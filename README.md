@@ -158,7 +158,7 @@ You can process notes using the **Notemd Sidebar** or the **Command Palette**.
 
 ## Contributing
 
-Contributions are welcome! Please refer to the GitHub repository for guidelines: [https://github.com/Jacobinwwey/Notemd](https://github.com/Jacobinwwey/Notemd) (Replace if incorrect)
+Contributions are welcome! Please refer to the GitHub repository for guidelines: [https://github.com/Jacobinwwey/obsidian-NotEMD](https://github.com/Jacobinwwey/obsidian-NotEMD) 
 
 ## License
 
