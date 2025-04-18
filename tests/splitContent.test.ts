@@ -43,7 +43,13 @@ describe('splitContent', () => {
       useCustomConceptNoteFolder: false,
       conceptNoteFolder: '',
       useCustomProcessedFileFolder: false,
-      processedFileFolder: ''
+      processedFileFolder: '',
+      // Add defaults for the new log settings
+      generateConceptLogFile: false,
+      useCustomConceptLogFolder: false,
+      conceptLogFolderPath: '',
+      useCustomConceptLogFileName: false,
+      conceptLogFileName: 'Generate.log'
     };
   });
 

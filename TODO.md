@@ -119,6 +119,11 @@
     -   [x] Update processing methods to accept and use `ProgressReporter` (showing progress in sidebar when initiated there).
     -   [x] Add "Copy Log" button to sidebar view.
     -   [ ] Make processing truly asynchronous/non-blocking (e.g., using web workers) to prevent UI freezes during long LLM calls. (Future Work / Advanced)
+4.  **Concept Log File Generation:**
+    -   [x] Add settings for enabling log file generation.
+    -   [x] Add settings for customizing log file name and folder path.
+    -   [x] Implement logic in `createConceptNotes` to call `generateConceptLog`.
+    -   [x] Implement `generateConceptLog` to create the log file based on settings.
 
 ## Configuration Requirements
 

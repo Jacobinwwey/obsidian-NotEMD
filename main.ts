@@ -20,6 +20,13 @@ interface NotemdSettings {
 	// Processed File Settings
 	useCustomProcessedFileFolder: boolean; // New setting
 	processedFileFolder: string; // New setting
+	// Concept Log File Settings - START
+	generateConceptLogFile: boolean;
+	useCustomConceptLogFolder: boolean;
+	conceptLogFolderPath: string;
+	useCustomConceptLogFileName: boolean;
+	conceptLogFileName: string;
+	// Concept Log File Settings - END
 	// Other settings
 	chunkWordCount: number;
 	maxTokens: number; // Added setting for max tokens
@@ -101,6 +108,13 @@ const DEFAULT_SETTINGS: NotemdSettings = {
 	// Processed File Defaults
 	useCustomProcessedFileFolder: false,
 	processedFileFolder: '',
+	// Concept Log File Defaults - START
+	generateConceptLogFile: false,
+	useCustomConceptLogFolder: false,
+	conceptLogFolderPath: '',
+	useCustomConceptLogFileName: false,
+	conceptLogFileName: 'Generate.log',
+	// Concept Log File Defaults - END
 	// Other Defaults
 	chunkWordCount: 3000,
 	maxTokens: 4096, // Default max tokens for LLM response
@@ -925,7 +939,7 @@ export default class NotemdPlugin extends Plugin {
 					options.headers = {
 						'Content-Type': 'application/json',
 						'Authorization': `Bearer ${provider.apiKey}`, // Required
-						'HTTP-Referer': 'https://github.com/Jacobinwwey/Notemd', // Required by OpenRouter
+						'HTTP-Referer': 'https://github.com/Jacobinwwey/obsidian-NotEMD', // Required by OpenRouter - CORRECTED AGAIN
 						'X-Title': 'Notemd Obsidian Plugin' // Required by OpenRouter
 					};
 					options.body = JSON.stringify({
@@ -1426,7 +1440,7 @@ export default class NotemdPlugin extends Plugin {
 			headers: {
 				'Content-Type': 'application/json',
 				'Authorization': `Bearer ${provider.apiKey}`, // Required
-				'HTTP-Referer': 'https://github.com/Jacobinwwey/Notemd', // Required by OpenRouter - replace with your actual repo URL if different
+				'HTTP-Referer': 'https://github.com/Jacobinwwey/obsidian-NotEMD', // Required by OpenRouter - CORRECTED AGAIN
 				'X-Title': 'Notemd Obsidian Plugin' // Required by OpenRouter - can be your app's name
 			},
 			body: JSON.stringify(requestBody)
@@ -1650,6 +1664,7 @@ Rules:
 		}
 
 		const folderPath = this.settings.conceptNoteFolder; // Use the new setting
+		const newlyCreatedConcepts: string[] = []; // Track newly created concepts for logging
 
 		let createdCount = 0;
 		let updatedCount = 0;
@@ -1730,6 +1745,7 @@ Rules:
 						}
 						await this.app.vault.create(notePath, newNoteContent.trim());
 						createdCount++;
+						newlyCreatedConcepts.push(concept); // Log this concept name
 					}
 				} catch (fileOpError: any) {
 					console.error(`Error processing concept note "${notePath}": ${fileOpError.message}`);
@@ -1738,7 +1754,15 @@ Rules:
 			} // End for loop
 
 			// if (createdCount > 0) console.log(`Created ${createdCount} new concept notes.`); // Less critical logs
-			// if (updatedCount > 0) console.log(`Updated ${updatedCount} existing concept notes with backlinks.`);
+			// if (updatedCount > 0) console.log(`Updated ${updatedCount} existing concept notes with backlinks.`); // DEBUG
+
+			// --- Generate Concept Log File ---
+			if (this.settings.generateConceptLogFile && newlyCreatedConcepts.length > 0) {
+				// console.log(`Calling generateConceptLog for ${newlyCreatedConcepts.length} concepts.`); // DEBUG
+				await this.generateConceptLog(newlyCreatedConcepts);
+			} else {
+				// console.log(`Skipping concept log generation. Setting: ${this.settings.generateConceptLogFile}, New Concepts: ${newlyCreatedConcepts.length}`); // DEBUG
+			}
 
 		} catch (error: any) { // Added type annotation
 			console.error("Error creating concept notes:", error);
@@ -1747,6 +1771,74 @@ Rules:
 			// progressModal?.log(`Error creating concept notes: ${error.message}`);
 		}
 	}
+
+	// --- Concept Log File Generation ---
+	async generateConceptLog(createdConcepts: string[]) {
+		let logFolderPath = '';
+		// Determine folder path
+		if (this.settings.useCustomConceptLogFolder && this.settings.conceptLogFolderPath) {
+			logFolderPath = this.settings.conceptLogFolderPath;
+		} else if (this.settings.useCustomConceptNoteFolder && this.settings.conceptNoteFolder) {
+			// Fallback to concept note folder if custom log folder isn't set/used
+			logFolderPath = this.settings.conceptNoteFolder;
+		}
+		// Vault root ('/') is the ultimate fallback if neither custom log nor concept note folder is specified
+
+		// Normalize folder path (remove leading/trailing slashes, ensure trailing slash if not root)
+		logFolderPath = logFolderPath.replace(/^\/|\/$/g, '');
+		if (logFolderPath) {
+			logFolderPath += '/';
+		}
+
+		// Determine file name
+		const logFileName = (this.settings.useCustomConceptLogFileName && this.settings.conceptLogFileName)
+			? this.settings.conceptLogFileName
+			: DEFAULT_SETTINGS.conceptLogFileName; // Default to 'Generate.log'
+
+		// Ensure filename ends with .log (redundant check if settings validation works, but safe)
+		const finalLogFileName = logFileName.toLowerCase().endsWith('.log') ? logFileName : `${logFileName}.log`;
+
+		const logFilePath = `${logFolderPath}${finalLogFileName}`;
+
+		// Format log content
+		let logContent = `generate ${createdConcepts.length} concepts md file\n`;
+		createdConcepts.forEach((concept, index) => {
+			logContent += `${index + 1}. ${concept}\n`;
+		});
+
+		try {
+			// Ensure target folder exists
+			const targetLogFolder = logFolderPath.replace(/\/$/, ''); // Remove trailing slash for check/create
+			if (targetLogFolder && !this.app.vault.getAbstractFileByPath(targetLogFolder)) {
+				try {
+					await this.app.vault.createFolder(targetLogFolder);
+					console.log(`Created concept log folder: ${targetLogFolder}`);
+				} catch (folderError: any) {
+					console.error(`Error creating concept log folder ${targetLogFolder}:`, folderError);
+					new Notice(`Error creating concept log folder: ${folderError.message}`);
+					// Don't throw, just log the error and skip log file creation
+					return;
+				}
+			} else if (targetLogFolder && !(this.app.vault.getAbstractFileByPath(targetLogFolder) instanceof TFolder)) {
+				new Notice(`Concept log output path '${targetLogFolder}' exists but is not a folder. Cannot create log file.`);
+				return; // Skip log file creation
+			}
+
+			// Check if log file exists - overwrite if it does
+			const existingLogFile = this.app.vault.getAbstractFileByPath(logFilePath);
+			if (existingLogFile instanceof TFile) {
+				await this.app.vault.modify(existingLogFile, logContent.trim());
+				new Notice(`Overwrote concept log file: ${logFilePath}`);
+			} else {
+				await this.app.vault.create(logFilePath, logContent.trim());
+				new Notice(`Created concept log file: ${logFilePath}`);
+			}
+		} catch (error: any) {
+			console.error(`Error writing concept log file to ${logFilePath}:`, error);
+			new Notice(`Error writing concept log file: ${error.message}`);
+		}
+	}
+
 
 	// --- Duplicate Handling (Refined) ---
 
@@ -2547,34 +2639,153 @@ class NotemdSettingTab extends PluginSettingTab {
 					}));
 		}
 
+		// --- Concept Log File Output Settings --- START
+		containerEl.createEl('h4', { text: 'Concept Log File Output' });
+
+		new Setting(containerEl)
+			.setName('Generate Concept Log File')
+			.setDesc('If enabled, a log file listing newly created concept notes will be generated after processing.')
+			.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.generateConceptLogFile)
+				.onChange(async (value) => {
+					this.plugin.settings.generateConceptLogFile = value;
+					await this.plugin.saveSettings();
+					this.display(); // Refresh to show/hide dependent options
+				}));
+
+		// Only show log file options if the main toggle is enabled
+		if (this.plugin.settings.generateConceptLogFile) {
+			// --- Customize Log Folder Path ---
+			const logFolderSetting = new Setting(containerEl) // Store setting for potential dynamic updates
+				.setName('Customize Log File Save Path'); // Keep description concise
+
+			// Add description dynamically based on concept note folder setting
+			let logFolderDesc = 'If enabled, the concept log file will be saved to the specified relative path.';
+			if (this.plugin.settings.useCustomConceptNoteFolder && this.plugin.settings.conceptNoteFolder) {
+				logFolderDesc += ` If disabled, it saves in the Concept Note Folder ('${this.plugin.settings.conceptNoteFolder}')`;
+			} else {
+				logFolderDesc += ' If disabled, it saves in the vault root.';
+			}
+			logFolderSetting.setDesc(logFolderDesc);
+
+			logFolderSetting.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.useCustomConceptLogFolder)
+				.onChange(async (value) => {
+					this.plugin.settings.useCustomConceptLogFolder = value;
+					await this.plugin.saveSettings();
+					this.display(); // Refresh to show/hide text input and update description
+				}));
+
+			// Conditionally display the log folder path input
+			if (this.plugin.settings.useCustomConceptLogFolder) {
+				new Setting(containerEl)
+					.setName('Concept Log Folder Path')
+					.setDesc('Relative path within the vault. Must be filled if customization is enabled. Invalid chars: * " \\ / < > : | ? # ^ [ ]')
+					.addText(text => text
+						.setPlaceholder('e.g., Logs/ConceptLogs') // More specific placeholder
+						.setValue(this.plugin.settings.conceptLogFolderPath)
+						.onChange(async (value) => {
+							const trimmedValue = value.trim();
+							const invalidChars = /[<>:"\\|?*#^[\]]/; // Allow forward slash
+							if (!trimmedValue) { // Path is required when toggle is on
+								new Notice("Concept log folder path cannot be empty when customization is enabled.", 5000);
+								// Keep the invalid value in the box for correction, but don't save? Or revert?
+								// Let's revert for now to avoid saving invalid state.
+								text.setValue(this.plugin.settings.conceptLogFolderPath);
+								return;
+							}
+							if (invalidChars.test(trimmedValue)) {
+								new Notice("Concept log folder path contains invalid characters.", 5000);
+								text.setValue(this.plugin.settings.conceptLogFolderPath); // Revert
+								return;
+							}
+							if (/^(?:[a-zA-Z]:\\|\/)/.test(trimmedValue)) { // Basic absolute path check
+								new Notice("Please use a relative path within your vault for the log folder.", 5000);
+								text.setValue(this.plugin.settings.conceptLogFolderPath); // Revert
+								return;
+							}
+
+							this.plugin.settings.conceptLogFolderPath = trimmedValue;
+							await this.plugin.saveSettings();
+						}));
+			}
+
+			// --- Customize Log File Name ---
+			const logFileNameSetting = new Setting(containerEl)
+				.setName('Customize Log File Name');
+
+			logFileNameSetting.setDesc(`If enabled, use the specified file name. If disabled, use "${DEFAULT_SETTINGS.conceptLogFileName}".`);
+
+			logFileNameSetting.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.useCustomConceptLogFileName)
+				.onChange(async (value) => {
+					this.plugin.settings.useCustomConceptLogFileName = value;
+					await this.plugin.saveSettings();
+					this.display(); // Refresh to show/hide text input
+				}));
+
+			// Conditionally display the log file name input
+			if (this.plugin.settings.useCustomConceptLogFileName) {
+				new Setting(containerEl)
+					.setName('Concept Log File Name')
+					.setDesc('Name for the log file (e.g., "ConceptLog.log"). Must be filled if customization is enabled. Invalid chars: \\ / : * ? " < > | # ^ [ ]')
+					.addText(text => text
+						.setPlaceholder(DEFAULT_SETTINGS.conceptLogFileName) // Show default
+						.setValue(this.plugin.settings.conceptLogFileName)
+						.onChange(async (value) => {
+							let fileName = value.trim();
+							const invalidChars = /[\\/:*?"<>|#^[\]]/; // Invalid filename chars
+
+							if (!fileName) { // Name is required when toggle is on
+								new Notice("Log file name cannot be empty when customization is enabled.", 5000);
+								text.setValue(this.plugin.settings.conceptLogFileName); // Revert
+								return;
+							}
+							if (invalidChars.test(fileName)) {
+								new Notice("Log file name contains invalid characters.", 5000);
+								text.setValue(this.plugin.settings.conceptLogFileName); // Revert
+								return;
+							}
+							// Optional: Enforce .log extension? Let's allow flexibility but maybe warn.
+							// if (!fileName.toLowerCase().endsWith('.log')) {
+							// 	new Notice("Consider using a '.log' extension for the log file name.", 3000);
+							// }
+
+							this.plugin.settings.conceptLogFileName = fileName;
+							await this.plugin.saveSettings();
+						}));
+			}
+		}
+		// --- Concept Log File Output Settings --- END
+
 
 		// --- Other General Settings ---
 		containerEl.createEl('h4', { text: 'Processing Parameters' });
 
 		new Setting(containerEl)
 			.setName('Chunk Word Count')
-			.setDesc('Maximum number of words per chunk sent to the LLM. Lower values use less context per API call but may increase the number of calls.')
+			.setDesc('Maximum words per chunk sent to LLM. Lower values use less context per call but increase call count.')
 			.addText(text => text
-				.setPlaceholder(String(DEFAULT_SETTINGS.chunkWordCount)) // Show default as placeholder
+				.setPlaceholder(String(DEFAULT_SETTINGS.chunkWordCount))
 				.setValue(String(this.plugin.settings.chunkWordCount))
 				.onChange(async (value) => {
 					const numValue = parseInt(value, 10);
-					if (!isNaN(numValue) && numValue > 50) { // Basic validation: ensure it's a number > 50
+					if (!isNaN(numValue) && numValue > 50) {
 						this.plugin.settings.chunkWordCount = numValue;
 						await this.plugin.saveSettings();
-					} else if (value === '') { // Allow clearing to reset to default (or handle differently)
+					} else if (value === '') {
 						this.plugin.settings.chunkWordCount = DEFAULT_SETTINGS.chunkWordCount;
 						await this.plugin.saveSettings();
-						// Optionally refresh the display to show the default value restored
-						// this.display();
+						this.display(); // Refresh to show default restored
 					} else {
 						new Notice("Please enter a valid number greater than 50 for chunk word count.");
-					}0
+						text.setValue(String(this.plugin.settings.chunkWordCount)); // Revert
+					}
 				}));
 
 		new Setting(containerEl)
 			.setName('Enable Duplicate Detection')
-			.setDesc('Enable checks for duplicate words, plural/singular pairs, and normalization conflicts within processed content (results logged to console).')
+			.setDesc('Enable checks for duplicate words, plural/singular pairs, etc. (results logged to console).')
 			.addToggle(toggle => toggle
 				.setValue(this.plugin.settings.enableDuplicateDetection)
 				.onChange(async (value) => {
@@ -2584,47 +2795,27 @@ class NotemdSettingTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName('Max Tokens')
-			.setDesc('Maximum number of tokens the LLM should generate in its response. Affects cost and response length.')
+			.setDesc('Maximum tokens LLM should generate per response. Affects cost and length.')
 			.addText(text => text
-				.setPlaceholder(String(DEFAULT_SETTINGS.maxTokens)) // Show default
+				.setPlaceholder(String(DEFAULT_SETTINGS.maxTokens))
 				.setValue(String(this.plugin.settings.maxTokens))
 				.onChange(async (value) => {
 					const numValue = parseInt(value, 10);
-					// Add reasonable validation, e.g., must be > 0 and maybe not excessively large
 					if (!isNaN(numValue) && numValue > 0) {
 						this.plugin.settings.maxTokens = numValue;
 						await this.plugin.saveSettings();
 					} else if (value === '') {
-						this.plugin.settings.maxTokens = DEFAULT_SETTINGS.maxTokens; // Reset to default if cleared
+						this.plugin.settings.maxTokens = DEFAULT_SETTINGS.maxTokens;
 						await this.plugin.saveSettings();
-						// Optionally refresh display: this.display();
+						this.display(); // Refresh to show default restored
 					} else {
 						new Notice("Please enter a valid positive number for max tokens.");
+						text.setValue(String(this.plugin.settings.maxTokens)); // Revert
 					}
 				}));
 
-		new Setting(containerEl)
-			.setName('Max Tokens')
-			.setDesc('Maximum number of tokens the LLM should generate in its response. Affects cost and response length.')
-			.addText(text => text
-				.setPlaceholder(String(DEFAULT_SETTINGS.maxTokens)) // Show default
-				.setValue(String(this.plugin.settings.maxTokens))
-				.onChange(async (value) => {
-					const numValue = parseInt(value, 10);
-					// Add reasonable validation, e.g., must be > 0 and maybe not excessively large
-					if (!isNaN(numValue) && numValue > 0) {
-						this.plugin.settings.maxTokens = numValue;
-						await this.plugin.saveSettings();
-					} else if (value === '') {
-						this.plugin.settings.maxTokens = DEFAULT_SETTINGS.maxTokens; // Reset to default if cleared
-						await this.plugin.saveSettings();
-						// Optionally refresh display: this.display();
-					} else {
-						new Notice("Please enter a valid positive number for max tokens.");
-					}
-				}));
-
-		new Setting(containerEl)
+		// Removed duplicate Max Tokens setting
+		// new Setting(containerEl)
 		// Processing Mode setting might be less relevant now with separate commands
 		// new Setting(containerEl)
 		// 	.setName('Processing Mode')

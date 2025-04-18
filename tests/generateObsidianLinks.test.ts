@@ -43,7 +43,13 @@ describe('generateObsidianLinks', () => {
       useCustomConceptNoteFolder: true,
       conceptNoteFolder: 'concepts', // Use the value from the old setting
       useCustomProcessedFileFolder: false,
-      processedFileFolder: ''
+      processedFileFolder: '',
+      // Add defaults for the new log settings
+      generateConceptLogFile: false,
+      useCustomConceptLogFolder: false,
+      conceptLogFolderPath: '',
+      useCustomConceptLogFileName: false,
+      conceptLogFileName: 'Generate.log'
     };
   });
 

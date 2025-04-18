@@ -38,15 +38,22 @@ describe('Duplicate Handling', () => {
       processMode: 'single',
       providers: [],
       activeProvider: 'DeepSeek',
-      // New settings defaults for tests
-      useCustomConceptNoteFolder: false,
-      conceptNoteFolder: '',
-      useCustomProcessedFileFolder: false,
-      processedFileFolder: ''
-    };
-  });
+			// New settings defaults for tests
+			useCustomConceptNoteFolder: false,
+			conceptNoteFolder: '',
+			useCustomProcessedFileFolder: false,
+			processedFileFolder: '',
+			// Add defaults for the new log settings
+			generateConceptLogFile: false,
+			useCustomConceptLogFolder: false,
+			conceptLogFolderPath: '',
+			useCustomConceptLogFileName: false,
+			conceptLogFileName: 'Generate.log'
+		};
+		plugin.app = mockApp as any; // Assign mockApp after settings
+	});
 
-  describe('findDuplicates', () => {
+	describe('findDuplicates', () => {
     it('should find duplicate words in content', () => {
       const content = "word word another test test";
       const duplicates = plugin.findDuplicates(content);

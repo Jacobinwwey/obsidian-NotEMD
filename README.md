@@ -90,6 +90,26 @@ Access plugin settings via:
     *   **Enabled**: Allows you to specify a folder where new concept notes will be created.
 -   **Concept Note Folder Path**: (Visible only when the above is enabled) Enter a *relative path* within your vault (e.g., `Concepts` or `Generated/Topics`) where new concept notes should be saved. Folders will be created if they don't exist. **Must be filled if customization is enabled.** **Do not use absolute paths or invalid characters.**
 
+#### Concept Log File Output
+-   **Generate Concept Log File**:
+    *   **Disabled (Default)**: No log file is generated.
+    *   **Enabled**: Creates a log file listing newly created concept notes after processing. The format is:
+        ```
+        generate xx concepts md file
+        1. concepts1
+        2. concepts2
+        ...
+        n. conceptsn
+        ```
+-   **Customize Log File Save Path**: (Visible only when "Generate Concept Log File" is enabled)
+    *   **Disabled (Default)**: The log file is saved in the **Concept Note Folder Path** (if specified) or the vault root otherwise.
+    *   **Enabled**: Allows you to specify a custom folder for the log file.
+-   **Concept Log Folder Path**: (Visible only when "Customize Log File Save Path" is enabled) Enter a *relative path* within your vault (e.g., `Logs/Notemd`) where the log file should be saved. **Must be filled if customization is enabled.**
+-   **Customize Log File Name**: (Visible only when "Generate Concept Log File" is enabled)
+    *   **Disabled (Default)**: The log file is named `Generate.log`.
+    *   **Enabled**: Allows you to specify a custom name for the log file.
+-   **Concept Log File Name**: (Visible only when "Customize Log File Name" is enabled) Enter the desired file name (e.g., `ConceptCreation.log`). **Must be filled if customization is enabled.**
+
 #### Processing Parameters
 -   **Chunk Word Count**: Maximum words per chunk sent to the LLM. Affects the number of API calls for large files. (Default: 3000)
 -   **Enable Duplicate Detection**: Toggles the basic check for duplicate words within processed content (results in console). (Default: Enabled)
