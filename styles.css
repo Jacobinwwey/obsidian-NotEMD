@@ -25,7 +25,7 @@
 .notemd-progress-bar-fill {
     height: 100%;
     background-color: var(--interactive-accent);
-    transition: width 0.3s ease;
+    transition: width 0.3s ease, background-color 0.3s ease; /* Added background-color transition */
     width: 0%;
     display: flex;
     align-items: center;
@@ -33,6 +33,11 @@
     color: white;
     font-size: 12px;
     font-weight: bold;
+}
+
+/* Error state for progress bar fill */
+.notemd-progress-bar-fill.is-error {
+    background-color: var(--text-error);
 }
 
 .notemd-log-output {
@@ -82,4 +87,51 @@
 /* Error state styling */
 .notemd-error-text {
     color: var(--text-error);
+}
+
+/* General utility class for hiding elements */
+.is-hidden {
+    display: none !important;
+}
+
+/* Sidebar specific styles */
+.notemd-sidebar-container {
+    padding: 1em;
+}
+
+.notemd-button-group button {
+    margin-right: 0.5em;
+    margin-bottom: 0.5em; /* Add some spacing between buttons */
+}
+
+.notemd-progress-area {
+    margin-top: 1em;
+}
+
+.notemd-log-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1em;
+}
+
+.notemd-copy-log-button {
+    /* Style similarly to cancel button or use default button styles */
+    background-color: var(--background-secondary);
+    color: var(--text-normal);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 4px;
+    padding: 0.3em 0.6em;
+    font-size: 0.9em;
+    cursor: pointer;
+}
+
+.notemd-copy-log-button:hover {
+    background-color: var(--background-modifier-hover);
+}
+
+/* Ensure sidebar log is selectable */
+.notemd-log-output.is-selectable {
+    user-select: text; /* Standard CSS property */
+    -webkit-user-select: text; /* For Safari */
 }

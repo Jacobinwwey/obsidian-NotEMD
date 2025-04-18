@@ -142,7 +142,7 @@ export default class NotemdPlugin extends Plugin {
 		// Add command to open the sidebar view
 		this.addCommand({
 			id: 'open-notemd-sidebar',
-			name: 'Open Notemd Sidebar',
+			name: 'Open Sidebar',
 			callback: () => {
 				this.activateView();
 			}
@@ -155,7 +155,7 @@ export default class NotemdPlugin extends Plugin {
 		// --- Command Palette Integration ---
 		this.addCommand({
 			id: 'process-with-notemd',
-			name: 'Process Current File with Notemd',
+			name: 'Process Current File',
 			callback: async () => {
 				await this.processWithNotemd();
 			}
@@ -163,7 +163,7 @@ export default class NotemdPlugin extends Plugin {
 
 		this.addCommand({
 			id: 'process-folder-with-notemd',
-			name: 'Process Folder with Notemd',
+			name: 'Process Folder',
 			callback: async () => {
 				await this.processFolderWithNotemd();
 			}
@@ -176,6 +176,11 @@ export default class NotemdPlugin extends Plugin {
 				const activeFile = this.app.workspace.getActiveFile();
 				if (!activeFile) {
 					new Notice('No active file to check');
+					return;
+				}
+				// Check if the file is a supported text format (.md or .txt)
+				if (!(activeFile instanceof TFile) || (activeFile.extension !== 'md' && activeFile.extension !== 'txt')) {
+					new Notice(`Cannot check this file type. Please select a '.md' or '.txt' file.`);
 					return;
 				}
 				const content = await this.app.vault.read(activeFile);
@@ -243,7 +248,7 @@ export default class NotemdPlugin extends Plugin {
 		});
 
 		// When registering intervals, this function will automatically clear the interval when the plugin is disabled.
-		this.registerInterval(window.setInterval(() => console.log('Notemd interval check'), 15 * 60 * 1000)); // Example: 15 minutes
+		// this.registerInterval(window.setInterval(() => console.log('Notemd interval check'), 15 * 60 * 1000)); // Example: 15 minutes
 
 		// Register the Sidebar View
 		this.registerView(
@@ -254,7 +259,7 @@ export default class NotemdPlugin extends Plugin {
 
 	onunload() {
 		// Clean up event handlers
-		console.log('Unloading Notemd plugin');
+		// console.log('Unloading Notemd plugin');
 	}
 
 	// --- Settings Management ---
@@ -350,15 +355,22 @@ export default class NotemdPlugin extends Plugin {
 
 	// Updated to accept optional progress reporter
 	async processWithNotemd(progressReporter?: ProgressReporter) {
-		console.log("Entering processWithNotemd"); // DEBUG
+		// console.log("Entering processWithNotemd"); // DEBUG
 		const activeFile = this.app.workspace.getActiveFile();
 		if (!activeFile) {
 			this.updateStatusBar('No file selected');
 			new Notice('No active file to process');
-			console.log("processWithNotemd: No active file."); // DEBUG
+			// console.log("processWithNotemd: No active file."); // DEBUG
 			return;
 		}
-		console.log(`processWithNotemd: Processing file: ${activeFile.path}`); // DEBUG
+
+		// Check if the file is a supported text format (.md or .txt)
+		if (!(activeFile instanceof TFile) || (activeFile.extension !== 'md' && activeFile.extension !== 'txt')) {
+			new Notice(`Cannot process this file type. Please select a '.md' or '.txt' file.`);
+			// console.log("processWithNotemd: No active file."); // DEBUG
+			return;
+		}
+		// console.log(`processWithNotemd: Processing file: ${activeFile.path}`); // DEBUG
 
 		// Use provided reporter or create a ProgressModal as fallback
 		let reporter: ProgressReporter;
@@ -376,17 +388,17 @@ export default class NotemdPlugin extends Plugin {
 			reporter.updateStatus(`Processing ${activeFile.name}...`, 0);
 			reporter.log(`Reading file: ${activeFile.name}`);
 			this.updateStatusBar(`Processing: ${activeFile.name}`);
-			console.log(`processWithNotemd: Reading content of ${activeFile.name}`); // DEBUG
+			// console.log(`processWithNotemd: Reading content of ${activeFile.name}`); // DEBUG
 
 			// Get file content
 			const content = await this.app.vault.read(activeFile);
-			console.log(`processWithNotemd: Read ${content.length} characters.`); // DEBUG
+			// console.log(`processWithNotemd: Read ${content.length} characters.`); // DEBUG
 
 			// Step 1: Process content with LLM, passing the reporter
 			reporter.log(`Processing content with LLM...`);
-			console.log("processWithNotemd: Calling processContentWithLLM..."); // DEBUG
+			// console.log("processWithNotemd: Calling processContentWithLLM..."); // DEBUG
 			const processedContent = await this.processContentWithLLM(content, reporter); // Pass reporter
-			console.log(`processWithNotemd: processContentWithLLM returned ${processedContent?.length ?? 'null/undefined'} characters.`); // DEBUG
+			// console.log(`processWithNotemd: processContentWithLLM returned ${processedContent?.length ?? 'null/undefined'} characters.`); // DEBUG
 
 			if (reporter.cancelled) {
 				new Notice('Processing cancelled by user.');
@@ -397,15 +409,15 @@ export default class NotemdPlugin extends Plugin {
 
 			// Step 2: Generate Obsidian links
 			reporter.log(`Generating links...`);
-			console.log("processWithNotemd: Calling generateObsidianLinks..."); // DEBUG
+			// console.log("processWithNotemd: Calling generateObsidianLinks..."); // DEBUG
 			const withLinks = this.generateObsidianLinks(processedContent);
-			console.log(`processWithNotemd: generateObsidianLinks returned ${withLinks?.length ?? 'null/undefined'} characters.`); // DEBUG
+			// console.log(`processWithNotemd: generateObsidianLinks returned ${withLinks?.length ?? 'null/undefined'} characters.`); // DEBUG
 
 			// Step 3: Handle duplicates within the processed content
 			reporter.log(`Checking for duplicates in content...`);
-			console.log("processWithNotemd: Calling handleDuplicates..."); // DEBUG
+			// console.log("processWithNotemd: Calling handleDuplicates..."); // DEBUG
 			await this.handleDuplicates(withLinks); // Check duplicates in the result
-			console.log("processWithNotemd: handleDuplicates finished."); // DEBUG
+			// console.log("processWithNotemd: handleDuplicates finished."); // DEBUG
 
 			// --- Determine Processed File Output Path ---
 			let processedFileSaveDir = '';
@@ -431,11 +443,11 @@ export default class NotemdPlugin extends Plugin {
 			const targetSaveFolder = processedFileSaveDir.replace(/\/$/, ''); // Remove trailing slash for check/create
 			if (targetSaveFolder && !this.app.vault.getAbstractFileByPath(targetSaveFolder)) {
 				try {
-					console.log(`DEBUG: Attempting to create processed file folder: '${targetSaveFolder}'`);
+					// console.log(`DEBUG: Attempting to create processed file folder: '${targetSaveFolder}'`);
 					await this.app.vault.createFolder(targetSaveFolder);
 					reporter.log(`Created processed file output folder: ${targetSaveFolder}`);
 				} catch (folderError: any) {
-					console.error(`DEBUG: createFolder failed specifically for processed file path: '${targetSaveFolder}'`, folderError);
+					// console.error(`DEBUG: createFolder failed specifically for processed file path: '${targetSaveFolder}'`, folderError);
 					reporter.log(`Error creating processed file output folder ${targetSaveFolder}: ${folderError.message}`);
 					new Notice(`Error creating processed file output folder: ${folderError.message}`);
 					throw folderError; // Re-throw to stop processing
@@ -450,21 +462,21 @@ export default class NotemdPlugin extends Plugin {
 			// Construct final processed file name
 			const processedName = `${processedFileSaveDir}${activeFile.basename}_processed.md`;
 			reporter.log(`Saving processed file as: ${processedName}`);
-			console.log(`processWithNotemd: Determined processed file output path: ${processedName}`); // DEBUG
+			// console.log(`processWithNotemd: Determined processed file output path: ${processedName}`); // DEBUG
 
 			// Check if file exists before creating/modifying
 			const existingProcessedFile = this.app.vault.getAbstractFileByPath(processedName);
-			console.log(`processWithNotemd: Checking existence of ${processedName}. Found: ${!!existingProcessedFile}`); // DEBUG
+			// console.log(`processWithNotemd: Checking existence of ${processedName}. Found: ${!!existingProcessedFile}`); // DEBUG
 			if (existingProcessedFile instanceof TFile) {
-				console.log(`processWithNotemd: Modifying existing file: ${processedName}`); // DEBUG
+				// console.log(`processWithNotemd: Modifying existing file: ${processedName}`); // DEBUG
 				await this.app.vault.modify(existingProcessedFile, withLinks);
 				reporter.log(`Overwrote existing processed file: ${processedName}`);
 			} else {
-				console.log(`processWithNotemd: Creating new file: ${processedName}`); // DEBUG
+				// console.log(`processWithNotemd: Creating new file: ${processedName}`); // DEBUG
 				await this.app.vault.create(processedName, withLinks);
 				reporter.log(`Created processed file: ${processedName}`);
 			}
-			console.log("processWithNotemd: File saving complete."); // DEBUG
+			// console.log("processWithNotemd: File saving complete."); // DEBUG
 
 			this.updateStatusBar('Processing complete');
 			reporter.updateStatus('Processing complete!', 100);
@@ -474,11 +486,11 @@ export default class NotemdPlugin extends Plugin {
 				// Explicitly cast inside setTimeout to ensure type safety
 				setTimeout(() => (reporter as ProgressModal).close(), 2000);
 			}
-			console.log("Exiting processWithNotemd successfully."); // DEBUG
+			// console.log("Exiting processWithNotemd successfully."); // DEBUG
 		} catch (error: any) { // Added type annotation
 			this.updateStatusBar('Error occurred');
 			const errorDetails = error instanceof Error ? error.stack || error.message : String(error);
-			console.error("Notemd Processing Error in processWithNotemd:", errorDetails); // DEBUG: Added context
+			console.error("Notemd Processing Error in processWithNotemd:", errorDetails); // Keep this error log
 			// Show a simple notice
 			new Notice(`Error during Notemd processing. See details or console.`, 10000);
 			// Log to reporter
@@ -504,12 +516,15 @@ export default class NotemdPlugin extends Plugin {
 			return;
 		}
 
-		const files = this.app.vault.getMarkdownFiles().filter(f =>
-			f.path === folderPath || f.path.startsWith(folderPath === '/' ? '' : folderPath + '/') // Handle root folder case correctly
+		// Filter for only .md and .txt files within the selected folder
+		const files = this.app.vault.getFiles().filter(f =>
+			(f.extension === 'md' || f.extension === 'txt') &&
+			(f.path === folderPath || f.path.startsWith(folderPath === '/' ? '' : folderPath + '/')) // Handle root folder case correctly
 		);
 
+
 		if (files.length === 0) {
-			new Notice(`No markdown files found in selected folder: ${folderPath}`);
+			new Notice(`No '.md' or '.txt' files found in selected folder: ${folderPath}`);
 			return;
 		}
 
@@ -535,14 +550,17 @@ export default class NotemdPlugin extends Plugin {
 		}
 
 		// Removed duplicate declaration of 'files'
-		// const files = this.app.vault.getMarkdownFiles().filter(f =>
-		// 	f.path === folderPath || f.path.startsWith(folderPath === '/' ? '' : folderPath + '/') // Handle root folder case correctly
+		// Filter for only .md and .txt files within the selected folder
+		// const files = this.app.vault.getFiles().filter(f =>
+		// 	(f.extension === 'md' || f.extension === 'txt') &&
+		// 	(f.path === folderPath || f.path.startsWith(folderPath === '/' ? '' : folderPath + '/')) // Handle root folder case correctly
 		// );
 
+
 		if (files.length === 0) {
-			reporter.log(`No markdown files found in selected folder: ${folderPath}`);
+			reporter.log(`No '.md' or '.txt' files found in selected folder: ${folderPath}`);
 			reporter.updateStatus('No files found', 100); // Indicate completion, even if no files
-			new Notice(`No markdown files found in selected folder: ${folderPath}`);
+			new Notice(`No '.md' or '.txt' files found in selected folder: ${folderPath}`);
 			// Only close if it's the modal we created
 			if (closeModalOnFinish && reporter instanceof ProgressModal) {
 				// Explicitly cast inside setTimeout
@@ -624,33 +642,33 @@ export default class NotemdPlugin extends Plugin {
 
 	// Updated processFile to accept ProgressReporter
 	async processFile(file: TFile, progressReporter: ProgressReporter) {
-		console.log(`Entering processFile for: ${file.path}`); // DEBUG
+		// console.log(`Entering processFile for: ${file.path}`); // DEBUG
 		this.currentProcessingFile = file.basename; // Set current file for backlinks
 		progressReporter.log(`Starting processing for: ${file.name}`);
-		console.log(`processFile: Reading content of ${file.name}`); // DEBUG
+		// console.log(`processFile: Reading content of ${file.name}`); // DEBUG
 		const content = await this.app.vault.read(file);
-		console.log(`processFile: Read ${content.length} characters.`); // DEBUG
+		// console.log(`processFile: Read ${content.length} characters.`); // DEBUG
 
 		// Pass the reporter instance to the LLM processor
-		console.log(`processFile: Calling processContentWithLLM for ${file.name}...`); // DEBUG
+		// console.log(`processFile: Calling processContentWithLLM for ${file.name}...`); // DEBUG
 		const processedContent = await this.processContentWithLLM(content, progressReporter);
-		console.log(`processFile: processContentWithLLM returned ${processedContent?.length ?? 'null/undefined'} characters for ${file.name}.`); // DEBUG
+		// console.log(`processFile: processContentWithLLM returned ${processedContent?.length ?? 'null/undefined'} characters for ${file.name}.`); // DEBUG
 
 		if (progressReporter.cancelled) {
 			progressReporter.log(`Processing cancelled for ${file.name}`);
-			console.log(`processFile: Processing cancelled for ${file.name}`); // DEBUG
+			// console.log(`processFile: Processing cancelled for ${file.name}`); // DEBUG
 			return; // Stop processing this file if cancelled
 		}
 
 		progressReporter.log(`Generating links for: ${file.name}`);
-		console.log(`processFile: Calling generateObsidianLinks for ${file.name}...`); // DEBUG
+		// console.log(`processFile: Calling generateObsidianLinks for ${file.name}...`); // DEBUG
 		const withLinks = this.generateObsidianLinks(processedContent);
-		console.log(`processFile: generateObsidianLinks returned ${withLinks?.length ?? 'null/undefined'} characters for ${file.name}.`); // DEBUG
+		// console.log(`processFile: generateObsidianLinks returned ${withLinks?.length ?? 'null/undefined'} characters for ${file.name}.`); // DEBUG
 
 		progressReporter.log(`Handling duplicates for: ${file.name}`);
-		console.log(`processFile: Calling handleDuplicates for ${file.name}...`); // DEBUG
+		// console.log(`processFile: Calling handleDuplicates for ${file.name}...`); // DEBUG
 		await this.handleDuplicates(withLinks);
-		console.log(`processFile: handleDuplicates finished for ${file.name}.`); // DEBUG
+		// console.log(`processFile: handleDuplicates finished for ${file.name}.`); // DEBUG
 
 		// --- Determine Processed File Output Path ---
 		let processedFileSaveDir = '';
@@ -675,11 +693,11 @@ export default class NotemdPlugin extends Plugin {
 		const targetSaveFolder = processedFileSaveDir.replace(/\/$/, ''); // Remove trailing slash for check/create
 		if (targetSaveFolder && !this.app.vault.getAbstractFileByPath(targetSaveFolder)) {
 			try {
-				console.log(`DEBUG: Attempting to create processed file folder: '${targetSaveFolder}'`);
+				// console.log(`DEBUG: Attempting to create processed file folder: '${targetSaveFolder}'`);
 				await this.app.vault.createFolder(targetSaveFolder);
 				progressReporter.log(`Created processed file output folder: ${targetSaveFolder}`);
 			} catch (folderError: any) {
-				console.error(`DEBUG: createFolder failed specifically for processed file path: '${targetSaveFolder}'`, folderError);
+				// console.error(`DEBUG: createFolder failed specifically for processed file path: '${targetSaveFolder}'`, folderError);
 				progressReporter.log(`Error creating processed file output folder ${targetSaveFolder}: ${folderError.message}`);
 				new Notice(`Error creating processed file output folder: ${folderError.message}`);
 				throw folderError; // Re-throw to stop processing
@@ -694,25 +712,25 @@ export default class NotemdPlugin extends Plugin {
 		// Construct final processed file name
 		const processedName = `${processedFileSaveDir}${file.basename}_processed.md`;
 		progressReporter.log(`Saving processed file as: ${processedName}`);
-		console.log(`processFile: Determined processed file output path: ${processedName}`); // DEBUG
+		// console.log(`processFile: Determined processed file output path: ${processedName}`); // DEBUG
 
 		// Check if file exists before creating/modifying
 		const existingProcessedFile = this.app.vault.getAbstractFileByPath(processedName);
-		console.log(`processFile: Checking existence of ${processedName}. Found: ${!!existingProcessedFile}`); // DEBUG
+		// console.log(`processFile: Checking existence of ${processedName}. Found: ${!!existingProcessedFile}`); // DEBUG
 		if (existingProcessedFile instanceof TFile) {
-			console.log(`processFile: Modifying existing file: ${processedName}`); // DEBUG
+			// console.log(`processFile: Modifying existing file: ${processedName}`); // DEBUG
 			await this.app.vault.modify(existingProcessedFile, withLinks);
 			progressReporter.log(`Overwrote existing processed file: ${processedName}`);
 		} else {
-			console.log(`processFile: Creating new file: ${processedName}`); // DEBUG
+			// console.log(`processFile: Creating new file: ${processedName}`); // DEBUG
 			await this.app.vault.create(processedName, withLinks);
 			progressReporter.log(`Created processed file: ${processedName}`);
 		}
-		console.log(`processFile: File saving complete for ${processedName}.`); // DEBUG
+		// console.log(`processFile: File saving complete for ${processedName}.`); // DEBUG
 
 		progressReporter.log(`Finished processing: ${file.name}`);
 		this.currentProcessingFile = ''; // Clear after processing
-		console.log(`Exiting processFile for: ${file.path}`); // DEBUG
+		// console.log(`Exiting processFile for: ${file.path}`); // DEBUG
 	}
 
 
@@ -724,7 +742,7 @@ export default class NotemdPlugin extends Plugin {
 
 		if (!oldName || !newName || oldName === newName) return;
 
-		console.log(`Handling rename: "${oldName}" -> "${newName}"`);
+		// console.log(`Handling rename: "${oldName}" -> "${newName}"`); // Keep this log? Maybe less verbose.
 		new Notice(`Updating links for renamed file: ${newName}`, 5000); // Show notice longer
 
 		// Escape special regex characters in oldName for accurate matching
@@ -746,7 +764,7 @@ export default class NotemdPlugin extends Plugin {
 					if (content !== updatedContent) {
 						await this.app.vault.modify(file, updatedContent);
 						updatedCount++;
-						console.log(`Updated link in: ${file.path}`);
+						// console.log(`Updated link in: ${file.path}`); // Maybe too verbose for many files
 					}
 				}
 			} catch (error: any) {
@@ -758,10 +776,10 @@ export default class NotemdPlugin extends Plugin {
 
 		if (updatedCount > 0) {
 			const message = `Updated links to "${newName}" in ${updatedCount} files.`;
-			console.log(message);
+			// console.log(message); // Notice is sufficient
 			new Notice(message, 5000);
 		} else {
-			console.log(`No links found for "${oldName}" to update.`);
+			// console.log(`No links found for "${oldName}" to update.`); // Less critical log
 		}
 		if (errors.length > 0) {
 			new Notice(`Encountered ${errors.length} errors while updating links. Check console.`, 10000);
@@ -772,7 +790,7 @@ export default class NotemdPlugin extends Plugin {
 		const fileName = path.split('/').pop()?.replace('.md', '') || '';
 		if (!fileName) return;
 
-		console.log(`Handling delete: "${fileName}"`);
+		// console.log(`Handling delete: "${fileName}"`); // Keep this log? Maybe less verbose.
 		new Notice(`Removing links for deleted file: ${fileName}`, 5000);
 
 		// Escape special regex characters in fileName
@@ -811,7 +829,7 @@ export default class NotemdPlugin extends Plugin {
 					if (content !== updatedContent) {
 						await this.app.vault.modify(file, updatedContent);
 						updatedCount++;
-						console.log(`Removed link from: ${file.path}`);
+						// console.log(`Removed link from: ${file.path}`); // Maybe too verbose
 					}
 				}
 			} catch (error: any) {
@@ -823,10 +841,10 @@ export default class NotemdPlugin extends Plugin {
 
 		if (updatedCount > 0) {
 			const message = `Removed links to "${fileName}" from ${updatedCount} files.`;
-			console.log(message);
+			// console.log(message); // Notice is sufficient
 			new Notice(message, 5000);
 		} else {
-			console.log(`No links found for "${fileName}" to remove.`);
+			// console.log(`No links found for "${fileName}" to remove.`); // Less critical log
 		}
 		if (errors.length > 0) {
 			new Notice(`Encountered ${errors.length} errors while removing links. Check console.`, 10000);
@@ -837,7 +855,7 @@ export default class NotemdPlugin extends Plugin {
 
 	// Refined API test function
 	public async testAPI(provider: LLMProviderConfig): Promise<{ success: boolean; message: string }> {
-		console.log(`Testing connection for ${provider.name}...`);
+		// console.log(`Testing connection for ${provider.name}...`); // Logged by caller (Settings/Sidebar)
 		try {
 			let response: Response;
 			let url: string;
@@ -856,7 +874,7 @@ export default class NotemdPlugin extends Plugin {
 				case 'LMStudio':
 					// Try direct POST to chat completions endpoint since OPTIONS may fail
 					try {
-						console.log(`Testing LMStudio via chat completions endpoint (${provider.baseUrl}/chat/completions)...`);
+						// console.log(`Testing LMStudio via chat completions endpoint (${provider.baseUrl}/chat/completions)...`);
 						const lmStudioUrl = `${provider.baseUrl}/chat/completions`;
 						const lmStudioOptions: RequestInit = {
 							method: 'POST',
@@ -874,7 +892,7 @@ export default class NotemdPlugin extends Plugin {
 								max_tokens: 10
 							})
 						};
-						console.log("DEBUG: LMStudio Test - Request Body:", lmStudioOptions.body);
+						// console.log("DEBUG: LMStudio Test - Request Body:", lmStudioOptions.body);
 						response = await fetch(lmStudioUrl, lmStudioOptions);
 						if (response.ok) {
 							// Attempt to parse JSON, but handle cases where LM Studio might return non-JSON on success for simple tests
@@ -886,7 +904,7 @@ export default class NotemdPlugin extends Plugin {
 							return { success: true, message: `Successfully connected to LMStudio API at ${provider.baseUrl} using model '${provider.model}'.` };
 						} else {
 							const errorText = await response.text();
-							console.error(`DEBUG: LMStudio Test failed (${response.status}): ${errorText}`);
+							// console.error(`DEBUG: LMStudio Test failed (${response.status}): ${errorText}`);
 							// Provide a more specific error message if possible
 							if (errorText.includes("Could not find model")) {
 								throw new Error(`LMStudio API error: Model '${provider.model}' not found or loaded on the server.`);
@@ -894,14 +912,14 @@ export default class NotemdPlugin extends Plugin {
 							throw new Error(`LMStudio API error: ${response.status} - ${errorText}`);
 						}
 					} catch (e: any) {
-						console.error(`DEBUG: LMStudio Test fetch error: ${e.message}`);
+						// console.error(`DEBUG: LMStudio Test fetch error: ${e.message}`);
 						throw new Error(`LMStudio API connection failed: ${e.message}. Is the server running at ${provider.baseUrl}?`);
 					}
 					// --- End LMStudio Test Logic ---
 
 				case 'OpenRouter':
 					// OpenRouter uses OpenAI compatible endpoint but requires specific headers
-					console.log(`Testing OpenRouter via chat completions endpoint...`);
+					// console.log(`Testing OpenRouter via chat completions endpoint...`);
 					url = `${provider.baseUrl}/chat/completions`;
 					options.method = 'POST';
 					options.headers = {
@@ -931,7 +949,7 @@ export default class NotemdPlugin extends Plugin {
 					response = await fetch(url, options);
 					// If listing models fails, try a minimal chat completion as fallback
 					if (!response.ok) {
-						console.log(`Listing models failed for ${provider.name} (${response.status}), trying minimal chat completion...`);
+						// console.log(`Listing models failed for ${provider.name} (${response.status}), trying minimal chat completion...`);
 						url = `${provider.baseUrl}/chat/completions`;
 						options.method = 'POST';
 						options.headers = {
@@ -1034,8 +1052,8 @@ export default class NotemdPlugin extends Plugin {
 			temperature: provider.temperature,
 			max_tokens: this.settings.maxTokens
 		};
-		console.log(`callDeepSeekAPI: Calling URL: ${url}`); // DEBUG
-		console.log(`callDeepSeekAPI: Request Body (excluding content):`, { ...requestBody, messages: [{ role: 'system', content: '...' }, { role: 'user', content: `(length: ${content.length})` }] }); // DEBUG
+		// console.log(`callDeepSeekAPI: Calling URL: ${url}`); // DEBUG
+		// console.log(`callDeepSeekAPI: Request Body (excluding content):`, { ...requestBody, messages: [{ role: 'system', content: '...' }, { role: 'user', content: `(length: ${content.length})` }] }); // DEBUG
 
 		const response = await fetch(url, {
 			method: 'POST',
@@ -1046,20 +1064,20 @@ export default class NotemdPlugin extends Plugin {
 			body: JSON.stringify(requestBody)
 		});
 
-		console.log(`callDeepSeekAPI: Response Status: ${response.status}`); // DEBUG
+		// console.log(`callDeepSeekAPI: Response Status: ${response.status}`); // DEBUG
 		if (!response.ok) {
 			const errorText = await response.text();
-			console.error(`callDeepSeekAPI: Error Response Text: ${errorText}`); // DEBUG
+			console.error(`callDeepSeekAPI: Error Response Text: ${errorText}`); // Keep error log
 			throw new Error(`DeepSeek API error: ${response.status} - ${errorText}`);
 		}
 
 		const data = await response.json();
-		// console.log("callDeepSeekAPI: Raw Response Data:", data); // DEBUG: Potentially verbose
+		// // console.log("callDeepSeekAPI: Raw Response Data:", data); // DEBUG: Potentially verbose
 		if (!data.choices || !data.choices[0] || !data.choices[0].message || !data.choices[0].message.content) {
-			console.error("callDeepSeekAPI: Unexpected response format:", data); // DEBUG
+			console.error("callDeepSeekAPI: Unexpected response format:", data); // Keep error log
 			throw new Error(`Unexpected response format from DeepSeek API`);
 		}
-		console.log(`callDeepSeekAPI: Success. Returning content length: ${data.choices[0].message.content.length}`); // DEBUG
+		// console.log(`callDeepSeekAPI: Success. Returning content length: ${data.choices[0].message.content.length}`); // DEBUG
 		return data.choices[0].message.content;
 	}
 
@@ -1081,8 +1099,8 @@ export default class NotemdPlugin extends Plugin {
 			temperature: provider.temperature,
 			max_tokens: this.settings.maxTokens
 		};
-		console.log(`callOpenAIApi: Calling URL: ${url}`); // DEBUG
-		console.log(`callOpenAIApi: Request Body (excluding content):`, { ...requestBody, messages: [{ role: 'system', content: '...' }, { role: 'user', content: `(length: ${content.length})` }] }); // DEBUG
+		// console.log(`callOpenAIApi: Calling URL: ${url}`); // DEBUG
+		// console.log(`callOpenAIApi: Request Body (excluding content):`, { ...requestBody, messages: [{ role: 'system', content: '...' }, { role: 'user', content: `(length: ${content.length})` }] }); // DEBUG
 
 		const response = await fetch(url, {
 			method: 'POST',
@@ -1093,20 +1111,20 @@ export default class NotemdPlugin extends Plugin {
 			body: JSON.stringify(requestBody)
 		});
 
-		console.log(`callOpenAIApi: Response Status: ${response.status}`); // DEBUG
+		// console.log(`callOpenAIApi: Response Status: ${response.status}`); // DEBUG
 		if (!response.ok) {
 			const errorText = await response.text();
-			console.error(`callOpenAIApi: Error Response Text: ${errorText}`); // DEBUG
+			console.error(`callOpenAIApi: Error Response Text: ${errorText}`); // Keep error log
 			throw new Error(`OpenAI API error: ${response.status} - ${errorText}`);
 		}
 
 		const data = await response.json();
-		// console.log("callOpenAIApi: Raw Response Data:", data); // DEBUG: Potentially verbose
+		// // console.log("callOpenAIApi: Raw Response Data:", data); // DEBUG: Potentially verbose
 		if (!data.choices || !data.choices[0] || !data.choices[0].message || !data.choices[0].message.content) {
-			console.error("callOpenAIApi: Unexpected response format:", data); // DEBUG
+			console.error("callOpenAIApi: Unexpected response format:", data); // Keep error log
 			throw new Error(`Unexpected response format from OpenAI API`);
 		}
-		console.log(`callOpenAIApi: Success. Returning content length: ${data.choices[0].message.content.length}`); // DEBUG
+		// console.log(`callOpenAIApi: Success. Returning content length: ${data.choices[0].message.content.length}`); // DEBUG
 		return data.choices[0].message.content;
 	}
 
@@ -1121,8 +1139,8 @@ export default class NotemdPlugin extends Plugin {
 			temperature: provider.temperature,
 			max_tokens: this.settings.maxTokens // Use setting
 		};
-		console.log(`callAnthropicApi: Calling URL: ${url}`); // DEBUG
-		console.log(`callAnthropicApi: Request Body (excluding content):`, { ...requestBody, messages: [{ role: 'user', content: `(prompt + content length: ${prompt.length + content.length})` }] }); // DEBUG
+		// console.log(`callAnthropicApi: Calling URL: ${url}`); // DEBUG
+		// console.log(`callAnthropicApi: Request Body (excluding content):`, { ...requestBody, messages: [{ role: 'user', content: `(prompt + content length: ${prompt.length + content.length})` }] }); // DEBUG
 
 		const response = await fetch(url, {
 			method: 'POST',
@@ -1134,20 +1152,20 @@ export default class NotemdPlugin extends Plugin {
 			body: JSON.stringify(requestBody)
 		});
 
-		console.log(`callAnthropicApi: Response Status: ${response.status}`); // DEBUG
+		// console.log(`callAnthropicApi: Response Status: ${response.status}`); // DEBUG
 		if (!response.ok) {
 			const errorText = await response.text();
-			console.error(`callAnthropicApi: Error Response Text: ${errorText}`); // DEBUG
+			console.error(`callAnthropicApi: Error Response Text: ${errorText}`); // Keep error log
 			throw new Error(`Anthropic API error: ${response.status} - ${errorText}`);
 		}
 
 		const data = await response.json();
-		// console.log("callAnthropicApi: Raw Response Data:", data); // DEBUG: Potentially verbose
+		// // console.log("callAnthropicApi: Raw Response Data:", data); // DEBUG: Potentially verbose
 		if (!data.content || !data.content[0] || !data.content[0].text) {
-			console.error("callAnthropicApi: Unexpected response format:", data); // DEBUG
+			console.error("callAnthropicApi: Unexpected response format:", data); // Keep error log
 			throw new Error(`Unexpected response format from Anthropic API`);
 		}
-		console.log(`callAnthropicApi: Success. Returning content length: ${data.content[0].text.length}`); // DEBUG
+		// console.log(`callAnthropicApi: Success. Returning content length: ${data.content[0].text.length}`); // DEBUG
 		return data.content[0].text;
 	}
 
@@ -1168,8 +1186,8 @@ export default class NotemdPlugin extends Plugin {
 				maxOutputTokens: this.settings.maxTokens
 			}
 		};
-		console.log(`callGoogleApi: Calling URL: ${urlWithKey}`); // DEBUG
-		console.log(`callGoogleApi: Request Body (excluding content):`, { ...requestBody, contents: [{ role: 'user', parts: [{ text: `(prompt + content length: ${prompt.length + content.length})` }] }] }); // DEBUG
+		// console.log(`callGoogleApi: Calling URL: ${urlWithKey}`); // DEBUG
+		// console.log(`callGoogleApi: Request Body (excluding content):`, { ...requestBody, contents: [{ role: 'user', parts: [{ text: `(prompt + content length: ${prompt.length + content.length})` }] }] }); // DEBUG
 
 		const response = await fetch(urlWithKey, {
 			method: 'POST',
@@ -1179,21 +1197,21 @@ export default class NotemdPlugin extends Plugin {
 			body: JSON.stringify(requestBody)
 		});
 
-		console.log(`callGoogleApi: Response Status: ${response.status}`); // DEBUG
+		// console.log(`callGoogleApi: Response Status: ${response.status}`); // DEBUG
 		if (!response.ok) {
 			const errorText = await response.text();
-			console.error(`callGoogleApi: Error Response Text: ${errorText}`); // DEBUG
+			console.error(`callGoogleApi: Error Response Text: ${errorText}`); // Keep error log
 			throw new Error(`Google API error: ${response.status} - ${errorText}`);
 		}
 
 		const data = await response.json();
-		// console.log("callGoogleApi: Raw Response Data:", data); // DEBUG: Potentially verbose
+		// // console.log("callGoogleApi: Raw Response Data:", data); // DEBUG: Potentially verbose
 		// Check response structure carefully
 		if (!data.candidates || !data.candidates[0].content || !data.candidates[0].content.parts || !data.candidates[0].content.parts[0].text) {
-			console.error("callGoogleApi: Unexpected response format:", data); // DEBUG
+			console.error("callGoogleApi: Unexpected response format:", data); // Keep error log
 			throw new Error(`Unexpected response format from Google API`);
 		}
-		console.log(`callGoogleApi: Success. Returning content length: ${data.candidates[0].content.parts[0].text.length}`); // DEBUG
+		// console.log(`callGoogleApi: Success. Returning content length: ${data.candidates[0].content.parts[0].text.length}`); // DEBUG
 		return data.candidates[0].content.parts[0].text;
 	}
 
@@ -1212,8 +1230,8 @@ export default class NotemdPlugin extends Plugin {
 			temperature: provider.temperature,
 			max_tokens: this.settings.maxTokens
 		};
-		console.log(`callMistralApi: Calling URL: ${url}`); // DEBUG
-		console.log(`callMistralApi: Request Body (excluding content):`, { ...requestBody, messages: [{ role: 'system', content: '...' }, { role: 'user', content: `(length: ${content.length})` }] }); // DEBUG
+		// console.log(`callMistralApi: Calling URL: ${url}`); // DEBUG
+		// console.log(`callMistralApi: Request Body (excluding content):`, { ...requestBody, messages: [{ role: 'system', content: '...' }, { role: 'user', content: `(length: ${content.length})` }] }); // DEBUG
 
 		const response = await fetch(url, {
 			method: 'POST',
@@ -1224,20 +1242,20 @@ export default class NotemdPlugin extends Plugin {
 			body: JSON.stringify(requestBody)
 		});
 
-		console.log(`callMistralApi: Response Status: ${response.status}`); // DEBUG
+		// console.log(`callMistralApi: Response Status: ${response.status}`); // DEBUG
 		if (!response.ok) {
 			const errorText = await response.text();
-			console.error(`callMistralApi: Error Response Text: ${errorText}`); // DEBUG
+			console.error(`callMistralApi: Error Response Text: ${errorText}`); // Keep error log
 			throw new Error(`Mistral API error: ${response.status} - ${errorText}`);
 		}
 
 		const data = await response.json();
-		// console.log("callMistralApi: Raw Response Data:", data); // DEBUG: Potentially verbose
+		// // console.log("callMistralApi: Raw Response Data:", data); // DEBUG: Potentially verbose
 		if (!data.choices || !data.choices[0] || !data.choices[0].message || !data.choices[0].message.content) {
-			console.error("callMistralApi: Unexpected response format:", data); // DEBUG
+			console.error("callMistralApi: Unexpected response format:", data); // Keep error log
 			throw new Error(`Unexpected response format from Mistral API`);
 		}
-		console.log(`callMistralApi: Success. Returning content length: ${data.choices[0].message.content.length}`); // DEBUG
+		// console.log(`callMistralApi: Success. Returning content length: ${data.choices[0].message.content.length}`); // DEBUG
 		return data.choices[0].message.content;
 	}
 
@@ -1262,8 +1280,8 @@ export default class NotemdPlugin extends Plugin {
 			temperature: provider.temperature,
 			max_tokens: this.settings.maxTokens
 		};
-		console.log(`callAzureOpenAIApi: Calling URL: ${url}`); // DEBUG
-		console.log(`callAzureOpenAIApi: Request Body (excluding content):`, { ...requestBody, messages: [{ role: 'system', content: '...' }, { role: 'user', content: `(length: ${content.length})` }] }); // DEBUG
+		// console.log(`callAzureOpenAIApi: Calling URL: ${url}`); // DEBUG
+		// console.log(`callAzureOpenAIApi: Request Body (excluding content):`, { ...requestBody, messages: [{ role: 'system', content: '...' }, { role: 'user', content: `(length: ${content.length})` }] }); // DEBUG
 
 		const response = await fetch(url, {
 			method: 'POST',
@@ -1274,20 +1292,20 @@ export default class NotemdPlugin extends Plugin {
 			body: JSON.stringify(requestBody)
 		});
 
-		console.log(`callAzureOpenAIApi: Response Status: ${response.status}`); // DEBUG
+		// console.log(`callAzureOpenAIApi: Response Status: ${response.status}`); // DEBUG
 		if (!response.ok) {
 			const errorText = await response.text();
-			console.error(`callAzureOpenAIApi: Error Response Text: ${errorText}`); // DEBUG
+			console.error(`callAzureOpenAIApi: Error Response Text: ${errorText}`); // Keep error log
 			throw new Error(`Azure OpenAI API error: ${response.status} - ${errorText}`);
 		}
 
 		const data = await response.json();
-		// console.log("callAzureOpenAIApi: Raw Response Data:", data); // DEBUG: Potentially verbose
+		// // console.log("callAzureOpenAIApi: Raw Response Data:", data); // DEBUG: Potentially verbose
 		if (!data.choices || !data.choices[0] || !data.choices[0].message || !data.choices[0].message.content) {
-			console.error("callAzureOpenAIApi: Unexpected response format:", data); // DEBUG
+			console.error("callAzureOpenAIApi: Unexpected response format:", data); // Keep error log
 			throw new Error(`Unexpected response format from Azure OpenAI API`);
 		}
-		console.log(`callAzureOpenAIApi: Success. Returning content length: ${data.choices[0].message.content.length}`); // DEBUG
+		// console.log(`callAzureOpenAIApi: Success. Returning content length: ${data.choices[0].message.content.length}`); // DEBUG
 		return data.choices[0].message.content;
 	}
 
@@ -1306,8 +1324,8 @@ export default class NotemdPlugin extends Plugin {
 			temperature: provider.temperature,
 			max_tokens: this.settings.maxTokens
 		};
-		console.log(`callLMStudioApi: Calling URL: ${url}`); // DEBUG
-		console.log(`callLMStudioApi: Request Body (excluding content):`, { ...requestBody, messages: [{ role: 'system', content: '...' }, { role: 'user', content: `(length: ${content.length})` }] }); // DEBUG
+		// console.log(`callLMStudioApi: Calling URL: ${url}`); // DEBUG
+		// console.log(`callLMStudioApi: Request Body (excluding content):`, { ...requestBody, messages: [{ role: 'system', content: '...' }, { role: 'user', content: `(length: ${content.length})` }] }); // DEBUG
 
 		const response = await fetch(url, {
 			method: 'POST',
@@ -1319,21 +1337,21 @@ export default class NotemdPlugin extends Plugin {
 			body: JSON.stringify(requestBody)
 		});
 
-		console.log(`callLMStudioApi: Response Status: ${response.status}`); // DEBUG
+		// console.log(`callLMStudioApi: Response Status: ${response.status}`); // DEBUG
 		if (!response.ok) {
 			const errorText = await response.text();
-			console.error(`callLMStudioApi: Error Response Text: ${errorText}`); // DEBUG
+			console.error(`callLMStudioApi: Error Response Text: ${errorText}`); // Keep error log
 			throw new Error(`LMStudio API error: ${response.status} - ${errorText}`);
 		}
 
 		const data = await response.json();
-		// console.log("callLMStudioApi: Raw Response Data:", data); // DEBUG: Potentially verbose
+		// // console.log("callLMStudioApi: Raw Response Data:", data); // DEBUG: Potentially verbose
 		// Standard OpenAI response format expected
 		if (!data.choices || !data.choices[0] || !data.choices[0].message || !data.choices[0].message.content) {
-			console.error("callLMStudioApi: Unexpected response format:", data); // DEBUG
+			console.error("callLMStudioApi: Unexpected response format:", data); // Keep error log
 			throw new Error(`Unexpected response format from LMStudio`);
 		}
-		console.log(`callLMStudioApi: Success. Returning content length: ${data.choices[0].message.content.length}`); // DEBUG
+		// console.log(`callLMStudioApi: Success. Returning content length: ${data.choices[0].message.content.length}`); // DEBUG
 		return data.choices[0].message.content;
 	}
 
@@ -1355,8 +1373,8 @@ export default class NotemdPlugin extends Plugin {
 			},
 			stream: false
 		};
-		console.log(`callOllamaApi: Calling URL: ${url}`); // DEBUG
-		console.log(`callOllamaApi: Request Body (excluding content):`, { ...requestBody, messages: [{ role: 'system', content: '...' }, { role: 'user', content: `(length: ${content.length})` }] }); // DEBUG
+		// console.log(`callOllamaApi: Calling URL: ${url}`); // DEBUG
+		// console.log(`callOllamaApi: Request Body (excluding content):`, { ...requestBody, messages: [{ role: 'system', content: '...' }, { role: 'user', content: `(length: ${content.length})` }] }); // DEBUG
 
 		const response = await fetch(url, {
 			method: 'POST',
@@ -1367,21 +1385,21 @@ export default class NotemdPlugin extends Plugin {
 			body: JSON.stringify(requestBody)
 		});
 
-		console.log(`callOllamaApi: Response Status: ${response.status}`); // DEBUG
+		// console.log(`callOllamaApi: Response Status: ${response.status}`); // DEBUG
 		if (!response.ok) {
 			const errorText = await response.text();
-			console.error(`callOllamaApi: Error Response Text: ${errorText}`); // DEBUG
+			console.error(`callOllamaApi: Error Response Text: ${errorText}`); // Keep error log
 			throw new Error(`Ollama API error: ${response.status} - ${errorText}`);
 		}
 
 		const data = await response.json();
-		// console.log("callOllamaApi: Raw Response Data:", data); // DEBUG: Potentially verbose
+		// // console.log("callOllamaApi: Raw Response Data:", data); // DEBUG: Potentially verbose
 		// Ollama's response structure is different
 		if (!data.message || !data.message.content) {
-			console.error("callOllamaApi: Unexpected response format:", data); // DEBUG
+			console.error("callOllamaApi: Unexpected response format:", data); // Keep error log
 			throw new Error(`Unexpected response format from Ollama`);
 		}
-		console.log(`callOllamaApi: Success. Returning content length: ${data.message.content.length}`); // DEBUG
+		// console.log(`callOllamaApi: Success. Returning content length: ${data.message.content.length}`); // DEBUG
 		return data.message.content;
 	}
 
@@ -1400,8 +1418,8 @@ export default class NotemdPlugin extends Plugin {
 			temperature: provider.temperature,
 			max_tokens: this.settings.maxTokens
 		};
-		console.log(`callOpenRouterAPI: Calling URL: ${url}`); // DEBUG
-		console.log(`callOpenRouterAPI: Request Body (excluding content):`, { ...requestBody, messages: [{ role: 'system', content: '...' }, { role: 'user', content: `(length: ${content.length})` }] }); // DEBUG
+		// console.log(`callOpenRouterAPI: Calling URL: ${url}`); // DEBUG
+		// console.log(`callOpenRouterAPI: Request Body (excluding content):`, { ...requestBody, messages: [{ role: 'system', content: '...' }, { role: 'user', content: `(length: ${content.length})` }] }); // DEBUG
 
 		const response = await fetch(url, {
 			method: 'POST',
@@ -1414,21 +1432,21 @@ export default class NotemdPlugin extends Plugin {
 			body: JSON.stringify(requestBody)
 		});
 
-		console.log(`callOpenRouterAPI: Response Status: ${response.status}`); // DEBUG
+		// console.log(`callOpenRouterAPI: Response Status: ${response.status}`); // DEBUG
 		if (!response.ok) {
 			const errorText = await response.text();
-			console.error(`callOpenRouterAPI: Error Response Text: ${errorText}`); // DEBUG
+			console.error(`callOpenRouterAPI: Error Response Text: ${errorText}`); // Keep error log
 			throw new Error(`OpenRouter API error: ${response.status} - ${errorText}`);
 		}
 
 		const data = await response.json();
-		// console.log("callOpenRouterAPI: Raw Response Data:", data); // DEBUG: Potentially verbose
+		// // console.log("callOpenRouterAPI: Raw Response Data:", data); // DEBUG: Potentially verbose
 		// Standard OpenAI response format expected
 		if (!data.choices || !data.choices[0] || !data.choices[0].message || !data.choices[0].message.content) {
-			console.error("callOpenRouterAPI: Unexpected response format:", data); // DEBUG
+			console.error("callOpenRouterAPI: Unexpected response format:", data); // Keep error log
 			throw new Error(`Unexpected response format from OpenRouter`);
 		}
-		console.log(`callOpenRouterAPI: Success. Returning content length: ${data.choices[0].message.content.length}`); // DEBUG
+		// console.log(`callOpenRouterAPI: Success. Returning content length: ${data.choices[0].message.content.length}`); // DEBUG
 		return data.choices[0].message.content;
 	}
 
@@ -1471,61 +1489,58 @@ export default class NotemdPlugin extends Plugin {
 			if (lastChunk) {
 				chunks.push(lastChunk);
 			}
-		}
-
-		// Handle case where the entire content fits in one chunk or is empty
-		if (chunks.length === 0 && content.trim()) {
-			chunks.push(content.trim());
-		}
-
-		console.log(`Split content into ${chunks.length} chunks based on maxWords=${maxWords}`);
+			}
+		// console.log(`Split content into ${chunks.length} chunks based on maxWords=${maxWords}`);
 		return chunks;
 	}
 
+
+
+
 	// Modify signature to accept ProgressReporter
 	async processContentWithLLM(content: string, progressReporter: ProgressReporter): Promise<string> {
-		console.log("Entering processContentWithLLM"); // DEBUG
+		// console.log("Entering processContentWithLLM"); // DEBUG
 		const provider = this.settings.providers.find(p => p.name === this.settings.activeProvider);
 		if (!provider) {
-			console.error("processContentWithLLM: No active provider found!"); // DEBUG
+			console.error("processContentWithLLM: No active provider found!"); // Keep error log
 			throw new Error('No active LLM provider configured');
 		}
-		console.log(`processContentWithLLM: Using provider: ${provider.name}, Model: ${provider.model}, BaseURL: ${provider.baseUrl}`); // DEBUG
+		// console.log(`processContentWithLLM: Using provider: ${provider.name}, Model: ${provider.model}, BaseURL: ${provider.baseUrl}`); // DEBUG
 		// Allow empty API key for local providers like Ollama, LMStudio might need 'EMPTY'
 		if (!provider.apiKey && provider.name !== 'Ollama' && provider.name !== 'LMStudio') {
 			// Check if it's Azure with managed identity (no key needed) - needs more robust check
 			if (provider.name !== 'Azure OpenAI' /* && !isManagedIdentity */) {
-				console.error(`processContentWithLLM: API key missing for ${provider.name}`); // DEBUG
+				console.error(`processContentWithLLM: API key missing for ${provider.name}`); // Keep error log
 				throw new Error(`API key not configured for selected provider: ${provider.name}`);
 			}
 		}
 		if (provider.name === 'Azure OpenAI' && !provider.baseUrl) {
-			console.error("processContentWithLLM: Base URL missing for Azure OpenAI"); // DEBUG
+			console.error("processContentWithLLM: Base URL missing for Azure OpenAI"); // Keep error log
 			throw new Error('Base URL (endpoint) is required for Azure OpenAI');
 		}
 
 		// Split content into chunks if needed
-		console.log("processContentWithLLM: Calling splitContent..."); // DEBUG
+		// console.log("processContentWithLLM: Calling splitContent..."); // DEBUG
 		const chunks = this.splitContent(content); // Use configured word count
 		let processedChunks: string[] = [];
 		const totalChunks = chunks.length;
 		progressReporter.log(`Splitting content into ${totalChunks} chunks.`);
-		console.log(`processContentWithLLM: Content split into ${totalChunks} chunks.`); // DEBUG
+		// console.log(`processContentWithLLM: Content split into ${totalChunks} chunks.`); // DEBUG
 
 		for (let i = 0; i < totalChunks; i++) {
 			// Check for cancellation before processing each chunk
 			if (progressReporter.cancelled) {
-				console.log("processContentWithLLM: Processing cancelled by user during chunk processing."); // DEBUG
+				// console.log("processContentWithLLM: Processing cancelled by user during chunk processing."); // DEBUG
 				throw new Error("Processing cancelled by user."); // Re-throw to be caught by caller
 			}
 
 			const chunk = chunks[i];
-			console.log(`processContentWithLLM: Processing chunk ${i + 1}/${totalChunks} (Length: ${chunk.length})`); // DEBUG
+			// console.log(`processContentWithLLM: Processing chunk ${i + 1}/${totalChunks} (Length: ${chunk.length})`); // DEBUG
 			// Calculate progress based on chunks completed
 			const chunkProgress = Math.floor(((i) / totalChunks) * 100); // Progress before starting current chunk
 			progressReporter.updateStatus(`Processing chunk ${i + 1}/${totalChunks}...`, chunkProgress);
 			progressReporter.log(`Processing chunk ${i + 1}/${totalChunks}...`);
-			// console.log(`Processing chunk ${i + 1}/${totalChunks}`); // Redundant with log above
+			// // console.log(`Processing chunk ${i + 1}/${totalChunks}`); // Redundant with log above
 
 
 			// Refined prompt based on PowerShell script rules
@@ -1543,7 +1558,7 @@ Rules:
 
 			try {
 				let responseText;
-				console.log(`processContentWithLLM: Calling API function for provider: ${provider.name}`); // DEBUG
+				// console.log(`processContentWithLLM: Calling API function for provider: ${provider.name}`); // DEBUG
 				switch (provider.name) {
 					case 'DeepSeek':
 						responseText = await this.callDeepSeekAPI(provider, prompt, chunk);
@@ -1573,14 +1588,14 @@ Rules:
 						responseText = await this.callOpenRouterAPI(provider, prompt, chunk);
 						break;
 					default:
-						console.error(`processContentWithLLM: Unsupported provider: ${provider.name}`); // DEBUG
+						console.error(`processContentWithLLM: Unsupported provider: ${provider.name}`); // Keep error log
 						throw new Error(`Unsupported provider: ${provider.name}`);
 				}
-				console.log(`processContentWithLLM: Received response for chunk ${i + 1}. Length: ${responseText?.length ?? 'null/undefined'}`); // DEBUG
+				// console.log(`processContentWithLLM: Received response for chunk ${i + 1}. Length: ${responseText?.length ?? 'null/undefined'}`); // DEBUG
 				processedChunks.push(responseText); // Store processed chunk
 				progressReporter.log(`Chunk ${i + 1} processed successfully.`);
 			} catch (error: any) { // Added type annotation for error
-				console.error(`processContentWithLLM: LLM processing error on chunk ${i + 1}:`, error); // DEBUG: Added context
+				console.error(`processContentWithLLM: LLM processing error on chunk ${i + 1}:`, error); // Keep error log
 				progressReporter.log(`Error processing chunk ${i + 1}: ${error.message}`);
 				new Notice(`LLM Error (${provider.name}) on chunk ${i + 1}: ${error.message}`);
 				// Re-throw error to be handled by the calling function (processFile or processWithNotemd)
@@ -1590,11 +1605,11 @@ Rules:
 
 		// Update progress to 100% after loop finishes successfully
 		progressReporter.updateStatus('Merging processed chunks...', 100); // Update final status before returning
-		console.log("processContentWithLLM: Finished processing all chunks. Joining results."); // DEBUG
+		// console.log("processContentWithLLM: Finished processing all chunks. Joining results."); // DEBUG
 
 		// Join chunks with double newline, ensuring no triple+ newlines
 		const finalResult = processedChunks.join('\n\n').replace(/\n{3,}/g, '\n\n').trim();
-		console.log(`processContentWithLLM: Final merged content length: ${finalResult.length}`); // DEBUG
+		// console.log(`processContentWithLLM: Final merged content length: ${finalResult.length}`); // DEBUG
 		return finalResult;
 	}
 
@@ -1630,7 +1645,7 @@ Rules:
 	async createConceptNotes(concepts: Set<string>) {
 		// Check if concept note creation is enabled and a path is set
 		if (!this.settings.useCustomConceptNoteFolder || !this.settings.conceptNoteFolder) {
-			console.log("Concept note creation is disabled or no folder path is set.");
+			// console.log("Concept note creation is disabled or no folder path is set."); // Less critical log
 			return;
 		}
 
@@ -1645,9 +1660,9 @@ Rules:
 			if (!targetFolder) {
 				try {
 					await this.app.vault.createFolder(folderPath);
-					console.log(`Created concept note folder: ${folderPath}`);
+					// console.log(`Created concept note folder: ${folderPath}`);
 				} catch (folderError: any) {
-					console.error(`DEBUG: createFolder failed specifically for concept note path: '${folderPath}'`, folderError);
+					// console.error(`DEBUG: createFolder failed specifically for concept note path: '${folderPath}'`, folderError);
 					new Notice(`Error creating concept note folder: ${folderError.message}`);
 					throw folderError; // Stop concept note creation if folder fails
 				}
@@ -1722,8 +1737,8 @@ Rules:
 				}
 			} // End for loop
 
-			if (createdCount > 0) console.log(`Created ${createdCount} new concept notes.`);
-			if (updatedCount > 0) console.log(`Updated ${updatedCount} existing concept notes with backlinks.`);
+			// if (createdCount > 0) console.log(`Created ${createdCount} new concept notes.`); // Less critical logs
+			// if (updatedCount > 0) console.log(`Updated ${updatedCount} existing concept notes with backlinks.`);
 
 		} catch (error: any) { // Added type annotation
 			console.error("Error creating concept notes:", error);
@@ -1764,7 +1779,7 @@ Rules:
 	// rather than deleting files across the vault.
 	async handleDuplicates(content: string) {
 		if (!this.settings.enableDuplicateDetection) {
-			console.log("Duplicate detection is disabled in settings.");
+			console.log("Duplicate detection is disabled in settings."); // Restore this log for the test case
 			return; // Skip if disabled
 		}
 
@@ -1816,7 +1831,7 @@ Rules:
 		// Report findings
 		if (potentialIssues.size > 0) {
 			new Notice(`Found ${potentialIssues.size} potential duplicate/consistency issues in processed content. Check console.`);
-			console.log('Potential duplicate/consistency issues found in content:', Array.from(potentialIssues));
+			console.log('Potential duplicate/consistency issues found in content:', Array.from(potentialIssues)); // Keep this log as it's user-facing via Notice
 		}
 	}
 
@@ -1889,8 +1904,9 @@ class ProgressModal extends Modal implements ProgressReporter {
 		
 		// Progress bar
 		this.progressBarContainerEl = contentEl.createEl('div', {cls: 'notemd-progress-bar-container'});
+		this.progressBarContainerEl.addClass('is-hidden'); // Hide initially
 		this.progressEl = this.progressBarContainerEl.createEl('div', {cls: 'notemd-progress-bar-fill'});
-		this.progressEl.style.width = '0%';
+		// Width is still set dynamically
 		
 		// Time remaining indicator
 		this.timeRemainingEl = contentEl.createEl('p', {
@@ -1937,7 +1953,8 @@ class ProgressModal extends Modal implements ProgressReporter {
 			}
 		} else if (this.progressEl && percent < 0) { // Handle negative percent for error/cancel state
 			this.progressEl.style.width = `100%`;
-			this.progressEl.style.backgroundColor = 'var(--text-error)'; // Use error color
+			this.progressEl.addClass('is-error'); // Use CSS class for error state
+			// this.progressEl.style.backgroundColor = 'var(--text-error)'; // Removed inline style
 			this.progressEl.setText('Cancelled/Error');
 			this.timeRemainingEl.setText('Processing cancelled');
 		}
@@ -1993,23 +2010,6 @@ class ProgressModal extends Modal implements ProgressReporter {
 	}
 }
 
-class SampleModal extends Modal { // Keep this example modal or remove if not needed
-	constructor(app: App) {
-		super(app);
-	}
-
-	onOpen() {
-		const {contentEl} = this;
-		contentEl.setText('Woah!');
-	}
-
-	onClose() {
-		const {contentEl} = this;
-		contentEl.empty();
-	}
-}
-
-
 // --- Sidebar View Implementation ---
 import { ItemView, WorkspaceLeaf } from 'obsidian';
 
@@ -2051,14 +2051,15 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 		if (this.logEl) this.logEl.empty();
 		if (this.statusEl) this.statusEl.setText('Ready');
 		if (this.progressEl) {
-			this.progressEl.style.width = '0%';
+			this.progressEl.style.width = '0%'; // Width remains dynamic
 			this.progressEl.setText('');
-			this.progressEl.style.backgroundColor = ''; // Reset color
+			this.progressEl.removeClass('is-error'); // Reset error state class
+			// this.progressEl.style.backgroundColor = ''; // Removed inline style
 		}
 		if (this.timeRemainingEl) this.timeRemainingEl.setText('');
-		if (this.progressBarContainerEl) this.progressBarContainerEl.style.display = 'none'; // Hide progress bar initially
+		if (this.progressBarContainerEl) this.progressBarContainerEl.addClass('is-hidden'); // Hide progress bar
 		if (this.cancelButton) {
-			this.cancelButton.style.display = 'none'; // Hide cancel button
+			this.cancelButton.addClass('is-hidden'); // Hide cancel button
 			this.cancelButton.disabled = true;
 		}
 		this.isProcessing = false;
@@ -2071,12 +2072,13 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 		if (this.statusEl) this.statusEl.setText(text);
 
 		if (percent !== undefined && this.progressEl && this.progressBarContainerEl) {
-			this.progressBarContainerEl.style.display = 'block'; // Show progress bar
+			this.progressBarContainerEl.removeClass('is-hidden'); // Show progress bar
 			if (percent >= 0) {
 				const clampedPercent = Math.min(100, Math.max(0, percent));
-				this.progressEl.style.width = `${clampedPercent}%`;
+				this.progressEl.style.width = `${clampedPercent}%`; // Width remains dynamic
 				this.progressEl.setText(`${Math.round(clampedPercent)}%`);
-				this.progressEl.style.backgroundColor = ''; // Reset color
+				this.progressEl.removeClass('is-error'); // Ensure error class is removed
+				// this.progressEl.style.backgroundColor = ''; // Removed inline style
 
 				// Update time remaining estimate
 				if (percent > 0 && this.startTime > 0) {
@@ -2090,8 +2092,9 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 					this.timeRemainingEl.setText('Est. time remaining: calculating...');
 				}
 			} else { // Handle negative percent for error/cancel state
-				this.progressEl.style.width = `100%`;
-				this.progressEl.style.backgroundColor = 'var(--text-error)'; // Use error color
+				this.progressEl.style.width = `100%`; // Width remains dynamic
+				this.progressEl.addClass('is-error'); // Use CSS class for error state
+				// this.progressEl.style.backgroundColor = 'var(--text-error)'; // Removed inline style
 				this.progressEl.setText('Cancelled/Error');
 				if (this.timeRemainingEl) this.timeRemainingEl.setText('Processing stopped.');
 			}
@@ -2157,7 +2160,7 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 			this.isProcessing = true;
 			this.startTime = Date.now();
 			if (this.cancelButton) {
-				this.cancelButton.style.display = 'inline-block'; // Show cancel button
+				this.cancelButton.removeClass('is-hidden'); // Show cancel button
 				this.cancelButton.disabled = false;
 			}
 			this.log('Starting: Process Current File...');
@@ -2165,7 +2168,7 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 			// Pass 'this' (the view instance) instead of creating a ProgressModal
 			await this.plugin.processWithNotemd(this);
 			this.isProcessing = false; // Mark processing finished
-			if (this.cancelButton) this.cancelButton.style.display = 'none'; // Hide cancel button
+			if (this.cancelButton) this.cancelButton.addClass('is-hidden'); // Hide cancel button
 		};
 
 		// Process Folder Button
@@ -2179,7 +2182,7 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 			this.isProcessing = true;
 			this.startTime = Date.now();
 			if (this.cancelButton) {
-				this.cancelButton.style.display = 'inline-block';
+				this.cancelButton.removeClass('is-hidden'); // Show cancel button
 				this.cancelButton.disabled = false;
 			}
 			this.log('Starting: Process Folder...');
@@ -2187,7 +2190,7 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 			// Pass 'this' (the view instance) instead of creating a ProgressModal
 			await this.plugin.processFolderWithNotemd(this);
 			this.isProcessing = false;
-			if (this.cancelButton) this.cancelButton.style.display = 'none';
+			if (this.cancelButton) this.cancelButton.addClass('is-hidden'); // Hide cancel button
 		};
 
 		// Check Duplicates Button
@@ -2259,11 +2262,11 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 		this.progressBarContainerEl = progressArea.createEl('div', { cls: 'notemd-progress-bar-container' });
 		this.progressEl = this.progressBarContainerEl.createEl('div', { cls: 'notemd-progress-bar-fill' });
 		this.timeRemainingEl = progressArea.createEl('p', { cls: 'notemd-time-remaining' });
-		this.progressBarContainerEl.style.display = 'none'; // Hide initially
+		this.progressBarContainerEl.addClass('is-hidden'); // Hide initially
 
 		// Cancel Button (initially hidden)
 		this.cancelButton = progressArea.createEl('button', { text: 'Cancel Processing', cls: 'notemd-cancel-button' });
-		this.cancelButton.style.display = 'none';
+		this.cancelButton.addClass('is-hidden'); // Hide initially
 		this.cancelButton.disabled = true;
 		this.cancelButton.onclick = () => this.requestCancel();
 
@@ -2293,7 +2296,7 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 
 	async onClose() {
 		// Nothing specific to clean up yet, but good practice
-		console.log("Closing Notemd sidebar view");
+		// console.log("Closing Notemd sidebar view");
 		this.statusEl = null;
 		this.progressEl = null;
 		this.progressBarContainerEl = null;

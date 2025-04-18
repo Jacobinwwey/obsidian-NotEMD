@@ -98,21 +98,23 @@ Access plugin settings via:
 ## Usage Guide
 
 ### Processing Documents
+**Important:** Notemd currently only processes files with `.md` or `.txt` extensions. Please ensure your files are in one of these formats before processing.
+
 You can process notes using the **Notemd Sidebar** or the **Command Palette**.
 
 1.  **Using the Sidebar**:
-    *   Open the Notemd Sidebar using the ribbon icon (wand icon) or the command palette (`Open Notemd Sidebar`).
-    *   Open the Markdown file you want to process.
+    *   Open the Notemd Sidebar using the ribbon icon (wand icon) or the command palette (`Open Sidebar`).
+    *   Open the `.md` or `.txt` file you want to process.
     *   Click **"Process Current File"** in the sidebar.
     *   Progress will be shown in the sidebar's log area. You can click "Cancel Processing" if needed.
-    *   To process all Markdown files in a folder: Click **"Process Folder"**, select the folder from the dropdown, and click "Process" (or "Cancel"). Processing will begin for each file, showing progress in the sidebar.
+    *   To process all supported files (`.md`, `.txt`) in a folder: Click **"Process Folder"**, select the folder from the dropdown, and click "Process" (or "Cancel"). Processing will begin for each supported file, showing progress in the sidebar.
 
 2.  **Using the Command Palette** (`Ctrl+P` or `Cmd+P`):
-    *   **Single File**: Open the desired file and run the command `Notemd: Process Current File with Notemd`. A progress modal will appear with a cancel button.
-    *   **Folder**: Run the command `Notemd: Process Folder with Notemd`. You will be prompted to select a folder and click "Process" or "Cancel". If you proceed, a progress modal will appear with a cancel button.
+    *   **Single File**: Open the desired `.md` or `.txt` file and run the command `Notemd: Process Current File`. A progress modal will appear with a cancel button.
+    *   **Folder**: Run the command `Notemd: Process Folder`. You will be prompted to select a folder and click "Process" or "Cancel". If you proceed, processing will start for all `.md` and `.txt` files in that folder, and a progress modal will appear with a cancel button.
 
 ### Checking for Duplicates
--   Open the file you want to check.
+-   Open the `.md` or `.txt` file you want to check.
 -   Run the command `Notemd: Check for Duplicates in Current File` via the command palette or the sidebar button.
 -   Results (potential duplicate words found in the file) will be logged to the Obsidian Developer Console (`Ctrl+Shift+I` or `Cmd+Option+I`) and mentioned in a notice/sidebar log. *Note: This is a basic check within the single file's content.*
 
@@ -143,11 +145,12 @@ You can process notes using the **Notemd Sidebar** or the **Command Palette**.
 ### Common Issues
 -   **Plugin Not Loading**: Ensure `manifest.json`, `main.js`, `styles.css` are in the correct folder (`<Vault>/.obsidian/plugins/notemd/`) and restart Obsidian. Check the Developer Console (`Ctrl+Shift+I` or `Cmd+Option+I`) for errors on startup.
 -   **Processing Failures / API Errors**:
-    1.  Use the "Test LLM Connection" command/button to verify settings for the active provider.
-    2.  Double-check API Key, Base URL, Model Name, and API Version (for Azure). Ensure the API key is correct and has sufficient credits/permissions.
-    3.  Ensure your local LLM server (LMStudio, Ollama) is running and the Base URL is correct (e.g., `http://localhost:1234/v1` for LMStudio).
-    4.  Check your internet connection for cloud providers.
-    5.  Review the Developer Console for detailed error messages. Copy them using the button in the error modal if needed.
+    1.  **Check File Format**: Ensure the file you are trying to process or check has a `.md` or `.txt` extension. Notemd currently only supports these text-based formats.
+    2.  Use the "Test LLM Connection" command/button to verify settings for the active provider.
+    3.  Double-check API Key, Base URL, Model Name, and API Version (for Azure). Ensure the API key is correct and has sufficient credits/permissions.
+    4.  Ensure your local LLM server (LMStudio, Ollama) is running and the Base URL is correct (e.g., `http://localhost:1234/v1` for LMStudio).
+    5.  Check your internet connection for cloud providers.
+    6.  Review the Developer Console for detailed error messages. Copy them using the button in the error modal if needed.
 -   **LM Studio Test Connection Fails**: Ensure LM Studio server is running and the correct model is loaded and selected within LM Studio. The test now uses the chat completions endpoint, which should be more reliable.
 -   **Folder Creation Errors ("File name cannot contain...")**:
     *   This usually means the path provided in the settings (**Processed File Folder Path** or **Concept Note Folder Path**) is invalid *for Obsidian*.
