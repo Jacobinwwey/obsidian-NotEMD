@@ -49,10 +49,6 @@ describe('generateObsidianLinks', () => {
       useCustomConceptLogFolder: false,
       conceptLogFolderPath: '',
       useCustomConceptLogFileName: false,
-<<<<<<< HEAD
-      conceptLogFileName: 'Generate.log'
-    };
-=======
       conceptLogFileName: 'Generate.log',
       moveOriginalFileOnProcess: false, // Add missing property
       tavilyApiKey: '', // Add the new Tavily API key setting
@@ -66,7 +62,6 @@ describe('generateObsidianLinks', () => {
     };
      // Mock createConceptNotes to return a resolved promise
      plugin.createConceptNotes = jest.fn().mockResolvedValue(undefined);
->>>>>>> add-LMCG
   });
 
   it('should extract concepts from LLM output and generate links', () => {
@@ -81,15 +76,6 @@ describe('generateObsidianLinks', () => {
     expect(result).toBe(content);
   });
 
-<<<<<<< HEAD
-    it('should filter out invalid links', () => {
-      const content = "Valid: [[AI]] Invalid: [[123]] [[ ]]";
-      const result = plugin.generateObsidianLinks(content);
-      expect(result).toContain('[[AI]]');
-      // Update expectations since filtering was removed
-      expect(result).toContain('[[123]]');
-      expect(result).toContain('[[ ]]');
-=======
     it('should return original content and trigger concept note creation', () => {
       const content = "Valid: [[AI]] Invalid: [[123]] [[ ]] Also [[Machine Learning]].";
       const result = plugin.generateObsidianLinks(content);
@@ -124,6 +110,5 @@ describe('generateObsidianLinks', () => {
         const result = plugin.generateObsidianLinks(content);
         expect(result).toBe(content);
         expect(plugin.createConceptNotes).not.toHaveBeenCalled();
->>>>>>> add-LMCG
     });
 });

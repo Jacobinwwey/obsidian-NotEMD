@@ -142,35 +142,6 @@ Access plugin settings via:
 -   **Enable Duplicate Detection**: Toggles the basic check for duplicate words within processed content (results in console). (Default: Enabled)
 -   **Max Tokens**: Maximum tokens the LLM should generate per response chunk. Affects cost and detail. (Default: 4096)
 
-<<<<<<< HEAD
-## Usage Guide
-
-### Processing Documents
-**Important:** Notemd currently only processes files with `.md` or `.txt` extensions. Please ensure your files are in one of these formats before processing.
-
-You can process notes using the **Notemd Sidebar** or the **Command Palette**.
-
-1.  **Using the Sidebar**:
-    *   Open the Notemd Sidebar using the ribbon icon (wand icon) or the command palette (`Open Sidebar`).
-    *   Open the `.md` or `.txt` file you want to process.
-    *   Click **"Process Current File"** in the sidebar.
-    *   Progress will be shown in the sidebar's log area. You can click "Cancel Processing" if needed.
-    *   To process all supported files (`.md`, `.txt`) in a folder: Click **"Process Folder"**, select the folder from the dropdown, and click "Process" (or "Cancel"). Processing will begin for each supported file, showing progress in the sidebar.
-
-2.  **Using the Command Palette** (`Ctrl+P` or `Cmd+P`):
-    *   **Single File**: Open the desired `.md` or `.txt` file and run the command `Notemd: Process Current File`. A progress modal will appear with a cancel button.
-    *   **Folder**: Run the command `Notemd: Process Folder`. You will be prompted to select a folder and click "Process" or "Cancel". If you proceed, processing will start for all `.md` and `.txt` files in that folder, and a progress modal will appear with a cancel button.
-
-### Checking for Duplicates
--   Open the `.md` or `.txt` file you want to check.
--   Run the command `Notemd: Check for Duplicates in Current File` via the command palette or the sidebar button.
--   Results (potential duplicate words found in the file) will be logged to the Obsidian Developer Console (`Ctrl+Shift+I` or `Cmd+Option+I`) and mentioned in a notice/sidebar log. *Note: This is a basic check within the single file's content.*
-
-### Testing LLM Connection
--   Run the command `Notemd: Test LLM Connection` via the command palette or the sidebar button.
--   This will test the connection to the currently **Active Provider** configured in the settings.
--   Success or failure messages will appear as Obsidian notices and in the sidebar log/console.
-=======
 #### Content Generation
 -   **Enable Research in "Generate from Title"**:
     *   **Disabled (Default)**: "Generate from Title" uses only the title as input.
@@ -237,7 +208,6 @@ This is the core functionality focused on identifying concepts and adding `[[wik
     *   Run `Notemd: Test LLM Connection` (via command palette or sidebar button).
     *   Tests the connection to the **Active Provider**.
     *   Results appear as notices and in the sidebar log/console.
->>>>>>> add-LMCG
 
 ## Supported LLM Providers
 
@@ -285,8 +255,4 @@ MIT License - See [LICENSE](LICENSE) file for details.
 
 ---
 
-<<<<<<< HEAD
-*Notemd v1.1.0 - Enhance your Obsidian knowledge graph with AI.*
-=======
 *Notemd v1.2.0 - Enhance your Obsidian knowledge graph with AI.*
->>>>>>> add-LMCG
