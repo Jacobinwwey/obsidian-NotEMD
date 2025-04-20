@@ -48,7 +48,21 @@ describe('Duplicate Handling', () => {
 			useCustomConceptLogFolder: false,
 			conceptLogFolderPath: '',
 			useCustomConceptLogFileName: false,
+<<<<<<< HEAD
 			conceptLogFileName: 'Generate.log'
+=======
+			conceptLogFileName: 'Generate.log',
+			// Add missing properties from recent updates
+			moveOriginalFileOnProcess: false,
+			tavilyApiKey: '',
+			searchProvider: 'tavily',
+			ddgMaxResults: 5,
+			ddgFetchTimeout: 15,
+			maxResearchContentTokens: 3000,
+			enableResearchInGenerateContent: false, // Add the new setting for tests
+			tavilyMaxResults: 5, // Add default for test
+      tavilySearchDepth: 'basic' // Add default for test
+>>>>>>> add-LMCG
 		};
 		plugin.app = mockApp as any; // Assign mockApp after settings
 	});

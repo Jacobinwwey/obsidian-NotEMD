@@ -49,8 +49,24 @@ describe('generateObsidianLinks', () => {
       useCustomConceptLogFolder: false,
       conceptLogFolderPath: '',
       useCustomConceptLogFileName: false,
+<<<<<<< HEAD
       conceptLogFileName: 'Generate.log'
     };
+=======
+      conceptLogFileName: 'Generate.log',
+      moveOriginalFileOnProcess: false, // Add missing property
+      tavilyApiKey: '', // Add the new Tavily API key setting
+      searchProvider: 'tavily', // Add the new search provider setting
+      ddgMaxResults: 5, // Add default for test
+      ddgFetchTimeout: 15, // Add default for test
+      maxResearchContentTokens: 3000, // Add default for test
+      enableResearchInGenerateContent: false, // Add the new setting for tests
+      tavilyMaxResults: 5, // Add default for test
+      tavilySearchDepth: 'basic' // Add default for test
+    };
+     // Mock createConceptNotes to return a resolved promise
+     plugin.createConceptNotes = jest.fn().mockResolvedValue(undefined);
+>>>>>>> add-LMCG
   });
 
   it('should extract concepts from LLM output and generate links', () => {
@@ -65,6 +81,7 @@ describe('generateObsidianLinks', () => {
     expect(result).toBe(content);
   });
 
+<<<<<<< HEAD
     it('should filter out invalid links', () => {
       const content = "Valid: [[AI]] Invalid: [[123]] [[ ]]";
       const result = plugin.generateObsidianLinks(content);
@@ -72,5 +89,41 @@ describe('generateObsidianLinks', () => {
       // Update expectations since filtering was removed
       expect(result).toContain('[[123]]');
       expect(result).toContain('[[ ]]');
+=======
+    it('should return original content and trigger concept note creation', () => {
+      const content = "Valid: [[AI]] Invalid: [[123]] [[ ]] Also [[Machine Learning]].";
+      const result = plugin.generateObsidianLinks(content);
+
+      // Expect the original content to be returned
+      expect(result).toBe(content);
+
+      // Expect createConceptNotes to have been called with valid concepts
+      expect(plugin.createConceptNotes).toHaveBeenCalledTimes(1);
+      const expectedConcepts = new Set(['AI', 'Machine Learning']);
+      expect(plugin.createConceptNotes).toHaveBeenCalledWith(expectedConcepts);
+    });
+
+    it('should not trigger concept note creation if setting is disabled', () => {
+        plugin.settings.useCustomConceptNoteFolder = false; // Disable setting
+        const content = "Link: [[Concept]]";
+        const result = plugin.generateObsidianLinks(content);
+        expect(result).toBe(content);
+        expect(plugin.createConceptNotes).not.toHaveBeenCalled();
+    });
+
+     it('should not trigger concept note creation if folder path is empty', () => {
+        plugin.settings.conceptNoteFolder = ''; // Empty path
+        const content = "Link: [[Concept]]";
+        const result = plugin.generateObsidianLinks(content);
+        expect(result).toBe(content);
+        expect(plugin.createConceptNotes).not.toHaveBeenCalled();
+    });
+
+     it('should not trigger concept note creation if no valid concepts found', () => {
+        const content = "Invalid links: [[1]] [[]]";
+        const result = plugin.generateObsidianLinks(content);
+        expect(result).toBe(content);
+        expect(plugin.createConceptNotes).not.toHaveBeenCalled();
+>>>>>>> add-LMCG
     });
 });

@@ -1,9 +1,15 @@
 {
 	"id": "notemd",
 	"name": "Notemd",
+<<<<<<< HEAD
 	"version": "1.1.0",
 	"minAppVersion": "0.15.0",
 	"description": "Integrates with various LLMs (DeepSeek, OpenAI, Anthropic, Google, Mistral, Azure, OpenRouter, LMStudio, Ollama) to process notes, automatically generate [[wiki-links]] for key concepts, create corresponding concept notes in a customizable folder, save processed files to a customizable location, and perform basic duplicate checks.",
+=======
+	"version": "1.2.0",
+	"minAppVersion": "0.15.0",
+	"description": "Enhances notes using LLMs: 1) Processes text to add [[wiki-links]] and create concept notes. 2) Performs web research (Tavily/DuckDuckGo) and summarizes topics. 3) Generates content from note titles. Supports multiple LLM providers and customizable output.",
+>>>>>>> add-LMCG
 	"author": "jacob",
 	"authorUrl": "https://github.com/Jacobinwwey",
 	"isDesktopOnly": false

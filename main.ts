@@ -1,4 +1,9 @@
+<<<<<<< HEAD
 import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting, TFile, TFolder } from 'obsidian';
+=======
+import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting, TFile, TFolder, requestUrl } from 'obsidian'; // Import requestUrl
+import { refineMermaidBlocks, cleanupLatexDelimiters } from './mermaidProcessor'; // Import new functions
+>>>>>>> add-LMCG
 
 // Remember to rename these classes and interfaces!
 
@@ -32,8 +37,30 @@ interface NotemdSettings {
 	maxTokens: number; // Added setting for max tokens
 	enableDuplicateDetection: boolean; // Added setting for duplicate checks
 	processMode: string; // Although commands are separate, keep for potential future use or settings logic
+<<<<<<< HEAD
 }
 
+=======
+	moveOriginalFileOnProcess: boolean; // New setting for alternative workflow
+	tavilyApiKey: string; // New setting for Tavily API Key
+	searchProvider: 'tavily' | 'duckduckgo'; // New setting for search provider
+	ddgMaxResults: number; // Max results for DuckDuckGo
+	ddgFetchTimeout: number; // Timeout in seconds for fetching DDG result content
+	maxResearchContentTokens: number; // New setting for max research content tokens
+	enableResearchInGenerateContent: boolean; // New setting: Toggle research for Generate from Title
+	tavilyMaxResults: number; // New setting for Tavily max results
+	tavilySearchDepth: 'basic' | 'advanced'; // New setting for Tavily search depth
+}
+
+// Interface for search results
+interface SearchResult {
+	title: string;
+	url: string;
+	content: string; // Snippet or fetched content
+}
+
+
+>>>>>>> add-LMCG
 const DEFAULT_SETTINGS: NotemdSettings = {
 	providers: [
 		{
@@ -119,7 +146,20 @@ const DEFAULT_SETTINGS: NotemdSettings = {
 	chunkWordCount: 3000,
 	maxTokens: 4096, // Default max tokens for LLM response
 	enableDuplicateDetection: true, // Enable by default
+<<<<<<< HEAD
 	processMode: 'single'
+=======
+	processMode: 'single',
+	moveOriginalFileOnProcess: false, // Default to creating copies
+	tavilyApiKey: '', // Default Tavily API Key to empty
+	searchProvider: 'tavily', // Default search provider
+	ddgMaxResults: 5, // Default max results for DuckDuckGo
+	ddgFetchTimeout: 15, // Default timeout (seconds) for fetching DDG result content
+	maxResearchContentTokens: 3000, // Default token limit for research content
+	enableResearchInGenerateContent: false, // Default to false: Generate from Title does NOT research by default
+	tavilyMaxResults: 5, // Default Tavily max results
+	tavilySearchDepth: 'basic' // Default Tavily search depth
+>>>>>>> add-LMCG
 }
 
 // Interface for progress reporting (used by Modal and Sidebar View)
@@ -239,6 +279,48 @@ export default class NotemdPlugin extends Plugin {
 			}
 		});
 
+<<<<<<< HEAD
+=======
+		this.addCommand({
+			id: 'generate-content-from-title',
+			name: 'Generate Content from Note Title',
+			callback: async () => {
+				// Use the sidebar/modal reporter for progress
+				const view = this.app.workspace.getLeavesOfType(NOTEMD_SIDEBAR_VIEW_TYPE)[0]?.view;
+				if (view instanceof NotemdSidebarView) {
+					this.app.workspace.revealLeaf(view.leaf); // Ensure sidebar is visible
+					await this.generateContentForTitle(view); // Pass sidebar view as reporter
+				} else {
+					// Fallback to modal if sidebar isn't open
+					const modal = new ProgressModal(this.app);
+					modal.open();
+					await this.generateContentForTitle(modal);
+				}
+			}
+		});
+
+		this.addCommand({
+			id: 'research-and-summarize-topic',
+			name: 'Research and Summarize Topic',
+			editorCallback: async (editor: Editor, view: MarkdownView) => {
+				// Use sidebar/modal reporter
+				const reporter = this.getReporter();
+				await this.researchAndSummarize(editor, view, reporter);
+			}
+		});
+
+		// New Command: Batch Generate Content from Titles
+		this.addCommand({
+			id: 'batch-generate-content-from-titles',
+			name: 'Batch Generate Content from Titles',
+			callback: async () => {
+				const reporter = this.getReporter();
+				await this.batchGenerateContentForTitles(reporter);
+			}
+		});
+
+
+>>>>>>> add-LMCG
 		// --- Settings Tab ---
 		this.addSettingTab(new NotemdSettingTab(this.app, this));
 
@@ -585,6 +667,10 @@ export default class NotemdPlugin extends Plugin {
 
 		this.updateStatusBar(`Batch processing ${files.length} files...`);
 		reporter.log(`Starting batch processing for ${files.length} files in "${folderPath}"...`);
+<<<<<<< HEAD
+=======
+		const errors: { file: string; message: string }[] = []; // Array to collect errors
+>>>>>>> add-LMCG
 
 		try {
 			for (let i = 0; i < files.length; i++) {
@@ -614,10 +700,17 @@ export default class NotemdPlugin extends Plugin {
 				} catch (fileError: any) {
 					// Log error for this specific file and continue with the next
 					const errorMsg = `Error processing ${file.name}: ${fileError.message}`;
+<<<<<<< HEAD
 					console.error(errorMsg, fileError);
 					reporter.log(errorMsg);
 					// Optionally mark the overall progress as errored? Or just log?
 					// For now, just log and continue. We'll show the detailed error modal outside the loop if needed.
+=======
+					console.error(errorMsg, fileError); // Keep console error for details
+					reporter.log(`❌ ${errorMsg}`); // Log user-friendly error to reporter
+					errors.push({ file: file.name, message: fileError.message }); // Collect error details
+					// Continue to the next file
+>>>>>>> add-LMCG
 				}
 
 				if (reporter.cancelled) { // Check again after processFile
@@ -629,15 +722,37 @@ export default class NotemdPlugin extends Plugin {
 			} // End of loop
 
 			if (!reporter.cancelled) {
+<<<<<<< HEAD
 				reporter.updateStatus('Batch processing complete!', 100);
 				this.updateStatusBar('Batch complete');
 				// Only close if it's the modal we created
 				if (closeModalOnFinish && reporter instanceof ProgressModal) {
+=======
+				// Report final status including any errors
+				if (errors.length > 0) {
+					const errorSummary = `Batch processing finished with ${errors.length} error(s). Check log for details.`;
+					reporter.log(`⚠️ ${errorSummary}`);
+					reporter.updateStatus(errorSummary, -1); // Indicate error state in status/progress
+					this.updateStatusBar(`Batch complete with errors`);
+					new Notice(errorSummary, 10000); // Show notice about errors
+				} else {
+					reporter.updateStatus('Batch processing complete!', 100);
+					this.updateStatusBar('Batch complete');
+					new Notice(`Successfully processed ${files.length} files.`, 5000);
+				}
+				// Only close if it's the modal we created AND there were no errors (or maybe always close?)
+				// Let's keep it open if there were errors so user can see log.
+				if (closeModalOnFinish && reporter instanceof ProgressModal && errors.length === 0) {
+>>>>>>> add-LMCG
 					// Explicitly cast inside setTimeout
 					setTimeout(() => (reporter as ProgressModal).close(), 2000);
 				}
 			}
+<<<<<<< HEAD
 			// If cancelled, the status is already set inside the loop
+=======
+			// If cancelled, the status is already set inside the loop and modal remains open
+>>>>>>> add-LMCG
 
 		} catch (error: any) { // Catch errors outside the loop (e.g., initial setup)
 			this.updateStatusBar('Error occurred');
@@ -664,6 +779,10 @@ export default class NotemdPlugin extends Plugin {
 		// console.log(`processFile: Read ${content.length} characters.`); // DEBUG
 
 		// Pass the reporter instance to the LLM processor
+<<<<<<< HEAD
+=======
+		progressReporter.log(`Submitting content to LLM for: ${file.name}...`); // Added log
+>>>>>>> add-LMCG
 		// console.log(`processFile: Calling processContentWithLLM for ${file.name}...`); // DEBUG
 		const processedContent = await this.processContentWithLLM(content, progressReporter);
 		// console.log(`processFile: processContentWithLLM returned ${processedContent?.length ?? 'null/undefined'} characters for ${file.name}.`); // DEBUG
@@ -674,16 +793,55 @@ export default class NotemdPlugin extends Plugin {
 			return; // Stop processing this file if cancelled
 		}
 
+<<<<<<< HEAD
 		progressReporter.log(`Generating links for: ${file.name}`);
+=======
+		progressReporter.log(`Generating Obsidian links for: ${file.name}...`); // Refined log
+>>>>>>> add-LMCG
 		// console.log(`processFile: Calling generateObsidianLinks for ${file.name}...`); // DEBUG
 		const withLinks = this.generateObsidianLinks(processedContent);
 		// console.log(`processFile: generateObsidianLinks returned ${withLinks?.length ?? 'null/undefined'} characters for ${file.name}.`); // DEBUG
 
+<<<<<<< HEAD
 		progressReporter.log(`Handling duplicates for: ${file.name}`);
+=======
+		progressReporter.log(`Checking for duplicates in: ${file.name}...`); // Refined log
+>>>>>>> add-LMCG
 		// console.log(`processFile: Calling handleDuplicates for ${file.name}...`); // DEBUG
 		await this.handleDuplicates(withLinks);
 		// console.log(`processFile: handleDuplicates finished for ${file.name}.`); // DEBUG
 
+<<<<<<< HEAD
+=======
+		// --- Apply Post-Processing ---
+		progressReporter.log(`Cleaning Mermaid/LaTeX for: ${file.name}`);
+		let finalContent = withLinks;
+		try {
+			finalContent = cleanupLatexDelimiters(finalContent);
+			finalContent = refineMermaidBlocks(finalContent);
+			// console.log(`processFile: Mermaid/LaTeX cleanup applied for ${file.name}.`); // DEBUG
+			progressReporter.log(`Mermaid/LaTeX cleanup applied for: ${file.name}`); // Added log
+		} catch (cleanupError: any) {
+			progressReporter.log(`Warning: Error during Mermaid/LaTeX cleanup for ${file.name}: ${cleanupError.message}`);
+			console.warn(`Warning during Mermaid/LaTeX cleanup for ${file.name}:`, cleanupError);
+			// Continue with the content before cleanup attempt
+			finalContent = withLinks;
+		}
+
+		// --- Remove \boxed{ line if present ---
+		const lines = finalContent.split('\n');
+		if (lines.length > 0 && lines[0].trim() === '\\boxed{') {
+			progressReporter.log(`Removing leading '\\boxed{' line.`);
+			lines.shift(); // Remove the first line
+			// Remove the corresponding closing brace '}' potentially at the end
+			if (lines.length > 0 && lines[lines.length - 1].trim() === '}') {
+				lines.pop();
+			}
+			finalContent = lines.join('\n');
+		}
+
+
+>>>>>>> add-LMCG
 		// --- Determine Processed File Output Path ---
 		let processedFileSaveDir = '';
 		if (this.settings.useCustomProcessedFileFolder && this.settings.processedFileFolder) {
@@ -723,6 +881,7 @@ export default class NotemdPlugin extends Plugin {
 			throw new Error(errorMsg);
 		}
 
+<<<<<<< HEAD
 		// Construct final processed file name
 		const processedName = `${processedFileSaveDir}${file.basename}_processed.md`;
 		progressReporter.log(`Saving processed file as: ${processedName}`);
@@ -741,6 +900,68 @@ export default class NotemdPlugin extends Plugin {
 			progressReporter.log(`Created processed file: ${processedName}`);
 		}
 		// console.log(`processFile: File saving complete for ${processedName}.`); // DEBUG
+=======
+		// --- Save or Move Processed File ---
+		if (this.settings.moveOriginalFileOnProcess) {
+			// Move original file to target directory (if different) and overwrite content
+			const targetPath = `${processedFileSaveDir}${file.name}`; // Use original filename in target dir
+			progressReporter.log(`Processing mode: Move & Overwrite original file.`);
+
+			// Check if target path is different from original path
+			if (targetPath !== file.path) {
+				progressReporter.log(`Moving original file to: ${targetPath}`);
+				// Ensure target directory exists (already done earlier)
+				try {
+					// Check if a file already exists at the target path before attempting rename
+					const existingTargetFile = this.app.vault.getAbstractFileByPath(targetPath);
+					if (existingTargetFile) {
+						// Handle conflict - maybe delete existing or throw error?
+						// For now, let's throw an error to prevent accidental overwrite by rename.
+						// User should manually resolve conflict in target folder.
+						throw new Error(`File already exists at target move path: ${targetPath}. Cannot move original file.`);
+					}
+
+					// Move first (rename)
+					await this.app.vault.rename(file, targetPath);
+					progressReporter.log(`Moved original file to: ${targetPath}`);
+
+					// Now modify the moved file's content
+					const movedFile = this.app.vault.getAbstractFileByPath(targetPath);
+					if (movedFile instanceof TFile) {
+						await this.app.vault.modify(movedFile, finalContent);
+						progressReporter.log(`Overwrote content of moved file: ${targetPath}`);
+					} else {
+						// This should ideally not happen if rename succeeded
+						throw new Error(`Failed to find moved file at ${targetPath} after rename.`);
+					}
+				} catch (moveError: any) {
+					progressReporter.log(`Error moving file ${file.name} to ${targetPath}: ${moveError.message}`);
+					// Stop processing this file if move fails
+					throw new Error(`Failed to move original file: ${moveError.message}`);
+				}
+			} else {
+				// Target path is the same, just modify the original file in place
+				progressReporter.log(`Overwriting original file in place: ${file.path}`);
+				await this.app.vault.modify(file, finalContent);
+				progressReporter.log(`Overwrote original file: ${file.path}`);
+			}
+		} else {
+			// Original logic: Create/overwrite _processed.md file
+			const processedName = `${processedFileSaveDir}${file.basename}_processed.md`;
+			progressReporter.log(`Processing mode: Create/Overwrite processed copy.`);
+			progressReporter.log(`Saving processed file as: ${processedName}`);
+
+			const existingProcessedFile = this.app.vault.getAbstractFileByPath(processedName);
+			if (existingProcessedFile instanceof TFile) {
+				await this.app.vault.modify(existingProcessedFile, finalContent); // Use finalContent
+				progressReporter.log(`Overwrote existing processed file: ${processedName}`);
+			} else {
+				await this.app.vault.create(processedName, finalContent); // Use finalContent
+				progressReporter.log(`Created processed file: ${processedName}`);
+			}
+		}
+		// console.log(`processFile: File saving/moving complete for ${file.name}.`); // DEBUG
+>>>>>>> add-LMCG
 
 		progressReporter.log(`Finished processing: ${file.name}`);
 		this.currentProcessingFile = ''; // Clear after processing
@@ -809,6 +1030,7 @@ export default class NotemdPlugin extends Plugin {
 
 		// Escape special regex characters in fileName
 		const escapedFileName = fileName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+<<<<<<< HEAD
 		// Regex to find the link:
 		// - Optionally preceded by list marker and whitespace (^[ \t]*[-*+]\s+)
 		// - OR just the link itself
@@ -816,6 +1038,10 @@ export default class NotemdPlugin extends Plugin {
 		const linkRegex = new RegExp(`(?:^[ \\t]*[-*+]\\s+)?\\[\\[${escapedFileName}\\]\\][ \\t]*$\\n?`, 'gm');
 		// Simpler regex just to remove the link itself if the above is too aggressive
 		// const simpleLinkRegex = new RegExp(`\\[\\[${escapedFileName}\\]\\]`, 'g');
+=======
+		// Simplified Regex to find only the link itself, globally and case-insensitively (Obsidian links are case-insensitive)
+		const linkRegex = new RegExp(`\\[\\[${escapedFileName}\\]\\]`, 'gi');
+>>>>>>> add-LMCG
 
 		const files = this.app.vault.getMarkdownFiles();
 		let updatedCount = 0;
@@ -826,6 +1052,7 @@ export default class NotemdPlugin extends Plugin {
 				let content = await this.app.vault.read(file);
 				let updatedContent = content;
 
+<<<<<<< HEAD
 				if (content.includes(`[[${fileName}]]`)) { // Quick check before running regex
 					// Attempt to remove the link, potentially removing the list item line
 					updatedContent = content.replace(linkRegex, (match) => {
@@ -840,6 +1067,19 @@ export default class NotemdPlugin extends Plugin {
 					// Clean up potential empty lines left after removal
 					updatedContent = updatedContent.replace(/\n{3,}/g, '\n\n').trim();
 
+=======
+				// Use the simplified regex to replace only the link itself with an empty string
+				if (linkRegex.test(content)) { // Check if the link exists before modifying
+					updatedContent = content.replace(linkRegex, '');
+
+					// Optional: Clean up potential empty list items like "-  " or "*  " left after removal
+					// This regex looks for lines starting with list markers followed only by whitespace
+					updatedContent = updatedContent.replace(/^[ \t]*[-*+]\s*$/gm, '');
+					// Clean up extra blank lines that might result
+					updatedContent = updatedContent.replace(/\n{3,}/g, '\n\n').trim();
+
+
+>>>>>>> add-LMCG
 					if (content !== updatedContent) {
 						await this.app.vault.modify(file, updatedContent);
 						updatedCount++;
@@ -1081,8 +1321,18 @@ export default class NotemdPlugin extends Plugin {
 		// console.log(`callDeepSeekAPI: Response Status: ${response.status}`); // DEBUG
 		if (!response.ok) {
 			const errorText = await response.text();
+<<<<<<< HEAD
 			console.error(`callDeepSeekAPI: Error Response Text: ${errorText}`); // Keep error log
 			throw new Error(`DeepSeek API error: ${response.status} - ${errorText}`);
+=======
+			console.error(`callDeepSeekAPI: Error Response Text (${response.status}): ${errorText}`); // Keep error log
+			let userMessage = `DeepSeek API error: ${response.status}`;
+			if (response.status === 401) userMessage += " - Unauthorized. Check your API key.";
+			else if (response.status === 429) userMessage += " - Rate limit exceeded. Please wait and try again.";
+			else if (response.status >= 500) userMessage += " - Server error. Please try again later.";
+			else userMessage += ` - ${errorText}`; // Include original text for other errors
+			throw new Error(userMessage);
+>>>>>>> add-LMCG
 		}
 
 		const data = await response.json();
@@ -1128,8 +1378,19 @@ export default class NotemdPlugin extends Plugin {
 		// console.log(`callOpenAIApi: Response Status: ${response.status}`); // DEBUG
 		if (!response.ok) {
 			const errorText = await response.text();
+<<<<<<< HEAD
 			console.error(`callOpenAIApi: Error Response Text: ${errorText}`); // Keep error log
 			throw new Error(`OpenAI API error: ${response.status} - ${errorText}`);
+=======
+			console.error(`callOpenAIApi: Error Response Text (${response.status}): ${errorText}`); // Keep error log
+			let userMessage = `OpenAI API error: ${response.status}`;
+			if (response.status === 401) userMessage += " - Unauthorized. Check your API key.";
+			else if (response.status === 404) userMessage += " - Not Found. Check the Base URL and model name.";
+			else if (response.status === 429) userMessage += " - Rate limit exceeded. Please wait and try again.";
+			else if (response.status >= 500) userMessage += " - Server error. Please try again later.";
+			else userMessage += ` - ${errorText}`; // Include original text for other errors
+			throw new Error(userMessage);
+>>>>>>> add-LMCG
 		}
 
 		const data = await response.json();
@@ -1169,8 +1430,20 @@ export default class NotemdPlugin extends Plugin {
 		// console.log(`callAnthropicApi: Response Status: ${response.status}`); // DEBUG
 		if (!response.ok) {
 			const errorText = await response.text();
+<<<<<<< HEAD
 			console.error(`callAnthropicApi: Error Response Text: ${errorText}`); // Keep error log
 			throw new Error(`Anthropic API error: ${response.status} - ${errorText}`);
+=======
+			console.error(`callAnthropicApi: Error Response Text (${response.status}): ${errorText}`); // Keep error log
+			let userMessage = `Anthropic API error: ${response.status}`;
+			if (response.status === 401) userMessage += " - Unauthorized. Check your API key.";
+			else if (response.status === 403) userMessage += " - Forbidden. Check API key permissions.";
+			else if (response.status === 404) userMessage += " - Not Found. Check the Base URL.";
+			else if (response.status === 429) userMessage += " - Rate limit exceeded. Please wait and try again.";
+			else if (response.status >= 500) userMessage += " - Server error. Please try again later.";
+			else userMessage += ` - ${errorText}`; // Include original text for other errors
+			throw new Error(userMessage);
+>>>>>>> add-LMCG
 		}
 
 		const data = await response.json();
@@ -1214,8 +1487,20 @@ export default class NotemdPlugin extends Plugin {
 		// console.log(`callGoogleApi: Response Status: ${response.status}`); // DEBUG
 		if (!response.ok) {
 			const errorText = await response.text();
+<<<<<<< HEAD
 			console.error(`callGoogleApi: Error Response Text: ${errorText}`); // Keep error log
 			throw new Error(`Google API error: ${response.status} - ${errorText}`);
+=======
+			console.error(`callGoogleApi: Error Response Text (${response.status}): ${errorText}`); // Keep error log
+			let userMessage = `Google API error: ${response.status}`;
+			if (response.status === 400) userMessage += " - Bad Request. Check API key or request format.";
+			else if (response.status === 403) userMessage += " - Forbidden. Check API key permissions.";
+			else if (response.status === 404) userMessage += " - Not Found. Check the Base URL and model name.";
+			else if (response.status === 429) userMessage += " - Rate limit exceeded. Please wait and try again.";
+			else if (response.status >= 500) userMessage += " - Server error. Please try again later.";
+			else userMessage += ` - ${errorText}`; // Include original text for other errors
+			throw new Error(userMessage);
+>>>>>>> add-LMCG
 		}
 
 		const data = await response.json();
@@ -1259,8 +1544,19 @@ export default class NotemdPlugin extends Plugin {
 		// console.log(`callMistralApi: Response Status: ${response.status}`); // DEBUG
 		if (!response.ok) {
 			const errorText = await response.text();
+<<<<<<< HEAD
 			console.error(`callMistralApi: Error Response Text: ${errorText}`); // Keep error log
 			throw new Error(`Mistral API error: ${response.status} - ${errorText}`);
+=======
+			console.error(`callMistralApi: Error Response Text (${response.status}): ${errorText}`); // Keep error log
+			let userMessage = `Mistral API error: ${response.status}`;
+			if (response.status === 401) userMessage += " - Unauthorized. Check your API key.";
+			else if (response.status === 404) userMessage += " - Not Found. Check the Base URL and model name.";
+			else if (response.status === 429) userMessage += " - Rate limit exceeded. Please wait and try again.";
+			else if (response.status >= 500) userMessage += " - Server error. Please try again later.";
+			else userMessage += ` - ${errorText}`; // Include original text for other errors
+			throw new Error(userMessage);
+>>>>>>> add-LMCG
 		}
 
 		const data = await response.json();
@@ -1309,8 +1605,19 @@ export default class NotemdPlugin extends Plugin {
 		// console.log(`callAzureOpenAIApi: Response Status: ${response.status}`); // DEBUG
 		if (!response.ok) {
 			const errorText = await response.text();
+<<<<<<< HEAD
 			console.error(`callAzureOpenAIApi: Error Response Text: ${errorText}`); // Keep error log
 			throw new Error(`Azure OpenAI API error: ${response.status} - ${errorText}`);
+=======
+			console.error(`callAzureOpenAIApi: Error Response Text (${response.status}): ${errorText}`); // Keep error log
+			let userMessage = `Azure OpenAI API error: ${response.status}`;
+			if (response.status === 401) userMessage += " - Unauthorized. Check your API key and endpoint.";
+			else if (response.status === 404) userMessage += " - Not Found. Check the endpoint and deployment name (model).";
+			else if (response.status === 429) userMessage += " - Rate limit exceeded. Please wait and try again.";
+			else if (response.status >= 500) userMessage += " - Server error. Please try again later.";
+			else userMessage += ` - ${errorText}`; // Include original text for other errors
+			throw new Error(userMessage);
+>>>>>>> add-LMCG
 		}
 
 		const data = await response.json();
@@ -1354,8 +1661,18 @@ export default class NotemdPlugin extends Plugin {
 		// console.log(`callLMStudioApi: Response Status: ${response.status}`); // DEBUG
 		if (!response.ok) {
 			const errorText = await response.text();
+<<<<<<< HEAD
 			console.error(`callLMStudioApi: Error Response Text: ${errorText}`); // Keep error log
 			throw new Error(`LMStudio API error: ${response.status} - ${errorText}`);
+=======
+			console.error(`callLMStudioApi: Error Response Text (${response.status}): ${errorText}`); // Keep error log
+			let userMessage = `LMStudio API error: ${response.status}`;
+			if (response.status === 404) userMessage += " - Not Found. Check the Base URL (e.g., http://localhost:1234/v1).";
+			else if (errorText.includes("Could not find model")) userMessage += ` - Model '${provider.model}' not found or loaded.`;
+			else if (response.status >= 500) userMessage += " - Server error. Is LM Studio running?";
+			else userMessage += ` - ${errorText}`; // Include original text for other errors
+			throw new Error(userMessage);
+>>>>>>> add-LMCG
 		}
 
 		const data = await response.json();
@@ -1402,8 +1719,18 @@ export default class NotemdPlugin extends Plugin {
 		// console.log(`callOllamaApi: Response Status: ${response.status}`); // DEBUG
 		if (!response.ok) {
 			const errorText = await response.text();
+<<<<<<< HEAD
 			console.error(`callOllamaApi: Error Response Text: ${errorText}`); // Keep error log
 			throw new Error(`Ollama API error: ${response.status} - ${errorText}`);
+=======
+			console.error(`callOllamaApi: Error Response Text (${response.status}): ${errorText}`); // Keep error log
+			let userMessage = `Ollama API error: ${response.status}`;
+			if (response.status === 404) userMessage += " - Not Found. Check the Base URL (e.g., http://localhost:11434/api) and ensure Ollama is running.";
+			else if (errorText.includes("model not found")) userMessage += ` - Model '${provider.model}' not found.`;
+			else if (response.status >= 500) userMessage += " - Server error. Is Ollama running?";
+			else userMessage += ` - ${errorText}`; // Include original text for other errors
+			throw new Error(userMessage);
+>>>>>>> add-LMCG
 		}
 
 		const data = await response.json();
@@ -1435,6 +1762,7 @@ export default class NotemdPlugin extends Plugin {
 		// console.log(`callOpenRouterAPI: Calling URL: ${url}`); // DEBUG
 		// console.log(`callOpenRouterAPI: Request Body (excluding content):`, { ...requestBody, messages: [{ role: 'system', content: '...' }, { role: 'user', content: `(length: ${content.length})` }] }); // DEBUG
 
+<<<<<<< HEAD
 		const response = await fetch(url, {
 			method: 'POST',
 			headers: {
@@ -1445,12 +1773,50 @@ export default class NotemdPlugin extends Plugin {
 			},
 			body: JSON.stringify(requestBody)
 		});
+=======
+		let response: Response; // Define response variable outside try block
+
+		try { // Wrap the fetch call
+			response = await fetch(url, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					'Authorization': `Bearer ${provider.apiKey}`, // Required
+					'HTTP-Referer': 'https://github.com/Jacobinwwey/obsidian-NotEMD', // Required by OpenRouter
+					'X-Title': 'Notemd Obsidian Plugin' // Required by OpenRouter
+				},
+				body: JSON.stringify(requestBody)
+			});
+		} catch (fetchError: any) {
+			// Handle fetch-specific errors (network, DNS, CORS etc.)
+			console.error(`callOpenRouterAPI: Fetch failed for URL ${url}:`, fetchError);
+			// Provide a more informative message for fetch errors
+			let userMessage = `Network error calling OpenRouter: ${fetchError.message}. Check internet connection and if ${provider.baseUrl} is reachable.`;
+			if (fetchError.name === 'TypeError' && fetchError.message.includes('fetch')) {
+				 userMessage += ' This might indicate a CORS issue or network configuration problem.';
+			}
+			throw new Error(userMessage);
+		}
+
+>>>>>>> add-LMCG
 
 		// console.log(`callOpenRouterAPI: Response Status: ${response.status}`); // DEBUG
 		if (!response.ok) {
 			const errorText = await response.text();
+<<<<<<< HEAD
 			console.error(`callOpenRouterAPI: Error Response Text: ${errorText}`); // Keep error log
 			throw new Error(`OpenRouter API error: ${response.status} - ${errorText}`);
+=======
+			console.error(`callOpenRouterAPI: Error Response Text (${response.status}): ${errorText}`); // Keep error log
+			let userMessage = `OpenRouter API error: ${response.status}`;
+			if (response.status === 401) userMessage += " - Unauthorized. Check your API key.";
+			else if (response.status === 402) userMessage += " - Payment Required / Quota Exceeded.";
+			else if (response.status === 404) userMessage += " - Not Found. Check the Base URL and model name.";
+			else if (response.status === 429) userMessage += " - Rate limit exceeded. Please wait and try again.";
+			else if (response.status >= 500) userMessage += " - Server error. Please try again later.";
+			else userMessage += ` - ${errorText}`; // Include original text for other errors
+			throw new Error(userMessage);
+>>>>>>> add-LMCG
 		}
 
 		const data = await response.json();
@@ -1511,7 +1877,11 @@ export default class NotemdPlugin extends Plugin {
 
 
 
+<<<<<<< HEAD
 	// Modify signature to accept ProgressReporter
+=======
+	// Restore original function signature and logic
+>>>>>>> add-LMCG
 	async processContentWithLLM(content: string, progressReporter: ProgressReporter): Promise<string> {
 		// console.log("Entering processContentWithLLM"); // DEBUG
 		const provider = this.settings.providers.find(p => p.name === this.settings.activeProvider);
@@ -1627,6 +1997,10 @@ Rules:
 		return finalResult;
 	}
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> add-LMCG
 	// --- Post-Processing ---
 
 	generateObsidianLinks(content: string): string {
@@ -1686,11 +2060,16 @@ Rules:
 			}
 
 			for (const concept of concepts) {
+<<<<<<< HEAD
 				// Sanitize concept name for filename (more robustly)
 				let safeName = concept
 					.replace(/[\\/:*?"<>|#^[\]]/g, '') // Remove invalid file path chars + Obsidian specific ones
 					.replace(/\s+/g, ' ') // Collapse multiple spaces
 					.trim();
+=======
+				// Sanitize concept name for filename using the new normalization function
+				let safeName = this.normalizeNameForFilePath(concept);
+>>>>>>> add-LMCG
 
 				// Limit filename length (e.g., 100 chars) to avoid issues
 				if (safeName.length > 100) {
@@ -1963,6 +2342,750 @@ Rules:
 		}
 	}
 
+<<<<<<< HEAD
+=======
+	/**
+	 * Normalizes a concept name for use as a file path.
+	 * - Replaces hyphens and underscores with spaces.
+	 * - Removes characters invalid for file paths and Obsidian links.
+	 * - Collapses multiple spaces to single spaces.
+	 * - Trims leading/trailing whitespace.
+	 * Inspired by process_string from mermaid.py.
+	 * @param name The concept name to normalize.
+	 * @returns A normalized string suitable for file paths.
+	 */
+	private normalizeNameForFilePath(name: string): string {
+		let normalized = name;
+		// Replace hyphens and underscores with spaces first
+		normalized = normalized.replace(/[-_]/g, ' ');
+		// Remove invalid file path characters and Obsidian link characters
+		normalized = normalized.replace(/[\\/:*?"<>|#^[\]]/g, '');
+		// Collapse multiple spaces and trim
+		normalized = normalized.replace(/\s+/g, ' ').trim();
+		return normalized;
+	}
+
+	/**
+	 * Generates the system prompt for the LLM processing task (adding backlinks).
+	 * @returns The prompt string.
+	 */
+	private getLLMProcessingPrompt(): string {
+		// Refined prompt based on PowerShell script rules
+		return `Completely decompose and structure the knowledge points in this markdown document, outputting them in markdown format supported by Obsidian. Core knowledge points should be labelled with Obsidian's backlink format [[]]. Do not output anything other than the original text and the requested "Obsidian's backlink format [[]]".
+
+Rules:
+1. Only add Obsidian backlinks [[like this]] to core concepts. Do not modify the original text content or formatting otherwise.
+2. Skip conventional names (common products, company names, dates, times, individual names) unless they represent a core technical or scientific concept within the text's context.
+3. Output the *entire* original content of the chunk, preserving all formatting (headers, lists, code blocks, etc.), with only the added backlinks.
+4. Handle duplicate concepts carefully:
+    a. If both singular and plural forms of a word/concept appear (e.g., "model" and "models"), only add the backlink to the *first occurrence* of the *singular* form (e.g., [[model]]). Do not link the plural form.
+    b. If a single-word concept (e.g., "relaxation") also appears as part of a multi-word concept (e.g., "dielectric relaxation"), only add the backlink to the *multi-word* concept (e.g., [[dielectric relaxation]]). Do not link the standalone single word in this case.
+    c. Do not add duplicate backlinks for the exact same concept within this chunk. Link only the first meaningful occurrence.
+5. Ignore any "References", "Bibliography", or similar sections, typically found at the end of documents. Do not add backlinks within these sections.`;
+	}
+
+	/**
+	 * Generates content for the active note based on its title using an LLM.
+	 * Replaces the entire note content with the generated documentation.
+	 * @param progressReporter - Interface for reporting progress (Modal or Sidebar).
+	 */
+	async generateContentForTitle(progressReporter: ProgressReporter) {
+		const activeFile = this.app.workspace.getActiveFile();
+		if (!activeFile || !(activeFile instanceof TFile) || activeFile.extension !== 'md') {
+			new Notice('No active Markdown file to generate content for.');
+			progressReporter.log('Error: No active Markdown file selected.');
+			progressReporter.updateStatus('Error: No active file', -1);
+			if (progressReporter instanceof ProgressModal) setTimeout(() => progressReporter.close(), 2000);
+			return;
+		}
+
+		const title = activeFile.basename; // Use basename as the topic title
+		const provider = this.settings.providers.find(p => p.name === this.settings.activeProvider);
+
+		if (!provider) {
+			new Notice('No active LLM provider configured.');
+			progressReporter.log('Error: No active LLM provider configured.');
+			progressReporter.updateStatus('Error: No provider', -1);
+			if (progressReporter instanceof ProgressModal) setTimeout(() => progressReporter.close(), 2000);
+			return;
+		}
+
+		// Clear display and start progress reporting
+		progressReporter.clearDisplay();
+		progressReporter.updateStatus(`Generating content for "${title}"...`, 5);
+		progressReporter.log(`Starting content generation for: ${activeFile.name}`);
+		this.updateStatusBar(`Generating: ${activeFile.name}`);
+
+		try {
+			let researchContext = '';
+			// --- Conditional Research ---
+			if (this.settings.enableResearchInGenerateContent) {
+				progressReporter.log(`Research enabled for "${title}". Performing web search...`);
+				progressReporter.updateStatus(`Researching "${title}"...`, 10);
+				try {
+					// Use the refactored research logic
+					const context = await this._performResearch(title, progressReporter);
+					if (context) {
+						researchContext = context;
+						progressReporter.log(`Research context obtained for "${title}".`);
+						progressReporter.updateStatus(`Summarizing research for "${title}"...`, 15); // Update status
+					} else {
+						progressReporter.log(`Warning: Research for "${title}" returned no results or failed. Proceeding without web context.`);
+						// Optionally add a Notice here?
+					}
+				} catch (researchError: any) {
+					progressReporter.log(`Error during research for "${title}": ${researchError.message}. Proceeding without web context.`);
+					// Optionally add a Notice here?
+				}
+			} else {
+				progressReporter.log(`Research disabled for "Generate from Title". Proceeding with title only.`);
+			}
+			// --- End Conditional Research ---
+
+
+			// Construct the prompt for content generation
+			let generationPrompt = `Create comprehensive technical documentation about "${title}" with a focus on scientific and mathematical rigor.`;
+
+			// Append research context if available
+			if (researchContext) {
+				generationPrompt += `\n\nUse the following research context to inform the documentation:\n\n${researchContext}\n\nDocumentation based on the title "${title}" and the provided context:`;
+			} else {
+				generationPrompt += `\n\nDocumentation based *only* on the title "${title}":`;
+			}
+
+			// Add the detailed instructions (common part)
+			generationPrompt += `
+
+Include:
+1.  Detailed explanation of core concepts with their mathematical foundations. Start with a Level 2 Header (## ${title}).
+2.  Key technical specifications with precise values and units (use tables).
+3.  Common use cases with quantitative performance metrics.
+4.  Implementation considerations with algorithmic complexity analysis (if applicable).
+5.  Performance characteristics with statistical measures.
+6.  Related technologies with comparative mathematical models.
+7.  Mathematical equations in LaTeX format (using $$...$$ for display and $...$ for inline) with detailed explanations of all parameters and variables. Example: $$ P(f) = \\int_{-\\infty}^{\\infty} p(t) e^{-i2\\pi ft} dt $$
+8.  Mermaid.js diagram code blocks (\`\`\`mermaid ... \`\`\`) for complex relationships or system architectures.
+9.  Use bullet points for lists longer than 3 items.
+10. Include references to academic papers with DOI where applicable, under a "## References" section.
+11. Preserve all mathematical formulas and scientific principles without simplification.
+12. Define all variables and parameters used in equations.
+13. Include statistical measures and confidence intervals where relevant.
+
+Format directly for Obsidian markdown. Do NOT wrap the entire response in a markdown code block. Start directly with the Level 2 Header.`;
+
+			progressReporter.log(`Calling ${provider.name} to generate content...`);
+			// Adjust progress percentage based on whether research happened
+			const llmCallProgress = this.settings.enableResearchInGenerateContent ? 25 : 20;
+			progressReporter.updateStatus(`Calling ${provider.name}...`, llmCallProgress);
+
+			// Call the appropriate API function based on the active provider
+			// Pass an empty string for 'content' as the prompt now contains everything.
+			let generatedContent;
+			switch (provider.name) {
+				case 'DeepSeek':
+					generatedContent = await this.callDeepSeekAPI(provider, generationPrompt, '');
+					break;
+				case 'OpenAI':
+					generatedContent = await this.callOpenAIApi(provider, generationPrompt, '');
+					break;
+				case 'Anthropic':
+					// Anthropic combines system prompt and user message, so pass empty prompt here
+					generatedContent = await this.callAnthropicApi(provider, '', generationPrompt);
+					break;
+				case 'Google':
+					generatedContent = await this.callGoogleApi(provider, generationPrompt, '');
+					break;
+				case 'Mistral':
+					generatedContent = await this.callMistralApi(provider, generationPrompt, '');
+					break;
+				case 'Azure OpenAI':
+					generatedContent = await this.callAzureOpenAIApi(provider, generationPrompt, '');
+					break;
+				case 'LMStudio':
+					generatedContent = await this.callLMStudioApi(provider, generationPrompt, '');
+					break;
+				case 'Ollama':
+					generatedContent = await this.callOllamaApi(provider, generationPrompt, '');
+					break;
+				case 'OpenRouter':
+					generatedContent = await this.callOpenRouterAPI(provider, generationPrompt, '');
+					break;
+				default:
+					throw new Error(`Unsupported provider for content generation: ${provider.name}`);
+			}
+
+			progressReporter.log(`Content received from ${provider.name}.`);
+			progressReporter.updateStatus('Applying post-processing...', 80);
+
+			// Apply post-processing (cleanup)
+			let finalContent = generatedContent;
+			try {
+				finalContent = cleanupLatexDelimiters(finalContent);
+				finalContent = refineMermaidBlocks(finalContent);
+				progressReporter.log(`Mermaid/LaTeX cleanup applied.`);
+			} catch (cleanupError: any) {
+				progressReporter.log(`Warning: Error during Mermaid/LaTeX cleanup: ${cleanupError.message}`);
+				console.warn(`Warning during Mermaid/LaTeX cleanup for ${activeFile.name}:`, cleanupError);
+				// Continue with the uncleaned content
+				finalContent = generatedContent;
+			}
+
+			// --- Remove \boxed{ if present before saving ---
+			let contentToSave = finalContent.trim();
+			const contentLines = contentToSave.split('\n');
+			if (contentLines.length > 0 && contentLines[0].trim() === '\\boxed{') {
+				progressReporter.log(`Removing '\\boxed{' wrapper from generated content.`);
+				contentLines.shift();
+				if (contentLines.length > 0 && contentLines[contentLines.length - 1].trim() === '}') {
+					contentLines.pop();
+				}
+				contentToSave = contentLines.join('\n');
+			}
+
+			// Replace the entire content of the current file
+			progressReporter.log(`Replacing content in: ${activeFile.name}`);
+			progressReporter.updateStatus('Saving content...', 95);
+			await this.app.vault.modify(activeFile, contentToSave); // Use contentToSave
+
+			this.updateStatusBar('Generation complete');
+			progressReporter.updateStatus('Content generation complete!', 100);
+			new Notice(`Content generated successfully for ${activeFile.name}!`);
+			if (progressReporter instanceof ProgressModal) setTimeout(() => progressReporter.close(), 2000);
+
+		} catch (error: any) {
+			this.updateStatusBar('Error during generation');
+			const errorDetails = error instanceof Error ? error.stack || error.message : String(error);
+			console.error(`Error generating content for ${activeFile.name}:`, errorDetails);
+			new Notice(`Error generating content: ${error.message}. See console.`, 10000);
+			progressReporter.log(`Error: ${error.message}`);
+			progressReporter.updateStatus('Error occurred', -1);
+			new ErrorModal(this.app, "Content Generation Error", errorDetails).open();
+			// Keep reporter open on error
+		}
+	}
+
+	/**
+	 * Estimates the number of tokens in a string.
+	 * Uses a simple approximation (e.g., 4 characters per token).
+	 * @param text The string to estimate tokens for.
+	 * @returns An estimated token count.
+	 */
+	private estimateTokens(text: string): number {
+		if (!text) return 0;
+		// Simple approximation: 1 token ~ 4 characters
+		return Math.ceil(text.length / 4);
+	}
+
+
+	/**
+	 * Helper to get a progress reporter (Sidebar or new Modal)
+	 */
+	private getReporter(): ProgressReporter {
+		const view = this.app.workspace.getLeavesOfType(NOTEMD_SIDEBAR_VIEW_TYPE)[0]?.view;
+		if (view instanceof NotemdSidebarView) {
+			this.app.workspace.revealLeaf(view.leaf); // Ensure sidebar is visible
+			return view;
+		} else {
+			// Fallback to modal if sidebar isn't open
+			const modal = new ProgressModal(this.app);
+			modal.open();
+			return modal;
+		}
+	}
+
+	// --- DuckDuckGo Search Implementation ---
+
+	/**
+	 * Performs a search using DuckDuckGo HTML endpoint and parses results.
+	 * @param query The search query.
+	 * @param progressReporter For logging progress/errors.
+	 * @returns A promise resolving to an array of SearchResult objects.
+	 */
+	private async searchDuckDuckGo(query: string, progressReporter: ProgressReporter): Promise<SearchResult[]> {
+		const maxResults = this.settings.ddgMaxResults;
+		const encodedQuery = encodeURIComponent(query);
+		const url = `https://html.duckduckgo.com/html/?q=${encodedQuery}`;
+		const results: SearchResult[] = [];
+
+		progressReporter.log(`Querying DuckDuckGo HTML endpoint: ${url}`);
+		try {
+			// Use Obsidian's global requestUrl function
+			const response = await requestUrl({ // Use global requestUrl
+				url: url,
+				method: 'GET',
+				headers: { // Mimic browser headers
+					'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+					'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+					'Accept-Language': 'en-US,en;q=0.5',
+				}
+			});
+
+			if (response.status !== 200) {
+				throw new Error(`DuckDuckGo request failed: ${response.status}`);
+			}
+
+			const htmlContent = response.text;
+			progressReporter.log(`Received HTML response from DuckDuckGo (${htmlContent.length} bytes). Parsing...`);
+
+			// Regex to capture result blocks (adjust if DDG HTML structure changes)
+			// Using [\s\S] to match any character including newlines
+			const resultRegex = /<div class="result result--html[\s\S]*?<a class="result__a" href="([^"]*)"[\s\S]*?>(.*?)<\/a>[\s\S]*?<a class="result__snippet"[\s\S]*?>(.*?)<\/a>/g;
+			let match;
+			let count = 0;
+
+			while ((match = resultRegex.exec(htmlContent)) !== null && count < maxResults) {
+				let link = match[1];
+				// Decode DDG redirect URL (e.g., /l/?uddg=...)
+				if (link.startsWith('/l/?uddg=')) {
+					const urlParams = new URLSearchParams(link.substring(3)); // Remove /l/?
+					const decodedLink = urlParams.get('uddg');
+					if (decodedLink) {
+						link = decodeURIComponent(decodedLink);
+					} else {
+						progressReporter.log(`Warning: Could not decode DDG redirect URL: ${match[1]}`);
+						// Optionally skip this result or use the raw link
+						// continue;
+						link = `https://duckduckgo.com${link}`; // Fallback to DDG link
+					}
+				} else if (!link.startsWith('http')) {
+					// Handle relative links if any (unlikely for main results)
+					try {
+						const base = new URL('https://duckduckgo.com');
+						link = new URL(link, base).toString();
+					} catch (e) {
+						progressReporter.log(`Warning: Could not resolve relative URL: ${link}`);
+						continue; // Skip invalid relative URLs
+					}
+				}
+
+				// Basic HTML tag stripping for title/snippet
+				const title = match[2].replace(/<.*?>/g, '').trim();
+				const snippet = match[3].replace(/<.*?>/g, '').trim();
+
+				// Basic validation
+				if (title && link && snippet) {
+					results.push({ title, url: link, content: snippet });
+					count++;
+				} else {
+					progressReporter.log(`Warning: Skipping partially parsed result (Title: ${!!title}, Link: ${!!link}, Snippet: ${!!snippet})`);
+				}
+			}
+
+			if (results.length === 0) {
+				progressReporter.log("Warning: Could not parse any valid results from DuckDuckGo HTML. Structure might have changed.");
+			} else {
+				progressReporter.log(`Successfully parsed ${results.length} results from DuckDuckGo.`);
+			}
+
+			return results;
+
+		} catch (error: any) {
+			const message = `Automated DuckDuckGo search failed. This is likely due to search engine restrictions or changes in their HTML structure. Error: ${error.message}. Consider using Tavily.`;
+			progressReporter.log(`Error: ${message}`);
+			// Don't throw here, let the caller handle the empty results
+			// throw new Error(message);
+			return []; // Return empty array on failure
+		}
+	}
+
+	/**
+	 * Fetches content from a URL and extracts basic text.
+	 * @param url The URL to fetch.
+	 * @param progressReporter For logging.
+	 * @returns A promise resolving to the extracted text content or an error message string.
+	 */
+	private async fetchContentFromUrl(url: string, progressReporter: ProgressReporter): Promise<string> {
+		progressReporter.log(`Fetching content from: ${url}`);
+		try {
+			// Add a small random delay
+			// await new Promise(resolve => setTimeout(resolve, Math.random() * 1000 + 500)); // Removed delay for faster testing
+			// Use Obsidian's global requestUrl function
+			const response = await requestUrl({ // Use global requestUrl
+				url: url,
+				method: 'GET',
+				headers: { // Mimic browser headers
+					'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+					'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+				},
+				// Add a timeout mechanism if requestUrl doesn't support it directly
+				// This requires a wrapper like Promise.race
+			});
+
+			// Check content type - only process HTML
+			const contentType = response.headers['content-type'] || response.headers['Content-Type'] || '';
+			if (!contentType.includes('text/html')) {
+				progressReporter.log(`Skipping non-HTML content (${contentType}) from: ${url}`);
+				return `[Content skipped: Not HTML - ${contentType}]`;
+			}
+
+			const htmlContent = response.text;
+
+			// Basic text extraction: Remove scripts, styles, and then tags
+			let text = htmlContent
+				.replace(/<script[\s\S]*?<\/script>/gi, '') // Remove script blocks
+				.replace(/<style[\s\S]*?<\/style>/gi, '')   // Remove style blocks
+				.replace(/<[^>]+>/g, ' ')                   // Replace all tags with space
+				.replace(/\s+/g, ' ')                       // Collapse multiple whitespace
+				.trim();
+
+			// Decode HTML entities (simple common ones)
+			text = text.replace(/</g, '<').replace(/>/g, '>').replace(/&/g, '&').replace(/"/g, '"').replace(/'/g, "'").replace(/&nbsp;/g, ' ');
+
+			// Truncate if very long
+			const maxLength = 15000; // Limit fetched content size
+			if (text.length > maxLength) {
+				text = text.substring(0, maxLength) + "... [content truncated]";
+				progressReporter.log(`Truncated content from: ${url}`);
+			}
+
+			progressReporter.log(`Successfully fetched and extracted text from: ${url}`);
+			return text;
+
+		} catch (error: any) {
+			progressReporter.log(`Error fetching content from ${url}: ${error.message}`);
+			return `[Content skipped: Error fetching - ${error.message}]`;
+		}
+	}
+
+
+	/**
+	 * Performs web research on a topic (note title or selection) and appends a summary.
+	 */
+	async researchAndSummarize(editor: Editor, view: MarkdownView, progressReporter: ProgressReporter): Promise<void> {
+		const activeFile = view.file;
+		if (!activeFile) {
+			new Notice('No active file.');
+			return;
+		}
+
+		// Determine input: selected text or file title
+		const selectedText = editor.getSelection();
+		const topic = selectedText ? selectedText.trim() : activeFile.basename;
+
+		if (!topic) {
+			new Notice('No topic found (select text or use a note with a title).');
+			return;
+		}
+
+		progressReporter.clearDisplay();
+		progressReporter.log(`Starting research for topic: "${topic}"`);
+		this.updateStatusBar(`Researching: ${topic}`);
+
+		try {
+			// --- Perform Research using Helper ---
+			const researchContext = await this._performResearch(topic, progressReporter);
+
+			if (!researchContext) {
+				// Error/No results handled within _performResearch, just update status
+				new Notice(`Research for "${topic}" failed or returned no results. Summary not generated.`);
+				progressReporter.updateStatus('Research failed/No results', -1);
+				this.updateStatusBar('Research failed');
+				if (progressReporter instanceof ProgressModal) setTimeout(() => progressReporter.close(), 3000);
+				return;
+			}
+
+			// --- Summarize Research Context ---
+			progressReporter.updateStatus('Summarizing research...', 50);
+
+			const provider = this.settings.providers.find(p => p.name === this.settings.activeProvider);
+			if (!provider) throw new Error('No active LLM provider configured');
+
+			progressReporter.log(`Calling ${provider.name} for summarization...`);
+			// Use the original topic in the prompt, but provide the fetched context
+			const summaryPrompt = `Based on the following research context gathered for "${topic}", provide a concise summary focusing on the key facts, concepts, and conclusions. Present the summary in clear Markdown format.\n\nResearch Context:\n${researchContext}`;
+
+			// Call the appropriate LLM API function (pass empty string for 'content' as prompt contains everything)
+			let summary = '';
+			switch (provider.name) {
+				case 'DeepSeek':
+					summary = await this.callDeepSeekAPI(provider, summaryPrompt, '');
+					break;
+				case 'OpenAI':
+					summary = await this.callOpenAIApi(provider, summaryPrompt, '');
+					break;
+				case 'Anthropic':
+					summary = await this.callAnthropicApi(provider, '', summaryPrompt); // Anthropic combines prompt/content
+					break;
+				case 'Google':
+					summary = await this.callGoogleApi(provider, summaryPrompt, '');
+					break;
+				case 'Mistral':
+					summary = await this.callMistralApi(provider, summaryPrompt, '');
+					break;
+				case 'Azure OpenAI':
+					summary = await this.callAzureOpenAIApi(provider, summaryPrompt, '');
+					break;
+				case 'LMStudio':
+					summary = await this.callLMStudioApi(provider, summaryPrompt, '');
+					break;
+				case 'Ollama':
+					summary = await this.callOllamaApi(provider, summaryPrompt, '');
+					break;
+				case 'OpenRouter':
+					summary = await this.callOpenRouterAPI(provider, summaryPrompt, '');
+					break;
+				default:
+					throw new Error(`Unsupported provider for summarization: ${provider.name}`);
+			}
+
+			progressReporter.log(`Generated summary using ${provider.name}.`);
+			progressReporter.updateStatus('Appending summary...', 90);
+
+			// --- Remove \boxed{ if present in summary ---
+			let finalSummary = summary.trim();
+			const summaryLines = finalSummary.split('\n');
+			if (summaryLines.length > 0 && summaryLines[0].trim() === '\\boxed{') {
+				progressReporter.log(`Removing '\\boxed{' wrapper from summary.`);
+				summaryLines.shift();
+				if (summaryLines.length > 0 && summaryLines[summaryLines.length - 1].trim() === '}') {
+					summaryLines.pop();
+				}
+				finalSummary = summaryLines.join('\n');
+			}
+
+			// --- Append Summary to Note ---
+			const searchSource = this.settings.searchProvider === 'tavily' ? 'Tavily' : 'DuckDuckGo';
+			const summaryHeader = `\n\n## Research Summary (via ${searchSource}): ${topic}\n\n`; // Use original topic in header
+			editor.replaceSelection(selectedText); // Clear selection if it was used
+			const currentContent = editor.getValue();
+			editor.setValue(currentContent.trim() + summaryHeader + finalSummary); // Use finalSummary
+
+			this.updateStatusBar('Research complete');
+			progressReporter.updateStatus('Research and summary complete!', 100);
+			new Notice(`Research summary for "${topic}" appended.`);
+			if (progressReporter instanceof ProgressModal) setTimeout(() => progressReporter.close(), 2000);
+
+		} catch (error: any) {
+			this.updateStatusBar('Error during research');
+			const errorDetails = error instanceof Error ? error.stack || error.message : String(error);
+			console.error(`Error researching "${topic}":`, errorDetails);
+			new Notice(`Error during research: ${error.message}. See console.`, 10000);
+			progressReporter.log(`Error: ${error.message}`);
+			progressReporter.updateStatus('Error occurred', -1);
+			new ErrorModal(this.app, "Research Error", errorDetails).open();
+			// Keep reporter open on error
+		}
+	}
+
+	/**
+	 * Helper function to perform web research (Tavily or DDG) and return combined context.
+	 * @param topic The topic to research.
+	 * @param progressReporter For logging progress/errors.
+	 * @returns A promise resolving to the combined research context string, or null if research fails/yields no results.
+	 */
+	private async _performResearch(topic: string, progressReporter: ProgressReporter): Promise<string | null> {
+		const searchQuery = `${topic} wiki`; // Use modified query
+		let combinedContent = '';
+		let searchSource = '';
+		let searchResults: SearchResult[] = [];
+
+		try {
+			// --- Select Search Provider ---
+			if (this.settings.searchProvider === 'tavily') {
+				searchSource = 'Tavily';
+				if (!this.settings.tavilyApiKey) {
+					throw new Error('Tavily API key is not configured in Notemd settings.');
+				}
+				const tavilyUrl = 'https://api.tavily.com/search';
+				progressReporter.log(`Searching Tavily for: "${searchQuery}"`);
+				progressReporter.updateStatus('Searching Tavily...', 10);
+				const tavilyRequestBody = {
+					api_key: this.settings.tavilyApiKey,
+					query: searchQuery,
+					search_depth: this.settings.tavilySearchDepth, // Use setting
+					include_answer: false,
+					include_raw_content: false, // Keep false, rely on snippets/content field
+					max_results: this.settings.tavilyMaxResults // Use setting
+				};
+				const tavilyResponse = await requestUrl({ url: tavilyUrl, method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(tavilyRequestBody), throw: false });
+				if (tavilyResponse.status !== 200) throw new Error(`Tavily API error: ${tavilyResponse.status} - ${tavilyResponse.text}`);
+				const tavilyData = tavilyResponse.json;
+				if (!tavilyData.results || tavilyData.results.length === 0) {
+					progressReporter.log('Tavily returned no results.');
+					return null; // Indicate no results found
+				}
+				searchResults = tavilyData.results.map((r: any) => ({ title: r.title, url: r.url, content: r.content }));
+				progressReporter.log(`Fetched ${searchResults.length} results from Tavily.`);
+
+			} else { // DuckDuckGo selected
+				searchSource = 'DuckDuckGo';
+				progressReporter.log(`Searching DuckDuckGo for: "${searchQuery}"`);
+				progressReporter.updateStatus('Searching DuckDuckGo...', 10);
+				searchResults = await this.searchDuckDuckGo(searchQuery, progressReporter);
+				if (searchResults.length === 0) {
+					progressReporter.log('DuckDuckGo search failed or returned no results.');
+					return null; // Indicate failure/no results
+				}
+			}
+
+			// --- Fetch Content (if DDG) or Use Snippets (if Tavily) ---
+			let fetchedContents: string[] = [];
+			if (searchSource === 'DuckDuckGo') {
+				progressReporter.log(`Fetching content for top ${searchResults.length} DuckDuckGo results...`);
+				progressReporter.updateStatus('Fetching content...', 30);
+				const fetchPromises = searchResults.map(async (result) => {
+					const timeoutPromise = new Promise<string>((_, reject) => setTimeout(() => reject(new Error(`Timeout fetching ${result.url}`)), this.settings.ddgFetchTimeout * 1000));
+					try { return await Promise.race([this.fetchContentFromUrl(result.url, progressReporter), timeoutPromise]); }
+					catch (fetchError: any) { return `[Content skipped: Timeout or fetch error for ${result.url}]`; }
+				});
+				const settledResults = await Promise.allSettled(fetchPromises);
+				fetchedContents = settledResults.map((result, index) => result.status === 'fulfilled' ? result.value : `[Content skipped for ${searchResults[index].url} due to error: ${result.reason?.message}]`);
+				progressReporter.log(`Finished fetching content for DuckDuckGo results.`);
+			} else { // Tavily
+				fetchedContents = searchResults.map(result => result.content); // Use snippets directly
+			}
+
+			// --- Combine Content ---
+			if (fetchedContents.length > 0) {
+				combinedContent = `Research context for "${searchQuery}" (via ${searchSource}):\n\n`;
+				searchResults.forEach((result, index) => {
+					combinedContent += `Result ${index + 1}:\n`;
+					combinedContent += `Title: ${result.title}\n`;
+					combinedContent += `URL: ${result.url}\n`;
+					combinedContent += `${searchSource === 'Tavily' ? 'Snippet' : 'Content'}: ${fetchedContents[index] ? fetchedContents[index] : '[No content available]'}\n\n`;
+				});
+
+				// --- Truncate combined content ---
+				const estimatedTokens = this.estimateTokens(combinedContent);
+				const maxTokens = this.settings.maxResearchContentTokens;
+				progressReporter.log(`Estimated research context tokens: ${estimatedTokens}. Limit: ${maxTokens}`);
+				if (estimatedTokens > maxTokens) {
+					const maxChars = maxTokens * 4;
+					combinedContent = combinedContent.substring(0, maxChars) + "\n\n[...research context truncated due to token limit]";
+					progressReporter.log(`Truncated research context to ~${maxTokens} tokens.`);
+					new Notice(`Research context truncated to fit token limit (${maxTokens}).`);
+				}
+				return combinedContent.trim(); // Return the combined context
+			} else {
+				progressReporter.log('No content could be obtained from search results.');
+				return null; // Indicate no content fetched/available
+			}
+
+		} catch (error: any) {
+			// Log the error via the reporter
+			progressReporter.log(`Error during research for "${topic}": ${error.message}`);
+			console.error(`Error researching "${topic}":`, error); // Also log detailed error to console
+			// Do not throw here, return null to indicate failure
+			return null;
+		}
+	}
+
+	/**
+	 * Batch generates content for all Markdown files in a selected folder.
+	 * @param progressReporter - Interface for reporting progress.
+	 */
+	async batchGenerateContentForTitles(progressReporter: ProgressReporter) {
+		const folderPath = await this.getFolderSelection();
+		if (!folderPath) {
+			new Notice('Folder selection cancelled.');
+			return;
+		}
+
+		const folder = this.app.vault.getAbstractFileByPath(folderPath);
+		if (!folder || !(folder instanceof TFolder)) {
+			new Notice(`Selected path is not a valid folder: ${folderPath}`);
+			progressReporter.log(`Error: Selected path is not a valid folder: ${folderPath}`);
+			progressReporter.updateStatus('Error: Invalid folder', -1);
+			return;
+		}
+
+		// Filter for only .md files within the selected folder (excluding _processed.md)
+		const filesToProcess = this.app.vault.getMarkdownFiles().filter(f =>
+			!f.name.endsWith('_processed.md') && // Exclude processed files
+			(f.path === folderPath || f.path.startsWith(folderPath === '/' ? '' : folderPath + '/'))
+		);
+
+		if (filesToProcess.length === 0) {
+			new Notice(`No eligible '.md' files found in selected folder: ${folderPath}`);
+			progressReporter.log(`No eligible '.md' files found in selected folder: ${folderPath}`);
+			progressReporter.updateStatus('No files found', 100);
+			if (progressReporter instanceof ProgressModal) setTimeout(() => progressReporter.close(), 2000);
+			return;
+		}
+
+		this.updateStatusBar(`Batch generating content for ${filesToProcess.length} files...`);
+		progressReporter.clearDisplay();
+		progressReporter.log(`Starting batch content generation for ${filesToProcess.length} files in "${folderPath}"...`);
+		const errors: { file: string; message: string }[] = [];
+
+		try {
+			for (let i = 0; i < filesToProcess.length; i++) {
+				const file = filesToProcess[i];
+				const progress = Math.floor(((i) / filesToProcess.length) * 100);
+				progressReporter.updateStatus(
+					`Generating ${i + 1}/${filesToProcess.length}: ${file.name}`,
+					progress
+				);
+
+				if (progressReporter.cancelled) {
+					new Notice('Batch generation cancelled by user.');
+					this.updateStatusBar('Cancelled');
+					progressReporter.updateStatus('Batch generation cancelled.', -1);
+					break; // Exit loop
+				}
+
+				try {
+					// Temporarily set the active file for generateContentForTitle
+					// This is a bit hacky, ideally generateContentForTitle would take a TFile argument
+					const currentLeaf = this.app.workspace.activeLeaf;
+					await this.app.workspace.setActiveLeaf(this.app.workspace.getLeaf(true), { focus: false }); // Create temp leaf if needed
+					await this.app.workspace.openLinkText(file.path, '', false); // Open file without focus
+
+					// Call generateContentForTitle, which uses the (now active) file
+					await this.generateContentForTitle(progressReporter); // Pass reporter
+
+					// Restore original leaf if possible
+					if (currentLeaf) {
+						this.app.workspace.setActiveLeaf(currentLeaf);
+					}
+
+				} catch (fileError: any) {
+					const errorMsg = `Error generating content for ${file.name}: ${fileError.message}`;
+					console.error(errorMsg, fileError);
+					progressReporter.log(`❌ ${errorMsg}`);
+					errors.push({ file: file.name, message: fileError.message });
+					// Continue to the next file
+				}
+
+				if (progressReporter.cancelled) { // Check again after generation attempt
+					new Notice('Batch generation cancelled by user.');
+					this.updateStatusBar('Cancelled');
+					progressReporter.updateStatus('Batch generation cancelled.', -1);
+					break;
+				}
+			} // End of loop
+
+			// --- Final Reporting ---
+			if (!progressReporter.cancelled) {
+				if (errors.length > 0) {
+					const errorSummary = `Batch generation finished with ${errors.length} error(s). Check log.`;
+					progressReporter.log(`⚠️ ${errorSummary}`);
+					progressReporter.updateStatus(errorSummary, -1);
+					this.updateStatusBar(`Batch generation complete with errors`);
+					new Notice(errorSummary, 10000);
+				} else {
+					progressReporter.updateStatus('Batch generation complete!', 100);
+					this.updateStatusBar('Batch generation complete');
+					new Notice(`Successfully generated content for ${filesToProcess.length} files.`, 5000);
+				}
+				if (progressReporter instanceof ProgressModal && errors.length === 0) {
+					setTimeout(() => (progressReporter as ProgressModal).close(), 2000);
+				}
+			}
+
+		} catch (batchError: any) { // Catch errors outside the loop
+			this.updateStatusBar('Error during batch generation');
+			const errorDetails = batchError instanceof Error ? batchError.stack || batchError.message : String(batchError);
+			console.error("Notemd Batch Generation Error:", errorDetails);
+			new Notice(`Error during batch generation: ${batchError.message}. See console.`, 10000);
+			progressReporter.log(`Batch Error: ${batchError.message}`);
+			progressReporter.updateStatus('Error occurred during batch generation', -1);
+			new ErrorModal(this.app, "Notemd Batch Generation Error", errorDetails).open();
+		}
+	}
+
+
+>>>>>>> add-LMCG
 } // End of NotemdPlugin class definition
 
 
@@ -2236,6 +3359,7 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 		container.empty();
 		container.addClass('notemd-sidebar-container'); // Add a class for potential styling
 
+<<<<<<< HEAD
 		container.createEl("h4", { text: "Notemd Actions" });
 
 		// --- Action Buttons ---
@@ -2243,6 +3367,16 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 
 		// Process Current File Button
 		const processCurrentButton = buttonGroup.createEl('button', { text: 'Process Current File', cls: 'mod-cta' });
+=======
+		container.createEl("h4", { text: "Original Processing" });
+
+		// --- Original Action Buttons ---
+		const originalButtonGroup = container.createDiv({ cls: 'notemd-button-group' });
+
+		// Process Current File Button (Original Logic)
+		const processCurrentButton = originalButtonGroup.createEl('button', { text: 'Process File (Add Links)', cls: 'mod-cta' });
+		processCurrentButton.title = 'Processes the current file to add [[wiki-links]] and create concept notes based on LLM analysis.'; // Use title attribute
+>>>>>>> add-LMCG
 		processCurrentButton.onclick = async () => {
 			if (this.isProcessing) {
 				new Notice("Processing already in progress.");
@@ -2258,6 +3392,7 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 			this.log('Starting: Process Current File...');
 			this.updateStatus('Processing current file...', 0);
 			// Pass 'this' (the view instance) instead of creating a ProgressModal
+<<<<<<< HEAD
 			await this.plugin.processWithNotemd(this);
 			this.isProcessing = false; // Mark processing finished
 			if (this.cancelButton) this.cancelButton.addClass('is-hidden'); // Hide cancel button
@@ -2265,6 +3400,15 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 
 		// Process Folder Button
 		const processFolderButton = buttonGroup.createEl('button', { text: 'Process Folder' });
+=======
+			await this.plugin.processWithNotemd(this); // Calls original logic
+			this.isProcessing = false; // Mark processing finished
+			if (this.cancelButton) this.cancelButton.addClass('is-hidden'); // Hide cancel button
+		};
+		// Process Folder Button (Original Logic)
+		const processFolderButton = originalButtonGroup.createEl('button', { text: 'Process Folder (Add Links)' });
+		processFolderButton.title = 'Processes all files in a selected folder to add [[wiki-links]] and create concept notes.'; // Use title attribute
+>>>>>>> add-LMCG
 		processFolderButton.onclick = async () => {
 			if (this.isProcessing) {
 				new Notice("Processing already in progress.");
@@ -2280,13 +3424,100 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 			this.log('Starting: Process Folder...');
 			this.updateStatus('Processing folder...', 0);
 			// Pass 'this' (the view instance) instead of creating a ProgressModal
+<<<<<<< HEAD
 			await this.plugin.processFolderWithNotemd(this);
+=======
+			await this.plugin.processFolderWithNotemd(this); // Calls original logic
+>>>>>>> add-LMCG
 			this.isProcessing = false;
 			if (this.cancelButton) this.cancelButton.addClass('is-hidden'); // Hide cancel button
 		};
 
+<<<<<<< HEAD
 		// Check Duplicates Button
 		const checkDuplicatesButton = buttonGroup.createEl('button', { text: 'Check Duplicates (Current File)' });
+=======
+		// --- New Feature Buttons ---
+		container.createEl('h4', { text: "New Features" });
+		const newFeatureButtonGroup = container.createDiv({ cls: 'notemd-button-group' });
+		// Research & Summarize Button
+		const researchButton = newFeatureButtonGroup.createEl('button', { text: 'Research & Summarize' });
+		researchButton.title = 'Uses the current note title or selection to search the web (Tavily/DDG) and appends an LLM-generated summary.'; // Use title attribute
+		researchButton.onclick = async () => {
+			if (this.isProcessing) {
+				new Notice("Processing already in progress.");
+				return;
+			}
+			const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
+			if (activeView && activeView.editor) {
+				this.clearDisplay();
+				this.isProcessing = true;
+				this.startTime = Date.now();
+				if (this.cancelButton) {
+					this.cancelButton.removeClass('is-hidden');
+					this.cancelButton.disabled = false;
+				}
+				this.log('Starting: Research & Summarize Topic...');
+				this.updateStatus('Researching topic...', 0);
+				await this.plugin.researchAndSummarize(activeView.editor, activeView, this);
+				this.isProcessing = false;
+				if (this.cancelButton) this.cancelButton.addClass('is-hidden');
+			} else {
+				new Notice('No active Markdown editor found.');
+			}
+		};
+		// Generate Content from Title Button
+		const generateTitleButton = newFeatureButtonGroup.createEl('button', { text: 'Generate from Title' });
+		generateTitleButton.title = 'Generates content for the current note based on its title (optionally including web research), replacing existing content.'; // Updated title
+		generateTitleButton.onclick = async () => {
+			if (this.isProcessing) {
+				new Notice("Processing already in progress.");
+				return;
+			}
+			this.clearDisplay();
+			this.isProcessing = true;
+			this.startTime = Date.now();
+			if (this.cancelButton) {
+				this.cancelButton.removeClass('is-hidden');
+				this.cancelButton.disabled = false;
+			}
+			this.log('Starting: Generate Content from Title...');
+			this.updateStatus('Generating content...', 0);
+			await this.plugin.generateContentForTitle(this); // Calls the modified function
+			this.isProcessing = false;
+			if (this.cancelButton) this.cancelButton.addClass('is-hidden');
+		};
+
+		// Batch Generate Content from Titles Button
+		const batchGenerateTitleButton = newFeatureButtonGroup.createEl('button', { text: 'Batch Generate from Titles' });
+		batchGenerateTitleButton.title = 'Generates content for all notes in a selected folder based on their titles (optionally including web research).'; // Use title attribute
+		batchGenerateTitleButton.onclick = async () => {
+			if (this.isProcessing) {
+				new Notice("Processing already in progress.");
+				return;
+			}
+			this.clearDisplay();
+			this.isProcessing = true;
+			this.startTime = Date.now();
+			if (this.cancelButton) {
+				this.cancelButton.removeClass('is-hidden');
+				this.cancelButton.disabled = false;
+			}
+			this.log('Starting: Batch Generate Content from Titles...');
+			this.updateStatus('Starting batch generation...', 0);
+			await this.plugin.batchGenerateContentForTitles(this); // Call the new batch function
+			this.isProcessing = false;
+			if (this.cancelButton) this.cancelButton.addClass('is-hidden');
+		};
+
+
+		// --- Utility Buttons ---
+		container.createEl('h4', { text: "Utilities" });
+		const utilityButtonGroup = container.createDiv({ cls: 'notemd-button-group' });
+
+		// Check Duplicates Button
+		const checkDuplicatesButton = utilityButtonGroup.createEl('button', { text: 'Check Duplicates (Current File)' });
+>>>>>>> add-LMCG
 		checkDuplicatesButton.onclick = async () => {
 			// This action is quick, doesn't need the full processing state management
 			const activeFile = this.plugin.app.workspace.getActiveFile();
@@ -2308,7 +3539,11 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 		};
 
 		// Test Connection Button
+<<<<<<< HEAD
 		const testConnectionButton = buttonGroup.createEl('button', { text: 'Test LLM Connection' });
+=======
+		const testConnectionButton = utilityButtonGroup.createEl('button', { text: 'Test LLM Connection' });
+>>>>>>> add-LMCG
 		testConnectionButton.onclick = async () => {
 			if (this.isProcessing) {
 				new Notice("Cannot test connection while processing.");
@@ -2406,6 +3641,106 @@ class NotemdSettingTab extends PluginSettingTab {
 		this.plugin = plugin;
 	}
 
+<<<<<<< HEAD
+=======
+	// Define the path for the providers JSON file within the plugin's config directory
+	private get providersFilePath(): string {
+		// Note: this.app.vault.configDir might be '.obsidian'
+		// this.plugin.manifest.dir might be '.obsidian/plugins/obsidian-NoteMD_new' (or similar)
+		// We want to save it inside the plugin's specific folder.
+		const pluginConfigDir = this.app.vault.configDir + '/plugins/' + this.plugin.manifest.id;
+		return `${pluginConfigDir}/notemd-providers.json`;
+	}
+
+	async exportProviderSettings(): Promise<void> {
+		try {
+			const providersToExport = this.plugin.settings.providers;
+			const jsonData = JSON.stringify(providersToExport, null, 2); // Pretty print JSON
+
+			// Ensure the plugin directory exists (it should, but check just in case)
+			const pluginConfigDir = this.app.vault.configDir + '/plugins/' + this.plugin.manifest.id;
+			try {
+				// Use adapter.exists and adapter.mkdir to handle potential non-existence
+				const dirExists = await this.app.vault.adapter.exists(pluginConfigDir);
+				if (!dirExists) {
+					await this.app.vault.adapter.mkdir(pluginConfigDir);
+				}
+			} catch (mkdirError) {
+				console.error("Error ensuring plugin directory exists:", mkdirError);
+				new Notice(`Error creating plugin directory: ${mkdirError.message}`); // Use error.message
+				return; // Stop if we can't ensure the directory exists
+			}
+
+
+			await this.app.vault.adapter.write(this.providersFilePath, jsonData);
+			new Notice(`Provider settings exported successfully to ${this.providersFilePath}`);
+		} catch (error: any) {
+			console.error("Error exporting provider settings:", error);
+			new Notice(`Error exporting settings: ${error.message}`);
+		}
+	}
+
+	async importProviderSettings(): Promise<void> {
+		try {
+			const filePath = this.providersFilePath;
+			const fileExists = await this.app.vault.adapter.exists(filePath);
+
+			if (!fileExists) {
+				new Notice(`Import file not found at ${filePath}. Please place your 'notemd-providers.json' file there.`);
+				return;
+			}
+
+			const jsonData = await this.app.vault.adapter.read(filePath);
+			const importedProviders = JSON.parse(jsonData) as LLMProviderConfig[];
+
+			// Basic validation: Check if it's an array
+			if (!Array.isArray(importedProviders)) {
+				throw new Error("Imported file does not contain a valid provider array.");
+			}
+
+			// Merge strategy: Overwrite existing by name, add new ones
+			const existingProvidersMap = new Map(this.plugin.settings.providers.map(p => [p.name, p]));
+			let importedCount = 0;
+			let newCount = 0;
+
+			importedProviders.forEach(importedProvider => {
+				// Add basic validation for each provider object if needed here
+				if (importedProvider && typeof importedProvider.name === 'string') {
+					if (existingProvidersMap.has(importedProvider.name)) {
+						// Overwrite existing
+						existingProvidersMap.set(importedProvider.name, importedProvider);
+						importedCount++;
+					} else {
+						// Add new provider
+						existingProvidersMap.set(importedProvider.name, importedProvider);
+						newCount++;
+					}
+				} else {
+					console.warn("Skipping invalid provider object during import:", importedProvider);
+				}
+			});
+
+			// Update settings
+			this.plugin.settings.providers = Array.from(existingProvidersMap.values());
+
+			// Ensure activeProvider is still valid after import, fallback if needed
+			if (!this.plugin.settings.providers.some(p => p.name === this.plugin.settings.activeProvider)) {
+				this.plugin.settings.activeProvider = DEFAULT_SETTINGS.activeProvider;
+				new Notice(`Active provider reset to default as previous one was not found after import.`);
+			}
+
+			await this.plugin.saveSettings();
+			new Notice(`Successfully imported ${newCount} new and updated ${importedCount} existing provider settings.`);
+			this.display(); // Refresh display after successful import
+
+		} catch (error: any) {
+			console.error("Error importing provider settings:", error);
+			new Notice(`Error importing settings: ${error.message}`);
+		}
+	}
+
+
+>>>>>>> add-LMCG
 	display(): void {
 		const {containerEl} = this;
 
@@ -2416,6 +3751,31 @@ class NotemdSettingTab extends PluginSettingTab {
 		// --- Provider Configuration ---
 		containerEl.createEl('h3', { text: 'LLM Provider Configuration' });
 
+<<<<<<< HEAD
+=======
+		// --- Import/Export Buttons ---
+		const providerMgmtSetting = new Setting(containerEl)
+			.setName('Manage Provider Configurations')
+			.setDesc('Export your current provider settings to a JSON file, or import settings from a file.');
+
+		providerMgmtSetting.addButton(button => button
+			.setButtonText('Export Providers')
+			.setTooltip('Save provider configurations to providers.json')
+			.onClick(async () => {
+				await this.exportProviderSettings();
+			}));
+
+		providerMgmtSetting.addButton(button => button
+			.setButtonText('Import Providers')
+			.setTooltip('Load provider configurations from providers.json (merges with existing)')
+			.onClick(async () => {
+				await this.importProviderSettings();
+				this.display(); // Refresh settings tab after import
+			}));
+		// --- End Import/Export Buttons ---
+
+
+>>>>>>> add-LMCG
 		new Setting(containerEl)
 			.setName('Active Provider')
 			.setDesc('Select the LLM provider to use for processing.')
@@ -2590,6 +3950,22 @@ class NotemdSettingTab extends PluginSettingTab {
 					}));
 		}
 
+<<<<<<< HEAD
+=======
+		// Add the new toggle setting for move/copy workflow
+		new Setting(containerEl)
+			.setName('Move Original File After Processing')
+			.setDesc('ON: Move the original file to the "Processed File Folder" after processing. OFF: Create a copy named "_processed.md" instead.')
+			.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.moveOriginalFileOnProcess)
+				.onChange(async (value) => {
+					this.plugin.settings.moveOriginalFileOnProcess = value;
+					await this.plugin.saveSettings();
+					// No need to refresh display for this toggle
+				}));
+
+
+>>>>>>> add-LMCG
 		// --- Concept Note Output Settings ---
 		containerEl.createEl('h4', { text: 'Concept Note Output' });
 
@@ -2759,6 +4135,135 @@ class NotemdSettingTab extends PluginSettingTab {
 		// --- Concept Log File Output Settings --- END
 
 
+<<<<<<< HEAD
+=======
+		// --- Content Generation Settings ---
+		containerEl.createEl('h4', { text: 'Content Generation' });
+
+		new Setting(containerEl)
+			.setName('Enable Research in "Generate from Title"')
+			.setDesc('ON: Perform web research (using selected provider below) and include context when using "Generate from Title". OFF: Generate based only on the title.')
+			.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.enableResearchInGenerateContent)
+				.onChange(async (value) => {
+					this.plugin.settings.enableResearchInGenerateContent = value;
+					await this.plugin.saveSettings();
+					// No need to refresh display for this toggle specifically
+				}));
+
+		// --- Web Research Settings (Now relevant to both features) ---
+		containerEl.createEl('h4', { text: 'Web Research Provider' });
+
+		new Setting(containerEl)
+			.setName('Search Provider')
+			.setDesc('Select the search engine for the "Research and Summarize Topic" command.')
+			.addDropdown(dropdown => dropdown
+				.addOption('tavily', 'Tavily (Requires API Key)')
+				.addOption('duckduckgo', 'DuckDuckGo (Experimental, often blocked)')
+				.setValue(this.plugin.settings.searchProvider)
+				.onChange(async (value: 'tavily' | 'duckduckgo') => {
+					this.plugin.settings.searchProvider = value;
+					await this.plugin.saveSettings();
+					this.display(); // Refresh settings
+				}));
+
+		// Conditional settings based on provider
+		if (this.plugin.settings.searchProvider === 'tavily') {
+			new Setting(containerEl)
+				.setName('Tavily API Key')
+				.setDesc('Required if Tavily is selected. Get a key from tavily.com.')
+				.addText(text => text
+					.setPlaceholder('Enter your Tavily API key (tvly-...)')
+					.setValue(this.plugin.settings.tavilyApiKey)
+					.onChange(async (value) => {
+						this.plugin.settings.tavilyApiKey = value.trim();
+						await this.plugin.saveSettings();
+					}));
+
+			// Add Tavily Max Results setting
+			new Setting(containerEl)
+				.setName('Tavily Max Results')
+				.setDesc('Maximum number of search results Tavily should return (1-20).')
+				.addText(text => text
+					.setPlaceholder(String(DEFAULT_SETTINGS.tavilyMaxResults))
+					.setValue(String(this.plugin.settings.tavilyMaxResults))
+					.onChange(async (value) => {
+						const numValue = parseInt(value, 10);
+						if (!isNaN(numValue) && numValue >= 1 && numValue <= 20) {
+							this.plugin.settings.tavilyMaxResults = numValue;
+							await this.plugin.saveSettings();
+						} else if (value === '') {
+							this.plugin.settings.tavilyMaxResults = DEFAULT_SETTINGS.tavilyMaxResults;
+							await this.plugin.saveSettings();
+							this.display(); // Refresh to show default restored
+						} else {
+							new Notice("Please enter a valid number between 1 and 20 for Tavily max results.");
+							text.setValue(String(this.plugin.settings.tavilyMaxResults)); // Revert
+						}
+					}));
+
+			// Add Tavily Search Depth setting
+			new Setting(containerEl)
+				.setName('Tavily Search Depth')
+				.setDesc('Controls the depth of the search. "advanced" provides better results but costs 2 API credits per search.')
+				.addDropdown(dropdown => dropdown
+					.addOption('basic', 'Basic')
+					.addOption('advanced', 'Advanced (2 Credits)')
+					.setValue(this.plugin.settings.tavilySearchDepth)
+					.onChange(async (value: 'basic' | 'advanced') => {
+						this.plugin.settings.tavilySearchDepth = value;
+						await this.plugin.saveSettings();
+					}));
+
+		} else if (this.plugin.settings.searchProvider === 'duckduckgo') {
+			new Setting(containerEl)
+				.setName('DuckDuckGo Max Results')
+				.setDesc('Maximum number of search results to parse from DuckDuckGo.')
+				.addSlider(slider => slider
+					.setLimits(1, 10, 1)
+					.setValue(this.plugin.settings.ddgMaxResults)
+					.setDynamicTooltip()
+					.onChange(async (value) => {
+						this.plugin.settings.ddgMaxResults = value;
+						await this.plugin.saveSettings();
+					}));
+			new Setting(containerEl)
+				.setName('DuckDuckGo Content Fetch Timeout (seconds)')
+				.setDesc('Maximum time to wait when fetching content from each DuckDuckGo result URL.')
+				.addSlider(slider => slider
+					.setLimits(5, 60, 5)
+					.setValue(this.plugin.settings.ddgFetchTimeout)
+					.setDynamicTooltip()
+					.onChange(async (value) => {
+						this.plugin.settings.ddgFetchTimeout = value;
+						await this.plugin.saveSettings();
+					}));
+		}
+
+		// Add setting for max research content tokens
+		new Setting(containerEl)
+			.setName('Max Research Content Tokens')
+			.setDesc('Approximate maximum tokens from web research results to include in the summarization prompt. Helps manage context window size.')
+			.addText(text => text
+				.setPlaceholder(String(DEFAULT_SETTINGS.maxResearchContentTokens))
+				.setValue(String(this.plugin.settings.maxResearchContentTokens))
+				.onChange(async (value) => {
+					const numValue = parseInt(value, 10);
+					if (!isNaN(numValue) && numValue > 100) { // Ensure a reasonable minimum
+						this.plugin.settings.maxResearchContentTokens = numValue;
+						await this.plugin.saveSettings();
+					} else if (value === '') {
+						this.plugin.settings.maxResearchContentTokens = DEFAULT_SETTINGS.maxResearchContentTokens;
+						await this.plugin.saveSettings();
+						this.display(); // Refresh to show default restored
+					} else {
+						new Notice("Please enter a valid number greater than 100 for max research tokens.");
+						text.setValue(String(this.plugin.settings.maxResearchContentTokens)); // Revert
+					}
+				}));
+
+
+>>>>>>> add-LMCG
 		// --- Other General Settings ---
 		containerEl.createEl('h4', { text: 'Processing Parameters' });
 

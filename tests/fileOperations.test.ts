@@ -51,9 +51,25 @@ describe('File Operations', () => {
       generateConceptLogFile: false,
       useCustomConceptLogFolder: false,
       conceptLogFolderPath: '',
+<<<<<<< HEAD
       useCustomConceptLogFileName: false,
       conceptLogFileName: 'Generate.log'
     };
+=======
+			useCustomConceptLogFileName: false,
+			conceptLogFileName: 'Generate.log',
+			// Add missing properties from recent updates
+			moveOriginalFileOnProcess: false,
+			tavilyApiKey: '',
+			searchProvider: 'tavily',
+			ddgMaxResults: 5,
+			ddgFetchTimeout: 15,
+			maxResearchContentTokens: 3000,
+			enableResearchInGenerateContent: false, // Add the new setting for tests
+			tavilyMaxResults: 5, // Add default for test
+      tavilySearchDepth: 'basic' // Add default for test
+		};
+>>>>>>> add-LMCG
   });
 
   describe('handleFileRename', () => {
