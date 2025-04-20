@@ -49,9 +49,6 @@ describe('splitContent', () => {
       useCustomConceptLogFolder: false,
       conceptLogFolderPath: '',
       useCustomConceptLogFileName: false,
-<<<<<<< HEAD
-      conceptLogFileName: 'Generate.log'
-=======
       conceptLogFileName: 'Generate.log',
       moveOriginalFileOnProcess: false, // Add the missing property
       tavilyApiKey: '', // Add the new Tavily API key setting
@@ -62,7 +59,6 @@ describe('splitContent', () => {
       enableResearchInGenerateContent: false, // Add the new setting for tests
       tavilyMaxResults: 5, // Add default for test
       tavilySearchDepth: 'basic' // Add default for test
->>>>>>> add-LMCG
     };
   });
 
@@ -87,8 +83,6 @@ describe('splitContent', () => {
     const chunks = plugin.splitContent('');
     expect(chunks.length).toBe(0);
   });
-<<<<<<< HEAD
-=======
 
   it('should split content exceeding word count across paragraphs', () => {
     // Set a smaller word count for easier testing
@@ -117,5 +111,4 @@ describe('splitContent', () => {
      plugin.settings.chunkWordCount = 3000;
   });
 
->>>>>>> add-LMCG
 });

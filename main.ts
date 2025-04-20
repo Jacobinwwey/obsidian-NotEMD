@@ -1,9 +1,5 @@
-<<<<<<< HEAD
-import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting, TFile, TFolder } from 'obsidian';
-=======
 import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting, TFile, TFolder, requestUrl } from 'obsidian'; // Import requestUrl
 import { refineMermaidBlocks, cleanupLatexDelimiters } from './mermaidProcessor'; // Import new functions
->>>>>>> add-LMCG
 
 // Remember to rename these classes and interfaces!
 
@@ -37,10 +33,6 @@ interface NotemdSettings {
 	maxTokens: number; // Added setting for max tokens
 	enableDuplicateDetection: boolean; // Added setting for duplicate checks
 	processMode: string; // Although commands are separate, keep for potential future use or settings logic
-<<<<<<< HEAD
-}
-
-=======
 	moveOriginalFileOnProcess: boolean; // New setting for alternative workflow
 	tavilyApiKey: string; // New setting for Tavily API Key
 	searchProvider: 'tavily' | 'duckduckgo'; // New setting for search provider
@@ -60,7 +52,6 @@ interface SearchResult {
 }
 
 
->>>>>>> add-LMCG
 const DEFAULT_SETTINGS: NotemdSettings = {
 	providers: [
 		{
@@ -146,9 +137,6 @@ const DEFAULT_SETTINGS: NotemdSettings = {
 	chunkWordCount: 3000,
 	maxTokens: 4096, // Default max tokens for LLM response
 	enableDuplicateDetection: true, // Enable by default
-<<<<<<< HEAD
-	processMode: 'single'
-=======
 	processMode: 'single',
 	moveOriginalFileOnProcess: false, // Default to creating copies
 	tavilyApiKey: '', // Default Tavily API Key to empty
@@ -159,7 +147,6 @@ const DEFAULT_SETTINGS: NotemdSettings = {
 	enableResearchInGenerateContent: false, // Default to false: Generate from Title does NOT research by default
 	tavilyMaxResults: 5, // Default Tavily max results
 	tavilySearchDepth: 'basic' // Default Tavily search depth
->>>>>>> add-LMCG
 }
 
 // Interface for progress reporting (used by Modal and Sidebar View)
@@ -279,8 +266,6 @@ export default class NotemdPlugin extends Plugin {
 			}
 		});
 
-<<<<<<< HEAD
-=======
 		this.addCommand({
 			id: 'generate-content-from-title',
 			name: 'Generate Content from Note Title',
@@ -320,7 +305,6 @@ export default class NotemdPlugin extends Plugin {
 		});
 
 
->>>>>>> add-LMCG
 		// --- Settings Tab ---
 		this.addSettingTab(new NotemdSettingTab(this.app, this));
 
@@ -667,10 +651,7 @@ export default class NotemdPlugin extends Plugin {
 
 		this.updateStatusBar(`Batch processing ${files.length} files...`);
 		reporter.log(`Starting batch processing for ${files.length} files in "${folderPath}"...`);
-<<<<<<< HEAD
-=======
 		const errors: { file: string; message: string }[] = []; // Array to collect errors
->>>>>>> add-LMCG
 
 		try {
 			for (let i = 0; i < files.length; i++) {
@@ -700,17 +681,10 @@ export default class NotemdPlugin extends Plugin {
 				} catch (fileError: any) {
 					// Log error for this specific file and continue with the next
 					const errorMsg = `Error processing ${file.name}: ${fileError.message}`;
-<<<<<<< HEAD
-					console.error(errorMsg, fileError);
-					reporter.log(errorMsg);
-					// Optionally mark the overall progress as errored? Or just log?
-					// For now, just log and continue. We'll show the detailed error modal outside the loop if needed.
-=======
 					console.error(errorMsg, fileError); // Keep console error for details
 					reporter.log(`❌ ${errorMsg}`); // Log user-friendly error to reporter
 					errors.push({ file: file.name, message: fileError.message }); // Collect error details
 					// Continue to the next file
->>>>>>> add-LMCG
 				}
 
 				if (reporter.cancelled) { // Check again after processFile
@@ -722,12 +696,6 @@ export default class NotemdPlugin extends Plugin {
 			} // End of loop
 
 			if (!reporter.cancelled) {
-<<<<<<< HEAD
-				reporter.updateStatus('Batch processing complete!', 100);
-				this.updateStatusBar('Batch complete');
-				// Only close if it's the modal we created
-				if (closeModalOnFinish && reporter instanceof ProgressModal) {
-=======
 				// Report final status including any errors
 				if (errors.length > 0) {
 					const errorSummary = `Batch processing finished with ${errors.length} error(s). Check log for details.`;
@@ -743,16 +711,11 @@ export default class NotemdPlugin extends Plugin {
 				// Only close if it's the modal we created AND there were no errors (or maybe always close?)
 				// Let's keep it open if there were errors so user can see log.
 				if (closeModalOnFinish && reporter instanceof ProgressModal && errors.length === 0) {
->>>>>>> add-LMCG
 					// Explicitly cast inside setTimeout
 					setTimeout(() => (reporter as ProgressModal).close(), 2000);
 				}
 			}
-<<<<<<< HEAD
-			// If cancelled, the status is already set inside the loop
-=======
 			// If cancelled, the status is already set inside the loop and modal remains open
->>>>>>> add-LMCG
 
 		} catch (error: any) { // Catch errors outside the loop (e.g., initial setup)
 			this.updateStatusBar('Error occurred');
@@ -779,10 +742,7 @@ export default class NotemdPlugin extends Plugin {
 		// console.log(`processFile: Read ${content.length} characters.`); // DEBUG
 
 		// Pass the reporter instance to the LLM processor
-<<<<<<< HEAD
-=======
 		progressReporter.log(`Submitting content to LLM for: ${file.name}...`); // Added log
->>>>>>> add-LMCG
 		// console.log(`processFile: Calling processContentWithLLM for ${file.name}...`); // DEBUG
 		const processedContent = await this.processContentWithLLM(content, progressReporter);
 		// console.log(`processFile: processContentWithLLM returned ${processedContent?.length ?? 'null/undefined'} characters for ${file.name}.`); // DEBUG
@@ -793,26 +753,16 @@ export default class NotemdPlugin extends Plugin {
 			return; // Stop processing this file if cancelled
 		}
 
-<<<<<<< HEAD
-		progressReporter.log(`Generating links for: ${file.name}`);
-=======
 		progressReporter.log(`Generating Obsidian links for: ${file.name}...`); // Refined log
->>>>>>> add-LMCG
 		// console.log(`processFile: Calling generateObsidianLinks for ${file.name}...`); // DEBUG
 		const withLinks = this.generateObsidianLinks(processedContent);
 		// console.log(`processFile: generateObsidianLinks returned ${withLinks?.length ?? 'null/undefined'} characters for ${file.name}.`); // DEBUG
 
-<<<<<<< HEAD
-		progressReporter.log(`Handling duplicates for: ${file.name}`);
-=======
 		progressReporter.log(`Checking for duplicates in: ${file.name}...`); // Refined log
->>>>>>> add-LMCG
 		// console.log(`processFile: Calling handleDuplicates for ${file.name}...`); // DEBUG
 		await this.handleDuplicates(withLinks);
 		// console.log(`processFile: handleDuplicates finished for ${file.name}.`); // DEBUG
 
-<<<<<<< HEAD
-=======
 		// --- Apply Post-Processing ---
 		progressReporter.log(`Cleaning Mermaid/LaTeX for: ${file.name}`);
 		let finalContent = withLinks;
@@ -841,7 +791,6 @@ export default class NotemdPlugin extends Plugin {
 		}
 
 
->>>>>>> add-LMCG
 		// --- Determine Processed File Output Path ---
 		let processedFileSaveDir = '';
 		if (this.settings.useCustomProcessedFileFolder && this.settings.processedFileFolder) {
@@ -881,26 +830,6 @@ export default class NotemdPlugin extends Plugin {
 			throw new Error(errorMsg);
 		}
 
-<<<<<<< HEAD
-		// Construct final processed file name
-		const processedName = `${processedFileSaveDir}${file.basename}_processed.md`;
-		progressReporter.log(`Saving processed file as: ${processedName}`);
-		// console.log(`processFile: Determined processed file output path: ${processedName}`); // DEBUG
-
-		// Check if file exists before creating/modifying
-		const existingProcessedFile = this.app.vault.getAbstractFileByPath(processedName);
-		// console.log(`processFile: Checking existence of ${processedName}. Found: ${!!existingProcessedFile}`); // DEBUG
-		if (existingProcessedFile instanceof TFile) {
-			// console.log(`processFile: Modifying existing file: ${processedName}`); // DEBUG
-			await this.app.vault.modify(existingProcessedFile, withLinks);
-			progressReporter.log(`Overwrote existing processed file: ${processedName}`);
-		} else {
-			// console.log(`processFile: Creating new file: ${processedName}`); // DEBUG
-			await this.app.vault.create(processedName, withLinks);
-			progressReporter.log(`Created processed file: ${processedName}`);
-		}
-		// console.log(`processFile: File saving complete for ${processedName}.`); // DEBUG
-=======
 		// --- Save or Move Processed File ---
 		if (this.settings.moveOriginalFileOnProcess) {
 			// Move original file to target directory (if different) and overwrite content
@@ -961,7 +890,6 @@ export default class NotemdPlugin extends Plugin {
 			}
 		}
 		// console.log(`processFile: File saving/moving complete for ${file.name}.`); // DEBUG
->>>>>>> add-LMCG
 
 		progressReporter.log(`Finished processing: ${file.name}`);
 		this.currentProcessingFile = ''; // Clear after processing
@@ -1030,18 +958,8 @@ export default class NotemdPlugin extends Plugin {
 
 		// Escape special regex characters in fileName
 		const escapedFileName = fileName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-<<<<<<< HEAD
-		// Regex to find the link:
-		// - Optionally preceded by list marker and whitespace (^[ \t]*[-*+]\s+)
-		// - OR just the link itself
-		// - Followed by optional whitespace and newline
-		const linkRegex = new RegExp(`(?:^[ \\t]*[-*+]\\s+)?\\[\\[${escapedFileName}\\]\\][ \\t]*$\\n?`, 'gm');
-		// Simpler regex just to remove the link itself if the above is too aggressive
-		// const simpleLinkRegex = new RegExp(`\\[\\[${escapedFileName}\\]\\]`, 'g');
-=======
 		// Simplified Regex to find only the link itself, globally and case-insensitively (Obsidian links are case-insensitive)
 		const linkRegex = new RegExp(`\\[\\[${escapedFileName}\\]\\]`, 'gi');
->>>>>>> add-LMCG
 
 		const files = this.app.vault.getMarkdownFiles();
 		let updatedCount = 0;
@@ -1052,22 +970,6 @@ export default class NotemdPlugin extends Plugin {
 				let content = await this.app.vault.read(file);
 				let updatedContent = content;
 
-<<<<<<< HEAD
-				if (content.includes(`[[${fileName}]]`)) { // Quick check before running regex
-					// Attempt to remove the link, potentially removing the list item line
-					updatedContent = content.replace(linkRegex, (match) => {
-						// If the match starts with list syntax, remove the whole line (including newline)
-						// Otherwise, just remove the link itself (replace with empty string) - this part needs refinement
-						// For simplicity now, let's just remove the link text itself if not a list item
-						// A better approach might involve AST parsing, but regex is used here.
-						// Let's try removing the whole line if it's a list item, otherwise just the link.
-						return match.trim().startsWith('-') || match.trim().startsWith('*') || match.trim().startsWith('+') ? '' : match.replace(`[[${fileName}]]`, '');
-					});
-
-					// Clean up potential empty lines left after removal
-					updatedContent = updatedContent.replace(/\n{3,}/g, '\n\n').trim();
-
-=======
 				// Use the simplified regex to replace only the link itself with an empty string
 				if (linkRegex.test(content)) { // Check if the link exists before modifying
 					updatedContent = content.replace(linkRegex, '');
@@ -1079,7 +981,6 @@ export default class NotemdPlugin extends Plugin {
 					updatedContent = updatedContent.replace(/\n{3,}/g, '\n\n').trim();
 
 
->>>>>>> add-LMCG
 					if (content !== updatedContent) {
 						await this.app.vault.modify(file, updatedContent);
 						updatedCount++;
@@ -1321,10 +1222,6 @@ export default class NotemdPlugin extends Plugin {
 		// console.log(`callDeepSeekAPI: Response Status: ${response.status}`); // DEBUG
 		if (!response.ok) {
 			const errorText = await response.text();
-<<<<<<< HEAD
-			console.error(`callDeepSeekAPI: Error Response Text: ${errorText}`); // Keep error log
-			throw new Error(`DeepSeek API error: ${response.status} - ${errorText}`);
-=======
 			console.error(`callDeepSeekAPI: Error Response Text (${response.status}): ${errorText}`); // Keep error log
 			let userMessage = `DeepSeek API error: ${response.status}`;
 			if (response.status === 401) userMessage += " - Unauthorized. Check your API key.";
@@ -1332,7 +1229,6 @@ export default class NotemdPlugin extends Plugin {
 			else if (response.status >= 500) userMessage += " - Server error. Please try again later.";
 			else userMessage += ` - ${errorText}`; // Include original text for other errors
 			throw new Error(userMessage);
->>>>>>> add-LMCG
 		}
 
 		const data = await response.json();
@@ -1378,10 +1274,6 @@ export default class NotemdPlugin extends Plugin {
 		// console.log(`callOpenAIApi: Response Status: ${response.status}`); // DEBUG
 		if (!response.ok) {
 			const errorText = await response.text();
-<<<<<<< HEAD
-			console.error(`callOpenAIApi: Error Response Text: ${errorText}`); // Keep error log
-			throw new Error(`OpenAI API error: ${response.status} - ${errorText}`);
-=======
 			console.error(`callOpenAIApi: Error Response Text (${response.status}): ${errorText}`); // Keep error log
 			let userMessage = `OpenAI API error: ${response.status}`;
 			if (response.status === 401) userMessage += " - Unauthorized. Check your API key.";
@@ -1390,7 +1282,6 @@ export default class NotemdPlugin extends Plugin {
 			else if (response.status >= 500) userMessage += " - Server error. Please try again later.";
 			else userMessage += ` - ${errorText}`; // Include original text for other errors
 			throw new Error(userMessage);
->>>>>>> add-LMCG
 		}
 
 		const data = await response.json();
@@ -1430,10 +1321,6 @@ export default class NotemdPlugin extends Plugin {
 		// console.log(`callAnthropicApi: Response Status: ${response.status}`); // DEBUG
 		if (!response.ok) {
 			const errorText = await response.text();
-<<<<<<< HEAD
-			console.error(`callAnthropicApi: Error Response Text: ${errorText}`); // Keep error log
-			throw new Error(`Anthropic API error: ${response.status} - ${errorText}`);
-=======
 			console.error(`callAnthropicApi: Error Response Text (${response.status}): ${errorText}`); // Keep error log
 			let userMessage = `Anthropic API error: ${response.status}`;
 			if (response.status === 401) userMessage += " - Unauthorized. Check your API key.";
@@ -1443,7 +1330,6 @@ export default class NotemdPlugin extends Plugin {
 			else if (response.status >= 500) userMessage += " - Server error. Please try again later.";
 			else userMessage += ` - ${errorText}`; // Include original text for other errors
 			throw new Error(userMessage);
->>>>>>> add-LMCG
 		}
 
 		const data = await response.json();
@@ -1487,10 +1373,6 @@ export default class NotemdPlugin extends Plugin {
 		// console.log(`callGoogleApi: Response Status: ${response.status}`); // DEBUG
 		if (!response.ok) {
 			const errorText = await response.text();
-<<<<<<< HEAD
-			console.error(`callGoogleApi: Error Response Text: ${errorText}`); // Keep error log
-			throw new Error(`Google API error: ${response.status} - ${errorText}`);
-=======
 			console.error(`callGoogleApi: Error Response Text (${response.status}): ${errorText}`); // Keep error log
 			let userMessage = `Google API error: ${response.status}`;
 			if (response.status === 400) userMessage += " - Bad Request. Check API key or request format.";
@@ -1500,7 +1382,6 @@ export default class NotemdPlugin extends Plugin {
 			else if (response.status >= 500) userMessage += " - Server error. Please try again later.";
 			else userMessage += ` - ${errorText}`; // Include original text for other errors
 			throw new Error(userMessage);
->>>>>>> add-LMCG
 		}
 
 		const data = await response.json();
@@ -1544,10 +1425,6 @@ export default class NotemdPlugin extends Plugin {
 		// console.log(`callMistralApi: Response Status: ${response.status}`); // DEBUG
 		if (!response.ok) {
 			const errorText = await response.text();
-<<<<<<< HEAD
-			console.error(`callMistralApi: Error Response Text: ${errorText}`); // Keep error log
-			throw new Error(`Mistral API error: ${response.status} - ${errorText}`);
-=======
 			console.error(`callMistralApi: Error Response Text (${response.status}): ${errorText}`); // Keep error log
 			let userMessage = `Mistral API error: ${response.status}`;
 			if (response.status === 401) userMessage += " - Unauthorized. Check your API key.";
@@ -1556,7 +1433,6 @@ export default class NotemdPlugin extends Plugin {
 			else if (response.status >= 500) userMessage += " - Server error. Please try again later.";
 			else userMessage += ` - ${errorText}`; // Include original text for other errors
 			throw new Error(userMessage);
->>>>>>> add-LMCG
 		}
 
 		const data = await response.json();
@@ -1605,10 +1481,6 @@ export default class NotemdPlugin extends Plugin {
 		// console.log(`callAzureOpenAIApi: Response Status: ${response.status}`); // DEBUG
 		if (!response.ok) {
 			const errorText = await response.text();
-<<<<<<< HEAD
-			console.error(`callAzureOpenAIApi: Error Response Text: ${errorText}`); // Keep error log
-			throw new Error(`Azure OpenAI API error: ${response.status} - ${errorText}`);
-=======
 			console.error(`callAzureOpenAIApi: Error Response Text (${response.status}): ${errorText}`); // Keep error log
 			let userMessage = `Azure OpenAI API error: ${response.status}`;
 			if (response.status === 401) userMessage += " - Unauthorized. Check your API key and endpoint.";
@@ -1617,7 +1489,6 @@ export default class NotemdPlugin extends Plugin {
 			else if (response.status >= 500) userMessage += " - Server error. Please try again later.";
 			else userMessage += ` - ${errorText}`; // Include original text for other errors
 			throw new Error(userMessage);
->>>>>>> add-LMCG
 		}
 
 		const data = await response.json();
@@ -1661,10 +1532,6 @@ export default class NotemdPlugin extends Plugin {
 		// console.log(`callLMStudioApi: Response Status: ${response.status}`); // DEBUG
 		if (!response.ok) {
 			const errorText = await response.text();
-<<<<<<< HEAD
-			console.error(`callLMStudioApi: Error Response Text: ${errorText}`); // Keep error log
-			throw new Error(`LMStudio API error: ${response.status} - ${errorText}`);
-=======
 			console.error(`callLMStudioApi: Error Response Text (${response.status}): ${errorText}`); // Keep error log
 			let userMessage = `LMStudio API error: ${response.status}`;
 			if (response.status === 404) userMessage += " - Not Found. Check the Base URL (e.g., http://localhost:1234/v1).";
@@ -1672,7 +1539,6 @@ export default class NotemdPlugin extends Plugin {
 			else if (response.status >= 500) userMessage += " - Server error. Is LM Studio running?";
 			else userMessage += ` - ${errorText}`; // Include original text for other errors
 			throw new Error(userMessage);
->>>>>>> add-LMCG
 		}
 
 		const data = await response.json();
@@ -1719,10 +1585,6 @@ export default class NotemdPlugin extends Plugin {
 		// console.log(`callOllamaApi: Response Status: ${response.status}`); // DEBUG
 		if (!response.ok) {
 			const errorText = await response.text();
-<<<<<<< HEAD
-			console.error(`callOllamaApi: Error Response Text: ${errorText}`); // Keep error log
-			throw new Error(`Ollama API error: ${response.status} - ${errorText}`);
-=======
 			console.error(`callOllamaApi: Error Response Text (${response.status}): ${errorText}`); // Keep error log
 			let userMessage = `Ollama API error: ${response.status}`;
 			if (response.status === 404) userMessage += " - Not Found. Check the Base URL (e.g., http://localhost:11434/api) and ensure Ollama is running.";
@@ -1730,7 +1592,6 @@ export default class NotemdPlugin extends Plugin {
 			else if (response.status >= 500) userMessage += " - Server error. Is Ollama running?";
 			else userMessage += ` - ${errorText}`; // Include original text for other errors
 			throw new Error(userMessage);
->>>>>>> add-LMCG
 		}
 
 		const data = await response.json();
@@ -1762,18 +1623,6 @@ export default class NotemdPlugin extends Plugin {
 		// console.log(`callOpenRouterAPI: Calling URL: ${url}`); // DEBUG
 		// console.log(`callOpenRouterAPI: Request Body (excluding content):`, { ...requestBody, messages: [{ role: 'system', content: '...' }, { role: 'user', content: `(length: ${content.length})` }] }); // DEBUG
 
-<<<<<<< HEAD
-		const response = await fetch(url, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-				'Authorization': `Bearer ${provider.apiKey}`, // Required
-				'HTTP-Referer': 'https://github.com/Jacobinwwey/obsidian-NotEMD', // Required by OpenRouter - CORRECTED AGAIN
-				'X-Title': 'Notemd Obsidian Plugin' // Required by OpenRouter - can be your app's name
-			},
-			body: JSON.stringify(requestBody)
-		});
-=======
 		let response: Response; // Define response variable outside try block
 
 		try { // Wrap the fetch call
@@ -1798,15 +1647,10 @@ export default class NotemdPlugin extends Plugin {
 			throw new Error(userMessage);
 		}
 
->>>>>>> add-LMCG
 
 		// console.log(`callOpenRouterAPI: Response Status: ${response.status}`); // DEBUG
 		if (!response.ok) {
 			const errorText = await response.text();
-<<<<<<< HEAD
-			console.error(`callOpenRouterAPI: Error Response Text: ${errorText}`); // Keep error log
-			throw new Error(`OpenRouter API error: ${response.status} - ${errorText}`);
-=======
 			console.error(`callOpenRouterAPI: Error Response Text (${response.status}): ${errorText}`); // Keep error log
 			let userMessage = `OpenRouter API error: ${response.status}`;
 			if (response.status === 401) userMessage += " - Unauthorized. Check your API key.";
@@ -1816,7 +1660,6 @@ export default class NotemdPlugin extends Plugin {
 			else if (response.status >= 500) userMessage += " - Server error. Please try again later.";
 			else userMessage += ` - ${errorText}`; // Include original text for other errors
 			throw new Error(userMessage);
->>>>>>> add-LMCG
 		}
 
 		const data = await response.json();
@@ -1877,11 +1720,7 @@ export default class NotemdPlugin extends Plugin {
 
 
 
-<<<<<<< HEAD
-	// Modify signature to accept ProgressReporter
-=======
 	// Restore original function signature and logic
->>>>>>> add-LMCG
 	async processContentWithLLM(content: string, progressReporter: ProgressReporter): Promise<string> {
 		// console.log("Entering processContentWithLLM"); // DEBUG
 		const provider = this.settings.providers.find(p => p.name === this.settings.activeProvider);
@@ -1997,10 +1836,6 @@ Rules:
 		return finalResult;
 	}
 
-<<<<<<< HEAD
-=======
-
->>>>>>> add-LMCG
 	// --- Post-Processing ---
 
 	generateObsidianLinks(content: string): string {
@@ -2060,16 +1895,8 @@ Rules:
 			}
 
 			for (const concept of concepts) {
-<<<<<<< HEAD
-				// Sanitize concept name for filename (more robustly)
-				let safeName = concept
-					.replace(/[\\/:*?"<>|#^[\]]/g, '') // Remove invalid file path chars + Obsidian specific ones
-					.replace(/\s+/g, ' ') // Collapse multiple spaces
-					.trim();
-=======
 				// Sanitize concept name for filename using the new normalization function
 				let safeName = this.normalizeNameForFilePath(concept);
->>>>>>> add-LMCG
 
 				// Limit filename length (e.g., 100 chars) to avoid issues
 				if (safeName.length > 100) {
@@ -2342,8 +2169,6 @@ Rules:
 		}
 	}
 
-<<<<<<< HEAD
-=======
 	/**
 	 * Normalizes a concept name for use as a file path.
 	 * - Replaces hyphens and underscores with spaces.
@@ -3085,7 +2910,6 @@ Format directly for Obsidian markdown. Do NOT wrap the entire response in a mark
 	}
 
 
->>>>>>> add-LMCG
 } // End of NotemdPlugin class definition
 
 
@@ -3359,15 +3183,6 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 		container.empty();
 		container.addClass('notemd-sidebar-container'); // Add a class for potential styling
 
-<<<<<<< HEAD
-		container.createEl("h4", { text: "Notemd Actions" });
-
-		// --- Action Buttons ---
-		const buttonGroup = container.createDiv({ cls: 'notemd-button-group' });
-
-		// Process Current File Button
-		const processCurrentButton = buttonGroup.createEl('button', { text: 'Process Current File', cls: 'mod-cta' });
-=======
 		container.createEl("h4", { text: "Original Processing" });
 
 		// --- Original Action Buttons ---
@@ -3376,7 +3191,6 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 		// Process Current File Button (Original Logic)
 		const processCurrentButton = originalButtonGroup.createEl('button', { text: 'Process File (Add Links)', cls: 'mod-cta' });
 		processCurrentButton.title = 'Processes the current file to add [[wiki-links]] and create concept notes based on LLM analysis.'; // Use title attribute
->>>>>>> add-LMCG
 		processCurrentButton.onclick = async () => {
 			if (this.isProcessing) {
 				new Notice("Processing already in progress.");
@@ -3392,15 +3206,6 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 			this.log('Starting: Process Current File...');
 			this.updateStatus('Processing current file...', 0);
 			// Pass 'this' (the view instance) instead of creating a ProgressModal
-<<<<<<< HEAD
-			await this.plugin.processWithNotemd(this);
-			this.isProcessing = false; // Mark processing finished
-			if (this.cancelButton) this.cancelButton.addClass('is-hidden'); // Hide cancel button
-		};
-
-		// Process Folder Button
-		const processFolderButton = buttonGroup.createEl('button', { text: 'Process Folder' });
-=======
 			await this.plugin.processWithNotemd(this); // Calls original logic
 			this.isProcessing = false; // Mark processing finished
 			if (this.cancelButton) this.cancelButton.addClass('is-hidden'); // Hide cancel button
@@ -3408,7 +3213,6 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 		// Process Folder Button (Original Logic)
 		const processFolderButton = originalButtonGroup.createEl('button', { text: 'Process Folder (Add Links)' });
 		processFolderButton.title = 'Processes all files in a selected folder to add [[wiki-links]] and create concept notes.'; // Use title attribute
->>>>>>> add-LMCG
 		processFolderButton.onclick = async () => {
 			if (this.isProcessing) {
 				new Notice("Processing already in progress.");
@@ -3424,19 +3228,11 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 			this.log('Starting: Process Folder...');
 			this.updateStatus('Processing folder...', 0);
 			// Pass 'this' (the view instance) instead of creating a ProgressModal
-<<<<<<< HEAD
-			await this.plugin.processFolderWithNotemd(this);
-=======
 			await this.plugin.processFolderWithNotemd(this); // Calls original logic
->>>>>>> add-LMCG
 			this.isProcessing = false;
 			if (this.cancelButton) this.cancelButton.addClass('is-hidden'); // Hide cancel button
 		};
 
-<<<<<<< HEAD
-		// Check Duplicates Button
-		const checkDuplicatesButton = buttonGroup.createEl('button', { text: 'Check Duplicates (Current File)' });
-=======
 		// --- New Feature Buttons ---
 		container.createEl('h4', { text: "New Features" });
 		const newFeatureButtonGroup = container.createDiv({ cls: 'notemd-button-group' });
@@ -3517,7 +3313,6 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 
 		// Check Duplicates Button
 		const checkDuplicatesButton = utilityButtonGroup.createEl('button', { text: 'Check Duplicates (Current File)' });
->>>>>>> add-LMCG
 		checkDuplicatesButton.onclick = async () => {
 			// This action is quick, doesn't need the full processing state management
 			const activeFile = this.plugin.app.workspace.getActiveFile();
@@ -3539,11 +3334,7 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 		};
 
 		// Test Connection Button
-<<<<<<< HEAD
-		const testConnectionButton = buttonGroup.createEl('button', { text: 'Test LLM Connection' });
-=======
 		const testConnectionButton = utilityButtonGroup.createEl('button', { text: 'Test LLM Connection' });
->>>>>>> add-LMCG
 		testConnectionButton.onclick = async () => {
 			if (this.isProcessing) {
 				new Notice("Cannot test connection while processing.");
@@ -3641,8 +3432,6 @@ class NotemdSettingTab extends PluginSettingTab {
 		this.plugin = plugin;
 	}
 
-<<<<<<< HEAD
-=======
 	// Define the path for the providers JSON file within the plugin's config directory
 	private get providersFilePath(): string {
 		// Note: this.app.vault.configDir might be '.obsidian'
@@ -3740,7 +3529,6 @@ class NotemdSettingTab extends PluginSettingTab {
 	}
 
 
->>>>>>> add-LMCG
 	display(): void {
 		const {containerEl} = this;
 
@@ -3751,8 +3539,6 @@ class NotemdSettingTab extends PluginSettingTab {
 		// --- Provider Configuration ---
 		containerEl.createEl('h3', { text: 'LLM Provider Configuration' });
 
-<<<<<<< HEAD
-=======
 		// --- Import/Export Buttons ---
 		const providerMgmtSetting = new Setting(containerEl)
 			.setName('Manage Provider Configurations')
@@ -3775,7 +3561,6 @@ class NotemdSettingTab extends PluginSettingTab {
 		// --- End Import/Export Buttons ---
 
 
->>>>>>> add-LMCG
 		new Setting(containerEl)
 			.setName('Active Provider')
 			.setDesc('Select the LLM provider to use for processing.')
@@ -3950,8 +3735,6 @@ class NotemdSettingTab extends PluginSettingTab {
 					}));
 		}
 
-<<<<<<< HEAD
-=======
 		// Add the new toggle setting for move/copy workflow
 		new Setting(containerEl)
 			.setName('Move Original File After Processing')
@@ -3965,7 +3748,6 @@ class NotemdSettingTab extends PluginSettingTab {
 				}));
 
 
->>>>>>> add-LMCG
 		// --- Concept Note Output Settings ---
 		containerEl.createEl('h4', { text: 'Concept Note Output' });
 
@@ -4135,8 +3917,6 @@ class NotemdSettingTab extends PluginSettingTab {
 		// --- Concept Log File Output Settings --- END
 
 
-<<<<<<< HEAD
-=======
 		// --- Content Generation Settings ---
 		containerEl.createEl('h4', { text: 'Content Generation' });
 
@@ -4263,7 +4043,6 @@ class NotemdSettingTab extends PluginSettingTab {
 				}));
 
 
->>>>>>> add-LMCG
 		// --- Other General Settings ---
 		containerEl.createEl('h4', { text: 'Processing Parameters' });
 
