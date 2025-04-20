@@ -12,15 +12,9 @@
 =============================================
 ```
 
-<<<<<<< HEAD
-Notemd enhances your Obsidian workflow by integrating with various Large Language Models (LLMs) to process your notes, automatically generate wiki-links for key concepts, create corresponding concept notes, and perform basic duplicate checks.
-
-**Version:** 1.1.0
-=======
 Notemd enhances your Obsidian workflow by integrating with various Large Language Models (LLMs) to process your notes, automatically generate wiki-links for key concepts, create corresponding concept notes, perform web research, and more.
 
 **Version:** 1.2.0
->>>>>>> add-LMCG
 
 ## Table of Contents
 - [Features](#features)
@@ -47,10 +41,6 @@ Notemd enhances your Obsidian workflow by integrating with various Large Languag
 - **Customizable Output Paths**: Configure separate relative paths within your vault for saving processed files and newly created concept notes.
 - **Link Integrity Maintenance**: Basic handling for updating links when notes are renamed or deleted within the vault.
 
-<<<<<<< HEAD
-### Duplicate Detection
-- **Basic Duplicate Check**: Identifies potential duplicate words within the currently processed file's content (results logged to console).
-=======
 ### Web Research & Content Generation
 - **Web Research & Summarization**:
     - Perform web searches using Tavily (requires API key) or DuckDuckGo (experimental).
@@ -65,7 +55,6 @@ Notemd enhances your Obsidian workflow by integrating with various Large Languag
 ### Utility Features
 - **Duplicate Detection**: Basic check for duplicate words within the currently processed file's content (results logged to console).
 - **LLM Connection Test**: Verify API settings for the active provider.
->>>>>>> add-LMCG
 
 ## Installation
 
@@ -98,10 +87,7 @@ Access plugin settings via:
     *   **Temperature**: Controls the randomness of the LLM's output (0=deterministic, 1=max creativity). Lower values (e.g., 0.2-0.5) are generally better for structured tasks.
     *   **API Version (Azure Only)**: Required for Azure OpenAI deployments (e.g., `2024-02-15-preview`).
 3.  **Test Connection**: Use the "Test Connection" button for the active provider to verify your settings. This now uses a more reliable method for LM Studio.
-<<<<<<< HEAD
-=======
 4.  **Manage Provider Configurations**: Use the "Export Providers" and "Import Providers" buttons to save/load your LLM provider settings to/from a `notemd-providers.json` file within the plugin's configuration directory. This allows for easy backup and sharing.
->>>>>>> add-LMCG
 
 ### General Settings
 
