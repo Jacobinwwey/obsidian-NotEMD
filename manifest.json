@@ -1,0 +1,10 @@
+{
+	"id": "notemd",
+	"name": "Notemd",
+	"version": "1.2.0",
+	"minAppVersion": "0.15.0",
+	"description": "Enhances notes using LLMs: 1) Processes text to add [[wiki-links]] and create concept notes. 2) Performs web research (Tavily/DuckDuckGo) and summarizes topics. 3) Generates content from note titles. Supports multiple LLM providers and customizable output.",
+	"author": "jacob",
+	"authorUrl": "https://github.com/Jacobinwwey",
+	"isDesktopOnly": false
+}
