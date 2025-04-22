@@ -37,6 +37,7 @@ This list outlines potential new features and improvements for the Notemd Obsidi
 -   [x] **Mermaid Syntax Validation & Fixing:**
     -   Integrate post-processing logic to validate and fix common Mermaid syntax issues in LLM output (e.g., ensure ` ```mermaid ` blocks are properly closed after last arrow `-->`).
     -   Adapt logic from `LMStudio-Markdown-Content-Generator/mermaid.py`.
+    -   [x] Added logic to remove parentheses `()` from within Mermaid blocks. (April 2025)
 
 -   [x] **LaTeX Math Delimiter Cleanup:**
     -   Add post-processing step to normalize LaTeX math delimiters (e.g., convert `\(` `\)` to `$`, ensure consistent spacing around `$`).
@@ -96,6 +97,7 @@ This list outlines potential new features and improvements for the Notemd Obsidi
     -   [x] If checked and input is "suffix", generate `filenamesuffix.md`. (Handled in `processFile`)
     -   [x] Update the 'Add Links' batch processing logic (`processFile`) to respect these settings. (Implemented in `processFile`)
 -   [x] **Batch Task Cancel Button:** Implement a mechanism (e.g., a button in a modal or status bar) to allow users to cancel ongoing batch processing tasks. (Implemented via `ProgressReporter` interface, `ProgressModal`, and `NotemdSidebarView` cancel buttons and checks within batch loops)
+    -   [x] Refined API retry logic to improve cancel responsiveness during waits. (April 2025)
 -   [x] **Customizable 'Generate from Title' Output Folder:**
     -   [x] Modify the 'Generate Content for Note Title' batch process (`batchGenerateContentForTitles`) to move successfully processed files to a dedicated subfolder within the processed folder to prevent reprocessing. (Implemented)
     -   [x] Add a checkbox setting: "Use custom output folder name for 'Generate from Title'". (Implemented in Settings)

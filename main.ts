@@ -1374,8 +1374,8 @@ export default class NotemdPlugin extends Plugin {
 		}
 	}
 
-	// Modified to accept modelName parameter
-	private async callDeepSeekAPI(provider: LLMProviderConfig, modelName: string, prompt: string, content: string): Promise<string> {
+	// Modified to accept modelName parameter and progressReporter
+	private async callDeepSeekAPI(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter): Promise<string> {
 		// Removed the old testAPI call here - connection test should be done separately if desired
 		// const isHealthy = await this.testAPI(provider);
 		// if (!isHealthy) {
@@ -1450,6 +1450,11 @@ export default class NotemdPlugin extends Plugin {
 
 			// If we reached here, it means the attempt failed and we might retry
 			if (attempt < maxAttempts) {
+				// Check for cancellation BEFORE waiting
+				if (progressReporter.cancelled) {
+					console.log("callDeepSeekAPI: Cancellation detected before retry wait.");
+					throw new Error("Processing cancelled by user during API retry wait.");
+				}
 				console.log(`callDeepSeekAPI: Waiting ${intervalSeconds} seconds before retry ${attempt + 1}...`);
 				await new Promise(resolve => setTimeout(resolve, intervalSeconds * 1000));
 			}
@@ -1460,8 +1465,8 @@ export default class NotemdPlugin extends Plugin {
 		throw lastError || new Error("DeepSeek API call failed after multiple retries."); // Throw the last error
 	}
 
-	// Modified to accept modelName parameter
-	private async callOpenAIApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string): Promise<string> {
+	// Modified to accept modelName parameter and progressReporter
+	private async callOpenAIApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter): Promise<string> {
 		// Add API health check if applicable (assuming a similar /health or equivalent endpoint)
 		// const isHealthy = await this.testAPI(provider); // Adapt testAPI or use a provider-specific check
 		// if (!isHealthy) { throw new Error('API connection test failed'); }
@@ -1534,6 +1539,11 @@ export default class NotemdPlugin extends Plugin {
 
 			// Wait before retrying if applicable
 			if (attempt < maxAttempts) {
+				// Check for cancellation BEFORE waiting
+				if (progressReporter.cancelled) {
+					console.log("callOpenAIApi: Cancellation detected before retry wait.");
+					throw new Error("Processing cancelled by user during API retry wait.");
+				}
 				console.log(`callOpenAIApi: Waiting ${intervalSeconds} seconds before retry ${attempt + 1}...`);
 				await new Promise(resolve => setTimeout(resolve, intervalSeconds * 1000));
 			}
@@ -1544,8 +1554,8 @@ export default class NotemdPlugin extends Plugin {
 		throw lastError || new Error("OpenAI API call failed after multiple retries.");
 	}
 
-	// Modified to accept modelName parameter
-	private async callAnthropicApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string): Promise<string> {
+	// Modified to accept modelName parameter and progressReporter
+	private async callAnthropicApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter): Promise<string> {
 		const url = `${provider.baseUrl}/v1/messages`;
 		const requestBody = {
 			model: modelName, // Use passed modelName
@@ -1613,6 +1623,11 @@ export default class NotemdPlugin extends Plugin {
 
 			// Wait before retrying if applicable
 			if (attempt < maxAttempts) {
+				// Check for cancellation BEFORE waiting
+				if (progressReporter.cancelled) {
+					console.log("callAnthropicApi: Cancellation detected before retry wait.");
+					throw new Error("Processing cancelled by user during API retry wait.");
+				}
 				console.log(`callAnthropicApi: Waiting ${intervalSeconds} seconds before retry ${attempt + 1}...`);
 				await new Promise(resolve => setTimeout(resolve, intervalSeconds * 1000));
 			}
@@ -1623,8 +1638,8 @@ export default class NotemdPlugin extends Plugin {
 		throw lastError || new Error("Anthropic API call failed after multiple retries.");
 	}
 
-	// Modified to accept modelName parameter
-	private async callGoogleApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string): Promise<string> {
+	// Modified to accept modelName parameter and progressReporter
+	private async callGoogleApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter): Promise<string> {
 		// Google API doesn't have a standard /health endpoint. Skipping testAPI.
 		// const isHealthy = await this.testAPI(provider);
 		// if (!isHealthy) { throw new Error('API connection test failed'); }
@@ -1696,6 +1711,11 @@ export default class NotemdPlugin extends Plugin {
 
 			// Wait before retrying if applicable
 			if (attempt < maxAttempts) {
+				// Check for cancellation BEFORE waiting
+				if (progressReporter.cancelled) {
+					console.log("callGoogleApi: Cancellation detected before retry wait.");
+					throw new Error("Processing cancelled by user during API retry wait.");
+				}
 				console.log(`callGoogleApi: Waiting ${intervalSeconds} seconds before retry ${attempt + 1}...`);
 				await new Promise(resolve => setTimeout(resolve, intervalSeconds * 1000));
 			}
@@ -1706,8 +1726,8 @@ export default class NotemdPlugin extends Plugin {
 		throw lastError || new Error("Google API call failed after multiple retries.");
 	}
 
-	// Modified to accept modelName parameter
-	private async callMistralApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string): Promise<string> {
+	// Modified to accept modelName parameter and progressReporter
+	private async callMistralApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter): Promise<string> {
 		const url = `${provider.baseUrl}/chat/completions`;
 		const requestBody = {
 			model: modelName, // Use passed modelName
@@ -1776,6 +1796,11 @@ export default class NotemdPlugin extends Plugin {
 
 			// Wait before retrying if applicable
 			if (attempt < maxAttempts) {
+				// Check for cancellation BEFORE waiting
+				if (progressReporter.cancelled) {
+					console.log("callMistralApi: Cancellation detected before retry wait.");
+					throw new Error("Processing cancelled by user during API retry wait.");
+				}
 				console.log(`callMistralApi: Waiting ${intervalSeconds} seconds before retry ${attempt + 1}...`);
 				await new Promise(resolve => setTimeout(resolve, intervalSeconds * 1000));
 			}
@@ -1786,8 +1811,8 @@ export default class NotemdPlugin extends Plugin {
 		throw lastError || new Error("Mistral API call failed after multiple retries.");
 	}
 
-	// Modified to accept modelName parameter (used as deployment name)
-	private async callAzureOpenAIApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string): Promise<string> {
+	// Modified to accept modelName parameter (used as deployment name) and progressReporter
+	private async callAzureOpenAIApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter): Promise<string> {
 		if (!provider.apiVersion) {
 			throw new Error('API version is required for Azure OpenAI');
 		}
@@ -1863,6 +1888,11 @@ export default class NotemdPlugin extends Plugin {
 
 			// Wait before retrying if applicable
 			if (attempt < maxAttempts) {
+				// Check for cancellation BEFORE waiting
+				if (progressReporter.cancelled) {
+					console.log("callAzureOpenAIApi: Cancellation detected before retry wait.");
+					throw new Error("Processing cancelled by user during API retry wait.");
+				}
 				console.log(`callAzureOpenAIApi: Waiting ${intervalSeconds} seconds before retry ${attempt + 1}...`);
 				await new Promise(resolve => setTimeout(resolve, intervalSeconds * 1000));
 			}
@@ -1873,8 +1903,8 @@ export default class NotemdPlugin extends Plugin {
 		throw lastError || new Error("Azure OpenAI API call failed after multiple retries.");
 	}
 
-	// Modified to accept modelName parameter
-	private async callLMStudioApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string): Promise<string> {
+	// Modified to accept modelName parameter and progressReporter
+	private async callLMStudioApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter): Promise<string> {
 		// LMStudio uses OpenAI compatible endpoint
 		const url = `${provider.baseUrl}/chat/completions`;
 		const requestBody = {
@@ -1945,6 +1975,11 @@ export default class NotemdPlugin extends Plugin {
 
 			// Wait before retrying if applicable
 			if (attempt < maxAttempts) {
+				// Check for cancellation BEFORE waiting
+				if (progressReporter.cancelled) {
+					console.log("callLMStudioApi: Cancellation detected before retry wait.");
+					throw new Error("Processing cancelled by user during API retry wait.");
+				}
 				console.log(`callLMStudioApi: Waiting ${intervalSeconds} seconds before retry ${attempt + 1}...`);
 				await new Promise(resolve => setTimeout(resolve, intervalSeconds * 1000));
 			}
@@ -1955,8 +1990,8 @@ export default class NotemdPlugin extends Plugin {
 		throw lastError || new Error("LMStudio API call failed after multiple retries.");
 	}
 
-	// Modified to accept modelName parameter
-	private async callOllamaApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string): Promise<string> {
+	// Modified to accept modelName parameter and progressReporter
+	private async callOllamaApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter): Promise<string> {
 		// Ollama has a different endpoint and request structure
 		const url = `${provider.baseUrl}/chat`; // Endpoint is /api/chat
 		const requestBody = {
@@ -2029,6 +2064,11 @@ export default class NotemdPlugin extends Plugin {
 
 			// Wait before retrying if applicable
 			if (attempt < maxAttempts) {
+				// Check for cancellation BEFORE waiting
+				if (progressReporter.cancelled) {
+					console.log("callOllamaApi: Cancellation detected before retry wait.");
+					throw new Error("Processing cancelled by user during API retry wait.");
+				}
 				console.log(`callOllamaApi: Waiting ${intervalSeconds} seconds before retry ${attempt + 1}...`);
 				await new Promise(resolve => setTimeout(resolve, intervalSeconds * 1000));
 			}
@@ -2039,8 +2079,8 @@ export default class NotemdPlugin extends Plugin {
 		throw lastError || new Error("Ollama API call failed after multiple retries.");
 	}
 
-	// Modified to accept modelName parameter
-	private async callOpenRouterAPI(provider: LLMProviderConfig, modelName: string, prompt: string, content: string): Promise<string> {
+	// Modified to accept modelName parameter and progressReporter
+	private async callOpenRouterAPI(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter): Promise<string> {
 		// OpenRouter uses OpenAI compatible endpoint but requires specific headers
 		const url = `${provider.baseUrl}/chat/completions`;
 		const requestBody = {
@@ -2114,6 +2154,11 @@ export default class NotemdPlugin extends Plugin {
 
 			// Wait before retrying if applicable
 			if (attempt < maxAttempts) {
+				// Check for cancellation BEFORE waiting
+				if (progressReporter.cancelled) {
+					console.log("callOpenRouterAPI: Cancellation detected before retry wait.");
+					throw new Error("Processing cancelled by user during API retry wait.");
+				}
 				console.log(`callOpenRouterAPI: Waiting ${intervalSeconds} seconds before retry ${attempt + 1}...`);
 				await new Promise(resolve => setTimeout(resolve, intervalSeconds * 1000));
 			}
@@ -2237,31 +2282,31 @@ Rules:
 				// console.log(`processContentWithLLM: Calling API function for provider: ${provider.name} with model ${modelName}`); // DEBUG
 				switch (provider.name) {
 					case 'DeepSeek':
-						responseText = await this.callDeepSeekAPI(provider, modelName, prompt, chunk);
+						responseText = await this.callDeepSeekAPI(provider, modelName, prompt, chunk, progressReporter); // Pass reporter
 						break;
 					case 'OpenAI':
-						responseText = await this.callOpenAIApi(provider, modelName, prompt, chunk);
+						responseText = await this.callOpenAIApi(provider, modelName, prompt, chunk, progressReporter); // Pass reporter
 						break;
 					case 'Anthropic':
-						responseText = await this.callAnthropicApi(provider, modelName, prompt, chunk);
+						responseText = await this.callAnthropicApi(provider, modelName, prompt, chunk, progressReporter); // Pass reporter
 						break;
 					case 'Google':
-						responseText = await this.callGoogleApi(provider, modelName, prompt, chunk);
+						responseText = await this.callGoogleApi(provider, modelName, prompt, chunk, progressReporter); // Pass reporter
 						break;
 					case 'Mistral':
-						responseText = await this.callMistralApi(provider, modelName, prompt, chunk);
+						responseText = await this.callMistralApi(provider, modelName, prompt, chunk, progressReporter); // Pass reporter
 						break;
 					case 'Azure OpenAI':
-						responseText = await this.callAzureOpenAIApi(provider, modelName, prompt, chunk);
+						responseText = await this.callAzureOpenAIApi(provider, modelName, prompt, chunk, progressReporter); // Pass reporter
 						break;
 					case 'LMStudio':
-						responseText = await this.callLMStudioApi(provider, modelName, prompt, chunk);
+						responseText = await this.callLMStudioApi(provider, modelName, prompt, chunk, progressReporter); // Pass reporter
 						break;
 					case 'Ollama':
-						responseText = await this.callOllamaApi(provider, modelName, prompt, chunk);
+						responseText = await this.callOllamaApi(provider, modelName, prompt, chunk, progressReporter); // Pass reporter
 						break;
 					case 'OpenRouter':
-						responseText = await this.callOpenRouterAPI(provider, modelName, prompt, chunk);
+						responseText = await this.callOpenRouterAPI(provider, modelName, prompt, chunk, progressReporter); // Pass reporter
 						break;
 					default:
 						console.error(`processContentWithLLM: Unsupported provider: ${provider.name}`); // Keep error log
@@ -2853,32 +2898,32 @@ Format directly for Obsidian markdown. Do NOT wrap the entire response in a mark
 			let generatedContent;
 			switch (provider.name) {
 				case 'DeepSeek':
-					generatedContent = await this.callDeepSeekAPI(provider, modelName, generationPrompt, '');
+					generatedContent = await this.callDeepSeekAPI(provider, modelName, generationPrompt, '', progressReporter); // Pass reporter
 					break;
 				case 'OpenAI':
-					generatedContent = await this.callOpenAIApi(provider, modelName, generationPrompt, '');
+					generatedContent = await this.callOpenAIApi(provider, modelName, generationPrompt, '', progressReporter); // Pass reporter
 					break;
 				case 'Anthropic':
 					// Anthropic combines system prompt and user message, so pass empty prompt here
-					generatedContent = await this.callAnthropicApi(provider, modelName, '', generationPrompt);
+					generatedContent = await this.callAnthropicApi(provider, modelName, '', generationPrompt, progressReporter); // Pass reporter
 					break;
 				case 'Google':
-					generatedContent = await this.callGoogleApi(provider, modelName, generationPrompt, '');
+					generatedContent = await this.callGoogleApi(provider, modelName, generationPrompt, '', progressReporter); // Pass reporter
 					break;
 				case 'Mistral':
-					generatedContent = await this.callMistralApi(provider, modelName, generationPrompt, '');
+					generatedContent = await this.callMistralApi(provider, modelName, generationPrompt, '', progressReporter); // Pass reporter
 					break;
 				case 'Azure OpenAI':
-					generatedContent = await this.callAzureOpenAIApi(provider, modelName, generationPrompt, '');
+					generatedContent = await this.callAzureOpenAIApi(provider, modelName, generationPrompt, '', progressReporter); // Pass reporter
 					break;
 				case 'LMStudio':
-					generatedContent = await this.callLMStudioApi(provider, modelName, generationPrompt, '');
+					generatedContent = await this.callLMStudioApi(provider, modelName, generationPrompt, '', progressReporter); // Pass reporter
 					break;
 				case 'Ollama':
-					generatedContent = await this.callOllamaApi(provider, modelName, generationPrompt, '');
+					generatedContent = await this.callOllamaApi(provider, modelName, generationPrompt, '', progressReporter); // Pass reporter
 					break;
 				case 'OpenRouter':
-					generatedContent = await this.callOpenRouterAPI(provider, modelName, generationPrompt, '');
+					generatedContent = await this.callOpenRouterAPI(provider, modelName, generationPrompt, '', progressReporter); // Pass reporter
 					break;
 				default:
 					throw new Error(`Unsupported provider for content generation: ${provider.name}`);
@@ -3180,31 +3225,31 @@ Format directly for Obsidian markdown. Do NOT wrap the entire response in a mark
 			let summary = '';
 			switch (provider.name) {
 				case 'DeepSeek':
-					summary = await this.callDeepSeekAPI(provider, modelName, summaryPrompt, '');
+					summary = await this.callDeepSeekAPI(provider, modelName, summaryPrompt, '', progressReporter); // Pass reporter
 					break;
 				case 'OpenAI':
-					summary = await this.callOpenAIApi(provider, modelName, summaryPrompt, '');
+					summary = await this.callOpenAIApi(provider, modelName, summaryPrompt, '', progressReporter); // Pass reporter
 					break;
 				case 'Anthropic':
-					summary = await this.callAnthropicApi(provider, modelName, '', summaryPrompt); // Anthropic combines prompt/content
+					summary = await this.callAnthropicApi(provider, modelName, '', summaryPrompt, progressReporter); // Pass reporter
 					break;
 				case 'Google':
-					summary = await this.callGoogleApi(provider, modelName, summaryPrompt, '');
+					summary = await this.callGoogleApi(provider, modelName, summaryPrompt, '', progressReporter); // Pass reporter
 					break;
 				case 'Mistral':
-					summary = await this.callMistralApi(provider, modelName, summaryPrompt, '');
+					summary = await this.callMistralApi(provider, modelName, summaryPrompt, '', progressReporter); // Pass reporter
 					break;
 				case 'Azure OpenAI':
-					summary = await this.callAzureOpenAIApi(provider, modelName, summaryPrompt, '');
+					summary = await this.callAzureOpenAIApi(provider, modelName, summaryPrompt, '', progressReporter); // Pass reporter
 					break;
 				case 'LMStudio':
-					summary = await this.callLMStudioApi(provider, modelName, summaryPrompt, '');
+					summary = await this.callLMStudioApi(provider, modelName, summaryPrompt, '', progressReporter); // Pass reporter
 					break;
 				case 'Ollama':
-					summary = await this.callOllamaApi(provider, modelName, summaryPrompt, '');
+					summary = await this.callOllamaApi(provider, modelName, summaryPrompt, '', progressReporter); // Pass reporter
 					break;
 				case 'OpenRouter':
-					summary = await this.callOpenRouterAPI(provider, modelName, summaryPrompt, '');
+					summary = await this.callOpenRouterAPI(provider, modelName, summaryPrompt, '', progressReporter); // Pass reporter
 					break;
 				default:
 					throw new Error(`Unsupported provider for summarization: ${provider.name}`);

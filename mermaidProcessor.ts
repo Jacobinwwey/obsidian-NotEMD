@@ -10,10 +10,17 @@ export function refineMermaidBlocks(content: string): string {
 	let currentBlockLines: string[] = [];
 	let lastArrowIndexInBlock = -1;
 
-	for (const line of lines) {
+	for (let line of lines) { // Use 'let' so we can modify the line
 		const stripped = line.trim();
 
-		if (stripped.startsWith('```mermaid')) {
+		// Regex to detect ```(mermaid) or ``` mermaid with optional space/parentheses
+		const mermaidStartRegex = /^```\s*\(?\s*mermaid\s*\)?/;
+		
+
+		if (mermaidStartRegex.test(stripped)) {
+			// Normalize the starting line
+			line = line.replace(mermaidStartRegex, '```mermaid');
+
 			// If already in a block, finish the previous one before starting new
 			if (inMermaid) {
 				if (lastArrowIndexInBlock !== -1) {
@@ -37,8 +44,10 @@ export function refineMermaidBlocks(content: string): string {
 			currentBlockLines = [line];
 			lastArrowIndexInBlock = -1;
 		} else if (inMermaid) {
-			currentBlockLines.push(line);
-			if (line.includes('-->')) {
+			// Remove parentheses from the line content within the mermaid block
+			const lineWithoutParentheses = line.replace(/[()]/g, '');
+			currentBlockLines.push(lineWithoutParentheses);
+			if (lineWithoutParentheses.includes('-->')) { // Check the modified line for arrows
 				lastArrowIndexInBlock = currentBlockLines.length - 1; // Index within currentBlockLines
 			}
 			if (stripped === '```') {
