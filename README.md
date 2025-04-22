@@ -12,15 +12,9 @@
 =============================================
 ```
 
-<<<<<<< HEAD
-Notemd enhances your Obsidian workflow by integrating with various Large Language Models (LLMs) to process your notes, automatically generate wiki-links for key concepts, create corresponding concept notes, and perform basic duplicate checks.
-
-**Version:** 1.1.0
-=======
 Notemd enhances your Obsidian workflow by integrating with various Large Language Models (LLMs) to process your notes, automatically generate wiki-links for key concepts, create corresponding concept notes, perform web research, and more.
 
 **Version:** 1.2.0
->>>>>>> add-LMCG
 
 ## Table of Contents
 - [Features](#features)
@@ -40,17 +34,16 @@ Notemd enhances your Obsidian workflow by integrating with various Large Languag
 - **Content Preservation**: Aims to maintain original formatting while adding structure and links.
 - **Progress Tracking**: Real-time updates via the Notemd Sidebar or a progress modal.
 - **Cancellable Operations**: Cancel processing via the modal or sidebar.
+- **Multi-Model Configuration**: Use different LLM providers *and* specific models for different tasks (Add Links, Research, Generate Title) or use a single provider for all.
+- **Stable API Calls (Retry Logic)**: Optionally enable automatic retries for failed LLM API calls with configurable interval and attempt limits.
 
 ### Knowledge Graph Enhancement
 - **Automatic Wiki-Linking**: Identifies and adds `[[wiki-links]]` to core concepts within your processed notes based on LLM output.
 - **Concept Note Creation (Optional & Customizable)**: Automatically creates new notes for discovered concepts in a specified vault folder.
 - **Customizable Output Paths**: Configure separate relative paths within your vault for saving processed files and newly created concept notes.
+- **Customizable Output Filenames (Add Links)**: Optionally overwrite the original file or use a custom suffix/replacement string instead of the default `_processed.md` when processing files for links.
 - **Link Integrity Maintenance**: Basic handling for updating links when notes are renamed or deleted within the vault.
 
-<<<<<<< HEAD
-### Duplicate Detection
-- **Basic Duplicate Check**: Identifies potential duplicate words within the currently processed file's content (results logged to console).
-=======
 ### Web Research & Content Generation
 - **Web Research & Summarization**:
     - Perform web searches using Tavily (requires API key) or DuckDuckGo (experimental).
@@ -60,12 +53,11 @@ Notemd enhances your Obsidian workflow by integrating with various Large Languag
 - **Content Generation from Title**:
     - Use the note title to generate initial content via LLM, replacing existing content.
     - **Optional Research**: Configure whether to perform web research (using the selected provider) to provide context for generation.
-- **Batch Content Generation from Titles**: Generate content for all notes within a selected folder based on their titles (respects the optional research setting).
+- **Batch Content Generation from Titles**: Generate content for all notes within a selected folder based on their titles (respects the optional research setting). Successfully processed files are moved to a configurable "complete" subfolder (e.g., `[foldername]_complete` or a custom name) to avoid reprocessing.
 
 ### Utility Features
 - **Duplicate Detection**: Basic check for duplicate words within the currently processed file's content (results logged to console).
 - **LLM Connection Test**: Verify API settings for the active provider.
->>>>>>> add-LMCG
 
 ## Installation
 
@@ -98,10 +90,19 @@ Access plugin settings via:
     *   **Temperature**: Controls the randomness of the LLM's output (0=deterministic, 1=max creativity). Lower values (e.g., 0.2-0.5) are generally better for structured tasks.
     *   **API Version (Azure Only)**: Required for Azure OpenAI deployments (e.g., `2024-02-15-preview`).
 3.  **Test Connection**: Use the "Test Connection" button for the active provider to verify your settings. This now uses a more reliable method for LM Studio.
-<<<<<<< HEAD
-=======
 4.  **Manage Provider Configurations**: Use the "Export Providers" and "Import Providers" buttons to save/load your LLM provider settings to/from a `notemd-providers.json` file within the plugin's configuration directory. This allows for easy backup and sharing.
->>>>>>> add-LMCG
+
+### Multi-Model Configuration
+-   **Use Different Providers for Tasks**:
+    *   **Disabled (Default)**: Uses the single "Active Provider" (selected above) for all tasks.
+    *   **Enabled**: Allows you to select a specific provider *and* optionally override the model name for each task ("Add Links", "Research & Summarize", "Generate from Title"). If the model override field for a task is left blank, it will use the default model configured for that task's selected provider.
+
+### Stable API Call Settings
+-   **Enable Stable API Calls (Retry Logic)**:
+    *   **Disabled (Default)**: A single API call failure will stop the current task.
+    *   **Enabled**: Automatically retries failed LLM API calls (useful for intermittent network issues or rate limits).
+-   **Retry Interval (seconds)**: (Visible only when enabled) Time to wait between retry attempts (1-300 seconds). Default: 5.
+-   **Maximum Retries**: (Visible only when enabled) Maximum number of retry attempts (0-10). Default: 3.
 
 ### General Settings
 
@@ -110,6 +111,12 @@ Access plugin settings via:
     *   **Disabled (Default)**: Processed files (e.g., `YourNote_processed.md`) are saved in the *same folder* as the original note.
     *   **Enabled**: Allows you to specify a custom save location.
 -   **Processed File Folder Path**: (Visible only when the above is enabled) Enter a *relative path* within your vault (e.g., `Processed Notes` or `Output/LLM`) where processed files should be saved. Folders will be created if they don't exist. **Do not use absolute paths (like C:\...) or invalid characters.**
+-   **Use Custom Output Filename for 'Add Links'**:
+    *   **Disabled (Default)**: Processed files created by the 'Add Links' command use the default `_processed.md` suffix (e.g., `YourNote_processed.md`).
+    *   **Enabled**: Allows you to customize the output filename using the setting below.
+-   **Custom Suffix/Replacement String**: (Visible only when the above is enabled) Enter the string to use for the output filename.
+    *   If left **empty**, the original file will be **overwritten** with the processed content.
+    *   If you enter a string (e.g., `_linked`), it will be appended to the original base name (e.g., `YourNote_linked.md`).
 
 #### Concept Note Output
 -   **Customize Concept Note Path**:
@@ -142,39 +149,14 @@ Access plugin settings via:
 -   **Enable Duplicate Detection**: Toggles the basic check for duplicate words within processed content (results in console). (Default: Enabled)
 -   **Max Tokens**: Maximum tokens the LLM should generate per response chunk. Affects cost and detail. (Default: 4096)
 
-<<<<<<< HEAD
-## Usage Guide
-
-### Processing Documents
-**Important:** Notemd currently only processes files with `.md` or `.txt` extensions. Please ensure your files are in one of these formats before processing.
-
-You can process notes using the **Notemd Sidebar** or the **Command Palette**.
-
-1.  **Using the Sidebar**:
-    *   Open the Notemd Sidebar using the ribbon icon (wand icon) or the command palette (`Open Sidebar`).
-    *   Open the `.md` or `.txt` file you want to process.
-    *   Click **"Process Current File"** in the sidebar.
-    *   Progress will be shown in the sidebar's log area. You can click "Cancel Processing" if needed.
-    *   To process all supported files (`.md`, `.txt`) in a folder: Click **"Process Folder"**, select the folder from the dropdown, and click "Process" (or "Cancel"). Processing will begin for each supported file, showing progress in the sidebar.
-
-2.  **Using the Command Palette** (`Ctrl+P` or `Cmd+P`):
-    *   **Single File**: Open the desired `.md` or `.txt` file and run the command `Notemd: Process Current File`. A progress modal will appear with a cancel button.
-    *   **Folder**: Run the command `Notemd: Process Folder`. You will be prompted to select a folder and click "Process" or "Cancel". If you proceed, processing will start for all `.md` and `.txt` files in that folder, and a progress modal will appear with a cancel button.
-
-### Checking for Duplicates
--   Open the `.md` or `.txt` file you want to check.
--   Run the command `Notemd: Check for Duplicates in Current File` via the command palette or the sidebar button.
--   Results (potential duplicate words found in the file) will be logged to the Obsidian Developer Console (`Ctrl+Shift+I` or `Cmd+Option+I`) and mentioned in a notice/sidebar log. *Note: This is a basic check within the single file's content.*
-
-### Testing LLM Connection
--   Run the command `Notemd: Test LLM Connection` via the command palette or the sidebar button.
--   This will test the connection to the currently **Active Provider** configured in the settings.
--   Success or failure messages will appear as Obsidian notices and in the sidebar log/console.
-=======
 #### Content Generation
 -   **Enable Research in "Generate from Title"**:
     *   **Disabled (Default)**: "Generate from Title" uses only the title as input.
     *   **Enabled**: Performs web research using the configured **Web Research Provider** and includes the findings as context for the LLM during title-based generation.
+-   **Use Custom Output Folder for 'Generate from Title'**:
+    *   **Disabled (Default)**: Successfully generated files are moved to a subfolder named `[OriginalFolderName]_complete` within the original folder's parent directory (or `Vault_complete` if the original folder was the root).
+    *   **Enabled**: Allows you to specify a custom name for the subfolder where completed files are moved.
+-   **Custom Output Folder Name**: (Visible only when the above is enabled) Enter the desired name for the subfolder (e.g., `Generated Content`, `_complete`). Invalid characters are not allowed. Defaults to `_complete` if left empty.
 
 #### Web Research Provider
 -   **Search Provider**: Choose between `Tavily` (requires API key, recommended) and `DuckDuckGo` (experimental, often blocked by the search engine for automated requests). Used for "Research & Summarize Topic" and optionally for "Generate from Title".
@@ -237,7 +219,6 @@ This is the core functionality focused on identifying concepts and adding `[[wik
     *   Run `Notemd: Test LLM Connection` (via command palette or sidebar button).
     *   Tests the connection to the **Active Provider**.
     *   Results appear as notices and in the sidebar log/console.
->>>>>>> add-LMCG
 
 ## Supported LLM Providers
 
@@ -285,8 +266,4 @@ MIT License - See [LICENSE](LICENSE) file for details.
 
 ---
 
-<<<<<<< HEAD
-*Notemd v1.1.0 - Enhance your Obsidian knowledge graph with AI.*
-=======
 *Notemd v1.2.0 - Enhance your Obsidian knowledge graph with AI.*
->>>>>>> add-LMCG

@@ -51,11 +51,6 @@ describe('File Operations', () => {
       generateConceptLogFile: false,
       useCustomConceptLogFolder: false,
       conceptLogFolderPath: '',
-<<<<<<< HEAD
-      useCustomConceptLogFileName: false,
-      conceptLogFileName: 'Generate.log'
-    };
-=======
 			useCustomConceptLogFileName: false,
 			conceptLogFileName: 'Generate.log',
 			// Add missing properties from recent updates
@@ -67,9 +62,21 @@ describe('File Operations', () => {
 			maxResearchContentTokens: 3000,
 			enableResearchInGenerateContent: false, // Add the new setting for tests
 			tavilyMaxResults: 5, // Add default for test
-      tavilySearchDepth: 'basic' // Add default for test
-		};
->>>>>>> add-LMCG
+      tavilySearchDepth: 'basic', // Add default for test
+      // Add missing multi-model and stable API call settings
+      useMultiModelSettings: false,
+      addLinksProvider: 'DeepSeek',
+      researchProvider: 'DeepSeek',
+      generateTitleProvider: 'DeepSeek',
+      enableStableApiCall: false,
+            apiCallInterval: 5,
+            apiCallMaxRetries: 3,
+            // Added missing properties from TS errors
+            useCustomAddLinksSuffix: false,
+            addLinksCustomSuffix: '',
+            useCustomGenerateTitleOutputFolder: false,
+            generateTitleOutputFolderName: '_complete',
+        };
   });
 
   describe('handleFileRename', () => {

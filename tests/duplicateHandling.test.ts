@@ -48,9 +48,6 @@ describe('Duplicate Handling', () => {
 			useCustomConceptLogFolder: false,
 			conceptLogFolderPath: '',
 			useCustomConceptLogFileName: false,
-<<<<<<< HEAD
-			conceptLogFileName: 'Generate.log'
-=======
 			conceptLogFileName: 'Generate.log',
 			// Add missing properties from recent updates
 			moveOriginalFileOnProcess: false,
@@ -61,9 +58,21 @@ describe('Duplicate Handling', () => {
 			maxResearchContentTokens: 3000,
 			enableResearchInGenerateContent: false, // Add the new setting for tests
 			tavilyMaxResults: 5, // Add default for test
-      tavilySearchDepth: 'basic' // Add default for test
->>>>>>> add-LMCG
-		};
+      tavilySearchDepth: 'basic', // Add default for test
+      // Add missing multi-model and stable API call settings
+      useMultiModelSettings: false,
+      addLinksProvider: 'DeepSeek',
+      researchProvider: 'DeepSeek',
+      generateTitleProvider: 'DeepSeek',
+      enableStableApiCall: false,
+            apiCallInterval: 5,
+            apiCallMaxRetries: 3,
+            // Added missing properties from TS errors
+            useCustomAddLinksSuffix: false,
+            addLinksCustomSuffix: '',
+            useCustomGenerateTitleOutputFolder: false,
+            generateTitleOutputFolderName: '_complete',
+        };
 		plugin.app = mockApp as any; // Assign mockApp after settings
 	});
 

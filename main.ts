@@ -1,9 +1,5 @@
-<<<<<<< HEAD
-import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting, TFile, TFolder } from 'obsidian';
-=======
 import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting, TFile, TFolder, requestUrl } from 'obsidian'; // Import requestUrl
 import { refineMermaidBlocks, cleanupLatexDelimiters } from './mermaidProcessor'; // Import new functions
->>>>>>> add-LMCG
 
 // Remember to rename these classes and interfaces!
 
@@ -37,10 +33,6 @@ interface NotemdSettings {
 	maxTokens: number; // Added setting for max tokens
 	enableDuplicateDetection: boolean; // Added setting for duplicate checks
 	processMode: string; // Although commands are separate, keep for potential future use or settings logic
-<<<<<<< HEAD
-}
-
-=======
 	moveOriginalFileOnProcess: boolean; // New setting for alternative workflow
 	tavilyApiKey: string; // New setting for Tavily API Key
 	searchProvider: 'tavily' | 'duckduckgo'; // New setting for search provider
@@ -50,6 +42,25 @@ interface NotemdSettings {
 	enableResearchInGenerateContent: boolean; // New setting: Toggle research for Generate from Title
 	tavilyMaxResults: number; // New setting for Tavily max results
 	tavilySearchDepth: 'basic' | 'advanced'; // New setting for Tavily search depth
+	// Multi-model settings
+	useMultiModelSettings: boolean; // Toggle for using different models per task
+	addLinksProvider: string; // Provider for "Process File/Folder (Add Links)"
+	researchProvider: string; // Provider for "Research and Summarize"
+	generateTitleProvider: string; // Provider for "Generate from Title"
+	// Stable API Call Settings
+	enableStableApiCall: boolean; // Toggle for enabling retry logic
+	apiCallInterval: number; // Interval in seconds between retries
+	apiCallMaxRetries: number; // Maximum number of retry attempts
+	// Task-specific models (used if useMultiModelSettings is true)
+	addLinksModel?: string; // Optional: Model override for Add Links task
+	researchModel?: string; // Optional: Model override for Research task
+	generateTitleModel?: string; // Optional: Model override for Generate Title task
+	// Custom Add Links Output Filename Settings
+	useCustomAddLinksSuffix: boolean; // Toggle for custom suffix/overwrite
+	addLinksCustomSuffix: string; // The custom suffix string (empty means overwrite)
+	// Custom Generate from Title Output Folder Settings
+	useCustomGenerateTitleOutputFolder: boolean; // Toggle for custom output folder
+	generateTitleOutputFolderName: string; // The custom folder name (defaults to _complete)
 }
 
 // Interface for search results
@@ -60,7 +71,6 @@ interface SearchResult {
 }
 
 
->>>>>>> add-LMCG
 const DEFAULT_SETTINGS: NotemdSettings = {
 	providers: [
 		{
@@ -146,9 +156,6 @@ const DEFAULT_SETTINGS: NotemdSettings = {
 	chunkWordCount: 3000,
 	maxTokens: 4096, // Default max tokens for LLM response
 	enableDuplicateDetection: true, // Enable by default
-<<<<<<< HEAD
-	processMode: 'single'
-=======
 	processMode: 'single',
 	moveOriginalFileOnProcess: false, // Default to creating copies
 	tavilyApiKey: '', // Default Tavily API Key to empty
@@ -158,8 +165,26 @@ const DEFAULT_SETTINGS: NotemdSettings = {
 	maxResearchContentTokens: 3000, // Default token limit for research content
 	enableResearchInGenerateContent: false, // Default to false: Generate from Title does NOT research by default
 	tavilyMaxResults: 5, // Default Tavily max results
-	tavilySearchDepth: 'basic' // Default Tavily search depth
->>>>>>> add-LMCG
+	tavilySearchDepth: 'basic', // Default Tavily search depth
+	// Multi-model defaults
+	useMultiModelSettings: false, // Default to using the single activeProvider
+	addLinksProvider: 'DeepSeek', // Default to the primary activeProvider initially
+	researchProvider: 'DeepSeek', // Default to the primary activeProvider initially
+	generateTitleProvider: 'DeepSeek', // Default to the primary activeProvider initially
+	// Stable API Call Defaults
+	enableStableApiCall: false, // Default to disabled
+	apiCallInterval: 5, // Default interval 5 seconds
+	apiCallMaxRetries: 3, // Default max 3 retries
+	// Task-specific model defaults (empty means use provider's default)
+	addLinksModel: '',
+	researchModel: '',
+	generateTitleModel: '',
+	// Custom Add Links Output Filename Defaults
+	useCustomAddLinksSuffix: false, // Default to standard '_processed.md' suffix
+	addLinksCustomSuffix: '', // Default custom suffix is empty (relevant only if toggle is on)
+	// Custom Generate from Title Output Folder Defaults
+	useCustomGenerateTitleOutputFolder: false, // Default to using '[foldername]_complete'
+	generateTitleOutputFolderName: '_complete', // Default folder name if custom is enabled but empty
 }
 
 // Interface for progress reporting (used by Modal and Sidebar View)
@@ -279,23 +304,21 @@ export default class NotemdPlugin extends Plugin {
 			}
 		});
 
-<<<<<<< HEAD
-=======
 		this.addCommand({
 			id: 'generate-content-from-title',
 			name: 'Generate Content from Note Title',
 			callback: async () => {
-				// Use the sidebar/modal reporter for progress
-				const view = this.app.workspace.getLeavesOfType(NOTEMD_SIDEBAR_VIEW_TYPE)[0]?.view;
-				if (view instanceof NotemdSidebarView) {
-					this.app.workspace.revealLeaf(view.leaf); // Ensure sidebar is visible
-					await this.generateContentForTitle(view); // Pass sidebar view as reporter
-				} else {
-					// Fallback to modal if sidebar isn't open
-					const modal = new ProgressModal(this.app);
-					modal.open();
-					await this.generateContentForTitle(modal);
+				const activeFile = this.app.workspace.getActiveFile();
+				if (!activeFile || !(activeFile instanceof TFile) || activeFile.extension !== 'md') {
+					new Notice('No active Markdown file selected.');
+					return;
 				}
+
+				// Use the sidebar/modal reporter for progress
+				const reporter = this.getReporter(); // Get reporter (sidebar or modal)
+
+				// Pass the active file and the reporter
+				await this.generateContentForTitle(activeFile, reporter);
 			}
 		});
 
@@ -320,7 +343,6 @@ export default class NotemdPlugin extends Plugin {
 		});
 
 
->>>>>>> add-LMCG
 		// --- Settings Tab ---
 		this.addSettingTab(new NotemdSettingTab(this.app, this));
 
@@ -667,10 +689,7 @@ export default class NotemdPlugin extends Plugin {
 
 		this.updateStatusBar(`Batch processing ${files.length} files...`);
 		reporter.log(`Starting batch processing for ${files.length} files in "${folderPath}"...`);
-<<<<<<< HEAD
-=======
 		const errors: { file: string; message: string }[] = []; // Array to collect errors
->>>>>>> add-LMCG
 
 		try {
 			for (let i = 0; i < files.length; i++) {
@@ -700,17 +719,25 @@ export default class NotemdPlugin extends Plugin {
 				} catch (fileError: any) {
 					// Log error for this specific file and continue with the next
 					const errorMsg = `Error processing ${file.name}: ${fileError.message}`;
-<<<<<<< HEAD
-					console.error(errorMsg, fileError);
-					reporter.log(errorMsg);
-					// Optionally mark the overall progress as errored? Or just log?
-					// For now, just log and continue. We'll show the detailed error modal outside the loop if needed.
-=======
-					console.error(errorMsg, fileError); // Keep console error for details
+					const errorDetails = fileError instanceof Error ? fileError.stack || fileError.message : String(fileError);
+					console.error(errorMsg, errorDetails); // Keep console error for details
 					reporter.log(`❌ ${errorMsg}`); // Log user-friendly error to reporter
 					errors.push({ file: file.name, message: fileError.message }); // Collect error details
+
+					// --- Silent Error Logging to File ---
+					const timestamp = new Date().toISOString();
+					const logEntry = `[${timestamp}] Error processing ${file.path}:\n${errorDetails}\n\n`;
+					try {
+						await this.app.vault.adapter.append('error_processing_filename.log', logEntry);
+					} catch (logError) {
+						console.error("Failed to write to error_processing_filename.log:", logError);
+						reporter.log("⚠️ Failed to write error details to log file.");
+						// Optionally show a notice here if writing the log fails?
+						// new Notice("Failed to write to error log file. Check console.", 5000);
+					}
+					// --- End Silent Error Logging ---
+
 					// Continue to the next file
->>>>>>> add-LMCG
 				}
 
 				if (reporter.cancelled) { // Check again after processFile
@@ -722,19 +749,15 @@ export default class NotemdPlugin extends Plugin {
 			} // End of loop
 
 			if (!reporter.cancelled) {
-<<<<<<< HEAD
-				reporter.updateStatus('Batch processing complete!', 100);
-				this.updateStatusBar('Batch complete');
-				// Only close if it's the modal we created
-				if (closeModalOnFinish && reporter instanceof ProgressModal) {
-=======
 				// Report final status including any errors
 				if (errors.length > 0) {
-					const errorSummary = `Batch processing finished with ${errors.length} error(s). Check log for details.`;
+					// Modify the error summary message to point to the log file
+					const errorSummary = `Batch processing finished with ${errors.length} error(s). Check 'error_processing_filename.log' for details.`;
 					reporter.log(`⚠️ ${errorSummary}`);
 					reporter.updateStatus(errorSummary, -1); // Indicate error state in status/progress
 					this.updateStatusBar(`Batch complete with errors`);
-					new Notice(errorSummary, 10000); // Show notice about errors
+					// Update the Notice to mention the log file
+					new Notice(errorSummary, 10000);
 				} else {
 					reporter.updateStatus('Batch processing complete!', 100);
 					this.updateStatusBar('Batch complete');
@@ -743,16 +766,11 @@ export default class NotemdPlugin extends Plugin {
 				// Only close if it's the modal we created AND there were no errors (or maybe always close?)
 				// Let's keep it open if there were errors so user can see log.
 				if (closeModalOnFinish && reporter instanceof ProgressModal && errors.length === 0) {
->>>>>>> add-LMCG
 					// Explicitly cast inside setTimeout
 					setTimeout(() => (reporter as ProgressModal).close(), 2000);
 				}
 			}
-<<<<<<< HEAD
-			// If cancelled, the status is already set inside the loop
-=======
 			// If cancelled, the status is already set inside the loop and modal remains open
->>>>>>> add-LMCG
 
 		} catch (error: any) { // Catch errors outside the loop (e.g., initial setup)
 			this.updateStatusBar('Error occurred');
@@ -779,10 +797,7 @@ export default class NotemdPlugin extends Plugin {
 		// console.log(`processFile: Read ${content.length} characters.`); // DEBUG
 
 		// Pass the reporter instance to the LLM processor
-<<<<<<< HEAD
-=======
 		progressReporter.log(`Submitting content to LLM for: ${file.name}...`); // Added log
->>>>>>> add-LMCG
 		// console.log(`processFile: Calling processContentWithLLM for ${file.name}...`); // DEBUG
 		const processedContent = await this.processContentWithLLM(content, progressReporter);
 		// console.log(`processFile: processContentWithLLM returned ${processedContent?.length ?? 'null/undefined'} characters for ${file.name}.`); // DEBUG
@@ -793,26 +808,16 @@ export default class NotemdPlugin extends Plugin {
 			return; // Stop processing this file if cancelled
 		}
 
-<<<<<<< HEAD
-		progressReporter.log(`Generating links for: ${file.name}`);
-=======
 		progressReporter.log(`Generating Obsidian links for: ${file.name}...`); // Refined log
->>>>>>> add-LMCG
 		// console.log(`processFile: Calling generateObsidianLinks for ${file.name}...`); // DEBUG
 		const withLinks = this.generateObsidianLinks(processedContent);
 		// console.log(`processFile: generateObsidianLinks returned ${withLinks?.length ?? 'null/undefined'} characters for ${file.name}.`); // DEBUG
 
-<<<<<<< HEAD
-		progressReporter.log(`Handling duplicates for: ${file.name}`);
-=======
 		progressReporter.log(`Checking for duplicates in: ${file.name}...`); // Refined log
->>>>>>> add-LMCG
 		// console.log(`processFile: Calling handleDuplicates for ${file.name}...`); // DEBUG
 		await this.handleDuplicates(withLinks);
 		// console.log(`processFile: handleDuplicates finished for ${file.name}.`); // DEBUG
 
-<<<<<<< HEAD
-=======
 		// --- Apply Post-Processing ---
 		progressReporter.log(`Cleaning Mermaid/LaTeX for: ${file.name}`);
 		let finalContent = withLinks;
@@ -841,7 +846,6 @@ export default class NotemdPlugin extends Plugin {
 		}
 
 
->>>>>>> add-LMCG
 		// --- Determine Processed File Output Path ---
 		let processedFileSaveDir = '';
 		if (this.settings.useCustomProcessedFileFolder && this.settings.processedFileFolder) {
@@ -881,26 +885,6 @@ export default class NotemdPlugin extends Plugin {
 			throw new Error(errorMsg);
 		}
 
-<<<<<<< HEAD
-		// Construct final processed file name
-		const processedName = `${processedFileSaveDir}${file.basename}_processed.md`;
-		progressReporter.log(`Saving processed file as: ${processedName}`);
-		// console.log(`processFile: Determined processed file output path: ${processedName}`); // DEBUG
-
-		// Check if file exists before creating/modifying
-		const existingProcessedFile = this.app.vault.getAbstractFileByPath(processedName);
-		// console.log(`processFile: Checking existence of ${processedName}. Found: ${!!existingProcessedFile}`); // DEBUG
-		if (existingProcessedFile instanceof TFile) {
-			// console.log(`processFile: Modifying existing file: ${processedName}`); // DEBUG
-			await this.app.vault.modify(existingProcessedFile, withLinks);
-			progressReporter.log(`Overwrote existing processed file: ${processedName}`);
-		} else {
-			// console.log(`processFile: Creating new file: ${processedName}`); // DEBUG
-			await this.app.vault.create(processedName, withLinks);
-			progressReporter.log(`Created processed file: ${processedName}`);
-		}
-		// console.log(`processFile: File saving complete for ${processedName}.`); // DEBUG
-=======
 		// --- Save or Move Processed File ---
 		if (this.settings.moveOriginalFileOnProcess) {
 			// Move original file to target directory (if different) and overwrite content
@@ -946,22 +930,58 @@ export default class NotemdPlugin extends Plugin {
 				progressReporter.log(`Overwrote original file: ${file.path}`);
 			}
 		} else {
-			// Original logic: Create/overwrite _processed.md file
-			const processedName = `${processedFileSaveDir}${file.basename}_processed.md`;
-			progressReporter.log(`Processing mode: Create/Overwrite processed copy.`);
-			progressReporter.log(`Saving processed file as: ${processedName}`);
+			// Logic for creating a processed copy (not moving original)
+			let outputPath: string;
+			let logAction: string;
 
-			const existingProcessedFile = this.app.vault.getAbstractFileByPath(processedName);
-			if (existingProcessedFile instanceof TFile) {
-				await this.app.vault.modify(existingProcessedFile, finalContent); // Use finalContent
-				progressReporter.log(`Overwrote existing processed file: ${processedName}`);
+			if (this.settings.useCustomAddLinksSuffix) {
+				// Custom suffix/overwrite logic applies
+				if (this.settings.addLinksCustomSuffix === '') {
+					// Overwrite original file
+					outputPath = file.path; // Target the original file path
+					logAction = `Overwriting original file (custom setting): ${outputPath}`;
+					progressReporter.log(`Processing mode: Overwrite original (custom setting).`);
+				} else {
+					// Use custom suffix - ensure .md extension is handled correctly
+					// Remove existing .md if present in suffix, then add it back
+					let suffix = this.settings.addLinksCustomSuffix;
+					if (suffix.toLowerCase().endsWith('.md')) {
+						suffix = suffix.substring(0, suffix.length - 3);
+					}
+					outputPath = `${processedFileSaveDir}${file.basename}${suffix}.md`;
+					logAction = `Saving processed file with custom suffix: ${outputPath}`;
+					progressReporter.log(`Processing mode: Create copy with custom suffix.`);
+				}
 			} else {
-				await this.app.vault.create(processedName, finalContent); // Use finalContent
-				progressReporter.log(`Created processed file: ${processedName}`);
+				// Default behavior: append _processed.md
+				outputPath = `${processedFileSaveDir}${file.basename}_processed.md`;
+				logAction = `Saving processed file with default suffix: ${outputPath}`;
+				progressReporter.log(`Processing mode: Create/Overwrite default processed copy.`);
+			}
+
+			progressReporter.log(logAction);
+
+			const existingOutputFile = this.app.vault.getAbstractFileByPath(outputPath);
+			if (existingOutputFile instanceof TFile) {
+				// If overwriting original or custom file exists, modify it
+				await this.app.vault.modify(existingOutputFile, finalContent);
+				progressReporter.log(`Overwrote existing file: ${outputPath}`);
+			} else if (outputPath !== file.path) {
+				// If creating a new file (not overwriting original) and it doesn't exist
+				await this.app.vault.create(outputPath, finalContent);
+				progressReporter.log(`Created processed file: ${outputPath}`);
+			} else {
+				// This case handles trying to overwrite the original file when it somehow doesn't exist
+				// which shouldn't happen if 'file' is valid, but log a warning just in case.
+				console.warn(`Attempted to overwrite original file ${outputPath}, but it was not found.`);
+				progressReporter.log(`Warning: Could not find original file ${outputPath} to overwrite.`);
+				// Optionally throw an error or create the file anyway? Let's create it.
+				await this.app.vault.create(outputPath, finalContent);
+				progressReporter.log(`Created file (intended overwrite target not found): ${outputPath}`);
+
 			}
 		}
-		// console.log(`processFile: File saving/moving complete for ${file.name}.`); // DEBUG
->>>>>>> add-LMCG
+		// console.log(`processFile: File saving/moving/overwriting complete for ${file.name}.`); // DEBUG
 
 		progressReporter.log(`Finished processing: ${file.name}`);
 		this.currentProcessingFile = ''; // Clear after processing
@@ -1030,18 +1050,8 @@ export default class NotemdPlugin extends Plugin {
 
 		// Escape special regex characters in fileName
 		const escapedFileName = fileName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-<<<<<<< HEAD
-		// Regex to find the link:
-		// - Optionally preceded by list marker and whitespace (^[ \t]*[-*+]\s+)
-		// - OR just the link itself
-		// - Followed by optional whitespace and newline
-		const linkRegex = new RegExp(`(?:^[ \\t]*[-*+]\\s+)?\\[\\[${escapedFileName}\\]\\][ \\t]*$\\n?`, 'gm');
-		// Simpler regex just to remove the link itself if the above is too aggressive
-		// const simpleLinkRegex = new RegExp(`\\[\\[${escapedFileName}\\]\\]`, 'g');
-=======
 		// Simplified Regex to find only the link itself, globally and case-insensitively (Obsidian links are case-insensitive)
 		const linkRegex = new RegExp(`\\[\\[${escapedFileName}\\]\\]`, 'gi');
->>>>>>> add-LMCG
 
 		const files = this.app.vault.getMarkdownFiles();
 		let updatedCount = 0;
@@ -1052,22 +1062,6 @@ export default class NotemdPlugin extends Plugin {
 				let content = await this.app.vault.read(file);
 				let updatedContent = content;
 
-<<<<<<< HEAD
-				if (content.includes(`[[${fileName}]]`)) { // Quick check before running regex
-					// Attempt to remove the link, potentially removing the list item line
-					updatedContent = content.replace(linkRegex, (match) => {
-						// If the match starts with list syntax, remove the whole line (including newline)
-						// Otherwise, just remove the link itself (replace with empty string) - this part needs refinement
-						// For simplicity now, let's just remove the link text itself if not a list item
-						// A better approach might involve AST parsing, but regex is used here.
-						// Let's try removing the whole line if it's a list item, otherwise just the link.
-						return match.trim().startsWith('-') || match.trim().startsWith('*') || match.trim().startsWith('+') ? '' : match.replace(`[[${fileName}]]`, '');
-					});
-
-					// Clean up potential empty lines left after removal
-					updatedContent = updatedContent.replace(/\n{3,}/g, '\n\n').trim();
-
-=======
 				// Use the simplified regex to replace only the link itself with an empty string
 				if (linkRegex.test(content)) { // Check if the link exists before modifying
 					updatedContent = content.replace(linkRegex, '');
@@ -1079,7 +1073,6 @@ export default class NotemdPlugin extends Plugin {
 					updatedContent = updatedContent.replace(/\n{3,}/g, '\n\n').trim();
 
 
->>>>>>> add-LMCG
 					if (content !== updatedContent) {
 						await this.app.vault.modify(file, updatedContent);
 						updatedCount++;
@@ -1285,8 +1278,8 @@ export default class NotemdPlugin extends Plugin {
 		}
 	}
 
-
-	private async callDeepSeekAPI(provider: LLMProviderConfig, prompt: string, content: string): Promise<string> {
+	// Modified to accept modelName parameter
+	private async callDeepSeekAPI(provider: LLMProviderConfig, modelName: string, prompt: string, content: string): Promise<string> {
 		// Removed the old testAPI call here - connection test should be done separately if desired
 		// const isHealthy = await this.testAPI(provider);
 		// if (!isHealthy) {
@@ -1295,7 +1288,7 @@ export default class NotemdPlugin extends Plugin {
 
 		const url = `${provider.baseUrl}/chat/completions`;
 		const requestBody = {
-			model: provider.model,
+			model: modelName, // Use passed modelName
 			messages: [{
 				role: 'system',
 				content: prompt
@@ -1309,50 +1302,77 @@ export default class NotemdPlugin extends Plugin {
 		// console.log(`callDeepSeekAPI: Calling URL: ${url}`); // DEBUG
 		// console.log(`callDeepSeekAPI: Request Body (excluding content):`, { ...requestBody, messages: [{ role: 'system', content: '...' }, { role: 'user', content: `(length: ${content.length})` }] }); // DEBUG
 
-		const response = await fetch(url, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-				'Authorization': `Bearer ${provider.apiKey}`
-			},
-			body: JSON.stringify(requestBody)
-		});
+		let lastError: Error | null = null;
+		const maxAttempts = this.settings.enableStableApiCall ? this.settings.apiCallMaxRetries + 1 : 1;
+		const intervalSeconds = this.settings.enableStableApiCall ? this.settings.apiCallInterval : 0;
 
-		// console.log(`callDeepSeekAPI: Response Status: ${response.status}`); // DEBUG
-		if (!response.ok) {
-			const errorText = await response.text();
-<<<<<<< HEAD
-			console.error(`callDeepSeekAPI: Error Response Text: ${errorText}`); // Keep error log
-			throw new Error(`DeepSeek API error: ${response.status} - ${errorText}`);
-=======
-			console.error(`callDeepSeekAPI: Error Response Text (${response.status}): ${errorText}`); // Keep error log
-			let userMessage = `DeepSeek API error: ${response.status}`;
-			if (response.status === 401) userMessage += " - Unauthorized. Check your API key.";
-			else if (response.status === 429) userMessage += " - Rate limit exceeded. Please wait and try again.";
-			else if (response.status >= 500) userMessage += " - Server error. Please try again later.";
-			else userMessage += ` - ${errorText}`; // Include original text for other errors
-			throw new Error(userMessage);
->>>>>>> add-LMCG
+		for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+			try {
+				const response = await fetch(url, {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						'Authorization': `Bearer ${provider.apiKey}`
+					},
+					body: JSON.stringify(requestBody)
+				});
+
+				// console.log(`callDeepSeekAPI: Attempt ${attempt}/${maxAttempts} - Response Status: ${response.status}`); // DEBUG
+				if (!response.ok) {
+					const errorText = await response.text();
+					let userMessage = `DeepSeek API error: ${response.status}`;
+					if (response.status === 401) userMessage += " - Unauthorized. Check your API key.";
+					else if (response.status === 429) userMessage += " - Rate limit exceeded."; // Retry might help
+					else if (response.status >= 500) userMessage += " - Server error."; // Retry might help
+					else userMessage += ` - ${errorText}`; // Include original text for other errors
+
+					lastError = new Error(userMessage); // Store error for potential retry/final throw
+					console.warn(`callDeepSeekAPI: Attempt ${attempt} failed: ${userMessage}`); // Log warning on failure
+
+					// Don't retry on certain fatal errors like 401
+					if (response.status === 401 || response.status === 400 || response.status === 403 || response.status === 404) {
+						throw lastError;
+					}
+					// Continue to retry logic if applicable
+
+				} else {
+					// Success path
+					const data = await response.json();
+					if (!data.choices || !data.choices[0] || !data.choices[0].message || !data.choices[0].message.content) {
+						console.error("callDeepSeekAPI: Unexpected response format:", data); // Keep error log
+						throw new Error(`Unexpected response format from DeepSeek API`);
+					}
+					// console.log(`callDeepSeekAPI: Attempt ${attempt} successful. Returning content length: ${data.choices[0].message.content.length}`); // DEBUG
+					return data.choices[0].message.content; // Return on success
+				}
+
+			} catch (error: any) {
+				lastError = error; // Store network or other fetch errors
+				console.warn(`callDeepSeekAPI: Attempt ${attempt} failed with error: ${error.message}`);
+				// If it's a network error, retry might help. If it's a parsing error, maybe not, but retry anyway.
+			}
+
+			// If we reached here, it means the attempt failed and we might retry
+			if (attempt < maxAttempts) {
+				console.log(`callDeepSeekAPI: Waiting ${intervalSeconds} seconds before retry ${attempt + 1}...`);
+				await new Promise(resolve => setTimeout(resolve, intervalSeconds * 1000));
+			}
 		}
 
-		const data = await response.json();
-		// // console.log("callDeepSeekAPI: Raw Response Data:", data); // DEBUG: Potentially verbose
-		if (!data.choices || !data.choices[0] || !data.choices[0].message || !data.choices[0].message.content) {
-			console.error("callDeepSeekAPI: Unexpected response format:", data); // Keep error log
-			throw new Error(`Unexpected response format from DeepSeek API`);
-		}
-		// console.log(`callDeepSeekAPI: Success. Returning content length: ${data.choices[0].message.content.length}`); // DEBUG
-		return data.choices[0].message.content;
+		// If all attempts failed, throw the last recorded error
+		console.error(`callDeepSeekAPI: All ${maxAttempts} attempts failed.`);
+		throw lastError || new Error("DeepSeek API call failed after multiple retries."); // Throw the last error
 	}
 
-	private async callOpenAIApi(provider: LLMProviderConfig, prompt: string, content: string): Promise<string> {
+	// Modified to accept modelName parameter
+	private async callOpenAIApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string): Promise<string> {
 		// Add API health check if applicable (assuming a similar /health or equivalent endpoint)
 		// const isHealthy = await this.testAPI(provider); // Adapt testAPI or use a provider-specific check
 		// if (!isHealthy) { throw new Error('API connection test failed'); }
 
 		const url = `${provider.baseUrl}/chat/completions`;
 		const requestBody = {
-			model: provider.model,
+			model: modelName, // Use passed modelName
 			messages: [{
 				role: 'system',
 				content: prompt
@@ -1366,47 +1386,73 @@ export default class NotemdPlugin extends Plugin {
 		// console.log(`callOpenAIApi: Calling URL: ${url}`); // DEBUG
 		// console.log(`callOpenAIApi: Request Body (excluding content):`, { ...requestBody, messages: [{ role: 'system', content: '...' }, { role: 'user', content: `(length: ${content.length})` }] }); // DEBUG
 
-		const response = await fetch(url, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-				'Authorization': `Bearer ${provider.apiKey}`
-			},
-			body: JSON.stringify(requestBody)
-		});
+		let lastError: Error | null = null;
+		const maxAttempts = this.settings.enableStableApiCall ? this.settings.apiCallMaxRetries + 1 : 1;
+		const intervalSeconds = this.settings.enableStableApiCall ? this.settings.apiCallInterval : 0;
 
-		// console.log(`callOpenAIApi: Response Status: ${response.status}`); // DEBUG
-		if (!response.ok) {
-			const errorText = await response.text();
-<<<<<<< HEAD
-			console.error(`callOpenAIApi: Error Response Text: ${errorText}`); // Keep error log
-			throw new Error(`OpenAI API error: ${response.status} - ${errorText}`);
-=======
-			console.error(`callOpenAIApi: Error Response Text (${response.status}): ${errorText}`); // Keep error log
-			let userMessage = `OpenAI API error: ${response.status}`;
-			if (response.status === 401) userMessage += " - Unauthorized. Check your API key.";
-			else if (response.status === 404) userMessage += " - Not Found. Check the Base URL and model name.";
-			else if (response.status === 429) userMessage += " - Rate limit exceeded. Please wait and try again.";
-			else if (response.status >= 500) userMessage += " - Server error. Please try again later.";
-			else userMessage += ` - ${errorText}`; // Include original text for other errors
-			throw new Error(userMessage);
->>>>>>> add-LMCG
+		for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+			try {
+				const response = await fetch(url, {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						'Authorization': `Bearer ${provider.apiKey}`
+					},
+					body: JSON.stringify(requestBody)
+				});
+
+				// console.log(`callOpenAIApi: Attempt ${attempt}/${maxAttempts} - Response Status: ${response.status}`); // DEBUG
+				if (!response.ok) {
+					const errorText = await response.text();
+					let userMessage = `OpenAI API error: ${response.status}`;
+					if (response.status === 401) userMessage += " - Unauthorized. Check your API key.";
+					else if (response.status === 404) userMessage += " - Not Found. Check the Base URL and model name.";
+					else if (response.status === 429) userMessage += " - Rate limit exceeded."; // Retry might help
+					else if (response.status >= 500) userMessage += " - Server error."; // Retry might help
+					else userMessage += ` - ${errorText}`; // Include original text for other errors
+
+					lastError = new Error(userMessage);
+					console.warn(`callOpenAIApi: Attempt ${attempt} failed: ${userMessage}`);
+
+					// Don't retry on fatal errors
+					if (response.status === 401 || response.status === 400 || response.status === 403 || response.status === 404) {
+						throw lastError;
+					}
+					// Continue to retry logic
+
+				} else {
+					// Success path
+					const data = await response.json();
+					if (!data.choices || !data.choices[0] || !data.choices[0].message || !data.choices[0].message.content) {
+						console.error("callOpenAIApi: Unexpected response format:", data);
+						throw new Error(`Unexpected response format from OpenAI API`);
+					}
+					// console.log(`callOpenAIApi: Attempt ${attempt} successful. Returning content length: ${data.choices[0].message.content.length}`); // DEBUG
+					return data.choices[0].message.content; // Return on success
+				}
+
+			} catch (error: any) {
+				lastError = error;
+				console.warn(`callOpenAIApi: Attempt ${attempt} failed with error: ${error.message}`);
+			}
+
+			// Wait before retrying if applicable
+			if (attempt < maxAttempts) {
+				console.log(`callOpenAIApi: Waiting ${intervalSeconds} seconds before retry ${attempt + 1}...`);
+				await new Promise(resolve => setTimeout(resolve, intervalSeconds * 1000));
+			}
 		}
 
-		const data = await response.json();
-		// // console.log("callOpenAIApi: Raw Response Data:", data); // DEBUG: Potentially verbose
-		if (!data.choices || !data.choices[0] || !data.choices[0].message || !data.choices[0].message.content) {
-			console.error("callOpenAIApi: Unexpected response format:", data); // Keep error log
-			throw new Error(`Unexpected response format from OpenAI API`);
-		}
-		// console.log(`callOpenAIApi: Success. Returning content length: ${data.choices[0].message.content.length}`); // DEBUG
-		return data.choices[0].message.content;
+		// If all attempts failed
+		console.error(`callOpenAIApi: All ${maxAttempts} attempts failed.`);
+		throw lastError || new Error("OpenAI API call failed after multiple retries.");
 	}
 
-	private async callAnthropicApi(provider: LLMProviderConfig, prompt: string, content: string): Promise<string> {
+	// Modified to accept modelName parameter
+	private async callAnthropicApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string): Promise<string> {
 		const url = `${provider.baseUrl}/v1/messages`;
 		const requestBody = {
-			model: provider.model,
+			model: modelName, // Use passed modelName
 			messages: [{
 				role: 'user',
 				content: `${prompt}\n\n${content}` // Anthropic prefers prompt in user message
@@ -1417,52 +1463,78 @@ export default class NotemdPlugin extends Plugin {
 		// console.log(`callAnthropicApi: Calling URL: ${url}`); // DEBUG
 		// console.log(`callAnthropicApi: Request Body (excluding content):`, { ...requestBody, messages: [{ role: 'user', content: `(prompt + content length: ${prompt.length + content.length})` }] }); // DEBUG
 
-		const response = await fetch(url, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-				'x-api-key': provider.apiKey,
-				'anthropic-version': '2023-06-01' // Use a specific version
-			},
-			body: JSON.stringify(requestBody)
-		});
+		let lastError: Error | null = null;
+		const maxAttempts = this.settings.enableStableApiCall ? this.settings.apiCallMaxRetries + 1 : 1;
+		const intervalSeconds = this.settings.enableStableApiCall ? this.settings.apiCallInterval : 0;
 
-		// console.log(`callAnthropicApi: Response Status: ${response.status}`); // DEBUG
-		if (!response.ok) {
-			const errorText = await response.text();
-<<<<<<< HEAD
-			console.error(`callAnthropicApi: Error Response Text: ${errorText}`); // Keep error log
-			throw new Error(`Anthropic API error: ${response.status} - ${errorText}`);
-=======
-			console.error(`callAnthropicApi: Error Response Text (${response.status}): ${errorText}`); // Keep error log
-			let userMessage = `Anthropic API error: ${response.status}`;
-			if (response.status === 401) userMessage += " - Unauthorized. Check your API key.";
-			else if (response.status === 403) userMessage += " - Forbidden. Check API key permissions.";
-			else if (response.status === 404) userMessage += " - Not Found. Check the Base URL.";
-			else if (response.status === 429) userMessage += " - Rate limit exceeded. Please wait and try again.";
-			else if (response.status >= 500) userMessage += " - Server error. Please try again later.";
-			else userMessage += ` - ${errorText}`; // Include original text for other errors
-			throw new Error(userMessage);
->>>>>>> add-LMCG
+		for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+			try {
+				const response = await fetch(url, {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						'x-api-key': provider.apiKey,
+						'anthropic-version': '2023-06-01' // Use a specific version
+					},
+					body: JSON.stringify(requestBody)
+				});
+
+				// console.log(`callAnthropicApi: Attempt ${attempt}/${maxAttempts} - Response Status: ${response.status}`); // DEBUG
+				if (!response.ok) {
+					const errorText = await response.text();
+					let userMessage = `Anthropic API error: ${response.status}`;
+					if (response.status === 401) userMessage += " - Unauthorized. Check your API key.";
+					else if (response.status === 403) userMessage += " - Forbidden. Check API key permissions.";
+					else if (response.status === 404) userMessage += " - Not Found. Check the Base URL.";
+					else if (response.status === 429) userMessage += " - Rate limit exceeded."; // Retry might help
+					else if (response.status >= 500) userMessage += " - Server error."; // Retry might help
+					else userMessage += ` - ${errorText}`; // Include original text for other errors
+
+					lastError = new Error(userMessage);
+					console.warn(`callAnthropicApi: Attempt ${attempt} failed: ${userMessage}`);
+
+					// Don't retry on fatal errors
+					if (response.status === 401 || response.status === 400 || response.status === 403 || response.status === 404) {
+						throw lastError;
+					}
+					// Continue to retry logic
+
+				} else {
+					// Success path
+					const data = await response.json();
+					if (!data.content || !data.content[0] || !data.content[0].text) {
+						console.error("callAnthropicApi: Unexpected response format:", data);
+						throw new Error(`Unexpected response format from Anthropic API`);
+					}
+					// console.log(`callAnthropicApi: Attempt ${attempt} successful. Returning content length: ${data.content[0].text.length}`); // DEBUG
+					return data.content[0].text; // Return on success
+				}
+
+			} catch (error: any) {
+				lastError = error;
+				console.warn(`callAnthropicApi: Attempt ${attempt} failed with error: ${error.message}`);
+			}
+
+			// Wait before retrying if applicable
+			if (attempt < maxAttempts) {
+				console.log(`callAnthropicApi: Waiting ${intervalSeconds} seconds before retry ${attempt + 1}...`);
+				await new Promise(resolve => setTimeout(resolve, intervalSeconds * 1000));
+			}
 		}
 
-		const data = await response.json();
-		// // console.log("callAnthropicApi: Raw Response Data:", data); // DEBUG: Potentially verbose
-		if (!data.content || !data.content[0] || !data.content[0].text) {
-			console.error("callAnthropicApi: Unexpected response format:", data); // Keep error log
-			throw new Error(`Unexpected response format from Anthropic API`);
-		}
-		// console.log(`callAnthropicApi: Success. Returning content length: ${data.content[0].text.length}`); // DEBUG
-		return data.content[0].text;
+		// If all attempts failed
+		console.error(`callAnthropicApi: All ${maxAttempts} attempts failed.`);
+		throw lastError || new Error("Anthropic API call failed after multiple retries.");
 	}
 
-	private async callGoogleApi(provider: LLMProviderConfig, prompt: string, content: string): Promise<string> {
+	// Modified to accept modelName parameter
+	private async callGoogleApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string): Promise<string> {
 		// Google API doesn't have a standard /health endpoint. Skipping testAPI.
 		// const isHealthy = await this.testAPI(provider);
 		// if (!isHealthy) { throw new Error('API connection test failed'); }
 
 		// Use API key in query parameter for Google Gemini
-		const urlWithKey = `${provider.baseUrl}/models/${provider.model}:generateContent?key=${provider.apiKey}`;
+		const urlWithKey = `${provider.baseUrl}/models/${modelName}:generateContent?key=${provider.apiKey}`; // Use passed modelName
 		const requestBody = {
 			contents: [
 				// { role: 'system', parts: [{ text: prompt }] }, // Optional system prompt
@@ -1476,49 +1548,73 @@ export default class NotemdPlugin extends Plugin {
 		// console.log(`callGoogleApi: Calling URL: ${urlWithKey}`); // DEBUG
 		// console.log(`callGoogleApi: Request Body (excluding content):`, { ...requestBody, contents: [{ role: 'user', parts: [{ text: `(prompt + content length: ${prompt.length + content.length})` }] }] }); // DEBUG
 
-		const response = await fetch(urlWithKey, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify(requestBody)
-		});
+		let lastError: Error | null = null;
+		const maxAttempts = this.settings.enableStableApiCall ? this.settings.apiCallMaxRetries + 1 : 1;
+		const intervalSeconds = this.settings.enableStableApiCall ? this.settings.apiCallInterval : 0;
 
-		// console.log(`callGoogleApi: Response Status: ${response.status}`); // DEBUG
-		if (!response.ok) {
-			const errorText = await response.text();
-<<<<<<< HEAD
-			console.error(`callGoogleApi: Error Response Text: ${errorText}`); // Keep error log
-			throw new Error(`Google API error: ${response.status} - ${errorText}`);
-=======
-			console.error(`callGoogleApi: Error Response Text (${response.status}): ${errorText}`); // Keep error log
-			let userMessage = `Google API error: ${response.status}`;
-			if (response.status === 400) userMessage += " - Bad Request. Check API key or request format.";
-			else if (response.status === 403) userMessage += " - Forbidden. Check API key permissions.";
-			else if (response.status === 404) userMessage += " - Not Found. Check the Base URL and model name.";
-			else if (response.status === 429) userMessage += " - Rate limit exceeded. Please wait and try again.";
-			else if (response.status >= 500) userMessage += " - Server error. Please try again later.";
-			else userMessage += ` - ${errorText}`; // Include original text for other errors
-			throw new Error(userMessage);
->>>>>>> add-LMCG
+		for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+			try {
+				const response = await fetch(urlWithKey, {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify(requestBody)
+				});
+
+				// console.log(`callGoogleApi: Attempt ${attempt}/${maxAttempts} - Response Status: ${response.status}`); // DEBUG
+				if (!response.ok) {
+					const errorText = await response.text();
+					let userMessage = `Google API error: ${response.status}`;
+					if (response.status === 400) userMessage += " - Bad Request. Check API key or request format.";
+					else if (response.status === 403) userMessage += " - Forbidden. Check API key permissions.";
+					else if (response.status === 404) userMessage += " - Not Found. Check the Base URL and model name.";
+					else if (response.status === 429) userMessage += " - Rate limit exceeded."; // Retry might help
+					else if (response.status >= 500) userMessage += " - Server error."; // Retry might help
+					else userMessage += ` - ${errorText}`; // Include original text for other errors
+
+					lastError = new Error(userMessage);
+					console.warn(`callGoogleApi: Attempt ${attempt} failed: ${userMessage}`);
+
+					// Don't retry on fatal errors
+					if (response.status === 400 || response.status === 401 || response.status === 403 || response.status === 404) {
+						throw lastError;
+					}
+					// Continue to retry logic
+
+				} else {
+					// Success path
+					const data = await response.json();
+					if (!data.candidates || !data.candidates[0].content || !data.candidates[0].content.parts || !data.candidates[0].content.parts[0].text) {
+						console.error("callGoogleApi: Unexpected response format:", data);
+						throw new Error(`Unexpected response format from Google API`);
+					}
+					// console.log(`callGoogleApi: Attempt ${attempt} successful. Returning content length: ${data.candidates[0].content.parts[0].text.length}`); // DEBUG
+					return data.candidates[0].content.parts[0].text; // Return on success
+				}
+
+			} catch (error: any) {
+				lastError = error;
+				console.warn(`callGoogleApi: Attempt ${attempt} failed with error: ${error.message}`);
+			}
+
+			// Wait before retrying if applicable
+			if (attempt < maxAttempts) {
+				console.log(`callGoogleApi: Waiting ${intervalSeconds} seconds before retry ${attempt + 1}...`);
+				await new Promise(resolve => setTimeout(resolve, intervalSeconds * 1000));
+			}
 		}
 
-		const data = await response.json();
-		// // console.log("callGoogleApi: Raw Response Data:", data); // DEBUG: Potentially verbose
-		// Check response structure carefully
-		if (!data.candidates || !data.candidates[0].content || !data.candidates[0].content.parts || !data.candidates[0].content.parts[0].text) {
-			console.error("callGoogleApi: Unexpected response format:", data); // Keep error log
-			throw new Error(`Unexpected response format from Google API`);
-		}
-		// console.log(`callGoogleApi: Success. Returning content length: ${data.candidates[0].content.parts[0].text.length}`); // DEBUG
-		return data.candidates[0].content.parts[0].text;
+		// If all attempts failed
+		console.error(`callGoogleApi: All ${maxAttempts} attempts failed.`);
+		throw lastError || new Error("Google API call failed after multiple retries.");
 	}
 
-
-	private async callMistralApi(provider: LLMProviderConfig, prompt: string, content: string): Promise<string> {
+	// Modified to accept modelName parameter
+	private async callMistralApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string): Promise<string> {
 		const url = `${provider.baseUrl}/chat/completions`;
 		const requestBody = {
-			model: provider.model,
+			model: modelName, // Use passed modelName
 			messages: [{
 				role: 'system',
 				content: prompt
@@ -1532,44 +1628,70 @@ export default class NotemdPlugin extends Plugin {
 		// console.log(`callMistralApi: Calling URL: ${url}`); // DEBUG
 		// console.log(`callMistralApi: Request Body (excluding content):`, { ...requestBody, messages: [{ role: 'system', content: '...' }, { role: 'user', content: `(length: ${content.length})` }] }); // DEBUG
 
-		const response = await fetch(url, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-				'Authorization': `Bearer ${provider.apiKey}`
-			},
-			body: JSON.stringify(requestBody)
-		});
+		let lastError: Error | null = null;
+		const maxAttempts = this.settings.enableStableApiCall ? this.settings.apiCallMaxRetries + 1 : 1;
+		const intervalSeconds = this.settings.enableStableApiCall ? this.settings.apiCallInterval : 0;
 
-		// console.log(`callMistralApi: Response Status: ${response.status}`); // DEBUG
-		if (!response.ok) {
-			const errorText = await response.text();
-<<<<<<< HEAD
-			console.error(`callMistralApi: Error Response Text: ${errorText}`); // Keep error log
-			throw new Error(`Mistral API error: ${response.status} - ${errorText}`);
-=======
-			console.error(`callMistralApi: Error Response Text (${response.status}): ${errorText}`); // Keep error log
-			let userMessage = `Mistral API error: ${response.status}`;
-			if (response.status === 401) userMessage += " - Unauthorized. Check your API key.";
-			else if (response.status === 404) userMessage += " - Not Found. Check the Base URL and model name.";
-			else if (response.status === 429) userMessage += " - Rate limit exceeded. Please wait and try again.";
-			else if (response.status >= 500) userMessage += " - Server error. Please try again later.";
-			else userMessage += ` - ${errorText}`; // Include original text for other errors
-			throw new Error(userMessage);
->>>>>>> add-LMCG
+		for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+			try {
+				const response = await fetch(url, {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						'Authorization': `Bearer ${provider.apiKey}`
+					},
+					body: JSON.stringify(requestBody)
+				});
+
+				// console.log(`callMistralApi: Attempt ${attempt}/${maxAttempts} - Response Status: ${response.status}`); // DEBUG
+				if (!response.ok) {
+					const errorText = await response.text();
+					let userMessage = `Mistral API error: ${response.status}`;
+					if (response.status === 401) userMessage += " - Unauthorized. Check your API key.";
+					else if (response.status === 404) userMessage += " - Not Found. Check the Base URL and model name.";
+					else if (response.status === 429) userMessage += " - Rate limit exceeded."; // Retry might help
+					else if (response.status >= 500) userMessage += " - Server error."; // Retry might help
+					else userMessage += ` - ${errorText}`; // Include original text for other errors
+
+					lastError = new Error(userMessage);
+					console.warn(`callMistralApi: Attempt ${attempt} failed: ${userMessage}`);
+
+					// Don't retry on fatal errors
+					if (response.status === 401 || response.status === 400 || response.status === 403 || response.status === 404) {
+						throw lastError;
+					}
+					// Continue to retry logic
+
+				} else {
+					// Success path
+					const data = await response.json();
+					if (!data.choices || !data.choices[0] || !data.choices[0].message || !data.choices[0].message.content) {
+						console.error("callMistralApi: Unexpected response format:", data);
+						throw new Error(`Unexpected response format from Mistral API`);
+					}
+					// console.log(`callMistralApi: Attempt ${attempt} successful. Returning content length: ${data.choices[0].message.content.length}`); // DEBUG
+					return data.choices[0].message.content; // Return on success
+				}
+
+			} catch (error: any) {
+				lastError = error;
+				console.warn(`callMistralApi: Attempt ${attempt} failed with error: ${error.message}`);
+			}
+
+			// Wait before retrying if applicable
+			if (attempt < maxAttempts) {
+				console.log(`callMistralApi: Waiting ${intervalSeconds} seconds before retry ${attempt + 1}...`);
+				await new Promise(resolve => setTimeout(resolve, intervalSeconds * 1000));
+			}
 		}
 
-		const data = await response.json();
-		// // console.log("callMistralApi: Raw Response Data:", data); // DEBUG: Potentially verbose
-		if (!data.choices || !data.choices[0] || !data.choices[0].message || !data.choices[0].message.content) {
-			console.error("callMistralApi: Unexpected response format:", data); // Keep error log
-			throw new Error(`Unexpected response format from Mistral API`);
-		}
-		// console.log(`callMistralApi: Success. Returning content length: ${data.choices[0].message.content.length}`); // DEBUG
-		return data.choices[0].message.content;
+		// If all attempts failed
+		console.error(`callMistralApi: All ${maxAttempts} attempts failed.`);
+		throw lastError || new Error("Mistral API call failed after multiple retries.");
 	}
 
-	private async callAzureOpenAIApi(provider: LLMProviderConfig, prompt: string, content: string): Promise<string> {
+	// Modified to accept modelName parameter (used as deployment name)
+	private async callAzureOpenAIApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string): Promise<string> {
 		if (!provider.apiVersion) {
 			throw new Error('API version is required for Azure OpenAI');
 		}
@@ -1577,8 +1699,8 @@ export default class NotemdPlugin extends Plugin {
 			throw new Error('Base URL (endpoint) is required for Azure OpenAI');
 		}
 
-		// Construct the full URL for Azure deployment
-		const url = `${provider.baseUrl}/openai/deployments/${provider.model}/chat/completions?api-version=${provider.apiVersion}`;
+		// Construct the full URL for Azure deployment using passed modelName (deployment name)
+		const url = `${provider.baseUrl}/openai/deployments/${modelName}/chat/completions?api-version=${provider.apiVersion}`;
 		const requestBody = {
 			messages: [{
 				role: 'system',
@@ -1593,48 +1715,74 @@ export default class NotemdPlugin extends Plugin {
 		// console.log(`callAzureOpenAIApi: Calling URL: ${url}`); // DEBUG
 		// console.log(`callAzureOpenAIApi: Request Body (excluding content):`, { ...requestBody, messages: [{ role: 'system', content: '...' }, { role: 'user', content: `(length: ${content.length})` }] }); // DEBUG
 
-		const response = await fetch(url, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-				'api-key': provider.apiKey // Azure uses 'api-key' header
-			},
-			body: JSON.stringify(requestBody)
-		});
+		let lastError: Error | null = null;
+		const maxAttempts = this.settings.enableStableApiCall ? this.settings.apiCallMaxRetries + 1 : 1;
+		const intervalSeconds = this.settings.enableStableApiCall ? this.settings.apiCallInterval : 0;
 
-		// console.log(`callAzureOpenAIApi: Response Status: ${response.status}`); // DEBUG
-		if (!response.ok) {
-			const errorText = await response.text();
-<<<<<<< HEAD
-			console.error(`callAzureOpenAIApi: Error Response Text: ${errorText}`); // Keep error log
-			throw new Error(`Azure OpenAI API error: ${response.status} - ${errorText}`);
-=======
-			console.error(`callAzureOpenAIApi: Error Response Text (${response.status}): ${errorText}`); // Keep error log
-			let userMessage = `Azure OpenAI API error: ${response.status}`;
-			if (response.status === 401) userMessage += " - Unauthorized. Check your API key and endpoint.";
-			else if (response.status === 404) userMessage += " - Not Found. Check the endpoint and deployment name (model).";
-			else if (response.status === 429) userMessage += " - Rate limit exceeded. Please wait and try again.";
-			else if (response.status >= 500) userMessage += " - Server error. Please try again later.";
-			else userMessage += ` - ${errorText}`; // Include original text for other errors
-			throw new Error(userMessage);
->>>>>>> add-LMCG
+		for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+			try {
+				const response = await fetch(url, {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						'api-key': provider.apiKey // Azure uses 'api-key' header
+					},
+					body: JSON.stringify(requestBody)
+				});
+
+				// console.log(`callAzureOpenAIApi: Attempt ${attempt}/${maxAttempts} - Response Status: ${response.status}`); // DEBUG
+				if (!response.ok) {
+					const errorText = await response.text();
+					let userMessage = `Azure OpenAI API error: ${response.status}`;
+					if (response.status === 401) userMessage += " - Unauthorized. Check your API key and endpoint.";
+					else if (response.status === 404) userMessage += " - Not Found. Check the endpoint and deployment name (model).";
+					else if (response.status === 429) userMessage += " - Rate limit exceeded."; // Retry might help
+					else if (response.status >= 500) userMessage += " - Server error."; // Retry might help
+					else userMessage += ` - ${errorText}`; // Include original text for other errors
+
+					lastError = new Error(userMessage);
+					console.warn(`callAzureOpenAIApi: Attempt ${attempt} failed: ${userMessage}`);
+
+					// Don't retry on fatal errors
+					if (response.status === 401 || response.status === 400 || response.status === 403 || response.status === 404) {
+						throw lastError;
+					}
+					// Continue to retry logic
+
+				} else {
+					// Success path
+					const data = await response.json();
+					if (!data.choices || !data.choices[0] || !data.choices[0].message || !data.choices[0].message.content) {
+						console.error("callAzureOpenAIApi: Unexpected response format:", data);
+						throw new Error(`Unexpected response format from Azure OpenAI API`);
+					}
+					// console.log(`callAzureOpenAIApi: Attempt ${attempt} successful. Returning content length: ${data.choices[0].message.content.length}`); // DEBUG
+					return data.choices[0].message.content; // Return on success
+				}
+
+			} catch (error: any) {
+				lastError = error;
+				console.warn(`callAzureOpenAIApi: Attempt ${attempt} failed with error: ${error.message}`);
+			}
+
+			// Wait before retrying if applicable
+			if (attempt < maxAttempts) {
+				console.log(`callAzureOpenAIApi: Waiting ${intervalSeconds} seconds before retry ${attempt + 1}...`);
+				await new Promise(resolve => setTimeout(resolve, intervalSeconds * 1000));
+			}
 		}
 
-		const data = await response.json();
-		// // console.log("callAzureOpenAIApi: Raw Response Data:", data); // DEBUG: Potentially verbose
-		if (!data.choices || !data.choices[0] || !data.choices[0].message || !data.choices[0].message.content) {
-			console.error("callAzureOpenAIApi: Unexpected response format:", data); // Keep error log
-			throw new Error(`Unexpected response format from Azure OpenAI API`);
-		}
-		// console.log(`callAzureOpenAIApi: Success. Returning content length: ${data.choices[0].message.content.length}`); // DEBUG
-		return data.choices[0].message.content;
+		// If all attempts failed
+		console.error(`callAzureOpenAIApi: All ${maxAttempts} attempts failed.`);
+		throw lastError || new Error("Azure OpenAI API call failed after multiple retries.");
 	}
 
-	private async callLMStudioApi(provider: LLMProviderConfig, prompt: string, content: string): Promise<string> {
+	// Modified to accept modelName parameter
+	private async callLMStudioApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string): Promise<string> {
 		// LMStudio uses OpenAI compatible endpoint
 		const url = `${provider.baseUrl}/chat/completions`;
 		const requestBody = {
-			model: provider.model,
+			model: modelName, // Use passed modelName
 			messages: [{
 				role: 'system',
 				content: prompt
@@ -1648,49 +1796,75 @@ export default class NotemdPlugin extends Plugin {
 		// console.log(`callLMStudioApi: Calling URL: ${url}`); // DEBUG
 		// console.log(`callLMStudioApi: Request Body (excluding content):`, { ...requestBody, messages: [{ role: 'system', content: '...' }, { role: 'user', content: `(length: ${content.length})` }] }); // DEBUG
 
-		const response = await fetch(url, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-				// LMStudio might need a placeholder key, even if not validated
-				'Authorization': `Bearer ${provider.apiKey || 'EMPTY'}`
-			},
-			body: JSON.stringify(requestBody)
-		});
+		let lastError: Error | null = null;
+		const maxAttempts = this.settings.enableStableApiCall ? this.settings.apiCallMaxRetries + 1 : 1;
+		const intervalSeconds = this.settings.enableStableApiCall ? this.settings.apiCallInterval : 0;
 
-		// console.log(`callLMStudioApi: Response Status: ${response.status}`); // DEBUG
-		if (!response.ok) {
-			const errorText = await response.text();
-<<<<<<< HEAD
-			console.error(`callLMStudioApi: Error Response Text: ${errorText}`); // Keep error log
-			throw new Error(`LMStudio API error: ${response.status} - ${errorText}`);
-=======
-			console.error(`callLMStudioApi: Error Response Text (${response.status}): ${errorText}`); // Keep error log
-			let userMessage = `LMStudio API error: ${response.status}`;
-			if (response.status === 404) userMessage += " - Not Found. Check the Base URL (e.g., http://localhost:1234/v1).";
-			else if (errorText.includes("Could not find model")) userMessage += ` - Model '${provider.model}' not found or loaded.`;
-			else if (response.status >= 500) userMessage += " - Server error. Is LM Studio running?";
-			else userMessage += ` - ${errorText}`; // Include original text for other errors
-			throw new Error(userMessage);
->>>>>>> add-LMCG
+		for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+			try {
+				const response = await fetch(url, {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						// LMStudio might need a placeholder key, even if not validated
+						'Authorization': `Bearer ${provider.apiKey || 'EMPTY'}`
+					},
+					body: JSON.stringify(requestBody)
+				});
+
+				// console.log(`callLMStudioApi: Attempt ${attempt}/${maxAttempts} - Response Status: ${response.status}`); // DEBUG
+				if (!response.ok) {
+					const errorText = await response.text();
+					let userMessage = `LMStudio API error: ${response.status}`;
+					if (response.status === 404) userMessage += " - Not Found. Check the Base URL (e.g., http://localhost:1234/v1).";
+					else if (errorText.includes("Could not find model")) userMessage += ` - Model '${provider.model}' not found or loaded.`;
+					else if (response.status >= 500) userMessage += " - Server error."; // Retry might help
+					else userMessage += ` - ${errorText}`; // Include original text for other errors
+
+					lastError = new Error(userMessage);
+					console.warn(`callLMStudioApi: Attempt ${attempt} failed: ${userMessage}`);
+
+					// Don't retry on fatal errors like model not found or bad request
+					if (response.status === 400 || response.status === 401 || response.status === 403 || response.status === 404 || errorText.includes("Could not find model")) {
+						throw lastError;
+					}
+					// Continue to retry logic
+
+				} else {
+					// Success path
+					const data = await response.json();
+					// Standard OpenAI response format expected
+					if (!data.choices || !data.choices[0] || !data.choices[0].message || !data.choices[0].message.content) {
+						console.error("callLMStudioApi: Unexpected response format:", data);
+						throw new Error(`Unexpected response format from LMStudio`);
+					}
+					// console.log(`callLMStudioApi: Attempt ${attempt} successful. Returning content length: ${data.choices[0].message.content.length}`); // DEBUG
+					return data.choices[0].message.content; // Return on success
+				}
+
+			} catch (error: any) {
+				lastError = error;
+				console.warn(`callLMStudioApi: Attempt ${attempt} failed with error: ${error.message}`);
+			}
+
+			// Wait before retrying if applicable
+			if (attempt < maxAttempts) {
+				console.log(`callLMStudioApi: Waiting ${intervalSeconds} seconds before retry ${attempt + 1}...`);
+				await new Promise(resolve => setTimeout(resolve, intervalSeconds * 1000));
+			}
 		}
 
-		const data = await response.json();
-		// // console.log("callLMStudioApi: Raw Response Data:", data); // DEBUG: Potentially verbose
-		// Standard OpenAI response format expected
-		if (!data.choices || !data.choices[0] || !data.choices[0].message || !data.choices[0].message.content) {
-			console.error("callLMStudioApi: Unexpected response format:", data); // Keep error log
-			throw new Error(`Unexpected response format from LMStudio`);
-		}
-		// console.log(`callLMStudioApi: Success. Returning content length: ${data.choices[0].message.content.length}`); // DEBUG
-		return data.choices[0].message.content;
+		// If all attempts failed
+		console.error(`callLMStudioApi: All ${maxAttempts} attempts failed.`);
+		throw lastError || new Error("LMStudio API call failed after multiple retries.");
 	}
 
-	private async callOllamaApi(provider: LLMProviderConfig, prompt: string, content: string): Promise<string> {
+	// Modified to accept modelName parameter
+	private async callOllamaApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string): Promise<string> {
 		// Ollama has a different endpoint and request structure
 		const url = `${provider.baseUrl}/chat`; // Endpoint is /api/chat
 		const requestBody = {
-			model: provider.model,
+			model: modelName, // Use passed modelName
 			messages: [{
 				role: 'system',
 				content: prompt
@@ -1707,48 +1881,74 @@ export default class NotemdPlugin extends Plugin {
 		// console.log(`callOllamaApi: Calling URL: ${url}`); // DEBUG
 		// console.log(`callOllamaApi: Request Body (excluding content):`, { ...requestBody, messages: [{ role: 'system', content: '...' }, { role: 'user', content: `(length: ${content.length})` }] }); // DEBUG
 
-		const response = await fetch(url, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-				// No API key needed for Ollama
-			},
-			body: JSON.stringify(requestBody)
-		});
+		let lastError: Error | null = null;
+		const maxAttempts = this.settings.enableStableApiCall ? this.settings.apiCallMaxRetries + 1 : 1;
+		const intervalSeconds = this.settings.enableStableApiCall ? this.settings.apiCallInterval : 0;
 
-		// console.log(`callOllamaApi: Response Status: ${response.status}`); // DEBUG
-		if (!response.ok) {
-			const errorText = await response.text();
-<<<<<<< HEAD
-			console.error(`callOllamaApi: Error Response Text: ${errorText}`); // Keep error log
-			throw new Error(`Ollama API error: ${response.status} - ${errorText}`);
-=======
-			console.error(`callOllamaApi: Error Response Text (${response.status}): ${errorText}`); // Keep error log
-			let userMessage = `Ollama API error: ${response.status}`;
-			if (response.status === 404) userMessage += " - Not Found. Check the Base URL (e.g., http://localhost:11434/api) and ensure Ollama is running.";
-			else if (errorText.includes("model not found")) userMessage += ` - Model '${provider.model}' not found.`;
-			else if (response.status >= 500) userMessage += " - Server error. Is Ollama running?";
-			else userMessage += ` - ${errorText}`; // Include original text for other errors
-			throw new Error(userMessage);
->>>>>>> add-LMCG
+		for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+			try {
+				const response = await fetch(url, {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						// No API key needed for Ollama
+					},
+					body: JSON.stringify(requestBody)
+				});
+
+				// console.log(`callOllamaApi: Attempt ${attempt}/${maxAttempts} - Response Status: ${response.status}`); // DEBUG
+				if (!response.ok) {
+					const errorText = await response.text();
+					let userMessage = `Ollama API error: ${response.status}`;
+					if (response.status === 404) userMessage += " - Not Found. Check the Base URL (e.g., http://localhost:11434/api) and ensure Ollama is running.";
+					else if (errorText.includes("model not found")) userMessage += ` - Model '${provider.model}' not found.`;
+					else if (response.status >= 500) userMessage += " - Server error."; // Retry might help
+					else userMessage += ` - ${errorText}`; // Include original text for other errors
+
+					lastError = new Error(userMessage);
+					console.warn(`callOllamaApi: Attempt ${attempt} failed: ${userMessage}`);
+
+					// Don't retry on fatal errors like model not found or bad request
+					if (response.status === 400 || response.status === 401 || response.status === 403 || response.status === 404 || errorText.includes("model not found")) {
+						throw lastError;
+					}
+					// Continue to retry logic
+
+				} else {
+					// Success path
+					const data = await response.json();
+					// Ollama's response structure is different
+					if (!data.message || !data.message.content) {
+						console.error("callOllamaApi: Unexpected response format:", data);
+						throw new Error(`Unexpected response format from Ollama`);
+					}
+					// console.log(`callOllamaApi: Attempt ${attempt} successful. Returning content length: ${data.message.content.length}`); // DEBUG
+					return data.message.content; // Return on success
+				}
+
+			} catch (error: any) {
+				lastError = error;
+				console.warn(`callOllamaApi: Attempt ${attempt} failed with error: ${error.message}`);
+			}
+
+			// Wait before retrying if applicable
+			if (attempt < maxAttempts) {
+				console.log(`callOllamaApi: Waiting ${intervalSeconds} seconds before retry ${attempt + 1}...`);
+				await new Promise(resolve => setTimeout(resolve, intervalSeconds * 1000));
+			}
 		}
 
-		const data = await response.json();
-		// // console.log("callOllamaApi: Raw Response Data:", data); // DEBUG: Potentially verbose
-		// Ollama's response structure is different
-		if (!data.message || !data.message.content) {
-			console.error("callOllamaApi: Unexpected response format:", data); // Keep error log
-			throw new Error(`Unexpected response format from Ollama`);
-		}
-		// console.log(`callOllamaApi: Success. Returning content length: ${data.message.content.length}`); // DEBUG
-		return data.message.content;
+		// If all attempts failed
+		console.error(`callOllamaApi: All ${maxAttempts} attempts failed.`);
+		throw lastError || new Error("Ollama API call failed after multiple retries.");
 	}
 
-	private async callOpenRouterAPI(provider: LLMProviderConfig, prompt: string, content: string): Promise<string> {
+	// Modified to accept modelName parameter
+	private async callOpenRouterAPI(provider: LLMProviderConfig, modelName: string, prompt: string, content: string): Promise<string> {
 		// OpenRouter uses OpenAI compatible endpoint but requires specific headers
 		const url = `${provider.baseUrl}/chat/completions`;
 		const requestBody = {
-			model: provider.model, // User specifies the full model string e.g., "google/gemini-pro"
+			model: modelName, // Use passed modelName
 			messages: [{
 				role: 'system',
 				content: prompt
@@ -1762,72 +1962,70 @@ export default class NotemdPlugin extends Plugin {
 		// console.log(`callOpenRouterAPI: Calling URL: ${url}`); // DEBUG
 		// console.log(`callOpenRouterAPI: Request Body (excluding content):`, { ...requestBody, messages: [{ role: 'system', content: '...' }, { role: 'user', content: `(length: ${content.length})` }] }); // DEBUG
 
-<<<<<<< HEAD
-		const response = await fetch(url, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-				'Authorization': `Bearer ${provider.apiKey}`, // Required
-				'HTTP-Referer': 'https://github.com/Jacobinwwey/obsidian-NotEMD', // Required by OpenRouter - CORRECTED AGAIN
-				'X-Title': 'Notemd Obsidian Plugin' // Required by OpenRouter - can be your app's name
-			},
-			body: JSON.stringify(requestBody)
-		});
-=======
-		let response: Response; // Define response variable outside try block
+		let lastError: Error | null = null;
+		const maxAttempts = this.settings.enableStableApiCall ? this.settings.apiCallMaxRetries + 1 : 1;
+		const intervalSeconds = this.settings.enableStableApiCall ? this.settings.apiCallInterval : 0;
 
-		try { // Wrap the fetch call
-			response = await fetch(url, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					'Authorization': `Bearer ${provider.apiKey}`, // Required
-					'HTTP-Referer': 'https://github.com/Jacobinwwey/obsidian-NotEMD', // Required by OpenRouter
-					'X-Title': 'Notemd Obsidian Plugin' // Required by OpenRouter
-				},
-				body: JSON.stringify(requestBody)
-			});
-		} catch (fetchError: any) {
-			// Handle fetch-specific errors (network, DNS, CORS etc.)
-			console.error(`callOpenRouterAPI: Fetch failed for URL ${url}:`, fetchError);
-			// Provide a more informative message for fetch errors
-			let userMessage = `Network error calling OpenRouter: ${fetchError.message}. Check internet connection and if ${provider.baseUrl} is reachable.`;
-			if (fetchError.name === 'TypeError' && fetchError.message.includes('fetch')) {
-				 userMessage += ' This might indicate a CORS issue or network configuration problem.';
+		for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+			try {
+				const response = await fetch(url, {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						'Authorization': `Bearer ${provider.apiKey}`, // Required
+						'HTTP-Referer': 'https://github.com/Jacobinwwey/obsidian-NotEMD', // Required by OpenRouter
+						'X-Title': 'Notemd Obsidian Plugin' // Required by OpenRouter
+					},
+					body: JSON.stringify(requestBody)
+				});
+
+				// console.log(`callOpenRouterAPI: Attempt ${attempt}/${maxAttempts} - Response Status: ${response.status}`); // DEBUG
+				if (!response.ok) {
+					const errorText = await response.text();
+					let userMessage = `OpenRouter API error: ${response.status}`;
+					if (response.status === 401) userMessage += " - Unauthorized. Check your API key.";
+					else if (response.status === 402) userMessage += " - Payment Required / Quota Exceeded.";
+					else if (response.status === 404) userMessage += " - Not Found. Check the Base URL and model name.";
+					else if (response.status === 429) userMessage += " - Rate limit exceeded."; // Retry might help
+					else if (response.status >= 500) userMessage += " - Server error."; // Retry might help
+					else userMessage += ` - ${errorText}`; // Include original text for other errors
+
+					lastError = new Error(userMessage);
+					console.warn(`callOpenRouterAPI: Attempt ${attempt} failed: ${userMessage}`);
+
+					// Don't retry on fatal errors
+					if (response.status === 401 || response.status === 400 || response.status === 402 || response.status === 403 || response.status === 404) {
+						throw lastError;
+					}
+					// Continue to retry logic
+
+				} else {
+					// Success path
+					const data = await response.json();
+					// Standard OpenAI response format expected
+					if (!data.choices || !data.choices[0] || !data.choices[0].message || !data.choices[0].message.content) {
+						console.error("callOpenRouterAPI: Unexpected response format:", data);
+						throw new Error(`Unexpected response format from OpenRouter`);
+					}
+					// console.log(`callOpenRouterAPI: Attempt ${attempt} successful. Returning content length: ${data.choices[0].message.content.length}`); // DEBUG
+					return data.choices[0].message.content; // Return on success
+				}
+
+			} catch (error: any) {
+				lastError = error; // Includes fetch errors caught by the outer try-catch
+				console.warn(`callOpenRouterAPI: Attempt ${attempt} failed with error: ${error.message}`);
 			}
-			throw new Error(userMessage);
+
+			// Wait before retrying if applicable
+			if (attempt < maxAttempts) {
+				console.log(`callOpenRouterAPI: Waiting ${intervalSeconds} seconds before retry ${attempt + 1}...`);
+				await new Promise(resolve => setTimeout(resolve, intervalSeconds * 1000));
+			}
 		}
 
->>>>>>> add-LMCG
-
-		// console.log(`callOpenRouterAPI: Response Status: ${response.status}`); // DEBUG
-		if (!response.ok) {
-			const errorText = await response.text();
-<<<<<<< HEAD
-			console.error(`callOpenRouterAPI: Error Response Text: ${errorText}`); // Keep error log
-			throw new Error(`OpenRouter API error: ${response.status} - ${errorText}`);
-=======
-			console.error(`callOpenRouterAPI: Error Response Text (${response.status}): ${errorText}`); // Keep error log
-			let userMessage = `OpenRouter API error: ${response.status}`;
-			if (response.status === 401) userMessage += " - Unauthorized. Check your API key.";
-			else if (response.status === 402) userMessage += " - Payment Required / Quota Exceeded.";
-			else if (response.status === 404) userMessage += " - Not Found. Check the Base URL and model name.";
-			else if (response.status === 429) userMessage += " - Rate limit exceeded. Please wait and try again.";
-			else if (response.status >= 500) userMessage += " - Server error. Please try again later.";
-			else userMessage += ` - ${errorText}`; // Include original text for other errors
-			throw new Error(userMessage);
->>>>>>> add-LMCG
-		}
-
-		const data = await response.json();
-		// // console.log("callOpenRouterAPI: Raw Response Data:", data); // DEBUG: Potentially verbose
-		// Standard OpenAI response format expected
-		if (!data.choices || !data.choices[0] || !data.choices[0].message || !data.choices[0].message.content) {
-			console.error("callOpenRouterAPI: Unexpected response format:", data); // Keep error log
-			throw new Error(`Unexpected response format from OpenRouter`);
-		}
-		// console.log(`callOpenRouterAPI: Success. Returning content length: ${data.choices[0].message.content.length}`); // DEBUG
-		return data.choices[0].message.content;
+		// If all attempts failed
+		console.error(`callOpenRouterAPI: All ${maxAttempts} attempts failed.`);
+		throw lastError || new Error("OpenRouter API call failed after multiple retries.");
 	}
 
 
@@ -1877,19 +2075,17 @@ export default class NotemdPlugin extends Plugin {
 
 
 
-<<<<<<< HEAD
-	// Modify signature to accept ProgressReporter
-=======
 	// Restore original function signature and logic
->>>>>>> add-LMCG
 	async processContentWithLLM(content: string, progressReporter: ProgressReporter): Promise<string> {
 		// console.log("Entering processContentWithLLM"); // DEBUG
-		const provider = this.settings.providers.find(p => p.name === this.settings.activeProvider);
+		// Use helper functions to get the correct provider and model for this task
+		const provider = this.getProviderForTask('addLinks');
 		if (!provider) {
-			console.error("processContentWithLLM: No active provider found!"); // Keep error log
-			throw new Error('No active LLM provider configured');
+			console.error("processContentWithLLM: Could not determine a valid provider for 'addLinks' task!"); // Keep error log
+			throw new Error('No valid LLM provider configured for the "Add Links" task.');
 		}
-		// console.log(`processContentWithLLM: Using provider: ${provider.name}, Model: ${provider.model}, BaseURL: ${provider.baseUrl}`); // DEBUG
+		const modelName = this.getModelForTask('addLinks', provider);
+		// console.log(`processContentWithLLM: Using provider: ${provider.name}, Model: ${modelName}, BaseURL: ${provider.baseUrl}`); // DEBUG
 		// Allow empty API key for local providers like Ollama, LMStudio might need 'EMPTY'
 		if (!provider.apiKey && provider.name !== 'Ollama' && provider.name !== 'LMStudio') {
 			// Check if it's Azure with managed identity (no key needed) - needs more robust check
@@ -1942,34 +2138,34 @@ Rules:
 
 			try {
 				let responseText;
-				// console.log(`processContentWithLLM: Calling API function for provider: ${provider.name}`); // DEBUG
+				// console.log(`processContentWithLLM: Calling API function for provider: ${provider.name} with model ${modelName}`); // DEBUG
 				switch (provider.name) {
 					case 'DeepSeek':
-						responseText = await this.callDeepSeekAPI(provider, prompt, chunk);
+						responseText = await this.callDeepSeekAPI(provider, modelName, prompt, chunk);
 						break;
 					case 'OpenAI':
-						responseText = await this.callOpenAIApi(provider, prompt, chunk);
+						responseText = await this.callOpenAIApi(provider, modelName, prompt, chunk);
 						break;
 					case 'Anthropic':
-						responseText = await this.callAnthropicApi(provider, prompt, chunk);
+						responseText = await this.callAnthropicApi(provider, modelName, prompt, chunk);
 						break;
 					case 'Google':
-						responseText = await this.callGoogleApi(provider, prompt, chunk);
+						responseText = await this.callGoogleApi(provider, modelName, prompt, chunk);
 						break;
 					case 'Mistral':
-						responseText = await this.callMistralApi(provider, prompt, chunk);
+						responseText = await this.callMistralApi(provider, modelName, prompt, chunk);
 						break;
 					case 'Azure OpenAI':
-						responseText = await this.callAzureOpenAIApi(provider, prompt, chunk);
+						responseText = await this.callAzureOpenAIApi(provider, modelName, prompt, chunk);
 						break;
 					case 'LMStudio':
-						responseText = await this.callLMStudioApi(provider, prompt, chunk);
+						responseText = await this.callLMStudioApi(provider, modelName, prompt, chunk);
 						break;
 					case 'Ollama':
-						responseText = await this.callOllamaApi(provider, prompt, chunk);
+						responseText = await this.callOllamaApi(provider, modelName, prompt, chunk);
 						break;
 					case 'OpenRouter':
-						responseText = await this.callOpenRouterAPI(provider, prompt, chunk);
+						responseText = await this.callOpenRouterAPI(provider, modelName, prompt, chunk);
 						break;
 					default:
 						console.error(`processContentWithLLM: Unsupported provider: ${provider.name}`); // Keep error log
@@ -1981,7 +2177,8 @@ Rules:
 			} catch (error: any) { // Added type annotation for error
 				console.error(`processContentWithLLM: LLM processing error on chunk ${i + 1}:`, error); // Keep error log
 				progressReporter.log(`Error processing chunk ${i + 1}: ${error.message}`);
-				new Notice(`LLM Error (${provider.name}) on chunk ${i + 1}: ${error.message}`);
+				// Removed Notice pop-up for silent batch processing
+				// new Notice(`LLM Error (${provider.name}) on chunk ${i + 1}: ${error.message}`);
 				// Re-throw error to be handled by the calling function (processFile or processWithNotemd)
 				throw error;
 			}
@@ -1997,10 +2194,6 @@ Rules:
 		return finalResult;
 	}
 
-<<<<<<< HEAD
-=======
-
->>>>>>> add-LMCG
 	// --- Post-Processing ---
 
 	generateObsidianLinks(content: string): string {
@@ -2060,16 +2253,8 @@ Rules:
 			}
 
 			for (const concept of concepts) {
-<<<<<<< HEAD
-				// Sanitize concept name for filename (more robustly)
-				let safeName = concept
-					.replace(/[\\/:*?"<>|#^[\]]/g, '') // Remove invalid file path chars + Obsidian specific ones
-					.replace(/\s+/g, ' ') // Collapse multiple spaces
-					.trim();
-=======
 				// Sanitize concept name for filename using the new normalization function
 				let safeName = this.normalizeNameForFilePath(concept);
->>>>>>> add-LMCG
 
 				// Limit filename length (e.g., 100 chars) to avoid issues
 				if (safeName.length > 100) {
@@ -2342,8 +2527,6 @@ Rules:
 		}
 	}
 
-<<<<<<< HEAD
-=======
 	/**
 	 * Normalizes a concept name for use as a file path.
 	 * - Replaces hyphens and underscores with spaces.
@@ -2366,6 +2549,91 @@ Rules:
 	}
 
 	/**
+	 * Gets the appropriate LLM provider configuration for a specific task.
+	 * Respects the `useMultiModelSettings` flag.
+	 * @param taskType The type of task being performed.
+	 * @returns The LLMProviderConfig or undefined if no valid provider is found.
+	 */
+	private getProviderForTask(taskType: 'addLinks' | 'research' | 'generateTitle'): LLMProviderConfig | undefined {
+		let providerName: string;
+		if (this.settings.useMultiModelSettings) {
+			switch (taskType) {
+				case 'addLinks':
+					providerName = this.settings.addLinksProvider;
+					break;
+				case 'research':
+					providerName = this.settings.researchProvider;
+					break;
+				case 'generateTitle':
+					providerName = this.settings.generateTitleProvider;
+					break;
+				default:
+					console.warn(`Unknown task type '${taskType}' in getProviderForTask. Falling back to active provider.`);
+					providerName = this.settings.activeProvider; // Fallback
+			}
+		} else {
+			providerName = this.settings.activeProvider;
+		}
+
+		const provider = this.settings.providers.find(p => p.name === providerName);
+
+		if (!provider) {
+			const errorMsg = `Provider configuration not found for name: '${providerName}' (Task: ${taskType}).`;
+			console.error(errorMsg);
+			// Fallback to the globally active provider if the task-specific one is missing/invalid
+			const fallbackProvider = this.settings.providers.find(p => p.name === this.settings.activeProvider);
+			if (fallbackProvider && providerName !== this.settings.activeProvider) {
+				new Notice(`${errorMsg} Falling back to active provider '${this.settings.activeProvider}'.`);
+				return fallbackProvider;
+			} else {
+				// If even the active provider isn't found, return undefined
+				new Notice(`${errorMsg} Active provider '${this.settings.activeProvider}' also not found.`);
+				return undefined;
+			}
+		}
+		return provider;
+	}
+
+	/**
+	 * Gets the appropriate model name for a specific task.
+	 * Respects the `useMultiModelSettings` flag and task-specific model overrides.
+	 * Falls back to the provider's default model if override is not set.
+	 * @param taskType The type of task being performed.
+	 * @param provider The LLMProviderConfig determined for this task.
+	 * @returns The model name string to use.
+	 */
+	private getModelForTask(taskType: 'addLinks' | 'research' | 'generateTitle', provider: LLMProviderConfig): string {
+		let modelName: string | undefined | null = provider.model; // Start with provider's default
+
+		if (this.settings.useMultiModelSettings) {
+			switch (taskType) {
+				case 'addLinks':
+					// Use override if it's not empty, otherwise stick with provider default
+					modelName = this.settings.addLinksModel?.trim() || provider.model;
+					break;
+				case 'research':
+					modelName = this.settings.researchModel?.trim() || provider.model;
+					break;
+				case 'generateTitle':
+					modelName = this.settings.generateTitleModel?.trim() || provider.model;
+					break;
+				default:
+					// Should not happen if taskType is correctly typed, but keep fallback
+					console.warn(`Unknown task type '${taskType}' in getModelForTask. Using provider default.`);
+					modelName = provider.model;
+			}
+		} else {
+			// If not using multi-model settings, always use the active provider's model
+			// (The passed 'provider' should already be the active one in this case)
+			modelName = provider.model;
+		}
+
+		// Ensure we return a valid string, defaulting to provider's model if somehow null/undefined
+		return modelName || provider.model;
+	}
+
+
+	/**
 	 * Generates the system prompt for the LLM processing task (adding backlinks).
 	 * @returns The prompt string.
 	 */
@@ -2385,36 +2653,42 @@ Rules:
 	}
 
 	/**
-	 * Generates content for the active note based on its title using an LLM.
+	 * Generates content for a given note based on its title using an LLM.
 	 * Replaces the entire note content with the generated documentation.
-	 * @param progressReporter - Interface for reporting progress (Modal or Sidebar).
+	 * @param file The TFile object to process.
+	 * @param progressReporter Interface for reporting progress (Modal or Sidebar).
 	 */
-	async generateContentForTitle(progressReporter: ProgressReporter) {
-		const activeFile = this.app.workspace.getActiveFile();
-		if (!activeFile || !(activeFile instanceof TFile) || activeFile.extension !== 'md') {
-			new Notice('No active Markdown file to generate content for.');
-			progressReporter.log('Error: No active Markdown file selected.');
-			progressReporter.updateStatus('Error: No active file', -1);
+	async generateContentForTitle(file: TFile, progressReporter: ProgressReporter) {
+		// Use the passed file argument instead of relying on the active file
+		// const activeFile = this.app.workspace.getActiveFile();
+		if (!file || !(file instanceof TFile) || file.extension !== 'md') {
+			// Adjust error message slightly
+			new Notice('Invalid file provided for content generation.');
+			progressReporter.log(`Error: Invalid file provided: ${file?.path || 'undefined'}`);
+			progressReporter.updateStatus('Error: Invalid file', -1);
 			if (progressReporter instanceof ProgressModal) setTimeout(() => progressReporter.close(), 2000);
 			return;
 		}
 
-		const title = activeFile.basename; // Use basename as the topic title
-		const provider = this.settings.providers.find(p => p.name === this.settings.activeProvider);
-
+		const title = file.basename; // Use basename from the passed file
+		// Use helper functions to get the correct provider and model for this task
+		const provider = this.getProviderForTask('generateTitle');
 		if (!provider) {
-			new Notice('No active LLM provider configured.');
+			// Error is handled by getProviderForTask, but throw specific error here too
+			new Notice('No valid LLM provider configured for the "Generate from Title" task.');
 			progressReporter.log('Error: No active LLM provider configured.');
 			progressReporter.updateStatus('Error: No provider', -1);
 			if (progressReporter instanceof ProgressModal) setTimeout(() => progressReporter.close(), 2000);
 			return;
 		}
+		const modelName = this.getModelForTask('generateTitle', provider);
 
 		// Clear display and start progress reporting
-		progressReporter.clearDisplay();
-		progressReporter.updateStatus(`Generating content for "${title}"...`, 5);
-		progressReporter.log(`Starting content generation for: ${activeFile.name}`);
-		this.updateStatusBar(`Generating: ${activeFile.name}`);
+		// Clear display and start progress reporting (if it's the first file in a batch, this is fine)
+		// progressReporter.clearDisplay(); // Caller (batch function or single command) should handle clearing
+		progressReporter.updateStatus(`Generating content for "${title}"...`, 5); // Status update is fine
+		progressReporter.log(`Starting content generation for: ${file.name}`);
+		this.updateStatusBar(`Generating: ${file.name}`);
 
 		try {
 			let researchContext = '';
@@ -2464,7 +2738,7 @@ Include:
 5.  Performance characteristics with statistical measures.
 6.  Related technologies with comparative mathematical models.
 7.  Mathematical equations in LaTeX format (using $$...$$ for display and $...$ for inline) with detailed explanations of all parameters and variables. Example: $$ P(f) = \\int_{-\\infty}^{\\infty} p(t) e^{-i2\\pi ft} dt $$
-8.  Mermaid.js diagram code blocks (\`\`\`mermaid ... \`\`\`) for complex relationships or system architectures.
+8.  Mermaid.js diagram code blocks using the format \`\`\`mermaid ... \`\`\` (IMPORTANT: without brackets for Mermaid diagrams) for complex relationships or system architectures.
 9.  Use bullet points for lists longer than 3 items.
 10. Include references to academic papers with DOI where applicable, under a "## References" section.
 11. Preserve all mathematical formulas and scientific principles without simplification.
@@ -2478,37 +2752,37 @@ Format directly for Obsidian markdown. Do NOT wrap the entire response in a mark
 			const llmCallProgress = this.settings.enableResearchInGenerateContent ? 25 : 20;
 			progressReporter.updateStatus(`Calling ${provider.name}...`, llmCallProgress);
 
-			// Call the appropriate API function based on the active provider
+			// Call the appropriate API function based on the provider, passing the determined modelName
 			// Pass an empty string for 'content' as the prompt now contains everything.
 			let generatedContent;
 			switch (provider.name) {
 				case 'DeepSeek':
-					generatedContent = await this.callDeepSeekAPI(provider, generationPrompt, '');
+					generatedContent = await this.callDeepSeekAPI(provider, modelName, generationPrompt, '');
 					break;
 				case 'OpenAI':
-					generatedContent = await this.callOpenAIApi(provider, generationPrompt, '');
+					generatedContent = await this.callOpenAIApi(provider, modelName, generationPrompt, '');
 					break;
 				case 'Anthropic':
 					// Anthropic combines system prompt and user message, so pass empty prompt here
-					generatedContent = await this.callAnthropicApi(provider, '', generationPrompt);
+					generatedContent = await this.callAnthropicApi(provider, modelName, '', generationPrompt);
 					break;
 				case 'Google':
-					generatedContent = await this.callGoogleApi(provider, generationPrompt, '');
+					generatedContent = await this.callGoogleApi(provider, modelName, generationPrompt, '');
 					break;
 				case 'Mistral':
-					generatedContent = await this.callMistralApi(provider, generationPrompt, '');
+					generatedContent = await this.callMistralApi(provider, modelName, generationPrompt, '');
 					break;
 				case 'Azure OpenAI':
-					generatedContent = await this.callAzureOpenAIApi(provider, generationPrompt, '');
+					generatedContent = await this.callAzureOpenAIApi(provider, modelName, generationPrompt, '');
 					break;
 				case 'LMStudio':
-					generatedContent = await this.callLMStudioApi(provider, generationPrompt, '');
+					generatedContent = await this.callLMStudioApi(provider, modelName, generationPrompt, '');
 					break;
 				case 'Ollama':
-					generatedContent = await this.callOllamaApi(provider, generationPrompt, '');
+					generatedContent = await this.callOllamaApi(provider, modelName, generationPrompt, '');
 					break;
 				case 'OpenRouter':
-					generatedContent = await this.callOpenRouterAPI(provider, generationPrompt, '');
+					generatedContent = await this.callOpenRouterAPI(provider, modelName, generationPrompt, '');
 					break;
 				default:
 					throw new Error(`Unsupported provider for content generation: ${provider.name}`);
@@ -2525,7 +2799,7 @@ Format directly for Obsidian markdown. Do NOT wrap the entire response in a mark
 				progressReporter.log(`Mermaid/LaTeX cleanup applied.`);
 			} catch (cleanupError: any) {
 				progressReporter.log(`Warning: Error during Mermaid/LaTeX cleanup: ${cleanupError.message}`);
-				console.warn(`Warning during Mermaid/LaTeX cleanup for ${activeFile.name}:`, cleanupError);
+				console.warn(`Warning during Mermaid/LaTeX cleanup for ${file.name}:`, cleanupError); // Use file.name here
 				// Continue with the uncleaned content
 				finalContent = generatedContent;
 			}
@@ -2542,25 +2816,31 @@ Format directly for Obsidian markdown. Do NOT wrap the entire response in a mark
 				contentToSave = contentLines.join('\n');
 			}
 
-			// Replace the entire content of the current file
-			progressReporter.log(`Replacing content in: ${activeFile.name}`);
+			// Replace the entire content of the provided file
+			progressReporter.log(`Replacing content in: ${file.name}`);
 			progressReporter.updateStatus('Saving content...', 95);
-			await this.app.vault.modify(activeFile, contentToSave); // Use contentToSave
+			await this.app.vault.modify(file, contentToSave); // Use the passed file object
 
-			this.updateStatusBar('Generation complete');
-			progressReporter.updateStatus('Content generation complete!', 100);
-			new Notice(`Content generated successfully for ${activeFile.name}!`);
-			if (progressReporter instanceof ProgressModal) setTimeout(() => progressReporter.close(), 2000);
+			this.updateStatusBar('Generation complete'); // Status bar is global, ok to update
+			progressReporter.updateStatus('Content generation complete!', 100); // Update reporter status
+			// Only show Notice for single file operation, not batch
+			// new Notice(`Content generated successfully for ${file.name}!`);
+			progressReporter.log(`Content generated successfully for ${file.name}.`); // Log success instead of Notice
+			// Caller (batch or single) handles closing the modal/reporter
+			// if (progressReporter instanceof ProgressModal) setTimeout(() => progressReporter.close(), 2000);
 
 		} catch (error: any) {
 			this.updateStatusBar('Error during generation');
 			const errorDetails = error instanceof Error ? error.stack || error.message : String(error);
-			console.error(`Error generating content for ${activeFile.name}:`, errorDetails);
-			new Notice(`Error generating content: ${error.message}. See console.`, 10000);
-			progressReporter.log(`Error: ${error.message}`);
+			console.error(`Error generating content for ${file.name}:`, errorDetails); // Use file.name in log
+			// Removed Notice pop-up for silent batch processing
+			// new Notice(`Error generating content: ${error.message}. See console.`, 10000);
+			progressReporter.log(`Error generating content for ${file.name}: ${error.message}`); // Log specific file error
 			progressReporter.updateStatus('Error occurred', -1);
-			new ErrorModal(this.app, "Content Generation Error", errorDetails).open();
-			// Keep reporter open on error
+			// Keep ErrorModal for single file errors, but batch handles summary
+			// new ErrorModal(this.app, "Content Generation Error", errorDetails).open();
+			// Re-throw the error so the batch function can catch it and log it silently
+			throw error;
 		}
 	}
 
@@ -2787,42 +3067,48 @@ Format directly for Obsidian markdown. Do NOT wrap the entire response in a mark
 			// --- Summarize Research Context ---
 			progressReporter.updateStatus('Summarizing research...', 50);
 
-			const provider = this.settings.providers.find(p => p.name === this.settings.activeProvider);
-			if (!provider) throw new Error('No active LLM provider configured');
+			// Use helper functions to get the correct provider and model for this task
+			const provider = this.getProviderForTask('research');
+			if (!provider) {
+				// Error is handled by getProviderForTask, but throw specific error here too
+				throw new Error('No valid LLM provider configured for the "Research & Summarize" task.');
+			}
+			const modelName = this.getModelForTask('research', provider);
 
-			progressReporter.log(`Calling ${provider.name} for summarization...`);
+			progressReporter.log(`Calling ${provider.name} (Model: ${modelName}) for summarization...`);
 			// Use the original topic in the prompt, but provide the fetched context
 			const summaryPrompt = `Based on the following research context gathered for "${topic}", provide a concise summary focusing on the key facts, concepts, and conclusions. Present the summary in clear Markdown format.\n\nResearch Context:\n${researchContext}`;
 
-			// Call the appropriate LLM API function (pass empty string for 'content' as prompt contains everything)
+			// Call the appropriate LLM API function, passing the determined modelName
+			// Pass empty string for 'content' as prompt contains everything
 			let summary = '';
 			switch (provider.name) {
 				case 'DeepSeek':
-					summary = await this.callDeepSeekAPI(provider, summaryPrompt, '');
+					summary = await this.callDeepSeekAPI(provider, modelName, summaryPrompt, '');
 					break;
 				case 'OpenAI':
-					summary = await this.callOpenAIApi(provider, summaryPrompt, '');
+					summary = await this.callOpenAIApi(provider, modelName, summaryPrompt, '');
 					break;
 				case 'Anthropic':
-					summary = await this.callAnthropicApi(provider, '', summaryPrompt); // Anthropic combines prompt/content
+					summary = await this.callAnthropicApi(provider, modelName, '', summaryPrompt); // Anthropic combines prompt/content
 					break;
 				case 'Google':
-					summary = await this.callGoogleApi(provider, summaryPrompt, '');
+					summary = await this.callGoogleApi(provider, modelName, summaryPrompt, '');
 					break;
 				case 'Mistral':
-					summary = await this.callMistralApi(provider, summaryPrompt, '');
+					summary = await this.callMistralApi(provider, modelName, summaryPrompt, '');
 					break;
 				case 'Azure OpenAI':
-					summary = await this.callAzureOpenAIApi(provider, summaryPrompt, '');
+					summary = await this.callAzureOpenAIApi(provider, modelName, summaryPrompt, '');
 					break;
 				case 'LMStudio':
-					summary = await this.callLMStudioApi(provider, summaryPrompt, '');
+					summary = await this.callLMStudioApi(provider, modelName, summaryPrompt, '');
 					break;
 				case 'Ollama':
-					summary = await this.callOllamaApi(provider, summaryPrompt, '');
+					summary = await this.callOllamaApi(provider, modelName, summaryPrompt, '');
 					break;
 				case 'OpenRouter':
-					summary = await this.callOpenRouterAPI(provider, summaryPrompt, '');
+					summary = await this.callOpenRouterAPI(provider, modelName, summaryPrompt, '');
 					break;
 				default:
 					throw new Error(`Unsupported provider for summarization: ${provider.name}`);
@@ -2975,7 +3261,7 @@ Format directly for Obsidian markdown. Do NOT wrap the entire response in a mark
 	 * @param progressReporter - Interface for reporting progress.
 	 */
 	async batchGenerateContentForTitles(progressReporter: ProgressReporter) {
-		const folderPath = await this.getFolderSelection();
+		const folderPath = await this.getFolderSelection(); // e.g., "Notes/Subfolder" or "/" for root
 		if (!folderPath) {
 			new Notice('Folder selection cancelled.');
 			return;
@@ -2984,29 +3270,72 @@ Format directly for Obsidian markdown. Do NOT wrap the entire response in a mark
 		const folder = this.app.vault.getAbstractFileByPath(folderPath);
 		if (!folder || !(folder instanceof TFolder)) {
 			new Notice(`Selected path is not a valid folder: ${folderPath}`);
-			progressReporter.log(`Error: Selected path is not a valid folder: ${folderPath}`);
-			progressReporter.updateStatus('Error: Invalid folder', -1);
+			progressReporter?.log(`Error: Selected path is not a valid folder: ${folderPath}`); // Use optional chaining for reporter
+			progressReporter?.updateStatus('Error: Invalid folder', -1);
 			return;
 		}
 
-		// Filter for only .md files within the selected folder (excluding _processed.md)
-		const filesToProcess = this.app.vault.getMarkdownFiles().filter(f =>
-			!f.name.endsWith('_processed.md') && // Exclude processed files
-			(f.path === folderPath || f.path.startsWith(folderPath === '/' ? '' : folderPath + '/'))
-		);
+		// --- Determine the "Complete" Folder Path ---
+		let completeFolderName: string;
+		if (this.settings.useCustomGenerateTitleOutputFolder) {
+			completeFolderName = this.settings.generateTitleOutputFolderName || DEFAULT_SETTINGS.generateTitleOutputFolderName; // Use default if custom is empty
+		} else {
+			// Default: Use original folder name + _complete (handle root case)
+			const baseFolderName = folderPath === '/' ? 'Vault' : folder.name; // Use 'Vault' for root
+			completeFolderName = `${baseFolderName}_complete`;
+		}
+		// Construct the full path relative to the *parent* of the selected folder, or root if selected folder is root
+		const parentPath = folder.parent?.path === '/' ? '' : (folder.parent?.path ? folder.parent.path + '/' : ''); // Handle root and subfolder parents
+		const completeFolderPath = `${parentPath}${completeFolderName}`;
+		progressReporter?.log(`Determined 'complete' folder path: ${completeFolderPath}`);
+
+		// --- Filter Files ---
+		// Filter for only .md files within the selected folder, excluding _processed.md AND files already in the complete folder
+		const filesToProcess = this.app.vault.getMarkdownFiles().filter(f => {
+			const isInSelectedFolder = f.path.startsWith(folderPath === '/' ? '' : folderPath + '/');
+			// Ensure completeFolderPath ends with '/' for accurate startsWith check unless it's root
+			const normalizedCompletePath = completeFolderPath === '' ? '' : (completeFolderPath.endsWith('/') ? completeFolderPath : completeFolderPath + '/');
+			const isInCompleteFolder = normalizedCompletePath ? f.path.startsWith(normalizedCompletePath) : false; // Check if file is inside the complete folder
+			return isInSelectedFolder && !isInCompleteFolder && !f.name.endsWith('_processed.md');
+		});
+
 
 		if (filesToProcess.length === 0) {
-			new Notice(`No eligible '.md' files found in selected folder: ${folderPath}`);
-			progressReporter.log(`No eligible '.md' files found in selected folder: ${folderPath}`);
-			progressReporter.updateStatus('No files found', 100);
+			new Notice(`No eligible '.md' files found in "${folderPath}" (excluding the '${completeFolderName}' subfolder).`);
+			progressReporter?.log(`No eligible '.md' files found in "${folderPath}" (excluding '${completeFolderName}').`);
+			progressReporter?.updateStatus('No files found', 100);
 			if (progressReporter instanceof ProgressModal) setTimeout(() => progressReporter.close(), 2000);
 			return;
 		}
 
 		this.updateStatusBar(`Batch generating content for ${filesToProcess.length} files...`);
-		progressReporter.clearDisplay();
-		progressReporter.log(`Starting batch content generation for ${filesToProcess.length} files in "${folderPath}"...`);
+		progressReporter?.clearDisplay(); // Use optional chaining
+		progressReporter?.log(`Starting batch content generation for ${filesToProcess.length} files in "${folderPath}"...`);
 		const errors: { file: string; message: string }[] = [];
+
+		// --- Ensure Complete Folder Exists ---
+		try {
+			// Normalize path for adapter methods (remove trailing slash if not root)
+			const normalizedCompleteFolderPath = completeFolderPath.endsWith('/') && completeFolderPath !== '/' ? completeFolderPath.slice(0, -1) : completeFolderPath;
+
+			const targetFolderExists = await this.app.vault.adapter.exists(normalizedCompleteFolderPath);
+			if (!targetFolderExists) {
+				await this.app.vault.createFolder(normalizedCompleteFolderPath);
+				progressReporter?.log(`Created 'complete' folder: ${normalizedCompleteFolderPath}`);
+			} else {
+				const targetFolderStat = await this.app.vault.adapter.stat(normalizedCompleteFolderPath);
+				if (targetFolderStat && targetFolderStat.type !== 'folder') {
+					throw new Error(`Path for 'complete' folder (${normalizedCompleteFolderPath}) exists but is not a directory.`);
+				}
+			}
+		} catch (folderError: any) {
+			new Notice(`Error ensuring 'complete' folder exists: ${folderError.message}`);
+			progressReporter?.log(`Error ensuring 'complete' folder exists at ${completeFolderPath}: ${folderError.message}`);
+			progressReporter?.updateStatus('Error creating output folder', -1);
+			return; // Stop processing if we can't create the output folder
+		}
+		// --- End Ensure Complete Folder Exists ---
+
 
 		try {
 			for (let i = 0; i < filesToProcess.length; i++) {
@@ -3029,21 +3358,67 @@ Format directly for Obsidian markdown. Do NOT wrap the entire response in a mark
 					// This is a bit hacky, ideally generateContentForTitle would take a TFile argument
 					const currentLeaf = this.app.workspace.activeLeaf;
 					await this.app.workspace.setActiveLeaf(this.app.workspace.getLeaf(true), { focus: false }); // Create temp leaf if needed
-					await this.app.workspace.openLinkText(file.path, '', false); // Open file without focus
+					// No longer need to open the file, just pass it directly
+					// await this.app.workspace.openLinkText(file.path, '', false);
 
-					// Call generateContentForTitle, which uses the (now active) file
-					await this.generateContentForTitle(progressReporter); // Pass reporter
+					// Call generateContentForTitle, passing the file and reporter
+					await this.generateContentForTitle(file, progressReporter);
 
-					// Restore original leaf if possible
+					// --- Move Successfully Processed File ---
+					try {
+						// Ensure completeFolderPath ends with a slash if it's not empty
+						const normalizedCompletePathForMove = completeFolderPath ? (completeFolderPath.endsWith('/') ? completeFolderPath : completeFolderPath + '/') : '';
+						const destinationPath = `${normalizedCompletePathForMove}${file.name}`;
+
+						// Check if file already exists at destination to prevent error
+						const destExists = await this.app.vault.adapter.exists(destinationPath);
+						if (destExists) {
+							progressReporter?.log(`⚠️ File already exists at destination, skipping move: ${destinationPath}`);
+							// Optionally delete the source file? Or just log? Let's just log for now.
+						} else {
+							// Check if source file still exists before attempting rename
+							const sourceExists = await this.app.vault.adapter.exists(file.path);
+							if (sourceExists) {
+								await this.app.vault.rename(file, destinationPath);
+								progressReporter?.log(`✅ Moved processed file to: ${destinationPath}`);
+							} else {
+								progressReporter?.log(`⚠️ Source file ${file.path} not found, skipping move.`);
+							}
+						}
+					} catch (moveError: any) {
+						const moveErrorMsg = `Error moving processed file ${file.name} to ${completeFolderPath}: ${moveError.message}`;
+						console.error(moveErrorMsg, moveError);
+						progressReporter?.log(`❌ ${moveErrorMsg}`);
+						// Add this specific error to the main error list?
+						errors.push({ file: file.name, message: `Failed to move after generation: ${moveError.message}` });
+						// Continue to next file even if move fails
+					}
+					// --- End Move File ---
+
+
+					// No longer need to restore leaf as we didn't change it
 					if (currentLeaf) {
 						this.app.workspace.setActiveLeaf(currentLeaf);
 					}
 
-				} catch (fileError: any) {
+				} catch (fileError: any) { // Catch errors from generateContentForTitle
 					const errorMsg = `Error generating content for ${file.name}: ${fileError.message}`;
-					console.error(errorMsg, fileError);
+					const errorDetails = fileError instanceof Error ? fileError.stack || fileError.message : String(fileError);
+					console.error(errorMsg, errorDetails); // Keep console error for details
 					progressReporter.log(`❌ ${errorMsg}`);
 					errors.push({ file: file.name, message: fileError.message });
+
+					// --- Silent Error Logging to File ---
+					const timestamp = new Date().toISOString();
+					const logEntry = `[${timestamp}] Error generating content for ${file.path}:\n${errorDetails}\n\n`;
+					try {
+						await this.app.vault.adapter.append('error_processing_filename.log', logEntry);
+					} catch (logError) {
+						console.error("Failed to write to error_processing_filename.log:", logError);
+						progressReporter.log("⚠️ Failed to write error details to log file."); // Corrected variable name
+					}
+					// --- End Silent Error Logging ---
+
 					// Continue to the next file
 				}
 
@@ -3058,10 +3433,12 @@ Format directly for Obsidian markdown. Do NOT wrap the entire response in a mark
 			// --- Final Reporting ---
 			if (!progressReporter.cancelled) {
 				if (errors.length > 0) {
-					const errorSummary = `Batch generation finished with ${errors.length} error(s). Check log.`;
+					// Modify the error summary message to point to the log file
+					const errorSummary = `Batch generation finished with ${errors.length} error(s). Check 'error_processing_filename.log' for details.`;
 					progressReporter.log(`⚠️ ${errorSummary}`);
-					progressReporter.updateStatus(errorSummary, -1);
+					progressReporter.updateStatus(errorSummary, -1); // Indicate error state
 					this.updateStatusBar(`Batch generation complete with errors`);
+					// Update the Notice to mention the log file
 					new Notice(errorSummary, 10000);
 				} else {
 					progressReporter.updateStatus('Batch generation complete!', 100);
@@ -3085,7 +3462,6 @@ Format directly for Obsidian markdown. Do NOT wrap the entire response in a mark
 	}
 
 
->>>>>>> add-LMCG
 } // End of NotemdPlugin class definition
 
 
@@ -3359,15 +3735,6 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 		container.empty();
 		container.addClass('notemd-sidebar-container'); // Add a class for potential styling
 
-<<<<<<< HEAD
-		container.createEl("h4", { text: "Notemd Actions" });
-
-		// --- Action Buttons ---
-		const buttonGroup = container.createDiv({ cls: 'notemd-button-group' });
-
-		// Process Current File Button
-		const processCurrentButton = buttonGroup.createEl('button', { text: 'Process Current File', cls: 'mod-cta' });
-=======
 		container.createEl("h4", { text: "Original Processing" });
 
 		// --- Original Action Buttons ---
@@ -3376,7 +3743,6 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 		// Process Current File Button (Original Logic)
 		const processCurrentButton = originalButtonGroup.createEl('button', { text: 'Process File (Add Links)', cls: 'mod-cta' });
 		processCurrentButton.title = 'Processes the current file to add [[wiki-links]] and create concept notes based on LLM analysis.'; // Use title attribute
->>>>>>> add-LMCG
 		processCurrentButton.onclick = async () => {
 			if (this.isProcessing) {
 				new Notice("Processing already in progress.");
@@ -3392,15 +3758,6 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 			this.log('Starting: Process Current File...');
 			this.updateStatus('Processing current file...', 0);
 			// Pass 'this' (the view instance) instead of creating a ProgressModal
-<<<<<<< HEAD
-			await this.plugin.processWithNotemd(this);
-			this.isProcessing = false; // Mark processing finished
-			if (this.cancelButton) this.cancelButton.addClass('is-hidden'); // Hide cancel button
-		};
-
-		// Process Folder Button
-		const processFolderButton = buttonGroup.createEl('button', { text: 'Process Folder' });
-=======
 			await this.plugin.processWithNotemd(this); // Calls original logic
 			this.isProcessing = false; // Mark processing finished
 			if (this.cancelButton) this.cancelButton.addClass('is-hidden'); // Hide cancel button
@@ -3408,7 +3765,6 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 		// Process Folder Button (Original Logic)
 		const processFolderButton = originalButtonGroup.createEl('button', { text: 'Process Folder (Add Links)' });
 		processFolderButton.title = 'Processes all files in a selected folder to add [[wiki-links]] and create concept notes.'; // Use title attribute
->>>>>>> add-LMCG
 		processFolderButton.onclick = async () => {
 			if (this.isProcessing) {
 				new Notice("Processing already in progress.");
@@ -3424,19 +3780,11 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 			this.log('Starting: Process Folder...');
 			this.updateStatus('Processing folder...', 0);
 			// Pass 'this' (the view instance) instead of creating a ProgressModal
-<<<<<<< HEAD
-			await this.plugin.processFolderWithNotemd(this);
-=======
 			await this.plugin.processFolderWithNotemd(this); // Calls original logic
->>>>>>> add-LMCG
 			this.isProcessing = false;
 			if (this.cancelButton) this.cancelButton.addClass('is-hidden'); // Hide cancel button
 		};
 
-<<<<<<< HEAD
-		// Check Duplicates Button
-		const checkDuplicatesButton = buttonGroup.createEl('button', { text: 'Check Duplicates (Current File)' });
-=======
 		// --- New Feature Buttons ---
 		container.createEl('h4', { text: "New Features" });
 		const newFeatureButtonGroup = container.createDiv({ cls: 'notemd-button-group' });
@@ -3481,9 +3829,16 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 				this.cancelButton.removeClass('is-hidden');
 				this.cancelButton.disabled = false;
 			}
+			const activeFile = this.plugin.app.workspace.getActiveFile();
+			if (!activeFile || !(activeFile instanceof TFile) || activeFile.extension !== 'md') {
+				new Notice('No active Markdown file selected.');
+				this.isProcessing = false;
+				if (this.cancelButton) this.cancelButton.addClass('is-hidden');
+				return;
+			}
 			this.log('Starting: Generate Content from Title...');
 			this.updateStatus('Generating content...', 0);
-			await this.plugin.generateContentForTitle(this); // Calls the modified function
+			await this.plugin.generateContentForTitle(activeFile, this); // Pass active file and reporter
 			this.isProcessing = false;
 			if (this.cancelButton) this.cancelButton.addClass('is-hidden');
 		};
@@ -3517,7 +3872,6 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 
 		// Check Duplicates Button
 		const checkDuplicatesButton = utilityButtonGroup.createEl('button', { text: 'Check Duplicates (Current File)' });
->>>>>>> add-LMCG
 		checkDuplicatesButton.onclick = async () => {
 			// This action is quick, doesn't need the full processing state management
 			const activeFile = this.plugin.app.workspace.getActiveFile();
@@ -3539,11 +3893,7 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 		};
 
 		// Test Connection Button
-<<<<<<< HEAD
-		const testConnectionButton = buttonGroup.createEl('button', { text: 'Test LLM Connection' });
-=======
 		const testConnectionButton = utilityButtonGroup.createEl('button', { text: 'Test LLM Connection' });
->>>>>>> add-LMCG
 		testConnectionButton.onclick = async () => {
 			if (this.isProcessing) {
 				new Notice("Cannot test connection while processing.");
@@ -3641,8 +3991,6 @@ class NotemdSettingTab extends PluginSettingTab {
 		this.plugin = plugin;
 	}
 
-<<<<<<< HEAD
-=======
 	// Define the path for the providers JSON file within the plugin's config directory
 	private get providersFilePath(): string {
 		// Note: this.app.vault.configDir might be '.obsidian'
@@ -3740,7 +4088,6 @@ class NotemdSettingTab extends PluginSettingTab {
 	}
 
 
->>>>>>> add-LMCG
 	display(): void {
 		const {containerEl} = this;
 
@@ -3751,8 +4098,6 @@ class NotemdSettingTab extends PluginSettingTab {
 		// --- Provider Configuration ---
 		containerEl.createEl('h3', { text: 'LLM Provider Configuration' });
 
-<<<<<<< HEAD
-=======
 		// --- Import/Export Buttons ---
 		const providerMgmtSetting = new Setting(containerEl)
 			.setName('Manage Provider Configurations')
@@ -3775,7 +4120,6 @@ class NotemdSettingTab extends PluginSettingTab {
 		// --- End Import/Export Buttons ---
 
 
->>>>>>> add-LMCG
 		new Setting(containerEl)
 			.setName('Active Provider')
 			.setDesc('Select the LLM provider to use for processing.')
@@ -3903,6 +4247,134 @@ class NotemdSettingTab extends PluginSettingTab {
 			containerEl.createEl('p', { text: 'Error: Could not find configuration for the active provider.', cls: 'notemd-error-text' });
 		}
 
+		// --- Multi-Model Settings ---
+		containerEl.createEl('h3', { text: 'Multi-Model Configuration' });
+
+		new Setting(containerEl)
+			.setName('Use Different Providers for Tasks')
+			.setDesc('ON: Select a specific LLM provider for each task below. OFF: Use the single "Active Provider" selected above for all tasks.')
+			.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.useMultiModelSettings)
+				.onChange(async (value) => {
+					this.plugin.settings.useMultiModelSettings = value;
+					// Ensure task-specific providers are initialized if toggled on
+					if (value) {
+						this.plugin.settings.addLinksProvider = this.plugin.settings.addLinksProvider || this.plugin.settings.activeProvider;
+						this.plugin.settings.researchProvider = this.plugin.settings.researchProvider || this.plugin.settings.activeProvider;
+						this.plugin.settings.generateTitleProvider = this.plugin.settings.generateTitleProvider || this.plugin.settings.activeProvider;
+					}
+					await this.plugin.saveSettings();
+					this.display(); // Refresh to show/hide task-specific dropdowns
+				}));
+
+		if (this.plugin.settings.useMultiModelSettings) {
+			const providerNames = this.plugin.settings.providers.map(p => p.name).sort();
+
+			// Helper function to create provider and model settings for a task
+			const createTaskModelSettings = (
+				providerSettingName: keyof NotemdSettings,
+				modelSettingName: keyof NotemdSettings,
+				taskDesc: string
+			) => {
+				const taskSetting = new Setting(containerEl)
+					.setName(`${taskDesc} Provider & Model`)
+					.setDesc(`Select provider and optionally override model for "${taskDesc}". Leave model blank to use provider's default.`);
+
+				// Provider Dropdown
+				taskSetting.addDropdown(dropdown => {
+					providerNames.forEach(name => {
+						dropdown.addOption(name, name);
+					});
+					dropdown
+						.setValue(this.plugin.settings[providerSettingName] as string)
+						.onChange(async (value) => {
+							(this.plugin.settings[providerSettingName] as any) = value;
+							await this.plugin.saveSettings();
+							this.display(); // Refresh display to update model placeholder
+						});
+				});
+
+				// Model Text Input (Override)
+				const selectedProviderName = this.plugin.settings[providerSettingName] as string;
+				const selectedProvider = this.plugin.settings.providers.find(p => p.name === selectedProviderName);
+				const defaultModel = selectedProvider ? selectedProvider.model : 'Provider not found';
+
+				taskSetting.addText(text => text
+					.setPlaceholder(`Default: ${defaultModel}`)
+					.setValue(this.plugin.settings[modelSettingName] as string || '') // Use || '' to handle undefined/null
+					.onChange(async (value) => {
+						// Store the override, even if empty (means use default)
+						(this.plugin.settings[modelSettingName] as any) = value.trim();
+						await this.plugin.saveSettings();
+					}));
+			};
+
+			createTaskModelSettings('addLinksProvider', 'addLinksModel', 'Add Links (Process File/Folder)');
+			createTaskModelSettings('researchProvider', 'researchModel', 'Research & Summarize');
+			createTaskModelSettings('generateTitleProvider', 'generateTitleModel', 'Generate from Title');
+		}
+		// --- End Multi-Model Settings ---
+
+
+		// --- Stable API Call Settings ---
+		containerEl.createEl('h3', { text: 'Stable API Call Settings' });
+
+		new Setting(containerEl)
+			.setName('Enable Stable API Calls (Retry Logic)')
+			.setDesc('ON: Automatically retry failed LLM API calls based on the settings below. OFF: A single API call failure will stop the current task.')
+			.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.enableStableApiCall)
+				.onChange(async (value) => {
+					this.plugin.settings.enableStableApiCall = value;
+					await this.plugin.saveSettings();
+					this.display(); // Refresh to show/hide retry options
+				}));
+
+		if (this.plugin.settings.enableStableApiCall) {
+			new Setting(containerEl)
+				.setName('Retry Interval (seconds)')
+				.setDesc('Time to wait between retry attempts after an API call fails.')
+				.addText(text => text
+					.setPlaceholder(String(DEFAULT_SETTINGS.apiCallInterval))
+					.setValue(String(this.plugin.settings.apiCallInterval))
+					.onChange(async (value) => {
+						const numValue = parseInt(value, 10);
+						if (!isNaN(numValue) && numValue >= 1 && numValue <= 300) { // Allow 1 sec to 5 mins interval
+							this.plugin.settings.apiCallInterval = numValue;
+							await this.plugin.saveSettings();
+						} else if (value === '') {
+							this.plugin.settings.apiCallInterval = DEFAULT_SETTINGS.apiCallInterval;
+							await this.plugin.saveSettings();
+							this.display(); // Refresh to show default restored
+						} else {
+							new Notice("Please enter a valid number between 1 and 300 for the retry interval.");
+							text.setValue(String(this.plugin.settings.apiCallInterval)); // Revert
+						}
+					}));
+
+			new Setting(containerEl)
+				.setName('Maximum Retries')
+				.setDesc('Maximum number of times to retry a failed API call.')
+				.addText(text => text
+					.setPlaceholder(String(DEFAULT_SETTINGS.apiCallMaxRetries))
+					.setValue(String(this.plugin.settings.apiCallMaxRetries))
+					.onChange(async (value) => {
+						const numValue = parseInt(value, 10);
+						if (!isNaN(numValue) && numValue >= 0 && numValue <= 10) { // Allow 0 to 10 retries
+							this.plugin.settings.apiCallMaxRetries = numValue;
+							await this.plugin.saveSettings();
+						} else if (value === '') {
+							this.plugin.settings.apiCallMaxRetries = DEFAULT_SETTINGS.apiCallMaxRetries;
+							await this.plugin.saveSettings();
+							this.display(); // Refresh to show default restored
+						} else {
+							new Notice("Please enter a valid number between 0 and 10 for maximum retries.");
+							text.setValue(String(this.plugin.settings.apiCallMaxRetries)); // Revert
+						}
+					}));
+		}
+		// --- End Stable API Call Settings ---
+
 
 		// --- General Settings ---
 		containerEl.createEl('h3', { text: 'General Settings' });
@@ -3950,8 +4422,6 @@ class NotemdSettingTab extends PluginSettingTab {
 					}));
 		}
 
-<<<<<<< HEAD
-=======
 		// Add the new toggle setting for move/copy workflow
 		new Setting(containerEl)
 			.setName('Move Original File After Processing')
@@ -3964,8 +4434,33 @@ class NotemdSettingTab extends PluginSettingTab {
 					// No need to refresh display for this toggle
 				}));
 
+		// Add Custom Output Filename settings for 'Add Links'
+		new Setting(containerEl)
+			.setName("Use Custom Output Filename for 'Add Links'")
+			.setDesc("ON: Use the custom suffix/replacement below instead of '_processed.md'. OFF: Use the default '_processed.md' suffix.")
+			.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.useCustomAddLinksSuffix)
+				.onChange(async (value) => {
+					this.plugin.settings.useCustomAddLinksSuffix = value;
+					await this.plugin.saveSettings();
+					this.display(); // Refresh to show/hide the text input
+				}));
 
->>>>>>> add-LMCG
+		if (this.plugin.settings.useCustomAddLinksSuffix) {
+			new Setting(containerEl)
+				.setName("Custom Suffix/Replacement String")
+				.setDesc("Enter the string to append/replace the filename with. Leave empty to overwrite the original file. Example: '_linked' results in 'filename_linked.md'.")
+				.addText(text => text
+					.setPlaceholder("Leave empty to overwrite original")
+					.setValue(this.plugin.settings.addLinksCustomSuffix)
+					.onChange(async (value) => {
+						// No specific validation needed here, empty string is a valid option
+						this.plugin.settings.addLinksCustomSuffix = value; // Store trimmed or full? Let's store as is.
+						await this.plugin.saveSettings();
+					}));
+		}
+
+
 		// --- Concept Note Output Settings ---
 		containerEl.createEl('h4', { text: 'Concept Note Output' });
 
@@ -4135,10 +4630,8 @@ class NotemdSettingTab extends PluginSettingTab {
 		// --- Concept Log File Output Settings --- END
 
 
-<<<<<<< HEAD
-=======
 		// --- Content Generation Settings ---
-		containerEl.createEl('h4', { text: 'Content Generation' });
+		containerEl.createEl('h4', { text: 'Content Generation & Output' }); // Updated heading
 
 		new Setting(containerEl)
 			.setName('Enable Research in "Generate from Title"')
@@ -4166,6 +4659,49 @@ class NotemdSettingTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 					this.display(); // Refresh settings
 				}));
+
+		// --- Generate from Title Output Folder Settings ---
+		new Setting(containerEl)
+			.setName("Use Custom Output Folder for 'Generate from Title'")
+			.setDesc("ON: Move successfully generated files to the custom folder name specified below (relative to the original folder). OFF: Move them to '[original_foldername]_complete'.")
+			.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.useCustomGenerateTitleOutputFolder)
+				.onChange(async (value) => {
+					this.plugin.settings.useCustomGenerateTitleOutputFolder = value;
+					await this.plugin.saveSettings();
+					this.display(); // Refresh to show/hide the text input
+				}));
+
+		if (this.plugin.settings.useCustomGenerateTitleOutputFolder) {
+			new Setting(containerEl)
+				.setName("Custom Output Folder Name")
+				.setDesc("Name of the subfolder to move completed 'Generate from Title' files into. Invalid chars: \\ / : * ? \" < > | # ^ [ ]")
+				.addText(text => text
+					.setPlaceholder(DEFAULT_SETTINGS.generateTitleOutputFolderName) // Show default
+					.setValue(this.plugin.settings.generateTitleOutputFolderName)
+					.onChange(async (value) => {
+						let folderName = value.trim();
+						const invalidChars = /[\\/:*?"<>|#^[\]]/; // Invalid folder name chars
+
+						if (!folderName) { // Use default if empty
+							folderName = DEFAULT_SETTINGS.generateTitleOutputFolderName;
+							// Optionally inform user? Or just save default silently.
+							// new Notice(`Using default folder name: ${DEFAULT_SETTINGS.generateTitleOutputFolderName}`);
+							text.setValue(folderName); // Update input field to show default
+						}
+
+						if (invalidChars.test(folderName)) {
+							new Notice("Custom output folder name contains invalid characters.", 5000);
+							text.setValue(this.plugin.settings.generateTitleOutputFolderName); // Revert
+							return;
+						}
+
+						this.plugin.settings.generateTitleOutputFolderName = folderName;
+						await this.plugin.saveSettings();
+					}));
+		}
+		// --- End Generate from Title Output Folder Settings ---
+
 
 		// Conditional settings based on provider
 		if (this.plugin.settings.searchProvider === 'tavily') {
@@ -4263,7 +4799,6 @@ class NotemdSettingTab extends PluginSettingTab {
 				}));
 
 
->>>>>>> add-LMCG
 		// --- Other General Settings ---
 		containerEl.createEl('h4', { text: 'Processing Parameters' });
 

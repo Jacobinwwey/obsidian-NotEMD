@@ -49,9 +49,6 @@ describe('splitContent', () => {
       useCustomConceptLogFolder: false,
       conceptLogFolderPath: '',
       useCustomConceptLogFileName: false,
-<<<<<<< HEAD
-      conceptLogFileName: 'Generate.log'
-=======
       conceptLogFileName: 'Generate.log',
       moveOriginalFileOnProcess: false, // Add the missing property
       tavilyApiKey: '', // Add the new Tavily API key setting
@@ -60,10 +57,22 @@ describe('splitContent', () => {
       ddgFetchTimeout: 15, // Add default for test
       maxResearchContentTokens: 3000, // Add default for test
       enableResearchInGenerateContent: false, // Add the new setting for tests
-      tavilyMaxResults: 5, // Add default for test
-      tavilySearchDepth: 'basic' // Add default for test
->>>>>>> add-LMCG
-    };
+			tavilyMaxResults: 5, // Add default for test
+      tavilySearchDepth: 'basic', // Add default for test
+      // Add missing multi-model and stable API call settings
+      useMultiModelSettings: false,
+      addLinksProvider: 'DeepSeek',
+      researchProvider: 'DeepSeek',
+      generateTitleProvider: 'DeepSeek',
+      enableStableApiCall: false,
+            apiCallInterval: 5,
+            apiCallMaxRetries: 3,
+            // Added missing properties from TS errors
+            useCustomAddLinksSuffix: false,
+            addLinksCustomSuffix: '',
+            useCustomGenerateTitleOutputFolder: false,
+            generateTitleOutputFolderName: '_complete',
+        };
   });
 
   it('should split content into chunks based on word count', () => {
@@ -72,6 +81,7 @@ describe('splitContent', () => {
     expect(chunks.length).toBe(1); // Content is not split due to no paragraph breaks
     expect(chunks[0].split(/\s+/).length).toBe(5000);
   });
+
 
   it('should preserve paragraph boundaries when splitting', () => {
     const para1 = 'para1\n\n';
@@ -87,8 +97,6 @@ describe('splitContent', () => {
     const chunks = plugin.splitContent('');
     expect(chunks.length).toBe(0);
   });
-<<<<<<< HEAD
-=======
 
   it('should split content exceeding word count across paragraphs', () => {
     // Set a smaller word count for easier testing
@@ -117,5 +125,4 @@ describe('splitContent', () => {
      plugin.settings.chunkWordCount = 3000;
   });
 
->>>>>>> add-LMCG
 });
