@@ -2998,7 +2998,7 @@ Include:
 5.  Performance characteristics with statistical measures.
 6.  Related technologies with comparative mathematical models.
 7.  Mathematical equations in LaTeX format (using $$...$$ for display and $...$ for inline) with detailed explanations of all parameters and variables. Example: $$ P(f) = \\int_{-\\infty}^{\\infty} p(t) e^{-i2\\pi ft} dt $$
-8.  Mermaid.js diagram code blocks using the format \`\`\`mermaid ... \`\`\` (IMPORTANT: without brackets "()" or "{}" for Mermaid diagrams,Uses plain text labels for edges) for complex relationships or system architectures, Avoids special LaTeX syntax and Uses -->|label| syntax for edge labels.
+8.  Mermaid.js diagram code blocks using the format \`\`\`mermaid ... \`\`\` (IMPORTANT: without brackets "()" or "{}" for Mermaid diagrams,Enclosed node names with spaces/special characters in square brackets) for complex relationships or system architectures, Avoids special LaTeX syntax and Added quotes around subgraph titles with special characters.
 9.  Use bullet points for lists longer than 3 items.
 10. Include references to academic papers with DOI where applicable, under a "## References" section.
 11. Preserve all mathematical formulas and scientific principles without simplification.
