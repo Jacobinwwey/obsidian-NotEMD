@@ -44,10 +44,10 @@ export function refineMermaidBlocks(content: string): string {
 			currentBlockLines = [line];
 			lastArrowIndexInBlock = -1;
 		} else if (inMermaid) {
-			// Remove parentheses from the line content within the mermaid block
-			const lineWithoutParentheses = line.replace(/[()]/g, '');
-			currentBlockLines.push(lineWithoutParentheses);
-			if (lineWithoutParentheses.includes('-->')) { // Check the modified line for arrows
+			// Remove parentheses and curly braces from the line content within the mermaid block
+			const lineWithoutBrackets = line.replace(/[(){}]/g, ''); // Updated regex
+			currentBlockLines.push(lineWithoutBrackets);
+			if (lineWithoutBrackets.includes('-->')) { // Check the modified line for arrows
 				lastArrowIndexInBlock = currentBlockLines.length - 1; // Index within currentBlockLines
 			}
 			if (stripped === '```') {

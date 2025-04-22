@@ -37,7 +37,7 @@ This list outlines potential new features and improvements for the Notemd Obsidi
 -   [x] **Mermaid Syntax Validation & Fixing:**
     -   Integrate post-processing logic to validate and fix common Mermaid syntax issues in LLM output (e.g., ensure ` ```mermaid ` blocks are properly closed after last arrow `-->`).
     -   Adapt logic from `LMStudio-Markdown-Content-Generator/mermaid.py`.
-    -   [x] Added logic to remove parentheses `()` from within Mermaid blocks. (April 2025)
+    -   [x] Added logic to remove parentheses `()` and curly braces `{}` from within Mermaid blocks. (April 2025)
 
 -   [x] **LaTeX Math Delimiter Cleanup:**
     -   Add post-processing step to normalize LaTeX math delimiters (e.g., convert `\(` `\)` to `$`, ensure consistent spacing around `$`).

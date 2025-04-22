@@ -194,6 +194,8 @@ interface ProgressReporter {
 	requestCancel(): void;
 	clearDisplay(): void;
 	get cancelled(): boolean;
+	// Add property to hold the AbortController for the current fetch
+	abortController?: AbortController | null;
 }
 
 
@@ -1403,9 +1405,12 @@ export default class NotemdPlugin extends Plugin {
 		const intervalSeconds = this.settings.enableStableApiCall ? this.settings.apiCallInterval : 0;
 
 		for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+			const controller = new AbortController();
+			progressReporter.abortController = controller; // Store controller
 			try {
 				const response = await fetch(url, {
 					method: 'POST',
+					signal: controller.signal, // Pass signal to fetch
 					headers: {
 						'Content-Type': 'application/json',
 						'Authorization': `Bearer ${provider.apiKey}`
@@ -1446,9 +1451,19 @@ export default class NotemdPlugin extends Plugin {
 				lastError = error; // Store network or other fetch errors
 				console.warn(`callDeepSeekAPI: Attempt ${attempt} failed with error: ${error.message}`);
 				// If it's a network error, retry might help. If it's a parsing error, maybe not, but retry anyway.
+				// Handle AbortError specifically
+				if (error.name === 'AbortError') {
+					console.log("callDeepSeekAPI: Fetch aborted by user cancellation.");
+					throw new Error("API call cancelled by user."); // Re-throw specific error
+				}
+			} finally {
+				// Clear the controller from the reporter once this attempt is done
+				if (progressReporter.abortController === controller) {
+					progressReporter.abortController = null;
+				}
 			}
 
-			// If we reached here, it means the attempt failed and we might retry
+			// If we reached here, it means the attempt failed (and wasn't aborted) and we might retry
 			if (attempt < maxAttempts) {
 				// Check for cancellation BEFORE waiting
 				if (progressReporter.cancelled) {
@@ -1492,9 +1507,12 @@ export default class NotemdPlugin extends Plugin {
 		const intervalSeconds = this.settings.enableStableApiCall ? this.settings.apiCallInterval : 0;
 
 		for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+			const controller = new AbortController();
+			progressReporter.abortController = controller; // Store controller
 			try {
 				const response = await fetch(url, {
 					method: 'POST',
+					signal: controller.signal, // Pass signal to fetch
 					headers: {
 						'Content-Type': 'application/json',
 						'Authorization': `Bearer ${provider.apiKey}`
@@ -1535,9 +1553,19 @@ export default class NotemdPlugin extends Plugin {
 			} catch (error: any) {
 				lastError = error;
 				console.warn(`callOpenAIApi: Attempt ${attempt} failed with error: ${error.message}`);
+				// Handle AbortError specifically
+				if (error.name === 'AbortError') {
+					console.log("callOpenAIApi: Fetch aborted by user cancellation.");
+					throw new Error("API call cancelled by user."); // Re-throw specific error
+				}
+			} finally {
+				// Clear the controller from the reporter once this attempt is done
+				if (progressReporter.abortController === controller) {
+					progressReporter.abortController = null;
+				}
 			}
 
-			// Wait before retrying if applicable
+			// Wait before retrying if applicable (and not aborted)
 			if (attempt < maxAttempts) {
 				// Check for cancellation BEFORE waiting
 				if (progressReporter.cancelled) {
@@ -1574,9 +1602,12 @@ export default class NotemdPlugin extends Plugin {
 		const intervalSeconds = this.settings.enableStableApiCall ? this.settings.apiCallInterval : 0;
 
 		for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+			const controller = new AbortController();
+			progressReporter.abortController = controller; // Store controller
 			try {
 				const response = await fetch(url, {
 					method: 'POST',
+					signal: controller.signal, // Pass signal to fetch
 					headers: {
 						'Content-Type': 'application/json',
 						'x-api-key': provider.apiKey,
@@ -1619,9 +1650,19 @@ export default class NotemdPlugin extends Plugin {
 			} catch (error: any) {
 				lastError = error;
 				console.warn(`callAnthropicApi: Attempt ${attempt} failed with error: ${error.message}`);
+				// Handle AbortError specifically
+				if (error.name === 'AbortError') {
+					console.log("callAnthropicApi: Fetch aborted by user cancellation.");
+					throw new Error("API call cancelled by user."); // Re-throw specific error
+				}
+			} finally {
+				// Clear the controller from the reporter once this attempt is done
+				if (progressReporter.abortController === controller) {
+					progressReporter.abortController = null;
+				}
 			}
 
-			// Wait before retrying if applicable
+			// Wait before retrying if applicable (and not aborted)
 			if (attempt < maxAttempts) {
 				// Check for cancellation BEFORE waiting
 				if (progressReporter.cancelled) {
@@ -1664,9 +1705,12 @@ export default class NotemdPlugin extends Plugin {
 		const intervalSeconds = this.settings.enableStableApiCall ? this.settings.apiCallInterval : 0;
 
 		for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+			const controller = new AbortController();
+			progressReporter.abortController = controller; // Store controller
 			try {
 				const response = await fetch(urlWithKey, {
 					method: 'POST',
+					signal: controller.signal, // Pass signal to fetch
 					headers: {
 						'Content-Type': 'application/json',
 					},
@@ -1707,9 +1751,19 @@ export default class NotemdPlugin extends Plugin {
 			} catch (error: any) {
 				lastError = error;
 				console.warn(`callGoogleApi: Attempt ${attempt} failed with error: ${error.message}`);
+				// Handle AbortError specifically
+				if (error.name === 'AbortError') {
+					console.log("callGoogleApi: Fetch aborted by user cancellation.");
+					throw new Error("API call cancelled by user."); // Re-throw specific error
+				}
+			} finally {
+				// Clear the controller from the reporter once this attempt is done
+				if (progressReporter.abortController === controller) {
+					progressReporter.abortController = null;
+				}
 			}
 
-			// Wait before retrying if applicable
+			// Wait before retrying if applicable (and not aborted)
 			if (attempt < maxAttempts) {
 				// Check for cancellation BEFORE waiting
 				if (progressReporter.cancelled) {
@@ -1749,9 +1803,12 @@ export default class NotemdPlugin extends Plugin {
 		const intervalSeconds = this.settings.enableStableApiCall ? this.settings.apiCallInterval : 0;
 
 		for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+			const controller = new AbortController();
+			progressReporter.abortController = controller; // Store controller
 			try {
 				const response = await fetch(url, {
 					method: 'POST',
+					signal: controller.signal, // Pass signal to fetch
 					headers: {
 						'Content-Type': 'application/json',
 						'Authorization': `Bearer ${provider.apiKey}`
@@ -1792,9 +1849,19 @@ export default class NotemdPlugin extends Plugin {
 			} catch (error: any) {
 				lastError = error;
 				console.warn(`callMistralApi: Attempt ${attempt} failed with error: ${error.message}`);
+				// Handle AbortError specifically
+				if (error.name === 'AbortError') {
+					console.log("callMistralApi: Fetch aborted by user cancellation.");
+					throw new Error("API call cancelled by user."); // Re-throw specific error
+				}
+			} finally {
+				// Clear the controller from the reporter once this attempt is done
+				if (progressReporter.abortController === controller) {
+					progressReporter.abortController = null;
+				}
 			}
 
-			// Wait before retrying if applicable
+			// Wait before retrying if applicable (and not aborted)
 			if (attempt < maxAttempts) {
 				// Check for cancellation BEFORE waiting
 				if (progressReporter.cancelled) {
@@ -1841,9 +1908,12 @@ export default class NotemdPlugin extends Plugin {
 		const intervalSeconds = this.settings.enableStableApiCall ? this.settings.apiCallInterval : 0;
 
 		for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+			const controller = new AbortController();
+			progressReporter.abortController = controller; // Store controller
 			try {
 				const response = await fetch(url, {
 					method: 'POST',
+					signal: controller.signal, // Pass signal to fetch
 					headers: {
 						'Content-Type': 'application/json',
 						'api-key': provider.apiKey // Azure uses 'api-key' header
@@ -1884,9 +1954,19 @@ export default class NotemdPlugin extends Plugin {
 			} catch (error: any) {
 				lastError = error;
 				console.warn(`callAzureOpenAIApi: Attempt ${attempt} failed with error: ${error.message}`);
+				// Handle AbortError specifically
+				if (error.name === 'AbortError') {
+					console.log("callAzureOpenAIApi: Fetch aborted by user cancellation.");
+					throw new Error("API call cancelled by user."); // Re-throw specific error
+				}
+			} finally {
+				// Clear the controller from the reporter once this attempt is done
+				if (progressReporter.abortController === controller) {
+					progressReporter.abortController = null;
+				}
 			}
 
-			// Wait before retrying if applicable
+			// Wait before retrying if applicable (and not aborted)
 			if (attempt < maxAttempts) {
 				// Check for cancellation BEFORE waiting
 				if (progressReporter.cancelled) {
@@ -1927,9 +2007,12 @@ export default class NotemdPlugin extends Plugin {
 		const intervalSeconds = this.settings.enableStableApiCall ? this.settings.apiCallInterval : 0;
 
 		for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+			const controller = new AbortController();
+			progressReporter.abortController = controller; // Store controller
 			try {
 				const response = await fetch(url, {
 					method: 'POST',
+					signal: controller.signal, // Pass signal to fetch
 					headers: {
 						'Content-Type': 'application/json',
 						// LMStudio might need a placeholder key, even if not validated
@@ -1971,9 +2054,19 @@ export default class NotemdPlugin extends Plugin {
 			} catch (error: any) {
 				lastError = error;
 				console.warn(`callLMStudioApi: Attempt ${attempt} failed with error: ${error.message}`);
+				// Handle AbortError specifically
+				if (error.name === 'AbortError') {
+					console.log("callLMStudioApi: Fetch aborted by user cancellation.");
+					throw new Error("API call cancelled by user."); // Re-throw specific error
+				}
+			} finally {
+				// Clear the controller from the reporter once this attempt is done
+				if (progressReporter.abortController === controller) {
+					progressReporter.abortController = null;
+				}
 			}
 
-			// Wait before retrying if applicable
+			// Wait before retrying if applicable (and not aborted)
 			if (attempt < maxAttempts) {
 				// Check for cancellation BEFORE waiting
 				if (progressReporter.cancelled) {
@@ -2017,9 +2110,12 @@ export default class NotemdPlugin extends Plugin {
 		const intervalSeconds = this.settings.enableStableApiCall ? this.settings.apiCallInterval : 0;
 
 		for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+			const controller = new AbortController();
+			progressReporter.abortController = controller; // Store controller
 			try {
 				const response = await fetch(url, {
 					method: 'POST',
+					signal: controller.signal, // Pass signal to fetch
 					headers: {
 						'Content-Type': 'application/json',
 						// No API key needed for Ollama
@@ -2060,9 +2156,19 @@ export default class NotemdPlugin extends Plugin {
 			} catch (error: any) {
 				lastError = error;
 				console.warn(`callOllamaApi: Attempt ${attempt} failed with error: ${error.message}`);
+				// Handle AbortError specifically
+				if (error.name === 'AbortError') {
+					console.log("callOllamaApi: Fetch aborted by user cancellation.");
+					throw new Error("API call cancelled by user."); // Re-throw specific error
+				}
+			} finally {
+				// Clear the controller from the reporter once this attempt is done
+				if (progressReporter.abortController === controller) {
+					progressReporter.abortController = null;
+				}
 			}
 
-			// Wait before retrying if applicable
+			// Wait before retrying if applicable (and not aborted)
 			if (attempt < maxAttempts) {
 				// Check for cancellation BEFORE waiting
 				if (progressReporter.cancelled) {
@@ -2103,9 +2209,12 @@ export default class NotemdPlugin extends Plugin {
 		const intervalSeconds = this.settings.enableStableApiCall ? this.settings.apiCallInterval : 0;
 
 		for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+			const controller = new AbortController();
+			progressReporter.abortController = controller; // Store controller
 			try {
 				const response = await fetch(url, {
 					method: 'POST',
+					signal: controller.signal, // Pass signal to fetch
 					headers: {
 						'Content-Type': 'application/json',
 						'Authorization': `Bearer ${provider.apiKey}`, // Required
@@ -2150,9 +2259,19 @@ export default class NotemdPlugin extends Plugin {
 			} catch (error: any) {
 				lastError = error; // Includes fetch errors caught by the outer try-catch
 				console.warn(`callOpenRouterAPI: Attempt ${attempt} failed with error: ${error.message}`);
+				// Handle AbortError specifically
+				if (error.name === 'AbortError') {
+					console.log("callOpenRouterAPI: Fetch aborted by user cancellation.");
+					throw new Error("API call cancelled by user."); // Re-throw specific error
+				}
+			} finally {
+				// Clear the controller from the reporter once this attempt is done
+				if (progressReporter.abortController === controller) {
+					progressReporter.abortController = null;
+				}
 			}
 
-			// Wait before retrying if applicable
+			// Wait before retrying if applicable (and not aborted)
 			if (attempt < maxAttempts) {
 				// Check for cancellation BEFORE waiting
 				if (progressReporter.cancelled) {
@@ -2879,7 +2998,7 @@ Include:
 5.  Performance characteristics with statistical measures.
 6.  Related technologies with comparative mathematical models.
 7.  Mathematical equations in LaTeX format (using $$...$$ for display and $...$ for inline) with detailed explanations of all parameters and variables. Example: $$ P(f) = \\int_{-\\infty}^{\\infty} p(t) e^{-i2\\pi ft} dt $$
-8.  Mermaid.js diagram code blocks using the format \`\`\`mermaid ... \`\`\` (IMPORTANT: without brackets for Mermaid diagrams) for complex relationships or system architectures.
+8.  Mermaid.js diagram code blocks using the format \`\`\`mermaid ... \`\`\` (IMPORTANT: without brackets "()" or "{}" for Mermaid diagrams,Uses plain text labels for edges) for complex relationships or system architectures, Avoids special LaTeX syntax and Uses -->|label| syntax for edge labels.
 9.  Use bullet points for lists longer than 3 items.
 10. Include references to academic papers with DOI where applicable, under a "## References" section.
 11. Preserve all mathematical formulas and scientific principles without simplification.
@@ -3618,6 +3737,8 @@ class ProgressModal extends Modal implements ProgressReporter {
 	private isCancelled = false;
 	private startTime: number = 0;
 	private timeRemainingEl: HTMLElement;
+	// Store the AbortController for the current operation
+	private currentAbortController: AbortController | null = null;
 
 	constructor(app: App) {
 		super(app);
@@ -3728,7 +3849,9 @@ class ProgressModal extends Modal implements ProgressReporter {
 		if (!this.isCancelled) {
 			this.isCancelled = true;
 			this.updateStatus('Cancelling...', -1); // Indicate cancellation visually
-			this.log('User requested cancellation');
+			this.log('User requested cancellation.');
+			// Abort the ongoing fetch request, if any
+			this.currentAbortController?.abort();
 			if (this.cancelButton) this.cancelButton.setAttribute('disabled', 'true');
 		}
 	}
@@ -3738,7 +3861,16 @@ class ProgressModal extends Modal implements ProgressReporter {
 		this.logEl?.empty();
 		this.updateStatus('Starting...', 0);
 		this.isCancelled = false;
+		this.currentAbortController = null; // Clear controller on display clear
 		if (this.cancelButton) this.cancelButton.removeAttribute('disabled');
+	}
+
+	// Implement the abortController property from the interface
+	get abortController(): AbortController | null | undefined {
+		return this.currentAbortController;
+	}
+	set abortController(controller: AbortController | null | undefined) {
+		this.currentAbortController = controller ?? null;
 	}
 }
 
@@ -3759,6 +3891,8 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 	private isProcessing: boolean = false; // Track if processing is active
 	private cancelButton: HTMLButtonElement | null = null; // Reference to cancel button
 	private isCancelled: boolean = false; // Track cancellation state
+	// Store the AbortController for the current operation
+	private currentAbortController: AbortController | null = null;
 
 	constructor(leaf: WorkspaceLeaf, plugin: NotemdPlugin) {
 		super(leaf);
@@ -3800,6 +3934,7 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 		this.isProcessing = false;
 		this.isCancelled = false;
 		this.startTime = 0;
+		this.currentAbortController = null; // Clear controller
 	}
 
 	// Method to update status display
@@ -3865,12 +4000,22 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 
 	// Method to handle cancellation request
 	requestCancel() {
-		if (this.isProcessing) {
+		if (this.isProcessing && !this.isCancelled) { // Only cancel if processing and not already cancelled
 			this.isCancelled = true;
 			this.updateStatus('Cancelling...', -1);
 			this.log('User requested cancellation.');
+			// Abort the ongoing fetch request, if any
+			this.currentAbortController?.abort();
 			if (this.cancelButton) this.cancelButton.disabled = true;
 		}
+	}
+
+	// Implement the abortController property from the interface
+	get abortController(): AbortController | null | undefined {
+		return this.currentAbortController;
+	}
+	set abortController(controller: AbortController | null | undefined) {
+		this.currentAbortController = controller ?? null;
 	}
 
 
