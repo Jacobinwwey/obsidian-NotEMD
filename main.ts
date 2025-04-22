@@ -3925,11 +3925,9 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 		if (this.timeRemainingEl) this.timeRemainingEl.setText('');
 		if (this.progressBarContainerEl) this.progressBarContainerEl.addClass('is-hidden'); // Hide progress bar
 		if (this.cancelButton) {
-			// Keep button visible but disabled and styled as inactive
-			this.cancelButton.disabled = true;
-			this.cancelButton.removeClass('is-active'); // Remove active class if present
-			// Optionally add an 'is-inactive' class if specific styling is desired
-			// this.cancelButton.addClass('is-inactive');
+			this.cancelButton.disabled = false; // Enable button
+			this.cancelButton.addClass('is-active');
+			// this.cancelButton.removeClass('is-inactive');
 		}
 		this.isProcessing = false;
 		this.isCancelled = false;
@@ -4006,7 +4004,11 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 			this.log('User requested cancellation.');
 			// Abort the ongoing fetch request, if any
 			this.currentAbortController?.abort();
-			if (this.cancelButton) this.cancelButton.disabled = true;
+			if (this.cancelButton) {
+				this.cancelButton.disabled = false; // Enable button
+				this.cancelButton.addClass('is-active');
+				// this.cancelButton.removeClass('is-inactive');
+			}
 		}
 	}
 
@@ -4042,7 +4044,7 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 			this.startTime = Date.now();
 			if (this.cancelButton) {
 				this.cancelButton.disabled = false; // Enable button
-				this.cancelButton.addClass('is-active'); // Add class for active styling
+				this.cancelButton.addClass('is-active');
 				// this.cancelButton.removeClass('is-inactive');
 			}
 			this.log('Starting: Process Current File...');
@@ -4136,9 +4138,9 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 				new Notice('No active Markdown file selected.');
 				this.isProcessing = false;
 				if (this.cancelButton) {
-					this.cancelButton.disabled = true; // Disable button
-					this.cancelButton.removeClass('is-active');
-					// this.cancelButton.addClass('is-inactive');
+					this.cancelButton.disabled = false; // Enable button
+					this.cancelButton.addClass('is-active');
+					// this.cancelButton.removeClass('is-inactive');
 				}
 				return;
 			}
@@ -4257,7 +4259,11 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 		// Cancel Button (visible but disabled initially)
 		this.cancelButton = progressArea.createEl('button', { text: 'Cancel Processing', cls: 'notemd-cancel-button' });
 		// this.cancelButton.addClass('is-inactive'); // Optional class for styling when disabled
-		this.cancelButton.disabled = true; // Start disabled
+		if (this.cancelButton) {
+			this.cancelButton.disabled = false; // Enable button
+			this.cancelButton.addClass('is-active');
+			// this.cancelButton.removeClass('is-inactive');
+		}
 		this.cancelButton.onclick = () => this.requestCancel();
 
 
