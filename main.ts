@@ -3852,7 +3852,7 @@ class ProgressModal extends Modal implements ProgressReporter {
 			this.log('User requested cancellation.');
 			// Abort the ongoing fetch request, if any
 			this.currentAbortController?.abort();
-			if (this.cancelButton) this.cancelButton.setAttribute('disabled', 'true');
+			// The button will be disabled when the processing task fully stops in the main button handlers.
 		}
 	}
 
@@ -4050,10 +4050,9 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 			// Pass 'this' (the view instance) instead of creating a ProgressModal
 			await this.plugin.processWithNotemd(this); // Calls original logic
 			this.isProcessing = false; // Mark processing finished
+			// Keep cancel button enabled even after completion/cancellation
 			if (this.cancelButton) {
-				this.cancelButton.disabled = true; // Disable button
 				this.cancelButton.removeClass('is-active');
-				// this.cancelButton.addClass('is-inactive');
 			}
 		};
 		// Process Folder Button (Original Logic)
@@ -4077,10 +4076,9 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 			// Pass 'this' (the view instance) instead of creating a ProgressModal
 			await this.plugin.processFolderWithNotemd(this); // Calls original logic
 			this.isProcessing = false;
+			// Keep cancel button enabled even after completion/cancellation
 			if (this.cancelButton) {
-				this.cancelButton.disabled = true; // Disable button
 				this.cancelButton.removeClass('is-active');
-				// this.cancelButton.addClass('is-inactive');
 			}
 		};
 
@@ -4109,10 +4107,9 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 				this.updateStatus('Researching topic...', 0);
 				await this.plugin.researchAndSummarize(activeView.editor, activeView, this);
 				this.isProcessing = false;
+				// Keep cancel button enabled even after completion/cancellation
 				if (this.cancelButton) {
-					this.cancelButton.disabled = true; // Disable button
 					this.cancelButton.removeClass('is-active');
-					// this.cancelButton.addClass('is-inactive');
 				}
 			} else {
 				new Notice('No active Markdown editor found.');
@@ -4149,10 +4146,9 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 			this.updateStatus('Generating content...', 0);
 			await this.plugin.generateContentForTitle(activeFile, this); // Pass active file and reporter
 			this.isProcessing = false;
+			// Keep cancel button enabled even after completion/cancellation
 			if (this.cancelButton) {
-				this.cancelButton.disabled = true; // Disable button
 				this.cancelButton.removeClass('is-active');
-				// this.cancelButton.addClass('is-inactive');
 			}
 		};
 
@@ -4176,10 +4172,9 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 			this.updateStatus('Starting batch generation...', 0);
 			await this.plugin.batchGenerateContentForTitles(this); // Call the new batch function
 			this.isProcessing = false;
+			// Keep cancel button enabled even after completion/cancellation
 			if (this.cancelButton) {
-				this.cancelButton.disabled = true; // Disable button
 				this.cancelButton.removeClass('is-active');
-				// this.cancelButton.addClass('is-inactive');
 			}
 		};
 
