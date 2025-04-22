@@ -473,6 +473,7 @@ export default class NotemdPlugin extends Plugin {
 
 	// Updated to accept optional progress reporter
 	async processWithNotemd(progressReporter?: ProgressReporter) {
+		await this.loadSettings(); // Ensure latest settings are loaded
 		// console.log("Entering processWithNotemd"); // DEBUG
 		const activeFile = this.app.workspace.getActiveFile();
 		if (!activeFile) {
@@ -537,64 +538,143 @@ export default class NotemdPlugin extends Plugin {
 			await this.handleDuplicates(withLinks); // Check duplicates in the result
 			// console.log("processWithNotemd: handleDuplicates finished."); // DEBUG
 
-			// --- Determine Processed File Output Path ---
+			// --- Refactored: Call processFile to handle saving/moving ---
+			// The processFile function now contains all the logic for determining
+			// the output path based on settings (custom suffix, move original, etc.)
+			// and performs the actual file creation/modification/move.
+			// We pass the activeFile and the reporter instance.
+			// Note: processFile already includes post-processing (Mermaid/LaTeX cleanup)
+			// and duplicate handling, so we don't need to call them again here.
+			// We just need to ensure processFile gets the content *after* LLM processing and link generation.
+
+			// Re-apply post-processing here before passing to processFile,
+			// as processFile expects the final content.
+			reporter.log(`Applying post-processing (Mermaid/LaTeX)...`);
+			let finalContent = withLinks; // Start with content after LLM + link generation
+			try {
+				finalContent = cleanupLatexDelimiters(finalContent);
+				finalContent = refineMermaidBlocks(finalContent);
+				// Remove leading \boxed{ if present
+				const lines = finalContent.split('\n');
+				if (lines.length > 0 && lines[0].trim() === '\\boxed{') {
+					reporter.log(`Removing leading '\\boxed{' line.`);
+					lines.shift();
+					if (lines.length > 0 && lines[lines.length - 1].trim() === '}') {
+						lines.pop();
+					}
+					finalContent = lines.join('\n');
+				}
+				reporter.log(`Post-processing applied.`);
+			} catch (cleanupError: any) {
+				reporter.log(`Warning: Error during Mermaid/LaTeX cleanup: ${cleanupError.message}`);
+				console.warn(`Warning during Mermaid/LaTeX cleanup for ${activeFile.name}:`, cleanupError);
+				// Continue with the content before cleanup attempt
+				finalContent = withLinks;
+			}
+
+
+			// Now, call a modified version of processFile logic directly or refactor processFile
+			// Let's adapt the core saving logic from processFile here, as processFile itself
+			// includes the LLM call which we've already done.
+
+			// --- Determine Output Path (Adapted from processFile) ---
 			let processedFileSaveDir = '';
 			if (this.settings.useCustomProcessedFileFolder && this.settings.processedFileFolder) {
 				processedFileSaveDir = this.settings.processedFileFolder;
 			} else {
-				// Default: Save in the same folder as the original file
-				processedFileSaveDir = activeFile.parent?.path || ''; // Use empty string for vault root
+				processedFileSaveDir = activeFile.parent?.path || '';
 			}
-
-			// Normalize path (remove leading/trailing slashes for consistency, handle root case)
 			processedFileSaveDir = processedFileSaveDir.replace(/^\/|\/$/g, '');
 			if (processedFileSaveDir && !processedFileSaveDir.endsWith('/')) {
 				processedFileSaveDir += '/';
 			}
-			// Handle vault root case explicitly
 			if (activeFile.parent?.path === '/' && !(this.settings.useCustomProcessedFileFolder && this.settings.processedFileFolder)) {
-				processedFileSaveDir = ''; // Ensure root path is empty string for correct concatenation
+				processedFileSaveDir = '';
 			}
 
-
-			// Ensure output folder exists before constructing path
-			const targetSaveFolder = processedFileSaveDir.replace(/\/$/, ''); // Remove trailing slash for check/create
+			// Ensure output folder exists
+			const targetSaveFolder = processedFileSaveDir.replace(/\/$/, '');
 			if (targetSaveFolder && !this.app.vault.getAbstractFileByPath(targetSaveFolder)) {
 				try {
-					// console.log(`DEBUG: Attempting to create processed file folder: '${targetSaveFolder}'`);
 					await this.app.vault.createFolder(targetSaveFolder);
-					reporter.log(`Created processed file output folder: ${targetSaveFolder}`);
+					reporter.log(`Created output folder: ${targetSaveFolder}`);
 				} catch (folderError: any) {
-					// console.error(`DEBUG: createFolder failed specifically for processed file path: '${targetSaveFolder}'`, folderError);
-					reporter.log(`Error creating processed file output folder ${targetSaveFolder}: ${folderError.message}`);
-					new Notice(`Error creating processed file output folder: ${folderError.message}`);
-					throw folderError; // Re-throw to stop processing
+					reporter.log(`Error creating output folder ${targetSaveFolder}: ${folderError.message}`);
+					throw folderError;
 				}
 			} else if (targetSaveFolder && !(this.app.vault.getAbstractFileByPath(targetSaveFolder) instanceof TFolder)) {
-				const errorMsg = `Processed file output path '${targetSaveFolder}' exists but is not a folder.`;
+				const errorMsg = `Output path '${targetSaveFolder}' exists but is not a folder.`;
 				reporter.log(errorMsg);
-				new Notice(errorMsg);
 				throw new Error(errorMsg);
 			}
 
-			// Construct final processed file name
-			const processedName = `${processedFileSaveDir}${activeFile.basename}_processed.md`;
-			reporter.log(`Saving processed file as: ${processedName}`);
-			// console.log(`processWithNotemd: Determined processed file output path: ${processedName}`); // DEBUG
-
-			// Check if file exists before creating/modifying
-			const existingProcessedFile = this.app.vault.getAbstractFileByPath(processedName);
-			// console.log(`processWithNotemd: Checking existence of ${processedName}. Found: ${!!existingProcessedFile}`); // DEBUG
-			if (existingProcessedFile instanceof TFile) {
-				// console.log(`processWithNotemd: Modifying existing file: ${processedName}`); // DEBUG
-				await this.app.vault.modify(existingProcessedFile, withLinks);
-				reporter.log(`Overwrote existing processed file: ${processedName}`);
+			// --- Save or Move File (Adapted from processFile) ---
+			if (this.settings.moveOriginalFileOnProcess) {
+				const targetPath = `${processedFileSaveDir}${activeFile.name}`;
+				reporter.log(`Processing mode: Move & Overwrite original file.`);
+				if (targetPath !== activeFile.path) {
+					reporter.log(`Moving original file to: ${targetPath}`);
+					const existingTargetFile = this.app.vault.getAbstractFileByPath(targetPath);
+					if (existingTargetFile) {
+						throw new Error(`File already exists at target move path: ${targetPath}. Cannot move original file.`);
+					}
+					await this.app.vault.rename(activeFile, targetPath);
+					const movedFile = this.app.vault.getAbstractFileByPath(targetPath);
+					if (movedFile instanceof TFile) {
+						await this.app.vault.modify(movedFile, finalContent);
+						reporter.log(`Overwrote content of moved file: ${targetPath}`);
+					} else {
+						throw new Error(`Failed to find moved file at ${targetPath} after rename.`);
+					}
+				} else {
+					reporter.log(`Overwriting original file in place: ${activeFile.path}`);
+					await this.app.vault.modify(activeFile, finalContent);
+					reporter.log(`Overwrote original file: ${activeFile.path}`);
+				}
 			} else {
-				// console.log(`processWithNotemd: Creating new file: ${processedName}`); // DEBUG
-				await this.app.vault.create(processedName, withLinks);
-				reporter.log(`Created processed file: ${processedName}`);
+				// Logic for creating a processed copy (not moving original)
+				let outputPath: string;
+				let logAction: string;
+
+				if (this.settings.useCustomAddLinksSuffix) {
+					if (this.settings.addLinksCustomSuffix === '') {
+						outputPath = activeFile.path;
+						logAction = `Overwriting original file (custom setting): ${outputPath}`;
+						reporter.log(`Processing mode: Overwrite original (custom setting).`);
+					} else {
+						let suffix = this.settings.addLinksCustomSuffix;
+						if (suffix.toLowerCase().endsWith('.md')) {
+							suffix = suffix.substring(0, suffix.length - 3);
+						}
+						outputPath = `${processedFileSaveDir}${activeFile.basename}${suffix}.md`;
+						logAction = `Saving processed file with custom suffix: ${outputPath}`;
+						reporter.log(`Processing mode: Create copy with custom suffix.`);
+					}
+				} else {
+					outputPath = `${processedFileSaveDir}${activeFile.basename}_processed.md`;
+					logAction = `Saving processed file with default suffix: ${outputPath}`;
+					reporter.log(`Processing mode: Create/Overwrite default processed copy.`);
+				}
+
+				reporter.log(logAction); // Log the determined action and path
+
+				if (outputPath === activeFile.path) {
+					// Overwrite original file case
+					await this.app.vault.modify(activeFile, finalContent);
+					reporter.log(`Overwrote original file: ${outputPath}`);
+				} else {
+					// Create or overwrite a *different* file
+					const existingOutputFile = this.app.vault.getAbstractFileByPath(outputPath);
+					if (existingOutputFile instanceof TFile) {
+						await this.app.vault.modify(existingOutputFile, finalContent);
+						reporter.log(`Overwrote existing file: ${outputPath}`);
+					} else {
+						await this.app.vault.create(outputPath, finalContent);
+						reporter.log(`Created processed file: ${outputPath}`);
+					}
+				}
 			}
-			// console.log("processWithNotemd: File saving complete."); // DEBUG
+			// --- End Adapted Saving Logic ---
 
 			this.updateStatusBar('Processing complete');
 			reporter.updateStatus('Processing complete!', 100);
@@ -622,6 +702,7 @@ export default class NotemdPlugin extends Plugin {
 
 	// Updated to accept optional progress reporter
 	async processFolderWithNotemd(progressReporter?: ProgressReporter) {
+		await this.loadSettings(); // Ensure latest settings are loaded
 		const folderPath = await this.getFolderSelection();
 		if (!folderPath) {
 			new Notice('Folder selection cancelled.');
@@ -931,23 +1012,30 @@ export default class NotemdPlugin extends Plugin {
 			}
 		} else {
 			// Logic for creating a processed copy (not moving original)
+			// Logic for creating a processed copy (not moving original)
 			let outputPath: string;
 			let logAction: string;
 
+			// DEBUGGING LOGS START
+			progressReporter.log(`DEBUG: useCustomAddLinksSuffix = ${this.settings.useCustomAddLinksSuffix}`);
+			progressReporter.log(`DEBUG: addLinksCustomSuffix = "${this.settings.addLinksCustomSuffix}"`);
+			// DEBUGGING LOGS END
+
+			// Determine output path based on custom suffix settings
 			if (this.settings.useCustomAddLinksSuffix) {
-				// Custom suffix/overwrite logic applies
 				if (this.settings.addLinksCustomSuffix === '') {
 					// Overwrite original file
 					outputPath = file.path; // Target the original file path
 					logAction = `Overwriting original file (custom setting): ${outputPath}`;
 					progressReporter.log(`Processing mode: Overwrite original (custom setting).`);
 				} else {
-					// Use custom suffix - ensure .md extension is handled correctly
-					// Remove existing .md if present in suffix, then add it back
+					// Use custom suffix
+					// Ensure .md extension is handled correctly (remove if present in suffix, then add)
 					let suffix = this.settings.addLinksCustomSuffix;
 					if (suffix.toLowerCase().endsWith('.md')) {
 						suffix = suffix.substring(0, suffix.length - 3);
 					}
+					// Ensure suffix starts appropriately (e.g., with '_' if desired, user adds it)
 					outputPath = `${processedFileSaveDir}${file.basename}${suffix}.md`;
 					logAction = `Saving processed file with custom suffix: ${outputPath}`;
 					progressReporter.log(`Processing mode: Create copy with custom suffix.`);
@@ -959,27 +1047,35 @@ export default class NotemdPlugin extends Plugin {
 				progressReporter.log(`Processing mode: Create/Overwrite default processed copy.`);
 			}
 
-			progressReporter.log(logAction);
+			progressReporter.log(logAction); // Log the determined action and path
 
-			const existingOutputFile = this.app.vault.getAbstractFileByPath(outputPath);
-			if (existingOutputFile instanceof TFile) {
-				// If overwriting original or custom file exists, modify it
-				await this.app.vault.modify(existingOutputFile, finalContent);
-				progressReporter.log(`Overwrote existing file: ${outputPath}`);
-			} else if (outputPath !== file.path) {
-				// If creating a new file (not overwriting original) and it doesn't exist
-				await this.app.vault.create(outputPath, finalContent);
-				progressReporter.log(`Created processed file: ${outputPath}`);
+			// --- Corrected File Operation Logic ---
+			if (outputPath === file.path) {
+				// Overwrite original file case
+				const originalFile = this.app.vault.getAbstractFileByPath(file.path);
+				if (originalFile instanceof TFile) {
+					await this.app.vault.modify(originalFile, finalContent);
+					progressReporter.log(`Overwrote original file: ${outputPath}`);
+				} else {
+					// This should ideally not happen, but log an error if it does
+					console.error(`Error: Tried to overwrite original file ${file.path}, but it was not found or not a TFile.`);
+					progressReporter.log(`Error: Could not find original file ${file.path} to overwrite.`);
+					// Optionally throw an error? For now, just log.
+				}
 			} else {
-				// This case handles trying to overwrite the original file when it somehow doesn't exist
-				// which shouldn't happen if 'file' is valid, but log a warning just in case.
-				console.warn(`Attempted to overwrite original file ${outputPath}, but it was not found.`);
-				progressReporter.log(`Warning: Could not find original file ${outputPath} to overwrite.`);
-				// Optionally throw an error or create the file anyway? Let's create it.
-				await this.app.vault.create(outputPath, finalContent);
-				progressReporter.log(`Created file (intended overwrite target not found): ${outputPath}`);
-
+				// Create or overwrite a *different* file (with suffix or in different dir)
+				const existingOutputFile = this.app.vault.getAbstractFileByPath(outputPath);
+				if (existingOutputFile instanceof TFile) {
+					// If the target output file exists, modify it
+					await this.app.vault.modify(existingOutputFile, finalContent);
+					progressReporter.log(`Overwrote existing file: ${outputPath}`);
+				} else {
+					// If the target output file doesn't exist, create it
+					await this.app.vault.create(outputPath, finalContent);
+					progressReporter.log(`Created processed file: ${outputPath}`);
+				}
 			}
+			// --- End Corrected File Operation Logic ---
 		}
 		// console.log(`processFile: File saving/moving/overwriting complete for ${file.name}.`); // DEBUG
 
