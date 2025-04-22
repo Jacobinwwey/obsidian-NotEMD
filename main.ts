@@ -3746,8 +3746,11 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 		if (this.timeRemainingEl) this.timeRemainingEl.setText('');
 		if (this.progressBarContainerEl) this.progressBarContainerEl.addClass('is-hidden'); // Hide progress bar
 		if (this.cancelButton) {
-			this.cancelButton.addClass('is-hidden'); // Hide cancel button
+			// Keep button visible but disabled and styled as inactive
 			this.cancelButton.disabled = true;
+			this.cancelButton.removeClass('is-active'); // Remove active class if present
+			// Optionally add an 'is-inactive' class if specific styling is desired
+			// this.cancelButton.addClass('is-inactive');
 		}
 		this.isProcessing = false;
 		this.isCancelled = false;
@@ -3848,15 +3851,20 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 			this.isProcessing = true;
 			this.startTime = Date.now();
 			if (this.cancelButton) {
-				this.cancelButton.removeClass('is-hidden'); // Show cancel button
-				this.cancelButton.disabled = false;
+				this.cancelButton.disabled = false; // Enable button
+				this.cancelButton.addClass('is-active'); // Add class for active styling
+				// this.cancelButton.removeClass('is-inactive');
 			}
 			this.log('Starting: Process Current File...');
 			this.updateStatus('Processing current file...', 0);
 			// Pass 'this' (the view instance) instead of creating a ProgressModal
 			await this.plugin.processWithNotemd(this); // Calls original logic
 			this.isProcessing = false; // Mark processing finished
-			if (this.cancelButton) this.cancelButton.addClass('is-hidden'); // Hide cancel button
+			if (this.cancelButton) {
+				this.cancelButton.disabled = true; // Disable button
+				this.cancelButton.removeClass('is-active');
+				// this.cancelButton.addClass('is-inactive');
+			}
 		};
 		// Process Folder Button (Original Logic)
 		const processFolderButton = originalButtonGroup.createEl('button', { text: 'Process Folder (Add Links)' });
@@ -3870,15 +3878,20 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 			this.isProcessing = true;
 			this.startTime = Date.now();
 			if (this.cancelButton) {
-				this.cancelButton.removeClass('is-hidden'); // Show cancel button
-				this.cancelButton.disabled = false;
+				this.cancelButton.disabled = false; // Enable button
+				this.cancelButton.addClass('is-active');
+				// this.cancelButton.removeClass('is-inactive');
 			}
 			this.log('Starting: Process Folder...');
 			this.updateStatus('Processing folder...', 0);
 			// Pass 'this' (the view instance) instead of creating a ProgressModal
 			await this.plugin.processFolderWithNotemd(this); // Calls original logic
 			this.isProcessing = false;
-			if (this.cancelButton) this.cancelButton.addClass('is-hidden'); // Hide cancel button
+			if (this.cancelButton) {
+				this.cancelButton.disabled = true; // Disable button
+				this.cancelButton.removeClass('is-active');
+				// this.cancelButton.addClass('is-inactive');
+			}
 		};
 
 		// --- New Feature Buttons ---
@@ -3898,14 +3911,19 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 				this.isProcessing = true;
 				this.startTime = Date.now();
 				if (this.cancelButton) {
-					this.cancelButton.removeClass('is-hidden');
-					this.cancelButton.disabled = false;
+					this.cancelButton.disabled = false; // Enable button
+					this.cancelButton.addClass('is-active');
+					// this.cancelButton.removeClass('is-inactive');
 				}
 				this.log('Starting: Research & Summarize Topic...');
 				this.updateStatus('Researching topic...', 0);
 				await this.plugin.researchAndSummarize(activeView.editor, activeView, this);
 				this.isProcessing = false;
-				if (this.cancelButton) this.cancelButton.addClass('is-hidden');
+				if (this.cancelButton) {
+					this.cancelButton.disabled = true; // Disable button
+					this.cancelButton.removeClass('is-active');
+					// this.cancelButton.addClass('is-inactive');
+				}
 			} else {
 				new Notice('No active Markdown editor found.');
 			}
@@ -3922,21 +3940,30 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 			this.isProcessing = true;
 			this.startTime = Date.now();
 			if (this.cancelButton) {
-				this.cancelButton.removeClass('is-hidden');
-				this.cancelButton.disabled = false;
+				this.cancelButton.disabled = false; // Enable button
+				this.cancelButton.addClass('is-active');
+				// this.cancelButton.removeClass('is-inactive');
 			}
 			const activeFile = this.plugin.app.workspace.getActiveFile();
 			if (!activeFile || !(activeFile instanceof TFile) || activeFile.extension !== 'md') {
 				new Notice('No active Markdown file selected.');
 				this.isProcessing = false;
-				if (this.cancelButton) this.cancelButton.addClass('is-hidden');
+				if (this.cancelButton) {
+					this.cancelButton.disabled = true; // Disable button
+					this.cancelButton.removeClass('is-active');
+					// this.cancelButton.addClass('is-inactive');
+				}
 				return;
 			}
 			this.log('Starting: Generate Content from Title...');
 			this.updateStatus('Generating content...', 0);
 			await this.plugin.generateContentForTitle(activeFile, this); // Pass active file and reporter
 			this.isProcessing = false;
-			if (this.cancelButton) this.cancelButton.addClass('is-hidden');
+			if (this.cancelButton) {
+				this.cancelButton.disabled = true; // Disable button
+				this.cancelButton.removeClass('is-active');
+				// this.cancelButton.addClass('is-inactive');
+			}
 		};
 
 		// Batch Generate Content from Titles Button
@@ -3951,14 +3978,19 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 			this.isProcessing = true;
 			this.startTime = Date.now();
 			if (this.cancelButton) {
-				this.cancelButton.removeClass('is-hidden');
-				this.cancelButton.disabled = false;
+				this.cancelButton.disabled = false; // Enable button
+				this.cancelButton.addClass('is-active');
+				// this.cancelButton.removeClass('is-inactive');
 			}
 			this.log('Starting: Batch Generate Content from Titles...');
 			this.updateStatus('Starting batch generation...', 0);
 			await this.plugin.batchGenerateContentForTitles(this); // Call the new batch function
 			this.isProcessing = false;
-			if (this.cancelButton) this.cancelButton.addClass('is-hidden');
+			if (this.cancelButton) {
+				this.cancelButton.disabled = true; // Disable button
+				this.cancelButton.removeClass('is-active');
+				// this.cancelButton.addClass('is-inactive');
+			}
 		};
 
 
@@ -4037,10 +4069,10 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 		this.timeRemainingEl = progressArea.createEl('p', { cls: 'notemd-time-remaining' });
 		this.progressBarContainerEl.addClass('is-hidden'); // Hide initially
 
-		// Cancel Button (initially hidden)
+		// Cancel Button (visible but disabled initially)
 		this.cancelButton = progressArea.createEl('button', { text: 'Cancel Processing', cls: 'notemd-cancel-button' });
-		this.cancelButton.addClass('is-hidden'); // Hide initially
-		this.cancelButton.disabled = true;
+		// this.cancelButton.addClass('is-inactive'); // Optional class for styling when disabled
+		this.cancelButton.disabled = true; // Start disabled
 		this.cancelButton.onclick = () => this.requestCancel();
 
 
