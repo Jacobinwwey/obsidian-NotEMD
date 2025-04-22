@@ -33,7 +33,7 @@ Notemd enhances your Obsidian workflow by integrating with various Large Languag
 - **Smart Chunking**: Automatically splits large documents into manageable chunks based on word count for processing.
 - **Content Preservation**: Aims to maintain original formatting while adding structure and links.
 - **Progress Tracking**: Real-time updates via the Notemd Sidebar or a progress modal.
-- **Cancellable Operations**: Cancel processing via the modal or sidebar.
+- **Cancellable Operations**: Cancel any processing task (single or batch) initiated from the sidebar via its dedicated cancel button. Command palette operations use a modal which can also be cancelled.
 - **Multi-Model Configuration**: Use different LLM providers *and* specific models for different tasks (Add Links, Research, Generate Title) or use a single provider for all.
 - **Stable API Calls (Retry Logic)**: Optionally enable automatic retries for failed LLM API calls with configurable interval and attempt limits.
 
@@ -41,7 +41,7 @@ Notemd enhances your Obsidian workflow by integrating with various Large Languag
 - **Automatic Wiki-Linking**: Identifies and adds `[[wiki-links]]` to core concepts within your processed notes based on LLM output.
 - **Concept Note Creation (Optional & Customizable)**: Automatically creates new notes for discovered concepts in a specified vault folder.
 - **Customizable Output Paths**: Configure separate relative paths within your vault for saving processed files and newly created concept notes.
-- **Customizable Output Filenames (Add Links)**: Optionally overwrite the original file or use a custom suffix/replacement string instead of the default `_processed.md` when processing files for links.
+- **Customizable Output Filenames (Add Links)**: Optionally **overwrite the original file** or use a custom suffix/replacement string instead of the default `_processed.md` when processing files for links.
 - **Link Integrity Maintenance**: Basic handling for updating links when notes are renamed or deleted within the vault.
 
 ### Web Research & Content Generation
@@ -53,7 +53,7 @@ Notemd enhances your Obsidian workflow by integrating with various Large Languag
 - **Content Generation from Title**:
     - Use the note title to generate initial content via LLM, replacing existing content.
     - **Optional Research**: Configure whether to perform web research (using the selected provider) to provide context for generation.
-- **Batch Content Generation from Titles**: Generate content for all notes within a selected folder based on their titles (respects the optional research setting). Successfully processed files are moved to a configurable "complete" subfolder (e.g., `[foldername]_complete` or a custom name) to avoid reprocessing.
+- **Batch Content Generation from Titles**: Generate content for all notes within a selected folder based on their titles (respects the optional research setting). Successfully processed files are moved to a **configurable "complete" subfolder** (e.g., `[foldername]_complete` or a custom name) to avoid reprocessing.
 
 ### Utility Features
 - **Duplicate Detection**: Basic check for duplicate words within the currently processed file's content (results logged to console).
@@ -116,7 +116,7 @@ Access plugin settings via:
     *   **Enabled**: Allows you to customize the output filename using the setting below.
 -   **Custom Suffix/Replacement String**: (Visible only when the above is enabled) Enter the string to use for the output filename.
     *   If left **empty**, the original file will be **overwritten** with the processed content.
-    *   If you enter a string (e.g., `_linked`), it will be appended to the original base name (e.g., `YourNote_linked.md`).
+    *   If you enter a string (e.g., `_linked`), it will be appended to the original base name (e.g., `YourNote_linked.md`). Ensure the suffix doesn't contain invalid filename characters.
 
 #### Concept Note Output
 -   **Customize Concept Note Path**:
@@ -154,9 +154,9 @@ Access plugin settings via:
     *   **Disabled (Default)**: "Generate from Title" uses only the title as input.
     *   **Enabled**: Performs web research using the configured **Web Research Provider** and includes the findings as context for the LLM during title-based generation.
 -   **Use Custom Output Folder for 'Generate from Title'**:
-    *   **Disabled (Default)**: Successfully generated files are moved to a subfolder named `[OriginalFolderName]_complete` within the original folder's parent directory (or `Vault_complete` if the original folder was the root).
+    *   **Disabled (Default)**: Successfully generated files are moved to a subfolder named `[OriginalFolderName]_complete` relative to the original folder's parent (or `Vault_complete` if the original folder was the root).
     *   **Enabled**: Allows you to specify a custom name for the subfolder where completed files are moved.
--   **Custom Output Folder Name**: (Visible only when the above is enabled) Enter the desired name for the subfolder (e.g., `Generated Content`, `_complete`). Invalid characters are not allowed. Defaults to `_complete` if left empty.
+-   **Custom Output Folder Name**: (Visible only when the above is enabled) Enter the desired name for the subfolder (e.g., `Generated Content`, `_complete`). Invalid characters are not allowed. Defaults to `_complete` if left empty. This folder is created relative to the original folder's parent directory.
 
 #### Web Research Provider
 -   **Search Provider**: Choose between `Tavily` (requires API key, recommended) and `DuckDuckGo` (experimental, often blocked by the search engine for automated requests). Used for "Research & Summarize Topic" and optionally for "Generate from Title".
@@ -179,12 +179,12 @@ This is the core functionality focused on identifying concepts and adding `[[wik
     *   Open the `.md` or `.txt` file.
     *   Click **"Process File (Add Links)"**.
     *   To process a folder: Click **"Process Folder (Add Links)"**, select the folder, and click "Process".
-    *   Progress is shown in the sidebar.
+    *   Progress is shown in the sidebar. You can cancel the task using the "Cancel Processing" button in the sidebar.
 
 2.  **Using the Command Palette** (`Ctrl+P` or `Cmd+P`):
     *   **Single File**: Open the file and run `Notemd: Process Current File`.
     *   **Folder**: Run `Notemd: Process Folder`, then select the folder.
-    *   A progress modal appears for command palette actions.
+    *   A progress modal appears for command palette actions, which includes a cancel button.
     *   *Note:* The plugin automatically removes leading `\boxed{` and trailing `}` lines if found in the final processed content before saving.
 
 ### New Features (Web Research & Content Generation)
@@ -192,21 +192,25 @@ This is the core functionality focused on identifying concepts and adding `[[wik
 1.  **Research & Summarize Topic**:
     *   Select text in a note OR ensure the note has a title (this will be the search topic).
     *   Run the command `Notemd: Research and Summarize Topic` (via command palette or sidebar button).
-    *   The plugin uses the configured **Search Provider** (Tavily/DuckDuckGo) and **Active LLM Provider** to find and summarize information.
+    *   The plugin uses the configured **Search Provider** (Tavily/DuckDuckGo) and the appropriate **LLM Provider** (based on Multi-Model settings) to find and summarize information.
     *   The summary is appended to the current note.
+    *   You can cancel this task via the sidebar button or modal cancel button.
     *   *Note:* DuckDuckGo searches may fail due to bot detection. Tavily is recommended.
 
 2.  **Generate Content from Title**:
     *   Open a note (it can be empty).
-    *   Run the command `Notemd: Generate Content from Note Title` (via command palette or sidebar button).
-    *   The plugin uses the **Active LLM Provider** to generate content based on the note's title, replacing any existing content.
+    *   Run the command `Notemd: Generate Content from Title` (via command palette or sidebar button).
+    *   The plugin uses the appropriate **LLM Provider** (based on Multi-Model settings) to generate content based on the note's title, replacing any existing content.
     *   If the **"Enable Research in 'Generate from Title'"** setting is enabled, it will first perform web research (using the configured **Web Research Provider**) and include that context in the prompt sent to the LLM.
+    *   You can cancel this task via the sidebar button or modal cancel button.
 
 3.  **Batch Generate Content from Titles**:
     *   Run the command `Notemd: Batch Generate Content from Titles` (via command palette or sidebar button).
     *   Select the folder containing the notes you want to process.
-    *   The plugin will iterate through each `.md` file in the folder (excluding `_processed.md` files), generating content based on the note's title and replacing existing content.
+    *   The plugin will iterate through each `.md` file in the folder (excluding `_processed.md` files and files in the designated "complete" folder), generating content based on the note's title and replacing existing content.
+    *   Successfully processed files are moved to the configured "complete" folder.
     *   This command respects the **"Enable Research in 'Generate from Title'"** setting for each note processed.
+    *   You can cancel this task via the sidebar button or modal cancel button.
 
 ### Utilities
 
@@ -217,7 +221,7 @@ This is the core functionality focused on identifying concepts and adding `[[wik
 
 2.  **Test LLM Connection**:
     *   Run `Notemd: Test LLM Connection` (via command palette or sidebar button).
-    *   Tests the connection to the **Active Provider**.
+    *   Tests the connection to the **Active Provider** selected in the main dropdown.
     *   Results appear as notices and in the sidebar log/console.
 
 ## Supported LLM Providers
