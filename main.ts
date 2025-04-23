@@ -1500,19 +1500,19 @@ export default class NotemdPlugin extends Plugin {
 				}
 
 			} catch (error: any) {
-				lastError = error; // Store network or other fetch errors
-				console.warn(`callDeepSeekAPI: Attempt ${attempt} failed with error: ${error.message}`);
 				// Handle AbortError specifically first
 				if (error.name === 'AbortError') {
-					console.log("callDeepSeekAPI: Fetch aborted by user cancellation.");
+					console.log("callDeepSeekAPI: Fetch aborted by user cancellation. AbortError caught."); // Added log detail
 					throw new Error("API call cancelled by user."); // Re-throw specific error
 				}
 				// Check for cancellation if it wasn't an AbortError
 				if (progressReporter.cancelled) {
-					console.log("callDeepSeekAPI: Cancellation detected during error handling.");
+					console.log("callDeepSeekAPI: Cancellation detected during non-AbortError handling."); // Added log detail
 					throw new Error("Processing cancelled by user during API error handling.");
 				}
-				// If not cancelled and not AbortError, it's some other error to potentially retry
+				// If not cancelled and not AbortError, store the error and proceed
+				lastError = error; // Store network or other fetch errors
+				console.warn(`callDeepSeekAPI: Attempt ${attempt} failed with error: ${error.message}`);
 			} finally {
 				// Clear the controller from the reporter once this attempt is done
 				if (progressReporter.abortController === controller) {
@@ -1655,18 +1655,19 @@ export default class NotemdPlugin extends Plugin {
 				}
 
 			} catch (error: any) {
-				lastError = error;
-				console.warn(`callOpenAIApi: Attempt ${attempt} failed with error: ${error.message}`);
 				// Handle AbortError specifically first
 				if (error.name === 'AbortError') {
-					console.log("callOpenAIApi: Fetch aborted by user cancellation.");
-					throw new Error("API call cancelled by user.");
+					console.log("callAnthropicApi: Fetch aborted by user cancellation. AbortError caught."); // Corrected log
+					throw new Error("API call cancelled by user."); // Re-throw specific error
 				}
 				// Check for cancellation if it wasn't an AbortError
 				if (progressReporter.cancelled) {
-					console.log("callOpenAIApi: Cancellation detected during error handling.");
+					console.log("callAnthropicApi: Cancellation detected during non-AbortError handling."); // Corrected log
 					throw new Error("Processing cancelled by user during API error handling.");
 				}
+				// If not cancelled and not AbortError, store the error and proceed
+				lastError = error;
+				console.warn(`callAnthropicApi: Attempt ${attempt} failed with error: ${error.message}`); // Corrected log
 			} finally {
 				// Clear the controller from the reporter once this attempt is done
 				if (progressReporter.abortController === controller) {
@@ -1784,18 +1785,19 @@ export default class NotemdPlugin extends Plugin {
 				}
 
 			} catch (error: any) {
-				lastError = error;
-				console.warn(`callAnthropicApi: Attempt ${attempt} failed with error: ${error.message}`);
 				// Handle AbortError specifically first
 				if (error.name === 'AbortError') {
-					console.log("callAnthropicApi: Fetch aborted by user cancellation.");
-					throw new Error("API call cancelled by user.");
+					console.log("callOpenAIApi: Fetch aborted by user cancellation. AbortError caught."); // Added log detail
+					throw new Error("API call cancelled by user."); // Re-throw specific error
 				}
 				// Check for cancellation if it wasn't an AbortError
 				if (progressReporter.cancelled) {
-					console.log("callAnthropicApi: Cancellation detected during error handling.");
+					console.log("callOpenAIApi: Cancellation detected during non-AbortError handling."); // Added log detail
 					throw new Error("Processing cancelled by user during API error handling.");
 				}
+				// If not cancelled and not AbortError, store the error and proceed
+				lastError = error;
+				console.warn(`callOpenAIApi: Attempt ${attempt} failed with error: ${error.message}`);
 			} finally {
 				// Clear the controller from the reporter once this attempt is done
 				if (progressReporter.abortController === controller) {
@@ -1917,18 +1919,19 @@ export default class NotemdPlugin extends Plugin {
 				}
 
 			} catch (error: any) {
-				lastError = error;
-				console.warn(`callGoogleApi: Attempt ${attempt} failed with error: ${error.message}`);
 				// Handle AbortError specifically first
 				if (error.name === 'AbortError') {
-					console.log("callGoogleApi: Fetch aborted by user cancellation.");
-					throw new Error("API call cancelled by user.");
+					console.log("callGoogleApi: Fetch aborted by user cancellation. AbortError caught."); // Corrected log
+					throw new Error("API call cancelled by user."); // Re-throw specific error
 				}
 				// Check for cancellation if it wasn't an AbortError
 				if (progressReporter.cancelled) {
-					console.log("callGoogleApi: Cancellation detected during error handling.");
+					console.log("callGoogleApi: Cancellation detected during non-AbortError handling."); // Corrected log
 					throw new Error("Processing cancelled by user during API error handling.");
 				}
+				// If not cancelled and not AbortError, store the error and proceed
+				lastError = error;
+				console.warn(`callGoogleApi: Attempt ${attempt} failed with error: ${error.message}`); // Corrected log
 			} finally {
 				// Clear the controller from the reporter once this attempt is done
 				if (progressReporter.abortController === controller) {
@@ -2047,18 +2050,19 @@ export default class NotemdPlugin extends Plugin {
 				}
 
 			} catch (error: any) {
-				lastError = error;
-				console.warn(`callMistralApi: Attempt ${attempt} failed with error: ${error.message}`);
 				// Handle AbortError specifically first
 				if (error.name === 'AbortError') {
-					console.log("callMistralApi: Fetch aborted by user cancellation.");
-					throw new Error("API call cancelled by user.");
+					console.log("callMistralApi: Fetch aborted by user cancellation. AbortError caught."); // Corrected log
+					throw new Error("API call cancelled by user."); // Re-throw specific error
 				}
 				// Check for cancellation if it wasn't an AbortError
 				if (progressReporter.cancelled) {
-					console.log("callMistralApi: Cancellation detected during error handling.");
+					console.log("callMistralApi: Cancellation detected during non-AbortError handling."); // Corrected log
 					throw new Error("Processing cancelled by user during API error handling.");
 				}
+				// If not cancelled and not AbortError, store the error and proceed
+				lastError = error;
+				console.warn(`callMistralApi: Attempt ${attempt} failed with error: ${error.message}`); // Corrected log
 			} finally {
 				// Clear the controller from the reporter once this attempt is done
 				if (progressReporter.abortController === controller) {
@@ -2184,18 +2188,19 @@ export default class NotemdPlugin extends Plugin {
 				}
 
 			} catch (error: any) {
-				lastError = error;
-				console.warn(`callAzureOpenAIApi: Attempt ${attempt} failed with error: ${error.message}`);
 				// Handle AbortError specifically first
 				if (error.name === 'AbortError') {
-					console.log("callAzureOpenAIApi: Fetch aborted by user cancellation.");
-					throw new Error("API call cancelled by user.");
+					console.log("callAzureOpenAIApi: Fetch aborted by user cancellation. AbortError caught."); // Corrected log
+					throw new Error("API call cancelled by user."); // Re-throw specific error
 				}
 				// Check for cancellation if it wasn't an AbortError
 				if (progressReporter.cancelled) {
-					console.log("callAzureOpenAIApi: Cancellation detected during error handling.");
+					console.log("callAzureOpenAIApi: Cancellation detected during non-AbortError handling."); // Corrected log
 					throw new Error("Processing cancelled by user during API error handling.");
 				}
+				// If not cancelled and not AbortError, store the error and proceed
+				lastError = error;
+				console.warn(`callAzureOpenAIApi: Attempt ${attempt} failed with error: ${error.message}`); // Corrected log
 			} finally {
 				// Clear the controller from the reporter once this attempt is done
 				if (progressReporter.abortController === controller) {
@@ -2316,18 +2321,19 @@ export default class NotemdPlugin extends Plugin {
 				}
 
 			} catch (error: any) {
-				lastError = error;
-				console.warn(`callLMStudioApi: Attempt ${attempt} failed with error: ${error.message}`);
 				// Handle AbortError specifically first
 				if (error.name === 'AbortError') {
-					console.log("callLMStudioApi: Fetch aborted by user cancellation.");
-					throw new Error("API call cancelled by user.");
+					console.log("callLMStudioApi: Fetch aborted by user cancellation. AbortError caught."); // Corrected log
+					throw new Error("API call cancelled by user."); // Re-throw specific error
 				}
 				// Check for cancellation if it wasn't an AbortError
 				if (progressReporter.cancelled) {
-					console.log("callLMStudioApi: Cancellation detected during error handling.");
+					console.log("callLMStudioApi: Cancellation detected during non-AbortError handling."); // Corrected log
 					throw new Error("Processing cancelled by user during API error handling.");
 				}
+				// If not cancelled and not AbortError, store the error and proceed
+				lastError = error;
+				console.warn(`callLMStudioApi: Attempt ${attempt} failed with error: ${error.message}`); // Corrected log
 			} finally {
 				// Clear the controller from the reporter once this attempt is done
 				if (progressReporter.abortController === controller) {
@@ -2450,18 +2456,19 @@ export default class NotemdPlugin extends Plugin {
 				}
 
 			} catch (error: any) {
-				lastError = error;
-				console.warn(`callOllamaApi: Attempt ${attempt} failed with error: ${error.message}`);
 				// Handle AbortError specifically first
 				if (error.name === 'AbortError') {
-					console.log("callOllamaApi: Fetch aborted by user cancellation.");
-					throw new Error("API call cancelled by user.");
+					console.log("callOllamaApi: Fetch aborted by user cancellation. AbortError caught."); // Corrected log
+					throw new Error("API call cancelled by user."); // Re-throw specific error
 				}
 				// Check for cancellation if it wasn't an AbortError
 				if (progressReporter.cancelled) {
-					console.log("callOllamaApi: Cancellation detected during error handling.");
+					console.log("callOllamaApi: Cancellation detected during non-AbortError handling."); // Corrected log
 					throw new Error("Processing cancelled by user during API error handling.");
 				}
+				// If not cancelled and not AbortError, store the error and proceed
+				lastError = error;
+				console.warn(`callOllamaApi: Attempt ${attempt} failed with error: ${error.message}`); // Corrected log
 			} finally {
 				// Clear the controller from the reporter once this attempt is done
 				if (progressReporter.abortController === controller) {
@@ -2585,18 +2592,19 @@ export default class NotemdPlugin extends Plugin {
 				}
 
 			} catch (error: any) {
-				lastError = error; // Includes fetch errors caught by the outer try-catch
-				console.warn(`callOpenRouterAPI: Attempt ${attempt} failed with error: ${error.message}`);
 				// Handle AbortError specifically first
 				if (error.name === 'AbortError') {
-					console.log("callOpenRouterAPI: Fetch aborted by user cancellation.");
-					throw new Error("API call cancelled by user.");
+					console.log("callOpenRouterAPI: Fetch aborted by user cancellation. AbortError caught."); // Corrected log
+					throw new Error("API call cancelled by user."); // Re-throw specific error
 				}
 				// Check for cancellation if it wasn't an AbortError
 				if (progressReporter.cancelled) {
-					console.log("callOpenRouterAPI: Cancellation detected during error handling.");
+					console.log("callOpenRouterAPI: Cancellation detected during non-AbortError handling."); // Corrected log
 					throw new Error("Processing cancelled by user during API error handling.");
 				}
+				// If not cancelled and not AbortError, store the error and proceed
+				lastError = error;
+				console.warn(`callOpenRouterAPI: Attempt ${attempt} failed with error: ${error.message}`); // Corrected log
 			} finally {
 				// Clear the controller from the reporter once this attempt is done
 				if (progressReporter.abortController === controller) {
@@ -3998,9 +4006,21 @@ Format directly for Obsidian markdown. Do NOT wrap the entire response in a mark
 	 * @param progressReporter - Interface for reporting progress.
 	 */
 	async batchGenerateContentForTitles(progressReporter: ProgressReporter) {
+		// Check #0: Immediately check for cancellation before any setup
+		if (progressReporter.cancelled) {
+			new Notice('Operation cancelled before starting.');
+			progressReporter.updateStatus('Cancelled before start.', -1);
+			return;
+		}
+
 		const folderPath = await this.getFolderSelection(); // e.g., "Notes/Subfolder" or "/" for root
 		if (!folderPath) {
 			new Notice('Folder selection cancelled.');
+			// Ensure reporter reflects cancellation if folder selection is cancelled
+			if (progressReporter) { // Check if reporter exists
+				progressReporter.log("Folder selection cancelled by user.");
+				progressReporter.updateStatus("Cancelled during folder selection.", -1);
+			}
 			return;
 		}
 
@@ -4116,8 +4136,15 @@ Format directly for Obsidian markdown. Do NOT wrap the entire response in a mark
 							// Check if source file still exists before attempting rename
 							const sourceExists = await this.app.vault.adapter.exists(file.path);
 							if (sourceExists) {
-								await this.app.vault.rename(file, destinationPath);
-								progressReporter?.log(`✅ Moved processed file to: ${destinationPath}`);
+								// *** Added Cancellation Check before rename ***
+								if (progressReporter.cancelled) {
+									progressReporter?.log(`⚠️ Cancellation requested before moving ${file.name}. Skipping move.`);
+									// Optionally throw a cancellation error here if needed, but skipping might be sufficient
+									// throw new Error("Processing cancelled by user before file move.");
+								} else {
+									await this.app.vault.rename(file, destinationPath);
+									progressReporter?.log(`✅ Moved processed file to: ${destinationPath}`);
+								}
 							} else {
 								progressReporter?.log(`⚠️ Source file ${file.path} not found, skipping move.`);
 							}
@@ -4490,9 +4517,9 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 			// Abort the ongoing fetch request, if any
 			this.currentAbortController?.abort();
 			if (this.cancelButton) {
-				this.cancelButton.disabled = false; // Enable button
-				this.cancelButton.addClass('is-active');
-				// this.cancelButton.removeClass('is-inactive');
+				this.cancelButton.disabled = true; // Disable button after requesting cancel
+				this.cancelButton.removeClass('is-active'); // Reflect disabled state visually
+				// this.cancelButton.addClass('is-inactive'); // Optional alternative styling
 			}
 		}
 	}
@@ -4527,11 +4554,12 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 			this.clearDisplay(); // Clear previous run
 			this.isProcessing = true;
 			this.startTime = Date.now();
-			if (this.cancelButton) {
-				this.cancelButton.disabled = false; // Enable button
-				this.cancelButton.addClass('is-active');
-				// this.cancelButton.removeClass('is-inactive');
-			}
+			// Button state is handled by clearDisplay
+			// if (this.cancelButton) {
+			// 	this.cancelButton.disabled = false; // Enable button
+			// 	this.cancelButton.addClass('is-active');
+			// 	// this.cancelButton.removeClass('is-inactive');
+			// }
 			this.log('Starting: Process Current File...');
 			this.updateStatus('Processing current file...', 0);
 			// Pass 'this' (the view instance) instead of creating a ProgressModal
@@ -4553,11 +4581,12 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 			this.clearDisplay();
 			this.isProcessing = true;
 			this.startTime = Date.now();
-			if (this.cancelButton) {
-				this.cancelButton.disabled = false; // Enable button
-				this.cancelButton.addClass('is-active');
-				// this.cancelButton.removeClass('is-inactive');
-			}
+			// Button state is handled by clearDisplay
+			// if (this.cancelButton) {
+			// 	this.cancelButton.disabled = false; // Enable button
+			// 	this.cancelButton.addClass('is-active');
+			// 	// this.cancelButton.removeClass('is-inactive');
+			// }
 			this.log('Starting: Process Folder...');
 			this.updateStatus('Processing folder...', 0);
 			// Pass 'this' (the view instance) instead of creating a ProgressModal
@@ -4585,11 +4614,12 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 				this.clearDisplay();
 				this.isProcessing = true;
 				this.startTime = Date.now();
-				if (this.cancelButton) {
-					this.cancelButton.disabled = false; // Enable button
-					this.cancelButton.addClass('is-active');
-					// this.cancelButton.removeClass('is-inactive');
-				}
+				// Button state is handled by clearDisplay
+				// if (this.cancelButton) {
+				// 	this.cancelButton.disabled = false; // Enable button
+				// 	this.cancelButton.addClass('is-active');
+				// 	// this.cancelButton.removeClass('is-inactive');
+				// }
 				this.log('Starting: Research & Summarize Topic...');
 				this.updateStatus('Researching topic...', 0);
 				await this.plugin.researchAndSummarize(activeView.editor, activeView, this);
@@ -4613,20 +4643,22 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 			this.clearDisplay();
 			this.isProcessing = true;
 			this.startTime = Date.now();
-			if (this.cancelButton) {
-				this.cancelButton.disabled = false; // Enable button
-				this.cancelButton.addClass('is-active');
-				// this.cancelButton.removeClass('is-inactive');
-			}
+			// Button state is handled by clearDisplay
+			// if (this.cancelButton) {
+			// 	this.cancelButton.disabled = false; // Enable button
+			// 	this.cancelButton.addClass('is-active');
+			// 	// this.cancelButton.removeClass('is-inactive');
+			// }
 			const activeFile = this.plugin.app.workspace.getActiveFile();
 			if (!activeFile || !(activeFile instanceof TFile) || activeFile.extension !== 'md') {
 				new Notice('No active Markdown file selected.');
 				this.isProcessing = false;
-				if (this.cancelButton) {
-					this.cancelButton.disabled = false; // Enable button
-					this.cancelButton.addClass('is-active');
-					// this.cancelButton.removeClass('is-inactive');
-				}
+				// No need to re-enable button here, clearDisplay handles it on next run
+				// if (this.cancelButton) {
+				// 	this.cancelButton.disabled = false; // Enable button
+				// 	this.cancelButton.addClass('is-active');
+				// 	// this.cancelButton.removeClass('is-inactive');
+				// }
 				return;
 			}
 			this.log('Starting: Generate Content from Title...');
@@ -4650,11 +4682,12 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 			this.clearDisplay();
 			this.isProcessing = true;
 			this.startTime = Date.now();
-			if (this.cancelButton) {
-				this.cancelButton.disabled = false; // Enable button
-				this.cancelButton.addClass('is-active');
-				// this.cancelButton.removeClass('is-inactive');
-			}
+			// Button state is handled by clearDisplay
+			// if (this.cancelButton) {
+			// 	this.cancelButton.disabled = false; // Enable button
+			// 	this.cancelButton.addClass('is-active');
+			// 	// this.cancelButton.removeClass('is-inactive');
+			// }
 			this.log('Starting: Batch Generate Content from Titles...');
 			this.updateStatus('Starting batch generation...', 0);
 			await this.plugin.batchGenerateContentForTitles(this); // Call the new batch function
