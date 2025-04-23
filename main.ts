@@ -3097,7 +3097,7 @@ Rules:
 			words.forEach(word => {
 				// Normalize: lowercase, remove possessive 's
 				const normalized = word.toLowerCase().replace(/'s$/, '');
-				if (normalized.length > 2) { // Ignore very short words
+				if (normalized.length > 1) { // Ignore very short words
 					if (seenWords.has(normalized)) {
 						duplicates.add(normalized);
 					}
@@ -3148,7 +3148,7 @@ Rules:
 		const normalizedMap = new Map<string, string[]>();
 		words.forEach(word => {
 			const normalized = word.toLowerCase().replace(/[-_\s]/g, ''); // Remove hyphens, underscores, spaces
-			if (normalized.length > 3) {
+			if (normalized.length > 1) {
 				const list = normalizedMap.get(normalized) || [];
 				if (!list.includes(word)) { // Avoid adding same word multiple times
 					list.push(word);
