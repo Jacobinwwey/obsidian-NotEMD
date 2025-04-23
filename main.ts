@@ -1431,9 +1431,19 @@ export default class NotemdPlugin extends Plugin {
 		const intervalSeconds = this.settings.enableStableApiCall ? this.settings.apiCallInterval : 0;
 
 		for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+			// Check for cancellation before even setting up the controller for this attempt
+			if (progressReporter.cancelled) {
+				console.log("callDeepSeekAPI: Cancellation detected before attempt", attempt);
+				throw new Error("Processing cancelled by user before API attempt.");
+			}
 			const controller = new AbortController();
 			progressReporter.abortController = controller; // Store controller
 			try {
+				// Check for cancellation immediately before the fetch call
+				if (progressReporter.cancelled) {
+					console.log("callDeepSeekAPI: Cancellation detected just before fetch.");
+					throw new Error("Processing cancelled by user before API fetch.");
+				}
 				const response = await fetch(url, {
 					method: 'POST',
 					signal: controller.signal, // Pass signal to fetch
@@ -1491,13 +1501,9 @@ export default class NotemdPlugin extends Plugin {
 
 			// If we reached here, it means the attempt failed (and wasn't aborted) and we might retry
 			if (attempt < maxAttempts) {
-				// Check for cancellation BEFORE waiting
-				if (progressReporter.cancelled) {
-					console.log("callDeepSeekAPI: Cancellation detected before retry wait.");
-					throw new Error("Processing cancelled by user during API retry wait.");
-				}
-				console.log(`callDeepSeekAPI: Waiting ${intervalSeconds} seconds before retry ${attempt + 1}...`);
-				await new Promise(resolve => setTimeout(resolve, intervalSeconds * 1000));
+				// Use cancellable delay
+				progressReporter.log(`Waiting ${intervalSeconds} seconds before retry ${attempt + 1}...`);
+				await this.cancellableDelay(intervalSeconds * 1000, progressReporter);
 			}
 		}
 
@@ -1558,9 +1564,19 @@ export default class NotemdPlugin extends Plugin {
 		const intervalSeconds = this.settings.enableStableApiCall ? this.settings.apiCallInterval : 0;
 
 		for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+			// Check for cancellation before even setting up the controller for this attempt
+			if (progressReporter.cancelled) {
+				console.log("callOpenAIApi: Cancellation detected before attempt", attempt);
+				throw new Error("Processing cancelled by user before API attempt.");
+			}
 			const controller = new AbortController();
 			progressReporter.abortController = controller; // Store controller
 			try {
+				// Check for cancellation immediately before the fetch call
+				if (progressReporter.cancelled) {
+					console.log("callOpenAIApi: Cancellation detected just before fetch.");
+					throw new Error("Processing cancelled by user before API fetch.");
+				}
 				const response = await fetch(url, {
 					method: 'POST',
 					signal: controller.signal, // Pass signal to fetch
@@ -1654,9 +1670,19 @@ export default class NotemdPlugin extends Plugin {
 		const intervalSeconds = this.settings.enableStableApiCall ? this.settings.apiCallInterval : 0;
 
 		for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+			// Check for cancellation before even setting up the controller for this attempt
+			if (progressReporter.cancelled) {
+				console.log("callAnthropicApi: Cancellation detected before attempt", attempt);
+				throw new Error("Processing cancelled by user before API attempt.");
+			}
 			const controller = new AbortController();
 			progressReporter.abortController = controller; // Store controller
 			try {
+				// Check for cancellation immediately before the fetch call
+				if (progressReporter.cancelled) {
+					console.log("callAnthropicApi: Cancellation detected just before fetch.");
+					throw new Error("Processing cancelled by user before API fetch.");
+				}
 				const response = await fetch(url, {
 					method: 'POST',
 					signal: controller.signal, // Pass signal to fetch
@@ -1758,9 +1784,19 @@ export default class NotemdPlugin extends Plugin {
 		const intervalSeconds = this.settings.enableStableApiCall ? this.settings.apiCallInterval : 0;
 
 		for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+			// Check for cancellation before even setting up the controller for this attempt
+			if (progressReporter.cancelled) {
+				console.log("callGoogleApi: Cancellation detected before attempt", attempt);
+				throw new Error("Processing cancelled by user before API attempt.");
+			}
 			const controller = new AbortController();
 			progressReporter.abortController = controller; // Store controller
 			try {
+				// Check for cancellation immediately before the fetch call
+				if (progressReporter.cancelled) {
+					console.log("callGoogleApi: Cancellation detected just before fetch.");
+					throw new Error("Processing cancelled by user before API fetch.");
+				}
 				const response = await fetch(urlWithKey, {
 					method: 'POST',
 					signal: controller.signal, // Pass signal to fetch
@@ -1857,9 +1893,19 @@ export default class NotemdPlugin extends Plugin {
 		const intervalSeconds = this.settings.enableStableApiCall ? this.settings.apiCallInterval : 0;
 
 		for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+			// Check for cancellation before even setting up the controller for this attempt
+			if (progressReporter.cancelled) {
+				console.log("callMistralApi: Cancellation detected before attempt", attempt);
+				throw new Error("Processing cancelled by user before API attempt.");
+			}
 			const controller = new AbortController();
 			progressReporter.abortController = controller; // Store controller
 			try {
+				// Check for cancellation immediately before the fetch call
+				if (progressReporter.cancelled) {
+					console.log("callMistralApi: Cancellation detected just before fetch.");
+					throw new Error("Processing cancelled by user before API fetch.");
+				}
 				const response = await fetch(url, {
 					method: 'POST',
 					signal: controller.signal, // Pass signal to fetch
@@ -1963,9 +2009,19 @@ export default class NotemdPlugin extends Plugin {
 		const intervalSeconds = this.settings.enableStableApiCall ? this.settings.apiCallInterval : 0;
 
 		for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+			// Check for cancellation before even setting up the controller for this attempt
+			if (progressReporter.cancelled) {
+				console.log("callAzureOpenAIApi: Cancellation detected before attempt", attempt);
+				throw new Error("Processing cancelled by user before API attempt.");
+			}
 			const controller = new AbortController();
 			progressReporter.abortController = controller; // Store controller
 			try {
+				// Check for cancellation immediately before the fetch call
+				if (progressReporter.cancelled) {
+					console.log("callAzureOpenAIApi: Cancellation detected just before fetch.");
+					throw new Error("Processing cancelled by user before API fetch.");
+				}
 				const response = await fetch(url, {
 					method: 'POST',
 					signal: controller.signal, // Pass signal to fetch
@@ -2063,9 +2119,19 @@ export default class NotemdPlugin extends Plugin {
 		const intervalSeconds = this.settings.enableStableApiCall ? this.settings.apiCallInterval : 0;
 
 		for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+			// Check for cancellation before even setting up the controller for this attempt
+			if (progressReporter.cancelled) {
+				console.log("callLMStudioApi: Cancellation detected before attempt", attempt);
+				throw new Error("Processing cancelled by user before API attempt.");
+			}
 			const controller = new AbortController();
 			progressReporter.abortController = controller; // Store controller
 			try {
+				// Check for cancellation immediately before the fetch call
+				if (progressReporter.cancelled) {
+					console.log("callLMStudioApi: Cancellation detected just before fetch.");
+					throw new Error("Processing cancelled by user before API fetch.");
+				}
 				const response = await fetch(url, {
 					method: 'POST',
 					signal: controller.signal, // Pass signal to fetch
@@ -2167,9 +2233,19 @@ export default class NotemdPlugin extends Plugin {
 		const intervalSeconds = this.settings.enableStableApiCall ? this.settings.apiCallInterval : 0;
 
 		for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+			// Check for cancellation before even setting up the controller for this attempt
+			if (progressReporter.cancelled) {
+				console.log("callOllamaApi: Cancellation detected before attempt", attempt);
+				throw new Error("Processing cancelled by user before API attempt.");
+			}
 			const controller = new AbortController();
 			progressReporter.abortController = controller; // Store controller
 			try {
+				// Check for cancellation immediately before the fetch call
+				if (progressReporter.cancelled) {
+					console.log("callOllamaApi: Cancellation detected just before fetch.");
+					throw new Error("Processing cancelled by user before API fetch.");
+				}
 				const response = await fetch(url, {
 					method: 'POST',
 					signal: controller.signal, // Pass signal to fetch
@@ -2267,9 +2343,19 @@ export default class NotemdPlugin extends Plugin {
 		const intervalSeconds = this.settings.enableStableApiCall ? this.settings.apiCallInterval : 0;
 
 		for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+			// Check for cancellation before even setting up the controller for this attempt
+			if (progressReporter.cancelled) {
+				console.log("callOpenRouterAPI: Cancellation detected before attempt", attempt);
+				throw new Error("Processing cancelled by user before API attempt.");
+			}
 			const controller = new AbortController();
 			progressReporter.abortController = controller; // Store controller
 			try {
+				// Check for cancellation immediately before the fetch call
+				if (progressReporter.cancelled) {
+					console.log("callOpenRouterAPI: Cancellation detected just before fetch.");
+					throw new Error("Processing cancelled by user before API fetch.");
+				}
 				const response = await fetch(url, {
 					method: 'POST',
 					signal: controller.signal, // Pass signal to fetch
