@@ -809,7 +809,8 @@ export default class NotemdPlugin extends Plugin {
 
 					// --- Silent Error Logging to File ---
 					const timestamp = new Date().toISOString();
-					const logEntry = `[${timestamp}] Error processing ${file.path}:\n${errorDetails}\n\n`;
+					// Explicitly include error.message which contains status code/API details
+					const logEntry = `[${timestamp}] Error processing ${file.path}:\nMessage: ${fileError.message}\nStack Trace:\n${errorDetails}\n\n`;
 					try {
 						await this.app.vault.adapter.append('error_processing_filename.log', logEntry);
 					} catch (logError) {
@@ -820,10 +821,17 @@ export default class NotemdPlugin extends Plugin {
 					}
 					// --- End Silent Error Logging ---
 
-					// Continue to the next file
+					// Check if the error was due to cancellation, and break the loop if so
+					if (fileError.message.includes("cancelled by user")) {
+						new Notice('Batch processing cancelled by user.');
+						this.updateStatusBar('Cancelled');
+						reporter.updateStatus('Batch processing cancelled.', -1);
+						break; // Exit the loop immediately on cancellation
+					}
+					// Otherwise, continue to the next file for non-cancellation errors
 				}
 
-				if (reporter.cancelled) { // Check again after processFile
+				if (reporter.cancelled) { // Check again after processFile (redundant if break works, but safe)
 					new Notice('Batch processing cancelled by user.');
 					this.updateStatusBar('Cancelled');
 					reporter.updateStatus('Batch processing cancelled.', -1);
@@ -886,8 +894,7 @@ export default class NotemdPlugin extends Plugin {
 		// console.log(`processFile: processContentWithLLM returned ${processedContent?.length ?? 'null/undefined'} characters for ${file.name}.`); // DEBUG
 
 		if (progressReporter.cancelled) {
-			progressReporter.log(`Processing cancelled for ${file.name}`);
-			// console.log(`processFile: Processing cancelled for ${file.name}`); // DEBUG
+			progressReporter.log(`Processing cancelled for ${file.name} after LLM call.`);
 			return; // Stop processing this file if cancelled
 		}
 
@@ -896,10 +903,20 @@ export default class NotemdPlugin extends Plugin {
 		const withLinks = this.generateObsidianLinks(processedContent);
 		// console.log(`processFile: generateObsidianLinks returned ${withLinks?.length ?? 'null/undefined'} characters for ${file.name}.`); // DEBUG
 
+		if (progressReporter.cancelled) { // Check after link generation
+			progressReporter.log(`Processing cancelled for ${file.name} after link generation.`);
+			return;
+		}
+
 		progressReporter.log(`Checking for duplicates in: ${file.name}...`); // Refined log
 		// console.log(`processFile: Calling handleDuplicates for ${file.name}...`); // DEBUG
 		await this.handleDuplicates(withLinks);
 		// console.log(`processFile: handleDuplicates finished for ${file.name}.`); // DEBUG
+
+		if (progressReporter.cancelled) { // Check after duplicate handling
+			progressReporter.log(`Processing cancelled for ${file.name} after duplicate check.`);
+			return;
+		}
 
 		// --- Apply Post-Processing ---
 		progressReporter.log(`Cleaning Mermaid/LaTeX for: ${file.name}`);
@@ -916,6 +933,11 @@ export default class NotemdPlugin extends Plugin {
 			finalContent = withLinks;
 		}
 
+		if (progressReporter.cancelled) { // Check after post-processing
+			progressReporter.log(`Processing cancelled for ${file.name} after post-processing.`);
+			return;
+		}
+
 		// --- Remove \boxed{ line if present ---
 		const lines = finalContent.split('\n');
 		if (lines.length > 0 && lines[0].trim() === '\\boxed{') {
@@ -928,6 +950,10 @@ export default class NotemdPlugin extends Plugin {
 			finalContent = lines.join('\n');
 		}
 
+		if (progressReporter.cancelled) { // Check before file operations
+			progressReporter.log(`Processing cancelled for ${file.name} before saving.`);
+			return;
+		}
 
 		// --- Determine Processed File Output Path ---
 		let processedFileSaveDir = '';
@@ -1480,6 +1506,31 @@ export default class NotemdPlugin extends Plugin {
 		throw lastError || new Error("DeepSeek API call failed after multiple retries."); // Throw the last error
 	}
 
+	/**
+	 * Creates a promise that resolves after a specified delay but rejects immediately
+	 * if the progressReporter signals cancellation during the delay.
+	 * @param ms Delay in milliseconds.
+	 * @param progressReporter The reporter to check for cancellation.
+	 * @returns A promise that resolves on completion or rejects on cancellation.
+	 */
+	private cancellableDelay(ms: number, progressReporter: ProgressReporter): Promise<void> {
+		return new Promise((resolve, reject) => {
+			const timeoutId = setTimeout(() => {
+				clearInterval(intervalId); // Clear the interval check
+				resolve();
+			}, ms);
+
+			const intervalId = setInterval(() => {
+				if (progressReporter.cancelled) {
+					clearTimeout(timeoutId); // Clear the timeout
+					clearInterval(intervalId); // Clear this interval
+					reject(new Error("Processing cancelled by user during API retry wait."));
+				}
+			}, 100); // Check for cancellation every 100ms
+		});
+	}
+
+
 	// Modified to accept modelName parameter and progressReporter
 	private async callOpenAIApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter): Promise<string> {
 		// Add API health check if applicable (assuming a similar /health or equivalent endpoint)
@@ -1572,8 +1623,9 @@ export default class NotemdPlugin extends Plugin {
 					console.log("callOpenAIApi: Cancellation detected before retry wait.");
 					throw new Error("Processing cancelled by user during API retry wait.");
 				}
-				console.log(`callOpenAIApi: Waiting ${intervalSeconds} seconds before retry ${attempt + 1}...`);
-				await new Promise(resolve => setTimeout(resolve, intervalSeconds * 1000));
+				progressReporter.log(`Waiting ${intervalSeconds} seconds before retry ${attempt + 1}...`);
+				// Use cancellable delay
+				await this.cancellableDelay(intervalSeconds * 1000, progressReporter);
 			}
 		}
 
@@ -1669,8 +1721,9 @@ export default class NotemdPlugin extends Plugin {
 					console.log("callAnthropicApi: Cancellation detected before retry wait.");
 					throw new Error("Processing cancelled by user during API retry wait.");
 				}
-				console.log(`callAnthropicApi: Waiting ${intervalSeconds} seconds before retry ${attempt + 1}...`);
-				await new Promise(resolve => setTimeout(resolve, intervalSeconds * 1000));
+				progressReporter.log(`Waiting ${intervalSeconds} seconds before retry ${attempt + 1}...`);
+				// Use cancellable delay
+				await this.cancellableDelay(intervalSeconds * 1000, progressReporter);
 			}
 		}
 
@@ -1770,8 +1823,9 @@ export default class NotemdPlugin extends Plugin {
 					console.log("callGoogleApi: Cancellation detected before retry wait.");
 					throw new Error("Processing cancelled by user during API retry wait.");
 				}
-				console.log(`callGoogleApi: Waiting ${intervalSeconds} seconds before retry ${attempt + 1}...`);
-				await new Promise(resolve => setTimeout(resolve, intervalSeconds * 1000));
+				progressReporter.log(`Waiting ${intervalSeconds} seconds before retry ${attempt + 1}...`);
+				// Use cancellable delay
+				await this.cancellableDelay(intervalSeconds * 1000, progressReporter);
 			}
 		}
 
@@ -1868,8 +1922,9 @@ export default class NotemdPlugin extends Plugin {
 					console.log("callMistralApi: Cancellation detected before retry wait.");
 					throw new Error("Processing cancelled by user during API retry wait.");
 				}
-				console.log(`callMistralApi: Waiting ${intervalSeconds} seconds before retry ${attempt + 1}...`);
-				await new Promise(resolve => setTimeout(resolve, intervalSeconds * 1000));
+				progressReporter.log(`Waiting ${intervalSeconds} seconds before retry ${attempt + 1}...`);
+				// Use cancellable delay
+				await this.cancellableDelay(intervalSeconds * 1000, progressReporter);
 			}
 		}
 
@@ -1973,8 +2028,9 @@ export default class NotemdPlugin extends Plugin {
 					console.log("callAzureOpenAIApi: Cancellation detected before retry wait.");
 					throw new Error("Processing cancelled by user during API retry wait.");
 				}
-				console.log(`callAzureOpenAIApi: Waiting ${intervalSeconds} seconds before retry ${attempt + 1}...`);
-				await new Promise(resolve => setTimeout(resolve, intervalSeconds * 1000));
+				progressReporter.log(`Waiting ${intervalSeconds} seconds before retry ${attempt + 1}...`);
+				// Use cancellable delay
+				await this.cancellableDelay(intervalSeconds * 1000, progressReporter);
 			}
 		}
 
@@ -2073,8 +2129,9 @@ export default class NotemdPlugin extends Plugin {
 					console.log("callLMStudioApi: Cancellation detected before retry wait.");
 					throw new Error("Processing cancelled by user during API retry wait.");
 				}
-				console.log(`callLMStudioApi: Waiting ${intervalSeconds} seconds before retry ${attempt + 1}...`);
-				await new Promise(resolve => setTimeout(resolve, intervalSeconds * 1000));
+				progressReporter.log(`Waiting ${intervalSeconds} seconds before retry ${attempt + 1}...`);
+				// Use cancellable delay
+				await this.cancellableDelay(intervalSeconds * 1000, progressReporter);
 			}
 		}
 
@@ -2175,8 +2232,9 @@ export default class NotemdPlugin extends Plugin {
 					console.log("callOllamaApi: Cancellation detected before retry wait.");
 					throw new Error("Processing cancelled by user during API retry wait.");
 				}
-				console.log(`callOllamaApi: Waiting ${intervalSeconds} seconds before retry ${attempt + 1}...`);
-				await new Promise(resolve => setTimeout(resolve, intervalSeconds * 1000));
+				progressReporter.log(`Waiting ${intervalSeconds} seconds before retry ${attempt + 1}...`);
+				// Use cancellable delay
+				await this.cancellableDelay(intervalSeconds * 1000, progressReporter);
 			}
 		}
 
@@ -2278,8 +2336,9 @@ export default class NotemdPlugin extends Plugin {
 					console.log("callOpenRouterAPI: Cancellation detected before retry wait.");
 					throw new Error("Processing cancelled by user during API retry wait.");
 				}
-				console.log(`callOpenRouterAPI: Waiting ${intervalSeconds} seconds before retry ${attempt + 1}...`);
-				await new Promise(resolve => setTimeout(resolve, intervalSeconds * 1000));
+				progressReporter.log(`Waiting ${intervalSeconds} seconds before retry ${attempt + 1}...`);
+				// Use cancellable delay
+				await this.cancellableDelay(intervalSeconds * 1000, progressReporter);
 			}
 		}
 
@@ -2954,11 +3013,13 @@ Rules:
 			let researchContext = '';
 			// --- Conditional Research ---
 			if (this.settings.enableResearchInGenerateContent) {
+				if (progressReporter.cancelled) throw new Error("Processing cancelled by user before research."); // Cancellation Check
 				progressReporter.log(`Research enabled for "${title}". Performing web search...`);
 				progressReporter.updateStatus(`Researching "${title}"...`, 10);
 				try {
 					// Use the refactored research logic
 					const context = await this._performResearch(title, progressReporter);
+					if (progressReporter.cancelled) throw new Error("Processing cancelled by user during research."); // Cancellation Check
 					if (context) {
 						researchContext = context;
 						progressReporter.log(`Research context obtained for "${title}".`);
@@ -2968,6 +3029,7 @@ Rules:
 						// Optionally add a Notice here?
 					}
 				} catch (researchError: any) {
+					if (researchError.message.includes("cancelled by user")) throw researchError; // Propagate cancellation
 					progressReporter.log(`Error during research for "${title}": ${researchError.message}. Proceeding without web context.`);
 					// Optionally add a Notice here?
 				}
@@ -2976,6 +3038,7 @@ Rules:
 			}
 			// --- End Conditional Research ---
 
+			if (progressReporter.cancelled) throw new Error("Processing cancelled by user before generation prompt construction."); // Cancellation Check
 
 			// Construct the prompt for content generation
 			let generationPrompt = `Create comprehensive technical documentation about "${title}" with a focus on scientific and mathematical rigor.`;
@@ -2998,7 +3061,79 @@ Include:
 5.  Performance characteristics with statistical measures.
 6.  Related technologies with comparative mathematical models.
 7.  Mathematical equations in LaTeX format (using $$...$$ for display and $...$ for inline) with detailed explanations of all parameters and variables. Example: $$ P(f) = \\int_{-\\infty}^{\\infty} p(t) e^{-i2\\pi ft} dt $$
-8.  Mermaid.js diagram code blocks using the format \`\`\`mermaid ... \`\`\` (IMPORTANT: without brackets "()" or "{}" for Mermaid diagrams,Enclosed node names with spaces/special characters in square brackets) for complex relationships or system architectures, Avoids special LaTeX syntax and Added quotes around subgraph titles with special characters.
+8.  Mermaid.js diagram code blocks using the format \`\`\`mermaid ... \`\`\` (IMPORTANT: without brackets "()" or "{}" for Mermaid diagrams,Enclosed node names with spaces/special characters in square brackets) for complex relationships or system architectures, Avoids special LaTeX syntax and Added quotes around subgraph titles with special characters.For example:
+\`\`\`mermaid
+graph TD
+    Start[Input: Year] --> IsDiv400["Year % 400 == 0?"];
+    IsDiv400 -- Yes --> Leap[Leap Year, 366 days];
+    IsDiv400 -- No --> IsDiv100["Year % 100 == 0?"];
+    IsDiv100 -- Yes --> Common1[Common Year, 365 days];
+    IsDiv100 -- No --> IsDiv4["Year % 4 == 0?"];
+    IsDiv4 -- Yes --> Leap;
+    IsDiv4 -- No --> Common2[Common Year, 365 days];
+    Leap --> End[End];
+    Common1 --> End;
+    Common2 --> End;
+
+    style Leap fill:#ccffcc,stroke:#006600
+    style Common1 fill:#ffcccc,stroke:#990000
+    style Common2 fill:#ffcccc,stroke:#990000
+\`\`\` and \`\`\`mermaid
+graph LR
+    subgraph "Material Mechanical Properties"
+        Stress --> Strain;
+        Strain -- "Linear Ratio" --> Youngs_Modulus[E - Young's Modulus<br>Tensile Stiffness];
+        Stress -- "Yield Point" --> Yield_Strength[σy - Yield Strength<br>Onset of Plasticity];
+        Stress -- "Maximum Point" --> UTS[UTS - Ultimate Tensile Strength];
+        Strain -- "Transverse/Axial Ratio" --> Poissons_Ratio[ν - Poisson's Ratio];
+        Shear_Stress --> Shear_Strain;
+        Shear_Strain -- "Linear Ratio" --> Shear_Modulus[G - Shear Modulus<br>Shear Stiffness];
+        Hydrostatic_Pressure --> Volumetric_Strain;
+        Volumetric_Strain -- "Linear Ratio" --> Bulk_Modulus[K - Bulk Modulus<br>Volumetric Stiffness];
+
+        Youngs_Modulus -- "Isotropic Relations" --> Shear_Modulus;
+        Youngs_Modulus -- "Isotropic Relations" --> Bulk_Modulus;
+        Youngs_Modulus -- "Isotropic Relations" --> Poissons_Ratio;
+        Shear_Modulus -- "Isotropic Relations" --> Bulk_Modulus;
+        Shear_Modulus -- "Isotropic Relations" --> Poissons_Ratio;
+        Bulk_Modulus -- "Isotropic Relations" --> Poissons_Ratio;
+
+        Yield_Strength --> Plasticity[Plastic Deformation Region];
+        UTS --> Plasticity;
+        Stress_Strain_Curve_Area --> Toughness;
+
+    end
+
+    style Youngs_Modulus fill:#ccf,stroke:#333,stroke-width:2px
+    style Shear_Modulus fill:#cfc,stroke:#333,stroke-width:2px
+    style Bulk_Modulus fill:#cff,stroke:#333,stroke-width:2px
+    style Poissons_Ratio fill:#fcf,stroke:#333,stroke-width:2px
+\`\`\` or \`\`\`mermaid
+graph TD
+    subgraph "Theoretical Frameworks for Electromagnetism"
+        QED["Standard Model QED Massless Photon"]
+        Proca["Proca Theory Massive Photon - 'Yukawa Photon'"]
+        Stueckelberg["Stueckelberg Mechanism Massive Photon"]
+        DarkPhoton["Dark Photon Models New Gauge Boson"]
+    end
+
+    QED -- "Add Mass Term" --> Proca;
+    Proca -- "Breaks Gauge Invariance" --> Issue1["Renormalization/High Energy Issues"];
+    QED -- "Introduce Stueckelberg Field" --> Stueckelberg;
+    Stueckelberg -- "Preserves Gauge Invariance" --> Proca_Unitary["Unitary Gauge -> Proca"];
+    Stueckelberg -- "Theoretically Cleaner" --> Benefit1["Better Renormalizability"];
+    QED -- "Add New U1' + Mixing" --> DarkPhoton;
+
+    Proca -- "Feature: Yukawa Potential" --> YP["Vr ~ exp-mr/r"];
+    QED -- "Feature: Coulomb Potential" --> CP["Vr ~ 1/r"];
+    Proca -- "Feature: 3 d.o.f." --> DOF3["2 Transverse + 1 Longitudinal"];
+    QED -- "Feature: 2 d.o.f." --> DOF2["2 Transverse"];
+
+    style QED fill:#ccf,stroke:#333,stroke-width:2px
+    style Proca fill:#fcc,stroke:#333,stroke-width:2px
+    style Stueckelberg fill:#cfc,stroke:#333,stroke-width:2px
+    style DarkPhoton fill:#ffc,stroke:#333,stroke-width:2px
+\`\`\`.
 9.  Use bullet points for lists longer than 3 items.
 10. Include references to academic papers with DOI where applicable, under a "## References" section.
 11. Preserve all mathematical formulas and scientific principles without simplification.
@@ -3006,6 +3141,8 @@ Include:
 13. Include statistical measures and confidence intervals where relevant.
 
 Format directly for Obsidian markdown. Do NOT wrap the entire response in a markdown code block. Start directly with the Level 2 Header.`;
+
+			if (progressReporter.cancelled) throw new Error("Processing cancelled by user before API call."); // Cancellation Check
 
 			progressReporter.log(`Calling ${provider.name} to generate content...`);
 			// Adjust progress percentage based on whether research happened
@@ -3048,6 +3185,8 @@ Format directly for Obsidian markdown. Do NOT wrap the entire response in a mark
 					throw new Error(`Unsupported provider for content generation: ${provider.name}`);
 			}
 
+			if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API call."); // Cancellation Check
+
 			progressReporter.log(`Content received from ${provider.name}.`);
 			progressReporter.updateStatus('Applying post-processing...', 80);
 
@@ -3055,14 +3194,18 @@ Format directly for Obsidian markdown. Do NOT wrap the entire response in a mark
 			let finalContent = generatedContent;
 			try {
 				finalContent = cleanupLatexDelimiters(finalContent);
+				if (progressReporter.cancelled) throw new Error("Processing cancelled by user during post-processing."); // Cancellation Check
 				finalContent = refineMermaidBlocks(finalContent);
 				progressReporter.log(`Mermaid/LaTeX cleanup applied.`);
 			} catch (cleanupError: any) {
+				if (cleanupError.message.includes("cancelled by user")) throw cleanupError; // Propagate cancellation
 				progressReporter.log(`Warning: Error during Mermaid/LaTeX cleanup: ${cleanupError.message}`);
 				console.warn(`Warning during Mermaid/LaTeX cleanup for ${file.name}:`, cleanupError); // Use file.name here
 				// Continue with the uncleaned content
 				finalContent = generatedContent;
 			}
+
+			if (progressReporter.cancelled) throw new Error("Processing cancelled by user after post-processing."); // Cancellation Check
 
 			// --- Remove \boxed{ if present before saving ---
 			let contentToSave = finalContent.trim();
@@ -3075,6 +3218,8 @@ Format directly for Obsidian markdown. Do NOT wrap the entire response in a mark
 				}
 				contentToSave = contentLines.join('\n');
 			}
+
+			if (progressReporter.cancelled) throw new Error("Processing cancelled by user before saving."); // Cancellation Check
 
 			// Replace the entire content of the provided file
 			progressReporter.log(`Replacing content in: ${file.name}`);
@@ -3092,13 +3237,19 @@ Format directly for Obsidian markdown. Do NOT wrap the entire response in a mark
 		} catch (error: any) {
 			this.updateStatusBar('Error during generation');
 			const errorDetails = error instanceof Error ? error.stack || error.message : String(error);
-			console.error(`Error generating content for ${file.name}:`, errorDetails); // Use file.name in log
-			// Removed Notice pop-up for silent batch processing
-			// new Notice(`Error generating content: ${error.message}. See console.`, 10000);
-			progressReporter.log(`Error generating content for ${file.name}: ${error.message}`); // Log specific file error
-			progressReporter.updateStatus('Error occurred', -1);
-			// Keep ErrorModal for single file errors, but batch handles summary
-			// new ErrorModal(this.app, "Content Generation Error", errorDetails).open();
+			// Check if it's a cancellation error
+			if (error.message.includes("cancelled by user")) {
+				progressReporter.log(`Content generation cancelled for ${file.name}.`);
+				progressReporter.updateStatus('Cancelled', -1);
+				// Don't show error modal for cancellation
+			} else {
+				// Log and potentially show modal for other errors
+				console.error(`Error generating content for ${file.name}:`, errorDetails); // Use file.name in log
+				progressReporter.log(`Error generating content for ${file.name}: ${error.message}`); // Log specific file error
+				progressReporter.updateStatus('Error occurred', -1);
+				// Keep ErrorModal for single file errors, but batch handles summary
+				// new ErrorModal(this.app, "Content Generation Error", errorDetails).open();
+			}
 			// Re-throw the error so the batch function can catch it and log it silently
 			throw error;
 		}
@@ -3313,7 +3464,10 @@ Format directly for Obsidian markdown. Do NOT wrap the entire response in a mark
 
 		try {
 			// --- Perform Research using Helper ---
+			if (progressReporter.cancelled) throw new Error("Processing cancelled by user before research."); // Cancellation Check
 			const researchContext = await this._performResearch(topic, progressReporter);
+
+			if (progressReporter.cancelled) throw new Error("Processing cancelled by user during research."); // Cancellation Check
 
 			if (!researchContext) {
 				// Error/No results handled within _performResearch, just update status
@@ -3334,6 +3488,8 @@ Format directly for Obsidian markdown. Do NOT wrap the entire response in a mark
 				throw new Error('No valid LLM provider configured for the "Research & Summarize" task.');
 			}
 			const modelName = this.getModelForTask('research', provider);
+
+			if (progressReporter.cancelled) throw new Error("Processing cancelled by user before summarization."); // Cancellation Check
 
 			progressReporter.log(`Calling ${provider.name} (Model: ${modelName}) for summarization...`);
 			// Use the original topic in the prompt, but provide the fetched context
@@ -3374,6 +3530,8 @@ Format directly for Obsidian markdown. Do NOT wrap the entire response in a mark
 					throw new Error(`Unsupported provider for summarization: ${provider.name}`);
 			}
 
+			if (progressReporter.cancelled) throw new Error("Processing cancelled by user after summarization."); // Cancellation Check
+
 			progressReporter.log(`Generated summary using ${provider.name}.`);
 			progressReporter.updateStatus('Appending summary...', 90);
 
@@ -3388,6 +3546,8 @@ Format directly for Obsidian markdown. Do NOT wrap the entire response in a mark
 				}
 				finalSummary = summaryLines.join('\n');
 			}
+
+			if (progressReporter.cancelled) throw new Error("Processing cancelled by user before appending summary."); // Cancellation Check
 
 			// --- Append Summary to Note ---
 			const searchSource = this.settings.searchProvider === 'tavily' ? 'Tavily' : 'DuckDuckGo';
@@ -3404,12 +3564,19 @@ Format directly for Obsidian markdown. Do NOT wrap the entire response in a mark
 		} catch (error: any) {
 			this.updateStatusBar('Error during research');
 			const errorDetails = error instanceof Error ? error.stack || error.message : String(error);
-			console.error(`Error researching "${topic}":`, errorDetails);
-			new Notice(`Error during research: ${error.message}. See console.`, 10000);
-			progressReporter.log(`Error: ${error.message}`);
-			progressReporter.updateStatus('Error occurred', -1);
-			new ErrorModal(this.app, "Research Error", errorDetails).open();
-			// Keep reporter open on error
+			// Check if it's a cancellation error
+			if (error.message.includes("cancelled by user")) {
+				progressReporter.log(`Research cancelled for "${topic}".`);
+				progressReporter.updateStatus('Cancelled', -1);
+				// Don't show error modal for cancellation
+			} else {
+				console.error(`Error researching "${topic}":`, errorDetails);
+				new Notice(`Error during research: ${error.message}. See console.`, 10000);
+				progressReporter.log(`Error: ${error.message}`);
+				progressReporter.updateStatus('Error occurred', -1);
+				new ErrorModal(this.app, "Research Error", errorDetails).open();
+			}
+			// Keep reporter open on error/cancellation
 		}
 	}
 
@@ -3432,6 +3599,7 @@ Format directly for Obsidian markdown. Do NOT wrap the entire response in a mark
 				if (!this.settings.tavilyApiKey) {
 					throw new Error('Tavily API key is not configured in Notemd settings.');
 				}
+				if (progressReporter.cancelled) throw new Error("Processing cancelled by user before Tavily search."); // Cancellation Check
 				const tavilyUrl = 'https://api.tavily.com/search';
 				progressReporter.log(`Searching Tavily for: "${searchQuery}"`);
 				progressReporter.updateStatus('Searching Tavily...', 10);
@@ -3443,7 +3611,10 @@ Format directly for Obsidian markdown. Do NOT wrap the entire response in a mark
 					include_raw_content: false, // Keep false, rely on snippets/content field
 					max_results: this.settings.tavilyMaxResults // Use setting
 				};
+				// Note: requestUrl doesn't directly support AbortController signal.
+				// Cancellation here relies on checking the flag *before* the call.
 				const tavilyResponse = await requestUrl({ url: tavilyUrl, method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(tavilyRequestBody), throw: false });
+				if (progressReporter.cancelled) throw new Error("Processing cancelled by user during Tavily search."); // Cancellation Check
 				if (tavilyResponse.status !== 200) throw new Error(`Tavily API error: ${tavilyResponse.status} - ${tavilyResponse.text}`);
 				const tavilyData = tavilyResponse.json;
 				if (!tavilyData.results || tavilyData.results.length === 0) {
@@ -3455,9 +3626,11 @@ Format directly for Obsidian markdown. Do NOT wrap the entire response in a mark
 
 			} else { // DuckDuckGo selected
 				searchSource = 'DuckDuckGo';
+				if (progressReporter.cancelled) throw new Error("Processing cancelled by user before DuckDuckGo search."); // Cancellation Check
 				progressReporter.log(`Searching DuckDuckGo for: "${searchQuery}"`);
 				progressReporter.updateStatus('Searching DuckDuckGo...', 10);
-				searchResults = await this.searchDuckDuckGo(searchQuery, progressReporter);
+				searchResults = await this.searchDuckDuckGo(searchQuery, progressReporter); // searchDuckDuckGo uses requestUrl, cancellation check inside is limited
+				if (progressReporter.cancelled) throw new Error("Processing cancelled by user during DuckDuckGo search."); // Cancellation Check
 				if (searchResults.length === 0) {
 					progressReporter.log('DuckDuckGo search failed or returned no results.');
 					return null; // Indicate failure/no results
@@ -3469,17 +3642,40 @@ Format directly for Obsidian markdown. Do NOT wrap the entire response in a mark
 			if (searchSource === 'DuckDuckGo') {
 				progressReporter.log(`Fetching content for top ${searchResults.length} DuckDuckGo results...`);
 				progressReporter.updateStatus('Fetching content...', 30);
-				const fetchPromises = searchResults.map(async (result) => {
+				const fetchPromises = searchResults.map(async (result, index) => {
+					if (progressReporter.cancelled) throw new Error(`Processing cancelled by user before fetching DDG result ${index + 1}.`); // Check before each fetch
 					const timeoutPromise = new Promise<string>((_, reject) => setTimeout(() => reject(new Error(`Timeout fetching ${result.url}`)), this.settings.ddgFetchTimeout * 1000));
-					try { return await Promise.race([this.fetchContentFromUrl(result.url, progressReporter), timeoutPromise]); }
-					catch (fetchError: any) { return `[Content skipped: Timeout or fetch error for ${result.url}]`; }
+					try {
+						// fetchContentFromUrl uses requestUrl, cancellation check inside is limited
+						return await Promise.race([this.fetchContentFromUrl(result.url, progressReporter), timeoutPromise]);
+					}
+					catch (fetchError: any) {
+						if (fetchError.message.includes("cancelled by user")) throw fetchError; // Propagate cancellation
+						return `[Content skipped: Timeout or fetch error for ${result.url}]`;
+					}
 				});
 				const settledResults = await Promise.allSettled(fetchPromises);
-				fetchedContents = settledResults.map((result, index) => result.status === 'fulfilled' ? result.value : `[Content skipped for ${searchResults[index].url} due to error: ${result.reason?.message}]`);
+				// Check for cancellation after fetches complete or fail
+				if (progressReporter.cancelled) throw new Error("Processing cancelled by user during DuckDuckGo content fetching.");
+
+				fetchedContents = settledResults.map((result, index) => {
+					if (result.status === 'fulfilled') {
+						return result.value;
+					} else {
+						// Check if the rejection was due to cancellation
+						if (result.reason?.message?.includes("cancelled by user")) {
+							// Re-throw cancellation error to stop processing
+							throw new Error("Processing cancelled by user during DuckDuckGo content fetching.");
+						}
+						return `[Content skipped for ${searchResults[index].url} due to error: ${result.reason?.message}]`;
+					}
+				});
 				progressReporter.log(`Finished fetching content for DuckDuckGo results.`);
 			} else { // Tavily
 				fetchedContents = searchResults.map(result => result.content); // Use snippets directly
 			}
+
+			if (progressReporter.cancelled) throw new Error("Processing cancelled by user before combining content."); // Cancellation Check
 
 			// --- Combine Content ---
 			if (fetchedContents.length > 0) {
@@ -3508,11 +3704,17 @@ Format directly for Obsidian markdown. Do NOT wrap the entire response in a mark
 			}
 
 		} catch (error: any) {
-			// Log the error via the reporter
-			progressReporter.log(`Error during research for "${topic}": ${error.message}`);
-			console.error(`Error researching "${topic}":`, error); // Also log detailed error to console
-			// Do not throw here, return null to indicate failure
-			return null;
+			// Check if it's a cancellation error before logging generic error
+			if (error.message.includes("cancelled by user")) {
+				progressReporter.log(`Research cancelled for "${topic}".`);
+				throw error; // Re-throw cancellation error
+			} else {
+				// Log other errors
+				progressReporter.log(`Error during research for "${topic}": ${error.message}`);
+				console.error(`Error researching "${topic}":`, error); // Also log detailed error to console
+				// Do not throw here for non-cancellation errors, return null to indicate failure
+				return null;
+			}
 		}
 	}
 
@@ -3670,7 +3872,8 @@ Format directly for Obsidian markdown. Do NOT wrap the entire response in a mark
 
 					// --- Silent Error Logging to File ---
 					const timestamp = new Date().toISOString();
-					const logEntry = `[${timestamp}] Error generating content for ${file.path}:\n${errorDetails}\n\n`;
+					// Explicitly include error.message which contains status code/API details
+					const logEntry = `[${timestamp}] Error generating content for ${file.path}:\nMessage: ${fileError.message}\nStack Trace:\n${errorDetails}\n\n`;
 					try {
 						await this.app.vault.adapter.append('error_processing_filename.log', logEntry);
 					} catch (logError) {
@@ -3679,10 +3882,17 @@ Format directly for Obsidian markdown. Do NOT wrap the entire response in a mark
 					}
 					// --- End Silent Error Logging ---
 
-					// Continue to the next file
+					// Check if the error was due to cancellation, and break the loop if so
+					if (fileError.message.includes("cancelled by user")) {
+						new Notice('Batch generation cancelled by user.');
+						this.updateStatusBar('Cancelled');
+						progressReporter.updateStatus('Batch generation cancelled.', -1);
+						break; // Exit the loop immediately on cancellation
+					}
+					// Otherwise, continue to the next file for non-cancellation errors
 				}
 
-				if (progressReporter.cancelled) { // Check again after generation attempt
+				if (progressReporter.cancelled) { // Check again after generation attempt (redundant if break works, but safe)
 					new Notice('Batch generation cancelled by user.');
 					this.updateStatusBar('Cancelled');
 					progressReporter.updateStatus('Batch generation cancelled.', -1);
