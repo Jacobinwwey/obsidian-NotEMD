@@ -1454,6 +1454,12 @@ export default class NotemdPlugin extends Plugin {
 					body: JSON.stringify(requestBody)
 				});
 
+				// Check #2: Immediately after fetch completes
+				if (progressReporter.cancelled) {
+					console.log("callDeepSeekAPI: Cancellation detected after fetch completed.");
+					throw new Error("Processing cancelled by user after API response.");
+				}
+
 				// console.log(`callDeepSeekAPI: Attempt ${attempt}/${maxAttempts} - Response Status: ${response.status}`); // DEBUG
 				if (!response.ok) {
 					const errorText = await response.text();
@@ -1471,10 +1477,20 @@ export default class NotemdPlugin extends Plugin {
 						throw lastError;
 					}
 					// Continue to retry logic if applicable
+					// Check #2.5: After handling API error but before retry logic/throwing fatal
+					if (progressReporter.cancelled) {
+						console.log("callDeepSeekAPI: Cancellation detected after API error handling.");
+						throw new Error("Processing cancelled by user after API error.");
+					}
 
 				} else {
 					// Success path
 					const data = await response.json();
+					// Check #2.6: After successful response parsing but before returning
+					if (progressReporter.cancelled) {
+						console.log("callDeepSeekAPI: Cancellation detected after successful API response parsing.");
+						throw new Error("Processing cancelled by user after API success.");
+					}
 					if (!data.choices || !data.choices[0] || !data.choices[0].message || !data.choices[0].message.content) {
 						console.error("callDeepSeekAPI: Unexpected response format:", data); // Keep error log
 						throw new Error(`Unexpected response format from DeepSeek API`);
@@ -1486,12 +1502,17 @@ export default class NotemdPlugin extends Plugin {
 			} catch (error: any) {
 				lastError = error; // Store network or other fetch errors
 				console.warn(`callDeepSeekAPI: Attempt ${attempt} failed with error: ${error.message}`);
-				// If it's a network error, retry might help. If it's a parsing error, maybe not, but retry anyway.
-				// Handle AbortError specifically
+				// Handle AbortError specifically first
 				if (error.name === 'AbortError') {
 					console.log("callDeepSeekAPI: Fetch aborted by user cancellation.");
 					throw new Error("API call cancelled by user."); // Re-throw specific error
 				}
+				// Check for cancellation if it wasn't an AbortError
+				if (progressReporter.cancelled) {
+					console.log("callDeepSeekAPI: Cancellation detected during error handling.");
+					throw new Error("Processing cancelled by user during API error handling.");
+				}
+				// If not cancelled and not AbortError, it's some other error to potentially retry
 			} finally {
 				// Clear the controller from the reporter once this attempt is done
 				if (progressReporter.abortController === controller) {
@@ -1587,6 +1608,12 @@ export default class NotemdPlugin extends Plugin {
 					body: JSON.stringify(requestBody)
 				});
 
+				// Check #2: Immediately after fetch completes
+				if (progressReporter.cancelled) {
+					console.log("callOpenAIApi: Cancellation detected after fetch completed.");
+					throw new Error("Processing cancelled by user after API response.");
+				}
+
 				// console.log(`callOpenAIApi: Attempt ${attempt}/${maxAttempts} - Response Status: ${response.status}`); // DEBUG
 				if (!response.ok) {
 					const errorText = await response.text();
@@ -1605,10 +1632,20 @@ export default class NotemdPlugin extends Plugin {
 						throw lastError;
 					}
 					// Continue to retry logic
+					// Check #2.5: After handling API error but before retry logic/throwing fatal
+					if (progressReporter.cancelled) {
+						console.log("callOpenAIApi: Cancellation detected after API error handling.");
+						throw new Error("Processing cancelled by user after API error.");
+					}
 
 				} else {
 					// Success path
 					const data = await response.json();
+					// Check #2.6: After successful response parsing but before returning
+					if (progressReporter.cancelled) {
+						console.log("callOpenAIApi: Cancellation detected after successful API response parsing.");
+						throw new Error("Processing cancelled by user after API success.");
+					}
 					if (!data.choices || !data.choices[0] || !data.choices[0].message || !data.choices[0].message.content) {
 						console.error("callOpenAIApi: Unexpected response format:", data);
 						throw new Error(`Unexpected response format from OpenAI API`);
@@ -1620,10 +1657,15 @@ export default class NotemdPlugin extends Plugin {
 			} catch (error: any) {
 				lastError = error;
 				console.warn(`callOpenAIApi: Attempt ${attempt} failed with error: ${error.message}`);
-				// Handle AbortError specifically
+				// Handle AbortError specifically first
 				if (error.name === 'AbortError') {
 					console.log("callOpenAIApi: Fetch aborted by user cancellation.");
-					throw new Error("API call cancelled by user."); // Re-throw specific error
+					throw new Error("API call cancelled by user.");
+				}
+				// Check for cancellation if it wasn't an AbortError
+				if (progressReporter.cancelled) {
+					console.log("callOpenAIApi: Cancellation detected during error handling.");
+					throw new Error("Processing cancelled by user during API error handling.");
 				}
 			} finally {
 				// Clear the controller from the reporter once this attempt is done
@@ -1694,6 +1736,12 @@ export default class NotemdPlugin extends Plugin {
 					body: JSON.stringify(requestBody)
 				});
 
+				// Check #2: Immediately after fetch completes
+				if (progressReporter.cancelled) {
+					console.log("callAnthropicApi: Cancellation detected after fetch completed.");
+					throw new Error("Processing cancelled by user after API response.");
+				}
+
 				// console.log(`callAnthropicApi: Attempt ${attempt}/${maxAttempts} - Response Status: ${response.status}`); // DEBUG
 				if (!response.ok) {
 					const errorText = await response.text();
@@ -1713,10 +1761,20 @@ export default class NotemdPlugin extends Plugin {
 						throw lastError;
 					}
 					// Continue to retry logic
+					// Check #2.5: After handling API error but before retry logic/throwing fatal
+					if (progressReporter.cancelled) {
+						console.log("callAnthropicApi: Cancellation detected after API error handling.");
+						throw new Error("Processing cancelled by user after API error.");
+					}
 
 				} else {
 					// Success path
 					const data = await response.json();
+					// Check #2.6: After successful response parsing but before returning
+					if (progressReporter.cancelled) {
+						console.log("callAnthropicApi: Cancellation detected after successful API response parsing.");
+						throw new Error("Processing cancelled by user after API success.");
+					}
 					if (!data.content || !data.content[0] || !data.content[0].text) {
 						console.error("callAnthropicApi: Unexpected response format:", data);
 						throw new Error(`Unexpected response format from Anthropic API`);
@@ -1728,10 +1786,15 @@ export default class NotemdPlugin extends Plugin {
 			} catch (error: any) {
 				lastError = error;
 				console.warn(`callAnthropicApi: Attempt ${attempt} failed with error: ${error.message}`);
-				// Handle AbortError specifically
+				// Handle AbortError specifically first
 				if (error.name === 'AbortError') {
 					console.log("callAnthropicApi: Fetch aborted by user cancellation.");
-					throw new Error("API call cancelled by user."); // Re-throw specific error
+					throw new Error("API call cancelled by user.");
+				}
+				// Check for cancellation if it wasn't an AbortError
+				if (progressReporter.cancelled) {
+					console.log("callAnthropicApi: Cancellation detected during error handling.");
+					throw new Error("Processing cancelled by user during API error handling.");
 				}
 			} finally {
 				// Clear the controller from the reporter once this attempt is done
@@ -1806,6 +1869,12 @@ export default class NotemdPlugin extends Plugin {
 					body: JSON.stringify(requestBody)
 				});
 
+				// Check #2: Immediately after fetch completes
+				if (progressReporter.cancelled) {
+					console.log("callGoogleApi: Cancellation detected after fetch completed.");
+					throw new Error("Processing cancelled by user after API response.");
+				}
+
 				// console.log(`callGoogleApi: Attempt ${attempt}/${maxAttempts} - Response Status: ${response.status}`); // DEBUG
 				if (!response.ok) {
 					const errorText = await response.text();
@@ -1825,10 +1894,20 @@ export default class NotemdPlugin extends Plugin {
 						throw lastError;
 					}
 					// Continue to retry logic
+					// Check #2.5: After handling API error but before retry logic/throwing fatal
+					if (progressReporter.cancelled) {
+						console.log("callGoogleApi: Cancellation detected after API error handling.");
+						throw new Error("Processing cancelled by user after API error.");
+					}
 
 				} else {
 					// Success path
 					const data = await response.json();
+					// Check #2.6: After successful response parsing but before returning
+					if (progressReporter.cancelled) {
+						console.log("callGoogleApi: Cancellation detected after successful API response parsing.");
+						throw new Error("Processing cancelled by user after API success.");
+					}
 					if (!data.candidates || !data.candidates[0].content || !data.candidates[0].content.parts || !data.candidates[0].content.parts[0].text) {
 						console.error("callGoogleApi: Unexpected response format:", data);
 						throw new Error(`Unexpected response format from Google API`);
@@ -1840,10 +1919,15 @@ export default class NotemdPlugin extends Plugin {
 			} catch (error: any) {
 				lastError = error;
 				console.warn(`callGoogleApi: Attempt ${attempt} failed with error: ${error.message}`);
-				// Handle AbortError specifically
+				// Handle AbortError specifically first
 				if (error.name === 'AbortError') {
 					console.log("callGoogleApi: Fetch aborted by user cancellation.");
-					throw new Error("API call cancelled by user."); // Re-throw specific error
+					throw new Error("API call cancelled by user.");
+				}
+				// Check for cancellation if it wasn't an AbortError
+				if (progressReporter.cancelled) {
+					console.log("callGoogleApi: Cancellation detected during error handling.");
+					throw new Error("Processing cancelled by user during API error handling.");
 				}
 			} finally {
 				// Clear the controller from the reporter once this attempt is done
@@ -1916,6 +2000,12 @@ export default class NotemdPlugin extends Plugin {
 					body: JSON.stringify(requestBody)
 				});
 
+				// Check #2: Immediately after fetch completes
+				if (progressReporter.cancelled) {
+					console.log("callMistralApi: Cancellation detected after fetch completed.");
+					throw new Error("Processing cancelled by user after API response.");
+				}
+
 				// console.log(`callMistralApi: Attempt ${attempt}/${maxAttempts} - Response Status: ${response.status}`); // DEBUG
 				if (!response.ok) {
 					const errorText = await response.text();
@@ -1934,10 +2024,20 @@ export default class NotemdPlugin extends Plugin {
 						throw lastError;
 					}
 					// Continue to retry logic
+					// Check #2.5: After handling API error but before retry logic/throwing fatal
+					if (progressReporter.cancelled) {
+						console.log("callMistralApi: Cancellation detected after API error handling.");
+						throw new Error("Processing cancelled by user after API error.");
+					}
 
 				} else {
 					// Success path
 					const data = await response.json();
+					// Check #2.6: After successful response parsing but before returning
+					if (progressReporter.cancelled) {
+						console.log("callMistralApi: Cancellation detected after successful API response parsing.");
+						throw new Error("Processing cancelled by user after API success.");
+					}
 					if (!data.choices || !data.choices[0] || !data.choices[0].message || !data.choices[0].message.content) {
 						console.error("callMistralApi: Unexpected response format:", data);
 						throw new Error(`Unexpected response format from Mistral API`);
@@ -1949,10 +2049,15 @@ export default class NotemdPlugin extends Plugin {
 			} catch (error: any) {
 				lastError = error;
 				console.warn(`callMistralApi: Attempt ${attempt} failed with error: ${error.message}`);
-				// Handle AbortError specifically
+				// Handle AbortError specifically first
 				if (error.name === 'AbortError') {
 					console.log("callMistralApi: Fetch aborted by user cancellation.");
-					throw new Error("API call cancelled by user."); // Re-throw specific error
+					throw new Error("API call cancelled by user.");
+				}
+				// Check for cancellation if it wasn't an AbortError
+				if (progressReporter.cancelled) {
+					console.log("callMistralApi: Cancellation detected during error handling.");
+					throw new Error("Processing cancelled by user during API error handling.");
 				}
 			} finally {
 				// Clear the controller from the reporter once this attempt is done
@@ -2032,6 +2137,12 @@ export default class NotemdPlugin extends Plugin {
 					body: JSON.stringify(requestBody)
 				});
 
+				// Check #2: Immediately after fetch completes
+				if (progressReporter.cancelled) {
+					console.log("callAzureOpenAIApi: Cancellation detected after fetch completed.");
+					throw new Error("Processing cancelled by user after API response.");
+				}
+
 				// console.log(`callAzureOpenAIApi: Attempt ${attempt}/${maxAttempts} - Response Status: ${response.status}`); // DEBUG
 				if (!response.ok) {
 					const errorText = await response.text();
@@ -2050,10 +2161,20 @@ export default class NotemdPlugin extends Plugin {
 						throw lastError;
 					}
 					// Continue to retry logic
+					// Check #2.5: After handling API error but before retry logic/throwing fatal
+					if (progressReporter.cancelled) {
+						console.log("callAzureOpenAIApi: Cancellation detected after API error handling.");
+						throw new Error("Processing cancelled by user after API error.");
+					}
 
 				} else {
 					// Success path
 					const data = await response.json();
+					// Check #2.6: After successful response parsing but before returning
+					if (progressReporter.cancelled) {
+						console.log("callAzureOpenAIApi: Cancellation detected after successful API response parsing.");
+						throw new Error("Processing cancelled by user after API success.");
+					}
 					if (!data.choices || !data.choices[0] || !data.choices[0].message || !data.choices[0].message.content) {
 						console.error("callAzureOpenAIApi: Unexpected response format:", data);
 						throw new Error(`Unexpected response format from Azure OpenAI API`);
@@ -2065,10 +2186,15 @@ export default class NotemdPlugin extends Plugin {
 			} catch (error: any) {
 				lastError = error;
 				console.warn(`callAzureOpenAIApi: Attempt ${attempt} failed with error: ${error.message}`);
-				// Handle AbortError specifically
+				// Handle AbortError specifically first
 				if (error.name === 'AbortError') {
 					console.log("callAzureOpenAIApi: Fetch aborted by user cancellation.");
-					throw new Error("API call cancelled by user."); // Re-throw specific error
+					throw new Error("API call cancelled by user.");
+				}
+				// Check for cancellation if it wasn't an AbortError
+				if (progressReporter.cancelled) {
+					console.log("callAzureOpenAIApi: Cancellation detected during error handling.");
+					throw new Error("Processing cancelled by user during API error handling.");
 				}
 			} finally {
 				// Clear the controller from the reporter once this attempt is done
@@ -2143,6 +2269,12 @@ export default class NotemdPlugin extends Plugin {
 					body: JSON.stringify(requestBody)
 				});
 
+				// Check #2: Immediately after fetch completes
+				if (progressReporter.cancelled) {
+					console.log("callLMStudioApi: Cancellation detected after fetch completed.");
+					throw new Error("Processing cancelled by user after API response.");
+				}
+
 				// console.log(`callLMStudioApi: Attempt ${attempt}/${maxAttempts} - Response Status: ${response.status}`); // DEBUG
 				if (!response.ok) {
 					const errorText = await response.text();
@@ -2160,10 +2292,20 @@ export default class NotemdPlugin extends Plugin {
 						throw lastError;
 					}
 					// Continue to retry logic
+					// Check #2.5: After handling API error but before retry logic/throwing fatal
+					if (progressReporter.cancelled) {
+						console.log("callLMStudioApi: Cancellation detected after API error handling.");
+						throw new Error("Processing cancelled by user after API error.");
+					}
 
 				} else {
 					// Success path
 					const data = await response.json();
+					// Check #2.6: After successful response parsing but before returning
+					if (progressReporter.cancelled) {
+						console.log("callLMStudioApi: Cancellation detected after successful API response parsing.");
+						throw new Error("Processing cancelled by user after API success.");
+					}
 					// Standard OpenAI response format expected
 					if (!data.choices || !data.choices[0] || !data.choices[0].message || !data.choices[0].message.content) {
 						console.error("callLMStudioApi: Unexpected response format:", data);
@@ -2176,10 +2318,15 @@ export default class NotemdPlugin extends Plugin {
 			} catch (error: any) {
 				lastError = error;
 				console.warn(`callLMStudioApi: Attempt ${attempt} failed with error: ${error.message}`);
-				// Handle AbortError specifically
+				// Handle AbortError specifically first
 				if (error.name === 'AbortError') {
 					console.log("callLMStudioApi: Fetch aborted by user cancellation.");
-					throw new Error("API call cancelled by user."); // Re-throw specific error
+					throw new Error("API call cancelled by user.");
+				}
+				// Check for cancellation if it wasn't an AbortError
+				if (progressReporter.cancelled) {
+					console.log("callLMStudioApi: Cancellation detected during error handling.");
+					throw new Error("Processing cancelled by user during API error handling.");
 				}
 			} finally {
 				// Clear the controller from the reporter once this attempt is done
@@ -2256,6 +2403,12 @@ export default class NotemdPlugin extends Plugin {
 					body: JSON.stringify(requestBody)
 				});
 
+				// Check #2: Immediately after fetch completes
+				if (progressReporter.cancelled) {
+					console.log("callOllamaApi: Cancellation detected after fetch completed.");
+					throw new Error("Processing cancelled by user after API response.");
+				}
+
 				// console.log(`callOllamaApi: Attempt ${attempt}/${maxAttempts} - Response Status: ${response.status}`); // DEBUG
 				if (!response.ok) {
 					const errorText = await response.text();
@@ -2273,10 +2426,20 @@ export default class NotemdPlugin extends Plugin {
 						throw lastError;
 					}
 					// Continue to retry logic
+					// Check #2.5: After handling API error but before retry logic/throwing fatal
+					if (progressReporter.cancelled) {
+						console.log("callOllamaApi: Cancellation detected after API error handling.");
+						throw new Error("Processing cancelled by user after API error.");
+					}
 
 				} else {
 					// Success path
 					const data = await response.json();
+					// Check #2.6: After successful response parsing but before returning
+					if (progressReporter.cancelled) {
+						console.log("callOllamaApi: Cancellation detected after successful API response parsing.");
+						throw new Error("Processing cancelled by user after API success.");
+					}
 					// Ollama's response structure is different
 					if (!data.message || !data.message.content) {
 						console.error("callOllamaApi: Unexpected response format:", data);
@@ -2289,10 +2452,15 @@ export default class NotemdPlugin extends Plugin {
 			} catch (error: any) {
 				lastError = error;
 				console.warn(`callOllamaApi: Attempt ${attempt} failed with error: ${error.message}`);
-				// Handle AbortError specifically
+				// Handle AbortError specifically first
 				if (error.name === 'AbortError') {
 					console.log("callOllamaApi: Fetch aborted by user cancellation.");
-					throw new Error("API call cancelled by user."); // Re-throw specific error
+					throw new Error("API call cancelled by user.");
+				}
+				// Check for cancellation if it wasn't an AbortError
+				if (progressReporter.cancelled) {
+					console.log("callOllamaApi: Cancellation detected during error handling.");
+					throw new Error("Processing cancelled by user during API error handling.");
 				}
 			} finally {
 				// Clear the controller from the reporter once this attempt is done
@@ -2368,6 +2536,12 @@ export default class NotemdPlugin extends Plugin {
 					body: JSON.stringify(requestBody)
 				});
 
+				// Check #2: Immediately after fetch completes
+				if (progressReporter.cancelled) {
+					console.log("callOpenRouterAPI: Cancellation detected after fetch completed.");
+					throw new Error("Processing cancelled by user after API response.");
+				}
+
 				// console.log(`callOpenRouterAPI: Attempt ${attempt}/${maxAttempts} - Response Status: ${response.status}`); // DEBUG
 				if (!response.ok) {
 					const errorText = await response.text();
@@ -2387,10 +2561,20 @@ export default class NotemdPlugin extends Plugin {
 						throw lastError;
 					}
 					// Continue to retry logic
+					// Check #2.5: After handling API error but before retry logic/throwing fatal
+					if (progressReporter.cancelled) {
+						console.log("callOpenRouterAPI: Cancellation detected after API error handling.");
+						throw new Error("Processing cancelled by user after API error.");
+					}
 
 				} else {
 					// Success path
 					const data = await response.json();
+					// Check #2.6: After successful response parsing but before returning
+					if (progressReporter.cancelled) {
+						console.log("callOpenRouterAPI: Cancellation detected after successful API response parsing.");
+						throw new Error("Processing cancelled by user after API success.");
+					}
 					// Standard OpenAI response format expected
 					if (!data.choices || !data.choices[0] || !data.choices[0].message || !data.choices[0].message.content) {
 						console.error("callOpenRouterAPI: Unexpected response format:", data);
@@ -2403,10 +2587,15 @@ export default class NotemdPlugin extends Plugin {
 			} catch (error: any) {
 				lastError = error; // Includes fetch errors caught by the outer try-catch
 				console.warn(`callOpenRouterAPI: Attempt ${attempt} failed with error: ${error.message}`);
-				// Handle AbortError specifically
+				// Handle AbortError specifically first
 				if (error.name === 'AbortError') {
 					console.log("callOpenRouterAPI: Fetch aborted by user cancellation.");
-					throw new Error("API call cancelled by user."); // Re-throw specific error
+					throw new Error("API call cancelled by user.");
+				}
+				// Check for cancellation if it wasn't an AbortError
+				if (progressReporter.cancelled) {
+					console.log("callOpenRouterAPI: Cancellation detected during error handling.");
+					throw new Error("Processing cancelled by user during API error handling.");
 				}
 			} finally {
 				// Clear the controller from the reporter once this attempt is done
