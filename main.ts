@@ -208,6 +208,7 @@ export default class NotemdPlugin extends Plugin {
 	settings: NotemdSettings;
 	currentProcessingFile: string = ''; // Track currently processed file for backlinks
 	statusBarItem: HTMLElement; // Reference to status bar element
+	private isBusy: boolean = false; // Plugin-level flag to prevent concurrent processing
 	// progressModal?: ProgressModal; // No longer needed at plugin level
 
 	async onload() {
@@ -473,8 +474,16 @@ export default class NotemdPlugin extends Plugin {
 
 	// --- File Processing Logic ---
 
-	// Updated to accept optional progress reporter
+	// Updated to accept optional progress reporter and check isBusy flag
 	async processWithNotemd(progressReporter?: ProgressReporter) {
+		if (this.isBusy) {
+			new Notice("Notemd is already processing another task.");
+			progressReporter?.log("Error: Another task is already in progress."); // Log to reporter if available
+			progressReporter?.updateStatus("Busy", -1); // Update reporter status
+			return;
+		}
+		this.isBusy = true; // Set busy flag
+
 		await this.loadSettings(); // Ensure latest settings are loaded
 		// console.log("Entering processWithNotemd"); // DEBUG
 		const activeFile = this.app.workspace.getActiveFile();
@@ -699,11 +708,21 @@ export default class NotemdPlugin extends Plugin {
 			// Show detailed, copyable error modal
 			new ErrorModal(this.app, "Notemd Processing Error", errorDetails).open();
 			// Keep reporter open on error (modal stays open, sidebar remains)
+		} finally {
+			this.isBusy = false; // Clear busy flag regardless of success or failure
 		}
 	}
 
-	// Updated to accept optional progress reporter
+	// Updated to accept optional progress reporter and check isBusy flag
 	async processFolderWithNotemd(progressReporter?: ProgressReporter) {
+		if (this.isBusy) {
+			new Notice("Notemd is already processing another task.");
+			progressReporter?.log("Error: Another task is already in progress.");
+			progressReporter?.updateStatus("Busy", -1);
+			return;
+		}
+		this.isBusy = true; // Set busy flag
+
 		await this.loadSettings(); // Ensure latest settings are loaded
 		const folderPath = await this.getFolderSelection();
 		if (!folderPath) {
@@ -875,6 +894,8 @@ export default class NotemdPlugin extends Plugin {
 			// Show detailed, copyable error modal
 			new ErrorModal(this.app, "Notemd Batch Processing Error", errorDetails).open();
 			// Keep reporter open (modal stays open, sidebar remains)
+		} finally {
+			this.isBusy = false; // Clear busy flag regardless of success or failure
 		}
 	}
 
@@ -1520,7 +1541,15 @@ export default class NotemdPlugin extends Plugin {
 				}
 			}
 
-			// If we reached here, it means the attempt failed (and wasn't aborted) and we might retry
+			// *** ADDED/REINFORCED CHECK ***
+			// Explicitly check for cancellation *after* the try/catch/finally for the current attempt completes,
+			// before deciding whether to proceed to the delay/next iteration.
+			if (progressReporter.cancelled) {
+				console.log(`callDeepSeekAPI: Cancellation detected after attempt ${attempt} finished (before retry decision).`);
+				throw new Error("Processing cancelled by user during API retry sequence.");
+			}
+
+			// If we reached here, it means the attempt failed (and wasn't aborted/cancelled inside try/catch)
 			if (attempt < maxAttempts) {
 				// Use cancellable delay
 				progressReporter.log(`Waiting ${intervalSeconds} seconds before retry ${attempt + 1}...`);
@@ -1675,9 +1704,15 @@ export default class NotemdPlugin extends Plugin {
 				}
 			}
 
+			// *** ADDED/REINFORCED CHECK ***
+			if (progressReporter.cancelled) {
+				console.log(`callOpenAIApi: Cancellation detected after attempt ${attempt} finished (before retry decision).`);
+				throw new Error("Processing cancelled by user during API retry sequence.");
+			}
+
 			// Wait before retrying if applicable (and not aborted)
 			if (attempt < maxAttempts) {
-				// Check for cancellation BEFORE waiting
+				// Check for cancellation BEFORE waiting (this check is technically redundant now but harmless)
 				if (progressReporter.cancelled) {
 					console.log("callOpenAIApi: Cancellation detected before retry wait.");
 					throw new Error("Processing cancelled by user during API retry wait.");
@@ -1805,9 +1840,15 @@ export default class NotemdPlugin extends Plugin {
 				}
 			}
 
+			// *** ADDED/REINFORCED CHECK ***
+			if (progressReporter.cancelled) {
+				console.log(`callAnthropicApi: Cancellation detected after attempt ${attempt} finished (before retry decision).`);
+				throw new Error("Processing cancelled by user during API retry sequence.");
+			}
+
 			// Wait before retrying if applicable (and not aborted)
 			if (attempt < maxAttempts) {
-				// Check for cancellation BEFORE waiting
+				// Check for cancellation BEFORE waiting (redundant but harmless)
 				if (progressReporter.cancelled) {
 					console.log("callAnthropicApi: Cancellation detected before retry wait.");
 					throw new Error("Processing cancelled by user during API retry wait.");
@@ -1939,9 +1980,15 @@ export default class NotemdPlugin extends Plugin {
 				}
 			}
 
+			// *** ADDED/REINFORCED CHECK ***
+			if (progressReporter.cancelled) {
+				console.log(`callGoogleApi: Cancellation detected after attempt ${attempt} finished (before retry decision).`);
+				throw new Error("Processing cancelled by user during API retry sequence.");
+			}
+
 			// Wait before retrying if applicable (and not aborted)
 			if (attempt < maxAttempts) {
-				// Check for cancellation BEFORE waiting
+				// Check for cancellation BEFORE waiting (redundant but harmless)
 				if (progressReporter.cancelled) {
 					console.log("callGoogleApi: Cancellation detected before retry wait.");
 					throw new Error("Processing cancelled by user during API retry wait.");
@@ -2070,9 +2117,15 @@ export default class NotemdPlugin extends Plugin {
 				}
 			}
 
+			// *** ADDED/REINFORCED CHECK ***
+			if (progressReporter.cancelled) {
+				console.log(`callMistralApi: Cancellation detected after attempt ${attempt} finished (before retry decision).`);
+				throw new Error("Processing cancelled by user during API retry sequence.");
+			}
+
 			// Wait before retrying if applicable (and not aborted)
 			if (attempt < maxAttempts) {
-				// Check for cancellation BEFORE waiting
+				// Check for cancellation BEFORE waiting (redundant but harmless)
 				if (progressReporter.cancelled) {
 					console.log("callMistralApi: Cancellation detected before retry wait.");
 					throw new Error("Processing cancelled by user during API retry wait.");
@@ -2208,9 +2261,15 @@ export default class NotemdPlugin extends Plugin {
 				}
 			}
 
+			// *** ADDED/REINFORCED CHECK ***
+			if (progressReporter.cancelled) {
+				console.log(`callAzureOpenAIApi: Cancellation detected after attempt ${attempt} finished (before retry decision).`);
+				throw new Error("Processing cancelled by user during API retry sequence.");
+			}
+
 			// Wait before retrying if applicable (and not aborted)
 			if (attempt < maxAttempts) {
-				// Check for cancellation BEFORE waiting
+				// Check for cancellation BEFORE waiting (redundant but harmless)
 				if (progressReporter.cancelled) {
 					console.log("callAzureOpenAIApi: Cancellation detected before retry wait.");
 					throw new Error("Processing cancelled by user during API retry wait.");
@@ -2341,9 +2400,15 @@ export default class NotemdPlugin extends Plugin {
 				}
 			}
 
+			// *** ADDED/REINFORCED CHECK ***
+			if (progressReporter.cancelled) {
+				console.log(`callLMStudioApi: Cancellation detected after attempt ${attempt} finished (before retry decision).`);
+				throw new Error("Processing cancelled by user during API retry sequence.");
+			}
+
 			// Wait before retrying if applicable (and not aborted)
 			if (attempt < maxAttempts) {
-				// Check for cancellation BEFORE waiting
+				// Check for cancellation BEFORE waiting (redundant but harmless)
 				if (progressReporter.cancelled) {
 					console.log("callLMStudioApi: Cancellation detected before retry wait.");
 					throw new Error("Processing cancelled by user during API retry wait.");
@@ -2476,9 +2541,15 @@ export default class NotemdPlugin extends Plugin {
 				}
 			}
 
+			// *** ADDED/REINFORCED CHECK ***
+			if (progressReporter.cancelled) {
+				console.log(`callOllamaApi: Cancellation detected after attempt ${attempt} finished (before retry decision).`);
+				throw new Error("Processing cancelled by user during API retry sequence.");
+			}
+
 			// Wait before retrying if applicable (and not aborted)
 			if (attempt < maxAttempts) {
-				// Check for cancellation BEFORE waiting
+				// Check for cancellation BEFORE waiting (redundant but harmless)
 				if (progressReporter.cancelled) {
 					console.log("callOllamaApi: Cancellation detected before retry wait.");
 					throw new Error("Processing cancelled by user during API retry wait.");
@@ -2612,9 +2683,15 @@ export default class NotemdPlugin extends Plugin {
 				}
 			}
 
+			// *** ADDED/REINFORCED CHECK ***
+			if (progressReporter.cancelled) {
+				console.log(`callOpenRouterAPI: Cancellation detected after attempt ${attempt} finished (before retry decision).`);
+				throw new Error("Processing cancelled by user during API retry sequence.");
+			}
+
 			// Wait before retrying if applicable (and not aborted)
 			if (attempt < maxAttempts) {
-				// Check for cancellation BEFORE waiting
+				// Check for cancellation BEFORE waiting (redundant but harmless)
 				if (progressReporter.cancelled) {
 					console.log("callOpenRouterAPI: Cancellation detected before retry wait.");
 					throw new Error("Processing cancelled by user during API retry wait.");
@@ -3261,6 +3338,20 @@ Rules:
 	 * @param progressReporter Interface for reporting progress (Modal or Sidebar).
 	 */
 	async generateContentForTitle(file: TFile, progressReporter: ProgressReporter) {
+		// Check busy flag at the start of the core logic function as well,
+		// although the command/button handlers should prevent concurrent calls.
+		// This acts as a secondary safeguard.
+		if (this.isBusy && !progressReporter) { // Avoid double-flagging if called from a batch job that already set it
+			new Notice("Notemd is already processing another task.");
+			return; // Don't set/unset flag here if called internally
+		}
+		// If called directly (e.g., single file command), manage the flag.
+		let calledDirectly = false;
+		if (!this.isBusy) {
+			this.isBusy = true;
+			calledDirectly = true;
+		}
+
 		// Use the passed file argument instead of relying on the active file
 		// const activeFile = this.app.workspace.getActiveFile();
 		if (!file || !(file instanceof TFile) || file.extension !== 'md') {
@@ -3535,6 +3626,10 @@ Format directly for Obsidian markdown. Do NOT wrap the entire response in a mark
 			}
 			// Re-throw the error so the batch function can catch it and log it silently
 			throw error;
+		} finally {
+			if (calledDirectly) {
+				this.isBusy = false; // Clear flag if this was the top-level call
+			}
 		}
 	}
 
@@ -3726,6 +3821,14 @@ Format directly for Obsidian markdown. Do NOT wrap the entire response in a mark
 	 * Performs web research on a topic (note title or selection) and appends a summary.
 	 */
 	async researchAndSummarize(editor: Editor, view: MarkdownView, progressReporter: ProgressReporter): Promise<void> {
+		if (this.isBusy) {
+			new Notice("Notemd is already processing another task.");
+			progressReporter?.log("Error: Another task is already in progress.");
+			progressReporter?.updateStatus("Busy", -1);
+			return;
+		}
+		this.isBusy = true; // Set busy flag
+
 		const activeFile = view.file;
 		if (!activeFile) {
 			new Notice('No active file.');
@@ -3860,6 +3963,8 @@ Format directly for Obsidian markdown. Do NOT wrap the entire response in a mark
 				new ErrorModal(this.app, "Research Error", errorDetails).open();
 			}
 			// Keep reporter open on error/cancellation
+		} finally {
+			this.isBusy = false; // Clear busy flag regardless of success or failure
 		}
 	}
 
@@ -3894,10 +3999,24 @@ Format directly for Obsidian markdown. Do NOT wrap the entire response in a mark
 					include_raw_content: false, // Keep false, rely on snippets/content field
 					max_results: this.settings.tavilyMaxResults // Use setting
 				};
+				// Add timeout for Tavily request using Promise.race
+				const tavilyTimeout = this.settings.ddgFetchTimeout * 1000; // Reuse DDG timeout setting for Tavily
+				const timeoutPromise = new Promise<never>((_, reject) =>
+					setTimeout(() => reject(new Error(`Tavily API request timed out after ${tavilyTimeout / 1000}s`)), tavilyTimeout)
+				);
+
 				// Note: requestUrl doesn't directly support AbortController signal.
-				// Cancellation here relies on checking the flag *before* the call.
-				const tavilyResponse = await requestUrl({ url: tavilyUrl, method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(tavilyRequestBody), throw: false });
+				// Cancellation here relies on checking the flag *before* the call and the timeout.
+				const tavilyResponse = await Promise.race([
+					requestUrl({ url: tavilyUrl, method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(tavilyRequestBody), throw: false }),
+					timeoutPromise
+				]);
+
 				if (progressReporter.cancelled) throw new Error("Processing cancelled by user during Tavily search."); // Cancellation Check
+				// Check if the response object has status (it might be the timeout error)
+				if (!tavilyResponse || typeof tavilyResponse.status !== 'number') {
+					throw new Error("Tavily request failed or timed out without a proper response object.");
+				}
 				if (tavilyResponse.status !== 200) throw new Error(`Tavily API error: ${tavilyResponse.status} - ${tavilyResponse.text}`);
 				const tavilyData = tavilyResponse.json;
 				if (!tavilyData.results || tavilyData.results.length === 0) {
@@ -4006,6 +4125,14 @@ Format directly for Obsidian markdown. Do NOT wrap the entire response in a mark
 	 * @param progressReporter - Interface for reporting progress.
 	 */
 	async batchGenerateContentForTitles(progressReporter: ProgressReporter) {
+		if (this.isBusy) {
+			new Notice("Notemd is already processing another task.");
+			progressReporter?.log("Error: Another task is already in progress.");
+			progressReporter?.updateStatus("Busy", -1);
+			return;
+		}
+		this.isBusy = true; // Set busy flag
+
 		// Check #0: Immediately check for cancellation before any setup
 		if (progressReporter.cancelled) {
 			new Notice('Operation cancelled before starting.');
@@ -4230,6 +4357,8 @@ Format directly for Obsidian markdown. Do NOT wrap the entire response in a mark
 			progressReporter.log(`Batch Error: ${batchError.message}`);
 			progressReporter.updateStatus('Error occurred during batch generation', -1);
 			new ErrorModal(this.app, "Notemd Batch Generation Error", errorDetails).open();
+		} finally {
+			this.isBusy = false; // Clear busy flag regardless of success or failure
 		}
 	}
 
@@ -4562,12 +4691,16 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 			// }
 			this.log('Starting: Process Current File...');
 			this.updateStatus('Processing current file...', 0);
-			// Pass 'this' (the view instance) instead of creating a ProgressModal
-			await this.plugin.processWithNotemd(this); // Calls original logic
-			this.isProcessing = false; // Mark processing finished
-			// Keep cancel button enabled even after completion/cancellation
-			if (this.cancelButton) {
-				this.cancelButton.removeClass('is-active');
+			try {
+				// Pass 'this' (the view instance) instead of creating a ProgressModal
+				await this.plugin.processWithNotemd(this); // Calls original logic
+			} finally {
+				this.isProcessing = false; // Mark processing finished
+				// Ensure cancel button is re-enabled and visually reset
+				if (this.cancelButton) {
+					this.cancelButton.disabled = false;
+					this.cancelButton.removeClass('is-active'); // Reset visual state
+				}
 			}
 		};
 		// Process Folder Button (Original Logic)
@@ -4589,12 +4722,16 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 			// }
 			this.log('Starting: Process Folder...');
 			this.updateStatus('Processing folder...', 0);
-			// Pass 'this' (the view instance) instead of creating a ProgressModal
-			await this.plugin.processFolderWithNotemd(this); // Calls original logic
-			this.isProcessing = false;
-			// Keep cancel button enabled even after completion/cancellation
-			if (this.cancelButton) {
-				this.cancelButton.removeClass('is-active');
+			try {
+				// Pass 'this' (the view instance) instead of creating a ProgressModal
+				await this.plugin.processFolderWithNotemd(this); // Calls original logic
+			} finally {
+				this.isProcessing = false;
+				// Ensure cancel button is re-enabled and visually reset
+				if (this.cancelButton) {
+					this.cancelButton.disabled = false;
+					this.cancelButton.removeClass('is-active');
+				}
 			}
 		};
 
@@ -4622,14 +4759,19 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 				// }
 				this.log('Starting: Research & Summarize Topic...');
 				this.updateStatus('Researching topic...', 0);
-				await this.plugin.researchAndSummarize(activeView.editor, activeView, this);
-				this.isProcessing = false;
-				// Keep cancel button enabled even after completion/cancellation
-				if (this.cancelButton) {
-					this.cancelButton.removeClass('is-active');
+				try {
+					await this.plugin.researchAndSummarize(activeView.editor, activeView, this);
+				} finally {
+					this.isProcessing = false;
+					// Ensure cancel button is re-enabled and visually reset
+					if (this.cancelButton) {
+						this.cancelButton.disabled = false;
+						this.cancelButton.removeClass('is-active');
+					}
 				}
 			} else {
 				new Notice('No active Markdown editor found.');
+				this.isProcessing = false; // Ensure flag is reset if no editor found
 			}
 		};
 		// Generate Content from Title Button
@@ -4663,11 +4805,15 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 			}
 			this.log('Starting: Generate Content from Title...');
 			this.updateStatus('Generating content...', 0);
-			await this.plugin.generateContentForTitle(activeFile, this); // Pass active file and reporter
-			this.isProcessing = false;
-			// Keep cancel button enabled even after completion/cancellation
-			if (this.cancelButton) {
-				this.cancelButton.removeClass('is-active');
+			try {
+				await this.plugin.generateContentForTitle(activeFile, this); // Pass active file and reporter
+			} finally {
+				this.isProcessing = false;
+				// Ensure cancel button is re-enabled and visually reset
+				if (this.cancelButton) {
+					this.cancelButton.disabled = false;
+					this.cancelButton.removeClass('is-active');
+				}
 			}
 		};
 
@@ -4690,11 +4836,15 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 			// }
 			this.log('Starting: Batch Generate Content from Titles...');
 			this.updateStatus('Starting batch generation...', 0);
-			await this.plugin.batchGenerateContentForTitles(this); // Call the new batch function
-			this.isProcessing = false;
-			// Keep cancel button enabled even after completion/cancellation
-			if (this.cancelButton) {
-				this.cancelButton.removeClass('is-active');
+			try {
+				await this.plugin.batchGenerateContentForTitles(this); // Call the new batch function
+			} finally {
+				this.isProcessing = false;
+				// Ensure cancel button is re-enabled and visually reset
+				if (this.cancelButton) {
+					this.cancelButton.disabled = false;
+					this.cancelButton.removeClass('is-active');
+				}
 			}
 		};
 

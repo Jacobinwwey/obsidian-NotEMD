@@ -44,6 +44,13 @@ export function refineMermaidBlocks(content: string): string {
 			currentBlockLines = [line];
 			lastArrowIndexInBlock = -1;
 		} else if (inMermaid) {
+			// Apply new quote rules BEFORE removing brackets
+			// Rule 1: Replace " followed by non-space with ["
+			line = line.replace(/(?<!\s)(?<!\[)"(?!;|\s)(?!\])/g, '["');
+			// Rule 2: Replace "; with ];
+			line = line.replace(/";/g, '"];');
+
+
 			// Remove parentheses and curly braces from the line content within the mermaid block
 			const lineWithoutBrackets = line.replace(/[(){}]/g, ''); // Updated regex
 			currentBlockLines.push(lineWithoutBrackets);
