@@ -345,6 +345,16 @@ export default class NotemdPlugin extends Plugin {
 			}
 		});
 
+		// New Command: Check and Remove Duplicate Concept Notes
+		this.addCommand({
+			id: 'check-and-remove-duplicate-concept-notes', // Updated ID
+			name: 'Check and Remove Duplicate Concept Notes', // Updated Name
+			callback: async () => {
+				const reporter = this.getReporter(); // Use sidebar/modal for progress/results
+				await this.checkAndRemoveDuplicateConceptNotes(reporter); // Updated function call
+			}
+		});
+
 
 		// --- Settings Tab ---
 		this.addSettingTab(new NotemdSettingTab(this.app, this));
@@ -2981,11 +2991,12 @@ Rules:
 							}
 						}
 					} else if (!existingFile) {
-						// Create new note with template
+						// Create new note with template (only title)
 						let newNoteContent = `# ${concept}\n`; // Use original concept for title
-						if (this.currentProcessingFile) {
-							newNoteContent += `\n## Linked From\n- [[${this.currentProcessingFile}]]`;
-						}
+						// Removed the "Linked From" section addition:
+						// if (this.currentProcessingFile) {
+						// 	newNoteContent += `\n## Linked From\n- [[${this.currentProcessingFile}]]`;
+						// }
 						await this.app.vault.create(notePath, newNoteContent.trim());
 						createdCount++;
 						newlyCreatedConcepts.push(concept); // Log this concept name
@@ -3097,7 +3108,7 @@ Rules:
 			words.forEach(word => {
 				// Normalize: lowercase, remove possessive 's
 				const normalized = word.toLowerCase().replace(/'s$/, '');
-				if (normalized.length > 1) { // Ignore very short words
+				if (normalized.length > 2) { // Ignore very short words
 					if (seenWords.has(normalized)) {
 						duplicates.add(normalized);
 					}
@@ -3148,7 +3159,7 @@ Rules:
 		const normalizedMap = new Map<string, string[]>();
 		words.forEach(word => {
 			const normalized = word.toLowerCase().replace(/[-_\s]/g, ''); // Remove hyphens, underscores, spaces
-			if (normalized.length > 1) {
+			if (normalized.length > 3) {
 				const list = normalizedMap.get(normalized) || [];
 				if (!list.includes(word)) { // Avoid adding same word multiple times
 					list.push(word);
@@ -4362,6 +4373,305 @@ Format directly for Obsidian markdown. Do NOT wrap the entire response in a mark
 		}
 	}
 
+	/**
+	/**
+	 * Checks for duplicate concept notes based on PowerShell script logic.
+	 * Reports potential duplicates and prompts the user for deletion confirmation.
+	 * @param progressReporter Interface for reporting progress.
+	 */
+	async checkAndRemoveDuplicateConceptNotes(progressReporter: ProgressReporter) { // Renamed function
+		if (this.isBusy) {
+			new Notice("Notemd is already processing another task.");
+			progressReporter?.log("Error: Another task is already in progress."); // Use optional chaining
+			progressReporter?.updateStatus("Busy", -1);
+			return;
+		}
+		this.isBusy = true;
+
+		progressReporter.clearDisplay();
+		progressReporter.log("Starting duplicate concept note check...");
+		progressReporter.updateStatus("Checking for duplicates...", 0);
+		this.updateStatusBar("Checking duplicates...");
+
+		try {
+			// --- Settings Check ---
+			if (!this.settings.useCustomConceptNoteFolder || !this.settings.conceptNoteFolder) {
+				throw new Error("Concept Note Folder is not configured in settings. Cannot perform check.");
+			}
+			const conceptFolderPath = this.settings.conceptNoteFolder;
+			const conceptFolder = this.app.vault.getAbstractFileByPath(conceptFolderPath);
+			if (!conceptFolder || !(conceptFolder instanceof TFolder)) {
+				throw new Error(`Concept Note Folder path "${conceptFolderPath}" is invalid or not a folder.`);
+			}
+
+			progressReporter.log(`Using Concept Note Folder: ${conceptFolderPath}`);
+
+			// --- Get Files ---
+			progressReporter.updateStatus("Gathering files...", 10);
+			const allMarkdownFiles = this.app.vault.getMarkdownFiles();
+			const conceptNotes = allMarkdownFiles.filter(f => f.path.startsWith(conceptFolderPath + '/'));
+			const otherNotes = allMarkdownFiles.filter(f => !f.path.startsWith(conceptFolderPath + '/'));
+
+			if (conceptNotes.length === 0) {
+				throw new Error("No concept notes found in the specified folder.");
+			}
+			progressReporter.log(`Found ${conceptNotes.length} concept notes and ${otherNotes.length} other notes.`);
+
+			// --- Duplicate Detection Logic (Adapted from DeleteDuplicates.ps1) ---
+			// Store detailed info: path -> { reason: string, counterparts: string[] }
+			const filesToReport = new Map<string, { reason: string; counterparts: string[] }>();
+
+			// ** 1. Exact Filename Matching (Case-Insensitive) **
+			progressReporter.updateStatus("Checking exact filename matches...", 20);
+			const filenameMap = new Map<string, string[]>(); // Map basename -> list of full paths
+			allMarkdownFiles.forEach(file => {
+				const basenameLower = file.basename.toLowerCase();
+				const list = filenameMap.get(basenameLower) || [];
+				list.push(file.path);
+				filenameMap.set(basenameLower, list);
+			});
+
+			conceptNotes.forEach(cn => {
+				const basenameLower = cn.basename.toLowerCase();
+				const matches = filenameMap.get(basenameLower) || [];
+				if (matches.length > 1) {
+					const counterparts = matches.filter(path => path !== cn.path && !path.startsWith(conceptFolderPath + '/'));
+					// Check if there's at least one file with the same name *outside* the concept folder
+					if (counterparts.length > 0) {
+						// Only add if not already reported for a different reason
+						if (!filesToReport.has(cn.path)) {
+							filesToReport.set(cn.path, { reason: "Exact Match", counterparts: counterparts });
+							progressReporter.log(`[Exact Match] ${cn.path} matches ${counterparts.join(', ')}`);
+						}
+					}
+				}
+			});
+
+			// ** 2. Plural Handling (Simple s/es/ies) **
+			progressReporter.updateStatus("Checking plural variants...", 40);
+			const allBasenamesLower = new Set(allMarkdownFiles.map(f => f.basename.toLowerCase()));
+			const allFilesMap = new Map(allMarkdownFiles.map(f => [f.path, f])); // For easy lookup
+
+			conceptNotes.forEach(cn => {
+				if (filesToReport.has(cn.path)) return; // Skip already marked
+
+				const nameLower = cn.basename.toLowerCase();
+				let singular = '';
+
+				if (nameLower.endsWith('ies') && nameLower.length > 3) {
+					singular = nameLower.substring(0, nameLower.length - 3) + 'y';
+				} else if (nameLower.endsWith('es') && nameLower.length > 2) {
+					singular = nameLower.substring(0, nameLower.length - 2);
+				} else if (nameLower.endsWith('s') && nameLower.length > 1) {
+					singular = nameLower.substring(0, nameLower.length - 1);
+				}
+
+				if (singular && allBasenamesLower.has(singular)) {
+					const counterparts = allMarkdownFiles
+						.filter(f => f.basename.toLowerCase() === singular && f.path !== cn.path)
+						.map(f => f.path);
+
+					if (counterparts.length > 0) {
+						// Check if any counterpart is outside the concept folder
+						const existsOutside = counterparts.some(path => !path.startsWith(conceptFolderPath + '/'));
+						if (existsOutside || counterparts.length > 0) { // Report if singular exists anywhere else
+							if (!filesToReport.has(cn.path)) {
+								filesToReport.set(cn.path, { reason: `Plural of "${singular}"`, counterparts: counterparts });
+								progressReporter.log(`[Plural Match] ${cn.path} is plural of ${counterparts.join(', ')}`);
+							}
+						}
+					}
+				}
+			});
+
+			// ** 3. Symbol Normalization Check ** (Simplified version)
+			progressReporter.updateStatus("Checking normalized names...", 60);
+			const normalizedMap = new Map<string, string[]>(); // Map normalized name -> list of full paths
+			allMarkdownFiles.forEach(file => {
+				// Basic normalization: lowercase, remove symbols, collapse space
+				const normalized = file.basename
+					.toLowerCase()
+					.replace(/[-_]/g, ' ') // hyphens/underscores to spaces
+					.replace(/[^\p{L}\p{N} ]/gu, '') // Remove non-letter/number/space
+					.replace(/\s+/g, ' ')
+					.trim();
+				if (normalized) {
+					const list = normalizedMap.get(normalized) || [];
+					// Store path and original basename for reporting context
+					list.push(file.path); // Store full path
+					normalizedMap.set(normalized, list);
+				}
+			});
+
+			conceptNotes.forEach(cn => {
+				if (filesToReport.has(cn.path)) return; // Skip already marked
+				const normalized = cn.basename.toLowerCase().replace(/[-_]/g, ' ').replace(/[^\p{L}\p{N} ]/gu, '').replace(/\s+/g, ' ').trim();
+				if (normalized) {
+					const matches = normalizedMap.get(normalized) || [];
+					if (matches.length > 1) {
+						const counterparts = matches.filter(path => path !== cn.path && !path.startsWith(conceptFolderPath + '/'));
+						if (counterparts.length > 0) {
+							if (!filesToReport.has(cn.path)) {
+								// Get original names of counterparts for better reporting
+								const counterpartNames = counterparts.map(p => allFilesMap.get(p)?.basename || p);
+								filesToReport.set(cn.path, { reason: `Normalized Match (to "${normalized}")`, counterparts: counterpartNames });
+								progressReporter.log(`[Normalized Match] ${cn.path} matches ${counterpartNames.join(', ')}`);
+							}
+						}
+					}
+				}
+			});
+
+			// ** 4. Single-Word Containment Check **
+			progressReporter.updateStatus("Checking single-word containment...", 80);
+			conceptNotes.forEach(cn => {
+				if (filesToReport.has(cn.path)) return; // Skip already marked
+
+				const words = cn.basename.split(/\s+/);
+				if (words.length === 1) {
+					const singleWordLower = words[0].toLowerCase();
+					const counterparts = otherNotes.filter(on =>
+						on.basename.toLowerCase().split(/\s+/).includes(singleWordLower) && on.basename.includes(' ') // Ensure it's actually multi-word
+					).map(f => f.path); // Get paths of counterparts
+
+					if (counterparts.length > 0) {
+						if (!filesToReport.has(cn.path)) {
+							const counterpartNames = counterparts.map(p => allFilesMap.get(p)?.basename || p);
+							filesToReport.set(cn.path, { reason: `Contained in Multi-Word Note`, counterparts: counterpartNames });
+							progressReporter.log(`[Containment] ${cn.path} contained in ${counterpartNames.join(', ')}`);
+						}
+					}
+				}
+			});
+
+
+			// --- Report Results ---
+			progressReporter.updateStatus("Reporting results...", 95);
+
+			if (filesToReport.size > 0) {
+				// Convert Map to array of objects for modal
+				const reportList = Array.from(filesToReport.entries()).map(([path, details]) => ({
+					path: path,
+					reason: details.reason,
+					counterparts: details.counterparts
+				}));
+
+				// Log detailed report
+				progressReporter.log(`--- Potential Duplicate Concept Notes Found (${filesToReport.size}) ---`);
+				reportList.forEach(item => {
+					progressReporter.log(`- ${item.path} (Reason: ${item.reason}, Conflicts: ${item.counterparts.join(', ') || 'N/A'})`);
+				});
+				progressReporter.log(`--------------------------------------------------`);
+				progressReporter.log("Review the list above. These files are potential duplicates based on naming conventions and existence outside the concept folder.");
+
+				// --- Confirmation Modal ---
+				const shouldDelete = await this.showDeletionConfirmationModal(reportList); // Pass detailed list
+
+				if (shouldDelete) {
+					progressReporter.log("User confirmed deletion. Proceeding...");
+					const totalToDelete = reportList.length;
+					progressReporter.updateStatus(`Deleting ${totalToDelete} files...`, 0); // Start progress at 0% for deletion
+					let deletedCount = 0;
+					let deletionErrors = 0;
+					// Iterate through the detailed list to get paths for deletion
+					for (let i = 0; i < reportList.length; i++) {
+						const item = reportList[i];
+						const progressPercent = Math.floor(((i + 1) / totalToDelete) * 100);
+						progressReporter.updateStatus(`Deleting ${i + 1}/${totalToDelete}: ${item.path}`, progressPercent); // Update status with count and percentage
+
+						// Add a small delay to allow UI update, especially for many files
+						await new Promise(resolve => setTimeout(resolve, 10)); // 10ms delay
+
+						try {
+							const fileToDelete = this.app.vault.getAbstractFileByPath(item.path);
+							if (fileToDelete instanceof TFile) {
+								await this.app.vault.trash(fileToDelete, true); // Move to system trash
+								progressReporter.log(`[DELETED] ${item.path}`);
+								deletedCount++;
+							} else {
+								progressReporter.log(`[SKIP] File not found or not a file: ${item.path}`);
+							}
+						} catch (deleteError: any) {
+							progressReporter.log(`[ERROR] Failed to delete ${item.path}: ${deleteError.message}`);
+							deletionErrors++;
+						}
+					}
+					const finalMessage = `Deletion complete. Deleted ${deletedCount} of ${reportList.length} identified files. Encountered ${deletionErrors} errors.`;
+					progressReporter.log(finalMessage);
+					new Notice(finalMessage);
+					progressReporter.updateStatus(finalMessage, 100);
+				} else {
+					progressReporter.log("Deletion cancelled by user.");
+					new Notice("Duplicate deletion cancelled.");
+					progressReporter.updateStatus("Duplicate check complete (deletion cancelled).", 100);
+				}
+				// --- End Confirmation ---
+
+			} else {
+				progressReporter.log("No potential duplicate concept notes found based on the checks.");
+				new Notice("No potential duplicate concept notes found.");
+				progressReporter.updateStatus("Duplicate check complete.", 100);
+			}
+
+			this.updateStatusBar("Duplicate check complete.");
+
+		} catch (error: any) {
+			this.updateStatusBar('Error during duplicate check'); // Corrected status bar message
+			const errorDetails = error instanceof Error ? error.stack || error.message : String(error);
+			console.error("Error checking/removing duplicate concept notes:", errorDetails); // Updated log message
+			new Notice(`Error checking/removing duplicates: ${error.message}. See console.`, 10000); // Updated notice
+			progressReporter.log(`Error: ${error.message}`);
+			progressReporter.updateStatus('Error occurred', -1);
+			new ErrorModal(this.app, "Duplicate Check/Remove Error", errorDetails).open(); // Updated modal title
+		} finally {
+			this.isBusy = false;
+		}
+	}
+
+	/**
+	 * Shows a modal to confirm deletion of files.
+	 * @param reportList Array of objects containing path, reason, and counterparts.
+	 * @returns Promise resolving to true if deletion is confirmed, false otherwise.
+	 */
+	private showDeletionConfirmationModal(reportList: { path: string; reason: string; counterparts: string[] }[]): Promise<boolean> {
+		return new Promise((resolve) => {
+			const modal = new Modal(this.app);
+			modal.titleEl.setText('Confirm Duplicate Deletion');
+			modal.contentEl.addClass('notemd-confirm-delete-modal'); // Keep class for styling
+
+			modal.contentEl.createEl('p', { text: `The following ${reportList.length} concept notes are identified as potential duplicates and will be moved to system trash:` });
+
+			const listEl = modal.contentEl.createEl('ul', { cls: 'notemd-delete-list' });
+			reportList.forEach(item => {
+				const li = listEl.createEl('li');
+				li.createSpan({ text: `${item.path} `, cls: 'notemd-delete-path' });
+				li.createSpan({ text: `(Reason: ${item.reason})`, cls: 'notemd-delete-reason' });
+				if (item.counterparts && item.counterparts.length > 0) {
+					li.createEl('br'); // New line for counterparts
+					li.createSpan({ text: `Conflicts with: ${item.counterparts.join(', ')}`, cls: 'notemd-delete-counterparts' });
+				}
+			});
+
+			modal.contentEl.createEl('p', { text: 'This action cannot be easily undone from within Obsidian, but files can usually be recovered from the system trash.', cls: 'mod-warning' });
+
+			const buttonContainer = modal.contentEl.createDiv({ cls: 'modal-button-container' });
+
+			const confirmButton = buttonContainer.createEl('button', { text: `Delete ${reportList.length} Files`, cls: 'mod-warning' });
+			confirmButton.onclick = () => {
+				modal.close();
+				resolve(true);
+			};
+
+			const cancelButton = buttonContainer.createEl('button', { text: 'Cancel' });
+			cancelButton.onclick = () => {
+				modal.close();
+				resolve(false);
+			};
+
+			modal.open();
+		});
+	}
+
 
 } // End of NotemdPlugin class definition
 
@@ -4914,6 +5224,33 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 				testConnectionButton.disabled = false;
 			}
 		};
+
+		// Add the new Check/Remove Duplicates button
+		const checkRemoveDuplicatesButton = utilityButtonGroup.createEl('button', { text: 'Check & Remove Duplicates' });
+		checkRemoveDuplicatesButton.title = 'Checks the configured Concept Note folder for potential duplicates based on various rules and prompts for deletion.';
+		checkRemoveDuplicatesButton.onclick = async () => {
+			if (this.isProcessing) {
+				new Notice("Processing already in progress.");
+				return;
+			}
+			this.clearDisplay();
+			this.isProcessing = true;
+			this.startTime = Date.now();
+			this.log('Starting: Check & Remove Duplicate Concept Notes...');
+			this.updateStatus('Checking duplicates...', 0);
+			try {
+				// Call the correct function on the plugin instance, passing the view as reporter
+				await this.plugin.checkAndRemoveDuplicateConceptNotes(this);
+			} finally {
+				this.isProcessing = false;
+				// Ensure cancel button is re-enabled and visually reset
+				if (this.cancelButton) {
+					this.cancelButton.disabled = false;
+					this.cancelButton.removeClass('is-active');
+				}
+			}
+		};
+
 
 		// --- Progress Display Area ---
 		container.createEl('hr'); // Separator

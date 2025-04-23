@@ -44,8 +44,9 @@ This list outlines potential new features and improvements for the Notemd Obsidi
     -   Adapt logic from `LMStudio-Markdown-Content-Generator/mermaid.py`.
 
 -   [x] **Enhanced Duplicate Concept Handling:**
-    -   Improve concept note creation to avoid near-duplicates by normalizing names (e.g., "Topic-Name" vs "Topic Name" should likely point to the same note). Use logic similar to `process_string` from `mermaid.py`. (Normalization added)
-    -   Explore options for detecting duplicate concepts *across* different notes (more complex, might require index scanning). (Further exploration pending)
+    -   [x] Improve concept note creation to avoid near-duplicates by normalizing names (e.g., "Topic-Name" vs "Topic Name" should likely point to the same note). Use logic similar to `process_string` from `mermaid.py`. (Normalization added)
+    -   [x] Add command "Check and Remove Duplicate Concept Notes" to identify potential duplicates in the concept note folder based on `DeleteDuplicates.ps1` logic (exact match, plural, normalization, containment). Presents a detailed list with reasons/conflicts, prompts user for confirmation, and shows progress before moving identified duplicates to system trash. (April 2025)
+    -   [ ] Explore options for detecting duplicate concepts *across* different notes (more complex, might require index scanning). (Further exploration pending)
 
 -   [x] **Improved Batch Processing Robustness:**
     -   Modify `processFolderWithNotemd` to better handle errors on individual files.

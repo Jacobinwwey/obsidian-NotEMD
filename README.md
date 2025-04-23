@@ -57,6 +57,7 @@ Notemd enhances your Obsidian workflow by integrating with various Large Languag
 
 ### Utility Features
 - **Duplicate Detection**: Basic check for duplicate words within the currently processed file's content (results logged to console).
+- **Check and Remove Duplicate Concept Notes**: Identifies potential duplicate notes within the configured **Concept Note Folder** based on exact name matches, plurals, normalization, and single-word containment compared to notes outside the folder. Presents a detailed list with reasons and conflicting files, then prompts for confirmation before moving identified duplicates to system trash. Shows progress during deletion.
 - **LLM Connection Test**: Verify API settings for the active provider.
 
 ## Installation
@@ -223,6 +224,14 @@ This is the core functionality focused on identifying concepts and adding `[[wik
     *   Run `Notemd: Test LLM Connection` (via command palette or sidebar button).
     *   Tests the connection to the **Active Provider** selected in the main dropdown.
     *   Results appear as notices and in the sidebar log/console.
+
+3.  **Check and Remove Duplicate Concept Notes**:
+    *   Ensure the **Concept Note Folder Path** is correctly configured in settings.
+    *   Run `Notemd: Check and Remove Duplicate Concept Notes` (via command palette or sidebar button).
+    *   The plugin scans the concept note folder and compares filenames against notes outside the folder using several rules (exact match, plurals, normalization, containment).
+    *   If potential duplicates are found, a modal window appears listing the files, the reason they were flagged, and the conflicting files.
+    *   Review the list carefully. Click **"Delete Files"** to move the listed files to the system trash, or **"Cancel"** to take no action.
+    *   Progress and results are shown in the sidebar/modal log.
 
 ## Supported LLM Providers
 
