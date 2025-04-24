@@ -1563,7 +1563,7 @@ export default class NotemdPlugin extends Plugin {
 			if (attempt < maxAttempts) {
 				// Use cancellable delay
 				progressReporter.log(`Waiting ${intervalSeconds} seconds before retry ${attempt + 1}...`);
-				await this.cancellableDelay(intervalSeconds * 1000, progressReporter);
+				await this.cancellableDelay(intervalSeconds * 1000, progressReporter); // Pass reporter
 			}
 		}
 
@@ -1729,7 +1729,7 @@ export default class NotemdPlugin extends Plugin {
 				}
 				progressReporter.log(`Waiting ${intervalSeconds} seconds before retry ${attempt + 1}...`);
 				// Use cancellable delay
-				await this.cancellableDelay(intervalSeconds * 1000, progressReporter);
+				await this.cancellableDelay(intervalSeconds * 1000, progressReporter); // Pass reporter
 			}
 		}
 
@@ -1865,7 +1865,7 @@ export default class NotemdPlugin extends Plugin {
 				}
 				progressReporter.log(`Waiting ${intervalSeconds} seconds before retry ${attempt + 1}...`);
 				// Use cancellable delay
-				await this.cancellableDelay(intervalSeconds * 1000, progressReporter);
+				await this.cancellableDelay(intervalSeconds * 1000, progressReporter); // Pass reporter
 			}
 		}
 
@@ -2005,7 +2005,7 @@ export default class NotemdPlugin extends Plugin {
 				}
 				progressReporter.log(`Waiting ${intervalSeconds} seconds before retry ${attempt + 1}...`);
 				// Use cancellable delay
-				await this.cancellableDelay(intervalSeconds * 1000, progressReporter);
+				await this.cancellableDelay(intervalSeconds * 1000, progressReporter); // Pass reporter
 			}
 		}
 
@@ -2142,7 +2142,7 @@ export default class NotemdPlugin extends Plugin {
 				}
 				progressReporter.log(`Waiting ${intervalSeconds} seconds before retry ${attempt + 1}...`);
 				// Use cancellable delay
-				await this.cancellableDelay(intervalSeconds * 1000, progressReporter);
+				await this.cancellableDelay(intervalSeconds * 1000, progressReporter); // Pass reporter
 			}
 		}
 
@@ -2286,7 +2286,7 @@ export default class NotemdPlugin extends Plugin {
 				}
 				progressReporter.log(`Waiting ${intervalSeconds} seconds before retry ${attempt + 1}...`);
 				// Use cancellable delay
-				await this.cancellableDelay(intervalSeconds * 1000, progressReporter);
+				await this.cancellableDelay(intervalSeconds * 1000, progressReporter); // Pass reporter
 			}
 		}
 
@@ -2425,7 +2425,7 @@ export default class NotemdPlugin extends Plugin {
 				}
 				progressReporter.log(`Waiting ${intervalSeconds} seconds before retry ${attempt + 1}...`);
 				// Use cancellable delay
-				await this.cancellableDelay(intervalSeconds * 1000, progressReporter);
+				await this.cancellableDelay(intervalSeconds * 1000, progressReporter); // Pass reporter
 			}
 		}
 
@@ -2566,7 +2566,7 @@ export default class NotemdPlugin extends Plugin {
 				}
 				progressReporter.log(`Waiting ${intervalSeconds} seconds before retry ${attempt + 1}...`);
 				// Use cancellable delay
-				await this.cancellableDelay(intervalSeconds * 1000, progressReporter);
+				await this.cancellableDelay(intervalSeconds * 1000, progressReporter); // Pass reporter
 			}
 		}
 
@@ -2708,7 +2708,7 @@ export default class NotemdPlugin extends Plugin {
 				}
 				progressReporter.log(`Waiting ${intervalSeconds} seconds before retry ${attempt + 1}...`);
 				// Use cancellable delay
-				await this.cancellableDelay(intervalSeconds * 1000, progressReporter);
+				await this.cancellableDelay(intervalSeconds * 1000, progressReporter); // Pass reporter
 			}
 		}
 
@@ -3832,10 +3832,12 @@ Format directly for Obsidian markdown. Do NOT wrap the entire response in a mark
 	 * Performs web research on a topic (note title or selection) and appends a summary.
 	 */
 	async researchAndSummarize(editor: Editor, view: MarkdownView, progressReporter: ProgressReporter): Promise<void> {
+		progressReporter.log(`Entering researchAndSummarize. Plugin isBusy state: ${this.isBusy}`); // <<< ADDED LOGGING
+		// progressReporter.log("Entering researchAndSummarize function."); // Original log, commented out for clarity
 		if (this.isBusy) {
 			new Notice("Notemd is already processing another task.");
-			progressReporter?.log("Error: Another task is already in progress.");
-			progressReporter?.updateStatus("Busy", -1);
+			progressReporter.log("Error: Another task is already in progress."); // Use reporter directly
+			progressReporter.updateStatus("Busy", -1); // Use reporter directly
 			return;
 		}
 		this.isBusy = true; // Set busy flag
@@ -3843,6 +3845,8 @@ Format directly for Obsidian markdown. Do NOT wrap the entire response in a mark
 		const activeFile = view.file;
 		if (!activeFile) {
 			new Notice('No active file.');
+			progressReporter.log("Exiting researchAndSummarize: No active file."); // Added log
+			this.isBusy = false; // Ensure busy flag is reset
 			return;
 		}
 
@@ -3850,8 +3854,12 @@ Format directly for Obsidian markdown. Do NOT wrap the entire response in a mark
 		const selectedText = editor.getSelection();
 		const topic = selectedText ? selectedText.trim() : activeFile.basename;
 
-		if (!topic) {
-			new Notice('No topic found (select text or use a note with a title).');
+		// Issue 2 Fix: Check for empty topic
+		if (!topic || topic.trim() === '') {
+			new Notice('Please select the topic text in the editor first, or ensure the note has a title.');
+			progressReporter.log("Exiting researchAndSummarize: Topic is empty.");
+			// The finally block below will handle resetting isBusy = false
+			this.isBusy = false; // Ensure busy flag is reset here too
 			return;
 		}
 
@@ -3861,6 +3869,7 @@ Format directly for Obsidian markdown. Do NOT wrap the entire response in a mark
 
 		try {
 			// --- Perform Research using Helper ---
+			progressReporter.log(`Calling _performResearch for topic: "${topic}"`); // Added log
 			if (progressReporter.cancelled) throw new Error("Processing cancelled by user before research."); // Cancellation Check
 			const researchContext = await this._performResearch(topic, progressReporter);
 
@@ -3869,11 +3878,13 @@ Format directly for Obsidian markdown. Do NOT wrap the entire response in a mark
 			if (!researchContext) {
 				// Error/No results handled within _performResearch, just update status
 				new Notice(`Research for "${topic}" failed or returned no results. Summary not generated.`);
+				progressReporter.log(`_performResearch returned null or empty context for "${topic}".`);
 				progressReporter.updateStatus('Research failed/No results', -1);
 				this.updateStatusBar('Research failed');
 				if (progressReporter instanceof ProgressModal) setTimeout(() => progressReporter.close(), 3000);
-				return;
+				return; // Exit here as no context means no summary
 			}
+			progressReporter.log(`_performResearch returned context for "${topic}" (length: ${researchContext.length}).`);
 
 			// --- Summarize Research Context ---
 			progressReporter.updateStatus('Summarizing research...', 50);
@@ -3881,16 +3892,19 @@ Format directly for Obsidian markdown. Do NOT wrap the entire response in a mark
 			// Use helper functions to get the correct provider and model for this task
 			const provider = this.getProviderForTask('research');
 			if (!provider) {
+				progressReporter.log("Error: Could not get provider for 'research' task."); // Added log
 				// Error is handled by getProviderForTask, but throw specific error here too
 				throw new Error('No valid LLM provider configured for the "Research & Summarize" task.');
 			}
 			const modelName = this.getModelForTask('research', provider);
+			progressReporter.log(`Using provider "${provider.name}" and model "${modelName}" for summarization.`); // Added log
 
 			if (progressReporter.cancelled) throw new Error("Processing cancelled by user before summarization."); // Cancellation Check
 
 			progressReporter.log(`Calling ${provider.name} (Model: ${modelName}) for summarization...`);
 			// Use the original topic in the prompt, but provide the fetched context
 			const summaryPrompt = `Based on the following research context gathered for "${topic}", provide a concise summary focusing on the key facts, concepts, and conclusions. Present the summary in clear Markdown format.\n\nResearch Context:\n${researchContext}`;
+			progressReporter.log(`Constructed summary prompt (context length: ${researchContext.length}).`); // Added log
 
 			// Call the appropriate LLM API function, passing the determined modelName
 			// Pass empty string for 'content' as prompt contains everything
@@ -3969,12 +3983,17 @@ Format directly for Obsidian markdown. Do NOT wrap the entire response in a mark
 			} else {
 				console.error(`Error researching "${topic}":`, errorDetails);
 				new Notice(`Error during research: ${error.message}. See console.`, 10000);
-				progressReporter.log(`Error: ${error.message}`);
+				progressReporter.log(`Error in researchAndSummarize catch block: ${error.message}`); // Existing log
 				progressReporter.updateStatus('Error occurred', -1);
-				new ErrorModal(this.app, "Research Error", errorDetails).open();
+				// Ensure a Notice is shown for non-cancellation errors
+				if (!error.message.includes("cancelled by user")) {
+					new Notice(`Error during research: ${error.message}. See console.`, 10000); // <<< ENSURED NOTICE
+					new ErrorModal(this.app, "Research Error", errorDetails).open();
+				}
 			}
 			// Keep reporter open on error/cancellation
 		} finally {
+			progressReporter.log("Exiting researchAndSummarize function (finally block)."); // Existing log
 			this.isBusy = false; // Clear busy flag regardless of success or failure
 		}
 	}
@@ -3986,6 +4005,7 @@ Format directly for Obsidian markdown. Do NOT wrap the entire response in a mark
 	 * @returns A promise resolving to the combined research context string, or null if research fails/yields no results.
 	 */
 	private async _performResearch(topic: string, progressReporter: ProgressReporter): Promise<string | null> {
+		progressReporter.log(`Entering _performResearch for topic: "${topic}"`);
 		const searchQuery = `${topic} wiki`; // Use modified query
 		let combinedContent = '';
 		let searchSource = '';
@@ -3995,7 +4015,9 @@ Format directly for Obsidian markdown. Do NOT wrap the entire response in a mark
 			// --- Select Search Provider ---
 			if (this.settings.searchProvider === 'tavily') {
 				searchSource = 'Tavily';
+				progressReporter.log(`Selected search provider: Tavily.`); // Added log
 				if (!this.settings.tavilyApiKey) {
+					progressReporter.log("Error: Tavily API key is missing."); // Added log
 					throw new Error('Tavily API key is not configured in Notemd settings.');
 				}
 				if (progressReporter.cancelled) throw new Error("Processing cancelled by user before Tavily search."); // Cancellation Check
@@ -4039,10 +4061,12 @@ Format directly for Obsidian markdown. Do NOT wrap the entire response in a mark
 
 			} else { // DuckDuckGo selected
 				searchSource = 'DuckDuckGo';
+				progressReporter.log(`Selected search provider: DuckDuckGo.`); // Added log
 				if (progressReporter.cancelled) throw new Error("Processing cancelled by user before DuckDuckGo search."); // Cancellation Check
 				progressReporter.log(`Searching DuckDuckGo for: "${searchQuery}"`);
 				progressReporter.updateStatus('Searching DuckDuckGo...', 10);
 				searchResults = await this.searchDuckDuckGo(searchQuery, progressReporter); // searchDuckDuckGo uses requestUrl, cancellation check inside is limited
+				progressReporter.log(`searchDuckDuckGo returned ${searchResults.length} results.`);
 				if (progressReporter.cancelled) throw new Error("Processing cancelled by user during DuckDuckGo search."); // Cancellation Check
 				if (searchResults.length === 0) {
 					progressReporter.log('DuckDuckGo search failed or returned no results.');
@@ -4085,6 +4109,7 @@ Format directly for Obsidian markdown. Do NOT wrap the entire response in a mark
 				});
 				progressReporter.log(`Finished fetching content for DuckDuckGo results.`);
 			} else { // Tavily
+				progressReporter.log(`Using snippets directly from Tavily results.`); // Added log
 				fetchedContents = searchResults.map(result => result.content); // Use snippets directly
 			}
 
@@ -4092,6 +4117,7 @@ Format directly for Obsidian markdown. Do NOT wrap the entire response in a mark
 
 			// --- Combine Content ---
 			if (fetchedContents.length > 0) {
+				progressReporter.log(`Combining ${fetchedContents.length} fetched/snippet contents.`); // Added log
 				combinedContent = `Research context for "${searchQuery}" (via ${searchSource}):\n\n`;
 				searchResults.forEach((result, index) => {
 					combinedContent += `Result ${index + 1}:\n`;
@@ -4123,8 +4149,10 @@ Format directly for Obsidian markdown. Do NOT wrap the entire response in a mark
 				throw error; // Re-throw cancellation error
 			} else {
 				// Log other errors
-				progressReporter.log(`Error during research for "${topic}": ${error.message}`);
+				progressReporter.log(`Error in _performResearch catch block for "${topic}": ${error.message}`); // Existing log
 				console.error(`Error researching "${topic}":`, error); // Also log detailed error to console
+				// Optionally show a Notice here as well for non-cancellation errors
+				new Notice(`Error during web search: ${error.message}`, 7000); // <<< ADDED NOTICE
 				// Do not throw here for non-cancellation errors, return null to indicate failure
 				return null;
 			}
@@ -4244,6 +4272,7 @@ Format directly for Obsidian markdown. Do NOT wrap the entire response in a mark
 				if (progressReporter.cancelled) {
 					new Notice('Batch generation cancelled by user.');
 					this.updateStatusBar('Cancelled');
+					progressReporter.log('Cancellation requested, stopping batch processing.'); // Added explicit log
 					progressReporter.updateStatus('Batch generation cancelled.', -1);
 					break; // Exit loop
 				}
@@ -4277,8 +4306,8 @@ Format directly for Obsidian markdown. Do NOT wrap the entire response in a mark
 								// *** Added Cancellation Check before rename ***
 								if (progressReporter.cancelled) {
 									progressReporter?.log(`⚠️ Cancellation requested before moving ${file.name}. Skipping move.`);
-									// Optionally throw a cancellation error here if needed, but skipping might be sufficient
-									// throw new Error("Processing cancelled by user before file move.");
+									// Break here as well, since we shouldn't process further files if cancelled
+									break;
 								} else {
 									await this.app.vault.rename(file, destinationPath);
 									progressReporter?.log(`✅ Moved processed file to: ${destinationPath}`);
@@ -4332,9 +4361,11 @@ Format directly for Obsidian markdown. Do NOT wrap the entire response in a mark
 					// Otherwise, continue to the next file for non-cancellation errors
 				}
 
-				if (progressReporter.cancelled) { // Check again after generation attempt (redundant if break works, but safe)
+				if (progressReporter.cancelled) { // Check again after the move attempt (or skip if broken out)
+					// This check might be redundant if the break above works, but safe to keep
 					new Notice('Batch generation cancelled by user.');
 					this.updateStatusBar('Cancelled');
+					progressReporter.log('Cancellation detected after processing file, stopping batch.'); // Add explicit log
 					progressReporter.updateStatus('Batch generation cancelled.', -1);
 					break;
 				}
@@ -4840,10 +4871,21 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 	private logContent: string[] = []; // Store log messages
 	private startTime: number = 0;
 	private isProcessing: boolean = false; // Track if processing is active
-	private cancelButton: HTMLButtonElement | null = null; // Reference to cancel button
 	private isCancelled: boolean = false; // Track cancellation state
 	// Store the AbortController for the current operation
 	private currentAbortController: AbortController | null = null;
+	private activeLeafChangeHandler: (() => void) | null = null; // Store handler reference
+
+	// --- Button References ---
+	private processCurrentButton: HTMLButtonElement | null = null;
+	private processFolderButton: HTMLButtonElement | null = null;
+	private researchButton: HTMLButtonElement | null = null;
+	private generateTitleButton: HTMLButtonElement | null = null;
+	private batchGenerateTitleButton: HTMLButtonElement | null = null;
+	private checkDuplicatesButton: HTMLButtonElement | null = null; // Assuming this is the 'Check Duplicates (Current File)' button
+	private testConnectionButton: HTMLButtonElement | null = null;
+	private checkRemoveDuplicatesButton: HTMLButtonElement | null = null;
+	private cancelButton: HTMLButtonElement | null = null;
 
 	constructor(leaf: WorkspaceLeaf, plugin: NotemdPlugin) {
 		super(leaf);
@@ -4881,9 +4923,11 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 			// this.cancelButton.removeClass('is-inactive');
 		}
 		this.isProcessing = false;
+		this.isProcessing = false;
 		this.isCancelled = false;
 		this.startTime = 0;
 		this.currentAbortController = null; // Clear controller
+		this.updateButtonStates(); // Update button states after clearing
 	}
 
 	// Method to update status display
@@ -4956,10 +5000,9 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 			// Abort the ongoing fetch request, if any
 			this.currentAbortController?.abort();
 			if (this.cancelButton) {
-				this.cancelButton.disabled = true; // Disable button after requesting cancel
-				this.cancelButton.removeClass('is-active'); // Reflect disabled state visually
-				// this.cancelButton.addClass('is-inactive'); // Optional alternative styling
+				// No need to directly disable here, updateButtonStates will handle it
 			}
+			this.updateButtonStates(); // Update states after requesting cancel
 		}
 	}
 
@@ -4970,6 +5013,38 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 	set abortController(controller: AbortController | null | undefined) {
 		this.currentAbortController = controller ?? null;
 	}
+
+	// --- Centralized Button State Management ---
+	private updateButtonStates() {
+		const processing = this.isProcessing;
+		const cancelled = this.isCancelled;
+
+		// Action buttons are disabled *during* processing
+		if (this.processCurrentButton) this.processCurrentButton.disabled = processing;
+		if (this.processFolderButton) this.processFolderButton.disabled = processing;
+		// Research button state also depends on active view, handled separately in updateResearchButtonState
+		// but still disable during *any* processing
+		if (this.researchButton) this.researchButton.disabled = processing || !this.app.workspace.getActiveViewOfType(MarkdownView);
+		if (this.generateTitleButton) this.generateTitleButton.disabled = processing;
+		if (this.batchGenerateTitleButton) this.batchGenerateTitleButton.disabled = processing;
+		if (this.checkDuplicatesButton) this.checkDuplicatesButton.disabled = processing; // Assuming quick check, maybe allow? For now, disable.
+		if (this.testConnectionButton) this.testConnectionButton.disabled = processing;
+		if (this.checkRemoveDuplicatesButton) this.checkRemoveDuplicatesButton.disabled = processing;
+
+		// Cancel button is enabled *only* during processing and *before* cancellation is requested
+		if (this.cancelButton) {
+			this.cancelButton.disabled = !processing || cancelled;
+			if (!processing || cancelled) {
+				this.cancelButton.removeClass('is-active'); // Visually indicate disabled/inactive
+			} else {
+				this.cancelButton.addClass('is-active'); // Visually indicate enabled/active
+			}
+		}
+
+		// Update research button specific state (active view check)
+		this.updateResearchButtonState();
+	}
+	// --- End Button State Management ---
 
 
 	async onOpen() {
@@ -4983,16 +5058,17 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 		const originalButtonGroup = container.createDiv({ cls: 'notemd-button-group' });
 
 		// Process Current File Button (Original Logic)
-		const processCurrentButton = originalButtonGroup.createEl('button', { text: 'Process File (Add Links)', cls: 'mod-cta' });
-		processCurrentButton.title = 'Processes the current file to add [[wiki-links]] and create concept notes based on LLM analysis.'; // Use title attribute
-		processCurrentButton.onclick = async () => {
+		this.processCurrentButton = originalButtonGroup.createEl('button', { text: 'Process File (Add Links)', cls: 'mod-cta' }); // Store reference
+		this.processCurrentButton.title = 'Processes the current file to add [[wiki-links]] and create concept notes based on LLM analysis.'; // Use title attribute
+		this.processCurrentButton.onclick = async () => {
 			if (this.isProcessing) {
 				new Notice("Processing already in progress.");
 				return;
 			}
-			this.clearDisplay(); // Clear previous run
+			this.clearDisplay(); // Clear previous run (calls updateButtonStates)
 			this.isProcessing = true;
 			this.startTime = Date.now();
+			this.updateButtonStates(); // Update states again after setting isProcessing
 			// Button state is handled by clearDisplay
 			// if (this.cancelButton) {
 			// 	this.cancelButton.disabled = false; // Enable button
@@ -5006,24 +5082,21 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 				await this.plugin.processWithNotemd(this); // Calls original logic
 			} finally {
 				this.isProcessing = false; // Mark processing finished
-				// Ensure cancel button is re-enabled and visually reset
-				if (this.cancelButton) {
-					this.cancelButton.disabled = false;
-					this.cancelButton.removeClass('is-active'); // Reset visual state
-				}
+				this.updateButtonStates(); // Update states in finally
 			}
 		};
 		// Process Folder Button (Original Logic)
-		const processFolderButton = originalButtonGroup.createEl('button', { text: 'Process Folder (Add Links)' });
-		processFolderButton.title = 'Processes all files in a selected folder to add [[wiki-links]] and create concept notes.'; // Use title attribute
-		processFolderButton.onclick = async () => {
+		this.processFolderButton = originalButtonGroup.createEl('button', { text: 'Process Folder (Add Links)' }); // Store reference
+		this.processFolderButton.title = 'Processes all files in a selected folder to add [[wiki-links]] and create concept notes.'; // Use title attribute
+		this.processFolderButton.onclick = async () => {
 			if (this.isProcessing) {
 				new Notice("Processing already in progress.");
 				return;
 			}
-			this.clearDisplay();
+			this.clearDisplay(); // Clear previous run (calls updateButtonStates)
 			this.isProcessing = true;
 			this.startTime = Date.now();
+			this.updateButtonStates(); // Update states again after setting isProcessing
 			// Button state is handled by clearDisplay
 			// if (this.cancelButton) {
 			// 	this.cancelButton.disabled = false; // Enable button
@@ -5037,30 +5110,31 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 				await this.plugin.processFolderWithNotemd(this); // Calls original logic
 			} finally {
 				this.isProcessing = false;
-				// Ensure cancel button is re-enabled and visually reset
-				if (this.cancelButton) {
-					this.cancelButton.disabled = false;
-					this.cancelButton.removeClass('is-active');
-				}
+				this.updateButtonStates(); // Update states in finally
 			}
 		};
+		// Store reference to the first button as well - Already done above
+		// this.processCurrentButton = processCurrentButton;
 
 		// --- New Feature Buttons ---
 		container.createEl('h4', { text: "New Features" });
 		const newFeatureButtonGroup = container.createDiv({ cls: 'notemd-button-group' });
 		// Research & Summarize Button
-		const researchButton = newFeatureButtonGroup.createEl('button', { text: 'Research & Summarize' });
-		researchButton.title = 'Uses the current note title or selection to search the web (Tavily/DDG) and appends an LLM-generated summary.'; // Use title attribute
-		researchButton.onclick = async () => {
+		this.researchButton = newFeatureButtonGroup.createEl('button', { text: 'Research & Summarize' }); // Store reference
+		this.researchButton.title = 'Uses the current note title or selection to search the web (Tavily/DDG) and appends an LLM-generated summary.'; // Use title attribute
+		this.researchButton.onclick = async () => {
+			this.log(`Research button clicked. Current isProcessing state: ${this.isProcessing}`); // <<< ADDED LOGGING
 			if (this.isProcessing) {
 				new Notice("Processing already in progress.");
+				this.log("Research button click ignored: Processing already in progress."); // <<< ADDED LOGGING
 				return;
 			}
 			const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
 			if (activeView && activeView.editor) {
-				this.clearDisplay();
+				this.clearDisplay(); // Clear previous run (calls updateButtonStates)
 				this.isProcessing = true;
 				this.startTime = Date.now();
+				this.updateButtonStates(); // Update states again after setting isProcessing
 				// Button state is handled by clearDisplay
 				// if (this.cancelButton) {
 				// 	this.cancelButton.disabled = false; // Enable button
@@ -5072,29 +5146,29 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 				try {
 					await this.plugin.researchAndSummarize(activeView.editor, activeView, this);
 				} finally {
-					this.isProcessing = false;
-					// Ensure cancel button is re-enabled and visually reset
-					if (this.cancelButton) {
-						this.cancelButton.disabled = false;
-						this.cancelButton.removeClass('is-active');
-					}
+					this.isProcessing = false; // Mark processing finished
+					this.updateButtonStates(); // Update states in finally
+					// Reset status bar if needed (optional, depends on desired behavior)
+					// this.plugin.updateStatusBar("Ready");
 				}
 			} else {
 				new Notice('No active Markdown editor found.');
 				this.isProcessing = false; // Ensure flag is reset if no editor found
+				this.updateButtonStates(); // Update states even if no editor found
 			}
 		};
 		// Generate Content from Title Button
-		const generateTitleButton = newFeatureButtonGroup.createEl('button', { text: 'Generate from Title' });
-		generateTitleButton.title = 'Generates content for the current note based on its title (optionally including web research), replacing existing content.'; // Updated title
-		generateTitleButton.onclick = async () => {
+		this.generateTitleButton = newFeatureButtonGroup.createEl('button', { text: 'Generate from Title' }); // Store reference
+		this.generateTitleButton.title = 'Generates content for the current note based on its title (optionally including web research), replacing existing content.'; // Updated title
+		this.generateTitleButton.onclick = async () => {
 			if (this.isProcessing) {
 				new Notice("Processing already in progress.");
 				return;
 			}
-			this.clearDisplay();
+			this.clearDisplay(); // Clear previous run (calls updateButtonStates)
 			this.isProcessing = true;
 			this.startTime = Date.now();
+			this.updateButtonStates(); // Update states again after setting isProcessing
 			// Button state is handled by clearDisplay
 			// if (this.cancelButton) {
 			// 	this.cancelButton.disabled = false; // Enable button
@@ -5105,12 +5179,7 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 			if (!activeFile || !(activeFile instanceof TFile) || activeFile.extension !== 'md') {
 				new Notice('No active Markdown file selected.');
 				this.isProcessing = false;
-				// No need to re-enable button here, clearDisplay handles it on next run
-				// if (this.cancelButton) {
-				// 	this.cancelButton.disabled = false; // Enable button
-				// 	this.cancelButton.addClass('is-active');
-				// 	// this.cancelButton.removeClass('is-inactive');
-				// }
+				this.updateButtonStates(); // Update states even if no file selected
 				return;
 			}
 			this.log('Starting: Generate Content from Title...');
@@ -5119,25 +5188,22 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 				await this.plugin.generateContentForTitle(activeFile, this); // Pass active file and reporter
 			} finally {
 				this.isProcessing = false;
-				// Ensure cancel button is re-enabled and visually reset
-				if (this.cancelButton) {
-					this.cancelButton.disabled = false;
-					this.cancelButton.removeClass('is-active');
-				}
+				this.updateButtonStates(); // Update states in finally
 			}
 		};
 
 		// Batch Generate Content from Titles Button
-		const batchGenerateTitleButton = newFeatureButtonGroup.createEl('button', { text: 'Batch Generate from Titles' });
-		batchGenerateTitleButton.title = 'Generates content for all notes in a selected folder based on their titles (optionally including web research).'; // Use title attribute
-		batchGenerateTitleButton.onclick = async () => {
+		this.batchGenerateTitleButton = newFeatureButtonGroup.createEl('button', { text: 'Batch Generate from Titles' }); // Store reference
+		this.batchGenerateTitleButton.title = 'Generates content for all notes in a selected folder based on their titles (optionally including web research).'; // Use title attribute
+		this.batchGenerateTitleButton.onclick = async () => {
 			if (this.isProcessing) {
 				new Notice("Processing already in progress.");
 				return;
 			}
-			this.clearDisplay();
+			this.clearDisplay(); // Clear previous run (calls updateButtonStates)
 			this.isProcessing = true;
 			this.startTime = Date.now();
+			this.updateButtonStates(); // Update states again after setting isProcessing
 			// Button state is handled by clearDisplay
 			// if (this.cancelButton) {
 			// 	this.cancelButton.disabled = false; // Enable button
@@ -5150,11 +5216,7 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 				await this.plugin.batchGenerateContentForTitles(this); // Call the new batch function
 			} finally {
 				this.isProcessing = false;
-				// Ensure cancel button is re-enabled and visually reset
-				if (this.cancelButton) {
-					this.cancelButton.disabled = false;
-					this.cancelButton.removeClass('is-active');
-				}
+				this.updateButtonStates(); // Update states in finally
 			}
 		};
 
@@ -5164,9 +5226,9 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 		const utilityButtonGroup = container.createDiv({ cls: 'notemd-button-group' });
 
 		// Check Duplicates Button
-		const checkDuplicatesButton = utilityButtonGroup.createEl('button', { text: 'Check Duplicates (Current File)' });
-		checkDuplicatesButton.onclick = async () => {
-			// This action is quick, doesn't need the full processing state management
+		this.checkDuplicatesButton = utilityButtonGroup.createEl('button', { text: 'Check Duplicates (Current File)' }); // Store reference
+		this.checkDuplicatesButton.onclick = async () => {
+			// This action is quick, doesn't need the full processing state management (no isProcessing flag set)
 			const activeFile = this.plugin.app.workspace.getActiveFile();
 			if (!activeFile) {
 				new Notice('No active file to check');
@@ -5186,8 +5248,8 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 		};
 
 		// Test Connection Button
-		const testConnectionButton = utilityButtonGroup.createEl('button', { text: 'Test LLM Connection' });
-		testConnectionButton.onclick = async () => {
+		this.testConnectionButton = utilityButtonGroup.createEl('button', { text: 'Test LLM Connection' }); // Store reference
+		this.testConnectionButton.onclick = async () => {
 			if (this.isProcessing) {
 				new Notice("Cannot test connection while processing.");
 				return;
@@ -5201,7 +5263,8 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 			}
 			this.log(`Testing connection to ${provider.name}...`);
 			const testingNotice = new Notice(`Testing connection to ${provider.name}...`, 0);
-			testConnectionButton.disabled = true;
+			this.isProcessing = true; // Temporarily set busy to disable other buttons
+			this.updateButtonStates();
 			try {
 				const result = await this.plugin.testAPI(provider);
 				testingNotice.hide();
@@ -5221,21 +5284,23 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 				const errorDetails = error instanceof Error ? error.stack || error.message : String(error);
 				new ErrorModal(this.app, "LLM Connection Test Error", errorDetails).open();
 			} finally {
-				testConnectionButton.disabled = false;
+				this.isProcessing = false; // Clear busy flag
+				this.updateButtonStates(); // Re-enable buttons
 			}
 		};
 
 		// Add the new Check/Remove Duplicates button
-		const checkRemoveDuplicatesButton = utilityButtonGroup.createEl('button', { text: 'Check & Remove Duplicates' });
-		checkRemoveDuplicatesButton.title = 'Checks the configured Concept Note folder for potential duplicates based on various rules and prompts for deletion.';
-		checkRemoveDuplicatesButton.onclick = async () => {
+		this.checkRemoveDuplicatesButton = utilityButtonGroup.createEl('button', { text: 'Check & Remove Duplicates' }); // Store reference
+		this.checkRemoveDuplicatesButton.title = 'Checks the configured Concept Note folder for potential duplicates based on various rules and prompts for deletion.';
+		this.checkRemoveDuplicatesButton.onclick = async () => {
 			if (this.isProcessing) {
 				new Notice("Processing already in progress.");
 				return;
 			}
-			this.clearDisplay();
+			this.clearDisplay(); // Clear previous run (calls updateButtonStates)
 			this.isProcessing = true;
 			this.startTime = Date.now();
+			this.updateButtonStates(); // Update states again after setting isProcessing
 			this.log('Starting: Check & Remove Duplicate Concept Notes...');
 			this.updateStatus('Checking duplicates...', 0);
 			try {
@@ -5243,11 +5308,7 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 				await this.plugin.checkAndRemoveDuplicateConceptNotes(this);
 			} finally {
 				this.isProcessing = false;
-				// Ensure cancel button is re-enabled and visually reset
-				if (this.cancelButton) {
-					this.cancelButton.disabled = false;
-					this.cancelButton.removeClass('is-active');
-				}
+				this.updateButtonStates(); // Update states in finally
 			}
 		};
 
@@ -5262,14 +5323,9 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 		this.progressBarContainerEl.addClass('is-hidden'); // Hide initially
 
 		// Cancel Button (visible but disabled initially)
-		this.cancelButton = progressArea.createEl('button', { text: 'Cancel Processing', cls: 'notemd-cancel-button' });
-		// this.cancelButton.addClass('is-inactive'); // Optional class for styling when disabled
-		if (this.cancelButton) {
-			this.cancelButton.disabled = false; // Enable button
-			this.cancelButton.addClass('is-active');
-			// this.cancelButton.removeClass('is-inactive');
-		}
+		this.cancelButton = progressArea.createEl('button', { text: 'Cancel Processing', cls: 'notemd-cancel-button' }); // Store reference
 		this.cancelButton.onclick = () => this.requestCancel();
+		// Initial state set by updateButtonStates below
 
 
 		// --- Log Output Area ---
@@ -5292,18 +5348,52 @@ class NotemdSidebarView extends ItemView implements ProgressReporter {
 
 		// Make the log element selectable
 		this.logEl = container.createEl('div', { cls: 'notemd-log-output is-selectable' }); // Added 'is-selectable' Obsidian helper class
-		this.clearDisplay(); // Initialize display state
+
+		// Initial button state update
+		this.updateResearchButtonState();
+
+		// Register event listener for active leaf change
+		this.activeLeafChangeHandler = () => this.updateResearchButtonState();
+		this.plugin.registerEvent(
+			this.app.workspace.on('active-leaf-change', this.activeLeafChangeHandler)
+		);
+
+		// this.clearDisplay(); // clearDisplay calls updateButtonStates, avoid double call
+		this.updateButtonStates(); // Set initial button states
 	}
+
+	// New method to update the research button state (also called by updateButtonStates)
+	private updateResearchButtonState() {
+		if (!this.researchButton) return; // Button might not be created yet
+
+		const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
+		if (activeView) {
+			this.researchButton.disabled = false;
+			this.researchButton.removeClass('is-disabled'); // Optional: for styling
+		} else {
+			this.researchButton.disabled = true;
+			this.researchButton.addClass('is-disabled'); // Optional: for styling
+		}
+	}
+
 
 	async onClose() {
 		// Nothing specific to clean up yet, but good practice
 		// console.log("Closing Notemd sidebar view");
+
+		// Unregister the event listener if it was registered
+		if (this.activeLeafChangeHandler) {
+			this.app.workspace.off('active-leaf-change', this.activeLeafChangeHandler);
+			this.activeLeafChangeHandler = null; // Clear the stored handler
+		}
+
 		this.statusEl = null;
 		this.progressEl = null;
 		this.progressBarContainerEl = null;
 		this.timeRemainingEl = null;
 		this.logEl = null;
 		this.cancelButton = null;
+		this.researchButton = null; // Clear button reference
 	}
 }
 
@@ -5968,22 +6058,6 @@ class NotemdSettingTab extends PluginSettingTab {
 					// No need to refresh display for this toggle specifically
 				}));
 
-		// --- Web Research Settings (Now relevant to both features) ---
-		containerEl.createEl('h4', { text: 'Web Research Provider' });
-
-		new Setting(containerEl)
-			.setName('Search Provider')
-			.setDesc('Select the search engine for the "Research and Summarize Topic" command.')
-			.addDropdown(dropdown => dropdown
-				.addOption('tavily', 'Tavily (Requires API Key)')
-				.addOption('duckduckgo', 'DuckDuckGo (Experimental, often blocked)')
-				.setValue(this.plugin.settings.searchProvider)
-				.onChange(async (value: 'tavily' | 'duckduckgo') => {
-					this.plugin.settings.searchProvider = value;
-					await this.plugin.saveSettings();
-					this.display(); // Refresh settings
-				}));
-
 		// --- Generate from Title Output Folder Settings ---
 		new Setting(containerEl)
 			.setName("Use Custom Output Folder for 'Generate from Title'")
@@ -6026,6 +6100,21 @@ class NotemdSettingTab extends PluginSettingTab {
 		}
 		// --- End Generate from Title Output Folder Settings ---
 
+		// --- Web Research Settings (Now relevant to both features) ---
+		containerEl.createEl('h4', { text: 'Web Research Provider' });
+
+		new Setting(containerEl)
+			.setName('Search Provider')
+			.setDesc('Select the search engine for the "Research and Summarize Topic" command.')
+			.addDropdown(dropdown => dropdown
+				.addOption('tavily', 'Tavily (Requires API Key)')
+				.addOption('duckduckgo', 'DuckDuckGo (Experimental, often blocked)')
+				.setValue(this.plugin.settings.searchProvider)
+				.onChange(async (value: 'tavily' | 'duckduckgo') => {
+					this.plugin.settings.searchProvider = value;
+					await this.plugin.saveSettings();
+					this.display(); // Refresh settings
+				}));
 
 		// Conditional settings based on provider
 		if (this.plugin.settings.searchProvider === 'tavily') {
