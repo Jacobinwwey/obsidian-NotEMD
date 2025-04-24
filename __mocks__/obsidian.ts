@@ -19,11 +19,11 @@ export const TFolder = jest.fn();
 
 // Basic mock for ItemView to allow extension
 export class ItemView {
-	app: any;
-	leaf: any;
-	containerEl: { children: any[] }; // Mock basic structure
+	app: unknown; // Changed from any
+	leaf: unknown; // Changed from any
+	containerEl: { children: unknown[] }; // Reverted HTMLElement[], using unknown[] instead of any[]
 
-	constructor(leaf: any) {
+	constructor(leaf: unknown) { // Changed from any
 		this.leaf = leaf;
 		// Mock containerEl structure needed by the view's onOpen
 		this.containerEl = {

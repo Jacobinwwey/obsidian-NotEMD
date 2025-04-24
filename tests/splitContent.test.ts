@@ -1,5 +1,6 @@
 import NotemdPlugin from '../main';
 import { App } from 'obsidian';
+import { splitContent } from '../utils'; // Import the function
 
 // Mock App class
 class MockApp {
@@ -77,7 +78,7 @@ describe('splitContent', () => {
 
   it('should split content into chunks based on word count', () => {
     const content = 'word '.repeat(5000);
-    const chunks = plugin.splitContent(content);
+    const chunks = splitContent(content, plugin.settings); // Call imported function
     expect(chunks.length).toBe(1); // Content is not split due to no paragraph breaks
     expect(chunks[0].split(/\s+/).length).toBe(5000);
   });
@@ -88,13 +89,13 @@ describe('splitContent', () => {
     const para2 = 'para2\n\n';
     const para3 = 'para3';
     const content = para1 + para2 + para3;
-    const chunks = plugin.splitContent(content);
+    const chunks = splitContent(content, plugin.settings); // Call imported function
     expect(chunks.length).toBe(1);
     expect(chunks[0]).toBe(content);
   });
 
   it('should handle empty content', () => {
-    const chunks = plugin.splitContent('');
+    const chunks = splitContent('', plugin.settings); // Call imported function
     expect(chunks.length).toBe(0);
   });
 
@@ -107,7 +108,7 @@ describe('splitContent', () => {
     const para3 = 'word '.repeat(30);          // 30 words (Total 90)
     const content = para1 + para2 + para3;
 
-    const chunks = plugin.splitContent(content);
+    const chunks = splitContent(content, plugin.settings); // Call imported function
 
     // Expecting 2 chunks:
     // Chunk 1: para1 (30 words) - doesn't exceed 50

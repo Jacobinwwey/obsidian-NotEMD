@@ -84,6 +84,21 @@
     background-color: var(--background-modifier-hover);
 }
 
+/* Active/Enabled state for Cancel button */
+.notemd-cancel-button.is-active {
+    /* Optional: Add subtle visual cue, e.g., slightly brighter border or background */
+    /* Example: border-color: var(--interactive-accent); */
+    opacity: 1; /* Ensure fully visible when active */
+    cursor: pointer;
+}
+
+/* Disabled state for Cancel button */
+.notemd-cancel-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: var(--background-secondary); /* Keep background consistent */
+}
+
 /* Error state styling */
 .notemd-error-text {
     color: var(--text-error);

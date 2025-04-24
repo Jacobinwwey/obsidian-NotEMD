@@ -1,5 +1,6 @@
 import NotemdPlugin from '../main';
 import { App, TFile } from 'obsidian';
+import { handleFileRename, handleFileDelete } from '../fileUtils'; // Import functions
 
 class MockApp {
   vault = {
@@ -106,7 +107,7 @@ describe('File Operations', () => {
       );
       plugin.app.vault.modify = jest.fn();
 
-      await plugin.handleFileRename(oldPath, newPath);
+      await handleFileRename(plugin.app, oldPath, newPath); // Call imported function
 
       expect(plugin.app.vault.modify).toHaveBeenCalledTimes(2);
       expect(plugin.app.vault.modify).toHaveBeenCalledWith(
@@ -141,7 +142,7 @@ describe('File Operations', () => {
       );
       plugin.app.vault.modify = jest.fn();
 
-      await plugin.handleFileDelete(path);
+      await handleFileDelete(plugin.app, path); // Call imported function
 
       expect(plugin.app.vault.modify).toHaveBeenCalledTimes(2);
       expect(plugin.app.vault.modify).toHaveBeenCalledWith(

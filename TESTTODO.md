@@ -1,59 +1,144 @@
 # NoteMD Plugin - Testing & TODO List (Based on User Report)
 
-## Issue 1: Batch Generate from Title - Cancel Button Unresponsive / Stuck Disabled
-- **Observation:** User reports the cancel button in the sidebar does not stop the 'Batch Generate from Titles' task, provides no feedback, and **stays disabled ("lit up")** after being clicked or after a task finishes/errors.
+## Issue: Batch Cancellation Button Greyed Out (Confirmed by Screenshot)
+- **Observation:** User reports and screenshot confirms the 'Cancel Processing' button in the sidebar is consistently greyed out and cannot be clicked *during* the "Calling Provider" phase (e.g., "Calling Deepseek...") of the 'Batch Generate from Titles' task. It should remain enabled and clickable throughout the process.
+- **Previous Attempts (Ineffective):**
+    - Adding `await this.cancellableDelay(1, ...)` before API calls.
+    - Adding `await delay(1);` inside the batch loop in `batchGenerateContentForTitles`.
+    - Ensuring `cancelButton.disabled = false;` within `updateStatus` when `isProcessing` is true.
 - **Files to Check:**
-    - `main.ts`: `batchGenerateContentForTitles` function.
-    - `main.ts`: API call functions (`call*Api`) - how `ProgressReporter.cancelled` and `AbortController` are used. (Previously checked, potentially related to feedback).
-    - `main.ts`: `NotemdSidebarView` class - `requestCancel` method, cancel button's `onclick` handler, `updateButtonStates` method (or similar logic), and `finally` blocks in task button handlers.
+    - `main.ts`: `NotemdSidebarView` class - `onOpen` (batch button `onclick`), `requestCancel`, `updateStatus`, `updateButtonStates`.
+    - `main.ts`: `NotemdPlugin.batchGenerateContentForTitles` function (loop structure).
+    - `main.ts`: API call functions (`call*Api`) and `makeStableApiCall` (specifically around `requestUrl` or `fetch`).
     - `main.ts`: `ProgressReporter` interface and implementations.
-    - `main.ts`: `cancellableDelay` function.
-- **Investigation Steps & Findings:**
-    1.  ✅ Verify `batchGenerateContentForTitles` checks `reporter.cancelled`. (Confirmed)
-    2.  ✅ Confirm `generateContentForTitle` passes `reporter` down. (Confirmed)
-    3.  ✅ API call functions use `reporter.abortController.signal` and `cancellableDelay`. (Fixes previously applied - 2025-04-24).
-    4.  ✅ `NotemdSidebarView.requestCancel` sets flag and aborts controller. (Confirmed)
-    5.  ❓ **NEW:** Check `NotemdSidebarView`'s button state management:
-        *   Does `updateButtonStates` (or equivalent logic) correctly enable/disable the `cancelButton` based on an `isProcessing` flag?
-        *   Are the `finally` blocks in the `onclick` handlers for **all** processing tasks (Process File/Folder, Batch Generate, Research) reliably setting `isProcessing = false` and calling `updateButtonStates()` to reset button states (disable cancel, enable actions) even if errors occur?
-        *   Does the `cancelButton`'s own `onclick` handler correctly update its state or rely solely on the task's `finally` block?
--   **Required Fixes:**
-    1.  [COMPLETED - 2025-04-24] Modify `call*Api` functions for cancellation.
-    2.  [COMPLETED - 2025-04-24] Ensured robust button state management in `NotemdSidebarView` by introducing `updateButtonStates()` and calling it from `clearDisplay`, `requestCancel`, and the start/`finally` blocks of all processing task handlers.
--   **Status:** [READY FOR TESTING] Code changes for button state management are complete.
--   **Testing:**
-    1. Start a long batch process. Click 'Cancel'. Verify process stops AND the cancel button becomes disabled, while action buttons become enabled.
-    2. Start a process that errors out quickly. Verify the cancel button becomes disabled and action buttons become enabled.
-    3. Start a process and let it complete normally. Verify cancel button becomes disabled and action buttons become enabled.
+- **REVISED HYPOTHESIS (Post-Testing):**
+    *   **A) Persistent UI Blocking by Network Request:** The primary suspect remains that Obsidian's `requestUrl` (or potentially `fetch` if used directly) blocks the UI thread *during* the actual network communication, preventing the button's state update from rendering or click events from registering, even with small delays (`delay(1)`). The yield might not be effective enough during an active, blocking network I/O operation within Obsidian's event loop.
+    *   **B) State Update Timing/Override:** The logic ensuring the button is enabled in `updateStatus` might be getting overridden by a subsequent call to `updateButtonStates` (perhaps in a `finally` block or elsewhere) before the UI thread gets a chance to repaint the button in its enabled state during the brief "Calling..." status update.
+    *   **C) `AbortController` Ineffectiveness:** While unlikely, there might be an edge case where `requestUrl` doesn't fully respect the `AbortController` signal immediately or in a way that allows the UI to respond promptly.
+-   **Potential Improvements/Checks (Round 2):**
+    1.  **Isolate Network Blocking:** Temporarily replace the actual network call (`requestUrl(...)` or `fetch(...)`) inside the relevant API function (e.g., `callDeepSeekApi`) with a simple `await delay(5000);` (5 seconds).
+        ```typescript
+        // Inside callDeepSeekApi (or other relevant API function)
+        try {
+            progressReporter.updateStatus(`Calling ${provider.name}...`); // Ensure status updates
+            console.log(`SIMULATING API CALL for 5 seconds...`);
+            await delay(5000); // Simulate network delay WITHOUT actual network call
+            console.log(`SIMULATION finished.`);
+            // Comment out the actual requestUrl/fetch call
+            // const response = await requestUrl(...);
+            // ... rest of original success/error handling (maybe return dummy data) ...
+            return "Simulated response";
+        } catch (error) { ... }
+        ```
+        *   **Test:** Run the batch process. Is the 'Cancel' button clickable *during* this 5-second simulated call?
+            *   If YES: This strongly confirms the actual network request (`requestUrl`/`fetch`) is the blocking culprit. Further investigation needed into non-blocking alternatives or better yielding strategies around `requestUrl`.
+            *   If NO: The issue lies elsewhere, likely in the `updateButtonStates`/`updateStatus` logic or event loop handling within the batch process itself. Proceed to step 2.
+    2.  **Trace Button State Updates:** Add detailed logging *immediately before and after* every call to `this.updateButtonStates()` within the batch processing loop (`batchGenerateContentForTitles`) and the single file processing functions it calls (`generateContentForTitle`, `processFile`, API calls). Also log the value of `this.cancelButton.disabled` within `updateStatus` *before and after* it's potentially modified.
+        ```typescript
+        // Example in NotemdSidebarView.updateButtonStates
+        console.log('Entering updateButtonStates. isProcessing:', this.isProcessing);
+        // ... existing logic ...
+        console.log('Exiting updateButtonStates. Cancel button disabled:', this.cancelButton?.disabled);
 
-## Issue 2: Research Button Unresponsive After Click
--   **Observation:** User reports the 'Research and Summarize' button activates, but clicking it immediately turns it grey (disabled) and produces no output or response.
+        // Example in NotemdSidebarView.updateStatus
+        console.log(`updateStatus: Received text "${text}". Current cancel disabled: ${this.cancelButton?.disabled}`);
+        if (this.statusEl) this.statusEl.setText(text);
+        if (this.cancelButton && this.isProcessing) {
+             console.log(`updateStatus: Ensuring cancel button is enabled.`);
+             this.cancelButton.disabled = false;
+        }
+        console.log(`updateStatus: Finished. Final cancel disabled: ${this.cancelButton?.disabled}`);
+        // ... rest of progress bar logic ...
+
+        // Example around calls in batchGenerateContentForTitles
+        console.log('BATCH: Before updateButtonStates (start)');
+        progressReporter.updateButtonStates();
+        console.log('BATCH: After updateButtonStates (start)');
+        // ... loop ...
+        console.log('BATCH: Before updateButtonStates (finally)');
+        progressReporter.updateButtonStates();
+        console.log('BATCH: After updateButtonStates (finally)');
+        ```
+        *   **Test:** Run batch, observe console logs during the "Calling..." phase. Pinpoint exactly when and why `cancelButton.disabled` becomes `true`.
+-   **Status:** [PENDING TESTING] Ready for implementing and testing Step 1 (Simulated Delay) first. If that doesn't reveal the cause, proceed to Step 2 (Detailed Logging).
+
+## Issue: Research Button Unresponsive (Handler Fails Silently Before Logs)
+-   **Observation:** User reports the 'Research and Summarize' button activates (becomes clickable when a file is open), but clicking it immediately turns it grey (disabled) and produces no output or response. **Crucially, console logs added *inside* the `onclick` handler in the previous attempt did *not* appear at all.**
+-   **Previous Attempt (Ineffective):** Adding `console.log` statements at various points *inside* the `async () => { ... }` handler body.
 -   **Files to Check:**
-    -   `main.ts`: `NotemdSidebarView.onOpen` - `onclick` handler for the 'Research & Summarize' button, `updateButtonStates`.
-    -   `main.ts`: `researchAndSummarize` function.
-    -   `main.ts`: `_performResearch` function.
-    -   `main.ts`: `isBusy` flag usage.
-    -   `main.ts`: `getReporter` function.
--   **Investigation Steps & Findings:**
-    1.  ✅ User confirms clicking the *sidebar button*. (Implied)
-    2.  ✅ Button activation on file open works. (Confirmed)
-    3.  ✅ Immediate grey-out is expected: `onclick` disables button, `finally` re-enables. (Confirmed)
-    4.  ❓ Investigate lack of output/response:
-        *   Is `plugin.isBusy` already `true` when clicked? (Add logging to check).
-        *   ✅ Check for empty selection (`topic.trim() === ''`) handled? (Fix previously applied - 2025-04-24).
-        *   **NEW:** Are there other early exits in `researchAndSummarize` *before* logging/notices (e.g., error getting editor/view)?
-        *   **NEW:** Is `getReporter()` returning the correct sidebar instance?
-        *   **NEW:** Is there an unhandled promise rejection or a `catch` block in `researchAndSummarize` or `_performResearch` that fails to show a `Notice` or log to the reporter? Check API key errors, network errors, content fetching errors.
-        *   **NEW:** Does the `finally` block in the `onclick` handler reliably call `updateButtonStates()`?
--   **Potential Improvements/Checks:**
-    1.  ✅ [COMPLETED - 2025-04-24] Added check for empty topic.
-    2.  ✅ [COMPLETED - 2025-04-24] Added more logging. (May need more at very start).
-    3.  ✅ [COMPLETED - 2025-04-24] Ensured `finally` block resets state. (Needs re-verification).
-    4.  ✅ [COMPLETED - 2025-04-24] Added logging at the very beginning of the research button's `onclick` handler and `researchAndSummarize` to check `isBusy` state and confirm execution entry.
-    5.  ✅ [COMPLETED - 2025-04-24] Explicitly added `reporter.log` or `new Notice` calls within `catch` blocks in `researchAndSummarize` and `_performResearch` for better error reporting.
--   **Status:** [READY FOR TESTING] Code changes for logging and error reporting are complete.
--   **Testing:**
-    1. Test without selecting text (should show notice).
-    2. Test with selected text (should start processing).
-    3. Test with invalid API keys (Tavily/LLM) or network disconnected (should show error notice/log).
-    4. Test while another task is running (`isBusy` = true) (should show busy notice).
+    -   `main.ts`: `NotemdSidebarView.onOpen` - Creation of `researchButton`, assignment of `onclick` handler (or `addEventListener`), and surrounding code.
+    -   `main.ts`: `NotemdSidebarView.updateButtonStates` method.
+-   **REVISED HYPOTHESIS (Post-Testing):** Since *no* logs from inside the handler appeared, the issue is likely occurring *before* the handler's code block even begins execution, or the handler assignment itself is failing silently.
+    *   **A) Handler Assignment Failure:** An error might occur during the `researchButton.onclick = async () => { ... };` line itself in `onOpen`, preventing the handler from being attached correctly.
+    *   **B) Invalid Button Reference:** The `researchButton` variable might be `null`, `undefined`, or pointing to a detached DOM element by the time `onOpen` tries to assign the handler.
+    *   **C) Event Propagation/Conflict:** Another event listener (possibly higher up in the DOM or within Obsidian) might be capturing the click event and stopping its propagation before it reaches the intended handler.
+    *   **D) Error in `onOpen` Before Handler:** An error could be happening elsewhere in the `NotemdSidebarView.onOpen` method *before* the `onclick` assignment line is even reached.
+-   **Potential Improvements/Checks (Round 2):**
+    1.  **Verify Handler Assignment & Button Validity (HIGHEST PRIORITY):**
+        *   Add logging *immediately before and after* the `onclick` assignment in `NotemdSidebarView.onOpen`. Log the button element itself.
+        ```typescript
+        // Inside NotemdSidebarView.onOpen, around the researchButton setup
+        const researchButton = container.createEl('button', { text: 'Research & Summarize', cls: 'mod-cta' });
+        console.log('Research button element created:', researchButton); // Log the element
+
+        try {
+            console.log('Attempting to assign researchButton.onclick...');
+            researchButton.onclick = async () => {
+                console.log('Entering researchButton onclick handler'); // Keep this first line
+                // ... rest of the original handler body ...
+                this.log('Research button handler started.'); // Add log inside
+                // ...
+            };
+            console.log('Successfully assigned researchButton.onclick.');
+            if (typeof researchButton.onclick !== 'function') {
+                 console.error('ERROR: researchButton.onclick is NOT a function after assignment!');
+            }
+        } catch (e) {
+            console.error('Error during researchButton.onclick assignment:', e);
+        }
+        // ... rest of onOpen ...
+        ```
+    2.  **Use `addEventListener`:** If Step 1 shows assignment works but clicks still fail, try `addEventListener` as it can be more robust. Replace the `onclick` assignment with:
+        ```typescript
+        // Replace the researchButton.onclick = ... block with this:
+        try {
+            console.log('Attempting to add researchButton click listener...');
+            researchButton.addEventListener('click', async () => {
+                console.log('Entering researchButton click listener'); // New first log
+                // ... rest of the original handler body ...
+                 this.log('Research button listener triggered.'); // Add log inside
+                // ...
+            });
+            console.log('Successfully added researchButton click listener.');
+        } catch (e) {
+            console.error('Error adding researchButton click listener:', e);
+        }
+        ```
+    3.  **Wrap `onOpen` Content:** Add a `try...catch` block around the entire content of the `async onOpen()` method in `NotemdSidebarView` to catch any unexpected errors during the view's initialization that might prevent handlers from being set up correctly.
+        ```typescript
+        async onOpen() {
+            console.log('NotemdSidebarView: onOpen started.');
+            try {
+                const container = this.contentEl;
+                container.empty();
+                container.createEl("h4", { text: "Original Processing" });
+                // ... ALL existing button creation and handler assignments ...
+
+                console.log('NotemdSidebarView: onOpen finished setup successfully.');
+            } catch (error) {
+                console.error('FATAL ERROR during NotemdSidebarView.onOpen:', error);
+                new Notice('Error initializing Notemd sidebar view. Check console.');
+            }
+        }
+        ```
+    4.  **Minimal Handler Test:** If the above steps fail, reduce the handler to its absolute minimum to confirm if *any* click interaction is registered:
+        ```typescript
+        // Replace the onclick/addEventListener assignment with this:
+        console.log('Assigning MINIMAL researchButton click handler...');
+        researchButton.onclick = () => {
+            console.log('MINIMAL researchButton onclick fired!');
+            new Notice('Research button clicked!'); // Visual feedback
+        };
+        console.log('Assigned MINIMAL handler.');
+        ```
+-   **Status:** [PENDING TESTING] Ready for implementing and testing Step 1 (Verify Assignment) first. Based on the console output, proceed to Step 2, 3, or 4 as needed.

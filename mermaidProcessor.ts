@@ -15,7 +15,7 @@ export function refineMermaidBlocks(content: string): string {
 
 		// Regex to detect ```(mermaid) or ``` mermaid with optional space/parentheses
 		const mermaidStartRegex = /^```\s*\(?\s*mermaid\s*\)?/;
-		
+
 
 		if (mermaidStartRegex.test(stripped)) {
 			// Normalize the starting line
