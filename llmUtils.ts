@@ -178,7 +178,7 @@ async function callApiWithRetry(
 
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
         if (progressReporter.cancelled) {
-            console.log(`${provider.name} API Call: Cancellation detected before attempt ${attempt}`);
+            // console.log(`${provider.name} API Call: Cancellation detected before attempt ${attempt}`);
             throw new Error("Processing cancelled by user before API attempt.");
         }
 
@@ -192,7 +192,7 @@ async function callApiWithRetry(
 
             // Handle cancellation specifically
             if ((error instanceof Error && error.name === 'AbortError') || errorMessage.includes("cancelled by user")) {
-                console.log(`${provider.name} API Call: Cancellation detected during attempt ${attempt}.`);
+                // console.log(`${provider.name} API Call: Cancellation detected during attempt ${attempt}.`);
                 throw new Error("API call cancelled by user."); // Propagate cancellation
             }
 
@@ -205,7 +205,7 @@ async function callApiWithRetry(
 
             // Check cancellation again before waiting for retry
             if (progressReporter.cancelled) {
-                console.log(`${provider.name} API Call: Cancellation detected after failed attempt ${attempt} (before retry wait).`);
+                // console.log(`${provider.name} API Call: Cancellation detected after failed attempt ${attempt} (before retry wait).`);
                 throw new Error("Processing cancelled by user during API retry sequence.");
             }
 

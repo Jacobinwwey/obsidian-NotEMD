@@ -56,7 +56,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         if (this.logEl) this.logEl.empty();
         if (this.statusEl) this.statusEl.setText('Ready');
         if (this.progressEl) {
-            this.progressEl.style.width = '0%';
+            this.progressEl.style.setProperty('--notemd-progress-percent', '0%'); // Use CSS variable
             this.progressEl.setText('');
             this.progressEl.removeClass('is-error');
         }
@@ -88,7 +88,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             this.progressBarContainerEl.removeClass('is-hidden');
             if (percent >= 0) {
                 const clampedPercent = Math.min(100, Math.max(0, percent));
-                this.progressEl.style.width = `${clampedPercent}%`;
+                this.progressEl.style.setProperty('--notemd-progress-percent', `${clampedPercent}%`); // Use CSS variable
                 this.progressEl.setText(`${Math.round(clampedPercent)}%`);
                 this.progressEl.removeClass('is-error');
 
@@ -103,7 +103,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
                     this.timeRemainingEl.setText('Est. time remaining: calculating...');
                 }
             } else { // Handle negative percent for error/cancel state
-                this.progressEl.style.width = `100%`;
+                this.progressEl.style.setProperty('--notemd-progress-percent', `100%`); // Use CSS variable for error state width
                 this.progressEl.addClass('is-error');
                 this.progressEl.setText('Cancelled/Error');
                 if (this.timeRemainingEl) this.timeRemainingEl.setText('Processing stopped.');

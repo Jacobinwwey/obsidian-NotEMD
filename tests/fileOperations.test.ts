@@ -101,8 +101,8 @@ describe('File Operations', () => {
         vault: plugin.app.vault,
         name: f.path.split('/').pop() || '',
         parent: null
-      } as unknown as TFile)));
-      plugin.app.vault.read = jest.fn((file) => 
+      } /* Removed 'as unknown as TFile' */)));
+      plugin.app.vault.read = jest.fn((file) =>
         Promise.resolve(files.find(f => f.path === file.path)?.content || '')
       );
       plugin.app.vault.modify = jest.fn();
@@ -136,8 +136,8 @@ describe('File Operations', () => {
         vault: plugin.app.vault,
         name: f.path.split('/').pop() || '',
         parent: null
-      } as unknown as TFile)));
-      plugin.app.vault.read = jest.fn((file) => 
+      } /* Removed 'as unknown as TFile' */)));
+      plugin.app.vault.read = jest.fn((file) =>
         Promise.resolve(files.find(f => f.path === file.path)?.content || '')
       );
       plugin.app.vault.modify = jest.fn();
