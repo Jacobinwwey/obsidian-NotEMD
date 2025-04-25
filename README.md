@@ -11,7 +11,7 @@
       AI-Powered Knowledge Enhancement
 =============================================
 ```
-
+A Easy way to create your own Knowledge-base!
 Notemd enhances your Obsidian workflow by integrating with various Large Language Models (LLMs) to process your notes, automatically generate wiki-links for key concepts, create corresponding concept notes, perform web research, and more.
 
 **Version:** 1.2.0
