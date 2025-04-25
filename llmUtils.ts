@@ -228,12 +228,25 @@ async function callApiWithRetry(
                 throw new Error("API call cancelled by user."); // Propagate cancellation
             }
 
-            // Don't retry on certain fatal errors (e.g., 401, 404) - this logic might need refinement per provider
-            const statusMatch = errorMessage.match(/API error: (\d+)/);
-            const statusCode = statusMatch ? parseInt(statusMatch[1], 10) : null;
-            if (statusCode && (statusCode === 400 || statusCode === 401 || statusCode === 403 || statusCode === 404)) {
-                throw lastError; // Throw fatal errors immediately
+            // Don't retry on certain fatal errors
+            // Check 1: HTTP Status Code (Client Errors)
+            const httpStatusMatch = errorMessage.match(/API error: (\d+)/);
+            const httpStatusCode = httpStatusMatch ? parseInt(httpStatusMatch[1], 10) : null;
+            if (httpStatusCode && (httpStatusCode === 400 || httpStatusCode === 401 || httpStatusCode === 403 || httpStatusCode === 404)) {
+                throw lastError; // Throw fatal client HTTP errors immediately
             }
+            // Check 2: Specific Error Codes reported *within* JSON (Server Errors)
+            const jsonErrorCodeMatch = errorMessage.match(/\(Code: (\d+)\)/);
+            const jsonErrorCode = jsonErrorCodeMatch ? parseInt(jsonErrorCodeMatch[1], 10) : null;
+            if (jsonErrorCode && jsonErrorCode >= 500) { // Treat 5xx errors reported in JSON as fatal for retries
+                 progressReporter.log(`[callApiWithRetry] Detected non-retryable error code ${jsonErrorCode} within API response.`);
+                 throw lastError;
+            }
+            // Check 3: Specific non-retryable messages (optional, add if needed)
+            // if (errorMessage.includes("some specific non-retryable text")) {
+            //     throw lastError;
+            // }
+
 
             // Check cancellation again before waiting for retry
             if (progressReporter.cancelled) {
@@ -507,8 +520,18 @@ async function executeOpenRouterAPI(provider: LLMProviderConfig, modelName: stri
             // Fallback: If JSON parsing fails on 200 OK, maybe the raw text is the content?
             progressReporter.log(`[OpenRouter] Warning: JSON parsing failed despite 200 OK. Using raw response text as potential content.`);
             return responseText; // Use raw text as fallback content
-            // throw new Error(`Failed to parse JSON response from OpenRouter, status: ${response.status}.`); // Original error
         }
+
+        // --- Check for errors *within* the successfully parsed JSON response ---
+        const choice = data.choices?.[0];
+        if (choice && (choice.finish_reason === 'error' || choice.error)) {
+            const errorMessage = choice.error?.message || `OpenRouter reported finish_reason: error`;
+            const errorCode = choice.error?.code || 'N/A';
+            progressReporter.log(`[OpenRouter] Error reported in JSON response: Code ${errorCode}, Message: ${errorMessage}`);
+            // Throw specific error based on JSON content
+            throw new Error(`OpenRouter API reported an error: ${errorMessage} (Code: ${errorCode})`);
+        }
+        // --- End JSON error check ---
 
         // Check expected structure - Primary: content field
         let responseContent = data.choices?.[0]?.message?.content;
