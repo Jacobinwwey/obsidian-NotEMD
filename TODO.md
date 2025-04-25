@@ -46,7 +46,7 @@ This list outlines potential new features and improvements for the Notemd Obsidi
 -   [x] **Enhanced Duplicate Concept Handling:**
     -   [x] Improve concept note creation to avoid near-duplicates by normalizing names (e.g., "Topic-Name" vs "Topic Name" should likely point to the same note). Use logic similar to `process_string` from `mermaid.py`. (Normalization added)
     -   [x] Add command "Check and Remove Duplicate Concept Notes" to identify potential duplicates in the concept note folder based on `DeleteDuplicates.ps1` logic (exact match, plural, normalization, containment). Presents a detailed list with reasons/conflicts, prompts user for confirmation, and shows progress before moving identified duplicates to system trash. (April 2025)
-    -   [ ] Explore options for detecting duplicate concepts *across* different notes (more complex, might require index scanning). (Further exploration pending)
+    -   [x] Explore options for detecting duplicate concepts *across* different notes (more complex, might require index scanning). (Exploration complete: Outlined Lexical, Semantic (Embedding), and Hybrid strategies. Feature requires significant effort, further implementation pending specific strategy selection. April 25, 2025)
 
 -   [x] **Improved Batch Processing Robustness:**
     -   Modify `processFolderWithNotemd` to better handle errors on individual files.
@@ -97,9 +97,10 @@ This list outlines potential new features and improvements for the Notemd Obsidi
     -   [x] If checked and input is empty, overwrite the original file (`filename.md`). (Handled in `processFile`)
     -   [x] If checked and input is "suffix", generate `filenamesuffix.md`. (Handled in `processFile`)
     -   [x] Update the 'Add Links' batch processing logic (`processFile`) to respect these settings. (Implemented in `processFile`)
--   [x] **Batch Task Cancel Button:** Implement a mechanism (e.g., a button in a modal or status bar) to allow users to cancel ongoing batch processing tasks. (Implemented via `ProgressReporter` interface, `ProgressModal`, and `NotemdSidebarView` cancel buttons and checks within batch loops)
-    -   [x] Refined API retry logic to improve cancel responsiveness during waits (using `cancellableDelay`). (April 2025)
-    -   [x] Added pre-fetch cancellation checks within API retry loops for immediate interruption. (April 2025)
+    -   [x] **Batch Task Cancel Button:** Implement a mechanism (e.g., a button in a modal or status bar) to allow users to cancel ongoing batch processing tasks. (Implemented via `ProgressReporter` interface, `ProgressModal`, and `NotemdSidebarView` cancel buttons and checks within batch loops)
+        -   [x] Refined API retry logic to improve cancel responsiveness during waits (using `cancellableDelay`). (April 2025)
+        -   [x] Added pre-fetch cancellation checks within API retry loops for immediate interruption. (April 2025)
+        -   [x] Investigated inconsistent cancellation behavior (e.g., OpenRouter). Code review confirms client-side logic is consistent across providers. Issue likely external (server-side handling or network timing). (April 25, 2025)
 -   [x] **Customizable 'Generate from Title' Output Folder:**
     -   [x] Modify the 'Generate Content for Note Title' batch process (`batchGenerateContentForTitles`) to move successfully processed files to a dedicated subfolder within the processed folder to prevent reprocessing. (Implemented)
     -   [x] Add a checkbox setting: "Use custom output folder name for 'Generate from Title'". (Implemented in Settings)

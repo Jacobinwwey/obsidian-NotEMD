@@ -96,11 +96,27 @@ export async function testAPI(provider: LLMProviderConfig): Promise<{ success: b
                 return { success: true, message: `Successfully connected to OpenRouter API using model '${provider.model}'.` };
 
             case 'OpenAI':
-            case 'Mistral':
+                 // OpenAI API: Try /models first, fallback to chat/completions
+                 url = `${provider.baseUrl}/models`;
+                 options.headers = { 'Authorization': `Bearer ${provider.apiKey}` };
+                 response = await fetch(url, options);
+                 if (!response.ok) {
+                     url = `${provider.baseUrl}/chat/completions`;
+                     options.method = 'POST';
+                     options.headers = { ...options.headers, 'Content-Type': 'application/json' };
+                     options.body = JSON.stringify({ model: provider.model, messages: [{ role: 'user', content: 'Test' }], max_tokens: 1, temperature: 0 });
+                     response = await fetch(url, options);
+                 }
+                 if (!response.ok) throw new Error(`OpenAI API error: ${response.status} - ${await response.text()}`);
+                 await response.json();
+                 return { success: true, message: `Successfully connected to OpenAI API at ${provider.baseUrl}.` };
+
             case 'DeepSeek':
+                 // DeepSeek API: Try /models first, fallback to chat/completions
                 url = `${provider.baseUrl}/models`;
                 options.headers = { 'Authorization': `Bearer ${provider.apiKey}` };
                 response = await fetch(url, options);
+                // Fallback to chat completion test if /models fails
                 if (!response.ok) {
                     url = `${provider.baseUrl}/chat/completions`;
                     options.method = 'POST';
@@ -111,6 +127,22 @@ export async function testAPI(provider: LLMProviderConfig): Promise<{ success: b
                 if (!response.ok) throw new Error(`${provider.name} API error: ${response.status} - ${await response.text()}`);
                 await response.json();
                 return { success: true, message: `Successfully connected to ${provider.name} API at ${provider.baseUrl}.` };
+
+            case 'Mistral':
+                 // Mistral API: Try /models first, fallback to chat/completions
+                 url = `${provider.baseUrl}/models`;
+                 options.headers = { 'Authorization': `Bearer ${provider.apiKey}` };
+                 response = await fetch(url, options);
+                 if (!response.ok) {
+                     url = `${provider.baseUrl}/chat/completions`;
+                     options.method = 'POST';
+                     options.headers = { ...options.headers, 'Content-Type': 'application/json' };
+                     options.body = JSON.stringify({ model: provider.model, messages: [{ role: 'user', content: 'Test' }], max_tokens: 1, temperature: 0 });
+                     response = await fetch(url, options);
+                 }
+                 if (!response.ok) throw new Error(`Mistral API error: ${response.status} - ${await response.text()}`);
+                 await response.json();
+                 return { success: true, message: `Successfully connected to Mistral API at ${provider.baseUrl}.` };
 
             case 'Anthropic':
                 url = `${provider.baseUrl}/v1/messages`;
@@ -224,6 +256,7 @@ async function callApiWithRetry(
 // --- Provider-Specific API Call Implementations ---
 
 async function executeDeepSeekAPI(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings): Promise<string> {
+    if (!provider.apiKey) throw new Error(`API key is missing for DeepSeek provider.`);
     const url = `${provider.baseUrl}/chat/completions`;
     const requestBody = {
         model: modelName,
@@ -248,6 +281,7 @@ async function executeDeepSeekAPI(provider: LLMProviderConfig, modelName: string
 }
 
 async function executeOpenAIApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings): Promise<string> {
+    if (!provider.apiKey) throw new Error(`API key is missing for OpenAI provider.`);
     const url = `${provider.baseUrl}/chat/completions`;
     const requestBody = {
         model: modelName,
@@ -272,6 +306,7 @@ async function executeOpenAIApi(provider: LLMProviderConfig, modelName: string, 
 }
 
 async function executeAnthropicApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings): Promise<string> {
+    if (!provider.apiKey) throw new Error(`API key is missing for Anthropic provider.`);
     const url = `${provider.baseUrl}/v1/messages`;
     // Anthropic combines prompt and content in the user message
     const requestBody = {
@@ -297,6 +332,7 @@ async function executeAnthropicApi(provider: LLMProviderConfig, modelName: strin
 }
 
 async function executeGoogleApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings): Promise<string> {
+    if (!provider.apiKey) throw new Error(`API key is missing for Google provider.`);
     const urlWithKey = `${provider.baseUrl}/models/${modelName}:generateContent?key=${provider.apiKey}`;
     const requestBody = {
         contents: [{ role: 'user', parts: [{ text: `${prompt}\n\n${content}` }] }],
@@ -319,6 +355,7 @@ async function executeGoogleApi(provider: LLMProviderConfig, modelName: string, 
 }
 
 async function executeMistralApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings): Promise<string> {
+    if (!provider.apiKey) throw new Error(`API key is missing for Mistral provider.`);
     const url = `${provider.baseUrl}/chat/completions`;
     const requestBody = {
         model: modelName,
@@ -343,6 +380,7 @@ async function executeMistralApi(provider: LLMProviderConfig, modelName: string,
 }
 
 async function executeAzureOpenAIApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings): Promise<string> {
+    if (!provider.apiKey) throw new Error(`API key is missing for Azure OpenAI provider.`);
     if (!provider.apiVersion || !provider.baseUrl) { throw new Error('API version and Base URL are required for Azure OpenAI'); }
     const url = `${provider.baseUrl}/openai/deployments/${modelName}/chat/completions?api-version=${provider.apiVersion}`;
     const requestBody = {
@@ -367,6 +405,8 @@ async function executeAzureOpenAIApi(provider: LLMProviderConfig, modelName: str
 }
 
 async function executeLMStudioApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings): Promise<string> {
+    // Note: LMStudio might not require an API key, or use a placeholder like 'EMPTY'.
+    // No explicit check here, rely on the API call itself to fail if needed.
     const url = `${provider.baseUrl}/chat/completions`;
     const requestBody = {
         model: modelName,
@@ -391,6 +431,7 @@ async function executeLMStudioApi(provider: LLMProviderConfig, modelName: string
 }
 
 async function executeOllamaApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings): Promise<string> {
+    // Note: Ollama does not use API keys.
     const url = `${provider.baseUrl}/chat`;
     const requestBody = {
         model: modelName,
@@ -414,28 +455,95 @@ async function executeOllamaApi(provider: LLMProviderConfig, modelName: string, 
     } finally { if (progressReporter.abortController === controller) { progressReporter.abortController = null; } }
 }
 
+// Updated executeOpenRouterAPI with safer parsing and enhanced logging
 async function executeOpenRouterAPI(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings): Promise<string> {
+    if (!provider.apiKey) throw new Error(`API key is missing for OpenRouter provider.`);
     const url = `${provider.baseUrl}/chat/completions`;
     const requestBody = {
-        model: modelName,
+        model: modelName, // User specifies the full model string e.g., "google/gemini-pro"
         messages: [{ role: 'system', content: prompt }, { role: 'user', content: content }],
         temperature: provider.temperature,
         max_tokens: settings.maxTokens
     };
     const controller = new AbortController();
     progressReporter.abortController = controller;
+    let response: Response | null = null;
+
     try {
         await cancellableDelay(1, progressReporter); // Yield
-        const response = await fetch(url, {
-            method: 'POST', signal: controller.signal, headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${provider.apiKey}`, 'HTTP-Referer': 'https://github.com/Jacobinwwey/obsidian-NotEMD', 'X-Title': 'Notemd Obsidian Plugin' }, body: JSON.stringify(requestBody)
+        progressReporter.log(`[OpenRouter] Calling API: ${url} with model ${modelName}`);
+        response = await fetch(url, {
+            method: 'POST',
+            signal: controller.signal,
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${provider.apiKey}`,
+                'HTTP-Referer': 'https://github.com/Jacobinwwey/obsidian-NotEMD', // Required by OpenRouter
+                'X-Title': 'Notemd Obsidian Plugin' // Required by OpenRouter
+            },
+            body: JSON.stringify(requestBody)
         });
+        progressReporter.log(`[OpenRouter] Received response status: ${response.status}`);
+
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
-        if (!response.ok) { const errorText = await response.text(); throw new Error(`OpenRouter API error: ${response.status} - ${errorText}`); }
-        const data = await response.json();
-        if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API success.");
-        if (!data.choices?.[0]?.message?.content) { throw new Error(`Unexpected response format from OpenRouter`); }
-        return data.choices[0].message.content;
-    } finally { if (progressReporter.abortController === controller) { progressReporter.abortController = null; } }
+
+        const responseText = await response.text(); // Read body as text first
+        progressReporter.log(`[OpenRouter] Read response text (length: ${responseText.length}).`);
+        if (progressReporter.cancelled) throw new Error("Processing cancelled by user after reading response text."); // Check again
+
+        if (!response.ok) {
+            progressReporter.log(`[OpenRouter] API Error Response Text: ${responseText}`); // Log error text
+            throw new Error(`OpenRouter API error: ${response.status} - ${responseText}`);
+        }
+
+        // Now attempt to parse the text as JSON
+        let data;
+        try {
+            data = JSON.parse(responseText);
+            progressReporter.log(`[OpenRouter] Successfully parsed JSON response.`);
+        } catch (jsonError: unknown) {
+            progressReporter.log(`[OpenRouter] Failed to parse JSON response, status was ${response.status}.`);
+            progressReporter.log(`[OpenRouter] Raw response text: ${responseText}`); // Log raw text on parse failure
+            // Fallback: If JSON parsing fails on 200 OK, maybe the raw text is the content?
+            progressReporter.log(`[OpenRouter] Warning: JSON parsing failed despite 200 OK. Using raw response text as potential content.`);
+            return responseText; // Use raw text as fallback content
+            // throw new Error(`Failed to parse JSON response from OpenRouter, status: ${response.status}.`); // Original error
+        }
+
+        // Check expected structure - Primary: content field
+        let responseContent = data.choices?.[0]?.message?.content;
+
+        // Fallback: Check reasoning field if content is empty/null
+        if (!responseContent && data.choices?.[0]?.message?.reasoning) {
+            progressReporter.log(`[OpenRouter] 'content' field empty, using 'reasoning' field as fallback.`);
+            responseContent = data.choices?.[0]?.message?.reasoning;
+        }
+
+        // Final check: If still no content, throw error
+        if (!responseContent) {
+            progressReporter.log(`[OpenRouter] Unexpected JSON structure or empty content/reasoning: ${JSON.stringify(data)}`); // Log unexpected structure
+            throw new Error(`Unexpected response format or empty content from OpenRouter`);
+        }
+
+        progressReporter.log(`[OpenRouter] API call successful (using ${data.choices?.[0]?.message?.content ? 'content' : 'reasoning'} field).`);
+        return responseContent;
+
+    } catch (error) {
+         // Log fetch-related errors (network, CORS, abort, etc.)
+         if (error instanceof Error && error.name === 'AbortError') {
+             progressReporter.log(`[OpenRouter] Fetch aborted.`);
+         } else if (error instanceof Error) {
+             progressReporter.log(`[OpenRouter] Fetch error: ${error.message}`);
+         } else {
+             progressReporter.log(`[OpenRouter] Unknown fetch error: ${error}`);
+         }
+         // Re-throw the error to be handled by callApiWithRetry
+         throw error;
+    } finally {
+        if (progressReporter.abortController === controller) {
+            progressReporter.abortController = null;
+        }
+    }
 }
 
 
