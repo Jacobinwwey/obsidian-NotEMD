@@ -334,25 +334,26 @@ export class NotemdSettingTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .setName('Duplicate Check Scope Mode')
-            .setDesc('Define the scope for finding duplicate counterparts (files outside the Concept Note Folder).')
+            .setDesc('Define the scope for finding duplicate counterparts.')
             .addDropdown(dropdown => dropdown
-                .addOption('vault', 'Entire Vault (Default)')
-                .addOption('include', 'Include Specific Folders Only')
-                .addOption('exclude', 'Exclude Specific Folders')
+                .addOption('vault', 'Entire Vault (Default - Compares concept notes to all other notes)')
+                .addOption('include', 'Include Specific Folders Only (Compares concept notes to notes in specified folders)')
+                .addOption('exclude', 'Exclude Specific Folders (Compares concept notes to notes outside specified folders)')
+                .addOption('concept_folder_only', 'Concept Folder Only (Compares concept notes against each other)') // Added new option
                 .setValue(this.plugin.settings.duplicateCheckScopeMode)
-                .onChange(async (value: 'vault' | 'include' | 'exclude') => {
+                .onChange(async (value: 'vault' | 'include' | 'exclude' | 'concept_folder_only') => { // Updated type
                     this.plugin.settings.duplicateCheckScopeMode = value;
                     await this.plugin.saveSettings();
                     this.display(); // Refresh to show/hide the paths textarea
                 }));
 
-        // Show path input only if mode is 'include' or 'exclude'
+        // Show path input only if mode is 'include' or 'exclude' (not for 'vault' or 'concept_folder_only')
         if (this.plugin.settings.duplicateCheckScopeMode === 'include' || this.plugin.settings.duplicateCheckScopeMode === 'exclude') {
             new Setting(containerEl)
                 .setName(this.plugin.settings.duplicateCheckScopeMode === 'include' ? 'Include Folders' : 'Exclude Folders')
-                .setDesc(`Enter relative paths (one per line) for folders to ${this.plugin.settings.duplicateCheckScopeMode}. Required if mode is not 'Entire Vault'. Paths are case-sensitive and use '/' as separator.`)
+                .setDesc(`Enter relative paths (one per line) for folders to ${this.plugin.settings.duplicateCheckScopeMode}. Required if mode is not 'Entire Vault' or 'Concept Folder Only'. Paths are case-sensitive and use '/' as separator.`)
                 .addTextArea(textarea => textarea
-                    .setPlaceholder('e.g., Notes/ProjectA\nArchive/OldStuff')
+                    .setPlaceholder('e.g., Notes/ProjectA\nSource Material') // Updated placeholder
                     .setValue(this.plugin.settings.duplicateCheckScopePaths)
                     .onChange(async (value) => {
                         // Basic validation: Ensure not empty if mode requires it

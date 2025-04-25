@@ -742,14 +742,18 @@ export async function checkAndRemoveDuplicateConceptNotes(app: App, settings: No
     const allMarkdownFiles = app.vault.getMarkdownFiles();
     const conceptNotes = allMarkdownFiles.filter(f => f.path.startsWith(conceptFolderPath + '/'));
 
-    // --- Determine the scope for 'otherNotes' based on refined settings ---
-    let otherNotes: TFile[];
+    // --- Determine the scope for comparison based on refined settings ---
+    let notesToCompareAgainst: TFile[]; // This will hold the files to check against
     const conceptFolderPrefix = conceptFolderPath === '/' ? '' : conceptFolderPath + '/'; // Handle root concept folder
 
     if (settings.duplicateCheckScopeMode === 'vault') {
-        progressReporter.log(`Using duplicate check scope: Entire vault (excluding concept folder).`);
-        otherNotes = allMarkdownFiles.filter(f => !f.path.startsWith(conceptFolderPrefix));
-    } else {
+        progressReporter.log(`Duplicate check mode: Comparing concept notes against 'Entire Vault' (excluding concept folder).`);
+        notesToCompareAgainst = allMarkdownFiles.filter(f => !f.path.startsWith(conceptFolderPrefix));
+    } else if (settings.duplicateCheckScopeMode === 'concept_folder_only') {
+        progressReporter.log(`Duplicate check mode: Comparing concept notes against other notes within the 'Concept Folder Only'.`);
+        // Compare concept notes against each other (excluding self-comparison later)
+        notesToCompareAgainst = conceptNotes;
+    } else { // 'include' or 'exclude' modes
         const paths = settings.duplicateCheckScopePaths
             .split('\n')
             .map(p => p.trim().replace(/^\/|\/$/g, '')) // Normalize each path
@@ -765,7 +769,7 @@ export async function checkAndRemoveDuplicateConceptNotes(app: App, settings: No
             if (!folder || !(folder instanceof TFolder)) {
                  throw new Error(`Invalid folder path specified in duplicate check scope: "${p}"`);
             }
-            // Ensure scope paths are not the concept folder itself or inside it
+            // Ensure scope paths are not the concept folder itself or inside it (still relevant for include/exclude)
              if (p === conceptFolderPath || p.startsWith(conceptFolderPrefix)) {
                  throw new Error(`Duplicate check scope path "${p}" cannot be the concept folder or inside it.`);
              }
@@ -774,14 +778,14 @@ export async function checkAndRemoveDuplicateConceptNotes(app: App, settings: No
         const normalizedPaths = paths.map(p => p === '/' ? '' : p + '/'); // Add trailing slash for startsWith check, handle root
 
         if (settings.duplicateCheckScopeMode === 'include') {
-            progressReporter.log(`Using duplicate check scope: Include folders: ${paths.join(', ')}`);
-            otherNotes = allMarkdownFiles.filter(f =>
+            progressReporter.log(`Duplicate check mode: Comparing concept notes against 'Include Folders': ${paths.join(', ')}`);
+            notesToCompareAgainst = allMarkdownFiles.filter(f =>
                 !f.path.startsWith(conceptFolderPrefix) && // Exclude concept notes
                 normalizedPaths.some(p => f.path.startsWith(p)) // Must be within one of the included paths
             );
         } else { // exclude mode
-            progressReporter.log(`Using duplicate check scope: Exclude folders: ${paths.join(', ')}`);
-            otherNotes = allMarkdownFiles.filter(f =>
+            progressReporter.log(`Duplicate check mode: Comparing concept notes against vault, 'Exclude Folders': ${paths.join(', ')}`);
+            notesToCompareAgainst = allMarkdownFiles.filter(f =>
                 !f.path.startsWith(conceptFolderPrefix) && // Exclude concept notes
                 !normalizedPaths.some(p => f.path.startsWith(p)) // Must NOT be within any of the excluded paths
             );
@@ -790,31 +794,139 @@ export async function checkAndRemoveDuplicateConceptNotes(app: App, settings: No
     // --- End scope determination ---
 
     if (conceptNotes.length === 0) throw new Error("No concept notes found in the specified folder.");
-    progressReporter.log(`Found ${conceptNotes.length} concept notes and ${otherNotes.length} potential counterpart notes within the defined scope.`);
-
+    progressReporter.log(`Found ${conceptNotes.length} concept notes to check.`);
+    progressReporter.log(`Comparing against ${notesToCompareAgainst.length} notes in the defined scope.`);
     const filesToReport = new Map<string, { reason: string; counterparts: string[] }>();
+    const allFilesMap = new Map(allMarkdownFiles.map(f => [f.path, f])); // For easy lookup by path
 
     // ** 1. Exact Filename Matching **
     progressReporter.updateStatus("Checking exact filename matches...", 20);
-    const filenameMap = new Map<string, string[]>();
-    allMarkdownFiles.forEach(file => { const basenameLower = file.basename.toLowerCase(); const list = filenameMap.get(basenameLower) || []; list.push(file.path); filenameMap.set(basenameLower, list); });
-    conceptNotes.forEach(cn => { const basenameLower = cn.basename.toLowerCase(); const matches = filenameMap.get(basenameLower) || []; if (matches.length > 1) { const counterparts = matches.filter(path => path !== cn.path && !path.startsWith(conceptFolderPath + '/')); if (counterparts.length > 0 && !filesToReport.has(cn.path)) { filesToReport.set(cn.path, { reason: "Exact Match", counterparts: counterparts }); progressReporter.log(`[Exact Match] ${cn.path} matches ${counterparts.join(', ')}`); } } });
+    const filenameMap = new Map<string, string[]>(); // Map basename -> list of full paths
+    // Build map using only the files within the comparison scope
+    notesToCompareAgainst.forEach(file => {
+        const basenameLower = file.basename.toLowerCase();
+        const list = filenameMap.get(basenameLower) || [];
+        list.push(file.path);
+        filenameMap.set(basenameLower, list);
+    });
+    // Also add concept notes themselves to the map if checking within concept folder
+    if (settings.duplicateCheckScopeMode === 'concept_folder_only') {
+        conceptNotes.forEach(file => {
+            const basenameLower = file.basename.toLowerCase();
+            const list = filenameMap.get(basenameLower) || [];
+            if (!list.includes(file.path)) { // Avoid adding self twice
+                 list.push(file.path);
+                 filenameMap.set(basenameLower, list);
+            }
+        });
+    }
+
+    conceptNotes.forEach(cn => {
+        const basenameLower = cn.basename.toLowerCase();
+        const matches = filenameMap.get(basenameLower) || [];
+        // Find counterparts *within the comparison scope* that are not the concept note itself
+        const counterparts = matches.filter(path => path !== cn.path);
+        if (counterparts.length > 0 && !filesToReport.has(cn.path)) {
+            filesToReport.set(cn.path, { reason: "Exact Match", counterparts: counterparts });
+            progressReporter.log(`[Exact Match] ${cn.path} matches ${counterparts.join(', ')}`);
+        }
+    });
 
     // ** 2. Plural Handling **
     progressReporter.updateStatus("Checking plural variants...", 40);
-    const allBasenamesLower = new Set(allMarkdownFiles.map(f => f.basename.toLowerCase()));
-    const allFilesMap = new Map(allMarkdownFiles.map(f => [f.path, f]));
-    conceptNotes.forEach(cn => { if (filesToReport.has(cn.path)) return; const nameLower = cn.basename.toLowerCase(); let singular = ''; if (nameLower.endsWith('ies') && nameLower.length > 3) singular = nameLower.substring(0, nameLower.length - 3) + 'y'; else if (nameLower.endsWith('es') && nameLower.length > 2) singular = nameLower.substring(0, nameLower.length - 2); else if (nameLower.endsWith('s') && nameLower.length > 1) singular = nameLower.substring(0, nameLower.length - 1); if (singular && allBasenamesLower.has(singular)) { const counterparts = allMarkdownFiles.filter(f => f.basename.toLowerCase() === singular && f.path !== cn.path).map(f => f.path); if (counterparts.length > 0) { const existsOutside = counterparts.some(path => !path.startsWith(conceptFolderPath + '/')); if ((existsOutside || counterparts.length > 0) && !filesToReport.has(cn.path)) { filesToReport.set(cn.path, { reason: `Plural of "${singular}"`, counterparts: counterparts }); progressReporter.log(`[Plural Match] ${cn.path} is plural of ${counterparts.join(', ')}`); } } } });
+    const comparisonBasenamesLower = new Set(notesToCompareAgainst.map(f => f.basename.toLowerCase()));
+    // If checking within concept folder, add those basenames too
+     if (settings.duplicateCheckScopeMode === 'concept_folder_only') {
+         conceptNotes.forEach(cn => comparisonBasenamesLower.add(cn.basename.toLowerCase()));
+     }
+
+    conceptNotes.forEach(cn => {
+        if (filesToReport.has(cn.path)) return; // Skip already marked
+        const nameLower = cn.basename.toLowerCase();
+        let singular = '';
+        if (nameLower.endsWith('ies') && nameLower.length > 3) singular = nameLower.substring(0, nameLower.length - 3) + 'y';
+        else if (nameLower.endsWith('es') && nameLower.length > 2) singular = nameLower.substring(0, nameLower.length - 2);
+        else if (nameLower.endsWith('s') && nameLower.length > 1) singular = nameLower.substring(0, nameLower.length - 1);
+
+        if (singular && comparisonBasenamesLower.has(singular)) {
+            // Find all files in the comparison scope (including concept notes if mode is concept_folder_only) that match the singular form
+            const counterparts = notesToCompareAgainst
+                 .concat(settings.duplicateCheckScopeMode === 'concept_folder_only' ? conceptNotes : [])
+                 .filter(f => f.basename.toLowerCase() === singular && f.path !== cn.path) // Exclude self
+                 .map(f => f.path);
+
+            if (counterparts.length > 0 && !filesToReport.has(cn.path)) {
+                filesToReport.set(cn.path, { reason: `Plural of "${singular}"`, counterparts: counterparts });
+                progressReporter.log(`[Plural Match] ${cn.path} is plural of ${counterparts.join(', ')}`);
+            }
+        }
+    });
 
     // ** 3. Symbol Normalization Check **
     progressReporter.updateStatus("Checking normalized names...", 60);
-    const normalizedMap = new Map<string, string[]>();
-    allMarkdownFiles.forEach(file => { const normalized = file.basename.toLowerCase().replace(/[-_]/g, ' ').replace(/[^\p{L}\p{N} ]/gu, '').replace(/\s+/g, ' ').trim(); if (normalized) { const list = normalizedMap.get(normalized) || []; list.push(file.path); normalizedMap.set(normalized, list); } });
-    conceptNotes.forEach(cn => { if (filesToReport.has(cn.path)) return; const normalized = cn.basename.toLowerCase().replace(/[-_]/g, ' ').replace(/[^\p{L}\p{N} ]/gu, '').replace(/\s+/g, ' ').trim(); if (normalized) { const matches = normalizedMap.get(normalized) || []; if (matches.length > 1) { const counterparts = matches.filter(path => path !== cn.path && !path.startsWith(conceptFolderPath + '/')); if (counterparts.length > 0 && !filesToReport.has(cn.path)) { const counterpartNames = counterparts.map(p => allFilesMap.get(p)?.basename || p); filesToReport.set(cn.path, { reason: `Normalized Match (to "${normalized}")`, counterparts: counterpartNames }); progressReporter.log(`[Normalized Match] ${cn.path} matches ${counterpartNames.join(', ')}`); } } } });
+    const normalizedMap = new Map<string, string[]>(); // Map normalized name -> list of full paths
+    // Build map using only files in comparison scope
+    notesToCompareAgainst.forEach(file => {
+        const normalized = file.basename.toLowerCase().replace(/[-_]/g, ' ').replace(/[^\p{L}\p{N} ]/gu, '').replace(/\s+/g, ' ').trim();
+        if (normalized) {
+            const list = normalizedMap.get(normalized) || [];
+            list.push(file.path);
+            normalizedMap.set(normalized, list);
+        }
+    });
+     // Also add concept notes themselves to the map if checking within concept folder
+     if (settings.duplicateCheckScopeMode === 'concept_folder_only') {
+         conceptNotes.forEach(file => {
+             const normalized = file.basename.toLowerCase().replace(/[-_]/g, ' ').replace(/[^\p{L}\p{N} ]/gu, '').replace(/\s+/g, ' ').trim();
+             if (normalized) {
+                 const list = normalizedMap.get(normalized) || [];
+                 if (!list.includes(file.path)) { // Avoid adding self twice
+                     list.push(file.path);
+                     normalizedMap.set(normalized, list);
+                 }
+             }
+         });
+     }
+
+    conceptNotes.forEach(cn => {
+        if (filesToReport.has(cn.path)) return; // Skip already marked
+        const normalized = cn.basename.toLowerCase().replace(/[-_]/g, ' ').replace(/[^\p{L}\p{N} ]/gu, '').replace(/\s+/g, ' ').trim();
+        if (normalized) {
+            const matches = normalizedMap.get(normalized) || [];
+            // Find counterparts *within the comparison scope* that are not the concept note itself
+            const counterparts = matches.filter(path => path !== cn.path);
+            if (counterparts.length > 0 && !filesToReport.has(cn.path)) {
+                const counterpartNames = counterparts.map(p => allFilesMap.get(p)?.basename || p); // Use allFilesMap for display names
+                filesToReport.set(cn.path, { reason: `Normalized Match (to "${normalized}")`, counterparts: counterpartNames });
+                progressReporter.log(`[Normalized Match] ${cn.path} matches ${counterpartNames.join(', ')}`);
+            }
+        }
+    });
 
     // ** 4. Single-Word Containment Check **
-    progressReporter.updateStatus("Checking single-word containment...", 80);
-    conceptNotes.forEach(cn => { if (filesToReport.has(cn.path)) return; const words = cn.basename.split(/\s+/); if (words.length === 1) { const singleWordLower = words[0].toLowerCase(); const counterparts = otherNotes.filter(on => on.basename.toLowerCase().split(/\s+/).includes(singleWordLower) && on.basename.includes(' ')).map(f => f.path); if (counterparts.length > 0 && !filesToReport.has(cn.path)) { const counterpartNames = counterparts.map(p => allFilesMap.get(p)?.basename || p); filesToReport.set(cn.path, { reason: `Contained in Multi-Word Note`, counterparts: counterpartNames }); progressReporter.log(`[Containment] ${cn.path} contained in ${counterpartNames.join(', ')}`); } } });
+    // This check only makes sense when comparing against notes *outside* the concept folder.
+    if (settings.duplicateCheckScopeMode !== 'concept_folder_only') {
+        progressReporter.updateStatus("Checking single-word containment...", 80);
+        conceptNotes.forEach(cn => {
+            if (filesToReport.has(cn.path)) return; // Skip already marked
+            const words = cn.basename.split(/\s+/);
+            if (words.length === 1) {
+                const singleWordLower = words[0].toLowerCase();
+                // Compare against notesToCompareAgainst (which already excludes concept notes in vault/include/exclude modes)
+                const counterparts = notesToCompareAgainst
+                    .filter(on => on.basename.toLowerCase().split(/\s+/).includes(singleWordLower) && on.basename.includes(' ')) // Ensure counterpart is multi-word
+                    .map(f => f.path);
+
+                if (counterparts.length > 0 && !filesToReport.has(cn.path)) {
+                    const counterpartNames = counterparts.map(p => allFilesMap.get(p)?.basename || p);
+                    filesToReport.set(cn.path, { reason: `Contained in Multi-Word Note`, counterparts: counterpartNames });
+                    progressReporter.log(`[Containment] ${cn.path} contained in ${counterpartNames.join(', ')}`);
+                }
+            }
+        });
+    } else {
+         progressReporter.log(`Skipping single-word containment check (mode: 'Concept Folder Only').`);
+    }
 
     // --- Report Results & Confirm Deletion ---
     progressReporter.updateStatus("Reporting results...", 95);

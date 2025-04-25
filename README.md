@@ -169,10 +169,11 @@ Access plugin settings via:
 -   **Max Research Content Tokens**: Approximate maximum tokens from combined web research results (snippets/fetched content) to include in the summarization prompt. Helps manage context window size and cost. (Default: 3000)
 
 #### Duplicate Check Scope
--   **Duplicate Check Scope Mode**: Controls which files (outside the Concept Note Folder) are checked for potential duplicates.
-    *   **Entire Vault (Default)**: Compares concept notes against all other notes in the vault.
-    *   **Include Specific Folders Only**: Only compares concept notes against notes within the folders listed below.
-    *   **Exclude Specific Folders**: Compares concept notes against all notes *except* those within the folders listed below.
+-   **Duplicate Check Scope Mode**: Controls which files are checked against the notes in your Concept Note Folder for potential duplicates.
+    *   **Entire Vault (Default)**: Compares concept notes against all other notes in the vault (excluding the Concept Note Folder itself).
+    *   **Include Specific Folders Only**: Compares concept notes only against notes within the folders listed below.
+    *   **Exclude Specific Folders**: Compares concept notes against all notes *except* those within the folders listed below (and also excluding the Concept Note Folder).
+    *   **Concept Folder Only**: Compares concept notes only against *other notes within the Concept Note Folder*. This helps find duplicates purely inside your generated concepts.
 -   **Include/Exclude Folders**: (Visible only if Mode is 'Include' or 'Exclude') Enter the *relative paths* of the folders you want to include or exclude, **one path per line**. Paths are case-sensitive and use `/` as the separator (e.g., `Reference Material/Papers` or `Daily Notes`). These folders cannot be the same as or inside the Concept Note Folder.
 
 ## Usage Guide
