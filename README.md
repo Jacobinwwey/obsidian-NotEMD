@@ -57,7 +57,7 @@ Notemd enhances your Obsidian workflow by integrating with various Large Languag
 
 ### Utility Features
 - **Duplicate Detection**: Basic check for duplicate words within the currently processed file's content (results logged to console).
-- **Check and Remove Duplicate Concept Notes**: Identifies potential duplicate notes within the configured **Concept Note Folder** based on exact name matches, plurals, normalization, and single-word containment compared to notes outside the folder. Presents a detailed list with reasons and conflicting files, then prompts for confirmation before moving identified duplicates to system trash. Shows progress during deletion.
+- **Check and Remove Duplicate Concept Notes**: Identifies potential duplicate notes within the configured **Concept Note Folder** based on exact name matches, plurals, normalization, and single-word containment compared to notes outside the folder. The scope of the comparison (which notes outside the concept folder are checked) can be configured to the **entire vault**, **specific included folders**, or **all folders excluding specific ones**. Presents a detailed list with reasons and conflicting files, then prompts for confirmation before moving identified duplicates to system trash. Shows progress during deletion.
 - **LLM Connection Test**: Verify API settings for the active provider.
 
 ## Installation
@@ -167,6 +167,13 @@ Access plugin settings via:
 -   **DuckDuckGo Max Results**: (Visible only if DuckDuckGo is selected) Maximum number of search results to parse (1-10). Default: 5.
 -   **DuckDuckGo Content Fetch Timeout**: (Visible only if DuckDuckGo is selected) Maximum seconds to wait when trying to fetch content from each DuckDuckGo result URL. Default: 15.
 -   **Max Research Content Tokens**: Approximate maximum tokens from combined web research results (snippets/fetched content) to include in the summarization prompt. Helps manage context window size and cost. (Default: 3000)
+
+#### Duplicate Check Scope
+-   **Duplicate Check Scope Mode**: Controls which files (outside the Concept Note Folder) are checked for potential duplicates.
+    *   **Entire Vault (Default)**: Compares concept notes against all other notes in the vault.
+    *   **Include Specific Folders Only**: Only compares concept notes against notes within the folders listed below.
+    *   **Exclude Specific Folders**: Compares concept notes against all notes *except* those within the folders listed below.
+-   **Include/Exclude Folders**: (Visible only if Mode is 'Include' or 'Exclude') Enter the *relative paths* of the folders you want to include or exclude, **one path per line**. Paths are case-sensitive and use `/` as the separator (e.g., `Reference Material/Papers` or `Daily Notes`). These folders cannot be the same as or inside the Concept Note Folder.
 
 ## Usage Guide
 

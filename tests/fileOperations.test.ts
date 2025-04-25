@@ -77,6 +77,9 @@ describe('File Operations', () => {
             addLinksCustomSuffix: '',
             useCustomGenerateTitleOutputFolder: false,
             generateTitleOutputFolderName: '_complete',
+            // Add missing duplicate check scope settings
+            duplicateCheckScopeMode: 'vault',
+            duplicateCheckScopePaths: '',
         };
   });
 

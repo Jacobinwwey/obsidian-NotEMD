@@ -73,6 +73,9 @@ describe('Duplicate Handling', () => {
             addLinksCustomSuffix: '',
             useCustomGenerateTitleOutputFolder: false,
             generateTitleOutputFolderName: '_complete',
+            // Add missing duplicate check scope settings
+            duplicateCheckScopeMode: 'vault',
+            duplicateCheckScopePaths: '',
         };
         // Removed corrupted line: plugin.app = mockApp as annckApp after settings
 	});

@@ -741,10 +741,56 @@ export async function checkAndRemoveDuplicateConceptNotes(app: App, settings: No
     progressReporter.updateStatus("Gathering files...", 10);
     const allMarkdownFiles = app.vault.getMarkdownFiles();
     const conceptNotes = allMarkdownFiles.filter(f => f.path.startsWith(conceptFolderPath + '/'));
-    const otherNotes = allMarkdownFiles.filter(f => !f.path.startsWith(conceptFolderPath + '/'));
+
+    // --- Determine the scope for 'otherNotes' based on refined settings ---
+    let otherNotes: TFile[];
+    const conceptFolderPrefix = conceptFolderPath === '/' ? '' : conceptFolderPath + '/'; // Handle root concept folder
+
+    if (settings.duplicateCheckScopeMode === 'vault') {
+        progressReporter.log(`Using duplicate check scope: Entire vault (excluding concept folder).`);
+        otherNotes = allMarkdownFiles.filter(f => !f.path.startsWith(conceptFolderPrefix));
+    } else {
+        const paths = settings.duplicateCheckScopePaths
+            .split('\n')
+            .map(p => p.trim().replace(/^\/|\/$/g, '')) // Normalize each path
+            .filter(p => p); // Remove empty lines
+
+        if (paths.length === 0) {
+            throw new Error(`Duplicate check scope mode is '${settings.duplicateCheckScopeMode}', but no paths were provided.`);
+        }
+
+        // Validate paths (basic check: ensure they exist and are folders)
+        for (const p of paths) {
+            const folder = app.vault.getAbstractFileByPath(p);
+            if (!folder || !(folder instanceof TFolder)) {
+                 throw new Error(`Invalid folder path specified in duplicate check scope: "${p}"`);
+            }
+            // Ensure scope paths are not the concept folder itself or inside it
+             if (p === conceptFolderPath || p.startsWith(conceptFolderPrefix)) {
+                 throw new Error(`Duplicate check scope path "${p}" cannot be the concept folder or inside it.`);
+             }
+        }
+
+        const normalizedPaths = paths.map(p => p === '/' ? '' : p + '/'); // Add trailing slash for startsWith check, handle root
+
+        if (settings.duplicateCheckScopeMode === 'include') {
+            progressReporter.log(`Using duplicate check scope: Include folders: ${paths.join(', ')}`);
+            otherNotes = allMarkdownFiles.filter(f =>
+                !f.path.startsWith(conceptFolderPrefix) && // Exclude concept notes
+                normalizedPaths.some(p => f.path.startsWith(p)) // Must be within one of the included paths
+            );
+        } else { // exclude mode
+            progressReporter.log(`Using duplicate check scope: Exclude folders: ${paths.join(', ')}`);
+            otherNotes = allMarkdownFiles.filter(f =>
+                !f.path.startsWith(conceptFolderPrefix) && // Exclude concept notes
+                !normalizedPaths.some(p => f.path.startsWith(p)) // Must NOT be within any of the excluded paths
+            );
+        }
+    }
+    // --- End scope determination ---
 
     if (conceptNotes.length === 0) throw new Error("No concept notes found in the specified folder.");
-    progressReporter.log(`Found ${conceptNotes.length} concept notes and ${otherNotes.length} other notes.`);
+    progressReporter.log(`Found ${conceptNotes.length} concept notes and ${otherNotes.length} potential counterpart notes within the defined scope.`);
 
     const filesToReport = new Map<string, { reason: string; counterparts: string[] }>();
 

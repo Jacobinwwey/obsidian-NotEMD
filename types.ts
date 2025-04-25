@@ -57,6 +57,9 @@ export interface NotemdSettings {
     // Custom Generate from Title Output Folder Settings
     useCustomGenerateTitleOutputFolder: boolean;
     generateTitleOutputFolderName: string;
+    // Custom Duplicate Check Scope Settings (Refined)
+    duplicateCheckScopeMode: 'vault' | 'include' | 'exclude'; // New: Mode selection
+    duplicateCheckScopePaths: string; // New: Newline-separated list of paths for include/exclude modes
 }
 
 // Interface for search results

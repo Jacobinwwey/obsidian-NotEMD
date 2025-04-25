@@ -72,6 +72,9 @@ describe('generateObsidianLinks', () => {
             addLinksCustomSuffix: '',
             useCustomGenerateTitleOutputFolder: false,
             generateTitleOutputFolderName: '_complete',
+            // Add missing duplicate check scope settings
+            duplicateCheckScopeMode: 'vault',
+            duplicateCheckScopePaths: '',
         };
      // Mock createConceptNotes to return a resolved promise - REMOVED as function moved from plugin class
      // plugin.createConceptNotes = jest.fn().mockResolvedValue(undefined);

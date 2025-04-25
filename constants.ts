@@ -115,6 +115,9 @@ export const DEFAULT_SETTINGS: NotemdSettings = {
     // Custom Generate from Title Output Folder Defaults
     useCustomGenerateTitleOutputFolder: false, // Default to using '[foldername]_complete'
     generateTitleOutputFolderName: '_complete', // Default folder name if custom is enabled but empty
+    // Custom Duplicate Check Scope Defaults (Refined)
+    duplicateCheckScopeMode: 'vault', // Default to checking the entire vault
+    duplicateCheckScopePaths: '', // Default to empty list of paths
 };
 
 // Constants for the Sidebar View

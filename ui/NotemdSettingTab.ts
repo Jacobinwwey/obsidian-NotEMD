@@ -327,6 +327,46 @@ export class NotemdSettingTab extends PluginSettingTab {
         containerEl.createEl('h4', { text: 'Processing Parameters' });
         new Setting(containerEl).setName('Chunk Word Count').setDesc('Max words per chunk sent to LLM.').addText(text => text.setPlaceholder(String(DEFAULT_SETTINGS.chunkWordCount)).setValue(String(this.plugin.settings.chunkWordCount)).onChange(async (value) => { const num = parseInt(value, 10); if (!isNaN(num) && num > 50) { this.plugin.settings.chunkWordCount = num; } else { this.plugin.settings.chunkWordCount = DEFAULT_SETTINGS.chunkWordCount; } await this.plugin.saveSettings(); this.display(); }));
         new Setting(containerEl).setName('Enable Duplicate Detection').setDesc('Enable checks for duplicate terms (results in console).').addToggle(toggle => toggle.setValue(this.plugin.settings.enableDuplicateDetection).onChange(async (value) => { this.plugin.settings.enableDuplicateDetection = value; await this.plugin.saveSettings(); }));
-        new Setting(containerEl).setName('Max Tokens').setDesc('Max tokens LLM should generate per response.').addText(text => text.setPlaceholder(String(DEFAULT_SETTINGS.maxTokens)).setValue(String(this.plugin.settings.maxTokens)).onChange(async (value) => { const num = parseInt(value, 10); if (!isNaN(num) && num > 0) { this.plugin.settings.maxTokens = num; } else { this.plugin.settings.maxTokens = DEFAULT_SETTINGS.maxTokens; } await this.plugin.saveSettings(); this.display(); }));
+            new Setting(containerEl).setName('Max Tokens').setDesc('Max tokens LLM should generate per response.').addText(text => text.setPlaceholder(String(DEFAULT_SETTINGS.maxTokens)).setValue(String(this.plugin.settings.maxTokens)).onChange(async (value) => { const num = parseInt(value, 10); if (!isNaN(num) && num > 0) { this.plugin.settings.maxTokens = num; } else { this.plugin.settings.maxTokens = DEFAULT_SETTINGS.maxTokens; } await this.plugin.saveSettings(); this.display(); }));
+
+        // --- Duplicate Check Scope Settings (Refined) ---
+        containerEl.createEl('h4', { text: 'Duplicate Check Scope' });
+
+        new Setting(containerEl)
+            .setName('Duplicate Check Scope Mode')
+            .setDesc('Define the scope for finding duplicate counterparts (files outside the Concept Note Folder).')
+            .addDropdown(dropdown => dropdown
+                .addOption('vault', 'Entire Vault (Default)')
+                .addOption('include', 'Include Specific Folders Only')
+                .addOption('exclude', 'Exclude Specific Folders')
+                .setValue(this.plugin.settings.duplicateCheckScopeMode)
+                .onChange(async (value: 'vault' | 'include' | 'exclude') => {
+                    this.plugin.settings.duplicateCheckScopeMode = value;
+                    await this.plugin.saveSettings();
+                    this.display(); // Refresh to show/hide the paths textarea
+                }));
+
+        // Show path input only if mode is 'include' or 'exclude'
+        if (this.plugin.settings.duplicateCheckScopeMode === 'include' || this.plugin.settings.duplicateCheckScopeMode === 'exclude') {
+            new Setting(containerEl)
+                .setName(this.plugin.settings.duplicateCheckScopeMode === 'include' ? 'Include Folders' : 'Exclude Folders')
+                .setDesc(`Enter relative paths (one per line) for folders to ${this.plugin.settings.duplicateCheckScopeMode}. Required if mode is not 'Entire Vault'. Paths are case-sensitive and use '/' as separator.`)
+                .addTextArea(textarea => textarea
+                    .setPlaceholder('e.g., Notes/ProjectA\nArchive/OldStuff')
+                    .setValue(this.plugin.settings.duplicateCheckScopePaths)
+                    .onChange(async (value) => {
+                        // Basic validation: Ensure not empty if mode requires it
+                        if (!value.trim() && (this.plugin.settings.duplicateCheckScopeMode === 'include' || this.plugin.settings.duplicateCheckScopeMode === 'exclude')) {
+                            new Notice("Folder paths cannot be empty when 'Include' or 'Exclude' mode is selected.", 5000);
+                            // Optionally revert or just warn? Let's just warn for now.
+                        }
+                        // Further validation could check path format, but keep it simple for now
+                        this.plugin.settings.duplicateCheckScopePaths = value; // Store raw value with newlines
+                        await this.plugin.saveSettings();
+                    })
+                    .inputEl.setAttrs({ rows: 4, style: 'width: 100%;' }) // Make textarea larger
+                );
+        }
+        // --- End Duplicate Check Scope Settings ---
     }
 }
