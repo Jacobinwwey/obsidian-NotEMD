@@ -60,6 +60,7 @@ Notemd enhances your Obsidian workflow by integrating with various Large Languag
 ### Utility Features
 - **Duplicate Detection**: Basic check for duplicate words within the currently processed file's content (results logged to console).
 - **Check and Remove Duplicate Concept Notes**: Identifies potential duplicate notes within the configured **Concept Note Folder** based on exact name matches, plurals, normalization, and single-word containment compared to notes outside the folder. The scope of the comparison (which notes outside the concept folder are checked) can be configured to the **entire vault**, **specific included folders**, or **all folders excluding specific ones**. Presents a detailed list with reasons and conflicting files, then prompts for confirmation before moving identified duplicates to system trash. Shows progress during deletion.
+- **Batch Mermaid Fix**: Applies Mermaid and LaTeX syntax corrections (`refineMermaidBlocks` and `cleanupLatexDelimiters`) to all Markdown files within a user-selected folder.
 - **LLM Connection Test**: Verify API settings for the active provider.
 
 ## Installation
@@ -235,7 +236,13 @@ This is the core functionality focused on identifying concepts and adding `[[wik
     *   Tests the connection to the **Active Provider** selected in the main dropdown.
     *   Results appear as notices and in the sidebar log/console.
 
-3.  **Check and Remove Duplicate Concept Notes**:
+3.  **Batch Mermaid Fix**:
+    *   Run `Notemd: Batch Fix Mermaid Syntax` (via command palette or sidebar button).
+    *   Select the folder containing the Markdown files you want to fix.
+    *   The plugin will iterate through each `.md` file, apply the syntax corrections, and save the changes if any were made.
+    *   Progress and results (number of files modified, errors) are shown in the sidebar/modal log.
+
+4.  **Check and Remove Duplicate Concept Notes**:
     *   Ensure the **Concept Note Folder Path** is correctly configured in settings.
     *   Run `Notemd: Check and Remove Duplicate Concept Notes` (via command palette or sidebar button).
     *   The plugin scans the concept note folder and compares filenames against notes outside the folder using several rules (exact match, plurals, normalization, containment).
