@@ -63,6 +63,15 @@ export function refineMermaidBlocks(content: string): string {
 				line = line.replace(/\[";/g, '"];');
 				// New Rule 4: Replace ?["; with ?"];
 				line = line.replace(/\?\[";/g, '?"];');
+				
+				// 添加额外的清理步骤，确保没有残留的[";模式
+				// 重复应用Rule 3直到没有更多的[";模式
+				while (line.includes('[";')) {
+					line = line.replace(/\[";/g, '"];');
+					
+					// New Rule 4: Replace ?["; with ?"];
+					line = line.replace(/\?\[";/g, '?"];');
+				}
 			}
 
 
