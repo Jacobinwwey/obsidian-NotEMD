@@ -61,6 +61,8 @@ export function refineMermaidBlocks(content: string): string {
 				
 				// Rule 3: Replace ["; with "];
 				line = line.replace(/\[";/g, '"];');
+				// New Rule 4: Replace ?["; with ?"];
+				line = line.replace(/\?\[";/g, '?"];');
 			}
 
 
