@@ -522,6 +522,19 @@ graph LR
     style Shear_Modulus fill:#cfc,stroke:#333,stroke-width:2px
     style Bulk_Modulus fill:#cff,stroke:#333,stroke-width:2px
     style Poissons_Ratio fill:#fcf,stroke:#333,stroke-width:2px
+\`\`\` and 
+\`\`\`mermaid
+graph TD
+    WavePattern -->|Mechanical?| Mechanical
+    WavePattern -->|Electromagnetic?| Electromagnetic
+    Mechanical -->|Longitudinal?| Sound
+    Mechanical -->|Transverse?| SeismicWaves
+    Sound[Sound Waves] -->|In air?| Acoustic[343 m/s, 20 Hz-20 kHz]
+    SeismicWaves[Seismic Waves] -->|Body wave?| PWave[6.5 km/s]
+    SeismicWaves -->|Surface wave?| RayleighWave[2.5 km/s]
+
+    Electromagnetic -->|Free space?| EMFreeSpace[c=3e8 m/s]
+    Electromagnetic -->|Guided medium?| OpticalFiber[Dispersion=1e-3 ps/nm/km]
 \`\`\` and \`\`\`mermaid
 graph TD
     subgraph "Theoretical Frameworks for Electromagnetism"
