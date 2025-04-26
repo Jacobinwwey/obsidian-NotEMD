@@ -147,6 +147,14 @@ export default class NotemdPlugin extends Plugin {
             }
         });
 
+        this.addCommand({
+            id: 'batch-mermaid-fix',
+            name: 'Batch Fix Mermaid Syntax',
+            callback: async () => {
+                await this.batchMermaidFixCommand(); // Use the new command handler method
+            }
+        });
+
         // --- Settings Tab ---
         this.addSettingTab(new NotemdSettingTab(this.app, this));
 
@@ -624,6 +632,61 @@ export default class NotemdPlugin extends Plugin {
             useReporter.log(`Error: ${errorMessage}`);
             useReporter.updateStatus('Error occurred', -1);
             new ErrorModal(this.app, "Duplicate Check/Remove Error", errorDetails).open();
+        } finally {
+            this.isBusy = false;
+            // No need to call useReporter.updateButtonStates() here
+        }
+    }
+    /** Command: Batch Fix Mermaid Syntax */
+    async batchMermaidFixCommand(reporter?: ProgressReporter) {
+        if (this.isBusy) { new Notice("Notemd is busy."); return; }
+        this.isBusy = true;
+        const useReporter = reporter || this.getReporter();
+        if (!reporter) useReporter.clearDisplay();
+
+        try {
+            await this.loadSettings(); // Load settings in case needed by future logic
+            const folderPath = await this.getFolderSelection();
+            if (!folderPath) { useReporter.log("Folder selection cancelled."); useReporter.updateStatus("Cancelled", -1); throw new Error("Folder selection cancelled."); }
+
+            this.updateStatusBar(`Batch fixing Mermaid syntax...`);
+            useReporter.log(`Starting batch Mermaid fix for folder: "${folderPath}"...`);
+
+            // Import the new function we will create in fileUtils.ts
+            const { batchFixMermaidSyntaxInFolder } = await import('./fileUtils');
+            const { errors, modifiedCount } = await batchFixMermaidSyntaxInFolder(this.app, folderPath, useReporter); // Call utility
+
+            if (!useReporter.cancelled) {
+                if (errors.length > 0) {
+                    const errorSummary = `Batch Mermaid fix finished with ${errors.length} error(s). Modified ${modifiedCount} files. Check console/log.`;
+                    useReporter.log(`⚠️ ${errorSummary}`); useReporter.updateStatus(errorSummary, -1);
+                    this.updateStatusBar(`Batch fix complete with errors`); new Notice(errorSummary, 10000);
+                } else {
+                    const finalMessage = `Batch Mermaid fix complete! Modified ${modifiedCount} files.`;
+                    useReporter.updateStatus(finalMessage, 100); this.updateStatusBar('Batch fix complete');
+                    new Notice(finalMessage, 5000);
+                    if (useReporter instanceof ProgressModal) setTimeout(() => useReporter.close(), 2000);
+                }
+            } else {
+                 this.updateStatusBar('Batch fix cancelled');
+                 new Notice('Batch Mermaid fix cancelled.');
+            }
+
+        } catch (error: unknown) { // Changed to unknown
+            this.updateStatusBar('Error during batch fix');
+            let errorMessage = 'An unknown error occurred during batch Mermaid fix.';
+            let errorDetails = String(error);
+            if (error instanceof Error) {
+                errorMessage = error.message;
+                errorDetails = error.stack || error.message;
+            }
+            if (!errorMessage.includes("cancelled")) {
+                console.error("Notemd Batch Mermaid Fix Error:", errorDetails);
+                new Notice(`Error during batch fix: ${errorMessage}. See console.`, 10000);
+                new ErrorModal(this.app, "Notemd Batch Mermaid Fix Error", errorDetails).open();
+            }
+            useReporter.log(`Batch Fix Error: ${errorMessage}`);
+            useReporter.updateStatus('Error occurred during batch fix', -1);
         } finally {
             this.isBusy = false;
             // No need to call useReporter.updateButtonStates() here

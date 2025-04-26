@@ -734,6 +734,86 @@ export async function batchGenerateContentForTitles(app: App, settings: NotemdSe
 }
 
 /**
+ * Batch fixes Mermaid and LaTeX syntax in Markdown files within a specified folder.
+ * @param app Obsidian App instance.
+ * @param folderPath Path of the folder to process.
+ * @param progressReporter Interface for reporting progress.
+ * @returns Object containing errors array and modifiedCount.
+ */
+export async function batchFixMermaidSyntaxInFolder(app: App, folderPath: string, progressReporter: ProgressReporter): Promise<{ errors: { file: string; message: string }[], modifiedCount: number }> {
+    const folder = app.vault.getAbstractFileByPath(folderPath);
+    if (!folder || !(folder instanceof TFolder)) {
+        throw new Error(`Selected path is not a valid folder: ${folderPath}`);
+    }
+
+    const filesToProcess = app.vault.getMarkdownFiles().filter(f =>
+        f.path.startsWith(folderPath === '/' ? '' : folderPath + '/')
+    );
+
+    if (filesToProcess.length === 0) {
+        new Notice(`No '.md' files found in selected folder: ${folderPath}`);
+        progressReporter.log(`No eligible files found in "${folderPath}".`);
+        progressReporter.updateStatus('No files found', 100);
+        return { errors: [], modifiedCount: 0 };
+    }
+
+    progressReporter.log(`Starting batch Mermaid/LaTeX fix for ${filesToProcess.length} files in "${folderPath}"...`);
+    const errors: { file: string; message: string }[] = [];
+    let modifiedCount = 0;
+
+    for (let i = 0; i < filesToProcess.length; i++) {
+        const file = filesToProcess[i];
+        const progress = Math.floor(((i) / filesToProcess.length) * 100);
+        progressReporter.updateStatus(`Fixing ${i + 1}/${filesToProcess.length}: ${file.name}`, progress);
+
+        if (progressReporter.cancelled) {
+            progressReporter.log('Cancellation requested, stopping batch fix.');
+            break;
+        }
+        await delay(1); // Yield
+
+        try {
+            const originalContent = await app.vault.read(file);
+            let processedContent = originalContent;
+
+            // Apply cleanup functions
+            processedContent = cleanupLatexDelimiters(processedContent);
+            processedContent = refineMermaidBlocks(processedContent);
+
+            // Only save if content actually changed
+            if (processedContent.trim() !== originalContent.trim()) {
+                await app.vault.modify(file, processedContent);
+                progressReporter.log(`✅ Fixed syntax in: ${file.name}`);
+                modifiedCount++;
+            } else {
+                progressReporter.log(`➖ No changes needed for: ${file.name}`);
+            }
+
+        } catch (fileError: unknown) {
+            const errorMessage = fileError instanceof Error ? fileError.message : String(fileError);
+            const errorMsg = `Error fixing syntax in ${file.name}: ${errorMessage}`;
+            console.error(errorMsg, fileError);
+            progressReporter.log(`❌ ${errorMsg}`);
+            errors.push({ file: file.name, message: errorMessage });
+            // Log error silently
+            const timestamp = new Date().toISOString();
+            const errorDetails = fileError instanceof Error ? fileError.stack || fileError.message : String(fileError);
+            const logEntry = `[${timestamp}] Error fixing syntax in ${file.path}:\nMessage: ${errorMessage}\nStack Trace:\n${errorDetails}\n\n`;
+            try { await app.vault.adapter.append('error_syntax_fix.log', logEntry); }
+            catch (logError: unknown) {
+                 const logErrorMessage = logError instanceof Error ? logError.message : String(logError);
+                 console.error("Failed to write to error_syntax_fix.log:", logError);
+                 progressReporter.log(`⚠️ Failed to write error details to log file: ${logErrorMessage}`);
+            }
+            if (errorMessage.includes("cancelled by user")) { break; }
+        }
+        if (progressReporter.cancelled) { break; }
+    }
+    return { errors, modifiedCount }; // Return collected errors and count
+}
+
+
+/**
  * Checks for duplicate concept notes based on PowerShell script logic.
  * Reports potential duplicates and prompts the user for deletion confirmation.
  * @param app Obsidian App instance.

@@ -31,6 +31,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
     private checkDuplicatesButton: HTMLButtonElement | null = null;
     private testConnectionButton: HTMLButtonElement | null = null;
     private checkRemoveDuplicatesButton: HTMLButtonElement | null = null;
+    private batchMermaidFixButton: HTMLButtonElement | null = null; // Added
     private cancelButton: HTMLButtonElement | null = null;
 
     constructor(leaf: WorkspaceLeaf, plugin: NotemdPlugin) {
@@ -170,6 +171,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         if (this.checkDuplicatesButton) this.checkDuplicatesButton.disabled = processing;
         if (this.testConnectionButton) this.testConnectionButton.disabled = processing;
         if (this.checkRemoveDuplicatesButton) this.checkRemoveDuplicatesButton.disabled = processing;
+        if (this.batchMermaidFixButton) this.batchMermaidFixButton.disabled = processing; // Added
 
         // Cancel button enabled only during processing and before cancellation
         if (this.cancelButton) {
@@ -292,6 +294,17 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         container.createEl('h4', { text: "Utilities" });
         const utilityButtonGroup = container.createDiv({ cls: 'notemd-button-group' });
 
+        this.batchMermaidFixButton = utilityButtonGroup.createEl('button', { text: 'Batch Mermaid Fix' });
+        this.batchMermaidFixButton.title = 'Fixes Mermaid and LaTeX syntax in all Markdown files in a selected folder.';
+        this.batchMermaidFixButton.onclick = async () => {
+            if (this.isProcessing) return;
+            this.clearDisplay();
+            this.isProcessing = true; this.startTime = Date.now(); this.updateButtonStates();
+            this.log('Starting: Batch Mermaid Fix...'); this.updateStatus('Starting batch fix...', 0);
+            try { await this.plugin.batchMermaidFixCommand(this); } // Use plugin method
+            finally { this.isProcessing = false; this.updateButtonStates(); }
+        };
+
         this.checkDuplicatesButton = utilityButtonGroup.createEl('button', { text: 'Check Duplicates (Current File)' });
         this.checkDuplicatesButton.onclick = async () => {
             // Replicate logic from main.ts onload for this command
@@ -387,6 +400,6 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         this.timeRemainingEl = null; this.logEl = null; this.cancelButton = null;
         this.processCurrentButton = null; this.processFolderButton = null; this.researchButton = null;
         this.generateTitleButton = null; this.batchGenerateTitleButton = null; this.checkDuplicatesButton = null;
-        this.testConnectionButton = null; this.checkRemoveDuplicatesButton = null;
+        this.testConnectionButton = null; this.checkRemoveDuplicatesButton = null; this.batchMermaidFixButton = null; // Added
     }
 }
