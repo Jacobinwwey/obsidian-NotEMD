@@ -72,6 +72,9 @@ export function refineMermaidBlocks(content: string): string {
 					// New Rule 4: Replace ?["; with ?"];
 					line = line.replace(/\?\[";/g, '?"];');
 				}
+                // Safeguard: Final replacements to ensure ["; and ?["; are corrected
+                line = line.replace(/\[";/g, '"];');
+                line = line.replace(/\?\[";/g, '?"];');
 			}
 
 
