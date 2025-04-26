@@ -55,11 +55,12 @@ export function refineMermaidBlocks(content: string): string {
 				line = line.replace(/(?<!\s)(?<!\[)"(?!;|\s)(?!\])/g, '["');
 				// Rule 2: Replace "; with ];
 				line = line.replace(/";/g, '"];');
-				// Rule 3: Replace ["; with "];
-				line = line.replace(/\[";/g, '"];');
 
 				// 还原被保护的引号
 				line = line.replace(new RegExp(placeholder, 'g'), '"');
+				
+				// Rule 3: Replace ["; with "];
+				line = line.replace(/\[";/g, '"];');
 			}
 
 
