@@ -46,10 +46,18 @@ export function refineMermaidBlocks(content: string): string {
 		} else if (inMermaid) {
 			// Apply new quote rules BEFORE removing brackets, ONLY if 'subgraph' is NOT on the line
 			if (!line.includes('subgraph')) {
+				// 先保护 |" 和 "| 的情况
+				const placeholder = '___PROTECTED_QUOTE___';
+				line = line.replace(/\|"/g, `|${placeholder}`);
+				line = line.replace(/"\|/g, `${placeholder}|`);
+
 				// Rule 1: Replace " followed by non-space with ["
 				line = line.replace(/(?<!\s)(?<!\[)"(?!;|\s)(?!\])/g, '["');
 				// Rule 2: Replace "; with ];
 				line = line.replace(/";/g, '"];');
+
+				// 还原被保护的引号
+				line = line.replace(new RegExp(placeholder, 'g'), '"');
 			}
 
 
