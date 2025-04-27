@@ -84,7 +84,7 @@ export const DEFAULT_SETTINGS: NotemdSettings = {
     // Concept Log File Defaults - END
     // Other Defaults
     chunkWordCount: 3000,
-    maxTokens: 4096, // Default max tokens for LLM response
+    maxTokens: 8192, // Default max tokens for LLM response
     enableDuplicateDetection: true, // Enable by default
     processMode: 'single',
     moveOriginalFileOnProcess: false, // Default to creating copies
