@@ -402,10 +402,17 @@ export async function processFile(app: App, settings: NotemdSettings, file: TFil
     }
     if (progressReporter.cancelled) { progressReporter.log(`Processing cancelled for ${file.name} before saving.`); return; }
 
-    // Final cleanup: Remove ```markdown specifiers from the content
-    progressReporter.log(`Removing \`\`\`markdown specifiers...`);
-    // Replace ```markdown with an empty string, keeping the rest of the line
-    finalContent = finalContent.replace(/```markdown/g, ''); // Remove ```markdown but keep surrounding content
+    // Conditionally remove all code fences if setting is enabled
+    if (settings.removeCodeFencesOnAddLinks) {
+        progressReporter.log(`Removing all code fences (\`\`\`markdown and \`\`\`)...`);
+        // Remove ```markdown first, then remove any remaining ```
+        finalContent = finalContent.replace(/```markdown/g, '');
+        finalContent = finalContent.replace(/```/g, '');
+    } else {
+        // Original cleanup: Only remove ```markdown specifier, keep the fences
+        progressReporter.log(`Removing only \`\`\`markdown specifiers...`);
+        finalContent = finalContent.replace(/```markdown/g, ''); // Delete ```markdown 
+    }
 
     // Determine Output Path & Save/Move
     await saveOrMoveProcessedFile(app, settings, file, finalContent, progressReporter);
