@@ -118,6 +118,8 @@ export const DEFAULT_SETTINGS: NotemdSettings = {
     // Custom Duplicate Check Scope Defaults (Refined)
     duplicateCheckScopeMode: 'vault', // Default to checking the entire vault
     duplicateCheckScopePaths: '', // Default to empty list of paths
+    // Add Links Post-Processing Defaults
+    removeCodeFencesOnAddLinks: false, // Default to NOT removing code fences
 };
 
 // Constants for the Sidebar View

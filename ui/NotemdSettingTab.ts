@@ -279,6 +279,16 @@ export class NotemdSettingTab extends PluginSettingTab {
         if (this.plugin.settings.useCustomAddLinksSuffix) {
             new Setting(containerEl).setName("Custom Suffix/Replacement String").setDesc("Empty to overwrite original. Ex: '_linked'.").addText(text => text.setPlaceholder("Leave empty to overwrite").setValue(this.plugin.settings.addLinksCustomSuffix).onChange(async (value) => { this.plugin.settings.addLinksCustomSuffix = value; await this.plugin.saveSettings(); }));
         }
+        // Add the new toggle for removing code fences
+        new Setting(containerEl)
+            .setName("Remove Code Fences on 'Add Links'")
+            .setDesc("ON: Remove all ```markdown and ``` fences from the final output of 'Process File' and 'Process Folder'. OFF: Keep code fences.")
+            .addToggle(toggle => toggle
+                .setValue(this.plugin.settings.removeCodeFencesOnAddLinks)
+                .onChange(async (value) => {
+                    this.plugin.settings.removeCodeFencesOnAddLinks = value;
+                    await this.plugin.saveSettings();
+                }));
 
         containerEl.createEl('h4', { text: 'Concept Note Output' });
         new Setting(containerEl).setName('Customize Concept Note Path').setDesc('ON: Create new concept notes in specified path. OFF: Do not create automatically.').addToggle(toggle => toggle.setValue(this.plugin.settings.useCustomConceptNoteFolder).onChange(async (value) => { this.plugin.settings.useCustomConceptNoteFolder = value; await this.plugin.saveSettings(); this.display(); }));

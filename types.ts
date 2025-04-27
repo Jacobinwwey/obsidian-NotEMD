@@ -55,11 +55,13 @@ export interface NotemdSettings {
     useCustomAddLinksSuffix: boolean;
     addLinksCustomSuffix: string;
     // Custom Generate from Title Output Folder Settings
-    useCustomGenerateTitleOutputFolder: boolean;
-    generateTitleOutputFolderName: string;
+    useCustomGenerateTitleOutputFolder: boolean; // Toggle for custom output folder
+    generateTitleOutputFolderName: string; // The custom folder name (defaults to _complete)
     // Custom Duplicate Check Scope Settings (Refined)
     duplicateCheckScopeMode: 'vault' | 'include' | 'exclude' | 'concept_folder_only'; // Added 'concept_folder_only' mode
     duplicateCheckScopePaths: string; // New: Newline-separated list of paths for include/exclude modes
+    // Add Links Post-Processing
+    removeCodeFencesOnAddLinks: boolean; // New: Option to remove ```markdown and ``` fences
 }
 
 // Interface for search results
