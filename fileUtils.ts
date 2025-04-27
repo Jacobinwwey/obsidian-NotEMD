@@ -341,12 +341,42 @@ export async function processFile(app: App, settings: NotemdSettings, file: TFil
     // --- End LLM Processing with Chunking ---
 
 
-    // Link Generation (Placeholder - LLM is expected to add links)
-    // This step now operates on the fully aggregated processedContent
-    progressReporter.log(`Generating Obsidian links for: ${file.name}...`); // Log remains relevant
-    const withLinks = processedContent; // Assume LLM added links
+    // --- Concept Extraction and Note Creation ---
+    // Extract concepts from the LLM-processed content (which should contain [[links]])
+    progressReporter.log(`Extracting concepts and creating notes for: ${file.name}...`);
+    const concepts = new Set<string>();
+    const linkRegex = /\[\[([^\[\]]+)\]\]/g; // Find [[links]]
+    let match;
+    const withLinks = processedContent; // Use the aggregated content
 
-    // Duplicate Handling
+    while ((match = linkRegex.exec(withLinks)) !== null) {
+        const concept = match[1].trim();
+        // Basic filtering
+        if (concept && concept.length > 1 && !/^\d+$/.test(concept)) {
+            concepts.add(concept);
+        }
+    }
+
+    // Create notes if setting is enabled and concepts were found
+    if (settings.useCustomConceptNoteFolder && settings.conceptNoteFolder && concepts.size > 0) {
+        progressReporter.log(`Found ${concepts.size} concepts. Creating/updating notes...`);
+        try {
+            // Pass the current file's basename for backlinking
+            await createConceptNotes(app, settings, concepts, file.basename);
+        } catch (conceptError: unknown) {
+            const errorMsg = conceptError instanceof Error ? conceptError.message : String(conceptError);
+            progressReporter.log(`⚠️ Error during concept note creation: ${errorMsg}`);
+            // Don't stop the whole process, just log the warning
+        }
+    } else if (concepts.size > 0) {
+        progressReporter.log(`Found ${concepts.size} concepts, but concept note creation is disabled or folder not set.`);
+    } else {
+        progressReporter.log(`No concepts found in LLM output to create notes for.`);
+    }
+    // --- End Concept Extraction ---
+
+
+    // Duplicate Handling (Operates on the content with links)
     progressReporter.log(`Checking for duplicates in: ${file.name}...`);
     await handleDuplicates(withLinks, settings);
     if (progressReporter.cancelled) { progressReporter.log(`Processing cancelled for ${file.name} after duplicate check.`); return; }
