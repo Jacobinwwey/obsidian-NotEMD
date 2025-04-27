@@ -287,35 +287,63 @@ export async function processFile(app: App, settings: NotemdSettings, file: TFil
     if (!provider) throw new Error('No valid LLM provider configured for "Add Links" task.');
     const modelName = getModelForTask('addLinks', provider, settings);
 
-    // LLM Processing
-    progressReporter.log(`Submitting content to LLM (${provider.name}/${modelName}) for: ${file.name}...`);
-    const prompt = getLLMProcessingPrompt();
-    let processedContent;
-    try {
-        switch (provider.name) {
-            case 'DeepSeek': processedContent = await callDeepSeekAPI(provider, modelName, prompt, content, progressReporter, settings); break;
-            case 'OpenAI': processedContent = await callOpenAIApi(provider, modelName, prompt, content, progressReporter, settings); break;
-            case 'Anthropic': processedContent = await callAnthropicApi(provider, modelName, prompt, content, progressReporter, settings); break;
-            case 'Google': processedContent = await callGoogleApi(provider, modelName, prompt, content, progressReporter, settings); break;
-            case 'Mistral': processedContent = await callMistralApi(provider, modelName, prompt, content, progressReporter, settings); break;
-            case 'Azure OpenAI': processedContent = await callAzureOpenAIApi(provider, modelName, prompt, content, progressReporter, settings); break;
-            case 'LMStudio': processedContent = await callLMStudioApi(provider, modelName, prompt, content, progressReporter, settings); break;
-            case 'Ollama': processedContent = await callOllamaApi(provider, modelName, prompt, content, progressReporter, settings); break;
-            case 'OpenRouter': processedContent = await callOpenRouterAPI(provider, modelName, prompt, content, progressReporter, settings); break;
-            default: throw new Error(`Unsupported provider: ${provider.name}`);
+    // --- LLM Processing with Chunking ---
+    const chunks = splitContent(content, settings); // Pass the full settings object
+    let processedChunks: string[] = [];
+    const totalChunks = chunks.length;
+    progressReporter.log(`Splitting content into ${totalChunks} chunks.`);
+
+    for (let i = 0; i < totalChunks; i++) {
+        if (progressReporter.cancelled) {
+            throw new Error("Processing cancelled by user during chunk processing.");
         }
-    } catch (error: unknown) { // Changed to unknown
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        console.error(`LLM processing error for ${file.name}:`, error);
-        progressReporter.log(`Error processing chunk for ${file.name}: ${errorMessage}`);
-        // Re-throw the original error if it's an Error instance, otherwise wrap it
-        throw error instanceof Error ? error : new Error(errorMessage);
+
+        const chunk = chunks[i];
+        const chunkProgress = Math.floor(((i) / totalChunks) * 100);
+        progressReporter.updateStatus(`Processing chunk ${i + 1}/${totalChunks}...`, chunkProgress);
+        progressReporter.log(`Processing chunk ${i + 1}/${totalChunks}...`);
+
+        const prompt = getLLMProcessingPrompt(); // Get prompt for each chunk (it's static)
+
+        try {
+            let responseText;
+            switch (provider.name) {
+                case 'DeepSeek': responseText = await callDeepSeekAPI(provider, modelName, prompt, chunk, progressReporter, settings); break;
+                case 'OpenAI': responseText = await callOpenAIApi(provider, modelName, prompt, chunk, progressReporter, settings); break;
+                case 'Anthropic': responseText = await callAnthropicApi(provider, modelName, prompt, chunk, progressReporter, settings); break; // Note: Anthropic might prefer prompt in user message, adjust call if needed
+                case 'Google': responseText = await callGoogleApi(provider, modelName, prompt, chunk, progressReporter, settings); break;
+                case 'Mistral': responseText = await callMistralApi(provider, modelName, prompt, chunk, progressReporter, settings); break;
+                case 'Azure OpenAI': responseText = await callAzureOpenAIApi(provider, modelName, prompt, chunk, progressReporter, settings); break;
+                case 'LMStudio': responseText = await callLMStudioApi(provider, modelName, prompt, chunk, progressReporter, settings); break;
+                case 'Ollama': responseText = await callOllamaApi(provider, modelName, prompt, chunk, progressReporter, settings); break;
+                case 'OpenRouter': responseText = await callOpenRouterAPI(provider, modelName, prompt, chunk, progressReporter, settings); break;
+                default: throw new Error(`Unsupported provider: ${provider.name}`);
+            }
+            processedChunks.push(responseText);
+            progressReporter.log(`Chunk ${i + 1} processed successfully.`);
+        } catch (error: unknown) {
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            console.error(`LLM processing error on chunk ${i + 1} for ${file.name}:`, error);
+            progressReporter.log(`Error processing chunk ${i + 1}: ${errorMessage}`);
+            // Re-throw error to stop processing the current file on chunk failure
+            throw error instanceof Error ? error : new Error(errorMessage);
+        }
+    } // End chunk loop
+
+    if (progressReporter.cancelled) {
+        progressReporter.log(`Processing cancelled for ${file.name} after LLM calls.`);
+        return; // Exit if cancelled after loop
     }
 
-    if (progressReporter.cancelled) { progressReporter.log(`Processing cancelled for ${file.name} after LLM call.`); return; }
+    // Join chunks
+    progressReporter.updateStatus('Merging processed chunks...', 90); // Update status before joining
+    const processedContent = processedChunks.join('\n\n').replace(/\n{3,}/g, '\n\n').trim();
+    // --- End LLM Processing with Chunking ---
+
 
     // Link Generation (Placeholder - LLM is expected to add links)
-    progressReporter.log(`Generating Obsidian links for: ${file.name}...`);
+    // This step now operates on the fully aggregated processedContent
+    progressReporter.log(`Generating Obsidian links for: ${file.name}...`); // Log remains relevant
     const withLinks = processedContent; // Assume LLM added links
 
     // Duplicate Handling
