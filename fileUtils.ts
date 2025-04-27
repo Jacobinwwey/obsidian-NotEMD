@@ -372,6 +372,11 @@ export async function processFile(app: App, settings: NotemdSettings, file: TFil
     }
     if (progressReporter.cancelled) { progressReporter.log(`Processing cancelled for ${file.name} before saving.`); return; }
 
+    // Final cleanup: Remove ```markdown specifiers from the content
+    progressReporter.log(`Removing \`\`\`markdown specifiers...`);
+    // Replace ```markdown with an empty string, keeping the rest of the line
+    finalContent = finalContent.replace(/```markdown/g, ''); // Remove ```markdown but keep surrounding content
+
     // Determine Output Path & Save/Move
     await saveOrMoveProcessedFile(app, settings, file, finalContent, progressReporter);
 
