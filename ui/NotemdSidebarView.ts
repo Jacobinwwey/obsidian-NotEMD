@@ -199,6 +199,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         this.processCurrentButton.onclick = async () => {
             if (this.isProcessing) return;
             this.clearDisplay();
+            this.currentAbortController = new AbortController(); // Create new controller
             this.isProcessing = true; this.startTime = Date.now(); this.updateButtonStates();
             this.log('Starting: Process Current File...'); this.updateStatus('Processing current file...', 0);
             try { await this.plugin.processWithNotemdCommand(this); } // Use plugin method
@@ -210,6 +211,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         this.processFolderButton.onclick = async () => {
             if (this.isProcessing) return;
             this.clearDisplay();
+            this.currentAbortController = new AbortController(); // Create new controller
             this.isProcessing = true; this.startTime = Date.now(); this.updateButtonStates();
             this.log('Starting: Process Folder...'); this.updateStatus('Processing folder...', 0);
             try { await this.plugin.processFolderWithNotemdCommand(this); } // Use plugin method
@@ -246,6 +248,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
 
             if (targetView && targetEditor) {
                 this.clearDisplay();
+                this.currentAbortController = new AbortController(); // Create new controller
                 this.isProcessing = true; this.startTime = Date.now(); this.updateButtonStates();
                 this.log(`Starting: Research & Summarize Topic for ${activeFile.name}...`);
                 this.updateStatus('Researching topic...', 0);
@@ -274,6 +277,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             const activeFile = this.plugin.app.workspace.getActiveFile();
             if (!activeFile || !(activeFile instanceof TFile) || activeFile.extension !== 'md') { new Notice('No active Markdown file selected.'); return; }
             this.clearDisplay();
+            this.currentAbortController = new AbortController(); // Create new controller
             this.isProcessing = true; this.startTime = Date.now(); this.updateButtonStates();
             this.log('Starting: Generate Content from Title...'); this.updateStatus('Generating content...', 0);
             try { await this.plugin.generateContentForTitleCommand(activeFile, this); } // Use plugin method
@@ -285,6 +289,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         this.batchGenerateTitleButton.onclick = async () => {
             if (this.isProcessing) return;
             this.clearDisplay();
+            this.currentAbortController = new AbortController(); // Create new controller
             this.isProcessing = true; this.startTime = Date.now(); this.updateButtonStates();
             this.log('Starting: Batch Generate Content from Titles...'); this.updateStatus('Starting batch generation...', 0);
             try { await this.plugin.batchGenerateContentForTitlesCommand(this); } // Use plugin method
@@ -299,6 +304,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         this.batchMermaidFixButton.onclick = async () => {
             if (this.isProcessing) return;
             this.clearDisplay();
+            this.currentAbortController = new AbortController(); // Create new controller
             this.isProcessing = true; this.startTime = Date.now(); this.updateButtonStates();
             this.log('Starting: Batch Mermaid Fix...'); this.updateStatus('Starting batch fix...', 0);
             try { await this.plugin.batchMermaidFixCommand(this); } // Use plugin method
@@ -348,6 +354,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         this.checkRemoveDuplicatesButton.onclick = async () => {
             if (this.isProcessing) return;
             this.clearDisplay();
+            this.currentAbortController = new AbortController(); // Create new controller
             this.isProcessing = true; this.startTime = Date.now(); this.updateButtonStates();
             this.log('Starting: Check & Remove Duplicate Concept Notes...'); this.updateStatus('Checking duplicates...', 0);
             try { await this.plugin.checkAndRemoveDuplicateConceptNotesCommand(this); } // Use plugin method
