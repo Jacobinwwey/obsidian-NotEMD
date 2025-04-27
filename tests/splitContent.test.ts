@@ -76,6 +76,7 @@ describe('splitContent', () => {
             // Add missing duplicate check scope settings
             duplicateCheckScopeMode: 'vault',
             duplicateCheckScopePaths: '',
+            removeCodeFencesOnAddLinks: false, // Added missing property for tests
         };
   });
 

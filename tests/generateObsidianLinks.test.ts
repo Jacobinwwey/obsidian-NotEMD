@@ -75,6 +75,7 @@ describe('generateObsidianLinks', () => {
             // Add missing duplicate check scope settings
             duplicateCheckScopeMode: 'vault',
             duplicateCheckScopePaths: '',
+            removeCodeFencesOnAddLinks: false, // Added missing property for tests
         };
      // Mock createConceptNotes to return a resolved promise - REMOVED as function moved from plugin class
      // plugin.createConceptNotes = jest.fn().mockResolvedValue(undefined);
