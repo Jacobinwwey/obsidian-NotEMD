@@ -76,6 +76,7 @@ describe('Duplicate Handling', () => {
             // Add missing duplicate check scope settings
             duplicateCheckScopeMode: 'vault',
             duplicateCheckScopePaths: '',
+            removeCodeFencesOnAddLinks: false, // Added missing property for tests
         };
         // Removed corrupted line: plugin.app = mockApp as annckApp after settings
 	});
