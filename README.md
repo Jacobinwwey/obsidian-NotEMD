@@ -123,7 +123,7 @@ Access plugin settings via:
     *   If you enter a string (e.g., `_linked`), it will be appended to the original base name (e.g., `YourNote_linked.md`). Ensure the suffix doesn't contain invalid filename characters.
 
 -   **Remove Code Fences on Add Links**:
-    *   **Disabled (Default)**: Code fences `(\`\`\`)` are kept in the content when adding links, and `(\`\`\`markdown)` will be delete automaticly.
+    *   **Disabled (Default)**: Code fences **(\`\`\`)** are kept in the content when adding links, and **(\`\`\`markdown)** will be delete automaticly.
     *   **Enabled**: Removes code fences from the content before adding links.
 
 #### Concept Note Output
