@@ -73,7 +73,7 @@ Notemd enhances your Obsidian workflow by integrating with various Large Languag
 5. Once installed, click **Enable**.
 
 ### Manual Installation
-1. Download the latest release files (`main.js`, `styles.css`, `manifest.json`) from the [GitHub Releases page](https://github.com/Jacobinwwey/Notemd/releases) (Replace with actual link if available).
+1. Download the latest release files (`main.js`, `styles.css`, `manifest.json`) from the [GitHub Releases page](https://github.com/Jacobinwwey/obsidian-NotEMD/releases) .
 2. Navigate to your Obsidian vault's configuration folder: `<YourVault>/.obsidian/plugins/`.
 3. Create a new folder named `notemd`.
 4. Copy the downloaded `main.js`, `styles.css`, and `manifest.json` files into the `notemd` folder.
