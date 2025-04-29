@@ -59,7 +59,8 @@ export class ProgressModal extends Modal implements ProgressReporter {
         if (this.statusEl) this.statusEl.setText(text);
         if (this.progressEl && percent !== undefined && percent >= 0) { // Check if percent is defined and non-negative
             const clampedPercent = Math.min(100, Math.max(0, percent));
-            this.progressEl.style.width = `${clampedPercent}%`;
+            // REMOVED: this.progressEl.style.width = `${clampedPercent}%`;
+            this.progressEl.dataset.progress = String(clampedPercent); // Store progress in data attribute
             this.progressEl.setText(`${Math.round(clampedPercent)}%`);
             this.progressEl.removeClass('is-error'); // Ensure error class is removed
 
@@ -76,7 +77,8 @@ export class ProgressModal extends Modal implements ProgressReporter {
             }
             if (this.progressBarContainerEl) this.progressBarContainerEl.removeClass('is-hidden'); // Show progress bar
         } else if (this.progressEl && percent !== undefined && percent < 0) { // Handle negative percent for error/cancel state
-            this.progressEl.style.width = `100%`;
+            // REMOVED: this.progressEl.style.width = `100%`;
+            this.progressEl.dataset.progress = '100'; // Set data attribute for error state
             this.progressEl.addClass('is-error'); // Use CSS class for error state
             this.progressEl.setText('Cancelled/Error');
             if (this.timeRemainingEl) this.timeRemainingEl.setText('Processing stopped.');

@@ -23,11 +23,12 @@
 }
 
 .notemd-progress-bar-fill {
-    --notemd-progress-percent: 0%; /* Define CSS variable for width */
+    /* --notemd-progress-percent: 0%; /* Define CSS variable for width - REMOVED */
     height: 100%;
     background-color: var(--interactive-accent);
     transition: width 0.3s ease, background-color 0.3s ease; /* Added background-color transition */
-    width: var(--notemd-progress-percent); /* Use the CSS variable */
+    /* width: var(--notemd-progress-percent); /* Use the CSS variable - REMOVED */
+    width: calc(1% * attr(data-progress number, 0)); /* Use data-progress attribute */
     display: flex;
     align-items: center;
     justify-content: center;
