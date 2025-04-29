@@ -51,8 +51,12 @@ export function refineMermaidBlocks(content: string): string {
 				line = line.replace(/\|"/g, `|${placeholder}`);
 				line = line.replace(/"\|/g, `${placeholder}|`);
 
-				// Rule 1: Replace " followed by non-space with ["
-				line = line.replace(/(?<!\s)(?<!\[)"(?!;|\s)(?!\])/g, '["');
+				// Rule 1 (Revised - No Lookbehind):
+				// 1a: Handle quote at the start of the line
+				line = line.replace(/^"(?!;|\s)(?!\])/g, '["');
+				// 1b: Handle quote preceded by a non-space, non-[ character
+				line = line.replace(/([^\s\[])"(?!;|\s)(?!\])/g, '$1["');
+
 				// Rule 2: Replace "; with ];
 				line = line.replace(/";/g, '"];');
 
