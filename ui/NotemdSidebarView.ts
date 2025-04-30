@@ -57,7 +57,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         if (this.logEl) this.logEl.empty();
         if (this.statusEl) this.statusEl.setText('Ready');
         if (this.progressEl) {
-            this.progressEl.style.setProperty('--notemd-progress-percent', '0%'); // Use CSS variable
+            this.progressEl.dataset.progress = '0'; // Set data attribute
             this.progressEl.setText('');
             this.progressEl.removeClass('is-error');
         }
