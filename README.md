@@ -183,6 +183,17 @@ Access plugin settings via:
     *   **Concept Folder Only**: Compares concept notes only against *other notes within the Concept Note Folder*. This helps find duplicates purely inside your generated concepts.
 -   **Include/Exclude Folders**: (Visible only if Mode is 'Include' or 'Exclude') Enter the *relative paths* of the folders you want to include or exclude, **one path per line**. Paths are case-sensitive and use `/` as the separator (e.g., `Reference Material/Papers` or `Daily Notes`). These folders cannot be the same as or inside the Concept Note Folder.
 
+#### Custom Prompts
+-   **Enable Changing Prompt Words**:
+    *   **Disabled (Default)**: The plugin uses its built-in default prompts for all tasks.
+    *   **Enabled**: Allows you to customize the prompts used for specific tasks ("Add Links", "Generate from Title", "Research & Summarize").
+-   **Enable Custom Prompt for "[Task Name]"**: (Visible for each task if "Enable Changing Prompt Words" is ON)
+    *   **Disabled**: The specific task will use its default prompt.
+    *   **Enabled**: Allows you to provide a custom prompt for this task.
+        *   **Default Prompt for "[Task Name]" (Read-only)**: When enabled, the current default prompt for the task is displayed in a read-only text area.
+        *   **Copy Default Button**: A button next to the read-only display allows you to copy the full default prompt text to your clipboard. This is useful as a starting point for your custom prompt.
+        *   **Your Custom Prompt for "[Task Name]"**: An editable text area where you can enter your own prompt. If left empty, the task will still use its default prompt even if this section is enabled.
+
 ## Usage Guide
 
 ### Original Processing (Adding Wiki-Links)
