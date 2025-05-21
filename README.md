@@ -90,9 +90,15 @@ Access plugin settings via:
 2.  **Provider Settings**: Configure the specific settings for the selected provider:
     *   **API Key**: Required for most cloud providers (e.g., OpenAI, Anthropic, DeepSeek, Google, Mistral, Azure, OpenRouter). Not needed for Ollama. LMStudio often uses `EMPTY` or can be left blank.
     *   **Base URL / Endpoint**: The API endpoint for the service. Defaults are provided, but you may need to change this for local models (LMStudio, Ollama), OpenRouter, or specific Azure deployments. **Required for Azure OpenAI.**
-    *   **Model**: The specific model name/ID to use (e.g., `gpt-4o`, `claude-3-5-sonnet-20240620`, `google/gemini-flash-1.5`, `llama3`, `mistral-large-latest`). Ensure the model is available at your endpoint/provider. For OpenRouter, use the model ID shown on their site (e.g., `gryphe/mythomax-l2-13b`).
+    *   **Model**: The specific model name/ID to use (e.g., `gpt-4o`, `claude-3-5-sonnet-20240620`, `gemini-1.5-flash-latest`, `llama3`, `mistral-large-latest`). Ensure the model is available at your endpoint/provider. For OpenRouter, use the model ID shown on their site (e.g., `gryphe/mythomax-l2-13b`). For Google Vertex AI, use the model ID (e.g., `gemini-1.5-pro-001`).
     *   **Temperature**: Controls the randomness of the LLM's output (0=deterministic, 1=max creativity). Lower values (e.g., 0.2-0.5) are generally better for structured tasks.
     *   **API Version (Azure Only)**: Required for Azure OpenAI deployments (e.g., `2024-02-15-preview`).
+    *   **Google Vertex AI Specific Settings**:
+        *   **Use Vertex AI**: Toggle ON to use Google Cloud Vertex AI. If OFF, the standard Google Generative Language API (Gemini API) will be used.
+        *   **GCP Project ID**: (Visible if "Use Vertex AI" is ON) Your Google Cloud Project ID.
+        *   **GCP Location**: (Visible if "Use Vertex AI" is ON) The GCP region for your Vertex AI endpoint (e.g., `us-central1`).
+        *   **API Key / Access Token (for Vertex AI)**: When "Use Vertex AI" is ON, this field should contain a valid OAuth 2.0 Access Token for authentication.
+        *   **Base URL / Endpoint (for Vertex AI)**: When "Use Vertex AI" is ON, this should be your regional Vertex AI endpoint (e.g., `https://us-central1-aiplatform.googleapis.com`).
 3.  **Test Connection**: Use the "Test Connection" button for the active provider to verify your settings. This now uses a more reliable method for LM Studio.
 4.  **Manage Provider Configurations**: Use the "Export Providers" and "Import Providers" buttons to save/load your LLM provider settings to/from a `notemd-providers.json` file within the plugin's configuration directory. This allows for easy backup and sharing.
 

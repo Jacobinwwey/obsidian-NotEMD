@@ -6,6 +6,10 @@ export interface LLMProviderConfig {
     model: string;
     temperature: number;
     apiVersion?: string;  // Only used for Azure OpenAI
+    // Google Vertex AI specific settings
+    useVertexAI?: boolean;
+    gcpProjectId?: string;
+    gcpLocation?: string;
 }
 
 // Main settings structure for the plugin

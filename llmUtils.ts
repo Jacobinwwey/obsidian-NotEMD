@@ -342,24 +342,64 @@ async function executeAnthropicApi(provider: LLMProviderConfig, modelName: strin
 }
 
 async function executeGoogleApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings): Promise<string> {
-    if (!provider.apiKey) throw new Error(`API key is missing for Google provider.`);
-    const urlWithKey = `${provider.baseUrl}/models/${modelName}:generateContent?key=${provider.apiKey}`;
     const requestBody = {
         contents: [{ role: 'user', parts: [{ text: `${prompt}\n\n${content}` }] }],
         generationConfig: { temperature: provider.temperature, maxOutputTokens: settings.maxTokens }
     };
     const controller = new AbortController();
     progressReporter.abortController = controller;
+    
+    let url: string;
+    let headers: HeadersInit = { 'Content-Type': 'application/json' };
+
+    if (provider.useVertexAI) {
+        if (!provider.gcpProjectId || !provider.gcpLocation) {
+            throw new Error('GCP Project ID and Location are required for Vertex AI.');
+        }
+        if (!provider.apiKey) { // Assuming apiKey holds the OAuth token for Vertex
+            throw new Error('Access Token (in API Key field) is missing for Google Vertex AI.');
+        }
+        // Ensure baseUrl is a regional endpoint, e.g., https://us-central1-aiplatform.googleapis.com
+        // The modelName for Vertex AI should be the specific model ID, e.g., gemini-1.5-pro-001 or publishers/google/models/gemini-1.5-pro-latest
+        url = `${provider.baseUrl}/v1/projects/${provider.gcpProjectId}/locations/${provider.gcpLocation}/publishers/google/models/${modelName}:generateContent`;
+        headers['Authorization'] = `Bearer ${provider.apiKey}`;
+        progressReporter.log(`Using Google Vertex AI endpoint: ${url}`);
+    } else {
+        if (!provider.apiKey) {
+            throw new Error(`API key is missing for Google Generative Language API.`);
+        }
+        // Standard Gemini API (generativelanguage.googleapis.com)
+        // modelName here is typically like 'gemini-1.5-flash-latest'
+        url = `${provider.baseUrl}/v1beta/models/${modelName}:generateContent?key=${provider.apiKey}`;
+        // For v1, it would be: `${provider.baseUrl}/v1/models/${modelName}:generateContent?key=${provider.apiKey}`;
+        // The current default constant uses v1. Let's stick to v1 for consistency if not Vertex.
+        // url = `${provider.baseUrl}/v1/models/${modelName}:generateContent?key=${provider.apiKey}`;
+        progressReporter.log(`Using Google Gemini API endpoint: ${url}`);
+    }
+
     try {
         await cancellableDelay(1, progressReporter); // Yield
-        const response = await fetch(urlWithKey, {
-            method: 'POST', signal: controller.signal, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(requestBody)
+        const response = await fetch(url, {
+            method: 'POST', signal: controller.signal, headers: headers, body: JSON.stringify(requestBody)
         });
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
-        if (!response.ok) { const errorText = await response.text(); throw new Error(`Google API error: ${response.status} - ${errorText}`); }
+        if (!response.ok) { 
+            const errorText = await response.text(); 
+            throw new Error(`Google API error (${provider.useVertexAI ? 'Vertex AI' : 'Gemini API'}): ${response.status} - ${errorText}`); 
+        }
         const data = await response.json();
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API success.");
-        if (!data.candidates?.[0]?.content?.parts?.[0]?.text) { throw new Error(`Unexpected response format from Google API`); }
+        
+        // Vertex AI and Gemini API have slightly different successful response structures for generateContent
+        // Gemini API: data.candidates[0].content.parts[0].text
+        // Vertex AI: data.candidates[0].content.parts[0].text (seems consistent for non-streaming)
+        // The SDK example `response.text` might be a convenience wrapper.
+        // The actual response for Vertex `generateContent` is `GenerateContentResponse`
+        // which has `candidates[] -> content -> parts[] -> text`
+        if (!data.candidates?.[0]?.content?.parts?.[0]?.text) { 
+            console.error("Unexpected Google API response structure:", JSON.stringify(data, null, 2));
+            throw new Error(`Unexpected response format from Google API (${provider.useVertexAI ? 'Vertex AI' : 'Gemini API'})`); 
+        }
         return data.candidates[0].content.parts[0].text;
     } finally { if (progressReporter.abortController === controller) { progressReporter.abortController = null; } }
 }

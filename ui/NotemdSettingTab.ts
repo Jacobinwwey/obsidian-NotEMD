@@ -174,6 +174,56 @@ export class NotemdSettingTab extends PluginSettingTab {
                     .onChange(async (value) => { activeProvider.temperature = value; await this.plugin.saveSettings(); })
                     .setDynamicTooltip());
 
+            if (activeProvider.name === 'Google') {
+                new Setting(containerEl)
+                    .setName('Use Vertex AI')
+                    .setDesc('ON: Use Vertex AI specific configuration. OFF: Use standard Google Generative Language API (Gemini API).')
+                    .addToggle(toggle => toggle
+                        .setValue(activeProvider.useVertexAI || false)
+                        .onChange(async (value) => {
+                            activeProvider.useVertexAI = value;
+                            await this.plugin.saveSettings();
+                            this.display(); // Refresh to show/hide Vertex AI specific fields
+                        }));
+
+                if (activeProvider.useVertexAI) {
+                    new Setting(containerEl)
+                        .setName('GCP Project ID')
+                        .setDesc('Your Google Cloud Project ID (Required for Vertex AI).')
+                        .addText(text => text
+                            .setPlaceholder('Enter GCP Project ID')
+                            .setValue(activeProvider.gcpProjectId || '')
+                            .onChange(async (value) => {
+                                activeProvider.gcpProjectId = value.trim();
+                                await this.plugin.saveSettings();
+                            }));
+                    new Setting(containerEl)
+                        .setName('GCP Location')
+                        .setDesc('Your GCP Project Location, e.g., "us-central1" (Required for Vertex AI).')
+                        .addText(text => text
+                            .setPlaceholder('Enter GCP Location (e.g., us-central1)')
+                            .setValue(activeProvider.gcpLocation || '')
+                            .onChange(async (value) => {
+                                activeProvider.gcpLocation = value.trim();
+                                await this.plugin.saveSettings();
+                            }));
+                    new Setting(containerEl)
+                        .setName('API Key / Access Token')
+                        .setDesc('For Vertex AI, this should be an OAuth 2.0 Access Token.')
+                        .addText(text => text // Re-iterating the API key field but with Vertex context
+                            .setPlaceholder('Enter OAuth 2.0 Access Token for Vertex AI')
+                            .setValue(activeProvider.apiKey) // It uses the same apiKey field
+                            .onChange(async (value) => { activeProvider.apiKey = value; await this.plugin.saveSettings(); }));
+                    new Setting(containerEl)
+                        .setName('Base URL / Endpoint')
+                        .setDesc('For Vertex AI, e.g., "https://us-central1-aiplatform.googleapis.com". Ensure it matches your GCP Location.')
+                        .addText(text => text // Re-iterating the Base URL field
+                            .setPlaceholder('Enter Vertex AI regional endpoint')
+                            .setValue(activeProvider.baseUrl)
+                            .onChange(async (value) => { activeProvider.baseUrl = value; await this.plugin.saveSettings(); }));
+                }
+            }
+
             if (activeProvider.name === 'Azure OpenAI') {
                 new Setting(containerEl)
                     .setName('API Version')

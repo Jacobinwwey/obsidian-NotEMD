@@ -27,9 +27,12 @@ export const DEFAULT_SETTINGS: NotemdSettings = {
         {
             name: 'Google',
             apiKey: '',
-            baseUrl: 'https://generativelanguage.googleapis.com/v1',
-            model: 'gemini-2.0-flash-exp',
-            temperature: 0.5
+            baseUrl: 'https://generativelanguage.googleapis.com/v1', // Default to Gemini API
+            model: 'gemini-1.5-flash-latest', // Changed to a common Gemini API model
+            temperature: 0.5,
+            useVertexAI: false, // Default to not using Vertex AI
+            gcpProjectId: '',
+            gcpLocation: ''
         },
         {
             name: 'Mistral',
