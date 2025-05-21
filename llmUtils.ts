@@ -152,14 +152,60 @@ export async function testAPI(provider: LLMProviderConfig): Promise<{ success: b
                 return { success: true, message: `Successfully connected to Anthropic API.` };
 
             case 'Google':
-                url = `${provider.baseUrl}/models/${provider.model}:generateContent?key=${provider.apiKey}`;
-                options.method = 'POST';
-                options.headers = { 'Content-Type': 'application/json' };
-                options.body = JSON.stringify({ contents: [{ role: 'user', parts: [{ text: 'Test' }] }], generationConfig: { maxOutputTokens: 1, temperature: 0 } });
-                response = await fetch(url, options);
-                if (!response.ok) throw new Error(`Google API error: ${response.status} - ${await response.text()}`);
-                await response.json();
-                return { success: true, message: `Successfully connected to Google API.` };
+                let testUrlGoogle: string;
+                let testOptionsGoogle: RequestInit = {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ role: 'user', parts: [{ text: 'Test connection' }] }],
+                        // Ensure generationConfig is compatible or minimal for a test
+                        generationConfig: { maxOutputTokens: 1, temperature: 0.0 } 
+                    })
+                };
+
+                if (provider.useVertexAI) {
+                    if (!provider.gcpProjectId || !provider.gcpLocation || !provider.apiKey || !provider.baseUrl) {
+                        throw new Error('Vertex AI test requires Project ID, Location, Base URL, and Access Token (in API Key field).');
+                    }
+                    // Construct Vertex AI URL for generateContent
+                    // Model name for Vertex is often just the ID, not publishers/google/models/...
+                    testUrlGoogle = `${provider.baseUrl}/v1/projects/${provider.gcpProjectId}/locations/${provider.gcpLocation}/publishers/google/models/${provider.model}:generateContent`;
+                    testOptionsGoogle.headers = { 
+                        ...testOptionsGoogle.headers, 
+                        'Authorization': `Bearer ${provider.apiKey}` 
+                    };
+                } else {
+                    if (!provider.apiKey || !provider.baseUrl) {
+                        throw new Error('Google Generative API test requires API Key and Base URL.');
+                    }
+                    // Standard Gemini API URL (using v1 as per default baseUrl)
+                    // Model name is like 'gemini-1.5-flash-latest'
+                    testUrlGoogle = `${provider.baseUrl}/v1/models/${provider.model}:generateContent?key=${provider.apiKey}`;
+                }
+                
+                response = await fetch(testUrlGoogle, testOptionsGoogle);
+                if (!response.ok) {
+                    const errorText = await response.text(); // Attempt to get more info
+                    // Try to parse errorText if it's JSON, otherwise use as is
+                    let detail = errorText;
+                    try {
+                        const errJson = JSON.parse(errorText);
+                        detail = errJson.error?.message || errorText;
+                    } catch (e) { /* ignore if not json */ }
+                    throw new Error(`Google API error (${provider.useVertexAI ? 'Vertex AI' : 'Gemini API'} test): ${response.status} - ${detail}`);
+                }
+                // Check if response is actually JSON before parsing
+                const responseContentType = response.headers.get('content-type');
+                if (responseContentType && responseContentType.includes('application/json')) {
+                    await response.json(); // Parse to ensure it's valid JSON
+                } else {
+                    // If not JSON, but status is OK, it's unusual for this API.
+                    // For a test, we might still consider it a partial success if an HTML page isn't returned.
+                    // However, the original error indicates HTML. So if we reach here and it's not JSON, it's still an issue.
+                    const textResponse = await response.text();
+                    throw new Error(`Google API test connection returned non-JSON response: ${textResponse.substring(0,100)}`);
+                }
+                return { success: true, message: `Successfully connected to Google API (${provider.useVertexAI ? 'Vertex AI' : 'Gemini API'}). Model: ${provider.model}` };
 
             case 'Azure OpenAI':
                 if (!provider.apiVersion || !provider.baseUrl || !provider.model) { throw new Error('Azure requires Base URL, Model (Deployment Name), and API Version.'); }
@@ -293,9 +339,20 @@ async function executeDeepSeekAPI(provider: LLMProviderConfig, modelName: string
 async function executeOpenAIApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings): Promise<string> {
     if (!provider.apiKey) throw new Error(`API key is missing for OpenAI provider.`);
     const url = `${provider.baseUrl}/chat/completions`;
+    
+    let messages;
+    if (content && content.trim() !== '') {
+        messages = [{ role: 'system', content: prompt }, { role: 'user', content: content }];
+    } else {
+        // If user content is empty, send the system prompt as the user prompt.
+        // This can sometimes avoid issues with proxies or models that don't like empty user messages
+        // when a system message is present.
+        messages = [{ role: 'user', content: prompt }];
+    }
+
     const requestBody = {
         model: modelName,
-        messages: [{ role: 'system', content: prompt }, { role: 'user', content: content }],
+        messages: messages,
         temperature: provider.temperature,
         max_tokens: settings.maxTokens
     };
