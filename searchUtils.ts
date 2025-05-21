@@ -3,6 +3,7 @@ import { NotemdSettings, ProgressReporter, SearchResult } from './types';
 import { estimateTokens, getProviderForTask, getModelForTask } from './utils'; // Added getProviderForTask, getModelForTask
 import { callDeepSeekAPI, callOpenAIApi, callAnthropicApi, callGoogleApi, callMistralApi, callAzureOpenAIApi, callLMStudioApi, callOllamaApi, callOpenRouterAPI } from './llmUtils'; // Added LLM callers
 import { cleanupLatexDelimiters, refineMermaidBlocks } from './mermaidProcessor'; // Added post-processors
+import { getFullDefaultResearchSummarizePrompt } from './constants'; // Import the default prompt helper
 import { ErrorModal } from './ui/ErrorModal'; // Added ErrorModal
 
 /**
@@ -334,7 +335,22 @@ export async function researchAndSummarize(app: App, settings: NotemdSettings, e
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user before summarization.");
 
         progressReporter.log(`Calling ${provider.name} (Model: ${modelName}) for summarization...`);
-        const summaryPrompt = `Based on the following research context gathered for "${topic}", provide a concise summary focusing on the key facts, concepts, and conclusions. Present the summary in clear Markdown format.\n\nResearch Context:\n${researchContext}`;
+        
+        // Determine the prompt to use (default or custom)
+        let summaryPrompt;
+        if (settings.enableChangePromptWord && settings.enableChangePromptResearchSummarize && settings.customPromptResearchSummarize) {
+            // Use custom prompt if enabled and available
+            // Ensure the custom prompt also receives the research context.
+            // Users might write custom prompts that expect {RESEARCH_CONTEXT} or similar, or just append it.
+            // For simplicity, we'll append it, assuming the user's custom prompt is the main instruction.
+            summaryPrompt = `${settings.customPromptResearchSummarize}\n\nResearch Context:\n${researchContext}`;
+            progressReporter.log(`Using custom prompt for research summarization.`);
+        } else {
+            // Use default prompt from constants.ts
+            summaryPrompt = getFullDefaultResearchSummarizePrompt(topic, researchContext);
+            progressReporter.log(`Using default prompt for research summarization.`);
+        }
+        
         progressReporter.log(`Constructed summary prompt (context length: ${researchContext.length}).`);
 
         let summary = '';

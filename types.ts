@@ -62,6 +62,18 @@ export interface NotemdSettings {
     duplicateCheckScopePaths: string; // New: Newline-separated list of paths for include/exclude modes
     // Add Links Post-Processing
     removeCodeFencesOnAddLinks: boolean; // New: Option to remove ```markdown and ``` fences
+
+    // Master toggle for changing prompt words
+    enableChangePromptWord?: boolean; // New: Master toggle for all custom prompt settings
+
+    // Custom Prompts
+    enableChangePromptAddLinks?: boolean; // New: Toggle to enable/disable changing Add Links prompt
+    customPromptAddLinks?: string;
+    enableChangePromptGenerateContent?: boolean; // New: Toggle to enable/disable changing Generate Content prompt
+    customPromptGenerateContent?: string;
+    enableChangePromptResearchSummarize?: boolean; // New: Toggle to enable/disable changing Research Summarize prompt
+    customPromptResearchSummarize?: string;
+    // Add more custom prompts for other tasks as needed
 }
 
 // Interface for search results

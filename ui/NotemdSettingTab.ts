@@ -1,7 +1,7 @@
 import { App, PluginSettingTab, Setting, Notice } from 'obsidian';
 import NotemdPlugin from '../main'; // Import the plugin class itself
 import { LLMProviderConfig, NotemdSettings } from '../types';
-import { DEFAULT_SETTINGS } from '../constants';
+import { DEFAULT_SETTINGS, DEFAULT_PROMPT_ADD_LINKS, DEFAULT_PROMPT_GENERATE_CONTENT_DISPLAY, DEFAULT_PROMPT_RESEARCH_SUMMARIZE_DISPLAY } from '../constants';
 import { testAPI } from '../llmUtils'; // Import testAPI
 
 // Define specific key types for settings accessed dynamically
@@ -379,5 +379,106 @@ export class NotemdSettingTab extends PluginSettingTab {
                 );
         }
         // --- End Duplicate Check Scope Settings ---
+
+        // --- Custom Prompts Settings ---
+        containerEl.createEl('h3', { text: 'Custom Prompts' });
+
+        // Master Toggle for Custom Prompts
+        new Setting(containerEl)
+            .setName('Enable Changing Prompt Words')
+            .setDesc('ON: Allow modification of individual task prompts. OFF: Use default or last saved prompts.')
+            .addToggle(toggle => toggle
+                .setValue(this.plugin.settings.enableChangePromptWord || false)
+                .onChange(async (value) => {
+                    this.plugin.settings.enableChangePromptWord = value;
+                    await this.plugin.saveSettings();
+                    this.display(); // Refresh to show/hide individual prompt settings
+                }));
+
+        if (this.plugin.settings.enableChangePromptWord) {
+            const createPromptSetting = (
+                taskName: string,
+                enableSettingKey: keyof NotemdSettings,
+                customPromptSettingKey: keyof NotemdSettings,
+                defaultPrompt: string
+            ) => {
+                new Setting(containerEl)
+                    .setName(`Enable Custom Prompt for "${taskName}"`)
+                    .setDesc(`ON: Use a custom prompt for the "${taskName}" task. OFF: Use the default prompt.`)
+                    .addToggle(toggle => toggle
+                        .setValue(this.plugin.settings[enableSettingKey] as boolean || false)
+                        .onChange(async (value) => {
+                            (this.plugin.settings[enableSettingKey] as any) = value;
+                            await this.plugin.saveSettings();
+                            this.display();
+                        }));
+
+                if (this.plugin.settings[enableSettingKey]) {
+                    // Display Default Prompt (Read-only)
+                    const defaultPromptSetting = new Setting(containerEl)
+                        .setName(`Default Prompt for "${taskName}" (Read-only)`)
+                        .setDesc('This is the current default prompt used by the plugin.');
+                    
+                    const defaultPromptTextarea = defaultPromptSetting.controlEl.createEl('textarea', {
+                        text: defaultPrompt,
+                        cls: 'notemd-default-prompt-display' 
+                    });
+                    defaultPromptTextarea.readOnly = true;
+                    defaultPromptTextarea.style.width = '100%';
+                    defaultPromptTextarea.style.minHeight = '100px'; // Adjust as needed
+                    defaultPromptTextarea.style.resize = 'vertical';
+                    defaultPromptTextarea.style.marginBottom = '10px';
+
+
+                    defaultPromptSetting.addButton(button => button
+                        .setButtonText('Copy Default')
+                        .setIcon('copy')
+                        .setTooltip('Copy the default prompt to clipboard')
+                        .onClick(() => {
+                            navigator.clipboard.writeText(defaultPrompt)
+                                .then(() => new Notice(`${taskName} default prompt copied!`))
+                                .catch(err => {
+                                    new Notice(`Failed to copy ${taskName} default prompt. See console.`);
+                                    console.error(`Failed to copy ${taskName} default prompt:`, err);
+                                });
+                        }));
+                    
+                    // Custom Prompt Input
+                    new Setting(containerEl)
+                        .setName(`Your Custom Prompt for "${taskName}"`)
+                        .setDesc(`Enter your custom prompt word/phrase for the "${taskName}" task.`)
+                        .addTextArea(textarea => textarea
+                            .setPlaceholder('Enter your custom prompt here...')
+                            .setValue(this.plugin.settings[customPromptSettingKey] as string || '')
+                            .onChange(async (value) => {
+                                (this.plugin.settings[customPromptSettingKey] as any) = value.trim() || undefined;
+                                await this.plugin.saveSettings();
+                            })
+                            .inputEl.setAttrs({ rows: 6, style: 'width: 100%;' })
+                        );
+                }
+            };
+
+            createPromptSetting(
+                'Add Links',
+                'enableChangePromptAddLinks',
+                'customPromptAddLinks',
+                DEFAULT_PROMPT_ADD_LINKS
+            );
+
+            createPromptSetting(
+                'Generate from Title',
+                'enableChangePromptGenerateContent',
+                'customPromptGenerateContent',
+                DEFAULT_PROMPT_GENERATE_CONTENT_DISPLAY 
+            );
+
+            createPromptSetting(
+                'Research & Summarize',
+                'enableChangePromptResearchSummarize',
+                'customPromptResearchSummarize',
+                DEFAULT_PROMPT_RESEARCH_SUMMARIZE_DISPLAY
+            );
+        } // This closes the if (this.plugin.settings.enableChangePromptWord) block
     }
 }
