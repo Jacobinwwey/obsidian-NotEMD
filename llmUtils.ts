@@ -263,7 +263,14 @@ async function callApiWithRetry(
         } catch (error: unknown) { // Changed to unknown
             const errorMessage = error instanceof Error ? error.message : String(error);
             lastError = error instanceof Error ? error : new Error(errorMessage); // Store Error object if possible
-            console.warn(`${provider.name} API Call: Attempt ${attempt} failed: ${errorMessage}`);
+            
+            let logMessage = `${provider.name} API Call: Attempt ${attempt} failed: ${errorMessage}`;
+            if (errorMessage.toLowerCase().includes('failed to fetch')) {
+                logMessage += ` (This could be a network issue, a timeout at the endpoint '${provider.baseUrl}', or the endpoint might be temporarily unavailable.)`;
+            }
+            console.warn(logMessage);
+            progressReporter.log(`⚠️ ${logMessage}`);
+
 
             // Handle cancellation specifically
             if ((error instanceof Error && error.name === 'AbortError') || errorMessage.includes("cancelled by user")) {
@@ -314,12 +321,32 @@ async function callApiWithRetry(
 async function executeDeepSeekAPI(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings): Promise<string> {
     if (!provider.apiKey) throw new Error(`API key is missing for DeepSeek provider.`);
     const url = `${provider.baseUrl}/chat/completions`;
-    const requestBody = {
+
+    let effectiveMaxTokens: number | undefined;
+    if (settings.maxTokens > 0) {
+        effectiveMaxTokens = Math.max(1, settings.maxTokens);
+        // DeepSeek might have different limits, but applying similar clamping for consistency for now
+        if (effectiveMaxTokens >= 65536) { // Example clamp, adjust if DeepSeek has specific limits
+            effectiveMaxTokens = 65535; 
+        }
+    } else {
+        effectiveMaxTokens = undefined; // Omit to use API default
+    }
+
+    const requestBody: {
+        model: string;
+        messages: { role: string; content: string; }[];
+        temperature: number;
+        max_tokens?: number;
+    } = {
         model: modelName,
         messages: [{ role: 'system', content: prompt }, { role: 'user', content: content }],
         temperature: provider.temperature,
-        max_tokens: settings.maxTokens
     };
+
+    if (effectiveMaxTokens !== undefined) {
+        requestBody.max_tokens = effectiveMaxTokens;
+    }
     const controller = new AbortController();
     progressReporter.abortController = controller;
     try {
@@ -350,11 +377,18 @@ async function executeOpenAIApi(provider: LLMProviderConfig, modelName: string, 
         messages = [{ role: 'user', content: prompt }];
     }
 
+    // Clamp maxTokens to be within a valid range, e.g. [1, 65535] based on a previous error.
+    // Ensure max_tokens is always a positive integer.
+    let effectiveMaxTokens = Math.max(1, settings.maxTokens);
+    if (effectiveMaxTokens >= 65536) {
+        effectiveMaxTokens = 65535;
+    }
+
     const requestBody = {
         model: modelName,
         messages: messages,
         temperature: provider.temperature,
-        max_tokens: settings.maxTokens
+        max_tokens: effectiveMaxTokens // Always include max_tokens
     };
     const controller = new AbortController();
     progressReporter.abortController = controller;
@@ -372,16 +406,46 @@ async function executeOpenAIApi(provider: LLMProviderConfig, modelName: string, 
     } finally { if (progressReporter.abortController === controller) { progressReporter.abortController = null; } }
 }
 
-async function executeAnthropicApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings): Promise<string> {
+async function executeAnthropicApi(provider: LLMProviderConfig, modelName: string, systemPrompt: string, userContent: string, progressReporter: ProgressReporter, settings: NotemdSettings): Promise<string> {
     if (!provider.apiKey) throw new Error(`API key is missing for Anthropic provider.`);
     const url = `${provider.baseUrl}/v1/messages`;
-    // Anthropic combines prompt and content in the user message
-    const requestBody = {
+    const requestBody: {
+        model: string;
+        system?: string;
+        messages: { role: 'user'; content: string }[];
+        temperature: number;
+        max_tokens?: number; // Make max_tokens optional
+        // anthropic_version: string; // Header handles this
+    } = {
         model: modelName,
-        messages: [{ role: 'user', content: `${prompt}\n\n${content}` }],
+        messages: [{ role: 'user', content: userContent }],
         temperature: provider.temperature,
-        max_tokens: settings.maxTokens
+        // max_tokens will be added below if effectiveMaxTokens is defined
     };
+
+    let effectiveMaxTokens: number | undefined;
+    if (settings.maxTokens > 0) {
+        effectiveMaxTokens = Math.max(1, settings.maxTokens);
+        // Anthropic's max_tokens limit can vary by model, e.g. 4096 for Claude 2, 8192 for Claude 3 Sonnet.
+        // A general clamp might be too restrictive or too loose.
+        // For now, let's use a common high value or rely on API to error for specific model if too high.
+        // Example: if (effectiveMaxTokens > 8192) effectiveMaxTokens = 8192;
+        // Sticking to the existing behavior of not clamping here unless a specific error indicated it.
+    } else {
+        effectiveMaxTokens = undefined; // Omit to use API default (though Anthropic requires max_tokens)
+    }
+
+    // Anthropic API requires max_tokens. If settings.maxTokens <=0, we must provide a sensible default.
+    // Let's use a moderate default if it would otherwise be undefined.
+    if (effectiveMaxTokens === undefined) {
+        effectiveMaxTokens = 4096; // Default to 4096 if not specified positively
+    }
+    requestBody.max_tokens = effectiveMaxTokens;
+
+    if (systemPrompt && systemPrompt.trim() !== '') {
+        requestBody.system = systemPrompt;
+    }
+
     const controller = new AbortController();
     progressReporter.abortController = controller;
     try {
@@ -399,9 +463,33 @@ async function executeAnthropicApi(provider: LLMProviderConfig, modelName: strin
 }
 
 async function executeGoogleApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings): Promise<string> {
+    
+    let effectiveMaxOutputTokens: number | undefined;
+    if (settings.maxTokens > 0) {
+        effectiveMaxOutputTokens = Math.max(1, settings.maxTokens);
+        // Google's typical limits can be model-specific, e.g., 8192 for gemini-1.0-pro, 2048 for flash.
+        // The previous clamp to 65535 was based on a specific error.
+        // It's generally better to let the API validate unless a specific known limit is being hit.
+        // For now, maintaining a high clamp if one was needed, or removing it if it's too general.
+        // Let's assume the 65535 clamp is still relevant from past issues for this endpoint.
+        if (effectiveMaxOutputTokens >= 65536) { 
+            effectiveMaxOutputTokens = 65535;
+        }
+    } else {
+        effectiveMaxOutputTokens = undefined; // Omit to use API default for maxOutputTokens
+    }
+
+    const generationConfig: { temperature: number; maxOutputTokens?: number } = {
+        temperature: provider.temperature,
+    };
+
+    if (effectiveMaxOutputTokens !== undefined) {
+        generationConfig.maxOutputTokens = effectiveMaxOutputTokens;
+    }
+
     const requestBody = {
         contents: [{ role: 'user', parts: [{ text: `${prompt}\n\n${content}` }] }],
-        generationConfig: { temperature: provider.temperature, maxOutputTokens: settings.maxTokens }
+        generationConfig: generationConfig
     };
     const controller = new AbortController();
     progressReporter.abortController = controller;
@@ -464,12 +552,31 @@ async function executeGoogleApi(provider: LLMProviderConfig, modelName: string, 
 async function executeMistralApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings): Promise<string> {
     if (!provider.apiKey) throw new Error(`API key is missing for Mistral provider.`);
     const url = `${provider.baseUrl}/chat/completions`;
-    const requestBody = {
+
+    let effectiveMaxTokens: number | undefined;
+    if (settings.maxTokens > 0) {
+        effectiveMaxTokens = Math.max(1, settings.maxTokens);
+        // Mistral models can have large context windows, e.g., 32k or 128k.
+        // A general clamp might be too restrictive.
+        // Let's assume no specific clamp needed beyond ensuring it's positive if set.
+    } else {
+        effectiveMaxTokens = undefined; // Omit to use API default
+    }
+
+    const requestBody: {
+        model: string;
+        messages: { role: string; content: string; }[];
+        temperature: number;
+        max_tokens?: number;
+    } = {
         model: modelName,
         messages: [{ role: 'system', content: prompt }, { role: 'user', content: content }],
         temperature: provider.temperature,
-        max_tokens: settings.maxTokens
     };
+
+    if (effectiveMaxTokens !== undefined) {
+        requestBody.max_tokens = effectiveMaxTokens;
+    }
     const controller = new AbortController();
     progressReporter.abortController = controller;
     try {
@@ -490,11 +597,31 @@ async function executeAzureOpenAIApi(provider: LLMProviderConfig, modelName: str
     if (!provider.apiKey) throw new Error(`API key is missing for Azure OpenAI provider.`);
     if (!provider.apiVersion || !provider.baseUrl) { throw new Error('API version and Base URL are required for Azure OpenAI'); }
     const url = `${provider.baseUrl}/openai/deployments/${modelName}/chat/completions?api-version=${provider.apiVersion}`;
-    const requestBody = {
+
+    let effectiveMaxTokens: number | undefined;
+    if (settings.maxTokens > 0) {
+        effectiveMaxTokens = Math.max(1, settings.maxTokens);
+        // Azure OpenAI models also have limits, often similar to OpenAI's.
+        // A clamp like 65535 might be relevant if specific errors were seen.
+        if (effectiveMaxTokens >= 65536) { 
+            effectiveMaxTokens = 65535;
+        }
+    } else {
+        effectiveMaxTokens = undefined; // Omit to use API default
+    }
+
+    const requestBody: {
+        messages: { role: string; content: string; }[];
+        temperature: number;
+        max_tokens?: number;
+    } = {
         messages: [{ role: 'system', content: prompt }, { role: 'user', content: content }],
         temperature: provider.temperature,
-        max_tokens: settings.maxTokens
     };
+
+    if (effectiveMaxTokens !== undefined) {
+        requestBody.max_tokens = effectiveMaxTokens;
+    }
     const controller = new AbortController();
     progressReporter.abortController = controller;
     try {
@@ -515,12 +642,30 @@ async function executeLMStudioApi(provider: LLMProviderConfig, modelName: string
     // Note: LMStudio might not require an API key, or use a placeholder like 'EMPTY'.
     // No explicit check here, rely on the API call itself to fail if needed.
     const url = `${provider.baseUrl}/chat/completions`;
-    const requestBody = {
+
+    let effectiveMaxTokens: number | undefined;
+    if (settings.maxTokens > 0) {
+        effectiveMaxTokens = Math.max(1, settings.maxTokens);
+        // LMStudio models might have specific limits, but often generous.
+        // No specific clamp unless an error indicates one is needed.
+    } else {
+        effectiveMaxTokens = undefined; // Omit to use server/model default
+    }
+
+    const requestBody: {
+        model: string;
+        messages: { role: string; content: string; }[];
+        temperature: number;
+        max_tokens?: number;
+    } = {
         model: modelName,
         messages: [{ role: 'system', content: prompt }, { role: 'user', content: content }],
         temperature: provider.temperature,
-        max_tokens: settings.maxTokens
     };
+
+    if (effectiveMaxTokens !== undefined) {
+        requestBody.max_tokens = effectiveMaxTokens;
+    }
     const controller = new AbortController();
     progressReporter.abortController = controller;
     try {
@@ -566,12 +711,29 @@ async function executeOllamaApi(provider: LLMProviderConfig, modelName: string, 
 async function executeOpenRouterAPI(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings): Promise<string> {
     if (!provider.apiKey) throw new Error(`API key is missing for OpenRouter provider.`);
     const url = `${provider.baseUrl}/chat/completions`;
-    const requestBody = {
+
+    let effectiveMaxTokens: number | undefined;
+    if (settings.maxTokens > 0) {
+        effectiveMaxTokens = Math.max(1, settings.maxTokens);
+        // No specific clamp unless an error indicates one is needed for OpenRouter.
+    } else {
+        effectiveMaxTokens = undefined; // Omit to use API/model default
+    }
+
+    const requestBody: {
+        model: string;
+        messages: { role: string; content: string; }[];
+        temperature: number;
+        max_tokens?: number;
+    } = {
         model: modelName, // User specifies the full model string e.g., "google/gemini-pro"
         messages: [{ role: 'system', content: prompt }, { role: 'user', content: content }],
         temperature: provider.temperature,
-        max_tokens: settings.maxTokens
     };
+
+    if (effectiveMaxTokens !== undefined) {
+        requestBody.max_tokens = effectiveMaxTokens;
+    }
     const controller = new AbortController();
     progressReporter.abortController = controller;
     let response: Response | null = null;
@@ -675,8 +837,8 @@ export function callOpenAIApi(provider: LLMProviderConfig, modelName: string, pr
 }
 
 export function callAnthropicApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings): Promise<string> {
-    // Note: Anthropic combines prompt and content in user message, so pass empty prompt to execute function
-    return callApiWithRetry(provider, modelName, '', `${prompt}\n\n${content}`, settings, progressReporter, executeAnthropicApi);
+    // Pass prompt as systemPrompt and content as userContent to executeAnthropicApi
+    return callApiWithRetry(provider, modelName, prompt, content, settings, progressReporter, executeAnthropicApi);
 }
 
 export function callGoogleApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings): Promise<string> {
