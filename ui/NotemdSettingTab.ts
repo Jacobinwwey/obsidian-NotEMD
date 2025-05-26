@@ -106,21 +106,20 @@ export class NotemdSettingTab extends PluginSettingTab {
     display(): void {
         const { containerEl } = this;
         containerEl.empty();
-        containerEl.createEl('h2', { text: 'Notemd Settings' });
 
         // --- Provider Configuration ---
-        containerEl.createEl('h3', { text: 'LLM Provider Configuration' });
+        new Setting(containerEl).setName('LLM providers').setHeading();
 
         const providerMgmtSetting = new Setting(containerEl)
-            .setName('Manage Provider Configurations')
+            .setName('Manage provider configurations')
             .setDesc('Export your current provider settings to a JSON file, or import settings from a file.');
         providerMgmtSetting.addButton(button => button
-            .setButtonText('Export Providers').setTooltip('Save provider configurations').onClick(() => this.exportProviderSettings()));
+            .setButtonText('Export providers').setTooltip('Save provider configurations').onClick(() => this.exportProviderSettings()));
         providerMgmtSetting.addButton(button => button
-            .setButtonText('Import Providers').setTooltip('Load provider configurations (merges)').onClick(() => this.importProviderSettings()));
+            .setButtonText('Import providers').setTooltip('Load provider configurations (merges)').onClick(() => this.importProviderSettings()));
 
         new Setting(containerEl)
-            .setName('Active Provider')
+            .setName('Active provider')
             .setDesc('Select the LLM provider to use for processing.')
             .addDropdown(dropdown => {
                 const providerNames = this.plugin.settings.providers.map(p => p.name).sort();
@@ -137,11 +136,11 @@ export class NotemdSettingTab extends PluginSettingTab {
         const activeProvider = this.plugin.settings.providers.find(p => p.name === this.plugin.settings.activeProvider);
 
         if (activeProvider) {
-            containerEl.createEl('h4', { text: `${activeProvider.name} Settings` });
+            new Setting(containerEl).setName(`${activeProvider.name} details`).setHeading();
 
             if (activeProvider.name !== 'Ollama') {
                 new Setting(containerEl)
-                    .setName('API Key')
+                    .setName('API key')
                     .setDesc(`API key for ${activeProvider.name}. ${activeProvider.name === 'LMStudio' ? "(Optional, often 'EMPTY')" : ""}`)
                     .addText(text => text
                         .setPlaceholder(activeProvider.name === 'LMStudio' ? 'Usually EMPTY or leave blank' : 'Enter your API key')
@@ -150,7 +149,7 @@ export class NotemdSettingTab extends PluginSettingTab {
             }
 
             new Setting(containerEl)
-                .setName('Base URL / Endpoint')
+                .setName('Base URL / endpoint')
                 .setDesc(`The API endpoint for ${activeProvider.name}. ${activeProvider.name === 'Azure OpenAI' ? 'Required.' : ''}`)
                 .addText(text => text
                     .setPlaceholder(DEFAULT_SETTINGS.providers.find(p => p.name === activeProvider.name)?.baseUrl || 'Enter API Base URL')
@@ -176,7 +175,7 @@ export class NotemdSettingTab extends PluginSettingTab {
 
             if (activeProvider.name === 'Azure OpenAI') {
                 new Setting(containerEl)
-                    .setName('API Version')
+                    .setName('API version')
                     .setDesc('Required API version for Azure OpenAI (e.g., 2024-02-15-preview)')
                     .addText(text => text
                         .setPlaceholder('Enter API version')
@@ -185,10 +184,10 @@ export class NotemdSettingTab extends PluginSettingTab {
             }
 
             new Setting(containerEl)
-                .setName(`Test ${activeProvider.name} Connection`)
+                .setName(`Test ${activeProvider.name} connection`)
                 .setDesc('Verify API key, endpoint, and model accessibility.')
                 .addButton(button => button
-                    .setButtonText('Test Connection').setCta()
+                    .setButtonText('Test connection').setCta()
                     .onClick(async () => {
                         button.setDisabled(true).setButtonText('Testing...');
                         const testingNotice = new Notice(`Testing connection to ${activeProvider.name}...`, 0);
@@ -211,9 +210,9 @@ export class NotemdSettingTab extends PluginSettingTab {
         }
 
         // --- Multi-Model Settings ---
-        containerEl.createEl('h3', { text: 'Multi-Model Configuration' });
+        new Setting(containerEl).setName('Multi-model usage').setHeading();
         new Setting(containerEl)
-            .setName('Use Different Providers for Tasks')
+            .setName('Use different providers for tasks')
             .setDesc('ON: Select a specific LLM provider for each task below. OFF: Use the single "Active Provider".')
             .addToggle(toggle => toggle
                 .setValue(this.plugin.settings.useMultiModelSettings)
@@ -245,43 +244,43 @@ export class NotemdSettingTab extends PluginSettingTab {
                 const selectedProviderName = this.plugin.settings[providerSettingName];
                 const selectedProvider = this.plugin.settings.providers.find(p => p.name === selectedProviderName);
                 const defaultModel = selectedProvider ? selectedProvider.model : 'Provider not found';
-                // Use the typed key
-                taskSetting.addText(text => text.setPlaceholder(`Default: ${defaultModel}`).setValue(this.plugin.settings[modelSettingName] || '').onChange(async (value) => {
-                    this.plugin.settings[modelSettingName] = value.trim() || undefined;
-                    await this.plugin.saveSettings();
-                }));
+                    // Use the typed key
+                    taskSetting.addText(text => text.setPlaceholder(`Default: ${defaultModel}`).setValue(this.plugin.settings[modelSettingName] || '').onChange(async (value) => {
+                        this.plugin.settings[modelSettingName] = value.trim() || undefined;
+                        await this.plugin.saveSettings();
+                    }));
             };
-            createTaskModelSettings('addLinksProvider', 'addLinksModel', 'Add Links (Process File/Folder)');
-            createTaskModelSettings('researchProvider', 'researchModel', 'Research & Summarize');
-            createTaskModelSettings('generateTitleProvider', 'generateTitleModel', 'Generate from Title');
+            createTaskModelSettings('addLinksProvider', 'addLinksModel', 'Add links (process file/folder)');
+            createTaskModelSettings('researchProvider', 'researchModel', 'Research & summarize');
+            createTaskModelSettings('generateTitleProvider', 'generateTitleModel', 'Generate from title');
         }
 
         // --- Stable API Call Settings ---
-        containerEl.createEl('h3', { text: 'Stable API Call Settings' });
+        new Setting(containerEl).setName('Stable API calls').setHeading();
         new Setting(containerEl)
-            .setName('Enable Stable API Calls (Retry Logic)')
+            .setName('Enable stable API calls (retry logic)')
             .setDesc('ON: Automatically retry failed LLM API calls. OFF: Fail on first error.')
             .addToggle(toggle => toggle.setValue(this.plugin.settings.enableStableApiCall).onChange(async (value) => { this.plugin.settings.enableStableApiCall = value; await this.plugin.saveSettings(); this.display(); }));
         if (this.plugin.settings.enableStableApiCall) {
-            new Setting(containerEl).setName('Retry Interval (seconds)').setDesc('Wait time between retries.').addText(text => text.setPlaceholder(String(DEFAULT_SETTINGS.apiCallInterval)).setValue(String(this.plugin.settings.apiCallInterval)).onChange(async (value) => { const num = parseInt(value, 10); if (!isNaN(num) && num >= 1 && num <= 300) { this.plugin.settings.apiCallInterval = num; } else { this.plugin.settings.apiCallInterval = DEFAULT_SETTINGS.apiCallInterval; } await this.plugin.saveSettings(); this.display(); }));
-            new Setting(containerEl).setName('Maximum Retries').setDesc('Max retry attempts.').addText(text => text.setPlaceholder(String(DEFAULT_SETTINGS.apiCallMaxRetries)).setValue(String(this.plugin.settings.apiCallMaxRetries)).onChange(async (value) => { const num = parseInt(value, 10); if (!isNaN(num) && num >= 0 && num <= 10) { this.plugin.settings.apiCallMaxRetries = num; } else { this.plugin.settings.apiCallMaxRetries = DEFAULT_SETTINGS.apiCallMaxRetries; } await this.plugin.saveSettings(); this.display(); }));
+            new Setting(containerEl).setName('Retry interval (seconds)').setDesc('Wait time between retries.').addText(text => text.setPlaceholder(String(DEFAULT_SETTINGS.apiCallInterval)).setValue(String(this.plugin.settings.apiCallInterval)).onChange(async (value) => { const num = parseInt(value, 10); if (!isNaN(num) && num >= 1 && num <= 300) { this.plugin.settings.apiCallInterval = num; } else { this.plugin.settings.apiCallInterval = DEFAULT_SETTINGS.apiCallInterval; } await this.plugin.saveSettings(); this.display(); }));
+            new Setting(containerEl).setName('Maximum retries').setDesc('Max retry attempts.').addText(text => text.setPlaceholder(String(DEFAULT_SETTINGS.apiCallMaxRetries)).setValue(String(this.plugin.settings.apiCallMaxRetries)).onChange(async (value) => { const num = parseInt(value, 10); if (!isNaN(num) && num >= 0 && num <= 10) { this.plugin.settings.apiCallMaxRetries = num; } else { this.plugin.settings.apiCallMaxRetries = DEFAULT_SETTINGS.apiCallMaxRetries; } await this.plugin.saveSettings(); this.display(); }));
         }
 
         // --- General Settings ---
-        containerEl.createEl('h3', { text: 'General Settings' });
-        containerEl.createEl('h4', { text: 'Processed File Output' });
-        new Setting(containerEl).setName('Customize Processed File Save Path').setDesc('ON: Save to specified path. OFF: Save in original folder.').addToggle(toggle => toggle.setValue(this.plugin.settings.useCustomProcessedFileFolder).onChange(async (value) => { this.plugin.settings.useCustomProcessedFileFolder = value; await this.plugin.saveSettings(); this.display(); }));
+        new Setting(containerEl).setName('General').setHeading();
+        new Setting(containerEl).setName('Processed file output').setHeading();
+        new Setting(containerEl).setName('Customize processed file save path').setDesc('ON: Save to specified path. OFF: Save in original folder.').addToggle(toggle => toggle.setValue(this.plugin.settings.useCustomProcessedFileFolder).onChange(async (value) => { this.plugin.settings.useCustomProcessedFileFolder = value; await this.plugin.saveSettings(); this.display(); }));
         if (this.plugin.settings.useCustomProcessedFileFolder) {
-            new Setting(containerEl).setName('Processed File Folder Path').setDesc('Relative path within vault.').addText(text => text.setPlaceholder('e.g., Processed/Notes').setValue(this.plugin.settings.processedFileFolder).onChange(async (value) => { /* Add validation */ this.plugin.settings.processedFileFolder = value.trim(); await this.plugin.saveSettings(); }));
+            new Setting(containerEl).setName('Processed file folder path').setDesc('Relative path within vault.').addText(text => text.setPlaceholder('e.g., Processed/Notes').setValue(this.plugin.settings.processedFileFolder).onChange(async (value) => { /* Add validation */ this.plugin.settings.processedFileFolder = value.trim(); await this.plugin.saveSettings(); }));
         }
-        new Setting(containerEl).setName('Move Original File After Processing').setDesc('ON: Move original to processed folder. OFF: Create copy named "_processed.md".').addToggle(toggle => toggle.setValue(this.plugin.settings.moveOriginalFileOnProcess).onChange(async (value) => { this.plugin.settings.moveOriginalFileOnProcess = value; await this.plugin.saveSettings(); }));
-        new Setting(containerEl).setName("Use Custom Output Filename for 'Add Links'").setDesc("ON: Use custom suffix/replacement. OFF: Use '_processed.md'.").addToggle(toggle => toggle.setValue(this.plugin.settings.useCustomAddLinksSuffix).onChange(async (value) => { this.plugin.settings.useCustomAddLinksSuffix = value; await this.plugin.saveSettings(); this.display(); }));
+        new Setting(containerEl).setName('Move original file after processing').setDesc('ON: Move original to processed folder. OFF: Create copy named "_processed.md".').addToggle(toggle => toggle.setValue(this.plugin.settings.moveOriginalFileOnProcess).onChange(async (value) => { this.plugin.settings.moveOriginalFileOnProcess = value; await this.plugin.saveSettings(); }));
+        new Setting(containerEl).setName("Use custom output filename for 'Add links'").setDesc("ON: Use custom suffix/replacement. OFF: Use '_processed.md'.").addToggle(toggle => toggle.setValue(this.plugin.settings.useCustomAddLinksSuffix).onChange(async (value) => { this.plugin.settings.useCustomAddLinksSuffix = value; await this.plugin.saveSettings(); this.display(); }));
         if (this.plugin.settings.useCustomAddLinksSuffix) {
-            new Setting(containerEl).setName("Custom Suffix/Replacement String").setDesc("Empty to overwrite original. Ex: '_linked'.").addText(text => text.setPlaceholder("Leave empty to overwrite").setValue(this.plugin.settings.addLinksCustomSuffix).onChange(async (value) => { this.plugin.settings.addLinksCustomSuffix = value; await this.plugin.saveSettings(); }));
+            new Setting(containerEl).setName("Custom suffix/replacement string").setDesc("Empty to overwrite original. Ex: '_linked'.").addText(text => text.setPlaceholder("Leave empty to overwrite").setValue(this.plugin.settings.addLinksCustomSuffix).onChange(async (value) => { this.plugin.settings.addLinksCustomSuffix = value; await this.plugin.saveSettings(); }));
         }
         // Add the new toggle for removing code fences
         new Setting(containerEl)
-            .setName("Remove Code Fences on 'Add Links'")
+            .setName("Remove code fences on 'Add links'")
             .setDesc("ON: Remove all ```markdown and ``` fences from the final output of 'Process File' and 'Process Folder'. OFF: Keep code fences.")
             .addToggle(toggle => toggle
                 .setValue(this.plugin.settings.removeCodeFencesOnAddLinks)
@@ -290,60 +289,60 @@ export class NotemdSettingTab extends PluginSettingTab {
                     await this.plugin.saveSettings();
                 }));
 
-        containerEl.createEl('h4', { text: 'Concept Note Output' });
-        new Setting(containerEl).setName('Customize Concept Note Path').setDesc('ON: Create new concept notes in specified path. OFF: Do not create automatically.').addToggle(toggle => toggle.setValue(this.plugin.settings.useCustomConceptNoteFolder).onChange(async (value) => { this.plugin.settings.useCustomConceptNoteFolder = value; await this.plugin.saveSettings(); this.display(); }));
+        new Setting(containerEl).setName('Concept note output').setHeading();
+        new Setting(containerEl).setName('Customize concept note path').setDesc('ON: Create new concept notes in specified path. OFF: Do not create automatically.').addToggle(toggle => toggle.setValue(this.plugin.settings.useCustomConceptNoteFolder).onChange(async (value) => { this.plugin.settings.useCustomConceptNoteFolder = value; await this.plugin.saveSettings(); this.display(); }));
         if (this.plugin.settings.useCustomConceptNoteFolder) {
-            new Setting(containerEl).setName('Concept Note Folder Path').setDesc('Relative path within vault.').addText(text => text.setPlaceholder('e.g., Concepts').setValue(this.plugin.settings.conceptNoteFolder).onChange(async (value) => { /* Add validation */ this.plugin.settings.conceptNoteFolder = value.trim(); await this.plugin.saveSettings(); }));
+            new Setting(containerEl).setName('Concept note folder path').setDesc('Relative path within vault.').addText(text => text.setPlaceholder('e.g., Concepts').setValue(this.plugin.settings.conceptNoteFolder).onChange(async (value) => { /* Add validation */ this.plugin.settings.conceptNoteFolder = value.trim(); await this.plugin.saveSettings(); }));
         }
 
-        containerEl.createEl('h4', { text: 'Concept Log File Output' });
-        new Setting(containerEl).setName('Generate Concept Log File').setDesc('ON: Log newly created concept notes.').addToggle(toggle => toggle.setValue(this.plugin.settings.generateConceptLogFile).onChange(async (value) => { this.plugin.settings.generateConceptLogFile = value; await this.plugin.saveSettings(); this.display(); }));
+        new Setting(containerEl).setName('Concept log file output').setHeading();
+        new Setting(containerEl).setName('Generate concept log file').setDesc('ON: Log newly created concept notes.').addToggle(toggle => toggle.setValue(this.plugin.settings.generateConceptLogFile).onChange(async (value) => { this.plugin.settings.generateConceptLogFile = value; await this.plugin.saveSettings(); this.display(); }));
         if (this.plugin.settings.generateConceptLogFile) {
-            const logFolderSetting = new Setting(containerEl).setName('Customize Log File Save Path');
+            const logFolderSetting = new Setting(containerEl).setName('Customize log file save path');
             let logFolderDesc = 'ON: Save log to specified path.';
             if (this.plugin.settings.useCustomConceptNoteFolder && this.plugin.settings.conceptNoteFolder) { logFolderDesc += ` OFF: Save in Concept Note Folder ('${this.plugin.settings.conceptNoteFolder}')`; } else { logFolderDesc += ' OFF: Save in vault root.'; }
             logFolderSetting.setDesc(logFolderDesc);
             logFolderSetting.addToggle(toggle => toggle.setValue(this.plugin.settings.useCustomConceptLogFolder).onChange(async (value) => { this.plugin.settings.useCustomConceptLogFolder = value; await this.plugin.saveSettings(); this.display(); }));
             if (this.plugin.settings.useCustomConceptLogFolder) {
-                new Setting(containerEl).setName('Concept Log Folder Path').setDesc('Relative path. Required if custom path enabled.').addText(text => text.setPlaceholder('e.g., Logs/ConceptLogs').setValue(this.plugin.settings.conceptLogFolderPath).onChange(async (value) => { /* Add validation */ this.plugin.settings.conceptLogFolderPath = value.trim(); await this.plugin.saveSettings(); }));
+                new Setting(containerEl).setName('Concept log folder path').setDesc('Relative path. Required if custom path enabled.').addText(text => text.setPlaceholder('e.g., Logs/ConceptLogs').setValue(this.plugin.settings.conceptLogFolderPath).onChange(async (value) => { /* Add validation */ this.plugin.settings.conceptLogFolderPath = value.trim(); await this.plugin.saveSettings(); }));
             }
-            const logFileNameSetting = new Setting(containerEl).setName('Customize Log File Name');
+            const logFileNameSetting = new Setting(containerEl).setName('Customize log file name');
             logFileNameSetting.setDesc(`ON: Use specified name. OFF: Use "${DEFAULT_SETTINGS.conceptLogFileName}".`);
             logFileNameSetting.addToggle(toggle => toggle.setValue(this.plugin.settings.useCustomConceptLogFileName).onChange(async (value) => { this.plugin.settings.useCustomConceptLogFileName = value; await this.plugin.saveSettings(); this.display(); }));
             if (this.plugin.settings.useCustomConceptLogFileName) {
-                new Setting(containerEl).setName('Concept Log File Name').setDesc('Name for the log file. Required if custom name enabled.').addText(text => text.setPlaceholder(DEFAULT_SETTINGS.conceptLogFileName).setValue(this.plugin.settings.conceptLogFileName).onChange(async (value) => { /* Add validation */ this.plugin.settings.conceptLogFileName = value.trim(); await this.plugin.saveSettings(); }));
+                new Setting(containerEl).setName('Concept log file name').setDesc('Name for the log file. Required if custom name enabled.').addText(text => text.setPlaceholder(DEFAULT_SETTINGS.conceptLogFileName).setValue(this.plugin.settings.conceptLogFileName).onChange(async (value) => { /* Add validation */ this.plugin.settings.conceptLogFileName = value.trim(); await this.plugin.saveSettings(); }));
             }
         }
 
-        containerEl.createEl('h4', { text: 'Content Generation & Output' });
-        new Setting(containerEl).setName('Enable Research in "Generate from Title"').setDesc('ON: Perform web research before generating.').addToggle(toggle => toggle.setValue(this.plugin.settings.enableResearchInGenerateContent).onChange(async (value) => { this.plugin.settings.enableResearchInGenerateContent = value; await this.plugin.saveSettings(); }));
-        new Setting(containerEl).setName("Use Custom Output Folder for 'Generate from Title'").setDesc("ON: Move completed files to custom folder. OFF: Move to '[original_foldername]_complete'.").addToggle(toggle => toggle.setValue(this.plugin.settings.useCustomGenerateTitleOutputFolder).onChange(async (value) => { this.plugin.settings.useCustomGenerateTitleOutputFolder = value; await this.plugin.saveSettings(); this.display(); }));
+        new Setting(containerEl).setName('Content generation & output').setHeading();
+        new Setting(containerEl).setName('Enable research in "Generate from title"').setDesc('ON: Perform web research before generating.').addToggle(toggle => toggle.setValue(this.plugin.settings.enableResearchInGenerateContent).onChange(async (value) => { this.plugin.settings.enableResearchInGenerateContent = value; await this.plugin.saveSettings(); }));
+        new Setting(containerEl).setName("Use custom output folder for 'Generate from title'").setDesc("ON: Move completed files to custom folder. OFF: Move to '[original_foldername]_complete'.").addToggle(toggle => toggle.setValue(this.plugin.settings.useCustomGenerateTitleOutputFolder).onChange(async (value) => { this.plugin.settings.useCustomGenerateTitleOutputFolder = value; await this.plugin.saveSettings(); this.display(); }));
         if (this.plugin.settings.useCustomGenerateTitleOutputFolder) {
-            new Setting(containerEl).setName("Custom Output Folder Name").setDesc("Subfolder name for completed files.").addText(text => text.setPlaceholder(DEFAULT_SETTINGS.generateTitleOutputFolderName).setValue(this.plugin.settings.generateTitleOutputFolderName).onChange(async (value) => { /* Add validation */ this.plugin.settings.generateTitleOutputFolderName = value.trim() || DEFAULT_SETTINGS.generateTitleOutputFolderName; await this.plugin.saveSettings(); this.display(); }));
+            new Setting(containerEl).setName("Custom output folder name").setDesc("Subfolder name for completed files.").addText(text => text.setPlaceholder(DEFAULT_SETTINGS.generateTitleOutputFolderName).setValue(this.plugin.settings.generateTitleOutputFolderName).onChange(async (value) => { /* Add validation */ this.plugin.settings.generateTitleOutputFolderName = value.trim() || DEFAULT_SETTINGS.generateTitleOutputFolderName; await this.plugin.saveSettings(); this.display(); }));
         }
 
-        containerEl.createEl('h4', { text: 'Web Research Provider' });
-        new Setting(containerEl).setName('Search Provider').setDesc('Engine for "Research and Summarize".').addDropdown(dropdown => dropdown.addOption('tavily', 'Tavily (Requires API Key)').addOption('duckduckgo', 'DuckDuckGo (Experimental)').setValue(this.plugin.settings.searchProvider).onChange(async (value: 'tavily' | 'duckduckgo') => { this.plugin.settings.searchProvider = value; await this.plugin.saveSettings(); this.display(); }));
+        new Setting(containerEl).setName('Web research provider').setHeading();
+        new Setting(containerEl).setName('Search provider').setDesc('Engine for "Research and Summarize".').addDropdown(dropdown => dropdown.addOption('tavily', 'Tavily (Requires API Key)').addOption('duckduckgo', 'DuckDuckGo (Experimental)').setValue(this.plugin.settings.searchProvider).onChange(async (value: 'tavily' | 'duckduckgo') => { this.plugin.settings.searchProvider = value; await this.plugin.saveSettings(); this.display(); }));
         if (this.plugin.settings.searchProvider === 'tavily') {
-            new Setting(containerEl).setName('Tavily API Key').setDesc('Required for Tavily. Get from tavily.com.').addText(text => text.setPlaceholder('Enter Tavily API key (tvly-...)').setValue(this.plugin.settings.tavilyApiKey).onChange(async (value) => { this.plugin.settings.tavilyApiKey = value.trim(); await this.plugin.saveSettings(); }));
-            new Setting(containerEl).setName('Tavily Max Results').setDesc('Max results (1-20).').addText(text => text.setPlaceholder(String(DEFAULT_SETTINGS.tavilyMaxResults)).setValue(String(this.plugin.settings.tavilyMaxResults)).onChange(async (value) => { const num = parseInt(value, 10); if (!isNaN(num) && num >= 1 && num <= 20) { this.plugin.settings.tavilyMaxResults = num; } else { this.plugin.settings.tavilyMaxResults = DEFAULT_SETTINGS.tavilyMaxResults; } await this.plugin.saveSettings(); this.display(); }));
-            new Setting(containerEl).setName('Tavily Search Depth').setDesc('"advanced" uses more credits.').addDropdown(dropdown => dropdown.addOption('basic', 'Basic').addOption('advanced', 'Advanced (2 Credits)').setValue(this.plugin.settings.tavilySearchDepth).onChange(async (value: 'basic' | 'advanced') => { this.plugin.settings.tavilySearchDepth = value; await this.plugin.saveSettings(); }));
+            new Setting(containerEl).setName('Tavily API key').setDesc('Required for Tavily. Get from tavily.com.').addText(text => text.setPlaceholder('Enter Tavily API key (tvly-...)').setValue(this.plugin.settings.tavilyApiKey).onChange(async (value) => { this.plugin.settings.tavilyApiKey = value.trim(); await this.plugin.saveSettings(); }));
+            new Setting(containerEl).setName('Tavily max results').setDesc('Max results (1-20).').addText(text => text.setPlaceholder(String(DEFAULT_SETTINGS.tavilyMaxResults)).setValue(String(this.plugin.settings.tavilyMaxResults)).onChange(async (value) => { const num = parseInt(value, 10); if (!isNaN(num) && num >= 1 && num <= 20) { this.plugin.settings.tavilyMaxResults = num; } else { this.plugin.settings.tavilyMaxResults = DEFAULT_SETTINGS.tavilyMaxResults; } await this.plugin.saveSettings(); this.display(); }));
+            new Setting(containerEl).setName('Tavily search depth').setDesc('"advanced" uses more credits.').addDropdown(dropdown => dropdown.addOption('basic', 'Basic').addOption('advanced', 'Advanced (2 Credits)').setValue(this.plugin.settings.tavilySearchDepth).onChange(async (value: 'basic' | 'advanced') => { this.plugin.settings.tavilySearchDepth = value; await this.plugin.saveSettings(); }));
         } else if (this.plugin.settings.searchProvider === 'duckduckgo') {
-            new Setting(containerEl).setName('DuckDuckGo Max Results').setDesc('Max results to parse.').addSlider(slider => slider.setLimits(1, 10, 1).setValue(this.plugin.settings.ddgMaxResults).setDynamicTooltip().onChange(async (value) => { this.plugin.settings.ddgMaxResults = value; await this.plugin.saveSettings(); }));
-            new Setting(containerEl).setName('DuckDuckGo Content Fetch Timeout (seconds)').setDesc('Max wait time per result URL.').addSlider(slider => slider.setLimits(5, 60, 5).setValue(this.plugin.settings.ddgFetchTimeout).setDynamicTooltip().onChange(async (value) => { this.plugin.settings.ddgFetchTimeout = value; await this.plugin.saveSettings(); }));
+            new Setting(containerEl).setName('DuckDuckGo max results').setDesc('Max results to parse.').addSlider(slider => slider.setLimits(1, 10, 1).setValue(this.plugin.settings.ddgMaxResults).setDynamicTooltip().onChange(async (value) => { this.plugin.settings.ddgMaxResults = value; await this.plugin.saveSettings(); }));
+            new Setting(containerEl).setName('DuckDuckGo content fetch timeout (seconds)').setDesc('Max wait time per result URL.').addSlider(slider => slider.setLimits(5, 60, 5).setValue(this.plugin.settings.ddgFetchTimeout).setDynamicTooltip().onChange(async (value) => { this.plugin.settings.ddgFetchTimeout = value; await this.plugin.saveSettings(); }));
         }
-        new Setting(containerEl).setName('Max Research Content Tokens').setDesc('Approx. max tokens from web results for summarization prompt.').addText(text => text.setPlaceholder(String(DEFAULT_SETTINGS.maxResearchContentTokens)).setValue(String(this.plugin.settings.maxResearchContentTokens)).onChange(async (value) => { const num = parseInt(value, 10); if (!isNaN(num) && num > 100) { this.plugin.settings.maxResearchContentTokens = num; } else { this.plugin.settings.maxResearchContentTokens = DEFAULT_SETTINGS.maxResearchContentTokens; } await this.plugin.saveSettings(); this.display(); }));
+        new Setting(containerEl).setName('Max research content tokens').setDesc('Approx. max tokens from web results for summarization prompt.').addText(text => text.setPlaceholder(String(DEFAULT_SETTINGS.maxResearchContentTokens)).setValue(String(this.plugin.settings.maxResearchContentTokens)).onChange(async (value) => { const num = parseInt(value, 10); if (!isNaN(num) && num > 100) { this.plugin.settings.maxResearchContentTokens = num; } else { this.plugin.settings.maxResearchContentTokens = DEFAULT_SETTINGS.maxResearchContentTokens; } await this.plugin.saveSettings(); this.display(); }));
 
-        containerEl.createEl('h4', { text: 'Processing Parameters' });
-        new Setting(containerEl).setName('Chunk Word Count').setDesc('Max words per chunk sent to LLM.').addText(text => text.setPlaceholder(String(DEFAULT_SETTINGS.chunkWordCount)).setValue(String(this.plugin.settings.chunkWordCount)).onChange(async (value) => { const num = parseInt(value, 10); if (!isNaN(num) && num > 50) { this.plugin.settings.chunkWordCount = num; } else { this.plugin.settings.chunkWordCount = DEFAULT_SETTINGS.chunkWordCount; } await this.plugin.saveSettings(); this.display(); }));
-        new Setting(containerEl).setName('Enable Duplicate Detection').setDesc('Enable checks for duplicate terms (results in console).').addToggle(toggle => toggle.setValue(this.plugin.settings.enableDuplicateDetection).onChange(async (value) => { this.plugin.settings.enableDuplicateDetection = value; await this.plugin.saveSettings(); }));
-            new Setting(containerEl).setName('Max Tokens').setDesc('Max tokens LLM should generate per response.').addText(text => text.setPlaceholder(String(DEFAULT_SETTINGS.maxTokens)).setValue(String(this.plugin.settings.maxTokens)).onChange(async (value) => { const num = parseInt(value, 10); if (!isNaN(num) && num > 0) { this.plugin.settings.maxTokens = num; } else { this.plugin.settings.maxTokens = DEFAULT_SETTINGS.maxTokens; } await this.plugin.saveSettings(); this.display(); }));
+        new Setting(containerEl).setName('Processing parameters').setHeading();
+        new Setting(containerEl).setName('Chunk word count').setDesc('Max words per chunk sent to LLM.').addText(text => text.setPlaceholder(String(DEFAULT_SETTINGS.chunkWordCount)).setValue(String(this.plugin.settings.chunkWordCount)).onChange(async (value) => { const num = parseInt(value, 10); if (!isNaN(num) && num > 50) { this.plugin.settings.chunkWordCount = num; } else { this.plugin.settings.chunkWordCount = DEFAULT_SETTINGS.chunkWordCount; } await this.plugin.saveSettings(); this.display(); }));
+        new Setting(containerEl).setName('Enable duplicate detection').setDesc('Enable checks for duplicate terms (results in console).').addToggle(toggle => toggle.setValue(this.plugin.settings.enableDuplicateDetection).onChange(async (value) => { this.plugin.settings.enableDuplicateDetection = value; await this.plugin.saveSettings(); }));
+            new Setting(containerEl).setName('Max tokens').setDesc('Max tokens LLM should generate per response.').addText(text => text.setPlaceholder(String(DEFAULT_SETTINGS.maxTokens)).setValue(String(this.plugin.settings.maxTokens)).onChange(async (value) => { const num = parseInt(value, 10); if (!isNaN(num) && num > 0) { this.plugin.settings.maxTokens = num; } else { this.plugin.settings.maxTokens = DEFAULT_SETTINGS.maxTokens; } await this.plugin.saveSettings(); this.display(); }));
 
         // --- Duplicate Check Scope Settings (Refined) ---
-        containerEl.createEl('h4', { text: 'Duplicate Check Scope' });
+        new Setting(containerEl).setName('Duplicate check scope').setHeading();
 
         new Setting(containerEl)
-            .setName('Duplicate Check Scope Mode')
+            .setName('Duplicate check scope mode')
             .setDesc('Define the scope for finding duplicate counterparts.')
             .addDropdown(dropdown => dropdown
                 .addOption('vault', 'Entire Vault (Default - Compares concept notes to all other notes)')
@@ -360,7 +359,7 @@ export class NotemdSettingTab extends PluginSettingTab {
         // Show path input only if mode is 'include' or 'exclude' (not for 'vault' or 'concept_folder_only')
         if (this.plugin.settings.duplicateCheckScopeMode === 'include' || this.plugin.settings.duplicateCheckScopeMode === 'exclude') {
             new Setting(containerEl)
-                .setName(this.plugin.settings.duplicateCheckScopeMode === 'include' ? 'Include Folders' : 'Exclude Folders')
+                .setName(this.plugin.settings.duplicateCheckScopeMode === 'include' ? 'Include folders' : 'Exclude folders')
                 .setDesc(`Enter relative paths (one per line) for folders to ${this.plugin.settings.duplicateCheckScopeMode}. Required if mode is not 'Entire Vault' or 'Concept Folder Only'. Paths are case-sensitive and use '/' as separator.`)
                 .addTextArea(textarea => textarea
                     .setPlaceholder('e.g., Notes/ProjectA\nSource Material') // Updated placeholder

@@ -79,6 +79,11 @@ export function refineMermaidBlocks(content: string): string {
                 // Safeguard: Final replacements to ensure ["; and ?["; are corrected
                 line = line.replace(/\[";/g, '"];');
                 line = line.replace(/\?\[";/g, '?"];');
+
+				// New User Rule 1: If line ends with [;";, change to "];
+				line = line.replace(/\[";$/, '"];');
+				// New User Rule 2: Then, if line ends with [", change to "]
+				line = line.replace(/\["$/, '"\"]');
 			}
 
 
