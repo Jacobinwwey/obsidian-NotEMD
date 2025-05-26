@@ -47,7 +47,7 @@ export default class NotemdPlugin extends Plugin {
         );
         const ribbonIconEl = this.addRibbonIcon(NOTEMD_SIDEBAR_ICON, NOTEMD_SIDEBAR_DISPLAY_TEXT, () => this.activateView());
         ribbonIconEl.addClass('notemd-ribbon-class');
-        this.addCommand({ id: 'open-notemd-sidebar', name: 'Open Sidebar', callback: () => this.activateView() });
+        this.addCommand({ id: 'open-notemd-sidebar', name: 'Open sidebar', callback: () => this.activateView() });
 
         // --- Status Bar ---
         this.statusBarItem = this.addStatusBarItem();
@@ -56,7 +56,7 @@ export default class NotemdPlugin extends Plugin {
         // --- Command Palette Integration ---
         this.addCommand({
             id: 'process-with-notemd',
-            name: 'Process Current File (Add Links)', // Clarified command name
+            name: 'Process current file (add links)', // Clarified command name
             callback: async () => {
                 await this.processWithNotemdCommand(); // Use the command handler method
             }
@@ -64,7 +64,7 @@ export default class NotemdPlugin extends Plugin {
 
         this.addCommand({
             id: 'process-folder-with-notemd',
-            name: 'Process Folder (Add Links)', // Clarified command name
+            name: 'Process folder (add links)', // Clarified command name
             callback: async () => {
                 await this.processFolderWithNotemdCommand(); // Use the command handler method
             }
@@ -73,7 +73,7 @@ export default class NotemdPlugin extends Plugin {
         // Command to check duplicates in the current file (simple version)
         this.addCommand({
             id: 'check-for-duplicates',
-            name: 'Check for Duplicates in Current File',
+            name: 'Check for duplicates in current file',
             callback: async () => {
                 // This command is simple and doesn't use the full reporter/busy state
                 const activeFile = this.app.workspace.getActiveFile();
@@ -103,7 +103,7 @@ export default class NotemdPlugin extends Plugin {
 
         this.addCommand({
             id: 'test-llm-connection',
-            name: 'Test LLM Connection',
+            name: 'Test LLM connection',
             callback: async () => {
                 await this.testLlmConnectionCommand(); // Use the command handler method
             }
@@ -111,7 +111,7 @@ export default class NotemdPlugin extends Plugin {
 
         this.addCommand({
             id: 'generate-content-from-title',
-            name: 'Generate Content from Note Title',
+            name: 'Generate content from note title',
             callback: async () => {
                 const activeFile = this.app.workspace.getActiveFile();
                  if (!activeFile || !(activeFile instanceof TFile) || activeFile.extension !== 'md') {
@@ -124,7 +124,7 @@ export default class NotemdPlugin extends Plugin {
 
         this.addCommand({
             id: 'research-and-summarize-topic',
-            name: 'Research and Summarize Topic',
+            name: 'Research and summarize topic',
             editorCallback: async (editor: Editor, view: MarkdownView) => {
                 // Directly call the command handler, passing editor and view
                 await this.researchAndSummarizeCommand(editor, view);
@@ -133,7 +133,7 @@ export default class NotemdPlugin extends Plugin {
 
         this.addCommand({
             id: 'batch-generate-content-from-titles',
-            name: 'Batch Generate Content from Titles',
+            name: 'Batch generate content from titles',
             callback: async () => {
                 await this.batchGenerateContentForTitlesCommand(); // Use the command handler method
             }
@@ -141,7 +141,7 @@ export default class NotemdPlugin extends Plugin {
 
         this.addCommand({
             id: 'check-and-remove-duplicate-concept-notes',
-            name: 'Check and Remove Duplicate Concept Notes',
+            name: 'Check and remove duplicate concept notes',
             callback: async () => {
                 await this.checkAndRemoveDuplicateConceptNotesCommand(); // Use the command handler method
             }
@@ -149,7 +149,7 @@ export default class NotemdPlugin extends Plugin {
 
         this.addCommand({
             id: 'batch-mermaid-fix',
-            name: 'Batch Fix Mermaid Syntax',
+            name: 'Batch fix Mermaid syntax',
             callback: async () => {
                 await this.batchMermaidFixCommand(); // Use the new command handler method
             }

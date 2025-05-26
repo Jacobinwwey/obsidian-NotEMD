@@ -193,10 +193,10 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         container.empty();
         container.addClass('notemd-sidebar-container');
 
-        container.createEl("h4", { text: "Original Processing" });
+        container.createEl("h4", { text: "Original processing" });
         const originalButtonGroup = container.createDiv({ cls: 'notemd-button-group' });
 
-        this.processCurrentButton = originalButtonGroup.createEl('button', { text: 'Process File (Add Links)', cls: 'mod-cta' });
+        this.processCurrentButton = originalButtonGroup.createEl('button', { text: 'Process file (add links)', cls: 'mod-cta' });
         this.processCurrentButton.title = 'Processes the current file to add [[wiki-links]] and create concept notes.';
         this.processCurrentButton.onclick = async () => {
             if (this.isProcessing) return;
@@ -208,7 +208,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             finally { this.isProcessing = false; this.updateButtonStates(); }
         };
 
-        this.processFolderButton = originalButtonGroup.createEl('button', { text: 'Process Folder (Add Links)' });
+        this.processFolderButton = originalButtonGroup.createEl('button', { text: 'Process folder (add links)' });
         this.processFolderButton.title = 'Processes all files in a selected folder to add [[wiki-links]] and create concept notes.';
         this.processFolderButton.onclick = async () => {
             if (this.isProcessing) return;
@@ -220,10 +220,10 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             finally { this.isProcessing = false; this.updateButtonStates(); }
         };
 
-        container.createEl('h4', { text: "New Features" });
+        container.createEl('h4', { text: "New features" });
         const newFeatureButtonGroup = container.createDiv({ cls: 'notemd-button-group' });
 
-        this.researchButton = newFeatureButtonGroup.createEl('button', { text: 'Research & Summarize' });
+        this.researchButton = newFeatureButtonGroup.createEl('button', { text: 'Research & summarize' });
         this.researchButton.title = 'Uses the current note title or selection for web search and appends an LLM summary.';
         this.researchButton.onclick = async () => {
             if (this.isProcessing || this.plugin.getIsBusy()) { new Notice('Processing already in progress.'); return; }
@@ -272,7 +272,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             }
         };
 
-        this.generateTitleButton = newFeatureButtonGroup.createEl('button', { text: 'Generate from Title' });
+        this.generateTitleButton = newFeatureButtonGroup.createEl('button', { text: 'Generate from title' });
         this.generateTitleButton.title = 'Generates content for the current note based on its title, replacing existing content.';
         this.generateTitleButton.onclick = async () => {
             if (this.isProcessing) return;
@@ -286,7 +286,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             finally { this.isProcessing = false; this.updateButtonStates(); }
         };
 
-        this.batchGenerateTitleButton = newFeatureButtonGroup.createEl('button', { text: 'Batch Generate from Titles' });
+        this.batchGenerateTitleButton = newFeatureButtonGroup.createEl('button', { text: 'Batch generate from titles' });
         this.batchGenerateTitleButton.title = 'Generates content for all notes in a selected folder based on their titles.';
         this.batchGenerateTitleButton.onclick = async () => {
             if (this.isProcessing) return;
@@ -301,7 +301,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         container.createEl('h4', { text: "Utilities" });
         const utilityButtonGroup = container.createDiv({ cls: 'notemd-button-group' });
 
-        this.batchMermaidFixButton = utilityButtonGroup.createEl('button', { text: 'Batch Mermaid Fix' });
+        this.batchMermaidFixButton = utilityButtonGroup.createEl('button', { text: 'Batch Mermaid fix' });
         this.batchMermaidFixButton.title = 'Fixes Mermaid and LaTeX syntax in all Markdown files in a selected folder.';
         this.batchMermaidFixButton.onclick = async () => {
             if (this.isProcessing) return;
@@ -313,7 +313,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             finally { this.isProcessing = false; this.updateButtonStates(); }
         };
 
-        this.checkDuplicatesButton = utilityButtonGroup.createEl('button', { text: 'Check Duplicates (Current File)' });
+        this.checkDuplicatesButton = utilityButtonGroup.createEl('button', { text: 'Check duplicates (current file)' });
         this.checkDuplicatesButton.onclick = async () => {
             // Replicate logic from main.ts onload for this command
             const activeFile = this.plugin.app.workspace.getActiveFile();
@@ -344,14 +344,14 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             }
         };
 
-        this.testConnectionButton = utilityButtonGroup.createEl('button', { text: 'Test LLM Connection' });
+        this.testConnectionButton = utilityButtonGroup.createEl('button', { text: 'Test LLM connection' });
         this.testConnectionButton.onclick = async () => {
             if (this.isProcessing) { new Notice("Cannot test connection while processing."); return; }
             this.clearDisplay();
             await this.plugin.testLlmConnectionCommand(this); // Use plugin method
         };
 
-        this.checkRemoveDuplicatesButton = utilityButtonGroup.createEl('button', { text: 'Check & Remove Duplicates' });
+        this.checkRemoveDuplicatesButton = utilityButtonGroup.createEl('button', { text: 'Check & remove duplicates' });
         this.checkRemoveDuplicatesButton.title = 'Checks Concept Note folder for duplicates and prompts for deletion.';
         this.checkRemoveDuplicatesButton.onclick = async () => {
             if (this.isProcessing) return;
@@ -370,13 +370,13 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         this.progressEl = this.progressBarContainerEl.createEl('div', { cls: 'notemd-progress-bar-fill' });
         this.timeRemainingEl = progressArea.createEl('p', { cls: 'notemd-time-remaining' });
 
-        this.cancelButton = progressArea.createEl('button', { text: 'Cancel Processing', cls: 'notemd-cancel-button' });
+        this.cancelButton = progressArea.createEl('button', { text: 'Cancel processing', cls: 'notemd-cancel-button' });
         this.cancelButton.onclick = () => this.requestCancel();
 
         container.createEl('hr');
         const logHeader = container.createDiv({ cls: 'notemd-log-header' });
-        logHeader.createEl('h5', { text: 'Log Output' });
-        const copyLogButton = logHeader.createEl('button', { text: 'Copy Log', cls: 'notemd-copy-log-button' });
+        logHeader.createEl('h5', { text: 'Log output' });
+        const copyLogButton = logHeader.createEl('button', { text: 'Copy log', cls: 'notemd-copy-log-button' });
         copyLogButton.onclick = () => {
             if (this.logContent.length > 0) {
                 navigator.clipboard.writeText(this.logContent.join('\n')).then(() => new Notice('Log copied!'), () => new Notice('Failed to copy log.'));

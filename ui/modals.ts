@@ -9,7 +9,7 @@ import { App, Modal } from 'obsidian';
 export function showDeletionConfirmationModal(app: App, reportList: { path: string; reason: string; counterparts: string[] }[]): Promise<boolean> {
     return new Promise((resolve) => {
         const modal = new Modal(app);
-        modal.titleEl.setText('Confirm Duplicate Deletion');
+        modal.titleEl.setText('Confirm duplicate deletion');
         modal.contentEl.addClass('notemd-confirm-delete-modal'); // For potential styling
 
         modal.contentEl.createEl('p', { text: `The following ${reportList.length} concept notes are identified as potential duplicates and will be moved to system trash:` });
@@ -29,7 +29,7 @@ export function showDeletionConfirmationModal(app: App, reportList: { path: stri
 
         const buttonContainer = modal.contentEl.createDiv({ cls: 'modal-button-container' });
 
-        const confirmButton = buttonContainer.createEl('button', { text: `Delete ${reportList.length} Files`, cls: 'mod-warning' });
+        const confirmButton = buttonContainer.createEl('button', { text: `Delete ${reportList.length} files`, cls: 'mod-warning' });
         confirmButton.onclick = () => {
             modal.close();
             resolve(true);
