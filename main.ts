@@ -56,15 +56,23 @@ export default class NotemdPlugin extends Plugin {
         // --- Command Palette Integration ---
         this.addCommand({
             id: 'process-with-notemd',
-            name: 'Process current file (add links)', // Clarified command name
-            callback: async () => {
-                await this.processWithNotemdCommand(); // Use the command handler method
+            name: 'Process current file (add links)',
+            checkCallback: (checking: boolean) => {
+                const activeFile = this.app.workspace.getActiveFile();
+                const condition = activeFile && (activeFile.extension === 'md' || activeFile.extension === 'txt');
+                if (condition) {
+                    if (!checking) {
+                        this.processWithNotemdCommand();
+                    }
+                    return true;
+                }
+                return false;
             }
         });
 
         this.addCommand({
             id: 'process-folder-with-notemd',
-            name: 'Process folder (add links)', // Clarified command name
+            name: 'Process folder (add links)',
             callback: async () => {
                 await this.processFolderWithNotemdCommand(); // Use the command handler method
             }
@@ -74,29 +82,41 @@ export default class NotemdPlugin extends Plugin {
         this.addCommand({
             id: 'check-for-duplicates',
             name: 'Check for duplicates in current file',
-            callback: async () => {
-                // This command is simple and doesn't use the full reporter/busy state
+            checkCallback: (checking: boolean) => {
                 const activeFile = this.app.workspace.getActiveFile();
-                if (!activeFile || !(activeFile instanceof TFile) || (activeFile.extension !== 'md' && activeFile.extension !== 'txt')) {
-                    new Notice("No active '.md' or '.txt' file to check.");
-                    return;
-                }
-                try {
-                    const content = await this.app.vault.read(activeFile);
-                    const duplicates = findDuplicates(content); // Use utility
-                    const message = `Found ${duplicates.size} potential duplicate terms. Check console.`;
-                    new Notice(message);
-                    if (duplicates.size > 0) {
-                        console.log(`Potential duplicates in ${activeFile.name}:`, Array.from(duplicates));
+                const condition = activeFile && (activeFile.extension === 'md' || activeFile.extension === 'txt');
+                if (condition) {
+                    if (!checking) {
+                        // This command is simple and doesn't use the full reporter/busy state
+                        // We need to ensure activeFile is valid here if it was captured in an outer scope for check,
+                        // or re-fetch it. Given the example, it's safer to re-evaluate.
+                        const currentActiveFile = this.app.workspace.getActiveFile();
+                        if (currentActiveFile && (currentActiveFile.extension === 'md' || currentActiveFile.extension === 'txt')) {
+                            (async () => { // Wrap async logic
+                                try {
+                                    const content = await this.app.vault.read(currentActiveFile);
+                                    const duplicates = findDuplicates(content); // Use utility
+                                    const message = `Found ${duplicates.size} potential duplicate terms. Check console.`;
+                                    new Notice(message);
+                                    if (duplicates.size > 0) {
+                                        console.log(`Potential duplicates in ${currentActiveFile.name}:`, Array.from(duplicates));
+                                    }
+                                } catch (error: unknown) {
+                                    let errorMessage = 'An unknown error occurred while checking duplicates.';
+                                    if (error instanceof Error) {
+                                        errorMessage = error.message;
+                                    }
+                                    new Notice(`Error checking duplicates: ${errorMessage}`);
+                                    console.error("Error checking duplicates:", error);
+                                }
+                            })();
+                        } else if (!checking) { // If file became invalid between check and action
+                             new Notice("No active '.md' or '.txt' file to check.");
+                        }
                     }
-                } catch (error: unknown) { // Changed to unknown
-                    let errorMessage = 'An unknown error occurred while checking duplicates.';
-                     if (error instanceof Error) {
-                        errorMessage = error.message;
-                    }
-                    new Notice(`Error checking duplicates: ${errorMessage}`);
-                    console.error("Error checking duplicates:", error); // Log the original error object
+                    return true;
                 }
+                return false;
             }
         });
 
@@ -104,30 +124,69 @@ export default class NotemdPlugin extends Plugin {
         this.addCommand({
             id: 'test-llm-connection',
             name: 'Test LLM connection',
-            callback: async () => {
-                await this.testLlmConnectionCommand(); // Use the command handler method
+            checkCallback: (checking: boolean) => {
+                const provider = this.settings.providers.find(p => p.name === this.settings.activeProvider);
+                const condition = !!provider;
+                if (condition) {
+                    if (!checking) {
+                        this.testLlmConnectionCommand();
+                    }
+                    return true;
+                }
+                if (!checking) { // Only show notice if trying to execute, not just checking availability
+                    new Notice("No active LLM provider configured. Please check Notemd settings.");
+                }
+                return false;
             }
         });
 
         this.addCommand({
             id: 'generate-content-from-title',
             name: 'Generate content from note title',
-            callback: async () => {
+            checkCallback: (checking: boolean) => {
                 const activeFile = this.app.workspace.getActiveFile();
-                 if (!activeFile || !(activeFile instanceof TFile) || activeFile.extension !== 'md') {
-                    new Notice('No active Markdown file selected.');
-                    return;
+                const condition = activeFile && activeFile instanceof TFile && activeFile.extension === 'md';
+                if (condition) {
+                    if (!checking) {
+                        // Re-fetch activeFile for safety, as it might change
+                        const currentActiveFile = this.app.workspace.getActiveFile();
+                        if (currentActiveFile && currentActiveFile instanceof TFile && currentActiveFile.extension === 'md') {
+                            this.generateContentForTitleCommand(currentActiveFile);
+                        } else {
+                            new Notice('No active Markdown file selected or file changed.');
+                        }
+                    }
+                    return true;
                 }
-                await this.generateContentForTitleCommand(activeFile); // Use the command handler method
+                 if (!checking) {
+                    new Notice('No active Markdown file selected.');
+                }
+                return false;
             }
         });
 
         this.addCommand({
             id: 'research-and-summarize-topic',
             name: 'Research and summarize topic',
-            editorCallback: async (editor: Editor, view: MarkdownView) => {
-                // Directly call the command handler, passing editor and view
-                await this.researchAndSummarizeCommand(editor, view);
+            checkCallback: (checking: boolean) => {
+                const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
+                const condition = activeView !== null;
+                if (condition) {
+                    if (!checking) {
+                        // Re-fetch activeView for safety
+                        const currentActiveView = this.app.workspace.getActiveViewOfType(MarkdownView);
+                        if (currentActiveView) {
+                             this.researchAndSummarizeCommand(currentActiveView.editor, currentActiveView);
+                        } else {
+                            new Notice('No active Markdown editor found.');
+                        }
+                    }
+                    return true;
+                }
+                if (!checking) {
+                    new Notice('No active Markdown editor found.');
+                }
+                return false;
             }
         });
 
