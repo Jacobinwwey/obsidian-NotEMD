@@ -196,10 +196,11 @@ This is the core functionality focused on identifying concepts and adding `[[wik
     *   Click **"Process File (Add Links)"**.
     *   To process a folder: Click **"Process Folder (Add Links)"**, select the folder, and click "Process".
     *   Progress is shown in the sidebar. You can cancel the task using the "Cancel Processing" button in the sidebar.
+    *   *Note for folder processing:* Files are processed in the background without being opened in the editor.
 
 2.  **Using the Command Palette** (`Ctrl+P` or `Cmd+P`):
     *   **Single File**: Open the file and run `Notemd: Process Current File`.
-    *   **Folder**: Run `Notemd: Process Folder`, then select the folder.
+    *   **Folder**: Run `Notemd: Process Folder`, then select the folder. Files are processed in the background without being opened in the editor.
     *   A progress modal appears for command palette actions, which includes a cancel button.
     *   *Note:* The plugin automatically removes leading `\boxed{` and trailing `}` lines if found in the final processed content before saving.
 
@@ -223,7 +224,7 @@ This is the core functionality focused on identifying concepts and adding `[[wik
 3.  **Batch Generate Content from Titles**:
     *   Run the command `Notemd: Batch Generate Content from Titles` (via command palette or sidebar button).
     *   Select the folder containing the notes you want to process.
-    *   The plugin will iterate through each `.md` file in the folder (excluding `_processed.md` files and files in the designated "complete" folder), generating content based on the note's title and replacing existing content.
+    *   The plugin will iterate through each `.md` file in the folder (excluding `_processed.md` files and files in the designated "complete" folder), generating content based on the note's title and replacing existing content. Files are processed in the background without being opened in the editor.
     *   Successfully processed files are moved to the configured "complete" folder.
     *   This command respects the **"Enable Research in 'Generate from Title'"** setting for each note processed.
     *   You can cancel this task via the sidebar button or modal cancel button.
@@ -243,7 +244,10 @@ This is the core functionality focused on identifying concepts and adding `[[wik
 3.  **Batch Mermaid Fix**:
     *   Run `Notemd: Batch Fix Mermaid Syntax` (via command palette or sidebar button).
     *   Select the folder containing the Markdown files you want to fix.
-    *   The plugin will iterate through each `.md` file, apply the syntax corrections, and save the changes if any were made.
+    *   The plugin will iterate through each `.md` file, apply syntax corrections, and save the changes if any were made. Corrections include:
+        *   Ensuring proper Mermaid block structure.
+        *   Removing extraneous parentheses `()` and curly braces `{}` from within Mermaid diagrams.
+        *   Normalizing LaTeX math delimiters (e.g., `\(\)` to `$`).
     *   Progress and results (number of files modified, errors) are shown in the sidebar/modal log.
 
 4.  **Check and Remove Duplicate Concept Notes**:
@@ -281,7 +285,8 @@ This is the core functionality focused on identifying concepts and adding `[[wik
     3.  Double-check API Key, Base URL, Model Name, and API Version (for Azure). Ensure the API key is correct and has sufficient credits/permissions.
     4.  Ensure your local LLM server (LMStudio, Ollama) is running and the Base URL is correct (e.g., `http://localhost:1234/v1` for LMStudio).
     5.  Check your internet connection for cloud providers.
-    6.  Review the Developer Console for detailed error messages. Copy them using the button in the error modal if needed.
+    6.  **For single file processing errors:** Review the Developer Console for detailed error messages. Copy them using the button in the error modal if needed.
+    7.  **For batch processing errors:** Check the `error_processing_filename.log` file in your vault root for detailed error messages for each failed file. The Developer Console or error modal might show a summary or general batch error.
 -   **LM Studio Test Connection Fails**: Ensure LM Studio server is running and the correct model is loaded and selected within LM Studio. The test now uses the chat completions endpoint, which should be more reliable.
 -   **Folder Creation Errors ("File name cannot contain...")**:
     *   This usually means the path provided in the settings (**Processed File Folder Path** or **Concept Note Folder Path**) is invalid *for Obsidian*.
