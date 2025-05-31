@@ -1,4 +1,4 @@
-import { App, Modal } from 'obsidian';
+import { App, Modal, Setting } from 'obsidian';
 import { ProgressReporter } from '../types'; // Adjust import path
 
 // ProgressModal now implements ProgressReporter
@@ -23,7 +23,7 @@ export class ProgressModal extends Modal implements ProgressReporter {
         contentEl.addClass('notemd-progress-modal');
 
         // Header
-        contentEl.createEl('h3', { text: 'Notemd Processing' });
+        new Setting(contentEl).setName('Notemd processing').setHeading();
 
         // Status section
         const statusContainer = contentEl.createEl('div', { cls: 'notemd-status-container' });
