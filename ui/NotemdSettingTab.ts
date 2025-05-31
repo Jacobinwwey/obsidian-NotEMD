@@ -202,7 +202,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                             new Notice(`Error during connection test: ${message}`, 10000);
                             console.error(`Error testing ${activeProvider.name} connection from settings:`, error);
                         } finally {
-                            button.setDisabled(false).setButtonText('Test Connection');
+                            button.setDisabled(false).setButtonText('Test connection');
                         }
                     }));
         } else {
@@ -213,7 +213,7 @@ export class NotemdSettingTab extends PluginSettingTab {
         new Setting(containerEl).setName('Multi-model usage').setHeading();
         new Setting(containerEl)
             .setName('Use different providers for tasks')
-            .setDesc('ON: Select a specific LLM provider for each task below. OFF: Use the single "Active Provider".')
+            .setDesc('On: Select a specific LLM provider for each task below. Off: Use the single "Active Provider".')
             .addToggle(toggle => toggle
                 .setValue(this.plugin.settings.useMultiModelSettings)
                 .onChange(async (value) => {
@@ -231,7 +231,7 @@ export class NotemdSettingTab extends PluginSettingTab {
             const providerNames = this.plugin.settings.providers.map(p => p.name).sort();
             // Use the specific key types defined above
             const createTaskModelSettings = (providerSettingName: ProviderSettingKey, modelSettingName: ModelSettingKey, taskDesc: string) => {
-                const taskSetting = new Setting(containerEl).setName(`${taskDesc} Provider & Model`).setDesc(`Select provider and optionally override model for "${taskDesc}".`);
+                const taskSetting = new Setting(containerEl).setName(`${taskDesc} provider & model`).setDesc(`Select provider and optionally override model for "${taskDesc}".`);
                 taskSetting.addDropdown(dropdown => {
                     providerNames.forEach(name => dropdown.addOption(name, name));
                     // Use the typed key
@@ -259,7 +259,7 @@ export class NotemdSettingTab extends PluginSettingTab {
         new Setting(containerEl).setName('Stable API calls').setHeading();
         new Setting(containerEl)
             .setName('Enable stable API calls (retry logic)')
-            .setDesc('ON: Automatically retry failed LLM API calls. OFF: Fail on first error.')
+            .setDesc('On: Automatically retry failed LLM API calls. Off: Fail on first error.')
             .addToggle(toggle => toggle.setValue(this.plugin.settings.enableStableApiCall).onChange(async (value) => { this.plugin.settings.enableStableApiCall = value; await this.plugin.saveSettings(); this.display(); }));
         if (this.plugin.settings.enableStableApiCall) {
             new Setting(containerEl).setName('Retry interval (seconds)').setDesc('Wait time between retries.').addText(text => text.setPlaceholder(String(DEFAULT_SETTINGS.apiCallInterval)).setValue(String(this.plugin.settings.apiCallInterval)).onChange(async (value) => { const num = parseInt(value, 10); if (!isNaN(num) && num >= 1 && num <= 300) { this.plugin.settings.apiCallInterval = num; } else { this.plugin.settings.apiCallInterval = DEFAULT_SETTINGS.apiCallInterval; } await this.plugin.saveSettings(); this.display(); }));
@@ -267,21 +267,20 @@ export class NotemdSettingTab extends PluginSettingTab {
         }
 
         // --- General Settings ---
-        new Setting(containerEl).setName('General').setHeading();
         new Setting(containerEl).setName('Processed file output').setHeading();
-        new Setting(containerEl).setName('Customize processed file save path').setDesc('ON: Save to specified path. OFF: Save in original folder.').addToggle(toggle => toggle.setValue(this.plugin.settings.useCustomProcessedFileFolder).onChange(async (value) => { this.plugin.settings.useCustomProcessedFileFolder = value; await this.plugin.saveSettings(); this.display(); }));
+        new Setting(containerEl).setName('Customize processed file save path').setDesc('On: Save to specified path. Off: Save in original folder.').addToggle(toggle => toggle.setValue(this.plugin.settings.useCustomProcessedFileFolder).onChange(async (value) => { this.plugin.settings.useCustomProcessedFileFolder = value; await this.plugin.saveSettings(); this.display(); }));
         if (this.plugin.settings.useCustomProcessedFileFolder) {
             new Setting(containerEl).setName('Processed file folder path').setDesc('Relative path within vault.').addText(text => text.setPlaceholder('e.g., Processed/Notes').setValue(this.plugin.settings.processedFileFolder).onChange(async (value) => { /* Add validation */ this.plugin.settings.processedFileFolder = value.trim(); await this.plugin.saveSettings(); }));
         }
-        new Setting(containerEl).setName('Move original file after processing').setDesc('ON: Move original to processed folder. OFF: Create copy named "_processed.md".').addToggle(toggle => toggle.setValue(this.plugin.settings.moveOriginalFileOnProcess).onChange(async (value) => { this.plugin.settings.moveOriginalFileOnProcess = value; await this.plugin.saveSettings(); }));
-        new Setting(containerEl).setName("Use custom output filename for 'Add links'").setDesc("ON: Use custom suffix/replacement. OFF: Use '_processed.md'.").addToggle(toggle => toggle.setValue(this.plugin.settings.useCustomAddLinksSuffix).onChange(async (value) => { this.plugin.settings.useCustomAddLinksSuffix = value; await this.plugin.saveSettings(); this.display(); }));
+        new Setting(containerEl).setName('Move original file after processing').setDesc('On: Move original to processed folder. Off: Create copy named "_processed.md".').addToggle(toggle => toggle.setValue(this.plugin.settings.moveOriginalFileOnProcess).onChange(async (value) => { this.plugin.settings.moveOriginalFileOnProcess = value; await this.plugin.saveSettings(); }));
+        new Setting(containerEl).setName("Use custom output filename for 'Add links'").setDesc("On: Use custom suffix/replacement. Off: Use '_processed.md'.").addToggle(toggle => toggle.setValue(this.plugin.settings.useCustomAddLinksSuffix).onChange(async (value) => { this.plugin.settings.useCustomAddLinksSuffix = value; await this.plugin.saveSettings(); this.display(); }));
         if (this.plugin.settings.useCustomAddLinksSuffix) {
             new Setting(containerEl).setName("Custom suffix/replacement string").setDesc("Empty to overwrite original. Ex: '_linked'.").addText(text => text.setPlaceholder("Leave empty to overwrite").setValue(this.plugin.settings.addLinksCustomSuffix).onChange(async (value) => { this.plugin.settings.addLinksCustomSuffix = value; await this.plugin.saveSettings(); }));
         }
         // Add the new toggle for removing code fences
         new Setting(containerEl)
             .setName("Remove code fences on 'Add links'")
-            .setDesc("ON: Remove all ```markdown and ``` fences from the final output of 'Process File' and 'Process Folder'. OFF: Keep code fences.")
+            .setDesc("On: Remove all ```markdown and ``` fences from the final output of 'Process File' and 'Process Folder'. Off: Keep code fences.")
             .addToggle(toggle => toggle
                 .setValue(this.plugin.settings.removeCodeFencesOnAddLinks)
                 .onChange(async (value) => {
@@ -290,24 +289,24 @@ export class NotemdSettingTab extends PluginSettingTab {
                 }));
 
         new Setting(containerEl).setName('Concept note output').setHeading();
-        new Setting(containerEl).setName('Customize concept note path').setDesc('ON: Create new concept notes in specified path. OFF: Do not create automatically.').addToggle(toggle => toggle.setValue(this.plugin.settings.useCustomConceptNoteFolder).onChange(async (value) => { this.plugin.settings.useCustomConceptNoteFolder = value; await this.plugin.saveSettings(); this.display(); }));
+        new Setting(containerEl).setName('Customize concept note path').setDesc('On: Create new concept notes in specified path. Off: Do not create automatically.').addToggle(toggle => toggle.setValue(this.plugin.settings.useCustomConceptNoteFolder).onChange(async (value) => { this.plugin.settings.useCustomConceptNoteFolder = value; await this.plugin.saveSettings(); this.display(); }));
         if (this.plugin.settings.useCustomConceptNoteFolder) {
             new Setting(containerEl).setName('Concept note folder path').setDesc('Relative path within vault.').addText(text => text.setPlaceholder('e.g., Concepts').setValue(this.plugin.settings.conceptNoteFolder).onChange(async (value) => { /* Add validation */ this.plugin.settings.conceptNoteFolder = value.trim(); await this.plugin.saveSettings(); }));
         }
 
         new Setting(containerEl).setName('Concept log file output').setHeading();
-        new Setting(containerEl).setName('Generate concept log file').setDesc('ON: Log newly created concept notes.').addToggle(toggle => toggle.setValue(this.plugin.settings.generateConceptLogFile).onChange(async (value) => { this.plugin.settings.generateConceptLogFile = value; await this.plugin.saveSettings(); this.display(); }));
+        new Setting(containerEl).setName('Generate concept log file').setDesc('On: Log newly created concept notes.').addToggle(toggle => toggle.setValue(this.plugin.settings.generateConceptLogFile).onChange(async (value) => { this.plugin.settings.generateConceptLogFile = value; await this.plugin.saveSettings(); this.display(); }));
         if (this.plugin.settings.generateConceptLogFile) {
             const logFolderSetting = new Setting(containerEl).setName('Customize log file save path');
-            let logFolderDesc = 'ON: Save log to specified path.';
-            if (this.plugin.settings.useCustomConceptNoteFolder && this.plugin.settings.conceptNoteFolder) { logFolderDesc += ` OFF: Save in Concept Note Folder ('${this.plugin.settings.conceptNoteFolder}')`; } else { logFolderDesc += ' OFF: Save in vault root.'; }
+            let logFolderDesc = 'On: Save log to specified path.';
+            if (this.plugin.settings.useCustomConceptNoteFolder && this.plugin.settings.conceptNoteFolder) { logFolderDesc += ` Off: Save in Concept Note Folder ('${this.plugin.settings.conceptNoteFolder}')`; } else { logFolderDesc += ' Off: Save in vault root.'; }
             logFolderSetting.setDesc(logFolderDesc);
             logFolderSetting.addToggle(toggle => toggle.setValue(this.plugin.settings.useCustomConceptLogFolder).onChange(async (value) => { this.plugin.settings.useCustomConceptLogFolder = value; await this.plugin.saveSettings(); this.display(); }));
             if (this.plugin.settings.useCustomConceptLogFolder) {
                 new Setting(containerEl).setName('Concept log folder path').setDesc('Relative path. Required if custom path enabled.').addText(text => text.setPlaceholder('e.g., Logs/ConceptLogs').setValue(this.plugin.settings.conceptLogFolderPath).onChange(async (value) => { /* Add validation */ this.plugin.settings.conceptLogFolderPath = value.trim(); await this.plugin.saveSettings(); }));
             }
             const logFileNameSetting = new Setting(containerEl).setName('Customize log file name');
-            logFileNameSetting.setDesc(`ON: Use specified name. OFF: Use "${DEFAULT_SETTINGS.conceptLogFileName}".`);
+            logFileNameSetting.setDesc(`On: Use specified name. Off: Use "${DEFAULT_SETTINGS.conceptLogFileName}".`);
             logFileNameSetting.addToggle(toggle => toggle.setValue(this.plugin.settings.useCustomConceptLogFileName).onChange(async (value) => { this.plugin.settings.useCustomConceptLogFileName = value; await this.plugin.saveSettings(); this.display(); }));
             if (this.plugin.settings.useCustomConceptLogFileName) {
                 new Setting(containerEl).setName('Concept log file name').setDesc('Name for the log file. Required if custom name enabled.').addText(text => text.setPlaceholder(DEFAULT_SETTINGS.conceptLogFileName).setValue(this.plugin.settings.conceptLogFileName).onChange(async (value) => { /* Add validation */ this.plugin.settings.conceptLogFileName = value.trim(); await this.plugin.saveSettings(); }));
@@ -315,14 +314,14 @@ export class NotemdSettingTab extends PluginSettingTab {
         }
 
         new Setting(containerEl).setName('Content generation & output').setHeading();
-        new Setting(containerEl).setName('Enable research in "Generate from title"').setDesc('ON: Perform web research before generating.').addToggle(toggle => toggle.setValue(this.plugin.settings.enableResearchInGenerateContent).onChange(async (value) => { this.plugin.settings.enableResearchInGenerateContent = value; await this.plugin.saveSettings(); }));
-        new Setting(containerEl).setName("Use custom output folder for 'Generate from title'").setDesc("ON: Move completed files to custom folder. OFF: Move to '[original_foldername]_complete'.").addToggle(toggle => toggle.setValue(this.plugin.settings.useCustomGenerateTitleOutputFolder).onChange(async (value) => { this.plugin.settings.useCustomGenerateTitleOutputFolder = value; await this.plugin.saveSettings(); this.display(); }));
+        new Setting(containerEl).setName('Enable research in "Generate from title"').setDesc('On: Perform web research before generating.').addToggle(toggle => toggle.setValue(this.plugin.settings.enableResearchInGenerateContent).onChange(async (value) => { this.plugin.settings.enableResearchInGenerateContent = value; await this.plugin.saveSettings(); }));
+        new Setting(containerEl).setName("Use custom output folder for 'Generate from title'").setDesc("On: Move completed files to custom folder. Off: Move to '[original_foldername]_complete'.").addToggle(toggle => toggle.setValue(this.plugin.settings.useCustomGenerateTitleOutputFolder).onChange(async (value) => { this.plugin.settings.useCustomGenerateTitleOutputFolder = value; await this.plugin.saveSettings(); this.display(); }));
         if (this.plugin.settings.useCustomGenerateTitleOutputFolder) {
             new Setting(containerEl).setName("Custom output folder name").setDesc("Subfolder name for completed files.").addText(text => text.setPlaceholder(DEFAULT_SETTINGS.generateTitleOutputFolderName).setValue(this.plugin.settings.generateTitleOutputFolderName).onChange(async (value) => { /* Add validation */ this.plugin.settings.generateTitleOutputFolderName = value.trim() || DEFAULT_SETTINGS.generateTitleOutputFolderName; await this.plugin.saveSettings(); this.display(); }));
         }
 
         new Setting(containerEl).setName('Web research provider').setHeading();
-        new Setting(containerEl).setName('Search provider').setDesc('Engine for "Research and Summarize".').addDropdown(dropdown => dropdown.addOption('tavily', 'Tavily (Requires API Key)').addOption('duckduckgo', 'DuckDuckGo (Experimental)').setValue(this.plugin.settings.searchProvider).onChange(async (value: 'tavily' | 'duckduckgo') => { this.plugin.settings.searchProvider = value; await this.plugin.saveSettings(); this.display(); }));
+        new Setting(containerEl).setName('Search provider').setDesc('Engine for "Research and Summarize".').addDropdown(dropdown => dropdown.addOption('tavily', 'Tavily (requires API key)').addOption('duckduckgo', 'DuckDuckGo (experimental)').setValue(this.plugin.settings.searchProvider).onChange(async (value: 'tavily' | 'duckduckgo') => { this.plugin.settings.searchProvider = value; await this.plugin.saveSettings(); this.display(); }));
         if (this.plugin.settings.searchProvider === 'tavily') {
             new Setting(containerEl).setName('Tavily API key').setDesc('Required for Tavily. Get from tavily.com.').addText(text => text.setPlaceholder('Enter Tavily API key (tvly-...)').setValue(this.plugin.settings.tavilyApiKey).onChange(async (value) => { this.plugin.settings.tavilyApiKey = value.trim(); await this.plugin.saveSettings(); }));
             new Setting(containerEl).setName('Tavily max results').setDesc('Max results (1-20).').addText(text => text.setPlaceholder(String(DEFAULT_SETTINGS.tavilyMaxResults)).setValue(String(this.plugin.settings.tavilyMaxResults)).onChange(async (value) => { const num = parseInt(value, 10); if (!isNaN(num) && num >= 1 && num <= 20) { this.plugin.settings.tavilyMaxResults = num; } else { this.plugin.settings.tavilyMaxResults = DEFAULT_SETTINGS.tavilyMaxResults; } await this.plugin.saveSettings(); this.display(); }));
@@ -345,10 +344,10 @@ export class NotemdSettingTab extends PluginSettingTab {
             .setName('Duplicate check scope mode')
             .setDesc('Define the scope for finding duplicate counterparts.')
             .addDropdown(dropdown => dropdown
-                .addOption('vault', 'Entire Vault (Default - Compares concept notes to all other notes)')
-                .addOption('include', 'Include Specific Folders Only (Compares concept notes to notes in specified folders)')
-                .addOption('exclude', 'Exclude Specific Folders (Compares concept notes to notes outside specified folders)')
-                .addOption('concept_folder_only', 'Concept Folder Only (Compares concept notes against each other)') // Added new option
+                .addOption('vault', 'Entire vault (default - compares concept notes to all other notes)')
+                .addOption('include', 'Include specific folders only (compares concept notes to notes in specified folders)')
+                .addOption('exclude', 'Exclude specific folders (compares concept notes to notes outside specified folders)')
+                .addOption('concept_folder_only', 'Concept folder only (compares concept notes against each other)') // Added new option
                 .setValue(this.plugin.settings.duplicateCheckScopeMode)
                 .onChange(async (value: 'vault' | 'include' | 'exclude' | 'concept_folder_only') => { // Updated type
                     this.plugin.settings.duplicateCheckScopeMode = value;
@@ -360,19 +359,45 @@ export class NotemdSettingTab extends PluginSettingTab {
         if (this.plugin.settings.duplicateCheckScopeMode === 'include' || this.plugin.settings.duplicateCheckScopeMode === 'exclude') {
             new Setting(containerEl)
                 .setName(this.plugin.settings.duplicateCheckScopeMode === 'include' ? 'Include folders' : 'Exclude folders')
-                .setDesc(`Enter relative paths (one per line) for folders to ${this.plugin.settings.duplicateCheckScopeMode}. Required if mode is not 'Entire Vault' or 'Concept Folder Only'. Paths are case-sensitive and use '/' as separator.`)
+                .setDesc(`Enter relative paths (one per line) for folders to ${this.plugin.settings.duplicateCheckScopeMode}. Required if mode is not 'Entire vault' or 'Concept folder only'. Paths are case-sensitive and use '/' as separator.`)
                 .addTextArea(textarea => textarea
                     .setPlaceholder('e.g., Notes/ProjectA\nSource Material') // Updated placeholder
                     .setValue(this.plugin.settings.duplicateCheckScopePaths)
                     .onChange(async (value) => {
-                        // Basic validation: Ensure not empty if mode requires it
+                        const paths = value.split('\n').map(p => p.trim()).filter(p => p.length > 0);
+                        let isValid = true;
+                        const invalidChars = /[\\"<>\:\?#\^\[\]\|\s]/; // Added space to invalid chars, removed / as it's the separator
+
+                        for (const path of paths) {
+                            if (path.includes('\\')) {
+                                new Notice(`Invalid path: "${path}". Use '/' as path separator, not '\\'.`, 7000);
+                                isValid = false;
+                                break;
+                            }
+                            if (invalidChars.test(path)) {
+                                const offendingChar = path.match(invalidChars)?.[0];
+                                new Notice(`Invalid character "${offendingChar}" in path: "${path}". Forbidden chars: space, \\, <, >, :, |, ?, #, ^, [, ]`, 7000);
+                                isValid = false;
+                                break;
+                            }
+                        }
+
                         if (!value.trim() && (this.plugin.settings.duplicateCheckScopeMode === 'include' || this.plugin.settings.duplicateCheckScopeMode === 'exclude')) {
                             new Notice("Folder paths cannot be empty when 'Include' or 'Exclude' mode is selected.", 5000);
-                            // Optionally revert or just warn? Let's just warn for now.
+                            // Do not save if critical validation fails
+                            // isValid = false; // Or let it save but with a warning if desired
                         }
-                        // Further validation could check path format, but keep it simple for now
-                        this.plugin.settings.duplicateCheckScopePaths = value; // Store raw value with newlines
-                        await this.plugin.saveSettings();
+
+                        if (isValid) {
+                            this.plugin.settings.duplicateCheckScopePaths = value; // Store raw value with newlines
+                            await this.plugin.saveSettings();
+                        } else {
+                            // Optionally, you could revert the textarea to the last saved valid value
+                            // For now, we'll just prevent saving the invalid input by not calling saveSettings
+                            // or by explicitly setting it back if the UX demands it.
+                            // textarea.setValue(this.plugin.settings.duplicateCheckScopePaths); // Revert to last saved
+                            new Notice("Invalid path(s) detected. Settings not saved for this field.", 5000);
+                        }
                     })
                     .inputEl.setAttrs({ rows: 4, style: 'width: 100%;' }) // Make textarea larger
                 );
