@@ -77,6 +77,22 @@ describe('Duplicate Handling', () => {
             duplicateCheckScopeMode: 'vault',
             duplicateCheckScopePaths: '',
             removeCodeFencesOnAddLinks: false, // Added missing property for tests
+            language: 'en', // Added missing property
+            availableLanguages: [{ code: 'en', name: 'English' }], // Added missing property
+            // Custom Prompt Settings Defaults
+            enableGlobalCustomPrompts: false,
+            useCustomPromptForAddLinks: false,
+            customPromptAddLinks: '',
+            useCustomPromptForGenerateTitle: false,
+            customPromptGenerateTitle: '',
+            useCustomPromptForResearchSummarize: false,
+            customPromptResearchSummarize: '',
+            useCustomPromptWordForAddLinks: false,
+            customPromptWordAddLinks: '',
+            useCustomPromptWordForGenerateTitle: false,
+            customPromptWordGenerateTitle: '',
+            useCustomPromptWordForResearchSummarize: false,
+            customPromptWordResearchSummarize: '',
         };
         // Removed corrupted line: plugin.app = mockApp as annckApp after settings
 	});

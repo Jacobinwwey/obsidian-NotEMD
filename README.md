@@ -16,7 +16,7 @@ A Easy way to create your own Knowledge-base!
 
 Notemd enhances your Obsidian workflow by integrating with various Large Language Models (LLMs) to process your notes, automatically generate wiki-links for key concepts, create corresponding concept notes, perform web research, and more.
 
-**Version:** 1.2.0
+**Version:** 1.3.0
 
 ## Table of Contents
 - [Features](#features)
@@ -161,6 +161,12 @@ Access plugin settings via:
 -   **Enable Research in "Generate from Title"**:
     *   **Disabled (Default)**: "Generate from Title" uses only the title as input.
     *   **Enabled**: Performs web research using the configured **Web Research Provider** and includes the findings as context for the LLM during title-based generation.
+-   **Output Language**: (New) Select the desired output language for "Generate from Title" and "Batch Generate from Title" tasks.
+    *   **English (Default)**: Prompts are processed and output in English.
+    *   **Other Languages**: The LLM is instructed to perform its reasoning in English but provide the final documentation in your selected language (e.g., Español, Français, 简体中文, etc.).
+-   **Change Prompt Word**: (New)
+    *   **Change Prompt Word**: Allows you to change the prompt word for a specific task.
+    *   **Custom Prompt Word**: Enter your custom prompt word for the task.
 -   **Use Custom Output Folder for 'Generate from Title'**:
     *   **Disabled (Default)**: Successfully generated files are moved to a subfolder named `[OriginalFolderName]_complete` relative to the original folder's parent (or `Vault_complete` if the original folder was the root).
     *   **Enabled**: Allows you to specify a custom name for the subfolder where completed files are moved.
@@ -305,4 +311,4 @@ MIT License - See [LICENSE](LICENSE) file for details.
 
 ---
 
-*Notemd v1.2.0 - Enhance your Obsidian knowledge graph with AI.*
+*Notemd v1.3.0 - Enhance your Obsidian knowledge graph with AI.*
