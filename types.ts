@@ -62,7 +62,30 @@ export interface NotemdSettings {
     duplicateCheckScopePaths: string; // New: Newline-separated list of paths for include/exclude modes
     // Add Links Post-Processing
     removeCodeFencesOnAddLinks: boolean; // New: Option to remove ```markdown and ``` fences
+    // Language Settings
+    language: string; // Stores the selected language code (e.g., 'en', 'es', 'fr')
+    availableLanguages: Array<{ code: string; name: string }>; // List of available languages
+
+    // Custom Prompt Settings
+    enableGlobalCustomPrompts: boolean; // Master toggle for custom prompts
+    useCustomPromptForAddLinks: boolean;
+    customPromptAddLinks: string;
+    useCustomPromptForGenerateTitle: boolean;
+    customPromptGenerateTitle: string;
+    useCustomPromptForResearchSummarize: boolean;
+    customPromptResearchSummarize: string;
+
+    // Change Prompt Word Settings
+    useCustomPromptWordForAddLinks: boolean;
+    customPromptWordAddLinks: string;
+    useCustomPromptWordForGenerateTitle: boolean;
+    customPromptWordGenerateTitle: string;
+    useCustomPromptWordForResearchSummarize: boolean;
+    customPromptWordResearchSummarize: string;
 }
+
+// Defines the keys for tasks that can have custom prompts
+export type TaskKey = 'addLinks' | 'generateTitle' | 'researchSummarize';
 
 // Interface for search results
 export interface SearchResult {

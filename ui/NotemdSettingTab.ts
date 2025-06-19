@@ -1,8 +1,9 @@
-import { App, PluginSettingTab, Setting, Notice } from 'obsidian';
+import { App, PluginSettingTab, Setting, Notice, TextAreaComponent } from 'obsidian';
 import NotemdPlugin from '../main'; // Import the plugin class itself
-import { LLMProviderConfig, NotemdSettings } from '../types';
+import { LLMProviderConfig, NotemdSettings, TaskKey } from '../types';
 import { DEFAULT_SETTINGS } from '../constants';
 import { testAPI } from '../llmUtils'; // Import testAPI
+import { getDefaultPrompt } from '../promptUtils'; // Import for default prompts
 
 // Define specific key types for settings accessed dynamically
 type ProviderSettingKey = 'addLinksProvider' | 'researchProvider' | 'generateTitleProvider';
@@ -335,7 +336,24 @@ export class NotemdSettingTab extends PluginSettingTab {
         new Setting(containerEl).setName('Processing parameters').setHeading();
         new Setting(containerEl).setName('Chunk word count').setDesc('Max words per chunk sent to LLM.').addText(text => text.setPlaceholder(String(DEFAULT_SETTINGS.chunkWordCount)).setValue(String(this.plugin.settings.chunkWordCount)).onChange(async (value) => { const num = parseInt(value, 10); if (!isNaN(num) && num > 50) { this.plugin.settings.chunkWordCount = num; } else { this.plugin.settings.chunkWordCount = DEFAULT_SETTINGS.chunkWordCount; } await this.plugin.saveSettings(); this.display(); }));
         new Setting(containerEl).setName('Enable duplicate detection').setDesc('Enable checks for duplicate terms (results in console).').addToggle(toggle => toggle.setValue(this.plugin.settings.enableDuplicateDetection).onChange(async (value) => { this.plugin.settings.enableDuplicateDetection = value; await this.plugin.saveSettings(); }));
-            new Setting(containerEl).setName('Max tokens').setDesc('Max tokens LLM should generate per response.').addText(text => text.setPlaceholder(String(DEFAULT_SETTINGS.maxTokens)).setValue(String(this.plugin.settings.maxTokens)).onChange(async (value) => { const num = parseInt(value, 10); if (!isNaN(num) && num > 0) { this.plugin.settings.maxTokens = num; } else { this.plugin.settings.maxTokens = DEFAULT_SETTINGS.maxTokens; } await this.plugin.saveSettings(); this.display(); }));
+        new Setting(containerEl).setName('Max tokens').setDesc('Max tokens LLM should generate per response.').addText(text => text.setPlaceholder(String(DEFAULT_SETTINGS.maxTokens)).setValue(String(this.plugin.settings.maxTokens)).onChange(async (value) => { const num = parseInt(value, 10); if (!isNaN(num) && num > 0) { this.plugin.settings.maxTokens = num; } else { this.plugin.settings.maxTokens = DEFAULT_SETTINGS.maxTokens; } await this.plugin.saveSettings(); this.display(); }));
+
+        // --- Language Settings ---
+        new Setting(containerEl).setName('Language settings').setHeading();
+        new Setting(containerEl)
+            .setName('Output language')
+            .setDesc('Select the desired output language for LLM responses.')
+            .addDropdown(dropdown => {
+                (this.plugin.settings.availableLanguages || DEFAULT_SETTINGS.availableLanguages).forEach(lang => {
+                    dropdown.addOption(lang.code, lang.name);
+                });
+                dropdown
+                    .setValue(this.plugin.settings.language || DEFAULT_SETTINGS.language)
+                    .onChange(async (value) => {
+                        this.plugin.settings.language = value;
+                        await this.plugin.saveSettings();
+                    });
+            });
 
         // --- Duplicate Check Scope Settings (Refined) ---
         new Setting(containerEl).setName('Duplicate check scope').setHeading();
@@ -403,5 +421,102 @@ export class NotemdSettingTab extends PluginSettingTab {
                 );
         }
         // --- End Duplicate Check Scope Settings ---
+
+        // --- Custom Prompt Settings ---
+        new Setting(containerEl).setName('Custom prompt settings').setHeading();
+
+        new Setting(containerEl)
+            .setName('Enable custom prompts for specific tasks')
+            .setDesc('On: Allows you to override the default system prompts for selected tasks below. Off: Default prompts will always be used.')
+            .addToggle(toggle => toggle
+                .setValue(this.plugin.settings.enableGlobalCustomPrompts)
+                .onChange(async (value) => {
+                    this.plugin.settings.enableGlobalCustomPrompts = value;
+                    await this.plugin.saveSettings();
+                    this.display(); // Refresh to show/hide task-specific prompt settings
+                }));
+
+        if (this.plugin.settings.enableGlobalCustomPrompts) {
+            const tasksToCustomize: Array<{
+                key: TaskKey,
+                name: string,
+                useCustomSettingKey: keyof Pick<NotemdSettings, 'useCustomPromptForAddLinks' | 'useCustomPromptForGenerateTitle' | 'useCustomPromptForResearchSummarize'>,
+                customPromptSettingKey: keyof Pick<NotemdSettings, 'customPromptAddLinks' | 'customPromptGenerateTitle' | 'customPromptResearchSummarize'>
+            }> = [
+                { key: 'addLinks', name: 'Add Links (Process File/Folder)', useCustomSettingKey: 'useCustomPromptForAddLinks', customPromptSettingKey: 'customPromptAddLinks' },
+                { key: 'generateTitle', name: 'Generate from Title', useCustomSettingKey: 'useCustomPromptForGenerateTitle', customPromptSettingKey: 'customPromptGenerateTitle' },
+                { key: 'researchSummarize', name: 'Research & Summarize', useCustomSettingKey: 'useCustomPromptForResearchSummarize', customPromptSettingKey: 'customPromptResearchSummarize' },
+            ];
+
+            tasksToCustomize.forEach(task => {
+                new Setting(containerEl)
+                    .setName(`Use custom prompt for "${task.name}"`)
+                    .setDesc(`On: Use your custom prompt below for this task. Off: Use the default prompt.`)
+                    .addToggle(toggle => toggle
+                        .setValue(this.plugin.settings[task.useCustomSettingKey])
+                        .onChange(async (value) => {
+                            (this.plugin.settings as any)[task.useCustomSettingKey] = value;
+                            await this.plugin.saveSettings();
+                            this.display(); // Refresh to show/hide custom prompt area
+                        }));
+
+                if (this.plugin.settings[task.useCustomSettingKey]) {
+                    // Change Prompt Word setting
+                    new Setting(containerEl)
+                        .setName(`Change Prompt Word for "${task.name}"`)
+                        .setDesc(`On: Use a custom prompt word for this task. Off: Use the default prompt word.`)
+                        .addToggle(toggle => toggle
+                            .setValue((this.plugin.settings as any)[`useCustomPromptWordFor${task.key.charAt(0).toUpperCase() + task.key.slice(1)}`])
+                            .onChange(async (value) => {
+                                (this.plugin.settings as any)[`useCustomPromptWordFor${task.key.charAt(0).toUpperCase() + task.key.slice(1)}`] = value;
+                                await this.plugin.saveSettings();
+                                this.display();
+                            }));
+
+                    if ((this.plugin.settings as any)[`useCustomPromptWordFor${task.key.charAt(0).toUpperCase() + task.key.slice(1)}`]) {
+                        new Setting(containerEl)
+                            .setName(`Custom prompt word for "${task.name}"`)
+                            .setDesc(`Enter your custom prompt word for ${task.name}.`)
+                            .addText(text => text
+                                .setPlaceholder(`Enter your custom prompt word for ${task.name}...`)
+                                .setValue((this.plugin.settings as any)[`customPromptWord${task.key.charAt(0).toUpperCase() + task.key.slice(1)}`])
+                                .onChange(async (value) => {
+                                    (this.plugin.settings as any)[`customPromptWord${task.key.charAt(0).toUpperCase() + task.key.slice(1)}`] = value;
+                                    await this.plugin.saveSettings();
+                                }));
+                    }
+
+                    const defaultPromptDisplay = containerEl.createDiv();
+                    defaultPromptDisplay.createEl('p', { text: `Default prompt for "${task.name}":` });
+                    const defaultPromptText = getDefaultPrompt(task.key);
+                    const defaultPromptArea = new TextAreaComponent(defaultPromptDisplay)
+                        .setValue(defaultPromptText)
+                        .setDisabled(true)
+                        .inputEl.setAttrs({ rows: 5, style: 'width: 100%; font-family: monospace; font-size: 0.9em; margin-bottom: 5px;' });
+
+                    const copyButton = defaultPromptDisplay.createEl('button', { text: 'Copy Default Prompt' });
+                    copyButton.onclick = () => {
+                        navigator.clipboard.writeText(defaultPromptText);
+                        new Notice('Default prompt copied to clipboard!');
+                    };
+                    defaultPromptDisplay.style.marginBottom = "10px";
+
+
+                    new Setting(containerEl)
+                        .setName(`Custom prompt for "${task.name}"`)
+                        .setDesc('Enter your custom prompt. Placeholders like {TITLE} or {RESEARCH_CONTEXT_SECTION} will be replaced if applicable for the task. Refer to the default prompt for available placeholders.')
+                        .addTextArea(textarea => textarea
+                            .setPlaceholder(`Enter your custom prompt for ${task.name}...`)
+                            .setValue(this.plugin.settings[task.customPromptSettingKey])
+                            .onChange(async (value) => {
+                                (this.plugin.settings as any)[task.customPromptSettingKey] = value;
+                                await this.plugin.saveSettings();
+                            })
+                            .inputEl.setAttrs({ rows: 10, style: 'width: 100%;' })
+                        );
+                }
+            });
+        }
+        // --- End Custom Prompt Settings ---
     }
 }

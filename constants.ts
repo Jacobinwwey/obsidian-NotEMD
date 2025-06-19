@@ -120,6 +120,36 @@ export const DEFAULT_SETTINGS: NotemdSettings = {
     duplicateCheckScopePaths: '', // Default to empty list of paths
     // Add Links Post-Processing Defaults
     removeCodeFencesOnAddLinks: false, // Default to NOT removing code fences
+    // Language Settings Defaults
+    language: 'en', // Default to English
+    availableLanguages: [ // Default list of available languages
+        { code: 'en', name: 'English' },
+        { code: 'es', name: 'Español' },
+        { code: 'fr', name: 'Français' },
+        { code: 'de', name: 'Deutsch' },
+        { code: 'it', name: 'Italiano' },
+        { code: 'pt', name: 'Português' },
+        { code: 'zh-CN', name: '简体中文' },
+        { code: 'ja', name: '日本語' },
+        { code: 'ko', name: '한국어' },
+        { code: 'ru', name: 'Русский' },
+    ],
+    // Custom Prompt Settings Defaults
+    enableGlobalCustomPrompts: false,
+    useCustomPromptForAddLinks: false,
+    customPromptAddLinks: '',
+    useCustomPromptForGenerateTitle: false,
+    customPromptGenerateTitle: '',
+    useCustomPromptForResearchSummarize: false,
+    customPromptResearchSummarize: '',
+
+    // Change Prompt Word Settings Defaults
+    useCustomPromptWordForAddLinks: false,
+    customPromptWordAddLinks: '',
+    useCustomPromptWordForGenerateTitle: false,
+    customPromptWordGenerateTitle: '',
+    useCustomPromptWordForResearchSummarize: false,
+    customPromptWordResearchSummarize: '',
 };
 
 // Constants for the Sidebar View

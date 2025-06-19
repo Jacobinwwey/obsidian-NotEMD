@@ -204,6 +204,14 @@ async function callApiWithRetry(
     progressReporter: ProgressReporter,
     apiCallFunction: (provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings) => Promise<string>
 ): Promise<string> {
+    const taskKey = prompt.includes('{TITLE}') ? 'generateTitle' : prompt.includes('{TOPIC}') ? 'researchSummarize' : 'addLinks';
+    if (settings.useCustomPromptWordForAddLinks && taskKey === 'addLinks') {
+        prompt = prompt.replace(/prompt/g, settings.customPromptWordAddLinks);
+    } else if (settings.useCustomPromptWordForGenerateTitle && taskKey === 'generateTitle') {
+        prompt = prompt.replace(/prompt/g, settings.customPromptWordGenerateTitle);
+    } else if (settings.useCustomPromptWordForResearchSummarize && taskKey === 'researchSummarize') {
+        prompt = prompt.replace(/prompt/g, settings.customPromptWordResearchSummarize);
+    }
     let lastError: Error | null = null;
     const maxAttempts = settings.enableStableApiCall ? settings.apiCallMaxRetries + 1 : 1;
     const intervalSeconds = settings.enableStableApiCall ? settings.apiCallInterval : 0;
