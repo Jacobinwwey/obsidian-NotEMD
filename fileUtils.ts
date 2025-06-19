@@ -534,6 +534,13 @@ export async function generateContentForTitle(app: App, settings: NotemdSettings
     let generationPrompt = `Create comprehensive technical documentation about "${title}" with a focus on scientific and mathematical rigor.`;
     if (researchContext) { generationPrompt += `\n\nUse the following research context to inform the documentation:\n\n${researchContext}\n\nDocumentation based on the title "${title}" and the provided context:`; }
     else { generationPrompt += `\n\nDocumentation based *only* on the title "${title}":`; }
+
+    // Language-specific instruction
+    const targetLanguageName = settings.availableLanguages.find(lang => lang.code === settings.language)?.name || settings.language;
+    if (settings.language && settings.language !== 'en') {
+        generationPrompt += `\n\IMPORTANT: Process the request and perform all reasoning in English. However, the final output/documentation MUST be written in ${targetLanguageName}.In mermaid diagrams, it is necessary to translate into ${targetLanguageName} while retaining the English.`;
+    }
+
     // Add the detailed instructions (common part) - Restored from main_origin.ts
     generationPrompt += `
 
