@@ -3,20 +3,20 @@
 [English](./README.md) | [简体中文](./README_zh.md)
 
 ```
-=============================================
+==================================================
   _   _       _   _ ___    __  __ ___
  | \ | | ___ | |_| |___|  |  \/  |___ \
  |  \| |/ _ \| __| |___|  | |\/| |   | |
  | |\  | (_) | |_| |___   | |  | |___| |
  |_| \_|\___/ \__|_|___|  | |  | |____/
-=============================================
-      AI-Powered Knowledge Enhancement
-=============================================
+==================================================
+AI-Powered Multi-Languages Knowledge Enhancement
+==================================================
 ```
 
 A Easy way to create your own Knowledge-base!
 
-Notemd enhances your Obsidian workflow by integrating with various Large Language Models (LLMs) to process your notes, automatically generate wiki-links for key concepts, create corresponding concept notes, perform web research, and more.
+Notemd enhances your Obsidian workflow by integrating with various Large Language Models (LLMs) to process your multi-languages notes, automatically generate wiki-links for key concepts, create corresponding concept notes, perform web research, and more.
 
 **Version:** 1.3.0
 
