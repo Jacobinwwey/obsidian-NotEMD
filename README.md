@@ -1,5 +1,7 @@
 # Notemd Plugin for Obsidian
 
+[English](./README.md) | [简体中文](./README_zh.md)
+
 ```
 =============================================
   _   _       _   _ ___    __  __ ___
