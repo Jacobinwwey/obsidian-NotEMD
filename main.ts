@@ -266,6 +266,20 @@ export default class NotemdPlugin extends Plugin {
         this.settings.addLinksProvider = this.settings.providers.some(p => p.name === this.settings.addLinksProvider) ? this.settings.addLinksProvider : this.settings.activeProvider;
         this.settings.researchProvider = this.settings.providers.some(p => p.name === this.settings.researchProvider) ? this.settings.researchProvider : this.settings.activeProvider;
         this.settings.generateTitleProvider = this.settings.providers.some(p => p.name === this.settings.generateTitleProvider) ? this.settings.generateTitleProvider : this.settings.activeProvider;
+
+        // Merge availableLanguages to ensure new languages are added for existing users
+        const defaultLanguages = DEFAULT_SETTINGS.availableLanguages;
+        const savedLanguages = this.settings.availableLanguages || [];
+        const savedLanguageCodes = new Set(savedLanguages.map(l => l.code));
+        const mergedLanguages = [...savedLanguages];
+
+        defaultLanguages.forEach(defaultLang => {
+            if (!savedLanguageCodes.has(defaultLang.code)) {
+                mergedLanguages.push(defaultLang);
+            }
+        });
+
+        this.settings.availableLanguages = mergedLanguages;
     }
 
     async saveSettings() {
