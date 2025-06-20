@@ -10,7 +10,7 @@
  | |\  | (_) | |_| |___   | |  | |___| |
  |_| \_|\___/ \__|_|___|  | |  | |____/
 ==================================================
-AI-Powered Multi-Languages Knowledge Enhancement
+ AI-Powered Multi-Languages Knowledge Enhancement
 ==================================================
 ```
 
