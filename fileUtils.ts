@@ -538,7 +538,7 @@ export async function generateContentForTitle(app: App, settings: NotemdSettings
     // Language-specific instruction
     const targetLanguageName = settings.availableLanguages.find(lang => lang.code === settings.language)?.name || settings.language;
     if (settings.language && settings.language !== 'en') {
-        generationPrompt += `\n\IMPORTANT: Process the request and perform all reasoning in English. However, the final output/documentation MUST be written in ${targetLanguageName}.In mermaid diagrams, it is necessary to translate into ${targetLanguageName} while retaining the English.`;
+        generationPrompt += `\n\IMPORTANT: Process the request and perform all reasoning in English. However, the final output MUST be written in ${targetLanguageName}.In mermaid diagrams, it is necessary to translate into ${targetLanguageName} while retaining the English.`;
     }
 
     // Add the detailed instructions (common part) - Restored from main_origin.ts
