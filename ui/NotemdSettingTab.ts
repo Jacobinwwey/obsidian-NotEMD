@@ -461,30 +461,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                         }));
 
                 if (this.plugin.settings[task.useCustomSettingKey]) {
-                    // Change Prompt Word setting
-                    new Setting(containerEl)
-                        .setName(`Change Prompt Word for "${task.name}"`)
-                        .setDesc(`On: Use a custom prompt word for this task. Off: Use the default prompt word.`)
-                        .addToggle(toggle => toggle
-                            .setValue((this.plugin.settings as any)[`useCustomPromptWordFor${task.key.charAt(0).toUpperCase() + task.key.slice(1)}`])
-                            .onChange(async (value) => {
-                                (this.plugin.settings as any)[`useCustomPromptWordFor${task.key.charAt(0).toUpperCase() + task.key.slice(1)}`] = value;
-                                await this.plugin.saveSettings();
-                                this.display();
-                            }));
-
-                    if ((this.plugin.settings as any)[`useCustomPromptWordFor${task.key.charAt(0).toUpperCase() + task.key.slice(1)}`]) {
-                        new Setting(containerEl)
-                            .setName(`Custom prompt word for "${task.name}"`)
-                            .setDesc(`Enter your custom prompt word for ${task.name}.`)
-                            .addText(text => text
-                                .setPlaceholder(`Enter your custom prompt word for ${task.name}...`)
-                                .setValue((this.plugin.settings as any)[`customPromptWord${task.key.charAt(0).toUpperCase() + task.key.slice(1)}`])
-                                .onChange(async (value) => {
-                                    (this.plugin.settings as any)[`customPromptWord${task.key.charAt(0).toUpperCase() + task.key.slice(1)}`] = value;
-                                    await this.plugin.saveSettings();
-                                }));
-                    }
+                    
 
                     const defaultPromptDisplay = containerEl.createDiv();
                     defaultPromptDisplay.createEl('p', { text: `Default prompt for "${task.name}":` });
