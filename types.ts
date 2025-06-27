@@ -75,13 +75,7 @@ export interface NotemdSettings {
     useCustomPromptForResearchSummarize: boolean;
     customPromptResearchSummarize: string;
 
-    // Change Prompt Word Settings
-    useCustomPromptWordForAddLinks: boolean;
-    customPromptWordAddLinks: string;
-    useCustomPromptWordForGenerateTitle: boolean;
-    customPromptWordGenerateTitle: string;
-    useCustomPromptWordForResearchSummarize: boolean;
-    customPromptWordResearchSummarize: string;
+    
 }
 
 // Defines the keys for tasks that can have custom prompts

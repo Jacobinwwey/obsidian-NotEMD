@@ -160,13 +160,7 @@ export const DEFAULT_SETTINGS: NotemdSettings = {
     useCustomPromptForResearchSummarize: false,
     customPromptResearchSummarize: '',
 
-    // Change Prompt Word Settings Defaults
-    useCustomPromptWordForAddLinks: false,
-    customPromptWordAddLinks: '',
-    useCustomPromptWordForGenerateTitle: false,
-    customPromptWordGenerateTitle: '',
-    useCustomPromptWordForResearchSummarize: false,
-    customPromptWordResearchSummarize: '',
+    
 };
 
 // Constants for the Sidebar View

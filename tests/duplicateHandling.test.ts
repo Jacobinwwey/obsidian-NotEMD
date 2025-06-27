@@ -87,12 +87,7 @@ describe('Duplicate Handling', () => {
             customPromptGenerateTitle: '',
             useCustomPromptForResearchSummarize: false,
             customPromptResearchSummarize: '',
-            useCustomPromptWordForAddLinks: false,
-            customPromptWordAddLinks: '',
-            useCustomPromptWordForGenerateTitle: false,
-            customPromptWordGenerateTitle: '',
-            useCustomPromptWordForResearchSummarize: false,
-            customPromptWordResearchSummarize: '',
+            
         };
         // Removed corrupted line: plugin.app = mockApp as annckApp after settings
 	});

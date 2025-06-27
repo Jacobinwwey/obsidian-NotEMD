@@ -91,12 +91,7 @@ describe('File Operations', () => {
             customPromptGenerateTitle: '',
             useCustomPromptForResearchSummarize: false,
             customPromptResearchSummarize: '',
-            useCustomPromptWordForAddLinks: false,
-            customPromptWordAddLinks: '',
-            useCustomPromptWordForGenerateTitle: false,
-            customPromptWordGenerateTitle: '',
-            useCustomPromptWordForResearchSummarize: false,
-            customPromptWordResearchSummarize: '',
+            
         };
   });
 
