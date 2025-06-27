@@ -86,12 +86,6 @@ describe('generateObsidianLinks', () => {
             customPromptGenerateTitle: '',
             useCustomPromptForResearchSummarize: false,
             customPromptResearchSummarize: '',
-            useCustomPromptWordForAddLinks: false,
-            customPromptWordAddLinks: '',
-            useCustomPromptWordForGenerateTitle: false,
-            customPromptWordGenerateTitle: '',
-            useCustomPromptWordForResearchSummarize: false,
-            customPromptWordResearchSummarize: '',
         };
      // Mock createConceptNotes to return a resolved promise - REMOVED as function moved from plugin class
      // plugin.createConceptNotes = jest.fn().mockResolvedValue(undefined);
