@@ -92,6 +92,106 @@ Notemd enhances your Obsidian workflow by integrating with various Large Languag
 5. Restart Obsidian.
 6. Go to **Settings** → **Community plugins** and enable "Notemd".
 
+## Usage Guide
+
+### Original Processing (Adding Wiki-Links)
+This is the core functionality focused on identifying concepts and adding `[[wiki-links]]`.
+
+**Important:** This process only works on `.md` or `.txt` files.
+
+1.  **Using the Sidebar**:
+    *   Open the Notemd Sidebar (wand icon or command palette).
+    *   Open the `.md` or `.txt` file.
+    *   Click **"Process File (Add Links)"**.
+    *   To process a folder: Click **"Process Folder (Add Links)"**, select the folder, and click "Process".
+    *   Progress is shown in the sidebar. You can cancel the task using the "Cancel Processing" button in the sidebar.
+    *   *Note for folder processing:* Files are processed in the background without being opened in the editor.
+
+2.  **Using the Command Palette** (`Ctrl+P` or `Cmd+P`):
+    *   **Single File**: Open the file and run `Notemd: Process Current File`.
+    *   **Folder**: Run `Notemd: Process Folder`, then select the folder. Files are processed in the background without being opened in the editor.
+    *   A progress modal appears for command palette actions, which includes a cancel button.
+    *   *Note:* The plugin automatically removes leading `\boxed{` and trailing `}` lines if found in the final processed content before saving.
+
+### New Features (Translation, Web Research & Content Generation)
+
+1.  **Translate Note/Selection**:
+    *   Select text in a note to translate just that selection, or invoke the command with no selection to translate the entire note.
+    *   Run the command `Notemd: Translate Note/Selection` (via command palette or sidebar button).
+    *   A modal will appear allowing you to confirm or change the **Target Language** (defaulting to the setting specified in Configuration).
+    *   The plugin uses the configured **LLM Provider** (based on Multi-Model settings) to perform the translation.
+    *   The translated content is saved to the configured **Translation Save Path** with the appropriate suffix, and opened in a **new pane to the right** of the original content for easy comparison.
+    *   You can cancel this task via the sidebar button or modal cancel button.
+
+2.  **Research & Summarize Topic**:
+    *   Select text in a note OR ensure the note has a title (this will be the search topic).
+    *   Run the command `Notemd: Research and Summarize Topic` (via command palette or sidebar button).
+    *   The plugin uses the configured **Search Provider** (Tavily/DuckDuckGo) and the appropriate **LLM Provider** (based on Multi-Model settings) to find and summarize information.
+    *   The summary is appended to the current note.
+    *   You can cancel this task via the sidebar button or modal cancel button.
+    *   *Note:* DuckDuckGo searches may fail due to bot detection. Tavily is recommended.
+
+3.  **Generate Content from Title**:
+    *   Open a note (it can be empty).
+    *   Run the command `Notemd: Generate Content from Title` (via command palette or sidebar button).
+    *   The plugin uses the appropriate **LLM Provider** (based on Multi-Model settings) to generate content based on the note's title, replacing any existing content.
+    *   If the **"Enable Research in 'Generate from Title'"** setting is enabled, it will first perform web research (using the configured **Web Research Provider**) and include that context in the prompt sent to the LLM.
+    *   You can cancel this task via the sidebar button or modal cancel button.
+
+4.  **Batch Generate Content from Titles**:
+    *   Run the command `Notemd: Batch Generate Content from Titles` (via command palette or sidebar button).
+    *   Select the folder containing the notes you want to process.
+    *   The plugin will iterate through each `.md` file in the folder (excluding `_processed.md` files and files in the designated "complete" folder), generating content based on the note's title and replacing existing content. Files are processed in the background without being opened in the editor.
+    *   Successfully processed files are moved to the configured "complete" folder.
+    *   This command respects the **"Enable Research in 'Generate from Title'"** setting for each note processed.
+    *   You can cancel this task via the sidebar button or modal cancel button.
+
+### Utilities
+
+1.  **Check for Duplicates**:
+    *   Open the `.md` or `.txt` file.
+    *   Run `Notemd: Check for Duplicates in Current File` (via command palette or sidebar button).
+    *   Results are logged to the Developer Console (`Ctrl+Shift+I`) and mentioned in a notice/sidebar log.
+
+2.  **Test LLM Connection**:
+    *   Run `Notemd: Test LLM Connection` (via command palette or sidebar button).
+    *   Tests the connection to the **Active Provider** selected in the main dropdown.
+    *   Results appear as notices and in the sidebar log/console.
+
+3.  **Batch Mermaid Fix**:
+    *   Run `Notemd: Batch Fix Mermaid Syntax` (via command palette or sidebar button).
+    *   Select the folder containing the Markdown files you want to fix.
+    *   The plugin will iterate through each `.md` file, apply syntax corrections, and save the changes if any were made. Corrections include:
+        *   Ensuring proper Mermaid block structure.
+        *   Removing extraneous parentheses `()` and curly braces `{}` from within Mermaid diagrams.
+        *   Normalizing LaTeX math delimiters (e.g., `\(\)` to `$`).
+    *   Progress and results (number of files modified, errors) are shown in the sidebar/modal log.
+
+4.  **Check and Remove Duplicate Concept Notes**:
+    *   Ensure the **Concept Note Folder Path** is correctly configured in settings.
+    *   Run `Notemd: Check and Remove Duplicate Concept Notes` (via command palette or sidebar button).
+    *   The plugin scans the concept note folder and compares filenames against notes outside the folder using several rules (exact match, plurals, normalization, containment).
+    *   If potential duplicates are found, a modal window appears listing the files, the reason they were flagged, and the conflicting files.
+    *   Review the list carefully. Click **"Delete Files"** to move the listed files to the system trash, or **"Cancel"** to take no action.
+    *   Progress and results are shown in the sidebar/modal log.
+
+## Supported LLM Providers
+
+| Provider     | Type  | API Key Required | Notes                                                    |
+|--------------|-------|------------------|----------------------------------------------------------|
+| DeepSeek     | Cloud | Yes              |                                                          |
+| OpenAI       | Cloud | Yes              | Supports various models like GPT-4o, GPT-3.5             |
+| Anthropic    | Cloud | Yes              | Supports Claude models                                   |
+| Google       | Cloud | Yes              | Supports Gemini models                                   |
+| Mistral      | Cloud | Yes              | Supports Mistral models                                  |
+| Azure OpenAI | Cloud | Yes              | Requires Endpoint, API Key, API Version                  |
+| OpenRouter   | Cloud | Yes              | Accesses many models via OpenRouter API                  |
+| LMStudio     | Local | No (Use `EMPTY`) | Runs models locally via LM Studio server                 |
+| Ollama       | Local | No               | Runs models locally via Ollama server                    |
+
+*Note: For local providers (LMStudio, Ollama), ensure the respective server application is running and accessible at the configured Base URL.*
+*Note: For OpenRouter, use the full model identifier from their website (e.g., `google/gemini-flash-1.5`) in the Model setting.*
+
 ## Configuration
 
 Access plugin settings via:
@@ -210,106 +310,6 @@ Access plugin settings via:
     *   **Exclude Specific Folders**: Compares concept notes against all notes *except* those within the folders listed below (and also excluding the Concept Note Folder).
     *   **Concept Folder Only**: Compares concept notes only against *other notes within the Concept Note Folder*. This helps find duplicates purely inside your generated concepts.
 -   **Include/Exclude Folders**: (Visible only if Mode is 'Include' or 'Exclude') Enter the *relative paths* of the folders you want to include or exclude, **one path per line**. Paths are case-sensitive and use `/` as the separator (e.g., `Reference Material/Papers` or `Daily Notes`). These folders cannot be the same as or inside the Concept Note Folder.
-
-## Usage Guide
-
-### Original Processing (Adding Wiki-Links)
-This is the core functionality focused on identifying concepts and adding `[[wiki-links]]`.
-
-**Important:** This process only works on `.md` or `.txt` files.
-
-1.  **Using the Sidebar**:
-    *   Open the Notemd Sidebar (wand icon or command palette).
-    *   Open the `.md` or `.txt` file.
-    *   Click **"Process File (Add Links)"**.
-    *   To process a folder: Click **"Process Folder (Add Links)"**, select the folder, and click "Process".
-    *   Progress is shown in the sidebar. You can cancel the task using the "Cancel Processing" button in the sidebar.
-    *   *Note for folder processing:* Files are processed in the background without being opened in the editor.
-
-2.  **Using the Command Palette** (`Ctrl+P` or `Cmd+P`):
-    *   **Single File**: Open the file and run `Notemd: Process Current File`.
-    *   **Folder**: Run `Notemd: Process Folder`, then select the folder. Files are processed in the background without being opened in the editor.
-    *   A progress modal appears for command palette actions, which includes a cancel button.
-    *   *Note:* The plugin automatically removes leading `\boxed{` and trailing `}` lines if found in the final processed content before saving.
-
-### New Features (Translation, Web Research & Content Generation)
-
-1.  **Translate Note/Selection**:
-    *   Select text in a note to translate just that selection, or invoke the command with no selection to translate the entire note.
-    *   Run the command `Notemd: Translate Note/Selection` (via command palette or sidebar button).
-    *   A modal will appear allowing you to confirm or change the **Target Language** (defaulting to the setting specified in Configuration).
-    *   The plugin uses the configured **LLM Provider** (based on Multi-Model settings) to perform the translation.
-    *   The translated content is saved to the configured **Translation Save Path** with the appropriate suffix, and opened in a **new pane to the right** of the original content for easy comparison.
-    *   You can cancel this task via the sidebar button or modal cancel button.
-
-2.  **Research & Summarize Topic**:
-    *   Select text in a note OR ensure the note has a title (this will be the search topic).
-    *   Run the command `Notemd: Research and Summarize Topic` (via command palette or sidebar button).
-    *   The plugin uses the configured **Search Provider** (Tavily/DuckDuckGo) and the appropriate **LLM Provider** (based on Multi-Model settings) to find and summarize information.
-    *   The summary is appended to the current note.
-    *   You can cancel this task via the sidebar button or modal cancel button.
-    *   *Note:* DuckDuckGo searches may fail due to bot detection. Tavily is recommended.
-
-3.  **Generate Content from Title**:
-    *   Open a note (it can be empty).
-    *   Run the command `Notemd: Generate Content from Title` (via command palette or sidebar button).
-    *   The plugin uses the appropriate **LLM Provider** (based on Multi-Model settings) to generate content based on the note's title, replacing any existing content.
-    *   If the **"Enable Research in 'Generate from Title'"** setting is enabled, it will first perform web research (using the configured **Web Research Provider**) and include that context in the prompt sent to the LLM.
-    *   You can cancel this task via the sidebar button or modal cancel button.
-
-4.  **Batch Generate Content from Titles**:
-    *   Run the command `Notemd: Batch Generate Content from Titles` (via command palette or sidebar button).
-    *   Select the folder containing the notes you want to process.
-    *   The plugin will iterate through each `.md` file in the folder (excluding `_processed.md` files and files in the designated "complete" folder), generating content based on the note's title and replacing existing content. Files are processed in the background without being opened in the editor.
-    *   Successfully processed files are moved to the configured "complete" folder.
-    *   This command respects the **"Enable Research in 'Generate from Title'"** setting for each note processed.
-    *   You can cancel this task via the sidebar button or modal cancel button.
-
-### Utilities
-
-1.  **Check for Duplicates**:
-    *   Open the `.md` or `.txt` file.
-    *   Run `Notemd: Check for Duplicates in Current File` (via command palette or sidebar button).
-    *   Results are logged to the Developer Console (`Ctrl+Shift+I`) and mentioned in a notice/sidebar log.
-
-2.  **Test LLM Connection**:
-    *   Run `Notemd: Test LLM Connection` (via command palette or sidebar button).
-    *   Tests the connection to the **Active Provider** selected in the main dropdown.
-    *   Results appear as notices and in the sidebar log/console.
-
-3.  **Batch Mermaid Fix**:
-    *   Run `Notemd: Batch Fix Mermaid Syntax` (via command palette or sidebar button).
-    *   Select the folder containing the Markdown files you want to fix.
-    *   The plugin will iterate through each `.md` file, apply syntax corrections, and save the changes if any were made. Corrections include:
-        *   Ensuring proper Mermaid block structure.
-        *   Removing extraneous parentheses `()` and curly braces `{}` from within Mermaid diagrams.
-        *   Normalizing LaTeX math delimiters (e.g., `\(\)` to `$`).
-    *   Progress and results (number of files modified, errors) are shown in the sidebar/modal log.
-
-4.  **Check and Remove Duplicate Concept Notes**:
-    *   Ensure the **Concept Note Folder Path** is correctly configured in settings.
-    *   Run `Notemd: Check and Remove Duplicate Concept Notes` (via command palette or sidebar button).
-    *   The plugin scans the concept note folder and compares filenames against notes outside the folder using several rules (exact match, plurals, normalization, containment).
-    *   If potential duplicates are found, a modal window appears listing the files, the reason they were flagged, and the conflicting files.
-    *   Review the list carefully. Click **"Delete Files"** to move the listed files to the system trash, or **"Cancel"** to take no action.
-    *   Progress and results are shown in the sidebar/modal log.
-
-## Supported LLM Providers
-
-| Provider     | Type  | API Key Required | Notes                                                    |
-|--------------|-------|------------------|----------------------------------------------------------|
-| DeepSeek     | Cloud | Yes              |                                                          |
-| OpenAI       | Cloud | Yes              | Supports various models like GPT-4o, GPT-3.5             |
-| Anthropic    | Cloud | Yes              | Supports Claude models                                   |
-| Google       | Cloud | Yes              | Supports Gemini models                                   |
-| Mistral      | Cloud | Yes              | Supports Mistral models                                  |
-| Azure OpenAI | Cloud | Yes              | Requires Endpoint, API Key, API Version                  |
-| OpenRouter   | Cloud | Yes              | Accesses many models via OpenRouter API                  |
-| LMStudio     | Local | No (Use `EMPTY`) | Runs models locally via LM Studio server                 |
-| Ollama       | Local | No               | Runs models locally via Ollama server                    |
-
-*Note: For local providers (LMStudio, Ollama), ensure the respective server application is running and accessible at the configured Base URL.*
-*Note: For OpenRouter, use the full model identifier from their website (e.g., `google/gemini-flash-1.5`) in the Model setting.*
 
 ## Troubleshooting
 
