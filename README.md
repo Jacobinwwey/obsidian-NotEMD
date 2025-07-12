@@ -376,4 +376,4 @@ MIT License - See [LICENSE](LICENSE) file for details.
 
 ---
 
-*Notemd v1.3.0 - Enhance your Obsidian knowledge graph with AI.*
+*Notemd v1.3.2 - Enhance your Obsidian knowledge graph with AI.*
