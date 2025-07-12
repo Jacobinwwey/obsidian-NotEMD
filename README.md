@@ -216,7 +216,7 @@ Access plugin settings via:
 ### Original Processing (Adding Wiki-Links)
 This is the core functionality focused on identifying concepts and adding `[[wiki-links]]`.
 
-**Important:** This process only works on `.md` or `.txt` files.
+**Important:** This process only works on `.md` or `.txt` files. You can convert PDF files to MD files for free using [Mineru](https://github.com/opendatalab/MinerU) before further processing.
 
 1.  **Using the Sidebar**:
     *   Open the Notemd Sidebar (wand icon or command palette).
