@@ -167,7 +167,12 @@ Access plugin settings via:
 -   **Max Tokens**: Maximum tokens the LLM should generate per response chunk. Affects cost and detail. (Default: 4096)
 
 #### Translation
--   **Target Language**: Select the language you want to translate your notes into. (Default: English)
+-   **Default Target Language**: Select the default language you want to translate your notes into. This can be overridden in the UI when running the translation command. (Default: English)
+-   **Translation Save Path**: Specify a *relative path* within your vault (e.g., `Translations`) where translated files should be saved. Folders will be created if they don't exist.
+-   **Use custom suffix for translated files**:
+    *   **Disabled (Default)**: Translated files use the default `_translated.md` suffix (e.g., `YourNote_translated.md`).
+    *   **Enabled**: Allows you to specify a custom suffix.
+-   **Custom Suffix**: (Visible only when the above is enabled) Enter the custom suffix to append to translated filenames (e.g., `_es` or `_fr`).
 
 #### Content Generation
 -   **Enable Research in "Generate from Title"**:
@@ -227,8 +232,9 @@ This is the core functionality focused on identifying concepts and adding `[[wik
 1.  **Translate Note/Selection**:
     *   Select text in a note to translate just that selection, or invoke the command with no selection to translate the entire note.
     *   Run the command `Notemd: Translate Note/Selection` (via command palette or sidebar button).
-    *   The plugin uses the configured **LLM Provider** (based on Multi-Model settings) to translate the content to the **Target Language** specified in settings.
-    *   The translated content replaces the original selection or the entire note content.
+    *   A modal will appear allowing you to confirm or change the **Target Language** (defaulting to the setting specified in Configuration).
+    *   The plugin uses the configured **LLM Provider** (based on Multi-Model settings) to perform the translation.
+    *   The translated content is saved to the configured **Translation Save Path** with the appropriate suffix, and opened in a **new pane to the right** of the original content for easy comparison.
     *   You can cancel this task via the sidebar button or modal cancel button.
 
 2.  **Research & Summarize Topic**:
