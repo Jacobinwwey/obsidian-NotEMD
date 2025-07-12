@@ -168,7 +168,9 @@ Access plugin settings via:
 
 #### Translation
 -   **Default Target Language**: Select the default language you want to translate your notes into. This can be overridden in the UI when running the translation command. (Default: English)
--   **Translation Save Path**: Specify a *relative path* within your vault (e.g., `Translations`) where translated files should be saved. Folders will be created if they don't exist.
+-   **Customise Translation File Save Path**:
+    *   **Disabled (Default)**: Translated files are saved in the *same folder* as the original note.
+    *   **Enabled**: Allows you to specify a *relative path* within your vault (e.g., `Translations`) where translated files should be saved. Folders will be created if they don't exist.
 -   **Use custom suffix for translated files**:
     *   **Disabled (Default)**: Translated files use the default `_translated.md` suffix (e.g., `YourNote_translated.md`).
     *   **Enabled**: Allows you to specify a custom suffix.

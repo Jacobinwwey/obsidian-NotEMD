@@ -59,6 +59,7 @@ export interface NotemdSettings {
     // Custom Translation Output Filename Settings
     useCustomTranslationSuffix: boolean;
     translationCustomSuffix: string;
+    useCustomTranslationSavePath: boolean; // New: Toggle for custom translation save path
     translationSavePath: string;
     // Custom Generate from Title Output Folder Settings
     useCustomGenerateTitleOutputFolder: boolean; // Toggle for custom output folder

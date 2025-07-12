@@ -117,7 +117,8 @@ export const DEFAULT_SETTINGS: NotemdSettings = {
     // Custom Translation Output Filename Defaults
     useCustomTranslationSuffix: false,
     translationCustomSuffix: '_translated',
-    translationSavePath: 'translations',
+    useCustomTranslationSavePath: false, // Default: save in the same folder
+    translationSavePath: '', // Default path is empty when custom path is disabled
     // Custom Generate from Title Output Folder Defaults
     useCustomGenerateTitleOutputFolder: false, // Default to using '[foldername]_complete'
     generateTitleOutputFolderName: '_complete', // Default folder name if custom is enabled but empty
