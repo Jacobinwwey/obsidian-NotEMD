@@ -18,7 +18,7 @@ A Easy way to create your own Knowledge-base!
 
 Notemd enhances your Obsidian workflow by integrating with various Large Language Models (LLMs) to process your multi-languages notes, automatically generate wiki-links for key concepts, create corresponding concept notes, perform web research, and more.
 
-**Version:** 1.3.0
+**Version:** 1.3.2
 
 ## Table of Contents
 - [Features](#features)
@@ -38,7 +38,7 @@ Notemd enhances your Obsidian workflow by integrating with various Large Languag
 - **Content Preservation**: Aims to maintain original formatting while adding structure and links.
 - **Progress Tracking**: Real-time updates via the Notemd Sidebar or a progress modal.
 - **Cancellable Operations**: Cancel any processing task (single or batch) initiated from the sidebar via its dedicated cancel button. Command palette operations use a modal which can also be cancelled.
-- **Multi-Model Configuration**: Use different LLM providers *and* specific models for different tasks (Add Links, Research, Generate Title) or use a single provider for all.
+- **Multi-Model Configuration**: Use different LLM providers *and* specific models for different tasks (Add Links, Research, Generate Title, Translate) or use a single provider for all.
 - **Stable API Calls (Retry Logic)**: Optionally enable automatic retries for failed LLM API calls with configurable interval and attempt limits.
 
 ### Knowledge Graph Enhancement
@@ -47,6 +47,13 @@ Notemd enhances your Obsidian workflow by integrating with various Large Languag
 - **Customizable Output Paths**: Configure separate relative paths within your vault for saving processed files and newly created concept notes.
 - **Customizable Output Filenames (Add Links)**: Optionally **overwrite the original file** or use a custom suffix/replacement string instead of the default `_processed.md` when processing files for links.
 - **Link Integrity Maintenance**: Basic handling for updating links when notes are renamed or deleted within the vault.
+
+### Translation
+- **AI-Powered Translation**:
+    - Translate note content using the configured LLM.
+    - Supports translation between multiple languages.
+    - Option to translate the entire file or selected text.
+    - Customizable target language in settings.
 
 ### Web Research & Content Generation
 - **Web Research & Summarization**:
@@ -101,7 +108,7 @@ Access plugin settings via:
 ### Multi-Model Configuration
 -   **Use Different Providers for Tasks**:
     *   **Disabled (Default)**: Uses the single "Active Provider" (selected above) for all tasks.
-    *   **Enabled**: Allows you to select a specific provider *and* optionally override the model name for each task ("Add Links", "Research & Summarize", "Generate from Title"). If the model override field for a task is left blank, it will use the default model configured for that task's selected provider.
+    *   **Enabled**: Allows you to select a specific provider *and* optionally override the model name for each task ("Add Links", "Research & Summarize", "Generate from Title", "Translate"). If the model override field for a task is left blank, it will use the default model configured for that task's selected provider.
 
 ### Stable API Call Settings
 -   **Enable Stable API Calls (Retry Logic)**:
@@ -159,6 +166,9 @@ Access plugin settings via:
 -   **Enable Duplicate Detection**: Toggles the basic check for duplicate words within processed content (results in console). (Default: Enabled)
 -   **Max Tokens**: Maximum tokens the LLM should generate per response chunk. Affects cost and detail. (Default: 4096)
 
+#### Translation
+-   **Target Language**: Select the language you want to translate your notes into. (Default: English)
+
 #### Content Generation
 -   **Enable Research in "Generate from Title"**:
     *   **Disabled (Default)**: "Generate from Title" uses only the title as input.
@@ -212,9 +222,16 @@ This is the core functionality focused on identifying concepts and adding `[[wik
     *   A progress modal appears for command palette actions, which includes a cancel button.
     *   *Note:* The plugin automatically removes leading `\boxed{` and trailing `}` lines if found in the final processed content before saving.
 
-### New Features (Web Research & Content Generation)
+### New Features (Translation, Web Research & Content Generation)
 
-1.  **Research & Summarize Topic**:
+1.  **Translate Note/Selection**:
+    *   Select text in a note to translate just that selection, or invoke the command with no selection to translate the entire note.
+    *   Run the command `Notemd: Translate Note/Selection` (via command palette or sidebar button).
+    *   The plugin uses the configured **LLM Provider** (based on Multi-Model settings) to translate the content to the **Target Language** specified in settings.
+    *   The translated content replaces the original selection or the entire note content.
+    *   You can cancel this task via the sidebar button or modal cancel button.
+
+2.  **Research & Summarize Topic**:
     *   Select text in a note OR ensure the note has a title (this will be the search topic).
     *   Run the command `Notemd: Research and Summarize Topic` (via command palette or sidebar button).
     *   The plugin uses the configured **Search Provider** (Tavily/DuckDuckGo) and the appropriate **LLM Provider** (based on Multi-Model settings) to find and summarize information.
@@ -222,14 +239,14 @@ This is the core functionality focused on identifying concepts and adding `[[wik
     *   You can cancel this task via the sidebar button or modal cancel button.
     *   *Note:* DuckDuckGo searches may fail due to bot detection. Tavily is recommended.
 
-2.  **Generate Content from Title**:
+3.  **Generate Content from Title**:
     *   Open a note (it can be empty).
     *   Run the command `Notemd: Generate Content from Title` (via command palette or sidebar button).
     *   The plugin uses the appropriate **LLM Provider** (based on Multi-Model settings) to generate content based on the note's title, replacing any existing content.
     *   If the **"Enable Research in 'Generate from Title'"** setting is enabled, it will first perform web research (using the configured **Web Research Provider**) and include that context in the prompt sent to the LLM.
     *   You can cancel this task via the sidebar button or modal cancel button.
 
-3.  **Batch Generate Content from Titles**:
+4.  **Batch Generate Content from Titles**:
     *   Run the command `Notemd: Batch Generate Content from Titles` (via command palette or sidebar button).
     *   Select the folder containing the notes you want to process.
     *   The plugin will iterate through each `.md` file in the folder (excluding `_processed.md` files and files in the designated "complete" folder), generating content based on the note's title and replacing existing content. Files are processed in the background without being opened in the editor.
