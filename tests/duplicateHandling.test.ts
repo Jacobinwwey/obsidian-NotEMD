@@ -87,6 +87,10 @@ describe('Duplicate Handling', () => {
             customPromptGenerateTitle: '',
             useCustomPromptForResearchSummarize: false,
             customPromptResearchSummarize: '',
+            translateProvider: 'DeepSeek',
+            useCustomTranslationSuffix: false,
+            translationCustomSuffix: '_translated',
+            translationSavePath: 'translations',
             
         };
         // Removed corrupted line: plugin.app = mockApp as annckApp after settings
