@@ -10,6 +10,7 @@ import {
     generateContentForTitle,
     batchGenerateContentForTitles,
     checkAndRemoveDuplicateConceptNotes,
+    batchFixMermaidSyntaxInFolder,
     findDuplicates // Keep findDuplicates for the simple command
 } from './fileUtils';
 import { _performResearch, researchAndSummarize } from './searchUtils'; // Import _performResearch if needed directly, ensure researchAndSummarize is exported
@@ -742,8 +743,6 @@ export default class NotemdPlugin extends Plugin {
             this.updateStatusBar(`Batch fixing Mermaid syntax...`);
             useReporter.log(`Starting batch Mermaid fix for folder: "${folderPath}"...`);
 
-            // Import the new function we will create in fileUtils.ts
-            const { batchFixMermaidSyntaxInFolder } = await import('./fileUtils');
             const { errors, modifiedCount } = await batchFixMermaidSyntaxInFolder(this.app, folderPath, useReporter); // Call utility
 
             if (!useReporter.cancelled) {
