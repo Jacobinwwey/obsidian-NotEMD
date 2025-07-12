@@ -783,22 +783,30 @@ export default class NotemdPlugin extends Plugin {
         }
     }
 
-    async translateFileCommand(file: TFile, signal?: AbortSignal) {
+    async translateFileCommand(file: TFile, signal?: AbortSignal, reporter?: ProgressReporter) {
         if (this.isBusy) {
             new Notice("Notemd is busy.");
             return;
         }
+        
+        // Use provided reporter or get a new one (which clears display if it's the sidebar)
+        const useReporter = reporter || this.getReporter();
+        
         this.isBusy = true;
-        const reporter = this.getReporter();
         this.updateStatusBar("Translating...");
 
         try {
             await this.loadSettings();
-            const translatedFilePath = await translateFile(this.app, this.settings, file, this.settings.language, reporter, signal);
+            const translatedFilePath = await translateFile(this.app, this.settings, file, this.settings.language, useReporter, signal);
+            
+            // Update status and progress on success
             this.updateStatusBar("Translation complete");
+            useReporter.log("Translation complete.");
+            useReporter.updateStatus("Translation complete", 100);
 
             if (translatedFilePath) {
-                const newLeaf = this.app.workspace.splitActiveLeaf();
+                // Open the translated file in a new pane
+                const newLeaf = this.app.workspace.getLeaf('split', 'vertical');
                 const translatedFile = this.app.vault.getAbstractFileByPath(translatedFilePath);
                 if (translatedFile instanceof TFile) {
                     newLeaf.openFile(translatedFile);
@@ -818,8 +826,8 @@ export default class NotemdPlugin extends Plugin {
                 new Notice(`Failed to translate file: ${errorMessage}. See console for details.`, 10000);
                 new ErrorModal(this.app, "Translation Error", errorDetails).open();
             }
-            reporter.log(`Error: ${errorMessage}`);
-            reporter.updateStatus('Error occurred', -1);
+            useReporter.log(`Error: ${errorMessage}`);
+            useReporter.updateStatus('Error occurred', -1);
         } finally {
             this.isBusy = false;
         }
