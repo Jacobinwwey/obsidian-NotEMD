@@ -26,9 +26,9 @@ Notemd enhances your Obsidian workflow by integrating with various Large Languag
 ## Table of Contents
 - [Features](#features)
 - [Installation](#installation)
-- [Configuration](#configuration)
 - [Usage Guide](#usage-guide)
 - [Supported LLM Providers](#supported-llm-providers)
+- [Configuration](#configuration)
 - [Troubleshooting](#troubleshooting)
 - [Contributing](#contributing)
 - [License](#license)
