@@ -1,7 +1,7 @@
 import { App, TFile, TFolder, Notice } from 'obsidian';
-import { NotemdSettings, ProgressReporter } from '../types';
-import { getProviderForTask, getModelForTask } from '../utils';
-import { callLLM } from '../llmUtils';
+import { NotemdSettings, ProgressReporter } from './types';
+import { getProviderForTask, getModelForTask } from './utils';
+import { callLLM } from './llmUtils';
 
 export async function translateFile(
     app: App,
