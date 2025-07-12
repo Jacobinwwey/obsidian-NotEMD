@@ -18,6 +18,7 @@ import { ErrorModal } from './ui/ErrorModal';
 import { NotemdSettingTab } from './ui/NotemdSettingTab';
 import { showDeletionConfirmationModal } from './ui/modals'; // Import the modal function
 import { NotemdSidebarView } from './ui/NotemdSidebarView';
+import { translateFile } from './src/translate';
 
 export default class NotemdPlugin extends Plugin {
     settings: NotemdSettings;
@@ -214,6 +215,21 @@ export default class NotemdPlugin extends Plugin {
             }
         });
 
+        this.addCommand({
+            id: 'translate-file',
+            name: 'Translate current file',
+            checkCallback: (checking: boolean) => {
+                const activeFile = this.app.workspace.getActiveFile();
+                if (activeFile) {
+                    if (!checking) {
+                        this.translateFileCommand(activeFile);
+                    }
+                    return true;
+                }
+                return false;
+            }
+        });
+
         // --- Settings Tab ---
         this.addSettingTab(new NotemdSettingTab(this.app, this));
 
@@ -266,6 +282,7 @@ export default class NotemdPlugin extends Plugin {
         this.settings.addLinksProvider = this.settings.providers.some(p => p.name === this.settings.addLinksProvider) ? this.settings.addLinksProvider : this.settings.activeProvider;
         this.settings.researchProvider = this.settings.providers.some(p => p.name === this.settings.researchProvider) ? this.settings.researchProvider : this.settings.activeProvider;
         this.settings.generateTitleProvider = this.settings.providers.some(p => p.name === this.settings.generateTitleProvider) ? this.settings.generateTitleProvider : this.settings.activeProvider;
+        this.settings.translateProvider = this.settings.providers.some(p => p.name === this.settings.translateProvider) ? this.settings.translateProvider : this.settings.activeProvider;
 
         // Merge availableLanguages to ensure new languages are added for existing users
         const defaultLanguages = DEFAULT_SETTINGS.availableLanguages;
@@ -763,6 +780,48 @@ export default class NotemdPlugin extends Plugin {
         } finally {
             this.isBusy = false;
             // No need to call useReporter.updateButtonStates() here
+        }
+    }
+
+    async translateFileCommand(file: TFile, signal?: AbortSignal) {
+        if (this.isBusy) {
+            new Notice("Notemd is busy.");
+            return;
+        }
+        this.isBusy = true;
+        const reporter = this.getReporter();
+        this.updateStatusBar("Translating...");
+
+        try {
+            await this.loadSettings();
+            const translatedFilePath = await translateFile(this.app, this.settings, file, this.settings.language, reporter, signal);
+            this.updateStatusBar("Translation complete");
+
+            if (translatedFilePath) {
+                const newLeaf = this.app.workspace.splitActiveLeaf();
+                const translatedFile = this.app.vault.getAbstractFileByPath(translatedFilePath);
+                if (translatedFile instanceof TFile) {
+                    newLeaf.openFile(translatedFile);
+                }
+            }
+
+        } catch (error: unknown) {
+            this.updateStatusBar("Translation failed");
+            let errorMessage = 'An unknown error occurred during translation.';
+            let errorDetails = String(error);
+            if (error instanceof Error) {
+                errorMessage = error.message;
+                errorDetails = error.stack || error.message;
+            }
+            if (!errorMessage.includes("cancelled by user")) {
+                console.error("Translation Error:", errorDetails);
+                new Notice(`Failed to translate file: ${errorMessage}. See console for details.`, 10000);
+                new ErrorModal(this.app, "Translation Error", errorDetails).open();
+            }
+            reporter.log(`Error: ${errorMessage}`);
+            reporter.updateStatus('Error occurred', -1);
+        } finally {
+            this.isBusy = false;
         }
     }
 

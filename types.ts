@@ -43,6 +43,7 @@ export interface NotemdSettings {
     addLinksProvider: string;
     researchProvider: string;
     generateTitleProvider: string;
+    translateProvider: string;
     // Stable API Call Settings
     enableStableApiCall: boolean;
     apiCallInterval: number;
@@ -51,9 +52,14 @@ export interface NotemdSettings {
     addLinksModel?: string;
     researchModel?: string;
     generateTitleModel?: string;
+    translateModel?: string;
     // Custom Add Links Output Filename Settings
     useCustomAddLinksSuffix: boolean;
     addLinksCustomSuffix: string;
+    // Custom Translation Output Filename Settings
+    useCustomTranslationSuffix: boolean;
+    translationCustomSuffix: string;
+    translationSavePath: string;
     // Custom Generate from Title Output Folder Settings
     useCustomGenerateTitleOutputFolder: boolean; // Toggle for custom output folder
     generateTitleOutputFolderName: string; // The custom folder name (defaults to _complete)
@@ -79,7 +85,7 @@ export interface NotemdSettings {
 }
 
 // Defines the keys for tasks that can have custom prompts
-export type TaskKey = 'addLinks' | 'generateTitle' | 'researchSummarize';
+export type TaskKey = 'addLinks' | 'generateTitle' | 'researchSummarize' | 'translate';
 
 // Interface for search results
 export interface SearchResult {

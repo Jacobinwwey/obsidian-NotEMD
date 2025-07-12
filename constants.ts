@@ -101,6 +101,7 @@ export const DEFAULT_SETTINGS: NotemdSettings = {
     addLinksProvider: 'DeepSeek', // Default to the primary activeProvider initially
     researchProvider: 'DeepSeek', // Default to the primary activeProvider initially
     generateTitleProvider: 'DeepSeek', // Default to the primary activeProvider initially
+    translateProvider: 'DeepSeek',
     // Stable API Call Defaults
     enableStableApiCall: false, // Default to disabled
     apiCallInterval: 5, // Default interval 5 seconds
@@ -109,9 +110,14 @@ export const DEFAULT_SETTINGS: NotemdSettings = {
     addLinksModel: '',
     researchModel: '',
     generateTitleModel: '',
+    translateModel: '',
     // Custom Add Links Output Filename Defaults
     useCustomAddLinksSuffix: false, // Default to standard '_processed.md' suffix
     addLinksCustomSuffix: '', // Default custom suffix is empty (relevant only if toggle is on)
+    // Custom Translation Output Filename Defaults
+    useCustomTranslationSuffix: false,
+    translationCustomSuffix: '_translated',
+    translationSavePath: 'translations',
     // Custom Generate from Title Output Folder Defaults
     useCustomGenerateTitleOutputFolder: false, // Default to using '[foldername]_complete'
     generateTitleOutputFolderName: '_complete', // Default folder name if custom is enabled but empty

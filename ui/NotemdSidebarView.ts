@@ -33,6 +33,8 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
     private checkRemoveDuplicatesButton: HTMLButtonElement | null = null;
     private batchMermaidFixButton: HTMLButtonElement | null = null; // Added
     private cancelButton: HTMLButtonElement | null = null;
+    private translateButton: HTMLButtonElement | null = null;
+    private languageSelector: HTMLSelectElement | null = null;
 
     constructor(leaf: WorkspaceLeaf, plugin: NotemdPlugin) {
         super(leaf);
@@ -53,6 +55,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
 
     // Method to clear progress/log display
     clearDisplay() {
+        console.log('clearDisplay called.');
         this.logContent = [];
         if (this.logEl) this.logEl.empty();
         if (this.statusEl) this.statusEl.setText('Ready');
@@ -142,6 +145,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
 
     // Method to handle cancellation request
     requestCancel() {
+        console.log(`requestCancel called. isProcessing: ${this.isProcessing}, isCancelled: ${this.isCancelled}`);
         if (this.isProcessing && !this.isCancelled) {
             this.isCancelled = true;
             this.updateStatus('Cancelling...', -1);
@@ -161,6 +165,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
 
     // --- Centralized Button State Management ---
     private updateButtonStates() {
+        console.log(`updateButtonStates called. isProcessing: ${this.isProcessing}, isCancelled: ${this.isCancelled}`);
         const processing = this.isProcessing;
         const cancelled = this.isCancelled;
 
@@ -174,6 +179,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         if (this.testConnectionButton) this.testConnectionButton.disabled = processing;
         if (this.checkRemoveDuplicatesButton) this.checkRemoveDuplicatesButton.disabled = processing;
         if (this.batchMermaidFixButton) this.batchMermaidFixButton.disabled = processing; // Added
+        if (this.translateButton) this.translateButton.disabled = processing;
 
         // Cancel button enabled only during processing and before cancellation
         if (this.cancelButton) {
@@ -298,6 +304,51 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             finally { this.isProcessing = false; this.updateButtonStates(); }
         };
 
+        const translateGroup = newFeatureButtonGroup.createDiv({ cls: 'notemd-translate-group' });
+        this.translateButton = translateGroup.createEl('button', { text: 'Translate', cls: 'mod-cta' });
+        this.translateButton.title = 'Translates the selected text using the configured provider.';
+        this.translateButton.onclick = async () => {
+            if (this.isProcessing) {
+                console.log('Translate button clicked but already processing. Ignoring.');
+                return;
+            }
+            const activeFile = this.app.workspace.getActiveFile();
+            if (activeFile) {
+                console.log('Translate button clicked. Initializing processing state.');
+                this.clearDisplay();
+                this.currentAbortController = new AbortController();
+                this.isProcessing = true;
+                this.startTime = Date.now();
+                this.updateButtonStates(); // Should enable cancel button here
+                this.log('Starting: Translate File...');
+                this.updateStatus('Translating...', 0);
+                try {
+                    await this.plugin.translateFileCommand(activeFile, this.currentAbortController.signal);
+                } finally {
+                    console.log('Translate command finished. Resetting processing state.');
+                    this.isProcessing = false;
+                    this.updateButtonStates(); // Should disable cancel button here
+                }
+            } else {
+                new Notice('No active file to translate.');
+                console.log('No active file to translate. Translate command not started.');
+            }
+        };
+
+        this.languageSelector = translateGroup.createEl('select');
+        const languageSelector = this.languageSelector;
+        if (languageSelector) {
+            this.plugin.settings.availableLanguages.forEach(lang => {
+                languageSelector.add(new Option(lang.name, lang.code));
+            });
+            languageSelector.value = this.plugin.settings.language;
+            languageSelector.onchange = async (e) => {
+                this.plugin.settings.language = (e.target as HTMLSelectElement).value;
+                await this.plugin.saveSettings();
+                new Notice(`Language changed to ${this.plugin.settings.language}`);
+            };
+        }
+
         container.createEl('h4', { text: "Utilities" });
         const utilityButtonGroup = container.createDiv({ cls: 'notemd-button-group' });
 
@@ -352,16 +403,22 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         };
 
         this.checkRemoveDuplicatesButton = utilityButtonGroup.createEl('button', { text: 'Check & remove duplicates' });
-        this.checkRemoveDuplicatesButton.title = 'Checks Concept Note folder for duplicates and prompts for deletion.';
-        this.checkRemoveDuplicatesButton.onclick = async () => {
-            if (this.isProcessing) return;
-            this.clearDisplay();
-            this.currentAbortController = new AbortController(); // Create new controller
-            this.isProcessing = true; this.startTime = Date.now(); this.updateButtonStates();
-            this.log('Starting: Check & Remove Duplicate Concept Notes...'); this.updateStatus('Checking duplicates...', 0);
-            try { await this.plugin.checkAndRemoveDuplicateConceptNotesCommand(this); } // Use plugin method
-            finally { this.isProcessing = false; this.updateButtonStates(); }
-        };
+        if (this.checkRemoveDuplicatesButton) {
+            this.checkRemoveDuplicatesButton.title = 'Checks Concept Note folder for duplicates and prompts for deletion.';
+            this.checkRemoveDuplicatesButton.onclick = async () => {
+                if (this.isProcessing) return;
+                this.clearDisplay();
+                this.currentAbortController = new AbortController(); // Create new controller
+                this.isProcessing = true; this.startTime = Date.now(); this.updateButtonStates();
+                this.log('Starting: Check & Remove Duplicate Concept Notes...'); this.updateStatus('Checking duplicates...', 0);
+                try {
+                    if (this.plugin) {
+                        await this.plugin.checkAndRemoveDuplicateConceptNotesCommand(this);
+                    }
+                } // Use plugin method
+                finally { this.isProcessing = false; this.updateButtonStates(); }
+            };
+        }
 
         container.createEl('hr');
         const progressArea = container.createDiv({ cls: 'notemd-progress-area' });
@@ -410,5 +467,6 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         this.processCurrentButton = null; this.processFolderButton = null; this.researchButton = null;
         this.generateTitleButton = null; this.batchGenerateTitleButton = null; this.checkDuplicatesButton = null;
         this.testConnectionButton = null; this.checkRemoveDuplicatesButton = null; this.batchMermaidFixButton = null; // Added
+        this.translateButton = null; this.languageSelector = null;
     }
 }

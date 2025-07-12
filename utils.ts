@@ -102,13 +102,14 @@ export function cancellableDelay(ms: number, progressReporter: ProgressReporter)
  * @param settings The current plugin settings.
  * @returns The LLMProviderConfig or undefined if no valid provider is found.
  */
-export function getProviderForTask(taskType: 'addLinks' | 'research' | 'generateTitle', settings: NotemdSettings): LLMProviderConfig | undefined {
+export function getProviderForTask(taskType: 'addLinks' | 'research' | 'generateTitle' | 'translate', settings: NotemdSettings): LLMProviderConfig | undefined {
     let providerName: string;
     if (settings.useMultiModelSettings) {
         switch (taskType) {
             case 'addLinks': providerName = settings.addLinksProvider; break;
             case 'research': providerName = settings.researchProvider; break;
             case 'generateTitle': providerName = settings.generateTitleProvider; break;
+            case 'translate': providerName = settings.translateProvider; break;
             default:
                 console.warn(`Unknown task type '${taskType}' in getProviderForTask. Falling back to active provider.`);
                 providerName = settings.activeProvider;
@@ -141,7 +142,7 @@ export function getProviderForTask(taskType: 'addLinks' | 'research' | 'generate
  * @param settings The current plugin settings.
  * @returns The model name string to use.
  */
-export function getModelForTask(taskType: 'addLinks' | 'research' | 'generateTitle', provider: LLMProviderConfig, settings: NotemdSettings): string {
+export function getModelForTask(taskType: 'addLinks' | 'research' | 'generateTitle' | 'translate', provider: LLMProviderConfig, settings: NotemdSettings): string {
     let modelName: string | undefined | null = provider.model;
 
     if (settings.useMultiModelSettings) {
@@ -149,6 +150,7 @@ export function getModelForTask(taskType: 'addLinks' | 'research' | 'generateTit
             case 'addLinks': modelName = settings.addLinksModel?.trim() || provider.model; break;
             case 'research': modelName = settings.researchModel?.trim() || provider.model; break;
             case 'generateTitle': modelName = settings.generateTitleModel?.trim() || provider.model; break;
+            case 'translate': modelName = settings.translateModel?.trim() || provider.model; break;
             default:
                 console.warn(`Unknown task type '${taskType}' in getModelForTask. Using provider default.`);
                 modelName = provider.model;

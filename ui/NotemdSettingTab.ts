@@ -6,8 +6,8 @@ import { testAPI } from '../llmUtils'; // Import testAPI
 import { getDefaultPrompt } from '../promptUtils'; // Import for default prompts
 
 // Define specific key types for settings accessed dynamically
-type ProviderSettingKey = 'addLinksProvider' | 'researchProvider' | 'generateTitleProvider';
-type ModelSettingKey = 'addLinksModel' | 'researchModel' | 'generateTitleModel';
+type ProviderSettingKey = 'addLinksProvider' | 'researchProvider' | 'generateTitleProvider' | 'translateProvider';
+type ModelSettingKey = 'addLinksModel' | 'researchModel' | 'generateTitleModel' | 'translateModel';
 
 
 export class NotemdSettingTab extends PluginSettingTab {
@@ -254,6 +254,45 @@ export class NotemdSettingTab extends PluginSettingTab {
             createTaskModelSettings('addLinksProvider', 'addLinksModel', 'Add links (process file/folder)');
             createTaskModelSettings('researchProvider', 'researchModel', 'Research & summarize');
             createTaskModelSettings('generateTitleProvider', 'generateTitleModel', 'Generate from title');
+            createTaskModelSettings('translateProvider', 'translateModel', 'Translate');
+        }
+
+        // --- Translate Task Settings ---
+        new Setting(containerEl).setName('Task: Translate').setHeading();
+
+        new Setting(containerEl)
+            .setName('Translation Save Path')
+            .setDesc('The folder where translated files will be saved.')
+            .addText(text => text
+                .setPlaceholder('e.g., Translations')
+                .setValue(this.plugin.settings.translationSavePath)
+                .onChange(async (value) => {
+                    this.plugin.settings.translationSavePath = value;
+                    await this.plugin.saveSettings();
+                }));
+
+        new Setting(containerEl)
+            .setName('Use custom suffix for translated files')
+            .setDesc('Enable to use a custom suffix instead of the default "_translated".')
+            .addToggle(toggle => toggle
+                .setValue(this.plugin.settings.useCustomTranslationSuffix)
+                .onChange(async (value) => {
+                    this.plugin.settings.useCustomTranslationSuffix = value;
+                    await this.plugin.saveSettings();
+                    this.display(); // Refresh to show/hide the text input
+                }));
+
+        if (this.plugin.settings.useCustomTranslationSuffix) {
+            new Setting(containerEl)
+                .setName('Custom Suffix')
+                .setDesc('The custom suffix to append to translated filenames.')
+                .addText(text => text
+                    .setPlaceholder('_my_translation')
+                    .setValue(this.plugin.settings.translationCustomSuffix)
+                    .onChange(async (value) => {
+                        this.plugin.settings.translationCustomSuffix = value;
+                        await this.plugin.saveSettings();
+                    }));
         }
 
         // --- Stable API Call Settings ---

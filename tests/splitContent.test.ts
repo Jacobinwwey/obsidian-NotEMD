@@ -87,6 +87,10 @@ describe('splitContent', () => {
             customPromptGenerateTitle: '',
             useCustomPromptForResearchSummarize: false,
             customPromptResearchSummarize: '',
+            translateProvider: 'DeepSeek',
+            useCustomTranslationSuffix: false,
+            translationCustomSuffix: '_translated',
+            translationSavePath: 'translations',
         };
   });
 

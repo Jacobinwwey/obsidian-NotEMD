@@ -118,7 +118,11 @@ Format directly for Obsidian markdown. Do NOT wrap the entire response in a mark
     researchSummarize: `Summarize the following search results for the topic "{TOPIC}". Provide a concise yet comprehensive overview. Focus on key findings, data, and important conclusions. Format the summary in Markdown.
 
 Search Results:
-{SEARCH_RESULTS_CONTEXT}`
+{SEARCH_RESULTS_CONTEXT}`,
+    translate: `Translate the following text to {LANGUAGE}. Only output the translated text. Do not include the original text.
+    
+Text to translate:
+{TEXT}`
 };
 
 export function getDefaultPrompt(taskKey: TaskKey): string {
