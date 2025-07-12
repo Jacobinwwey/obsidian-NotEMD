@@ -23,7 +23,11 @@ Notemd enhances your Obsidian workflow by integrating with various Large Languag
 
 **Version:** 1.3.2
 
+<img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
+<img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
+
 ## Table of Contents
+
 - [Features](#features)
 - [Installation](#installation)
 - [Configuration](#configuration)
@@ -44,6 +48,7 @@ Notemd enhances your Obsidian workflow by integrating with various Large Languag
 - **Multi-Model Configuration**: Use different LLM providers *and* specific models for different tasks (Add Links, Research, Generate Title, Translate) or use a single provider for all.
 - **Stable API Calls (Retry Logic)**: Optionally enable automatic retries for failed LLM API calls with configurable interval and attempt limits.
 
+
 ### Knowledge Graph Enhancement
 - **Automatic Wiki-Linking**: Identifies and adds `[[wiki-links]]` to core concepts within your processed notes based on LLM output.
 - **Concept Note Creation (Optional & Customizable)**: Automatically creates new notes for discovered concepts in a specified vault folder.
@@ -51,12 +56,15 @@ Notemd enhances your Obsidian workflow by integrating with various Large Languag
 - **Customizable Output Filenames (Add Links)**: Optionally **overwrite the original file** or use a custom suffix/replacement string instead of the default `_processed.md` when processing files for links.
 - **Link Integrity Maintenance**: Basic handling for updating links when notes are renamed or deleted within the vault.
 
+
 ### Translation
+
 - **AI-Powered Translation**:
     - Translate note content using the configured LLM.
     - Supports translation between multiple languages.
     - Customizable target language in settings or in UI.
     - Automatically open the translated text on the right side of the original text for easy reading.
+
 
 ### Web Research & Content Generation
 - **Web Research & Summarization**:
@@ -69,13 +77,17 @@ Notemd enhances your Obsidian workflow by integrating with various Large Languag
     - **Optional Research**: Configure whether to perform web research (using the selected provider) to provide context for generation.
 - **Batch Content Generation from Titles**: Generate content for all notes within a selected folder based on their titles (respects the optional research setting). Successfully processed files are moved to a **configurable "complete" subfolder** (e.g., `[foldername]_complete` or a custom name) to avoid reprocessing.
 
+
 ### Utility Features
 - **Duplicate Detection**: Basic check for duplicate words within the currently processed file's content (results logged to console).
 - **Check and Remove Duplicate Concept Notes**: Identifies potential duplicate notes within the configured **Concept Note Folder** based on exact name matches, plurals, normalization, and single-word containment compared to notes outside the folder. The scope of the comparison (which notes outside the concept folder are checked) can be configured to the **entire vault**, **specific included folders**, or **all folders excluding specific ones**. Presents a detailed list with reasons and conflicting files, then prompts for confirmation before moving identified duplicates to system trash. Shows progress during deletion.
 - **Batch Mermaid Fix**: Applies Mermaid and LaTeX syntax corrections (`refineMermaidBlocks` and `cleanupLatexDelimiters`) to all Markdown files within a user-selected folder.
 - **LLM Connection Test**: Verify API settings for the active provider.
 
+
 ## Installation
+
+<img width="819" height="733" alt="Install" src="https://github.com/user-attachments/assets/f1733532-68fd-4c47-86b4-6fcc185e3f66" />
 
 ### From Obsidian Marketplace (Recommended)
 1. Open Obsidian **Settings** → **Community plugins**.
@@ -107,11 +119,13 @@ Access plugin settings via:
     *   **API Version (Azure Only)**: Required for Azure OpenAI deployments (e.g., `2024-02-15-preview`).
 3.  **Test Connection**: Use the "Test Connection" button for the active provider to verify your settings. This now uses a more reliable method for LM Studio.
 4.  **Manage Provider Configurations**: Use the "Export Providers" and "Import Providers" buttons to save/load your LLM provider settings to/from a `notemd-providers.json` file within the plugin's configuration directory. This allows for easy backup and sharing.
+<img width="804" height="506" alt="LLM" src="https://github.com/user-attachments/assets/8caf42e3-43ad-456d-8b96-b63e7914e45f" />
 
 ### Multi-Model Configuration
 -   **Use Different Providers for Tasks**:
     *   **Disabled (Default)**: Uses the single "Active Provider" (selected above) for all tasks.
     *   **Enabled**: Allows you to select a specific provider *and* optionally override the model name for each task ("Add Links", "Research & Summarize", "Generate from Title", "Translate"). If the model override field for a task is left blank, it will use the default model configured for that task's selected provider.
+<img width="817" height="428" alt="Multi-model" src="https://github.com/user-attachments/assets/85e6b854-c0ca-45cc-a55e-24638dceb120" />
 
 ### Stable API Call Settings
 -   **Enable Stable API Calls (Retry Logic)**:
@@ -119,6 +133,7 @@ Access plugin settings via:
     *   **Enabled**: Automatically retries failed LLM API calls (useful for intermittent network issues or rate limits).
 -   **Retry Interval (seconds)**: (Visible only when enabled) Time to wait between retry attempts (1-300 seconds). Default: 5.
 -   **Maximum Retries**: (Visible only when enabled) Maximum number of retry attempts (0-10). Default: 3.
+<img width="805" height="187" alt="stable API calls" src="https://github.com/user-attachments/assets/936454a7-b657-413c-8a2a-13d517f9c519" />
 
 ### General Settings
 
@@ -137,12 +152,14 @@ Access plugin settings via:
 -   **Remove Code Fences on Add Links**:
     *   **Disabled (Default)**: Code fences **(\`\`\`)** are kept in the content when adding links, and **(\`\`\`markdown)** will be delete automaticly.
     *   **Enabled**: Removes code fences from the content before adding links.
+<img width="799" height="301" alt="Processed file output" src="https://github.com/user-attachments/assets/65d4e864-ff5f-402a-be90-e9c44b208903" />
 
 #### Concept Note Output
 -   **Customize Concept Note Path**:
     *   **Disabled (Default)**: Automatic creation of notes for `[[linked concepts]]` is disabled.
     *   **Enabled**: Allows you to specify a folder where new concept notes will be created.
 -   **Concept Note Folder Path**: (Visible only when the above is enabled) Enter a *relative path* within your vault (e.g., `Concepts` or `Generated/Topics`) where new concept notes should be saved. Folders will be created if they don't exist. **Must be filled if customization is enabled.** **Do not use absolute paths or invalid characters.**
+<img width="800" height="145" alt="concept note output" src="https://github.com/user-attachments/assets/d0338341-7d67-4472-964c-75a0992165b8" />
 
 #### Concept Log File Output
 -   **Generate Concept Log File**:
@@ -163,11 +180,13 @@ Access plugin settings via:
     *   **Disabled (Default)**: The log file is named `Generate.log`.
     *   **Enabled**: Allows you to specify a custom name for the log file.
 -   **Concept Log File Name**: (Visible only when "Customize Log File Name" is enabled) Enter the desired file name (e.g., `ConceptCreation.log`). **Must be filled if customization is enabled.**
+<img width="809" height="281" alt="Concept log file output" src="https://github.com/user-attachments/assets/eef6f5d5-592d-4b8f-84b1-7404521a6e9b" />
 
 #### Processing Parameters
 -   **Chunk Word Count**: Maximum words per chunk sent to the LLM. Affects the number of API calls for large files. (Default: 3000)
 -   **Enable Duplicate Detection**: Toggles the basic check for duplicate words within processed content (results in console). (Default: Enabled)
 -   **Max Tokens**: Maximum tokens the LLM should generate per response chunk. Affects cost and detail. (Default: 4096)
+<img width="795" height="274" alt="Processing Parameters   Language settings" src="https://github.com/user-attachments/assets/74e4af76-3333-48fc-bb86-0a3ee61825d1" />
 
 #### Translation
 -   **Default Target Language**: Select the default language you want to translate your notes into. This can be overridden in the UI when running the translation command. (Default: English)
@@ -178,6 +197,7 @@ Access plugin settings via:
     *   **Disabled (Default)**: Translated files use the default `_translated.md` suffix (e.g., `YourNote_translated.md`).
     *   **Enabled**: Allows you to specify a custom suffix.
 -   **Custom Suffix**: (Visible only when the above is enabled) Enter the custom suffix to append to translated filenames (e.g., `_es` or `_fr`).
+<img width="811" height="243" alt="translate" src="https://github.com/user-attachments/assets/57d21a72-e86c-4369-8be5-fd18cb734e2b" />
 
 #### Content Generation
 -   **Enable Research in "Generate from Title"**:
@@ -193,6 +213,17 @@ Access plugin settings via:
     *   **Disabled (Default)**: Successfully generated files are moved to a subfolder named `[OriginalFolderName]_complete` relative to the original folder's parent (or `Vault_complete` if the original folder was the root).
     *   **Enabled**: Allows you to specify a custom name for the subfolder where completed files are moved.
 -   **Custom Output Folder Name**: (Visible only when the above is enabled) Enter the desired name for the subfolder (e.g., `Generated Content`, `_complete`). Invalid characters are not allowed. Defaults to `_complete` if left empty. This folder is created relative to the original folder's parent directory.
+<img width="794" height="174" alt="Content generation   output" src="https://github.com/user-attachments/assets/76d93942-980d-49ad-b9d4-1c73ea013d17" />
+
+<img width="866" height="646" alt="Duplicate check scope   Custom prompt settings" src="https://github.com/user-attachments/assets/1b37a523-ef00-4e40-94a0-43bbe0c78572" />
+
+#### Duplicate Check Scope
+-   **Duplicate Check Scope Mode**: Controls which files are checked against the notes in your Concept Note Folder for potential duplicates.
+    *   **Entire Vault (Default)**: Compares concept notes against all other notes in the vault (excluding the Concept Note Folder itself).
+    *   **Include Specific Folders Only**: Compares concept notes only against notes within the folders listed below.
+    *   **Exclude Specific Folders**: Compares concept notes against all notes *except* those within the folders listed below (and also excluding the Concept Note Folder).
+    *   **Concept Folder Only**: Compares concept notes only against *other notes within the Concept Note Folder*. This helps find duplicates purely inside your generated concepts.
+-   **Include/Exclude Folders**: (Visible only if Mode is 'Include' or 'Exclude') Enter the *relative paths* of the folders you want to include or exclude, **one path per line**. Paths are case-sensitive and use `/` as the separator (e.g., `Reference Material/Papers` or `Daily Notes`). These folders cannot be the same as or inside the Concept Note Folder.
 
 #### Web Research Provider
 -   **Search Provider**: Choose between `Tavily` (requires API key, recommended) and `DuckDuckGo` (experimental, often blocked by the search engine for automated requests). Used for "Research & Summarize Topic" and optionally for "Generate from Title".
@@ -202,14 +233,8 @@ Access plugin settings via:
 -   **DuckDuckGo Max Results**: (Visible only if DuckDuckGo is selected) Maximum number of search results to parse (1-10). Default: 5.
 -   **DuckDuckGo Content Fetch Timeout**: (Visible only if DuckDuckGo is selected) Maximum seconds to wait when trying to fetch content from each DuckDuckGo result URL. Default: 15.
 -   **Max Research Content Tokens**: Approximate maximum tokens from combined web research results (snippets/fetched content) to include in the summarization prompt. Helps manage context window size and cost. (Default: 3000)
+<img width="810" height="278" alt="Web research provider" src="https://github.com/user-attachments/assets/be0280eb-bb4e-4db0-bf69-91da3f0fd3c0" />
 
-#### Duplicate Check Scope
--   **Duplicate Check Scope Mode**: Controls which files are checked against the notes in your Concept Note Folder for potential duplicates.
-    *   **Entire Vault (Default)**: Compares concept notes against all other notes in the vault (excluding the Concept Note Folder itself).
-    *   **Include Specific Folders Only**: Compares concept notes only against notes within the folders listed below.
-    *   **Exclude Specific Folders**: Compares concept notes against all notes *except* those within the folders listed below (and also excluding the Concept Note Folder).
-    *   **Concept Folder Only**: Compares concept notes only against *other notes within the Concept Note Folder*. This helps find duplicates purely inside your generated concepts.
--   **Include/Exclude Folders**: (Visible only if Mode is 'Include' or 'Exclude') Enter the *relative paths* of the folders you want to include or exclude, **one path per line**. Paths are case-sensitive and use `/` as the separator (e.g., `Reference Material/Papers` or `Daily Notes`). These folders cannot be the same as or inside the Concept Note Folder.
 
 ## Usage Guide
 
@@ -225,6 +250,8 @@ This is the core functionality focused on identifying concepts and adding `[[wik
     *   To process a folder: Click **"Process Folder (Add Links)"**, select the folder, and click "Process".
     *   Progress is shown in the sidebar. You can cancel the task using the "Cancel Processing" button in the sidebar.
     *   *Note for folder processing:* Files are processed in the background without being opened in the editor.
+
+<img width="618" height="154" alt="image" src="https://github.com/user-attachments/assets/fcfbcc9e-3c80-4e84-b9bb-e3a5cd66acaa" />
 
 2.  **Using the Command Palette** (`Ctrl+P` or `Cmd+P`):
     *   **Single File**: Open the file and run `Notemd: Process Current File`.
@@ -242,6 +269,8 @@ This is the core functionality focused on identifying concepts and adding `[[wik
     *   The translated content is saved to the configured **Translation Save Path** with the appropriate suffix, and opened in a **new pane to the right** of the original content for easy comparison.
     *   You can cancel this task via the sidebar button or modal cancel button.
 
+<img width="1081" height="1214" alt="image" src="https://github.com/user-attachments/assets/6b6fefbf-3692-4281-bdb1-11efdd6c88b5" />
+
 2.  **Research & Summarize Topic**:
     *   Select text in a note OR ensure the note has a title (this will be the search topic).
     *   Run the command `Notemd: Research and Summarize Topic` (via command palette or sidebar button).
@@ -249,6 +278,8 @@ This is the core functionality focused on identifying concepts and adding `[[wik
     *   The summary is appended to the current note.
     *   You can cancel this task via the sidebar button or modal cancel button.
     *   *Note:* DuckDuckGo searches may fail due to bot detection. Tavily is recommended.
+
+<img width="239" height="63" alt="image" src="https://github.com/user-attachments/assets/afcd0497-3ee3-41f2-9281-8bfbb448372d" />
 
 3.  **Generate Content from Title**:
     *   Open a note (it can be empty).
@@ -265,7 +296,11 @@ This is the core functionality focused on identifying concepts and adding `[[wik
     *   This command respects the **"Enable Research in 'Generate from Title'"** setting for each note processed.
     *   You can cancel this task via the sidebar button or modal cancel button.
 
+<img width="477" height="76" alt="image" src="https://github.com/user-attachments/assets/8c762d0a-be60-4811-b3e0-9d86c6ddfa4e" />
+
 ### Utilities
+
+<img width="1023" height="124" alt="image" src="https://github.com/user-attachments/assets/3ed72edb-a10f-436c-b5b8-8a40aa051230" />
 
 1.  **Check for Duplicates**:
     *   Open the `.md` or `.txt` file.
