@@ -28,7 +28,8 @@ export async function translateFile(
     const prompt = `Translate the following markdown document to ${targetLanguage}. Preserve the original markdown formatting, including headers, lists, bold, italics, links, etc. Only output the translated document.`;
 
     try {
-        const translatedText = await callLLM(provider, prompt, fileContent, settings, progressReporter, model);
+        // Pass the signal to callLLM
+        const translatedText = await callLLM(provider, prompt, fileContent, settings, progressReporter, model, signal);
         const savePath = settings.translationSavePath || 'translations';
         const suffix = settings.useCustomTranslationSuffix ? settings.translationCustomSuffix : `_${targetLanguage}`;
         const fileName = `${file.basename}${suffix}.md`;

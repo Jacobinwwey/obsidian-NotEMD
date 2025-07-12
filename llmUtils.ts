@@ -202,7 +202,8 @@ async function callApiWithRetry(
     content: string,
     settings: NotemdSettings,
     progressReporter: ProgressReporter,
-    apiCallFunction: (provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings) => Promise<string>
+    apiCallFunction: (provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings, signal?: AbortSignal) => Promise<string>,
+    signal?: AbortSignal // Accept optional signal
 ): Promise<string> {
     
     let lastError: Error | null = null;
@@ -216,8 +217,8 @@ async function callApiWithRetry(
         }
 
         try {
-            // Pass settings to the underlying API call function
-            return await apiCallFunction(provider, modelName, prompt, content, progressReporter, settings);
+            // Pass settings and signal to the underlying API call function
+            return await apiCallFunction(provider, modelName, prompt, content, progressReporter, settings, signal);
         } catch (error: unknown) { // Changed to unknown
             const errorMessage = error instanceof Error ? error.message : String(error);
             lastError = error instanceof Error ? error : new Error(errorMessage); // Store Error object if possible
@@ -269,7 +270,17 @@ async function callApiWithRetry(
 
 // --- Provider-Specific API Call Implementations ---
 
-async function executeDeepSeekAPI(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings): Promise<string> {
+// Helper function to manage AbortController/Signal
+function getAbortSignal(progressReporter: ProgressReporter, providedSignal?: AbortSignal): { signal: AbortSignal, controller: AbortController | null } {
+    if (providedSignal) {
+        return { signal: providedSignal, controller: null };
+    }
+    const controller = new AbortController();
+    progressReporter.abortController = controller;
+    return { signal: controller.signal, controller: controller };
+}
+
+async function executeDeepSeekAPI(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings, signal?: AbortSignal): Promise<string> {
     if (!provider.apiKey) throw new Error(`API key is missing for DeepSeek provider.`);
     const url = `${provider.baseUrl}/chat/completions`;
     const requestBody = {
@@ -278,23 +289,32 @@ async function executeDeepSeekAPI(provider: LLMProviderConfig, modelName: string
         temperature: provider.temperature,
         max_tokens: settings.maxTokens
     };
-    const controller = new AbortController();
-    progressReporter.abortController = controller;
+    
+    const { signal: fetchSignal, controller } = getAbortSignal(progressReporter, signal);
+
     try {
         await cancellableDelay(1, progressReporter); // Yield
         const response = await fetch(url, {
-            method: 'POST', signal: controller.signal, headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${provider.apiKey}` }, body: JSON.stringify(requestBody)
+            method: 'POST', 
+            signal: fetchSignal, 
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${provider.apiKey}` }, 
+            body: JSON.stringify(requestBody)
         });
-        if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
+        if (progressReporter.cancelled || fetchSignal.aborted) throw new Error("Processing cancelled by user after API response.");
         if (!response.ok) { const errorText = await response.text(); throw new Error(`DeepSeek API error: ${response.status} - ${errorText}`); }
         const data = await response.json();
-        if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API success.");
+        if (progressReporter.cancelled || fetchSignal.aborted) throw new Error("Processing cancelled by user after API success.");
         if (!data.choices?.[0]?.message?.content) { throw new Error(`Unexpected response format from DeepSeek API`); }
         return data.choices[0].message.content;
-    } finally { if (progressReporter.abortController === controller) { progressReporter.abortController = null; } }
+    } finally { 
+        // Only clear the reporter's controller if we created it internally
+        if (controller && progressReporter.abortController === controller) { 
+            progressReporter.abortController = null; 
+        } 
+    }
 }
 
-async function executeOpenAIApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings): Promise<string> {
+async function executeOpenAIApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings, signal?: AbortSignal): Promise<string> {
     if (!provider.apiKey) throw new Error(`API key is missing for OpenAI provider.`);
     const url = `${provider.baseUrl}/chat/completions`;
     const requestBody = {
@@ -303,72 +323,96 @@ async function executeOpenAIApi(provider: LLMProviderConfig, modelName: string, 
         temperature: provider.temperature,
         max_tokens: settings.maxTokens
     };
-    const controller = new AbortController();
-    progressReporter.abortController = controller;
+    
+    const { signal: fetchSignal, controller } = getAbortSignal(progressReporter, signal);
+
     try {
         await cancellableDelay(1, progressReporter); // Yield
         const response = await fetch(url, {
-            method: 'POST', signal: controller.signal, headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${provider.apiKey}` }, body: JSON.stringify(requestBody)
+            method: 'POST', 
+            signal: fetchSignal, 
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${provider.apiKey}` }, 
+            body: JSON.stringify(requestBody)
         });
-        if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
+        if (progressReporter.cancelled || fetchSignal.aborted) throw new Error("Processing cancelled by user after API response.");
         if (!response.ok) { const errorText = await response.text(); throw new Error(`OpenAI API error: ${response.status} - ${errorText}`); }
         const data = await response.json();
-        if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API success.");
+        if (progressReporter.cancelled || fetchSignal.aborted) throw new Error("Processing cancelled by user after API success.");
         if (!data.choices?.[0]?.message?.content) { throw new Error(`Unexpected response format from OpenAI API`); }
         return data.choices[0].message.content;
-    } finally { if (progressReporter.abortController === controller) { progressReporter.abortController = null; } }
+    } finally { 
+        if (controller && progressReporter.abortController === controller) { 
+            progressReporter.abortController = null; 
+        } 
+    }
 }
 
-async function executeAnthropicApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings): Promise<string> {
+async function executeAnthropicApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings, signal?: AbortSignal): Promise<string> {
     if (!provider.apiKey) throw new Error(`API key is missing for Anthropic provider.`);
     const url = `${provider.baseUrl}/v1/messages`;
-    // Anthropic combines prompt and content in the user message
+    // Anthropic combines prompt and content in the user message (content already includes prompt in callApiWithRetry for Anthropic)
     const requestBody = {
         model: modelName,
-        messages: [{ role: 'user', content: `${prompt}\n\n${content}` }],
+        messages: [{ role: 'user', content: content }],
         temperature: provider.temperature,
         max_tokens: settings.maxTokens
     };
-    const controller = new AbortController();
-    progressReporter.abortController = controller;
+    
+    const { signal: fetchSignal, controller } = getAbortSignal(progressReporter, signal);
+
     try {
         await cancellableDelay(1, progressReporter); // Yield
         const response = await fetch(url, {
-            method: 'POST', signal: controller.signal, headers: { 'Content-Type': 'application/json', 'x-api-key': provider.apiKey, 'anthropic-version': '2023-06-01' }, body: JSON.stringify(requestBody)
+            method: 'POST', 
+            signal: fetchSignal, 
+            headers: { 'Content-Type': 'application/json', 'x-api-key': provider.apiKey, 'anthropic-version': '2023-06-01' }, 
+            body: JSON.stringify(requestBody)
         });
-        if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
+        if (progressReporter.cancelled || fetchSignal.aborted) throw new Error("Processing cancelled by user after API response.");
         if (!response.ok) { const errorText = await response.text(); throw new Error(`Anthropic API error: ${response.status} - ${errorText}`); }
         const data = await response.json();
-        if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API success.");
+        if (progressReporter.cancelled || fetchSignal.aborted) throw new Error("Processing cancelled by user after API success.");
         if (!data.content?.[0]?.text) { throw new Error(`Unexpected response format from Anthropic API`); }
         return data.content[0].text;
-    } finally { if (progressReporter.abortController === controller) { progressReporter.abortController = null; } }
+    } finally { 
+        if (controller && progressReporter.abortController === controller) { 
+            progressReporter.abortController = null; 
+        } 
+    }
 }
 
-async function executeGoogleApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings): Promise<string> {
+async function executeGoogleApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings, signal?: AbortSignal): Promise<string> {
     if (!provider.apiKey) throw new Error(`API key is missing for Google provider.`);
     const urlWithKey = `${provider.baseUrl}/models/${modelName}:generateContent?key=${provider.apiKey}`;
     const requestBody = {
         contents: [{ role: 'user', parts: [{ text: `${prompt}\n\n${content}` }] }],
         generationConfig: { temperature: provider.temperature, maxOutputTokens: settings.maxTokens }
     };
-    const controller = new AbortController();
-    progressReporter.abortController = controller;
+
+    const { signal: fetchSignal, controller } = getAbortSignal(progressReporter, signal);
+
     try {
         await cancellableDelay(1, progressReporter); // Yield
         const response = await fetch(urlWithKey, {
-            method: 'POST', signal: controller.signal, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(requestBody)
+            method: 'POST', 
+            signal: fetchSignal, 
+            headers: { 'Content-Type': 'application/json' }, 
+            body: JSON.stringify(requestBody)
         });
-        if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
+        if (progressReporter.cancelled || fetchSignal.aborted) throw new Error("Processing cancelled by user after API response.");
         if (!response.ok) { const errorText = await response.text(); throw new Error(`Google API error: ${response.status} - ${errorText}`); }
         const data = await response.json();
-        if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API success.");
+        if (progressReporter.cancelled || fetchSignal.aborted) throw new Error("Processing cancelled by user after API success.");
         if (!data.candidates?.[0]?.content?.parts?.[0]?.text) { throw new Error(`Unexpected response format from Google API`); }
         return data.candidates[0].content.parts[0].text;
-    } finally { if (progressReporter.abortController === controller) { progressReporter.abortController = null; } }
+    } finally { 
+        if (controller && progressReporter.abortController === controller) { 
+            progressReporter.abortController = null; 
+        } 
+    }
 }
 
-async function executeMistralApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings): Promise<string> {
+async function executeMistralApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings, signal?: AbortSignal): Promise<string> {
     if (!provider.apiKey) throw new Error(`API key is missing for Mistral provider.`);
     const url = `${provider.baseUrl}/chat/completions`;
     const requestBody = {
@@ -377,23 +421,31 @@ async function executeMistralApi(provider: LLMProviderConfig, modelName: string,
         temperature: provider.temperature,
         max_tokens: settings.maxTokens
     };
-    const controller = new AbortController();
-    progressReporter.abortController = controller;
+
+    const { signal: fetchSignal, controller } = getAbortSignal(progressReporter, signal);
+
     try {
         await cancellableDelay(1, progressReporter); // Yield
         const response = await fetch(url, {
-            method: 'POST', signal: controller.signal, headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${provider.apiKey}` }, body: JSON.stringify(requestBody)
+            method: 'POST', 
+            signal: fetchSignal, 
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${provider.apiKey}` }, 
+            body: JSON.stringify(requestBody)
         });
-        if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
+        if (progressReporter.cancelled || fetchSignal.aborted) throw new Error("Processing cancelled by user after API response.");
         if (!response.ok) { const errorText = await response.text(); throw new Error(`Mistral API error: ${response.status} - ${errorText}`); }
         const data = await response.json();
-        if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API success.");
+        if (progressReporter.cancelled || fetchSignal.aborted) throw new Error("Processing cancelled by user after API success.");
         if (!data.choices?.[0]?.message?.content) { throw new Error(`Unexpected response format from Mistral API`); }
         return data.choices[0].message.content;
-    } finally { if (progressReporter.abortController === controller) { progressReporter.abortController = null; } }
+    } finally { 
+        if (controller && progressReporter.abortController === controller) { 
+            progressReporter.abortController = null; 
+        } 
+    }
 }
 
-async function executeAzureOpenAIApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings): Promise<string> {
+async function executeAzureOpenAIApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings, signal?: AbortSignal): Promise<string> {
     if (!provider.apiKey) throw new Error(`API key is missing for Azure OpenAI provider.`);
     if (!provider.apiVersion || !provider.baseUrl) { throw new Error('API version and Base URL are required for Azure OpenAI'); }
     const url = `${provider.baseUrl}/openai/deployments/${modelName}/chat/completions?api-version=${provider.apiVersion}`;
@@ -402,25 +454,32 @@ async function executeAzureOpenAIApi(provider: LLMProviderConfig, modelName: str
         temperature: provider.temperature,
         max_tokens: settings.maxTokens
     };
-    const controller = new AbortController();
-    progressReporter.abortController = controller;
+
+    const { signal: fetchSignal, controller } = getAbortSignal(progressReporter, signal);
+
     try {
         await cancellableDelay(1, progressReporter); // Yield
         const response = await fetch(url, {
-            method: 'POST', signal: controller.signal, headers: { 'Content-Type': 'application/json', 'api-key': provider.apiKey }, body: JSON.stringify(requestBody)
+            method: 'POST', 
+            signal: fetchSignal, 
+            headers: { 'Content-Type': 'application/json', 'api-key': provider.apiKey }, 
+            body: JSON.stringify(requestBody)
         });
-        if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
+        if (progressReporter.cancelled || fetchSignal.aborted) throw new Error("Processing cancelled by user after API response.");
         if (!response.ok) { const errorText = await response.text(); throw new Error(`Azure OpenAI API error: ${response.status} - ${errorText}`); }
         const data = await response.json();
-        if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API success.");
+        if (progressReporter.cancelled || fetchSignal.aborted) throw new Error("Processing cancelled by user after API success.");
         if (!data.choices?.[0]?.message?.content) { throw new Error(`Unexpected response format from Azure OpenAI API`); }
         return data.choices[0].message.content;
-    } finally { if (progressReporter.abortController === controller) { progressReporter.abortController = null; } }
+    } finally { 
+        if (controller && progressReporter.abortController === controller) { 
+            progressReporter.abortController = null; 
+        } 
+    }
 }
 
-async function executeLMStudioApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings): Promise<string> {
+async function executeLMStudioApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings, signal?: AbortSignal): Promise<string> {
     // Note: LMStudio might not require an API key, or use a placeholder like 'EMPTY'.
-    // No explicit check here, rely on the API call itself to fail if needed.
     const url = `${provider.baseUrl}/chat/completions`;
     const requestBody = {
         model: modelName,
@@ -428,23 +487,31 @@ async function executeLMStudioApi(provider: LLMProviderConfig, modelName: string
         temperature: provider.temperature,
         max_tokens: settings.maxTokens
     };
-    const controller = new AbortController();
-    progressReporter.abortController = controller;
+
+    const { signal: fetchSignal, controller } = getAbortSignal(progressReporter, signal);
+
     try {
         await cancellableDelay(1, progressReporter); // Yield
         const response = await fetch(url, {
-            method: 'POST', signal: controller.signal, headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${provider.apiKey || 'EMPTY'}` }, body: JSON.stringify(requestBody)
+            method: 'POST', 
+            signal: fetchSignal, 
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${provider.apiKey || 'EMPTY'}` }, 
+            body: JSON.stringify(requestBody)
         });
-        if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
+        if (progressReporter.cancelled || fetchSignal.aborted) throw new Error("Processing cancelled by user after API response.");
         if (!response.ok) { const errorText = await response.text(); throw new Error(`LMStudio API error: ${response.status} - ${errorText}`); }
         const data = await response.json();
-        if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API success.");
+        if (progressReporter.cancelled || fetchSignal.aborted) throw new Error("Processing cancelled by user after API success.");
         if (!data.choices?.[0]?.message?.content) { throw new Error(`Unexpected response format from LMStudio`); }
         return data.choices[0].message.content;
-    } finally { if (progressReporter.abortController === controller) { progressReporter.abortController = null; } }
+    } finally { 
+        if (controller && progressReporter.abortController === controller) { 
+            progressReporter.abortController = null; 
+        } 
+    }
 }
 
-async function executeOllamaApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings): Promise<string> {
+async function executeOllamaApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings, signal?: AbortSignal): Promise<string> {
     // Note: Ollama does not use API keys.
     const url = `${provider.baseUrl}/chat`;
     const requestBody = {
@@ -453,24 +520,32 @@ async function executeOllamaApi(provider: LLMProviderConfig, modelName: string, 
         options: { temperature: provider.temperature, num_predict: settings.maxTokens },
         stream: false
     };
-    const controller = new AbortController();
-    progressReporter.abortController = controller;
+    
+    const { signal: fetchSignal, controller } = getAbortSignal(progressReporter, signal);
+
     try {
         await cancellableDelay(1, progressReporter); // Yield
         const response = await fetch(url, {
-            method: 'POST', signal: controller.signal, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(requestBody)
+            method: 'POST', 
+            signal: fetchSignal, 
+            headers: { 'Content-Type': 'application/json' }, 
+            body: JSON.stringify(requestBody)
         });
-        if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
+        if (progressReporter.cancelled || fetchSignal.aborted) throw new Error("Processing cancelled by user after API response.");
         if (!response.ok) { const errorText = await response.text(); throw new Error(`Ollama API error: ${response.status} - ${errorText}`); }
         const data = await response.json();
-        if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API success.");
+        if (progressReporter.cancelled || fetchSignal.aborted) throw new Error("Processing cancelled by user after API success.");
         if (!data.message?.content) { throw new Error(`Unexpected response format from Ollama`); }
         return data.message.content;
-    } finally { if (progressReporter.abortController === controller) { progressReporter.abortController = null; } }
+    } finally { 
+        if (controller && progressReporter.abortController === controller) { 
+            progressReporter.abortController = null; 
+        } 
+    }
 }
 
 // Updated executeOpenRouterAPI with safer parsing and enhanced logging
-async function executeOpenRouterAPI(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings): Promise<string> {
+async function executeOpenRouterAPI(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings, signal?: AbortSignal): Promise<string> {
     if (!provider.apiKey) throw new Error(`API key is missing for OpenRouter provider.`);
     const url = `${provider.baseUrl}/chat/completions`;
     const requestBody = {
@@ -479,8 +554,8 @@ async function executeOpenRouterAPI(provider: LLMProviderConfig, modelName: stri
         temperature: provider.temperature,
         max_tokens: settings.maxTokens
     };
-    const controller = new AbortController();
-    progressReporter.abortController = controller;
+    
+    const { signal: fetchSignal, controller } = getAbortSignal(progressReporter, signal);
     let response: Response | null = null;
 
     try {
@@ -488,7 +563,7 @@ async function executeOpenRouterAPI(provider: LLMProviderConfig, modelName: stri
         progressReporter.log(`[OpenRouter] Calling API: ${url} with model ${modelName}`);
         response = await fetch(url, {
             method: 'POST',
-            signal: controller.signal,
+            signal: fetchSignal,
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${provider.apiKey}`,
@@ -499,7 +574,7 @@ async function executeOpenRouterAPI(provider: LLMProviderConfig, modelName: stri
         });
         progressReporter.log(`[OpenRouter] Received response status: ${response.status}`);
 
-        if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
+        if (progressReporter.cancelled || fetchSignal.aborted) throw new Error("Processing cancelled by user after API response.");
 
         const responseText = await response.text(); // Read body as text first
         progressReporter.log(`[OpenRouter] Read response text (length: ${responseText.length}).`);
@@ -564,50 +639,53 @@ async function executeOpenRouterAPI(provider: LLMProviderConfig, modelName: stri
          // Re-throw the error to be handled by callApiWithRetry
          throw error;
     } finally {
-        if (progressReporter.abortController === controller) {
-            progressReporter.abortController = null;
+        // Only clear the reporter's controller if we created it internally
+        if (controller && progressReporter.abortController === controller) { 
+            progressReporter.abortController = null; 
         }
     }
 }
 
 
 // --- Exported API Call Functions ---
+// Note: These exported functions are primarily used by other parts of the plugin that DON'T pass an external signal (e.g., processFile).
+// The callLLM function handles passing the signal when available (e.g., translateFile).
 
-export function callDeepSeekAPI(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings): Promise<string> {
-    return callApiWithRetry(provider, modelName, prompt, content, settings, progressReporter, executeDeepSeekAPI);
+export function callDeepSeekAPI(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings, signal?: AbortSignal): Promise<string> {
+    return callApiWithRetry(provider, modelName, prompt, content, settings, progressReporter, executeDeepSeekAPI, signal);
 }
 
-export function callOpenAIApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings): Promise<string> {
-    return callApiWithRetry(provider, modelName, prompt, content, settings, progressReporter, executeOpenAIApi);
+export function callOpenAIApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings, signal?: AbortSignal): Promise<string> {
+    return callApiWithRetry(provider, modelName, prompt, content, settings, progressReporter, executeOpenAIApi, signal);
 }
 
-export function callAnthropicApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings): Promise<string> {
+export function callAnthropicApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings, signal?: AbortSignal): Promise<string> {
     // Note: Anthropic combines prompt and content in user message, so pass empty prompt to execute function
-    return callApiWithRetry(provider, modelName, '', `${prompt}\n\n${content}`, settings, progressReporter, executeAnthropicApi);
+    return callApiWithRetry(provider, modelName, '', `${prompt}\n\n${content}`, settings, progressReporter, executeAnthropicApi, signal);
 }
 
-export function callGoogleApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings): Promise<string> {
-    return callApiWithRetry(provider, modelName, prompt, content, settings, progressReporter, executeGoogleApi);
+export function callGoogleApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings, signal?: AbortSignal): Promise<string> {
+    return callApiWithRetry(provider, modelName, prompt, content, settings, progressReporter, executeGoogleApi, signal);
 }
 
-export function callMistralApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings): Promise<string> {
-    return callApiWithRetry(provider, modelName, prompt, content, settings, progressReporter, executeMistralApi);
+export function callMistralApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings, signal?: AbortSignal): Promise<string> {
+    return callApiWithRetry(provider, modelName, prompt, content, settings, progressReporter, executeMistralApi, signal);
 }
 
-export function callAzureOpenAIApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings): Promise<string> {
-    return callApiWithRetry(provider, modelName, prompt, content, settings, progressReporter, executeAzureOpenAIApi);
+export function callAzureOpenAIApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings, signal?: AbortSignal): Promise<string> {
+    return callApiWithRetry(provider, modelName, prompt, content, settings, progressReporter, executeAzureOpenAIApi, signal);
 }
 
-export function callLMStudioApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings): Promise<string> {
-    return callApiWithRetry(provider, modelName, prompt, content, settings, progressReporter, executeLMStudioApi);
+export function callLMStudioApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings, signal?: AbortSignal): Promise<string> {
+    return callApiWithRetry(provider, modelName, prompt, content, settings, progressReporter, executeLMStudioApi, signal);
 }
 
-export function callOllamaApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings): Promise<string> {
-    return callApiWithRetry(provider, modelName, prompt, content, settings, progressReporter, executeOllamaApi);
+export function callOllamaApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings, signal?: AbortSignal): Promise<string> {
+    return callApiWithRetry(provider, modelName, prompt, content, settings, progressReporter, executeOllamaApi, signal);
 }
 
-export function callOpenRouterAPI(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings): Promise<string> {
-    return callApiWithRetry(provider, modelName, prompt, content, settings, progressReporter, executeOpenRouterAPI);
+export function callOpenRouterAPI(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings, signal?: AbortSignal): Promise<string> {
+    return callApiWithRetry(provider, modelName, prompt, content, settings, progressReporter, executeOpenRouterAPI, signal);
 }
 
 export async function callLLM(
@@ -616,28 +694,29 @@ export async function callLLM(
     content: string,
     settings: NotemdSettings,
     progressReporter: ProgressReporter,
-    modelName?: string
+    modelName?: string,
+    signal?: AbortSignal // Add optional signal
 ): Promise<string> {
     const modelToUse = modelName || provider.model;
     switch (provider.name) {
         case 'DeepSeek':
-            return callDeepSeekAPI(provider, modelToUse, prompt, content, progressReporter, settings);
+            return callDeepSeekAPI(provider, modelToUse, prompt, content, progressReporter, settings, signal);
         case 'OpenAI':
-            return callOpenAIApi(provider, modelToUse, prompt, content, progressReporter, settings);
+            return callOpenAIApi(provider, modelToUse, prompt, content, progressReporter, settings, signal);
         case 'Anthropic':
-            return callAnthropicApi(provider, modelToUse, prompt, content, progressReporter, settings);
+            return callAnthropicApi(provider, modelToUse, prompt, content, progressReporter, settings, signal);
         case 'Google':
-            return callGoogleApi(provider, modelToUse, prompt, content, progressReporter, settings);
+            return callGoogleApi(provider, modelToUse, prompt, content, progressReporter, settings, signal);
         case 'Mistral':
-            return callMistralApi(provider, modelToUse, prompt, content, progressReporter, settings);
+            return callMistralApi(provider, modelToUse, prompt, content, progressReporter, settings, signal);
         case 'Azure OpenAI':
-            return callAzureOpenAIApi(provider, modelToUse, prompt, content, progressReporter, settings);
+            return callAzureOpenAIApi(provider, modelToUse, prompt, content, progressReporter, settings, signal);
         case 'LMStudio':
-            return callLMStudioApi(provider, modelToUse, prompt, content, progressReporter, settings);
+            return callLMStudioApi(provider, modelToUse, prompt, content, progressReporter, settings, signal);
         case 'Ollama':
-            return callOllamaApi(provider, modelToUse, prompt, content, progressReporter, settings);
+            return callOllamaApi(provider, modelToUse, prompt, content, progressReporter, settings, signal);
         case 'OpenRouter':
-            return callOpenRouterAPI(provider, modelToUse, prompt, content, progressReporter, settings);
+            return callOpenRouterAPI(provider, modelToUse, prompt, content, progressReporter, settings, signal);
         default:
             throw new Error(`Provider ${provider.name} not supported`);
     }

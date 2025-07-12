@@ -80,13 +80,17 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
     // Method to update status display
     updateStatus(text: string, percent?: number) {
         if (this.statusEl) this.statusEl.setText(text);
-        if (this.cancelButton && this.isProcessing && !this.isCancelled) { // Enable cancel only when processing and not cancelled
-            this.cancelButton.disabled = false;
-            this.cancelButton.addClass('is-active');
-        } else if (this.cancelButton) {
-            this.cancelButton.disabled = true;
-            this.cancelButton.removeClass('is-active');
+        
+        // Rely on updateButtonStates for button management, but ensure state reflects reality if needed
+        // If status updates imply completion or error (percent < 0 or percent === 100), we might need to update processing state.
+        
+        if (percent !== undefined && (percent < 0 || percent >= 100)) {
+            this.isProcessing = false; // Processing is done (error or complete)
         }
+
+        // We call updateButtonStates here to ensure the UI reflects the current state (isProcessing, isCancelled)
+        // after a status update, especially if the status update changes those flags.
+        this.updateButtonStates(); 
 
         if (percent !== undefined && this.progressEl && this.progressBarContainerEl) {
             this.progressBarContainerEl.removeClass('is-hidden');
@@ -323,7 +327,8 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
                 this.log('Starting: Translate File...');
                 this.updateStatus('Translating...', 0);
                 try {
-                    await this.plugin.translateFileCommand(activeFile, this.currentAbortController.signal);
+                    // Pass 'this' as the reporter to prevent main.ts from calling getReporter() and clearing the state.
+                    await this.plugin.translateFileCommand(activeFile, this.currentAbortController.signal, this);
                 } finally {
                     console.log('Translate command finished. Resetting processing state.');
                     this.isProcessing = false;
