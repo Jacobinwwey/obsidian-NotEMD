@@ -52,8 +52,8 @@ Notemd enhances your Obsidian workflow by integrating with various Large Languag
 - **AI-Powered Translation**:
     - Translate note content using the configured LLM.
     - Supports translation between multiple languages.
-    - Option to translate the entire file or selected text.
-    - Customizable target language in settings.
+    - Customizable target language in settings or in UI.
+    - Automatically open the translated text on the right side of the original text for easy reading.
 
 ### Web Research & Content Generation
 - **Web Research & Summarization**:
