@@ -107,7 +107,7 @@ Notemd 通过与各种大型语言模型 (LLM) 集成来增强您的 Obsidian �
     * **模型**: 填写具体模型名/ID（如`gpt-4o`、`claude-3-5-sonnet-20240620`、`google/gemini-flash-1.5`等）。
     * **温度**: 控制生成内容的随机性，结构化任务建议0.2-0.5。
     * **API版本（仅Azure）**: Azure OpenAI需填写该项（如`2024-02-15-preview`）。
-3. **测试连接**：点击“测试连接”验证当前设置是否可用。
+3. **测试连接**：点击“测试连接”验证当前设置是否可用（Notemd: Test LLM Connection）。
 4. **导入/导出服务商配置**：一键备份/恢复服务商账号信息。
 
 <img width="804" height="506" alt="LLM" src="https://github.com/user-attachments/assets/8caf42e3-43ad-456d-8b96-b63e7914e45f" />
@@ -125,7 +125,7 @@ Notemd 通过与各种大型语言模型 (LLM) 集成来增强您的 Obsidian �
 ### 常规设置
 
 #### 处理文件输出
-- **自定义保存路径/文件名后缀**：可自定义处理结果保存位置、文件名，留空则覆盖原文件。
+- **自定义保存路径/文件名后缀**：可自定义处理结果保存位置、文件名（Notemd: Process Current File, Notemd: Process Folder），留空则覆盖原文件。
 - **添加链接时删除代码围栏**：可选，默认保留，仅删除 \`\`\`markdown。
 
 <img width="799" height="301" alt="Processed file output" src="https://github.com/user-attachments/assets/65d4e864-ff5f-402a-be90-e9c44b208903" />
@@ -149,7 +149,7 @@ Notemd 通过与各种大型语言模型 (LLM) 集成来增强您的 Obsidian �
 
 #### 翻译
 - **目标语言**：可选默认目标语言，命令时可覆盖。
-- **翻译文件保存路径/后缀**：自定义翻译结果的保存路径和文件名后缀。
+- **翻译文件保存路径/后缀**：自定义翻译结果的保存路径和文件名后缀（Notemd: Translate Note/Selection）。
 
 <img width="811" height="243" alt="translate" src="https://github.com/user-attachments/assets/57d21a72-e86c-4369-8be5-fd18cb734e2b" />
 
@@ -157,7 +157,7 @@ Notemd 通过与各种大型语言模型 (LLM) 集成来增强您的 Obsidian �
 - **启用标题内容生成时的研究**：生成内容前可自动网页研究并加入上下文。
 - **输出语言**：支持多语言输出。
 - **自定义提示词**：自定义每个任务的提示词。
-- **自定义完成文件夹名**：成功处理文件将自动移动到自定义“完成”文件夹。
+- **自定义完成文件夹名**：成功处理文件将自动移动到自定义“完成”文件夹（Notemd: Batch Generate Content from Titles）。
 
 <img width="794" height="174" alt="Content generation   output" src="https://github.com/user-attachments/assets/76d93942-980d-49ad-b9d4-1c73ea013d17" />
 
@@ -175,14 +175,14 @@ Notemd 通过与各种大型语言模型 (LLM) 集成来增强您的 Obsidian �
 1.  **侧边栏操作**：
     *   打开 Notemd 侧边栏（魔杖图标/命令面板）。
     *   打开目标`.md`或`.txt`文件。
-    *   点击“处理文件（添加链接）”。
-    *   文件夹处理：点击“处理文件夹（添加链接）”，选择文件夹并点击“处理”。
+    *   点击“处理文件（添加链接）”(Notemd: Process Current File)。
+    *   文件夹处理：点击“处理文件夹（添加链接）”(Notemd: Process Folder)，选择文件夹并点击“处理”。
     *   进度实时显示，可随时取消任务（侧边栏按钮）。
     *   *批量处理文件在后台执行，不会打开编辑器。*
 
 2.  **命令面板操作**（`Ctrl+P` 或 `Cmd+P`）：
-    *   单文件：打开后运行 `Notemd: 处理当前文件`。
-    *   文件夹：运行 `Notemd: 处理文件夹`，选择目标文件夹。批量处理不打开编辑器。
+    *   单文件：打开后运行 `Notemd: 处理当前文件 (Notemd: Process Current File)`。
+    *   文件夹：运行 `Notemd: 处理文件夹 (Notemd: Process Folder)`，选择目标文件夹。批量处理不打开编辑器。
     *   进度弹窗可随时取消。
     *   *插件自动移除内容开头`\boxed{`和结尾`}（如有）再保存。*
 
@@ -190,27 +190,27 @@ Notemd 通过与各种大型语言模型 (LLM) 集成来增强您的 Obsidian �
 
 1.  **翻译笔记/选区**：
     *   选中文本可仅翻译选区，无选区则翻译全文。
-    *   运行 `Notemd: 翻译笔记/选区`。
+    *   运行 `Notemd: 翻译笔记/选区 (Notemd: Translate Note/Selection)`。
     *   弹窗可确认/修改目标语言（默认使用设置）。
     *   翻译内容保存到指定路径并在原文右侧新窗格打开。
     *   任务可随时取消。
 
 2.  **研究与摘要主题**：
     *   选中文本或用笔记标题作为搜索主题。
-    *   运行 `Notemd: 研究和摘要主题`。
+    *   运行 `Notemd: 研究和摘要主题 (Notemd: Research and Summarize Topic)`。
     *   配置的搜索服务与LLM自动协作，结果附加到当前笔记。
     *   任务可随时取消。
     *   *DuckDuckGo 可能因反爬机制失败，推荐Tavily。*
 
 3.  **从标题生成内容**：
     *   打开任意笔记（可为空）。
-    *   运行 `Notemd: 从标题生成内容`。
+    *   运行 `Notemd: 从标题生成内容 (Notemd: Generate Content from Title)`。
     *   LLM根据标题生成内容并替换原文。
     *   可选先自动研究，丰富上下文。
     *   任务可随时取消。
 
 4.  **批量从标题生成内容**：
-    *   运行 `Notemd: 从标题批量生成内容`。
+    *   运行 `Notemd: 从标题批量生成内容 (Notemd: Batch Generate Content from Titles)`。
     *   选择要处理的文件夹，自动跳过已完成文件。
     *   成功处理的文件自动移动到指定“完成”子文件夹。
     *   任务可随时取消。
@@ -219,20 +219,21 @@ Notemd 通过与各种大型语言模型 (LLM) 集成来增强您的 Obsidian �
 
 1.  **检查重复项**：
     *   打开目标`.md`或`.txt`文件。
-    *   运行 `Notemd: 检查当前文件中的重复项`。
+    *   运行 `Notemd: 检查当前文件中的重复项 (Notemd: Check for Duplicates in Current File)`。
     *   结果输出到开发者控制台和通知栏/侧边栏。
 
 2.  **测试LLM连接**：
-    *   运行 `Notemd: 测试LLM连接`。
+    *   运行 `Notemd: 测试LLM连接 (Notemd: Test LLM Connection)`。
     *   验证当前激活服务商的API设置，结果显示在通知栏和侧边栏。
 
 3.  **批量Mermaid修复**：
-    *   运行 `Notemd: 批量修复Mermaid语法`。
+    *   运行 `Notemd: 批量修复Mermaid语法 (Notemd: Batch Fix Mermaid Syntax)`。
     *   选择Markdown文件夹，自动逐个修复语法并保存。
     *   包括Mermaid块结构调整、去除多余括号、LaTeX分隔符规范化等。
 
 4.  **检查并删除重复概念笔记**：
     *   配置好概念笔记文件夹后运行该命令。
+    *   运行 `Notemd: 检查并删除重复概念笔记 (Notemd: Check and Remove Duplicate Concept Notes)`。
     *   自动检测并提示所有潜在重复项，需手动确认删除。
     *   进度与结果显示在侧边栏/通知栏。
 
@@ -259,7 +260,7 @@ Notemd 通过与各种大型语言模型 (LLM) 集成来增强您的 Obsidian �
 - **插件未加载**：确保`manifest.json`、`main.js`、`styles.css`均放置在 `<保险库>/.obsidian/plugins/notemd/` 并重启Obsidian。启动异常可通过开发者控制台查看。
 - **处理失败/API错误**：
     1. 文件必须为`.md`或`.txt`格式；
-    2. “测试LLM连接”命令可验证API设置；
+    2. “测试LLM连接”命令可验证API设置（Notemd: Test LLM Connection）；
     3. 检查API Key、Base URL、模型名等参数是否填写正确；
     4. 本地模型需确保服务端已启动，Base URL无误；
     5. 云端服务需保证网络连接正常；
