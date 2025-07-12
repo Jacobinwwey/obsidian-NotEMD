@@ -609,3 +609,36 @@ export function callOllamaApi(provider: LLMProviderConfig, modelName: string, pr
 export function callOpenRouterAPI(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings): Promise<string> {
     return callApiWithRetry(provider, modelName, prompt, content, settings, progressReporter, executeOpenRouterAPI);
 }
+
+export async function callLLM(
+    provider: LLMProviderConfig,
+    prompt: string,
+    content: string,
+    settings: NotemdSettings,
+    progressReporter: ProgressReporter,
+    modelName?: string
+): Promise<string> {
+    const modelToUse = modelName || provider.model;
+    switch (provider.name) {
+        case 'DeepSeek':
+            return callDeepSeekAPI(provider, modelToUse, prompt, content, progressReporter, settings);
+        case 'OpenAI':
+            return callOpenAIApi(provider, modelToUse, prompt, content, progressReporter, settings);
+        case 'Anthropic':
+            return callAnthropicApi(provider, modelToUse, prompt, content, progressReporter, settings);
+        case 'Google':
+            return callGoogleApi(provider, modelToUse, prompt, content, progressReporter, settings);
+        case 'Mistral':
+            return callMistralApi(provider, modelToUse, prompt, content, progressReporter, settings);
+        case 'Azure OpenAI':
+            return callAzureOpenAIApi(provider, modelToUse, prompt, content, progressReporter, settings);
+        case 'LMStudio':
+            return callLMStudioApi(provider, modelToUse, prompt, content, progressReporter, settings);
+        case 'Ollama':
+            return callOllamaApi(provider, modelToUse, prompt, content, progressReporter, settings);
+        case 'OpenRouter':
+            return callOpenRouterAPI(provider, modelToUse, prompt, content, progressReporter, settings);
+        default:
+            throw new Error(`Provider ${provider.name} not supported`);
+    }
+}

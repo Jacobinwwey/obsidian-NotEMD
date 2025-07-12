@@ -86,6 +86,10 @@ describe('generateObsidianLinks', () => {
             customPromptGenerateTitle: '',
             useCustomPromptForResearchSummarize: false,
             customPromptResearchSummarize: '',
+            translateProvider: 'DeepSeek',
+            useCustomTranslationSuffix: false,
+            translationCustomSuffix: '_translated',
+            translationSavePath: 'translations',
         };
      // Mock createConceptNotes to return a resolved promise - REMOVED as function moved from plugin class
      // plugin.createConceptNotes = jest.fn().mockResolvedValue(undefined);
