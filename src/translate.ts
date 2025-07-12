@@ -1,4 +1,4 @@
-import { App, TFile, Notice } from 'obsidian';
+import { App, TFile, TFolder, Notice } from 'obsidian';
 import { NotemdSettings, ProgressReporter } from '../types';
 import { getProviderForTask, getModelForTask } from '../utils';
 import { callLLM } from '../llmUtils';
@@ -30,16 +30,34 @@ export async function translateFile(
     try {
         // Pass the signal to callLLM
         const translatedText = await callLLM(provider, prompt, fileContent, settings, progressReporter, model, signal);
-        const savePath = settings.translationSavePath || 'translations';
+
+        let savePath: string;
+
+        if (settings.useCustomTranslationSavePath && settings.translationSavePath) {
+            savePath = settings.translationSavePath;
+            // Ensure the custom directory exists
+            const dir = app.vault.getAbstractFileByPath(savePath);
+            if (!dir) {
+                try {
+                    await app.vault.createFolder(savePath);
+                } catch (error) {
+                    console.error(`Error creating translation folder at ${savePath}:`, error);
+                    new Notice(`Failed to create translation folder: ${savePath}. Defaulting to original file's folder.`);
+                    // Fallback to original folder if creation fails
+                    savePath = file.parent ? file.parent.path : '/';
+                }
+            }
+        } else {
+            // Default: Save in the same folder as the original file
+            savePath = file.parent ? file.parent.path : '/';
+        }
+
         const suffix = settings.useCustomTranslationSuffix ? settings.translationCustomSuffix : `_${targetLanguage}`;
         const fileName = `${file.basename}${suffix}.md`;
-        const fullPath = `${savePath}/${fileName}`;
+        
+        // Handle root path correctly
+        const fullPath = savePath === '/' || savePath === '' ? fileName : `${savePath}/${fileName}`;
 
-        // Ensure the directory exists
-        const dir = app.vault.getAbstractFileByPath(savePath);
-        if (!dir) {
-            await app.vault.createFolder(savePath);
-        }
 
         const existingFile = app.vault.getAbstractFileByPath(fullPath);
         if (existingFile) {

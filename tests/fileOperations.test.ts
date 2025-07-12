@@ -94,6 +94,7 @@ describe('File Operations', () => {
             translateProvider: 'DeepSeek',
             useCustomTranslationSuffix: false,
             translationCustomSuffix: '_translated',
+            useCustomTranslationSavePath: false, // Added missing property
             translationSavePath: 'translations',
             
         };

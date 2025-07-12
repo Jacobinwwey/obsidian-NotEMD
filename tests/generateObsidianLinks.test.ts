@@ -89,6 +89,7 @@ describe('generateObsidianLinks', () => {
             translateProvider: 'DeepSeek',
             useCustomTranslationSuffix: false,
             translationCustomSuffix: '_translated',
+            useCustomTranslationSavePath: false, // Added missing property
             translationSavePath: 'translations',
         };
      // Mock createConceptNotes to return a resolved promise - REMOVED as function moved from plugin class
