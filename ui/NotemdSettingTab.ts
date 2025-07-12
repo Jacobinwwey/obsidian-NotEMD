@@ -260,16 +260,31 @@ export class NotemdSettingTab extends PluginSettingTab {
         // --- Translate Task Settings ---
         new Setting(containerEl).setName('Task: Translate').setHeading();
 
+        // New setting: Toggle for custom translation save path
         new Setting(containerEl)
-            .setName('Translation Save Path')
-            .setDesc('The folder where translated files will be saved.')
-            .addText(text => text
-                .setPlaceholder('e.g., Translations')
-                .setValue(this.plugin.settings.translationSavePath)
+            .setName('Customise translation file save path')
+            .setDesc('On: Save translated files to a specified path. Off: Save in the same folder as the original file.')
+            .addToggle(toggle => toggle
+                .setValue(this.plugin.settings.useCustomTranslationSavePath)
                 .onChange(async (value) => {
-                    this.plugin.settings.translationSavePath = value;
+                    this.plugin.settings.useCustomTranslationSavePath = value;
                     await this.plugin.saveSettings();
+                    this.display(); // Refresh to show/hide the path input
                 }));
+
+        // Conditionally display the path input
+        if (this.plugin.settings.useCustomTranslationSavePath) {
+            new Setting(containerEl)
+                .setName('Translation save path')
+                .setDesc('The folder where translated files will be saved (relative to vault root).')
+                .addText(text => text
+                    .setPlaceholder('e.g., Translations')
+                    .setValue(this.plugin.settings.translationSavePath)
+                    .onChange(async (value) => {
+                        this.plugin.settings.translationSavePath = value.trim();
+                        await this.plugin.saveSettings();
+                    }));
+        }
 
         new Setting(containerEl)
             .setName('Use custom suffix for translated files')
