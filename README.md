@@ -205,7 +205,7 @@ Access plugin settings via:
     *   **Enabled**: Performs web research using the configured **Web Research Provider** and includes the findings as context for the LLM during title-based generation.
 -   **Output Language**: (New) Select the desired output language for "Generate from Title" and "Batch Generate from Title" tasks.
     *   **English (Default)**: Prompts are processed and output in English.
-    *   **Other Languages**: The LLM is instructed to perform its reasoning in English but provide the final documentation in your selected language (e.g., Español, Français, 简体中文, العربية, हिन्दी, etc.).
+    *   **Other Languages**: The LLM is instructed to perform its reasoning in English but provide the final documentation in your selected language (e.g., Español, Français, 简体中文, 繁體中文, العربية, हिन्दी, etc.).
 -   **Change Prompt Word**: (New)
     *   **Change Prompt Word**: Allows you to change the prompt word for a specific task.
     *   **Custom Prompt Word**: Enter your custom prompt word for the task.
