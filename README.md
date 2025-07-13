@@ -213,6 +213,27 @@ Access plugin settings via:
     *   **Disabled (Default)**: Successfully generated files are moved to a subfolder named `[OriginalFolderName]_complete` relative to the original folder's parent (or `Vault_complete` if the original folder was the root).
     *   **Enabled**: Allows you to specify a custom name for the subfolder where completed files are moved.
 -   **Custom Output Folder Name**: (Visible only when the above is enabled) Enter the desired name for the subfolder (e.g., `Generated Content`, `_complete`). Invalid characters are not allowed. Defaults to `_complete` if left empty. This folder is created relative to the original folder's parent directory.
+
+#### Custom Prompt Settings
+This feature allows you to override the default instructions (prompts) sent to the LLM for specific tasks, giving you fine-grained control over the output.
+
+-   **Enable Custom Prompts for Specific Tasks**:
+    *   **Disabled (Default)**: The plugin uses its built-in default prompts for all operations.
+    *   **Enabled**: Activates the ability to set custom prompts for the tasks listed below. This is the master switch for this feature.
+
+-   **Use Custom Prompt for [Task Name]**: (Visible only when the above is enabled)
+    *   For each supported task ("Add Links", "Generate from Title", "Research & Summarize"), you can individually enable or disable your custom prompt.
+    *   **Disabled**: This specific task will use the default prompt.
+    *   **Enabled**: This task will use the text you provide in the corresponding "Custom Prompt" text area below.
+
+-   **Custom Prompt Text Area**: (Visible only when a task's custom prompt is enabled)
+    *   **Default Prompt Display**: For your reference, the plugin displays the default prompt that it would normally use for the task. You can use the **"Copy Default Prompt"** button to copy this text as a starting point for your own custom prompt.
+    *   **Custom Prompt Input**: This is where you write your own instructions for the LLM.
+    *   **Placeholders**: You can (and should) use special placeholders in your prompt, which the plugin will replace with actual content before sending the request to the LLM. Refer to the default prompt to see which placeholders are available for each task. Common placeholders include:
+        *   `{TITLE}`: The title of the current note.
+        *   `{RESEARCH_CONTEXT_SECTION}`: The content gathered from web research.
+        *   `{USER_PROMPT}`: The content of the note being processed.
+
 <img width="794" height="174" alt="Content generation   output" src="https://github.com/user-attachments/assets/76d93942-980d-49ad-b9d4-1c73ea013d17" />
 
 <img width="866" height="646" alt="Duplicate check scope   Custom prompt settings" src="https://github.com/user-attachments/assets/1b37a523-ef00-4e40-94a0-43bbe0c78572" />
