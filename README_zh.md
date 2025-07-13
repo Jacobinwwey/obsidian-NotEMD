@@ -38,23 +38,24 @@ Notemd 通过与各种大型语言模型 (LLM) 集成来增强您的 Obsidian �
 ## 功能特性
 
 ### AI驱动的文档处理
-- **多LLM支持**: 兼容多种云端及本地LLM提供商（详见[支持的LLM提供商]）。
-- **智能分块**: 按字数自动将大文档拆分为可处理小块。
-- **内容格式保留**: 在增加结构和链接的同时尽力保持原文格式。
-- **进度跟踪**: 侧边栏或弹窗实时显示处理进度。
-- **可取消操作**: 所有由侧边栏或命令面板发起的处理任务均可随时取消。
-- **多模型配置**: 不同任务（添加链接、研究、生成标题、翻译）可灵活指定不同的LLM服务商和模型，也可统一使用单一服务商。
-- **稳定API调用（重试机制）**: 支持为API调用失败自动重试，重试间隔和最大次数可配置。
+- **多 LLM 支持**: 连接到各种云和本地 LLM 提供商 (参见 [支持的 LLM 提供商](about:blank#支持的-llm-提供商-1))。
+- **智能分块**: 根据字数自动将大型文档分割成易于管理的小块进行处理。
+- **内容保留**: 在添加结构和链接的同时，旨在保持原始内容格式。
+- **进度跟踪**: 通过 Notemd 侧边栏或进度模式进行实时更新。
+- **可取消操作**: 可以通过侧边栏的专用取消按钮取消任何处理任务（单个或批量）。命令面板操作使用模式窗口，也可以取消。
+- **多模型配置**: 为不同任务（添加链接、研究、生成标题）使用不同的 LLM 提供商*和*特定模型，或为所有任务使用单一提供商。
+- **稳定的 API 调用（重试逻辑）**: 可选择为失败的 LLM API 调用启用自动重试，并可配置重试间隔和尝试次数限制。
 
 ### 知识图谱增强
-- **自动维基链接**: 基于LLM结果为笔记核心概念添加 `[[维基链接]]`。
-- **概念笔记自动创建**: 可选项，自动为新发现概念在指定文件夹中生成新笔记。
-- **自定义输出路径与文件名**: 支持为处理结果与概念笔记单独设置存储路径、文件名后缀或直接覆盖原文件。
-- **链接完整性维护**: 对笔记重命名/删除自动维护相关链接。
+- **自动维基链接**: 根据 LLM 输出，识别您处理过的笔记中的核心概念并添加 `[[维基链接]]`。
+- **概念笔记创建（可选和可定制）**: 在指定的 vault 文件夹中自动为发现的概念创建新笔记。
+- **可定制的输出路径**: 在您的 vault 中为保存处理过的文件和新创建的概念笔记配置单独的相对路径。
+- **可定制的输出文件名（添加链接）**: 在处理文件以添加链接时，可选择**覆盖原始文件**或使用自定义后缀/替换字符串，而不是默认的 `_processed.md`。
+- **链接完整性维护**: 在 vault 内重命名或删除笔记时，基本处理更新链接的功能。
 
-### 翻译
+### AI翻译
 
-- **AI驱动的翻译**:
+- **27种语言高质量翻译:**:
     - 使用LLM翻译笔记内容，支持多语言互译。
     - 目标语言可在设置或命令时灵活选择。
     - 翻译结果自动在原文右侧新窗格展示，方便对照阅读。
@@ -99,72 +100,204 @@ Notemd 通过与各种大型语言模型 (LLM) 集成来增强您的 Obsidian �
 
 进入设置：**设置** → **社区插件** → **Notemd**（齿轮图标）。
 
-### LLM服务商配置
-1. **激活服务商**：下拉选择想要使用的服务商。
-2. **服务商设置**：
-    * **API Key**: 云端大多需要（如OpenAI、Anthropic、DeepSeek、Google、Mistral、Azure、OpenRouter），本地Ollama不需要，LMStudio一般留空或用`EMPTY`。
-    * **Base URL/Endpoint**: API地址。大多自带默认值，本地或部分服务商（如OpenRouter、Azure）需手动填写。
-    * **模型**: 填写具体模型名/ID（如`gpt-4o`、`claude-3-5-sonnet-20240620`、`google/gemini-flash-1.5`等）。
-    * **温度**: 控制生成内容的随机性，结构化任务建议0.2-0.5。
-    * **API版本（仅Azure）**: Azure OpenAI需填写该项（如`2024-02-15-preview`）。
-3. **测试连接**：点击“测试连接”验证当前设置是否可用（Notemd: Test LLM Connection）。
-4. **导入/导出服务商配置**：一键备份/恢复服务商账号信息。
+### LLM 提供商配置 (LLM Provider Configuration)
+
+1. **活动提供商 (Active Provider)**: 从下拉菜单中选择您想要使用的 LLM 提供商。
+
+2. 提供商设置 (Provider Settings)
+
+   : 配置所选提供商的具体设置：
+
+   - **API 密钥 (API Key)**: 大多数云提供商（例如 OpenAI, Anthropic, DeepSeek, Google, Mistral, Azure, OpenRouter）需要。Ollama 不需要。LMStudio 通常使用 `EMPTY` 或可以留空。
+   - **基础 URL / 端点 (Base URL / Endpoint)**: 服务的 API 端点。提供了默认值，但您可能需要为本地模型（LMStudio, Ollama）、OpenRouter 或特定的 Azure 部署更改此设置。**Azure OpenAI 必需。**
+   - **模型 (Model)**: 要使用的具体模型名称/ID（例如 `gpt-4o`, `claude-3-5-sonnet-20240620`, `google/gemini-flash-1.5`, `llama3`, `mistral-large-latest`）。确保模型在您的端点/提供商处可用。对于 OpenRouter，请使用其网站上显示的模型 ID（例如 `gryphe/mythomax-l2-13b`）。
+   - **温度 (Temperature)**: 控制 LLM 输出的随机性（0=确定性，1=最大创造力）。较低的值（例如 0.2-0.5）通常更适合结构化任务。
+   - **API 版本 (仅限 Azure) (API Version (Azure Only))**: Azure OpenAI 部署需要（例如 `2024-02-15-preview`）。
+
+3. **测试连接 (Test Connection)**: 使用活动提供商的“测试连接”按钮来验证您的设置。现在对 LM Studio 使用了更可靠的方法。
+
+4. **管理提供商配置 (Manage Provider Configurations)**: 使用“导出提供商”和“导入提供商”按钮将您的 LLM 提供商设置保存到插件配置目录中的 `notemd-providers.json` 文件或从中加载。这便于备份和共享。
 
 <img width="804" height="506" alt="LLM" src="https://github.com/user-attachments/assets/8caf42e3-43ad-456d-8b96-b63e7914e45f" />
 
-### 多模型配置
-- **为不同任务指定不同LLM**：可分别为“添加链接”、“研究与摘要”、“生成标题”、“翻译”指定不同服务商或模型，未填写则继承全局设置。
+### 多模型配置 (Multi-Model Configuration)
+
+- 为任务使用不同的提供商 (Use Different Providers for Tasks)
+
+  :
+
+  - **禁用 (默认)**: 对所有任务使用上面选择的单个“活动提供商”。
+  - **启用**: 允许您为每个任务（“添加链接”、“研究与摘要”、“从标题生成”）选择特定的提供商*和*可选地覆盖模型名称。如果任务的模型覆盖字段留空，则将使用为该任务选定提供商配置的默认模型。
 
 <img width="817" height="428" alt="Multi-model" src="https://github.com/user-attachments/assets/85e6b854-c0ca-45cc-a55e-24638dceb120" />
 
-### 稳定API调用设置
-- **启用自动重试**：API调用失败时自动重试，重试间隔（秒）和最大次数均可自定义。
+### 稳定 API 调用设置 (Stable API Call Settings)
+
+- 启用稳定 API 调用（重试逻辑）(Enable Stable API Calls (Retry Logic))
+
+  :
+
+  - **禁用 (默认)**: 单个 API 调用失败将停止当前任务。
+  - **启用**: 自动重试失败的 LLM API 调用（对于间歇性网络问题或速率限制很有用）。
+
+- **重试间隔 (秒) (Retry Interval (seconds))**: (仅在启用时可见) 重试尝试之间等待的时间（1-300 秒）。默认值：5。
+
+- **最大重试次数 (Maximum Retries)**: (仅在启用时可见) 最大重试尝试次数（0-10）。默认值：3。
 
 <img width="805" height="187" alt="stable API calls" src="https://github.com/user-attachments/assets/936454a7-b657-413c-8a2a-13d517f9c519" />
 
 ### 常规设置
 
-#### 处理文件输出
-- **自定义保存路径/文件名后缀**：可自定义处理结果保存位置、文件名（Notemd: Process Current File, Notemd: Process Folder），留空则覆盖原文件。
-- **添加链接时删除代码围栏**：可选，默认保留，仅删除 \`\`\`markdown。
+#### 处理文件输出 (Processed File Output)
+
+- 自定义处理文件的保存路径 (Customize Processed File Save Path)
+
+  :
+
+  - **禁用 (默认)**: 处理过的文件（例如 `YourNote_processed.md`）保存在与原始笔记*相同的文件夹*中。
+  - **启用**: 允许您指定自定义保存位置。
+
+- **处理文件文件夹路径 (Processed File Folder Path)**: (仅在启用上述选项时可见) 输入 vault 内的*相对路径*（例如 `Processed Notes` 或 `Output/LLM`），处理过的文件应保存在此路径。如果文件夹不存在，将自动创建。**请勿使用绝对路径（如 C:...）或无效字符。**
+
+- 为“添加链接”使用自定义输出文件名 (Use Custom Output Filename for ‘Add Links’)
+
+  :
+
+  - **禁用 (默认)**: 由“添加链接”命令创建的处理文件使用默认的 `_processed.md` 后缀（例如 `YourNote_processed.md`）。
+  - **启用**: 允许您使用下面的设置自定义输出文件名。
+
+- 自定义后缀/替换字符串 (Custom Suffix/Replacement String)
+
+  : (仅在启用上述选项时可见) 输入用于输出文件名的字符串。
+
+  - 如果留**空**，原始文件将被处理后的内容**覆盖**。
+  - 如果您输入一个字符串（例如 `_linked`），它将被附加到原始基本名称后（例如 `YourNote_linked.md`）。确保后缀不包含无效的文件名字符。
+
+- 在添加链接时移除代码围栏 (Remove Code Fences on Add Links)
+
+  :
+
+  - **禁用 (默认)**: 添加链接时，代码围栏 **(`)\** 会保留在内容中，而 \**(`markdown)** 会被自动删除。
+  - **启用**: 在添加链接之前从内容中移除代码围栏。
 
 <img width="799" height="301" alt="Processed file output" src="https://github.com/user-attachments/assets/65d4e864-ff5f-402a-be90-e9c44b208903" />
 
-#### 概念笔记输出
-- **自定义概念笔记目录**：可选，指定生成概念笔记的文件夹路径。
+#### 概念笔记输出 (Concept Note Output)
+
+- 自定义概念笔记路径 (Customize Concept Note Path)
+
+  :
+
+  - **禁用 (默认)**: 禁用为 `[[链接的概念]]` 自动创建笔记。
+  - **启用**: 允许您指定创建新概念笔记的文件夹。
+
+- **概念笔记文件夹路径 (Concept Note Folder Path)**: (仅在启用上述选项时可见) 输入 vault 内的*相对路径*（例如 `Concepts` 或 `Generated/Topics`），新概念笔记应保存在此路径。如果文件夹不存在，将自动创建。**如果启用了自定义，则必须填写。** **请勿使用绝对路径或无效字符。**
 
 <img width="800" height="145" alt="concept note output" src="https://github.com/user-attachments/assets/d0338341-7d67-4472-964c-75a0992165b8" />
 
-#### 概念日志文件输出
-- **生成概念日志文件**：自动记录每次处理新生成的概念笔记，可配置保存路径和文件名。
+#### 概念日志文件输出 (Concept Log File Output)
+
+- 生成概念日志文件 (Generate Concept Log File)
+
+  :
+
+  - **禁用 (默认)**: 不生成日志文件。
+  - **启用**: 处理后创建一个日志文件，列出新创建的概念笔记。格式如下： `generate xx concepts md file 1. concepts1 2. concepts2 ... n. conceptsn`
+
+- 自定义日志文件保存路径 (Customize Log File Save Path)
+
+  : (仅在启用“生成概念日志文件”时可见)
+
+  - **禁用 (默认)**: 日志文件保存在**概念笔记文件夹路径**（如果已指定）中，否则保存在 vault 根目录。
+  - **启用**: 允许您为日志文件指定自定义文件夹。
+
+- **概念日志文件夹路径 (Concept Log Folder Path)**: (仅在启用“自定义日志文件保存路径”时可见) 输入 vault 内的*相对路径*（例如 `Logs/Notemd`），日志文件应保存在此路径。**如果启用了自定义，则必须填写。**
+
+- 自定义日志文件名 (Customize Log File Name)
+
+  : (仅在启用“生成概念日志文件”时可见)
+
+  - **禁用 (默认)**: 日志文件名为 `Generate.log`。
+  - **启用**: 允许您为日志文件指定自定义名称。
+
+- **概念日志文件名 (Concept Log File Name)**: (仅在启用“自定义日志文件名”时可见) 输入所需的文件名（例如 `ConceptCreation.log`）。**如果启用了自定义，则必须填写。**
 
 <img width="809" height="281" alt="Concept log file output" src="https://github.com/user-attachments/assets/eef6f5d5-592d-4b8f-84b1-7404521a6e9b" />
 
-#### 处理参数
-- **分块字数**：单次调用LLM的最大分块长度（默认3000）。
-- **启用重复检测**：处理内容时检测并输出重复词（默认开启）。
-- **最大tokens数**：LLM单次回复的最大长度（默认4096）。
+#### 处理参数 (Processing Parameters)
+
+- **分块字数 (Chunk Word Count)**: 发送给 LLM 的每个块的最大字数。影响大型文件的 API 调用次数。（默认值：3000）
+- **启用重复检测 (Enable Duplicate Detection)**: 切换对处理内容中重复单词的基本检查（结果在控制台中）。（默认值：启用）
+- **最大令牌数 (Max Tokens)**: LLM 每个响应块应生成的最大令牌数。影响成本和细节。（默认值：4096）
 
 <img width="795" height="274" alt="Processing Parameters   Language settings" src="https://github.com/user-attachments/assets/74e4af76-3333-48fc-bb86-0a3ee61825d1" />
 
-#### 翻译
+#### 翻译（Translate）
 - **目标语言**：可选默认目标语言，命令时可覆盖。
 - **翻译文件保存路径/后缀**：自定义翻译结果的保存路径和文件名后缀（Notemd: Translate Note/Selection）。
 
 <img width="811" height="243" alt="translate" src="https://github.com/user-attachments/assets/57d21a72-e86c-4369-8be5-fd18cb734e2b" />
 
-#### 内容生成
-- **启用标题内容生成时的研究**：生成内容前可自动网页研究并加入上下文。
-- **输出语言**：支持多语言输出。
-- **自定义提示词**：自定义每个任务的提示词。
-- **自定义完成文件夹名**：成功处理文件将自动移动到自定义“完成”文件夹（Notemd: Batch Generate Content from Titles）。
+
+
+#### 内容生成 (Content Generation)
+
+- 在“从标题生成”中启用研究 (Enable Research in “Generate from Title”)
+
+  :
+
+  - **禁用 (默认)**: “从标题生成”仅使用标题作为输入。
+  - **启用**: 使用配置的**网络研究提供商**执行网络研究，并将研究结果作为上下文包含在基于标题生成的 LLM 提示中。
+
+- 输出语言
+
+  : (新增) 为“从标题生成”和“从标题批量生成”任务选择所需的输出语言。
+
+  - **英语 (默认)**: 提示以英语处理和输出。
+  - **其他语言**: 指示LLM以英语进行推理，但以您选择的语言 (例如 西班牙语、法语、简体中文、阿拉伯语、印地语等) 提供最终文档。
+
+- 更改提示词
+
+  : (新增)
+
+  - **更改提示词**: 允许您更改特定任务的提示词。
+  - **自定义提示词**: 输入您任务的自定义提示词。
+
+- 为“从标题生成”使用自定义输出文件夹 (Use Custom Output Folder for ‘Generate from Title’)
+
+  :
+
+  - **禁用 (默认)**: 成功生成的文件将移动到相对于原始文件夹父目录的名为 `[原始文件夹名称]_complete` 的子文件夹中（如果原始文件夹是根目录，则为 `Vault_complete`）。
+  - **启用**: 允许您为移动已完成文件的子文件夹指定自定义名称。
+
+- **自定义输出文件夹名称 (Custom Output Folder Name)**: (仅在启用上述选项时可见) 输入子文件夹所需的名称（例如 `Generated Content`, `_complete`）。不允许使用无效字符。如果留空，则默认为 `_complete`。此文件夹创建在原始文件夹的父目录内。
 
 <img width="794" height="174" alt="Content generation   output" src="https://github.com/user-attachments/assets/76d93942-980d-49ad-b9d4-1c73ea013d17" />
 
 <img width="866" height="646" alt="Duplicate check scope   Custom prompt settings" src="https://github.com/user-attachments/assets/1b37a523-ef00-4e40-94a0-43bbe0c78572" />
 
-#### 重复检查范围
-- **检测范围模式**：可对整个保险库、指定文件夹、排除文件夹或仅文件夹内进行概念笔记重复检测。
+#### 重复检查范围 (Duplicate Check Scope)
+
+- 重复检查范围模式 (Duplicate Check Scope Mode)
+
+  : 控制将概念笔记文件夹中的笔记与哪些文件进行比较以查找潜在重复项。
+
+  - **整个 Vault (默认)**: 将概念笔记与 vault 中的所有其他笔记（不包括概念笔记文件夹本身）进行比较。
+  - **仅包含特定文件夹**: 仅将概念笔记与下面列出的文件夹中的笔记进行比较。
+  - **排除特定文件夹**: 将概念笔记与*除*下面列出的文件夹中的笔记（以及概念笔记文件夹）之外的所有笔记进行比较。
+  - **仅概念文件夹**: 仅将概念笔记与*概念笔记文件夹内的其他笔记*进行比较。这有助于查找纯粹在您生成的概念内部的重复项。
+
+- **包含/排除文件夹 (Include/Exclude Folders)**: (仅在模式为“包含”或“排除”时可见) 输入您要包含或排除的文件夹的*相对路径*，**每行一个路径**。路径区分大小写，并使用 `/` 作为分隔符（例如 `Reference Material/Papers` 或 `Daily Notes`）。这些文件夹不能与概念笔记文件夹相同或位于其内部。
+
+#### 网络研究提供商 (Web Research Provider)
+
+- **搜索提供商 (Search Provider)**: 在 `Tavily`（需要 API 密钥，推荐）和 `DuckDuckGo`（实验性，经常被搜索引擎阻止自动化请求）之间选择。用于“研究与摘要主题”和可选的“从标题生成”。
+- **Tavily API 密钥 (Tavily API Key)**: (仅在选择 Tavily 时可见) 输入您从 [tavily.com](https://tavily.com/) 获取的 API 密钥。
+- **Tavily 最大结果数 (Tavily Max Results)**: (仅在选择 Tavily 时可见) Tavily 应返回的最大搜索结果数（1-20）。默认值：5。
+- **Tavily 搜索深度 (Tavily Search Depth)**: (仅在选择 Tavily 时可见) 选择 `basic`（默认）或 `advanced`。注意：`advanced` 提供更好的结果，但每次搜索消耗 2 个 API 积分，而不是 1 个。
+- **DuckDuckGo 最大结果数 (DuckDuckGo Max Results)**: (仅在选择 DuckDuckGo 时可见) 要解析的最大搜索结果数（1-10）。默认值：5。
+- **DuckDuckGo 内容获取超时 (DuckDuckGo Content Fetch Timeout)**: (仅在选择 DuckDuckGo 时可见) 尝试从每个 DuckDuckGo 结果 URL 获取内容时等待的最大秒数。默认值：15。
+- **最大研究内容令牌数 (Max Research Content Tokens)**: 要包含在摘要提示中的组合网络研究结果（片段/获取的内容）的大致最大令牌数。有助于管理上下文窗口大小和成本。（默认值：3000）
 
 ## 使用指南
 
