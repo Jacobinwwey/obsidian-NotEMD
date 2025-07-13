@@ -137,6 +137,7 @@ export const DEFAULT_SETTINGS: NotemdSettings = {
         { code: 'it', name: 'Italiano' },
         { code: 'pt', name: 'Português' },
         { code: 'zh-CN', name: '简体中文' },
+        { code: 'zh-TW', name: '繁體中文' },
         { code: 'ja', name: '日本語' },
         { code: 'ko', name: '한국어' },
         { code: 'ru', name: 'Русский' },
@@ -156,7 +157,10 @@ export const DEFAULT_SETTINGS: NotemdSettings = {
         { code: 'cs', name: 'Čeština' },
         { code: 'hu', name: 'Magyar' },
         { code: 'ro', name: 'Română' },
-        { code: 'uk', name: 'Українська' }
+        { code: 'uk', name: 'Українська' },
+        { code: 'vi', name: 'Tiếng Việt' },
+        { code: 'id', name: 'Bahasa Indonesia' },
+        { code: 'ms', name: 'Bahasa Melayu' }
     ],
     // Custom Prompt Settings Defaults
     enableGlobalCustomPrompts: false,
