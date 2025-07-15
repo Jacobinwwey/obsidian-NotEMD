@@ -398,3 +398,6 @@ MIT License - See [LICENSE](LICENSE) file for details.
 ---
 
 *Notemd v1.3.2 - Enhance your Obsidian knowledge graph with AI.*
+
+
+![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)
