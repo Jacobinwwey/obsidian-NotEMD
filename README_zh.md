@@ -435,3 +435,5 @@ MIT许可证 - 详情请见[LICENSE](LICENSE)。
 ---
 
 *Notemd v1.3.2 - 用AI提升你的Obsidian知识图谱。*
+
+![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)
