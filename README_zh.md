@@ -16,9 +16,9 @@
 
 一个创建您自己知识库的简单方法！
 
-Notemd 通过与各种大型语言模型 (LLM) 集成来增强您的 Obsidian 工作流程，支持多语言笔记处理，自动为关键概念生成维基链接、创建相应的概念笔记、执行网页搜索与摘要、翻译内容等，助力构建强大的知识图谱。
+Notemd 通过与各种大型语言模型 (LLM) 集成来增强您的 Obsidian 工作流程，支持多语言笔记处理，自动为关键概念生成维基链接、创建相应的概念笔记、执行网页搜索与摘要、翻译内容、总结为Mermaid脑图等，助力构建强大的知识图谱。
 
-**版本:** 1.3.2
+**版本:** 1.3.3
 
 ![image](https://img.shields.io/github/v/release/Jacobinwwey/obsidian-NotEMD?label=Version&link=https%3A%2F%2Fgithub.com%2Jacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest) ![image](https://img.shields.io/github/downloads/Jacobinwwey/obsidian-NotEMD/total?logo=Obsidian&label=Downloads&labelColor=%237C3AED&color=%235b5b5b&link=https%3A%2F%2Fgithub.com%2Jacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest)
 
@@ -26,6 +26,7 @@ Notemd 通过与各种大型语言模型 (LLM) 集成来增强您的 Obsidian �
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
 
 ## 目录
+- [快速入门](#快速入门)
 - [功能特性](#功能特性)
 - [安装](#安装)
 - [配置](#配置)
@@ -34,6 +35,15 @@ Notemd 通过与各种大型语言模型 (LLM) 集成来增强您的 Obsidian �
 - [故障排除](#故障排除)
 - [贡献](#贡献)
 - [许可证](#许可证)
+  
+## 快速入门
+
+1.  **安装与启用**：从 Obsidian 市场获取插件。
+2.  **配置 LLM**：进入 `设置 -> Notemd`，选择您的 LLM 提供商（如 OpenAI 或本地提供商如 Ollama），并输入 API 密钥/URL。
+3.  **打开侧边栏**：点击左侧工具栏中的 Notemd 魔法棒图标以打开侧边栏。
+4.  **处理笔记**：打开任意笔记，在侧边栏中点击 **“处理文件 (添加链接)”**，即可自动为关键概念添加 `[[wiki-links]]` 链接。
+
+完成！探索更多设置以解锁网页搜索、翻译和内容生成等功能。
 
 ## 功能特性
 
@@ -434,6 +444,6 @@ MIT许可证 - 详情请见[LICENSE](LICENSE)。
 
 ---
 
-*Notemd v1.3.2 - 用AI提升你的Obsidian知识图谱。*
+*Notemd v1.3.3 - 用AI提升你的Obsidian知识图谱。*
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)
