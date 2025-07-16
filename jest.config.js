@@ -2,12 +2,9 @@ module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
   moduleFileExtensions: ['ts', 'js', 'json'],
-  transform: {
-    '^.+\\.ts$': 'ts-jest'
-  },
   testMatch: ['**/tests/**/*.test.ts'],
   moduleNameMapper: {
-    '^obsidian$': '<rootDir>/__mocks__/obsidian.ts'
+    '^obsidian$': '<rootDir>/src/__mocks__/obsidian.ts'
   },
   transform: {
     '^.+\\.ts$': [
