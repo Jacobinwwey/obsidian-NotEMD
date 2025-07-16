@@ -44,6 +44,7 @@ export interface NotemdSettings {
     researchProvider: string;
     generateTitleProvider: string;
     translateProvider: string;
+    summarizeToMermaidProvider: string;
     // Stable API Call Settings
     enableStableApiCall: boolean;
     apiCallInterval: number;
@@ -53,6 +54,7 @@ export interface NotemdSettings {
     researchModel?: string;
     generateTitleModel?: string;
     translateModel?: string;
+    summarizeToMermaidModel?: string;
     // Custom Add Links Output Filename Settings
     useCustomAddLinksSuffix: boolean;
     addLinksCustomSuffix: string;
@@ -61,6 +63,11 @@ export interface NotemdSettings {
     translationCustomSuffix: string;
     useCustomTranslationSavePath: boolean; // New: Toggle for custom translation save path
     translationSavePath: string;
+    // Custom Summarize to Mermaid Output Filename Settings
+    useCustomSummarizeToMermaidSuffix: boolean;
+    summarizeToMermaidCustomSuffix: string;
+    useCustomSummarizeToMermaidSavePath: boolean;
+    summarizeToMermaidSavePath: string;
     // Custom Generate from Title Output Folder Settings
     useCustomGenerateTitleOutputFolder: boolean; // Toggle for custom output folder
     generateTitleOutputFolderName: string; // The custom folder name (defaults to _complete)
@@ -81,12 +88,13 @@ export interface NotemdSettings {
     customPromptGenerateTitle: string;
     useCustomPromptForResearchSummarize: boolean;
     customPromptResearchSummarize: string;
-
-    
+    useCustomPromptForSummarizeToMermaid: boolean;
+    customPromptSummarizeToMermaid: string;
+    translateSummarizeToMermaidOutput: boolean;
 }
 
 // Defines the keys for tasks that can have custom prompts
-export type TaskKey = 'addLinks' | 'generateTitle' | 'researchSummarize' | 'translate';
+export type TaskKey = 'addLinks' | 'generateTitle' | 'researchSummarize' | 'translate' | 'summarizeToMermaid';
 
 // Interface for search results
 export interface SearchResult {

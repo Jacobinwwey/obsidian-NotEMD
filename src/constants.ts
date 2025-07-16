@@ -111,6 +111,7 @@ export const DEFAULT_SETTINGS: NotemdSettings = {
     researchModel: '',
     generateTitleModel: '',
     translateModel: '',
+    summarizeToMermaidModel: '',
     // Custom Add Links Output Filename Defaults
     useCustomAddLinksSuffix: false, // Default to standard '_processed.md' suffix
     addLinksCustomSuffix: '', // Default custom suffix is empty (relevant only if toggle is on)
@@ -170,8 +171,14 @@ export const DEFAULT_SETTINGS: NotemdSettings = {
     customPromptGenerateTitle: '',
     useCustomPromptForResearchSummarize: false,
     customPromptResearchSummarize: '',
-
-    
+    summarizeToMermaidProvider: 'DeepSeek',
+    useCustomPromptForSummarizeToMermaid: false,
+    customPromptSummarizeToMermaid: '',
+    translateSummarizeToMermaidOutput: false,
+    useCustomSummarizeToMermaidSuffix: false,
+    summarizeToMermaidCustomSuffix: '_summ',
+    useCustomSummarizeToMermaidSavePath: false,
+    summarizeToMermaidSavePath: ''
 };
 
 // Constants for the Sidebar View

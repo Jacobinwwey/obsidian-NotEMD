@@ -34,6 +34,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
     private batchMermaidFixButton: HTMLButtonElement | null = null; // Added
     private cancelButton: HTMLButtonElement | null = null;
     private translateButton: HTMLButtonElement | null = null;
+    private summarizeToMermaidButton: HTMLButtonElement | null = null;
     private languageSelector: HTMLSelectElement | null = null;
 
     constructor(leaf: WorkspaceLeaf, plugin: NotemdPlugin) {
@@ -340,6 +341,20 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             }
         };
 
+        this.summarizeToMermaidButton = newFeatureButtonGroup.createEl('button', { text: 'Summarise as Mermaid diagram' });
+        this.summarizeToMermaidButton.title = 'Summarises the current note content as a Mermaid mindmap diagram and saves it to a new file.';
+        this.summarizeToMermaidButton.onclick = async () => {
+            if (this.isProcessing) return;
+            const activeFile = this.plugin.app.workspace.getActiveFile();
+            if (!activeFile || !(activeFile instanceof TFile) || activeFile.extension !== 'md') { new Notice('No active Markdown file selected.'); return; }
+            this.clearDisplay();
+            this.currentAbortController = new AbortController();
+            this.isProcessing = true; this.startTime = Date.now(); this.updateButtonStates();
+            this.log('Starting: Summarise as Mermaid diagram...'); this.updateStatus('Summarizing...', 0);
+            try { await this.plugin.summarizeToMermaidCommand(activeFile, this); }
+            finally { this.isProcessing = false; this.updateButtonStates(); }
+        };
+
         this.languageSelector = translateGroup.createEl('select');
         const languageSelector = this.languageSelector;
         if (languageSelector) {
@@ -472,6 +487,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         this.processCurrentButton = null; this.processFolderButton = null; this.researchButton = null;
         this.generateTitleButton = null; this.batchGenerateTitleButton = null; this.checkDuplicatesButton = null;
         this.testConnectionButton = null; this.checkRemoveDuplicatesButton = null; this.batchMermaidFixButton = null; // Added
+        this.summarizeToMermaidButton = null;
         this.translateButton = null; this.languageSelector = null;
     }
 }

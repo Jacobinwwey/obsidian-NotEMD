@@ -2,7 +2,7 @@ import { TFile, TFolder } from 'obsidian';
 import { processFile } from '../fileUtils';
 import { NotemdSettings, ProgressReporter } from '../types';
 import * as llmUtils from '../llmUtils';
-import { mockApp, mockVault } from './__mocks__/app';
+import { mockApp } from './__mocks__/app';
 import { mockSettings } from './__mocks__/settings';
 
 // Mock Progress Reporter
@@ -30,7 +30,7 @@ describe('processFile', () => {
             parent: { path: '/' }
         } as TFile;
 
-        mockVault.read.mockResolvedValue('This is a test file about AI and machine learning.');
+        (mockApp.vault.read as jest.Mock).mockResolvedValue('This is a test file about AI and machine learning.');
     });
 
     it('should process a file and save the processed file', async () => {
@@ -39,16 +39,16 @@ describe('processFile', () => {
 
         await processFile(mockApp, settings, mockFile, mockReporter, { value: null });
 
-        expect(mockVault.read).toHaveBeenCalledWith(mockFile);
+        expect(mockApp.vault.read).toHaveBeenCalledWith(mockFile);
         expect(llmUtils.callDeepSeekAPI).toHaveBeenCalled();
-        expect(mockVault.create).toHaveBeenCalledWith('test_processed.md', llmResponse);
+        expect(mockApp.vault.create).toHaveBeenCalledWith('test_processed.md', llmResponse);
     });
 
     it('should create concept notes for extracted concepts', async () => {
         const llmResponse = 'This is a test file about [[AI]] and [[machine learning]].';
         jest.spyOn(llmUtils, 'callDeepSeekAPI').mockResolvedValue(llmResponse);
 
-        mockVault.getAbstractFileByPath.mockImplementation((path) => {
+        (mockApp.vault.getAbstractFileByPath as jest.Mock).mockImplementation((path: string) => {
             if (path === 'Concepts') {
                 const folder = new TFolder();
                 Object.assign(folder, { path: 'Concepts', children: [] });
@@ -59,7 +59,7 @@ describe('processFile', () => {
 
         await processFile(mockApp, settings, mockFile, mockReporter, { value: null });
 
-        expect(mockVault.create).toHaveBeenCalledWith('Concepts/AI.md', '# AI');
-        expect(mockVault.create).toHaveBeenCalledWith('Concepts/machine learning.md', '# machine learning');
+        expect(mockApp.vault.create).toHaveBeenCalledWith('Concepts/AI.md', '# AI');
+        expect(mockApp.vault.create).toHaveBeenCalledWith('Concepts/machine learning.md', '# machine learning');
     });
 });

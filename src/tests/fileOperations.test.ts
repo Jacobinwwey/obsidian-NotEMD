@@ -1,7 +1,7 @@
 import NotemdPlugin from '../main';
 import { TFile } from 'obsidian';
 import { handleFileRename, handleFileDelete } from '../fileUtils'; // Import functions
-import { mockApp, mockVault } from './__mocks__/app';
+import { mockApp } from './__mocks__/app';
 import { mockSettings } from './__mocks__/settings';
 
 describe('File Operations', () => {
@@ -37,24 +37,24 @@ describe('File Operations', () => {
         { path: 'file2.md', content: '[[old]]' }
       ];
 
-      mockVault.getMarkdownFiles = jest.fn(() => files.map(f => ({
+      mockApp.vault.getMarkdownFiles = jest.fn(() => files.map(f => ({
         path: f.path,
         extension: 'md',
         basename: f.path.replace('.md',''),
         stat: { size: 0, ctime: 0, mtime: 0 },
-        vault: mockVault,
+        vault: mockApp.vault,
         name: f.path.split('/').pop() || '',
         parent: null
       } as TFile)));
-      mockVault.read = jest.fn((file) =>
+      mockApp.vault.read = jest.fn((file) =>
         Promise.resolve(files.find(f => f.path === file.path)?.content || '')
       );
-      mockVault.modify = jest.fn();
+      mockApp.vault.modify = jest.fn();
 
       await handleFileRename(plugin.app, oldPath, newPath); // Call imported function
 
-      expect(mockVault.modify).toHaveBeenCalledTimes(2);
-      expect(mockVault.modify).toHaveBeenCalledWith(
+      expect(mockApp.vault.modify).toHaveBeenCalledTimes(2);
+      expect(mockApp.vault.modify).toHaveBeenCalledWith(
         expect.anything(), 
         expect.stringContaining(`[[${newName}]]`)
       );
@@ -72,24 +72,24 @@ describe('File Operations', () => {
         { path: 'file2.md', content: '[[deleted]]' }
       ];
 
-      mockVault.getMarkdownFiles = jest.fn(() => files.map(f => ({
+      mockApp.vault.getMarkdownFiles = jest.fn(() => files.map(f => ({
         path: f.path,
         extension: 'md',
         basename: f.path.replace('.md',''),
         stat: { size: 0, ctime: 0, mtime: 0 },
-        vault: mockVault,
+        vault: mockApp.vault,
         name: f.path.split('/').pop() || '',
         parent: null
       } as TFile)));
-      mockVault.read = jest.fn((file) =>
+      mockApp.vault.read = jest.fn((file) =>
         Promise.resolve(files.find(f => f.path === file.path)?.content || '')
       );
-      mockVault.modify = jest.fn();
+      mockApp.vault.modify = jest.fn();
 
       await handleFileDelete(plugin.app, path); // Call imported function
 
-      expect(mockVault.modify).toHaveBeenCalledTimes(2);
-      expect(mockVault.modify).toHaveBeenCalledWith(
+      expect(mockApp.vault.modify).toHaveBeenCalledTimes(2);
+      expect(mockApp.vault.modify).toHaveBeenCalledWith(
         expect.anything(),
         expect.not.stringContaining(`[[${fileName}]]`)
       );
