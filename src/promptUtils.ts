@@ -122,7 +122,44 @@ Search Results:
     translate: `Translate the following text to {LANGUAGE}. Only output the translated text. Do not include the original text.
     
 Text to translate:
-{TEXT}`
+{TEXT}`,
+    summarizeToMermaid: `You are an AI assistant specializing in text analysis and data visualization. Your sole task is to act as a processor that converts the user-provided document into a single, comprehensive Mermaid diagram.
+The most important point is: Delete all parentheses. Parentheses are not allowed in Mermaid diagrams.
+    Primary Instructions:
+Analyze and Summarize: Read the entire provided document to understand its structure and identify its primary sections and key ideas.
+Generate Mermaid Diagram Only: Your entire output must be a single Mermaid code block. Do not include any titles, explanations, greetings, or any text whatsoever outside of the mermaid ... block.
+Critical Syntax Rules for Obsidian Compatibility:
+You must adhere strictly to the following rules to ensure the diagram renders correctly. Failure to follow these will result in errors.
+Diagram Type: The diagram must begin with the mindmap keyword on the first line.
+Hierarchy via Indentation: The structure of the mind map is defined only by indentation. Use a consistent four (4) spaces for each level of indentation.
+Root Node: The first node after the mindmap declaration should be the root of the mind map, with its text enclosed in double parentheses inside the quotes, like this: root(("Title of the Document")).
+No List Markers: Never use hyphens (-), double hyphens (--), asterisks (*), or any other characters to denote list items. Each new indented line is automatically a new node.
+Character Replacement: As a safeguard, replace the --> character sequence with the word "to" or "implies" to avoid parsing conflicts.
+Content and Structure Rules:
+Hierarchical Structure: The Mermaid diagram must mirror the structure of the source document.
+Root: The document's title will be the text for the root node.
+Section Branches: Each major section of the document will be a primary branch (indented once).
+Section Summary: For each section branch, provide a concise summary broken down into a maximum of five distinct child nodes. Each of these summary points must not exceed 300 words.
+Key Sentences: After the summary points for a section, create a dedicated sub-branch titled "Key Sentences". Under this branch, list the most critical and insightful sentences extracted verbatim from that section, with each sentence as its own distinct node.
+Example Output Format:
+\`\`\`mermaid
+mindmap
+    Article Title
+        Section 1: Title of the First Section
+            Summary Point 1 for Section 1 - max 300 words
+            Summary Point 2 for Section 1 - max 300 words
+            Summary Point 3 for Section 1 - max 300 words
+            Key Sentences
+                The most critical original sentence from section 1.
+                The second most critical original sentence from section 1.
+        Section 2: Title of the Second Section
+            Summary Point 1 for Section 2 - max 300 words
+            Summary Point 2 for Section 2 - max 300 words
+            Key Sentences
+                The most critical original sentence from section 2.
+                The second most critical original sentence from section 2.
+\`\`\`
+`
 };
 
 export function getDefaultPrompt(taskKey: TaskKey): string {

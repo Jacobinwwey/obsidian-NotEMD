@@ -1,8 +1,8 @@
 import { App, Editor, MarkdownView, Modal, Notice, Plugin, TFile, TFolder, PluginSettingTab, Setting, WorkspaceLeaf } from 'obsidian';
-import { NotemdSettings, ProgressReporter, LLMProviderConfig } from './types';
+import { NotemdSettings, ProgressReporter, LLMProviderConfig, TaskKey } from './types';
 import { DEFAULT_SETTINGS, NOTEMD_SIDEBAR_VIEW_TYPE, NOTEMD_SIDEBAR_DISPLAY_TEXT, NOTEMD_SIDEBAR_ICON } from './constants';
-import { delay, getProviderForTask, getModelForTask } from './utils';
-import { testAPI } from './llmUtils';
+import { delay } from './utils';
+import { testAPI, callLLM } from './llmUtils';
 import {
     handleFileRename,
     handleFileDelete,
@@ -11,7 +11,8 @@ import {
     batchGenerateContentForTitles,
     checkAndRemoveDuplicateConceptNotes,
     batchFixMermaidSyntaxInFolder,
-    findDuplicates // Keep findDuplicates for the simple command
+    findDuplicates,
+    saveMermaidSummaryFile // Import the new function
 } from './fileUtils';
 import { _performResearch, researchAndSummarize } from './searchUtils'; // Import _performResearch if needed directly, ensure researchAndSummarize is exported
 import { ProgressModal } from './ui/ProgressModal';
@@ -20,6 +21,7 @@ import { NotemdSettingTab } from './ui/NotemdSettingTab';
 import { showDeletionConfirmationModal } from './ui/modals'; // Import the modal function
 import { NotemdSidebarView } from './ui/NotemdSidebarView';
 import { translateFile } from './translate';
+import { getDefaultPrompt } from './promptUtils';
 
 export default class NotemdPlugin extends Plugin {
     settings: NotemdSettings;
@@ -43,13 +45,23 @@ export default class NotemdPlugin extends Plugin {
         await this.loadSettings();
 
         // --- Sidebar View ---
-        this.registerView(
-            NOTEMD_SIDEBAR_VIEW_TYPE,
-            (leaf) => new NotemdSidebarView(leaf, this)
-        );
-        const ribbonIconEl = this.addRibbonIcon(NOTEMD_SIDEBAR_ICON, NOTEMD_SIDEBAR_DISPLAY_TEXT, () => this.activateView());
-        ribbonIconEl.addClass('notemd-ribbon-class');
-        this.addCommand({ id: 'open-notemd-sidebar', name: 'Open sidebar', callback: () => this.activateView() });
+        this.registerView(NOTEMD_SIDEBAR_VIEW_TYPE, (leaf) => new NotemdSidebarView(leaf, this));
+		
+		this.addCommand({
+			id: 'notemd-summarize-as-mermaid',
+			name: 'Summarise as Mermaid diagram',
+			editorCallback: async (editor: Editor, view: MarkdownView) => {
+				const file = view.file;
+				if (file) {
+					const reporter = this.getReporter();
+					await this.summarizeToMermaidCommand(file, reporter);
+				}
+			},
+		});
+
+		this.addRibbonIcon(NOTEMD_SIDEBAR_ICON, NOTEMD_SIDEBAR_DISPLAY_TEXT, () => {
+			this.activateView();
+		});
 
         // --- Status Bar ---
         this.statusBarItem = this.addStatusBarItem();
@@ -179,9 +191,9 @@ export default class NotemdPlugin extends Plugin {
                         const currentActiveView = this.app.workspace.getActiveViewOfType(MarkdownView);
                         if (currentActiveView) {
                              this.researchAndSummarizeCommand(currentActiveView.editor, currentActiveView);
-                        } else {
-                            new Notice('No active Markdown editor found.');
                         }
+                    } else {
+                        new Notice('No active Markdown editor found.');
                     }
                     return true;
                 }
@@ -359,6 +371,65 @@ export default class NotemdPlugin extends Plugin {
             modal.open();
         });
     }
+
+    log(message: string) {
+        // Simple console log for now. Could be expanded to log to a file.
+        console.log(`[Notemd] ${message}`);
+    }
+
+	getProviderAndModelForTask(taskKey: 'addLinks' | 'research' | 'generateTitle' | 'translate' | 'summarizeToMermaid'): { provider: LLMProviderConfig, modelName: string } {
+		let providerName: string = this.settings.activeProvider;
+		let modelName: string | undefined = undefined;
+
+		if (this.settings.useMultiModelSettings) {
+			switch (taskKey) {
+				case 'addLinks':
+					providerName = this.settings.addLinksProvider;
+					modelName = this.settings.addLinksModel;
+					break;
+				case 'research':
+					providerName = this.settings.researchProvider;
+					modelName = this.settings.researchModel;
+					break;
+				case 'generateTitle':
+					providerName = this.settings.generateTitleProvider;
+					modelName = this.settings.generateTitleModel;
+					break;
+				case 'translate':
+					providerName = this.settings.translateProvider;
+					modelName = this.settings.translateModel;
+					break;
+				case 'summarizeToMermaid':
+					providerName = this.settings.summarizeToMermaidProvider;
+					modelName = this.settings.summarizeToMermaidModel;
+					break;
+			}
+		}
+
+		const provider = this.settings.providers.find(p => p.name === providerName) || this.settings.providers.find(p => p.name === this.settings.activeProvider);
+		if (!provider) {
+			throw new Error("Could not find a valid LLM provider. Please check your settings.");
+		}
+
+		return { provider, modelName: modelName || provider.model };
+	}
+
+	getPromptForTask(taskKey: TaskKey): string {
+		const settingKey = `useCustomPromptFor${taskKey.charAt(0).toUpperCase() + taskKey.slice(1)}` as keyof NotemdSettings;
+		const promptKey = `customPrompt${taskKey.charAt(0).toUpperCase() + taskKey.slice(1)}` as keyof NotemdSettings;
+
+		const useCustom = this.settings.enableGlobalCustomPrompts && this.settings[settingKey];
+
+		if (useCustom) {
+			const customPrompt = this.settings[promptKey] as string;
+			if (customPrompt && customPrompt.trim()) {
+				this.log(`Using custom prompt for task: ${taskKey}`);
+				return customPrompt;
+			}
+		}
+		this.log(`Using default prompt for task: ${taskKey}`);
+		return getDefaultPrompt(taskKey);
+	}
 
     // --- Command Handler Methods ---
     // These methods contain the core logic initiated by commands or sidebar buttons.
@@ -666,7 +737,7 @@ export default class NotemdPlugin extends Plugin {
                 } else {
                     const fileCount = this.app.vault.getMarkdownFiles().filter(f => f.path.startsWith(folderPath === '/' ? '' : folderPath + '/')).length; // Re-count for notice
                     useReporter.updateStatus('Batch generation complete!', 100); this.updateStatusBar('Batch generation complete');
-                    new Notice(`Successfully generated content for eligible files in "${folderPath}".`, 5000); // Adjusted notice
+                    new Notice(`Successfully generated content for eligible files in "${folderPath}".`, 5000);
                     if (useReporter instanceof ProgressModal) setTimeout(() => useReporter.close(), 2000);
                 }
             } else {
@@ -756,9 +827,6 @@ export default class NotemdPlugin extends Plugin {
                     new Notice(finalMessage, 5000);
                     if (useReporter instanceof ProgressModal) setTimeout(() => useReporter.close(), 2000);
                 }
-            } else {
-                 this.updateStatusBar('Batch fix cancelled');
-                 new Notice('Batch Mermaid fix cancelled.');
             }
 
         } catch (error: unknown) { // Changed to unknown
@@ -831,5 +899,66 @@ export default class NotemdPlugin extends Plugin {
             this.isBusy = false;
         }
     }
+
+	async summarizeToMermaidCommand(file: TFile, reporter: ProgressReporter) {
+		if (this.isBusy) {
+			new Notice('Another process is running. Please wait.');
+			return;
+		}
+		this.isBusy = true;
+		reporter.clearDisplay();
+		reporter.log(`Starting Mermaid summarization for ${file.name}...`);
+		reporter.updateStatus(`Summarizing ${file.name}...`, 5);
+
+		try {
+			const fileContent = await this.app.vault.read(file);
+			if (!fileContent.trim()) {
+				throw new Error("File is empty. Cannot summarize.");
+			}
+
+			const { provider, modelName } = this.getProviderAndModelForTask('summarizeToMermaid');
+			reporter.log(`Using provider: ${provider.name}, Model: ${modelName}`);
+
+			let prompt = this.getPromptForTask('summarizeToMermaid');
+
+            // Add translation instruction to the prompt if the setting is enabled
+            if (this.settings.translateSummarizeToMermaidOutput) {
+                const targetLanguageName = this.settings.availableLanguages.find(lang => lang.code === this.settings.language)?.name || this.settings.language;
+                prompt += `
+
+IMPORTANT: The entire Mermaid diagram, including all node text, MUST be translated into ${targetLanguageName}.`;
+                reporter.log(`Translation to ${targetLanguageName} requested for Mermaid output.`);
+            }
+
+            reporter.updateStatus('Calling LLM for summarization...', 20);
+            const mermaidContent = await callLLM(provider, prompt, fileContent, this.settings, reporter, modelName);
+            reporter.updateStatus('LLM call complete. Processing response...', 90);
+
+			const outputFilePath = await saveMermaidSummaryFile(this.app, this.settings, file, mermaidContent, reporter);
+
+			reporter.updateStatus('Mermaid diagram saved successfully!', 100);
+			reporter.log(`Mermaid diagram saved to: ${outputFilePath}`);
+			new Notice('Mermaid diagram summarization complete!');
+
+			// Open the new file in a split pane
+			if (outputFilePath) {
+				const newLeaf = this.app.workspace.getLeaf('split', 'vertical');
+				const newFile = this.app.vault.getAbstractFileByPath(outputFilePath);
+				if (newFile instanceof TFile) {
+					newLeaf.openFile(newFile);
+				}
+			}
+
+		} catch (error: any) {
+			const message = error instanceof Error ? error.message : String(error);
+			reporter.log(`Error during Mermaid summarization: ${message}`);
+			reporter.updateStatus('Error during summarization.', -1);
+			new Notice(`Summarization Error: ${message}`);
+			console.error("Summarization Error:", error);
+		} finally {
+			reporter.log('Summarization process finished.');
+			this.isBusy = false;
+		}
+	}
 
 } // End of NotemdPlugin class
