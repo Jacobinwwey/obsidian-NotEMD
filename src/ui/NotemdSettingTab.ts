@@ -231,23 +231,23 @@ export class NotemdSettingTab extends PluginSettingTab {
         if (this.plugin.settings.useMultiModelSettings) {
             const providerNames = this.plugin.settings.providers.map(p => p.name).sort();
             // Use the specific key types defined above
-            const createTaskModelSettings = (providerSettingName: ProviderSettingKey, modelSettingName: ModelSettingKey, taskDesc: string) => {
+            const createTaskModelSettings = (providerSettingName: keyof NotemdSettings, modelSettingName: keyof NotemdSettings, taskDesc: string) => {
                 const taskSetting = new Setting(containerEl).setName(`${taskDesc} provider & model`).setDesc(`Select provider and optionally override model for "${taskDesc}".`);
                 taskSetting.addDropdown(dropdown => {
                     providerNames.forEach(name => dropdown.addOption(name, name));
                     // Use the typed key
-                    dropdown.setValue(this.plugin.settings[providerSettingName]).onChange(async (value) => {
-                        this.plugin.settings[providerSettingName] = value;
+                    dropdown.setValue(this.plugin.settings[providerSettingName] as string).onChange(async (value) => {
+                        (this.plugin.settings as any)[providerSettingName] = value;
                         await this.plugin.saveSettings();
                         this.display();
                     });
                 });
-                const selectedProviderName = this.plugin.settings[providerSettingName];
+                const selectedProviderName = this.plugin.settings[providerSettingName] as string;
                 const selectedProvider = this.plugin.settings.providers.find(p => p.name === selectedProviderName);
                 const defaultModel = selectedProvider ? selectedProvider.model : 'Provider not found';
                     // Use the typed key
-                    taskSetting.addText(text => text.setPlaceholder(`Default: ${defaultModel}`).setValue(this.plugin.settings[modelSettingName] || '').onChange(async (value) => {
-                        this.plugin.settings[modelSettingName] = value.trim() || undefined;
+                    taskSetting.addText(text => text.setPlaceholder(`Default: ${defaultModel}`).setValue(this.plugin.settings[modelSettingName] as string || '').onChange(async (value) => {
+                        (this.plugin.settings as any)[modelSettingName] = value.trim() || undefined;
                         await this.plugin.saveSettings();
                     }));
             };
@@ -255,6 +255,7 @@ export class NotemdSettingTab extends PluginSettingTab {
             createTaskModelSettings('researchProvider', 'researchModel', 'Research & summarize');
             createTaskModelSettings('generateTitleProvider', 'generateTitleModel', 'Generate from title');
             createTaskModelSettings('translateProvider', 'translateModel', 'Translate');
+            createTaskModelSettings('summarizeToMermaidProvider', 'summarizeToMermaidModel', 'Summarise as Mermaid diagram');
         }
 
         // --- Translate Task Settings ---
@@ -309,6 +310,67 @@ export class NotemdSettingTab extends PluginSettingTab {
                         await this.plugin.saveSettings();
                     }));
         }
+
+        // --- Summarize to Mermaid Task Settings ---
+        new Setting(containerEl).setName('Task: Summarise as Mermaid diagram').setHeading();
+
+        new Setting(containerEl)
+            .setName('Customise Mermaid summary save path')
+            .setDesc('On: Save Mermaid summary files to a specified path. Off: Save in the same folder as the original file.')
+            .addToggle(toggle => toggle
+                .setValue(this.plugin.settings.useCustomSummarizeToMermaidSavePath)
+                .onChange(async (value) => {
+                    this.plugin.settings.useCustomSummarizeToMermaidSavePath = value;
+                    await this.plugin.saveSettings();
+                    this.display();
+                }));
+
+        if (this.plugin.settings.useCustomSummarizeToMermaidSavePath) {
+            new Setting(containerEl)
+                .setName('Mermaid summary save path')
+                .setDesc('The folder where Mermaid summary files will be saved (relative to vault root).')
+                .addText(text => text
+                    .setPlaceholder('e.g., Summaries/Mermaid')
+                    .setValue(this.plugin.settings.summarizeToMermaidSavePath)
+                    .onChange(async (value) => {
+                        this.plugin.settings.summarizeToMermaidSavePath = value.trim();
+                        await this.plugin.saveSettings();
+                    }));
+        }
+
+        new Setting(containerEl)
+            .setName('Use custom suffix for Mermaid summary files')
+            .setDesc('Enable to use a custom suffix instead of the default "_summ".')
+            .addToggle(toggle => toggle
+                .setValue(this.plugin.settings.useCustomSummarizeToMermaidSuffix)
+                .onChange(async (value) => {
+                    this.plugin.settings.useCustomSummarizeToMermaidSuffix = value;
+                    await this.plugin.saveSettings();
+                    this.display();
+                }));
+
+        if (this.plugin.settings.useCustomSummarizeToMermaidSuffix) {
+            new Setting(containerEl)
+                .setName('Custom Suffix')
+                .setDesc('The custom suffix to append to Mermaid summary filenames.')
+                .addText(text => text
+                    .setPlaceholder('_mermaid_summary')
+                    .setValue(this.plugin.settings.summarizeToMermaidCustomSuffix)
+                    .onChange(async (value) => {
+                        this.plugin.settings.summarizeToMermaidCustomSuffix = value;
+                        await this.plugin.saveSettings();
+                    }));
+        }
+
+        new Setting(containerEl)
+            .setName('Translate to corresponding language when summarising')
+            .setDesc('If selected, the summary output will be translated into the user\'s selected translation language; if not selected, the default will be the original text language.')
+            .addToggle(toggle => toggle
+                .setValue(this.plugin.settings.translateSummarizeToMermaidOutput)
+                .onChange(async (value) => {
+                    this.plugin.settings.translateSummarizeToMermaidOutput = value;
+                    await this.plugin.saveSettings();
+                }));
 
         // --- Stable API Call Settings ---
         new Setting(containerEl).setName('Stable API calls').setHeading();
@@ -494,12 +556,13 @@ export class NotemdSettingTab extends PluginSettingTab {
             const tasksToCustomize: Array<{
                 key: TaskKey,
                 name: string,
-                useCustomSettingKey: keyof Pick<NotemdSettings, 'useCustomPromptForAddLinks' | 'useCustomPromptForGenerateTitle' | 'useCustomPromptForResearchSummarize'>,
-                customPromptSettingKey: keyof Pick<NotemdSettings, 'customPromptAddLinks' | 'customPromptGenerateTitle' | 'customPromptResearchSummarize'>
+                useCustomSettingKey: keyof Pick<NotemdSettings, 'useCustomPromptForAddLinks' | 'useCustomPromptForGenerateTitle' | 'useCustomPromptForResearchSummarize' | 'useCustomPromptForSummarizeToMermaid'>,
+                customPromptSettingKey: keyof Pick<NotemdSettings, 'customPromptAddLinks' | 'customPromptGenerateTitle' | 'customPromptResearchSummarize' | 'customPromptSummarizeToMermaid'>
             }> = [
                 { key: 'addLinks', name: 'Add Links (Process File/Folder)', useCustomSettingKey: 'useCustomPromptForAddLinks', customPromptSettingKey: 'customPromptAddLinks' },
                 { key: 'generateTitle', name: 'Generate from Title', useCustomSettingKey: 'useCustomPromptForGenerateTitle', customPromptSettingKey: 'customPromptGenerateTitle' },
                 { key: 'researchSummarize', name: 'Research & Summarize', useCustomSettingKey: 'useCustomPromptForResearchSummarize', customPromptSettingKey: 'customPromptResearchSummarize' },
+                { key: 'summarizeToMermaid', name: 'Summarise as Mermaid diagram', useCustomSettingKey: 'useCustomPromptForSummarizeToMermaid', customPromptSettingKey: 'customPromptSummarizeToMermaid' },
             ];
 
             tasksToCustomize.forEach(task => {

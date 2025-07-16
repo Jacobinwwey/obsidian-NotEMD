@@ -53,4 +53,13 @@ export const mockSettings: NotemdSettings = {
     translationCustomSuffix: '_translated',
     useCustomTranslationSavePath: false,
     translationSavePath: 'translations',
+    summarizeToMermaidProvider: 'DeepSeek',
+    summarizeToMermaidModel: '',
+    useCustomPromptForSummarizeToMermaid: false,
+    customPromptSummarizeToMermaid: '',
+    useCustomSummarizeToMermaidSuffix: false,
+    summarizeToMermaidCustomSuffix: '_summ',
+    useCustomSummarizeToMermaidSavePath: false,
+    summarizeToMermaidSavePath: '',
+    translateSummarizeToMermaidOutput: false
 };

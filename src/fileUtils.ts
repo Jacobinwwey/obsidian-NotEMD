@@ -904,7 +904,72 @@ export async function batchFixMermaidSyntaxInFolder(app: App, folderPath: string
  * @param settings Plugin settings.
  * @param progressReporter Interface for reporting progress.
  */
+
+/**
+ * Saves the generated Mermaid summary content to a new file.
+ * @param app Obsidian App instance.
+ * @param settings Plugin settings.
+ * @param originalFile The original TFile that was summarized.
+ * @param mermaidContent The generated Mermaid diagram content.
+ * @param progressReporter Progress reporter instance.
+ * @returns The path of the newly created file.
+ */
+export async function saveMermaidSummaryFile(app: App, settings: NotemdSettings, originalFile: TFile, mermaidContent: string, progressReporter: ProgressReporter): Promise<string> {
+    let saveDir = '';
+    if (settings.useCustomSummarizeToMermaidSavePath && settings.summarizeToMermaidSavePath) {
+        saveDir = settings.summarizeToMermaidSavePath;
+    } else {
+        saveDir = originalFile.parent?.path || '';
+    }
+
+    saveDir = saveDir.replace(/^\/|\/$/g, ''); // Remove leading/trailing slashes
+    if (saveDir && !saveDir.endsWith('/')) saveDir += '/'; // Ensure trailing slash if not empty
+
+    const targetSaveFolder = saveDir.replace(/\/$/, ''); // Remove trailing slash for folder creation check
+    if (targetSaveFolder && !app.vault.getAbstractFileByPath(targetSaveFolder)) {
+        try {
+            await app.vault.createFolder(targetSaveFolder);
+            progressReporter.log(`Created Mermaid summary output folder: ${targetSaveFolder}`);
+        } catch (folderError: unknown) {
+            const errorMessage = folderError instanceof Error ? folderError.message : String(folderError);
+            const errorMsg = `Error creating Mermaid summary output folder ${targetSaveFolder}: ${errorMessage}. Please check folder permissions and path validity.`;
+            progressReporter.log(errorMsg);
+            new Notice(errorMsg, 10000);
+            throw folderError instanceof Error ? folderError : new Error(errorMessage); // Re-throw
+        }
+    } else if (targetSaveFolder && !(app.vault.getAbstractFileByPath(targetSaveFolder) instanceof TFolder)) {
+        const errorMsg = `Mermaid summary output path '${targetSaveFolder}' exists but is not a folder.`;
+        progressReporter.log(errorMsg);
+        new Notice(errorMsg, 10000);
+        throw new Error(errorMsg);
+    }
+
+    let suffix = settings.summarizeToMermaidCustomSuffix;
+    if (!settings.useCustomSummarizeToMermaidSuffix || !suffix) {
+        suffix = DEFAULT_SETTINGS.summarizeToMermaidCustomSuffix;
+    }
+    if (suffix.toLowerCase().endsWith('.md')) {
+        suffix = suffix.substring(0, suffix.length - 3);
+    }
+
+    const outputFileName = `${originalFile.basename}${suffix}.md`;
+    const outputPath = `${saveDir}${outputFileName}`;
+
+    progressReporter.log(`Saving Mermaid summary to: ${outputPath}`);
+
+    const existingOutputFile = app.vault.getAbstractFileByPath(outputPath);
+    if (existingOutputFile instanceof TFile) {
+        await app.vault.modify(existingOutputFile, mermaidContent);
+        progressReporter.log(`Overwrote existing Mermaid summary file: ${outputPath}`);
+    } else {
+        await app.vault.create(outputPath, mermaidContent);
+        progressReporter.log(`Created Mermaid summary file: ${outputPath}`);
+    }
+    return outputPath;
+}
+
 export async function checkAndRemoveDuplicateConceptNotes(app: App, settings: NotemdSettings, progressReporter: ProgressReporter) {
+
     if (!settings.useCustomConceptNoteFolder || !settings.conceptNoteFolder) {
         throw new Error("Concept Note Folder is not configured in settings. Cannot perform check.");
     }
