@@ -1,28 +1,12 @@
 import NotemdPlugin from '../main';
-import { App } from 'obsidian';
 import { findDuplicates, handleDuplicates } from '../fileUtils'; // Import the functions
-
-class MockApp {
-  vault = {
-    getMarkdownFiles: jest.fn(() => []),
-    getAbstractFileByPath: jest.fn(),
-    read: jest.fn(),
-    modify: jest.fn(),
-    create: jest.fn(),
-    createFolder: jest.fn(),
-    getAllLoadedFiles: jest.fn(() => []),
-    on: jest.fn()
-  };
-  workspace = {
-    getActiveFile: jest.fn()
-  };
-}
+import { mockApp } from './__mocks__/app';
+import { mockSettings } from './__mocks__/settings';
 
 describe('Duplicate Handling', () => {
   let plugin: NotemdPlugin;
   
   beforeEach(() => {
-    const mockApp = new MockApp() as unknown as App;
     plugin = new NotemdPlugin(mockApp, {
       id: 'notemd-test',
       name: 'Notemd Test',
@@ -32,69 +16,7 @@ describe('Duplicate Handling', () => {
       isDesktopOnly: false,
       minAppVersion: '1.0.0'
     });
-    plugin.settings = {
-      chunkWordCount: 3000,
-      maxTokens: 4096,
-      enableDuplicateDetection: true,
-      processMode: 'single',
-      providers: [],
-      activeProvider: 'DeepSeek',
-			// New settings defaults for tests
-			useCustomConceptNoteFolder: false,
-			conceptNoteFolder: '',
-			useCustomProcessedFileFolder: false,
-			processedFileFolder: '',
-			// Add defaults for the new log settings
-			generateConceptLogFile: false,
-			useCustomConceptLogFolder: false,
-			conceptLogFolderPath: '',
-			useCustomConceptLogFileName: false,
-			conceptLogFileName: 'Generate.log',
-			// Add missing properties from recent updates
-			moveOriginalFileOnProcess: false,
-			tavilyApiKey: '',
-			searchProvider: 'tavily',
-			ddgMaxResults: 5,
-			ddgFetchTimeout: 15,
-			maxResearchContentTokens: 3000,
-			enableResearchInGenerateContent: false, // Add the new setting for tests
-			tavilyMaxResults: 5, // Add default for test
-      tavilySearchDepth: 'basic', // Add default for test
-      // Add missing multi-model and stable API call settings
-      useMultiModelSettings: false,
-      addLinksProvider: 'DeepSeek',
-      researchProvider: 'DeepSeek',
-      generateTitleProvider: 'DeepSeek',
-      enableStableApiCall: false,
-            apiCallInterval: 5,
-            apiCallMaxRetries: 3,
-            // Added missing properties from TS errors
-            useCustomAddLinksSuffix: false,
-            addLinksCustomSuffix: '',
-            useCustomGenerateTitleOutputFolder: false,
-            generateTitleOutputFolderName: '_complete',
-            // Add missing duplicate check scope settings
-            duplicateCheckScopeMode: 'vault',
-            duplicateCheckScopePaths: '',
-            removeCodeFencesOnAddLinks: false, // Added missing property for tests
-            language: 'en', // Added missing property
-            availableLanguages: [{ code: 'en', name: 'English' }], // Added missing property
-            // Custom Prompt Settings Defaults
-            enableGlobalCustomPrompts: false,
-            useCustomPromptForAddLinks: false,
-            customPromptAddLinks: '',
-            useCustomPromptForGenerateTitle: false,
-            customPromptGenerateTitle: '',
-            useCustomPromptForResearchSummarize: false,
-            customPromptResearchSummarize: '',
-            translateProvider: 'DeepSeek',
-            useCustomTranslationSuffix: false,
-            translationCustomSuffix: '_translated',
-            useCustomTranslationSavePath: false, // Added missing property
-            translationSavePath: 'translations',
-            
-        };
-        // Removed corrupted line: plugin.app = mockApp as annckApp after settings
+    plugin.settings = mockSettings;
 	});
 
 	describe('findDuplicates', () => { // Corrected describe block
