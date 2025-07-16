@@ -47,7 +47,7 @@ export async function handleFileRename(app: App, oldPath: string, newPath: strin
         new Notice(`Updated links to "${newName}" in ${updatedCount} files.`, 5000);
     }
     if (errors.length > 0) {
-        new Notice(`Encountered ${errors.length} errors while updating links. Check console.`, 10000);
+        new Notice(`Encountered ${errors.length} errors while updating links. Please check the developer console for more details.`, 10000);
     }
 }
 
@@ -91,7 +91,7 @@ export async function handleFileDelete(app: App, path: string) {
         new Notice(`Removed links to "${fileName}" from ${updatedCount} files.`, 5000);
     }
     if (errors.length > 0) {
-        new Notice(`Encountered ${errors.length} errors while removing links. Check console.`, 10000);
+        new Notice(`Encountered ${errors.length} errors while removing links. Please check the developer console for more details.`, 10000);
     }
 }
 
@@ -166,7 +166,7 @@ export async function createConceptNotes(app: App, settings: NotemdSettings, con
     } catch (error: unknown) { // Changed to unknown
         const errorMessage = error instanceof Error ? error.message : String(error);
         console.error("Error creating concept notes:", error);
-        new Notice(`Error creating concept notes: ${errorMessage}. Check console.`);
+        new Notice(`Error creating concept notes: ${errorMessage}. Please check the developer console for more details.`);
     }
 }
 
@@ -210,7 +210,7 @@ async function generateConceptLog(app: App, settings: NotemdSettings, createdCon
     } catch (error: unknown) { // Changed to unknown
         const errorMessage = error instanceof Error ? error.message : String(error);
         console.error(`Error writing concept log file to ${logFilePath}:`, error);
-        new Notice(`Error writing concept log file: ${errorMessage}`);
+        new Notice(`Error writing concept log file: ${errorMessage}. Please check the developer console for more details.`);
     }
 }
 
@@ -325,8 +325,8 @@ export async function processFile(app: App, settings: NotemdSettings, file: TFil
             const errorMessage = error instanceof Error ? error.message : String(error);
             console.error(`LLM processing error on chunk ${i + 1} for ${file.name}:`, error);
             progressReporter.log(`Error processing chunk ${i + 1}: ${errorMessage}`);
-            // Re-throw error to stop processing the current file on chunk failure
-            throw error instanceof Error ? error : new Error(errorMessage);
+            // Continue processing other files in the batch
+            return;
         }
     } // End chunk loop
 
@@ -437,14 +437,21 @@ async function saveOrMoveProcessedFile(app: App, settings: NotemdSettings, origi
 
     const targetSaveFolder = processedFileSaveDir.replace(/\/$/, '');
     if (targetSaveFolder && !app.vault.getAbstractFileByPath(targetSaveFolder)) {
-        try { await app.vault.createFolder(targetSaveFolder); progressReporter.log(`Created processed file output folder: ${targetSaveFolder}`); }
-        catch (folderError: unknown) { // Changed to unknown
-             const errorMessage = folderError instanceof Error ? folderError.message : String(folderError);
-             progressReporter.log(`Error creating processed file output folder ${targetSaveFolder}: ${errorMessage}`);
-             throw folderError instanceof Error ? folderError : new Error(errorMessage); // Re-throw
+        try {
+            await app.vault.createFolder(targetSaveFolder);
+            progressReporter.log(`Created processed file output folder: ${targetSaveFolder}`);
+        } catch (folderError: unknown) {
+            const errorMessage = folderError instanceof Error ? folderError.message : String(folderError);
+            const errorMsg = `Error creating processed file output folder ${targetSaveFolder}: ${errorMessage}. Please check folder permissions and path validity.`;
+            progressReporter.log(errorMsg);
+            new Notice(errorMsg, 10000);
+            throw folderError instanceof Error ? folderError : new Error(errorMessage); // Re-throw
         }
     } else if (targetSaveFolder && !(app.vault.getAbstractFileByPath(targetSaveFolder) instanceof TFolder)) {
-        const errorMsg = `Processed file output path '${targetSaveFolder}' exists but is not a folder.`; progressReporter.log(errorMsg); throw new Error(errorMsg);
+        const errorMsg = `Processed file output path '${targetSaveFolder}' exists but is not a folder.`;
+        progressReporter.log(errorMsg);
+        new Notice(errorMsg, 10000);
+        throw new Error(errorMsg);
     }
 
     if (settings.moveOriginalFileOnProcess) {
