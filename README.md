@@ -19,15 +19,16 @@
 
 A Easy way to create your own Knowledge-base!
 
-Notemd enhances your Obsidian workflow by integrating with various Large Language Models (LLMs) to process your multi-languages notes, automatically generate wiki-links for key concepts, create corresponding concept notes, perform web research, and more.
+Notemd enhances your Obsidian workflow by integrating with various Large Language Models (LLMs) to process your multi-languages notes, automatically generate wiki-links for key concepts, create corresponding concept notes, perform web research, helping you build powerful knowledge graphs and more.
 
-**Version:** 1.3.2
+**Version:** 1.3.3
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
 
 ## Table of Contents
 
+- [Quick Start](#quick-start)
 - [Features](#features)
 - [Installation](#installation)
 - [Configuration](#configuration)
@@ -36,6 +37,15 @@ Notemd enhances your Obsidian workflow by integrating with various Large Languag
 - [Troubleshooting](#troubleshooting)
 - [Contributing](#contributing)
 - [License](#license)
+
+## Quick Start
+
+1.  **Install & Enable**: Get the plugin from the Obsidian Marketplace.
+2.  **Configure LLM**: Go to `Settings -> Notemd`, select your LLM provider (like OpenAI or a local one like Ollama), and enter your API key/URL.
+3.  **Open Sidebar**: Click the Notemd wand icon in the left ribbon to open the sidebar.
+4.  **Process a Note**: Open any note and click **"Process File (Add Links)"** in the sidebar to automatically add `[[wiki-links]]` to key concepts.
+
+That's it! Explore the settings to unlock more features like web research, translation, and content generation.
 
 ## Features
 
@@ -397,7 +407,7 @@ MIT License - See [LICENSE](LICENSE) file for details.
 
 ---
 
-*Notemd v1.3.2 - Enhance your Obsidian knowledge graph with AI.*
+*Notemd v1.3.3 - Enhance your Obsidian knowledge graph with AI.*
 
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)
