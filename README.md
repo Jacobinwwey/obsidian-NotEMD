@@ -89,6 +89,9 @@ That's it! Explore the settings to unlock more features like web research, trans
 
 
 ### Utility Features
+- **Summarise as Mermaid diagram**:
+    - This feature allows you to summarize the content of a note into a Mermaid diagram.
+    - The output language of the Mermaid diagram can be customized in the settings.
 - **Duplicate Detection**: Basic check for duplicate words within the currently processed file's content (results logged to console).
 - **Check and Remove Duplicate Concept Notes**: Identifies potential duplicate notes within the configured **Concept Note Folder** based on exact name matches, plurals, normalization, and single-word containment compared to notes outside the folder. The scope of the comparison (which notes outside the concept folder are checked) can be configured to the **entire vault**, **specific included folders**, or **all folders excluding specific ones**. Presents a detailed list with reasons and conflicting files, then prompts for confirmation before moving identified duplicates to system trash. Shows progress during deletion.
 - **Batch Mermaid Fix**: Applies Mermaid and LaTeX syntax corrections (`refineMermaidBlocks` and `cleanupLatexDelimiters`) to all Markdown files within a user-selected folder.
@@ -292,7 +295,12 @@ This is the core functionality focused on identifying concepts and adding `[[wik
 
 ### New Features (Translation, Web Research & Content Generation)
 
-1.  **Translate Note/Selection**:
+1.  **Summarise as Mermaid diagram**:
+    *   Open the note you want to summarize.
+    *   Run the command `Notemd: Summarise as Mermaid diagram` (via command palette or sidebar button).
+    *   The plugin will generate a new note with the Mermaid diagram.
+
+2.  **Translate Note/Selection**:
     *   Select text in a note to translate just that selection, or invoke the command with no selection to translate the entire note.
     *   Run the command `Notemd: Translate Note/Selection` (via command palette or sidebar button).
     *   A modal will appear allowing you to confirm or change the **Target Language** (defaulting to the setting specified in Configuration).
