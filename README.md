@@ -25,6 +25,8 @@ Notemd enhances your Obsidian workflow by integrating with various Large Languag
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
+<img width="1657" height="1000" alt="NEW FEATURE" src="https://github.com/user-attachments/assets/44ba4e35-0dc2-44bc-9714-6eb920e84865" />
+
 
 ## Table of Contents
 
@@ -303,6 +305,7 @@ This is the core functionality focused on identifying concepts and adding `[[wik
     *   Run the command `Notemd: Summarise as Mermaid diagram` (via command palette or sidebar button).
     *   The plugin will generate a new note with the Mermaid diagram.
 
+
 2.  **Translate Note/Selection**:
     *   Select text in a note to translate just that selection, or invoke the command with no selection to translate the entire note.
     *   Run the command `Notemd: Translate Note/Selection` (via command palette or sidebar button).
@@ -456,6 +459,7 @@ That's it! Explore the settings to unlock more features like web research, trans
     - The output language of the Mermaid diagram can be customized in the settings.
     - **Mermaid Output Folder**: Configure the folder where the generated Mermaid diagram files will be saved.
     - **Translate Summarize to Mermaid Output**: Optionally translate the generated Mermaid diagram content into the configured target language.
+<img width="596" height="239" alt="SUMM" src="https://github.com/user-attachments/assets/08f44a41-9ec0-472c-91ee-19c8477ec639" />
 - **Check for Duplicates in Current File**: This command helps identify potential duplicate terms within the active file.
 - **Duplicate Detection**: Basic check for duplicate words within the currently processed file's content (results logged to console).
 - **Check and Remove Duplicate Concept Notes**: Identifies potential duplicate notes within the configured **Concept Note Folder** based on exact name matches, plurals, normalization, and single-word containment compared to notes outside the folder. The scope of the comparison (which notes outside the concept folder are checked) can be configured to the **entire vault**, **specific included folders**, or **all folders excluding specific ones**. Presents a detailed list with reasons and conflicting files, then prompts for confirmation before moving identified duplicates to system trash. Shows progress during deletion.
