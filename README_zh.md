@@ -24,6 +24,8 @@ Notemd 通过与各种大型语言模型 (LLM) 集成来增强您的 Obsidian �
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
+<img width="1657" height="1000" alt="NEW FEATURE" src="https://github.com/user-attachments/assets/1d97ca0d-2ea6-41a4-accc-be3be9590088" />
+
 
 ## 目录
 - [快速入门](#快速入门)
@@ -88,6 +90,10 @@ Notemd 通过与各种大型语言模型 (LLM) 集成来增强您的 Obsidian �
     - 可以在设置中自定义Mermaid图表的输出语言。
     - **Mermaid 输出文件夹**: 配置生成Mermaid图表文件的保存文件夹。如果留空，图表将保存在与原始笔记相同的文件夹中。
     - **翻译总结为Mermaid输出**: 可选地将生成的Mermaid图表内容翻译成配置的目标语言。
+
+<img width="596" height="239" alt="SUMM" src="https://github.com/user-attachments/assets/803d444f-e477-428a-9ce6-4aac8075062a" />
+
+
 - **检查当前文件中的重复项**: 此命令有助于识别活动文件中的潜在重复术语。
 - **重复检测**: 检查当前处理内容中的重复词（结果输出到控制台）。
 - **检查并删除重复概念笔记**: 综合文件名（精确/复数/规范化/包含关系）检测概念笔记文件夹内外潜在重复项，支持自定义检测范围，操作前会详细列出并需手动确认。
