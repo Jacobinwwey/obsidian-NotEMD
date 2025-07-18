@@ -71,6 +71,7 @@ That's it! Explore the settings to unlock more features like web research, trans
 
 - **AI-Powered Translation**:
     - Translate note content using the configured LLM.
+    - **Large File Support**: Automatically splits large files into smaller chunks based on the `Chunk word count` setting before sending them to the LLM. The translated chunks are then seamlessly combined back into a single document.
     - Supports translation between multiple languages.
     - Customizable target language in settings or in UI.
     - Automatically open the translated text on the right side of the original text for easy reading.
