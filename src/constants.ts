@@ -66,6 +66,13 @@ export const DEFAULT_SETTINGS: NotemdSettings = {
             baseUrl: 'https://openrouter.ai/api/v1',
             model: 'gryphe/mythomax-l2-13b', // Example model, user should change
             temperature: 0.7
+        },
+        {
+            name: 'xAI',
+            apiKey: '', // Required
+            baseUrl: 'https://api.x.ai/v1',
+            model: 'grok-1.5-flash', // Example model, user should change
+            temperature: 0.7
         }
     ],
     activeProvider: 'DeepSeek',

@@ -163,7 +163,6 @@ export async function testAPI(provider: LLMProviderConfig): Promise<{ success: b
                 if (!response.ok) throw new Error(`Google API error: ${response.status} - ${await response.text()}`);
                 await response.json();
                 return { success: true, message: `Successfully connected to Google API.` };
-
             case 'Azure OpenAI':
                 if (!provider.apiVersion || !provider.baseUrl || !provider.model) { throw new Error('Azure requires Base URL, Model (Deployment Name), and API Version.'); }
                 url = `${provider.baseUrl}/openai/deployments/${provider.model}/chat/completions?api-version=${provider.apiVersion}`;
@@ -174,6 +173,22 @@ export async function testAPI(provider: LLMProviderConfig): Promise<{ success: b
                 if (!response.ok) throw new Error(`Azure OpenAI API error: ${response.status} - ${await response.text()}`);
                 await response.json();
                 return { success: true, message: `Successfully connected to Azure OpenAI deployment '${provider.model}'.` };
+            
+            case 'xAI':
+                // xAI API: Try /models first, fallback to chat/completions
+                url = `${provider.baseUrl}/models`;
+                options.headers = { 'Authorization': `Bearer ${provider.apiKey}` };
+                response = await fetch(url, options);
+                if (!response.ok) {
+                    url = `${provider.baseUrl}/chat/completions`;
+                    options.method = 'POST';
+                    options.headers = { ...options.headers, 'Content-Type': 'application/json' };
+                    options.body = JSON.stringify({ model: provider.model, messages: [{ role: 'user', content: 'Test' }], max_tokens: 1, temperature: 0 });
+                    response = await fetch(url, options);
+                }
+                if (!response.ok) throw new Error(`xAI API error: ${response.status} - ${await response.text()}`);
+                await response.json();
+                return { success: true, message: `Successfully connected to xAI API at ${provider.baseUrl}.` };
 
             default:
                 return { success: false, message: `Connection test not implemented for provider: ${provider.name}` };
@@ -183,7 +198,7 @@ export async function testAPI(provider: LLMProviderConfig): Promise<{ success: b
         console.error(`Connection test failed for ${provider.name}:`, error);
         return { success: false, message: `Connection failed: ${message}` };
     }
-}
+}""
 
 /**
  * Calls the specified LLM provider API with retry logic.
@@ -646,6 +661,40 @@ async function executeOpenRouterAPI(provider: LLMProviderConfig, modelName: stri
     }
 }
 
+async function executeXaiApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings, signal?: AbortSignal): Promise<string> {
+    if (!provider.apiKey) throw new Error(`API key is missing for xAI provider.`);
+    const url = `${provider.baseUrl}/chat/completions`;
+    const requestBody = {
+        model: modelName,
+        messages: [{ role: 'system', content: prompt }, { role: 'user', content: content }],
+        temperature: provider.temperature,
+        max_tokens: settings.maxTokens
+    };
+    
+    const { signal: fetchSignal, controller } = getAbortSignal(progressReporter, signal);
+
+    try {
+        await cancellableDelay(1, progressReporter); // Yield
+        const response = await fetch(url, {
+            method: 'POST', 
+            signal: fetchSignal, 
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${provider.apiKey}` }, 
+            body: JSON.stringify(requestBody)
+        });
+        if (progressReporter.cancelled || fetchSignal.aborted) throw new Error("Processing cancelled by user after API response.");
+        if (!response.ok) { const errorText = await response.text(); throw new Error(`xAI API error: ${response.status} - ${errorText}`); }
+        const data = await response.json();
+        if (progressReporter.cancelled || fetchSignal.aborted) throw new Error("Processing cancelled by user after API success.");
+        if (!data.choices?.[0]?.message?.content) { throw new Error(`Unexpected response format from xAI API`); }
+        return data.choices[0].message.content;
+    } finally { 
+        if (controller && progressReporter.abortController === controller) { 
+            progressReporter.abortController = null; 
+        } 
+    }
+}
+
+
 
 // --- Exported API Call Functions ---
 // Note: These exported functions are primarily used by other parts of the plugin that DON'T pass an external signal (e.g., processFile).
@@ -688,6 +737,10 @@ export function callOpenRouterAPI(provider: LLMProviderConfig, modelName: string
     return callApiWithRetry(provider, modelName, prompt, content, settings, progressReporter, executeOpenRouterAPI, signal);
 }
 
+export function callXaiApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings, signal?: AbortSignal): Promise<string> {
+    return callApiWithRetry(provider, modelName, prompt, content, settings, progressReporter, executeXaiApi, signal);
+}
+
 export async function callLLM(
     provider: LLMProviderConfig,
     prompt: string,
@@ -717,6 +770,8 @@ export async function callLLM(
             return callOllamaApi(provider, modelToUse, prompt, content, progressReporter, settings, signal);
         case 'OpenRouter':
             return callOpenRouterAPI(provider, modelToUse, prompt, content, progressReporter, settings, signal);
+        case 'xAI':
+            return callXaiApi(provider, modelToUse, prompt, content, progressReporter, settings, signal);
         default:
             throw new Error(`Provider ${provider.name} not supported`);
     }
