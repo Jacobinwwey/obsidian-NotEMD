@@ -454,7 +454,7 @@ export class NotemdSettingTab extends PluginSettingTab {
         new Setting(containerEl).setName('Enable duplicate detection').setDesc('Enable checks for duplicate terms (results in console).').addToggle(toggle => toggle.setValue(this.plugin.settings.enableDuplicateDetection).onChange(async (value) => { this.plugin.settings.enableDuplicateDetection = value; await this.plugin.saveSettings(); }));
         new Setting(containerEl).setName('Max tokens').setDesc('Max tokens LLM should generate per response.').addText(text => text.setPlaceholder(String(DEFAULT_SETTINGS.maxTokens)).setValue(String(this.plugin.settings.maxTokens)).onChange(async (value) => { const num = parseInt(value, 10); if (!isNaN(num) && num > 0) { this.plugin.settings.maxTokens = num; } else { this.plugin.settings.maxTokens = DEFAULT_SETTINGS.maxTokens; } await this.plugin.saveSettings(); this.display(); }));
 
-        // --- Language Settings ---
+
         new Setting(containerEl).setName('Language settings').setHeading();
         new Setting(containerEl)
             .setName('Output language')
@@ -471,7 +471,44 @@ export class NotemdSettingTab extends PluginSettingTab {
                     });
             });
 
-        // --- Duplicate Check Scope Settings (Refined) ---
+        new Setting(containerEl)
+            .setName('Select different languages for different tasks.')
+            .setDesc('On: Select a specific language for each task below. Off: Use the single "Output language".')
+            .addToggle(toggle => toggle
+                .setValue(this.plugin.settings.useDifferentLanguagesForTasks)
+                .onChange(async (value) => {
+                    this.plugin.settings.useDifferentLanguagesForTasks = value;
+                    await this.plugin.saveSettings();
+                    this.display();
+                }));
+
+        if (this.plugin.settings.useDifferentLanguagesForTasks) {
+            const availableLanguages = this.plugin.settings.availableLanguages || DEFAULT_SETTINGS.availableLanguages;
+
+            const createTaskLanguageSettings = (languageSettingName: keyof NotemdSettings, taskDesc: string) => {
+                new Setting(containerEl)
+                    .setName(`${taskDesc} language`)
+                    .setDesc(`Select the output language for "${taskDesc}".`)
+                    .addDropdown(dropdown => {
+                        availableLanguages.forEach(lang => {
+                            dropdown.addOption(lang.code, lang.name);
+                        });
+                        dropdown
+                            .setValue(this.plugin.settings[languageSettingName] as string)
+                            .onChange(async (value) => {
+                                (this.plugin.settings as any)[languageSettingName] = value;
+                                await this.plugin.saveSettings();
+                            });
+                    });
+            };
+
+            createTaskLanguageSettings('generateTitleLanguage', 'Generate from title');
+            createTaskLanguageSettings('researchSummarizeLanguage', 'Research & summarize');
+            createTaskLanguageSettings('addLinksLanguage', 'Add links (process file/folder)');
+            createTaskLanguageSettings('summarizeToMermaidLanguage', 'Summarise as Mermaid diagram');
+        }
+
+        // --- Duplicate Check Scope Settings (Refined) ---""
         new Setting(containerEl).setName('Duplicate check scope').setHeading();
 
         new Setting(containerEl)

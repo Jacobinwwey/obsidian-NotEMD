@@ -79,9 +79,14 @@ export interface NotemdSettings {
     // Language Settings
     language: string; // Stores the selected language code (e.g., 'en', 'es', 'fr')
     availableLanguages: Array<{ code: string; name: string }>; // List of available languages
+    useDifferentLanguagesForTasks: boolean;
+    generateTitleLanguage: string;
+    researchSummarizeLanguage: string;
+    addLinksLanguage: string;
+    summarizeToMermaidLanguage: string;
 
     // Custom Prompt Settings
-    enableGlobalCustomPrompts: boolean; // Master toggle for custom prompts
+    enableGlobalCustomPrompts: boolean; // Master toggle for custom prompts""
     useCustomPromptForAddLinks: boolean;
     customPromptAddLinks: string;
     useCustomPromptForGenerateTitle: boolean;
