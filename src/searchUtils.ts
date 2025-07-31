@@ -4,6 +4,7 @@ import { estimateTokens, getProviderForTask, getModelForTask } from './utils'; /
 import { callDeepSeekAPI, callOpenAIApi, callAnthropicApi, callGoogleApi, callMistralApi, callAzureOpenAIApi, callLMStudioApi, callOllamaApi, callOpenRouterAPI } from './llmUtils'; // Added LLM callers
 import { cleanupLatexDelimiters, refineMermaidBlocks } from './mermaidProcessor'; // Added post-processors
 import { ErrorModal } from './ui/ErrorModal'; // Added ErrorModal
+import { getDefaultPrompt } from './promptUtils'; // Import for default prompts
 
 /**
  * Performs a search using DuckDuckGo HTML endpoint and parses results.
@@ -334,20 +335,26 @@ export async function researchAndSummarize(app: App, settings: NotemdSettings, e
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user before summarization.");
 
         progressReporter.log(`Calling ${provider.name} (Model: ${modelName}) for summarization...`);
-        const summaryPrompt = `Based on the following research context gathered for "${topic}", provide a concise summary focusing on the key facts, concepts, and conclusions. Present the summary in clear Markdown format.\n\nResearch Context:\n${researchContext}`;
+
+        const language = settings.useDifferentLanguagesForTasks ? settings.researchSummarizeLanguage : settings.language;
+
+        const summaryPrompt = getDefaultPrompt('researchSummarize').replace('{TOPIC}', topic).replace('{LANGUAGE}', language);
+
+        const finalPrompt = `${summaryPrompt}\n\nResearch Context:\n${researchContext}`;
+
         progressReporter.log(`Constructed summary prompt (context length: ${researchContext.length}).`);
 
         let summary = '';
         switch (provider.name) {
-            case 'DeepSeek': summary = await callDeepSeekAPI(provider, modelName, summaryPrompt, '', progressReporter, settings); break;
-            case 'OpenAI': summary = await callOpenAIApi(provider, modelName, summaryPrompt, '', progressReporter, settings); break;
-            case 'Anthropic': summary = await callAnthropicApi(provider, modelName, '', summaryPrompt, progressReporter, settings); break; // Prompt in content
-            case 'Google': summary = await callGoogleApi(provider, modelName, summaryPrompt, '', progressReporter, settings); break;
-            case 'Mistral': summary = await callMistralApi(provider, modelName, summaryPrompt, '', progressReporter, settings); break;
-            case 'Azure OpenAI': summary = await callAzureOpenAIApi(provider, modelName, summaryPrompt, '', progressReporter, settings); break;
-            case 'LMStudio': summary = await callLMStudioApi(provider, modelName, summaryPrompt, '', progressReporter, settings); break;
-            case 'Ollama': summary = await callOllamaApi(provider, modelName, summaryPrompt, '', progressReporter, settings); break;
-            case 'OpenRouter': summary = await callOpenRouterAPI(provider, modelName, summaryPrompt, '', progressReporter, settings); break;
+            case 'DeepSeek': summary = await callDeepSeekAPI(provider, modelName, finalPrompt, '', progressReporter, settings); break;
+            case 'OpenAI': summary = await callOpenAIApi(provider, modelName, finalPrompt, '', progressReporter, settings); break;
+            case 'Anthropic': summary = await callAnthropicApi(provider, modelName, '', finalPrompt, progressReporter, settings); break; // Prompt in content
+            case 'Google': summary = await callGoogleApi(provider, modelName, finalPrompt, '', progressReporter, settings); break;
+            case 'Mistral': summary = await callMistralApi(provider, modelName, finalPrompt, '', progressReporter, settings); break;
+            case 'Azure OpenAI': summary = await callAzureOpenAIApi(provider, modelName, finalPrompt, '', progressReporter, settings); break;
+            case 'LMStudio': summary = await callLMStudioApi(provider, modelName, finalPrompt, '', progressReporter, settings); break;
+            case 'Ollama': summary = await callOllamaApi(provider, modelName, finalPrompt, '', progressReporter, settings); break;
+            case 'OpenRouter': summary = await callOpenRouterAPI(provider, modelName, finalPrompt, '', progressReporter, settings); break;
             default: throw new Error(`Unsupported provider for summarization: ${provider.name}`);
         }
 
