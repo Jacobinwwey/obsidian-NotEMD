@@ -81,6 +81,7 @@ That's it! Explore the settings to unlock more features like web research, trans
 - **Web Research & Summarization**:
     - Perform web searches using Tavily (requires API key) or DuckDuckGo (experimental).
     - Summarize search results using the configured LLM.
+    - The output language of the summary can be customized in the settings.
     - Append summaries to the current note.
     - Configurable token limit for research content sent to the LLM.
 - **Content Generation from Title**:
@@ -145,6 +146,10 @@ Access plugin settings via:
 -   **Use Different Providers for Tasks**:
     *   **Disabled (Default)**: Uses the single "Active Provider" (selected above) for all tasks.
     *   **Enabled**: Allows you to select a specific provider *and* optionally override the model name for each task ("Add Links", "Research & Summarize", "Generate from Title", "Translate"). If the model override field for a task is left blank, it will use the default model configured for that task's selected provider.
+-   **Select different languages for different tasks**:
+    *   **Disabled (Default)**: Uses the single "Output language" for all tasks.
+    *   **Enabled**: Allows you to select a specific language for each task ("Add Links", "Research & Summarize", "Generate from Title", "Summarise as Mermaid diagram").
+
 <img width="817" height="428" alt="Multi-model" src="https://github.com/user-attachments/assets/85e6b854-c0ca-45cc-a55e-24638dceb120" />
 
 ### Stable API Call Settings
