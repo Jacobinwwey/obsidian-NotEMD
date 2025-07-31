@@ -170,6 +170,11 @@ export const DEFAULT_SETTINGS: NotemdSettings = {
         { code: 'id', name: 'Bahasa Indonesia' },
         { code: 'ms', name: 'Bahasa Melayu' }
     ],
+    useDifferentLanguagesForTasks: false,
+    generateTitleLanguage: 'en',
+    researchSummarizeLanguage: 'en',
+    addLinksLanguage: 'en',
+    summarizeToMermaidLanguage: 'en',
     // Custom Prompt Settings Defaults
     enableGlobalCustomPrompts: false,
     useCustomPromptForAddLinks: false,

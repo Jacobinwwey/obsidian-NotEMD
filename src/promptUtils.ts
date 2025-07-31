@@ -115,7 +115,7 @@ graph TD
 13. Include statistical measures and confidence intervals where relevant.
 
 Format directly for Obsidian markdown. Do NOT wrap the entire response in a markdown code block. Start directly with the Level 2 Header.`,
-    researchSummarize: `Summarize the following search results for the topic "{TOPIC}". Provide a concise yet comprehensive overview. Focus on key findings, data, and important conclusions. Format the summary in Markdown.
+    researchSummarize: `Summarize the following search results for the topic "{TOPIC}". Provide a concise yet comprehensive overview. Focus on key findings, data, and important conclusions. Format the summary in Markdown. The output language should be {LANGUAGE}.
 
 Search Results:
 {SEARCH_RESULTS_CONTEXT}`,
