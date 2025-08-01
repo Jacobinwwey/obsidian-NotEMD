@@ -21,7 +21,7 @@ export const DEFAULT_SETTINGS: NotemdSettings = {
             name: 'Anthropic',
             apiKey: '',
             baseUrl: 'https://api.anthropic.com',
-            model: 'claude-3-5-sonnet-20241022',
+            model: 'claude-3-5-sonnet-20240620',
             temperature: 0.5
         },
         {

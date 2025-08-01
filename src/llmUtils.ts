@@ -147,8 +147,16 @@ export async function testAPI(provider: LLMProviderConfig): Promise<{ success: b
             case 'Anthropic':
                 url = `${provider.baseUrl}/v1/messages`;
                 options.method = 'POST';
-                options.headers = { 'Content-Type': 'application/json', 'x-api-key': provider.apiKey, 'anthropic-version': '2023-06-01' };
-                options.body = JSON.stringify({ model: provider.model, messages: [{ role: 'user', content: 'Test' }], max_tokens: 1 });
+                options.headers = { 
+                    'Content-Type': 'application/json', 
+                    'x-api-key': provider.apiKey, 
+                    'anthropic-version': '2023-06-01' 
+                };
+                options.body = JSON.stringify({ 
+                    model: provider.model, 
+                    messages: [{ role: 'user', content: 'Test' }], 
+                    max_tokens: 1 
+                });
                 response = await fetch(url, options);
                 if (!response.ok) throw new Error(`Anthropic API error: ${response.status} - ${await response.text()}`);
                 await response.json();
@@ -365,9 +373,9 @@ async function executeOpenAIApi(provider: LLMProviderConfig, modelName: string, 
 async function executeAnthropicApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings, signal?: AbortSignal): Promise<string> {
     if (!provider.apiKey) throw new Error(`API key is missing for Anthropic provider.`);
     const url = `${provider.baseUrl}/v1/messages`;
-    // Anthropic combines prompt and content in the user message (content already includes prompt in callApiWithRetry for Anthropic)
     const requestBody = {
         model: modelName,
+        system: prompt, // Pass the prompt as the system message
         messages: [{ role: 'user', content: content }],
         temperature: provider.temperature,
         max_tokens: settings.maxTokens
@@ -380,7 +388,11 @@ async function executeAnthropicApi(provider: LLMProviderConfig, modelName: strin
         const response = await fetch(url, {
             method: 'POST', 
             signal: fetchSignal, 
-            headers: { 'Content-Type': 'application/json', 'x-api-key': provider.apiKey, 'anthropic-version': '2023-06-01' }, 
+            headers: { 
+                'Content-Type': 'application/json', 
+                'x-api-key': provider.apiKey, 
+                'anthropic-version': '2023-06-01' 
+            }, 
             body: JSON.stringify(requestBody)
         });
         if (progressReporter.cancelled || fetchSignal.aborted) throw new Error("Processing cancelled by user after API response.");
@@ -709,8 +721,7 @@ export function callOpenAIApi(provider: LLMProviderConfig, modelName: string, pr
 }
 
 export function callAnthropicApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings, signal?: AbortSignal): Promise<string> {
-    // Note: Anthropic combines prompt and content in user message, so pass empty prompt to execute function
-    return callApiWithRetry(provider, modelName, '', `${prompt}\n\n${content}`, settings, progressReporter, executeAnthropicApi, signal);
+    return callApiWithRetry(provider, modelName, prompt, content, settings, progressReporter, executeAnthropicApi, signal);
 }
 
 export function callGoogleApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings, signal?: AbortSignal): Promise<string> {
