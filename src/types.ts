@@ -96,6 +96,10 @@ export interface NotemdSettings {
     useCustomPromptForSummarizeToMermaid: boolean;
     customPromptSummarizeToMermaid: string;
     translateSummarizeToMermaidOutput: boolean;
+
+    // Focused Learning Domain
+    enableFocusedLearning: boolean;
+    focusedLearningDomain: string;
 }
 
 // Defines the keys for tasks that can have custom prompts

@@ -4,7 +4,7 @@ import { estimateTokens, getProviderForTask, getModelForTask } from './utils'; /
 import { callDeepSeekAPI, callOpenAIApi, callAnthropicApi, callGoogleApi, callMistralApi, callAzureOpenAIApi, callLMStudioApi, callOllamaApi, callOpenRouterAPI } from './llmUtils'; // Added LLM callers
 import { cleanupLatexDelimiters, refineMermaidBlocks } from './mermaidProcessor'; // Added post-processors
 import { ErrorModal } from './ui/ErrorModal'; // Added ErrorModal
-import { getDefaultPrompt } from './promptUtils'; // Import for default prompts
+import { getSystemPrompt } from './promptUtils'; // Import for default prompts
 
 /**
  * Performs a search using DuckDuckGo HTML endpoint and parses results.
@@ -338,9 +338,11 @@ export async function researchAndSummarize(app: App, settings: NotemdSettings, e
 
         const language = settings.useDifferentLanguagesForTasks ? settings.researchSummarizeLanguage : settings.language;
 
-        const summaryPrompt = getDefaultPrompt('researchSummarize').replace('{TOPIC}', topic).replace('{LANGUAGE}', language);
-
-        const finalPrompt = `${summaryPrompt}\n\nResearch Context:\n${researchContext}`;
+        const finalPrompt = getSystemPrompt(settings, 'researchSummarize', {
+            TOPIC: topic,
+            LANGUAGE: language,
+            SEARCH_RESULTS_CONTEXT: researchContext
+        });
 
         progressReporter.log(`Constructed summary prompt (context length: ${researchContext.length}).`);
 

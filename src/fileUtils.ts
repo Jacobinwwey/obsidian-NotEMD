@@ -303,7 +303,7 @@ export async function processFile(app: App, settings: NotemdSettings, file: TFil
         progressReporter.updateStatus(`Processing chunk ${i + 1}/${totalChunks}...`, chunkProgress);
         progressReporter.log(`Processing chunk ${i + 1}/${totalChunks}...`);
 
-        const prompt = getLLMProcessingPrompt(); // Get prompt for each chunk (it's static)
+        const prompt = getLLMProcessingPrompt(settings); // Get prompt for each chunk (it's static)
 
         try {
             let responseText;

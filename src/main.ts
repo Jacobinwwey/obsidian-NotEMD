@@ -21,7 +21,7 @@ import { NotemdSettingTab } from './ui/NotemdSettingTab';
 import { showDeletionConfirmationModal } from './ui/modals'; // Import the modal function
 import { NotemdSidebarView } from './ui/NotemdSidebarView';
 import { translateFile } from './translate';
-import { getDefaultPrompt } from './promptUtils';
+import { getSystemPrompt } from './promptUtils';
 
 export default class NotemdPlugin extends Plugin {
     settings: NotemdSettings;
@@ -414,21 +414,20 @@ export default class NotemdPlugin extends Plugin {
 		return { provider, modelName: modelName || provider.model };
 	}
 
-	getPromptForTask(taskKey: TaskKey): string {
-		const settingKey = `useCustomPromptFor${taskKey.charAt(0).toUpperCase() + taskKey.slice(1)}` as keyof NotemdSettings;
-		const promptKey = `customPrompt${taskKey.charAt(0).toUpperCase() + taskKey.slice(1)}` as keyof NotemdSettings;
-
-		const useCustom = this.settings.enableGlobalCustomPrompts && this.settings[settingKey];
-
-		if (useCustom) {
-			const customPrompt = this.settings[promptKey] as string;
-			if (customPrompt && customPrompt.trim()) {
-				this.log(`Using custom prompt for task: ${taskKey}`);
-				return customPrompt;
-			}
-		}
-		this.log(`Using default prompt for task: ${taskKey}`);
-		return getDefaultPrompt(taskKey);
+	getPromptForTask(taskKey: TaskKey, replacements: Record<string, string> = {}): string {
+		const prompt = getSystemPrompt(this.settings, taskKey, replacements);
+        if (this.settings.enableGlobalCustomPrompts && 
+            ((taskKey === 'addLinks' && this.settings.useCustomPromptForAddLinks) ||
+             (taskKey === 'generateTitle' && this.settings.useCustomPromptForGenerateTitle) ||
+             (taskKey === 'researchSummarize' && this.settings.useCustomPromptForResearchSummarize) ||
+             (taskKey === 'summarizeToMermaid' && this.settings.useCustomPromptForSummarizeToMermaid))) {
+            this.log(`Using custom prompt for task: ${taskKey}`);
+        } else if (this.settings.enableFocusedLearning && this.settings.focusedLearningDomain) {
+            this.log(`Using focused learning domain for task: ${taskKey}`);
+        } else {
+		    this.log(`Using default prompt for task: ${taskKey}`);
+        }
+		return prompt;
 	}
 
     // --- Command Handler Methods ---

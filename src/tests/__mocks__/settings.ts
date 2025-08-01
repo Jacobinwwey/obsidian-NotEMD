@@ -66,5 +66,7 @@ export const mockSettings: NotemdSettings = {
     summarizeToMermaidCustomSuffix: '_summ',
     useCustomSummarizeToMermaidSavePath: false,
     summarizeToMermaidSavePath: '',
-    translateSummarizeToMermaidOutput: false
+    translateSummarizeToMermaidOutput: false,
+    enableFocusedLearning: false,
+    focusedLearningDomain: ''
 };
