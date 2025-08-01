@@ -353,13 +353,10 @@ This is the core functionality focused on identifying concepts and adding `[[wik
     *   Successfully processed files are moved to the configured "complete" folder.
     *   This command respects the **"Enable Research in 'Generate from Title'"** setting for each note processed.
     *   You can cancel this task via the sidebar button or modal cancel button.
-
+    *   Progress and results (number of files modified, errors) are shown in the sidebar/modal log.
 <img width="477" height="76" alt="image" src="https://github.com/user-attachments/assets/8c762d0a-be60-4811-b3e0-9d86c6ddfa4e" />
 
-).
-    *   Progress and results (number of files modified, errors) are shown in the sidebar/modal log.
-
-4.  **Check and Remove Duplicate Concept Notes**:
+6.  **Check and Remove Duplicate Concept Notes**:
     *   Ensure the **Concept Note Folder Path** is correctly configured in settings.
     *   Run `Notemd: Check and Remove Duplicate Concept Notes` (via command palette or sidebar button).
     *   The plugin scans the concept note folder and compares filenames against notes outside the folder using several rules (exact match, plurals, normalization, containment).
