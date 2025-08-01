@@ -349,6 +349,7 @@ Notemd 通过与各种大型语言模型 (LLM) 集成来增强您的 Obsidian �
 - **DuckDuckGo 最大结果数 (DuckDuckGo Max Results)**: (仅在选择 DuckDuckGo 时可见) 要解析的最大搜索结果数（1-10）。默认值：5。
 - **DuckDuckGo 内容获取超时 (DuckDuckGo Content Fetch Timeout)**: (仅在选择 DuckDuckGo 时可见) 尝试从每个 DuckDuckGo 结果 URL 获取内容时等待的最大秒数。默认值：15。
 - **最大研究内容令牌数 (Max Research Content Tokens)**: 要包含在摘要提示中的组合网络研究结果（片段/获取的内容）的大致最大令牌数。有助于管理上下文窗口大小和成本。（默认值：3000）
+<img width="810" height="278" alt="Web research provider" src="https://github.com/user-attachments/assets/be0280eb-bb4e-4db0-bf69-91da3f0fd3c0" />
 
 #### 专注学习领域 (Focused Learning Domain)
 -   **启用专注学习领域**:
