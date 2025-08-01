@@ -190,7 +190,10 @@ export const DEFAULT_SETTINGS: NotemdSettings = {
     useCustomSummarizeToMermaidSuffix: false,
     summarizeToMermaidCustomSuffix: '_summ',
     useCustomSummarizeToMermaidSavePath: false,
-    summarizeToMermaidSavePath: ''
+    summarizeToMermaidSavePath: '',
+    // Focused Learning Domain
+    enableFocusedLearning: false,
+    focusedLearningDomain: ''
 };
 
 // Constants for the Sidebar View
