@@ -1,4 +1,4 @@
-import { TaskKey } from './types';
+import { NotemdSettings, TaskKey } from './types';
 
 export const DEFAULT_PROMPTS: Record<TaskKey, string> = {
     addLinks: `Completely decompose and structure the knowledge points in this markdown document, outputting them in markdown format supported by Obsidian. Core knowledge points should be labelled with Obsidian's backlink format [[]]. Do not output anything other than the original text and the requested "Obsidian's backlink format [[]]".
@@ -164,4 +164,48 @@ mindmap
 
 export function getDefaultPrompt(taskKey: TaskKey): string {
     return DEFAULT_PROMPTS[taskKey] || '';
+}
+
+export function getSystemPrompt(settings: NotemdSettings, taskKey: TaskKey, replacements: Record<string, string> = {}): string {
+    let useCustomPrompt = false;
+    let customPrompt = '';
+
+    // Determine if a custom prompt should be used for the given task
+    if (settings.enableGlobalCustomPrompts) {
+        switch (taskKey) {
+            case 'addLinks':
+                useCustomPrompt = settings.useCustomPromptForAddLinks;
+                customPrompt = settings.customPromptAddLinks;
+                break;
+            case 'generateTitle':
+                useCustomPrompt = settings.useCustomPromptForGenerateTitle;
+                customPrompt = settings.customPromptGenerateTitle;
+                break;
+            case 'researchSummarize':
+                useCustomPrompt = settings.useCustomPromptForResearchSummarize;
+                customPrompt = settings.customPromptResearchSummarize;
+                break;
+            case 'summarizeToMermaid':
+                useCustomPrompt = settings.useCustomPromptForSummarizeToMermaid;
+                customPrompt = settings.customPromptSummarizeToMermaid;
+                break;
+            // 'translate' does not have a custom prompt option in this structure
+        }
+    }
+
+    // Start with the appropriate base prompt
+    let prompt = (useCustomPrompt && customPrompt) ? customPrompt : getDefaultPrompt(taskKey);
+
+    // Prepend the focused learning domain if enabled
+    if (settings.enableFocusedLearning && settings.focusedLearningDomain) {
+        const domainText = `Relevant Fields: [${settings.focusedLearningDomain}]`;
+        prompt = `${domainText}\n\n${prompt}`;
+    }
+
+    // Perform replacements
+    for (const key in replacements) {
+        prompt = prompt.replace(new RegExp(`{${key}}`, 'g'), replacements[key]);
+    }
+
+    return prompt;
 }

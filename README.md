@@ -239,6 +239,12 @@ Access plugin settings via:
     *   **Enabled**: Allows you to specify a custom name for the subfolder where completed files are moved.
 -   **Custom Output Folder Name**: (Visible only when the above is enabled) Enter the desired name for the subfolder (e.g., `Generated Content`, `_complete`). Invalid characters are not allowed. Defaults to `_complete` if left empty. This folder is created relative to the original folder's parent directory.
 
+#### Focused Learning Domain
+-   **Enable Focused Learning Domain**:
+    *   **Disabled (Default)**: Prompts sent to the LLM use the standard, general-purpose instructions.
+    *   **Enabled**: Allows you to specify one or more fields of study to improve the LLM's contextual understanding.
+-   **Learning Domain**: (Visible only when the above is enabled) Enter your specific field(s), e.g., 'Materials Science', 'Polymer Physics', 'Machine Learning'. This will add a "Relevant Fields: [...]" line to the beginning of prompts, helping the LLM generate more accurate and relevant links and content for your specific area of study.
+
 #### Custom Prompt Settings
 This feature allows you to override the default instructions (prompts) sent to the LLM for specific tasks, giving you fine-grained control over the output.
 

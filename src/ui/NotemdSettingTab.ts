@@ -649,5 +649,32 @@ export class NotemdSettingTab extends PluginSettingTab {
             });
         }
         // --- End Custom Prompt Settings ---
+
+        // --- Focused Learning Domain Settings ---
+        new Setting(containerEl).setName('Focused learning domain').setHeading();
+
+        new Setting(containerEl)
+            .setName('Enable focused learning domain')
+            .setDesc('On: Add a specific learning domain to your prompts to improve contextual understanding. Off: Use the default general prompt.')
+            .addToggle(toggle => toggle
+                .setValue(this.plugin.settings.enableFocusedLearning)
+                .onChange(async (value) => {
+                    this.plugin.settings.enableFocusedLearning = value;
+                    await this.plugin.saveSettings();
+                    this.display(); // Refresh to show/hide the domain input
+                }));
+
+        if (this.plugin.settings.enableFocusedLearning) {
+            new Setting(containerEl)
+                .setName('Learning domain')
+                .setDesc("Specify one or more fields, e.g., 'Materials Science', 'Polymer Physics', 'Machine Learning'. This will be added to the beginning of your prompts.")
+                .addText(text => text
+                    .setPlaceholder("e.g., 'Materials Science', 'Polymer Physics'")
+                    .setValue(this.plugin.settings.focusedLearningDomain)
+                    .onChange(async (value) => {
+                        this.plugin.settings.focusedLearningDomain = value;
+                        await this.plugin.saveSettings();
+                    }));
+        }
     }
 }
