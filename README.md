@@ -239,12 +239,6 @@ Access plugin settings via:
     *   **Enabled**: Allows you to specify a custom name for the subfolder where completed files are moved.
 -   **Custom Output Folder Name**: (Visible only when the above is enabled) Enter the desired name for the subfolder (e.g., `Generated Content`, `_complete`). Invalid characters are not allowed. Defaults to `_complete` if left empty. This folder is created relative to the original folder's parent directory.
 
-#### Focused Learning Domain
--   **Enable Focused Learning Domain**:
-    *   **Disabled (Default)**: Prompts sent to the LLM use the standard, general-purpose instructions.
-    *   **Enabled**: Allows you to specify one or more fields of study to improve the LLM's contextual understanding.
--   **Learning Domain**: (Visible only when the above is enabled) Enter your specific field(s), e.g., 'Materials Science', 'Polymer Physics', 'Machine Learning'. This will add a "Relevant Fields: [...]" line to the beginning of prompts, helping the LLM generate more accurate and relevant links and content for your specific area of study.
-
 #### Custom Prompt Settings
 This feature allows you to override the default instructions (prompts) sent to the LLM for specific tasks, giving you fine-grained control over the output.
 
@@ -286,6 +280,13 @@ This feature allows you to override the default instructions (prompts) sent to t
 -   **DuckDuckGo Content Fetch Timeout**: (Visible only if DuckDuckGo is selected) Maximum seconds to wait when trying to fetch content from each DuckDuckGo result URL. Default: 15.
 -   **Max Research Content Tokens**: Approximate maximum tokens from combined web research results (snippets/fetched content) to include in the summarization prompt. Helps manage context window size and cost. (Default: 3000)
 <img width="810" height="278" alt="Web research provider" src="https://github.com/user-attachments/assets/be0280eb-bb4e-4db0-bf69-91da3f0fd3c0" />
+
+#### Focused Learning Domain
+-   **Enable Focused Learning Domain**:
+    *   **Disabled (Default)**: Prompts sent to the LLM use the standard, general-purpose instructions.
+    *   **Enabled**: Allows you to specify one or more fields of study to improve the LLM's contextual understanding.
+-   **Learning Domain**: (Visible only when the above is enabled) Enter your specific field(s), e.g., 'Materials Science', 'Polymer Physics', 'Machine Learning'. This will add a "Relevant Fields: [...]" line to the beginning of prompts, helping the LLM generate more accurate and relevant links and content for your specific area of study.
+<img width="595" height="143" alt="focused learning domain" src="https://github.com/user-attachments/assets/1bcc9707-5c10-4944-a61b-65fde0cd0404" />
 
 
 ## Usage Guide
