@@ -3,31 +3,7 @@ import { LLMProviderConfig, NotemdSettings, ProgressReporter } from './types';
 import { cancellableDelay } from './utils';
 import { ErrorModal } from './ui/ErrorModal'; // Import ErrorModal
 
-/**
- * Generates the system prompt for the LLM processing task (adding backlinks).
- * @param settings The plugin settings.
- * @returns The prompt string.
- */
-export function getLLMProcessingPrompt(settings: NotemdSettings): string {
-    const basePrompt = `Completely decompose and structure the knowledge points in this markdown document, outputting them in markdown format supported by Obsidian. Core knowledge points should be labelled with Obsidian's backlink format [[]]. Do not output anything other than the original text and the requested "Obsidian's backlink format [[]]".
 
-Rules:
-1. Only add Obsidian backlinks [[like this]] to core concepts. Do not modify the original text content or formatting otherwise.
-2. Skip conventional names (common products, company names, dates, times, individual names) unless they represent a core technical or scientific concept within the text's context.
-3. Output the *entire* original content of the chunk, preserving all formatting (headers, lists, code blocks, etc.), with only the added backlinks.
-4. Handle duplicate concepts carefully:
-    a. If both singular and plural forms of a word/concept appear (e.g., "model" and "models"), only add the backlink to the *first occurrence* of the *singular* form (e.g., [[model]]). Do not link the plural form.
-    b. If a single-word concept (e.g., "relaxation") also appears as part of a multi-word concept (e.g., "dielectric relaxation"), only add the backlink to the *multi-word* concept (e.g., [[dielectric relaxation]]). Do not link the standalone single word in this case.
-    c. Do not add duplicate backlinks for the exact same concept within this chunk. Link only the first meaningful occurrence.
-5. Ignore any "References", "Bibliography", or similar sections, typically found at the end of documents. Do not add backlinks within these sections.`
-
-    if (settings.enableFocusedLearning && settings.focusedLearningDomain) {
-        const domainPreamble = `Relevant Fields: [USER: SPECIFY ONE OR MORE FIELDS HERE, e.g., '${settings.focusedLearningDomain}']`;
-        return `${domainPreamble}\n\n${basePrompt}`;
-    }
-
-    return basePrompt;
-}
 
 /**
  * Tests the connection to a given LLM provider.

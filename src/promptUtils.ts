@@ -207,5 +207,13 @@ export function getSystemPrompt(settings: NotemdSettings, taskKey: TaskKey, repl
         prompt = prompt.replace(new RegExp(`{${key}}`, 'g'), replacements[key]);
     }
 
+    // Add translation instruction for Mermaid summarization if enabled
+    if (taskKey === 'summarizeToMermaid' && settings.translateSummarizeToMermaidOutput) {
+        const targetLanguageName = settings.availableLanguages.find(lang => lang.code === settings.language)?.name || settings.language;
+        prompt += `
+
+IMPORTANT: The entire Mermaid diagram, including all node text, MUST be translated into ${targetLanguageName}.`;
+    }
+
     return prompt;
 }
