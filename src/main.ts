@@ -918,16 +918,7 @@ export default class NotemdPlugin extends Plugin {
 			const { provider, modelName } = this.getProviderAndModelForTask('summarizeToMermaid');
 			reporter.log(`Using provider: ${provider.name}, Model: ${modelName}`);
 
-			let prompt = this.getPromptForTask('summarizeToMermaid');
-
-            // Add translation instruction to the prompt if the setting is enabled
-            if (this.settings.translateSummarizeToMermaidOutput) {
-                const targetLanguageName = this.settings.availableLanguages.find(lang => lang.code === this.settings.language)?.name || this.settings.language;
-                prompt += `
-
-IMPORTANT: The entire Mermaid diagram, including all node text, MUST be translated into ${targetLanguageName}.`;
-                reporter.log(`Translation to ${targetLanguageName} requested for Mermaid output.`);
-            }
+			const prompt = this.getPromptForTask('summarizeToMermaid');
 
             reporter.updateStatus('Calling LLM for summarization...', 20);
             const mermaidContent = await callLLM(provider, prompt, fileContent, this.settings, reporter, modelName);
