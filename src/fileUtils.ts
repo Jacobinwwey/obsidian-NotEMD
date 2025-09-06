@@ -566,15 +566,15 @@ export async function generateContentForTitle(app: App, settings: NotemdSettings
     let generatedContent;
     try {
         switch (provider.name) {
-            case 'DeepSeek': generatedContent = await callDeepSeekAPI(provider, modelName, generationPrompt, '', progressReporter, settings); break;
-            case 'OpenAI': generatedContent = await callOpenAIApi(provider, modelName, generationPrompt, '', progressReporter, settings); break;
+            case 'DeepSeek': generatedContent = await callDeepSeekAPI(provider, modelName, '', generationPrompt, progressReporter, settings); break;
+            case 'OpenAI': generatedContent = await callOpenAIApi(provider, modelName, '', generationPrompt, progressReporter, settings); break;
             case 'Anthropic': generatedContent = await callAnthropicApi(provider, modelName, '', generationPrompt, progressReporter, settings); break; // Prompt in content for Anthropic
             case 'Google': generatedContent = await callGoogleApi(provider, modelName, generationPrompt, '', progressReporter, settings); break;
-            case 'Mistral': generatedContent = await callMistralApi(provider, modelName, generationPrompt, '', progressReporter, settings); break;
-            case 'Azure OpenAI': generatedContent = await callAzureOpenAIApi(provider, modelName, generationPrompt, '', progressReporter, settings); break;
-            case 'LMStudio': generatedContent = await callLMStudioApi(provider, modelName, generationPrompt, '', progressReporter, settings); break;
-            case 'Ollama': generatedContent = await callOllamaApi(provider, modelName, generationPrompt, '', progressReporter, settings); break;
-            case 'OpenRouter': generatedContent = await callOpenRouterAPI(provider, modelName, generationPrompt, '', progressReporter, settings); break;
+            case 'Mistral': generatedContent = await callMistralApi(provider, modelName, '', generationPrompt, progressReporter, settings); break;
+            case 'Azure OpenAI': generatedContent = await callAzureOpenAIApi(provider, modelName, '', generationPrompt, progressReporter, settings); break;
+            case 'LMStudio': generatedContent = await callLMStudioApi(provider, modelName, '', generationPrompt, progressReporter, settings); break;
+            case 'Ollama': generatedContent = await callOllamaApi(provider, modelName, '', generationPrompt, progressReporter, settings); break;
+            case 'OpenRouter': generatedContent = await callOpenRouterAPI(provider, modelName, '', generationPrompt, progressReporter, settings); break;
             default: throw new Error(`Unsupported provider for content generation: ${provider.name}`);
         }
     } catch (error: unknown) { // Changed to unknown
