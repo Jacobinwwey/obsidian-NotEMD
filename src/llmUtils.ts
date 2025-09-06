@@ -228,6 +228,7 @@ async function callApiWithRetry(
         } catch (error: unknown) { // Changed to unknown
             const errorMessage = error instanceof Error ? error.message : String(error);
             lastError = error instanceof Error ? error : new Error(errorMessage); // Store Error object if possible
+            progressReporter.log(`${provider.name} API Call: Attempt ${attempt} failed: ${errorMessage}`);
             console.warn(`${provider.name} API Call: Attempt ${attempt} failed: ${errorMessage}`);
 
             // Handle cancellation specifically
