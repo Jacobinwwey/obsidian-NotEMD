@@ -18,7 +18,7 @@
 
 Notemd 通过与各种大型语言模型 (LLM) 集成来增强您的 Obsidian 工作流程，支持多语言笔记处理，自动为关键概念生成维基链接、创建相应的概念笔记、执行网页搜索与摘要、翻译内容、总结为Mermaid脑图等，助力构建强大的知识图谱。
 
-**版本:** 1.4.0
+**版本:** 1.4.1
 
 ![image](https://img.shields.io/github/v/release/Jacobinwwey/obsidian-NotEMD?label=Version&link=https%3A%2F%2Fgithub.com%2Jacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest) ![image](https://img.shields.io/github/downloads/Jacobinwwey/obsidian-NotEMD/total?logo=Obsidian&label=Downloads&labelColor=%237C3AED&color=%235b5b5b&link=https%3A%2F%2Fgithub.com%2Jacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest)
 
@@ -463,7 +463,10 @@ Notemd 通过与各种大型语言模型 (LLM) 集成来增强您的 Obsidian �
     5. 云端服务需保证网络连接正常；
     6. 单文件处理失败可查看开发者控制台详细信息；
     7. 批量处理失败可查看保险库根目录的`error_processing_filename.log`日志。
-- **LM Studio连接失败**：确认LM Studio服务器已启动, 并加载了正确模型。
+- **LM Studio/Ollama 连接问题**：
+    *   **测试连接失败**：确保本地服务器（LM Studio 或 Ollama）正在运行，并且已加载/可用正确的模型。
+    *   **CORS 错误（Windows上的Ollama）**：如果在 Windows 上使用 Ollama 时遇到 CORS（跨源资源共享）错误，您可能需要设置 `OLLAMA_ORIGINS` 环境变量。您可以在启动 Ollama 之前，在命令提示符中运行 `set OLLAMA_ORIGINS=*` 来实现。这允许来自任何来源的请求。
+    *   **在 LM Studio 中启用 CORS**：对于 LM Studio，您可以直接在服务器设置中启用 CORS，如果 Obsidian 在浏览器中运行或具有严格的来源策略，这可能是必需的。
 - **文件夹创建失败**：请确保设置中保存路径为相对路径，且不包含无效字符（如\* " \ / < > : | ? # ^ [ ] 等）。
 - **性能问题**：大文件或批量处理可适当调低分块字数，或更换LLM模型。
 - **链接质量问题**：可尝试不同模型或温度设置改善效果。
@@ -478,6 +481,6 @@ MIT许可证 - 详情请见[LICENSE](LICENSE)。
 
 ---
 
-*Notemd v1.4.0 - 用AI提升你的Obsidian知识图谱。*
+*Notemd v1.4.1 - 用AI提升你的Obsidian知识图谱。*
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)
