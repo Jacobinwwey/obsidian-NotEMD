@@ -1,4 +1,4 @@
-import { Notice } from 'obsidian';
+import { Notice, requestUrl } from 'obsidian';
 import { LLMProviderConfig, NotemdSettings, ProgressReporter } from './types';
 import { cancellableDelay } from './utils';
 import { ErrorModal } from './ui/ErrorModal'; // Import ErrorModal
@@ -12,22 +12,39 @@ import { ErrorModal } from './ui/ErrorModal'; // Import ErrorModal
  */
 export async function testAPI(provider: LLMProviderConfig): Promise<{ success: boolean; message: string }> {
     try {
-        let response: Response;
+        let response;
         let url: string;
-        let options: RequestInit = { method: 'GET' }; // Default to GET
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        let options: any = { method: 'GET' }; // Default to GET
 
         switch (provider.name) {
             case 'Ollama':
-                url = `${provider.baseUrl}/tags`;
-                options.headers = { 'Content-Type': 'application/json' };
-                response = await fetch(url, options);
-                if (!response.ok) throw new Error(`Ollama API error: ${response.status} - ${await response.text()}`);
-                await response.json();
-                return { success: true, message: `Successfully connected to Ollama at ${provider.baseUrl} and listed models.` };
+                const ollamaUrl = `${provider.baseUrl}/chat`;
+                const ollamaOptions = {
+                    url: ollamaUrl,
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model: provider.model,
+                        messages: [{ role: 'user', content: 'Test connection' }],
+                        stream: false
+                    })
+                };
+                response = await requestUrl(ollamaOptions);
+                if (response.status < 200 || response.status >= 300) {
+                    const errorText = response.text;
+                    if (errorText.includes("model") && errorText.includes("not found")) {
+                        throw new Error(`Ollama API error: Model '${provider.model}' not found. Please make sure it is pulled and available.`);
+                    }
+                    throw new Error(`Ollama API error: ${response.status} - ${errorText}`);
+                }
+                // No need to call .json() on the response text, it's already parsed
+                return { success: true, message: `Successfully connected to Ollama at ${provider.baseUrl} using model '${provider.model}'.` };
 
             case 'LMStudio':
                 const lmStudioUrl = `${provider.baseUrl}/chat/completions`;
-                const lmStudioOptions: RequestInit = {
+                const lmStudioOptions = {
+                    url: lmStudioUrl,
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -36,20 +53,17 @@ export async function testAPI(provider: LLMProviderConfig): Promise<{ success: b
                     body: JSON.stringify({
                         model: provider.model,
                         messages: [
-                            { role: 'system', content: 'You are a helpful assistant' },
-                            { role: 'user', content: 'Hello' }
-                        ],
-                        temperature: 0.7,
-                        max_tokens: 10
+                            { role: 'system', content: 'You are a helpful assistant.' },
+                            { role: 'user', content: 'This is a connection test.' }
+                        ]
                     })
                 };
                 try {
-                    response = await fetch(lmStudioUrl, lmStudioOptions);
-                    if (response.ok) {
-                        try { await response.json(); } catch (jsonError) { console.warn("LMStudio test connection response was not valid JSON, but status was OK. Assuming success."); }
+                    response = await requestUrl(lmStudioOptions);
+                    if (response.status >= 200 && response.status < 300) {
                         return { success: true, message: `Successfully connected to LMStudio API at ${provider.baseUrl} using model '${provider.model}'.` };
                     } else {
-                        const errorText = await response.text();
+                        const errorText = response.text;
                         if (errorText.includes("Could not find model")) { throw new Error(`LMStudio API error: Model '${provider.model}' not found or loaded on the server.`); }
                         throw new Error(`LMStudio API error: ${response.status} - ${errorText}`);
                     }
@@ -60,6 +74,7 @@ export async function testAPI(provider: LLMProviderConfig): Promise<{ success: b
 
             case 'OpenRouter':
                 url = `${provider.baseUrl}/chat/completions`;
+                options.url = url;
                 options.method = 'POST';
                 options.headers = {
                     'Content-Type': 'application/json',
@@ -73,62 +88,87 @@ export async function testAPI(provider: LLMProviderConfig): Promise<{ success: b
                     max_tokens: 1,
                     temperature: 0
                 });
-                response = await fetch(url, options);
-                if (!response.ok) throw new Error(`OpenRouter API error: ${response.status} - ${await response.text()}`);
-                await response.json();
+                response = await requestUrl(options);
+                if (response.status < 200 || response.status >= 300) throw new Error(`OpenRouter API error: ${response.status} - ${response.text}`);
                 return { success: true, message: `Successfully connected to OpenRouter API using model '${provider.model}'.` };
 
             case 'OpenAI':
                  // OpenAI API: Try /models first, fallback to chat/completions
                  url = `${provider.baseUrl}/models`;
+                 options.url = url;
                  options.headers = { 'Authorization': `Bearer ${provider.apiKey}` };
-                 response = await fetch(url, options);
-                 if (!response.ok) {
-                     url = `${provider.baseUrl}/chat/completions`;
-                     options.method = 'POST';
-                     options.headers = { ...options.headers, 'Content-Type': 'application/json' };
-                     options.body = JSON.stringify({ model: provider.model, messages: [{ role: 'user', content: 'Test' }], max_tokens: 1, temperature: 0 });
-                     response = await fetch(url, options);
+                 try {
+                    response = await requestUrl(options);
+                 } catch (e) {
+                    // Ignore error and try chat completions
                  }
-                 if (!response.ok) throw new Error(`OpenAI API error: ${response.status} - ${await response.text()}`);
-                 await response.json();
+
+                 if (response && response.status >= 200 && response.status < 300) {
+                    return { success: true, message: `Successfully connected to OpenAI API at ${provider.baseUrl}.` };
+                 }
+
+                 url = `${provider.baseUrl}/chat/completions`;
+                 options.url = url;
+                 options.method = 'POST';
+                 options.headers = { ...options.headers, 'Content-Type': 'application/json' };
+                 options.body = JSON.stringify({ model: provider.model, messages: [{ role: 'user', content: 'Test' }], max_tokens: 1, temperature: 0 });
+                 response = await requestUrl(options);
+
+                 if (response.status < 200 || response.status >= 300) throw new Error(`OpenAI API error: ${response.status} - ${response.text}`);
                  return { success: true, message: `Successfully connected to OpenAI API at ${provider.baseUrl}.` };
 
             case 'DeepSeek':
                  // DeepSeek API: Try /models first, fallback to chat/completions
                 url = `${provider.baseUrl}/models`;
+                options.url = url;
                 options.headers = { 'Authorization': `Bearer ${provider.apiKey}` };
-                response = await fetch(url, options);
-                // Fallback to chat completion test if /models fails
-                if (!response.ok) {
-                    url = `${provider.baseUrl}/chat/completions`;
-                    options.method = 'POST';
-                    options.headers = { ...options.headers, 'Content-Type': 'application/json' };
-                    options.body = JSON.stringify({ model: provider.model, messages: [{ role: 'user', content: 'Test' }], max_tokens: 1, temperature: 0 });
-                    response = await fetch(url, options);
+                try {
+                    response = await requestUrl(options);
+                } catch (e) {
+                    // Ignore error and try chat completions
                 }
-                if (!response.ok) throw new Error(`${provider.name} API error: ${response.status} - ${await response.text()}`);
-                await response.json();
+                // Fallback to chat completion test if /models fails
+                if (response && response.status >= 200 && response.status < 300) {
+                    return { success: true, message: `Successfully connected to ${provider.name} API at ${provider.baseUrl}.` };
+                }
+
+                url = `${provider.baseUrl}/chat/completions`;
+                options.url = url;
+                options.method = 'POST';
+                options.headers = { ...options.headers, 'Content-Type': 'application/json' };
+                options.body = JSON.stringify({ model: provider.model, messages: [{ role: 'user', content: 'Test' }], max_tokens: 1, temperature: 0 });
+                response = await requestUrl(options);
+
+                if (response.status < 200 || response.status >= 300) throw new Error(`${provider.name} API error: ${response.status} - ${response.text}`);
                 return { success: true, message: `Successfully connected to ${provider.name} API at ${provider.baseUrl}.` };
 
             case 'Mistral':
                  // Mistral API: Try /models first, fallback to chat/completions
                  url = `${provider.baseUrl}/models`;
+                 options.url = url;
                  options.headers = { 'Authorization': `Bearer ${provider.apiKey}` };
-                 response = await fetch(url, options);
-                 if (!response.ok) {
-                     url = `${provider.baseUrl}/chat/completions`;
-                     options.method = 'POST';
-                     options.headers = { ...options.headers, 'Content-Type': 'application/json' };
-                     options.body = JSON.stringify({ model: provider.model, messages: [{ role: 'user', content: 'Test' }], max_tokens: 1, temperature: 0 });
-                     response = await fetch(url, options);
+                 try {
+                    response = await requestUrl(options);
+                 } catch (e) {
+                    // Ignore error and try chat completions
                  }
-                 if (!response.ok) throw new Error(`Mistral API error: ${response.status} - ${await response.text()}`);
-                 await response.json();
+                 if (response && response.status >= 200 && response.status < 300) {
+                    return { success: true, message: `Successfully connected to Mistral API at ${provider.baseUrl}.` };
+                 }
+
+                 url = `${provider.baseUrl}/chat/completions`;
+                 options.url = url;
+                 options.method = 'POST';
+                 options.headers = { ...options.headers, 'Content-Type': 'application/json' };
+                 options.body = JSON.stringify({ model: provider.model, messages: [{ role: 'user', content: 'Test' }], max_tokens: 1, temperature: 0 });
+                 response = await requestUrl(options);
+
+                 if (response.status < 200 || response.status >= 300) throw new Error(`Mistral API error: ${response.status} - ${response.text}`);
                  return { success: true, message: `Successfully connected to Mistral API at ${provider.baseUrl}.` };
 
             case 'Anthropic':
                 url = `${provider.baseUrl}/v1/messages`;
+                options.url = url;
                 options.method = 'POST';
                 options.headers = { 
                     'Content-Type': 'application/json', 
@@ -140,45 +180,52 @@ export async function testAPI(provider: LLMProviderConfig): Promise<{ success: b
                     messages: [{ role: 'user', content: 'Test' }], 
                     max_tokens: 1 
                 });
-                response = await fetch(url, options);
-                if (!response.ok) throw new Error(`Anthropic API error: ${response.status} - ${await response.text()}`);
-                await response.json();
+                response = await requestUrl(options);
+                if (response.status < 200 || response.status >= 300) throw new Error(`Anthropic API error: ${response.status} - ${response.text}`);
                 return { success: true, message: `Successfully connected to Anthropic API.` };
 
             case 'Google':
                 url = `${provider.baseUrl}/models/${provider.model}:generateContent?key=${provider.apiKey}`;
+                options.url = url;
                 options.method = 'POST';
                 options.headers = { 'Content-Type': 'application/json' };
                 options.body = JSON.stringify({ contents: [{ role: 'user', parts: [{ text: 'Test' }] }], generationConfig: { maxOutputTokens: 1, temperature: 0 } });
-                response = await fetch(url, options);
-                if (!response.ok) throw new Error(`Google API error: ${response.status} - ${await response.text()}`);
-                await response.json();
+                response = await requestUrl(options);
+                if (response.status < 200 || response.status >= 300) throw new Error(`Google API error: ${response.status} - ${response.text}`);
                 return { success: true, message: `Successfully connected to Google API.` };
             case 'Azure OpenAI':
                 if (!provider.apiVersion || !provider.baseUrl || !provider.model) { throw new Error('Azure requires Base URL, Model (Deployment Name), and API Version.'); }
                 url = `${provider.baseUrl}/openai/deployments/${provider.model}/chat/completions?api-version=${provider.apiVersion}`;
+                options.url = url;
                 options.method = 'POST';
                 options.headers = { 'Content-Type': 'application/json', 'api-key': provider.apiKey };
                 options.body = JSON.stringify({ messages: [{ role: 'user', content: 'Test' }], max_tokens: 1, temperature: 0 });
-                response = await fetch(url, options);
-                if (!response.ok) throw new Error(`Azure OpenAI API error: ${response.status} - ${await response.text()}`);
-                await response.json();
+                response = await requestUrl(options);
+                if (response.status < 200 || response.status >= 300) throw new Error(`Azure OpenAI API error: ${response.status} - ${response.text}`);
                 return { success: true, message: `Successfully connected to Azure OpenAI deployment '${provider.model}'.` };
             
             case 'xAI':
                 // xAI API: Try /models first, fallback to chat/completions
                 url = `${provider.baseUrl}/models`;
+                options.url = url;
                 options.headers = { 'Authorization': `Bearer ${provider.apiKey}` };
-                response = await fetch(url, options);
-                if (!response.ok) {
-                    url = `${provider.baseUrl}/chat/completions`;
-                    options.method = 'POST';
-                    options.headers = { ...options.headers, 'Content-Type': 'application/json' };
-                    options.body = JSON.stringify({ model: provider.model, messages: [{ role: 'user', content: 'Test' }], max_tokens: 1, temperature: 0 });
-                    response = await fetch(url, options);
+                try {
+                    response = await requestUrl(options);
+                } catch (e) {
+                    // Ignore error and try chat completions
                 }
-                if (!response.ok) throw new Error(`xAI API error: ${response.status} - ${await response.text()}`);
-                await response.json();
+                if (response && response.status >= 200 && response.status < 300) {
+                    return { success: true, message: `Successfully connected to xAI API at ${provider.baseUrl}.` };
+                }
+
+                url = `${provider.baseUrl}/chat/completions`;
+                options.url = url;
+                options.method = 'POST';
+                options.headers = { ...options.headers, 'Content-Type': 'application/json' };
+                options.body = JSON.stringify({ model: provider.model, messages: [{ role: 'user', content: 'Test' }], max_tokens: 1, temperature: 0 });
+                response = await requestUrl(options);
+
+                if (response.status < 200 || response.status >= 300) throw new Error(`xAI API error: ${response.status} - ${response.text}`);
                 return { success: true, message: `Successfully connected to xAI API at ${provider.baseUrl}.` };
 
             default:
@@ -297,24 +344,27 @@ async function executeDeepSeekAPI(provider: LLMProviderConfig, modelName: string
         max_tokens: settings.maxTokens
     };
     
-    const { signal: fetchSignal, controller } = getAbortSignal(progressReporter, signal);
+    const { controller } = getAbortSignal(progressReporter, signal);
 
     try {
         await cancellableDelay(1, progressReporter); // Yield
-        const response = await fetch(url, {
-            method: 'POST', 
-            signal: fetchSignal, 
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${provider.apiKey}` }, 
+        const response = await requestUrl({
+            url: url,
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${provider.apiKey}` },
             body: JSON.stringify(requestBody)
         });
-        if (progressReporter.cancelled || fetchSignal.aborted) throw new Error("Processing cancelled by user after API response.");
-        if (!response.ok) { const errorText = await response.text(); throw new Error(`DeepSeek API error: ${response.status} - ${errorText}`); }
-        const data = await response.json();
-        if (progressReporter.cancelled || fetchSignal.aborted) throw new Error("Processing cancelled by user after API success.");
+
+        if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
+        if (response.status < 200 || response.status >= 300) {
+            const errorText = response.text;
+            throw new Error(`DeepSeek API error: ${response.status} - ${errorText}`);
+        }
+        const data = response.json;
+        if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API success.");
         if (!data.choices?.[0]?.message?.content) { throw new Error(`Unexpected response format from DeepSeek API`); }
         return data.choices[0].message.content;
     } finally { 
-        // Only clear the reporter's controller if we created it internally
         if (controller && progressReporter.abortController === controller) { 
             progressReporter.abortController = null; 
         } 
@@ -331,20 +381,20 @@ async function executeOpenAIApi(provider: LLMProviderConfig, modelName: string, 
         max_tokens: settings.maxTokens
     };
     
-    const { signal: fetchSignal, controller } = getAbortSignal(progressReporter, signal);
+    const { controller } = getAbortSignal(progressReporter, signal);
 
     try {
         await cancellableDelay(1, progressReporter); // Yield
-        const response = await fetch(url, {
-            method: 'POST', 
-            signal: fetchSignal, 
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${provider.apiKey}` }, 
+        const response = await requestUrl({
+            url: url,
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${provider.apiKey}` },
             body: JSON.stringify(requestBody)
         });
-        if (progressReporter.cancelled || fetchSignal.aborted) throw new Error("Processing cancelled by user after API response.");
-        if (!response.ok) { const errorText = await response.text(); throw new Error(`OpenAI API error: ${response.status} - ${errorText}`); }
-        const data = await response.json();
-        if (progressReporter.cancelled || fetchSignal.aborted) throw new Error("Processing cancelled by user after API success.");
+        if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
+        if (response.status < 200 || response.status >= 300) { const errorText = response.text; throw new Error(`OpenAI API error: ${response.status} - ${errorText}`); }
+        const data = response.json;
+        if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API success.");
         if (!data.choices?.[0]?.message?.content) { throw new Error(`Unexpected response format from OpenAI API`); }
         return data.choices[0].message.content;
     } finally { 
@@ -365,13 +415,13 @@ async function executeAnthropicApi(provider: LLMProviderConfig, modelName: strin
         max_tokens: settings.maxTokens
     };
     
-    const { signal: fetchSignal, controller } = getAbortSignal(progressReporter, signal);
+    const { controller } = getAbortSignal(progressReporter, signal);
 
     try {
         await cancellableDelay(1, progressReporter); // Yield
-        const response = await fetch(url, {
-            method: 'POST', 
-            signal: fetchSignal, 
+        const response = await requestUrl({
+            url: url,
+            method: 'POST',
             headers: { 
                 'Content-Type': 'application/json', 
                 'x-api-key': provider.apiKey, 
@@ -379,10 +429,10 @@ async function executeAnthropicApi(provider: LLMProviderConfig, modelName: strin
             }, 
             body: JSON.stringify(requestBody)
         });
-        if (progressReporter.cancelled || fetchSignal.aborted) throw new Error("Processing cancelled by user after API response.");
-        if (!response.ok) { const errorText = await response.text(); throw new Error(`Anthropic API error: ${response.status} - ${errorText}`); }
-        const data = await response.json();
-        if (progressReporter.cancelled || fetchSignal.aborted) throw new Error("Processing cancelled by user after API success.");
+        if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
+        if (response.status < 200 || response.status >= 300) { const errorText = response.text; throw new Error(`Anthropic API error: ${response.status} - ${errorText}`); }
+        const data = response.json;
+        if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API success.");
         if (!data.content?.[0]?.text) { throw new Error(`Unexpected response format from Anthropic API`); }
         return data.content[0].text;
     } finally { 
@@ -400,20 +450,20 @@ async function executeGoogleApi(provider: LLMProviderConfig, modelName: string, 
         generationConfig: { temperature: provider.temperature, maxOutputTokens: settings.maxTokens }
     };
 
-    const { signal: fetchSignal, controller } = getAbortSignal(progressReporter, signal);
+    const { controller } = getAbortSignal(progressReporter, signal);
 
     try {
         await cancellableDelay(1, progressReporter); // Yield
-        const response = await fetch(urlWithKey, {
-            method: 'POST', 
-            signal: fetchSignal, 
-            headers: { 'Content-Type': 'application/json' }, 
+        const response = await requestUrl({
+            url: urlWithKey,
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(requestBody)
         });
-        if (progressReporter.cancelled || fetchSignal.aborted) throw new Error("Processing cancelled by user after API response.");
-        if (!response.ok) { const errorText = await response.text(); throw new Error(`Google API error: ${response.status} - ${errorText}`); }
-        const data = await response.json();
-        if (progressReporter.cancelled || fetchSignal.aborted) throw new Error("Processing cancelled by user after API success.");
+        if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
+        if (response.status < 200 || response.status >= 300) { const errorText = response.text; throw new Error(`Google API error: ${response.status} - ${errorText}`); }
+        const data = response.json;
+        if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API success.");
         if (!data.candidates?.[0]?.content?.parts?.[0]?.text) { throw new Error(`Unexpected response format from Google API`); }
         return data.candidates[0].content.parts[0].text;
     } finally { 
@@ -433,20 +483,20 @@ async function executeMistralApi(provider: LLMProviderConfig, modelName: string,
         max_tokens: settings.maxTokens
     };
 
-    const { signal: fetchSignal, controller } = getAbortSignal(progressReporter, signal);
+    const { controller } = getAbortSignal(progressReporter, signal);
 
     try {
         await cancellableDelay(1, progressReporter); // Yield
-        const response = await fetch(url, {
-            method: 'POST', 
-            signal: fetchSignal, 
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${provider.apiKey}` }, 
+        const response = await requestUrl({
+            url: url,
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${provider.apiKey}` },
             body: JSON.stringify(requestBody)
         });
-        if (progressReporter.cancelled || fetchSignal.aborted) throw new Error("Processing cancelled by user after API response.");
-        if (!response.ok) { const errorText = await response.text(); throw new Error(`Mistral API error: ${response.status} - ${errorText}`); }
-        const data = await response.json();
-        if (progressReporter.cancelled || fetchSignal.aborted) throw new Error("Processing cancelled by user after API success.");
+        if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
+        if (response.status < 200 || response.status >= 300) { const errorText = response.text; throw new Error(`Mistral API error: ${response.status} - ${errorText}`); }
+        const data = response.json;
+        if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API success.");
         if (!data.choices?.[0]?.message?.content) { throw new Error(`Unexpected response format from Mistral API`); }
         return data.choices[0].message.content;
     } finally { 
@@ -466,20 +516,20 @@ async function executeAzureOpenAIApi(provider: LLMProviderConfig, modelName: str
         max_tokens: settings.maxTokens
     };
 
-    const { signal: fetchSignal, controller } = getAbortSignal(progressReporter, signal);
+    const { controller } = getAbortSignal(progressReporter, signal);
 
     try {
         await cancellableDelay(1, progressReporter); // Yield
-        const response = await fetch(url, {
-            method: 'POST', 
-            signal: fetchSignal, 
-            headers: { 'Content-Type': 'application/json', 'api-key': provider.apiKey }, 
+        const response = await requestUrl({
+            url: url,
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'api-key': provider.apiKey },
             body: JSON.stringify(requestBody)
         });
-        if (progressReporter.cancelled || fetchSignal.aborted) throw new Error("Processing cancelled by user after API response.");
-        if (!response.ok) { const errorText = await response.text(); throw new Error(`Azure OpenAI API error: ${response.status} - ${errorText}`); }
-        const data = await response.json();
-        if (progressReporter.cancelled || fetchSignal.aborted) throw new Error("Processing cancelled by user after API success.");
+        if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
+        if (response.status < 200 || response.status >= 300) { const errorText = response.text; throw new Error(`Azure OpenAI API error: ${response.status} - ${errorText}`); }
+        const data = response.json;
+        if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API success.");
         if (!data.choices?.[0]?.message?.content) { throw new Error(`Unexpected response format from Azure OpenAI API`); }
         return data.choices[0].message.content;
     } finally { 
@@ -492,27 +542,34 @@ async function executeAzureOpenAIApi(provider: LLMProviderConfig, modelName: str
 async function executeLMStudioApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings, signal?: AbortSignal): Promise<string> {
     // Note: LMStudio might not require an API key, or use a placeholder like 'EMPTY'.
     const url = `${provider.baseUrl}/chat/completions`;
-    const requestBody = {
+    
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const requestBody: any = {
         model: modelName,
         messages: [{ role: 'system', content: prompt }, { role: 'user', content: content }],
-        temperature: provider.temperature,
-        max_tokens: settings.maxTokens
     };
 
-    const { signal: fetchSignal, controller } = getAbortSignal(progressReporter, signal);
+    if (typeof provider.temperature === 'number') {
+        requestBody.temperature = provider.temperature;
+    }
+    if (typeof settings.maxTokens === 'number' && settings.maxTokens > 0) {
+        requestBody.max_tokens = settings.maxTokens;
+    }
+
+    const { controller } = getAbortSignal(progressReporter, signal);
 
     try {
         await cancellableDelay(1, progressReporter); // Yield
-        const response = await fetch(url, {
-            method: 'POST', 
-            signal: fetchSignal, 
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${provider.apiKey || 'EMPTY'}` }, 
+        const response = await requestUrl({
+            url: url,
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${provider.apiKey || 'EMPTY'}` },
             body: JSON.stringify(requestBody)
         });
-        if (progressReporter.cancelled || fetchSignal.aborted) throw new Error("Processing cancelled by user after API response.");
-        if (!response.ok) { const errorText = await response.text(); throw new Error(`LMStudio API error: ${response.status} - ${errorText}`); }
-        const data = await response.json();
-        if (progressReporter.cancelled || fetchSignal.aborted) throw new Error("Processing cancelled by user after API success.");
+        if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
+        if (response.status < 200 || response.status >= 300) { const errorText = response.text; throw new Error(`LMStudio API error: ${response.status} - ${errorText}`); }
+        const data = response.json;
+        if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API success.");
         if (!data.choices?.[0]?.message?.content) { throw new Error(`Unexpected response format from LMStudio`); }
         return data.choices[0].message.content;
     } finally { 
@@ -532,20 +589,20 @@ async function executeOllamaApi(provider: LLMProviderConfig, modelName: string, 
         stream: false
     };
     
-    const { signal: fetchSignal, controller } = getAbortSignal(progressReporter, signal);
+    const { controller } = getAbortSignal(progressReporter, signal);
 
     try {
         await cancellableDelay(1, progressReporter); // Yield
-        const response = await fetch(url, {
-            method: 'POST', 
-            signal: fetchSignal, 
-            headers: { 'Content-Type': 'application/json' }, 
+        const response = await requestUrl({
+            url: url,
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(requestBody)
         });
-        if (progressReporter.cancelled || fetchSignal.aborted) throw new Error("Processing cancelled by user after API response.");
-        if (!response.ok) { const errorText = await response.text(); throw new Error(`Ollama API error: ${response.status} - ${errorText}`); }
-        const data = await response.json();
-        if (progressReporter.cancelled || fetchSignal.aborted) throw new Error("Processing cancelled by user after API success.");
+        if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
+        if (response.status < 200 || response.status >= 300) { const errorText = response.text; throw new Error(`Ollama API error: ${response.status} - ${errorText}`); }
+        const data = response.json;
+        if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API success.");
         if (!data.message?.content) { throw new Error(`Unexpected response format from Ollama`); }
         return data.message.content;
     } finally { 
@@ -566,15 +623,15 @@ async function executeOpenRouterAPI(provider: LLMProviderConfig, modelName: stri
         max_tokens: settings.maxTokens
     };
     
-    const { signal: fetchSignal, controller } = getAbortSignal(progressReporter, signal);
-    let response: Response | null = null;
+    const { controller } = getAbortSignal(progressReporter, signal);
+    let response;
 
     try {
         await cancellableDelay(1, progressReporter); // Yield
         progressReporter.log(`[OpenRouter] Calling API: ${url} with model ${modelName}`);
-        response = await fetch(url, {
+        response = await requestUrl({
+            url: url,
             method: 'POST',
-            signal: fetchSignal,
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${provider.apiKey}`,
@@ -585,13 +642,13 @@ async function executeOpenRouterAPI(provider: LLMProviderConfig, modelName: stri
         });
         progressReporter.log(`[OpenRouter] Received response status: ${response.status}`);
 
-        if (progressReporter.cancelled || fetchSignal.aborted) throw new Error("Processing cancelled by user after API response.");
+        if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
 
-        const responseText = await response.text(); // Read body as text first
+        const responseText = response.text; // Read body as text first
         progressReporter.log(`[OpenRouter] Read response text (length: ${responseText.length}).`);
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after reading response text."); // Check again
 
-        if (!response.ok) {
+        if (response.status < 200 || response.status >= 300) {
             progressReporter.log(`[OpenRouter] API Error Response Text: ${responseText}`); // Log error text
             throw new Error(`OpenRouter API error: ${response.status} - ${responseText}`);
         }
@@ -599,7 +656,7 @@ async function executeOpenRouterAPI(provider: LLMProviderConfig, modelName: stri
         // Now attempt to parse the text as JSON
         let data;
         try {
-            data = JSON.parse(responseText);
+            data = response.json;
             progressReporter.log(`[OpenRouter] Successfully parsed JSON response.`);
         } catch (jsonError: unknown) {
             progressReporter.log(`[OpenRouter] Failed to parse JSON response, status was ${response.status}.`);
@@ -667,20 +724,20 @@ async function executeXaiApi(provider: LLMProviderConfig, modelName: string, pro
         max_tokens: settings.maxTokens
     };
     
-    const { signal: fetchSignal, controller } = getAbortSignal(progressReporter, signal);
+    const { controller } = getAbortSignal(progressReporter, signal);
 
     try {
         await cancellableDelay(1, progressReporter); // Yield
-        const response = await fetch(url, {
-            method: 'POST', 
-            signal: fetchSignal, 
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${provider.apiKey}` }, 
+        const response = await requestUrl({
+            url: url,
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${provider.apiKey}` },
             body: JSON.stringify(requestBody)
         });
-        if (progressReporter.cancelled || fetchSignal.aborted) throw new Error("Processing cancelled by user after API response.");
-        if (!response.ok) { const errorText = await response.text(); throw new Error(`xAI API error: ${response.status} - ${errorText}`); }
-        const data = await response.json();
-        if (progressReporter.cancelled || fetchSignal.aborted) throw new Error("Processing cancelled by user after API success.");
+        if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
+        if (response.status < 200 || response.status >= 300) { const errorText = response.text; throw new Error(`xAI API error: ${response.status} - ${errorText}`); }
+        const data = response.json;
+        if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API success.");
         if (!data.choices?.[0]?.message?.content) { throw new Error(`Unexpected response format from xAI API`); }
         return data.choices[0].message.content;
     } finally { 
