@@ -11,13 +11,16 @@ export const DEFAULT_PROMPTS: Record<TaskKey, string> = {
 - **Identify Core Concepts:** Extract nouns or noun phrases that are central to the document's topic. These should be terms that would be valuable as standalone notes in a knowledge base.
 - **Prioritize Specificity:** Always extract the most specific concept available. For example, in a document about polymer physics, extract \`Dielectric Relaxation\` over just \`Relaxation\`.
 - **Technical & Scientific Terms:** Focus on technical terms, scientific principles, methodologies, and key entities relevant to the subject matter.
-
+- **Contextual Relevance:** Only extract if the term represents a core technical or scientific concept within the text's context. Skip if ambiguous or non-central.
 ### Rules & Constraints
 1.  **Normalization:** Normalize concepts to their singular form (e.g., extract "model" from "models").
-2.  **Sub-concepts:** If a word is part of a larger, more specific concept (e.g., "polymer" in "polymer physics"), extract the full concept (\`polymer physics\`) and not the individual word.
-3.  **Avoid Common Nouns/Proper Nouns:** Do not extract common, non-technical nouns or proper nouns like company names, product names, people's names, dates, or locations unless they are a central concept in a specific context (e.g., \`Turing Machine\`).
-4.  **Ignored Sections:** Do not extract any concepts from sections titled "References", "Bibliography", "Acknowledgements", or similar citation/reference lists.
-
+2.  **Sub-concepts and Multi-Word Priority:** If a single-word concept (e.g., "relaxation") also appears as part of a multi-word concept (e.g., "dielectric relaxation"), only extract the multi-word concept. Do not extract the standalone single word.
+3.  **Singular/Plural Handling:** If both singular and plural forms appear (e.g., "model" and "models"), only extract the singular form. Ignore plurals entirely.
+4.  **Avoid Common Nouns/Proper Nouns:** Do not extract common, non-technical nouns or proper nouns like company names, product names, people's names, dates, or locations unless they are a central concept in a specific context (e.g., \`Turing Machine\`). Skip conventional names unless they represent a core technical or scientific concept.
+5.  **Ignored Sections:** Do not extract any concepts from sections titled "References", "Bibliography", "Acknowledgements", or similar citation/reference lists. Ignore these sections entirely.
+6.  **Uniqueness and Deduplication:** Extract each unique concept only once, based on its normalized form. Do not include duplicates, even if they appear multiple times in the document. Extract only the first meaningful occurrence's form.
+7.  **Edge Cases:** If no concepts are found, output an empty list. Do not hallucinate concepts not explicitly present. Normalize case to title case for output (e.g., \`Polymer Physics\`).
+8.  **Markdown Handling:** Extract from all markdown elements (headers, paragraphs, lists) but ignore code blocks, inline code, or non-conceptual formatting.
 ### Example Output
 \`\`\`
 CONCEPT: Dielectric Relaxation
