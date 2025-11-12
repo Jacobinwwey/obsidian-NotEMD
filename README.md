@@ -375,8 +375,8 @@ This is the core functionality focused on identifying concepts and adding `[[wik
 
 7.  **Extract Concepts (Pure Mode)**:
     *   This feature allows you to extract concepts from a document and create the corresponding concept notes *without* altering the original file. It's perfect for quickly populating your knowledge base from a set of documents.
-    *   **Single File**: Open a file and run the command `Notemd: Extract concepts (create concept notes only)`.
-    *   **Folder**: Run the command `Notemd: Extract concepts for folder (concept notes only)` and select a folder to process all its notes.
+    *   **Single File**: Open a file and run the command `Notemd: Extract concepts (create concept notes only)` from the command palette or click the **"Extract concepts (current file)"** button in the sidebar.
+    *   **Folder**: Run the command `Notemd: Batch extract concepts from folder` from the command palette or click the **"Extract concepts (folder)"** button in the sidebar, then select a folder to process all its notes.
     *   The plugin will read the files, identify concepts, and create new notes for them in your designated **Concept Note Folder**, leaving your original files untouched.
 
 ## Supported LLM Providers

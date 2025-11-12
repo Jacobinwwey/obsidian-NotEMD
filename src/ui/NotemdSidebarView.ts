@@ -35,6 +35,8 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
     private cancelButton: HTMLButtonElement | null = null;
     private translateButton: HTMLButtonElement | null = null;
     private summarizeToMermaidButton: HTMLButtonElement | null = null;
+    private extractConceptsButton: HTMLButtonElement | null = null;
+    private extractConceptsFolderButton: HTMLButtonElement | null = null;
     private languageSelector: HTMLSelectElement | null = null;
 
     constructor(leaf: WorkspaceLeaf, plugin: NotemdPlugin) {
@@ -185,6 +187,8 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         if (this.checkRemoveDuplicatesButton) this.checkRemoveDuplicatesButton.disabled = processing;
         if (this.batchMermaidFixButton) this.batchMermaidFixButton.disabled = processing; // Added
         if (this.translateButton) this.translateButton.disabled = processing;
+        if (this.extractConceptsButton) this.extractConceptsButton.disabled = processing;
+        if (this.extractConceptsFolderButton) this.extractConceptsFolderButton.disabled = processing;
 
         // Cancel button enabled only during processing and before cancellation
         if (this.cancelButton) {
@@ -355,6 +359,30 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             finally { this.isProcessing = false; this.updateButtonStates(); }
         };
 
+        this.extractConceptsButton = newFeatureButtonGroup.createEl('button', { text: 'Extract concepts (current file)' });
+        this.extractConceptsButton.title = 'Extracts concepts from the current file and creates concept notes without modifying the original file.';
+        this.extractConceptsButton.onclick = async () => {
+            if (this.isProcessing) return;
+            this.clearDisplay();
+            this.currentAbortController = new AbortController();
+            this.isProcessing = true; this.startTime = Date.now(); this.updateButtonStates();
+            this.log('Starting: Extract Concepts (Current File)...'); this.updateStatus('Extracting concepts...', 0);
+            try { await this.plugin.extractConceptsCommand(this); }
+            finally { this.isProcessing = false; this.updateButtonStates(); }
+        };
+
+        this.extractConceptsFolderButton = newFeatureButtonGroup.createEl('button', { text: 'Extract concepts (folder)' });
+        this.extractConceptsFolderButton.title = 'Extracts concepts from all files in a selected folder and creates concept notes without modifying the original files.';
+        this.extractConceptsFolderButton.onclick = async () => {
+            if (this.isProcessing) return;
+            this.clearDisplay();
+            this.currentAbortController = new AbortController();
+            this.isProcessing = true; this.startTime = Date.now(); this.updateButtonStates();
+            this.log('Starting: Batch Extract Concepts (Folder)...'); this.updateStatus('Extracting concepts from folder...', 0);
+            try { await this.plugin.batchExtractConceptsForFolderCommand(this); }
+            finally { this.isProcessing = false; this.updateButtonStates(); }
+        };
+
         this.languageSelector = translateGroup.createEl('select');
         const languageSelector = this.languageSelector;
         if (languageSelector) {
@@ -488,6 +516,8 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         this.generateTitleButton = null; this.batchGenerateTitleButton = null; this.checkDuplicatesButton = null;
         this.testConnectionButton = null; this.checkRemoveDuplicatesButton = null; this.batchMermaidFixButton = null; // Added
         this.summarizeToMermaidButton = null;
+        this.extractConceptsButton = null;
+        this.extractConceptsFolderButton = null;
         this.translateButton = null; this.languageSelector = null;
     }
 }

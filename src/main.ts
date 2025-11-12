@@ -262,10 +262,10 @@ export default class NotemdPlugin extends Plugin {
         });
 
         this.addCommand({
-            id: 'extract-concepts-from-folder',
-            name: 'Extract concepts for folder (concept notes only)',
+            id: 'batch-extract-concepts-from-folder',
+            name: 'Batch extract concepts from folder',
             callback: async () => {
-                await this.extractConceptsForFolderCommand();
+                await this.batchExtractConceptsForFolderCommand();
             }
         });
 
@@ -1038,7 +1038,7 @@ export default class NotemdPlugin extends Plugin {
         }
     }
 
-    async extractConceptsForFolderCommand(reporter?: ProgressReporter) {
+    async batchExtractConceptsForFolderCommand(reporter?: ProgressReporter) {
         if (this.isBusy) { new Notice("Notemd is busy."); return; }
         this.isBusy = true;
         const useReporter = reporter || this.getReporter();
