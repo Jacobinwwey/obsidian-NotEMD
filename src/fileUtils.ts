@@ -1,5 +1,6 @@
 import { getSystemPrompt } from './promptUtils';
 import { App, TFile, TFolder, Notice, Vault } from 'obsidian';
+import NotemdPlugin from './main';
 import { NotemdSettings, ProgressReporter } from './types';
 import { DEFAULT_SETTINGS } from './constants';
 import { normalizeNameForFilePath, splitContent, getProviderForTask, getModelForTask, delay } from './utils'; // Added delay import
@@ -98,7 +99,13 @@ export async function handleFileDelete(app: App, path: string) {
 
 // --- Concept Note and Log File Generation ---
 
-export async function createConceptNotes(app: App, settings: NotemdSettings, concepts: Set<string>, currentProcessingFileBasename: string | null) {
+export async function createConceptNotes(
+    app: App,
+    settings: NotemdSettings,
+    concepts: Set<string>,
+    currentProcessingFileBasename: string | null,
+    options?: { disableBacklink?: boolean; minimalTemplate?: boolean }
+) {
     if (!settings.useCustomConceptNoteFolder || !settings.conceptNoteFolder) {
         return;
     }
@@ -126,7 +133,8 @@ export async function createConceptNotes(app: App, settings: NotemdSettings, con
 
             try {
                 if (existingFile instanceof TFile) {
-                    if (currentProcessingFileBasename) {
+                    // Add backlink only if not disabled
+                    if (!options?.disableBacklink && currentProcessingFileBasename) {
                         let existingContent = await app.vault.read(existingFile);
                         const backlink = `[[${currentProcessingFileBasename}]]`;
                         const linkedFromHeader = `## Linked From`;
@@ -150,6 +158,11 @@ export async function createConceptNotes(app: App, settings: NotemdSettings, con
                     }
                 } else if (!existingFile) {
                     let newNoteContent = `# ${concept}\n`;
+                    // If minimal template is requested, do not add backlinks.
+                    // Otherwise, add backlink if not disabled.
+                    if (!options?.minimalTemplate && !options?.disableBacklink && currentProcessingFileBasename) {
+                        newNoteContent += `\n## Linked From\n- [[${currentProcessingFileBasename}]]`;
+                    }
                     await app.vault.create(notePath, newNoteContent.trim());
                     createdCount++;
                     newlyCreatedConcepts.push(concept);
@@ -269,6 +282,86 @@ function getAllWords(content: string): Set<string> {
 }
 
 // --- Main File Processing Logic ---
+
+/**
+ * Extracts concepts from a file using the LLM without modifying the file.
+ * @param app Obsidian App instance.
+ * @param settings Plugin settings.
+ * @param file The TFile to process.
+ * @param progressReporter Progress reporter instance.
+ * @returns A promise that resolves to a Set of extracted concepts.
+ */
+export async function extractConceptsFromFile(
+    app: App,
+    plugin: NotemdPlugin,
+    file: TFile,
+    progressReporter: ProgressReporter
+): Promise<Set<string>> {
+    progressReporter.log(`Starting concept extraction for: ${file.name}`);
+    const content = await app.vault.read(file);
+    const allConcepts = new Set<string>();
+    const settings = plugin.settings;
+
+    // Determine provider and model
+    const { provider, modelName } = plugin.getProviderAndModelForTask('extractConcepts');
+    if (!provider) throw new Error('No valid LLM provider configured for "Extract Concepts" task.');
+
+    const chunks = splitContent(content, settings);
+    const totalChunks = chunks.length;
+    progressReporter.log(`Splitting content into ${totalChunks} chunks for concept extraction.`);
+
+    for (let i = 0; i < totalChunks; i++) {
+        if (progressReporter.cancelled) {
+            throw new Error("Concept extraction cancelled by user.");
+        }
+
+        const chunk = chunks[i];
+        const chunkProgress = Math.floor(((i) / totalChunks) * 100);
+        progressReporter.updateStatus(`Extracting concepts from chunk ${i + 1}/${totalChunks}...`, chunkProgress);
+        progressReporter.log(`Processing chunk ${i + 1}/${totalChunks}...`);
+
+        const prompt = getSystemPrompt(settings, 'extractConcepts');
+
+        try {
+            let responseText;
+            // Using the same provider logic as processFile
+            switch (provider.name) {
+                case 'DeepSeek': responseText = await callDeepSeekAPI(provider, modelName, prompt, chunk, progressReporter, settings); break;
+                case 'OpenAI': responseText = await callOpenAIApi(provider, modelName, prompt, chunk, progressReporter, settings); break;
+                case 'Anthropic': responseText = await callAnthropicApi(provider, modelName, prompt, chunk, progressReporter, settings); break;
+                case 'Google': responseText = await callGoogleApi(provider, modelName, prompt, chunk, progressReporter, settings); break;
+                case 'Mistral': responseText = await callMistralApi(provider, modelName, prompt, chunk, progressReporter, settings); break;
+                case 'Azure OpenAI': responseText = await callAzureOpenAIApi(provider, modelName, prompt, chunk, progressReporter, settings); break;
+                case 'LMStudio': responseText = await callLMStudioApi(provider, modelName, prompt, chunk, progressReporter, settings); break;
+                case 'Ollama': responseText = await callOllamaApi(provider, modelName, prompt, chunk, progressReporter, settings); break;
+                case 'OpenRouter': responseText = await callOpenRouterAPI(provider, modelName, prompt, chunk, progressReporter, settings); break;
+                default: throw new Error(`Unsupported provider: ${provider.name}`);
+            }
+
+            // Parse the response to extract concepts
+            const lines = responseText.split('\n');
+            for (const line of lines) {
+                if (line.startsWith('CONCEPT:')) {
+                    const concept = line.substring('CONCEPT:'.length).trim();
+                    if (concept) {
+                        allConcepts.add(concept);
+                    }
+                }
+            }
+            progressReporter.log(`Chunk ${i + 1} processed, found ${allConcepts.size} unique concepts so far.`);
+
+        } catch (error: unknown) {
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            console.error(`LLM error on chunk ${i + 1} for ${file.name} during concept extraction:`, error);
+            progressReporter.log(`Error extracting concepts from chunk ${i + 1}: ${errorMessage}`);
+            // Continue to next chunk
+        }
+    }
+
+    progressReporter.log(`Concept extraction finished for ${file.name}. Found a total of ${allConcepts.size} unique concepts.`);
+    return allConcepts;
+}
+
 
 /**
  * Processes a single file: LLM call, link generation, duplicate check, post-processing, saving.

@@ -256,6 +256,7 @@ export class NotemdSettingTab extends PluginSettingTab {
             createTaskModelSettings('generateTitleProvider', 'generateTitleModel', 'Generate from title');
             createTaskModelSettings('translateProvider', 'translateModel', 'Translate');
             createTaskModelSettings('summarizeToMermaidProvider', 'summarizeToMermaidModel', 'Summarise as Mermaid diagram');
+            createTaskModelSettings('extractConceptsProvider', 'extractConceptsModel', 'Extract Concepts');
         }
 
         // --- Translate Task Settings ---
@@ -369,6 +370,29 @@ export class NotemdSettingTab extends PluginSettingTab {
                 .setValue(this.plugin.settings.translateSummarizeToMermaidOutput)
                 .onChange(async (value) => {
                     this.plugin.settings.translateSummarizeToMermaidOutput = value;
+                    await this.plugin.saveSettings();
+                }));
+
+        // --- Extract Concepts Task Settings ---
+        new Setting(containerEl).setName('Task: Extract Concepts').setHeading();
+
+        new Setting(containerEl)
+            .setName('Create minimal concept notes')
+            .setDesc('On: Newly created concept notes will only contain the title. Off: They may include other content like backlinks.')
+            .addToggle(toggle => toggle
+                .setValue(this.plugin.settings.extractConceptsMinimalTemplate)
+                .onChange(async (value) => {
+                    this.plugin.settings.extractConceptsMinimalTemplate = value;
+                    await this.plugin.saveSettings();
+                }));
+
+        new Setting(containerEl)
+            .setName('Add "Linked From" backlink')
+            .setDesc('On: Add a backlink to the source document in the concept note. Off: Do not add backlinks during extraction.')
+            .addToggle(toggle => toggle
+                .setValue(this.plugin.settings.extractConceptsAddBacklink)
+                .onChange(async (value) => {
+                    this.plugin.settings.extractConceptsAddBacklink = value;
                     await this.plugin.saveSettings();
                 }));
 
@@ -506,6 +530,7 @@ export class NotemdSettingTab extends PluginSettingTab {
             createTaskLanguageSettings('researchSummarizeLanguage', 'Research & summarize');
             createTaskLanguageSettings('addLinksLanguage', 'Add links (process file/folder)');
             createTaskLanguageSettings('summarizeToMermaidLanguage', 'Summarise as Mermaid diagram');
+            createTaskLanguageSettings('extractConceptsLanguage', 'Extract Concepts');
         }
 
         // --- Duplicate Check Scope Settings (Refined) ---""
@@ -593,13 +618,14 @@ export class NotemdSettingTab extends PluginSettingTab {
             const tasksToCustomize: Array<{
                 key: TaskKey,
                 name: string,
-                useCustomSettingKey: keyof Pick<NotemdSettings, 'useCustomPromptForAddLinks' | 'useCustomPromptForGenerateTitle' | 'useCustomPromptForResearchSummarize' | 'useCustomPromptForSummarizeToMermaid'>,
-                customPromptSettingKey: keyof Pick<NotemdSettings, 'customPromptAddLinks' | 'customPromptGenerateTitle' | 'customPromptResearchSummarize' | 'customPromptSummarizeToMermaid'>
+                useCustomSettingKey: keyof Pick<NotemdSettings, 'useCustomPromptForAddLinks' | 'useCustomPromptForGenerateTitle' | 'useCustomPromptForResearchSummarize' | 'useCustomPromptForSummarizeToMermaid' | 'useCustomPromptForExtractConcepts'>,
+                customPromptSettingKey: keyof Pick<NotemdSettings, 'customPromptAddLinks' | 'customPromptGenerateTitle' | 'customPromptResearchSummarize' | 'customPromptSummarizeToMermaid' | 'customPromptExtractConcepts'>
             }> = [
                 { key: 'addLinks', name: 'Add Links (Process File/Folder)', useCustomSettingKey: 'useCustomPromptForAddLinks', customPromptSettingKey: 'customPromptAddLinks' },
                 { key: 'generateTitle', name: 'Generate from Title', useCustomSettingKey: 'useCustomPromptForGenerateTitle', customPromptSettingKey: 'customPromptGenerateTitle' },
                 { key: 'researchSummarize', name: 'Research & Summarize', useCustomSettingKey: 'useCustomPromptForResearchSummarize', customPromptSettingKey: 'customPromptResearchSummarize' },
                 { key: 'summarizeToMermaid', name: 'Summarise as Mermaid diagram', useCustomSettingKey: 'useCustomPromptForSummarizeToMermaid', customPromptSettingKey: 'customPromptSummarizeToMermaid' },
+                { key: 'extractConcepts', name: 'Extract Concepts', useCustomSettingKey: 'useCustomPromptForExtractConcepts', customPromptSettingKey: 'customPromptExtractConcepts' },
             ];
 
             tasksToCustomize.forEach(task => {
