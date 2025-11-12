@@ -109,6 +109,7 @@ export const DEFAULT_SETTINGS: NotemdSettings = {
     researchProvider: 'DeepSeek', // Default to the primary activeProvider initially
     generateTitleProvider: 'DeepSeek', // Default to the primary activeProvider initially
     translateProvider: 'DeepSeek',
+    extractConceptsProvider: 'DeepSeek',
     // Stable API Call Defaults
     enableStableApiCall: false, // Default to disabled
     apiCallInterval: 5, // Default interval 5 seconds
@@ -119,6 +120,7 @@ export const DEFAULT_SETTINGS: NotemdSettings = {
     generateTitleModel: '',
     translateModel: '',
     summarizeToMermaidModel: '',
+    extractConceptsModel: '',
     // Custom Add Links Output Filename Defaults
     useCustomAddLinksSuffix: false, // Default to standard '_processed.md' suffix
     addLinksCustomSuffix: '', // Default custom suffix is empty (relevant only if toggle is on)
@@ -133,6 +135,9 @@ export const DEFAULT_SETTINGS: NotemdSettings = {
     // Custom Duplicate Check Scope Defaults (Refined)
     duplicateCheckScopeMode: 'vault', // Default to checking the entire vault
     duplicateCheckScopePaths: '', // Default to empty list of paths
+    // Extract Concepts Task Defaults
+    extractConceptsMinimalTemplate: true,
+    extractConceptsAddBacklink: false,
     // Add Links Post-Processing Defaults
     removeCodeFencesOnAddLinks: false, // Default to NOT removing code fences
     // Language Settings Defaults
@@ -175,6 +180,7 @@ export const DEFAULT_SETTINGS: NotemdSettings = {
     researchSummarizeLanguage: 'en',
     addLinksLanguage: 'en',
     summarizeToMermaidLanguage: 'en',
+    extractConceptsLanguage: 'en',
     // Custom Prompt Settings Defaults
     enableGlobalCustomPrompts: false,
     useCustomPromptForAddLinks: false,
@@ -186,6 +192,8 @@ export const DEFAULT_SETTINGS: NotemdSettings = {
     summarizeToMermaidProvider: 'DeepSeek',
     useCustomPromptForSummarizeToMermaid: false,
     customPromptSummarizeToMermaid: '',
+    useCustomPromptForExtractConcepts: false,
+    customPromptExtractConcepts: '',
     translateSummarizeToMermaidOutput: false,
     useCustomSummarizeToMermaidSuffix: false,
     summarizeToMermaidCustomSuffix: '_summ',

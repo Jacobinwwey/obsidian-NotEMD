@@ -1,6 +1,6 @@
 {
 	"name": "notemd",
-	"version": "1.4.1",
+	"version": "1.5.0",
 	"description": "Enhances notes using LLMs: 1) Processes text to add [[wiki-links]] and create concept notes. 2) Performs web research (Tavily/DuckDuckGo) and summarizes topics. 3) Generates content from note titles. 4) Translates notes/selections. Supports multiple LLM providers and customizable output.",
 	"main": "main.js",
 	"scripts": {
@@ -10,7 +10,15 @@
 		"test": "jest",
 		"lint": "eslint . --ext .ts"
 	},
-	"keywords": ["obsidian", "plugin", "llm", "notes", "wiki-links", "research", "translation"],
+	"keywords": [
+		"obsidian",
+		"plugin",
+		"llm",
+		"notes",
+		"wiki-links",
+		"research",
+		"translation"
+	],
 	"author": "jacob",
 	"license": "MIT",
 	"devDependencies": {

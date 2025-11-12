@@ -45,6 +45,7 @@ export interface NotemdSettings {
     generateTitleProvider: string;
     translateProvider: string;
     summarizeToMermaidProvider: string;
+    extractConceptsProvider: string;
     // Stable API Call Settings
     enableStableApiCall: boolean;
     apiCallInterval: number;
@@ -55,6 +56,7 @@ export interface NotemdSettings {
     generateTitleModel?: string;
     translateModel?: string;
     summarizeToMermaidModel?: string;
+    extractConceptsModel?: string;
     // Custom Add Links Output Filename Settings
     useCustomAddLinksSuffix: boolean;
     addLinksCustomSuffix: string;
@@ -74,6 +76,9 @@ export interface NotemdSettings {
     // Custom Duplicate Check Scope Settings (Refined)
     duplicateCheckScopeMode: 'vault' | 'include' | 'exclude' | 'concept_folder_only'; // Added 'concept_folder_only' mode
     duplicateCheckScopePaths: string; // New: Newline-separated list of paths for include/exclude modes
+    // Extract Concepts Task Settings
+    extractConceptsMinimalTemplate: boolean;
+    extractConceptsAddBacklink: boolean;
     // Add Links Post-Processing
     removeCodeFencesOnAddLinks: boolean; // New: Option to remove ```markdown and ``` fences
     // Language Settings
@@ -84,6 +89,7 @@ export interface NotemdSettings {
     researchSummarizeLanguage: string;
     addLinksLanguage: string;
     summarizeToMermaidLanguage: string;
+    extractConceptsLanguage: string;
 
     // Custom Prompt Settings
     enableGlobalCustomPrompts: boolean; // Master toggle for custom prompts""
@@ -95,6 +101,8 @@ export interface NotemdSettings {
     customPromptResearchSummarize: string;
     useCustomPromptForSummarizeToMermaid: boolean;
     customPromptSummarizeToMermaid: string;
+    useCustomPromptForExtractConcepts: boolean;
+    customPromptExtractConcepts: string;
     translateSummarizeToMermaidOutput: boolean;
 
     // Focused Learning Domain
@@ -103,7 +111,7 @@ export interface NotemdSettings {
 }
 
 // Defines the keys for tasks that can have custom prompts
-export type TaskKey = 'addLinks' | 'generateTitle' | 'researchSummarize' | 'translate' | 'summarizeToMermaid';
+export type TaskKey = 'addLinks' | 'generateTitle' | 'researchSummarize' | 'translate' | 'summarizeToMermaid' | 'extractConcepts';
 
 // Interface for search results
 export interface SearchResult {

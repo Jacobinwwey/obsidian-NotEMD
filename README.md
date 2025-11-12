@@ -20,7 +20,7 @@ A Easy way to create your own Knowledge-base!
 
 Notemd enhances your Obsidian workflow by integrating with various Large Language Models (LLMs) to process your multi-languages notes, automatically generate wiki-links for key concepts, create corresponding concept notes, perform web research, helping you build powerful knowledge graphs and more.
 
-**Version:** 1.4.1
+**Version:** 1.5.0
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
@@ -65,6 +65,7 @@ That's it! Explore the settings to unlock more features like web research, trans
 - **Customizable Output Paths**: Configure separate relative paths within your vault for saving processed files and newly created concept notes.
 - **Customizable Output Filenames (Add Links)**: Optionally **overwrite the original file** or use a custom suffix/replacement string instead of the default `_processed.md` when processing files for links.
 - **Link Integrity Maintenance**: Basic handling for updating links when notes are renamed or deleted within the vault.
+- **Pure Concept Extraction**: Extract concepts and create corresponding concept notes without modifying the original document. This is ideal for populating a knowledge base from existing documents without altering them.
 
 
 ### Translation
@@ -145,10 +146,10 @@ Access plugin settings via:
 ### Multi-Model Configuration
 -   **Use Different Providers for Tasks**:
     *   **Disabled (Default)**: Uses the single "Active Provider" (selected above) for all tasks.
-    *   **Enabled**: Allows you to select a specific provider *and* optionally override the model name for each task ("Add Links", "Research & Summarize", "Generate from Title", "Translate"). If the model override field for a task is left blank, it will use the default model configured for that task's selected provider.
+    *   **Enabled**: Allows you to select a specific provider *and* optionally override the model name for each task ("Add Links", "Research & Summarize", "Generate from Title", "Translate", "Extract Concepts"). If the model override field for a task is left blank, it will use the default model configured for that task's selected provider.
 -   **Select different languages for different tasks**:
     *   **Disabled (Default)**: Uses the single "Output language" for all tasks.
-    *   **Enabled**: Allows you to select a specific language for each task ("Add Links", "Research & Summarize", "Generate from Title", "Summarise as Mermaid diagram").
+    *   **Enabled**: Allows you to select a specific language for each task ("Add Links", "Research & Summarize", "Generate from Title", "Summarise as Mermaid diagram", "Extract Concepts").
 
 <img width="817" height="428" alt="Multi-model" src="https://github.com/user-attachments/assets/85e6b854-c0ca-45cc-a55e-24638dceb120" />
 
@@ -207,6 +208,14 @@ Access plugin settings via:
 -   **Concept Log File Name**: (Visible only when "Customize Log File Name" is enabled) Enter the desired file name (e.g., `ConceptCreation.log`). **Must be filled if customization is enabled.**
 <img width="809" height="281" alt="Concept log file output" src="https://github.com/user-attachments/assets/eef6f5d5-592d-4b8f-84b1-7404521a6e9b" />
 
+#### Extract Concepts Task
+-   **Create minimal concept notes**:
+    *   **On (Default)**: Newly created concept notes will only contain the title (e.g., `# Concept`).
+    *   **Off**: Concept notes may include additional content, such as a "Linked From" backlink, if not disabled by the setting below.
+-   **Add "Linked From" backlink**:
+    *   **Off (Default)**: Does not add a backlink to the source document in the concept note during extraction.
+    *   **On**: Adds a "Linked From" section with a backlink to the source file.
+
 #### Processing Parameters
 -   **Chunk Word Count**: Maximum words per chunk sent to the LLM. Affects the number of API calls for large files. (Default: 3000)
 -   **Enable Duplicate Detection**: Toggles the basic check for duplicate words within processed content (results in console). (Default: Enabled)
@@ -247,7 +256,7 @@ This feature allows you to override the default instructions (prompts) sent to t
     *   **Enabled**: Activates the ability to set custom prompts for the tasks listed below. This is the master switch for this feature.
 
 -   **Use Custom Prompt for [Task Name]**: (Visible only when the above is enabled)
-    *   For each supported task ("Add Links", "Generate from Title", "Research & Summarize"), you can individually enable or disable your custom prompt.
+    *   For each supported task ("Add Links", "Generate from Title", "Research & Summarize", "Extract Concepts"), you can individually enable or disable your custom prompt.
     *   **Disabled**: This specific task will use the default prompt.
     *   **Enabled**: This task will use the text you provide in the corresponding "Custom Prompt" text area below.
 
@@ -364,6 +373,12 @@ This is the core functionality focused on identifying concepts and adding `[[wik
     *   Review the list carefully. Click **"Delete Files"** to move the listed files to the system trash, or **"Cancel"** to take no action.
     *   Progress and results are shown in the sidebar/modal log.
 
+7.  **Extract Concepts (Pure Mode)**:
+    *   This feature allows you to extract concepts from a document and create the corresponding concept notes *without* altering the original file. It's perfect for quickly populating your knowledge base from a set of documents.
+    *   **Single File**: Open a file and run the command `Notemd: Extract concepts (create concept notes only)`.
+    *   **Folder**: Run the command `Notemd: Extract concepts for folder (concept notes only)` and select a folder to process all its notes.
+    *   The plugin will read the files, identify concepts, and create new notes for them in your designated **Concept Note Folder**, leaving your original files untouched.
+
 ## Supported LLM Providers
 
 | Provider     | Type  | API Key Required | Notes                                                    |
@@ -414,7 +429,7 @@ MIT License - See [LICENSE](LICENSE) file for details.
 
 ---
 
-*Notemd v1.4.1 - Enhance your Obsidian knowledge graph with AI.*
+*Notemd v1.5.0 - Enhance your Obsidian knowledge graph with AI.*
 
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)

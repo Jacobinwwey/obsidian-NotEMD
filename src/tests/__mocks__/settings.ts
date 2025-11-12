@@ -46,6 +46,7 @@ export const mockSettings: NotemdSettings = {
     researchSummarizeLanguage: 'en',
     addLinksLanguage: 'en',
     summarizeToMermaidLanguage: 'en',
+    extractConceptsLanguage: 'en',
     enableGlobalCustomPrompts: false,
     useCustomPromptForAddLinks: false,
     customPromptAddLinks: '',
@@ -53,6 +54,8 @@ export const mockSettings: NotemdSettings = {
     customPromptGenerateTitle: '',
     useCustomPromptForResearchSummarize: false,
     customPromptResearchSummarize: '',
+    useCustomPromptForExtractConcepts: false,
+    customPromptExtractConcepts: '',
     translateProvider: 'DeepSeek',
     useCustomTranslationSuffix: false,
     translationCustomSuffix: '_translated',
@@ -68,5 +71,9 @@ export const mockSettings: NotemdSettings = {
     summarizeToMermaidSavePath: '',
     translateSummarizeToMermaidOutput: false,
     enableFocusedLearning: false,
-    focusedLearningDomain: ''
+    focusedLearningDomain: '',
+    extractConceptsProvider: 'DeepSeek',
+    extractConceptsModel: '',
+    extractConceptsMinimalTemplate: true,
+    extractConceptsAddBacklink: false,
 };

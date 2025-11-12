@@ -1,6 +1,29 @@
 import { NotemdSettings, TaskKey } from './types';
 
 export const DEFAULT_PROMPTS: Record<TaskKey, string> = {
+    extractConcepts: `You are an AI assistant specializing in knowledge extraction. Your task is to analyze a markdown document and identify all core concepts and keywords.
+
+**CRITICAL:** Your output must be a simple list of concepts. Each concept must be on a new line and prefixed with \`CONCEPT: \`. Do not include the original text, explanations, or any other formatting.
+
+---
+
+### Concept Identification Criteria
+- **Identify Core Concepts:** Extract nouns or noun phrases that are central to the document's topic. These should be terms that would be valuable as standalone notes in a knowledge base.
+- **Prioritize Specificity:** Always extract the most specific concept available. For example, in a document about polymer physics, extract \`Dielectric Relaxation\` over just \`Relaxation\`.
+- **Technical & Scientific Terms:** Focus on technical terms, scientific principles, methodologies, and key entities relevant to the subject matter.
+
+### Rules & Constraints
+1.  **Normalization:** Normalize concepts to their singular form (e.g., extract "model" from "models").
+2.  **Sub-concepts:** If a word is part of a larger, more specific concept (e.g., "polymer" in "polymer physics"), extract the full concept (\`polymer physics\`) and not the individual word.
+3.  **Avoid Common Nouns/Proper Nouns:** Do not extract common, non-technical nouns or proper nouns like company names, product names, people's names, dates, or locations unless they are a central concept in a specific context (e.g., \`Turing Machine\`).
+4.  **Ignored Sections:** Do not extract any concepts from sections titled "References", "Bibliography", "Acknowledgements", or similar citation/reference lists.
+
+### Example Output
+\`\`\`
+CONCEPT: Dielectric Relaxation
+CONCEPT: Polymer Physics
+CONCEPT: Turing Machine
+\`\`\``,
     addLinks: `Completely decompose and structure the knowledge points in this markdown document, outputting them in markdown format supported by Obsidian. Core knowledge points should be labelled with Obsidian's backlink format [[]]. Do not output anything other than the original text and the requested "Obsidian's backlink format [[]]".
 
 Rules:
@@ -189,6 +212,10 @@ export function getSystemPrompt(settings: NotemdSettings, taskKey: TaskKey, repl
                 useCustomPrompt = settings.useCustomPromptForSummarizeToMermaid;
                 customPrompt = settings.customPromptSummarizeToMermaid;
                 break;
+            case 'extractConcepts':
+                useCustomPrompt = settings.useCustomPromptForExtractConcepts;
+                customPrompt = settings.customPromptExtractConcepts;
+                break;
             // 'translate' does not have a custom prompt option in this structure
         }
     }
@@ -213,6 +240,15 @@ export function getSystemPrompt(settings: NotemdSettings, taskKey: TaskKey, repl
         prompt += `
 
 IMPORTANT: The entire Mermaid diagram, including all node text, MUST be translated into ${targetLanguageName}.`;
+    }
+
+    // Add language instruction for extractConcepts if a specific language is set
+    if (taskKey === 'extractConcepts') {
+        const languageCode = settings.useDifferentLanguagesForTasks ? settings.extractConceptsLanguage : settings.language;
+        const targetLanguageName = settings.availableLanguages.find(lang => lang.code === languageCode)?.name || languageCode;
+        if (targetLanguageName) {
+            prompt += `\n\nThe output concepts MUST be in ${targetLanguageName}.`;
+        }
     }
 
     return prompt;
