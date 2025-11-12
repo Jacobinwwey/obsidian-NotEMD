@@ -12,7 +12,9 @@ import {
     checkAndRemoveDuplicateConceptNotes,
     batchFixMermaidSyntaxInFolder,
     findDuplicates,
-    saveMermaidSummaryFile // Import the new function
+    saveMermaidSummaryFile,
+    extractConceptsFromFile,
+    createConceptNotes
 } from './fileUtils';
 import { _performResearch, researchAndSummarize } from './searchUtils'; // Import _performResearch if needed directly, ensure researchAndSummarize is exported
 import { ProgressModal } from './ui/ProgressModal';
@@ -243,6 +245,30 @@ export default class NotemdPlugin extends Plugin {
             }
         });
 
+        this.addCommand({
+            id: 'extract-concepts-from-current-file',
+            name: 'Extract concepts (create concept notes only)',
+            checkCallback: (checking: boolean) => {
+                const activeFile = this.app.workspace.getActiveFile();
+                const condition = activeFile && (activeFile.extension === 'md' || activeFile.extension === 'txt');
+                if (condition) {
+                    if (!checking) {
+                        this.extractConceptsCommand();
+                    }
+                    return true;
+                }
+                return false;
+            }
+        });
+
+        this.addCommand({
+            id: 'extract-concepts-from-folder',
+            name: 'Extract concepts for folder (concept notes only)',
+            callback: async () => {
+                await this.extractConceptsForFolderCommand();
+            }
+        });
+
         // --- Settings Tab ---
         this.addSettingTab(new NotemdSettingTab(this.app, this));
 
@@ -296,6 +322,7 @@ export default class NotemdPlugin extends Plugin {
         this.settings.researchProvider = this.settings.providers.some(p => p.name === this.settings.researchProvider) ? this.settings.researchProvider : this.settings.activeProvider;
         this.settings.generateTitleProvider = this.settings.providers.some(p => p.name === this.settings.generateTitleProvider) ? this.settings.generateTitleProvider : this.settings.activeProvider;
         this.settings.translateProvider = this.settings.providers.some(p => p.name === this.settings.translateProvider) ? this.settings.translateProvider : this.settings.activeProvider;
+        this.settings.extractConceptsProvider = this.settings.providers.some(p => p.name === this.settings.extractConceptsProvider) ? this.settings.extractConceptsProvider : this.settings.activeProvider;
 
         // Merge availableLanguages to ensure new languages are added for existing users
         const defaultLanguages = DEFAULT_SETTINGS.availableLanguages;
@@ -377,7 +404,7 @@ export default class NotemdPlugin extends Plugin {
         console.log(`[Notemd] ${message}`);
     }
 
-	getProviderAndModelForTask(taskKey: 'addLinks' | 'research' | 'generateTitle' | 'translate' | 'summarizeToMermaid'): { provider: LLMProviderConfig, modelName: string } {
+	getProviderAndModelForTask(taskKey: 'addLinks' | 'research' | 'generateTitle' | 'translate' | 'summarizeToMermaid' | 'extractConcepts'): { provider: LLMProviderConfig, modelName: string } {
 		let providerName: string = this.settings.activeProvider;
 		let modelName: string | undefined = undefined;
 
@@ -403,6 +430,10 @@ export default class NotemdPlugin extends Plugin {
 					providerName = this.settings.summarizeToMermaidProvider;
 					modelName = this.settings.summarizeToMermaidModel;
 					break;
+                case 'extractConcepts':
+                    providerName = this.settings.extractConceptsProvider;
+                    modelName = this.settings.extractConceptsModel;
+                    break;
 			}
 		}
 
@@ -950,5 +981,151 @@ export default class NotemdPlugin extends Plugin {
 			this.isBusy = false;
 		}
 	}
+
+    async extractConceptsCommand(reporter?: ProgressReporter) {
+        if (this.isBusy) { new Notice("Notemd is busy."); return; }
+        this.isBusy = true;
+        const useReporter = reporter || this.getReporter();
+        useReporter.clearDisplay();
+
+        try {
+            await this.loadSettings();
+            const activeFile = this.app.workspace.getActiveFile();
+            if (!activeFile || !(activeFile instanceof TFile) || (activeFile.extension !== 'md' && activeFile.extension !== 'txt')) {
+                throw new Error("No active '.md' or '.txt' file to extract concepts from.");
+            }
+
+            useReporter.updateStatus(`Extracting concepts from ${activeFile.name}...`, 0);
+            this.updateStatusBar(`Extracting concepts: ${activeFile.name}`);
+
+            const concepts = await extractConceptsFromFile(this.app, this, activeFile, useReporter);
+
+            if (concepts.size > 0) {
+                useReporter.log(`Found ${concepts.size} concepts. Creating concept notes...`);
+                await createConceptNotes(
+                    this.app,
+                    this.settings,
+                    concepts,
+                    null,
+                    {
+                        disableBacklink: !this.settings.extractConceptsAddBacklink,
+                        minimalTemplate: this.settings.extractConceptsMinimalTemplate
+                    }
+                );
+                useReporter.updateStatus('Concept extraction complete!', 100);
+                new Notice(`Concept extraction complete! Found and created ${concepts.size} concept notes.`);
+            } else {
+                useReporter.updateStatus('No concepts found.', 100);
+                new Notice('No concepts found to extract.');
+            }
+
+            if (useReporter instanceof ProgressModal) setTimeout(() => useReporter.close(), 2000);
+
+        } catch (error: unknown) {
+            this.updateStatusBar('Error occurred');
+            let errorMessage = 'An unknown error occurred during concept extraction.';
+            if (error instanceof Error) {
+                errorMessage = error.message;
+            }
+            if (!errorMessage.includes("cancelled by user")) {
+                new Notice(`Error during concept extraction: ${errorMessage}.`, 10000);
+                new ErrorModal(this.app, "Concept Extraction Error", errorMessage).open();
+            }
+            useReporter.log(`Error: ${errorMessage}`);
+            useReporter.updateStatus('Error occurred', -1);
+        } finally {
+            this.isBusy = false;
+        }
+    }
+
+    async extractConceptsForFolderCommand(reporter?: ProgressReporter) {
+        if (this.isBusy) { new Notice("Notemd is busy."); return; }
+        this.isBusy = true;
+        const useReporter = reporter || this.getReporter();
+        useReporter.clearDisplay();
+
+        try {
+            await this.loadSettings();
+            const folderPath = await this.getFolderSelection();
+            if (!folderPath) { throw new Error("Folder selection cancelled."); }
+
+            const folder = this.app.vault.getAbstractFileByPath(folderPath);
+            if (!folder || !(folder instanceof TFolder)) throw new Error(`Invalid folder selected: ${folderPath}`);
+
+            const files = this.app.vault.getFiles().filter(f =>
+                (f.extension === 'md' || f.extension === 'txt') &&
+                (f.path.startsWith(folderPath === '/' ? '' : folderPath + '/'))
+            );
+
+            if (files.length === 0) {
+                new Notice(`No '.md' or '.txt' files found in selected folder: ${folderPath}`);
+                return;
+            }
+
+            this.updateStatusBar(`Batch extracting concepts from ${files.length} files...`);
+            useReporter.log(`Starting batch concept extraction for ${files.length} files in "${folderPath}"...`);
+            const errors: { file: string; message: string }[] = [];
+            let totalConcepts = 0;
+
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                if (useReporter.cancelled) { new Notice('Batch extraction cancelled.'); break; }
+
+                const progress = Math.floor(((i) / files.length) * 100);
+                useReporter.updateStatus(`Processing ${i + 1}/${files.length}: ${file.name}`, progress);
+
+                try {
+                    const concepts = await extractConceptsFromFile(this.app, this, file, useReporter);
+                    if (concepts.size > 0) {
+                        totalConcepts += concepts.size;
+                        await createConceptNotes(
+                            this.app,
+                            this.settings,
+                            concepts,
+                            null,
+                            {
+                                disableBacklink: !this.settings.extractConceptsAddBacklink,
+                                minimalTemplate: this.settings.extractConceptsMinimalTemplate
+                            }
+                        );
+                    }
+                } catch (fileError: unknown) {
+                    const message = fileError instanceof Error ? fileError.message : String(fileError);
+                    errors.push({ file: file.name, message: message });
+                    useReporter.log(`❌ Error processing ${file.name}: ${message}`);
+                    if (message.includes("cancelled by user")) break;
+                }
+            }
+
+            if (!useReporter.cancelled) {
+                if (errors.length > 0) {
+                    const errorSummary = `Batch extraction finished with ${errors.length} error(s).`;
+                    useReporter.log(`⚠️ ${errorSummary}`);
+                    useReporter.updateStatus(errorSummary, -1);
+                    new Notice(errorSummary, 10000);
+                } else {
+                    const successMessage = `Batch extraction complete! Found ${totalConcepts} concepts across ${files.length} files.`;
+                    useReporter.updateStatus(successMessage, 100);
+                    new Notice(successMessage);
+                    if (useReporter instanceof ProgressModal) setTimeout(() => useReporter.close(), 2000);
+                }
+            }
+
+        } catch (error: unknown) {
+            this.updateStatusBar('Error occurred');
+            let errorMessage = 'An unknown error occurred during batch extraction.';
+            if (error instanceof Error) {
+                errorMessage = error.message;
+            }
+            if (!errorMessage.includes("cancelled")) {
+                new Notice(`Error during batch extraction: ${errorMessage}.`, 10000);
+                new ErrorModal(this.app, "Batch Concept Extraction Error", errorMessage).open();
+            }
+            useReporter.log(`Batch Error: ${errorMessage}`);
+            useReporter.updateStatus('Error occurred', -1);
+        } finally {
+            this.isBusy = false;
+        }
+    }
 
 } // End of NotemdPlugin class
