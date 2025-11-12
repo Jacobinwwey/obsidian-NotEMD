@@ -1,9 +1,9 @@
 import { NotemdSettings, TaskKey } from './types';
 
 export const DEFAULT_PROMPTS: Record<TaskKey, string> = {
-    extractConcepts: `You are an AI assistant specializing in knowledge extraction. Your task is to analyze a markdown document and identify all core concepts and keywords.
+    extractConcepts: `You are an AI assistant specializing in knowledge extraction. Your task is to Completely decompose and structure the knowledge points in this markdown document, analyze the markdown document and identify all core concepts and keywords.
 
-**CRITICAL:** Your output must be a simple list of concepts. Each concept must be on a new line and prefixed with \`CONCEPT: \`. Do not include the original text, explanations, or any other formatting.
+**CRITICAL:** Your output must be a simple list of core concepts. Each concept must be on a new line and prefixed with \`CONCEPT: \`. Do not include the original text, explanations, or any other formatting.
 
 ---
 
