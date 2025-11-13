@@ -65,7 +65,7 @@ That's it! Explore the settings to unlock more features like web research, trans
 - **Customizable Output Paths**: Configure separate relative paths within your vault for saving processed files and newly created concept notes.
 - **Customizable Output Filenames (Add Links)**: Optionally **overwrite the original file** or use a custom suffix/replacement string instead of the default `_processed.md` when processing files for links.
 - **Link Integrity Maintenance**: Basic handling for updating links when notes are renamed or deleted within the vault.
-- **Pure Concept Extraction**: Extract concepts and create corresponding concept notes without modifying the original document. This is ideal for populating a knowledge base from existing documents without altering them.
+- **Pure Concept Extraction**: Extract concepts and create corresponding concept notes without modifying the original document. This is ideal for populating a knowledge base from existing documents without altering them. This feature has configurable options for creating minimal concept notes and adding backlinks. This feature has configurable options for creating minimal concept notes and adding backlinks.
 
 
 ### Translation
@@ -76,6 +76,7 @@ That's it! Explore the settings to unlock more features like web research, trans
     - Supports translation between multiple languages.
     - Customizable target language in settings or in UI.
     - Automatically open the translated text on the right side of the original text for easy reading.
+- **Disable auto translation**: When this option is enabled, non-Translate tasks will no longer force outputs into a specific language, preserving the original language context. The explicit "Translate" task will still perform translation as configured.
 
 
 ### Web Research & Content Generation

@@ -76,4 +76,5 @@ export const mockSettings: NotemdSettings = {
     extractConceptsModel: '',
     extractConceptsMinimalTemplate: true,
     extractConceptsAddBacklink: false,
+    disableAutoTranslation: false,
 };

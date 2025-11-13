@@ -201,7 +201,8 @@ export const DEFAULT_SETTINGS: NotemdSettings = {
     summarizeToMermaidSavePath: '',
     // Focused Learning Domain
     enableFocusedLearning: false,
-    focusedLearningDomain: ''
+    focusedLearningDomain: '',
+    disableAutoTranslation: false,
 };
 
 // Constants for the Sidebar View

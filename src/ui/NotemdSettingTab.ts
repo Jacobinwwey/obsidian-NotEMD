@@ -506,6 +506,21 @@ export class NotemdSettingTab extends PluginSettingTab {
                     this.display();
                 }));
 
+        new Setting(containerEl)
+            .setName('Disable auto translation (except for "Translate" task)')
+            .setDesc(
+                'On: Non-Translate tasks do not force a target language or auto-translate outputs. ' +
+                'The explicit "Translate" task still performs translation as configured.'
+            )
+            .addToggle(toggle =>
+                toggle
+                    .setValue(this.plugin.settings.disableAutoTranslation)
+                    .onChange(async (value) => {
+                        this.plugin.settings.disableAutoTranslation = value;
+                        await this.plugin.saveSettings();
+                    })
+            );
+
         if (this.plugin.settings.useDifferentLanguagesForTasks) {
             const availableLanguages = this.plugin.settings.availableLanguages || DEFAULT_SETTINGS.availableLanguages;
 

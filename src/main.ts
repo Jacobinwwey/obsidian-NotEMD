@@ -1006,7 +1006,7 @@ export default class NotemdPlugin extends Plugin {
                     this.app,
                     this.settings,
                     concepts,
-                    null,
+                    activeFile.basename, // Pass the basename of the active file
                     {
                         disableBacklink: !this.settings.extractConceptsAddBacklink,
                         minimalTemplate: this.settings.extractConceptsMinimalTemplate
@@ -1082,7 +1082,7 @@ export default class NotemdPlugin extends Plugin {
                             this.app,
                             this.settings,
                             concepts,
-                            null,
+                            file.basename, // Pass the basename of the current file
                             {
                                 disableBacklink: !this.settings.extractConceptsAddBacklink,
                                 minimalTemplate: this.settings.extractConceptsMinimalTemplate
