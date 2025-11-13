@@ -469,7 +469,14 @@ export default class NotemdPlugin extends Plugin {
         if (this.isBusy) { new Notice("Notemd is busy."); return; }
         this.isBusy = true;
         const useReporter = reporter || this.getReporter();
-        useReporter.clearDisplay(); // Ensure display is clear before starting
+        
+        const maybeSidebar = useReporter as any;
+        if (maybeSidebar instanceof NotemdSidebarView) {
+            maybeSidebar.startProcessing('Processing current file...');
+        } else {
+            useReporter.clearDisplay();
+            useReporter.updateStatus('Processing current file...', 0);
+        }
 
         try {
             await this.loadSettings(); // Load latest settings
@@ -478,7 +485,6 @@ export default class NotemdPlugin extends Plugin {
                 throw new Error("No active '.md' or '.txt' file to process.");
             }
 
-            useReporter.updateStatus(`Processing ${activeFile.name}...`, 0);
             this.updateStatusBar(`Processing: ${activeFile.name}`);
 
             // Pass the ref object for currentProcessingFileBasename
@@ -507,9 +513,10 @@ export default class NotemdPlugin extends Plugin {
             useReporter.updateStatus('Error occurred', -1);
             // Keep reporter open on error/cancellation
         } finally {
+            if (maybeSidebar instanceof NotemdSidebarView) {
+                maybeSidebar.finishProcessing();
+            }
             this.isBusy = false;
-            // Ensure reporter state reflects completion/error if it's the sidebar
-            // No need to call useReporter.updateButtonStates() here - sidebar manages its own state
         }
     }
 
@@ -518,7 +525,14 @@ export default class NotemdPlugin extends Plugin {
         if (this.isBusy) { new Notice("Notemd is busy."); return; }
         this.isBusy = true;
         const useReporter = reporter || this.getReporter();
-        useReporter.clearDisplay();
+        
+        const maybeSidebar = useReporter as any;
+        if (maybeSidebar instanceof NotemdSidebarView) {
+            maybeSidebar.startProcessing('Processing folder...');
+        } else {
+            useReporter.clearDisplay();
+            useReporter.updateStatus('Processing folder...', 0);
+        }
 
         try {
             await this.loadSettings();
@@ -600,8 +614,10 @@ export default class NotemdPlugin extends Plugin {
             useReporter.log(`Batch Error: ${errorMessage}`);
             useReporter.updateStatus('Error occurred during batch processing', -1);
         } finally {
+            if (maybeSidebar instanceof NotemdSidebarView) {
+                maybeSidebar.finishProcessing();
+            }
             this.isBusy = false;
-            // No need to call useReporter.updateButtonStates() here
         }
     }
 
@@ -659,7 +675,14 @@ export default class NotemdPlugin extends Plugin {
         if (this.isBusy) { new Notice("Notemd is busy."); return; }
         this.isBusy = true;
         const useReporter = reporter || this.getReporter();
-        if (!reporter) useReporter.clearDisplay();
+        
+        const maybeSidebar = useReporter as any;
+        if (maybeSidebar instanceof NotemdSidebarView) {
+            maybeSidebar.startProcessing(`Generating: ${file.name}`);
+        } else {
+            useReporter.clearDisplay();
+            useReporter.updateStatus(`Generating: ${file.name}`, 0);
+        }
 
         this.updateStatusBar(`Generating: ${file.name}`);
         try {
@@ -686,8 +709,10 @@ export default class NotemdPlugin extends Plugin {
             useReporter.log(`Error generating content for ${file.name}: ${errorMessage}`);
             useReporter.updateStatus('Error occurred', -1);
         } finally {
+            if (maybeSidebar instanceof NotemdSidebarView) {
+                maybeSidebar.finishProcessing();
+            }
             this.isBusy = false;
-            // No need to call useReporter.updateButtonStates() here
         }
     }
 
@@ -696,7 +721,14 @@ export default class NotemdPlugin extends Plugin {
         if (this.isBusy) { new Notice("Notemd is busy."); return; }
         this.isBusy = true;
         const useReporter = reporter || this.getReporter();
-        if (!reporter) useReporter.clearDisplay();
+        
+        const maybeSidebar = useReporter as any;
+        if (maybeSidebar instanceof NotemdSidebarView) {
+            maybeSidebar.startProcessing('Researching and summarizing...');
+        } else {
+            useReporter.clearDisplay();
+            useReporter.updateStatus('Researching and summarizing...', 0);
+        }
 
         const activeFile = view.file;
         if (!activeFile) { new Notice('No active file.'); this.isBusy = false; return; }
@@ -737,8 +769,10 @@ export default class NotemdPlugin extends Plugin {
                  useReporter.updateStatus('Error occurred', -1);
             }
         } finally {
+            if (maybeSidebar instanceof NotemdSidebarView) {
+                maybeSidebar.finishProcessing();
+            }
             this.isBusy = false;
-            // No need to call useReporter.updateButtonStates() here
         }
     }
 
@@ -747,7 +781,14 @@ export default class NotemdPlugin extends Plugin {
         if (this.isBusy) { new Notice("Notemd is busy."); return; }
         this.isBusy = true;
         const useReporter = reporter || this.getReporter();
-        if (!reporter) useReporter.clearDisplay();
+        
+        const maybeSidebar = useReporter as any;
+        if (maybeSidebar instanceof NotemdSidebarView) {
+            maybeSidebar.startProcessing('Batch generating content...');
+        } else {
+            useReporter.clearDisplay();
+            useReporter.updateStatus('Batch generating content...', 0);
+        }
 
         try {
             await this.loadSettings();
@@ -791,8 +832,10 @@ export default class NotemdPlugin extends Plugin {
             useReporter.log(`Batch Error: ${errorMessage}`);
             useReporter.updateStatus('Error occurred during batch generation', -1);
         } finally {
+            if (maybeSidebar instanceof NotemdSidebarView) {
+                maybeSidebar.finishProcessing();
+            }
             this.isBusy = false;
-            // No need to call useReporter.updateButtonStates() here
         }
     }
 
@@ -801,11 +844,17 @@ export default class NotemdPlugin extends Plugin {
         if (this.isBusy) { new Notice("Notemd is busy."); return; }
         this.isBusy = true;
         const useReporter = reporter || this.getReporter();
-        if (!reporter) useReporter.clearDisplay();
+        
+        const maybeSidebar = useReporter as any;
+        if (maybeSidebar instanceof NotemdSidebarView) {
+            maybeSidebar.startProcessing('Checking duplicates...');
+        } else {
+            useReporter.clearDisplay();
+            useReporter.updateStatus('Checking duplicates...', 0);
+        }
 
         this.updateStatusBar("Checking duplicates...");
         useReporter.log("Starting: Check & Remove Duplicate Concept Notes...");
-        useReporter.updateStatus("Checking duplicates...", 0);
         try {
             await this.loadSettings();
             await checkAndRemoveDuplicateConceptNotes(this.app, this.settings, useReporter); // Call utility
@@ -825,8 +874,10 @@ export default class NotemdPlugin extends Plugin {
             useReporter.updateStatus('Error occurred', -1);
             new ErrorModal(this.app, "Duplicate Check/Remove Error", errorDetails).open();
         } finally {
+            if (maybeSidebar instanceof NotemdSidebarView) {
+                maybeSidebar.finishProcessing();
+            }
             this.isBusy = false;
-            // No need to call useReporter.updateButtonStates() here
         }
     }
     /** Command: Batch Fix Mermaid Syntax */
@@ -834,7 +885,14 @@ export default class NotemdPlugin extends Plugin {
         if (this.isBusy) { new Notice("Notemd is busy."); return; }
         this.isBusy = true;
         const useReporter = reporter || this.getReporter();
-        if (!reporter) useReporter.clearDisplay();
+        
+        const maybeSidebar = useReporter as any;
+        if (maybeSidebar instanceof NotemdSidebarView) {
+            maybeSidebar.startProcessing('Batch fixing Mermaid syntax...');
+        } else {
+            useReporter.clearDisplay();
+            useReporter.updateStatus('Batch fixing Mermaid syntax...', 0);
+        }
 
         try {
             await this.loadSettings(); // Load settings in case needed by future logic
@@ -875,8 +933,10 @@ export default class NotemdPlugin extends Plugin {
             useReporter.log(`Batch Fix Error: ${errorMessage}`);
             useReporter.updateStatus('Error occurred during batch fix', -1);
         } finally {
+            if (maybeSidebar instanceof NotemdSidebarView) {
+                maybeSidebar.finishProcessing();
+            }
             this.isBusy = false;
-            // No need to call useReporter.updateButtonStates() here
         }
     }
 
@@ -885,11 +945,17 @@ export default class NotemdPlugin extends Plugin {
             new Notice("Notemd is busy.");
             return;
         }
-        
-        // Use provided reporter or get a new one (which clears display if it's the sidebar)
+        this.isBusy = true;
         const useReporter = reporter || this.getReporter();
         
-        this.isBusy = true;
+        const maybeSidebar = useReporter as any;
+        if (maybeSidebar instanceof NotemdSidebarView) {
+            maybeSidebar.startProcessing("Translating...");
+        } else {
+            useReporter.clearDisplay();
+            useReporter.updateStatus("Translating...", 0);
+        }
+
         this.updateStatusBar("Translating...");
 
         try {
@@ -926,6 +992,9 @@ export default class NotemdPlugin extends Plugin {
             useReporter.log(`Error: ${errorMessage}`);
             useReporter.updateStatus('Error occurred', -1);
         } finally {
+            if (maybeSidebar instanceof NotemdSidebarView) {
+                maybeSidebar.finishProcessing();
+            }
             this.isBusy = false;
         }
     }
@@ -936,9 +1005,16 @@ export default class NotemdPlugin extends Plugin {
 			return;
 		}
 		this.isBusy = true;
-		reporter.clearDisplay();
-		reporter.log(`Starting Mermaid summarization for ${file.name}...`);
-		reporter.updateStatus(`Summarizing ${file.name}...`, 5);
+        const useReporter = reporter || this.getReporter();
+
+        const maybeSidebar = useReporter as any;
+        if (maybeSidebar instanceof NotemdSidebarView) {
+            maybeSidebar.startProcessing(`Summarizing ${file.name}...`);
+        } else {
+            useReporter.clearDisplay();
+		    reporter.log(`Starting Mermaid summarization for ${file.name}...`);
+		    reporter.updateStatus(`Summarizing ${file.name}...`, 5);
+        }
 
 		try {
 			const fileContent = await this.app.vault.read(file);
@@ -977,7 +1053,9 @@ export default class NotemdPlugin extends Plugin {
 			new Notice(`Summarization Error: ${message}`);
 			console.error("Summarization Error:", error);
 		} finally {
-			reporter.log('Summarization process finished.');
+            if (maybeSidebar instanceof NotemdSidebarView) {
+                maybeSidebar.finishProcessing();
+            }
 			this.isBusy = false;
 		}
 	}
@@ -986,7 +1064,14 @@ export default class NotemdPlugin extends Plugin {
         if (this.isBusy) { new Notice("Notemd is busy."); return; }
         this.isBusy = true;
         const useReporter = reporter || this.getReporter();
-        useReporter.clearDisplay();
+        
+        const maybeSidebar = useReporter as any;
+        if (maybeSidebar instanceof NotemdSidebarView) {
+            maybeSidebar.startProcessing('Extracting concepts...');
+        } else {
+            useReporter.clearDisplay();
+            useReporter.updateStatus('Extracting concepts...', 0);
+        }
 
         try {
             await this.loadSettings();
@@ -995,7 +1080,6 @@ export default class NotemdPlugin extends Plugin {
                 throw new Error("No active '.md' or '.txt' file to extract concepts from.");
             }
 
-            useReporter.updateStatus(`Extracting concepts from ${activeFile.name}...`, 0);
             this.updateStatusBar(`Extracting concepts: ${activeFile.name}`);
 
             const concepts = await extractConceptsFromFile(this.app, this, activeFile, useReporter);
@@ -1034,6 +1118,9 @@ export default class NotemdPlugin extends Plugin {
             useReporter.log(`Error: ${errorMessage}`);
             useReporter.updateStatus('Error occurred', -1);
         } finally {
+            if (maybeSidebar instanceof NotemdSidebarView) {
+                maybeSidebar.finishProcessing();
+            }
             this.isBusy = false;
         }
     }
@@ -1042,7 +1129,14 @@ export default class NotemdPlugin extends Plugin {
         if (this.isBusy) { new Notice("Notemd is busy."); return; }
         this.isBusy = true;
         const useReporter = reporter || this.getReporter();
-        useReporter.clearDisplay();
+        
+        const maybeSidebar = useReporter as any;
+        if (maybeSidebar instanceof NotemdSidebarView) {
+            maybeSidebar.startProcessing('Batch extracting concepts...');
+        } else {
+            useReporter.clearDisplay();
+            useReporter.updateStatus('Batch extracting concepts...', 0);
+        }
 
         try {
             await this.loadSettings();
@@ -1124,6 +1218,9 @@ export default class NotemdPlugin extends Plugin {
             useReporter.log(`Batch Error: ${errorMessage}`);
             useReporter.updateStatus('Error occurred', -1);
         } finally {
+            if (maybeSidebar instanceof NotemdSidebarView) {
+                maybeSidebar.finishProcessing();
+            }
             this.isBusy = false;
         }
     }

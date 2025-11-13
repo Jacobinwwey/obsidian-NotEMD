@@ -56,6 +56,21 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         return NOTEMD_SIDEBAR_ICON;
     }
 
+    startProcessing(initialStatus: string) {
+        this.clearDisplay();
+        this.currentAbortController = new AbortController();
+        this.isProcessing = true;
+        this.isCancelled = false;
+        this.startTime = Date.now();
+        this.updateStatus(initialStatus, 0);
+        this.updateButtonStates();
+    }
+
+    finishProcessing() {
+        this.isProcessing = false;
+        this.updateButtonStates();
+    }
+
     // Method to clear progress/log display
     clearDisplay() {
         console.log('clearDisplay called.');
@@ -215,24 +230,18 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         this.processCurrentButton.title = 'Processes the current file to add [[wiki-links]] and create concept notes.';
         this.processCurrentButton.onclick = async () => {
             if (this.isProcessing) return;
-            this.clearDisplay();
-            this.currentAbortController = new AbortController(); // Create new controller
-            this.isProcessing = true; this.startTime = Date.now(); this.updateButtonStates();
-            this.log('Starting: Process Current File...'); this.updateStatus('Processing current file...', 0);
-            try { await this.plugin.processWithNotemdCommand(this); } // Use plugin method
-            finally { this.isProcessing = false; this.updateButtonStates(); }
+            this.startProcessing('Processing current file...');
+            try { await this.plugin.processWithNotemdCommand(this); }
+            finally { this.finishProcessing(); }
         };
 
         this.processFolderButton = originalButtonGroup.createEl('button', { text: 'Process folder (add links)' });
         this.processFolderButton.title = 'Processes all files in a selected folder to add [[wiki-links]] and create concept notes.';
         this.processFolderButton.onclick = async () => {
             if (this.isProcessing) return;
-            this.clearDisplay();
-            this.currentAbortController = new AbortController(); // Create new controller
-            this.isProcessing = true; this.startTime = Date.now(); this.updateButtonStates();
-            this.log('Starting: Process Folder...'); this.updateStatus('Processing folder...', 0);
-            try { await this.plugin.processFolderWithNotemdCommand(this); } // Use plugin method
-            finally { this.isProcessing = false; this.updateButtonStates(); }
+            this.startProcessing('Processing folder...');
+            try { await this.plugin.processFolderWithNotemdCommand(this); }
+            finally { this.finishProcessing(); }
         };
 
         container.createEl('h4', { text: "New features" });
@@ -243,17 +252,12 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         this.researchButton.onclick = async () => {
             if (this.isProcessing || this.plugin.getIsBusy()) { new Notice('Processing already in progress.'); return; }
 
-            // Get active file like 'Process File' button
             const activeFile = this.app.workspace.getActiveFile();
-
             if (!activeFile || !(activeFile instanceof TFile) || activeFile.extension !== 'md') {
                 this.log('Debug: "Research & Summarize" clicked, but no active Markdown file found.');
-                // Optionally show notice or update status for debugging
-                // new Notice('No active Markdown file found.');
-                return; // Stop if no valid file
+                return;
             }
 
-            // Try to find the corresponding MarkdownView and Editor
             let targetView: MarkdownView | null = null;
             let targetEditor: Editor | null = null;
             this.app.workspace.iterateAllLeaves(leaf => {
@@ -264,25 +268,17 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             });
 
             if (targetView && targetEditor) {
-                this.clearDisplay();
-                this.currentAbortController = new AbortController(); // Create new controller
-                this.isProcessing = true; this.startTime = Date.now(); this.updateButtonStates();
-                this.log(`Starting: Research & Summarize Topic for ${activeFile.name}...`);
-                this.updateStatus('Researching topic...', 0);
+                this.startProcessing(`Researching topic for ${activeFile.name}...`);
                 try {
-                    // Pass the found editor and view
                     await this.plugin.researchAndSummarizeCommand(targetEditor, targetView, this);
                 } catch (error) {
                     const message = error instanceof Error ? error.message : String(error);
                     this.log(`Error during Research & Summarize: ${message}`);
                     this.updateStatus('Error occurred', -1);
-                    // new Notice(`Error: ${message}`); // Optional notice
                 } finally {
-                    this.isProcessing = false;
-                    this.updateButtonStates();
+                    this.finishProcessing();
                 }
             } else {
-                // Log if the view/editor for the active file couldn't be found (e.g., file open but not focused)
                 this.log(`Debug: "Research & Summarize" clicked for active file "${activeFile.name}", but its editor/view was not found.`);
             }
         };
@@ -293,24 +289,18 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             if (this.isProcessing) return;
             const activeFile = this.plugin.app.workspace.getActiveFile();
             if (!activeFile || !(activeFile instanceof TFile) || activeFile.extension !== 'md') { new Notice('No active Markdown file selected.'); return; }
-            this.clearDisplay();
-            this.currentAbortController = new AbortController(); // Create new controller
-            this.isProcessing = true; this.startTime = Date.now(); this.updateButtonStates();
-            this.log('Starting: Generate Content from Title...'); this.updateStatus('Generating content...', 0);
-            try { await this.plugin.generateContentForTitleCommand(activeFile, this); } // Use plugin method
-            finally { this.isProcessing = false; this.updateButtonStates(); }
+            this.startProcessing('Generating content...');
+            try { await this.plugin.generateContentForTitleCommand(activeFile, this); }
+            finally { this.finishProcessing(); }
         };
 
         this.batchGenerateTitleButton = newFeatureButtonGroup.createEl('button', { text: 'Batch generate from titles' });
         this.batchGenerateTitleButton.title = 'Generates content for all notes in a selected folder based on their titles.';
         this.batchGenerateTitleButton.onclick = async () => {
             if (this.isProcessing) return;
-            this.clearDisplay();
-            this.currentAbortController = new AbortController(); // Create new controller
-            this.isProcessing = true; this.startTime = Date.now(); this.updateButtonStates();
-            this.log('Starting: Batch Generate Content from Titles...'); this.updateStatus('Starting batch generation...', 0);
-            try { await this.plugin.batchGenerateContentForTitlesCommand(this); } // Use plugin method
-            finally { this.isProcessing = false; this.updateButtonStates(); }
+            this.startProcessing('Starting batch generation...');
+            try { await this.plugin.batchGenerateContentForTitlesCommand(this); }
+            finally { this.finishProcessing(); }
         };
 
         const translateGroup = newFeatureButtonGroup.createDiv({ cls: 'notemd-translate-group' });
@@ -323,21 +313,11 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             }
             const activeFile = this.app.workspace.getActiveFile();
             if (activeFile) {
-                console.log('Translate button clicked. Initializing processing state.');
-                this.clearDisplay();
-                this.currentAbortController = new AbortController();
-                this.isProcessing = true;
-                this.startTime = Date.now();
-                this.updateButtonStates(); // Should enable cancel button here
-                this.log('Starting: Translate File...');
-                this.updateStatus('Translating...', 0);
+                this.startProcessing('Translating...');
                 try {
-                    // Pass 'this' as the reporter to prevent main.ts from calling getReporter() and clearing the state.
-                    await this.plugin.translateFileCommand(activeFile, this.currentAbortController.signal, this);
+                    await this.plugin.translateFileCommand(activeFile, this.currentAbortController?.signal, this);
                 } finally {
-                    console.log('Translate command finished. Resetting processing state.');
-                    this.isProcessing = false;
-                    this.updateButtonStates(); // Should disable cancel button here
+                    this.finishProcessing();
                 }
             } else {
                 new Notice('No active file to translate.');
@@ -351,36 +331,27 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             if (this.isProcessing) return;
             const activeFile = this.plugin.app.workspace.getActiveFile();
             if (!activeFile || !(activeFile instanceof TFile) || activeFile.extension !== 'md') { new Notice('No active Markdown file selected.'); return; }
-            this.clearDisplay();
-            this.currentAbortController = new AbortController();
-            this.isProcessing = true; this.startTime = Date.now(); this.updateButtonStates();
-            this.log('Starting: Summarise as Mermaid diagram...'); this.updateStatus('Summarizing...', 0);
+            this.startProcessing('Summarizing...');
             try { await this.plugin.summarizeToMermaidCommand(activeFile, this); }
-            finally { this.isProcessing = false; this.updateButtonStates(); }
+            finally { this.finishProcessing(); }
         };
 
         this.extractConceptsButton = newFeatureButtonGroup.createEl('button', { text: 'Extract concepts (current file)' });
         this.extractConceptsButton.title = 'Extracts concepts from the current file and creates concept notes without modifying the original file.';
         this.extractConceptsButton.onclick = async () => {
             if (this.isProcessing) return;
-            this.clearDisplay();
-            this.currentAbortController = new AbortController();
-            this.isProcessing = true; this.startTime = Date.now(); this.updateButtonStates();
-            this.log('Starting: Extract Concepts (Current File)...'); this.updateStatus('Extracting concepts...', 0);
+            this.startProcessing('Extracting concepts...');
             try { await this.plugin.extractConceptsCommand(this); }
-            finally { this.isProcessing = false; this.updateButtonStates(); }
+            finally { this.finishProcessing(); }
         };
 
         this.extractConceptsFolderButton = newFeatureButtonGroup.createEl('button', { text: 'Extract concepts (folder)' });
         this.extractConceptsFolderButton.title = 'Extracts concepts from all files in a selected folder and creates concept notes without modifying the original files.';
         this.extractConceptsFolderButton.onclick = async () => {
             if (this.isProcessing) return;
-            this.clearDisplay();
-            this.currentAbortController = new AbortController();
-            this.isProcessing = true; this.startTime = Date.now(); this.updateButtonStates();
-            this.log('Starting: Batch Extract Concepts (Folder)...'); this.updateStatus('Extracting concepts from folder...', 0);
+            this.startProcessing('Extracting concepts from folder...');
             try { await this.plugin.batchExtractConceptsForFolderCommand(this); }
-            finally { this.isProcessing = false; this.updateButtonStates(); }
+            finally { this.finishProcessing(); }
         };
 
         this.languageSelector = translateGroup.createEl('select');
@@ -404,12 +375,9 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         this.batchMermaidFixButton.title = 'Fixes Mermaid and LaTeX syntax in all Markdown files in a selected folder.';
         this.batchMermaidFixButton.onclick = async () => {
             if (this.isProcessing) return;
-            this.clearDisplay();
-            this.currentAbortController = new AbortController(); // Create new controller
-            this.isProcessing = true; this.startTime = Date.now(); this.updateButtonStates();
-            this.log('Starting: Batch Mermaid Fix...'); this.updateStatus('Starting batch fix...', 0);
-            try { await this.plugin.batchMermaidFixCommand(this); } // Use plugin method
-            finally { this.isProcessing = false; this.updateButtonStates(); }
+            this.startProcessing('Starting batch fix...');
+            try { await this.plugin.batchMermaidFixCommand(this); }
+            finally { this.finishProcessing(); }
         };
 
         this.checkDuplicatesButton = utilityButtonGroup.createEl('button', { text: 'Check duplicates (current file)' });
@@ -455,16 +423,13 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             this.checkRemoveDuplicatesButton.title = 'Checks Concept Note folder for duplicates and prompts for deletion.';
             this.checkRemoveDuplicatesButton.onclick = async () => {
                 if (this.isProcessing) return;
-                this.clearDisplay();
-                this.currentAbortController = new AbortController(); // Create new controller
-                this.isProcessing = true; this.startTime = Date.now(); this.updateButtonStates();
-                this.log('Starting: Check & Remove Duplicate Concept Notes...'); this.updateStatus('Checking duplicates...', 0);
+                this.startProcessing('Checking duplicates...');
                 try {
                     if (this.plugin) {
                         await this.plugin.checkAndRemoveDuplicateConceptNotesCommand(this);
                     }
-                } // Use plugin method
-                finally { this.isProcessing = false; this.updateButtonStates(); }
+                }
+                finally { this.finishProcessing(); }
             };
         }
 
