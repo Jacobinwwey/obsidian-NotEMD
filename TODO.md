@@ -1,271 +1,228 @@
-# Plan: Add "No Auto Translation" Option and Integrate into Task Logic
+# Plan: Fix “Extract Concepts” Cancel Behavior (English Implementation Plan)
 
-Goal: Add a global “No auto translation” option so that, when enabled, all tasks **except** the explicit “Translate” task stop forcing outputs into a target language or performing automatic translation. This prevents misalignment between multilingual source corpora and generated outputs, while preserving the existing Translate task behavior.
+Goal: Ensure that after recent code changes, the “Extract concepts” tasks fully support cancellation, consistent with “Process file (add links)”. Specifically:
+- The “Cancel processing” button must be enabled during Extract Concepts runs.
+- Clicking Cancel must reliably stop the current Extract Concepts operation.
 
----
+## 1. Root Cause Summary
 
-## 1. Requirements & Behavior
+Current components and behavior:
 
-1. Introduce a global boolean setting, e.g. `disableAutoTranslation`:
-   - `true`: Forbid automatic translation for all tasks except the explicit “Translate” task.
-   - `false`: Keep current behavior (tasks may enforce output language or post-translate results according to settings).
+1) ProgressModal (src/ui/ProgressModal.ts)
+- Always renders an enabled “Cancel” button when opened.
+- `requestCancel()`:
+  - Sets `isCancelled = true`
+  - Calls `updateStatus('Cancelling...', -1)`
+  - Logs “User requested cancellation.”
+  - Aborts `currentAbortController` (if set)
+  - Disables the button
+- `clearDisplay()`:
+  - Resets `isCancelled`
+  - Re-enables the Cancel button
+- It does NOT depend on an `isProcessing` flag to enable Cancel.
+- Conclusion: For tasks using ProgressModal directly, cancel support is implemented correctly.
 
-2. The explicit **Translate** task must:
-   - Always perform translation as configured.
-   - Ignore `disableAutoTranslation` (i.e., this switch does not weaken the Translate feature).
+2) NotemdSidebarView (src/ui/NotemdSidebarView.ts)
+- Implements ProgressReporter for sidebar-driven operations.
+- Tracks:
+  - `isProcessing`
+  - `isCancelled`
+  - `currentAbortController`
+- `updateButtonStates()`:
+  - Disables all command buttons while `isProcessing` is true.
+  - Enables “Cancel processing” ONLY when:
+    - `isProcessing === true` AND `isCancelled === false`.
+  - Otherwise disables the Cancel button.
+- For sidebar buttons (e.g. Process file, Process folder, Translate, Summarise, Extract Concepts), each `onclick`:
+  - Calls `this.clearDisplay()`
+  - Sets `this.currentAbortController = new AbortController()`
+  - Sets `this.isProcessing = true`
+  - Calls `this.updateButtonStates()` (Cancel becomes enabled)
+  - Awaits the plugin command with `this` as reporter
+  - In `finally`:
+    - Sets `this.isProcessing = false`
+    - Calls `this.updateButtonStates()` (Cancel disabled again)
+- Conclusion: When Extract Concepts is started via the sidebar buttons, Cancel should already work.
 
-3. For all other tasks that currently depend on language configuration — including but not limited to:
-   - Add Links (Process File/Folder)
-   - Research & Summarize
-   - Generate from Title
-   - Summarise as Mermaid diagram
-   - Extract Concepts
-   - Any other LLM-based processing that sets/normalizes output language
-   behavior should be:
+3) Extract Concepts logic (src/fileUtils.ts)
+- `extractConceptsFromFile`:
+  - Before each chunk:
+    - If `progressReporter.cancelled` → `throw new Error("Concept extraction cancelled by user.");`
+  - Uses `progressReporter.abortController?.signal` when calling LLM helpers.
+- `batchExtractConceptsForFolderCommand` (in main.ts; not shown here but assumed):
+  - Typical pattern: checks `useReporter.cancelled` and breaks loops on cancel.
+- Conclusion: The internal loops already respect `ProgressReporter.cancelled` and are wired for cancellation.
 
-   - When `disableAutoTranslation = true`:
-     - Do not force “output must be in language X” in prompts.
-     - Do not perform secondary translation passes to normalize language.
-     - Let the LLM operate in the original / natural language context (or model default), preserving multilingual structure.
-   - When `disableAutoTranslation = false`:
-     - Preserve existing behavior:
-       - Use global “Output language” or task-specific language settings.
-       - Apply any current prompt-level or post-processing translation logic.
+Observed issue (from user report and screenshot):
 
-4. Backwards compatibility:
-   - Default value must keep existing semantics (`disableAutoTranslation = false`).
-   - Existing users see no behavior change until they explicitly enable the option.
+- When “Extract concepts” is triggered (in some usage paths), the UI shows:
+  - “Extracting concepts from chunk 1/1…”
+  - A disabled “Cancel processing” button.
+- This indicates:
+  - The active reporter is the NotemdSidebarView (button label matches).
+  - But its `isProcessing` was never set to true for this run, so `updateButtonStates()` kept Cancel disabled.
+- Likely scenario:
+  - Extract Concepts was run via a command (e.g. command palette), not via sidebar button.
+  - In that path, `main.ts` uses:
+    - `const useReporter = reporter || this.getReporter();`
+  - `getReporter()` returns the sidebar view if it exists.
+  - But `main.ts` does NOT set `isProcessing = true` on the sidebar when invoked this way.
+  - As a result:
+    - Sidebar’s Cancel button remains disabled (grey), even though the task is running and checking `cancelled`.
 
----
+## 2. Design Principles for the Fix
 
-## 2. Settings Model Changes
+1. Single source of truth:
+   - The component that owns the UI (NotemdSidebarView / ProgressModal) should manage:
+     - Whether a task is “processing”.
+     - Whether Cancel is enabled.
+   - Callers (commands in main.ts) must consistently signal “start” and “end” of processing.
 
-### 2.1 Add to `NotemdSettings` (src/types.ts)
+2. Symmetry with Add Links:
+   - Extract Concepts should follow the same pattern as:
+     - Process current file
+     - Process folder
+     - Batch operations
+   - No special-case UX differences unless intentional.
 
-Add a dedicated field to control auto translation:
+3. Non-breaking:
+   - Do not break the existing working flows:
+     - Sidebar buttons for Process/Translate/etc.
+     - ProgressModal cancel behavior.
+
+## 3. Concrete Changes
+
+### 3.1 Introduce unified start/finish helpers on NotemdSidebarView (optional but recommended)
+
+Add two methods to `NotemdSidebarView`:
 
 ```ts
-export interface NotemdSettings {
-  // ...existing fields...
-
-  // Language / translation behavior
-  disableAutoTranslation: boolean; // true => only explicit "Translate" task performs translation
+startProcessing(initialStatus: string) {
+    this.clearDisplay();
+    this.currentAbortController = new AbortController();
+    this.isProcessing = true;
+    this.isCancelled = false;
+    this.startTime = Date.now();
+    this.updateStatus(initialStatus, 0);
+    this.updateButtonStates();
 }
-```
 
-### 2.2 Default Value (src/constants.ts)
-
-In `DEFAULT_SETTINGS`, provide a default that preserves current behavior:
-
-```ts
-export const DEFAULT_SETTINGS: NotemdSettings = {
-  // ...existing defaults...
-  disableAutoTranslation: false,
-};
-```
-
-This ensures older configs load safely without breakage.
-
----
-
-## 3. Settings UI: Add Toggle in NotemdSettingTab
-
-Location: `src/ui/NotemdSettingTab.ts`, inside the “Language settings” section.
-
-Add a new toggle near the Output language and per-task language options:
-
-- Name: `Disable auto translation (except for "Translate" task)`
-- Description (example):
-  - `When enabled: Non-Translate tasks will no longer force outputs into a specific language or auto-translate results. Only the "Translate" task will perform translation.`
-
-Pseudo-implementation:
-
-```ts
-new Setting(containerEl)
-  .setName('Disable auto translation (except for "Translate" task)')
-  .setDesc(
-    'On: Non-Translate tasks do not force a target language or auto-translate outputs. ' +
-    'The explicit "Translate" task still performs translation as configured.'
-  )
-  .addToggle(toggle =>
-    toggle
-      .setValue(this.plugin.settings.disableAutoTranslation)
-      .onChange(async (value) => {
-        this.plugin.settings.disableAutoTranslation = value;
-        await this.plugin.saveSettings();
-      })
-  );
-```
-
-Key points:
-
-- Scope is clearly documented: applies to all tasks except the explicit Translate task.
-- No breaking of existing workflows until user opts in.
-
----
-
-## 4. Integration into Task Execution Logic
-
-Objective: Centralize and respect `disableAutoTranslation` wherever language constraints or translation calls are applied.
-
-### 4.1 Task Key Awareness
-
-`TaskKey` already includes `'translate'`:
-
-```ts
-export type TaskKey =
-  | 'addLinks'
-  | 'generateTitle'
-  | 'researchSummarize'
-  | 'translate'
-  | 'summarizeToMermaid'
-  | 'extractConcepts';
-```
-
-Use `taskKey` to distinguish behavior:
-
-- If `taskKey === 'translate'`:
-  - Always allow/perform translation.
-- If `taskKey !== 'translate'`:
-  - Behavior depends on `disableAutoTranslation`.
-
-### 4.2 Prompt Construction Adjustments
-
-Where prompts are built (e.g. `src/promptUtils.ts` or similar):
-
-1. Ensure builders receive:
-   - `taskKey: TaskKey`
-   - `settings: NotemdSettings`
-   - (Optionally) `targetLanguage` if applicable.
-
-2. Apply logic:
-
-```ts
-const shouldForceLanguage =
-  taskKey === 'translate' || !settings.disableAutoTranslation;
-
-if (shouldForceLanguage && targetLanguage) {
-  prompt += `\nPlease respond in ${resolveLanguageLabel(targetLanguage)}.`;
-} else {
-  // Do not add a forced language requirement for non-Translate tasks
+finishProcessing() {
+    this.isProcessing = false;
+    this.updateButtonStates();
 }
 ```
 
 Notes:
+- `clearDisplay()` already disables Cancel, resets flags; `startProcessing` immediately re-enables Cancel by setting `isProcessing = true` before calling `updateButtonStates()`.
+- These helpers encapsulate the pattern currently duplicated in each button handler.
 
-- `resolveLanguageLabel` represents the existing mapping from code to readable label if present.
-- For non-Translate tasks and `disableAutoTranslation = true`, prompts become language-neutral or context-driven, not language-enforcing.
+### 3.2 Ensure Extract Concepts commands mark the sidebar as processing when using it
 
-### 4.3 Output Post-Processing / Secondary Translation
+In `src/main.ts`, for:
 
-If any non-Translate task currently:
+- `extractConceptsCommand(reporter?: ProgressReporter)`
+- `batchExtractConceptsForFolderCommand(reporter?: ProgressReporter)`
 
-- Calls a helper like `translate(...)` or
-- Normalizes outputs into the global/task-specific language after LLM generation,
+Adjust the logic as follows:
 
-then guard those calls:
+1) Determine reporter:
 
 ```ts
-const shouldPostTranslate =
-  taskKey === 'translate' || !settings.disableAutoTranslation;
-
-let finalOutput = llmOutput;
-
-if (shouldPostTranslate && needsNormalization) {
-  finalOutput = await translateToTargetLanguage(...);
+const useReporter = reporter || this.getReporter();
+if (!reporter) {
+    useReporter.clearDisplay();
 }
 ```
 
-Rules:
+2) If `useReporter` is the sidebar (NotemdSidebarView), mark processing:
 
-- For `taskKey === 'translate'`:
-  - Always run the translation pipeline as designed.
-- For other tasks:
-  - Only run translation/normalization when `disableAutoTranslation` is `false`.
-  - When `true`, keep `llmOutput` as-is (no extra translation step).
+```ts
+const maybeSidebar = useReporter as any;
+if (maybeSidebar instanceof (NotemdSidebarView as any)) {
+    // If you added helpers:
+    maybeSidebar.startProcessing('Extracting concepts...');
+} else {
+    // For ProgressModal or other reporters:
+    useReporter.updateStatus('Extracting concepts...', 0);
+}
+```
 
-### 4.4 Centralization
+3) Run the core logic with try/finally:
 
-Prefer a centralized utility (e.g. in `llmUtils.ts` / `promptUtils.ts`) to determine:
+```ts
+try {
+    await this.loadSettings();
+    const activeFile = this.app.workspace.getActiveFile();
+    // ... validations ...
+    const concepts = await extractConceptsFromFile(this.app, this, activeFile, useReporter);
+    // ... createConceptNotes, notices, etc ...
+} catch (error) {
+    // existing error and cancellation handling
+} finally {
+    // Ensure sidebar knows processing ended
+    if (maybeSidebar instanceof (NotemdSidebarView as any)) {
+        maybeSidebar.finishProcessing();
+    }
+    this.isBusy = false;
+}
+```
 
-- Whether to apply language clauses to prompts.
-- Whether to perform post-translation.
+4) Apply the same pattern in `batchExtractConceptsForFolderCommand`:
+- When `getReporter()` returns the sidebar, call `startProcessing('Batch extracting concepts...')` before the loop and `finishProcessing()` in `finally`.
 
-This avoids scattering conditional logic and reduces risk of missing a call site.
+Result:
+- No matter whether Extract Concepts is started via:
+  - Sidebar buttons (which already set isProcessing), or
+  - Command palette / hotkey (via `getReporter()` returning sidebar),
+- The sidebar’s `isProcessing` will become true while work is running, enabling the Cancel button.
 
----
+### 3.3 Do not change ProgressModal cancel logic
 
-## 5. Affected Areas (Audit Checklist)
+- ProgressModal already:
+  - Always shows an enabled Cancel button.
+  - Sets `isCancelled` and aborts when clicked.
+- No changes are required for Extract Concepts when using the modal:
+  - It passes `abortController?.signal` to LLM calls.
+  - `extractConceptsFromFile` checks `cancelled` and returns early.
 
-Review and adjust (non-exhaustive; based on repo structure):
+### 3.4 Reconfirm loop checks (for completeness)
 
-1. `src/main.ts`
-   - Confirm each command invocation has an associated `taskKey`.
-   - Ensure Translate-related commands are marked with `'translate'`.
+- Keep existing checks:
 
-2. `src/promptUtils.ts`
-   - Update prompt builders to accept `taskKey` and `settings`.
-   - Apply `disableAutoTranslation` logic when composing language instructions.
+In `extractConceptsFromFile`:
 
-3. `src/llmUtils.ts` / `src/translators/*`
-   - Wrap any automatic translation or enforced language behavior with checks as described.
-   - Ensure Translate task remains fully functional.
+```ts
+for (...) {
+    if (progressReporter.cancelled) {
+        throw new Error("Concept extraction cancelled by user.");
+    }
+    ...
+}
+```
 
-4. Any per-task language usage:
-   - Add Links language
-   - Research & summarize language
-   - Summarise as Mermaid language
-   - Extract Concepts language
-   - Generate Title language
-   - Ensure they are only enforced when:
-     - `disableAutoTranslation = false`, or
-     - Task is `translate`.
+In `batchExtractConceptsForFolderCommand`:
 
----
+```ts
+if (useReporter.cancelled) { ... break; }
+```
 
-## 6. Testing Plan
+Optionally:
+- Before calling `createConceptNotes` in batch mode, check `cancelled` again to avoid extra work after cancel.
 
-Add or update tests (e.g. under `src/tests`) to validate:
+## 4. Expected Behavior After Fix
 
-1. **Default behavior (backward compatibility)**:
-   - `disableAutoTranslation = false`
-   - Non-Translate tasks:
-     - Still enforce the configured output language where expected.
-     - Any existing translation/normalization behavior remains unchanged.
-   - Translate task:
-     - Works as before.
+- When “Extract concepts (current file)” or “Extract concepts (folder)” is run:
+  - If using sidebar:
+    - `isProcessing` is set to true.
+    - “Cancel processing” button becomes enabled.
+    - Clicking it sets `cancelled = true` and aborts the LLM calls.
+    - The loop in `extractConceptsFromFile` sees `cancelled` and exits.
+    - UI updates to “Cancelled” without error modals.
+  - If using modal:
+    - “Cancel” is enabled and works as before.
+- Behavior is now:
+  - Consistent with Add Links.
+  - Clear and reliable from a user’s perspective.
 
-2. **Auto translation disabled**:
-   - `disableAutoTranslation = true`
-   - For non-Translate tasks:
-     - Prompts do not include “respond in X language” constraints.
-     - No secondary translation helper is invoked.
-     - Outputs remain in the model’s natural/original language, preserving mixed-language corpora.
-   - For Translate task:
-     - Still performs translation according to its configuration.
-     - Ignores `disableAutoTranslation`.
-
-3. **Multilingual corpus scenario**:
-   - With `disableAutoTranslation = true`, verify:
-     - Per-note or per-chunk outputs are not forced into one language.
-     - Source/target alignment is preserved for analysis workflows.
-
-4. **Configuration persistence**:
-   - Toggling the new setting in the UI updates and persists `NotemdSettings.disableAutoTranslation`.
-   - No runtime errors when loading old configs without the new field (default applied correctly).
-
----
-
-## 7. Expected Outcome
-
-After implementation:
-
-- Users working with multilingual corpora can enable “No auto translation” to:
-  - Prevent unintended language normalization.
-  - Keep outputs aligned with original languages across all non-Translate tasks.
-- The dedicated Translate task:
-  - Continues to provide explicit translation functionality.
-- Behavior is:
-  - Backward compatible by default,
-  - Explicitly documented in settings,
-  - Centralized and consistent across the codebase.
+This plan is fully captured in English and ready for implementation in TODO.md or direct code changes.
