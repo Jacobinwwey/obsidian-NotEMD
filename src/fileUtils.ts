@@ -326,15 +326,15 @@ export async function extractConceptsFromFile(
             let responseText;
             // Using the same provider logic as processFile
             switch (provider.name) {
-                case 'DeepSeek': responseText = await callDeepSeekAPI(provider, modelName, prompt, chunk, progressReporter, settings); break;
-                case 'OpenAI': responseText = await callOpenAIApi(provider, modelName, prompt, chunk, progressReporter, settings); break;
-                case 'Anthropic': responseText = await callAnthropicApi(provider, modelName, prompt, chunk, progressReporter, settings); break;
-                case 'Google': responseText = await callGoogleApi(provider, modelName, prompt, chunk, progressReporter, settings); break;
-                case 'Mistral': responseText = await callMistralApi(provider, modelName, prompt, chunk, progressReporter, settings); break;
-                case 'Azure OpenAI': responseText = await callAzureOpenAIApi(provider, modelName, prompt, chunk, progressReporter, settings); break;
-                case 'LMStudio': responseText = await callLMStudioApi(provider, modelName, prompt, chunk, progressReporter, settings); break;
-                case 'Ollama': responseText = await callOllamaApi(provider, modelName, prompt, chunk, progressReporter, settings); break;
-                case 'OpenRouter': responseText = await callOpenRouterAPI(provider, modelName, prompt, chunk, progressReporter, settings); break;
+                case 'DeepSeek': responseText = await callDeepSeekAPI(provider, modelName, prompt, chunk, progressReporter, settings, progressReporter.abortController?.signal); break;
+                case 'OpenAI': responseText = await callOpenAIApi(provider, modelName, prompt, chunk, progressReporter, settings, progressReporter.abortController?.signal); break;
+                case 'Anthropic': responseText = await callAnthropicApi(provider, modelName, prompt, chunk, progressReporter, settings, progressReporter.abortController?.signal); break;
+                case 'Google': responseText = await callGoogleApi(provider, modelName, prompt, chunk, progressReporter, settings, progressReporter.abortController?.signal); break;
+                case 'Mistral': responseText = await callMistralApi(provider, modelName, prompt, chunk, progressReporter, settings, progressReporter.abortController?.signal); break;
+                case 'Azure OpenAI': responseText = await callAzureOpenAIApi(provider, modelName, prompt, chunk, progressReporter, settings, progressReporter.abortController?.signal); break;
+                case 'LMStudio': responseText = await callLMStudioApi(provider, modelName, prompt, chunk, progressReporter, settings, progressReporter.abortController?.signal); break;
+                case 'Ollama': responseText = await callOllamaApi(provider, modelName, prompt, chunk, progressReporter, settings, progressReporter.abortController?.signal); break;
+                case 'OpenRouter': responseText = await callOpenRouterAPI(provider, modelName, prompt, chunk, progressReporter, settings, progressReporter.abortController?.signal); break;
                 default: throw new Error(`Unsupported provider: ${provider.name}`);
             }
 

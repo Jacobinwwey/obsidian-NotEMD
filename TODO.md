@@ -1,269 +1,271 @@
-# Plan: Align "Extract Concepts" with Existing Behaviors and Improve UX
+# Plan: Add "No Auto Translation" Option and Integrate into Task Logic
 
-Goal: Ensure the “Extract Concepts” feature (1) consistently respects the Concept Log settings, (2) only creates concept notes without modifying source documents, and (3) properly supports cancellation, aligned with the behavior of “Process file (add links)”.
+Goal: Add a global “No auto translation” option so that, when enabled, all tasks **except** the explicit “Translate” task stop forcing outputs into a target language or performing automatic translation. This prevents misalignment between multilingual source corpora and generated outputs, while preserving the existing Translate task behavior.
 
-## 1. Current Behavior Summary
+---
 
-Two main flows are relevant:
+## 1. Requirements & Behavior
 
-1) Add Links / processFile flow
+1. Introduce a global boolean setting, e.g. `disableAutoTranslation`:
+   - `true`: Forbid automatic translation for all tasks except the explicit “Translate” task.
+   - `false`: Keep current behavior (tasks may enforce output language or post-translate results according to settings).
 
-- Location:
-  - processFile and saveOrMoveProcessedFile in src/fileUtils.ts
-  - Commands in src/main.ts (process-with-notemd, process-folder-with-notemd)
-- Behavior:
-  - Uses the "addLinks" task (LLM + prompt) to transform content and insert [[links]].
-  - Extracts concepts from processed content via [[...]] patterns.
-  - Calls createConceptNotes to create/update concept notes in the configured concept note folder.
-  - Uses saveOrMoveProcessedFile to:
-    - Overwrite the original file, or
-    - Move it, or
-    - Write a processed copy (suffix-based), based on settings.
-- Characteristics:
-  - Intentionally mutates or moves source files.
-  - Concept notes are a by-product of link insertion.
-  - File output behavior is fully parameterized via processed-file-related settings.
+2. The explicit **Translate** task must:
+   - Always perform translation as configured.
+   - Ignore `disableAutoTranslation` (i.e., this switch does not weaken the Translate feature).
 
-2) Extract Concepts / extractConceptsFromFile flow
+3. For all other tasks that currently depend on language configuration — including but not limited to:
+   - Add Links (Process File/Folder)
+   - Research & Summarize
+   - Generate from Title
+   - Summarise as Mermaid diagram
+   - Extract Concepts
+   - Any other LLM-based processing that sets/normalizes output language
+   behavior should be:
 
-- Location:
-  - extractConceptsFromFile and related commands in src/fileUtils.ts and src/main.ts
-- Behavior:
-  - Reads source file content.
-  - Splits into chunks and calls LLM with the "extractConcepts" prompt.
-  - Parses LLM output lines starting with "CONCEPT:" and collects concepts into a Set.
-  - Returns concepts; does not modify or save the source file.
-  - The command handlers then call createConceptNotes to generate concept notes.
-- Characteristics:
-  - Source documents are read-only in this flow.
-  - Concept note creation is explicit and separate from any content rewriting.
+   - When `disableAutoTranslation = true`:
+     - Do not force “output must be in language X” in prompts.
+     - Do not perform secondary translation passes to normalize language.
+     - Let the LLM operate in the original / natural language context (or model default), preserving multilingual structure.
+   - When `disableAutoTranslation = false`:
+     - Preserve existing behavior:
+       - Use global “Output language” or task-specific language settings.
+       - Apply any current prompt-level or post-processing translation logic.
 
-Conclusion:
+4. Backwards compatibility:
+   - Default value must keep existing semantics (`disableAutoTranslation = false`).
+   - Existing users see no behavior change until they explicitly enable the option.
 
-- "Process file (add links)" and "Extract concepts" use different output strategies:
-  - Add Links: uses saveOrMoveProcessedFile with rich settings.
-  - Extract Concepts: relies on createConceptNotes; no source modifications.
-- Concept Log configuration is shared via createConceptNotes/generateConceptLog, but this is not clearly surfaced as “also applies to Extract Concepts”.
-- Cancel behavior for Extract Concepts exists at the code level (via ProgressReporter.cancelled checks) but may not be consistently wired in the UI.
+---
 
-## 2. Concept Log Behavior for Extract Concepts
+## 2. Settings Model Changes
 
-Existing logic:
+### 2.1 Add to `NotemdSettings` (src/types.ts)
 
-- createConceptNotes:
-  - Writes concept notes into settings.conceptNoteFolder (when enabled).
-  - After creating new notes, optionally calls generateConceptLog.
-- generateConceptLog:
-  - Determines log path using:
-    - If useCustomConceptLogFolder && conceptLogFolderPath: use that folder
-    - Else if useCustomConceptNoteFolder && conceptNoteFolder: use concept note folder
-  - Uses conceptLogFileName / default name; overwrites the log file with the latest run’s created concepts.
+Add a dedicated field to control auto translation:
 
-Implication:
+```ts
+export interface NotemdSettings {
+  // ...existing fields...
 
-- Any call to createConceptNotes (including from Extract Concepts) already respects:
-  - Concept log output folder
-  - Concept log file name
-  - Overwrite behavior
-- However:
-  - This coupling is implicit.
-  - There is no explicit per-task toggle for whether Extract Concepts should generate the log.
+  // Language / translation behavior
+  disableAutoTranslation: boolean; // true => only explicit "Translate" task performs translation
+}
+```
 
-Decision:
+### 2.2 Default Value (src/constants.ts)
 
-- Treat "Concept log file output" as a shared configuration for all concept-note-creation flows (Add Links and Extract Concepts).
-- Make this explicit in documentation and settings UI.
-- Optionally, introduce a dedicated toggle if users need more granular control (see section 4.3).
+In `DEFAULT_SETTINGS`, provide a default that preserves current behavior:
 
-## 3. Cancel Behavior for Extract Concepts
+```ts
+export const DEFAULT_SETTINGS: NotemdSettings = {
+  // ...existing defaults...
+  disableAutoTranslation: false,
+};
+```
 
-Current implementation:
+This ensures older configs load safely without breakage.
 
-- extractConceptsFromFile:
-  - In each chunk:
-    - Checks progressReporter.cancelled.
-    - If true, throws "Concept extraction cancelled by user."
-- batchExtractConceptsForFolderCommand:
-  - Checks useReporter.cancelled between files.
-  - Stops when cancelled.
-- Error handling:
-  - Command handlers treat “cancelled by user” messages specially (no error modal for normal cancellations).
+---
 
-Problem observed:
+## 3. Settings UI: Add Toggle in NotemdSettingTab
 
-- In the UI, when running Extract Concepts:
-  - “Cancel processing” appears disabled (greyed out).
-  - This suggests:
-    - The ProgressReporter implementation (Sidebar/Modal) is not enabling the cancel button for Extract Concepts flows, or
-    - The command wiring does not register Extract Concepts as a cancellable operation in the same way as Add Links.
+Location: `src/ui/NotemdSettingTab.ts`, inside the “Language settings” section.
 
-Goal:
+Add a new toggle near the Output language and per-task language options:
 
-- Extract Concepts should support cancellation:
-  - The same as Add Links:
-    - Visible/active Cancel button.
-    - Setting cancelled = true.
-    - Loops exit promptly and cleanly.
+- Name: `Disable auto translation (except for "Translate" task)`
+- Description (example):
+  - `When enabled: Non-Translate tasks will no longer force outputs into a specific language or auto-translate results. Only the "Translate" task will perform translation.`
 
-## 4. Implementation Plan
+Pseudo-implementation:
 
-### 4.1 Clarify and Solidify Concept Log Usage in Extract Concepts
+```ts
+new Setting(containerEl)
+  .setName('Disable auto translation (except for "Translate" task)')
+  .setDesc(
+    'On: Non-Translate tasks do not force a target language or auto-translate outputs. ' +
+    'The explicit "Translate" task still performs translation as configured.'
+  )
+  .addToggle(toggle =>
+    toggle
+      .setValue(this.plugin.settings.disableAutoTranslation)
+      .onChange(async (value) => {
+        this.plugin.settings.disableAutoTranslation = value;
+        await this.plugin.saveSettings();
+      })
+  );
+```
 
-Objectives:
+Key points:
 
-- Ensure Extract Concepts uses Concept Log output settings consistently.
-- Make the behavior explicit and understandable.
+- Scope is clearly documented: applies to all tasks except the explicit Translate task.
+- No breaking of existing workflows until user opts in.
 
-Actions:
+---
 
-- Keep using createConceptNotes → generateConceptLog for all concept-note creation:
-  - This already:
-    - Uses Concept Log folder and file name config.
-    - Overwrites the log on each run.
-- Update documentation and NotemdSettingTab UI:
-  - Clearly state:
-    - “Concept Log settings apply to all concept notes created by the plugin (including Extract Concepts and Add Links).”
-- Optional (if needed):
-  - Add settings flag:
-    - extractConceptsGenerateLog: boolean
-      - When false: skip generateConceptLog for Extract Concepts runs.
-  - Implement by passing a mode parameter or option into createConceptNotes/generateConceptLog or by branching at call sites.
+## 4. Integration into Task Execution Logic
 
-### 4.2 Ensure Extract Concepts Never Modifies Source Files
+Objective: Centralize and respect `disableAutoTranslation` wherever language constraints or translation calls are applied.
 
-Current code is already read-only for Extract Concepts; enforce this contract explicitly:
+### 4.1 Task Key Awareness
 
-- Confirm in src/main.ts:
-  - extract-concepts-from-current-file command:
-    - Calls extractConceptsFromFile.
-    - Calls createConceptNotes.
-    - Does not call processFile or saveOrMoveProcessedFile.
-  - batch-extract-concepts-from-folder command:
-    - Same pattern for multiple files.
-- Add defensive guarantees:
-  - No Extract Concepts code path invokes:
-    - saveOrMoveProcessedFile
-    - processFile
-    - Any mutation to the original TFile.
+`TaskKey` already includes `'translate'`:
 
-This keeps Extract Concepts behavior strictly:
+```ts
+export type TaskKey =
+  | 'addLinks'
+  | 'generateTitle'
+  | 'researchSummarize'
+  | 'translate'
+  | 'summarizeToMermaid'
+  | 'extractConcepts';
+```
 
-- Read source.
-- Generate concept notes.
-- Do not touch original documents.
+Use `taskKey` to distinguish behavior:
 
-### 4.3 Make Concept Note Creation for Extract Concepts Explicit and Configurable
+- If `taskKey === 'translate'`:
+  - Always allow/perform translation.
+- If `taskKey !== 'translate'`:
+  - Behavior depends on `disableAutoTranslation`.
 
-Goals:
+### 4.2 Prompt Construction Adjustments
 
-- Provide clear, predictable behavior for Extract Concepts concept notes.
-- Avoid unintended “Linked From” backlinks when not desired.
+Where prompts are built (e.g. `src/promptUtils.ts` or similar):
 
-Actions:
+1. Ensure builders receive:
+   - `taskKey: TaskKey`
+   - `settings: NotemdSettings`
+   - (Optionally) `targetLanguage` if applicable.
 
-1) Implement minimalTemplate option in createConceptNotes (if not fully applied):
+2. Apply logic:
 
-- When creating a new concept note:
-  - Always start with:
-    - "# {concept}\n"
-- If options.minimalTemplate === true:
-  - Do NOT append “## Linked From” or any other sections.
-- If options.minimalTemplate !== true:
-  - Preserve existing behavior:
-    - Add backlinks only when:
-      - !options.disableBacklink
-      - currentProcessingFileBasename is provided.
+```ts
+const shouldForceLanguage =
+  taskKey === 'translate' || !settings.disableAutoTranslation;
 
-2) Add Extract Concepts–specific settings:
+if (shouldForceLanguage && targetLanguage) {
+  prompt += `\nPlease respond in ${resolveLanguageLabel(targetLanguage)}.`;
+} else {
+  // Do not add a forced language requirement for non-Translate tasks
+}
+```
 
-- In NotemdSettings:
-  - extractConceptsMinimalTemplate: boolean
-  - extractConceptsAddBacklink: boolean
-- In NotemdSettingTab:
-  - Add UI controls:
-    - “Extract Concepts: use minimal template for concept notes”
-    - “Extract Concepts: add ‘Linked From’ backlink to source file”
+Notes:
 
-3) Apply settings in Extract Concepts commands:
+- `resolveLanguageLabel` represents the existing mapping from code to readable label if present.
+- For non-Translate tasks and `disableAutoTranslation = true`, prompts become language-neutral or context-driven, not language-enforcing.
 
-- For single-file Extract Concepts:
-  - currentSource = activeFile.basename
-  - const concepts = await extractConceptsFromFile(...);
-  - if (concepts.size > 0) {
-      await createConceptNotes(app, this.settings, concepts,
-        this.settings.extractConceptsAddBacklink ? currentSource : null,
-        {
-          disableBacklink: !this.settings.extractConceptsAddBacklink,
-          minimalTemplate: this.settings.extractConceptsMinimalTemplate
-        }
-      );
-    }
+### 4.3 Output Post-Processing / Secondary Translation
 
-- For batch Extract Concepts:
-  - For each file, pass its basename as currentProcessingFileBasename under the same settings rules.
+If any non-Translate task currently:
 
-Result:
+- Calls a helper like `translate(...)` or
+- Normalizes outputs into the global/task-specific language after LLM generation,
 
-- Users can choose:
-  - Minimal “# Concept” notes with no backlinks, or
-  - Notes that include a “Linked From [[source]]” section.
-- Behavior is explicit and consistent across Extract Concepts runs.
+then guard those calls:
 
-### 4.4 Enable and Wire Up “Cancel processing” for Extract Concepts
+```ts
+const shouldPostTranslate =
+  taskKey === 'translate' || !settings.disableAutoTranslation;
 
-Goals:
+let finalOutput = llmOutput;
 
-- Provide a consistent, working cancel experience for Extract Concepts.
+if (shouldPostTranslate && needsNormalization) {
+  finalOutput = await translateToTargetLanguage(...);
+}
+```
 
-Actions:
+Rules:
 
-1) ProgressReporter / UI:
+- For `taskKey === 'translate'`:
+  - Always run the translation pipeline as designed.
+- For other tasks:
+  - Only run translation/normalization when `disableAutoTranslation` is `false`.
+  - When `true`, keep `llmOutput` as-is (no extra translation step).
 
-- Ensure that the same cancel controls used for Add Links are also:
-  - Rendered and enabled when Extract Concepts commands run.
-- If the cancel button visibility depends on task type:
-  - Add Extract Concepts commands to the allowed/cancellable set.
+### 4.4 Centralization
 
-2) Extraction loops (already partially implemented):
+Prefer a centralized utility (e.g. in `llmUtils.ts` / `promptUtils.ts`) to determine:
 
-- extractConceptsFromFile:
-  - Keep:
-    - if (progressReporter.cancelled) throw new Error("Concept extraction cancelled by user.");
-  - Ensure this check occurs:
-    - Before each chunk processing.
-    - Immediately after LLM calls where appropriate.
+- Whether to apply language clauses to prompts.
+- Whether to perform post-translation.
 
-- batchExtractConceptsForFolderCommand:
-  - Maintain:
-    - If (useReporter.cancelled) break cleanly.
-  - Optionally:
-    - Add checks before calling createConceptNotes to avoid extra work after cancellation.
+This avoids scattering conditional logic and reduces risk of missing a call site.
 
-3) Error handling and UX:
+---
 
-- When cancelled:
-  - Treat “cancelled by user” as a normal outcome:
-    - No error modal.
-    - Reporter shows “Cancelled”.
-    - Status bar updated accordingly.
-- Align this behavior with Add Links so users see a consistent pattern.
+## 5. Affected Areas (Audit Checklist)
 
-## 5. Final Expected Behavior
+Review and adjust (non-exhaustive; based on repo structure):
 
-After these changes:
+1. `src/main.ts`
+   - Confirm each command invocation has an associated `taskKey`.
+   - Ensure Translate-related commands are marked with `'translate'`.
 
-- Concept Log:
-  - Concept log output settings are consistently applied to all concept note creation flows.
-  - Optionally configurable per-task if desired.
-- Extract Concepts:
-  - Never modifies or moves source documents.
-  - Only creates concept notes in the configured concept note folder.
-  - Concept note content is controlled via:
-    - extractConceptsMinimalTemplate
-    - extractConceptsAddBacklink
-- Cancel Support:
-  - Extract Concepts operations can be canceled via the same UI controls as Add Links.
-  - Cancellation is responsive and does not leave partial/long-running work.
-- Overall:
-  - “Extract Concepts” is predictable, safe, and aligned with the “Process file (add links)” ecosystem,
-    while keeping the responsibilities of each flow clearly separated.
+2. `src/promptUtils.ts`
+   - Update prompt builders to accept `taskKey` and `settings`.
+   - Apply `disableAutoTranslation` logic when composing language instructions.
+
+3. `src/llmUtils.ts` / `src/translators/*`
+   - Wrap any automatic translation or enforced language behavior with checks as described.
+   - Ensure Translate task remains fully functional.
+
+4. Any per-task language usage:
+   - Add Links language
+   - Research & summarize language
+   - Summarise as Mermaid language
+   - Extract Concepts language
+   - Generate Title language
+   - Ensure they are only enforced when:
+     - `disableAutoTranslation = false`, or
+     - Task is `translate`.
+
+---
+
+## 6. Testing Plan
+
+Add or update tests (e.g. under `src/tests`) to validate:
+
+1. **Default behavior (backward compatibility)**:
+   - `disableAutoTranslation = false`
+   - Non-Translate tasks:
+     - Still enforce the configured output language where expected.
+     - Any existing translation/normalization behavior remains unchanged.
+   - Translate task:
+     - Works as before.
+
+2. **Auto translation disabled**:
+   - `disableAutoTranslation = true`
+   - For non-Translate tasks:
+     - Prompts do not include “respond in X language” constraints.
+     - No secondary translation helper is invoked.
+     - Outputs remain in the model’s natural/original language, preserving mixed-language corpora.
+   - For Translate task:
+     - Still performs translation according to its configuration.
+     - Ignores `disableAutoTranslation`.
+
+3. **Multilingual corpus scenario**:
+   - With `disableAutoTranslation = true`, verify:
+     - Per-note or per-chunk outputs are not forced into one language.
+     - Source/target alignment is preserved for analysis workflows.
+
+4. **Configuration persistence**:
+   - Toggling the new setting in the UI updates and persists `NotemdSettings.disableAutoTranslation`.
+   - No runtime errors when loading old configs without the new field (default applied correctly).
+
+---
+
+## 7. Expected Outcome
+
+After implementation:
+
+- Users working with multilingual corpora can enable “No auto translation” to:
+  - Prevent unintended language normalization.
+  - Keep outputs aligned with original languages across all non-Translate tasks.
+- The dedicated Translate task:
+  - Continues to provide explicit translation functionality.
+- Behavior is:
+  - Backward compatible by default,
+  - Explicitly documented in settings,
+  - Centralized and consistent across the codebase.
