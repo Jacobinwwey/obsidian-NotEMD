@@ -108,6 +108,9 @@ export interface NotemdSettings {
     // Focused Learning Domain
     enableFocusedLearning: boolean;
     focusedLearningDomain: string;
+
+    // Language / translation behavior
+    disableAutoTranslation: boolean; // true => only explicit "Translate" task performs translation
 }
 
 // Defines the keys for tasks that can have custom prompts

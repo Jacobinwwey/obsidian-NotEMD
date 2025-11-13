@@ -238,7 +238,7 @@ export function getSystemPrompt(settings: NotemdSettings, taskKey: TaskKey, repl
     }
 
     // Add translation instruction for Mermaid summarization if enabled
-    if (taskKey === 'summarizeToMermaid' && settings.translateSummarizeToMermaidOutput) {
+    if (taskKey === 'summarizeToMermaid' && settings.translateSummarizeToMermaidOutput && !settings.disableAutoTranslation) {
         const targetLanguageName = settings.availableLanguages.find(lang => lang.code === settings.language)?.name || settings.language;
         prompt += `
 
@@ -246,11 +246,27 @@ IMPORTANT: The entire Mermaid diagram, including all node text, MUST be translat
     }
 
     // Add language instruction for extractConcepts if a specific language is set
-    if (taskKey === 'extractConcepts') {
+    if (taskKey === 'extractConcepts' && !settings.disableAutoTranslation) {
         const languageCode = settings.useDifferentLanguagesForTasks ? settings.extractConceptsLanguage : settings.language;
         const targetLanguageName = settings.availableLanguages.find(lang => lang.code === languageCode)?.name || languageCode;
         if (targetLanguageName) {
             prompt += `\n\nThe output concepts MUST be in ${targetLanguageName}.`;
+        }
+    }
+
+    // For other tasks that might have language settings, ensure they are also skipped if disableAutoTranslation is true
+    if (taskKey !== 'translate' && taskKey !== 'summarizeToMermaid' && taskKey !== 'extractConcepts' && !settings.disableAutoTranslation) {
+        const languageCode = settings.useDifferentLanguagesForTasks 
+            ? (settings as any)[`${taskKey}Language`] // e.g., settings.addLinksLanguage
+            : settings.language;
+        
+        const targetLanguageName = settings.availableLanguages.find(lang => lang.code === languageCode)?.name || languageCode;
+        
+        if (targetLanguageName && prompt.includes('{LANGUAGE}')) {
+            prompt = prompt.replace(/{LANGUAGE}/g, targetLanguageName);
+        } else if (targetLanguageName) {
+            // A more generic way to add language instruction if not already in prompt
+            // This part might need to be adjusted based on how other prompts are structured
         }
     }
 
