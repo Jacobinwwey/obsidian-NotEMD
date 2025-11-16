@@ -474,6 +474,56 @@ export class NotemdSettingTab extends PluginSettingTab {
         new Setting(containerEl).setName('Max research content tokens').setDesc('Approx. max tokens from web results for summarization prompt.').addText(text => text.setPlaceholder(String(DEFAULT_SETTINGS.maxResearchContentTokens)).setValue(String(this.plugin.settings.maxResearchContentTokens)).onChange(async (value) => { const num = parseInt(value, 10); if (!isNaN(num) && num > 100) { this.plugin.settings.maxResearchContentTokens = num; } else { this.plugin.settings.maxResearchContentTokens = DEFAULT_SETTINGS.maxResearchContentTokens; } await this.plugin.saveSettings(); this.display(); }));
 
         new Setting(containerEl).setName('Processing parameters').setHeading();
+
+        new Setting(containerEl)
+            .setName('Enable Batch Parallelism')
+            .setDesc('Allow parallel LLM calls for faster batch processing.')
+            .addToggle(t => t
+                .setValue(this.plugin.settings.enableBatchParallelism)
+                .onChange(async (v) => {
+                    this.plugin.settings.enableBatchParallelism = v;
+                    await this.plugin.saveSettings();
+                    this.display();
+                }));
+
+        if (this.plugin.settings.enableBatchParallelism) {
+            new Setting(containerEl)
+                .setName('Batch Concurrency')
+                .setDesc('Max parallel LLM calls (1=serial). Respect API limits!')
+                .addSlider(s => s
+                    .setLimits(1, 20, 1)
+                    .setValue(this.plugin.settings.batchConcurrency)
+                    .setDynamicTooltip()
+                    .onChange(async (v) => {
+                        this.plugin.settings.batchConcurrency = Math.floor(v);
+                        await this.plugin.saveSettings();
+                    }));
+
+            new Setting(containerEl)
+                .setName('Batch Size')
+                .setDesc('Files per batch (balances memory/rates).')
+                .addSlider(s => s
+                    .setLimits(10, 200, 10)
+                    .setValue(this.plugin.settings.batchSize)
+                    .setDynamicTooltip()
+                    .onChange(async (v) => {
+                        this.plugin.settings.batchSize = Math.floor(v);
+                        await this.plugin.saveSettings();
+                    }));
+
+            new Setting(containerEl)
+                .setName('Delay Between Batches (ms)')
+                .setDesc('Delay between batches (ms, for rate limits).')
+                .addSlider(s => s
+                    .setLimits(0, 5000, 100)
+                    .setValue(this.plugin.settings.batchInterDelayMs)
+                    .setDynamicTooltip()
+                    .onChange(async (v) => {
+                        this.plugin.settings.batchInterDelayMs = Math.floor(v);
+                        await this.plugin.saveSettings();
+                    }));
+        }
+        
         new Setting(containerEl).setName('Chunk word count').setDesc('Max words per chunk sent to LLM.').addText(text => text.setPlaceholder(String(DEFAULT_SETTINGS.chunkWordCount)).setValue(String(this.plugin.settings.chunkWordCount)).onChange(async (value) => { const num = parseInt(value, 10); if (!isNaN(num) && num > 50) { this.plugin.settings.chunkWordCount = num; } else { this.plugin.settings.chunkWordCount = DEFAULT_SETTINGS.chunkWordCount; } await this.plugin.saveSettings(); this.display(); }));
         new Setting(containerEl).setName('Enable duplicate detection').setDesc('Enable checks for duplicate terms (results in console).').addToggle(toggle => toggle.setValue(this.plugin.settings.enableDuplicateDetection).onChange(async (value) => { this.plugin.settings.enableDuplicateDetection = value; await this.plugin.saveSettings(); }));
         new Setting(containerEl).setName('Max tokens').setDesc('Max tokens LLM should generate per response.').addText(text => text.setPlaceholder(String(DEFAULT_SETTINGS.maxTokens)).setValue(String(this.plugin.settings.maxTokens)).onChange(async (value) => { const num = parseInt(value, 10); if (!isNaN(num) && num > 0) { this.plugin.settings.maxTokens = num; } else { this.plugin.settings.maxTokens = DEFAULT_SETTINGS.maxTokens; } await this.plugin.saveSettings(); this.display(); }));

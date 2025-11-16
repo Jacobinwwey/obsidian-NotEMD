@@ -21,6 +21,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
     // Store the AbortController for the current operation
     private currentAbortController: AbortController | null = null;
     private activeLeafChangeHandler: (() => void) | null = null; // Store handler reference
+    activeTasks = 0;
 
     // --- Button References ---
     private processCurrentButton: HTMLButtonElement | null = null;
@@ -42,6 +43,11 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
     constructor(leaf: WorkspaceLeaf, plugin: NotemdPlugin) {
         super(leaf);
         this.plugin = plugin;
+    }
+
+    updateActiveTasks(delta: number): void {
+        this.activeTasks += delta;
+        this.updateStatus(`Active: ${this.activeTasks}`);
     }
 
     getViewType() {
