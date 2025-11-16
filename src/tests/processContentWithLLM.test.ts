@@ -11,7 +11,10 @@ describe('processContentWithLLM', () => {
     updateStatus: jest.fn(),
     requestCancel: jest.fn(),
     clearDisplay: jest.fn(),
-    get cancelled() { return false; } // Default to not cancelled for tests
+    get cancelled() { return false; }, // Default to not cancelled for tests
+    activeTasks: 0,
+    updateActiveTasks: jest.fn(),
+    abortController: new AbortController(),
   };
   
   beforeEach(() => {

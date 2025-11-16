@@ -5,8 +5,8 @@ export const mockApp = {
         create: jest.fn(),
         createFolder: jest.fn(),
         getAbstractFileByPath: jest.fn(),
-        read: jest.fn(),
-        modify: jest.fn(),
+        read: jest.fn().mockResolvedValue(''),
+        modify: jest.fn().mockResolvedValue(undefined),
         rename: jest.fn(),
         delete: jest.fn(),
         trash: jest.fn(),
@@ -15,11 +15,11 @@ export const mockApp = {
         getName: jest.fn(() => 'MyVault'),
         configDir: '.obsidian',
         adapter: {
-            exists: jest.fn(),
-            write: jest.fn(),
-            read: jest.fn(),
-            mkdir: jest.fn(),
-            append: jest.fn(), // Added
+            exists: jest.fn().mockResolvedValue(false),
+            write: jest.fn().mockResolvedValue(undefined),
+            read: jest.fn().mockResolvedValue(''),
+            mkdir: jest.fn().mockResolvedValue(undefined),
+            append: jest.fn().mockResolvedValue(undefined), // Added
             stat: jest.fn(), // Added
         },
         on: jest.fn(), // Added

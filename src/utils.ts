@@ -161,3 +161,76 @@ export function getModelForTask(taskType: 'addLinks' | 'research' | 'generateTit
 
     return modelName || provider.model; // Ensure valid string
 }
+
+// Lightweight semaphore
+export class Semaphore {
+    private queue: Array<() => void> = [];
+    private active = 0;
+    constructor(private concurrency: number) { }
+
+    async acquire(): Promise<() => void> {
+        return new Promise(resolve => {
+            const release = () => {
+                this.active--;
+                const next = this.queue.shift();
+                if (next) {
+                    next();
+                }
+            };
+
+            if (this.active < this.concurrency) {
+                this.active++;
+                resolve(release);
+            } else {
+                this.queue.push(() => {
+                    this.active++;
+                    resolve(release);
+                });
+            }
+        });
+    }
+}
+
+export function createConcurrentProcessor(concurrency: number) {
+    const semaphore = new Semaphore(concurrency);
+    return async <T>(tasks: Array<{ task: () => Promise<T>, file: any }>): Promise<Array<{ success: boolean; value?: T; error?: unknown, file: any }>> => {
+        const results: Array<Promise<{ success: boolean; value?: T; error?: unknown, file: any }>> = [];
+
+        for (const { task, file } of tasks) {
+            const p = new Promise<{ success: boolean; value?: T; error?: unknown, file: any }>(async (resolve) => {
+                const release = await semaphore.acquire();
+                try {
+                    const value = await task();
+                    resolve({ success: true, value, file });
+                } catch (error) {
+                    resolve({ success: false, error, file });
+                } finally {
+                    release();
+                }
+            });
+            results.push(p);
+        }
+
+        return Promise.all(results);
+    };
+}
+
+export function chunkArray<T>(arr: T[], size: number): T[][] {
+    const chunks: T[][] = [];
+    for (let i = 0; i < arr.length; i += size) {
+        chunks.push(arr.slice(i, i + size));
+    }
+    return chunks;
+}
+
+export async function retry<T>(fn: () => Promise<T>, maxRetries = 3, delayMs = 1000): Promise<T> {
+    for (let i = 0; i < maxRetries; i++) {
+        try {
+            return await fn();
+        } catch (e) {
+            if (i === maxRetries - 1) throw e;
+            await delay(delayMs * Math.pow(2, i)); // Exponential backoff
+        }
+    }
+    throw new Error('Retry exhausted');
+}

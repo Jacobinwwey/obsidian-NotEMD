@@ -1,7 +1,7 @@
 import { App, Editor, MarkdownView, Modal, Notice, Plugin, TFile, TFolder, PluginSettingTab, Setting, WorkspaceLeaf } from 'obsidian';
 import { NotemdSettings, ProgressReporter, LLMProviderConfig, TaskKey } from './types';
 import { DEFAULT_SETTINGS, NOTEMD_SIDEBAR_VIEW_TYPE, NOTEMD_SIDEBAR_DISPLAY_TEXT, NOTEMD_SIDEBAR_ICON } from './constants';
-import { delay } from './utils';
+import { delay, createConcurrentProcessor, chunkArray, retry } from './utils';
 import { testAPI, callLLM } from './llmUtils';
 import {
     handleFileRename,
@@ -559,31 +559,59 @@ export default class NotemdPlugin extends Plugin {
             useReporter.log(`Starting batch processing for ${files.length} files in "${folderPath}"...`);
             const errors: { file: string; message: string }[] = [];
 
-            for (let i = 0; i < files.length; i++) {
-                const file = files[i];
-                if (useReporter.cancelled) { new Notice('Batch processing cancelled.'); this.updateStatusBar('Cancelled'); useReporter.updateStatus('Cancelled', -1); break; }
+            if (!this.settings.enableBatchParallelism || this.settings.batchConcurrency <= 1) {
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    if (useReporter.cancelled) { new Notice('Batch processing cancelled.'); this.updateStatusBar('Cancelled'); useReporter.updateStatus('Cancelled', -1); break; }
 
-                const progress = Math.floor(((i) / files.length) * 100);
-                useReporter.updateStatus(`Processing ${i + 1}/${files.length}: ${file.name}`, progress);
+                    const progress = Math.floor(((i) / files.length) * 100);
+                    useReporter.updateStatus(`Processing ${i + 1}/${files.length}: ${file.name}`, progress);
 
-                try {
-                    // Pass the ref object
-                    await processFile(this.app, this.settings, file, useReporter, this.currentProcessingFileBasename);
-                } catch (fileError: unknown) {
-                    const message = fileError instanceof Error ? fileError.message : String(fileError);
-                    const stack = fileError instanceof Error ? fileError.stack : undefined;
-                    const errorMsg = `Error processing ${file.name}: ${message}`;
-                    console.error(errorMsg, fileError);
-                    useReporter.log(`❌ ${errorMsg}`);
-                    errors.push({ file: file.name, message: message });
-                    // Log silently
-                    const timestamp = new Date().toISOString();
-                    const logEntry = `[${timestamp}] Error processing ${file.path}:\nMessage: ${message}\nStack Trace:\n${stack || fileError}\n\n`;
-                    try { await this.app.vault.adapter.append('error_processing_filename.log', logEntry); }
-                    catch (logError) { console.error("Failed to write to error log:", logError); useReporter.log("⚠️ Failed to write error details to log file."); }
-                    if (message.includes("cancelled by user")) break; // Exit loop on cancellation
+                    try {
+                        // Pass the ref object
+                        await processFile(this.app, this.settings, file, useReporter, this.currentProcessingFileBasename);
+                    } catch (fileError: unknown) {
+                        const message = fileError instanceof Error ? fileError.message : String(fileError);
+                        const stack = fileError instanceof Error ? fileError.stack : undefined;
+                        const errorMsg = `Error processing ${file.name}: ${message}`;
+                        console.error(errorMsg, fileError);
+                        useReporter.log(`❌ ${errorMsg}`);
+                        errors.push({ file: file.name, message: message });
+                        // Log silently
+                        const timestamp = new Date().toISOString();
+                        const logEntry = `[${timestamp}] Error processing ${file.path}:\nMessage: ${message}\nStack Trace:\n${stack || fileError}\n\n`;
+                        try { await this.app.vault.adapter.append('error_processing_filename.log', logEntry); }
+                        catch (logError) { console.error("Failed to write to error log:", logError); useReporter.log("⚠️ Failed to write error details to log file."); }
+                        if (message.includes("cancelled by user")) break; // Exit loop on cancellation
+                    }
+                } // End loop
+            } else {
+                const concurrency = Math.min(this.settings.batchConcurrency, 20); // Cap
+                const processor = createConcurrentProcessor(concurrency);
+                const fileBatches = chunkArray(files, this.settings.batchSize);
+
+                for (let b = 0; b < fileBatches.length; b++) {
+                    const batch = fileBatches[b];
+                    useReporter.log(`Processing batch ${b + 1}/${fileBatches.length} (${batch.length} files)`);
+                    if (useReporter.cancelled) break;
+
+                    const tasks = batch.map(file => ({
+                        task: () => {
+                            useReporter.updateActiveTasks(1);
+                            return retry(() => processFile(this.app, this.settings, file, useReporter, this.currentProcessingFileBasename), 3);
+                        },
+                        file
+                    }));
+
+                    const results = await processor(tasks);
+                    errors.push(...results.filter(r => !r.success).map(r => ({ file: r.file.name, message: String(r.error) })));
+
+                    // Cleanup active
+                    batch.forEach(() => useReporter.updateActiveTasks(-1));
+                    await delay(this.settings.batchInterDelayMs);
                 }
-            } // End loop
+            }
+
 
             if (!useReporter.cancelled) {
                 if (errors.length > 0) {
@@ -1161,35 +1189,78 @@ export default class NotemdPlugin extends Plugin {
             const errors: { file: string; message: string }[] = [];
             let totalConcepts = 0;
 
-            for (let i = 0; i < files.length; i++) {
-                const file = files[i];
-                if (useReporter.cancelled) { new Notice('Batch extraction cancelled.'); break; }
+            if (!this.settings.enableBatchParallelism || this.settings.batchConcurrency <= 1) {
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    if (useReporter.cancelled) { new Notice('Batch extraction cancelled.'); break; }
 
-                const progress = Math.floor(((i) / files.length) * 100);
-                useReporter.updateStatus(`Processing ${i + 1}/${files.length}: ${file.name}`, progress);
+                    const progress = Math.floor(((i) / files.length) * 100);
+                    useReporter.updateStatus(`Processing ${i + 1}/${files.length}: ${file.name}`, progress);
 
-                try {
-                    const concepts = await extractConceptsFromFile(this.app, this, file, useReporter);
-                    if (concepts.size > 0) {
-                        totalConcepts += concepts.size;
-                        await createConceptNotes(
-                            this.app,
-                            this.settings,
-                            concepts,
-                            file.basename, // Pass the basename of the current file
-                            {
-                                disableBacklink: !this.settings.extractConceptsAddBacklink,
-                                minimalTemplate: this.settings.extractConceptsMinimalTemplate
-                            }
-                        );
+                    try {
+                        const concepts = await extractConceptsFromFile(this.app, this, file, useReporter);
+                        if (concepts.size > 0) {
+                            totalConcepts += concepts.size;
+                            await createConceptNotes(
+                                this.app,
+                                this.settings,
+                                concepts,
+                                file.basename, // Pass the basename of the current file
+                                {
+                                    disableBacklink: !this.settings.extractConceptsAddBacklink,
+                                    minimalTemplate: this.settings.extractConceptsMinimalTemplate
+                                }
+                            );
+                        }
+                    } catch (fileError: unknown) {
+                        const message = fileError instanceof Error ? fileError.message : String(fileError);
+                        errors.push({ file: file.name, message: message });
+                        useReporter.log(`❌ Error processing ${file.name}: ${message}`);
+                        if (message.includes("cancelled by user")) break;
                     }
-                } catch (fileError: unknown) {
-                    const message = fileError instanceof Error ? fileError.message : String(fileError);
-                    errors.push({ file: file.name, message: message });
-                    useReporter.log(`❌ Error processing ${file.name}: ${message}`);
-                    if (message.includes("cancelled by user")) break;
+                }
+            } else {
+                const concurrency = Math.min(this.settings.batchConcurrency, 20); // Cap
+                const processor = createConcurrentProcessor(concurrency);
+                const fileBatches = chunkArray(files, this.settings.batchSize);
+
+                for (let b = 0; b < fileBatches.length; b++) {
+                    const batch = fileBatches[b];
+                    useReporter.log(`Processing batch ${b + 1}/${fileBatches.length} (${batch.length} files)`);
+                    if (useReporter.cancelled) break;
+
+                    const tasks = batch.map(file => ({
+                        task: () => {
+                            useReporter.updateActiveTasks(1);
+                            return retry(async () => {
+                                const concepts = await extractConceptsFromFile(this.app, this, file, useReporter);
+                                if (concepts.size > 0) {
+                                    totalConcepts += concepts.size;
+                                    await createConceptNotes(
+                                        this.app,
+                                        this.settings,
+                                        concepts,
+                                        file.basename, // Pass the basename of the current file
+                                        {
+                                            disableBacklink: !this.settings.extractConceptsAddBacklink,
+                                            minimalTemplate: this.settings.extractConceptsMinimalTemplate
+                                        }
+                                    );
+                                }
+                            }, 3);
+                        },
+                        file
+                    }));
+
+                    const results = await processor(tasks);
+                    errors.push(...results.filter(r => !r.success).map(r => ({ file: r.file.name, message: String(r.error) })));
+
+                    // Cleanup active
+                    batch.forEach(() => useReporter.updateActiveTasks(-1));
+                    await delay(this.settings.batchInterDelayMs);
                 }
             }
+
 
             if (!useReporter.cancelled) {
                 if (errors.length > 0) {
