@@ -111,6 +111,12 @@ export interface NotemdSettings {
 
     // Language / translation behavior
     disableAutoTranslation: boolean; // true => only explicit "Translate" task performs translation
+
+    // Batch processing settings
+    enableBatchParallelism: boolean;
+    batchConcurrency: number;
+    batchSize: number;
+    batchInterDelayMs: number;
 }
 
 // Defines the keys for tasks that can have custom prompts
@@ -197,4 +203,6 @@ export interface ProgressReporter {
     get cancelled(): boolean;
     // Property to hold the AbortController for the current fetch
     abortController?: AbortController | null;
+    activeTasks: number; // NEW: For concurrency display
+    updateActiveTasks(delta: number): void; // NEW
 }

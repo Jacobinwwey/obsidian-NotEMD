@@ -11,7 +11,10 @@ const mockReporter: ProgressReporter = {
     updateStatus: jest.fn(),
     requestCancel: jest.fn(),
     clearDisplay: jest.fn(),
-    get cancelled() { return false; }
+    get cancelled() { return false; },
+    activeTasks: 0,
+    updateActiveTasks: jest.fn(),
+    abortController: new AbortController(),
 };
 
 describe('processFile', () => {
@@ -59,7 +62,7 @@ describe('processFile', () => {
 
         await processFile(mockApp, settings, mockFile, mockReporter, { value: null });
 
-        expect(mockApp.vault.create).toHaveBeenCalledWith('Concepts/AI.md', '# AI');
-        expect(mockApp.vault.create).toHaveBeenCalledWith('Concepts/machine learning.md', '# machine learning');
+        expect(mockApp.vault.create).toHaveBeenCalledWith('Concepts/AI.md', '# AI\n\n## Linked From\n- [[test]]');
+        expect(mockApp.vault.create).toHaveBeenCalledWith('Concepts/machine learning.md', '# machine learning\n\n## Linked From\n- [[test]]');
     });
 });

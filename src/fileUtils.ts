@@ -3,7 +3,7 @@ import { App, TFile, TFolder, Notice, Vault } from 'obsidian';
 import NotemdPlugin from './main';
 import { NotemdSettings, ProgressReporter } from './types';
 import { DEFAULT_SETTINGS } from './constants';
-import { normalizeNameForFilePath, splitContent, getProviderForTask, getModelForTask, delay } from './utils'; // Added delay import
+import { normalizeNameForFilePath, splitContent, getProviderForTask, getModelForTask, delay, createConcurrentProcessor, chunkArray, retry } from './utils'; // Added delay import
 import { callDeepSeekAPI, callOpenAIApi, callAnthropicApi, callGoogleApi, callMistralApi, callAzureOpenAIApi, callLMStudioApi, callOllamaApi, callOpenRouterAPI } from './llmUtils';
 import { refineMermaidBlocks, cleanupLatexDelimiters } from './mermaidProcessor'; // Assuming this will be moved or imported correctly later
 import { _performResearch } from './searchUtils'; // Assuming this will be moved or imported correctly later
@@ -761,58 +761,110 @@ export async function batchGenerateContentForTitles(app: App, settings: NotemdSe
         throw folderError instanceof Error ? folderError : new Error(errorMessage); // Re-throw
     }
 
-    for (let i = 0; i < filesToProcess.length; i++) {
-        const file = filesToProcess[i];
-        const progress = Math.floor(((i) / filesToProcess.length) * 100);
-        progressReporter.updateStatus(`Generating ${i + 1}/${filesToProcess.length}: ${file.name}`, progress);
+    if (!settings.enableBatchParallelism || settings.batchConcurrency <= 1) {
+        // Serial fallback (existing loop)
+        for (let i = 0; i < filesToProcess.length; i++) {
+            const file = filesToProcess[i];
+            const progress = Math.floor(((i) / filesToProcess.length) * 100);
+            progressReporter.updateStatus(`Generating ${i + 1}/${filesToProcess.length}: ${file.name}`, progress);
 
-        if (progressReporter.cancelled) { progressReporter.log('Cancellation requested, stopping batch processing.'); break; }
-        await delay(1); // Yield
-
-        try {
-            await generateContentForTitle(app, settings, file, progressReporter);
+            if (progressReporter.cancelled) { progressReporter.log('Cancellation requested, stopping batch processing.'); break; }
             await delay(1); // Yield
 
-            // Move Successfully Processed File
             try {
-                const normalizedCompletePathForMove = completeFolderPath ? (completeFolderPath.endsWith('/') ? completeFolderPath : completeFolderPath + '/') : '';
-                const destinationPath = `${normalizedCompletePathForMove}${file.name}`;
-                const destExists = await app.vault.adapter.exists(destinationPath);
-                if (destExists) { progressReporter.log(`⚠️ File already exists at destination, skipping move: ${destinationPath}`); }
-                else {
-                    const sourceExists = await app.vault.adapter.exists(file.path);
-                    if (sourceExists) {
-                        if (progressReporter.cancelled) { progressReporter.log(`⚠️ Cancellation requested before moving ${file.name}. Skipping move.`); break; }
-                        else { await app.vault.rename(file, destinationPath); progressReporter.log(`✅ Moved processed file to: ${destinationPath}`); }
-                    } else { progressReporter.log(`⚠️ Source file ${file.path} not found, skipping move.`); }
-                }
-            } catch (moveError: unknown) { // Changed to unknown
-                const errorMessage = moveError instanceof Error ? moveError.message : String(moveError);
-                const moveErrorMsg = `Error moving processed file ${file.name} to ${completeFolderPath}: ${errorMessage}`;
-                console.error(moveErrorMsg, moveError); progressReporter.log(`❌ ${moveErrorMsg}`);
-                errors.push({ file: file.name, message: `Failed to move after generation: ${errorMessage}` });
-            }
-        } catch (fileError: unknown) { // Changed to unknown
-            const errorMessage = fileError instanceof Error ? fileError.message : String(fileError);
-            const errorMsg = `Error generating content for ${file.name}: ${errorMessage}`;
-            console.error(errorMsg, fileError); progressReporter.log(`❌ ${errorMsg}`);
-            errors.push({ file: file.name, message: errorMessage });
-            // Log error silently
-            const timestamp = new Date().toISOString();
-            const errorDetails = fileError instanceof Error ? fileError.stack || fileError.message : String(fileError);
-            const logEntry = `[${timestamp}] Error generating content for ${file.path}:\nMessage: ${errorMessage}\nStack Trace:\n${errorDetails}\n\n`;
-            try { await app.vault.adapter.append('error_processing_filename.log', logEntry); }
-            catch (logError: unknown) { // Changed to unknown
-                 const logErrorMessage = logError instanceof Error ? logError.message : String(logError);
-                 console.error("Failed to write to error_processing_filename.log:", logError);
-                 progressReporter.log(`⚠️ Failed to write error details to log file: ${logErrorMessage}`);
-            }
+                await generateContentForTitle(app, settings, file, progressReporter);
+                await delay(1); // Yield
 
-            if (errorMessage.includes("cancelled by user")) { break; }
+                // Move Successfully Processed File
+                try {
+                    const normalizedCompletePathForMove = completeFolderPath ? (completeFolderPath.endsWith('/') ? completeFolderPath : completeFolderPath + '/') : '';
+                    const destinationPath = `${normalizedCompletePathForMove}${file.name}`;
+                    const destExists = await app.vault.adapter.exists(destinationPath);
+                    if (destExists) { progressReporter.log(`⚠️ File already exists at destination, skipping move: ${destinationPath}`); }
+                    else {
+                        const sourceExists = await app.vault.adapter.exists(file.path);
+                        if (sourceExists) {
+                            if (progressReporter.cancelled) { progressReporter.log(`⚠️ Cancellation requested before moving ${file.name}. Skipping move.`); break; }
+                            else { await app.vault.rename(file, destinationPath); progressReporter.log(`✅ Moved processed file to: ${destinationPath}`); }
+                        } else { progressReporter.log(`⚠️ Source file ${file.path} not found, skipping move.`); }
+                    }
+                } catch (moveError: unknown) { // Changed to unknown
+                    const errorMessage = moveError instanceof Error ? moveError.message : String(moveError);
+                    const moveErrorMsg = `Error moving processed file ${file.name} to ${completeFolderPath}: ${errorMessage}`;
+                    console.error(moveErrorMsg, moveError); progressReporter.log(`❌ ${moveErrorMsg}`);
+                    errors.push({ file: file.name, message: `Failed to move after generation: ${errorMessage}` });
+                }
+            } catch (fileError: unknown) { // Changed to unknown
+                const errorMessage = fileError instanceof Error ? fileError.message : String(fileError);
+                const errorMsg = `Error generating content for ${file.name}: ${errorMessage}`;
+                console.error(errorMsg, fileError); progressReporter.log(`❌ ${errorMsg}`);
+                errors.push({ file: file.name, message: errorMessage });
+                // Log error silently
+                const timestamp = new Date().toISOString();
+                const errorDetails = fileError instanceof Error ? fileError.stack || fileError.message : String(fileError);
+                const logEntry = `[${timestamp}] Error generating content for ${file.path}:\nMessage: ${errorMessage}\nStack Trace:\n${errorDetails}\n\n`;
+                try { await app.vault.adapter.append('error_processing_filename.log', logEntry); }
+                catch (logError: unknown) { // Changed to unknown
+                    const logErrorMessage = logError instanceof Error ? logError.message : String(logError);
+                    console.error("Failed to write to error_processing_filename.log:", logError);
+                    progressReporter.log(`⚠️ Failed to write error details to log file: ${logErrorMessage}`);
+                }
+
+                if (errorMessage.includes("cancelled by user")) { break; }
+            }
+            if (progressReporter.cancelled) { break; }
         }
-        if (progressReporter.cancelled) { break; }
+        return { errors }; // Return collected errors
     }
-    return { errors }; // Return collected errors
+
+    const concurrency = Math.min(settings.batchConcurrency, 20); // Cap
+    const processor = createConcurrentProcessor(concurrency);
+    const fileBatches = chunkArray(filesToProcess, settings.batchSize);
+
+    let allErrors: { file: string; message: string }[] = [];
+    for (let b = 0; b < fileBatches.length; b++) {
+        const batch = fileBatches[b];
+        progressReporter.log(`Processing batch ${b + 1}/${fileBatches.length} (${batch.length} files)`);
+        if (progressReporter.cancelled) break;
+
+        const tasks = batch.map(file => ({
+            task: () => {
+                progressReporter.updateActiveTasks(1);
+                return retry(async () => {
+                    await generateContentForTitle(app, settings, file, progressReporter);
+                    // Move/save immediately after LLM (still serial per result, but parallel LLM)
+                    const normalizedCompletePathForMove = completeFolderPath ? (completeFolderPath.endsWith('/') ? completeFolderPath : completeFolderPath + '/') : '';
+                    const destinationPath = `${normalizedCompletePathForMove}${file.name}`;
+                    const destExists = await app.vault.adapter.exists(destinationPath);
+                    if (destExists) {
+                        progressReporter.log(`⚠️ File already exists at destination, skipping move: ${destinationPath}`);
+                    } else {
+                        const sourceExists = await app.vault.adapter.exists(file.path);
+                        if (sourceExists) {
+                            if (progressReporter.cancelled) {
+                                progressReporter.log(`⚠️ Cancellation requested before moving ${file.name}. Skipping move.`);
+                            } else {
+                                await app.vault.rename(file, destinationPath);
+                                progressReporter.log(`✅ Moved processed file to: ${destinationPath}`);
+                            }
+                        } else {
+                            progressReporter.log(`⚠️ Source file ${file.path} not found, skipping move.`);
+                        }
+                    }
+                    return { file, success: true };
+                }, 3);
+            },
+            file
+        }));
+
+        const results = await processor(tasks);
+        allErrors.push(...results.filter(r => !r.success).map(r => ({ file: r.file.name, message: String(r.error) })));
+
+        // Cleanup active
+        batch.forEach(() => progressReporter.updateActiveTasks(-1));
+        await delay(settings.batchInterDelayMs);
+    }
+    return { errors: allErrors };
 }
 
 /**

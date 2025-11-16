@@ -203,6 +203,11 @@ export const DEFAULT_SETTINGS: NotemdSettings = {
     enableFocusedLearning: false,
     focusedLearningDomain: '',
     disableAutoTranslation: false,
+    // Batch processing settings
+    enableBatchParallelism: false,
+    batchConcurrency: 1,
+    batchSize: 50,
+    batchInterDelayMs: 1000,
 };
 
 // Constants for the Sidebar View

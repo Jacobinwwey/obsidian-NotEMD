@@ -13,9 +13,15 @@ export class ProgressModal extends Modal implements ProgressReporter {
     private timeRemainingEl: HTMLElement;
     // Store the AbortController for the current operation
     private currentAbortController: AbortController | null = null;
+    activeTasks = 0;
 
     constructor(app: App) {
         super(app);
+    }
+
+    updateActiveTasks(delta: number) {
+        this.activeTasks += delta;
+        this.updateStatus(`Active: ${this.activeTasks}`);
     }
 
     onOpen() {

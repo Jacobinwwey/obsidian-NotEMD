@@ -77,4 +77,8 @@ export const mockSettings: NotemdSettings = {
     extractConceptsMinimalTemplate: true,
     extractConceptsAddBacklink: false,
     disableAutoTranslation: false,
+    enableBatchParallelism: false,
+    batchConcurrency: 1,
+    batchSize: 50,
+    batchInterDelayMs: 1000,
 };

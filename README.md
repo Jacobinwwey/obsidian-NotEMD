@@ -218,6 +218,12 @@ Access plugin settings via:
     *   **On**: Adds a "Linked From" section with a backlink to the source file.
 
 #### Processing Parameters
+-   **Enable Batch Parallelism**:
+    *   **Disabled (Default)**: Batch processing tasks (like "Process Folder" or "Batch Generate from Titles") process files one by one (serially).
+    *   **Enabled**: Allows the plugin to process multiple files concurrently, which can significantly speed up large batch jobs.
+-   **Batch Concurrency**: (Visible only when parallelism is enabled) Sets the maximum number of files to process in parallel. A higher number can be faster but uses more resources and may hit API rate limits. (Default: 1, Range: 1-20)
+-   **Batch Size**: (Visible only when parallelism is enabled) The number of files to group into a single batch. (Default: 50, Range: 10-200)
+-   **Delay Between Batches (ms)**: (Visible only when parallelism is enabled) An optional delay in milliseconds between processing each batch, which can help manage API rate limits. (Default: 1000ms)
 -   **Chunk Word Count**: Maximum words per chunk sent to the LLM. Affects the number of API calls for large files. (Default: 3000)
 -   **Enable Duplicate Detection**: Toggles the basic check for duplicate words within processed content (results in console). (Default: Enabled)
 -   **Max Tokens**: Maximum tokens the LLM should generate per response chunk. Affects cost and detail. (Default: 4096)
