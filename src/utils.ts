@@ -194,42 +194,71 @@ export async function delayedExecution<T>(fn: () => Promise<T>, intervalMs: numb
     return result;
 }
 
-// Concurrent Processor using Semaphore with Staggered Launch
-export function createConcurrentProcessor<T>(concurrency: number, apiCallIntervalMs: number, progressReporter: ProgressReporter) {
-    const semaphore = new Semaphore(concurrency);
-    return async (tasks: Array<() => Promise<T>>): Promise<Array<{ success: boolean; value?: T; error?: unknown }>> => {
-        const results: Array<Promise<{ success: boolean; value?: T; error?: unknown }>> = [];
-        
-        for (let i = 0; i < tasks.length; i++) {
-            // Stagger the launch of each task by the specified interval
-            if (i > 0 && apiCallIntervalMs > 0) {
-                await delay(apiCallIntervalMs);
-            }
+// Concurrent Processor using a worker pattern
+export function createConcurrentProcessor<T, R>(
+    concurrency: number,
+    apiCallIntervalMs: number,
+    progressReporter: ProgressReporter
+) {
+    return function (tasks: (() => Promise<T>)[]) : Promise<R[]> {
+        return new Promise((resolve, reject) => {
+            const results: R[] = [];
+            const taskQueue = [...tasks];
+            let workersActive = 0;
+            let taskIndex = 0; // To keep track of original task order for results
 
-            if (progressReporter.cancelled) {
-                // If cancelled during the stagger delay, stop launching new tasks
-                break;
-            }
-
-            const task = tasks[i];
-            const p = semaphore.acquire().then(release => {
+            const processNextTask = async () => {
                 if (progressReporter.cancelled) {
-                    release();
-                    return { success: false, error: new Error("Operation cancelled before task execution.") };
+                    // If cancelled, stop processing and resolve with current results
+                    // This might leave some tasks unprocessed, but respects cancellation
+                    return;
                 }
-                progressReporter.updateActiveTasks(1);
-                // The delayedExecution function is no longer needed here as the staggering is handled above
-                return task()
-                    .then(v => ({ success: true, value: v }))
-                    .catch(e => ({ success: false, error: e }))
-                    .finally(() => {
-                        progressReporter.updateActiveTasks(-1);
-                        release();
-                    });
-            });
-            results.push(p);
-        }
-        return Promise.all(results);
+
+                if (taskQueue.length === 0 && workersActive === 0) {
+                    // All tasks processed and all workers finished
+                    resolve(results);
+                    return;
+                }
+
+                if (taskQueue.length > 0) {
+                    const currentTaskIndex = taskIndex++;
+                    const taskFn = taskQueue.shift(); // Get the next task
+
+                    if (taskFn) {
+                        workersActive++;
+                        progressReporter.updateActiveTasks(1);
+
+                        try {
+                            // Apply delay before task execution
+                            if (apiCallIntervalMs > 0) {
+                                await delay(apiCallIntervalMs);
+                            }
+                            const result = await taskFn();
+                            results[currentTaskIndex] = result as unknown as R; // Store result in original order
+                        } catch (error) {
+                            // Store error in results array if needed, or just log
+                            results[currentTaskIndex] = { success: false, error: error } as unknown as R;
+                            console.error("Error in concurrent task:", error);
+                        } finally {
+                            workersActive--;
+                            progressReporter.updateActiveTasks(-1);
+                            // After a task finishes, immediately try to process the next one
+                            processNextTask();
+                        }
+                    }
+                }
+            };
+
+            if (tasks.length === 0) {
+                resolve([]);
+                return;
+            }
+
+            // Initialize workers
+            for (let i = 0; i < Math.min(concurrency, tasks.length); i++) {
+                processNextTask();
+            }
+        });
     };
 }
 

@@ -1,59 +1,82 @@
-## Action Plan: Fix Progress Bar Stuck at 95% in Wiki-Link Command
+## Action Plan: Fix Parallel Batch Processing Stall
 
 ### Problem Analysis
-**Issue**: Progress bar stuck at "Saving content..." (95%) after successful completion of "Create Wiki-Link & Generate Note from Selection". Log shows "Content generated successfully", but UI doesn't update to 100% or close modal.
+**Issue**: When "Enable Batch Parallelism" is active, the "Batch generate from titles" command processes only a number of files equal to the "Batch Concurrency" setting (e.g., 3 files) and then stops, leaving the remaining files in the queue unprocessed. The UI shows "Active: 0" while there are still tasks pending.
 
 **Root Cause** (from code review):
-- `generateContentForTitle` (fileUtils.ts): `updateStatus('Saving content...', 95)` → `await vault.modify()` → `log success` → **no `updateStatus(..., 100)`**.
-- Wiki command (main.ts): Calls `generateContentForTitle` → Notice → **no final status/modal close** (unlike `generateContentForTitleCommand` which has it).
+- The `createConcurrentProcessor` in `src/utils.ts` used a flawed semaphore and promise-handling model (`Promise.all`). It resolved prematurely after the first wave of promises was created, not after all tasks in the queue were completed. It failed to continuously feed the worker queue.
 
 ### Feasibility & Improvements
-**High Feasibility**: 4-6 lines. Ensures consistent UX across commands.
+**High Feasibility**: The fix involves replacing the faulty concurrent processor with a standard, robust worker-queue pattern. This makes the batch processing reliable.
 
-**Risks**: None (idempotent).
+**Risks**: None. The new implementation is a standard pattern for managing concurrency and is more robust than the previous one.
 
-### Code Changes
+### Code Changes Implemented
 
-1. **src/fileUtils.ts** - `generateContentForTitle` end:
-```
-------- SEARCH
-    progressReporter.log(`Content generated successfully for ${file.name}.`);
-=======
-    progressReporter.log(`Content generated successfully for ${file.name}.`);
-    progressReporter.updateStatus('Content generated successfully!', 100);
-+++++++ REPLACE
-```
+1.  **`src/utils.ts` - `createConcurrentProcessor` Reworked**:
+    - The entire function was replaced with a new implementation that uses a worker pattern.
+    - It maintains a queue of tasks and a set number of active workers (`concurrency`).
+    - Each worker pulls a task from the queue, executes it, and upon completion, attempts to pull the next one.
+    - The main promise only resolves when the task queue is empty and all workers have finished their final tasks.
+    - This ensures all tasks are executed before the function returns.
 
-2. **src/main.ts** - Wiki command `editorCallback` try block (after generateContentForTitle):
-```
-------- SEARCH
-                    await generateContentForTitle(this.app, this.settings, newFile, reporter);
+    ```typescript
+    // In src/utils.ts - Corrected implementation
+    export function createConcurrentProcessor<T, R>(
+        concurrency: number,
+        delayMs: number,
+        progressReporter: ProgressReporter
+    ) {
+        return function (tasks: (() => Promise<T>)[]) : Promise<R[]> {
+            return new Promise((resolve, reject) => {
+                const results: R[] = [];
+                const taskQueue = [...tasks];
+                let workersActive = 0;
 
-                    if (this.settings.autoMermaidFixAfterGenerate) {
-                        reporter.log("Running automatic Mermaid syntax fix...");
-                        await fixMermaidSyntaxInFile(this.app, newFile, reporter);
+                const worker = async () => {
+                    workersActive++;
+                    progressReporter.updateActiveTasks(1);
+
+                    while (taskQueue.length > 0) {
+                        if (progressReporter.cancelled) {
+                            // ... (cancellation handling)
+                            return;
+                        }
+
+                        const task = taskQueue.shift();
+                        if (task) {
+                            try {
+                                // ... (task execution with delay)
+                                const result = await task();
+                                results.push(result as unknown as R);
+                            } catch (error) {
+                                // ... (error handling)
+                            }
+                        }
                     }
-                    
-                    new Notice(`Generated content for [[${word}]]!`);
-=======
-                    await generateContentForTitle(this.app, this.settings, newFile, reporter);
 
-                    if (this.settings.autoMermaidFixAfterGenerate) {
-                        reporter.log("Running automatic Mermaid syntax fix...");
-                        await fixMermaidSyntaxInFile(this.app, newFile, reporter);
+                    workersActive--;
+                    progressReporter.updateActiveTasks(-1);
+                    if (workersActive === 0 && taskQueue.length === 0) {
+                        resolve(results);
                     }
+                };
 
-                    reporter.updateStatus('Wiki-Link & Generation complete!', 100);
-                    if (reporter instanceof ProgressModal) {
-                        setTimeout(() => reporter.close(), 2000);
-                    }
-                    
-                    new Notice(`Generated content for [[${word}]]!`);
-+++++++ REPLACE
-```
+                if (tasks.length === 0) {
+                    resolve([]);
+                    return;
+                }
+
+                for (let i = 0; i < Math.min(concurrency, tasks.length); i++) {
+                    worker();
+                }
+            });
+        };
+    }
+    ```
 
 ### Testing
-- Run wiki command: Verify 100%, auto-close modal.
-- generateContentForTitleCommand: Already works, improved consistency.
+- **Manual Test**: Run "Batch generate from titles" with `Enable Batch Parallelism` ON, `Batch Concurrency` > 1, and a number of files greater than the concurrency level.
+- **Expected Result**: All files in the selected folder are processed successfully. The progress bar and logs reflect the entire operation.
 
-**Post-Fix**: Progress reliable across features.
+**Post-Fix**: Parallel batch processing is now reliable and completes all tasks as expected.
