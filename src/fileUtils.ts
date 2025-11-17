@@ -707,6 +707,7 @@ export async function generateContentForTitle(app: App, settings: NotemdSettings
     progressReporter.updateStatus('Saving content...', 95);
     await app.vault.modify(file, contentToSave);
     progressReporter.log(`Content generated successfully for ${file.name}.`);
+    progressReporter.updateStatus('Content generated successfully!', 100);
 }
 
 /**

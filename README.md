@@ -58,6 +58,7 @@ That's it! Explore the settings to unlock more features like web research, trans
 - **Multi-Model Configuration**: Use different LLM providers *and* specific models for different tasks (Add Links, Research, Generate Title, Translate) or use a single provider for all.
 - **Stable API Calls (Retry Logic)**: Optionally enable automatic retries for failed LLM API calls with configurable interval and attempt limits.
 - **Reliable Batch Processing**: Improved concurrent processing logic with staggered API calls to prevent rate-limiting errors and ensure stable performance during large batch jobs.
+- **Accurate Progress Reporting**: Fixed a bug where the progress bar could get stuck, ensuring that the UI always reflects the true status of the operation.
 
 
 ### Knowledge Graph Enhancement
