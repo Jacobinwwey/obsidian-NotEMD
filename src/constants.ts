@@ -209,6 +209,7 @@ export const DEFAULT_SETTINGS: NotemdSettings = {
     batchSize: 50,
     batchInterDelayMs: 1000,
     apiCallIntervalMs: 500,
+    autoMermaidFixAfterGenerate: false,
 };
 
 // Constants for the Sidebar View

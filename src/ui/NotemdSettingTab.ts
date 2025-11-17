@@ -456,6 +456,17 @@ export class NotemdSettingTab extends PluginSettingTab {
 
         new Setting(containerEl).setName('Content generation & output').setHeading();
         new Setting(containerEl).setName('Enable research in "Generate from title"').setDesc('On: Perform web research before generating.').addToggle(toggle => toggle.setValue(this.plugin.settings.enableResearchInGenerateContent).onChange(async (value) => { this.plugin.settings.enableResearchInGenerateContent = value; await this.plugin.saveSettings(); }));
+        
+        new Setting(containerEl)
+            .setName('Auto-run Mermaid syntax fix after generation')
+            .setDesc("On: Automatically run a syntax fix pass on notes after using 'Generate from Title' or 'Create & Generate from Selection'.")
+            .addToggle(toggle => toggle
+                .setValue(this.plugin.settings.autoMermaidFixAfterGenerate)
+                .onChange(async (value) => {
+                    this.plugin.settings.autoMermaidFixAfterGenerate = value;
+                    await this.plugin.saveSettings();
+                }));
+
         new Setting(containerEl).setName("Use custom output folder for 'Generate from title'").setDesc("On: Move completed files to custom folder. Off: Move to '[original_foldername]_complete'.").addToggle(toggle => toggle.setValue(this.plugin.settings.useCustomGenerateTitleOutputFolder).onChange(async (value) => { this.plugin.settings.useCustomGenerateTitleOutputFolder = value; await this.plugin.saveSettings(); this.display(); }));
         if (this.plugin.settings.useCustomGenerateTitleOutputFolder) {
             new Setting(containerEl).setName("Custom output folder name").setDesc("Subfolder name for completed files.").addText(text => text.setPlaceholder(DEFAULT_SETTINGS.generateTitleOutputFolderName).setValue(this.plugin.settings.generateTitleOutputFolderName).onChange(async (value) => { /* Add validation */ this.plugin.settings.generateTitleOutputFolderName = value.trim() || DEFAULT_SETTINGS.generateTitleOutputFolderName; await this.plugin.saveSettings(); this.display(); }));

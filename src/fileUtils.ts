@@ -885,13 +885,33 @@ export async function batchGenerateContentForTitles(app: App, settings: NotemdSe
 }
 
 /**
+ * Fixes Mermaid and LaTeX syntax in a single file.
+ * @param app Obsidian App instance.
+ * @param file The TFile to process.
+ * @param reporter The progress reporter.
+ * @returns A promise that resolves to true if the file was modified, false otherwise.
+ */
+export async function fixMermaidSyntaxInFile(app: App, file: TFile, reporter: ProgressReporter): Promise<boolean> {
+    const content = await app.vault.read(file);
+    let fixed = cleanupLatexDelimiters(content);
+    fixed = refineMermaidBlocks(fixed);
+    if (fixed.trim() !== content.trim()) {
+        await app.vault.modify(file, fixed);
+        reporter.log(`Fixed syntax in: ${file.name}`);
+        return true;
+    }
+    return false;
+}
+
+/**
  * Batch fixes Mermaid and LaTeX syntax in Markdown files within a specified folder.
  * @param app Obsidian App instance.
+ * @param settings The plugin settings.
  * @param folderPath Path of the folder to process.
  * @param progressReporter Interface for reporting progress.
  * @returns Object containing errors array and modifiedCount.
  */
-export async function batchFixMermaidSyntaxInFolder(app: App, folderPath: string, progressReporter: ProgressReporter): Promise<{ errors: { file: string; message: string }[], modifiedCount: number }> {
+export async function batchFixMermaidSyntaxInFolder(app: App, settings: NotemdSettings, folderPath: string, progressReporter: ProgressReporter): Promise<{ errors: { file: string; message: string }[], modifiedCount: number }> {
     const folder = app.vault.getAbstractFileByPath(folderPath);
     if (!folder || !(folder instanceof TFolder)) {
         throw new Error(`Selected path is not a valid folder: ${folderPath}`);
@@ -924,17 +944,7 @@ export async function batchFixMermaidSyntaxInFolder(app: App, folderPath: string
         await delay(1); // Yield
 
         try {
-            const originalContent = await app.vault.read(file);
-            let processedContent = originalContent;
-
-            // Apply cleanup functions
-            processedContent = cleanupLatexDelimiters(processedContent);
-            processedContent = refineMermaidBlocks(processedContent);
-
-            // Only save if content actually changed
-            if (processedContent.trim() !== originalContent.trim()) {
-                await app.vault.modify(file, processedContent);
-                progressReporter.log(`✅ Fixed syntax in: ${file.name}`);
+            if (await fixMermaidSyntaxInFile(app, file, progressReporter)) {
                 modifiedCount++;
             } else {
                 progressReporter.log(`➖ No changes needed for: ${file.name}`);

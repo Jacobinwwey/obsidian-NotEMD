@@ -118,6 +118,7 @@ export interface NotemdSettings {
     batchSize: number;
     batchInterDelayMs: number;
     apiCallIntervalMs: number;
+    autoMermaidFixAfterGenerate: boolean;
 }
 
 // Defines the keys for tasks that can have custom prompts

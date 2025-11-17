@@ -82,4 +82,5 @@ export const mockSettings: NotemdSettings = {
     batchSize: 50,
     batchInterDelayMs: 1000,
     apiCallIntervalMs: 500,
+    autoMermaidFixAfterGenerate: false,
 };

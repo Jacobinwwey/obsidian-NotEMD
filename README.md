@@ -57,6 +57,7 @@ That's it! Explore the settings to unlock more features like web research, trans
 - **Cancellable Operations**: Cancel any processing task (single or batch) initiated from the sidebar via its dedicated cancel button. Command palette operations use a modal which can also be cancelled.
 - **Multi-Model Configuration**: Use different LLM providers *and* specific models for different tasks (Add Links, Research, Generate Title, Translate) or use a single provider for all.
 - **Stable API Calls (Retry Logic)**: Optionally enable automatic retries for failed LLM API calls with configurable interval and attempt limits.
+- **Reliable Batch Processing**: Improved concurrent processing logic with staggered API calls to prevent rate-limiting errors and ensure stable performance during large batch jobs.
 
 
 ### Knowledge Graph Enhancement
@@ -245,6 +246,9 @@ Access plugin settings via:
 -   **Enable Research in "Generate from Title"**:
     *   **Disabled (Default)**: "Generate from Title" uses only the title as input.
     *   **Enabled**: Performs web research using the configured **Web Research Provider** and includes the findings as context for the LLM during title-based generation.
+-   **Auto-run Mermaid Syntax Fix after Generation**:
+    *   **Disabled (Default)**: No extra action is taken.
+    *   **Enabled**: Automatically runs a syntax-fixing pass on notes after they have been created or updated by "Generate from Title", "Batch Generate from Titles", or "Create & Generate from Selection". This helps ensure any generated Mermaid diagrams are valid.
 -   **Output Language**: (New) Select the desired output language for "Generate from Title" and "Batch Generate from Title" tasks.
     *   **English (Default)**: Prompts are processed and output in English.
     *   **Other Languages**: The LLM is instructed to perform its reasoning in English but provide the final documentation in your selected language (e.g., Español, Français, 简体中文, 繁體中文, العربية, हिन्दी, etc.).
