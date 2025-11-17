@@ -208,6 +208,7 @@ export const DEFAULT_SETTINGS: NotemdSettings = {
     batchConcurrency: 1,
     batchSize: 50,
     batchInterDelayMs: 1000,
+    apiCallIntervalMs: 500,
 };
 
 // Constants for the Sidebar View

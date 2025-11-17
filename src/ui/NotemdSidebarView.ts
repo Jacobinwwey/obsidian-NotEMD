@@ -47,7 +47,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
 
     updateActiveTasks(delta: number): void {
         this.activeTasks += delta;
-        this.updateStatus(`Active: ${this.activeTasks}`);
+        this.updateStatus(`Processing... (Active: ${this.activeTasks})`);
     }
 
     getViewType() {

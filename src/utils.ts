@@ -173,64 +173,71 @@ export class Semaphore {
             const release = () => {
                 this.active--;
                 const next = this.queue.shift();
-                if (next) {
-                    next();
-                }
+                next?.();
             };
-
             if (this.active < this.concurrency) {
                 this.active++;
                 resolve(release);
             } else {
-                this.queue.push(() => {
-                    this.active++;
-                    resolve(release);
-                });
+                this.queue.push(release);
             }
         });
     }
 }
 
-export function createConcurrentProcessor(concurrency: number) {
-    const semaphore = new Semaphore(concurrency);
-    return async <T>(tasks: Array<{ task: () => Promise<T>, file: any }>): Promise<Array<{ success: boolean; value?: T; error?: unknown, file: any }>> => {
-        const results: Array<Promise<{ success: boolean; value?: T; error?: unknown, file: any }>> = [];
+// Helper to introduce delay before/after an async function call
+export async function delayedExecution<T>(fn: () => Promise<T>, intervalMs: number): Promise<T> {
+    if (intervalMs > 0) {
+        await delay(intervalMs); // Delay BEFORE the call
+    }
+    const result = await fn();
+    if (intervalMs > 0) {
+        await delay(intervalMs); // Delay AFTER the call
+    }
+    return result;
+}
 
-        for (const { task, file } of tasks) {
-            const p = new Promise<{ success: boolean; value?: T; error?: unknown, file: any }>(async (resolve) => {
-                const release = await semaphore.acquire();
-                try {
-                    const value = await task();
-                    resolve({ success: true, value, file });
-                } catch (error) {
-                    resolve({ success: false, error, file });
-                } finally {
-                    release();
-                }
+// Concurrent Processor using Semaphore
+export function createConcurrentProcessor<T>(concurrency: number, apiCallIntervalMs: number, progressReporter: ProgressReporter) {
+    const semaphore = new Semaphore(concurrency);
+    return async (tasks: Array<() => Promise<T>>): Promise<Array<{ success: boolean; value?: T; error?: unknown }>> => {
+        const results: Array<Promise<{ success: boolean; value?: T; error?: unknown }>> = [];
+        for (const task of tasks) {
+            // Acquire semaphore, then execute task with delay and release
+            const p = semaphore.acquire().then(release => {
+                progressReporter.updateActiveTasks(1); // Increment active tasks
+                return delayedExecution(task, apiCallIntervalMs) // Wrap task with interval delay
+                    .then(v => ({ success: true, value: v }))
+                    .catch(e => ({ success: false, error: e }))
+                    .finally(() => {
+                        progressReporter.updateActiveTasks(-1); // Decrement active tasks
+                        release(); // Release semaphore
+                    });
             });
             results.push(p);
         }
-
         return Promise.all(results);
     };
 }
 
+// Chunk Array Helper
 export function chunkArray<T>(arr: T[], size: number): T[][] {
-    const chunks: T[][] = [];
-    for (let i = 0; i < arr.length; i += size) {
-        chunks.push(arr.slice(i, i + size));
-    }
-    return chunks;
+    return arr.reduce((acc, _, i) => {
+        if (i % size === 0) acc.push(arr.slice(i, i + size));
+        return acc;
+    }, [] as T[][]);
 }
 
-export async function retry<T>(fn: () => Promise<T>, maxRetries = 3, delayMs = 1000): Promise<T> {
+// Retry with Exponential Backoff Helper
+export async function retry<T>(fn: () => Promise<T>, maxRetries = 3, delayMs = 1000, signal?: AbortSignal): Promise<T> {
     for (let i = 0; i < maxRetries; i++) {
+        if (signal?.aborted) throw new Error("Operation aborted during retry.");
         try {
             return await fn();
         } catch (e) {
-            if (i === maxRetries - 1) throw e;
+            if (i === maxRetries - 1) throw e; // Re-throw last error
             await delay(delayMs * Math.pow(2, i)); // Exponential backoff
         }
     }
-    throw new Error('Retry exhausted');
+    throw new Error('Retry exhausted'); // Should not be reached
 }
