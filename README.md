@@ -59,6 +59,8 @@ That's it! Explore the settings to unlock more features like web research, trans
 - **Stable API Calls (Retry Logic)**: Optionally enable automatic retries for failed LLM API calls with configurable interval and attempt limits.
 - **Reliable Batch Processing**: Improved concurrent processing logic with staggered API calls to prevent rate-limiting errors and ensure stable performance during large batch jobs.
 - **Accurate Progress Reporting**: Fixed a bug where the progress bar could get stuck, ensuring that the UI always reflects the true status of the operation.
+- **Robust Parallel Batch Processing**: Resolved an issue where parallel batch operations would stall prematurely, ensuring all files are processed reliably and efficiently.
+- **Progress Bar Accuracy**: Fixed a bug where the progress bar for the "Create Wiki-Link & Generate Note" command would get stuck at 95%, ensuring it now correctly shows 100% upon completion.
 
 
 ### Knowledge Graph Enhancement

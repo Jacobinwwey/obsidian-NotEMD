@@ -698,9 +698,10 @@ export default class NotemdPlugin extends Plugin {
                     processedCount += batch.length;
 
                     results.forEach(r => {
-                        if (!r.success && r.error) {
-                            const error = r.error as { file?: TFile, message: string };
-                            errors.push({ file: error.file?.name || 'Unknown file', message: String(error.message) });
+                        const result = r as { success: boolean; file: TFile; error?: any };
+                        if (!result.success && result.error) {
+                            const errorMessage = result.error.message || String(result.error);
+                            errors.push({ file: result.file.name, message: errorMessage });
                         }
                     });
 
@@ -1407,9 +1408,10 @@ export default class NotemdPlugin extends Plugin {
                     processedCount += batch.length;
 
                     results.forEach(r => {
-                        if (!r.success && r.error) {
-                            const error = r.error as { file?: TFile, message: string };
-                            errors.push({ file: error.file?.name || 'Unknown file', message: String(error.message) });
+                        const result = r as { success: boolean; file: TFile; error?: any };
+                        if (!result.success && result.error) {
+                            const errorMessage = result.error.message || String(result.error);
+                            errors.push({ file: result.file.name, message: errorMessage });
                         }
                     });
 
