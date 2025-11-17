@@ -6,6 +6,24 @@ This document summarizes the major functional and architectural changes implemen
 ## Code/Architecture Update
 
 ### English
+*   **Improved Progress Bar Logic**: Enhanced the logic for progress bar updates to ensure it accurately reflects the completion status of operations, preventing it from getting stuck at intermediate percentages.
+
+### Chinese (中文)
+*   **改进的进度条逻辑**: 增强了进度条更新逻辑，确保其准确反映操作的完成状态，防止其卡在中间百分比。
+
+---
+## Implementation of Functionality
+
+### English
+*   **Accurate UI Feedback for Wiki-Link Command**: The "Create Wiki-Link & Generate Note from Selection" command now provides accurate progress updates, reaching 100% completion and automatically closing the progress modal upon successful execution.
+
+### Chinese (中文)
+*   **Wiki-Link命令的准确UI反馈**: “从选中文本创建维基链接并生成笔记”命令现在提供准确的进度更新，在成功执行后达到100%完成并自动关闭进度模态框。
+
+---
+## Code/Architecture Update
+
+### English
 *   **Refined Concurrent Processing**: Implemented a staggered launch mechanism in the `createConcurrentProcessor` utility. This ensures that API calls within a parallel batch are spaced out by the configured `apiCallIntervalMs`, preventing request bursts and resolving potential 429 rate-limit errors from LLM providers.
 *   **Modularized Syntax Fixing**: Refactored the `batchFixMermaidSyntaxInFolder` function by extracting the core logic into a new, reusable `fixMermaidSyntaxInFile` function. This improves code modularity and maintainability.
 
