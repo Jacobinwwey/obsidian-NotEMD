@@ -322,6 +322,11 @@ export default class NotemdPlugin extends Plugin {
                         reporter.log("Running automatic Mermaid syntax fix...");
                         await fixMermaidSyntaxInFile(this.app, newFile, reporter);
                     }
+
+                    reporter.updateStatus('Wiki-Link & Generation complete!', 100);
+                    if (reporter instanceof ProgressModal) {
+                        setTimeout(() => reporter.close(), 2000);
+                    }
                     
                     new Notice(`Generated content for [[${word}]]!`);
                 } catch (error: any) {
