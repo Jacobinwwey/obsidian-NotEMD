@@ -865,8 +865,9 @@ export async function batchGenerateContentForTitles(app: App, settings: NotemdSe
         processedCount += batch.length; // Update count for overall progress
 
         results.forEach(r => {
-            if (!r.success && r.error) {
-                const error = r.error as { file?: TFile, message: string };
+            const result = r as { success: boolean; file: TFile; error?: any };
+            if (!result.success && result.error) {
+                const error = result.error as { file?: TFile, message: string };
                 allErrors.push({ file: error.file?.name || 'Unknown file', message: String(error.message) });
             }
         });
