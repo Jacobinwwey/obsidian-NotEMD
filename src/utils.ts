@@ -185,11 +185,8 @@ export class Semaphore {
     }
 }
 
-// Helper to introduce delay before/after an async function call
+// Helper to introduce a delay *after* an async function call
 export async function delayedExecution<T>(fn: () => Promise<T>, intervalMs: number): Promise<T> {
-    if (intervalMs > 0) {
-        await delay(intervalMs); // Delay BEFORE the call
-    }
     const result = await fn();
     if (intervalMs > 0) {
         await delay(intervalMs); // Delay AFTER the call
@@ -197,21 +194,37 @@ export async function delayedExecution<T>(fn: () => Promise<T>, intervalMs: numb
     return result;
 }
 
-// Concurrent Processor using Semaphore
+// Concurrent Processor using Semaphore with Staggered Launch
 export function createConcurrentProcessor<T>(concurrency: number, apiCallIntervalMs: number, progressReporter: ProgressReporter) {
     const semaphore = new Semaphore(concurrency);
     return async (tasks: Array<() => Promise<T>>): Promise<Array<{ success: boolean; value?: T; error?: unknown }>> => {
         const results: Array<Promise<{ success: boolean; value?: T; error?: unknown }>> = [];
-        for (const task of tasks) {
-            // Acquire semaphore, then execute task with delay and release
+        
+        for (let i = 0; i < tasks.length; i++) {
+            // Stagger the launch of each task by the specified interval
+            if (i > 0 && apiCallIntervalMs > 0) {
+                await delay(apiCallIntervalMs);
+            }
+
+            if (progressReporter.cancelled) {
+                // If cancelled during the stagger delay, stop launching new tasks
+                break;
+            }
+
+            const task = tasks[i];
             const p = semaphore.acquire().then(release => {
-                progressReporter.updateActiveTasks(1); // Increment active tasks
-                return delayedExecution(task, apiCallIntervalMs) // Wrap task with interval delay
+                if (progressReporter.cancelled) {
+                    release();
+                    return { success: false, error: new Error("Operation cancelled before task execution.") };
+                }
+                progressReporter.updateActiveTasks(1);
+                // The delayedExecution function is no longer needed here as the staggering is handled above
+                return task()
                     .then(v => ({ success: true, value: v }))
                     .catch(e => ({ success: false, error: e }))
                     .finally(() => {
-                        progressReporter.updateActiveTasks(-1); // Decrement active tasks
-                        release(); // Release semaphore
+                        progressReporter.updateActiveTasks(-1);
+                        release();
                     });
             });
             results.push(p);

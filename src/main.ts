@@ -14,7 +14,8 @@ import {
     findDuplicates,
     saveMermaidSummaryFile,
     extractConceptsFromFile,
-    createConceptNotes
+    createConceptNotes,
+    fixMermaidSyntaxInFile
 } from './fileUtils';
 import { _performResearch, researchAndSummarize } from './searchUtils'; // Import _performResearch if needed directly, ensure researchAndSummarize is exported
 import { ProgressModal } from './ui/ProgressModal';
@@ -316,6 +317,12 @@ export default class NotemdPlugin extends Plugin {
                     if (this.isBusy) throw new Error('Busy');
                     this.isBusy = true;
                     await generateContentForTitle(this.app, this.settings, newFile, reporter);
+
+                    if (this.settings.autoMermaidFixAfterGenerate) {
+                        reporter.log("Running automatic Mermaid syntax fix...");
+                        await fixMermaidSyntaxInFile(this.app, newFile, reporter);
+                    }
+                    
                     new Notice(`Generated content for [[${word}]]!`);
                 } catch (error: any) {
                     new Notice(`Error: ${error.message}`);
@@ -808,6 +815,12 @@ export default class NotemdPlugin extends Plugin {
         try {
             await this.loadSettings();
             await generateContentForTitle(this.app, this.settings, file, useReporter); // Call utility
+
+            if (this.settings.autoMermaidFixAfterGenerate) {
+                useReporter.log("Running automatic Mermaid syntax fix...");
+                await fixMermaidSyntaxInFile(this.app, file, useReporter);
+            }
+
             this.updateStatusBar('Generation complete');
             useReporter.updateStatus('Content generation complete!', 100);
             new Notice(`Content generated successfully for ${file.name}!`);
@@ -920,6 +933,27 @@ export default class NotemdPlugin extends Plugin {
 
             const { errors } = await batchGenerateContentForTitles(this.app, this.settings, folderPath, useReporter); // Call utility
 
+            if (this.settings.autoMermaidFixAfterGenerate && !useReporter.cancelled) {
+                useReporter.log("Running automatic Mermaid syntax fix on completed folder...");
+                const folder = this.app.vault.getAbstractFileByPath(folderPath);
+                if (folder instanceof TFolder) {
+                    let completeFolderName: string;
+                    if (this.settings.useCustomGenerateTitleOutputFolder) {
+                        completeFolderName = this.settings.generateTitleOutputFolderName || DEFAULT_SETTINGS.generateTitleOutputFolderName;
+                    } else {
+                        const baseFolderName = folderPath === '/' ? 'Vault' : folder.name;
+                        completeFolderName = `${baseFolderName}_complete`;
+                    }
+                    const parentPath = folder.parent?.path === '/' ? '' : (folder.parent?.path ? folder.parent.path + '/' : '');
+                    const completeFolderPath = `${parentPath}${completeFolderName}`;
+                    
+                    useReporter.log(`Targeting completed folder for Mermaid fix: ${completeFolderPath}`);
+                    await batchFixMermaidSyntaxInFolder(this.app, this.settings, completeFolderPath, useReporter);
+                } else {
+                    useReporter.log("Could not determine completed folder path for Mermaid fix.");
+                }
+            }
+
             if (!useReporter.cancelled) {
                 if (errors.length > 0) {
                     const errorSummary = `Batch generation finished with ${errors.length} error(s). Check 'error_processing_filename.log'.`;
@@ -1022,7 +1056,7 @@ export default class NotemdPlugin extends Plugin {
             this.updateStatusBar(`Batch fixing Mermaid syntax...`);
             useReporter.log(`Starting batch Mermaid fix for folder: "${folderPath}"...`);
 
-            const { errors, modifiedCount } = await batchFixMermaidSyntaxInFolder(this.app, folderPath, useReporter); // Call utility
+            const { errors, modifiedCount } = await batchFixMermaidSyntaxInFolder(this.app, this.settings, folderPath, useReporter); // Call utility
 
             if (!useReporter.cancelled) {
                 if (errors.length > 0) {
