@@ -522,6 +522,18 @@ export class NotemdSettingTab extends PluginSettingTab {
                         this.plugin.settings.batchInterDelayMs = Math.floor(v);
                         await this.plugin.saveSettings();
                     }));
+
+            new Setting(containerEl)
+                .setName('API Call Interval (ms)')
+                .setDesc('Minimum delay in milliseconds *before and after* each individual LLM API call. Crucial for low-rate APIs or to prevent 429 errors. Set to 0 for no artificial delay.')
+                .addSlider(s => s
+                    .setLimits(0, 10000, 100)
+                    .setValue(this.plugin.settings.apiCallIntervalMs)
+                    .setDynamicTooltip()
+                    .onChange(async (v) => {
+                        this.plugin.settings.apiCallIntervalMs = Math.floor(v);
+                        await this.plugin.saveSettings();
+                    }));
         }
         
         new Setting(containerEl).setName('Chunk word count').setDesc('Max words per chunk sent to LLM.').addText(text => text.setPlaceholder(String(DEFAULT_SETTINGS.chunkWordCount)).setValue(String(this.plugin.settings.chunkWordCount)).onChange(async (value) => { const num = parseInt(value, 10); if (!isNaN(num) && num > 50) { this.plugin.settings.chunkWordCount = num; } else { this.plugin.settings.chunkWordCount = DEFAULT_SETTINGS.chunkWordCount; } await this.plugin.saveSettings(); this.display(); }));

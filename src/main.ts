@@ -1,7 +1,7 @@
 import { App, Editor, MarkdownView, Modal, Notice, Plugin, TFile, TFolder, PluginSettingTab, Setting, WorkspaceLeaf } from 'obsidian';
 import { NotemdSettings, ProgressReporter, LLMProviderConfig, TaskKey } from './types';
 import { DEFAULT_SETTINGS, NOTEMD_SIDEBAR_VIEW_TYPE, NOTEMD_SIDEBAR_DISPLAY_TEXT, NOTEMD_SIDEBAR_ICON } from './constants';
-import { delay, createConcurrentProcessor, chunkArray, retry } from './utils';
+import { delay, createConcurrentProcessor, chunkArray, retry, normalizeNameForFilePath } from './utils';
 import { testAPI, callLLM } from './llmUtils';
 import {
     handleFileRename,
@@ -267,6 +267,63 @@ export default class NotemdPlugin extends Plugin {
             callback: async () => {
                 await this.batchExtractConceptsForFolderCommand();
             }
+        });
+
+        this.addCommand({
+            id: 'create-wiki-link-and-generate-from-selection',
+            name: 'Create Wiki-Link & Generate Note from Selection',
+            editorCallback: async (editor: Editor, view: MarkdownView) => {
+                const word = editor.getSelection().trim();
+                if (!word || word.length < 2) {
+                    new Notice('Select a valid word (2+ chars).');
+                    return;
+                }
+
+                // Replace selection with wiki-link
+                editor.replaceSelection(`[[${word}]]`);
+
+                if (!this.settings.useCustomConceptNoteFolder || !this.settings.conceptNoteFolder) {
+                    new Notice('Set Concept Note Folder in settings.');
+                    return;
+                }
+
+                const safeName = normalizeNameForFilePath(word);
+                const notePath = `${this.settings.conceptNoteFolder}/${safeName}.md`;
+                const existingFile = this.app.vault.getAbstractFileByPath(notePath);
+
+                let newFile: TFile;
+                const reporter = this.getReporter();
+
+                try {
+                    if (existingFile instanceof TFile) {
+                        // Add backlink to existing (reuse createConceptNotes logic)
+                        await createConceptNotes(this.app, this.settings, new Set([word]), view.file?.basename || null, { disableBacklink: false });
+                        newFile = existingFile;
+                        reporter.log(`Updated existing note: ${notePath}`);
+                    } else {
+                        // Create blank note (reuse createConceptNotes minimal template)
+                        await createConceptNotes(this.app, this.settings, new Set([word]), view.file?.basename || null, { minimalTemplate: false });
+                        const createdFile = this.app.vault.getAbstractFileByPath(notePath);
+                        if (createdFile instanceof TFile) {
+                            newFile = createdFile;
+                        } else {
+                            throw new Error("Failed to create note.");
+                        }
+                        reporter.log(`Created blank note: ${notePath}`);
+                    }
+
+                    // Auto-run Generate from Title
+                    if (this.isBusy) throw new Error('Busy');
+                    this.isBusy = true;
+                    await generateContentForTitle(this.app, this.settings, newFile, reporter);
+                    new Notice(`Generated content for [[${word}]]!`);
+                } catch (error: any) {
+                    new Notice(`Error: ${error.message}`);
+                    reporter.log(`Error: ${error.message}`);
+                } finally {
+                    this.isBusy = false;
+                }
+            },
         });
 
         // --- Settings Tab ---
@@ -587,28 +644,63 @@ export default class NotemdPlugin extends Plugin {
                 } // End loop
             } else {
                 const concurrency = Math.min(this.settings.batchConcurrency, 20); // Cap
-                const processor = createConcurrentProcessor(concurrency);
+                const processor = createConcurrentProcessor(concurrency, this.settings.apiCallIntervalMs, useReporter);
                 const fileBatches = chunkArray(files, this.settings.batchSize);
+                let processedCount = 0;
 
                 for (let b = 0; b < fileBatches.length; b++) {
                     const batch = fileBatches[b];
                     useReporter.log(`Processing batch ${b + 1}/${fileBatches.length} (${batch.length} files)`);
                     if (useReporter.cancelled) break;
 
-                    const tasks = batch.map(file => ({
-                        task: () => {
-                            useReporter.updateActiveTasks(1);
-                            return retry(() => processFile(this.app, this.settings, file, useReporter, this.currentProcessingFileBasename), 3);
-                        },
-                        file
-                    }));
+                    const tasks = batch.map(file => async () => {
+                        const fileProgressReporter: ProgressReporter = {
+                            log: (msg: string) => useReporter.log(`[${file.name}] ${msg}`),
+                            updateStatus: (msg: string, percentage?: number) => {
+                                if (percentage !== undefined) {
+                                    const overallProgress = Math.floor(((processedCount + (percentage / 100)) / files.length) * 100);
+                                    useReporter.updateStatus(`Batch: ${processedCount}/${files.length} (${file.name}: ${msg})`, overallProgress);
+                                } else {
+                                    useReporter.updateStatus(`Batch: ${processedCount}/${files.length} (${file.name}: ${msg})`);
+                                }
+                            },
+                            cancelled: useReporter.cancelled,
+                            requestCancel: () => useReporter.requestCancel(),
+                            clearDisplay: () => { },
+                            abortController: useReporter.abortController,
+                            activeTasks: useReporter.activeTasks,
+                            updateActiveTasks: (delta: number) => useReporter.updateActiveTasks(delta),
+                        };
+
+                        try {
+                            await processFile(this.app, this.settings, file, fileProgressReporter, this.currentProcessingFileBasename);
+                            return { file, success: true };
+                        } catch (e: unknown) {
+                            const errorMessage = e instanceof Error ? e.message : String(e);
+                            fileProgressReporter.log(`❌ Error processing ${file.name}: ${errorMessage}`);
+                            return { file, success: false, error: e };
+                        }
+                    });
 
                     const results = await processor(tasks);
-                    errors.push(...results.filter(r => !r.success).map(r => ({ file: r.file.name, message: String(r.error) })));
+                    processedCount += batch.length;
 
-                    // Cleanup active
-                    batch.forEach(() => useReporter.updateActiveTasks(-1));
-                    await delay(this.settings.batchInterDelayMs);
+                    results.forEach(r => {
+                        if (!r.success && r.error) {
+                            const error = r.error as { file?: TFile, message: string };
+                            errors.push({ file: error.file?.name || 'Unknown file', message: String(error.message) });
+                        }
+                    });
+
+                    if (useReporter.cancelled) {
+                        useReporter.log('Cancellation requested, stopping batch processing.');
+                        break;
+                    }
+
+                    if (this.settings.batchInterDelayMs > 0 && b < fileBatches.length - 1) {
+                        useReporter.log(`Delaying for ${this.settings.batchInterDelayMs}ms before next batch...`);
+                        await delay(this.settings.batchInterDelayMs);
+                    }
                 }
             }
 
@@ -1221,43 +1313,76 @@ export default class NotemdPlugin extends Plugin {
                 }
             } else {
                 const concurrency = Math.min(this.settings.batchConcurrency, 20); // Cap
-                const processor = createConcurrentProcessor(concurrency);
+                const processor = createConcurrentProcessor(concurrency, this.settings.apiCallIntervalMs, useReporter);
                 const fileBatches = chunkArray(files, this.settings.batchSize);
+                let processedCount = 0;
 
                 for (let b = 0; b < fileBatches.length; b++) {
                     const batch = fileBatches[b];
                     useReporter.log(`Processing batch ${b + 1}/${fileBatches.length} (${batch.length} files)`);
                     if (useReporter.cancelled) break;
 
-                    const tasks = batch.map(file => ({
-                        task: () => {
-                            useReporter.updateActiveTasks(1);
-                            return retry(async () => {
-                                const concepts = await extractConceptsFromFile(this.app, this, file, useReporter);
-                                if (concepts.size > 0) {
-                                    totalConcepts += concepts.size;
-                                    await createConceptNotes(
-                                        this.app,
-                                        this.settings,
-                                        concepts,
-                                        file.basename, // Pass the basename of the current file
-                                        {
-                                            disableBacklink: !this.settings.extractConceptsAddBacklink,
-                                            minimalTemplate: this.settings.extractConceptsMinimalTemplate
-                                        }
-                                    );
+                    const tasks = batch.map(file => async () => {
+                        const fileProgressReporter: ProgressReporter = {
+                            log: (msg: string) => useReporter.log(`[${file.name}] ${msg}`),
+                            updateStatus: (msg: string, percentage?: number) => {
+                                if (percentage !== undefined) {
+                                    const overallProgress = Math.floor(((processedCount + (percentage / 100)) / files.length) * 100);
+                                    useReporter.updateStatus(`Batch: ${processedCount}/${files.length} (${file.name}: ${msg})`, overallProgress);
+                                } else {
+                                    useReporter.updateStatus(`Batch: ${processedCount}/${files.length} (${file.name}: ${msg})`);
                                 }
-                            }, 3);
-                        },
-                        file
-                    }));
+                            },
+                            cancelled: useReporter.cancelled,
+                            requestCancel: () => useReporter.requestCancel(),
+                            clearDisplay: () => { },
+                            abortController: useReporter.abortController,
+                            activeTasks: useReporter.activeTasks,
+                            updateActiveTasks: (delta: number) => useReporter.updateActiveTasks(delta),
+                        };
+
+                        try {
+                            const concepts = await extractConceptsFromFile(this.app, this, file, fileProgressReporter);
+                            if (concepts.size > 0) {
+                                totalConcepts += concepts.size;
+                                await createConceptNotes(
+                                    this.app,
+                                    this.settings,
+                                    concepts,
+                                    file.basename, // Pass the basename of the current file
+                                    {
+                                        disableBacklink: !this.settings.extractConceptsAddBacklink,
+                                        minimalTemplate: this.settings.extractConceptsMinimalTemplate
+                                    }
+                                );
+                            }
+                            return { file, success: true };
+                        } catch (e: unknown) {
+                            const errorMessage = e instanceof Error ? e.message : String(e);
+                            fileProgressReporter.log(`❌ Error processing ${file.name}: ${errorMessage}`);
+                            return { file, success: false, error: e };
+                        }
+                    });
 
                     const results = await processor(tasks);
-                    errors.push(...results.filter(r => !r.success).map(r => ({ file: r.file.name, message: String(r.error) })));
+                    processedCount += batch.length;
 
-                    // Cleanup active
-                    batch.forEach(() => useReporter.updateActiveTasks(-1));
-                    await delay(this.settings.batchInterDelayMs);
+                    results.forEach(r => {
+                        if (!r.success && r.error) {
+                            const error = r.error as { file?: TFile, message: string };
+                            errors.push({ file: error.file?.name || 'Unknown file', message: String(error.message) });
+                        }
+                    });
+
+                    if (useReporter.cancelled) {
+                        useReporter.log('Cancellation requested, stopping batch processing.');
+                        break;
+                    }
+
+                    if (this.settings.batchInterDelayMs > 0 && b < fileBatches.length - 1) {
+                        useReporter.log(`Delaying for ${this.settings.batchInterDelayMs}ms before next batch...`);
+                        await delay(this.settings.batchInterDelayMs);
+                    }
                 }
             }
 

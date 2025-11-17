@@ -224,6 +224,7 @@ Access plugin settings via:
 -   **Batch Concurrency**: (Visible only when parallelism is enabled) Sets the maximum number of files to process in parallel. A higher number can be faster but uses more resources and may hit API rate limits. (Default: 1, Range: 1-20)
 -   **Batch Size**: (Visible only when parallelism is enabled) The number of files to group into a single batch. (Default: 50, Range: 10-200)
 -   **Delay Between Batches (ms)**: (Visible only when parallelism is enabled) An optional delay in milliseconds between processing each batch, which can help manage API rate limits. (Default: 1000ms)
+-   **API Call Interval (ms)**: Minimum delay in milliseconds *before and after* each individual LLM API call. Crucial for low-rate APIs or to prevent 429 errors. Set to 0 for no artificial delay. (Default: 500ms)
 -   **Chunk Word Count**: Maximum words per chunk sent to the LLM. Affects the number of API calls for large files. (Default: 3000)
 -   **Enable Duplicate Detection**: Toggles the basic check for duplicate words within processed content (results in console). (Default: Enabled)
 -   **Max Tokens**: Maximum tokens the LLM should generate per response chunk. Affects cost and detail. (Default: 4096)
@@ -385,6 +386,17 @@ This is the core functionality focused on identifying concepts and adding `[[wik
     *   **Single File**: Open a file and run the command `Notemd: Extract concepts (create concept notes only)` from the command palette or click the **"Extract concepts (current file)"** button in the sidebar.
     *   **Folder**: Run the command `Notemd: Batch extract concepts from folder` from the command palette or click the **"Extract concepts (folder)"** button in the sidebar, then select a folder to process all its notes.
     *   The plugin will read the files, identify concepts, and create new notes for them in your designated **Concept Note Folder**, leaving your original files untouched.
+
+8.  **Create Wiki-Link & Generate Note from Selection**:
+    *   This powerful command streamlines the process of creating and populating new concept notes.
+    *   Select a word or phrase in your editor.
+    *   Run the command `Notemd: Create Wiki-Link & Generate Note from Selection` (it is recommended to assign a hotkey to this, like `Cmd+Shift+W`).
+    *   The plugin will:
+        1.  Replace your selected text with a `[[wiki-link]]`.
+        2.  Check if a note with that title already exists in your **Concept Note Folder**.
+        3.  If it exists, it adds a backlink to the current note.
+        4.  If it doesn't exist, it creates a new, empty note.
+        5.  It then automatically runs the **"Generate Content from Title"** command on the new or existing note, populating it with AI-generated content.
 
 ## Supported LLM Providers
 

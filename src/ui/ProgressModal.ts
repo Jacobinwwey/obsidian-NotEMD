@@ -21,7 +21,7 @@ export class ProgressModal extends Modal implements ProgressReporter {
 
     updateActiveTasks(delta: number) {
         this.activeTasks += delta;
-        this.updateStatus(`Active: ${this.activeTasks}`);
+        this.updateStatus(`Processing... (Active: ${this.activeTasks})`);
     }
 
     onOpen() {

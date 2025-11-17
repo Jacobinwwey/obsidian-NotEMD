@@ -81,4 +81,5 @@ export const mockSettings: NotemdSettings = {
     batchConcurrency: 1,
     batchSize: 50,
     batchInterDelayMs: 1000,
+    apiCallIntervalMs: 500,
 };

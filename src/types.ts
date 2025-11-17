@@ -117,6 +117,7 @@ export interface NotemdSettings {
     batchConcurrency: number;
     batchSize: number;
     batchInterDelayMs: number;
+    apiCallIntervalMs: number;
 }
 
 // Defines the keys for tasks that can have custom prompts
