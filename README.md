@@ -80,6 +80,11 @@ That's it! Explore the settings to unlock more features like web research, trans
     - Supports translation between multiple languages.
     - Customizable target language in settings or in UI.
     - Automatically open the translated text on the right side of the original text for easy reading.
+- **Batch Translate**:
+    - Translate all files within a selected folder.
+    - Supports parallel processing when "Enable Batch Parallelism" is on.
+    - Uses custom prompts for translation if configured.
+	- Adds a "Batch translate this folder" option to the file explorer context menu.
 - **Disable auto translation**: When this option is enabled, non-Translate tasks will no longer force outputs into a specific language, preserving the original language context. The explicit "Translate" task will still perform translation as configured.
 
 
@@ -350,6 +355,11 @@ This is the core functionality focused on identifying concepts and adding `[[wik
     *   The plugin uses the configured **LLM Provider** (based on Multi-Model settings) to perform the translation.
     *   The translated content is saved to the configured **Translation Save Path** with the appropriate suffix, and opened in a **new pane to the right** of the original content for easy comparison.
     *   You can cancel this task via the sidebar button or modal cancel button.
+3.  **Batch Translate**:
+    *   Run the command `Notemd: Batch Translate Folder` from the command palette and select a folder, or right-click a folder in the file explorer and choose "Batch translate this folder".
+    *   The plugin will translate all Markdown files in the selected folder.
+    *   Translated files are saved to the configured translation path but are not opened automatically.
+    *   This process can be cancelled via the progress modal.
 
 <img width="1081" height="1214" alt="image" src="https://github.com/user-attachments/assets/6b6fefbf-3692-4281-bdb1-11efdd6c88b5" />
 

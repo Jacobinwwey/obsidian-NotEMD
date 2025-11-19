@@ -103,6 +103,8 @@ export interface NotemdSettings {
     customPromptSummarizeToMermaid: string;
     useCustomPromptForExtractConcepts: boolean;
     customPromptExtractConcepts: string;
+    useCustomPromptForTranslate: boolean;
+    translatePrompt: string;
     translateSummarizeToMermaidOutput: boolean;
 
     // Focused Learning Domain
