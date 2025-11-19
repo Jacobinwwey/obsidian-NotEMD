@@ -194,6 +194,8 @@ export const DEFAULT_SETTINGS: NotemdSettings = {
     customPromptSummarizeToMermaid: '',
     useCustomPromptForExtractConcepts: false,
     customPromptExtractConcepts: '',
+    useCustomPromptForTranslate: false,
+    translatePrompt: '',
     translateSummarizeToMermaidOutput: false,
     useCustomSummarizeToMermaidSuffix: false,
     summarizeToMermaidCustomSuffix: '_summ',

@@ -56,6 +56,8 @@ export const mockSettings: NotemdSettings = {
     customPromptResearchSummarize: '',
     useCustomPromptForExtractConcepts: false,
     customPromptExtractConcepts: '',
+    useCustomPromptForTranslate: false,
+    translatePrompt: '',
     translateProvider: 'DeepSeek',
     useCustomTranslationSuffix: false,
     translationCustomSuffix: '_translated',
