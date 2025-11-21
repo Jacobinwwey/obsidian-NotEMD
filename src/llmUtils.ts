@@ -236,7 +236,7 @@ export async function testAPI(provider: LLMProviderConfig): Promise<{ success: b
         console.error(`Connection test failed for ${provider.name}:`, error);
         return { success: false, message: `Connection failed: ${message}` };
     }
-}""
+}
 
 /**
  * Calls the specified LLM provider API with retry logic.
@@ -324,6 +324,27 @@ async function callApiWithRetry(
 
 // --- Provider-Specific API Call Implementations ---
 
+// Helper function to safely parse error details from API responses
+function getErrorDetails(errorText: string): string {
+    try {
+        const errorJson = JSON.parse(errorText);
+        // Check for common error message structures
+        if (errorJson.error && typeof errorJson.error.message === 'string') {
+            return errorJson.error.message;
+        }
+        if (errorJson.error && typeof errorJson.error === 'string') {
+            return errorJson.error;
+        }
+        if (errorJson.message && typeof errorJson.message === 'string') {
+            return errorJson.message;
+        }
+        return errorText; // Fallback to raw text if no known structure is found
+    } catch (e) {
+        return errorText; // If parsing fails, return the original raw text
+    }
+}
+
+
 // Helper function to manage AbortController/Signal
 function getAbortSignal(progressReporter: ProgressReporter, providedSignal?: AbortSignal): { signal: AbortSignal, controller: AbortController | null } {
     if (providedSignal) {
@@ -337,12 +358,23 @@ function getAbortSignal(progressReporter: ProgressReporter, providedSignal?: Abo
 async function executeDeepSeekAPI(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings, signal?: AbortSignal): Promise<string> {
     if (!provider.apiKey) throw new Error(`API key is missing for DeepSeek provider.`);
     const url = `${provider.baseUrl}/chat/completions`;
-    const requestBody = {
+    
+    // DeepSeek reasoning models (deepseek-reasoner, deepseek-r1, etc.) work with user-only messages
+    // Based on official API examples, reasoning models should NOT include temperature or max_tokens
+    const isReasoningModel = modelName.includes('reasoner') || modelName.includes('-r1');
+    
+    const requestBody: any = {
         model: modelName,
-        messages: [{ role: 'system', content: prompt }, { role: 'user', content: content }],
-        temperature: provider.temperature,
-        max_tokens: settings.maxTokens
+        messages: isReasoningModel 
+            ? [{ role: 'user', content: `${prompt}\n\n${content}` }]
+            : [{ role: 'system', content: prompt }, { role: 'user', content: content }]
     };
+    
+    // Only add these parameters for non-reasoning models
+    if (!isReasoningModel) {
+        requestBody.temperature = provider.temperature;
+        requestBody.max_tokens = settings.maxTokens;
+    }
     
     const { controller } = getAbortSignal(progressReporter, signal);
 
@@ -357,13 +389,29 @@ async function executeDeepSeekAPI(provider: LLMProviderConfig, modelName: string
 
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
         if (response.status < 200 || response.status >= 300) {
-            const errorText = response.text;
-            throw new Error(`DeepSeek API error: ${response.status} - ${errorText}`);
+            const detailedMessage = getErrorDetails(response.text);
+            throw new Error(`DeepSeek API error: ${response.status} - ${detailedMessage}`);
         }
         const data = response.json;
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API success.");
-        if (!data.choices?.[0]?.message?.content) { throw new Error(`Unexpected response format from DeepSeek API`); }
-        return data.choices[0].message.content;
+        
+        // For reasoning models, response includes both reasoning_content and content
+        // We want the final answer (content), not the reasoning process
+        const message = data.choices?.[0]?.message;
+        if (!message) {
+            progressReporter.log(`[DeepSeek] Unexpected response structure: ${JSON.stringify(data)}`);
+            throw new Error(`Unexpected response format from DeepSeek API - no message in choices`);
+        }
+        
+        // Reasoning models may have reasoning_content + content, or just content
+        const responseContent = message.content || '';
+        
+        if (!responseContent && !message.reasoning_content) {
+            progressReporter.log(`[DeepSeek] Response has no content or reasoning_content: ${JSON.stringify(data)}`);
+            throw new Error(`Unexpected response format from DeepSeek API - empty response`);
+        }
+        
+        return responseContent;
     } finally { 
         if (controller && progressReporter.abortController === controller) { 
             progressReporter.abortController = null; 
@@ -374,12 +422,23 @@ async function executeDeepSeekAPI(provider: LLMProviderConfig, modelName: string
 async function executeOpenAIApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings, signal?: AbortSignal): Promise<string> {
     if (!provider.apiKey) throw new Error(`API key is missing for OpenAI provider.`);
     const url = `${provider.baseUrl}/chat/completions`;
-    const requestBody = {
+    
+    // OpenAI reasoning models (o1, o1-mini, o1-preview, o3-mini) don't support system role or temperature
+    // They only accept 'user' and 'assistant' roles
+    const isReasoningModel = modelName.startsWith('o1') || modelName.startsWith('o3');
+    
+    const requestBody: any = {
         model: modelName,
-        messages: [{ role: 'system', content: prompt }, { role: 'user', content: content }],
-        temperature: provider.temperature,
-        max_tokens: settings.maxTokens
+        messages: isReasoningModel 
+            ? [{ role: 'user', content: `${prompt}\n\n${content}` }]
+            : [{ role: 'system', content: prompt }, { role: 'user', content: content }],
     };
+    
+    // Reasoning models don't support temperature or max_tokens parameters
+    if (!isReasoningModel) {
+        requestBody.temperature = provider.temperature;
+        requestBody.max_tokens = settings.maxTokens;
+    }
     
     const { controller } = getAbortSignal(progressReporter, signal);
 
@@ -392,7 +451,10 @@ async function executeOpenAIApi(provider: LLMProviderConfig, modelName: string, 
             body: JSON.stringify(requestBody)
         });
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
-        if (response.status < 200 || response.status >= 300) { const errorText = response.text; throw new Error(`OpenAI API error: ${response.status} - ${errorText}`); }
+        if (response.status < 200 || response.status >= 300) {
+            const detailedMessage = getErrorDetails(response.text);
+            throw new Error(`OpenAI API error: ${response.status} - ${detailedMessage}`);
+        }
         const data = response.json;
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API success.");
         if (!data.choices?.[0]?.message?.content) { throw new Error(`Unexpected response format from OpenAI API`); }
@@ -430,7 +492,10 @@ async function executeAnthropicApi(provider: LLMProviderConfig, modelName: strin
             body: JSON.stringify(requestBody)
         });
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
-        if (response.status < 200 || response.status >= 300) { const errorText = response.text; throw new Error(`Anthropic API error: ${response.status} - ${errorText}`); }
+        if (response.status < 200 || response.status >= 300) {
+            const detailedMessage = getErrorDetails(response.text);
+            throw new Error(`Anthropic API error: ${response.status} - ${detailedMessage}`);
+        }
         const data = response.json;
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API success.");
         if (!data.content?.[0]?.text) { throw new Error(`Unexpected response format from Anthropic API`); }
@@ -461,7 +526,10 @@ async function executeGoogleApi(provider: LLMProviderConfig, modelName: string, 
             body: JSON.stringify(requestBody)
         });
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
-        if (response.status < 200 || response.status >= 300) { const errorText = response.text; throw new Error(`Google API error: ${response.status} - ${errorText}`); }
+        if (response.status < 200 || response.status >= 300) {
+            const detailedMessage = getErrorDetails(response.text);
+            throw new Error(`Google API error: ${response.status} - ${detailedMessage}`);
+        }
         const data = response.json;
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API success.");
         if (!data.candidates?.[0]?.content?.parts?.[0]?.text) { throw new Error(`Unexpected response format from Google API`); }
@@ -494,7 +562,10 @@ async function executeMistralApi(provider: LLMProviderConfig, modelName: string,
             body: JSON.stringify(requestBody)
         });
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
-        if (response.status < 200 || response.status >= 300) { const errorText = response.text; throw new Error(`Mistral API error: ${response.status} - ${errorText}`); }
+        if (response.status < 200 || response.status >= 300) {
+            const detailedMessage = getErrorDetails(response.text);
+            throw new Error(`Mistral API error: ${response.status} - ${detailedMessage}`);
+        }
         const data = response.json;
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API success.");
         if (!data.choices?.[0]?.message?.content) { throw new Error(`Unexpected response format from Mistral API`); }
@@ -527,7 +598,10 @@ async function executeAzureOpenAIApi(provider: LLMProviderConfig, modelName: str
             body: JSON.stringify(requestBody)
         });
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
-        if (response.status < 200 || response.status >= 300) { const errorText = response.text; throw new Error(`Azure OpenAI API error: ${response.status} - ${errorText}`); }
+        if (response.status < 200 || response.status >= 300) {
+            const detailedMessage = getErrorDetails(response.text);
+            throw new Error(`Azure OpenAI API error: ${response.status} - ${detailedMessage}`);
+        }
         const data = response.json;
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API success.");
         if (!data.choices?.[0]?.message?.content) { throw new Error(`Unexpected response format from Azure OpenAI API`); }
@@ -567,7 +641,10 @@ async function executeLMStudioApi(provider: LLMProviderConfig, modelName: string
             body: JSON.stringify(requestBody)
         });
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
-        if (response.status < 200 || response.status >= 300) { const errorText = response.text; throw new Error(`LMStudio API error: ${response.status} - ${errorText}`); }
+        if (response.status < 200 || response.status >= 300) {
+            const detailedMessage = getErrorDetails(response.text);
+            throw new Error(`LMStudio API error: ${response.status} - ${detailedMessage}`);
+        }
         const data = response.json;
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API success.");
         if (!data.choices?.[0]?.message?.content) { throw new Error(`Unexpected response format from LMStudio`); }
@@ -600,7 +677,10 @@ async function executeOllamaApi(provider: LLMProviderConfig, modelName: string, 
             body: JSON.stringify(requestBody)
         });
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
-        if (response.status < 200 || response.status >= 300) { const errorText = response.text; throw new Error(`Ollama API error: ${response.status} - ${errorText}`); }
+        if (response.status < 200 || response.status >= 300) {
+            const detailedMessage = getErrorDetails(response.text);
+            throw new Error(`Ollama API error: ${response.status} - ${detailedMessage}`);
+        }
         const data = response.json;
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API success.");
         if (!data.message?.content) { throw new Error(`Unexpected response format from Ollama`); }
@@ -735,7 +815,10 @@ async function executeXaiApi(provider: LLMProviderConfig, modelName: string, pro
             body: JSON.stringify(requestBody)
         });
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
-        if (response.status < 200 || response.status >= 300) { const errorText = response.text; throw new Error(`xAI API error: ${response.status} - ${errorText}`); }
+        if (response.status < 200 || response.status >= 300) {
+            const detailedMessage = getErrorDetails(response.text);
+            throw new Error(`xAI API error: ${response.status} - ${detailedMessage}`);
+        }
         const data = response.json;
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API success.");
         if (!data.choices?.[0]?.message?.content) { throw new Error(`Unexpected response format from xAI API`); }
