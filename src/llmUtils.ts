@@ -82,12 +82,18 @@ export async function testAPI(provider: LLMProviderConfig): Promise<{ success: b
                     'HTTP-Referer': 'https://github.com/Jacobinwwey/obsidian-NotEMD',
                     'X-Title': 'Notemd Obsidian Plugin'
                 };
-                options.body = JSON.stringify({
+                
+                const isReasoningRouter = provider.model.includes('deepseek-r1') || provider.model.includes('reasoner') || provider.model.includes('o1') || provider.model.includes('o3');
+                const routerBody: any = {
                     model: provider.model,
-                    messages: [{ role: 'user', content: 'Test connection' }],
-                    max_tokens: 1,
-                    temperature: 0
-                });
+                    messages: [{ role: 'user', content: 'Test connection' }]
+                };
+                if (!isReasoningRouter) {
+                    routerBody.max_tokens = 1;
+                    routerBody.temperature = 0;
+                }
+                options.body = JSON.stringify(routerBody);
+                
                 response = await requestUrl(options);
                 if (response.status < 200 || response.status >= 300) throw new Error(`OpenRouter API error: ${response.status} - ${response.text}`);
                 return { success: true, message: `Successfully connected to OpenRouter API using model '${provider.model}'.` };
@@ -111,7 +117,15 @@ export async function testAPI(provider: LLMProviderConfig): Promise<{ success: b
                  options.url = url;
                  options.method = 'POST';
                  options.headers = { ...options.headers, 'Content-Type': 'application/json' };
-                 options.body = JSON.stringify({ model: provider.model, messages: [{ role: 'user', content: 'Test' }], max_tokens: 1, temperature: 0 });
+                 
+                 const isReasoningOpenAI = provider.model.startsWith('o1') || provider.model.startsWith('o3');
+                 const openAIBody: any = { model: provider.model, messages: [{ role: 'user', content: 'Test' }] };
+                 if (!isReasoningOpenAI) {
+                    openAIBody.max_tokens = 1;
+                    openAIBody.temperature = 0;
+                 }
+                 options.body = JSON.stringify(openAIBody);
+                 
                  response = await requestUrl(options);
 
                  if (response.status < 200 || response.status >= 300) throw new Error(`OpenAI API error: ${response.status} - ${response.text}`);
@@ -136,7 +150,15 @@ export async function testAPI(provider: LLMProviderConfig): Promise<{ success: b
                 options.url = url;
                 options.method = 'POST';
                 options.headers = { ...options.headers, 'Content-Type': 'application/json' };
-                options.body = JSON.stringify({ model: provider.model, messages: [{ role: 'user', content: 'Test' }], max_tokens: 1, temperature: 0 });
+
+                const isReasoningDeepSeek = provider.model.includes('reasoner') || provider.model.includes('-r1');
+                const deepSeekBody: any = { model: provider.model, messages: [{ role: 'user', content: 'Test' }] };
+                if (!isReasoningDeepSeek) {
+                    deepSeekBody.max_tokens = 1;
+                    deepSeekBody.temperature = 0;
+                }
+                options.body = JSON.stringify(deepSeekBody);
+
                 response = await requestUrl(options);
 
                 if (response.status < 200 || response.status >= 300) throw new Error(`${provider.name} API error: ${response.status} - ${response.text}`);
@@ -199,7 +221,15 @@ export async function testAPI(provider: LLMProviderConfig): Promise<{ success: b
                 options.url = url;
                 options.method = 'POST';
                 options.headers = { 'Content-Type': 'application/json', 'api-key': provider.apiKey };
-                options.body = JSON.stringify({ messages: [{ role: 'user', content: 'Test' }], max_tokens: 1, temperature: 0 });
+                
+                const isReasoningAzure = provider.model.includes('o1') || provider.model.includes('o3');
+                const azureBody: any = { messages: [{ role: 'user', content: 'Test' }] };
+                if (!isReasoningAzure) {
+                    azureBody.max_tokens = 1;
+                    azureBody.temperature = 0;
+                }
+                options.body = JSON.stringify(azureBody);
+                
                 response = await requestUrl(options);
                 if (response.status < 200 || response.status >= 300) throw new Error(`Azure OpenAI API error: ${response.status} - ${response.text}`);
                 return { success: true, message: `Successfully connected to Azure OpenAI deployment '${provider.model}'.` };
@@ -696,12 +726,29 @@ async function executeOllamaApi(provider: LLMProviderConfig, modelName: string, 
 async function executeOpenRouterAPI(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings, signal?: AbortSignal): Promise<string> {
     if (!provider.apiKey) throw new Error(`API key is missing for OpenRouter provider.`);
     const url = `${provider.baseUrl}/chat/completions`;
-    const requestBody = {
+
+    // Check for reasoning models (e.g., DeepSeek R1, OpenAI o1/o3)
+    const isDeepSeekReasoner = modelName.includes('deepseek-r1') || modelName.includes('reasoner');
+    const isOpenAIReasoner = modelName.includes('openai/o1') || modelName.includes('openai/o3');
+    const isReasoningModel = isDeepSeekReasoner || isOpenAIReasoner;
+
+    const requestBody: any = {
         model: modelName, // User specifies the full model string e.g., "google/gemini-pro"
-        messages: [{ role: 'system', content: prompt }, { role: 'user', content: content }],
-        temperature: provider.temperature,
-        max_tokens: settings.maxTokens
+        messages: isReasoningModel 
+            ? [{ role: 'user', content: `${prompt}\n\n${content}` }]
+            : [{ role: 'system', content: prompt }, { role: 'user', content: content }],
     };
+
+    // Only add specific parameters for non-reasoning models, or as required
+    if (!isReasoningModel) {
+        requestBody.temperature = provider.temperature;
+        requestBody.max_tokens = settings.maxTokens;
+    } else {
+         // For DeepSeek R1 on OpenRouter, recommended temperature is 0.7
+         if (isDeepSeekReasoner) {
+             requestBody.temperature = 0.7;
+         }
+    }
     
     const { controller } = getAbortSignal(progressReporter, signal);
     let response;
