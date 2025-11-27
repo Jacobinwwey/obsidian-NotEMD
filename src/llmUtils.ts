@@ -397,13 +397,13 @@ async function executeDeepSeekAPI(provider: LLMProviderConfig, modelName: string
         model: modelName,
         messages: isReasoningModel 
             ? [{ role: 'user', content: `${prompt}\n\n${content}` }]
-            : [{ role: 'system', content: prompt }, { role: 'user', content: content }]
+            : [{ role: 'system', content: prompt }, { role: 'user', content: content }],
+        max_completion_tokens: settings.maxTokens
     };
     
     // Only add these parameters for non-reasoning models
     if (!isReasoningModel) {
         requestBody.temperature = provider.temperature;
-        requestBody.max_tokens = settings.maxTokens;
     }
     
     const { controller } = getAbortSignal(progressReporter, signal);
