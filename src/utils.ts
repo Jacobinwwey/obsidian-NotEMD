@@ -203,47 +203,56 @@ export function createConcurrentProcessor<T, R>(
     return function (tasks: (() => Promise<T>)[]) : Promise<R[]> {
         return new Promise((resolve, reject) => {
             const results: R[] = [];
-            const taskQueue = [...tasks];
+            const taskQueue = [...tasks]; // Clone queue to manage tasks safely
             let workersActive = 0;
-            let taskIndex = 0; // To keep track of original task order for results
+            let taskIndex = 0; // Track original index to maintain result order
 
+            // The recursive worker function
             const processNextTask = async () => {
+                // 1. Check Cancellation
                 if (progressReporter.cancelled) {
-                    // If cancelled, stop processing and resolve with current results
-                    // This might leave some tasks unprocessed, but respects cancellation
+                    // Check if we are the last active worker to shut down
+                    if (workersActive === 0) resolve(results);
                     return;
                 }
 
-                if (taskQueue.length === 0 && workersActive === 0) {
-                    // All tasks processed and all workers finished
-                    resolve(results);
+                // 2. Check Queue Exhaustion
+                if (taskQueue.length === 0) {
+                    if (workersActive === 0) resolve(results);
                     return;
                 }
 
-                if (taskQueue.length > 0) {
-                    const currentTaskIndex = taskIndex++;
-                    const taskFn = taskQueue.shift(); // Get the next task
+                // 3. Dequeue Next Task
+                // Capture index immediately to ensure result order
+                const currentTaskIndex = taskIndex++;
+                const taskFn = taskQueue.shift();
 
-                    if (taskFn) {
-                        workersActive++;
-                        progressReporter.updateActiveTasks(1);
+                if (taskFn) {
+                    workersActive++;
+                    progressReporter.updateActiveTasks(1);
 
-                        try {
-                            // Apply delay before task execution
-                            if (apiCallIntervalMs > 0) {
+                    try {
+                        // 4. Execute Task (Delay is handled by staggered start + post-task delay)
+                        const result = await taskFn();
+                        results[currentTaskIndex] = result as unknown as R;
+                    } catch (error) {
+                        results[currentTaskIndex] = { success: false, error: error } as unknown as R;
+                        console.error("Error in concurrent task:", error);
+                    } finally {
+                        workersActive--;
+                        progressReporter.updateActiveTasks(-1);
+
+                        // 5. Chain Next Task with Interval
+                        if (!progressReporter.cancelled) {
+                             // Apply delay *after* a task finishes, before picking up the next.
+                             // This maintains the rhythm established by the staggered start.
+                             if (apiCallIntervalMs > 0 && taskQueue.length > 0) {
                                 await delay(apiCallIntervalMs);
-                            }
-                            const result = await taskFn();
-                            results[currentTaskIndex] = result as unknown as R; // Store result in original order
-                        } catch (error) {
-                            // Store error in results array if needed, or just log
-                            results[currentTaskIndex] = { success: false, error: error } as unknown as R;
-                            console.error("Error in concurrent task:", error);
-                        } finally {
-                            workersActive--;
-                            progressReporter.updateActiveTasks(-1);
-                            // After a task finishes, immediately try to process the next one
-                            processNextTask();
+                             }
+                             processNextTask();
+                        } else {
+                            // If cancelled during task, ensure we check for resolution
+                            if (workersActive === 0) resolve(results);
                         }
                     }
                 }
@@ -254,9 +263,22 @@ export function createConcurrentProcessor<T, R>(
                 return;
             }
 
-            // Initialize workers
-            for (let i = 0; i < Math.min(concurrency, tasks.length); i++) {
-                processNextTask();
+            // --- KEY FIX: Staggered Start ---
+            // Start workers one by one, spaced out by the apiCallIntervalMs.
+            // This prevents the "burst" effect at T=delay.
+            const actualConcurrency = Math.min(concurrency, tasks.length);
+            
+            for (let i = 0; i < actualConcurrency; i++) {
+                // Worker 0 starts immediately (0ms)
+                // Worker 1 starts at 1 * interval ms
+                // Worker 2 starts at 2 * interval ms
+                const startDelay = i * apiCallIntervalMs;
+                
+                setTimeout(() => {
+                    if (!progressReporter.cancelled) {
+                        processNextTask();
+                    }
+                }, startDelay);
             }
         });
     };

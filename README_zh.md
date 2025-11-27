@@ -18,7 +18,7 @@
 
 Notemd 通过与各种大型语言模型 (LLM) 集成来增强您的 Obsidian 工作流程，支持多语言笔记处理，自动为关键概念生成维基链接、创建相应的概念笔记、执行网页搜索与摘要、翻译内容、总结为Mermaid脑图等，助力构建强大的知识图谱。
 
-**版本:** 1.5.1
+**版本:** 1.5.2
 
 ![image](https://img.shields.io/github/v/release/Jacobinwwey/obsidian-NotEMD?label=Version&link=https%3A%2F%2Fgithub.com%2Jacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest) ![image](https://img.shields.io/github/downloads/Jacobinwwey/obsidian-NotEMD/total?logo=Obsidian&label=Downloads&labelColor=%237C3AED&color=%235b5b5b&link=https%3A%2F%2Fgithub.com%2Jacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest)
 
@@ -57,7 +57,7 @@ Notemd 通过与各种大型语言模型 (LLM) 集成来增强您的 Obsidian �
 - **可取消操作**: 可以通过侧边栏的专用取消按钮取消任何处理任务（单个或批量）。命令面板操作使用模式窗口，也可以取消。
 - **多模型配置**: 为不同任务（添加链接、研究、生成标题）使用不同的 LLM 提供商*和*特定模型，或为所有任务使用单一提供商。
 - **稳定的 API 调用（重试逻辑）**: 可选择为失败的 LLM API 调用启用自动重试，并可配置重试间隔和尝试次数限制。
-- **可靠的批处理**: 改进了并发处理逻辑，通过交错的API调用来防止速率限制错误，确保在大型批处理作业中性能稳定。
+- **可靠的批处理**: 改进了并发处理逻辑，通过**交错的API调用**来防止速率限制错误，确保在大型批处理作业中性能稳定。新的实现确保任务在不同时间间隔启动，而不是同时启动。
 - **准确的进度报告**: 修复了进度条可能卡住的错误，确保用户界面始终反映操作的真实状态。
 - **健壮的并行批处理**: 解决了并行批处理操作过早停止的问题，确保所有文件都能可靠高效地处理。
 - **进度条准确性**: 修复了“创建维基链接并生成笔记”命令进度条卡在95%的错误，确保现在能正确显示100%完成。
