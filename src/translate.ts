@@ -1,7 +1,57 @@
 import { App, TFile, TFolder, Notice } from 'obsidian';
 import { NotemdSettings, ProgressReporter } from './types';
-import { getProviderForTask, getModelForTask, splitContent } from './utils';
+import { getProviderForTask, getModelForTask, splitContent, createConcurrentProcessor } from './utils';
 import { callLLM } from './llmUtils';
+import { getSystemPrompt } from './promptUtils';
+import { ProgressModal } from './ui/ProgressModal';
+
+
+export async function batchTranslateFolder(
+	app: App,
+	settings: NotemdSettings,
+	folder: TFolder,
+	targetLanguage: string
+): Promise<void> {
+	const files = folder.children.filter(
+		(file): file is TFile => file instanceof TFile && file.extension === 'md'
+	);
+
+	if (files.length === 0) {
+		new Notice('No markdown files found in the selected folder.');
+		return;
+	}
+
+	const progressModal = new ProgressModal(app);
+	progressModal.open();
+
+
+	const processFile = async (file: TFile) => {
+		try {
+			await translateFile(app, settings, file, targetLanguage, progressModal, false);
+			progressModal.log(`Successfully translated ${file.name}`);
+		} catch (error) {
+			progressModal.log(`Failed to translate ${file.name}: ${error.message}`);
+		}
+	};
+
+	const concurrentProcessor = createConcurrentProcessor(
+		settings.batchConcurrency,
+        settings.apiCallIntervalMs,
+		progressModal
+	);
+
+	try {
+        const tasks = files.map(file => () => processFile(file));
+		await concurrentProcessor(tasks);
+		new Notice(`Batch translation of ${files.length} files completed.`);
+	} catch (error) {
+		new Notice('Batch translation failed. See console for details.');
+		console.error('Batch translation error:', error);
+	} finally {
+		progressModal.close();
+	}
+}
+
 
 export async function translateFile(
     app: App,
@@ -9,6 +59,7 @@ export async function translateFile(
     file: TFile,
     targetLanguage: string,
     progressReporter: ProgressReporter,
+    openFile = false, // Default to false
     signal?: AbortSignal
 ): Promise<string | null> {
     const fileContent = await app.vault.read(file);
@@ -25,7 +76,10 @@ export async function translateFile(
     }
     const model = getModelForTask('translate', provider, settings);
 
-    const prompt = `Translate the following markdown document to ${targetLanguage}. Preserve the original markdown formatting, including headers, lists, bold, italics, links, etc. Only output the translated document.`;
+    const prompt = getSystemPrompt(settings, 'translate', {
+        LANGUAGE: targetLanguage,
+        TEXT: fileContent,
+    });
 
     try {
         const chunks = splitContent(fileContent, settings);
@@ -83,6 +137,13 @@ export async function translateFile(
             await app.vault.create(fullPath, translatedText);
         }
         
+        if (openFile) {
+            const newFile = app.vault.getAbstractFileByPath(fullPath);
+            if (newFile instanceof TFile) {
+                await app.workspace.getLeaf(true).openFile(newFile);
+            }
+        }
+
         new Notice(`Translated file saved to ${fullPath}`);
         return fullPath;
     } catch (error: unknown) {
