@@ -219,7 +219,10 @@ export function getSystemPrompt(settings: NotemdSettings, taskKey: TaskKey, repl
                 useCustomPrompt = settings.useCustomPromptForExtractConcepts;
                 customPrompt = settings.customPromptExtractConcepts;
                 break;
-            // 'translate' does not have a custom prompt option in this structure
+            case 'translate':
+                useCustomPrompt = settings.useCustomPromptForTranslate;
+                customPrompt = settings.translatePrompt;
+                break;
         }
     }
 

@@ -23,7 +23,7 @@ import { ErrorModal } from './ui/ErrorModal';
 import { NotemdSettingTab } from './ui/NotemdSettingTab';
 import { showDeletionConfirmationModal } from './ui/modals'; // Import the modal function
 import { NotemdSidebarView } from './ui/NotemdSidebarView';
-import { translateFile } from './translate';
+import { translateFile, batchTranslateFolder } from './translate';
 import { getSystemPrompt } from './promptUtils';
 
 export default class NotemdPlugin extends Plugin {
@@ -269,6 +269,29 @@ export default class NotemdPlugin extends Plugin {
                 await this.batchExtractConceptsForFolderCommand();
             }
         });
+
+        this.addCommand({
+            id: 'batch-translate-folder',
+            name: 'Batch Translate Folder',
+            callback: async () => {
+                await this.batchTranslateFolderCommand();
+            }
+        });
+
+        this.registerEvent(
+            this.app.workspace.on('file-menu', (menu, file) => {
+                if (file instanceof TFolder) {
+                    menu.addItem((item) => {
+                        item
+                            .setTitle('Batch Translate')
+                            .setIcon('language')
+                            .onClick(async () => {
+                                await this.batchTranslateFolderCommand(file);
+                            });
+                    });
+                }
+            })
+        );
 
         this.addCommand({
             id: 'create-wiki-link-and-generate-from-selection',
@@ -1100,6 +1123,61 @@ export default class NotemdPlugin extends Plugin {
         }
     }
 
+    async batchTranslateFolderCommand(folder?: TFolder, reporter?: ProgressReporter) {
+        if (this.isBusy) {
+            new Notice("Notemd is busy.");
+            return;
+        }
+        this.isBusy = true;
+        const useReporter = reporter || this.getReporter();
+
+        const maybeSidebar = useReporter as any;
+        if (maybeSidebar instanceof NotemdSidebarView) {
+            maybeSidebar.startProcessing("Batch translating...");
+        } else {
+            useReporter.clearDisplay();
+            useReporter.updateStatus("Batch translating...", 0);
+        }
+
+        this.updateStatusBar("Batch translating...");
+
+        try {
+            await this.loadSettings();
+            let targetFolder = folder;
+            if (!targetFolder) {
+                const folderPath = await this.getFolderSelection();
+                if (!folderPath) {
+                    throw new Error("Folder selection cancelled.");
+                }
+                const abstractFile = this.app.vault.getAbstractFileByPath(folderPath);
+                if (!(abstractFile instanceof TFolder)) {
+                    throw new Error("Invalid folder selected.");
+                }
+                targetFolder = abstractFile;
+            }
+
+            await batchTranslateFolder(this.app, this.settings, targetFolder, this.settings.language);
+
+        } catch (error: unknown) {
+            this.updateStatusBar("Batch translation failed");
+            let errorMessage = 'An unknown error occurred during batch translation.';
+            if (error instanceof Error) {
+                errorMessage = error.message;
+            }
+            if (!errorMessage.includes("cancelled")) {
+                new Notice(`Failed to translate folder: ${errorMessage}. See console for details.`, 10000);
+                new ErrorModal(this.app, "Batch Translation Error", errorMessage).open();
+            }
+            useReporter.log(`Error: ${errorMessage}`);
+            useReporter.updateStatus('Error occurred', -1);
+        } finally {
+            if (maybeSidebar instanceof NotemdSidebarView) {
+                maybeSidebar.finishProcessing();
+            }
+            this.isBusy = false;
+        }
+    }
+
     async translateFileCommand(file: TFile, signal?: AbortSignal, reporter?: ProgressReporter) {
         if (this.isBusy) {
             new Notice("Notemd is busy.");
@@ -1120,21 +1198,12 @@ export default class NotemdPlugin extends Plugin {
 
         try {
             await this.loadSettings();
-            const translatedFilePath = await translateFile(this.app, this.settings, file, this.settings.language, useReporter, signal);
+            await translateFile(this.app, this.settings, file, this.settings.language, useReporter, true, signal);
             
             // Update status and progress on success
             this.updateStatusBar("Translation complete");
             useReporter.log("Translation complete.");
             useReporter.updateStatus("Translation complete", 100);
-
-            if (translatedFilePath) {
-                // Open the translated file in a new pane
-                const newLeaf = this.app.workspace.getLeaf('split', 'vertical');
-                const translatedFile = this.app.vault.getAbstractFileByPath(translatedFilePath);
-                if (translatedFile instanceof TFile) {
-                    newLeaf.openFile(translatedFile);
-                }
-            }
 
         } catch (error: unknown) {
             this.updateStatusBar("Translation failed");

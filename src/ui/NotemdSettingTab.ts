@@ -487,6 +487,43 @@ export class NotemdSettingTab extends PluginSettingTab {
         new Setting(containerEl).setName('Processing parameters').setHeading();
 
         new Setting(containerEl)
+            .setName('Chunk word count')
+            .setDesc('Max words per chunk sent to LLM.')
+            .addText(text => text
+                .setPlaceholder(String(DEFAULT_SETTINGS.chunkWordCount))
+                .setValue(String(this.plugin.settings.chunkWordCount))
+                .onChange(async (value) => {
+                    const num = parseInt(value, 10);
+                    if (!isNaN(num) && num > 50) {
+                        this.plugin.settings.chunkWordCount = num;
+                    } else {
+                        this.plugin.settings.chunkWordCount = DEFAULT_SETTINGS.chunkWordCount;
+                    }
+                    await this.plugin.saveSettings();
+                    this.display();
+                }));
+        
+        new Setting(containerEl)
+            .setName('Max tokens')
+            .setDesc('Max tokens LLM should generate per response.')
+            .addText(text => text
+                .setPlaceholder(String(DEFAULT_SETTINGS.maxTokens))
+                .setValue(String(this.plugin.settings.maxTokens))
+                .onChange(async (value) => {
+                    const num = parseInt(value, 10);
+                    if (!isNaN(num) && num > 0) {
+                        this.plugin.settings.maxTokens = num;
+                    } else {
+                        this.plugin.settings.maxTokens = DEFAULT_SETTINGS.maxTokens;
+                    }
+                    await this.plugin.saveSettings();
+                    this.display();
+                }));
+
+        // --- Batch Processing Settings ---
+        new Setting(containerEl).setName('Batch Processing').setHeading();
+
+        new Setting(containerEl)
             .setName('Enable Batch Parallelism')
             .setDesc('Allow parallel LLM calls for faster batch processing.')
             .addToggle(t => t
@@ -509,47 +546,17 @@ export class NotemdSettingTab extends PluginSettingTab {
                         this.plugin.settings.batchConcurrency = Math.floor(v);
                         await this.plugin.saveSettings();
                     }));
-
-            new Setting(containerEl)
-                .setName('Batch Size')
-                .setDesc('Files per batch (balances memory/rates).')
-                .addSlider(s => s
-                    .setLimits(10, 200, 10)
-                    .setValue(this.plugin.settings.batchSize)
-                    .setDynamicTooltip()
-                    .onChange(async (v) => {
-                        this.plugin.settings.batchSize = Math.floor(v);
-                        await this.plugin.saveSettings();
-                    }));
-
-            new Setting(containerEl)
-                .setName('Delay Between Batches (ms)')
-                .setDesc('Delay between batches (ms, for rate limits).')
-                .addSlider(s => s
-                    .setLimits(0, 5000, 100)
-                    .setValue(this.plugin.settings.batchInterDelayMs)
-                    .setDynamicTooltip()
-                    .onChange(async (v) => {
-                        this.plugin.settings.batchInterDelayMs = Math.floor(v);
-                        await this.plugin.saveSettings();
-                    }));
-
-            new Setting(containerEl)
-                .setName('API Call Interval (ms)')
-                .setDesc('Minimum delay in milliseconds *before and after* each individual LLM API call. Crucial for low-rate APIs or to prevent 429 errors. Set to 0 for no artificial delay.')
-                .addSlider(s => s
-                    .setLimits(0, 10000, 100)
-                    .setValue(this.plugin.settings.apiCallIntervalMs)
-                    .setDynamicTooltip()
-                    .onChange(async (v) => {
-                        this.plugin.settings.apiCallIntervalMs = Math.floor(v);
-                        await this.plugin.saveSettings();
-                    }));
         }
-        
-        new Setting(containerEl).setName('Chunk word count').setDesc('Max words per chunk sent to LLM.').addText(text => text.setPlaceholder(String(DEFAULT_SETTINGS.chunkWordCount)).setValue(String(this.plugin.settings.chunkWordCount)).onChange(async (value) => { const num = parseInt(value, 10); if (!isNaN(num) && num > 50) { this.plugin.settings.chunkWordCount = num; } else { this.plugin.settings.chunkWordCount = DEFAULT_SETTINGS.chunkWordCount; } await this.plugin.saveSettings(); this.display(); }));
-        new Setting(containerEl).setName('Enable duplicate detection').setDesc('Enable checks for duplicate terms (results in console).').addToggle(toggle => toggle.setValue(this.plugin.settings.enableDuplicateDetection).onChange(async (value) => { this.plugin.settings.enableDuplicateDetection = value; await this.plugin.saveSettings(); }));
-        new Setting(containerEl).setName('Max tokens').setDesc('Max tokens LLM should generate per response.').addText(text => text.setPlaceholder(String(DEFAULT_SETTINGS.maxTokens)).setValue(String(this.plugin.settings.maxTokens)).onChange(async (value) => { const num = parseInt(value, 10); if (!isNaN(num) && num > 0) { this.plugin.settings.maxTokens = num; } else { this.plugin.settings.maxTokens = DEFAULT_SETTINGS.maxTokens; } await this.plugin.saveSettings(); this.display(); }));
+
+        new Setting(containerEl)
+            .setName('Enable duplicate detection')
+            .setDesc('Enable checks for duplicate terms (results in console).')
+            .addToggle(toggle => toggle
+                .setValue(this.plugin.settings.enableDuplicateDetection)
+                .onChange(async (value) => {
+                    this.plugin.settings.enableDuplicateDetection = value;
+                    await this.plugin.saveSettings();
+                }));
 
 
         new Setting(containerEl).setName('Language settings').setHeading();
@@ -706,14 +713,15 @@ export class NotemdSettingTab extends PluginSettingTab {
             const tasksToCustomize: Array<{
                 key: TaskKey,
                 name: string,
-                useCustomSettingKey: keyof Pick<NotemdSettings, 'useCustomPromptForAddLinks' | 'useCustomPromptForGenerateTitle' | 'useCustomPromptForResearchSummarize' | 'useCustomPromptForSummarizeToMermaid' | 'useCustomPromptForExtractConcepts'>,
-                customPromptSettingKey: keyof Pick<NotemdSettings, 'customPromptAddLinks' | 'customPromptGenerateTitle' | 'customPromptResearchSummarize' | 'customPromptSummarizeToMermaid' | 'customPromptExtractConcepts'>
+                useCustomSettingKey: keyof Pick<NotemdSettings, 'useCustomPromptForAddLinks' | 'useCustomPromptForGenerateTitle' | 'useCustomPromptForResearchSummarize' | 'useCustomPromptForSummarizeToMermaid' | 'useCustomPromptForExtractConcepts' | 'useCustomPromptForTranslate'>,
+                customPromptSettingKey: keyof Pick<NotemdSettings, 'customPromptAddLinks' | 'customPromptGenerateTitle' | 'customPromptResearchSummarize' | 'customPromptSummarizeToMermaid' | 'customPromptExtractConcepts' | 'translatePrompt'>
             }> = [
                 { key: 'addLinks', name: 'Add Links (Process File/Folder)', useCustomSettingKey: 'useCustomPromptForAddLinks', customPromptSettingKey: 'customPromptAddLinks' },
                 { key: 'generateTitle', name: 'Generate from Title', useCustomSettingKey: 'useCustomPromptForGenerateTitle', customPromptSettingKey: 'customPromptGenerateTitle' },
                 { key: 'researchSummarize', name: 'Research & Summarize', useCustomSettingKey: 'useCustomPromptForResearchSummarize', customPromptSettingKey: 'customPromptResearchSummarize' },
                 { key: 'summarizeToMermaid', name: 'Summarise as Mermaid diagram', useCustomSettingKey: 'useCustomPromptForSummarizeToMermaid', customPromptSettingKey: 'customPromptSummarizeToMermaid' },
                 { key: 'extractConcepts', name: 'Extract Concepts', useCustomSettingKey: 'useCustomPromptForExtractConcepts', customPromptSettingKey: 'customPromptExtractConcepts' },
+                { key: 'translate', name: 'Translate', useCustomSettingKey: 'useCustomPromptForTranslate', customPromptSettingKey: 'translatePrompt' },
             ];
 
             tasksToCustomize.forEach(task => {

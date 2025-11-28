@@ -35,6 +35,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
     private batchMermaidFixButton: HTMLButtonElement | null = null; // Added
     private cancelButton: HTMLButtonElement | null = null;
     private translateButton: HTMLButtonElement | null = null;
+    private batchTranslateButton: HTMLButtonElement | null = null;
     private summarizeToMermaidButton: HTMLButtonElement | null = null;
     private extractConceptsButton: HTMLButtonElement | null = null;
     private extractConceptsFolderButton: HTMLButtonElement | null = null;
@@ -208,6 +209,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         if (this.checkRemoveDuplicatesButton) this.checkRemoveDuplicatesButton.disabled = processing;
         if (this.batchMermaidFixButton) this.batchMermaidFixButton.disabled = processing; // Added
         if (this.translateButton) this.translateButton.disabled = processing;
+        if (this.batchTranslateButton) this.batchTranslateButton.disabled = processing;
         if (this.extractConceptsButton) this.extractConceptsButton.disabled = processing;
         if (this.extractConceptsFolderButton) this.extractConceptsFolderButton.disabled = processing;
 
@@ -329,6 +331,15 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
                 new Notice('No active file to translate.');
                 console.log('No active file to translate. Translate command not started.');
             }
+        };
+
+        this.batchTranslateButton = translateGroup.createEl('button', { text: 'Batch Translate' });
+        this.batchTranslateButton.title = 'Translates all files in a selected folder.';
+        this.batchTranslateButton.onclick = async () => {
+            if (this.isProcessing) return;
+            this.startProcessing('Starting batch translation...');
+            try { await this.plugin.batchTranslateFolderCommand(undefined, this); }
+            finally { this.finishProcessing(); }
         };
 
         this.summarizeToMermaidButton = newFeatureButtonGroup.createEl('button', { text: 'Summarise as Mermaid diagram' });
@@ -489,6 +500,8 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         this.summarizeToMermaidButton = null;
         this.extractConceptsButton = null;
         this.extractConceptsFolderButton = null;
-        this.translateButton = null; this.languageSelector = null;
+        this.translateButton = null; 
+        this.batchTranslateButton = null;
+        this.languageSelector = null;
     }
 }
