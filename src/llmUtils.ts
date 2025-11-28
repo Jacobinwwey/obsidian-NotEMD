@@ -151,12 +151,21 @@ export async function testAPI(provider: LLMProviderConfig): Promise<{ success: b
                 options.method = 'POST';
                 options.headers = { ...options.headers, 'Content-Type': 'application/json' };
 
-                const isReasoningDeepSeek = provider.model.includes('reasoner') || provider.model.includes('-r1');
-                const deepSeekBody: any = { model: provider.model, messages: [{ role: 'user', content: 'Test' }] };
-                if (!isReasoningDeepSeek) {
-                    deepSeekBody.max_tokens = 1;
+                // Match the same logic as executeDeepSeekAPI
+                const isDeepseekReasonerTest = provider.model === 'deepseek-reasoner' || provider.model.includes('deepseek-reasoner');
+                const isReasoningDeepSeek = isDeepseekReasonerTest || provider.model.includes('-r1');
+                
+                const deepSeekBody: any = { 
+                    model: provider.model, 
+                    messages: [{ role: 'user', content: 'Test' }],
+                    max_completion_tokens: 1
+                };
+                
+                // Only add temperature for non-reasoner models (exclude exact "deepseek-reasoner")
+                if (provider.model !== 'deepseek-reasoner' && !isReasoningDeepSeek) {
                     deepSeekBody.temperature = 0;
                 }
+                
                 options.body = JSON.stringify(deepSeekBody);
 
                 response = await requestUrl(options);
@@ -389,9 +398,12 @@ async function executeDeepSeekAPI(provider: LLMProviderConfig, modelName: string
     if (!provider.apiKey) throw new Error(`API key is missing for DeepSeek provider.`);
     const url = `${provider.baseUrl}/chat/completions`;
     
-    // DeepSeek reasoning models (deepseek-reasoner, deepseek-r1, etc.) work with user-only messages
-    // Based on official API examples, reasoning models should NOT include temperature or max_tokens
-    const isReasoningModel = modelName.includes('reasoner') || modelName.includes('-r1');
+    // DeepSeek reasoning models (deepseek-reasoner, deepseek-r1) require special handling:
+    // 1. Use ONLY 'user' role messages (no 'system' role)
+    // 2. For exact model "deepseek-reasoner": NO temperature parameter at all
+    // 3. Use max_completion_tokens instead of max_tokens
+    const isDeepseekReasoner = modelName === 'deepseek-reasoner' || modelName.includes('deepseek-reasoner');
+    const isReasoningModel = isDeepseekReasoner || modelName.includes('-r1');
     
     const requestBody: any = {
         model: modelName,
@@ -401,8 +413,9 @@ async function executeDeepSeekAPI(provider: LLMProviderConfig, modelName: string
         max_completion_tokens: settings.maxTokens
     };
     
-    // Only add these parameters for non-reasoning models
-    if (!isReasoningModel) {
+    // Only set temperature for non-reasoner models
+    // For exact "deepseek-reasoner" model, exclude temperature completely
+    if (modelName !== 'deepseek-reasoner' && !isReasoningModel) {
         requestBody.temperature = provider.temperature;
     }
     
@@ -410,18 +423,42 @@ async function executeDeepSeekAPI(provider: LLMProviderConfig, modelName: string
 
     try {
         await cancellableDelay(1, progressReporter); // Yield
-        const response = await requestUrl({
-            url: url,
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${provider.apiKey}` },
-            body: JSON.stringify(requestBody)
-        });
+        progressReporter.log(`[DeepSeek] Calling API with model: ${modelName}, isReasoner: ${isDeepseekReasoner}`);
+        progressReporter.log(`[DeepSeek] Request body: ${JSON.stringify(requestBody, null, 2)}`);
+        
+        let response;
+        try {
+            response = await requestUrl({
+                url: url,
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${provider.apiKey}` },
+                body: JSON.stringify(requestBody)
+            });
+        } catch (error: any) {
+            // requestUrl throws on non-2xx status codes
+            // The error object contains the response details
+            if (error.status) {
+                const errorText = error.text || JSON.stringify(error);
+                const detailedMessage = getErrorDetails(errorText);
+                progressReporter.log(`[DeepSeek] Request failed with status ${error.status}`);
+                progressReporter.log(`[DeepSeek] Error response: ${errorText}`);
+                throw new Error(`DeepSeek API error: ${error.status} - ${detailedMessage}`);
+            }
+            // Network or other error
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            progressReporter.log(`[DeepSeek] Request failed with error: ${errorMessage}`);
+            throw new Error(`DeepSeek API request failed: ${errorMessage}`);
+        }
 
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
+        
         if (response.status < 200 || response.status >= 300) {
             const detailedMessage = getErrorDetails(response.text);
+            progressReporter.log(`[DeepSeek] API Error (${response.status}): ${detailedMessage}`);
+            progressReporter.log(`[DeepSeek] Response text: ${response.text}`);
             throw new Error(`DeepSeek API error: ${response.status} - ${detailedMessage}`);
         }
+        
         const data = response.json;
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API success.");
         
@@ -433,14 +470,19 @@ async function executeDeepSeekAPI(provider: LLMProviderConfig, modelName: string
             throw new Error(`Unexpected response format from DeepSeek API - no message in choices`);
         }
         
-        // Reasoning models may have reasoning_content + content, or just content
+        // Get the final content (for reasoning models, this is the answer after reasoning)
         const responseContent = message.content || '';
         
-        if (!responseContent && !message.reasoning_content) {
-            progressReporter.log(`[DeepSeek] Response has no content or reasoning_content: ${JSON.stringify(data)}`);
-            throw new Error(`Unexpected response format from DeepSeek API - empty response`);
+        if (!responseContent) {
+            // For debugging: log if there's reasoning_content but no content
+            if (message.reasoning_content) {
+                progressReporter.log(`[DeepSeek] Response has reasoning_content but no content field`);
+            }
+            progressReporter.log(`[DeepSeek] Response structure: ${JSON.stringify(data)}`);
+            throw new Error(`Unexpected response format from DeepSeek API - empty content`);
         }
         
+        progressReporter.log(`[DeepSeek] API call successful, received ${responseContent.length} characters`);
         return responseContent;
     } finally { 
         if (controller && progressReporter.abortController === controller) { 
