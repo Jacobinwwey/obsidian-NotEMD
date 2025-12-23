@@ -294,6 +294,36 @@ export default class NotemdPlugin extends Plugin {
         );
 
         this.addCommand({
+            id: 'extract-concepts-and-generate-titles',
+            name: 'Extract Concepts and Generate Titles',
+            checkCallback: (checking: boolean) => {
+                const activeFile = this.app.workspace.getActiveFile();
+                if (activeFile && activeFile.extension === 'md') {
+                    if (!checking) {
+                        this.extractConceptsAndGenerateTitlesCommand();
+                    }
+                    return true;
+                }
+                return false;
+            }
+        });
+
+        this.addCommand({
+            id: 'extract-concepts-and-generate-titles',
+            name: 'Extract Concepts and Generate Titles',
+            checkCallback: (checking: boolean) => {
+                const activeFile = this.app.workspace.getActiveFile();
+                if (activeFile && activeFile.extension === 'md') {
+                    if (!checking) {
+                        this.extractConceptsAndGenerateTitlesCommand();
+                    }
+                    return true;
+                }
+                return false;
+            }
+        });
+
+        this.addCommand({
             id: 'create-wiki-link-and-generate-from-selection',
             name: 'Create Wiki-Link & Generate Note from Selection',
             editorCallback: async (editor: Editor, view: MarkdownView) => {
@@ -1531,4 +1561,55 @@ export default class NotemdPlugin extends Plugin {
         }
     }
 
+    async extractConceptsAndGenerateTitlesCommand(reporter?: ProgressReporter) {
+        if (this.isBusy) {
+            new Notice("Notemd is busy.");
+            return;
+        }
+        this.isBusy = true;
+        const useReporter = reporter || this.getReporter();
+
+        const maybeSidebar = useReporter as any;
+        if (maybeSidebar instanceof NotemdSidebarView) {
+            maybeSidebar.startProcessing("Extracting concepts and generating titles...");
+        } else {
+            useReporter.clearDisplay();
+            useReporter.updateStatus("Extracting concepts and generating titles...", 0);
+        }
+
+        try {
+            await this.extractConceptsCommand(useReporter);
+            
+            if (this.settings.useCustomConceptNoteFolder && this.settings.conceptNoteFolder) {
+                const conceptFolder = this.app.vault.getAbstractFileByPath(this.settings.conceptNoteFolder);
+                if (conceptFolder instanceof TFolder) {
+                    await this.batchGenerateContentForTitlesCommand(useReporter);
+                } else {
+                    throw new Error("Concept note folder not found.");
+                }
+            } else {
+                throw new Error("Concept note folder not set.");
+            }
+
+        } catch (error: unknown) {
+            this.updateStatusBar("Error occurred");
+            let errorMessage = 'An unknown error occurred during the process.';
+            if (error instanceof Error) {
+                errorMessage = error.message;
+            }
+            if (!errorMessage.includes("cancelled")) {
+                new Notice(`Error: ${errorMessage}. See console for details.`, 10000);
+                new ErrorModal(this.app, "Error", errorMessage).open();
+            }
+            useReporter.log(`Error: ${errorMessage}`);
+            useReporter.updateStatus('Error occurred', -1);
+        } finally {
+            if (maybeSidebar instanceof NotemdSidebarView) {
+                maybeSidebar.finishProcessing();
+            }
+            this.isBusy = false;
+        }
+    }
+
 } // End of NotemdPlugin class
+
