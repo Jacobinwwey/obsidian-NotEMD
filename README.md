@@ -415,6 +415,14 @@ This is the core functionality focused on identifying concepts and adding `[[wik
         4.  If it doesn't exist, it creates a new, empty note.
         5.  It then automatically runs the **"Generate Content from Title"** command on the new or existing note, populating it with AI-generated content.
 
+9.  **Extract Concepts and Generate Titles**:
+    *   This command chains two powerful features together for a streamlined workflow.
+    *   Run the command `Notemd: Extract Concepts and Generate Titles` from the command palette (it is recommended to assign a hotkey to this).
+    *   The plugin will:
+        1.  First, run the **"Extract concepts (current file)"** task on the currently active file.
+        2.  Then, it will automatically run the **"Batch generate from titles"** task on the folder you have configured as your **Concept note folder path** in the settings.
+    *   This allows you to first populate your knowledge base with new concepts from a source document and then immediately flesh out those new concept notes with AI-generated content in a single step.
+
 ## Supported LLM Providers
 
 | Provider     | Type  | API Key Required | Notes                                                    |
