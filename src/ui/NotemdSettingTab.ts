@@ -257,6 +257,7 @@ export class NotemdSettingTab extends PluginSettingTab {
             createTaskModelSettings('translateProvider', 'translateModel', 'Translate');
             createTaskModelSettings('summarizeToMermaidProvider', 'summarizeToMermaidModel', 'Summarise as Mermaid diagram');
             createTaskModelSettings('extractConceptsProvider', 'extractConceptsModel', 'Extract Concepts');
+            createTaskModelSettings('extractOriginalTextProvider', 'extractOriginalTextModel', 'Extract Specific Original Text');
         }
 
         // --- Translate Task Settings ---
@@ -467,6 +468,20 @@ export class NotemdSettingTab extends PluginSettingTab {
                     await this.plugin.saveSettings();
                 }));
 
+        // --- Extract Specific Original Text Settings ---
+        new Setting(containerEl).setName('Extract Specific Original Text').setHeading();
+        new Setting(containerEl)
+            .setName('Questions for extraction')
+            .setDesc('Enter the list of questions to extract specific text for, separated by newlines.')
+            .addTextArea(text => text
+                .setPlaceholder('Enter your questions here...')
+                .setValue(this.plugin.settings.extractQuestions)
+                .onChange(async (value) => {
+                    this.plugin.settings.extractQuestions = value;
+                    await this.plugin.saveSettings();
+                })
+                .inputEl.setAttrs({ rows: 6, style: 'width: 100%;' }));
+
         new Setting(containerEl).setName("Use custom output folder for 'Generate from title'").setDesc("On: Move completed files to custom folder. Off: Move to '[original_foldername]_complete'.").addToggle(toggle => toggle.setValue(this.plugin.settings.useCustomGenerateTitleOutputFolder).onChange(async (value) => { this.plugin.settings.useCustomGenerateTitleOutputFolder = value; await this.plugin.saveSettings(); this.display(); }));
         if (this.plugin.settings.useCustomGenerateTitleOutputFolder) {
             new Setting(containerEl).setName("Custom output folder name").setDesc("Subfolder name for completed files.").addText(text => text.setPlaceholder(DEFAULT_SETTINGS.generateTitleOutputFolderName).setValue(this.plugin.settings.generateTitleOutputFolderName).onChange(async (value) => { /* Add validation */ this.plugin.settings.generateTitleOutputFolderName = value.trim() || DEFAULT_SETTINGS.generateTitleOutputFolderName; await this.plugin.saveSettings(); this.display(); }));
@@ -626,7 +641,18 @@ export class NotemdSettingTab extends PluginSettingTab {
             createTaskLanguageSettings('addLinksLanguage', 'Add links (process file/folder)');
             createTaskLanguageSettings('summarizeToMermaidLanguage', 'Summarise as Mermaid diagram');
             createTaskLanguageSettings('extractConceptsLanguage', 'Extract Concepts');
+            createTaskLanguageSettings('extractOriginalTextLanguage', 'Extract Specific Original Text');
         }
+
+        new Setting(containerEl)
+            .setName('Translate output to corresponding language')
+            .setDesc('If selected, the output will include a translation in the selected extraction language.')
+            .addToggle(toggle => toggle
+                .setValue(this.plugin.settings.translateExtractOriginalTextOutput)
+                .onChange(async (value) => {
+                    this.plugin.settings.translateExtractOriginalTextOutput = value;
+                    await this.plugin.saveSettings();
+                }));
 
         // --- Duplicate Check Scope Settings (Refined) ---""
         new Setting(containerEl).setName('Duplicate check scope').setHeading();
@@ -713,8 +739,8 @@ export class NotemdSettingTab extends PluginSettingTab {
             const tasksToCustomize: Array<{
                 key: TaskKey,
                 name: string,
-                useCustomSettingKey: keyof Pick<NotemdSettings, 'useCustomPromptForAddLinks' | 'useCustomPromptForGenerateTitle' | 'useCustomPromptForResearchSummarize' | 'useCustomPromptForSummarizeToMermaid' | 'useCustomPromptForExtractConcepts' | 'useCustomPromptForTranslate'>,
-                customPromptSettingKey: keyof Pick<NotemdSettings, 'customPromptAddLinks' | 'customPromptGenerateTitle' | 'customPromptResearchSummarize' | 'customPromptSummarizeToMermaid' | 'customPromptExtractConcepts' | 'translatePrompt'>
+                useCustomSettingKey: keyof Pick<NotemdSettings, 'useCustomPromptForAddLinks' | 'useCustomPromptForGenerateTitle' | 'useCustomPromptForResearchSummarize' | 'useCustomPromptForSummarizeToMermaid' | 'useCustomPromptForExtractConcepts' | 'useCustomPromptForTranslate' | 'useCustomPromptForExtractOriginalText'>,
+                customPromptSettingKey: keyof Pick<NotemdSettings, 'customPromptAddLinks' | 'customPromptGenerateTitle' | 'customPromptResearchSummarize' | 'customPromptSummarizeToMermaid' | 'customPromptExtractConcepts' | 'translatePrompt' | 'customPromptExtractOriginalText'>
             }> = [
                 { key: 'addLinks', name: 'Add Links (Process File/Folder)', useCustomSettingKey: 'useCustomPromptForAddLinks', customPromptSettingKey: 'customPromptAddLinks' },
                 { key: 'generateTitle', name: 'Generate from Title', useCustomSettingKey: 'useCustomPromptForGenerateTitle', customPromptSettingKey: 'customPromptGenerateTitle' },
@@ -722,6 +748,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                 { key: 'summarizeToMermaid', name: 'Summarise as Mermaid diagram', useCustomSettingKey: 'useCustomPromptForSummarizeToMermaid', customPromptSettingKey: 'customPromptSummarizeToMermaid' },
                 { key: 'extractConcepts', name: 'Extract Concepts', useCustomSettingKey: 'useCustomPromptForExtractConcepts', customPromptSettingKey: 'customPromptExtractConcepts' },
                 { key: 'translate', name: 'Translate', useCustomSettingKey: 'useCustomPromptForTranslate', customPromptSettingKey: 'translatePrompt' },
+                { key: 'extractOriginalText', name: 'Extract Specific Original Text', useCustomSettingKey: 'useCustomPromptForExtractOriginalText', customPromptSettingKey: 'customPromptExtractOriginalText' },
             ];
 
             tasksToCustomize.forEach(task => {

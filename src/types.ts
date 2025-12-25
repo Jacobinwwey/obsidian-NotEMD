@@ -121,10 +121,17 @@ export interface NotemdSettings {
     batchInterDelayMs: number;
     apiCallIntervalMs: number;
     autoMermaidFixAfterGenerate: boolean;
+    extractQuestions: string;
+    extractOriginalTextProvider: string;
+    extractOriginalTextModel: string;
+    extractOriginalTextLanguage: string;
+    translateExtractOriginalTextOutput: boolean;
+    useCustomPromptForExtractOriginalText: boolean;
+    customPromptExtractOriginalText: string;
 }
 
 // Defines the keys for tasks that can have custom prompts
-export type TaskKey = 'addLinks' | 'generateTitle' | 'researchSummarize' | 'translate' | 'summarizeToMermaid' | 'extractConcepts';
+export type TaskKey = 'addLinks' | 'generateTitle' | 'researchSummarize' | 'translate' | 'summarizeToMermaid' | 'extractConcepts' | 'extractOriginalText';
 
 // Interface for search results
 export interface SearchResult {

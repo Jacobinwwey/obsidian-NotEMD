@@ -25,6 +25,7 @@ import { showDeletionConfirmationModal } from './ui/modals'; // Import the modal
 import { NotemdSidebarView } from './ui/NotemdSidebarView';
 import { translateFile, batchTranslateFolder } from './translate';
 import { getSystemPrompt } from './promptUtils';
+import { extractOriginalText } from './extractOriginalText';
 
 export default class NotemdPlugin extends Plugin {
     settings: NotemdSettings;
@@ -526,7 +527,7 @@ export default class NotemdPlugin extends Plugin {
         console.log(`[Notemd] ${message}`);
     }
 
-	getProviderAndModelForTask(taskKey: 'addLinks' | 'research' | 'generateTitle' | 'translate' | 'summarizeToMermaid' | 'extractConcepts'): { provider: LLMProviderConfig, modelName: string } {
+	getProviderAndModelForTask(taskKey: 'addLinks' | 'research' | 'generateTitle' | 'translate' | 'summarizeToMermaid' | 'extractConcepts' | 'extractOriginalText'): { provider: LLMProviderConfig, modelName: string } {
 		let providerName: string = this.settings.activeProvider;
 		let modelName: string | undefined = undefined;
 
@@ -555,6 +556,10 @@ export default class NotemdPlugin extends Plugin {
                 case 'extractConcepts':
                     providerName = this.settings.extractConceptsProvider;
                     modelName = this.settings.extractConceptsModel;
+                    break;
+                case 'extractOriginalText':
+                    providerName = this.settings.extractOriginalTextProvider;
+                    modelName = this.settings.extractOriginalTextModel;
                     break;
 			}
 		}
@@ -1600,6 +1605,53 @@ export default class NotemdPlugin extends Plugin {
             if (!errorMessage.includes("cancelled")) {
                 new Notice(`Error: ${errorMessage}. See console for details.`, 10000);
                 new ErrorModal(this.app, "Error", errorMessage).open();
+            }
+            useReporter.log(`Error: ${errorMessage}`);
+            useReporter.updateStatus('Error occurred', -1);
+        } finally {
+            if (maybeSidebar instanceof NotemdSidebarView) {
+                maybeSidebar.finishProcessing();
+            }
+            this.isBusy = false;
+        }
+    }
+
+    async extractOriginalTextCommand(reporter?: ProgressReporter) {
+        if (this.isBusy) {
+            new Notice("Notemd is busy.");
+            return;
+        }
+        this.isBusy = true;
+        const useReporter = reporter || this.getReporter();
+
+        const maybeSidebar = useReporter as any;
+        if (maybeSidebar instanceof NotemdSidebarView) {
+            maybeSidebar.startProcessing("Extracting specific original text...");
+        } else {
+            useReporter.clearDisplay();
+            useReporter.updateStatus("Extracting specific original text...", 0);
+        }
+
+        try {
+            await this.loadSettings();
+            const activeFile = this.app.workspace.getActiveFile();
+            if (!activeFile || !(activeFile instanceof TFile) || (activeFile.extension !== 'md' && activeFile.extension !== 'txt')) {
+                throw new Error("No active '.md' or '.txt' file to process.");
+            }
+
+            await extractOriginalText(this.app, this, activeFile, useReporter);
+            
+            useReporter.updateStatus('Extraction complete!', 100);
+
+        } catch (error: unknown) {
+            this.updateStatusBar("Error occurred");
+            let errorMessage = 'An unknown error occurred during extraction.';
+            if (error instanceof Error) {
+                errorMessage = error.message;
+            }
+            if (!errorMessage.includes("cancelled")) {
+                new Notice(`Error: ${errorMessage}. See console for details.`, 10000);
+                new ErrorModal(this.app, "Extraction Error", errorMessage).open();
             }
             useReporter.log(`Error: ${errorMessage}`);
             useReporter.updateStatus('Error occurred', -1);

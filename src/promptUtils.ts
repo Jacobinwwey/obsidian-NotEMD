@@ -185,7 +185,61 @@ mindmap
                 The most critical original sentence from section 2.
                 The second most critical original sentence from section 2.
 \`\`\`
-`
+`,
+    extractOriginalText: `Role & Objective
+You are a strict Data Extraction and Verification Agent. Your sole purpose is to map specific User Inputs to the most relevant Original Text found within a provided Reference Content.
+
+Task Description
+Analyze the provided [Reference Content] thoroughly.
+Read the list of [User Inputs].
+For each user input, search the [Reference Content] to find ALL text segments (sentences, phrases, or paragraphs) that have a high degree of semantic matching or keyword alignment.
+
+CRITICAL: You must extract the text verbatim (word-for-word) from the reference content. Do not summarize, paraphrase, rephrase, or correct grammar. Do not generate any new text.
+Output the result in the exact format specified below.
+
+Strict Constraints
+NO HALLUCINATIONS: If the information is not present in the Reference Content, output "No match found in reference" for that specific input.
+NO PARAPHRASING: The "Original Text" part of your output must be an exact string copy from the Reference Content.
+MATCHING LOGIC: Focus on semantic meaning. Even if the keywords aren't identical, if the meaning of the user input corresponds to a specific section of the reference, extract that section.
+MULTIPLE MATCHES & COMPLETENESS: If multiple distinct excerpts match a single user input, you MUST list ALL of them as separate bullet points. Do not limit the output to just 2 or 3 items. Ensure the output is absolutely accurate and sufficient to cover the user's query based on the reference content.
+
+Data Input
+[Reference Content]
+"""
+{REFERENCE_CONTENT}
+"""
+
+[User Input]
+"""
+{USER_INPUT}
+"""
+
+Output Format
+Please present the result strictly in the following format:
+
+[User Input String]
+
+- [First Exact Excerpt from Reference Content]
+
+- [Second Exact Excerpt from Reference Content]
+
+- [Third Exact Excerpt from Reference Content]
+
+-...
+
+- [Last Exact Excerpt from Reference Content]
+
+Example (For Context Only):
+Reference Content: "The sky is blue because of Rayleigh scattering. It disperses shorter wavelengths of light more efficiently. Sunset is red due to path length."
+User Input: "Why is the sky blue?"
+Correct Output:
+Why is the sky blue?
+
+- The sky is blue because of Rayleigh scattering.
+
+- It disperses shorter wavelengths of light more efficiently.
+
+Please generate the output now based on the [Reference Content] and [User Input] provided above.`
 };
 
 export function getDefaultPrompt(taskKey: TaskKey): string {
@@ -223,6 +277,10 @@ export function getSystemPrompt(settings: NotemdSettings, taskKey: TaskKey, repl
                 useCustomPrompt = settings.useCustomPromptForTranslate;
                 customPrompt = settings.translatePrompt;
                 break;
+            case 'extractOriginalText':
+                useCustomPrompt = settings.useCustomPromptForExtractOriginalText;
+                customPrompt = settings.customPromptExtractOriginalText;
+                break;
         }
     }
 
@@ -246,6 +304,37 @@ export function getSystemPrompt(settings: NotemdSettings, taskKey: TaskKey, repl
         prompt += `
 
 IMPORTANT: The entire Mermaid diagram, including all node text, MUST be translated into ${targetLanguageName}.`;
+    }
+
+    // Add translation instruction for extractOriginalText if enabled
+    if (taskKey === 'extractOriginalText' && settings.translateExtractOriginalTextOutput && !settings.disableAutoTranslation) {
+         // Modify the output format instruction for the multi-line format
+         const originalExcerpts = `- [First Exact Excerpt from Reference Content]
+
+- [Second Exact Excerpt from Reference Content]
+
+- [Third Exact Excerpt from Reference Content]
+
+-...
+
+- [Last Exact Excerpt from Reference Content]`;
+         
+         const translatedExcerpts = `- [First Exact Excerpt from Reference Content] - [First Exact Excerpt from Reference Content being translated into {LANGUAGE}]
+
+- [Second Exact Excerpt from Reference Content] - [Second Exact Excerpt from Reference Content being translated into {LANGUAGE}]
+
+- [Third Exact Excerpt from Reference Content] - [Third Exact Excerpt from Reference Content being translated into {LANGUAGE}]
+
+-...
+
+- [Last Exact Excerpt from Reference Content] - [Last Exact Excerpt from Reference Content being translated into {LANGUAGE}]`;
+
+         if (prompt.includes(originalExcerpts)) {
+             prompt = prompt.replace(originalExcerpts, translatedExcerpts);
+         } else {
+             // Fallback if custom prompt or exact match fails: append instruction
+             prompt += `\n\nIMPORTANT: For each matching excerpt, append the translation in {LANGUAGE} like this: "- [Excerpt] - [Translated Excerpt]"`;
+         }
     }
 
     // Add language instruction for extractConcepts if a specific language is set
