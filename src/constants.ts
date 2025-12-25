@@ -212,6 +212,13 @@ export const DEFAULT_SETTINGS: NotemdSettings = {
     batchInterDelayMs: 1000,
     apiCallIntervalMs: 500,
     autoMermaidFixAfterGenerate: false,
+    extractQuestions: '',
+    extractOriginalTextProvider: 'DeepSeek',
+    extractOriginalTextModel: '',
+    extractOriginalTextLanguage: 'en',
+    translateExtractOriginalTextOutput: false,
+    useCustomPromptForExtractOriginalText: false,
+    customPromptExtractOriginalText: '',
 };
 
 // Constants for the Sidebar View

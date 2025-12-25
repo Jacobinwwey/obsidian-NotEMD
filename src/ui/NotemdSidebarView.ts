@@ -39,6 +39,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
     private summarizeToMermaidButton: HTMLButtonElement | null = null;
     private extractConceptsButton: HTMLButtonElement | null = null;
     private extractConceptsFolderButton: HTMLButtonElement | null = null;
+    private extractOriginalTextButton: HTMLButtonElement | null = null;
     private languageSelector: HTMLSelectElement | null = null;
 
     constructor(leaf: WorkspaceLeaf, plugin: NotemdPlugin) {
@@ -212,6 +213,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         if (this.batchTranslateButton) this.batchTranslateButton.disabled = processing;
         if (this.extractConceptsButton) this.extractConceptsButton.disabled = processing;
         if (this.extractConceptsFolderButton) this.extractConceptsFolderButton.disabled = processing;
+        if (this.extractOriginalTextButton) this.extractOriginalTextButton.disabled = processing;
 
         // Cancel button enabled only during processing and before cancellation
         if (this.cancelButton) {
@@ -371,6 +373,15 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             finally { this.finishProcessing(); }
         };
 
+        this.extractOriginalTextButton = newFeatureButtonGroup.createEl('button', { text: 'Extract Specific Original Text' });
+        this.extractOriginalTextButton.title = 'Extracts verbatim text from the current file based on questions defined in settings.';
+        this.extractOriginalTextButton.onclick = async () => {
+            if (this.isProcessing) return;
+            this.startProcessing('Extracting original text...');
+            try { await this.plugin.extractOriginalTextCommand(this); }
+            finally { this.finishProcessing(); }
+        };
+
         this.languageSelector = translateGroup.createEl('select');
         const languageSelector = this.languageSelector;
         if (languageSelector) {
@@ -500,6 +511,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         this.summarizeToMermaidButton = null;
         this.extractConceptsButton = null;
         this.extractConceptsFolderButton = null;
+        this.extractOriginalTextButton = null;
         this.translateButton = null; 
         this.batchTranslateButton = null;
         this.languageSelector = null;
