@@ -161,6 +161,10 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         }
     }
 
+    getLogs(): string {
+        return this.logContent.join('\n');
+    }
+
     // Helper to format time
     private formatTime(seconds: number): string {
         const mins = Math.floor(seconds / 60);

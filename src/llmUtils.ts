@@ -383,6 +383,63 @@ function getErrorDetails(errorText: string): string {
     }
 }
 
+/**
+ * Modularized API Error Handler.
+ * Implements the "DeepSeek-style" verbose debugging design.
+ * @param providerName The name of the provider (e.g., "DeepSeek", "OpenAI").
+ * @param errorOrResponse The error object caught from catch block, or a response object with bad status.
+ * @param progressReporter The reporter to log to.
+ * @param debugMode Whether to enable verbose logging (DeepSeek design).
+ */
+function handleProviderError(
+    providerName: string,
+    errorOrResponse: any,
+    progressReporter: ProgressReporter,
+    debugMode: boolean
+): never {
+    let status: number | undefined;
+    let rawText: string = '';
+    let message: string = '';
+
+    // Determine input type
+    if (errorOrResponse instanceof Error) {
+        message = errorOrResponse.message;
+        // Check for Obsidian requestUrl error properties
+        if ((errorOrResponse as any).status) {
+            status = (errorOrResponse as any).status;
+            rawText = (errorOrResponse as any).text || '';
+        }
+    } else if (errorOrResponse && typeof errorOrResponse.status === 'number') {
+        // Response object
+        status = errorOrResponse.status;
+        rawText = errorOrResponse.text || (errorOrResponse.json ? JSON.stringify(errorOrResponse.json) : '');
+    } else {
+        message = String(errorOrResponse);
+    }
+
+    // Try to extract a clean message
+    const detailedMessage = rawText ? getErrorDetails(rawText) : message;
+
+    // Verbose Debugging Logic (DeepSeek Design)
+    if (debugMode) {
+        if (status) {
+            progressReporter.log(`[${providerName}] Request failed with status ${status}`);
+        }
+        if (rawText) {
+            progressReporter.log(`[${providerName}] Error response: ${rawText}`);
+        } else {
+            progressReporter.log(`[${providerName}] Error details: ${message}`);
+        }
+    }
+
+    // Standardized Error Throwing
+    if (status) {
+        throw new Error(`${providerName} API error: ${status} - ${detailedMessage}`);
+    } else {
+        throw new Error(`${providerName} API request failed: ${detailedMessage || message}`);
+    }
+}
+
 
 // Helper function to manage AbortController/Signal
 function getAbortSignal(progressReporter: ProgressReporter, providedSignal?: AbortSignal): { signal: AbortSignal, controller: AbortController | null } {
@@ -435,28 +492,14 @@ async function executeDeepSeekAPI(provider: LLMProviderConfig, modelName: string
                 body: JSON.stringify(requestBody)
             });
         } catch (error: any) {
-            // requestUrl throws on non-2xx status codes
-            // The error object contains the response details
-            if (error.status) {
-                const errorText = error.text || JSON.stringify(error);
-                const detailedMessage = getErrorDetails(errorText);
-                progressReporter.log(`[DeepSeek] Request failed with status ${error.status}`);
-                progressReporter.log(`[DeepSeek] Error response: ${errorText}`);
-                throw new Error(`DeepSeek API error: ${error.status} - ${detailedMessage}`);
-            }
-            // Network or other error
-            const errorMessage = error instanceof Error ? error.message : String(error);
-            progressReporter.log(`[DeepSeek] Request failed with error: ${errorMessage}`);
-            throw new Error(`DeepSeek API request failed: ${errorMessage}`);
+            // Delegate error handling
+            handleProviderError('DeepSeek', error, progressReporter, settings.enableApiErrorDebugMode);
         }
 
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
         
         if (response.status < 200 || response.status >= 300) {
-            const detailedMessage = getErrorDetails(response.text);
-            progressReporter.log(`[DeepSeek] API Error (${response.status}): ${detailedMessage}`);
-            progressReporter.log(`[DeepSeek] Response text: ${response.text}`);
-            throw new Error(`DeepSeek API error: ${response.status} - ${detailedMessage}`);
+            handleProviderError('DeepSeek', response, progressReporter, settings.enableApiErrorDebugMode);
         }
         
         const data = response.json;
@@ -516,16 +559,21 @@ async function executeOpenAIApi(provider: LLMProviderConfig, modelName: string, 
 
     try {
         await cancellableDelay(1, progressReporter); // Yield
-        const response = await requestUrl({
-            url: url,
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${provider.apiKey}` },
-            body: JSON.stringify(requestBody)
-        });
+        let response;
+        try {
+            response = await requestUrl({
+                url: url,
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${provider.apiKey}` },
+                body: JSON.stringify(requestBody)
+            });
+        } catch (error: any) {
+            handleProviderError('OpenAI', error, progressReporter, settings.enableApiErrorDebugMode);
+        }
+
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
         if (response.status < 200 || response.status >= 300) {
-            const detailedMessage = getErrorDetails(response.text);
-            throw new Error(`OpenAI API error: ${response.status} - ${detailedMessage}`);
+            handleProviderError('OpenAI', response, progressReporter, settings.enableApiErrorDebugMode);
         }
         const data = response.json;
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API success.");
@@ -553,20 +601,25 @@ async function executeAnthropicApi(provider: LLMProviderConfig, modelName: strin
 
     try {
         await cancellableDelay(1, progressReporter); // Yield
-        const response = await requestUrl({
-            url: url,
-            method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json', 
-                'x-api-key': provider.apiKey, 
-                'anthropic-version': '2023-06-01' 
-            }, 
-            body: JSON.stringify(requestBody)
-        });
+        let response;
+        try {
+            response = await requestUrl({
+                url: url,
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json', 
+                    'x-api-key': provider.apiKey, 
+                    'anthropic-version': '2023-06-01' 
+                }, 
+                body: JSON.stringify(requestBody)
+            });
+        } catch (error: any) {
+            handleProviderError('Anthropic', error, progressReporter, settings.enableApiErrorDebugMode);
+        }
+
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
         if (response.status < 200 || response.status >= 300) {
-            const detailedMessage = getErrorDetails(response.text);
-            throw new Error(`Anthropic API error: ${response.status} - ${detailedMessage}`);
+            handleProviderError('Anthropic', response, progressReporter, settings.enableApiErrorDebugMode);
         }
         const data = response.json;
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API success.");
@@ -591,16 +644,21 @@ async function executeGoogleApi(provider: LLMProviderConfig, modelName: string, 
 
     try {
         await cancellableDelay(1, progressReporter); // Yield
-        const response = await requestUrl({
-            url: urlWithKey,
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(requestBody)
-        });
+        let response;
+        try {
+            response = await requestUrl({
+                url: urlWithKey,
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(requestBody)
+            });
+        } catch (error: any) {
+            handleProviderError('Google', error, progressReporter, settings.enableApiErrorDebugMode);
+        }
+
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
         if (response.status < 200 || response.status >= 300) {
-            const detailedMessage = getErrorDetails(response.text);
-            throw new Error(`Google API error: ${response.status} - ${detailedMessage}`);
+            handleProviderError('Google', response, progressReporter, settings.enableApiErrorDebugMode);
         }
         const data = response.json;
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API success.");
@@ -627,16 +685,21 @@ async function executeMistralApi(provider: LLMProviderConfig, modelName: string,
 
     try {
         await cancellableDelay(1, progressReporter); // Yield
-        const response = await requestUrl({
-            url: url,
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${provider.apiKey}` },
-            body: JSON.stringify(requestBody)
-        });
+        let response;
+        try {
+            response = await requestUrl({
+                url: url,
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${provider.apiKey}` },
+                body: JSON.stringify(requestBody)
+            });
+        } catch (error: any) {
+            handleProviderError('Mistral', error, progressReporter, settings.enableApiErrorDebugMode);
+        }
+
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
         if (response.status < 200 || response.status >= 300) {
-            const detailedMessage = getErrorDetails(response.text);
-            throw new Error(`Mistral API error: ${response.status} - ${detailedMessage}`);
+            handleProviderError('Mistral', response, progressReporter, settings.enableApiErrorDebugMode);
         }
         const data = response.json;
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API success.");
@@ -663,16 +726,21 @@ async function executeAzureOpenAIApi(provider: LLMProviderConfig, modelName: str
 
     try {
         await cancellableDelay(1, progressReporter); // Yield
-        const response = await requestUrl({
-            url: url,
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'api-key': provider.apiKey },
-            body: JSON.stringify(requestBody)
-        });
+        let response;
+        try {
+            response = await requestUrl({
+                url: url,
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'api-key': provider.apiKey },
+                body: JSON.stringify(requestBody)
+            });
+        } catch (error: any) {
+            handleProviderError('Azure OpenAI', error, progressReporter, settings.enableApiErrorDebugMode);
+        }
+
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
         if (response.status < 200 || response.status >= 300) {
-            const detailedMessage = getErrorDetails(response.text);
-            throw new Error(`Azure OpenAI API error: ${response.status} - ${detailedMessage}`);
+            handleProviderError('Azure OpenAI', response, progressReporter, settings.enableApiErrorDebugMode);
         }
         const data = response.json;
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API success.");
@@ -706,16 +774,21 @@ async function executeLMStudioApi(provider: LLMProviderConfig, modelName: string
 
     try {
         await cancellableDelay(1, progressReporter); // Yield
-        const response = await requestUrl({
-            url: url,
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${provider.apiKey || 'EMPTY'}` },
-            body: JSON.stringify(requestBody)
-        });
+        let response;
+        try {
+            response = await requestUrl({
+                url: url,
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${provider.apiKey || 'EMPTY'}` },
+                body: JSON.stringify(requestBody)
+            });
+        } catch (error: any) {
+            handleProviderError('LMStudio', error, progressReporter, settings.enableApiErrorDebugMode);
+        }
+
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
         if (response.status < 200 || response.status >= 300) {
-            const detailedMessage = getErrorDetails(response.text);
-            throw new Error(`LMStudio API error: ${response.status} - ${detailedMessage}`);
+            handleProviderError('LMStudio', response, progressReporter, settings.enableApiErrorDebugMode);
         }
         const data = response.json;
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API success.");
@@ -742,16 +815,21 @@ async function executeOllamaApi(provider: LLMProviderConfig, modelName: string, 
 
     try {
         await cancellableDelay(1, progressReporter); // Yield
-        const response = await requestUrl({
-            url: url,
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(requestBody)
-        });
+        let response;
+        try {
+            response = await requestUrl({
+                url: url,
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(requestBody)
+            });
+        } catch (error: any) {
+            handleProviderError('Ollama', error, progressReporter, settings.enableApiErrorDebugMode);
+        }
+
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
         if (response.status < 200 || response.status >= 300) {
-            const detailedMessage = getErrorDetails(response.text);
-            throw new Error(`Ollama API error: ${response.status} - ${detailedMessage}`);
+            handleProviderError('Ollama', response, progressReporter, settings.enableApiErrorDebugMode);
         }
         const data = response.json;
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API success.");
@@ -798,17 +876,23 @@ async function executeOpenRouterAPI(provider: LLMProviderConfig, modelName: stri
     try {
         await cancellableDelay(1, progressReporter); // Yield
         progressReporter.log(`[OpenRouter] Calling API: ${url} with model ${modelName}`);
-        response = await requestUrl({
-            url: url,
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${provider.apiKey}`,
-                'HTTP-Referer': 'https://github.com/Jacobinwwey/obsidian-NotEMD', // Required by OpenRouter
-                'X-Title': 'Notemd Obsidian Plugin' // Required by OpenRouter
-            },
-            body: JSON.stringify(requestBody)
-        });
+        
+        try {
+            response = await requestUrl({
+                url: url,
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${provider.apiKey}`,
+                    'HTTP-Referer': 'https://github.com/Jacobinwwey/obsidian-NotEMD', // Required by OpenRouter
+                    'X-Title': 'Notemd Obsidian Plugin' // Required by OpenRouter
+                },
+                body: JSON.stringify(requestBody)
+            });
+        } catch (error: any) {
+             handleProviderError('OpenRouter', error, progressReporter, settings.enableApiErrorDebugMode);
+        }
+
         progressReporter.log(`[OpenRouter] Received response status: ${response.status}`);
 
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
@@ -818,14 +902,14 @@ async function executeOpenRouterAPI(provider: LLMProviderConfig, modelName: stri
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after reading response text."); // Check again
 
         if (response.status < 200 || response.status >= 300) {
-            progressReporter.log(`[OpenRouter] API Error Response Text: ${responseText}`); // Log error text
-            throw new Error(`OpenRouter API error: ${response.status} - ${responseText}`);
+             // Pass response object (which still has .status and .text)
+             handleProviderError('OpenRouter', response, progressReporter, settings.enableApiErrorDebugMode);
         }
 
         // Now attempt to parse the text as JSON
         let data;
         try {
-            data = response.json;
+            data = JSON.parse(responseText); // Use already read text
             progressReporter.log(`[OpenRouter] Successfully parsed JSON response.`);
         } catch (jsonError: unknown) {
             progressReporter.log(`[OpenRouter] Failed to parse JSON response, status was ${response.status}.`);
@@ -864,17 +948,6 @@ async function executeOpenRouterAPI(provider: LLMProviderConfig, modelName: stri
         progressReporter.log(`[OpenRouter] API call successful (using ${data.choices?.[0]?.message?.content ? 'content' : 'reasoning'} field).`);
         return responseContent;
 
-    } catch (error) {
-         // Log fetch-related errors (network, CORS, abort, etc.)
-         if (error instanceof Error && error.name === 'AbortError') {
-             progressReporter.log(`[OpenRouter] Fetch aborted.`);
-         } else if (error instanceof Error) {
-             progressReporter.log(`[OpenRouter] Fetch error: ${error.message}`);
-         } else {
-             progressReporter.log(`[OpenRouter] Unknown fetch error: ${error}`);
-         }
-         // Re-throw the error to be handled by callApiWithRetry
-         throw error;
     } finally {
         // Only clear the reporter's controller if we created it internally
         if (controller && progressReporter.abortController === controller) { 
@@ -897,16 +970,21 @@ async function executeXaiApi(provider: LLMProviderConfig, modelName: string, pro
 
     try {
         await cancellableDelay(1, progressReporter); // Yield
-        const response = await requestUrl({
-            url: url,
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${provider.apiKey}` },
-            body: JSON.stringify(requestBody)
-        });
+        let response;
+        try {
+            response = await requestUrl({
+                url: url,
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${provider.apiKey}` },
+                body: JSON.stringify(requestBody)
+            });
+        } catch (error: any) {
+            handleProviderError('xAI', error, progressReporter, settings.enableApiErrorDebugMode);
+        }
+
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
         if (response.status < 200 || response.status >= 300) {
-            const detailedMessage = getErrorDetails(response.text);
-            throw new Error(`xAI API error: ${response.status} - ${detailedMessage}`);
+            handleProviderError('xAI', response, progressReporter, settings.enableApiErrorDebugMode);
         }
         const data = response.json;
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API success.");

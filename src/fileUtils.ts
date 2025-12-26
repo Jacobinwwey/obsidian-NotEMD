@@ -1076,6 +1076,50 @@ export async function batchFixMermaidSyntaxInFolder(app: App, settings: NotemdSe
     return { errors, modifiedCount }; // Return collected errors and count
 }
 
+/**
+ * Saves the accumulated logs to an error log file in the vault root.
+ * Also appends a suggestion to enable debug mode if disabled.
+ */
+export async function saveErrorLog(app: App, reporter: ProgressReporter, error: any, settings: NotemdSettings): Promise<void> {
+    try {
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        const filename = `Notemd_Error_Log_${timestamp}.txt`;
+        
+        let logContent = reporter.getLogs ? reporter.getLogs() : '';
+        if (!logContent) {
+            logContent = "No logs available from reporter.";
+        }
+
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        const errorStack = error instanceof Error ? error.stack : '';
+
+        let fileContent = `Notemd Error Log - ${new Date().toLocaleString()}\n`;
+        fileContent += `=================================================\n\n`;
+        fileContent += `Error Message: ${errorMessage}\n`;
+        if (errorStack) {
+            fileContent += `Stack Trace:\n${errorStack}\n`;
+        }
+        fileContent += `\n=================================================\n`;
+        fileContent += `Session Logs:\n\n${logContent}\n`;
+
+        if (!settings.enableApiErrorDebugMode) {
+            const suggestion = "\n[TIP] 'API Error Debugging Mode' is currently DISABLED. Enable it in Notemd settings -> Stable API calls to see detailed API error responses (status codes, raw text) in future logs.";
+            fileContent += suggestion;
+            reporter.log(suggestion); // Also show in UI
+        } else {
+             fileContent += "\n[INFO] 'API Error Debugging Mode' is ENABLED. Detailed API errors should be present in the logs above.";
+        }
+
+        await app.vault.create(filename, fileContent);
+        reporter.log(`Error log saved to: ${filename}`);
+        new Notice(`Error log saved: ${filename}`);
+
+    } catch (saveError) {
+        console.error("Failed to save error log:", saveError);
+        reporter.log("Failed to save error log file. Check console.");
+    }
+}
+
 
 /**
  * Checks for duplicate concept notes based on PowerShell script logic.
