@@ -279,6 +279,8 @@ Please present the result strictly in the following format, separating each ques
 
 ...
 
+- [Last Exact Excerpt from Reference Content for Q1]
+
 ---
 
 # [Second User Input String]
@@ -289,9 +291,24 @@ Please present the result strictly in the following format, separating each ques
 
 ...
 
+- [Last Exact Excerpt from Reference Content for Q2]
+
 ---
 
 ...
+
+---
+
+# [Last User Input String]
+
+- [First Exact Excerpt from Reference Content for QN]
+
+- [Second Exact Excerpt from Reference Content for QN]
+
+...
+
+- [Last Exact Excerpt from Reference Content for QN]
+
 
 Please generate the output now.`
 };
