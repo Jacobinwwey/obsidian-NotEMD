@@ -113,7 +113,7 @@ export function refineMermaidBlocks(content: string): string {
                      // Filter out matches that don't actually contain broken characters we care about.
                      // The regex already excludes things starting with ".
                      // We specifically want to fix things that have [ or ] inside.
-                     if (/[\[\]]/.test(content)) {
+                     if (/[\[\]|]/.test(content)) {
                          // Logic:
                          // 1. Remove existing double quotes from content to avoid syntax errors (as per user example where inner quotes were removed).
                          // 2. Wrap in double quotes.
