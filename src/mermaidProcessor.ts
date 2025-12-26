@@ -213,3 +213,45 @@ export function cleanupLatexDelimiters(content: string): string {
 
 	return processed;
 }
+
+/**
+ * Deep debug function for Mermaid syntax.
+ * Scans for nodes following arrows that are missing brackets but have trailing content before the semicolon.
+ * Example: `... --> SpreadCalc价差计算 Spread Calculation;` -> `... --> SpreadCalc[价差计算 Spread Calculation];`
+ * This function prepares the code for `refineMermaidBlocks` to handle the quoting.
+ */
+export function deepDebugMermaid(content: string): string {
+    const lines = content.split('\n');
+    const processedLines = lines.map(line => {
+        // Skip if not in a mermaid block context?
+        // The user says "In all instances where the format begins with `words --` or `words -->`".
+        // We can check if the line looks like a graph edge.
+        if (!line.includes('-->') && !line.includes('---') && !line.includes('--')) {
+            return line;
+        }
+
+        // Regex to find:
+        // 1. Arrow (including labeled arrows like -- "label" -->)
+        // 2. ASCII NodeID ([a-zA-Z0-9_]+)
+        // 3. Content that is NOT empty, has NO brackets, and ends at ;
+        // We capture groups to reconstruct.
+        
+        // Regex explanation:
+        // ((?:---|-->|--\s*"[^"]*"\s*-->)\s*) : Group 1 - Arrow prefix (simple or labeled)
+        // ([a-zA-Z0-9_]+\b)                   : Group 2 - Node ID (ASCII + word boundary)
+        // ([^\[\];\n]+)                       : Group 3 - The "Label" part (must act have brackets)
+        // (;)                                 : Group 4 - The terminating semicolon
+        
+        // Note: [^\[\];\n]+ ensures we don't match if there ARE brackets already.
+        // It also ensures we match the text between ID and semicolon.
+        
+        const regex = /((?:---|-->|--\s*"[^"]*"\s*-->)\s*)([a-zA-Z0-9_]+\b)([^\[\];\n]+)(;)/g;
+        
+        if (regex.test(line)) {
+             return line.replace(regex, '$1$2[$3]$4');
+        }
+        
+        return line;
+    });
+    return processedLines.join('\n');
+}
