@@ -90,9 +90,10 @@ export function refineMermaidBlocks(content: string): string {
                 // Targeted cases:
                 // 1. `Investment[Corporate Investment "[企业投资]"]` -> `Investment["Corporate Investment [企业投资]"]`
                 // 2. `Consumption[Consumption [消费]]` -> `Consumption["Consumption [消费]"]`
+                // 3. `WhiteDwarf[白矮星 [White Dwarf]]` -> `WhiteDwarf["白矮星 [White Dwarf]"]`
                 
                 // Improved regex to handle one level of nested brackets:
-                // (\S+)       : NodeID
+                // ([^\s\[]+)  : NodeID (non-whitespace AND non-[ chars)
                 // \s*\[       : Opening bracket
                 // (?!"|')     : Content does NOT start with " or ' (already quoted nodes are skipped)
                 // (           : Start capturing content
@@ -104,7 +105,7 @@ export function refineMermaidBlocks(content: string): string {
                 // )           : End capturing content
                 // \]          : Closing bracket
                 
-                line = line.replace(/(\S+)\s*\[(?!"|')((?:[^\[\]]|\[[^\[\]]*\])*)\]/g, (match, nodeId, content) => {
+                line = line.replace(/([^\s\[]+)\s*\[(?!"|')((?:[^\[\]]|\[[^\[\]]*\])*)\]/g, (match, nodeId, content) => {
                      // Filter out matches that don't actually contain broken characters we care about.
                      // The regex already excludes things starting with ".
                      // We specifically want to fix things that have [ or ] inside.
