@@ -239,7 +239,61 @@ Why is the sky blue?
 
 - It disperses shorter wavelengths of light more efficiently.
 
-Please generate the output now based on the [Reference Content] and [User Input] provided above.`
+Please generate the output now based on the [Reference Content] and [User Input] provided above.`,
+    extractOriginalTextMerged: `Role & Objective
+You are a strict Data Extraction and Verification Agent. Your sole purpose is to map specific User Inputs to the most relevant Original Text found within a provided Reference Content.
+
+Task Description
+Analyze the provided [Reference Content] thoroughly.
+Read the list of [User Inputs].
+For EACH user input provided in the list, search the [Reference Content] to find ALL text segments (sentences, phrases, or paragraphs) that have a high degree of semantic matching or keyword alignment.
+
+CRITICAL: You must extract the text verbatim (word-for-word) from the reference content. Do not summarize, paraphrase, rephrase, or correct grammar. Do not generate any new text.
+Output the result in the exact format specified below.
+
+Strict Constraints
+NO HALLUCINATIONS: If the information is not present in the Reference Content for a specific question, output "[Question] - No match found in reference".
+NO PARAPHRASING: The "Original Text" part of your output must be an exact string copy from the Reference Content.
+MATCHING LOGIC: Focus on semantic meaning. Even if the keywords aren't identical, if the meaning of the user input corresponds to a specific section of the reference, extract that section.
+MULTIPLE MATCHES & COMPLETENESS: If multiple distinct excerpts match a single user input, you MUST list ALL of them as separate bullet points under that question. Do not limit the output.
+
+Data Input
+[Reference Content]
+"""
+{REFERENCE_CONTENT}
+"""
+
+[User Inputs]
+"""
+{USER_INPUT}
+"""
+
+Output Format
+Please present the result strictly in the following format, separating each question's block with a separator line (---).
+
+# [First User Input String]
+
+- [First Exact Excerpt from Reference Content for Q1]
+
+- [Second Exact Excerpt from Reference Content for Q1]
+
+...
+
+---
+
+# [Second User Input String]
+
+- [First Exact Excerpt from Reference Content for Q2]
+
+- [Second Exact Excerpt from Reference Content for Q2]
+
+...
+
+---
+
+...
+
+Please generate the output now.`
 };
 
 export function getDefaultPrompt(taskKey: TaskKey): string {
@@ -285,7 +339,18 @@ export function getSystemPrompt(settings: NotemdSettings, taskKey: TaskKey, repl
     }
 
     // Start with the appropriate base prompt
-    let prompt = (useCustomPrompt && customPrompt) ? customPrompt : getDefaultPrompt(taskKey);
+    // Special handling for merged mode if the key is 'extractOriginalText' but merged mode is active
+    // However, the caller usually decides which key to request.
+    // If the caller requests 'extractOriginalTextMerged', we use that.
+    // There is no custom prompt setting specifically for 'Merged Mode', so we might fallback to default 'extractOriginalTextMerged'
+    // or share the custom prompt if appropriate (though formatting differs).
+    // For now, assume 'extractOriginalTextMerged' uses its own default prompt and no custom override unless added.
+    let prompt = (useCustomPrompt && customPrompt && taskKey !== 'extractOriginalTextMerged') ? customPrompt : (DEFAULT_PROMPTS[taskKey] || '');
+    
+    // If task is 'extractOriginalTextMerged' and user has a custom prompt for 'extractOriginalText',
+    // we should probably NOT use it because the format is different.
+    // So logic above is okay: only use custom if taskKey matches the switch case.
+    // Since 'extractOriginalTextMerged' isn't in the switch, it defaults to DEFAULT_PROMPTS.
 
     // Prepend the focused learning domain if enabled
     if (settings.enableFocusedLearning && settings.focusedLearningDomain) {
@@ -306,35 +371,16 @@ export function getSystemPrompt(settings: NotemdSettings, taskKey: TaskKey, repl
 IMPORTANT: The entire Mermaid diagram, including all node text, MUST be translated into ${targetLanguageName}.`;
     }
 
-    // Add translation instruction for extractOriginalText if enabled
-    if (taskKey === 'extractOriginalText' && settings.translateExtractOriginalTextOutput && !settings.disableAutoTranslation) {
+    // Add translation instruction for extractOriginalText (and Merged variant) if enabled
+    if ((taskKey === 'extractOriginalText' || taskKey === 'extractOriginalTextMerged') && settings.translateExtractOriginalTextOutput && !settings.disableAutoTranslation) {
          // Modify the output format instruction for the multi-line format
-         const originalExcerpts = `- [First Exact Excerpt from Reference Content]
-
-- [Second Exact Excerpt from Reference Content]
-
-- [Third Exact Excerpt from Reference Content]
-
--...
-
-- [Last Exact Excerpt from Reference Content]`;
+         // We look for the generic bullet structure pattern
          
-         const translatedExcerpts = `- [First Exact Excerpt from Reference Content] - [First Exact Excerpt from Reference Content being translated into {LANGUAGE}]
+         const translationInstruction = `\n\nIMPORTANT: For each matching excerpt, you MUST append the translation in {LANGUAGE}.
+The format for each bullet point must be strictly:
+- [Exact Excerpt] - [Excerpt translated into {LANGUAGE}]`;
 
-- [Second Exact Excerpt from Reference Content] - [Second Exact Excerpt from Reference Content being translated into {LANGUAGE}]
-
-- [Third Exact Excerpt from Reference Content] - [Third Exact Excerpt from Reference Content being translated into {LANGUAGE}]
-
--...
-
-- [Last Exact Excerpt from Reference Content] - [Last Exact Excerpt from Reference Content being translated into {LANGUAGE}]`;
-
-         if (prompt.includes(originalExcerpts)) {
-             prompt = prompt.replace(originalExcerpts, translatedExcerpts);
-         } else {
-             // Fallback if custom prompt or exact match fails: append instruction
-             prompt += `\n\nIMPORTANT: For each matching excerpt, append the translation in {LANGUAGE} like this: "- [Excerpt] - [Translated Excerpt]"`;
-         }
+         prompt += translationInstruction;
     }
 
     // Add language instruction for extractConcepts if a specific language is set

@@ -92,4 +92,10 @@ export const mockSettings: NotemdSettings = {
     translateExtractOriginalTextOutput: false,
     useCustomPromptForExtractOriginalText: false,
     customPromptExtractOriginalText: '',
+    extractOriginalTextMergedMode: false,
+    extractOriginalTextUseCustomOutput: false,
+    extractOriginalTextCustomPath: '',
+    extractOriginalTextCustomSuffix: '',
+    moveMermaidErrorFiles: false,
+    mermaidErrorFolderPath: '',
 };
