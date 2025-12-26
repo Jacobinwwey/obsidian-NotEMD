@@ -15,7 +15,8 @@ import {
     saveMermaidSummaryFile,
     extractConceptsFromFile,
     createConceptNotes,
-    fixMermaidSyntaxInFile
+    fixMermaidSyntaxInFile,
+    saveErrorLog // Import
 } from './fileUtils';
 import { _performResearch, researchAndSummarize } from './searchUtils'; // Import _performResearch if needed directly, ensure researchAndSummarize is exported
 import { ProgressModal } from './ui/ProgressModal';
@@ -635,6 +636,9 @@ export default class NotemdPlugin extends Plugin {
             if (!errorMessage.includes("cancelled by user")) {
                 new Notice(`Error during processing: ${errorMessage}. See console.`, 10000);
                 new ErrorModal(this.app, "Notemd Processing Error", errorDetails).open();
+                
+                // Save error log
+                await saveErrorLog(this.app, useReporter, error, this.settings);
             }
             useReporter.log(`Error: ${errorMessage}`);
             useReporter.updateStatus('Error occurred', -1);
@@ -801,6 +805,9 @@ export default class NotemdPlugin extends Plugin {
             if (!errorMessage.includes("cancelled")) {
                 new Notice(`Error during batch processing: ${errorMessage}. See console.`, 10000);
                 new ErrorModal(this.app, "Notemd Batch Processing Error", errorDetails).open();
+                
+                // Save error log
+                await saveErrorLog(this.app, useReporter, error, this.settings);
             }
             useReporter.log(`Batch Error: ${errorMessage}`);
             useReporter.updateStatus('Error occurred during batch processing', -1);
@@ -855,6 +862,9 @@ export default class NotemdPlugin extends Plugin {
             console.error('LLM Connection Test Error:', errorDetails); // Log details
             useReporter.updateStatus("Connection test error.", -1);
             new ErrorModal(this.app, "LLM Connection Test Error", errorDetails).open();
+            
+            // Save error log
+            await saveErrorLog(this.app, useReporter, error, this.settings);
         } finally {
             this.isBusy = false;
             // No need to call useReporter.updateButtonStates() here
@@ -902,6 +912,9 @@ export default class NotemdPlugin extends Plugin {
                 console.error(`Error generating content for ${file.name}:`, errorDetails);
                 new Notice(`Error generating content: ${errorMessage}. See console.`, 10000);
                 new ErrorModal(this.app, "Content Generation Error", errorDetails).open();
+                
+                // Save error log
+                await saveErrorLog(this.app, useReporter, error, this.settings);
             }
             useReporter.log(`Error generating content for ${file.name}: ${errorMessage}`);
             useReporter.updateStatus('Error occurred', -1);
@@ -958,6 +971,9 @@ export default class NotemdPlugin extends Plugin {
                 console.error(`Error researching "${topic}":`, errorDetails);
                 new Notice(`Error during research: ${errorMessage}. See console.`, 10000);
                 new ErrorModal(this.app, "Research Error", errorDetails).open();
+                
+                // Save error log
+                await saveErrorLog(this.app, useReporter, error, this.settings);
             }
             // Reporter status should already be set by the utility function if it's used
             // If reporter wasn't used or failed early, log here
@@ -1046,6 +1062,9 @@ export default class NotemdPlugin extends Plugin {
                 console.error("Notemd Batch Generation Error:", errorDetails);
                 new Notice(`Error during batch generation: ${errorMessage}. See console.`, 10000);
                 new ErrorModal(this.app, "Notemd Batch Generation Error", errorDetails).open();
+                
+                // Save error log
+                await saveErrorLog(this.app, useReporter, error, this.settings);
             }
             useReporter.log(`Batch Error: ${errorMessage}`);
             useReporter.updateStatus('Error occurred during batch generation', -1);
@@ -1147,6 +1166,9 @@ export default class NotemdPlugin extends Plugin {
                 console.error("Notemd Batch Mermaid Fix Error:", errorDetails);
                 new Notice(`Error during batch fix: ${errorMessage}. See console.`, 10000);
                 new ErrorModal(this.app, "Notemd Batch Mermaid Fix Error", errorDetails).open();
+                
+                // Save error log
+                await saveErrorLog(this.app, useReporter, error, this.settings);
             }
             useReporter.log(`Batch Fix Error: ${errorMessage}`);
             useReporter.updateStatus('Error occurred during batch fix', -1);
@@ -1202,6 +1224,9 @@ export default class NotemdPlugin extends Plugin {
             if (!errorMessage.includes("cancelled")) {
                 new Notice(`Failed to translate folder: ${errorMessage}. See console for details.`, 10000);
                 new ErrorModal(this.app, "Batch Translation Error", errorMessage).open();
+                
+                // Save error log
+                await saveErrorLog(this.app, useReporter, error, this.settings);
             }
             useReporter.log(`Error: ${errorMessage}`);
             useReporter.updateStatus('Error occurred', -1);
@@ -1252,6 +1277,9 @@ export default class NotemdPlugin extends Plugin {
                 console.error("Translation Error:", errorDetails);
                 new Notice(`Failed to translate file: ${errorMessage}. See console for details.`, 10000);
                 new ErrorModal(this.app, "Translation Error", errorDetails).open();
+                
+                // Save error log
+                await saveErrorLog(this.app, useReporter, error, this.settings);
             }
             useReporter.log(`Error: ${errorMessage}`);
             useReporter.updateStatus('Error occurred', -1);
@@ -1316,6 +1344,9 @@ export default class NotemdPlugin extends Plugin {
 			reporter.updateStatus('Error during summarization.', -1);
 			new Notice(`Summarization Error: ${message}`);
 			console.error("Summarization Error:", error);
+            
+            // Save error log
+            await saveErrorLog(this.app, reporter, error, this.settings);
 		} finally {
             if (maybeSidebar instanceof NotemdSidebarView) {
                 maybeSidebar.finishProcessing();
@@ -1378,6 +1409,9 @@ export default class NotemdPlugin extends Plugin {
             if (!errorMessage.includes("cancelled by user")) {
                 new Notice(`Error during concept extraction: ${errorMessage}.`, 10000);
                 new ErrorModal(this.app, "Concept Extraction Error", errorMessage).open();
+                
+                // Save error log
+                await saveErrorLog(this.app, useReporter, error, this.settings);
             }
             useReporter.log(`Error: ${errorMessage}`);
             useReporter.updateStatus('Error occurred', -1);
@@ -1555,6 +1589,9 @@ export default class NotemdPlugin extends Plugin {
             if (!errorMessage.includes("cancelled")) {
                 new Notice(`Error during batch extraction: ${errorMessage}.`, 10000);
                 new ErrorModal(this.app, "Batch Concept Extraction Error", errorMessage).open();
+                
+                // Save error log
+                await saveErrorLog(this.app, useReporter, error, this.settings);
             }
             useReporter.log(`Batch Error: ${errorMessage}`);
             useReporter.updateStatus('Error occurred', -1);
@@ -1605,6 +1642,9 @@ export default class NotemdPlugin extends Plugin {
             if (!errorMessage.includes("cancelled")) {
                 new Notice(`Error: ${errorMessage}. See console for details.`, 10000);
                 new ErrorModal(this.app, "Error", errorMessage).open();
+                
+                // Save error log
+                await saveErrorLog(this.app, useReporter, error, this.settings);
             }
             useReporter.log(`Error: ${errorMessage}`);
             useReporter.updateStatus('Error occurred', -1);
@@ -1652,6 +1692,9 @@ export default class NotemdPlugin extends Plugin {
             if (!errorMessage.includes("cancelled")) {
                 new Notice(`Error: ${errorMessage}. See console for details.`, 10000);
                 new ErrorModal(this.app, "Extraction Error", errorMessage).open();
+                
+                // Save error log
+                await saveErrorLog(this.app, useReporter, error, this.settings);
             }
             useReporter.log(`Error: ${errorMessage}`);
             useReporter.updateStatus('Error occurred', -1);

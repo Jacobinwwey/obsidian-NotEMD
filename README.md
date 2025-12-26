@@ -178,6 +178,9 @@ Access plugin settings via:
     *   **Enabled**: Automatically retries failed LLM API calls (useful for intermittent network issues or rate limits).
 -   **Retry Interval (seconds)**: (Visible only when enabled) Time to wait between retry attempts (1-300 seconds). Default: 5.
 -   **Maximum Retries**: (Visible only when enabled) Maximum number of retry attempts (0-10). Default: 3.
+-   **API Error Debugging Mode**:
+    *   **Disabled (Default)**: Uses standard, concise error reporting.
+    *   **Enabled**: Activates detailed error logging (similar to DeepSeek's verbose output) for all providers. This includes HTTP status codes and raw response text, which is crucial for troubleshooting API connection issues.
 <img width="805" height="187" alt="stable API calls" src="https://github.com/user-attachments/assets/936454a7-b657-413c-8a2a-13d517f9c519" />
 
 ### General Settings
@@ -491,6 +494,7 @@ This is the core functionality focused on identifying concepts and adding `[[wik
     5.  Check your internet connection for cloud providers.
     6.  **For single file processing errors:** Review the Developer Console for detailed error messages. Copy them using the button in the error modal if needed.
     7.  **For batch processing errors:** Check the `error_processing_filename.log` file in your vault root for detailed error messages for each failed file. The Developer Console or error modal might show a summary or general batch error.
+    8.  **Automatic Error Logs:** If a process fails, the plugin automatically saves a detailed log file named `Notemd_Error_Log_[Timestamp].txt` in your vault's root directory. This file contains the error message, stack trace, and session logs. If you encounter persistent issues, please check this file. Enabling "API Error Debugging Mode" in settings will populate this log with even more detailed API response data.
 -   **LM Studio/Ollama Connection Issues**:
     *   **Test Connection Fails**: Ensure the local server (LM Studio or Ollama) is running and the correct model is loaded/available.
     *   **CORS Errors (Ollama on Windows)**: If you encounter CORS (Cross-Origin Resource Sharing) errors when using Ollama on Windows, you may need to set the `OLLAMA_ORIGINS` environment variable. You can do this by running `set OLLAMA_ORIGINS=*` in your command prompt before starting Ollama. This allows requests from any origin.
