@@ -83,4 +83,18 @@ style GovCurve fill:#e0f2f1,stroke:#00695c
         
         expect(refineMermaidBlocks(content)).toBe(expected);
     });
+
+    test('should fix broken edge labels with --["...["--> pattern', () => {
+        const content = `\`\`\`mermaid
+graph LR
+CapRate --["Inverse Relationship["--> PropValue;
+WACC --["Hurdle Rate["--> Acquisitions;
+\`\`\``;
+        const expected = `\`\`\`mermaid
+graph LR
+CapRate -- "Inverse Relationship" --> PropValue;
+WACC -- "Hurdle Rate" --> Acquisitions;
+\`\`\``;
+        expect(refineMermaidBlocks(content)).toBe(expected);
+    });
 });
