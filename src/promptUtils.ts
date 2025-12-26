@@ -217,7 +217,7 @@ Data Input
 Output Format
 Please present the result strictly in the following format:
 
-[User Input String]
+# [User Input String]
 
 - [First Exact Excerpt from Reference Content]
 
