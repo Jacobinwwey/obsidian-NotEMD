@@ -84,6 +84,39 @@ export function refineMermaidBlocks(content: string): string {
 				line = line.replace(/\[";$/, '"];');
 				// New User Rule 2: Then, if line ends with [", change to "]
 				line = line.replace(/\["$/, '"]');
+
+                // --- User Requested "Fix Mode" Logic for [ ... ] ---
+                // Detects Node[Label] where Label isn't fully quoted but contains brackets/quotes.
+                // Targeted cases:
+                // 1. `Investment[Corporate Investment "[企业投资]"]` -> `Investment["Corporate Investment [企业投资]"]`
+                // 2. `Consumption[Consumption [消费]]` -> `Consumption["Consumption [消费]"]`
+                
+                // Improved regex to handle one level of nested brackets:
+                // (\S+)       : NodeID
+                // \s*\[       : Opening bracket
+                // (?!"|')     : Content does NOT start with " or ' (already quoted nodes are skipped)
+                // (           : Start capturing content
+                //   (?:       : Non-capturing group for content parts
+                //     [^\[\]] : Any character EXCEPT [ or ]
+                //     |       : OR
+                //     \[[^\[\]]*\] : A nested [...] block with no brackets inside
+                //   )*        : Repeat content parts
+                // )           : End capturing content
+                // \]          : Closing bracket
+                
+                line = line.replace(/(\S+)\s*\[(?!"|')((?:[^\[\]]|\[[^\[\]]*\])*)\]/g, (match, nodeId, content) => {
+                     // Filter out matches that don't actually contain broken characters we care about.
+                     // The regex already excludes things starting with ".
+                     // We specifically want to fix things that have [ or ] inside.
+                     if (/[\[\]]/.test(content)) {
+                         // Logic:
+                         // 1. Remove existing double quotes from content to avoid syntax errors (as per user example where inner quotes were removed).
+                         // 2. Wrap in double quotes.
+                         const cleanContent = content.replace(/"/g, ''); 
+                         return `${nodeId}["${cleanContent}"]`;
+                     }
+                     return match;
+                });
 			}
 
 

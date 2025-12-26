@@ -216,9 +216,15 @@ export const DEFAULT_SETTINGS: NotemdSettings = {
     extractOriginalTextProvider: 'DeepSeek',
     extractOriginalTextModel: '',
     extractOriginalTextLanguage: 'en',
+    extractOriginalTextMergedMode: false,
     translateExtractOriginalTextOutput: false,
+    extractOriginalTextUseCustomOutput: false,
+    extractOriginalTextCustomPath: '',
+    extractOriginalTextCustomSuffix: '_Extracted',
     useCustomPromptForExtractOriginalText: false,
     customPromptExtractOriginalText: '',
+    moveMermaidErrorFiles: false,
+    mermaidErrorFolderPath: 'MermaidErrors',
 };
 
 // Constants for the Sidebar View

@@ -113,7 +113,16 @@ That's it! Explore the settings to unlock more features like web research, trans
 - **Check for Duplicates in Current File**: This command helps identify potential duplicate terms within the active file.
 - **Duplicate Detection**: Basic check for duplicate words within the currently processed file's content (results logged to console).
 - **Check and Remove Duplicate Concept Notes**: Identifies potential duplicate notes within the configured **Concept Note Folder** based on exact name matches, plurals, normalization, and single-word containment compared to notes outside the folder. The scope of the comparison (which notes outside the concept folder are checked) can be configured to the **entire vault**, **specific included folders**, or **all folders excluding specific ones**. Presents a detailed list with reasons and conflicting files, then prompts for confirmation before moving identified duplicates to system trash. Shows progress during deletion.
-- **Batch Mermaid Fix**: Applies Mermaid and LaTeX syntax corrections (`refineMermaidBlocks` and `cleanupLatexDelimiters`) to all Markdown files within a user-selected folder.
+- **Batch Mermaid Fix**: Applies Mermaid and LaTeX syntax corrections to all Markdown files within a user-selected folder.
+    - **Error Reporting**: Generates a `mermaid_error_{foldername}.md` report listing files that still contain potential Mermaid errors after processing.
+    - **Move Error Files**: Optionally moves files with detected errors to a specified folder for manual review.
+    - **Advanced Fix Mode**: Includes robust fixes for unquoted node labels containing spaces, special characters, or nested brackets (e.g., converting `Node[Label [Text]]` to `Node["Label [Text]"]`).
+- **Extract Specific Original Text**:
+    - Define a list of questions in settings.
+    - Extracts verbatim text segments from the active note that answer these questions.
+    - **Merged Query Mode**: Option to process all questions in a single API call for efficiency.
+    - **Translation**: Option to include translations of the extracted text in the output.
+    - **Custom Output**: Configurable save path and filename suffix for the extracted text file.
 - **LLM Connection Test**: Verify API settings for the active provider.
 
 
@@ -186,7 +195,7 @@ Access plugin settings via:
     *   If you enter a string (e.g., `_linked`), it will be appended to the original base name (e.g., `YourNote_linked.md`). Ensure the suffix doesn't contain invalid filename characters.
 
 -   **Remove Code Fences on Add Links**:
-    *   **Disabled (Default)**: Code fences **(\`\`\`)** are kept in the content when adding links, and **(\`\`\`markdown)** will be delete automaticly.
+    *   **Disabled (Default)**: Code fences **(\`\\\`\`)** are kept in the content when adding links, and **(\`\\\`markdown)** will be delete automaticly.
     *   **Enabled**: Removes code fences from the content before adding links.
 <img width="799" height="301" alt="Processed file output" src="https://github.com/user-attachments/assets/65d4e864-ff5f-402a-be90-e9c44b208903" />
 
@@ -225,6 +234,24 @@ Access plugin settings via:
 -   **Add "Linked From" backlink**:
     *   **Off (Default)**: Does not add a backlink to the source document in the concept note during extraction.
     *   **On**: Adds a "Linked From" section with a backlink to the source file.
+
+#### Extract Specific Original Text
+-   **Questions for extraction**: Enter a list of questions (one per line) that you want the AI to extract verbatim answers for from your notes.
+-   **Translate output to corresponding language**:
+    *   **Off (Default)**: Outputs only the extracted text in its original language.
+    *   **On**: Appends a translation of the extracted text in the language selected for this task.
+-   **Merged query mode**:
+    *   **Off**: Processes each question individually (higher precision but more API calls).
+    *   **On**: Sends all questions in a single prompt (faster and fewer API calls).
+-   **Customise extracted text save path & filename**:
+    *   **Off**: Saves to the same folder as the original file with `_Extracted` suffix.
+    *   **On**: Allows you to specify a custom output folder and filename suffix.
+
+#### Batch Mermaid Fix
+-   **Move files with Mermaid errors to specified folder**:
+    *   **Off**: Files with errors remain in place.
+    *   **On**: Moves any files that still contain Mermaid syntax errors after the fix attempt to a dedicated folder for manual review.
+-   **Mermaid error folder path**: (Visible if above is enabled) The folder to move error files to.
 
 #### Processing Parameters
 -   **Enable Batch Parallelism**:
@@ -339,7 +366,7 @@ This is the core functionality focused on identifying concepts and adding `[[wik
     *   **Single File**: Open the file and run `Notemd: Process Current File`.
     *   **Folder**: Run `Notemd: Process Folder`, then select the folder. Files are processed in the background without being opened in the editor.
     *   A progress modal appears for command palette actions, which includes a cancel button.
-    *   *Note:* The plugin automatically removes leading `\boxed{` and trailing `}` lines if found in the final processed content before saving.
+    *   *Note:* the plugin automatically removes leading `\boxed{` and trailing `}` lines if found in the final processed content before saving.
 
 ### New Features
 
@@ -422,6 +449,18 @@ This is the core functionality focused on identifying concepts and adding `[[wik
         1.  First, run the **"Extract concepts (current file)"** task on the currently active file.
         2.  Then, it will automatically run the **"Batch generate from titles"** task on the folder you have configured as your **Concept note folder path** in the settings.
     *   This allows you to first populate your knowledge base with new concepts from a source document and then immediately flesh out those new concept notes with AI-generated content in a single step.
+
+10. **Extract Specific Original Text**:
+    *   Configure your questions in the settings under "Extract Specific Original Text".
+    *   Use the "Extract Specific Original Text" button in the sidebar to process the active file.
+    *   **Merged Mode**: Enables faster processing by sending all questions in one prompt.
+    *   **Translation**: Optionally translates the extracted text to your configured language.
+    *   **Custom Output**: Configure where and how the extracted file is saved.
+
+11. **Batch Mermaid Fix**:
+    *   Use the "Batch Mermaid Fix" button in the sidebar to scan a folder and fix common Mermaid syntax errors.
+    *   The plugin will report any files that still contain errors in a `mermaid_error_{foldername}.md` file.
+    *   Optionally configure the plugin to move these problematic files to a separate folder for review.
 
 ## Supported LLM Providers
 

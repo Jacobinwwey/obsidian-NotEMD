@@ -654,6 +654,78 @@ export class NotemdSettingTab extends PluginSettingTab {
                     await this.plugin.saveSettings();
                 }));
 
+        new Setting(containerEl)
+            .setName('Merged query mode')
+            .setDesc('On: Submit all questions in a single LLM prompt (faster/cheaper). Off: Process each question individually (higher precision).')
+            .addToggle(toggle => toggle
+                .setValue(this.plugin.settings.extractOriginalTextMergedMode)
+                .onChange(async (value) => {
+                    this.plugin.settings.extractOriginalTextMergedMode = value;
+                    await this.plugin.saveSettings();
+                }));
+
+        new Setting(containerEl)
+            .setName('Customise extracted text save path & filename')
+            .setDesc('On: Use custom folder and suffix for extracted files. Off: Save in original folder with default "_Extracted" suffix.')
+            .addToggle(toggle => toggle
+                .setValue(this.plugin.settings.extractOriginalTextUseCustomOutput)
+                .onChange(async (value) => {
+                    this.plugin.settings.extractOriginalTextUseCustomOutput = value;
+                    await this.plugin.saveSettings();
+                    this.display(); // Refresh to show/hide path/suffix inputs
+                }));
+
+        if (this.plugin.settings.extractOriginalTextUseCustomOutput) {
+            new Setting(containerEl)
+                .setName('Extracted file save path')
+                .setDesc('The folder where extracted files will be saved (relative to vault root).')
+                .addText(text => text
+                    .setPlaceholder('e.g., ExtractedData')
+                    .setValue(this.plugin.settings.extractOriginalTextCustomPath)
+                    .onChange(async (value) => {
+                        this.plugin.settings.extractOriginalTextCustomPath = value.trim();
+                        await this.plugin.saveSettings();
+                    }));
+
+            new Setting(containerEl)
+                .setName('Custom Suffix')
+                .setDesc('The custom suffix to append to the filename (e.g., "_MyExtract").')
+                .addText(text => text
+                    .setPlaceholder('_Extracted')
+                    .setValue(this.plugin.settings.extractOriginalTextCustomSuffix)
+                    .onChange(async (value) => {
+                        this.plugin.settings.extractOriginalTextCustomSuffix = value.trim();
+                        await this.plugin.saveSettings();
+                    }));
+        }
+
+        // --- Batch Mermaid Fix Settings ---
+        new Setting(containerEl).setName('Batch Mermaid fix').setHeading();
+        
+        new Setting(containerEl)
+            .setName('Move files with Mermaid errors to specified folder')
+            .setDesc('On: Move any files that still contain Mermaid errors after fixing to a designated folder.')
+            .addToggle(toggle => toggle
+                .setValue(this.plugin.settings.moveMermaidErrorFiles)
+                .onChange(async (value) => {
+                    this.plugin.settings.moveMermaidErrorFiles = value;
+                    await this.plugin.saveSettings();
+                    this.display();
+                }));
+
+        if (this.plugin.settings.moveMermaidErrorFiles) {
+            new Setting(containerEl)
+                .setName('Mermaid error folder path')
+                .setDesc('Folder to move files with errors to.')
+                .addText(text => text
+                    .setPlaceholder('MermaidErrors')
+                    .setValue(this.plugin.settings.mermaidErrorFolderPath)
+                    .onChange(async (value) => {
+                        this.plugin.settings.mermaidErrorFolderPath = value.trim();
+                        await this.plugin.saveSettings();
+                    }));
+        }
+
         // --- Duplicate Check Scope Settings (Refined) ---""
         new Setting(containerEl).setName('Duplicate check scope').setHeading();
 

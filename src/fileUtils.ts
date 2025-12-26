@@ -933,6 +933,23 @@ export async function batchFixMermaidSyntaxInFolder(app: App, settings: NotemdSe
     progressReporter.log(`Starting batch Mermaid/LaTeX fix for ${filesToProcess.length} files in "${folderPath}"...`);
     const errors: { file: string; message: string }[] = [];
     let modifiedCount = 0;
+    const mermaidErrors: { filename: string; count: number }[] = [];
+
+    // Ensure error folder exists if moving is enabled
+    let errorMoveFolder = '';
+    if (settings.moveMermaidErrorFiles && settings.mermaidErrorFolderPath) {
+        errorMoveFolder = settings.mermaidErrorFolderPath.replace(/^\/|\/$/g, '');
+        if (errorMoveFolder) {
+            if (!app.vault.getAbstractFileByPath(errorMoveFolder)) {
+                try {
+                    await app.vault.createFolder(errorMoveFolder);
+                    progressReporter.log(`Created Mermaid error folder: ${errorMoveFolder}`);
+                } catch (e: any) {
+                    progressReporter.log(`Error creating error folder: ${e.message}`);
+                }
+            }
+        }
+    }
 
     for (let i = 0; i < filesToProcess.length; i++) {
         const file = filesToProcess[i];
@@ -950,6 +967,62 @@ export async function batchFixMermaidSyntaxInFolder(app: App, settings: NotemdSe
                 modifiedCount++;
             } else {
                 progressReporter.log(`➖ No changes needed for: ${file.name}`);
+            }
+
+            // Post-fix check for remaining errors
+            // Read content again (fixMermaidSyntaxInFile might have modified it)
+            const content = await app.vault.read(file);
+            let fileErrorCount = 0;
+            // Simple heuristic regex to find potentially broken nodes: Node[...] where content has space/CJK and NOT quoted
+            // We reuse the logic from refinedMermaidBlocks but just for detection
+            const lines = content.split('\n');
+            let inMermaid = false;
+            for (const line of lines) {
+                if (/^```\s*\(?\s*mermaid\s*\)?/.test(line)) { inMermaid = true; continue; }
+                if (line.trim() === '```') { inMermaid = false; continue; }
+                if (inMermaid) {
+                     // Check for Node[...] that isn't quoted but should be
+                     // We search for matches that refinedMermaidBlocks WOULD catch but maybe missed or are new?
+                     // Actually, if refineMermaidBlocks worked, these should be fixed.
+                     // The user says "which files still contain Mermaid errors".
+                     // Let's assume if we find any `Node[...]` where `...` contains spaces/CJK and isn't `"... "`, it's an error.
+                     // Regex: (\S+)\[([^"\]]+)\] where group 2 has spaces or CJK
+                     // Exclude matches that look like `Node["..."]` (already handled by [^"])
+                     // But `Node[Label]` is valid if Label is simple.
+                     // Only error if Label has spaces or CJK.
+                     // Also excluding lines with 'subgraph' as they might be handled differently or valid.
+                     if (!line.includes('subgraph')) {
+                         const brokenNodeRegex = /(\S+)\[([^"\]]+)\]/g;
+                         let match;
+                         while ((match = brokenNodeRegex.exec(line)) !== null) {
+                             const content = match[2];
+                             if (/[ \u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]/.test(content)) {
+                                 fileErrorCount++;
+                             }
+                         }
+                     }
+                }
+            }
+
+            if (fileErrorCount > 0) {
+                mermaidErrors.push({ filename: file.name, count: fileErrorCount });
+                // Move file if enabled
+                if (errorMoveFolder) {
+                    const destPath = `${errorMoveFolder}/${file.name}`;
+                    if (file.parent?.path !== errorMoveFolder) {
+                        try {
+                            // Check if dest exists
+                            if (app.vault.getAbstractFileByPath(destPath)) {
+                                progressReporter.log(`⚠️ Destination ${destPath} exists. Skipping move for ${file.name}.`);
+                            } else {
+                                await app.vault.rename(file, destPath);
+                                progressReporter.log(`Moved error file to: ${destPath}`);
+                            }
+                        } catch (moveErr: any) {
+                            progressReporter.log(`Error moving file ${file.name}: ${moveErr.message}`);
+                        }
+                    }
+                }
             }
 
         } catch (fileError: unknown) {
@@ -972,6 +1045,34 @@ export async function batchFixMermaidSyntaxInFolder(app: App, settings: NotemdSe
         }
         if (progressReporter.cancelled) { break; }
     }
+
+    // Generate Error Report
+    if (mermaidErrors.length > 0) {
+        const folderName = folder.name === '/' ? 'Root' : folder.name;
+        const reportFileName = `mermaid_error_${folderName}.md`;
+        // Determine save path: current directory implies root or same level? User said "within the current directory".
+        // Usually, putting it in the root is safest/easiest to find.
+        const reportContent = mermaidErrors.map(e => `[[${e.filename}]]-[${e.count}]`).join(''); // User requested single line per entry? 
+        // "structured and output as a single line per entry" -> usually means one line in the file per error entry?
+        // OR "output as a single line per entry" -> [[File]]-[Count]\n[[File]]-[Count]
+        // Example: `[[First error filename]]-[Number of faulty Mermaid diagrams][[Second error filename]]-[Number of faulty Mermaid diagrams]...`
+        // Wait, the example shows them ALL on one line concatenated?
+        // `[[First error filename]]-[Number of faulty Mermaid diagrams][[Second error filename]]-[Number of faulty Mermaid diagrams]...`
+        // This is unusual but I will follow the example literally: Concatenated string.
+        
+        try {
+            const reportFile = app.vault.getAbstractFileByPath(reportFileName);
+            if (reportFile instanceof TFile) {
+                await app.vault.modify(reportFile, reportContent);
+            } else {
+                await app.vault.create(reportFileName, reportContent);
+            }
+            progressReporter.log(`Generated error report: ${reportFileName}`);
+        } catch (reportErr: any) {
+            progressReporter.log(`Error generating report file: ${reportErr.message}`);
+        }
+    }
+
     return { errors, modifiedCount }; // Return collected errors and count
 }
 

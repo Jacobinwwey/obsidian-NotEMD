@@ -125,13 +125,19 @@ export interface NotemdSettings {
     extractOriginalTextProvider: string;
     extractOriginalTextModel: string;
     extractOriginalTextLanguage: string;
+    extractOriginalTextMergedMode: boolean; // New
     translateExtractOriginalTextOutput: boolean;
+    extractOriginalTextUseCustomOutput: boolean; // New
+    extractOriginalTextCustomPath: string; // New
+    extractOriginalTextCustomSuffix: string; // New
     useCustomPromptForExtractOriginalText: boolean;
     customPromptExtractOriginalText: string;
+    moveMermaidErrorFiles: boolean; // New
+    mermaidErrorFolderPath: string; // New
 }
 
 // Defines the keys for tasks that can have custom prompts
-export type TaskKey = 'addLinks' | 'generateTitle' | 'researchSummarize' | 'translate' | 'summarizeToMermaid' | 'extractConcepts' | 'extractOriginalText';
+export type TaskKey = 'addLinks' | 'generateTitle' | 'researchSummarize' | 'translate' | 'summarizeToMermaid' | 'extractConcepts' | 'extractOriginalText' | 'extractOriginalTextMerged';
 
 // Interface for search results
 export interface SearchResult {
