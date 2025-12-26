@@ -114,6 +114,8 @@ export const DEFAULT_SETTINGS: NotemdSettings = {
     enableStableApiCall: false, // Default to disabled
     apiCallInterval: 5, // Default interval 5 seconds
     apiCallMaxRetries: 3, // Default max 3 retries
+    // API Debugging
+    enableApiErrorDebugMode: false,
     // Task-specific model defaults (empty means use provider's default)
     addLinksModel: '',
     researchModel: '',

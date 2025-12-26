@@ -408,6 +408,16 @@ export class NotemdSettingTab extends PluginSettingTab {
             new Setting(containerEl).setName('Maximum retries').setDesc('Max retry attempts.').addText(text => text.setPlaceholder(String(DEFAULT_SETTINGS.apiCallMaxRetries)).setValue(String(this.plugin.settings.apiCallMaxRetries)).onChange(async (value) => { const num = parseInt(value, 10); if (!isNaN(num) && num >= 0 && num <= 10) { this.plugin.settings.apiCallMaxRetries = num; } else { this.plugin.settings.apiCallMaxRetries = DEFAULT_SETTINGS.apiCallMaxRetries; } await this.plugin.saveSettings(); this.display(); }));
         }
 
+        new Setting(containerEl)
+            .setName('API error debugging mode')
+            .setDesc('On: Enable detailed error logging (DeepSeek-style) for all providers to help diagnose API issues. Off: Use standard concise error reporting.')
+            .addToggle(toggle => toggle
+                .setValue(this.plugin.settings.enableApiErrorDebugMode)
+                .onChange(async (value) => {
+                    this.plugin.settings.enableApiErrorDebugMode = value;
+                    await this.plugin.saveSettings();
+                }));
+
         // --- General Settings ---
         new Setting(containerEl).setName('Processed file output').setHeading();
         new Setting(containerEl).setName('Customize processed file save path').setDesc('On: Save to specified path. Off: Save in original folder.').addToggle(toggle => toggle.setValue(this.plugin.settings.useCustomProcessedFileFolder).onChange(async (value) => { this.plugin.settings.useCustomProcessedFileFolder = value; await this.plugin.saveSettings(); this.display(); }));

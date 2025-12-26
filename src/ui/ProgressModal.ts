@@ -14,6 +14,7 @@ export class ProgressModal extends Modal implements ProgressReporter {
     // Store the AbortController for the current operation
     private currentAbortController: AbortController | null = null;
     activeTasks = 0;
+    private logContent: string[] = []; // Store logs
 
     constructor(app: App) {
         super(app);
@@ -100,9 +101,13 @@ export class ProgressModal extends Modal implements ProgressReporter {
 
     log(message: string) {
         if (this.logEl) {
+            const timestamp = `[${new Date().toLocaleTimeString()}]`;
+            const fullMessage = `${timestamp} ${message}`;
+            this.logContent.push(fullMessage);
+
             const entry = this.logEl.createEl('div', { cls: 'notemd-log-entry' });
             entry.createEl('span', {
-                text: `[${new Date().toLocaleTimeString()}] `,
+                text: `${timestamp} `,
                 cls: 'notemd-log-time'
             });
             entry.createEl('span', {
@@ -112,6 +117,10 @@ export class ProgressModal extends Modal implements ProgressReporter {
             // Auto-scroll to bottom
             this.logEl.scrollTop = this.logEl.scrollHeight;
         }
+    }
+
+    getLogs(): string {
+        return this.logContent.join('\n');
     }
 
     onClose() {

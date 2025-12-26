@@ -4,6 +4,38 @@ This document summarizes the major functional and architectural changes implemen
 
 ---
 
+## Code/Architecture Update
+
+### English
+*   **Modularized API Error Handling**: Refactored `llmUtils.ts` to introduce a centralized `handleProviderError` function. This function supports both concise error reporting (default) and verbose, "DeepSeek-style" debugging logs (status codes, raw responses), ensuring consistent error handling across all 10+ supported LLM providers.
+*   **Automatic Error Logging**: Implemented a `saveErrorLog` utility in `fileUtils.ts`. This function captures the error message, stack trace, and the full session log from the reporter, saving it to a timestamped file (e.g., `Notemd_Error_Log_2023-10-27_10-00-00.txt`) in the vault root whenever a process fails. It also intelligently prompts users to enable debug mode if it's currently disabled.
+
+### Chinese (中文)
+*   **模块化API错误处理**: 重构了 `llmUtils.ts`，引入了集中的 `handleProviderError` 函数。该函数支持简洁的错误报告（默认）和详细的“DeepSeek风格”调试日志（状态代码、原始响应），确保所有10多个受支持的LLM提供商具有一致的错误处理。
+*   **自动错误日志记录**: 在 `fileUtils.ts` 中实现了 `saveErrorLog` 工具。该函数捕获错误消息、堆栈跟踪和来自报告器的完整会话日志，并在进程失败时将其保存到保管库根目录下的带时间戳的文件（例如 `Notemd_Error_Log_2023-10-27_10-00-00.txt`）。如果当前禁用了调试模式，它还会智能地提示用户启用调试模式。
+
+---
+
+## Implementation of Functionality
+
+### English
+*   **API Error Debugging Mode**: Added a new setting in the "Stable API calls" section.
+    *   **Enabled**: Activates detailed logging for all API calls, including HTTP status codes and raw response text, aiding in troubleshooting connection issues.
+    *   **Disabled**: Maintains the standard, clean user experience with concise error messages.
+*   **Automatic Log File Generation**:
+    *   When an error occurs during any major operation (processing files, generating content, research, etc.), a detailed log file is now automatically created in the vault root.
+    *   This file includes the error context and session history, making it easier for users to report bugs and for developers to diagnose issues.
+
+### Chinese (中文)
+*   **API错误调试模式**: 在“稳定API调用”部分添加了一个新设置。
+    *   **启用**: 激活所有API调用的详细日志记录，包括HTTP状态代码和原始响应文本，有助于排查连接问题。
+    *   **禁用**: 保持标准的、干净的用户体验，提供简洁的错误消息。
+*   **自动日志文件生成**:
+    *   当任何主要操作（处理文件、生成内容、研究等）期间发生错误时，现在会自动在保管库根目录中创建一个详细的日志文件。
+    *   该文件包含错误上下文和会话历史记录，使用户更容易报告错误，也便于开发人员诊断问题。
+
+---
+
 ## Implementation of Functionality
 
 ### English

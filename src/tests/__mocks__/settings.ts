@@ -32,6 +32,7 @@ export const mockSettings: NotemdSettings = {
     enableStableApiCall: false,
     apiCallInterval: 5,
     apiCallMaxRetries: 3,
+    enableApiErrorDebugMode: false,
     useCustomAddLinksSuffix: false,
     addLinksCustomSuffix: '',
     useCustomGenerateTitleOutputFolder: false,

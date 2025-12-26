@@ -50,6 +50,8 @@ export interface NotemdSettings {
     enableStableApiCall: boolean;
     apiCallInterval: number;
     apiCallMaxRetries: number;
+    // API Debugging
+    enableApiErrorDebugMode: boolean;
     // Task-specific models (used if useMultiModelSettings is true)
     addLinksModel?: string;
     researchModel?: string;
@@ -222,4 +224,5 @@ export interface ProgressReporter {
     abortController?: AbortController | null;
     activeTasks: number; // NEW: For concurrency display
     updateActiveTasks(delta: number): void; // NEW
+    getLogs?(): string; // NEW: Retrieve all logs
 }
