@@ -116,7 +116,7 @@ That's it! Explore the settings to unlock more features like web research, trans
 - **Batch Mermaid Fix**: Applies Mermaid and LaTeX syntax corrections to all Markdown files within a user-selected folder.
     - **Error Reporting**: Generates a `mermaid_error_{foldername}.md` report listing files that still contain potential Mermaid errors after processing.
     - **Move Error Files**: Optionally moves files with detected errors to a specified folder for manual review.
-            -   **Advanced Fix Mode**: Includes robust fixes for unquoted node labels containing spaces, special characters, or nested brackets (e.g., `Node[Label [Text]]` -> `Node["Label [Text]"]`), ensuring compatibility with complex diagrams like Stellar Evolution paths. Also corrects malformed edge labels (e.g., `--["Label["-->` to `-- "Label" -->`).
+            -   **Advanced Fix Mode**: Includes robust fixes for unquoted node labels containing spaces, special characters, or nested brackets (e.g., `Node[Label [Text]]` -> `Node["Label [Text]"]`), ensuring compatibility with complex diagrams like Stellar Evolution paths. Also corrects malformed edge labels (e.g., `--["Label["-->` to `-- "Label" -->`). Additionally converts inline comments (`Consensus --> Adaptive; # Some advanced consensus` to `Consensus -- "Some advanced consensus" --> Adaptive`) and fixes incomplete quotes at line ends (`;"` at the end replaced with `"]`).
         -   **Extract Specific Original Text**:    - Define a list of questions in settings.
     - Extracts verbatim text segments from the active note that answer these questions.
     - **Merged Query Mode**: Option to process all questions in a single API call for efficiency.

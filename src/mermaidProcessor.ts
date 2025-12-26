@@ -44,6 +44,12 @@ export function refineMermaidBlocks(content: string): string {
 			currentBlockLines = [line];
 			lastArrowIndexInBlock = -1;
 		} else if (inMermaid) {
+			// Handle ; # comments - convert to labeled arrows
+			const commentMatch = line.match(/^(\w+)\s*-->\s*(\w+);\s*#(.*)$/);
+			if (commentMatch) {
+				line = `${commentMatch[1]} -- "${commentMatch[3].trim()}" --> ${commentMatch[2]};`;
+			}
+
 			// Apply new quote rules BEFORE removing brackets, ONLY if 'subgraph' is NOT on the line
 			if (!line.includes('subgraph')) {
 				// 先保护 |" 和 "| 的情况
@@ -126,7 +132,13 @@ export function refineMermaidBlocks(content: string): string {
 
 
 			// Remove parentheses and curly braces from the line content within the mermaid block
-			const lineWithoutBrackets = line.replace(/[(){}]/g, ''); // Updated regex
+			let lineWithoutBrackets = line.replace(/[(){}]/g, ''); // Updated regex
+
+			// Fix [" at the end of the line
+			if (lineWithoutBrackets.endsWith('\["')) {
+				lineWithoutBrackets = lineWithoutBrackets.slice(0, -2) + '"]';
+			}
+
 			currentBlockLines.push(lineWithoutBrackets);
 			if (lineWithoutBrackets.includes('-->')) { // Check the modified line for arrows
 				lastArrowIndexInBlock = currentBlockLines.length - 1; // Index within currentBlockLines
