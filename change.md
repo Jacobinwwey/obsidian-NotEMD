@@ -3,6 +3,44 @@
 This document summarizes the major functional and architectural changes implemented.
 
 ---
+
+## Implementation of Functionality
+
+### English
+*   **Extract Specific Original Text**:
+    *   Introduced a new feature to extract verbatim text segments from notes based on user-defined questions.
+    *   **Merged Query Mode**: Efficiently processes all questions in a single API call.
+    *   **Translation Support**: Optionally includes translations of the extracted text.
+    *   **Custom Output**: Configurable output paths and filenames.
+*   **Batch Mermaid Fix Enhancements**:
+    *   **Advanced Fix Mode**: Added robust handling for unquoted Mermaid node labels containing nested brackets (e.g., `Node[Label [Text]]`) and special characters.
+    *   **Error Reporting**: Automatically generates a `mermaid_error_{foldername}.md` report listing files with remaining errors.
+    *   **Move Error Files**: Added an option to automatically move files with persistent errors to a specific folder for manual review.
+
+### Chinese (中文)
+*   **提取特定原始内容**:
+    *   引入了一项新功能，可根据用户定义的问题从笔记中逐字提取文本段落。
+    *   **合并查询模式**: 在单个API调用中高效处理所有问题。
+    *   **翻译支持**: 可选包含提取文本的翻译。
+    *   **自定义输出**: 可配置输出路径和文件名。
+*   **批量Mermaid修复增强**:
+    *   **高级修复模式**: 增加了对包含嵌套括号（例如 `Node[标签 [文本]]`）和特殊字符的未加引号Mermaid节点标签的稳健处理。
+    *   **错误报告**: 自动生成 `mermaid_error_{foldername}.md` 报告，列出仍有错误的文件。
+    *   **移动错误文件**: 添加了一个选项，可自动将存在持久错误的文件移动到特定文件夹以供手动审查。
+
+---
+
+## Code/Architecture Update
+
+### English
+*   **Robust Regex for Mermaid**: Implemented a sophisticated regex pattern in `mermaidProcessor.ts` to correctly identify and quote complex node labels without breaking existing valid syntax.
+*   **Documentation Synchronization**: Fully synchronized `README.md` and `README_zh.md` to ensure all new features (Extract Text, Mermaid Fixes) are documented in both languages.
+
+### Chinese (中文)
+*   **Mermaid的稳健正则表达式**: 在 `mermaidProcessor.ts` 中实现了复杂的正则表达式模式，以正确识别并引用复杂的节点标签，而不会破坏现有的有效语法。
+*   **文档同步**: 完全同步了 `README.md` 和 `README_zh.md`，确保所有新功能（提取文本，Mermaid修复）都以两种语言记录。
+
+---
 ## Code/Architecture Update
 
 ### English
