@@ -134,6 +134,7 @@ export interface NotemdSettings {
     extractOriginalTextCustomSuffix: string; // New
     useCustomPromptForExtractOriginalText: boolean;
     customPromptExtractOriginalText: string;
+    enableMermaidErrorDetection: boolean; // New
     moveMermaidErrorFiles: boolean; // New
     mermaidErrorFolderPath: string; // New
 }

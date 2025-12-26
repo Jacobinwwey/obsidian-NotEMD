@@ -34,6 +34,9 @@
 		"obsidian": "latest",
 		"ts-jest": "^29.3.2",
 		"tslib": "2.4.0",
-		"typescript": "4.7.4"
+		"typescript": "^5.9.3"
+	},
+	"dependencies": {
+		"mermaid": "^11.12.2"
 	}
 }

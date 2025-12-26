@@ -713,6 +713,17 @@ export class NotemdSettingTab extends PluginSettingTab {
         new Setting(containerEl).setName('Batch Mermaid fix').setHeading();
         
         new Setting(containerEl)
+            .setName('Enable Mermaid Error Detection')
+            .setDesc('On: Scan files for Mermaid syntax errors after fixing and generate a report. Off: Skip error detection.')
+            .addToggle(toggle => toggle
+                .setValue(this.plugin.settings.enableMermaidErrorDetection)
+                .onChange(async (value) => {
+                    this.plugin.settings.enableMermaidErrorDetection = value;
+                    await this.plugin.saveSettings();
+                    this.display(); // Refresh to show/hide related settings if needed
+                }));
+
+        new Setting(containerEl)
             .setName('Move files with Mermaid errors to specified folder')
             .setDesc('On: Move any files that still contain Mermaid errors after fixing to a designated folder.')
             .addToggle(toggle => toggle
