@@ -85,6 +85,10 @@ export function refineMermaidBlocks(content: string): string {
 				// New User Rule 2: Then, if line ends with [", change to "]
 				line = line.replace(/\["$/, '"]');
 
+                // New User Rule 3: Fix broken edge labels `--["Text["-->` to `-- "Text" -->`
+                // Example: `CapRate --["Inverse Relationship["-->` becomes `CapRate -- "Inverse Relationship" -->`
+                line = line.replace(/--\s*\["(.+?)\["\s*-->/g, '-- "$1" -->');
+
                 // --- User Requested "Fix Mode" Logic for [ ... ] ---
                 // Detects Node[Label] where Label isn't fully quoted but contains brackets/quotes.
                 // Targeted cases:
