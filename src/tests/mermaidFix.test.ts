@@ -97,4 +97,16 @@ WACC -- "Hurdle Rate" --> Acquisitions;
 \`\`\``;
         expect(refineMermaidBlocks(content)).toBe(expected);
     });
+
+    test('should quote labels containing pipe characters', () => {
+        const content = `\`\`\`mermaid
+graph LR
+B -- Explicit Prior pθ --> B_Out[Posterior pθ|D];
+\`\`\``;
+        const expected = `\`\`\`mermaid
+graph LR
+B -- Explicit Prior pθ --> B_Out["Posterior pθ|D"];
+\`\`\``;
+        expect(refineMermaidBlocks(content)).toBe(expected);
+    });
 });
