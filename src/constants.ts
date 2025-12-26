@@ -225,6 +225,7 @@ export const DEFAULT_SETTINGS: NotemdSettings = {
     extractOriginalTextCustomSuffix: '_Extracted',
     useCustomPromptForExtractOriginalText: false,
     customPromptExtractOriginalText: '',
+    enableMermaidErrorDetection: false,
     moveMermaidErrorFiles: false,
     mermaidErrorFolderPath: 'MermaidErrors',
 };

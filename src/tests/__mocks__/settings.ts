@@ -97,6 +97,7 @@ export const mockSettings: NotemdSettings = {
     extractOriginalTextUseCustomOutput: false,
     extractOriginalTextCustomPath: '',
     extractOriginalTextCustomSuffix: '',
+    enableMermaidErrorDetection: false,
     moveMermaidErrorFiles: false,
     mermaidErrorFolderPath: '',
 };

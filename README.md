@@ -251,6 +251,9 @@ Access plugin settings via:
     *   **On**: Allows you to specify a custom output folder and filename suffix.
 
 #### Batch Mermaid Fix
+-   **Enable Mermaid Error Detection**:
+    *   **Off (Default)**: Error detection is skipped after processing.
+    *   **On**: Scans processed files for remaining Mermaid syntax errors and generates a `mermaid_error_{foldername}.md` report.
 -   **Move files with Mermaid errors to specified folder**:
     *   **Off**: Files with errors remain in place.
     *   **On**: Moves any files that still contain Mermaid syntax errors after the fix attempt to a dedicated folder for manual review.

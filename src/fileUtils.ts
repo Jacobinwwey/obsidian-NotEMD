@@ -8,6 +8,7 @@ import { callDeepSeekAPI, callOpenAIApi, callAnthropicApi, callGoogleApi, callMi
 import { refineMermaidBlocks, cleanupLatexDelimiters } from './mermaidProcessor'; // Assuming this will be moved or imported correctly later
 import { _performResearch } from './searchUtils'; // Assuming this will be moved or imported correctly later
 import { showDeletionConfirmationModal } from './ui/modals'; // Assuming this will be moved or imported correctly later
+import mermaid from 'mermaid';
 
 // --- Backlink and Note Management ---
 
@@ -969,57 +970,50 @@ export async function batchFixMermaidSyntaxInFolder(app: App, settings: NotemdSe
                 progressReporter.log(`➖ No changes needed for: ${file.name}`);
             }
 
-            // Post-fix check for remaining errors
-            // Read content again (fixMermaidSyntaxInFile might have modified it)
-            const content = await app.vault.read(file);
-            let fileErrorCount = 0;
-            // Simple heuristic regex to find potentially broken nodes: Node[...] where content has space/CJK and NOT quoted
-            // We reuse the logic from refinedMermaidBlocks but just for detection
-            const lines = content.split('\n');
-            let inMermaid = false;
-            for (const line of lines) {
-                if (/^```\s*\(?\s*mermaid\s*\)?/.test(line)) { inMermaid = true; continue; }
-                if (line.trim() === '```') { inMermaid = false; continue; }
-                if (inMermaid) {
-                     // Check for Node[...] that isn't quoted but should be
-                     // We search for matches that refinedMermaidBlocks WOULD catch but maybe missed or are new?
-                     // Actually, if refineMermaidBlocks worked, these should be fixed.
-                     // The user says "which files still contain Mermaid errors".
-                     // Let's assume if we find any `Node[...]` where `...` contains spaces/CJK and isn't `"... "`, it's an error.
-                     // Regex: (\S+)\[([^"\]]+)\] where group 2 has spaces or CJK
-                     // Exclude matches that look like `Node["..."]` (already handled by [^"])
-                     // But `Node[Label]` is valid if Label is simple.
-                     // Only error if Label has spaces or CJK.
-                     // Also excluding lines with 'subgraph' as they might be handled differently or valid.
-                     if (!line.includes('subgraph')) {
-                         const brokenNodeRegex = /(\S+)\[([^"\]]+)\]/g;
-                         let match;
-                         while ((match = brokenNodeRegex.exec(line)) !== null) {
-                             const content = match[2];
-                             if (/[ \u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]/.test(content)) {
-                                 fileErrorCount++;
-                             }
-                         }
-                     }
+            // Post-fix check for remaining errors (if enabled)
+            if (settings.enableMermaidErrorDetection) {
+                // Read content again (fixMermaidSyntaxInFile might have modified it)
+                const content = await app.vault.read(file);
+                let fileErrorCount = 0;
+                
+                // Robust Regex to find mermaid blocks:
+                // 1. Matches indentation (Start of line + spaces/tabs)
+                // 2. Matches ``` or ~~~ fences
+                // 3. Matches 'mermaid' (case insensitive via flags)
+                // 4. Captures content inside
+                const mermaidBlockRegex = /^(?:[ \t]*)(?:```|~~~)\s*mermaid\b[^\n]*\n([\s\S]*?)\n(?:[ \t]*)(?:```|~~~)/gim;
+                let match;
+                
+                while ((match = mermaidBlockRegex.exec(content)) !== null) {
+                    const blockContent = match[1];
+                    try {
+                        // Use the imported mermaid library to validate syntax
+                        // mermaid.parse throws an error if the code is invalid
+                        await mermaid.parse(blockContent);
+                    } catch (parseErr) {
+                        fileErrorCount++;
+                        // Optional: detailed logging if needed
+                        // console.log(`Mermaid parse error in ${file.name}:`, parseErr);
+                    }
                 }
-            }
 
-            if (fileErrorCount > 0) {
-                mermaidErrors.push({ filename: file.name, count: fileErrorCount });
-                // Move file if enabled
-                if (errorMoveFolder) {
-                    const destPath = `${errorMoveFolder}/${file.name}`;
-                    if (file.parent?.path !== errorMoveFolder) {
-                        try {
-                            // Check if dest exists
-                            if (app.vault.getAbstractFileByPath(destPath)) {
-                                progressReporter.log(`⚠️ Destination ${destPath} exists. Skipping move for ${file.name}.`);
-                            } else {
-                                await app.vault.rename(file, destPath);
-                                progressReporter.log(`Moved error file to: ${destPath}`);
+                if (fileErrorCount > 0) {
+                    mermaidErrors.push({ filename: file.name, count: fileErrorCount });
+                    // Move file if enabled
+                    if (errorMoveFolder) {
+                        const destPath = `${errorMoveFolder}/${file.name}`;
+                        if (file.parent?.path !== errorMoveFolder) {
+                            try {
+                                // Check if dest exists
+                                if (app.vault.getAbstractFileByPath(destPath)) {
+                                    progressReporter.log(`⚠️ Destination ${destPath} exists. Skipping move for ${file.name}.`);
+                                } else {
+                                    await app.vault.rename(file, destPath);
+                                    progressReporter.log(`Moved error file to: ${destPath}`);
+                                }
+                            } catch (moveErr: any) {
+                                progressReporter.log(`Error moving file ${file.name}: ${moveErr.message}`);
                             }
-                        } catch (moveErr: any) {
-                            progressReporter.log(`Error moving file ${file.name}: ${moveErr.message}`);
                         }
                     }
                 }
@@ -1047,18 +1041,12 @@ export async function batchFixMermaidSyntaxInFolder(app: App, settings: NotemdSe
     }
 
     // Generate Error Report
-    if (mermaidErrors.length > 0) {
+    if (settings.enableMermaidErrorDetection && mermaidErrors.length > 0) {
         const folderName = folder.name === '/' ? 'Root' : folder.name;
         const reportFileName = `mermaid_error_${folderName}.md`;
-        // Determine save path: current directory implies root or same level? User said "within the current directory".
-        // Usually, putting it in the root is safest/easiest to find.
-        const reportContent = mermaidErrors.map(e => `[[${e.filename}]]-[${e.count}]`).join(''); // User requested single line per entry? 
-        // "structured and output as a single line per entry" -> usually means one line in the file per error entry?
-        // OR "output as a single line per entry" -> [[File]]-[Count]\n[[File]]-[Count]
-        // Example: `[[First error filename]]-[Number of faulty Mermaid diagrams][[Second error filename]]-[Number of faulty Mermaid diagrams]...`
-        // Wait, the example shows them ALL on one line concatenated?
-        // `[[First error filename]]-[Number of faulty Mermaid diagrams][[Second error filename]]-[Number of faulty Mermaid diagrams]...`
-        // This is unusual but I will follow the example literally: Concatenated string.
+        
+        // Use triple newline to match the requested format's spacing
+        const reportContent = mermaidErrors.map(e => `[[${e.filename}]]-[${e.count}]`).join('\n\n\n'); 
         
         try {
             const reportFile = app.vault.getAbstractFileByPath(reportFileName);
