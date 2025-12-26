@@ -5,7 +5,7 @@ import { NotemdSettings, ProgressReporter } from './types';
 import { DEFAULT_SETTINGS } from './constants';
 import { normalizeNameForFilePath, splitContent, getProviderForTask, getModelForTask, delay, createConcurrentProcessor, chunkArray, retry } from './utils'; // Added delay import
 import { callDeepSeekAPI, callOpenAIApi, callAnthropicApi, callGoogleApi, callMistralApi, callAzureOpenAIApi, callLMStudioApi, callOllamaApi, callOpenRouterAPI } from './llmUtils';
-import { refineMermaidBlocks, cleanupLatexDelimiters } from './mermaidProcessor'; // Assuming this will be moved or imported correctly later
+import { refineMermaidBlocks, cleanupLatexDelimiters, deepDebugMermaid } from './mermaidProcessor'; // Assuming this will be moved or imported correctly later
 import { _performResearch } from './searchUtils'; // Assuming this will be moved or imported correctly later
 import { showDeletionConfirmationModal } from './ui/modals'; // Assuming this will be moved or imported correctly later
 import mermaid from 'mermaid';
@@ -973,28 +973,53 @@ export async function batchFixMermaidSyntaxInFolder(app: App, settings: NotemdSe
             // Post-fix check for remaining errors (if enabled)
             if (settings.enableMermaidErrorDetection) {
                 // Read content again (fixMermaidSyntaxInFile might have modified it)
-                const content = await app.vault.read(file);
+                let content = await app.vault.read(file);
                 let fileErrorCount = 0;
                 
-                // Robust Regex to find mermaid blocks:
-                // 1. Matches indentation (Start of line + spaces/tabs)
-                // 2. Matches ``` or ~~~ fences
-                // 3. Matches 'mermaid' (case insensitive via flags)
-                // 4. Captures content inside
-                const mermaidBlockRegex = /^(?:[ \t]*)(?:```|~~~)\s*mermaid\b[^\n]*\n([\s\S]*?)\n(?:[ \t]*)(?:```|~~~)/gim;
-                let match;
-                
-                while ((match = mermaidBlockRegex.exec(content)) !== null) {
-                    const blockContent = match[1];
-                    try {
-                        // Use the imported mermaid library to validate syntax
-                        // mermaid.parse throws an error if the code is invalid
-                        await mermaid.parse(blockContent);
-                    } catch (parseErr) {
-                        fileErrorCount++;
-                        // Optional: detailed logging if needed
-                        // console.log(`Mermaid parse error in ${file.name}:`, parseErr);
+                // Helper to validate content using mermaid.parse
+                const validateContent = async (text: string) => {
+                    let errors = 0;
+                    const mermaidBlockRegex = /^(?:[ \t]*)(?:```|~~~)\s*mermaid\b[^\n]*\n([\s\S]*?)\n(?:[ \t]*)(?:```|~~~)/gim;
+                    let match;
+                    while ((match = mermaidBlockRegex.exec(text)) !== null) {
+                        try {
+                            await mermaid.parse(match[1]);
+                        } catch (parseErr) {
+                            errors++;
+                        }
                     }
+                    return errors;
+                };
+
+                fileErrorCount = await validateContent(content);
+
+                // If errors found, attempt Deep Debug and re-fix
+                if (fileErrorCount > 0) {
+                     progressReporter.log(`⚠️ Errors found in ${file.name}. Attempting Deep Debug...`);
+                     const deepDebugged = deepDebugMermaid(content);
+                     
+                     if (deepDebugged !== content) {
+                         // Apply deep debug changes
+                         await app.vault.modify(file, deepDebugged);
+                         progressReporter.log(`Applied Deep Debug fixes to ${file.name}`);
+                         
+                         // Re-run standard fix (to handle the new brackets/quotes)
+                         if (await fixMermaidSyntaxInFile(app, file, progressReporter)) {
+                             modifiedCount++;
+                         }
+                         
+                         // Re-validate
+                         content = await app.vault.read(file);
+                         const newErrorCount = await validateContent(content);
+                         
+                         if (newErrorCount === 0) {
+                             progressReporter.log(`✅ Deep Debug successfully resolved errors in ${file.name}`);
+                             fileErrorCount = 0;
+                         } else {
+                             progressReporter.log(`❌ Deep Debug reduced errors from ${fileErrorCount} to ${newErrorCount} in ${file.name}`);
+                             fileErrorCount = newErrorCount;
+                         }
+                     }
                 }
 
                 if (fileErrorCount > 0) {
