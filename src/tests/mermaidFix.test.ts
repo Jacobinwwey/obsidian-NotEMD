@@ -109,4 +109,86 @@ B -- Explicit Prior pθ --> B_Out["Posterior pθ|D"];
 \`\`\``;
         expect(refineMermaidBlocks(content)).toBe(expected);
     });
+
+    test('should convert inline comments to labeled arrows and fix end quotes', () => {
+        const content = `\`\`\`mermaid
+graph TD
+subgraph "Synchronization Approaches"
+Kuramoto["Standard Kuramoto Model"]
+aPS["a-PS Augmented Phase Sync"]
+PLL["Phase-Locked Loop"]
+Consensus["Consensus Algorithms"]
+end
+
+subgraph "Key Characteristics"
+Pairwise["Pairwise Interaction"]
+Network["Network Synchronization N > 2"]
+Adaptive["Adaptive Coupling / Control"]
+HigherOrder["Higher-Order Terms"]
+Delay["Explicit Delay Handling"]
+Reference["External Reference Tracking"]
+StateConv["General State Convergence"]
+end
+
+Kuramoto --> Pairwise;
+Kuramoto --> Network;
+
+aPS --> Pairwise;
+aPS --> Network;
+aPS --> Adaptive;
+aPS --> HigherOrder;
+aPS --> Delay;
+
+PLL --> Pairwise;
+PLL --> Reference;
+
+Consensus --> Pairwise;
+Consensus --> Network;
+Consensus --> StateConv;
+Consensus --> Adaptive; # Some advanced consensus
+Consensus --> Delay; # Some advanced consensus
+
+style aPS fill:#ccf,stroke:#333,stroke-width:2px
+\`\`\``;
+        const expected = `\`\`\`mermaid
+graph TD
+subgraph "Synchronization Approaches"
+Kuramoto["Standard Kuramoto Model"]
+aPS["a-PS Augmented Phase Sync"]
+PLL["Phase-Locked Loop"]
+Consensus["Consensus Algorithms"]
+end
+
+subgraph "Key Characteristics"
+Pairwise["Pairwise Interaction"]
+Network["Network Synchronization N > 2"]
+Adaptive["Adaptive Coupling / Control"]
+HigherOrder["Higher-Order Terms"]
+Delay["Explicit Delay Handling"]
+Reference["External Reference Tracking"]
+StateConv["General State Convergence"]
+end
+
+Kuramoto --> Pairwise;
+Kuramoto --> Network;
+
+aPS --> Pairwise;
+aPS --> Network;
+aPS --> Adaptive;
+aPS --> HigherOrder;
+aPS --> Delay;
+
+PLL --> Pairwise;
+PLL --> Reference;
+
+Consensus --> Pairwise;
+Consensus --> Network;
+Consensus --> StateConv;
+Consensus -- "Some advanced consensus" --> Adaptive;
+Consensus -- "Some advanced consensus" --> Delay;
+
+style aPS fill:#ccf,stroke:#333,stroke-width:2px
+\`\`\``;
+        expect(refineMermaidBlocks(content)).toBe(expected);
+    });
 });
