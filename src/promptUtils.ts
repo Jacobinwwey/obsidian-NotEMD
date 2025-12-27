@@ -133,6 +133,47 @@ graph TD
     style Proca fill:#fcc,stroke:#333,stroke-width:2px
     style Stueckelberg fill:#cfc,stroke:#333,stroke-width:2px
     style DarkPhoton fill:#ffc,stroke:#333,stroke-width:2px
+\`\`\` and \`\`\`mermaid
+graph TD
+    subgraph "Semiconductor Energy Bands (p-type)"
+        %% Define the main Energy Levels
+        ConductionBand["E_C Conduction Band Edge"]
+        
+        %% Represents the large gap
+        Gap1["Energy Gap (E_g)"]
+        
+        AcceptorLevel["E_A Acceptor Energy Level"]
+        FermiLevel["E_F Fermi Level"]
+        ValenceBand["E_V Valence Band Edge"]
+
+        %% Define the Vertical Stack (Energy Scale)
+        ConductionBand --- Gap1
+        Gap1 --- AcceptorLevel
+        AcceptorLevel --- FermiLevel
+        FermiLevel --- ValenceBand
+    end
+
+    %% Define the Annotations (Replacements for 'note right of')
+    Note1[/"Note: E_A is typically<br>slightly above E_V"/]
+    Note2[/"Note: E_F is closer to E_V<br>in p-type material"/]
+
+    %% Connect Annotations with dotted lines
+    AcceptorLevel -.- Note1
+    FermiLevel -.- Note2
+
+    %% Styling
+    style ConductionBand fill:#b3e5fc,stroke:#333,stroke-width:2px
+    style ValenceBand fill:#b3e5fc,stroke:#333,stroke-width:2px
+    
+    %% Style the Gap to look 'empty' or distinct
+    style Gap1 fill:#fff,stroke:#999,stroke-dasharray: 5 5
+    
+    style AcceptorLevel fill:#ffcc99,stroke:#cc6600
+    style FermiLevel fill:#ccffcc,stroke:#006600,stroke-dasharray: 5 5
+    
+    %% Style the notes to look like yellow post-its
+    style Note1 fill:#ffffcc,stroke:#d4b46a
+    style Note2 fill:#ffffcc,stroke:#d4b46a
 \`\`\`.
 9.  Use bullet points for lists longer than 3 items.
 10. Include references to academic papers with DOI where applicable, under a "## References" section.
