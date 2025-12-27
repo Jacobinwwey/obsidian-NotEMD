@@ -118,5 +118,72 @@ E --> F;
 `;
         expect(deepDebugMermaid(content)).toBe(expected);
     });
+
+    test('should convert note comments to edge labels', () => {
+        const content = `graph LR
+    subgraph "General 2D NMR Experiment Timeline"
+        Prep[Preparation] --> Evol["Evolution t1"];
+        Evol --> Mix[Mixing];
+        Mix --> Detect["Detection t2"];
+    end
+
+    style Prep fill:#ccf,stroke:#333
+    style Evol fill:#cfc,stroke:#333
+    style Mix fill:#fcf,stroke:#333
+    style Detect fill:#ffc,stroke:#333
+
+    note right of Evol: t1 is systematically incremented
+    note right of Detect: FID St1, t2 is acquired`;
+
+        // Logic:
+        // 1. Evol line: `Evol --> Mix` becomes `Evol -- "t1 is systematically incremented" --> Mix`
+        // 2. Detect line: `Mix --> Detect` becomes `Mix -- "FID St1, t2 is acquired" --> Detect` (Target match)
+        // 3. Note lines removed.
+
+        const expected = `graph LR
+    subgraph "General 2D NMR Experiment Timeline"
+        Prep[Preparation] --> Evol["Evolution t1"];
+        Evol -- "t1 is systematically incremented" --> Mix[Mixing];
+        Mix -- "FID St1, t2 is acquired" --> Detect["Detection t2"];
+    end
+
+    style Prep fill:#ccf,stroke:#333
+    style Evol fill:#cfc,stroke:#333
+    style Mix fill:#fcf,stroke:#333
+    style Detect fill:#ffc,stroke:#333
+
+    `; 
+        // Note: The empty lines might be tricky depending on how filter works. 
+        // The original content has blank lines between styles and notes. 
+        // The notes are on the last two lines.
+        // My implementation removes the note lines but keeps the preceding blank lines if they were not part of the note regex match (they are not).
+        // So expected string should end with the blank line that was before the notes.
+        
+        // Let's refine the expected string to match exact output behavior
+        const expectedClean = `graph LR
+    subgraph "General 2D NMR Experiment Timeline"
+        Prep[Preparation] --> Evol["Evolution t1"];
+        Evol -- "t1 is systematically incremented" --> Mix[Mixing];
+        Mix -- "FID St1, t2 is acquired" --> Detect["Detection t2"];
+    end
+
+    style Prep fill:#ccf,stroke:#333
+    style Evol fill:#cfc,stroke:#333
+    style Mix fill:#fcf,stroke:#333
+    style Detect fill:#ffc,stroke:#333
+
+    `;
+        // The content has a newline after the last style, then a newline (blank line), then the notes.
+        // Lines:
+        // ...
+        // style Detect ...
+        // (empty)
+        // note right ...
+        // note right ...
+        
+        // The filter removes the last two lines. The empty line remains.
+        
+        expect(deepDebugMermaid(content).trim()).toBe(expectedClean.trim());
+    });
 });
 

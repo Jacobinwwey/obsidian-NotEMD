@@ -228,16 +228,25 @@ export function cleanupLatexDelimiters(content: string): string {
 
 /**
  * Deep debug function for Mermaid syntax.
- * Scans for nodes following arrows that are missing brackets but have trailing content before the semicolon.
- * Example: `... --> SpreadCalc价差计算 Spread Calculation;` -> `... --> SpreadCalc[价差计算 Spread Calculation];`
- * This function prepares the code for `refineMermaidBlocks` to handle the quoting.
+ * 1. Converts "note right/left... of Node" comments into edge labels on the nearest preceding arrow.
+ * 2. Scans for nodes following arrows that are missing brackets but have trailing content.
  */
 export function deepDebugMermaid(content: string): string {
+    // 1. Fix Mermaid Notes (move "note right of" to edge labels)
+    const noteFixedContent = fixMermaidNotes(content);
+
+    // 2. Fix Missing Brackets (existing logic)
+    return fixMissingBrackets(noteFixedContent);
+}
+
+/**
+ * Internal function to fix missing brackets in Mermaid nodes.
+ * Example: `... --> SpreadCalc价差计算 Spread Calculation;` -> `... --> SpreadCalc[价差计算 Spread Calculation];`
+ */
+function fixMissingBrackets(content: string): string {
     const lines = content.split('\n');
     const processedLines = lines.map(line => {
-        // Skip if not in a mermaid block context?
-        // The user says "In all instances where the format begins with `words --` or `words -->`".
-        // We can check if the line looks like a graph edge.
+        // Skip if not in a mermaid block context or no arrows
         if (!line.includes('-->') && !line.includes('---') && !line.includes('--')) {
             return line;
         }
@@ -246,16 +255,6 @@ export function deepDebugMermaid(content: string): string {
         // 1. Arrow (including labeled arrows like -- "label" -->)
         // 2. ASCII NodeID ([a-zA-Z0-9_]+)
         // 3. Content that is NOT empty, has NO brackets, and ends at ;
-        // We capture groups to reconstruct.
-        
-        // Regex explanation:
-        // ((?:---|-->|--\s*"[^"]*"\s*-->)\s*) : Group 1 - Arrow prefix (simple or labeled)
-        // ([a-zA-Z0-9_]+\b)                   : Group 2 - Node ID (ASCII + word boundary)
-        // ([^\[\];\n]+)                       : Group 3 - The "Label" part (must act have brackets)
-        // (;)                                 : Group 4 - The terminating semicolon
-        
-        // Note: [^\[\];\n]+ ensures we don't match if there ARE brackets already.
-        // It also ensures we match the text between ID and semicolon.
         
         const regex = /((?:---|-->|--\s*"[^"]*"\s*-->)\s*)([a-zA-Z0-9_]+\b)([^\[\];\n]+)(;)/g;
         
@@ -266,4 +265,85 @@ export function deepDebugMermaid(content: string): string {
         return line;
     });
     return processedLines.join('\n');
+}
+
+/**
+ * Converts "note right of Node: Text" lines into edge labels on the nearest preceding connection.
+ * Requirements:
+ * - Detect `note right of words: ...`
+ * - Relocate sentence to nearest `words -->` block (Source) or `--> words` block (Target).
+ * - Replace `-->` with `-- "Sentences" -->`.
+ * - Remove the original note line.
+ */
+function fixMermaidNotes(content: string): string {
+    const lines = content.split('\n');
+    const notesToProcess: { lineIndex: number; nodeId: string; text: string; }[] = [];
+
+    // 1. Identify all notes
+    // Regex allows "note right/left/top/bottom of Node: Text"
+    const noteRegex = /^\s*note\s+(right|left|top|bottom)\s+of\s+([a-zA-Z0-9_]+)\s*:\s*(.*)$/i;
+
+    lines.forEach((line, index) => {
+        const match = line.match(noteRegex);
+        if (match) {
+            notesToProcess.push({
+                lineIndex: index,
+                nodeId: match[2],
+                text: match[3].trim()
+            });
+        }
+    });
+
+    if (notesToProcess.length === 0) return content;
+
+    const linesToDelete = new Set<number>();
+    
+    // Process notes
+    for (const note of notesToProcess) {
+        const { lineIndex, nodeId, text } = note;
+        let found = false;
+
+        // Search backwards from the note's position
+        for (let j = lineIndex - 1; j >= 0; j--) {
+            if (linesToDelete.has(j)) continue;
+
+            const line = lines[j];
+            
+            // Check for Node as SOURCE (Outgoing)
+            // Regex: Start or space + NodeID + word boundary + optional brackets + space + -->
+            // We use \\ to escape backslash for the string, so \\[ matches literal [ in the regex
+            const sourceRegex = new RegExp(`(^|\\s)${nodeId}\\b(?:\\\[.*?\\\])?\\s*-->`);
+            
+            // Check for Node as TARGET (Incoming)
+            // Regex: --> space + NodeID + word boundary + optional brackets + (semicolon, end, or space)
+            const targetRegex = new RegExp(`-->\\s*${nodeId}\\b(?:\\\[.*?\\\])?(?:;|$|\\s)`);
+
+            // Apply replacement
+            // Priority: Source (Outgoing) first, then Target (Incoming)
+            
+            if (sourceRegex.test(line)) {
+                const escapedText = text.replace(/"/g, '\\"');
+                // Replace the last `-->` in the match? Or just the `-->` found.
+                // We use a replacer function to modify specifically the matched part.
+                lines[j] = line.replace(sourceRegex, (match) => {
+                    return match.replace(/-->$/, `-- "${escapedText}" -->`);
+                });
+                found = true;
+            } else if (targetRegex.test(line)) {
+                const escapedText = text.replace(/"/g, '\\"');
+                lines[j] = line.replace(targetRegex, (match) => {
+                     return match.replace(/^-->/, `-- "${escapedText}" -->`);
+                });
+                found = true;
+            }
+
+            if (found) {
+                linesToDelete.add(lineIndex);
+                break; // Stop searching for this note
+            }
+        }
+    }
+
+    // Return joined lines, filtering out deleted ones
+    return lines.filter((_, index) => !linesToDelete.has(index)).join('\n');
 }
