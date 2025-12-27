@@ -280,5 +280,55 @@ style Strehl_Ratio fill:#fcc,stroke:#333`;
 
         expect(deepDebugMermaid(content)).toBe(expected);
     });
+
+    test('should merge double labels (-- "L1" -->|"L2"|)', () => {
+        const content = `graph LR
+    subgraph "Filtering Approaches"
+        Causal["Causal Filters<br>yt depends on xs ≤ t"]
+        Acausal["Standard Acausal Filters<br>yt depends on xs for s < t, s = t, s > t<br>Fixed hτ"]
+        Adaptive["Adaptive Filters Causal<br>hτ, t adapts based on past error et"]
+        Kalman["Kalman Filter/Smoother<br>State-space model, uses future measurements smoother"]
+        AFA["acausal filteracausal<br>yt depends on xs, hτ, t adapts based on future xs"]
+    end
+
+    Causal --> Adaptive;
+    Causal --> Acausal;
+    Acausal --> AFA;
+    Acausal --> Kalman;
+    Adaptive -- "Uses Past Error" -->|"Difference"| AFA;
+    Kalman -- "Uses Future Measurements" -->|"Similarity"| AFA;
+    Acausal -- "Adds Future-Input Adaptation" --> AFA;
+
+    style Causal fill:#eee,stroke:#333
+    style Acausal fill:#ccf,stroke:#333
+    style Adaptive fill:#cfc,stroke:#333
+    style Kalman fill:#ffc,stroke:#333
+    style AFA fill:#fcc,stroke:#900,stroke-width:3px`;
+
+        const expected = `graph LR
+    subgraph "Filtering Approaches"
+        Causal["Causal Filters<br>yt depends on xs ≤ t"]
+        Acausal["Standard Acausal Filters<br>yt depends on xs for s < t, s = t, s > t<br>Fixed hτ"]
+        Adaptive["Adaptive Filters Causal<br>hτ, t adapts based on past error et"]
+        Kalman["Kalman Filter/Smoother<br>State-space model, uses future measurements smoother"]
+        AFA["acausal filteracausal<br>yt depends on xs, hτ, t adapts based on future xs"]
+    end
+
+    Causal --> Adaptive;
+    Causal --> Acausal;
+    Acausal --> AFA;
+    Acausal --> Kalman;
+    Adaptive -- "Uses Past Error<br>(Difference)" --> AFA;
+    Kalman -- "Uses Future Measurements<br>(Similarity)" --> AFA;
+    Acausal -- "Adds Future-Input Adaptation" --> AFA;
+
+    style Causal fill:#eee,stroke:#333
+    style Acausal fill:#ccf,stroke:#333
+    style Adaptive fill:#cfc,stroke:#333
+    style Kalman fill:#ffc,stroke:#333
+    style AFA fill:#fcc,stroke:#900,stroke-width:3px`;
+
+        expect(deepDebugMermaid(content)).toBe(expected);
+    });
 });
 
