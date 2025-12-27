@@ -185,5 +185,62 @@ E --> F;
         
         expect(deepDebugMermaid(content).trim()).toBe(expectedClean.trim());
     });
+
+    test('should fix malformed arrow labels ( -->" and "-- )', () => {
+        const content = `graph LR
+subgraph "Computational Chemistry Methods Spectrum"
+QM["Quantum Mechanics Electrons Explicit"] -- Based On --> SEq["Schrödinger Equation"];
+Classical["Classical Mechanics Electrons Implicit"] -- Based On --> NewtonEq["Newton's Equations / Classical Potentials"];
+
+QM --> AbInitio["Ab Initio Methods<br>HF, MPn, CC, CI<br>No empirical parameters<br>Systematic improvability"];
+QM --> DFT["Density Functional Theory<br>Uses electron density ρr<br>Requires approx.  E<sub>XC</sub> functional"];
+QM --> SemiEmpirical["Semi-Empirical Methods<br>HF formalism + parameters<br>Integral approximation"];
+QM --> QMC["Quantum Monte Carlo<br>Stochastic sampling<br>Explicit correlation"];
+
+Classical --> MM["Molecular Mechanics / Force Fields<br>Classical potentials<br>Parameterized functions"];
+
+AbInitio -- "High Accuracy / High Cost" --> CostAccuAxis;
+DFT -- "Good Balance" --> CostAccuAxis;
+SemiEmpirical -- "Lower Accuracy / Low Cost" --> CostAccuAxis;
+MM -- "Very Low Cost / Very Large Systems" --> CostAccuAxis;
+QMC -- "High Accuracy / High Cost Statistical" --> CostAccuAxis;
+
+AbInitio -- "Related Formalism" --> SemiEmpirical;
+AbInitio -- "Conceptual Alternative QM" --> DFT;
+AbInitio -- "Conceptual Alternative QM" --> QMC;
+AbInitio -- "Provides Parameters For -->" MM;
+DFT -- "Provides Parameters For -->" MM;
+end`;
+
+        const expected = `graph LR
+subgraph "Computational Chemistry Methods Spectrum"
+QM["Quantum Mechanics Electrons Explicit"] -- Based On --> SEq["Schrödinger Equation"];
+Classical["Classical Mechanics Electrons Implicit"] -- Based On --> NewtonEq["Newton's Equations / Classical Potentials"];
+
+QM --> AbInitio["Ab Initio Methods<br>HF, MPn, CC, CI<br>No empirical parameters<br>Systematic improvability"];
+QM --> DFT["Density Functional Theory<br>Uses electron density ρr<br>Requires approx.  E<sub>XC</sub> functional"];
+QM --> SemiEmpirical["Semi-Empirical Methods<br>HF formalism + parameters<br>Integral approximation"];
+QM --> QMC["Quantum Monte Carlo<br>Stochastic sampling<br>Explicit correlation"];
+
+Classical --> MM["Molecular Mechanics / Force Fields<br>Classical potentials<br>Parameterized functions"];
+
+AbInitio -- "High Accuracy / High Cost" --> CostAccuAxis;
+DFT -- "Good Balance" --> CostAccuAxis;
+SemiEmpirical -- "Lower Accuracy / Low Cost" --> CostAccuAxis;
+MM -- "Very Low Cost / Very Large Systems" --> CostAccuAxis;
+QMC -- "High Accuracy / High Cost Statistical" --> CostAccuAxis;
+
+AbInitio -- "Related Formalism" --> SemiEmpirical;
+AbInitio -- "Conceptual Alternative QM" --> DFT;
+AbInitio -- "Conceptual Alternative QM" --> QMC;
+AbInitio -- "Provides Parameters For" --> MM;
+DFT -- "Provides Parameters For" --> MM;
+end`;
+
+        // We focus on these lines being fixed:
+        // AbInitio -- "Provides Parameters For -->" MM;  ->  AbInitio -- "Provides Parameters For" --> MM;
+        
+        expect(deepDebugMermaid(content)).toBe(expected);
+    });
 });
 
