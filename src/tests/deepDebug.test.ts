@@ -331,68 +331,174 @@ style Strehl_Ratio fill:#fcc,stroke:#333`;
         expect(deepDebugMermaid(content)).toBe(expected);
     });
 
-    test('should fix inline subgraphs used as edge labels', () => {
-        const content = `graph LR
-subgraph "Numerical Summation & Extrapolation"
-Series["Infinite Series S = Σ a_n"] --> PartialSums["Sequence S_N"];
-PartialSums --> DirectSum["Direct Summation Truncation"];
-PartialSums --> SeqTrans["Sequence Transformations"];
+        test('should fix inline subgraphs used as edge labels', () => {
 
-SeqTrans --> Aitken["Aitken Δ² Process"];
-SeqTrans --> Shanks["Shanks Transformation e_k"];
-SeqTrans --> Levin["Levin Transformations u, t, v"];
-SeqTrans --> Richardson["Richardson Extrapolation"];
-SeqTrans --> Euler["Euler Transformation"];
+            const content = `graph LR
 
-Aitken --> Shanks; subgraph "Relation: k=1" end;
-Shanks --> Pade["Padé Approximants"]; subgraph "Relation: Theoretical Link" end;
+    subgraph "Numerical Summation & Extrapolation"
 
-Richardson --> Romberg["Romberg Integration"]; subgraph "Application" end;
-Richardson --> BulirschStoer["Bulirsch-Stoer ODE Solver"]; subgraph "Application" end;
+    Series["Infinite Series S = Σ a_n"] --> PartialSums["Sequence S_N"];
 
-Euler --> Alternating["Alternating Series"]; subgraph "Specific Applicability" end;
+    PartialSums --> DirectSum["Direct Summation Truncation"];
 
-DirectSum -- "Slow Convergence" --> NeedAccel["Need for Acceleration"];
-NeedAccel --> SeqTrans;
-end
+    PartialSums --> SeqTrans["Sequence Transformations"];
 
-style Aitken fill:#ccf,stroke:#333,stroke-width:2px
-style Richardson fill:#cfc,stroke:#333,stroke-width:2px
-style Shanks fill:#fcc,stroke:#333,stroke-width:2px
-style Levin fill:#ffc,stroke:#333,stroke-width:2px
-style Euler fill:#cff,stroke:#333,stroke-width:2px`;
+    
 
-        const expected = `graph LR
-subgraph "Numerical Summation & Extrapolation"
-Series["Infinite Series S = Σ a_n"] --> PartialSums["Sequence S_N"];
-PartialSums --> DirectSum["Direct Summation Truncation"];
-PartialSums --> SeqTrans["Sequence Transformations"];
+    SeqTrans --> Aitken["Aitken Δ² Process"];
 
-SeqTrans --> Aitken["Aitken Δ² Process"];
-SeqTrans --> Shanks["Shanks Transformation e_k"];
-SeqTrans --> Levin["Levin Transformations u, t, v"];
-SeqTrans --> Richardson["Richardson Extrapolation"];
-SeqTrans --> Euler["Euler Transformation"];
+    SeqTrans --> Shanks["Shanks Transformation e_k"];
 
-Aitken -- "Relation: k=1" --> Shanks;
-Shanks -- "Relation: Theoretical Link" --> Pade["Padé Approximants"];
+    SeqTrans --> Levin["Levin Transformations u, t, v"];
 
-Richardson -- "Application" --> Romberg["Romberg Integration"];
-Richardson -- "Application" --> BulirschStoer["Bulirsch-Stoer ODE Solver"];
+    SeqTrans --> Richardson["Richardson Extrapolation"];
 
-Euler -- "Specific Applicability" --> Alternating["Alternating Series"];
+    SeqTrans --> Euler["Euler Transformation"];
 
-DirectSum -- "Slow Convergence" --> NeedAccel["Need for Acceleration"];
-NeedAccel --> SeqTrans;
-end
+    
 
-style Aitken fill:#ccf,stroke:#333,stroke-width:2px
-style Richardson fill:#cfc,stroke:#333,stroke-width:2px
-style Shanks fill:#fcc,stroke:#333,stroke-width:2px
-style Levin fill:#ffc,stroke:#333,stroke-width:2px
-style Euler fill:#cff,stroke:#333,stroke-width:2px`;
+    Aitken -- "Relation: k=1" --> Shanks;
 
-        expect(deepDebugMermaid(content)).toBe(expected);
+    Shanks -- "Relation: Theoretical Link" --> Pade["Padé Approximants"];
+
+    Richardson -- "Application" --> Romberg["Romberg Integration"];
+
+    Richardson -- "Application" --> BulirschStoer["Bulirsch-Stoer ODE Solver"];
+
+    Euler -- "Specific Applicability" --> Alternating["Alternating Series"];
+
+    
+
+    DirectSum -- "Slow Convergence" --> NeedAccel["Need for Acceleration"];
+
+    NeedAccel --> SeqTrans;
+
+    end
+
+    
+
+    style Aitken fill:#ccf,stroke:#333,stroke-width:2px
+
+    style Richardson fill:#cfc,stroke:#333,stroke-width:2px
+
+    style Shanks fill:#fcc,stroke:#333,stroke-width:2px
+
+    style Levin fill:#ffc,stroke:#333,stroke-width:2px
+
+    style Euler fill:#cff,stroke:#333,stroke-width:2px`;
+
+    
+
+            const expected = `graph LR
+
+    subgraph "Numerical Summation & Extrapolation"
+
+    Series["Infinite Series S = Σ a_n"] --> PartialSums["Sequence S_N"];
+
+    PartialSums --> DirectSum["Direct Summation Truncation"];
+
+    PartialSums --> SeqTrans["Sequence Transformations"];
+
+    
+
+    SeqTrans --> Aitken["Aitken Δ² Process"];
+
+    SeqTrans --> Shanks["Shanks Transformation e_k"];
+
+    SeqTrans --> Levin["Levin Transformations u, t, v"];
+
+    SeqTrans --> Richardson["Richardson Extrapolation"];
+
+    SeqTrans --> Euler["Euler Transformation"];
+
+    
+
+    Aitken -- "Relation: k=1" --> Shanks;
+
+    Shanks -- "Relation: Theoretical Link" --> Pade["Padé Approximants"];
+
+    Richardson -- "Application" --> Romberg["Romberg Integration"];
+
+    Richardson -- "Application" --> BulirschStoer["Bulirsch-Stoer ODE Solver"];
+
+    Euler -- "Specific Applicability" --> Alternating["Alternating Series"];
+
+    
+
+    DirectSum -- "Slow Convergence" --> NeedAccel["Need for Acceleration"];
+
+    NeedAccel --> SeqTrans;
+
+    end
+
+    
+
+    style Aitken fill:#ccf,stroke:#333,stroke-width:2px
+
+    style Richardson fill:#cfc,stroke:#333,stroke-width:2px
+
+    style Shanks fill:#fcc,stroke:#333,stroke-width:2px
+
+    style Levin fill:#ffc,stroke:#333,stroke-width:2px
+
+    style Euler fill:#cff,stroke:#333,stroke-width:2px`;
+
+    
+
+            expect(deepDebugMermaid(content)).toBe(expected);
+
+        });
+
+    
+
+    test('should fix mermaid notes with solid lines (---)', () => {
+        const content = `graph TD
+    subgraph "Semiconductor Energy Bands p-type"
+        ConductionBand["E_C Conduction Band Edge"];
+        ValenceBand["E_V Valence Band Edge"];
+        AcceptorLevel["E_A Acceptor Energy Level"];
+        FermiLevel["E_F Fermi Level"];
+
+        Gap1 --- ConductionBand;
+        Gap1["Energy Gap E_g"];
+        Gap2 --- AcceptorLevel;
+        Gap2["Ionization Energy E_A - E_V"];
+        AcceptorLevel --- ValenceBand;
+        FermiLevel --- ValenceBand;
+
+        style ConductionBand fill:#lightblue,stroke:#333
+        style ValenceBand fill:#lightblue,stroke:#333
+        style AcceptorLevel fill:#ffcc99,stroke:#cc6600
+        style FermiLevel fill:#ccffcc,stroke:#006600,stroke-dasharray: 5 5
+    end
+
+    direction TB
+    note right of AcceptorLevel : E_A is typically slightly above E_V
+    note right of FermiLevel : E_F is closer to E_V in p-type material`;
+
+        const expected = `graph TD
+    subgraph "Semiconductor Energy Bands p-type"
+        ConductionBand["E_C Conduction Band Edge"];
+        ValenceBand["E_V Valence Band Edge"];
+        AcceptorLevel["E_A Acceptor Energy Level"];
+        FermiLevel["E_F Fermi Level"];
+
+        Gap1 --- ConductionBand;
+        Gap1["Energy Gap E_g"];
+        Gap2 --- AcceptorLevel;
+        Gap2["Ionization Energy E_A - E_V"];
+        AcceptorLevel -- "E_A is typically slightly above E_V" --- ValenceBand;
+        FermiLevel -- "E_F is closer to E_V in p-type material" --- ValenceBand;
+
+        style ConductionBand fill:#lightblue,stroke:#333
+        style ValenceBand fill:#lightblue,stroke:#333
+        style AcceptorLevel fill:#ffcc99,stroke:#cc6600
+        style FermiLevel fill:#ccffcc,stroke:#006600,stroke-dasharray: 5 5
+    end
+
+    direction TB`;
+
+        expect(deepDebugMermaid(content).trim()).toBe(expected.trim());
     });
 });
 
