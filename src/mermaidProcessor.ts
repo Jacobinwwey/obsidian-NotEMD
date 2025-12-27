@@ -278,7 +278,90 @@ export function deepDebugMermaid(content: string): string {
     processed = fixMissingBrackets(processed);
 
     // 6. Fix Inline Subgraphs (convert subgraph "Label" end; to edge label)
-    return fixInlineSubgraphs(processed);
+    processed = fixInlineSubgraphs(processed);
+
+    // 7. Fix Mermaid Comments (Move % comments to label)
+    return fixMermaidComments(processed);
+}
+
+/**
+ * Fixes Mermaid comments that break syntax by merging them into the label.
+ * Example: `A -- Label --> B; % Comment` -> `A -- "Label(Comment)" --> B;`
+ */
+export function fixMermaidComments(content: string): string {
+    const lines = content.split('\n');
+    const processedLines = lines.map(line => {
+        // Simple check for potential Mermaid comment
+        if (!line.includes('%') || !line.includes('-->')) {
+            return line;
+        }
+
+        // We only care about lines that look like: ... -- ... --> ... % ...
+        // Split by '%' first to safely isolate the comment, ensuring % isn't inside a quoted label.
+        
+        const parts = line.split('%');
+        
+        let codePart = parts[0];
+        let commentPart = '';
+        let foundComment = false;
+        
+        // Re-assemble parts if the % was inside a quote.
+        for (let i = 1; i < parts.length; i++) {
+             const potentialCode = parts.slice(0, i).join('%');
+             const quoteCount = (potentialCode.match(/"/g) || []).length;
+             if (quoteCount % 2 === 0) {
+                 // Even quotes means we are outside a string, so this % starts a comment
+                 codePart = potentialCode;
+                 commentPart = parts.slice(i).join('%');
+                 foundComment = true;
+                 break;
+             }
+        }
+        
+        if (!foundComment) return line; // No valid comment found or % was inside quotes
+        
+        // Clean up parts
+        let cleanCode = codePart.trim();
+        const cleanComment = commentPart.trim();
+        
+        if (!cleanComment) return line; // Empty comment, keep as is
+        
+        // Check for trailing semicolon in code
+        let hasSemi = false;
+        if (cleanCode.endsWith(';')) {
+            cleanCode = cleanCode.slice(0, -1).trim();
+            hasSemi = true;
+        }
+        
+        // Parse the arrow relation in cleanCode
+        // We support: A -- Label --> B
+        // Regex: (Start) (-- ) (Label) ( --> ) (End)
+        const arrowLabelRegex = /^(.*?)(--\s*)(.*?)(\s*-->\s*)(.*?)$/;
+        const match = cleanCode.match(arrowLabelRegex);
+        
+        if (match) {
+            const pre = match[1];
+            const arrowStart = match[2];
+            let label = match[3];
+            const arrowEnd = match[4];
+            const post = match[5];
+            
+            // If label is quoted, strip quotes
+            if (label.startsWith('"') && label.endsWith('"')) {
+                label = label.slice(1, -1);
+            }
+            
+            // Append comment
+            const newLabel = `${label}(${cleanComment})`;
+            
+            // Reconstruct
+            return `${pre}${arrowStart}"${newLabel}"${arrowEnd}${post}${hasSemi ? ';' : ''}`;
+        }
+        
+        return line;
+    });
+    
+    return processedLines.join('\n');
 }
 
 /**
