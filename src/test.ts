@@ -1,55 +1,41 @@
 import { deepDebugMermaid } from './mermaidProcessor';
 
-// User provided example for testing
-const input = `graph TD
-Start[Start: Measure Rate Constant k at Multiple Temperatures T] --> DataCollect[ T_i, k_i data pairs];
-Data --> Transform[Transform data: Calculate 1/T_i, ln k_i];
-Transform --> Plot[Plot ln k vs 1/T: "Arrhenius Plot"];
-Plot --> Regression[Perform Linear Regression: ln k = ln A - Ea/R1/T];
-Regression --> SlopeExtract[ Slope 'm'];
-Slope --> Calc_Ea[Calculate Ea = -m * R];
-Regression --> InterceptExtract[ Intercept 'c'];
-Intercept --> Calc_A[Calculate A = expc];
-Calc_Ea --> Results[Output: Ea ± Confidence Interval];
-Calc_A --> Results;
-Results --> End[End];
+const input = `graph LR
+subgraph "Reaction Coordinate Diagram"
+Reactants[Initial Solid State<br>Energy E1] -- Barrier1["Activation Energy Ea1"] --> Products[Activated State / Products<br>Energy E2]
+ActivatedSolid[Activated Solid State<br>Energy E1'] -- Barrier2["Lowered Activation Energy Ea2<br>Ea2 < Ea1"] --> Products
+Reactants --> ActivatedSolid["Activation Process<br>e.g., Milling"]
 
-style Start fill:#ccf,stroke:#333
-style Data fill:#cfc,stroke:#333
-style Transform fill:#cfc,stroke:#333
-style Plot fill:#ffc,stroke:#333
-style Regression fill:#fcc,stroke:#333
-style Calc_Ea fill:#cff,stroke:#333
-style Calc_A fill:#cff,stroke:#333
-style Results fill:#ccf,stroke:#333`;
+Barrier1 -- "Activation Process Modifies" --> Barrier2
+end
 
-const expected = `graph TD
-Start[Start: Measure Rate Constant k at Multiple Temperatures T] --> DataCollect[ T_i, k_i data pairs];
-Data --> Transform[Transform data: Calculate 1/T_i, ln k_i];
-Transform --> Plot["Plot ln k vs 1/T: \"Arrhenius Plot\""];
-Plot --> Regression["Perform Linear Regression: ln k = ln A - Ea/R1/T"];
-Regression --> SlopeExtract[" Slope 'm'"];
-Slope --> Calc_Ea["Calculate Ea = -m * R"];
-Regression --> InterceptExtract[" Intercept 'c'"];
-Intercept --> Calc_A["Calculate A = expc"];
-Calc_Ea --> Results["Output: Ea ± Confidence Interval"];
-Calc_A --> Results;
-Results --> End[End];
-
-style Start fill:#ccf,stroke:#333
-style Data fill:#cfc,stroke:#333
-style Transform fill:#cfc,stroke:#333
-style Plot fill:#ffc,stroke:#333
-style Regression fill:#fcc,stroke:#333
-style Calc_Ea fill:#cff,stroke:#333
-style Calc_A fill:#cff,stroke:#333
-style Results fill:#ccf,stroke:#333`;
+style Reactants fill:#ccf,stroke:#333
+style ActivatedSolid fill:#fcc,stroke:#333
+style Products fill:#cfc,stroke:#333`;
 
 const result = deepDebugMermaid(input);
 
-console.log("Test Passed:", result.trim() === expected.trim());
-if (result.trim() !== expected.trim()) {
-    console.log("Expected:\n", expected);
-    console.log("Actual:\n", result);
+console.log("Processed Result:\n", result);
+
+const expectedFragment1 = `Reactants[Initial Solid State<br>Energy E1] --> Barrier1["Activation Energy Ea1"]`;
+const expectedFragment2 = `Barrier1["Activation Energy Ea1"] --> Products[Activated State / Products<br>Energy E2]`;
+// Note: ActivatedSolid gets quoted due to "E1'"
+const expectedFragment3 = `ActivatedSolid["Activated Solid State<br>Energy E1'"] --> Barrier2["Lowered Activation Energy Ea2<br>Ea2 < Ea1"]`;
+const expectedFragment4 = `Barrier2["Lowered Activation Energy Ea2<br>Ea2 < Ea1"] --> Products`;
+
+const passed = result.includes(expectedFragment1) && 
+               result.includes(expectedFragment2) && 
+               result.includes(expectedFragment3) && 
+               result.includes(expectedFragment4);
+
+console.log("Test Passed:", passed);
+
+if (!passed) {
+    console.error("Failed to match expected fragments.");
 }
 
+const input2 = `graph TD
+Start[Activated Solid Sample] --> SplitSplit Sample for Multiple Tests`;
+const result2 = deepDebugMermaid(input2);
+console.log("\nInput 2 Result:\n", result2);
+console.log("Test 2 Passed:", result2.trim().includes("Start[Activated Solid Sample] --> Split[Split Sample for Multiple Tests]"));

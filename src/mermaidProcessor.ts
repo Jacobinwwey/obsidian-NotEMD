@@ -284,13 +284,123 @@ export function deepDebugMermaid(content: string): string {
     processed = fixMermaidComments(processed);
 
     // 8. Fix Unquoted Node Labels (Quote labels with special chars)
-    return fixUnquotedNodeLabels(processed);
+    processed = fixUnquotedNodeLabels(processed);
+
+    // 9. Fix Intermediate Nodes (NodeA -- NodeB[...] --> NodeC)
+    processed = fixIntermediateNodes(processed);
+
+    // 10. Fix Doubled IDs (SplitSplit Sample -> Split[Split Sample])
+    processed = fixDoubledID(processed);
+
+    // 11. Fix Excessive Brackets (Clean up [[...]] and handle ["; patterns)
+    return fixExcessiveBrackets(processed);
+}
+
+/**
+ * Fixes excessive brackets like `[["` -> `["` and `["]` -> `"]`.
+ * Also ensures `[";` becomes `"];` if not already handled.
+ */
+export function fixExcessiveBrackets(content: string): string {
+    let lines = content.split('\n');
+    lines = lines.map(line => {
+        let processedLine = line;
+        // Replace [[" with ["
+        processedLine = processedLine.replace(/\[\["/g, '["');
+        // Replace ["] with "]
+        processedLine = processedLine.replace(/\["\]/g, '"]');
+        
+        // Ensure ["; becomes "]; (Standard Mermaid terminator handling)
+        // This regex looks for ["; where " is inside the brackets.
+        // It should be "];
+        processedLine = processedLine.replace(/\[";/g, '"];');
+
+        return processedLine;
+    });
+    return lines.join('\n');
+}
+
+/**
+ * Fixes intermediate nodes defined inside an edge.
+ * Pattern: `A -- B[...] --> C`
+ * Result:
+ * A --> B[...]
+ * B[...] --> C
+ */
+export function fixIntermediateNodes(content: string): string {
+    const lines = content.split('\n');
+    const resultLines: string[] = [];
+
+    for (const line of lines) {
+        // Regex to detect: NodeA ... -- NodeB[...] ... --> NodeC
+        // We look for ` -- ` followed by `NodeID[...]` followed by ` --> `
+        // Be careful with greedy matches.
+        // We assume the intermediate node has brackets [ ... ]
+        
+        // Group 1: Start (NodeA)
+        // Group 2: Intermediate Node (NodeB[...])
+        // Group 3: End (NodeC)
+        const match = line.match(/^(.*?)\s*--\s*([a-zA-Z0-9_]+\s*\[.*?\])\s*-->\s*(.*)$/);
+        
+        if (match) {
+            const start = match[1].trim();
+            const middle = match[2].trim();
+            const end = match[3].trim();
+            
+            // Extract the NodeID from middle to use in the second line
+            const middleIdMatch = middle.match(/^([a-zA-Z0-9_]+)/);
+            const middleId = middleIdMatch ? middleIdMatch[1] : middle; // Fallback to full middle if parse fails (unlikely)
+
+            // Line 1: A --> B[...] 
+            // Note: Use --> for the first connection as well, or preserve --?
+            // The user example converted `Reactants -- Barrier1 -->` to `Reactants --> Barrier1`.
+            resultLines.push(`${start} --> ${middle}`);
+            
+            // Line 2: B[...] --> C
+            // User example: Barrier1["..."] --> Products
+            // Actually user example uses the full definition `Barrier1["..."]` in the second line too.
+            // "Barrier1["Activation Energy Ea1"] --> Products[...]"
+            // This is valid Mermaid (re-defining node is fine).
+            resultLines.push(`${middle} --> ${end}`);
+        } else {
+            resultLines.push(line);
+        }
+    }
+    return resultLines.join('\n');
+}
+
+/**
+ * Fixes doubled IDs causing malformed definitions.
+ * Pattern: `Arrow SplitSplit Sample` -> `Arrow Split[Split Sample]`
+ */
+export function fixDoubledID(content: string): string {
+    const lines = content.split('\n');
+    const processedLines = lines.map(line => {
+        // Look for pattern: (Arrow) (Word)(SameWord) (Space) (Rest)
+        // \1 backreference to match repeated word
+        // We only target lines with arrows to avoid false positives in text
+        if (!line.includes('-->') && !line.includes('---') && !line.includes('--')) {
+            return line;
+        }
+
+        return line.replace(/(\s*(?:---|-->|--)\s*)([A-Z][a-z]+)\2(\s+)(.*)$/, (match, arrow, word, space, rest) => {
+            // arrow: " --> "
+            // word: "Split"
+            // space: " "
+            // rest: "Sample for..."
+            
+            // Result: " --> Split[Split Sample for...]"
+            // We append the word back to the start of the label
+            return `${arrow}${word}[${word}${space}${rest}]`;
+        });
+    });
+    return processedLines.join('\n');
 }
 
 /**
  * Fixes unquoted node labels containing characters that might cause rendering issues.
  * Heuristic: Quote labels containing ", ', =, *, ±, -
  * Example: Plot[Plot "A"] -> Plot["Plot "A""]
+ * Handles trailing semicolons by moving them outside the quotes.
  */
 export function fixUnquotedNodeLabels(content: string): string {
     const lines = content.split('\n');
@@ -302,7 +412,18 @@ export function fixUnquotedNodeLabels(content: string): string {
              // Check for triggers: quotes, equals, asterisk, plus-minus, minus
              // These are characters that often require quoting in Mermaid labels
              if (/["'=*±-]/.test(innerContent)) {
-                 return `${nodeId}["${innerContent}"]`;
+                 // Check if innerContent ends with semicolon
+                 let contentToQuote = innerContent;
+                 let suffix = '';
+                 // Trim trailing whitespace first to check for semicolon
+                 const trimmedContent = contentToQuote.trim();
+                 if (trimmedContent.endsWith(';')) {
+                     // Remove semicolon from content
+                     contentToQuote = trimmedContent.slice(0, -1);
+                     suffix = ';';
+                 }
+                 
+                 return `${nodeId}["${contentToQuote}"]${suffix}`;
              }
              return match;
         });
@@ -531,7 +652,8 @@ export function fixMermaidPipes(content: string): string {
 
         // 3. Restore Bracketed Content
         placeholders.forEach((block, index) => {
-            protectedLine = protectedLine.replace('___BRACKET_BLOCK_' + index + '___', block);
+            const placeholder = '___BRACKET_BLOCK_' + index + '___';
+            protectedLine = protectedLine.split(placeholder).join(block);
         });
 
         return protectedLine;
@@ -603,7 +725,8 @@ export function fixMalformedArrows(content: string): string {
 
         // 3. Restore Bracketed Content
         placeholders.forEach((block, index) => {
-            protectedLine = protectedLine.replace('___BRACKET_BLOCK_' + index + '___', block);
+            const placeholder = '___BRACKET_BLOCK_' + index + '___';
+            protectedLine = protectedLine.split(placeholder).join(block);
         });
 
         return protectedLine;
@@ -625,11 +748,12 @@ export function fixMissingBrackets(content: string): string {
         }
 
         // Regex to find:
-        // 1. Arrow (including labeled arrows like -- "label" -->)
+        // 1. Arrow (standard or labeled). We use a flexible match for labeled arrows: -- ... -->
         // 2. ASCII NodeID ([a-zA-Z0-9_]+)
-        // 3. Content that is NOT empty, has NO brackets, and ends at ;
+        // 3. Content that is NOT empty, DOES NOT START with [, and ends at ;
+        // We use non-greedy match .*? to capture content until ;
         
-        const regex = /((?:---|-->|--\s*"[^"]*"\s*-->)\s*)([a-zA-Z0-9_]+\b)([^\[\];\n]+)(;)/g;
+        const regex = /((?:---|-->|--.*?-->)\s*)([a-zA-Z0-9_]+\b)\s*([^\[\n].*?)(;)/g;
         
         if (regex.test(line)) {
              return line.replace(regex, '$1$2[$3]$4');
