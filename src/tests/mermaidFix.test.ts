@@ -2,7 +2,7 @@ import { refineMermaidBlocks } from '../mermaidProcessor';
 
 describe('Mermaid Fix Mode Tests', () => {
 
-    test('should fix unquoted labels with nested brackets (Example 1)', () => {
+    test('should fix unquoted labels with nested brackets (Example 1)', async () => {
         const content = `\`\`\`mermaid
 graph LR
 CorpBonds -- "Cost of Capital" --> Investment[Corporate Investment "[企业投资]"];
@@ -11,10 +11,11 @@ CorpBonds -- "Cost of Capital" --> Investment[Corporate Investment "[企业投�
 graph LR
 CorpBonds -- "Cost of Capital" --> Investment["Corporate Investment [企业投资]"];
 \`\`\``;
-        expect(refineMermaidBlocks(content)).toBe(expected);
+        const result = await refineMermaidBlocks(content);
+        expect(result).toBe(expected);
     });
 
-    test('should fix unquoted labels with nested brackets (Example 2)', () => {
+    test('should fix unquoted labels with nested brackets (Example 2)', async () => {
         const content = `\`\`\`mermaid
 graph LR
 MBS -- "Housing Demand" --> Consumption[Consumption [消费]];
@@ -23,10 +24,11 @@ MBS -- "Housing Demand" --> Consumption[Consumption [消费]];
 graph LR
 MBS -- "Housing Demand" --> Consumption["Consumption [消费]"];
 \`\`\``;
-        expect(refineMermaidBlocks(content)).toBe(expected);
+        const result = await refineMermaidBlocks(content);
+        expect(result).toBe(expected);
     });
 
-    test('should fix unquoted labels with nested brackets (Example 3 - White Dwarf)', () => {
+    test('should fix unquoted labels with nested brackets (Example 3 - White Dwarf)', async () => {
         const content = `\`\`\`mermaid
 graph TD
 PlanetaryNebula --> WhiteDwarf[白矮星 [White Dwarf]];
@@ -35,18 +37,20 @@ PlanetaryNebula --> WhiteDwarf[白矮星 [White Dwarf]];
 graph TD
 PlanetaryNebula --> WhiteDwarf["白矮星 [White Dwarf]"];
 \`\`\``;
-        expect(refineMermaidBlocks(content)).toBe(expected);
+        const result = await refineMermaidBlocks(content);
+        expect(result).toBe(expected);
     });
 
-    test('should NOT fix interference items (already quoted)', () => {
+    test('should NOT fix interference items (already quoted)', async () => {
         const content = `\`\`\`mermaid
 graph LR
 GovCurve -- "Mortgage Rates" --> MBS["MBS Pricing [MBS定价]["];
 \`\`\``;
-        expect(refineMermaidBlocks(content)).toBe(content);
+        const result = await refineMermaidBlocks(content);
+        expect(result).toBe(content);
     });
 
-    test('should handle full example block correctly', () => {
+    test('should handle full example block correctly', async () => {
         const content = `\`\`\`mermaid
 graph LR
 subgraph "Monetary Policy Transmission 货币政策传导"
@@ -81,10 +85,11 @@ style CentralBank fill:#fff9c4,stroke:#fbc02d
 style GovCurve fill:#e0f2f1,stroke:#00695c
 \`\`\``;
         
-        expect(refineMermaidBlocks(content)).toBe(expected);
+        const result = await refineMermaidBlocks(content);
+        expect(result).toBe(expected);
     });
 
-    test('should fix broken edge labels with --["...["--> pattern', () => {
+    test('should fix broken edge labels with --["...["--> pattern', async () => {
         const content = `\`\`\`mermaid
 graph LR
 CapRate --["Inverse Relationship["--> PropValue;
@@ -95,10 +100,11 @@ graph LR
 CapRate -- "Inverse Relationship" --> PropValue;
 WACC -- "Hurdle Rate" --> Acquisitions;
 \`\`\``;
-        expect(refineMermaidBlocks(content)).toBe(expected);
+        const result = await refineMermaidBlocks(content);
+        expect(result).toBe(expected);
     });
 
-    test('should quote labels containing pipe characters', () => {
+    test('should quote labels containing pipe characters', async () => {
         const content = `\`\`\`mermaid
 graph LR
 B -- Explicit Prior pθ --> B_Out[Posterior pθ|D];
@@ -107,10 +113,11 @@ B -- Explicit Prior pθ --> B_Out[Posterior pθ|D];
 graph LR
 B -- Explicit Prior pθ --> B_Out["Posterior pθ|D"];
 \`\`\``;
-        expect(refineMermaidBlocks(content)).toBe(expected);
+        const result = await refineMermaidBlocks(content);
+        expect(result).toBe(expected);
     });
 
-    test('should convert inline comments to labeled arrows and fix end quotes', () => {
+    test('should convert inline comments to labeled arrows and fix end quotes', async () => {
         const content = `\`\`\`mermaid
 graph TD
 subgraph "Synchronization Approaches"
@@ -189,6 +196,7 @@ Consensus -- "Some advanced consensus" --> Delay;
 
 style aPS fill:#ccf,stroke:#333,stroke-width:2px
 \`\`\``;
-        expect(refineMermaidBlocks(content)).toBe(expected);
+        const result = await refineMermaidBlocks(content);
+        expect(result).toBe(expected);
     });
 });

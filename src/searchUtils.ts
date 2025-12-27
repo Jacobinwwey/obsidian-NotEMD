@@ -370,7 +370,7 @@ export async function researchAndSummarize(app: App, settings: NotemdSettings, e
         try {
             finalSummary = cleanupLatexDelimiters(finalSummary);
             if (progressReporter.cancelled) throw new Error("Processing cancelled by user during post-processing.");
-            finalSummary = refineMermaidBlocks(finalSummary);
+            finalSummary = await refineMermaidBlocks(finalSummary);
             progressReporter.log(`Mermaid/LaTeX cleanup applied to summary.`);
         } catch (cleanupError: unknown) {
             const message = cleanupError instanceof Error ? cleanupError.message : String(cleanupError);

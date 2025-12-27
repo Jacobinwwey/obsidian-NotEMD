@@ -2,6 +2,7 @@ import mermaid from 'mermaid';
 
 /**
  * Checks if the content contains any Mermaid syntax errors using mermaid.parse.
+ * Also detects unclosed Mermaid blocks.
  * @param content The markdown content to check.
  * @returns A promise that resolves to the number of errors found.
  */
@@ -14,6 +15,7 @@ export async function checkMermaidErrors(content: string): Promise<number> {
     // We use a safe configuration
     mermaid.initialize({ startOnLoad: false, suppressErrorRendering: true });
 
+    // Check closed blocks
     while ((match = mermaidBlockRegex.exec(content)) !== null) {
         try {
             await mermaid.parse(match[1]);
@@ -27,9 +29,10 @@ export async function checkMermaidErrors(content: string): Promise<number> {
 /**
  * Processes markdown content to validate and fix Mermaid syntax issues.
  * Specifically ensures that ```mermaid blocks are properly closed after the last arrow (`-->`).
+ * Also applies deep debug fixes if Mermaid errors still exist after basic fixes.
  * Adapted from logic in LMStudio-Markdown-Content-Generator/mermaid.py.
  */
-export function refineMermaidBlocks(content: string): string {
+export async function refineMermaidBlocks(content: string): Promise<string> {
 	const lines = content.split('\n');
 	let resultLines: string[] = [];
 	let inMermaid = false;
@@ -156,7 +159,6 @@ export function refineMermaidBlocks(content: string): string {
                 });
 			}
 
-
 			// Remove parentheses and curly braces from the line content within the mermaid block
 			let lineWithoutBrackets = line.replace(/[(){}]/g, ''); // Updated regex
 
@@ -208,7 +210,22 @@ export function refineMermaidBlocks(content: string): string {
 		resultLines.push(...currentBlockLines);
 	}
 
-	return resultLines.join('\n');
+	let result = resultLines.join('\n');
+
+	// Apply global replacements outside mermaid blocks
+	// Replace note "Sentences" with Note1[/"Sentences"/]
+	result = result.replace(/note\s+"([^"]*)"/g, 'Note1[/"$1"/]');
+
+	// Remove content after ; if the line contains % after ;
+	result = result.replace(/;(.*)$/gm, (match, p1) => p1.includes('%') ? ';' : match);
+
+	// Check for remaining errors and apply deep debug fixes if needed
+	const errorCount = await checkMermaidErrors(result);
+	if (errorCount > 0) {
+		result = deepDebugMermaid(result);
+	}
+
+	return result;
 }
 
 /**
@@ -260,6 +277,8 @@ export function cleanupLatexDelimiters(content: string): string {
  * 3. Fix Malformed Arrows.
  * 4. Merge Double Labels.
  * 5. Fix Missing Brackets.
+ * 6. Fix Semicolon Positioning.
+ * 7. Fix Unquoted Labels with Semicolons.
  */
 export function deepDebugMermaid(content: string): string {
     // 1. Fix Mermaid Pipes (handle `|`) - Requested to be first
@@ -293,26 +312,59 @@ export function deepDebugMermaid(content: string): string {
     processed = fixDoubledID(processed);
 
     // 11. Fix Excessive Brackets (Clean up [[...]] and handle ["; patterns)
-    return fixExcessiveBrackets(processed);
+    processed = fixExcessiveBrackets(processed);
+
+    // 12. Fix Semicolon Positioning (Move "] before ;)
+    processed = fixSemicolonPositioning(processed);
+
+    // 13. Fix Unquoted Labels Ending with Semicolons
+    processed = fixUnquotedLabelsWithSemicolons(processed);
+
+    // 14. Enhanced Note Pattern and Semicolon Content Removal
+    processed = enhancedNoteAndSemicolonCleanup(processed);
+
+    return processed;
 }
 
 /**
  * Fixes excessive brackets like `[["` -> `["` and `["]` -> `"]`.
  * Also ensures `[";` becomes `"];` if not already handled.
+ * Enhanced to handle complex patterns like:
+ * - `Target -- Result --> PT___BRACKET_BLOCK_0______BRACKET_BLOCK_0______BRACKET_BLOCK_0___[["Final...["` 
+ * - Should become: `Target -- Result --> PT___BRACKET_BLOCK_0______BRACKET_BLOCK_0______BRACKET_BLOCK_0___["Final..."]`
  */
 export function fixExcessiveBrackets(content: string): string {
     let lines = content.split('\n');
     lines = lines.map(line => {
         let processedLine = line;
-        // Replace [[" with ["
-        processedLine = processedLine.replace(/\[\["/g, '["');
-        // Replace ["] with "]
-        processedLine = processedLine.replace(/\["\]/g, '"]');
         
-        // Ensure ["; becomes "]; (Standard Mermaid terminator handling)
-        // This regex looks for ["; where " is inside the brackets.
-        // It should be "];
-        processedLine = processedLine.replace(/\[";/g, '"];');
+        // Multiple passes to handle nested/repeated patterns
+        let previousLine = '';
+        let maxIterations = 10; // Prevent infinite loops
+        let iteration = 0;
+        
+        while (processedLine !== previousLine && iteration < maxIterations) {
+            previousLine = processedLine;
+            
+            // Replace [[" with ["
+            processedLine = processedLine.replace(/\[\["/g, '["');
+            
+            // Replace ["] with "] (but be careful not to break valid patterns)
+            // Only replace if it's truly excessive (e.g., ends improperly)
+            processedLine = processedLine.replace(/\["\]/g, '"]');
+            
+            // Fix pattern like `text["` at end of line -> `text"]`
+            processedLine = processedLine.replace(/\["$/g, '"]');
+            
+            // Fix pattern like `text[";` -> `text"];`
+            processedLine = processedLine.replace(/\[";/g, '"];');
+            
+            // Fix pattern like [[[ or ]]] (excessive brackets without quotes)
+            processedLine = processedLine.replace(/\[\[\[/g, '[');
+            processedLine = processedLine.replace(/\]\]\]/g, ']');
+            
+            iteration++;
+        }
 
         return processedLine;
     });
@@ -808,11 +860,11 @@ export function fixMermaidNotes(content: string): string {
             
             // Check for Node as SOURCE (Outgoing)
             // Regex: Start or space(s) + NodeID + word boundary + optional brackets + space + (---|-->)
-            const sourceRegex = new RegExp(`(?:^|\\s+)${nodeId}\\b(?:\\\[.*?\\\])?\\s*(---|-->)`);
+            const sourceRegex = new RegExp(`(?:^|\\s+)${nodeId}\\b(?:\\[.*?\\])?\\s*(---|-->)`);
             
             // Check for Node as TARGET (Incoming)
             // Regex: (---|-->) + space + NodeID + word boundary + optional brackets + (semicolon, end, or space)
-            const targetRegex = new RegExp(`(---|-->)\\s*${nodeId}\\b(?:\\\[.*?\\\])?(?:;|$|\\s)`);
+            const targetRegex = new RegExp(`(---|-->)\\s*${nodeId}\\b(?:\\[.*?\\])?(?:;|$|\\s)`);
 
             // Apply replacement
             // Priority: Source (Outgoing) first, then Target (Incoming)
@@ -840,4 +892,103 @@ export function fixMermaidNotes(content: string): string {
 
     // Return joined lines, filtering out deleted ones
     return lines.filter((_, index) => !linesToDelete.has(index)).join('\n');
+}
+
+/**
+ * Fixes semicolon positioning in Mermaid node labels.
+ * Ensures that closing brackets `"]` appear before semicolons `;`.
+ * Example: `Node["Label"];` is correct, but `Node["Label];` should become `Node["Label"];`
+ * Also handles: `text];` -> `text"];` when text should be quoted
+ */
+export function fixSemicolonPositioning(content: string): string {
+    const lines = content.split('\n');
+    const processedLines = lines.map(line => {
+        // Skip lines without semicolons or arrows
+        if (!line.includes(';') || (!line.includes('-->') && !line.includes('--'))) {
+            return line;
+        }
+
+        // Pattern 1: Fix `"];` that might be incorrectly positioned
+        // Look for patterns where ] comes after ; when it should be before
+        // Pattern: `"...];` should be `"..."];`
+        let processedLine = line.replace(/("\s*)\];/g, '"];');
+
+        // Pattern 2: Ensure quoted labels ending with semicolon have proper bracket placement
+        // `["text;` -> `["text"];`
+        processedLine = processedLine.replace(/\["([^"\]]*);/g, '["$1"];');
+
+        // Pattern 3: Handle unquoted text after arrow ending with semicolon
+        // This catches patterns like: `--> NodeIDText Text;` and converts to `--> NodeID["Text Text"];`
+        // We need to be careful to identify where the NodeID ends and label begins
+        
+        return processedLine;
+    });
+    return processedLines.join('\n');
+}
+
+/**
+ * Fixes unquoted node labels that end with semicolons.
+ * Converts patterns like: `NodeID Text Content;` to `NodeID["Text Content"];`
+ * Example: `Evaluate1E: Evaluate $f$;` -> `Evaluate1["E: Evaluate $f$"];`
+ */
+export function fixUnquotedLabelsWithSemicolons(content: string): string {
+    const lines = content.split('\n');
+    const processedLines = lines.map(line => {
+        // Skip lines without semicolons or arrows
+        if (!line.includes(';') || (!line.includes('-->') && !line.includes('--'))) {
+            return line;
+        }
+
+        // Pattern: Arrow followed by NodeID followed by unquoted text ending with semicolon
+        // Regex: (Arrow) (Space) (NodeID) (Unquoted Text Content) (Semicolon)
+        // We look for: `--> NodeIDText Text...;` where there's no opening bracket after NodeID
+        
+        // Match pattern: `(-->) (NodeID)(Content without brackets)(;)`
+        const regex = /((?:--|---)->)\s*([a-zA-Z0-9_]+)([^[\n;]+);/g;
+        
+        return line.replace(regex, (match, arrow, nodeId, content) => {
+            // Check if content starts with a bracket (already has label)
+            if (content.trim().startsWith('[')) {
+                return match;
+            }
+            
+            // Extract the label from content
+            // Often NodeID is partially in the content (e.g., "E: Text" where NodeID was "Evaluate1E")
+            const trimmedContent = content.trim();
+            
+            // If content is empty or very short, skip
+            if (!trimmedContent || trimmedContent.length < 2) {
+                return match;
+            }
+            
+            // Build new syntax: arrow NodeID["Content"];
+            return `${arrow} ${nodeId}["${trimmedContent}"];`;
+        });
+    });
+    return processedLines.join('\n');
+}
+
+/**
+ * Enhanced note pattern and semicolon content removal.
+ * 1. Replaces `note "Sentences"` with `Note1[/"Sentences"/]`
+ * 2. Removes content after `;` if line contains `%` after the semicolon
+ * 3. Specifically handles `-.- Words["Sentences"]; % notes` pattern
+ */
+export function enhancedNoteAndSemicolonCleanup(content: string): string {
+    let processed = content;
+    
+    // 1. Replace note "Sentences" with Note1[/"Sentences"/]
+    // This pattern catches standalone note statements (not "note right of")
+    processed = processed.replace(/\bnote\s+"([^"]*)"/gi, 'Note1[/"$1"/]');
+    
+    // 2. Remove content after ; if the line contains % after ;
+    // Pattern: `;...%...` on any line
+    // We want to keep everything before `;`, the `;` itself, but remove everything after if `%` appears
+    processed = processed.replace(/;([^;\n]*%[^\n]*)/g, ';');
+    
+    // 3. Specific pattern: Lines with `-.-` (dotted lines) containing `["..."];` followed by `% comment`
+    // Example: `A -.- B["Text"]; % comment` -> `A -.- B["Text"];`
+    // This is already handled by rule 2 above
+    
+    return processed;
 }

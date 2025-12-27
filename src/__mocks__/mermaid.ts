@@ -1,4 +1,7 @@
 export default {
-    initialize: () => {},
-    parse: async () => {},
+    initialize: jest.fn(),
+    parse: jest.fn(async () => {
+        // Default: no errors
+        return true;
+    }),
 };
