@@ -481,7 +481,7 @@ export async function processFile(app: App, settings: NotemdSettings, file: TFil
     let finalContent = withLinks;
     try {
         finalContent = cleanupLatexDelimiters(finalContent);
-        finalContent = refineMermaidBlocks(finalContent);
+        finalContent = await refineMermaidBlocks(finalContent);
     } catch (cleanupError: unknown) { // Changed to unknown
         const errorMessage = cleanupError instanceof Error ? cleanupError.message : String(cleanupError);
         progressReporter.log(`Warning: Error during Mermaid/LaTeX cleanup for ${file.name}: ${errorMessage}`);
@@ -686,7 +686,7 @@ export async function generateContentForTitle(app: App, settings: NotemdSettings
     try {
         finalContent = cleanupLatexDelimiters(finalContent);
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user during post-processing.");
-        finalContent = refineMermaidBlocks(finalContent);
+        finalContent = await refineMermaidBlocks(finalContent);
         progressReporter.log(`Mermaid/LaTeX cleanup applied.`);
     } catch (cleanupError: unknown) { // Changed to unknown
         const errorMessage = cleanupError instanceof Error ? cleanupError.message : String(cleanupError);
@@ -897,7 +897,7 @@ export async function batchGenerateContentForTitles(app: App, settings: NotemdSe
 export async function fixMermaidSyntaxInFile(app: App, file: TFile, reporter: ProgressReporter): Promise<boolean> {
     const content = await app.vault.read(file);
     let fixed = cleanupLatexDelimiters(content);
-    fixed = refineMermaidBlocks(fixed);
+    fixed = await refineMermaidBlocks(fixed);
     if (fixed.trim() !== content.trim()) {
         await app.vault.modify(file, fixed);
         reporter.log(`Fixed syntax in: ${file.name}`);
