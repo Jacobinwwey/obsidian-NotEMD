@@ -4,43 +4,50 @@ describe('Mermaid Processor Tests', () => {
 
     // --- refineMermaidBlocks Tests ---
 
-    test('should add closing ``` for unclosed mermaid block after arrow', () => {
+    test('should add closing ``` for unclosed mermaid block after arrow', async () => {
         const content = "Some text\n```mermaid\ngraph TD;\nA --> B;\nSome other text";
         const expected = "Some text\n```mermaid\ngraph TD;\nA --> B;\n```\nSome other text";
-        expect(refineMermaidBlocks(content)).toBe(expected);
+        const result = await refineMermaidBlocks(content);
+        expect(result).toBe(expected);
     });
 
-    test('should not add closing ``` if already closed', () => {
+    test('should not add closing ``` if already closed', async () => {
         const content = "Some text\n```mermaid\ngraph TD;\nA --> B;\n```\nSome other text";
-        expect(refineMermaidBlocks(content)).toBe(content);
+        const result = await refineMermaidBlocks(content);
+        expect(result).toBe(content);
     });
 
-    test('should handle multiple mermaid blocks', () => {
+    test('should handle multiple mermaid blocks', async () => {
         const content = "Block 1:\n```mermaid\ngraph TD;\nA --> B;\n\nBlock 2:\n```mermaid\ngraph LR;\nC --> D\n```\nEnd";
         const expected = "Block 1:\n```mermaid\ngraph TD;\nA --> B;\n```\n\nBlock 2:\n```mermaid\ngraph LR;\nC --> D\n```\nEnd";
-        expect(refineMermaidBlocks(content)).toBe(expected);
+        const result = await refineMermaidBlocks(content);
+        expect(result).toBe(expected);
     });
 
-     test('should handle mermaid block at end of file', () => {
+     test('should handle mermaid block at end of file', async () => {
         const content = "Start\n```mermaid\ngraph TD;\nA --> B;";
         const expected = "Start\n```mermaid\ngraph TD;\nA --> B;\n```";
-        expect(refineMermaidBlocks(content)).toBe(expected);
+        const result = await refineMermaidBlocks(content);
+        expect(result).toBe(expected);
     });
 
-    test('should handle empty mermaid block', () => {
+    test('should handle empty mermaid block', async () => {
         const content = "```mermaid\n```";
-        expect(refineMermaidBlocks(content)).toBe(content);
+        const result = await refineMermaidBlocks(content);
+        expect(result).toBe(content);
     });
 
-     test('should handle mermaid block with no arrows', () => {
+     test('should handle mermaid block with no arrows', async () => {
         const content = "```mermaid\ngraph TD;\nA[Test];\n```";
-        expect(refineMermaidBlocks(content)).toBe(content);
+        const result = await refineMermaidBlocks(content);
+        expect(result).toBe(content);
     });
 
-    test('should handle unclosed mermaid block with no arrows', () => {
+    test('should handle unclosed mermaid block with no arrows', async () => {
         const content = "```mermaid\ngraph TD;\nA[Test];";
         const expected = "```mermaid\n```\ngraph TD;\nA[Test];"; // Defensive closing after start
-        expect(refineMermaidBlocks(content)).toBe(expected);
+        const result = await refineMermaidBlocks(content);
+        expect(result).toBe(expected);
     });
 
 
