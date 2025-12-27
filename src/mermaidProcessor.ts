@@ -1,3 +1,29 @@
+import mermaid from 'mermaid';
+
+/**
+ * Checks if the content contains any Mermaid syntax errors using mermaid.parse.
+ * @param content The markdown content to check.
+ * @returns A promise that resolves to the number of errors found.
+ */
+export async function checkMermaidErrors(content: string): Promise<number> {
+    const mermaidBlockRegex = /^(?:[ \t]*)(?:```|~~~)\s*mermaid\b[^\n]*\n([\s\S]*?)\n(?:[ \t]*)(?:```|~~~)/gim;
+    let match;
+    let errorCount = 0;
+    
+    // Initialize mermaid if needed (though usually handled by the app/plugin load)
+    // We use a safe configuration
+    mermaid.initialize({ startOnLoad: false, suppressErrorRendering: true });
+
+    while ((match = mermaidBlockRegex.exec(content)) !== null) {
+        try {
+            await mermaid.parse(match[1]);
+        } catch (error) {
+            errorCount++;
+        }
+    }
+    return errorCount;
+}
+
 /**
  * Processes markdown content to validate and fix Mermaid syntax issues.
  * Specifically ensures that ```mermaid blocks are properly closed after the last arrow (`-->`).

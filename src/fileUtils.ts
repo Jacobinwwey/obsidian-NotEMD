@@ -5,7 +5,7 @@ import { NotemdSettings, ProgressReporter } from './types';
 import { DEFAULT_SETTINGS } from './constants';
 import { normalizeNameForFilePath, splitContent, getProviderForTask, getModelForTask, delay, createConcurrentProcessor, chunkArray, retry } from './utils'; // Added delay import
 import { callDeepSeekAPI, callOpenAIApi, callAnthropicApi, callGoogleApi, callMistralApi, callAzureOpenAIApi, callLMStudioApi, callOllamaApi, callOpenRouterAPI } from './llmUtils';
-import { refineMermaidBlocks, cleanupLatexDelimiters, deepDebugMermaid } from './mermaidProcessor'; // Assuming this will be moved or imported correctly later
+import { refineMermaidBlocks, cleanupLatexDelimiters, deepDebugMermaid, checkMermaidErrors } from './mermaidProcessor'; // Assuming this will be moved or imported correctly later
 import { _performResearch } from './searchUtils'; // Assuming this will be moved or imported correctly later
 import { showDeletionConfirmationModal } from './ui/modals'; // Assuming this will be moved or imported correctly later
 import mermaid from 'mermaid';
@@ -955,7 +955,7 @@ export async function batchFixMermaidSyntaxInFolder(app: App, settings: NotemdSe
     for (let i = 0; i < filesToProcess.length; i++) {
         const file = filesToProcess[i];
         const progress = Math.floor(((i) / filesToProcess.length) * 100);
-        progressReporter.updateStatus(`Fixing ${i + 1}/${filesToProcess.length}: ${file.name}`, progress);
+        progressReporter.updateStatus(`Checking ${i + 1}/${filesToProcess.length}: ${file.name}`, progress);
 
         if (progressReporter.cancelled) {
             progressReporter.log('Cancellation requested, stopping batch fix.');
@@ -964,84 +964,91 @@ export async function batchFixMermaidSyntaxInFolder(app: App, settings: NotemdSe
         await delay(1); // Yield
 
         try {
-            if (await fixMermaidSyntaxInFile(app, file, progressReporter)) {
-                modifiedCount++;
-            } else {
-                progressReporter.log(`➖ No changes needed for: ${file.name}`);
-            }
+            // 1. Detect Errors (Read-only check)
+            let content = await app.vault.read(file);
+            let initialErrorCount = await checkMermaidErrors(content);
 
-            // Post-fix check for remaining errors (if enabled)
-            if (settings.enableMermaidErrorDetection) {
-                // Read content again (fixMermaidSyntaxInFile might have modified it)
-                let content = await app.vault.read(file);
-                let fileErrorCount = 0;
-                
-                // Helper to validate content using mermaid.parse
-                const validateContent = async (text: string) => {
-                    let errors = 0;
-                    const mermaidBlockRegex = /^(?:[ \t]*)(?:```|~~~)\s*mermaid\b[^\n]*\n([\s\S]*?)\n(?:[ \t]*)(?:```|~~~)/gim;
-                    let match;
-                    while ((match = mermaidBlockRegex.exec(text)) !== null) {
-                        try {
-                            await mermaid.parse(match[1]);
-                        } catch (parseErr) {
-                            errors++;
-                        }
-                    }
-                    return errors;
-                };
+            if (initialErrorCount > 0) {
+                progressReporter.log(`⚠️ ${initialErrorCount} Mermaid error(s) detected in ${file.name}. Applying fixes...`);
 
-                fileErrorCount = await validateContent(content);
-
-                // If errors found, attempt Deep Debug and re-fix
-                if (fileErrorCount > 0) {
-                     progressReporter.log(`⚠️ Errors found in ${file.name}. Attempting Deep Debug...`);
-                     const deepDebugged = deepDebugMermaid(content);
-                     
-                     if (deepDebugged !== content) {
-                         // Apply deep debug changes
-                         await app.vault.modify(file, deepDebugged);
-                         progressReporter.log(`Applied Deep Debug fixes to ${file.name}`);
-                         
-                         // Re-run standard fix (to handle the new brackets/quotes)
-                         if (await fixMermaidSyntaxInFile(app, file, progressReporter)) {
-                             modifiedCount++;
-                         }
-                         
-                         // Re-validate
-                         content = await app.vault.read(file);
-                         const newErrorCount = await validateContent(content);
-                         
-                         if (newErrorCount === 0) {
-                             progressReporter.log(`✅ Deep Debug successfully resolved errors in ${file.name}`);
-                             fileErrorCount = 0;
-                         } else {
-                             progressReporter.log(`❌ Deep Debug reduced errors from ${fileErrorCount} to ${newErrorCount} in ${file.name}`);
-                             fileErrorCount = newErrorCount;
-                         }
-                     }
+                // 2. Apply Standard Fix (Refine Mermaid Blocks)
+                if (await fixMermaidSyntaxInFile(app, file, progressReporter)) {
+                    modifiedCount++;
+                    // Refresh content after fix
+                    content = await app.vault.read(file);
                 }
 
-                if (fileErrorCount > 0) {
-                    mermaidErrors.push({ filename: file.name, count: fileErrorCount });
-                    // Move file if enabled
-                    if (errorMoveFolder) {
-                        const destPath = `${errorMoveFolder}/${file.name}`;
-                        if (file.parent?.path !== errorMoveFolder) {
+                // 3. Re-validate & Deep Debug if needed
+                if (settings.enableMermaidErrorDetection) {
+                    // Read content again (fixMermaidSyntaxInFile might have modified it)
+                    let content = await app.vault.read(file);
+                    let fileErrorCount = 0;
+                    
+                    // Helper to validate content using mermaid.parse
+                    const validateContent = async (text: string) => {
+                        let errors = 0;
+                        const mermaidBlockRegex = /^(?:[ \t]*)(?:```|~~~)\s*mermaid\b[^\n]*\n([\s\S]*?)\n(?:[ \t]*)(?:```|~~~)/gim;
+                        let match;
+                        while ((match = mermaidBlockRegex.exec(text)) !== null) {
                             try {
-                                // Check if dest exists
-                                if (app.vault.getAbstractFileByPath(destPath)) {
-                                    progressReporter.log(`⚠️ Destination ${destPath} exists. Skipping move for ${file.name}.`);
-                                } else {
-                                    await app.vault.rename(file, destPath);
-                                    progressReporter.log(`Moved error file to: ${destPath}`);
+                                await mermaid.parse(match[1]);
+                            } catch (parseErr) {
+                                errors++;
+                            }
+                        }
+                        return errors;
+                    };
+
+                    fileErrorCount = await validateContent(content);
+
+                    if (fileErrorCount > 0) {
+                         progressReporter.log(`⚠️ Errors persist in ${file.name}. Attempting Deep Debug...`);
+                         const deepDebugged = deepDebugMermaid(content);
+                         
+                         if (deepDebugged !== content) {
+                             // Apply deep debug changes
+                             await app.vault.modify(file, deepDebugged);
+                             progressReporter.log(`Applied Deep Debug fixes to ${file.name}`);
+                             
+                             // Re-run standard fix (to handle the new brackets/quotes introduced by deep debug if any)
+                             if (await fixMermaidSyntaxInFile(app, file, progressReporter)) {
+                                 modifiedCount++;
+                             }
+                             
+                             // Re-validate final state
+                             content = await app.vault.read(file);
+                             fileErrorCount = await validateContent(content);
+                             
+                             if (fileErrorCount === 0) {
+                                 progressReporter.log(`✅ Deep Debug successfully resolved errors in ${file.name}`);
+                             } else {
+                                 progressReporter.log(`❌ Deep Debug reduced errors to ${fileErrorCount} in ${file.name}`);
+                             }
+                         }
+                    }
+
+                    if (fileErrorCount > 0) {
+                        mermaidErrors.push({ filename: file.name, count: fileErrorCount });
+                        // Move file if enabled
+                        if (errorMoveFolder) {
+                            const destPath = `${errorMoveFolder}/${file.name}`;
+                            if (file.parent?.path !== errorMoveFolder) {
+                                try {
+                                    if (app.vault.getAbstractFileByPath(destPath)) {
+                                        progressReporter.log(`⚠️ Destination ${destPath} exists. Skipping move for ${file.name}.`);
+                                    } else {
+                                        await app.vault.rename(file, destPath);
+                                        progressReporter.log(`Moved error file to: ${destPath}`);
+                                    }
+                                } catch (moveErr: any) {
+                                    progressReporter.log(`Error moving file ${file.name}: ${moveErr.message}`);
                                 }
-                            } catch (moveErr: any) {
-                                progressReporter.log(`Error moving file ${file.name}: ${moveErr.message}`);
                             }
                         }
                     }
                 }
+            } else {
+                progressReporter.log(`✅ No Mermaid errors detected in ${file.name}. Skipping.`);
             }
 
         } catch (fileError: unknown) {
