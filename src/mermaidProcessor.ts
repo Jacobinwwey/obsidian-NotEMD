@@ -574,29 +574,26 @@ export function fixMermaidNotes(content: string): string {
             const line = lines[j];
             
             // Check for Node as SOURCE (Outgoing)
-            // Regex: Start or space + NodeID + word boundary + optional brackets + space + -->
-            // We use \\ to escape backslash for the string, so \\[ matches literal [ in the regex
-            const sourceRegex = new RegExp(`(^|\\s)${nodeId}\\b(?:\\\[.*?\\\])?\\s*-->`);
+            // Regex: Start or space(s) + NodeID + word boundary + optional brackets + space + (---|-->)
+            const sourceRegex = new RegExp(`(?:^|\\s+)${nodeId}\\b(?:\\\[.*?\\\])?\\s*(---|-->)`);
             
             // Check for Node as TARGET (Incoming)
-            // Regex: --> space + NodeID + word boundary + optional brackets + (semicolon, end, or space)
-            const targetRegex = new RegExp(`-->\\s*${nodeId}\\b(?:\\\[.*?\\\])?(?:;|$|\\s)`);
+            // Regex: (---|-->) + space + NodeID + word boundary + optional brackets + (semicolon, end, or space)
+            const targetRegex = new RegExp(`(---|-->)\\s*${nodeId}\\b(?:\\\[.*?\\\])?(?:;|$|\\s)`);
 
             // Apply replacement
             // Priority: Source (Outgoing) first, then Target (Incoming)
             
             if (sourceRegex.test(line)) {
                 const escapedText = text.replace(/"/g, '\\"');
-                // Replace the last `-->` in the match? Or just the `-->` found.
-                // We use a replacer function to modify specifically the matched part.
                 lines[j] = line.replace(sourceRegex, (match) => {
-                    return match.replace(/-->$/, `-- "${escapedText}" -->`);
+                    return match.replace(/\s*(---|-->)$/, (fullMatch, arrow) => ` -- "${escapedText}" ${arrow}`);
                 });
                 found = true;
             } else if (targetRegex.test(line)) {
                 const escapedText = text.replace(/"/g, '\\"');
                 lines[j] = line.replace(targetRegex, (match) => {
-                     return match.replace(/^-->/, `-- "${escapedText}" -->`);
+                     return match.replace(/^(---|-->)/, (arrow) => `-- "${escapedText}" ${arrow}`);
                 });
                 found = true;
             }
