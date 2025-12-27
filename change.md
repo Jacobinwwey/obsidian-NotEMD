@@ -44,8 +44,9 @@ This document summarizes the major functional and architectural changes implemen
     *   **Merged Query Mode**: Efficiently processes all questions in a single API call.
     *   **Translation Support**: Optionally includes translations of the extracted text.
     *   **Custom Output**: Configurable output paths and filenames.
-*   **Batch Mermaid Fix Enhancements**:
+    *   **Batch Mermaid Fix Enhancements**:
     *   **Advanced Fix Mode**: Added robust handling for unquoted Mermaid node labels containing nested brackets (e.g., `Node[Label [Text]]`) and special characters.
+    *   **Note Conversion**: Added functionality to automatically convert `note right/left of` comments in Mermaid graphs to edge labels, ensuring better rendering and adherence to standard graph syntax.
     *   **Error Reporting**: Automatically generates a `mermaid_error_{foldername}.md` report listing files with remaining errors.
     *   **Move Error Files**: Added an option to automatically move files with persistent errors to a specific folder for manual review.
 
@@ -57,8 +58,8 @@ This document summarizes the major functional and architectural changes implemen
     *   **自定义输出**: 可配置输出路径和文件名。
 *   **批量Mermaid修复增强**:
     *   **高级修复模式**: 增加了对包含嵌套括号（例如 `Node[标签 [文本]]`）和特殊字符的未加引号Mermaid节点标签的稳健处理。
-    *   **错误报告**: 自动生成 `mermaid_error_{foldername}.md` 报告，列出仍有错误的文件。
-    *   **移动错误文件**: 添加了一个选项，可自动将存在持久错误的文件移动到特定文件夹以供手动审查。
+    *   **注释转换**: 增加了自动将 Mermaid 图表中的 `note right/left of` 注释转换为连接线标签的功能，确保更好的渲染效果并符合标准图表语法。
+    *   **错误报告**: 自动生成 `mermaid_error_{foldername}.md` 报告，列出仍有错误的文件。    *   **移动错误文件**: 添加了一个选项，可自动将存在持久错误的文件移动到特定文件夹以供手动审查。
 
 ---
 
