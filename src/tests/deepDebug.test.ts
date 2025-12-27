@@ -242,5 +242,43 @@ end`;
         
         expect(deepDebugMermaid(content)).toBe(expected);
     });
+
+    test('should fix mermaid pipes (-->|Text| and -- Text |)', () => {
+        const content = `graph LR
+subgraph "Image Quality Relationships"
+Pupil_Function["Pupil Function Pxp, yp = Axp, yp * expi * k * Wxp, yp"] -->|Fourier Transform|^2| PSF["Point Spread Function PSFxi, yi"];
+Wavefront_Aberration["Wavefront Aberration Wxp, yp"] --> Pupil_Function;
+PSF -->|Fourier Transform| OTF["Optical Transfer Function OTFνx, νy"];
+OTF -->|Magnitude| MTF["Modulation Transfer Function MTFνx, νy"];
+Wavefront_Aberration -- Reduces --> Strehl_Ratio["Strehl Ratio S"];
+PSF -- Peak Intensity --> Strehl_Ratio;
+Wavefront_Aberration -- Degrades --> MTF;
+end
+
+style Wavefront_Aberration fill:#f9f,stroke:#333
+style Pupil_Function fill:#ccf,stroke:#333
+style PSF fill:#cfc,stroke:#333
+style MTF fill:#ffc,stroke:#333
+style Strehl_Ratio fill:#fcc,stroke:#333`;
+
+        const expected = `graph LR
+subgraph "Image Quality Relationships"
+Pupil_Function["Pupil Function Pxp, yp = Axp, yp * expi * k * Wxp, yp"] -->|"Fourier Transform|^2"| PSF["Point Spread Function PSFxi, yi"];
+Wavefront_Aberration["Wavefront Aberration Wxp, yp"] --> Pupil_Function;
+PSF -->|"Fourier Transform"| OTF["Optical Transfer Function OTFνx, νy"];
+OTF -->|"Magnitude"| MTF["Modulation Transfer Function MTFνx, νy"];
+Wavefront_Aberration -- Reduces --> Strehl_Ratio["Strehl Ratio S"];
+PSF -- Peak Intensity --> Strehl_Ratio;
+Wavefront_Aberration -- Degrades --> MTF;
+end
+
+style Wavefront_Aberration fill:#f9f,stroke:#333
+style Pupil_Function fill:#ccf,stroke:#333
+style PSF fill:#cfc,stroke:#333
+style MTF fill:#ffc,stroke:#333
+style Strehl_Ratio fill:#fcc,stroke:#333`;
+
+        expect(deepDebugMermaid(content)).toBe(expected);
+    });
 });
 

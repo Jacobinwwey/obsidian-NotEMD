@@ -230,7 +230,8 @@ export function cleanupLatexDelimiters(content: string): string {
  * Deep debug function for Mermaid syntax.
  * 1. Converts "note right/left... of Node" comments into edge labels on the nearest preceding arrow.
  * 2. Fixes malformed arrow labels (e.g., `-->"` to `" -->`).
- * 3. Scans for nodes following arrows that are missing brackets but have trailing content.
+ * 3. Fixes pipe usage in labels (e.g., `-->|Text|` to `-->|"Text"|` or `-- Text |` to `--|"Text"|`).
+ * 4. Scans for nodes following arrows that are missing brackets but have trailing content.
  */
 export function deepDebugMermaid(content: string): string {
     // 1. Fix Mermaid Notes (move "note right of" to edge labels)
@@ -239,9 +240,101 @@ export function deepDebugMermaid(content: string): string {
     // 2. Fix Malformed Arrows (handle `-->"` and `"-- `)
     processed = fixMalformedArrows(processed);
 
-    // 3. Fix Missing Brackets (existing logic)
+    // 3. Fix Mermaid Pipes (handle `|`)
+    processed = fixMermaidPipes(processed);
+
+    // 4. Fix Missing Brackets (existing logic)
     return fixMissingBrackets(processed);
 }
+
+/**
+ * Fixes Mermaid edge labels involving pipes `|`.
+ * Ensures that labels are properly quoted and delimited.
+ * 1. `-->|Text|` -> `-->|"Text"|`
+ * 2. `-- Text |` -> `--|"Text"|`
+ * 3. Handles complex cases like `-->|Fourier Transform|^2|` -> `|"Fourier Transform|^2"|` (quoting the content)
+ */
+function fixMermaidPipes(content: string): string {
+    const lines = content.split('\n');
+    const processedLines = lines.map(line => {
+        // Skip lines without pipes or arrows
+        if (!line.includes('|') || (!line.includes('-->') && !line.includes('--'))) {
+            return line;
+        }
+
+        // 1. Protect Bracketed Content [...]
+        const placeholders: string[] = [];
+        let protectedLine = '';
+        let depth = 0;
+        let currentBlock = '';
+        
+        for (let i = 0; i < line.length; i++) {
+            const char = line[i];
+            if (char === '[') {
+                if (depth === 0) protectedLine += '___BRACKET_BLOCK_' + placeholders.length + '___';
+                depth++;
+                currentBlock += char;
+            } else if (char === ']') {
+                depth--;
+                currentBlock += char;
+                if (depth === 0) {
+                    placeholders.push(currentBlock);
+                    currentBlock = '';
+                }
+            } else {
+                if (depth > 0) currentBlock += char;
+                else protectedLine += char;
+            }
+        }
+        if (depth > 0) protectedLine += currentBlock;
+
+        // 2. Fix Pipes in Protected Line
+        // Regex: (Arrow)(Space)(Content Ending in Pipe)(Space)(NodeStart)
+        // Content must NOT contain Arrow markers to prevent over-greediness.
+        // NodeStart includes brackets, parens, quotes, or word chars.
+        
+        const arrowRegex = /((?:---|-->|--))(\s*)((?:(?!(?:---|-->|--)).)*\|)(\s*)(?=[a-zA-Z0-9_\[\(\{\"])/g;
+        
+        protectedLine = protectedLine.replace(arrowRegex, (match, arrow, space1, labelCandidate, space2) => {
+            // labelCandidate is the text between arrow and Node, ending with `|`.
+            
+            let content = labelCandidate.trim();
+            
+            // Logic:
+            // If it matches `|...|` (standard), extract inner.
+            // If it matches `...|` (separator), extract all.
+            // If it matches `|...|...|`, extract inner from first/last pipe?
+            
+            let inner = content;
+            
+            if (content.startsWith('|') && content.endsWith('|') && content.length > 1) {
+                // Remove outer pipes
+                inner = content.substring(1, content.length - 1);
+            } else if (content.endsWith('|')) {
+                // Remove trailing pipe
+                inner = content.substring(0, content.length - 1).trim();
+            }
+            
+            // Check if already quoted
+            if (inner.startsWith('"') && inner.endsWith('"')) {
+                return match;
+            }
+            
+            // Quote it and wrap in pipes
+            return `${arrow}${space1}|"${inner}"|${space2}`;
+        });
+
+        // 3. Restore Bracketed Content
+        placeholders.forEach((block, index) => {
+            protectedLine = protectedLine.replace('___BRACKET_BLOCK_' + index + '___', block);
+        });
+
+        return protectedLine;
+    });
+
+    return processedLines.join('\n');
+}
+
 
 /**
  * Fixes malformed arrow labels where the arrow syntax is absorbed into quotes.
