@@ -281,7 +281,33 @@ export function deepDebugMermaid(content: string): string {
     processed = fixInlineSubgraphs(processed);
 
     // 7. Fix Mermaid Comments (Move % comments to label)
-    return fixMermaidComments(processed);
+    processed = fixMermaidComments(processed);
+
+    // 8. Fix Unquoted Node Labels (Quote labels with special chars)
+    return fixUnquotedNodeLabels(processed);
+}
+
+/**
+ * Fixes unquoted node labels containing characters that might cause rendering issues.
+ * Heuristic: Quote labels containing ", ', =, *, ±, -
+ * Example: Plot[Plot "A"] -> Plot["Plot "A""]
+ */
+export function fixUnquotedNodeLabels(content: string): string {
+    const lines = content.split('\n');
+    const processedLines = lines.map(line => {
+        // Match NodeID[Content] where Content is not fully quoted
+        // Exclude content that starts with " (heuristic for already quoted)
+        // We use a safe regex that doesn't cross brackets to avoid breaking nested structures
+        return line.replace(/([a-zA-Z0-9_]+)\s*\[(?!")([^\[\]]+)\]/g, (match, nodeId, innerContent) => {
+             // Check for triggers: quotes, equals, asterisk, plus-minus, minus
+             // These are characters that often require quoting in Mermaid labels
+             if (/["'=*±-]/.test(innerContent)) {
+                 return `${nodeId}["${innerContent}"]`;
+             }
+             return match;
+        });
+    });
+    return processedLines.join('\n');
 }
 
 /**
