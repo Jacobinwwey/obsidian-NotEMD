@@ -228,23 +228,44 @@ export function cleanupLatexDelimiters(content: string): string {
 
 /**
  * Deep debug function for Mermaid syntax.
- * 1. Converts "note right/left... of Node" comments into edge labels on the nearest preceding arrow.
- * 2. Fixes malformed arrow labels (e.g., `-->"` to `" -->`).
- * 3. Fixes pipe usage in labels (e.g., `-->|Text|` to `-->|"Text"|` or `-- Text |` to `--|"Text"|`).
- * 4. Scans for nodes following arrows that are missing brackets but have trailing content.
+ * Applies all available fixes in a specific order.
+ * 1. Fix Mermaid Pipes (handle `|`).
+ * 2. Fix Mermaid Notes.
+ * 3. Fix Malformed Arrows.
+ * 4. Merge Double Labels.
+ * 5. Fix Missing Brackets.
  */
 export function deepDebugMermaid(content: string): string {
-    // 1. Fix Mermaid Notes (move "note right of" to edge labels)
-    let processed = fixMermaidNotes(content);
+    // 1. Fix Mermaid Pipes (handle `|`) - Requested to be first
+    let processed = fixMermaidPipes(content);
 
-    // 2. Fix Malformed Arrows (handle `-->"` and `"-- `)
+    // 2. Fix Mermaid Notes (move "note right of" to edge labels)
+    processed = fixMermaidNotes(processed);
+
+    // 3. Fix Malformed Arrows (handle `-->"` and `"-- `)
     processed = fixMalformedArrows(processed);
 
-    // 3. Fix Mermaid Pipes (handle `|`)
-    processed = fixMermaidPipes(processed);
+    // 4. Merge Double Labels
+    processed = mergeDoubleLabels(processed);
 
-    // 4. Fix Missing Brackets (existing logic)
+    // 5. Fix Missing Brackets (existing logic)
     return fixMissingBrackets(processed);
+}
+
+/**
+ * Merges double labels on a single edge.
+ * Pattern: `-- "Label1" -->|"Label2"|`
+ * Result: `-- "Label1<br>(Label2)" -->`
+ * This relies on fixMermaidPipes having already standardized the pipe label to `|"..."|`.
+ */
+export function mergeDoubleLabels(content: string): string {
+    // Regex to capture:
+    // -- "Label1" --> |"Label2"|
+    // We allow whitespace flexibility.
+    
+    return content.replace(/--\s*"([^"]*)"\s*-->\s*\|"([^"]*)"\|/g, (match, label1, label2) => {
+        return `-- "${label1}<br>(${label2})" -->`;
+    });
 }
 
 /**
@@ -254,7 +275,7 @@ export function deepDebugMermaid(content: string): string {
  * 2. `-- Text |` -> `--|"Text"|`
  * 3. Handles complex cases like `-->|Fourier Transform|^2|` -> `|"Fourier Transform|^2"|` (quoting the content)
  */
-function fixMermaidPipes(content: string): string {
+export function fixMermaidPipes(content: string): string {
     const lines = content.split('\n');
     const processedLines = lines.map(line => {
         // Skip lines without pipes or arrows
@@ -341,7 +362,7 @@ function fixMermaidPipes(content: string): string {
  * Rule: Replace ` -->"` with `" -->` and `"-- ` with `--" `, unless inside `[...]`.
  * Example: `AbInitio -- "Provides Parameters For -->" MM` -> `AbInitio -- "Provides Parameters For" --> MM`
  */
-function fixMalformedArrows(content: string): string {
+export function fixMalformedArrows(content: string): string {
     const lines = content.split('\n');
     const processedLines = lines.map(line => {
         // Simple check to avoid processing lines without arrow-like patterns
@@ -411,7 +432,7 @@ function fixMalformedArrows(content: string): string {
  * Internal function to fix missing brackets in Mermaid nodes.
  * Example: `... --> SpreadCalc价差计算 Spread Calculation;` -> `... --> SpreadCalc[价差计算 Spread Calculation];`
  */
-function fixMissingBrackets(content: string): string {
+export function fixMissingBrackets(content: string): string {
     const lines = content.split('\n');
     const processedLines = lines.map(line => {
         // Skip if not in a mermaid block context or no arrows
@@ -443,7 +464,7 @@ function fixMissingBrackets(content: string): string {
  * - Replace `-->` with `-- "Sentences" -->`.
  * - Remove the original note line.
  */
-function fixMermaidNotes(content: string): string {
+export function fixMermaidNotes(content: string): string {
     const lines = content.split('\n');
     const notesToProcess: { lineIndex: number; nodeId: string; text: string; }[] = [];
 

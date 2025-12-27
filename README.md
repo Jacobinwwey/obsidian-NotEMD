@@ -120,6 +120,7 @@ That's it! Explore the settings to unlock more features like web research, trans
         -   **Note Conversion**: Automatically converts `note right/left of` comments into standard Mermaid edge labels (e.g., `note right of A: text` becomes `A -- "text" --> B`), improving graph layout and readability.
         -   **Malformed Arrow Fix**: Deep debug mode now identifies and corrects malformed arrow labels where the arrow syntax is incorrectly absorbed into quotes (e.g., `A -- "Label -->" B` becomes `A -- "Label" --> B`).
         -   **Standardize Pipe Labels**: Automatically fixes and standardizes edge labels containing pipes, ensuring they are properly quoted (e.g., `-->|Text|` becomes `-->|"Text"|` and `-->|Math|^2|` becomes `-->|"Math|^2"|`).
+        -   **Merge Double Labels**: Detects and merges confusing double labels on a single edge (e.g., `A -- "Label1" -->|"Label2"| B`) into a single, clean label (`A -- "Label1<br>(Label2)" --> B`).
         -   **Extract Specific Original Text**:    - Define a list of questions in settings.
     - Extracts verbatim text segments from the active note that answer these questions.
     - **Merged Query Mode**: Option to process all questions in a single API call for efficiency.
