@@ -4,7 +4,8 @@ module.exports = {
   moduleFileExtensions: ['ts', 'js', 'json'],
   testMatch: ['**/tests/**/*.test.ts'],
   moduleNameMapper: {
-    '^obsidian$': '<rootDir>/src/__mocks__/obsidian.ts'
+    '^obsidian$': '<rootDir>/src/__mocks__/obsidian.ts',
+    '^mermaid$': '<rootDir>/src/__mocks__/mermaid.ts'
   },
   transform: {
     '^.+\\.ts$': [
