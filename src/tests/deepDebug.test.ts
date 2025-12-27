@@ -330,5 +330,69 @@ style Strehl_Ratio fill:#fcc,stroke:#333`;
 
         expect(deepDebugMermaid(content)).toBe(expected);
     });
+
+    test('should fix inline subgraphs used as edge labels', () => {
+        const content = `graph LR
+subgraph "Numerical Summation & Extrapolation"
+Series["Infinite Series S = Σ a_n"] --> PartialSums["Sequence S_N"];
+PartialSums --> DirectSum["Direct Summation Truncation"];
+PartialSums --> SeqTrans["Sequence Transformations"];
+
+SeqTrans --> Aitken["Aitken Δ² Process"];
+SeqTrans --> Shanks["Shanks Transformation e_k"];
+SeqTrans --> Levin["Levin Transformations u, t, v"];
+SeqTrans --> Richardson["Richardson Extrapolation"];
+SeqTrans --> Euler["Euler Transformation"];
+
+Aitken --> Shanks; subgraph "Relation: k=1" end;
+Shanks --> Pade["Padé Approximants"]; subgraph "Relation: Theoretical Link" end;
+
+Richardson --> Romberg["Romberg Integration"]; subgraph "Application" end;
+Richardson --> BulirschStoer["Bulirsch-Stoer ODE Solver"]; subgraph "Application" end;
+
+Euler --> Alternating["Alternating Series"]; subgraph "Specific Applicability" end;
+
+DirectSum -- "Slow Convergence" --> NeedAccel["Need for Acceleration"];
+NeedAccel --> SeqTrans;
+end
+
+style Aitken fill:#ccf,stroke:#333,stroke-width:2px
+style Richardson fill:#cfc,stroke:#333,stroke-width:2px
+style Shanks fill:#fcc,stroke:#333,stroke-width:2px
+style Levin fill:#ffc,stroke:#333,stroke-width:2px
+style Euler fill:#cff,stroke:#333,stroke-width:2px`;
+
+        const expected = `graph LR
+subgraph "Numerical Summation & Extrapolation"
+Series["Infinite Series S = Σ a_n"] --> PartialSums["Sequence S_N"];
+PartialSums --> DirectSum["Direct Summation Truncation"];
+PartialSums --> SeqTrans["Sequence Transformations"];
+
+SeqTrans --> Aitken["Aitken Δ² Process"];
+SeqTrans --> Shanks["Shanks Transformation e_k"];
+SeqTrans --> Levin["Levin Transformations u, t, v"];
+SeqTrans --> Richardson["Richardson Extrapolation"];
+SeqTrans --> Euler["Euler Transformation"];
+
+Aitken -- "Relation: k=1" --> Shanks;
+Shanks -- "Relation: Theoretical Link" --> Pade["Padé Approximants"];
+
+Richardson -- "Application" --> Romberg["Romberg Integration"];
+Richardson -- "Application" --> BulirschStoer["Bulirsch-Stoer ODE Solver"];
+
+Euler -- "Specific Applicability" --> Alternating["Alternating Series"];
+
+DirectSum -- "Slow Convergence" --> NeedAccel["Need for Acceleration"];
+NeedAccel --> SeqTrans;
+end
+
+style Aitken fill:#ccf,stroke:#333,stroke-width:2px
+style Richardson fill:#cfc,stroke:#333,stroke-width:2px
+style Shanks fill:#fcc,stroke:#333,stroke-width:2px
+style Levin fill:#ffc,stroke:#333,stroke-width:2px
+style Euler fill:#cff,stroke:#333,stroke-width:2px`;
+
+        expect(deepDebugMermaid(content)).toBe(expected);
+    });
 });
 

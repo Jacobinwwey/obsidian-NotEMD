@@ -275,7 +275,56 @@ export function deepDebugMermaid(content: string): string {
     processed = mergeDoubleLabels(processed);
 
     // 5. Fix Missing Brackets (existing logic)
-    return fixMissingBrackets(processed);
+    processed = fixMissingBrackets(processed);
+
+    // 6. Fix Inline Subgraphs (convert subgraph "Label" end; to edge label)
+    return fixInlineSubgraphs(processed);
+}
+
+/**
+ * Fixes inline subgraphs used as edge labels.
+ * Pattern: `NodeA --> NodeB; subgraph "Label" end;`
+ * Result: `NodeA -- "Label" --> NodeB;`
+ */
+export function fixInlineSubgraphs(content: string): string {
+    const lines = content.split('\n');
+    const processedLines = lines.map(line => {
+        // Regex to detect: Node ... Arrow ... Node; subgraph "Label" end;
+        // Captures:
+        // 1. Source (lazy)
+        // 2. Arrow (--> or ---)
+        // 3. Target (lazy)
+        // 4. Label (inside quotes)
+        
+        const regex = /^(.*?)\s*(---|-->)\s*(.*?);\s*subgraph\s+"(.*?)"\s*end;?\s*$/;
+        const match = line.match(regex);
+        
+        if (match) {
+            const source = match[1].trim();
+            const arrow = match[2].trim(); // '-->' or '---'
+            const target = match[3].trim();
+            const label = match[4].trim();
+            
+            // Construct new line: source -- "label" --> target;
+            // We use the arrow type to determine the connector.
+            // --> becomes -- "label" -->
+            // --- becomes -- "label" ---
+            
+            let newArrow = arrow;
+            if (arrow === '-->') {
+                newArrow = ` -- "${label}" --> `;
+            } else if (arrow === '---') {
+                newArrow = ` -- "${label}" --- `;
+            } else {
+                 // Fallback if regex matched something else (unlikely given regex)
+                 newArrow = ` -- "${label}" ${arrow} `;
+            }
+            
+            return `${source}${newArrow}${target};`;
+        }
+        return line;
+    });
+    return processedLines.join('\n');
 }
 
 /**
