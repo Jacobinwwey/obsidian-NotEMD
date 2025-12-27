@@ -272,17 +272,28 @@ export function cleanupLatexDelimiters(content: string): string {
 /**
  * Deep debug function for Mermaid syntax.
  * Applies all available fixes in a specific order.
+ * 0. Fix Smart Quotes (curly quotes to straight quotes, slashed notes).
  * 1. Fix Mermaid Pipes (handle `|`).
  * 2. Fix Mermaid Notes.
  * 3. Fix Malformed Arrows.
  * 4. Merge Double Labels.
  * 5. Fix Missing Brackets.
- * 6. Fix Semicolon Positioning.
- * 7. Fix Unquoted Labels with Semicolons.
+ * 6. Fix Inline Subgraphs.
+ * 7. Fix Mermaid Comments.
+ * 8. Fix Unquoted Node Labels.
+ * 9. Fix Intermediate Nodes.
+ * 10. Fix Doubled IDs.
+ * 11. Fix Excessive Brackets (including ]]] -> ]).
+ * 12. Fix Semicolon Positioning.
+ * 13. Fix Unquoted Labels with Semicolons.
+ * 14. Enhanced Note and Semicolon Cleanup.
  */
 export function deepDebugMermaid(content: string): string {
+    // 0. Fix Smart Quotes FIRST - handles “” -> "" and Note["/“text”/"] -> Note["/text/"]
+    let processed = fixSmartQuotes(content);
+
     // 1. Fix Mermaid Pipes (handle `|`) - Requested to be first
-    let processed = fixMermaidPipes(content);
+    processed = fixMermaidPipes(processed);
 
     // 2. Fix Mermaid Notes (move "note right of" to edge labels)
     processed = fixMermaidNotes(processed);
@@ -990,5 +1001,34 @@ export function enhancedNoteAndSemicolonCleanup(content: string): string {
     // Example: `A -.- B["Text"]; % comment` -> `A -.- B["Text"];`
     // This is already handled by rule 2 above
     
+    return processed;
+}
+
+/**
+ * Fixes smart (curly) quotes in Mermaid labels.
+ * Converts “” ‘’ to "" ''
+ * Specifically fixes Note["/“Sentences”/"] -> Note["/Sentences/"]
+ * Also handles general cases of excessive closing brackets if needed.
+ */
+export function fixSmartQuotes(content: string): string {
+    let processed = content
+        .replace(/[\u201C\u201D]/g, '"') // Curly double quotes to straight
+        .replace(/[\u2018\u2019]/g, "'"); // Curly single quotes to straight
+
+    // Fix slashed note pattern: Note["/“Sentences”/"] -> Note["/Sentences/"]
+    // Handle with spaces or without
+    processed = processed.replace(/Note\s*\["\s*\/\s*(["\u201C][^"\u201D]*["\u201D])\s*\/\s*"\]/g, (match, innerQuotes) => {
+        const innerText = innerQuotes.replace(/[\u201C\u201D]/g, '"').replace(/^["']|["']$/g, '');
+        return `Note["/${innerText}/"]`;
+    });
+    processed = processed.replace(/Note\s*\["\/([^"]+)\"\/"\]/g, (match, text) => `Note["/${text.trim()}/"]`);
+
+    // General for any node: [" / “text” / "] -> [" / text / "]
+    processed = processed.replace(/\["\s*\/\s*(["\u201C][^"\u201D]*["\u201D])\s*\/\s*"\]/g, (match, innerQuotes) => {
+        const innerText = innerQuotes.replace(/[\u201C\u201D]/g, '"').replace(/^["']|["']$/g, '');
+        return `["/${innerText}/"]`;
+    });
+    processed = processed.replace(/\["\/([^"]+)\"\/"\]/g, (match, text) => `["/${text.trim()}/"]`);
+
     return processed;
 }
