@@ -501,4 +501,3 @@ style Strehl_Ratio fill:#fcc,stroke:#333`;
         expect(deepDebugMermaid(content).trim()).toBe(expected.trim());
     });
 });
-
