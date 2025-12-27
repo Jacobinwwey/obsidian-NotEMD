@@ -229,14 +229,89 @@ export function cleanupLatexDelimiters(content: string): string {
 /**
  * Deep debug function for Mermaid syntax.
  * 1. Converts "note right/left... of Node" comments into edge labels on the nearest preceding arrow.
- * 2. Scans for nodes following arrows that are missing brackets but have trailing content.
+ * 2. Fixes malformed arrow labels (e.g., `-->"` to `" -->`).
+ * 3. Scans for nodes following arrows that are missing brackets but have trailing content.
  */
 export function deepDebugMermaid(content: string): string {
     // 1. Fix Mermaid Notes (move "note right of" to edge labels)
-    const noteFixedContent = fixMermaidNotes(content);
+    let processed = fixMermaidNotes(content);
 
-    // 2. Fix Missing Brackets (existing logic)
-    return fixMissingBrackets(noteFixedContent);
+    // 2. Fix Malformed Arrows (handle `-->"` and `"-- `)
+    processed = fixMalformedArrows(processed);
+
+    // 3. Fix Missing Brackets (existing logic)
+    return fixMissingBrackets(processed);
+}
+
+/**
+ * Fixes malformed arrow labels where the arrow syntax is absorbed into quotes.
+ * Rule: Replace ` -->"` with `" -->` and `"-- ` with `--" `, unless inside `[...]`.
+ * Example: `AbInitio -- "Provides Parameters For -->" MM` -> `AbInitio -- "Provides Parameters For" --> MM`
+ */
+function fixMalformedArrows(content: string): string {
+    const lines = content.split('\n');
+    const processedLines = lines.map(line => {
+        // Simple check to avoid processing lines without arrow-like patterns
+        if (!line.includes('--') && !line.includes('-->')) {
+            return line;
+        }
+
+        // 1. Protect Bracketed Content [...]
+        // We use a placeholder to hide content inside top-level brackets
+        const placeholders: string[] = [];
+        let protectedLine = '';
+        let depth = 0;
+        let currentBlock = '';
+        
+        for (let i = 0; i < line.length; i++) {
+            const char = line[i];
+            
+            if (char === '[') {
+                if (depth === 0) {
+                    protectedLine += '___BRACKET_BLOCK_' + placeholders.length + '___';
+                }
+                depth++;
+                currentBlock += char;
+            } else if (char === ']') {
+                depth--;
+                currentBlock += char;
+                if (depth === 0) {
+                    placeholders.push(currentBlock);
+                    currentBlock = '';
+                }
+            } else {
+                if (depth > 0) {
+                    currentBlock += char;
+                } else {
+                    protectedLine += char;
+                }
+            }
+        }
+        // Handle unclosed brackets (append remaining)
+        if (depth > 0) {
+            protectedLine += currentBlock;
+        }
+
+        // 2. Perform Replacements on Protected Line
+        // Fix A: ` -->"` -> `" -->`
+        // We look for the pattern and replace it. 
+        // Note: The user said "instances of ` -->"` ".
+        // We assume this means literally space-dash-dash-gt-quote.
+        protectedLine = protectedLine.replace(/ -->"/g, '" -->');
+
+        // Fix B: `"-- ` -> `--" `
+        // Quote-dash-dash-space
+        protectedLine = protectedLine.replace(/"-- /g, '--" ');
+
+        // 3. Restore Bracketed Content
+        placeholders.forEach((block, index) => {
+            protectedLine = protectedLine.replace('___BRACKET_BLOCK_' + index + '___', block);
+        });
+
+        return protectedLine;
+    });
+
+    return processedLines.join('\n');
 }
 
 /**

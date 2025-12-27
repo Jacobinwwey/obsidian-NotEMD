@@ -118,6 +118,7 @@ That's it! Explore the settings to unlock more features like web research, trans
     - **Move Error Files**: Optionally moves files with detected errors to a specified folder for manual review.
             -   **Advanced Fix Mode**: Includes robust fixes for unquoted node labels containing spaces, special characters, or nested brackets (e.g., `Node[Label [Text]]` -> `Node["Label [Text]"]`), ensuring compatibility with complex diagrams like Stellar Evolution paths. Also corrects malformed edge labels (e.g., `--["Label["-->` to `-- "Label" -->`). Additionally converts inline comments (`Consensus --> Adaptive; # Some advanced consensus` to `Consensus -- "Some advanced consensus" --> Adaptive`) and fixes incomplete quotes at line ends (`;"` at the end replaced with `"]`).
         -   **Note Conversion**: Automatically converts `note right/left of` comments into standard Mermaid edge labels (e.g., `note right of A: text` becomes `A -- "text" --> B`), improving graph layout and readability.
+        -   **Malformed Arrow Fix**: Deep debug mode now identifies and corrects malformed arrow labels where the arrow syntax is incorrectly absorbed into quotes (e.g., `A -- "Label -->" B` becomes `A -- "Label" --> B`).
         -   **Extract Specific Original Text**:    - Define a list of questions in settings.
     - Extracts verbatim text segments from the active note that answer these questions.
     - **Merged Query Mode**: Option to process all questions in a single API call for efficiency.
