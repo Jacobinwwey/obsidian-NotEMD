@@ -121,6 +121,10 @@ That's it! Explore the settings to unlock more features like web research, trans
         - **Comment Integration**: Automatically merges trailing comments (starting with `%`) into the edge label (e.g., `A -- Label --> B; % Comment` becomes `A -- "Label(Comment)" --> B;`).
         - **Malformed Arrows**: Fixes arrows absorbed into quotes (e.g., `A -- "Label -->" B` becomes `A -- "Label" --> B`).
         - **Inline Subgraphs**: Converts inline subgraph labels to edge labels.
+        - **Reverse Arrow Fix**: Corrects non-standard `X <-- Y` arrows to `Y --> X`.
+        - **Direction Keyword Fix**: Ensures `direction` keyword is lowercase inside subgraphs (e.g., `Direction TB` -> `direction TB`).
+        - **Comment Conversion**: Converts `//` comments into edge labels (e.g., `A --> B; // Comment` -> `A -- "Comment" --> B;`).
+        - **Duplicate Label Fix**: Simplifies repeated bracketed labels (e.g., `Node["Label"]["Label"]` -> `Node["Label"]`).
         - **Advanced Fix Mode**: Includes robust fixes for unquoted node labels containing spaces, special characters, or nested brackets (e.g., `Node[Label [Text]]` -> `Node["Label [Text]"]`), ensuring compatibility with complex diagrams like Stellar Evolution paths. Also corrects malformed edge labels (e.g., `--["Label["-->` to `-- "Label" -->`). Additionally converts inline comments (`Consensus --> Adaptive; # Some advanced consensus` to `Consensus -- "Some advanced consensus" --> Adaptive`) and fixes incomplete quotes at line ends (`;"` at the end replaced with `"]`).
         -   **Note Conversion**: Automatically converts `note right/left of` comments into standard Mermaid edge labels (e.g., `note right of A: text` becomes `A -- "text" --> B`), improving graph layout and readability. Now supports both arrow links (`-->`) and solid links (`---`).
                 - **Standardize Pipe Labels**: Automatically fixes and standardizes edge labels containing pipes, ensuring they are properly quoted (e.g., `-->|Text|` becomes `-->|"Text"|` and `-->|Math|^2|` becomes `-->|"Math|^2"|`).

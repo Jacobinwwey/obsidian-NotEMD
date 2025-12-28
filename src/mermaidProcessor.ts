@@ -313,6 +313,9 @@ export function deepDebugMermaid(content: string): string {
     // 7. Fix Mermaid Comments (Move % comments to label)
     processed = fixMermaidComments(processed);
 
+    // 17. Fix Double Slash Comments (// -> -- "..." -->) - Apply before general label fixes
+    processed = fixDoubleSlashComments(processed);
+
     // 8. Fix Unquoted Node Labels (Quote labels with special chars)
     processed = fixUnquotedNodeLabels(processed);
 
@@ -333,6 +336,15 @@ export function deepDebugMermaid(content: string): string {
 
     // 14. Enhanced Note Pattern and Semicolon Content Removal
     processed = enhancedNoteAndSemicolonCleanup(processed);
+
+    // 15. Fix Reverse Arrows (<--)
+    processed = fixReverseArrows(processed);
+
+    // 16. Fix Subgraph Direction (Direction -> direction)
+    processed = fixSubgraphDirection(processed);
+
+    // 18. Fix Duplicate Labels (["..."]["..."] -> ["..."])
+    processed = fixDuplicateLabels(processed);
 
     return processed;
 }
@@ -1031,4 +1043,141 @@ export function fixSmartQuotes(content: string): string {
     processed = processed.replace(/\["\/([^"]+)\"\/"\]/g, (match, text) => `["/${text.trim()}/"]`);
 
     return processed;
+}
+
+/**
+ * Fixes reverse arrows `A <-- B` to `B --> A`.
+ * Supports optional brackets/quotes on nodes.
+ * Example: `ExSitu["Ex-situ..."] <-- Sample;` -> `Sample --> ExSitu["Ex-situ..."];`
+ */
+export function fixReverseArrows(content: string): string {
+    const lines = content.split('\n');
+    const processedLines = lines.map(line => {
+        if (!line.includes('<--')) return line;
+
+        // Regex to capture:
+        // Group 1: Left Node (lazy)
+        // Group 2: <-- (literal)
+        // Group 3: Right Node (lazy)
+        // Group 4: Optional Semicolon
+        const regex = /^(.*?)\s*<--\s*(.*?)(;?)\s*$/;
+        const match = line.match(regex);
+
+        if (match) {
+            const leftNode = match[1].trim();
+            const rightNode = match[2].trim();
+            const semicolon = match[3] || '';
+            
+            return `${rightNode} --> ${leftNode}${semicolon}`;
+        }
+        return line;
+    });
+    return processedLines.join('\n');
+}
+
+/**
+ * Fixes `Direction` keyword case in subgraphs.
+ * Mermaid is case-sensitive inside subgraphs: `Direction TB` -> `direction TB`.
+ */
+export function fixSubgraphDirection(content: string): string {
+    const lines = content.split('\n');
+    let insideSubgraph = false;
+    const processedLines = lines.map(line => {
+        if (line.trim().startsWith('subgraph')) {
+            insideSubgraph = true;
+        } else if (line.trim() === 'end') {
+            insideSubgraph = false;
+        }
+
+        if (insideSubgraph) {
+            // Replace `Direction` with `direction` if followed by TB, BT, LR, RL, TD
+            return line.replace(/^\s*Direction\s+(TB|BT|LR|RL|TD)\b/g, (match) => {
+                return match.replace('Direction', 'direction');
+            });
+        }
+        return line;
+    });
+    return processedLines.join('\n');
+}
+
+/**
+ * Fixes comments designated by `//` on arrow lines, converting them to edge labels.
+ * Example: `Thermal --> Optical; // Thermo-optic effect` 
+ * Become: `Thermal -- "Thermo-optic effect" --> Optical;`
+ */
+export function fixDoubleSlashComments(content: string): string {
+    const lines = content.split('\n');
+    const processedLines = lines.map(line => {
+        if (!line.includes('//') || !line.includes('-->')) return line;
+
+        // Regex to find arrow relation followed by // comment
+        // Handle optional semicolon before //
+        // Group 1: Pre-arrow part
+        // Group 2: Arrow (-->)
+        // Group 3: Post-arrow part (target node)
+        // Group 4: Semicolon (optional)
+        // Group 5: Comment text
+        
+        // This regex assumes standard `-->` arrow. 
+        // We match `//` specifically.
+        
+        const regex = /^(.*?)(\s*-->\s*)(.*?)(;?)\s*\/\/\s*(.*)$/;
+        const match = line.match(regex);
+        
+        if (match) {
+            const preArrow = match[1]; // "Thermal"
+            const arrow = match[2]; // " --> "
+            const target = match[3].trim(); // "Optical"
+            const semicolon = match[4]; // ";"
+            const comment = match[5].trim(); // "Thermo-optic effect"
+            
+            if (comment) {
+                // Construct: Pre -- "Comment" --> Target;
+                // Note: arrow variable contains " --> ". We change it to " -- "Comment" --> "
+                const newArrow = ` -- "${comment}" --> `;
+                return `${preArrow}${newArrow}${target}${semicolon}`;
+            }
+        }
+        return line;
+    });
+    return processedLines.join('\n');
+}
+
+/**
+ * Fixes duplicated bracketed labels.
+ * Example: `Node["Label"]["Label"]` -> `Node["Label"]`
+ * Retains only the last occurrence if they differ, or just collapses them.
+ * The prompt says: "only the final occurrence shall be retained".
+ */
+export function fixDuplicateLabels(content: string): string {
+    const lines = content.split('\n');
+    const processedLines = lines.map(line => {
+        // Regex to match consecutive quoted brackets: ["..."]["..."]...
+        // We want to replace the whole sequence with just the last ["..."]
+        
+        // Strategy: Find a sequence of 2 or more `["..."]` blocks (allowing optional whitespace)
+        // Replace with the last block.
+        
+        // Regex for one block: \[\"[^"]*\"\]
+        const blockRegex = /\["[^"]*"\]/g;
+        
+        // We iterate line by line.
+        // If line has multiple blocks adjacent, we check them.
+        
+        // Harder to do with single regex replace because of "last occurrence".
+        // Example: `A["1"]["2"]["3"]` -> `A["3"]`
+        
+        // Regex: ((\[\"[^"]*\"\]\s*)+)
+        // This captures the whole chain.
+        
+        return line.replace(/((?:\["[^"]*"\]\s*){2,})/g, (match) => {
+             // Split match into blocks
+             const blocks = match.match(/\["[^"]*"\]/g);
+             if (blocks && blocks.length > 0) {
+                 return blocks[blocks.length - 1];
+             }
+             return match;
+        });
+    });
+    return processedLines.join('\n');
 }
