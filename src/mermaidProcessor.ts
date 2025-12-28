@@ -331,6 +331,9 @@ export function deepDebugMermaid(content: string): string {
     // 12. Fix Semicolon Positioning (Move "] before ;)
     processed = fixSemicolonPositioning(processed);
 
+    // 12.5. Fix Concatenated Labels (SubdivideSubdivide... -> Subdivide["Subdivide..."])
+    processed = fixConcatenatedLabels(processed);
+
     // 13. Fix Unquoted Labels Ending with Semicolons
     processed = fixUnquotedLabelsWithSemicolons(processed);
 
@@ -1362,6 +1365,134 @@ export function fixDoubleDashToArrow(content: string): string {
         }
         return line;
     });
+    return processedLines.join('\n');
+}
+
+/**
+ * Scans the content to identify valid Node IDs.
+ * Used to heuristically fix malformed node definitions.
+ */
+function getValidNodeIDs(content: string): Set<string> {
+    const validIDs = new Set<string>();
+    
+    // Regex patterns to find node IDs
+    const patterns = [
+        /\b([a-zA-Z0-9_]+)\s*\[/g,       // Node[...
+        /\b([a-zA-Z0-9_]+)\s*-->/g,      // Node -->
+        /-->\s*([a-zA-Z0-9_]+)\b/g,      // --> Node
+        /\b([a-zA-Z0-9_]+)\s*---/g,      // Node ---
+        /---\s*([a-zA-Z0-9_]+)\b/g,      // --- Node
+        /^([a-zA-Z0-9_]+)\s*-->/gm,      // Start of line Node -->
+    ];
+
+    patterns.forEach(regex => {
+        let match;
+        while ((match = regex.exec(content)) !== null) {
+            // Filter out common keywords
+            const id = match[1];
+            if (!['graph', 'subgraph', 'style', 'class', 'click', 'linkStyle', 'TD', 'LR', 'TB', 'BT', 'RL'].includes(id)) {
+                validIDs.add(id);
+            }
+        }
+    });
+    
+    return validIDs;
+}
+
+/**
+ * Fixes concatenated node labels where the NodeID is repeated or the label starts with the NodeID,
+ * and the label is unquoted.
+ * Example: `... --> SubdivideSubdivide into 8 Octants;`
+ * If `Subdivide` is a valid ID, converts to `... --> Subdivide["Subdivide into 8 Octants"];`
+ */
+export function fixConcatenatedLabels(content: string): string {
+    const validIDs = getValidNodeIDs(content);
+    
+    const lines = content.split('\n');
+    const processedLines = lines.map(line => {
+        // Skip lines that don't look like they have arrows and unquoted text ending in ;
+        if (!line.includes(';') || (!line.includes('-->') && !line.includes('---'))) {
+            return line;
+        }
+        
+        // Regex:
+        // Group 1: Arrow prefix (e.g. `-->` or `--> |Label| `)
+        // Group 2: The Unquoted Text (NodeID + Label)
+        // Match up to ;
+        const regex = /((?:---|-->)(?:\s*\|[^|]+\|)?\s*)([^"\[\];\n]+);/;
+        
+        const match = line.match(regex);
+        if (match) {
+            const arrowPrefix = match[1];
+            const text = match[2].trim();
+            
+            // Check if text starts with a valid ID
+            // We iterate over validIDs to find a match at the start
+            // Prefer longest match?
+            let bestId = '';
+            
+            for (const id of validIDs) {
+                if (text.startsWith(id)) {
+                    if (id.length > bestId.length) {
+                        bestId = id;
+                    }
+                }
+            }
+            
+            if (bestId) {
+                // Determine label.
+                // If text is exactly the ID, we might not want to do anything?
+                // Example `A --> B;`. Text "B". ID "B".
+                // We leave it as is.
+                if (text === bestId) {
+                    return line;
+                }
+                
+                // If text is longer, we assume it's `ID` + `Label` (concatenated or just unquoted)
+                // Example `SubdivideSubdivide...` ID `Subdivide`.
+                // Example `BLabel Text`. ID `B`.
+                
+                // Construct replacement: Arrow ID["Text"]
+                // But wait, the `text` variable contains the FULL text including the ID prefix.
+                // In `SubdivideSubdivide...`, the full text IS the label we want?
+                // User example: `SubdivideSubdivide into...` -> `Subdivide["Subdivide into..."]`
+                // Wait, if the text is `SubdivideSubdivide into...`
+                // And we output `Subdivide["Subdivide into..."]`.
+                // The label inside quotes starts with `Subdivide`.
+                // So we assume the *entire* text is the label?
+                // Or do we strip the ID?
+                // `SubdivideSubdivide...`. ID `Subdivide`. Remainder `Subdivide...`.
+                // If we treat remainder as label: `Subdivide["Subdivide..."]`.
+                // If we treat whole text as label: `Subdivide["SubdivideSubdivide..."]`.
+                // The user example output is `Subdivide["Subdivide into 8 Octants"]`.
+                // Broken input: `SubdivideSubdivide into 8 Octants`.
+                // It seems the "broken" text is basically `ID` + `Label`.
+                // And the User wants `ID` + `["Label"]`.
+                // So we need to remove the FIRST instance of ID from the text.
+                // `Subdivide` (ID) + `Subdivide into...` (Label).
+                // `text` starts with `bestId`.
+                // Label = text.substring(bestId.length).
+                
+                let label = text.substring(bestId.length).trim();
+                
+                // Special check for `SubdivideSubdivide` pattern where label matches ID?
+                // Actually if `label` itself starts with `bestId`?
+                // In `SubdivideSubdivide...`, label is `Subdivide into...`.
+                // It starts with `Subdivide`.
+                // This seems consistent.
+                
+                // What if `BLabel Text`. ID `B`. Label `Label Text`.
+                // Result `B["Label Text"]`.
+                
+                // If label is empty (e.g. `A --> A;`), we already skipped it.
+                
+                return line.replace(regex, `${arrowPrefix}${bestId}["${label}"];`);
+            }
+        }
+        
+        return line;
+    });
+    
     return processedLines.join('\n');
 }
 
