@@ -93,3 +93,56 @@ const result6 = deepDebugMermaid(input6);
 console.log("\nInput 6 Result (Duplicate Labels):\n", result6);
 const expected6 = `D --> E["Label"];`;
 console.log("Test 6 Passed:", result6.includes(expected6));
+
+console.log("\n--- User Requested Test Case ---");
+const userExampleInput = `mermaid
+graph LR
+subgraph "Energy Storage Comparison Log-Log Scale"
+direction LR
+A[Conventional Capacitor] -- Low Energy, High Power --> BSupercapacitor;
+B -- Moderate Energy & Power -- "Balanced Energy/Power<br>Widely Used" --> C["Lithium-ion Battery"];
+C -- Higher Energy, Lower Power --> D[Flow Battery];
+D -- Very High Energy, Low Power -- "Grid Scale<br>High Energy Capacity<br>Geographically Limited" --> E[Pumped Hydro / CAES];
+F[Flywheel] -- Similar to Supercap but Mechanical --> B;
+
+XAxis["Power Density W/kg or W/L"];
+YAxis["Energy Density Wh/kg or Wh/L"];
+
+note right of A : Very High Power Density<br>Very Low Energy Density
+end
+XAxis --- YAxis;`;
+
+// We use refineMermaidBlocks to simulate the full pipeline including checkMermaidErrors
+import { refineMermaidBlocks } from './mermaidProcessor';
+
+// Mock checkMermaidErrors to force deepDebug (since we can't easily run mermaid.parse here without headless setup)
+// Or we just call deepDebugMermaid directly if we are sure it covers it.
+// The user said: "Start only when Mermaid errors still exist ... deep debug function needs to be added."
+// refineMermaidBlocks calls deepDebugMermaid if checkMermaidErrors > 0.
+// Since we can't easily run real mermaid.parse in this CLI environment without a browser/headless,
+// we will verify deepDebugMermaid logic directly.
+
+const resultUser = deepDebugMermaid(userExampleInput);
+console.log("\nUser Example Result:\n", resultUser);
+
+// Verification logic
+const expectedUserFragment1 = 'B -- "Moderate Energy & Power<br>Balanced Energy/Power<br>Widely Used" --> C["Lithium-ion Battery"]';
+const expectedUserFragment2 = 'D -- "Very High Energy, Low Power<br>Grid Scale<br>High Energy Capacity<br>Geographically Limited" --> E["Pumped Hydro / CAES"]';
+const expectedUserFragment3 = 'NoteA["Note: Very High Power Density<br>Very Low Energy Density"]';
+const expectedUserFragment4 = 'A -.- NoteA';
+
+const userTestPassed = resultUser.includes(expectedUserFragment1) &&
+                       resultUser.includes(expectedUserFragment2) &&
+                       resultUser.includes(expectedUserFragment3) &&
+                       resultUser.includes(expectedUserFragment4);
+
+console.log("User Example Test Passed:", userTestPassed);
+
+if (!userTestPassed) {
+    console.log("Missing Fragments:");
+    if (!resultUser.includes(expectedUserFragment1)) console.log("- Fragment 1 (Double Dash Chain B)");
+    if (!resultUser.includes(expectedUserFragment2)) console.log("- Fragment 2 (Double Dash Chain D)");
+    if (!resultUser.includes(expectedUserFragment3)) console.log("- Fragment 3 (Note Definition)");
+    if (!resultUser.includes(expectedUserFragment4)) console.log("- Fragment 4 (Note Connection)");
+}
+
