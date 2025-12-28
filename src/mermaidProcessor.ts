@@ -346,8 +346,150 @@ export function deepDebugMermaid(content: string): string {
     // 18. Fix Duplicate Labels (["..."]["..."] -> ["..."])
     processed = fixDuplicateLabels(processed);
 
+    // 19. Fix Nested Mermaid Quotes (["...["..."]..."] -> ["...[...]..."])
+    processed = fixNestedMermaidQuotes(processed);
+
+    // 20. Fix Quoted Labels After Semicolon (A --> B; "Label" -> A -- "Label" --> B;)
+    processed = fixQuotedLabelsAfterSemicolon(processed);
+
+    // 21. Fix Double Dash To Arrow (... -- ...; -> ... --> ...;)
+    processed = fixDoubleDashToArrow(processed);
+
+    // 22. Fix Targeted Notes (note Node "Content" -> NoteNode["Content"] \n Node -.- NoteNode)
+    processed = fixTargetedNotes(processed);
+
     return processed;
 }
+
+/**
+ * Fixes nested quotes within Mermaid node labels.
+ * Ensures that if a label is wrapped in `["..."]`, any internal double quotes are removed.
+ * This handles cases like: `SP --> Martingale["Martingale<br>E["Future | Past"] = Present"];`
+ * converting it to: `SP --> Martingale["Martingale<br>E[Future | Past] = Present"];`
+ * Uses a balanced bracket approach to identify the outer block.
+ */
+export function fixNestedMermaidQuotes(content: string): string {
+    const lines = content.split('\n');
+    const processedLines = lines.map(line => {
+        // Optimization: Skip if no `["` present
+        if (!line.includes('["')) return line;
+
+        let newLine = '';
+        let currentIndex = 0;
+        
+        while (currentIndex < line.length) {
+            // Find start of a potential `["` block
+            const openQuoteIndex = line.indexOf('["', currentIndex);
+            
+            if (openQuoteIndex === -1) {
+                // No more blocks, append rest of line
+                newLine += line.slice(currentIndex);
+                break;
+            }
+
+            // Append everything before the block
+            newLine += line.slice(currentIndex, openQuoteIndex);
+            
+            // Now scan for the closing `"]` using balanced brackets
+            let depth = 0;
+            let foundClose = false;
+            let closeIndex = -1;
+            
+            // Start scanning from the `[`
+            for (let i = openQuoteIndex; i < line.length; i++) {
+                const char = line[i];
+                
+                if (char === '[') {
+                    depth++;
+                } else if (char === ']') {
+                    depth--;
+                }
+                
+                // Check if we are at depth 0 (closed) and it's a `"]` pattern
+                // The closing pattern is `"]`. So current char is `]` and prev was `"`.
+                // Note: We need to be careful. The block starts with `["`.
+                // If we have `["abc"]`, at `]` depth becomes 0.
+                if (depth === 0) {
+                    // Check if it's `"]`
+                    if (line[i] === ']' && line[i-1] === '"') {
+                        closeIndex = i;
+                        foundClose = true;
+                        break;
+                    }
+                }
+            }
+            
+            if (foundClose) {
+                // We found a complete `[" ... "]` block
+                // Extract content: between `["` (start+2) and `"]` (end-1)
+                const fullBlock = line.slice(openQuoteIndex, closeIndex + 1);
+                const innerContent = line.slice(openQuoteIndex + 2, closeIndex - 1); // remove `["` and `"]`
+                
+                // Process inner content: remove all quotes `"`
+                // Requirement: "remove all redundant `"` characters"
+                // This keeps `["` and `"]` valid as brackets [ ] inside.
+                const cleanContent = innerContent.replace(/"/g, '');
+                
+                // Reconstruct block
+                newLine += `["${cleanContent}"]`;
+                
+                // Advance index past this block
+                currentIndex = closeIndex + 1;
+            } else {
+                // Unbalanced or malformed, just keep the `["` and move on
+                // To avoid infinite loop, advance past the `["`
+                newLine += '["';
+                currentIndex = openQuoteIndex + 2;
+            }
+        }
+        
+        return newLine;
+    });
+    return processedLines.join('\n');
+}
+
+/**
+ * Fixes formatted arrows followed by a semicolon and a string literal.
+ * Converts `A --> B; "Label"` into `A -- "Label" --> B;`.
+ * Example: `Levy --> Stationary; "Increments are stationary"`
+ */
+export function fixQuotedLabelsAfterSemicolon(content: string): string {
+    const lines = content.split('\n');
+    const processedLines = lines.map(line => {
+        // Regex to look for:
+        // 1. Everything before the arrow (Source)
+        // 2. The arrow (-->)
+        // 3. The target node (Target)
+        // 4. A semicolon
+        // 5. Optional whitespace
+        // 6. A quoted string ("Label")
+        // 7. Optional trailing content (ignored or kept?) -> usually assume end of meaningful instruction
+        
+        // We match `-->` specifically as per request.
+        if (!line.includes('-->')) return line;
+        
+        // Regex:
+        // ^(start) (-->) (target) (;)\s* " (label) " \s* $
+        const regex = /^(.*?)\s*(-->)\s*(.*?);\s*"([^"]+)"\s*$/;
+        
+        const match = line.match(regex);
+        if (match) {
+            const source = match[1].trim();
+            const arrow = match[2].trim(); // "-->"
+            const target = match[3].trim();
+            const label = match[4].trim(); // content inside quotes
+            
+            // Construct new line
+            // Source -- "Label" --> Target;
+            // We insert the label into the arrow.
+            return `${source} -- "${label}" ${arrow} ${target};`;
+        }
+        
+        return line;
+    });
+    return processedLines.join('\n');
+}
+
 
 /**
  * Fixes excessive brackets like `[["` -> `["` and `["]` -> `"]`.
@@ -385,6 +527,9 @@ export function fixExcessiveBrackets(content: string): string {
             // Fix pattern like [[[ or ]]] (excessive brackets without quotes)
             processedLine = processedLine.replace(/\[\[\[/g, '[');
             processedLine = processedLine.replace(/\]\]\]/g, ']');
+
+            // NEW: Fix end of line ]] or ]];
+            processedLine = processedLine.replace(/\]\](;?)\s*$/g, ']$1');
             
             iteration++;
         }
@@ -1155,29 +1300,105 @@ export function fixDuplicateLabels(content: string): string {
         // Regex to match consecutive quoted brackets: ["..."]["..."]...
         // We want to replace the whole sequence with just the last ["..."]
         
-        // Strategy: Find a sequence of 2 or more `["..."]` blocks (allowing optional whitespace)
-        // Replace with the last block.
+        // Improved Regex to handle escaped quotes: \[\"(?:[^"\\]|\\.)*\"\]
+        const blockRegexStr = '\\["(?:[^"\\\\]|\\\\.)*"\\]';
+        const blockRegex = new RegExp(blockRegexStr, 'g');
         
-        // Regex for one block: \[\"[^"]*\"\]
-        const blockRegex = /\["[^"]*"\]/g;
+        // We look for 2 or more occurrences
+        const chainRegex = new RegExp(`((?:${blockRegexStr}\\s*){2,})`, 'g');
         
-        // We iterate line by line.
-        // If line has multiple blocks adjacent, we check them.
-        
-        // Harder to do with single regex replace because of "last occurrence".
-        // Example: `A["1"]["2"]["3"]` -> `A["3"]`
-        
-        // Regex: ((\[\"[^"]*\"\]\s*)+)
-        // This captures the whole chain.
-        
-        return line.replace(/((?:\["[^"]*"\]\s*){2,})/g, (match) => {
+        return line.replace(chainRegex, (match) => {
              // Split match into blocks
-             const blocks = match.match(/\["[^"]*"\]/g);
+             const blocks = match.match(blockRegex);
              if (blocks && blocks.length > 0) {
                  return blocks[blocks.length - 1];
              }
              return match;
         });
+    });
+    return processedLines.join('\n');
+}
+
+/**
+ * Fixes lines ending with `;` where the last delimiter is `--` instead of `-->`.
+ * Example: `A -- B;` -> `A --> B;`
+ */
+export function fixDoubleDashToArrow(content: string): string {
+    const lines = content.split('\n');
+    const processedLines = lines.map(line => {
+        // Target: ... -- Words...; where Words contains no -- or -->
+        if (!line.trim().endsWith(';')) return line;
+        
+        // Regex to capture:
+        // Group 1: Everything before
+        // Group 2: Pre-dash whitespace
+        // Group 3: Post-dash whitespace
+        // Group 4: Content
+        
+        // We match `--` explicitly.
+        // Lookahead (?![>]) ensures we don't match `-->`.
+        // We do NOT use (?![>-]) because we want to capture `---` candidates and filter them manually.
+        
+        const regex = /^(.*?)(\s*)--(\s*)(?![>])((?:(?!--|-->).)*?);\s*$/;
+        
+        const match = line.match(regex);
+        if (match) {
+            const p1 = match[1];
+            const s1 = match[2];
+            const s2 = match[3];
+            const p4 = match[4]; // Content
+            
+            // Check for ---
+            // If s1 is empty and p1 ends with -, it's --- (from left)
+            if (s1 === '' && p1.endsWith('-')) return line;
+            
+            // If s2 is empty and p4 starts with -, it's --- (from right)
+            if (s2 === '' && p4.startsWith('-')) return line;
+            
+            // Otherwise, it's a valid -- to convert
+            // We reconstruct with -->
+            // We preserve s1 and s2 whitespace.
+            return `${p1}${s1}-->${s2}${p4};`;
+        }
+        return line;
+    });
+    return processedLines.join('\n');
+}
+
+/**
+ * Fixes targeted note format: `note NodeId "Content"`
+ * Converts to:
+ * NoteNodeId["Content"]
+ * NodeId -.- NoteNodeId
+ * Also removes `[""]` artifacts from the content.
+ */
+export function fixTargetedNotes(content: string): string {
+    const lines = content.split('\n');
+    const processedLines = lines.flatMap(line => {
+        // Regex: note (NodeID) "(Content)"
+        // Use greedy match (.*) to handle potential unescaped quotes inside, assuming line ends with quote.
+        const regex = /^\s*note\s+([a-zA-Z0-9_]+)\s+"(.*)"\s*$/;
+        
+        const match = line.match(regex);
+        if (match) {
+            const nodeId = match[1];
+            let content = match[2];
+            
+            // Clean content: remove [""] if present
+            content = content.replace(/\[""\]/g, '');
+            // Handle potentially escaped versions if they exist
+            content = content.replace(/\[\\""\\""\]/g, '');
+            content = content.replace(/\[\\"\\"\]/g, '');
+
+            const noteId = `Note${nodeId}`;
+            
+            // Return two lines
+            return [
+                `${noteId}["${content}"]`,
+                `${nodeId} -.- ${noteId}`
+            ];
+        }
+        return [line];
     });
     return processedLines.join('\n');
 }
