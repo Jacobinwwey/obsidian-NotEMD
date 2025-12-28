@@ -131,7 +131,7 @@ That's it! Explore the settings to unlock more features like web research, trans
                 - **Merge Double Labels**: Detects and merges confusing double labels on a single edge (e.g., `A -- "Label1" -->|"Label2"| B`) into a single, clean label (`A -- "Label1<br>(Label2)" --> B`).
                         - **Unquoted Label Fix**: Automatically quotes node labels that contain potentially problematic characters (e.g., quotes, equals signs, math operators) but are missing outer quotes (e.g., `Plot[Plot "A"]` becomes `Plot["Plot "A""]`), preventing render errors.
                         - **Intermediate Node Fix**: Splits edges that contain an intermediate node definition into two separate edges (e.g., `A -- B[...] --> C` becomes `A --> B[...]` and `B[...] --> C`), ensuring valid Mermaid syntax.
-                        - **Doubled ID Fix**: Corrects malformed node definitions where the ID appears concatenated or duplicated at the start of the label (e.g., `Start --> SplitSplit Sample` becomes `Start --> Split[Split Sample]`).
+                        - **Concatenated Label Fix**: Robustly fixes node definitions where the ID is concatenated with the label (e.g., `SubdivideSubdivide...` becomes `Subdivide["Subdivide..."]`), even when preceded by pipe labels or when the duplication isn't exact, by validating against known node IDs.
                         - **Extract Specific Original Text**:    - Define a list of questions in settings.
                     - Extracts verbatim text segments from the active note that answer these questions.
                     - **Merged Query Mode**: Option to process all questions in a single API call for efficiency.
