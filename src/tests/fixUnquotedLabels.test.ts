@@ -30,7 +30,7 @@ style Results fill:#ccf,stroke:#333`;
         const expected = `graph TD
 Start[Start: Measure Rate Constant k at Multiple Temperatures T] --> DataCollect[ T_i, k_i data pairs];
 Data --> Transform[Transform data: Calculate 1/T_i, ln k_i];
-Transform --> Plot["Plot ln k vs 1/T: "Arrhenius Plot""];
+Transform --> Plot["Plot ln k vs 1/T: Arrhenius Plot"];
 Plot --> Regression["Perform Linear Regression: ln k = ln A - Ea/R1/T"];
 Regression --> SlopeExtract[" Slope 'm'"];
 Slope --> Calc_Ea["Calculate Ea = -m * R"];
