@@ -1,7 +1,60 @@
 import { deepDebugMermaid } from '../mermaidProcessor';
 
-describe('Deep Debug Mermaid Tests', () => {
+describe('deepDebugMermaid', () => {
+    test('User Example 1: Reverse Arrows', () => {
+        const input = `graph TD
+subgraph "Experimental Setup: Aging at Constant Pressure"
+PressureSource["Pressure Source Pump/Intensifier"] --> PressureControl["Pressure Controller Regulator/Feedback Loop"];
+PressureControl --> PressureVessel["High-Pressure Vessel/Chamber"];
+PressureSensor["Pressure Sensor"] --> PressureControl;
 
+TempSource["Heating/Cooling System"] --> TempControl["Temperature Controller PID"];
+TempControl --> PressureVessel;
+TempSensor["Temperature Sensor"] --> TempControl;
+
+Sample["Material Sample"] -- Placed Inside --> PressureVessel;
+Sample -- Interaction --> Environment["Controlled Atmosphere/Fluid"];
+
+subgraph "Data Acquisition & Monitoring"
+InSitu["In-situ Measurements Optional, e.g., Strain Gauge, AE Sensor"] -- Attached To/Observing --> Sample;
+InSitu --> DAQ["Data Acquisition System"];
+PressureSensor --> DAQ;
+TempSensor --> DAQ;
+ExSitu["Ex-situ Characterization Post-test or Interrupted"] <-- Sample;
+end
+
+DAQ --> Analysis["Data Analysis & Modeling"];
+ExSitu --> Analysis;
+end
+
+style PressureVessel fill:#f9f,stroke:#333,stroke-width:2px`;
+
+        const result = deepDebugMermaid(input);
+        const expectedFragment = `Sample --> ExSitu["Ex-situ Characterization Post-test or Interrupted"];`;
+        expect(result).toContain(expectedFragment);
+    });
+
+    test('User Example 2: Comments //', () => {
+        const input = `Thermal --> Optical; // Thermo-optic effect`;
+        const result = deepDebugMermaid(input);
+        const expected = `Thermal -- "Thermo-optic effect" --> Optical;`;
+        expect(result).toContain(expected);
+    });
+
+    test('User Example 3: Subgraph Direction', () => {
+        const input = `subgraph test
+  Direction TB
+end`;
+        const result = deepDebugMermaid(input);
+        expect(result).toContain(`direction TB`);
+    });
+
+    test('User Example 4: Duplicate Labels', () => {
+        const input = `D --> E["Label"]["Label"]["Label"];`;
+        const result = deepDebugMermaid(input);
+        expect(result).toContain(`D --> E["Label"];`);
+        expect(result).not.toContain(`E["Label"]["Label"]`);
+    });
     test('should add brackets to nodes missing them after arrow', () => {
         const content = `\
 \
