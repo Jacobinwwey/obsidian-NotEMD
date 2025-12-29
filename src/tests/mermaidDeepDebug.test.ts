@@ -43,7 +43,8 @@ describe('Mermaid Deep Debug Fixes', () => {
         // Check for node A definition with quoted label if possible, or just the note
         // The previous expectation was 'A -- "Low Energy...' but A is defined as A[...].
         // So we just check that the label is quoted correctly in the output line.
-        expect(processed).toContain('A[Conventional Capacitor] -- "Low Energy, High Power" --> BSupercapacitor');
+        // Also BSupercapacitor is fixed to B["Supercapacitor"]
+        expect(processed).toContain('A[Conventional Capacitor] -- "Low Energy, High Power" --> B["Supercapacitor"]');
 
         // Check triple dash support
         // G -- Label1 -- Label2 --- H; -> G -- "Label1<br>Label2" --- H;
