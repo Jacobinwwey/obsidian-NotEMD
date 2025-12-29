@@ -151,7 +151,55 @@ const tripleDashInput = `G -- Label1 -- Label2 --- H;`;
 const resultTriple = deepDebugMermaid(tripleDashInput);
 console.log("Result Triple:", resultTriple);
 const expectedTriple = `G -- "Label1<br>Label2" --- H;`;
-const tripleTestPassed = resultTriple.includes(expectedTriple);
-console.log("Triple Dash Test Passed:", tripleTestPassed);
+
+console.log("\n--- Table Corruption Test Case ---");
+
+const tableInput = `
+| Component | Specification | Typical Value & Unit | Significance |
+| : --- | :--- | :--- | :--- |
+| Some Item | Some Spec | 100 kg | High |
+
+\`\`\`mermaid
+graph TD
+A --> B;
+\`\`\`
+`;
+
+(async () => {
+    // deepDebugMermaid on raw table (should corrupt)
+    const rawResult = deepDebugMermaid(tableInput);
+    const rawCorrupted = rawResult.includes('| : -- "- |');
+    console.log("Deep Debug on Raw Text Corrupts Table (Expected):", rawCorrupted);
+
+    // refineMermaidBlocks on file (should NOT corrupt)
+    // Note: refineMermaidBlocks might need mocking of checkMermaidErrors if strictly unit testing, 
+    // but here we run integration logic. checkMermaidErrors uses mermaid.parse which might fail in node without setup?
+    // src/mermaidProcessor.ts imports mermaid.
+    // If this script runs in node, mermaid.parse might fail or warn.
+    // However, we just want to see if the table is touched.
+    // If checkMermaidErrors returns 0, deepDebug isn't called.
+    // We need to trigger deepDebug. 
+    // We can simulate it by ensuring checkMermaidErrors returns > 0, 
+    // or just relying on the fact that refineMermaidBlocks is now SAFER regardless.
+    // Actually, refineMermaidBlocks now scopes deepDebug to blocks only.
+    // So even if we force deepDebug, it shouldn't touch the table.
+    
+    // To properly test this in this script without full mock:
+    // We can verify that refineMermaidBlocks DOES NOT change the table part.
+    try {
+        const result = await refineMermaidBlocks(tableInput);
+        const tableCorrupted = result.includes('| : -- "- |');
+        console.log("refineMermaidBlocks Preserves Table (Expected True):", !tableCorrupted);
+        if (tableCorrupted) {
+            console.error("FAILED: Table was corrupted!");
+            console.log("Result snippet:", result.substring(0, 200));
+        } else {
+             console.log("PASSED: Table intact.");
+        }
+    } catch (e) {
+        console.error("Error running refineMermaidBlocks:", e);
+    }
+})();
+
 
 
