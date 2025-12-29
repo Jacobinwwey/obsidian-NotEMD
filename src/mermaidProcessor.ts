@@ -375,26 +375,28 @@ export function deepDebugMermaid(content: string): string {
 
 /**
  * Fixes double arrow labels.
- * Pattern: `Node -- Label1 -- Label2 --> Node`
+ * Pattern: `Node -- Label1 -- Label2 --> Node` or `Node -- Label1 -- Label2 --- Node`
  * Result: `Node -- "Label1<br>Label2" --> Node`
  * Handles quoted or unquoted labels.
  */
 export function fixDoubleArrowLabels(content: string): string {
     const lines = content.split('\n');
     return lines.map(line => {
-        // Regex: Start -- L1 -- L2 --> End
+        // Regex: Start -- L1 -- L2 (Arrow) End
+        // Arrow can be --> or ---
         // We match non-greedy content between dashes.
-        // We ensure we don't match if "-->" is inside (already fixed or normal arrow).
-        // Format: (Start) -- (L1) -- (L2) --> (End)
+        // We ensure we don't match if "-->" or "---" is inside (already fixed or normal arrow).
+        // Format: (Start) -- (L1) -- (L2) (Arrow) (End)
         
-        const regex = /^(.*?)\s*--\s*((?:(?!-->|---|--\s).)*?)\s*--\s*((?:(?!-->|---|--\s).)*?)\s*-->\s*(.*)$/;
+        const regex = /^(.*?)\s*--\s*((?:(?!-->|---|--\s).)*?)\s*--\s*((?:(?!-->|---|--\s).)*?)\s*(-->|---)\s*(.*)$/;
         
         const match = line.match(regex);
         if (match) {
             const start = match[1];
             let l1 = match[2].trim();
             let l2 = match[3].trim();
-            const end = match[4];
+            const arrow = match[4]; // "-->" or "---"
+            const end = match[5];
 
             // Strip quotes if present
             if (l1.startsWith('"') && l1.endsWith('"')) l1 = l1.slice(1, -1);
@@ -403,7 +405,7 @@ export function fixDoubleArrowLabels(content: string): string {
             // Combine with <br>
             const combined = `${l1}<br>${l2}`;
             
-            return `${start} -- "${combined}" --> ${end}`;
+            return `${start} -- "${combined}" ${arrow} ${end}`;
         }
         return line;
     }).join('\n');

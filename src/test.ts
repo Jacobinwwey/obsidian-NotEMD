@@ -146,3 +146,12 @@ if (!userTestPassed) {
     if (!resultUser.includes(expectedUserFragment4)) console.log("- Fragment 4 (Note Connection)");
 }
 
+console.log("\n--- Triple Dash Test Case ---");
+const tripleDashInput = `G -- Label1 -- Label2 --- H;`;
+const resultTriple = deepDebugMermaid(tripleDashInput);
+console.log("Result Triple:", resultTriple);
+const expectedTriple = `G -- "Label1<br>Label2" --- H;`;
+const tripleTestPassed = resultTriple.includes(expectedTriple);
+console.log("Triple Dash Test Passed:", tripleTestPassed);
+
+
