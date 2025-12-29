@@ -11,7 +11,7 @@ end`;
 
         const expected = `graph TD
 subgraph "Model Evaluation Workflow"
-CalcMetrics -- Metrics for Model A --> ModelA_Metrics;
+CalcMetrics -- "Metrics for Model A" --> ModelA_Metrics;
 CalcMetrics -- "Metrics for Model B(Assuming comparison context)" --> ModelB_Metrics;
 Decision --> Report;
 end`;
