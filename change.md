@@ -4,6 +4,16 @@ This document summarizes the major functional and architectural changes implemen
 
 ---
 
+## Bug Fixes
+
+### English
+*   **Fix Mermaid Table Corruption**: Resolved a critical issue where the "Batch Mermaid Fix" and "Deep Debug" features would incorrectly apply syntax fixes to Markdown tables (e.g., changing `| : --- |` to `| : -- "- |`), ensuring that modifications are strictly limited to code blocks within ```mermaid``` tags.
+
+### Chinese (中文)
+*   **修复Mermaid表格损坏**: 解决了“批量Mermaid修复”和“深度调试”功能错误地将语法修复应用于Markdown表格（例如，将 `| : --- |` 更改为 `| : -- "- |`）的关键问题，确保修改严格限制在 ```mermaid``` 标签内的代码块中。
+
+---
+
 ## Code/Architecture Update
 
 ### English

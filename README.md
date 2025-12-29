@@ -117,6 +117,7 @@ That's it! Explore the settings to unlock more features like web research, trans
     - **Error Reporting**: Generates a `mermaid_error_{foldername}.md` report listing files that still contain potential Mermaid errors after processing.
     - **Move Error Files**: Optionally moves files with detected errors to a specified folder for manual review.
     - **Smart Detection**: Now intelligently checks files for syntax errors using `mermaid.parse` before attempting fixes, saving processing time and avoiding unnecessary edits.
+    - **Safe Processing**: Ensures syntax fixes are applied exclusively to Mermaid code blocks, preventing accidental modification of Markdown tables or other content.
     - **Deep Debug Mode**: If errors persist after the initial fix, an advanced deep debug mode is triggered. This mode handles complex edge cases, including:
         - **Comment Integration**: Automatically merges trailing comments (starting with `%`) into the edge label (e.g., `A -- Label --> B; % Comment` becomes `A -- "Label(Comment)" --> B;`).
         - **Malformed Arrows**: Fixes arrows absorbed into quotes (e.g., `A -- "Label -->" B` becomes `A -- "Label" --> B`).
