@@ -212,18 +212,33 @@ export async function refineMermaidBlocks(content: string): Promise<string> {
 
 	let result = resultLines.join('\n');
 
-	// Apply global replacements outside mermaid blocks
-	// Replace note "Sentences" with Note1[/"Sentences"/]
-	result = result.replace(/note\s+"([^"]*)"/g, 'Note1[/"$1"/]');
-
-	// Remove content after ; if the line contains % after ;
-	result = result.replace(/;(.*)$/gm, (match, p1) => p1.includes('%') ? ';' : match);
-
-	// Check for remaining errors and apply deep debug fixes if needed
+	// Check for remaining errors to decide if we need deep debug
 	const errorCount = await checkMermaidErrors(result);
-	if (errorCount > 0) {
-		result = deepDebugMermaid(result);
-	}
+
+    // Regex to find mermaid blocks and apply fixes ONLY inside them
+    // Matches ```mermaid followed by content and ending with ```
+    // We use [\s\S]*? for non-greedy multiline match
+    const mermaidBlockRegex = /(```\s*mermaid\n)([\s\S]*?)(\n```)/gi;
+
+    result = result.replace(mermaidBlockRegex, (match, startTag, blockContent, endTag) => {
+        let processedBlock = blockContent;
+
+        // Apply scoped replacements inside mermaid blocks
+        
+        // Replace note "Sentences" with Note1[/"Sentences"/]
+        processedBlock = processedBlock.replace(/note\s+"([^"]*)"/g, 'Note1[/"$1"/]');
+
+        // Remove content after ; if the line contains % after ;
+        processedBlock = processedBlock.replace(/;(.*)$/gm, (match: string, p1: string) => p1.includes('%') ? ';' : match);
+
+        // Apply deep debug fixes if errors were found in the file
+        // (Optimally we would check this block specifically, but this preserves original logic trigger)
+        if (errorCount > 0) {
+            processedBlock = deepDebugMermaid(processedBlock);
+        }
+
+        return `${startTag}${processedBlock}${endTag}`;
+    });
 
 	return result;
 }
