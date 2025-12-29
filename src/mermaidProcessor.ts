@@ -1519,12 +1519,14 @@ function getValidNodeIDs(content: string): Set<string> {
     const validIDs = new Set<string>();
     
     // Regex patterns to find node IDs
+    // We strictly look for definitions (brackets) or usage as SOURCE.
+    // We exclude usage as TARGET (--> Node) because that might be the typo we are trying to fix (e.g. --> BSupercapacitor).
     const patterns = [
         /\b([a-zA-Z0-9_]+)\s*\[/g,       // Node[...
         /\b([a-zA-Z0-9_]+)\s*-->/g,      // Node -->
-        /-->\s*([a-zA-Z0-9_]+)\b/g,      // --> Node
+        // /-->\s*([a-zA-Z0-9_]+)\b/g,   // REMOVED: --> Node (Target)
         /\b([a-zA-Z0-9_]+)\s*---/g,      // Node ---
-        /---\s*([a-zA-Z0-9_]+)\b/g,      // --- Node
+        // /---\s*([a-zA-Z0-9_]+)\b/g,   // REMOVED: --- Node (Target)
         /^\s*([a-zA-Z0-9_]+)\s*-->/gm,   // Start of line Node -->
         /^\s*([a-zA-Z0-9_]+)\s*--\s/gm,  // Start of line Node -- (Labeled arrow start)
         /\b([a-zA-Z0-9_]+)\s*--\s/g,     // Node -- (anywhere)
@@ -1552,24 +1554,27 @@ function getValidNodeIDs(content: string): Set<string> {
  */
 export function fixConcatenatedLabels(content: string): string {
     const validIDs = getValidNodeIDs(content);
+    // console.log('Valid IDs:', Array.from(validIDs));
     
     const lines = content.split('\n');
     const processedLines = lines.map(line => {
-        // Skip lines that don't look like they have arrows and unquoted text ending in ;
-        if (!line.includes(';') || (!line.includes('-->') && !line.includes('---'))) {
+        // Skip lines that don't look like they have arrows and unquoted text
+        // Relaxed check for semicolon or arrow
+        if ((!line.includes('-->') && !line.includes('---'))) {
             return line;
         }
         
         // Regex:
         // Group 1: Arrow prefix (e.g. `-->` or `--> |Label| `)
         // Group 2: The Unquoted Text (NodeID + Label)
-        // Match up to ;
-        const regex = /((?:---|-->)(?:\s*\|[^|]+\|)?\s*)([^"\[\];\n]+);/;
+        // Match up to ; or end of line
+        const regex = /((?:---|-->)(?:\s*\|[^|]+\|)?\s*)([^"\[\];\n]+)(?:;|$)/;
         
         const match = line.match(regex);
         if (match) {
             const arrowPrefix = match[1];
             const text = match[2].trim();
+            // console.log('Checking text:', text);
             
             // Check if text starts with a valid ID
             // We iterate over validIDs to find a match at the start
@@ -1630,8 +1635,18 @@ export function fixConcatenatedLabels(content: string): string {
                 // Result `B["Label Text"]`.
                 
                 // If label is empty (e.g. `A --> A;`), we already skipped it.
+                if (!label) return line;
+
+                // Determine if we need to append a semicolon
+                // If the original line had a semicolon at the end of the match, or generally ended with it.
+                // The regex `(?:;|$)` consumed the semicolon if present.
+                // To be safe, we append `;` if the line ends with `;` or if the match consumed it.
+                // But `match[0]` includes the consumed part?
+                // `match[0]` is the whole match.
+                const hadSemi = match[0].trim().endsWith(';');
+                const suffix = hadSemi ? ';' : '';
                 
-                return line.replace(regex, `${arrowPrefix}${bestId}["${label}"];`);
+                return line.replace(match[0], `${arrowPrefix}${bestId}["${label}"]${suffix}`);
             }
         }
         
