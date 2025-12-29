@@ -1328,7 +1328,10 @@ export function enhancedNoteAndSemicolonCleanup(content: string): string {
     
     // 1. Replace note "Sentences" with Note1[/"Sentences"/]
     // This pattern catches standalone note statements (not "note right of")
-    processed = processed.replace(/\bnote\s+"([^"]*)"/gi, 'Note1[/"$1"/]');
+    let noteCounter = 1;
+    processed = processed.replace(/\bnote\s+"([^"]*)"/gi, (match, noteContent) => {
+        return `Note${noteCounter++}[/"${noteContent}"/]`;
+    });
     
     // 2. Remove content after ; if the line contains % after ;
     // Pattern: `;...%...` on any line
