@@ -225,8 +225,11 @@ export async function refineMermaidBlocks(content: string): Promise<string> {
 
         // Apply scoped replacements inside mermaid blocks
         
-        // Replace note "Sentences" with Note1[/"Sentences"/]
-        processedBlock = processedBlock.replace(/note\s+"([^"]*)"/g, 'Note1[/"$1"/]');
+        // Replace note "Sentences" with Note1[/"Sentences"/], Note2[/"Sentences"/]...
+        let noteCounter = 1;
+        processedBlock = processedBlock.replace(/note\s+"([^"]*)"/g, (match, noteContent) => {
+            return `Note${noteCounter++}[/"${noteContent}"/]`;
+        });
 
         // Remove content after ; if the line contains % after ;
         processedBlock = processedBlock.replace(/;(.*)$/gm, (match: string, p1: string) => p1.includes('%') ? ';' : match);
@@ -385,6 +388,23 @@ export function deepDebugMermaid(content: string): string {
     // 25. Fix Notes to Nodes (note right of A : Text -> NoteA["Note: Text"] A -.- NoteA)
     processed = fixNotesToNodes(processed);
 
+    // 26. Fix Shape Mismatch ([/["...["/] -> ["..."])
+    processed = fixShapeMismatch(processed);
+
+    return processed;
+}
+
+/**
+ * Fixes shape mismatch where node shape definitions are mixed with quoted labels.
+ * Specifically targets the pattern `[/["...["/]` and converts it to standard `["..."]`.
+ * Example: `note1[/["Path Difference = CB + BD["/] -> note1["Path Difference = CB + BD"]`
+ */
+export function fixShapeMismatch(content: string): string {
+    let processed = content;
+    // Fix start: [/[" -> ["
+    processed = processed.replace(/\[\/\["/g, '["');
+    // Fix end: ["/] -> "]
+    processed = processed.replace(/\["\/\]/g, '"]');
     return processed;
 }
 
