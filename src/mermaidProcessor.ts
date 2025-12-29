@@ -227,7 +227,7 @@ export async function refineMermaidBlocks(content: string): Promise<string> {
         
         // Replace note "Sentences" with Note1[/"Sentences"/], Note2[/"Sentences"/]...
         let noteCounter = 1;
-        processedBlock = processedBlock.replace(/note\s+"([^"]*)"/g, (match, noteContent) => {
+        processedBlock = processedBlock.replace(/note\s+"([^"]*)"/g, (match: string, noteContent: string) => {
             return `Note${noteCounter++}[/"${noteContent}"/]`;
         });
 
@@ -1328,8 +1328,9 @@ export function enhancedNoteAndSemicolonCleanup(content: string): string {
     
     // 1. Replace note "Sentences" with Note1[/"Sentences"/]
     // This pattern catches standalone note statements (not "note right of")
+    // Use a counter to avoid aliasing multiple notes to Note1
     let noteCounter = 1;
-    processed = processed.replace(/\bnote\s+"([^"]*)"/gi, (match, noteContent) => {
+    processed = processed.replace(/\bnote\s+"([^"]*)"/gi, (match: string, noteContent: string) => {
         return `Note${noteCounter++}[/"${noteContent}"/]`;
     });
     
