@@ -361,7 +361,148 @@ export function deepDebugMermaid(content: string): string {
     // 22. Fix Targeted Notes (note Node "Content" -> NoteNode["Content"] \n Node -.- NoteNode)
     processed = fixTargetedNotes(processed);
 
+    // 23. Fix Double Arrow Labels (Node -- L1 -- L2 --> Node)
+    processed = fixDoubleArrowLabels(processed);
+
+    // 24. Fix Unquoted Edge Labels (Node -- Unquoted --> Node)
+    processed = fixUnquotedEdgeLabels(processed);
+
+    // 25. Fix Notes to Nodes (note right of A : Text -> NoteA["Note: Text"] A -.- NoteA)
+    processed = fixNotesToNodes(processed);
+
     return processed;
+}
+
+/**
+ * Fixes double arrow labels.
+ * Pattern: `Node -- Label1 -- Label2 --> Node`
+ * Result: `Node -- "Label1<br>Label2" --> Node`
+ * Handles quoted or unquoted labels.
+ */
+export function fixDoubleArrowLabels(content: string): string {
+    const lines = content.split('\n');
+    return lines.map(line => {
+        // Regex: Start -- L1 -- L2 --> End
+        // We match non-greedy content between dashes.
+        // We ensure we don't match if "-->" is inside (already fixed or normal arrow).
+        // Format: (Start) -- (L1) -- (L2) --> (End)
+        
+        const regex = /^(.*?)\s*--\s*((?:(?!-->|---|--\s).)*?)\s*--\s*((?:(?!-->|---|--\s).)*?)\s*-->\s*(.*)$/;
+        
+        const match = line.match(regex);
+        if (match) {
+            const start = match[1];
+            let l1 = match[2].trim();
+            let l2 = match[3].trim();
+            const end = match[4];
+
+            // Strip quotes if present
+            if (l1.startsWith('"') && l1.endsWith('"')) l1 = l1.slice(1, -1);
+            if (l2.startsWith('"') && l2.endsWith('"')) l2 = l2.slice(1, -1);
+
+            // Combine with <br>
+            const combined = `${l1}<br>${l2}`;
+            
+            return `${start} -- "${combined}" --> ${end}`;
+        }
+        return line;
+    }).join('\n');
+}
+
+/**
+ * Fixes unquoted edge labels.
+ * Pattern: `Node -- Unquoted Text --> Node`
+ * Result: `Node -- "Unquoted Text" --> Node`
+ * Skips if already quoted.
+ */
+export function fixUnquotedEdgeLabels(content: string): string {
+    const lines = content.split('\n');
+    return lines.map(line => {
+        // Regex: (Start) -- (Label) --> (End)
+        // Label must NOT start with ".
+        // We need to be careful about `Node -- Node` (no label) which uses `---` or `-->` directly.
+        // This regex targets ` -- ` space-dash-dash-space specifically used for labels.
+        
+        const regex = /^(.*?)\s*--\s*([^">]+?)\s*-->\s*(.*)$/;
+        
+        // Exclude if it looks like `Node -- Node -->` (which is invalid anyway but...)
+        // We assume valid label text doesn't contain `-->` which regex enforces.
+        
+        const match = line.match(regex);
+        if (match) {
+            const start = match[1];
+            const label = match[2].trim();
+            const end = match[3];
+
+            // Double check it's not starting with quote (regex might miss if whitespace handled poorly)
+            if (label.startsWith('"')) return line;
+            
+            // Also ignore if label is empty (e.g. `A -- --> B` ? Invalid but possible typo)
+            if (!label) return line;
+
+            return `${start} -- "${label}" --> ${end}`;
+        }
+        return line;
+    }).join('\n');
+}
+
+/**
+ * Fixes "note position of Node : Content" by converting to a Note Node.
+ * Pattern: `note right of A : Text`
+ * Result: 
+ * NoteA["Note: Text"]
+ * A -.- NoteA
+ * 
+ * Also handles `note : Text` (standalone) -> `NoteX["Text"]` (no connection? or standalone)
+ */
+export function fixNotesToNodes(content: string): string {
+    const lines = content.split('\n');
+    const resultLines: string[] = [];
+    let standaloneCounter = 1;
+
+    // Regex for targeted notes
+    const targetedRegex = /^\s*note\s+(?:right|left|top|bottom)\s+of\s+([a-zA-Z0-9_]+)\s*:\s*(.*)$/i;
+    
+    // Regex for standalone notes (note : Content)
+    // Sometimes people write `note "Content"` which is handled elsewhere, but `note :` is specific.
+    const standaloneRegex = /^\s*note\s*:\s*(.*)$/i;
+
+    for (const line of lines) {
+        // Check Targeted
+        const tMatch = line.match(targetedRegex);
+        if (tMatch) {
+            const nodeId = tMatch[1];
+            const text = tMatch[2].trim();
+            const noteId = `Note${nodeId}`;
+            
+            // Format: NoteA["Note: ..."]
+            // If text is already quoted, strip them?
+            // User example: `Very High...` -> `["Note: Very High..."]`
+            let cleanText = text;
+            if (cleanText.startsWith('"') && cleanText.endsWith('"')) {
+                cleanText = cleanText.slice(1, -1);
+            }
+            
+            resultLines.push(`${noteId}["Note: ${cleanText}"]`);
+            resultLines.push(`${nodeId} -.- ${noteId}`);
+            continue;
+        }
+
+        // Check Standalone
+        const sMatch = line.match(standaloneRegex);
+        if (sMatch) {
+            let text = sMatch[1].trim();
+             if (text.startsWith('"') && text.endsWith('"')) {
+                text = text.slice(1, -1);
+            }
+            const noteId = `Note${standaloneCounter++}`;
+            resultLines.push(`${noteId}["${text}"]`);
+            continue;
+        }
+
+        resultLines.push(line);
+    }
+    return resultLines.join('\n');
 }
 
 /**
@@ -1382,7 +1523,9 @@ function getValidNodeIDs(content: string): Set<string> {
         /-->\s*([a-zA-Z0-9_]+)\b/g,      // --> Node
         /\b([a-zA-Z0-9_]+)\s*---/g,      // Node ---
         /---\s*([a-zA-Z0-9_]+)\b/g,      // --- Node
-        /^([a-zA-Z0-9_]+)\s*-->/gm,      // Start of line Node -->
+        /^\s*([a-zA-Z0-9_]+)\s*-->/gm,   // Start of line Node -->
+        /^\s*([a-zA-Z0-9_]+)\s*--\s/gm,  // Start of line Node -- (Labeled arrow start)
+        /\b([a-zA-Z0-9_]+)\s*--\s/g,     // Node -- (anywhere)
     ];
 
     patterns.forEach(regex => {

@@ -267,8 +267,8 @@ end`;
 
         const expected = `graph LR
 subgraph "Computational Chemistry Methods Spectrum"
-QM["Quantum Mechanics Electrons Explicit"] -- Based On --> SEq["Schrödinger Equation"];
-Classical["Classical Mechanics Electrons Implicit"] -- Based On --> NewtonEq["Newton's Equations / Classical Potentials"];
+QM["Quantum Mechanics Electrons Explicit"] -- "Based On" --> SEq["Schrödinger Equation"];
+Classical["Classical Mechanics Electrons Implicit"] -- "Based On" --> NewtonEq["Newton's Equations / Classical Potentials"];
 
 QM --> AbInitio["Ab Initio Methods<br>HF, MPn, CC, CI<br>No empirical parameters<br>Systematic improvability"];
 QM --> DFT["Density Functional Theory<br>Uses electron density ρr<br>Requires approx.  E<sub>XC</sub> functional"];
@@ -320,9 +320,9 @@ Pupil_Function["Pupil Function Pxp, yp = Axp, yp * expi * k * Wxp, yp"] -->|"Fou
 Wavefront_Aberration["Wavefront Aberration Wxp, yp"] --> Pupil_Function;
 PSF -->|"Fourier Transform"| OTF["Optical Transfer Function OTFνx, νy"];
 OTF -->|"Magnitude"| MTF["Modulation Transfer Function MTFνx, νy"];
-Wavefront_Aberration -- Reduces --> Strehl_Ratio["Strehl Ratio S"];
-PSF -- Peak Intensity --> Strehl_Ratio;
-Wavefront_Aberration -- Degrades --> MTF;
+Wavefront_Aberration -- "Reduces" --> Strehl_Ratio["Strehl Ratio S"];
+PSF -- "Peak Intensity" --> Strehl_Ratio;
+Wavefront_Aberration -- "Degrades" --> MTF;
 end
 
 style Wavefront_Aberration fill:#f9f,stroke:#333
