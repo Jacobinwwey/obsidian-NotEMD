@@ -5,7 +5,7 @@ import { NotemdSettings, ProgressReporter } from './types';
 import { DEFAULT_SETTINGS } from './constants';
 import { normalizeNameForFilePath, splitContent, getProviderForTask, getModelForTask, delay, createConcurrentProcessor, chunkArray, retry } from './utils'; // Added delay import
 import { callDeepSeekAPI, callOpenAIApi, callAnthropicApi, callGoogleApi, callMistralApi, callAzureOpenAIApi, callLMStudioApi, callOllamaApi, callOpenRouterAPI } from './llmUtils';
-import { refineMermaidBlocks, cleanupLatexDelimiters, deepDebugMermaid, checkMermaidErrors } from './mermaidProcessor'; // Assuming this will be moved or imported correctly later
+import { refineMermaidBlocks, cleanupLatexDelimiters, deepDebugMermaid, applyDeepDebugToMermaidBlocks, checkMermaidErrors } from './mermaidProcessor'; // Assuming this will be moved or imported correctly later
 import { _performResearch } from './searchUtils'; // Assuming this will be moved or imported correctly later
 import { showDeletionConfirmationModal } from './ui/modals'; // Assuming this will be moved or imported correctly later
 import mermaid from 'mermaid';
@@ -1003,7 +1003,7 @@ export async function batchFixMermaidSyntaxInFolder(app: App, settings: NotemdSe
 
                     if (fileErrorCount > 0) {
                          progressReporter.log(`⚠️ Errors persist in ${file.name}. Attempting Deep Debug...`);
-                         const deepDebugged = deepDebugMermaid(content);
+                         const deepDebugged = applyDeepDebugToMermaidBlocks(content);
                          
                          if (deepDebugged !== content) {
                              // Apply deep debug changes

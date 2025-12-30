@@ -8,9 +8,11 @@ This document summarizes the major functional and architectural changes implemen
 
 ### English
 *   **Fix Mermaid Table Corruption**: Resolved a critical issue where the "Batch Mermaid Fix" and "Deep Debug" features would incorrectly apply syntax fixes to Markdown tables (e.g., changing `| : --- |` to `| : -- "- |`), ensuring that modifications are strictly limited to code blocks within ```mermaid``` tags.
+*   **Enhanced Table Protection**: Implemented robust safeguards in the deep debug processor to specifically ignore lines matching Markdown table separators (e.g., `| :--- |`) and lines containing `:-- :`, preserving table integrity even in aggressive fix modes.
 
 ### Chinese (中文)
 *   **修复Mermaid表格损坏**: 解决了“批量Mermaid修复”和“深度调试”功能错误地将语法修复应用于Markdown表格（例如，将 `| : --- |` 更改为 `| : -- "- |`）的关键问题，确保修改严格限制在 ```mermaid``` 标签内的代码块中。
+*   **增强的表格保护**: 在深度调试处理器中实现了稳健的保护措施，专门忽略匹配Markdown表格分隔符（例如 `| :--- |`）和包含 `:-- :` 的行，即使在激进的修复模式下也能保持表格完整性。
 
 ---
 
