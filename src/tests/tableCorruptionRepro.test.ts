@@ -1,4 +1,4 @@
-import { refineMermaidBlocks, deepDebugMermaid } from '../mermaidProcessor';
+import { refineMermaidBlocks, deepDebugMermaid, applyDeepDebugToMermaidBlocks } from '../mermaidProcessor';
 
 describe('Table Corruption Reproduction', () => {
     const tableContent = `
@@ -9,15 +9,33 @@ describe('Table Corruption Reproduction', () => {
 
     const tripleBacktick = '```';
 
-    test('deepDebugMermaid should corrupt markdown tables (expected behavior for unsafe input)', () => {
-        // deepDebugMermaid applies global regexes.
+    test('deepDebugMermaid should NOT corrupt markdown tables due to safeguard', () => {
+        // deepDebugMermaid now has internal safeguards for lines with :-- :
         const result = deepDebugMermaid(tableContent);
         
-        // The reported corruption: | : --- | becomes | : -- "- |
-        // We expect it to change (corrupt) because deepDebugMermaid is not context-aware on its own.
-        // The fix is in refineMermaidBlocks not calling it on non-mermaid content.
-        expect(result).not.toBe(tableContent);
-        expect(result).toContain('| : -- "- |');
+        // We expect it to REMAIN UNCHANGED
+        expect(result).toBe(tableContent);
+        expect(result).not.toContain('| : -- "- |');
+    });
+
+    test('applyDeepDebugToMermaidBlocks should not corrupt markdown tables outside mermaid blocks', () => {
+        const content = `
+# Title
+
+Some text.
+
+${tableContent}
+
+${tripleBacktick}mermaid
+graph TD
+A --> B
+${tripleBacktick}
+`;
+        const result = applyDeepDebugToMermaidBlocks(content);
+        
+        // Table should be intact
+        expect(result).toContain('| : --- |'); 
+        expect(result).not.toContain('| : -- "- |');
     });
 
     test('refineMermaidBlocks should not corrupt markdown tables outside mermaid blocks', async () => {
