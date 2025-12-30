@@ -247,6 +247,21 @@ export async function refineMermaidBlocks(content: string): Promise<string> {
 }
 
 /**
+ * Applies deep debug fixes ONLY to the content within Mermaid code blocks.
+ * This is a safe alternative to calling deepDebugMermaid on the entire file.
+ * @param content The markdown content.
+ * @returns The processed content with Mermaid blocks debugged.
+ */
+export function applyDeepDebugToMermaidBlocks(content: string): string {
+    const mermaidBlockRegex = /(```\s*mermaid\n)([\s\S]*?)(\n```)/gi;
+
+    return content.replace(mermaidBlockRegex, (match, startTag, blockContent, endTag) => {
+        const processedBlock = deepDebugMermaid(blockContent);
+        return `${startTag}${processedBlock}${endTag}`;
+    });
+}
+
+/**
  * Cleans up LaTeX math delimiters.
  * Converts \( and \) to $.
  * Removes extra spaces around $.
@@ -307,8 +322,26 @@ export function cleanupLatexDelimiters(content: string): string {
  * 14. Enhanced Note and Semicolon Cleanup.
  */
 export function deepDebugMermaid(content: string): string {
+    // --- SAFEGUARD: Protect Table Lines ---
+    // User requirement: Ensure no modification to lines containing ':-- :'
+    // Also protecting standard markdown table separators to prevent corruption
+    const tableLinePlaceholderPrefix = '___PROTECTED_TABLE_LINE_';
+    const protectedTableLines: string[] = [];
+    
+    // Regex for table separator line: starts with |, contains dashes/colons/pipes, ends with | (roughly)
+    const tableSeparatorRegex = /^\s*\|(?:[\s\t]*:?[\s\t]*-+[\s\t]*:?[\s\t]*\|)+[\s\t]*$/;
+
+    let processed = content.split('\n').map(line => {
+        if (line.includes(':-- :') || tableSeparatorRegex.test(line)) {
+            const placeholder = `${tableLinePlaceholderPrefix}${protectedTableLines.length}___`;
+            protectedTableLines.push(line);
+            return placeholder;
+        }
+        return line;
+    }).join('\n');
+
     // 0. Fix Smart Quotes FIRST - handles “” -> "" and Note["/“text”/"] -> Note["/text/"]
-    let processed = fixSmartQuotes(content);
+    processed = fixSmartQuotes(processed);
 
     // 1. Fix Mermaid Pipes (handle `|`) - Requested to be first
     processed = fixMermaidPipes(processed);
@@ -343,7 +376,7 @@ export function deepDebugMermaid(content: string): string {
     // 10. Fix Doubled IDs (SplitSplit Sample -> Split[Split Sample])
     processed = fixDoubledID(processed);
 
-    // 11. Fix Excessive Brackets (Clean up [[...]] and handle ["; patterns)
+    // 11. Fix Excessive Brackets (including ]]] -> ]).
     processed = fixExcessiveBrackets(processed);
 
     // 12. Fix Semicolon Positioning (Move "] before ;)
@@ -355,7 +388,7 @@ export function deepDebugMermaid(content: string): string {
     // 13. Fix Unquoted Labels Ending with Semicolons
     processed = fixUnquotedLabelsWithSemicolons(processed);
 
-    // 14. Enhanced Note Pattern and Semicolon Content Removal
+    // 14. Enhanced Note and Semicolon Cleanup.
     processed = enhancedNoteAndSemicolonCleanup(processed);
 
     // 15. Fix Reverse Arrows (<--)
@@ -367,7 +400,7 @@ export function deepDebugMermaid(content: string): string {
     // 18. Fix Duplicate Labels (["..."]["..."] -> ["..."])
     processed = fixDuplicateLabels(processed);
 
-    // 19. Fix Nested Mermaid Quotes (["...["..."]..."] -> ["...[...]..."])
+    // 19. Fix Nested Mermaid Quotes (["...["..."]...."] -> ["...[...]..."])
     processed = fixNestedMermaidQuotes(processed);
 
     // 20. Fix Quoted Labels After Semicolon (A --> B; "Label" -> A -- "Label" --> B;)
@@ -390,6 +423,22 @@ export function deepDebugMermaid(content: string): string {
 
     // 26. Fix Shape Mismatch ([/["...["/] -> ["..."])
     processed = fixShapeMismatch(processed);
+
+    // --- RESTORE: Table Lines ---
+    if (protectedTableLines.length > 0) {
+        // We need to restore them. Since we operate on the whole string, we can replace the placeholders.
+        // However, some functions might have shifted things around? 
+        // Most functions are line-preserving or map lines.
+        // But `fixMermaidNotes` removes lines. `fixTargetedNotes` adds lines.
+        // The placeholders should persist as lines.
+        
+        // We iterate through the protected lines and replace their corresponding placeholder
+        protectedTableLines.forEach((originalLine, index) => {
+             const placeholder = `${tableLinePlaceholderPrefix}${index}___`;
+             // Use split/join to replace all occurrences (though strictly should be one)
+             processed = processed.split(placeholder).join(originalLine);
+        });
+    }
 
     return processed;
 }

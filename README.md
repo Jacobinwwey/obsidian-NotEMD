@@ -20,7 +20,7 @@ A Easy way to create your own Knowledge-base!
 
 Notemd enhances your Obsidian workflow by integrating with various Large Language Models (LLMs) to process your multi-languages notes, automatically generate wiki-links for key concepts, create corresponding concept notes, perform web research, helping you build powerful knowledge graphs and more.
 
-**Version:** 1.6.0
+**Version:** 1.6.1
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
@@ -117,7 +117,7 @@ That's it! Explore the settings to unlock more features like web research, trans
     - **Error Reporting**: Generates a `mermaid_error_{foldername}.md` report listing files that still contain potential Mermaid errors after processing.
     - **Move Error Files**: Optionally moves files with detected errors to a specified folder for manual review.
     - **Smart Detection**: Now intelligently checks files for syntax errors using `mermaid.parse` before attempting fixes, saving processing time and avoiding unnecessary edits.
-    - **Safe Processing**: Ensures syntax fixes are applied exclusively to Mermaid code blocks, preventing accidental modification of Markdown tables or other content.
+    - **Safe Processing**: Ensures syntax fixes are applied exclusively to Mermaid code blocks, preventing accidental modification of Markdown tables or other content. Includes robust safeguards to protect table syntax (e.g., `| :--- |`) from aggressive debug fixes.
     - **Deep Debug Mode**: If errors persist after the initial fix, an advanced deep debug mode is triggered. This mode handles complex edge cases, including:
         - **Comment Integration**: Automatically merges trailing comments (starting with `%`) into the edge label (e.g., `A -- Label --> B; % Comment` becomes `A -- "Label(Comment)" --> B;`).
         - **Malformed Arrows**: Fixes arrows absorbed into quotes (e.g., `A -- "Label -->" B` becomes `A -- "Label" --> B`).
@@ -535,7 +535,7 @@ MIT License - See [LICENSE](LICENSE) file for details.
 
 ---
 
-*Notemd v1.5.0 - Enhance your Obsidian knowledge graph with AI.*
+*Notemd v1.6.1 - Enhance your Obsidian knowledge graph with AI.*
 
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)
