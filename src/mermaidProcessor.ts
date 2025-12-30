@@ -424,6 +424,9 @@ export function deepDebugMermaid(content: string): string {
     // 26. Fix Shape Mismatch ([/["...["/] -> ["..."])
     processed = fixShapeMismatch(processed);
 
+    // 27. Cleanup Placeholder Artifacts
+    processed = fixPlaceholderArtifacts(processed);
+
     // --- RESTORE: Table Lines ---
     if (protectedTableLines.length > 0) {
         // We need to restore them. Since we operate on the whole string, we can replace the placeholders.
@@ -455,6 +458,14 @@ export function fixShapeMismatch(content: string): string {
     // Fix end: ["/] -> "]
     processed = processed.replace(/\["\/\]/g, '"]');
     return processed;
+}
+
+/**
+ * Cleans up leftover placeholder artifacts.
+ * Deletes '___BRACKET_BLOCK_0___' and similar artifacts.
+ */
+export function fixPlaceholderArtifacts(content: string): string {
+    return content.replace(/___BRACKET_BLOCK_\d+___/g, '');
 }
 
 /**
