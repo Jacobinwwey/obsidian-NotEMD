@@ -427,6 +427,9 @@ export function deepDebugMermaid(content: string): string {
     // 27. Cleanup Placeholder Artifacts
     processed = fixPlaceholderArtifacts(processed);
 
+    // 28. Cleanup `|\"\"|\"`
+    processed = processed.replace(/\|""\|"/g, '');
+
     // --- RESTORE: Table Lines ---
     if (protectedTableLines.length > 0) {
         // We need to restore them. Since we operate on the whole string, we can replace the placeholders.
