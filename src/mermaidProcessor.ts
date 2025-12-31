@@ -596,15 +596,19 @@ export function fixNotesToNodes(content: string): string {
     const resultLines: string[] = [];
     let standaloneCounter = 1;
 
-    // Regex for targeted notes
+    // Regex for targeted notes (standard mermaid: note right of ...)
     const targetedRegex = /^\s*note\s+(?:right|left|top|bottom)\s+of\s+([a-zA-Z0-9_]+)\s*:\s*(.*)$/i;
+    
+    // Regex for "note for/of Node Content" (User Extension)
+    // Matches: note for Node "Content"
+    const noteForOfRegex = /^\s*note\s+(?:for|of)\s+([a-zA-Z0-9_]+)\s+(.*)$/i;
     
     // Regex for standalone notes (note : Content)
     // Sometimes people write `note "Content"` which is handled elsewhere, but `note :` is specific.
     const standaloneRegex = /^\s*note\s*:\s*(.*)$/i;
 
     for (const line of lines) {
-        // Check Targeted
+        // Check Targeted (Standard)
         const tMatch = line.match(targetedRegex);
         if (tMatch) {
             const nodeId = tMatch[1];
@@ -620,6 +624,24 @@ export function fixNotesToNodes(content: string): string {
             }
             
             resultLines.push(`${noteId}["Note: ${cleanText}"]`);
+            resultLines.push(`${nodeId} -.- ${noteId}`);
+            continue;
+        }
+
+        // Check Targeted (Note For/Of - User Extension)
+        const nfMatch = line.match(noteForOfRegex);
+        if (nfMatch) {
+            const nodeId = nfMatch[1];
+            let text = nfMatch[2].trim();
+            const noteId = `Note${nodeId}`;
+
+            // Clean quotes
+            if (text.startsWith('"') && text.endsWith('"')) {
+                text = text.slice(1, -1);
+            }
+            
+            // User requested format: NoteM00[" Gaussian Intensity Profile"] (with leading space)
+            resultLines.push(`${noteId}[" ${text}"]`);
             resultLines.push(`${nodeId} -.- ${noteId}`);
             continue;
         }
