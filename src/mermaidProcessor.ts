@@ -433,6 +433,9 @@ export function deepDebugMermaid(content: string): string {
     // 28. Cleanup `|\"\"|\"`
     processed = processed.replace(/\|""\|"/g, '');
 
+    // 29. Cleanup `\[""\]`
+    processed = processed.replace(/\[""\]/g, '');
+
     // 29 Fix Misplaced Pipes (>|"..."| ...)
     processed = fixMisplacedPipes(processed);
 
