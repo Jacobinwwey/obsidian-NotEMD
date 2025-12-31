@@ -13,7 +13,7 @@ Barrier1 -- "Activation Process Modifies" --> Barrier2
 end`;
 
         const expectedFragment1 = `Reactants[Initial Solid State<br>Energy E1] --> Barrier1["Activation Energy Ea1"]`;
-        const expectedFragment2 = `Barrier1["Activation Energy Ea1"] --> Products[Activated State / Products<br>Energy E2]`;
+        const expectedFragment2 = `Barrier1["Activation Energy Ea1"] --> Products["Activated State / Products<br>Energy E2"]`;
         // Note: fixUnquotedNodeLabels adds quotes to ActivatedSolid because of the single quote in E1'
         const expectedFragment3 = `ActivatedSolid["Activated Solid State<br>Energy E1'"] --> Barrier2["Lowered Activation Energy Ea2<br>Ea2 < Ea1"]`;
         const expectedFragment4 = `Barrier2["Lowered Activation Energy Ea2<br>Ea2 < Ea1"] --> Products`;

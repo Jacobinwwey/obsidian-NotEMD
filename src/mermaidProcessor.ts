@@ -349,6 +349,9 @@ export function deepDebugMermaid(content: string): string {
     // 2. Fix Mermaid Notes (move "note right of" to edge labels)
     processed = fixMermaidNotes(processed);
 
+    // 2.5. Fix Notes to Nodes (note right of A : Text -> NoteA["Note: Text"] A -.- NoteA)
+    processed = fixNotesToNodes(processed);
+
     // 3. Fix Malformed Arrows (handle `-->"` and `"-- `)
     processed = fixMalformedArrows(processed);
 
@@ -420,9 +423,6 @@ export function deepDebugMermaid(content: string): string {
 
     // 24. Fix Unquoted Edge Labels (Node -- Unquoted --> Node)
     processed = fixUnquotedEdgeLabels(processed);
-
-    // 25. Fix Notes to Nodes (note right of A : Text -> NoteA["Note: Text"] A -.- NoteA)
-    processed = fixNotesToNodes(processed);
 
     // 26. Fix Shape Mismatch ([/["...["/] -> ["..."])
     processed = fixShapeMismatch(processed);
@@ -512,6 +512,7 @@ export function fixPlaceholderArtifacts(content: string): string {
  * Pattern: `Node -- Label1 -- Label2 --> Node` or `Node -- Label1 -- Label2 --- Node`
  * Result: `Node -- "Label1<br>Label2" --> Node`
  * Handles quoted or unquoted labels.
+ * Refined to avoid matching `---` or `-->` as label separators.
  */
 export function fixDoubleArrowLabels(content: string): string {
     const lines = content.split('\n');
@@ -519,10 +520,10 @@ export function fixDoubleArrowLabels(content: string): string {
         // Regex: Start -- L1 -- L2 (Arrow) End
         // Arrow can be --> or ---
         // We match non-greedy content between dashes.
-        // We ensure we don't match if "-->" or "---" is inside (already fixed or normal arrow).
-        // Format: (Start) -- (L1) -- (L2) (Arrow) (End)
+        // We use lookbehind (?<!-) and lookahead (?!>|-) to ensure we match exactly "--"
+        // and not parts of "---" or "-->".
         
-        const regex = /^(.*?)\s*--\s*((?:(?!-->|---|--\s).)*?)\s*--\s*((?:(?!-->|---|--\s).)*?)\s*(-->|---)\s*(.*)$/;
+        const regex = /^(.*?)\s*(?<!-)--(?!>|-)\s*((?:(?!-->|---|(?<!-)--(?!>|-)\s).)*?)\s*(?<!-)--(?!>|-)\s*((?:(?!-->|---|(?<!-)--(?!>|-)\s).)*?)\s*(-->|---)\s*(.*)$/;
         
         const match = line.match(regex);
         if (match) {
@@ -558,8 +559,9 @@ export function fixUnquotedEdgeLabels(content: string): string {
         // Label must NOT start with ".
         // We need to be careful about `Node -- Node` (no label) which uses `---` or `-->` directly.
         // This regex targets ` -- ` space-dash-dash-space specifically used for labels.
+        // Refined to use (?<!-)--(?!>|-) to avoid matching ---
         
-        const regex = /^(.*?)\s*--\s*([^">]+?)\s*-->\s*(.*)$/;
+        const regex = /^(.*?)\s*(?<!-)--(?!>|-)\s*([^">]+?)\s*-->\s*(.*)$/;
         
         // Exclude if it looks like `Node -- Node -->` (which is invalid anyway but...)
         // We assume valid label text doesn't contain `-->` which regex enforces.
@@ -633,6 +635,12 @@ export function fixNotesToNodes(content: string): string {
         if (nfMatch) {
             const nodeId = nfMatch[1];
             let text = nfMatch[2].trim();
+
+            // Handle artifact where line ends with ]
+            if (text.endsWith(']')) {
+                 text = text.slice(0, -1).trim();
+            }
+
             const noteId = `Note${nodeId}`;
 
             // Clean quotes
@@ -933,7 +941,7 @@ export function fixUnquotedNodeLabels(content: string): string {
         return line.replace(/([a-zA-Z0-9_]+)\s*\[(?!")([^\[\]]+)\]/g, (match, nodeId, innerContent) => {
              // Check for triggers: quotes, equals, asterisk, plus-minus, minus
              // These are characters that often require quoting in Mermaid labels
-             if (/["'=*±-]/.test(innerContent)) {
+             if (/["'=*±\/-]/.test(innerContent)) {
                  // Check if innerContent ends with semicolon
                  let contentToQuote = innerContent;
                  let suffix = '';
@@ -1641,11 +1649,10 @@ export function fixDoubleDashToArrow(content: string): string {
         // Group 3: Post-dash whitespace
         // Group 4: Content
         
-        // We match `--` explicitly.
-        // Lookahead (?![>]) ensures we don't match `-->`.
-        // We do NOT use (?![>-]) because we want to capture `---` candidates and filter them manually.
+        // We match `--` explicitly using lookbehind/lookahead to avoid ---
+        // (?<!-)--(?!>|-)
         
-        const regex = /^(.*?)(\s*)--(\s*)(?![>])((?:(?!--|-->).)*?);\s*$/;
+        const regex = /^(.*?)(\s*)(?<!-)--(?!>|-)(\s*)((?:(?!--|-->).)*?);\s*$/;
         
         const match = line.match(regex);
         if (match) {
@@ -1654,21 +1661,16 @@ export function fixDoubleDashToArrow(content: string): string {
             const s2 = match[3];
             const p4 = match[4]; // Content
             
-            // Check for ---
-            // If s1 is empty and p1 ends with -, it's --- (from left)
-            if (s1 === '' && p1.endsWith('-')) return line;
+            // The regex lookbehind handles the --- cases now, but we can double check logic
+            // strict logic is better
             
-            // If s2 is empty and p4 starts with -, it's --- (from right)
-            if (s2 === '' && p4.startsWith('-')) return line;
-            
-            // Otherwise, it's a valid -- to convert
             // We reconstruct with -->
             // We preserve s1 and s2 whitespace.
             return `${p1}${s1}-->${s2}${p4};`;
         }
         return line;
-    });
-    return processedLines.join('\n');
+    }).join('\n');
+    return processedLines;
 }
 
 /**
@@ -1796,6 +1798,13 @@ export function fixConcatenatedLabels(content: string): string {
                 
                 // If label is empty (e.g. `A --> A;`), we already skipped it.
                 if (!label) return line;
+
+                // FIX: Check if label looks like valid Mermaid syntax (e.g. starts with --- or --> or -- )
+                // This happens when we match `C1 --- C2` and capture `C1 --- C2` as text.
+                // bestId is C1. Label is `--- C2`.
+                if (label.startsWith('---') || label.startsWith('-->') || label.startsWith('-- ')) {
+                    return line;
+                }
 
                 // Determine if we need to append a semicolon
                 // If the original line had a semicolon at the end of the match, or generally ended with it.

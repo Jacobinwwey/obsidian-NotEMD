@@ -29,7 +29,7 @@ style Results fill:#ccf,stroke:#333`;
         // This matches the user's specific request "Transform --> Plot["Plot ln k vs 1/T: "Arrhenius Plot""];"
         const expected = `graph TD
 Start[Start: Measure Rate Constant k at Multiple Temperatures T] --> DataCollect[ T_i, k_i data pairs];
-Data --> Transform[Transform data: Calculate 1/T_i, ln k_i];
+Data --> Transform["Transform data: Calculate 1/T_i, ln k_i"];
 Transform --> Plot["Plot ln k vs 1/T: Arrhenius Plot"];
 Plot --> Regression["Perform Linear Regression: ln k = ln A - Ea/R1/T"];
 Regression --> SlopeExtract[" Slope 'm'"];
@@ -52,12 +52,15 @@ style Results fill:#ccf,stroke:#333`;
         expect(deepDebugMermaid(input).trim()).toBe(expected.trim());
     });
 
-    test('should NOT quote simple alphanumeric labels or simple punctuation', () => {
+    test('should NOT quote simple alphanumeric labels or simple punctuation (except slash)', () => {
         const input = `graph TD
 A[Simple Label] --> B[Label with: Colon];
 C[Label with, Comma] --> D[Label with / Slash];`;
-        // No change expected
-        expect(deepDebugMermaid(input)).toBe(input);
+        
+        const expected = `graph TD
+A[Simple Label] --> B[Label with: Colon];
+C[Label with, Comma] --> D["Label with / Slash"];`;
+        expect(deepDebugMermaid(input)).toBe(expected);
     });
 
     test('should quote labels with minus sign', () => {
