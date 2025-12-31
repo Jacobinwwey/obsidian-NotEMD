@@ -46,4 +46,14 @@ describe('Mermaid Fixes V2', () => {
         const expected = 'Node["Second"];';
         expect(deepDebugMermaid(input)).toBe(expected);
     });
+
+    test('Should fix misplaced pipes (>|"..."| ...)', () => {
+         const input = '>|"Transformation"| Delta_Configuration --> Wye_Configuration';
+         const expected = 'Delta_Configuration -->|"Transformation"| Wye_Configuration';
+         expect(deepDebugMermaid(input)).toBe(expected);
+
+         const input2 = '> |"Transformation"| Delta_Configuration --- Wye_Configuration';
+         const expected2 = 'Delta_Configuration ---|"Transformation"| Wye_Configuration';
+         expect(deepDebugMermaid(input2)).toBe(expected2);
+    });
 });
