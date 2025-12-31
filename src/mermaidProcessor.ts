@@ -436,8 +436,12 @@ export function deepDebugMermaid(content: string): string {
     // 29 Fix Misplaced Pipes (>|"..."| ...)
     processed = fixMisplacedPipes(processed);
 
-    // 29 Fix Misplaced Pipes (>|"..."| ...)
+    // 30 Fix Misplaced Pipes (>|"..."| ...)
     processed = processed.replace(/\"\[\]\"/g, '');
+
+    // 31 Fix Misplaced Pipes (>|"..."| ...)
+    processed = fixBlankArrows(processed);
+
     
     // --- RESTORE: Table Lines ---
     if (protectedTableLines.length > 0) {
@@ -467,6 +471,18 @@ export function deepDebugMermaid(content: string): string {
 export function fixInvalidArrows(content: string): string {
     // Global replacement of --|> with -->
     return content.replace(/--\|>/g, '-->');
+}
+
+
+/**
+ * Fixes invalid arrow syntax `--|>` by converting it to the standard `-->`.
+ * This often appears as a malformed attempt at an arrow or a typo.
+ * @param content The markdown content.
+ * @returns Content with `--|>` replaced by `-->`.
+ */
+export function fixBlankArrows(content: string): string {
+    // Global replacement of -- > with -->
+    return content.replace(/-- >/g, '-->');
 }
 
 /**
