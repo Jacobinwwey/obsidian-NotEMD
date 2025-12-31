@@ -28,9 +28,9 @@ describe('Mermaid Note Fixes (note for/of)', () => {
     
     it('should handle multi-line input correctly', () => {
         const input = `
-note for M00 "Gaussian Intensity Profile"
+note for M00 "Gaussian Intensity Profile"]
 
-note for M01 "Two-Lobe Intensity Profile"
+note for M01 "Two-Lobe Intensity Profile"]
 `;
         const result = fixNotesToNodes(input);
         expect(result).toContain('NoteM00[" Gaussian Intensity Profile"]');
