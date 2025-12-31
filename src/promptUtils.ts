@@ -174,21 +174,7 @@ graph TD
     %% Style the notes to look like yellow post-its
     style Note1 fill:#ffffcc,stroke:#d4b46a
     style Note2 fill:#ffffcc,stroke:#d4b46a
-\`\`\` and \`\`\`mermaid
-xychart-beta
-    title "Mixed Alkali Effect: Conductivity vs Activation Energy"
-    
-    %% FIXED: Defined X-axis with specific categories to match your data points
-    x-axis "Na Fraction (x)" [0, 0.1, 0.3, 0.5, 0.7, 0.9, 1.0]
-    
-    %% FIXED: Created a single Y-axis range that covers both datasets (-7 to +2)
-    y-axis "Value (Log Scale / eV)" -7 --> 2
-
-    %% FIXED: Extracted only the Y-values. 
-    %% (Mermaid maps these sequentially to the X-axis categories)
-    line [-2.66, -3.21, -5.06, -6.70, -5.02, -3.28, -1.82]
-    bar [0.92, 1.00, 1.23, 1.40, 1.25, 1.02, 0.85]
-\`\`\`.
+\`\`\` .
 9.  Use bullet points for lists longer than 3 items.
 10. Include references to academic papers with DOI where applicable, under a "## References" section.
 11. Preserve all mathematical formulas and scientific principles without simplification.
