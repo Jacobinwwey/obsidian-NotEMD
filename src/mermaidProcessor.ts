@@ -430,6 +430,8 @@ export function deepDebugMermaid(content: string): string {
     // 28. Cleanup `|\"\"|\"`
     processed = processed.replace(/\|""\|"/g, '');
 
+    // 29 Fix Misplaced Pipes (>|"..."| ...)
+    processed = fixMisplacedPipes(processed);
     // --- RESTORE: Table Lines ---
     if (protectedTableLines.length > 0) {
         // We need to restore them. Since we operate on the whole string, we can replace the placeholders.
@@ -1755,6 +1757,36 @@ export function fixConcatenatedLabels(content: string): string {
         return line;
     });
     
+    return processedLines.join('\n');
+}
+
+/**
+ * Fixes misplaced edge labels that appear at the start of the line with a leading `>`.
+ * Pattern: `>|"Label"| Source --> Target` or `> | "Label" | Source --> Target`
+ * Result: `Source -->|"Label"| Target`
+ * Now supports escaped quotes inside the label and flexible whitespace.
+ */
+export function fixMisplacedPipes(content: string): string {
+    const lines = content.split('\n');
+    const processedLines = lines.map(line => {
+        // Regex to capture:
+        // > | "Label" | Source Arrow Target
+        // We handle --> and ---
+        // Label matches: "((?:[^"\\]|\\.)*)" -> non-greedy quoted string with escapes
+        const regex = /^\s*>\s*\|\s*"((?:[^"\\]|\\.)*)"\s*\|\s*(.*?)\s*(-->|---)\s*(.*)$/;
+        const match = line.match(regex);
+        
+        if (match) {
+            const label = match[1];
+            const source = match[2].trim();
+            const arrow = match[3]; // "-->" or "---"
+            const target = match[4].trim();
+            
+            // Construct: Source Arrow|"Label"| Target
+            return `${source} ${arrow}|"${label}"| ${target}`;
+        }
+        return line;
+    });
     return processedLines.join('\n');
 }
 
