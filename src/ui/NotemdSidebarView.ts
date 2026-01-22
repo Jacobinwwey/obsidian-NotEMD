@@ -33,6 +33,8 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
     private testConnectionButton: HTMLButtonElement | null = null;
     private checkRemoveDuplicatesButton: HTMLButtonElement | null = null;
     private batchMermaidFixButton: HTMLButtonElement | null = null; // Added
+    private fixFormulaButton: HTMLButtonElement | null = null;
+    private batchFixFormulaButton: HTMLButtonElement | null = null;
     private cancelButton: HTMLButtonElement | null = null;
     private translateButton: HTMLButtonElement | null = null;
     private batchTranslateButton: HTMLButtonElement | null = null;
@@ -213,6 +215,8 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         if (this.testConnectionButton) this.testConnectionButton.disabled = processing;
         if (this.checkRemoveDuplicatesButton) this.checkRemoveDuplicatesButton.disabled = processing;
         if (this.batchMermaidFixButton) this.batchMermaidFixButton.disabled = processing; // Added
+        if (this.fixFormulaButton) this.fixFormulaButton.disabled = processing;
+        if (this.batchFixFormulaButton) this.batchFixFormulaButton.disabled = processing;
         if (this.translateButton) this.translateButton.disabled = processing;
         if (this.batchTranslateButton) this.batchTranslateButton.disabled = processing;
         if (this.extractConceptsButton) this.extractConceptsButton.disabled = processing;
@@ -412,6 +416,29 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             finally { this.finishProcessing(); }
         };
 
+        this.fixFormulaButton = utilityButtonGroup.createEl('button', { text: 'Fix formula formats (current)' });
+        this.fixFormulaButton.title = 'Converts single $ lines to $$ blocks in the current file.';
+        this.fixFormulaButton.onclick = async () => {
+            if (this.isProcessing) return;
+            const activeFile = this.app.workspace.getActiveFile();
+            if (!activeFile || (activeFile.extension !== 'md' && activeFile.extension !== 'txt')) {
+                new Notice('No active .md/.txt file.');
+                return;
+            }
+            this.startProcessing(`Fixing formulas in ${activeFile.name}...`);
+            try { await this.plugin.fixFormulaFormatsCommand(activeFile, this); }
+            finally { this.finishProcessing(); }
+        };
+
+        this.batchFixFormulaButton = utilityButtonGroup.createEl('button', { text: 'Batch fix formula formats' });
+        this.batchFixFormulaButton.title = 'Converts single $ lines to $$ blocks for all files in a folder.';
+        this.batchFixFormulaButton.onclick = async () => {
+            if (this.isProcessing) return;
+            this.startProcessing('Batch fixing formulas...');
+            try { await this.plugin.batchFixFormulaFormatsCommand(this); }
+            finally { this.finishProcessing(); }
+        };
+
         this.checkDuplicatesButton = utilityButtonGroup.createEl('button', { text: 'Check duplicates (current file)' });
         this.checkDuplicatesButton.onclick = async () => {
             // Replicate logic from main.ts onload for this command
@@ -512,6 +539,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         this.processCurrentButton = null; this.processFolderButton = null; this.researchButton = null;
         this.generateTitleButton = null; this.batchGenerateTitleButton = null; this.checkDuplicatesButton = null;
         this.testConnectionButton = null; this.checkRemoveDuplicatesButton = null; this.batchMermaidFixButton = null; // Added
+        this.fixFormulaButton = null; this.batchFixFormulaButton = null;
         this.summarizeToMermaidButton = null;
         this.extractConceptsButton = null;
         this.extractConceptsFolderButton = null;

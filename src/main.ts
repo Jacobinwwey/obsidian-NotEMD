@@ -18,6 +18,7 @@ import {
     fixMermaidSyntaxInFile,
     saveErrorLog // Import
 } from './fileUtils';
+import { fixFormulaFormatsInFile, batchFixFormulaFormatsInFolder } from './formulaFixer';
 import { _performResearch, researchAndSummarize } from './searchUtils'; // Import _performResearch if needed directly, ensure researchAndSummarize is exported
 import { ProgressModal } from './ui/ProgressModal';
 import { ErrorModal } from './ui/ErrorModal';
@@ -230,6 +231,30 @@ export default class NotemdPlugin extends Plugin {
             name: 'Batch fix Mermaid syntax',
             callback: async () => {
                 await this.batchMermaidFixCommand(); // Use the new command handler method
+            }
+        });
+
+        this.addCommand({
+            id: 'fix-formula-formats',
+            name: 'Fix formula formats (current file)',
+            checkCallback: (checking: boolean) => {
+                const activeFile = this.app.workspace.getActiveFile();
+                const condition = activeFile && (activeFile.extension === 'md' || activeFile.extension === 'txt');
+                if (condition) {
+                    if (!checking) {
+                        this.fixFormulaFormatsCommand(activeFile);
+                    }
+                    return true;
+                }
+                return false;
+            }
+        });
+
+        this.addCommand({
+            id: 'batch-fix-formula-formats',
+            name: 'Batch fix formula formats',
+            callback: async () => {
+                await this.batchFixFormulaFormatsCommand();
             }
         });
 
@@ -1172,6 +1197,101 @@ export default class NotemdPlugin extends Plugin {
             }
             useReporter.log(`Batch Fix Error: ${errorMessage}`);
             useReporter.updateStatus('Error occurred during batch fix', -1);
+        } finally {
+            if (maybeSidebar instanceof NotemdSidebarView) {
+                maybeSidebar.finishProcessing();
+            }
+            this.isBusy = false;
+        }
+    }
+
+    async fixFormulaFormatsCommand(file: TFile, reporter?: ProgressReporter) {
+        if (this.isBusy) { new Notice("Notemd is busy."); return; }
+        this.isBusy = true;
+        const useReporter = reporter || this.getReporter();
+        
+        const maybeSidebar = useReporter as any;
+        if (maybeSidebar instanceof NotemdSidebarView) {
+            maybeSidebar.startProcessing(`Fixing formulas in ${file.name}...`);
+        } else {
+            useReporter.clearDisplay();
+            useReporter.updateStatus(`Fixing formulas in ${file.name}...`, 0);
+        }
+
+        try {
+            await this.loadSettings();
+            const modified = await fixFormulaFormatsInFile(this.app, file, useReporter);
+
+            if (modified) {
+                useReporter.log(`✅ Fixed formulas in ${file.name}`);
+                new Notice(`Fixed formulas in ${file.name}`);
+            } else {
+                useReporter.log(`No formula fixes needed for ${file.name}`);
+                new Notice(`No formula fixes needed for ${file.name}`);
+            }
+            useReporter.updateStatus('Formula fix complete!', 100);
+            if (useReporter instanceof ProgressModal) setTimeout(() => useReporter.close(), 1000);
+
+        } catch (error: unknown) {
+            this.updateStatusBar('Error during formula fix');
+            let errorMessage = 'An unknown error occurred.';
+            if (error instanceof Error) errorMessage = error.message;
+            
+            useReporter.log(`Error: ${errorMessage}`);
+            useReporter.updateStatus('Error occurred', -1);
+            new Notice(`Error: ${errorMessage}`);
+            await saveErrorLog(this.app, useReporter, error, this.settings);
+        } finally {
+            if (maybeSidebar instanceof NotemdSidebarView) {
+                maybeSidebar.finishProcessing();
+            }
+            this.isBusy = false;
+        }
+    }
+
+    async batchFixFormulaFormatsCommand(reporter?: ProgressReporter) {
+        if (this.isBusy) { new Notice("Notemd is busy."); return; }
+        this.isBusy = true;
+        const useReporter = reporter || this.getReporter();
+        
+        const maybeSidebar = useReporter as any;
+        if (maybeSidebar instanceof NotemdSidebarView) {
+            maybeSidebar.startProcessing('Batch fixing formula formats...');
+        } else {
+            useReporter.clearDisplay();
+            useReporter.updateStatus('Batch fixing formula formats...', 0);
+        }
+
+        try {
+            await this.loadSettings();
+            const folderPath = await this.getFolderSelection();
+            if (!folderPath) { useReporter.log("Cancelled."); useReporter.updateStatus("Cancelled", -1); throw new Error("Cancelled"); }
+
+            const { modifiedCount, errors } = await batchFixFormulaFormatsInFolder(this.app, folderPath, useReporter);
+
+            if (!useReporter.cancelled) {
+                if (errors.length > 0) {
+                    const msg = `Batch fix finished with ${errors.length} errors. Modified ${modifiedCount} files.`;
+                    useReporter.log(msg);
+                    useReporter.updateStatus('Finished with errors', -1);
+                    new Notice(msg);
+                } else {
+                    const msg = `Batch fix complete! Modified ${modifiedCount} files.`;
+                    useReporter.log(msg);
+                    useReporter.updateStatus('Complete', 100);
+                    new Notice(msg);
+                    if (useReporter instanceof ProgressModal) setTimeout(() => useReporter.close(), 2000);
+                }
+            }
+        } catch (error: unknown) {
+            let errorMessage = 'An unknown error occurred.';
+            if (error instanceof Error) errorMessage = error.message;
+            if (!errorMessage.includes("Cancelled")) {
+                useReporter.log(`Error: ${errorMessage}`);
+                useReporter.updateStatus('Error occurred', -1);
+                new Notice(`Error: ${errorMessage}`);
+                await saveErrorLog(this.app, useReporter, error, this.settings);
+            }
         } finally {
             if (maybeSidebar instanceof NotemdSidebarView) {
                 maybeSidebar.finishProcessing();

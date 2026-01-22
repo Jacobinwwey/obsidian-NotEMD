@@ -110,6 +110,11 @@ That's it! Explore the settings to unlock more features like web research, trans
     - 
 <img width="596" height="239" alt="SUMM" src="https://github.com/user-attachments/assets/08f44a41-9ec0-472c-91ee-19c8477ec639" />
 
+- **Simple Formula Format Correction**:
+    - Quickly fixes single-line math formulas delimited by single `$` to standard double `$$` blocks.
+    - **Single File**: Process the current file via the sidebar button or command palette.
+    - **Batch Fix**: Process all files in a selected folder via the sidebar button or command palette.
+
 - **Check for Duplicates in Current File**: This command helps identify potential duplicate terms within the active file.
 - **Duplicate Detection**: Basic check for duplicate words within the currently processed file's content (results logged to console).
 - **Check and Remove Duplicate Concept Notes**: Identifies potential duplicate notes within the configured **Concept Note Folder** based on exact name matches, plurals, normalization, and single-word containment compared to notes outside the folder. The scope of the comparison (which notes outside the concept folder are checked) can be configured to the **entire vault**, **specific included folders**, or **all folders excluding specific ones**. Presents a detailed list with reasons and conflicting files, then prompts for confirmation before moving identified duplicates to system trash. Shows progress during deletion.
