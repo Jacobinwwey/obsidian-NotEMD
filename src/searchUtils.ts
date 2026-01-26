@@ -1,7 +1,7 @@
 import { App, requestUrl, Notice, Editor, MarkdownView } from 'obsidian'; // Added Notice, Editor, MarkdownView
 import { NotemdSettings, ProgressReporter, SearchResult } from './types';
 import { estimateTokens, getProviderForTask, getModelForTask } from './utils'; // Added getProviderForTask, getModelForTask
-import { callDeepSeekAPI, callOpenAIApi, callAnthropicApi, callGoogleApi, callMistralApi, callAzureOpenAIApi, callLMStudioApi, callOllamaApi, callOpenRouterAPI, handleApiError } from './llmUtils'; // Added LLM callers
+import { callDeepSeekAPI, callOpenAIApi, callAnthropicApi, callGoogleApi, callMistralApi, callAzureOpenAIApi, callLMStudioApi, callOllamaApi, callOpenRouterAPI, handleApiError, getDebugInfo } from './llmUtils'; // Added LLM callers
 import { cleanupLatexDelimiters, refineMermaidBlocks } from './mermaidProcessor'; // Added post-processors
 import { ErrorModal } from './ui/ErrorModal'; // Added ErrorModal
 import { getSystemPrompt } from './promptUtils'; // Import for default prompts
@@ -110,9 +110,10 @@ export async function searchDuckDuckGo(query: string, settings: NotemdSettings, 
  * Fetches content from a URL and extracts basic text.
  * @param url The URL to fetch.
  * @param progressReporter For logging.
+ * @param debugMode Whether to log detailed debug info on error.
  * @returns A promise resolving to the extracted text content or an error message string.
  */
-export async function fetchContentFromUrl(url: string, progressReporter: ProgressReporter): Promise<string> {
+export async function fetchContentFromUrl(url: string, progressReporter: ProgressReporter, debugMode: boolean = false): Promise<string> {
     progressReporter.log(`Fetching content from: ${url}`);
     try {
         const response = await requestUrl({
@@ -152,6 +153,14 @@ export async function fetchContentFromUrl(url: string, progressReporter: Progres
     } catch (error: unknown) {
         const message = error instanceof Error ? error.message : String(error);
         progressReporter.log(`Error fetching content from ${url}: ${message}`);
+        
+        if (debugMode) {
+            const debugInfo = getDebugInfo(error);
+            if (debugInfo) {
+                 progressReporter.log(`[DEBUG] Fetch Error Details:\n${debugInfo}`);
+            }
+        }
+
         return `[Content skipped: Error fetching - ${message}]`;
     }
 }
@@ -229,7 +238,7 @@ export async function _performResearch(app: App, settings: NotemdSettings, topic
                 if (progressReporter.cancelled) throw new Error(`Processing cancelled by user before fetching DDG result ${index + 1}.`);
                 const timeoutPromise = new Promise<string>((_, reject) => setTimeout(() => reject(new Error(`Timeout fetching ${result.url}`)), settings.ddgFetchTimeout * 1000));
                 try {
-                    return await Promise.race([fetchContentFromUrl(result.url, progressReporter), timeoutPromise]);
+                    return await Promise.race([fetchContentFromUrl(result.url, progressReporter, settings.enableApiErrorDebugMode), timeoutPromise]);
                 } catch (fetchError: unknown) {
                     const message = fetchError instanceof Error ? fetchError.message : String(fetchError);
                     if (message.includes("cancelled by user")) throw fetchError;

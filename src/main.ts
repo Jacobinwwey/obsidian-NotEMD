@@ -863,7 +863,7 @@ export default class NotemdPlugin extends Plugin {
             useReporter.updateStatus(`Testing ${provider.name}...`, 50);
             const testingNotice = new Notice(`Testing connection to ${provider.name}...`, 0);
 
-            const result = await testAPI(provider); // Use utility function
+            const result = await testAPI(provider, this.settings.enableApiErrorDebugMode); // Use utility function
             testingNotice.hide();
 
             if (result.success) {

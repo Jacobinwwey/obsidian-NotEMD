@@ -218,7 +218,7 @@ Notemd 通过与各种大型语言模型 (LLM) 集成来增强您的 Obsidian �
 - **最大重试次数 (Maximum Retries)**: (仅在启用时可见) 最大重试尝试次数（0-10）。默认值：3。
 - **API 错误调试模式 (API Error Debugging Mode)**:
     *   **禁用 (默认)**: 使用标准的简洁错误报告。
-    *   **启用**: 为所有提供商和任务（包括翻译和搜索）激活详细的错误日志记录（类似于 DeepSeek 的详细输出）。这包括 HTTP 状态代码和原始响应文本，对于排查 API 连接问题至关重要。
+    *   **启用**: 为所有提供商和任务（包括翻译、搜索和连接测试）激活详细的错误日志记录（类似于 DeepSeek 的详细输出）。这包括 HTTP 状态代码和原始响应文本，对于排查 API 连接问题至关重要。
 
 <img width="805" height="187" alt="stable API calls" src="https://github.com/user-attachments/assets/936454a7-b657-413c-8a2a-13d517f9c519" />
 

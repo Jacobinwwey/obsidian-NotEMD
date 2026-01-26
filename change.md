@@ -8,11 +8,11 @@ This document summarizes the major functional and architectural changes implemen
 
 ### English
 *   **Modularized API Error Handling**: Refactored error handling logic to ensure consistency across all tasks.
-*   **Enhanced Debugging**: The "API Error Debugging Mode" now fully supports "Translate" and "Search" tasks, providing detailed logs (HTTP status codes, raw responses) for deeper troubleshooting.
+*   **Enhanced Debugging**: The "API Error Debugging Mode" now fully supports "Translate", "Search", and "Connection Test" tasks, providing detailed logs (HTTP status codes, raw responses) for deeper troubleshooting.
 
 ### Chinese (中文)
 *   **模块化API错误处理**: 重构了错误处理逻辑，确保所有任务的一致性。
-*   **增强调试**: “API错误调试模式”现在完全支持“翻译”和“搜索”任务，提供详细的日志（HTTP状态代码、原始响应）以便进行更深入的故障排除。
+*   **增强调试**: “API错误调试模式”现在完全支持“翻译”、“搜索”和“连接测试”任务，提供详细的日志（HTTP状态代码、原始响应）以便进行更深入的故障排除。
 
 ---
 

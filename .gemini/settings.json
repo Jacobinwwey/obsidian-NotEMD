@@ -9,6 +9,7 @@
       ".gemini/**/*",
       "skills/**/*",
       "src/**/*",   // 别忘了加上你的源代码目录！
+      ".gemini-clipboard/**/*",
       "README.md"
     ]
   },

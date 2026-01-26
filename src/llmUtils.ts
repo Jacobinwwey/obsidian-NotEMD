@@ -8,9 +8,10 @@ import { ErrorModal } from './ui/ErrorModal'; // Import ErrorModal
 /**
  * Tests the connection to a given LLM provider.
  * @param provider The provider configuration to test.
+ * @param debugMode Whether to include detailed debug info in failure messages.
  * @returns A promise resolving to an object indicating success and a message.
  */
-export async function testAPI(provider: LLMProviderConfig): Promise<{ success: boolean; message: string }> {
+export async function testAPI(provider: LLMProviderConfig, debugMode: boolean = false): Promise<{ success: boolean; message: string }> {
     try {
         let response;
         let url: string;
@@ -273,7 +274,15 @@ export async function testAPI(provider: LLMProviderConfig): Promise<{ success: b
     } catch (error: unknown) { // Changed to unknown
         const message = error instanceof Error ? error.message : String(error);
         console.error(`Connection test failed for ${provider.name}:`, error);
-        return { success: false, message: `Connection failed: ${message}` };
+        
+        let finalMessage = `Connection failed: ${message}`;
+        if (debugMode) {
+            const debugInfo = getDebugInfo(error);
+            if (debugInfo) {
+                finalMessage += `\n\n[DEBUG MODE ENABLED]\n${debugInfo}`;
+            }
+        }
+        return { success: false, message: finalMessage };
     }
 }
 
@@ -363,7 +372,7 @@ async function callApiWithRetry(
 
 // --- Provider-Specific API Call Implementations ---
 
-// Helper function to safely parse error details from API responses
+// Helper function to safe-parse error details from API responses
 function getErrorDetails(errorText: string): string {
     try {
         const errorJson = JSON.parse(errorText);
@@ -381,6 +390,20 @@ function getErrorDetails(errorText: string): string {
     } catch (e) {
         return errorText; // If parsing fails, return the original raw text
     }
+}
+
+/**
+ * Extracts detailed debug information from an error object.
+ * @param error The error object.
+ * @returns A formatted string with stack trace and raw response if available.
+ */
+export function getDebugInfo(error: any): string {
+    const stack = error instanceof Error ? error.stack : '';
+    const rawText = (error as any).text || (error as any).response?.text || '';
+    let info = '';
+    if (stack) info += `Stack: ${stack}\n`;
+    if (rawText) info += `Raw Response: ${rawText}`;
+    return info.trim();
 }
 
 /**
@@ -429,6 +452,11 @@ export function handleApiError(
             progressReporter.log(`[${providerName}] Error response: ${rawText}`);
         } else {
             progressReporter.log(`[${providerName}] Error details: ${message}`);
+            // Use shared helper for stack trace if it's an error object
+            if (errorOrResponse instanceof Error) {
+                 const extraDebug = getDebugInfo(errorOrResponse);
+                 if (extraDebug) progressReporter.log(`[${providerName}] ${extraDebug}`);
+            }
         }
     }
 
