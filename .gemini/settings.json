@@ -1,0 +1,20 @@
+{
+  "context": {
+    // 【关键设置 1】设置为 true，强制 CLI 忽略项目的 .gitignore 文件
+    // 效果：CLI 将不再自动忽略 git 忽略的文件，完全由你的 .geminiignore 决定
+    "ignoreGitIgnore": true,
+
+    // 【关键设置 2】显式包含路径 (支持 glob 通配符)
+    "include": [
+      ".gemini/**/*",
+      "skills/**/*",
+      "src/**/*",   // 别忘了加上你的源代码目录！
+      "README.md"
+    ]
+  },
+  
+  // 【关键设置 3】开启 Skills 和 Rules 的实验性支持
+  "experimental": {
+    "skills": true
+  }
+}
