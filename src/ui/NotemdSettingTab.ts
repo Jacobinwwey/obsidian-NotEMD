@@ -193,7 +193,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                         button.setDisabled(true).setButtonText('Testing...');
                         const testingNotice = new Notice(`Testing connection to ${activeProvider.name}...`, 0);
                         try {
-                            const result = await testAPI(activeProvider); // Use imported testAPI
+                            const result = await testAPI(activeProvider, this.plugin.settings.enableApiErrorDebugMode); // Use imported testAPI
                             testingNotice.hide();
                             if (result.success) { new Notice(`✅ Success: ${result.message}`, 5000); }
                             else { new Notice(`❌ Failed: ${result.message}. Check console.`, 10000); }
