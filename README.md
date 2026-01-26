@@ -20,7 +20,7 @@ A Easy way to create your own Knowledge-base!
 
 Notemd enhances your Obsidian workflow by integrating with various Large Language Models (LLMs) to process your multi-languages notes, automatically generate wiki-links for key concepts, create corresponding concept notes, perform web research, helping you build powerful knowledge graphs and more.
 
-**Version:** 1.6.1
+**Version:** 1.6.2
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
@@ -204,7 +204,7 @@ Access plugin settings via:
 -   **Maximum Retries**: (Visible only when enabled) Maximum number of retry attempts (0-10). Default: 3.
 -   **API Error Debugging Mode**:
     *   **Disabled (Default)**: Uses standard, concise error reporting.
-    *   **Enabled**: Activates detailed error logging (similar to DeepSeek's verbose output) for all providers. This includes HTTP status codes and raw response text, which is crucial for troubleshooting API connection issues.
+    *   **Enabled**: Activates detailed error logging (similar to DeepSeek's verbose output) for all providers and tasks (including Translate and Search). This includes HTTP status codes and raw response text, which is crucial for troubleshooting API connection issues.
 <img width="805" height="187" alt="stable API calls" src="https://github.com/user-attachments/assets/936454a7-b657-413c-8a2a-13d517f9c519" />
 
 ### General Settings
@@ -543,7 +543,7 @@ MIT License - See [LICENSE](LICENSE) file for details.
 
 ---
 
-*Notemd v1.6.1 - Enhance your Obsidian knowledge graph with AI.*
+*Notemd v1.6.2 - Enhance your Obsidian knowledge graph with AI.*
 
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)

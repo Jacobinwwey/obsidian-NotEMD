@@ -18,7 +18,7 @@
 
 Notemd 通过与各种大型语言模型 (LLM) 集成来增强您的 Obsidian 工作流程，支持多语言笔记处理，自动为关键概念生成维基链接、创建相应的概念笔记、执行网页搜索与摘要、翻译内容、总结为Mermaid脑图等，助力构建强大的知识图谱。
 
-**版本:** 1.6.1
+**版本:** 1.6.2
 
 ![image](https://img.shields.io/github/v/release/Jacobinwwey/obsidian-NotEMD?label=Version&link=https%3A%2F%2Fgithub.com%2Jacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest) ![image](https://img.shields.io/github/downloads/Jacobinwwey/obsidian-NotEMD/total?logo=Obsidian&label=Downloads&labelColor=%237C3AED&color=%235b5b5b&link=https%3A%2F%2Fgithub.com%2Jacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest)
 
@@ -218,7 +218,7 @@ Notemd 通过与各种大型语言模型 (LLM) 集成来增强您的 Obsidian �
 - **最大重试次数 (Maximum Retries)**: (仅在启用时可见) 最大重试尝试次数（0-10）。默认值：3。
 - **API 错误调试模式 (API Error Debugging Mode)**:
     *   **禁用 (默认)**: 使用标准的简洁错误报告。
-    *   **启用**: 为所有提供商激活详细的错误日志记录（类似于 DeepSeek 的详细输出）。这包括 HTTP 状态代码和原始响应文本，对于排查 API 连接问题至关重要。
+    *   **启用**: 为所有提供商和任务（包括翻译和搜索）激活详细的错误日志记录（类似于 DeepSeek 的详细输出）。这包括 HTTP 状态代码和原始响应文本，对于排查 API 连接问题至关重要。
 
 <img width="805" height="187" alt="stable API calls" src="https://github.com/user-attachments/assets/936454a7-b657-413c-8a2a-13d517f9c519" />
 
@@ -609,6 +609,6 @@ MIT许可证 - 详情请见[LICENSE](LICENSE)。
 
 ---
 
-*Notemd v1.6.1 - 用AI提升你的Obsidian知识图谱。*
+*Notemd v1.6.2 - 用AI提升你的Obsidian知识图谱。*
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)
