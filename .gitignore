@@ -1,5 +1,9 @@
 # vscode
-.vscode 
+.vscode
+ 
+#gemini
+.gemini-clipboard
+.gemini
 
 # Intellij
 *.iml

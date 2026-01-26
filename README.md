@@ -204,7 +204,7 @@ Access plugin settings via:
 -   **Maximum Retries**: (Visible only when enabled) Maximum number of retry attempts (0-10). Default: 3.
 -   **API Error Debugging Mode**:
     *   **Disabled (Default)**: Uses standard, concise error reporting.
-    *   **Enabled**: Activates detailed error logging (similar to DeepSeek's verbose output) for all providers and tasks (including Translate and Search). This includes HTTP status codes and raw response text, which is crucial for troubleshooting API connection issues.
+    *   **Enabled**: Activates detailed error logging (similar to DeepSeek's verbose output) for all providers and tasks (including Translate, Search, and Connection Tests). This includes HTTP status codes and raw response text, which is crucial for troubleshooting API connection issues.
 <img width="805" height="187" alt="stable API calls" src="https://github.com/user-attachments/assets/936454a7-b657-413c-8a2a-13d517f9c519" />
 
 ### General Settings
