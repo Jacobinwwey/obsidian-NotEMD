@@ -186,7 +186,7 @@ Format directly for Obsidian markdown. Do NOT wrap the entire response in a mark
 
 Search Results:
 {SEARCH_RESULTS_CONTEXT}`,
-    translate: `Translate the following text to {LANGUAGE}. Only output the translated text. Do not include the original text.
+    translate: `Translate the following text to {LANGUAGE}. Only output the translated text. Do not include the original text.Note: For special image formats, please retain them as they are, for example: ![](images/3c6d56a5dd52751121cefd4868e7b3a3ceb929b566eb63fc931a335d85a0095e.jpg)
     
 Text to translate:
 {TEXT}`,
