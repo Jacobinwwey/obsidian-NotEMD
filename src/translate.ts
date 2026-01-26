@@ -1,7 +1,7 @@
 import { App, TFile, TFolder, Notice } from 'obsidian';
 import { NotemdSettings, ProgressReporter } from './types';
 import { getProviderForTask, getModelForTask, splitContent, createConcurrentProcessor } from './utils';
-import { callLLM } from './llmUtils';
+import { callLLM, handleApiError } from './llmUtils';
 import { getSystemPrompt } from './promptUtils';
 import { ProgressModal } from './ui/ProgressModal';
 
@@ -152,8 +152,16 @@ export async function translateFile(
             progressReporter.updateStatus('Cancelled', -1);
             throw new Error('Translation cancelled by user.'); // Re-throw for main.ts to catch
         }
-        console.error('Translation Error:', error);
-        new Notice('Failed to translate file. See console for details.');
-        throw error; // Re-throw other errors as well
+        
+        // Use handleApiError for consistent debugging (it might throw, which is fine as we want to re-throw anyway)
+        try {
+            handleApiError('Translate', error, progressReporter, settings.enableApiErrorDebugMode);
+        } catch (e) {
+            // handleApiError throws a formatted error. 
+            // We log it and let it propagate or re-throw original if needed.
+            console.error('Translation Error:', error);
+            new Notice('Failed to translate file. See console for details.');
+            throw e; // Throw the formatted error from handleApiError
+        }
     }
 }
