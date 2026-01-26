@@ -386,12 +386,12 @@ function getErrorDetails(errorText: string): string {
 /**
  * Modularized API Error Handler.
  * Implements the "DeepSeek-style" verbose debugging design.
- * @param providerName The name of the provider (e.g., "DeepSeek", "OpenAI").
+ * @param providerName The name of the provider (e.g., "DeepSeek", "OpenAI", "Tavily").
  * @param errorOrResponse The error object caught from catch block, or a response object with bad status.
  * @param progressReporter The reporter to log to.
  * @param debugMode Whether to enable verbose logging (DeepSeek design).
  */
-function handleProviderError(
+export function handleApiError(
     providerName: string,
     errorOrResponse: any,
     progressReporter: ProgressReporter,
@@ -493,13 +493,13 @@ async function executeDeepSeekAPI(provider: LLMProviderConfig, modelName: string
             });
         } catch (error: any) {
             // Delegate error handling
-            handleProviderError('DeepSeek', error, progressReporter, settings.enableApiErrorDebugMode);
+            handleApiError('DeepSeek', error, progressReporter, settings.enableApiErrorDebugMode);
         }
 
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
         
         if (response.status < 200 || response.status >= 300) {
-            handleProviderError('DeepSeek', response, progressReporter, settings.enableApiErrorDebugMode);
+            handleApiError('DeepSeek', response, progressReporter, settings.enableApiErrorDebugMode);
         }
         
         const data = response.json;
@@ -568,12 +568,12 @@ async function executeOpenAIApi(provider: LLMProviderConfig, modelName: string, 
                 body: JSON.stringify(requestBody)
             });
         } catch (error: any) {
-            handleProviderError('OpenAI', error, progressReporter, settings.enableApiErrorDebugMode);
+            handleApiError('OpenAI', error, progressReporter, settings.enableApiErrorDebugMode);
         }
 
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
         if (response.status < 200 || response.status >= 300) {
-            handleProviderError('OpenAI', response, progressReporter, settings.enableApiErrorDebugMode);
+            handleApiError('OpenAI', response, progressReporter, settings.enableApiErrorDebugMode);
         }
         const data = response.json;
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API success.");
@@ -614,12 +614,12 @@ async function executeAnthropicApi(provider: LLMProviderConfig, modelName: strin
                 body: JSON.stringify(requestBody)
             });
         } catch (error: any) {
-            handleProviderError('Anthropic', error, progressReporter, settings.enableApiErrorDebugMode);
+            handleApiError('Anthropic', error, progressReporter, settings.enableApiErrorDebugMode);
         }
 
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
         if (response.status < 200 || response.status >= 300) {
-            handleProviderError('Anthropic', response, progressReporter, settings.enableApiErrorDebugMode);
+            handleApiError('Anthropic', response, progressReporter, settings.enableApiErrorDebugMode);
         }
         const data = response.json;
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API success.");
@@ -653,12 +653,12 @@ async function executeGoogleApi(provider: LLMProviderConfig, modelName: string, 
                 body: JSON.stringify(requestBody)
             });
         } catch (error: any) {
-            handleProviderError('Google', error, progressReporter, settings.enableApiErrorDebugMode);
+            handleApiError('Google', error, progressReporter, settings.enableApiErrorDebugMode);
         }
 
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
         if (response.status < 200 || response.status >= 300) {
-            handleProviderError('Google', response, progressReporter, settings.enableApiErrorDebugMode);
+            handleApiError('Google', response, progressReporter, settings.enableApiErrorDebugMode);
         }
         const data = response.json;
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API success.");
@@ -694,12 +694,12 @@ async function executeMistralApi(provider: LLMProviderConfig, modelName: string,
                 body: JSON.stringify(requestBody)
             });
         } catch (error: any) {
-            handleProviderError('Mistral', error, progressReporter, settings.enableApiErrorDebugMode);
+            handleApiError('Mistral', error, progressReporter, settings.enableApiErrorDebugMode);
         }
 
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
         if (response.status < 200 || response.status >= 300) {
-            handleProviderError('Mistral', response, progressReporter, settings.enableApiErrorDebugMode);
+            handleApiError('Mistral', response, progressReporter, settings.enableApiErrorDebugMode);
         }
         const data = response.json;
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API success.");
@@ -735,12 +735,12 @@ async function executeAzureOpenAIApi(provider: LLMProviderConfig, modelName: str
                 body: JSON.stringify(requestBody)
             });
         } catch (error: any) {
-            handleProviderError('Azure OpenAI', error, progressReporter, settings.enableApiErrorDebugMode);
+            handleApiError('Azure OpenAI', error, progressReporter, settings.enableApiErrorDebugMode);
         }
 
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
         if (response.status < 200 || response.status >= 300) {
-            handleProviderError('Azure OpenAI', response, progressReporter, settings.enableApiErrorDebugMode);
+            handleApiError('Azure OpenAI', response, progressReporter, settings.enableApiErrorDebugMode);
         }
         const data = response.json;
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API success.");
@@ -783,12 +783,12 @@ async function executeLMStudioApi(provider: LLMProviderConfig, modelName: string
                 body: JSON.stringify(requestBody)
             });
         } catch (error: any) {
-            handleProviderError('LMStudio', error, progressReporter, settings.enableApiErrorDebugMode);
+            handleApiError('LMStudio', error, progressReporter, settings.enableApiErrorDebugMode);
         }
 
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
         if (response.status < 200 || response.status >= 300) {
-            handleProviderError('LMStudio', response, progressReporter, settings.enableApiErrorDebugMode);
+            handleApiError('LMStudio', response, progressReporter, settings.enableApiErrorDebugMode);
         }
         const data = response.json;
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API success.");
@@ -824,12 +824,12 @@ async function executeOllamaApi(provider: LLMProviderConfig, modelName: string, 
                 body: JSON.stringify(requestBody)
             });
         } catch (error: any) {
-            handleProviderError('Ollama', error, progressReporter, settings.enableApiErrorDebugMode);
+            handleApiError('Ollama', error, progressReporter, settings.enableApiErrorDebugMode);
         }
 
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
         if (response.status < 200 || response.status >= 300) {
-            handleProviderError('Ollama', response, progressReporter, settings.enableApiErrorDebugMode);
+            handleApiError('Ollama', response, progressReporter, settings.enableApiErrorDebugMode);
         }
         const data = response.json;
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API success.");
@@ -890,7 +890,7 @@ async function executeOpenRouterAPI(provider: LLMProviderConfig, modelName: stri
                 body: JSON.stringify(requestBody)
             });
         } catch (error: any) {
-             handleProviderError('OpenRouter', error, progressReporter, settings.enableApiErrorDebugMode);
+             handleApiError('OpenRouter', error, progressReporter, settings.enableApiErrorDebugMode);
         }
 
         progressReporter.log(`[OpenRouter] Received response status: ${response.status}`);
@@ -903,7 +903,7 @@ async function executeOpenRouterAPI(provider: LLMProviderConfig, modelName: stri
 
         if (response.status < 200 || response.status >= 300) {
              // Pass response object (which still has .status and .text)
-             handleProviderError('OpenRouter', response, progressReporter, settings.enableApiErrorDebugMode);
+             handleApiError('OpenRouter', response, progressReporter, settings.enableApiErrorDebugMode);
         }
 
         // Now attempt to parse the text as JSON
@@ -979,12 +979,12 @@ async function executeXaiApi(provider: LLMProviderConfig, modelName: string, pro
                 body: JSON.stringify(requestBody)
             });
         } catch (error: any) {
-            handleProviderError('xAI', error, progressReporter, settings.enableApiErrorDebugMode);
+            handleApiError('xAI', error, progressReporter, settings.enableApiErrorDebugMode);
         }
 
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
         if (response.status < 200 || response.status >= 300) {
-            handleProviderError('xAI', response, progressReporter, settings.enableApiErrorDebugMode);
+            handleApiError('xAI', response, progressReporter, settings.enableApiErrorDebugMode);
         }
         const data = response.json;
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API success.");

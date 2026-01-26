@@ -1,7 +1,7 @@
 import { App, requestUrl, Notice, Editor, MarkdownView } from 'obsidian'; // Added Notice, Editor, MarkdownView
 import { NotemdSettings, ProgressReporter, SearchResult } from './types';
 import { estimateTokens, getProviderForTask, getModelForTask } from './utils'; // Added getProviderForTask, getModelForTask
-import { callDeepSeekAPI, callOpenAIApi, callAnthropicApi, callGoogleApi, callMistralApi, callAzureOpenAIApi, callLMStudioApi, callOllamaApi, callOpenRouterAPI } from './llmUtils'; // Added LLM callers
+import { callDeepSeekAPI, callOpenAIApi, callAnthropicApi, callGoogleApi, callMistralApi, callAzureOpenAIApi, callLMStudioApi, callOllamaApi, callOpenRouterAPI, handleApiError } from './llmUtils'; // Added LLM callers
 import { cleanupLatexDelimiters, refineMermaidBlocks } from './mermaidProcessor'; // Added post-processors
 import { ErrorModal } from './ui/ErrorModal'; // Added ErrorModal
 import { getSystemPrompt } from './promptUtils'; // Import for default prompts
@@ -82,7 +82,24 @@ export async function searchDuckDuckGo(query: string, settings: NotemdSettings, 
         return results;
 
     } catch (error: unknown) {
+        // Use handleApiError for consistent debugging
+        try {
+            handleApiError('DuckDuckGo', error, progressReporter, settings.enableApiErrorDebugMode);
+        } catch (e) {
+            // handleApiError throws, so we catch it to return empty array as per original logic, 
+            // but we let handleApiError do the logging first.
+            // However, handleApiError throws an Error with a message.
+            // The original logic returned [] on failure.
+        }
+        // Fallback logging if handleApiError didn't log (it logs if debugMode is on)
+        // If debugMode is off, handleApiError throws a clean error message.
+        
+        // Actually, the original logic was: log error and return [].
+        // handleApiError throws. So we need to wrap it.
         const message = error instanceof Error ? error.message : String(error);
+        if (settings.enableApiErrorDebugMode) {
+             progressReporter.log(`[DuckDuckGo] Debug: ${message}`);
+        }
         const errorMessage = `Automated DuckDuckGo search failed. Error: ${message}. Consider using Tavily.`;
         progressReporter.log(`Error: ${errorMessage}`);
         return []; // Return empty array on failure
@@ -183,7 +200,9 @@ export async function _performResearch(app: App, settings: NotemdSettings, topic
 
             if (progressReporter.cancelled) throw new Error("Processing cancelled by user during Tavily search.");
             if (!tavilyResponse || typeof tavilyResponse.status !== 'number') { throw new Error("Tavily request failed or timed out."); }
-            if (tavilyResponse.status !== 200) throw new Error(`Tavily API error: ${tavilyResponse.status} - ${tavilyResponse.text}`);
+            if (tavilyResponse.status !== 200) {
+                 handleApiError('Tavily', tavilyResponse, progressReporter, settings.enableApiErrorDebugMode);
+            }
 
             const tavilyData = tavilyResponse.json;
             if (!tavilyData.results || tavilyData.results.length === 0) { progressReporter.log('Tavily returned no results.'); return null; }
