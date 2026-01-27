@@ -18,7 +18,7 @@
 
 Notemd 通过与各种大型语言模型 (LLM) 集成来增强您的 Obsidian 工作流程，支持多语言笔记处理，自动为关键概念生成维基链接、创建相应的概念笔记、执行网页搜索与摘要、翻译内容、总结为Mermaid脑图等，助力构建强大的知识图谱。
 
-**版本:** 1.6.2
+**版本:** 1.6.3
 
 ![image](https://img.shields.io/github/v/release/Jacobinwwey/obsidian-NotEMD?label=Version&link=https%3A%2F%2Fgithub.com%2Jacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest) ![image](https://img.shields.io/github/downloads/Jacobinwwey/obsidian-NotEMD/total?logo=Obsidian&label=Downloads&labelColor=%237C3AED&color=%235b5b5b&link=https%3A%2F%2Fgithub.com%2Jacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest)
 
@@ -61,6 +61,7 @@ Notemd 通过与各种大型语言模型 (LLM) 集成来增强您的 Obsidian �
 - **准确的进度报告**: 修复了进度条可能卡住的错误，确保用户界面始终反映操作的真实状态。
 - **健壮的并行批处理**: 解决了并行批处理操作过早停止的问题，确保所有文件都能可靠高效地处理。
 - **进度条准确性**: 修复了“创建维基链接并生成笔记”命令进度条卡在95%的错误，确保现在能正确显示100%完成。
+- **增强的API调试**: “API错误调试模式”现在可以捕获来自LLM提供商和搜索服务（Tavily/DuckDuckGo）的完整响应体，从而实现对429/500错误和其他API故障的详细记录，以便更好地进行故障排除。
 
 ### 知识图谱增强
 - **自动维基链接**: 根据 LLM 输出，识别您处理过的笔记中的核心概念并添加 `[[维基链接]]`。

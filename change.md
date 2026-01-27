@@ -4,6 +4,11 @@ This document summarizes the major functional and architectural changes implemen
 
 ---
 
+## [1.6.3] - 2026-01-27
+
+### Fixed
+*   **API Error Debugging**: Fixed an issue where the "API Error Debugging Mode" would not show the full error response body for certain providers (like LMStudio 429 errors). Now, detailed JSON responses and status codes are correctly captured and logged when this mode is enabled, aiding significantly in troubleshooting connectivity and rate-limit issues.
+
 ## v1.6.2
 
 ### English
