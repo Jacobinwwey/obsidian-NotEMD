@@ -28,11 +28,12 @@ export async function searchDuckDuckGo(query: string, settings: NotemdSettings, 
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
                 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
                 'Accept-Language': 'en-US,en;q=0.5',
-            }
+            },
+            throw: false
         });
 
         if (response.status !== 200) {
-            throw new Error(`DuckDuckGo request failed: ${response.status}`);
+            handleApiError('DuckDuckGo', response, progressReporter, settings.enableApiErrorDebugMode);
         }
 
         const htmlContent = response.text;
@@ -123,7 +124,15 @@ export async function fetchContentFromUrl(url: string, progressReporter: Progres
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
                 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
             },
+            throw: false
         });
+
+        if (response.status !== 200) {
+            if (debugMode) {
+                progressReporter.log(`[DEBUG] Fetch Error Response from ${url}: Status ${response.status}, Body: ${response.text}`);
+            }
+            throw new Error(`Fetch failed with status ${response.status}`);
+        }
 
         const contentType = response.headers['content-type'] || response.headers['Content-Type'] || '';
         if (!contentType.includes('text/html')) {
