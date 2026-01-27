@@ -6,17 +6,23 @@ This document summarizes the major functional and architectural changes implemen
 
 ## [1.6.4] - 2026-01-27
 
-### Fixed
+### English
 *   **Search Engine Support**: Resolved issues with DuckDuckGo search by implementing a robust, modular architecture. The new `DuckDuckGoProvider` now uses DOMParser for reliable HTML parsing with a regex fallback, ensuring consistent search results even if the layout changes.
 *   **Modular Architecture**: Refactored the search logic into a modular `SearchProvider` system, making it easier to add new search engines and maintain existing ones.
-
-### Improved
 *   **Code Quality**: Integrated comprehensive unit tests for search providers to prevent regression.
+
+### Chinese (中文)
+*   **搜索引擎支持**: 通过实施稳健的模块化架构解决了DuckDuckGo搜索的问题。新的 `DuckDuckGoProvider` 现在使用 DOMParser 进行可靠的 HTML 解析，并带有正则表达式回退机制，即使布局发生变化也能确保一致的搜索结果。
+*   **模块化架构**: 将搜索逻辑重构为模块化的 `SearchProvider` 系统，从而更易于添加新的搜索引擎和维护现有引擎。
+*   **代码质量**: 集成了针对搜索提供商的全面单元测试，以防止回归。
 
 ## [1.6.3] - 2026-01-27
 
-### Fixed
+### English
 *   **API Error Debugging**: Fixed an issue where the "API Error Debugging Mode" would not show the full error response body for certain providers (like LMStudio 429 errors). Now, detailed JSON responses and status codes are correctly captured and logged when this mode is enabled, aiding significantly in troubleshooting connectivity and rate-limit issues.
+
+### Chinese (中文)
+*   **API 错误调试**: 修复了“API 错误调试模式”无法显示某些提供商（如 LMStudio 429 错误）的完整错误响应正文的问题。现在，启用此模式后，可以正确捕获并记录详细的 JSON 响应和状态代码，极大地帮助排查连接和速率限制问题。
 
 ## v1.6.2
 
