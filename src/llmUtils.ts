@@ -29,7 +29,8 @@ export async function testAPI(provider: LLMProviderConfig, debugMode: boolean = 
                         model: provider.model,
                         messages: [{ role: 'user', content: 'Test connection' }],
                         stream: false
-                    })
+                    }),
+                    throw: false
                 };
                 response = await requestUrl(ollamaOptions);
                 if (response.status < 200 || response.status >= 300) {
@@ -57,7 +58,8 @@ export async function testAPI(provider: LLMProviderConfig, debugMode: boolean = 
                             { role: 'system', content: 'You are a helpful assistant.' },
                             { role: 'user', content: 'This is a connection test.' }
                         ]
-                    })
+                    }),
+                    throw: false
                 };
                 try {
                     response = await requestUrl(lmStudioOptions);
@@ -94,6 +96,7 @@ export async function testAPI(provider: LLMProviderConfig, debugMode: boolean = 
                     routerBody.temperature = 0;
                 }
                 options.body = JSON.stringify(routerBody);
+                options.throw = false;
                 
                 response = await requestUrl(options);
                 if (response.status < 200 || response.status >= 300) throw new Error(`OpenRouter API error: ${response.status} - ${response.text}`);
@@ -104,6 +107,7 @@ export async function testAPI(provider: LLMProviderConfig, debugMode: boolean = 
                  url = `${provider.baseUrl}/models`;
                  options.url = url;
                  options.headers = { 'Authorization': `Bearer ${provider.apiKey}` };
+                 options.throw = false;
                  try {
                     response = await requestUrl(options);
                  } catch (e) {
@@ -126,6 +130,7 @@ export async function testAPI(provider: LLMProviderConfig, debugMode: boolean = 
                     openAIBody.temperature = 0;
                  }
                  options.body = JSON.stringify(openAIBody);
+                 options.throw = false;
                  
                  response = await requestUrl(options);
 
@@ -137,6 +142,7 @@ export async function testAPI(provider: LLMProviderConfig, debugMode: boolean = 
                 url = `${provider.baseUrl}/models`;
                 options.url = url;
                 options.headers = { 'Authorization': `Bearer ${provider.apiKey}` };
+                options.throw = false;
                 try {
                     response = await requestUrl(options);
                 } catch (e) {
@@ -168,6 +174,7 @@ export async function testAPI(provider: LLMProviderConfig, debugMode: boolean = 
                 }
                 
                 options.body = JSON.stringify(deepSeekBody);
+                options.throw = false;
 
                 response = await requestUrl(options);
 
@@ -179,6 +186,7 @@ export async function testAPI(provider: LLMProviderConfig, debugMode: boolean = 
                  url = `${provider.baseUrl}/models`;
                  options.url = url;
                  options.headers = { 'Authorization': `Bearer ${provider.apiKey}` };
+                 options.throw = false;
                  try {
                     response = await requestUrl(options);
                  } catch (e) {
@@ -193,6 +201,7 @@ export async function testAPI(provider: LLMProviderConfig, debugMode: boolean = 
                  options.method = 'POST';
                  options.headers = { ...options.headers, 'Content-Type': 'application/json' };
                  options.body = JSON.stringify({ model: provider.model, messages: [{ role: 'user', content: 'Test' }], max_tokens: 1, temperature: 0 });
+                 options.throw = false;
                  response = await requestUrl(options);
 
                  if (response.status < 200 || response.status >= 300) throw new Error(`Mistral API error: ${response.status} - ${response.text}`);
@@ -212,6 +221,7 @@ export async function testAPI(provider: LLMProviderConfig, debugMode: boolean = 
                     messages: [{ role: 'user', content: 'Test' }], 
                     max_tokens: 1 
                 });
+                options.throw = false;
                 response = await requestUrl(options);
                 if (response.status < 200 || response.status >= 300) throw new Error(`Anthropic API error: ${response.status} - ${response.text}`);
                 return { success: true, message: `Successfully connected to Anthropic API.` };
@@ -222,6 +232,7 @@ export async function testAPI(provider: LLMProviderConfig, debugMode: boolean = 
                 options.method = 'POST';
                 options.headers = { 'Content-Type': 'application/json' };
                 options.body = JSON.stringify({ contents: [{ role: 'user', parts: [{ text: 'Test' }] }], generationConfig: { maxOutputTokens: 1, temperature: 0 } });
+                options.throw = false;
                 response = await requestUrl(options);
                 if (response.status < 200 || response.status >= 300) throw new Error(`Google API error: ${response.status} - ${response.text}`);
                 return { success: true, message: `Successfully connected to Google API.` };
@@ -239,6 +250,7 @@ export async function testAPI(provider: LLMProviderConfig, debugMode: boolean = 
                     azureBody.temperature = 0;
                 }
                 options.body = JSON.stringify(azureBody);
+                options.throw = false;
                 
                 response = await requestUrl(options);
                 if (response.status < 200 || response.status >= 300) throw new Error(`Azure OpenAI API error: ${response.status} - ${response.text}`);
@@ -249,6 +261,7 @@ export async function testAPI(provider: LLMProviderConfig, debugMode: boolean = 
                 url = `${provider.baseUrl}/models`;
                 options.url = url;
                 options.headers = { 'Authorization': `Bearer ${provider.apiKey}` };
+                options.throw = false;
                 try {
                     response = await requestUrl(options);
                 } catch (e) {
@@ -263,6 +276,7 @@ export async function testAPI(provider: LLMProviderConfig, debugMode: boolean = 
                 options.method = 'POST';
                 options.headers = { ...options.headers, 'Content-Type': 'application/json' };
                 options.body = JSON.stringify({ model: provider.model, messages: [{ role: 'user', content: 'Test' }], max_tokens: 1, temperature: 0 });
+                options.throw = false;
                 response = await requestUrl(options);
 
                 if (response.status < 200 || response.status >= 300) throw new Error(`xAI API error: ${response.status} - ${response.text}`);
@@ -517,7 +531,8 @@ async function executeDeepSeekAPI(provider: LLMProviderConfig, modelName: string
                 url: url,
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${provider.apiKey}` },
-                body: JSON.stringify(requestBody)
+                body: JSON.stringify(requestBody),
+                throw: false
             });
         } catch (error: any) {
             // Delegate error handling
@@ -593,7 +608,8 @@ async function executeOpenAIApi(provider: LLMProviderConfig, modelName: string, 
                 url: url,
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${provider.apiKey}` },
-                body: JSON.stringify(requestBody)
+                body: JSON.stringify(requestBody),
+                throw: false
             });
         } catch (error: any) {
             handleApiError('OpenAI', error, progressReporter, settings.enableApiErrorDebugMode);
@@ -639,7 +655,8 @@ async function executeAnthropicApi(provider: LLMProviderConfig, modelName: strin
                     'x-api-key': provider.apiKey, 
                     'anthropic-version': '2023-06-01' 
                 }, 
-                body: JSON.stringify(requestBody)
+                body: JSON.stringify(requestBody),
+                throw: false
             });
         } catch (error: any) {
             handleApiError('Anthropic', error, progressReporter, settings.enableApiErrorDebugMode);
@@ -678,7 +695,8 @@ async function executeGoogleApi(provider: LLMProviderConfig, modelName: string, 
                 url: urlWithKey,
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(requestBody)
+                body: JSON.stringify(requestBody),
+                throw: false
             });
         } catch (error: any) {
             handleApiError('Google', error, progressReporter, settings.enableApiErrorDebugMode);
@@ -719,7 +737,8 @@ async function executeMistralApi(provider: LLMProviderConfig, modelName: string,
                 url: url,
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${provider.apiKey}` },
-                body: JSON.stringify(requestBody)
+                body: JSON.stringify(requestBody),
+                throw: false
             });
         } catch (error: any) {
             handleApiError('Mistral', error, progressReporter, settings.enableApiErrorDebugMode);
@@ -760,7 +779,8 @@ async function executeAzureOpenAIApi(provider: LLMProviderConfig, modelName: str
                 url: url,
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'api-key': provider.apiKey },
-                body: JSON.stringify(requestBody)
+                body: JSON.stringify(requestBody),
+                throw: false
             });
         } catch (error: any) {
             handleApiError('Azure OpenAI', error, progressReporter, settings.enableApiErrorDebugMode);
@@ -808,7 +828,8 @@ async function executeLMStudioApi(provider: LLMProviderConfig, modelName: string
                 url: url,
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${provider.apiKey || 'EMPTY'}` },
-                body: JSON.stringify(requestBody)
+                body: JSON.stringify(requestBody),
+                throw: false
             });
         } catch (error: any) {
             handleApiError('LMStudio', error, progressReporter, settings.enableApiErrorDebugMode);
@@ -849,7 +870,8 @@ async function executeOllamaApi(provider: LLMProviderConfig, modelName: string, 
                 url: url,
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(requestBody)
+                body: JSON.stringify(requestBody),
+                throw: false
             });
         } catch (error: any) {
             handleApiError('Ollama', error, progressReporter, settings.enableApiErrorDebugMode);
@@ -915,7 +937,8 @@ async function executeOpenRouterAPI(provider: LLMProviderConfig, modelName: stri
                     'HTTP-Referer': 'https://github.com/Jacobinwwey/obsidian-NotEMD', // Required by OpenRouter
                     'X-Title': 'Notemd Obsidian Plugin' // Required by OpenRouter
                 },
-                body: JSON.stringify(requestBody)
+                body: JSON.stringify(requestBody),
+                throw: false
             });
         } catch (error: any) {
              handleApiError('OpenRouter', error, progressReporter, settings.enableApiErrorDebugMode);
@@ -1004,7 +1027,8 @@ async function executeXaiApi(provider: LLMProviderConfig, modelName: string, pro
                 url: url,
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${provider.apiKey}` },
-                body: JSON.stringify(requestBody)
+                body: JSON.stringify(requestBody),
+                throw: false
             });
         } catch (error: any) {
             handleApiError('xAI', error, progressReporter, settings.enableApiErrorDebugMode);
