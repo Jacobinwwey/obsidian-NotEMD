@@ -20,7 +20,7 @@ A Easy way to create your own Knowledge-base!
 
 Notemd enhances your Obsidian workflow by integrating with various Large Language Models (LLMs) to process your multi-languages notes, automatically generate wiki-links for key concepts, create corresponding concept notes, perform web research, helping you build powerful knowledge graphs and more.
 
-**Version:** 1.6.3
+**Version:** 1.6.4
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
@@ -92,6 +92,7 @@ That's it! Explore the settings to unlock more features like web research, trans
 ### Web Research & Content Generation
 - **Web Research & Summarization**:
     - Perform web searches using Tavily (requires API key) or DuckDuckGo (experimental).
+    - **Improved Search Robustness**: DuckDuckGo search now features enhanced parsing logic (DOMParser with Regex fallback) to handle layout changes and ensure reliable results.
     - Summarize search results using the configured LLM.
     - The output language of the summary can be customized in the settings.
     - Append summaries to the current note.

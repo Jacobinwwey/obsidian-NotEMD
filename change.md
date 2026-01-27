@@ -4,6 +4,15 @@ This document summarizes the major functional and architectural changes implemen
 
 ---
 
+## [1.6.4] - 2026-01-27
+
+### Fixed
+*   **Search Engine Support**: Resolved issues with DuckDuckGo search by implementing a robust, modular architecture. The new `DuckDuckGoProvider` now uses DOMParser for reliable HTML parsing with a regex fallback, ensuring consistent search results even if the layout changes.
+*   **Modular Architecture**: Refactored the search logic into a modular `SearchProvider` system, making it easier to add new search engines and maintain existing ones.
+
+### Improved
+*   **Code Quality**: Integrated comprehensive unit tests for search providers to prevent regression.
+
 ## [1.6.3] - 2026-01-27
 
 ### Fixed

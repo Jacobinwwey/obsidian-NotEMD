@@ -18,7 +18,7 @@
 
 Notemd 通过与各种大型语言模型 (LLM) 集成来增强您的 Obsidian 工作流程，支持多语言笔记处理，自动为关键概念生成维基链接、创建相应的概念笔记、执行网页搜索与摘要、翻译内容、总结为Mermaid脑图等，助力构建强大的知识图谱。
 
-**版本:** 1.6.3
+**版本:** 1.6.4
 
 ![image](https://img.shields.io/github/v/release/Jacobinwwey/obsidian-NotEMD?label=Version&link=https%3A%2F%2Fgithub.com%2Jacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest) ![image](https://img.shields.io/github/downloads/Jacobinwwey/obsidian-NotEMD/total?logo=Obsidian&label=Downloads&labelColor=%237C3AED&color=%235b5b5b&link=https%3A%2F%2Fgithub.com%2Jacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest)
 
@@ -89,6 +89,7 @@ Notemd 通过与各种大型语言模型 (LLM) 集成来增强您的 Obsidian �
 ### 网络研究与内容生成
 - **网页研究与摘要**:
     - 支持Tavily（需API Key）与DuckDuckGo（实验性）两种网络搜索服务。
+    - **改进的搜索稳定性**: DuckDuckGo 搜索现在具有增强的解析逻辑（DOMParser 与 Regex 回退），以处理布局变化并确保结果的可靠性。
     - 自动用LLM总结搜索结果，并附加到当前笔记。
     - 可以在设置中自定义摘要的输出语言。
     - 可配置用于研究的最大内容长度。
