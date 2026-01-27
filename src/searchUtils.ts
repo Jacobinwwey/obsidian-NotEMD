@@ -1,111 +1,11 @@
-import { App, requestUrl, Notice, Editor, MarkdownView } from 'obsidian'; // Added Notice, Editor, MarkdownView
-import { NotemdSettings, ProgressReporter, SearchResult } from './types';
-import { estimateTokens, getProviderForTask, getModelForTask } from './utils'; // Added getProviderForTask, getModelForTask
-import { callDeepSeekAPI, callOpenAIApi, callAnthropicApi, callGoogleApi, callMistralApi, callAzureOpenAIApi, callLMStudioApi, callOllamaApi, callOpenRouterAPI, handleApiError, getDebugInfo } from './llmUtils'; // Added LLM callers
-import { cleanupLatexDelimiters, refineMermaidBlocks } from './mermaidProcessor'; // Added post-processors
-import { ErrorModal } from './ui/ErrorModal'; // Added ErrorModal
-import { getSystemPrompt } from './promptUtils'; // Import for default prompts
-
-/**
- * Performs a search using DuckDuckGo HTML endpoint and parses results.
- * @param query The search query.
- * @param settings Plugin settings containing DDG configuration.
- * @param progressReporter For logging progress/errors.
- * @returns A promise resolving to an array of SearchResult objects.
- */
-export async function searchDuckDuckGo(query: string, settings: NotemdSettings, progressReporter: ProgressReporter): Promise<SearchResult[]> {
-    const maxResults = settings.ddgMaxResults;
-    const encodedQuery = encodeURIComponent(query);
-    const url = `https://html.duckduckgo.com/html/?q=${encodedQuery}`;
-    const results: SearchResult[] = [];
-
-    progressReporter.log(`Querying DuckDuckGo HTML endpoint: ${url}`);
-    try {
-        const response = await requestUrl({
-            url: url,
-            method: 'GET',
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-                'Accept-Language': 'en-US,en;q=0.5',
-            },
-            throw: false
-        });
-
-        if (response.status !== 200) {
-            handleApiError('DuckDuckGo', response, progressReporter, settings.enableApiErrorDebugMode);
-        }
-
-        const htmlContent = response.text;
-        progressReporter.log(`Received HTML response from DuckDuckGo (${htmlContent.length} bytes). Parsing...`);
-
-        const resultRegex = /<div class="result result--html[\s\S]*?<a class="result__a" href="([^"]*)"[\s\S]*?>(.*?)<\/a>[\s\S]*?<a class="result__snippet"[\s\S]*?>(.*?)<\/a>/g;
-        let match;
-        let count = 0;
-
-        while ((match = resultRegex.exec(htmlContent)) !== null && count < maxResults) {
-            let link = match[1];
-            if (link.startsWith('/l/?uddg=')) {
-                const urlParams = new URLSearchParams(link.substring(3));
-                const decodedLink = urlParams.get('uddg');
-                if (decodedLink) {
-                    link = decodeURIComponent(decodedLink);
-                } else {
-                    progressReporter.log(`Warning: Could not decode DDG redirect URL: ${match[1]}`);
-                    link = `https://duckduckgo.com${link}`;
-                }
-            } else if (!link.startsWith('http')) {
-                try {
-                    const base = new URL('https://duckduckgo.com');
-                    link = new URL(link, base).toString();
-                } catch (e) {
-                    progressReporter.log(`Warning: Could not resolve relative URL: ${link}`);
-                    continue;
-                }
-            }
-
-            const title = match[2].replace(/<.*?>/g, '').trim();
-            const snippet = match[3].replace(/<.*?>/g, '').trim();
-
-            if (title && link && snippet) {
-                results.push({ title, url: link, content: snippet });
-                count++;
-            } else {
-                progressReporter.log(`Warning: Skipping partially parsed result (Title: ${!!title}, Link: ${!!link}, Snippet: ${!!snippet})`);
-            }
-        }
-
-        if (results.length === 0) {
-            progressReporter.log("Warning: Could not parse any valid results from DuckDuckGo HTML.");
-        } else {
-            progressReporter.log(`Successfully parsed ${results.length} results from DuckDuckGo.`);
-        }
-        return results;
-
-    } catch (error: unknown) {
-        // Use handleApiError for consistent debugging
-        try {
-            handleApiError('DuckDuckGo', error, progressReporter, settings.enableApiErrorDebugMode);
-        } catch (e) {
-            // handleApiError throws, so we catch it to return empty array as per original logic, 
-            // but we let handleApiError do the logging first.
-            // However, handleApiError throws an Error with a message.
-            // The original logic returned [] on failure.
-        }
-        // Fallback logging if handleApiError didn't log (it logs if debugMode is on)
-        // If debugMode is off, handleApiError throws a clean error message.
-        
-        // Actually, the original logic was: log error and return [].
-        // handleApiError throws. So we need to wrap it.
-        const message = error instanceof Error ? error.message : String(error);
-        if (settings.enableApiErrorDebugMode) {
-             progressReporter.log(`[DuckDuckGo] Debug: ${message}`);
-        }
-        const errorMessage = `Automated DuckDuckGo search failed. Error: ${message}. Consider using Tavily.`;
-        progressReporter.log(`Error: ${errorMessage}`);
-        return []; // Return empty array on failure
-    }
-}
+import { App, requestUrl, Notice, Editor, MarkdownView } from 'obsidian';
+import { NotemdSettings, ProgressReporter } from './types';
+import { estimateTokens, getProviderForTask, getModelForTask } from './utils';
+import { callDeepSeekAPI, callOpenAIApi, callAnthropicApi, callGoogleApi, callMistralApi, callAzureOpenAIApi, callLMStudioApi, callOllamaApi, callOpenRouterAPI, getDebugInfo } from './llmUtils';
+import { cleanupLatexDelimiters, refineMermaidBlocks } from './mermaidProcessor';
+import { ErrorModal } from './ui/ErrorModal';
+import { getSystemPrompt } from './promptUtils';
+import { SearchManager } from './search/SearchManager';
 
 /**
  * Fetches content from a URL and extracts basic text.
@@ -114,7 +14,7 @@ export async function searchDuckDuckGo(query: string, settings: NotemdSettings, 
  * @param debugMode Whether to log detailed debug info on error.
  * @returns A promise resolving to the extracted text content or an error message string.
  */
-export async function fetchContentFromUrl(url: string, progressReporter: ProgressReporter, debugMode: boolean = false): Promise<string> {
+export async function fetchContentFromUrl(url: string, progressReporter: ProgressReporter, debugMode = false): Promise<string> {
     progressReporter.log(`Fetching content from: ${url}`);
     try {
         const response = await requestUrl({
@@ -187,59 +87,30 @@ export async function _performResearch(app: App, settings: NotemdSettings, topic
     progressReporter.log(`Entering _performResearch for topic: "${topic}"`);
     const searchQuery = `${topic} wiki`;
     let combinedContent = '';
-    let searchSource = '';
-    let searchResults: SearchResult[] = [];
-
+    
     try {
-        if (settings.searchProvider === 'tavily') {
-            searchSource = 'Tavily';
-            progressReporter.log(`Selected search provider: Tavily.`);
-            if (!settings.tavilyApiKey) { throw new Error('Tavily API key is not configured.'); }
-            if (progressReporter.cancelled) throw new Error("Processing cancelled by user before Tavily search.");
+        const provider = SearchManager.getProvider(settings);
+        const searchSource = provider.name;
+        progressReporter.log(`Selected search provider: ${searchSource}.`);
 
-            const tavilyUrl = 'https://api.tavily.com/search';
-            progressReporter.log(`Searching Tavily for: "${searchQuery}"`);
-            progressReporter.updateStatus('Searching Tavily...', 10);
-            const tavilyRequestBody = {
-                api_key: settings.tavilyApiKey,
-                query: searchQuery,
-                search_depth: settings.tavilySearchDepth,
-                include_answer: false,
-                include_raw_content: false,
-                max_results: settings.tavilyMaxResults
-            };
-            const tavilyTimeout = settings.ddgFetchTimeout * 1000;
-            const timeoutPromise = new Promise<never>((_, reject) => setTimeout(() => reject(new Error(`Tavily API request timed out after ${tavilyTimeout / 1000}s`)), tavilyTimeout));
+        if (progressReporter.cancelled) throw new Error(`Processing cancelled by user before ${searchSource} search.`);
 
-            const tavilyResponse = await Promise.race([
-                requestUrl({ url: tavilyUrl, method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(tavilyRequestBody), throw: false }),
-                timeoutPromise
-            ]);
+        progressReporter.log(`Searching ${searchSource} for: "${searchQuery}"`);
+        progressReporter.updateStatus(`Searching ${searchSource}...`, 10);
 
-            if (progressReporter.cancelled) throw new Error("Processing cancelled by user during Tavily search.");
-            if (!tavilyResponse || typeof tavilyResponse.status !== 'number') { throw new Error("Tavily request failed or timed out."); }
-            if (tavilyResponse.status !== 200) {
-                 handleApiError('Tavily', tavilyResponse, progressReporter, settings.enableApiErrorDebugMode);
-            }
+        const searchResults = await provider.search(searchQuery, settings, progressReporter);
 
-            const tavilyData = tavilyResponse.json;
-            if (!tavilyData.results || tavilyData.results.length === 0) { progressReporter.log('Tavily returned no results.'); return null; }
-            // Assuming tavilyData.results elements match the SearchResult structure
-            searchResults = tavilyData.results.map((r: SearchResult) => ({ title: r.title, url: r.url, content: r.content }));
-            progressReporter.log(`Fetched ${searchResults.length} results from Tavily.`);
-
-        } else { // DuckDuckGo
-            searchSource = 'DuckDuckGo';
-            progressReporter.log(`Selected search provider: DuckDuckGo.`);
-            if (progressReporter.cancelled) throw new Error("Processing cancelled by user before DuckDuckGo search.");
-            progressReporter.log(`Searching DuckDuckGo for: "${searchQuery}"`);
-            progressReporter.updateStatus('Searching DuckDuckGo...', 10);
-            searchResults = await searchDuckDuckGo(searchQuery, settings, progressReporter);
-            if (progressReporter.cancelled) throw new Error("Processing cancelled by user during DuckDuckGo search.");
-            if (searchResults.length === 0) { progressReporter.log('DuckDuckGo search failed or returned no results.'); return null; }
+        if (progressReporter.cancelled) throw new Error(`Processing cancelled by user during ${searchSource} search.`);
+        
+        if (!searchResults || searchResults.length === 0) {
+             progressReporter.log(`${searchSource} search failed or returned no results.`); 
+             return null; 
         }
 
         let fetchedContents: string[] = [];
+        
+        // DuckDuckGo results are snippets, so we fetch full content.
+        // Tavily results (in current config) are snippets/summaries which we use directly.
         if (searchSource === 'DuckDuckGo') {
             progressReporter.log(`Fetching content for top ${searchResults.length} DuckDuckGo results...`);
             progressReporter.updateStatus('Fetching content...', 30);
