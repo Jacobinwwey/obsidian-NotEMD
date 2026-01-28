@@ -4,6 +4,19 @@ This document summarizes the major functional and architectural changes implemen
 
 ---
 
+## [1.6.5] - 2026-01-27
+
+## Bug Fixes
+
+### English
+*   **Fix installation Error**: Delete the unused js files, Fix the Severe installation difficulties
+
+### Chinese (中文)
+*   **解决安装问题**: 删除无用js文件，解决了严重的安装问题。
+
+
+---
+
 ## [1.6.4] - 2026-01-27
 
 ### English
