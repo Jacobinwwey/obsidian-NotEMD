@@ -1,57 +1,80 @@
-import { ItemView, WorkspaceLeaf, MarkdownView, Notice, TFile, TFolder, Editor } from 'obsidian'; // Added Editor
-import NotemdPlugin from '../main'; // Import the plugin class
+import { Editor, ItemView, MarkdownView, Notice, TFile, TFolder, WorkspaceLeaf } from 'obsidian';
+import NotemdPlugin from '../main';
 import { ProgressReporter } from '../types';
-import { NOTEMD_SIDEBAR_VIEW_TYPE, NOTEMD_SIDEBAR_DISPLAY_TEXT, NOTEMD_SIDEBAR_ICON } from '../constants';
-import { ErrorModal } from './ErrorModal'; // Import ErrorModal
-import { findDuplicates } from '../fileUtils'; // Import findDuplicates utility
+import { NOTEMD_SIDEBAR_DISPLAY_TEXT, NOTEMD_SIDEBAR_ICON, NOTEMD_SIDEBAR_VIEW_TYPE } from '../constants';
+import { findDuplicates } from '../fileUtils';
+import {
+    CustomWorkflowButton,
+    resolveCustomWorkflowButtons,
+    SIDEBAR_ACTION_DEFINITIONS,
+    SidebarActionId
+} from '../workflowButtons';
 
-// NotemdSidebarView now implements ProgressReporter
+type ActionCategory = typeof SIDEBAR_ACTION_DEFINITIONS[number]['category'];
+
+interface WorkflowExecutionContext {
+    preferredFolderPath: string | null;
+    lastGeneratedCompleteFolderPath: string | null;
+}
+
+const ACTION_CATEGORY_LABEL: Record<ActionCategory, { title: string; openByDefault: boolean }> = {
+    core: { title: 'Core Flow', openByDefault: true },
+    generation: { title: 'Generation & Mermaid', openByDefault: true },
+    knowledge: { title: 'Knowledge', openByDefault: false },
+    translation: { title: 'Translation', openByDefault: false },
+    utilities: { title: 'Utilities', openByDefault: false }
+};
+
+const ACTION_TOOLTIP: Record<SidebarActionId, string> = {
+    'process-current-add-links': 'Processes current file and creates wiki links/concept notes.',
+    'process-folder-add-links': 'Processes all eligible notes in a folder.',
+    'generate-from-title': 'Generate note content from current note title.',
+    'batch-generate-from-titles': 'Batch-generate content from note titles in a folder.',
+    'research-and-summarize': 'Research selected topic/title and append summary.',
+    'summarize-as-mermaid': 'Generate a Mermaid diagram summary from current note.',
+    'translate-current-file': 'Translate the active file into selected output language.',
+    'batch-translate-folder': 'Translate all markdown files in a folder.',
+    'extract-concepts-current': 'Extract concepts from current file only.',
+    'extract-concepts-folder': 'Extract concepts from every file in a selected folder.',
+    'extract-original-text': 'Extract verbatim source excerpts for configured questions.',
+    'batch-mermaid-fix': 'Run Mermaid/LaTeX batch syntax fix on selected folder.',
+    'fix-formula-current': 'Normalize formula delimiters in current file.',
+    'batch-fix-formula': 'Normalize formula delimiters across a selected folder.',
+    'check-duplicates-current': 'Detect duplicate terms in the current file.',
+    'check-remove-duplicate-concepts': 'Detect and remove duplicate concept notes.',
+    'test-llm-connection': 'Test active provider connection and credentials.'
+};
+
+const PRIMARY_ACTION_IDS = new Set<SidebarActionId>([
+    'process-current-add-links',
+    'batch-generate-from-titles',
+    'summarize-as-mermaid'
+]);
+
 export class NotemdSidebarView extends ItemView implements ProgressReporter {
-    plugin: NotemdPlugin; // Reference to the main plugin
-    // UI Elements for progress display
+    plugin: NotemdPlugin;
+
     private statusEl: HTMLElement | null = null;
     private progressEl: HTMLElement | null = null;
     private progressBarContainerEl: HTMLElement | null = null;
     private timeRemainingEl: HTMLElement | null = null;
     private logEl: HTMLElement | null = null;
-    private logContent: string[] = []; // Store log messages
-    private startTime: number = 0;
-    private isProcessing: boolean = false; // Track if processing is active
-    private isCancelled: boolean = false; // Track cancellation state
-    // Store the AbortController for the current operation
+    private cancelButton: HTMLButtonElement | null = null;
+    private languageSelector: HTMLSelectElement | null = null;
+
+    private logContent: string[] = [];
+    private startTime = 0;
+    private isProcessing = false;
+    private isCancelled = false;
     private currentAbortController: AbortController | null = null;
-    private activeLeafChangeHandler: (() => void) | null = null; // Store handler reference
     activeTasks = 0;
 
-    // --- Button References ---
-    private processCurrentButton: HTMLButtonElement | null = null;
-    private processFolderButton: HTMLButtonElement | null = null;
-    private researchButton: HTMLButtonElement | null = null;
-    private generateTitleButton: HTMLButtonElement | null = null;
-    private batchGenerateTitleButton: HTMLButtonElement | null = null;
-    private checkDuplicatesButton: HTMLButtonElement | null = null;
-    private testConnectionButton: HTMLButtonElement | null = null;
-    private checkRemoveDuplicatesButton: HTMLButtonElement | null = null;
-    private batchMermaidFixButton: HTMLButtonElement | null = null; // Added
-    private fixFormulaButton: HTMLButtonElement | null = null;
-    private batchFixFormulaButton: HTMLButtonElement | null = null;
-    private cancelButton: HTMLButtonElement | null = null;
-    private translateButton: HTMLButtonElement | null = null;
-    private batchTranslateButton: HTMLButtonElement | null = null;
-    private summarizeToMermaidButton: HTMLButtonElement | null = null;
-    private extractConceptsButton: HTMLButtonElement | null = null;
-    private extractConceptsFolderButton: HTMLButtonElement | null = null;
-    private extractOriginalTextButton: HTMLButtonElement | null = null;
-    private languageSelector: HTMLSelectElement | null = null;
+    private actionButtons = new Map<string, HTMLButtonElement>();
+    private workflowButtons: HTMLButtonElement[] = [];
 
     constructor(leaf: WorkspaceLeaf, plugin: NotemdPlugin) {
         super(leaf);
         this.plugin = plugin;
-    }
-
-    updateActiveTasks(delta: number): void {
-        this.activeTasks += delta;
-        this.updateStatus(`Processing... (Active: ${this.activeTasks})`);
     }
 
     getViewType() {
@@ -81,53 +104,46 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         this.updateButtonStates();
     }
 
-    // Method to clear progress/log display
     clearDisplay() {
-        console.log('clearDisplay called.');
         this.logContent = [];
         if (this.logEl) this.logEl.empty();
         if (this.statusEl) this.statusEl.setText('Ready');
         if (this.progressEl) {
-            this.progressEl.dataset.progress = '0'; // Set data attribute
+            this.progressEl.dataset.progress = '0';
             this.progressEl.setText('');
             this.progressEl.removeClass('is-error');
+            this.progressEl.style.width = '0%';
         }
         if (this.timeRemainingEl) this.timeRemainingEl.setText('');
         if (this.progressBarContainerEl) this.progressBarContainerEl.addClass('is-hidden');
         if (this.cancelButton) {
-            this.cancelButton.disabled = true; // Cancel button disabled when not processing
+            this.cancelButton.disabled = true;
             this.cancelButton.removeClass('is-active');
         }
         this.isProcessing = false;
         this.isCancelled = false;
         this.startTime = 0;
         this.currentAbortController = null;
-        this.updateButtonStates(); // Update button states after clearing
+        this.updateButtonStates();
     }
 
-    // Method to update status display
     updateStatus(text: string, percent?: number) {
         if (this.statusEl) this.statusEl.setText(text);
-        
-        // Rely on updateButtonStates for button management, but ensure state reflects reality if needed
-        // If status updates imply completion or error (percent < 0 or percent === 100), we might need to update processing state.
-        
+
         if (percent !== undefined && (percent < 0 || percent >= 100)) {
-            this.isProcessing = false; // Processing is done (error or complete)
+            this.isProcessing = false;
         }
 
-        // We call updateButtonStates here to ensure the UI reflects the current state (isProcessing, isCancelled)
-        // after a status update, especially if the status update changes those flags.
-        this.updateButtonStates(); 
+        this.updateButtonStates();
 
         if (percent !== undefined && this.progressEl && this.progressBarContainerEl) {
             this.progressBarContainerEl.removeClass('is-hidden');
             if (percent >= 0) {
                 const clampedPercent = Math.min(100, Math.max(0, percent));
-                // REMOVED: this.progressEl.style.setProperty('--notemd-progress-percent', `${clampedPercent}%`);
-                this.progressEl.dataset.progress = String(clampedPercent); // Store progress in data attribute
+                this.progressEl.dataset.progress = String(clampedPercent);
                 this.progressEl.setText(`${Math.round(clampedPercent)}%`);
                 this.progressEl.removeClass('is-error');
+                this.progressEl.style.width = `${clampedPercent}%`;
 
                 if (percent > 0 && this.startTime > 0) {
                     const elapsed = (Date.now() - this.startTime) / 1000;
@@ -139,59 +155,54 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
                 } else if (this.timeRemainingEl) {
                     this.timeRemainingEl.setText('Est. time remaining: calculating...');
                 }
-            } else { // Handle negative percent for error/cancel state
-                // REMOVED: this.progressEl.style.setProperty('--notemd-progress-percent', `100%`);
-                this.progressEl.dataset.progress = '100'; // Set data attribute for error state
+            } else {
+                this.progressEl.dataset.progress = '100';
                 this.progressEl.addClass('is-error');
                 this.progressEl.setText('Cancelled/Error');
+                this.progressEl.style.width = '100%';
                 if (this.timeRemainingEl) this.timeRemainingEl.setText('Processing stopped.');
             }
         }
     }
 
-    // Method to add log messages
     log(message: string) {
-        if (this.logEl) {
-            const timestamp = `[${new Date().toLocaleTimeString()}]`;
-            const fullMessage = `${timestamp} ${message}`;
-            this.logContent.push(fullMessage);
-
-            const entry = this.logEl.createEl('div', { cls: 'notemd-log-entry' });
-            entry.createEl('span', { text: timestamp, cls: 'notemd-log-time' });
-            entry.createEl('span', { text: ` ${message}`, cls: 'notemd-log-message' });
-            this.logEl.scrollTop = this.logEl.scrollHeight;
+        if (!this.logEl) {
+            return;
         }
+        const timestamp = `[${new Date().toLocaleTimeString()}]`;
+        const fullMessage = `${timestamp} ${message}`;
+        this.logContent.push(fullMessage);
+
+        const entry = this.logEl.createEl('div', { cls: 'notemd-log-entry' });
+        entry.createEl('span', { text: timestamp, cls: 'notemd-log-time' });
+        entry.createEl('span', { text: ` ${message}`, cls: 'notemd-log-message' });
+        this.logEl.scrollTop = this.logEl.scrollHeight;
     }
 
     getLogs(): string {
         return this.logContent.join('\n');
     }
 
-    // Helper to format time
     private formatTime(seconds: number): string {
         const mins = Math.floor(seconds / 60);
         const secs = Math.floor(seconds % 60);
         return `${mins}m ${secs}s`;
     }
 
-    // Getter for cancellation status
     get cancelled() {
         return this.isCancelled;
     }
 
-    // Method to handle cancellation request
     requestCancel() {
-        console.log(`requestCancel called. isProcessing: ${this.isProcessing}, isCancelled: ${this.isCancelled}`);
         if (this.isProcessing && !this.isCancelled) {
             this.isCancelled = true;
             this.updateStatus('Cancelling...', -1);
             this.log('User requested cancellation.');
             this.currentAbortController?.abort();
-            this.updateButtonStates(); // Update states after requesting cancel
+            this.updateButtonStates();
         }
     }
 
-    // Implement the abortController property from the interface
     get abortController(): AbortController | null | undefined {
         return this.currentAbortController;
     }
@@ -199,298 +210,415 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         this.currentAbortController = controller ?? null;
     }
 
-    // --- Centralized Button State Management ---
+    updateActiveTasks(delta: number): void {
+        this.activeTasks += delta;
+        this.updateStatus(`Processing... (Active: ${this.activeTasks})`);
+    }
+
     private updateButtonStates() {
-        console.log(`updateButtonStates called. isProcessing: ${this.isProcessing}, isCancelled: ${this.isCancelled}`);
         const processing = this.isProcessing;
-        const cancelled = this.isCancelled;
+        this.actionButtons.forEach(button => {
+            button.disabled = processing;
+        });
+        this.workflowButtons.forEach(button => {
+            button.disabled = processing;
+        });
+        if (this.languageSelector) {
+            this.languageSelector.disabled = processing;
+        }
 
-        // Action buttons disabled during processing
-        if (this.processCurrentButton) this.processCurrentButton.disabled = processing;
-        if (this.processFolderButton) this.processFolderButton.disabled = processing;
-        if (this.researchButton) this.researchButton.disabled = processing || !this.app.workspace.getActiveViewOfType(MarkdownView);
-        if (this.generateTitleButton) this.generateTitleButton.disabled = processing;
-        if (this.batchGenerateTitleButton) this.batchGenerateTitleButton.disabled = processing;
-        if (this.checkDuplicatesButton) this.checkDuplicatesButton.disabled = processing;
-        if (this.testConnectionButton) this.testConnectionButton.disabled = processing;
-        if (this.checkRemoveDuplicatesButton) this.checkRemoveDuplicatesButton.disabled = processing;
-        if (this.batchMermaidFixButton) this.batchMermaidFixButton.disabled = processing; // Added
-        if (this.fixFormulaButton) this.fixFormulaButton.disabled = processing;
-        if (this.batchFixFormulaButton) this.batchFixFormulaButton.disabled = processing;
-        if (this.translateButton) this.translateButton.disabled = processing;
-        if (this.batchTranslateButton) this.batchTranslateButton.disabled = processing;
-        if (this.extractConceptsButton) this.extractConceptsButton.disabled = processing;
-        if (this.extractConceptsFolderButton) this.extractConceptsFolderButton.disabled = processing;
-        if (this.extractOriginalTextButton) this.extractOriginalTextButton.disabled = processing;
-
-        // Cancel button enabled only during processing and before cancellation
         if (this.cancelButton) {
-            this.cancelButton.disabled = !processing || cancelled;
-            if (!processing || cancelled) {
-                this.cancelButton.removeClass('is-active');
-            } else {
-                this.cancelButton.addClass('is-active');
+            this.cancelButton.disabled = !processing || this.isCancelled;
+            if (this.cancelButton.disabled) this.cancelButton.removeClass('is-active');
+            else this.cancelButton.addClass('is-active');
+        }
+    }
+
+    private createReporterProxy(clearEnabled = false): ProgressReporter {
+        const view = this;
+        return {
+            log(message: string) {
+                view.log(message);
+            },
+            updateStatus(text: string, percent?: number) {
+                view.updateStatus(text, percent);
+            },
+            requestCancel() {
+                view.requestCancel();
+            },
+            clearDisplay() {
+                if (clearEnabled) {
+                    view.clearDisplay();
+                }
+            },
+            get cancelled() {
+                return view.cancelled;
+            },
+            get abortController() {
+                return view.abortController;
+            },
+            set abortController(controller: AbortController | null | undefined) {
+                view.abortController = controller;
+            },
+            get activeTasks() {
+                return view.activeTasks;
+            },
+            set activeTasks(value: number) {
+                view.activeTasks = value;
+            },
+            updateActiveTasks(delta: number) {
+                view.updateActiveTasks(delta);
+            },
+            getLogs() {
+                return view.getLogs();
+            }
+        };
+    }
+
+    private createSection(
+        parent: HTMLElement,
+        title: string,
+        description: string,
+        openByDefault: boolean
+    ): HTMLElement {
+        const details = parent.createEl('details', { cls: 'notemd-section-card' });
+        details.open = openByDefault;
+        const summary = details.createEl('summary', { cls: 'notemd-section-summary' });
+        summary.createEl('span', { text: title });
+        details.createEl('p', { text: description, cls: 'notemd-section-description' });
+        return details.createDiv({ cls: 'notemd-button-grid' });
+    }
+
+    private createActionButton(
+        parent: HTMLElement,
+        actionId: SidebarActionId,
+        label: string
+    ) {
+        const classes = ['notemd-action-button'];
+        if (PRIMARY_ACTION_IDS.has(actionId)) {
+            classes.push('mod-cta');
+        }
+        const button = parent.createEl('button', {
+            text: label,
+            cls: classes.join(' ')
+        });
+        button.title = ACTION_TOOLTIP[actionId] || label;
+        button.onclick = async () => {
+            await this.runSingleAction(actionId);
+        };
+        this.actionButtons.set(actionId, button);
+    }
+
+    private getConfiguredConceptFolderPath(): string | null {
+        if (this.plugin.settings.useCustomConceptNoteFolder && this.plugin.settings.conceptNoteFolder.trim()) {
+            return this.plugin.settings.conceptNoteFolder.trim();
+        }
+        return null;
+    }
+
+    private async runSingleAction(actionId: SidebarActionId): Promise<void> {
+        if (this.isProcessing || this.plugin.getIsBusy()) {
+            new Notice('Processing already in progress.');
+            return;
+        }
+        const actionLabel = SIDEBAR_ACTION_DEFINITIONS.find(def => def.id === actionId)?.label || actionId;
+        this.startProcessing(`Running "${actionLabel}"...`);
+        const reporter = this.createReporterProxy();
+
+        try {
+            await this.executeAction(actionId, reporter);
+            if (!this.cancelled) {
+                this.updateStatus(`"${actionLabel}" complete`, 100);
+            }
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : String(error);
+            this.log(`Action failed: ${message}`);
+            this.updateStatus('Error occurred', -1);
+        } finally {
+            this.finishProcessing();
+        }
+    }
+
+    private async runCustomWorkflow(button: CustomWorkflowButton): Promise<void> {
+        if (this.isProcessing || this.plugin.getIsBusy()) {
+            new Notice('Processing already in progress.');
+            return;
+        }
+        this.startProcessing(`Workflow: ${button.name}`);
+        const reporter = this.createReporterProxy();
+        const context: WorkflowExecutionContext = {
+            preferredFolderPath: this.getConfiguredConceptFolderPath(),
+            lastGeneratedCompleteFolderPath: null
+        };
+        const continueOnError = this.plugin.settings.customWorkflowErrorStrategy === 'continue_on_error';
+        let failedSteps = 0;
+        this.log(
+            `Executing workflow "${button.name}" with ${button.actions.length} step(s). ` +
+            `Strategy: ${continueOnError ? 'continue on error' : 'stop on first error'}.`
+        );
+
+        try {
+            for (let i = 0; i < button.actions.length; i++) {
+                if (this.cancelled) {
+                    break;
+                }
+                const actionId = button.actions[i];
+                const actionLabel = SIDEBAR_ACTION_DEFINITIONS.find(def => def.id === actionId)?.label || actionId;
+                const progress = Math.floor((i / button.actions.length) * 100);
+                this.updateStatus(`[${i + 1}/${button.actions.length}] ${actionLabel}`, progress);
+                this.log(`Step ${i + 1}/${button.actions.length}: ${actionLabel}`);
+                try {
+                    await this.executeAction(actionId, reporter, context);
+                } catch (error: unknown) {
+                    failedSteps++;
+                    const message = error instanceof Error ? error.message : String(error);
+                    this.log(`Step failed: ${message}`);
+                    if (!continueOnError) {
+                        throw error;
+                    }
+                }
+            }
+
+            if (!this.cancelled) {
+                if (failedSteps > 0) {
+                    this.updateStatus(`Workflow "${button.name}" finished with ${failedSteps} error(s)`, -1);
+                    new Notice(`Workflow "${button.name}" finished with ${failedSteps} error(s).`);
+                } else {
+                    this.updateStatus(`Workflow "${button.name}" complete`, 100);
+                    new Notice(`Workflow "${button.name}" completed.`);
+                }
+            }
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : String(error);
+            this.log(`Workflow failed: ${message}`);
+            this.updateStatus('Workflow failed', -1);
+            new Notice(`Workflow "${button.name}" failed: ${message}`);
+        } finally {
+            this.finishProcessing();
+        }
+    }
+
+    private async executeAction(
+        actionId: SidebarActionId,
+        reporter: ProgressReporter,
+        context?: WorkflowExecutionContext
+    ): Promise<void> {
+        switch (actionId) {
+            case 'process-current-add-links': {
+                await this.plugin.processWithNotemdCommand(reporter);
+                if (context && !context.preferredFolderPath) {
+                    context.preferredFolderPath = this.getConfiguredConceptFolderPath();
+                }
+                break;
+            }
+            case 'process-folder-add-links': {
+                await this.plugin.processFolderWithNotemdCommand(reporter, context?.preferredFolderPath || undefined);
+                break;
+            }
+            case 'generate-from-title': {
+                const activeFile = this.plugin.app.workspace.getActiveFile();
+                if (!activeFile || !(activeFile instanceof TFile) || activeFile.extension !== 'md') {
+                    throw new Error('No active Markdown file selected.');
+                }
+                await this.plugin.generateContentForTitleCommand(activeFile, reporter);
+                break;
+            }
+            case 'batch-generate-from-titles': {
+                const folderOverride = context?.preferredFolderPath || this.getConfiguredConceptFolderPath() || undefined;
+                const result = await this.plugin.batchGenerateContentForTitlesCommand(reporter, folderOverride);
+                if (result && context) {
+                    context.preferredFolderPath = result.sourceFolderPath;
+                    context.lastGeneratedCompleteFolderPath = result.completeFolderPath;
+                }
+                break;
+            }
+            case 'research-and-summarize': {
+                const activeFile = this.app.workspace.getActiveFile();
+                if (!activeFile || !(activeFile instanceof TFile) || activeFile.extension !== 'md') {
+                    throw new Error('No active Markdown file selected.');
+                }
+
+                let targetView: MarkdownView | null = null;
+                let targetEditor: Editor | null = null;
+                this.app.workspace.iterateAllLeaves(leaf => {
+                    if (leaf.view instanceof MarkdownView && leaf.view.file?.path === activeFile.path) {
+                        targetView = leaf.view;
+                        targetEditor = leaf.view.editor;
+                    }
+                });
+
+                if (!targetView || !targetEditor) {
+                    throw new Error('Could not find active Markdown editor view.');
+                }
+                await this.plugin.researchAndSummarizeCommand(targetEditor, targetView, reporter);
+                break;
+            }
+            case 'summarize-as-mermaid': {
+                const activeFile = this.plugin.app.workspace.getActiveFile();
+                if (!activeFile || !(activeFile instanceof TFile) || activeFile.extension !== 'md') {
+                    throw new Error('No active Markdown file selected.');
+                }
+                await this.plugin.summarizeToMermaidCommand(activeFile, reporter);
+                break;
+            }
+            case 'translate-current-file': {
+                const activeFile = this.app.workspace.getActiveFile();
+                if (!activeFile) {
+                    throw new Error('No active file selected.');
+                }
+                await this.plugin.translateFileCommand(activeFile, reporter.abortController?.signal, reporter);
+                break;
+            }
+            case 'batch-translate-folder': {
+                const targetFolderPath = context?.preferredFolderPath;
+                if (targetFolderPath) {
+                    const abstract = this.app.vault.getAbstractFileByPath(targetFolderPath);
+                    if (abstract instanceof TFolder) {
+                        await this.plugin.batchTranslateFolderCommand(abstract, reporter);
+                        break;
+                    }
+                }
+                await this.plugin.batchTranslateFolderCommand(undefined, reporter);
+                break;
+            }
+            case 'extract-concepts-current': {
+                await this.plugin.extractConceptsCommand(reporter);
+                break;
+            }
+            case 'extract-concepts-folder': {
+                await this.plugin.batchExtractConceptsForFolderCommand(reporter);
+                break;
+            }
+            case 'extract-original-text': {
+                await this.plugin.extractOriginalTextCommand(reporter);
+                break;
+            }
+            case 'batch-mermaid-fix': {
+                const folderOverride = context?.lastGeneratedCompleteFolderPath || context?.preferredFolderPath || undefined;
+                await this.plugin.batchMermaidFixCommand(reporter, folderOverride);
+                break;
+            }
+            case 'fix-formula-current': {
+                const activeFile = this.app.workspace.getActiveFile();
+                if (!activeFile || (activeFile.extension !== 'md' && activeFile.extension !== 'txt')) {
+                    throw new Error('No active .md/.txt file selected.');
+                }
+                await this.plugin.fixFormulaFormatsCommand(activeFile, reporter);
+                break;
+            }
+            case 'batch-fix-formula': {
+                await this.plugin.batchFixFormulaFormatsCommand(reporter);
+                break;
+            }
+            case 'check-duplicates-current': {
+                const activeFile = this.plugin.app.workspace.getActiveFile();
+                if (!activeFile || !(activeFile instanceof TFile) || (activeFile.extension !== 'md' && activeFile.extension !== 'txt')) {
+                    throw new Error("No active '.md' or '.txt' file selected.");
+                }
+
+                const content = await this.plugin.app.vault.read(activeFile);
+                const duplicates = findDuplicates(content);
+                const message = `Found ${duplicates.size} potential duplicate terms.`;
+                reporter.log(message);
+                new Notice(`${message} Check log and console.`);
+                if (duplicates.size > 0) {
+                    reporter.log(`Potential duplicates: ${Array.from(duplicates).join(', ')}`);
+                    console.log(`Potential duplicates in ${activeFile.name}:`, Array.from(duplicates));
+                }
+                break;
+            }
+            case 'check-remove-duplicate-concepts': {
+                await this.plugin.checkAndRemoveDuplicateConceptNotesCommand(reporter);
+                break;
+            }
+            case 'test-llm-connection': {
+                await this.plugin.testLlmConnectionCommand(reporter);
+                break;
+            }
+            default: {
+                throw new Error(`Unsupported action: ${actionId}`);
             }
         }
-        this.updateResearchButtonState(); // Update research button specific state
     }
-    // --- End Button State Management ---
+
+    private buildLanguageSelector(parent: HTMLElement) {
+        const row = parent.createDiv({ cls: 'notemd-inline-control' });
+        row.createEl('label', { text: 'Language', cls: 'notemd-inline-label' });
+        this.languageSelector = row.createEl('select', { cls: 'notemd-language-select' });
+        const selector = this.languageSelector;
+        this.plugin.settings.availableLanguages.forEach(lang => {
+            selector.add(new Option(lang.name, lang.code));
+        });
+        selector.value = this.plugin.settings.language;
+        selector.onchange = async () => {
+            this.plugin.settings.language = selector.value;
+            await this.plugin.saveSettings();
+            new Notice(`Language changed to ${selector.value}`);
+        };
+    }
 
     async onOpen() {
-        const container = this.containerEl.children[1];
+        const container = this.containerEl.children[1] as HTMLElement;
         container.empty();
         container.addClass('notemd-sidebar-container');
 
-        container.createEl("h4", { text: "Original processing" });
-        const originalButtonGroup = container.createDiv({ cls: 'notemd-button-group' });
+        const hero = container.createDiv({ cls: 'notemd-hero-card' });
+        hero.createEl('h3', { text: 'Notemd Workbench' });
+        hero.createEl('p', { text: 'Run single actions or custom one-click workflows with live progress and logs.' });
 
-        this.processCurrentButton = originalButtonGroup.createEl('button', { text: 'Process file (add links)', cls: 'mod-cta' });
-        this.processCurrentButton.title = 'Processes the current file to add [[wiki-links]] and create concept notes.';
-        this.processCurrentButton.onclick = async () => {
-            if (this.isProcessing) return;
-            this.startProcessing('Processing current file...');
-            try { await this.plugin.processWithNotemdCommand(this); }
-            finally { this.finishProcessing(); }
-        };
+        const workflowResolution = resolveCustomWorkflowButtons(this.plugin.settings.customWorkflowButtonsDsl);
+        const quickBody = this.createSection(
+            container,
+            'Quick Workflows',
+            'Custom buttons assembled from built-in actions.',
+            true
+        );
 
-        this.processFolderButton = originalButtonGroup.createEl('button', { text: 'Process folder (add links)' });
-        this.processFolderButton.title = 'Processes all files in a selected folder to add [[wiki-links]] and create concept notes.';
-        this.processFolderButton.onclick = async () => {
-            if (this.isProcessing) return;
-            this.startProcessing('Processing folder...');
-            try { await this.plugin.processFolderWithNotemdCommand(this); }
-            finally { this.finishProcessing(); }
-        };
-
-        container.createEl('h4', { text: "New features" });
-        const newFeatureButtonGroup = container.createDiv({ cls: 'notemd-button-group' });
-
-        this.researchButton = newFeatureButtonGroup.createEl('button', { text: 'Research & summarize' });
-        this.researchButton.title = 'Uses the current note title or selection for web search and appends an LLM summary.';
-        this.researchButton.onclick = async () => {
-            if (this.isProcessing || this.plugin.getIsBusy()) { new Notice('Processing already in progress.'); return; }
-
-            const activeFile = this.app.workspace.getActiveFile();
-            if (!activeFile || !(activeFile instanceof TFile) || activeFile.extension !== 'md') {
-                this.log('Debug: "Research & Summarize" clicked, but no active Markdown file found.');
-                return;
-            }
-
-            let targetView: MarkdownView | null = null;
-            let targetEditor: Editor | null = null;
-            this.app.workspace.iterateAllLeaves(leaf => {
-                if (leaf.view instanceof MarkdownView && leaf.view.file?.path === activeFile.path) {
-                    targetView = leaf.view;
-                    targetEditor = leaf.view.editor;
-                }
+        workflowResolution.buttons.forEach(buttonConfig => {
+            const workflowButton = quickBody.createEl('button', {
+                text: buttonConfig.name,
+                cls: 'notemd-action-button mod-cta'
             });
-
-            if (targetView && targetEditor) {
-                this.startProcessing(`Researching topic for ${activeFile.name}...`);
-                try {
-                    await this.plugin.researchAndSummarizeCommand(targetEditor, targetView, this);
-                } catch (error) {
-                    const message = error instanceof Error ? error.message : String(error);
-                    this.log(`Error during Research & Summarize: ${message}`);
-                    this.updateStatus('Error occurred', -1);
-                } finally {
-                    this.finishProcessing();
-                }
-            } else {
-                this.log(`Debug: "Research & Summarize" clicked for active file "${activeFile.name}", but its editor/view was not found.`);
-            }
-        };
-
-        this.generateTitleButton = newFeatureButtonGroup.createEl('button', { text: 'Generate from title' });
-        this.generateTitleButton.title = 'Generates content for the current note based on its title, replacing existing content.';
-        this.generateTitleButton.onclick = async () => {
-            if (this.isProcessing) return;
-            const activeFile = this.plugin.app.workspace.getActiveFile();
-            if (!activeFile || !(activeFile instanceof TFile) || activeFile.extension !== 'md') { new Notice('No active Markdown file selected.'); return; }
-            this.startProcessing('Generating content...');
-            try { await this.plugin.generateContentForTitleCommand(activeFile, this); }
-            finally { this.finishProcessing(); }
-        };
-
-        this.batchGenerateTitleButton = newFeatureButtonGroup.createEl('button', { text: 'Batch generate from titles' });
-        this.batchGenerateTitleButton.title = 'Generates content for all notes in a selected folder based on their titles.';
-        this.batchGenerateTitleButton.onclick = async () => {
-            if (this.isProcessing) return;
-            this.startProcessing('Starting batch generation...');
-            try { await this.plugin.batchGenerateContentForTitlesCommand(this); }
-            finally { this.finishProcessing(); }
-        };
-
-        const translateGroup = newFeatureButtonGroup.createDiv({ cls: 'notemd-translate-group' });
-        this.translateButton = translateGroup.createEl('button', { text: 'Translate', cls: 'mod-cta' });
-        this.translateButton.title = 'Translates the selected text using the configured provider.';
-        this.translateButton.onclick = async () => {
-            if (this.isProcessing) {
-                console.log('Translate button clicked but already processing. Ignoring.');
-                return;
-            }
-            const activeFile = this.app.workspace.getActiveFile();
-            if (activeFile) {
-                this.startProcessing('Translating...');
-                try {
-                    await this.plugin.translateFileCommand(activeFile, this.currentAbortController?.signal, this);
-                } finally {
-                    this.finishProcessing();
-                }
-            } else {
-                new Notice('No active file to translate.');
-                console.log('No active file to translate. Translate command not started.');
-            }
-        };
-
-        this.batchTranslateButton = translateGroup.createEl('button', { text: 'Batch Translate' });
-        this.batchTranslateButton.title = 'Translates all files in a selected folder.';
-        this.batchTranslateButton.onclick = async () => {
-            if (this.isProcessing) return;
-            this.startProcessing('Starting batch translation...');
-            try { await this.plugin.batchTranslateFolderCommand(undefined, this); }
-            finally { this.finishProcessing(); }
-        };
-
-        this.summarizeToMermaidButton = newFeatureButtonGroup.createEl('button', { text: 'Summarise as Mermaid diagram' });
-        this.summarizeToMermaidButton.title = 'Summarises the current note content as a Mermaid mindmap diagram and saves it to a new file.';
-        this.summarizeToMermaidButton.onclick = async () => {
-            if (this.isProcessing) return;
-            const activeFile = this.plugin.app.workspace.getActiveFile();
-            if (!activeFile || !(activeFile instanceof TFile) || activeFile.extension !== 'md') { new Notice('No active Markdown file selected.'); return; }
-            this.startProcessing('Summarizing...');
-            try { await this.plugin.summarizeToMermaidCommand(activeFile, this); }
-            finally { this.finishProcessing(); }
-        };
-
-        this.extractConceptsButton = newFeatureButtonGroup.createEl('button', { text: 'Extract concepts (current file)' });
-        this.extractConceptsButton.title = 'Extracts concepts from the current file and creates concept notes without modifying the original file.';
-        this.extractConceptsButton.onclick = async () => {
-            if (this.isProcessing) return;
-            this.startProcessing('Extracting concepts...');
-            try { await this.plugin.extractConceptsCommand(this); }
-            finally { this.finishProcessing(); }
-        };
-
-        this.extractConceptsFolderButton = newFeatureButtonGroup.createEl('button', { text: 'Extract concepts (folder)' });
-        this.extractConceptsFolderButton.title = 'Extracts concepts from all files in a selected folder and creates concept notes without modifying the original files.';
-        this.extractConceptsFolderButton.onclick = async () => {
-            if (this.isProcessing) return;
-            this.startProcessing('Extracting concepts from folder...');
-            try { await this.plugin.batchExtractConceptsForFolderCommand(this); }
-            finally { this.finishProcessing(); }
-        };
-
-        this.extractOriginalTextButton = newFeatureButtonGroup.createEl('button', { text: 'Extract Specific Original Text' });
-        this.extractOriginalTextButton.title = 'Extracts verbatim text from the current file based on questions defined in settings.';
-        this.extractOriginalTextButton.onclick = async () => {
-            if (this.isProcessing) return;
-            this.startProcessing('Extracting original text...');
-            try { await this.plugin.extractOriginalTextCommand(this); }
-            finally { this.finishProcessing(); }
-        };
-
-        this.languageSelector = translateGroup.createEl('select');
-        const languageSelector = this.languageSelector;
-        if (languageSelector) {
-            this.plugin.settings.availableLanguages.forEach(lang => {
-                languageSelector.add(new Option(lang.name, lang.code));
-            });
-            languageSelector.value = this.plugin.settings.language;
-            languageSelector.onchange = async (e) => {
-                this.plugin.settings.language = (e.target as HTMLSelectElement).value;
-                await this.plugin.saveSettings();
-                new Notice(`Language changed to ${this.plugin.settings.language}`);
+            workflowButton.title = buttonConfig.actions.join(' > ');
+            workflowButton.onclick = async () => {
+                await this.runCustomWorkflow(buttonConfig);
             };
+            this.workflowButtons.push(workflowButton);
+        });
+
+        if (workflowResolution.usedFallback && workflowResolution.errors.length > 0) {
+            const warn = quickBody.createDiv({ cls: 'notemd-workflow-warning' });
+            warn.setText(`Workflow DSL has ${workflowResolution.errors.length} issue(s). Sidebar is using default fallback.`);
         }
 
-        container.createEl('h4', { text: "Utilities" });
-        const utilityButtonGroup = container.createDiv({ cls: 'notemd-button-group' });
+        const actionsByCategory = new Map<ActionCategory, Array<typeof SIDEBAR_ACTION_DEFINITIONS[number]>>();
+        SIDEBAR_ACTION_DEFINITIONS.forEach(def => {
+            const existing = actionsByCategory.get(def.category) || [];
+            existing.push(def);
+            actionsByCategory.set(def.category, existing);
+        });
 
-        this.batchMermaidFixButton = utilityButtonGroup.createEl('button', { text: 'Batch Mermaid fix' });
-        this.batchMermaidFixButton.title = 'Fixes Mermaid and LaTeX syntax in all Markdown files in a selected folder.';
-        this.batchMermaidFixButton.onclick = async () => {
-            if (this.isProcessing) return;
-            this.startProcessing('Starting batch fix...');
-            try { await this.plugin.batchMermaidFixCommand(this); }
-            finally { this.finishProcessing(); }
-        };
-
-        this.fixFormulaButton = utilityButtonGroup.createEl('button', { text: 'Fix formula formats (current)' });
-        this.fixFormulaButton.title = 'Converts single $ lines to $$ blocks in the current file.';
-        this.fixFormulaButton.onclick = async () => {
-            if (this.isProcessing) return;
-            const activeFile = this.app.workspace.getActiveFile();
-            if (!activeFile || (activeFile.extension !== 'md' && activeFile.extension !== 'txt')) {
-                new Notice('No active .md/.txt file.');
+        (Object.keys(ACTION_CATEGORY_LABEL) as ActionCategory[]).forEach(category => {
+            const defs = actionsByCategory.get(category) || [];
+            if (defs.length === 0) {
                 return;
             }
-            this.startProcessing(`Fixing formulas in ${activeFile.name}...`);
-            try { await this.plugin.fixFormulaFormatsCommand(activeFile, this); }
-            finally { this.finishProcessing(); }
-        };
 
-        this.batchFixFormulaButton = utilityButtonGroup.createEl('button', { text: 'Batch fix formula formats' });
-        this.batchFixFormulaButton.title = 'Converts single $ lines to $$ blocks for all files in a folder.';
-        this.batchFixFormulaButton.onclick = async () => {
-            if (this.isProcessing) return;
-            this.startProcessing('Batch fixing formulas...');
-            try { await this.plugin.batchFixFormulaFormatsCommand(this); }
-            finally { this.finishProcessing(); }
-        };
+            const body = this.createSection(
+                container,
+                ACTION_CATEGORY_LABEL[category].title,
+                `Built-in ${ACTION_CATEGORY_LABEL[category].title.toLowerCase()} actions.`,
+                ACTION_CATEGORY_LABEL[category].openByDefault
+            );
 
-        this.checkDuplicatesButton = utilityButtonGroup.createEl('button', { text: 'Check duplicates (current file)' });
-        this.checkDuplicatesButton.onclick = async () => {
-            // Replicate logic from main.ts onload for this command
-            const activeFile = this.plugin.app.workspace.getActiveFile();
-            if (!activeFile || !(activeFile instanceof TFile) || (activeFile.extension !== 'md' && activeFile.extension !== 'txt')) {
-                new Notice("No active '.md' or '.txt' file to check.");
-                return;
+            defs.forEach(def => {
+                this.createActionButton(body, def.id, def.label);
+            });
+
+            if (category === 'translation') {
+                this.buildLanguageSelector(body);
             }
-            this.clearDisplay(); // Clear sidebar log/status
-            this.log(`Checking duplicates in ${activeFile.name}...`);
-            this.updateStatus(`Checking ${activeFile.name}...`, 50); // Show some progress indication
-            try {
-                const content = await this.plugin.app.vault.read(activeFile);
-                const duplicates = findDuplicates(content); // Use imported utility
-                const message = `Found ${duplicates.size} potential duplicate terms. Check log below and console.`;
-                this.log(message);
-                new Notice(message);
-                if (duplicates.size > 0) {
-                    this.log(`Potential duplicates: ${Array.from(duplicates).join(', ')}`);
-                    console.log(`Potential duplicates in ${activeFile.name}:`, Array.from(duplicates));
-                }
-                this.updateStatus("Duplicate check complete.", 100);
-            } catch (error: unknown) {
-                const message = error instanceof Error ? error.message : String(error);
-                new Notice(`Error checking duplicates: ${message}`);
-                this.log(`Error: ${message}`);
-                this.updateStatus("Error checking duplicates.", -1);
-                console.error("Error checking duplicates (Sidebar):", error);
-            }
-        };
-
-        this.testConnectionButton = utilityButtonGroup.createEl('button', { text: 'Test LLM connection' });
-        this.testConnectionButton.onclick = async () => {
-            if (this.isProcessing) { new Notice("Cannot test connection while processing."); return; }
-            this.clearDisplay();
-            await this.plugin.testLlmConnectionCommand(this); // Use plugin method
-        };
-
-        this.checkRemoveDuplicatesButton = utilityButtonGroup.createEl('button', { text: 'Check & remove duplicates' });
-        if (this.checkRemoveDuplicatesButton) {
-            this.checkRemoveDuplicatesButton.title = 'Checks Concept Note folder for duplicates and prompts for deletion.';
-            this.checkRemoveDuplicatesButton.onclick = async () => {
-                if (this.isProcessing) return;
-                this.startProcessing('Checking duplicates...');
-                try {
-                    if (this.plugin) {
-                        await this.plugin.checkAndRemoveDuplicateConceptNotesCommand(this);
-                    }
-                }
-                finally { this.finishProcessing(); }
-            };
-        }
+        });
 
         container.createEl('hr');
         const progressArea = container.createDiv({ cls: 'notemd-progress-area' });
@@ -508,44 +636,26 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         const copyLogButton = logHeader.createEl('button', { text: 'Copy log', cls: 'notemd-copy-log-button' });
         copyLogButton.onclick = () => {
             if (this.logContent.length > 0) {
-                navigator.clipboard.writeText(this.logContent.join('\n')).then(() => new Notice('Log copied!'), () => new Notice('Failed to copy log.'));
-            } else { new Notice('Log is empty.'); }
+                navigator.clipboard
+                    .writeText(this.logContent.join('\n'))
+                    .then(() => new Notice('Log copied!'), () => new Notice('Failed to copy log.'));
+            } else {
+                new Notice('Log is empty.');
+            }
         };
         this.logEl = container.createEl('div', { cls: 'notemd-log-output is-selectable' });
-
-        this.activeLeafChangeHandler = () => this.updateResearchButtonState();
-        this.plugin.registerEvent(this.app.workspace.on('active-leaf-change', this.activeLeafChangeHandler));
-        this.updateButtonStates(); // Set initial states
-    }
-
-    private updateResearchButtonState() {
-        if (!this.researchButton) return;
-        // Keep the check for activeView for context, but don't use it to disable
-        const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
-        const disabled = this.isProcessing; // Only disable if processing is active
-        this.researchButton.disabled = disabled;
-        if (disabled) this.researchButton.addClass('is-disabled');
-        else this.researchButton.removeClass('is-disabled');
+        this.updateButtonStates();
     }
 
     async onClose() {
-        if (this.activeLeafChangeHandler) {
-            this.app.workspace.off('active-leaf-change', this.activeLeafChangeHandler);
-            this.activeLeafChangeHandler = null;
-        }
-        // Clear references
-        this.statusEl = null; this.progressEl = null; this.progressBarContainerEl = null;
-        this.timeRemainingEl = null; this.logEl = null; this.cancelButton = null;
-        this.processCurrentButton = null; this.processFolderButton = null; this.researchButton = null;
-        this.generateTitleButton = null; this.batchGenerateTitleButton = null; this.checkDuplicatesButton = null;
-        this.testConnectionButton = null; this.checkRemoveDuplicatesButton = null; this.batchMermaidFixButton = null; // Added
-        this.fixFormulaButton = null; this.batchFixFormulaButton = null;
-        this.summarizeToMermaidButton = null;
-        this.extractConceptsButton = null;
-        this.extractConceptsFolderButton = null;
-        this.extractOriginalTextButton = null;
-        this.translateButton = null; 
-        this.batchTranslateButton = null;
+        this.statusEl = null;
+        this.progressEl = null;
+        this.progressBarContainerEl = null;
+        this.timeRemainingEl = null;
+        this.logEl = null;
+        this.cancelButton = null;
         this.languageSelector = null;
+        this.actionButtons.clear();
+        this.workflowButtons = [];
     }
 }

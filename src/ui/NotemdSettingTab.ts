@@ -4,6 +4,15 @@ import { LLMProviderConfig, NotemdSettings, TaskKey } from '../types';
 import { DEFAULT_SETTINGS } from '../constants';
 import { testAPI } from '../llmUtils'; // Import testAPI
 import { getDefaultPrompt } from '../promptUtils'; // Import for default prompts
+import {
+    createEmptyWorkflowButton,
+    CustomWorkflowButton,
+    getWorkflowActionHelpText,
+    resolveCustomWorkflowButtons,
+    serializeCustomWorkflowButtons,
+    SIDEBAR_ACTION_DEFINITIONS,
+    SidebarActionId
+} from '../workflowButtons';
 
 // Define specific key types for settings accessed dynamically
 type ProviderSettingKey = 'addLinksProvider' | 'researchProvider' | 'generateTitleProvider' | 'translateProvider';
@@ -22,6 +31,165 @@ export class NotemdSettingTab extends PluginSettingTab {
     private get providersFilePath(): string {
         const pluginConfigDir = this.app.vault.configDir + '/plugins/' + this.plugin.manifest.id;
         return `${pluginConfigDir}/notemd-providers.json`;
+    }
+
+    private getWorkflowBuilderStateFromSettings(): CustomWorkflowButton[] {
+        const resolved = resolveCustomWorkflowButtons(this.plugin.settings.customWorkflowButtonsDsl);
+        if (resolved.buttons.length > 0) {
+            return resolved.buttons.map((button, index) => ({
+                id: button.id || `workflow-${index + 1}`,
+                name: button.name,
+                actions: [...button.actions]
+            }));
+        }
+        return [createEmptyWorkflowButton(1)];
+    }
+
+    private async persistWorkflowBuilderState(
+        workflows: CustomWorkflowButton[],
+        options?: { refresh?: boolean; notice?: string }
+    ): Promise<void> {
+        const normalized = workflows
+            .map((workflow, index) => ({
+                id: workflow.id || `workflow-${index + 1}`,
+                name: workflow.name.trim(),
+                actions: workflow.actions.filter(Boolean) as SidebarActionId[]
+            }))
+            .filter(workflow => workflow.name && workflow.actions.length > 0);
+
+        const finalState = normalized.length > 0 ? normalized : [createEmptyWorkflowButton(1)];
+        this.plugin.settings.customWorkflowButtonsDsl = serializeCustomWorkflowButtons(finalState);
+        await this.plugin.saveSettings();
+
+        if (options?.notice) {
+            new Notice(options.notice);
+        }
+        if (options?.refresh !== false) {
+            this.display();
+        }
+    }
+
+    private renderWorkflowVisualBuilder(containerEl: HTMLElement): void {
+        const resolution = resolveCustomWorkflowButtons(this.plugin.settings.customWorkflowButtonsDsl);
+        const workflows = this.getWorkflowBuilderStateFromSettings();
+        const builderWrap = containerEl.createDiv({ cls: 'notemd-workflow-builder' });
+
+        if (resolution.errors.length > 0) {
+            builderWrap.createDiv({
+                text: `Detected ${resolution.errors.length} DSL issue(s). Visual editor loaded fallback-safe workflow state.`,
+                cls: 'notemd-workflow-builder-warning'
+            });
+        }
+
+        workflows.forEach((workflow, workflowIndex) => {
+            const card = builderWrap.createDiv({ cls: 'notemd-workflow-card' });
+            const cardHeader = card.createDiv({ cls: 'notemd-workflow-card-header' });
+            cardHeader.createEl('strong', { text: `Workflow ${workflowIndex + 1}` });
+            const deleteBtn = cardHeader.createEl('button', { text: 'Delete', cls: 'mod-warning' });
+            deleteBtn.onclick = async () => {
+                const next = workflows.filter((_, i) => i !== workflowIndex);
+                await this.persistWorkflowBuilderState(next, {
+                    notice: 'Workflow removed.'
+                });
+            };
+
+            const nameRow = card.createDiv({ cls: 'notemd-workflow-row' });
+            nameRow.createEl('label', { text: 'Button name' });
+            const nameInput = nameRow.createEl('input', { type: 'text' });
+            nameInput.value = workflow.name;
+            nameInput.placeholder = `Workflow ${workflowIndex + 1}`;
+            nameInput.onblur = async () => {
+                const next = workflows.map((item, i) => i === workflowIndex ? { ...item, name: nameInput.value.trim() || item.name } : item);
+                await this.persistWorkflowBuilderState(next);
+            };
+
+            const actionsTitle = card.createEl('p', { text: 'Action sequence', cls: 'notemd-workflow-subtitle' });
+            actionsTitle.setAttr('aria-hidden', 'true');
+
+            workflow.actions.forEach((actionId, actionIndex) => {
+                const actionRow = card.createDiv({ cls: 'notemd-workflow-action-row' });
+
+                const select = actionRow.createEl('select');
+                SIDEBAR_ACTION_DEFINITIONS.forEach(def => {
+                    const option = new Option(`${def.label} (${def.id})`, def.id);
+                    select.add(option);
+                });
+                select.value = actionId;
+                select.onchange = async () => {
+                    const selected = select.value as SidebarActionId;
+                    const next = workflows.map((item, i) => {
+                        if (i !== workflowIndex) return item;
+                        const actions = [...item.actions];
+                        actions[actionIndex] = selected;
+                        return { ...item, actions };
+                    });
+                    await this.persistWorkflowBuilderState(next);
+                };
+
+                const moveUp = actionRow.createEl('button', { text: '↑' });
+                moveUp.disabled = actionIndex === 0;
+                moveUp.onclick = async () => {
+                    const next = workflows.map((item, i) => {
+                        if (i !== workflowIndex) return item;
+                        const actions = [...item.actions];
+                        const temp = actions[actionIndex - 1];
+                        actions[actionIndex - 1] = actions[actionIndex];
+                        actions[actionIndex] = temp;
+                        return { ...item, actions };
+                    });
+                    await this.persistWorkflowBuilderState(next);
+                };
+
+                const moveDown = actionRow.createEl('button', { text: '↓' });
+                moveDown.disabled = actionIndex === workflow.actions.length - 1;
+                moveDown.onclick = async () => {
+                    const next = workflows.map((item, i) => {
+                        if (i !== workflowIndex) return item;
+                        const actions = [...item.actions];
+                        const temp = actions[actionIndex + 1];
+                        actions[actionIndex + 1] = actions[actionIndex];
+                        actions[actionIndex] = temp;
+                        return { ...item, actions };
+                    });
+                    await this.persistWorkflowBuilderState(next);
+                };
+
+                const removeAction = actionRow.createEl('button', { text: 'Remove' });
+                removeAction.disabled = workflow.actions.length <= 1;
+                removeAction.onclick = async () => {
+                    const next = workflows.map((item, i) => {
+                        if (i !== workflowIndex) return item;
+                        const actions = item.actions.filter((_, idx) => idx !== actionIndex);
+                        return { ...item, actions };
+                    });
+                    await this.persistWorkflowBuilderState(next);
+                };
+            });
+
+            const addActionButton = card.createEl('button', { text: 'Add action' });
+            addActionButton.onclick = async () => {
+                const next = workflows.map((item, i) => {
+                    if (i !== workflowIndex) return item;
+                    return { ...item, actions: [...item.actions, 'batch-mermaid-fix' as SidebarActionId] };
+                });
+                await this.persistWorkflowBuilderState(next);
+            };
+        });
+
+        const toolbar = builderWrap.createDiv({ cls: 'notemd-workflow-builder-toolbar' });
+        const addWorkflowButton = toolbar.createEl('button', { text: 'Add workflow', cls: 'mod-cta' });
+        addWorkflowButton.onclick = async () => {
+            const next = [...workflows, createEmptyWorkflowButton(workflows.length + 1)];
+            await this.persistWorkflowBuilderState(next, { notice: 'Workflow added.' });
+        };
+
+        const resetWorkflowButton = toolbar.createEl('button', { text: 'Reset to default' });
+        resetWorkflowButton.onclick = async () => {
+            this.plugin.settings.customWorkflowButtonsDsl = DEFAULT_SETTINGS.customWorkflowButtonsDsl;
+            await this.plugin.saveSettings();
+            this.display();
+            new Notice('Restored default one-click workflows.');
+        };
     }
 
     async exportProviderSettings(): Promise<void> {
@@ -470,13 +638,57 @@ export class NotemdSettingTab extends PluginSettingTab {
         
         new Setting(containerEl)
             .setName('Auto-run Mermaid syntax fix after generation')
-            .setDesc("On: Automatically run a syntax fix pass on notes after using 'Generate from Title' or 'Create & Generate from Selection'.")
+            .setDesc("On: Automatically run Mermaid syntax fix after Mermaid-related workflows (Generate, Research, Summarise as Mermaid, Process, Translate).")
             .addToggle(toggle => toggle
                 .setValue(this.plugin.settings.autoMermaidFixAfterGenerate)
                 .onChange(async (value) => {
                     this.plugin.settings.autoMermaidFixAfterGenerate = value;
                     await this.plugin.saveSettings();
                 }));
+
+        new Setting(containerEl).setName('One-click workflow buttons').setHeading();
+
+        new Setting(containerEl)
+            .setName('Workflow error strategy')
+            .setDesc('Stop immediately on first failed step, or continue and finish remaining steps.')
+            .addDropdown(dropdown => dropdown
+                .addOption('stop_on_error', 'Stop on first error')
+                .addOption('continue_on_error', 'Continue on error')
+                .setValue(this.plugin.settings.customWorkflowErrorStrategy)
+                .onChange(async (value: 'stop_on_error' | 'continue_on_error') => {
+                    this.plugin.settings.customWorkflowErrorStrategy = value;
+                    await this.plugin.saveSettings();
+                }));
+
+        new Setting(containerEl)
+            .setName('Visual workflow builder')
+            .setDesc('Create custom workflow buttons from built-in actions without writing DSL.');
+        this.renderWorkflowVisualBuilder(containerEl);
+
+        new Setting(containerEl)
+            .setName('Advanced DSL editor')
+            .setDesc("Optional: direct edit using Button Name::action-a>action-b format. Visual builder and DSL stay synchronized.")
+            .addTextArea((text: TextAreaComponent) => {
+                text
+                    .setPlaceholder(DEFAULT_SETTINGS.customWorkflowButtonsDsl)
+                    .setValue(this.plugin.settings.customWorkflowButtonsDsl)
+                    .onChange(async (value) => {
+                        this.plugin.settings.customWorkflowButtonsDsl = value;
+                        await this.plugin.saveSettings();
+                    });
+                text.inputEl.setAttrs({ rows: 5, style: 'width: 100%; font-family: var(--font-monospace);' });
+            });
+
+        const parsedWorkflowButtons = resolveCustomWorkflowButtons(this.plugin.settings.customWorkflowButtonsDsl);
+        if (parsedWorkflowButtons.errors.length > 0) {
+            new Setting(containerEl)
+                .setName('Workflow DSL validation')
+                .setDesc(`Found ${parsedWorkflowButtons.errors.length} issue(s). Invalid lines are ignored in sidebar rendering.`);
+        }
+
+        new Setting(containerEl)
+            .setName('Available workflow action IDs')
+            .setDesc(getWorkflowActionHelpText());
 
         // --- Extract Specific Original Text Settings ---
         new Setting(containerEl).setName('Extract Specific Original Text').setHeading();

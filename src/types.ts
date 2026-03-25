@@ -123,6 +123,8 @@ export interface NotemdSettings {
     batchInterDelayMs: number;
     apiCallIntervalMs: number;
     autoMermaidFixAfterGenerate: boolean;
+    customWorkflowButtonsDsl: string;
+    customWorkflowErrorStrategy: 'stop_on_error' | 'continue_on_error';
     extractQuestions: string;
     extractOriginalTextProvider: string;
     extractOriginalTextModel: string;
