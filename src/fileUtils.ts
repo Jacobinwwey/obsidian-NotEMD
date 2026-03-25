@@ -372,7 +372,7 @@ export async function extractConceptsFromFile(
  * @param progressReporter Progress reporter instance.
  * @param currentProcessingFileBasename Ref object to hold the current file basename.
  */
-export async function processFile(app: App, settings: NotemdSettings, file: TFile, progressReporter: ProgressReporter, currentProcessingFileBasename: { value: string | null }) {
+export async function processFile(app: App, settings: NotemdSettings, file: TFile, progressReporter: ProgressReporter, currentProcessingFileBasename: { value: string | null }): Promise<string | null> {
     currentProcessingFileBasename.value = file.basename;
     progressReporter.log(`Starting processing for: ${file.name}`);
     const content = await app.vault.read(file);
@@ -421,13 +421,15 @@ export async function processFile(app: App, settings: NotemdSettings, file: TFil
             console.error(`LLM processing error on chunk ${i + 1} for ${file.name}:`, error);
             progressReporter.log(`Error processing chunk ${i + 1}: ${errorMessage}`);
             // Continue processing other files in the batch
-            return;
+            currentProcessingFileBasename.value = null;
+            return null;
         }
     } // End chunk loop
 
     if (progressReporter.cancelled) {
         progressReporter.log(`Processing cancelled for ${file.name} after LLM calls.`);
-        return; // Exit if cancelled after loop
+        currentProcessingFileBasename.value = null;
+        return null; // Exit if cancelled after loop
     }
 
     // Join chunks
@@ -474,7 +476,11 @@ export async function processFile(app: App, settings: NotemdSettings, file: TFil
     // Duplicate Handling (Operates on the content with links)
     progressReporter.log(`Checking for duplicates in: ${file.name}...`);
     await handleDuplicates(withLinks, settings);
-    if (progressReporter.cancelled) { progressReporter.log(`Processing cancelled for ${file.name} after duplicate check.`); return; }
+    if (progressReporter.cancelled) {
+        progressReporter.log(`Processing cancelled for ${file.name} after duplicate check.`);
+        currentProcessingFileBasename.value = null;
+        return null;
+    }
 
     // Post-Processing (Mermaid/LaTeX)
     progressReporter.log(`Cleaning Mermaid/LaTeX for: ${file.name}`);
@@ -486,7 +492,11 @@ export async function processFile(app: App, settings: NotemdSettings, file: TFil
         const errorMessage = cleanupError instanceof Error ? cleanupError.message : String(cleanupError);
         progressReporter.log(`Warning: Error during Mermaid/LaTeX cleanup for ${file.name}: ${errorMessage}`);
     }
-    if (progressReporter.cancelled) { progressReporter.log(`Processing cancelled for ${file.name} after post-processing.`); return; }
+    if (progressReporter.cancelled) {
+        progressReporter.log(`Processing cancelled for ${file.name} after post-processing.`);
+        currentProcessingFileBasename.value = null;
+        return null;
+    }
 
     // Remove \boxed{ wrapper
     const lines = finalContent.split('\n');
@@ -495,7 +505,11 @@ export async function processFile(app: App, settings: NotemdSettings, file: TFil
         if (lines.length > 0 && lines[lines.length - 1].trim() === '}') lines.pop();
         finalContent = lines.join('\n');
     }
-    if (progressReporter.cancelled) { progressReporter.log(`Processing cancelled for ${file.name} before saving.`); return; }
+    if (progressReporter.cancelled) {
+        progressReporter.log(`Processing cancelled for ${file.name} before saving.`);
+        currentProcessingFileBasename.value = null;
+        return null;
+    }
 
     // Conditionally remove all code fences if setting is enabled
     if (settings.removeCodeFencesOnAddLinks) {
@@ -510,16 +524,17 @@ export async function processFile(app: App, settings: NotemdSettings, file: TFil
     }
 
     // Determine Output Path & Save/Move
-    await saveOrMoveProcessedFile(app, settings, file, finalContent, progressReporter);
+    const savedOutputPath = await saveOrMoveProcessedFile(app, settings, file, finalContent, progressReporter);
 
     progressReporter.log(`Finished processing: ${file.name}`);
     currentProcessingFileBasename.value = null; // Clear after processing
+    return savedOutputPath;
 }
 
 /**
  * Handles saving or moving the processed file based on settings.
  */
-async function saveOrMoveProcessedFile(app: App, settings: NotemdSettings, originalFile: TFile, processedContent: string, progressReporter: ProgressReporter) {
+async function saveOrMoveProcessedFile(app: App, settings: NotemdSettings, originalFile: TFile, processedContent: string, progressReporter: ProgressReporter): Promise<string> {
     let processedFileSaveDir = '';
     if (settings.useCustomProcessedFileFolder && settings.processedFileFolder) {
         processedFileSaveDir = settings.processedFileFolder;
@@ -565,6 +580,7 @@ async function saveOrMoveProcessedFile(app: App, settings: NotemdSettings, origi
             await app.vault.modify(originalFile, processedContent);
             progressReporter.log(`Overwrote original file: ${originalFile.path}`);
         }
+        return targetPath;
     } else {
         let outputPath: string; let logAction: string;
         if (settings.useCustomAddLinksSuffix) {
@@ -587,6 +603,7 @@ async function saveOrMoveProcessedFile(app: App, settings: NotemdSettings, origi
             if (existingOutputFile instanceof TFile) { await app.vault.modify(existingOutputFile, processedContent); progressReporter.log(`Overwrote existing file: ${outputPath}`); }
             else { await app.vault.create(outputPath, processedContent); progressReporter.log(`Created processed file: ${outputPath}`); }
         }
+        return outputPath;
     }
 }
 

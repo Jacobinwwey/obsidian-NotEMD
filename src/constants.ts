@@ -1,4 +1,5 @@
 import { NotemdSettings, LLMProviderConfig } from './types';
+import { DEFAULT_CUSTOM_WORKFLOW_BUTTONS_DSL } from './workflowButtons';
 
 // Default settings for the plugin
 export const DEFAULT_SETTINGS: NotemdSettings = {
@@ -213,7 +214,9 @@ export const DEFAULT_SETTINGS: NotemdSettings = {
     batchSize: 50,
     batchInterDelayMs: 1000,
     apiCallIntervalMs: 500,
-    autoMermaidFixAfterGenerate: false,
+    autoMermaidFixAfterGenerate: true,
+    customWorkflowButtonsDsl: DEFAULT_CUSTOM_WORKFLOW_BUTTONS_DSL,
+    customWorkflowErrorStrategy: 'stop_on_error',
     extractQuestions: '',
     extractOriginalTextProvider: 'DeepSeek',
     extractOriginalTextModel: '',

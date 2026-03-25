@@ -398,10 +398,7 @@ export default class NotemdPlugin extends Plugin {
                     this.isBusy = true;
                     await generateContentForTitle(this.app, this.settings, newFile, reporter);
 
-                    if (this.settings.autoMermaidFixAfterGenerate) {
-                        reporter.log("Running automatic Mermaid syntax fix...");
-                        await fixMermaidSyntaxInFile(this.app, newFile, reporter);
-                    }
+                    await this.maybeAutoFixMermaidForFile(newFile, reporter, 'create wiki-link and generate');
 
                     reporter.updateStatus('Wiki-Link & Generation complete!', 100);
                     if (reporter instanceof ProgressModal) {
@@ -614,6 +611,40 @@ export default class NotemdPlugin extends Plugin {
 		return prompt;
 	}
 
+    private resolveCompleteFolderPath(sourceFolderPath: string): string | null {
+        const folder = this.app.vault.getAbstractFileByPath(sourceFolderPath);
+        if (!(folder instanceof TFolder)) {
+            return null;
+        }
+
+        let completeFolderName: string;
+        if (this.settings.useCustomGenerateTitleOutputFolder) {
+            completeFolderName = this.settings.generateTitleOutputFolderName || DEFAULT_SETTINGS.generateTitleOutputFolderName;
+        } else {
+            const baseFolderName = sourceFolderPath === '/' ? 'Vault' : folder.name;
+            completeFolderName = `${baseFolderName}_complete`;
+        }
+
+        const parentPath = folder.parent?.path === '/' ? '' : (folder.parent?.path ? folder.parent.path + '/' : '');
+        return `${parentPath}${completeFolderName}`;
+    }
+
+    private async maybeAutoFixMermaidForFile(file: TFile, reporter: ProgressReporter, reason: string): Promise<void> {
+        if (!this.settings.autoMermaidFixAfterGenerate || reporter.cancelled) {
+            return;
+        }
+        reporter.log(`Running automatic Mermaid fix (${reason}) for: ${file.path}`);
+        await fixMermaidSyntaxInFile(this.app, file, reporter);
+    }
+
+    private async maybeAutoFixMermaidForFolder(folderPath: string | null, reporter: ProgressReporter, reason: string): Promise<void> {
+        if (!this.settings.autoMermaidFixAfterGenerate || reporter.cancelled || !folderPath) {
+            return;
+        }
+        reporter.log(`Running automatic batch Mermaid fix (${reason}) for folder: ${folderPath}`);
+        await batchFixMermaidSyntaxInFolder(this.app, this.settings, folderPath, reporter);
+    }
+
     // --- Command Handler Methods ---
     // These methods contain the core logic initiated by commands or sidebar buttons.
 
@@ -641,7 +672,15 @@ export default class NotemdPlugin extends Plugin {
             this.updateStatusBar(`Processing: ${activeFile.name}`);
 
             // Pass the ref object for currentProcessingFileBasename
-            await processFile(this.app, this.settings, activeFile, useReporter, this.currentProcessingFileBasename);
+            const outputPath = await processFile(this.app, this.settings, activeFile, useReporter, this.currentProcessingFileBasename);
+            if (outputPath && this.settings.autoMermaidFixAfterGenerate) {
+                const outputFile = this.app.vault.getAbstractFileByPath(outputPath);
+                if (outputFile instanceof TFile) {
+                    await this.maybeAutoFixMermaidForFile(outputFile, useReporter, 'process current file');
+                } else {
+                    useReporter.log(`Skipped Mermaid auto-fix: output file not found at ${outputPath}`);
+                }
+            }
 
             this.updateStatusBar('Processing complete');
             useReporter.updateStatus('Processing complete!', 100);
@@ -677,7 +716,7 @@ export default class NotemdPlugin extends Plugin {
     }
 
     /** Command: Process Folder (Add Links) */
-    async processFolderWithNotemdCommand(reporter?: ProgressReporter) {
+    async processFolderWithNotemdCommand(reporter?: ProgressReporter, folderPathOverride?: string) {
         if (this.isBusy) { new Notice("Notemd is busy."); return; }
         this.isBusy = true;
         const useReporter = reporter || this.getReporter();
@@ -692,7 +731,7 @@ export default class NotemdPlugin extends Plugin {
 
         try {
             await this.loadSettings();
-            const folderPath = await this.getFolderSelection();
+            const folderPath = folderPathOverride ?? await this.getFolderSelection();
             if (!folderPath) { useReporter.log("Folder selection cancelled."); useReporter.updateStatus("Cancelled", -1); throw new Error("Folder selection cancelled."); }
 
             const folder = this.app.vault.getAbstractFileByPath(folderPath);
@@ -803,7 +842,12 @@ export default class NotemdPlugin extends Plugin {
                     }
                 }
             }
-
+            if (!useReporter.cancelled) {
+                const mermaidFixTargetFolder = (this.settings.useCustomProcessedFileFolder && this.settings.processedFileFolder)
+                    ? this.settings.processedFileFolder
+                    : folderPath;
+                await this.maybeAutoFixMermaidForFolder(mermaidFixTargetFolder, useReporter, 'process folder');
+            }
 
             if (!useReporter.cancelled) {
                 if (errors.length > 0) {
@@ -915,10 +959,7 @@ export default class NotemdPlugin extends Plugin {
             await this.loadSettings();
             await generateContentForTitle(this.app, this.settings, file, useReporter); // Call utility
 
-            if (this.settings.autoMermaidFixAfterGenerate) {
-                useReporter.log("Running automatic Mermaid syntax fix...");
-                await fixMermaidSyntaxInFile(this.app, file, useReporter);
-            }
+            await this.maybeAutoFixMermaidForFile(file, useReporter, 'generate from title');
 
             this.updateStatusBar('Generation complete');
             useReporter.updateStatus('Content generation complete!', 100);
@@ -977,6 +1018,9 @@ export default class NotemdPlugin extends Plugin {
             await this.loadSettings();
             // Assuming researchAndSummarize is now in searchUtils and takes app, settings
             await researchAndSummarize(this.app, this.settings, editor, view, useReporter); // Call utility
+            if (activeFile instanceof TFile) {
+                await this.maybeAutoFixMermaidForFile(activeFile, useReporter, 'research & summarize');
+            }
             // Success/error handling is now within researchAndSummarize
             // Update status bar based on final reporter state?
             if (!useReporter.cancelled) {
@@ -1015,8 +1059,11 @@ export default class NotemdPlugin extends Plugin {
     }
 
     /** Command: Batch Generate Content from Titles */
-    async batchGenerateContentForTitlesCommand(reporter?: ProgressReporter) {
-        if (this.isBusy) { new Notice("Notemd is busy."); return; }
+    async batchGenerateContentForTitlesCommand(
+        reporter?: ProgressReporter,
+        folderPathOverride?: string
+    ): Promise<{ sourceFolderPath: string; completeFolderPath: string } | null> {
+        if (this.isBusy) { new Notice("Notemd is busy."); return null; }
         this.isBusy = true;
         const useReporter = reporter || this.getReporter();
         
@@ -1030,7 +1077,7 @@ export default class NotemdPlugin extends Plugin {
 
         try {
             await this.loadSettings();
-            const folderPath = await this.getFolderSelection();
+            const folderPath = folderPathOverride ?? await this.getFolderSelection();
             if (!folderPath) { useReporter.log("Folder selection cancelled."); useReporter.updateStatus("Cancelled", -1); throw new Error("Folder selection cancelled."); }
 
             this.updateStatusBar(`Batch generating...`);
@@ -1038,25 +1085,11 @@ export default class NotemdPlugin extends Plugin {
 
             const { errors } = await batchGenerateContentForTitles(this.app, this.settings, folderPath, useReporter); // Call utility
 
-            if (this.settings.autoMermaidFixAfterGenerate && !useReporter.cancelled) {
-                useReporter.log("Running automatic Mermaid syntax fix on completed folder...");
-                const folder = this.app.vault.getAbstractFileByPath(folderPath);
-                if (folder instanceof TFolder) {
-                    let completeFolderName: string;
-                    if (this.settings.useCustomGenerateTitleOutputFolder) {
-                        completeFolderName = this.settings.generateTitleOutputFolderName || DEFAULT_SETTINGS.generateTitleOutputFolderName;
-                    } else {
-                        const baseFolderName = folderPath === '/' ? 'Vault' : folder.name;
-                        completeFolderName = `${baseFolderName}_complete`;
-                    }
-                    const parentPath = folder.parent?.path === '/' ? '' : (folder.parent?.path ? folder.parent.path + '/' : '');
-                    const completeFolderPath = `${parentPath}${completeFolderName}`;
-                    
-                    useReporter.log(`Targeting completed folder for Mermaid fix: ${completeFolderPath}`);
-                    await batchFixMermaidSyntaxInFolder(this.app, this.settings, completeFolderPath, useReporter);
-                } else {
-                    useReporter.log("Could not determine completed folder path for Mermaid fix.");
-                }
+            const completeFolderPath = this.resolveCompleteFolderPath(folderPath);
+            if (!completeFolderPath) {
+                useReporter.log("Could not determine completed folder path for Mermaid fix.");
+            } else {
+                await this.maybeAutoFixMermaidForFolder(completeFolderPath, useReporter, 'batch generate from titles');
             }
 
             if (!useReporter.cancelled) {
@@ -1069,6 +1102,12 @@ export default class NotemdPlugin extends Plugin {
                     useReporter.updateStatus('Batch generation complete!', 100); this.updateStatusBar('Batch generation complete');
                     new Notice(`Successfully generated content for eligible files in "${folderPath}".`, 5000);
                     if (useReporter instanceof ProgressModal) setTimeout(() => useReporter.close(), 2000);
+                }
+                if (completeFolderPath) {
+                    return {
+                        sourceFolderPath: folderPath,
+                        completeFolderPath
+                    };
                 }
             } else {
                  this.updateStatusBar('Batch generation cancelled');
@@ -1099,6 +1138,7 @@ export default class NotemdPlugin extends Plugin {
             }
             this.isBusy = false;
         }
+        return null;
     }
 
     /** Command: Check and Remove Duplicate Concept Notes */
@@ -1143,8 +1183,11 @@ export default class NotemdPlugin extends Plugin {
         }
     }
     /** Command: Batch Fix Mermaid Syntax */
-    async batchMermaidFixCommand(reporter?: ProgressReporter) {
-        if (this.isBusy) { new Notice("Notemd is busy."); return; }
+    async batchMermaidFixCommand(
+        reporter?: ProgressReporter,
+        folderPathOverride?: string
+    ): Promise<{ folderPath: string; modifiedCount: number } | null> {
+        if (this.isBusy) { new Notice("Notemd is busy."); return null; }
         this.isBusy = true;
         const useReporter = reporter || this.getReporter();
         
@@ -1158,7 +1201,7 @@ export default class NotemdPlugin extends Plugin {
 
         try {
             await this.loadSettings(); // Load settings in case needed by future logic
-            const folderPath = await this.getFolderSelection();
+            const folderPath = folderPathOverride ?? await this.getFolderSelection();
             if (!folderPath) { useReporter.log("Folder selection cancelled."); useReporter.updateStatus("Cancelled", -1); throw new Error("Folder selection cancelled."); }
 
             this.updateStatusBar(`Batch fixing Mermaid syntax...`);
@@ -1177,6 +1220,7 @@ export default class NotemdPlugin extends Plugin {
                     new Notice(finalMessage, 5000);
                     if (useReporter instanceof ProgressModal) setTimeout(() => useReporter.close(), 2000);
                 }
+                return { folderPath, modifiedCount };
             }
 
         } catch (error: unknown) { // Changed to unknown
@@ -1203,6 +1247,7 @@ export default class NotemdPlugin extends Plugin {
             }
             this.isBusy = false;
         }
+        return null;
     }
 
     async fixFormulaFormatsCommand(file: TFile, reporter?: ProgressReporter) {
@@ -1332,8 +1377,15 @@ export default class NotemdPlugin extends Plugin {
                 }
                 targetFolder = abstractFile;
             }
+            const resolvedTargetFolder = targetFolder as TFolder;
 
-            await batchTranslateFolder(this.app, this.settings, targetFolder, this.settings.language);
+            await batchTranslateFolder(this.app, this.settings, resolvedTargetFolder, this.settings.language);
+            if (!useReporter.cancelled) {
+                const mermaidFixTarget = (this.settings.useCustomTranslationSavePath && this.settings.translationSavePath)
+                    ? this.settings.translationSavePath
+                    : resolvedTargetFolder.path;
+                await this.maybeAutoFixMermaidForFolder(mermaidFixTarget, useReporter, 'batch translate folder');
+            }
 
         } catch (error: unknown) {
             this.updateStatusBar("Batch translation failed");
@@ -1378,7 +1430,13 @@ export default class NotemdPlugin extends Plugin {
 
         try {
             await this.loadSettings();
-            await translateFile(this.app, this.settings, file, this.settings.language, useReporter, true, signal);
+            const outputPath = await translateFile(this.app, this.settings, file, this.settings.language, useReporter, true, signal);
+            if (outputPath && this.settings.autoMermaidFixAfterGenerate) {
+                const outputFile = this.app.vault.getAbstractFileByPath(outputPath);
+                if (outputFile instanceof TFile) {
+                    await this.maybeAutoFixMermaidForFile(outputFile, useReporter, 'translate current file');
+                }
+            }
             
             // Update status and progress on success
             this.updateStatusBar("Translation complete");
@@ -1444,6 +1502,12 @@ export default class NotemdPlugin extends Plugin {
             reporter.updateStatus('LLM call complete. Processing response...', 90);
 
 			const outputFilePath = await saveMermaidSummaryFile(this.app, this.settings, file, mermaidContent, reporter);
+            if (this.settings.autoMermaidFixAfterGenerate) {
+                const outputFile = this.app.vault.getAbstractFileByPath(outputFilePath);
+                if (outputFile instanceof TFile) {
+                    await this.maybeAutoFixMermaidForFile(outputFile, reporter, 'summarise as mermaid');
+                }
+            }
 
 			reporter.updateStatus('Mermaid diagram saved successfully!', 100);
 			reporter.log(`Mermaid diagram saved to: ${outputFilePath}`);
@@ -1827,4 +1891,3 @@ export default class NotemdPlugin extends Plugin {
     }
 
 } // End of NotemdPlugin class
-
