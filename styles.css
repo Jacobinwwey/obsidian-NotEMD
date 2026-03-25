@@ -1,11 +1,23 @@
 /*
- * Notemd v1.3.0
+ * Notemd v1.7.0
  */
 
-/* Progress Modal Styles */
+:root {
+    --notemd-accent: #0d9488;
+    --notemd-accent-strong: #0f766e;
+    --notemd-action: #f97316;
+    --notemd-surface: color-mix(in srgb, var(--background-secondary) 86%, #f0fdfa 14%);
+    --notemd-surface-alt: color-mix(in srgb, var(--background-primary) 82%, #f0fdfa 18%);
+    --notemd-border: color-mix(in srgb, var(--background-modifier-border) 80%, #14b8a6 20%);
+    --notemd-focus: color-mix(in srgb, var(--interactive-accent) 75%, #f97316 25%);
+    --notemd-sidebar-font: "Plus Jakarta Sans", "Avenir Next", "Segoe UI", sans-serif;
+}
+
+/* Progress Modal */
 .notemd-progress-modal {
     padding: 1em;
     max-width: 600px;
+    font-family: var(--notemd-sidebar-font);
 }
 
 .notemd-status-container {
@@ -13,146 +25,374 @@
 }
 
 .notemd-status-text {
-    font-weight: bold;
-    margin-bottom: 0.5em;
+    font-weight: 600;
+    margin-bottom: 0.45em;
+    line-height: 1.4;
 }
 
 .notemd-progress-bar-container {
     width: 100%;
-    height: 20px;
+    height: 18px;
     background-color: var(--background-secondary);
-    border-radius: 10px;
+    border-radius: 999px;
     margin: 10px 0;
     overflow: hidden;
+    border: 1px solid var(--notemd-border);
 }
 
 .notemd-progress-bar-fill {
-    /* --notemd-progress-percent: 0%; /* Define CSS variable for width - REMOVED */
     height: 100%;
-    background-color: var(--interactive-accent);
-    transition: width 0.3s ease, background-color 0.3s ease; /* Added background-color transition */
-    /* width: var(--notemd-progress-percent); /* Use the CSS variable - REMOVED */
-    width: calc(1% * attr(data-progress number, 0)); /* Use data-progress attribute */
+    background: linear-gradient(90deg, var(--notemd-accent), var(--notemd-accent-strong));
+    transition: width 180ms ease-out, background-color 180ms ease-out;
+    width: 0%;
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
     font-size: 12px;
-    font-weight: bold;
+    font-weight: 700;
 }
 
-/* Error state for progress bar fill */
 .notemd-progress-bar-fill.is-error {
-    background-color: var(--text-error);
+    background: linear-gradient(90deg, #ef4444, #b91c1c);
 }
 
 .notemd-log-output {
-    max-height: 200px;
+    max-height: 240px;
     overflow-y: auto;
-    background-color: var(--background-secondary);
-    border-radius: 5px;
-    padding: 0.5em;
-    margin: 1em 0;
-    font-family: monospace;
-    font-size: 0.9em;
+    background: var(--notemd-surface-alt);
+    border-radius: 10px;
+    padding: 0.7em;
+    margin: 0.75em 0 0;
+    font-family: var(--font-monospace);
+    font-size: 12px;
+    border: 1px solid var(--notemd-border);
 }
 
 .notemd-log-entry {
     margin-bottom: 0.3em;
-    line-height: 1.4;
+    line-height: 1.45;
 }
 
 .notemd-log-time {
     color: var(--text-muted);
-    margin-right: 0.5em;
+    margin-right: 0.45em;
 }
 
 .notemd-log-message {
     color: var(--text-normal);
 }
 
-.notemd-button-container {
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 1em;
-}
-
-.notemd-cancel-button {
-    background-color: var(--background-secondary);
+.notemd-cancel-button,
+.notemd-copy-log-button {
+    background: var(--background-secondary);
     color: var(--text-normal);
-    border: 1px solid var(--background-modifier-border);
-    border-radius: 4px;
-    padding: 0.5em 1em;
+    border: 1px solid var(--notemd-border);
+    border-radius: 8px;
+    padding: 0.44em 0.75em;
+    font-size: 12px;
+    font-family: var(--notemd-sidebar-font);
     cursor: pointer;
+    transition: background-color 160ms ease, border-color 160ms ease, transform 160ms ease;
 }
 
-.notemd-cancel-button:hover {
-    background-color: var(--background-modifier-hover);
+.notemd-cancel-button:hover,
+.notemd-copy-log-button:hover {
+    background: color-mix(in srgb, var(--background-modifier-hover) 70%, #f0fdfa 30%);
+    border-color: var(--notemd-accent);
 }
 
-/* Active/Enabled state for Cancel button */
+.notemd-cancel-button:focus-visible,
+.notemd-copy-log-button:focus-visible,
+.notemd-action-button:focus-visible,
+.notemd-language-select:focus-visible,
+.notemd-section-summary:focus-visible {
+    outline: 2px solid var(--notemd-focus);
+    outline-offset: 2px;
+}
+
 .notemd-cancel-button.is-active {
-    /* Optional: Add subtle visual cue, e.g., slightly brighter border or background */
-    /* Example: border-color: var(--interactive-accent); */
-    opacity: 1; /* Ensure fully visible when active */
+    opacity: 1;
     cursor: pointer;
 }
 
-/* Disabled state for Cancel button */
 .notemd-cancel-button:disabled {
-    opacity: 0.5;
+    opacity: 0.45;
     cursor: not-allowed;
-    background-color: var(--background-secondary); /* Keep background consistent */
 }
 
-/* Error state styling */
 .notemd-error-text {
     color: var(--text-error);
 }
 
-/* General utility class for hiding elements */
 .is-hidden {
     display: none !important;
 }
 
-/* Sidebar specific styles */
+/* Sidebar */
 .notemd-sidebar-container {
-    padding: 1em;
+    padding: 0.85em;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85em;
+    font-family: var(--notemd-sidebar-font);
 }
 
-.notemd-button-group button {
-    margin-right: 0.5em;
-    margin-bottom: 0.5em; /* Add some spacing between buttons */
+.notemd-hero-card {
+    border: 1px solid var(--notemd-border);
+    border-radius: 14px;
+    padding: 0.85em 0.95em;
+    background:
+        radial-gradient(circle at 8% 6%, color-mix(in srgb, #14b8a6 18%, transparent) 0%, transparent 40%),
+        radial-gradient(circle at 92% 4%, color-mix(in srgb, #f97316 18%, transparent) 0%, transparent 42%),
+        var(--notemd-surface);
+}
+
+.notemd-hero-card h3 {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.3;
+}
+
+.notemd-hero-card p {
+    margin: 0.45em 0 0;
+    color: var(--text-muted);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.notemd-section-card {
+    border: 1px solid var(--notemd-border);
+    border-radius: 12px;
+    padding: 0.2em 0.75em 0.75em;
+    background: var(--notemd-surface-alt);
+}
+
+.notemd-section-summary {
+    cursor: pointer;
+    list-style: none;
+    font-weight: 700;
+    font-size: 13px;
+    line-height: 1.4;
+    padding: 0.45em 0 0.32em;
+    color: var(--text-normal);
+}
+
+.notemd-section-summary::-webkit-details-marker {
+    display: none;
+}
+
+.notemd-section-summary::before {
+    content: "▸";
+    display: inline-block;
+    margin-right: 0.45em;
+    transition: transform 150ms ease-out;
+    color: var(--notemd-accent);
+}
+
+.notemd-section-card[open] > .notemd-section-summary::before {
+    transform: rotate(90deg);
+}
+
+.notemd-section-description {
+    margin: 0 0 0.55em;
+    color: var(--text-muted);
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+.notemd-button-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.45em;
+}
+
+.notemd-action-button {
+    border: 1px solid var(--notemd-border);
+    border-radius: 10px;
+    padding: 0.52em 0.66em;
+    text-align: left;
+    font-size: 12px;
+    line-height: 1.35;
+    background: var(--background-secondary);
+    color: var(--text-normal);
+    min-height: 40px;
+    transition: transform 140ms ease-out, border-color 140ms ease-out, background-color 140ms ease-out;
+}
+
+.notemd-action-button:hover {
+    cursor: pointer;
+    transform: translateY(-1px);
+    border-color: var(--notemd-accent);
+    background: color-mix(in srgb, var(--background-modifier-hover) 64%, #f0fdfa 36%);
+}
+
+.notemd-action-button.mod-cta {
+    border-color: color-mix(in srgb, var(--interactive-accent) 60%, var(--notemd-action) 40%);
+    background: linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--interactive-accent) 24%, var(--background-secondary) 76%),
+        color-mix(in srgb, var(--notemd-action) 20%, var(--background-secondary) 80%)
+    );
+}
+
+.notemd-action-button:disabled {
+    opacity: 0.52;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.notemd-inline-control {
+    display: flex;
+    align-items: center;
+    gap: 0.6em;
+    margin-top: 0.4em;
+}
+
+.notemd-inline-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    min-width: 64px;
+}
+
+.notemd-language-select {
+    width: 100%;
+    min-height: 34px;
+    border-radius: 8px;
+    border: 1px solid var(--notemd-border);
+    background: var(--background-primary);
+    color: var(--text-normal);
+    padding: 0.35em 0.5em;
+    font-size: 12px;
+}
+
+.notemd-workflow-warning {
+    margin-top: 0.2em;
+    border: 1px solid color-mix(in srgb, var(--text-error) 70%, transparent);
+    background: color-mix(in srgb, var(--text-error) 11%, transparent);
+    border-radius: 8px;
+    padding: 0.45em 0.55em;
+    font-size: 11px;
+    line-height: 1.4;
+    color: var(--text-normal);
+}
+
+.notemd-workflow-builder {
+    border: 1px solid var(--notemd-border);
+    border-radius: 12px;
+    padding: 0.7em;
+    background: var(--notemd-surface-alt);
+    margin: 0.55em 0 0.85em;
+    display: flex;
+    flex-direction: column;
+    gap: 0.7em;
+}
+
+.notemd-workflow-builder-warning {
+    border: 1px solid color-mix(in srgb, #f59e0b 65%, transparent);
+    background: color-mix(in srgb, #f59e0b 13%, transparent);
+    border-radius: 8px;
+    font-size: 12px;
+    line-height: 1.45;
+    padding: 0.45em 0.55em;
+}
+
+.notemd-workflow-card {
+    border: 1px solid var(--notemd-border);
+    border-radius: 10px;
+    background: var(--background-primary);
+    padding: 0.58em;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45em;
+}
+
+.notemd-workflow-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.6em;
+}
+
+.notemd-workflow-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2em;
+}
+
+.notemd-workflow-row label {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.notemd-workflow-row input {
+    width: 100%;
+    min-height: 32px;
+}
+
+.notemd-workflow-subtitle {
+    margin: 0.2em 0 0;
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.notemd-workflow-action-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto auto;
+    gap: 0.35em;
+    align-items: center;
+}
+
+.notemd-workflow-action-row select {
+    min-height: 34px;
+}
+
+.notemd-workflow-action-row button {
+    min-height: 30px;
+    min-width: 30px;
+}
+
+.notemd-workflow-builder-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45em;
+    margin-top: 0.2em;
 }
 
 .notemd-progress-area {
-    margin-top: 1em;
+    border: 1px solid var(--notemd-border);
+    border-radius: 12px;
+    padding: 0.65em 0.75em 0.75em;
+    background: var(--notemd-surface);
 }
 
 .notemd-log-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-top: 1em;
+    gap: 0.7em;
 }
 
-.notemd-copy-log-button {
-    /* Style similarly to cancel button or use default button styles */
-    background-color: var(--background-secondary);
-    color: var(--text-normal);
-    border: 1px solid var(--background-modifier-border);
-    border-radius: 4px;
-    padding: 0.3em 0.6em;
-    font-size: 0.9em;
-    cursor: pointer;
-}
-
-.notemd-copy-log-button:hover {
-    background-color: var(--background-modifier-hover);
-}
-
-/* Ensure sidebar log is selectable */
 .notemd-log-output.is-selectable {
-    user-select: text; /* Standard CSS property */
-    -webkit-user-select: text; /* For Safari */
+    user-select: text;
+    -webkit-user-select: text;
+}
+
+@media (max-width: 420px) {
+    .notemd-sidebar-container {
+        padding: 0.65em;
+    }
+    .notemd-action-button {
+        min-height: 44px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .notemd-action-button,
+    .notemd-cancel-button,
+    .notemd-copy-log-button,
+    .notemd-progress-bar-fill,
+    .notemd-section-summary::before {
+        transition: none !important;
+    }
 }

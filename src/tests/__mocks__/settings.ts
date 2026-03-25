@@ -86,6 +86,8 @@ export const mockSettings: NotemdSettings = {
     batchInterDelayMs: 1000,
     apiCallIntervalMs: 500,
     autoMermaidFixAfterGenerate: false,
+    customWorkflowButtonsDsl: 'One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix',
+    customWorkflowErrorStrategy: 'stop_on_error',
     extractQuestions: '',
     extractOriginalTextProvider: 'DeepSeek',
     extractOriginalTextModel: '',
