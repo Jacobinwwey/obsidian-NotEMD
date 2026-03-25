@@ -20,7 +20,7 @@ A Easy way to create your own Knowledge-base!
 
 Notemd enhances your Obsidian workflow by integrating with various Large Language Models (LLMs) to process your multi-languages notes, automatically generate wiki-links for key concepts, create corresponding concept notes, perform web research, helping you build powerful knowledge graphs and more.
 
-**Version:** 1.6.5
+**Version:** 1.6.6
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
@@ -44,6 +44,7 @@ Notemd enhances your Obsidian workflow by integrating with various Large Languag
 2.  **Configure LLM**: Go to `Settings -> Notemd`, select your LLM provider (like OpenAI or a local one like Ollama), and enter your API key/URL.
 3.  **Open Sidebar**: Click the Notemd wand icon in the left ribbon to open the sidebar.
 4.  **Process a Note**: Open any note and click **"Process File (Add Links)"** in the sidebar to automatically add `[[wiki-links]]` to key concepts.
+5.  **Run a Quick Workflow**: Use the default **"One-Click Extract"** button to chain processing, batch generation, and Mermaid cleanup from one entry point.
 
 That's it! Explore the settings to unlock more features like web research, translation, and content generation.
 
@@ -62,6 +63,8 @@ That's it! Explore the settings to unlock more features like web research, trans
 - **Robust Parallel Batch Processing**: Resolved an issue where parallel batch operations would stall prematurely, ensuring all files are processed reliably and efficiently.
 - **Progress Bar Accuracy**: Fixed a bug where the progress bar for the "Create Wiki-Link & Generate Note" command would get stuck at 95%, ensuring it now correctly shows 100% upon completion.
 - **Enhanced API Debugging**: The "API Error Debugging Mode" now captures full response bodies from LLM providers and search services (Tavily/DuckDuckGo), enabling detailed logging of 429/500 errors and other API failures for better troubleshooting.
+- **Redesigned Sidebar**: Built-in actions are grouped into focused sections with clearer labels, live status, cancellable progress, and copyable logs to reduce sidebar clutter.
+- **Custom One-Click Workflows**: Turn built-in sidebar utilities into reusable custom buttons with user-defined names and assembled action chains. A default `One-Click Extract` workflow is included out of the box.
 
 
 ### Knowledge Graph Enhancement
@@ -101,6 +104,7 @@ That's it! Explore the settings to unlock more features like web research, trans
     - Use the note title to generate initial content via LLM, replacing existing content.
     - **Optional Research**: Configure whether to perform web research (using the selected provider) to provide context for generation.
 - **Batch Content Generation from Titles**: Generate content for all notes within a selected folder based on their titles (respects the optional research setting). Successfully processed files are moved to a **configurable "complete" subfolder** (e.g., `[foldername]_complete` or a custom name) to avoid reprocessing.
+- **Mermaid Auto-Fix Coupling**: When Mermaid auto-fix is enabled, Mermaid-related workflows now automatically repair generated files or output folders after processing. This covers Process, Generate from Title, Batch Generate from Titles, Research & Summarize, Summarise as Mermaid, and Translate flows.
 
 
 ### Utility Features
@@ -121,6 +125,7 @@ That's it! Explore the settings to unlock more features like web research, trans
 - **Duplicate Detection**: Basic check for duplicate words within the currently processed file's content (results logged to console).
 - **Check and Remove Duplicate Concept Notes**: Identifies potential duplicate notes within the configured **Concept Note Folder** based on exact name matches, plurals, normalization, and single-word containment compared to notes outside the folder. The scope of the comparison (which notes outside the concept folder are checked) can be configured to the **entire vault**, **specific included folders**, or **all folders excluding specific ones**. Presents a detailed list with reasons and conflicting files, then prompts for confirmation before moving identified duplicates to system trash. Shows progress during deletion.
 - **Batch Mermaid Fix**: Applies Mermaid and LaTeX syntax corrections to all Markdown files within a user-selected folder.
+    - **Workflow Ready**: Can be used as a standalone utility or as a step inside a custom one-click workflow button.
     - **Error Reporting**: Generates a `mermaid_error_{foldername}.md` report listing files that still contain potential Mermaid errors after processing.
     - **Move Error Files**: Optionally moves files with detected errors to a specified folder for manual review.
     - **Smart Detection**: Now intelligently checks files for syntax errors using `mermaid.parse` before attempting fixes, saving processing time and avoiding unnecessary edits.
@@ -314,8 +319,8 @@ Access plugin settings via:
     *   **Disabled (Default)**: "Generate from Title" uses only the title as input.
     *   **Enabled**: Performs web research using the configured **Web Research Provider** and includes the findings as context for the LLM during title-based generation.
 -   **Auto-run Mermaid Syntax Fix after Generation**:
-    *   **Disabled (Default)**: No extra action is taken.
-    *   **Enabled**: Automatically runs a syntax-fixing pass on notes after they have been created or updated by "Generate from Title", "Batch Generate from Titles", or "Create & Generate from Selection". This helps ensure any generated Mermaid diagrams are valid.
+    *   **Enabled (Default)**: Automatically runs a Mermaid syntax-fixing pass after Mermaid-related workflows such as Process, Generate from Title, Batch Generate from Titles, Research & Summarize, Summarise as Mermaid, and Translate.
+    *   **Disabled**: Leaves generated Mermaid output untouched unless you run `Batch Mermaid Fix` manually or add it to a custom workflow.
 -   **Output Language**: (New) Select the desired output language for "Generate from Title" and "Batch Generate from Title" tasks.
     *   **English (Default)**: Prompts are processed and output in English.
     *   **Other Languages**: The LLM is instructed to perform its reasoning in English but provide the final documentation in your selected language (e.g., Español, Français, 简体中文, 繁體中文, العربية, हिन्दी, etc.).
@@ -326,6 +331,14 @@ Access plugin settings via:
     *   **Disabled (Default)**: Successfully generated files are moved to a subfolder named `[OriginalFolderName]_complete` relative to the original folder's parent (or `Vault_complete` if the original folder was the root).
     *   **Enabled**: Allows you to specify a custom name for the subfolder where completed files are moved.
 -   **Custom Output Folder Name**: (Visible only when the above is enabled) Enter the desired name for the subfolder (e.g., `Generated Content`, `_complete`). Invalid characters are not allowed. Defaults to `_complete` if left empty. This folder is created relative to the original folder's parent directory.
+
+#### One-click Workflow Buttons
+-   **Visual Workflow Builder**: Create custom workflow buttons from built-in actions without hand-writing the DSL.
+-   **Custom Workflow Buttons DSL**: Advanced users can still edit the workflow definition text directly. Invalid DSL falls back to the default workflow safely and shows a warning in the sidebar/settings UI.
+-   **Workflow Error Strategy**:
+    *   **Stop on Error (Default)**: Stops the workflow immediately when one step fails.
+    *   **Continue on Error**: Continues running later steps and reports the number of failed actions at the end.
+-   **Default Workflow Included**: `One-Click Extract` chains `Process File (Add Links)`, `Batch Generate from Titles`, and `Batch Mermaid Fix`.
 
 #### Custom Prompt Settings
 This feature allows you to override the default instructions (prompts) sent to the LLM for specific tasks, giving you fine-grained control over the output.
@@ -378,6 +391,13 @@ This feature allows you to override the default instructions (prompts) sent to t
 
 
 ## Usage Guide
+
+### Quick Workflows & Sidebar
+
+-   Open the Notemd sidebar to access grouped action sections for core processing, generation, translation, knowledge, and utilities.
+-   Use the **Quick Workflows** area at the top of the sidebar to launch custom multi-step buttons.
+-   The default **One-Click Extract** workflow runs `Process File (Add Links)` -> `Batch Generate from Titles` -> `Batch Mermaid Fix`.
+-   Workflow progress, per-step logs, and failures are shown in the sidebar, and the same custom workflows can be reconfigured from settings.
 
 ### Original Processing (Adding Wiki-Links)
 This is the core functionality focused on identifying concepts and adding `[[wiki-links]]`.
