@@ -454,7 +454,7 @@ export default class NotemdPlugin extends Plugin {
 
         defaultProviders.forEach(defaultProvider => {
             if (!savedProviderMap.has(defaultProvider.name)) {
-                mergedProviders.push(defaultProvider);
+                mergedProviders.push({ ...defaultProvider });
             }
         });
 
@@ -468,7 +468,9 @@ export default class NotemdPlugin extends Plugin {
         this.settings.researchProvider = this.settings.providers.some(p => p.name === this.settings.researchProvider) ? this.settings.researchProvider : this.settings.activeProvider;
         this.settings.generateTitleProvider = this.settings.providers.some(p => p.name === this.settings.generateTitleProvider) ? this.settings.generateTitleProvider : this.settings.activeProvider;
         this.settings.translateProvider = this.settings.providers.some(p => p.name === this.settings.translateProvider) ? this.settings.translateProvider : this.settings.activeProvider;
+        this.settings.summarizeToMermaidProvider = this.settings.providers.some(p => p.name === this.settings.summarizeToMermaidProvider) ? this.settings.summarizeToMermaidProvider : this.settings.activeProvider;
         this.settings.extractConceptsProvider = this.settings.providers.some(p => p.name === this.settings.extractConceptsProvider) ? this.settings.extractConceptsProvider : this.settings.activeProvider;
+        this.settings.extractOriginalTextProvider = this.settings.providers.some(p => p.name === this.settings.extractOriginalTextProvider) ? this.settings.extractOriginalTextProvider : this.settings.activeProvider;
 
         // Merge availableLanguages to ensure new languages are added for existing users
         const defaultLanguages = DEFAULT_SETTINGS.availableLanguages;

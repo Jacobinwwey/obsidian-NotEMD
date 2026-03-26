@@ -255,6 +255,53 @@
     min-width: 64px;
 }
 
+.notemd-provider-callout {
+    border: 1px solid var(--notemd-border);
+    border-radius: 12px;
+    padding: 0.85em 0.95em;
+    margin: 0 0 0.9em;
+    background:
+        radial-gradient(circle at 12% 16%, color-mix(in srgb, #14b8a6 14%, transparent) 0%, transparent 36%),
+        radial-gradient(circle at 88% 12%, color-mix(in srgb, #f97316 12%, transparent) 0%, transparent 34%),
+        var(--notemd-surface-alt);
+}
+
+.notemd-provider-callout strong {
+    display: block;
+    line-height: 1.4;
+}
+
+.notemd-provider-callout p {
+    margin: 0.45em 0 0;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+.notemd-provider-badge-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45em;
+    margin-bottom: 0.6em;
+}
+
+.notemd-provider-badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 0.2em 0.65em;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    background: color-mix(in srgb, #14b8a6 18%, var(--background-secondary) 82%);
+    color: var(--text-normal);
+    border: 1px solid color-mix(in srgb, var(--notemd-border) 75%, #14b8a6 25%);
+}
+
+.notemd-provider-badge.is-secondary {
+    background: color-mix(in srgb, #f97316 15%, var(--background-secondary) 85%);
+    border-color: color-mix(in srgb, var(--notemd-border) 70%, #f97316 30%);
+}
+
 .notemd-language-select {
     width: 100%;
     min-height: 34px;
