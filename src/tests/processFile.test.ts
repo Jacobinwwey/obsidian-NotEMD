@@ -38,18 +38,18 @@ describe('processFile', () => {
 
     it('should process a file and save the processed file', async () => {
         const llmResponse = 'This is a test file about [[AI]] and [[machine learning]].';
-        jest.spyOn(llmUtils, 'callDeepSeekAPI').mockResolvedValue(llmResponse);
+        jest.spyOn(llmUtils, 'callLLM').mockResolvedValue(llmResponse);
 
         await processFile(mockApp, settings, mockFile, mockReporter, { value: null });
 
         expect(mockApp.vault.read).toHaveBeenCalledWith(mockFile);
-        expect(llmUtils.callDeepSeekAPI).toHaveBeenCalled();
+        expect(llmUtils.callLLM).toHaveBeenCalled();
         expect(mockApp.vault.create).toHaveBeenCalledWith('test_processed.md', llmResponse);
     });
 
     it('should create concept notes for extracted concepts', async () => {
         const llmResponse = 'This is a test file about [[AI]] and [[machine learning]].';
-        jest.spyOn(llmUtils, 'callDeepSeekAPI').mockResolvedValue(llmResponse);
+        jest.spyOn(llmUtils, 'callLLM').mockResolvedValue(llmResponse);
 
         (mockApp.vault.getAbstractFileByPath as jest.Mock).mockImplementation((path: string) => {
             if (path === 'Concepts') {

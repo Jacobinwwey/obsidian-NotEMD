@@ -5,6 +5,7 @@ export const Modal = jest.fn();
 export const Notice = jest.fn();
 export const Plugin = jest.fn();
 export const PluginSettingTab = jest.fn();
+export const requestUrl = jest.fn();
 export const Setting = jest.fn().mockImplementation(() => ({
 	setName: jest.fn().mockReturnThis(),
 	setDesc: jest.fn().mockReturnThis(),

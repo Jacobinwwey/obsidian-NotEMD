@@ -1,7 +1,7 @@
 import { App, requestUrl, Notice, Editor, MarkdownView } from 'obsidian';
 import { NotemdSettings, ProgressReporter } from './types';
 import { estimateTokens, getProviderForTask, getModelForTask } from './utils';
-import { callDeepSeekAPI, callOpenAIApi, callAnthropicApi, callGoogleApi, callMistralApi, callAzureOpenAIApi, callLMStudioApi, callOllamaApi, callOpenRouterAPI, getDebugInfo } from './llmUtils';
+import { callLLM, getDebugInfo } from './llmUtils';
 import { cleanupLatexDelimiters, refineMermaidBlocks } from './mermaidProcessor';
 import { ErrorModal } from './ui/ErrorModal';
 import { getSystemPrompt } from './promptUtils';
@@ -254,19 +254,7 @@ export async function researchAndSummarize(app: App, settings: NotemdSettings, e
 
         progressReporter.log(`Constructed summary prompt (context length: ${researchContext.length}).`);
 
-        let summary = '';
-        switch (provider.name) {
-            case 'DeepSeek': summary = await callDeepSeekAPI(provider, modelName, finalPrompt, '', progressReporter, settings); break;
-            case 'OpenAI': summary = await callOpenAIApi(provider, modelName, finalPrompt, '', progressReporter, settings); break;
-            case 'Anthropic': summary = await callAnthropicApi(provider, modelName, '', finalPrompt, progressReporter, settings); break; // Prompt in content
-            case 'Google': summary = await callGoogleApi(provider, modelName, finalPrompt, '', progressReporter, settings); break;
-            case 'Mistral': summary = await callMistralApi(provider, modelName, finalPrompt, '', progressReporter, settings); break;
-            case 'Azure OpenAI': summary = await callAzureOpenAIApi(provider, modelName, finalPrompt, '', progressReporter, settings); break;
-            case 'LMStudio': summary = await callLMStudioApi(provider, modelName, finalPrompt, '', progressReporter, settings); break;
-            case 'Ollama': summary = await callOllamaApi(provider, modelName, finalPrompt, '', progressReporter, settings); break;
-            case 'OpenRouter': summary = await callOpenRouterAPI(provider, modelName, finalPrompt, '', progressReporter, settings); break;
-            default: throw new Error(`Unsupported provider for summarization: ${provider.name}`);
-        }
+        const summary = await callLLM(provider, '', finalPrompt, settings, progressReporter, modelName);
 
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after summarization.");
 

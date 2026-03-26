@@ -1,7 +1,218 @@
 import { Notice, requestUrl } from 'obsidian';
 import { LLMProviderConfig, NotemdSettings, ProgressReporter } from './types';
+import { getLLMProviderDefinition } from './llmProviders';
 import { cancellableDelay } from './utils';
 import { ErrorModal } from './ui/ErrorModal'; // Import ErrorModal
+
+function providerRequiresApiKey(provider: LLMProviderConfig): boolean {
+    return getLLMProviderDefinition(provider.name)?.apiKeyMode === 'required';
+}
+
+function ensureProviderApiKey(provider: LLMProviderConfig): void {
+    if (providerRequiresApiKey(provider) && !provider.apiKey) {
+        throw new Error(`API key is missing for ${provider.name} provider.`);
+    }
+}
+
+function isOpenAIReasoningModel(modelName: string): boolean {
+    const normalized = modelName.toLowerCase();
+    return normalized.startsWith('o1') || normalized.startsWith('o3') || normalized.startsWith('o4') || normalized.startsWith('gpt-5');
+}
+
+function isDeepSeekReasoningModel(modelName: string): boolean {
+    const normalized = modelName.toLowerCase();
+    return normalized === 'deepseek-reasoner' || normalized.includes('deepseek-reasoner') || normalized.includes('-r1');
+}
+
+function isOpenRouterReasoningModel(modelName: string): boolean {
+    const normalized = modelName.toLowerCase();
+    return normalized.includes('deepseek-r1')
+        || normalized.includes('reasoner')
+        || normalized.includes('openai/o1')
+        || normalized.includes('openai/o3')
+        || normalized.includes('openai/o4')
+        || normalized.includes('gpt-5');
+}
+
+function shouldUseCombinedUserPrompt(providerName: string, modelName: string): boolean {
+    switch (providerName) {
+        case 'DeepSeek':
+            return isDeepSeekReasoningModel(modelName);
+        case 'OpenRouter':
+            return isOpenRouterReasoningModel(modelName);
+        default:
+            return isOpenAIReasoningModel(modelName);
+    }
+}
+
+function buildOpenAICompatibleHeaders(provider: LLMProviderConfig): Record<string, string> {
+    const headers: Record<string, string> = {
+        'Content-Type': 'application/json'
+    };
+
+    if (provider.apiKey || provider.name === 'LMStudio') {
+        headers['Authorization'] = `Bearer ${provider.apiKey || 'EMPTY'}`;
+    }
+
+    if (provider.name === 'OpenRouter' || provider.name === 'Requesty') {
+        headers['HTTP-Referer'] = 'https://github.com/Jacobinwwey/obsidian-NotEMD';
+        headers['X-Title'] = 'Notemd Obsidian Plugin';
+    }
+
+    return headers;
+}
+
+function buildOpenAICompatibleMessages(providerName: string, modelName: string, prompt: string, content: string) {
+    if (shouldUseCombinedUserPrompt(providerName, modelName)) {
+        return [
+            {
+                role: 'user',
+                content: [prompt, content].filter(Boolean).join('\n\n')
+            }
+        ];
+    }
+
+    return [
+        { role: 'system', content: prompt },
+        { role: 'user', content: content }
+    ];
+}
+
+function buildOpenAICompatibleRequestBody(
+    provider: LLMProviderConfig,
+    modelName: string,
+    prompt: string,
+    content: string,
+    maxTokens: number,
+    temperature: number,
+    options?: { connectionTest?: boolean }
+) {
+    const requestBody: any = {
+        model: modelName,
+        messages: buildOpenAICompatibleMessages(provider.name, modelName, prompt, content)
+    };
+
+    const tokenLimit = options?.connectionTest ? 1 : maxTokens;
+    const deterministicTemperature = options?.connectionTest ? 0 : temperature;
+    const isDeepSeekProvider = provider.name === 'DeepSeek';
+    const isReasoningModel = shouldUseCombinedUserPrompt(provider.name, modelName);
+
+    if (isDeepSeekProvider) {
+        if (typeof tokenLimit === 'number' && tokenLimit > 0) {
+            requestBody.max_completion_tokens = tokenLimit;
+        }
+        if (!isDeepSeekReasoningModel(modelName)) {
+            requestBody.temperature = deterministicTemperature;
+        }
+        return requestBody;
+    }
+
+    if (!isReasoningModel) {
+        if (typeof deterministicTemperature === 'number') {
+            requestBody.temperature = deterministicTemperature;
+        }
+        if (typeof tokenLimit === 'number' && tokenLimit > 0) {
+            requestBody.max_tokens = tokenLimit;
+        }
+    } else if (provider.name === 'OpenRouter' && modelName.toLowerCase().includes('deepseek')) {
+        requestBody.temperature = 0.7;
+    }
+
+    return requestBody;
+}
+
+function extractOpenAICompatibleText(providerName: string, data: any, fallbackText: string): string {
+    const choice = data?.choices?.[0];
+    if (choice && (choice.finish_reason === 'error' || choice.error)) {
+        const errorMessage = choice.error?.message || `${providerName} reported finish_reason: error`;
+        const errorCode = choice.error?.code || 'N/A';
+        throw new Error(`${providerName} API reported an error: ${errorMessage} (Code: ${errorCode})`);
+    }
+
+    const message = choice?.message;
+    const rawContent = message?.content;
+
+    if (typeof rawContent === 'string' && rawContent.trim()) {
+        return rawContent;
+    }
+
+    if (Array.isArray(rawContent)) {
+        const joined = rawContent
+            .map(part => typeof part === 'string' ? part : part?.text || '')
+            .join('')
+            .trim();
+        if (joined) {
+            return joined;
+        }
+    }
+
+    if (typeof message?.reasoning === 'string' && message.reasoning.trim()) {
+        return message.reasoning;
+    }
+
+    if (fallbackText?.trim()) {
+        return fallbackText;
+    }
+
+    throw new Error(`Unexpected response format from ${providerName}`);
+}
+
+async function testOpenAICompatibleAPI(provider: LLMProviderConfig): Promise<{ success: boolean; message: string }> {
+    ensureProviderApiKey(provider);
+
+    let response;
+    const headers = buildOpenAICompatibleHeaders(provider);
+    const apiTestMode = getLLMProviderDefinition(provider.name)?.apiTestMode ?? 'chat-only';
+
+    if (apiTestMode === 'models-then-chat') {
+        let response;
+        const modelsUrl = `${provider.baseUrl}/models`;
+
+        try {
+            response = await requestUrl({
+                url: modelsUrl,
+                method: 'GET',
+                headers,
+                throw: false
+            });
+        } catch (_error) {
+            response = null;
+        }
+
+        if (response && response.status >= 200 && response.status < 300) {
+            return { success: true, message: `Successfully connected to ${provider.name} at ${provider.baseUrl}.` };
+        }
+    }
+
+    const chatUrl = `${provider.baseUrl}/chat/completions`;
+    const responseBody = buildOpenAICompatibleRequestBody(
+        provider,
+        provider.model,
+        provider.name === 'LMStudio' ? 'You are a helpful assistant.' : '',
+        provider.name === 'LMStudio' ? 'This is a connection test.' : 'Test',
+        1,
+        0,
+        { connectionTest: true }
+    );
+
+    response = await requestUrl({
+        url: chatUrl,
+        method: 'POST',
+        headers,
+        body: JSON.stringify(responseBody),
+        throw: false
+    });
+
+    if (response.status < 200 || response.status >= 300) {
+        const errorText = response.text;
+        if (provider.name === 'LMStudio' && errorText.includes('Could not find model')) {
+            throw new Error(`LMStudio API error: Model '${provider.model}' not found or loaded on the server.`);
+        }
+        throw new Error(`${provider.name} API error: ${response.status} - ${errorText}`);
+    }
+
+    return { success: true, message: `Successfully connected to ${provider.name} at ${provider.baseUrl} using model '${provider.model}'.` };
+}
 
 
 
@@ -13,13 +224,19 @@ import { ErrorModal } from './ui/ErrorModal'; // Import ErrorModal
  */
 export async function testAPI(provider: LLMProviderConfig, debugMode: boolean = false): Promise<{ success: boolean; message: string }> {
     try {
+        const providerDefinition = getLLMProviderDefinition(provider.name);
+
+        if (providerDefinition?.transport === 'openai-compatible') {
+            return await testOpenAICompatibleAPI(provider);
+        }
+
         let response;
         let url: string;
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let options: any = { method: 'GET' }; // Default to GET
 
-        switch (provider.name) {
-            case 'Ollama':
+        switch (providerDefinition?.transport) {
+            case 'ollama':
                 const ollamaUrl = `${provider.baseUrl}/chat`;
                 const ollamaOptions = {
                     url: ollamaUrl,
@@ -43,171 +260,7 @@ export async function testAPI(provider: LLMProviderConfig, debugMode: boolean = 
                 // No need to call .json() on the response text, it's already parsed
                 return { success: true, message: `Successfully connected to Ollama at ${provider.baseUrl} using model '${provider.model}'.` };
 
-            case 'LMStudio':
-                const lmStudioUrl = `${provider.baseUrl}/chat/completions`;
-                const lmStudioOptions = {
-                    url: lmStudioUrl,
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${provider.apiKey || 'EMPTY'}`
-                    },
-                    body: JSON.stringify({
-                        model: provider.model,
-                        messages: [
-                            { role: 'system', content: 'You are a helpful assistant.' },
-                            { role: 'user', content: 'This is a connection test.' }
-                        ]
-                    }),
-                    throw: false
-                };
-                try {
-                    response = await requestUrl(lmStudioOptions);
-                    if (response.status >= 200 && response.status < 300) {
-                        return { success: true, message: `Successfully connected to LMStudio API at ${provider.baseUrl} using model '${provider.model}'.` };
-                    } else {
-                        const errorText = response.text;
-                        if (errorText.includes("Could not find model")) { throw new Error(`LMStudio API error: Model '${provider.model}' not found or loaded on the server.`); }
-                        throw new Error(`LMStudio API error: ${response.status} - ${errorText}`);
-                    }
-                } catch (e: unknown) { // Changed to unknown
-                    const message = e instanceof Error ? e.message : String(e);
-                    throw new Error(`LMStudio API connection failed: ${message}. Is the server running at ${provider.baseUrl}?`);
-                }
-
-            case 'OpenRouter':
-                url = `${provider.baseUrl}/chat/completions`;
-                options.url = url;
-                options.method = 'POST';
-                options.headers = {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${provider.apiKey}`,
-                    'HTTP-Referer': 'https://github.com/Jacobinwwey/obsidian-NotEMD',
-                    'X-Title': 'Notemd Obsidian Plugin'
-                };
-                
-                const isReasoningRouter = provider.model.includes('deepseek-r1') || provider.model.includes('reasoner') || provider.model.includes('o1') || provider.model.includes('o3');
-                const routerBody: any = {
-                    model: provider.model,
-                    messages: [{ role: 'user', content: 'Test connection' }]
-                };
-                if (!isReasoningRouter) {
-                    routerBody.max_tokens = 1;
-                    routerBody.temperature = 0;
-                }
-                options.body = JSON.stringify(routerBody);
-                options.throw = false;
-                
-                response = await requestUrl(options);
-                if (response.status < 200 || response.status >= 300) throw new Error(`OpenRouter API error: ${response.status} - ${response.text}`);
-                return { success: true, message: `Successfully connected to OpenRouter API using model '${provider.model}'.` };
-
-            case 'OpenAI':
-                 // OpenAI API: Try /models first, fallback to chat/completions
-                 url = `${provider.baseUrl}/models`;
-                 options.url = url;
-                 options.headers = { 'Authorization': `Bearer ${provider.apiKey}` };
-                 options.throw = false;
-                 try {
-                    response = await requestUrl(options);
-                 } catch (e) {
-                    // Ignore error and try chat completions
-                 }
-
-                 if (response && response.status >= 200 && response.status < 300) {
-                    return { success: true, message: `Successfully connected to OpenAI API at ${provider.baseUrl}.` };
-                 }
-
-                 url = `${provider.baseUrl}/chat/completions`;
-                 options.url = url;
-                 options.method = 'POST';
-                 options.headers = { ...options.headers, 'Content-Type': 'application/json' };
-                 
-                 const isReasoningOpenAI = provider.model.startsWith('o1') || provider.model.startsWith('o3');
-                 const openAIBody: any = { model: provider.model, messages: [{ role: 'user', content: 'Test' }] };
-                 if (!isReasoningOpenAI) {
-                    openAIBody.max_tokens = 1;
-                    openAIBody.temperature = 0;
-                 }
-                 options.body = JSON.stringify(openAIBody);
-                 options.throw = false;
-                 
-                 response = await requestUrl(options);
-
-                 if (response.status < 200 || response.status >= 300) throw new Error(`OpenAI API error: ${response.status} - ${response.text}`);
-                 return { success: true, message: `Successfully connected to OpenAI API at ${provider.baseUrl}.` };
-
-            case 'DeepSeek':
-                 // DeepSeek API: Try /models first, fallback to chat/completions
-                url = `${provider.baseUrl}/models`;
-                options.url = url;
-                options.headers = { 'Authorization': `Bearer ${provider.apiKey}` };
-                options.throw = false;
-                try {
-                    response = await requestUrl(options);
-                } catch (e) {
-                    // Ignore error and try chat completions
-                }
-                // Fallback to chat completion test if /models fails
-                if (response && response.status >= 200 && response.status < 300) {
-                    return { success: true, message: `Successfully connected to ${provider.name} API at ${provider.baseUrl}.` };
-                }
-
-                url = `${provider.baseUrl}/chat/completions`;
-                options.url = url;
-                options.method = 'POST';
-                options.headers = { ...options.headers, 'Content-Type': 'application/json' };
-
-                // Match the same logic as executeDeepSeekAPI
-                const isDeepseekReasonerTest = provider.model === 'deepseek-reasoner' || provider.model.includes('deepseek-reasoner');
-                const isReasoningDeepSeek = isDeepseekReasonerTest || provider.model.includes('-r1');
-                
-                const deepSeekBody: any = { 
-                    model: provider.model, 
-                    messages: [{ role: 'user', content: 'Test' }],
-                    max_completion_tokens: 1
-                };
-                
-                // Only add temperature for non-reasoner models (exclude exact "deepseek-reasoner")
-                if (provider.model !== 'deepseek-reasoner' && !isReasoningDeepSeek) {
-                    deepSeekBody.temperature = 0;
-                }
-                
-                options.body = JSON.stringify(deepSeekBody);
-                options.throw = false;
-
-                response = await requestUrl(options);
-
-                if (response.status < 200 || response.status >= 300) throw new Error(`${provider.name} API error: ${response.status} - ${response.text}`);
-                return { success: true, message: `Successfully connected to ${provider.name} API at ${provider.baseUrl}.` };
-
-            case 'Mistral':
-                 // Mistral API: Try /models first, fallback to chat/completions
-                 url = `${provider.baseUrl}/models`;
-                 options.url = url;
-                 options.headers = { 'Authorization': `Bearer ${provider.apiKey}` };
-                 options.throw = false;
-                 try {
-                    response = await requestUrl(options);
-                 } catch (e) {
-                    // Ignore error and try chat completions
-                 }
-                 if (response && response.status >= 200 && response.status < 300) {
-                    return { success: true, message: `Successfully connected to Mistral API at ${provider.baseUrl}.` };
-                 }
-
-                 url = `${provider.baseUrl}/chat/completions`;
-                 options.url = url;
-                 options.method = 'POST';
-                 options.headers = { ...options.headers, 'Content-Type': 'application/json' };
-                 options.body = JSON.stringify({ model: provider.model, messages: [{ role: 'user', content: 'Test' }], max_tokens: 1, temperature: 0 });
-                 options.throw = false;
-                 response = await requestUrl(options);
-
-                 if (response.status < 200 || response.status >= 300) throw new Error(`Mistral API error: ${response.status} - ${response.text}`);
-                 return { success: true, message: `Successfully connected to Mistral API at ${provider.baseUrl}.` };
-
-            case 'Anthropic':
+            case 'anthropic':
                 url = `${provider.baseUrl}/v1/messages`;
                 options.url = url;
                 options.method = 'POST';
@@ -226,7 +279,7 @@ export async function testAPI(provider: LLMProviderConfig, debugMode: boolean = 
                 if (response.status < 200 || response.status >= 300) throw new Error(`Anthropic API error: ${response.status} - ${response.text}`);
                 return { success: true, message: `Successfully connected to Anthropic API.` };
 
-            case 'Google':
+            case 'google':
                 url = `${provider.baseUrl}/models/${provider.model}:generateContent?key=${provider.apiKey}`;
                 options.url = url;
                 options.method = 'POST';
@@ -236,7 +289,7 @@ export async function testAPI(provider: LLMProviderConfig, debugMode: boolean = 
                 response = await requestUrl(options);
                 if (response.status < 200 || response.status >= 300) throw new Error(`Google API error: ${response.status} - ${response.text}`);
                 return { success: true, message: `Successfully connected to Google API.` };
-            case 'Azure OpenAI':
+            case 'azure-openai':
                 if (!provider.apiVersion || !provider.baseUrl || !provider.model) { throw new Error('Azure requires Base URL, Model (Deployment Name), and API Version.'); }
                 url = `${provider.baseUrl}/openai/deployments/${provider.model}/chat/completions?api-version=${provider.apiVersion}`;
                 options.url = url;
@@ -255,32 +308,6 @@ export async function testAPI(provider: LLMProviderConfig, debugMode: boolean = 
                 response = await requestUrl(options);
                 if (response.status < 200 || response.status >= 300) throw new Error(`Azure OpenAI API error: ${response.status} - ${response.text}`);
                 return { success: true, message: `Successfully connected to Azure OpenAI deployment '${provider.model}'.` };
-            
-            case 'xAI':
-                // xAI API: Try /models first, fallback to chat/completions
-                url = `${provider.baseUrl}/models`;
-                options.url = url;
-                options.headers = { 'Authorization': `Bearer ${provider.apiKey}` };
-                options.throw = false;
-                try {
-                    response = await requestUrl(options);
-                } catch (e) {
-                    // Ignore error and try chat completions
-                }
-                if (response && response.status >= 200 && response.status < 300) {
-                    return { success: true, message: `Successfully connected to xAI API at ${provider.baseUrl}.` };
-                }
-
-                url = `${provider.baseUrl}/chat/completions`;
-                options.url = url;
-                options.method = 'POST';
-                options.headers = { ...options.headers, 'Content-Type': 'application/json' };
-                options.body = JSON.stringify({ model: provider.model, messages: [{ role: 'user', content: 'Test' }], max_tokens: 1, temperature: 0 });
-                options.throw = false;
-                response = await requestUrl(options);
-
-                if (response.status < 200 || response.status >= 300) throw new Error(`xAI API error: ${response.status} - ${response.text}`);
-                return { success: true, message: `Successfully connected to xAI API at ${provider.baseUrl}.` };
 
             default:
                 return { success: false, message: `Connection test not implemented for provider: ${provider.name}` };
@@ -1049,6 +1076,52 @@ async function executeXaiApi(provider: LLMProviderConfig, modelName: string, pro
     }
 }
 
+async function executeOpenAICompatibleApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings, signal?: AbortSignal): Promise<string> {
+    ensureProviderApiKey(provider);
+
+    const url = `${provider.baseUrl}/chat/completions`;
+    const requestBody = buildOpenAICompatibleRequestBody(
+        provider,
+        modelName,
+        prompt,
+        content,
+        settings.maxTokens,
+        provider.temperature
+    );
+
+    const { controller } = getAbortSignal(progressReporter, signal);
+
+    try {
+        await cancellableDelay(1, progressReporter);
+        let response;
+        try {
+            response = await requestUrl({
+                url,
+                method: 'POST',
+                headers: buildOpenAICompatibleHeaders(provider),
+                body: JSON.stringify(requestBody),
+                throw: false
+            });
+        } catch (error: any) {
+            handleApiError(provider.name, error, progressReporter, settings.enableApiErrorDebugMode);
+        }
+
+        if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
+        if (response.status < 200 || response.status >= 300) {
+            handleApiError(provider.name, response, progressReporter, settings.enableApiErrorDebugMode);
+        }
+
+        const data = response.json;
+        const fallbackText = typeof response.text === 'string' ? response.text : '';
+        if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API success.");
+        return extractOpenAICompatibleText(provider.name, data, fallbackText);
+    } finally {
+        if (controller && progressReporter.abortController === controller) {
+            progressReporter.abortController = null;
+        }
+    }
+}
+
 
 
 // --- Exported API Call Functions ---
@@ -1095,6 +1168,10 @@ export function callXaiApi(provider: LLMProviderConfig, modelName: string, promp
     return callApiWithRetry(provider, modelName, prompt, content, settings, progressReporter, executeXaiApi, signal);
 }
 
+export function callOpenAICompatibleApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings, signal?: AbortSignal): Promise<string> {
+    return callApiWithRetry(provider, modelName, prompt, content, settings, progressReporter, executeOpenAICompatibleApi, signal);
+}
+
 export async function callLLM(
     provider: LLMProviderConfig,
     prompt: string,
@@ -1105,27 +1182,19 @@ export async function callLLM(
     signal?: AbortSignal // Add optional signal
 ): Promise<string> {
     const modelToUse = modelName || provider.model;
-    switch (provider.name) {
-        case 'DeepSeek':
-            return callDeepSeekAPI(provider, modelToUse, prompt, content, progressReporter, settings, signal);
-        case 'OpenAI':
-            return callOpenAIApi(provider, modelToUse, prompt, content, progressReporter, settings, signal);
-        case 'Anthropic':
+    const providerDefinition = getLLMProviderDefinition(provider.name);
+
+    switch (providerDefinition?.transport) {
+        case 'openai-compatible':
+            return callOpenAICompatibleApi(provider, modelToUse, prompt, content, progressReporter, settings, signal);
+        case 'anthropic':
             return callAnthropicApi(provider, modelToUse, prompt, content, progressReporter, settings, signal);
-        case 'Google':
+        case 'google':
             return callGoogleApi(provider, modelToUse, prompt, content, progressReporter, settings, signal);
-        case 'Mistral':
-            return callMistralApi(provider, modelToUse, prompt, content, progressReporter, settings, signal);
-        case 'Azure OpenAI':
+        case 'azure-openai':
             return callAzureOpenAIApi(provider, modelToUse, prompt, content, progressReporter, settings, signal);
-        case 'LMStudio':
-            return callLMStudioApi(provider, modelToUse, prompt, content, progressReporter, settings, signal);
-        case 'Ollama':
+        case 'ollama':
             return callOllamaApi(provider, modelToUse, prompt, content, progressReporter, settings, signal);
-        case 'OpenRouter':
-            return callOpenRouterAPI(provider, modelToUse, prompt, content, progressReporter, settings, signal);
-        case 'xAI':
-            return callXaiApi(provider, modelToUse, prompt, content, progressReporter, settings, signal);
         default:
             throw new Error(`Provider ${provider.name} not supported`);
     }
