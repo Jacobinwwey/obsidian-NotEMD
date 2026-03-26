@@ -20,7 +20,7 @@ A Easy way to create your own Knowledge-base!
 
 Notemd enhances your Obsidian workflow by integrating with various Large Language Models (LLMs) to process your multi-languages notes, automatically generate wiki-links for key concepts, create corresponding concept notes, perform web research, helping you build powerful knowledge graphs and more.
 
-**Version:** 1.7.0
+**Version:** 1.7.1
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
@@ -58,7 +58,7 @@ That's it! Explore the settings to unlock more features like web research, trans
 - **Cancellable Operations**: Cancel any processing task (single or batch) initiated from the sidebar via its dedicated cancel button. Command palette operations use a modal which can also be cancelled.
 - **Multi-Model Configuration**: Use different LLM providers *and* specific models for different tasks (Add Links, Research, Generate Title, Translate) or use a single provider for all.
 - **Stable API Calls (Retry Logic)**: Optionally enable automatic retries for failed LLM API calls with configurable interval and attempt limits.
-- **China-Ready Provider Presets**: Built-in presets now cover `Qwen`, `Doubao`, `Moonshot`, `GLM`, and `MiniMax` in addition to the existing global and local providers.
+- **China-Ready Provider Presets**: Built-in presets now cover `Qwen`, `Doubao`, `Moonshot`, `GLM`, `MiniMax`, `Baidu Qianfan`, and `SiliconFlow` in addition to the existing global and local providers.
 - **Reliable Batch Processing**: Improved concurrent processing logic with **staggered API calls** to prevent rate-limiting errors and ensure stable performance during large batch jobs. The new implementation ensures that tasks are initiated at different intervals rather than all at once.
 - **Accurate Progress Reporting**: Fixed a bug where the progress bar could get stuck, ensuring that the UI always reflects the true status of the operation.
 - **Robust Parallel Batch Processing**: Resolved an issue where parallel batch operations would stall prematurely, ensuring all files are processed reliably and efficiently.
@@ -185,14 +185,14 @@ Access plugin settings via:
 ### LLM Provider Configuration
 1.  **Active Provider**: Select the LLM provider you want to use from the dropdown menu.
 2.  **Provider Settings**: Configure the specific settings for the selected provider:
-    *   **API Key**: Required for most cloud providers (e.g., OpenAI, Anthropic, DeepSeek, Qwen, Doubao, Moonshot, GLM, MiniMax, Google, Mistral, Azure OpenAI, OpenRouter, xAI, Groq, Together, Fireworks, Requesty). Not needed for Ollama. Optional for LM Studio and the generic `OpenAI Compatible` preset when your endpoint accepts anonymous or placeholder access.
+    *   **API Key**: Required for most cloud providers (e.g., OpenAI, Anthropic, DeepSeek, Qwen, Doubao, Moonshot, GLM, MiniMax, Baidu Qianfan, SiliconFlow, Google, Mistral, Azure OpenAI, OpenRouter, xAI, Groq, Together, Fireworks, Requesty). Not needed for Ollama. Optional for LM Studio and the generic `OpenAI Compatible` preset when your endpoint accepts anonymous or placeholder access.
     *   **Base URL / Endpoint**: The API endpoint for the service. Defaults are provided, but you may need to change this for local models (LMStudio, Ollama), gateways (OpenRouter, Requesty, OpenAI Compatible), or specific Azure deployments. **Required for Azure OpenAI.**
     *   **Model**: The specific model name/ID to use (e.g., `gpt-4o`, `claude-3-5-sonnet-20240620`, `google/gemini-flash-1.5`, `grok-4`, `moonshotai/kimi-k2-instruct-0905`, `accounts/fireworks/models/kimi-k2p5`, `anthropic/claude-3-7-sonnet-latest`). Ensure the model is available at your endpoint/provider.
     *   **Temperature**: Controls the randomness of the LLM's output (0=deterministic, 1=max creativity). Lower values (e.g., 0.2-0.5) are generally better for structured tasks.
     *   **API Version (Azure Only)**: Required for Azure OpenAI deployments (e.g., `2024-02-15-preview`).
-3.  **Test Connection**: Use the "Test Connection" button for the active provider to verify your settings. OpenAI-compatible providers now use provider-aware checks: endpoints such as `Qwen`, `Doubao`, `Moonshot`, `GLM`, `MiniMax`, `Groq`, `Together`, `Fireworks`, `LMStudio`, and `OpenAI Compatible` probe `chat/completions` directly, while providers with a reliable `/models` endpoint can still use model listing first.
+3.  **Test Connection**: Use the "Test Connection" button for the active provider to verify your settings. OpenAI-compatible providers now use provider-aware checks: endpoints such as `Qwen`, `Doubao`, `Moonshot`, `GLM`, `MiniMax`, `Baidu Qianfan`, `SiliconFlow`, `Groq`, `Together`, `Fireworks`, `LMStudio`, and `OpenAI Compatible` probe `chat/completions` directly, while providers with a reliable `/models` endpoint can still use model listing first.
 4.  **Manage Provider Configurations**: Use the "Export Providers" and "Import Providers" buttons to save/load your LLM provider settings to/from a `notemd-providers.json` file within the plugin's configuration directory. This allows for easy backup and sharing.
-5.  **Preset Coverage**: In addition to the original providers, Notemd now includes preset entries for `Qwen`, `Doubao`, `Moonshot`, `GLM`, `MiniMax`, `xAI`, `Groq`, `Together`, `Fireworks`, `Requesty`, and a generic `OpenAI Compatible` target for LiteLLM, vLLM, Perplexity, Vercel AI Gateway, or custom proxies.
+5.  **Preset Coverage**: In addition to the original providers, Notemd now includes preset entries for `Qwen`, `Doubao`, `Moonshot`, `GLM`, `MiniMax`, `Baidu Qianfan`, `SiliconFlow`, `xAI`, `Groq`, `Together`, `Fireworks`, `Requesty`, and a generic `OpenAI Compatible` target for LiteLLM, vLLM, Perplexity, Vercel AI Gateway, or custom proxies.
 <img width="804" height="506" alt="LLM" src="https://github.com/user-attachments/assets/8caf42e3-43ad-456d-8b96-b63e7914e45f" />
 
 ### Multi-Model Configuration
@@ -526,6 +526,8 @@ This is the core functionality focused on identifying concepts and adding `[[wik
 | Moonshot           | Cloud   | Yes                    | Official Kimi / Moonshot endpoint                                     |
 | GLM                | Cloud   | Yes                    | Official Zhipu BigModel OpenAI-compatible endpoint                    |
 | MiniMax            | Cloud   | Yes                    | Official MiniMax chat-completions endpoint                            |
+| Baidu Qianfan      | Cloud   | Yes                    | Official Qianfan OpenAI-compatible endpoint for ERNIE models          |
+| SiliconFlow        | Cloud   | Yes                    | Official SiliconFlow OpenAI-compatible endpoint for hosted OSS models |
 | OpenAI             | Cloud   | Yes                    | Supports GPT and o-series models                                      |
 | Anthropic          | Cloud   | Yes                    | Supports Claude models                                                |
 | Google             | Cloud   | Yes                    | Supports Gemini models                                                |
@@ -543,7 +545,7 @@ This is the core functionality focused on identifying concepts and adding `[[wik
 
 *Note: For local providers (LMStudio, Ollama), ensure the respective server application is running and accessible at the configured Base URL.*
 *Note: For OpenRouter and Requesty, use the provider-prefixed/full model identifier shown by the gateway (for example `google/gemini-flash-1.5` or `anthropic/claude-3-7-sonnet-latest`).*
-*Note: `Doubao` usually expects an Ark endpoint/deployment ID in the model field rather than a raw model family name. Replace the preset placeholder before testing or running tasks.*
+*Note: `Doubao` usually expects an Ark endpoint/deployment ID in the model field rather than a raw model family name. The settings screen now warns when the placeholder value is still present and blocks connection tests until you replace it with a real endpoint ID.*
 *Note: China-focused presets use chat-first connection checks so the test validates the actual configured model/deployment, not only API-key reachability.*
 *Note: `OpenAI Compatible` is intended for custom gateways and proxies. Set the Base URL, API key policy, and model ID according to your provider's documentation.*
 

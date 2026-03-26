@@ -1,5 +1,5 @@
 /*
- * Notemd v1.7.0
+ * Notemd v1.7.1
  */
 
 :root {
@@ -275,6 +275,33 @@
     margin: 0.45em 0 0;
     color: var(--text-muted);
     line-height: 1.5;
+}
+
+.notemd-provider-validation {
+    border-radius: 10px;
+    padding: 0.75em 0.85em;
+    margin: 0 0 0.85em;
+    border: 1px solid transparent;
+}
+
+.notemd-provider-validation strong {
+    display: block;
+    line-height: 1.4;
+}
+
+.notemd-provider-validation p {
+    margin: 0.4em 0 0;
+    line-height: 1.45;
+}
+
+.notemd-provider-validation-warning {
+    background: color-mix(in srgb, #f59e0b 12%, var(--background-secondary) 88%);
+    border-color: color-mix(in srgb, #f59e0b 42%, var(--background-modifier-border) 58%);
+}
+
+.notemd-provider-validation-error {
+    background: color-mix(in srgb, #ef4444 10%, var(--background-secondary) 90%);
+    border-color: color-mix(in srgb, #ef4444 38%, var(--background-modifier-border) 62%);
 }
 
 .notemd-provider-badge-row {
