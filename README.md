@@ -170,10 +170,10 @@ That's it! Explore the settings to unlock more features like web research, trans
 5. Once installed, click **Enable**.
 
 ### Manual Installation
-1. Download the latest release files (`main.js`, `styles.css`, `manifest.json`) from the [GitHub Releases page](https://github.com/Jacobinwwey/obsidian-NotEMD/releases) .
+1. Download the latest release assets from the [GitHub Releases page](https://github.com/Jacobinwwey/obsidian-NotEMD/releases). Each release also includes `README.md` for packaged reference, but manual installation only requires `main.js`, `styles.css`, and `manifest.json`.
 2. Navigate to your Obsidian vault's configuration folder: `<YourVault>/.obsidian/plugins/`.
 3. Create a new folder named `notemd`.
-4. Copy the downloaded `main.js`, `styles.css`, and `manifest.json` files into the `notemd` folder.
+4. Copy `main.js`, `styles.css`, and `manifest.json` into the `notemd` folder.
 5. Restart Obsidian.
 6. Go to **Settings** → **Community plugins** and enable "Notemd".
 
