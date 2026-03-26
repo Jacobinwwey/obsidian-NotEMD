@@ -92,6 +92,33 @@ describe('llmUtils expanded provider support', () => {
         expect(requestBody.model).toBe('qwen-plus');
     });
 
+    test('callLLM routes SiliconFlow through the OpenAI-compatible runtime', async () => {
+        const provider: LLMProviderConfig = {
+            name: 'SiliconFlow',
+            apiKey: 'sf-key',
+            baseUrl: 'https://api.siliconflow.cn/v1',
+            model: 'Qwen/QwQ-32B',
+            temperature: 0.2
+        };
+
+        (requestUrl as jest.Mock).mockResolvedValue({
+            status: 200,
+            json: { choices: [{ message: { content: 'siliconflow-ok' } }] },
+            text: '{"choices":[{"message":{"content":"siliconflow-ok"}}]}'
+        });
+
+        const result = await callLLM(provider, 'System prompt', 'Provider content', settings, reporter);
+
+        expect(result).toBe('siliconflow-ok');
+        expect(requestUrl).toHaveBeenCalledWith(expect.objectContaining({
+            url: 'https://api.siliconflow.cn/v1/chat/completions',
+            method: 'POST',
+            headers: expect.objectContaining({
+                Authorization: 'Bearer sf-key'
+            })
+        }));
+    });
+
     test('OpenAI Compatible preset can call unauthenticated local gateways', async () => {
         const provider: LLMProviderConfig = {
             name: 'OpenAI Compatible',
@@ -168,5 +195,35 @@ describe('llmUtils expanded provider support', () => {
 
         const requestBody = JSON.parse((requestUrl as jest.Mock).mock.calls[0][0].body);
         expect(requestBody.model).toBe('qwen-plus');
+    });
+
+    test('testAPI uses direct chat probing for Baidu Qianfan', async () => {
+        const provider: LLMProviderConfig = {
+            name: 'Baidu Qianfan',
+            apiKey: 'qianfan-key',
+            baseUrl: 'https://qianfan.baidubce.com/v2',
+            model: 'ernie-4.5-turbo-32k',
+            temperature: 0.2
+        };
+
+        (requestUrl as jest.Mock).mockResolvedValue({
+            status: 200,
+            json: { choices: [{ message: { content: 'ok' } }] },
+            text: '{"choices":[{"message":{"content":"ok"}}]}'
+        });
+
+        const result = await testAPI(provider);
+
+        expect(result.success).toBe(true);
+        expect(requestUrl).toHaveBeenCalledTimes(1);
+        expect(requestUrl).toHaveBeenCalledWith(expect.objectContaining({
+            url: 'https://qianfan.baidubce.com/v2/chat/completions',
+            method: 'POST',
+            headers: expect.objectContaining({
+                Authorization: 'Bearer qianfan-key'
+            })
+        }));
+        const requestBody = JSON.parse((requestUrl as jest.Mock).mock.calls[0][0].body);
+        expect(requestBody.model).toBe('ernie-4.5-turbo-32k');
     });
 });

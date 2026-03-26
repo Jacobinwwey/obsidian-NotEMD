@@ -4,6 +4,7 @@ export type LLMProviderCategory = 'cloud' | 'gateway' | 'local';
 export type LLMProviderTransport = 'openai-compatible' | 'anthropic' | 'google' | 'azure-openai' | 'ollama';
 export type LLMProviderApiKeyMode = 'required' | 'optional' | 'none';
 export type LLMProviderApiTestMode = 'models-then-chat' | 'chat-only';
+export type LLMProviderValidationLevel = 'warning' | 'error';
 
 export interface LLMProviderDefinition {
     name: string;
@@ -14,6 +15,11 @@ export interface LLMProviderDefinition {
     description: string;
     setupHint: string;
     defaultConfig: LLMProviderConfig;
+}
+
+export interface LLMProviderValidationIssue {
+    level: LLMProviderValidationLevel;
+    message: string;
 }
 
 export const LLM_PROVIDER_DEFINITIONS: LLMProviderDefinition[] = [
@@ -110,6 +116,38 @@ export const LLM_PROVIDER_DEFINITIONS: LLMProviderDefinition[] = [
             apiKey: '',
             baseUrl: 'https://api.minimaxi.com/v1',
             model: 'MiniMax-M1',
+            temperature: 0.3
+        }
+    },
+    {
+        name: 'Baidu Qianfan',
+        category: 'cloud',
+        transport: 'openai-compatible',
+        apiKeyMode: 'required',
+        apiTestMode: 'chat-only',
+        description: 'Baidu Qianfan OpenAI-compatible endpoint for ERNIE and other hosted models.',
+        setupHint: 'Use Qianfan model IDs such as ernie-4.5-turbo-32k or other Qianfan-hosted models available in your account.',
+        defaultConfig: {
+            name: 'Baidu Qianfan',
+            apiKey: '',
+            baseUrl: 'https://qianfan.baidubce.com/v2',
+            model: 'ernie-4.5-turbo-32k',
+            temperature: 0.3
+        }
+    },
+    {
+        name: 'SiliconFlow',
+        category: 'cloud',
+        transport: 'openai-compatible',
+        apiKeyMode: 'required',
+        apiTestMode: 'chat-only',
+        description: 'SiliconFlow OpenAI-compatible endpoint for hosted OSS models and reasoning models.',
+        setupHint: 'Use SiliconFlow model IDs such as Qwen/QwQ-32B, DeepSeek-R1, or other SiliconFlow-hosted model names.',
+        defaultConfig: {
+            name: 'SiliconFlow',
+            apiKey: '',
+            baseUrl: 'https://api.siliconflow.cn/v1',
+            model: 'Qwen/QwQ-32B',
             temperature: 0.3
         }
     },
@@ -353,6 +391,37 @@ export function createDefaultProviders(): LLMProviderConfig[] {
 
 export function isOpenAICompatibleProvider(name: string): boolean {
     return getLLMProviderDefinition(name)?.transport === 'openai-compatible';
+}
+
+function looksLikeDoubaoEndpointId(model: string): boolean {
+    return /^ep-[a-z0-9-]{8,}$/i.test(model.trim());
+}
+
+export function getProviderValidationIssues(provider: Pick<LLMProviderConfig, 'name' | 'model' | 'baseUrl'>): LLMProviderValidationIssue[] {
+    if (provider.name !== 'Doubao') {
+        return [];
+    }
+
+    const normalizedModel = (provider.model || '').trim();
+    if (!normalizedModel || normalizedModel === 'ep-xxxxxxxxxxxxxxxx') {
+        return [{
+            level: 'error',
+            message: 'Doubao needs a real Ark endpoint ID in the model field before testing or running tasks.'
+        }];
+    }
+
+    if (!looksLikeDoubaoEndpointId(normalizedModel)) {
+        return [{
+            level: 'warning',
+            message: 'Doubao usually expects an Ark endpoint ID such as ep-xxxxxxxx. If you are intentionally using a raw model ID, verify that your Ark deployment accepts it.'
+        }];
+    }
+
+    return [];
+}
+
+export function hasBlockingProviderValidationIssues(provider: Pick<LLMProviderConfig, 'name' | 'model' | 'baseUrl'>): boolean {
+    return getProviderValidationIssues(provider).some(issue => issue.level === 'error');
 }
 
 export function getOrderedProviderNames(providers: LLMProviderConfig[]): string[] {

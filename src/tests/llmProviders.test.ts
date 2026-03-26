@@ -17,6 +17,8 @@ describe('llmProviders registry', () => {
             'Moonshot',
             'GLM',
             'MiniMax',
+            'Baidu Qianfan',
+            'SiliconFlow',
             'OpenAI',
             'Anthropic',
             'Google',
@@ -53,6 +55,8 @@ describe('llmProviders registry', () => {
         expect(isOpenAICompatibleProvider('Moonshot')).toBe(true);
         expect(isOpenAICompatibleProvider('GLM')).toBe(true);
         expect(isOpenAICompatibleProvider('MiniMax')).toBe(true);
+        expect(isOpenAICompatibleProvider('Baidu Qianfan')).toBe(true);
+        expect(isOpenAICompatibleProvider('SiliconFlow')).toBe(true);
         expect(isOpenAICompatibleProvider('Anthropic')).toBe(false);
         expect(getLLMProviderDefinition('Ollama')?.transport).toBe('ollama');
     });
@@ -75,6 +79,14 @@ describe('llmProviders registry', () => {
             apiTestMode: 'chat-only'
         }));
         expect(getLLMProviderDefinition('MiniMax')).toEqual(expect.objectContaining({
+            transport: 'openai-compatible',
+            apiTestMode: 'chat-only'
+        }));
+        expect(getLLMProviderDefinition('Baidu Qianfan')).toEqual(expect.objectContaining({
+            transport: 'openai-compatible',
+            apiTestMode: 'chat-only'
+        }));
+        expect(getLLMProviderDefinition('SiliconFlow')).toEqual(expect.objectContaining({
             transport: 'openai-compatible',
             apiTestMode: 'chat-only'
         }));

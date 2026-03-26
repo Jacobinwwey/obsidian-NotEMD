@@ -2,7 +2,13 @@ import { App, PluginSettingTab, Setting, Notice, TextAreaComponent } from 'obsid
 import NotemdPlugin from '../main'; // Import the plugin class itself
 import { LLMProviderConfig, NotemdSettings, TaskKey } from '../types';
 import { DEFAULT_SETTINGS } from '../constants';
-import { getLLMProviderDefinition, getOrderedProviderNames, getProviderCategoryLabel } from '../llmProviders';
+import {
+    getLLMProviderDefinition,
+    getOrderedProviderNames,
+    getProviderCategoryLabel,
+    getProviderValidationIssues,
+    hasBlockingProviderValidationIssues
+} from '../llmProviders';
 import { testAPI } from '../llmUtils'; // Import testAPI
 import { getDefaultPrompt } from '../promptUtils'; // Import for default prompts
 import {
@@ -53,6 +59,23 @@ export class NotemdSettingTab extends PluginSettingTab {
 
         callout.createEl('strong', { text: definition.description });
         callout.createEl('p', { text: definition.setupHint });
+    }
+
+    private renderProviderValidation(containerEl: HTMLElement, provider: LLMProviderConfig): void {
+        const issues = getProviderValidationIssues(provider);
+        if (issues.length === 0) {
+            return;
+        }
+
+        issues.forEach(issue => {
+            const callout = containerEl.createDiv({
+                cls: `notemd-provider-validation notemd-provider-validation-${issue.level}`
+            });
+            callout.createEl('strong', {
+                text: issue.level === 'error' ? 'Configuration required' : 'Configuration warning'
+            });
+            callout.createEl('p', { text: issue.message });
+        });
     }
 
     private getWorkflowBuilderStateFromSettings(): CustomWorkflowButton[] {
@@ -305,7 +328,7 @@ export class NotemdSettingTab extends PluginSettingTab {
             text: `Provider presets expanded to ${this.plugin.settings.providers.length} entries.`
         });
         providerSupportCallout.createEl('p', {
-            text: 'OpenAI-compatible providers now share one runtime path. Built-in presets cover China-focused services such as Qwen, Doubao, Moonshot, GLM, and MiniMax, and the generic "OpenAI Compatible" preset can target LiteLLM, vLLM, Perplexity, Vercel AI Gateway, or your own proxy.'
+            text: 'OpenAI-compatible providers now share one runtime path. Built-in presets cover China-focused services such as Qwen, Doubao, Moonshot, GLM, MiniMax, Baidu Qianfan, and SiliconFlow, and the generic "OpenAI Compatible" preset can target LiteLLM, vLLM, Perplexity, Vercel AI Gateway, or your own proxy.'
         });
 
         const providerMgmtSetting = new Setting(containerEl)
@@ -336,6 +359,7 @@ export class NotemdSettingTab extends PluginSettingTab {
         if (activeProvider) {
             new Setting(containerEl).setName(`${activeProvider.name} details`).setHeading();
             this.renderProviderSummary(containerEl, activeProvider);
+            this.renderProviderValidation(containerEl, activeProvider);
 
             const providerDefinition = getLLMProviderDefinition(activeProvider.name);
             const apiKeyMode = providerDefinition?.apiKeyMode ?? 'required';
@@ -394,6 +418,13 @@ export class NotemdSettingTab extends PluginSettingTab {
                 .addButton(button => button
                     .setButtonText('Test connection').setCta()
                     .onClick(async () => {
+                        const blockingIssues = getProviderValidationIssues(activeProvider)
+                            .filter(issue => issue.level === 'error')
+                            .map(issue => issue.message);
+                        if (hasBlockingProviderValidationIssues(activeProvider)) {
+                            new Notice(`Cannot test ${activeProvider.name}: ${blockingIssues.join(' ')}`, 8000);
+                            return;
+                        }
                         button.setDisabled(true).setButtonText('Testing...');
                         const testingNotice = new Notice(`Testing connection to ${activeProvider.name}...`, 0);
                         try {
