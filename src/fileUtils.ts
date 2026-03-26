@@ -4,7 +4,7 @@ import NotemdPlugin from './main';
 import { NotemdSettings, ProgressReporter } from './types';
 import { DEFAULT_SETTINGS } from './constants';
 import { normalizeNameForFilePath, splitContent, getProviderForTask, getModelForTask, delay, createConcurrentProcessor, chunkArray, retry } from './utils'; // Added delay import
-import { callDeepSeekAPI, callOpenAIApi, callAnthropicApi, callGoogleApi, callMistralApi, callAzureOpenAIApi, callLMStudioApi, callOllamaApi, callOpenRouterAPI } from './llmUtils';
+import { callLLM } from './llmUtils';
 import { refineMermaidBlocks, cleanupLatexDelimiters, deepDebugMermaid, applyDeepDebugToMermaidBlocks, checkMermaidErrors } from './mermaidProcessor'; // Assuming this will be moved or imported correctly later
 import { _performResearch } from './searchUtils'; // Assuming this will be moved or imported correctly later
 import { showDeletionConfirmationModal } from './ui/modals'; // Assuming this will be moved or imported correctly later
@@ -324,20 +324,7 @@ export async function extractConceptsFromFile(
         const prompt = getSystemPrompt(settings, 'extractConcepts');
 
         try {
-            let responseText;
-            // Using the same provider logic as processFile
-            switch (provider.name) {
-                case 'DeepSeek': responseText = await callDeepSeekAPI(provider, modelName, prompt, chunk, progressReporter, settings, progressReporter.abortController?.signal); break;
-                case 'OpenAI': responseText = await callOpenAIApi(provider, modelName, prompt, chunk, progressReporter, settings, progressReporter.abortController?.signal); break;
-                case 'Anthropic': responseText = await callAnthropicApi(provider, modelName, prompt, chunk, progressReporter, settings, progressReporter.abortController?.signal); break;
-                case 'Google': responseText = await callGoogleApi(provider, modelName, prompt, chunk, progressReporter, settings, progressReporter.abortController?.signal); break;
-                case 'Mistral': responseText = await callMistralApi(provider, modelName, prompt, chunk, progressReporter, settings, progressReporter.abortController?.signal); break;
-                case 'Azure OpenAI': responseText = await callAzureOpenAIApi(provider, modelName, prompt, chunk, progressReporter, settings, progressReporter.abortController?.signal); break;
-                case 'LMStudio': responseText = await callLMStudioApi(provider, modelName, prompt, chunk, progressReporter, settings, progressReporter.abortController?.signal); break;
-                case 'Ollama': responseText = await callOllamaApi(provider, modelName, prompt, chunk, progressReporter, settings, progressReporter.abortController?.signal); break;
-                case 'OpenRouter': responseText = await callOpenRouterAPI(provider, modelName, prompt, chunk, progressReporter, settings, progressReporter.abortController?.signal); break;
-                default: throw new Error(`Unsupported provider: ${provider.name}`);
-            }
+            const responseText = await callLLM(provider, prompt, chunk, settings, progressReporter, modelName, progressReporter.abortController?.signal);
 
             // Parse the response to extract concepts
             const lines = responseText.split('\n');
@@ -401,19 +388,7 @@ export async function processFile(app: App, settings: NotemdSettings, file: TFil
         const prompt = getSystemPrompt(settings, 'addLinks');
 
         try {
-            let responseText;
-            switch (provider.name) {
-                case 'DeepSeek': responseText = await callDeepSeekAPI(provider, modelName, prompt, chunk, progressReporter, settings); break;
-                case 'OpenAI': responseText = await callOpenAIApi(provider, modelName, prompt, chunk, progressReporter, settings); break;
-                case 'Anthropic': responseText = await callAnthropicApi(provider, modelName, prompt, chunk, progressReporter, settings); break; // Note: Anthropic might prefer prompt in user message, adjust call if needed
-                case 'Google': responseText = await callGoogleApi(provider, modelName, prompt, chunk, progressReporter, settings); break;
-                case 'Mistral': responseText = await callMistralApi(provider, modelName, prompt, chunk, progressReporter, settings); break;
-                case 'Azure OpenAI': responseText = await callAzureOpenAIApi(provider, modelName, prompt, chunk, progressReporter, settings); break;
-                case 'LMStudio': responseText = await callLMStudioApi(provider, modelName, prompt, chunk, progressReporter, settings); break;
-                case 'Ollama': responseText = await callOllamaApi(provider, modelName, prompt, chunk, progressReporter, settings); break;
-                case 'OpenRouter': responseText = await callOpenRouterAPI(provider, modelName, prompt, chunk, progressReporter, settings); break;
-                default: throw new Error(`Unsupported provider: ${provider.name}`);
-            }
+            const responseText = await callLLM(provider, prompt, chunk, settings, progressReporter, modelName);
             processedChunks.push(responseText);
             progressReporter.log(`Chunk ${i + 1} processed successfully.`);
         } catch (error: unknown) {
@@ -676,18 +651,7 @@ export async function generateContentForTitle(app: App, settings: NotemdSettings
 
     let generatedContent;
     try {
-        switch (provider.name) {
-            case 'DeepSeek': generatedContent = await callDeepSeekAPI(provider, modelName, '', generationPrompt, progressReporter, settings); break;
-            case 'OpenAI': generatedContent = await callOpenAIApi(provider, modelName, '', generationPrompt, progressReporter, settings); break;
-            case 'Anthropic': generatedContent = await callAnthropicApi(provider, modelName, '', generationPrompt, progressReporter, settings); break; // Prompt in content for Anthropic
-            case 'Google': generatedContent = await callGoogleApi(provider, modelName, generationPrompt, '', progressReporter, settings); break;
-            case 'Mistral': generatedContent = await callMistralApi(provider, modelName, '', generationPrompt, progressReporter, settings); break;
-            case 'Azure OpenAI': generatedContent = await callAzureOpenAIApi(provider, modelName, '', generationPrompt, progressReporter, settings); break;
-            case 'LMStudio': generatedContent = await callLMStudioApi(provider, modelName, '', generationPrompt, progressReporter, settings); break;
-            case 'Ollama': generatedContent = await callOllamaApi(provider, modelName, '', generationPrompt, progressReporter, settings); break;
-            case 'OpenRouter': generatedContent = await callOpenRouterAPI(provider, modelName, '', generationPrompt, progressReporter, settings); break;
-            default: throw new Error(`Unsupported provider for content generation: ${provider.name}`);
-        }
+        generatedContent = await callLLM(provider, '', generationPrompt, settings, progressReporter, modelName);
     } catch (error: unknown) { // Changed to unknown
         const errorMessage = error instanceof Error ? error.message : String(error);
         console.error(`LLM generation error for ${file.name}:`, error);

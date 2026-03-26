@@ -5,7 +5,7 @@ import { DEFAULT_SETTINGS } from '../constants';
 
 // Mock dependencies
 jest.mock('../llmUtils', () => ({
-    callDeepSeekAPI: jest.fn().mockResolvedValue('processed content'),
+    callLLM: jest.fn().mockResolvedValue('processed content'),
 }));
 
 jest.mock('../utils', () => ({

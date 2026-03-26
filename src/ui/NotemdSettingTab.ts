@@ -2,6 +2,7 @@ import { App, PluginSettingTab, Setting, Notice, TextAreaComponent } from 'obsid
 import NotemdPlugin from '../main'; // Import the plugin class itself
 import { LLMProviderConfig, NotemdSettings, TaskKey } from '../types';
 import { DEFAULT_SETTINGS } from '../constants';
+import { getLLMProviderDefinition, getOrderedProviderNames, getProviderCategoryLabel } from '../llmProviders';
 import { testAPI } from '../llmUtils'; // Import testAPI
 import { getDefaultPrompt } from '../promptUtils'; // Import for default prompts
 import {
@@ -31,6 +32,27 @@ export class NotemdSettingTab extends PluginSettingTab {
     private get providersFilePath(): string {
         const pluginConfigDir = this.app.vault.configDir + '/plugins/' + this.plugin.manifest.id;
         return `${pluginConfigDir}/notemd-providers.json`;
+    }
+
+    private renderProviderSummary(containerEl: HTMLElement, provider: LLMProviderConfig): void {
+        const definition = getLLMProviderDefinition(provider.name);
+        if (!definition) {
+            return;
+        }
+
+        const callout = containerEl.createDiv({ cls: 'notemd-provider-callout' });
+        const badgeRow = callout.createDiv({ cls: 'notemd-provider-badge-row' });
+        badgeRow.createEl('span', {
+            text: getProviderCategoryLabel(definition.category),
+            cls: 'notemd-provider-badge'
+        });
+        badgeRow.createEl('span', {
+            text: definition.transport === 'openai-compatible' ? 'OpenAI-compatible' : definition.transport,
+            cls: 'notemd-provider-badge is-secondary'
+        });
+
+        callout.createEl('strong', { text: definition.description });
+        callout.createEl('p', { text: definition.setupHint });
     }
 
     private getWorkflowBuilderStateFromSettings(): CustomWorkflowButton[] {
@@ -278,6 +300,13 @@ export class NotemdSettingTab extends PluginSettingTab {
 
         // --- Provider Configuration ---
         new Setting(containerEl).setName('LLM providers').setHeading();
+        const providerSupportCallout = containerEl.createDiv({ cls: 'notemd-provider-callout' });
+        providerSupportCallout.createEl('strong', {
+            text: `Provider presets expanded to ${this.plugin.settings.providers.length} entries.`
+        });
+        providerSupportCallout.createEl('p', {
+            text: 'OpenAI-compatible providers now share one runtime path. Built-in presets cover China-focused services such as Qwen, Doubao, Moonshot, GLM, and MiniMax, and the generic "OpenAI Compatible" preset can target LiteLLM, vLLM, Perplexity, Vercel AI Gateway, or your own proxy.'
+        });
 
         const providerMgmtSetting = new Setting(containerEl)
             .setName('Manage provider configurations')
@@ -291,7 +320,7 @@ export class NotemdSettingTab extends PluginSettingTab {
             .setName('Active provider')
             .setDesc('Select the LLM provider to use for processing.')
             .addDropdown(dropdown => {
-                const providerNames = this.plugin.settings.providers.map(p => p.name).sort();
+                const providerNames = getOrderedProviderNames(this.plugin.settings.providers);
                 providerNames.forEach(name => dropdown.addOption(name, name));
                 dropdown
                     .setValue(this.plugin.settings.activeProvider)
@@ -306,11 +335,18 @@ export class NotemdSettingTab extends PluginSettingTab {
 
         if (activeProvider) {
             new Setting(containerEl).setName(`${activeProvider.name} details`).setHeading();
+            this.renderProviderSummary(containerEl, activeProvider);
 
-            if (activeProvider.name !== 'Ollama') {
+            const providerDefinition = getLLMProviderDefinition(activeProvider.name);
+            const apiKeyMode = providerDefinition?.apiKeyMode ?? 'required';
+
+            if (apiKeyMode !== 'none') {
+                const apiKeyDescription = apiKeyMode === 'optional'
+                    ? `API key for ${activeProvider.name}. Optional for endpoints that allow placeholder or anonymous access.`
+                    : `API key for ${activeProvider.name}. ${activeProvider.name === 'LMStudio' ? "(Optional, often 'EMPTY')" : ""}`;
                 new Setting(containerEl)
                     .setName('API key')
-                    .setDesc(`API key for ${activeProvider.name}. ${activeProvider.name === 'LMStudio' ? "(Optional, often 'EMPTY')" : ""}`)
+                    .setDesc(apiKeyDescription)
                     .addText(text => text
                         .setPlaceholder(activeProvider.name === 'LMStudio' ? 'Usually EMPTY or leave blank' : 'Enter your API key')
                         .setValue(activeProvider.apiKey)
@@ -382,7 +418,7 @@ export class NotemdSettingTab extends PluginSettingTab {
         new Setting(containerEl).setName('Multi-model usage').setHeading();
         new Setting(containerEl)
             .setName('Use different providers for tasks')
-            .setDesc('On: Select a specific LLM provider for each task below. Off: Use the single "Active Provider".')
+                .setDesc('On: Select a specific LLM provider for each task below. Off: Use the single "Active Provider".')
             .addToggle(toggle => toggle
                 .setValue(this.plugin.settings.useMultiModelSettings)
                 .onChange(async (value) => {
@@ -391,13 +427,17 @@ export class NotemdSettingTab extends PluginSettingTab {
                         this.plugin.settings.addLinksProvider = this.plugin.settings.addLinksProvider || this.plugin.settings.activeProvider;
                         this.plugin.settings.researchProvider = this.plugin.settings.researchProvider || this.plugin.settings.activeProvider;
                         this.plugin.settings.generateTitleProvider = this.plugin.settings.generateTitleProvider || this.plugin.settings.activeProvider;
+                        this.plugin.settings.translateProvider = this.plugin.settings.translateProvider || this.plugin.settings.activeProvider;
+                        this.plugin.settings.summarizeToMermaidProvider = this.plugin.settings.summarizeToMermaidProvider || this.plugin.settings.activeProvider;
+                        this.plugin.settings.extractConceptsProvider = this.plugin.settings.extractConceptsProvider || this.plugin.settings.activeProvider;
+                        this.plugin.settings.extractOriginalTextProvider = this.plugin.settings.extractOriginalTextProvider || this.plugin.settings.activeProvider;
                     }
                     await this.plugin.saveSettings();
                     this.display();
                 }));
 
         if (this.plugin.settings.useMultiModelSettings) {
-            const providerNames = this.plugin.settings.providers.map(p => p.name).sort();
+            const providerNames = getOrderedProviderNames(this.plugin.settings.providers);
             // Use the specific key types defined above
             const createTaskModelSettings = (providerSettingName: keyof NotemdSettings, modelSettingName: keyof NotemdSettings, taskDesc: string) => {
                 const taskSetting = new Setting(containerEl).setName(`${taskDesc} provider & model`).setDesc(`Select provider and optionally override model for "${taskDesc}".`);
