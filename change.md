@@ -4,6 +4,22 @@ This document summarizes the major functional and architectural changes implemen
 
 ---
 
+## [1.7.6] - 2026-03-26
+
+### English
+*   **Runtime Transport Robustness**: Long-running LLM task calls now switch from Obsidian `requestUrl` to desktop `http/https` transport after transient disconnects such as `ERR_CONNECTION_CLOSED`, then continue into the existing stable retry sequence only if the fallback also fails. This hardens slow translation and generation jobs against proxy or gateway drops.
+*   **China Provider Expansion Round 2**: Added first-class presets for `Qwen Code`, `Z AI`, and `Huawei Cloud MaaS`, with routing coverage, connection-test coverage, and synchronized English/Chinese provider documentation.
+*   **Sidebar Footer Stability**: Refined the sidebar footer into a docked status/log area with a clearer standby progress state so the log panel remains visible and the ready-state progress area is readable even when every section is expanded.
+*   **Regression Coverage**: Added focused runtime fallback tests for every active transport path plus sidebar DOM tests for the docked footer and standby progress state.
+
+### Chinese (中文)
+*   **运行时传输鲁棒性增强**: 长耗时 LLM 任务在遇到 `ERR_CONNECTION_CLOSED` 等瞬时断连时，现在会先从 Obsidian 的 `requestUrl` 切换到桌面端 `http/https` 传输；只有该回退也失败时，才进入原有稳定重试序列。慢速翻译和生成任务对代理/网关断连的容忍度明显提升。
+*   **中国区 Provider 第二轮扩展**: 新增 `Qwen Code`、`Z AI`、`Huawei Cloud MaaS` 三个一等预设，并补齐运行时路由测试、连接测试覆盖以及中英文 Provider 文档说明。
+*   **侧边栏底部区域稳定性提升**: 将侧边栏底部进一步整理为停靠式状态/日志区域，并增强 Ready 状态下的待机进度显示；即使所有分组全部展开，日志面板也不会继续被挤压到不可见。
+*   **回归测试覆盖**: 新增覆盖全部活跃 transport 路径的运行时回退测试，以及锁定 docked footer 与 standby 进度态的 sidebar DOM 测试。
+
+---
+
 ## [1.7.5] - 2026-03-26
 
 ### English
