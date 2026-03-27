@@ -479,6 +479,90 @@ describe('llmUtils expanded provider support', () => {
         expect(requestBody.model).toBe('qwen-plus');
     });
 
+    test('testAPI uses direct chat probing for Qwen Code', async () => {
+        const provider: LLMProviderConfig = {
+            name: 'Qwen Code',
+            apiKey: 'dashscope-code-key',
+            baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
+            model: 'qwen3-coder-plus',
+            temperature: 0.2
+        };
+
+        (requestUrl as jest.Mock).mockResolvedValue({
+            status: 200,
+            json: { choices: [{ message: { content: 'ok' } }] },
+            text: '{"choices":[{"message":{"content":"ok"}}]}'
+        });
+
+        const result = await testAPI(provider);
+
+        expect(result.success).toBe(true);
+        expect(requestUrl).toHaveBeenCalledTimes(1);
+        expect(requestUrl).toHaveBeenCalledWith(expect.objectContaining({
+            url: 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions',
+            method: 'POST'
+        }));
+
+        const requestBody = JSON.parse((requestUrl as jest.Mock).mock.calls[0][0].body);
+        expect(requestBody.model).toBe('qwen3-coder-plus');
+    });
+
+    test('testAPI uses direct chat probing for Z AI', async () => {
+        const provider: LLMProviderConfig = {
+            name: 'Z AI',
+            apiKey: 'zai-key',
+            baseUrl: 'https://api.z.ai/api/paas/v4',
+            model: 'glm-5',
+            temperature: 0.3
+        };
+
+        (requestUrl as jest.Mock).mockResolvedValue({
+            status: 200,
+            json: { choices: [{ message: { content: 'ok' } }] },
+            text: '{"choices":[{"message":{"content":"ok"}}]}'
+        });
+
+        const result = await testAPI(provider);
+
+        expect(result.success).toBe(true);
+        expect(requestUrl).toHaveBeenCalledTimes(1);
+        expect(requestUrl).toHaveBeenCalledWith(expect.objectContaining({
+            url: 'https://api.z.ai/api/paas/v4/chat/completions',
+            method: 'POST'
+        }));
+
+        const requestBody = JSON.parse((requestUrl as jest.Mock).mock.calls[0][0].body);
+        expect(requestBody.model).toBe('glm-5');
+    });
+
+    test('testAPI uses direct chat probing for Huawei Cloud MaaS', async () => {
+        const provider: LLMProviderConfig = {
+            name: 'Huawei Cloud MaaS',
+            apiKey: 'huawei-key',
+            baseUrl: 'https://api.modelarts-maas.com/v1',
+            model: 'DeepSeek-V3',
+            temperature: 0.3
+        };
+
+        (requestUrl as jest.Mock).mockResolvedValue({
+            status: 200,
+            json: { choices: [{ message: { content: 'ok' } }] },
+            text: '{"choices":[{"message":{"content":"ok"}}]}'
+        });
+
+        const result = await testAPI(provider);
+
+        expect(result.success).toBe(true);
+        expect(requestUrl).toHaveBeenCalledTimes(1);
+        expect(requestUrl).toHaveBeenCalledWith(expect.objectContaining({
+            url: 'https://api.modelarts-maas.com/v1/chat/completions',
+            method: 'POST'
+        }));
+
+        const requestBody = JSON.parse((requestUrl as jest.Mock).mock.calls[0][0].body);
+        expect(requestBody.model).toBe('DeepSeek-V3');
+    });
+
     test('testAPI uses direct chat probing for Baidu Qianfan', async () => {
         const provider: LLMProviderConfig = {
             name: 'Baidu Qianfan',
@@ -574,6 +658,64 @@ describe('llmUtils expanded provider support', () => {
             await expect(pendingResult).resolves.toEqual(expect.objectContaining({
                 success: true,
                 message: expect.stringContaining('Successfully connected to Qwen')
+            }));
+            expect(requestUrl).toHaveBeenCalledTimes(2);
+        } finally {
+            jest.clearAllTimers();
+            jest.useRealTimers();
+        }
+    });
+
+    test.each([
+        {
+            name: 'Qwen Code',
+            provider: {
+                name: 'Qwen Code',
+                apiKey: 'dashscope-code-key',
+                baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
+                model: 'qwen3-coder-plus',
+                temperature: 0.2
+            } as LLMProviderConfig
+        },
+        {
+            name: 'Z AI',
+            provider: {
+                name: 'Z AI',
+                apiKey: 'zai-key',
+                baseUrl: 'https://api.z.ai/api/paas/v4',
+                model: 'glm-5',
+                temperature: 0.3
+            } as LLMProviderConfig
+        },
+        {
+            name: 'Huawei Cloud MaaS',
+            provider: {
+                name: 'Huawei Cloud MaaS',
+                apiKey: 'huawei-key',
+                baseUrl: 'https://api.modelarts-maas.com/v1',
+                model: 'DeepSeek-V3',
+                temperature: 0.3
+            } as LLMProviderConfig
+        }
+    ])('testAPI retries transient network disconnects for $name chat-only probes', async ({ provider }) => {
+        jest.useFakeTimers();
+
+        try {
+            (requestUrl as jest.Mock)
+                .mockRejectedValueOnce(new Error('net::ERR_CONNECTION_CLOSED'))
+                .mockResolvedValueOnce({
+                    status: 200,
+                    json: { choices: [{ message: { content: 'ok' } }] },
+                    text: '{"choices":[{"message":{"content":"ok"}}]}'
+                });
+
+            const pendingResult = testAPI(provider);
+
+            await Promise.resolve();
+            await jest.advanceTimersByTimeAsync(5200);
+
+            await expect(pendingResult).resolves.toEqual(expect.objectContaining({
+                success: true
             }));
             expect(requestUrl).toHaveBeenCalledTimes(2);
         } finally {
