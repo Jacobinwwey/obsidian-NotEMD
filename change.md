@@ -4,6 +4,24 @@ This document summarizes the major functional and architectural changes implemen
 
 ---
 
+## [1.7.7] - 2026-03-26
+
+### English
+*   **Cross-Provider Deep Debugging**: The shared LLM transport/error path now records per-attempt debug metadata for every provider, including transport name, sanitized request URL and headers, elapsed duration, response headers, partial response bodies, and stack traces. This makes slow upstream gateway resets and proxy disconnects visible without relying on provider-specific logging.
+*   **Connection Test Debug Consistency**: Provider connection probes now use the same instrumented request path as runtime calls, so debug mode exposes the same transport-level evidence during "Test Connection" failures.
+*   **Non-Desktop Runtime Fallback**: When desktop Node transport is unavailable, transient `requestUrl` disconnects now retry the same attempt through browser `fetch`, extending runtime resilience and provider connection testing to mobile/non-desktop environments.
+*   **Chinese Preset Refresh**: Synced selected China-focused preset defaults with current `cline` model baselines, including `Qwen` -> `qwen3-235b-a22b`, `Moonshot` -> `kimi-k2-0905-preview`, and `MiniMax` -> `MiniMax-M2.7`.
+*   **Regression Coverage**: Added focused tests for shared debug metadata rendering and interrupted desktop fallback responses with partial-body capture.
+
+### Chinese (中文)
+*   **跨 Provider 深度调试**: 共享的 LLM 传输/错误处理链路现在会为所有 Provider 记录按尝试维度展开的调试元数据，包括 transport 名称、脱敏后的请求 URL/请求头、耗时、响应头、部分响应体与堆栈信息。这样即使没有 Provider 特定日志，也能直接看见慢速上游网关重置或代理断连发生在哪一段链路上。
+*   **连接测试调试一致性**: Provider 的连接探测现在复用与运行时调用相同的带仪表化请求路径，因此“测试连接”失败时，调试模式也会输出同等级别的 transport 证据。
+*   **非桌面运行时回退**: 当桌面 Node 传输不可用时，`requestUrl` 的瞬时断连现在会在同一次调用内切换到浏览器 `fetch` 重试，从而将运行时鲁棒性和 Provider 连接测试能力扩展到移动端/非桌面环境。
+*   **中国区预设刷新**: 已将部分中国区 Provider 预设默认模型同步到当前 `cline` 基线，包括 `Qwen` -> `qwen3-235b-a22b`、`Moonshot` -> `kimi-k2-0905-preview`、`MiniMax` -> `MiniMax-M2.7`。
+*   **回归测试覆盖**: 新增共享调试元数据渲染测试，以及桌面端 fallback 在响应中途断开时对部分响应体的捕获测试。
+
+---
+
 ## [1.7.6] - 2026-03-26
 
 ### English
