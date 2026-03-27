@@ -13,9 +13,11 @@ describe('llmProviders registry', () => {
         expect(providerNames).toEqual(expect.arrayContaining([
             'DeepSeek',
             'Qwen',
+            'Qwen Code',
             'Doubao',
             'Moonshot',
             'GLM',
+            'Z AI',
             'MiniMax',
             'Baidu Qianfan',
             'SiliconFlow',
@@ -30,6 +32,7 @@ describe('llmProviders registry', () => {
             'Together',
             'Fireworks',
             'Requesty',
+            'Huawei Cloud MaaS',
             'OpenAI Compatible',
             'LMStudio',
             'Ollama'
@@ -51,18 +54,25 @@ describe('llmProviders registry', () => {
         expect(isOpenAICompatibleProvider('Groq')).toBe(true);
         expect(isOpenAICompatibleProvider('Requesty')).toBe(true);
         expect(isOpenAICompatibleProvider('Qwen')).toBe(true);
+        expect(isOpenAICompatibleProvider('Qwen Code')).toBe(true);
         expect(isOpenAICompatibleProvider('Doubao')).toBe(true);
         expect(isOpenAICompatibleProvider('Moonshot')).toBe(true);
         expect(isOpenAICompatibleProvider('GLM')).toBe(true);
+        expect(isOpenAICompatibleProvider('Z AI')).toBe(true);
         expect(isOpenAICompatibleProvider('MiniMax')).toBe(true);
         expect(isOpenAICompatibleProvider('Baidu Qianfan')).toBe(true);
         expect(isOpenAICompatibleProvider('SiliconFlow')).toBe(true);
+        expect(isOpenAICompatibleProvider('Huawei Cloud MaaS')).toBe(true);
         expect(isOpenAICompatibleProvider('Anthropic')).toBe(false);
         expect(getLLMProviderDefinition('Ollama')?.transport).toBe('ollama');
     });
 
     test('china-focused provider presets expose chat-first API test metadata', () => {
         expect(getLLMProviderDefinition('Qwen')).toEqual(expect.objectContaining({
+            transport: 'openai-compatible',
+            apiTestMode: 'chat-only'
+        }));
+        expect(getLLMProviderDefinition('Qwen Code')).toEqual(expect.objectContaining({
             transport: 'openai-compatible',
             apiTestMode: 'chat-only'
         }));
@@ -78,6 +88,10 @@ describe('llmProviders registry', () => {
             transport: 'openai-compatible',
             apiTestMode: 'chat-only'
         }));
+        expect(getLLMProviderDefinition('Z AI')).toEqual(expect.objectContaining({
+            transport: 'openai-compatible',
+            apiTestMode: 'chat-only'
+        }));
         expect(getLLMProviderDefinition('MiniMax')).toEqual(expect.objectContaining({
             transport: 'openai-compatible',
             apiTestMode: 'chat-only'
@@ -87,6 +101,10 @@ describe('llmProviders registry', () => {
             apiTestMode: 'chat-only'
         }));
         expect(getLLMProviderDefinition('SiliconFlow')).toEqual(expect.objectContaining({
+            transport: 'openai-compatible',
+            apiTestMode: 'chat-only'
+        }));
+        expect(getLLMProviderDefinition('Huawei Cloud MaaS')).toEqual(expect.objectContaining({
             transport: 'openai-compatible',
             apiTestMode: 'chat-only'
         }));

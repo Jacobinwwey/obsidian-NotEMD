@@ -56,6 +56,22 @@ export const LLM_PROVIDER_DEFINITIONS: LLMProviderDefinition[] = [
         }
     },
     {
+        name: 'Qwen Code',
+        category: 'cloud',
+        transport: 'openai-compatible',
+        apiKeyMode: 'required',
+        apiTestMode: 'chat-only',
+        description: 'Alibaba Cloud DashScope coding-focused compatible endpoint for Qwen coder models.',
+        setupHint: 'Use DashScope coding model IDs such as qwen3-coder-plus or other Qwen Code models available in your account.',
+        defaultConfig: {
+            name: 'Qwen Code',
+            apiKey: '',
+            baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
+            model: 'qwen3-coder-plus',
+            temperature: 0.2
+        }
+    },
+    {
         name: 'Doubao',
         category: 'cloud',
         transport: 'openai-compatible',
@@ -99,6 +115,22 @@ export const LLM_PROVIDER_DEFINITIONS: LLMProviderDefinition[] = [
             name: 'GLM',
             apiKey: '',
             baseUrl: 'https://open.bigmodel.cn/api/paas/v4',
+            model: 'glm-5',
+            temperature: 0.3
+        }
+    },
+    {
+        name: 'Z AI',
+        category: 'cloud',
+        transport: 'openai-compatible',
+        apiKeyMode: 'required',
+        apiTestMode: 'chat-only',
+        description: 'International Z AI endpoint for GLM/Zhipu models through the OpenAI-compatible API.',
+        setupHint: 'Use Z AI model IDs such as glm-5 on the international endpoint. Keep using the GLM preset for the mainland China BigModel endpoint.',
+        defaultConfig: {
+            name: 'Z AI',
+            apiKey: '',
+            baseUrl: 'https://api.z.ai/api/paas/v4',
             model: 'glm-5',
             temperature: 0.3
         }
@@ -148,6 +180,22 @@ export const LLM_PROVIDER_DEFINITIONS: LLMProviderDefinition[] = [
             apiKey: '',
             baseUrl: 'https://api.siliconflow.cn/v1',
             model: 'Qwen/QwQ-32B',
+            temperature: 0.3
+        }
+    },
+    {
+        name: 'Huawei Cloud MaaS',
+        category: 'cloud',
+        transport: 'openai-compatible',
+        apiKeyMode: 'required',
+        apiTestMode: 'chat-only',
+        description: 'Huawei Cloud ModelArts MaaS endpoint for hosted DeepSeek, Qwen, and other models.',
+        setupHint: 'Use a Huawei Cloud MaaS model ID such as DeepSeek-V3 or another model exposed by your ModelArts MaaS deployment.',
+        defaultConfig: {
+            name: 'Huawei Cloud MaaS',
+            apiKey: '',
+            baseUrl: 'https://api.modelarts-maas.com/v1',
+            model: 'DeepSeek-V3',
             temperature: 0.3
         }
     },
