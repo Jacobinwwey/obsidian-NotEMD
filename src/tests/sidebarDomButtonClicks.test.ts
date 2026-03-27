@@ -263,7 +263,7 @@ describe('NotemdSidebarView DOM button wiring', () => {
         expect(plugin.batchMermaidFixCommand).toHaveBeenCalledTimes(1);
     });
 
-    test('builds a scrollable work area with a persistent progress and log footer', async () => {
+    test('builds a docked footer that keeps ready progress and logs visible', async () => {
         await sidebar.onOpen();
 
         const shell = contentContainer.findByClass('notemd-sidebar-shell');
@@ -276,25 +276,30 @@ describe('NotemdSidebarView DOM button wiring', () => {
         expect(shell).not.toBeNull();
         expect(scrollArea).not.toBeNull();
         expect(footer).not.toBeNull();
-        expect(progressValue?.text).toBe('0%');
-        expect(progressBar?.cls).not.toContain('is-hidden');
+        expect(footer?.cls).toContain('mod-docked');
+        expect(progressValue?.text).toBe('Ready');
+        expect(progressBar?.cls).toContain('is-idle');
         expect(logCard).not.toBeNull();
+        expect(logCard?.cls).toContain('mod-persistent');
     });
 
-    test('updateStatus keeps percent text in the dedicated progress summary pill', async () => {
+    test('updateStatus swaps between active progress and idle standby states', async () => {
         await sidebar.onOpen();
 
         sidebar.updateStatus('Working...', 25);
         const progressValue = contentContainer.findByClass('notemd-progress-value');
+        const progressBar = contentContainer.findByClass('notemd-progress-bar-container');
         const progressFill = contentContainer.findByClass('notemd-progress-bar-fill');
 
         expect(progressValue?.text).toBe('25%');
+        expect(progressBar?.cls).not.toContain('is-idle');
         expect(progressFill?.text).toBe('');
         expect(progressFill?.style.width).toBe('25%');
 
         sidebar.clearDisplay();
 
-        expect(progressValue?.text).toBe('0%');
+        expect(progressValue?.text).toBe('Ready');
+        expect(progressBar?.cls).toContain('is-idle');
         expect(progressFill?.style.width).toBe('0%');
     });
 });

@@ -55,6 +55,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
     plugin: NotemdPlugin;
 
     private statusEl: HTMLElement | null = null;
+    private progressAreaEl: HTMLElement | null = null;
     private progressEl: HTMLElement | null = null;
     private progressBarContainerEl: HTMLElement | null = null;
     private progressValueEl: HTMLElement | null = null;
@@ -109,18 +110,23 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         this.logContent = [];
         if (this.logEl) this.logEl.empty();
         if (this.statusEl) this.statusEl.setText('Ready');
+        if (this.progressAreaEl) this.progressAreaEl.addClass('is-idle');
         if (this.progressEl) {
             this.progressEl.dataset.progress = '0';
             this.progressEl.setText('');
             this.progressEl.removeClass('is-error');
             this.progressEl.style.width = '0%';
         }
+        if (this.progressBarContainerEl) {
+            this.progressBarContainerEl.removeClass('is-hidden');
+            this.progressBarContainerEl.addClass('is-idle');
+        }
         if (this.progressValueEl) {
-            this.progressValueEl.setText('0%');
+            this.progressValueEl.setText('Ready');
+            this.progressValueEl.addClass('is-idle');
             this.progressValueEl.removeClass('is-error');
         }
-        if (this.timeRemainingEl) this.timeRemainingEl.setText('Idle');
-        if (this.progressBarContainerEl) this.progressBarContainerEl.removeClass('is-hidden');
+        if (this.timeRemainingEl) this.timeRemainingEl.setText('Standby');
         if (this.cancelButton) {
             this.cancelButton.disabled = true;
             this.cancelButton.removeClass('is-active');
@@ -143,6 +149,8 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
 
         if (percent !== undefined && this.progressEl && this.progressBarContainerEl) {
             this.progressBarContainerEl.removeClass('is-hidden');
+            this.progressBarContainerEl.removeClass('is-idle');
+            if (this.progressAreaEl) this.progressAreaEl.removeClass('is-idle');
             if (percent >= 0) {
                 const clampedPercent = Math.min(100, Math.max(0, percent));
                 this.progressEl.dataset.progress = String(clampedPercent);
@@ -151,6 +159,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
                 this.progressEl.style.width = `${clampedPercent}%`;
                 if (this.progressValueEl) {
                     this.progressValueEl.setText(`${Math.round(clampedPercent)}%`);
+                    this.progressValueEl.removeClass('is-idle');
                     this.progressValueEl.removeClass('is-error');
                 }
 
@@ -171,6 +180,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
                 this.progressEl.style.width = '100%';
                 if (this.progressValueEl) {
                     this.progressValueEl.setText('Stopped');
+                    this.progressValueEl.removeClass('is-idle');
                     this.progressValueEl.addClass('is-error');
                 }
                 if (this.timeRemainingEl) this.timeRemainingEl.setText('Processing stopped.');
@@ -576,7 +586,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         container.addClass('notemd-sidebar-container');
         const shell = container.createDiv({ cls: 'notemd-sidebar-shell' });
         const scrollArea = shell.createDiv({ cls: 'notemd-sidebar-scroll' });
-        const footer = shell.createDiv({ cls: 'notemd-sidebar-footer' });
+        const footer = shell.createDiv({ cls: 'notemd-sidebar-footer mod-docked' });
 
         const hero = scrollArea.createDiv({ cls: 'notemd-hero-card' });
         hero.createEl('h3', { text: 'Notemd Workbench' });
@@ -636,18 +646,19 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             }
         });
 
-        const progressArea = footer.createDiv({ cls: 'notemd-progress-area' });
+        const progressArea = footer.createDiv({ cls: 'notemd-progress-area is-idle' });
+        this.progressAreaEl = progressArea;
         const progressMeta = progressArea.createDiv({ cls: 'notemd-progress-meta' });
         this.statusEl = progressMeta.createEl('p', { text: 'Ready', cls: 'notemd-status-text' });
-        this.progressValueEl = progressMeta.createEl('span', { text: '0%', cls: 'notemd-progress-value' });
-        this.progressBarContainerEl = progressArea.createEl('div', { cls: 'notemd-progress-bar-container mod-sidebar' });
+        this.progressValueEl = progressMeta.createEl('span', { text: 'Ready', cls: 'notemd-progress-value is-idle' });
+        this.progressBarContainerEl = progressArea.createEl('div', { cls: 'notemd-progress-bar-container mod-sidebar is-idle' });
         this.progressEl = this.progressBarContainerEl.createEl('div', { cls: 'notemd-progress-bar-fill' });
-        this.timeRemainingEl = progressArea.createEl('p', { text: 'Idle', cls: 'notemd-time-remaining' });
+        this.timeRemainingEl = progressArea.createEl('p', { text: 'Standby', cls: 'notemd-time-remaining' });
 
         this.cancelButton = progressArea.createEl('button', { text: 'Cancel processing', cls: 'notemd-cancel-button' });
         this.cancelButton.onclick = () => this.requestCancel();
 
-        const logCard = footer.createDiv({ cls: 'notemd-log-card' });
+        const logCard = footer.createDiv({ cls: 'notemd-log-card mod-persistent' });
         const logHeader = logCard.createDiv({ cls: 'notemd-log-header' });
         logHeader.createEl('h5', { text: 'Log output' });
         const copyLogButton = logHeader.createEl('button', { text: 'Copy log', cls: 'notemd-copy-log-button' });
@@ -661,11 +672,12 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             }
         };
         this.logEl = logCard.createEl('div', { cls: 'notemd-log-output is-selectable mod-sidebar' });
-        this.updateButtonStates();
+        this.clearDisplay();
     }
 
     async onClose() {
         this.statusEl = null;
+        this.progressAreaEl = null;
         this.progressEl = null;
         this.progressBarContainerEl = null;
         this.progressValueEl = null;
