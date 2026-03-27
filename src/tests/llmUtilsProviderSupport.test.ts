@@ -198,6 +198,96 @@ describe('llmUtils expanded provider support', () => {
         }
     });
 
+    test.each([
+        {
+            name: 'Anthropic',
+            provider: {
+                name: 'Anthropic',
+                apiKey: 'anthropic-key',
+                baseUrl: 'https://api.anthropic.com',
+                model: 'claude-3-5-sonnet-20240620',
+                temperature: 0.5
+            } as LLMProviderConfig,
+            response: {
+                status: 200,
+                json: { content: [{ text: 'anthropic-ok' }] },
+                text: '{"content":[{"text":"anthropic-ok"}]}'
+            },
+            expected: 'anthropic-ok'
+        },
+        {
+            name: 'Google',
+            provider: {
+                name: 'Google',
+                apiKey: 'google-key',
+                baseUrl: 'https://generativelanguage.googleapis.com/v1',
+                model: 'gemini-2.0-flash-exp',
+                temperature: 0.5
+            } as LLMProviderConfig,
+            response: {
+                status: 200,
+                json: { candidates: [{ content: { parts: [{ text: 'google-ok' }] } }] },
+                text: '{"candidates":[{"content":{"parts":[{"text":"google-ok"}]}}]}'
+            },
+            expected: 'google-ok'
+        },
+        {
+            name: 'Azure OpenAI',
+            provider: {
+                name: 'Azure OpenAI',
+                apiKey: 'azure-key',
+                baseUrl: 'https://azure.example.com',
+                model: 'gpt-4o',
+                temperature: 0.5,
+                apiVersion: '2025-01-01-preview'
+            } as LLMProviderConfig,
+            response: {
+                status: 200,
+                json: { choices: [{ message: { content: 'azure-ok' } }] },
+                text: '{"choices":[{"message":{"content":"azure-ok"}}]}'
+            },
+            expected: 'azure-ok'
+        },
+        {
+            name: 'Ollama',
+            provider: {
+                name: 'Ollama',
+                apiKey: '',
+                baseUrl: 'http://localhost:11434/api',
+                model: 'llama3',
+                temperature: 0.7
+            } as LLMProviderConfig,
+            response: {
+                status: 200,
+                json: { message: { content: 'ollama-ok' } },
+                text: '{"message":{"content":"ollama-ok"}}'
+            },
+            expected: 'ollama-ok'
+        }
+    ])('callLLM retries transient network disconnects for $name transport', async ({ provider, response, expected }) => {
+        jest.useFakeTimers();
+
+        try {
+            settings = { ...settings, enableStableApiCall: false };
+
+            (requestUrl as jest.Mock)
+                .mockRejectedValueOnce(new Error('net::ERR_CONNECTION_CLOSED'))
+                .mockResolvedValueOnce(response);
+
+            const pendingResult = callLLM(provider, 'System prompt', 'Transport content', settings, reporter);
+
+            await Promise.resolve();
+            await jest.advanceTimersByTimeAsync(5200);
+
+            await expect(pendingResult).resolves.toBe(expected);
+            expect(requestUrl).toHaveBeenCalledTimes(2);
+            expect(reporter.log).toHaveBeenCalledWith(expect.stringContaining('Switching to stable API retry logic'));
+        } finally {
+            jest.clearAllTimers();
+            jest.useRealTimers();
+        }
+    });
+
     test('callLLM does not retry fatal OpenAI client errors when stable API calls are disabled', async () => {
         const provider: LLMProviderConfig = {
             name: 'OpenAI',
@@ -327,5 +417,147 @@ describe('llmUtils expanded provider support', () => {
         }));
         const requestBody = JSON.parse((requestUrl as jest.Mock).mock.calls[0][0].body);
         expect(requestBody.model).toBe('ernie-4.5-turbo-32k');
+    });
+
+    test('testAPI retries transient network disconnects for models-then-chat OpenAI providers', async () => {
+        jest.useFakeTimers();
+
+        try {
+            const provider: LLMProviderConfig = {
+                name: 'OpenAI',
+                apiKey: 'openai-key',
+                baseUrl: 'https://api.openai.com/v1',
+                model: 'gpt-4o',
+                temperature: 0.2
+            };
+
+            (requestUrl as jest.Mock)
+                .mockRejectedValueOnce(new Error('net::ERR_CONNECTION_CLOSED'))
+                .mockRejectedValueOnce(new Error('net::ERR_CONNECTION_CLOSED'))
+                .mockResolvedValueOnce({
+                    status: 200,
+                    json: { choices: [{ message: { content: 'ok' } }] },
+                    text: '{"choices":[{"message":{"content":"ok"}}]}'
+                });
+
+            const pendingResult = testAPI(provider);
+
+            await Promise.resolve();
+            await jest.advanceTimersByTimeAsync(10500);
+
+            await expect(pendingResult).resolves.toEqual(expect.objectContaining({
+                success: true,
+                message: expect.stringContaining('Successfully connected to OpenAI')
+            }));
+            expect(requestUrl).toHaveBeenCalledTimes(3);
+        } finally {
+            jest.clearAllTimers();
+            jest.useRealTimers();
+        }
+    });
+
+    test('testAPI retries transient network disconnects for chat-only openai-compatible providers', async () => {
+        jest.useFakeTimers();
+
+        try {
+            const provider: LLMProviderConfig = {
+                name: 'Qwen',
+                apiKey: 'dashscope-key',
+                baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
+                model: 'qwen-plus',
+                temperature: 0.2
+            };
+
+            (requestUrl as jest.Mock)
+                .mockRejectedValueOnce(new Error('net::ERR_CONNECTION_CLOSED'))
+                .mockResolvedValueOnce({
+                    status: 200,
+                    json: { choices: [{ message: { content: 'ok' } }] },
+                    text: '{"choices":[{"message":{"content":"ok"}}]}'
+                });
+
+            const pendingResult = testAPI(provider);
+
+            await Promise.resolve();
+            await jest.advanceTimersByTimeAsync(5200);
+
+            await expect(pendingResult).resolves.toEqual(expect.objectContaining({
+                success: true,
+                message: expect.stringContaining('Successfully connected to Qwen')
+            }));
+            expect(requestUrl).toHaveBeenCalledTimes(2);
+        } finally {
+            jest.clearAllTimers();
+            jest.useRealTimers();
+        }
+    });
+
+    test.each([
+        {
+            name: 'Anthropic',
+            provider: {
+                name: 'Anthropic',
+                apiKey: 'anthropic-key',
+                baseUrl: 'https://api.anthropic.com',
+                model: 'claude-3-5-sonnet-20240620',
+                temperature: 0.5
+            } as LLMProviderConfig
+        },
+        {
+            name: 'Google',
+            provider: {
+                name: 'Google',
+                apiKey: 'google-key',
+                baseUrl: 'https://generativelanguage.googleapis.com/v1',
+                model: 'gemini-2.0-flash-exp',
+                temperature: 0.5
+            } as LLMProviderConfig
+        },
+        {
+            name: 'Azure OpenAI',
+            provider: {
+                name: 'Azure OpenAI',
+                apiKey: 'azure-key',
+                baseUrl: 'https://azure.example.com',
+                model: 'gpt-4o',
+                temperature: 0.5,
+                apiVersion: '2025-01-01-preview'
+            } as LLMProviderConfig
+        },
+        {
+            name: 'Ollama',
+            provider: {
+                name: 'Ollama',
+                apiKey: '',
+                baseUrl: 'http://localhost:11434/api',
+                model: 'llama3',
+                temperature: 0.7
+            } as LLMProviderConfig
+        }
+    ])('testAPI retries transient network disconnects for $name', async ({ provider }) => {
+        jest.useFakeTimers();
+
+        try {
+            (requestUrl as jest.Mock)
+                .mockRejectedValueOnce(new Error('net::ERR_CONNECTION_CLOSED'))
+                .mockResolvedValueOnce({
+                    status: 200,
+                    json: {},
+                    text: '{}'
+                });
+
+            const pendingResult = testAPI(provider);
+
+            await Promise.resolve();
+            await jest.advanceTimersByTimeAsync(5200);
+
+            await expect(pendingResult).resolves.toEqual(expect.objectContaining({
+                success: true
+            }));
+            expect(requestUrl).toHaveBeenCalledTimes(2);
+        } finally {
+            jest.clearAllTimers();
+            jest.useRealTimers();
+        }
     });
 });
