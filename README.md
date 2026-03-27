@@ -20,7 +20,7 @@ A Easy way to create your own Knowledge-base!
 
 Notemd enhances your Obsidian workflow by integrating with various Large Language Models (LLMs) to process your multi-languages notes, automatically generate wiki-links for key concepts, create corresponding concept notes, perform web research, helping you build powerful knowledge graphs and more.
 
-**Version:** 1.7.4
+**Version:** 1.7.5
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
@@ -58,6 +58,7 @@ That's it! Explore the settings to unlock more features like web research, trans
 - **Cancellable Operations**: Cancel any processing task (single or batch) initiated from the sidebar via its dedicated cancel button. Command palette operations use a modal which can also be cancelled.
 - **Multi-Model Configuration**: Use different LLM providers *and* specific models for different tasks (Add Links, Research, Generate Title, Translate) or use a single provider for all.
 - **Stable API Calls (Retry Logic)**: Optionally enable automatic retries for failed LLM API calls with configurable interval and attempt limits.
+- **Resilient Provider Connection Tests**: If the first provider test hits a transient network disconnect, Notemd now falls back to the stable retry sequence before failing, covering OpenAI-compatible, Anthropic, Google, Azure OpenAI, and Ollama transports.
 - **China-Ready Provider Presets**: Built-in presets now cover `Qwen`, `Doubao`, `Moonshot`, `GLM`, `MiniMax`, `Baidu Qianfan`, and `SiliconFlow` in addition to the existing global and local providers.
 - **Reliable Batch Processing**: Improved concurrent processing logic with **staggered API calls** to prevent rate-limiting errors and ensure stable performance during large batch jobs. The new implementation ensures that tasks are initiated at different intervals rather than all at once.
 - **Accurate Progress Reporting**: Fixed a bug where the progress bar could get stuck, ensuring that the UI always reflects the true status of the operation.
@@ -190,7 +191,7 @@ Access plugin settings via:
     *   **Model**: The specific model name/ID to use (e.g., `gpt-4o`, `claude-3-5-sonnet-20240620`, `google/gemini-flash-1.5`, `grok-4`, `moonshotai/kimi-k2-instruct-0905`, `accounts/fireworks/models/kimi-k2p5`, `anthropic/claude-3-7-sonnet-latest`). Ensure the model is available at your endpoint/provider.
     *   **Temperature**: Controls the randomness of the LLM's output (0=deterministic, 1=max creativity). Lower values (e.g., 0.2-0.5) are generally better for structured tasks.
     *   **API Version (Azure Only)**: Required for Azure OpenAI deployments (e.g., `2024-02-15-preview`).
-3.  **Test Connection**: Use the "Test Connection" button for the active provider to verify your settings. OpenAI-compatible providers now use provider-aware checks: endpoints such as `Qwen`, `Doubao`, `Moonshot`, `GLM`, `MiniMax`, `Baidu Qianfan`, `SiliconFlow`, `Groq`, `Together`, `Fireworks`, `LMStudio`, and `OpenAI Compatible` probe `chat/completions` directly, while providers with a reliable `/models` endpoint can still use model listing first.
+3.  **Test Connection**: Use the "Test Connection" button for the active provider to verify your settings. OpenAI-compatible providers now use provider-aware checks: endpoints such as `Qwen`, `Doubao`, `Moonshot`, `GLM`, `MiniMax`, `Baidu Qianfan`, `SiliconFlow`, `Groq`, `Together`, `Fireworks`, `LMStudio`, and `OpenAI Compatible` probe `chat/completions` directly, while providers with a reliable `/models` endpoint can still use model listing first. If the first probe fails with a transient network disconnect such as `ERR_CONNECTION_CLOSED`, Notemd automatically falls back to the stable retry sequence instead of failing immediately.
 4.  **Manage Provider Configurations**: Use the "Export Providers" and "Import Providers" buttons to save/load your LLM provider settings to/from a `notemd-providers.json` file within the plugin's configuration directory. This allows for easy backup and sharing.
 5.  **Preset Coverage**: In addition to the original providers, Notemd now includes preset entries for `Qwen`, `Doubao`, `Moonshot`, `GLM`, `MiniMax`, `Baidu Qianfan`, `SiliconFlow`, `xAI`, `Groq`, `Together`, `Fireworks`, `Requesty`, and a generic `OpenAI Compatible` target for LiteLLM, vLLM, Perplexity, Vercel AI Gateway, or custom proxies.
 <img width="804" height="506" alt="LLM" src="https://github.com/user-attachments/assets/8caf42e3-43ad-456d-8b96-b63e7914e45f" />
@@ -209,6 +210,7 @@ Access plugin settings via:
 -   **Enable Stable API Calls (Retry Logic)**:
     *   **Disabled (Default)**: A single API call failure will stop the current task.
     *   **Enabled**: Automatically retries failed LLM API calls (useful for intermittent network issues or rate limits).
+    *   **Connection Test Fallback**: Even when normal calls are not already running in stable mode, provider connection tests now switch into the same retry sequence after the first transient network failure.
 -   **Retry Interval (seconds)**: (Visible only when enabled) Time to wait between retry attempts (1-300 seconds). Default: 5.
 -   **Maximum Retries**: (Visible only when enabled) Maximum number of retry attempts (0-10). Default: 3.
 -   **API Error Debugging Mode**:
