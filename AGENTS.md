@@ -125,6 +125,15 @@ Before creating a release:
 5. Create/push the Git tag.
 6. Create the GitHub Release with release notes.
 
+### GitHub Release Notes Format
+
+Every GitHub release body must be fully bilingual:
+
+- Include one complete English section and one complete Chinese section.
+- Each language section must be independently readable on its own.
+- Do not publish release notes that are only Chinese, only English, or partially mixed with missing mirrored content.
+- When using structured release notes, mirror the same core sections in both languages as applicable, such as Highlights, Breaking Changes, New Features, Bug Fixes, Refactors/Chores, and Contributors.
+
 ### Required GitHub Release Assets
 
 Every GitHub release for this plugin must upload all of the following assets:
