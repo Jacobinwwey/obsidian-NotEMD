@@ -155,6 +155,49 @@ describe('llmUtils expanded provider support', () => {
         }
     });
 
+    test('callLLM falls back to the stable retry sequence after the first transient network failure', async () => {
+        jest.useFakeTimers();
+
+        try {
+            const provider: LLMProviderConfig = {
+                name: 'OpenAI',
+                apiKey: 'openai-key',
+                baseUrl: 'https://api.openai.com/v1',
+                model: 'gpt-4o',
+                temperature: 0.2
+            };
+
+            settings = {
+                ...settings,
+                enableStableApiCall: false,
+                apiCallMaxRetries: 3,
+                apiCallInterval: 7
+            };
+
+            (requestUrl as jest.Mock)
+                .mockRejectedValueOnce(new Error('net::ERR_CONNECTION_CLOSED'))
+                .mockRejectedValueOnce(new Error('net::ERR_CONNECTION_CLOSED'))
+                .mockResolvedValueOnce({
+                    status: 200,
+                    json: { choices: [{ message: { content: 'stable-fallback-ok' } }] },
+                    text: '{"choices":[{"message":{"content":"stable-fallback-ok"}}]}'
+                });
+
+            const pendingResult = callLLM(provider, 'System prompt', 'Fallback content', settings, reporter);
+
+            await Promise.resolve();
+            await jest.advanceTimersByTimeAsync(14500);
+
+            await expect(pendingResult).resolves.toBe('stable-fallback-ok');
+            expect(requestUrl).toHaveBeenCalledTimes(3);
+            expect(reporter.log).toHaveBeenCalledWith(expect.stringContaining('Switching to stable API retry logic'));
+            expect(reporter.log).toHaveBeenCalledWith(expect.stringContaining('Waiting 7 seconds before retry 3'));
+        } finally {
+            jest.clearAllTimers();
+            jest.useRealTimers();
+        }
+    });
+
     test('callLLM does not retry fatal OpenAI client errors when stable API calls are disabled', async () => {
         const provider: LLMProviderConfig = {
             name: 'OpenAI',

@@ -74,9 +74,6 @@ const TRANSIENT_NETWORK_ERROR_PATTERNS = [
     'network request failed'
 ];
 
-const MIN_TRANSIENT_NETWORK_ATTEMPTS = 2;
-const TRANSIENT_NETWORK_RETRY_DELAY_SECONDS = 5;
-
 function buildOpenAICompatibleMessages(providerName: string, modelName: string, prompt: string, content: string) {
     if (shouldUseCombinedUserPrompt(providerName, modelName)) {
         return [
@@ -369,10 +366,13 @@ async function callApiWithRetry(
 ): Promise<string> {
     
     let lastError: Error | null = null;
-    const configuredMaxAttempts = settings.enableStableApiCall ? settings.apiCallMaxRetries + 1 : 1;
-    const intervalSeconds = settings.enableStableApiCall ? settings.apiCallInterval : 0;
+    const stableRetryMaxAttempts = settings.apiCallMaxRetries + 1;
+    const stableRetryIntervalSeconds = settings.apiCallInterval;
+    let maxAttempts = settings.enableStableApiCall ? stableRetryMaxAttempts : 1;
+    let intervalSeconds = settings.enableStableApiCall ? stableRetryIntervalSeconds : 0;
+    let usingStableRetrySequence = settings.enableStableApiCall;
 
-    for (let attempt = 1; attempt <= Math.max(configuredMaxAttempts, MIN_TRANSIENT_NETWORK_ATTEMPTS); attempt++) {
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
         if (progressReporter.cancelled) {
             // console.log(`${provider.name} API Call: Cancellation detected before attempt ${attempt}`);
             throw new Error("Processing cancelled by user before API attempt.");
@@ -394,9 +394,15 @@ async function callApiWithRetry(
             }
 
             const isTransientNetworkError = isTransientNetworkErrorMessage(errorMessage);
-            const maxAttempts = isTransientNetworkError
-                ? Math.max(configuredMaxAttempts, MIN_TRANSIENT_NETWORK_ATTEMPTS)
-                : configuredMaxAttempts;
+
+            if (!usingStableRetrySequence && attempt === 1 && isTransientNetworkError) {
+                usingStableRetrySequence = true;
+                maxAttempts = stableRetryMaxAttempts;
+                intervalSeconds = stableRetryIntervalSeconds;
+                progressReporter.log(
+                    `Transient network error detected. Switching to stable API retry logic (${Math.max(maxAttempts - attempt, 0)} retries remaining, ${intervalSeconds} seconds interval).`
+                );
+            }
 
             // Don't retry on certain fatal errors
             // Check 1: HTTP Status Code (Client Errors)
@@ -425,15 +431,8 @@ async function callApiWithRetry(
             }
 
             if (attempt < maxAttempts) {
-                const retryDelaySeconds = settings.enableStableApiCall
-                    ? intervalSeconds
-                    : (isTransientNetworkError ? TRANSIENT_NETWORK_RETRY_DELAY_SECONDS : 0);
-
-                if (isTransientNetworkError && !settings.enableStableApiCall) {
-                    progressReporter.log(`Transient network error detected. Waiting ${retryDelaySeconds} seconds before retry ${attempt + 1}...`);
-                } else {
-                    progressReporter.log(`Waiting ${retryDelaySeconds} seconds before retry ${attempt + 1}...`);
-                }
+                const retryDelaySeconds = intervalSeconds;
+                progressReporter.log(`Waiting ${retryDelaySeconds} seconds before retry ${attempt + 1}...`);
 
                 await cancellableDelay(retryDelaySeconds * 1000, progressReporter);
             }
