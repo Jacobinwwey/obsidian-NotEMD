@@ -109,4 +109,10 @@ describe('llmProviders registry', () => {
             apiTestMode: 'chat-only'
         }));
     });
+
+    test('selected china-focused preset defaults stay aligned with current cline model defaults', () => {
+        expect(getLLMProviderDefinition('Qwen')?.defaultConfig.model).toBe('qwen3-235b-a22b');
+        expect(getLLMProviderDefinition('Moonshot')?.defaultConfig.model).toBe('kimi-k2-0905-preview');
+        expect(getLLMProviderDefinition('MiniMax')?.defaultConfig.model).toBe('MiniMax-M2.7');
+    });
 });

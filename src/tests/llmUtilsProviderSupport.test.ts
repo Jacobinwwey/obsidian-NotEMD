@@ -2,7 +2,7 @@ import { EventEmitter } from 'events';
 import * as http from 'http';
 import * as https from 'https';
 import { requestUrl } from 'obsidian';
-import { callLLM, testAPI } from '../llmUtils';
+import { callLLM, getDebugInfo, handleApiError, testAPI } from '../llmUtils';
 import { ProgressReporter, LLMProviderConfig, NotemdSettings } from '../types';
 import { mockSettings } from './__mocks__/settings';
 
@@ -85,6 +85,106 @@ function mockDesktopTransportFailure(
     });
 }
 
+function mockDesktopTransportInterruptedResponse(
+    transportModule: typeof http | typeof https,
+    options: {
+        errorMessage?: string;
+        partialBody?: string;
+        statusCode?: number;
+        headers?: Record<string, string>;
+    } = {}
+): void {
+    const {
+        errorMessage = 'socket hang up',
+        partialBody = '',
+        statusCode = 200,
+        headers = { 'x-request-id': 'desktop-debug-request' }
+    } = options;
+
+    (transportModule.request as unknown as jest.Mock).mockImplementationOnce((_options, callback) => {
+        const response = new EventEmitter() as EventEmitter & {
+            statusCode?: number;
+            headers?: Record<string, string>;
+        };
+        response.statusCode = statusCode;
+        response.headers = headers;
+
+        const request = new EventEmitter() as EventEmitter & {
+            write: jest.Mock;
+            end: jest.Mock;
+            destroy: jest.Mock;
+        };
+
+        request.write = jest.fn();
+        request.destroy = jest.fn();
+        request.end = jest.fn(() => {
+            callback(response);
+            if (partialBody) {
+                response.emit('data', Buffer.from(partialBody));
+            }
+            response.emit('error', new Error(errorMessage));
+        });
+
+        return request;
+    });
+}
+
+function mockFetchSuccess(
+    responseBody: unknown,
+    options: {
+        status?: number;
+        headers?: Record<string, string>;
+    } = {}
+): jest.Mock {
+    const {
+        status = 200,
+        headers = {}
+    } = options;
+
+    const fetchMock = jest.fn().mockResolvedValue({
+        status,
+        ok: status >= 200 && status < 300,
+        headers: new Headers(headers),
+        body: undefined,
+        text: jest.fn().mockResolvedValue(JSON.stringify(responseBody))
+    });
+
+    Object.defineProperty(globalThis, 'fetch', {
+        value: fetchMock,
+        configurable: true,
+        writable: true
+    });
+
+    return fetchMock;
+}
+
+async function withDesktopNodeTransportDisabled<T>(run: () => Promise<T>): Promise<T> {
+    const originalDescriptor = Object.getOwnPropertyDescriptor(process, 'versions');
+    const originalVersions = process.versions;
+
+    Object.defineProperty(process, 'versions', {
+        value: { ...originalVersions, node: undefined },
+        configurable: true,
+        enumerable: originalDescriptor?.enumerable ?? true,
+        writable: false
+    });
+
+    try {
+        return await run();
+    } finally {
+        if (originalDescriptor) {
+            Object.defineProperty(process, 'versions', originalDescriptor);
+        } else {
+            Object.defineProperty(process, 'versions', {
+                value: originalVersions,
+                configurable: true,
+                enumerable: true,
+                writable: false
+            });
+        }
+    }
+}
+
 describe('llmUtils expanded provider support', () => {
     let reporter: ProgressReporter;
     let settings: NotemdSettings;
@@ -95,6 +195,11 @@ describe('llmUtils expanded provider support', () => {
         (requestUrl as jest.Mock).mockReset();
         (http.request as unknown as jest.Mock).mockReset();
         (https.request as unknown as jest.Mock).mockReset();
+        Object.defineProperty(globalThis, 'fetch', {
+            value: undefined,
+            configurable: true,
+            writable: true
+        });
     });
 
     test('callLLM routes Groq through the OpenAI-compatible runtime', async () => {
@@ -960,5 +1065,156 @@ describe('llmUtils expanded provider support', () => {
             jest.clearAllTimers();
             jest.useRealTimers();
         }
+    });
+
+    test('handleApiError emits shared transport debug metadata with sanitized secrets for all providers', () => {
+        const debugInfo = {
+            attempts: [
+                {
+                    transport: 'requestUrl',
+                    requestMethod: 'POST',
+                    requestUrl: 'https://api.example.com/v1/chat/completions?key=top-secret',
+                    durationMs: 68000,
+                    errorMessage: 'net::ERR_CONNECTION_CLOSED'
+                },
+                {
+                    transport: 'desktop-http',
+                    requestMethod: 'POST',
+                    requestUrl: 'https://api.example.com/v1/chat/completions?key=top-secret',
+                    durationMs: 61000,
+                    status: 502,
+                    responseHeaders: {
+                        'x-request-id': 'req-123',
+                        authorization: 'Bearer very-secret'
+                    },
+                    partialResponseText: '{"error":"upstream timeout"}',
+                    errorMessage: 'socket hang up'
+                }
+            ]
+        };
+
+        expect(() => handleApiError('Qwen', {
+            status: 502,
+            text: '{"error":{"message":"upstream timeout"}}',
+            __notemdDebug: debugInfo
+        }, reporter, true)).toThrow('Qwen API error: 502 - upstream timeout');
+
+        expect(reporter.log).toHaveBeenCalledWith(expect.stringContaining('[Qwen] Debug details:'));
+        expect(reporter.log).toHaveBeenCalledWith(expect.stringContaining('Attempt 1 [requestUrl]'));
+        expect(reporter.log).toHaveBeenCalledWith(expect.stringContaining('Attempt 2 [desktop-http]'));
+        expect(reporter.log).toHaveBeenCalledWith(expect.stringContaining('Request: POST https://api.example.com/v1/chat/completions?key=[REDACTED]'));
+        expect(reporter.log).toHaveBeenCalledWith(expect.stringContaining('Duration: 68000ms'));
+        expect(reporter.log).toHaveBeenCalledWith(expect.stringContaining('Response Headers: {"x-request-id":"req-123","authorization":"[REDACTED]"}'));
+        expect(reporter.log).toHaveBeenCalledWith(expect.stringContaining('Partial Response: {"error":"upstream timeout"}'));
+    });
+
+    test('callLLM logs partial desktop fallback responses in debug mode when the fallback transport is interrupted', async () => {
+        const provider: LLMProviderConfig = {
+            name: 'OpenAI',
+            apiKey: 'openai-key',
+            baseUrl: 'https://api.openai.com/v1',
+            model: 'gpt-4o',
+            temperature: 0.2
+        };
+
+        settings = {
+            ...settings,
+            enableStableApiCall: false,
+            enableApiErrorDebugMode: true,
+            apiCallMaxRetries: 0
+        };
+
+        (requestUrl as jest.Mock).mockRejectedValueOnce(new Error('net::ERR_CONNECTION_CLOSED'));
+        mockDesktopTransportInterruptedResponse(https, {
+            partialBody: '{"id":"chatcmpl-partial","choices":['
+        });
+
+        await expect(callLLM(provider, 'System prompt', 'Slow content', settings, reporter)).rejects.toThrow(
+            'OpenAI API request failed: socket hang up'
+        );
+
+        const debugLog = (reporter.log as jest.Mock).mock.calls
+            .map(call => String(call[0]))
+            .find(entry => entry.includes('[OpenAI] Debug details:'));
+
+        expect(debugLog).toContain('Attempt 1 [requestUrl]');
+        expect(debugLog).toContain('Attempt 2 [desktop-http]');
+        expect(debugLog).toContain('Partial Response: {"id":"chatcmpl-partial","choices":[');
+        expect(debugLog).toContain('Response Headers: {"x-request-id":"desktop-debug-request"}');
+    });
+
+    test('getDebugInfo includes stack and shared transport attempts', () => {
+        const error = Object.assign(new Error('socket hang up'), {
+            __notemdDebug: {
+                attempts: [
+                    {
+                        transport: 'desktop-http',
+                        requestMethod: 'POST',
+                        requestUrl: 'https://api.example.com/v1/chat/completions?key=super-secret',
+                        durationMs: 60000,
+                        partialResponseText: '{"message":"partial"}'
+                    }
+                ]
+            }
+        });
+
+        const debugInfo = getDebugInfo(error);
+
+        expect(debugInfo).toContain('Stack:');
+        expect(debugInfo).toContain('Attempt 1 [desktop-http]');
+        expect(debugInfo).toContain('Request: POST https://api.example.com/v1/chat/completions?key=[REDACTED]');
+        expect(debugInfo).toContain('Partial Response: {"message":"partial"}');
+    });
+
+    test('callLLM falls back to web fetch transport after a transient requestUrl failure when desktop transport is unavailable', async () => {
+        const provider: LLMProviderConfig = {
+            name: 'OpenAI',
+            apiKey: 'openai-key',
+            baseUrl: 'https://api.openai.com/v1',
+            model: 'gpt-4o',
+            temperature: 0.2
+        };
+
+        settings = { ...settings, enableStableApiCall: false };
+
+        (requestUrl as jest.Mock).mockRejectedValueOnce(new Error('net::ERR_CONNECTION_CLOSED'));
+        const fetchMock = mockFetchSuccess({
+            choices: [{ message: { content: 'web-fetch-ok' } }]
+        }, {
+            headers: { 'x-request-id': 'fetch-runtime' }
+        });
+
+        await withDesktopNodeTransportDisabled(async () => {
+            await expect(callLLM(provider, 'System prompt', 'Fetch fallback content', settings, reporter)).resolves.toBe('web-fetch-ok');
+        });
+
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+        expect(reporter.log).toHaveBeenCalledWith(expect.stringContaining('web fetch transport'));
+    });
+
+    test('testAPI falls back to web fetch transport after a transient requestUrl failure when desktop transport is unavailable', async () => {
+        const provider: LLMProviderConfig = {
+            name: 'Qwen',
+            apiKey: 'dashscope-key',
+            baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
+            model: 'qwen-plus',
+            temperature: 0.2
+        };
+
+        (requestUrl as jest.Mock).mockRejectedValueOnce(new Error('net::ERR_CONNECTION_CLOSED'));
+        const fetchMock = mockFetchSuccess({
+            choices: [{ message: { content: 'ok' } }]
+        }, {
+            headers: { 'x-request-id': 'fetch-testapi' }
+        });
+
+        await withDesktopNodeTransportDisabled(async () => {
+            await expect(testAPI(provider)).resolves.toEqual(expect.objectContaining({
+                success: true,
+                message: expect.stringContaining('Successfully connected to Qwen')
+            }));
+        });
+
+        expect(fetchMock).toHaveBeenCalledTimes(1);
     });
 });
