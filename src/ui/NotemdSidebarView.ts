@@ -57,6 +57,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
     private statusEl: HTMLElement | null = null;
     private progressEl: HTMLElement | null = null;
     private progressBarContainerEl: HTMLElement | null = null;
+    private progressValueEl: HTMLElement | null = null;
     private timeRemainingEl: HTMLElement | null = null;
     private logEl: HTMLElement | null = null;
     private cancelButton: HTMLButtonElement | null = null;
@@ -114,8 +115,12 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             this.progressEl.removeClass('is-error');
             this.progressEl.style.width = '0%';
         }
-        if (this.timeRemainingEl) this.timeRemainingEl.setText('');
-        if (this.progressBarContainerEl) this.progressBarContainerEl.addClass('is-hidden');
+        if (this.progressValueEl) {
+            this.progressValueEl.setText('0%');
+            this.progressValueEl.removeClass('is-error');
+        }
+        if (this.timeRemainingEl) this.timeRemainingEl.setText('Idle');
+        if (this.progressBarContainerEl) this.progressBarContainerEl.removeClass('is-hidden');
         if (this.cancelButton) {
             this.cancelButton.disabled = true;
             this.cancelButton.removeClass('is-active');
@@ -141,9 +146,13 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             if (percent >= 0) {
                 const clampedPercent = Math.min(100, Math.max(0, percent));
                 this.progressEl.dataset.progress = String(clampedPercent);
-                this.progressEl.setText(`${Math.round(clampedPercent)}%`);
+                this.progressEl.setText('');
                 this.progressEl.removeClass('is-error');
                 this.progressEl.style.width = `${clampedPercent}%`;
+                if (this.progressValueEl) {
+                    this.progressValueEl.setText(`${Math.round(clampedPercent)}%`);
+                    this.progressValueEl.removeClass('is-error');
+                }
 
                 if (percent > 0 && this.startTime > 0) {
                     const elapsed = (Date.now() - this.startTime) / 1000;
@@ -158,8 +167,12 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             } else {
                 this.progressEl.dataset.progress = '100';
                 this.progressEl.addClass('is-error');
-                this.progressEl.setText('Cancelled/Error');
+                this.progressEl.setText('');
                 this.progressEl.style.width = '100%';
+                if (this.progressValueEl) {
+                    this.progressValueEl.setText('Stopped');
+                    this.progressValueEl.addClass('is-error');
+                }
                 if (this.timeRemainingEl) this.timeRemainingEl.setText('Processing stopped.');
             }
         }
@@ -561,14 +574,17 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         const container = this.containerEl.children[1] as HTMLElement;
         container.empty();
         container.addClass('notemd-sidebar-container');
+        const shell = container.createDiv({ cls: 'notemd-sidebar-shell' });
+        const scrollArea = shell.createDiv({ cls: 'notemd-sidebar-scroll' });
+        const footer = shell.createDiv({ cls: 'notemd-sidebar-footer' });
 
-        const hero = container.createDiv({ cls: 'notemd-hero-card' });
+        const hero = scrollArea.createDiv({ cls: 'notemd-hero-card' });
         hero.createEl('h3', { text: 'Notemd Workbench' });
         hero.createEl('p', { text: 'Run single actions or custom one-click workflows with live progress and logs.' });
 
         const workflowResolution = resolveCustomWorkflowButtons(this.plugin.settings.customWorkflowButtonsDsl);
         const quickBody = this.createSection(
-            container,
+            scrollArea,
             'Quick Workflows',
             'Custom buttons assembled from built-in actions.',
             true
@@ -605,7 +621,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             }
 
             const body = this.createSection(
-                container,
+                scrollArea,
                 ACTION_CATEGORY_LABEL[category].title,
                 `Built-in ${ACTION_CATEGORY_LABEL[category].title.toLowerCase()} actions.`,
                 ACTION_CATEGORY_LABEL[category].openByDefault
@@ -620,18 +636,19 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             }
         });
 
-        container.createEl('hr');
-        const progressArea = container.createDiv({ cls: 'notemd-progress-area' });
-        this.statusEl = progressArea.createEl('p', { text: 'Ready', cls: 'notemd-status-text' });
-        this.progressBarContainerEl = progressArea.createEl('div', { cls: 'notemd-progress-bar-container is-hidden' });
+        const progressArea = footer.createDiv({ cls: 'notemd-progress-area' });
+        const progressMeta = progressArea.createDiv({ cls: 'notemd-progress-meta' });
+        this.statusEl = progressMeta.createEl('p', { text: 'Ready', cls: 'notemd-status-text' });
+        this.progressValueEl = progressMeta.createEl('span', { text: '0%', cls: 'notemd-progress-value' });
+        this.progressBarContainerEl = progressArea.createEl('div', { cls: 'notemd-progress-bar-container mod-sidebar' });
         this.progressEl = this.progressBarContainerEl.createEl('div', { cls: 'notemd-progress-bar-fill' });
-        this.timeRemainingEl = progressArea.createEl('p', { cls: 'notemd-time-remaining' });
+        this.timeRemainingEl = progressArea.createEl('p', { text: 'Idle', cls: 'notemd-time-remaining' });
 
         this.cancelButton = progressArea.createEl('button', { text: 'Cancel processing', cls: 'notemd-cancel-button' });
         this.cancelButton.onclick = () => this.requestCancel();
 
-        container.createEl('hr');
-        const logHeader = container.createDiv({ cls: 'notemd-log-header' });
+        const logCard = footer.createDiv({ cls: 'notemd-log-card' });
+        const logHeader = logCard.createDiv({ cls: 'notemd-log-header' });
         logHeader.createEl('h5', { text: 'Log output' });
         const copyLogButton = logHeader.createEl('button', { text: 'Copy log', cls: 'notemd-copy-log-button' });
         copyLogButton.onclick = () => {
@@ -643,7 +660,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
                 new Notice('Log is empty.');
             }
         };
-        this.logEl = container.createEl('div', { cls: 'notemd-log-output is-selectable' });
+        this.logEl = logCard.createEl('div', { cls: 'notemd-log-output is-selectable mod-sidebar' });
         this.updateButtonStates();
     }
 
@@ -651,6 +668,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         this.statusEl = null;
         this.progressEl = null;
         this.progressBarContainerEl = null;
+        this.progressValueEl = null;
         this.timeRemainingEl = null;
         this.logEl = null;
         this.cancelButton = null;
