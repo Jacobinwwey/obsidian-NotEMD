@@ -1,7 +1,18 @@
+import { EventEmitter } from 'events';
+import * as http from 'http';
+import * as https from 'https';
 import { requestUrl } from 'obsidian';
 import { callLLM, testAPI } from '../llmUtils';
 import { ProgressReporter, LLMProviderConfig, NotemdSettings } from '../types';
 import { mockSettings } from './__mocks__/settings';
+
+jest.mock('http', () => ({
+    request: jest.fn()
+}));
+
+jest.mock('https', () => ({
+    request: jest.fn()
+}));
 
 function createReporter(): ProgressReporter {
     return {
@@ -18,6 +29,62 @@ function createReporter(): ProgressReporter {
     };
 }
 
+function mockDesktopTransportSuccess(
+    transportModule: typeof http | typeof https,
+    responseBody: unknown,
+    statusCode: number = 200
+): void {
+    (transportModule.request as unknown as jest.Mock).mockImplementationOnce((options, callback) => {
+        const response = new EventEmitter() as EventEmitter & {
+            statusCode?: number;
+            headers?: Record<string, string>;
+        };
+        response.statusCode = statusCode;
+        response.headers = {};
+
+        const request = new EventEmitter() as EventEmitter & {
+            write: jest.Mock;
+            end: jest.Mock;
+            destroy: jest.Mock;
+        };
+
+        request.write = jest.fn();
+        request.destroy = jest.fn((error?: Error) => {
+            if (error) {
+                request.emit('error', error);
+            }
+        });
+        request.end = jest.fn(() => {
+            callback(response);
+            response.emit('data', Buffer.from(JSON.stringify(responseBody)));
+            response.emit('end');
+        });
+
+        return request;
+    });
+}
+
+function mockDesktopTransportFailure(
+    transportModule: typeof http | typeof https,
+    errorMessage: string = 'net::ERR_CONNECTION_CLOSED'
+): void {
+    (transportModule.request as unknown as jest.Mock).mockImplementationOnce((_options, _callback) => {
+        const request = new EventEmitter() as EventEmitter & {
+            write: jest.Mock;
+            end: jest.Mock;
+            destroy: jest.Mock;
+        };
+
+        request.write = jest.fn();
+        request.destroy = jest.fn();
+        request.end = jest.fn(() => {
+            request.emit('error', new Error(errorMessage));
+        });
+
+        return request;
+    });
+}
+
 describe('llmUtils expanded provider support', () => {
     let reporter: ProgressReporter;
     let settings: NotemdSettings;
@@ -26,6 +93,8 @@ describe('llmUtils expanded provider support', () => {
         reporter = createReporter();
         settings = { ...mockSettings, maxTokens: 2048 };
         (requestUrl as jest.Mock).mockReset();
+        (http.request as unknown as jest.Mock).mockReset();
+        (https.request as unknown as jest.Mock).mockReset();
     });
 
     test('callLLM routes Groq through the OpenAI-compatible runtime', async () => {
@@ -209,7 +278,7 @@ describe('llmUtils expanded provider support', () => {
         expect(requestBody.model).toBe('DeepSeek-V3');
     });
 
-    test('callLLM retries a transient OpenAI network disconnect even when stable API calls are disabled', async () => {
+    test('callLLM retries after both requestUrl and desktop fallback fail on the first transient OpenAI disconnect', async () => {
         jest.useFakeTimers();
 
         try {
@@ -230,6 +299,7 @@ describe('llmUtils expanded provider support', () => {
                     json: { choices: [{ message: { content: 'retry-ok' } }] },
                     text: '{"choices":[{"message":{"content":"retry-ok"}}]}'
                 });
+            mockDesktopTransportFailure(https);
 
             const pendingResult = callLLM(provider, 'System prompt', 'Slow provider content', settings, reporter);
 
@@ -239,13 +309,14 @@ describe('llmUtils expanded provider support', () => {
             await expect(pendingResult).resolves.toBe('retry-ok');
             expect(requestUrl).toHaveBeenCalledTimes(2);
             expect(reporter.log).toHaveBeenCalledWith(expect.stringContaining('Transient network error detected'));
+            expect(https.request).toHaveBeenCalledTimes(1);
         } finally {
             jest.clearAllTimers();
             jest.useRealTimers();
         }
     });
 
-    test('callLLM falls back to the stable retry sequence after the first transient network failure', async () => {
+    test('callLLM falls back to the stable retry sequence after requestUrl and desktop fallback both fail', async () => {
         jest.useFakeTimers();
 
         try {
@@ -272,6 +343,8 @@ describe('llmUtils expanded provider support', () => {
                     json: { choices: [{ message: { content: 'stable-fallback-ok' } }] },
                     text: '{"choices":[{"message":{"content":"stable-fallback-ok"}}]}'
                 });
+            mockDesktopTransportFailure(https);
+            mockDesktopTransportFailure(https);
 
             const pendingResult = callLLM(provider, 'System prompt', 'Fallback content', settings, reporter);
 
@@ -282,10 +355,100 @@ describe('llmUtils expanded provider support', () => {
             expect(requestUrl).toHaveBeenCalledTimes(3);
             expect(reporter.log).toHaveBeenCalledWith(expect.stringContaining('Switching to stable API retry logic'));
             expect(reporter.log).toHaveBeenCalledWith(expect.stringContaining('Waiting 7 seconds before retry 3'));
+            expect(https.request).toHaveBeenCalledTimes(2);
         } finally {
             jest.clearAllTimers();
             jest.useRealTimers();
         }
+    });
+
+    test.each([
+        {
+            name: 'OpenAI-compatible',
+            provider: {
+                name: 'OpenAI',
+                apiKey: 'openai-key',
+                baseUrl: 'https://api.openai.com/v1',
+                model: 'gpt-4o',
+                temperature: 0.2
+            } as LLMProviderConfig,
+            response: {
+                choices: [{ message: { content: 'desktop-openai-ok' } }]
+            },
+            expected: 'desktop-openai-ok',
+            transportModule: https
+        },
+        {
+            name: 'Anthropic',
+            provider: {
+                name: 'Anthropic',
+                apiKey: 'anthropic-key',
+                baseUrl: 'https://api.anthropic.com',
+                model: 'claude-3-5-sonnet-20240620',
+                temperature: 0.5
+            } as LLMProviderConfig,
+            response: {
+                content: [{ text: 'desktop-anthropic-ok' }]
+            },
+            expected: 'desktop-anthropic-ok',
+            transportModule: https
+        },
+        {
+            name: 'Google',
+            provider: {
+                name: 'Google',
+                apiKey: 'google-key',
+                baseUrl: 'https://generativelanguage.googleapis.com/v1',
+                model: 'gemini-2.0-flash-exp',
+                temperature: 0.5
+            } as LLMProviderConfig,
+            response: {
+                candidates: [{ content: { parts: [{ text: 'desktop-google-ok' }] } }]
+            },
+            expected: 'desktop-google-ok',
+            transportModule: https
+        },
+        {
+            name: 'Azure OpenAI',
+            provider: {
+                name: 'Azure OpenAI',
+                apiKey: 'azure-key',
+                baseUrl: 'https://azure.example.com',
+                model: 'gpt-4o',
+                temperature: 0.5,
+                apiVersion: '2025-01-01-preview'
+            } as LLMProviderConfig,
+            response: {
+                choices: [{ message: { content: 'desktop-azure-ok' } }]
+            },
+            expected: 'desktop-azure-ok',
+            transportModule: https
+        },
+        {
+            name: 'Ollama',
+            provider: {
+                name: 'Ollama',
+                apiKey: '',
+                baseUrl: 'http://localhost:11434/api',
+                model: 'llama3',
+                temperature: 0.7
+            } as LLMProviderConfig,
+            response: {
+                message: { content: 'desktop-ollama-ok' }
+            },
+            expected: 'desktop-ollama-ok',
+            transportModule: http
+        }
+    ])('callLLM falls back to desktop transport after a transient requestUrl failure for $name', async ({ provider, response, expected, transportModule }) => {
+        settings = { ...settings, enableStableApiCall: false };
+
+        (requestUrl as jest.Mock).mockRejectedValueOnce(new Error('net::ERR_CONNECTION_CLOSED'));
+        mockDesktopTransportSuccess(transportModule, response);
+
+        await expect(callLLM(provider, 'System prompt', 'Desktop fallback content', settings, reporter)).resolves.toBe(expected);
+        expect(requestUrl).toHaveBeenCalledTimes(1);
+        expect(transportModule.request).toHaveBeenCalledTimes(1);
+        expect(reporter.log).toHaveBeenCalledWith(expect.stringContaining('desktop HTTP transport'));
     });
 
     test.each([
@@ -303,7 +466,8 @@ describe('llmUtils expanded provider support', () => {
                 json: { content: [{ text: 'anthropic-ok' }] },
                 text: '{"content":[{"text":"anthropic-ok"}]}'
             },
-            expected: 'anthropic-ok'
+            expected: 'anthropic-ok',
+            transportModule: https
         },
         {
             name: 'Google',
@@ -319,7 +483,8 @@ describe('llmUtils expanded provider support', () => {
                 json: { candidates: [{ content: { parts: [{ text: 'google-ok' }] } }] },
                 text: '{"candidates":[{"content":{"parts":[{"text":"google-ok"}]}}]}'
             },
-            expected: 'google-ok'
+            expected: 'google-ok',
+            transportModule: https
         },
         {
             name: 'Azure OpenAI',
@@ -336,7 +501,8 @@ describe('llmUtils expanded provider support', () => {
                 json: { choices: [{ message: { content: 'azure-ok' } }] },
                 text: '{"choices":[{"message":{"content":"azure-ok"}}]}'
             },
-            expected: 'azure-ok'
+            expected: 'azure-ok',
+            transportModule: https
         },
         {
             name: 'Ollama',
@@ -352,9 +518,10 @@ describe('llmUtils expanded provider support', () => {
                 json: { message: { content: 'ollama-ok' } },
                 text: '{"message":{"content":"ollama-ok"}}'
             },
-            expected: 'ollama-ok'
+            expected: 'ollama-ok',
+            transportModule: http
         }
-    ])('callLLM retries transient network disconnects for $name transport', async ({ provider, response, expected }) => {
+    ])('callLLM retries transient network disconnects for $name transport after desktop fallback also fails', async ({ provider, response, expected, transportModule }) => {
         jest.useFakeTimers();
 
         try {
@@ -363,6 +530,7 @@ describe('llmUtils expanded provider support', () => {
             (requestUrl as jest.Mock)
                 .mockRejectedValueOnce(new Error('net::ERR_CONNECTION_CLOSED'))
                 .mockResolvedValueOnce(response);
+            mockDesktopTransportFailure(transportModule);
 
             const pendingResult = callLLM(provider, 'System prompt', 'Transport content', settings, reporter);
 
@@ -372,6 +540,7 @@ describe('llmUtils expanded provider support', () => {
             await expect(pendingResult).resolves.toBe(expected);
             expect(requestUrl).toHaveBeenCalledTimes(2);
             expect(reporter.log).toHaveBeenCalledWith(expect.stringContaining('Switching to stable API retry logic'));
+            expect(transportModule.request).toHaveBeenCalledTimes(1);
         } finally {
             jest.clearAllTimers();
             jest.useRealTimers();

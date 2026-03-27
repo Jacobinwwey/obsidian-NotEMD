@@ -1,5 +1,5 @@
 /*
- * Notemd v1.7.4
+ * Notemd v1.7.6
  */
 
 :root {
@@ -143,6 +143,7 @@
     gap: 0.85em;
     height: 100%;
     min-height: 0;
+    overflow: hidden;
 }
 
 .notemd-sidebar-scroll {
@@ -160,6 +161,13 @@
     flex-direction: column;
     gap: 0.75em;
     flex: 0 0 auto;
+}
+
+.notemd-sidebar-footer.mod-docked {
+    flex: 0 0 clamp(250px, 34vh, 360px);
+    min-height: 240px;
+    max-height: 42%;
+    overflow: hidden;
 }
 
 .notemd-hero-card {
@@ -466,8 +474,18 @@
             180deg,
             color-mix(in srgb, var(--notemd-surface) 82%, #ffffff 18%),
             color-mix(in srgb, var(--notemd-surface-alt) 88%, #f0fdfa 12%)
-        );
+    );
     box-shadow: inset 0 1px 0 color-mix(in srgb, #ffffff 40%, transparent);
+}
+
+.notemd-progress-area.is-idle {
+    border-color: color-mix(in srgb, var(--notemd-border) 68%, var(--interactive-accent) 32%);
+    background:
+        linear-gradient(
+            180deg,
+            color-mix(in srgb, var(--notemd-surface) 76%, #ffffff 24%),
+            color-mix(in srgb, var(--notemd-surface-alt) 90%, #e0f2fe 10%)
+        );
 }
 
 .notemd-progress-meta {
@@ -493,12 +511,19 @@
     letter-spacing: 0.03em;
 }
 
+.notemd-progress-value.is-idle {
+    border-color: color-mix(in srgb, var(--notemd-border) 62%, var(--interactive-accent) 38%);
+    background: color-mix(in srgb, var(--interactive-accent) 12%, var(--background-secondary) 88%);
+    color: color-mix(in srgb, var(--text-normal) 88%, var(--interactive-accent) 12%);
+}
+
 .notemd-progress-value.is-error {
     border-color: color-mix(in srgb, #ef4444 46%, var(--background-modifier-border) 54%);
     background: color-mix(in srgb, #ef4444 12%, var(--background-secondary) 88%);
 }
 
 .notemd-progress-area .notemd-progress-bar-container.mod-sidebar {
+    position: relative;
     height: 20px;
     margin: 0;
     background:
@@ -512,11 +537,44 @@
         inset 0 0 0 1px color-mix(in srgb, var(--notemd-border) 72%, #0d9488 28%);
 }
 
+.notemd-progress-area .notemd-progress-bar-container.mod-sidebar.is-idle {
+    border-style: solid;
+    background:
+        linear-gradient(
+            135deg,
+            color-mix(in srgb, var(--background-secondary) 84%, #e0f2fe 16%) 0%,
+            color-mix(in srgb, var(--background-secondary-alt, var(--background-secondary)) 88%, #bae6fd 12%) 100%
+        );
+    box-shadow:
+        inset 0 1px 0 color-mix(in srgb, #ffffff 42%, transparent),
+        inset 0 0 0 1px color-mix(in srgb, var(--interactive-accent) 22%, var(--notemd-border) 78%);
+}
+
+.notemd-progress-area .notemd-progress-bar-container.mod-sidebar.is-idle::after {
+    content: 'Standby';
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--text-muted) 72%, var(--interactive-accent) 28%);
+    pointer-events: none;
+}
+
 .notemd-progress-area .notemd-progress-bar-fill {
     position: relative;
     box-shadow:
         inset 0 0 0 1px color-mix(in srgb, #ffffff 18%, transparent),
         0 4px 14px color-mix(in srgb, var(--notemd-accent) 18%, transparent);
+}
+
+.notemd-progress-area .notemd-progress-bar-container.mod-sidebar.is-idle .notemd-progress-bar-fill {
+    opacity: 0.16;
+    box-shadow: none;
 }
 
 .notemd-time-remaining {
@@ -536,6 +594,12 @@
     gap: 0.45em;
 }
 
+.notemd-log-card.mod-persistent {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+}
+
 .notemd-log-header {
     display: flex;
     justify-content: space-between;
@@ -552,7 +616,8 @@
 .notemd-log-output.mod-sidebar {
     flex: 1 1 auto;
     min-height: 140px;
-    max-height: clamp(150px, 28vh, 280px);
+    height: 100%;
+    max-height: none;
     margin: 0;
     background: var(--background-secondary);
 }

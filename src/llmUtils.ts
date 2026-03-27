@@ -134,6 +134,183 @@ async function requestUrlForConnectionTest(
     throw lastError || new Error('Connection test failed after multiple retries.');
 }
 
+type RuntimeRequestOptions = {
+    url: string;
+    method: string;
+    headers?: Record<string, string>;
+    body?: string;
+    throw?: boolean;
+};
+
+type RuntimeRequestResponse = {
+    status: number;
+    text: string;
+    json: any;
+};
+
+function hasHeader(headers: Record<string, string>, headerName: string): boolean {
+    const normalizedTarget = headerName.toLowerCase();
+    return Object.keys(headers).some(key => key.toLowerCase() === normalizedTarget);
+}
+
+function createAbortError(): Error {
+    const error = new Error('The operation was aborted.');
+    error.name = 'AbortError';
+    return error;
+}
+
+function parseRuntimeResponseBody(responseText: string): any {
+    if (!responseText.trim()) {
+        return {};
+    }
+
+    try {
+        return JSON.parse(responseText);
+    } catch (_error) {
+        return null;
+    }
+}
+
+function canUseDesktopHttpTransport(targetUrl: string): boolean {
+    if (typeof process === 'undefined' || !process.versions?.node) {
+        return false;
+    }
+
+    try {
+        const protocol = new URL(targetUrl).protocol;
+        if (protocol === 'https:') {
+            require('https');
+            return true;
+        }
+        if (protocol === 'http:') {
+            require('http');
+            return true;
+        }
+    } catch (_error) {
+        return false;
+    }
+
+    return false;
+}
+
+async function requestViaDesktopHttpTransport(
+    options: RuntimeRequestOptions,
+    signal?: AbortSignal
+): Promise<RuntimeRequestResponse> {
+    return await new Promise((resolve, reject) => {
+        const parsedUrl = new URL(options.url);
+        const transport = parsedUrl.protocol === 'https:' ? require('https') : require('http');
+        const headers = { ...(options.headers ?? {}) };
+
+        if (options.body && !hasHeader(headers, 'Content-Length')) {
+            headers['Content-Length'] = Buffer.byteLength(options.body, 'utf8').toString();
+        }
+        if (!hasHeader(headers, 'Accept-Encoding')) {
+            headers['Accept-Encoding'] = 'identity';
+        }
+
+        let settled = false;
+        let abortListener: (() => void) | null = null;
+
+        const cleanup = () => {
+            if (abortListener && signal) {
+                signal.removeEventListener('abort', abortListener);
+            }
+            abortListener = null;
+        };
+
+        const rejectOnce = (error: unknown) => {
+            if (settled) {
+                return;
+            }
+            settled = true;
+            cleanup();
+            reject(error);
+        };
+
+        const resolveOnce = (value: RuntimeRequestResponse) => {
+            if (settled) {
+                return;
+            }
+            settled = true;
+            cleanup();
+            resolve(value);
+        };
+
+        const request = transport.request({
+            protocol: parsedUrl.protocol,
+            hostname: parsedUrl.hostname,
+            port: parsedUrl.port || undefined,
+            path: `${parsedUrl.pathname}${parsedUrl.search}`,
+            method: options.method,
+            headers
+        }, (response: any) => {
+            const chunks: Buffer[] = [];
+
+            response.on('data', (chunk: Buffer | string) => {
+                chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+            });
+            response.on('end', () => {
+                const responseText = Buffer.concat(chunks).toString('utf8');
+                resolveOnce({
+                    status: response.statusCode ?? 0,
+                    text: responseText,
+                    json: parseRuntimeResponseBody(responseText)
+                });
+            });
+            response.on('error', rejectOnce);
+        });
+
+        request.on('error', rejectOnce);
+
+        if (signal?.aborted) {
+            const abortError = createAbortError();
+            request.destroy(abortError);
+            rejectOnce(abortError);
+            return;
+        }
+
+        abortListener = () => {
+            const abortError = createAbortError();
+            request.destroy(abortError);
+            rejectOnce(abortError);
+        };
+
+        if (signal) {
+            signal.addEventListener('abort', abortListener, { once: true });
+        }
+
+        if (options.body) {
+            request.write(options.body);
+        }
+
+        request.end();
+    });
+}
+
+async function requestRuntimeUrlWithDesktopFallback(
+    providerName: string,
+    options: RuntimeRequestOptions,
+    progressReporter: ProgressReporter,
+    signal?: AbortSignal
+): Promise<RuntimeRequestResponse> {
+    try {
+        return await requestUrl(options);
+    } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+
+        if (!isTransientNetworkErrorMessage(errorMessage) || !canUseDesktopHttpTransport(options.url)) {
+            throw error;
+        }
+
+        progressReporter.log(
+            `[${providerName}] requestUrl transport closed unexpectedly (${errorMessage}). Retrying this attempt via desktop HTTP transport.`
+        );
+
+        return await requestViaDesktopHttpTransport(options, signal);
+    }
+}
+
 function buildOpenAICompatibleRequestBody(
     provider: LLMProviderConfig,
     modelName: string,
@@ -630,13 +807,13 @@ async function executeDeepSeekAPI(provider: LLMProviderConfig, modelName: string
         
         let response;
         try {
-            response = await requestUrl({
+            response = await requestRuntimeUrlWithDesktopFallback('DeepSeek', {
                 url: url,
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${provider.apiKey}` },
                 body: JSON.stringify(requestBody),
                 throw: false
-            });
+            }, progressReporter, signal);
         } catch (error: any) {
             // Delegate error handling
             handleApiError('DeepSeek', error, progressReporter, settings.enableApiErrorDebugMode);
@@ -707,13 +884,13 @@ async function executeOpenAIApi(provider: LLMProviderConfig, modelName: string, 
         await cancellableDelay(1, progressReporter); // Yield
         let response;
         try {
-            response = await requestUrl({
+            response = await requestRuntimeUrlWithDesktopFallback('OpenAI', {
                 url: url,
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${provider.apiKey}` },
                 body: JSON.stringify(requestBody),
                 throw: false
-            });
+            }, progressReporter, signal);
         } catch (error: any) {
             handleApiError('OpenAI', error, progressReporter, settings.enableApiErrorDebugMode);
         }
@@ -750,7 +927,7 @@ async function executeAnthropicApi(provider: LLMProviderConfig, modelName: strin
         await cancellableDelay(1, progressReporter); // Yield
         let response;
         try {
-            response = await requestUrl({
+            response = await requestRuntimeUrlWithDesktopFallback('Anthropic', {
                 url: url,
                 method: 'POST',
                 headers: { 
@@ -760,7 +937,7 @@ async function executeAnthropicApi(provider: LLMProviderConfig, modelName: strin
                 }, 
                 body: JSON.stringify(requestBody),
                 throw: false
-            });
+            }, progressReporter, signal);
         } catch (error: any) {
             handleApiError('Anthropic', error, progressReporter, settings.enableApiErrorDebugMode);
         }
@@ -794,13 +971,13 @@ async function executeGoogleApi(provider: LLMProviderConfig, modelName: string, 
         await cancellableDelay(1, progressReporter); // Yield
         let response;
         try {
-            response = await requestUrl({
+            response = await requestRuntimeUrlWithDesktopFallback('Google', {
                 url: urlWithKey,
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(requestBody),
                 throw: false
-            });
+            }, progressReporter, signal);
         } catch (error: any) {
             handleApiError('Google', error, progressReporter, settings.enableApiErrorDebugMode);
         }
@@ -836,13 +1013,13 @@ async function executeMistralApi(provider: LLMProviderConfig, modelName: string,
         await cancellableDelay(1, progressReporter); // Yield
         let response;
         try {
-            response = await requestUrl({
+            response = await requestRuntimeUrlWithDesktopFallback('Mistral', {
                 url: url,
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${provider.apiKey}` },
                 body: JSON.stringify(requestBody),
                 throw: false
-            });
+            }, progressReporter, signal);
         } catch (error: any) {
             handleApiError('Mistral', error, progressReporter, settings.enableApiErrorDebugMode);
         }
@@ -878,13 +1055,13 @@ async function executeAzureOpenAIApi(provider: LLMProviderConfig, modelName: str
         await cancellableDelay(1, progressReporter); // Yield
         let response;
         try {
-            response = await requestUrl({
+            response = await requestRuntimeUrlWithDesktopFallback('Azure OpenAI', {
                 url: url,
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'api-key': provider.apiKey },
                 body: JSON.stringify(requestBody),
                 throw: false
-            });
+            }, progressReporter, signal);
         } catch (error: any) {
             handleApiError('Azure OpenAI', error, progressReporter, settings.enableApiErrorDebugMode);
         }
@@ -927,13 +1104,13 @@ async function executeLMStudioApi(provider: LLMProviderConfig, modelName: string
         await cancellableDelay(1, progressReporter); // Yield
         let response;
         try {
-            response = await requestUrl({
+            response = await requestRuntimeUrlWithDesktopFallback('LMStudio', {
                 url: url,
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${provider.apiKey || 'EMPTY'}` },
                 body: JSON.stringify(requestBody),
                 throw: false
-            });
+            }, progressReporter, signal);
         } catch (error: any) {
             handleApiError('LMStudio', error, progressReporter, settings.enableApiErrorDebugMode);
         }
@@ -969,13 +1146,13 @@ async function executeOllamaApi(provider: LLMProviderConfig, modelName: string, 
         await cancellableDelay(1, progressReporter); // Yield
         let response;
         try {
-            response = await requestUrl({
+            response = await requestRuntimeUrlWithDesktopFallback('Ollama', {
                 url: url,
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(requestBody),
                 throw: false
-            });
+            }, progressReporter, signal);
         } catch (error: any) {
             handleApiError('Ollama', error, progressReporter, settings.enableApiErrorDebugMode);
         }
@@ -1031,7 +1208,7 @@ async function executeOpenRouterAPI(provider: LLMProviderConfig, modelName: stri
         progressReporter.log(`[OpenRouter] Calling API: ${url} with model ${modelName}`);
         
         try {
-            response = await requestUrl({
+            response = await requestRuntimeUrlWithDesktopFallback('OpenRouter', {
                 url: url,
                 method: 'POST',
                 headers: {
@@ -1042,7 +1219,7 @@ async function executeOpenRouterAPI(provider: LLMProviderConfig, modelName: stri
                 },
                 body: JSON.stringify(requestBody),
                 throw: false
-            });
+            }, progressReporter, signal);
         } catch (error: any) {
              handleApiError('OpenRouter', error, progressReporter, settings.enableApiErrorDebugMode);
         }
@@ -1126,13 +1303,13 @@ async function executeXaiApi(provider: LLMProviderConfig, modelName: string, pro
         await cancellableDelay(1, progressReporter); // Yield
         let response;
         try {
-            response = await requestUrl({
+            response = await requestRuntimeUrlWithDesktopFallback('xAI', {
                 url: url,
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${provider.apiKey}` },
                 body: JSON.stringify(requestBody),
                 throw: false
-            });
+            }, progressReporter, signal);
         } catch (error: any) {
             handleApiError('xAI', error, progressReporter, settings.enableApiErrorDebugMode);
         }
@@ -1171,13 +1348,13 @@ async function executeOpenAICompatibleApi(provider: LLMProviderConfig, modelName
         await cancellableDelay(1, progressReporter);
         let response;
         try {
-            response = await requestUrl({
+            response = await requestRuntimeUrlWithDesktopFallback(provider.name, {
                 url,
                 method: 'POST',
                 headers: buildOpenAICompatibleHeaders(provider),
                 body: JSON.stringify(requestBody),
                 throw: false
-            });
+            }, progressReporter, signal);
         } catch (error: any) {
             handleApiError(provider.name, error, progressReporter, settings.enableApiErrorDebugMode);
         }
