@@ -20,7 +20,7 @@ A Easy way to create your own Knowledge-base!
 
 Notemd enhances your Obsidian workflow by integrating with various Large Language Models (LLMs) to process your multi-languages notes, automatically generate wiki-links for key concepts, create corresponding concept notes, perform web research, helping you build powerful knowledge graphs and more.
 
-**Version:** 1.7.3
+**Version:** 1.7.4
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
@@ -64,7 +64,7 @@ That's it! Explore the settings to unlock more features like web research, trans
 - **Robust Parallel Batch Processing**: Resolved an issue where parallel batch operations would stall prematurely, ensuring all files are processed reliably and efficiently.
 - **Progress Bar Accuracy**: Fixed a bug where the progress bar for the "Create Wiki-Link & Generate Note" command would get stuck at 95%, ensuring it now correctly shows 100% upon completion.
 - **Enhanced API Debugging**: The "API Error Debugging Mode" now captures full response bodies from LLM providers and search services (Tavily/DuckDuckGo), enabling detailed logging of 429/500 errors and other API failures for better troubleshooting.
-- **Redesigned Sidebar**: Built-in actions are grouped into focused sections with clearer labels, live status, cancellable progress, and copyable logs to reduce sidebar clutter.
+- **Redesigned Sidebar**: Built-in actions are grouped into focused sections with clearer labels, live status, cancellable progress, and copyable logs to reduce sidebar clutter. The progress/log footer now stays visible even when every section is expanded.
 - **Custom One-Click Workflows**: Turn built-in sidebar utilities into reusable custom buttons with user-defined names and assembled action chains. A default `One-Click Extract` workflow is included out of the box.
 
 
@@ -399,7 +399,8 @@ This feature allows you to override the default instructions (prompts) sent to t
 -   Open the Notemd sidebar to access grouped action sections for core processing, generation, translation, knowledge, and utilities.
 -   Use the **Quick Workflows** area at the top of the sidebar to launch custom multi-step buttons.
 -   The default **One-Click Extract** workflow runs `Process File (Add Links)` -> `Batch Generate from Titles` -> `Batch Mermaid Fix`.
--   Workflow progress, per-step logs, and failures are shown in the sidebar, and the same custom workflows can be reconfigured from settings.
+-   Workflow progress, per-step logs, and failures are shown in the sidebar, with a pinned footer that protects the progress bar and log area from being squeezed out by expanded sections.
+-   The progress card keeps status text, a dedicated percentage pill, and time remaining readable at a glance, and the same custom workflows can be reconfigured from settings.
 
 ### Original Processing (Adding Wiki-Links)
 This is the core functionality focused on identifying concepts and adding `[[wiki-links]]`.

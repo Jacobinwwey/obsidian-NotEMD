@@ -4,6 +4,22 @@ This document summarizes the major functional and architectural changes implemen
 
 ---
 
+## [1.7.4] - 2026-03-26
+
+### English
+*   **Sidebar Layout Stability**: Reworked the sidebar into a scrollable action area plus a persistent footer so the progress card and log output remain visible even when all action groups are expanded.
+*   **Clearer Progress Feedback**: Moved the percentage text into a dedicated status pill, kept the progress bar visible in the ready state, and improved visual contrast for the sidebar progress area.
+*   **Regression Coverage**: Added focused sidebar DOM tests to lock in the persistent footer layout and the new progress summary behavior.
+*   **Documentation**: Updated the English and Chinese READMEs to reflect the pinned sidebar telemetry layout.
+
+### Chinese (中文)
+*   **侧边栏布局稳定性**: 将侧边栏重构为可滚动的工作区加固定底部区域，即使所有动作分组全部展开，进度卡片和日志输出也不会被挤出视野。
+*   **更清晰的进度反馈**: 将百分比文本移到独立状态标签中，保留 Ready 状态下可见的进度条，并增强侧边栏进度区域的视觉对比度。
+*   **回归测试覆盖**: 新增聚焦侧边栏 DOM 的测试，锁定固定底部布局与新的进度摘要展示行为。
+*   **文档更新**: 同步更新中英文 README，补充固定底部进度/日志布局说明。
+
+---
+
 ## [1.6.5] - 2026-01-27
 
 ## Bug Fixes
