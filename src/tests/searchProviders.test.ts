@@ -118,5 +118,31 @@ describe('Search Providers', () => {
             expect(results.length).toBe(1);
             expect(results[0].title).toBe('Tavily Title');
         });
+
+        it('clears the timeout after a successful API response', async () => {
+            jest.useFakeTimers();
+
+            try {
+                const provider = new TavilyProvider();
+                const mockResponse = {
+                    status: 200,
+                    json: {
+                        results: [
+                            { title: 'Tavily Title', url: 'https://tavily.com', content: 'Tavily Content' }
+                        ]
+                    }
+                };
+
+                (obsidian.requestUrl as jest.Mock).mockResolvedValue(mockResponse);
+
+                const results = await provider.search('query', mockSettings, mockProgressReporter);
+
+                expect(results.length).toBe(1);
+                expect(jest.getTimerCount()).toBe(0);
+            } finally {
+                jest.clearAllTimers();
+                jest.useRealTimers();
+            }
+        });
     });
 });
