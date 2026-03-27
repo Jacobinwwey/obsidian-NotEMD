@@ -62,6 +62,21 @@ function buildOpenAICompatibleHeaders(provider: LLMProviderConfig): Record<strin
     return headers;
 }
 
+const TRANSIENT_NETWORK_ERROR_PATTERNS = [
+    'err_connection_closed',
+    'err_connection_reset',
+    'err_network_changed',
+    'err_timed_out',
+    'econnreset',
+    'econnaborted',
+    'etimedout',
+    'socket hang up',
+    'network request failed'
+];
+
+const MIN_TRANSIENT_NETWORK_ATTEMPTS = 2;
+const TRANSIENT_NETWORK_RETRY_DELAY_SECONDS = 5;
+
 function buildOpenAICompatibleMessages(providerName: string, modelName: string, prompt: string, content: string) {
     if (shouldUseCombinedUserPrompt(providerName, modelName)) {
         return [
@@ -76,6 +91,11 @@ function buildOpenAICompatibleMessages(providerName: string, modelName: string, 
         { role: 'system', content: prompt },
         { role: 'user', content: content }
     ];
+}
+
+function isTransientNetworkErrorMessage(errorMessage: string): boolean {
+    const normalized = errorMessage.trim().toLowerCase();
+    return TRANSIENT_NETWORK_ERROR_PATTERNS.some(pattern => normalized.includes(pattern));
 }
 
 function buildOpenAICompatibleRequestBody(
@@ -349,10 +369,10 @@ async function callApiWithRetry(
 ): Promise<string> {
     
     let lastError: Error | null = null;
-    const maxAttempts = settings.enableStableApiCall ? settings.apiCallMaxRetries + 1 : 1;
+    const configuredMaxAttempts = settings.enableStableApiCall ? settings.apiCallMaxRetries + 1 : 1;
     const intervalSeconds = settings.enableStableApiCall ? settings.apiCallInterval : 0;
 
-    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    for (let attempt = 1; attempt <= Math.max(configuredMaxAttempts, MIN_TRANSIENT_NETWORK_ATTEMPTS); attempt++) {
         if (progressReporter.cancelled) {
             // console.log(`${provider.name} API Call: Cancellation detected before attempt ${attempt}`);
             throw new Error("Processing cancelled by user before API attempt.");
@@ -372,6 +392,11 @@ async function callApiWithRetry(
                 // console.log(`${provider.name} API Call: Cancellation detected during attempt ${attempt}.`);
                 throw new Error("API call cancelled by user."); // Propagate cancellation
             }
+
+            const isTransientNetworkError = isTransientNetworkErrorMessage(errorMessage);
+            const maxAttempts = isTransientNetworkError
+                ? Math.max(configuredMaxAttempts, MIN_TRANSIENT_NETWORK_ATTEMPTS)
+                : configuredMaxAttempts;
 
             // Don't retry on certain fatal errors
             // Check 1: HTTP Status Code (Client Errors)
@@ -400,13 +425,26 @@ async function callApiWithRetry(
             }
 
             if (attempt < maxAttempts) {
-                progressReporter.log(`Waiting ${intervalSeconds} seconds before retry ${attempt + 1}...`);
-                await cancellableDelay(intervalSeconds * 1000, progressReporter);
+                const retryDelaySeconds = settings.enableStableApiCall
+                    ? intervalSeconds
+                    : (isTransientNetworkError ? TRANSIENT_NETWORK_RETRY_DELAY_SECONDS : 0);
+
+                if (isTransientNetworkError && !settings.enableStableApiCall) {
+                    progressReporter.log(`Transient network error detected. Waiting ${retryDelaySeconds} seconds before retry ${attempt + 1}...`);
+                } else {
+                    progressReporter.log(`Waiting ${retryDelaySeconds} seconds before retry ${attempt + 1}...`);
+                }
+
+                await cancellableDelay(retryDelaySeconds * 1000, progressReporter);
+            }
+
+            if (attempt >= maxAttempts) {
+                break;
             }
         }
     }
 
-    console.error(`${provider.name} API Call: All ${maxAttempts} attempts failed.`);
+    console.error(`${provider.name} API Call: All configured attempts failed.`);
     throw lastError || new Error(`${provider.name} API call failed after multiple retries.`);
 }
 

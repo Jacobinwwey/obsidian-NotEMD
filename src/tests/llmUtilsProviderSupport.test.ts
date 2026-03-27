@@ -119,6 +119,65 @@ describe('llmUtils expanded provider support', () => {
         }));
     });
 
+    test('callLLM retries a transient OpenAI network disconnect even when stable API calls are disabled', async () => {
+        jest.useFakeTimers();
+
+        try {
+            const provider: LLMProviderConfig = {
+                name: 'OpenAI',
+                apiKey: 'openai-key',
+                baseUrl: 'https://api.openai.com/v1',
+                model: 'gpt-4o',
+                temperature: 0.2
+            };
+
+            settings = { ...settings, enableStableApiCall: false };
+
+            (requestUrl as jest.Mock)
+                .mockRejectedValueOnce(new Error('net::ERR_CONNECTION_CLOSED'))
+                .mockResolvedValueOnce({
+                    status: 200,
+                    json: { choices: [{ message: { content: 'retry-ok' } }] },
+                    text: '{"choices":[{"message":{"content":"retry-ok"}}]}'
+                });
+
+            const pendingResult = callLLM(provider, 'System prompt', 'Slow provider content', settings, reporter);
+
+            await Promise.resolve();
+            await jest.advanceTimersByTimeAsync(5200);
+
+            await expect(pendingResult).resolves.toBe('retry-ok');
+            expect(requestUrl).toHaveBeenCalledTimes(2);
+            expect(reporter.log).toHaveBeenCalledWith(expect.stringContaining('Transient network error detected'));
+        } finally {
+            jest.clearAllTimers();
+            jest.useRealTimers();
+        }
+    });
+
+    test('callLLM does not retry fatal OpenAI client errors when stable API calls are disabled', async () => {
+        const provider: LLMProviderConfig = {
+            name: 'OpenAI',
+            apiKey: 'openai-key',
+            baseUrl: 'https://api.openai.com/v1',
+            model: 'gpt-4o',
+            temperature: 0.2
+        };
+
+        settings = { ...settings, enableStableApiCall: false };
+
+        (requestUrl as jest.Mock).mockResolvedValue({
+            status: 400,
+            json: { error: { message: 'Bad request' } },
+            text: '{"error":{"message":"Bad request"}}'
+        });
+
+        await expect(callLLM(provider, 'System prompt', 'Broken content', settings, reporter)).rejects.toThrow(
+            'OpenAI API error: 400 - Bad request'
+        );
+        expect(requestUrl).toHaveBeenCalledTimes(1);
+    });
+
     test('OpenAI Compatible preset can call unauthenticated local gateways', async () => {
         const provider: LLMProviderConfig = {
             name: 'OpenAI Compatible',
