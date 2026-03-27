@@ -1,6 +1,7 @@
 import { Notice, requestUrl } from 'obsidian';
 import { LLMProviderConfig, NotemdSettings, ProgressReporter } from './types';
 import { getLLMProviderDefinition } from './llmProviders';
+import { DEFAULT_SETTINGS } from './constants';
 import { cancellableDelay } from './utils';
 import { ErrorModal } from './ui/ErrorModal'; // Import ErrorModal
 
@@ -95,6 +96,44 @@ function isTransientNetworkErrorMessage(errorMessage: string): boolean {
     return TRANSIENT_NETWORK_ERROR_PATTERNS.some(pattern => normalized.includes(pattern));
 }
 
+const CONNECTION_TEST_MAX_ATTEMPTS = DEFAULT_SETTINGS.apiCallMaxRetries + 1;
+const CONNECTION_TEST_RETRY_DELAY_MS = DEFAULT_SETTINGS.apiCallInterval * 1000;
+
+async function waitForConnectionTestRetry(): Promise<void> {
+    await new Promise(resolve => setTimeout(resolve, CONNECTION_TEST_RETRY_DELAY_MS));
+}
+
+async function requestUrlForConnectionTest(
+    requestFactory: () => Promise<any>
+): Promise<any> {
+    let lastError: Error | null = null;
+    let shouldUseStableRetrySequence = false;
+    let maxAttempts = 1;
+
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        try {
+            return await requestFactory();
+        } catch (error: unknown) {
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            lastError = error instanceof Error ? error : new Error(errorMessage);
+            const isTransientNetworkError = isTransientNetworkErrorMessage(errorMessage);
+
+            if (!shouldUseStableRetrySequence && attempt === 1 && isTransientNetworkError) {
+                shouldUseStableRetrySequence = true;
+                maxAttempts = CONNECTION_TEST_MAX_ATTEMPTS;
+            }
+
+            if (!isTransientNetworkError || attempt >= maxAttempts) {
+                throw lastError;
+            }
+
+            await waitForConnectionTestRetry();
+        }
+    }
+
+    throw lastError || new Error('Connection test failed after multiple retries.');
+}
+
 function buildOpenAICompatibleRequestBody(
     provider: LLMProviderConfig,
     modelName: string,
@@ -186,12 +225,12 @@ async function testOpenAICompatibleAPI(provider: LLMProviderConfig): Promise<{ s
         const modelsUrl = `${provider.baseUrl}/models`;
 
         try {
-            response = await requestUrl({
+            response = await requestUrlForConnectionTest(() => requestUrl({
                 url: modelsUrl,
                 method: 'GET',
                 headers,
                 throw: false
-            });
+            }));
         } catch (_error) {
             response = null;
         }
@@ -212,13 +251,13 @@ async function testOpenAICompatibleAPI(provider: LLMProviderConfig): Promise<{ s
         { connectionTest: true }
     );
 
-    response = await requestUrl({
+    response = await requestUrlForConnectionTest(() => requestUrl({
         url: chatUrl,
         method: 'POST',
         headers,
         body: JSON.stringify(responseBody),
         throw: false
-    });
+    }));
 
     if (response.status < 200 || response.status >= 300) {
         const errorText = response.text;
@@ -266,7 +305,7 @@ export async function testAPI(provider: LLMProviderConfig, debugMode: boolean = 
                     }),
                     throw: false
                 };
-                response = await requestUrl(ollamaOptions);
+                response = await requestUrlForConnectionTest(() => requestUrl(ollamaOptions));
                 if (response.status < 200 || response.status >= 300) {
                     const errorText = response.text;
                     if (errorText.includes("model") && errorText.includes("not found")) {
@@ -292,7 +331,7 @@ export async function testAPI(provider: LLMProviderConfig, debugMode: boolean = 
                     max_tokens: 1 
                 });
                 options.throw = false;
-                response = await requestUrl(options);
+                response = await requestUrlForConnectionTest(() => requestUrl(options));
                 if (response.status < 200 || response.status >= 300) throw new Error(`Anthropic API error: ${response.status} - ${response.text}`);
                 return { success: true, message: `Successfully connected to Anthropic API.` };
 
@@ -303,7 +342,7 @@ export async function testAPI(provider: LLMProviderConfig, debugMode: boolean = 
                 options.headers = { 'Content-Type': 'application/json' };
                 options.body = JSON.stringify({ contents: [{ role: 'user', parts: [{ text: 'Test' }] }], generationConfig: { maxOutputTokens: 1, temperature: 0 } });
                 options.throw = false;
-                response = await requestUrl(options);
+                response = await requestUrlForConnectionTest(() => requestUrl(options));
                 if (response.status < 200 || response.status >= 300) throw new Error(`Google API error: ${response.status} - ${response.text}`);
                 return { success: true, message: `Successfully connected to Google API.` };
             case 'azure-openai':
@@ -322,7 +361,7 @@ export async function testAPI(provider: LLMProviderConfig, debugMode: boolean = 
                 options.body = JSON.stringify(azureBody);
                 options.throw = false;
                 
-                response = await requestUrl(options);
+                response = await requestUrlForConnectionTest(() => requestUrl(options));
                 if (response.status < 200 || response.status >= 300) throw new Error(`Azure OpenAI API error: ${response.status} - ${response.text}`);
                 return { success: true, message: `Successfully connected to Azure OpenAI deployment '${provider.model}'.` };
 
