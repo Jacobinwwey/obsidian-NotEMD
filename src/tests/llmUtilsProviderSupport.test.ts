@@ -92,6 +92,36 @@ describe('llmUtils expanded provider support', () => {
         expect(requestBody.model).toBe('qwen-plus');
     });
 
+    test('callLLM routes Qwen Code through the OpenAI-compatible runtime', async () => {
+        const provider: LLMProviderConfig = {
+            name: 'Qwen Code',
+            apiKey: 'dashscope-code-key',
+            baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
+            model: 'qwen3-coder-plus',
+            temperature: 0.2
+        };
+
+        (requestUrl as jest.Mock).mockResolvedValue({
+            status: 200,
+            json: { choices: [{ message: { content: 'qwen-code-ok' } }] },
+            text: '{"choices":[{"message":{"content":"qwen-code-ok"}}]}'
+        });
+
+        const result = await callLLM(provider, 'System prompt', 'Write code', settings, reporter);
+
+        expect(result).toBe('qwen-code-ok');
+        expect(requestUrl).toHaveBeenCalledWith(expect.objectContaining({
+            url: 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions',
+            method: 'POST',
+            headers: expect.objectContaining({
+                Authorization: 'Bearer dashscope-code-key'
+            })
+        }));
+
+        const requestBody = JSON.parse((requestUrl as jest.Mock).mock.calls[0][0].body);
+        expect(requestBody.model).toBe('qwen3-coder-plus');
+    });
+
     test('callLLM routes SiliconFlow through the OpenAI-compatible runtime', async () => {
         const provider: LLMProviderConfig = {
             name: 'SiliconFlow',
@@ -117,6 +147,66 @@ describe('llmUtils expanded provider support', () => {
                 Authorization: 'Bearer sf-key'
             })
         }));
+    });
+
+    test('callLLM routes Z AI through the OpenAI-compatible runtime', async () => {
+        const provider: LLMProviderConfig = {
+            name: 'Z AI',
+            apiKey: 'zai-key',
+            baseUrl: 'https://api.z.ai/api/paas/v4',
+            model: 'glm-5',
+            temperature: 0.3
+        };
+
+        (requestUrl as jest.Mock).mockResolvedValue({
+            status: 200,
+            json: { choices: [{ message: { content: 'zai-ok' } }] },
+            text: '{"choices":[{"message":{"content":"zai-ok"}}]}'
+        });
+
+        const result = await callLLM(provider, 'System prompt', 'Global content', settings, reporter);
+
+        expect(result).toBe('zai-ok');
+        expect(requestUrl).toHaveBeenCalledWith(expect.objectContaining({
+            url: 'https://api.z.ai/api/paas/v4/chat/completions',
+            method: 'POST',
+            headers: expect.objectContaining({
+                Authorization: 'Bearer zai-key'
+            })
+        }));
+
+        const requestBody = JSON.parse((requestUrl as jest.Mock).mock.calls[0][0].body);
+        expect(requestBody.model).toBe('glm-5');
+    });
+
+    test('callLLM routes Huawei Cloud MaaS through the OpenAI-compatible runtime', async () => {
+        const provider: LLMProviderConfig = {
+            name: 'Huawei Cloud MaaS',
+            apiKey: 'huawei-key',
+            baseUrl: 'https://api.modelarts-maas.com/v1',
+            model: 'DeepSeek-V3',
+            temperature: 0.3
+        };
+
+        (requestUrl as jest.Mock).mockResolvedValue({
+            status: 200,
+            json: { choices: [{ message: { content: 'huawei-ok' } }] },
+            text: '{"choices":[{"message":{"content":"huawei-ok"}}]}'
+        });
+
+        const result = await callLLM(provider, 'System prompt', 'Hosted content', settings, reporter);
+
+        expect(result).toBe('huawei-ok');
+        expect(requestUrl).toHaveBeenCalledWith(expect.objectContaining({
+            url: 'https://api.modelarts-maas.com/v1/chat/completions',
+            method: 'POST',
+            headers: expect.objectContaining({
+                Authorization: 'Bearer huawei-key'
+            })
+        }));
+
+        const requestBody = JSON.parse((requestUrl as jest.Mock).mock.calls[0][0].body);
+        expect(requestBody.model).toBe('DeepSeek-V3');
     });
 
     test('callLLM retries a transient OpenAI network disconnect even when stable API calls are disabled', async () => {
