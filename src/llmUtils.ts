@@ -104,7 +104,8 @@ async function waitForConnectionTestRetry(): Promise<void> {
 }
 
 async function requestUrlForConnectionTest(
-    requestFactory: () => Promise<any>
+    requestFactory: () => Promise<any>,
+    fallbackFactory?: () => Promise<any>
 ): Promise<any> {
     let lastError: Error | null = null;
     let shouldUseStableRetrySequence = false;
@@ -117,6 +118,19 @@ async function requestUrlForConnectionTest(
             const errorMessage = error instanceof Error ? error.message : String(error);
             lastError = error instanceof Error ? error : new Error(errorMessage);
             const isTransientNetworkError = isTransientNetworkErrorMessage(errorMessage);
+
+            if (attempt === 1 && isTransientNetworkError && fallbackFactory) {
+                try {
+                    return await fallbackFactory();
+                } catch (fallbackError: unknown) {
+                    const fallbackMessage = fallbackError instanceof Error ? fallbackError.message : String(fallbackError);
+                    lastError = fallbackError instanceof Error ? fallbackError : new Error(fallbackMessage);
+
+                    if (!isTransientNetworkErrorMessage(fallbackMessage)) {
+                        throw lastError;
+                    }
+                }
+            }
 
             if (!shouldUseStableRetrySequence && attempt === 1 && isTransientNetworkError) {
                 shouldUseStableRetrySequence = true;
@@ -134,6 +148,16 @@ async function requestUrlForConnectionTest(
     throw lastError || new Error('Connection test failed after multiple retries.');
 }
 
+function buildConnectionTestFallbackFactory(
+    options: RuntimeRequestOptions
+): (() => Promise<RuntimeRequestResponse>) | undefined {
+    if (canUseDesktopHttpTransport(options.url) || !canUseWebFetchTransport(options.url)) {
+        return undefined;
+    }
+
+    return () => requestViaWebFetchTransport(options);
+}
+
 type RuntimeRequestOptions = {
     url: string;
     method: string;
@@ -146,7 +170,43 @@ type RuntimeRequestResponse = {
     status: number;
     text: string;
     json: any;
+    headers?: Record<string, string>;
+    __notemdDebug?: RuntimeDebugInfo;
 };
+
+type TransportDebugAttempt = {
+    transport: string;
+    requestMethod: string;
+    requestUrl: string;
+    requestHeaders?: Record<string, string>;
+    durationMs?: number;
+    status?: number;
+    responseHeaders?: Record<string, string>;
+    responseText?: string;
+    partialResponseText?: string;
+    errorMessage?: string;
+};
+
+type RuntimeDebugInfo = {
+    attempts: TransportDebugAttempt[];
+};
+
+const SENSITIVE_DEBUG_QUERY_PARAMS = new Set([
+    'access_token',
+    'api-key',
+    'api_key',
+    'authorization',
+    'key',
+    'token',
+    'x-api-key'
+]);
+
+const SENSITIVE_DEBUG_HEADERS = new Set([
+    'api-key',
+    'authorization',
+    'proxy-authorization',
+    'x-api-key'
+]);
 
 function hasHeader(headers: Record<string, string>, headerName: string): boolean {
     const normalizedTarget = headerName.toLowerCase();
@@ -168,6 +228,240 @@ function parseRuntimeResponseBody(responseText: string): any {
         return JSON.parse(responseText);
     } catch (_error) {
         return null;
+    }
+}
+
+function canUseWebFetchTransport(targetUrl: string): boolean {
+    if (typeof globalThis.fetch !== 'function') {
+        return false;
+    }
+
+    try {
+        const protocol = new URL(targetUrl).protocol;
+        return protocol === 'https:' || protocol === 'http:';
+    } catch (_error) {
+        return false;
+    }
+}
+
+function sanitizeUrlForDebug(rawUrl: string): string {
+    try {
+        const parsedUrl = new URL(rawUrl);
+        if (parsedUrl.username || parsedUrl.password) {
+            parsedUrl.username = '[REDACTED]';
+            parsedUrl.password = '[REDACTED]';
+        }
+
+        parsedUrl.searchParams.forEach((_value, key) => {
+            if (SENSITIVE_DEBUG_QUERY_PARAMS.has(key.toLowerCase())) {
+                parsedUrl.searchParams.set(key, '[REDACTED]');
+            }
+        });
+
+        return parsedUrl.toString().replace(/%5BREDACTED%5D/g, '[REDACTED]');
+    } catch (_error) {
+        return rawUrl;
+    }
+}
+
+function sanitizeHeadersForDebug(headers?: Record<string, unknown> | null): Record<string, string> | undefined {
+    if (!headers) {
+        return undefined;
+    }
+
+    const sanitizedHeaders: Record<string, string> = {};
+    for (const [key, value] of Object.entries(headers)) {
+        if (value === undefined || value === null) {
+            continue;
+        }
+
+        const normalizedKey = key.toLowerCase();
+        sanitizedHeaders[key] = SENSITIVE_DEBUG_HEADERS.has(normalizedKey)
+            ? '[REDACTED]'
+            : Array.isArray(value)
+                ? value.join(', ')
+                : String(value);
+    }
+
+    return Object.keys(sanitizedHeaders).length > 0 ? sanitizedHeaders : undefined;
+}
+
+function createTransportDebugAttempt(
+    transport: string,
+    options: RuntimeRequestOptions,
+    details: Omit<TransportDebugAttempt, 'transport' | 'requestMethod' | 'requestUrl' | 'requestHeaders'>
+): TransportDebugAttempt {
+    return {
+        transport,
+        requestMethod: options.method,
+        requestUrl: sanitizeUrlForDebug(options.url),
+        requestHeaders: sanitizeHeadersForDebug(options.headers),
+        ...details
+    };
+}
+
+function getTransportDebugAttempts(value: any): TransportDebugAttempt[] {
+    return value?.__notemdDebug?.attempts ?? [];
+}
+
+function mergeTransportDebugAttempts(...groups: Array<TransportDebugAttempt[] | undefined>): TransportDebugAttempt[] {
+    const merged: TransportDebugAttempt[] = [];
+    for (const group of groups) {
+        if (group?.length) {
+            merged.push(...group);
+        }
+    }
+    return merged;
+}
+
+function attachTransportDebugToError(error: unknown, attempts: TransportDebugAttempt[]): Error {
+    const normalizedError = error instanceof Error ? error : new Error(String(error));
+    (normalizedError as any).__notemdDebug = { attempts };
+    return normalizedError;
+}
+
+function attachTransportDebugToResponse(
+    response: RuntimeRequestResponse,
+    attempts: TransportDebugAttempt[]
+): RuntimeRequestResponse {
+    response.__notemdDebug = { attempts };
+    return response;
+}
+
+function normalizeRuntimeResponse(
+    rawResponse: { status?: number; text?: string; json?: any; headers?: Record<string, unknown> },
+    attempts: TransportDebugAttempt[]
+): RuntimeRequestResponse {
+    const responseText = typeof rawResponse.text === 'string'
+        ? rawResponse.text
+        : rawResponse.json
+            ? JSON.stringify(rawResponse.json)
+            : '';
+
+    return attachTransportDebugToResponse({
+        status: rawResponse.status ?? 0,
+        text: responseText,
+        json: rawResponse.json ?? parseRuntimeResponseBody(responseText),
+        headers: sanitizeHeadersForDebug(rawResponse.headers) ?? {}
+    }, attempts);
+}
+
+async function requestViaObsidianTransport(options: RuntimeRequestOptions): Promise<RuntimeRequestResponse> {
+    const startedAt = Date.now();
+
+    try {
+        const response = await requestUrl(options);
+        const attempt = createTransportDebugAttempt('requestUrl', options, {
+            durationMs: Date.now() - startedAt,
+            status: response.status,
+            responseHeaders: sanitizeHeadersForDebug(response.headers),
+            responseText: typeof response.text === 'string' ? response.text : undefined
+        });
+
+        return normalizeRuntimeResponse(response, [attempt]);
+    } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        const attempt = createTransportDebugAttempt('requestUrl', options, {
+            durationMs: Date.now() - startedAt,
+            status: typeof (error as any)?.status === 'number' ? (error as any).status : undefined,
+            responseHeaders: sanitizeHeadersForDebug((error as any)?.headers || (error as any)?.response?.headers),
+            responseText: (error as any)?.text || (error as any)?.response?.text || '',
+            errorMessage
+        });
+
+        throw attachTransportDebugToError(error, [attempt]);
+    }
+}
+
+function extractFetchHeaders(headers: Headers): Record<string, string> {
+    const result: Record<string, string> = {};
+    headers.forEach((value, key) => {
+        result[key] = value;
+    });
+    return result;
+}
+
+async function readFetchResponseText(
+    response: Response,
+    transport: string,
+    options: RuntimeRequestOptions,
+    startedAt: number
+): Promise<string> {
+    if (!response.body || typeof response.body.getReader !== 'function') {
+        return await response.text();
+    }
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    const chunks: string[] = [];
+
+    try {
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) {
+                break;
+            }
+            if (value) {
+                chunks.push(decoder.decode(value, { stream: true }));
+            }
+        }
+        chunks.push(decoder.decode());
+        return chunks.join('');
+    } catch (error: unknown) {
+        const partialResponseText = `${chunks.join('')}${decoder.decode()}`;
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        const attempt = createTransportDebugAttempt(transport, options, {
+            durationMs: Date.now() - startedAt,
+            status: response.status,
+            responseHeaders: sanitizeHeadersForDebug(extractFetchHeaders(response.headers)),
+            partialResponseText: partialResponseText || undefined,
+            errorMessage
+        });
+
+        throw attachTransportDebugToError(error, [attempt]);
+    }
+}
+
+async function requestViaWebFetchTransport(
+    options: RuntimeRequestOptions,
+    signal?: AbortSignal
+): Promise<RuntimeRequestResponse> {
+    const startedAt = Date.now();
+
+    try {
+        const response = await globalThis.fetch(options.url, {
+            method: options.method,
+            headers: options.headers,
+            body: options.body,
+            signal
+        });
+        const responseHeaders = extractFetchHeaders(response.headers);
+        const responseText = await readFetchResponseText(response, 'web-fetch', options, startedAt);
+        const attempt = createTransportDebugAttempt('web-fetch', options, {
+            durationMs: Date.now() - startedAt,
+            status: response.status,
+            responseHeaders: sanitizeHeadersForDebug(responseHeaders),
+            responseText
+        });
+
+        return normalizeRuntimeResponse({
+            status: response.status,
+            text: responseText,
+            json: parseRuntimeResponseBody(responseText),
+            headers: responseHeaders
+        }, [attempt]);
+    } catch (error: unknown) {
+        if (getTransportDebugAttempts(error).length > 0) {
+            throw error;
+        }
+
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        const attempt = createTransportDebugAttempt('web-fetch', options, {
+            durationMs: Date.now() - startedAt,
+            errorMessage
+        });
+
+        throw attachTransportDebugToError(error, [attempt]);
     }
 }
 
@@ -198,6 +492,7 @@ async function requestViaDesktopHttpTransport(
     signal?: AbortSignal
 ): Promise<RuntimeRequestResponse> {
     return await new Promise((resolve, reject) => {
+        const startedAt = Date.now();
         const parsedUrl = new URL(options.url);
         const transport = parsedUrl.protocol === 'https:' ? require('https') : require('http');
         const headers = { ...(options.headers ?? {}) };
@@ -246,34 +541,87 @@ async function requestViaDesktopHttpTransport(
             headers
         }, (response: any) => {
             const chunks: Buffer[] = [];
+            let responseEnded = false;
+            const responseHeaders = response.headers as Record<string, unknown> | undefined;
+            const statusCode = response.statusCode ?? 0;
+
+            const rejectWithTransportDebug = (error: unknown) => {
+                const responseText = chunks.length > 0 ? Buffer.concat(chunks).toString('utf8') : '';
+                const errorMessage = error instanceof Error ? error.message : String(error);
+                const attempt = createTransportDebugAttempt('desktop-http', options, {
+                    durationMs: Date.now() - startedAt,
+                    status: statusCode,
+                    responseHeaders: sanitizeHeadersForDebug(responseHeaders),
+                    partialResponseText: responseEnded ? undefined : responseText || undefined,
+                    responseText: responseEnded ? responseText || undefined : undefined,
+                    errorMessage
+                });
+
+                rejectOnce(attachTransportDebugToError(error, [attempt]));
+            };
 
             response.on('data', (chunk: Buffer | string) => {
                 chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
             });
             response.on('end', () => {
+                responseEnded = true;
                 const responseText = Buffer.concat(chunks).toString('utf8');
-                resolveOnce({
-                    status: response.statusCode ?? 0,
-                    text: responseText,
-                    json: parseRuntimeResponseBody(responseText)
+                const attempt = createTransportDebugAttempt('desktop-http', options, {
+                    durationMs: Date.now() - startedAt,
+                    status: statusCode,
+                    responseHeaders: sanitizeHeadersForDebug(responseHeaders),
+                    responseText
                 });
+
+                resolveOnce(normalizeRuntimeResponse({
+                    status: statusCode,
+                    text: responseText,
+                    json: parseRuntimeResponseBody(responseText),
+                    headers: responseHeaders
+                }, [attempt]));
             });
-            response.on('error', rejectOnce);
+            response.on('error', rejectWithTransportDebug);
+            response.on('aborted', () => {
+                rejectWithTransportDebug(new Error('response aborted'));
+            });
+            response.on('close', () => {
+                if (!responseEnded) {
+                    rejectWithTransportDebug(new Error('response stream closed before completion'));
+                }
+            });
         });
 
-        request.on('error', rejectOnce);
+        request.on('error', (error: unknown) => {
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            const attempt = createTransportDebugAttempt('desktop-http', options, {
+                durationMs: Date.now() - startedAt,
+                errorMessage
+            });
+
+            rejectOnce(attachTransportDebugToError(error, [attempt]));
+        });
 
         if (signal?.aborted) {
             const abortError = createAbortError();
             request.destroy(abortError);
-            rejectOnce(abortError);
+            rejectOnce(attachTransportDebugToError(abortError, [
+                createTransportDebugAttempt('desktop-http', options, {
+                    durationMs: Date.now() - startedAt,
+                    errorMessage: abortError.message
+                })
+            ]));
             return;
         }
 
         abortListener = () => {
             const abortError = createAbortError();
             request.destroy(abortError);
-            rejectOnce(abortError);
+            rejectOnce(attachTransportDebugToError(abortError, [
+                createTransportDebugAttempt('desktop-http', options, {
+                    durationMs: Date.now() - startedAt,
+                    errorMessage: abortError.message
+                })
+            ]));
         };
 
         if (signal) {
@@ -291,23 +639,44 @@ async function requestViaDesktopHttpTransport(
 async function requestRuntimeUrlWithDesktopFallback(
     providerName: string,
     options: RuntimeRequestOptions,
-    progressReporter: ProgressReporter,
+    progressReporter?: ProgressReporter | null,
     signal?: AbortSignal
 ): Promise<RuntimeRequestResponse> {
     try {
-        return await requestUrl(options);
+        return await requestViaObsidianTransport(options);
     } catch (error: unknown) {
         const errorMessage = error instanceof Error ? error.message : String(error);
+        const requestUrlAttempts = getTransportDebugAttempts(error);
+        const fallbackTransport = canUseDesktopHttpTransport(options.url)
+            ? 'desktop-http'
+            : canUseWebFetchTransport(options.url)
+                ? 'web-fetch'
+                : null;
 
-        if (!isTransientNetworkErrorMessage(errorMessage) || !canUseDesktopHttpTransport(options.url)) {
+        if (!isTransientNetworkErrorMessage(errorMessage) || !fallbackTransport) {
             throw error;
         }
 
-        progressReporter.log(
-            `[${providerName}] requestUrl transport closed unexpectedly (${errorMessage}). Retrying this attempt via desktop HTTP transport.`
-        );
+        if (progressReporter) {
+            progressReporter.log(
+                `[${providerName}] requestUrl transport closed unexpectedly (${errorMessage}). Retrying this attempt via ${fallbackTransport === 'desktop-http' ? 'desktop HTTP transport' : 'web fetch transport'}.`
+            );
+        }
 
-        return await requestViaDesktopHttpTransport(options, signal);
+        try {
+            const fallbackResponse = fallbackTransport === 'desktop-http'
+                ? await requestViaDesktopHttpTransport(options, signal)
+                : await requestViaWebFetchTransport(options, signal);
+            return attachTransportDebugToResponse(
+                fallbackResponse,
+                mergeTransportDebugAttempts(requestUrlAttempts, getTransportDebugAttempts(fallbackResponse))
+            );
+        } catch (fallbackError: unknown) {
+            throw attachTransportDebugToError(
+                fallbackError,
+                mergeTransportDebugAttempts(requestUrlAttempts, getTransportDebugAttempts(fallbackError))
+            );
+        }
     }
 }
 
@@ -402,12 +771,16 @@ async function testOpenAICompatibleAPI(provider: LLMProviderConfig): Promise<{ s
         const modelsUrl = `${provider.baseUrl}/models`;
 
         try {
-            response = await requestUrlForConnectionTest(() => requestUrl({
+            const modelsRequest = {
                 url: modelsUrl,
                 method: 'GET',
                 headers,
                 throw: false
-            }));
+            };
+            response = await requestUrlForConnectionTest(
+                () => requestViaObsidianTransport(modelsRequest),
+                buildConnectionTestFallbackFactory(modelsRequest)
+            );
         } catch (_error) {
             response = null;
         }
@@ -428,13 +801,17 @@ async function testOpenAICompatibleAPI(provider: LLMProviderConfig): Promise<{ s
         { connectionTest: true }
     );
 
-    response = await requestUrlForConnectionTest(() => requestUrl({
+    const chatRequest = {
         url: chatUrl,
         method: 'POST',
         headers,
         body: JSON.stringify(responseBody),
         throw: false
-    }));
+    };
+    response = await requestUrlForConnectionTest(
+        () => requestViaObsidianTransport(chatRequest),
+        buildConnectionTestFallbackFactory(chatRequest)
+    );
 
     if (response.status < 200 || response.status >= 300) {
         const errorText = response.text;
@@ -482,7 +859,10 @@ export async function testAPI(provider: LLMProviderConfig, debugMode: boolean = 
                     }),
                     throw: false
                 };
-                response = await requestUrlForConnectionTest(() => requestUrl(ollamaOptions));
+                response = await requestUrlForConnectionTest(
+                    () => requestViaObsidianTransport(ollamaOptions),
+                    buildConnectionTestFallbackFactory(ollamaOptions)
+                );
                 if (response.status < 200 || response.status >= 300) {
                     const errorText = response.text;
                     if (errorText.includes("model") && errorText.includes("not found")) {
@@ -508,7 +888,10 @@ export async function testAPI(provider: LLMProviderConfig, debugMode: boolean = 
                     max_tokens: 1 
                 });
                 options.throw = false;
-                response = await requestUrlForConnectionTest(() => requestUrl(options));
+                response = await requestUrlForConnectionTest(
+                    () => requestViaObsidianTransport(options),
+                    buildConnectionTestFallbackFactory(options)
+                );
                 if (response.status < 200 || response.status >= 300) throw new Error(`Anthropic API error: ${response.status} - ${response.text}`);
                 return { success: true, message: `Successfully connected to Anthropic API.` };
 
@@ -519,7 +902,10 @@ export async function testAPI(provider: LLMProviderConfig, debugMode: boolean = 
                 options.headers = { 'Content-Type': 'application/json' };
                 options.body = JSON.stringify({ contents: [{ role: 'user', parts: [{ text: 'Test' }] }], generationConfig: { maxOutputTokens: 1, temperature: 0 } });
                 options.throw = false;
-                response = await requestUrlForConnectionTest(() => requestUrl(options));
+                response = await requestUrlForConnectionTest(
+                    () => requestViaObsidianTransport(options),
+                    buildConnectionTestFallbackFactory(options)
+                );
                 if (response.status < 200 || response.status >= 300) throw new Error(`Google API error: ${response.status} - ${response.text}`);
                 return { success: true, message: `Successfully connected to Google API.` };
             case 'azure-openai':
@@ -538,7 +924,10 @@ export async function testAPI(provider: LLMProviderConfig, debugMode: boolean = 
                 options.body = JSON.stringify(azureBody);
                 options.throw = false;
                 
-                response = await requestUrlForConnectionTest(() => requestUrl(options));
+                response = await requestUrlForConnectionTest(
+                    () => requestViaObsidianTransport(options),
+                    buildConnectionTestFallbackFactory(options)
+                );
                 if (response.status < 200 || response.status >= 300) throw new Error(`Azure OpenAI API error: ${response.status} - ${response.text}`);
                 return { success: true, message: `Successfully connected to Azure OpenAI deployment '${provider.model}'.` };
 
@@ -692,12 +1081,46 @@ function getErrorDetails(errorText: string): string {
  * @returns A formatted string with stack trace and raw response if available.
  */
 export function getDebugInfo(error: any): string {
+    const infoLines: string[] = [];
+    const attempts = getTransportDebugAttempts(error);
+
+    attempts.forEach((attempt, index) => {
+        infoLines.push(`Attempt ${index + 1} [${attempt.transport}]`);
+        infoLines.push(`Request: ${attempt.requestMethod} ${sanitizeUrlForDebug(attempt.requestUrl)}`);
+        const sanitizedRequestHeaders = sanitizeHeadersForDebug(attempt.requestHeaders);
+        if (sanitizedRequestHeaders && Object.keys(sanitizedRequestHeaders).length > 0) {
+            infoLines.push(`Request Headers: ${JSON.stringify(sanitizedRequestHeaders)}`);
+        }
+        if (typeof attempt.durationMs === 'number') {
+            infoLines.push(`Duration: ${attempt.durationMs}ms`);
+        }
+        if (typeof attempt.status === 'number') {
+            infoLines.push(`Status: ${attempt.status}`);
+        }
+        if (attempt.errorMessage) {
+            infoLines.push(`Error: ${attempt.errorMessage}`);
+        }
+        const sanitizedResponseHeaders = sanitizeHeadersForDebug(attempt.responseHeaders);
+        if (sanitizedResponseHeaders && Object.keys(sanitizedResponseHeaders).length > 0) {
+            infoLines.push(`Response Headers: ${JSON.stringify(sanitizedResponseHeaders)}`);
+        }
+        if (attempt.partialResponseText) {
+            infoLines.push(`Partial Response: ${attempt.partialResponseText}`);
+        } else if (attempt.responseText) {
+            infoLines.push(`Raw Response: ${attempt.responseText}`);
+        }
+    });
+
     const stack = error instanceof Error ? error.stack : '';
     const rawText = (error as any).text || (error as any).response?.text || '';
-    let info = '';
-    if (stack) info += `Stack: ${stack}\n`;
-    if (rawText) info += `Raw Response: ${rawText}`;
-    return info.trim();
+    if (!attempts.length && rawText) {
+        infoLines.push(`Raw Response: ${rawText}`);
+    }
+    if (stack) {
+        infoLines.push(`Stack: ${stack}`);
+    }
+
+    return infoLines.join('\n').trim();
 }
 
 /**
@@ -744,13 +1167,13 @@ export function handleApiError(
         }
         if (rawText) {
             progressReporter.log(`[${providerName}] Error response: ${rawText}`);
-        } else {
+        } else if (message) {
             progressReporter.log(`[${providerName}] Error details: ${message}`);
-            // Use shared helper for stack trace if it's an error object
-            if (errorOrResponse instanceof Error) {
-                 const extraDebug = getDebugInfo(errorOrResponse);
-                 if (extraDebug) progressReporter.log(`[${providerName}] ${extraDebug}`);
-            }
+        }
+
+        const extraDebug = getDebugInfo(errorOrResponse);
+        if (extraDebug) {
+            progressReporter.log(`[${providerName}] Debug details:\n${extraDebug}`);
         }
     }
 

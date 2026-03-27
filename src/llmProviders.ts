@@ -46,12 +46,12 @@ export const LLM_PROVIDER_DEFINITIONS: LLMProviderDefinition[] = [
         apiKeyMode: 'required',
         apiTestMode: 'chat-only',
         description: 'Alibaba Cloud DashScope compatible-mode endpoint for Qwen and QwQ models.',
-        setupHint: 'Use DashScope Qwen model IDs such as qwen-plus, qwen-max, qwen-flash, qwen3-coder-plus or qwq-plus.',
+        setupHint: 'Use DashScope Qwen model IDs such as qwen3-235b-a22b, qwen3-32b, qwen-plus, qwen-max or qwq-plus.',
         defaultConfig: {
             name: 'Qwen',
             apiKey: '',
             baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
-            model: 'qwen-plus',
+            model: 'qwen3-235b-a22b',
             temperature: 0.3
         }
     },
@@ -94,12 +94,12 @@ export const LLM_PROVIDER_DEFINITIONS: LLMProviderDefinition[] = [
         apiKeyMode: 'required',
         apiTestMode: 'chat-only',
         description: 'Moonshot AI Kimi endpoint with native OpenAI-style chat and model listing.',
-        setupHint: 'Use Moonshot-hosted Kimi model IDs such as kimi-k2.5.',
+        setupHint: 'Use Moonshot-hosted Kimi model IDs such as kimi-k2-0905-preview, kimi-k2.5 or kimi-k2-thinking.',
         defaultConfig: {
             name: 'Moonshot',
             apiKey: '',
             baseUrl: 'https://api.moonshot.cn/v1',
-            model: 'kimi-k2.5',
+            model: 'kimi-k2-0905-preview',
             temperature: 0.3
         }
     },
@@ -142,12 +142,12 @@ export const LLM_PROVIDER_DEFINITIONS: LLMProviderDefinition[] = [
         apiKeyMode: 'required',
         apiTestMode: 'chat-only',
         description: 'MiniMax chat completions endpoint for domestic MiniMax text models.',
-        setupHint: 'Use MiniMax text/chat models such as MiniMax-M1 or MiniMax-Text-01.',
+        setupHint: 'Use MiniMax text/chat models such as MiniMax-M2.7, MiniMax-M2.5 or their highspeed variants.',
         defaultConfig: {
             name: 'MiniMax',
             apiKey: '',
             baseUrl: 'https://api.minimaxi.com/v1',
-            model: 'MiniMax-M1',
+            model: 'MiniMax-M2.7',
             temperature: 0.3
         }
     },
