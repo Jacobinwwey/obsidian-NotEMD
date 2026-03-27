@@ -4,6 +4,22 @@ This document summarizes the major functional and architectural changes implemen
 
 ---
 
+## [1.7.5] - 2026-03-26
+
+### English
+*   **Provider Connection Test Robustness**: Connection tests now fall back to the stable retry sequence after the first transient network disconnect instead of failing immediately, aligning the "Test Connection" button with the runtime resilience already used by task execution.
+*   **Full Transport Coverage**: The transient-failure fallback now covers every transport used by built-in provider presets, including OpenAI-compatible providers, Anthropic, Google, Azure OpenAI, and Ollama.
+*   **Regression Coverage**: Added focused provider-support tests for both runtime API calls and connection-test probes so transient disconnect handling stays locked in across transports.
+*   **Documentation**: Updated the English and Chinese READMEs plus version metadata to document the new provider-connection retry behavior for `1.7.5`.
+
+### Chinese (中文)
+*   **Provider 连接测试鲁棒性增强**: 连接测试在首次遇到瞬时网络断连后，不会再立刻失败，而是会回退到稳定重试序列，使“测试连接”按钮与实际任务执行路径的鲁棒性保持一致。
+*   **全 Transport 覆盖**: 这套瞬时失败回退机制现已覆盖所有内置 Provider 预设所使用的传输链路，包括 OpenAI-compatible、Anthropic、Google、Azure OpenAI 与 Ollama。
+*   **回归测试覆盖**: 新增针对运行时 API 调用与连接测试探测链路的 Provider 支持测试，确保跨 transport 的瞬时断连处理不会回退。
+*   **文档更新**: 已同步更新中英文 README 与版本元数据，记录 `1.7.5` 的 Provider 连接测试重试行为。
+
+---
+
 ## [1.7.4] - 2026-03-26
 
 ### English
