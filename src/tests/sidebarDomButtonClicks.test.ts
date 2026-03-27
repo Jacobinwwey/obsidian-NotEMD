@@ -111,6 +111,17 @@ class FakeElement {
         }
         return null;
     }
+
+    findByClass(cls: string): FakeElement | null {
+        if (this.cls.includes(cls)) {
+            return this;
+        }
+        for (const child of this.children) {
+            const match = child.findByClass(cls);
+            if (match) return match;
+        }
+        return null;
+    }
 }
 
 function createPluginMock(): MockPlugin {
@@ -250,5 +261,40 @@ describe('NotemdSidebarView DOM button wiring', () => {
         expect(plugin.processWithNotemdCommand).toHaveBeenCalledTimes(1);
         expect(plugin.batchGenerateContentForTitlesCommand).toHaveBeenCalledTimes(1);
         expect(plugin.batchMermaidFixCommand).toHaveBeenCalledTimes(1);
+    });
+
+    test('builds a scrollable work area with a persistent progress and log footer', async () => {
+        await sidebar.onOpen();
+
+        const shell = contentContainer.findByClass('notemd-sidebar-shell');
+        const scrollArea = contentContainer.findByClass('notemd-sidebar-scroll');
+        const footer = contentContainer.findByClass('notemd-sidebar-footer');
+        const progressValue = contentContainer.findByClass('notemd-progress-value');
+        const progressBar = contentContainer.findByClass('notemd-progress-bar-container');
+        const logCard = contentContainer.findByClass('notemd-log-card');
+
+        expect(shell).not.toBeNull();
+        expect(scrollArea).not.toBeNull();
+        expect(footer).not.toBeNull();
+        expect(progressValue?.text).toBe('0%');
+        expect(progressBar?.cls).not.toContain('is-hidden');
+        expect(logCard).not.toBeNull();
+    });
+
+    test('updateStatus keeps percent text in the dedicated progress summary pill', async () => {
+        await sidebar.onOpen();
+
+        sidebar.updateStatus('Working...', 25);
+        const progressValue = contentContainer.findByClass('notemd-progress-value');
+        const progressFill = contentContainer.findByClass('notemd-progress-bar-fill');
+
+        expect(progressValue?.text).toBe('25%');
+        expect(progressFill?.text).toBe('');
+        expect(progressFill?.style.width).toBe('25%');
+
+        sidebar.clearDisplay();
+
+        expect(progressValue?.text).toBe('0%');
+        expect(progressFill?.style.width).toBe('0%');
     });
 });
