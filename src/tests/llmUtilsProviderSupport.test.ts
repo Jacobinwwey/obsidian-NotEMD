@@ -129,6 +129,97 @@ function mockDesktopTransportInterruptedResponse(
     });
 }
 
+function mockDesktopTransportStreamingSuccess(
+    transportModule: typeof http | typeof https,
+    frames: string[],
+    options: {
+        statusCode?: number;
+        headers?: Record<string, string>;
+    } = {}
+): void {
+    const {
+        statusCode = 200,
+        headers = {
+            'content-type': 'text/event-stream',
+            'x-request-id': 'desktop-stream-request'
+        }
+    } = options;
+
+    (transportModule.request as unknown as jest.Mock).mockImplementationOnce((_options, callback) => {
+        const response = new EventEmitter() as EventEmitter & {
+            statusCode?: number;
+            headers?: Record<string, string>;
+        };
+        response.statusCode = statusCode;
+        response.headers = headers;
+
+        const request = new EventEmitter() as EventEmitter & {
+            write: jest.Mock;
+            end: jest.Mock;
+            destroy: jest.Mock;
+        };
+
+        request.write = jest.fn();
+        request.destroy = jest.fn((error?: Error) => {
+            if (error) {
+                request.emit('error', error);
+            }
+        });
+        request.end = jest.fn(() => {
+            callback(response);
+            frames.forEach(frame => response.emit('data', Buffer.from(frame)));
+            response.emit('end');
+        });
+
+        return request;
+    });
+}
+
+function mockDesktopTransportStreamingInterruption(
+    transportModule: typeof http | typeof https,
+    options: {
+        frames?: string[];
+        errorMessage?: string;
+        statusCode?: number;
+        headers?: Record<string, string>;
+    } = {}
+): void {
+    const {
+        frames = [],
+        errorMessage = 'socket hang up',
+        statusCode = 200,
+        headers = {
+            'content-type': 'text/event-stream',
+            'x-request-id': 'desktop-stream-request'
+        }
+    } = options;
+
+    (transportModule.request as unknown as jest.Mock).mockImplementationOnce((_options, callback) => {
+        const response = new EventEmitter() as EventEmitter & {
+            statusCode?: number;
+            headers?: Record<string, string>;
+        };
+        response.statusCode = statusCode;
+        response.headers = headers;
+
+        const request = new EventEmitter() as EventEmitter & {
+            write: jest.Mock;
+            end: jest.Mock;
+            destroy: jest.Mock;
+        };
+
+        request.write = jest.fn();
+        request.destroy = jest.fn();
+        request.end = jest.fn(() => {
+            callback(response);
+            frames.forEach(frame => response.emit('data', Buffer.from(frame)));
+            response.emit('error', new Error(errorMessage));
+        });
+
+        return request;
+    });
+}
+
 function mockFetchSuccess(
     responseBody: unknown,
     options: {
@@ -147,6 +238,61 @@ function mockFetchSuccess(
         headers: new Headers(headers),
         body: undefined,
         text: jest.fn().mockResolvedValue(JSON.stringify(responseBody))
+    });
+
+    Object.defineProperty(globalThis, 'fetch', {
+        value: fetchMock,
+        configurable: true,
+        writable: true
+    });
+
+    return fetchMock;
+}
+
+function createStreamingReader(chunks: string[], errorMessage?: string): { read: jest.Mock; releaseLock: jest.Mock } {
+    const encodedChunks = chunks.map(chunk => new TextEncoder().encode(chunk));
+    let index = 0;
+
+    return {
+        read: jest.fn().mockImplementation(async () => {
+            if (index < encodedChunks.length) {
+                return { done: false, value: encodedChunks[index++] };
+            }
+
+            if (errorMessage) {
+                throw new Error(errorMessage);
+            }
+
+            return { done: true, value: undefined };
+        }),
+        releaseLock: jest.fn()
+    };
+}
+
+function mockFetchStreamingSuccess(
+    frames: string[],
+    options: {
+        status?: number;
+        headers?: Record<string, string>;
+    } = {}
+): jest.Mock {
+    const {
+        status = 200,
+        headers = {
+            'content-type': 'text/event-stream',
+            'x-request-id': 'fetch-stream-request'
+        }
+    } = options;
+    const reader = createStreamingReader(frames);
+
+    const fetchMock = jest.fn().mockResolvedValue({
+        status,
+        ok: status >= 200 && status < 300,
+        headers: new Headers(headers),
+        body: {
+            getReader: () => reader
+        },
+        text: jest.fn().mockResolvedValue(frames.join(''))
     });
 
     Object.defineProperty(globalThis, 'fetch', {
@@ -1138,7 +1284,7 @@ describe('llmUtils expanded provider support', () => {
             .find(entry => entry.includes('[OpenAI] Debug details:'));
 
         expect(debugLog).toContain('Attempt 1 [requestUrl]');
-        expect(debugLog).toContain('Attempt 2 [desktop-http]');
+        expect(debugLog).toContain('Attempt 2 [desktop-http-stream]');
         expect(debugLog).toContain('Partial Response: {"id":"chatcmpl-partial","choices":[');
         expect(debugLog).toContain('Response Headers: {"x-request-id":"desktop-debug-request"}');
     });
@@ -1216,5 +1362,93 @@ describe('llmUtils expanded provider support', () => {
         });
 
         expect(fetchMock).toHaveBeenCalledTimes(1);
+    });
+
+    test('callLLM assembles OpenAI-compatible SSE chunks from desktop fallback after a transient requestUrl failure', async () => {
+        const provider: LLMProviderConfig = {
+            name: 'OpenAI',
+            apiKey: 'openai-key',
+            baseUrl: 'https://api.openai.com/v1',
+            model: 'gpt-4o',
+            temperature: 0.2
+        };
+
+        settings = { ...settings, enableStableApiCall: false };
+
+        (requestUrl as jest.Mock).mockRejectedValueOnce(new Error('net::ERR_CONNECTION_CLOSED'));
+        mockDesktopTransportStreamingSuccess(https, [
+            'data: {"choices":[{"delta":{"role":"assistant","content":""},"finish_reason":null}]}\n\n',
+            'data: {"choices":[{"delta":{"content":"Hello"},"finish_reason":null}]}\n\n',
+            'data: {"choices":[{"delta":{"content":" world"},"finish_reason":null}]}\n\n',
+            'data: {"choices":[{"delta":{},"finish_reason":"stop"}]}\n\n',
+            'data: [DONE]\n\n'
+        ]);
+
+        await expect(callLLM(provider, 'System prompt', 'Streamed content', settings, reporter)).resolves.toBe('Hello world');
+        expect(https.request).toHaveBeenCalledTimes(1);
+        expect(reporter.log).toHaveBeenCalledWith(expect.stringContaining('streaming response parsing'));
+    });
+
+    test('callLLM captures partial parsed SSE content in debug mode when desktop streaming fallback aborts', async () => {
+        const provider: LLMProviderConfig = {
+            name: 'OpenAI',
+            apiKey: 'openai-key',
+            baseUrl: 'https://api.openai.com/v1',
+            model: 'gpt-4o',
+            temperature: 0.2
+        };
+
+        settings = {
+            ...settings,
+            enableStableApiCall: false,
+            enableApiErrorDebugMode: true,
+            apiCallMaxRetries: 0
+        };
+
+        (requestUrl as jest.Mock).mockRejectedValueOnce(new Error('net::ERR_CONNECTION_CLOSED'));
+        mockDesktopTransportStreamingInterruption(https, {
+            frames: [
+                'data: {"choices":[{"delta":{"content":"Partial"},"finish_reason":null}]}\n\n'
+            ]
+        });
+
+        await expect(callLLM(provider, 'System prompt', 'Slow streamed content', settings, reporter)).rejects.toThrow(
+            'OpenAI API request failed: socket hang up'
+        );
+
+        const debugLog = (reporter.log as jest.Mock).mock.calls
+            .map(call => String(call[0]))
+            .find(entry => entry.includes('[OpenAI] Debug details:'));
+
+        expect(debugLog).toContain('Attempt 2 [desktop-http-stream]');
+        expect(debugLog).toContain('Partial Parsed Response: Partial');
+        expect(debugLog).toContain('Partial Response: data: {"choices":[{"delta":{"content":"Partial"},"finish_reason":null}]}');
+    });
+
+    test('callLLM assembles OpenAI-compatible SSE chunks from web fetch fallback when desktop transport is unavailable', async () => {
+        const provider: LLMProviderConfig = {
+            name: 'OpenAI',
+            apiKey: 'openai-key',
+            baseUrl: 'https://api.openai.com/v1',
+            model: 'gpt-4o',
+            temperature: 0.2
+        };
+
+        settings = { ...settings, enableStableApiCall: false };
+
+        (requestUrl as jest.Mock).mockRejectedValueOnce(new Error('net::ERR_CONNECTION_CLOSED'));
+        const fetchMock = mockFetchStreamingSuccess([
+            'data: {"choices":[{"delta":{"content":"web"},"finish_reason":null}]}\n\n',
+            'data: {"choices":[{"delta":{"content":" fetch"},"finish_reason":null}]}\n\n',
+            'data: {"choices":[{"delta":{},"finish_reason":"stop"}]}\n\n',
+            'data: [DONE]\n\n'
+        ]);
+
+        await withDesktopNodeTransportDisabled(async () => {
+            await expect(callLLM(provider, 'System prompt', 'Web stream content', settings, reporter)).resolves.toBe('web fetch');
+        });
+
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+        expect(reporter.log).toHaveBeenCalledWith(expect.stringContaining('streaming response parsing'));
     });
 });

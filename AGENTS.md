@@ -86,6 +86,12 @@ All new LLM providers must follow these rules:
 
 For OpenAI-compatible endpoints, default to the shared runtime unless the provider requires a dedicated protocol.
 
+If you change the shared OpenAI-compatible runtime:
+
+- Preserve the streaming fallback path for long-running requests on desktop `http/https` and non-desktop `fetch`.
+- Preserve deep debug coverage for both raw partial bodies and parsed partial stream output.
+- Update `src/tests/llmUtilsProviderSupport.test.ts` to cover both desktop and non-desktop fallback behavior.
+
 ## UI, Workflow, And Mermaid Rules
 
 If you touch workflow or sidebar behavior:

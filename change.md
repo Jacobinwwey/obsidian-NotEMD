@@ -4,6 +4,20 @@ This document summarizes the major functional and architectural changes implemen
 
 ---
 
+## [1.7.8] - 2026-03-29
+
+### English
+*   **OpenAI-Compatible Streaming Fallback**: Long-running OpenAI-compatible task calls now upgrade their desktop `http/https` and non-desktop `fetch` fallback attempts to streaming response parsing after an initial transient `requestUrl` disconnect. This helps slow gateways and reverse proxies return body chunks earlier instead of failing the whole request while waiting for one large buffered response.
+*   **Parsed Partial Stream Debugging**: Shared deep-debug output now records both raw partial bodies and parsed partial stream text when a streamed fallback attempt is interrupted. This gives developers enough evidence to distinguish between transport resets and upstream provider-side error payloads.
+*   **Regression Coverage**: Added focused tests for desktop and web streaming fallback assembly, plus interrupted streaming fallback diagnostics.
+
+### Chinese (中文)
+*   **OpenAI-compatible 流式回退**: 长耗时的 OpenAI-compatible 任务调用在首次 `requestUrl` 瞬时断连后，现在会把桌面端 `http/https` 与非桌面环境 `fetch` 的回退尝试升级为流式响应解析。这样慢速网关和反向代理可以更早返回 body 分片，而不是一直等待整块缓冲响应后直接判定整次请求失败。
+*   **已解析流式片段调试**: 共享深度调试输出现在会在流式回退被中途打断时，同时记录原始部分响应体和“已解析的部分流式文本”。开发者可以更清楚地区分到底是传输层重置，还是上游 Provider 已经返回了可用于定位问题的错误/内容片段。
+*   **回归测试覆盖**: 新增桌面端与 Web 流式回退拼装测试，以及流式回退中断时的诊断信息测试。
+
+---
+
 ## [1.7.7] - 2026-03-26
 
 ### English
