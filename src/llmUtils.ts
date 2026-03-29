@@ -184,11 +184,23 @@ type TransportDebugAttempt = {
     responseHeaders?: Record<string, string>;
     responseText?: string;
     partialResponseText?: string;
+    parsedResponseText?: string;
+    partialParsedResponseText?: string;
     errorMessage?: string;
 };
 
 type RuntimeDebugInfo = {
     attempts: TransportDebugAttempt[];
+};
+
+type OpenAICompatibleStreamState = {
+    buffer: string;
+    rawResponseText: string;
+    assembledContentText: string;
+    assembledReasoningText: string;
+    sawStreamEvent: boolean;
+    sawDoneToken: boolean;
+    sawFinishReason: boolean;
 };
 
 const SENSITIVE_DEBUG_QUERY_PARAMS = new Set([
@@ -229,6 +241,141 @@ function parseRuntimeResponseBody(responseText: string): any {
     } catch (_error) {
         return null;
     }
+}
+
+function extractTextLikeContent(rawContent: unknown): string {
+    if (typeof rawContent === 'string') {
+        return rawContent;
+    }
+
+    if (Array.isArray(rawContent)) {
+        return rawContent
+            .map(part => typeof part === 'string' ? part : typeof part?.text === 'string' ? part.text : '')
+            .join('');
+    }
+
+    if (rawContent && typeof rawContent === 'object' && typeof (rawContent as { text?: unknown }).text === 'string') {
+        return (rawContent as { text: string }).text;
+    }
+
+    return '';
+}
+
+function createOpenAICompatibleStreamState(): OpenAICompatibleStreamState {
+    return {
+        buffer: '',
+        rawResponseText: '',
+        assembledContentText: '',
+        assembledReasoningText: '',
+        sawStreamEvent: false,
+        sawDoneToken: false,
+        sawFinishReason: false
+    };
+}
+
+function getOpenAICompatibleStreamParsedText(state: OpenAICompatibleStreamState): string {
+    return state.assembledContentText.trim()
+        ? state.assembledContentText
+        : state.assembledReasoningText;
+}
+
+function extractOpenAICompatibleStreamEventText(providerName: string, data: any): { contentText: string; reasoningText: string; finishReason?: string | null } {
+    if (data?.error) {
+        const errorMessage = data.error?.message || `${providerName} reported a streaming error`;
+        const errorCode = data.error?.code || 'N/A';
+        throw new Error(`${providerName} API reported an error: ${errorMessage} (Code: ${errorCode})`);
+    }
+
+    const choice = data?.choices?.[0];
+    if (choice && (choice.finish_reason === 'error' || choice.error)) {
+        const errorMessage = choice.error?.message || `${providerName} reported finish_reason: error`;
+        const errorCode = choice.error?.code || 'N/A';
+        throw new Error(`${providerName} API reported an error: ${errorMessage} (Code: ${errorCode})`);
+    }
+
+    const delta = choice?.delta ?? choice?.message ?? {};
+    const contentText = extractTextLikeContent(delta?.content ?? choice?.text);
+    const reasoningText = typeof delta?.reasoning_content === 'string'
+        ? delta.reasoning_content
+        : typeof delta?.reasoning === 'string'
+            ? delta.reasoning
+            : typeof choice?.reasoning === 'string'
+                ? choice.reasoning
+                : '';
+
+    return {
+        contentText,
+        reasoningText,
+        finishReason: choice?.finish_reason ?? null
+    };
+}
+
+function processOpenAICompatibleSseFrame(providerName: string, state: OpenAICompatibleStreamState, frame: string): void {
+    const normalizedFrame = frame.replace(/\r\n/g, '\n').trim();
+    if (!normalizedFrame) {
+        return;
+    }
+
+    const dataLines = normalizedFrame
+        .split('\n')
+        .filter(line => line.startsWith('data:'));
+
+    if (dataLines.length === 0) {
+        return;
+    }
+
+    state.sawStreamEvent = true;
+    const payload = dataLines
+        .map(line => line.slice(5).trimStart())
+        .join('\n')
+        .trim();
+
+    if (!payload) {
+        return;
+    }
+
+    if (payload === '[DONE]') {
+        state.sawDoneToken = true;
+        return;
+    }
+
+    let data: any;
+    try {
+        data = JSON.parse(payload);
+    } catch (_error) {
+        throw new Error(`${providerName} streaming response contained invalid JSON payload: ${payload}`);
+    }
+
+    const { contentText, reasoningText, finishReason } = extractOpenAICompatibleStreamEventText(providerName, data);
+    if (contentText) {
+        state.assembledContentText += contentText;
+    }
+    if (reasoningText) {
+        state.assembledReasoningText += reasoningText;
+    }
+    if (finishReason && finishReason !== 'error') {
+        state.sawFinishReason = true;
+    }
+}
+
+function drainOpenAICompatibleSseBuffer(
+    providerName: string,
+    state: OpenAICompatibleStreamState,
+    flush: boolean = false
+): void {
+    const normalizedBuffer = state.buffer.replace(/\r\n/g, '\n');
+
+    if (flush) {
+        state.buffer = '';
+        normalizedBuffer
+            .split('\n\n')
+            .forEach(frame => processOpenAICompatibleSseFrame(providerName, state, frame));
+        return;
+    }
+
+    const frames = normalizedBuffer.split('\n\n');
+    state.buffer = frames.pop() ?? '';
+    frames.forEach(frame => processOpenAICompatibleSseFrame(providerName, state, frame));
 }
 
 function canUseWebFetchTransport(targetUrl: string): boolean {
@@ -636,6 +783,408 @@ async function requestViaDesktopHttpTransport(
     });
 }
 
+function buildOpenAICompatibleStreamResponse(
+    providerName: string,
+    transportName: string,
+    options: RuntimeRequestOptions,
+    startedAt: number,
+    statusCode: number,
+    responseHeaders: Record<string, unknown> | undefined,
+    state: OpenAICompatibleStreamState
+): RuntimeRequestResponse {
+    drainOpenAICompatibleSseBuffer(providerName, state, true);
+
+    const rawResponseText = state.rawResponseText;
+    const parsedResponseText = getOpenAICompatibleStreamParsedText(state);
+    const attempt = createTransportDebugAttempt(transportName, options, {
+        durationMs: Date.now() - startedAt,
+        status: statusCode,
+        responseHeaders: sanitizeHeadersForDebug(responseHeaders),
+        responseText: rawResponseText || undefined,
+        parsedResponseText: parsedResponseText || undefined
+    });
+
+    if (state.sawStreamEvent && statusCode >= 200 && statusCode < 300) {
+        if (!state.sawDoneToken && !state.sawFinishReason) {
+            throw attachTransportDebugToError(
+                new Error('stream ended before completion signal'),
+                [
+                    createTransportDebugAttempt(transportName, options, {
+                        durationMs: Date.now() - startedAt,
+                        status: statusCode,
+                        responseHeaders: sanitizeHeadersForDebug(responseHeaders),
+                        partialResponseText: rawResponseText || undefined,
+                        partialParsedResponseText: parsedResponseText || undefined,
+                        errorMessage: 'stream ended before completion signal'
+                    })
+                ]
+            );
+        }
+
+        return normalizeRuntimeResponse({
+            status: statusCode,
+            text: parsedResponseText,
+            json: {
+                choices: [
+                    {
+                        message: {
+                            content: parsedResponseText
+                        }
+                    }
+                ]
+            },
+            headers: responseHeaders
+        }, [attempt]);
+    }
+
+    return normalizeRuntimeResponse({
+        status: statusCode,
+        text: rawResponseText,
+        json: parseRuntimeResponseBody(rawResponseText),
+        headers: responseHeaders
+    }, [attempt]);
+}
+
+function createOpenAICompatibleStreamTransportError(
+    transportName: string,
+    options: RuntimeRequestOptions,
+    startedAt: number,
+    statusCode: number | undefined,
+    responseHeaders: Record<string, unknown> | undefined,
+    state: OpenAICompatibleStreamState,
+    error: unknown
+): Error {
+    const existingAttempts = getTransportDebugAttempts(error);
+    if (existingAttempts.length > 0) {
+        return error instanceof Error ? error : attachTransportDebugToError(error, existingAttempts);
+    }
+
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    const parsedResponseText = getOpenAICompatibleStreamParsedText(state);
+    return attachTransportDebugToError(error, [
+        createTransportDebugAttempt(transportName, options, {
+            durationMs: Date.now() - startedAt,
+            status: statusCode,
+            responseHeaders: sanitizeHeadersForDebug(responseHeaders),
+            partialResponseText: state.rawResponseText || undefined,
+            partialParsedResponseText: parsedResponseText || undefined,
+            errorMessage
+        })
+    ]);
+}
+
+async function requestViaWebFetchOpenAICompatibleStreamTransport(
+    providerName: string,
+    options: RuntimeRequestOptions,
+    signal?: AbortSignal
+): Promise<RuntimeRequestResponse> {
+    const startedAt = Date.now();
+    const transportName = 'web-fetch-stream';
+
+    try {
+        const response = await globalThis.fetch(options.url, {
+            method: options.method,
+            headers: options.headers,
+            body: options.body,
+            signal
+        });
+        const responseHeaders = extractFetchHeaders(response.headers);
+
+        if (!response.body || typeof response.body.getReader !== 'function') {
+            const responseText = await response.text();
+            const attempt = createTransportDebugAttempt(transportName, options, {
+                durationMs: Date.now() - startedAt,
+                status: response.status,
+                responseHeaders: sanitizeHeadersForDebug(responseHeaders),
+                responseText
+            });
+
+            return normalizeRuntimeResponse({
+                status: response.status,
+                text: responseText,
+                json: parseRuntimeResponseBody(responseText),
+                headers: responseHeaders
+            }, [attempt]);
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        const state = createOpenAICompatibleStreamState();
+
+        try {
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) {
+                    break;
+                }
+                if (value) {
+                    const chunkText = decoder.decode(value, { stream: true });
+                    if (chunkText) {
+                        state.rawResponseText += chunkText;
+                        state.buffer += chunkText;
+                        drainOpenAICompatibleSseBuffer(providerName, state);
+                    }
+                }
+            }
+
+            const trailingText = decoder.decode();
+            if (trailingText) {
+                state.rawResponseText += trailingText;
+                state.buffer += trailingText;
+            }
+
+            return buildOpenAICompatibleStreamResponse(
+                providerName,
+                transportName,
+                options,
+                startedAt,
+                response.status,
+                responseHeaders,
+                state
+            );
+        } catch (error: unknown) {
+            const trailingText = decoder.decode();
+            if (trailingText) {
+                state.rawResponseText += trailingText;
+                state.buffer += trailingText;
+            }
+            throw createOpenAICompatibleStreamTransportError(
+                transportName,
+                options,
+                startedAt,
+                response.status,
+                responseHeaders,
+                state,
+                error
+            );
+        } finally {
+            if (typeof reader.releaseLock === 'function') {
+                reader.releaseLock();
+            }
+        }
+    } catch (error: unknown) {
+        if (getTransportDebugAttempts(error).length > 0) {
+            throw error;
+        }
+
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        const attempt = createTransportDebugAttempt(transportName, options, {
+            durationMs: Date.now() - startedAt,
+            errorMessage
+        });
+
+        throw attachTransportDebugToError(error, [attempt]);
+    }
+}
+
+async function requestViaDesktopHttpOpenAICompatibleStreamTransport(
+    providerName: string,
+    options: RuntimeRequestOptions,
+    signal?: AbortSignal
+): Promise<RuntimeRequestResponse> {
+    return await new Promise((resolve, reject) => {
+        const startedAt = Date.now();
+        const transportName = 'desktop-http-stream';
+        const parsedUrl = new URL(options.url);
+        const transport = parsedUrl.protocol === 'https:' ? require('https') : require('http');
+        const headers = { ...(options.headers ?? {}) };
+
+        if (options.body && !hasHeader(headers, 'Content-Length')) {
+            headers['Content-Length'] = Buffer.byteLength(options.body, 'utf8').toString();
+        }
+        if (!hasHeader(headers, 'Accept-Encoding')) {
+            headers['Accept-Encoding'] = 'identity';
+        }
+
+        let settled = false;
+        let abortListener: (() => void) | null = null;
+
+        const cleanup = () => {
+            if (abortListener && signal) {
+                signal.removeEventListener('abort', abortListener);
+            }
+            abortListener = null;
+        };
+
+        const rejectOnce = (error: unknown) => {
+            if (settled) {
+                return;
+            }
+            settled = true;
+            cleanup();
+            reject(error);
+        };
+
+        const resolveOnce = (value: RuntimeRequestResponse) => {
+            if (settled) {
+                return;
+            }
+            settled = true;
+            cleanup();
+            resolve(value);
+        };
+
+        const request = transport.request({
+            protocol: parsedUrl.protocol,
+            hostname: parsedUrl.hostname,
+            port: parsedUrl.port || undefined,
+            path: `${parsedUrl.pathname}${parsedUrl.search}`,
+            method: options.method,
+            headers
+        }, (response: any) => {
+            let responseEnded = false;
+            const responseHeaders = response.headers as Record<string, unknown> | undefined;
+            const statusCode = response.statusCode ?? 0;
+            const state = createOpenAICompatibleStreamState();
+
+            const rejectWithTransportDebug = (error: unknown) => {
+                rejectOnce(createOpenAICompatibleStreamTransportError(
+                    transportName,
+                    options,
+                    startedAt,
+                    statusCode,
+                    responseHeaders,
+                    state,
+                    error
+                ));
+            };
+
+            response.on('data', (chunk: Buffer | string) => {
+                try {
+                    const chunkText = Buffer.isBuffer(chunk) ? chunk.toString('utf8') : chunk;
+                    state.rawResponseText += chunkText;
+                    state.buffer += chunkText;
+                    drainOpenAICompatibleSseBuffer(providerName, state);
+                } catch (error: unknown) {
+                    rejectWithTransportDebug(error);
+                }
+            });
+            response.on('end', () => {
+                responseEnded = true;
+                try {
+                    resolveOnce(buildOpenAICompatibleStreamResponse(
+                        providerName,
+                        transportName,
+                        options,
+                        startedAt,
+                        statusCode,
+                        responseHeaders,
+                        state
+                    ));
+                } catch (error: unknown) {
+                    rejectWithTransportDebug(error);
+                }
+            });
+            response.on('error', rejectWithTransportDebug);
+            response.on('aborted', () => {
+                rejectWithTransportDebug(new Error('response aborted'));
+            });
+            response.on('close', () => {
+                if (!responseEnded) {
+                    rejectWithTransportDebug(new Error('response stream closed before completion'));
+                }
+            });
+        });
+
+        request.on('error', (error: unknown) => {
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            const attempt = createTransportDebugAttempt(transportName, options, {
+                durationMs: Date.now() - startedAt,
+                errorMessage
+            });
+
+            rejectOnce(attachTransportDebugToError(error, [attempt]));
+        });
+
+        if (signal?.aborted) {
+            const abortError = createAbortError();
+            request.destroy(abortError);
+            rejectOnce(attachTransportDebugToError(abortError, [
+                createTransportDebugAttempt(transportName, options, {
+                    durationMs: Date.now() - startedAt,
+                    errorMessage: abortError.message
+                })
+            ]));
+            return;
+        }
+
+        abortListener = () => {
+            const abortError = createAbortError();
+            request.destroy(abortError);
+            rejectOnce(attachTransportDebugToError(abortError, [
+                createTransportDebugAttempt(transportName, options, {
+                    durationMs: Date.now() - startedAt,
+                    errorMessage: abortError.message
+                })
+            ]));
+        };
+
+        if (signal) {
+            signal.addEventListener('abort', abortListener, { once: true });
+        }
+
+        if (options.body) {
+            request.write(options.body);
+        }
+
+        request.end();
+    });
+}
+
+async function requestOpenAICompatibleWithStreamingFallback(
+    providerName: string,
+    options: RuntimeRequestOptions,
+    streamBody: string,
+    progressReporter?: ProgressReporter | null,
+    signal?: AbortSignal
+): Promise<RuntimeRequestResponse> {
+    try {
+        return await requestViaObsidianTransport(options);
+    } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        const requestUrlAttempts = getTransportDebugAttempts(error);
+        const fallbackTransport = canUseDesktopHttpTransport(options.url)
+            ? 'desktop-http'
+            : canUseWebFetchTransport(options.url)
+                ? 'web-fetch'
+                : null;
+
+        if (!isTransientNetworkErrorMessage(errorMessage) || !fallbackTransport) {
+            throw error;
+        }
+
+        if (progressReporter) {
+            progressReporter.log(
+                `[${providerName}] requestUrl transport closed unexpectedly (${errorMessage}). Retrying this attempt via ${fallbackTransport === 'desktop-http' ? 'desktop HTTP transport' : 'web fetch transport'} with streaming response parsing.`
+            );
+        }
+
+        const streamOptions: RuntimeRequestOptions = {
+            ...options,
+            headers: {
+                ...(options.headers ?? {}),
+                Accept: 'text/event-stream'
+            },
+            body: streamBody
+        };
+
+        try {
+            const fallbackResponse = fallbackTransport === 'desktop-http'
+                ? await requestViaDesktopHttpOpenAICompatibleStreamTransport(providerName, streamOptions, signal)
+                : await requestViaWebFetchOpenAICompatibleStreamTransport(providerName, streamOptions, signal);
+            return attachTransportDebugToResponse(
+                fallbackResponse,
+                mergeTransportDebugAttempts(requestUrlAttempts, getTransportDebugAttempts(fallbackResponse))
+            );
+        } catch (fallbackError: unknown) {
+            throw attachTransportDebugToError(
+                fallbackError,
+                mergeTransportDebugAttempts(requestUrlAttempts, getTransportDebugAttempts(fallbackError))
+            );
+        }
+    }
+}
+
 async function requestRuntimeUrlWithDesktopFallback(
     providerName: string,
     options: RuntimeRequestOptions,
@@ -734,18 +1283,9 @@ function extractOpenAICompatibleText(providerName: string, data: any, fallbackTe
     const message = choice?.message;
     const rawContent = message?.content;
 
-    if (typeof rawContent === 'string' && rawContent.trim()) {
-        return rawContent;
-    }
-
-    if (Array.isArray(rawContent)) {
-        const joined = rawContent
-            .map(part => typeof part === 'string' ? part : part?.text || '')
-            .join('')
-            .trim();
-        if (joined) {
-            return joined;
-        }
+    const messageContent = extractTextLikeContent(rawContent);
+    if (messageContent.trim()) {
+        return messageContent;
     }
 
     if (typeof message?.reasoning === 'string' && message.reasoning.trim()) {
@@ -1104,10 +1644,18 @@ export function getDebugInfo(error: any): string {
         if (sanitizedResponseHeaders && Object.keys(sanitizedResponseHeaders).length > 0) {
             infoLines.push(`Response Headers: ${JSON.stringify(sanitizedResponseHeaders)}`);
         }
+        if (attempt.partialParsedResponseText) {
+            infoLines.push(`Partial Parsed Response: ${attempt.partialParsedResponseText}`);
+        }
         if (attempt.partialResponseText) {
             infoLines.push(`Partial Response: ${attempt.partialResponseText}`);
-        } else if (attempt.responseText) {
-            infoLines.push(`Raw Response: ${attempt.responseText}`);
+        } else {
+            if (attempt.parsedResponseText) {
+                infoLines.push(`Parsed Response: ${attempt.parsedResponseText}`);
+            }
+            if (attempt.responseText) {
+                infoLines.push(`Raw Response: ${attempt.responseText}`);
+            }
         }
     });
 
@@ -1764,6 +2312,11 @@ async function executeOpenAICompatibleApi(provider: LLMProviderConfig, modelName
         settings.maxTokens,
         provider.temperature
     );
+    const requestBodyJson = JSON.stringify(requestBody);
+    const streamRequestBodyJson = JSON.stringify({
+        ...requestBody,
+        stream: true
+    });
 
     const { controller } = getAbortSignal(progressReporter, signal);
 
@@ -1771,13 +2324,13 @@ async function executeOpenAICompatibleApi(provider: LLMProviderConfig, modelName
         await cancellableDelay(1, progressReporter);
         let response;
         try {
-            response = await requestRuntimeUrlWithDesktopFallback(provider.name, {
+            response = await requestOpenAICompatibleWithStreamingFallback(provider.name, {
                 url,
                 method: 'POST',
                 headers: buildOpenAICompatibleHeaders(provider),
-                body: JSON.stringify(requestBody),
+                body: requestBodyJson,
                 throw: false
-            }, progressReporter, signal);
+            }, streamRequestBodyJson, progressReporter, signal);
         } catch (error: any) {
             handleApiError(provider.name, error, progressReporter, settings.enableApiErrorDebugMode);
         }

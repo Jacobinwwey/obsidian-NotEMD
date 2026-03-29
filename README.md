@@ -20,7 +20,7 @@ A Easy way to create your own Knowledge-base!
 
 Notemd enhances your Obsidian workflow by integrating with various Large Language Models (LLMs) to process your multi-languages notes, automatically generate wiki-links for key concepts, create corresponding concept notes, perform web research, helping you build powerful knowledge graphs and more.
 
-**Version:** 1.7.7
+**Version:** 1.7.8
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
@@ -60,12 +60,13 @@ That's it! Explore the settings to unlock more features like web research, trans
 - **Stable API Calls (Retry Logic)**: Optionally enable automatic retries for failed LLM API calls with configurable interval and attempt limits.
 - **Resilient Provider Connection Tests**: If the first provider test hits a transient network disconnect, Notemd now falls back to the stable retry sequence before failing, covering OpenAI-compatible, Anthropic, Google, Azure OpenAI, and Ollama transports.
 - **Runtime Environment Transport Fallback**: When a long-running provider request is dropped by `requestUrl` with transient network errors such as `ERR_CONNECTION_CLOSED`, Notemd now retries the same attempt through environment-specific fallback transport before entering the configured retry loop: desktop builds use Node `http/https`, while non-desktop environments use browser `fetch`. This reduces false failures on slow gateways and reverse proxies.
+- **OpenAI-Compatible Streaming Fallback**: For OpenAI-compatible providers, the runtime now upgrades fallback attempts to streaming response parsing on desktop `http/https` and browser `fetch`. This lets slow gateways start returning bytes earlier, keeps long requests alive more reliably, and assembles streamed output back into the normal final response used by Notemd tasks.
 - **China-Ready Provider Presets**: Built-in presets now cover `Qwen`, `Qwen Code`, `Doubao`, `Moonshot`, `GLM`, `Z AI`, `MiniMax`, `Huawei Cloud MaaS`, `Baidu Qianfan`, and `SiliconFlow` in addition to the existing global and local providers.
 - **Reliable Batch Processing**: Improved concurrent processing logic with **staggered API calls** to prevent rate-limiting errors and ensure stable performance during large batch jobs. The new implementation ensures that tasks are initiated at different intervals rather than all at once.
 - **Accurate Progress Reporting**: Fixed a bug where the progress bar could get stuck, ensuring that the UI always reflects the true status of the operation.
 - **Robust Parallel Batch Processing**: Resolved an issue where parallel batch operations would stall prematurely, ensuring all files are processed reliably and efficiently.
 - **Progress Bar Accuracy**: Fixed a bug where the progress bar for the "Create Wiki-Link & Generate Note" command would get stuck at 95%, ensuring it now correctly shows 100% upon completion.
-- **Enhanced API Debugging**: The "API Error Debugging Mode" now captures full response bodies from LLM providers and search services (Tavily/DuckDuckGo), and also records a per-attempt transport timeline with sanitized request URLs, elapsed duration, response headers, partial response bodies, and stack traces for better troubleshooting.
+- **Enhanced API Debugging**: The "API Error Debugging Mode" now captures full response bodies from LLM providers and search services (Tavily/DuckDuckGo), and also records a per-attempt transport timeline with sanitized request URLs, elapsed duration, response headers, partial response bodies, parsed partial stream content, and stack traces for better troubleshooting.
 - **Redesigned Sidebar**: Built-in actions are grouped into focused sections with clearer labels, live status, cancellable progress, and copyable logs to reduce sidebar clutter. The progress/log footer now stays visible even when every section is expanded, and the ready state uses a clearer standby progress track.
 - **Custom One-Click Workflows**: Turn built-in sidebar utilities into reusable custom buttons with user-defined names and assembled action chains. A default `One-Click Extract` workflow is included out of the box.
 
@@ -212,12 +213,12 @@ Access plugin settings via:
     *   **Disabled (Default)**: A single API call failure will stop the current task.
     *   **Enabled**: Automatically retries failed LLM API calls (useful for intermittent network issues or rate limits).
     *   **Connection Test Fallback**: Even when normal calls are not already running in stable mode, provider connection tests now switch into the same retry sequence after the first transient network failure.
-    *   **Runtime Transport Fallback (Environment-Aware)**: Long-running task requests that are transiently dropped by `requestUrl` now retry the same attempt through an environment-aware fallback first. Desktop builds use Node `http/https`; non-desktop environments use browser `fetch`. If that fallback also fails, Notemd then enters the normal stable retry sequence.
+    *   **Runtime Transport Fallback (Environment-Aware)**: Long-running task requests that are transiently dropped by `requestUrl` now retry the same attempt through an environment-aware fallback first. Desktop builds use Node `http/https`; non-desktop environments use browser `fetch`. OpenAI-compatible providers additionally switch those fallback attempts into streaming response parsing so slow gateways can return body chunks earlier. If the fallback also fails, Notemd then enters the normal stable retry sequence.
 -   **Retry Interval (seconds)**: (Visible only when enabled) Time to wait between retry attempts (1-300 seconds). Default: 5.
 -   **Maximum Retries**: (Visible only when enabled) Maximum number of retry attempts (0-10). Default: 3.
 -   **API Error Debugging Mode**:
     *   **Disabled (Default)**: Uses standard, concise error reporting.
-    *   **Enabled**: Activates detailed error logging (similar to DeepSeek's verbose output) for all providers and tasks (including Translate, Search, and Connection Tests). This includes HTTP status codes, raw response text, request transport timelines, sanitized request URLs and headers, elapsed attempt durations, response headers, partial response bodies, and stack traces, which is crucial for troubleshooting API connection issues and upstream gateway resets.
+    *   **Enabled**: Activates detailed error logging (similar to DeepSeek's verbose output) for all providers and tasks (including Translate, Search, and Connection Tests). This includes HTTP status codes, raw response text, request transport timelines, sanitized request URLs and headers, elapsed attempt durations, response headers, partial response bodies, parsed partial stream output, and stack traces, which is crucial for troubleshooting API connection issues and upstream gateway resets.
 <img width="805" height="187" alt="stable API calls" src="https://github.com/user-attachments/assets/936454a7-b657-413c-8a2a-13d517f9c519" />
 
 ### General Settings
