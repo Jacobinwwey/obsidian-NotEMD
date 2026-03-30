@@ -1359,6 +1359,54 @@ describe('llmUtils expanded provider support', () => {
         expect(debugInfo).toContain('Partial Response: {"message":"partial"}');
     });
 
+    test('callLLM uses desktop streaming transport as primary long-request path for OpenAI-compatible providers when stable mode is enabled', async () => {
+        const provider: LLMProviderConfig = {
+            name: 'OpenAI',
+            apiKey: 'openai-key',
+            baseUrl: 'https://api.openai.com/v1',
+            model: 'gpt-4o',
+            temperature: 0.2
+        };
+
+        settings = { ...settings, enableStableApiCall: true };
+        mockDesktopTransportStreamingSuccess(https, [
+            '{"choices":[{"message":{"content":"primary-desktop-ok"}}]}'
+        ], {
+            headers: {
+                'content-type': 'application/json',
+                'x-request-id': 'desktop-primary-request'
+            }
+        });
+
+        await expect(callLLM(provider, 'System prompt', 'Primary desktop content', settings, reporter)).resolves.toBe('primary-desktop-ok');
+        expect(requestUrl).not.toHaveBeenCalled();
+        expect(https.request).toHaveBeenCalledTimes(1);
+        expect(reporter.log).toHaveBeenCalledWith(expect.stringContaining('Using desktop HTTP streaming transport as primary long-request path'));
+    });
+
+    test('callLLM falls back to requestUrl path when primary desktop streaming transport fails in stable mode', async () => {
+        const provider: LLMProviderConfig = {
+            name: 'OpenAI',
+            apiKey: 'openai-key',
+            baseUrl: 'https://api.openai.com/v1',
+            model: 'gpt-4o',
+            temperature: 0.2
+        };
+
+        settings = { ...settings, enableStableApiCall: true };
+        mockDesktopTransportFailure(https, 'socket hang up');
+        (requestUrl as jest.Mock).mockResolvedValue({
+            status: 200,
+            json: { choices: [{ message: { content: 'requesturl-after-primary-failure' } }] },
+            text: '{"choices":[{"message":{"content":"requesturl-after-primary-failure"}}]}'
+        });
+
+        await expect(callLLM(provider, 'System prompt', 'Fallback content', settings, reporter)).resolves.toBe('requesturl-after-primary-failure');
+        expect(https.request).toHaveBeenCalledTimes(1);
+        expect(requestUrl).toHaveBeenCalledTimes(1);
+        expect(reporter.log).toHaveBeenCalledWith(expect.stringContaining('Primary desktop HTTP streaming transport failed'));
+    });
+
     test('callLLM falls back to web fetch transport after a transient requestUrl failure when desktop transport is unavailable', async () => {
         const provider: LLMProviderConfig = {
             name: 'OpenAI',
