@@ -315,16 +315,19 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
     private createActionButton(
         parent: HTMLElement,
         actionId: SidebarActionId,
-        label: string
+        label: string,
+        category: ActionCategory
     ) {
         const classes = ['notemd-action-button'];
         if (PRIMARY_ACTION_IDS.has(actionId)) {
             classes.push('mod-cta');
+            classes.push('is-primary');
         }
         const button = parent.createEl('button', {
             text: label,
             cls: classes.join(' ')
         });
+        button.dataset.category = category;
         button.title = ACTION_TOOLTIP[actionId] || label;
         button.onclick = async () => {
             await this.runSingleAction(actionId);
@@ -603,8 +606,9 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         workflowResolution.buttons.forEach(buttonConfig => {
             const workflowButton = quickBody.createEl('button', {
                 text: buttonConfig.name,
-                cls: 'notemd-action-button mod-cta'
+                cls: 'notemd-action-button notemd-workflow-button mod-cta is-primary'
             });
+            workflowButton.dataset.category = 'workflow';
             workflowButton.title = buttonConfig.actions.join(' > ');
             workflowButton.onclick = async () => {
                 await this.runCustomWorkflow(buttonConfig);
@@ -638,7 +642,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             );
 
             defs.forEach(def => {
-                this.createActionButton(body, def.id, def.label);
+                this.createActionButton(body, def.id, def.label, def.category);
             });
 
             if (category === 'translation') {

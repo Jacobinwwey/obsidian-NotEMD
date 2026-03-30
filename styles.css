@@ -10,6 +10,13 @@
     --notemd-surface-alt: color-mix(in srgb, var(--background-primary) 82%, #f0fdfa 18%);
     --notemd-border: color-mix(in srgb, var(--background-modifier-border) 80%, #14b8a6 20%);
     --notemd-focus: color-mix(in srgb, var(--interactive-accent) 75%, #f97316 25%);
+    --notemd-button-shadow: 0 1px 0 color-mix(in srgb, #ffffff 20%, transparent),
+        0 2px 6px color-mix(in srgb, #0f172a 10%, transparent);
+    --notemd-button-shadow-hover: 0 1px 0 color-mix(in srgb, #ffffff 34%, transparent),
+        0 8px 18px color-mix(in srgb, #0f172a 16%, transparent);
+    --notemd-button-shadow-active: inset 0 1px 0 color-mix(in srgb, #0f172a 12%, transparent),
+        0 1px 2px color-mix(in srgb, #0f172a 12%, transparent);
+    --notemd-cta-text: color-mix(in srgb, var(--text-normal) 94%, #1f2937 6%);
     --notemd-sidebar-font: "Plus Jakarta Sans", "Avenir Next", "Segoe UI", sans-serif;
 }
 
@@ -93,13 +100,21 @@
     font-size: 12px;
     font-family: var(--notemd-sidebar-font);
     cursor: pointer;
-    transition: background-color 160ms ease, border-color 160ms ease, transform 160ms ease;
+    box-shadow: var(--notemd-button-shadow);
+    transition: background-color 160ms ease, border-color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
 }
 
 .notemd-cancel-button:hover,
 .notemd-copy-log-button:hover {
     background: color-mix(in srgb, var(--background-modifier-hover) 70%, #f0fdfa 30%);
     border-color: var(--notemd-accent);
+    box-shadow: var(--notemd-button-shadow-hover);
+}
+
+.notemd-cancel-button:active,
+.notemd-copy-log-button:active {
+    transform: translateY(1px) scale(0.995);
+    box-shadow: var(--notemd-button-shadow-active);
 }
 
 .notemd-cancel-button:focus-visible,
@@ -135,6 +150,9 @@
     height: 100%;
     min-height: 0;
     font-family: var(--notemd-sidebar-font);
+    background:
+        radial-gradient(circle at 12% 0%, color-mix(in srgb, #14b8a6 8%, transparent) 0%, transparent 34%),
+        radial-gradient(circle at 88% 2%, color-mix(in srgb, #f97316 7%, transparent) 0%, transparent 30%);
 }
 
 .notemd-sidebar-shell {
@@ -153,7 +171,8 @@
     flex: 1 1 auto;
     min-height: 0;
     overflow-y: auto;
-    padding-right: 0.1em;
+    padding-right: 0.12em;
+    padding-bottom: 0.18em;
 }
 
 .notemd-sidebar-footer {
@@ -164,9 +183,9 @@
 }
 
 .notemd-sidebar-footer.mod-docked {
-    flex: 0 0 clamp(250px, 34vh, 360px);
-    min-height: 240px;
-    max-height: 42%;
+    flex: 0 0 clamp(280px, 42vh, 460px);
+    min-height: 280px;
+    max-height: 56%;
     overflow: hidden;
 }
 
@@ -198,6 +217,12 @@
     border-radius: 12px;
     padding: 0.2em 0.75em 0.75em;
     background: var(--notemd-surface-alt);
+    transition: border-color 160ms ease, box-shadow 180ms ease, background-color 180ms ease;
+}
+
+.notemd-section-card[open] {
+    border-color: color-mix(in srgb, var(--notemd-border) 62%, var(--notemd-accent) 38%);
+    box-shadow: inset 0 1px 0 color-mix(in srgb, #ffffff 18%, transparent);
 }
 
 .notemd-section-summary {
@@ -206,8 +231,14 @@
     font-weight: 700;
     font-size: 13px;
     line-height: 1.4;
-    padding: 0.45em 0 0.32em;
+    padding: 0.45em 0.15em 0.32em;
+    border-radius: 8px;
     color: var(--text-normal);
+    transition: background-color 140ms ease;
+}
+
+.notemd-section-summary:hover {
+    background: color-mix(in srgb, var(--background-modifier-hover) 68%, #f0fdfa 32%);
 }
 
 .notemd-section-summary::-webkit-details-marker {
@@ -236,20 +267,41 @@
 .notemd-button-grid {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 0.45em;
+    gap: 0.52em;
 }
 
 .notemd-action-button {
+    position: relative;
+    overflow: hidden;
+    display: inline-flex;
+    align-items: center;
     border: 1px solid var(--notemd-border);
     border-radius: 10px;
     padding: 0.52em 0.66em;
     text-align: left;
     font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
     line-height: 1.35;
     background: var(--background-secondary);
     color: var(--text-normal);
     min-height: 40px;
-    transition: transform 140ms ease-out, border-color 140ms ease-out, background-color 140ms ease-out;
+    box-shadow: var(--notemd-button-shadow);
+    transition: transform 140ms ease-out, border-color 140ms ease-out, background-color 140ms ease-out, box-shadow 160ms ease;
+}
+
+.notemd-action-button::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        180deg,
+        color-mix(in srgb, #ffffff 24%, transparent) 0%,
+        transparent 46%
+    );
+    opacity: 0.4;
+    pointer-events: none;
+    transition: opacity 160ms ease;
 }
 
 .notemd-action-button:hover {
@@ -257,21 +309,66 @@
     transform: translateY(-1px);
     border-color: var(--notemd-accent);
     background: color-mix(in srgb, var(--background-modifier-hover) 64%, #f0fdfa 36%);
+    box-shadow: var(--notemd-button-shadow-hover);
+}
+
+.notemd-action-button:hover::after {
+    opacity: 0.58;
+}
+
+.notemd-action-button:active {
+    transform: translateY(1px) scale(0.997);
+    box-shadow: var(--notemd-button-shadow-active);
 }
 
 .notemd-action-button.mod-cta {
     border-color: color-mix(in srgb, var(--interactive-accent) 60%, var(--notemd-action) 40%);
     background: linear-gradient(
         135deg,
-        color-mix(in srgb, var(--interactive-accent) 24%, var(--background-secondary) 76%),
-        color-mix(in srgb, var(--notemd-action) 20%, var(--background-secondary) 80%)
+        color-mix(in srgb, var(--interactive-accent) 18%, var(--background-secondary) 82%),
+        color-mix(in srgb, var(--notemd-action) 24%, var(--background-secondary) 76%)
     );
+    color: var(--notemd-cta-text) !important;
+    text-shadow: none;
+    box-shadow:
+        0 1px 0 color-mix(in srgb, #ffffff 30%, transparent),
+        0 7px 16px color-mix(in srgb, var(--interactive-accent) 16%, transparent);
+}
+
+.notemd-workflow-button.mod-cta {
+    border-color: color-mix(in srgb, var(--interactive-accent) 56%, var(--notemd-action) 44%);
+    background:
+        linear-gradient(
+            135deg,
+            color-mix(in srgb, #14b8a6 22%, var(--background-secondary) 78%),
+            color-mix(in srgb, #f97316 18%, var(--background-secondary) 82%)
+        );
+}
+
+.notemd-action-button.mod-cta:hover {
+    border-color: color-mix(in srgb, var(--interactive-accent) 72%, var(--notemd-action) 28%);
+    background:
+        linear-gradient(
+            135deg,
+            color-mix(in srgb, var(--interactive-accent) 26%, var(--background-secondary) 74%),
+            color-mix(in srgb, var(--notemd-action) 30%, var(--background-secondary) 70%)
+        );
+}
+
+.notemd-action-button.mod-cta:active {
+    background:
+        linear-gradient(
+            135deg,
+            color-mix(in srgb, var(--interactive-accent) 24%, var(--background-secondary) 76%),
+            color-mix(in srgb, var(--notemd-action) 28%, var(--background-secondary) 72%)
+        );
 }
 
 .notemd-action-button:disabled {
     opacity: 0.52;
     cursor: not-allowed;
     transform: none;
+    box-shadow: none;
 }
 
 .notemd-inline-control {
@@ -504,9 +601,9 @@
     padding: 0.24em 0.58em;
     border-radius: 999px;
     border: 1px solid color-mix(in srgb, var(--notemd-border) 76%, var(--notemd-accent) 24%);
-    background: color-mix(in srgb, #14b8a6 12%, var(--background-secondary) 88%);
+    background: color-mix(in srgb, #14b8a6 15%, var(--background-secondary) 85%);
     color: var(--text-normal);
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 800;
     letter-spacing: 0.03em;
 }
@@ -561,7 +658,7 @@
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: color-mix(in srgb, var(--text-muted) 72%, var(--interactive-accent) 28%);
+    color: color-mix(in srgb, var(--text-normal) 68%, var(--interactive-accent) 32%);
     pointer-events: none;
 }
 
@@ -579,8 +676,9 @@
 
 .notemd-time-remaining {
     margin: 0.5em 0 0;
-    color: var(--text-muted);
+    color: color-mix(in srgb, var(--text-muted) 88%, var(--text-normal) 12%);
     font-size: 11px;
+    font-weight: 600;
     line-height: 1.45;
 }
 
@@ -595,8 +693,8 @@
 }
 
 .notemd-log-card.mod-persistent {
-    flex: 1 1 auto;
-    min-height: 0;
+    flex: 1 1 180px;
+    min-height: 180px;
     overflow: hidden;
 }
 
@@ -615,7 +713,7 @@
 
 .notemd-log-output.mod-sidebar {
     flex: 1 1 auto;
-    min-height: 140px;
+    min-height: 160px;
     height: 100%;
     max-height: none;
     margin: 0;
