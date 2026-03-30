@@ -13,7 +13,10 @@ import { testAPI } from '../llmUtils'; // Import testAPI
 import { getDefaultPrompt } from '../promptUtils'; // Import for default prompts
 import {
     buildProviderDiagnosticFileName,
-    runProviderDiagnosticProbe
+    getProviderDiagnosticCallModeOptions,
+    ProviderDiagnosticCallMode,
+    runProviderDiagnosticProbe,
+    runProviderDiagnosticStabilityProbe
 } from '../providerDiagnostics';
 import {
     createEmptyWorkflowButton,
@@ -63,9 +66,34 @@ export class NotemdSettingTab extends PluginSettingTab {
         return candidatePath;
     }
 
+    private sanitizeDeveloperDiagnosticTimeoutMs(rawValue: number): number {
+        if (!Number.isFinite(rawValue)) {
+            return DEFAULT_SETTINGS.developerDiagnosticTimeoutMs;
+        }
+
+        const normalized = Math.floor(rawValue);
+        if (normalized < 15_000) {
+            return 15_000;
+        }
+        return Math.min(normalized, 60 * 60 * 1000);
+    }
+
+    private sanitizeDeveloperDiagnosticRuns(rawValue: number): number {
+        if (!Number.isFinite(rawValue)) {
+            return DEFAULT_SETTINGS.developerDiagnosticStabilityRuns;
+        }
+
+        const normalized = Math.floor(rawValue);
+        if (normalized < 1) {
+            return 1;
+        }
+        return Math.min(normalized, 10);
+    }
+
     private async runDeveloperProviderDiagnostic(
         provider: LLMProviderConfig,
-        buttonControl: ButtonComponent
+        buttonControl: ButtonComponent,
+        callMode: ProviderDiagnosticCallMode
     ): Promise<void> {
         const blockingIssues = getProviderValidationIssues(provider)
             .filter(issue => issue.level === 'error')
@@ -78,16 +106,20 @@ export class NotemdSettingTab extends PluginSettingTab {
 
         buttonControl.setDisabled(true).setButtonText('Running...');
         const runningNotice = new Notice(`Running developer diagnostic for ${provider.name}...`, 0);
+        const timeoutMs = this.sanitizeDeveloperDiagnosticTimeoutMs(this.plugin.settings.developerDiagnosticTimeoutMs);
 
         try {
-            const result = await runProviderDiagnosticProbe(provider, this.plugin.settings);
+            const result = await runProviderDiagnosticProbe(provider, this.plugin.settings, {
+                callMode,
+                timeoutMs
+            });
             const reportPath = await this.saveProviderDiagnosticReport(provider.name, result.report);
             runningNotice.hide();
 
             if (result.success) {
-                new Notice(`Developer diagnostic succeeded. Report saved to: ${reportPath}`, 8000);
+                new Notice(`Developer diagnostic succeeded (${result.callMode}). Report saved to: ${reportPath}`, 8000);
             } else {
-                new Notice(`Developer diagnostic captured failure. Report saved to: ${reportPath}`, 12000);
+                new Notice(`Developer diagnostic captured failure (${result.callMode}). Report saved to: ${reportPath}`, 12000);
             }
         } catch (error: unknown) {
             const message = error instanceof Error ? error.message : String(error);
@@ -96,6 +128,50 @@ export class NotemdSettingTab extends PluginSettingTab {
             console.error('Developer provider diagnostic failed:', error);
         } finally {
             buttonControl.setDisabled(false).setButtonText('Run diagnostic');
+        }
+    }
+
+    private async runDeveloperProviderStabilityDiagnostic(
+        provider: LLMProviderConfig,
+        buttonControl: ButtonComponent,
+        callMode: ProviderDiagnosticCallMode
+    ): Promise<void> {
+        const blockingIssues = getProviderValidationIssues(provider)
+            .filter(issue => issue.level === 'error')
+            .map(issue => issue.message);
+
+        if (blockingIssues.length > 0) {
+            new Notice(`Cannot run developer stability diagnostic for ${provider.name}: ${blockingIssues.join(' ')}`, 10000);
+            return;
+        }
+
+        const runs = this.sanitizeDeveloperDiagnosticRuns(this.plugin.settings.developerDiagnosticStabilityRuns);
+        const timeoutMs = this.sanitizeDeveloperDiagnosticTimeoutMs(this.plugin.settings.developerDiagnosticTimeoutMs);
+        buttonControl.setDisabled(true).setButtonText('Running...');
+        const runningNotice = new Notice(
+            `Running developer stability diagnostic for ${provider.name} (${runs} runs)...`,
+            0
+        );
+
+        try {
+            const result = await runProviderDiagnosticStabilityProbe(provider, this.plugin.settings, {
+                callMode,
+                timeoutMs,
+                runs
+            });
+            const reportPath = await this.saveProviderDiagnosticReport(`${provider.name}_stability`, result.report);
+            runningNotice.hide();
+            new Notice(
+                `Developer stability diagnostic finished (${result.callMode}): ${result.successCount}/${result.runs} succeeded. Report: ${reportPath}`,
+                12000
+            );
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : String(error);
+            runningNotice.hide();
+            new Notice(`Developer stability diagnostic failed before report generation: ${message}`, 12000);
+            console.error('Developer provider stability diagnostic failed:', error);
+        } finally {
+            buttonControl.setDisabled(false).setButtonText('Run stability test');
         }
     }
 
@@ -716,14 +792,95 @@ export class NotemdSettingTab extends PluginSettingTab {
                     await this.plugin.saveSettings();
                 }));
 
-        if (activeProvider) {
+        new Setting(containerEl)
+            .setName('Developer mode')
+            .setDesc('On: Show dedicated developer diagnostic tools in settings. Off: Hide developer-only controls.')
+            .addToggle(toggle => toggle
+                .setValue(this.plugin.settings.enableDeveloperMode)
+                .onChange(async (value) => {
+                    this.plugin.settings.enableDeveloperMode = value;
+                    await this.plugin.saveSettings();
+                    this.display();
+                }));
+
+        if (this.plugin.settings.enableDeveloperMode && activeProvider) {
+            new Setting(containerEl).setName('Developer diagnostics').setHeading();
+
+            const diagnosticModeOptions = getProviderDiagnosticCallModeOptions(activeProvider);
+            const modeSet = new Set(diagnosticModeOptions.map(option => option.value));
+            let effectiveCallMode = this.plugin.settings.developerDiagnosticCallMode as ProviderDiagnosticCallMode;
+            if (!modeSet.has(effectiveCallMode)) {
+                effectiveCallMode = diagnosticModeOptions[0].value;
+                this.plugin.settings.developerDiagnosticCallMode = effectiveCallMode;
+            }
+
+            new Setting(containerEl)
+                .setName('Diagnostic call mode')
+                .setDesc('Select the runtime call path used by developer diagnostics for this provider.')
+                .addDropdown(dropdown => {
+                    diagnosticModeOptions.forEach(option => {
+                        dropdown.addOption(option.value, option.label);
+                    });
+                    dropdown
+                        .setValue(effectiveCallMode)
+                        .onChange(async (value) => {
+                            this.plugin.settings.developerDiagnosticCallMode = value;
+                            await this.plugin.saveSettings();
+                            this.display();
+                        });
+                });
+
+            const selectedMode = diagnosticModeOptions.find(option => option.value === effectiveCallMode);
+            if (selectedMode) {
+                const modeHint = containerEl.createDiv({ cls: 'notemd-provider-callout' });
+                modeHint.createEl('strong', { text: selectedMode.label });
+                modeHint.createEl('p', { text: selectedMode.description });
+            }
+
+            new Setting(containerEl)
+                .setName('Diagnostic timeout (seconds)')
+                .setDesc('Timeout for each developer diagnostic run (15-3600 seconds).')
+                .addText(text => text
+                    .setPlaceholder(String(Math.floor(DEFAULT_SETTINGS.developerDiagnosticTimeoutMs / 1000)))
+                    .setValue(String(Math.floor(this.sanitizeDeveloperDiagnosticTimeoutMs(this.plugin.settings.developerDiagnosticTimeoutMs) / 1000)))
+                    .onChange(async (value) => {
+                        const num = Number.parseInt(value, 10);
+                        if (Number.isFinite(num)) {
+                            this.plugin.settings.developerDiagnosticTimeoutMs = this.sanitizeDeveloperDiagnosticTimeoutMs(num * 1000);
+                        } else {
+                            this.plugin.settings.developerDiagnosticTimeoutMs = DEFAULT_SETTINGS.developerDiagnosticTimeoutMs;
+                        }
+                        await this.plugin.saveSettings();
+                    }));
+
+            new Setting(containerEl)
+                .setName('Stability test runs')
+                .setDesc('How many repeated runs to execute in "Run stability test" (1-10).')
+                .addText(text => text
+                    .setPlaceholder(String(DEFAULT_SETTINGS.developerDiagnosticStabilityRuns))
+                    .setValue(String(this.sanitizeDeveloperDiagnosticRuns(this.plugin.settings.developerDiagnosticStabilityRuns)))
+                    .onChange(async (value) => {
+                        const num = Number.parseInt(value, 10);
+                        if (Number.isFinite(num)) {
+                            this.plugin.settings.developerDiagnosticStabilityRuns = this.sanitizeDeveloperDiagnosticRuns(num);
+                        } else {
+                            this.plugin.settings.developerDiagnosticStabilityRuns = DEFAULT_SETTINGS.developerDiagnosticStabilityRuns;
+                        }
+                        await this.plugin.saveSettings();
+                    }));
+
             new Setting(containerEl)
                 .setName('Developer provider diagnostic (long request)')
-                .setDesc('Run a long-request diagnostic using the active provider and save a full runtime report to vault root.')
+                .setDesc('Run one long-request diagnostic with the selected call mode and save a full report to vault root.')
                 .addButton(button => button
                     .setButtonText('Run diagnostic')
                     .onClick(async () => {
-                        await this.runDeveloperProviderDiagnostic(activeProvider, button);
+                        await this.runDeveloperProviderDiagnostic(activeProvider, button, effectiveCallMode);
+                    }))
+                .addButton(button => button
+                    .setButtonText('Run stability test')
+                    .onClick(async () => {
+                        await this.runDeveloperProviderStabilityDiagnostic(activeProvider, button, effectiveCallMode);
                     }));
         }
 

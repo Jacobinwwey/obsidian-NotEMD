@@ -46,6 +46,11 @@ export const DEFAULT_SETTINGS: NotemdSettings = {
     apiCallMaxRetries: 3, // Default max 3 retries
     // API Debugging
     enableApiErrorDebugMode: false,
+    // Developer diagnostics
+    enableDeveloperMode: false,
+    developerDiagnosticCallMode: 'runtime-stable',
+    developerDiagnosticStabilityRuns: 3,
+    developerDiagnosticTimeoutMs: 10 * 60 * 1000,
     // Task-specific model defaults (empty means use provider's default)
     addLinksModel: '',
     researchModel: '',

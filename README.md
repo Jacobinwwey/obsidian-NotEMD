@@ -68,6 +68,7 @@ That's it! Explore the settings to unlock more features like web research, trans
 - **Robust Parallel Batch Processing**: Resolved an issue where parallel batch operations would stall prematurely, ensuring all files are processed reliably and efficiently.
 - **Progress Bar Accuracy**: Fixed a bug where the progress bar for the "Create Wiki-Link & Generate Note" command would get stuck at 95%, ensuring it now correctly shows 100% upon completion.
 - **Enhanced API Debugging**: The "API Error Debugging Mode" now captures full response bodies from LLM providers and search services (Tavily/DuckDuckGo), and also records a per-attempt transport timeline with sanitized request URLs, elapsed duration, response headers, partial response bodies, parsed partial stream content, and stack traces for better troubleshooting across OpenAI-compatible, Anthropic, Google, Azure OpenAI, and Ollama fallbacks.
+- **Developer Mode Panel**: Settings now include a dedicated developer-only diagnostics panel that stays hidden unless "Developer mode" is enabled. It supports selecting diagnostic call paths and running repeated stability probes for the selected mode.
 - **Redesigned Sidebar**: Built-in actions are grouped into focused sections with clearer labels, live status, cancellable progress, and copyable logs to reduce sidebar clutter. The progress/log footer now stays visible even when every section is expanded, and the ready state uses a clearer standby progress track.
 - **Custom One-Click Workflows**: Turn built-in sidebar utilities into reusable custom buttons with user-defined names and assembled action chains. A default `One-Click Extract` workflow is included out of the box.
 
@@ -221,9 +222,14 @@ Access plugin settings via:
 -   **API Error Debugging Mode**:
     *   **Disabled (Default)**: Uses standard, concise error reporting.
     *   **Enabled**: Activates detailed error logging (similar to DeepSeek's verbose output) for all providers and tasks (including Translate, Search, and Connection Tests). This includes HTTP status codes, raw response text, request transport timelines, sanitized request URLs and headers, elapsed attempt durations, response headers, partial response bodies, parsed partial stream output, and stack traces, which is crucial for troubleshooting API connection issues and upstream gateway resets.
+-   **Developer Mode**:
+    *   **Disabled (Default)**: Hides all developer-only diagnostics controls from normal users.
+    *   **Enabled**: Shows a dedicated developer diagnostics panel in Settings.
 -   **Developer Provider Diagnostic (Long Request)**:
-    *   **Run Diagnostic**: Runs a long-request probe against the currently active provider from Settings and writes a full report file (`Notemd_Provider_Diagnostic_*.txt`) to your vault root.
-    *   **What It Captures**: Provider context, retry/debug mode runtime settings, elapsed duration, response preview, and runtime logs with deep debug details.
+    *   **Diagnostic Call Mode**: Choose runtime path per probe. OpenAI-compatible providers support additional forced modes (`direct streaming`, `direct buffered`, `requestUrl-only`) besides runtime modes.
+    *   **Run Diagnostic**: Runs one long-request probe with the selected call mode and writes `Notemd_Provider_Diagnostic_*.txt` in vault root.
+    *   **Run Stability Test**: Repeats the probe for configurable runs (1-10) using the selected call mode and saves an aggregated stability report.
+    *   **Diagnostic Timeout**: Configurable timeout per run (15-3600 seconds).
     *   **Why Use It**: Faster than manual reproduction when a provider passes "Test connection" but fails on real long-running tasks (for example, translation on slow gateways).
 <img width="805" height="187" alt="stable API calls" src="https://github.com/user-attachments/assets/936454a7-b657-413c-8a2a-13d517f9c519" />
 
