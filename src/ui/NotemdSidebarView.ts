@@ -45,11 +45,25 @@ const ACTION_TOOLTIP: Record<SidebarActionId, string> = {
     'test-llm-connection': 'Test active provider connection and credentials.'
 };
 
-const PRIMARY_ACTION_IDS = new Set<SidebarActionId>([
+const SINGLE_FILE_ACTION_IDS = new Set<SidebarActionId>([
     'process-current-add-links',
-    'batch-generate-from-titles',
-    'summarize-as-mermaid'
+    'generate-from-title',
+    'research-and-summarize',
+    'summarize-as-mermaid',
+    'translate-current-file',
+    'extract-concepts-current',
+    'extract-original-text',
+    'fix-formula-current',
+    'check-duplicates-current'
 ]);
+
+function isSingleFileAction(actionId: SidebarActionId): boolean {
+    return SINGLE_FILE_ACTION_IDS.has(actionId);
+}
+
+function isSingleFileWorkflow(button: CustomWorkflowButton): boolean {
+    return button.actions.length > 0 && button.actions.every(actionId => isSingleFileAction(actionId));
+}
 
 export class NotemdSidebarView extends ItemView implements ProgressReporter {
     plugin: NotemdPlugin;
@@ -319,7 +333,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         category: ActionCategory
     ) {
         const classes = ['notemd-action-button'];
-        if (PRIMARY_ACTION_IDS.has(actionId)) {
+        if (isSingleFileAction(actionId)) {
             classes.push('mod-cta');
             classes.push('is-primary');
         }
@@ -604,9 +618,13 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         );
 
         workflowResolution.buttons.forEach(buttonConfig => {
+            const workflowClasses = ['notemd-action-button', 'notemd-workflow-button'];
+            if (isSingleFileWorkflow(buttonConfig)) {
+                workflowClasses.push('mod-cta', 'is-primary');
+            }
             const workflowButton = quickBody.createEl('button', {
                 text: buttonConfig.name,
-                cls: 'notemd-action-button notemd-workflow-button mod-cta is-primary'
+                cls: workflowClasses.join(' ')
             });
             workflowButton.dataset.category = 'workflow';
             workflowButton.title = buttonConfig.actions.join(' > ');

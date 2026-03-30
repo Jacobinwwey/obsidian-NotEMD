@@ -263,6 +263,28 @@ describe('NotemdSidebarView DOM button wiring', () => {
         expect(plugin.batchMermaidFixCommand).toHaveBeenCalledTimes(1);
     });
 
+    test('uses colorful CTA styling only for single-file actions', async () => {
+        await sidebar.onOpen();
+
+        const processCurrent = contentContainer.findButton('Process file (add links)');
+        const translateCurrent = contentContainer.findButton('Translate current file');
+        const batchGenerate = contentContainer.findButton('Batch generate from titles');
+        const batchTranslate = contentContainer.findButton('Batch translate folder');
+        const workflowDefault = contentContainer.findButton('One-Click Extract');
+
+        expect(processCurrent).not.toBeNull();
+        expect(translateCurrent).not.toBeNull();
+        expect(batchGenerate).not.toBeNull();
+        expect(batchTranslate).not.toBeNull();
+        expect(workflowDefault).not.toBeNull();
+
+        expect(processCurrent?.cls).toContain('mod-cta');
+        expect(translateCurrent?.cls).toContain('mod-cta');
+        expect(batchGenerate?.cls).not.toContain('mod-cta');
+        expect(batchTranslate?.cls).not.toContain('mod-cta');
+        expect(workflowDefault?.cls).not.toContain('mod-cta');
+    });
+
     test('builds a docked footer that keeps ready progress and logs visible', async () => {
         await sidebar.onOpen();
 
