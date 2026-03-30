@@ -7,6 +7,7 @@ This document summarizes the major functional and architectural changes implemen
 ## [Unreleased]
 
 ### English
+*   **OpenAI-Compatible Non-Stream Stage In Stable Mode**: After a primary direct streaming failure, stable-mode OpenAI-compatible calls now attempt direct non-stream transport before falling back to `requestUrl`. This captures providers that return valid buffered responses but are unstable on streaming sockets.
 *   **Protocol-Aware Streaming Fallback Across All LLM Paths**: Extended long-request fallback parsing beyond OpenAI-compatible providers so Anthropic Messages, Google Gemini, Azure OpenAI, and Ollama now also use protocol-aware streamed fallback handling on desktop `http/https` and non-desktop `fetch`. Legacy exported OpenAI-style provider wrappers now delegate to the same shared streamed fallback path instead of keeping buffered-only logic.
 *   **Cross-Transport Partial Stream Debugging**: Shared debug output now preserves parsed partial stream text for Anthropic, Google/Azure-style SSE flows, and Ollama NDJSON fallbacks, not just OpenAI-compatible calls.
 *   **Stable-Mode Primary Transport Preference (OpenAI-Compatible)**: In stable mode, OpenAI-compatible runtime calls now prefer direct desktop/web streaming transport as the primary long-request path before trying `requestUrl`. This reduces false-fail chains where `requestUrl` disconnects even though upstream providers eventually return successful non-stream responses.
@@ -17,6 +18,7 @@ This document summarizes the major functional and architectural changes implemen
 *   **Docs and Agent Guide Alignment**: Updated both READMEs and `AGENTS.md` so in-plugin diagnostics and CLI diagnostics are documented and required to stay semantically aligned.
 
 ### Chinese (中文)
+*   **OpenAI-compatible 稳定模式新增非流式阶段**: 当主直连流式传输失败后，稳定模式下的 OpenAI-compatible 调用现在会先尝试直连非流式传输，再回退到 `requestUrl`。这能覆盖“流式链路不稳定但非流式可正常返回”的 Provider 场景。
 *   **全 LLM 路径的协议感知流式回退**: 长请求回退解析能力已从 OpenAI-compatible 扩展到 Anthropic Messages、Google Gemini、Azure OpenAI 和 Ollama，使这些 transport 在桌面 `http/https` 与非桌面 `fetch` 下都能走协议感知的流式回退链路。遗留的 OpenAI 风格导出 Provider 包装函数也已收敛到同一套共享流式回退路径，不再保留 buffered-only 旧逻辑。
 *   **跨 Transport 的部分流式调试**: 共享调试输出现在不仅覆盖 OpenAI-compatible，也会为 Anthropic、Google/Azure 风格 SSE，以及 Ollama NDJSON 回退保留“已解析的部分流式文本”。
 *   **稳定模式下的主传输优先策略（OpenAI-Compatible）**: 在稳定 API 调用模式下，OpenAI-compatible 运行时链路会优先使用桌面/网页流式传输作为主长请求路径，再回退到 `requestUrl`。这可以减少“`requestUrl` 先断连，但上游最终成功返回”导致的误失败链路。
