@@ -1,4 +1,4 @@
-import { App, PluginSettingTab, Setting, Notice, TextAreaComponent } from 'obsidian';
+import { App, ButtonComponent, PluginSettingTab, Setting, Notice, TextAreaComponent } from 'obsidian';
 import NotemdPlugin from '../main'; // Import the plugin class itself
 import { LLMProviderConfig, NotemdSettings, TaskKey } from '../types';
 import { DEFAULT_SETTINGS } from '../constants';
@@ -11,6 +11,10 @@ import {
 } from '../llmProviders';
 import { testAPI } from '../llmUtils'; // Import testAPI
 import { getDefaultPrompt } from '../promptUtils'; // Import for default prompts
+import {
+    buildProviderDiagnosticFileName,
+    runProviderDiagnosticProbe
+} from '../providerDiagnostics';
 import {
     createEmptyWorkflowButton,
     CustomWorkflowButton,
@@ -38,6 +42,61 @@ export class NotemdSettingTab extends PluginSettingTab {
     private get providersFilePath(): string {
         const pluginConfigDir = this.app.vault.configDir + '/plugins/' + this.plugin.manifest.id;
         return `${pluginConfigDir}/notemd-providers.json`;
+    }
+
+    private async saveProviderDiagnosticReport(providerName: string, reportContent: string): Promise<string> {
+        const baseFileName = buildProviderDiagnosticFileName(providerName, new Date());
+        const fileSuffix = '.txt';
+        const fileStem = baseFileName.endsWith(fileSuffix)
+            ? baseFileName.slice(0, -fileSuffix.length)
+            : baseFileName;
+
+        let candidatePath = baseFileName;
+        let index = 1;
+
+        while (await this.app.vault.adapter.exists(candidatePath)) {
+            candidatePath = `${fileStem}_${index}${fileSuffix}`;
+            index += 1;
+        }
+
+        await this.app.vault.create(candidatePath, reportContent);
+        return candidatePath;
+    }
+
+    private async runDeveloperProviderDiagnostic(
+        provider: LLMProviderConfig,
+        buttonControl: ButtonComponent
+    ): Promise<void> {
+        const blockingIssues = getProviderValidationIssues(provider)
+            .filter(issue => issue.level === 'error')
+            .map(issue => issue.message);
+
+        if (blockingIssues.length > 0) {
+            new Notice(`Cannot run developer diagnostic for ${provider.name}: ${blockingIssues.join(' ')}`, 10000);
+            return;
+        }
+
+        buttonControl.setDisabled(true).setButtonText('Running...');
+        const runningNotice = new Notice(`Running developer diagnostic for ${provider.name}...`, 0);
+
+        try {
+            const result = await runProviderDiagnosticProbe(provider, this.plugin.settings);
+            const reportPath = await this.saveProviderDiagnosticReport(provider.name, result.report);
+            runningNotice.hide();
+
+            if (result.success) {
+                new Notice(`Developer diagnostic succeeded. Report saved to: ${reportPath}`, 8000);
+            } else {
+                new Notice(`Developer diagnostic captured failure. Report saved to: ${reportPath}`, 12000);
+            }
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : String(error);
+            runningNotice.hide();
+            new Notice(`Developer diagnostic failed before report generation: ${message}`, 12000);
+            console.error('Developer provider diagnostic failed:', error);
+        } finally {
+            buttonControl.setDisabled(false).setButtonText('Run diagnostic');
+        }
     }
 
     private renderProviderSummary(containerEl: HTMLElement, provider: LLMProviderConfig): void {
@@ -656,6 +715,17 @@ export class NotemdSettingTab extends PluginSettingTab {
                     this.plugin.settings.enableApiErrorDebugMode = value;
                     await this.plugin.saveSettings();
                 }));
+
+        if (activeProvider) {
+            new Setting(containerEl)
+                .setName('Developer provider diagnostic (long request)')
+                .setDesc('Run a long-request diagnostic using the active provider and save a full runtime report to vault root.')
+                .addButton(button => button
+                    .setButtonText('Run diagnostic')
+                    .onClick(async () => {
+                        await this.runDeveloperProviderDiagnostic(activeProvider, button);
+                    }));
+        }
 
         // --- General Settings ---
         new Setting(containerEl).setName('Processed file output').setHeading();

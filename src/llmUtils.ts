@@ -203,6 +203,41 @@ type OpenAICompatibleStreamState = {
     sawFinishReason: boolean;
 };
 
+type AnthropicStreamState = {
+    buffer: string;
+    rawResponseText: string;
+    assembledText: string;
+    sawStreamEvent: boolean;
+    sawStop: boolean;
+};
+
+type GoogleStreamState = {
+    buffer: string;
+    rawResponseText: string;
+    assembledText: string;
+    sawStreamEvent: boolean;
+};
+
+type OllamaStreamState = {
+    buffer: string;
+    rawResponseText: string;
+    assembledText: string;
+    sawStreamEvent: boolean;
+    sawDone: boolean;
+};
+
+type StructuredStreamingStrategy<State> = {
+    createState(): State;
+    onChunk(providerName: string, state: State, chunkText: string): void;
+    finalize(providerName: string, state: State, statusCode: number): {
+        text: string;
+        json: any;
+        parsedText?: string;
+    };
+    getRawText(state: State): string;
+    getPartialParsedText(state: State): string | undefined;
+};
+
 const SENSITIVE_DEBUG_QUERY_PARAMS = new Set([
     'access_token',
     'api-key',
@@ -271,6 +306,79 @@ function createOpenAICompatibleStreamState(): OpenAICompatibleStreamState {
         sawDoneToken: false,
         sawFinishReason: false
     };
+}
+
+function createAnthropicStreamState(): AnthropicStreamState {
+    return {
+        buffer: '',
+        rawResponseText: '',
+        assembledText: '',
+        sawStreamEvent: false,
+        sawStop: false
+    };
+}
+
+function createGoogleStreamState(): GoogleStreamState {
+    return {
+        buffer: '',
+        rawResponseText: '',
+        assembledText: '',
+        sawStreamEvent: false
+    };
+}
+
+function createOllamaStreamState(): OllamaStreamState {
+    return {
+        buffer: '',
+        rawResponseText: '',
+        assembledText: '',
+        sawStreamEvent: false,
+        sawDone: false
+    };
+}
+
+function splitBufferedText(
+    buffer: string,
+    delimiter: string,
+    flush: boolean
+): { frames: string[]; remainder: string } {
+    const parts = buffer.split(delimiter);
+    if (flush) {
+        return { frames: parts, remainder: '' };
+    }
+
+    return {
+        frames: parts.slice(0, -1),
+        remainder: parts[parts.length - 1] ?? ''
+    };
+}
+
+function extractSsePayload(frame: string): string | null {
+    const normalizedFrame = frame.replace(/\r\n/g, '\n').trim();
+    if (!normalizedFrame) {
+        return null;
+    }
+
+    const dataLines = normalizedFrame
+        .split('\n')
+        .filter(line => line.startsWith('data:'));
+
+    if (dataLines.length === 0) {
+        return null;
+    }
+
+    return dataLines
+        .map(line => line.slice(5).trimStart())
+        .join('\n')
+        .trim();
+}
+
+function parseJsonPayload(providerName: string, protocolName: string, payload: string): any {
+    try {
+        return JSON.parse(payload);
+    } catch (_error) {
+        throw new Error(`${providerName} ${protocolName} response contained invalid JSON payload: ${payload}`);
+    }
 }
 
 function getOpenAICompatibleStreamParsedText(state: OpenAICompatibleStreamState): string {
@@ -376,6 +484,243 @@ function drainOpenAICompatibleSseBuffer(
     const frames = normalizedBuffer.split('\n\n');
     state.buffer = frames.pop() ?? '';
     frames.forEach(frame => processOpenAICompatibleSseFrame(providerName, state, frame));
+}
+
+function processAnthropicSseFrame(providerName: string, state: AnthropicStreamState, frame: string): void {
+    const payload = extractSsePayload(frame);
+    if (!payload) {
+        return;
+    }
+
+    state.sawStreamEvent = true;
+    const data = parseJsonPayload(providerName, 'Anthropic streaming', payload);
+
+    if (data?.type === 'error' || data?.error) {
+        const errorMessage = data?.error?.message || data?.message || `${providerName} reported a streaming error`;
+        throw new Error(`${providerName} API reported an error: ${errorMessage}`);
+    }
+
+    if (data?.type === 'content_block_start' && data?.content_block?.type === 'text' && typeof data.content_block.text === 'string') {
+        state.assembledText += data.content_block.text;
+    }
+
+    if (data?.type === 'content_block_delta' && data?.delta?.type === 'text_delta' && typeof data.delta.text === 'string') {
+        state.assembledText += data.delta.text;
+    }
+
+    if (data?.type === 'message_delta' && data?.delta?.stop_reason) {
+        state.sawStop = true;
+    }
+
+    if (data?.type === 'message_stop') {
+        state.sawStop = true;
+    }
+}
+
+function drainAnthropicSseBuffer(
+    providerName: string,
+    state: AnthropicStreamState,
+    flush: boolean = false
+): void {
+    const { frames, remainder } = splitBufferedText(state.buffer.replace(/\r\n/g, '\n'), '\n\n', flush);
+    state.buffer = remainder;
+    frames.forEach(frame => processAnthropicSseFrame(providerName, state, frame));
+}
+
+function processGoogleSseFrame(providerName: string, state: GoogleStreamState, frame: string): void {
+    const payload = extractSsePayload(frame);
+    if (!payload) {
+        return;
+    }
+
+    state.sawStreamEvent = true;
+    const data = parseJsonPayload(providerName, 'Google streaming', payload);
+
+    if (data?.error) {
+        const errorMessage = data.error?.message || `${providerName} reported a streaming error`;
+        throw new Error(`${providerName} API reported an error: ${errorMessage}`);
+    }
+
+    const text = data?.candidates?.[0]?.content?.parts
+        ?.map((part: any) => typeof part?.text === 'string' ? part.text : '')
+        .join('') || '';
+
+    if (text) {
+        state.assembledText += text;
+    }
+}
+
+function drainGoogleSseBuffer(
+    providerName: string,
+    state: GoogleStreamState,
+    flush: boolean = false
+): void {
+    const { frames, remainder } = splitBufferedText(state.buffer.replace(/\r\n/g, '\n'), '\n\n', flush);
+    state.buffer = remainder;
+    frames.forEach(frame => processGoogleSseFrame(providerName, state, frame));
+}
+
+function processOllamaJsonLine(providerName: string, state: OllamaStreamState, line: string): void {
+    const normalizedLine = line.trim();
+    if (!normalizedLine) {
+        return;
+    }
+
+    state.sawStreamEvent = true;
+    const data = parseJsonPayload(providerName, 'Ollama streaming', normalizedLine);
+
+    if (typeof data?.error === 'string' && data.error.trim()) {
+        throw new Error(`${providerName} API reported an error: ${data.error}`);
+    }
+
+    const messageContent = typeof data?.message?.content === 'string'
+        ? data.message.content
+        : typeof data?.response === 'string'
+            ? data.response
+            : '';
+
+    if (messageContent) {
+        state.assembledText += messageContent;
+    }
+
+    if (data?.done === true) {
+        state.sawDone = true;
+    }
+}
+
+function drainOllamaJsonLines(
+    providerName: string,
+    state: OllamaStreamState,
+    flush: boolean = false
+): void {
+    const { frames, remainder } = splitBufferedText(state.buffer.replace(/\r\n/g, '\n'), '\n', flush);
+    state.buffer = remainder;
+    frames.forEach(line => processOllamaJsonLine(providerName, state, line));
+}
+
+function createAnthropicStreamingStrategy(): StructuredStreamingStrategy<AnthropicStreamState> {
+    return {
+        createState: createAnthropicStreamState,
+        onChunk(providerName, state, chunkText) {
+            if (!chunkText) {
+                return;
+            }
+            state.rawResponseText += chunkText;
+            state.buffer += chunkText;
+            drainAnthropicSseBuffer(providerName, state);
+        },
+        finalize(providerName, state, statusCode) {
+            drainAnthropicSseBuffer(providerName, state, true);
+
+            if (state.sawStreamEvent && statusCode >= 200 && statusCode < 300) {
+                return {
+                    text: state.assembledText,
+                    parsedText: state.assembledText || undefined,
+                    json: {
+                        content: state.assembledText ? [{ text: state.assembledText }] : []
+                    }
+                };
+            }
+
+            const rawText = state.rawResponseText;
+            return {
+                text: rawText,
+                json: parseRuntimeResponseBody(rawText)
+            };
+        },
+        getRawText(state) {
+            return state.rawResponseText;
+        },
+        getPartialParsedText(state) {
+            return state.assembledText || undefined;
+        }
+    };
+}
+
+function createGoogleStreamingStrategy(): StructuredStreamingStrategy<GoogleStreamState> {
+    return {
+        createState: createGoogleStreamState,
+        onChunk(providerName, state, chunkText) {
+            if (!chunkText) {
+                return;
+            }
+            state.rawResponseText += chunkText;
+            state.buffer += chunkText;
+            drainGoogleSseBuffer(providerName, state);
+        },
+        finalize(providerName, state, statusCode) {
+            drainGoogleSseBuffer(providerName, state, true);
+
+            if (state.sawStreamEvent && statusCode >= 200 && statusCode < 300) {
+                return {
+                    text: state.assembledText,
+                    parsedText: state.assembledText || undefined,
+                    json: {
+                        candidates: [
+                            {
+                                content: {
+                                    parts: state.assembledText ? [{ text: state.assembledText }] : []
+                                }
+                            }
+                        ]
+                    }
+                };
+            }
+
+            const rawText = state.rawResponseText;
+            return {
+                text: rawText,
+                json: parseRuntimeResponseBody(rawText)
+            };
+        },
+        getRawText(state) {
+            return state.rawResponseText;
+        },
+        getPartialParsedText(state) {
+            return state.assembledText || undefined;
+        }
+    };
+}
+
+function createOllamaStreamingStrategy(): StructuredStreamingStrategy<OllamaStreamState> {
+    return {
+        createState: createOllamaStreamState,
+        onChunk(providerName, state, chunkText) {
+            if (!chunkText) {
+                return;
+            }
+            state.rawResponseText += chunkText;
+            state.buffer += chunkText;
+            drainOllamaJsonLines(providerName, state);
+        },
+        finalize(providerName, state, statusCode) {
+            drainOllamaJsonLines(providerName, state, true);
+
+            if (state.sawStreamEvent && statusCode >= 200 && statusCode < 300) {
+                return {
+                    text: state.assembledText,
+                    parsedText: state.assembledText || undefined,
+                    json: {
+                        message: {
+                            content: state.assembledText
+                        }
+                    }
+                };
+            }
+
+            const rawText = state.rawResponseText;
+            return {
+                text: rawText,
+                json: parseRuntimeResponseBody(rawText)
+            };
+        },
+        getRawText(state) {
+            return state.rawResponseText;
+        },
+        getPartialParsedText(state) {
+            return state.assembledText || undefined;
+        }
+    };
 }
 
 function canUseWebFetchTransport(targetUrl: string): boolean {
@@ -1185,6 +1530,359 @@ async function requestOpenAICompatibleWithStreamingFallback(
     }
 }
 
+function buildStructuredStreamingResponse<State>(
+    providerName: string,
+    transportName: string,
+    options: RuntimeRequestOptions,
+    startedAt: number,
+    statusCode: number,
+    responseHeaders: Record<string, unknown> | undefined,
+    state: State,
+    strategy: StructuredStreamingStrategy<State>
+): RuntimeRequestResponse {
+    const finalized = strategy.finalize(providerName, state, statusCode);
+    const rawResponseText = strategy.getRawText(state);
+    const attempt = createTransportDebugAttempt(transportName, options, {
+        durationMs: Date.now() - startedAt,
+        status: statusCode,
+        responseHeaders: sanitizeHeadersForDebug(responseHeaders),
+        responseText: rawResponseText || undefined,
+        parsedResponseText: finalized.parsedText || undefined
+    });
+
+    return normalizeRuntimeResponse({
+        status: statusCode,
+        text: finalized.text,
+        json: finalized.json,
+        headers: responseHeaders
+    }, [attempt]);
+}
+
+function createStructuredStreamingTransportError<State>(
+    transportName: string,
+    options: RuntimeRequestOptions,
+    startedAt: number,
+    statusCode: number | undefined,
+    responseHeaders: Record<string, unknown> | undefined,
+    state: State,
+    strategy: StructuredStreamingStrategy<State>,
+    error: unknown
+): Error {
+    const existingAttempts = getTransportDebugAttempts(error);
+    if (existingAttempts.length > 0) {
+        return error instanceof Error ? error : attachTransportDebugToError(error, existingAttempts);
+    }
+
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    return attachTransportDebugToError(error, [
+        createTransportDebugAttempt(transportName, options, {
+            durationMs: Date.now() - startedAt,
+            status: statusCode,
+            responseHeaders: sanitizeHeadersForDebug(responseHeaders),
+            partialResponseText: strategy.getRawText(state) || undefined,
+            partialParsedResponseText: strategy.getPartialParsedText(state),
+            errorMessage
+        })
+    ]);
+}
+
+async function requestViaWebFetchStructuredStreamingTransport<State>(
+    providerName: string,
+    options: RuntimeRequestOptions,
+    strategy: StructuredStreamingStrategy<State>,
+    signal?: AbortSignal
+): Promise<RuntimeRequestResponse> {
+    const startedAt = Date.now();
+    const transportName = 'web-fetch-stream';
+
+    try {
+        const response = await globalThis.fetch(options.url, {
+            method: options.method,
+            headers: options.headers,
+            body: options.body,
+            signal
+        });
+        const responseHeaders = extractFetchHeaders(response.headers);
+        const state = strategy.createState();
+
+        if (!response.body || typeof response.body.getReader !== 'function') {
+            strategy.onChunk(providerName, state, await response.text());
+            return buildStructuredStreamingResponse(
+                providerName,
+                transportName,
+                options,
+                startedAt,
+                response.status,
+                responseHeaders,
+                state,
+                strategy
+            );
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+
+        try {
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) {
+                    break;
+                }
+                if (value) {
+                    strategy.onChunk(providerName, state, decoder.decode(value, { stream: true }));
+                }
+            }
+
+            const trailingText = decoder.decode();
+            if (trailingText) {
+                strategy.onChunk(providerName, state, trailingText);
+            }
+
+            return buildStructuredStreamingResponse(
+                providerName,
+                transportName,
+                options,
+                startedAt,
+                response.status,
+                responseHeaders,
+                state,
+                strategy
+            );
+        } catch (error: unknown) {
+            const trailingText = decoder.decode();
+            if (trailingText) {
+                strategy.onChunk(providerName, state, trailingText);
+            }
+            throw createStructuredStreamingTransportError(
+                transportName,
+                options,
+                startedAt,
+                response.status,
+                responseHeaders,
+                state,
+                strategy,
+                error
+            );
+        } finally {
+            if (typeof reader.releaseLock === 'function') {
+                reader.releaseLock();
+            }
+        }
+    } catch (error: unknown) {
+        if (getTransportDebugAttempts(error).length > 0) {
+            throw error;
+        }
+
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        const attempt = createTransportDebugAttempt(transportName, options, {
+            durationMs: Date.now() - startedAt,
+            errorMessage
+        });
+
+        throw attachTransportDebugToError(error, [attempt]);
+    }
+}
+
+async function requestViaDesktopHttpStructuredStreamingTransport<State>(
+    providerName: string,
+    options: RuntimeRequestOptions,
+    strategy: StructuredStreamingStrategy<State>,
+    signal?: AbortSignal
+): Promise<RuntimeRequestResponse> {
+    return await new Promise((resolve, reject) => {
+        const startedAt = Date.now();
+        const transportName = 'desktop-http-stream';
+        const parsedUrl = new URL(options.url);
+        const transport = parsedUrl.protocol === 'https:' ? require('https') : require('http');
+        const headers = { ...(options.headers ?? {}) };
+
+        if (options.body && !hasHeader(headers, 'Content-Length')) {
+            headers['Content-Length'] = Buffer.byteLength(options.body, 'utf8').toString();
+        }
+        if (!hasHeader(headers, 'Accept-Encoding')) {
+            headers['Accept-Encoding'] = 'identity';
+        }
+
+        let settled = false;
+        let abortListener: (() => void) | null = null;
+
+        const cleanup = () => {
+            if (abortListener && signal) {
+                signal.removeEventListener('abort', abortListener);
+            }
+            abortListener = null;
+        };
+
+        const rejectOnce = (error: unknown) => {
+            if (settled) {
+                return;
+            }
+            settled = true;
+            cleanup();
+            reject(error);
+        };
+
+        const resolveOnce = (value: RuntimeRequestResponse) => {
+            if (settled) {
+                return;
+            }
+            settled = true;
+            cleanup();
+            resolve(value);
+        };
+
+        const request = transport.request({
+            protocol: parsedUrl.protocol,
+            hostname: parsedUrl.hostname,
+            port: parsedUrl.port || undefined,
+            path: `${parsedUrl.pathname}${parsedUrl.search}`,
+            method: options.method,
+            headers
+        }, (response: any) => {
+            let responseEnded = false;
+            const responseHeaders = response.headers as Record<string, unknown> | undefined;
+            const statusCode = response.statusCode ?? 0;
+            const state = strategy.createState();
+
+            const rejectWithTransportDebug = (error: unknown) => {
+                rejectOnce(createStructuredStreamingTransportError(
+                    transportName,
+                    options,
+                    startedAt,
+                    statusCode,
+                    responseHeaders,
+                    state,
+                    strategy,
+                    error
+                ));
+            };
+
+            response.on('data', (chunk: Buffer | string) => {
+                try {
+                    strategy.onChunk(providerName, state, Buffer.isBuffer(chunk) ? chunk.toString('utf8') : chunk);
+                } catch (error: unknown) {
+                    rejectWithTransportDebug(error);
+                }
+            });
+            response.on('end', () => {
+                responseEnded = true;
+                try {
+                    resolveOnce(buildStructuredStreamingResponse(
+                        providerName,
+                        transportName,
+                        options,
+                        startedAt,
+                        statusCode,
+                        responseHeaders,
+                        state,
+                        strategy
+                    ));
+                } catch (error: unknown) {
+                    rejectWithTransportDebug(error);
+                }
+            });
+            response.on('error', rejectWithTransportDebug);
+            response.on('aborted', () => {
+                rejectWithTransportDebug(new Error('response aborted'));
+            });
+            response.on('close', () => {
+                if (!responseEnded) {
+                    rejectWithTransportDebug(new Error('response stream closed before completion'));
+                }
+            });
+        });
+
+        request.on('error', (error: unknown) => {
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            const attempt = createTransportDebugAttempt(transportName, options, {
+                durationMs: Date.now() - startedAt,
+                errorMessage
+            });
+
+            rejectOnce(attachTransportDebugToError(error, [attempt]));
+        });
+
+        if (signal?.aborted) {
+            const abortError = createAbortError();
+            request.destroy(abortError);
+            rejectOnce(attachTransportDebugToError(abortError, [
+                createTransportDebugAttempt(transportName, options, {
+                    durationMs: Date.now() - startedAt,
+                    errorMessage: abortError.message
+                })
+            ]));
+            return;
+        }
+
+        abortListener = () => {
+            const abortError = createAbortError();
+            request.destroy(abortError);
+            rejectOnce(attachTransportDebugToError(abortError, [
+                createTransportDebugAttempt(transportName, options, {
+                    durationMs: Date.now() - startedAt,
+                    errorMessage: abortError.message
+                })
+            ]));
+        };
+
+        if (signal) {
+            signal.addEventListener('abort', abortListener, { once: true });
+        }
+
+        if (options.body) {
+            request.write(options.body);
+        }
+
+        request.end();
+    });
+}
+
+async function requestRuntimeUrlWithStructuredStreamingFallback<State>(
+    providerName: string,
+    options: RuntimeRequestOptions,
+    streamOptions: RuntimeRequestOptions,
+    strategy: StructuredStreamingStrategy<State>,
+    progressReporter?: ProgressReporter | null,
+    signal?: AbortSignal
+): Promise<RuntimeRequestResponse> {
+    try {
+        return await requestViaObsidianTransport(options);
+    } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        const requestUrlAttempts = getTransportDebugAttempts(error);
+        const fallbackTransport = canUseDesktopHttpTransport(streamOptions.url)
+            ? 'desktop-http'
+            : canUseWebFetchTransport(streamOptions.url)
+                ? 'web-fetch'
+                : null;
+
+        if (!isTransientNetworkErrorMessage(errorMessage) || !fallbackTransport) {
+            throw error;
+        }
+
+        if (progressReporter) {
+            progressReporter.log(
+                `[${providerName}] requestUrl transport closed unexpectedly (${errorMessage}). Retrying this attempt via ${fallbackTransport === 'desktop-http' ? 'desktop HTTP transport' : 'web fetch transport'} with streaming response parsing.`
+            );
+        }
+
+        try {
+            const fallbackResponse = fallbackTransport === 'desktop-http'
+                ? await requestViaDesktopHttpStructuredStreamingTransport(providerName, streamOptions, strategy, signal)
+                : await requestViaWebFetchStructuredStreamingTransport(providerName, streamOptions, strategy, signal);
+            return attachTransportDebugToResponse(
+                fallbackResponse,
+                mergeTransportDebugAttempts(requestUrlAttempts, getTransportDebugAttempts(fallbackResponse))
+            );
+        } catch (fallbackError: unknown) {
+            throw attachTransportDebugToError(
+                fallbackError,
+                mergeTransportDebugAttempts(requestUrlAttempts, getTransportDebugAttempts(fallbackError))
+            );
+        }
+    }
+}
+
 async function requestRuntimeUrlWithDesktopFallback(
     providerName: string,
     options: RuntimeRequestOptions,
@@ -1745,140 +2443,11 @@ function getAbortSignal(progressReporter: ProgressReporter, providedSignal?: Abo
 }
 
 async function executeDeepSeekAPI(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings, signal?: AbortSignal): Promise<string> {
-    if (!provider.apiKey) throw new Error(`API key is missing for DeepSeek provider.`);
-    const url = `${provider.baseUrl}/chat/completions`;
-    
-    // DeepSeek reasoning models (deepseek-reasoner, deepseek-r1) require special handling:
-    // 1. Use ONLY 'user' role messages (no 'system' role)
-    // 2. For exact model "deepseek-reasoner": NO temperature parameter at all
-    // 3. Use max_completion_tokens instead of max_tokens
-    const isDeepseekReasoner = modelName === 'deepseek-reasoner' || modelName.includes('deepseek-reasoner');
-    const isReasoningModel = isDeepseekReasoner || modelName.includes('-r1');
-    
-    const requestBody: any = {
-        model: modelName,
-        messages: isReasoningModel 
-            ? [{ role: 'user', content: `${prompt}\n\n${content}` }]
-            : [{ role: 'system', content: prompt }, { role: 'user', content: content }],
-        max_completion_tokens: settings.maxTokens
-    };
-    
-    // Only set temperature for non-reasoner models
-    // For exact "deepseek-reasoner" model, exclude temperature completely
-    if (modelName !== 'deepseek-reasoner' && !isReasoningModel) {
-        requestBody.temperature = provider.temperature;
-    }
-    
-    const { controller } = getAbortSignal(progressReporter, signal);
-
-    try {
-        await cancellableDelay(1, progressReporter); // Yield
-        progressReporter.log(`[DeepSeek] Calling API with model: ${modelName}, isReasoner: ${isDeepseekReasoner}`);
-        progressReporter.log(`[DeepSeek] Request body: ${JSON.stringify(requestBody, null, 2)}`);
-        
-        let response;
-        try {
-            response = await requestRuntimeUrlWithDesktopFallback('DeepSeek', {
-                url: url,
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${provider.apiKey}` },
-                body: JSON.stringify(requestBody),
-                throw: false
-            }, progressReporter, signal);
-        } catch (error: any) {
-            // Delegate error handling
-            handleApiError('DeepSeek', error, progressReporter, settings.enableApiErrorDebugMode);
-        }
-
-        if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
-        
-        if (response.status < 200 || response.status >= 300) {
-            handleApiError('DeepSeek', response, progressReporter, settings.enableApiErrorDebugMode);
-        }
-        
-        const data = response.json;
-        if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API success.");
-        
-        // For reasoning models, response includes both reasoning_content and content
-        // We want the final answer (content), not the reasoning process
-        const message = data.choices?.[0]?.message;
-        if (!message) {
-            progressReporter.log(`[DeepSeek] Unexpected response structure: ${JSON.stringify(data)}`);
-            throw new Error(`Unexpected response format from DeepSeek API - no message in choices`);
-        }
-        
-        // Get the final content (for reasoning models, this is the answer after reasoning)
-        const responseContent = message.content || '';
-        
-        if (!responseContent) {
-            // For debugging: log if there's reasoning_content but no content
-            if (message.reasoning_content) {
-                progressReporter.log(`[DeepSeek] Response has reasoning_content but no content field`);
-            }
-            progressReporter.log(`[DeepSeek] Response structure: ${JSON.stringify(data)}`);
-            throw new Error(`Unexpected response format from DeepSeek API - empty content`);
-        }
-        
-        progressReporter.log(`[DeepSeek] API call successful, received ${responseContent.length} characters`);
-        return responseContent;
-    } finally { 
-        if (controller && progressReporter.abortController === controller) { 
-            progressReporter.abortController = null; 
-        } 
-    }
+    return await executeOpenAICompatibleApi(provider, modelName, prompt, content, progressReporter, settings, signal);
 }
 
 async function executeOpenAIApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings, signal?: AbortSignal): Promise<string> {
-    if (!provider.apiKey) throw new Error(`API key is missing for OpenAI provider.`);
-    const url = `${provider.baseUrl}/chat/completions`;
-    
-    // OpenAI reasoning models (o1, o1-mini, o1-preview, o3-mini) don't support system role or temperature
-    // They only accept 'user' and 'assistant' roles
-    const isReasoningModel = modelName.startsWith('o1') || modelName.startsWith('o3');
-    
-    const requestBody: any = {
-        model: modelName,
-        messages: isReasoningModel 
-            ? [{ role: 'user', content: `${prompt}\n\n${content}` }]
-            : [{ role: 'system', content: prompt }, { role: 'user', content: content }],
-    };
-    
-    // Reasoning models don't support temperature or max_tokens parameters
-    if (!isReasoningModel) {
-        requestBody.temperature = provider.temperature;
-        requestBody.max_tokens = settings.maxTokens;
-    }
-    
-    const { controller } = getAbortSignal(progressReporter, signal);
-
-    try {
-        await cancellableDelay(1, progressReporter); // Yield
-        let response;
-        try {
-            response = await requestRuntimeUrlWithDesktopFallback('OpenAI', {
-                url: url,
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${provider.apiKey}` },
-                body: JSON.stringify(requestBody),
-                throw: false
-            }, progressReporter, signal);
-        } catch (error: any) {
-            handleApiError('OpenAI', error, progressReporter, settings.enableApiErrorDebugMode);
-        }
-
-        if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
-        if (response.status < 200 || response.status >= 300) {
-            handleApiError('OpenAI', response, progressReporter, settings.enableApiErrorDebugMode);
-        }
-        const data = response.json;
-        if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API success.");
-        if (!data.choices?.[0]?.message?.content) { throw new Error(`Unexpected response format from OpenAI API`); }
-        return data.choices[0].message.content;
-    } finally { 
-        if (controller && progressReporter.abortController === controller) { 
-            progressReporter.abortController = null; 
-        } 
-    }
+    return await executeOpenAICompatibleApi(provider, modelName, prompt, content, progressReporter, settings, signal);
 }
 
 async function executeAnthropicApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings, signal?: AbortSignal): Promise<string> {
@@ -1891,6 +2460,11 @@ async function executeAnthropicApi(provider: LLMProviderConfig, modelName: strin
         temperature: provider.temperature,
         max_tokens: settings.maxTokens
     };
+    const requestBodyJson = JSON.stringify(requestBody);
+    const streamRequestBodyJson = JSON.stringify({
+        ...requestBody,
+        stream: true
+    });
     
     const { controller } = getAbortSignal(progressReporter, signal);
 
@@ -1898,7 +2472,7 @@ async function executeAnthropicApi(provider: LLMProviderConfig, modelName: strin
         await cancellableDelay(1, progressReporter); // Yield
         let response;
         try {
-            response = await requestRuntimeUrlWithDesktopFallback('Anthropic', {
+            response = await requestRuntimeUrlWithStructuredStreamingFallback('Anthropic', {
                 url: url,
                 method: 'POST',
                 headers: { 
@@ -1906,9 +2480,20 @@ async function executeAnthropicApi(provider: LLMProviderConfig, modelName: strin
                     'x-api-key': provider.apiKey, 
                     'anthropic-version': '2023-06-01' 
                 }, 
-                body: JSON.stringify(requestBody),
+                body: requestBodyJson,
                 throw: false
-            }, progressReporter, signal);
+            }, {
+                url,
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'text/event-stream',
+                    'x-api-key': provider.apiKey,
+                    'anthropic-version': '2023-06-01'
+                },
+                body: streamRequestBodyJson,
+                throw: false
+            }, createAnthropicStreamingStrategy(), progressReporter, signal);
         } catch (error: any) {
             handleApiError('Anthropic', error, progressReporter, settings.enableApiErrorDebugMode);
         }
@@ -1931,10 +2516,14 @@ async function executeAnthropicApi(provider: LLMProviderConfig, modelName: strin
 async function executeGoogleApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings, signal?: AbortSignal): Promise<string> {
     if (!provider.apiKey) throw new Error(`API key is missing for Google provider.`);
     const urlWithKey = `${provider.baseUrl}/models/${modelName}:generateContent?key=${provider.apiKey}`;
+    const streamUrl = new URL(urlWithKey);
+    streamUrl.pathname = streamUrl.pathname.replace(':generateContent', ':streamGenerateContent');
+    streamUrl.searchParams.set('alt', 'sse');
     const requestBody = {
         contents: [{ role: 'user', parts: [{ text: `${prompt}\n\n${content}` }] }],
         generationConfig: { temperature: provider.temperature, maxOutputTokens: settings.maxTokens }
     };
+    const requestBodyJson = JSON.stringify(requestBody);
 
     const { controller } = getAbortSignal(progressReporter, signal);
 
@@ -1942,13 +2531,22 @@ async function executeGoogleApi(provider: LLMProviderConfig, modelName: string, 
         await cancellableDelay(1, progressReporter); // Yield
         let response;
         try {
-            response = await requestRuntimeUrlWithDesktopFallback('Google', {
+            response = await requestRuntimeUrlWithStructuredStreamingFallback('Google', {
                 url: urlWithKey,
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(requestBody),
+                body: requestBodyJson,
                 throw: false
-            }, progressReporter, signal);
+            }, {
+                url: streamUrl.toString(),
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'text/event-stream'
+                },
+                body: requestBodyJson,
+                throw: false
+            }, createGoogleStreamingStrategy(), progressReporter, signal);
         } catch (error: any) {
             handleApiError('Google', error, progressReporter, settings.enableApiErrorDebugMode);
         }
@@ -1969,45 +2567,7 @@ async function executeGoogleApi(provider: LLMProviderConfig, modelName: string, 
 }
 
 async function executeMistralApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings, signal?: AbortSignal): Promise<string> {
-    if (!provider.apiKey) throw new Error(`API key is missing for Mistral provider.`);
-    const url = `${provider.baseUrl}/chat/completions`;
-    const requestBody = {
-        model: modelName,
-        messages: [{ role: 'system', content: prompt }, { role: 'user', content: content }],
-        temperature: provider.temperature,
-        max_tokens: settings.maxTokens
-    };
-
-    const { controller } = getAbortSignal(progressReporter, signal);
-
-    try {
-        await cancellableDelay(1, progressReporter); // Yield
-        let response;
-        try {
-            response = await requestRuntimeUrlWithDesktopFallback('Mistral', {
-                url: url,
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${provider.apiKey}` },
-                body: JSON.stringify(requestBody),
-                throw: false
-            }, progressReporter, signal);
-        } catch (error: any) {
-            handleApiError('Mistral', error, progressReporter, settings.enableApiErrorDebugMode);
-        }
-
-        if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
-        if (response.status < 200 || response.status >= 300) {
-            handleApiError('Mistral', response, progressReporter, settings.enableApiErrorDebugMode);
-        }
-        const data = response.json;
-        if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API success.");
-        if (!data.choices?.[0]?.message?.content) { throw new Error(`Unexpected response format from Mistral API`); }
-        return data.choices[0].message.content;
-    } finally { 
-        if (controller && progressReporter.abortController === controller) { 
-            progressReporter.abortController = null; 
-        } 
-    }
+    return await executeOpenAICompatibleApi(provider, modelName, prompt, content, progressReporter, settings, signal);
 }
 
 async function executeAzureOpenAIApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings, signal?: AbortSignal): Promise<string> {
@@ -2019,6 +2579,11 @@ async function executeAzureOpenAIApi(provider: LLMProviderConfig, modelName: str
         temperature: provider.temperature,
         max_tokens: settings.maxTokens
     };
+    const requestBodyJson = JSON.stringify(requestBody);
+    const streamRequestBodyJson = JSON.stringify({
+        ...requestBody,
+        stream: true
+    });
 
     const { controller } = getAbortSignal(progressReporter, signal);
 
@@ -2026,13 +2591,13 @@ async function executeAzureOpenAIApi(provider: LLMProviderConfig, modelName: str
         await cancellableDelay(1, progressReporter); // Yield
         let response;
         try {
-            response = await requestRuntimeUrlWithDesktopFallback('Azure OpenAI', {
+            response = await requestOpenAICompatibleWithStreamingFallback('Azure OpenAI', {
                 url: url,
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'api-key': provider.apiKey },
-                body: JSON.stringify(requestBody),
+                body: requestBodyJson,
                 throw: false
-            }, progressReporter, signal);
+            }, streamRequestBodyJson, progressReporter, signal);
         } catch (error: any) {
             handleApiError('Azure OpenAI', error, progressReporter, settings.enableApiErrorDebugMode);
         }
@@ -2053,52 +2618,7 @@ async function executeAzureOpenAIApi(provider: LLMProviderConfig, modelName: str
 }
 
 async function executeLMStudioApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings, signal?: AbortSignal): Promise<string> {
-    // Note: LMStudio might not require an API key, or use a placeholder like 'EMPTY'.
-    const url = `${provider.baseUrl}/chat/completions`;
-    
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const requestBody: any = {
-        model: modelName,
-        messages: [{ role: 'system', content: prompt }, { role: 'user', content: content }],
-    };
-
-    if (typeof provider.temperature === 'number') {
-        requestBody.temperature = provider.temperature;
-    }
-    if (typeof settings.maxTokens === 'number' && settings.maxTokens > 0) {
-        requestBody.max_tokens = settings.maxTokens;
-    }
-
-    const { controller } = getAbortSignal(progressReporter, signal);
-
-    try {
-        await cancellableDelay(1, progressReporter); // Yield
-        let response;
-        try {
-            response = await requestRuntimeUrlWithDesktopFallback('LMStudio', {
-                url: url,
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${provider.apiKey || 'EMPTY'}` },
-                body: JSON.stringify(requestBody),
-                throw: false
-            }, progressReporter, signal);
-        } catch (error: any) {
-            handleApiError('LMStudio', error, progressReporter, settings.enableApiErrorDebugMode);
-        }
-
-        if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
-        if (response.status < 200 || response.status >= 300) {
-            handleApiError('LMStudio', response, progressReporter, settings.enableApiErrorDebugMode);
-        }
-        const data = response.json;
-        if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API success.");
-        if (!data.choices?.[0]?.message?.content) { throw new Error(`Unexpected response format from LMStudio`); }
-        return data.choices[0].message.content;
-    } finally { 
-        if (controller && progressReporter.abortController === controller) { 
-            progressReporter.abortController = null; 
-        } 
-    }
+    return await executeOpenAICompatibleApi(provider, modelName, prompt, content, progressReporter, settings, signal);
 }
 
 async function executeOllamaApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings, signal?: AbortSignal): Promise<string> {
@@ -2110,6 +2630,11 @@ async function executeOllamaApi(provider: LLMProviderConfig, modelName: string, 
         options: { temperature: provider.temperature, num_predict: settings.maxTokens },
         stream: false
     };
+    const requestBodyJson = JSON.stringify(requestBody);
+    const streamRequestBodyJson = JSON.stringify({
+        ...requestBody,
+        stream: true
+    });
     
     const { controller } = getAbortSignal(progressReporter, signal);
 
@@ -2117,13 +2642,22 @@ async function executeOllamaApi(provider: LLMProviderConfig, modelName: string, 
         await cancellableDelay(1, progressReporter); // Yield
         let response;
         try {
-            response = await requestRuntimeUrlWithDesktopFallback('Ollama', {
+            response = await requestRuntimeUrlWithStructuredStreamingFallback('Ollama', {
                 url: url,
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(requestBody),
+                body: requestBodyJson,
                 throw: false
-            }, progressReporter, signal);
+            }, {
+                url,
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/x-ndjson'
+                },
+                body: streamRequestBodyJson,
+                throw: false
+            }, createOllamaStreamingStrategy(), progressReporter, signal);
         } catch (error: any) {
             handleApiError('Ollama', error, progressReporter, settings.enableApiErrorDebugMode);
         }
@@ -2143,161 +2677,12 @@ async function executeOllamaApi(provider: LLMProviderConfig, modelName: string, 
     }
 }
 
-// Updated executeOpenRouterAPI with safer parsing and enhanced logging
 async function executeOpenRouterAPI(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings, signal?: AbortSignal): Promise<string> {
-    if (!provider.apiKey) throw new Error(`API key is missing for OpenRouter provider.`);
-    const url = `${provider.baseUrl}/chat/completions`;
-
-    // Check for reasoning models (e.g., DeepSeek R1, OpenAI o1/o3)
-    const isDeepSeekReasoner = modelName.includes('deepseek-r1') || modelName.includes('reasoner');
-    const isOpenAIReasoner = modelName.includes('openai/o1') || modelName.includes('openai/o3');
-    const isReasoningModel = isDeepSeekReasoner || isOpenAIReasoner;
-
-    const requestBody: any = {
-        model: modelName, // User specifies the full model string e.g., "google/gemini-pro"
-        messages: isReasoningModel 
-            ? [{ role: 'user', content: `${prompt}\n\n${content}` }]
-            : [{ role: 'system', content: prompt }, { role: 'user', content: content }],
-    };
-
-    // Only add specific parameters for non-reasoning models, or as required
-    if (!isReasoningModel) {
-        requestBody.temperature = provider.temperature;
-        requestBody.max_tokens = settings.maxTokens;
-    } else {
-         // For DeepSeek R1 on OpenRouter, recommended temperature is 0.7
-         if (isDeepSeekReasoner) {
-             requestBody.temperature = 0.7;
-         }
-    }
-    
-    const { controller } = getAbortSignal(progressReporter, signal);
-    let response;
-
-    try {
-        await cancellableDelay(1, progressReporter); // Yield
-        progressReporter.log(`[OpenRouter] Calling API: ${url} with model ${modelName}`);
-        
-        try {
-            response = await requestRuntimeUrlWithDesktopFallback('OpenRouter', {
-                url: url,
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${provider.apiKey}`,
-                    'HTTP-Referer': 'https://github.com/Jacobinwwey/obsidian-NotEMD', // Required by OpenRouter
-                    'X-Title': 'Notemd Obsidian Plugin' // Required by OpenRouter
-                },
-                body: JSON.stringify(requestBody),
-                throw: false
-            }, progressReporter, signal);
-        } catch (error: any) {
-             handleApiError('OpenRouter', error, progressReporter, settings.enableApiErrorDebugMode);
-        }
-
-        progressReporter.log(`[OpenRouter] Received response status: ${response.status}`);
-
-        if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
-
-        const responseText = response.text; // Read body as text first
-        progressReporter.log(`[OpenRouter] Read response text (length: ${responseText.length}).`);
-        if (progressReporter.cancelled) throw new Error("Processing cancelled by user after reading response text."); // Check again
-
-        if (response.status < 200 || response.status >= 300) {
-             // Pass response object (which still has .status and .text)
-             handleApiError('OpenRouter', response, progressReporter, settings.enableApiErrorDebugMode);
-        }
-
-        // Now attempt to parse the text as JSON
-        let data;
-        try {
-            data = JSON.parse(responseText); // Use already read text
-            progressReporter.log(`[OpenRouter] Successfully parsed JSON response.`);
-        } catch (jsonError: unknown) {
-            progressReporter.log(`[OpenRouter] Failed to parse JSON response, status was ${response.status}.`);
-            progressReporter.log(`[OpenRouter] Raw response text: ${responseText}`); // Log raw text on parse failure
-            // Fallback: If JSON parsing fails on 200 OK, maybe the raw text is the content?
-            progressReporter.log(`[OpenRouter] Warning: JSON parsing failed despite 200 OK. Using raw response text as potential content.`);
-            return responseText; // Use raw text as fallback content
-        }
-
-        // --- Check for errors *within* the successfully parsed JSON response ---
-        const choice = data.choices?.[0];
-        if (choice && (choice.finish_reason === 'error' || choice.error)) {
-            const errorMessage = choice.error?.message || `OpenRouter reported finish_reason: error`;
-            const errorCode = choice.error?.code || 'N/A';
-            progressReporter.log(`[OpenRouter] Error reported in JSON response: Code ${errorCode}, Message: ${errorMessage}`);
-            // Throw specific error based on JSON content
-            throw new Error(`OpenRouter API reported an error: ${errorMessage} (Code: ${errorCode})`);
-        }
-        // --- End JSON error check ---
-
-        // Check expected structure - Primary: content field
-        let responseContent = data.choices?.[0]?.message?.content;
-
-        // Fallback: Check reasoning field if content is empty/null
-        if (!responseContent && data.choices?.[0]?.message?.reasoning) {
-            progressReporter.log(`[OpenRouter] 'content' field empty, using 'reasoning' field as fallback.`);
-            responseContent = data.choices?.[0]?.message?.reasoning;
-        }
-
-        // Final check: If still no content, throw error
-        if (!responseContent) {
-            progressReporter.log(`[OpenRouter] Unexpected JSON structure or empty content/reasoning: ${JSON.stringify(data)}`); // Log unexpected structure
-            throw new Error(`Unexpected response format or empty content from OpenRouter`);
-        }
-
-        progressReporter.log(`[OpenRouter] API call successful (using ${data.choices?.[0]?.message?.content ? 'content' : 'reasoning'} field).`);
-        return responseContent;
-
-    } finally {
-        // Only clear the reporter's controller if we created it internally
-        if (controller && progressReporter.abortController === controller) { 
-            progressReporter.abortController = null; 
-        }
-    }
+    return await executeOpenAICompatibleApi(provider, modelName, prompt, content, progressReporter, settings, signal);
 }
 
 async function executeXaiApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings, signal?: AbortSignal): Promise<string> {
-    if (!provider.apiKey) throw new Error(`API key is missing for xAI provider.`);
-    const url = `${provider.baseUrl}/chat/completions`;
-    const requestBody = {
-        model: modelName,
-        messages: [{ role: 'system', content: prompt }, { role: 'user', content: content }],
-        temperature: provider.temperature,
-        max_tokens: settings.maxTokens
-    };
-    
-    const { controller } = getAbortSignal(progressReporter, signal);
-
-    try {
-        await cancellableDelay(1, progressReporter); // Yield
-        let response;
-        try {
-            response = await requestRuntimeUrlWithDesktopFallback('xAI', {
-                url: url,
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${provider.apiKey}` },
-                body: JSON.stringify(requestBody),
-                throw: false
-            }, progressReporter, signal);
-        } catch (error: any) {
-            handleApiError('xAI', error, progressReporter, settings.enableApiErrorDebugMode);
-        }
-
-        if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
-        if (response.status < 200 || response.status >= 300) {
-            handleApiError('xAI', response, progressReporter, settings.enableApiErrorDebugMode);
-        }
-        const data = response.json;
-        if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API success.");
-        if (!data.choices?.[0]?.message?.content) { throw new Error(`Unexpected response format from xAI API`); }
-        return data.choices[0].message.content;
-    } finally { 
-        if (controller && progressReporter.abortController === controller) { 
-            progressReporter.abortController = null; 
-        } 
-    }
+    return await executeOpenAICompatibleApi(provider, modelName, prompt, content, progressReporter, settings, signal);
 }
 
 async function executeOpenAICompatibleApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings, signal?: AbortSignal): Promise<string> {

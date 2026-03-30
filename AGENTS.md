@@ -90,7 +90,16 @@ If you change the shared OpenAI-compatible runtime:
 
 - Preserve the streaming fallback path for long-running requests on desktop `http/https` and non-desktop `fetch`.
 - Preserve deep debug coverage for both raw partial bodies and parsed partial stream output.
+- Keep legacy exported provider wrappers (`callOpenAIApi`, `callDeepSeekAPI`, `callMistralApi`, `callOpenRouterAPI`, `callXaiApi`, `callLMStudioApi`) delegating to the shared OpenAI-compatible execution path instead of reintroducing buffered-only fallback code.
 - Update `src/tests/llmUtilsProviderSupport.test.ts` to cover both desktop and non-desktop fallback behavior.
+- Keep `scripts/diagnose-llm-provider.js` and `scripts/lib/llm-provider-diagnostic.js` aligned with runtime protocol behavior so real-endpoint diagnostics match plugin transport semantics.
+- Keep the in-plugin settings action `Developer provider diagnostic (long request)` aligned with the same runtime protocol behavior so UI diagnostics and CLI diagnostics are comparable.
+
+If you change any non-OpenAI-compatible LLM transport runtime (`anthropic`, `google`, `azure-openai`, or `ollama`):
+
+- Preserve protocol-aware fallback parsing for long-running requests instead of regressing to buffered-only fallback reads.
+- Keep partial parsed stream output in shared debug metadata when a fallback attempt is interrupted.
+- Update `src/tests/llmUtilsProviderSupport.test.ts` to cover the affected transport on both success and interrupted-stream paths.
 
 ## UI, Workflow, And Mermaid Rules
 
