@@ -1481,50 +1481,101 @@ async function requestOpenAICompatibleWithStreamingFallback(
     options: RuntimeRequestOptions,
     streamBody: string,
     progressReporter?: ProgressReporter | null,
-    signal?: AbortSignal
+    signal?: AbortSignal,
+    preferDirectStreamingTransport: boolean = false
 ): Promise<RuntimeRequestResponse> {
-    try {
-        return await requestViaObsidianTransport(options);
-    } catch (error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        const requestUrlAttempts = getTransportDebugAttempts(error);
-        const fallbackTransport = canUseDesktopHttpTransport(options.url)
-            ? 'desktop-http'
-            : canUseWebFetchTransport(options.url)
-                ? 'web-fetch'
-                : null;
+    const streamOptions: RuntimeRequestOptions = {
+        ...options,
+        headers: {
+            ...(options.headers ?? {}),
+            Accept: 'text/event-stream'
+        },
+        body: streamBody
+    };
 
-        if (!isTransientNetworkErrorMessage(errorMessage) || !fallbackTransport) {
-            throw error;
+    const requestUrlThenStreamingFallback = async (): Promise<RuntimeRequestResponse> => {
+        try {
+            return await requestViaObsidianTransport(options);
+        } catch (error: unknown) {
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            const requestUrlAttempts = getTransportDebugAttempts(error);
+            const fallbackTransport = canUseDesktopHttpTransport(options.url)
+                ? 'desktop-http'
+                : canUseWebFetchTransport(options.url)
+                    ? 'web-fetch'
+                    : null;
+
+            if (!isTransientNetworkErrorMessage(errorMessage) || !fallbackTransport) {
+                throw error;
+            }
+
+            if (progressReporter) {
+                progressReporter.log(
+                    `[${providerName}] requestUrl transport closed unexpectedly (${errorMessage}). Retrying this attempt via ${fallbackTransport === 'desktop-http' ? 'desktop HTTP transport' : 'web fetch transport'} with streaming response parsing.`
+                );
+            }
+
+            try {
+                const fallbackResponse = fallbackTransport === 'desktop-http'
+                    ? await requestViaDesktopHttpOpenAICompatibleStreamTransport(providerName, streamOptions, signal)
+                    : await requestViaWebFetchOpenAICompatibleStreamTransport(providerName, streamOptions, signal);
+                return attachTransportDebugToResponse(
+                    fallbackResponse,
+                    mergeTransportDebugAttempts(requestUrlAttempts, getTransportDebugAttempts(fallbackResponse))
+                );
+            } catch (fallbackError: unknown) {
+                throw attachTransportDebugToError(
+                    fallbackError,
+                    mergeTransportDebugAttempts(requestUrlAttempts, getTransportDebugAttempts(fallbackError))
+                );
+            }
         }
+    };
+
+    if (!preferDirectStreamingTransport) {
+        return await requestUrlThenStreamingFallback();
+    }
+
+    const primaryTransport = canUseDesktopHttpTransport(options.url)
+        ? 'desktop-http'
+        : canUseWebFetchTransport(options.url)
+            ? 'web-fetch'
+            : null;
+
+    if (!primaryTransport) {
+        return await requestUrlThenStreamingFallback();
+    }
+
+    if (progressReporter) {
+        progressReporter.log(
+            `[${providerName}] Using ${primaryTransport === 'desktop-http' ? 'desktop HTTP streaming transport' : 'web fetch streaming transport'} as primary long-request path.`
+        );
+    }
+
+    try {
+        return primaryTransport === 'desktop-http'
+            ? await requestViaDesktopHttpOpenAICompatibleStreamTransport(providerName, streamOptions, signal)
+            : await requestViaWebFetchOpenAICompatibleStreamTransport(providerName, streamOptions, signal);
+    } catch (primaryError: unknown) {
+        const primaryErrorMessage = primaryError instanceof Error ? primaryError.message : String(primaryError);
+        const primaryAttempts = getTransportDebugAttempts(primaryError);
 
         if (progressReporter) {
             progressReporter.log(
-                `[${providerName}] requestUrl transport closed unexpectedly (${errorMessage}). Retrying this attempt via ${fallbackTransport === 'desktop-http' ? 'desktop HTTP transport' : 'web fetch transport'} with streaming response parsing.`
+                `[${providerName}] Primary ${primaryTransport === 'desktop-http' ? 'desktop HTTP streaming transport' : 'web fetch streaming transport'} failed (${primaryErrorMessage}). Falling back to requestUrl path.`
             );
         }
 
-        const streamOptions: RuntimeRequestOptions = {
-            ...options,
-            headers: {
-                ...(options.headers ?? {}),
-                Accept: 'text/event-stream'
-            },
-            body: streamBody
-        };
-
         try {
-            const fallbackResponse = fallbackTransport === 'desktop-http'
-                ? await requestViaDesktopHttpOpenAICompatibleStreamTransport(providerName, streamOptions, signal)
-                : await requestViaWebFetchOpenAICompatibleStreamTransport(providerName, streamOptions, signal);
+            const fallbackResponse = await requestUrlThenStreamingFallback();
             return attachTransportDebugToResponse(
                 fallbackResponse,
-                mergeTransportDebugAttempts(requestUrlAttempts, getTransportDebugAttempts(fallbackResponse))
+                mergeTransportDebugAttempts(primaryAttempts, getTransportDebugAttempts(fallbackResponse))
             );
         } catch (fallbackError: unknown) {
             throw attachTransportDebugToError(
                 fallbackError,
-                mergeTransportDebugAttempts(requestUrlAttempts, getTransportDebugAttempts(fallbackError))
+                mergeTransportDebugAttempts(primaryAttempts, getTransportDebugAttempts(fallbackError))
             );
         }
     }
@@ -2597,7 +2648,7 @@ async function executeAzureOpenAIApi(provider: LLMProviderConfig, modelName: str
                 headers: { 'Content-Type': 'application/json', 'api-key': provider.apiKey },
                 body: requestBodyJson,
                 throw: false
-            }, streamRequestBodyJson, progressReporter, signal);
+            }, streamRequestBodyJson, progressReporter, signal, settings.enableStableApiCall);
         } catch (error: any) {
             handleApiError('Azure OpenAI', error, progressReporter, settings.enableApiErrorDebugMode);
         }
@@ -2715,7 +2766,7 @@ async function executeOpenAICompatibleApi(provider: LLMProviderConfig, modelName
                 headers: buildOpenAICompatibleHeaders(provider),
                 body: requestBodyJson,
                 throw: false
-            }, streamRequestBodyJson, progressReporter, signal);
+            }, streamRequestBodyJson, progressReporter, signal, settings.enableStableApiCall);
         } catch (error: any) {
             handleApiError(provider.name, error, progressReporter, settings.enableApiErrorDebugMode);
         }
