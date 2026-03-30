@@ -34,6 +34,20 @@ This document summarizes the major functional and architectural changes implemen
 
 ---
 
+## [1.7.14] - 2026-03-30
+
+### English
+*   **Single-File CTA Visual Mapping**: Sidebar colorful CTA styling is now strictly mapped to single-file actions. Batch/folder-level actions no longer use CTA color treatment, reducing scope confusion and accidental batch triggers.
+*   **Workflow CTA Rule Alignment**: Custom workflow buttons now inherit CTA styling only when every step is single-file. Mixed workflows that include batch steps are rendered as non-CTA to keep visual semantics consistent.
+*   **Regression Coverage**: Added a sidebar DOM test to lock CTA mapping behavior for single-file actions vs batch/folder actions and default mixed workflow buttons.
+
+### Chinese (中文)
+*   **单文件 CTA 视觉映射**: 侧边栏彩色 CTA 样式现在严格对应“单文件处理”动作；批量/文件夹级动作不再使用 CTA 色彩，以减少范围误判和误触发批处理的风险。
+*   **工作流 CTA 规则对齐**: 自定义工作流按钮仅在“所有步骤均为单文件动作”时才应用 CTA 样式；只要包含批量步骤即回落为非 CTA 样式，保持视觉语义一致。
+*   **回归测试覆盖**: 新增侧边栏 DOM 测试，锁定单文件动作、批量/文件夹动作以及默认混合工作流按钮的 CTA 映射行为。
+
+---
+
 ## [1.7.13] - 2026-03-30
 
 ### English
