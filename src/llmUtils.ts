@@ -96,6 +96,15 @@ function isTransientNetworkErrorMessage(errorMessage: string): boolean {
     return TRANSIENT_NETWORK_ERROR_PATTERNS.some(pattern => normalized.includes(pattern));
 }
 
+function isAbortError(error: unknown): boolean {
+    if (error instanceof Error && error.name === 'AbortError') {
+        return true;
+    }
+
+    const message = error instanceof Error ? error.message : String(error);
+    return message.trim().toLowerCase() === 'the operation was aborted.';
+}
+
 const CONNECTION_TEST_MAX_ATTEMPTS = DEFAULT_SETTINGS.apiCallMaxRetries + 1;
 const CONNECTION_TEST_RETRY_DELAY_MS = DEFAULT_SETTINGS.apiCallInterval * 1000;
 
@@ -1557,26 +1566,56 @@ async function requestOpenAICompatibleWithStreamingFallback(
             ? await requestViaDesktopHttpOpenAICompatibleStreamTransport(providerName, streamOptions, signal)
             : await requestViaWebFetchOpenAICompatibleStreamTransport(providerName, streamOptions, signal);
     } catch (primaryError: unknown) {
+        if (isAbortError(primaryError)) {
+            throw primaryError;
+        }
+
         const primaryErrorMessage = primaryError instanceof Error ? primaryError.message : String(primaryError);
         const primaryAttempts = getTransportDebugAttempts(primaryError);
 
         if (progressReporter) {
             progressReporter.log(
-                `[${providerName}] Primary ${primaryTransport === 'desktop-http' ? 'desktop HTTP streaming transport' : 'web fetch streaming transport'} failed (${primaryErrorMessage}). Falling back to requestUrl path.`
+                `[${providerName}] Primary ${primaryTransport === 'desktop-http' ? 'desktop HTTP streaming transport' : 'web fetch streaming transport'} failed (${primaryErrorMessage}). Retrying via ${primaryTransport === 'desktop-http' ? 'desktop HTTP transport (non-stream)' : 'web fetch transport (non-stream)'} before requestUrl fallback.`
             );
         }
 
         try {
-            const fallbackResponse = await requestUrlThenStreamingFallback();
+            const bufferedResponse = primaryTransport === 'desktop-http'
+                ? await requestViaDesktopHttpTransport(options, signal)
+                : await requestViaWebFetchTransport(options, signal);
             return attachTransportDebugToResponse(
-                fallbackResponse,
-                mergeTransportDebugAttempts(primaryAttempts, getTransportDebugAttempts(fallbackResponse))
+                bufferedResponse,
+                mergeTransportDebugAttempts(primaryAttempts, getTransportDebugAttempts(bufferedResponse))
             );
-        } catch (fallbackError: unknown) {
-            throw attachTransportDebugToError(
-                fallbackError,
-                mergeTransportDebugAttempts(primaryAttempts, getTransportDebugAttempts(fallbackError))
-            );
+        } catch (bufferedError: unknown) {
+            if (isAbortError(bufferedError)) {
+                throw attachTransportDebugToError(
+                    bufferedError,
+                    mergeTransportDebugAttempts(primaryAttempts, getTransportDebugAttempts(bufferedError))
+                );
+            }
+
+            const bufferedErrorMessage = bufferedError instanceof Error ? bufferedError.message : String(bufferedError);
+            const bufferedAttempts = mergeTransportDebugAttempts(primaryAttempts, getTransportDebugAttempts(bufferedError));
+
+            if (progressReporter) {
+                progressReporter.log(
+                    `[${providerName}] Direct ${primaryTransport === 'desktop-http' ? 'desktop HTTP transport (non-stream)' : 'web fetch transport (non-stream)'} fallback failed (${bufferedErrorMessage}). Falling back to requestUrl path.`
+                );
+            }
+
+            try {
+                const fallbackResponse = await requestUrlThenStreamingFallback();
+                return attachTransportDebugToResponse(
+                    fallbackResponse,
+                    mergeTransportDebugAttempts(bufferedAttempts, getTransportDebugAttempts(fallbackResponse))
+                );
+            } catch (fallbackError: unknown) {
+                throw attachTransportDebugToError(
+                    fallbackError,
+                    mergeTransportDebugAttempts(bufferedAttempts, getTransportDebugAttempts(fallbackError))
+                );
+            }
         }
     }
 }
