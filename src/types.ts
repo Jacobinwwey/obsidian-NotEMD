@@ -52,6 +52,11 @@ export interface NotemdSettings {
     apiCallMaxRetries: number;
     // API Debugging
     enableApiErrorDebugMode: boolean;
+    // Developer mode / diagnostics
+    enableDeveloperMode: boolean;
+    developerDiagnosticCallMode: string;
+    developerDiagnosticStabilityRuns: number;
+    developerDiagnosticTimeoutMs: number;
     // Task-specific models (used if useMultiModelSettings is true)
     addLinksModel?: string;
     researchModel?: string;
