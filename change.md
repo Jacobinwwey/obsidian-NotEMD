@@ -34,6 +34,20 @@ This document summarizes the major functional and architectural changes implemen
 
 ---
 
+## [1.7.13] - 2026-03-30
+
+### English
+*   **Sidebar Interaction Polish**: Refined sidebar button interactions with clearer hover, pressed, and focus-visible states so action feedback is obvious during rapid workflows.
+*   **CTA Readability Fix**: Improved text contrast on colorful CTA buttons (including `One-Click Extract` and `Batch generate from titles`) to avoid low-contrast white-on-light combinations across different Obsidian themes.
+*   **Docked Footer Visibility Tuning**: Increased persistent footer sizing constraints and log minimum height so progress + log telemetry stays visible when multiple panels are expanded.
+
+### Chinese (中文)
+*   **侧边栏交互打磨**: 细化了侧边栏按钮的悬停、按下与键盘焦点态，让高频工作流中的操作反馈更明确。
+*   **CTA 可读性修复**: 提升了彩色 CTA 按钮（包括 `One-Click Extract`、`Batch generate from titles`）的文字对比度，避免不同主题下出现浅底白字可见性不足的问题。
+*   **底部停靠区可见性优化**: 调整了固定底部区域尺寸约束与日志最小高度，在展开多个分组时仍能稳定看到进度与日志信息。
+
+---
+
 ## [1.7.8] - 2026-03-29
 
 ### English
