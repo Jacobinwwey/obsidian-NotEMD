@@ -105,6 +105,13 @@ function isAbortError(error: unknown): boolean {
     return message.trim().toLowerCase() === 'the operation was aborted.';
 }
 
+export type OpenAICompatibleDiagnosticCallMode =
+    | 'runtime-stable'
+    | 'runtime-requesturl-first'
+    | 'openai-direct-stream'
+    | 'openai-direct-buffered'
+    | 'openai-requesturl-only';
+
 const CONNECTION_TEST_MAX_ATTEMPTS = DEFAULT_SETTINGS.apiCallMaxRetries + 1;
 const CONNECTION_TEST_RETRY_DELAY_MS = DEFAULT_SETTINGS.apiCallInterval * 1000;
 
@@ -986,6 +993,18 @@ function canUseDesktopHttpTransport(targetUrl: string): boolean {
     }
 
     return false;
+}
+
+type DirectRuntimeTransport = 'desktop-http' | 'web-fetch';
+
+function resolveDirectRuntimeTransport(targetUrl: string): DirectRuntimeTransport | null {
+    if (canUseDesktopHttpTransport(targetUrl)) {
+        return 'desktop-http';
+    }
+    if (canUseWebFetchTransport(targetUrl)) {
+        return 'web-fetch';
+    }
+    return null;
 }
 
 async function requestViaDesktopHttpTransport(
@@ -2087,6 +2106,17 @@ function extractOpenAICompatibleText(providerName: string, data: any, fallbackTe
     throw new Error(`Unexpected response format from ${providerName}`);
 }
 
+function buildRuntimeResponseStatusError(providerName: string, response: RuntimeRequestResponse): Error {
+    const detail = getErrorDetails(response.text || '');
+    const error = new Error(`${providerName} API error: ${response.status} - ${detail}`);
+    (error as any).status = response.status;
+    (error as any).text = response.text;
+    if (response.__notemdDebug?.attempts?.length) {
+        (error as any).__notemdDebug = response.__notemdDebug;
+    }
+    return error;
+}
+
 async function testOpenAICompatibleAPI(provider: LLMProviderConfig): Promise<{ success: boolean; message: string }> {
     ensureProviderApiKey(provider);
 
@@ -2824,6 +2854,121 @@ async function executeOpenAICompatibleApi(provider: LLMProviderConfig, modelName
             progressReporter.abortController = null;
         }
     }
+}
+
+export async function callOpenAICompatibleDiagnosticWithMode(
+    provider: LLMProviderConfig,
+    modelName: string,
+    prompt: string,
+    content: string,
+    progressReporter: ProgressReporter,
+    settings: NotemdSettings,
+    callMode: OpenAICompatibleDiagnosticCallMode,
+    signal?: AbortSignal
+): Promise<string> {
+    ensureProviderApiKey(provider);
+
+    const url = `${provider.baseUrl}/chat/completions`;
+    const requestBody = buildOpenAICompatibleRequestBody(
+        provider,
+        modelName,
+        prompt,
+        content,
+        settings.maxTokens,
+        provider.temperature
+    );
+    const requestBodyJson = JSON.stringify(requestBody);
+    const streamRequestBodyJson = JSON.stringify({
+        ...requestBody,
+        stream: true
+    });
+
+    const baseOptions: RuntimeRequestOptions = {
+        url,
+        method: 'POST',
+        headers: buildOpenAICompatibleHeaders(provider),
+        body: requestBodyJson,
+        throw: false
+    };
+    const streamOptions: RuntimeRequestOptions = {
+        ...baseOptions,
+        headers: {
+            ...(baseOptions.headers ?? {}),
+            Accept: 'text/event-stream'
+        },
+        body: streamRequestBodyJson
+    };
+
+    let response: RuntimeRequestResponse;
+
+    switch (callMode) {
+        case 'runtime-requesturl-first': {
+            response = await requestOpenAICompatibleWithStreamingFallback(
+                provider.name,
+                baseOptions,
+                streamRequestBodyJson,
+                progressReporter,
+                signal,
+                false
+            );
+            break;
+        }
+        case 'openai-requesturl-only': {
+            progressReporter.log(`[${provider.name}] Developer diagnostic: forcing requestUrl-only transport.`);
+            response = await requestViaObsidianTransport(baseOptions);
+            break;
+        }
+        case 'openai-direct-buffered': {
+            const directTransport = resolveDirectRuntimeTransport(url);
+            if (!directTransport) {
+                throw new Error(`[${provider.name}] No direct runtime transport available for direct buffered diagnostic mode.`);
+            }
+
+            progressReporter.log(
+                `[${provider.name}] Developer diagnostic: forcing ${directTransport === 'desktop-http' ? 'desktop HTTP' : 'web fetch'} buffered transport.`
+            );
+
+            response = directTransport === 'desktop-http'
+                ? await requestViaDesktopHttpTransport(baseOptions, signal)
+                : await requestViaWebFetchTransport(baseOptions, signal);
+            break;
+        }
+        case 'openai-direct-stream': {
+            const directTransport = resolveDirectRuntimeTransport(url);
+            if (!directTransport) {
+                throw new Error(`[${provider.name}] No direct runtime transport available for direct streaming diagnostic mode.`);
+            }
+
+            progressReporter.log(
+                `[${provider.name}] Developer diagnostic: forcing ${directTransport === 'desktop-http' ? 'desktop HTTP' : 'web fetch'} streaming transport.`
+            );
+
+            response = directTransport === 'desktop-http'
+                ? await requestViaDesktopHttpOpenAICompatibleStreamTransport(provider.name, streamOptions, signal)
+                : await requestViaWebFetchOpenAICompatibleStreamTransport(provider.name, streamOptions, signal);
+            break;
+        }
+        case 'runtime-stable':
+        default: {
+            response = await requestOpenAICompatibleWithStreamingFallback(
+                provider.name,
+                baseOptions,
+                streamRequestBodyJson,
+                progressReporter,
+                signal,
+                true
+            );
+            break;
+        }
+    }
+
+    if (response.status < 200 || response.status >= 300) {
+        throw buildRuntimeResponseStatusError(provider.name, response);
+    }
+
+    const data = response.json;
+    const fallbackText = typeof response.text === 'string' ? response.text : '';
+    return extractOpenAICompatibleText(provider.name, data, fallbackText);
 }
 
 
