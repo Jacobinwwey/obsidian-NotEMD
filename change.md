@@ -4,6 +4,28 @@ This document summarizes the major functional and architectural changes implemen
 
 ---
 
+## [Unreleased]
+
+### English
+*   **Protocol-Aware Streaming Fallback Across All LLM Paths**: Extended long-request fallback parsing beyond OpenAI-compatible providers so Anthropic Messages, Google Gemini, Azure OpenAI, and Ollama now also use protocol-aware streamed fallback handling on desktop `http/https` and non-desktop `fetch`. Legacy exported OpenAI-style provider wrappers now delegate to the same shared streamed fallback path instead of keeping buffered-only logic.
+*   **Cross-Transport Partial Stream Debugging**: Shared debug output now preserves parsed partial stream text for Anthropic, Google/Azure-style SSE flows, and Ollama NDJSON fallbacks, not just OpenAI-compatible calls.
+*   **Regression Coverage**: Added focused runtime tests for Anthropic, Google, Azure OpenAI, Ollama, and the remaining direct OpenAI-style provider wrappers on streamed fallback success and interruption scenarios.
+*   **Real Endpoint Diagnostic CLI**: Added `scripts/diagnose-llm-provider.js` (and `npm run diagnose:llm`) to run reproducible buffered/streaming long-request diagnostics against real provider endpoints with sanitized per-attempt timing, headers, partial bodies, and parsed stream fragments.
+*   **Settings Developer Diagnostic Button**: Added `Developer provider diagnostic (long request)` in settings to run an in-plugin runtime probe for the active provider and persist a full report (`Notemd_Provider_Diagnostic_*.txt`) in vault root.
+*   **Diagnostic Runtime Helper + Tests**: Added `src/providerDiagnostics.ts` and trigger-chain coverage in `src/tests/providerDiagnostics.test.ts` to lock report generation behavior for both success and provider-failure debug paths.
+*   **Docs and Agent Guide Alignment**: Updated both READMEs and `AGENTS.md` so in-plugin diagnostics and CLI diagnostics are documented and required to stay semantically aligned.
+
+### Chinese (中文)
+*   **全 LLM 路径的协议感知流式回退**: 长请求回退解析能力已从 OpenAI-compatible 扩展到 Anthropic Messages、Google Gemini、Azure OpenAI 和 Ollama，使这些 transport 在桌面 `http/https` 与非桌面 `fetch` 下都能走协议感知的流式回退链路。遗留的 OpenAI 风格导出 Provider 包装函数也已收敛到同一套共享流式回退路径，不再保留 buffered-only 旧逻辑。
+*   **跨 Transport 的部分流式调试**: 共享调试输出现在不仅覆盖 OpenAI-compatible，也会为 Anthropic、Google/Azure 风格 SSE，以及 Ollama NDJSON 回退保留“已解析的部分流式文本”。
+*   **回归测试覆盖**: 新增 Anthropic、Google、Azure OpenAI、Ollama，以及剩余直连 OpenAI 风格 Provider 包装函数在流式回退成功与中途中断场景下的定向运行时测试。
+*   **真实 Endpoint 诊断 CLI**: 新增 `scripts/diagnose-llm-provider.js`（以及 `npm run diagnose:llm`），可直接对真实 Provider 执行 buffered/streaming 长请求对照诊断，并输出脱敏后的每次尝试耗时、响应头、部分响应体与已解析流式片段。
+*   **设置页开发者诊断按钮**: 在设置页新增 `Developer provider diagnostic (long request)` 按钮，可直接对当前活动 Provider 发起插件内运行时探针，并在仓库根目录保存完整报告（`Notemd_Provider_Diagnostic_*.txt`）。
+*   **诊断运行时模块与测试**: 新增 `src/providerDiagnostics.ts`，并在 `src/tests/providerDiagnostics.test.ts` 中补齐按钮触发链路对应的成功/失败路径测试，确保报告输出与调试信息稳定可回归。
+*   **文档与代理指南对齐**: 已同步更新中英文 README 与 `AGENTS.md`，明确插件内诊断与 CLI 诊断需要保持协议语义一致。
+
+---
+
 ## [1.7.8] - 2026-03-29
 
 ### English

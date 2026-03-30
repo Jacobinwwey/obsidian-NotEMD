@@ -2,7 +2,18 @@ import { EventEmitter } from 'events';
 import * as http from 'http';
 import * as https from 'https';
 import { requestUrl } from 'obsidian';
-import { callLLM, getDebugInfo, handleApiError, testAPI } from '../llmUtils';
+import {
+    callDeepSeekAPI,
+    callLLM,
+    callLMStudioApi,
+    callMistralApi,
+    callOpenAIApi,
+    callOpenRouterAPI,
+    callXaiApi,
+    getDebugInfo,
+    handleApiError,
+    testAPI
+} from '../llmUtils';
 import { ProgressReporter, LLMProviderConfig, NotemdSettings } from '../types';
 import { mockSettings } from './__mocks__/settings';
 
@@ -284,6 +295,42 @@ function mockFetchStreamingSuccess(
         }
     } = options;
     const reader = createStreamingReader(frames);
+
+    const fetchMock = jest.fn().mockResolvedValue({
+        status,
+        ok: status >= 200 && status < 300,
+        headers: new Headers(headers),
+        body: {
+            getReader: () => reader
+        },
+        text: jest.fn().mockResolvedValue(frames.join(''))
+    });
+
+    Object.defineProperty(globalThis, 'fetch', {
+        value: fetchMock,
+        configurable: true,
+        writable: true
+    });
+
+    return fetchMock;
+}
+
+function mockFetchStreamingInterruption(
+    frames: string[],
+    errorMessage: string,
+    options: {
+        status?: number;
+        headers?: Record<string, string>;
+    } = {}
+): jest.Mock {
+    const {
+        status = 200,
+        headers = {
+            'content-type': 'text/event-stream',
+            'x-request-id': 'fetch-stream-request'
+        }
+    } = options;
+    const reader = createStreamingReader(frames, errorMessage);
 
     const fetchMock = jest.fn().mockResolvedValue({
         status,
@@ -1450,5 +1497,390 @@ describe('llmUtils expanded provider support', () => {
 
         expect(fetchMock).toHaveBeenCalledTimes(1);
         expect(reporter.log).toHaveBeenCalledWith(expect.stringContaining('streaming response parsing'));
+    });
+
+    test('callLLM assembles Anthropic streaming fallback chunks after a transient requestUrl failure', async () => {
+        const provider: LLMProviderConfig = {
+            name: 'Anthropic',
+            apiKey: 'anthropic-key',
+            baseUrl: 'https://api.anthropic.com',
+            model: 'claude-3-5-sonnet-20240620',
+            temperature: 0.5
+        };
+
+        settings = { ...settings, enableStableApiCall: false };
+
+        (requestUrl as jest.Mock).mockRejectedValueOnce(new Error('net::ERR_CONNECTION_CLOSED'));
+        mockDesktopTransportStreamingSuccess(https, [
+            'event: content_block_delta\n',
+            'data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"Hello"}}\n\n',
+            'event: content_block_delta\n',
+            'data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" Anthropic"}}\n\n',
+            'event: message_delta\n',
+            'data: {"type":"message_delta","delta":{"stop_reason":"end_turn"}}\n\n',
+            'event: message_stop\n',
+            'data: {"type":"message_stop"}\n\n'
+        ], {
+            headers: {
+                'content-type': 'text/event-stream',
+                'x-request-id': 'anthropic-stream-request'
+            }
+        });
+
+        await expect(callLLM(provider, 'System prompt', 'Anthropic streamed content', settings, reporter)).resolves.toBe('Hello Anthropic');
+        expect(reporter.log).toHaveBeenCalledWith(expect.stringContaining('streaming response parsing'));
+    });
+
+    test('callLLM assembles Google streaming fallback chunks after a transient requestUrl failure', async () => {
+        const provider: LLMProviderConfig = {
+            name: 'Google',
+            apiKey: 'google-key',
+            baseUrl: 'https://generativelanguage.googleapis.com/v1',
+            model: 'gemini-2.0-flash-exp',
+            temperature: 0.5
+        };
+
+        settings = { ...settings, enableStableApiCall: false };
+
+        (requestUrl as jest.Mock).mockRejectedValueOnce(new Error('net::ERR_CONNECTION_CLOSED'));
+        mockDesktopTransportStreamingSuccess(https, [
+            'data: {"candidates":[{"content":{"parts":[{"text":"Hello"}]}}]}\n\n',
+            'data: {"candidates":[{"content":{"parts":[{"text":" Google"}]}}]}\n\n'
+        ], {
+            headers: {
+                'content-type': 'text/event-stream',
+                'x-request-id': 'google-stream-request'
+            }
+        });
+
+        await expect(callLLM(provider, 'System prompt', 'Google streamed content', settings, reporter)).resolves.toBe('Hello Google');
+        expect(reporter.log).toHaveBeenCalledWith(expect.stringContaining('streaming response parsing'));
+    });
+
+    test('callLLM assembles Azure OpenAI streaming fallback chunks after a transient requestUrl failure', async () => {
+        const provider: LLMProviderConfig = {
+            name: 'Azure OpenAI',
+            apiKey: 'azure-key',
+            baseUrl: 'https://azure.example.com',
+            model: 'gpt-4o',
+            temperature: 0.5,
+            apiVersion: '2025-01-01-preview'
+        };
+
+        settings = { ...settings, enableStableApiCall: false };
+
+        (requestUrl as jest.Mock).mockRejectedValueOnce(new Error('net::ERR_CONNECTION_CLOSED'));
+        mockDesktopTransportStreamingSuccess(https, [
+            'data: {"choices":[{"delta":{"content":"Hello"},"finish_reason":null}]}\n\n',
+            'data: {"choices":[{"delta":{"content":" Azure"},"finish_reason":null}]}\n\n',
+            'data: {"choices":[{"delta":{},"finish_reason":"stop"}]}\n\n',
+            'data: [DONE]\n\n'
+        ], {
+            headers: {
+                'content-type': 'text/event-stream',
+                'x-request-id': 'azure-stream-request'
+            }
+        });
+
+        await expect(callLLM(provider, 'System prompt', 'Azure streamed content', settings, reporter)).resolves.toBe('Hello Azure');
+        expect(reporter.log).toHaveBeenCalledWith(expect.stringContaining('streaming response parsing'));
+    });
+
+    test('callLLM assembles Ollama streaming fallback chunks after a transient requestUrl failure', async () => {
+        const provider: LLMProviderConfig = {
+            name: 'Ollama',
+            apiKey: '',
+            baseUrl: 'http://localhost:11434/api',
+            model: 'llama3',
+            temperature: 0.7
+        };
+
+        settings = { ...settings, enableStableApiCall: false };
+
+        (requestUrl as jest.Mock).mockRejectedValueOnce(new Error('net::ERR_CONNECTION_CLOSED'));
+        mockDesktopTransportStreamingSuccess(http, [
+            '{"model":"llama3","message":{"role":"assistant","content":"Hello"},"done":false}\n',
+            '{"model":"llama3","message":{"role":"assistant","content":" Ollama"},"done":false}\n',
+            '{"model":"llama3","message":{"role":"assistant","content":""},"done":true,"done_reason":"stop"}\n'
+        ], {
+            headers: {
+                'content-type': 'application/x-ndjson',
+                'x-request-id': 'ollama-stream-request'
+            }
+        });
+
+        await expect(callLLM(provider, 'System prompt', 'Ollama streamed content', settings, reporter)).resolves.toBe('Hello Ollama');
+        expect(reporter.log).toHaveBeenCalledWith(expect.stringContaining('streaming response parsing'));
+    });
+
+    test('callLLM captures partial parsed Anthropic stream output in debug mode when streaming fallback aborts', async () => {
+        const provider: LLMProviderConfig = {
+            name: 'Anthropic',
+            apiKey: 'anthropic-key',
+            baseUrl: 'https://api.anthropic.com',
+            model: 'claude-3-5-sonnet-20240620',
+            temperature: 0.5
+        };
+
+        settings = {
+            ...settings,
+            enableStableApiCall: false,
+            enableApiErrorDebugMode: true,
+            apiCallMaxRetries: 0
+        };
+
+        (requestUrl as jest.Mock).mockRejectedValueOnce(new Error('net::ERR_CONNECTION_CLOSED'));
+        mockDesktopTransportStreamingInterruption(https, {
+            frames: [
+                'event: content_block_delta\n',
+                'data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"Partial Claude"}}\n\n'
+            ],
+            headers: {
+                'content-type': 'text/event-stream',
+                'x-request-id': 'anthropic-stream-request'
+            }
+        });
+
+        await expect(callLLM(provider, 'System prompt', 'Slow anthropic content', settings, reporter)).rejects.toThrow(
+            'Anthropic API request failed: socket hang up'
+        );
+
+        const debugLog = (reporter.log as jest.Mock).mock.calls
+            .map(call => String(call[0]))
+            .find(entry => entry.includes('[Anthropic] Debug details:'));
+
+        expect(debugLog).toContain('Partial Parsed Response: Partial Claude');
+        expect(debugLog).toContain('Attempt 2 [desktop-http-stream]');
+    });
+
+    test('callLLM assembles Anthropic streaming fallback chunks from web fetch when desktop transport is unavailable', async () => {
+        const provider: LLMProviderConfig = {
+            name: 'Anthropic',
+            apiKey: 'anthropic-key',
+            baseUrl: 'https://api.anthropic.com',
+            model: 'claude-3-5-sonnet-20240620',
+            temperature: 0.5
+        };
+
+        settings = { ...settings, enableStableApiCall: false };
+
+        (requestUrl as jest.Mock).mockRejectedValueOnce(new Error('net::ERR_CONNECTION_CLOSED'));
+        const fetchMock = mockFetchStreamingSuccess([
+            'event: content_block_delta\n',
+            'data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"Web"}}\n\n',
+            'event: content_block_delta\n',
+            'data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" Claude"}}\n\n',
+            'event: message_stop\n',
+            'data: {"type":"message_stop"}\n\n'
+        ], {
+            headers: {
+                'content-type': 'text/event-stream',
+                'x-request-id': 'anthropic-fetch-stream-request'
+            }
+        });
+
+        await withDesktopNodeTransportDisabled(async () => {
+            await expect(callLLM(provider, 'System prompt', 'Anthropic web streamed content', settings, reporter)).resolves.toBe('Web Claude');
+        });
+
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+    });
+
+    test('callLLM assembles Ollama streaming fallback chunks from web fetch when desktop transport is unavailable', async () => {
+        const provider: LLMProviderConfig = {
+            name: 'Ollama',
+            apiKey: '',
+            baseUrl: 'http://localhost:11434/api',
+            model: 'llama3',
+            temperature: 0.7
+        };
+
+        settings = { ...settings, enableStableApiCall: false };
+
+        (requestUrl as jest.Mock).mockRejectedValueOnce(new Error('net::ERR_CONNECTION_CLOSED'));
+        const fetchMock = mockFetchStreamingSuccess([
+            '{"model":"llama3","message":{"role":"assistant","content":"Web"},"done":false}\n',
+            '{"model":"llama3","message":{"role":"assistant","content":" Ollama"},"done":false}\n',
+            '{"model":"llama3","message":{"role":"assistant","content":""},"done":true,"done_reason":"stop"}\n'
+        ], {
+            headers: {
+                'content-type': 'application/x-ndjson',
+                'x-request-id': 'ollama-fetch-stream-request'
+            }
+        });
+
+        await withDesktopNodeTransportDisabled(async () => {
+            await expect(callLLM(provider, 'System prompt', 'Ollama web streamed content', settings, reporter)).resolves.toBe('Web Ollama');
+        });
+
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+    });
+
+    test('callLLM captures partial parsed Ollama stream output from web fetch in debug mode when streaming fallback aborts', async () => {
+        const provider: LLMProviderConfig = {
+            name: 'Ollama',
+            apiKey: '',
+            baseUrl: 'http://localhost:11434/api',
+            model: 'llama3',
+            temperature: 0.7
+        };
+
+        settings = {
+            ...settings,
+            enableStableApiCall: false,
+            enableApiErrorDebugMode: true,
+            apiCallMaxRetries: 0
+        };
+
+        (requestUrl as jest.Mock).mockRejectedValueOnce(new Error('net::ERR_CONNECTION_CLOSED'));
+        mockFetchStreamingInterruption([
+            '{"model":"llama3","message":{"role":"assistant","content":"Partial Ollama"},"done":false}\n'
+        ], 'socket hang up', {
+            headers: {
+                'content-type': 'application/x-ndjson',
+                'x-request-id': 'ollama-fetch-stream-request'
+            }
+        });
+
+        await withDesktopNodeTransportDisabled(async () => {
+            await expect(callLLM(provider, 'System prompt', 'Interrupted ollama stream', settings, reporter)).rejects.toThrow(
+                'Ollama API request failed: socket hang up'
+            );
+        });
+
+        const debugLog = (reporter.log as jest.Mock).mock.calls
+            .map(call => String(call[0]))
+            .find(entry => entry.includes('[Ollama] Debug details:'));
+
+        expect(debugLog).toContain('Partial Parsed Response: Partial Ollama');
+        expect(debugLog).toContain('Attempt 2 [web-fetch-stream]');
+    });
+
+    test.each([
+        {
+            name: 'OpenAI direct wrapper',
+            provider: {
+                name: 'OpenAI',
+                apiKey: 'openai-key',
+                baseUrl: 'https://api.openai.com/v1',
+                model: 'gpt-4o',
+                temperature: 0.2
+            } as LLMProviderConfig,
+            callApi: callOpenAIApi,
+            transportModule: https,
+            expected: 'Hello OpenAI'
+        },
+        {
+            name: 'DeepSeek direct wrapper',
+            provider: {
+                name: 'DeepSeek',
+                apiKey: 'deepseek-key',
+                baseUrl: 'https://api.deepseek.com/v1',
+                model: 'deepseek-chat',
+                temperature: 0.2
+            } as LLMProviderConfig,
+            callApi: callDeepSeekAPI,
+            transportModule: https,
+            expected: 'Hello DeepSeek'
+        },
+        {
+            name: 'Mistral direct wrapper',
+            provider: {
+                name: 'Mistral',
+                apiKey: 'mistral-key',
+                baseUrl: 'https://api.mistral.ai/v1',
+                model: 'mistral-large-latest',
+                temperature: 0.2
+            } as LLMProviderConfig,
+            callApi: callMistralApi,
+            transportModule: https,
+            expected: 'Hello Mistral'
+        },
+        {
+            name: 'OpenRouter direct wrapper',
+            provider: {
+                name: 'OpenRouter',
+                apiKey: 'openrouter-key',
+                baseUrl: 'https://openrouter.ai/api/v1',
+                model: 'anthropic/claude-3.7-sonnet',
+                temperature: 0.7
+            } as LLMProviderConfig,
+            callApi: callOpenRouterAPI,
+            transportModule: https,
+            expected: 'Hello OpenRouter'
+        },
+        {
+            name: 'xAI direct wrapper',
+            provider: {
+                name: 'xAI',
+                apiKey: 'xai-key',
+                baseUrl: 'https://api.x.ai/v1',
+                model: 'grok-4',
+                temperature: 0.7
+            } as LLMProviderConfig,
+            callApi: callXaiApi,
+            transportModule: https,
+            expected: 'Hello xAI'
+        },
+        {
+            name: 'LMStudio direct wrapper',
+            provider: {
+                name: 'LMStudio',
+                apiKey: '',
+                baseUrl: 'http://localhost:1234/v1',
+                model: 'local-model',
+                temperature: 0.7
+            } as LLMProviderConfig,
+            callApi: callLMStudioApi,
+            transportModule: http,
+            expected: 'Hello LMStudio'
+        }
+    ])('$name assembles streamed fallback chunks after a transient requestUrl failure', async ({ provider, callApi, transportModule, expected }) => {
+        settings = { ...settings, enableStableApiCall: false };
+
+        (requestUrl as jest.Mock).mockRejectedValueOnce(new Error('net::ERR_CONNECTION_CLOSED'));
+        mockDesktopTransportStreamingSuccess(transportModule, [
+            `data: {"choices":[{"delta":{"content":"Hello"},"finish_reason":null}]}\n\n`,
+            `data: {"choices":[{"delta":{"content":" ${provider.name}"},"finish_reason":null}]}\n\n`,
+            'data: {"choices":[{"delta":{},"finish_reason":"stop"}]}\n\n',
+            'data: [DONE]\n\n'
+        ]);
+
+        await expect(
+            callApi(provider, provider.model, 'System prompt', `${provider.name} streamed content`, reporter, settings)
+        ).resolves.toBe(expected);
+
+        expect(reporter.log).toHaveBeenCalledWith(expect.stringContaining('streaming response parsing'));
+    });
+
+    test('callOpenRouterAPI preserves gateway headers when switching into streamed fallback', async () => {
+        const provider: LLMProviderConfig = {
+            name: 'OpenRouter',
+            apiKey: 'openrouter-key',
+            baseUrl: 'https://openrouter.ai/api/v1',
+            model: 'anthropic/claude-3.7-sonnet',
+            temperature: 0.7
+        };
+
+        settings = { ...settings, enableStableApiCall: false };
+
+        (requestUrl as jest.Mock).mockRejectedValueOnce(new Error('net::ERR_CONNECTION_CLOSED'));
+        mockDesktopTransportStreamingSuccess(https, [
+            'data: {"choices":[{"delta":{"content":"Hello"},"finish_reason":null}]}\n\n',
+            'data: {"choices":[{"delta":{"content":" OpenRouter"},"finish_reason":null}]}\n\n',
+            'data: {"choices":[{"delta":{},"finish_reason":"stop"}]}\n\n',
+            'data: [DONE]\n\n'
+        ]);
+
+        await expect(
+            callOpenRouterAPI(provider, provider.model, 'System prompt', 'OpenRouter streamed content', reporter, settings)
+        ).resolves.toBe('Hello OpenRouter');
+
+        expect((https.request as unknown as jest.Mock).mock.calls[0][0].headers).toEqual(expect.objectContaining({
+            Authorization: 'Bearer openrouter-key',
+            'HTTP-Referer': 'https://github.com/Jacobinwwey/obsidian-NotEMD',
+            'X-Title': 'Notemd Obsidian Plugin',
+            Accept: 'text/event-stream'
+        }));
     });
 });
