@@ -65,7 +65,7 @@ That's it! Explore the settings to unlock more features like web research, trans
 | Locale fallback | Missing UI key resolution | locale -> `en` | Keeps UI stable when some keys are untranslated. |
 
 - Official docs are maintained in English and Simplified Chinese.
-- Additional language reading paths (community and machine-assisted) are listed in the [Language Hub](./docs/i18n/README.md).
+- Planned multilingual documentation support is tracked in the [Language Hub](./docs/i18n/README.md).
 
 ## Features
 
