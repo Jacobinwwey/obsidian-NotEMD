@@ -1,0 +1,12 @@
+
+> notemd@1.7.14 test
+> jest --runInBand src/tests/languagePolicy.test.ts
+
+No tests found, exiting with code 1
+Run with `--passWithNoTests` to exit with code 0
+In /home/jacob/obsidian-NotEMD
+  631 files checked.
+  testMatch: **/tests/**/*.test.ts - 149 matches
+  testPathIgnorePatterns: /node_modules/, /ref/ - 84 matches
+  testRegex:  - 0 matches
+Pattern: src/tests/languagePolicy.test.ts - 0 matches

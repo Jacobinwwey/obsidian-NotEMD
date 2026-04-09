@@ -1,0 +1,13 @@
+
+> notemd@1.7.14 test
+> jest --runInBand src/tests/languagePolicy.test.ts src/tests/processFile.test.ts src/tests/workflowButtons.test.ts
+
+PASS src/tests/processFile.test.ts
+PASS src/tests/languagePolicy.test.ts
+PASS src/tests/workflowButtons.test.ts
+
+Test Suites: 3 passed, 3 total
+Tests:       17 passed, 17 total
+Snapshots:   0 total
+Time:        0.374 s, estimated 1 s
+Ran all test suites matching /src\/tests\/languagePolicy.test.ts|src\/tests\/processFile.test.ts|src\/tests\/workflowButtons.test.ts/i.

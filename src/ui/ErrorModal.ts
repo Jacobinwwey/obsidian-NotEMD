@@ -1,4 +1,5 @@
 import { App, Modal, Notice } from 'obsidian';
+import { getI18nStrings } from '../i18n';
 
 // --- Error Modal for Copyable Messages ---
 export class ErrorModal extends Modal {
@@ -12,6 +13,7 @@ export class ErrorModal extends Modal {
     }
 
     onOpen() {
+        const i18n = getI18nStrings({ uiLocale: 'auto' });
         const { contentEl } = this;
         contentEl.addClass('notemd-error-modal');
 
@@ -23,19 +25,19 @@ export class ErrorModal extends Modal {
 
         // Add a copy button
         const buttonContainer = contentEl.createDiv({ cls: 'modal-button-container' });
-        const copyButton = buttonContainer.createEl('button', { text: 'Copy Error Details', cls: 'mod-cta' });
+        const copyButton = buttonContainer.createEl('button', { text: i18n.errorModal.copyDetails, cls: 'mod-cta' });
         copyButton.onclick = () => {
             navigator.clipboard.writeText(this.errorMessage).then(() => {
-                new Notice('Error details copied to clipboard!');
-                copyButton.setText('Copied!');
-                setTimeout(() => copyButton.setText('Copy Error Details'), 2000);
+                new Notice(i18n.errorModal.copySuccessNotice);
+                copyButton.setText(i18n.errorModal.copied);
+                setTimeout(() => copyButton.setText(i18n.errorModal.copyDetails), 2000);
             }).catch(err => {
-                new Notice('Failed to copy error details. See console.');
+                new Notice(i18n.errorModal.copyFailedNotice);
                 console.error('Failed to copy error to clipboard:', err);
             });
         };
 
-        const closeButton = buttonContainer.createEl('button', { text: 'Close' });
+        const closeButton = buttonContainer.createEl('button', { text: i18n.common.close });
         closeButton.onclick = () => {
             this.close();
         };

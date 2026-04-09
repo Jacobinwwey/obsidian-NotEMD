@@ -78,6 +78,7 @@ export const DEFAULT_SETTINGS: NotemdSettings = {
     // Add Links Post-Processing Defaults
     removeCodeFencesOnAddLinks: false, // Default to NOT removing code fences
     // Language Settings Defaults
+    uiLocale: 'auto',
     language: 'en', // Default to English
     availableLanguages: [ // Default list of available languages
         { code: 'en', name: 'English' },

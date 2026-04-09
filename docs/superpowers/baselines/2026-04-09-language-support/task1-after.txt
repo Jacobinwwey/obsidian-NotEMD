@@ -1,0 +1,23 @@
+
+> notemd@1.7.14 test
+> jest --runInBand src/tests/languagePolicy.test.ts
+
+PASS src/tests/languagePolicy.test.ts
+  task language policy
+    ✓ uses global language when per-task language is disabled (1 ms)
+    ✓ uses task-specific language when enabled
+    ✓ uses extractOriginalText language for merged mode
+    ✓ translate task always uses global translation target
+    ✓ resolves language display name from configured language list
+    ✓ disableAutoTranslation is ignored for explicit translate task
+    ✓ disableAutoTranslation disables auto-translation for non-translate tasks
+  ui locale resolution
+    ✓ uses manual locale when configured and supported
+    ✓ uses obsidian locale when ui locale is auto
+    ✓ falls back to en when unsupported
+
+Test Suites: 1 passed, 1 total
+Tests:       10 passed, 10 total
+Snapshots:   0 total
+Time:        0.222 s
+Ran all test suites matching /src\/tests\/languagePolicy.test.ts/i.

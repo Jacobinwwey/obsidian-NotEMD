@@ -212,6 +212,14 @@ Access plugin settings via:
 
 <img width="817" height="428" alt="Multi-model" src="https://github.com/user-attachments/assets/85e6b854-c0ca-45cc-a55e-24638dceb120" />
 
+### Language Architecture (UI Locale vs Task Output Language)
+
+-   **UI Locale** controls only plugin interface text (Settings labels, sidebar buttons, notices, and dialogs). The default `auto` mode follows Obsidian's current UI language.
+-   **Task Output Language** controls model-generated task output (links, summaries, title generation, Mermaid summary, concept extraction, translation target).
+-   **Per-task language mode** lets each task resolve its own output language from a unified policy layer instead of scattered per-module overrides.
+-   **Disable auto translation** keeps non-Translate tasks in source-language context, while explicit Translate tasks still enforce the configured target language.
+-   Mermaid-related generation paths follow the same language policy and can still trigger Mermaid auto-fix when enabled.
+
 ### Stable API Call Settings
 -   **Enable Stable API Calls (Retry Logic)**:
     *   **Disabled (Default)**: A single API call failure will stop the current task.
@@ -617,6 +625,26 @@ This is the core functionality focused on identifying concepts and adding `[[wik
 ## Contributing
 
 Contributions are welcome! Please refer to the GitHub repository for guidelines: [https://github.com/Jacobinwwey/obsidian-NotEMD](https://github.com/Jacobinwwey/obsidian-NotEMD) 
+
+## Maintainer Regression & Release Workflow
+
+1. Capture a before-change baseline:
+```bash
+npm run regression:language-baseline
+```
+2. Implement changes, then compare against the baseline:
+```bash
+npm run regression:language-compare
+```
+3. Run verification gates before release:
+```bash
+npm run build
+npm test -- --runInBand
+obsidian help
+obsidian-cli help
+```
+4. GitHub release body must be fully bilingual, with one complete English section and one complete Chinese section. Each section must be independently readable.
+5. Required release assets: `main.js`, `manifest.json`, `styles.css`, and `README.md`.
 
 ## License
 

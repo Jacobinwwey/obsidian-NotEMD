@@ -9,6 +9,7 @@ import { refineMermaidBlocks, cleanupLatexDelimiters, deepDebugMermaid, applyDee
 import { _performResearch } from './searchUtils'; // Assuming this will be moved or imported correctly later
 import { showDeletionConfirmationModal } from './ui/modals'; // Assuming this will be moved or imported correctly later
 import mermaid from 'mermaid';
+import { resolveTaskLanguageName, shouldApplyAutoTranslation } from './i18n/taskLanguagePolicy';
 
 // --- Backlink and Note Management ---
 
@@ -639,8 +640,8 @@ export async function generateContentForTitle(app: App, settings: NotemdSettings
     );
 
     // Language-specific instruction
-    const targetLanguageName = settings.availableLanguages.find(lang => lang.code === settings.language)?.name || settings.language;
-    if (settings.language && settings.language !== 'en') {
+    const targetLanguageName = resolveTaskLanguageName(settings, 'generateTitle');
+    if (shouldApplyAutoTranslation(settings, 'generateTitle') && targetLanguageName && targetLanguageName !== 'English') {
         generationPrompt += `\n\nIMPORTANT: Process the request and perform all reasoning in English. However, the final output MUST be written in ${targetLanguageName}.In mermaid diagrams, it is necessary to translate into ${targetLanguageName} while retaining the English.`;
     }
 
