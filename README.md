@@ -4,6 +4,8 @@
 
 [English](./README.md) | [简体中文](./README_zh.md)
 
+Read docs in more languages: [Language Hub](./docs/i18n/README.md)
+
 ```
 ==================================================
   _   _       _   _ ___    __  __ ___
@@ -29,13 +31,16 @@ Notemd enhances your Obsidian workflow by integrating with various Large Languag
 ## Table of Contents
 
 - [Quick Start](#quick-start)
+- [Language Support](#language-support)
 - [Features](#features)
 - [Installation](#installation)
 - [Configuration](#configuration)
 - [Usage Guide](#usage-guide)
 - [Supported LLM Providers](#supported-llm-providers)
+- [Network Usage & Data Handling](#network-usage--data-handling)
 - [Troubleshooting](#troubleshooting)
 - [Contributing](#contributing)
+- [Maintainer Docs](#maintainer-docs)
 - [License](#license)
 
 ## Quick Start
@@ -47,6 +52,20 @@ Notemd enhances your Obsidian workflow by integrating with various Large Languag
 5.  **Run a Quick Workflow**: Use the default **"One-Click Extract"** button to chain processing, batch generation, and Mermaid cleanup from one entry point.
 
 That's it! Explore the settings to unlock more features like web research, translation, and content generation.
+
+## Language Support
+
+### Language Behavior Contract
+
+| Concern | Scope | Default | Notes |
+|---|---|---|---|
+| `UI Locale` | Plugin UI text only (settings, sidebar, notices, dialogs) | `auto` | Follows Obsidian locale; current UI catalogs are `en`, `zh-CN`, `zh-TW`. |
+| `Task Output Language` | LLM-generated task output (links, summaries, generation, extraction, translation target) | `en` | Can be global or per-task when `Use different languages for tasks` is enabled. |
+| `Disable auto translation` | Non-Translate tasks keep source-language context | `false` | Explicit `Translate` tasks still enforce the configured target language. |
+| Locale fallback | Missing UI key resolution | locale -> `en` | Keeps UI stable when some keys are untranslated. |
+
+- Official docs are maintained in English and Simplified Chinese.
+- Additional language reading paths (community and machine-assisted) are listed in the [Language Hub](./docs/i18n/README.md).
 
 ## Features
 
@@ -81,7 +100,7 @@ That's it! Explore the settings to unlock more features like web research, trans
 - **Customizable Output Paths**: Configure separate relative paths within your vault for saving processed files and newly created concept notes.
 - **Customizable Output Filenames (Add Links)**: Optionally **overwrite the original file** or use a custom suffix/replacement string instead of the default `_processed.md` when processing files for links.
 - **Link Integrity Maintenance**: Basic handling for updating links when notes are renamed or deleted within the vault.
-- **Pure Concept Extraction**: Extract concepts and create corresponding concept notes without modifying the original document. This is ideal for populating a knowledge base from existing documents without altering them. This feature has configurable options for creating minimal concept notes and adding backlinks. This feature has configurable options for creating minimal concept notes and adding backlinks.
+- **Pure Concept Extraction**: Extract concepts and create corresponding concept notes without modifying the original document. This is ideal for populating a knowledge base from existing documents without altering them. This feature has configurable options for creating minimal concept notes and adding backlinks.
 
 
 ### Translation
@@ -581,6 +600,34 @@ This is the core functionality focused on identifying concepts and adding `[[wik
 *Note: China-focused presets use chat-first connection checks so the test validates the actual configured model/deployment, not only API-key reachability.*
 *Note: `OpenAI Compatible` is intended for custom gateways and proxies. Set the Base URL, API key policy, and model ID according to your provider's documentation.*
 
+## Network Usage & Data Handling
+
+Notemd runs locally inside Obsidian, but some features send outbound requests.
+
+### LLM Provider Calls (Configurable)
+
+- Trigger: file processing, generation, translation, research summarization, Mermaid summarization, and connection/diagnostic actions.
+- Endpoint: your configured provider base URL(s) in Notemd settings.
+- Data sent: prompt text and task content required for processing.
+- Data handling note: API keys are configured locally in plugin settings and used to sign requests from your device.
+
+### Web Research Calls (Optional)
+
+- Trigger: when web research is enabled and a search provider is selected.
+- Endpoint: Tavily API or DuckDuckGo endpoints.
+- Data sent: your research query and required request metadata.
+
+### Developer Diagnostics & Debug Logs (Optional)
+
+- Trigger: API debug mode and developer diagnostic actions.
+- Storage: diagnostic and error logs are written to your vault root (for example `Notemd_Provider_Diagnostic_*.txt` and `Notemd_Error_Log_*.txt`).
+- Risk note: logs can contain request/response excerpts. Review logs before sharing them publicly.
+
+### Local Storage
+
+- Plugin configuration is stored in `.obsidian/plugins/notemd/data.json`.
+- Generated files, reports, and optional logs are stored in your vault according to your settings.
+
 ## Troubleshooting
 
 ### Common Issues
@@ -626,25 +673,10 @@ This is the core functionality focused on identifying concepts and adding `[[wik
 
 Contributions are welcome! Please refer to the GitHub repository for guidelines: [https://github.com/Jacobinwwey/obsidian-NotEMD](https://github.com/Jacobinwwey/obsidian-NotEMD) 
 
-## Maintainer Regression & Release Workflow
+## Maintainer Docs
 
-1. Capture a before-change baseline:
-```bash
-npm run regression:language-baseline
-```
-2. Implement changes, then compare against the baseline:
-```bash
-npm run regression:language-compare
-```
-3. Run verification gates before release:
-```bash
-npm run build
-npm test -- --runInBand
-obsidian help
-obsidian-cli help
-```
-4. GitHub release body must be fully bilingual, with one complete English section and one complete Chinese section. Each section must be independently readable.
-5. Required release assets: `main.js`, `manifest.json`, `styles.css`, and `README.md`.
+- [Release Workflow (English)](./docs/maintainer/release-workflow.md)
+- [Release Workflow (简体中文)](./docs/maintainer/release-workflow.zh-CN.md)
 
 ## License
 
