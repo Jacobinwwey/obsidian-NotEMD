@@ -27,6 +27,7 @@ import {
     SIDEBAR_ACTION_DEFINITIONS,
     SidebarActionId
 } from '../workflowButtons';
+import { formatI18n, getI18nStrings } from '../i18n';
 
 // Define specific key types for settings accessed dynamically
 type ProviderSettingKey = 'addLinksProvider' | 'researchProvider' | 'generateTitleProvider' | 'translateProvider';
@@ -95,6 +96,7 @@ export class NotemdSettingTab extends PluginSettingTab {
         buttonControl: ButtonComponent,
         callMode: ProviderDiagnosticCallMode
     ): Promise<void> {
+        const i18n = getI18nStrings({ uiLocale: this.plugin.settings.uiLocale });
         const blockingIssues = getProviderValidationIssues(provider)
             .filter(issue => issue.level === 'error')
             .map(issue => issue.message);
@@ -104,7 +106,7 @@ export class NotemdSettingTab extends PluginSettingTab {
             return;
         }
 
-        buttonControl.setDisabled(true).setButtonText('Running...');
+        buttonControl.setDisabled(true).setButtonText(i18n.settings.developer.runDiagnostic);
         const runningNotice = new Notice(`Running developer diagnostic for ${provider.name}...`, 0);
         const timeoutMs = this.sanitizeDeveloperDiagnosticTimeoutMs(this.plugin.settings.developerDiagnosticTimeoutMs);
 
@@ -127,7 +129,7 @@ export class NotemdSettingTab extends PluginSettingTab {
             new Notice(`Developer diagnostic failed before report generation: ${message}`, 12000);
             console.error('Developer provider diagnostic failed:', error);
         } finally {
-            buttonControl.setDisabled(false).setButtonText('Run diagnostic');
+            buttonControl.setDisabled(false).setButtonText(i18n.settings.developer.runDiagnostic);
         }
     }
 
@@ -136,6 +138,7 @@ export class NotemdSettingTab extends PluginSettingTab {
         buttonControl: ButtonComponent,
         callMode: ProviderDiagnosticCallMode
     ): Promise<void> {
+        const i18n = getI18nStrings({ uiLocale: this.plugin.settings.uiLocale });
         const blockingIssues = getProviderValidationIssues(provider)
             .filter(issue => issue.level === 'error')
             .map(issue => issue.message);
@@ -147,7 +150,7 @@ export class NotemdSettingTab extends PluginSettingTab {
 
         const runs = this.sanitizeDeveloperDiagnosticRuns(this.plugin.settings.developerDiagnosticStabilityRuns);
         const timeoutMs = this.sanitizeDeveloperDiagnosticTimeoutMs(this.plugin.settings.developerDiagnosticTimeoutMs);
-        buttonControl.setDisabled(true).setButtonText('Running...');
+        buttonControl.setDisabled(true).setButtonText(i18n.settings.developer.runStability);
         const runningNotice = new Notice(
             `Running developer stability diagnostic for ${provider.name} (${runs} runs)...`,
             0
@@ -171,7 +174,7 @@ export class NotemdSettingTab extends PluginSettingTab {
             new Notice(`Developer stability diagnostic failed before report generation: ${message}`, 12000);
             console.error('Developer provider stability diagnostic failed:', error);
         } finally {
-            buttonControl.setDisabled(false).setButtonText('Run stability test');
+            buttonControl.setDisabled(false).setButtonText(i18n.settings.developer.runStability);
         }
     }
 
@@ -455,6 +458,7 @@ export class NotemdSettingTab extends PluginSettingTab {
     display(): void {
         const { containerEl } = this;
         containerEl.empty();
+        const i18n = getI18nStrings({ uiLocale: this.plugin.settings.uiLocale });
 
         // --- Provider Configuration ---
         new Setting(containerEl).setName('LLM providers').setHeading();
@@ -793,8 +797,8 @@ export class NotemdSettingTab extends PluginSettingTab {
                 }));
 
         new Setting(containerEl)
-            .setName('Developer mode')
-            .setDesc('On: Show dedicated developer diagnostic tools in settings. Off: Hide developer-only controls.')
+            .setName(i18n.settings.developer.modeName)
+            .setDesc(i18n.settings.developer.modeDesc)
             .addToggle(toggle => toggle
                 .setValue(this.plugin.settings.enableDeveloperMode)
                 .onChange(async (value) => {
@@ -804,7 +808,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                 }));
 
         if (this.plugin.settings.enableDeveloperMode && activeProvider) {
-            new Setting(containerEl).setName('Developer diagnostics').setHeading();
+            new Setting(containerEl).setName(i18n.settings.developer.heading).setHeading();
 
             const diagnosticModeOptions = getProviderDiagnosticCallModeOptions(activeProvider);
             const modeSet = new Set(diagnosticModeOptions.map(option => option.value));
@@ -873,12 +877,12 @@ export class NotemdSettingTab extends PluginSettingTab {
                 .setName('Developer provider diagnostic (long request)')
                 .setDesc('Run one long-request diagnostic with the selected call mode and save a full report to vault root.')
                 .addButton(button => button
-                    .setButtonText('Run diagnostic')
+                    .setButtonText(i18n.settings.developer.runDiagnostic)
                     .onClick(async () => {
                         await this.runDeveloperProviderDiagnostic(activeProvider, button, effectiveCallMode);
                     }))
                 .addButton(button => button
-                    .setButtonText('Run stability test')
+                    .setButtonText(i18n.settings.developer.runStability)
                     .onClick(async () => {
                         await this.runDeveloperProviderStabilityDiagnostic(activeProvider, button, effectiveCallMode);
                     }));
@@ -1094,10 +1098,10 @@ export class NotemdSettingTab extends PluginSettingTab {
                 }));
 
 
-        new Setting(containerEl).setName('Language settings').setHeading();
+        new Setting(containerEl).setName(i18n.settings.language.heading).setHeading();
         new Setting(containerEl)
-            .setName('Output language')
-            .setDesc('Select the desired output language for LLM responses.')
+            .setName(i18n.settings.language.outputName)
+            .setDesc(i18n.settings.language.outputDesc)
             .addDropdown(dropdown => {
                 (this.plugin.settings.availableLanguages || DEFAULT_SETTINGS.availableLanguages).forEach(lang => {
                     dropdown.addOption(lang.code, lang.name);
@@ -1111,8 +1115,8 @@ export class NotemdSettingTab extends PluginSettingTab {
             });
 
         new Setting(containerEl)
-            .setName('Select different languages for different tasks.')
-            .setDesc('On: Select a specific language for each task below. Off: Use the single "Output language".')
+            .setName(i18n.settings.language.perTaskName)
+            .setDesc(i18n.settings.language.perTaskDesc)
             .addToggle(toggle => toggle
                 .setValue(this.plugin.settings.useDifferentLanguagesForTasks)
                 .onChange(async (value) => {
@@ -1122,11 +1126,8 @@ export class NotemdSettingTab extends PluginSettingTab {
                 }));
 
         new Setting(containerEl)
-            .setName('Disable auto translation (except for "Translate" task)')
-            .setDesc(
-                'On: Non-Translate tasks do not force a target language or auto-translate outputs. ' +
-                'The explicit "Translate" task still performs translation as configured.'
-            )
+            .setName(i18n.settings.language.disableAutoTranslationName)
+            .setDesc(i18n.settings.language.disableAutoTranslationDesc)
             .addToggle(toggle =>
                 toggle
                     .setValue(this.plugin.settings.disableAutoTranslation)
@@ -1141,8 +1142,8 @@ export class NotemdSettingTab extends PluginSettingTab {
 
             const createTaskLanguageSettings = (languageSettingName: keyof NotemdSettings, taskDesc: string) => {
                 new Setting(containerEl)
-                    .setName(`${taskDesc} language`)
-                    .setDesc(`Select the output language for "${taskDesc}".`)
+                    .setName(formatI18n(i18n.settings.language.taskLanguageLabel, { task: taskDesc }))
+                    .setDesc(formatI18n(i18n.settings.language.taskLanguageDesc, { task: taskDesc }))
                     .addDropdown(dropdown => {
                         availableLanguages.forEach(lang => {
                             dropdown.addOption(lang.code, lang.name);

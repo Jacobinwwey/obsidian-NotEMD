@@ -89,6 +89,7 @@ export interface NotemdSettings {
     // Add Links Post-Processing
     removeCodeFencesOnAddLinks: boolean; // New: Option to remove ```markdown and ``` fences
     // Language Settings
+    uiLocale: string; // 'auto' uses Obsidian locale; otherwise a specific UI locale code
     language: string; // Stores the selected language code (e.g., 'en', 'es', 'fr')
     availableLanguages: Array<{ code: string; name: string }>; // List of available languages
     useDifferentLanguagesForTasks: boolean;

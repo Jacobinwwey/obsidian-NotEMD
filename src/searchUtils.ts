@@ -6,6 +6,7 @@ import { cleanupLatexDelimiters, refineMermaidBlocks } from './mermaidProcessor'
 import { ErrorModal } from './ui/ErrorModal';
 import { getSystemPrompt } from './promptUtils';
 import { SearchManager } from './search/SearchManager';
+import { resolveTaskLanguageCode } from './i18n/taskLanguagePolicy';
 
 /**
  * Fetches content from a URL and extracts basic text.
@@ -244,7 +245,7 @@ export async function researchAndSummarize(app: App, settings: NotemdSettings, e
 
         progressReporter.log(`Calling ${provider.name} (Model: ${modelName}) for summarization...`);
 
-        const language = settings.useDifferentLanguagesForTasks ? settings.researchSummarizeLanguage : settings.language;
+        const language = resolveTaskLanguageCode(settings, 'researchSummarize');
 
         const finalPrompt = getSystemPrompt(settings, 'researchSummarize', {
             TOPIC: topic,

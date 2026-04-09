@@ -1,4 +1,9 @@
 import { NotemdSettings, TaskKey } from './types';
+import {
+    resolveTaskLanguageName,
+    shouldApplyAutoTranslation
+} from './i18n/taskLanguagePolicy';
+import { resolveLanguageDisplayName } from './i18n/languageContext';
 
 export const DEFAULT_PROMPTS: Record<TaskKey, string> = {
     extractConcepts: `You are an AI assistant specializing in knowledge extraction. Your task is to Completely decompose and structure the knowledge points in this markdown document, analyze the markdown document and identify all core concepts and keywords.
@@ -416,54 +421,42 @@ export function getSystemPrompt(settings: NotemdSettings, taskKey: TaskKey, repl
         prompt = `${domainText}\n\n${prompt}`;
     }
 
+    const autoTranslationEnabled = shouldApplyAutoTranslation(settings, taskKey);
+    const resolvedTaskLanguageName = resolveTaskLanguageName(settings, taskKey);
+
+    const finalReplacements: Record<string, string> = { ...replacements };
+    if (finalReplacements.LANGUAGE) {
+        finalReplacements.LANGUAGE = resolveLanguageDisplayName(settings, finalReplacements.LANGUAGE);
+    } else if (autoTranslationEnabled || taskKey === 'translate') {
+        finalReplacements.LANGUAGE = resolvedTaskLanguageName;
+    } else {
+        finalReplacements.LANGUAGE = 'the same language as the source content';
+    }
+
     // Perform replacements
-    for (const key in replacements) {
-        prompt = prompt.replace(new RegExp(`{${key}}`, 'g'), replacements[key]);
+    for (const key in finalReplacements) {
+        prompt = prompt.replace(new RegExp(`{${key}}`, 'g'), finalReplacements[key]);
     }
 
     // Add translation instruction for Mermaid summarization if enabled
-    if (taskKey === 'summarizeToMermaid' && settings.translateSummarizeToMermaidOutput && !settings.disableAutoTranslation) {
-        const targetLanguageName = settings.availableLanguages.find(lang => lang.code === settings.language)?.name || settings.language;
+    if (taskKey === 'summarizeToMermaid' && settings.translateSummarizeToMermaidOutput && autoTranslationEnabled) {
         prompt += `
 
-IMPORTANT: The entire Mermaid diagram, including all node text, MUST be translated into ${targetLanguageName}.`;
+IMPORTANT: The entire Mermaid diagram, including all node text, MUST be translated into ${resolvedTaskLanguageName}.`;
     }
 
     // Add translation instruction for extractOriginalText (and Merged variant) if enabled
-    if ((taskKey === 'extractOriginalText' || taskKey === 'extractOriginalTextMerged') && settings.translateExtractOriginalTextOutput && !settings.disableAutoTranslation) {
-         // Modify the output format instruction for the multi-line format
-         // We look for the generic bullet structure pattern
-         
-         const translationInstruction = `\n\nIMPORTANT: For each matching excerpt, you MUST append the translation in {LANGUAGE}.
+    if ((taskKey === 'extractOriginalText' || taskKey === 'extractOriginalTextMerged') && settings.translateExtractOriginalTextOutput && autoTranslationEnabled) {
+        const translationInstruction = `\n\nIMPORTANT: For each matching excerpt, you MUST append the translation in ${resolvedTaskLanguageName}.
 The format for each bullet point must be strictly:
-- [Exact Excerpt] - [Excerpt translated into {LANGUAGE}]`;
+- [Exact Excerpt] - [Excerpt translated into ${resolvedTaskLanguageName}]`;
 
-         prompt += translationInstruction;
+        prompt += translationInstruction;
     }
 
     // Add language instruction for extractConcepts if a specific language is set
-    if (taskKey === 'extractConcepts' && !settings.disableAutoTranslation) {
-        const languageCode = settings.useDifferentLanguagesForTasks ? settings.extractConceptsLanguage : settings.language;
-        const targetLanguageName = settings.availableLanguages.find(lang => lang.code === languageCode)?.name || languageCode;
-        if (targetLanguageName) {
-            prompt += `\n\nThe output concepts MUST be in ${targetLanguageName}.`;
-        }
-    }
-
-    // For other tasks that might have language settings, ensure they are also skipped if disableAutoTranslation is true
-    if (taskKey !== 'translate' && taskKey !== 'summarizeToMermaid' && taskKey !== 'extractConcepts' && !settings.disableAutoTranslation) {
-        const languageCode = settings.useDifferentLanguagesForTasks 
-            ? (settings as any)[`${taskKey}Language`] // e.g., settings.addLinksLanguage
-            : settings.language;
-        
-        const targetLanguageName = settings.availableLanguages.find(lang => lang.code === languageCode)?.name || languageCode;
-        
-        if (targetLanguageName && prompt.includes('{LANGUAGE}')) {
-            prompt = prompt.replace(/{LANGUAGE}/g, targetLanguageName);
-        } else if (targetLanguageName) {
-            // A more generic way to add language instruction if not already in prompt
-            // This part might need to be adjusted based on how other prompts are structured
-        }
+    if (taskKey === 'extractConcepts' && autoTranslationEnabled) {
+        prompt += `\n\nThe output concepts MUST be in ${resolvedTaskLanguageName}.`;
     }
 
     return prompt;
