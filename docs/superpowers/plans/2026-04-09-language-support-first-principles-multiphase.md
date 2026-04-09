@@ -10,6 +10,34 @@
 
 ---
 
+## Execution Status (2026-04-09)
+
+This plan has been implemented on `main` in commit `88202c5`.
+
+### Evidence Index
+
+- Baseline and phase logs:
+  - `docs/superpowers/baselines/2026-04-09-language-support/`
+- Final verification artifacts:
+  - `task9-build-after-docs.txt`
+  - `task9-targeted-matrix.txt`
+  - `task9-full-runInBand.txt`
+  - `task9-regression-baseline.txt`
+  - `task9-regression-compare.txt`
+  - `task9-git-diff-check.txt`
+  - `task9-obsidian-help.txt`
+  - `task9-obsidian-cli-help.txt`
+
+### Final Gate Outcome
+
+- `npm run build`: PASS
+- Targeted regression matrix: PASS
+- Full `npm test -- --runInBand`: PASS
+- `npm run regression:language-compare`: PASS
+- `git diff --check`: PASS
+- `obsidian help`: executed with local desktop/config caveats captured in logs
+- `obsidian-cli help`: unavailable in current environment (`command not found`), captured in logs
+
 ## Phase Boundaries And Robustness Rule (Must Follow)
 
 - 每个阶段都必须执行：`修改前基线 -> 最小改动 -> 修改后回归 -> 基线对比 -> 提交`。
