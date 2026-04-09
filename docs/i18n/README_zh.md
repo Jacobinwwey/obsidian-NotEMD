@@ -7,33 +7,35 @@
 - English: [README.md](../../README.md)
 - 简体中文: [README_zh.md](../../README_zh.md)
 
-## 机器辅助阅读入口（社区便利）
+## 计划中的语言支持（待提升）
 
-以下链接通过 Google Translate 翻译英文主文档，仅用于快速阅读，不作为严格技术权威文档。
+以下语言已纳入文档多语支持规划，后续会逐步完善：
 
-- العربية: <https://translate.google.com/translate?sl=en&tl=ar&u=https://raw.githubusercontent.com/Jacobinwwey/obsidian-NotEMD/main/README.md>
-- Deutsch: <https://translate.google.com/translate?sl=en&tl=de&u=https://raw.githubusercontent.com/Jacobinwwey/obsidian-NotEMD/main/README.md>
-- Español: <https://translate.google.com/translate?sl=en&tl=es&u=https://raw.githubusercontent.com/Jacobinwwey/obsidian-NotEMD/main/README.md>
-- Français: <https://translate.google.com/translate?sl=en&tl=fr&u=https://raw.githubusercontent.com/Jacobinwwey/obsidian-NotEMD/main/README.md>
-- Italiano: <https://translate.google.com/translate?sl=en&tl=it&u=https://raw.githubusercontent.com/Jacobinwwey/obsidian-NotEMD/main/README.md>
-- 日本語: <https://translate.google.com/translate?sl=en&tl=ja&u=https://raw.githubusercontent.com/Jacobinwwey/obsidian-NotEMD/main/README.md>
-- 한국어: <https://translate.google.com/translate?sl=en&tl=ko&u=https://raw.githubusercontent.com/Jacobinwwey/obsidian-NotEMD/main/README.md>
-- Nederlands: <https://translate.google.com/translate?sl=en&tl=nl&u=https://raw.githubusercontent.com/Jacobinwwey/obsidian-NotEMD/main/README.md>
-- Polski: <https://translate.google.com/translate?sl=en&tl=pl&u=https://raw.githubusercontent.com/Jacobinwwey/obsidian-NotEMD/main/README.md>
-- Português: <https://translate.google.com/translate?sl=en&tl=pt&u=https://raw.githubusercontent.com/Jacobinwwey/obsidian-NotEMD/main/README.md>
-- Português (Brasil): <https://translate.google.com/translate?sl=en&tl=pt-BR&u=https://raw.githubusercontent.com/Jacobinwwey/obsidian-NotEMD/main/README.md>
-- Русский: <https://translate.google.com/translate?sl=en&tl=ru&u=https://raw.githubusercontent.com/Jacobinwwey/obsidian-NotEMD/main/README.md>
-- ไทย: <https://translate.google.com/translate?sl=en&tl=th&u=https://raw.githubusercontent.com/Jacobinwwey/obsidian-NotEMD/main/README.md>
-- Türkçe: <https://translate.google.com/translate?sl=en&tl=tr&u=https://raw.githubusercontent.com/Jacobinwwey/obsidian-NotEMD/main/README.md>
-- Українська: <https://translate.google.com/translate?sl=en&tl=uk&u=https://raw.githubusercontent.com/Jacobinwwey/obsidian-NotEMD/main/README.md>
-- Tiếng Việt: <https://translate.google.com/translate?sl=en&tl=vi&u=https://raw.githubusercontent.com/Jacobinwwey/obsidian-NotEMD/main/README.md>
-- 中文繁體: <https://translate.google.com/translate?sl=en&tl=zh-TW&u=https://raw.githubusercontent.com/Jacobinwwey/obsidian-NotEMD/main/README.md>
+| 语言 | 状态 |
+|---|---|
+| العربية | Planned |
+| Deutsch | Planned |
+| Español | Planned |
+| Français | Planned |
+| Italiano | Planned |
+| 日本語 | Planned |
+| 한국어 | Planned |
+| Nederlands | Planned |
+| Polski | Planned |
+| Português | Planned |
+| Português (Brasil) | Planned |
+| Русский | Planned |
+| ไทย | Planned |
+| Türkçe | Planned |
+| Українська | Planned |
+| Tiếng Việt | Planned |
+| 中文繁體 | Planned |
 
 ## 翻译状态策略
 
 - 权威源文档：仓库中的 English + 简体中文。
-- 机器辅助链接是 best-effort，可能存在时效滞后。
-- 如机器翻译与源文档冲突，以源文档为准。
+- 上述 Planned 语言为路线图项，当前尚非完整官方文档。
+- 未来如有译文与源文档冲突，以源文档为准。
 
 ## 贡献人工翻译
 
