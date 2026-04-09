@@ -9,7 +9,9 @@
 		"version": "node version-bump.mjs && git add manifest.json versions.json",
 		"test": "jest",
 		"lint": "eslint . --ext .ts",
-		"diagnose:llm": "node scripts/diagnose-llm-provider.js"
+		"diagnose:llm": "node scripts/diagnose-llm-provider.js",
+		"regression:language-baseline": "bash scripts/regression/language-support-baseline.sh",
+		"regression:language-compare": "bash scripts/regression/language-support-compare.sh"
 	},
 	"keywords": [
 		"obsidian",

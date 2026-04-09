@@ -44,6 +44,7 @@ export const mockSettings: NotemdSettings = {
     duplicateCheckScopeMode: 'vault',
     duplicateCheckScopePaths: '',
     removeCodeFencesOnAddLinks: false,
+    uiLocale: 'auto',
     language: 'en',
     availableLanguages: [{ code: 'en', name: 'English' }],
     useDifferentLanguagesForTasks: false,

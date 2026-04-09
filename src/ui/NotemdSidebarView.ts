@@ -9,6 +9,8 @@ import {
     SIDEBAR_ACTION_DEFINITIONS,
     SidebarActionId
 } from '../workflowButtons';
+import { formatI18n, getI18nStrings } from '../i18n';
+import { formatTimeForLocale } from '../i18n/localeFormat';
 
 type ActionCategory = typeof SIDEBAR_ACTION_DEFINITIONS[number]['category'];
 
@@ -88,6 +90,10 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
     private actionButtons = new Map<string, HTMLButtonElement>();
     private workflowButtons: HTMLButtonElement[] = [];
 
+    private getStrings() {
+        return getI18nStrings({ uiLocale: this.plugin.settings.uiLocale });
+    }
+
     constructor(leaf: WorkspaceLeaf, plugin: NotemdPlugin) {
         super(leaf);
         this.plugin = plugin;
@@ -121,9 +127,10 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
     }
 
     clearDisplay() {
+        const i18n = this.getStrings();
         this.logContent = [];
         if (this.logEl) this.logEl.empty();
-        if (this.statusEl) this.statusEl.setText('Ready');
+        if (this.statusEl) this.statusEl.setText(i18n.common.ready);
         if (this.progressAreaEl) this.progressAreaEl.addClass('is-idle');
         if (this.progressEl) {
             this.progressEl.dataset.progress = '0';
@@ -136,11 +143,11 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             this.progressBarContainerEl.addClass('is-idle');
         }
         if (this.progressValueEl) {
-            this.progressValueEl.setText('Ready');
+            this.progressValueEl.setText(i18n.common.ready);
             this.progressValueEl.addClass('is-idle');
             this.progressValueEl.removeClass('is-error');
         }
-        if (this.timeRemainingEl) this.timeRemainingEl.setText('Standby');
+        if (this.timeRemainingEl) this.timeRemainingEl.setText(i18n.common.standby);
         if (this.cancelButton) {
             this.cancelButton.disabled = true;
             this.cancelButton.removeClass('is-active');
@@ -206,7 +213,8 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         if (!this.logEl) {
             return;
         }
-        const timestamp = `[${new Date().toLocaleTimeString()}]`;
+        const uiLocale = this.plugin.settings.uiLocale === 'auto' ? undefined : this.plugin.settings.uiLocale;
+        const timestamp = `[${formatTimeForLocale(new Date(), uiLocale)}]`;
         const fullMessage = `${timestamp} ${message}`;
         this.logContent.push(fullMessage);
 
@@ -357,8 +365,9 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
     }
 
     private async runSingleAction(actionId: SidebarActionId): Promise<void> {
+        const i18n = this.getStrings();
         if (this.isProcessing || this.plugin.getIsBusy()) {
-            new Notice('Processing already in progress.');
+            new Notice(i18n.notices.processingAlreadyRunning);
             return;
         }
         const actionLabel = SIDEBAR_ACTION_DEFINITIONS.find(def => def.id === actionId)?.label || actionId;
@@ -380,8 +389,9 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
     }
 
     private async runCustomWorkflow(button: CustomWorkflowButton): Promise<void> {
+        const i18n = this.getStrings();
         if (this.isProcessing || this.plugin.getIsBusy()) {
-            new Notice('Processing already in progress.');
+            new Notice(i18n.notices.processingAlreadyRunning);
             return;
         }
         this.startProcessing(`Workflow: ${button.name}`);
@@ -582,8 +592,9 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
     }
 
     private buildLanguageSelector(parent: HTMLElement) {
+        const i18n = this.getStrings();
         const row = parent.createDiv({ cls: 'notemd-inline-control' });
-        row.createEl('label', { text: 'Language', cls: 'notemd-inline-label' });
+        row.createEl('label', { text: i18n.common.language, cls: 'notemd-inline-label' });
         this.languageSelector = row.createEl('select', { cls: 'notemd-language-select' });
         const selector = this.languageSelector;
         this.plugin.settings.availableLanguages.forEach(lang => {
@@ -593,11 +604,12 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         selector.onchange = async () => {
             this.plugin.settings.language = selector.value;
             await this.plugin.saveSettings();
-            new Notice(`Language changed to ${selector.value}`);
+            new Notice(formatI18n(i18n.sidebar.languageChangedNotice, { language: selector.value }));
         };
     }
 
     async onOpen() {
+        const i18n = this.getStrings();
         const container = this.containerEl.children[1] as HTMLElement;
         container.empty();
         container.addClass('notemd-sidebar-container');
@@ -606,14 +618,14 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         const footer = shell.createDiv({ cls: 'notemd-sidebar-footer mod-docked' });
 
         const hero = scrollArea.createDiv({ cls: 'notemd-hero-card' });
-        hero.createEl('h3', { text: 'Notemd Workbench' });
-        hero.createEl('p', { text: 'Run single actions or custom one-click workflows with live progress and logs.' });
+        hero.createEl('h3', { text: i18n.sidebar.heroTitle });
+        hero.createEl('p', { text: i18n.sidebar.heroDesc });
 
         const workflowResolution = resolveCustomWorkflowButtons(this.plugin.settings.customWorkflowButtonsDsl);
         const quickBody = this.createSection(
             scrollArea,
-            'Quick Workflows',
-            'Custom buttons assembled from built-in actions.',
+            i18n.sidebar.quickWorkflowTitle,
+            i18n.sidebar.quickWorkflowDesc,
             true
         );
 
@@ -636,7 +648,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
 
         if (workflowResolution.usedFallback && workflowResolution.errors.length > 0) {
             const warn = quickBody.createDiv({ cls: 'notemd-workflow-warning' });
-            warn.setText(`Workflow DSL has ${workflowResolution.errors.length} issue(s). Sidebar is using default fallback.`);
+            warn.setText(formatI18n(i18n.sidebar.workflowFallbackWarning, { count: workflowResolution.errors.length }));
         }
 
         const actionsByCategory = new Map<ActionCategory, Array<typeof SIDEBAR_ACTION_DEFINITIONS[number]>>();
@@ -655,7 +667,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             const body = this.createSection(
                 scrollArea,
                 ACTION_CATEGORY_LABEL[category].title,
-                `Built-in ${ACTION_CATEGORY_LABEL[category].title.toLowerCase()} actions.`,
+                formatI18n(i18n.sidebar.builtInActionsPrefix, { category: ACTION_CATEGORY_LABEL[category].title.toLowerCase() }),
                 ACTION_CATEGORY_LABEL[category].openByDefault
             );
 
@@ -671,26 +683,26 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         const progressArea = footer.createDiv({ cls: 'notemd-progress-area is-idle' });
         this.progressAreaEl = progressArea;
         const progressMeta = progressArea.createDiv({ cls: 'notemd-progress-meta' });
-        this.statusEl = progressMeta.createEl('p', { text: 'Ready', cls: 'notemd-status-text' });
-        this.progressValueEl = progressMeta.createEl('span', { text: 'Ready', cls: 'notemd-progress-value is-idle' });
+        this.statusEl = progressMeta.createEl('p', { text: i18n.common.ready, cls: 'notemd-status-text' });
+        this.progressValueEl = progressMeta.createEl('span', { text: i18n.common.ready, cls: 'notemd-progress-value is-idle' });
         this.progressBarContainerEl = progressArea.createEl('div', { cls: 'notemd-progress-bar-container mod-sidebar is-idle' });
         this.progressEl = this.progressBarContainerEl.createEl('div', { cls: 'notemd-progress-bar-fill' });
-        this.timeRemainingEl = progressArea.createEl('p', { text: 'Standby', cls: 'notemd-time-remaining' });
+        this.timeRemainingEl = progressArea.createEl('p', { text: i18n.common.standby, cls: 'notemd-time-remaining' });
 
-        this.cancelButton = progressArea.createEl('button', { text: 'Cancel processing', cls: 'notemd-cancel-button' });
+        this.cancelButton = progressArea.createEl('button', { text: i18n.sidebar.cancelProcessing, cls: 'notemd-cancel-button' });
         this.cancelButton.onclick = () => this.requestCancel();
 
         const logCard = footer.createDiv({ cls: 'notemd-log-card mod-persistent' });
         const logHeader = logCard.createDiv({ cls: 'notemd-log-header' });
-        logHeader.createEl('h5', { text: 'Log output' });
-        const copyLogButton = logHeader.createEl('button', { text: 'Copy log', cls: 'notemd-copy-log-button' });
+        logHeader.createEl('h5', { text: i18n.sidebar.logOutputTitle });
+        const copyLogButton = logHeader.createEl('button', { text: i18n.sidebar.copyLog, cls: 'notemd-copy-log-button' });
         copyLogButton.onclick = () => {
             if (this.logContent.length > 0) {
                 navigator.clipboard
                     .writeText(this.logContent.join('\n'))
-                    .then(() => new Notice('Log copied!'), () => new Notice('Failed to copy log.'));
+                    .then(() => new Notice(i18n.sidebar.copyLogSuccess), () => new Notice(i18n.sidebar.copyLogFailed));
             } else {
-                new Notice('Log is empty.');
+                new Notice(i18n.sidebar.logEmpty);
             }
         };
         this.logEl = logCard.createEl('div', { cls: 'notemd-log-output is-selectable mod-sidebar' });

@@ -746,3 +746,19 @@
         transition: none !important;
     }
 }
+
+/* RTL safety: keep Notemd panel readable in right-to-left locales. */
+.mod-rtl .notemd-sidebar-container,
+.mod-rtl .notemd-log-output,
+.mod-rtl .notemd-status-text,
+.mod-rtl .notemd-time-remaining {
+    direction: rtl;
+    text-align: right;
+}
+
+.notemd-log-time,
+.notemd-log-message,
+.notemd-status-text,
+.notemd-time-remaining {
+    unicode-bidi: plaintext;
+}

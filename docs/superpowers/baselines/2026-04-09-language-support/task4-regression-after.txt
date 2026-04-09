@@ -1,0 +1,27 @@
+
+> notemd@1.7.14 test
+> jest --runInBand src/tests/providerDiagnostics.test.ts src/tests/sidebarDomButtonClicks.test.ts src/tests/sidebarButtonTriggerChains.test.ts
+
+PASS src/tests/sidebarButtonTriggerChains.test.ts
+  ● Console
+
+    console.log
+      Potential duplicates in Current.md: [ 'duplicate' ]
+
+      at NotemdSidebarView.<anonymous> (src/ui/NotemdSidebarView.ts:574:29)
+
+PASS src/tests/sidebarDomButtonClicks.test.ts
+  ● Console
+
+    console.log
+      Potential duplicates in Active.txt: [ 'duplicate' ]
+
+      at NotemdSidebarView.<anonymous> (src/ui/NotemdSidebarView.ts:574:29)
+
+PASS src/tests/providerDiagnostics.test.ts
+
+Test Suites: 3 passed, 3 total
+Tests:       32 passed, 32 total
+Snapshots:   0 total
+Time:        0.423 s, estimated 1 s
+Ran all test suites matching /src\/tests\/providerDiagnostics.test.ts|src\/tests\/sidebarDomButtonClicks.test.ts|src\/tests\/sidebarButtonTriggerChains.test.ts/i.
