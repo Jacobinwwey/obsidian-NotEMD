@@ -64,8 +64,9 @@ That's it! Explore the settings to unlock more features like web research, trans
 | `Disable auto translation` | Non-Translate tasks keep source-language context | `false` | Explicit `Translate` tasks still enforce the configured target language. |
 | Locale fallback | Missing UI key resolution | locale -> `en` | Keeps UI stable when some keys are untranslated. |
 
-- Official docs are maintained in English and Simplified Chinese.
-- Planned multilingual documentation support is tracked in the [Language Hub](./docs/i18n/README.md).
+- Official docs are maintained in English and Simplified Chinese, with full support for over 30 languages.
+- All supported languages are linked in the header above.
+- Further details and contributing guidelines are tracked in the [Language Hub](./docs/i18n/README.md).
 
 ## Features
 
