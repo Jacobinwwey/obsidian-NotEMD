@@ -1,0 +1,6 @@
+
+> notemd@1.7.14 regression:language-compare
+> bash scripts/regression/language-support-compare.sh
+
+[compare] using baseline docs/superpowers/baselines/2026-04-09-language-support
+[compare] PASS: build + targeted regressions are stable

@@ -4,6 +4,7 @@ import { getProviderForTask, getModelForTask, splitContent, createConcurrentProc
 import { callLLM, handleApiError } from './llmUtils';
 import { getSystemPrompt } from './promptUtils';
 import { ProgressModal } from './ui/ProgressModal';
+import { resolveLanguageDisplayName } from './i18n/languageContext';
 
 
 export async function batchTranslateFolder(
@@ -76,8 +77,9 @@ export async function translateFile(
     }
     const model = getModelForTask('translate', provider, settings);
 
+    const promptLanguageName = resolveLanguageDisplayName(settings, targetLanguage);
     const prompt = getSystemPrompt(settings, 'translate', {
-        LANGUAGE: targetLanguage,
+        LANGUAGE: promptLanguageName,
         TEXT: fileContent,
     });
 

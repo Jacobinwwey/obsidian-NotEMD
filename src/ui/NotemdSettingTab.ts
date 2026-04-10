@@ -1,9 +1,23 @@
-import { App, PluginSettingTab, Setting, Notice, TextAreaComponent } from 'obsidian';
+import { App, ButtonComponent, PluginSettingTab, Setting, Notice, TextAreaComponent } from 'obsidian';
 import NotemdPlugin from '../main'; // Import the plugin class itself
 import { LLMProviderConfig, NotemdSettings, TaskKey } from '../types';
 import { DEFAULT_SETTINGS } from '../constants';
+import {
+    getLLMProviderDefinition,
+    getOrderedProviderNames,
+    getProviderCategoryLabel,
+    getProviderValidationIssues,
+    hasBlockingProviderValidationIssues
+} from '../llmProviders';
 import { testAPI } from '../llmUtils'; // Import testAPI
 import { getDefaultPrompt } from '../promptUtils'; // Import for default prompts
+import {
+    buildProviderDiagnosticFileName,
+    getProviderDiagnosticCallModeOptions,
+    ProviderDiagnosticCallMode,
+    runProviderDiagnosticProbe,
+    runProviderDiagnosticStabilityProbe
+} from '../providerDiagnostics';
 import {
     createEmptyWorkflowButton,
     CustomWorkflowButton,
@@ -13,6 +27,7 @@ import {
     SIDEBAR_ACTION_DEFINITIONS,
     SidebarActionId
 } from '../workflowButtons';
+import { formatI18n, getI18nStrings } from '../i18n';
 
 // Define specific key types for settings accessed dynamically
 type ProviderSettingKey = 'addLinksProvider' | 'researchProvider' | 'generateTitleProvider' | 'translateProvider';
@@ -31,6 +46,174 @@ export class NotemdSettingTab extends PluginSettingTab {
     private get providersFilePath(): string {
         const pluginConfigDir = this.app.vault.configDir + '/plugins/' + this.plugin.manifest.id;
         return `${pluginConfigDir}/notemd-providers.json`;
+    }
+
+    private async saveProviderDiagnosticReport(providerName: string, reportContent: string): Promise<string> {
+        const baseFileName = buildProviderDiagnosticFileName(providerName, new Date());
+        const fileSuffix = '.txt';
+        const fileStem = baseFileName.endsWith(fileSuffix)
+            ? baseFileName.slice(0, -fileSuffix.length)
+            : baseFileName;
+
+        let candidatePath = baseFileName;
+        let index = 1;
+
+        while (await this.app.vault.adapter.exists(candidatePath)) {
+            candidatePath = `${fileStem}_${index}${fileSuffix}`;
+            index += 1;
+        }
+
+        await this.app.vault.create(candidatePath, reportContent);
+        return candidatePath;
+    }
+
+    private sanitizeDeveloperDiagnosticTimeoutMs(rawValue: number): number {
+        if (!Number.isFinite(rawValue)) {
+            return DEFAULT_SETTINGS.developerDiagnosticTimeoutMs;
+        }
+
+        const normalized = Math.floor(rawValue);
+        if (normalized < 15_000) {
+            return 15_000;
+        }
+        return Math.min(normalized, 60 * 60 * 1000);
+    }
+
+    private sanitizeDeveloperDiagnosticRuns(rawValue: number): number {
+        if (!Number.isFinite(rawValue)) {
+            return DEFAULT_SETTINGS.developerDiagnosticStabilityRuns;
+        }
+
+        const normalized = Math.floor(rawValue);
+        if (normalized < 1) {
+            return 1;
+        }
+        return Math.min(normalized, 10);
+    }
+
+    private async runDeveloperProviderDiagnostic(
+        provider: LLMProviderConfig,
+        buttonControl: ButtonComponent,
+        callMode: ProviderDiagnosticCallMode
+    ): Promise<void> {
+        const i18n = getI18nStrings({ uiLocale: this.plugin.settings.uiLocale });
+        const blockingIssues = getProviderValidationIssues(provider)
+            .filter(issue => issue.level === 'error')
+            .map(issue => issue.message);
+
+        if (blockingIssues.length > 0) {
+            new Notice(`Cannot run developer diagnostic for ${provider.name}: ${blockingIssues.join(' ')}`, 10000);
+            return;
+        }
+
+        buttonControl.setDisabled(true).setButtonText(i18n.settings.developer.runDiagnostic);
+        const runningNotice = new Notice(`Running developer diagnostic for ${provider.name}...`, 0);
+        const timeoutMs = this.sanitizeDeveloperDiagnosticTimeoutMs(this.plugin.settings.developerDiagnosticTimeoutMs);
+
+        try {
+            const result = await runProviderDiagnosticProbe(provider, this.plugin.settings, {
+                callMode,
+                timeoutMs
+            });
+            const reportPath = await this.saveProviderDiagnosticReport(provider.name, result.report);
+            runningNotice.hide();
+
+            if (result.success) {
+                new Notice(`Developer diagnostic succeeded (${result.callMode}). Report saved to: ${reportPath}`, 8000);
+            } else {
+                new Notice(`Developer diagnostic captured failure (${result.callMode}). Report saved to: ${reportPath}`, 12000);
+            }
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : String(error);
+            runningNotice.hide();
+            new Notice(`Developer diagnostic failed before report generation: ${message}`, 12000);
+            console.error('Developer provider diagnostic failed:', error);
+        } finally {
+            buttonControl.setDisabled(false).setButtonText(i18n.settings.developer.runDiagnostic);
+        }
+    }
+
+    private async runDeveloperProviderStabilityDiagnostic(
+        provider: LLMProviderConfig,
+        buttonControl: ButtonComponent,
+        callMode: ProviderDiagnosticCallMode
+    ): Promise<void> {
+        const i18n = getI18nStrings({ uiLocale: this.plugin.settings.uiLocale });
+        const blockingIssues = getProviderValidationIssues(provider)
+            .filter(issue => issue.level === 'error')
+            .map(issue => issue.message);
+
+        if (blockingIssues.length > 0) {
+            new Notice(`Cannot run developer stability diagnostic for ${provider.name}: ${blockingIssues.join(' ')}`, 10000);
+            return;
+        }
+
+        const runs = this.sanitizeDeveloperDiagnosticRuns(this.plugin.settings.developerDiagnosticStabilityRuns);
+        const timeoutMs = this.sanitizeDeveloperDiagnosticTimeoutMs(this.plugin.settings.developerDiagnosticTimeoutMs);
+        buttonControl.setDisabled(true).setButtonText(i18n.settings.developer.runStability);
+        const runningNotice = new Notice(
+            `Running developer stability diagnostic for ${provider.name} (${runs} runs)...`,
+            0
+        );
+
+        try {
+            const result = await runProviderDiagnosticStabilityProbe(provider, this.plugin.settings, {
+                callMode,
+                timeoutMs,
+                runs
+            });
+            const reportPath = await this.saveProviderDiagnosticReport(`${provider.name}_stability`, result.report);
+            runningNotice.hide();
+            new Notice(
+                `Developer stability diagnostic finished (${result.callMode}): ${result.successCount}/${result.runs} succeeded. Report: ${reportPath}`,
+                12000
+            );
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : String(error);
+            runningNotice.hide();
+            new Notice(`Developer stability diagnostic failed before report generation: ${message}`, 12000);
+            console.error('Developer provider stability diagnostic failed:', error);
+        } finally {
+            buttonControl.setDisabled(false).setButtonText(i18n.settings.developer.runStability);
+        }
+    }
+
+    private renderProviderSummary(containerEl: HTMLElement, provider: LLMProviderConfig): void {
+        const definition = getLLMProviderDefinition(provider.name);
+        if (!definition) {
+            return;
+        }
+
+        const callout = containerEl.createDiv({ cls: 'notemd-provider-callout' });
+        const badgeRow = callout.createDiv({ cls: 'notemd-provider-badge-row' });
+        badgeRow.createEl('span', {
+            text: getProviderCategoryLabel(definition.category),
+            cls: 'notemd-provider-badge'
+        });
+        badgeRow.createEl('span', {
+            text: definition.transport === 'openai-compatible' ? 'OpenAI-compatible' : definition.transport,
+            cls: 'notemd-provider-badge is-secondary'
+        });
+
+        callout.createEl('strong', { text: definition.description });
+        callout.createEl('p', { text: definition.setupHint });
+    }
+
+    private renderProviderValidation(containerEl: HTMLElement, provider: LLMProviderConfig): void {
+        const issues = getProviderValidationIssues(provider);
+        if (issues.length === 0) {
+            return;
+        }
+
+        issues.forEach(issue => {
+            const callout = containerEl.createDiv({
+                cls: `notemd-provider-validation notemd-provider-validation-${issue.level}`
+            });
+            callout.createEl('strong', {
+                text: issue.level === 'error' ? 'Configuration required' : 'Configuration warning'
+            });
+            callout.createEl('p', { text: issue.message });
+        });
     }
 
     private getWorkflowBuilderStateFromSettings(): CustomWorkflowButton[] {
@@ -275,9 +458,17 @@ export class NotemdSettingTab extends PluginSettingTab {
     display(): void {
         const { containerEl } = this;
         containerEl.empty();
+        const i18n = getI18nStrings({ uiLocale: this.plugin.settings.uiLocale });
 
         // --- Provider Configuration ---
         new Setting(containerEl).setName('LLM providers').setHeading();
+        const providerSupportCallout = containerEl.createDiv({ cls: 'notemd-provider-callout' });
+        providerSupportCallout.createEl('strong', {
+            text: `Provider presets expanded to ${this.plugin.settings.providers.length} entries.`
+        });
+        providerSupportCallout.createEl('p', {
+            text: 'OpenAI-compatible providers now share one runtime path. Built-in presets cover China-focused services such as Qwen, Doubao, Moonshot, GLM, MiniMax, Baidu Qianfan, and SiliconFlow, and the generic "OpenAI Compatible" preset can target LiteLLM, vLLM, Perplexity, Vercel AI Gateway, or your own proxy.'
+        });
 
         const providerMgmtSetting = new Setting(containerEl)
             .setName('Manage provider configurations')
@@ -291,7 +482,7 @@ export class NotemdSettingTab extends PluginSettingTab {
             .setName('Active provider')
             .setDesc('Select the LLM provider to use for processing.')
             .addDropdown(dropdown => {
-                const providerNames = this.plugin.settings.providers.map(p => p.name).sort();
+                const providerNames = getOrderedProviderNames(this.plugin.settings.providers);
                 providerNames.forEach(name => dropdown.addOption(name, name));
                 dropdown
                     .setValue(this.plugin.settings.activeProvider)
@@ -306,11 +497,19 @@ export class NotemdSettingTab extends PluginSettingTab {
 
         if (activeProvider) {
             new Setting(containerEl).setName(`${activeProvider.name} details`).setHeading();
+            this.renderProviderSummary(containerEl, activeProvider);
+            this.renderProviderValidation(containerEl, activeProvider);
 
-            if (activeProvider.name !== 'Ollama') {
+            const providerDefinition = getLLMProviderDefinition(activeProvider.name);
+            const apiKeyMode = providerDefinition?.apiKeyMode ?? 'required';
+
+            if (apiKeyMode !== 'none') {
+                const apiKeyDescription = apiKeyMode === 'optional'
+                    ? `API key for ${activeProvider.name}. Optional for endpoints that allow placeholder or anonymous access.`
+                    : `API key for ${activeProvider.name}. ${activeProvider.name === 'LMStudio' ? "(Optional, often 'EMPTY')" : ""}`;
                 new Setting(containerEl)
                     .setName('API key')
-                    .setDesc(`API key for ${activeProvider.name}. ${activeProvider.name === 'LMStudio' ? "(Optional, often 'EMPTY')" : ""}`)
+                    .setDesc(apiKeyDescription)
                     .addText(text => text
                         .setPlaceholder(activeProvider.name === 'LMStudio' ? 'Usually EMPTY or leave blank' : 'Enter your API key')
                         .setValue(activeProvider.apiKey)
@@ -358,6 +557,13 @@ export class NotemdSettingTab extends PluginSettingTab {
                 .addButton(button => button
                     .setButtonText('Test connection').setCta()
                     .onClick(async () => {
+                        const blockingIssues = getProviderValidationIssues(activeProvider)
+                            .filter(issue => issue.level === 'error')
+                            .map(issue => issue.message);
+                        if (hasBlockingProviderValidationIssues(activeProvider)) {
+                            new Notice(`Cannot test ${activeProvider.name}: ${blockingIssues.join(' ')}`, 8000);
+                            return;
+                        }
                         button.setDisabled(true).setButtonText('Testing...');
                         const testingNotice = new Notice(`Testing connection to ${activeProvider.name}...`, 0);
                         try {
@@ -382,7 +588,7 @@ export class NotemdSettingTab extends PluginSettingTab {
         new Setting(containerEl).setName('Multi-model usage').setHeading();
         new Setting(containerEl)
             .setName('Use different providers for tasks')
-            .setDesc('On: Select a specific LLM provider for each task below. Off: Use the single "Active Provider".')
+                .setDesc('On: Select a specific LLM provider for each task below. Off: Use the single "Active Provider".')
             .addToggle(toggle => toggle
                 .setValue(this.plugin.settings.useMultiModelSettings)
                 .onChange(async (value) => {
@@ -391,13 +597,17 @@ export class NotemdSettingTab extends PluginSettingTab {
                         this.plugin.settings.addLinksProvider = this.plugin.settings.addLinksProvider || this.plugin.settings.activeProvider;
                         this.plugin.settings.researchProvider = this.plugin.settings.researchProvider || this.plugin.settings.activeProvider;
                         this.plugin.settings.generateTitleProvider = this.plugin.settings.generateTitleProvider || this.plugin.settings.activeProvider;
+                        this.plugin.settings.translateProvider = this.plugin.settings.translateProvider || this.plugin.settings.activeProvider;
+                        this.plugin.settings.summarizeToMermaidProvider = this.plugin.settings.summarizeToMermaidProvider || this.plugin.settings.activeProvider;
+                        this.plugin.settings.extractConceptsProvider = this.plugin.settings.extractConceptsProvider || this.plugin.settings.activeProvider;
+                        this.plugin.settings.extractOriginalTextProvider = this.plugin.settings.extractOriginalTextProvider || this.plugin.settings.activeProvider;
                     }
                     await this.plugin.saveSettings();
                     this.display();
                 }));
 
         if (this.plugin.settings.useMultiModelSettings) {
-            const providerNames = this.plugin.settings.providers.map(p => p.name).sort();
+            const providerNames = getOrderedProviderNames(this.plugin.settings.providers);
             // Use the specific key types defined above
             const createTaskModelSettings = (providerSettingName: keyof NotemdSettings, modelSettingName: keyof NotemdSettings, taskDesc: string) => {
                 const taskSetting = new Setting(containerEl).setName(`${taskDesc} provider & model`).setDesc(`Select provider and optionally override model for "${taskDesc}".`);
@@ -585,6 +795,98 @@ export class NotemdSettingTab extends PluginSettingTab {
                     this.plugin.settings.enableApiErrorDebugMode = value;
                     await this.plugin.saveSettings();
                 }));
+
+        new Setting(containerEl)
+            .setName(i18n.settings.developer.modeName)
+            .setDesc(i18n.settings.developer.modeDesc)
+            .addToggle(toggle => toggle
+                .setValue(this.plugin.settings.enableDeveloperMode)
+                .onChange(async (value) => {
+                    this.plugin.settings.enableDeveloperMode = value;
+                    await this.plugin.saveSettings();
+                    this.display();
+                }));
+
+        if (this.plugin.settings.enableDeveloperMode && activeProvider) {
+            new Setting(containerEl).setName(i18n.settings.developer.heading).setHeading();
+
+            const diagnosticModeOptions = getProviderDiagnosticCallModeOptions(activeProvider);
+            const modeSet = new Set(diagnosticModeOptions.map(option => option.value));
+            let effectiveCallMode = this.plugin.settings.developerDiagnosticCallMode as ProviderDiagnosticCallMode;
+            if (!modeSet.has(effectiveCallMode)) {
+                effectiveCallMode = diagnosticModeOptions[0].value;
+                this.plugin.settings.developerDiagnosticCallMode = effectiveCallMode;
+            }
+
+            new Setting(containerEl)
+                .setName('Diagnostic call mode')
+                .setDesc('Select the runtime call path used by developer diagnostics for this provider.')
+                .addDropdown(dropdown => {
+                    diagnosticModeOptions.forEach(option => {
+                        dropdown.addOption(option.value, option.label);
+                    });
+                    dropdown
+                        .setValue(effectiveCallMode)
+                        .onChange(async (value) => {
+                            this.plugin.settings.developerDiagnosticCallMode = value;
+                            await this.plugin.saveSettings();
+                            this.display();
+                        });
+                });
+
+            const selectedMode = diagnosticModeOptions.find(option => option.value === effectiveCallMode);
+            if (selectedMode) {
+                const modeHint = containerEl.createDiv({ cls: 'notemd-provider-callout' });
+                modeHint.createEl('strong', { text: selectedMode.label });
+                modeHint.createEl('p', { text: selectedMode.description });
+            }
+
+            new Setting(containerEl)
+                .setName('Diagnostic timeout (seconds)')
+                .setDesc('Timeout for each developer diagnostic run (15-3600 seconds).')
+                .addText(text => text
+                    .setPlaceholder(String(Math.floor(DEFAULT_SETTINGS.developerDiagnosticTimeoutMs / 1000)))
+                    .setValue(String(Math.floor(this.sanitizeDeveloperDiagnosticTimeoutMs(this.plugin.settings.developerDiagnosticTimeoutMs) / 1000)))
+                    .onChange(async (value) => {
+                        const num = Number.parseInt(value, 10);
+                        if (Number.isFinite(num)) {
+                            this.plugin.settings.developerDiagnosticTimeoutMs = this.sanitizeDeveloperDiagnosticTimeoutMs(num * 1000);
+                        } else {
+                            this.plugin.settings.developerDiagnosticTimeoutMs = DEFAULT_SETTINGS.developerDiagnosticTimeoutMs;
+                        }
+                        await this.plugin.saveSettings();
+                    }));
+
+            new Setting(containerEl)
+                .setName('Stability test runs')
+                .setDesc('How many repeated runs to execute in "Run stability test" (1-10).')
+                .addText(text => text
+                    .setPlaceholder(String(DEFAULT_SETTINGS.developerDiagnosticStabilityRuns))
+                    .setValue(String(this.sanitizeDeveloperDiagnosticRuns(this.plugin.settings.developerDiagnosticStabilityRuns)))
+                    .onChange(async (value) => {
+                        const num = Number.parseInt(value, 10);
+                        if (Number.isFinite(num)) {
+                            this.plugin.settings.developerDiagnosticStabilityRuns = this.sanitizeDeveloperDiagnosticRuns(num);
+                        } else {
+                            this.plugin.settings.developerDiagnosticStabilityRuns = DEFAULT_SETTINGS.developerDiagnosticStabilityRuns;
+                        }
+                        await this.plugin.saveSettings();
+                    }));
+
+            new Setting(containerEl)
+                .setName('Developer provider diagnostic (long request)')
+                .setDesc('Run one long-request diagnostic with the selected call mode and save a full report to vault root.')
+                .addButton(button => button
+                    .setButtonText(i18n.settings.developer.runDiagnostic)
+                    .onClick(async () => {
+                        await this.runDeveloperProviderDiagnostic(activeProvider, button, effectiveCallMode);
+                    }))
+                .addButton(button => button
+                    .setButtonText(i18n.settings.developer.runStability)
+                    .onClick(async () => {
+                        await this.runDeveloperProviderStabilityDiagnostic(activeProvider, button, effectiveCallMode);
+                    }));
+        }
 
         // --- General Settings ---
         new Setting(containerEl).setName('Processed file output').setHeading();
@@ -796,10 +1098,10 @@ export class NotemdSettingTab extends PluginSettingTab {
                 }));
 
 
-        new Setting(containerEl).setName('Language settings').setHeading();
+        new Setting(containerEl).setName(i18n.settings.language.heading).setHeading();
         new Setting(containerEl)
-            .setName('Output language')
-            .setDesc('Select the desired output language for LLM responses.')
+            .setName(i18n.settings.language.outputName)
+            .setDesc(i18n.settings.language.outputDesc)
             .addDropdown(dropdown => {
                 (this.plugin.settings.availableLanguages || DEFAULT_SETTINGS.availableLanguages).forEach(lang => {
                     dropdown.addOption(lang.code, lang.name);
@@ -813,8 +1115,8 @@ export class NotemdSettingTab extends PluginSettingTab {
             });
 
         new Setting(containerEl)
-            .setName('Select different languages for different tasks.')
-            .setDesc('On: Select a specific language for each task below. Off: Use the single "Output language".')
+            .setName(i18n.settings.language.perTaskName)
+            .setDesc(i18n.settings.language.perTaskDesc)
             .addToggle(toggle => toggle
                 .setValue(this.plugin.settings.useDifferentLanguagesForTasks)
                 .onChange(async (value) => {
@@ -824,11 +1126,8 @@ export class NotemdSettingTab extends PluginSettingTab {
                 }));
 
         new Setting(containerEl)
-            .setName('Disable auto translation (except for "Translate" task)')
-            .setDesc(
-                'On: Non-Translate tasks do not force a target language or auto-translate outputs. ' +
-                'The explicit "Translate" task still performs translation as configured.'
-            )
+            .setName(i18n.settings.language.disableAutoTranslationName)
+            .setDesc(i18n.settings.language.disableAutoTranslationDesc)
             .addToggle(toggle =>
                 toggle
                     .setValue(this.plugin.settings.disableAutoTranslation)
@@ -843,8 +1142,8 @@ export class NotemdSettingTab extends PluginSettingTab {
 
             const createTaskLanguageSettings = (languageSettingName: keyof NotemdSettings, taskDesc: string) => {
                 new Setting(containerEl)
-                    .setName(`${taskDesc} language`)
-                    .setDesc(`Select the output language for "${taskDesc}".`)
+                    .setName(formatI18n(i18n.settings.language.taskLanguageLabel, { task: taskDesc }))
+                    .setDesc(formatI18n(i18n.settings.language.taskLanguageDesc, { task: taskDesc }))
                     .addDropdown(dropdown => {
                         availableLanguages.forEach(lang => {
                             dropdown.addOption(lang.code, lang.name);

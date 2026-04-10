@@ -28,6 +28,8 @@ import { NotemdSidebarView } from './ui/NotemdSidebarView';
 import { translateFile, batchTranslateFolder } from './translate';
 import { getSystemPrompt } from './promptUtils';
 import { extractOriginalText } from './extractOriginalText';
+import { getI18nStrings } from './i18n';
+import { resolveTaskLanguageCode } from './i18n/taskLanguagePolicy';
 
 export default class NotemdPlugin extends Plugin {
     settings: NotemdSettings;
@@ -45,6 +47,10 @@ export default class NotemdPlugin extends Plugin {
         this.isBusy = busy;
         // Optionally update status bar or trigger UI updates if needed globally
         // this.updateStatusBar(busy ? 'Busy...' : 'Ready');
+    }
+
+    private getUiStrings() {
+        return getI18nStrings({ uiLocale: this.settings?.uiLocale || 'auto' });
     }
 
     async onload() {
@@ -454,7 +460,7 @@ export default class NotemdPlugin extends Plugin {
 
         defaultProviders.forEach(defaultProvider => {
             if (!savedProviderMap.has(defaultProvider.name)) {
-                mergedProviders.push(defaultProvider);
+                mergedProviders.push({ ...defaultProvider });
             }
         });
 
@@ -468,7 +474,9 @@ export default class NotemdPlugin extends Plugin {
         this.settings.researchProvider = this.settings.providers.some(p => p.name === this.settings.researchProvider) ? this.settings.researchProvider : this.settings.activeProvider;
         this.settings.generateTitleProvider = this.settings.providers.some(p => p.name === this.settings.generateTitleProvider) ? this.settings.generateTitleProvider : this.settings.activeProvider;
         this.settings.translateProvider = this.settings.providers.some(p => p.name === this.settings.translateProvider) ? this.settings.translateProvider : this.settings.activeProvider;
+        this.settings.summarizeToMermaidProvider = this.settings.providers.some(p => p.name === this.settings.summarizeToMermaidProvider) ? this.settings.summarizeToMermaidProvider : this.settings.activeProvider;
         this.settings.extractConceptsProvider = this.settings.providers.some(p => p.name === this.settings.extractConceptsProvider) ? this.settings.extractConceptsProvider : this.settings.activeProvider;
+        this.settings.extractOriginalTextProvider = this.settings.providers.some(p => p.name === this.settings.extractOriginalTextProvider) ? this.settings.extractOriginalTextProvider : this.settings.activeProvider;
 
         // Merge availableLanguages to ensure new languages are added for existing users
         const defaultLanguages = DEFAULT_SETTINGS.availableLanguages;
@@ -650,7 +658,7 @@ export default class NotemdPlugin extends Plugin {
 
     /** Command: Process Current File (Add Links) */
     async processWithNotemdCommand(reporter?: ProgressReporter) {
-        if (this.isBusy) { new Notice("Notemd is busy."); return; }
+        if (this.isBusy) { new Notice(this.getUiStrings().notices.notemdBusy); return; }
         this.isBusy = true;
         const useReporter = reporter || this.getReporter();
         
@@ -717,7 +725,7 @@ export default class NotemdPlugin extends Plugin {
 
     /** Command: Process Folder (Add Links) */
     async processFolderWithNotemdCommand(reporter?: ProgressReporter, folderPathOverride?: string) {
-        if (this.isBusy) { new Notice("Notemd is busy."); return; }
+        if (this.isBusy) { new Notice(this.getUiStrings().notices.notemdBusy); return; }
         this.isBusy = true;
         const useReporter = reporter || this.getReporter();
         
@@ -942,7 +950,7 @@ export default class NotemdPlugin extends Plugin {
 
     /** Command: Generate Content from Title */
     async generateContentForTitleCommand(file: TFile, reporter?: ProgressReporter) {
-        if (this.isBusy) { new Notice("Notemd is busy."); return; }
+        if (this.isBusy) { new Notice(this.getUiStrings().notices.notemdBusy); return; }
         this.isBusy = true;
         const useReporter = reporter || this.getReporter();
         
@@ -994,7 +1002,7 @@ export default class NotemdPlugin extends Plugin {
 
     /** Command: Research and Summarize Topic */
     async researchAndSummarizeCommand(editor: Editor, view: MarkdownView, reporter?: ProgressReporter) {
-        if (this.isBusy) { new Notice("Notemd is busy."); return; }
+        if (this.isBusy) { new Notice(this.getUiStrings().notices.notemdBusy); return; }
         this.isBusy = true;
         const useReporter = reporter || this.getReporter();
         
@@ -1063,7 +1071,7 @@ export default class NotemdPlugin extends Plugin {
         reporter?: ProgressReporter,
         folderPathOverride?: string
     ): Promise<{ sourceFolderPath: string; completeFolderPath: string } | null> {
-        if (this.isBusy) { new Notice("Notemd is busy."); return null; }
+        if (this.isBusy) { new Notice(this.getUiStrings().notices.notemdBusy); return null; }
         this.isBusy = true;
         const useReporter = reporter || this.getReporter();
         
@@ -1143,7 +1151,7 @@ export default class NotemdPlugin extends Plugin {
 
     /** Command: Check and Remove Duplicate Concept Notes */
     async checkAndRemoveDuplicateConceptNotesCommand(reporter?: ProgressReporter) {
-        if (this.isBusy) { new Notice("Notemd is busy."); return; }
+        if (this.isBusy) { new Notice(this.getUiStrings().notices.notemdBusy); return; }
         this.isBusy = true;
         const useReporter = reporter || this.getReporter();
         
@@ -1187,7 +1195,7 @@ export default class NotemdPlugin extends Plugin {
         reporter?: ProgressReporter,
         folderPathOverride?: string
     ): Promise<{ folderPath: string; modifiedCount: number } | null> {
-        if (this.isBusy) { new Notice("Notemd is busy."); return null; }
+        if (this.isBusy) { new Notice(this.getUiStrings().notices.notemdBusy); return null; }
         this.isBusy = true;
         const useReporter = reporter || this.getReporter();
         
@@ -1251,7 +1259,7 @@ export default class NotemdPlugin extends Plugin {
     }
 
     async fixFormulaFormatsCommand(file: TFile, reporter?: ProgressReporter) {
-        if (this.isBusy) { new Notice("Notemd is busy."); return; }
+        if (this.isBusy) { new Notice(this.getUiStrings().notices.notemdBusy); return; }
         this.isBusy = true;
         const useReporter = reporter || this.getReporter();
         
@@ -1295,7 +1303,7 @@ export default class NotemdPlugin extends Plugin {
     }
 
     async batchFixFormulaFormatsCommand(reporter?: ProgressReporter) {
-        if (this.isBusy) { new Notice("Notemd is busy."); return; }
+        if (this.isBusy) { new Notice(this.getUiStrings().notices.notemdBusy); return; }
         this.isBusy = true;
         const useReporter = reporter || this.getReporter();
         
@@ -1347,7 +1355,7 @@ export default class NotemdPlugin extends Plugin {
 
     async batchTranslateFolderCommand(folder?: TFolder, reporter?: ProgressReporter) {
         if (this.isBusy) {
-            new Notice("Notemd is busy.");
+            new Notice(this.getUiStrings().notices.notemdBusy);
             return;
         }
         this.isBusy = true;
@@ -1379,7 +1387,8 @@ export default class NotemdPlugin extends Plugin {
             }
             const resolvedTargetFolder = targetFolder as TFolder;
 
-            await batchTranslateFolder(this.app, this.settings, resolvedTargetFolder, this.settings.language);
+            const translateLanguage = resolveTaskLanguageCode(this.settings, 'translate');
+            await batchTranslateFolder(this.app, this.settings, resolvedTargetFolder, translateLanguage);
             if (!useReporter.cancelled) {
                 const mermaidFixTarget = (this.settings.useCustomTranslationSavePath && this.settings.translationSavePath)
                     ? this.settings.translationSavePath
@@ -1412,7 +1421,7 @@ export default class NotemdPlugin extends Plugin {
 
     async translateFileCommand(file: TFile, signal?: AbortSignal, reporter?: ProgressReporter) {
         if (this.isBusy) {
-            new Notice("Notemd is busy.");
+            new Notice(this.getUiStrings().notices.notemdBusy);
             return;
         }
         this.isBusy = true;
@@ -1430,7 +1439,8 @@ export default class NotemdPlugin extends Plugin {
 
         try {
             await this.loadSettings();
-            const outputPath = await translateFile(this.app, this.settings, file, this.settings.language, useReporter, true, signal);
+            const translateLanguage = resolveTaskLanguageCode(this.settings, 'translate');
+            const outputPath = await translateFile(this.app, this.settings, file, translateLanguage, useReporter, true, signal);
             if (outputPath && this.settings.autoMermaidFixAfterGenerate) {
                 const outputFile = this.app.vault.getAbstractFileByPath(outputPath);
                 if (outputFile instanceof TFile) {
@@ -1471,7 +1481,7 @@ export default class NotemdPlugin extends Plugin {
 
 	async summarizeToMermaidCommand(file: TFile, reporter: ProgressReporter) {
 		if (this.isBusy) {
-			new Notice('Another process is running. Please wait.');
+			new Notice(this.getUiStrings().notices.anotherProcessRunning);
 			return;
 		}
 		this.isBusy = true;
@@ -1540,7 +1550,7 @@ export default class NotemdPlugin extends Plugin {
 	}
 
     async extractConceptsCommand(reporter?: ProgressReporter) {
-        if (this.isBusy) { new Notice("Notemd is busy."); return; }
+        if (this.isBusy) { new Notice(this.getUiStrings().notices.notemdBusy); return; }
         this.isBusy = true;
         const useReporter = reporter || this.getReporter();
         
@@ -1608,7 +1618,7 @@ export default class NotemdPlugin extends Plugin {
     }
 
     async batchExtractConceptsForFolderCommand(reporter?: ProgressReporter) {
-        if (this.isBusy) { new Notice("Notemd is busy."); return; }
+        if (this.isBusy) { new Notice(this.getUiStrings().notices.notemdBusy); return; }
         this.isBusy = true;
         const useReporter = reporter || this.getReporter();
         
@@ -1789,7 +1799,7 @@ export default class NotemdPlugin extends Plugin {
 
     async extractConceptsAndGenerateTitlesCommand(reporter?: ProgressReporter) {
         if (this.isBusy) {
-            new Notice("Notemd is busy.");
+            new Notice(this.getUiStrings().notices.notemdBusy);
             return;
         }
         this.isBusy = true;
@@ -1842,7 +1852,7 @@ export default class NotemdPlugin extends Plugin {
 
     async extractOriginalTextCommand(reporter?: ProgressReporter) {
         if (this.isBusy) {
-            new Notice("Notemd is busy.");
+            new Notice(this.getUiStrings().notices.notemdBusy);
             return;
         }
         this.isBusy = true;
