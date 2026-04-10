@@ -111,6 +111,17 @@ class FakeElement {
         }
         return null;
     }
+
+    findByClass(cls: string): FakeElement | null {
+        if (this.cls.includes(cls)) {
+            return this;
+        }
+        for (const child of this.children) {
+            const match = child.findByClass(cls);
+            if (match) return match;
+        }
+        return null;
+    }
 }
 
 function createPluginMock(): MockPlugin {
@@ -250,5 +261,67 @@ describe('NotemdSidebarView DOM button wiring', () => {
         expect(plugin.processWithNotemdCommand).toHaveBeenCalledTimes(1);
         expect(plugin.batchGenerateContentForTitlesCommand).toHaveBeenCalledTimes(1);
         expect(plugin.batchMermaidFixCommand).toHaveBeenCalledTimes(1);
+    });
+
+    test('uses colorful CTA styling only for single-file actions', async () => {
+        await sidebar.onOpen();
+
+        const processCurrent = contentContainer.findButton('Process file (add links)');
+        const translateCurrent = contentContainer.findButton('Translate current file');
+        const batchGenerate = contentContainer.findButton('Batch generate from titles');
+        const batchTranslate = contentContainer.findButton('Batch translate folder');
+        const workflowDefault = contentContainer.findButton('One-Click Extract');
+
+        expect(processCurrent).not.toBeNull();
+        expect(translateCurrent).not.toBeNull();
+        expect(batchGenerate).not.toBeNull();
+        expect(batchTranslate).not.toBeNull();
+        expect(workflowDefault).not.toBeNull();
+
+        expect(processCurrent?.cls).toContain('mod-cta');
+        expect(translateCurrent?.cls).toContain('mod-cta');
+        expect(batchGenerate?.cls).not.toContain('mod-cta');
+        expect(batchTranslate?.cls).not.toContain('mod-cta');
+        expect(workflowDefault?.cls).not.toContain('mod-cta');
+    });
+
+    test('builds a docked footer that keeps ready progress and logs visible', async () => {
+        await sidebar.onOpen();
+
+        const shell = contentContainer.findByClass('notemd-sidebar-shell');
+        const scrollArea = contentContainer.findByClass('notemd-sidebar-scroll');
+        const footer = contentContainer.findByClass('notemd-sidebar-footer');
+        const progressValue = contentContainer.findByClass('notemd-progress-value');
+        const progressBar = contentContainer.findByClass('notemd-progress-bar-container');
+        const logCard = contentContainer.findByClass('notemd-log-card');
+
+        expect(shell).not.toBeNull();
+        expect(scrollArea).not.toBeNull();
+        expect(footer).not.toBeNull();
+        expect(footer?.cls).toContain('mod-docked');
+        expect(progressValue?.text).toBe('Ready');
+        expect(progressBar?.cls).toContain('is-idle');
+        expect(logCard).not.toBeNull();
+        expect(logCard?.cls).toContain('mod-persistent');
+    });
+
+    test('updateStatus swaps between active progress and idle standby states', async () => {
+        await sidebar.onOpen();
+
+        sidebar.updateStatus('Working...', 25);
+        const progressValue = contentContainer.findByClass('notemd-progress-value');
+        const progressBar = contentContainer.findByClass('notemd-progress-bar-container');
+        const progressFill = contentContainer.findByClass('notemd-progress-bar-fill');
+
+        expect(progressValue?.text).toBe('25%');
+        expect(progressBar?.cls).not.toContain('is-idle');
+        expect(progressFill?.text).toBe('');
+        expect(progressFill?.style.width).toBe('25%');
+
+        sidebar.clearDisplay();
+
+        expect(progressValue?.text).toBe('Ready');
+        expect(progressBar?.cls).toContain('is-idle');
+        expect(progressFill?.style.width).toBe('0%');
     });
 });

@@ -1,0 +1,655 @@
+
+> notemd@1.7.14 test
+> jest --runInBand
+
+PASS src/tests/parallelBatch.test.ts
+PASS src/tests/llmUtilsProviderSupport.test.ts
+  ● Console
+
+    console.warn
+      OpenAI API Call: Attempt 1 failed: OpenAI API request failed: net::ERR_CONNECTION_CLOSED
+
+      2349 |             lastError = error instanceof Error ? error : new Error(errorMessage); // Store Error object if possible
+      2350 |             progressReporter.log(`${provider.name} API Call: Attempt ${attempt} failed: ${errorMessage}`);
+    > 2351 |             console.warn(`${provider.name} API Call: Attempt ${attempt} failed: ${errorMessage}`);
+           |                     ^
+      2352 |
+      2353 |             // Handle cancellation specifically
+      2354 |             if ((error instanceof Error && error.name === 'AbortError') || errorMessage.includes("cancelled by user")) {
+
+      at src/llmUtils.ts:2351:21
+          at Generator.throw (<anonymous>)
+      at rejected (node_modules/tslib/tslib.js:116:69)
+
+    console.warn
+      OpenAI API Call: Attempt 1 failed: OpenAI API request failed: net::ERR_CONNECTION_CLOSED
+
+      2349 |             lastError = error instanceof Error ? error : new Error(errorMessage); // Store Error object if possible
+      2350 |             progressReporter.log(`${provider.name} API Call: Attempt ${attempt} failed: ${errorMessage}`);
+    > 2351 |             console.warn(`${provider.name} API Call: Attempt ${attempt} failed: ${errorMessage}`);
+           |                     ^
+      2352 |
+      2353 |             // Handle cancellation specifically
+      2354 |             if ((error instanceof Error && error.name === 'AbortError') || errorMessage.includes("cancelled by user")) {
+
+      at src/llmUtils.ts:2351:21
+          at Generator.throw (<anonymous>)
+      at rejected (node_modules/tslib/tslib.js:116:69)
+
+    console.warn
+      OpenAI API Call: Attempt 2 failed: OpenAI API request failed: net::ERR_CONNECTION_CLOSED
+
+      2349 |             lastError = error instanceof Error ? error : new Error(errorMessage); // Store Error object if possible
+      2350 |             progressReporter.log(`${provider.name} API Call: Attempt ${attempt} failed: ${errorMessage}`);
+    > 2351 |             console.warn(`${provider.name} API Call: Attempt ${attempt} failed: ${errorMessage}`);
+           |                     ^
+      2352 |
+      2353 |             // Handle cancellation specifically
+      2354 |             if ((error instanceof Error && error.name === 'AbortError') || errorMessage.includes("cancelled by user")) {
+
+      at src/llmUtils.ts:2351:21
+          at Generator.throw (<anonymous>)
+      at rejected (node_modules/tslib/tslib.js:116:69)
+
+    console.warn
+      Anthropic API Call: Attempt 1 failed: Anthropic API request failed: net::ERR_CONNECTION_CLOSED
+
+      2349 |             lastError = error instanceof Error ? error : new Error(errorMessage); // Store Error object if possible
+      2350 |             progressReporter.log(`${provider.name} API Call: Attempt ${attempt} failed: ${errorMessage}`);
+    > 2351 |             console.warn(`${provider.name} API Call: Attempt ${attempt} failed: ${errorMessage}`);
+           |                     ^
+      2352 |
+      2353 |             // Handle cancellation specifically
+      2354 |             if ((error instanceof Error && error.name === 'AbortError') || errorMessage.includes("cancelled by user")) {
+
+      at src/llmUtils.ts:2351:21
+          at Generator.throw (<anonymous>)
+      at rejected (node_modules/tslib/tslib.js:116:69)
+
+    console.warn
+      Google API Call: Attempt 1 failed: Google API request failed: net::ERR_CONNECTION_CLOSED
+
+      2349 |             lastError = error instanceof Error ? error : new Error(errorMessage); // Store Error object if possible
+      2350 |             progressReporter.log(`${provider.name} API Call: Attempt ${attempt} failed: ${errorMessage}`);
+    > 2351 |             console.warn(`${provider.name} API Call: Attempt ${attempt} failed: ${errorMessage}`);
+           |                     ^
+      2352 |
+      2353 |             // Handle cancellation specifically
+      2354 |             if ((error instanceof Error && error.name === 'AbortError') || errorMessage.includes("cancelled by user")) {
+
+      at src/llmUtils.ts:2351:21
+          at Generator.throw (<anonymous>)
+      at rejected (node_modules/tslib/tslib.js:116:69)
+
+    console.warn
+      Azure OpenAI API Call: Attempt 1 failed: Azure OpenAI API request failed: net::ERR_CONNECTION_CLOSED
+
+      2349 |             lastError = error instanceof Error ? error : new Error(errorMessage); // Store Error object if possible
+      2350 |             progressReporter.log(`${provider.name} API Call: Attempt ${attempt} failed: ${errorMessage}`);
+    > 2351 |             console.warn(`${provider.name} API Call: Attempt ${attempt} failed: ${errorMessage}`);
+           |                     ^
+      2352 |
+      2353 |             // Handle cancellation specifically
+      2354 |             if ((error instanceof Error && error.name === 'AbortError') || errorMessage.includes("cancelled by user")) {
+
+      at src/llmUtils.ts:2351:21
+          at Generator.throw (<anonymous>)
+      at rejected (node_modules/tslib/tslib.js:116:69)
+
+    console.warn
+      Ollama API Call: Attempt 1 failed: Ollama API request failed: net::ERR_CONNECTION_CLOSED
+
+      2349 |             lastError = error instanceof Error ? error : new Error(errorMessage); // Store Error object if possible
+      2350 |             progressReporter.log(`${provider.name} API Call: Attempt ${attempt} failed: ${errorMessage}`);
+    > 2351 |             console.warn(`${provider.name} API Call: Attempt ${attempt} failed: ${errorMessage}`);
+           |                     ^
+      2352 |
+      2353 |             // Handle cancellation specifically
+      2354 |             if ((error instanceof Error && error.name === 'AbortError') || errorMessage.includes("cancelled by user")) {
+
+      at src/llmUtils.ts:2351:21
+          at Generator.throw (<anonymous>)
+      at rejected (node_modules/tslib/tslib.js:116:69)
+
+    console.warn
+      OpenAI API Call: Attempt 1 failed: OpenAI API error: 400 - Bad request
+
+      2349 |             lastError = error instanceof Error ? error : new Error(errorMessage); // Store Error object if possible
+      2350 |             progressReporter.log(`${provider.name} API Call: Attempt ${attempt} failed: ${errorMessage}`);
+    > 2351 |             console.warn(`${provider.name} API Call: Attempt ${attempt} failed: ${errorMessage}`);
+           |                     ^
+      2352 |
+      2353 |             // Handle cancellation specifically
+      2354 |             if ((error instanceof Error && error.name === 'AbortError') || errorMessage.includes("cancelled by user")) {
+
+      at src/llmUtils.ts:2351:21
+          at Generator.throw (<anonymous>)
+      at rejected (node_modules/tslib/tslib.js:116:69)
+
+    console.warn
+      OpenAI API Call: Attempt 1 failed: OpenAI API request failed: socket hang up
+
+      2349 |             lastError = error instanceof Error ? error : new Error(errorMessage); // Store Error object if possible
+      2350 |             progressReporter.log(`${provider.name} API Call: Attempt ${attempt} failed: ${errorMessage}`);
+    > 2351 |             console.warn(`${provider.name} API Call: Attempt ${attempt} failed: ${errorMessage}`);
+           |                     ^
+      2352 |
+      2353 |             // Handle cancellation specifically
+      2354 |             if ((error instanceof Error && error.name === 'AbortError') || errorMessage.includes("cancelled by user")) {
+
+      at src/llmUtils.ts:2351:21
+          at Generator.throw (<anonymous>)
+      at rejected (node_modules/tslib/tslib.js:116:69)
+
+    console.error
+      OpenAI API Call: All configured attempts failed.
+
+      2407 |     }
+      2408 |
+    > 2409 |     console.error(`${provider.name} API Call: All configured attempts failed.`);
+           |             ^
+      2410 |     throw lastError || new Error(`${provider.name} API call failed after multiple retries.`);
+      2411 | }
+      2412 |
+
+      at src/llmUtils.ts:2409:13
+          at Generator.throw (<anonymous>)
+      at rejected (node_modules/tslib/tslib.js:116:69)
+
+    console.warn
+      OpenAI API Call: Attempt 1 failed: OpenAI API request failed: The operation was aborted.
+
+      2349 |             lastError = error instanceof Error ? error : new Error(errorMessage); // Store Error object if possible
+      2350 |             progressReporter.log(`${provider.name} API Call: Attempt ${attempt} failed: ${errorMessage}`);
+    > 2351 |             console.warn(`${provider.name} API Call: Attempt ${attempt} failed: ${errorMessage}`);
+           |                     ^
+      2352 |
+      2353 |             // Handle cancellation specifically
+      2354 |             if ((error instanceof Error && error.name === 'AbortError') || errorMessage.includes("cancelled by user")) {
+
+      at src/llmUtils.ts:2351:21
+          at Generator.throw (<anonymous>)
+      at rejected (node_modules/tslib/tslib.js:116:69)
+
+    console.error
+      OpenAI API Call: All configured attempts failed.
+
+      2407 |     }
+      2408 |
+    > 2409 |     console.error(`${provider.name} API Call: All configured attempts failed.`);
+           |             ^
+      2410 |     throw lastError || new Error(`${provider.name} API call failed after multiple retries.`);
+      2411 | }
+      2412 |
+
+      at src/llmUtils.ts:2409:13
+          at Generator.throw (<anonymous>)
+      at rejected (node_modules/tslib/tslib.js:116:69)
+
+    console.warn
+      OpenAI API Call: Attempt 1 failed: OpenAI API request failed: socket hang up
+
+      2349 |             lastError = error instanceof Error ? error : new Error(errorMessage); // Store Error object if possible
+      2350 |             progressReporter.log(`${provider.name} API Call: Attempt ${attempt} failed: ${errorMessage}`);
+    > 2351 |             console.warn(`${provider.name} API Call: Attempt ${attempt} failed: ${errorMessage}`);
+           |                     ^
+      2352 |
+      2353 |             // Handle cancellation specifically
+      2354 |             if ((error instanceof Error && error.name === 'AbortError') || errorMessage.includes("cancelled by user")) {
+
+      at src/llmUtils.ts:2351:21
+          at Generator.throw (<anonymous>)
+      at rejected (node_modules/tslib/tslib.js:116:69)
+
+    console.error
+      OpenAI API Call: All configured attempts failed.
+
+      2407 |     }
+      2408 |
+    > 2409 |     console.error(`${provider.name} API Call: All configured attempts failed.`);
+           |             ^
+      2410 |     throw lastError || new Error(`${provider.name} API call failed after multiple retries.`);
+      2411 | }
+      2412 |
+
+      at src/llmUtils.ts:2409:13
+          at Generator.throw (<anonymous>)
+      at rejected (node_modules/tslib/tslib.js:116:69)
+
+    console.warn
+      Anthropic API Call: Attempt 1 failed: Anthropic API request failed: socket hang up
+
+      2349 |             lastError = error instanceof Error ? error : new Error(errorMessage); // Store Error object if possible
+      2350 |             progressReporter.log(`${provider.name} API Call: Attempt ${attempt} failed: ${errorMessage}`);
+    > 2351 |             console.warn(`${provider.name} API Call: Attempt ${attempt} failed: ${errorMessage}`);
+           |                     ^
+      2352 |
+      2353 |             // Handle cancellation specifically
+      2354 |             if ((error instanceof Error && error.name === 'AbortError') || errorMessage.includes("cancelled by user")) {
+
+      at src/llmUtils.ts:2351:21
+          at Generator.throw (<anonymous>)
+      at rejected (node_modules/tslib/tslib.js:116:69)
+
+    console.error
+      Anthropic API Call: All configured attempts failed.
+
+      2407 |     }
+      2408 |
+    > 2409 |     console.error(`${provider.name} API Call: All configured attempts failed.`);
+           |             ^
+      2410 |     throw lastError || new Error(`${provider.name} API call failed after multiple retries.`);
+      2411 | }
+      2412 |
+
+      at src/llmUtils.ts:2409:13
+          at Generator.throw (<anonymous>)
+      at rejected (node_modules/tslib/tslib.js:116:69)
+
+    console.warn
+      Ollama API Call: Attempt 1 failed: Ollama API request failed: socket hang up
+
+      2349 |             lastError = error instanceof Error ? error : new Error(errorMessage); // Store Error object if possible
+      2350 |             progressReporter.log(`${provider.name} API Call: Attempt ${attempt} failed: ${errorMessage}`);
+    > 2351 |             console.warn(`${provider.name} API Call: Attempt ${attempt} failed: ${errorMessage}`);
+           |                     ^
+      2352 |
+      2353 |             // Handle cancellation specifically
+      2354 |             if ((error instanceof Error && error.name === 'AbortError') || errorMessage.includes("cancelled by user")) {
+
+      at src/llmUtils.ts:2351:21
+          at Generator.throw (<anonymous>)
+      at rejected (node_modules/tslib/tslib.js:116:69)
+
+    console.error
+      Ollama API Call: All configured attempts failed.
+
+      2407 |     }
+      2408 |
+    > 2409 |     console.error(`${provider.name} API Call: All configured attempts failed.`);
+           |             ^
+      2410 |     throw lastError || new Error(`${provider.name} API call failed after multiple retries.`);
+      2411 | }
+      2412 |
+
+      at src/llmUtils.ts:2409:13
+          at Generator.throw (<anonymous>)
+      at rejected (node_modules/tslib/tslib.js:116:69)
+
+PASS src/tests/fileOperations.test.ts
+PASS src/tests/deepDebug.test.ts
+PASS src/tests/sidebarDomButtonClicks.test.ts
+  ● Console
+
+    console.log
+      Potential duplicates in Active.txt: [ 'duplicate' ]
+
+      at NotemdSidebarView.<anonymous> (src/ui/NotemdSidebarView.ts:576:29)
+
+PASS src/tests/base.test.ts
+  ● Console
+
+    console.log
+      Processed Result:
+       graph LR
+          subgraph "Reaction Coordinate Diagram"
+      Reactants[Initial Solid State<br>Energy E1] --> Barrier1["Activation Energy Ea1"]
+      Barrier1["Activation Energy Ea1"] --> Products["Activated State / Products<br>Energy E2"]
+      ActivatedSolid["Activated Solid State<br>Energy E1'"] --> Barrier2["Lowered Activation Energy Ea2<br>Ea2 < Ea1"]
+      Barrier2["Lowered Activation Energy Ea2<br>Ea2 < Ea1"] --> Products
+          Reactants --> ActivatedSolid["Activation Process<br>e.g., Milling"]
+      
+          Barrier1 -- "Activation Process Modifies" --> Barrier2
+          end
+      
+          style Reactants fill:#ccf,stroke:#333
+          style ActivatedSolid fill:#fcc,stroke:#333
+          style Products fill:#cfc,stroke:#333
+
+      at Object.<anonymous> (src/tests/base.test.ts:21:13)
+
+    console.log
+      Test Passed: false
+
+      at Object.<anonymous> (src/tests/base.test.ts:34:13)
+
+    console.error
+      Failed to match expected fragments.
+
+      35 |
+      36 |     if (!passed) {
+    > 37 |         console.error("Failed to match expected fragments.");
+         |                 ^
+      38 |     }
+      39 |
+      40 |     const input2 = `graph TD
+
+      at Object.<anonymous> (src/tests/base.test.ts:37:17)
+
+    console.log
+      
+      Input 2 Result:
+       graph TD
+          Start[Activated Solid Sample] --> Split[Split Sample for Multiple Tests]
+
+      at Object.<anonymous> (src/tests/base.test.ts:43:13)
+
+    console.log
+      Test 2 Passed: true
+
+      at Object.<anonymous> (src/tests/base.test.ts:44:13)
+
+    console.log
+      
+      --- New Tests ---
+
+      at Object.<anonymous> (src/tests/base.test.ts:46:13)
+
+    console.log
+      
+      Input 3 Result (Reverse Arrow):
+       graph TD
+          subgraph "Experimental Setup: Aging at Constant Pressure"
+          PressureSource["Pressure Source Pump/Intensifier"] --> PressureControl["Pressure Controller Regulator/Feedback Loop"];
+          PressureControl --> PressureVessel["High-Pressure Vessel/Chamber"];
+          PressureSensor["Pressure Sensor"] --> PressureControl;
+      
+          TempSource["Heating/Cooling System"] --> TempControl["Temperature Controller PID"];
+          TempControl --> PressureVessel;
+          TempSensor["Temperature Sensor"] --> TempControl;
+      
+          Sample["Material Sample"] -- "Placed Inside" --> PressureVessel;
+          Sample -- "Interaction" --> Environment["Controlled Atmosphere/Fluid"];
+      
+          subgraph "Data Acquisition & Monitoring"
+          InSitu["In-situ Measurements Optional, e.g., Strain Gauge, AE Sensor"] -- "Attached To/Observing" --> Sample;
+          InSitu --> DAQ["Data Acquisition System"];
+          PressureSensor --> DAQ;
+          TempSensor --> DAQ;
+      Sample --> ExSitu["Ex-situ Characterization Post-test or Interrupted"];
+          end
+      
+          DAQ --> Analysis["Data Analysis & Modeling"];
+          ExSitu --> Analysis;
+          end
+      
+          style PressureVessel fill:#f9f,stroke:#333,stroke-width:2px
+
+      at Object.<anonymous> (src/tests/base.test.ts:76:13)
+
+    console.log
+      Test 3 Passed: true
+
+      at Object.<anonymous> (src/tests/base.test.ts:78:13)
+
+    console.log
+      
+      Input 4 Result (Comments):
+       Thermal -- "Thermo-optic effect" --> Optical;
+
+      at Object.<anonymous> (src/tests/base.test.ts:82:13)
+
+    console.log
+      Test 4 Passed: true
+
+      at Object.<anonymous> (src/tests/base.test.ts:84:13)
+
+    console.log
+      
+      Input 5 Result (Direction):
+       subgraph test
+          direction TB
+          end
+
+      at Object.<anonymous> (src/tests/base.test.ts:90:13)
+
+    console.log
+      Test 5 Passed: true
+
+      at Object.<anonymous> (src/tests/base.test.ts:92:13)
+
+    console.log
+      
+      Input 6 Result (Duplicate Labels):
+       D --> E["Label"];
+
+      at Object.<anonymous> (src/tests/base.test.ts:96:13)
+
+    console.log
+      Test 6 Passed: true
+
+      at Object.<anonymous> (src/tests/base.test.ts:98:13)
+
+    console.log
+      
+      --- User Requested Test Case ---
+
+      at Object.<anonymous> (src/tests/base.test.ts:100:13)
+
+    console.log
+      
+      User Example Result:
+       mermaid
+          graph LR
+          subgraph "Energy Storage Comparison Log-Log Scale"
+          direction LR
+          A[Conventional Capacitor] -- "Low Energy, High Power" --> B["Supercapacitor"];
+          B -- "Moderate Energy & Power<br>Balanced Energy/Power<br>Widely Used" --> C["Lithium-ion Battery"];
+          C -- "Higher Energy, Lower Power" --> D[Flow Battery];
+          D -- "Very High Energy, Low Power<br>Grid Scale<br>High Energy Capacity<br>Geographically Limited" --> E["Pumped Hydro / CAES"];
+          F[Flywheel] -- "Similar to Supercap but Mechanical" --> B;
+      
+          XAxis["Power Density W/kg or W/L"];
+          YAxis["Energy Density Wh/kg or Wh/L"];
+      
+      NoteA["Note: Very High Power Density<br>Very Low Energy Density"]
+      A -.- NoteA
+          end
+          XAxis --- YAxis;
+
+      at Object.<anonymous> (src/tests/base.test.ts:128:13)
+
+    console.log
+      User Example Test Passed: true
+
+      at Object.<anonymous> (src/tests/base.test.ts:141:13)
+
+    console.log
+      
+      --- Triple Dash Test Case ---
+
+      at Object.<anonymous> (src/tests/base.test.ts:151:13)
+
+    console.log
+      Result Triple: G -- "Label1<br>Label2" --- H;
+
+      at Object.<anonymous> (src/tests/base.test.ts:154:13)
+
+    console.log
+      
+      --- Table Corruption Test Case ---
+
+      at Object.<anonymous> (src/tests/base.test.ts:158:13)
+
+    console.log
+      Deep Debug on Raw Text Corrupts Table (Expected): false
+
+      at src/tests/base.test.ts:175:17
+
+    console.log
+      
+      --- Bragg's Law Test Case (New) ---
+
+      at Object.<anonymous> (src/tests/base.test.ts:211:13)
+
+    console.log
+      Bragg's Result Snippet:
+       graph TD
+              subgraph "Bragg's Law Geometry"
+                  P1["Plane 1"]
+                  P2["Plane 2"]
+                  
+                  IncidentRay1 --> PointA["A"]
+                  PointA --> ScatteredRay1
+                  
+                  IncidentRay2 --> PointB["B"]
+                  PointB --> ScatteredRay2
+      
+                  P1 --- P2
+                  
+                  note1["Path Difference = CB + BD"]
+                  note2["CB = BD = d sinθ"]
+                  note3["Total Path Difference = 2d sinθ"]
+                  
+                  PointA --- C
+                  PointA --- D
+                  
+                  subgraph "Path Difference Calculation"
+                      direction LR
+                      C -- "d sinθ" --> B
+                      B -- "d sinθ" --> D
+                  end
+              end
+              
+              style P1 fill:#e6f2ff,stroke:#003366
+              style P2 fill:#e6f2ff,stroke:#003366
+              style note1 fill:#ffffcc
+              style note2 fill:#ffffcc
+              style note3 fill:#ffffcc
+
+      at Object.<anonymous> (src/tests/base.test.ts:246:13)
+
+    console.log
+      Bragg's Law Test Passed: true
+
+      at Object.<anonymous> (src/tests/base.test.ts:256:13)
+
+    console.log
+      refineMermaidBlocks Preserves Table (Expected True): true
+
+      at src/tests/base.test.ts:195:21
+
+    console.log
+      PASSED: Table intact.
+
+      at src/tests/base.test.ts:200:25
+
+PASS src/tests/searchProviders.test.ts
+PASS src/tests/llmProviderDiagnosticScript.test.ts
+PASS src/tests/duplicateHandling.test.ts
+  ● Console
+
+    console.log
+      Potential duplicate/consistency issues found in content: [ 'Duplicate word: "duplicate"' ]
+
+      at console.<anonymous> (node_modules/jest-mock/build/index.js:794:25)
+
+    console.log
+      Duplicate detection is disabled in settings.
+
+      at console.<anonymous> (node_modules/jest-mock/build/index.js:794:25)
+
+PASS src/tests/sidebarButtonTriggerChains.test.ts
+  ● Console
+
+    console.log
+      Potential duplicates in Current.md: [ 'duplicate' ]
+
+      at NotemdSidebarView.<anonymous> (src/ui/NotemdSidebarView.ts:576:29)
+
+PASS src/tests/mermaidProcessor.test.ts
+PASS src/tests/providerDiagnostics.test.ts
+PASS src/tests/localeFormat.test.ts
+PASS src/tests/llmProviders.test.ts
+PASS src/tests/verifyDDGLogic.test.ts
+  ● Console
+
+    console.log
+      Test parsed 2 results.
+
+      at src/tests/verifyDDGLogic.test.ts:75:17
+
+    console.log
+      Result 1: {
+        title: 'Obsidian - Sharpen your thinking',
+        url: 'https://obsidian.md/',
+        content: 'Obsidian is the private and flexible writing app that adapts to the way you think.'
+      }
+
+      at src/tests/verifyDDGLogic.test.ts:77:21
+
+PASS src/tests/mermaidFix.test.ts
+PASS src/tests/splitContent.test.ts
+PASS src/tests/processFile.test.ts
+PASS src/tests/processContentWithLLM.test.ts
+PASS src/tests/mermaidFixv2.test.ts
+PASS src/tests/mermaidDeepDebug.test.ts
+  ● Console
+
+    console.log
+      Processed Mermaid:
+       ```mermaid
+      graph LR
+      subgraph "Energy Storage Comparison Log-Log Scale"
+      direction LR
+      A[Conventional Capacitor] -- "Low Energy, High Power" --> B["Supercapacitor"];
+      B -- "Moderate Energy & Power<br>Balanced Energy/Power<br>Widely Used" --> C["Lithium-ion Battery"];
+      C -- "Higher Energy, Lower Power" --> D[Flow Battery];
+      D -- "Very High Energy, Low Power<br>Grid Scale<br>High Energy Capacity<br>Geographically Limited" --> E["Pumped Hydro / CAES"];
+      F[Flywheel] -- "Similar to Supercap but Mechanical" --> B;
+      
+      XAxis["Power Density W/kg or W/L"];
+      YAxis["Energy Density Wh/kg or Wh/L"];
+      
+      NoteA["Note: Very High Power Density<br>Very Low Energy Density"]
+      A -.- NoteA
+      end
+      XAxis --- YAxis;
+      G -- "Label1<br>Label2" --- H;
+      ```
+
+      at src/tests/mermaidDeepDebug.test.ts:32:17
+
+PASS src/tests/formulaCorrection.test.ts
+PASS src/tests/fixExcessiveBrackets.test.ts
+PASS src/tests/conceptNoteCreation.test.ts
+PASS src/tests/tableCorruptionRepro.test.ts
+PASS src/tests/mermaidNewFixes.test.ts
+PASS src/tests/mermaidFixConcatenatedLabels.test.ts
+PASS src/tests/mermaidFixArrow.test.ts
+PASS src/tests/mermaidCommentFix.test.ts
+PASS src/tests/i18nFallback.test.ts
+PASS src/tests/fixUnquotedLabels.test.ts
+PASS src/tests/deepDebug_complex.test.ts
+PASS src/tests/checkMermaidErrors.test.ts
+PASS src/tests/providerValidation.test.ts
+PASS src/tests/mermaidNoteForFix.test.ts
+PASS src/tests/mermaidFixNoteFormat.test.ts
+PASS src/tests/mermaidFixLabelPrefix.test.ts
+  ● Console
+
+    console.log
+      Input: >|"Label with \"quote\""| A --> B
+
+      at Object.<anonymous> (src/tests/mermaidFixLabelPrefix.test.ts:39:17)
+
+    console.log
+      Result: A -->|"Label with \"quote\""| B
+
+      at Object.<anonymous> (src/tests/mermaidFixLabelPrefix.test.ts:41:17)
+
+PASS src/tests/mermaidFixDoubleDashRefined.test.ts
+PASS src/tests/mermaidFixComplexConcatenation.test.ts
+PASS src/tests/intermediateNodeFix.test.ts
+PASS src/tests/braggsLaw.test.ts
+PASS src/tests/workflowButtons.test.ts
+PASS src/tests/placeholderArtifacts.test.ts
+PASS src/tests/mermaidFixChain.test.ts
+PASS src/tests/example.test.ts
+PASS src/tests/languagePolicy.test.ts
+
+Test Suites: 46 passed, 46 total
+Tests:       270 passed, 270 total
+Snapshots:   0 total
+Time:        1.368 s, estimated 2 s
+Ran all test suites.

@@ -1,0 +1,19 @@
+
+> notemd@1.7.14 test
+> jest --runInBand src/tests/i18nFallback.test.ts
+
+PASS src/tests/i18nFallback.test.ts
+  i18n fallback and cache
+    ✓ falls back to English when locale is unsupported (1 ms)
+    ✓ supports zh locale alias resolution
+    ✓ fills missing localized keys from English base catalog (1 ms)
+    ✓ returns cached object for identical locale
+    ✓ resolves strings using Obsidian language when uiLocale is auto
+    ✓ manual ui locale override has priority over Obsidian language
+    ✓ formats placeholders
+
+Test Suites: 1 passed, 1 total
+Tests:       7 passed, 7 total
+Snapshots:   0 total
+Time:        0.234 s
+Ran all test suites matching /src\/tests\/i18nFallback.test.ts/i.

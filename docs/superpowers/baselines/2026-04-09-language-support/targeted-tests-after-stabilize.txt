@@ -1,0 +1,293 @@
+
+> notemd@1.7.14 test
+> jest --runInBand src/tests/workflowButtons.test.ts src/tests/sidebarDomButtonClicks.test.ts src/tests/llmUtilsProviderSupport.test.ts src/tests/providerDiagnostics.test.ts
+
+PASS src/tests/llmUtilsProviderSupport.test.ts
+  ● Console
+
+    console.warn
+      OpenAI API Call: Attempt 1 failed: OpenAI API request failed: net::ERR_CONNECTION_CLOSED
+
+      2349 |             lastError = error instanceof Error ? error : new Error(errorMessage); // Store Error object if possible
+      2350 |             progressReporter.log(`${provider.name} API Call: Attempt ${attempt} failed: ${errorMessage}`);
+    > 2351 |             console.warn(`${provider.name} API Call: Attempt ${attempt} failed: ${errorMessage}`);
+           |                     ^
+      2352 |
+      2353 |             // Handle cancellation specifically
+      2354 |             if ((error instanceof Error && error.name === 'AbortError') || errorMessage.includes("cancelled by user")) {
+
+      at src/llmUtils.ts:2351:21
+          at Generator.throw (<anonymous>)
+      at rejected (node_modules/tslib/tslib.js:116:69)
+
+    console.warn
+      OpenAI API Call: Attempt 1 failed: OpenAI API request failed: net::ERR_CONNECTION_CLOSED
+
+      2349 |             lastError = error instanceof Error ? error : new Error(errorMessage); // Store Error object if possible
+      2350 |             progressReporter.log(`${provider.name} API Call: Attempt ${attempt} failed: ${errorMessage}`);
+    > 2351 |             console.warn(`${provider.name} API Call: Attempt ${attempt} failed: ${errorMessage}`);
+           |                     ^
+      2352 |
+      2353 |             // Handle cancellation specifically
+      2354 |             if ((error instanceof Error && error.name === 'AbortError') || errorMessage.includes("cancelled by user")) {
+
+      at src/llmUtils.ts:2351:21
+          at Generator.throw (<anonymous>)
+      at rejected (node_modules/tslib/tslib.js:116:69)
+
+    console.warn
+      OpenAI API Call: Attempt 2 failed: OpenAI API request failed: net::ERR_CONNECTION_CLOSED
+
+      2349 |             lastError = error instanceof Error ? error : new Error(errorMessage); // Store Error object if possible
+      2350 |             progressReporter.log(`${provider.name} API Call: Attempt ${attempt} failed: ${errorMessage}`);
+    > 2351 |             console.warn(`${provider.name} API Call: Attempt ${attempt} failed: ${errorMessage}`);
+           |                     ^
+      2352 |
+      2353 |             // Handle cancellation specifically
+      2354 |             if ((error instanceof Error && error.name === 'AbortError') || errorMessage.includes("cancelled by user")) {
+
+      at src/llmUtils.ts:2351:21
+          at Generator.throw (<anonymous>)
+      at rejected (node_modules/tslib/tslib.js:116:69)
+
+    console.warn
+      Anthropic API Call: Attempt 1 failed: Anthropic API request failed: net::ERR_CONNECTION_CLOSED
+
+      2349 |             lastError = error instanceof Error ? error : new Error(errorMessage); // Store Error object if possible
+      2350 |             progressReporter.log(`${provider.name} API Call: Attempt ${attempt} failed: ${errorMessage}`);
+    > 2351 |             console.warn(`${provider.name} API Call: Attempt ${attempt} failed: ${errorMessage}`);
+           |                     ^
+      2352 |
+      2353 |             // Handle cancellation specifically
+      2354 |             if ((error instanceof Error && error.name === 'AbortError') || errorMessage.includes("cancelled by user")) {
+
+      at src/llmUtils.ts:2351:21
+          at Generator.throw (<anonymous>)
+      at rejected (node_modules/tslib/tslib.js:116:69)
+
+    console.warn
+      Google API Call: Attempt 1 failed: Google API request failed: net::ERR_CONNECTION_CLOSED
+
+      2349 |             lastError = error instanceof Error ? error : new Error(errorMessage); // Store Error object if possible
+      2350 |             progressReporter.log(`${provider.name} API Call: Attempt ${attempt} failed: ${errorMessage}`);
+    > 2351 |             console.warn(`${provider.name} API Call: Attempt ${attempt} failed: ${errorMessage}`);
+           |                     ^
+      2352 |
+      2353 |             // Handle cancellation specifically
+      2354 |             if ((error instanceof Error && error.name === 'AbortError') || errorMessage.includes("cancelled by user")) {
+
+      at src/llmUtils.ts:2351:21
+          at Generator.throw (<anonymous>)
+      at rejected (node_modules/tslib/tslib.js:116:69)
+
+    console.warn
+      Azure OpenAI API Call: Attempt 1 failed: Azure OpenAI API request failed: net::ERR_CONNECTION_CLOSED
+
+      2349 |             lastError = error instanceof Error ? error : new Error(errorMessage); // Store Error object if possible
+      2350 |             progressReporter.log(`${provider.name} API Call: Attempt ${attempt} failed: ${errorMessage}`);
+    > 2351 |             console.warn(`${provider.name} API Call: Attempt ${attempt} failed: ${errorMessage}`);
+           |                     ^
+      2352 |
+      2353 |             // Handle cancellation specifically
+      2354 |             if ((error instanceof Error && error.name === 'AbortError') || errorMessage.includes("cancelled by user")) {
+
+      at src/llmUtils.ts:2351:21
+          at Generator.throw (<anonymous>)
+      at rejected (node_modules/tslib/tslib.js:116:69)
+
+    console.warn
+      Ollama API Call: Attempt 1 failed: Ollama API request failed: net::ERR_CONNECTION_CLOSED
+
+      2349 |             lastError = error instanceof Error ? error : new Error(errorMessage); // Store Error object if possible
+      2350 |             progressReporter.log(`${provider.name} API Call: Attempt ${attempt} failed: ${errorMessage}`);
+    > 2351 |             console.warn(`${provider.name} API Call: Attempt ${attempt} failed: ${errorMessage}`);
+           |                     ^
+      2352 |
+      2353 |             // Handle cancellation specifically
+      2354 |             if ((error instanceof Error && error.name === 'AbortError') || errorMessage.includes("cancelled by user")) {
+
+      at src/llmUtils.ts:2351:21
+          at Generator.throw (<anonymous>)
+      at rejected (node_modules/tslib/tslib.js:116:69)
+
+    console.warn
+      OpenAI API Call: Attempt 1 failed: OpenAI API error: 400 - Bad request
+
+      2349 |             lastError = error instanceof Error ? error : new Error(errorMessage); // Store Error object if possible
+      2350 |             progressReporter.log(`${provider.name} API Call: Attempt ${attempt} failed: ${errorMessage}`);
+    > 2351 |             console.warn(`${provider.name} API Call: Attempt ${attempt} failed: ${errorMessage}`);
+           |                     ^
+      2352 |
+      2353 |             // Handle cancellation specifically
+      2354 |             if ((error instanceof Error && error.name === 'AbortError') || errorMessage.includes("cancelled by user")) {
+
+      at src/llmUtils.ts:2351:21
+          at Generator.throw (<anonymous>)
+      at rejected (node_modules/tslib/tslib.js:116:69)
+
+    console.warn
+      OpenAI API Call: Attempt 1 failed: OpenAI API request failed: socket hang up
+
+      2349 |             lastError = error instanceof Error ? error : new Error(errorMessage); // Store Error object if possible
+      2350 |             progressReporter.log(`${provider.name} API Call: Attempt ${attempt} failed: ${errorMessage}`);
+    > 2351 |             console.warn(`${provider.name} API Call: Attempt ${attempt} failed: ${errorMessage}`);
+           |                     ^
+      2352 |
+      2353 |             // Handle cancellation specifically
+      2354 |             if ((error instanceof Error && error.name === 'AbortError') || errorMessage.includes("cancelled by user")) {
+
+      at src/llmUtils.ts:2351:21
+          at Generator.throw (<anonymous>)
+      at rejected (node_modules/tslib/tslib.js:116:69)
+
+    console.error
+      OpenAI API Call: All configured attempts failed.
+
+      2407 |     }
+      2408 |
+    > 2409 |     console.error(`${provider.name} API Call: All configured attempts failed.`);
+           |             ^
+      2410 |     throw lastError || new Error(`${provider.name} API call failed after multiple retries.`);
+      2411 | }
+      2412 |
+
+      at src/llmUtils.ts:2409:13
+          at Generator.throw (<anonymous>)
+      at rejected (node_modules/tslib/tslib.js:116:69)
+
+    console.warn
+      OpenAI API Call: Attempt 1 failed: OpenAI API request failed: The operation was aborted.
+
+      2349 |             lastError = error instanceof Error ? error : new Error(errorMessage); // Store Error object if possible
+      2350 |             progressReporter.log(`${provider.name} API Call: Attempt ${attempt} failed: ${errorMessage}`);
+    > 2351 |             console.warn(`${provider.name} API Call: Attempt ${attempt} failed: ${errorMessage}`);
+           |                     ^
+      2352 |
+      2353 |             // Handle cancellation specifically
+      2354 |             if ((error instanceof Error && error.name === 'AbortError') || errorMessage.includes("cancelled by user")) {
+
+      at src/llmUtils.ts:2351:21
+          at Generator.throw (<anonymous>)
+      at rejected (node_modules/tslib/tslib.js:116:69)
+
+    console.error
+      OpenAI API Call: All configured attempts failed.
+
+      2407 |     }
+      2408 |
+    > 2409 |     console.error(`${provider.name} API Call: All configured attempts failed.`);
+           |             ^
+      2410 |     throw lastError || new Error(`${provider.name} API call failed after multiple retries.`);
+      2411 | }
+      2412 |
+
+      at src/llmUtils.ts:2409:13
+          at Generator.throw (<anonymous>)
+      at rejected (node_modules/tslib/tslib.js:116:69)
+
+    console.warn
+      OpenAI API Call: Attempt 1 failed: OpenAI API request failed: socket hang up
+
+      2349 |             lastError = error instanceof Error ? error : new Error(errorMessage); // Store Error object if possible
+      2350 |             progressReporter.log(`${provider.name} API Call: Attempt ${attempt} failed: ${errorMessage}`);
+    > 2351 |             console.warn(`${provider.name} API Call: Attempt ${attempt} failed: ${errorMessage}`);
+           |                     ^
+      2352 |
+      2353 |             // Handle cancellation specifically
+      2354 |             if ((error instanceof Error && error.name === 'AbortError') || errorMessage.includes("cancelled by user")) {
+
+      at src/llmUtils.ts:2351:21
+          at Generator.throw (<anonymous>)
+      at rejected (node_modules/tslib/tslib.js:116:69)
+
+    console.error
+      OpenAI API Call: All configured attempts failed.
+
+      2407 |     }
+      2408 |
+    > 2409 |     console.error(`${provider.name} API Call: All configured attempts failed.`);
+           |             ^
+      2410 |     throw lastError || new Error(`${provider.name} API call failed after multiple retries.`);
+      2411 | }
+      2412 |
+
+      at src/llmUtils.ts:2409:13
+          at Generator.throw (<anonymous>)
+      at rejected (node_modules/tslib/tslib.js:116:69)
+
+    console.warn
+      Anthropic API Call: Attempt 1 failed: Anthropic API request failed: socket hang up
+
+      2349 |             lastError = error instanceof Error ? error : new Error(errorMessage); // Store Error object if possible
+      2350 |             progressReporter.log(`${provider.name} API Call: Attempt ${attempt} failed: ${errorMessage}`);
+    > 2351 |             console.warn(`${provider.name} API Call: Attempt ${attempt} failed: ${errorMessage}`);
+           |                     ^
+      2352 |
+      2353 |             // Handle cancellation specifically
+      2354 |             if ((error instanceof Error && error.name === 'AbortError') || errorMessage.includes("cancelled by user")) {
+
+      at src/llmUtils.ts:2351:21
+          at Generator.throw (<anonymous>)
+      at rejected (node_modules/tslib/tslib.js:116:69)
+
+    console.error
+      Anthropic API Call: All configured attempts failed.
+
+      2407 |     }
+      2408 |
+    > 2409 |     console.error(`${provider.name} API Call: All configured attempts failed.`);
+           |             ^
+      2410 |     throw lastError || new Error(`${provider.name} API call failed after multiple retries.`);
+      2411 | }
+      2412 |
+
+      at src/llmUtils.ts:2409:13
+          at Generator.throw (<anonymous>)
+      at rejected (node_modules/tslib/tslib.js:116:69)
+
+    console.warn
+      Ollama API Call: Attempt 1 failed: Ollama API request failed: socket hang up
+
+      2349 |             lastError = error instanceof Error ? error : new Error(errorMessage); // Store Error object if possible
+      2350 |             progressReporter.log(`${provider.name} API Call: Attempt ${attempt} failed: ${errorMessage}`);
+    > 2351 |             console.warn(`${provider.name} API Call: Attempt ${attempt} failed: ${errorMessage}`);
+           |                     ^
+      2352 |
+      2353 |             // Handle cancellation specifically
+      2354 |             if ((error instanceof Error && error.name === 'AbortError') || errorMessage.includes("cancelled by user")) {
+
+      at src/llmUtils.ts:2351:21
+          at Generator.throw (<anonymous>)
+      at rejected (node_modules/tslib/tslib.js:116:69)
+
+    console.error
+      Ollama API Call: All configured attempts failed.
+
+      2407 |     }
+      2408 |
+    > 2409 |     console.error(`${provider.name} API Call: All configured attempts failed.`);
+           |             ^
+      2410 |     throw lastError || new Error(`${provider.name} API call failed after multiple retries.`);
+      2411 | }
+      2412 |
+
+      at src/llmUtils.ts:2409:13
+          at Generator.throw (<anonymous>)
+      at rejected (node_modules/tslib/tslib.js:116:69)
+
+PASS src/tests/sidebarDomButtonClicks.test.ts
+  ● Console
+
+    console.log
+      Potential duplicates in Active.txt: [ 'duplicate' ]
+
+      at NotemdSidebarView.<anonymous> (src/ui/NotemdSidebarView.ts:566:29)
+
+PASS src/tests/providerDiagnostics.test.ts
+PASS src/tests/workflowButtons.test.ts
+
+Test Suites: 4 passed, 4 total
+Tests:       80 passed, 80 total
+Snapshots:   0 total
+Time:        0.782 s, estimated 1 s
+Ran all test suites matching /src\/tests\/workflowButtons.test.ts|src\/tests\/sidebarDomButtonClicks.test.ts|src\/tests\/llmUtilsProviderSupport.test.ts|src\/tests\/providerDiagnostics.test.ts/i.

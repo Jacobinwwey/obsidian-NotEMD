@@ -24,20 +24,32 @@ export class TavilyProvider implements SearchProvider {
         };
 
         const tavilyTimeout = settings.ddgFetchTimeout * 1000;
-        const timeoutPromise = new Promise<never>((_, reject) => 
-            setTimeout(() => reject(new Error(`Tavily API request timed out after ${tavilyTimeout / 1000}s`)), tavilyTimeout)
-        );
+        let timeoutId: ReturnType<typeof setTimeout> | null = null;
+        const timeoutPromise = new Promise<never>((_, reject) => {
+            timeoutId = setTimeout(
+                () => reject(new Error(`Tavily API request timed out after ${tavilyTimeout / 1000}s`)),
+                tavilyTimeout
+            );
+        });
 
-        const response = await Promise.race([
-            requestUrl({ 
-                url: tavilyUrl, 
-                method: 'POST', 
-                headers: { 'Content-Type': 'application/json' }, 
-                body: JSON.stringify(tavilyRequestBody), 
-                throw: false 
-            }),
-            timeoutPromise
-        ]);
+        const response = await (async () => {
+            try {
+                return await Promise.race([
+                    requestUrl({
+                        url: tavilyUrl,
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(tavilyRequestBody),
+                        throw: false
+                    }),
+                    timeoutPromise
+                ]);
+            } finally {
+                if (timeoutId !== null) {
+                    clearTimeout(timeoutId);
+                }
+            }
+        })();
 
         if (!response || typeof response.status !== 'number') {
             throw new Error("Tavily request failed or timed out.");

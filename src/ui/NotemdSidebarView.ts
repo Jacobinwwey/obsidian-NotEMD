@@ -9,6 +9,8 @@ import {
     SIDEBAR_ACTION_DEFINITIONS,
     SidebarActionId
 } from '../workflowButtons';
+import { formatI18n, getI18nStrings } from '../i18n';
+import { formatTimeForLocale } from '../i18n/localeFormat';
 
 type ActionCategory = typeof SIDEBAR_ACTION_DEFINITIONS[number]['category'];
 
@@ -45,18 +47,34 @@ const ACTION_TOOLTIP: Record<SidebarActionId, string> = {
     'test-llm-connection': 'Test active provider connection and credentials.'
 };
 
-const PRIMARY_ACTION_IDS = new Set<SidebarActionId>([
+const SINGLE_FILE_ACTION_IDS = new Set<SidebarActionId>([
     'process-current-add-links',
-    'batch-generate-from-titles',
-    'summarize-as-mermaid'
+    'generate-from-title',
+    'research-and-summarize',
+    'summarize-as-mermaid',
+    'translate-current-file',
+    'extract-concepts-current',
+    'extract-original-text',
+    'fix-formula-current',
+    'check-duplicates-current'
 ]);
+
+function isSingleFileAction(actionId: SidebarActionId): boolean {
+    return SINGLE_FILE_ACTION_IDS.has(actionId);
+}
+
+function isSingleFileWorkflow(button: CustomWorkflowButton): boolean {
+    return button.actions.length > 0 && button.actions.every(actionId => isSingleFileAction(actionId));
+}
 
 export class NotemdSidebarView extends ItemView implements ProgressReporter {
     plugin: NotemdPlugin;
 
     private statusEl: HTMLElement | null = null;
+    private progressAreaEl: HTMLElement | null = null;
     private progressEl: HTMLElement | null = null;
     private progressBarContainerEl: HTMLElement | null = null;
+    private progressValueEl: HTMLElement | null = null;
     private timeRemainingEl: HTMLElement | null = null;
     private logEl: HTMLElement | null = null;
     private cancelButton: HTMLButtonElement | null = null;
@@ -71,6 +89,10 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
 
     private actionButtons = new Map<string, HTMLButtonElement>();
     private workflowButtons: HTMLButtonElement[] = [];
+
+    private getStrings() {
+        return getI18nStrings({ uiLocale: this.plugin.settings.uiLocale });
+    }
 
     constructor(leaf: WorkspaceLeaf, plugin: NotemdPlugin) {
         super(leaf);
@@ -105,17 +127,27 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
     }
 
     clearDisplay() {
+        const i18n = this.getStrings();
         this.logContent = [];
         if (this.logEl) this.logEl.empty();
-        if (this.statusEl) this.statusEl.setText('Ready');
+        if (this.statusEl) this.statusEl.setText(i18n.common.ready);
+        if (this.progressAreaEl) this.progressAreaEl.addClass('is-idle');
         if (this.progressEl) {
             this.progressEl.dataset.progress = '0';
             this.progressEl.setText('');
             this.progressEl.removeClass('is-error');
             this.progressEl.style.width = '0%';
         }
-        if (this.timeRemainingEl) this.timeRemainingEl.setText('');
-        if (this.progressBarContainerEl) this.progressBarContainerEl.addClass('is-hidden');
+        if (this.progressBarContainerEl) {
+            this.progressBarContainerEl.removeClass('is-hidden');
+            this.progressBarContainerEl.addClass('is-idle');
+        }
+        if (this.progressValueEl) {
+            this.progressValueEl.setText(i18n.common.ready);
+            this.progressValueEl.addClass('is-idle');
+            this.progressValueEl.removeClass('is-error');
+        }
+        if (this.timeRemainingEl) this.timeRemainingEl.setText(i18n.common.standby);
         if (this.cancelButton) {
             this.cancelButton.disabled = true;
             this.cancelButton.removeClass('is-active');
@@ -138,12 +170,19 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
 
         if (percent !== undefined && this.progressEl && this.progressBarContainerEl) {
             this.progressBarContainerEl.removeClass('is-hidden');
+            this.progressBarContainerEl.removeClass('is-idle');
+            if (this.progressAreaEl) this.progressAreaEl.removeClass('is-idle');
             if (percent >= 0) {
                 const clampedPercent = Math.min(100, Math.max(0, percent));
                 this.progressEl.dataset.progress = String(clampedPercent);
-                this.progressEl.setText(`${Math.round(clampedPercent)}%`);
+                this.progressEl.setText('');
                 this.progressEl.removeClass('is-error');
                 this.progressEl.style.width = `${clampedPercent}%`;
+                if (this.progressValueEl) {
+                    this.progressValueEl.setText(`${Math.round(clampedPercent)}%`);
+                    this.progressValueEl.removeClass('is-idle');
+                    this.progressValueEl.removeClass('is-error');
+                }
 
                 if (percent > 0 && this.startTime > 0) {
                     const elapsed = (Date.now() - this.startTime) / 1000;
@@ -158,8 +197,13 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             } else {
                 this.progressEl.dataset.progress = '100';
                 this.progressEl.addClass('is-error');
-                this.progressEl.setText('Cancelled/Error');
+                this.progressEl.setText('');
                 this.progressEl.style.width = '100%';
+                if (this.progressValueEl) {
+                    this.progressValueEl.setText('Stopped');
+                    this.progressValueEl.removeClass('is-idle');
+                    this.progressValueEl.addClass('is-error');
+                }
                 if (this.timeRemainingEl) this.timeRemainingEl.setText('Processing stopped.');
             }
         }
@@ -169,7 +213,8 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         if (!this.logEl) {
             return;
         }
-        const timestamp = `[${new Date().toLocaleTimeString()}]`;
+        const uiLocale = this.plugin.settings.uiLocale === 'auto' ? undefined : this.plugin.settings.uiLocale;
+        const timestamp = `[${formatTimeForLocale(new Date(), uiLocale)}]`;
         const fullMessage = `${timestamp} ${message}`;
         this.logContent.push(fullMessage);
 
@@ -292,16 +337,19 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
     private createActionButton(
         parent: HTMLElement,
         actionId: SidebarActionId,
-        label: string
+        label: string,
+        category: ActionCategory
     ) {
         const classes = ['notemd-action-button'];
-        if (PRIMARY_ACTION_IDS.has(actionId)) {
+        if (isSingleFileAction(actionId)) {
             classes.push('mod-cta');
+            classes.push('is-primary');
         }
         const button = parent.createEl('button', {
             text: label,
             cls: classes.join(' ')
         });
+        button.dataset.category = category;
         button.title = ACTION_TOOLTIP[actionId] || label;
         button.onclick = async () => {
             await this.runSingleAction(actionId);
@@ -317,8 +365,9 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
     }
 
     private async runSingleAction(actionId: SidebarActionId): Promise<void> {
+        const i18n = this.getStrings();
         if (this.isProcessing || this.plugin.getIsBusy()) {
-            new Notice('Processing already in progress.');
+            new Notice(i18n.notices.processingAlreadyRunning);
             return;
         }
         const actionLabel = SIDEBAR_ACTION_DEFINITIONS.find(def => def.id === actionId)?.label || actionId;
@@ -340,8 +389,9 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
     }
 
     private async runCustomWorkflow(button: CustomWorkflowButton): Promise<void> {
+        const i18n = this.getStrings();
         if (this.isProcessing || this.plugin.getIsBusy()) {
-            new Notice('Processing already in progress.');
+            new Notice(i18n.notices.processingAlreadyRunning);
             return;
         }
         this.startProcessing(`Workflow: ${button.name}`);
@@ -542,8 +592,9 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
     }
 
     private buildLanguageSelector(parent: HTMLElement) {
+        const i18n = this.getStrings();
         const row = parent.createDiv({ cls: 'notemd-inline-control' });
-        row.createEl('label', { text: 'Language', cls: 'notemd-inline-label' });
+        row.createEl('label', { text: i18n.common.language, cls: 'notemd-inline-label' });
         this.languageSelector = row.createEl('select', { cls: 'notemd-language-select' });
         const selector = this.languageSelector;
         this.plugin.settings.availableLanguages.forEach(lang => {
@@ -553,32 +604,41 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         selector.onchange = async () => {
             this.plugin.settings.language = selector.value;
             await this.plugin.saveSettings();
-            new Notice(`Language changed to ${selector.value}`);
+            new Notice(formatI18n(i18n.sidebar.languageChangedNotice, { language: selector.value }));
         };
     }
 
     async onOpen() {
+        const i18n = this.getStrings();
         const container = this.containerEl.children[1] as HTMLElement;
         container.empty();
         container.addClass('notemd-sidebar-container');
+        const shell = container.createDiv({ cls: 'notemd-sidebar-shell' });
+        const scrollArea = shell.createDiv({ cls: 'notemd-sidebar-scroll' });
+        const footer = shell.createDiv({ cls: 'notemd-sidebar-footer mod-docked' });
 
-        const hero = container.createDiv({ cls: 'notemd-hero-card' });
-        hero.createEl('h3', { text: 'Notemd Workbench' });
-        hero.createEl('p', { text: 'Run single actions or custom one-click workflows with live progress and logs.' });
+        const hero = scrollArea.createDiv({ cls: 'notemd-hero-card' });
+        hero.createEl('h3', { text: i18n.sidebar.heroTitle });
+        hero.createEl('p', { text: i18n.sidebar.heroDesc });
 
         const workflowResolution = resolveCustomWorkflowButtons(this.plugin.settings.customWorkflowButtonsDsl);
         const quickBody = this.createSection(
-            container,
-            'Quick Workflows',
-            'Custom buttons assembled from built-in actions.',
+            scrollArea,
+            i18n.sidebar.quickWorkflowTitle,
+            i18n.sidebar.quickWorkflowDesc,
             true
         );
 
         workflowResolution.buttons.forEach(buttonConfig => {
+            const workflowClasses = ['notemd-action-button', 'notemd-workflow-button'];
+            if (isSingleFileWorkflow(buttonConfig)) {
+                workflowClasses.push('mod-cta', 'is-primary');
+            }
             const workflowButton = quickBody.createEl('button', {
                 text: buttonConfig.name,
-                cls: 'notemd-action-button mod-cta'
+                cls: workflowClasses.join(' ')
             });
+            workflowButton.dataset.category = 'workflow';
             workflowButton.title = buttonConfig.actions.join(' > ');
             workflowButton.onclick = async () => {
                 await this.runCustomWorkflow(buttonConfig);
@@ -588,7 +648,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
 
         if (workflowResolution.usedFallback && workflowResolution.errors.length > 0) {
             const warn = quickBody.createDiv({ cls: 'notemd-workflow-warning' });
-            warn.setText(`Workflow DSL has ${workflowResolution.errors.length} issue(s). Sidebar is using default fallback.`);
+            warn.setText(formatI18n(i18n.sidebar.workflowFallbackWarning, { count: workflowResolution.errors.length }));
         }
 
         const actionsByCategory = new Map<ActionCategory, Array<typeof SIDEBAR_ACTION_DEFINITIONS[number]>>();
@@ -605,14 +665,14 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             }
 
             const body = this.createSection(
-                container,
+                scrollArea,
                 ACTION_CATEGORY_LABEL[category].title,
-                `Built-in ${ACTION_CATEGORY_LABEL[category].title.toLowerCase()} actions.`,
+                formatI18n(i18n.sidebar.builtInActionsPrefix, { category: ACTION_CATEGORY_LABEL[category].title.toLowerCase() }),
                 ACTION_CATEGORY_LABEL[category].openByDefault
             );
 
             defs.forEach(def => {
-                this.createActionButton(body, def.id, def.label);
+                this.createActionButton(body, def.id, def.label, def.category);
             });
 
             if (category === 'translation') {
@@ -620,37 +680,41 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             }
         });
 
-        container.createEl('hr');
-        const progressArea = container.createDiv({ cls: 'notemd-progress-area' });
-        this.statusEl = progressArea.createEl('p', { text: 'Ready', cls: 'notemd-status-text' });
-        this.progressBarContainerEl = progressArea.createEl('div', { cls: 'notemd-progress-bar-container is-hidden' });
+        const progressArea = footer.createDiv({ cls: 'notemd-progress-area is-idle' });
+        this.progressAreaEl = progressArea;
+        const progressMeta = progressArea.createDiv({ cls: 'notemd-progress-meta' });
+        this.statusEl = progressMeta.createEl('p', { text: i18n.common.ready, cls: 'notemd-status-text' });
+        this.progressValueEl = progressMeta.createEl('span', { text: i18n.common.ready, cls: 'notemd-progress-value is-idle' });
+        this.progressBarContainerEl = progressArea.createEl('div', { cls: 'notemd-progress-bar-container mod-sidebar is-idle' });
         this.progressEl = this.progressBarContainerEl.createEl('div', { cls: 'notemd-progress-bar-fill' });
-        this.timeRemainingEl = progressArea.createEl('p', { cls: 'notemd-time-remaining' });
+        this.timeRemainingEl = progressArea.createEl('p', { text: i18n.common.standby, cls: 'notemd-time-remaining' });
 
-        this.cancelButton = progressArea.createEl('button', { text: 'Cancel processing', cls: 'notemd-cancel-button' });
+        this.cancelButton = progressArea.createEl('button', { text: i18n.sidebar.cancelProcessing, cls: 'notemd-cancel-button' });
         this.cancelButton.onclick = () => this.requestCancel();
 
-        container.createEl('hr');
-        const logHeader = container.createDiv({ cls: 'notemd-log-header' });
-        logHeader.createEl('h5', { text: 'Log output' });
-        const copyLogButton = logHeader.createEl('button', { text: 'Copy log', cls: 'notemd-copy-log-button' });
+        const logCard = footer.createDiv({ cls: 'notemd-log-card mod-persistent' });
+        const logHeader = logCard.createDiv({ cls: 'notemd-log-header' });
+        logHeader.createEl('h5', { text: i18n.sidebar.logOutputTitle });
+        const copyLogButton = logHeader.createEl('button', { text: i18n.sidebar.copyLog, cls: 'notemd-copy-log-button' });
         copyLogButton.onclick = () => {
             if (this.logContent.length > 0) {
                 navigator.clipboard
                     .writeText(this.logContent.join('\n'))
-                    .then(() => new Notice('Log copied!'), () => new Notice('Failed to copy log.'));
+                    .then(() => new Notice(i18n.sidebar.copyLogSuccess), () => new Notice(i18n.sidebar.copyLogFailed));
             } else {
-                new Notice('Log is empty.');
+                new Notice(i18n.sidebar.logEmpty);
             }
         };
-        this.logEl = container.createEl('div', { cls: 'notemd-log-output is-selectable' });
-        this.updateButtonStates();
+        this.logEl = logCard.createEl('div', { cls: 'notemd-log-output is-selectable mod-sidebar' });
+        this.clearDisplay();
     }
 
     async onClose() {
         this.statusEl = null;
+        this.progressAreaEl = null;
         this.progressEl = null;
         this.progressBarContainerEl = null;
+        this.progressValueEl = null;
         this.timeRemainingEl = null;
         this.logEl = null;
         this.cancelButton = null;

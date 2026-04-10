@@ -1,0 +1,7 @@
+
+> notemd@1.7.14 regression:language-baseline
+> bash scripts/regression/language-support-baseline.sh
+
+[baseline] writing into docs/superpowers/baselines/2026-04-09-language-support
+[baseline] done
+BASE_DIR=docs/superpowers/baselines/2026-04-09-language-support
