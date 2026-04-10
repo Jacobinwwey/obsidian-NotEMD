@@ -1,6 +1,6 @@
 {
 	"name": "notemd",
-	"version": "1.6.5",
+	"version": "1.8.0",
 	"description": "Enhances notes using LLMs: 1) Processes text to add [[wiki-links]] and create concept notes. 2) Performs web research (Tavily/DuckDuckGo) and summarizes topics. 3) Generates content from note titles. 4) Translates notes/selections. Supports multiple LLM providers and customizable output.",
 	"main": "main.js",
 	"scripts": {
@@ -8,7 +8,10 @@
 		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
 		"version": "node version-bump.mjs && git add manifest.json versions.json",
 		"test": "jest",
-		"lint": "eslint . --ext .ts"
+		"lint": "eslint . --ext .ts",
+		"diagnose:llm": "node scripts/diagnose-llm-provider.js",
+		"regression:language-baseline": "bash scripts/regression/language-support-baseline.sh",
+		"regression:language-compare": "bash scripts/regression/language-support-compare.sh"
 	},
 	"keywords": [
 		"obsidian",

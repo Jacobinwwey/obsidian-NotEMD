@@ -52,6 +52,11 @@ export interface NotemdSettings {
     apiCallMaxRetries: number;
     // API Debugging
     enableApiErrorDebugMode: boolean;
+    // Developer mode / diagnostics
+    enableDeveloperMode: boolean;
+    developerDiagnosticCallMode: string;
+    developerDiagnosticStabilityRuns: number;
+    developerDiagnosticTimeoutMs: number;
     // Task-specific models (used if useMultiModelSettings is true)
     addLinksModel?: string;
     researchModel?: string;
@@ -84,6 +89,7 @@ export interface NotemdSettings {
     // Add Links Post-Processing
     removeCodeFencesOnAddLinks: boolean; // New: Option to remove ```markdown and ``` fences
     // Language Settings
+    uiLocale: string; // 'auto' uses Obsidian locale; otherwise a specific UI locale code
     language: string; // Stores the selected language code (e.g., 'en', 'es', 'fr')
     availableLanguages: Array<{ code: string; name: string }>; // List of available languages
     useDifferentLanguagesForTasks: boolean;

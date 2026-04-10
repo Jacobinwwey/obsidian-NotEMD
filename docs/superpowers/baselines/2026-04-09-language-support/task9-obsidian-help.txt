@@ -1,0 +1,2 @@
+Ignored: Error: ENOENT: no such file or directory, open '/root/.config/obsidian/obsidian.json'
+2026-04-09 11:15:42 Loaded main app package /opt/obsidian-desktop/1.12.7/resources/obsidian.asar

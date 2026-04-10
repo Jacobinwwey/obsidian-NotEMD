@@ -1,81 +1,10 @@
-import { NotemdSettings, LLMProviderConfig } from './types';
+import { NotemdSettings } from './types';
+import { createDefaultProviders } from './llmProviders';
 import { DEFAULT_CUSTOM_WORKFLOW_BUTTONS_DSL } from './workflowButtons';
 
 // Default settings for the plugin
 export const DEFAULT_SETTINGS: NotemdSettings = {
-    providers: [
-        {
-            name: 'DeepSeek',
-            apiKey: '',
-            baseUrl: 'https://api.deepseek.com/v1',
-            model: 'deepseek-reasoner',
-            temperature: 0.5
-        },
-        {
-            name: 'OpenAI',
-            apiKey: '',
-            baseUrl: 'https://api.openai.com/v1',
-            model: 'gpt-4o',
-            temperature: 0.5
-        },
-        {
-            name: 'Anthropic',
-            apiKey: '',
-            baseUrl: 'https://api.anthropic.com',
-            model: 'claude-3-5-sonnet-20240620',
-            temperature: 0.5
-        },
-        {
-            name: 'Google',
-            apiKey: '',
-            baseUrl: 'https://generativelanguage.googleapis.com/v1',
-            model: 'gemini-2.0-flash-exp',
-            temperature: 0.5
-        },
-        {
-            name: 'Mistral',
-            apiKey: '',
-            baseUrl: 'https://api.mistral.ai/v1',
-            model: 'mistral-large-latest',
-            temperature: 0.5
-        },
-        {
-            name: 'Azure OpenAI',
-            apiKey: '',
-            baseUrl: '',
-            model: 'gpt-4o',
-            temperature: 0.5,
-            apiVersion: '2025-01-01-preview'
-        },
-        {
-            name: 'LMStudio',
-            apiKey: 'EMPTY', // LMStudio often requires a placeholder
-            baseUrl: 'http://localhost:1234/v1',
-            model: 'local-model', // User needs to set this based on their loaded model
-            temperature: 0.7
-        },
-        {
-            name: 'Ollama',
-            apiKey: '', // Ollama doesn't use API keys
-            baseUrl: 'http://localhost:11434/api',
-            model: 'llama3', // User needs to set this based on their pulled models
-            temperature: 0.7
-        },
-        {
-            name: 'OpenRouter',
-            apiKey: '', // Required
-            baseUrl: 'https://openrouter.ai/api/v1',
-            model: 'gryphe/mythomax-l2-13b', // Example model, user should change
-            temperature: 0.7
-        },
-        {
-            name: 'xAI',
-            apiKey: '', // Required
-            baseUrl: 'https://api.x.ai/v1',
-            model: 'grok-1.5-flash', // Example model, user should change
-            temperature: 0.7
-        }
-    ],
+    providers: createDefaultProviders(),
     activeProvider: 'DeepSeek',
     // Concept Note Defaults
     useCustomConceptNoteFolder: false,
@@ -117,6 +46,11 @@ export const DEFAULT_SETTINGS: NotemdSettings = {
     apiCallMaxRetries: 3, // Default max 3 retries
     // API Debugging
     enableApiErrorDebugMode: false,
+    // Developer diagnostics
+    enableDeveloperMode: false,
+    developerDiagnosticCallMode: 'runtime-stable',
+    developerDiagnosticStabilityRuns: 3,
+    developerDiagnosticTimeoutMs: 10 * 60 * 1000,
     // Task-specific model defaults (empty means use provider's default)
     addLinksModel: '',
     researchModel: '',
@@ -144,6 +78,7 @@ export const DEFAULT_SETTINGS: NotemdSettings = {
     // Add Links Post-Processing Defaults
     removeCodeFencesOnAddLinks: false, // Default to NOT removing code fences
     // Language Settings Defaults
+    uiLocale: 'auto',
     language: 'en', // Default to English
     availableLanguages: [ // Default list of available languages
         { code: 'en', name: 'English' },

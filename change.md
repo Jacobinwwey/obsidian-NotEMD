@@ -4,6 +4,166 @@ This document summarizes the major functional and architectural changes implemen
 
 ---
 
+## [Unreleased]
+
+### English
+*   **Developer-Mode Diagnostics Panel**: Added a dedicated Settings developer panel gated by a new Developer mode switch, so normal users do not see developer-only controls.
+*   **Selectable Diagnostic Call Modes + Stability Runs**: Developer diagnostics can now run with selectable call modes (including OpenAI-compatible forced transport modes) and can execute repeated stability runs with aggregated reporting.
+*   **OpenAI-Compatible Non-Stream Stage In Stable Mode**: After a primary direct streaming failure, stable-mode OpenAI-compatible calls now attempt direct non-stream transport before falling back to `requestUrl`. This captures providers that return valid buffered responses but are unstable on streaming sockets.
+*   **Protocol-Aware Streaming Fallback Across All LLM Paths**: Extended long-request fallback parsing beyond OpenAI-compatible providers so Anthropic Messages, Google Gemini, Azure OpenAI, and Ollama now also use protocol-aware streamed fallback handling on desktop `http/https` and non-desktop `fetch`. Legacy exported OpenAI-style provider wrappers now delegate to the same shared streamed fallback path instead of keeping buffered-only logic.
+*   **Cross-Transport Partial Stream Debugging**: Shared debug output now preserves parsed partial stream text for Anthropic, Google/Azure-style SSE flows, and Ollama NDJSON fallbacks, not just OpenAI-compatible calls.
+*   **Stable-Mode Primary Transport Preference (OpenAI-Compatible)**: In stable mode, OpenAI-compatible runtime calls now prefer direct desktop/web streaming transport as the primary long-request path before trying `requestUrl`. This reduces false-fail chains where `requestUrl` disconnects even though upstream providers eventually return successful non-stream responses.
+*   **Regression Coverage**: Added focused runtime tests for Anthropic, Google, Azure OpenAI, Ollama, and the remaining direct OpenAI-style provider wrappers on streamed fallback success and interruption scenarios.
+*   **Real Endpoint Diagnostic CLI**: Added `scripts/diagnose-llm-provider.js` (and `npm run diagnose:llm`) to run reproducible buffered/streaming long-request diagnostics against real provider endpoints with sanitized per-attempt timing, headers, partial bodies, and parsed stream fragments.
+*   **Settings Developer Diagnostic Button**: Added `Developer provider diagnostic (long request)` in settings to run an in-plugin runtime probe for the active provider and persist a full report (`Notemd_Provider_Diagnostic_*.txt`) in vault root.
+*   **Diagnostic Runtime Helper + Tests**: Added `src/providerDiagnostics.ts` and trigger-chain coverage in `src/tests/providerDiagnostics.test.ts` to lock report generation behavior for both success and provider-failure debug paths.
+*   **Docs and Agent Guide Alignment**: Updated both READMEs and `AGENTS.md` so in-plugin diagnostics and CLI diagnostics are documented and required to stay semantically aligned.
+
+### Chinese (中文)
+*   **开发者模式诊断面板**: 设置页新增由“Developer mode”开关控制的独立开发者面板，默认对普通用户隐藏开发者专用控件。
+*   **可选诊断调用方式与稳定性多轮测试**: 开发者诊断现在可选择调用方式（含 OpenAI-compatible 的强制传输模式），并支持按指定轮次执行稳定性测试并输出聚合报告。
+*   **OpenAI-compatible 稳定模式新增非流式阶段**: 当主直连流式传输失败后，稳定模式下的 OpenAI-compatible 调用现在会先尝试直连非流式传输，再回退到 `requestUrl`。这能覆盖“流式链路不稳定但非流式可正常返回”的 Provider 场景。
+*   **全 LLM 路径的协议感知流式回退**: 长请求回退解析能力已从 OpenAI-compatible 扩展到 Anthropic Messages、Google Gemini、Azure OpenAI 和 Ollama，使这些 transport 在桌面 `http/https` 与非桌面 `fetch` 下都能走协议感知的流式回退链路。遗留的 OpenAI 风格导出 Provider 包装函数也已收敛到同一套共享流式回退路径，不再保留 buffered-only 旧逻辑。
+*   **跨 Transport 的部分流式调试**: 共享调试输出现在不仅覆盖 OpenAI-compatible，也会为 Anthropic、Google/Azure 风格 SSE，以及 Ollama NDJSON 回退保留“已解析的部分流式文本”。
+*   **稳定模式下的主传输优先策略（OpenAI-Compatible）**: 在稳定 API 调用模式下，OpenAI-compatible 运行时链路会优先使用桌面/网页流式传输作为主长请求路径，再回退到 `requestUrl`。这可以减少“`requestUrl` 先断连，但上游最终成功返回”导致的误失败链路。
+*   **回归测试覆盖**: 新增 Anthropic、Google、Azure OpenAI、Ollama，以及剩余直连 OpenAI 风格 Provider 包装函数在流式回退成功与中途中断场景下的定向运行时测试。
+*   **真实 Endpoint 诊断 CLI**: 新增 `scripts/diagnose-llm-provider.js`（以及 `npm run diagnose:llm`），可直接对真实 Provider 执行 buffered/streaming 长请求对照诊断，并输出脱敏后的每次尝试耗时、响应头、部分响应体与已解析流式片段。
+*   **设置页开发者诊断按钮**: 在设置页新增 `Developer provider diagnostic (long request)` 按钮，可直接对当前活动 Provider 发起插件内运行时探针，并在仓库根目录保存完整报告（`Notemd_Provider_Diagnostic_*.txt`）。
+*   **诊断运行时模块与测试**: 新增 `src/providerDiagnostics.ts`，并在 `src/tests/providerDiagnostics.test.ts` 中补齐按钮触发链路对应的成功/失败路径测试，确保报告输出与调试信息稳定可回归。
+*   **文档与代理指南对齐**: 已同步更新中英文 README 与 `AGENTS.md`，明确插件内诊断与 CLI 诊断需要保持协议语义一致。
+
+---
+
+## [1.8.0] - 2026-04-09
+
+### English
+*   **First-Principles Language Support Architecture**: Added a unified language domain model that separates UI locale from task output language policy.
+*   **UI i18n Foundation**: Introduced centralized locale catalogs (`en`, `zh-CN`, `zh-TW`) with fallback chaining and interpolation support.
+*   **Runtime String Migration**: Migrated high-impact settings/sidebar/error-modal/runtime notices to shared i18n strings.
+*   **Policy Unification Across Task Paths**: Consolidated task-language decisions in one policy layer and wired it into prompt, processing, research, and translation flows.
+*   **Locale/RTL Hardening**: Added locale-aware timestamp formatting and RTL safety styling guards.
+*   **Regression Harness**: Added reproducible baseline/compare scripts and preserved phase evidence for before/after robustness checks.
+*   **Build Stability with Reference Repo**: Excluded `ref/**` from TypeScript/Jest/ESLint scopes so reference projects can coexist without breaking plugin build/test gates.
+
+### Chinese (中文)
+*   **第一性原理语言支持架构**: 新增统一语言域模型，明确分离 UI 语言与任务输出语言策略。
+*   **UI i18n 基础设施**: 引入集中式语言目录（`en`、`zh-CN`、`zh-TW`），支持回退链与变量插值。
+*   **运行时文案迁移**: 将设置页、侧边栏、错误弹窗和主流程关键提示迁移到共享 i18n 字符串体系。
+*   **任务语言策略收口**: 将任务语言决策统一收敛到策略层，并接入 prompt、处理、研究与翻译路径。
+*   **Locale/RTL 鲁棒性增强**: 新增本地化时间格式化与 RTL 布局安全样式保护。
+*   **回归脚本化能力**: 增加可复现 baseline/compare 脚本，并保留阶段性前后对比证据以保障改造过程鲁棒性。
+*   **参考仓共存构建稳定性**: 将 `ref/**` 排除出 TypeScript/Jest/ESLint 编译与测试范围，使参考仓引入不再破坏插件主工程门禁。
+
+---
+
+## [1.7.14] - 2026-03-30
+
+### English
+*   **Single-File CTA Visual Mapping**: Sidebar colorful CTA styling is now strictly mapped to single-file actions. Batch/folder-level actions no longer use CTA color treatment, reducing scope confusion and accidental batch triggers.
+*   **Workflow CTA Rule Alignment**: Custom workflow buttons now inherit CTA styling only when every step is single-file. Mixed workflows that include batch steps are rendered as non-CTA to keep visual semantics consistent.
+*   **Regression Coverage**: Added a sidebar DOM test to lock CTA mapping behavior for single-file actions vs batch/folder actions and default mixed workflow buttons.
+
+### Chinese (中文)
+*   **单文件 CTA 视觉映射**: 侧边栏彩色 CTA 样式现在严格对应“单文件处理”动作；批量/文件夹级动作不再使用 CTA 色彩，以减少范围误判和误触发批处理的风险。
+*   **工作流 CTA 规则对齐**: 自定义工作流按钮仅在“所有步骤均为单文件动作”时才应用 CTA 样式；只要包含批量步骤即回落为非 CTA 样式，保持视觉语义一致。
+*   **回归测试覆盖**: 新增侧边栏 DOM 测试，锁定单文件动作、批量/文件夹动作以及默认混合工作流按钮的 CTA 映射行为。
+
+---
+
+## [1.7.13] - 2026-03-30
+
+### English
+*   **Sidebar Interaction Polish**: Refined sidebar button interactions with clearer hover, pressed, and focus-visible states so action feedback is obvious during rapid workflows.
+*   **CTA Readability Fix**: Improved text contrast on colorful CTA buttons (including `One-Click Extract` and `Batch generate from titles`) to avoid low-contrast white-on-light combinations across different Obsidian themes.
+*   **Docked Footer Visibility Tuning**: Increased persistent footer sizing constraints and log minimum height so progress + log telemetry stays visible when multiple panels are expanded.
+
+### Chinese (中文)
+*   **侧边栏交互打磨**: 细化了侧边栏按钮的悬停、按下与键盘焦点态，让高频工作流中的操作反馈更明确。
+*   **CTA 可读性修复**: 提升了彩色 CTA 按钮（包括 `One-Click Extract`、`Batch generate from titles`）的文字对比度，避免不同主题下出现浅底白字可见性不足的问题。
+*   **底部停靠区可见性优化**: 调整了固定底部区域尺寸约束与日志最小高度，在展开多个分组时仍能稳定看到进度与日志信息。
+
+---
+
+## [1.7.8] - 2026-03-29
+
+### English
+*   **OpenAI-Compatible Streaming Fallback**: Long-running OpenAI-compatible task calls now upgrade their desktop `http/https` and non-desktop `fetch` fallback attempts to streaming response parsing after an initial transient `requestUrl` disconnect. This helps slow gateways and reverse proxies return body chunks earlier instead of failing the whole request while waiting for one large buffered response.
+*   **Parsed Partial Stream Debugging**: Shared deep-debug output now records both raw partial bodies and parsed partial stream text when a streamed fallback attempt is interrupted. This gives developers enough evidence to distinguish between transport resets and upstream provider-side error payloads.
+*   **Regression Coverage**: Added focused tests for desktop and web streaming fallback assembly, plus interrupted streaming fallback diagnostics.
+
+### Chinese (中文)
+*   **OpenAI-compatible 流式回退**: 长耗时的 OpenAI-compatible 任务调用在首次 `requestUrl` 瞬时断连后，现在会把桌面端 `http/https` 与非桌面环境 `fetch` 的回退尝试升级为流式响应解析。这样慢速网关和反向代理可以更早返回 body 分片，而不是一直等待整块缓冲响应后直接判定整次请求失败。
+*   **已解析流式片段调试**: 共享深度调试输出现在会在流式回退被中途打断时，同时记录原始部分响应体和“已解析的部分流式文本”。开发者可以更清楚地区分到底是传输层重置，还是上游 Provider 已经返回了可用于定位问题的错误/内容片段。
+*   **回归测试覆盖**: 新增桌面端与 Web 流式回退拼装测试，以及流式回退中断时的诊断信息测试。
+
+---
+
+## [1.7.7] - 2026-03-26
+
+### English
+*   **Cross-Provider Deep Debugging**: The shared LLM transport/error path now records per-attempt debug metadata for every provider, including transport name, sanitized request URL and headers, elapsed duration, response headers, partial response bodies, and stack traces. This makes slow upstream gateway resets and proxy disconnects visible without relying on provider-specific logging.
+*   **Connection Test Debug Consistency**: Provider connection probes now use the same instrumented request path as runtime calls, so debug mode exposes the same transport-level evidence during "Test Connection" failures.
+*   **Non-Desktop Runtime Fallback**: When desktop Node transport is unavailable, transient `requestUrl` disconnects now retry the same attempt through browser `fetch`, extending runtime resilience and provider connection testing to mobile/non-desktop environments.
+*   **Chinese Preset Refresh**: Synced selected China-focused preset defaults with current `cline` model baselines, including `Qwen` -> `qwen3-235b-a22b`, `Moonshot` -> `kimi-k2-0905-preview`, and `MiniMax` -> `MiniMax-M2.7`.
+*   **Regression Coverage**: Added focused tests for shared debug metadata rendering and interrupted desktop fallback responses with partial-body capture.
+
+### Chinese (中文)
+*   **跨 Provider 深度调试**: 共享的 LLM 传输/错误处理链路现在会为所有 Provider 记录按尝试维度展开的调试元数据，包括 transport 名称、脱敏后的请求 URL/请求头、耗时、响应头、部分响应体与堆栈信息。这样即使没有 Provider 特定日志，也能直接看见慢速上游网关重置或代理断连发生在哪一段链路上。
+*   **连接测试调试一致性**: Provider 的连接探测现在复用与运行时调用相同的带仪表化请求路径，因此“测试连接”失败时，调试模式也会输出同等级别的 transport 证据。
+*   **非桌面运行时回退**: 当桌面 Node 传输不可用时，`requestUrl` 的瞬时断连现在会在同一次调用内切换到浏览器 `fetch` 重试，从而将运行时鲁棒性和 Provider 连接测试能力扩展到移动端/非桌面环境。
+*   **中国区预设刷新**: 已将部分中国区 Provider 预设默认模型同步到当前 `cline` 基线，包括 `Qwen` -> `qwen3-235b-a22b`、`Moonshot` -> `kimi-k2-0905-preview`、`MiniMax` -> `MiniMax-M2.7`。
+*   **回归测试覆盖**: 新增共享调试元数据渲染测试，以及桌面端 fallback 在响应中途断开时对部分响应体的捕获测试。
+
+---
+
+## [1.7.6] - 2026-03-26
+
+### English
+*   **Runtime Transport Robustness**: Long-running LLM task calls now switch from Obsidian `requestUrl` to desktop `http/https` transport after transient disconnects such as `ERR_CONNECTION_CLOSED`, then continue into the existing stable retry sequence only if the fallback also fails. This hardens slow translation and generation jobs against proxy or gateway drops.
+*   **China Provider Expansion Round 2**: Added first-class presets for `Qwen Code`, `Z AI`, and `Huawei Cloud MaaS`, with routing coverage, connection-test coverage, and synchronized English/Chinese provider documentation.
+*   **Sidebar Footer Stability**: Refined the sidebar footer into a docked status/log area with a clearer standby progress state so the log panel remains visible and the ready-state progress area is readable even when every section is expanded.
+*   **Regression Coverage**: Added focused runtime fallback tests for every active transport path plus sidebar DOM tests for the docked footer and standby progress state.
+
+### Chinese (中文)
+*   **运行时传输鲁棒性增强**: 长耗时 LLM 任务在遇到 `ERR_CONNECTION_CLOSED` 等瞬时断连时，现在会先从 Obsidian 的 `requestUrl` 切换到桌面端 `http/https` 传输；只有该回退也失败时，才进入原有稳定重试序列。慢速翻译和生成任务对代理/网关断连的容忍度明显提升。
+*   **中国区 Provider 第二轮扩展**: 新增 `Qwen Code`、`Z AI`、`Huawei Cloud MaaS` 三个一等预设，并补齐运行时路由测试、连接测试覆盖以及中英文 Provider 文档说明。
+*   **侧边栏底部区域稳定性提升**: 将侧边栏底部进一步整理为停靠式状态/日志区域，并增强 Ready 状态下的待机进度显示；即使所有分组全部展开，日志面板也不会继续被挤压到不可见。
+*   **回归测试覆盖**: 新增覆盖全部活跃 transport 路径的运行时回退测试，以及锁定 docked footer 与 standby 进度态的 sidebar DOM 测试。
+
+---
+
+## [1.7.5] - 2026-03-26
+
+### English
+*   **Provider Connection Test Robustness**: Connection tests now fall back to the stable retry sequence after the first transient network disconnect instead of failing immediately, aligning the "Test Connection" button with the runtime resilience already used by task execution.
+*   **Full Transport Coverage**: The transient-failure fallback now covers every transport used by built-in provider presets, including OpenAI-compatible providers, Anthropic, Google, Azure OpenAI, and Ollama.
+*   **Regression Coverage**: Added focused provider-support tests for both runtime API calls and connection-test probes so transient disconnect handling stays locked in across transports.
+*   **Documentation**: Updated the English and Chinese READMEs plus version metadata to document the new provider-connection retry behavior for `1.7.5`.
+
+### Chinese (中文)
+*   **Provider 连接测试鲁棒性增强**: 连接测试在首次遇到瞬时网络断连后，不会再立刻失败，而是会回退到稳定重试序列，使“测试连接”按钮与实际任务执行路径的鲁棒性保持一致。
+*   **全 Transport 覆盖**: 这套瞬时失败回退机制现已覆盖所有内置 Provider 预设所使用的传输链路，包括 OpenAI-compatible、Anthropic、Google、Azure OpenAI 与 Ollama。
+*   **回归测试覆盖**: 新增针对运行时 API 调用与连接测试探测链路的 Provider 支持测试，确保跨 transport 的瞬时断连处理不会回退。
+*   **文档更新**: 已同步更新中英文 README 与版本元数据，记录 `1.7.5` 的 Provider 连接测试重试行为。
+
+---
+
+## [1.7.4] - 2026-03-26
+
+### English
+*   **Sidebar Layout Stability**: Reworked the sidebar into a scrollable action area plus a persistent footer so the progress card and log output remain visible even when all action groups are expanded.
+*   **Clearer Progress Feedback**: Moved the percentage text into a dedicated status pill, kept the progress bar visible in the ready state, and improved visual contrast for the sidebar progress area.
+*   **Regression Coverage**: Added focused sidebar DOM tests to lock in the persistent footer layout and the new progress summary behavior.
+*   **Documentation**: Updated the English and Chinese READMEs to reflect the pinned sidebar telemetry layout.
+
+### Chinese (中文)
+*   **侧边栏布局稳定性**: 将侧边栏重构为可滚动的工作区加固定底部区域，即使所有动作分组全部展开，进度卡片和日志输出也不会被挤出视野。
+*   **更清晰的进度反馈**: 将百分比文本移到独立状态标签中，保留 Ready 状态下可见的进度条，并增强侧边栏进度区域的视觉对比度。
+*   **回归测试覆盖**: 新增聚焦侧边栏 DOM 的测试，锁定固定底部布局与新的进度摘要展示行为。
+*   **文档更新**: 同步更新中英文 README，补充固定底部进度/日志布局说明。
+
+---
+
 ## [1.6.5] - 2026-01-27
 
 ## Bug Fixes

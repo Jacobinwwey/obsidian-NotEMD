@@ -1,0 +1,4 @@
+
+> notemd@1.7.14 test
+> jest --runInBand src/tests/workflowButtons.test.ts src/tests/sidebarDomButtonClicks.test.ts src/tests/llmUtilsProviderSupport.test.ts src/tests/providerDiagnostics.test.ts src/tests/languagePolicy.test.ts src/tests/i18nFallback.test.ts src/tests/localeFormat.test.ts
+

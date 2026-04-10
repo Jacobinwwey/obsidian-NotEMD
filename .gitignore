@@ -27,3 +27,6 @@ data.json
 
 #skills
 skills
+
+# local git worktrees
+.worktrees

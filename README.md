@@ -4,6 +4,8 @@
 
 [English](./README.md) | [简体中文](./README_zh.md) | [Español](./README_es.md) | [Français](./README_fr.md) | [Deutsch](./README_de.md) | [Italiano](./README_it.md) | [Português](./README_pt.md) | [繁體中文](./README_zh_Hant.md) | [日本語](./README_ja.md) | [한국어](./README_ko.md) | [Русский](./README_ru.md) | [العربية](./README_ar.md) | [हिन्दी](./README_hi.md) | [বাংলা](./README_bn.md) | [Nederlands](./README_nl.md) | [Svenska](./README_sv.md) | [Suomi](./README_fi.md) | [Dansk](./README_da.md) | [Norsk](./README_no.md) | [Polski](./README_pl.md) | [Türkçe](./README_tr.md) | [עברית](./README_he.md) | [ไทย](./README_th.md) | [Ελληνικά](./README_el.md) | [Čeština](./README_cs.md) | [Magyar](./README_hu.md) | [Română](./README_ro.md) | [Українська](./README_uk.md) | [Tiếng Việt](./README_vi.md) | [Bahasa Indonesia](./README_id.md) | [Bahasa Melayu](./README_ms.md)
 
+Read docs in more languages: [Language Hub](./docs/i18n/README.md)
+
 ```
 ==================================================
   _   _       _   _ ___    __  __ ___
@@ -20,7 +22,7 @@ A Easy way to create your own Knowledge-base!
 
 Notemd enhances your Obsidian workflow by integrating with various Large Language Models (LLMs) to process your multi-languages notes, automatically generate wiki-links for key concepts, create corresponding concept notes, perform web research, helping you build powerful knowledge graphs and more.
 
-**Version:** 1.6.5
+**Version:** 1.8.0
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
@@ -29,13 +31,16 @@ Notemd enhances your Obsidian workflow by integrating with various Large Languag
 ## Table of Contents
 
 - [Quick Start](#quick-start)
+- [Language Support](#language-support)
 - [Features](#features)
 - [Installation](#installation)
 - [Configuration](#configuration)
 - [Usage Guide](#usage-guide)
 - [Supported LLM Providers](#supported-llm-providers)
+- [Network Usage & Data Handling](#network-usage--data-handling)
 - [Troubleshooting](#troubleshooting)
 - [Contributing](#contributing)
+- [Maintainer Docs](#maintainer-docs)
 - [License](#license)
 
 ## Quick Start
@@ -44,8 +49,23 @@ Notemd enhances your Obsidian workflow by integrating with various Large Languag
 2.  **Configure LLM**: Go to `Settings -> Notemd`, select your LLM provider (like OpenAI or a local one like Ollama), and enter your API key/URL.
 3.  **Open Sidebar**: Click the Notemd wand icon in the left ribbon to open the sidebar.
 4.  **Process a Note**: Open any note and click **"Process File (Add Links)"** in the sidebar to automatically add `[[wiki-links]]` to key concepts.
+5.  **Run a Quick Workflow**: Use the default **"One-Click Extract"** button to chain processing, batch generation, and Mermaid cleanup from one entry point.
 
 That's it! Explore the settings to unlock more features like web research, translation, and content generation.
+
+## Language Support
+
+### Language Behavior Contract
+
+| Concern | Scope | Default | Notes |
+|---|---|---|---|
+| `UI Locale` | Plugin UI text only (settings, sidebar, notices, dialogs) | `auto` | Follows Obsidian locale; current UI catalogs are `en`, `zh-CN`, `zh-TW`. |
+| `Task Output Language` | LLM-generated task output (links, summaries, generation, extraction, translation target) | `en` | Can be global or per-task when `Use different languages for tasks` is enabled. |
+| `Disable auto translation` | Non-Translate tasks keep source-language context | `false` | Explicit `Translate` tasks still enforce the configured target language. |
+| Locale fallback | Missing UI key resolution | locale -> `en` | Keeps UI stable when some keys are untranslated. |
+
+- Official docs are maintained in English and Simplified Chinese.
+- Planned multilingual documentation support is tracked in the [Language Hub](./docs/i18n/README.md).
 
 ## Features
 
@@ -57,11 +77,21 @@ That's it! Explore the settings to unlock more features like web research, trans
 - **Cancellable Operations**: Cancel any processing task (single or batch) initiated from the sidebar via its dedicated cancel button. Command palette operations use a modal which can also be cancelled.
 - **Multi-Model Configuration**: Use different LLM providers *and* specific models for different tasks (Add Links, Research, Generate Title, Translate) or use a single provider for all.
 - **Stable API Calls (Retry Logic)**: Optionally enable automatic retries for failed LLM API calls with configurable interval and attempt limits.
+- **Resilient Provider Connection Tests**: If the first provider test hits a transient network disconnect, Notemd now falls back to the stable retry sequence before failing, covering OpenAI-compatible, Anthropic, Google, Azure OpenAI, and Ollama transports.
+- **Runtime Environment Transport Fallback**: When a long-running provider request is dropped by `requestUrl` with transient network errors such as `ERR_CONNECTION_CLOSED`, Notemd now retries the same attempt through environment-specific fallback transport before entering the configured retry loop: desktop builds use Node `http/https`, while non-desktop environments use browser `fetch`. This reduces false failures on slow gateways and reverse proxies.
+- **OpenAI-Compatible Stable Long-Request Chain Hardening**: In stable mode, OpenAI-compatible calls now use an explicit 3-stage order for each attempt: primary direct streaming transport, then direct non-stream transport, then `requestUrl` fallback (which can still upgrade to streamed parsing when needed). This reduces false negatives where providers complete buffered responses but streaming pipes are unstable.
+- **Protocol-Aware Streaming Fallback Across LLM APIs**: Long-running fallback attempts now upgrade to protocol-aware streamed parsing across every built-in LLM path, not just OpenAI-compatible endpoints. Notemd now handles OpenAI/Azure-style SSE, Anthropic Messages streaming, Google Gemini SSE responses, and Ollama NDJSON streams on both desktop `http/https` and non-desktop `fetch`, and the remaining direct OpenAI-style provider entrypoints reuse that same shared fallback path.
+- **China-Ready Provider Presets**: Built-in presets now cover `Qwen`, `Qwen Code`, `Doubao`, `Moonshot`, `GLM`, `Z AI`, `MiniMax`, `Huawei Cloud MaaS`, `Baidu Qianfan`, and `SiliconFlow` in addition to the existing global and local providers.
 - **Reliable Batch Processing**: Improved concurrent processing logic with **staggered API calls** to prevent rate-limiting errors and ensure stable performance during large batch jobs. The new implementation ensures that tasks are initiated at different intervals rather than all at once.
 - **Accurate Progress Reporting**: Fixed a bug where the progress bar could get stuck, ensuring that the UI always reflects the true status of the operation.
 - **Robust Parallel Batch Processing**: Resolved an issue where parallel batch operations would stall prematurely, ensuring all files are processed reliably and efficiently.
 - **Progress Bar Accuracy**: Fixed a bug where the progress bar for the "Create Wiki-Link & Generate Note" command would get stuck at 95%, ensuring it now correctly shows 100% upon completion.
-- **Enhanced API Debugging**: The "API Error Debugging Mode" now captures full response bodies from LLM providers and search services (Tavily/DuckDuckGo), enabling detailed logging of 429/500 errors and other API failures for better troubleshooting.
+- **Enhanced API Debugging**: The "API Error Debugging Mode" now captures full response bodies from LLM providers and search services (Tavily/DuckDuckGo), and also records a per-attempt transport timeline with sanitized request URLs, elapsed duration, response headers, partial response bodies, parsed partial stream content, and stack traces for better troubleshooting across OpenAI-compatible, Anthropic, Google, Azure OpenAI, and Ollama fallbacks.
+- **Developer Mode Panel**: Settings now include a dedicated developer-only diagnostics panel that stays hidden unless "Developer mode" is enabled. It supports selecting diagnostic call paths and running repeated stability probes for the selected mode.
+- **Redesigned Sidebar**: Built-in actions are grouped into focused sections with clearer labels, live status, cancellable progress, and copyable logs to reduce sidebar clutter. The progress/log footer now stays visible even when every section is expanded, and the ready state uses a clearer standby progress track.
+- **Sidebar Interaction & Readability Polish**: Sidebar buttons now provide clearer hover/press/focus feedback, and colorful CTA buttons (including `One-Click Extract` and `Batch generate from titles`) use stronger text contrast for better readability across themes.
+- **Single-File CTA Mapping**: Colorful CTA styling is now reserved for single-file actions only. Batch/folder-level actions and mixed workflows use non-CTA styling to reduce action-scope misclicks.
+- **Custom One-Click Workflows**: Turn built-in sidebar utilities into reusable custom buttons with user-defined names and assembled action chains. A default `One-Click Extract` workflow is included out of the box.
 
 
 ### Knowledge Graph Enhancement
@@ -70,7 +100,7 @@ That's it! Explore the settings to unlock more features like web research, trans
 - **Customizable Output Paths**: Configure separate relative paths within your vault for saving processed files and newly created concept notes.
 - **Customizable Output Filenames (Add Links)**: Optionally **overwrite the original file** or use a custom suffix/replacement string instead of the default `_processed.md` when processing files for links.
 - **Link Integrity Maintenance**: Basic handling for updating links when notes are renamed or deleted within the vault.
-- **Pure Concept Extraction**: Extract concepts and create corresponding concept notes without modifying the original document. This is ideal for populating a knowledge base from existing documents without altering them. This feature has configurable options for creating minimal concept notes and adding backlinks. This feature has configurable options for creating minimal concept notes and adding backlinks.
+- **Pure Concept Extraction**: Extract concepts and create corresponding concept notes without modifying the original document. This is ideal for populating a knowledge base from existing documents without altering them. This feature has configurable options for creating minimal concept notes and adding backlinks.
 
 
 ### Translation
@@ -101,6 +131,7 @@ That's it! Explore the settings to unlock more features like web research, trans
     - Use the note title to generate initial content via LLM, replacing existing content.
     - **Optional Research**: Configure whether to perform web research (using the selected provider) to provide context for generation.
 - **Batch Content Generation from Titles**: Generate content for all notes within a selected folder based on their titles (respects the optional research setting). Successfully processed files are moved to a **configurable "complete" subfolder** (e.g., `[foldername]_complete` or a custom name) to avoid reprocessing.
+- **Mermaid Auto-Fix Coupling**: When Mermaid auto-fix is enabled, Mermaid-related workflows now automatically repair generated files or output folders after processing. This covers Process, Generate from Title, Batch Generate from Titles, Research & Summarize, Summarise as Mermaid, and Translate flows.
 
 
 ### Utility Features
@@ -121,6 +152,7 @@ That's it! Explore the settings to unlock more features like web research, trans
 - **Duplicate Detection**: Basic check for duplicate words within the currently processed file's content (results logged to console).
 - **Check and Remove Duplicate Concept Notes**: Identifies potential duplicate notes within the configured **Concept Note Folder** based on exact name matches, plurals, normalization, and single-word containment compared to notes outside the folder. The scope of the comparison (which notes outside the concept folder are checked) can be configured to the **entire vault**, **specific included folders**, or **all folders excluding specific ones**. Presents a detailed list with reasons and conflicting files, then prompts for confirmation before moving identified duplicates to system trash. Shows progress during deletion.
 - **Batch Mermaid Fix**: Applies Mermaid and LaTeX syntax corrections to all Markdown files within a user-selected folder.
+    - **Workflow Ready**: Can be used as a standalone utility or as a step inside a custom one-click workflow button.
     - **Error Reporting**: Generates a `mermaid_error_{foldername}.md` report listing files that still contain potential Mermaid errors after processing.
     - **Move Error Files**: Optionally moves files with detected errors to a specified folder for manual review.
     - **Smart Detection**: Now intelligently checks files for syntax errors using `mermaid.parse` before attempting fixes, saving processing time and avoiding unnecessary edits.
@@ -164,10 +196,10 @@ That's it! Explore the settings to unlock more features like web research, trans
 5. Once installed, click **Enable**.
 
 ### Manual Installation
-1. Download the latest release files (`main.js`, `styles.css`, `manifest.json`) from the [GitHub Releases page](https://github.com/Jacobinwwey/obsidian-NotEMD/releases) .
+1. Download the latest release assets from the [GitHub Releases page](https://github.com/Jacobinwwey/obsidian-NotEMD/releases). Each release also includes `README.md` for packaged reference, but manual installation only requires `main.js`, `styles.css`, and `manifest.json`.
 2. Navigate to your Obsidian vault's configuration folder: `<YourVault>/.obsidian/plugins/`.
 3. Create a new folder named `notemd`.
-4. Copy the downloaded `main.js`, `styles.css`, and `manifest.json` files into the `notemd` folder.
+4. Copy `main.js`, `styles.css`, and `manifest.json` into the `notemd` folder.
 5. Restart Obsidian.
 6. Go to **Settings** → **Community plugins** and enable "Notemd".
 
@@ -179,13 +211,14 @@ Access plugin settings via:
 ### LLM Provider Configuration
 1.  **Active Provider**: Select the LLM provider you want to use from the dropdown menu.
 2.  **Provider Settings**: Configure the specific settings for the selected provider:
-    *   **API Key**: Required for most cloud providers (e.g., OpenAI, Anthropic, DeepSeek, Google, Mistral, Azure, OpenRouter). Not needed for Ollama. LMStudio often uses `EMPTY` or can be left blank.
-    *   **Base URL / Endpoint**: The API endpoint for the service. Defaults are provided, but you may need to change this for local models (LMStudio, Ollama), OpenRouter, or specific Azure deployments. **Required for Azure OpenAI.**
-    *   **Model**: The specific model name/ID to use (e.g., `gpt-4o`, `claude-3-5-sonnet-20240620`, `google/gemini-flash-1.5`, `llama3`, `mistral-large-latest`). Ensure the model is available at your endpoint/provider. For OpenRouter, use the model ID shown on their site (e.g., `gryphe/mythomax-l2-13b`).
+    *   **API Key**: Required for most cloud providers (e.g., OpenAI, Anthropic, DeepSeek, Qwen, Qwen Code, Doubao, Moonshot, GLM, Z AI, MiniMax, Huawei Cloud MaaS, Baidu Qianfan, SiliconFlow, Google, Mistral, Azure OpenAI, OpenRouter, xAI, Groq, Together, Fireworks, Requesty). Not needed for Ollama. Optional for LM Studio and the generic `OpenAI Compatible` preset when your endpoint accepts anonymous or placeholder access.
+    *   **Base URL / Endpoint**: The API endpoint for the service. Defaults are provided, but you may need to change this for local models (LMStudio, Ollama), gateways (OpenRouter, Requesty, OpenAI Compatible), or specific Azure deployments. **Required for Azure OpenAI.**
+    *   **Model**: The specific model name/ID to use (e.g., `gpt-4o`, `claude-3-5-sonnet-20240620`, `google/gemini-flash-1.5`, `grok-4`, `moonshotai/kimi-k2-instruct-0905`, `accounts/fireworks/models/kimi-k2p5`, `anthropic/claude-3-7-sonnet-latest`). Ensure the model is available at your endpoint/provider.
     *   **Temperature**: Controls the randomness of the LLM's output (0=deterministic, 1=max creativity). Lower values (e.g., 0.2-0.5) are generally better for structured tasks.
     *   **API Version (Azure Only)**: Required for Azure OpenAI deployments (e.g., `2024-02-15-preview`).
-3.  **Test Connection**: Use the "Test Connection" button for the active provider to verify your settings. This now uses a more reliable method for LM Studio.
+3.  **Test Connection**: Use the "Test Connection" button for the active provider to verify your settings. OpenAI-compatible providers now use provider-aware checks: endpoints such as `Qwen`, `Qwen Code`, `Doubao`, `Moonshot`, `GLM`, `Z AI`, `MiniMax`, `Huawei Cloud MaaS`, `Baidu Qianfan`, `SiliconFlow`, `Groq`, `Together`, `Fireworks`, `LMStudio`, and `OpenAI Compatible` probe `chat/completions` directly, while providers with a reliable `/models` endpoint can still use model listing first. If the first probe fails with a transient network disconnect such as `ERR_CONNECTION_CLOSED`, Notemd automatically falls back to the stable retry sequence instead of failing immediately.
 4.  **Manage Provider Configurations**: Use the "Export Providers" and "Import Providers" buttons to save/load your LLM provider settings to/from a `notemd-providers.json` file within the plugin's configuration directory. This allows for easy backup and sharing.
+5.  **Preset Coverage**: In addition to the original providers, Notemd now includes preset entries for `Qwen`, `Qwen Code`, `Doubao`, `Moonshot`, `GLM`, `Z AI`, `MiniMax`, `Huawei Cloud MaaS`, `Baidu Qianfan`, `SiliconFlow`, `xAI`, `Groq`, `Together`, `Fireworks`, `Requesty`, and a generic `OpenAI Compatible` target for LiteLLM, vLLM, Perplexity, Vercel AI Gateway, or custom proxies.
 <img width="804" height="506" alt="LLM" src="https://github.com/user-attachments/assets/8caf42e3-43ad-456d-8b96-b63e7914e45f" />
 
 ### Multi-Model Configuration
@@ -198,15 +231,35 @@ Access plugin settings via:
 
 <img width="817" height="428" alt="Multi-model" src="https://github.com/user-attachments/assets/85e6b854-c0ca-45cc-a55e-24638dceb120" />
 
+### Language Architecture (UI Locale vs Task Output Language)
+
+-   **UI Locale** controls only plugin interface text (Settings labels, sidebar buttons, notices, and dialogs). The default `auto` mode follows Obsidian's current UI language.
+-   **Task Output Language** controls model-generated task output (links, summaries, title generation, Mermaid summary, concept extraction, translation target).
+-   **Per-task language mode** lets each task resolve its own output language from a unified policy layer instead of scattered per-module overrides.
+-   **Disable auto translation** keeps non-Translate tasks in source-language context, while explicit Translate tasks still enforce the configured target language.
+-   Mermaid-related generation paths follow the same language policy and can still trigger Mermaid auto-fix when enabled.
+
 ### Stable API Call Settings
 -   **Enable Stable API Calls (Retry Logic)**:
     *   **Disabled (Default)**: A single API call failure will stop the current task.
     *   **Enabled**: Automatically retries failed LLM API calls (useful for intermittent network issues or rate limits).
+    *   **Connection Test Fallback**: Even when normal calls are not already running in stable mode, provider connection tests now switch into the same retry sequence after the first transient network failure.
+    *   **Runtime Transport Fallback (Environment-Aware)**: Long-running task requests that are transiently dropped by `requestUrl` now retry the same attempt through an environment-aware fallback first. Desktop builds use Node `http/https`; non-desktop environments use browser `fetch`. Those fallback attempts now use protocol-aware streaming parsing across the built-in LLM paths, covering OpenAI-compatible SSE, Azure OpenAI SSE, Anthropic Messages SSE, Google Gemini SSE, and Ollama NDJSON output, so slow gateways can return body chunks earlier. The remaining direct OpenAI-style provider entrypoints reuse that same shared fallback path.
+    *   **OpenAI-Compatible Stable Order**: In stable mode, each OpenAI-compatible attempt now follows `direct streaming -> direct non-stream -> requestUrl (with streamed fallback when needed)` before counting as a failed attempt. This prevents overly aggressive failures when only one transport mode is flaky.
 -   **Retry Interval (seconds)**: (Visible only when enabled) Time to wait between retry attempts (1-300 seconds). Default: 5.
 -   **Maximum Retries**: (Visible only when enabled) Maximum number of retry attempts (0-10). Default: 3.
 -   **API Error Debugging Mode**:
     *   **Disabled (Default)**: Uses standard, concise error reporting.
-    *   **Enabled**: Activates detailed error logging (similar to DeepSeek's verbose output) for all providers and tasks (including Translate, Search, and Connection Tests). This includes HTTP status codes and raw response text, which is crucial for troubleshooting API connection issues.
+    *   **Enabled**: Activates detailed error logging (similar to DeepSeek's verbose output) for all providers and tasks (including Translate, Search, and Connection Tests). This includes HTTP status codes, raw response text, request transport timelines, sanitized request URLs and headers, elapsed attempt durations, response headers, partial response bodies, parsed partial stream output, and stack traces, which is crucial for troubleshooting API connection issues and upstream gateway resets.
+-   **Developer Mode**:
+    *   **Disabled (Default)**: Hides all developer-only diagnostics controls from normal users.
+    *   **Enabled**: Shows a dedicated developer diagnostics panel in Settings.
+-   **Developer Provider Diagnostic (Long Request)**:
+    *   **Diagnostic Call Mode**: Choose runtime path per probe. OpenAI-compatible providers support additional forced modes (`direct streaming`, `direct buffered`, `requestUrl-only`) besides runtime modes.
+    *   **Run Diagnostic**: Runs one long-request probe with the selected call mode and writes `Notemd_Provider_Diagnostic_*.txt` in vault root.
+    *   **Run Stability Test**: Repeats the probe for configurable runs (1-10) using the selected call mode and saves an aggregated stability report.
+    *   **Diagnostic Timeout**: Configurable timeout per run (15-3600 seconds).
+    *   **Why Use It**: Faster than manual reproduction when a provider passes "Test connection" but fails on real long-running tasks (for example, translation on slow gateways).
 <img width="805" height="187" alt="stable API calls" src="https://github.com/user-attachments/assets/936454a7-b657-413c-8a2a-13d517f9c519" />
 
 ### General Settings
@@ -314,8 +367,8 @@ Access plugin settings via:
     *   **Disabled (Default)**: "Generate from Title" uses only the title as input.
     *   **Enabled**: Performs web research using the configured **Web Research Provider** and includes the findings as context for the LLM during title-based generation.
 -   **Auto-run Mermaid Syntax Fix after Generation**:
-    *   **Disabled (Default)**: No extra action is taken.
-    *   **Enabled**: Automatically runs a syntax-fixing pass on notes after they have been created or updated by "Generate from Title", "Batch Generate from Titles", or "Create & Generate from Selection". This helps ensure any generated Mermaid diagrams are valid.
+    *   **Enabled (Default)**: Automatically runs a Mermaid syntax-fixing pass after Mermaid-related workflows such as Process, Generate from Title, Batch Generate from Titles, Research & Summarize, Summarise as Mermaid, and Translate.
+    *   **Disabled**: Leaves generated Mermaid output untouched unless you run `Batch Mermaid Fix` manually or add it to a custom workflow.
 -   **Output Language**: (New) Select the desired output language for "Generate from Title" and "Batch Generate from Title" tasks.
     *   **English (Default)**: Prompts are processed and output in English.
     *   **Other Languages**: The LLM is instructed to perform its reasoning in English but provide the final documentation in your selected language (e.g., Español, Français, 简体中文, 繁體中文, العربية, हिन्दी, etc.).
@@ -326,6 +379,14 @@ Access plugin settings via:
     *   **Disabled (Default)**: Successfully generated files are moved to a subfolder named `[OriginalFolderName]_complete` relative to the original folder's parent (or `Vault_complete` if the original folder was the root).
     *   **Enabled**: Allows you to specify a custom name for the subfolder where completed files are moved.
 -   **Custom Output Folder Name**: (Visible only when the above is enabled) Enter the desired name for the subfolder (e.g., `Generated Content`, `_complete`). Invalid characters are not allowed. Defaults to `_complete` if left empty. This folder is created relative to the original folder's parent directory.
+
+#### One-click Workflow Buttons
+-   **Visual Workflow Builder**: Create custom workflow buttons from built-in actions without hand-writing the DSL.
+-   **Custom Workflow Buttons DSL**: Advanced users can still edit the workflow definition text directly. Invalid DSL falls back to the default workflow safely and shows a warning in the sidebar/settings UI.
+-   **Workflow Error Strategy**:
+    *   **Stop on Error (Default)**: Stops the workflow immediately when one step fails.
+    *   **Continue on Error**: Continues running later steps and reports the number of failed actions at the end.
+-   **Default Workflow Included**: `One-Click Extract` chains `Process File (Add Links)`, `Batch Generate from Titles`, and `Batch Mermaid Fix`.
 
 #### Custom Prompt Settings
 This feature allows you to override the default instructions (prompts) sent to the LLM for specific tasks, giving you fine-grained control over the output.
@@ -378,6 +439,14 @@ This feature allows you to override the default instructions (prompts) sent to t
 
 
 ## Usage Guide
+
+### Quick Workflows & Sidebar
+
+-   Open the Notemd sidebar to access grouped action sections for core processing, generation, translation, knowledge, and utilities.
+-   Use the **Quick Workflows** area at the top of the sidebar to launch custom multi-step buttons.
+-   The default **One-Click Extract** workflow runs `Process File (Add Links)` -> `Batch Generate from Titles` -> `Batch Mermaid Fix`.
+-   Workflow progress, per-step logs, and failures are shown in the sidebar, with a pinned footer that protects the progress bar and log area from being squeezed out by expanded sections.
+-   The progress card keeps status text, a dedicated percentage pill, and time remaining readable at a glance, and the same custom workflows can be reconfigured from settings.
 
 ### Original Processing (Adding Wiki-Links)
 This is the core functionality focused on identifying concepts and adding `[[wiki-links]]`.
@@ -496,20 +565,68 @@ This is the core functionality focused on identifying concepts and adding `[[wik
 
 ## Supported LLM Providers
 
-| Provider     | Type  | API Key Required | Notes                                                    |
-|--------------|-------|------------------|----------------------------------------------------------|
-| DeepSeek     | Cloud | Yes              |                                                          |
-| OpenAI       | Cloud | Yes              | Supports various models like GPT-4o, GPT-3.5             |
-| Anthropic    | Cloud | Yes              | Supports Claude models                                   |
-| Google       | Cloud | Yes              | Supports Gemini models                                   |
-| Mistral      | Cloud | Yes              | Supports Mistral models                                  |
-| Azure OpenAI | Cloud | Yes              | Requires Endpoint, API Key, API Version                  |
-| OpenRouter   | Cloud | Yes              | Accesses many models via OpenRouter API                  |
-| LMStudio     | Local | No (Use `EMPTY`) | Runs models locally via LM Studio server                 |
-| Ollama       | Local | No               | Runs models locally via Ollama server                    |
+| Provider           | Type    | API Key Required       | Notes                                                                 |
+|--------------------|---------|------------------------|-----------------------------------------------------------------------|
+| DeepSeek           | Cloud   | Yes                    | Native DeepSeek endpoint with reasoning-model handling                |
+| Qwen               | Cloud   | Yes                    | DashScope compatible-mode preset for Qwen / QwQ models               |
+| Qwen Code          | Cloud   | Yes                    | DashScope coding-focused preset for Qwen coder models                 |
+| Doubao             | Cloud   | Yes                    | Volcengine Ark preset; usually set the model field to your endpoint ID |
+| Moonshot           | Cloud   | Yes                    | Official Kimi / Moonshot endpoint                                     |
+| GLM                | Cloud   | Yes                    | Official Zhipu BigModel OpenAI-compatible endpoint                    |
+| Z AI               | Cloud   | Yes                    | International GLM/Zhipu OpenAI-compatible endpoint; complements `GLM` |
+| MiniMax            | Cloud   | Yes                    | Official MiniMax chat-completions endpoint                            |
+| Huawei Cloud MaaS  | Cloud   | Yes                    | Huawei ModelArts MaaS OpenAI-compatible endpoint for hosted models    |
+| Baidu Qianfan      | Cloud   | Yes                    | Official Qianfan OpenAI-compatible endpoint for ERNIE models          |
+| SiliconFlow        | Cloud   | Yes                    | Official SiliconFlow OpenAI-compatible endpoint for hosted OSS models |
+| OpenAI             | Cloud   | Yes                    | Supports GPT and o-series models                                      |
+| Anthropic          | Cloud   | Yes                    | Supports Claude models                                                |
+| Google             | Cloud   | Yes                    | Supports Gemini models                                                |
+| Mistral            | Cloud   | Yes                    | Supports Mistral and Codestral families                               |
+| Azure OpenAI       | Cloud   | Yes                    | Requires Endpoint, API Key, deployment name, and API Version          |
+| OpenRouter         | Gateway | Yes                    | Access many providers through OpenRouter model IDs                    |
+| xAI                | Cloud   | Yes                    | Native Grok endpoint                                                  |
+| Groq               | Cloud   | Yes                    | Fast OpenAI-compatible inference for hosted OSS models                |
+| Together           | Cloud   | Yes                    | OpenAI-compatible endpoint for hosted OSS models                      |
+| Fireworks          | Cloud   | Yes                    | OpenAI-compatible inference endpoint                                  |
+| Requesty           | Gateway | Yes                    | Multi-provider router behind one API key                              |
+| OpenAI Compatible  | Gateway | Optional               | Generic preset for LiteLLM, vLLM, Perplexity, Vercel AI Gateway, etc. |
+| LMStudio           | Local   | Optional (`EMPTY`)     | Runs models locally via LM Studio server                              |
+| Ollama             | Local   | No                     | Runs models locally via Ollama server                                 |
 
 *Note: For local providers (LMStudio, Ollama), ensure the respective server application is running and accessible at the configured Base URL.*
-*Note: For OpenRouter, use the full model identifier from their website (e.g., `google/gemini-flash-1.5`) in the Model setting.*
+*Note: For OpenRouter and Requesty, use the provider-prefixed/full model identifier shown by the gateway (for example `google/gemini-flash-1.5` or `anthropic/claude-3-7-sonnet-latest`).*
+*Note: `Doubao` usually expects an Ark endpoint/deployment ID in the model field rather than a raw model family name. The settings screen now warns when the placeholder value is still present and blocks connection tests until you replace it with a real endpoint ID.*
+*Note: `Z AI` targets the international `api.z.ai` line, while `GLM` keeps the mainland China BigModel endpoint. Choose the preset that matches your account region.*
+*Note: China-focused presets use chat-first connection checks so the test validates the actual configured model/deployment, not only API-key reachability.*
+*Note: `OpenAI Compatible` is intended for custom gateways and proxies. Set the Base URL, API key policy, and model ID according to your provider's documentation.*
+
+## Network Usage & Data Handling
+
+Notemd runs locally inside Obsidian, but some features send outbound requests.
+
+### LLM Provider Calls (Configurable)
+
+- Trigger: file processing, generation, translation, research summarization, Mermaid summarization, and connection/diagnostic actions.
+- Endpoint: your configured provider base URL(s) in Notemd settings.
+- Data sent: prompt text and task content required for processing.
+- Data handling note: API keys are configured locally in plugin settings and used to sign requests from your device.
+
+### Web Research Calls (Optional)
+
+- Trigger: when web research is enabled and a search provider is selected.
+- Endpoint: Tavily API or DuckDuckGo endpoints.
+- Data sent: your research query and required request metadata.
+
+### Developer Diagnostics & Debug Logs (Optional)
+
+- Trigger: API debug mode and developer diagnostic actions.
+- Storage: diagnostic and error logs are written to your vault root (for example `Notemd_Provider_Diagnostic_*.txt` and `Notemd_Error_Log_*.txt`).
+- Risk note: logs can contain request/response excerpts. Review logs before sharing them publicly.
+
+### Local Storage
+
+- Plugin configuration is stored in `.obsidian/plugins/notemd/data.json`.
+- Generated files, reports, and optional logs are stored in your vault according to your settings.
 
 ## Troubleshooting
 
@@ -524,6 +641,23 @@ This is the core functionality focused on identifying concepts and adding `[[wik
     6.  **For single file processing errors:** Review the Developer Console for detailed error messages. Copy them using the button in the error modal if needed.
     7.  **For batch processing errors:** Check the `error_processing_filename.log` file in your vault root for detailed error messages for each failed file. The Developer Console or error modal might show a summary or general batch error.
     8.  **Automatic Error Logs:** If a process fails, the plugin automatically saves a detailed log file named `Notemd_Error_Log_[Timestamp].txt` in your vault's root directory. This file contains the error message, stack trace, and session logs. If you encounter persistent issues, please check this file. Enabling "API Error Debugging Mode" in settings will populate this log with even more detailed API response data.
+    9.  **Real Endpoint Long-Request Diagnostics (Developer)**:
+        - In-plugin path (recommended first): use **Settings -> Notemd -> Developer provider diagnostic (long request)** to run a runtime probe on the active provider and generate `Notemd_Provider_Diagnostic_*.txt` in vault root.
+        - CLI path (outside Obsidian runtime): for reproducible endpoint-level comparison between buffered and streaming behavior, use:
+        ```bash
+        npm run diagnose:llm -- \
+          --transport openai-compatible \
+          --provider-name OpenRouter \
+          --base-url https://openrouter.ai/api/v1 \
+          --api-key "$OPENROUTER_API_KEY" \
+          --model anthropic/claude-3.7-sonnet \
+          --prompt-file ./tmp/prompt.txt \
+          --content-file ./tmp/content.txt \
+          --mode compare \
+          --timeout-ms 360000 \
+          --output ./tmp/openrouter-diagnostic.txt
+        ```
+        The generated report contains per-attempt timing (`First Byte`, `Duration`), sanitized request metadata, response headers, raw/partial body fragments, parsed stream fragments, and transport-layer failure points.
 -   **LM Studio/Ollama Connection Issues**:
     *   **Test Connection Fails**: Ensure the local server (LM Studio or Ollama) is running and the correct model is loaded/available.
     *   **CORS Errors (Ollama on Windows)**: If you encounter CORS (Cross-Origin Resource Sharing) errors when using Ollama on Windows, you may need to set the `OLLAMA_ORIGINS` environment variable. You can do this by running `set OLLAMA_ORIGINS=*` in your command prompt before starting Ollama. This allows requests from any origin.
@@ -539,13 +673,18 @@ This is the core functionality focused on identifying concepts and adding `[[wik
 
 Contributions are welcome! Please refer to the GitHub repository for guidelines: [https://github.com/Jacobinwwey/obsidian-NotEMD](https://github.com/Jacobinwwey/obsidian-NotEMD) 
 
+## Maintainer Docs
+
+- [Release Workflow (English)](./docs/maintainer/release-workflow.md)
+- [Release Workflow (简体中文)](./docs/maintainer/release-workflow.zh-CN.md)
+
 ## License
 
 MIT License - See [LICENSE](LICENSE) file for details.
 
 ---
 
-*Notemd v1.6.2 - Enhance your Obsidian knowledge graph with AI.*
+*Notemd v1.8.0 - Enhance your Obsidian knowledge graph with AI.*
 
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)

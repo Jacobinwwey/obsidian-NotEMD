@@ -1,0 +1,478 @@
+
+> notemd@1.7.14 build
+> tsc -noEmit -skipLibCheck && node esbuild.config.mjs production
+
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/icon-assets/scripts/update-icon-packs.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/src/components/calendar/index.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/src/components/calendar/useCalendarFeatureImages.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/src/components/calendar/useCalendarHoverTooltip.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/src/components/calendar/useCalendarNoteActions.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/src/components/navigationPane/NavigationPaneItemRenderer.types.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/src/constants/surfaceColorMappings.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/src/context/storage/useCacheRebuildNotice.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/src/context/storage/useIndexedDBReady.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/src/context/storage/useInitializeContentProviderRegistry.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/src/context/storage/useMetadataCacheQueue.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/src/context/storage/usePropertyTreeSync.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/src/context/storage/useStorageCacheRebuild.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/src/context/storage/useStorageContentQueue.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/src/context/storage/useStorageFileQueries.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/src/context/storage/useStorageSettingsSync.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/src/context/storage/useStorageVaultSync.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/src/context/storage/useTagTreeSync.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/src/hooks/navigationPane/useNavigationPaneData.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/src/hooks/navigationPane/useNavigationPaneShortcuts.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/src/hooks/useAutoDismissFade.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/src/hooks/useContextMenu.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/src/hooks/useDragNavigationPaneActivation.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/src/hooks/useFileItemPillDecorationState.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/src/hooks/useFolderDecorationState.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/src/hooks/useListActions.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/src/hooks/useListPaneData.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/src/hooks/useListPaneKeyboard.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/src/hooks/useListPaneScroll.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/src/hooks/useListPaneSearch.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/src/hooks/useListPaneTitle.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/src/hooks/useMeasuredElementHeight.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/src/hooks/useNavigationPaneKeyboard.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/src/hooks/useNavigationPaneScroll.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/src/hooks/useNavigatorEventHandlers.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/src/hooks/useNavigatorScale.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/src/hooks/useResizablePane.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/src/hooks/useSelectedFolderFileVersion.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/src/hooks/useSwipeGesture.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/src/hooks/useTagNavigation.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/src/hooks/useUpdateNotice.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/src/hooks/useVaultProfileMenu.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/src/modals/InfoModal.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/src/modals/PropertyNodeSuggestModal.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/src/suggest/SearchDateInputSuggest.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/src/suggest/SearchTagInputSuggest.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/src/utils/androidFontScale.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/src/utils/paneLayout.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/src/utils/searchHighlight.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/src/utils/svgFilters.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/api/MenusAPI.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/api/MetadataAPI.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/api/NavigationAPI.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/api/NotebookNavigatorAPI.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/api/PublicApiDefinitionConsistency.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/api/SelectionAPI.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/components/calendarYearPanel.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/components/fileItem/useFileItemContentState.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/components/fileItem/useFileItemPills.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/context/CacheRebuildNoticeStorage.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/context/SelectionHistoryState.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/context/SelectionInitialState.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/context/StorageQueueFilters.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/contextMenu/NavigationMenuExtensionPlacement.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/filterSearchProperties.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/hooks/listPaneData/listItems.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/hooks/useLocalDayKey.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/hooks/useNavigationActions.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/hooks/useNavigationNoteCounts.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/hooks/useNavigationPaneTreeInteractions.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/hooks/useNavigationPaneTreeSections.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/modals/TagSuggestModal.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/propertyTreeBuilder.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/services/BaseContentProviderRace.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/services/BaseMetadataService.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/services/CommandQueueService.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/services/FeatureImageContentProvider.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/services/FileDeletionService.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/services/FileMetadataService.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/services/FileSystemService.deleteAttachments.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/services/FileThumbnailsForcedRegeneration.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/services/FolderMetadataService.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/services/ImageDimensions.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/services/MarkdownPipelineClearContent.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/services/MarkdownPipelineCustomPropertyFrontmatter.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/services/MarkdownPipelineFeatureImageErrors.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/services/MarkdownPipelineTasks.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/services/MarkdownPipelineWordCount.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/services/NavigationSeparatorService.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/services/OmnisearchService.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/services/PluginPreferencesController.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/services/PluginSettingsController.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/services/PropertyMetadataService.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/services/PropertyOperations.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/services/PropertyTreeService.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/services/RecentStorageService.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/services/ReleaseCheckService.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/services/RetryLaterContentProviders.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/services/TagMetadataService.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/services/TagOperations.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/services/TagTreeService.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/services/pdfPreflight.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/services/propertyOperations/PropertyFileMutations.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/services/tagOperations/TagFileMutations.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/services/tagOperations/TagWorkflows.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/services/thumbnailRuntimeUtils.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/settings/deleteAttachmentsSetting.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/settings/momentFormats.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/settings/syncedSettingsPropertyMigration.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/settings/transfer.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/storage/FeatureImageBlobCache.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/storage/FeatureImageBlobStore.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/storage/FeatureImageMoveInFlight.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/storage/GetFilesNeedingContent.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/storage/PreviewTextCache.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/storage/PreviewTextMoveInFlight.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/storage/fileData.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/storage/fileOperationsLifecycle.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/storage/recordFileChangesClobbering.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/storage/recordFileChangesRenameMerge.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/stubs/obsidian.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/styles/listPaneMeasurementsCssSync.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/utils/autoRevealUtils.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/utils/calendarCustomNotePatterns.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/utils/calendarNotesLocalePolicy.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/utils/calendarUtils.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/utils/codeRangeUtils.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/utils/dateUtils.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/utils/emojiUtils.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/utils/fileFilters.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/utils/fileFinder.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/utils/fileIconUtils.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/utils/fileItemPillDecoration.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/utils/fileNameUtils.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/utils/fileTypeUtils.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/utils/filterSearch.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/utils/folderNoteName.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/utils/iconizeFormat.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/utils/indentGuides.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/utils/listGrouping.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/utils/listPaneMeasurements.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/utils/metadataExtractor.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/utils/navigationRainbow.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/utils/noteCountFormatting.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/utils/omnisearchHighlight.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/utils/pathUtils.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/utils/previewTextUtils.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/utils/recordUtils.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/utils/shortcuts.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/utils/sortUtils.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/utils/tagPrefixMatcher.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/utils/tagTree.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/utils/tagUtils.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/utils/treeFlattener.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/utils/uxIcons.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/utils/vaultProfiles.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/tests/utils/workspaceActiveFileEvents.test.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
+error TS6059: File '/home/jacob/obsidian-NotEMD/ref/notebook-navigator/vitest.config.ts' is not under 'rootDir' '/home/jacob/obsidian-NotEMD/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern '**/*.ts' in '/home/jacob/obsidian-NotEMD/tsconfig.json'
