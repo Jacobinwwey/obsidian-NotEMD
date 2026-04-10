@@ -1,11 +1,11 @@
 
-![image](https://img.shields.io/github/v/release/Jacobinwwey/obsidian-NotEMD?label=Version&link=https%3A%2F%2Fgithub.com%2Jacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest) ![image](https://img.shields.io/github/downloads/Jacobinwwey/obsidian-NotEMD/total?logo=Obsidian&label=Downloads&labelColor=%237C3AED&color=%235b5b5b&link=https%3A%2F%2Fgithub.com%2Jacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest)
+![image](https://img.shields.io/github/v/release/Jacobinwwey/obsidian-NotEMD?label=Version&link=https%3A%2F%2Fgithub.com%2FJacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest) ![image](https://img.shields.io/github/downloads/Jacobinwwey/obsidian-NotEMD/total?logo=Obsidian&label=Downloads&labelColor=%237C3AED&color=%235b5b5b&link=https%3A%2F%2Fgithub.com%2FJacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest)
 
 # Notemd Obsidian 插件
 
 [English](./README.md) | [简体中文](./README_zh.md) | [Español](./README_es.md) | [Français](./README_fr.md) | [Deutsch](./README_de.md) | [Italiano](./README_it.md) | [Português](./README_pt.md) | [繁體中文](./README_zh_Hant.md) | [日本語](./README_ja.md) | [한국어](./README_ko.md) | [Русский](./README_ru.md) | [العربية](./README_ar.md) | [हिन्दी](./README_hi.md) | [বাংলা](./README_bn.md) | [Nederlands](./README_nl.md) | [Svenska](./README_sv.md) | [Suomi](./README_fi.md) | [Dansk](./README_da.md) | [Norsk](./README_no.md) | [Polski](./README_pl.md) | [Türkçe](./README_tr.md) | [עברית](./README_he.md) | [ไทย](./README_th.md) | [Ελληνικά](./README_el.md) | [Čeština](./README_cs.md) | [Magyar](./README_hu.md) | [Română](./README_ro.md) | [Українська](./README_uk.md) | [Tiếng Việt](./README_vi.md) | [Bahasa Indonesia](./README_id.md) | [Bahasa Melayu](./README_ms.md)
 
-更多语言文档：请查看 [语言中心](./docs/i18n/README_zh.md)
+更多語言文件：請查看 [語言中心](./docs/i18n/README_zh.md)
 
 ```
 =============================================
@@ -15,711 +15,712 @@
  | |\  | (_) | |_| |___   | |  | |___| |
  |_| \_|\___/ \__|_|___|  | |  | |____/
 =============================================
-      AI驱动的多语言知识增强工具
+      AI驅動的多語言知識增強工具
 =============================================
 ```
 
-一个创建您自己知识库的简单方法！
+一個建立您自己知識庫的簡單方法！
 
-Notemd 通过与各种大型语言模型 (LLM) 集成来增强您的 Obsidian 工作流程，支持多语言笔记处理，自动为关键概念生成维基链接、创建相应的概念笔记、执行网页搜索与摘要、翻译内容、总结为Mermaid脑图等，助力构建强大的知识图谱。
+Notemd 通過與各種大型語言模型 (LLM) 集成來增強您的 Obsidian 工作流程，支援多語言筆記處理，自動為關鍵概念生成維基連結、建立對應的概念筆記、執行網頁搜尋與摘要、翻譯內容、總結為 Mermaid 腦圖等，助力構建強大的知識圖譜。
 
 **版本:** 1.8.0
 
-![image](https://img.shields.io/github/v/release/Jacobinwwey/obsidian-NotEMD?label=Version&link=https%3A%2F%2Fgithub.com%2Jacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest) ![image](https://img.shields.io/github/downloads/Jacobinwwey/obsidian-NotEMD/total?logo=Obsidian&label=Downloads&labelColor=%237C3AED&color=%235b5b5b&link=https%3A%2F%2Fgithub.com%2Jacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest)
+![image](https://img.shields.io/github/v/release/Jacobinwwey/obsidian-NotEMD?label=Version&link=https%3A%2F%2Fgithub.com%2FJacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest) ![image](https://img.shields.io/github/downloads/Jacobinwwey/obsidian-NotEMD/total?logo=Obsidian&label=Downloads&labelColor=%237C3AED&color=%235b5b5b&link=https%3A%2F%2Fgithub.com%2FJacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest)
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
 <img width="1657" height="1000" alt="NEW FEATURE" src="https://github.com/user-attachments/assets/1d97ca0d-2ea6-41a4-accc-be3be9590088" />
 
 
-## 目录
-- [快速入门](#快速入门)
-- [语言支持](#语言支持)
+## 目錄
+- [快速入門](#快速入門)
+- [語言支援](#語言支援)
 - [功能特性](#功能特性)
-- [安装](#安装)
+- [安裝](#安裝)
 - [配置](#配置)
 - [使用指南](#使用指南)
-- [支持的LLM提供商](#支持的llm提供商)
-- [网络使用与数据处理](#网络使用与数据处理)
-- [故障排除](#故障排除)
-- [贡献](#贡献)
-- [维护者文档](#维护者文档)
-- [许可证](#许可证)
+- [支援的LLM供應商](#支援的llm供應商)
+- [網路使用與數據處理](#網路使用與數據處理)
+- [疑難排解](#疑難排解)
+- [貢獻](#貢獻)
+- [維護者文件](#維護者文件)
+- [授權條款](#授權條款)
   
-## 快速入门
+## 快速入門
 
-1.  **安装与启用**：从 Obsidian 市场获取插件。
-2.  **配置 LLM**：进入 `设置 -> Notemd`，选择您的 LLM 提供商（如 OpenAI 或本地提供商如 Ollama），并输入 API 密钥/URL。
-3.  **打开侧边栏**：点击左侧工具栏中的 Notemd 魔法棒图标以打开侧边栏。
-4.  **处理笔记**：打开任意笔记，在侧边栏中点击 **“处理文件 (添加链接)”**，即可自动为关键概念添加 `[[wiki-links]]` 链接。
-5.  **运行快捷工作流**：使用默认的 **“One-Click Extract”** 按钮，可一键串联处理、批量生成与 Mermaid 修复。
+1.  **安裝與啟用**：從 Obsidian 市場獲取插件。
+2.  **設定 LLM**：進入 `設定 -> Notemd`，選擇您的 LLM 供應商（如 OpenAI 或本地供應商如 Ollama），並輸入 API 金鑰/URL。
+3.  **開啟側邊欄**：點擊左側工具列中的 Notemd 魔法棒圖示以開啟側邊欄。
+4.  **處理筆記**：開啟任意筆記，在側邊欄中點擊 **「處理文件 (添加連結)」**，即可自動為關鍵概念添加 `[[wiki-links]]` 連結。
+5.  **執行快捷工作流**：使用預設的 **「One-Click Extract」** 按鈕，可一鍵串聯處理、批量生成與 Mermaid 修復。
 
-完成！探索更多设置以解锁网页搜索、翻译和内容生成等功能。
+完成！探索更多設定以解鎖網頁搜尋、翻譯和內容生成等功能。
 
-## 语言支持
+## 語言支援
 
-### 语言行为契约
+### 語言行為契約
 
-| 关注点 | 控制范围 | 默认值 | 说明 |
+| 關注點 | 控制範圍 | 預設值 | 說明 |
 |---|---|---|---|
-| `UI 语言 (UI Locale)` | 仅影响插件界面文案（设置、侧边栏、提示、弹窗） | `auto` | 跟随 Obsidian 语言；当前 UI 语言包为 `en`、`zh-CN`、`zh-TW`。 |
-| `任务输出语言` | 影响 LLM 任务输出（链接、摘要、生成、提取、翻译目标） | `en` | 可使用全局语言，或开启“按任务设置语言”。 |
-| `禁用自动翻译` | 非翻译任务保持原文语境 | `false` | 显式“翻译”任务仍按目标语言执行。 |
-| Locale 回退 | UI 文案缺失时的回退策略 | 当前 locale -> `en` | 避免部分翻译缺失导致界面异常。 |
+| `UI 語言 (UI Locale)` | 僅影響插件介面文案（設定、側邊欄、提示、彈窗） | `auto` | 跟隨 Obsidian 語言；當前 UI 語言包為 `en`、`zh-CN`、`zh-TW`。 |
+| `任務輸出語言` | 影響 LLM 任務輸出（連結、摘要、生成、提取、翻譯目標） | `en` | 可使用全局語言，或開啟「按任務設定語言」。 |
+| `禁用自動翻譯` | 非翻譯任務保持原文語境 | `false` | 顯式「翻譯」任務仍按目標語言執行。 |
+| Locale 回退 | UI 文案缺失時的回退策略 | 當前 locale -> `en` | 避免部分翻譯缺失導致介面異常。 |
 
-- 官方维护文档语言为：English + 简体中文。
-- 其他语言文档支持规划请见 [语言中心](./docs/i18n/README_zh.md)。
+- 官方維護文件語言為：English + 简体中文，並完整支援超過 30 種語言。
+- 所有支援的語言均已在上方頁眉中連結。
+- 更多詳情及貢獻指南請參閱 [語言中心](./docs/i18n/README_zh.md)。
 
 ## 功能特性
 
-### AI驱动的文档处理
-- **多 LLM 支持**: 连接到各种云和本地 LLM 提供商（参见 [支持的LLM提供商](#支持的llm提供商)）。
-- **智能分块**: 根据字数自动将大型文档分割成易于管理的小块进行处理。
-- **内容保留**: 在添加结构和链接的同时，旨在保持原始内容格式。
-- **进度跟踪**: 通过 Notemd 侧边栏或进度模式进行实时更新。
-- **可取消操作**: 可以通过侧边栏的专用取消按钮取消任何处理任务（单个或批量）。命令面板操作使用模式窗口，也可以取消。
-- **多模型配置**: 为不同任务（添加链接、研究、生成标题）使用不同的 LLM 提供商*和*特定模型，或为所有任务使用单一提供商。
-- **稳定的 API 调用（重试逻辑）**: 可选择为失败的 LLM API 调用启用自动重试，并可配置重试间隔和尝试次数限制。
-- **更稳健的 Provider 连接测试**: 当 Provider 的首次连接测试遇到瞬时断连时，Notemd 现在会先回退到稳定重试序列再判定失败，覆盖 OpenAI-compatible、Anthropic、Google、Azure OpenAI 与 Ollama 五类传输链路。
-- **运行时环境传输回退**: 当长耗时 Provider 请求被 `requestUrl` 以 `ERR_CONNECTION_CLOSED` 等瞬时网络错误中断时，Notemd 现在会先在同一次调用内切换到与运行环境匹配的回退传输：桌面端使用 Node `http/https`，非桌面环境使用浏览器 `fetch`；只有在该回退也失败时，才进入配置好的稳定重试序列，从而降低慢速网关或反向代理下的误报失败。
-- **OpenAI-compatible 稳定长请求链路加固**: 在稳定模式下，OpenAI-compatible 每次调用现在会按 `直连流式 -> 直连非流式 -> requestUrl` 的顺序依次尝试（必要时 `requestUrl` 仍可升级为流式解析），再决定是否进入下一次重试。这可降低“Provider 实际已返回非流式结果，但流式链路不稳定”导致的误失败。
-- **全 LLM API 的协议感知流式回退**: 长耗时回退请求现在不再只覆盖 OpenAI-compatible Provider，而是扩展到所有内置 LLM 路径。Notemd 现在会在桌面 `http/https` 与非桌面 `fetch` 回退阶段，分别处理 OpenAI/Azure 风格 SSE、Anthropic Messages SSE、Google Gemini SSE，以及 Ollama 的 NDJSON 流式输出，其余直连的 OpenAI 风格 Provider 入口也会复用同一套共享回退路径。
-- **中国区 Provider 预设增强**: 内置补充了 `Qwen`、`Qwen Code`、`Doubao`、`Moonshot`、`GLM`、`Z AI`、`MiniMax`、`Huawei Cloud MaaS`、`Baidu Qianfan`、`SiliconFlow` 等中国区常用云端模型服务商预设。
-- **可靠的批处理**: 改进了并发处理逻辑，通过**交错的API调用**来防止速率限制错误，确保在大型批处理作业中性能稳定。新的实现确保任务在不同时间间隔启动，而不是同时启动。
-- **准确的进度报告**: 修复了进度条可能卡住的错误，确保用户界面始终反映操作的真实状态。
-- **健壮的并行批处理**: 解决了并行批处理操作过早停止的问题，确保所有文件都能可靠高效地处理。
-- **进度条准确性**: 修复了“创建维基链接并生成笔记”命令进度条卡在95%的错误，确保现在能正确显示100%完成。
-- **增强的API调试**: “API错误调试模式”现在不仅可以捕获来自 LLM 提供商和搜索服务（Tavily/DuckDuckGo）的完整响应体，还会记录按尝试维度展开的传输时间线，包括脱敏后的请求 URL、耗时、响应头、部分响应体、已解析的部分流式内容与堆栈信息，从而更适合定位 OpenAI-compatible、Anthropic、Google、Azure OpenAI、Ollama 等链路上的 429/500 错误、网关断连和其他 API 故障。
-- **开发者模式面板**: 设置中新增独立 Developer 诊断面板，默认隐藏，只有开启“Developer mode”后才显示。该面板支持选择诊断调用方式，并可按指定方式执行多轮稳定性测试。
-- **重构后的侧边栏**: 内置操作按用途分组展示，并提供更清晰的标签、实时状态、可取消进度和可复制日志，显著减少按钮堆叠带来的混乱。即使所有分组都展开，底部的进度与日志区域也会保持可见，Ready 状态下的待机进度轨道也更容易辨认。
-- **侧边栏交互与可读性打磨**: 侧边栏按钮补齐了更清晰的悬停/按下/焦点反馈；`One-Click Extract`、`Batch generate from titles` 等彩色 CTA 按钮也强化了文字对比度，在不同主题下可读性更好。
-- **单文件 CTA 映射规则**: 彩色 CTA 现在仅用于“单文件处理”动作；批量/文件夹级动作以及包含批量步骤的工作流会使用非 CTA 样式，降低动作范围误判风险。
-- **自定义一键工作流**: 可将内置侧边栏操作组装成可复用的自定义按钮，支持用户命名与动作编排，默认内置 `One-Click Extract` 工作流。
+### AI驅動的文件處理
+- **多 LLM 支援**: 連接到各種雲端和本地 LLM 供應商（參見 [支援的LLM供應商](#支援的llm供應商)）。
+- **智慧分塊**: 根據字數自動將大型文件分割成易於管理的小塊進行處理。
+- **內容保留**: 在添加結構和連結的同時，旨在保持原始内容格式。
+- **進度追蹤**: 通過 Notemd 側邊欄或進度模式進行即時更新。
+- **可取消操作**: 可以通過側邊欄的專用取消按鈕取消任何處理任務（單個或批量）。命令面板操作使用強制回應視窗，也可以取消。
+- **多模型配置**: 為不同任務（添加連結、研究、生成標題）使用不同的 LLM 供應商*和*特定模型，或為所有任務使用單一供應商。
+- **穩定的 API 呼叫（重試邏輯）**: 可選擇為失敗的 LLM API 呼叫啟用自動重試，並可配置重試間隔和嘗試次數限制。
+- **更穩健的 Provider 連線測試**: 當 Provider 的首次連線測試遇到暫時性斷連時，Notemd 現在會先回退到穩定重試序列再判定失敗，涵蓋 OpenAI-compatible、Anthropic、Google、Azure OpenAI 與 Ollama 五類傳輸鏈路。
+- **執行階段環境傳輸回退**: 當長耗時 Provider 請求被 `requestUrl` 以 `ERR_CONNECTION_CLOSED` 等暫時性網路錯誤中斷時，Notemd 現在會先在同一次呼叫內切換到與執行環境相符的回退傳輸：桌面端使用 Node `http/https`，非桌面環境使用瀏覽器 `fetch`；只有在該回退也失敗時，才進入配置好的穩定重試序列，從而降低慢速網關或反向代理下的誤報失敗。
+- **OpenAI-compatible 穩定長請求鏈路加固**: 在穩定模式下，OpenAI-compatible 每次呼叫現在會按 `直連串流 -> 直連非串流 -> requestUrl` 的順序依次嘗試（必要時 `requestUrl` 仍可升級為串流解析），再決定是否進入下一次重試。這可降低「Provider 實際已返回非串流結果，但串流鏈路不穩定」導致的誤失敗。
+- **全 LLM API 的協定感知串流回退**: 長耗時回退請求現在不再只涵蓋 OpenAI-compatible Provider，而是擴展到所有內建 LLM 路徑。Notemd 現在會在桌面 `http/https` 與非桌面 `fetch` 回退階段，分別處理 OpenAI/Azure 風格 SSE、Anthropic Messages SSE、Google Gemini SSE，以及 Ollama 的 NDJSON 串流輸出，其餘直連的 OpenAI 風格 Provider 入口也會復用同一套共享回退路徑。
+- **中國區 Provider 預設增強**: 內建補充了 `Qwen`、`Qwen Code`、`Doubao`、`Moonshot`、`GLM`、`Z AI`、`MiniMax`、`Huawei Cloud MaaS`、`Baidu Qianfan`、`SiliconFlow` 等中國區常用雲端模型服務商預設。
+- **可靠的批次處理**: 改進了並發處理邏輯，通過**交錯的 API 呼叫**來防止速率限制錯誤，確保在大型批次處理作業中效能穩定。新的實作確保任務在不同時間間隔啟動，而不是同時啟動。
+- **準確的進度報告**: 修復了進度條可能卡住的錯誤，確保使用者介面始終反映操作的真實狀態。
+- **健壯的並行批次處理**: 解決了並行批次處理操作過早停止的問題，確保所有文件都能可靠高效地處理。
+- **進度條準確性**: 修復了「建立維基連結並生成筆記」命令進度條卡在 95% 的錯誤，確保現在能正確顯示 100% 完成。
+- **增強的 API 除錯**: 「API 錯誤除錯模式」現在不僅可以擷取來自 LLM 供應商和搜尋服務（Tavily/DuckDuckGo）的完整回應體，還會記錄按嘗試維度展開的傳輸時間線，包括脫敏後的請求 URL、耗時、回應標頭、部分回應體、已解析的部分串流內容與堆疊資訊，從而更適合定位 OpenAI-compatible、Anthropic、Google、Azure OpenAI、Ollama 等鏈路上的 429/500 錯誤、網關斷連和其他 API 故障。
+- **開發者模式面板**: 設定中新增獨立 Developer 診斷面板，預設隱藏，只有開啟「Developer mode」後才顯示。該面板支援選擇診斷呼叫方式，並可按指定方式執行多輪穩定性測試。
+- **重構後的側邊欄**: 內建操作按用途分組展示，並提供更清晰的標籤、即時狀態、可取消進度和可複製日誌，顯著減少按鈕堆疊帶來的混亂。即使所有分組都展開，底部的進度與日誌區域也會保持可見，Ready 狀態下的待機進度軌道也更容易辨認。
+- **側邊欄互動與可讀性打磨**: 側邊欄按鈕補齊了更清晰的懸停/按下/焦點回饋；`One-Click Extract`、`Batch generate from titles` 等彩色 CTA 按鈕也強化了文字對比度，在不同主題下可讀性更好。
+- **單文件 CTA 映射規則**: 彩色 CTA 現在僅用於「單文件處理」動作；批量/資料夾級動作以及包含批量步驟的工作流會使用非 CTA 樣式，降低動作範圍誤判風險。
+- **自定義一鍵工作流**: 可將內建側邊欄操作組裝成可複用的自定義按鈕，支援使用者命名與動作編排，預設內建 `One-Click Extract` 工作流。
 
-### 知识图谱增强
-- **自动维基链接**: 根据 LLM 输出，识别您处理过的笔记中的核心概念并添加 `[[维基链接]]`。
-- **概念笔记创建（可选和可定制）**: 在指定的 vault 文件夹中自动为发现的概念创建新笔记。
-- **可定制的输出路径**: 在您的 vault 中为保存处理过的文件和新创建的概念笔记配置单独的相对路径。
-- **可定制的输出文件名（添加链接）**: 在处理文件以添加链接时，可选择**覆盖原始文件**或使用自定义后缀/替换字符串，而不是默认的 `_processed.md`。
-- **链接完整性维护**: 在 vault 内重命名或删除笔记时，基本处理更新链接的功能。
-- **纯概念提取**: 提取概念并创建相应的概念笔记，而不修改原始文档。这对于从现有文档中填充知识库而不改变它们是理想的。此功能具有用于创建最简概念笔记和添加反向链接的可配置选项。
+### 知識圖譜增強
+- **自動維基連結**: 根據 LLM 輸出，識別您處理過的筆記中的核心概念並添加 `[[維基連結]]`。
+- **概念筆記建立（可選和可定制）**: 在指定的 vault 資料夾中自動為發現的概念建立新筆記。
+- **可定制的輸出路徑**: 在您的 vault 中為儲存處理過的文件和新建立的概念筆記配置單獨的相對路徑。
+- **可定制的輸出檔名（添加連結）**: 在處理文件以添加連結時，可選擇**覆蓋原始文件**或使用自定義字尾/取代字串，而不是預設的 `_processed.md`。
+- **連結完整性維護**: 在 vault 內重新命名或刪除筆記時，基本處理更新連結的功能。
+- **純概念提取**: 提取概念並建立對應的概念筆記，而不修改原始文件。這對於從現有文件中填充知識庫而不改變它們是理想的。此功能具有用於建立最簡概念筆記和添加反向連結的可配置選項。
 
-### 翻译
+### 翻譯
 
-- **AI 驱动的翻译**：
-    - 使用配置的 LLM 翻译笔记内容。
-    - **大文件支持**：在发送给 LLM 之前，会根据 `分块字数` 设置将大文件自动拆分为更小的块。翻译后的块随后会无缝地合并回单个文档中。
-    - 支持多种语言之间的翻译。
-    - 可在设置或 UI 中自定义目标语言。
-    - 自动在原始文本右侧打开翻译后的文本，便于阅读。
-- **批量翻译**:
-    - 一键翻译所选文件夹中的所有文件。
-    - 当“启用批处理并行化”开启时，支持并行处理。
-    - 如果已配置，则使用自定义提示进行翻译。
-	- 在文件浏览器的上下文菜单中添加“批量翻译此文件夹”选项。
-- **禁用自动翻译**: 启用此选项后，非翻译任务将不再强制输出为特定语言，从而保留原始语言上下文。明确的“翻译”任务仍将按配置执行翻译。
+- **AI 驅動的翻譯**：
+    - 使用配置的 LLM 翻譯筆記內容。
+    - **大文件支援**：在發送給 LLM 之前，會根據 `分塊字數` 設定將大文件自動拆分為更小的塊。翻譯後的塊隨後會無縫地合併回單個文件中。
+    - 支援多種語言之間的翻譯。
+    - 可在設定或 UI 中自定義目標語言。
+    - 自動在原始文字右側打開翻譯後的文字，便於閱讀。
+- **批量翻譯**:
+    - 一鍵翻譯所選資料夾中的所有文件。
+    - 當「啟用批次並行化」開啟時，支援並行處理。
+    - 如果已配置，則使用自定義提示進行翻譯。
+	- 在文件瀏覽器的操作功能表中添加「批量翻譯此資料夾」選項。
+- **禁用自動翻譯**: 啟用此選項後，非翻譯任務將不再強制輸出為特定語言，從而保留原始語言內容；顯式「翻譯」任務仍將按配置執行翻譯。
 
-### 网络研究与内容生成
-- **网页研究与摘要**:
-    - 支持Tavily（需API Key）与DuckDuckGo（实验性）两种网络搜索服务。
-    - **改进的搜索稳定性**: DuckDuckGo 搜索现在具有增强的解析逻辑（DOMParser 与 Regex 回退），以处理布局变化并确保结果的可靠性。
-    - 自动用LLM总结搜索结果，并附加到当前笔记。
-    - 可以在设置中自定义摘要的输出语言。
-    - 可配置用于研究的最大内容长度。
-- **根据标题生成内容**:
-    - 利用笔记标题通过LLM生成内容并替换原有文本。
-    - 可选在生成前自动执行网页研究，丰富生成上下文。
-- **批量根据标题生成内容**:
-    - 一键批量处理选定文件夹下所有笔记，自动跳过已处理文件。
-    - 可配置“完成”子文件夹名称，避免重复处理。
-- **Mermaid 自动修复耦合**:
-    - 当启用 Mermaid 自动修复后，处理、按标题生成、批量按标题生成、研究与摘要、总结为 Mermaid、翻译等 Mermaid 相关流程都会在输出后自动执行修复，减少图表语法残留与人工返工。
+### 網路研究與內容生成
+- **網頁研究與摘要**:
+    - 支援 Tavily（需 API 金鑰）與 DuckDuckGo（實驗性）兩種網路搜尋服務。
+    - **改進的搜尋穩定性**: DuckDuckGo 搜尋現在具有增強的解析邏輯（DOMParser 與 Regex 回退），以處理佈局變化並確保結果的可靠性。
+    - 自動用 LLM 總結搜尋結果，並附加到當前筆記。
+    - 可以在設定中自定義摘要的輸出語言。
+    - 可配置用於研究的最大內容長度。
+- **根據標題生成內容**:
+    - 利用筆記標題通過 LLM 生成內容並取代原有文字。
+    - 可選在生成前自動執行網頁研究，豐富生成內容。
+- **批量根據標題生成內容**:
+    - 一鍵批量處理選定資料夾下所有筆記，自動跳過已處理文件。
+    - 可配置「完成」子資料夾名稱，避免重複處理。
+- **Mermaid 自動修復耦合**:
+    - 當啟用 Mermaid 自動修復後，處理、按標題生成、批量按標題生成、研究與摘要、總結為 Mermaid、翻譯等 Mermaid 相關流程都會在輸出後自動執行修復，減少圖表語法殘留與人工返工。
 
-### 实用功能
-- **总结为Mermaid图表**:
-    - 此功能允许您将笔记内容总结为Mermaid图表。
-    - 可以在设置中自定义Mermaid图表的输出语言。
-    - **Mermaid 输出文件夹**: 配置生成Mermaid图表文件的保存文件夹。如果留空，图表将保存在与原始笔记相同的文件夹中。
-    - **翻译总结为Mermaid输出**: 可选地将生成的Mermaid图表内容翻译成配置的目标语言。
+### 實用功能
+- **總結為 Mermaid 圖表**:
+    - 此功能允許您將筆記內容總結為 Mermaid 圖表。
+    - 可以在設定中自定義 Mermaid 圖表的輸出語言。
+    - **Mermaid 輸出資料夾**: 配置生成 Mermaid 圖表文件的儲存資料夾。如果留空，圖表將儲存在與原始筆記相同的資料夾中。
+    - **翻譯總結為 Mermaid 輸出**: 可選地將生成的 Mermaid 圖表內容翻譯成配置的目標語言。
 
 <img width="596" height="239" alt="SUMM" src="https://github.com/user-attachments/assets/803d444f-e477-428a-9ce6-4aac8075062a" />
 
 
-- **简单公式格式修正**:
-    - 快速将单行 `$` 分隔的数学公式转换为标准的 `$$` 块。
-    - **单文件**: 通过侧边栏按钮或命令面板处理当前文件。
-    - **批量修复**: 通过侧边栏按钮或命令面板处理所选文件夹中的所有文件。
+- **簡單公式格式修正**:
+    - 快速將單行 `$` 分隔的數學公式轉換為標準的 `$$` 塊。
+    - **單文件**: 通過側邊欄按鈕或命令面板處理當前文件。
+    - **批量修復**: 通過側邊欄按鈕或命令面板處理所選資料夾中的所有文件。
 
-- **检查当前文件中的重复项**: 此命令有助于识别活动文件中的潜在重复术语。
-- **重复检测**: 检查当前处理内容中的重复词（结果输出到控制台）。
-- **检查并删除重复概念笔记**: 综合文件名（精确/复数/规范化/包含关系）检测概念笔记文件夹内外潜在重复项，支持自定义检测范围，操作前会详细列出并需手动确认。
-- **批量Mermaid修复**: 对选定文件夹内所有Markdown文件应用Mermaid和LaTeX语法校正。
-    - **可作为工作流步骤**: 除了单独执行外，也可以作为自定义一键工作流中的一步进行组合。
-    - **错误报告**: 生成 `mermaid_error_{foldername}.md` 报告，列出处理后仍包含潜在Mermaid错误的文件。
-    - **移动错误文件**: 可选地将检测到错误的文件移动到指定文件夹以供手动审查。
-    - **智能检测**: 在尝试修复之前，使用 `mermaid.parse` 智能检查文件是否存在语法错误，节省处理时间并避免不必要的编辑。
-    - **安全处理**: 确保语法修复仅应用于 Mermaid 代码块，防止意外修改 Markdown 表格或其他内容。包含针对表格语法（例如 `| :--- |`）的稳健保护措施，防止被深度调试功能误修。
-    - **深度调试模式**: 如果初始修复后错误仍然存在，将触发高级深度调试模式。此模式处理复杂的边缘情况，包括：
-        - **注释集成**: 自动将尾随注释（以 `%` 开头）合并到连接线标签中（例如，`A -- Label --> B; % Comment` 变为 `A -- "Label(Comment)" --> B;`）。
-        - **畸形箭头**: 修复被引号吸收的箭头（例如 `A -- "Label -->" B` 修正为 `A -- "Label" --> B`）。
-        - **行内子图**: 将行内子图标签转换为连接线标签。
-        - **反向箭头修复**: 将非标准的 `X <-- Y` 箭头修正为 `Y --> X`。
-        - **方向关键字修复**: 确保子图内的 `direction` 关键字为小写（例如 `Direction TB` -> `direction TB`）。
-        - **注释转换**: 将 `//` 注释转换为连接线标签（例如 `A --> B; // 注释` -> `A -- "注释" --> B;`）。
-        - **重复标签修复**: 简化重复的括号标签（例如 `Node["标签"]["标签"]` -> `Node["标签"]`）。
-        - **无效箭头修复**: 将无效的箭头语法 `--|>` 转换为标准的 `-->`。
-        - **稳健的标签与注释处理**: 改进了对包含特殊字符（如 `/`）的标签的处理，并更好地支持自定义注释语法（`note for ...`），确保彻底清除尾随括号等残留物。
-        - **高级修复模式**: 包含针对包含空格、特殊字符或嵌套括号的未加引号节点标签的稳健修复（例如，将 `Node[标签 [文本]]` 转换为 `Node["标签 [文本]"]`）。
-        - **注释转换**: 自动将 `note right/left of` 以及独立的 `note :` 注释转换为标准的 Mermaid 节点定义和连接（例如，将 `note right of A: text` 转换为 `NoteA["Note: text"]` 并连接到 `A`），防止语法错误并改善布局。
-        - **扩展注释支持**: 自动将 `note for Node "Content"` 和 `note of Node "Content"` 转换为标准的链接注释节点（例如 `NoteNode[" Content"]` 连接到 `Node`），确保与用户扩展语法的兼容性。
-        - **增强的注释修正**: 自动使用顺序编号（如 `Note1`, `Note2`）重命名注释，以防止存在多个注释时出现别名问题。
-        - **平行四边形/形状修复**: 修正畸形的节点形状定义，如将 `[/["标签["/]` 转换为标准的 `["标签"]`，确保与生成内容的兼容性。
-        - **标准化管道标签**: 自动修复和标准化包含管道符的连接线标签，确保它们被正确引用（例如，将 `-->|文本|` 转换为 `-->|"文本"|`）。
-        - **错位管道修复**: 修正出现在箭头之前的错位连接线标签（例如 `>|"标签"| A --> B` 修正为 `A -->|"标签"| B`）。
-        - **合并双重标签**: 检测并合并单条边上的复杂双重标签（例如，`A -- 标签1 -- 标签2 --> B` 或 `A -- 标签1 -- 标签2 --- B`），将其转换为带有换行的单个清晰标签（`A -- "标签1<br>标签2" --> B`）。
-        - **未加引号的标签修复**: 自动为包含潜在问题字符（如引号、等号、数学运算符）但缺少外引号的节点标签添加引号（例如，将 `Plot[Plot "A"]` 修正为 `Plot["Plot "A""]`），防止渲染错误。
-        - **连接标签修复**: 稳健地修复 ID 与标签连接的节点定义（例如，`SubdivideSubdivide...` 变为 `Subdivide["Subdivide..."]`），即使在前面有管道标签或重复不完全的情况下，也能通过验证已知节点 ID 进行修复。
-        -   **提取特定原始内容**:    - 在设置中定义问题列表。
-    - 从活动笔记中逐字提取回答这些问题的文本段落。
-    - **合并查询模式**: 可选择在单个 API 调用中处理所有问题以提高效率。
-    - **翻译**: 可选在输出中包含提取文本的翻译。
-    - **自定义输出**: 可配置提取文本文件的保存路径和文件名后缀。
-- **LLM连接测试**: 一键检测所有配置LLM服务商的API连接状态。
+- **檢查當前文件中的重複項**: 此命令有助於識別活動文件中的潛在重複術語。
+- **重複檢測**: 檢查當前處理內容中的重複詞（結果輸出到主控台）。
+- **檢查並刪除重複概念筆記**: 綜合檔名（精確/複數/規範化/包含關係）檢測概念筆記資料夾內外潛在重複項，支援自定義檢測範圍，操作前會詳細列出並需手動確認。
+- **批量 Mermaid 修復**: 對選定資料夾內所有 Markdown 文件應用 Mermaid 和 LaTeX 語法校正。
+    - **可作為工作流步驟**: 除了單獨執行外，也可以作為自定義一鍵工作流中的一步進行組合。
+    - **錯誤報告**: 生成 `mermaid_error_{foldername}.md` 報告，列出處理後仍包含潛在 Mermaid 錯誤的文件。
+    - **移動錯誤文件**: 可選地將檢測到錯誤的文件移動到指定資料夾以供手動審查。
+    - **智慧檢測**: 在嘗試修復之前，使用 `mermaid.parse` 智慧檢查文件是否存在語法錯誤，節省處理時間並避免不必要的編輯。
+    - **安全處理**: 確保語法修復僅應用於 Mermaid 程式碼塊，防止意外修改 Markdown 表格或其他內容。包含針對表格語法（例如 `| :--- |`）的穩健保護措施，防止被深度除錯功能誤修。
+    - **深度除錯模式**: 如果初始修復後錯誤仍然存在，將觸發高級深度除錯模式。此模式處理複雜的邊緣情況，包括：
+        - **註釋整合**: 自動將尾隨註釋（以 `%` 開頭）合併到連接線標籤中（例如，`A -- Label --> B; % Comment` 變為 `A -- "Label(Comment)" --> B;`）。
+        - **畸形箭頭**: 修復被引號吸收的箭頭（例如 `A -- "Label -->" B` 修正為 `A -- "Label" --> B`）。
+        - **行內子圖**: 將行內子圖標籤轉換為連接線標籤。
+        - **反向箭頭修復**: 將非標準的 `X <-- Y` 箭頭修正為 `Y --> X`。
+        - **方向關鍵字修復**: 確保子圖內的 `direction` 關鍵字為小寫（例如 `Direction TB` -> `direction TB`）。
+        - **註釋轉換**: 將 `//` 註釋轉換為連接線標籤（例如 `A --> B; // 註釋` -> `A -- "註釋" --> B;`）。
+        - **重複標籤修復**: 簡化重複的括號標籤（例如 `Node["標籤"]["標籤"]` -> `Node["標籤"]`）。
+        - **無效箭頭修復**: 將無效的箭頭語法 `--|>` 轉換為標準的 `-->`。
+        - **穩健的標籤與註釋處理**: 改進了對包含特殊字元（如 `/`）的標籤處理，並更好支援自定義註釋語法（`note for ...`），確保徹底清除尾隨括號等殘留物。
+        - **高級修復模式**: 包含針對包含空格、特殊字元或巢狀括號的未加引號節點標籤的穩健修復（例如，將 `Node[標籤 [文本]]` 轉換為 `Node["標籤 [文本]"]`）。
+        - **註釋轉換**: 自動將 `note right/left of` 以及獨立的 `note :` 註釋轉換為標準的 Mermaid 節點定義和連接（例如，將 `note right of A: text` 轉換為 `NoteA["Note: text"]` 並連接到 `A`），防止語法錯誤並改善佈局。
+        - **擴充註釋支援**: 自動將 `note for Node "Content"` 和 `note of Node "Content"` 轉換為標準的連結註釋節點（例如 `NoteNode[" Content"]` 連接到 `Node`），確保與使用者擴充語法的相容性。
+        - **增強的註釋修正**: 自動使用順序編號（如 `Note1`, `Note2`）重新命名註釋，以防止存在多個註釋時出現別名問題。
+        - **平行四邊形/形狀修復**: 修正畸形的節點形狀定義，如將 `[/["標籤["/]` 轉換為標準的 `["標籤"]`，確保與生成內容的相容性。
+        - **標準化管道標籤**: 自動修復和標準化包含管道符號的連接線標籤，確保它們被正確引用（例如，將 `-->|文本|` 轉換為 `-->|"文本"|`）。
+        - **錯位管道修復**: 修正出現在箭頭之前的錯位連接線標籤（例如 `>|"標籤"| A --> B` 修正為 `A -->|"標籤"| B`）。
+        - **合併雙重標籤**: 檢測並合併單條邊上的複雜雙重標籤（例如，`A -- 標籤1 -- 標籤2 --> B` 或 `A -- 標籤1 -- 標籤2 --- B`），將其轉換為帶有換行的單個清晰標籤（`A -- "標籤1<br>標籤2" --> B`）。
+        - **未加引號的標籤修復**: 自動為包含潛在問題字元（如引號、等號、數學運算子）但缺少外引號的節點標籤添加引號（例如，將 `Plot[Plot "A"]` 修正為 `Plot["Plot "A""]`），防止渲染錯誤。
+        - **連接標籤修復**: 穩健地修復 ID 與標籤連接的節點定義（例如，`SubdivideSubdivide...` 變為 `Subdivide["Subdivide..."]`），即使在前面有管道標籤或重複不完全的情況下，也能通過驗證已知節點 ID 進行修復。
+        -   **提取特定原始文本**:    - 在設定中定義問題列表。
+    - 從活動筆記中逐字提取回答這些問題的文本段落。
+    - **合併查詢模式**: 可選擇在單個 API 呼叫中處理所有問題以提高效率。
+    - **翻譯**: 可選在輸出中包含提取文本的翻譯。
+    - **自定義輸出**: 可配置提取文本文件的儲存路徑和檔名字尾。
+- **LLM連線測試**: 一鍵檢測所有配置 LLM 服務商的 API 連線狀態。
 
-## 安装
+## 安裝
 
 <img width="819" height="733" alt="Install" src="https://github.com/user-attachments/assets/f1733532-68fd-4c47-86b4-6fcc185e3f66" />
 
-### 通过Obsidian市场（推荐）
-1. 打开Obsidian **设置** → **社区插件**。
-2. 确认“受限模式”已关闭。
-3. 点击“浏览”社区插件，搜索“Notemd”。
-4. 点击“安装”。
-5. 安装后点击“启用”。
+### 通過 Obsidian 市場（推薦）
+1. 打開 Obsidian **設定** → **社群插件**。
+2. 確認「受限模式」已關閉。
+3. 點擊「瀏覽」社群插件，搜尋「Notemd」。
+4. 點擊「安裝」。
+5. 安裝後點擊「啟用」。
 
-### 手动安装
-1. 从 [GitHub发布页](https://github.com/Jacobinwwey/obsidian-NotEMD/releases) 下载最新发布资产。每个 Release 也会附带 `README.md` 作为随包文档，但手动安装实际只需要 `main.js`、`styles.css`、`manifest.json`。
-2. 进入 `<您的保险库>/.obsidian/plugins/` 目录。
-3. 新建 `notemd` 文件夹，将 `main.js`、`styles.css`、`manifest.json` 拷贝至此。
-4. 重启Obsidian。
-5. 在“社区插件”中启用Notemd插件。
+### 手動安裝
+1. 從 [GitHub發佈頁](https://github.com/Jacobinwwey/obsidian-NotEMD/releases) 下載最新發佈資產。每個 Release 也會附帶 `README.md` 作為隨包文件，但手動安裝實際只需要 `main.js`、`styles.css`、`manifest.json`。
+2. 進入 `<您的保險庫>/.obsidian/plugins/` 目錄。
+3. 新建 `notemd` 資料夾，將 `main.js`、`styles.css`、`manifest.json` 拷貝至此。
+4. 重啟 Obsidian。
+5. 在「社群插件」中啟用 Notemd 插件。
 
 ## 配置
 
-进入设置：**设置** → **社区插件** → **Notemd**（齿轮图标）。
+進入設定：**設定** → **社群插件** → **Notemd**（齒輪圖示）。
 
-### LLM 提供商配置 (LLM Provider Configuration)
+### LLM 供應商配置 (LLM Provider Configuration)
 
-1. **活动提供商 (Active Provider)**: 从下拉菜单中选择您想要使用的 LLM 提供商。
+1. **活動供應商 (Active Provider)**: 從下拉選單中選擇您想要使用的 LLM 供應商。
 
-2. 提供商设置 (Provider Settings)
+2. 供應商設定 (Provider Settings)
 
-   : 配置所选提供商的具体设置：
+   : 配置所選供應商的具體設定：
 
-   - **API 密钥 (API Key)**: 大多数云提供商（例如 OpenAI、Anthropic、DeepSeek、Qwen、Qwen Code、Doubao、Moonshot、GLM、Z AI、MiniMax、Huawei Cloud MaaS、Baidu Qianfan、SiliconFlow、Google、Mistral、Azure OpenAI、OpenRouter、xAI、Groq、Together、Fireworks、Requesty）需要。Ollama 不需要。LMStudio 和通用的 `OpenAI Compatible` 预设在某些允许匿名或占位密钥的端点上可留空。
-   - **基础 URL / 端点 (Base URL / Endpoint)**: 服务的 API 端点。提供了默认值，但您可能需要为本地模型（LMStudio、Ollama）、网关（OpenRouter、Requesty、OpenAI Compatible）或特定 Azure 部署修改此项。**Azure OpenAI 必填。**
-   - **模型 (Model)**: 要使用的具体模型名称/ID（例如 `gpt-4o`, `claude-3-5-sonnet-20240620`, `google/gemini-flash-1.5`, `grok-4`, `moonshotai/kimi-k2-instruct-0905`, `accounts/fireworks/models/kimi-k2p5`, `anthropic/claude-3-7-sonnet-latest`）。请确保该模型在您的端点/提供商处可用。
-   - **温度 (Temperature)**: 控制 LLM 输出的随机性（0=确定性，1=最大创造力）。较低的值（例如 0.2-0.5）通常更适合结构化任务。
-   - **API 版本 (仅限 Azure) (API Version (Azure Only))**: Azure OpenAI 部署需要（例如 `2024-02-15-preview`）。
+   - **API 金鑰 (API Key)**: 大多數雲端供應商（例如 OpenAI、Anthropic、DeepSeek、Qwen、Qwen Code、Doubao、Moonshot、GLM、Z AI、MiniMax、Huawei Cloud MaaS、Baidu Qianfan、SiliconFlow、Google、Mistral、Azure OpenAI、OpenRouter、xAI、Groq、Together、Fireworks、Requesty）需要。Ollama 不需要。LMStudio 和通用的 `OpenAI Compatible` 預設在某些允許匿名或佔位金鑰的端點上可留空。
+   - **基礎 URL / 端點 (Base URL / Endpoint)**: 服務的 API 端點。提供了預設值，但您可能需要為本地模型（LMStudio、Ollama）、網關（OpenRouter、Requesty、OpenAI Compatible）或特定 Azure 佈署修改此項。**Azure OpenAI 必填。**
+   - **模型 (Model)**: 要使用的具體模型名稱/ID（例如 `gpt-4o`, `claude-3-5-sonnet-20240620`, `google/gemini-flash-1.5`, `grok-4`, `moonshotai/kimi-k2-instruct-0905`, `accounts/fireworks/models/kimi-k2p5`, `anthropic/claude-3-7-sonnet-latest`）。請確保該模型在您的端點/供應商處可用。
+   - **溫度 (Temperature)**: 控制 LLM 輸出的隨機性（0=確定性，1=最大創造力）。較低的值（例如 0.2-0.5）通常更適合結構化任務。
+   - **API 版本 (僅限 Azure) (API Version (Azure Only))**: Azure OpenAI 佈署需要（例如 `2024-02-15-preview`）。
 
-3. **测试连接 (Test Connection)**: 使用活动提供商的“测试连接”按钮来验证您的设置。OpenAI-compatible 提供商现在会按 provider 特性自动选择测试策略：`Qwen`、`Qwen Code`、`Doubao`、`Moonshot`、`GLM`、`Z AI`、`MiniMax`、`Huawei Cloud MaaS`、`Baidu Qianfan`、`SiliconFlow`、`Groq`、`Together`、`Fireworks`、`LMStudio` 与 `OpenAI Compatible` 会直接探测 `chat/completions`，而具备稳定 `/models` 端点的服务仍会优先走模型列表探测。如果首次探测遇到 `ERR_CONNECTION_CLOSED` 这类瞬时网络断连，Notemd 会自动切入稳定重试序列，而不是立刻报错。
+3. **測試連線 (Test Connection)**: 使用活動供應商的「測試連線」按鈕來驗證您的設定。OpenAI-compatible 供應商現在會按 provider 特性自動選擇測試策略：`Qwen`、`Qwen Code`、`Doubao`、`Moonshot`、`GLM`、`Z AI`、`MiniMax`、`Huawei Cloud MaaS`、`Baidu Qianfan`、`SiliconFlow`、`Groq`、`Together`、`Fireworks`、`LMStudio` 與 `OpenAI Compatible` 會直接探測 `chat/completions`，而具備穩定 `/models` 端點的服務仍會優先走模型列表探測。如果首次探測遇到 `ERR_CONNECTION_CLOSED` 這類暫時性網路斷連，Notemd 會自動切入穩定重試序列，而不是立刻報錯。
 
-4. **管理提供商配置 (Manage Provider Configurations)**: 使用“导出提供商”和“导入提供商”按钮将您的 LLM 提供商设置保存到插件配置目录中的 `notemd-providers.json` 文件或从中加载。这便于备份和共享。
+4. **管理供應商配置 (Manage Provider Configurations)**: 使用「匯出供應商」和「匯入供應商」按鈕將您的 LLM 供應商設定儲存到插件配置目錄中的 `notemd-providers.json` 文件或從中載入。這便於備份和共享。
 
-5. **预设覆盖范围 (Preset Coverage)**: 除了原有提供商外，Notemd 现在还内置了 `Qwen`、`Qwen Code`、`Doubao`、`Moonshot`、`GLM`、`Z AI`、`MiniMax`、`Huawei Cloud MaaS`、`Baidu Qianfan`、`SiliconFlow`、`xAI`、`Groq`、`Together`、`Fireworks`、`Requesty` 以及通用的 `OpenAI Compatible` 预设，可用于 LiteLLM、vLLM、Perplexity、Vercel AI Gateway 或自定义代理。
+5. **預設覆蓋範圍 (Preset Coverage)**: 除了原有供應商外，Notemd 現在還內建了 `Qwen`、`Qwen Code`、`Doubao`、`Moonshot`、`GLM`、`Z AI`、`MiniMax`、`Huawei Cloud MaaS`、`Baidu Qianfan`、`SiliconFlow`、`xAI`、`Groq`、`Together`、`Fireworks`、`Requesty` 以及通用的 `OpenAI Compatible` 預設，可用於 LiteLLM、vLLM、Perplexity、Vercel AI Gateway 或自定義代理。
 
 <img width="804" height="506" alt="LLM" src="https://github.com/user-attachments/assets/8caf42e3-43ad-456d-8b96-b63e7914e45f" />
 
 ### 多模型配置 (Multi-Model Configuration)
 
-- 为任务使用不同的提供商 (Use Different Providers for Tasks)
+- 為任務使用不同的供應商 (Use Different Providers for Tasks)
 
   :
 
-  - **禁用 (默认)**: 对所有任务使用上面选择的单个“活动提供商”。
-  - **启用**: 允许您为每个任务（“添加链接”、“研究与摘要”、“从标题生成”、“提取概念”）选择特定的提供商*和*可选地覆盖模型名称。如果任务的模型覆盖字段留空，则将使用为该任务选定提供商配置的默认模型。
-- **为不同任务选择不同语言**:
-    *   **禁用 (默认)**: 所有任务都使用单一的“输出语言”。
-    *   **启用**: 允许您为每个任务（“添加链接”、“研究与摘要”、“从标题生成”、“总结为Mermaid图表”、“提取概念”）选择特定的语言。
+  - **禁用 (預設)**: 對所有任務使用上面選擇的單個「活動供應商」。
+  - **啟用**: 允許您為每個任務（「添加連結」、「研究與摘要」、「從標題生成」、「提取概念」）選擇特定的供應商*和*可選地覆蓋模型名稱。如果任務的模型覆蓋欄位留空，則將使用為該任務選定供應商配置的預設模型。
+- **為不同任務選擇不同語言**:
+    *   **禁用 (預設)**: 所有任務都使用單一的「輸出語言」。
+    *   **啟用**: 允許您為每個任務（「添加連結」、「研究與摘要」、「從標題生成」、「總結為 Mermaid 圖表」、「提取概念」）選擇特定的語言。
 
 <img width="817" height="428" alt="Multi-model" src="https://github.com/user-attachments/assets/85e6b854-c0ca-45cc-a55e-24638dceb120" />
 
-### 语言架构（UI 语言 vs 任务输出语言）
+### 語言架構（UI 語言 vs 任務輸出語言）
 
-- **UI 语言（UI Locale）**只控制插件界面文案（设置项、侧边栏按钮、提示、弹窗）。默认 `auto` 会跟随 Obsidian 当前界面语言。
-- **任务输出语言（Task Output Language）**控制模型生成内容的语言（添加链接、研究摘要、按标题生成、Mermaid 总结、概念提取、翻译目标）。
-- **按任务语言模式**通过统一策略层解析每个任务的输出语言，避免分散在各模块中的语言分支造成行为漂移。
-- **禁用自动翻译**后，非翻译任务会保留原文语言上下文；显式“翻译”任务仍按目标语言执行。
-- Mermaid 相关生成链路与上述统一语言策略保持一致，并在开启时继续支持自动 Mermaid 修复。
+- **UI 語言（UI Locale）**只控制插件介面文案（設定項、側邊欄按鈕、提示、彈窗）。預設 `auto` 會跟隨 Obsidian 當前介面語言。
+- **任務輸出語言（Task Output Language）**控制模型生成內容的語言（添加連結、研究摘要、按標題生成、Mermaid 總結、概念提取、翻譯目標）。
+- **按任務語言模式**通過統一策略層解析每個任務的輸出語言，避免分散在各模組中的語言分支造成行為漂移。
+- **禁用自動翻譯**後，非翻譯任務會保留原文語言內容；顯式「翻譯」任務仍按目標語言執行。
+- Mermaid 相關生成鏈路與上述統一語言策略保持一致，並在開啟時繼續支援自動 Mermaid 修復。
 
-### 稳定 API 调用设置 (Stable API Call Settings)
+### 穩定 API 呼叫設定 (Stable API Call Settings)
 
-- 启用稳定 API 调用（重试逻辑）(Enable Stable API Calls (Retry Logic))
+- 啟用穩定 API 呼叫（重試邏輯）(Enable Stable API Calls (Retry Logic))
 
   :
 
-  - **禁用 (默认)**: 单个 API 调用失败将停止当前任务。
-  - **启用**: 自动重试失败的 LLM API 调用（对于间歇性网络问题或速率限制很有用）。
-  - **连接测试回退**: 即使普通调用当前没有预先开启稳定模式，Provider 的连接测试在首次遇到瞬时网络错误后也会切换到同一套重试序列。
-  - **运行时传输回退（环境感知）**: 如果长耗时任务请求被 `requestUrl` 瞬时断开，Notemd 会先使用与当前环境匹配的回退传输重试同一次调用：桌面端走 Node `http/https`，非桌面环境走浏览器 `fetch`。该回退阶段现在会按协议解析各类流式输出，覆盖 OpenAI-compatible / Azure OpenAI 的 SSE、Anthropic Messages SSE、Google Gemini SSE，以及 Ollama 的 NDJSON，让慢速网关尽早返回 body 分片；其余直连的 OpenAI 风格 Provider 入口也会复用这条共享回退链路。
-  - **OpenAI-compatible 稳定模式顺序**: 在稳定模式下，OpenAI-compatible 的单次调用会优先走 `直连流式`，失败后立即尝试 `直连非流式`，最后才走 `requestUrl`（必要时附带流式回退解析）。三段都失败后，才计入下一次稳定重试，避免某一种传输链路抖动时过早报错。
+  - **禁用 (預設)**: 單個 API 呼叫失敗將停止當前任務。
+  - **啟用**: 自動重試失敗的 LLM API 呼叫（對於間歇性網路問題或速率限制很有用）。
+  - **連線測試回退**: 即使普通呼叫當前沒有預先開啟穩定模式，Provider 的連線測試在首次遇到暫時性網路錯誤後也會切換到同一套重試序列。
+  - **執行階段傳輸回退（環境感知）**: 如果長耗時任務請求被 `requestUrl` 暫時性中斷，Notemd 會先使用與當前環境相符的回退傳輸重試同一次呼叫：桌面端走 Node `http/https`，非桌面環境走瀏覽器 `fetch`。該回退階段現在會按協定解析各類串流輸出，涵蓋 OpenAI-compatible / Azure OpenAI 的 SSE、Anthropic Messages SSE、Google Gemini SSE，以及 Ollama 的 NDJSON，讓慢速網關儘早返回 body 分片；其餘直連的 OpenAI 風格 Provider 入口也會複用這條共享回退鏈路。
+  - **OpenAI-compatible 穩定模式順序**: 在穩定模式下，OpenAI-compatible 的單次呼叫會優先走 `直連串流`，失敗後立即嘗試 `直連非串流`，最後才走 `requestUrl`（必要時附帶串流回退解析）。三段都失敗後，才計入下一次穩定重試，避免某一種傳輸鏈路抖動時過早報錯。
 
-- **重试间隔 (秒) (Retry Interval (seconds))**: (仅在启用时可见) 重试尝试之间等待的时间（1-300 秒）。默认值：5。
+- **重試間隔 (秒) (Retry Interval (seconds))**: (僅在啟用時可見) 重試嘗試之間等待的時間（1-300 秒）。預設值：5。
 
-- **最大重试次数 (Maximum Retries)**: (仅在启用时可见) 最大重试尝试次数（0-10）。默认值：3。
-- **API 错误调试模式 (API Error Debugging Mode)**:
-    *   **禁用 (默认)**: 使用标准的简洁错误报告。
-    *   **启用**: 为所有 Provider 和任务（包括翻译、搜索和连接测试）激活详细的错误日志记录（类似 DeepSeek 的详细输出）。日志现在会包含 HTTP 状态码、原始响应文本、请求传输时间线、脱敏后的请求 URL/请求头、单次尝试耗时、响应头、部分响应体、已解析的部分流式输出与堆栈信息，对于排查 API 连接问题和上游网关重置尤其关键。
-- **开发者模式 (Developer Mode)**:
-    *   **禁用 (默认)**: 隐藏开发者专用诊断控件，避免普通用户误操作。
-    *   **启用**: 在设置页显示独立 Developer 诊断面板。
-- **开发者 Provider 诊断（长请求）(Developer Provider Diagnostic (Long Request))**:
-    *   **诊断调用方式 (Diagnostic Call Mode)**: 可选择调用路径进行诊断。OpenAI-compatible Provider 额外支持强制 `直连流式`、`直连非流式`、`requestUrl-only`。
-    *   **运行诊断 (Run Diagnostic)**: 以当前调用方式执行一次长请求探针，并将完整报告 `Notemd_Provider_Diagnostic_*.txt` 写入仓库根目录。
-    *   **运行稳定性测试 (Run Stability Test)**: 以当前调用方式执行可配置轮次（1-10）的重复调用，输出聚合稳定性报告。
-    *   **诊断超时 (Diagnostic Timeout)**: 可配置单次诊断超时（15-3600 秒）。
-    *   **适用场景**: 当“测试连接”成功但真实长任务（例如慢网关下翻译）仍快速失败时，可快速定位链路问题。
+- **最大重試次數 (Maximum Retries)**: (僅在啟用時可見) 最大重試嘗試次數（0-10）。預設值：3。
+- **API 錯誤除錯模式 (API Error Debugging Mode)**:
+    *   **禁用 (預設)**: 使用標準的簡潔錯誤報告。
+    *   **啟用**: 為所有 Provider 和任務（包括翻譯、搜尋和連線測試）啟動詳細的錯誤日誌記錄（類似 DeepSeek 的詳細輸出）。日誌現在會包含 HTTP 狀態碼、原始回應文本、請求傳輸時間線、脫敏後的請求 URL/請求標頭、單次嘗試耗時、回應標頭、部分回應體、已解析的部分串流輸出與堆疊資訊，對於排查 API 連線問題和上游網關重置尤其關鍵。
+- **開發者模式 (Developer Mode)**:
+    *   **禁用 (預設)**: 隱藏開發者專用診斷控制項，避免一般使用者誤操作。
+    *   **啟用**: 在設定頁顯示獨立 Developer 診斷面板。
+- **開發者 Provider 診斷（長請求）(Developer Provider Diagnostic (Long Request))**:
+    *   **診斷呼叫方式 (Diagnostic Call Mode)**: 可選擇呼叫路徑進行診斷。OpenAI-compatible Provider 額外支援強制 `直連串流`、`直連非串流`、`requestUrl-only`。
+    *   **執行診斷 (Run Diagnostic)**: 以當前呼叫方式執行一次長請求探針，並將完整報告 `Notemd_Provider_Diagnostic_*.txt` 寫入倉庫根目錄。
+    *   **執行穩定性測試 (Run Stability Test)**: 以當前呼叫方式執行可配置輪次（1-10）的重複呼叫，輸出聚合穩定性報告。
+    *   **診斷逾時 (Diagnostic Timeout)**: 可配置單次診斷逾時（15-3600 秒）。
+    *   **適用場景**: 當「測試連線」成功但真實長任務（例如慢網關下翻譯）仍快速失敗時，可快速定位鏈路問題。
 
 <img width="805" height="187" alt="stable API calls" src="https://github.com/user-attachments/assets/936454a7-b657-413c-8a2a-13d517f9c519" />
 
-### 常规设置
+### 常規設定
 
-#### 处理文件输出 (Processed File Output)
+#### 處理文件輸出 (Processed File Output)
 
-- 自定义处理文件的保存路径 (Customize Processed File Save Path)
-
-  :
-
-  - **禁用 (默认)**: 处理过的文件（例如 `YourNote_processed.md`）保存在与原始笔记*相同的文件夹*中。
-  - **启用**: 允许您指定自定义保存位置。
-
-- **处理文件文件夹路径 (Processed File Folder Path)**: (仅在启用上述选项时可见) 输入 vault 内的*相对路径*（例如 `Processed Notes` 或 `Output/LLM`），处理过的文件应保存在此路径。如果文件夹不存在，将自动创建。**请勿使用绝对路径（如 C:...）或无效字符。**
-
-- 为“添加链接”使用自定义输出文件名 (Use Custom Output Filename for ‘Add Links’)
+- 自定義處理文件的儲存路徑 (Customize Processed File Save Path)
 
   :
 
-  - **禁用 (默认)**: 由“添加链接”命令创建的处理文件使用默认的 `_processed.md` 后缀（例如 `YourNote_processed.md`）。
-  - **启用**: 允许您使用下面的设置自定义输出文件名。
+  - **禁用 (預設)**: 處理過的文件（例如 `YourNote_processed.md`）儲存在與原始筆記*相同的資料夾*中。
+  - **啟用**: 允許您指定自定義儲存位置。
 
-- 自定义后缀/替换字符串 (Custom Suffix/Replacement String)
+- **處理文件資料夾路徑 (Processed File Folder Path)**: (僅在啟用上述選項時可見) 輸入 vault 內的*相對路徑*（例如 `Processed Notes` 或 `Output/LLM`），處理過的文件應儲存在此路徑。如果資料夾不存在，將自動建立。**請勿使用絕對路徑（如 C:...）或無效字元。**
 
-  : (仅在启用上述选项时可见) 输入用于输出文件名的字符串。
-
-  - 如果留**空**，原始文件将被处理后的内容**覆盖**。
-  - 如果您输入一个字符串（例如 `_linked`），它将被附加到原始基本名称后（例如 `YourNote_linked.md`）。确保后缀不包含无效的文件名字符。
-
-- 在添加链接时移除代码围栏 (Remove Code Fences on Add Links)
+- 為「添加連結」使用自定義輸出檔名 (Use Custom Output Filename for ‘Add Links’)
 
   :
 
-  - **禁用 (默认)**: 添加链接时，代码围栏 **(`)\** 会保留在内容中，而 \**(`markdown)** 会被自动删除。
-  - **启用**: 在添加链接之前从内容中移除代码围栏。
+  - **禁用 (預設)**: 由「添加連結」命令建立的處理文件使用預設的 `_processed.md` 字尾（例如 `YourNote_processed.md`）。
+  - **啟用**: 允許您使用下面的設定自定義輸出檔名。
+
+- 自定義字尾/取代字串 (Custom Suffix/Replacement String)
+
+  : (僅在啟用上述選項時可見) 輸入用於輸出檔名的字串。
+
+  - 如果留**空**，原始文件將被處理後的內容**覆蓋**。
+  - 如果您輸入一個字串（例如 `_linked`），它將被附加到原始基本名稱後（例如 `YourNote_linked.md`）。確保字尾不包含無效的檔名字元。
+
+- 在添加連結時移除程式碼圍欄 (Remove Code Fences on Add Links)
+
+  :
+
+  - **禁用 (預設)**: 添加連結時，程式碼圍欄 **(`)\** 會保留在內容中，而 \**(`markdown)** 會被自動刪除。
+  - **啟用**: 在添加連結之前從內容中移除程式碼圍欄。
 
 <img width="799" height="301" alt="Processed file output" src="https://github.com/user-attachments/assets/65d4e864-ff5f-402a-be90-e9c44b208903" />
 
-#### 概念笔记输出 (Concept Note Output)
+#### 概念筆記輸出 (Concept Note Output)
 
-- 自定义概念笔记路径 (Customize Concept Note Path)
+- 自定義概念筆記路徑 (Customize Concept Note Path)
 
   :
 
-  - **禁用 (默认)**: 禁用为 `[[链接的概念]]` 自动创建笔记。
-  - **启用**: 允许您指定创建新概念笔记的文件夹。
+  - **禁用 (預設)**: 禁用為 `[[連結的概念]]` 自動建立筆記。
+  - **啟用**: 允許您指定建立新概念筆記的資料夾。
 
-- **概念笔记文件夹路径 (Concept Note Folder Path)**: (仅在启用上述选项时可见) 输入 vault 内的*相对路径*（例如 `Concepts` 或 `Generated/Topics`），新概念笔记应保存在此路径。如果文件夹不存在，将自动创建。**如果启用了自定义，则必须填写。** **请勿使用绝对路径或无效字符。**
+- **概念筆記資料夾路徑 (Concept Note Folder Path)**: (僅在啟用上述選項時可見) 輸入 vault 內的*相對路徑*（例如 `Concepts` 或 `Generated/Topics`），新概念筆記應儲存在此路徑。如果資料夾不存在，將自動建立。**如果啟用了自定義，則必須填寫。** **請勿使用絕對路徑或無效字元。**
 
 <img width="800" height="145" alt="concept note output" src="https://github.com/user-attachments/assets/d0338341-7d67-4472-964c-75a0992165b8" />
 
-#### 概念日志文件输出 (Concept Log File Output)
+#### 概念日誌文件輸出 (Concept Log File Output)
 
-- 生成概念日志文件 (Generate Concept Log File)
+- 生成概念日誌文件 (Generate Concept Log File)
 
   :
 
-  - **禁用 (默认)**: 不生成日志文件。
-  - **启用**: 处理后创建一个日志文件，列出新创建的概念笔记。格式如下： `generate xx concepts md file 1. concepts1 2. concepts2 ... n. conceptsn`
+  - **禁用 (預設)**: 不生成日誌文件。
+  - **啟用**: 處理後建立一個日誌文件，列出新建立的概念筆記。格式如下： `generate xx concepts md file 1. concepts1 2. concepts2 ... n. conceptsn`
 
-- 自定义日志文件保存路径 (Customize Log File Save Path)
+- 自定義日誌文件儲存路徑 (Customize Log File Save Path)
 
-  : (仅在启用“生成概念日志文件”时可见)
+  : (僅在啟用「生成概念日誌文件」時可見)
 
-  - **禁用 (默认)**: 日志文件保存在**概念笔记文件夹路径**（如果已指定）中，否则保存在 vault 根目录。
-  - **启用**: 允许您为日志文件指定自定义文件夹。
+  - **禁用 (預設)**: 日誌文件儲存在**概念筆記資料夾路徑**（如果已指定）中，否則儲存在 vault 根目錄。
+  - **啟用**: 允許您為日誌文件指定自定義資料夾。
 
-- **概念日志文件夹路径 (Concept Log Folder Path)**: (仅在启用“自定义日志文件保存路径”时可见) 输入 vault 内的*相对路径*（例如 `Logs/Notemd`），日志文件应保存在此路径。**如果启用了自定义，则必须填写。**
+- **概念日誌資料夾路徑 (Concept Log Folder Path)**: (僅在啟用「自定義日誌文件儲存路徑」時可見) 輸入 vault 內的*相對路徑*（例如 `Logs/Notemd`），日誌文件應儲存在此路徑。**如果啟用了自定義，則必須填寫。**
 
-- 自定义日志文件名 (Customize Log File Name)
+- 自定義日誌檔名 (Customize Log File Name)
 
-  : (仅在启用“生成概念日志文件”时可见)
+  : (僅在啟用「生成概念日誌文件」時可見)
 
-  - **禁用 (默认)**: 日志文件名为 `Generate.log`。
-  - **启用**: 允许您为日志文件指定自定义名称。
+  - **禁用 (預設)**: 日誌檔名為 `Generate.log`。
+  - **啟用**: 允許您為日誌文件指定自定義名稱。
 
-- **概念日志文件名 (Concept Log File Name)**: (仅在启用“自定义日志文件名”时可见) 输入所需的文件名（例如 `ConceptCreation.log`）。**如果启用了自定义，则必须填写。**
+- **概念日誌檔名 (Concept Log File Name)**: (僅在啟用「自定義日誌檔名」時可見) 輸入所需的檔名（例如 `ConceptCreation.log`）。**如果啟用了自定義，則必須填寫。**
 
 <img width="809" height="281" alt="Concept log file output" src="https://github.com/user-attachments/assets/eef6f5d5-592d-4b8f-84b1-7404521a6e9b" />
 
-#### 提取概念任务
-- **创建最简概念笔记**:
-    - **开启（默认）**：新创建的概念笔记将只包含标题（例如 `# 概念`）。
-    - **关闭**：概念笔记可能包含其他内容，例如“链接来源”反向链接（如果下面的设置未禁用）。
-- **添加“链接来源”反向链接**:
-    - **关闭（默认）**：在提取过程中，不会在概念笔记中添加指向源文档的反向链接。
-    - **开启**：添加一个带有指向源文件反向链接的“链接来源”部分。
+#### 提取概念任務
+- **建立最簡概念筆記**:
+    - **開啟（預設）**：新建立的概念筆記將只包含標題（例如 `# 概念`）。
+    - **關閉**：概念筆記可能包含其他內容，例如「連結來源」反向連結（如果下面的設定未禁用）。
+- **添加「連結來源」反向連結**:
+    - **關閉（預設）**：在提取過程中，不會在概念筆記中添加指向源文件的反向連結。
+    - **開啟**：添加一個帶有指向源文件反向連結的「連結來源」部分。
 
-#### 提取特定原始内容
--   **提取问题**: 输入您希望AI从笔记中逐字提取答案的问题列表（每行一个）。
--   **将输出翻译为相应语言**:
-    *   **关闭 (默认)**: 仅以原始语言输出提取的文本。
-    *   **开启**: 以由此任务选择的语言附加提取文本的翻译。
--   **合并查询模式**:
-    *   **关闭**: 单独处理每个问题（精度更高但API调用更多）。
-    *   **开启**: 在单个提示中发送所有问题（更快且API调用更少）。
--   **自定义提取文本保存路径和文件名**:
-    *   **关闭**: 保存到与原始文件相同的文件夹，后缀为 `_Extracted`。
-    *   **开启**: 允许您指定自定义输出文件夹和文件名后缀。
+#### 提取特定原始文本
+-   **提取問題**: 輸入您希望 AI 從筆記中逐字提取答案的問題列表（每行一個）。
+-   **將輸出翻譯為對應語言**:
+    *   **關閉 (預設)**: 僅以原始語言輸出提取的文本。
+    *   **開啟**: 以由此任務選擇的語言附加提取文本的翻譯。
+-   **合併查詢模式**:
+    *   **關閉**: 單獨處理每個問題（精度更高但 API 呼叫更多）。
+    *   **開啟**: 在單個提示中發送所有問題（更快且 API 呼叫更少）。
+-   **自定義提取文本儲存路徑和檔名**:
+    *   **關閉**: 儲存到與原始文件相同的資料夾，字尾為 `_Extracted`。
+    *   **開啟**: 允許您指定自定義輸出資料夾和檔名字尾。
 
-#### 批量Mermaid修复
--   **启用Mermaid错误检测**:
-    *   **关闭 (默认)**: 处理后跳过错误检测。
-    *   **开启**: 扫描处理后的文件以查找剩余的Mermaid语法错误，并生成 `mermaid_error_{foldername}.md` 报告。
--   **将存在Mermaid错误的文件移动到指定文件夹**:
-    *   **关闭**: 有错误的文件保留在原位。
-    *   **开启**: 将修复尝试后仍包含Mermaid语法错误的文件移动到专用文件夹以供手动审查。
--   **Mermaid错误文件夹路径**: (仅在启用上述选项时可见) 移动错误文件的文件夹。
+#### 批量 Mermaid 修復
+-   **啟用 Mermaid 錯誤檢測**:
+    *   **關閉 (預設)**: 處理後跳過錯誤檢測。
+    *   **開啟**: 掃描處理後的文件以查找剩餘的 Mermaid 語法錯誤，並生成 `mermaid_error_{foldername}.md` 報告。
+-   **將存在 Mermaid 錯誤的文件移動到指定資料夾**:
+    *   **關閉**: 有錯誤的文件保留在原位。
+    *   **開啟**: 將修復嘗試後仍包含 Mermaid 語法錯誤的文件移動到專用資料夾以供手動審查。
+-   **Mermaid 錯誤資料夾路徑**: (僅在啟用上述選項時可見) 移動錯誤文件的資料夾。
 
-#### 处理参数 (Processing Parameters)
+#### 處理參數 (Processing Parameters)
 
-- **启用批处理并行化 (Enable Batch Parallelism)**:
-    - **禁用 (默认)**: 批处理任务（如“处理文件夹”或“从标题批量生成”）将逐个（串行）处理文件。
-    - **启用**: 允许插件同时处理多个文件，这可以显著加快大型批处理作业的速度。
-- **批处理并发数 (Batch Concurrency)**: (仅在启用并行化时可见) 设置并行处理的最大文件数。较高的数字可以更快，但会消耗更多资源，并可能达到API速率限制。（默认值：1，范围：1-20）
-- **批处理大小 (Batch Size)**: (仅在启用并行化时可见) 分组到单个批次中的文件数。（默认值：50，范围：10-200）
-- **批处理间隔延迟 (毫秒) (Delay Between Batches (ms))**: (仅在启用并行化时可见) 处理每个批次之间的可选延迟（以毫秒为单位），这有助于管理API速率限制。（默认值：1000毫秒）
-- **API 调用间隔 (毫秒) (API Call Interval (ms))**: 每个单独的 LLM API 调用之前和之后的最小延迟（以毫秒为单位）。对于低速率 API 或防止 429 错误至关重要。设置为 0 表示没有人为延迟。（默认值：500毫秒）
-- **分块字数 (Chunk Word Count)**: 发送给 LLM 的每个块的最大字数。影响大型文件的 API 调用次数。（默认值：3000）
-- **启用重复检测 (Enable Duplicate Detection)**: 切换对处理内容中重复单词的基本检查（结果在控制台中）。（默认值：启用）
-- **最大令牌数 (Max Tokens)**: LLM 每个响应块应生成的最大令牌数。影响成本和细节。（默认值：4096）
+- **啟用批次並行化 (Enable Batch Parallelism)**:
+    - **禁用 (預設)**: 批次處理任務（如「處理資料夾」或「從標題批量生成」）將逐個（序列）處理文件。
+    - **啟用**: 允許插件同時處理多個文件，這可以顯著加快大型批次處理作業的速度。
+- **批次並發數 (Batch Concurrency)**: (僅在啟用並行化時可見) 設定並行處理的最大文件數。較高的數字可以更快，但會消耗更多資源，並可能達到 API 速率限制。（預設值：1，範圍：1-20）
+- **批次大小 (Batch Size)**: (僅在啟用並行化時可見) 分組到單個批次中的文件數。（預設值：50，範圍：10-200）
+- **批次間隔延遲 (毫秒) (Delay Between Batches (ms))**: (僅在啟用並行化時可見) 處理每個批次之間的可選延遲（以毫秒為單位），這有助於管理 API 速率限制。（預設值：1000 毫秒）
+- **API 呼叫間隔 (毫秒) (API Call Interval (ms))**: 每個單獨的 LLM API 呼叫之前和之後的最小延遲（以毫秒為單位）。對於低速率 API 或防止 429 錯誤至關重要。設定為 0 表示沒人為延遲。（預設值：500 毫秒）
+- **分塊字數 (Chunk Word Count)**: 發送給 LLM 的每個塊的最大字數。影響大型文件的 API 呼叫次數。（預設值：3000）
+- **啟用重複檢測 (Enable Duplicate Detection)**: 切換對處理內容中重複單詞的基本檢查（結果在主控台中）。（預設值：啟用）
+- **最大權杖數 (Max Tokens)**: LLM 每個回應塊應生成的最大權杖數。影響成本和細節。（預設值：4096）
 
 <img width="795" height="274" alt="Processing Parameters   Language settings" src="https://github.com/user-attachments/assets/74e4af76-3333-48fc-bb86-0a3ee61825d1" />
 
-#### 翻译（Translate）
-- **目标语言**：可选默认目标语言，命令时可覆盖。
-- **翻译文件保存路径/后缀**：自定义翻译结果的保存路径和文件名后缀（Notemd: Translate Note/Selection）。
+#### 翻譯（Translate）
+- **目標語言**：可選預設目標語言，命令時可覆蓋。
+- **翻譯文件儲存路徑/字尾**：自定義翻譯結果的儲存路徑和檔名字尾（Notemd: Translate Note/Selection）。
 <img width="811" height="243" alt="translate" src="https://github.com/user-attachments/assets/57d21a72-e86c-4369-8be5-fd18cb734e2b" />
 
-#### Mermaid 设置
-- **Mermaid 输出文件夹**: 配置生成Mermaid图表文件的保存文件夹。如果留空，图表将保存在与原始笔记相同的文件夹中。
-- **翻译总结为Mermaid输出**: 可选地将生成的Mermaid图表内容翻译成配置的目标语言。
+#### Mermaid 設定
+- **Mermaid 輸出資料夾**: 配置生成 Mermaid 圖表文件的儲存資料夾。如果留空，圖表將儲存在與原始筆記相同的資料夾中。
+- **翻譯總結為 Mermaid 輸出**: 可選地將生成的 Mermaid 圖表內容翻譯成配置的目標語言。
 
 
 
-#### 内容生成 (Content Generation)
+#### 內容生成 (Content Generation)
 
-- 在“从标题生成”中启用研究 (Enable Research in “Generate from Title”)
+- 在「從標題生成」中啟用研究 (Enable Research in “Generate from Title”)
 
   :
 
-  - **禁用 (默认)**: “从标题生成”仅使用标题作为输入。
-  - **启用**: 使用配置的**网络研究提供商**执行网络研究，并将研究结果作为上下文包含在基于标题生成的 LLM 提示中。
+  - **禁用 (預設)**: 「從標題生成」僅使用標題作為輸入。
+  - **啟用**: 使用配置的**網路研究供應商**執行網路研究，並將研究結果作為上下文包含在基於標題生成的 LLM 提示中。
 
-- **生成后自动修复Mermaid语法**:
-    - **启用 (默认)**: 在处理、从标题生成、批量从标题生成、研究与摘要、总结为Mermaid图表、翻译等 Mermaid 相关流程结束后，自动执行 Mermaid 语法修复。
-    - **禁用**: 不自动处理 Mermaid 输出，需要手动运行“批量Mermaid修复”或将其加入自定义工作流。
+- **生成後自動修復 Mermaid 語法**:
+    - **啟用 (預設)**: 在處理、從標題生成、批量從標題生成、研究與摘要、總結為 Mermaid 圖表、翻譯等 Mermaid 相關流程結束後，自動執行 Mermaid 語法修復。
+    - **禁用**: 不自動處理 Mermaid 輸出，需要手動執行「批量 Mermaid 修復」或將其加入自定義工作流。
 
-- 输出语言
+- 輸出語言
 
-  : (新增) 为“从标题生成”和“从标题批量生成”任务选择所需的输出语言。
+  : (新增) 為「從標題生成」和「從標題批量生成」任務選擇所需的輸出語言。
 
-  - **英语 (默认)**: 提示以英语处理和输出。
-  - **其他语言**: 指示LLM以英语进行推理，但以您选择的语言 (例如 西班牙语、法语、简体中文、繁體中文、阿拉伯语、印地语等) 提供最终文档。
+  - **英語 (預設)**: 提示以英語處理和輸出。
+  - **其他語言**: 指示 LLM 以英語進行推理，但以您選擇的語言 (例如 西班牙語、法語、簡體中文、繁體中文、阿拉伯語、印地語等) 提供最終文件。
 
-- 更改提示词
+- 更改提示詞
 
   : (新增)
 
-  - **更改提示词**: 允许您更改特定任务的提示词。
-  - **自定义提示词**: 输入您任务的自定义提示词。
+  - **更改提示詞**: 允許您更改特定任務的提示詞。
+  - **自定義提示詞**: 輸入您任務的自定義提示詞。
 
-- 为“从标题生成”使用自定义输出文件夹 (Use Custom Output Folder for ‘Generate from Title’)
+- 為「從標題生成」使用自定義輸出資料夾 (Use Custom Output Folder for ‘Generate from Title’)
 
   :
 
-  - **禁用 (默认)**: 成功生成的文件将移动到相对于原始文件夹父目录的名为 `[原始文件夹名称]_complete` 的子文件夹中（如果原始文件夹是根目录，则为 `Vault_complete`）。
-  - **启用**: 允许您为移动已完成文件的子文件夹指定自定义名称。
+  - **禁用 (預設)**: 成功生成的文件將移動到相對於原始資料夾父目錄的名為 `[原始資料夾名稱]_complete` 的子資料夾中（如果原始資料夾是根目錄，則為 `Vault_complete`）。
+  - **啟用**: 允許您為移動已完成文件的子資料夾指定自定義名稱。
 
-- **自定义输出文件夹名称 (Custom Output Folder Name)**: (仅在启用上述选项时可见) 输入子文件夹所需的名称（例如 `Generated Content`, `_complete`）。不允许使用无效字符。如果留空，则默认为 `_complete`。此文件夹创建在原始文件夹的父目录内。
+- **自定義輸出資料夾名稱 (Custom Output Folder Name)**: (僅在啟用上述選項時可見) 輸入子資料夾所需的名稱（例如 `Generated Content`, `_complete`）。不允許使用無效字元。如果留空，則預設為 `_complete`。此資料夾建立在原始資料夾的父目錄內。
 
-#### 一键工作流按钮
+#### 一鍵工作流按鈕
 
-- **可视化工作流构建器**：无需手写 DSL，即可从内置动作创建、编辑和排序自定义工作流按钮。
-- **自定义工作流 DSL**：高级用户仍可直接编辑文本定义。若 DSL 配置存在问题，插件会安全回退到默认工作流，并在设置/侧边栏中提示警告。
-- **工作流错误策略**：
-    - **遇错停止（默认）**：任一步骤失败后立即中止整个工作流。
-    - **遇错继续**：继续执行后续步骤，并在结束时汇总失败次数。
-- **内置默认工作流**：`One-Click Extract` 默认串联 `处理文件（添加链接）` -> `批量从标题生成内容` -> `批量Mermaid修复`。
+- **視覺化工作流構建器**：無需手寫 DSL，即可從內建動作建立、編輯和排序自定義工作流按鈕。
+- **自定義工作流 DSL**：進階使用者仍可直接編輯文本定義。若 DSL 配置存在問題，插件會安全回退到預設工作流，並在設定/側邊欄中提示警告。
+- **工作流錯誤策略**：
+    - **遇錯停止（預設）**：任一步驟失敗後立即中止整個工作流。
+    - **遇錯繼續**：繼續執行後續步驟，並在結束時匯總失敗次數。
+- **內建預設工作流**：`One-Click Extract` 預設串聯 `處理文件（添加連結）` -> `批量從標題生成內容` -> `批量 Mermaid 修復`。
 
-#### 自定义提示词设置
-此功能允许您覆盖发送给LLM的特定任务的默认指令（提示词），从而对输出进行精细控制。
+#### 自定義提示詞設定
+此功能允許您覆蓋發送給 LLM 的特定任務的預設指令（提示詞），從而對輸出進行精細控制。
 
--   **为特定任务启用自定义提示词**：
-    *   **禁用（默认）**：插件对所有操作使用其内置的默认提示词。
-    *   **启用**：激活为下面列出的任务设置自定义提示词的功能。这是此功能的主开关。
+-   **為特定任務啟用自定義提示詞**：
+    *   **禁用（預設）**：插件對所有操作使用其內建的預設提示詞。
+    *   **啟用**：啟動為下面列出的任務設定自定義提示詞的功能。這是此功能的主開關。
 
--   **为[任务名称]使用自定义提示词**：（仅��启用上述功能时可见）
-    *   对于每个支持的任务（“添加链接”、“从标题生成”、“研究与摘要”、“提取概念”），您可以单独启用或禁用您的自定义提示词。
-    *   **禁用**：此特定任务将使用默认提示词。
-    *   **启用**：此任务将使用您在下方相应“自定义提示词”文本区域中提供的文本。
+-   **為[任務名稱]使用自定義提示詞**：（僅在啟用上述功能時可見）
+    *   對於每個支援的任務（「添加連結」、「從標題生成」、「研究與摘要」、「提取概念」），您可以單獨啟用或禁用您的自定義提示詞。
+    *   **禁用**：此特定任務將使用預設提示詞。
+    *   **啟用**：此任務將使用您在下方相應「自定義提示詞」文字區域中提供的文本。
 
--   **自定义提示词文本区域**：（仅在启用任务的自定义提示词时可见）
-    *   **默认提示词显示**：为方便您参考，插件会显示该任务通常使用的默认提示词。您可以使用**“复制默认提示词”**按钮复制此文本，作为您自己自定义提示词的起点。
-    *   **自定义提示词输入**：您可以在此处编写自己的LLM指令。
-    *   **占位符**：您可以在提示词中使用特殊的占位符，插件在将请求发送给LLM之前会将其替换为实际内容。请参考默认提示词以查看每个任务可用的占位符。常用占位符包括：
-        *   `{TITLE}`：当前笔记的标题。
-        *   `{RESEARCH_CONTEXT_SECTION}`：从网络研究中收集的内容。
-        *   `{USER_PROMPT}`：正在处理的笔记内容。
+-   **自定義提示詞文字區域**：（僅在啟用任務的自定義提示詞時可見）
+    *   **預設提示詞顯示**：為方便您參考，插件會顯示該任務通常使用的預設提示詞。您可以使用**「複製預設提示詞」**按鈕複製此文本，作為您自己自定義提示詞的起點。
+    *   **自定義提示詞輸入**：您可以在此處編寫自己的 LLM 指令。
+    *   **佔位符**：您可以在提示詞中使用特殊的佔位符，插件在將請求發送給 LLM 之前會將其替換為實際內容。請參考預設提示詞以查看每個任務可用的佔位符。常用佔位符包括：
+        *   `{TITLE}`：當前筆記的標題。
+        *   `{RESEARCH_CONTEXT_SECTION}`：從網路研究中收集的內容。
+        *   `{USER_PROMPT}`：正在處理的筆記內容。
 
 <img width="794" height="174" alt="Content generation   output" src="https://github.com/user-attachments/assets/76d93942-980d-49ad-b9d4-1c73ea013d17" />
 
 <img width="866" height="646" alt="Duplicate check scope   Custom prompt settings" src="https://github.com/user-attachments/assets/1b37a523-ef00-4e40-94a0-43bbe0c78572" />
 
-#### 重复检查范围 (Duplicate Check Scope)
+#### 重複檢查範圍 (Duplicate Check Scope)
 
-- 重复检查范围模式 (Duplicate Check Scope Mode)
+- 重複檢查範圍模式 (Duplicate Check Scope Mode)
 
-  : 控制将概念笔记文件夹中的笔记与哪些文件进行比较以查找潜在重复项。
+  : 控制將概念筆記資料夾中的筆記與哪些文件進行比較以查找潛在重複項。
 
-  - **整个 Vault (默认)**: 将概念笔记与 vault 中的所有其他笔记（不包括概念笔记文件夹本身）进行比较。
-  - **仅包含特定文件夹**: 仅将概念笔记与下面列出的文件夹中的笔记进行比较。
-  - **排除特定文件夹**: 将概念笔记与*除*下面列出的文件夹中的笔记（以及概念笔记文件夹）之外的所有笔记进行比较。
-  - **仅概念文件夹**: 仅将概念笔记与*概念笔记文件夹内的其他笔记*进行比较。这有助于查找纯粹在您生成的概念内部的重复项。
+  - **整個 Vault (預設)**: 將概念筆記與 vault 中的所有其他筆記（不包括概念筆記資料夾本身）進行比較。
+  - **僅包含特定資料夾**: 僅將概念筆記與下面列出的資料夾中的筆記進行比較。
+  - **排除特定資料夾**: 將概念筆記與*除*下面列出的資料夾中的筆記（以及概念筆記資料夾）之外的所有筆記進行比較。
+  - **僅概念資料夾**: 僅將概念筆記與*概念筆記資料夾內的其他筆記*進行比較。這有助於查找純粹在您生成的概念內部的重複項。
 
-- **包含/排除文件夹 (Include/Exclude Folders)**: (仅在模式为“包含”或“排除”时可见) 输入您要包含或排除的文件夹的*相对路径*，**每行一个路径**。路径区分大小写，并使用 `/` 作为分隔符（例如 `Reference Material/Papers` 或 `Daily Notes`）。这些文件夹不能与概念笔记文件夹相同或位于其内部。
+- **包含/排除資料夾 (Include/Exclude Folders)**: (僅在模式為「包含」或「排除」時可見) 輸入您要包含或排除的資料夾的*相對路徑*，**每行一個路徑**。路徑區分大小寫，並使用 `/` 作為分隔符號（例如 `Reference Material/Papers` 或 `Daily Notes`）。這些資料夾不能與概念筆記資料夾相同或位於其內部。
 
-#### 网络研究提供商 (Web Research Provider)
+#### 網路研究供應商 (Web Research Provider)
 
-- **搜索提供商 (Search Provider)**: 在 `Tavily`（需要 API 密钥，推荐）和 `DuckDuckGo`（实验性，经常被搜索引擎阻止自动化请求）之间选择。用于“研究与摘要主题”和可选的“从标题生成”。
-- **Tavily API 密钥 (Tavily API Key)**: (仅在选择 Tavily 时可见) 输入您从 [tavily.com](https://tavily.com/) 获取的 API 密钥。
-- **Tavily 最大结果数 (Tavily Max Results)**: (仅在选择 Tavily 时可见) Tavily 应返回的最大搜索结果数（1-20）。默认值：5。
-- **Tavily 搜索深度 (Tavily Search Depth)**: (仅在选择 Tavily 时可见) 选择 `basic`（默认）或 `advanced`。注意：`advanced` 提供更好的结果，但每次搜索消耗 2 个 API 积分，而不是 1 个。
-- **DuckDuckGo 最大结果数 (DuckDuckGo Max Results)**: (仅在选择 DuckDuckGo 时可见) 要解析的最大搜索结果数（1-10）。默认值：5。
-- **DuckDuckGo 内容获取超时 (DuckDuckGo Content Fetch Timeout)**: (仅在选择 DuckDuckGo 时可见) 尝试从每个 DuckDuckGo 结果 URL 获取内容时等待的最大秒数。默认值：15。
-- **最大研究内容令牌数 (Max Research Content Tokens)**: 要包含在摘要提示中的组合网络研究结果（片段/获取的内容）的大致最大令牌数。有助于管理上下文窗口大小和成本。（默认值：3000）
+- **搜尋供應商 (Search Provider)**: 在 `Tavily`（需要 API 金鑰，推薦）和 `DuckDuckGo`（實驗性，經常被搜尋引擎阻止自動化請求）之間選擇。用於「研究與摘要主題」和可選的「從標題生成」。
+- **Tavily API 金鑰 (Tavily API Key)**: (僅在選擇 Tavily 時可見) 輸入您從 [tavily.com](https://tavily.com/) 獲取的 API 金鑰。
+- **Tavily 最大結果數 (Tavily Max Results)**: (僅在選擇 Tavily 時可見) Tavily 應返回的最大搜尋結果數（1-20）。預設值：5。
+- **Tavily 搜尋深度 (Tavily Search Depth)**: (僅在選擇 Tavily 時可見) 選擇 `basic`（預設）或 `advanced`。注意：`advanced` 提供更好結果，但每次搜尋消耗 2 個 API 點數，而不是 1 個。
+- **DuckDuckGo 最大結果數 (DuckDuckGo Max Results)**: (僅在選擇 DuckDuckGo 時可見) 要解析的最大搜尋結果數（1-10）。預設值：5。
+- **DuckDuckGo 內容獲取逾時 (DuckDuckGo Content Fetch Timeout)**: (僅在選擇 DuckDuckGo 時可見) 嘗試從每個 DuckDuckGo 結果 URL 獲取內容時等待的最大秒數。預設值：15。
+- **最大研究內容權杖數 (Max Research Content Tokens)**: 要包含在摘要提示中的組合網路研究結果（片段/獲取的內容）的大致最大權杖數。有助於管理上下文視窗大小和成本。（預設值：3000）
 <img width="810" height="278" alt="Web research provider" src="https://github.com/user-attachments/assets/be0280eb-bb4e-4db0-bf69-91da3f0fd3c0" />
 
-#### 专注学习领域 (Focused Learning Domain)
--   **启用专注学习领域**:
-    *   **禁用 (默认)**: 发送给LLM的提示词使用标准的通用指令。
-    *   **启用**: 允许您指定一个或多个研究���域，以提高LLM的上下文理解能力。
--   **学习领域**: (仅在启用上述选项时可见) 输入您的特定领域，例如“材料科学”、“高分子物理”、“机器学习”。这将在提示词的开头添加一行“相关领域: [...]”，帮助LLM为您的特定研究领域生成更准确、更相关的链接和内容。
+#### 專注學習領域 (Focused Learning Domain)
+-   **啟用專注學習領域**:
+    *   **禁用 (預設)**: 發送給 LLM 的提示詞使用標準的通用指令。
+    *   **啟用**: 允許您指定一個或多個研究領域，以提高 LLM 的上下文理解能力。
+-   **學習領域**: (僅在啟用上述選項時可見) 輸入您的特定領域，例如「材料科學」、「高分子物理」、「機器學習」。這將在提示詞的開頭添加一行「相關領域: [...]」，幫助 LLM 為您的特定研究領域生成更準確、更相關的連結和內容。
 <img width="595" height="143" alt="focused learning domain" src="https://github.com/user-attachments/assets/e8d5e407-d39d-4a21-a18f-446ca660276f" />
 
 ## 使用指南
 
-### 快捷工作流与新版侧边栏
+### 快捷工作流與新版側邊欄
 
--   打开 Notemd 侧边栏后，可按核心处理、生成、翻译、知识整理、实用工具等分组查看内置动作。
--   侧边栏顶部的 **Quick Workflows** 区域用于运行自定义多步骤按钮。
--   默认 **One-Click Extract** 会执行 `处理文件（添加链接）` -> `批量从标题生成内容` -> `批量Mermaid修复`。
--   每一步的状态、日志和失败信息都会显示在侧边栏中，底部固定区域会保护进度条与日志窗口不被展开的分组挤压。
--   进度卡片将状态文本、独立百分比标签与剩余时间分开展示，更便于快速判断当前执行情况；自定义工作流也可以在设置页中重新配置。
+-   打開 Notemd 側邊欄後，可按核心處理、生成、翻譯、知識整理、實用工具等分組查看內建動作。
+-   側邊欄頂部的 **Quick Workflows** 區域用於執行自定義多步驟按鈕。
+-   預設 **One-Click Extract** 會執行 `處理文件（添加連結）` -> `批量從標題生成內容` -> `批量 Mermaid 修復`。
+-   每一步的狀態、日誌和失敗資訊都會顯示在側邊欄中，底部固定區域會保護進度條與日誌視窗不被展開的分組擠壓。
+-   進度卡片將狀態文本、獨立百分比標籤與剩餘時間分開展示，更便於快速判斷當前執行情況；自定義工作流也可以在設定頁中重新配置。
 
-### 原始处理（添加维基链接）
+### 原始處理（添加維基連結）
 
-**注意：** 仅支持 `.md` 或 `.txt` 文件。PDF可用 [Mineru](https://github.com/opendatalab/MinerU) 转换为MD后再处理。
+**注意：** 僅支援 `.md` 或 `.txt` 文件。PDF 可用 [Mineru](https://github.com/opendatalab/MinerU) 轉換為 MD 後再處理。
 
-1.  **侧边栏操作**：
-    *   打开 Notemd 侧边栏（魔杖图标/命令面板）。
-    *   打开目标`.md`或`.txt`文件。
-    *   点击“处理文件（添加链接）”(Notemd: Process Current File)。
-    *   文件夹处理：点击“处理文件夹（添加链接）”(Notemd: Process Folder)，选择文件夹并点击“处理”。
-    *   进度实时显示，可随时取消任务（侧边栏按钮）。
-    *   *批量处理文件在后台执行，不会打开编辑器。*
+1.  **側邊欄操作**：
+    *   打開 Notemd 側邊欄（魔杖圖示/命令面板）。
+    *   打開目標 `.md` 或 `.txt` 文件。
+    *   點擊「處理文件（添加連結）」(Notemd: Process Current File)。
+    *   資料夾處理：點擊「處理資料夾（添加連結）」(Notemd: Process Folder)，選擇資料夾並點擊「處理」。
+    *   進度即時顯示，可隨時取消任務（側邊欄按鈕）。
+    *   *批量處理文件在背景執行，不會打開編輯器。*
 
 2.  **命令面板操作**（`Ctrl+P` 或 `Cmd+P`）：
-    *   单文件：打开后运行 `Notemd: 处理当前文件 (Notemd: Process Current File)`。
-    *   文件夹：运行 `Notemd: 处理文件夹 (Notemd: Process Folder)`，选择目标文件夹。批量处理不打开编辑器。
-    *   进度弹窗可随时取消。
-    *   *插件自动移除内容开头`\boxed{`和结尾`}（如有）再保存。*
+    *   單文件：打開後執行 `Notemd: 處理當前文件 (Notemd: Process Current File)`。
+    *   資料夾：執行 `Notemd: 處理資料夾 (Notemd: Process Folder)`，選擇目標資料夾。批量處理不打開編輯器。
+    *   進度彈窗可隨時取消。
+    *   *插件自動移除內容開頭 `\boxed{` 和結尾 `}（如有）再儲存。*
 
-### 新功能（翻译、网络研究与内容生成）
+### 新功能（翻譯、網路研究與內容生成）
 
-1.  **总结为Mermaid图表**：
-    *   打开要总结的笔记。
-    *   运行命令 `Notemd: 总结为Mermaid图表` (通过命令面板或侧边栏按钮)。
-    *   插件将生成一个带有Mermaid图表的新笔记。
+1.  **總結為 Mermaid 圖表**：
+    *   打開要總結的筆記。
+    *   執行命令 `Notemd: 總結為 Mermaid 圖表` (通過命令面板或側邊欄按鈕)。
+    *   插件將生成一個帶有 Mermaid 圖表的新筆記。
 
-2.  **翻译笔记/选区**：
-    *   选中文本可仅翻译选区，无选区则翻译全文。
-    *   运行 `Notemd: 翻译笔记/选区 (Notemd: Translate Note/Selection)`。
-    *   弹窗可确认/修改目标语言（默认使用设置）。
-    *   翻译内容保存到指定路径并在原文右侧新窗格打开。
-    *   任务可随时取消。
+2.  **翻譯筆記/選區**：
+    *   選取文字可僅翻譯選區，無選區則翻譯全文。
+    *   執行 `Notemd: 翻譯筆記/選區 (Notemd: Translate Note/Selection)`。
+    *   彈窗可確認/修改目標語言（預設使用設定）。
+    *   翻譯內容儲存到指定路徑並在原文右側新窗格打開。
+    *   任務可隨時取消。
 
-3.  **批量翻译**：
-    *   从命令面板运行 `Notemd: 批量翻译文件夹` 并选择一个文件夹，或在文件浏览器中右键单击一个文件夹并选择“批量翻译此文件夹”。
-    *   插件将翻译所选文件夹中的所有 Markdown 文件。
-    *   翻译后的文件将保存到配置的翻译路径中，但不会自动打开。
-    *   此过程可以通过进度模式取消。
+3.  **批量翻譯**:
+    *   從命令面板執行 `Notemd: 批量翻譯資料夾` 並選擇一個資料夾，或在文件瀏覽器中右鍵點擊一個資料夾並選擇「批量翻譯此資料夾」。
+    *   插件將翻譯所選資料夾中的所有 Markdown 文件。
+    *   翻譯後的文件將儲存到配置的翻譯路徑中，但不會自動打開。
+    *   此過程可以通過進度模式取消。
 
-3.  **研究与摘要主题**：
-    *   选中文本或用笔记标题作为搜索主题。
-    *   运行 `Notemd: 研究和摘要主题 (Notemd: Research and Summarize Topic)`。
-    *   配置的搜索服务与LLM自动协作，结果附加到当前笔记。
-    *   任务可随时取消。
-    *   *DuckDuckGo 可能因反爬机制失败，推荐Tavily。*
+3.  **研究與摘要主題**：
+    *   選取文字或用筆記標題作為搜尋主題。
+    *   執行 `Notemd: 研究和摘要主題 (Notemd: Research and Summarize Topic)`。
+    *   配置的搜尋服務與 LLM 自動協作，結果附加到當前筆記。
+    *   任務可隨時取消。
+    *   *DuckDuckGo 可能因反爬機制失敗，推薦 Tavily。*
 
-4.  **从标题生成内容**：
-    *   打开任意笔记（可为空）。
-    *   运行 `Notemd: 从标题生成内容 (Notemd: Generate Content from Title)`。
-    *   LLM根据标题生成内容并替换原文。
-    *   可选先自动研究，丰富上下文。
-    *   任务可随时取消。
+4.  **從標題生成內容**：
+    *   打開任意筆記（可為空）。
+    *   執行命令 `Notemd: 從標題生成內容 (Notemd: Generate Content from Title)`。
+    *   LLM 根據標題生成內容並取代原文。
+    *   可選先自動研究，豐富上下文。
+    *   任務可隨時取消。
 
-5.  **批量从标题生成内容**：
-    *   运行 `Notemd: 从标题批量生成内容 (Notemd: Batch Generate Content from Titles)`。
-    *   选择要处理的文件夹，自动跳过已完成文件。
-    *   成功处理的文件自动移动到指定“完成”子文件夹。
-    *   任务可随时取消。
+5.  **批量從標題生成內容**：
+    *   執行 `Notemd: 從標題批量生成內容 (Notemd: Batch Generate Content from Titles)`。
+    *   選擇要處理的資料夾，自動跳過已處理文件。
+    *   成功處理的文件自動移動到指定「完成」子資料夾。
+    *   任務可隨時取消。
 
-6.  **提取概念（纯模式）**:
-    *   此功能允许您从文档中提取概念并创建相应的概念笔记，而*不*更改原始文件。它非常适合从一组文档中快速填充您的知识库。
-    *   **单个文件**：打开一个文件，从命令面板运行 `Notemd: 提取概念（仅创建概念笔记）` 命令，或单击侧边栏中的 **“提取概念（当前文件）”** 按钮。
-    *   **文件夹**：从命令面板运行 `Notemd: 批量提取概念` 命令，或单击侧边栏中的 **“提取概念（文件夹）”** 按钮，然后选择一个文件夹来处理其中的所有笔记。
-    *   插件将读取文件，识别概念，并在您指定的 **概念笔记文件夹** 中为它们创建新笔记，而原始文件保持不变。
+6.  **提取概念（純模式）**:
+    *   此功能允許您從文件中提取概念並建立對應的概念筆記，而*不*更改原始文件。它非常適合從一組文件中快速填充您的知識庫。
+    *   **單個文件**：打開一個文件，從命令面板執行 `Notemd: 提取概念（僅建立概念筆記）` 命令，或點擊側邊欄中的 **「提取概念（當前文件）」** 按鈕。
+    *   **資料夾**：從命令面板執行 `Notemd: 批量提取概念` 命令，或點擊側邊欄中的 **「提取概念（資料夾）」** 按鈕，然後選擇一個資料夾來處理其中的所有筆記。
+    *   插件將讀取文件，識別概念，並在您指定的 **概念筆記資料夾** 中為它們建立新筆記，而原始文件保持不變。
 
-7.  **创建维基链接并从选区生成笔记**：
-    *   这个强大的命令简化了创建和填充新概念笔记的过程。
-    *   在编辑器中选择一个词或短语。
-    *   运行命令 `Notemd: 创建维基链接并从选区生成笔记` (建议为此分配一个快捷键，如 `Cmd+Shift+W`)。
-    *   插件将会：
-        1.  将您选择的文本替换为 `[[维基链接]]`。
-        2.  检查您的 **概念笔记文件夹** 中是否已存在该标题的笔记。
-        3.  如果存在，它会向当前笔记添加一个反向链接。
-        4.  如果不存在，它会创建一个新的空笔记。
-        5.  然后，它会自动对新的或现有的笔记运行 **“从标题生成内容”** 命令，用AI生成的内容填充它。
+7.  **建立維基連結並從選區生成筆記**：
+    *   這個強大的命令簡化了建立和填充新概念筆記的過程。
+    *   在編輯器中選擇一個詞或片語。
+    *   執行命令 `Notemd: 建立維基連結並從選區生成筆記` (建議為此分配一個快捷鍵，如 `Cmd+Shift+W`)。
+    *   插件將會：
+        1.  將您選擇的文字替換為 `[[維基連結]]`。
+        2.  檢查您的 **概念筆記資料夾** 中是否已存在該標題的筆記。
+        3.  如果存在，它會向當前筆記添加一個反向連結。
+        4.  如果不存在，它會建立一個新的空筆記。
+        5.  然後，它會自動對新的或現有的筆記執行 **「從標題生成內容」** 命令，用 AI 生成的內容填充它。
 
-8.  **提取概念并生成标题**：
-    *   该命令将两个强大的功能链接在一起，以实现简化的工作流程。
-    *   从命令面板运行命令 `Notemd: 提取概念并生成标题` (建议为此分配一个快捷键)。
-    *   插件将会：
-        1.  首先，对当前活动文件运行 **“提取概念（当前文件）”** 任务。
-        2.  然后，它将自动在您设置为 **概念笔记文件夹路径** 的文件夹上运行 **“批量从标题生成”** 任务。
-    *   这使您可以首先从源文档中提取新概念来填充您的知识库，然后立即在一个步骤中用AI生成的内容来充实这些新的概念笔记。
+8.  **提取概念並生成標題**：
+    *   該命令將兩個強大的功能連結在一起，以實現簡化的工作流程。
+    *   從命令面板執行命令 `Notemd: 提取概念並生成標題` (建議為此分配一個快捷鍵)。
+    *   插件將會：
+        1.  首先，對當前活動文件執行 **「提取概念（當前文件）」** 任務。
+        2.  然後，它將自動在您設定為 **概念筆記資料夾路徑** 的資料夾上執行 **「批量從標題生成」** 任務。
+    *   這使您可以首先從源文件中提取新概念來填充您的知識庫，然後立即在一個步驟中用 AI 生成的內容來充實這些新的概念筆記。
 
-### 实用工具
+### 實用工具
 
-1.  **检查重复项**：
-    *   打开目标`.md`或`.txt`文件。
-    *   运行 `Notemd: 检查当前文件中的重复项 (Notemd: Check for Duplicates in Current File)`。
-    *   结果输出到开发者控制台和通知栏/侧边栏。
+1.  **檢查重複項**：
+    *   打開目標 `.md` 或 `.txt` 文件。
+    *   執行 `Notemd: 檢查當前文件中的重複項 (Notemd: Check for Duplicates in Current File)`。
+    *   結果輸出到開發者主控台和通知列/側邊欄。
 
-2.  **测试LLM连接**：
-    *   运行 `Notemd: 测试LLM连接 (Notemd: Test LLM Connection)`。
-    *   验证当前激活服务商的API设置，结果显示在通知栏和侧边栏。
+2.  **測試 LLM 連線**：
+    *   執行 `Notemd: 測試 LLM 連線 (Notemd: Test LLM Connection)`。
+    *   驗證當前啟動服務商的 API 設定，結果顯示在通知列和側邊欄。
 
-3.  **批量Mermaid修复**：
-    *   运行 `Notemd: 批量修复Mermaid语法 (Notemd: Batch Fix Mermaid Syntax)`。
-    *   对用户选择的文件夹内的所有Markdown文件应用Mermaid和LaTeX语法校正。
-    *   **错误报告**: 生成 `mermaid_error_{foldername}.md` 报告，列出处理后仍包含潜在Mermaid错误的文件。
-    *   **移动错误文件**: 可选地将检测到错误的文件移动到指定文件夹以供手动审查。
-    *   **高级修复模式**: 包含针对包含空格、特殊字符或嵌套括号的未加引号节点标签的稳健修复（例如，将 `Node[标签 [文本]]` 转换为 `Node["标签 [文本]"]`）。
+3.  **批量 Mermaid 修復**：
+    *   執行 `Notemd: 批量修復 Mermaid 語法 (Notemd: Batch Fix Mermaid Syntax)`。
+    *   對使用者選擇的資料夾內的所有 Markdown 文件應用 Mermaid 和 LaTeX 語法校正。
+    *   **錯誤報告**: 生成 `mermaid_error_{foldername}.md` 報告，列出處理後仍包含潛在 Mermaid 錯誤的文件。
+    *   **移動錯誤文件**: 可選地將檢測到錯誤的文件移動到指定資料夾以供手動審查。
+    *   **高級修復模式**: 包含針對包含空格、特殊字元或巢狀括號的未加引號節點標籤的穩健修復（例如，將 `Node[標籤 [文本]]` 轉換為 `Node["標籤 [文本]"]`）。
 
-4.  **检查并删除重复概念笔记**：
-    *   配置好概念笔记文件夹后运行该命令。
-    *   运行 `Notemd: 检查并删除重复概念笔记 (Notemd: Check and Remove Duplicate Concept Notes)`。
-    *   自动检测并提示所有潜在重复项，需手动确认删除。
-    *   进度与结果显示在侧边栏/通知栏。
+4.  **檢查並刪除重複概念筆記**：
+    *   配置好概念筆記資料夾後執行該命令。
+    *   執行 `Notemd: 檢查並刪除重複概念筆記 (Notemd: Check and Remove Duplicate Concept Notes)`。
+    *   自動檢測並提示所有潛在重複項，需手動確認刪除。
+    *   進度與結果顯示在側邊欄/通知列。
 
-5.  **提取特定原始内容**:
-    *   在“提取特定原始内容”下的设置中配置您的问题。
-    *   使用侧边栏中的“提取特定原始内容”按钮来处理当前活动文件。
-    *   **合并模式**: 通过在一个提示中发送所有问题来加快处理速度。
-    *   **翻译**: 可选地将提取的文本翻译为您配置的语言。
-    *   **自定义输出**: 配置提取文件的保存位置和方式。
+5.  **提取特定原始文本**:
+    *   在「提取特定原始文本」下的設定中配置您的問題。
+    *   使用側邊欄中的「提取特定原始文本」按鈕來處理當前活動文件。
+    *   **合併模式**: 通過在一個提示中發送所有問題來加快處理速度。
+    *   **翻譯**: 可選地將提取的文字翻譯為您配置的語言。
+    *   **自定義輸出**: 配置提取文件的儲存位置和方式。
 
-## 支持的LLM提供商
+## 支援的LLM供應商
 
-| 提供商             | 类型   | 需要 API 密钥        | 说明                                                              |
+| 供應商             | 類型   | 需要 API 金鑰        | 說明                                                              |
 |--------------------|--------|----------------------|-------------------------------------------------------------------|
-| DeepSeek           | 云     | 是                   | DeepSeek 原生端点，已处理 reasoning 模型差异                      |
-| Qwen               | 云     | 是                   | 阿里云百炼 DashScope 兼容模式预设，适合 Qwen / QwQ               |
-| Qwen Code          | 云     | 是                   | 阿里云百炼面向编码模型的独立预设，适合 Qwen coder 系列            |
-| Doubao             | 云     | 是                   | 火山方舟 Ark 兼容模式预设，模型字段通常填写 Endpoint ID           |
-| Moonshot           | 云     | 是                   | Moonshot / Kimi 官方端点                                          |
-| GLM                | 云     | 是                   | 智谱 BigModel 官方 OpenAI-compatible 端点                         |
-| Z AI               | 云     | 是                   | Z AI 国际站 GLM/Zhipu OpenAI-compatible 端点，与 `GLM` 预设互补   |
-| MiniMax            | 云     | 是                   | MiniMax 官方 chat-completions 端点                                |
-| Huawei Cloud MaaS  | 云     | 是                   | 华为云 ModelArts MaaS OpenAI-compatible 端点，适合托管模型        |
-| Baidu Qianfan      | 云     | 是                   | 百度千帆官方 OpenAI-compatible 端点，适合 ERNIE 等模型            |
-| SiliconFlow        | 云     | 是                   | SiliconFlow 官方 OpenAI-compatible 端点，适合托管开源模型         |
-| OpenAI             | 云     | 是                   | 支持 GPT 与 o 系列模型                                            |
-| Anthropic          | 云     | 是                   | 支持 Claude 系列                                                  |
-| Google             | 云     | 是                   | 支持 Gemini 系列                                                  |
-| Mistral            | 云     | 是                   | 支持 Mistral / Codestral 系列                                    |
-| Azure OpenAI       | 云     | 是                   | 需要 Endpoint、API Key、Deployment Name 和 API Version            |
-| OpenRouter         | 网关   | 是                   | 通过 OpenRouter 模型 ID 访问多家提供商                            |
-| xAI                | 云     | 是                   | Grok 原生端点                                                     |
-| Groq               | 云     | 是                   | 面向托管开源模型的高速 OpenAI-compatible 推理端点                 |
-| Together           | 云     | 是                   | 面向托管开源模型的 OpenAI-compatible 端点                         |
-| Fireworks          | 云     | 是                   | OpenAI-compatible 推理端点                                        |
-| Requesty           | 网关   | 是                   | 单一 API Key 对接多提供商路由                                     |
-| OpenAI Compatible  | 网关   | 可选                 | 通用预设，可接 LiteLLM、vLLM、Perplexity、Vercel AI Gateway 等    |
-| LMStudio           | 本地   | 可选（`EMPTY`）      | LM Studio 本地 OpenAI-compatible 服务                             |
-| Ollama             | 本地   | 否                   | Ollama 本地原生服务                                               |
+| DeepSeek           | 雲端   | 是                   | DeepSeek 原生端點，已處理 reasoning 模型差異                      |
+| Qwen               | 雲端   | 是                   | 阿里雲百鍊 DashScope 相容模式預設，適合 Qwen / QwQ               |
+| Qwen Code          | 雲端   | 是                   | 阿里雲百鍊面向編碼模型的獨立預設，適合 Qwen coder 系列            |
+| Doubao             | 雲端   | 是                   | 火山方舟 Ark 相容模式預設，模型欄位通常填寫 Endpoint ID           |
+| Moonshot           | 雲端   | 是                   | Moonshot / Kimi 官方端點                                          |
+| GLM                | 雲端   | 是                   | 智譜 BigModel 官方 OpenAI-compatible 端點                         |
+| Z AI               | 雲端   | 是                   | Z AI 國際站 GLM/Zhipu OpenAI-compatible 端點，與 `GLM` 預設互補   |
+| MiniMax            | 雲端   | 是                   | MiniMax 官方 chat-completions 端點                                |
+| Huawei Cloud MaaS  | 雲端   | 是                   | 華為雲 ModelArts MaaS OpenAI-compatible 端點，適合託管模型        |
+| Baidu Qianfan      | 雲端   | 是                   | 百度千帆官方 OpenAI-compatible 端點，適合 ERNIE 等模型            |
+| SiliconFlow        | 雲端   | 是                   | SiliconFlow 官方 OpenAI-compatible 端點，適合託管開源模型         |
+| OpenAI             | 雲端   | 是                   | 支援 GPT 與 o 系列模型                                            |
+| Anthropic          | 雲端   | 是                   | 支援 Claude 系列                                                  |
+| Google             | 雲端   | 是                   | 支援 Gemini 系列                                                  |
+| Mistral            | 雲端   | 是                   | 支援 Mistral / Codestral 系列                                    |
+| Azure OpenAI       | 雲端   | 是                   | 需要 Endpoint、API Key、Deployment Name 和 API Version            |
+| OpenRouter         | 網關   | 是                   | 通過 OpenRouter 模型 ID 存取多家供應商                            |
+| xAI                | 雲端   | 是                   | Grok 原生端點                                                     |
+| Groq               | 雲端   | 是                   | 面向託管開源模型的高速 OpenAI-compatible 推理端點                 |
+| Together           | 雲端   | 是                   | 面向託管開源模型的 OpenAI-compatible 端點                         |
+| Fireworks          | 雲端   | 是                   | OpenAI-compatible 推理端點                                        |
+| Requesty           | 網關   | 是                   | 單一 API Key 對接多供應商路由                                     |
+| OpenAI Compatible  | 網關   | 可選                 | 通用預設，可接 LiteLLM、vLLM、Perplexity、Vercel AI Gateway 等    |
+| LMStudio           | 本地   | 可選（`EMPTY`）      | LM Studio 本地 OpenAI-compatible 服務                             |
+| Ollama             | 本地   | 否                   | Ollama 本地原生服務                                               |
 
-*本地服务商请确保服务器已启动且 Base URL 配置正确。*
-*OpenRouter 与 Requesty 请使用网关要求的完整/带前缀模型 ID（例如 `google/gemini-flash-1.5` 或 `anthropic/claude-3-7-sonnet-latest`）。*
-*`Doubao` 预设通常要求在模型字段中填写 Ark Endpoint/Deployment ID，而不是直接填写模型家族名。设置页现在会在仍使用默认占位值时发出警告，并阻止连接测试，直到你替换为真实 Endpoint ID。*
-*`Z AI` 面向国际 `api.z.ai` 线路，而 `GLM` 继续保留中国大陆 BigModel 入口。请根据账户区域选择对应预设。*
-*中国区兼容协议预设默认使用 chat-first 测试，这样可以同时验证 API Key、模型名或部署 ID 是否真正可用。*
-*`OpenAI Compatible` 预设用于自定义网关与代理，请按对应服务文档填写 Base URL、鉴权方式和模型 ID。*
+*本地服務商請確保伺服器已啟動且 Base URL 配置正確。*
+*OpenRouter 與 Requesty 請使用網關要求的完整/帶前綴模型 ID（例如 `google/gemini-flash-1.5` 或 `anthropic/claude-3-7-sonnet-latest`）。*
+*`Doubao` 預設通常要求在模型欄位中填寫 Ark Endpoint/Deployment ID，而不是直接填寫模型家族名。設定頁現在會在仍使用預設佔位值時發出警告，並阻止連線測試，直到您替換為真實 Endpoint ID。*
+*`Z AI` 面向國際 `api.z.ai` 線路，而 `GLM` 繼續保留中國大陸 BigModel 入口。請根據帳戶區域選擇對應預設。*
+*中國區相容協定預設預設使用 chat-first 測試，這樣可以同時驗證 API Key、模型名或佈署 ID 是否真正可用。*
+*`OpenAI Compatible` 預設用於自定義網關與代理，請按對應服務文件填寫 Base URL、鑑權方式和模型 ID。*
 
-## 网络使用与数据处理
+## 網路使用與數據處理
 
-Notemd 在本地 Obsidian 运行，但部分功能会发起外部网络请求。
+Notemd 在本地 Obsidian 執行，但部分功能會發起外部網路請求。
 
-### LLM Provider 调用（可配置）
+### LLM Provider 呼叫（可配置）
 
-- 触发场景：处理文件、内容生成、翻译、研究总结、Mermaid 总结，以及连接测试/开发者诊断。
-- 请求目标：你在 Notemd 设置中配置的 Provider Base URL。
-- 发送数据：完成任务所需的 prompt 与内容片段。
-- 数据说明：API Key 保存在本地插件配置中，并由你的设备发起签名请求。
+- 觸發場景：處理文件、內容生成、翻譯、研究總結、Mermaid 總結，以及連線測試/開發者診斷。
+- 請求目標：您在 Notemd 設定中配置的 Provider Base URL。
+- 發送數據：完成任務所需的 prompt 與內容片段。
+- 數據說明：API 金鑰儲存在本地插件配置中，並由您的裝置發起簽章請求。
 
-### 网页研究请求（可选）
+### 網頁研究請求（可選）
 
-- 触发场景：开启网页研究并选择搜索提供商时。
-- 请求目标：Tavily 或 DuckDuckGo。
-- 发送数据：你的查询词与必要请求元数据。
+- 觸發場景：開啟網頁研究並選擇搜尋供應商時。
+- 請求目標：Tavily 或 DuckDuckGo。
+- 發送數據：您的查詢詞與必要請求元數據。
 
-### 开发者诊断与调试日志（可选）
+### 開發者診斷與除錯日誌（可選）
 
-- 触发场景：开启 API 调试模式或执行开发者诊断动作。
-- 落地位置：保险库根目录（例如 `Notemd_Provider_Diagnostic_*.txt`、`Notemd_Error_Log_*.txt`）。
-- 风险提示：日志可能包含请求/响应片段，对外分享前请先审查并脱敏。
+- 觸發場景：開啟 API 除錯模式或執行開發者診斷動作。
+- 落地位置：保險庫根目錄（例如 `Notemd_Provider_Diagnostic_*.txt`、`Notemd_Error_Log_*.txt`）。
+- 風險提示：日誌可能包含請求/回應片段，對外分享前請先審查並脫敏。
 
-### 本地存储
+### 本地儲存
 
-- 插件配置保存在 `.obsidian/plugins/notemd/data.json`。
-- 生成文件、报告和可选日志根据你的设置保存在保险库内。
+- 插件配置儲存在 `.obsidian/plugins/notemd/data.json`。
+- 生成文件、報告和可選日誌根據您的設定儲存在保險庫內。
 
-## 故障排除
+## 疑難排解
 
-### 常见问题
-- **插件未加载**：确保`manifest.json`、`main.js`、`styles.css`均放置在 `<保险库>/.obsidian/plugins/notemd/` 并重启Obsidian。启动异常可通过开发者控制台查看。
-- **处理失败/API错误**：
-    1. 文件必须为`.md`或`.txt`格式；
-    2. “测试LLM连接”命令可验证API设置（Notemd: Test LLM Connection）；
-    3. 检查API Key、Base URL、模型名等参数是否填写正确；
-    4. 本地模型需确保服务端已启动，Base URL无误；
-    5. 云端服务需保证网络连接正常；
-    6. 单文件处理失败可查看开发者控制台详细信息；
-    7. 批量处理失败可查看保险库根目录的`error_processing_filename.log`日志。
-    8. 自动错误日志：若任务失败，插件会在仓库根目录生成 `Notemd_Error_Log_[Timestamp].txt`，其中包含错误信息、堆栈与会话日志。开启“API 错误调试模式”后，该日志会包含更完整的 API 调试细节。
-    9. 真实 Endpoint 长请求诊断（开发者）：
-        - 插件内路径（建议先用）：进入 **设置 -> Notemd -> 开发者 Provider 诊断（长请求）**，对活动 Provider 执行运行时探针，并在仓库根目录生成 `Notemd_Provider_Diagnostic_*.txt` 报告。
-        - CLI 路径（在 Obsidian 运行时之外）：若需要对真实端点执行 buffered 与 streaming 的可重复对照，可使用内置 Node 诊断脚本：
+### 常見問題
+- **插件未載入**：確保 `manifest.json`、`main.js`、`styles.css` 均放置在 `<保險庫>/.obsidian/plugins/notemd/` 並重啟 Obsidian。啟動異常可通過開發者主控台查看。
+- **處理失敗/API 錯誤**：
+    1. 文件必須為 `.md` 或 `.txt` 格式；
+    2. 「測試 LLM 連線」命令可驗證 API 設定 (Notemd: Test LLM Connection)；
+    3. 檢查 API 金鑰、Base URL、模型名等參數是否填寫正確；
+    4. 本地模型需確保伺服器已啟動，Base URL 無誤；
+    5. 雲端服務需保證網路連線正常；
+    6. 單文件處理失敗可查看開發者主控台詳細資訊；
+    7. 批量處理失敗可查看保險庫根目錄的 `error_processing_filename.log` 日誌。
+    8. 自動錯誤日誌：若任務失敗，插件會在倉庫根目錄生成 `Notemd_Error_Log_[Timestamp].txt`，其中包含錯誤資訊、堆疊與工作階段日誌。開啟「API 錯誤除錯模式」後，該日誌會包含更完整的 API 除錯細節。
+    9. 真實 Endpoint 長請求診斷（開發者）：
+        - 插件內路徑（建議先用）：進入 **設定 -> Notemd -> 開發者 Provider 診斷（長請求）**，對活動 Provider 執行執行階段探針，並在倉庫根目錄生成 `Notemd_Provider_Diagnostic_*.txt` 報告。
+        - CLI 路徑（在 Obsidian 執行階段之外）：若需要對真實端點執行 buffered 與 streaming 的可重複對照，可使用內建 Node 診斷指令碼：
         ```bash
         npm run diagnose:llm -- \
           --transport openai-compatible \
@@ -733,30 +734,30 @@ Notemd 在本地 Obsidian 运行，但部分功能会发起外部网络请求。
           --timeout-ms 360000 \
           --output ./tmp/openrouter-diagnostic.txt
         ```
-        该报告会记录每次尝试的 `First Byte`、`Duration`、脱敏后的请求信息、响应头、原始/部分响应体、已解析的流式片段以及传输层失败点，便于定位超时、断连与网关行为。
-- **LM Studio/Ollama 连接问题**：
-    *   **测试连接失败**：确保本地服务器（LM Studio 或 Ollama）正在运行，并且已加载/可用正确的模型。
-    *   **CORS 错误（Windows上的Ollama）**：如果在 Windows 上使用 Ollama 时遇到 CORS（跨源资源共享）错误，您可能需要设置 `OLLAMA_ORIGINS` 环境变量。您可以在启动 Ollama 之前，在命令提示符中运行 `set OLLAMA_ORIGINS=*` 来实现。这允许来自任何来源的请求。
-    *   **在 LM Studio 中启用 CORS**：对于 LM Studio，您可以直接在服务器设置中启用 CORS，如果 Obsidian 在浏览器中运行或具有严格的来源策略，这可能是必需的。
-- **文件夹创建失败**：请确保设置中保存路径为相对路径，且不包含无效字符（如\* " \ / < > : | ? # ^ [ ] 等）。
-- **性能问题**：大文件或批量处理可适当调低分块字数，或更换LLM模型。
-- **链接质量问题**：可尝试不同模型或温度设置改善效果。
+        該報告會記錄每次嘗試的 `First Byte`、`Duration`、脫敏後的請求資訊、回應標頭、原始/部分回應體、已解析的串流片段以及傳輸層失敗點，便於定位逾時、斷連與網關行為。
+- **LM Studio/Ollama 連線問題**：
+    *   **測試連線失敗**：確保本地伺服器（LM Studio 或 Ollama）正在執行，並且已載入/可用正確的模型。
+    *   **CORS 錯誤（Windows 上的 Ollama）**：如果在 Windows 上使用 Ollama 時遇到 CORS（跨來源資源共享）錯誤，您可能需要設定 `OLLAMA_ORIGINS` 環境變數。您可以在啟動 Ollama 之前，在命令提示字元中執行 `set OLLAMA_ORIGINS=*` 來實現。這允許來自任何來源的請求。
+    *   **在 LM Studio 中啟用 CORS**：對於 LM Studio，您可以直接在伺服器設定中啟用 CORS，如果 Obsidian 在瀏覽器中執行或具有嚴格的來源策略，這可能是必需的。
+- **資料夾建立失敗**：請確保設定中儲存路徑為相對路徑，且不包含無效字元（如\* " \ / < > : | ? # ^ [ ] 等）。
+- **效能問題**：大文件或批量處理可適當調低分塊字數，或更換 LLM 模型。
+- **連結品質問題**：可嘗試不同模型或溫度設定改善效果。
 
-## 贡献
+## 貢獻
 
-欢迎任何形式的贡献！请参考GitHub项目说明: [https://github.com/Jacobinwwey/obsidian-NotEMD](https://github.com/Jacobinwwey/obsidian-NotEMD) 
+歡迎任何形式的貢獻！請參考 GitHub 專案說明: [https://github.com/Jacobinwwey/obsidian-NotEMD](https://github.com/Jacobinwwey/obsidian-NotEMD) 
 
-## 维护者文档
+## 維護者文件
 
 - [Release Workflow (English)](./docs/maintainer/release-workflow.md)
-- [发布流程（简体中文）](./docs/maintainer/release-workflow.zh-CN.md)
+- [發佈流程（簡體中文）](./docs/maintainer/release-workflow.zh-CN.md)
 
-## 许可证
+## 授權條款
 
-MIT许可证 - 详情请见[LICENSE](LICENSE)。
+MIT 授權條款 - 詳情請見 [LICENSE](LICENSE)。
 
 ---
 
-*Notemd v1.8.0 - 用AI提升你的Obsidian知识图谱。*
+*Notemd v1.8.0 - 用 AI 提升你的 Obsidian 知識圖譜。*
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)
