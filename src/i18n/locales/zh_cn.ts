@@ -5,6 +5,7 @@ type DeepPartial<T> = T extends object ? { [K in keyof T]?: DeepPartial<T[K]> } 
 export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
     common: {
         language: '语言',
+        select: '选择',
         cancel: '取消',
         close: '关闭',
         copy: '复制',
@@ -12,9 +13,27 @@ export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
         standby: '待命',
         unknownError: '未知错误'
     },
+    commands: {
+        checkDuplicatesCurrent: '检查当前文件中的重复项',
+        extractConceptsAndGenerateTitles: '提取概念并生成标题',
+        createWikiLinkAndGenerateNoteFromSelection: '从选中文本创建 Wiki-Link 并生成笔记'
+    },
     plugin: {
         viewName: 'Notemd 工作台',
         ribbonTooltip: '打开 Notemd 侧边栏'
+    },
+    folderPicker: {
+        title: '选择文件夹',
+        vaultRoot: '（仓库根目录）',
+        selectAction: '选择'
+    },
+    duplicateModal: {
+        title: '确认删除重复项',
+        intro: '以下 {count} 条概念笔记被识别为潜在重复项，将移动到系统回收站：',
+        reason: '原因：{reason}',
+        conflictsWith: '冲突对象：{files}',
+        warning: '此操作无法在 Obsidian 内轻易撤销，但通常仍可从系统回收站中恢复文件。',
+        deleteFiles: '删除 {count} 个文件'
     },
     settings: {
         language: {
@@ -104,7 +123,36 @@ export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
     notices: {
         processingAlreadyRunning: '已有任务正在处理中。',
         anotherProcessRunning: '另一个任务正在运行，请稍候。',
-        notemdBusy: 'Notemd 正在忙碌中。'
+        notemdBusy: 'Notemd 正在忙碌中。',
+        duplicateTermsFound: '发现 {count} 个潜在重复词。',
+        duplicateTermsCheckConsole: '发现 {count} 个潜在重复词。请查看控制台。',
+        duplicateTermsCheckLogConsole: '发现 {count} 个潜在重复词。请查看日志和控制台。',
+        duplicateCheckError: '检查重复项时出错：{message}',
+        noActiveTextFileSelected: "当前没有选中的 '.md' 或 '.txt' 文件。",
+        noActiveProviderConfigured: '当前未配置活动的 LLM 提供商，请检查 Notemd 设置。',
+        noActiveMarkdownFileSelectedOrChanged: '当前没有选中的 Markdown 文件，或文件已变更。',
+        noActiveMarkdownFileSelected: '当前没有选中的 Markdown 文件。',
+        noActiveMarkdownEditorFound: '未找到活动的 Markdown 编辑器。',
+        selectValidWord: '请选择有效词语（至少 2 个字符）。',
+        setConceptNoteFolder: '请先在设置中配置 Concept Note Folder。',
+        generatedContentForWord: '已为 [[{word}]] 生成内容！',
+        genericError: '错误：{message}',
+        couldNotOpenSidebar: '无法打开 Notemd 侧边栏。',
+        processingComplete: 'Notemd 处理完成！',
+        extractionCompleteSavedTo: '提取完成，已保存到 {path}',
+        noMarkdownFilesFoundSelectedFolder: '所选文件夹中未找到 Markdown 文件。',
+        batchTranslationCompleted: '已完成 {count} 个文件的批量翻译。',
+        batchTranslationFailed: '批量翻译失败，请查看控制台了解详情。',
+        fileEmpty: '文件为空。',
+        noTranslationProviderConfigured: '未配置用于翻译的提供商。',
+        failedCreateTranslationFolder: '创建翻译文件夹失败：{path}。将回退到原文件所在文件夹。',
+        translatedFileSavedTo: '翻译后的文件已保存到 {path}',
+        failedTranslateFile: '翻译文件失败，请查看控制台了解详情。',
+        duplicateDeletionCancelled: '已取消删除重复项。',
+        duplicateCheckComplete: '重复项检查完成。',
+        duplicateCheckCompleteCancelled: '重复项检查完成（已取消删除）。',
+        noPotentialDuplicateConceptNotesFound: '未发现潜在的重复概念笔记。',
+        deletionCompleteSummary: '删除完成。已删除 {total} 个候选文件中的 {deleted} 个，发生 {errors} 个错误。'
     },
     errorModal: {
         copyDetails: '复制错误详情',
