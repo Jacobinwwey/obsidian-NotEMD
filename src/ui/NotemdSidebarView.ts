@@ -1,50 +1,32 @@
 import { Editor, ItemView, MarkdownView, Notice, TFile, TFolder, WorkspaceLeaf } from 'obsidian';
 import NotemdPlugin from '../main';
 import { ProgressReporter } from '../types';
-import { NOTEMD_SIDEBAR_DISPLAY_TEXT, NOTEMD_SIDEBAR_ICON, NOTEMD_SIDEBAR_VIEW_TYPE } from '../constants';
+import { NOTEMD_SIDEBAR_ICON, NOTEMD_SIDEBAR_VIEW_TYPE } from '../constants';
 import { findDuplicates } from '../fileUtils';
 import {
+    ActionCategory,
     CustomWorkflowButton,
+    getLocalizedWorkflowButtonName,
+    getSidebarActionLabel,
+    getSidebarActionTooltip,
     resolveCustomWorkflowButtons,
     SIDEBAR_ACTION_DEFINITIONS,
     SidebarActionId
 } from '../workflowButtons';
-import { formatI18n, getI18nStrings } from '../i18n';
+import { formatI18n, getCurrentUiLocale, getI18nStrings } from '../i18n';
 import { formatTimeForLocale } from '../i18n/localeFormat';
-
-type ActionCategory = typeof SIDEBAR_ACTION_DEFINITIONS[number]['category'];
 
 interface WorkflowExecutionContext {
     preferredFolderPath: string | null;
     lastGeneratedCompleteFolderPath: string | null;
 }
 
-const ACTION_CATEGORY_LABEL: Record<ActionCategory, { title: string; openByDefault: boolean }> = {
-    core: { title: 'Core Flow', openByDefault: true },
-    generation: { title: 'Generation & Mermaid', openByDefault: true },
-    knowledge: { title: 'Knowledge', openByDefault: false },
-    translation: { title: 'Translation', openByDefault: false },
-    utilities: { title: 'Utilities', openByDefault: false }
-};
-
-const ACTION_TOOLTIP: Record<SidebarActionId, string> = {
-    'process-current-add-links': 'Processes current file and creates wiki links/concept notes.',
-    'process-folder-add-links': 'Processes all eligible notes in a folder.',
-    'generate-from-title': 'Generate note content from current note title.',
-    'batch-generate-from-titles': 'Batch-generate content from note titles in a folder.',
-    'research-and-summarize': 'Research selected topic/title and append summary.',
-    'summarize-as-mermaid': 'Generate a Mermaid diagram summary from current note.',
-    'translate-current-file': 'Translate the active file into selected output language.',
-    'batch-translate-folder': 'Translate all markdown files in a folder.',
-    'extract-concepts-current': 'Extract concepts from current file only.',
-    'extract-concepts-folder': 'Extract concepts from every file in a selected folder.',
-    'extract-original-text': 'Extract verbatim source excerpts for configured questions.',
-    'batch-mermaid-fix': 'Run Mermaid/LaTeX batch syntax fix on selected folder.',
-    'fix-formula-current': 'Normalize formula delimiters in current file.',
-    'batch-fix-formula': 'Normalize formula delimiters across a selected folder.',
-    'check-duplicates-current': 'Detect duplicate terms in the current file.',
-    'check-remove-duplicate-concepts': 'Detect and remove duplicate concept notes.',
-    'test-llm-connection': 'Test active provider connection and credentials.'
+const ACTION_CATEGORY_CONFIG: Record<ActionCategory, { openByDefault: boolean }> = {
+    core: { openByDefault: true },
+    generation: { openByDefault: true },
+    knowledge: { openByDefault: false },
+    translation: { openByDefault: false },
+    utilities: { openByDefault: false }
 };
 
 const SINGLE_FILE_ACTION_IDS = new Set<SidebarActionId>([
@@ -94,6 +76,10 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         return getI18nStrings({ uiLocale: this.plugin.settings.uiLocale });
     }
 
+    private getResolvedUiLocale() {
+        return getCurrentUiLocale({ uiLocale: this.plugin.settings.uiLocale });
+    }
+
     constructor(leaf: WorkspaceLeaf, plugin: NotemdPlugin) {
         super(leaf);
         this.plugin = plugin;
@@ -104,7 +90,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
     }
 
     getDisplayText() {
-        return NOTEMD_SIDEBAR_DISPLAY_TEXT;
+        return this.getStrings().plugin.viewName;
     }
 
     getIcon() {
@@ -160,6 +146,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
     }
 
     updateStatus(text: string, percent?: number) {
+        const i18n = this.getStrings();
         if (this.statusEl) this.statusEl.setText(text);
 
         if (percent !== undefined && (percent < 0 || percent >= 100)) {
@@ -189,10 +176,12 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
                     const estimatedTotal = elapsed / (percent / 100);
                     const remaining = Math.max(0, estimatedTotal - elapsed);
                     if (this.timeRemainingEl) {
-                        this.timeRemainingEl.setText(`Est. time remaining: ${this.formatTime(remaining)}`);
+                        this.timeRemainingEl.setText(
+                            formatI18n(i18n.sidebar.status.timeRemaining, { time: this.formatTime(remaining) })
+                        );
                     }
                 } else if (this.timeRemainingEl) {
-                    this.timeRemainingEl.setText('Est. time remaining: calculating...');
+                    this.timeRemainingEl.setText(i18n.sidebar.status.timeRemainingCalculating);
                 }
             } else {
                 this.progressEl.dataset.progress = '100';
@@ -200,11 +189,11 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
                 this.progressEl.setText('');
                 this.progressEl.style.width = '100%';
                 if (this.progressValueEl) {
-                    this.progressValueEl.setText('Stopped');
+                    this.progressValueEl.setText(i18n.sidebar.status.stopped);
                     this.progressValueEl.removeClass('is-idle');
                     this.progressValueEl.addClass('is-error');
                 }
-                if (this.timeRemainingEl) this.timeRemainingEl.setText('Processing stopped.');
+                if (this.timeRemainingEl) this.timeRemainingEl.setText(i18n.sidebar.status.processingStopped);
             }
         }
     }
@@ -213,8 +202,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         if (!this.logEl) {
             return;
         }
-        const uiLocale = this.plugin.settings.uiLocale === 'auto' ? undefined : this.plugin.settings.uiLocale;
-        const timestamp = `[${formatTimeForLocale(new Date(), uiLocale)}]`;
+        const timestamp = `[${formatTimeForLocale(new Date(), this.getResolvedUiLocale())}]`;
         const fullMessage = `${timestamp} ${message}`;
         this.logContent.push(fullMessage);
 
@@ -240,9 +228,10 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
 
     requestCancel() {
         if (this.isProcessing && !this.isCancelled) {
+            const i18n = this.getStrings();
             this.isCancelled = true;
-            this.updateStatus('Cancelling...', -1);
-            this.log('User requested cancellation.');
+            this.updateStatus(i18n.sidebar.status.cancelling, -1);
+            this.log(i18n.sidebar.status.userRequestedCancellation);
             this.currentAbortController?.abort();
             this.updateButtonStates();
         }
@@ -256,8 +245,9 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
     }
 
     updateActiveTasks(delta: number): void {
+        const i18n = this.getStrings();
         this.activeTasks += delta;
-        this.updateStatus(`Processing... (Active: ${this.activeTasks})`);
+        this.updateStatus(formatI18n(i18n.sidebar.status.processingActive, { count: this.activeTasks }));
     }
 
     private updateButtonStates() {
@@ -337,9 +327,10 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
     private createActionButton(
         parent: HTMLElement,
         actionId: SidebarActionId,
-        label: string,
         category: ActionCategory
     ) {
+        const i18n = this.getStrings();
+        const label = getSidebarActionLabel(i18n, actionId);
         const classes = ['notemd-action-button'];
         if (isSingleFileAction(actionId)) {
             classes.push('mod-cta');
@@ -350,7 +341,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             cls: classes.join(' ')
         });
         button.dataset.category = category;
-        button.title = ACTION_TOOLTIP[actionId] || label;
+        button.title = getSidebarActionTooltip(i18n, actionId);
         button.onclick = async () => {
             await this.runSingleAction(actionId);
         };
@@ -370,19 +361,20 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             new Notice(i18n.notices.processingAlreadyRunning);
             return;
         }
-        const actionLabel = SIDEBAR_ACTION_DEFINITIONS.find(def => def.id === actionId)?.label || actionId;
-        this.startProcessing(`Running "${actionLabel}"...`);
+        const actionLabel = getSidebarActionLabel(i18n, actionId);
+        this.startProcessing(formatI18n(i18n.sidebar.status.runningAction, { label: actionLabel }));
         const reporter = this.createReporterProxy();
 
         try {
             await this.executeAction(actionId, reporter);
             if (!this.cancelled) {
-                this.updateStatus(`"${actionLabel}" complete`, 100);
+                this.updateStatus(formatI18n(i18n.sidebar.status.actionComplete, { label: actionLabel }), 100);
             }
         } catch (error: unknown) {
             const message = error instanceof Error ? error.message : String(error);
-            this.log(`Action failed: ${message}`);
-            this.updateStatus('Error occurred', -1);
+            const failureMessage = formatI18n(i18n.sidebar.status.actionFailed, { message });
+            this.log(failureMessage);
+            this.updateStatus(failureMessage, -1);
         } finally {
             this.finishProcessing();
         }
@@ -394,7 +386,8 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             new Notice(i18n.notices.processingAlreadyRunning);
             return;
         }
-        this.startProcessing(`Workflow: ${button.name}`);
+        const workflowName = getLocalizedWorkflowButtonName(i18n, button.name);
+        this.startProcessing(formatI18n(i18n.sidebar.status.workflowStart, { name: workflowName }));
         const reporter = this.createReporterProxy();
         const context: WorkflowExecutionContext = {
             preferredFolderPath: this.getConfiguredConceptFolderPath(),
@@ -402,10 +395,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         };
         const continueOnError = this.plugin.settings.customWorkflowErrorStrategy === 'continue_on_error';
         let failedSteps = 0;
-        this.log(
-            `Executing workflow "${button.name}" with ${button.actions.length} step(s). ` +
-            `Strategy: ${continueOnError ? 'continue on error' : 'stop on first error'}.`
-        );
+        this.log(formatI18n(i18n.sidebar.status.workflowStart, { name: workflowName }));
 
         try {
             for (let i = 0; i < button.actions.length; i++) {
@@ -413,16 +403,29 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
                     break;
                 }
                 const actionId = button.actions[i];
-                const actionLabel = SIDEBAR_ACTION_DEFINITIONS.find(def => def.id === actionId)?.label || actionId;
+                const actionLabel = getSidebarActionLabel(i18n, actionId);
                 const progress = Math.floor((i / button.actions.length) * 100);
-                this.updateStatus(`[${i + 1}/${button.actions.length}] ${actionLabel}`, progress);
-                this.log(`Step ${i + 1}/${button.actions.length}: ${actionLabel}`);
+                this.updateStatus(
+                    formatI18n(i18n.sidebar.status.stepLabel, {
+                        current: i + 1,
+                        total: button.actions.length,
+                        label: actionLabel
+                    }),
+                    progress
+                );
+                this.log(
+                    formatI18n(i18n.sidebar.status.stepLog, {
+                        current: i + 1,
+                        total: button.actions.length,
+                        label: actionLabel
+                    })
+                );
                 try {
                     await this.executeAction(actionId, reporter, context);
                 } catch (error: unknown) {
                     failedSteps++;
                     const message = error instanceof Error ? error.message : String(error);
-                    this.log(`Step failed: ${message}`);
+                    this.log(formatI18n(i18n.sidebar.status.stepFailed, { message }));
                     if (!continueOnError) {
                         throw error;
                     }
@@ -431,18 +434,23 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
 
             if (!this.cancelled) {
                 if (failedSteps > 0) {
-                    this.updateStatus(`Workflow "${button.name}" finished with ${failedSteps} error(s)`, -1);
-                    new Notice(`Workflow "${button.name}" finished with ${failedSteps} error(s).`);
+                    const failureSummary = formatI18n(i18n.sidebar.status.workflowFinishedWithErrors, {
+                        name: workflowName,
+                        count: failedSteps
+                    });
+                    this.updateStatus(failureSummary, -1);
+                    new Notice(failureSummary);
                 } else {
-                    this.updateStatus(`Workflow "${button.name}" complete`, 100);
-                    new Notice(`Workflow "${button.name}" completed.`);
+                    const completeMessage = formatI18n(i18n.sidebar.status.workflowComplete, { name: workflowName });
+                    this.updateStatus(completeMessage, 100);
+                    new Notice(completeMessage);
                 }
             }
         } catch (error: unknown) {
             const message = error instanceof Error ? error.message : String(error);
-            this.log(`Workflow failed: ${message}`);
-            this.updateStatus('Workflow failed', -1);
-            new Notice(`Workflow "${button.name}" failed: ${message}`);
+            this.log(formatI18n(i18n.sidebar.status.workflowFailedLog, { message }));
+            this.updateStatus(i18n.sidebar.status.workflowFailed, -1);
+            new Notice(`${workflowName}: ${message}`);
         } finally {
             this.finishProcessing();
         }
@@ -630,16 +638,17 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         );
 
         workflowResolution.buttons.forEach(buttonConfig => {
+            const workflowName = getLocalizedWorkflowButtonName(i18n, buttonConfig.name);
             const workflowClasses = ['notemd-action-button', 'notemd-workflow-button'];
             if (isSingleFileWorkflow(buttonConfig)) {
                 workflowClasses.push('mod-cta', 'is-primary');
             }
             const workflowButton = quickBody.createEl('button', {
-                text: buttonConfig.name,
+                text: workflowName,
                 cls: workflowClasses.join(' ')
             });
             workflowButton.dataset.category = 'workflow';
-            workflowButton.title = buttonConfig.actions.join(' > ');
+            workflowButton.title = buttonConfig.actions.map(actionId => getSidebarActionLabel(i18n, actionId)).join(' > ');
             workflowButton.onclick = async () => {
                 await this.runCustomWorkflow(buttonConfig);
             };
@@ -658,21 +667,22 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             actionsByCategory.set(def.category, existing);
         });
 
-        (Object.keys(ACTION_CATEGORY_LABEL) as ActionCategory[]).forEach(category => {
+        (Object.keys(ACTION_CATEGORY_CONFIG) as ActionCategory[]).forEach(category => {
             const defs = actionsByCategory.get(category) || [];
             if (defs.length === 0) {
                 return;
             }
 
+            const categoryTitle = i18n.sidebar.sectionTitles[category];
             const body = this.createSection(
                 scrollArea,
-                ACTION_CATEGORY_LABEL[category].title,
-                formatI18n(i18n.sidebar.builtInActionsPrefix, { category: ACTION_CATEGORY_LABEL[category].title.toLowerCase() }),
-                ACTION_CATEGORY_LABEL[category].openByDefault
+                categoryTitle,
+                formatI18n(i18n.sidebar.builtInActionsPrefix, { category: categoryTitle }),
+                ACTION_CATEGORY_CONFIG[category].openByDefault
             );
 
             defs.forEach(def => {
-                this.createActionButton(body, def.id, def.label, def.category);
+                this.createActionButton(body, def.id, def.category);
             });
 
             if (category === 'translation') {
