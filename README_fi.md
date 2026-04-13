@@ -59,7 +59,7 @@ Siinä kaikki. Tutki asetuksia avataksesi lisää ominaisuuksia, kuten verkkotut
 
 | Asia | Laajuus | Oletus | Huomautukset |
 |---|---|---|---|
-| `UI Locale` | Vain liitännäisen käyttöliittymätekstit (asetukset, sivupalkki, ilmoitukset, dialogit) | `auto` | Seuraa Obsidianin kieliasetusta; tämänhetkiset UI-käännöskatalogit ovat `en`, `zh-CN` ja `zh-TW`. |
+| `UI Locale` | Vain liitännäisen käyttöliittymätekstit (asetukset, sivupalkki, ilmoitukset, dialogit) | `auto` | Seuraa Obsidianin kieliasetusta; tämänhetkiset UI-käännöskatalogit ovat `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN` ja `zh-TW`. |
 | `Task Output Language` | LLM:n generoima tehtäväulostulo (linkit, yhteenvedot, generointi, poiminta, käännöskohde) | `en` | Voi olla globaali tai tehtäväkohtainen, kun `Use different languages for tasks` on käytössä. |
 | `Disable auto translation` | Muut kuin `Translate`-tehtävät säilyttävät lähdekielen kontekstin | `false` | Erilliset `Translate`-tehtävät pakottavat edelleen määritetyn kohdekielen. |
 | Locale fallback | Puuttuvien UI-avainten ratkaisu | locale -> `en` | Pitää käyttöliittymän vakaana, vaikka osa avaimista olisi vielä kääntämättä. |

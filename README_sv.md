@@ -59,7 +59,7 @@ Klart. Utforska inställningarna för att låsa upp fler funktioner som webbfors
 
 | Aspekt | Omfattning | Standard | Anmärkningar |
 |---|---|---|---|
-| `UI Locale` | Endast pluginens UI-text, som inställningar, sidofält, notiser och dialoger | `auto` | Följer Obsidians locale; nuvarande UI-kataloger är `en`, `zh-CN` och `zh-TW`. |
+| `UI Locale` | Endast pluginens UI-text, som inställningar, sidofält, notiser och dialoger | `auto` | Följer Obsidians locale; nuvarande UI-kataloger är `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN` och `zh-TW`. |
 | `Task Output Language` | Uppgiftsutdata genererad av LLM, som länkar, sammanfattningar, generering, extraktion och översättningsmål | `en` | Kan vara global eller per uppgift när `Use different languages for tasks` är aktiverat. |
 | `Disable auto translation` | Icke-Translate-uppgifter behåller källspråkets kontext | `false` | Explicita `Translate`-uppgifter tvingar fortfarande det konfigurerade målspråket. |
 | Locale-fallback | Upplösning av saknade UI-nycklar | locale -> `en` | Håller UI:t stabilt när vissa nycklar ännu inte är översatta. |

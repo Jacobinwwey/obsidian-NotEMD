@@ -59,7 +59,7 @@ Dat is alles. Verken de instellingen om meer functies vrij te schakelen, zoals w
 
 | Onderdeel | Reikwijdte | Standaard | Opmerkingen |
 |---|---|---|---|
-| `UI Locale` | Alleen plugin-UI-tekst (instellingen, zijbalk, meldingen, dialoogvensters) | `auto` | Volgt de Obsidian-locale; huidige UI-catalogi zijn `en`, `zh-CN`, `zh-TW`. |
+| `UI Locale` | Alleen plugin-UI-tekst (instellingen, zijbalk, meldingen, dialoogvensters) | `auto` | Volgt de Obsidian-locale; huidige UI-catalogi zijn `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, `zh-TW`. |
 | `Task Output Language` | Door de LLM gegenereerde taakuitvoer (links, samenvattingen, generatie, extractie, vertaald doel) | `en` | Kan globaal zijn of per taak worden ingesteld wanneer `Use different languages for tasks` is ingeschakeld. |
 | `Disable auto translation` | Niet-Translate-taken behouden broncontext in de oorspronkelijke taal | `false` | Expliciete `Translate`-taken forceren nog steeds de geconfigureerde doeltaal. |
 | Locale fallback | Resolutie van ontbrekende UI-sleutels | locale -> `en` | Houdt de UI stabiel wanneer sommige sleutels nog niet vertaald zijn. |

@@ -59,7 +59,7 @@ Notemd משפר את תהליך העבודה שלכם ב-Obsidian באמצעות
 
 | היבט | היקף | ברירת מחדל | הערות |
 |---|---|---|---|
-| `UI Locale` | טקסט ממשק התוסף בלבד (settings, sidebar, notices, dialogs) | `auto` | עוקב אחר שפת Obsidian; קטלוגי ה-UI הנוכחיים הם `en`, `zh-CN`, `zh-TW`. |
+| `UI Locale` | טקסט ממשק התוסף בלבד (settings, sidebar, notices, dialogs) | `auto` | עוקב אחר שפת Obsidian; קטלוגי ה-UI הנוכחיים הם `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, `zh-TW`. |
 | `Task Output Language` | פלט משימות שנוצר על ידי LLM (קישורים, סיכומים, יצירה, חילוץ, שפת יעד לתרגום) | `en` | יכול להיות גלובלי או לפי משימה כאשר `Use different languages for tasks` מופעל. |
 | `Disable auto translation` | משימות שאינן `Translate` שומרות על הקשר שפת המקור | `false` | משימות `Translate` מפורשות עדיין אוכפות את שפת היעד שהוגדרה. |
 | גיבוי locale | פתרון מפתחות UI חסרים | locale -> `en` | שומר על יציבות ה-UI כאשר חלק מהמפתחות אינם מתורגמים. |

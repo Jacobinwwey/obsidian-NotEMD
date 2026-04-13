@@ -59,7 +59,7 @@ Selesai. Jelajahi pengaturan untuk membuka fitur tambahan seperti riset web, ter
 
 | Aspek | Cakupan | Default | Catatan |
 |---|---|---|---|
-| `UI Locale` | Teks UI plugin saja, seperti settings, sidebar, notice, dan dialog | `auto` | Mengikuti locale Obsidian; katalog UI saat ini adalah `en`, `zh-CN`, dan `zh-TW`. |
+| `UI Locale` | Teks UI plugin saja, seperti settings, sidebar, notice, dan dialog | `auto` | Mengikuti locale Obsidian; katalog UI saat ini adalah `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, dan `zh-TW`. |
 | `Task Output Language` | Output tugas yang dihasilkan LLM, seperti link, ringkasan, generasi, ekstraksi, dan target terjemahan | `en` | Bisa global atau per-task jika `Use different languages for tasks` diaktifkan. |
 | `Disable auto translation` | Tugas non-Translate mempertahankan konteks bahasa sumber | `false` | Tugas `Translate` eksplisit tetap memaksa bahasa target yang dikonfigurasi. |
 | Locale cadangan | Resolusi key UI yang hilang | locale -> `en` | Menjaga UI tetap stabil ketika sebagian key belum diterjemahkan. |

@@ -59,7 +59,7 @@ Isso é tudo! Explore as configurações para desbloquear mais recursos como pes
 
 | Aspecto | Escopo | Padrão | Notas |
 |---|---|---|---|
-| `UI Locale` | Apenas texto da interface (configurações, barra lateral, avisos, diálogos) | `auto` | Segue o idioma do Obsidian; catálogos atuais: `en`, `zh-CN`, `zh-TW`. |
+| `UI Locale` | Apenas texto da interface (configurações, barra lateral, avisos, diálogos) | `auto` | Segue o idioma do Obsidian; catálogos atuais: `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, `zh-TW`. |
 | `Task Output Language` | Saída de tarefas gerada por LLM (links, resumos, geração, extração, destino da tradução) | `en` | Pode ser global ou por tarefa quando `Usar idiomas diferentes para tarefas` estiver ativado. |
 | `Disable auto translation` | Tarefas que não são de tradução mantêm o contexto original | `false` | Tarefas explícitas de `Traduzir` ainda aplicam o idioma de destino configurado. |
 | Locale fallback | Resolução de chaves de UI ausentes | locale -> `en` | Mantém a UI estável quando algumas chaves não estão traduzidas. |

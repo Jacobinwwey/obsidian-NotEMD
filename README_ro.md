@@ -59,7 +59,7 @@ Atât. Explorează setările pentru a debloca mai multe funcții, precum cerceta
 
 | Aspect | Domeniu | Implicit | Note |
 |---|---|---|---|
-| `UI Locale` | Doar textul interfeței pluginului (setări, sidebar, notificări, dialoguri) | `auto` | Urmează localizarea Obsidian; cataloagele actuale de UI sunt `en`, `zh-CN`, `zh-TW`. |
+| `UI Locale` | Doar textul interfeței pluginului (setări, sidebar, notificări, dialoguri) | `auto` | Urmează localizarea Obsidian; cataloagele actuale de UI sunt `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, `zh-TW`. |
 | `Task Output Language` | Ieșirea generată de LLM pentru sarcini (linkuri, rezumate, generare, extragere, ținta traducerii) | `en` | Poate fi globală sau per sarcină când `Use different languages for tasks` este activat. |
 | `Disable auto translation` | Sarcinile non-Translate păstrează contextul limbii sursă | `false` | Sarcinile explicite `Translate` aplică în continuare limba țintă configurată. |
 | Fallback de localizare | Rezolvarea cheilor UI lipsă | locale -> `en` | Menține UI-ul stabil când unele chei nu sunt încă traduse. |

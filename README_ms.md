@@ -59,7 +59,7 @@ Siap. Terokai tetapan untuk membuka lebih banyak ciri seperti penyelidikan web, 
 
 | Aspek | Skop | Lalai | Nota |
 |---|---|---|---|
-| `UI Locale` | Teks UI plugin sahaja, seperti tetapan, bar sisi, notis, dan dialog | `auto` | Mengikut locale Obsidian; katalog UI semasa ialah `en`, `zh-CN`, dan `zh-TW`. |
+| `UI Locale` | Teks UI plugin sahaja, seperti tetapan, bar sisi, notis, dan dialog | `auto` | Mengikut locale Obsidian; katalog UI semasa ialah `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, dan `zh-TW`. |
 | `Task Output Language` | Output tugas yang dijana oleh LLM, seperti pautan, ringkasan, penjanaan, pengekstrakan, dan sasaran terjemahan | `en` | Boleh diset secara global atau per tugas apabila `Use different languages for tasks` diaktifkan. |
 | `Disable auto translation` | Tugas bukan Translate mengekalkan konteks bahasa sumber | `false` | Tugas `Translate` yang eksplisit tetap memaksa bahasa sasaran yang dikonfigurasi. |
 | Locale sandaran | Resolusi key UI yang hilang | locale -> `en` | Memastikan UI kekal stabil apabila sebahagian key belum diterjemahkan. |

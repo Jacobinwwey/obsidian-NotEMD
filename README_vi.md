@@ -59,7 +59,7 @@ Vậy là xong. Hãy khám phá phần settings để mở khóa thêm các tín
 
 | Mối quan tâm | Phạm vi | Mặc định | Ghi chú |
 |---|---|---|---|
-| `UI Locale` | Chỉ văn bản giao diện của tiện ích, gồm settings, sidebar, notices và dialogs | `auto` | Đi theo locale của Obsidian; các UI catalog hiện có là `en`, `zh-CN`, `zh-TW`. |
+| `UI Locale` | Chỉ văn bản giao diện của tiện ích, gồm settings, sidebar, notices và dialogs | `auto` | Đi theo locale của Obsidian; các UI catalog hiện có là `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, `zh-TW`. |
 | `Task Output Language` | Đầu ra tác vụ do LLM tạo ra, gồm liên kết, tóm tắt, tạo nội dung, trích xuất và ngôn ngữ đích khi dịch | `en` | Có thể dùng chung hoặc theo từng tác vụ khi bật `Use different languages for tasks`. |
 | `Disable auto translation` | Các tác vụ không phải Translate giữ nguyên ngữ cảnh ngôn ngữ nguồn | `false` | Các tác vụ `Translate` rõ ràng vẫn áp dụng bắt buộc ngôn ngữ đích đã cấu hình. |
 | Locale dự phòng | Giải quyết các khóa UI bị thiếu | locale -> `en` | Giữ UI ổn định khi vẫn còn khóa chưa được dịch. |

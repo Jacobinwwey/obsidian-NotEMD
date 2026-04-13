@@ -59,7 +59,7 @@ Notemd mejora tu flujo de trabajo en Obsidian integrándose con varios Modelos d
 
 | Aspecto | Alcance | Predeterminado | Notas |
 |---|---|---|---|
-| `UI Locale` | Solo texto de la interfaz (ajustes, barra lateral, avisos) | `auto` | Sigue el idioma de Obsidian; los catálogos actuales son `en`, `zh-CN`, `zh-TW`. |
+| `UI Locale` | Solo texto de la interfaz (ajustes, barra lateral, avisos) | `auto` | Sigue el idioma de Obsidian; los catálogos actuales son `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, `zh-TW`. |
 | `Task Output Language` | Salida de tareas generada por LLM (enlaces, resúmenes, generación, extracción, objetivo de traducción) | `en` | Puede ser global o por tarea cuando se activa `Usar diferentes idiomas para tareas`. |
 | `Disable auto translation` | Las tareas que no son de traducción mantienen el contexto original | `false` | Las tareas explícitas de `Traducir` siguen aplicando el idioma objetivo configurado. |
 | Locale fallback | Resolución de claves de UI faltantes | locale -> `en` | Mantiene la UI estable cuando algunas claves no están traducidas. |

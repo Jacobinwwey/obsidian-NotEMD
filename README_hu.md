@@ -59,7 +59,7 @@ Ennyi az egész. Fedezze fel a beállításokat, hogy további lehetőségeket n
 
 | Szempont | Hatókör | Alapértelmezett | Megjegyzések |
 |---|---|---|---|
-| `UI Locale` | Csak a bővítmény kezelőfelületének szövege (beállítások, oldalsáv, értesítések, párbeszédablakok) | `auto` | Követi az Obsidian nyelvét; a jelenlegi felületi katalógusok: `en`, `zh-CN`, `zh-TW`. |
+| `UI Locale` | Csak a bővítmény kezelőfelületének szövege (beállítások, oldalsáv, értesítések, párbeszédablakok) | `auto` | Követi az Obsidian nyelvét; a jelenlegi felületi katalógusok: `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, `zh-TW`. |
 | `Task Output Language` | LLM által generált feladatkimenet (hivatkozások, összefoglalók, generálás, kivonatolás, fordítási célnyelv) | `en` | Lehet globális vagy feladatonkénti, ha a `Use different languages for tasks` be van kapcsolva. |
 | `Disable auto translation` | A nem `Translate` feladatok megtartják a forrásnyelvi kontextust | `false` | Az explicit `Translate` feladatok továbbra is a konfigurált célnyelvet alkalmazzák. |
 | Területi beállítási tartalék | Hiányzó UI-kulcsok feloldása | locale -> `en` | Stabilan tartja a felületet akkor is, ha néhány kulcs még nincs lefordítva. |
