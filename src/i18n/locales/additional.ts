@@ -2109,6 +2109,564 @@ extendLocale(STRINGS_KO, {
 });
 
 extendLocale(STRINGS_NL, {
+    settings: {
+        providerConfig: {
+            summaryTitle: 'Providerpresets uitgebreid naar {count} items.',
+            summaryDesc:
+                'OpenAI-compatibele providers delen nu één runtime-pad. Ingebouwde presets dekken China-gerichte diensten zoals Qwen, Doubao, Moonshot, GLM, MiniMax, Baidu Qianfan en SiliconFlow, en de algemene preset "OpenAI Compatible" kan LiteLLM, vLLM, Perplexity, Vercel AI Gateway of je eigen proxy gebruiken.',
+            manageName: 'Providerconfiguraties beheren',
+            manageDesc: 'Exporteer je huidige providerinstellingen naar een JSON-bestand of importeer instellingen uit een bestand.',
+            exportButton: 'Providers exporteren',
+            exportTooltip: 'Providerconfiguraties opslaan',
+            importButton: 'Providers importeren',
+            importTooltip: 'Providerconfiguraties laden (samenvoegen)',
+            activeProviderName: 'Actieve provider',
+            activeProviderDesc: 'Selecteer de LLM-provider die voor verwerking wordt gebruikt.',
+            providerDetailsHeading: 'Details van {provider}',
+            apiKeyName: 'API-sleutel',
+            apiKeyDescRequired: 'API-sleutel voor {provider}.{extra}',
+            apiKeyDescOptional: 'API-sleutel voor {provider}. Optioneel voor endpoints die anonieme toegang of placeholders toestaan.',
+            apiKeyExtraLmStudio: " (Optioneel, vaak 'EMPTY')",
+            apiKeyPlaceholderDefault: 'Voer je API-sleutel in',
+            apiKeyPlaceholderLmStudio: 'Meestal EMPTY of leeg laten',
+            baseUrlName: 'Basis-URL / endpoint',
+            baseUrlDesc: 'Het API-endpoint voor {provider}.{required}',
+            baseUrlRequired: ' Verplicht.',
+            baseUrlPlaceholder: 'Voer de basis-URL van de API in',
+            modelName: 'Model',
+            modelDesc: 'Modelnaam om met {provider} te gebruiken.',
+            modelPlaceholder: 'Voer modelnaam in',
+            temperatureName: 'Temperatuur',
+            temperatureDesc: 'Bepaalt de mate van willekeur (0=deterministisch, 1=creatief).',
+            apiVersionName: 'API-versie',
+            apiVersionDesc: 'Vereiste API-versie voor Azure OpenAI (bijv. 2024-02-15-preview)',
+            apiVersionPlaceholder: 'Voer API-versie in',
+            testConnectionName: 'Verbinding met {provider} testen',
+            testConnectionDesc: 'Controleer API-sleutel, endpoint en modeltoegang.',
+            testConnectionButton: 'Verbinding testen',
+            testConnectionTesting: 'Bezig met testen...',
+            testConnectionRunning: 'Verbinding met {provider} wordt getest...',
+            testConnectionBlocked: '{provider} kan niet worden getest: {issues}',
+            testConnectionSuccess: '✅ Succes: {message}',
+            testConnectionFailed: '❌ Mislukt: {message}. Controleer de console.',
+            testConnectionError: 'Fout tijdens verbindingstest: {message}',
+            missingActiveProvider: 'Fout: configuratie voor de actieve provider kon niet worden gevonden.',
+            exportDirectoryError: 'Fout bij maken van pluginmap: {message}',
+            exportSuccess: 'Providerinstellingen succesvol geëxporteerd naar {path}',
+            exportError: 'Fout bij exporteren van instellingen: {message}',
+            importFileMissing: "Importbestand niet gevonden op {path}. Plaats daar je bestand 'notemd-providers.json'.",
+            importInvalidArray: 'Het geïmporteerde bestand bevat geen geldige provider-array.',
+            activeProviderReset: 'Actieve provider is teruggezet naar de standaard omdat de vorige provider na importeren niet werd gevonden.',
+            importSuccess: '{newCount} nieuwe instellingen succesvol geïmporteerd en {updatedCount} bestaande providerinstellingen bijgewerkt.',
+            importError: 'Fout bij importeren van instellingen: {message}',
+            validationRequired: 'Configuratie vereist',
+            validationWarning: 'Configuratiewaarschuwing'
+        }
+    }
+});
+
+extendLocale(STRINGS_PL, {
+    settings: {
+        providerConfig: {
+            summaryTitle: 'Presety dostawców rozszerzono do {count} pozycji.',
+            summaryDesc:
+                'Dostawcy zgodni z OpenAI współdzielą teraz jedną ścieżkę runtime. Wbudowane presety obejmują usługi ukierunkowane na Chiny, takie jak Qwen, Doubao, Moonshot, GLM, MiniMax, Baidu Qianfan i SiliconFlow, a ogólny preset "OpenAI Compatible" może kierować ruch do LiteLLM, vLLM, Perplexity, Vercel AI Gateway lub własnego proxy.',
+            manageName: 'Zarządzaj konfiguracjami dostawców',
+            manageDesc: 'Wyeksportuj bieżące ustawienia dostawców do pliku JSON lub zaimportuj ustawienia z pliku.',
+            exportButton: 'Eksportuj dostawców',
+            exportTooltip: 'Zapisz konfiguracje dostawców',
+            importButton: 'Importuj dostawców',
+            importTooltip: 'Wczytaj konfiguracje dostawców (scala)',
+            activeProviderName: 'Aktywny dostawca',
+            activeProviderDesc: 'Wybierz dostawcę LLM używanego do przetwarzania.',
+            providerDetailsHeading: 'Szczegóły {provider}',
+            apiKeyName: 'Klucz API',
+            apiKeyDescRequired: 'Klucz API dla {provider}.{extra}',
+            apiKeyDescOptional: 'Klucz API dla {provider}. Opcjonalny dla endpointów, które pozwalają na dostęp anonimowy lub placeholder.',
+            apiKeyExtraLmStudio: " (Opcjonalne, często 'EMPTY')",
+            apiKeyPlaceholderDefault: 'Wprowadź swój klucz API',
+            apiKeyPlaceholderLmStudio: 'Zwykle EMPTY albo zostaw puste',
+            baseUrlName: 'Bazowy URL / endpoint',
+            baseUrlDesc: 'Endpoint API dla {provider}.{required}',
+            baseUrlRequired: ' Wymagane.',
+            baseUrlPlaceholder: 'Wprowadź bazowy URL API',
+            modelName: 'Model',
+            modelDesc: 'Nazwa modelu używanego z {provider}.',
+            modelPlaceholder: 'Wprowadź nazwę modelu',
+            temperatureName: 'Temperatura',
+            temperatureDesc: 'Steruje losowością (0=deterministyczny, 1=kreatywny).',
+            apiVersionName: 'Wersja API',
+            apiVersionDesc: 'Wymagana wersja API dla Azure OpenAI (np. 2024-02-15-preview)',
+            apiVersionPlaceholder: 'Wprowadź wersję API',
+            testConnectionName: 'Testuj połączenie z {provider}',
+            testConnectionDesc: 'Zweryfikuj klucz API, endpoint i dostępność modelu.',
+            testConnectionButton: 'Testuj połączenie',
+            testConnectionTesting: 'Testowanie...',
+            testConnectionRunning: 'Testowanie połączenia z {provider}...',
+            testConnectionBlocked: 'Nie można przetestować {provider}: {issues}',
+            testConnectionSuccess: '✅ Sukces: {message}',
+            testConnectionFailed: '❌ Niepowodzenie: {message}. Sprawdź konsolę.',
+            testConnectionError: 'Błąd podczas testu połączenia: {message}',
+            missingActiveProvider: 'Błąd: nie znaleziono konfiguracji aktywnego dostawcy.',
+            exportDirectoryError: 'Błąd tworzenia katalogu wtyczki: {message}',
+            exportSuccess: 'Ustawienia dostawców zostały pomyślnie wyeksportowane do {path}',
+            exportError: 'Błąd eksportowania ustawień: {message}',
+            importFileMissing: "Nie znaleziono pliku importu w {path}. Umieść tam plik 'notemd-providers.json'.",
+            importInvalidArray: 'Zaimportowany plik nie zawiera prawidłowej tablicy dostawców.',
+            activeProviderReset: 'Aktywny dostawca został zresetowany do domyślnego, ponieważ poprzedni nie został znaleziony po imporcie.',
+            importSuccess: 'Pomyślnie zaimportowano {newCount} nowych ustawień i zaktualizowano {updatedCount} istniejących ustawień dostawców.',
+            importError: 'Błąd importowania ustawień: {message}',
+            validationRequired: 'Wymagana konfiguracja',
+            validationWarning: 'Ostrzeżenie konfiguracji'
+        }
+    }
+});
+
+extendLocale(STRINGS_PT, {
+    settings: {
+        providerConfig: {
+            summaryTitle: 'Os predefinidos de fornecedor foram expandidos para {count} entradas.',
+            summaryDesc:
+                'Os fornecedores compatíveis com OpenAI partilham agora um único caminho de runtime. Os predefinidos integrados cobrem serviços focados na China como Qwen, Doubao, Moonshot, GLM, MiniMax, Baidu Qianfan e SiliconFlow, e o predefinido genérico "OpenAI Compatible" pode apontar para LiteLLM, vLLM, Perplexity, Vercel AI Gateway ou o seu próprio proxy.',
+            manageName: 'Gerir configurações de fornecedores',
+            manageDesc: 'Exporte as configurações atuais dos fornecedores para um ficheiro JSON ou importe definições a partir de um ficheiro.',
+            exportButton: 'Exportar fornecedores',
+            exportTooltip: 'Guardar configurações de fornecedores',
+            importButton: 'Importar fornecedores',
+            importTooltip: 'Carregar configurações de fornecedores (funde)',
+            activeProviderName: 'Fornecedor ativo',
+            activeProviderDesc: 'Selecione o fornecedor LLM a usar no processamento.',
+            providerDetailsHeading: 'Detalhes de {provider}',
+            apiKeyName: 'Chave API',
+            apiKeyDescRequired: 'Chave API de {provider}.{extra}',
+            apiKeyDescOptional: 'Chave API de {provider}. Opcional para endpoints que permitem acesso anónimo ou por placeholder.',
+            apiKeyExtraLmStudio: " (Opcional, frequentemente 'EMPTY')",
+            apiKeyPlaceholderDefault: 'Introduza a sua chave API',
+            apiKeyPlaceholderLmStudio: 'Normalmente EMPTY ou deixe em branco',
+            baseUrlName: 'URL base / endpoint',
+            baseUrlDesc: 'O endpoint de API de {provider}.{required}',
+            baseUrlRequired: ' Obrigatório.',
+            baseUrlPlaceholder: 'Introduza a URL base da API',
+            modelName: 'Modelo',
+            modelDesc: 'Nome do modelo a usar com {provider}.',
+            modelPlaceholder: 'Introduza o nome do modelo',
+            temperatureName: 'Temperatura',
+            temperatureDesc: 'Controla a aleatoriedade (0=determinístico, 1=criativo).',
+            apiVersionName: 'Versão da API',
+            apiVersionDesc: 'Versão de API necessária para Azure OpenAI (por ex., 2024-02-15-preview)',
+            apiVersionPlaceholder: 'Introduza a versão da API',
+            testConnectionName: 'Testar ligação a {provider}',
+            testConnectionDesc: 'Verifique a chave API, o endpoint e a acessibilidade do modelo.',
+            testConnectionButton: 'Testar ligação',
+            testConnectionTesting: 'A testar...',
+            testConnectionRunning: 'A testar ligação a {provider}...',
+            testConnectionBlocked: 'Não é possível testar {provider}: {issues}',
+            testConnectionSuccess: '✅ Sucesso: {message}',
+            testConnectionFailed: '❌ Falhou: {message}. Verifique a consola.',
+            testConnectionError: 'Erro durante o teste de ligação: {message}',
+            missingActiveProvider: 'Erro: não foi possível encontrar a configuração do fornecedor ativo.',
+            exportDirectoryError: 'Erro ao criar diretório do plugin: {message}',
+            exportSuccess: 'Configurações dos fornecedores exportadas com sucesso para {path}',
+            exportError: 'Erro ao exportar definições: {message}',
+            importFileMissing: "Ficheiro de importação não encontrado em {path}. Coloque aí o seu ficheiro 'notemd-providers.json'.",
+            importInvalidArray: 'O ficheiro importado não contém um array de fornecedores válido.',
+            activeProviderReset: 'O fornecedor ativo foi reposto para o valor predefinido, porque o anterior não foi encontrado após a importação.',
+            importSuccess: 'Foram importadas com sucesso {newCount} definições novas e atualizadas {updatedCount} definições de fornecedores existentes.',
+            importError: 'Erro ao importar definições: {message}',
+            validationRequired: 'Configuração obrigatória',
+            validationWarning: 'Aviso de configuração'
+        }
+    }
+});
+
+extendLocale(STRINGS_PT_BR, {
+    settings: {
+        providerConfig: {
+            summaryTitle: 'Os presets de provedores foram expandidos para {count} entradas.',
+            summaryDesc:
+                'Os provedores compatíveis com OpenAI agora compartilham um único caminho de runtime. Os presets integrados cobrem serviços focados na China, como Qwen, Doubao, Moonshot, GLM, MiniMax, Baidu Qianfan e SiliconFlow, e o preset genérico "OpenAI Compatible" pode apontar para LiteLLM, vLLM, Perplexity, Vercel AI Gateway ou seu próprio proxy.',
+            manageName: 'Gerenciar configurações de provedores',
+            manageDesc: 'Exporte as configurações atuais dos provedores para um arquivo JSON ou importe configurações de um arquivo.',
+            exportButton: 'Exportar provedores',
+            exportTooltip: 'Salvar configurações de provedores',
+            importButton: 'Importar provedores',
+            importTooltip: 'Carregar configurações de provedores (mescla)',
+            activeProviderName: 'Provedor ativo',
+            activeProviderDesc: 'Selecione o provedor LLM a ser usado no processamento.',
+            providerDetailsHeading: 'Detalhes de {provider}',
+            apiKeyName: 'Chave da API',
+            apiKeyDescRequired: 'Chave da API para {provider}.{extra}',
+            apiKeyDescOptional: 'Chave da API para {provider}. Opcional para endpoints que permitem acesso anônimo ou placeholder.',
+            apiKeyExtraLmStudio: " (Opcional, geralmente 'EMPTY')",
+            apiKeyPlaceholderDefault: 'Digite sua chave da API',
+            apiKeyPlaceholderLmStudio: 'Geralmente EMPTY ou deixe em branco',
+            baseUrlName: 'URL base / endpoint',
+            baseUrlDesc: 'O endpoint da API para {provider}.{required}',
+            baseUrlRequired: ' Obrigatório.',
+            baseUrlPlaceholder: 'Digite a URL base da API',
+            modelName: 'Modelo',
+            modelDesc: 'Nome do modelo a usar com {provider}.',
+            modelPlaceholder: 'Digite o nome do modelo',
+            temperatureName: 'Temperatura',
+            temperatureDesc: 'Controla a aleatoriedade (0=determinístico, 1=criativo).',
+            apiVersionName: 'Versão da API',
+            apiVersionDesc: 'Versão da API exigida para Azure OpenAI (por exemplo, 2024-02-15-preview)',
+            apiVersionPlaceholder: 'Digite a versão da API',
+            testConnectionName: 'Testar conexão com {provider}',
+            testConnectionDesc: 'Verifique a chave da API, o endpoint e a acessibilidade do modelo.',
+            testConnectionButton: 'Testar conexão',
+            testConnectionTesting: 'Testando...',
+            testConnectionRunning: 'Testando conexão com {provider}...',
+            testConnectionBlocked: 'Não é possível testar {provider}: {issues}',
+            testConnectionSuccess: '✅ Sucesso: {message}',
+            testConnectionFailed: '❌ Falha: {message}. Verifique o console.',
+            testConnectionError: 'Erro durante o teste de conexão: {message}',
+            missingActiveProvider: 'Erro: não foi possível encontrar a configuração do provedor ativo.',
+            exportDirectoryError: 'Erro ao criar o diretório do plugin: {message}',
+            exportSuccess: 'As configurações dos provedores foram exportadas com sucesso para {path}',
+            exportError: 'Erro ao exportar configurações: {message}',
+            importFileMissing: "Arquivo de importação não encontrado em {path}. Coloque seu arquivo 'notemd-providers.json' nesse local.",
+            importInvalidArray: 'O arquivo importado não contém uma lista válida de provedores.',
+            activeProviderReset: 'O provedor ativo foi redefinido para o padrão porque o anterior não foi encontrado após a importação.',
+            importSuccess: 'Foram importadas com sucesso {newCount} novas configurações e atualizadas {updatedCount} configurações existentes de provedores.',
+            importError: 'Erro ao importar configurações: {message}',
+            validationRequired: 'Configuração obrigatória',
+            validationWarning: 'Aviso de configuração'
+        }
+    }
+});
+
+extendLocale(STRINGS_RU, {
+    settings: {
+        providerConfig: {
+            summaryTitle: 'Наборы пресетов провайдеров расширены до {count} записей.',
+            summaryDesc:
+                'Провайдеры с совместимостью OpenAI теперь используют единый runtime-путь. Встроенные пресеты охватывают ориентированные на Китай сервисы, такие как Qwen, Doubao, Moonshot, GLM, MiniMax, Baidu Qianfan и SiliconFlow, а общий пресет "OpenAI Compatible" может работать с LiteLLM, vLLM, Perplexity, Vercel AI Gateway или вашим собственным прокси.',
+            manageName: 'Управление конфигурациями провайдеров',
+            manageDesc: 'Экспортируйте текущие настройки провайдеров в JSON-файл или импортируйте настройки из файла.',
+            exportButton: 'Экспортировать провайдеров',
+            exportTooltip: 'Сохранить конфигурации провайдеров',
+            importButton: 'Импортировать провайдеров',
+            importTooltip: 'Загрузить конфигурации провайдеров (с объединением)',
+            activeProviderName: 'Активный провайдер',
+            activeProviderDesc: 'Выберите провайдера LLM для обработки.',
+            providerDetailsHeading: 'Данные {provider}',
+            apiKeyName: 'API-ключ',
+            apiKeyDescRequired: 'API-ключ для {provider}.{extra}',
+            apiKeyDescOptional: 'API-ключ для {provider}. Необязателен для endpointов, допускающих placeholder- или анонимный доступ.',
+            apiKeyExtraLmStudio: " (Необязательно, часто 'EMPTY')",
+            apiKeyPlaceholderDefault: 'Введите API-ключ',
+            apiKeyPlaceholderLmStudio: 'Обычно EMPTY или оставить пустым',
+            baseUrlName: 'Базовый URL / endpoint',
+            baseUrlDesc: 'API-endpoint для {provider}.{required}',
+            baseUrlRequired: ' Обязательно.',
+            baseUrlPlaceholder: 'Введите базовый URL API',
+            modelName: 'Модель',
+            modelDesc: 'Имя модели для использования с {provider}.',
+            modelPlaceholder: 'Введите имя модели',
+            temperatureName: 'Температура',
+            temperatureDesc: 'Управляет случайностью (0=детерминированно, 1=креативно).',
+            apiVersionName: 'Версия API',
+            apiVersionDesc: 'Требуемая версия API для Azure OpenAI (например, 2024-02-15-preview)',
+            apiVersionPlaceholder: 'Введите версию API',
+            testConnectionName: 'Проверить подключение к {provider}',
+            testConnectionDesc: 'Проверьте API-ключ, endpoint и доступность модели.',
+            testConnectionButton: 'Проверить подключение',
+            testConnectionTesting: 'Проверка...',
+            testConnectionRunning: 'Проверяется подключение к {provider}...',
+            testConnectionBlocked: 'Невозможно проверить {provider}: {issues}',
+            testConnectionSuccess: '✅ Успех: {message}',
+            testConnectionFailed: '❌ Ошибка: {message}. Проверьте консоль.',
+            testConnectionError: 'Ошибка во время проверки подключения: {message}',
+            missingActiveProvider: 'Ошибка: не удалось найти конфигурацию активного провайдера.',
+            exportDirectoryError: 'Ошибка при создании директории плагина: {message}',
+            exportSuccess: 'Настройки провайдеров успешно экспортированы в {path}',
+            exportError: 'Ошибка при экспорте настроек: {message}',
+            importFileMissing: "Файл импорта не найден по пути {path}. Поместите туда файл 'notemd-providers.json'.",
+            importInvalidArray: 'Импортированный файл не содержит корректного массива провайдеров.',
+            activeProviderReset: 'Активный провайдер сброшен на значение по умолчанию, так как предыдущий не найден после импорта.',
+            importSuccess: 'Успешно импортировано {newCount} новых и обновлено {updatedCount} существующих настроек провайдеров.',
+            importError: 'Ошибка при импорте настроек: {message}',
+            validationRequired: 'Требуется конфигурация',
+            validationWarning: 'Предупреждение конфигурации'
+        }
+    }
+});
+
+extendLocale(STRINGS_TH, {
+    settings: {
+        providerConfig: {
+            summaryTitle: 'ขยายพรีเซ็ตผู้ให้บริการเป็น {count} รายการแล้ว',
+            summaryDesc:
+                'ผู้ให้บริการที่เข้ากันได้กับ OpenAI ใช้เส้นทาง runtime ร่วมกันแล้วในตอนนี้ พรีเซ็ตในตัวครอบคลุมบริการที่เน้นจีนอย่าง Qwen, Doubao, Moonshot, GLM, MiniMax, Baidu Qianfan และ SiliconFlow และพรีเซ็ตทั่วไป "OpenAI Compatible" สามารถชี้ไปที่ LiteLLM, vLLM, Perplexity, Vercel AI Gateway หรือพร็อกซีของคุณเองได้',
+            manageName: 'จัดการการกำหนดค่าผู้ให้บริการ',
+            manageDesc: 'ส่งออกการตั้งค่าผู้ให้บริการปัจจุบันของคุณเป็นไฟล์ JSON หรือจะนำเข้าการตั้งค่าจากไฟล์ก็ได้',
+            exportButton: 'ส่งออกผู้ให้บริการ',
+            exportTooltip: 'บันทึกการกำหนดค่าผู้ให้บริการ',
+            importButton: 'นำเข้าผู้ให้บริการ',
+            importTooltip: 'โหลดการกำหนดค่าผู้ให้บริการ (ผสานรวม)',
+            activeProviderName: 'ผู้ให้บริการที่ใช้งานอยู่',
+            activeProviderDesc: 'เลือกผู้ให้บริการ LLM ที่จะใช้ในการประมวลผล',
+            providerDetailsHeading: 'รายละเอียดของ {provider}',
+            apiKeyName: 'คีย์ API',
+            apiKeyDescRequired: 'คีย์ API สำหรับ {provider}.{extra}',
+            apiKeyDescOptional: 'คีย์ API สำหรับ {provider} เป็นตัวเลือกสำหรับ endpoint ที่อนุญาตการเข้าถึงแบบไม่ระบุตัวตนหรือใช้ค่า placeholder ได้',
+            apiKeyExtraLmStudio: " (ไม่บังคับ มักเป็น 'EMPTY')",
+            apiKeyPlaceholderDefault: 'ป้อนคีย์ API ของคุณ',
+            apiKeyPlaceholderLmStudio: 'โดยปกติเป็น EMPTY หรือปล่อยว่างไว้',
+            baseUrlName: 'Base URL / endpoint',
+            baseUrlDesc: 'API endpoint สำหรับ {provider}.{required}',
+            baseUrlRequired: ' จำเป็น',
+            baseUrlPlaceholder: 'ป้อน API Base URL',
+            modelName: 'โมเดล',
+            modelDesc: 'ชื่อโมเดลที่จะใช้กับ {provider}',
+            modelPlaceholder: 'ป้อนชื่อโมเดล',
+            temperatureName: 'Temperature',
+            temperatureDesc: 'ควบคุมความสุ่ม (0=กำหนดแน่นอน, 1=สร้างสรรค์)',
+            apiVersionName: 'เวอร์ชัน API',
+            apiVersionDesc: 'เวอร์ชัน API ที่จำเป็นสำหรับ Azure OpenAI (เช่น 2024-02-15-preview)',
+            apiVersionPlaceholder: 'ป้อนเวอร์ชัน API',
+            testConnectionName: 'ทดสอบการเชื่อมต่อ {provider}',
+            testConnectionDesc: 'ตรวจสอบคีย์ API, endpoint และการเข้าถึงโมเดล',
+            testConnectionButton: 'ทดสอบการเชื่อมต่อ',
+            testConnectionTesting: 'กำลังทดสอบ...',
+            testConnectionRunning: 'กำลังทดสอบการเชื่อมต่อกับ {provider}...',
+            testConnectionBlocked: 'ไม่สามารถทดสอบ {provider} ได้: {issues}',
+            testConnectionSuccess: '✅ สำเร็จ: {message}',
+            testConnectionFailed: '❌ ล้มเหลว: {message} ตรวจสอบคอนโซล',
+            testConnectionError: 'เกิดข้อผิดพลาดระหว่างการทดสอบการเชื่อมต่อ: {message}',
+            missingActiveProvider: 'ข้อผิดพลาด: ไม่พบการกำหนดค่าสำหรับผู้ให้บริการที่ใช้งานอยู่',
+            exportDirectoryError: 'ข้อผิดพลาดในการสร้างไดเรกทอรีปลั๊กอิน: {message}',
+            exportSuccess: 'ส่งออกการตั้งค่าผู้ให้บริการไปยัง {path} สำเร็จแล้ว',
+            exportError: 'ข้อผิดพลาดในการส่งออกการตั้งค่า: {message}',
+            importFileMissing: "ไม่พบไฟล์นำเข้าที่ {path} กรุณาวางไฟล์ 'notemd-providers.json' ไว้ที่นั่น",
+            importInvalidArray: 'ไฟล์ที่นำเข้าไม่มีอาร์เรย์ของผู้ให้บริการที่ถูกต้อง',
+            activeProviderReset: 'รีเซ็ตผู้ให้บริการที่ใช้งานอยู่กลับเป็นค่าเริ่มต้นแล้ว เพราะไม่พบผู้ให้บริการเดิมหลังการนำเข้า',
+            importSuccess: 'นำเข้าการตั้งค่าใหม่ {newCount} รายการสำเร็จ และอัปเดตการตั้งค่าผู้ให้บริการเดิม {updatedCount} รายการ',
+            importError: 'ข้อผิดพลาดในการนำเข้าการตั้งค่า: {message}',
+            validationRequired: 'จำเป็นต้องกำหนดค่า',
+            validationWarning: 'คำเตือนการกำหนดค่า'
+        }
+    }
+});
+
+extendLocale(STRINGS_TR, {
+    settings: {
+        providerConfig: {
+            summaryTitle: 'Sağlayıcı önayarları {count} girdiye çıkarıldı.',
+            summaryDesc:
+                'OpenAI uyumlu sağlayıcılar artık tek bir çalışma zamanı yolunu paylaşıyor. Yerleşik önayarlar Qwen, Doubao, Moonshot, GLM, MiniMax, Baidu Qianfan ve SiliconFlow gibi Çin odaklı hizmetleri kapsıyor; genel "OpenAI Compatible" önayarı ise LiteLLM, vLLM, Perplexity, Vercel AI Gateway veya kendi proxy’nizi hedefleyebiliyor.',
+            manageName: 'Sağlayıcı yapılandırmalarını yönet',
+            manageDesc: 'Mevcut sağlayıcı ayarlarınızı bir JSON dosyasına aktarın veya ayarları bir dosyadan içe aktarın.',
+            exportButton: 'Sağlayıcıları dışa aktar',
+            exportTooltip: 'Sağlayıcı yapılandırmalarını kaydet',
+            importButton: 'Sağlayıcıları içe aktar',
+            importTooltip: 'Sağlayıcı yapılandırmalarını yükle (birleştirir)',
+            activeProviderName: 'Etkin sağlayıcı',
+            activeProviderDesc: 'İşleme için kullanılacak LLM sağlayıcısını seçin.',
+            providerDetailsHeading: '{provider} ayrıntıları',
+            apiKeyName: 'API anahtarı',
+            apiKeyDescRequired: '{provider} için API anahtarı.{extra}',
+            apiKeyDescOptional: '{provider} için API anahtarı. Yer tutucu veya anonim erişime izin veren endpointler için isteğe bağlıdır.',
+            apiKeyExtraLmStudio: " (İsteğe bağlı, çoğu zaman 'EMPTY')",
+            apiKeyPlaceholderDefault: 'API anahtarınızı girin',
+            apiKeyPlaceholderLmStudio: 'Genellikle EMPTY veya boş bırakın',
+            baseUrlName: 'Temel URL / endpoint',
+            baseUrlDesc: '{provider} için API endpoint’i.{required}',
+            baseUrlRequired: ' Zorunlu.',
+            baseUrlPlaceholder: 'API temel URL’sini girin',
+            modelName: 'Model',
+            modelDesc: '{provider} ile kullanılacak model adı.',
+            modelPlaceholder: 'Model adını girin',
+            temperatureName: 'Sıcaklık',
+            temperatureDesc: 'Rastgeleliği kontrol eder (0=deterministik, 1=yaratıcı).',
+            apiVersionName: 'API sürümü',
+            apiVersionDesc: 'Azure OpenAI için gerekli API sürümü (örn. 2024-02-15-preview)',
+            apiVersionPlaceholder: 'API sürümünü girin',
+            testConnectionName: '{provider} bağlantısını test et',
+            testConnectionDesc: 'API anahtarını, endpoint’i ve model erişilebilirliğini doğrulayın.',
+            testConnectionButton: 'Bağlantıyı test et',
+            testConnectionTesting: 'Test ediliyor...',
+            testConnectionRunning: '{provider} bağlantısı test ediliyor...',
+            testConnectionBlocked: '{provider} test edilemiyor: {issues}',
+            testConnectionSuccess: '✅ Başarılı: {message}',
+            testConnectionFailed: '❌ Başarısız: {message}. Konsolu kontrol edin.',
+            testConnectionError: 'Bağlantı testi sırasında hata: {message}',
+            missingActiveProvider: 'Hata: etkin sağlayıcı için yapılandırma bulunamadı.',
+            exportDirectoryError: 'Eklenti dizini oluşturulurken hata: {message}',
+            exportSuccess: 'Sağlayıcı ayarları başarıyla {path} konumuna aktarıldı',
+            exportError: 'Ayarlar dışa aktarılırken hata: {message}',
+            importFileMissing: "İçe aktarılacak dosya {path} konumunda bulunamadı. Lütfen 'notemd-providers.json' dosyanızı oraya yerleştirin.",
+            importInvalidArray: 'İçe aktarılan dosya geçerli bir sağlayıcı dizisi içermiyor.',
+            activeProviderReset: 'İçe aktarma sonrasında önceki sağlayıcı bulunamadığı için etkin sağlayıcı varsayılana sıfırlandı.',
+            importSuccess: '{newCount} yeni ayar başarıyla içe aktarıldı ve mevcut sağlayıcı ayarlarından {updatedCount} tanesi güncellendi.',
+            importError: 'Ayarlar içe aktarılırken hata: {message}',
+            validationRequired: 'Yapılandırma gerekli',
+            validationWarning: 'Yapılandırma uyarısı'
+        }
+    }
+});
+
+extendLocale(STRINGS_UK, {
+    settings: {
+        providerConfig: {
+            summaryTitle: 'Пресети провайдерів розширено до {count} записів.',
+            summaryDesc:
+                'Провайдери з OpenAI-сумісністю тепер використовують спільний runtime-шлях. Вбудовані пресети охоплюють орієнтовані на Китай сервіси, як-от Qwen, Doubao, Moonshot, GLM, MiniMax, Baidu Qianfan і SiliconFlow, а загальний пресет "OpenAI Compatible" може працювати з LiteLLM, vLLM, Perplexity, Vercel AI Gateway або вашим власним проксі.',
+            manageName: 'Керування конфігураціями провайдерів',
+            manageDesc: 'Експортуйте поточні налаштування провайдерів у JSON-файл або імпортуйте налаштування з файлу.',
+            exportButton: 'Експортувати провайдерів',
+            exportTooltip: 'Зберегти конфігурації провайдерів',
+            importButton: 'Імпортувати провайдерів',
+            importTooltip: 'Завантажити конфігурації провайдерів (з об’єднанням)',
+            activeProviderName: 'Активний провайдер',
+            activeProviderDesc: 'Виберіть провайдера LLM для обробки.',
+            providerDetailsHeading: 'Деталі {provider}',
+            apiKeyName: 'API-ключ',
+            apiKeyDescRequired: 'API-ключ для {provider}.{extra}',
+            apiKeyDescOptional: 'API-ключ для {provider}. Необов’язковий для endpointів, що дозволяють анонімний доступ або placeholder.',
+            apiKeyExtraLmStudio: " (Необов’язково, часто 'EMPTY')",
+            apiKeyPlaceholderDefault: 'Введіть свій API-ключ',
+            apiKeyPlaceholderLmStudio: 'Зазвичай EMPTY або залиште порожнім',
+            baseUrlName: 'Базовий URL / endpoint',
+            baseUrlDesc: 'API-endpoint для {provider}.{required}',
+            baseUrlRequired: ' Обов’язково.',
+            baseUrlPlaceholder: 'Введіть базовий URL API',
+            modelName: 'Модель',
+            modelDesc: 'Назва моделі для використання з {provider}.',
+            modelPlaceholder: 'Введіть назву моделі',
+            temperatureName: 'Температура',
+            temperatureDesc: 'Керує випадковістю (0=детерміновано, 1=креативно).',
+            apiVersionName: 'Версія API',
+            apiVersionDesc: 'Потрібна версія API для Azure OpenAI (наприклад, 2024-02-15-preview)',
+            apiVersionPlaceholder: 'Введіть версію API',
+            testConnectionName: 'Перевірити підключення до {provider}',
+            testConnectionDesc: 'Перевірте API-ключ, endpoint і доступність моделі.',
+            testConnectionButton: 'Перевірити підключення',
+            testConnectionTesting: 'Тестування...',
+            testConnectionRunning: 'Тестується підключення до {provider}...',
+            testConnectionBlocked: 'Неможливо протестувати {provider}: {issues}',
+            testConnectionSuccess: '✅ Успіх: {message}',
+            testConnectionFailed: '❌ Помилка: {message}. Перевірте консоль.',
+            testConnectionError: 'Помилка під час перевірки підключення: {message}',
+            missingActiveProvider: 'Помилка: не вдалося знайти конфігурацію активного провайдера.',
+            exportDirectoryError: 'Помилка створення каталогу плагіна: {message}',
+            exportSuccess: 'Налаштування провайдерів успішно експортовано до {path}',
+            exportError: 'Помилка експорту налаштувань: {message}',
+            importFileMissing: "Файл імпорту не знайдено за адресою {path}. Помістіть туди файл 'notemd-providers.json'.",
+            importInvalidArray: 'Імпортований файл не містить коректного масиву провайдерів.',
+            activeProviderReset: 'Активного провайдера скинуто до стандартного, оскільки попереднього не знайдено після імпорту.',
+            importSuccess: 'Успішно імпортовано {newCount} нових і оновлено {updatedCount} наявних налаштувань провайдерів.',
+            importError: 'Помилка імпорту налаштувань: {message}',
+            validationRequired: 'Потрібна конфігурація',
+            validationWarning: 'Попередження конфігурації'
+        }
+    }
+});
+
+extendLocale(STRINGS_VI, {
+    settings: {
+        providerConfig: {
+            summaryTitle: 'Preset nhà cung cấp đã được mở rộng lên {count} mục.',
+            summaryDesc:
+                'Các nhà cung cấp tương thích OpenAI hiện dùng chung một đường chạy runtime. Các preset tích hợp sẵn bao phủ những dịch vụ tập trung vào Trung Quốc như Qwen, Doubao, Moonshot, GLM, MiniMax, Baidu Qianfan và SiliconFlow, còn preset chung "OpenAI Compatible" có thể trỏ tới LiteLLM, vLLM, Perplexity, Vercel AI Gateway hoặc proxy riêng của bạn.',
+            manageName: 'Quản lý cấu hình nhà cung cấp',
+            manageDesc: 'Xuất các thiết lập nhà cung cấp hiện tại của bạn ra tệp JSON hoặc nhập thiết lập từ một tệp.',
+            exportButton: 'Xuất nhà cung cấp',
+            exportTooltip: 'Lưu cấu hình nhà cung cấp',
+            importButton: 'Nhập nhà cung cấp',
+            importTooltip: 'Tải cấu hình nhà cung cấp (gộp)',
+            activeProviderName: 'Nhà cung cấp đang hoạt động',
+            activeProviderDesc: 'Chọn nhà cung cấp LLM dùng cho xử lý.',
+            providerDetailsHeading: 'Chi tiết {provider}',
+            apiKeyName: 'Khóa API',
+            apiKeyDescRequired: 'Khóa API cho {provider}.{extra}',
+            apiKeyDescOptional: 'Khóa API cho {provider}. Tùy chọn đối với các endpoint cho phép truy cập ẩn danh hoặc placeholder.',
+            apiKeyExtraLmStudio: " (Tùy chọn, thường là 'EMPTY')",
+            apiKeyPlaceholderDefault: 'Nhập khóa API của bạn',
+            apiKeyPlaceholderLmStudio: 'Thường là EMPTY hoặc để trống',
+            baseUrlName: 'URL gốc / endpoint',
+            baseUrlDesc: 'API endpoint cho {provider}.{required}',
+            baseUrlRequired: ' Bắt buộc.',
+            baseUrlPlaceholder: 'Nhập URL gốc của API',
+            modelName: 'Mô hình',
+            modelDesc: 'Tên mô hình sẽ dùng với {provider}.',
+            modelPlaceholder: 'Nhập tên mô hình',
+            temperatureName: 'Nhiệt độ',
+            temperatureDesc: 'Điều khiển mức ngẫu nhiên (0=quyết định, 1=sáng tạo).',
+            apiVersionName: 'Phiên bản API',
+            apiVersionDesc: 'Phiên bản API bắt buộc cho Azure OpenAI (ví dụ: 2024-02-15-preview)',
+            apiVersionPlaceholder: 'Nhập phiên bản API',
+            testConnectionName: 'Kiểm tra kết nối {provider}',
+            testConnectionDesc: 'Xác minh khóa API, endpoint và khả năng truy cập mô hình.',
+            testConnectionButton: 'Kiểm tra kết nối',
+            testConnectionTesting: 'Đang kiểm tra...',
+            testConnectionRunning: 'Đang kiểm tra kết nối tới {provider}...',
+            testConnectionBlocked: 'Không thể kiểm tra {provider}: {issues}',
+            testConnectionSuccess: '✅ Thành công: {message}',
+            testConnectionFailed: '❌ Thất bại: {message}. Xem bảng điều khiển.',
+            testConnectionError: 'Lỗi trong khi kiểm tra kết nối: {message}',
+            missingActiveProvider: 'Lỗi: Không thể tìm thấy cấu hình cho nhà cung cấp đang hoạt động.',
+            exportDirectoryError: 'Lỗi khi tạo thư mục plugin: {message}',
+            exportSuccess: 'Đã xuất thành công thiết lập nhà cung cấp tới {path}',
+            exportError: 'Lỗi khi xuất thiết lập: {message}',
+            importFileMissing: "Không tìm thấy tệp nhập tại {path}. Vui lòng đặt tệp 'notemd-providers.json' của bạn ở đó.",
+            importInvalidArray: 'Tệp đã nhập không chứa mảng nhà cung cấp hợp lệ.',
+            activeProviderReset: 'Nhà cung cấp đang hoạt động đã được đặt lại về mặc định vì không tìm thấy nhà cung cấp trước đó sau khi nhập.',
+            importSuccess: 'Đã nhập thành công {newCount} thiết lập mới và cập nhật {updatedCount} thiết lập nhà cung cấp hiện có.',
+            importError: 'Lỗi khi nhập thiết lập: {message}',
+            validationRequired: 'Yêu cầu cấu hình',
+            validationWarning: 'Cảnh báo cấu hình'
+        }
+    }
+});
+
+extendLocale(STRINGS_ID, {
+    settings: {
+        providerConfig: { modelName: 'Model AI' }
+    }
+});
+
+extendLocale(STRINGS_JA, {
+    settings: {
+        providerConfig: { temperatureName: '温度' }
+    }
+});
+
+extendLocale(STRINGS_KO, {
+    settings: {
+        providerConfig: { temperatureName: '온도' }
+    }
+});
+
+extendLocale(STRINGS_NL, {
+    settings: {
+        providerConfig: { modelName: 'Modelnaam' }
+    }
+});
+
+extendLocale(STRINGS_PL, {
+    settings: {
+        providerConfig: { modelName: 'Nazwa modelu' }
+    }
+});
+
+extendLocale(STRINGS_TH, {
+    settings: {
+        providerConfig: {
+            baseUrlName: 'URL พื้นฐาน / endpoint',
+            temperatureName: 'อุณหภูมิ'
+        }
+    }
+});
+
+extendLocale(STRINGS_TR, {
+    settings: {
+        providerConfig: { modelName: 'Model adı' }
+    }
+});
+
+extendLocale(STRINGS_NL, {
     common: { select: 'Selecteren' },
     commands: {
         checkDuplicatesCurrent: 'Duplicaten in huidig bestand controleren',
@@ -2474,5 +3032,563 @@ extendLocale(STRINGS_VI, {
         batchMermaidFix: { heading: 'Sửa Mermaid hàng loạt' },
         duplicateScope: { heading: 'Phạm vi kiểm tra trùng lặp' },
         focusedLearning: { heading: 'Miền học tập tập trung' }
+    }
+});
+
+extendLocale(STRINGS_AR, {
+    settings: {
+        providerConfig: {
+            summaryTitle: 'تم توسيع الإعدادات المسبقة للمزوّدين إلى {count} إدخالًا.',
+            summaryDesc:
+                'تستخدم المزوّدات المتوافقة مع OpenAI الآن مسار تشغيل موحّدًا. تغطي الإعدادات المسبقة المضمنة خدمات موجّهة للصين مثل Qwen وDoubao وMoonshot وGLM وMiniMax وBaidu Qianfan وSiliconFlow، كما يمكن للإعداد المسبق العام "OpenAI Compatible" استهداف LiteLLM أو vLLM أو Perplexity أو Vercel AI Gateway أو الوكيل الخاص بك.',
+            manageName: 'إدارة إعدادات المزوّدين',
+            manageDesc: 'صدّر إعدادات المزوّد الحالية إلى ملف JSON، أو استورد الإعدادات من ملف.',
+            exportButton: 'تصدير المزوّدين',
+            exportTooltip: 'حفظ إعدادات المزوّدين',
+            importButton: 'استيراد المزوّدين',
+            importTooltip: 'تحميل إعدادات المزوّدين (مع الدمج)',
+            activeProviderName: 'المزوّد النشط',
+            activeProviderDesc: 'اختر مزوّد LLM المستخدم في المعالجة.',
+            providerDetailsHeading: 'تفاصيل {provider}',
+            apiKeyName: 'مفتاح API',
+            apiKeyDescRequired: 'مفتاح API لـ {provider}.{extra}',
+            apiKeyDescOptional: 'مفتاح API لـ {provider}. وهو اختياري للنهايات التي تسمح بالوصول المؤقت أو المجهول.',
+            apiKeyExtraLmStudio: " (اختياري، غالبًا 'EMPTY')",
+            apiKeyPlaceholderDefault: 'أدخل مفتاح API الخاص بك',
+            apiKeyPlaceholderLmStudio: 'عادةً EMPTY أو اتركه فارغًا',
+            baseUrlName: 'عنوان URL الأساسي / نقطة النهاية',
+            baseUrlDesc: 'نقطة نهاية API الخاصة بـ {provider}.{required}',
+            baseUrlRequired: ' مطلوب.',
+            baseUrlPlaceholder: 'أدخل عنوان URL الأساسي للـ API',
+            modelName: 'النموذج',
+            modelDesc: 'اسم النموذج المستخدم مع {provider}.',
+            modelPlaceholder: 'أدخل اسم النموذج',
+            temperatureName: 'الحرارة',
+            temperatureDesc: 'تتحكم في العشوائية (0=حتمي، 1=إبداعي).',
+            apiVersionName: 'إصدار API',
+            apiVersionDesc: 'إصدار API المطلوب لـ Azure OpenAI (مثل 2024-02-15-preview)',
+            apiVersionPlaceholder: 'أدخل إصدار API',
+            testConnectionName: 'اختبر اتصال {provider}',
+            testConnectionDesc: 'تحقق من مفتاح API ونقطة النهاية وإمكانية الوصول إلى النموذج.',
+            testConnectionButton: 'اختبار الاتصال',
+            testConnectionTesting: 'جارٍ الاختبار...',
+            testConnectionRunning: 'جارٍ اختبار الاتصال بـ {provider}...',
+            testConnectionBlocked: 'تعذر اختبار {provider}: {issues}',
+            testConnectionSuccess: '✅ نجح: {message}',
+            testConnectionFailed: '❌ فشل: {message}. راجع وحدة التحكم.',
+            testConnectionError: 'خطأ أثناء اختبار الاتصال: {message}',
+            missingActiveProvider: 'خطأ: تعذر العثور على إعدادات المزوّد النشط.',
+            exportDirectoryError: 'خطأ أثناء إنشاء مجلد الإضافة: {message}',
+            exportSuccess: 'تم تصدير إعدادات المزوّدين بنجاح إلى {path}',
+            exportError: 'خطأ أثناء تصدير الإعدادات: {message}',
+            importFileMissing: "لم يتم العثور على ملف الاستيراد في {path}. يرجى وضع ملف 'notemd-providers.json' هناك.",
+            importInvalidArray: 'الملف المستورد لا يحتوي على مصفوفة مزوّدين صالحة.',
+            activeProviderReset: 'تمت إعادة تعيين المزوّد النشط إلى الافتراضي لأن المزوّد السابق لم يُعثر عليه بعد الاستيراد.',
+            importSuccess: 'تم استيراد {newCount} إعدادًا جديدًا وتحديث {updatedCount} من إعدادات المزوّدين الموجودة بنجاح.',
+            importError: 'خطأ أثناء استيراد الإعدادات: {message}',
+            validationRequired: 'الإعداد مطلوب',
+            validationWarning: 'تحذير في الإعداد'
+        }
+    }
+});
+
+extendLocale(STRINGS_DE, {
+    settings: {
+        providerConfig: {
+            summaryTitle: 'Anbietervoreinstellungen auf {count} Einträge erweitert.',
+            summaryDesc:
+                'OpenAI-kompatible Anbieter verwenden jetzt einen gemeinsamen Laufzeitpfad. Die integrierten Voreinstellungen decken China-orientierte Dienste wie Qwen, Doubao, Moonshot, GLM, MiniMax, Baidu Qianfan und SiliconFlow ab, und die allgemeine Voreinstellung "OpenAI Compatible" kann LiteLLM, vLLM, Perplexity, Vercel AI Gateway oder Ihren eigenen Proxy ansprechen.',
+            manageName: 'Anbieterkonfigurationen verwalten',
+            manageDesc: 'Exportieren Sie Ihre aktuellen Anbietereinstellungen in eine JSON-Datei oder importieren Sie Einstellungen aus einer Datei.',
+            exportButton: 'Anbieter exportieren',
+            exportTooltip: 'Anbieterkonfigurationen speichern',
+            importButton: 'Anbieter importieren',
+            importTooltip: 'Anbieterkonfigurationen laden (führt zusammen)',
+            activeProviderName: 'Aktiver Anbieter',
+            activeProviderDesc: 'Wählen Sie den LLM-Anbieter für die Verarbeitung.',
+            providerDetailsHeading: 'Details zu {provider}',
+            apiKeyName: 'API-Schlüssel',
+            apiKeyDescRequired: 'API-Schlüssel für {provider}.{extra}',
+            apiKeyDescOptional: 'API-Schlüssel für {provider}. Optional für Endpunkte, die Platzhalter- oder anonymen Zugriff erlauben.',
+            apiKeyExtraLmStudio: " (Optional, oft 'EMPTY')",
+            apiKeyPlaceholderDefault: 'API-Schlüssel eingeben',
+            apiKeyPlaceholderLmStudio: 'Normalerweise EMPTY oder leer lassen',
+            baseUrlName: 'Basis-URL / Endpunkt',
+            baseUrlDesc: 'Der API-Endpunkt für {provider}.{required}',
+            baseUrlRequired: ' Erforderlich.',
+            baseUrlPlaceholder: 'API-Basis-URL eingeben',
+            modelName: 'Modell',
+            modelDesc: 'Zu verwendender Modellname für {provider}.',
+            modelPlaceholder: 'Modellname eingeben',
+            temperatureName: 'Temperatur',
+            temperatureDesc: 'Steuert die Zufälligkeit (0=deterministisch, 1=kreativ).',
+            apiVersionName: 'API-Version',
+            apiVersionDesc: 'Erforderliche API-Version für Azure OpenAI (z. B. 2024-02-15-preview)',
+            apiVersionPlaceholder: 'API-Version eingeben',
+            testConnectionName: 'Verbindung zu {provider} testen',
+            testConnectionDesc: 'API-Schlüssel, Endpunkt und Modellzugriff prüfen.',
+            testConnectionButton: 'Verbindung testen',
+            testConnectionTesting: 'Test läuft...',
+            testConnectionRunning: 'Verbindung zu {provider} wird getestet...',
+            testConnectionBlocked: '{provider} kann nicht getestet werden: {issues}',
+            testConnectionSuccess: '✅ Erfolgreich: {message}',
+            testConnectionFailed: '❌ Fehlgeschlagen: {message}. Konsole prüfen.',
+            testConnectionError: 'Fehler beim Verbindungstest: {message}',
+            missingActiveProvider: 'Fehler: Konfiguration für den aktiven Anbieter wurde nicht gefunden.',
+            exportDirectoryError: 'Fehler beim Erstellen des Plugin-Verzeichnisses: {message}',
+            exportSuccess: 'Anbietereinstellungen erfolgreich nach {path} exportiert',
+            exportError: 'Fehler beim Exportieren der Einstellungen: {message}',
+            importFileMissing: "Importdatei unter {path} nicht gefunden. Bitte legen Sie Ihre Datei 'notemd-providers.json' dort ab.",
+            importInvalidArray: 'Die importierte Datei enthält kein gültiges Anbieter-Array.',
+            activeProviderReset: 'Aktiver Anbieter wurde auf den Standard zurückgesetzt, da der vorherige Anbieter nach dem Import nicht gefunden wurde.',
+            importSuccess: 'Erfolgreich {newCount} neue importiert und {updatedCount} vorhandene Anbietereinstellungen aktualisiert.',
+            importError: 'Fehler beim Importieren der Einstellungen: {message}',
+            validationRequired: 'Konfiguration erforderlich',
+            validationWarning: 'Konfigurationswarnung'
+        }
+    }
+});
+
+extendLocale(STRINGS_ES, {
+    settings: {
+        providerConfig: {
+            summaryTitle: 'Los preajustes de proveedores se ampliaron a {count} entradas.',
+            summaryDesc:
+                'Los proveedores compatibles con OpenAI ahora comparten una sola ruta de ejecución. Los preajustes integrados cubren servicios orientados a China como Qwen, Doubao, Moonshot, GLM, MiniMax, Baidu Qianfan y SiliconFlow, y el preajuste genérico "OpenAI Compatible" puede apuntar a LiteLLM, vLLM, Perplexity, Vercel AI Gateway o tu propio proxy.',
+            manageName: 'Gestionar configuraciones de proveedores',
+            manageDesc: 'Exporta tu configuración actual de proveedores a un archivo JSON o importa configuraciones desde un archivo.',
+            exportButton: 'Exportar proveedores',
+            exportTooltip: 'Guardar configuraciones de proveedores',
+            importButton: 'Importar proveedores',
+            importTooltip: 'Cargar configuraciones de proveedores (fusiona)',
+            activeProviderName: 'Proveedor activo',
+            activeProviderDesc: 'Selecciona el proveedor LLM que se usará para el procesamiento.',
+            providerDetailsHeading: 'Detalles de {provider}',
+            apiKeyName: 'Clave API',
+            apiKeyDescRequired: 'Clave API para {provider}.{extra}',
+            apiKeyDescOptional: 'Clave API para {provider}. Opcional para endpoints que permiten acceso anónimo o de marcador de posición.',
+            apiKeyExtraLmStudio: " (Opcional, a menudo 'EMPTY')",
+            apiKeyPlaceholderDefault: 'Introduce tu clave API',
+            apiKeyPlaceholderLmStudio: 'Normalmente EMPTY o dejar en blanco',
+            baseUrlName: 'URL base / endpoint',
+            baseUrlDesc: 'El endpoint de API para {provider}.{required}',
+            baseUrlRequired: ' Obligatorio.',
+            baseUrlPlaceholder: 'Introduce la URL base de la API',
+            modelName: 'Modelo',
+            modelDesc: 'Nombre del modelo que se usará con {provider}.',
+            modelPlaceholder: 'Introduce el nombre del modelo',
+            temperatureName: 'Temperatura',
+            temperatureDesc: 'Controla la aleatoriedad (0=determinista, 1=creativo).',
+            apiVersionName: 'Versión de API',
+            apiVersionDesc: 'Versión de API requerida para Azure OpenAI (p. ej., 2024-02-15-preview)',
+            apiVersionPlaceholder: 'Introduce la versión de API',
+            testConnectionName: 'Probar conexión con {provider}',
+            testConnectionDesc: 'Verifica la clave API, el endpoint y el acceso al modelo.',
+            testConnectionButton: 'Probar conexión',
+            testConnectionTesting: 'Probando...',
+            testConnectionRunning: 'Probando conexión con {provider}...',
+            testConnectionBlocked: 'No se puede probar {provider}: {issues}',
+            testConnectionSuccess: '✅ Correcto: {message}',
+            testConnectionFailed: '❌ Falló: {message}. Revisa la consola.',
+            testConnectionError: 'Error durante la prueba de conexión: {message}',
+            missingActiveProvider: 'Error: no se pudo encontrar la configuración del proveedor activo.',
+            exportDirectoryError: 'Error al crear el directorio del plugin: {message}',
+            exportSuccess: 'La configuración de proveedores se exportó correctamente a {path}',
+            exportError: 'Error al exportar la configuración: {message}',
+            importFileMissing: "No se encontró el archivo de importación en {path}. Coloca allí tu archivo 'notemd-providers.json'.",
+            importInvalidArray: 'El archivo importado no contiene un arreglo válido de proveedores.',
+            activeProviderReset: 'El proveedor activo se restableció al predeterminado porque el anterior no se encontró después de la importación.',
+            importSuccess: 'Se importaron correctamente {newCount} configuraciones nuevas y se actualizaron {updatedCount} configuraciones existentes de proveedores.',
+            importError: 'Error al importar la configuración: {message}',
+            validationRequired: 'Configuración obligatoria',
+            validationWarning: 'Advertencia de configuración'
+        }
+    }
+});
+
+extendLocale(STRINGS_FA, {
+    settings: {
+        providerConfig: {
+            summaryTitle: 'پیش‌تنظیم‌های ارائه‌دهنده به {count} مورد گسترش یافت.',
+            summaryDesc:
+                'ارائه‌دهنده‌های سازگار با OpenAI اکنون از یک مسیر اجرای مشترک استفاده می‌کنند. پیش‌تنظیم‌های داخلی سرویس‌های متمرکز بر چین مانند Qwen، Doubao، Moonshot، GLM، MiniMax، Baidu Qianfan و SiliconFlow را پوشش می‌دهند و پیش‌تنظیم عمومی "OpenAI Compatible" می‌تواند LiteLLM، vLLM، Perplexity، Vercel AI Gateway یا پراکسی خودتان را هدف بگیرد.',
+            manageName: 'مدیریت پیکربندی ارائه‌دهنده‌ها',
+            manageDesc: 'پیکربندی فعلی ارائه‌دهنده‌ها را به یک فایل JSON صادر کنید یا تنظیمات را از یک فایل وارد کنید.',
+            exportButton: 'صدور ارائه‌دهنده‌ها',
+            exportTooltip: 'ذخیره پیکربندی ارائه‌دهنده‌ها',
+            importButton: 'ورود ارائه‌دهنده‌ها',
+            importTooltip: 'بارگذاری پیکربندی ارائه‌دهنده‌ها (با ادغام)',
+            activeProviderName: 'ارائه‌دهنده فعال',
+            activeProviderDesc: 'ارائه‌دهنده LLM مورد استفاده برای پردازش را انتخاب کنید.',
+            providerDetailsHeading: 'جزئیات {provider}',
+            apiKeyName: 'کلید API',
+            apiKeyDescRequired: 'کلید API برای {provider}.{extra}',
+            apiKeyDescOptional: 'کلید API برای {provider}. برای endpointهایی که دسترسی ناشناس یا جایگزین را می‌پذیرند اختیاری است.',
+            apiKeyExtraLmStudio: " (اختیاری، اغلب 'EMPTY')",
+            apiKeyPlaceholderDefault: 'کلید API خود را وارد کنید',
+            apiKeyPlaceholderLmStudio: 'معمولاً EMPTY یا خالی بگذارید',
+            baseUrlName: 'URL پایه / endpoint',
+            baseUrlDesc: 'endpoint API برای {provider}.{required}',
+            baseUrlRequired: ' الزامی است.',
+            baseUrlPlaceholder: 'URL پایه API را وارد کنید',
+            modelName: 'مدل',
+            modelDesc: 'نام مدلی که با {provider} استفاده می‌شود.',
+            modelPlaceholder: 'نام مدل را وارد کنید',
+            temperatureName: 'دما',
+            temperatureDesc: 'میزان تصادفی بودن را کنترل می‌کند (0=قطعی، 1=خلاق).',
+            apiVersionName: 'نسخه API',
+            apiVersionDesc: 'نسخه API لازم برای Azure OpenAI (برای مثال 2024-02-15-preview)',
+            apiVersionPlaceholder: 'نسخه API را وارد کنید',
+            testConnectionName: 'آزمایش اتصال {provider}',
+            testConnectionDesc: 'کلید API، endpoint و دسترسی‌پذیری مدل را بررسی کنید.',
+            testConnectionButton: 'آزمایش اتصال',
+            testConnectionTesting: 'در حال آزمایش...',
+            testConnectionRunning: 'در حال آزمایش اتصال به {provider}...',
+            testConnectionBlocked: 'امکان آزمایش {provider} نیست: {issues}',
+            testConnectionSuccess: '✅ موفق: {message}',
+            testConnectionFailed: '❌ ناموفق: {message}. کنسول را بررسی کنید.',
+            testConnectionError: 'خطا هنگام آزمایش اتصال: {message}',
+            missingActiveProvider: 'خطا: پیکربندی ارائه‌دهنده فعال پیدا نشد.',
+            exportDirectoryError: 'خطا در ایجاد پوشه افزونه: {message}',
+            exportSuccess: 'تنظیمات ارائه‌دهنده با موفقیت به {path} صادر شد',
+            exportError: 'خطا در صدور تنظیمات: {message}',
+            importFileMissing: "فایل ورود در {path} پیدا نشد. لطفاً فایل 'notemd-providers.json' خود را آنجا قرار دهید.",
+            importInvalidArray: 'فایل واردشده شامل آرایه معتبر ارائه‌دهنده نیست.',
+            activeProviderReset: 'ارائه‌دهنده فعال به حالت پیش‌فرض بازنشانی شد چون ارائه‌دهنده قبلی پس از ورود پیدا نشد.',
+            importSuccess: 'با موفقیت {newCount} تنظیم جدید وارد و {updatedCount} تنظیم موجود ارائه‌دهنده به‌روزرسانی شد.',
+            importError: 'خطا در ورود تنظیمات: {message}',
+            validationRequired: 'پیکربندی الزامی است',
+            validationWarning: 'هشدار پیکربندی'
+        }
+    }
+});
+
+extendLocale(STRINGS_FR, {
+    settings: {
+        providerConfig: {
+            summaryTitle: 'Les préréglages de fournisseurs ont été étendus à {count} entrées.',
+            summaryDesc:
+                'Les fournisseurs compatibles OpenAI partagent désormais un seul chemin d’exécution. Les préréglages intégrés couvrent des services orientés vers la Chine comme Qwen, Doubao, Moonshot, GLM, MiniMax, Baidu Qianfan et SiliconFlow, et le préréglage générique "OpenAI Compatible" peut cibler LiteLLM, vLLM, Perplexity, Vercel AI Gateway ou votre propre proxy.',
+            manageName: 'Gérer les configurations de fournisseurs',
+            manageDesc: 'Exportez votre configuration actuelle de fournisseurs dans un fichier JSON ou importez des paramètres depuis un fichier.',
+            exportButton: 'Exporter les fournisseurs',
+            exportTooltip: 'Enregistrer les configurations de fournisseurs',
+            importButton: 'Importer des fournisseurs',
+            importTooltip: 'Charger les configurations de fournisseurs (fusion)',
+            activeProviderName: 'Fournisseur actif',
+            activeProviderDesc: 'Sélectionnez le fournisseur LLM à utiliser pour le traitement.',
+            providerDetailsHeading: 'Détails de {provider}',
+            apiKeyName: 'Clé API',
+            apiKeyDescRequired: 'Clé API pour {provider}.{extra}',
+            apiKeyDescOptional: 'Clé API pour {provider}. Optionnelle pour les endpoints qui autorisent un accès anonyme ou via valeur fictive.',
+            apiKeyExtraLmStudio: " (Optionnel, souvent 'EMPTY')",
+            apiKeyPlaceholderDefault: 'Saisissez votre clé API',
+            apiKeyPlaceholderLmStudio: 'Généralement EMPTY ou laissez vide',
+            baseUrlName: 'URL de base / endpoint',
+            baseUrlDesc: 'L’endpoint API pour {provider}.{required}',
+            baseUrlRequired: ' Requis.',
+            baseUrlPlaceholder: 'Saisissez l’URL de base de l’API',
+            modelName: 'Modèle',
+            modelDesc: 'Nom du modèle à utiliser avec {provider}.',
+            modelPlaceholder: 'Saisissez le nom du modèle',
+            temperatureName: 'Température',
+            temperatureDesc: 'Contrôle le degré d’aléatoire (0=déterministe, 1=créatif).',
+            apiVersionName: 'Version API',
+            apiVersionDesc: 'Version API requise pour Azure OpenAI (par ex. 2024-02-15-preview)',
+            apiVersionPlaceholder: 'Saisissez la version de l’API',
+            testConnectionName: 'Tester la connexion à {provider}',
+            testConnectionDesc: 'Vérifiez la clé API, l’endpoint et l’accessibilité du modèle.',
+            testConnectionButton: 'Tester la connexion',
+            testConnectionTesting: 'Test en cours...',
+            testConnectionRunning: 'Test de connexion à {provider}...',
+            testConnectionBlocked: 'Impossible de tester {provider} : {issues}',
+            testConnectionSuccess: '✅ Succès : {message}',
+            testConnectionFailed: '❌ Échec : {message}. Vérifiez la console.',
+            testConnectionError: 'Erreur pendant le test de connexion : {message}',
+            missingActiveProvider: 'Erreur : impossible de trouver la configuration du fournisseur actif.',
+            exportDirectoryError: 'Erreur lors de la création du répertoire du plugin : {message}',
+            exportSuccess: 'Paramètres des fournisseurs exportés avec succès vers {path}',
+            exportError: 'Erreur lors de l’export des paramètres : {message}',
+            importFileMissing: "Fichier d’import introuvable à {path}. Veuillez y placer votre fichier 'notemd-providers.json'.",
+            importInvalidArray: 'Le fichier importé ne contient pas un tableau de fournisseurs valide.',
+            activeProviderReset: 'Le fournisseur actif a été réinitialisé par défaut, car l’ancien fournisseur est introuvable après l’import.',
+            importSuccess: '{newCount} nouvelles configurations importées et {updatedCount} configurations existantes mises à jour avec succès.',
+            importError: 'Erreur lors de l’import des paramètres : {message}',
+            validationRequired: 'Configuration requise',
+            validationWarning: 'Avertissement de configuration'
+        }
+    }
+});
+
+extendLocale(STRINGS_ID, {
+    settings: {
+        providerConfig: {
+            summaryTitle: 'Preset penyedia diperluas menjadi {count} entri.',
+            summaryDesc:
+                'Penyedia yang kompatibel dengan OpenAI kini berbagi satu jalur runtime. Preset bawaan mencakup layanan berfokus Tiongkok seperti Qwen, Doubao, Moonshot, GLM, MiniMax, Baidu Qianfan, dan SiliconFlow, dan preset generik "OpenAI Compatible" dapat menargetkan LiteLLM, vLLM, Perplexity, Vercel AI Gateway, atau proxy Anda sendiri.',
+            manageName: 'Kelola konfigurasi penyedia',
+            manageDesc: 'Ekspor pengaturan penyedia Anda saat ini ke file JSON, atau impor pengaturan dari file.',
+            exportButton: 'Ekspor penyedia',
+            exportTooltip: 'Simpan konfigurasi penyedia',
+            importButton: 'Impor penyedia',
+            importTooltip: 'Muat konfigurasi penyedia (gabungkan)',
+            activeProviderName: 'Penyedia aktif',
+            activeProviderDesc: 'Pilih penyedia LLM yang akan digunakan untuk pemrosesan.',
+            providerDetailsHeading: 'Detail {provider}',
+            apiKeyName: 'Kunci API',
+            apiKeyDescRequired: 'Kunci API untuk {provider}.{extra}',
+            apiKeyDescOptional: 'Kunci API untuk {provider}. Opsional untuk endpoint yang mengizinkan akses anonim atau placeholder.',
+            apiKeyExtraLmStudio: " (Opsional, sering kali 'EMPTY')",
+            apiKeyPlaceholderDefault: 'Masukkan kunci API Anda',
+            apiKeyPlaceholderLmStudio: 'Biasanya EMPTY atau biarkan kosong',
+            baseUrlName: 'URL dasar / endpoint',
+            baseUrlDesc: 'Endpoint API untuk {provider}.{required}',
+            baseUrlRequired: ' Wajib.',
+            baseUrlPlaceholder: 'Masukkan URL dasar API',
+            modelName: 'Model',
+            modelDesc: 'Nama model yang digunakan dengan {provider}.',
+            modelPlaceholder: 'Masukkan nama model',
+            temperatureName: 'Temperatur',
+            temperatureDesc: 'Mengontrol tingkat acak (0=deterministik, 1=kreatif).',
+            apiVersionName: 'Versi API',
+            apiVersionDesc: 'Versi API yang diperlukan untuk Azure OpenAI (misalnya, 2024-02-15-preview)',
+            apiVersionPlaceholder: 'Masukkan versi API',
+            testConnectionName: 'Uji koneksi {provider}',
+            testConnectionDesc: 'Verifikasi kunci API, endpoint, dan aksesibilitas model.',
+            testConnectionButton: 'Uji koneksi',
+            testConnectionTesting: 'Menguji...',
+            testConnectionRunning: 'Menguji koneksi ke {provider}...',
+            testConnectionBlocked: 'Tidak dapat menguji {provider}: {issues}',
+            testConnectionSuccess: '✅ Berhasil: {message}',
+            testConnectionFailed: '❌ Gagal: {message}. Periksa konsol.',
+            testConnectionError: 'Kesalahan saat uji koneksi: {message}',
+            missingActiveProvider: 'Kesalahan: konfigurasi untuk penyedia aktif tidak ditemukan.',
+            exportDirectoryError: 'Kesalahan saat membuat direktori plugin: {message}',
+            exportSuccess: 'Pengaturan penyedia berhasil diekspor ke {path}',
+            exportError: 'Kesalahan saat mengekspor pengaturan: {message}',
+            importFileMissing: "File impor tidak ditemukan di {path}. Silakan letakkan file 'notemd-providers.json' Anda di sana.",
+            importInvalidArray: 'File yang diimpor tidak berisi array penyedia yang valid.',
+            activeProviderReset: 'Penyedia aktif direset ke default karena penyedia sebelumnya tidak ditemukan setelah impor.',
+            importSuccess: 'Berhasil mengimpor {newCount} pengaturan baru dan memperbarui {updatedCount} pengaturan penyedia yang sudah ada.',
+            importError: 'Kesalahan saat mengimpor pengaturan: {message}',
+            validationRequired: 'Konfigurasi wajib',
+            validationWarning: 'Peringatan konfigurasi'
+        }
+    }
+});
+
+extendLocale(STRINGS_IT, {
+    settings: {
+        providerConfig: {
+            summaryTitle: 'I preset dei provider sono stati estesi a {count} voci.',
+            summaryDesc:
+                'I provider compatibili con OpenAI ora condividono un unico percorso runtime. I preset integrati coprono servizi orientati alla Cina come Qwen, Doubao, Moonshot, GLM, MiniMax, Baidu Qianfan e SiliconFlow, e il preset generico "OpenAI Compatible" può puntare a LiteLLM, vLLM, Perplexity, Vercel AI Gateway o al tuo proxy.',
+            manageName: 'Gestisci configurazioni provider',
+            manageDesc: 'Esporta le impostazioni correnti dei provider in un file JSON oppure importa impostazioni da un file.',
+            exportButton: 'Esporta provider',
+            exportTooltip: 'Salva configurazioni provider',
+            importButton: 'Importa provider',
+            importTooltip: 'Carica configurazioni provider (unisce)',
+            activeProviderName: 'Provider attivo',
+            activeProviderDesc: 'Seleziona il provider LLM da usare per l’elaborazione.',
+            providerDetailsHeading: 'Dettagli di {provider}',
+            apiKeyName: 'Chiave API',
+            apiKeyDescRequired: 'Chiave API per {provider}.{extra}',
+            apiKeyDescOptional: 'Chiave API per {provider}. Facoltativa per endpoint che consentono accesso anonimo o segnaposto.',
+            apiKeyExtraLmStudio: " (Facoltativo, spesso 'EMPTY')",
+            apiKeyPlaceholderDefault: 'Inserisci la tua chiave API',
+            apiKeyPlaceholderLmStudio: 'Di solito EMPTY oppure lascia vuoto',
+            baseUrlName: 'URL di base / endpoint',
+            baseUrlDesc: 'L’endpoint API per {provider}.{required}',
+            baseUrlRequired: ' Obbligatorio.',
+            baseUrlPlaceholder: 'Inserisci l’URL base dell’API',
+            modelName: 'Modello',
+            modelDesc: 'Nome del modello da usare con {provider}.',
+            modelPlaceholder: 'Inserisci il nome del modello',
+            temperatureName: 'Temperatura',
+            temperatureDesc: 'Controlla il livello di casualità (0=deterministico, 1=creativo).',
+            apiVersionName: 'Versione API',
+            apiVersionDesc: 'Versione API richiesta per Azure OpenAI (ad es. 2024-02-15-preview)',
+            apiVersionPlaceholder: 'Inserisci la versione API',
+            testConnectionName: 'Testa connessione {provider}',
+            testConnectionDesc: 'Verifica chiave API, endpoint e accessibilità del modello.',
+            testConnectionButton: 'Testa connessione',
+            testConnectionTesting: 'Test in corso...',
+            testConnectionRunning: 'Test della connessione a {provider} in corso...',
+            testConnectionBlocked: 'Impossibile testare {provider}: {issues}',
+            testConnectionSuccess: '✅ Successo: {message}',
+            testConnectionFailed: '❌ Fallito: {message}. Controlla la console.',
+            testConnectionError: 'Errore durante il test di connessione: {message}',
+            missingActiveProvider: 'Errore: impossibile trovare la configurazione del provider attivo.',
+            exportDirectoryError: 'Errore durante la creazione della cartella del plugin: {message}',
+            exportSuccess: 'Impostazioni provider esportate con successo in {path}',
+            exportError: 'Errore durante l’esportazione delle impostazioni: {message}',
+            importFileMissing: "File di importazione non trovato in {path}. Inserisci lì il tuo file 'notemd-providers.json'.",
+            importInvalidArray: 'Il file importato non contiene un array valido di provider.',
+            activeProviderReset: 'Il provider attivo è stato reimpostato al valore predefinito perché il precedente non è stato trovato dopo l’importazione.',
+            importSuccess: 'Importate con successo {newCount} nuove configurazioni e aggiornate {updatedCount} configurazioni provider esistenti.',
+            importError: 'Errore durante l’importazione delle impostazioni: {message}',
+            validationRequired: 'Configurazione obbligatoria',
+            validationWarning: 'Avviso di configurazione'
+        }
+    }
+});
+
+extendLocale(STRINGS_JA, {
+    settings: {
+        providerConfig: {
+            summaryTitle: 'プロバイダープリセットが {count} 件に拡張されました。',
+            summaryDesc:
+                'OpenAI 互換プロバイダーは現在、単一のランタイム経路を共有しています。組み込みプリセットには Qwen、Doubao、Moonshot、GLM、MiniMax、Baidu Qianfan、SiliconFlow など中国向けサービスが含まれ、汎用の "OpenAI Compatible" プリセットでは LiteLLM、vLLM、Perplexity、Vercel AI Gateway、または独自プロキシを対象にできます。',
+            manageName: 'プロバイダー設定を管理',
+            manageDesc: '現在のプロバイダー設定を JSON ファイルにエクスポートするか、ファイルから設定をインポートします。',
+            exportButton: 'プロバイダーをエクスポート',
+            exportTooltip: 'プロバイダー設定を保存',
+            importButton: 'プロバイダーをインポート',
+            importTooltip: 'プロバイダー設定を読み込む（マージ）',
+            activeProviderName: 'アクティブなプロバイダー',
+            activeProviderDesc: '処理に使用する LLM プロバイダーを選択します。',
+            providerDetailsHeading: '{provider} の詳細',
+            apiKeyName: 'API キー',
+            apiKeyDescRequired: '{provider} の API キーです。{extra}',
+            apiKeyDescOptional: '{provider} の API キーです。プレースホルダーまたは匿名アクセスを許可するエンドポイントでは任意です。',
+            apiKeyExtraLmStudio: "（任意、通常は 'EMPTY'）",
+            apiKeyPlaceholderDefault: 'API キーを入力',
+            apiKeyPlaceholderLmStudio: '通常は EMPTY、または空欄のまま',
+            baseUrlName: 'ベース URL / エンドポイント',
+            baseUrlDesc: '{provider} の API エンドポイントです。{required}',
+            baseUrlRequired: ' 必須です。',
+            baseUrlPlaceholder: 'API ベース URL を入力',
+            modelName: 'モデル',
+            modelDesc: '{provider} で使用するモデル名です。',
+            modelPlaceholder: 'モデル名を入力',
+            temperatureName: 'Temperature',
+            temperatureDesc: 'ランダム性を制御します（0=決定的、1=創造的）。',
+            apiVersionName: 'API バージョン',
+            apiVersionDesc: 'Azure OpenAI に必要な API バージョン（例: 2024-02-15-preview）',
+            apiVersionPlaceholder: 'API バージョンを入力',
+            testConnectionName: '{provider} 接続をテスト',
+            testConnectionDesc: 'API キー、エンドポイント、モデルへのアクセス可否を確認します。',
+            testConnectionButton: '接続をテスト',
+            testConnectionTesting: 'テスト中...',
+            testConnectionRunning: '{provider} への接続をテスト中...',
+            testConnectionBlocked: '{provider} をテストできません: {issues}',
+            testConnectionSuccess: '✅ 成功: {message}',
+            testConnectionFailed: '❌ 失敗: {message}。コンソールを確認してください。',
+            testConnectionError: '接続テスト中のエラー: {message}',
+            missingActiveProvider: 'エラー: アクティブなプロバイダーの設定が見つかりませんでした。',
+            exportDirectoryError: 'プラグインディレクトリの作成エラー: {message}',
+            exportSuccess: 'プロバイダー設定を {path} に正常にエクスポートしました',
+            exportError: '設定のエクスポートエラー: {message}',
+            importFileMissing: "インポートファイルが {path} に見つかりません。そこに 'notemd-providers.json' を配置してください。",
+            importInvalidArray: 'インポートしたファイルに有効なプロバイダー配列が含まれていません。',
+            activeProviderReset: 'インポート後に以前のプロバイダーが見つからなかったため、アクティブなプロバイダーを既定値に戻しました。',
+            importSuccess: '{newCount} 件の新規設定をインポートし、既存のプロバイダー設定 {updatedCount} 件を更新しました。',
+            importError: '設定のインポートエラー: {message}',
+            validationRequired: '設定が必要です',
+            validationWarning: '設定の警告'
+        }
+    }
+});
+
+extendLocale(STRINGS_KO, {
+    settings: {
+        providerConfig: {
+            summaryTitle: '프로바이더 프리셋이 {count}개 항목으로 확장되었습니다.',
+            summaryDesc:
+                'OpenAI 호환 프로바이더는 이제 하나의 공통 런타임 경로를 공유합니다. 내장 프리셋은 Qwen, Doubao, Moonshot, GLM, MiniMax, Baidu Qianfan, SiliconFlow 같은 중국 중심 서비스를 포함하며, 일반 "OpenAI Compatible" 프리셋은 LiteLLM, vLLM, Perplexity, Vercel AI Gateway 또는 자체 프록시를 대상으로 할 수 있습니다.',
+            manageName: '프로바이더 구성 관리',
+            manageDesc: '현재 프로바이더 설정을 JSON 파일로 내보내거나 파일에서 설정을 가져옵니다.',
+            exportButton: '프로바이더 내보내기',
+            exportTooltip: '프로바이더 구성 저장',
+            importButton: '프로바이더 가져오기',
+            importTooltip: '프로바이더 구성 불러오기(병합)',
+            activeProviderName: '활성 프로바이더',
+            activeProviderDesc: '처리에 사용할 LLM 프로바이더를 선택합니다.',
+            providerDetailsHeading: '{provider} 세부 정보',
+            apiKeyName: 'API 키',
+            apiKeyDescRequired: '{provider}용 API 키입니다.{extra}',
+            apiKeyDescOptional: '{provider}용 API 키입니다. placeholder 또는 익명 접근을 허용하는 endpoint에서는 선택 사항입니다.',
+            apiKeyExtraLmStudio: " (선택 사항, 보통 'EMPTY')",
+            apiKeyPlaceholderDefault: 'API 키를 입력하세요',
+            apiKeyPlaceholderLmStudio: '보통 EMPTY 또는 비워 두기',
+            baseUrlName: '기본 URL / endpoint',
+            baseUrlDesc: '{provider}용 API endpoint입니다.{required}',
+            baseUrlRequired: ' 필수입니다.',
+            baseUrlPlaceholder: 'API 기본 URL을 입력하세요',
+            modelName: '모델',
+            modelDesc: '{provider}와 함께 사용할 모델 이름입니다.',
+            modelPlaceholder: '모델 이름을 입력하세요',
+            temperatureName: 'Temperature',
+            temperatureDesc: '무작위성을 제어합니다 (0=결정적, 1=창의적).',
+            apiVersionName: 'API 버전',
+            apiVersionDesc: 'Azure OpenAI에 필요한 API 버전(예: 2024-02-15-preview)',
+            apiVersionPlaceholder: 'API 버전을 입력하세요',
+            testConnectionName: '{provider} 연결 테스트',
+            testConnectionDesc: 'API 키, endpoint, 모델 접근 가능 여부를 확인합니다.',
+            testConnectionButton: '연결 테스트',
+            testConnectionTesting: '테스트 중...',
+            testConnectionRunning: '{provider} 연결을 테스트하는 중...',
+            testConnectionBlocked: '{provider}를 테스트할 수 없습니다: {issues}',
+            testConnectionSuccess: '✅ 성공: {message}',
+            testConnectionFailed: '❌ 실패: {message}. 콘솔을 확인하세요.',
+            testConnectionError: '연결 테스트 중 오류: {message}',
+            missingActiveProvider: '오류: 활성 프로바이더 구성을 찾을 수 없습니다.',
+            exportDirectoryError: '플러그인 디렉터리 생성 오류: {message}',
+            exportSuccess: '프로바이더 설정을 {path}로 성공적으로 내보냈습니다',
+            exportError: '설정 내보내기 오류: {message}',
+            importFileMissing: "{path}에서 가져오기 파일을 찾을 수 없습니다. 해당 위치에 'notemd-providers.json' 파일을 두세요.",
+            importInvalidArray: '가져온 파일에 유효한 프로바이더 배열이 없습니다.',
+            activeProviderReset: '가져온 후 이전 프로바이더를 찾을 수 없어 활성 프로바이더를 기본값으로 재설정했습니다.',
+            importSuccess: '{newCount}개의 새 설정을 가져오고 기존 프로바이더 설정 {updatedCount}개를 업데이트했습니다.',
+            importError: '설정 가져오기 오류: {message}',
+            validationRequired: '구성이 필요합니다',
+            validationWarning: '구성 경고'
+        }
+    }
+});
+
+extendLocale(STRINGS_ID, {
+    settings: {
+        providerConfig: { modelName: 'Model AI' }
+    }
+});
+
+extendLocale(STRINGS_JA, {
+    settings: {
+        providerConfig: { temperatureName: '温度' }
+    }
+});
+
+extendLocale(STRINGS_KO, {
+    settings: {
+        providerConfig: { temperatureName: '온도' }
+    }
+});
+
+extendLocale(STRINGS_NL, {
+    settings: {
+        providerConfig: { modelName: 'Modelnaam' }
+    }
+});
+
+extendLocale(STRINGS_PL, {
+    settings: {
+        providerConfig: { modelName: 'Nazwa modelu' }
+    }
+});
+
+extendLocale(STRINGS_TH, {
+    settings: {
+        providerConfig: {
+            baseUrlName: 'URL พื้นฐาน / endpoint',
+            temperatureName: 'อุณหภูมิ'
+        }
+    }
+});
+
+extendLocale(STRINGS_TR, {
+    settings: {
+        providerConfig: { modelName: 'Model adı' }
     }
 });
