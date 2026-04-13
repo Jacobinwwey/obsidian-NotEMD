@@ -208,7 +208,8 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
 
         const entry = this.logEl.createEl('div', { cls: 'notemd-log-entry' });
         entry.createEl('span', { text: timestamp, cls: 'notemd-log-time' });
-        entry.createEl('span', { text: ` ${message}`, cls: 'notemd-log-message' });
+        const messageEl = entry.createEl('span', { cls: 'notemd-log-message' });
+        messageEl.setText(` ${message}`);
         this.logEl.scrollTop = this.logEl.scrollHeight;
     }
 
@@ -450,7 +451,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             const message = error instanceof Error ? error.message : String(error);
             this.log(formatI18n(i18n.sidebar.status.workflowFailedLog, { message }));
             this.updateStatus(i18n.sidebar.status.workflowFailed, -1);
-            new Notice(`${workflowName}: ${message}`);
+            new Notice(formatI18n(i18n.sidebar.status.actionFailed, { message: `${workflowName}: ${message}` }));
         } finally {
             this.finishProcessing();
         }
