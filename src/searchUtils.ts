@@ -319,7 +319,7 @@ export async function researchAndSummarize(app: App, settings: NotemdSettings, e
             new Notice(`Error during research: ${message}. See console.`, 10000);
             progressReporter.log(`Error in researchAndSummarize catch block: ${message}`);
             progressReporter.updateStatus('Error occurred', -1);
-            new ErrorModal(app, "Research Error", errorDetails).open();
+            new ErrorModal(app, "Research Error", errorDetails, settings.uiLocale).open();
             // Do not re-throw non-cancellation errors here, let the function finish "unsuccessfully"
         }
     }

@@ -22,7 +22,7 @@ export async function batchTranslateFolder(
 		return;
 	}
 
-	const progressModal = new ProgressModal(app);
+	const progressModal = new ProgressModal(app, settings.uiLocale);
 	progressModal.open();
 
 

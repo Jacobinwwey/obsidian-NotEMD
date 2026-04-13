@@ -1,24 +1,29 @@
+import type { NotemdEnglishStrings } from './i18n/locales/en';
+
+type SidebarActionTranslationKey = keyof NotemdEnglishStrings['sidebar']['actions'];
+
 export const SIDEBAR_ACTION_DEFINITIONS = [
-    { id: 'process-current-add-links', label: 'Process file (add links)', category: 'core' },
-    { id: 'process-folder-add-links', label: 'Process folder (add links)', category: 'core' },
-    { id: 'generate-from-title', label: 'Generate from title', category: 'generation' },
-    { id: 'batch-generate-from-titles', label: 'Batch generate from titles', category: 'generation' },
-    { id: 'research-and-summarize', label: 'Research & summarize', category: 'generation' },
-    { id: 'summarize-as-mermaid', label: 'Summarise as Mermaid diagram', category: 'generation' },
-    { id: 'translate-current-file', label: 'Translate current file', category: 'translation' },
-    { id: 'batch-translate-folder', label: 'Batch translate folder', category: 'translation' },
-    { id: 'extract-concepts-current', label: 'Extract concepts (current file)', category: 'knowledge' },
-    { id: 'extract-concepts-folder', label: 'Extract concepts (folder)', category: 'knowledge' },
-    { id: 'extract-original-text', label: 'Extract specific original text', category: 'knowledge' },
-    { id: 'batch-mermaid-fix', label: 'Batch Mermaid fix', category: 'utilities' },
-    { id: 'fix-formula-current', label: 'Fix formula formats (current)', category: 'utilities' },
-    { id: 'batch-fix-formula', label: 'Batch fix formula formats', category: 'utilities' },
-    { id: 'check-duplicates-current', label: 'Check duplicates (current file)', category: 'utilities' },
-    { id: 'check-remove-duplicate-concepts', label: 'Check & remove duplicates', category: 'utilities' },
-    { id: 'test-llm-connection', label: 'Test LLM connection', category: 'utilities' }
+    { id: 'process-current-add-links', label: 'Process file (add links)', translationKey: 'processCurrentAddLinks', category: 'core' },
+    { id: 'process-folder-add-links', label: 'Process folder (add links)', translationKey: 'processFolderAddLinks', category: 'core' },
+    { id: 'generate-from-title', label: 'Generate from title', translationKey: 'generateFromTitle', category: 'generation' },
+    { id: 'batch-generate-from-titles', label: 'Batch generate from titles', translationKey: 'batchGenerateFromTitles', category: 'generation' },
+    { id: 'research-and-summarize', label: 'Research & summarize', translationKey: 'researchAndSummarize', category: 'generation' },
+    { id: 'summarize-as-mermaid', label: 'Summarise as Mermaid diagram', translationKey: 'summarizeAsMermaid', category: 'generation' },
+    { id: 'translate-current-file', label: 'Translate current file', translationKey: 'translateCurrentFile', category: 'translation' },
+    { id: 'batch-translate-folder', label: 'Batch translate folder', translationKey: 'batchTranslateFolder', category: 'translation' },
+    { id: 'extract-concepts-current', label: 'Extract concepts (current file)', translationKey: 'extractConceptsCurrent', category: 'knowledge' },
+    { id: 'extract-concepts-folder', label: 'Extract concepts (folder)', translationKey: 'extractConceptsFolder', category: 'knowledge' },
+    { id: 'extract-original-text', label: 'Extract specific original text', translationKey: 'extractOriginalText', category: 'knowledge' },
+    { id: 'batch-mermaid-fix', label: 'Batch Mermaid fix', translationKey: 'batchMermaidFix', category: 'utilities' },
+    { id: 'fix-formula-current', label: 'Fix formula formats (current)', translationKey: 'fixFormulaCurrent', category: 'utilities' },
+    { id: 'batch-fix-formula', label: 'Batch fix formula formats', translationKey: 'batchFixFormula', category: 'utilities' },
+    { id: 'check-duplicates-current', label: 'Check duplicates (current file)', translationKey: 'checkDuplicatesCurrent', category: 'utilities' },
+    { id: 'check-remove-duplicate-concepts', label: 'Check & remove duplicates', translationKey: 'checkRemoveDuplicateConcepts', category: 'utilities' },
+    { id: 'test-llm-connection', label: 'Test LLM connection', translationKey: 'testLlmConnection', category: 'utilities' }
 ] as const;
 
 export type SidebarActionId = typeof SIDEBAR_ACTION_DEFINITIONS[number]['id'];
+export type ActionCategory = typeof SIDEBAR_ACTION_DEFINITIONS[number]['category'];
 
 export interface CustomWorkflowButton {
     id: string;
@@ -39,9 +44,42 @@ export interface ResolvedWorkflowButtonsResult {
 }
 
 const ACTION_ID_SET = new Set<string>(SIDEBAR_ACTION_DEFINITIONS.map(def => def.id));
+const ACTION_DEFINITION_MAP = new Map<SidebarActionId, typeof SIDEBAR_ACTION_DEFINITIONS[number]>(
+    SIDEBAR_ACTION_DEFINITIONS.map(def => [def.id, def])
+);
 
+export const DEFAULT_CUSTOM_WORKFLOW_BUTTON_NAME = 'One-Click Extract';
 export const DEFAULT_CUSTOM_WORKFLOW_BUTTONS_DSL =
-    'One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix';
+    `${DEFAULT_CUSTOM_WORKFLOW_BUTTON_NAME}::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix`;
+
+export function getSidebarActionDefinition(actionId: SidebarActionId) {
+    return ACTION_DEFINITION_MAP.get(actionId);
+}
+
+export function getSidebarActionLabel(strings: NotemdEnglishStrings, actionId: SidebarActionId): string {
+    const definition = getSidebarActionDefinition(actionId);
+    if (!definition) {
+        return actionId;
+    }
+
+    return strings.sidebar.actions[definition.translationKey as SidebarActionTranslationKey]?.label || definition.label;
+}
+
+export function getSidebarActionTooltip(strings: NotemdEnglishStrings, actionId: SidebarActionId): string {
+    const definition = getSidebarActionDefinition(actionId);
+    if (!definition) {
+        return actionId;
+    }
+
+    const actionStrings = strings.sidebar.actions[definition.translationKey as SidebarActionTranslationKey];
+    return actionStrings?.tooltip || actionStrings?.label || definition.label;
+}
+
+export function getLocalizedWorkflowButtonName(strings: NotemdEnglishStrings, workflowName: string): string {
+    return workflowName === DEFAULT_CUSTOM_WORKFLOW_BUTTON_NAME
+        ? strings.sidebar.defaultWorkflowName
+        : workflowName;
+}
 
 function slugifyName(name: string): string {
     const slug = name
@@ -143,9 +181,9 @@ export function resolveCustomWorkflowButtons(dsl: string): ResolvedWorkflowButto
     };
 }
 
-export function getWorkflowActionHelpText(): string {
+export function getWorkflowActionHelpText(strings: NotemdEnglishStrings): string {
     return SIDEBAR_ACTION_DEFINITIONS
-        .map(def => `${def.id}  =>  ${def.label}`)
+        .map(def => `${def.id}  =>  ${getSidebarActionLabel(strings, def.id)}`)
         .join('\n');
 }
 

@@ -21,12 +21,15 @@ import {
 import {
     createEmptyWorkflowButton,
     CustomWorkflowButton,
+    getSidebarActionLabel,
     getWorkflowActionHelpText,
     resolveCustomWorkflowButtons,
     serializeCustomWorkflowButtons,
     SIDEBAR_ACTION_DEFINITIONS,
     SidebarActionId
 } from '../workflowButtons';
+import { UI_LOCALE_AUTO } from '../i18n/languageContext';
+import { SUPPORTED_UI_LOCALES } from '../i18n/uiLocales';
 import { formatI18n, getI18nStrings } from '../i18n';
 
 // Define specific key types for settings accessed dynamically
@@ -253,6 +256,7 @@ export class NotemdSettingTab extends PluginSettingTab {
     }
 
     private renderWorkflowVisualBuilder(containerEl: HTMLElement): void {
+        const i18n = getI18nStrings({ uiLocale: this.plugin.settings.uiLocale });
         const resolution = resolveCustomWorkflowButtons(this.plugin.settings.customWorkflowButtonsDsl);
         const workflows = this.getWorkflowBuilderStateFromSettings();
         const builderWrap = containerEl.createDiv({ cls: 'notemd-workflow-builder' });
@@ -294,7 +298,7 @@ export class NotemdSettingTab extends PluginSettingTab {
 
                 const select = actionRow.createEl('select');
                 SIDEBAR_ACTION_DEFINITIONS.forEach(def => {
-                    const option = new Option(`${def.label} (${def.id})`, def.id);
+                    const option = new Option(`${getSidebarActionLabel(i18n, def.id)} (${def.id})`, def.id);
                     select.add(option);
                 });
                 select.value = actionId;
@@ -990,7 +994,7 @@ export class NotemdSettingTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .setName('Available workflow action IDs')
-            .setDesc(getWorkflowActionHelpText());
+            .setDesc(getWorkflowActionHelpText(i18n));
 
         // --- Extract Specific Original Text Settings ---
         new Setting(containerEl).setName('Extract Specific Original Text').setHeading();
@@ -1099,6 +1103,30 @@ export class NotemdSettingTab extends PluginSettingTab {
 
 
         new Setting(containerEl).setName(i18n.settings.language.heading).setHeading();
+        new Setting(containerEl)
+            .setName(i18n.settings.language.uiLocaleName)
+            .setDesc(i18n.settings.language.uiLocaleDesc)
+            .addDropdown(dropdown => {
+                dropdown.addOption(UI_LOCALE_AUTO, i18n.settings.language.uiLocaleAuto);
+                SUPPORTED_UI_LOCALES.forEach(locale => {
+                    dropdown.addOption(locale.code, locale.name);
+                });
+
+                const currentUiLocale = this.plugin.settings.uiLocale || UI_LOCALE_AUTO;
+                if (currentUiLocale !== UI_LOCALE_AUTO && !SUPPORTED_UI_LOCALES.some(locale => locale.code === currentUiLocale)) {
+                    dropdown.addOption(currentUiLocale, currentUiLocale);
+                }
+
+                dropdown
+                    .setValue(currentUiLocale)
+                    .onChange(async (value) => {
+                        this.plugin.settings.uiLocale = value;
+                        await this.plugin.saveSettings();
+                        await this.plugin.refreshLocalizedUi();
+                        this.display();
+                    });
+            });
+
         new Setting(containerEl)
             .setName(i18n.settings.language.outputName)
             .setDesc(i18n.settings.language.outputDesc)

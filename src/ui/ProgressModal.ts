@@ -1,5 +1,7 @@
 import { App, Modal, Setting } from 'obsidian';
 import { ProgressReporter } from '../types'; // Adjust import path
+import { formatI18n, getCurrentUiLocale, getI18nStrings } from '../i18n';
+import { formatTimeForLocale } from '../i18n/localeFormat';
 
 // ProgressModal now implements ProgressReporter
 export class ProgressModal extends Modal implements ProgressReporter {
@@ -15,26 +17,38 @@ export class ProgressModal extends Modal implements ProgressReporter {
     private currentAbortController: AbortController | null = null;
     activeTasks = 0;
     private logContent: string[] = []; // Store logs
+    private readonly uiLocale: string;
 
-    constructor(app: App) {
+    constructor(app: App, uiLocale = 'auto') {
         super(app);
+        this.uiLocale = uiLocale;
+    }
+
+    private getStrings() {
+        return getI18nStrings({ uiLocale: this.uiLocale });
+    }
+
+    private getResolvedUiLocale() {
+        return getCurrentUiLocale({ uiLocale: this.uiLocale });
     }
 
     updateActiveTasks(delta: number) {
+        const i18n = this.getStrings();
         this.activeTasks += delta;
-        this.updateStatus(`Processing... (Active: ${this.activeTasks})`);
+        this.updateStatus(formatI18n(i18n.sidebar.status.processingActive, { count: this.activeTasks }));
     }
 
     onOpen() {
+        const i18n = this.getStrings();
         const { contentEl } = this;
         contentEl.addClass('notemd-progress-modal');
 
         // Header
-        new Setting(contentEl).setName('Notemd processing').setHeading();
+        new Setting(contentEl).setName(i18n.progressModal.heading).setHeading();
 
         // Status section
         const statusContainer = contentEl.createEl('div', { cls: 'notemd-status-container' });
-        this.statusEl = statusContainer.createEl('p', { text: 'Starting...', cls: 'notemd-status-text' });
+        this.statusEl = statusContainer.createEl('p', { text: i18n.progressModal.starting, cls: 'notemd-status-text' });
 
         // Progress bar
         this.progressBarContainerEl = contentEl.createEl('div', { cls: 'notemd-progress-bar-container' });
@@ -43,7 +57,7 @@ export class ProgressModal extends Modal implements ProgressReporter {
 
         // Time remaining indicator
         this.timeRemainingEl = contentEl.createEl('p', {
-            text: 'Estimated time remaining: calculating...',
+            text: i18n.progressModal.timeRemainingCalculating,
             cls: 'notemd-time-remaining'
         });
 
@@ -53,7 +67,7 @@ export class ProgressModal extends Modal implements ProgressReporter {
         // Cancel button
         const buttonContainer = contentEl.createEl('div', { cls: 'notemd-button-container' });
         this.cancelButton = buttonContainer.createEl('button', {
-            text: 'Cancel',
+            text: i18n.progressModal.cancelProgress,
             cls: 'notemd-cancel-button'
         });
         this.cancelButton.onclick = () => this.requestCancel(); // Call requestCancel method
@@ -63,6 +77,7 @@ export class ProgressModal extends Modal implements ProgressReporter {
     }
 
     updateStatus(text: string, percent?: number) { // Made percent optional
+        const i18n = this.getStrings();
         if (this.statusEl) this.statusEl.setText(text);
         if (this.progressEl && percent !== undefined && percent >= 0) { // Check if percent is defined and non-negative
             const clampedPercent = Math.min(100, Math.max(0, percent));
@@ -77,18 +92,18 @@ export class ProgressModal extends Modal implements ProgressReporter {
                 const estimatedTotal = elapsed / (percent / 100);
                 const remaining = Math.max(0, estimatedTotal - elapsed);
                 if (this.timeRemainingEl) {
-                    this.timeRemainingEl.setText(`Estimated time remaining: ${this.formatTime(remaining)}`);
+                    this.timeRemainingEl.setText(formatI18n(i18n.progressModal.timeRemaining, { time: this.formatTime(remaining) }));
                 }
             } else if (this.timeRemainingEl) {
-                this.timeRemainingEl.setText('Estimated time remaining: calculating...');
+                this.timeRemainingEl.setText(i18n.progressModal.timeRemainingCalculating);
             }
             if (this.progressBarContainerEl) this.progressBarContainerEl.removeClass('is-hidden'); // Show progress bar
         } else if (this.progressEl && percent !== undefined && percent < 0) { // Handle negative percent for error/cancel state
             // REMOVED: this.progressEl.style.width = `100%`;
             this.progressEl.dataset.progress = '100'; // Set data attribute for error state
             this.progressEl.addClass('is-error'); // Use CSS class for error state
-            this.progressEl.setText('Cancelled/Error');
-            if (this.timeRemainingEl) this.timeRemainingEl.setText('Processing stopped.');
+            this.progressEl.setText(i18n.progressModal.cancelledOrError);
+            if (this.timeRemainingEl) this.timeRemainingEl.setText(i18n.progressModal.processingStopped);
             if (this.progressBarContainerEl) this.progressBarContainerEl.removeClass('is-hidden'); // Ensure bar is visible
         }
     }
@@ -101,7 +116,7 @@ export class ProgressModal extends Modal implements ProgressReporter {
 
     log(message: string) {
         if (this.logEl) {
-            const timestamp = `[${new Date().toLocaleTimeString()}]`;
+            const timestamp = `[${formatTimeForLocale(new Date(), this.getResolvedUiLocale())}]`;
             const fullMessage = `${timestamp} ${message}`;
             this.logContent.push(fullMessage);
 
@@ -135,9 +150,10 @@ export class ProgressModal extends Modal implements ProgressReporter {
     // Implement ProgressReporter methods
     requestCancel() {
         if (!this.isCancelled) {
+            const i18n = this.getStrings();
             this.isCancelled = true;
-            this.updateStatus('Cancelling...', -1); // Indicate cancellation visually
-            this.log('User requested cancellation.');
+            this.updateStatus(i18n.progressModal.cancelling, -1); // Indicate cancellation visually
+            this.log(i18n.progressModal.userRequestedCancellation);
             // Abort the ongoing fetch request, if any
             this.currentAbortController?.abort();
             this.cancelButton?.setAttribute('disabled', 'true'); // Disable button
@@ -145,8 +161,9 @@ export class ProgressModal extends Modal implements ProgressReporter {
     }
 
     clearDisplay() {
+        const i18n = this.getStrings();
         this.logEl?.empty();
-        this.updateStatus('Starting...', 0);
+        this.updateStatus(i18n.progressModal.starting, 0);
         this.isCancelled = false;
         this.currentAbortController = null; // Clear controller on display clear
         if (this.cancelButton) this.cancelButton.removeAttribute('disabled');

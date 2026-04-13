@@ -5,15 +5,17 @@ import { getI18nStrings } from '../i18n';
 export class ErrorModal extends Modal {
     title: string;
     errorMessage: string;
+    uiLocale: string;
 
-    constructor(app: App, title: string, errorMessage: string) {
+    constructor(app: App, title: string, errorMessage: string, uiLocale = 'auto') {
         super(app);
         this.title = title;
         this.errorMessage = errorMessage;
+        this.uiLocale = uiLocale;
     }
 
     onOpen() {
-        const i18n = getI18nStrings({ uiLocale: 'auto' });
+        const i18n = getI18nStrings({ uiLocale: this.uiLocale });
         const { contentEl } = this;
         contentEl.addClass('notemd-error-modal');
 

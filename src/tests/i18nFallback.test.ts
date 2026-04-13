@@ -10,7 +10,7 @@ describe('i18n fallback and cache', () => {
     });
 
     test('falls back to English when locale is unsupported', () => {
-        const locale = getResolvedStrings('fr');
+        const locale = getResolvedStrings('sv');
         expect(locale.common.cancel).toBe('Cancel');
         expect(locale.sidebar.logOutputTitle).toBe('Log output');
     });
@@ -45,8 +45,19 @@ describe('i18n fallback and cache', () => {
         expect(resolved.common.language).toBe('語言');
     });
 
+    test('supports notebook-navigator parity locales via Obsidian auto detection', () => {
+        (getLanguage as jest.Mock).mockReturnValue('de');
+        const resolved = getI18nStrings({ uiLocale: 'auto' });
+        expect(resolved.common.cancel).toBe('Abbrechen');
+    });
+
+    test('supports manual ui locale override for regional variants', () => {
+        (getLanguage as jest.Mock).mockReturnValue('en');
+        const resolved = getI18nStrings({ uiLocale: 'pt-BR' });
+        expect(resolved.common.cancel).toBe('Cancelar');
+    });
+
     test('formats placeholders', () => {
         expect(formatI18n('Language changed to {language}', { language: 'zh-CN' })).toBe('Language changed to zh-CN');
     });
 });
-
