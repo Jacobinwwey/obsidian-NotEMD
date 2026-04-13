@@ -34,6 +34,22 @@ This document summarizes the major functional and architectural changes implemen
 
 ---
 
+## [1.8.1] - 2026-04-13
+
+### English
+*   **Complete Supported UI Locale Coverage**: Finished localizing the remaining visible settings, workflow builder, sidebar tooltip, extracted-text settings, advanced settings, and output-path surfaces for every advertised UI locale.
+*   **Stricter Regression Coverage**: Added focused tests so supported locales no longer silently fall back to English on those visible UI surfaces.
+*   **Documentation Reality Check**: Updated the root READMEs and Language Hub to distinguish maintainer source docs, published README translations, and the exact in-app UI locale catalog.
+*   **Version Alignment**: Synchronized release metadata and packaged documentation for `1.8.1`.
+
+### Chinese (中文)
+*   **补齐受支持 UI Locale 的可见覆盖面**: 完成了所有已宣称支持 locale 在剩余设置项、工作流构建器、侧边栏提示、原文提取设置、高级设置以及输出路径配置等可见界面上的本地化补齐。
+*   **强化回归测试覆盖**: 新增定向测试，确保这些已支持 locale 不再在上述可见 UI 上静默回落到英文。
+*   **文档现实校准**: 更新仓库根 README 与语言中心，明确区分维护源文档、已发布 README 译文以及应用内 UI locale 的精确目录。
+*   **版本元数据对齐**: 已将 `1.8.1` 的版本信息与随包文档同步完成。
+
+---
+
 ## [1.8.0] - 2026-04-09
 
 ### English

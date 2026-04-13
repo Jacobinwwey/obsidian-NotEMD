@@ -1,11 +1,14 @@
 # Notemd Language Hub
 
-This page centralizes documentation language access.
+This page centralizes the current language-support contract for both documentation and the in-app UI.
 
-## Official Documentation
+## Maintainer Source Docs
 
 - English: [README.md](../../README.md)
 - 简体中文 (Simplified Chinese): [README_zh.md](../../README_zh.md)
+
+## Published README Translations
+
 - 繁體中文 (Traditional Chinese): [README_zh_Hant.md](../../README_zh_Hant.md)
 - Español (Spanish): [README_es.md](../../README_es.md)
 - Français (French): [README_fr.md](../../README_fr.md)
@@ -36,14 +39,47 @@ This page centralizes documentation language access.
 - Bahasa Indonesia (Indonesian): [README_id.md](../../README_id.md)
 - Bahasa Melayu (Malay): [README_ms.md](../../README_ms.md)
 
+## In-App UI Locale Coverage
+
+- `auto` follows Obsidian's current UI language.
+- The supported in-app UI locale catalog is defined explicitly in [src/i18n/uiLocales.ts](../../src/i18n/uiLocales.ts): `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, `zh-TW`.
+- English fallback remains as an implementation safety net, but supported visible surfaces are regression-tested and should not silently fall back during normal use.
+- The implementation now follows the same core i18n design principles seen in Notebook Navigator: an explicit supported-language map, Obsidian locale alignment in `auto` mode, and English as the final fallback merge target.
+
+| Code | Display Name |
+|---|---|
+| `en` | English |
+| `ar` | العربية |
+| `de` | Deutsch |
+| `es` | Español |
+| `fa` | فارسی |
+| `fr` | Français |
+| `id` | Bahasa Indonesia |
+| `it` | Italiano |
+| `ja` | 日本語 |
+| `ko` | 한국어 |
+| `nl` | Nederlands |
+| `pl` | Polski |
+| `pt` | Português |
+| `pt-BR` | Português (Brasil) |
+| `ru` | Русский |
+| `th` | ไทย |
+| `tr` | Türkçe |
+| `uk` | Українська |
+| `vi` | Tiếng Việt |
+| `zh-CN` | 简体中文 |
+| `zh-TW` | 繁體中文 |
+
 ## Translation Status Policy
 
-- Source of truth: English + Simplified Chinese docs in this repository.
-- If future translated docs conflict with source docs, follow source docs.
+- Source of truth: the English and Simplified Chinese maintainer docs in this repository.
+- Published README translations are expected to cover the full source content, but the maintainer docs win temporarily if translation drift exists.
+- Do not document a UI locale as "supported" unless it exists in code and the visible-surface regression coverage passes.
+- Fallback behavior is resilience, not a substitute for missing visible translations.
 
 ## Contributing Human Translations
 
-1. Add or update a file under the root directory, for example: `README_es.md`.
-2. Keep section order aligned with `README.md`.
-3. Clearly mark the translation state at the top (`Draft` or `Reviewed`).
-4. Open a PR and include at least one native speaker review when possible.
+1. Add or update a file in the repository root, for example: `README_es.md`.
+2. Keep section order aligned with [README.md](../../README.md).
+3. Update this Language Hub whenever a new README translation or UI locale is added.
+4. Open a PR and include native-speaker review when practical.
