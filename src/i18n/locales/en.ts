@@ -1,6 +1,7 @@
 export const STRINGS_EN = {
     common: {
         language: 'Language',
+        select: 'Select',
         cancel: 'Cancel',
         close: 'Close',
         copy: 'Copy',
@@ -8,9 +9,27 @@ export const STRINGS_EN = {
         standby: 'Standby',
         unknownError: 'Unknown error'
     },
+    commands: {
+        checkDuplicatesCurrent: 'Check for duplicates in current file',
+        extractConceptsAndGenerateTitles: 'Extract Concepts and Generate Titles',
+        createWikiLinkAndGenerateNoteFromSelection: 'Create Wiki-Link & Generate Note from Selection'
+    },
     plugin: {
         viewName: 'Notemd Workbench',
         ribbonTooltip: 'Open Notemd sidebar'
+    },
+    folderPicker: {
+        title: 'Select folder',
+        vaultRoot: '(Vault Root)',
+        selectAction: 'Select'
+    },
+    duplicateModal: {
+        title: 'Confirm duplicate deletion',
+        intro: 'The following {count} concept notes are identified as potential duplicates and will be moved to system trash:',
+        reason: 'Reason: {reason}',
+        conflictsWith: 'Conflicts with: {files}',
+        warning: 'This action cannot be easily undone from within Obsidian, but files can usually be recovered from the system trash.',
+        deleteFiles: 'Delete {count} files'
     },
     settings: {
         language: {
@@ -152,7 +171,36 @@ export const STRINGS_EN = {
     notices: {
         processingAlreadyRunning: 'Processing already in progress.',
         anotherProcessRunning: 'Another process is running. Please wait.',
-        notemdBusy: 'Notemd is busy.'
+        notemdBusy: 'Notemd is busy.',
+        duplicateTermsFound: 'Found {count} potential duplicate terms.',
+        duplicateTermsCheckConsole: 'Found {count} potential duplicate terms. Check console.',
+        duplicateTermsCheckLogConsole: 'Found {count} potential duplicate terms. Check log and console.',
+        duplicateCheckError: 'Error checking duplicates: {message}',
+        noActiveTextFileSelected: "No active '.md' or '.txt' file selected.",
+        noActiveProviderConfigured: 'No active LLM provider configured. Please check Notemd settings.',
+        noActiveMarkdownFileSelectedOrChanged: 'No active Markdown file selected or file changed.',
+        noActiveMarkdownFileSelected: 'No active Markdown file selected.',
+        noActiveMarkdownEditorFound: 'No active Markdown editor found.',
+        selectValidWord: 'Select a valid word (2+ chars).',
+        setConceptNoteFolder: 'Set Concept Note Folder in settings.',
+        generatedContentForWord: 'Generated content for [[{word}]]!',
+        genericError: 'Error: {message}',
+        couldNotOpenSidebar: 'Could not open Notemd sidebar.',
+        processingComplete: 'Notemd processing complete!',
+        extractionCompleteSavedTo: 'Extraction complete. Saved to {path}',
+        noMarkdownFilesFoundSelectedFolder: 'No markdown files found in the selected folder.',
+        batchTranslationCompleted: 'Batch translation of {count} files completed.',
+        batchTranslationFailed: 'Batch translation failed. See console for details.',
+        fileEmpty: 'File is empty.',
+        noTranslationProviderConfigured: 'No provider configured for translation.',
+        failedCreateTranslationFolder: "Failed to create translation folder: {path}. Defaulting to original file's folder.",
+        translatedFileSavedTo: 'Translated file saved to {path}',
+        failedTranslateFile: 'Failed to translate file. See console for details.',
+        duplicateDeletionCancelled: 'Duplicate deletion cancelled.',
+        duplicateCheckComplete: 'Duplicate check complete.',
+        duplicateCheckCompleteCancelled: 'Duplicate check complete (deletion cancelled).',
+        noPotentialDuplicateConceptNotesFound: 'No potential duplicate concept notes found.',
+        deletionCompleteSummary: 'Deletion complete. Deleted {deleted} of {total} identified files. Encountered {errors} errors.'
     },
     errorModal: {
         copyDetails: 'Copy Error Details',

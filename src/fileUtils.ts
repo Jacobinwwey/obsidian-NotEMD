@@ -9,6 +9,7 @@ import { refineMermaidBlocks, cleanupLatexDelimiters, deepDebugMermaid, applyDee
 import { _performResearch } from './searchUtils'; // Assuming this will be moved or imported correctly later
 import { showDeletionConfirmationModal } from './ui/modals'; // Assuming this will be moved or imported correctly later
 import mermaid from 'mermaid';
+import { formatI18n, getI18nStrings } from './i18n';
 import { resolveTaskLanguageName, shouldApplyAutoTranslation } from './i18n/taskLanguagePolicy';
 
 // --- Backlink and Note Management ---
@@ -1195,6 +1196,7 @@ export async function saveMermaidSummaryFile(app: App, settings: NotemdSettings,
 }
 
 export async function checkAndRemoveDuplicateConceptNotes(app: App, settings: NotemdSettings, progressReporter: ProgressReporter) {
+    const i18n = getI18nStrings({ uiLocale: settings.uiLocale });
 
     if (!settings.useCustomConceptNoteFolder || !settings.conceptNoteFolder) {
         throw new Error("Concept Note Folder is not configured in settings. Cannot perform check.");
@@ -1406,7 +1408,7 @@ export async function checkAndRemoveDuplicateConceptNotes(app: App, settings: No
         progressReporter.log("Review the list above.");
 
         // Assuming showDeletionConfirmationModal is imported from ui/modals.ts
-        const shouldDelete = await showDeletionConfirmationModal(app, reportList);
+        const shouldDelete = await showDeletionConfirmationModal(app, reportList, settings.uiLocale);
 
         if (shouldDelete) {
             progressReporter.log("User confirmed deletion. Proceeding...");
@@ -1428,12 +1430,20 @@ export async function checkAndRemoveDuplicateConceptNotes(app: App, settings: No
                     deletionErrors++;
                 }
             }
-            const finalMessage = `Deletion complete. Deleted ${deletedCount} of ${reportList.length} identified files. Encountered ${deletionErrors} errors.`;
+            const finalMessage = formatI18n(i18n.notices.deletionCompleteSummary, {
+                deleted: deletedCount,
+                total: reportList.length,
+                errors: deletionErrors
+            });
             progressReporter.log(finalMessage); new Notice(finalMessage); progressReporter.updateStatus(finalMessage, 100);
         } else {
-            progressReporter.log("Deletion cancelled by user."); new Notice("Duplicate deletion cancelled."); progressReporter.updateStatus("Duplicate check complete (deletion cancelled).", 100);
+            progressReporter.log("Deletion cancelled by user.");
+            new Notice(i18n.notices.duplicateDeletionCancelled);
+            progressReporter.updateStatus(i18n.notices.duplicateCheckCompleteCancelled, 100);
         }
     } else {
-        progressReporter.log("No potential duplicate concept notes found."); new Notice("No potential duplicate concept notes found."); progressReporter.updateStatus("Duplicate check complete.", 100);
+        progressReporter.log("No potential duplicate concept notes found.");
+        new Notice(i18n.notices.noPotentialDuplicateConceptNotesFound);
+        progressReporter.updateStatus(i18n.notices.duplicateCheckComplete, 100);
     }
 }

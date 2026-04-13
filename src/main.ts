@@ -28,7 +28,7 @@ import { NotemdSidebarView } from './ui/NotemdSidebarView';
 import { translateFile, batchTranslateFolder } from './translate';
 import { getSystemPrompt } from './promptUtils';
 import { extractOriginalText } from './extractOriginalText';
-import { getI18nStrings } from './i18n';
+import { formatI18n, getI18nStrings } from './i18n';
 import { resolveTaskLanguageCode } from './i18n/taskLanguagePolicy';
 import { getSidebarActionLabel } from './workflowButtons';
 
@@ -112,7 +112,7 @@ export default class NotemdPlugin extends Plugin {
         // Command to check duplicates in the current file (simple version)
         this.addCommand({
             id: 'check-for-duplicates',
-            name: 'Check for duplicates in current file',
+            name: uiStrings.commands.checkDuplicatesCurrent,
             checkCallback: (checking: boolean) => {
                 const activeFile = this.app.workspace.getActiveFile();
                 const condition = activeFile && (activeFile.extension === 'md' || activeFile.extension === 'txt');
@@ -127,22 +127,22 @@ export default class NotemdPlugin extends Plugin {
                                 try {
                                     const content = await this.app.vault.read(currentActiveFile);
                                     const duplicates = findDuplicates(content); // Use utility
-                                    const message = `Found ${duplicates.size} potential duplicate terms. Check console.`;
+                                    const message = formatI18n(uiStrings.notices.duplicateTermsCheckConsole, { count: duplicates.size });
                                     new Notice(message);
                                     if (duplicates.size > 0) {
                                         console.log(`Potential duplicates in ${currentActiveFile.name}:`, Array.from(duplicates));
                                     }
                                 } catch (error: unknown) {
-                                    let errorMessage = 'An unknown error occurred while checking duplicates.';
+                                    let errorMessage = uiStrings.common.unknownError;
                                     if (error instanceof Error) {
                                         errorMessage = error.message;
                                     }
-                                    new Notice(`Error checking duplicates: ${errorMessage}`);
+                                    new Notice(formatI18n(uiStrings.notices.duplicateCheckError, { message: errorMessage }));
                                     console.error("Error checking duplicates:", error);
                                 }
                             })();
                         } else if (!checking) { // If file became invalid between check and action
-                             new Notice("No active '.md' or '.txt' file to check.");
+                             new Notice(uiStrings.notices.noActiveTextFileSelected);
                         }
                     }
                     return true;
@@ -165,7 +165,7 @@ export default class NotemdPlugin extends Plugin {
                     return true;
                 }
                 if (!checking) { // Only show notice if trying to execute, not just checking availability
-                    new Notice("No active LLM provider configured. Please check Notemd settings.");
+                    new Notice(uiStrings.notices.noActiveProviderConfigured);
                 }
                 return false;
             }
@@ -184,13 +184,13 @@ export default class NotemdPlugin extends Plugin {
                         if (currentActiveFile && currentActiveFile instanceof TFile && currentActiveFile.extension === 'md') {
                             this.generateContentForTitleCommand(currentActiveFile);
                         } else {
-                            new Notice('No active Markdown file selected or file changed.');
+                            new Notice(uiStrings.notices.noActiveMarkdownFileSelectedOrChanged);
                         }
                     }
                     return true;
                 }
                  if (!checking) {
-                    new Notice('No active Markdown file selected.');
+                    new Notice(uiStrings.notices.noActiveMarkdownFileSelected);
                 }
                 return false;
             }
@@ -209,13 +209,11 @@ export default class NotemdPlugin extends Plugin {
                         if (currentActiveView) {
                              this.researchAndSummarizeCommand(currentActiveView.editor, currentActiveView);
                         }
-                    } else {
-                        new Notice('No active Markdown editor found.');
                     }
                     return true;
                 }
                 if (!checking) {
-                    new Notice('No active Markdown editor found.');
+                    new Notice(uiStrings.notices.noActiveMarkdownEditorFound);
                 }
                 return false;
             }
@@ -333,22 +331,7 @@ export default class NotemdPlugin extends Plugin {
 
         this.addCommand({
             id: 'extract-concepts-and-generate-titles',
-            name: 'Extract Concepts and Generate Titles',
-            checkCallback: (checking: boolean) => {
-                const activeFile = this.app.workspace.getActiveFile();
-                if (activeFile && activeFile.extension === 'md') {
-                    if (!checking) {
-                        this.extractConceptsAndGenerateTitlesCommand();
-                    }
-                    return true;
-                }
-                return false;
-            }
-        });
-
-        this.addCommand({
-            id: 'extract-concepts-and-generate-titles',
-            name: 'Extract Concepts and Generate Titles',
+            name: uiStrings.commands.extractConceptsAndGenerateTitles,
             checkCallback: (checking: boolean) => {
                 const activeFile = this.app.workspace.getActiveFile();
                 if (activeFile && activeFile.extension === 'md') {
@@ -363,11 +346,11 @@ export default class NotemdPlugin extends Plugin {
 
         this.addCommand({
             id: 'create-wiki-link-and-generate-from-selection',
-            name: 'Create Wiki-Link & Generate Note from Selection',
+            name: uiStrings.commands.createWikiLinkAndGenerateNoteFromSelection,
             editorCallback: async (editor: Editor, view: MarkdownView) => {
                 const word = editor.getSelection().trim();
                 if (!word || word.length < 2) {
-                    new Notice('Select a valid word (2+ chars).');
+                    new Notice(uiStrings.notices.selectValidWord);
                     return;
                 }
 
@@ -375,7 +358,7 @@ export default class NotemdPlugin extends Plugin {
                 editor.replaceSelection(`[[${word}]]`);
 
                 if (!this.settings.useCustomConceptNoteFolder || !this.settings.conceptNoteFolder) {
-                    new Notice('Set Concept Note Folder in settings.');
+                    new Notice(uiStrings.notices.setConceptNoteFolder);
                     return;
                 }
 
@@ -416,10 +399,11 @@ export default class NotemdPlugin extends Plugin {
                         setTimeout(() => reporter.close(), 2000);
                     }
                     
-                    new Notice(`Generated content for [[${word}]]!`);
+                    new Notice(formatI18n(uiStrings.notices.generatedContentForWord, { word }));
                 } catch (error: any) {
-                    new Notice(`Error: ${error.message}`);
-                    reporter.log(`Error: ${error.message}`);
+                    const message = error instanceof Error ? error.message : String(error);
+                    new Notice(formatI18n(uiStrings.notices.genericError, { message }));
+                    reporter.log(formatI18n(uiStrings.notices.genericError, { message }));
                 } finally {
                     this.isBusy = false;
                 }
@@ -545,7 +529,7 @@ export default class NotemdPlugin extends Plugin {
             this.app.workspace.revealLeaf(leaf);
         } else {
             console.error("Could not get right sidebar leaf.");
-            new Notice("Could not open Notemd sidebar.");
+            new Notice(this.getUiStrings().notices.couldNotOpenSidebar);
         }
     }
 
@@ -572,12 +556,13 @@ export default class NotemdPlugin extends Plugin {
 
         return new Promise((resolve) => {
             const modal = new Modal(this.app);
-            modal.titleEl.setText('Select Folder');
+            const i18n = this.getUiStrings();
+            modal.titleEl.setText(i18n.folderPicker.title);
             const selectEl = modal.contentEl.createEl('select');
-            folders.forEach(folder => selectEl.createEl('option', { text: folder === '/' ? '(Vault Root)' : folder, value: folder }));
+            folders.forEach(folder => selectEl.createEl('option', { text: folder === '/' ? i18n.folderPicker.vaultRoot : folder, value: folder }));
             const btnContainer = modal.contentEl.createDiv({ cls: 'modal-button-container' });
-            btnContainer.createEl('button', { text: 'Select', cls: 'mod-cta' }).onclick = () => { modal.close(); resolve(selectEl.value); };
-            btnContainer.createEl('button', { text: 'Cancel' }).onclick = () => { modal.close(); resolve(null); };
+            btnContainer.createEl('button', { text: i18n.folderPicker.selectAction, cls: 'mod-cta' }).onclick = () => { modal.close(); resolve(selectEl.value); };
+            btnContainer.createEl('button', { text: i18n.common.cancel }).onclick = () => { modal.close(); resolve(null); };
             modal.open();
         });
     }
