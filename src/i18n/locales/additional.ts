@@ -3,6 +3,32 @@ import type { NotemdEnglishStrings } from './en';
 type DeepPartial<T> = T extends object ? { [K in keyof T]?: DeepPartial<T[K]> } : T;
 type LocaleStrings = DeepPartial<NotemdEnglishStrings>;
 
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+    return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function mergeLocaleExtension(target: Record<string, unknown>, source: Record<string, unknown>): void {
+    for (const [key, value] of Object.entries(source)) {
+        if (isPlainObject(value)) {
+            const current = target[key];
+            if (isPlainObject(current)) {
+                mergeLocaleExtension(current, value);
+            } else {
+                const nested: Record<string, unknown> = {};
+                target[key] = nested;
+                mergeLocaleExtension(nested, value);
+            }
+            continue;
+        }
+
+        target[key] = value;
+    }
+}
+
+function extendLocale(base: LocaleStrings, extension: LocaleStrings): void {
+    mergeLocaleExtension(base as Record<string, unknown>, extension as Record<string, unknown>);
+}
+
 export const STRINGS_AR: LocaleStrings = {
     common: { language: 'اللغة', cancel: 'إلغاء', close: 'إغلاق', copy: 'نسخ', ready: 'جاهز', standby: 'في وضع الاستعداد', unknownError: 'خطأ غير معروف' },
     plugin: { viewName: 'مساحة عمل Notemd', ribbonTooltip: 'فتح الشريط الجانبي لـ Notemd' },
@@ -1712,3 +1738,741 @@ export const STRINGS_VI: LocaleStrings = {
         userRequestedCancellation: 'Người dùng đã yêu cầu hủy.'
     }
 };
+
+extendLocale(STRINGS_AR, {
+    common: { select: 'اختيار' },
+    commands: {
+        checkDuplicatesCurrent: 'فحص التكرارات في الملف الحالي',
+        extractConceptsAndGenerateTitles: 'استخراج المفاهيم وإنشاء العناوين',
+        createWikiLinkAndGenerateNoteFromSelection: 'إنشاء رابط ويكي وتوليد ملاحظة من التحديد'
+    },
+    duplicateModal: {
+        title: 'تأكيد حذف التكرارات',
+        intro: 'تم تحديد ملاحظات المفاهيم الـ {count} التالية كتكرارات محتملة وسيتم نقلها إلى سلة مهملات النظام:',
+        reason: 'السبب: {reason}',
+        conflictsWith: 'يتعارض مع: {files}',
+        warning: 'لا يمكن التراجع عن هذا الإجراء بسهولة من داخل Obsidian، ولكن يمكن عادةً استعادة الملفات من سلة مهملات النظام.',
+        deleteFiles: 'حذف {count} ملفات'
+    },
+    settings: {
+        developer: { heading: 'تشخيصات المطور' },
+        providerConfig: { heading: 'مزودو LLM' },
+        multiModel: { heading: 'استخدام النماذج المتعددة' },
+        translationTask: { heading: 'المهمة: الترجمة' },
+        mermaidTask: { heading: 'المهمة: التلخيص كمخطط Mermaid' },
+        extractConceptsTask: { heading: 'المهمة: استخراج المفاهيم' },
+        stableApi: { heading: 'استدعاءات API المستقرة' },
+        workflowBuilder: { heading: 'أزرار سير العمل بنقرة واحدة' },
+        generalOutput: {
+            processedHeading: 'مخرجات الملفات المعالجة',
+            conceptNoteHeading: 'مخرجات ملاحظات المفاهيم',
+            conceptLogHeading: 'مخرجات سجل المفاهيم'
+        },
+        contentGeneration: { heading: 'إنشاء المحتوى والمخرجات' },
+        customPrompts: { heading: 'إعدادات المطالبات المخصصة' },
+        extractOriginalText: { heading: 'استخراج النص الأصلي المحدد' },
+        webResearch: { heading: 'مزود البحث على الويب' },
+        processing: { heading: 'معلمات المعالجة' },
+        batchProcessing: { heading: 'المعالجة الدفعية' },
+        batchMermaidFix: { heading: 'إصلاح Mermaid دفعة واحدة' },
+        duplicateScope: { heading: 'نطاق فحص التكرارات' },
+        focusedLearning: { heading: 'مجال التعلّم المركّز' }
+    }
+});
+
+extendLocale(STRINGS_DE, {
+    common: { select: 'Auswählen' },
+    commands: {
+        checkDuplicatesCurrent: 'Duplikate in aktueller Datei prüfen',
+        extractConceptsAndGenerateTitles: 'Konzepte extrahieren und Titel generieren',
+        createWikiLinkAndGenerateNoteFromSelection: 'Wiki-Link erstellen und Notiz aus Auswahl generieren'
+    },
+    duplicateModal: {
+        title: 'Löschen von Duplikaten bestätigen',
+        intro: 'Die folgenden {count} Konzeptnotizen wurden als potenzielle Duplikate erkannt und werden in den Systempapierkorb verschoben:',
+        reason: 'Grund: {reason}',
+        conflictsWith: 'Konflikt mit: {files}',
+        warning: 'Diese Aktion lässt sich in Obsidian nicht einfach rückgängig machen, die Dateien können jedoch normalerweise aus dem Systempapierkorb wiederhergestellt werden.',
+        deleteFiles: '{count} Dateien löschen'
+    },
+    settings: {
+        developer: { heading: 'Entwicklerdiagnose' },
+        providerConfig: { heading: 'LLM-Anbieter' },
+        multiModel: { heading: 'Mehrmodell-Nutzung' },
+        translationTask: { heading: 'Aufgabe: Übersetzen' },
+        mermaidTask: { heading: 'Aufgabe: Als Mermaid-Diagramm zusammenfassen' },
+        extractConceptsTask: { heading: 'Aufgabe: Konzepte extrahieren' },
+        stableApi: { heading: 'Stabile API-Aufrufe' },
+        workflowBuilder: { heading: 'Ein-Klick-Workflow-Schaltflächen' },
+        generalOutput: {
+            processedHeading: 'Ausgabe verarbeiteter Dateien',
+            conceptNoteHeading: 'Ausgabe von Konzeptnotizen',
+            conceptLogHeading: 'Ausgabe der Konzeptprotokolldatei'
+        },
+        contentGeneration: { heading: 'Inhaltsgenerierung und Ausgabe' },
+        customPrompts: { heading: 'Einstellungen für benutzerdefinierte Prompts' },
+        extractOriginalText: { heading: 'Bestimmten Originaltext extrahieren' },
+        webResearch: { heading: 'Web-Recherche-Anbieter' },
+        processing: { heading: 'Verarbeitungsparameter' },
+        batchProcessing: { heading: 'Stapelverarbeitung' },
+        batchMermaidFix: { heading: 'Stapelweise Mermaid-Reparatur' },
+        duplicateScope: { heading: 'Umfang der Duplikatprüfung' },
+        focusedLearning: { heading: 'Fokussierter Lernbereich' }
+    }
+});
+
+extendLocale(STRINGS_ES, {
+    common: { select: 'Seleccionar' },
+    commands: {
+        checkDuplicatesCurrent: 'Comprobar duplicados en el archivo actual',
+        extractConceptsAndGenerateTitles: 'Extraer conceptos y generar títulos',
+        createWikiLinkAndGenerateNoteFromSelection: 'Crear enlace wiki y generar nota desde la selección'
+    },
+    duplicateModal: {
+        title: 'Confirmar eliminación de duplicados',
+        intro: 'Las siguientes {count} notas de concepto se identificaron como posibles duplicados y se moverán a la papelera del sistema:',
+        reason: 'Motivo: {reason}',
+        conflictsWith: 'En conflicto con: {files}',
+        warning: 'Esta acción no puede deshacerse fácilmente desde Obsidian, aunque normalmente los archivos pueden recuperarse desde la papelera del sistema.',
+        deleteFiles: 'Eliminar {count} archivos'
+    },
+    settings: {
+        developer: { heading: 'Diagnósticos de desarrollador' },
+        providerConfig: { heading: 'Proveedores LLM' },
+        multiModel: { heading: 'Uso de múltiples modelos' },
+        translationTask: { heading: 'Tarea: Traducir' },
+        mermaidTask: { heading: 'Tarea: Resumir como diagrama Mermaid' },
+        extractConceptsTask: { heading: 'Tarea: Extraer conceptos' },
+        stableApi: { heading: 'Llamadas API estables' },
+        workflowBuilder: { heading: 'Botones de flujo de un clic' },
+        generalOutput: {
+            processedHeading: 'Salida del archivo procesado',
+            conceptNoteHeading: 'Salida de notas de concepto',
+            conceptLogHeading: 'Salida del archivo de registro de conceptos'
+        },
+        contentGeneration: { heading: 'Generación de contenido y salida' },
+        customPrompts: { heading: 'Ajustes de prompts personalizados' },
+        extractOriginalText: { heading: 'Extraer texto original específico' },
+        webResearch: { heading: 'Proveedor de investigación web' },
+        processing: { heading: 'Parámetros de procesamiento' },
+        batchProcessing: { heading: 'Procesamiento por lotes' },
+        batchMermaidFix: { heading: 'Corrección Mermaid por lotes' },
+        duplicateScope: { heading: 'Alcance de verificación de duplicados' },
+        focusedLearning: { heading: 'Dominio de aprendizaje enfocado' }
+    }
+});
+
+extendLocale(STRINGS_FA, {
+    common: { select: 'انتخاب' },
+    commands: {
+        checkDuplicatesCurrent: 'بررسی موارد تکراری در فایل فعلی',
+        extractConceptsAndGenerateTitles: 'استخراج مفاهیم و تولید عنوان‌ها',
+        createWikiLinkAndGenerateNoteFromSelection: 'ایجاد پیوند ویکی و تولید یادداشت از متن انتخاب‌شده'
+    },
+    duplicateModal: {
+        title: 'تأیید حذف موارد تکراری',
+        intro: 'یادداشت‌های مفهومی زیر به تعداد {count} مورد به‌عنوان موارد تکراری احتمالی شناسایی شده‌اند و به سطل زبالهٔ سیستم منتقل می‌شوند:',
+        reason: 'دلیل: {reason}',
+        conflictsWith: 'تداخل با: {files}',
+        warning: 'بازگردانی این اقدام از داخل Obsidian آسان نیست، اما معمولاً می‌توان فایل‌ها را از سطل زبالهٔ سیستم بازیابی کرد.',
+        deleteFiles: 'حذف {count} فایل'
+    },
+    settings: {
+        developer: { heading: 'عیب‌یابی توسعه‌دهنده' },
+        providerConfig: { heading: 'ارائه‌دهندگان LLM' },
+        multiModel: { heading: 'استفاده از چندمدل' },
+        translationTask: { heading: 'کار: ترجمه' },
+        mermaidTask: { heading: 'کار: خلاصه‌سازی به صورت نمودار Mermaid' },
+        extractConceptsTask: { heading: 'کار: استخراج مفاهیم' },
+        stableApi: { heading: 'فراخوانی‌های پایدار API' },
+        workflowBuilder: { heading: 'دکمه‌های گردش‌کار تک‌کلیکی' },
+        generalOutput: {
+            processedHeading: 'خروجی فایل پردازش‌شده',
+            conceptNoteHeading: 'خروجی یادداشت مفهوم',
+            conceptLogHeading: 'خروجی فایل گزارش مفاهیم'
+        },
+        contentGeneration: { heading: 'تولید محتوا و خروجی' },
+        customPrompts: { heading: 'تنظیمات پرامپت سفارشی' },
+        extractOriginalText: { heading: 'استخراج متن اصلی مشخص' },
+        webResearch: { heading: 'ارائه‌دهنده پژوهش وب' },
+        processing: { heading: 'پارامترهای پردازش' },
+        batchProcessing: { heading: 'پردازش دسته‌ای' },
+        batchMermaidFix: { heading: 'اصلاح دسته‌ای Mermaid' },
+        duplicateScope: { heading: 'دامنه بررسی موارد تکراری' },
+        focusedLearning: { heading: 'حوزه یادگیری متمرکز' }
+    }
+});
+
+extendLocale(STRINGS_FR, {
+    common: { select: 'Sélectionner' },
+    commands: {
+        checkDuplicatesCurrent: 'Vérifier les doublons dans le fichier actuel',
+        extractConceptsAndGenerateTitles: 'Extraire les concepts et générer les titres',
+        createWikiLinkAndGenerateNoteFromSelection: 'Créer un lien wiki et générer une note à partir de la sélection'
+    },
+    duplicateModal: {
+        title: 'Confirmer la suppression des doublons',
+        intro: 'Les {count} notes de concept suivantes ont été identifiées comme des doublons potentiels et seront déplacées vers la corbeille du système :',
+        reason: 'Raison : {reason}',
+        conflictsWith: 'En conflit avec : {files}',
+        warning: 'Cette action ne peut pas être annulée facilement dans Obsidian, mais les fichiers peuvent généralement être récupérés depuis la corbeille du système.',
+        deleteFiles: 'Supprimer {count} fichiers'
+    },
+    settings: {
+        developer: { heading: 'Diagnostics développeur' },
+        providerConfig: { heading: 'Fournisseurs LLM' },
+        multiModel: { heading: 'Utilisation multi-modèle' },
+        translationTask: { heading: 'Tâche : Traduire' },
+        mermaidTask: { heading: 'Tâche : Résumer en diagramme Mermaid' },
+        extractConceptsTask: { heading: 'Tâche : Extraire les concepts' },
+        stableApi: { heading: 'Appels API stables' },
+        workflowBuilder: { heading: 'Boutons de workflow en un clic' },
+        generalOutput: {
+            processedHeading: 'Sortie des fichiers traités',
+            conceptNoteHeading: 'Sortie des notes de concept',
+            conceptLogHeading: 'Sortie du fichier journal des concepts'
+        },
+        contentGeneration: { heading: 'Génération de contenu et sortie' },
+        customPrompts: { heading: 'Paramètres des prompts personnalisés' },
+        extractOriginalText: { heading: 'Extraire un texte original spécifique' },
+        webResearch: { heading: 'Fournisseur de recherche web' },
+        processing: { heading: 'Paramètres de traitement' },
+        batchProcessing: { heading: 'Traitement par lot' },
+        batchMermaidFix: { heading: 'Correction Mermaid par lot' },
+        duplicateScope: { heading: 'Portée de vérification des doublons' },
+        focusedLearning: { heading: 'Domaine d’apprentissage ciblé' }
+    }
+});
+
+extendLocale(STRINGS_ID, {
+    common: { select: 'Pilih' },
+    commands: {
+        checkDuplicatesCurrent: 'Periksa duplikat pada file saat ini',
+        extractConceptsAndGenerateTitles: 'Ekstrak konsep dan hasilkan judul',
+        createWikiLinkAndGenerateNoteFromSelection: 'Buat tautan wiki dan hasilkan catatan dari pilihan'
+    },
+    duplicateModal: {
+        title: 'Konfirmasi penghapusan duplikat',
+        intro: 'Sebanyak {count} catatan konsep berikut diidentifikasi sebagai kemungkinan duplikat dan akan dipindahkan ke tempat sampah sistem:',
+        reason: 'Alasan: {reason}',
+        conflictsWith: 'Bertabrakan dengan: {files}',
+        warning: 'Tindakan ini tidak mudah dibatalkan dari dalam Obsidian, tetapi file biasanya masih dapat dipulihkan dari tempat sampah sistem.',
+        deleteFiles: 'Hapus {count} file'
+    },
+    settings: {
+        developer: { heading: 'Diagnostik pengembang' },
+        providerConfig: { heading: 'Penyedia LLM' },
+        multiModel: { heading: 'Penggunaan multi-model' },
+        translationTask: { heading: 'Tugas: Terjemahkan' },
+        mermaidTask: { heading: 'Tugas: Ringkas sebagai diagram Mermaid' },
+        extractConceptsTask: { heading: 'Tugas: Ekstrak konsep' },
+        stableApi: { heading: 'Panggilan API stabil' },
+        workflowBuilder: { heading: 'Tombol alur satu klik' },
+        generalOutput: {
+            processedHeading: 'Keluaran file yang diproses',
+            conceptNoteHeading: 'Keluaran catatan konsep',
+            conceptLogHeading: 'Keluaran file log konsep'
+        },
+        contentGeneration: { heading: 'Pembuatan konten dan keluaran' },
+        customPrompts: { heading: 'Pengaturan prompt kustom' },
+        extractOriginalText: { heading: 'Ekstrak teks asli tertentu' },
+        webResearch: { heading: 'Penyedia riset web' },
+        processing: { heading: 'Parameter pemrosesan' },
+        batchProcessing: { heading: 'Pemrosesan batch' },
+        batchMermaidFix: { heading: 'Perbaikan Mermaid batch' },
+        duplicateScope: { heading: 'Cakupan pemeriksaan duplikat' },
+        focusedLearning: { heading: 'Domain pembelajaran terfokus' }
+    }
+});
+
+extendLocale(STRINGS_IT, {
+    common: { select: 'Seleziona' },
+    commands: {
+        checkDuplicatesCurrent: 'Controlla duplicati nel file corrente',
+        extractConceptsAndGenerateTitles: 'Estrai concetti e genera titoli',
+        createWikiLinkAndGenerateNoteFromSelection: 'Crea link wiki e genera nota dalla selezione'
+    },
+    duplicateModal: {
+        title: 'Conferma eliminazione duplicati',
+        intro: 'Le seguenti {count} note concetto sono state identificate come potenziali duplicati e verranno spostate nel cestino di sistema:',
+        reason: 'Motivo: {reason}',
+        conflictsWith: 'In conflitto con: {files}',
+        warning: 'Questa azione non può essere facilmente annullata da Obsidian, ma i file di solito possono essere recuperati dal cestino di sistema.',
+        deleteFiles: 'Elimina {count} file'
+    },
+    settings: {
+        developer: { heading: 'Diagnostica sviluppatore' },
+        providerConfig: { heading: 'Provider LLM' },
+        multiModel: { heading: 'Uso multi-modello' },
+        translationTask: { heading: 'Attività: Traduci' },
+        mermaidTask: { heading: 'Attività: Riassumi come diagramma Mermaid' },
+        extractConceptsTask: { heading: 'Attività: Estrai concetti' },
+        stableApi: { heading: 'Chiamate API stabili' },
+        workflowBuilder: { heading: 'Pulsanti workflow con un clic' },
+        generalOutput: {
+            processedHeading: 'Output file elaborato',
+            conceptNoteHeading: 'Output note concetto',
+            conceptLogHeading: 'Output file di log dei concetti'
+        },
+        contentGeneration: { heading: 'Generazione contenuti e output' },
+        customPrompts: { heading: 'Impostazioni prompt personalizzati' },
+        extractOriginalText: { heading: 'Estrai testo originale specifico' },
+        webResearch: { heading: 'Provider di ricerca web' },
+        processing: { heading: 'Parametri di elaborazione' },
+        batchProcessing: { heading: 'Elaborazione batch' },
+        batchMermaidFix: { heading: 'Correzione Mermaid batch' },
+        duplicateScope: { heading: 'Ambito controllo duplicati' },
+        focusedLearning: { heading: 'Dominio di apprendimento focalizzato' }
+    }
+});
+
+extendLocale(STRINGS_JA, {
+    common: { select: '選択' },
+    commands: {
+        checkDuplicatesCurrent: '現在のファイルの重複を確認',
+        extractConceptsAndGenerateTitles: '概念を抽出してタイトルを生成',
+        createWikiLinkAndGenerateNoteFromSelection: 'Wikiリンクを作成して選択範囲からノートを生成'
+    },
+    duplicateModal: {
+        title: '重複削除の確認',
+        intro: '次の {count} 件の概念ノートは重複の可能性があると判定され、システムのゴミ箱に移動されます:',
+        reason: '理由: {reason}',
+        conflictsWith: '競合先: {files}',
+        warning: 'この操作は Obsidian 内では簡単に元に戻せませんが、通常はシステムのゴミ箱からファイルを復元できます。',
+        deleteFiles: '{count} 件のファイルを削除'
+    },
+    settings: {
+        developer: { heading: '開発者向け診断' },
+        providerConfig: { heading: 'LLM プロバイダー' },
+        multiModel: { heading: 'マルチモデル利用' },
+        translationTask: { heading: 'タスク: 翻訳' },
+        mermaidTask: { heading: 'タスク: Mermaid 図として要約' },
+        extractConceptsTask: { heading: 'タスク: 概念を抽出' },
+        stableApi: { heading: '安定した API 呼び出し' },
+        workflowBuilder: { heading: 'ワンクリックワークフローボタン' },
+        generalOutput: {
+            processedHeading: '処理済みファイル出力',
+            conceptNoteHeading: '概念ノート出力',
+            conceptLogHeading: '概念ログファイル出力'
+        },
+        contentGeneration: { heading: 'コンテンツ生成と出力' },
+        customPrompts: { heading: 'カスタムプロンプト設定' },
+        extractOriginalText: { heading: '特定の原文を抽出' },
+        webResearch: { heading: 'Web 調査プロバイダー' },
+        processing: { heading: '処理パラメータ' },
+        batchProcessing: { heading: '一括処理' },
+        batchMermaidFix: { heading: 'Mermaid 一括修正' },
+        duplicateScope: { heading: '重複確認の範囲' },
+        focusedLearning: { heading: '重点学習ドメイン' }
+    }
+});
+
+extendLocale(STRINGS_KO, {
+    common: { select: '선택' },
+    commands: {
+        checkDuplicatesCurrent: '현재 파일에서 중복 확인',
+        extractConceptsAndGenerateTitles: '개념 추출 및 제목 생성',
+        createWikiLinkAndGenerateNoteFromSelection: '위키 링크 생성 및 선택 영역에서 노트 생성'
+    },
+    duplicateModal: {
+        title: '중복 삭제 확인',
+        intro: '다음 {count}개의 개념 노트가 잠재적 중복으로 식별되었으며 시스템 휴지통으로 이동됩니다:',
+        reason: '이유: {reason}',
+        conflictsWith: '충돌 대상: {files}',
+        warning: '이 작업은 Obsidian 안에서 쉽게 되돌릴 수 없지만, 파일은 보통 시스템 휴지통에서 복구할 수 있습니다.',
+        deleteFiles: '{count}개 파일 삭제'
+    },
+    settings: {
+        developer: { heading: '개발자 진단' },
+        providerConfig: { heading: 'LLM 제공자' },
+        multiModel: { heading: '멀티모델 사용' },
+        translationTask: { heading: '작업: 번역' },
+        mermaidTask: { heading: '작업: Mermaid 다이어그램으로 요약' },
+        extractConceptsTask: { heading: '작업: 개념 추출' },
+        stableApi: { heading: '안정적인 API 호출' },
+        workflowBuilder: { heading: '원클릭 워크플로 버튼' },
+        generalOutput: {
+            processedHeading: '처리된 파일 출력',
+            conceptNoteHeading: '개념 노트 출력',
+            conceptLogHeading: '개념 로그 파일 출력'
+        },
+        contentGeneration: { heading: '콘텐츠 생성 및 출력' },
+        customPrompts: { heading: '사용자 정의 프롬프트 설정' },
+        extractOriginalText: { heading: '특정 원문 추출' },
+        webResearch: { heading: '웹 연구 제공자' },
+        processing: { heading: '처리 매개변수' },
+        batchProcessing: { heading: '일괄 처리' },
+        batchMermaidFix: { heading: 'Mermaid 일괄 수정' },
+        duplicateScope: { heading: '중복 확인 범위' },
+        focusedLearning: { heading: '집중 학습 도메인' }
+    }
+});
+
+extendLocale(STRINGS_NL, {
+    common: { select: 'Selecteren' },
+    commands: {
+        checkDuplicatesCurrent: 'Duplicaten in huidig bestand controleren',
+        extractConceptsAndGenerateTitles: 'Concepten extraheren en titels genereren',
+        createWikiLinkAndGenerateNoteFromSelection: 'Wiki-link maken en notitie uit selectie genereren'
+    },
+    duplicateModal: {
+        title: 'Verwijderen van duplicaten bevestigen',
+        intro: 'De volgende {count} conceptnotities zijn als mogelijke duplicaten gemarkeerd en worden naar de systeemprullenbak verplaatst:',
+        reason: 'Reden: {reason}',
+        conflictsWith: 'Conflict met: {files}',
+        warning: 'Deze actie kan niet eenvoudig binnen Obsidian ongedaan worden gemaakt, maar bestanden kunnen meestal uit de systeemprullenbak worden hersteld.',
+        deleteFiles: '{count} bestanden verwijderen'
+    },
+    settings: {
+        developer: { heading: 'Ontwikkelaarsdiagnostiek' },
+        providerConfig: { heading: 'LLM-providers' },
+        multiModel: { heading: 'Gebruik van meerdere modellen' },
+        translationTask: { heading: 'Taak: Vertalen' },
+        mermaidTask: { heading: 'Taak: Samenvatten als Mermaid-diagram' },
+        extractConceptsTask: { heading: 'Taak: Concepten extraheren' },
+        stableApi: { heading: 'Stabiele API-aanroepen' },
+        workflowBuilder: { heading: 'Workflowknoppen met één klik' },
+        generalOutput: {
+            processedHeading: 'Uitvoer van verwerkte bestanden',
+            conceptNoteHeading: 'Uitvoer van conceptnotities',
+            conceptLogHeading: 'Uitvoer van conceptlogbestand'
+        },
+        contentGeneration: { heading: 'Inhoudsgeneratie en uitvoer' },
+        customPrompts: { heading: 'Instellingen voor aangepaste prompts' },
+        extractOriginalText: { heading: 'Specifieke originele tekst extraheren' },
+        webResearch: { heading: 'Provider voor webonderzoek' },
+        processing: { heading: 'Verwerkingsparameters' },
+        batchProcessing: { heading: 'Batchverwerking' },
+        batchMermaidFix: { heading: 'Batch Mermaid-herstel' },
+        duplicateScope: { heading: 'Bereik van duplicaatcontrole' },
+        focusedLearning: { heading: 'Gericht leerdomein' }
+    }
+});
+
+extendLocale(STRINGS_PL, {
+    common: { select: 'Wybierz' },
+    commands: {
+        checkDuplicatesCurrent: 'Sprawdź duplikaty w bieżącym pliku',
+        extractConceptsAndGenerateTitles: 'Wyodrębnij pojęcia i wygeneruj tytuły',
+        createWikiLinkAndGenerateNoteFromSelection: 'Utwórz link wiki i wygeneruj notatkę z zaznaczenia'
+    },
+    duplicateModal: {
+        title: 'Potwierdź usunięcie duplikatów',
+        intro: 'Następujące {count} notatek pojęć zidentyfikowano jako potencjalne duplikaty i zostaną przeniesione do kosza systemowego:',
+        reason: 'Powód: {reason}',
+        conflictsWith: 'Koliduje z: {files}',
+        warning: 'Tej operacji nie można łatwo cofnąć w Obsidianie, ale pliki zwykle można odzyskać z kosza systemowego.',
+        deleteFiles: 'Usuń {count} plików'
+    },
+    settings: {
+        developer: { heading: 'Diagnostyka deweloperska' },
+        providerConfig: { heading: 'Dostawcy LLM' },
+        multiModel: { heading: 'Użycie wielu modeli' },
+        translationTask: { heading: 'Zadanie: Tłumacz' },
+        mermaidTask: { heading: 'Zadanie: Podsumuj jako diagram Mermaid' },
+        extractConceptsTask: { heading: 'Zadanie: Wyodrębnij pojęcia' },
+        stableApi: { heading: 'Stabilne wywołania API' },
+        workflowBuilder: { heading: 'Przyciski workflow jednym kliknięciem' },
+        generalOutput: {
+            processedHeading: 'Wyjście przetworzonego pliku',
+            conceptNoteHeading: 'Wyjście notatek pojęć',
+            conceptLogHeading: 'Wyjście pliku dziennika pojęć'
+        },
+        contentGeneration: { heading: 'Generowanie treści i wyników' },
+        customPrompts: { heading: 'Ustawienia własnych promptów' },
+        extractOriginalText: { heading: 'Wyodrębnij wskazany tekst źródłowy' },
+        webResearch: { heading: 'Dostawca badań internetowych' },
+        processing: { heading: 'Parametry przetwarzania' },
+        batchProcessing: { heading: 'Przetwarzanie wsadowe' },
+        batchMermaidFix: { heading: 'Wsadowa naprawa Mermaid' },
+        duplicateScope: { heading: 'Zakres sprawdzania duplikatów' },
+        focusedLearning: { heading: 'Ukierunkowana domena uczenia' }
+    }
+});
+
+extendLocale(STRINGS_PT, {
+    common: { select: 'Selecionar' },
+    commands: {
+        checkDuplicatesCurrent: 'Verificar duplicados no ficheiro atual',
+        extractConceptsAndGenerateTitles: 'Extrair conceitos e gerar títulos',
+        createWikiLinkAndGenerateNoteFromSelection: 'Criar wiki-link e gerar nota a partir da seleção'
+    },
+    duplicateModal: {
+        title: 'Confirmar eliminação de duplicados',
+        intro: 'As seguintes {count} notas de conceito foram identificadas como possíveis duplicados e serão movidas para o lixo do sistema:',
+        reason: 'Motivo: {reason}',
+        conflictsWith: 'Em conflito com: {files}',
+        warning: 'Esta ação não pode ser facilmente desfeita dentro do Obsidian, mas normalmente os ficheiros podem ser recuperados do lixo do sistema.',
+        deleteFiles: 'Eliminar {count} ficheiros'
+    },
+    settings: {
+        developer: { heading: 'Diagnóstico de programador' },
+        providerConfig: { heading: 'Fornecedores de LLM' },
+        multiModel: { heading: 'Utilização de múltiplos modelos' },
+        translationTask: { heading: 'Tarefa: Traduzir' },
+        mermaidTask: { heading: 'Tarefa: Resumir como diagrama Mermaid' },
+        extractConceptsTask: { heading: 'Tarefa: Extrair conceitos' },
+        stableApi: { heading: 'Chamadas estáveis de API' },
+        workflowBuilder: { heading: 'Botões de fluxo de trabalho de um clique' },
+        generalOutput: {
+            processedHeading: 'Saída de ficheiro processado',
+            conceptNoteHeading: 'Saída de nota de conceito',
+            conceptLogHeading: 'Saída do ficheiro de registo de conceitos'
+        },
+        contentGeneration: { heading: 'Geração de conteúdo e saída' },
+        customPrompts: { heading: 'Definições de prompts personalizados' },
+        extractOriginalText: { heading: 'Extrair texto original específico' },
+        webResearch: { heading: 'Fornecedor de pesquisa web' },
+        processing: { heading: 'Parâmetros de processamento' },
+        batchProcessing: { heading: 'Processamento em lote' },
+        batchMermaidFix: { heading: 'Correção Mermaid em lote' },
+        duplicateScope: { heading: 'Âmbito da verificação de duplicados' },
+        focusedLearning: { heading: 'Domínio de aprendizagem focado' }
+    }
+});
+
+extendLocale(STRINGS_PT_BR, {
+    common: { select: 'Selecionar' },
+    commands: {
+        checkDuplicatesCurrent: 'Verificar duplicatas no arquivo atual',
+        extractConceptsAndGenerateTitles: 'Extrair conceitos e gerar títulos',
+        createWikiLinkAndGenerateNoteFromSelection: 'Criar wiki-link e gerar nota a partir da seleção'
+    },
+    duplicateModal: {
+        title: 'Confirmar exclusão de duplicatas',
+        intro: 'As seguintes {count} notas de conceito foram identificadas como possíveis duplicatas e serão movidas para a lixeira do sistema:',
+        reason: 'Motivo: {reason}',
+        conflictsWith: 'Conflita com: {files}',
+        warning: 'Esta ação não pode ser desfeita facilmente dentro do Obsidian, mas os arquivos normalmente podem ser recuperados da lixeira do sistema.',
+        deleteFiles: 'Excluir {count} arquivos'
+    },
+    settings: {
+        developer: { heading: 'Diagnósticos do desenvolvedor' },
+        providerConfig: { heading: 'Provedores de LLM' },
+        multiModel: { heading: 'Uso de múltiplos modelos' },
+        translationTask: { heading: 'Tarefa: Traduzir' },
+        mermaidTask: { heading: 'Tarefa: Resumir como diagrama Mermaid' },
+        extractConceptsTask: { heading: 'Tarefa: Extrair conceitos' },
+        stableApi: { heading: 'Chamadas estáveis de API' },
+        workflowBuilder: { heading: 'Botões de fluxo de trabalho de um clique' },
+        generalOutput: {
+            processedHeading: 'Saída do arquivo processado',
+            conceptNoteHeading: 'Saída de notas de conceito',
+            conceptLogHeading: 'Saída do arquivo de log de conceitos'
+        },
+        contentGeneration: { heading: 'Geração de conteúdo e saída' },
+        customPrompts: { heading: 'Configurações de prompts personalizados' },
+        extractOriginalText: { heading: 'Extrair texto original específico' },
+        webResearch: { heading: 'Provedor de pesquisa na web' },
+        processing: { heading: 'Parâmetros de processamento' },
+        batchProcessing: { heading: 'Processamento em lote' },
+        batchMermaidFix: { heading: 'Correção Mermaid em lote' },
+        duplicateScope: { heading: 'Escopo de verificação de duplicatas' },
+        focusedLearning: { heading: 'Domínio de aprendizado focado' }
+    }
+});
+
+extendLocale(STRINGS_RU, {
+    common: { select: 'Выбрать' },
+    commands: {
+        checkDuplicatesCurrent: 'Проверить дубликаты в текущем файле',
+        extractConceptsAndGenerateTitles: 'Извлечь концепты и сгенерировать заголовки',
+        createWikiLinkAndGenerateNoteFromSelection: 'Создать вики-ссылку и сгенерировать заметку из выделения'
+    },
+    duplicateModal: {
+        title: 'Подтвердить удаление дубликатов',
+        intro: 'Следующие {count} заметок-концептов определены как возможные дубликаты и будут перемещены в системную корзину:',
+        reason: 'Причина: {reason}',
+        conflictsWith: 'Конфликтует с: {files}',
+        warning: 'Это действие нельзя легко отменить внутри Obsidian, но файлы обычно можно восстановить из системной корзины.',
+        deleteFiles: 'Удалить {count} файлов'
+    },
+    settings: {
+        developer: { heading: 'Диагностика для разработчиков' },
+        providerConfig: { heading: 'Провайдеры LLM' },
+        multiModel: { heading: 'Использование нескольких моделей' },
+        translationTask: { heading: 'Задача: Перевод' },
+        mermaidTask: { heading: 'Задача: Резюмировать как диаграмму Mermaid' },
+        extractConceptsTask: { heading: 'Задача: Извлечь концепты' },
+        stableApi: { heading: 'Стабильные вызовы API' },
+        workflowBuilder: { heading: 'Кнопки workflow в один клик' },
+        generalOutput: {
+            processedHeading: 'Вывод обработанного файла',
+            conceptNoteHeading: 'Вывод заметок-концептов',
+            conceptLogHeading: 'Вывод файла журнала концептов'
+        },
+        contentGeneration: { heading: 'Генерация контента и вывод' },
+        customPrompts: { heading: 'Настройки пользовательских промптов' },
+        extractOriginalText: { heading: 'Извлечь определенный исходный текст' },
+        webResearch: { heading: 'Провайдер веб-исследований' },
+        processing: { heading: 'Параметры обработки' },
+        batchProcessing: { heading: 'Пакетная обработка' },
+        batchMermaidFix: { heading: 'Пакетное исправление Mermaid' },
+        duplicateScope: { heading: 'Область проверки дубликатов' },
+        focusedLearning: { heading: 'Фокусная область обучения' }
+    }
+});
+
+extendLocale(STRINGS_TH, {
+    common: { select: 'เลือก' },
+    commands: {
+        checkDuplicatesCurrent: 'ตรวจหาข้อความซ้ำในไฟล์ปัจจุบัน',
+        extractConceptsAndGenerateTitles: 'สกัดแนวคิดและสร้างชื่อเรื่อง',
+        createWikiLinkAndGenerateNoteFromSelection: 'สร้างลิงก์วิกิและสร้างโน้ตจากส่วนที่เลือก'
+    },
+    duplicateModal: {
+        title: 'ยืนยันการลบรายการซ้ำ',
+        intro: 'โน้ตแนวคิด {count} รายการต่อไปนี้ถูกระบุว่าอาจเป็นรายการซ้ำและจะถูกย้ายไปยังถังขยะของระบบ:',
+        reason: 'เหตุผล: {reason}',
+        conflictsWith: 'ขัดแย้งกับ: {files}',
+        warning: 'การกระทำนี้ไม่สามารถย้อนกลับได้ง่ายจากภายใน Obsidian แต่โดยปกติยังสามารถกู้ไฟล์กลับจากถังขยะของระบบได้',
+        deleteFiles: 'ลบ {count} ไฟล์'
+    },
+    settings: {
+        developer: { heading: 'การวินิจฉัยสำหรับนักพัฒนา' },
+        providerConfig: { heading: 'ผู้ให้บริการ LLM' },
+        multiModel: { heading: 'การใช้งานหลายโมเดล' },
+        translationTask: { heading: 'งาน: แปล' },
+        mermaidTask: { heading: 'งาน: สรุปเป็นแผนภาพ Mermaid' },
+        extractConceptsTask: { heading: 'งาน: สกัดแนวคิด' },
+        stableApi: { heading: 'การเรียก API แบบเสถียร' },
+        workflowBuilder: { heading: 'ปุ่มเวิร์กโฟลว์แบบคลิกเดียว' },
+        generalOutput: {
+            processedHeading: 'ผลลัพธ์ไฟล์ที่ประมวลผลแล้ว',
+            conceptNoteHeading: 'ผลลัพธ์โน้ตแนวคิด',
+            conceptLogHeading: 'ผลลัพธ์ไฟล์บันทึกแนวคิด'
+        },
+        contentGeneration: { heading: 'การสร้างเนื้อหาและผลลัพธ์' },
+        customPrompts: { heading: 'การตั้งค่าพรอมป์แบบกำหนดเอง' },
+        extractOriginalText: { heading: 'สกัดข้อความต้นฉบับเฉพาะส่วน' },
+        webResearch: { heading: 'ผู้ให้บริการวิจัยบนเว็บ' },
+        processing: { heading: 'พารามิเตอร์การประมวลผล' },
+        batchProcessing: { heading: 'การประมวลผลแบบกลุ่ม' },
+        batchMermaidFix: { heading: 'แก้ไข Mermaid แบบกลุ่ม' },
+        duplicateScope: { heading: 'ขอบเขตการตรวจสอบรายการซ้ำ' },
+        focusedLearning: { heading: 'โดเมนการเรียนรู้แบบมุ่งเน้น' }
+    }
+});
+
+extendLocale(STRINGS_TR, {
+    common: { select: 'Seç' },
+    commands: {
+        checkDuplicatesCurrent: 'Geçerli dosyada yinelenenleri kontrol et',
+        extractConceptsAndGenerateTitles: 'Kavramları çıkar ve başlıklar üret',
+        createWikiLinkAndGenerateNoteFromSelection: 'Wiki bağlantısı oluştur ve seçimden not üret'
+    },
+    duplicateModal: {
+        title: 'Yinelenen silmeyi onayla',
+        intro: 'Aşağıdaki {count} kavram notu olası yinelenen olarak belirlendi ve sistem çöp kutusuna taşınacak:',
+        reason: 'Neden: {reason}',
+        conflictsWith: 'Çakıştığı dosyalar: {files}',
+        warning: 'Bu işlem Obsidian içinden kolayca geri alınamaz, ancak dosyalar genellikle sistem çöp kutusundan kurtarılabilir.',
+        deleteFiles: '{count} dosyayı sil'
+    },
+    settings: {
+        developer: { heading: 'Geliştirici tanılamaları' },
+        providerConfig: { heading: 'LLM sağlayıcıları' },
+        multiModel: { heading: 'Çoklu model kullanımı' },
+        translationTask: { heading: 'Görev: Çevir' },
+        mermaidTask: { heading: 'Görev: Mermaid diyagramı olarak özetle' },
+        extractConceptsTask: { heading: 'Görev: Kavramları çıkar' },
+        stableApi: { heading: 'Kararlı API çağrıları' },
+        workflowBuilder: { heading: 'Tek tıklamalı iş akışı düğmeleri' },
+        generalOutput: {
+            processedHeading: 'İşlenen dosya çıktısı',
+            conceptNoteHeading: 'Kavram notu çıktısı',
+            conceptLogHeading: 'Kavram günlük dosyası çıktısı'
+        },
+        contentGeneration: { heading: 'İçerik üretimi ve çıktı' },
+        customPrompts: { heading: 'Özel istem ayarları' },
+        extractOriginalText: { heading: 'Belirli özgün metni çıkar' },
+        webResearch: { heading: 'Web araştırma sağlayıcısı' },
+        processing: { heading: 'İşleme parametreleri' },
+        batchProcessing: { heading: 'Toplu işleme' },
+        batchMermaidFix: { heading: 'Toplu Mermaid düzeltmesi' },
+        duplicateScope: { heading: 'Yinelenen kontrol kapsamı' },
+        focusedLearning: { heading: 'Odaklı öğrenme alanı' }
+    }
+});
+
+extendLocale(STRINGS_UK, {
+    common: { select: 'Вибрати' },
+    commands: {
+        checkDuplicatesCurrent: 'Перевірити дублікати в поточному файлі',
+        extractConceptsAndGenerateTitles: 'Видобути концепти й згенерувати заголовки',
+        createWikiLinkAndGenerateNoteFromSelection: 'Створити вікіпосилання й згенерувати нотатку з виділення'
+    },
+    duplicateModal: {
+        title: 'Підтвердити видалення дублікатів',
+        intro: 'Наступні {count} нотаток-концептів визначено як потенційні дублікати, і їх буде переміщено до системного кошика:',
+        reason: 'Причина: {reason}',
+        conflictsWith: 'Конфліктує з: {files}',
+        warning: 'Цю дію нелегко скасувати всередині Obsidian, але файли зазвичай можна відновити із системного кошика.',
+        deleteFiles: 'Видалити {count} файлів'
+    },
+    settings: {
+        developer: { heading: 'Діагностика для розробників' },
+        providerConfig: { heading: 'Провайдери LLM' },
+        multiModel: { heading: 'Використання кількох моделей' },
+        translationTask: { heading: 'Завдання: Переклад' },
+        mermaidTask: { heading: 'Завдання: Підсумувати як діаграму Mermaid' },
+        extractConceptsTask: { heading: 'Завдання: Видобути концепти' },
+        stableApi: { heading: 'Стабільні виклики API' },
+        workflowBuilder: { heading: 'Кнопки workflow в один клік' },
+        generalOutput: {
+            processedHeading: 'Вивід обробленого файлу',
+            conceptNoteHeading: 'Вивід нотаток-концептів',
+            conceptLogHeading: 'Вивід файла журналу концептів'
+        },
+        contentGeneration: { heading: 'Генерація контенту та вивід' },
+        customPrompts: { heading: 'Налаштування користувацьких промптів' },
+        extractOriginalText: { heading: 'Видобути певний оригінальний текст' },
+        webResearch: { heading: 'Провайдер веб-досліджень' },
+        processing: { heading: 'Параметри обробки' },
+        batchProcessing: { heading: 'Пакетна обробка' },
+        batchMermaidFix: { heading: 'Пакетне виправлення Mermaid' },
+        duplicateScope: { heading: 'Область перевірки дублікатів' },
+        focusedLearning: { heading: 'Сфокусована навчальна область' }
+    }
+});
+
+extendLocale(STRINGS_VI, {
+    common: { select: 'Chọn' },
+    commands: {
+        checkDuplicatesCurrent: 'Kiểm tra trùng lặp trong tệp hiện tại',
+        extractConceptsAndGenerateTitles: 'Trích xuất khái niệm và tạo tiêu đề',
+        createWikiLinkAndGenerateNoteFromSelection: 'Tạo wiki-link và tạo ghi chú từ vùng chọn'
+    },
+    duplicateModal: {
+        title: 'Xác nhận xóa mục trùng lặp',
+        intro: 'Các ghi chú khái niệm sau đây, tổng cộng {count} mục, được xác định là có khả năng trùng lặp và sẽ được chuyển vào thùng rác hệ thống:',
+        reason: 'Lý do: {reason}',
+        conflictsWith: 'Xung đột với: {files}',
+        warning: 'Không thể dễ dàng hoàn tác hành động này từ bên trong Obsidian, nhưng thông thường vẫn có thể khôi phục tệp từ thùng rác hệ thống.',
+        deleteFiles: 'Xóa {count} tệp'
+    },
+    settings: {
+        developer: { heading: 'Chẩn đoán cho nhà phát triển' },
+        providerConfig: { heading: 'Nhà cung cấp LLM' },
+        multiModel: { heading: 'Sử dụng đa mô hình' },
+        translationTask: { heading: 'Tác vụ: Dịch' },
+        mermaidTask: { heading: 'Tác vụ: Tóm tắt thành sơ đồ Mermaid' },
+        extractConceptsTask: { heading: 'Tác vụ: Trích xuất khái niệm' },
+        stableApi: { heading: 'Lời gọi API ổn định' },
+        workflowBuilder: { heading: 'Nút quy trình một chạm' },
+        generalOutput: {
+            processedHeading: 'Đầu ra tệp đã xử lý',
+            conceptNoteHeading: 'Đầu ra ghi chú khái niệm',
+            conceptLogHeading: 'Đầu ra tệp nhật ký khái niệm'
+        },
+        contentGeneration: { heading: 'Tạo nội dung và đầu ra' },
+        customPrompts: { heading: 'Cài đặt prompt tùy chỉnh' },
+        extractOriginalText: { heading: 'Trích xuất văn bản gốc cụ thể' },
+        webResearch: { heading: 'Nhà cung cấp nghiên cứu web' },
+        processing: { heading: 'Tham số xử lý' },
+        batchProcessing: { heading: 'Xử lý hàng loạt' },
+        batchMermaidFix: { heading: 'Sửa Mermaid hàng loạt' },
+        duplicateScope: { heading: 'Phạm vi kiểm tra trùng lặp' },
+        focusedLearning: { heading: 'Miền học tập tập trung' }
+    }
+});
