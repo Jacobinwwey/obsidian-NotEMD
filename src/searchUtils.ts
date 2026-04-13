@@ -86,6 +86,7 @@ export async function fetchContentFromUrl(url: string, progressReporter: Progres
  * @returns A promise resolving to the combined research context string, or null if research fails/yields no results.
  */
 export async function _performResearch(app: App, settings: NotemdSettings, topic: string, progressReporter: ProgressReporter): Promise<string | null> {
+    const i18n = getI18nStrings({ uiLocale: settings.uiLocale });
     progressReporter.log(`Entering _performResearch for topic: "${topic}"`);
     const searchQuery = `${topic} wiki`;
     let combinedContent = '';
@@ -98,7 +99,10 @@ export async function _performResearch(app: App, settings: NotemdSettings, topic
         if (progressReporter.cancelled) throw new Error(`Processing cancelled by user before ${searchSource} search.`);
 
         progressReporter.log(`Searching ${searchSource} for: "${searchQuery}"`);
-        progressReporter.updateStatus(`Searching ${searchSource}...`, 10);
+        progressReporter.updateStatus(
+            formatI18n(i18n.sidebar.status.runningAction, { label: searchSource }),
+            10
+        );
 
         const searchResults = await provider.search(searchQuery, settings, progressReporter);
 
@@ -115,7 +119,14 @@ export async function _performResearch(app: App, settings: NotemdSettings, topic
         // Tavily results (in current config) are snippets/summaries which we use directly.
         if (searchSource === 'DuckDuckGo') {
             progressReporter.log(`Fetching content for top ${searchResults.length} DuckDuckGo results...`);
-            progressReporter.updateStatus('Fetching content...', 30);
+            progressReporter.updateStatus(
+                formatI18n(i18n.sidebar.status.stepLabel, {
+                    current: 1,
+                    total: Math.max(searchResults.length, 1),
+                    label: searchSource
+                }),
+                30
+            );
             const fetchPromises = searchResults.map(async (result, index) => {
                 if (progressReporter.cancelled) throw new Error(`Processing cancelled by user before fetching DDG result ${index + 1}.`);
                 const timeoutPromise = new Promise<string>((_, reject) => setTimeout(() => reject(new Error(`Timeout fetching ${result.url}`)), settings.ddgFetchTimeout * 1000));
@@ -208,7 +219,7 @@ export async function researchAndSummarize(app: App, settings: NotemdSettings, e
     if (!topic || topic.trim() === '') {
         new Notice(i18n.notices.selectTopicTextOrUseNoteTitle);
         progressReporter.log("Exiting researchAndSummarize: Topic is empty.");
-        progressReporter.updateStatus("No topic selected", -1); // Indicate error state
+        progressReporter.updateStatus(i18n.notices.selectTopicTextOrUseNoteTitle, -1); // Indicate error state
         return;
     }
 
@@ -226,14 +237,21 @@ export async function researchAndSummarize(app: App, settings: NotemdSettings, e
         if (!researchContext) {
             new Notice(formatI18n(i18n.notices.researchFailedOrNoResults, { topic }));
             progressReporter.log(`_performResearch returned null or empty context for "${topic}".`);
-            progressReporter.updateStatus('Research failed/No results', -1);
+            progressReporter.updateStatus(formatI18n(i18n.notices.researchFailedOrNoResults, { topic }), -1);
             // Note: Closing modal/reporter handled by caller
             return; // Exit here as no context means no summary
         }
         progressReporter.log(`_performResearch returned context for "${topic}" (length: ${researchContext.length}).`);
 
         // --- Summarize Research Context ---
-        progressReporter.updateStatus('Summarizing research...', 50);
+        progressReporter.updateStatus(
+            formatI18n(i18n.sidebar.status.stepLabel, {
+                current: 2,
+                total: 3,
+                label: i18n.sidebar.actions.researchAndSummarize.label
+            }),
+            50
+        );
 
         const provider = getProviderForTask('research', settings);
         if (!provider) {
@@ -262,7 +280,14 @@ export async function researchAndSummarize(app: App, settings: NotemdSettings, e
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after summarization.");
 
         progressReporter.log(`Generated summary using ${provider.name}.`);
-        progressReporter.updateStatus('Applying post-processing...', 85); // Adjusted percentage
+        progressReporter.updateStatus(
+            formatI18n(i18n.sidebar.status.stepLabel, {
+                current: 3,
+                total: 3,
+                label: i18n.sidebar.actions.researchAndSummarize.label
+            }),
+            85
+        ); // Adjusted percentage
 
         // Apply post-processing
         let finalSummary = summary;
@@ -294,14 +319,24 @@ export async function researchAndSummarize(app: App, settings: NotemdSettings, e
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user before appending summary.");
 
         // --- Append Summary to Note ---
-        progressReporter.updateStatus('Appending summary...', 90);
+        progressReporter.updateStatus(
+            formatI18n(i18n.sidebar.status.stepLabel, {
+                current: 3,
+                total: 3,
+                label: i18n.sidebar.actions.researchAndSummarize.label
+            }),
+            90
+        );
         const searchSource = settings.searchProvider === 'tavily' ? 'Tavily' : 'DuckDuckGo';
         const summaryHeader = `\n\n## Research Summary (via ${searchSource}): ${topic}\n\n`;
         editor.replaceSelection(selectedText); // Clear selection if it was used
         const currentContent = editor.getValue();
         editor.setValue(currentContent.trim() + summaryHeader + summaryToAppend); // Use cleaned summary
 
-        progressReporter.updateStatus('Research and summary complete!', 100);
+        progressReporter.updateStatus(
+            formatI18n(i18n.sidebar.status.actionComplete, { label: i18n.sidebar.actions.researchAndSummarize.label }),
+            100
+        );
         new Notice(formatI18n(i18n.notices.researchSummaryAppended, { topic }));
         progressReporter.log(formatI18n(i18n.notices.researchSummaryAppended, { topic }));
         // Note: Closing modal/reporter handled by caller
@@ -312,7 +347,7 @@ export async function researchAndSummarize(app: App, settings: NotemdSettings, e
         const errorDetails = error instanceof Error ? error.stack || message : String(error);
         if (message.includes("cancelled by user")) {
             progressReporter.log(`Research cancelled for "${topic}".`);
-            progressReporter.updateStatus('Cancelled', -1);
+            progressReporter.updateStatus(i18n.sidebar.status.cancelling, -1);
             // Re-throw cancellation so the caller (command/sidebar) knows
             throw error; // Re-throw cancellation
         } else {
@@ -320,7 +355,7 @@ export async function researchAndSummarize(app: App, settings: NotemdSettings, e
             console.error(`Error researching "${topic}":`, errorDetails);
             new Notice(formatI18n(i18n.notices.researchError, { message }), 10000);
             progressReporter.log(`Error in researchAndSummarize catch block: ${message}`);
-            progressReporter.updateStatus('Error occurred', -1);
+            progressReporter.updateStatus(formatI18n(i18n.sidebar.status.actionFailed, { message }), -1);
             new ErrorModal(app, i18n.errorModal.titles.research, errorDetails, settings.uiLocale).open();
             // Do not re-throw non-cancellation errors here, let the function finish "unsuccessfully"
         }
