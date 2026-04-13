@@ -38,7 +38,7 @@ This document summarizes the major functional and architectural changes implemen
 
 ### English
 *   **First-Principles Language Support Architecture**: Added a unified language domain model that separates UI locale from task output language policy.
-*   **UI i18n Foundation**: Introduced centralized locale catalogs (`en`, `zh-CN`, `zh-TW`) with fallback chaining and interpolation support.
+*   **UI i18n Foundation**: Introduced centralized locale catalogs for all supported UI locales (`en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, `zh-TW`) with fallback chaining and interpolation support.
 *   **Runtime String Migration**: Migrated high-impact settings/sidebar/error-modal/runtime notices to shared i18n strings.
 *   **Policy Unification Across Task Paths**: Consolidated task-language decisions in one policy layer and wired it into prompt, processing, research, and translation flows.
 *   **Locale/RTL Hardening**: Added locale-aware timestamp formatting and RTL safety styling guards.
@@ -47,7 +47,7 @@ This document summarizes the major functional and architectural changes implemen
 
 ### Chinese (中文)
 *   **第一性原理语言支持架构**: 新增统一语言域模型，明确分离 UI 语言与任务输出语言策略。
-*   **UI i18n 基础设施**: 引入集中式语言目录（`en`、`zh-CN`、`zh-TW`），支持回退链与变量插值。
+*   **UI i18n 基础设施**: 为全部受支持的 UI locale（`en`、`ar`、`de`、`es`、`fa`、`fr`、`id`、`it`、`ja`、`ko`、`nl`、`pl`、`pt`、`pt-BR`、`ru`、`th`、`tr`、`uk`、`vi`、`zh-CN`、`zh-TW`）引入集中式语言目录，并支持回退链与变量插值。
 *   **运行时文案迁移**: 将设置页、侧边栏、错误弹窗和主流程关键提示迁移到共享 i18n 字符串体系。
 *   **任务语言策略收口**: 将任务语言决策统一收敛到策略层，并接入 prompt、处理、研究与翻译路径。
 *   **Locale/RTL 鲁棒性增强**: 新增本地化时间格式化与 RTL 布局安全样式保护。
