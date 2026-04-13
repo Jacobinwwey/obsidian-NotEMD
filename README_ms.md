@@ -22,7 +22,7 @@ Cara mudah untuk membina pangkalan pengetahuan anda sendiri.
 
 Notemd meningkatkan aliran kerja Obsidian anda dengan menyepadukan pelbagai Large Language Model (LLM) untuk memproses nota berbilang bahasa anda, menjana wiki-link secara automatik untuk konsep utama, mencipta nota konsep yang sepadan, menjalankan penyelidikan web, dan membantu anda membina graf pengetahuan yang kukuh.
 
-**Versi:** 1.8.0
+**Versi:** 1.8.1
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
@@ -64,8 +64,9 @@ Siap. Terokai tetapan untuk membuka lebih banyak ciri seperti penyelidikan web, 
 | `Disable auto translation` | Tugas bukan Translate mengekalkan konteks bahasa sumber | `false` | Tugas `Translate` yang eksplisit tetap memaksa bahasa sasaran yang dikonfigurasi. |
 | Locale sandaran | Resolusi key UI yang hilang | locale -> `en` | Memastikan UI kekal stabil apabila sebahagian key belum diterjemahkan. |
 
-- Dokumentasi rasmi diselenggara dalam bahasa Inggeris dan Cina Ringkas, dengan sokongan penuh untuk lebih 30 bahasa.
-- Semua bahasa yang disokong dipautkan di pengepala di atas.
+- Dokumen sumber yang diselenggara ialah bahasa Inggeris dan Cina Ringkas, dan terjemahan README yang telah diterbitkan dipautkan pada pengepala di atas.
+- Liputan UI locale dalam aplikasi kini sepadan tepat dengan katalog eksplisit dalam kod: `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, `zh-TW`.
+- Fallback bahasa Inggeris kekal sebagai jaringan keselamatan pelaksanaan, tetapi permukaan UI yang disokong dilindungi oleh regression tests dan tidak sepatutnya senyap-senyap kembali ke bahasa Inggeris dalam penggunaan biasa.
 - Butiran lanjut dan garis panduan sumbangan dijejak dalam [Language Hub](./docs/i18n/README.md).
 
 ## Ciri-ciri
@@ -682,7 +683,7 @@ Lesen MIT - lihat fail [LICENSE](LICENSE) untuk butiran.
 
 ---
 
-*Notemd v1.8.0 - Perkayakan graf pengetahuan Obsidian anda dengan AI.*
+*Notemd v1.8.1 - Perkayakan graf pengetahuan Obsidian anda dengan AI.*
 
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)

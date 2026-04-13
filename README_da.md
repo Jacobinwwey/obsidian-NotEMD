@@ -22,7 +22,7 @@ En nem måde at opbygge din egen vidensbase på.
 
 Notemd forbedrer dit Obsidian-workflow ved at integrere med forskellige store sprogmodeller (LLM'er) til at behandle dine flersprogede noter, automatisk generere wiki-links til nøglebegreber, oprette tilsvarende konceptnoter, udføre webresearch og hjælpe dig med at opbygge stærke vidensgrafer med mere.
 
-**Version:** 1.8.0
+**Version:** 1.8.1
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
@@ -64,8 +64,9 @@ Det er det. Udforsk indstillingerne for at låse op for flere funktioner som web
 | `Disable auto translation` | Ikke-Translate-opgaver bevarer kontekst på kildesproget | `false` | Eksplicitte `Translate`-opgaver håndhæver stadig det konfigurerede målsprog. |
 | Locale-fallback | Opløsning af manglende UI-nøgler | locale -> `en` | Holder UI'et stabilt, når enkelte nøgler endnu ikke er oversat. |
 
-- Officiel dokumentation vedligeholdes på engelsk og forenklet kinesisk med fuld understøttelse af mere end 30 sprog.
-- Alle understøttede sprog er linket i overskriften ovenfor.
+- De vedligeholdte kildedokumenter er engelsk og forenklet kinesisk, og offentliggjorte README-oversættelser er linket i overskriften ovenfor.
+- Appens dækning af UI-lokaler matcher i øjeblikket præcist det eksplicitte katalog i koden: `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, `zh-TW`.
+- Engelsk fallback forbliver et implementeringsmæssigt sikkerhedsnet, men understøttede synlige flader er dækket af regressionstests og bør ikke stiltiende falde tilbage til engelsk under normal brug.
 - Yderligere detaljer og retningslinjer for bidrag spores i [Language Hub](./docs/i18n/README.md).
 
 ## Funktioner
@@ -682,6 +683,6 @@ MIT License - Se filen [LICENSE](LICENSE) for detaljer.
 
 ---
 
-*Notemd v1.8.0 - Forbedr din Obsidian-vidensgraf med AI.*
+*Notemd v1.8.1 - Forbedr din Obsidian-vidensgraf med AI.*
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)

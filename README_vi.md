@@ -22,7 +22,7 @@ Một cách dễ dàng để xây dựng cơ sở tri thức của riêng bạn.
 
 Notemd nâng cấp quy trình làm việc trong Obsidian bằng cách tích hợp với nhiều Mô hình Ngôn ngữ Lớn, LLM, để xử lý ghi chú đa ngôn ngữ, tự động tạo wiki-link cho các khái niệm chính, tạo concept note tương ứng, thực hiện nghiên cứu web và giúp bạn xây dựng knowledge graph mạnh mẽ cùng nhiều khả năng khác.
 
-**Phiên bản:** 1.8.0
+**Phiên bản:** 1.8.1
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
@@ -64,8 +64,9 @@ Vậy là xong. Hãy khám phá phần settings để mở khóa thêm các tín
 | `Disable auto translation` | Các tác vụ không phải Translate giữ nguyên ngữ cảnh ngôn ngữ nguồn | `false` | Các tác vụ `Translate` rõ ràng vẫn áp dụng bắt buộc ngôn ngữ đích đã cấu hình. |
 | Locale dự phòng | Giải quyết các khóa UI bị thiếu | locale -> `en` | Giữ UI ổn định khi vẫn còn khóa chưa được dịch. |
 
-- Tài liệu chính thức được duy trì bằng tiếng Anh và tiếng Trung giản thể, với hỗ trợ đầy đủ cho hơn 30 ngôn ngữ.
-- Tất cả các ngôn ngữ được hỗ trợ đều được liên kết ở phần tiêu đề bên trên.
+- Tài liệu nguồn được duy trì là tiếng Anh và tiếng Trung giản thể, và các bản dịch README đã xuất bản được liên kết ở phần đầu trang phía trên.
+- Phạm vi hỗ trợ UI locale trong ứng dụng hiện khớp chính xác với danh mục tường minh trong mã: `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, `zh-TW`.
+- Fallback tiếng Anh vẫn là lưới an toàn ở tầng triển khai, nhưng các bề mặt hiển thị được hỗ trợ đã được bao phủ bằng regression tests và không nên âm thầm quay về tiếng Anh trong sử dụng bình thường.
 - Thông tin chi tiết hơn và hướng dẫn đóng góp được theo dõi trong [Language Hub](./docs/i18n/README.md).
 
 ## Tính năng
@@ -683,7 +684,7 @@ Giấy phép MIT. Xem file [LICENSE](LICENSE) để biết chi tiết.
 
 ---
 
-*Notemd v1.8.0 - Nâng cấp knowledge graph Obsidian của bạn bằng AI.*
+*Notemd v1.8.1 - Nâng cấp knowledge graph Obsidian của bạn bằng AI.*
 
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)

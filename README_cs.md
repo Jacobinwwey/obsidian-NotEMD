@@ -22,7 +22,7 @@ Snadný způsob, jak si vytvořit vlastní znalostní bázi.
 
 Notemd vylepšuje váš pracovní postup v Obsidianu integrací s různými velkými jazykovými modely, LLM, aby zpracovával vaše vícejazyčné poznámky, automaticky vytvářel wiki-links pro klíčové koncepty, generoval odpovídající concept notes, prováděl webový průzkum a pomáhal vám budovat silné grafy znalostí a další.
 
-**Verze:** 1.8.0
+**Verze:** 1.8.1
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
@@ -64,8 +64,9 @@ To je vše. Prozkoumejte nastavení a odemkněte další funkce, jako je webový
 | `Disable auto translation` | Úlohy mimo Translate zachovávají kontext zdrojového jazyka | `false` | Explicitní úlohy `Translate` stále vynucují nakonfigurovaný cílový jazyk. |
 | Záložní locale | Řešení chybějících UI klíčů | locale -> `en` | Udržuje UI stabilní, když některé klíče ještě nejsou přeložené. |
 
-- Oficiální dokumentace je udržována v angličtině a zjednodušené čínštině, s plnou podporou pro více než 30 jazyků.
-- Všechny podporované jazyky jsou propojeny v hlavičce výše.
+- Udržované zdrojové dokumenty jsou angličtina a zjednodušená čínština a publikované překlady README jsou odkazovány v záhlaví výše.
+- Pokrytí UI locale v aplikaci nyní přesně odpovídá explicitnímu katalogu v kódu: `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, `zh-TW`.
+- Anglický fallback zůstává implementační bezpečnostní sítí, ale podporované viditelné plochy jsou pokryty regresními testy a při běžném použití by se neměly tiše vracet do angličtiny.
 - Další detaily a pravidla pro přispívání jsou sledovány v [Language Hub](./docs/i18n/README.md).
 
 ## Funkce
@@ -682,7 +683,7 @@ Licence MIT. Podrobnosti naleznete v souboru [LICENSE](LICENSE).
 
 ---
 
-*Notemd v1.8.0 - Vylepšete svůj graf znalostí v Obsidianu pomocí AI.*
+*Notemd v1.8.1 - Vylepšete svůj graf znalostí v Obsidianu pomocí AI.*
 
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)

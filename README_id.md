@@ -22,7 +22,7 @@ Cara mudah untuk membangun knowledge base Anda sendiri.
 
 Notemd meningkatkan alur kerja Obsidian Anda dengan mengintegrasikan berbagai Large Language Model (LLM) untuk memproses catatan multi-bahasa, membuat wiki-link otomatis untuk konsep penting, membuat concept note yang sesuai, melakukan riset web, dan membantu Anda membangun knowledge graph yang kuat.
 
-**Versi:** 1.8.0
+**Versi:** 1.8.1
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
@@ -64,8 +64,9 @@ Selesai. Jelajahi pengaturan untuk membuka fitur tambahan seperti riset web, ter
 | `Disable auto translation` | Tugas non-Translate mempertahankan konteks bahasa sumber | `false` | Tugas `Translate` eksplisit tetap memaksa bahasa target yang dikonfigurasi. |
 | Locale cadangan | Resolusi key UI yang hilang | locale -> `en` | Menjaga UI tetap stabil ketika sebagian key belum diterjemahkan. |
 
-- Dokumentasi resmi dipelihara dalam bahasa Inggris dan Mandarin Sederhana, dengan dukungan penuh untuk lebih dari 30 bahasa.
-- Semua bahasa yang didukung tertaut di header di atas.
+- Dokumen sumber yang dipelihara adalah bahasa Inggris dan Mandarin Sederhana, dan terjemahan README yang telah diterbitkan ditautkan pada header di atas.
+- Cakupan locale UI di dalam aplikasi saat ini persis sesuai dengan katalog eksplisit di kode: `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, `zh-TW`.
+- Fallback bahasa Inggris tetap menjadi jaring pengaman implementasi, tetapi permukaan UI yang didukung telah dicakup oleh regression tests dan tidak seharusnya diam-diam kembali ke bahasa Inggris saat penggunaan normal.
 - Detail tambahan dan panduan kontribusi dilacak di [Language Hub](./docs/i18n/README.md).
 
 ## Fitur
@@ -691,6 +692,6 @@ MIT License. Lihat file [LICENSE](LICENSE) untuk detailnya.
 
 ---
 
-*Notemd v1.8.0 - Tingkatkan knowledge graph Obsidian Anda dengan AI.*
+*Notemd v1.8.1 - Tingkatkan knowledge graph Obsidian Anda dengan AI.*
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)

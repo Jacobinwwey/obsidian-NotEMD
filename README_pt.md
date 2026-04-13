@@ -22,7 +22,7 @@ Uma maneira fácil de criar sua própria base de conhecimento!
 
 O Notemd aprimora seu fluxo de trabalho no Obsidian integrando-se a vários Modelos de Linguagem de Grande Porte (LLM) para processar suas notas multilíngues, gerar automaticamente links wiki para conceitos-chave, criar notas de conceitos correspondentes, realizar pesquisas na web e ajudá-lo a construir grafos de conhecimento poderosos.
 
-**Versão:** 1.8.0
+**Versão:** 1.8.1
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
@@ -64,8 +64,9 @@ Isso é tudo! Explore as configurações para desbloquear mais recursos como pes
 | `Disable auto translation` | Tarefas que não são de tradução mantêm o contexto original | `false` | Tarefas explícitas de `Traduzir` ainda aplicam o idioma de destino configurado. |
 | Locale fallback | Resolução de chaves de UI ausentes | locale -> `en` | Mantém a UI estável quando algumas chaves não estão traduzidas. |
 
-- A documentação oficial é mantida em inglês e chinês simplificado, com suporte completo para mais de 30 idiomas.
-- Todos os idiomas suportados estão vinculados no cabeçalho acima.
+- Os documentos-fonte mantidos são inglês e chinês simplificado, e as traduções README publicadas estão ligadas no cabeçalho acima.
+- A cobertura de UI locale no app atualmente corresponde exatamente ao catálogo explícito do código: `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, `zh-TW`.
+- O fallback para inglês continua como rede de segurança de implementação, mas as superfícies visíveis suportadas são cobertas por testes de regressão e não devem voltar silenciosamente ao inglês no uso normal.
 - Mais detalhes e diretrizes de contribuição são rastreados no [Centro de Idiomas](./docs/i18n/README.md).
 
 ## Recursos
@@ -688,7 +689,7 @@ Licença MIT - Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
 
 ---
 
-*Notemd v1.8.0 - Melhore seu grafo de conhecimento no Obsidian com IA.*
+*Notemd v1.8.1 - Melhore seu grafo de conhecimento no Obsidian com IA.*
 
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)

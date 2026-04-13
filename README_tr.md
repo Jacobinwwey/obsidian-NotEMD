@@ -22,7 +22,7 @@ Kendi bilgi tabanınızı oluşturmanın kolay bir yolu.
 
 Notemd, çok dilli notlarınızı işlemek, anahtar kavramlar için otomatik wiki bağlantıları oluşturmak, ilgili kavram notları üretmek, web araştırması yapmak ve güçlü bilgi grafikleri kurmanıza yardımcı olmak için çeşitli büyük dil modelleriyle (LLM) entegre olarak Obsidian iş akışınızı geliştirir.
 
-**Sürüm:** 1.8.0
+**Sürüm:** 1.8.1
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
@@ -64,8 +64,9 @@ Hepsi bu kadar. Web araştırması, çeviri ve içerik üretimi gibi daha fazla 
 | `Disable auto translation` | Translate dışındaki görevler kaynak dil bağlamını korur | `false` | Açık `Translate` görevleri yine de yapılandırılmış hedef dili zorlar. |
 | Locale fallback | Eksik arayüz anahtarlarının çözümü | locale -> `en` | Bazı anahtarlar çevrilmemiş olsa bile arayüzü kararlı tutar. |
 
-- Resmi dokümantasyon İngilizce ve Basitleştirilmiş Çince olarak sürdürülür ve 30'dan fazla dil için tam destek sunar.
-- Desteklenen tüm diller yukarıdaki başlıkta bağlantılanmıştır.
+- Bakımı yapılan kaynak belgeler İngilizce ve Basitleştirilmiş Çince'dir; yayımlanmış README çevirileri yukarıdaki başlıkta bağlantılanmıştır.
+- Uygulama içi UI yerel dil kapsamı şu anda koddaki açık katalogla tam olarak eşleşmektedir: `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, `zh-TW`.
+- İngilizce fallback uygulama düzeyinde bir güvenlik ağı olarak kalır, ancak desteklenen görünür yüzeyler regresyon testleriyle güvence altındadır ve normal kullanımda sessizce İngilizceye dönmemelidir.
 - Daha fazla ayrıntı ve katkı yönergeleri [Language Hub](./docs/i18n/README.md) üzerinden izlenir.
 
 ## Özellikler
@@ -682,6 +683,6 @@ MIT Lisansı - Ayrıntılar için [LICENSE](LICENSE) dosyasına bakın.
 
 ---
 
-*Notemd v1.8.0 - Obsidian bilgi grafiğinizi yapay zeka ile geliştirin.*
+*Notemd v1.8.1 - Obsidian bilgi grafiğinizi yapay zeka ile geliştirin.*
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)

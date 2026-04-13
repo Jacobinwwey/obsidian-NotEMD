@@ -22,7 +22,7 @@ Een eenvoudige manier om je eigen kennisbank op te bouwen!
 
 Notemd verbetert je Obsidian-workflow door te integreren met verschillende Large Language Models (LLM's) om je meertalige notities te verwerken, automatisch wiki-links voor kernconcepten te genereren, bijbehorende conceptnotities te maken, webonderzoek uit te voeren en je te helpen krachtige kennisgrafieken op te bouwen.
 
-**Versie:** 1.8.0
+**Versie:** 1.8.1
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
@@ -64,8 +64,9 @@ Dat is alles. Verken de instellingen om meer functies vrij te schakelen, zoals w
 | `Disable auto translation` | Niet-Translate-taken behouden broncontext in de oorspronkelijke taal | `false` | Expliciete `Translate`-taken forceren nog steeds de geconfigureerde doeltaal. |
 | Locale fallback | Resolutie van ontbrekende UI-sleutels | locale -> `en` | Houdt de UI stabiel wanneer sommige sleutels nog niet vertaald zijn. |
 
-- Officiële documentatie wordt onderhouden in het Engels en vereenvoudigd Chinees, met volledige ondersteuning voor meer dan 30 talen.
-- Alle ondersteunde talen zijn gekoppeld in de header hierboven.
+- De onderhouden brondocumenten zijn Engels en Vereenvoudigd Chinees, en gepubliceerde README-vertalingen staan hierboven in de kop gelinkt.
+- De in-app dekking van UI-lokalen komt momenteel exact overeen met de expliciete catalogus in de code: `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, `zh-TW`.
+- De Engelse fallback blijft een implementatief veiligheidsnet, maar ondersteunde zichtbare oppervlakken zijn afgedekt door regressietests en zouden bij normaal gebruik niet stilletjes naar Engels moeten terugvallen.
 - Verdere details en richtlijnen voor bijdragen worden bijgehouden in de [Language Hub](./docs/i18n/README.md).
 
 ## Functies
@@ -682,7 +683,7 @@ MIT-licentie - Zie het bestand [LICENSE](LICENSE) voor details.
 
 ---
 
-*Notemd v1.8.0 - Verrijk je Obsidian-kennisgrafiek met AI.*
+*Notemd v1.8.1 - Verrijk je Obsidian-kennisgrafiek met AI.*
 
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)

@@ -22,7 +22,7 @@ Egyszerű módja annak, hogy létrehozza saját tudásbázisát.
 
 A Notemd az Obsidian munkafolyamatát fejleszti azáltal, hogy különféle nagy nyelvi modellekkel (LLM-ekkel) integrálódik a többnyelvű jegyzetek feldolgozásához, automatikusan wiki-linkeket hoz létre a kulcsfontosságú fogalmakhoz, elkészíti a hozzájuk tartozó fogalomjegyzeteket, webes kutatást végez, és segít erőteljes tudásgráfok felépítésében.
 
-**Verzió:** 1.8.0
+**Verzió:** 1.8.1
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
@@ -64,8 +64,9 @@ Ennyi az egész. Fedezze fel a beállításokat, hogy további lehetőségeket n
 | `Disable auto translation` | A nem `Translate` feladatok megtartják a forrásnyelvi kontextust | `false` | Az explicit `Translate` feladatok továbbra is a konfigurált célnyelvet alkalmazzák. |
 | Területi beállítási tartalék | Hiányzó UI-kulcsok feloldása | locale -> `en` | Stabilan tartja a felületet akkor is, ha néhány kulcs még nincs lefordítva. |
 
-- A hivatalos dokumentáció angolul és egyszerűsített kínaiul érhető el, teljes támogatással több mint 30 nyelven.
-- Az összes támogatott nyelv a fenti fejlécben van linkelve.
+- A karbantartott forrásdokumentumok az angol és az egyszerűsített kínai, és a közzétett README-fordítások a fenti fejlécben vannak belinkelve.
+- Az alkalmazáson belüli UI-lokál lefedettség jelenleg pontosan megegyezik a kódban szereplő explicit katalógussal: `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, `zh-TW`.
+- Az angol fallback továbbra is megvalósítási védőháló, de a támogatott látható felületeket regressziós tesztek fedik le, és normál használat közben nem szabad csendben angolra visszaesniük.
 - További részletek és hozzájárulási irányelvek a [Nyelvi központban](./docs/i18n/README.md) találhatók.
 
 ## Funkciók
@@ -679,6 +680,6 @@ MIT licenc - a részletekért lásd a [LICENSE](LICENSE) fájlt.
 
 ---
 
-*Notemd v1.8.0 - Fejlessze az Obsidian tudásgráfját mesterséges intelligenciával.*
+*Notemd v1.8.1 - Fejlessze az Obsidian tudásgráfját mesterséges intelligenciával.*
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)
