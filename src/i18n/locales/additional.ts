@@ -1870,6 +1870,409 @@ extendLocale(STRINGS_ES, {
     }
 });
 
+extendLocale(STRINGS_AR, {
+    settings: {
+        workflowBuilder: {
+            errorStrategyName: 'استراتيجية أخطاء سير العمل',
+            errorStrategyDesc: 'توقف فورًا عند أول خطوة فاشلة، أو تابع وأكمل الخطوات المتبقية.',
+            errorStrategyStop: 'توقف عند أول خطأ',
+            errorStrategyContinue: 'تابع عند الخطأ',
+            visualBuilderName: 'منشئ سير العمل المرئي',
+            visualBuilderDesc: 'أنشئ أزرار سير عمل مخصصة من الإجراءات المضمنة دون كتابة DSL.',
+            advancedDslName: 'محرر DSL المتقدم',
+            advancedDslDesc: 'اختياري: حرّر مباشرة بصيغة Button Name::action-a>action-b. يبقى المحرر المرئي وDSL متزامنين.',
+            dslValidationName: 'التحقق من DSL لسير العمل',
+            dslValidationDesc: 'تم العثور على {count} مشكلة/مشكلات. تُتجاهل الأسطر غير الصالحة عند عرض الشريط الجانبي.',
+            availableActionIdsName: 'معرّفات إجراءات سير العمل المتاحة',
+            builderDslWarning: 'تم اكتشاف {count} مشكلة/مشكلات في DSL. حمّل المحرر المرئي حالة سير عمل آمنة احتياطيًا.',
+            builderCardTitle: 'سير العمل {index}',
+            deleteButton: 'حذف',
+            workflowRemovedNotice: 'تمت إزالة سير العمل.',
+            buttonNameLabel: 'اسم الزر',
+            buttonNamePlaceholder: 'سير العمل {index}',
+            actionSequenceTitle: 'تسلسل الإجراءات',
+            removeAction: 'إزالة',
+            addAction: 'إضافة إجراء',
+            addWorkflow: 'إضافة سير عمل',
+            workflowAddedNotice: 'تمت إضافة سير العمل.',
+            resetDefault: 'استعادة الافتراضي',
+            resetDefaultNotice: 'تمت استعادة سير العمل الافتراضي بنقرة واحدة.'
+        }
+    }
+});
+
+extendLocale(STRINGS_DE, {
+    settings: {
+        workflowBuilder: {
+            errorStrategyName: 'Workflow-Fehlerstrategie',
+            errorStrategyDesc: 'Beim ersten fehlgeschlagenen Schritt sofort anhalten oder fortfahren und die restlichen Schritte abschließen.',
+            errorStrategyStop: 'Beim ersten Fehler anhalten',
+            errorStrategyContinue: 'Bei Fehler fortfahren',
+            visualBuilderName: 'Visueller Workflow-Builder',
+            visualBuilderDesc: 'Erstellen Sie benutzerdefinierte Workflow-Schaltflächen aus integrierten Aktionen, ohne DSL zu schreiben.',
+            advancedDslName: 'Erweiterter DSL-Editor',
+            advancedDslDesc: 'Optional: direkt im Format Button Name::action-a>action-b bearbeiten. Visueller Builder und DSL bleiben synchron.',
+            dslValidationName: 'Workflow-DSL-Prüfung',
+            dslValidationDesc: '{count} Problem(e) gefunden. Ungültige Zeilen werden bei der Darstellung der Seitenleiste ignoriert.',
+            availableActionIdsName: 'Verfügbare Workflow-Aktions-IDs',
+            builderDslWarning: '{count} DSL-Problem(e) erkannt. Der visuelle Editor hat einen fallback-sicheren Workflow-Zustand geladen.',
+            builderCardTitle: 'Arbeitsablauf {index}',
+            deleteButton: 'Löschen',
+            workflowRemovedNotice: 'Workflow entfernt.',
+            buttonNameLabel: 'Schaltflächenname',
+            buttonNamePlaceholder: 'Arbeitsablauf {index}',
+            actionSequenceTitle: 'Aktionsabfolge',
+            removeAction: 'Entfernen',
+            addAction: 'Aktion hinzufügen',
+            addWorkflow: 'Workflow hinzufügen',
+            workflowAddedNotice: 'Workflow hinzugefügt.',
+            resetDefault: 'Auf Standard zurücksetzen',
+            resetDefaultNotice: 'Standard-Workflows mit einem Klick wiederhergestellt.'
+        }
+    }
+});
+
+extendLocale(STRINGS_ES, {
+    settings: {
+        workflowBuilder: {
+            errorStrategyName: 'Estrategia de errores del flujo',
+            errorStrategyDesc: 'Detén inmediatamente en el primer paso fallido o continúa y termina los pasos restantes.',
+            errorStrategyStop: 'Detener en el primer error',
+            errorStrategyContinue: 'Continuar con error',
+            visualBuilderName: 'Constructor visual de flujos',
+            visualBuilderDesc: 'Crea botones de flujo personalizados a partir de acciones integradas sin escribir DSL.',
+            advancedDslName: 'Editor DSL avanzado',
+            advancedDslDesc: 'Opcional: edita directamente con el formato Button Name::action-a>action-b. El editor visual y el DSL permanecen sincronizados.',
+            dslValidationName: 'Validación del DSL del flujo',
+            dslValidationDesc: 'Se encontraron {count} problema(s). Las líneas inválidas se ignoran al renderizar la barra lateral.',
+            availableActionIdsName: 'IDs de acciones disponibles del flujo',
+            builderDslWarning: 'Se detectaron {count} problema(s) del DSL. El editor visual cargó un estado de flujo seguro de respaldo.',
+            builderCardTitle: 'Flujo {index}',
+            deleteButton: 'Eliminar',
+            workflowRemovedNotice: 'Flujo eliminado.',
+            buttonNameLabel: 'Nombre del botón',
+            buttonNamePlaceholder: 'Flujo {index}',
+            actionSequenceTitle: 'Secuencia de acciones',
+            removeAction: 'Quitar',
+            addAction: 'Agregar acción',
+            addWorkflow: 'Agregar flujo',
+            workflowAddedNotice: 'Flujo agregado.',
+            resetDefault: 'Restablecer predeterminado',
+            resetDefaultNotice: 'Se restauraron los flujos predeterminados de un clic.'
+        }
+    }
+});
+
+extendLocale(STRINGS_FA, {
+    settings: {
+        workflowBuilder: {
+            errorStrategyName: 'راهبرد خطای گردش‌کار',
+            errorStrategyDesc: 'در نخستین گام ناموفق فوراً توقف کنید، یا ادامه دهید و گام‌های باقی‌مانده را کامل کنید.',
+            errorStrategyStop: 'در اولین خطا توقف کن',
+            errorStrategyContinue: 'در صورت خطا ادامه بده',
+            visualBuilderName: 'سازنده دیداری گردش‌کار',
+            visualBuilderDesc: 'بدون نوشتن DSL، از اقدام‌های داخلی دکمه‌های گردش‌کار سفارشی بسازید.',
+            advancedDslName: 'ویرایشگر پیشرفته DSL',
+            advancedDslDesc: 'اختیاری: با قالب Button Name::action-a>action-b مستقیماً ویرایش کنید. سازنده دیداری و DSL همگام می‌مانند.',
+            dslValidationName: 'اعتبارسنجی DSL گردش‌کار',
+            dslValidationDesc: '{count} مشکل پیدا شد. خط‌های نامعتبر هنگام رندر نوار کناری نادیده گرفته می‌شوند.',
+            availableActionIdsName: 'شناسه‌های اقدامِ در دسترسِ گردش‌کار',
+            builderDslWarning: '{count} مشکل DSL شناسایی شد. ویرایشگر دیداری حالت امنِ جایگزینِ گردش‌کار را بارگذاری کرد.',
+            builderCardTitle: 'کارت گردش‌کار {index}',
+            deleteButton: 'حذف',
+            workflowRemovedNotice: 'گردش‌کار حذف شد.',
+            buttonNameLabel: 'نام دکمه',
+            buttonNamePlaceholder: 'گردش‌کار {index}',
+            actionSequenceTitle: 'ترتیب اقدام‌ها',
+            removeAction: 'حذف',
+            addAction: 'افزودن اقدام',
+            addWorkflow: 'افزودن گردش‌کار',
+            workflowAddedNotice: 'گردش‌کار اضافه شد.',
+            resetDefault: 'بازنشانی به پیش‌فرض',
+            resetDefaultNotice: 'گردش‌کارهای پیش‌فرض تک‌کلیکی بازگردانی شدند.'
+        }
+    }
+});
+
+extendLocale(STRINGS_FR, {
+    settings: {
+        workflowBuilder: {
+            errorStrategyName: 'Stratégie d’erreur du workflow',
+            errorStrategyDesc: 'Arrêter immédiatement au premier échec ou continuer et terminer les étapes restantes.',
+            errorStrategyStop: 'Arrêter à la première erreur',
+            errorStrategyContinue: 'Continuer malgré l’erreur',
+            visualBuilderName: 'Constructeur visuel de workflow',
+            visualBuilderDesc: 'Créez des boutons de workflow personnalisés à partir des actions intégrées sans écrire de DSL.',
+            advancedDslName: 'Éditeur DSL avancé',
+            advancedDslDesc: 'Optionnel : modifiez directement au format Button Name::action-a>action-b. Le constructeur visuel et le DSL restent synchronisés.',
+            dslValidationName: 'Validation DSL du workflow',
+            dslValidationDesc: '{count} problème(s) détecté(s). Les lignes invalides sont ignorées lors du rendu de la barre latérale.',
+            availableActionIdsName: 'IDs d’action de workflow disponibles',
+            builderDslWarning: '{count} problème(s) de DSL détecté(s). L’éditeur visuel a chargé un état de workflow sûr de repli.',
+            builderCardTitle: 'Flux de travail {index}',
+            deleteButton: 'Supprimer',
+            workflowRemovedNotice: 'Workflow supprimé.',
+            buttonNameLabel: 'Nom du bouton',
+            buttonNamePlaceholder: 'Flux de travail {index}',
+            actionSequenceTitle: 'Séquence d’actions',
+            removeAction: 'Retirer',
+            addAction: 'Ajouter une action',
+            addWorkflow: 'Ajouter un workflow',
+            workflowAddedNotice: 'Workflow ajouté.',
+            resetDefault: 'Réinitialiser par défaut',
+            resetDefaultNotice: 'Les workflows par défaut en un clic ont été restaurés.'
+        }
+    }
+});
+
+extendLocale(STRINGS_ID, {
+    settings: {
+        workflowBuilder: {
+            errorStrategyName: 'Strategi kesalahan alur kerja',
+            errorStrategyDesc: 'Segera berhenti pada langkah gagal pertama, atau lanjutkan dan selesaikan langkah yang tersisa.',
+            errorStrategyStop: 'Berhenti pada kesalahan pertama',
+            errorStrategyContinue: 'Lanjutkan saat ada kesalahan',
+            visualBuilderName: 'Pembuat alur kerja visual',
+            visualBuilderDesc: 'Buat tombol alur kerja kustom dari aksi bawaan tanpa menulis DSL.',
+            advancedDslName: 'Editor DSL lanjutan',
+            advancedDslDesc: 'Opsional: edit langsung dengan format Button Name::action-a>action-b. Pembuat visual dan DSL tetap sinkron.',
+            dslValidationName: 'Validasi DSL alur kerja',
+            dslValidationDesc: 'Ditemukan {count} masalah. Baris tidak valid diabaikan saat sidebar dirender.',
+            availableActionIdsName: 'ID aksi alur kerja yang tersedia',
+            builderDslWarning: 'Terdeteksi {count} masalah DSL. Editor visual memuat status alur kerja fallback yang aman.',
+            builderCardTitle: 'Alur kerja {index}',
+            deleteButton: 'Hapus',
+            workflowRemovedNotice: 'Alur kerja dihapus.',
+            buttonNameLabel: 'Nama tombol',
+            buttonNamePlaceholder: 'Alur kerja {index}',
+            actionSequenceTitle: 'Urutan aksi',
+            removeAction: 'Hapus',
+            addAction: 'Tambah aksi',
+            addWorkflow: 'Tambah alur kerja',
+            workflowAddedNotice: 'Alur kerja ditambahkan.',
+            resetDefault: 'Setel ulang ke default',
+            resetDefaultNotice: 'Alur kerja satu klik bawaan dipulihkan.'
+        }
+    }
+});
+
+extendLocale(STRINGS_IT, {
+    settings: {
+        workflowBuilder: {
+            errorStrategyName: 'Strategia errori del workflow',
+            errorStrategyDesc: 'Interrompi subito al primo passaggio fallito oppure continua e completa i passaggi rimanenti.',
+            errorStrategyStop: 'Interrompi al primo errore',
+            errorStrategyContinue: 'Continua in caso di errore',
+            visualBuilderName: 'Builder visuale del workflow',
+            visualBuilderDesc: 'Crea pulsanti di workflow personalizzati dalle azioni integrate senza scrivere DSL.',
+            advancedDslName: 'Editor DSL avanzato',
+            advancedDslDesc: 'Opzionale: modifica direttamente con il formato Button Name::action-a>action-b. Builder visuale e DSL restano sincronizzati.',
+            dslValidationName: 'Validazione DSL del workflow',
+            dslValidationDesc: 'Rilevati {count} problemi. Le righe non valide vengono ignorate nel rendering della barra laterale.',
+            availableActionIdsName: 'ID azioni workflow disponibili',
+            builderDslWarning: 'Rilevati {count} problemi DSL. L’editor visuale ha caricato uno stato workflow di fallback sicuro.',
+            builderCardTitle: 'Flusso di lavoro {index}',
+            deleteButton: 'Elimina',
+            workflowRemovedNotice: 'Workflow rimosso.',
+            buttonNameLabel: 'Nome pulsante',
+            buttonNamePlaceholder: 'Flusso di lavoro {index}',
+            actionSequenceTitle: 'Sequenza azioni',
+            removeAction: 'Rimuovi',
+            addAction: 'Aggiungi azione',
+            addWorkflow: 'Aggiungi workflow',
+            workflowAddedNotice: 'Workflow aggiunto.',
+            resetDefault: 'Ripristina predefinito',
+            resetDefaultNotice: 'Ripristinati i workflow predefiniti con un clic.'
+        }
+    }
+});
+
+extendLocale(STRINGS_JA, {
+    settings: {
+        workflowBuilder: {
+            errorStrategyName: 'ワークフローのエラー戦略',
+            errorStrategyDesc: '最初の失敗ステップで直ちに停止するか、続行して残りのステップを完了します。',
+            errorStrategyStop: '最初のエラーで停止',
+            errorStrategyContinue: 'エラー時も続行',
+            visualBuilderName: 'ビジュアルワークフロービルダー',
+            visualBuilderDesc: 'DSL を書かずに組み込みアクションからカスタムワークフローボタンを作成します。',
+            advancedDslName: '高度な DSL エディター',
+            advancedDslDesc: '任意: Button Name::action-a>action-b 形式で直接編集します。ビジュアルビルダーと DSL は同期されたままです。',
+            dslValidationName: 'ワークフロー DSL 検証',
+            dslValidationDesc: '{count} 件の問題が見つかりました。無効な行はサイドバーの描画時に無視されます。',
+            availableActionIdsName: '利用可能なワークフローアクション ID',
+            builderDslWarning: '{count} 件の DSL 問題を検出しました。ビジュアルエディターは安全なフォールバック状態のワークフローを読み込みました。',
+            builderCardTitle: 'ワークフロー {index}',
+            deleteButton: '削除',
+            workflowRemovedNotice: 'ワークフローを削除しました。',
+            buttonNameLabel: 'ボタン名',
+            buttonNamePlaceholder: 'ワークフロー {index}',
+            actionSequenceTitle: 'アクション順序',
+            removeAction: '削除',
+            addAction: 'アクションを追加',
+            addWorkflow: 'ワークフローを追加',
+            workflowAddedNotice: 'ワークフローを追加しました。',
+            resetDefault: 'デフォルトに戻す',
+            resetDefaultNotice: 'デフォルトのワンクリックワークフローを復元しました。'
+        }
+    }
+});
+
+extendLocale(STRINGS_KO, {
+    settings: {
+        workflowBuilder: {
+            errorStrategyName: '워크플로 오류 전략',
+            errorStrategyDesc: '첫 번째 실패 단계에서 즉시 중지하거나 계속 진행하여 남은 단계를 완료합니다.',
+            errorStrategyStop: '첫 번째 오류에서 중지',
+            errorStrategyContinue: '오류가 있어도 계속',
+            visualBuilderName: '시각적 워크플로 빌더',
+            visualBuilderDesc: 'DSL을 작성하지 않고 기본 제공 작업으로 사용자 정의 워크플로 버튼을 만듭니다.',
+            advancedDslName: '고급 DSL 편집기',
+            advancedDslDesc: '선택 사항: Button Name::action-a>action-b 형식으로 직접 편집합니다. 시각적 빌더와 DSL은 계속 동기화됩니다.',
+            dslValidationName: '워크플로 DSL 검증',
+            dslValidationDesc: '{count}개의 문제가 발견되었습니다. 잘못된 줄은 사이드바 렌더링에서 무시됩니다.',
+            availableActionIdsName: '사용 가능한 워크플로 작업 ID',
+            builderDslWarning: '{count}개의 DSL 문제가 감지되었습니다. 시각적 편집기가 안전한 fallback 워크플로 상태를 불러왔습니다.',
+            builderCardTitle: '워크플로 {index}',
+            deleteButton: '삭제',
+            workflowRemovedNotice: '워크플로를 제거했습니다.',
+            buttonNameLabel: '버튼 이름',
+            buttonNamePlaceholder: '워크플로 {index}',
+            actionSequenceTitle: '작업 순서',
+            removeAction: '제거',
+            addAction: '작업 추가',
+            addWorkflow: '워크플로 추가',
+            workflowAddedNotice: '워크플로를 추가했습니다.',
+            resetDefault: '기본값으로 재설정',
+            resetDefaultNotice: '기본 원클릭 워크플로를 복원했습니다.'
+        }
+    }
+});
+
+extendLocale(STRINGS_NL, {
+    settings: {
+        workflowBuilder: {
+            errorStrategyName: 'Werkstroomfoutstrategie',
+            errorStrategyDesc: 'Stop direct bij de eerste mislukte stap, of ga door en voltooi de resterende stappen.',
+            errorStrategyStop: 'Stop bij eerste fout',
+            errorStrategyContinue: 'Ga door bij fout',
+            visualBuilderName: 'Visuele werkstroombouwer',
+            visualBuilderDesc: 'Maak aangepaste werkstroomknoppen van ingebouwde acties zonder DSL te schrijven.',
+            advancedDslName: 'Geavanceerde DSL-editor',
+            advancedDslDesc: 'Optioneel: bewerk direct met het formaat Button Name::action-a>action-b. De visuele bouwer en DSL blijven gesynchroniseerd.',
+            dslValidationName: 'Workflow-DSL-validatie',
+            dslValidationDesc: '{count} probleem/problemen gevonden. Ongeldige regels worden genegeerd bij het renderen van de zijbalk.',
+            availableActionIdsName: 'Beschikbare workflow-actie-ID’s',
+            builderDslWarning: '{count} DSL-probleem/problemen gedetecteerd. De visuele editor heeft een fallback-veilige workflowstatus geladen.',
+            builderCardTitle: 'Werkstroom {index}',
+            deleteButton: 'Verwijderen',
+            workflowRemovedNotice: 'Werkstroom verwijderd.',
+            buttonNameLabel: 'Knopnaam',
+            buttonNamePlaceholder: 'Werkstroom {index}',
+            actionSequenceTitle: 'Actiesequentie',
+            removeAction: 'Verwijderen',
+            addAction: 'Actie toevoegen',
+            addWorkflow: 'Werkstroom toevoegen',
+            workflowAddedNotice: 'Werkstroom toegevoegd.',
+            resetDefault: 'Standaard herstellen',
+            resetDefaultNotice: 'Standaard éénklik-werkstromen hersteld.'
+        }
+    }
+});
+
+extendLocale(STRINGS_PL, {
+    settings: {
+        workflowBuilder: {
+            errorStrategyName: 'Strategia błędów workflow',
+            errorStrategyDesc: 'Zatrzymaj się natychmiast przy pierwszym nieudanym kroku albo kontynuuj i zakończ pozostałe kroki.',
+            errorStrategyStop: 'Zatrzymaj przy pierwszym błędzie',
+            errorStrategyContinue: 'Kontynuuj mimo błędu',
+            visualBuilderName: 'Wizualny kreator workflow',
+            visualBuilderDesc: 'Twórz własne przyciski workflow z wbudowanych akcji bez pisania DSL.',
+            advancedDslName: 'Zaawansowany edytor DSL',
+            advancedDslDesc: 'Opcjonalnie: edytuj bezpośrednio w formacie Button Name::action-a>action-b. Kreator wizualny i DSL pozostają zsynchronizowane.',
+            dslValidationName: 'Walidacja DSL workflow',
+            dslValidationDesc: 'Znaleziono {count} problem(y). Nieprawidłowe linie są ignorowane podczas renderowania paska bocznego.',
+            availableActionIdsName: 'Dostępne ID akcji workflow',
+            builderDslWarning: 'Wykryto {count} problem(y) DSL. Edytor wizualny wczytał bezpieczny stan zapasowy workflow.',
+            builderCardTitle: 'Przepływ pracy {index}',
+            deleteButton: 'Usuń',
+            workflowRemovedNotice: 'Workflow usunięto.',
+            buttonNameLabel: 'Nazwa przycisku',
+            buttonNamePlaceholder: 'Przepływ pracy {index}',
+            actionSequenceTitle: 'Sekwencja akcji',
+            removeAction: 'Usuń',
+            addAction: 'Dodaj akcję',
+            addWorkflow: 'Dodaj workflow',
+            workflowAddedNotice: 'Workflow dodano.',
+            resetDefault: 'Przywróć domyślne',
+            resetDefaultNotice: 'Przywrócono domyślne workflow jednym kliknięciem.'
+        }
+    }
+});
+
+extendLocale(STRINGS_PT, {
+    settings: {
+        workflowBuilder: {
+            errorStrategyName: 'Estratégia de erro do fluxo de trabalho',
+            errorStrategyDesc: 'Pare imediatamente na primeira etapa com falha, ou continue e conclua as etapas restantes.',
+            errorStrategyStop: 'Parar no primeiro erro',
+            errorStrategyContinue: 'Continuar com erro',
+            visualBuilderName: 'Construtor visual de fluxo de trabalho',
+            visualBuilderDesc: 'Crie botões de fluxo de trabalho personalizados a partir das ações integradas sem escrever DSL.',
+            advancedDslName: 'Editor DSL avançado',
+            advancedDslDesc: 'Opcional: edite diretamente com o formato Button Name::action-a>action-b. O construtor visual e o DSL mantêm-se sincronizados.',
+            dslValidationName: 'Validação DSL do fluxo de trabalho',
+            dslValidationDesc: 'Foram encontrados {count} problema(s). As linhas inválidas são ignoradas ao renderizar a barra lateral.',
+            availableActionIdsName: 'IDs de ação de fluxo de trabalho disponíveis',
+            builderDslWarning: 'Foram detetados {count} problema(s) de DSL. O editor visual carregou um estado de fluxo de trabalho seguro de fallback.',
+            builderCardTitle: 'Fluxo de trabalho {index}',
+            deleteButton: 'Eliminar',
+            workflowRemovedNotice: 'Fluxo de trabalho removido.',
+            buttonNameLabel: 'Nome do botão',
+            buttonNamePlaceholder: 'Fluxo de trabalho {index}',
+            actionSequenceTitle: 'Sequência de ações',
+            removeAction: 'Remover',
+            addAction: 'Adicionar ação',
+            addWorkflow: 'Adicionar fluxo de trabalho',
+            workflowAddedNotice: 'Fluxo de trabalho adicionado.',
+            resetDefault: 'Repor predefinição',
+            resetDefaultNotice: 'Os fluxos de trabalho predefinidos de um clique foram restaurados.'
+        }
+    }
+});
+
+extendLocale(STRINGS_PT_BR, {
+    settings: {
+        workflowBuilder: {
+            errorStrategyName: 'Estratégia de erro do fluxo de trabalho',
+            errorStrategyDesc: 'Pare imediatamente no primeiro passo com falha ou continue e conclua os passos restantes.',
+            errorStrategyStop: 'Parar no primeiro erro',
+            errorStrategyContinue: 'Continuar com erro',
+            visualBuilderName: 'Construtor visual de fluxo de trabalho',
+            visualBuilderDesc: 'Crie botões de fluxo de trabalho personalizados a partir das ações integradas sem escrever DSL.',
+            advancedDslName: 'Editor DSL avançado',
+            advancedDslDesc: 'Opcional: edite diretamente com o formato Button Name::action-a>action-b. O construtor visual e o DSL permanecem sincronizados.',
+            dslValidationName: 'Validação DSL do fluxo de trabalho',
+            dslValidationDesc: 'Foram encontrados {count} problema(s). Linhas inválidas são ignoradas ao renderizar a barra lateral.',
+            availableActionIdsName: 'IDs de ação de fluxo de trabalho disponíveis',
+            builderDslWarning: 'Foram detectados {count} problema(s) de DSL. O editor visual carregou um estado de fallback seguro do fluxo de trabalho.',
+            builderCardTitle: 'Fluxo de trabalho {index}',
+            deleteButton: 'Excluir',
+            workflowRemovedNotice: 'Fluxo de trabalho removido.',
+            buttonNameLabel: 'Nome do botão',
+            buttonNamePlaceholder: 'Fluxo de trabalho {index}',
+            actionSequenceTitle: 'Sequência de ações',
+            removeAction: 'Remover',
+            addAction: 'Adicionar ação',
+            addWorkflow: 'Adicionar fluxo de trabalho',
+            workflowAddedNotice: 'Fluxo de trabalho adicionado.',
+            resetDefault: 'Restaurar padrão',
+            resetDefaultNotice: 'Os fluxos de trabalho padrão de um clique foram restaurados.'
+        }
+    }
+});
+
 extendLocale(STRINGS_FA, {
     common: { select: 'انتخاب' },
     commands: {
@@ -3525,7 +3928,33 @@ extendLocale(STRINGS_RU, {
         mermaidTask: { heading: 'Задача: Резюмировать как диаграмму Mermaid' },
         extractConceptsTask: { heading: 'Задача: Извлечь концепты' },
         stableApi: { heading: 'Стабильные вызовы API' },
-        workflowBuilder: { heading: 'Кнопки workflow в один клик' },
+        workflowBuilder: {
+            heading: 'Кнопки workflow в один клик',
+            errorStrategyName: 'Стратегия ошибок рабочего процесса',
+            errorStrategyDesc: 'Остановиться сразу при первом неудачном шаге или продолжить и завершить оставшиеся шаги.',
+            errorStrategyStop: 'Остановиться при первой ошибке',
+            errorStrategyContinue: 'Продолжать при ошибке',
+            visualBuilderName: 'Визуальный конструктор рабочих процессов',
+            visualBuilderDesc: 'Создавайте пользовательские кнопки workflow из встроенных действий без написания DSL.',
+            advancedDslName: 'Расширенный редактор DSL',
+            advancedDslDesc: 'Необязательно: редактируйте напрямую в формате Button Name::action-a>action-b. Визуальный редактор и DSL остаются синхронизированными.',
+            dslValidationName: 'Проверка DSL workflow',
+            dslValidationDesc: 'Обнаружено {count} проблем(ы). Недопустимые строки игнорируются при отрисовке боковой панели.',
+            availableActionIdsName: 'Доступные идентификаторы действий workflow',
+            builderDslWarning: 'Обнаружено {count} проблем(ы) в DSL. Визуальный редактор загрузил безопасное резервное состояние workflow.',
+            builderCardTitle: 'Рабочий процесс {index}',
+            deleteButton: 'Удалить',
+            workflowRemovedNotice: 'Рабочий процесс удален.',
+            buttonNameLabel: 'Имя кнопки',
+            buttonNamePlaceholder: 'Рабочий процесс {index}',
+            actionSequenceTitle: 'Последовательность действий',
+            removeAction: 'Удалить',
+            addAction: 'Добавить действие',
+            addWorkflow: 'Добавить рабочий процесс',
+            workflowAddedNotice: 'Рабочий процесс добавлен.',
+            resetDefault: 'Сбросить по умолчанию',
+            resetDefaultNotice: 'Восстановлены рабочие процессы по умолчанию в один клик.'
+        },
         generalOutput: {
             processedHeading: 'Вывод обработанного файла',
             conceptNoteHeading: 'Вывод заметок-концептов',
@@ -3566,7 +3995,33 @@ extendLocale(STRINGS_TH, {
         mermaidTask: { heading: 'งาน: สรุปเป็นแผนภาพ Mermaid' },
         extractConceptsTask: { heading: 'งาน: สกัดแนวคิด' },
         stableApi: { heading: 'การเรียก API แบบเสถียร' },
-        workflowBuilder: { heading: 'ปุ่มเวิร์กโฟลว์แบบคลิกเดียว' },
+        workflowBuilder: {
+            heading: 'ปุ่มเวิร์กโฟลว์แบบคลิกเดียว',
+            errorStrategyName: 'กลยุทธ์ข้อผิดพลาดของเวิร์กโฟลว์',
+            errorStrategyDesc: 'หยุดทันทีเมื่อขั้นตอนแรกล้มเหลว หรือทำต่อและทำขั้นตอนที่เหลือให้เสร็จ',
+            errorStrategyStop: 'หยุดเมื่อเกิดข้อผิดพลาดแรก',
+            errorStrategyContinue: 'ทำต่อเมื่อเกิดข้อผิดพลาด',
+            visualBuilderName: 'ตัวสร้างเวิร์กโฟลว์แบบภาพ',
+            visualBuilderDesc: 'สร้างปุ่มเวิร์กโฟลว์แบบกำหนดเองจากแอ็กชันในตัวได้โดยไม่ต้องเขียน DSL',
+            advancedDslName: 'ตัวแก้ไข DSL ขั้นสูง',
+            advancedDslDesc: 'ไม่บังคับ: แก้ไขโดยตรงด้วยรูปแบบ Button Name::action-a>action-b โดยตัวแก้ไขแบบภาพและ DSL จะซิงก์กันอยู่เสมอ',
+            dslValidationName: 'การตรวจสอบ DSL ของเวิร์กโฟลว์',
+            dslValidationDesc: 'พบปัญหา {count} รายการ ระบบจะละเว้นบรรทัดที่ไม่ถูกต้องเมื่อแสดงผลในแถบด้านข้าง',
+            availableActionIdsName: 'รหัสแอ็กชันเวิร์กโฟลว์ที่ใช้ได้',
+            builderDslWarning: 'ตรวจพบปัญหา DSL {count} รายการ ตัวแก้ไขแบบภาพจึงโหลดสถานะเวิร์กโฟลว์สำรองที่ปลอดภัย',
+            builderCardTitle: 'เวิร์กโฟลว์ {index}',
+            deleteButton: 'ลบ',
+            workflowRemovedNotice: 'ลบเวิร์กโฟลว์แล้ว',
+            buttonNameLabel: 'ชื่อปุ่ม',
+            buttonNamePlaceholder: 'เวิร์กโฟลว์ {index}',
+            actionSequenceTitle: 'ลำดับแอ็กชัน',
+            removeAction: 'นำออก',
+            addAction: 'เพิ่มแอ็กชัน',
+            addWorkflow: 'เพิ่มเวิร์กโฟลว์',
+            workflowAddedNotice: 'เพิ่มเวิร์กโฟลว์แล้ว',
+            resetDefault: 'รีเซ็ตเป็นค่าเริ่มต้น',
+            resetDefaultNotice: 'กู้คืนเวิร์กโฟลว์แบบคลิกเดียวเริ่มต้นแล้ว'
+        },
         generalOutput: {
             processedHeading: 'ผลลัพธ์ไฟล์ที่ประมวลผลแล้ว',
             conceptNoteHeading: 'ผลลัพธ์โน้ตแนวคิด',
@@ -3607,7 +4062,33 @@ extendLocale(STRINGS_TR, {
         mermaidTask: { heading: 'Görev: Mermaid diyagramı olarak özetle' },
         extractConceptsTask: { heading: 'Görev: Kavramları çıkar' },
         stableApi: { heading: 'Kararlı API çağrıları' },
-        workflowBuilder: { heading: 'Tek tıklamalı iş akışı düğmeleri' },
+        workflowBuilder: {
+            heading: 'Tek tıklamalı iş akışı düğmeleri',
+            errorStrategyName: 'İş akışı hata stratejisi',
+            errorStrategyDesc: 'İlk başarısız adımda hemen durun veya devam edip kalan adımları tamamlayın.',
+            errorStrategyStop: 'İlk hatada dur',
+            errorStrategyContinue: 'Hata durumunda devam et',
+            visualBuilderName: 'Görsel iş akışı oluşturucu',
+            visualBuilderDesc: 'DSL yazmadan yerleşik eylemlerden özel iş akışı düğmeleri oluşturun.',
+            advancedDslName: 'Gelişmiş DSL düzenleyici',
+            advancedDslDesc: 'İsteğe bağlı: Button Name::action-a>action-b biçiminde doğrudan düzenleyin. Görsel düzenleyici ile DSL senkronize kalır.',
+            dslValidationName: 'İş akışı DSL doğrulaması',
+            dslValidationDesc: '{count} sorun bulundu. Geçersiz satırlar kenar çubuğu oluşturulurken yok sayılır.',
+            availableActionIdsName: 'Kullanılabilir iş akışı eylem kimlikleri',
+            builderDslWarning: '{count} DSL sorunu algılandı. Görsel düzenleyici güvenli yedek iş akışı durumunu yükledi.',
+            builderCardTitle: 'İş akışı {index}',
+            deleteButton: 'Sil',
+            workflowRemovedNotice: 'İş akışı kaldırıldı.',
+            buttonNameLabel: 'Düğme adı',
+            buttonNamePlaceholder: 'İş akışı {index}',
+            actionSequenceTitle: 'Eylem sırası',
+            removeAction: 'Kaldır',
+            addAction: 'Eylem ekle',
+            addWorkflow: 'İş akışı ekle',
+            workflowAddedNotice: 'İş akışı eklendi.',
+            resetDefault: 'Varsayılana sıfırla',
+            resetDefaultNotice: 'Varsayılan tek tıklamalı iş akışları geri yüklendi.'
+        },
         generalOutput: {
             processedHeading: 'İşlenen dosya çıktısı',
             conceptNoteHeading: 'Kavram notu çıktısı',
@@ -3648,7 +4129,33 @@ extendLocale(STRINGS_UK, {
         mermaidTask: { heading: 'Завдання: Підсумувати як діаграму Mermaid' },
         extractConceptsTask: { heading: 'Завдання: Видобути концепти' },
         stableApi: { heading: 'Стабільні виклики API' },
-        workflowBuilder: { heading: 'Кнопки workflow в один клік' },
+        workflowBuilder: {
+            heading: 'Кнопки workflow в один клік',
+            errorStrategyName: 'Стратегія помилок робочого процесу',
+            errorStrategyDesc: 'Негайно зупинятися на першому невдалому кроці або продовжувати й завершувати решту кроків.',
+            errorStrategyStop: 'Зупинятися на першій помилці',
+            errorStrategyContinue: 'Продовжувати при помилці',
+            visualBuilderName: 'Візуальний конструктор робочого процесу',
+            visualBuilderDesc: 'Створюйте власні кнопки workflow зі вбудованих дій без написання DSL.',
+            advancedDslName: 'Розширений редактор DSL',
+            advancedDslDesc: 'Необовʼязково: редагуйте напряму у форматі Button Name::action-a>action-b. Візуальний редактор і DSL залишаються синхронізованими.',
+            dslValidationName: 'Перевірка DSL workflow',
+            dslValidationDesc: 'Знайдено {count} проблем(и). Некоректні рядки ігноруються під час відображення бічної панелі.',
+            availableActionIdsName: 'Доступні ідентифікатори дій workflow',
+            builderDslWarning: 'Виявлено {count} проблем(и) DSL. Візуальний редактор завантажив безпечний резервний стан workflow.',
+            builderCardTitle: 'Робочий процес {index}',
+            deleteButton: 'Видалити',
+            workflowRemovedNotice: 'Робочий процес видалено.',
+            buttonNameLabel: 'Назва кнопки',
+            buttonNamePlaceholder: 'Робочий процес {index}',
+            actionSequenceTitle: 'Послідовність дій',
+            removeAction: 'Видалити',
+            addAction: 'Додати дію',
+            addWorkflow: 'Додати робочий процес',
+            workflowAddedNotice: 'Робочий процес додано.',
+            resetDefault: 'Скинути до типових',
+            resetDefaultNotice: 'Типові робочі процеси в один клік відновлено.'
+        },
         generalOutput: {
             processedHeading: 'Вивід обробленого файлу',
             conceptNoteHeading: 'Вивід нотаток-концептів',
@@ -3689,7 +4196,33 @@ extendLocale(STRINGS_VI, {
         mermaidTask: { heading: 'Tác vụ: Tóm tắt thành sơ đồ Mermaid' },
         extractConceptsTask: { heading: 'Tác vụ: Trích xuất khái niệm' },
         stableApi: { heading: 'Lời gọi API ổn định' },
-        workflowBuilder: { heading: 'Nút quy trình một chạm' },
+        workflowBuilder: {
+            heading: 'Nút quy trình một chạm',
+            errorStrategyName: 'Chiến lược lỗi của quy trình',
+            errorStrategyDesc: 'Dừng ngay ở bước đầu tiên thất bại, hoặc tiếp tục và hoàn tất các bước còn lại.',
+            errorStrategyStop: 'Dừng ở lỗi đầu tiên',
+            errorStrategyContinue: 'Tiếp tục khi có lỗi',
+            visualBuilderName: 'Trình tạo quy trình trực quan',
+            visualBuilderDesc: 'Tạo nút quy trình tùy chỉnh từ các hành động tích hợp mà không cần viết DSL.',
+            advancedDslName: 'Trình chỉnh sửa DSL nâng cao',
+            advancedDslDesc: 'Tùy chọn: chỉnh sửa trực tiếp bằng định dạng Button Name::action-a>action-b. Trình chỉnh sửa trực quan và DSL luôn được đồng bộ.',
+            dslValidationName: 'Xác thực DSL của quy trình',
+            dslValidationDesc: 'Đã tìm thấy {count} vấn đề. Các dòng không hợp lệ sẽ bị bỏ qua khi hiển thị thanh bên.',
+            availableActionIdsName: 'ID hành động quy trình khả dụng',
+            builderDslWarning: 'Phát hiện {count} vấn đề DSL. Trình chỉnh sửa trực quan đã tải trạng thái quy trình dự phòng an toàn.',
+            builderCardTitle: 'Quy trình {index}',
+            deleteButton: 'Xóa',
+            workflowRemovedNotice: 'Đã xóa quy trình.',
+            buttonNameLabel: 'Tên nút',
+            buttonNamePlaceholder: 'Quy trình {index}',
+            actionSequenceTitle: 'Chuỗi hành động',
+            removeAction: 'Xóa',
+            addAction: 'Thêm hành động',
+            addWorkflow: 'Thêm quy trình',
+            workflowAddedNotice: 'Đã thêm quy trình.',
+            resetDefault: 'Đặt lại mặc định',
+            resetDefaultNotice: 'Đã khôi phục các quy trình một chạm mặc định.'
+        },
         generalOutput: {
             processedHeading: 'Đầu ra tệp đã xử lý',
             conceptNoteHeading: 'Đầu ra ghi chú khái niệm',
