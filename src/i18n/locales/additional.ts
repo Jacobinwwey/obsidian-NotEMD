@@ -1862,6 +1862,14 @@ extendLocale(STRINGS_ES, {
     }
 });
 
+extendLocale(STRINGS_ES, {
+    errorModal: {
+        titles: {
+            generic: 'Error general'
+        }
+    }
+});
+
 extendLocale(STRINGS_FA, {
     common: { select: 'انتخاب' },
     commands: {
@@ -2105,6 +2113,338 @@ extendLocale(STRINGS_KO, {
         batchMermaidFix: { heading: 'Mermaid 일괄 수정' },
         duplicateScope: { heading: '중복 확인 범위' },
         focusedLearning: { heading: '집중 학습 도메인' }
+    }
+});
+
+extendLocale(STRINGS_NL, {
+    sidebar: {
+        status: {
+            workflowStart: 'Werkstroom: {name}',
+            workflowComplete: 'Werkstroom "{name}" voltooid',
+            workflowFailed: 'Werkstroom mislukt',
+            workflowFailedLog: 'Werkstroom mislukt: {message}',
+            workflowFinishedWithErrors: 'Werkstroom "{name}" voltooid met {count} fout(en)',
+            stepLabel: '[{current}/{total}] Stap: {label}',
+            stepLog: 'Stap {current}/{total}: {label}',
+            processingActive: 'Verwerken... (Actief: {count})',
+            timeRemaining: 'Geschatte resterende tijd: {time}',
+            timeRemainingCalculating: 'Geschatte resterende tijd: berekenen...',
+            stopped: 'Gestopt'
+        },
+        builtInActionsPrefix: 'Ingebouwde {category}-acties.',
+        workflowFallbackWarning: 'De workflow-DSL heeft {count} probleem/problemen. De zijbalk gebruikt de standaardfallback.'
+    },
+    errorModal: {
+        titles: {
+            processing: 'Notemd-verwerkingsfout',
+            batchProcessing: 'Notemd-batchverwerkingsfout',
+            llmConnectionTest: 'LLM-verbindingsfout bij test',
+            contentGeneration: 'Fout bij inhoudsgeneratie',
+            batchGeneration: 'Notemd-batchgeneratiefout',
+            duplicateCheckRemove: 'Fout bij controleren/verwijderen van duplicaten',
+            batchMermaidFix: 'Notemd-batch-Mermaid-herstel fout',
+            translation: 'Vertaalfout',
+            conceptExtraction: 'Fout bij conceptextractie',
+            batchConceptExtraction: 'Fout bij batch-conceptextractie',
+            generic: 'Fout',
+            extraction: 'Extractiefout'
+        }
+    }
+});
+
+extendLocale(STRINGS_PL, {
+    sidebar: {
+        status: {
+            workflowStart: 'Przepływ: {name}',
+            workflowComplete: 'Przepływ „{name}” ukończono',
+            workflowFailed: 'Przepływ nie powiódł się',
+            workflowFailedLog: 'Przepływ nie powiódł się: {message}',
+            workflowFinishedWithErrors: 'Przepływ „{name}” zakończył się z {count} błędem/błędami',
+            stepLabel: '[{current}/{total}] Krok: {label}',
+            stepLog: 'Krok {current}/{total}: {label}',
+            processingActive: 'Przetwarzanie... (Aktywne: {count})',
+            timeRemaining: 'Szacowany pozostały czas: {time}',
+            timeRemainingCalculating: 'Szacowany pozostały czas: obliczanie...',
+            stopped: 'Zatrzymano'
+        },
+        builtInActionsPrefix: 'Wbudowane akcje {category}.',
+        workflowFallbackWarning: 'DSL workflow zawiera {count} problem(y). Pasek boczny używa domyślnego fallbacku.'
+    },
+    errorModal: {
+        titles: {
+            processing: 'Błąd przetwarzania Notemd',
+            batchProcessing: 'Błąd przetwarzania wsadowego Notemd',
+            llmConnectionTest: 'Błąd testu połączenia LLM',
+            contentGeneration: 'Błąd generowania treści',
+            batchGeneration: 'Błąd generowania wsadowego Notemd',
+            duplicateCheckRemove: 'Błąd sprawdzania/usuwania duplikatów',
+            batchMermaidFix: 'Błąd wsadowej naprawy Mermaid w Notemd',
+            translation: 'Błąd tłumaczenia',
+            conceptExtraction: 'Błąd ekstrakcji pojęć',
+            batchConceptExtraction: 'Błąd wsadowej ekstrakcji pojęć',
+            generic: 'Błąd',
+            extraction: 'Błąd ekstrakcji'
+        }
+    }
+});
+
+extendLocale(STRINGS_PT, {
+    sidebar: {
+        status: {
+            workflowStart: 'Fluxo: {name}',
+            workflowComplete: 'Fluxo "{name}" concluído',
+            workflowFailed: 'Fluxo falhou',
+            workflowFailedLog: 'Fluxo falhou: {message}',
+            workflowFinishedWithErrors: 'Fluxo "{name}" terminou com {count} erro(s)',
+            stepLabel: '[{current}/{total}] Etapa: {label}',
+            stepLog: 'Etapa {current}/{total}: {label}',
+            processingActive: 'A processar... (Ativos: {count})',
+            timeRemaining: 'Tempo restante estimado: {time}',
+            timeRemainingCalculating: 'Tempo restante estimado: a calcular...',
+            stopped: 'Parado'
+        },
+        builtInActionsPrefix: 'Ações integradas de {category}.',
+        workflowFallbackWarning: 'O DSL do fluxo de trabalho tem {count} problema(s). A barra lateral está a usar o fallback predefinido.'
+    },
+    errorModal: {
+        titles: {
+            processing: 'Erro de processamento do Notemd',
+            batchProcessing: 'Erro de processamento em lote do Notemd',
+            llmConnectionTest: 'Erro no teste de ligação LLM',
+            contentGeneration: 'Erro de geração de conteúdo',
+            batchGeneration: 'Erro de geração em lote do Notemd',
+            duplicateCheckRemove: 'Erro de verificação/remoção de duplicados',
+            batchMermaidFix: 'Erro de correção Mermaid em lote do Notemd',
+            translation: 'Erro de tradução',
+            conceptExtraction: 'Erro de extração de conceitos',
+            batchConceptExtraction: 'Erro de extração de conceitos em lote',
+            generic: 'Erro',
+            extraction: 'Erro de extração'
+        }
+    }
+});
+
+extendLocale(STRINGS_PT_BR, {
+    sidebar: {
+        status: {
+            workflowStart: 'Fluxo: {name}',
+            workflowComplete: 'Fluxo "{name}" concluído',
+            workflowFailed: 'Fluxo falhou',
+            workflowFailedLog: 'Fluxo falhou: {message}',
+            workflowFinishedWithErrors: 'Fluxo "{name}" terminou com {count} erro(s)',
+            stepLabel: '[{current}/{total}] Etapa: {label}',
+            stepLog: 'Etapa {current}/{total}: {label}',
+            processingActive: 'Processando... (Ativos: {count})',
+            timeRemaining: 'Tempo restante estimado: {time}',
+            timeRemainingCalculating: 'Tempo restante estimado: calculando...',
+            stopped: 'Parado'
+        },
+        builtInActionsPrefix: 'Ações integradas de {category}.',
+        workflowFallbackWarning: 'O DSL do fluxo de trabalho tem {count} problema(s). A barra lateral está usando o fallback padrão.'
+    },
+    errorModal: {
+        titles: {
+            processing: 'Erro de processamento do Notemd',
+            batchProcessing: 'Erro de processamento em lote do Notemd',
+            llmConnectionTest: 'Erro no teste de conexão LLM',
+            contentGeneration: 'Erro de geração de conteúdo',
+            batchGeneration: 'Erro de geração em lote do Notemd',
+            duplicateCheckRemove: 'Erro de verificação/remoção de duplicatas',
+            batchMermaidFix: 'Erro de correção Mermaid em lote do Notemd',
+            translation: 'Erro de tradução',
+            conceptExtraction: 'Erro de extração de conceitos',
+            batchConceptExtraction: 'Erro de extração de conceitos em lote',
+            generic: 'Erro',
+            extraction: 'Erro de extração'
+        }
+    }
+});
+
+extendLocale(STRINGS_RU, {
+    sidebar: {
+        status: {
+            workflowStart: 'Сценарий: {name}',
+            workflowComplete: 'Сценарий "{name}" завершён',
+            workflowFailed: 'Сценарий завершился ошибкой',
+            workflowFailedLog: 'Сценарий завершился ошибкой: {message}',
+            workflowFinishedWithErrors: 'Сценарий "{name}" завершён, ошибок: {count}',
+            stepLabel: '[{current}/{total}] Шаг: {label}',
+            stepLog: 'Шаг {current}/{total}: {label}',
+            processingActive: 'Обработка... (Активно: {count})',
+            timeRemaining: 'Оценка оставшегося времени: {time}',
+            timeRemainingCalculating: 'Оценка оставшегося времени: вычисление...',
+            stopped: 'Остановлено'
+        },
+        builtInActionsPrefix: 'Встроенные действия категории {category}.',
+        workflowFallbackWarning: 'В DSL workflow обнаружено {count} проблем. Боковая панель использует стандартный fallback.'
+    },
+    errorModal: {
+        titles: {
+            processing: 'Ошибка обработки Notemd',
+            batchProcessing: 'Ошибка пакетной обработки Notemd',
+            llmConnectionTest: 'Ошибка теста подключения LLM',
+            contentGeneration: 'Ошибка генерации контента',
+            batchGeneration: 'Ошибка пакетной генерации Notemd',
+            duplicateCheckRemove: 'Ошибка проверки/удаления дубликатов',
+            batchMermaidFix: 'Ошибка пакетного исправления Mermaid в Notemd',
+            translation: 'Ошибка перевода',
+            conceptExtraction: 'Ошибка извлечения концептов',
+            batchConceptExtraction: 'Ошибка пакетного извлечения концептов',
+            generic: 'Ошибка',
+            extraction: 'Ошибка извлечения'
+        }
+    }
+});
+
+extendLocale(STRINGS_TH, {
+    sidebar: {
+        status: {
+            workflowStart: 'เวิร์กโฟลว์: {name}',
+            workflowComplete: 'เวิร์กโฟลว์ "{name}" เสร็จสมบูรณ์',
+            workflowFailed: 'เวิร์กโฟลว์ล้มเหลว',
+            workflowFailedLog: 'เวิร์กโฟลว์ล้มเหลว: {message}',
+            workflowFinishedWithErrors: 'เวิร์กโฟลว์ "{name}" เสร็จสิ้นพร้อมข้อผิดพลาด {count} รายการ',
+            stepLabel: '[{current}/{total}] ขั้นตอน: {label}',
+            stepLog: 'ขั้นตอน {current}/{total}: {label}',
+            processingActive: 'กำลังประมวลผล... (กำลังทำงาน: {count})',
+            timeRemaining: 'เวลาคงเหลือโดยประมาณ: {time}',
+            timeRemainingCalculating: 'เวลาคงเหลือโดยประมาณ: กำลังคำนวณ...',
+            stopped: 'หยุดแล้ว'
+        },
+        builtInActionsPrefix: 'แอ็กชัน {category} ที่มีมาในตัว',
+        workflowFallbackWarning: 'DSL ของเวิร์กโฟลว์มีปัญหา {count} รายการ แถบด้านข้างจึงใช้ fallback เริ่มต้น'
+    },
+    errorModal: {
+        titles: {
+            processing: 'ข้อผิดพลาดการประมวลผลของ Notemd',
+            batchProcessing: 'ข้อผิดพลาดการประมวลผลแบบกลุ่มของ Notemd',
+            llmConnectionTest: 'ข้อผิดพลาดการทดสอบการเชื่อมต่อ LLM',
+            contentGeneration: 'ข้อผิดพลาดในการสร้างเนื้อหา',
+            batchGeneration: 'ข้อผิดพลาดการสร้างแบบกลุ่มของ Notemd',
+            duplicateCheckRemove: 'ข้อผิดพลาดในการตรวจสอบ/ลบรายการซ้ำ',
+            batchMermaidFix: 'ข้อผิดพลาดการแก้ Mermaid แบบกลุ่มของ Notemd',
+            translation: 'ข้อผิดพลาดการแปล',
+            conceptExtraction: 'ข้อผิดพลาดการสกัดแนวคิด',
+            batchConceptExtraction: 'ข้อผิดพลาดการสกัดแนวคิดแบบกลุ่ม',
+            generic: 'ข้อผิดพลาด',
+            extraction: 'ข้อผิดพลาดการสกัด'
+        }
+    }
+});
+
+extendLocale(STRINGS_TR, {
+    sidebar: {
+        status: {
+            workflowStart: 'İş akışı: {name}',
+            workflowComplete: '"{name}" iş akışı tamamlandı',
+            workflowFailed: 'İş akışı başarısız oldu',
+            workflowFailedLog: 'İş akışı başarısız oldu: {message}',
+            workflowFinishedWithErrors: '"{name}" iş akışı {count} hata ile tamamlandı',
+            stepLabel: '[{current}/{total}] Adım: {label}',
+            stepLog: 'Adım {current}/{total}: {label}',
+            processingActive: 'İşleniyor... (Etkin: {count})',
+            timeRemaining: 'Tahmini kalan süre: {time}',
+            timeRemainingCalculating: 'Tahmini kalan süre: hesaplanıyor...',
+            stopped: 'Durduruldu'
+        },
+        builtInActionsPrefix: 'Yerleşik {category} eylemleri.',
+        workflowFallbackWarning: 'İş akışı DSL’sinde {count} sorun var. Kenar çubuğu varsayılan fallback kullanıyor.'
+    },
+    errorModal: {
+        titles: {
+            processing: 'Notemd işleme hatası',
+            batchProcessing: 'Notemd toplu işleme hatası',
+            llmConnectionTest: 'LLM bağlantı testi hatası',
+            contentGeneration: 'İçerik oluşturma hatası',
+            batchGeneration: 'Notemd toplu üretim hatası',
+            duplicateCheckRemove: 'Yinelenen kontrol/kaldırma hatası',
+            batchMermaidFix: 'Notemd toplu Mermaid düzeltme hatası',
+            translation: 'Çeviri hatası',
+            conceptExtraction: 'Kavram çıkarma hatası',
+            batchConceptExtraction: 'Toplu kavram çıkarma hatası',
+            generic: 'Hata',
+            extraction: 'Çıkarma hatası'
+        }
+    }
+});
+
+extendLocale(STRINGS_UK, {
+    sidebar: {
+        status: {
+            workflowStart: 'Процес: {name}',
+            workflowComplete: 'Процес "{name}" завершено',
+            workflowFailed: 'Процес завершився з помилкою',
+            workflowFailedLog: 'Процес завершився з помилкою: {message}',
+            workflowFinishedWithErrors: 'Процес "{name}" завершено з {count} помилками',
+            stepLabel: '[{current}/{total}] Крок: {label}',
+            stepLog: 'Крок {current}/{total}: {label}',
+            processingActive: 'Обробка... (Активно: {count})',
+            timeRemaining: 'Оцінка залишкового часу: {time}',
+            timeRemainingCalculating: 'Оцінка залишкового часу: обчислення...',
+            stopped: 'Зупинено'
+        },
+        builtInActionsPrefix: 'Вбудовані дії категорії {category}.',
+        workflowFallbackWarning: 'DSL workflow має {count} проблем. Бокова панель використовує стандартний fallback.'
+    },
+    errorModal: {
+        titles: {
+            processing: 'Помилка обробки Notemd',
+            batchProcessing: 'Помилка пакетної обробки Notemd',
+            llmConnectionTest: 'Помилка тесту підключення LLM',
+            contentGeneration: 'Помилка генерації контенту',
+            batchGeneration: 'Помилка пакетної генерації Notemd',
+            duplicateCheckRemove: 'Помилка перевірки/видалення дублікатів',
+            batchMermaidFix: 'Помилка пакетного виправлення Mermaid у Notemd',
+            translation: 'Помилка перекладу',
+            conceptExtraction: 'Помилка видобування концептів',
+            batchConceptExtraction: 'Помилка пакетного видобування концептів',
+            generic: 'Помилка',
+            extraction: 'Помилка видобування'
+        }
+    }
+});
+
+extendLocale(STRINGS_VI, {
+    sidebar: {
+        status: {
+            workflowStart: 'Quy trình: {name}',
+            workflowComplete: 'Quy trình "{name}" đã hoàn tất',
+            workflowFailed: 'Quy trình thất bại',
+            workflowFailedLog: 'Quy trình thất bại: {message}',
+            workflowFinishedWithErrors: 'Quy trình "{name}" hoàn tất với {count} lỗi',
+            stepLabel: '[{current}/{total}] Bước: {label}',
+            stepLog: 'Bước {current}/{total}: {label}',
+            processingActive: 'Đang xử lý... (Đang hoạt động: {count})',
+            timeRemaining: 'Thời gian còn lại ước tính: {time}',
+            timeRemainingCalculating: 'Thời gian còn lại ước tính: đang tính...',
+            stopped: 'Đã dừng'
+        },
+        builtInActionsPrefix: 'Các hành động {category} tích hợp sẵn.',
+        workflowFallbackWarning: 'DSL quy trình có {count} vấn đề. Sidebar đang dùng fallback mặc định.'
+    },
+    errorModal: {
+        titles: {
+            processing: 'Lỗi xử lý Notemd',
+            batchProcessing: 'Lỗi xử lý hàng loạt Notemd',
+            llmConnectionTest: 'Lỗi kiểm tra kết nối LLM',
+            contentGeneration: 'Lỗi tạo nội dung',
+            batchGeneration: 'Lỗi tạo nội dung hàng loạt của Notemd',
+            duplicateCheckRemove: 'Lỗi kiểm tra/xóa trùng lặp',
+            batchMermaidFix: 'Lỗi sửa Mermaid hàng loạt của Notemd',
+            translation: 'Lỗi dịch',
+            conceptExtraction: 'Lỗi trích xuất khái niệm',
+            batchConceptExtraction: 'Lỗi trích xuất khái niệm hàng loạt',
+            generic: 'Lỗi',
+            extraction: 'Lỗi trích xuất'
+        }
+    }
+});
+
+extendLocale(STRINGS_ES, {
+    errorModal: {
+        titles: {
+            generic: 'Error general'
+        }
     }
 });
 
@@ -2666,6 +3006,338 @@ extendLocale(STRINGS_TR, {
     }
 });
 
+extendLocale(STRINGS_ES, {
+    errorModal: {
+        titles: {
+            generic: 'Error general'
+        }
+    }
+});
+
+extendLocale(STRINGS_AR, {
+    sidebar: {
+        status: {
+            workflowStart: 'سير العمل: {name}',
+            workflowComplete: 'اكتمل سير العمل "{name}"',
+            workflowFailed: 'فشل سير العمل',
+            workflowFailedLog: 'فشل سير العمل: {message}',
+            workflowFinishedWithErrors: 'انتهى سير العمل "{name}" مع {count} خطأ/أخطاء',
+            stepLabel: '[{current}/{total}] الخطوة: {label}',
+            stepLog: 'الخطوة {current}/{total}: {label}',
+            processingActive: 'جارٍ المعالجة... (النشط: {count})',
+            timeRemaining: 'الوقت المتبقي المقدر: {time}',
+            timeRemainingCalculating: 'الوقت المتبقي المقدر: جارٍ الحساب...',
+            stopped: 'متوقف'
+        },
+        builtInActionsPrefix: 'إجراءات {category} المضمنة.',
+        workflowFallbackWarning: 'يحتوي DSL الخاص بسير العمل على {count} مشكلة/مشكلات. يستخدم الشريط الجانبي الوضع الاحتياطي الافتراضي.'
+    },
+    errorModal: {
+        titles: {
+            processing: 'خطأ معالجة Notemd',
+            batchProcessing: 'خطأ المعالجة الدُفعية في Notemd',
+            llmConnectionTest: 'خطأ اختبار اتصال LLM',
+            contentGeneration: 'خطأ إنشاء المحتوى',
+            batchGeneration: 'خطأ التوليد الدُفعي في Notemd',
+            duplicateCheckRemove: 'خطأ فحص/إزالة التكرارات',
+            batchMermaidFix: 'خطأ إصلاح Mermaid الدُفعي في Notemd',
+            translation: 'خطأ الترجمة',
+            conceptExtraction: 'خطأ استخراج المفاهيم',
+            batchConceptExtraction: 'خطأ استخراج المفاهيم الدُفعي',
+            generic: 'خطأ',
+            extraction: 'خطأ الاستخراج'
+        }
+    }
+});
+
+extendLocale(STRINGS_DE, {
+    sidebar: {
+        status: {
+            workflowStart: 'Ablauf: {name}',
+            workflowComplete: 'Ablauf "{name}" abgeschlossen',
+            workflowFailed: 'Ablauf fehlgeschlagen',
+            workflowFailedLog: 'Ablauf fehlgeschlagen: {message}',
+            workflowFinishedWithErrors: 'Ablauf "{name}" mit {count} Fehler(n) abgeschlossen',
+            stepLabel: '[{current}/{total}] Schritt: {label}',
+            stepLog: 'Schritt {current}/{total}: {label}',
+            processingActive: 'Verarbeitung... (Aktiv: {count})',
+            timeRemaining: 'Geschätzte Restzeit: {time}',
+            timeRemainingCalculating: 'Geschätzte Restzeit: wird berechnet...',
+            stopped: 'Gestoppt'
+        },
+        builtInActionsPrefix: 'Integrierte {category}-Aktionen.',
+        workflowFallbackWarning: 'Das Workflow-DSL hat {count} Problem(e). Die Seitenleiste verwendet den Standard-Fallback.'
+    },
+    errorModal: {
+        titles: {
+            processing: 'Notemd-Verarbeitungsfehler',
+            batchProcessing: 'Notemd-Stapelverarbeitungsfehler',
+            llmConnectionTest: 'Fehler beim LLM-Verbindungstest',
+            contentGeneration: 'Fehler bei der Inhaltserstellung',
+            batchGeneration: 'Notemd-Stapelgenerierungsfehler',
+            duplicateCheckRemove: 'Fehler bei Duplikatprüfung/-entfernung',
+            batchMermaidFix: 'Notemd-Fehler bei Stapel-Mermaid-Reparatur',
+            translation: 'Übersetzungsfehler',
+            conceptExtraction: 'Fehler bei Konzeptextraktion',
+            batchConceptExtraction: 'Fehler bei Stapel-Konzeptextraktion',
+            generic: 'Fehler',
+            extraction: 'Extraktionsfehler'
+        }
+    }
+});
+
+extendLocale(STRINGS_ES, {
+    sidebar: {
+        status: {
+            workflowStart: 'Flujo: {name}',
+            workflowComplete: 'Flujo "{name}" completado',
+            workflowFailed: 'El flujo falló',
+            workflowFailedLog: 'El flujo falló: {message}',
+            workflowFinishedWithErrors: 'El flujo "{name}" terminó con {count} error(es)',
+            stepLabel: '[{current}/{total}] Paso: {label}',
+            stepLog: 'Paso {current}/{total}: {label}',
+            processingActive: 'Procesando... (Activos: {count})',
+            timeRemaining: 'Tiempo restante estimado: {time}',
+            timeRemainingCalculating: 'Tiempo restante estimado: calculando...',
+            stopped: 'Detenido'
+        },
+        builtInActionsPrefix: 'Acciones integradas de {category}.',
+        workflowFallbackWarning: 'El DSL del flujo tiene {count} problema(s). La barra lateral usa el fallback predeterminado.'
+    },
+    errorModal: {
+        titles: {
+            processing: 'Error de procesamiento de Notemd',
+            batchProcessing: 'Error de procesamiento por lotes de Notemd',
+            llmConnectionTest: 'Error de prueba de conexión LLM',
+            contentGeneration: 'Error de generación de contenido',
+            batchGeneration: 'Error de generación por lotes de Notemd',
+            duplicateCheckRemove: 'Error de comprobación/eliminación de duplicados',
+            batchMermaidFix: 'Error de corrección Mermaid por lotes de Notemd',
+            translation: 'Error de traducción',
+            conceptExtraction: 'Error de extracción de conceptos',
+            batchConceptExtraction: 'Error de extracción de conceptos por lotes',
+            generic: 'Error',
+            extraction: 'Error de extracción'
+        }
+    }
+});
+
+extendLocale(STRINGS_FA, {
+    sidebar: {
+        status: {
+            workflowStart: 'گردش‌کار: {name}',
+            workflowComplete: 'گردش‌کار "{name}" کامل شد',
+            workflowFailed: 'گردش‌کار ناموفق بود',
+            workflowFailedLog: 'گردش‌کار ناموفق بود: {message}',
+            workflowFinishedWithErrors: 'گردش‌کار "{name}" با {count} خطا تمام شد',
+            stepLabel: '[{current}/{total}] گام: {label}',
+            stepLog: 'گام {current}/{total}: {label}',
+            processingActive: 'در حال پردازش... (فعال: {count})',
+            timeRemaining: 'زمان باقی‌مانده تخمینی: {time}',
+            timeRemainingCalculating: 'زمان باقی‌مانده تخمینی: در حال محاسبه...',
+            stopped: 'متوقف'
+        },
+        builtInActionsPrefix: 'اقدام‌های داخلی {category}.',
+        workflowFallbackWarning: 'DSL گردش‌کار {count} مشکل دارد. نوار کناری از حالت جایگزین پیش‌فرض استفاده می‌کند.'
+    },
+    errorModal: {
+        titles: {
+            processing: 'خطای پردازش Notemd',
+            batchProcessing: 'خطای پردازش دسته‌ای Notemd',
+            llmConnectionTest: 'خطای آزمون اتصال LLM',
+            contentGeneration: 'خطای تولید محتوا',
+            batchGeneration: 'خطای تولید دسته‌ای Notemd',
+            duplicateCheckRemove: 'خطای بررسی/حذف موارد تکراری',
+            batchMermaidFix: 'خطای اصلاح دسته‌ای Mermaid در Notemd',
+            translation: 'خطای ترجمه',
+            conceptExtraction: 'خطای استخراج مفاهیم',
+            batchConceptExtraction: 'خطای استخراج دسته‌ای مفاهیم',
+            generic: 'خطا',
+            extraction: 'خطای استخراج'
+        }
+    }
+});
+
+extendLocale(STRINGS_FR, {
+    sidebar: {
+        status: {
+            workflowStart: 'Workflow : {name}',
+            workflowComplete: 'Workflow "{name}" terminé',
+            workflowFailed: 'Échec du workflow',
+            workflowFailedLog: 'Échec du workflow : {message}',
+            workflowFinishedWithErrors: 'Workflow "{name}" terminé avec {count} erreur(s)',
+            stepLabel: '[{current}/{total}] Étape : {label}',
+            stepLog: 'Étape {current}/{total} : {label}',
+            processingActive: 'Traitement... (Actifs : {count})',
+            timeRemaining: 'Temps restant estimé : {time}',
+            timeRemainingCalculating: 'Temps restant estimé : calcul en cours...',
+            stopped: 'Arrêté'
+        },
+        builtInActionsPrefix: 'Actions intégrées de {category}.',
+        workflowFallbackWarning: 'Le DSL du workflow contient {count} problème(s). La barre latérale utilise le repli par défaut.'
+    },
+    errorModal: {
+        titles: {
+            processing: 'Erreur de traitement Notemd',
+            batchProcessing: 'Erreur de traitement par lot Notemd',
+            llmConnectionTest: 'Erreur de test de connexion LLM',
+            contentGeneration: 'Erreur de génération de contenu',
+            batchGeneration: 'Erreur de génération par lot Notemd',
+            duplicateCheckRemove: 'Erreur de vérification/suppression des doublons',
+            batchMermaidFix: 'Erreur de correction Mermaid par lot Notemd',
+            translation: 'Erreur de traduction',
+            conceptExtraction: 'Erreur d’extraction des concepts',
+            batchConceptExtraction: 'Erreur d’extraction des concepts par lot',
+            generic: 'Erreur',
+            extraction: 'Erreur d’extraction'
+        }
+    }
+});
+
+extendLocale(STRINGS_ID, {
+    sidebar: {
+        status: {
+            workflowStart: 'Alur kerja: {name}',
+            workflowComplete: 'Alur kerja "{name}" selesai',
+            workflowFailed: 'Alur kerja gagal',
+            workflowFailedLog: 'Alur kerja gagal: {message}',
+            workflowFinishedWithErrors: 'Alur kerja "{name}" selesai dengan {count} kesalahan',
+            stepLabel: '[{current}/{total}] Langkah: {label}',
+            stepLog: 'Langkah {current}/{total}: {label}',
+            processingActive: 'Memproses... (Aktif: {count})',
+            timeRemaining: 'Perkiraan sisa waktu: {time}',
+            timeRemainingCalculating: 'Perkiraan sisa waktu: menghitung...',
+            stopped: 'Dihentikan'
+        },
+        builtInActionsPrefix: 'Aksi bawaan {category}.',
+        workflowFallbackWarning: 'DSL alur kerja memiliki {count} masalah. Bilah sisi menggunakan fallback bawaan.'
+    },
+    errorModal: {
+        titles: {
+            processing: 'Kesalahan Pemrosesan Notemd',
+            batchProcessing: 'Kesalahan Pemrosesan Batch Notemd',
+            llmConnectionTest: 'Kesalahan Uji Koneksi LLM',
+            contentGeneration: 'Kesalahan Pembuatan Konten',
+            batchGeneration: 'Kesalahan Pembuatan Batch Notemd',
+            duplicateCheckRemove: 'Kesalahan Periksa/Hapus Duplikat',
+            batchMermaidFix: 'Kesalahan Perbaikan Mermaid Batch Notemd',
+            translation: 'Kesalahan Terjemahan',
+            conceptExtraction: 'Kesalahan Ekstraksi Konsep',
+            batchConceptExtraction: 'Kesalahan Ekstraksi Konsep Batch',
+            generic: 'Kesalahan',
+            extraction: 'Kesalahan Ekstraksi'
+        }
+    }
+});
+
+extendLocale(STRINGS_IT, {
+    sidebar: {
+        status: {
+            workflowStart: 'Flusso: {name}',
+            workflowComplete: 'Flusso "{name}" completato',
+            workflowFailed: 'Flusso non riuscito',
+            workflowFailedLog: 'Flusso non riuscito: {message}',
+            workflowFinishedWithErrors: 'Flusso "{name}" completato con {count} errori',
+            stepLabel: '[{current}/{total}] Passo: {label}',
+            stepLog: 'Passo {current}/{total}: {label}',
+            processingActive: 'Elaborazione... (Attivi: {count})',
+            timeRemaining: 'Tempo rimanente stimato: {time}',
+            timeRemainingCalculating: 'Tempo rimanente stimato: calcolo in corso...',
+            stopped: 'Interrotto'
+        },
+        builtInActionsPrefix: 'Azioni integrate di {category}.',
+        workflowFallbackWarning: 'Il DSL del workflow ha {count} problema/i. La barra laterale usa il fallback predefinito.'
+    },
+    errorModal: {
+        titles: {
+            processing: 'Errore di elaborazione Notemd',
+            batchProcessing: 'Errore di elaborazione batch Notemd',
+            llmConnectionTest: 'Errore test connessione LLM',
+            contentGeneration: 'Errore di generazione contenuto',
+            batchGeneration: 'Errore di generazione batch Notemd',
+            duplicateCheckRemove: 'Errore controllo/rimozione duplicati',
+            batchMermaidFix: 'Errore di correzione Mermaid batch Notemd',
+            translation: 'Errore di traduzione',
+            conceptExtraction: 'Errore di estrazione concetti',
+            batchConceptExtraction: 'Errore di estrazione concetti batch',
+            generic: 'Errore',
+            extraction: 'Errore di estrazione'
+        }
+    }
+});
+
+extendLocale(STRINGS_JA, {
+    sidebar: {
+        status: {
+            workflowStart: 'ワークフロー: {name}',
+            workflowComplete: 'ワークフロー「{name}」が完了しました',
+            workflowFailed: 'ワークフローに失敗しました',
+            workflowFailedLog: 'ワークフローに失敗しました: {message}',
+            workflowFinishedWithErrors: 'ワークフロー「{name}」は {count} 件のエラーで終了しました',
+            stepLabel: '[{current}/{total}] 手順: {label}',
+            stepLog: '手順 {current}/{total}: {label}',
+            processingActive: '処理中...（実行中: {count}）',
+            timeRemaining: '推定残り時間: {time}',
+            timeRemainingCalculating: '推定残り時間: 計算中...',
+            stopped: '停止済み'
+        },
+        builtInActionsPrefix: '組み込みの {category} アクション。',
+        workflowFallbackWarning: 'ワークフロー DSL に {count} 件の問題があります。サイドバーは既定のフォールバックを使用しています。'
+    },
+    errorModal: {
+        titles: {
+            processing: 'Notemd 処理エラー',
+            batchProcessing: 'Notemd 一括処理エラー',
+            llmConnectionTest: 'LLM 接続テストエラー',
+            contentGeneration: 'コンテンツ生成エラー',
+            batchGeneration: 'Notemd 一括生成エラー',
+            duplicateCheckRemove: '重複確認/削除エラー',
+            batchMermaidFix: 'Notemd 一括 Mermaid 修正エラー',
+            translation: '翻訳エラー',
+            conceptExtraction: '概念抽出エラー',
+            batchConceptExtraction: '一括概念抽出エラー',
+            generic: 'エラー',
+            extraction: '抽出エラー'
+        }
+    }
+});
+
+extendLocale(STRINGS_KO, {
+    sidebar: {
+        status: {
+            workflowStart: '워크플로: {name}',
+            workflowComplete: '워크플로 "{name}" 완료',
+            workflowFailed: '워크플로 실패',
+            workflowFailedLog: '워크플로 실패: {message}',
+            workflowFinishedWithErrors: '워크플로 "{name}"이(가) {count}개의 오류와 함께 완료되었습니다',
+            stepLabel: '[{current}/{total}] 단계: {label}',
+            stepLog: '단계 {current}/{total}: {label}',
+            processingActive: '처리 중... (활성: {count})',
+            timeRemaining: '예상 남은 시간: {time}',
+            timeRemainingCalculating: '예상 남은 시간: 계산 중...',
+            stopped: '중지됨'
+        },
+        builtInActionsPrefix: '기본 제공 {category} 작업입니다.',
+        workflowFallbackWarning: '워크플로 DSL에 {count}개의 문제가 있습니다. 사이드바는 기본 fallback을 사용합니다.'
+    },
+    errorModal: {
+        titles: {
+            processing: 'Notemd 처리 오류',
+            batchProcessing: 'Notemd 일괄 처리 오류',
+            llmConnectionTest: 'LLM 연결 테스트 오류',
+            contentGeneration: '콘텐츠 생성 오류',
+            batchGeneration: 'Notemd 일괄 생성 오류',
+            duplicateCheckRemove: '중복 확인/제거 오류',
+            batchMermaidFix: 'Notemd 일괄 Mermaid 수정 오류',
+            translation: '번역 오류',
+            conceptExtraction: '개념 추출 오류',
+            batchConceptExtraction: '일괄 개념 추출 오류',
+            generic: '오류',
+            extraction: '추출 오류'
+        }
+    }
+});
+
 extendLocale(STRINGS_NL, {
     common: { select: 'Selecteren' },
     commands: {
@@ -3202,6 +3874,11 @@ extendLocale(STRINGS_ES, {
             importError: 'Error al importar la configuración: {message}',
             validationRequired: 'Configuración obligatoria',
             validationWarning: 'Advertencia de configuración'
+        }
+    },
+    errorModal: {
+        titles: {
+            generic: 'Error general'
         }
     }
 });

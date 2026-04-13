@@ -403,7 +403,7 @@ export const STRINGS_ZH_TW: DeepPartial<NotemdEnglishStrings> = {
             workflowFailed: '工作流程失敗',
             workflowFailedLog: '工作流程失敗：{message}',
             workflowFinishedWithErrors: '工作流程「{name}」已結束，含 {count} 個錯誤',
-            stepLabel: '[{current}/{total}] {label}',
+            stepLabel: '步驟 [{current}/{total}]：{label}',
             stepLog: '步驟 {current}/{total}：{label}',
             stepFailed: '步驟失敗：{message}',
             processingActive: '處理中…（活動任務：{count}）',
