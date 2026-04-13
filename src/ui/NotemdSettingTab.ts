@@ -463,6 +463,10 @@ export class NotemdSettingTab extends PluginSettingTab {
         const { containerEl } = this;
         containerEl.empty();
         const i18n = getI18nStrings({ uiLocale: this.plugin.settings.uiLocale });
+        const generateFromTitleTaskLabel = getSidebarActionLabel(i18n, 'generate-from-title');
+        const researchAndSummarizeTaskLabel = getSidebarActionLabel(i18n, 'research-and-summarize');
+        const summarizeAsMermaidTaskLabel = getSidebarActionLabel(i18n, 'summarize-as-mermaid');
+        const extractOriginalTextTaskLabel = getSidebarActionLabel(i18n, 'extract-original-text');
 
         // --- Provider Configuration ---
         new Setting(containerEl).setName('LLM providers').setHeading();
@@ -635,11 +639,11 @@ export class NotemdSettingTab extends PluginSettingTab {
             };
             createTaskModelSettings('addLinksProvider', 'addLinksModel', 'Add links (process file/folder)');
             createTaskModelSettings('researchProvider', 'researchModel', 'Research & summarize');
-            createTaskModelSettings('generateTitleProvider', 'generateTitleModel', 'Generate from title');
+            createTaskModelSettings('generateTitleProvider', 'generateTitleModel', generateFromTitleTaskLabel);
             createTaskModelSettings('translateProvider', 'translateModel', 'Translate');
             createTaskModelSettings('summarizeToMermaidProvider', 'summarizeToMermaidModel', 'Summarise as Mermaid diagram');
             createTaskModelSettings('extractConceptsProvider', 'extractConceptsModel', 'Extract Concepts');
-            createTaskModelSettings('extractOriginalTextProvider', 'extractOriginalTextModel', 'Extract Specific Original Text');
+            createTaskModelSettings('extractOriginalTextProvider', 'extractOriginalTextModel', extractOriginalTextTaskLabel);
         }
 
         // --- Translate Task Settings ---
@@ -996,13 +1000,13 @@ export class NotemdSettingTab extends PluginSettingTab {
             .setName('Available workflow action IDs')
             .setDesc(getWorkflowActionHelpText(i18n));
 
-        // --- Extract Specific Original Text Settings ---
-        new Setting(containerEl).setName('Extract Specific Original Text').setHeading();
+        // --- Extract Original Text Settings ---
+        new Setting(containerEl).setName(i18n.settings.extractOriginalText.heading).setHeading();
         new Setting(containerEl)
-            .setName('Questions for extraction')
-            .setDesc('Enter the list of questions to extract specific text for, separated by newlines.')
+            .setName(i18n.settings.extractOriginalText.questionsName)
+            .setDesc(i18n.settings.extractOriginalText.questionsDesc)
             .addTextArea(text => text
-                .setPlaceholder('Enter your questions here...')
+                .setPlaceholder(i18n.settings.extractOriginalText.questionsPlaceholder)
                 .setValue(this.plugin.settings.extractQuestions)
                 .onChange(async (value) => {
                     this.plugin.settings.extractQuestions = value;
@@ -1010,28 +1014,127 @@ export class NotemdSettingTab extends PluginSettingTab {
                 })
                 .inputEl.setAttrs({ rows: 6, style: 'width: 100%;' }));
 
-        new Setting(containerEl).setName("Use custom output folder for 'Generate from title'").setDesc("On: Move completed files to custom folder. Off: Move to '[original_foldername]_complete'.").addToggle(toggle => toggle.setValue(this.plugin.settings.useCustomGenerateTitleOutputFolder).onChange(async (value) => { this.plugin.settings.useCustomGenerateTitleOutputFolder = value; await this.plugin.saveSettings(); this.display(); }));
+        new Setting(containerEl)
+            .setName(i18n.settings.generateTitleOutput.useCustomFolderName)
+            .setDesc(i18n.settings.generateTitleOutput.useCustomFolderDesc)
+            .addToggle(toggle => toggle
+                .setValue(this.plugin.settings.useCustomGenerateTitleOutputFolder)
+                .onChange(async (value) => {
+                    this.plugin.settings.useCustomGenerateTitleOutputFolder = value;
+                    await this.plugin.saveSettings();
+                    this.display();
+                }));
         if (this.plugin.settings.useCustomGenerateTitleOutputFolder) {
-            new Setting(containerEl).setName("Custom output folder name").setDesc("Subfolder name for completed files.").addText(text => text.setPlaceholder(DEFAULT_SETTINGS.generateTitleOutputFolderName).setValue(this.plugin.settings.generateTitleOutputFolderName).onChange(async (value) => { /* Add validation */ this.plugin.settings.generateTitleOutputFolderName = value.trim() || DEFAULT_SETTINGS.generateTitleOutputFolderName; await this.plugin.saveSettings(); this.display(); }));
+            new Setting(containerEl)
+                .setName(i18n.settings.generateTitleOutput.customFolderName)
+                .setDesc(i18n.settings.generateTitleOutput.customFolderDesc)
+                .addText(text => text
+                    .setPlaceholder(DEFAULT_SETTINGS.generateTitleOutputFolderName)
+                    .setValue(this.plugin.settings.generateTitleOutputFolderName)
+                    .onChange(async (value) => {
+                        this.plugin.settings.generateTitleOutputFolderName = value.trim() || DEFAULT_SETTINGS.generateTitleOutputFolderName;
+                        await this.plugin.saveSettings();
+                        this.display();
+                    }));
         }
 
-        new Setting(containerEl).setName('Web research provider').setHeading();
-        new Setting(containerEl).setName('Search provider').setDesc('Engine for "Research and Summarize".').addDropdown(dropdown => dropdown.addOption('tavily', 'Tavily (requires API key)').addOption('duckduckgo', 'DuckDuckGo (experimental)').setValue(this.plugin.settings.searchProvider).onChange(async (value: 'tavily' | 'duckduckgo') => { this.plugin.settings.searchProvider = value; await this.plugin.saveSettings(); this.display(); }));
+        new Setting(containerEl).setName(i18n.settings.webResearch.heading).setHeading();
+        new Setting(containerEl)
+            .setName(i18n.settings.webResearch.searchProviderName)
+            .setDesc(i18n.settings.webResearch.searchProviderDesc)
+            .addDropdown(dropdown => dropdown
+                .addOption('tavily', i18n.settings.webResearch.tavilyOption)
+                .addOption('duckduckgo', i18n.settings.webResearch.duckduckgoOption)
+                .setValue(this.plugin.settings.searchProvider)
+                .onChange(async (value: 'tavily' | 'duckduckgo') => {
+                    this.plugin.settings.searchProvider = value;
+                    await this.plugin.saveSettings();
+                    this.display();
+                }));
         if (this.plugin.settings.searchProvider === 'tavily') {
-            new Setting(containerEl).setName('Tavily API key').setDesc('Required for Tavily. Get from tavily.com.').addText(text => text.setPlaceholder('Enter Tavily API key (tvly-...)').setValue(this.plugin.settings.tavilyApiKey).onChange(async (value) => { this.plugin.settings.tavilyApiKey = value.trim(); await this.plugin.saveSettings(); }));
-            new Setting(containerEl).setName('Tavily max results').setDesc('Max results (1-20).').addText(text => text.setPlaceholder(String(DEFAULT_SETTINGS.tavilyMaxResults)).setValue(String(this.plugin.settings.tavilyMaxResults)).onChange(async (value) => { const num = parseInt(value, 10); if (!isNaN(num) && num >= 1 && num <= 20) { this.plugin.settings.tavilyMaxResults = num; } else { this.plugin.settings.tavilyMaxResults = DEFAULT_SETTINGS.tavilyMaxResults; } await this.plugin.saveSettings(); this.display(); }));
-            new Setting(containerEl).setName('Tavily search depth').setDesc('"advanced" uses more credits.').addDropdown(dropdown => dropdown.addOption('basic', 'Basic').addOption('advanced', 'Advanced (2 Credits)').setValue(this.plugin.settings.tavilySearchDepth).onChange(async (value: 'basic' | 'advanced') => { this.plugin.settings.tavilySearchDepth = value; await this.plugin.saveSettings(); }));
+            new Setting(containerEl)
+                .setName(i18n.settings.webResearch.tavilyApiKeyName)
+                .setDesc(i18n.settings.webResearch.tavilyApiKeyDesc)
+                .addText(text => text
+                    .setPlaceholder(i18n.settings.webResearch.tavilyApiKeyPlaceholder)
+                    .setValue(this.plugin.settings.tavilyApiKey)
+                    .onChange(async (value) => {
+                        this.plugin.settings.tavilyApiKey = value.trim();
+                        await this.plugin.saveSettings();
+                    }));
+            new Setting(containerEl)
+                .setName(i18n.settings.webResearch.tavilyMaxResultsName)
+                .setDesc(i18n.settings.webResearch.tavilyMaxResultsDesc)
+                .addText(text => text
+                    .setPlaceholder(String(DEFAULT_SETTINGS.tavilyMaxResults))
+                    .setValue(String(this.plugin.settings.tavilyMaxResults))
+                    .onChange(async (value) => {
+                        const num = parseInt(value, 10);
+                        if (!isNaN(num) && num >= 1 && num <= 20) {
+                            this.plugin.settings.tavilyMaxResults = num;
+                        } else {
+                            this.plugin.settings.tavilyMaxResults = DEFAULT_SETTINGS.tavilyMaxResults;
+                        }
+                        await this.plugin.saveSettings();
+                        this.display();
+                    }));
+            new Setting(containerEl)
+                .setName(i18n.settings.webResearch.tavilySearchDepthName)
+                .setDesc(i18n.settings.webResearch.tavilySearchDepthDesc)
+                .addDropdown(dropdown => dropdown
+                    .addOption('basic', i18n.settings.webResearch.tavilySearchDepthBasic)
+                    .addOption('advanced', i18n.settings.webResearch.tavilySearchDepthAdvanced)
+                    .setValue(this.plugin.settings.tavilySearchDepth)
+                    .onChange(async (value: 'basic' | 'advanced') => {
+                        this.plugin.settings.tavilySearchDepth = value;
+                        await this.plugin.saveSettings();
+                    }));
         } else if (this.plugin.settings.searchProvider === 'duckduckgo') {
-            new Setting(containerEl).setName('DuckDuckGo max results').setDesc('Max results to parse.').addSlider(slider => slider.setLimits(1, 10, 1).setValue(this.plugin.settings.ddgMaxResults).setDynamicTooltip().onChange(async (value) => { this.plugin.settings.ddgMaxResults = value; await this.plugin.saveSettings(); }));
-            new Setting(containerEl).setName('DuckDuckGo content fetch timeout (seconds)').setDesc('Max wait time per result URL.').addSlider(slider => slider.setLimits(5, 60, 5).setValue(this.plugin.settings.ddgFetchTimeout).setDynamicTooltip().onChange(async (value) => { this.plugin.settings.ddgFetchTimeout = value; await this.plugin.saveSettings(); }));
+            new Setting(containerEl)
+                .setName(i18n.settings.webResearch.duckduckgoMaxResultsName)
+                .setDesc(i18n.settings.webResearch.duckduckgoMaxResultsDesc)
+                .addSlider(slider => slider
+                    .setLimits(1, 10, 1)
+                    .setValue(this.plugin.settings.ddgMaxResults)
+                    .setDynamicTooltip()
+                    .onChange(async (value) => {
+                        this.plugin.settings.ddgMaxResults = value;
+                        await this.plugin.saveSettings();
+                    }));
+            new Setting(containerEl)
+                .setName(i18n.settings.webResearch.duckduckgoFetchTimeoutName)
+                .setDesc(i18n.settings.webResearch.duckduckgoFetchTimeoutDesc)
+                .addSlider(slider => slider
+                    .setLimits(5, 60, 5)
+                    .setValue(this.plugin.settings.ddgFetchTimeout)
+                    .setDynamicTooltip()
+                    .onChange(async (value) => {
+                        this.plugin.settings.ddgFetchTimeout = value;
+                        await this.plugin.saveSettings();
+                    }));
         }
-        new Setting(containerEl).setName('Max research content tokens').setDesc('Approx. max tokens from web results for summarization prompt.').addText(text => text.setPlaceholder(String(DEFAULT_SETTINGS.maxResearchContentTokens)).setValue(String(this.plugin.settings.maxResearchContentTokens)).onChange(async (value) => { const num = parseInt(value, 10); if (!isNaN(num) && num > 100) { this.plugin.settings.maxResearchContentTokens = num; } else { this.plugin.settings.maxResearchContentTokens = DEFAULT_SETTINGS.maxResearchContentTokens; } await this.plugin.saveSettings(); this.display(); }));
+        new Setting(containerEl)
+            .setName(i18n.settings.webResearch.maxResearchTokensName)
+            .setDesc(i18n.settings.webResearch.maxResearchTokensDesc)
+            .addText(text => text
+                .setPlaceholder(String(DEFAULT_SETTINGS.maxResearchContentTokens))
+                .setValue(String(this.plugin.settings.maxResearchContentTokens))
+                .onChange(async (value) => {
+                    const num = parseInt(value, 10);
+                    if (!isNaN(num) && num > 100) {
+                        this.plugin.settings.maxResearchContentTokens = num;
+                    } else {
+                        this.plugin.settings.maxResearchContentTokens = DEFAULT_SETTINGS.maxResearchContentTokens;
+                    }
+                    await this.plugin.saveSettings();
+                    this.display();
+                }));
 
-        new Setting(containerEl).setName('Processing parameters').setHeading();
+        new Setting(containerEl).setName(i18n.settings.processing.heading).setHeading();
 
         new Setting(containerEl)
-            .setName('Chunk word count')
-            .setDesc('Max words per chunk sent to LLM.')
+            .setName(i18n.settings.processing.chunkWordCountName)
+            .setDesc(i18n.settings.processing.chunkWordCountDesc)
             .addText(text => text
                 .setPlaceholder(String(DEFAULT_SETTINGS.chunkWordCount))
                 .setValue(String(this.plugin.settings.chunkWordCount))
@@ -1047,8 +1150,8 @@ export class NotemdSettingTab extends PluginSettingTab {
                 }));
         
         new Setting(containerEl)
-            .setName('Max tokens')
-            .setDesc('Max tokens LLM should generate per response.')
+            .setName(i18n.settings.processing.maxTokensName)
+            .setDesc(i18n.settings.processing.maxTokensDesc)
             .addText(text => text
                 .setPlaceholder(String(DEFAULT_SETTINGS.maxTokens))
                 .setValue(String(this.plugin.settings.maxTokens))
@@ -1063,12 +1166,12 @@ export class NotemdSettingTab extends PluginSettingTab {
                     this.display();
                 }));
 
-        // --- Batch Processing Settings ---
-        new Setting(containerEl).setName('Batch Processing').setHeading();
+        // --- Batch execution ---
+        new Setting(containerEl).setName(i18n.settings.batchProcessing.heading).setHeading();
 
         new Setting(containerEl)
-            .setName('Enable Batch Parallelism')
-            .setDesc('Allow parallel LLM calls for faster batch processing.')
+            .setName(i18n.settings.batchProcessing.parallelismName)
+            .setDesc(i18n.settings.batchProcessing.parallelismDesc)
             .addToggle(t => t
                 .setValue(this.plugin.settings.enableBatchParallelism)
                 .onChange(async (v) => {
@@ -1079,8 +1182,8 @@ export class NotemdSettingTab extends PluginSettingTab {
 
         if (this.plugin.settings.enableBatchParallelism) {
             new Setting(containerEl)
-                .setName('Batch Concurrency')
-                .setDesc('Max parallel LLM calls (1=serial). Respect API limits!')
+                .setName(i18n.settings.batchProcessing.concurrencyName)
+                .setDesc(i18n.settings.batchProcessing.concurrencyDesc)
                 .addSlider(s => s
                     .setLimits(1, 20, 1)
                     .setValue(this.plugin.settings.batchConcurrency)
@@ -1092,8 +1195,8 @@ export class NotemdSettingTab extends PluginSettingTab {
         }
 
         new Setting(containerEl)
-            .setName('Enable duplicate detection')
-            .setDesc('Enable checks for duplicate terms (results in console).')
+            .setName(i18n.settings.processing.duplicateDetectionName)
+            .setDesc(i18n.settings.processing.duplicateDetectionDesc)
             .addToggle(toggle => toggle
                 .setValue(this.plugin.settings.enableDuplicateDetection)
                 .onChange(async (value) => {
@@ -1185,17 +1288,17 @@ export class NotemdSettingTab extends PluginSettingTab {
                     });
             };
 
-            createTaskLanguageSettings('generateTitleLanguage', 'Generate from title');
-            createTaskLanguageSettings('researchSummarizeLanguage', 'Research & summarize');
+            createTaskLanguageSettings('generateTitleLanguage', generateFromTitleTaskLabel);
+            createTaskLanguageSettings('researchSummarizeLanguage', researchAndSummarizeTaskLabel);
             createTaskLanguageSettings('addLinksLanguage', 'Add links (process file/folder)');
-            createTaskLanguageSettings('summarizeToMermaidLanguage', 'Summarise as Mermaid diagram');
+            createTaskLanguageSettings('summarizeToMermaidLanguage', summarizeAsMermaidTaskLabel);
             createTaskLanguageSettings('extractConceptsLanguage', 'Extract Concepts');
-            createTaskLanguageSettings('extractOriginalTextLanguage', 'Extract Specific Original Text');
+            createTaskLanguageSettings('extractOriginalTextLanguage', extractOriginalTextTaskLabel);
         }
 
         new Setting(containerEl)
-            .setName('Translate output to corresponding language')
-            .setDesc('If selected, the output will include a translation in the selected extraction language.')
+            .setName(i18n.settings.extractOriginalText.translateOutputName)
+            .setDesc(i18n.settings.extractOriginalText.translateOutputDesc)
             .addToggle(toggle => toggle
                 .setValue(this.plugin.settings.translateExtractOriginalTextOutput)
                 .onChange(async (value) => {
@@ -1204,8 +1307,8 @@ export class NotemdSettingTab extends PluginSettingTab {
                 }));
 
         new Setting(containerEl)
-            .setName('Merged query mode')
-            .setDesc('On: Submit all questions in a single LLM prompt (faster/cheaper). Off: Process each question individually (higher precision).')
+            .setName(i18n.settings.extractOriginalText.mergedQueryName)
+            .setDesc(i18n.settings.extractOriginalText.mergedQueryDesc)
             .addToggle(toggle => toggle
                 .setValue(this.plugin.settings.extractOriginalTextMergedMode)
                 .onChange(async (value) => {
@@ -1214,8 +1317,8 @@ export class NotemdSettingTab extends PluginSettingTab {
                 }));
 
         new Setting(containerEl)
-            .setName('Customise extracted text save path & filename')
-            .setDesc('On: Use custom folder and suffix for extracted files. Off: Save in original folder with default "_Extracted" suffix.')
+            .setName(i18n.settings.extractOriginalText.customOutputName)
+            .setDesc(i18n.settings.extractOriginalText.customOutputDesc)
             .addToggle(toggle => toggle
                 .setValue(this.plugin.settings.extractOriginalTextUseCustomOutput)
                 .onChange(async (value) => {
@@ -1226,10 +1329,10 @@ export class NotemdSettingTab extends PluginSettingTab {
 
         if (this.plugin.settings.extractOriginalTextUseCustomOutput) {
             new Setting(containerEl)
-                .setName('Extracted file save path')
-                .setDesc('The folder where extracted files will be saved (relative to vault root).')
+                .setName(i18n.settings.extractOriginalText.savePathName)
+                .setDesc(i18n.settings.extractOriginalText.savePathDesc)
                 .addText(text => text
-                    .setPlaceholder('e.g., ExtractedData')
+                    .setPlaceholder(i18n.settings.extractOriginalText.savePathPlaceholder)
                     .setValue(this.plugin.settings.extractOriginalTextCustomPath)
                     .onChange(async (value) => {
                         this.plugin.settings.extractOriginalTextCustomPath = value.trim();
@@ -1237,10 +1340,10 @@ export class NotemdSettingTab extends PluginSettingTab {
                     }));
 
             new Setting(containerEl)
-                .setName('Custom Suffix')
-                .setDesc('The custom suffix to append to the filename (e.g., "_MyExtract").')
+                .setName(i18n.settings.extractOriginalText.customSuffixName)
+                .setDesc(i18n.settings.extractOriginalText.customSuffixDesc)
                 .addText(text => text
-                    .setPlaceholder('_Extracted')
+                    .setPlaceholder(i18n.settings.extractOriginalText.customSuffixPlaceholder)
                     .setValue(this.plugin.settings.extractOriginalTextCustomSuffix)
                     .onChange(async (value) => {
                         this.plugin.settings.extractOriginalTextCustomSuffix = value.trim();
@@ -1248,12 +1351,12 @@ export class NotemdSettingTab extends PluginSettingTab {
                     }));
         }
 
-        // --- Batch Mermaid Fix Settings ---
-        new Setting(containerEl).setName('Batch Mermaid fix').setHeading();
+        // --- Mermaid Batch Fix ---
+        new Setting(containerEl).setName(i18n.settings.batchMermaidFix.heading).setHeading();
         
         new Setting(containerEl)
-            .setName('Enable Mermaid Error Detection')
-            .setDesc('On: Scan files for Mermaid syntax errors after fixing and generate a report. Off: Skip error detection.')
+            .setName(i18n.settings.batchMermaidFix.enableDetectionName)
+            .setDesc(i18n.settings.batchMermaidFix.enableDetectionDesc)
             .addToggle(toggle => toggle
                 .setValue(this.plugin.settings.enableMermaidErrorDetection)
                 .onChange(async (value) => {
@@ -1263,8 +1366,8 @@ export class NotemdSettingTab extends PluginSettingTab {
                 }));
 
         new Setting(containerEl)
-            .setName('Move files with Mermaid errors to specified folder')
-            .setDesc('On: Move any files that still contain Mermaid errors after fixing to a designated folder.')
+            .setName(i18n.settings.batchMermaidFix.moveErrorFilesName)
+            .setDesc(i18n.settings.batchMermaidFix.moveErrorFilesDesc)
             .addToggle(toggle => toggle
                 .setValue(this.plugin.settings.moveMermaidErrorFiles)
                 .onChange(async (value) => {
@@ -1275,10 +1378,10 @@ export class NotemdSettingTab extends PluginSettingTab {
 
         if (this.plugin.settings.moveMermaidErrorFiles) {
             new Setting(containerEl)
-                .setName('Mermaid error folder path')
-                .setDesc('Folder to move files with errors to.')
+                .setName(i18n.settings.batchMermaidFix.errorFolderPathName)
+                .setDesc(i18n.settings.batchMermaidFix.errorFolderPathDesc)
                 .addText(text => text
-                    .setPlaceholder('MermaidErrors')
+                    .setPlaceholder(i18n.settings.batchMermaidFix.errorFolderPathPlaceholder)
                     .setValue(this.plugin.settings.mermaidErrorFolderPath)
                     .onChange(async (value) => {
                         this.plugin.settings.mermaidErrorFolderPath = value.trim();
@@ -1286,72 +1389,73 @@ export class NotemdSettingTab extends PluginSettingTab {
                     }));
         }
 
-        // --- Duplicate Check Scope Settings (Refined) ---""
-        new Setting(containerEl).setName('Duplicate check scope').setHeading();
+        // --- Duplicate Check Scope ---
+        new Setting(containerEl).setName(i18n.settings.duplicateScope.heading).setHeading();
 
         new Setting(containerEl)
-            .setName('Duplicate check scope mode')
-            .setDesc('Define the scope for finding duplicate counterparts.')
+            .setName(i18n.settings.duplicateScope.modeName)
+            .setDesc(i18n.settings.duplicateScope.modeDesc)
             .addDropdown(dropdown => dropdown
-                .addOption('vault', 'Entire vault (default - compares concept notes to all other notes)')
-                .addOption('include', 'Include specific folders only (compares concept notes to notes in specified folders)')
-                .addOption('exclude', 'Exclude specific folders (compares concept notes to notes outside specified folders)')
-                .addOption('concept_folder_only', 'Concept folder only (compares concept notes against each other)') // Added new option
+                .addOption('vault', i18n.settings.duplicateScope.optionVault)
+                .addOption('include', i18n.settings.duplicateScope.optionInclude)
+                .addOption('exclude', i18n.settings.duplicateScope.optionExclude)
+                .addOption('concept_folder_only', i18n.settings.duplicateScope.optionConceptFolderOnly)
                 .setValue(this.plugin.settings.duplicateCheckScopeMode)
-                .onChange(async (value: 'vault' | 'include' | 'exclude' | 'concept_folder_only') => { // Updated type
+                .onChange(async (value: 'vault' | 'include' | 'exclude' | 'concept_folder_only') => {
                     this.plugin.settings.duplicateCheckScopeMode = value;
                     await this.plugin.saveSettings();
-                    this.display(); // Refresh to show/hide the paths textarea
+                    this.display();
                 }));
 
-        // Show path input only if mode is 'include' or 'exclude' (not for 'vault' or 'concept_folder_only')
         if (this.plugin.settings.duplicateCheckScopeMode === 'include' || this.plugin.settings.duplicateCheckScopeMode === 'exclude') {
+            const scopeModeVerb = this.plugin.settings.duplicateCheckScopeMode === 'include'
+                ? i18n.settings.duplicateScope.pathsModeInclude
+                : i18n.settings.duplicateScope.pathsModeExclude;
             new Setting(containerEl)
-                .setName(this.plugin.settings.duplicateCheckScopeMode === 'include' ? 'Include folders' : 'Exclude folders')
-                .setDesc(`Enter relative paths (one per line) for folders to ${this.plugin.settings.duplicateCheckScopeMode}. Required if mode is not 'Entire vault' or 'Concept folder only'. Paths are case-sensitive and use '/' as separator.`)
+                .setName(this.plugin.settings.duplicateCheckScopeMode === 'include'
+                    ? i18n.settings.duplicateScope.includeFoldersName
+                    : i18n.settings.duplicateScope.excludeFoldersName)
+                .setDesc(formatI18n(i18n.settings.duplicateScope.pathsDesc, { mode: scopeModeVerb }))
                 .addTextArea(textarea => textarea
-                    .setPlaceholder('e.g., Notes/ProjectA\nSource Material') // Updated placeholder
+                    .setPlaceholder(i18n.settings.duplicateScope.pathsPlaceholder)
                     .setValue(this.plugin.settings.duplicateCheckScopePaths)
                     .onChange(async (value) => {
                         const paths = value.split('\n').map(p => p.trim()).filter(p => p.length > 0);
                         let isValid = true;
-                        const invalidChars = /[\\"<>\:\?#\^\[\]\|\s]/; // Added space to invalid chars, removed / as it's the separator
+                        const invalidChars = /[\\"<>\:\?#\^\[\]\|\s]/;
 
                         for (const path of paths) {
                             if (path.includes('\\')) {
-                                new Notice(`Invalid path: "${path}". Use '/' as path separator, not '\\'.`, 7000);
+                                new Notice(formatI18n(i18n.settings.duplicateScope.invalidPathNotice, { path }), 7000);
                                 isValid = false;
                                 break;
                             }
                             if (invalidChars.test(path)) {
                                 const offendingChar = path.match(invalidChars)?.[0];
-                                new Notice(`Invalid character "${offendingChar}" in path: "${path}". Forbidden chars: space, \\, <, >, :, |, ?, #, ^, [, ]`, 7000);
+                                new Notice(formatI18n(i18n.settings.duplicateScope.invalidCharacterNotice, {
+                                    char: offendingChar ?? '',
+                                    path
+                                }), 7000);
                                 isValid = false;
                                 break;
                             }
                         }
 
                         if (!value.trim() && (this.plugin.settings.duplicateCheckScopeMode === 'include' || this.plugin.settings.duplicateCheckScopeMode === 'exclude')) {
-                            new Notice("Folder paths cannot be empty when 'Include' or 'Exclude' mode is selected.", 5000);
-                            // Do not save if critical validation fails
-                            // isValid = false; // Or let it save but with a warning if desired
+                            new Notice(i18n.settings.duplicateScope.emptyPathsNotice, 5000);
                         }
 
                         if (isValid) {
-                            this.plugin.settings.duplicateCheckScopePaths = value; // Store raw value with newlines
+                            this.plugin.settings.duplicateCheckScopePaths = value;
                             await this.plugin.saveSettings();
                         } else {
-                            // Optionally, you could revert the textarea to the last saved valid value
-                            // For now, we'll just prevent saving the invalid input by not calling saveSettings
-                            // or by explicitly setting it back if the UX demands it.
-                            // textarea.setValue(this.plugin.settings.duplicateCheckScopePaths); // Revert to last saved
-                            new Notice("Invalid path(s) detected. Settings not saved for this field.", 5000);
+                            new Notice(i18n.settings.duplicateScope.invalidPathsNotSaved, 5000);
                         }
                     })
-                    .inputEl.setAttrs({ rows: 4, style: 'width: 100%;' }) // Make textarea larger
+                    .inputEl.setAttrs({ rows: 4, style: 'width: 100%;' })
                 );
         }
-        // --- End Duplicate Check Scope Settings ---
+        // --- End Duplicate Check Scope ---
 
         // --- Custom Prompt Settings ---
         new Setting(containerEl).setName('Custom prompt settings').setHeading();
@@ -1375,12 +1479,12 @@ export class NotemdSettingTab extends PluginSettingTab {
                 customPromptSettingKey: keyof Pick<NotemdSettings, 'customPromptAddLinks' | 'customPromptGenerateTitle' | 'customPromptResearchSummarize' | 'customPromptSummarizeToMermaid' | 'customPromptExtractConcepts' | 'translatePrompt' | 'customPromptExtractOriginalText'>
             }> = [
                 { key: 'addLinks', name: 'Add Links (Process File/Folder)', useCustomSettingKey: 'useCustomPromptForAddLinks', customPromptSettingKey: 'customPromptAddLinks' },
-                { key: 'generateTitle', name: 'Generate from Title', useCustomSettingKey: 'useCustomPromptForGenerateTitle', customPromptSettingKey: 'customPromptGenerateTitle' },
+                { key: 'generateTitle', name: generateFromTitleTaskLabel, useCustomSettingKey: 'useCustomPromptForGenerateTitle', customPromptSettingKey: 'customPromptGenerateTitle' },
                 { key: 'researchSummarize', name: 'Research & Summarize', useCustomSettingKey: 'useCustomPromptForResearchSummarize', customPromptSettingKey: 'customPromptResearchSummarize' },
                 { key: 'summarizeToMermaid', name: 'Summarise as Mermaid diagram', useCustomSettingKey: 'useCustomPromptForSummarizeToMermaid', customPromptSettingKey: 'customPromptSummarizeToMermaid' },
                 { key: 'extractConcepts', name: 'Extract Concepts', useCustomSettingKey: 'useCustomPromptForExtractConcepts', customPromptSettingKey: 'customPromptExtractConcepts' },
                 { key: 'translate', name: 'Translate', useCustomSettingKey: 'useCustomPromptForTranslate', customPromptSettingKey: 'translatePrompt' },
-                { key: 'extractOriginalText', name: 'Extract Specific Original Text', useCustomSettingKey: 'useCustomPromptForExtractOriginalText', customPromptSettingKey: 'customPromptExtractOriginalText' },
+                { key: 'extractOriginalText', name: extractOriginalTextTaskLabel, useCustomSettingKey: 'useCustomPromptForExtractOriginalText', customPromptSettingKey: 'customPromptExtractOriginalText' },
             ];
 
             tasksToCustomize.forEach(task => {
@@ -1431,12 +1535,12 @@ export class NotemdSettingTab extends PluginSettingTab {
         }
         // --- End Custom Prompt Settings ---
 
-        // --- Focused Learning Domain Settings ---
-        new Setting(containerEl).setName('Focused learning domain').setHeading();
+        // --- Focused Learning ---
+        new Setting(containerEl).setName(i18n.settings.focusedLearning.heading).setHeading();
 
         new Setting(containerEl)
-            .setName('Enable focused learning domain')
-            .setDesc('On: Add a specific learning domain to your prompts to improve contextual understanding. Off: Use the default general prompt.')
+            .setName(i18n.settings.focusedLearning.enableName)
+            .setDesc(i18n.settings.focusedLearning.enableDesc)
             .addToggle(toggle => toggle
                 .setValue(this.plugin.settings.enableFocusedLearning)
                 .onChange(async (value) => {
@@ -1447,10 +1551,10 @@ export class NotemdSettingTab extends PluginSettingTab {
 
         if (this.plugin.settings.enableFocusedLearning) {
             new Setting(containerEl)
-                .setName('Learning domain')
-                .setDesc("Specify one or more fields, e.g., 'Materials Science', 'Polymer Physics', 'Machine Learning'. This will be added to the beginning of your prompts.")
+                .setName(i18n.settings.focusedLearning.domainName)
+                .setDesc(i18n.settings.focusedLearning.domainDesc)
                 .addText(text => text
-                    .setPlaceholder("e.g., 'Materials Science', 'Polymer Physics'")
+                    .setPlaceholder(i18n.settings.focusedLearning.domainPlaceholder)
                     .setValue(this.plugin.settings.focusedLearningDomain)
                     .onChange(async (value) => {
                         this.plugin.settings.focusedLearningDomain = value;
