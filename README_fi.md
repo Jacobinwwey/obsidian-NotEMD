@@ -22,7 +22,7 @@ Helppo tapa rakentaa oma tietopohjasi.
 
 Notemd parantaa Obsidian-työnkulkuasi integroimalla erilaisia suuria kielimalleja (LLM) monikielisten muistiinpanojesi käsittelyyn, luomalla automaattisesti wiki-linkkejä keskeisille käsitteille, luomalla niitä vastaavia käsite-muistiinpanoja, tekemällä verkkotutkimusta ja auttamalla sinua rakentamaan tehokkaita tietograafeja ja paljon muuta.
 
-**Versio:** 1.8.0
+**Versio:** 1.8.1
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
@@ -64,8 +64,9 @@ Siinä kaikki. Tutki asetuksia avataksesi lisää ominaisuuksia, kuten verkkotut
 | `Disable auto translation` | Muut kuin `Translate`-tehtävät säilyttävät lähdekielen kontekstin | `false` | Erilliset `Translate`-tehtävät pakottavat edelleen määritetyn kohdekielen. |
 | Locale fallback | Puuttuvien UI-avainten ratkaisu | locale -> `en` | Pitää käyttöliittymän vakaana, vaikka osa avaimista olisi vielä kääntämättä. |
 
-- Virallista dokumentaatiota ylläpidetään englanniksi ja yksinkertaistetuksi kiinaksi, ja täysi tuki kattaa yli 30 kieltä.
-- Kaikki tuetut kielet on linkitetty yllä olevaan otsikkoon.
+- Ylläpidetyt lähdedokumentit ovat englanti ja yksinkertaistettu kiina, ja julkaistut README-käännökset on linkitetty yllä olevaan otsakkeeseen.
+- Sovelluksen UI-locale-kattavuus vastaa tällä hetkellä täsmälleen koodin eksplisiittistä katalogia: `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, `zh-TW`.
+- Englannin fallback säilyy toteutuksen turvaverkkona, mutta tuetut näkyvät käyttöliittymäpinnat on katettu regressiotesteillä eikä niiden pitäisi normaalissa käytössä hiljaisesti pudota englantiin.
 - Lisätiedot ja osallistumisohjeet löytyvät [Language Hubista](./docs/i18n/README.md).
 
 ## Ominaisuudet
@@ -682,6 +683,6 @@ MIT License - Katso lisätiedot tiedostosta [LICENSE](LICENSE).
 
 ---
 
-*Notemd v1.8.0 - Paranna Obsidian-tietograafiasi tekoälyn avulla.*
+*Notemd v1.8.1 - Paranna Obsidian-tietograafiasi tekoälyn avulla.*
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)

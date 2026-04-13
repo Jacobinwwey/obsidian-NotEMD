@@ -22,7 +22,7 @@ Ein einfacher Weg, Ihre eigene Wissensdatenbank zu erstellen!
 
 Notemd verbessert Ihren Obsidian-Workflow durch die Integration verschiedener großer Sprachmodelle (LLMs), um Ihre mehrsprachigen Notizen zu verarbeiten, automatisch Wiki-Links für Schlüsselkonzepte zu generieren, entsprechende Konzeptnotizen zu erstellen, Web-Recherchen durchzuführen und Ihnen dabei zu helfen, leistungsstarke Wissensgraphen aufzubauen.
 
-**Version:** 1.8.0
+**Version:** 1.8.1
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
@@ -64,8 +64,9 @@ Das ist alles! Erkunden Sie die Einstellungen, um weitere Funktionen wie Web-Rec
 | `Disable auto translation` | Nicht-Übersetzungsaufgaben behalten den Originalkontext bei | `false` | Explizite `Übersetzen`-Aufgaben erzwingen weiterhin die konfigurierte Zielsprache. |
 | Locale fallback | Auflösung fehlender UI-Schlüssel | locale -> `en` | Hält die UI stabil, wenn einige Schlüssel nicht übersetzt sind. |
 
-- Die offizielle Dokumentation wird in Englisch und vereinfachtem Chinesisch gepflegt, mit voller Unterstützung für über 30 Sprachen.
-- Alle unterstützten Sprachen sind im Header oben verlinkt.
+- Die gepflegten Quelldokumente sind Englisch und vereinfachtes Chinesisch; veröffentlichte README-Übersetzungen sind oben im Kopfbereich verlinkt.
+- Die In-App-UI-Locale-Abdeckung entspricht derzeit genau dem expliziten Katalog im Code: `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, `zh-TW`.
+- Der englische Fallback bleibt ein Implementierungs-Sicherheitsnetz, aber unterstützte sichtbare Oberflächen sind per Regressionstests abgesichert und sollten im Normalbetrieb nicht stillschweigend auf Englisch zurückfallen.
 - Weitere Details und Richtlinien für Mitwirkende finden Sie im [Language Hub](./docs/i18n/README.md).
 
 ## Funktionen
@@ -688,7 +689,7 @@ MIT-Lizenz - Siehe Datei [LICENSE](LICENSE) für Details.
 
 ---
 
-*Notemd v1.8.0 - Verbessern Sie Ihren Obsidian-Wissensgraphen mit KI.*
+*Notemd v1.8.1 - Verbessern Sie Ihren Obsidian-Wissensgraphen mit KI.*
 
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)

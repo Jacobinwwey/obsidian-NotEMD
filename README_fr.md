@@ -23,7 +23,7 @@ Un moyen facile de créer votre propre base de connaissances !
 
 Notemd améliore votre flux de travail Obsidian en s'intégrant à divers modèles de langage de grande taille (LLM) pour traiter vos notes multilingues, générer automatiquement des wiki-links pour les concepts clés, créer les notes de concept correspondantes, effectuer des recherches sur le web, vous aidant à construire des graphes de connaissances puissants et plus encore.
 
-**Version :** 1.8.0
+**Version :** 1.8.1
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
@@ -65,8 +65,9 @@ C'est tout ! Explorez les réglages pour débloquer plus de fonctionnalités com
 | `Disable auto translation` | Les tâches non-traduction gardent le contexte original | `false` | Les tâches de `Traduction` explicites appliquent toujours la langue cible configurée. |
 | Locale fallback | Résolution de clés d'interface manquantes | locale -> `en` | Maintient l'interface stable quand certaines clés ne sont pas traduites. |
 
-- La documentation officielle est maintenue en anglais et en chinois simplifié, avec un support complet pour plus de 30 langues.
-- Toutes les langues supportées sont liées dans l'en-tête ci-dessus.
+- Les documents source maintenus sont l'anglais et le chinois simplifié, et les traductions README publiées sont liées dans l'en-tête ci-dessus.
+- La couverture des locales d'interface intégrées correspond actuellement exactement au catalogue explicite du code : `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, `zh-TW`.
+- Le repli vers l'anglais reste un filet de sécurité d'implémentation, mais les surfaces visibles prises en charge sont couvertes par des tests de régression et ne devraient pas revenir silencieusement à l'anglais en usage normal.
 - Plus de détails et de directives de contribution sont suivis dans le [Centre de Langues](./docs/i18n/README.md).
 
 ## Fonctionnalités
@@ -689,7 +690,7 @@ Licence MIT - Voir le fichier [LICENSE](LICENSE) pour plus de détails.
 
 ---
 
-*Notemd v1.8.0 - Améliorez votre graphe de connaissances Obsidian avec l'IA.*
+*Notemd v1.8.1 - Améliorez votre graphe de connaissances Obsidian avec l'IA.*
 
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)

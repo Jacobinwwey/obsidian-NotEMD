@@ -22,7 +22,7 @@ O modalitate simplă de a-ți crea propria bază de cunoștințe.
 
 Notemd îți îmbunătățește fluxul de lucru din Obsidian prin integrarea cu diverse modele lingvistice mari (LLM) pentru a procesa note multilingve, a genera automat wiki-link-uri pentru conceptele cheie, a crea note de concept corespunzătoare, a face cercetare web și a te ajuta să construiești grafuri de cunoștințe puternice și multe altele.
 
-**Versiune:** 1.8.0
+**Versiune:** 1.8.1
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
@@ -64,8 +64,9 @@ Atât. Explorează setările pentru a debloca mai multe funcții, precum cerceta
 | `Disable auto translation` | Sarcinile non-Translate păstrează contextul limbii sursă | `false` | Sarcinile explicite `Translate` aplică în continuare limba țintă configurată. |
 | Fallback de localizare | Rezolvarea cheilor UI lipsă | locale -> `en` | Menține UI-ul stabil când unele chei nu sunt încă traduse. |
 
-- Documentația oficială este menținută în engleză și chineză simplificată, cu suport complet pentru peste 30 de limbi.
-- Toate limbile acceptate sunt legate în antetul de mai sus.
+- Documentele sursă întreținute sunt engleza și chineza simplificată, iar traducerile README publicate sunt legate în antetul de mai sus.
+- Acoperirea pentru UI locale din aplicație corespunde în prezent exact catalogului explicit din cod: `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, `zh-TW`.
+- Fallback-ul la engleză rămâne o plasă de siguranță la nivel de implementare, dar suprafețele vizibile suportate sunt acoperite de teste de regresie și nu ar trebui să revină tăcut la engleză în utilizarea normală.
 - Detalii suplimentare și ghidul de contribuție sunt urmărite în [Language Hub](./docs/i18n/README.md).
 
 ## Funcționalități
@@ -679,6 +680,6 @@ Licență MIT - vezi fișierul [LICENSE](LICENSE) pentru detalii.
 
 ---
 
-*Notemd v1.8.0 - Îmbunătățește-ți graful de cunoștințe din Obsidian cu AI.*
+*Notemd v1.8.1 - Îmbunătățește-ți graful de cunoștințe din Obsidian cu AI.*
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)

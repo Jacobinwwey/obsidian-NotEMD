@@ -22,7 +22,7 @@ Prosty sposób na stworzenie własnej bazy wiedzy.
 
 Notemd usprawnia pracę w Obsidianie, integrując się z różnymi dużymi modelami językowymi (LLM), aby przetwarzać wielojęzyczne notatki, automatycznie generować wiki-linki dla kluczowych pojęć, tworzyć odpowiadające im notatki pojęciowe, prowadzić badania w sieci i pomagać budować rozbudowane grafy wiedzy i nie tylko.
 
-**Wersja:** 1.8.0
+**Wersja:** 1.8.1
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
@@ -64,8 +64,9 @@ To wszystko. Przejrzyj ustawienia, aby odblokować więcej funkcji, takich jak b
 | `Disable auto translation` | Zadania inne niż Translate zachowują kontekst języka źródłowego | `false` | Jawne zadania `Translate` nadal wymuszają skonfigurowany język docelowy. |
 | Locale fallback | Rozwiązywanie brakujących kluczy UI | locale -> `en` | Utrzymuje stabilność interfejsu, gdy część kluczy nie ma jeszcze tłumaczenia. |
 
-- Oficjalna dokumentacja jest utrzymywana po angielsku i po chińsku uproszczonym, z pełnym wsparciem dla ponad 30 języków.
-- Wszystkie obsługiwane języki są podlinkowane w nagłówku powyżej.
+- Utrzymywane dokumenty źródłowe to angielski i uproszczony chiński, a opublikowane tłumaczenia README są podlinkowane w nagłówku powyżej.
+- Zakres obsługiwanych locale interfejsu w aplikacji jest obecnie dokładnie zgodny z jawnym katalogiem w kodzie: `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, `zh-TW`.
+- Angielski fallback pozostaje siatką bezpieczeństwa implementacji, ale obsługiwane widoczne powierzchnie są objęte testami regresyjnymi i nie powinny po cichu wracać do angielskiego podczas normalnego użycia.
 - Dodatkowe szczegóły i wytyczne dotyczące współtworzenia są śledzone w [Language Hub](./docs/i18n/README.md).
 
 ## Funkcje
@@ -682,6 +683,6 @@ MIT License - szczegóły znajdują się w pliku [LICENSE](LICENSE).
 
 ---
 
-*Notemd v1.8.0 - Rozwijaj swój graf wiedzy w Obsidianie dzięki AI.*
+*Notemd v1.8.1 - Rozwijaj swój graf wiedzy w Obsidianie dzięki AI.*
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)
