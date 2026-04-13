@@ -3409,6 +3409,438 @@ extendLocale(STRINGS_TR, {
     }
 });
 
+extendLocale(STRINGS_AR, {
+    sidebar: {
+        actions: {
+            processCurrentAddLinks: { tooltip: 'يعالج الملف الحالي وينشئ روابط ويكي/ملاحظات مفاهيم.' },
+            processFolderAddLinks: { tooltip: 'يعالج جميع الملاحظات المؤهلة داخل مجلد.' },
+            generateFromTitle: { tooltip: 'ينشئ محتوى الملاحظة من عنوان الملاحظة الحالية.' },
+            batchGenerateFromTitles: { tooltip: 'ينشئ المحتوى دفعيًا من عناوين الملاحظات داخل مجلد.' },
+            researchAndSummarize: { tooltip: 'يبحث في الموضوع/العنوان المحدد ويُلحق ملخصًا.' },
+            summarizeAsMermaid: { tooltip: 'ينشئ ملخصًا على شكل مخطط Mermaid من الملاحظة الحالية.' },
+            translateCurrentFile: { tooltip: 'يترجم الملف النشط إلى لغة الإخراج المحددة.' },
+            batchTranslateFolder: { tooltip: 'يترجم جميع ملفات Markdown داخل مجلد.' },
+            extractConceptsCurrent: { tooltip: 'يستخرج المفاهيم من الملف الحالي فقط.' },
+            extractConceptsFolder: { tooltip: 'يستخرج المفاهيم من كل ملف داخل مجلد محدد.' },
+            extractOriginalText: { tooltip: 'يستخرج مقتطفات حرفية من المصدر للأسئلة المُعدّة.' },
+            batchMermaidFix: { tooltip: 'يشغّل إصلاحًا دفعيًا لصياغة Mermaid/LaTeX على المجلد المحدد.' },
+            fixFormulaCurrent: { tooltip: 'يوحّد محددات الصيغ في الملف الحالي.' },
+            batchFixFormula: { tooltip: 'يوحّد محددات الصيغ عبر المجلد المحدد.' },
+            checkDuplicatesCurrent: { tooltip: 'يكتشف المصطلحات المكررة في الملف الحالي.' },
+            checkRemoveDuplicateConcepts: { tooltip: 'يكتشف ملاحظات المفاهيم المكررة ويزيلها.' },
+            testLlmConnection: { tooltip: 'يختبر اتصال المزوّد النشط وبيانات الاعتماد الخاصة به.' }
+        }
+    }
+});
+
+extendLocale(STRINGS_DE, {
+    sidebar: {
+        actions: {
+            processCurrentAddLinks: { tooltip: 'Verarbeitet die aktuelle Datei und erstellt Wiki-Links/Konzeptnotizen.' },
+            processFolderAddLinks: { tooltip: 'Verarbeitet alle geeigneten Notizen in einem Ordner.' },
+            generateFromTitle: { tooltip: 'Erzeugt Notizinhalte aus dem Titel der aktuellen Notiz.' },
+            batchGenerateFromTitles: { tooltip: 'Erzeugt Inhalte stapelweise aus Notiztiteln in einem Ordner.' },
+            researchAndSummarize: { tooltip: 'Recherchiert das ausgewählte Thema/den Titel und hängt eine Zusammenfassung an.' },
+            summarizeAsMermaid: { tooltip: 'Erstellt eine Mermaid-Diagrammzusammenfassung aus der aktuellen Notiz.' },
+            translateCurrentFile: { tooltip: 'Übersetzt die aktive Datei in die ausgewählte Ausgabesprache.' },
+            batchTranslateFolder: { tooltip: 'Übersetzt alle Markdown-Dateien in einem Ordner.' },
+            extractConceptsCurrent: { tooltip: 'Extrahiert Konzepte nur aus der aktuellen Datei.' },
+            extractConceptsFolder: { tooltip: 'Extrahiert Konzepte aus jeder Datei in einem ausgewählten Ordner.' },
+            extractOriginalText: { tooltip: 'Extrahiert wortgetreue Quellauszüge für konfigurierte Fragen.' },
+            batchMermaidFix: { tooltip: 'Führt die Stapel-Syntaxkorrektur für Mermaid/LaTeX im ausgewählten Ordner aus.' },
+            fixFormulaCurrent: { tooltip: 'Normalisiert Formeldelimiter in der aktuellen Datei.' },
+            batchFixFormula: { tooltip: 'Normalisiert Formeldelimiter in einem ausgewählten Ordner.' },
+            checkDuplicatesCurrent: { tooltip: 'Erkennt doppelte Begriffe in der aktuellen Datei.' },
+            checkRemoveDuplicateConcepts: { tooltip: 'Erkennt und entfernt doppelte Konzeptnotizen.' },
+            testLlmConnection: { tooltip: 'Testet Verbindung und Zugangsdaten des aktiven Anbieters.' }
+        }
+    }
+});
+
+extendLocale(STRINGS_ES, {
+    sidebar: {
+        actions: {
+            processCurrentAddLinks: { tooltip: 'Procesa el archivo actual y crea wiki-links/notas de concepto.' },
+            processFolderAddLinks: { tooltip: 'Procesa todas las notas compatibles de una carpeta.' },
+            generateFromTitle: { tooltip: 'Genera contenido de nota a partir del título de la nota actual.' },
+            batchGenerateFromTitles: { tooltip: 'Genera en lote contenido a partir de títulos de notas en una carpeta.' },
+            researchAndSummarize: { tooltip: 'Investiga el tema/título seleccionado y añade un resumen.' },
+            summarizeAsMermaid: { tooltip: 'Genera un resumen en diagrama Mermaid a partir de la nota actual.' },
+            translateCurrentFile: { tooltip: 'Traduce el archivo activo al idioma de salida seleccionado.' },
+            batchTranslateFolder: { tooltip: 'Traduce todos los archivos Markdown de una carpeta.' },
+            extractConceptsCurrent: { tooltip: 'Extrae conceptos solo del archivo actual.' },
+            extractConceptsFolder: { tooltip: 'Extrae conceptos de cada archivo de una carpeta seleccionada.' },
+            extractOriginalText: { tooltip: 'Extrae fragmentos literales del texto fuente para las preguntas configuradas.' },
+            batchMermaidFix: { tooltip: 'Ejecuta la corrección por lotes de sintaxis Mermaid/LaTeX en la carpeta seleccionada.' },
+            fixFormulaCurrent: { tooltip: 'Normaliza los delimitadores de fórmulas en el archivo actual.' },
+            batchFixFormula: { tooltip: 'Normaliza los delimitadores de fórmulas en una carpeta seleccionada.' },
+            checkDuplicatesCurrent: { tooltip: 'Detecta términos duplicados en el archivo actual.' },
+            checkRemoveDuplicateConcepts: { tooltip: 'Detecta y elimina notas de concepto duplicadas.' },
+            testLlmConnection: { tooltip: 'Prueba la conexión y las credenciales del proveedor activo.' }
+        }
+    }
+});
+
+extendLocale(STRINGS_FA, {
+    sidebar: {
+        actions: {
+            processCurrentAddLinks: { tooltip: 'فایل فعلی را پردازش می‌کند و ویکی‌لینک/یادداشت مفهومی می‌سازد.' },
+            processFolderAddLinks: { tooltip: 'همهٔ یادداشت‌های واجد شرایط را در یک پوشه پردازش می‌کند.' },
+            generateFromTitle: { tooltip: 'محتوای یادداشت را از عنوان یادداشت فعلی تولید می‌کند.' },
+            batchGenerateFromTitles: { tooltip: 'محتوا را به‌صورت دسته‌ای از عنوان یادداشت‌ها در یک پوشه تولید می‌کند.' },
+            researchAndSummarize: { tooltip: 'موضوع/عنوان انتخاب‌شده را پژوهش می‌کند و خلاصه را می‌افزاید.' },
+            summarizeAsMermaid: { tooltip: 'از یادداشت فعلی خلاصهٔ نمودار Mermaid تولید می‌کند.' },
+            translateCurrentFile: { tooltip: 'فایل فعال را به زبان خروجی انتخاب‌شده ترجمه می‌کند.' },
+            batchTranslateFolder: { tooltip: 'همهٔ فایل‌های Markdown را در یک پوشه ترجمه می‌کند.' },
+            extractConceptsCurrent: { tooltip: 'فقط از فایل فعلی مفهوم‌ها را استخراج می‌کند.' },
+            extractConceptsFolder: { tooltip: 'از هر فایل در پوشهٔ انتخاب‌شده مفهوم‌ها را استخراج می‌کند.' },
+            extractOriginalText: { tooltip: 'برای پرسش‌های پیکربندی‌شده، گزیده‌های لفظ‌به‌لفظ منبع را استخراج می‌کند.' },
+            batchMermaidFix: { tooltip: 'اصلاح نحوی دسته‌ای Mermaid/LaTeX را روی پوشهٔ انتخاب‌شده اجرا می‌کند.' },
+            fixFormulaCurrent: { tooltip: 'جداکننده‌های فرمول را در فایل فعلی نرمال‌سازی می‌کند.' },
+            batchFixFormula: { tooltip: 'جداکننده‌های فرمول را در سراسر پوشهٔ انتخاب‌شده نرمال‌سازی می‌کند.' },
+            checkDuplicatesCurrent: { tooltip: 'اصطلاحات تکراری را در فایل فعلی تشخیص می‌دهد.' },
+            checkRemoveDuplicateConcepts: { tooltip: 'یادداشت‌های مفهومی تکراری را تشخیص می‌دهد و حذف می‌کند.' },
+            testLlmConnection: { tooltip: 'اتصال و اطلاعات کاربری ارائه‌دهندهٔ فعال را آزمایش می‌کند.' }
+        }
+    }
+});
+
+extendLocale(STRINGS_FR, {
+    sidebar: {
+        actions: {
+            processCurrentAddLinks: { tooltip: 'Traite le fichier actuel et crée des wikiliens/notes de concept.' },
+            processFolderAddLinks: { tooltip: 'Traite toutes les notes admissibles d’un dossier.' },
+            generateFromTitle: { tooltip: 'Génère le contenu de la note à partir du titre de la note actuelle.' },
+            batchGenerateFromTitles: { tooltip: 'Génère en lot du contenu à partir des titres de notes d’un dossier.' },
+            researchAndSummarize: { tooltip: 'Recherche le sujet/titre sélectionné et ajoute un résumé.' },
+            summarizeAsMermaid: { tooltip: 'Génère un résumé en diagramme Mermaid à partir de la note actuelle.' },
+            translateCurrentFile: { tooltip: 'Traduit le fichier actif dans la langue de sortie sélectionnée.' },
+            batchTranslateFolder: { tooltip: 'Traduit tous les fichiers Markdown d’un dossier.' },
+            extractConceptsCurrent: { tooltip: 'Extrait les concepts uniquement du fichier actuel.' },
+            extractConceptsFolder: { tooltip: 'Extrait les concepts de chaque fichier d’un dossier sélectionné.' },
+            extractOriginalText: { tooltip: 'Extrait des passages sources verbatim pour les questions configurées.' },
+            batchMermaidFix: { tooltip: 'Exécute la correction syntaxique Mermaid/LaTeX par lot sur le dossier sélectionné.' },
+            fixFormulaCurrent: { tooltip: 'Normalise les délimiteurs de formules dans le fichier actuel.' },
+            batchFixFormula: { tooltip: 'Normalise les délimiteurs de formules dans un dossier sélectionné.' },
+            checkDuplicatesCurrent: { tooltip: 'Détecte les termes en double dans le fichier actuel.' },
+            checkRemoveDuplicateConcepts: { tooltip: 'Détecte et supprime les notes de concept en double.' },
+            testLlmConnection: { tooltip: 'Teste la connexion et les identifiants du fournisseur actif.' }
+        }
+    }
+});
+
+extendLocale(STRINGS_ID, {
+    sidebar: {
+        actions: {
+            processCurrentAddLinks: { tooltip: 'Memproses file saat ini dan membuat tautan wiki/catatan konsep.' },
+            processFolderAddLinks: { tooltip: 'Memproses semua catatan yang memenuhi syarat dalam folder.' },
+            generateFromTitle: { tooltip: 'Membuat konten catatan dari judul catatan saat ini.' },
+            batchGenerateFromTitles: { tooltip: 'Membuat konten secara batch dari judul catatan dalam folder.' },
+            researchAndSummarize: { tooltip: 'Meneliti topik/judul yang dipilih dan menambahkan ringkasan.' },
+            summarizeAsMermaid: { tooltip: 'Membuat ringkasan diagram Mermaid dari catatan saat ini.' },
+            translateCurrentFile: { tooltip: 'Menerjemahkan file aktif ke bahasa keluaran yang dipilih.' },
+            batchTranslateFolder: { tooltip: 'Menerjemahkan semua file Markdown dalam folder.' },
+            extractConceptsCurrent: { tooltip: 'Mengekstrak konsep hanya dari file saat ini.' },
+            extractConceptsFolder: { tooltip: 'Mengekstrak konsep dari setiap file dalam folder yang dipilih.' },
+            extractOriginalText: { tooltip: 'Mengekstrak kutipan sumber verbatim untuk pertanyaan yang dikonfigurasi.' },
+            batchMermaidFix: { tooltip: 'Menjalankan perbaikan sintaks batch Mermaid/LaTeX pada folder yang dipilih.' },
+            fixFormulaCurrent: { tooltip: 'Menormalkan delimiter formula dalam file saat ini.' },
+            batchFixFormula: { tooltip: 'Menormalkan delimiter formula di seluruh folder yang dipilih.' },
+            checkDuplicatesCurrent: { tooltip: 'Mendeteksi istilah duplikat dalam file saat ini.' },
+            checkRemoveDuplicateConcepts: { tooltip: 'Mendeteksi dan menghapus catatan konsep duplikat.' },
+            testLlmConnection: { tooltip: 'Menguji koneksi dan kredensial penyedia aktif.' }
+        }
+    }
+});
+
+extendLocale(STRINGS_IT, {
+    sidebar: {
+        actions: {
+            processCurrentAddLinks: { tooltip: 'Elabora il file corrente e crea wiki-link/note concetto.' },
+            processFolderAddLinks: { tooltip: 'Elabora tutte le note idonee in una cartella.' },
+            generateFromTitle: { tooltip: 'Genera il contenuto della nota dal titolo della nota corrente.' },
+            batchGenerateFromTitles: { tooltip: 'Genera in batch contenuti dai titoli delle note in una cartella.' },
+            researchAndSummarize: { tooltip: 'Esegue ricerche sul tema/titolo selezionato e aggiunge un riepilogo.' },
+            summarizeAsMermaid: { tooltip: 'Genera un riepilogo in diagramma Mermaid dalla nota corrente.' },
+            translateCurrentFile: { tooltip: 'Traduce il file attivo nella lingua di output selezionata.' },
+            batchTranslateFolder: { tooltip: 'Traduce tutti i file Markdown in una cartella.' },
+            extractConceptsCurrent: { tooltip: 'Estrae concetti solo dal file corrente.' },
+            extractConceptsFolder: { tooltip: 'Estrae concetti da ogni file in una cartella selezionata.' },
+            extractOriginalText: { tooltip: 'Estrae estratti testuali letterali dal testo sorgente per le domande configurate.' },
+            batchMermaidFix: { tooltip: 'Esegue la correzione batch della sintassi Mermaid/LaTeX sulla cartella selezionata.' },
+            fixFormulaCurrent: { tooltip: 'Normalizza i delimitatori delle formule nel file corrente.' },
+            batchFixFormula: { tooltip: 'Normalizza i delimitatori delle formule in una cartella selezionata.' },
+            checkDuplicatesCurrent: { tooltip: 'Rileva termini duplicati nel file corrente.' },
+            checkRemoveDuplicateConcepts: { tooltip: 'Rileva e rimuove note concetto duplicate.' },
+            testLlmConnection: { tooltip: 'Testa la connessione e le credenziali del provider attivo.' }
+        }
+    }
+});
+
+extendLocale(STRINGS_JA, {
+    sidebar: {
+        actions: {
+            processCurrentAddLinks: { tooltip: '現在のファイルを処理し、Wiki リンクと概念ノートを作成します。' },
+            processFolderAddLinks: { tooltip: 'フォルダー内の対象ノートをすべて処理します。' },
+            generateFromTitle: { tooltip: '現在のノートタイトルからノート内容を生成します。' },
+            batchGenerateFromTitles: { tooltip: 'フォルダー内のノートタイトルから内容を一括生成します。' },
+            researchAndSummarize: { tooltip: '選択したトピックまたはタイトルを調査し、要約を追記します。' },
+            summarizeAsMermaid: { tooltip: '現在のノートから Mermaid 図の要約を生成します。' },
+            translateCurrentFile: { tooltip: 'アクティブなファイルを選択した出力言語に翻訳します。' },
+            batchTranslateFolder: { tooltip: 'フォルダー内のすべての Markdown ファイルを翻訳します。' },
+            extractConceptsCurrent: { tooltip: '現在のファイルからのみ概念を抽出します。' },
+            extractConceptsFolder: { tooltip: '選択したフォルダー内のすべてのファイルから概念を抽出します。' },
+            extractOriginalText: { tooltip: '設定した質問に対する原文抜粋をそのまま抽出します。' },
+            batchMermaidFix: { tooltip: '選択したフォルダーで Mermaid/LaTeX の構文修正を一括実行します。' },
+            fixFormulaCurrent: { tooltip: '現在のファイル内の数式区切り記号を正規化します。' },
+            batchFixFormula: { tooltip: '選択したフォルダー全体の数式区切り記号を正規化します。' },
+            checkDuplicatesCurrent: { tooltip: '現在のファイル内の重複語句を検出します。' },
+            checkRemoveDuplicateConcepts: { tooltip: '重複した概念ノートを検出して削除します。' },
+            testLlmConnection: { tooltip: 'アクティブなプロバイダーの接続と認証情報をテストします。' }
+        }
+    }
+});
+
+extendLocale(STRINGS_KO, {
+    sidebar: {
+        actions: {
+            processCurrentAddLinks: { tooltip: '현재 파일을 처리하고 위키 링크/개념 노트를 생성합니다.' },
+            processFolderAddLinks: { tooltip: '폴더의 모든 대상 노트를 처리합니다.' },
+            generateFromTitle: { tooltip: '현재 노트 제목에서 노트 콘텐츠를 생성합니다.' },
+            batchGenerateFromTitles: { tooltip: '폴더 내 노트 제목에서 콘텐츠를 일괄 생성합니다.' },
+            researchAndSummarize: { tooltip: '선택한 주제/제목을 조사하고 요약을 덧붙입니다.' },
+            summarizeAsMermaid: { tooltip: '현재 노트에서 Mermaid 다이어그램 요약을 생성합니다.' },
+            translateCurrentFile: { tooltip: '활성 파일을 선택한 출력 언어로 번역합니다.' },
+            batchTranslateFolder: { tooltip: '폴더의 모든 Markdown 파일을 번역합니다.' },
+            extractConceptsCurrent: { tooltip: '현재 파일에서만 개념을 추출합니다.' },
+            extractConceptsFolder: { tooltip: '선택한 폴더의 모든 파일에서 개념을 추출합니다.' },
+            extractOriginalText: { tooltip: '구성된 질문에 대한 원문 발췌를 그대로 추출합니다.' },
+            batchMermaidFix: { tooltip: '선택한 폴더에 Mermaid/LaTeX 일괄 구문 수정을 실행합니다.' },
+            fixFormulaCurrent: { tooltip: '현재 파일의 수식 구분자를 정규화합니다.' },
+            batchFixFormula: { tooltip: '선택한 폴더 전체의 수식 구분자를 정규화합니다.' },
+            checkDuplicatesCurrent: { tooltip: '현재 파일의 중복 용어를 감지합니다.' },
+            checkRemoveDuplicateConcepts: { tooltip: '중복된 개념 노트를 감지하고 제거합니다.' },
+            testLlmConnection: { tooltip: '활성 공급자의 연결과 자격 증명을 테스트합니다.' }
+        }
+    }
+});
+
+extendLocale(STRINGS_NL, {
+    sidebar: {
+        actions: {
+            processCurrentAddLinks: { tooltip: 'Verwerkt het huidige bestand en maakt wiki-links/conceptnotities.' },
+            processFolderAddLinks: { tooltip: 'Verwerkt alle geschikte notities in een map.' },
+            generateFromTitle: { tooltip: 'Genereert notitie-inhoud op basis van de titel van de huidige notitie.' },
+            batchGenerateFromTitles: { tooltip: 'Genereert batchgewijs inhoud uit notitietitels in een map.' },
+            researchAndSummarize: { tooltip: 'Onderzoekt het geselecteerde onderwerp/de geselecteerde titel en voegt een samenvatting toe.' },
+            summarizeAsMermaid: { tooltip: 'Genereert een Mermaid-diagramsamenvatting uit de huidige notitie.' },
+            translateCurrentFile: { tooltip: 'Vertaalt het actieve bestand naar de geselecteerde uitvoertaal.' },
+            batchTranslateFolder: { tooltip: 'Vertaalt alle Markdown-bestanden in een map.' },
+            extractConceptsCurrent: { tooltip: 'Extraheert concepten alleen uit het huidige bestand.' },
+            extractConceptsFolder: { tooltip: 'Extraheert concepten uit elk bestand in een geselecteerde map.' },
+            extractOriginalText: { tooltip: 'Extraheert letterlijke bronfragmenten voor geconfigureerde vragen.' },
+            batchMermaidFix: { tooltip: 'Voert de batch-syntaxisreparatie voor Mermaid/LaTeX uit op de geselecteerde map.' },
+            fixFormulaCurrent: { tooltip: 'Normaliseert formulescheidingstekens in het huidige bestand.' },
+            batchFixFormula: { tooltip: 'Normaliseert formulescheidingstekens in een geselecteerde map.' },
+            checkDuplicatesCurrent: { tooltip: 'Detecteert dubbele termen in het huidige bestand.' },
+            checkRemoveDuplicateConcepts: { tooltip: 'Detecteert en verwijdert dubbele conceptnotities.' },
+            testLlmConnection: { tooltip: 'Test de verbinding en inloggegevens van de actieve provider.' }
+        }
+    }
+});
+
+extendLocale(STRINGS_PL, {
+    sidebar: {
+        actions: {
+            processCurrentAddLinks: { tooltip: 'Przetwarza bieżący plik i tworzy wiki-linki/notatki pojęciowe.' },
+            processFolderAddLinks: { tooltip: 'Przetwarza wszystkie kwalifikujące się notatki w folderze.' },
+            generateFromTitle: { tooltip: 'Generuje treść notatki na podstawie tytułu bieżącej notatki.' },
+            batchGenerateFromTitles: { tooltip: 'Wsadowo generuje treść z tytułów notatek w folderze.' },
+            researchAndSummarize: { tooltip: 'Bada wybrany temat/tytuł i dopisuje podsumowanie.' },
+            summarizeAsMermaid: { tooltip: 'Generuje podsumowanie diagramu Mermaid z bieżącej notatki.' },
+            translateCurrentFile: { tooltip: 'Tłumaczy aktywny plik na wybrany język wyjściowy.' },
+            batchTranslateFolder: { tooltip: 'Tłumaczy wszystkie pliki Markdown w folderze.' },
+            extractConceptsCurrent: { tooltip: 'Wyodrębnia pojęcia tylko z bieżącego pliku.' },
+            extractConceptsFolder: { tooltip: 'Wyodrębnia pojęcia z każdego pliku w wybranym folderze.' },
+            extractOriginalText: { tooltip: 'Wyodrębnia dosłowne fragmenty źródłowe dla skonfigurowanych pytań.' },
+            batchMermaidFix: { tooltip: 'Uruchamia wsadową naprawę składni Mermaid/LaTeX w wybranym folderze.' },
+            fixFormulaCurrent: { tooltip: 'Normalizuje delimitery formuł w bieżącym pliku.' },
+            batchFixFormula: { tooltip: 'Normalizuje delimitery formuł w całym wybranym folderze.' },
+            checkDuplicatesCurrent: { tooltip: 'Wykrywa zduplikowane terminy w bieżącym pliku.' },
+            checkRemoveDuplicateConcepts: { tooltip: 'Wykrywa i usuwa zduplikowane notatki pojęciowe.' },
+            testLlmConnection: { tooltip: 'Testuje połączenie i dane uwierzytelniające aktywnego dostawcy.' }
+        }
+    }
+});
+
+extendLocale(STRINGS_PT, {
+    sidebar: {
+        actions: {
+            processCurrentAddLinks: { tooltip: 'Processa o ficheiro atual e cria wiki-links/notas de conceito.' },
+            processFolderAddLinks: { tooltip: 'Processa todas as notas elegíveis numa pasta.' },
+            generateFromTitle: { tooltip: 'Gera conteúdo da nota a partir do título da nota atual.' },
+            batchGenerateFromTitles: { tooltip: 'Gera conteúdo em lote a partir dos títulos das notas numa pasta.' },
+            researchAndSummarize: { tooltip: 'Pesquisa o tópico/título selecionado e acrescenta um resumo.' },
+            summarizeAsMermaid: { tooltip: 'Gera um resumo em diagrama Mermaid a partir da nota atual.' },
+            translateCurrentFile: { tooltip: 'Traduz o ficheiro ativo para o idioma de saída selecionado.' },
+            batchTranslateFolder: { tooltip: 'Traduz todos os ficheiros Markdown numa pasta.' },
+            extractConceptsCurrent: { tooltip: 'Extrai conceitos apenas do ficheiro atual.' },
+            extractConceptsFolder: { tooltip: 'Extrai conceitos de cada ficheiro numa pasta selecionada.' },
+            extractOriginalText: { tooltip: 'Extrai excertos literais da fonte para as perguntas configuradas.' },
+            batchMermaidFix: { tooltip: 'Executa a correção sintática em lote de Mermaid/LaTeX na pasta selecionada.' },
+            fixFormulaCurrent: { tooltip: 'Normaliza os delimitadores de fórmulas no ficheiro atual.' },
+            batchFixFormula: { tooltip: 'Normaliza os delimitadores de fórmulas em toda a pasta selecionada.' },
+            checkDuplicatesCurrent: { tooltip: 'Deteta termos duplicados no ficheiro atual.' },
+            checkRemoveDuplicateConcepts: { tooltip: 'Deteta e remove notas de conceito duplicadas.' },
+            testLlmConnection: { tooltip: 'Testa a ligação e as credenciais do fornecedor ativo.' }
+        }
+    }
+});
+
+extendLocale(STRINGS_PT_BR, {
+    sidebar: {
+        actions: {
+            processCurrentAddLinks: { tooltip: 'Processa o arquivo atual e cria wiki-links/notas de conceito.' },
+            processFolderAddLinks: { tooltip: 'Processa todas as notas elegíveis em uma pasta.' },
+            generateFromTitle: { tooltip: 'Gera conteúdo da nota a partir do título da nota atual.' },
+            batchGenerateFromTitles: { tooltip: 'Gera conteúdo em lote a partir dos títulos das notas em uma pasta.' },
+            researchAndSummarize: { tooltip: 'Pesquisa o tópico/título selecionado e acrescenta um resumo.' },
+            summarizeAsMermaid: { tooltip: 'Gera um resumo em diagrama Mermaid a partir da nota atual.' },
+            translateCurrentFile: { tooltip: 'Traduz o arquivo ativo para o idioma de saída selecionado.' },
+            batchTranslateFolder: { tooltip: 'Traduz todos os arquivos Markdown em uma pasta.' },
+            extractConceptsCurrent: { tooltip: 'Extrai conceitos apenas do arquivo atual.' },
+            extractConceptsFolder: { tooltip: 'Extrai conceitos de cada arquivo em uma pasta selecionada.' },
+            extractOriginalText: { tooltip: 'Extrai trechos literais da fonte para as perguntas configuradas.' },
+            batchMermaidFix: { tooltip: 'Executa a correção sintática em lote de Mermaid/LaTeX na pasta selecionada.' },
+            fixFormulaCurrent: { tooltip: 'Normaliza os delimitadores de fórmulas no arquivo atual.' },
+            batchFixFormula: { tooltip: 'Normaliza os delimitadores de fórmulas em toda a pasta selecionada.' },
+            checkDuplicatesCurrent: { tooltip: 'Detecta termos duplicados no arquivo atual.' },
+            checkRemoveDuplicateConcepts: { tooltip: 'Detecta e remove notas de conceito duplicadas.' },
+            testLlmConnection: { tooltip: 'Testa a conexão e as credenciais do provedor ativo.' }
+        }
+    }
+});
+
+extendLocale(STRINGS_RU, {
+    sidebar: {
+        actions: {
+            processCurrentAddLinks: { tooltip: 'Обрабатывает текущий файл и создает вики-ссылки/заметки-концепты.' },
+            processFolderAddLinks: { tooltip: 'Обрабатывает все подходящие заметки в папке.' },
+            generateFromTitle: { tooltip: 'Генерирует содержимое заметки из заголовка текущей заметки.' },
+            batchGenerateFromTitles: { tooltip: 'Пакетно генерирует содержимое из заголовков заметок в папке.' },
+            researchAndSummarize: { tooltip: 'Исследует выбранную тему/заголовок и добавляет сводку.' },
+            summarizeAsMermaid: { tooltip: 'Создает Mermaid-диаграмму-сводку из текущей заметки.' },
+            translateCurrentFile: { tooltip: 'Переводит активный файл на выбранный язык вывода.' },
+            batchTranslateFolder: { tooltip: 'Переводит все Markdown-файлы в папке.' },
+            extractConceptsCurrent: { tooltip: 'Извлекает концепты только из текущего файла.' },
+            extractConceptsFolder: { tooltip: 'Извлекает концепты из каждого файла в выбранной папке.' },
+            extractOriginalText: { tooltip: 'Извлекает дословные фрагменты исходного текста по настроенным вопросам.' },
+            batchMermaidFix: { tooltip: 'Запускает пакетное исправление синтаксиса Mermaid/LaTeX для выбранной папки.' },
+            fixFormulaCurrent: { tooltip: 'Нормализует разделители формул в текущем файле.' },
+            batchFixFormula: { tooltip: 'Нормализует разделители формул во всей выбранной папке.' },
+            checkDuplicatesCurrent: { tooltip: 'Обнаруживает повторяющиеся термины в текущем файле.' },
+            checkRemoveDuplicateConcepts: { tooltip: 'Обнаруживает и удаляет дублирующиеся заметки-концепты.' },
+            testLlmConnection: { tooltip: 'Проверяет подключение и учетные данные активного провайдера.' }
+        }
+    }
+});
+
+extendLocale(STRINGS_TH, {
+    sidebar: {
+        actions: {
+            processCurrentAddLinks: { tooltip: 'ประมวลผลไฟล์ปัจจุบันและสร้างวิกิลิงก์/โน้ตแนวคิด' },
+            processFolderAddLinks: { tooltip: 'ประมวลผลโน้ตที่เข้าเงื่อนไขทั้งหมดในโฟลเดอร์' },
+            generateFromTitle: { tooltip: 'สร้างเนื้อหาโน้ตจากชื่อโน้ตปัจจุบัน' },
+            batchGenerateFromTitles: { tooltip: 'สร้างเนื้อหาแบบกลุ่มจากชื่อโน้ตในโฟลเดอร์' },
+            researchAndSummarize: { tooltip: 'ค้นคว้าหัวข้อ/ชื่อเรื่องที่เลือกและเพิ่มสรุปต่อท้าย' },
+            summarizeAsMermaid: { tooltip: 'สร้างสรุปเป็นแผนภาพ Mermaid จากโน้ตปัจจุบัน' },
+            translateCurrentFile: { tooltip: 'แปลไฟล์ที่ใช้งานอยู่เป็นภาษาผลลัพธ์ที่เลือก' },
+            batchTranslateFolder: { tooltip: 'แปลไฟล์ Markdown ทั้งหมดในโฟลเดอร์' },
+            extractConceptsCurrent: { tooltip: 'สกัดแนวคิดจากไฟล์ปัจจุบันเท่านั้น' },
+            extractConceptsFolder: { tooltip: 'สกัดแนวคิดจากทุกไฟล์ในโฟลเดอร์ที่เลือก' },
+            extractOriginalText: { tooltip: 'สกัดข้อความต้นฉบับแบบตรงตัวตามคำถามที่กำหนด' },
+            batchMermaidFix: { tooltip: 'รันการแก้ไวยากรณ์ Mermaid/LaTeX แบบกลุ่มในโฟลเดอร์ที่เลือก' },
+            fixFormulaCurrent: { tooltip: 'ปรับตัวคั่นสูตรในไฟล์ปัจจุบันให้เป็นมาตรฐาน' },
+            batchFixFormula: { tooltip: 'ปรับตัวคั่นสูตรในทั้งโฟลเดอร์ที่เลือกให้เป็นมาตรฐาน' },
+            checkDuplicatesCurrent: { tooltip: 'ตรวจจับคำที่ซ้ำกันในไฟล์ปัจจุบัน' },
+            checkRemoveDuplicateConcepts: { tooltip: 'ตรวจจับและลบโน้ตแนวคิดที่ซ้ำกัน' },
+            testLlmConnection: { tooltip: 'ทดสอบการเชื่อมต่อและข้อมูลรับรองของผู้ให้บริการที่ใช้งานอยู่' }
+        }
+    }
+});
+
+extendLocale(STRINGS_TR, {
+    sidebar: {
+        actions: {
+            processCurrentAddLinks: { tooltip: 'Geçerli dosyayı işler ve wiki bağlantıları/kavram notları oluşturur.' },
+            processFolderAddLinks: { tooltip: 'Klasördeki uygun tüm notları işler.' },
+            generateFromTitle: { tooltip: 'Geçerli not başlığından not içeriği üretir.' },
+            batchGenerateFromTitles: { tooltip: 'Klasördeki not başlıklarından toplu içerik üretir.' },
+            researchAndSummarize: { tooltip: 'Seçili konu/başlığı araştırır ve özet ekler.' },
+            summarizeAsMermaid: { tooltip: 'Geçerli nottan Mermaid diyagram özeti üretir.' },
+            translateCurrentFile: { tooltip: 'Etkin dosyayı seçili çıktı diline çevirir.' },
+            batchTranslateFolder: { tooltip: 'Klasördeki tüm Markdown dosyalarını çevirir.' },
+            extractConceptsCurrent: { tooltip: 'Kavramları yalnızca geçerli dosyadan çıkarır.' },
+            extractConceptsFolder: { tooltip: 'Seçili klasördeki her dosyadan kavram çıkarır.' },
+            extractOriginalText: { tooltip: 'Yapılandırılmış sorular için kaynağın birebir alıntılarını çıkarır.' },
+            batchMermaidFix: { tooltip: 'Seçili klasörde Mermaid/LaTeX toplu sözdizimi düzeltmesini çalıştırır.' },
+            fixFormulaCurrent: { tooltip: 'Geçerli dosyadaki formül ayraçlarını normalize eder.' },
+            batchFixFormula: { tooltip: 'Seçili klasör genelinde formül ayraçlarını normalize eder.' },
+            checkDuplicatesCurrent: { tooltip: 'Geçerli dosyadaki yinelenen terimleri algılar.' },
+            checkRemoveDuplicateConcepts: { tooltip: 'Yinelenen kavram notlarını algılar ve kaldırır.' },
+            testLlmConnection: { tooltip: 'Etkin sağlayıcı bağlantısını ve kimlik bilgilerini test eder.' }
+        }
+    }
+});
+
+extendLocale(STRINGS_UK, {
+    sidebar: {
+        actions: {
+            processCurrentAddLinks: { tooltip: 'Обробляє поточний файл і створює вікіпосилання/нотатки-концепти.' },
+            processFolderAddLinks: { tooltip: 'Обробляє всі відповідні нотатки в папці.' },
+            generateFromTitle: { tooltip: 'Генерує вміст нотатки із заголовка поточної нотатки.' },
+            batchGenerateFromTitles: { tooltip: 'Пакетно генерує вміст із заголовків нотаток у папці.' },
+            researchAndSummarize: { tooltip: 'Досліджує вибрану тему/заголовок і додає підсумок.' },
+            summarizeAsMermaid: { tooltip: 'Створює підсумок у вигляді Mermaid-діаграми з поточної нотатки.' },
+            translateCurrentFile: { tooltip: 'Перекладає активний файл вибраною мовою виводу.' },
+            batchTranslateFolder: { tooltip: 'Перекладає всі Markdown-файли в папці.' },
+            extractConceptsCurrent: { tooltip: 'Видобуває концепти лише з поточного файла.' },
+            extractConceptsFolder: { tooltip: 'Видобуває концепти з кожного файла у вибраній папці.' },
+            extractOriginalText: { tooltip: 'Видобуває дослівні уривки джерела для налаштованих запитань.' },
+            batchMermaidFix: { tooltip: 'Запускає пакетне виправлення синтаксису Mermaid/LaTeX для вибраної папки.' },
+            fixFormulaCurrent: { tooltip: 'Нормалізує розділювачі формул у поточному файлі.' },
+            batchFixFormula: { tooltip: 'Нормалізує розділювачі формул у всій вибраній папці.' },
+            checkDuplicatesCurrent: { tooltip: 'Виявляє дубльовані терміни в поточному файлі.' },
+            checkRemoveDuplicateConcepts: { tooltip: 'Виявляє та видаляє дубльовані нотатки-концепти.' },
+            testLlmConnection: { tooltip: 'Перевіряє з’єднання та облікові дані активного провайдера.' }
+        }
+    }
+});
+
+extendLocale(STRINGS_VI, {
+    sidebar: {
+        actions: {
+            processCurrentAddLinks: { tooltip: 'Xử lý tệp hiện tại và tạo wiki-link/ghi chú khái niệm.' },
+            processFolderAddLinks: { tooltip: 'Xử lý tất cả ghi chú đủ điều kiện trong một thư mục.' },
+            generateFromTitle: { tooltip: 'Tạo nội dung ghi chú từ tiêu đề ghi chú hiện tại.' },
+            batchGenerateFromTitles: { tooltip: 'Tạo nội dung hàng loạt từ tiêu đề ghi chú trong một thư mục.' },
+            researchAndSummarize: { tooltip: 'Nghiên cứu chủ đề/tiêu đề đã chọn và thêm phần tóm tắt.' },
+            summarizeAsMermaid: { tooltip: 'Tạo bản tóm tắt dạng sơ đồ Mermaid từ ghi chú hiện tại.' },
+            translateCurrentFile: { tooltip: 'Dịch tệp đang hoạt động sang ngôn ngữ đầu ra đã chọn.' },
+            batchTranslateFolder: { tooltip: 'Dịch tất cả tệp Markdown trong một thư mục.' },
+            extractConceptsCurrent: { tooltip: 'Trích xuất khái niệm chỉ từ tệp hiện tại.' },
+            extractConceptsFolder: { tooltip: 'Trích xuất khái niệm từ mọi tệp trong thư mục đã chọn.' },
+            extractOriginalText: { tooltip: 'Trích xuất nguyên văn các đoạn nguồn cho những câu hỏi đã cấu hình.' },
+            batchMermaidFix: { tooltip: 'Chạy sửa cú pháp Mermaid/LaTeX hàng loạt trên thư mục đã chọn.' },
+            fixFormulaCurrent: { tooltip: 'Chuẩn hóa dấu phân cách công thức trong tệp hiện tại.' },
+            batchFixFormula: { tooltip: 'Chuẩn hóa dấu phân cách công thức trên toàn bộ thư mục đã chọn.' },
+            checkDuplicatesCurrent: { tooltip: 'Phát hiện các thuật ngữ trùng lặp trong tệp hiện tại.' },
+            checkRemoveDuplicateConcepts: { tooltip: 'Phát hiện và xóa ghi chú khái niệm trùng lặp.' },
+            testLlmConnection: { tooltip: 'Kiểm tra kết nối và thông tin xác thực của nhà cung cấp đang hoạt động.' }
+        }
+    }
+});
+
 extendLocale(STRINGS_ES, {
     errorModal: {
         titles: {
