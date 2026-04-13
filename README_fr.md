@@ -60,7 +60,7 @@ C'est tout ! Explorez les réglages pour débloquer plus de fonctionnalités com
 
 | Aspect | Portée | Par Défaut | Notes |
 |---|---|---|---|
-| `UI Locale` | Texte de l'interface uniquement (réglages, barre latérale, avis, dialogues) | `auto` | Suit la langue d'Obsidian ; catalogues actuels : `en`, `zh-CN`, `zh-TW`. |
+| `UI Locale` | Texte de l'interface uniquement (réglages, barre latérale, avis, dialogues) | `auto` | Suit la langue d'Obsidian ; catalogues actuels : `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, `zh-TW`. |
 | `Task Output Language` | Sortie des tâches générée par LLM (liens, résumés, génération, extraction, cible de traduction) | `en` | Peut être global ou par tâche quand `Utiliser différentes langues pour les tâches` est activé. |
 | `Disable auto translation` | Les tâches non-traduction gardent le contexte original | `false` | Les tâches de `Traduction` explicites appliquent toujours la langue cible configurée. |
 | Locale fallback | Résolution de clés d'interface manquantes | locale -> `en` | Maintient l'interface stable quand certaines clés ne sont pas traduites. |

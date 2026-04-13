@@ -59,7 +59,7 @@ Det er det. Udforsk indstillingerne for at låse op for flere funktioner som web
 
 | Aspekt | Omfang | Standard | Bemærkninger |
 |---|---|---|---|
-| `UI Locale` | Kun pluginets UI-tekst, som indstillinger, sidepanel, notifikationer og dialoger | `auto` | Følger Obsidians locale; nuværende UI-kataloger er `en`, `zh-CN` og `zh-TW`. |
+| `UI Locale` | Kun pluginets UI-tekst, som indstillinger, sidepanel, notifikationer og dialoger | `auto` | Følger Obsidians locale; nuværende UI-kataloger er `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN` og `zh-TW`. |
 | `Task Output Language` | LLM-genereret opgaveoutput, som links, opsummeringer, generering, ekstraktion og oversættelsesmål | `en` | Kan være globalt eller pr. opgave, når `Use different languages for tasks` er aktiveret. |
 | `Disable auto translation` | Ikke-Translate-opgaver bevarer kontekst på kildesproget | `false` | Eksplicitte `Translate`-opgaver håndhæver stadig det konfigurerede målsprog. |
 | Locale-fallback | Opløsning af manglende UI-nøgler | locale -> `en` | Holder UI'et stabilt, når enkelte nøgler endnu ikke er oversat. |

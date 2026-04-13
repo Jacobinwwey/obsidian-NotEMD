@@ -59,7 +59,7 @@ Das ist alles! Erkunden Sie die Einstellungen, um weitere Funktionen wie Web-Rec
 
 | Aspekt | Umfang | Standard | Hinweise |
 |---|---|---|---|
-| `UI Locale` | Nur Text der Plugin-Oberfläche (Einstellungen, Seitenleiste, Hinweise, Dialoge) | `auto` | Folgt dem Obsidian-Gebietsschema; aktuelle Kataloge: `en`, `zh-CN`, `zh-TW`. |
+| `UI Locale` | Nur Text der Plugin-Oberfläche (Einstellungen, Seitenleiste, Hinweise, Dialoge) | `auto` | Folgt dem Obsidian-Gebietsschema; aktuelle Kataloge: `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, `zh-TW`. |
 | `Task Output Language` | Von LLM generierte Aufgabenausgabe (Links, Zusammenfassungen, Generierung, Extraktion, Übersetzungsziel) | `en` | Kann global oder pro Aufgabe eingestellt werden, wenn `Verschiedene Sprachen für Aufgaben verwenden` aktiviert ist. |
 | `Disable auto translation` | Nicht-Übersetzungsaufgaben behalten den Originalkontext bei | `false` | Explizite `Übersetzen`-Aufgaben erzwingen weiterhin die konfigurierte Zielsprache. |
 | Locale fallback | Auflösung fehlender UI-Schlüssel | locale -> `en` | Hält die UI stabil, wenn einige Schlüssel nicht übersetzt sind. |

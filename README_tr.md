@@ -59,7 +59,7 @@ Hepsi bu kadar. Web araştırması, çeviri ve içerik üretimi gibi daha fazla 
 
 | Konu | Kapsam | Varsayılan | Notlar |
 |---|---|---|---|
-| `UI Locale` | Yalnızca eklenti arayüzü metinleri (ayarlar, kenar çubuğu, bildirimler, diyaloglar) | `auto` | Obsidian yerel ayarını izler; mevcut arayüz katalogları `en`, `zh-CN` ve `zh-TW`'dir. |
+| `UI Locale` | Yalnızca eklenti arayüzü metinleri (ayarlar, kenar çubuğu, bildirimler, diyaloglar) | `auto` | Obsidian yerel ayarını izler; mevcut arayüz katalogları `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN` ve `zh-TW`'dir. |
 | `Task Output Language` | LLM tarafından oluşturulan görev çıktısı (bağlantılar, özetler, üretim, çıkarım, çeviri hedefi) | `en` | `Use different languages for tasks` etkinse global ya da görev bazlı olabilir. |
 | `Disable auto translation` | Translate dışındaki görevler kaynak dil bağlamını korur | `false` | Açık `Translate` görevleri yine de yapılandırılmış hedef dili zorlar. |
 | Locale fallback | Eksik arayüz anahtarlarının çözümü | locale -> `en` | Bazı anahtarlar çevrilmemiş olsa bile arayüzü kararlı tutar. |
