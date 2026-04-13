@@ -105,12 +105,17 @@ export class NotemdSettingTab extends PluginSettingTab {
             .map(issue => issue.message);
 
         if (blockingIssues.length > 0) {
-            new Notice(`Cannot run developer diagnostic for ${provider.name}: ${blockingIssues.join(' ')}`, 10000);
+            new Notice(formatI18n(i18n.settings.developer.diagnosticBlocked, {
+                provider: provider.name,
+                issues: blockingIssues.join(' ')
+            }), 10000);
             return;
         }
 
         buttonControl.setDisabled(true).setButtonText(i18n.settings.developer.runDiagnostic);
-        const runningNotice = new Notice(`Running developer diagnostic for ${provider.name}...`, 0);
+        const runningNotice = new Notice(formatI18n(i18n.settings.developer.diagnosticRunning, {
+            provider: provider.name
+        }), 0);
         const timeoutMs = this.sanitizeDeveloperDiagnosticTimeoutMs(this.plugin.settings.developerDiagnosticTimeoutMs);
 
         try {
@@ -122,14 +127,20 @@ export class NotemdSettingTab extends PluginSettingTab {
             runningNotice.hide();
 
             if (result.success) {
-                new Notice(`Developer diagnostic succeeded (${result.callMode}). Report saved to: ${reportPath}`, 8000);
+                new Notice(formatI18n(i18n.settings.developer.diagnosticSuccess, {
+                    callMode: result.callMode,
+                    path: reportPath
+                }), 8000);
             } else {
-                new Notice(`Developer diagnostic captured failure (${result.callMode}). Report saved to: ${reportPath}`, 12000);
+                new Notice(formatI18n(i18n.settings.developer.diagnosticCapturedFailure, {
+                    callMode: result.callMode,
+                    path: reportPath
+                }), 12000);
             }
         } catch (error: unknown) {
             const message = error instanceof Error ? error.message : String(error);
             runningNotice.hide();
-            new Notice(`Developer diagnostic failed before report generation: ${message}`, 12000);
+            new Notice(formatI18n(i18n.settings.developer.diagnosticFailedBeforeReport, { message }), 12000);
             console.error('Developer provider diagnostic failed:', error);
         } finally {
             buttonControl.setDisabled(false).setButtonText(i18n.settings.developer.runDiagnostic);
@@ -147,7 +158,10 @@ export class NotemdSettingTab extends PluginSettingTab {
             .map(issue => issue.message);
 
         if (blockingIssues.length > 0) {
-            new Notice(`Cannot run developer stability diagnostic for ${provider.name}: ${blockingIssues.join(' ')}`, 10000);
+            new Notice(formatI18n(i18n.settings.developer.stabilityBlocked, {
+                provider: provider.name,
+                issues: blockingIssues.join(' ')
+            }), 10000);
             return;
         }
 
@@ -155,7 +169,10 @@ export class NotemdSettingTab extends PluginSettingTab {
         const timeoutMs = this.sanitizeDeveloperDiagnosticTimeoutMs(this.plugin.settings.developerDiagnosticTimeoutMs);
         buttonControl.setDisabled(true).setButtonText(i18n.settings.developer.runStability);
         const runningNotice = new Notice(
-            `Running developer stability diagnostic for ${provider.name} (${runs} runs)...`,
+            formatI18n(i18n.settings.developer.stabilityRunning, {
+                provider: provider.name,
+                runs
+            }),
             0
         );
 
@@ -168,13 +185,18 @@ export class NotemdSettingTab extends PluginSettingTab {
             const reportPath = await this.saveProviderDiagnosticReport(`${provider.name}_stability`, result.report);
             runningNotice.hide();
             new Notice(
-                `Developer stability diagnostic finished (${result.callMode}): ${result.successCount}/${result.runs} succeeded. Report: ${reportPath}`,
+                formatI18n(i18n.settings.developer.stabilityFinished, {
+                    callMode: result.callMode,
+                    successCount: result.successCount,
+                    runs: result.runs,
+                    path: reportPath
+                }),
                 12000
             );
         } catch (error: unknown) {
             const message = error instanceof Error ? error.message : String(error);
             runningNotice.hide();
-            new Notice(`Developer stability diagnostic failed before report generation: ${message}`, 12000);
+            new Notice(formatI18n(i18n.settings.developer.stabilityFailedBeforeReport, { message }), 12000);
             console.error('Developer provider stability diagnostic failed:', error);
         } finally {
             buttonControl.setDisabled(false).setButtonText(i18n.settings.developer.runStability);

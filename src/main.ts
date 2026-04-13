@@ -55,6 +55,10 @@ export default class NotemdPlugin extends Plugin {
         return getI18nStrings({ uiLocale: this.settings?.uiLocale || 'auto' });
     }
 
+    private openLocalizedErrorModal(title: string, errorMessage: string) {
+        new ErrorModal(this.app, title, errorMessage, this.settings.uiLocale).open();
+    }
+
     async onload() {
         await this.loadSettings();
         const uiStrings = this.getUiStrings();
@@ -416,12 +420,12 @@ export default class NotemdPlugin extends Plugin {
         // --- Event Listeners ---
         this.registerEvent(this.app.vault.on('rename', (file, oldPath) => {
             if (file instanceof TFile && file.extension === 'md') {
-                handleFileRename(this.app, oldPath, file.path); // Call utility function
+                handleFileRename(this.app, oldPath, file.path, this.settings.uiLocale); // Call utility function
             }
         }));
         this.registerEvent(this.app.vault.on('delete', (file) => {
             if (file instanceof TFile && file.extension === 'md') {
-                handleFileDelete(this.app, file.path); // Call utility function
+                handleFileDelete(this.app, file.path, this.settings.uiLocale); // Call utility function
             }
         }));
 
@@ -675,6 +679,7 @@ export default class NotemdPlugin extends Plugin {
         if (this.isBusy) { new Notice(this.getUiStrings().notices.notemdBusy); return; }
         this.isBusy = true;
         const useReporter = reporter || this.getReporter();
+        let i18n = this.getUiStrings();
         
         const maybeSidebar = useReporter as any;
         if (maybeSidebar instanceof NotemdSidebarView) {
@@ -686,6 +691,7 @@ export default class NotemdPlugin extends Plugin {
 
         try {
             await this.loadSettings(); // Load latest settings
+            i18n = this.getUiStrings();
             const activeFile = this.app.workspace.getActiveFile();
             if (!activeFile || !(activeFile instanceof TFile) || (activeFile.extension !== 'md' && activeFile.extension !== 'txt')) {
                 throw new Error("No active '.md' or '.txt' file to process.");
@@ -706,7 +712,7 @@ export default class NotemdPlugin extends Plugin {
 
             this.updateStatusBar('Processing complete');
             useReporter.updateStatus('Processing complete!', 100);
-            new Notice('Notemd processing complete!');
+            new Notice(i18n.notices.processingComplete);
             if (useReporter instanceof ProgressModal) setTimeout(() => useReporter.close(), 2000);
 
         } catch (error: unknown) { // Changed to unknown
@@ -720,8 +726,8 @@ export default class NotemdPlugin extends Plugin {
             console.error("Notemd Processing Error:", errorDetails);
             // Check if it's a cancellation error before showing notice/modal
             if (!errorMessage.includes("cancelled by user")) {
-                new Notice(`Error during processing: ${errorMessage}. See console.`, 10000);
-                new ErrorModal(this.app, "Notemd Processing Error", errorDetails, this.settings.uiLocale).open();
+                new Notice(formatI18n(i18n.notices.processingError, { message: errorMessage }), 10000);
+                this.openLocalizedErrorModal(i18n.errorModal.titles.processing, errorDetails);
                 
                 // Save error log
                 await saveErrorLog(this.app, useReporter, error, this.settings);
@@ -742,6 +748,7 @@ export default class NotemdPlugin extends Plugin {
         if (this.isBusy) { new Notice(this.getUiStrings().notices.notemdBusy); return; }
         this.isBusy = true;
         const useReporter = reporter || this.getReporter();
+        let i18n = this.getUiStrings();
         
         const maybeSidebar = useReporter as any;
         if (maybeSidebar instanceof NotemdSidebarView) {
@@ -753,6 +760,7 @@ export default class NotemdPlugin extends Plugin {
 
         try {
             await this.loadSettings();
+            i18n = this.getUiStrings();
             const folderPath = folderPathOverride ?? await this.getFolderSelection();
             if (!folderPath) { useReporter.log("Folder selection cancelled."); useReporter.updateStatus("Cancelled", -1); throw new Error("Folder selection cancelled."); }
 
@@ -765,7 +773,7 @@ export default class NotemdPlugin extends Plugin {
             );
 
             if (files.length === 0) {
-                new Notice(`No '.md' or '.txt' files found in selected folder: ${folderPath}`);
+                new Notice(formatI18n(i18n.notices.noMarkdownOrTextFilesFoundSelectedFolder, { folderPath }));
                 useReporter.log(`No eligible files found in "${folderPath}".`);
                 useReporter.updateStatus('No files found', 100);
                 if (useReporter instanceof ProgressModal) setTimeout(() => useReporter.close(), 2000);
@@ -779,7 +787,7 @@ export default class NotemdPlugin extends Plugin {
             if (!this.settings.enableBatchParallelism || this.settings.batchConcurrency <= 1) {
                 for (let i = 0; i < files.length; i++) {
                     const file = files[i];
-                    if (useReporter.cancelled) { new Notice('Batch processing cancelled.'); this.updateStatusBar('Cancelled'); useReporter.updateStatus('Cancelled', -1); break; }
+                    if (useReporter.cancelled) { new Notice(i18n.notices.batchProcessingCancelled); this.updateStatusBar('Cancelled'); useReporter.updateStatus('Cancelled', -1); break; }
 
                     const progress = Math.floor(((i) / files.length) * 100);
                     useReporter.updateStatus(`Processing ${i + 1}/${files.length}: ${file.name}`, progress);
@@ -873,12 +881,12 @@ export default class NotemdPlugin extends Plugin {
 
             if (!useReporter.cancelled) {
                 if (errors.length > 0) {
-                    const errorSummary = `Batch processing finished with ${errors.length} error(s). Check 'error_processing_filename.log'.`;
+                    const errorSummary = formatI18n(i18n.notices.batchProcessingFinishedWithErrors, { count: errors.length });
                     useReporter.log(`⚠️ ${errorSummary}`); useReporter.updateStatus(errorSummary, -1);
                     this.updateStatusBar(`Batch complete with errors`); new Notice(errorSummary, 10000);
                 } else {
                     useReporter.updateStatus('Batch processing complete!', 100); this.updateStatusBar('Batch complete');
-                    new Notice(`Successfully processed ${files.length} files.`, 5000);
+                    new Notice(formatI18n(i18n.notices.batchProcessingSuccess, { count: files.length }), 5000);
                     if (useReporter instanceof ProgressModal) setTimeout(() => useReporter.close(), 2000);
                 }
             }
@@ -894,8 +902,8 @@ export default class NotemdPlugin extends Plugin {
             console.error("Notemd Batch Processing Error:", errorDetails);
             // Check if it's a cancellation error before showing notice/modal
             if (!errorMessage.includes("cancelled")) {
-                new Notice(`Error during batch processing: ${errorMessage}. See console.`, 10000);
-                new ErrorModal(this.app, "Notemd Batch Processing Error", errorDetails, this.settings.uiLocale).open();
+                new Notice(formatI18n(i18n.notices.batchProcessingError, { message: errorMessage }), 10000);
+                this.openLocalizedErrorModal(i18n.errorModal.titles.batchProcessing, errorDetails);
                 
                 // Save error log
                 await saveErrorLog(this.app, useReporter, error, this.settings);
@@ -915,7 +923,8 @@ export default class NotemdPlugin extends Plugin {
     /** Command: Test LLM Connection */
     // This command handler now uses the reporter for UI feedback
     async testLlmConnectionCommand(reporter?: ProgressReporter) {
-        if (this.isBusy) { new Notice("Cannot test connection while processing."); return; }
+        const i18n = this.getUiStrings();
+        if (this.isBusy) { new Notice(i18n.notices.cannotTestConnectionWhileProcessing); return; }
         this.isBusy = true; // Prevent other actions during test
         const useReporter = reporter || this.getReporter();
         if (!reporter) useReporter.clearDisplay();
@@ -924,21 +933,22 @@ export default class NotemdPlugin extends Plugin {
             await this.loadSettings();
             const provider = this.settings.providers.find(p => p.name === this.settings.activeProvider);
             if (!provider) throw new Error('No active provider configured');
+            const providerI18n = this.getUiStrings().settings.providerConfig;
 
             useReporter.log(`Testing connection to ${provider.name}...`);
             useReporter.updateStatus(`Testing ${provider.name}...`, 50);
-            const testingNotice = new Notice(`Testing connection to ${provider.name}...`, 0);
+            const testingNotice = new Notice(formatI18n(providerI18n.testConnectionRunning, { provider: provider.name }), 0);
 
             const result = await testAPI(provider, this.settings.enableApiErrorDebugMode); // Use utility function
             testingNotice.hide();
 
             if (result.success) {
                 useReporter.log(`✅ Success: ${result.message}`);
-                new Notice(`✅ Success: ${result.message}`, 5000);
+                new Notice(formatI18n(providerI18n.testConnectionSuccess, { message: result.message }), 5000);
                 useReporter.updateStatus("Connection successful!", 100);
             } else {
                 useReporter.log(`❌ Failed: ${result.message}. Check console.`);
-                new Notice(`❌ Failed: ${result.message}. Check console.`, 10000);
+                new Notice(formatI18n(providerI18n.testConnectionFailed, { message: result.message }), 10000);
                 useReporter.updateStatus("Connection failed.", -1);
             }
         } catch (error: unknown) { // Changed to unknown
@@ -948,11 +958,12 @@ export default class NotemdPlugin extends Plugin {
                 errorMessage = error.message;
                 errorDetails = error.stack || error.message;
             }
+            const providerI18n = this.getUiStrings().settings.providerConfig;
             useReporter.log(`❌ ${errorMessage}`);
-            new Notice(errorMessage, 10000);
+            new Notice(formatI18n(providerI18n.testConnectionError, { message: errorMessage }), 10000);
             console.error('LLM Connection Test Error:', errorDetails); // Log details
             useReporter.updateStatus("Connection test error.", -1);
-            new ErrorModal(this.app, "LLM Connection Test Error", errorDetails, this.settings.uiLocale).open();
+            this.openLocalizedErrorModal(this.getUiStrings().errorModal.titles.llmConnectionTest, errorDetails);
             
             // Save error log
             await saveErrorLog(this.app, useReporter, error, this.settings);
@@ -967,6 +978,7 @@ export default class NotemdPlugin extends Plugin {
         if (this.isBusy) { new Notice(this.getUiStrings().notices.notemdBusy); return; }
         this.isBusy = true;
         const useReporter = reporter || this.getReporter();
+        let i18n = this.getUiStrings();
         
         const maybeSidebar = useReporter as any;
         if (maybeSidebar instanceof NotemdSidebarView) {
@@ -979,13 +991,14 @@ export default class NotemdPlugin extends Plugin {
         this.updateStatusBar(`Generating: ${file.name}`);
         try {
             await this.loadSettings();
+            i18n = this.getUiStrings();
             await generateContentForTitle(this.app, this.settings, file, useReporter); // Call utility
 
             await this.maybeAutoFixMermaidForFile(file, useReporter, 'generate from title');
 
             this.updateStatusBar('Generation complete');
             useReporter.updateStatus('Content generation complete!', 100);
-            new Notice(`Content generated successfully for ${file.name}!`);
+            new Notice(formatI18n(i18n.notices.contentGenerationSuccess, { file: file.name }));
             if (useReporter instanceof ProgressModal) setTimeout(() => useReporter.close(), 2000);
         } catch (error: unknown) { // Changed to unknown
             this.updateStatusBar('Error during generation');
@@ -998,8 +1011,8 @@ export default class NotemdPlugin extends Plugin {
             // Check if it's a cancellation error before logging/showing modal
             if (!errorMessage.includes("cancelled by user")) {
                 console.error(`Error generating content for ${file.name}:`, errorDetails);
-                new Notice(`Error generating content: ${errorMessage}. See console.`, 10000);
-                new ErrorModal(this.app, "Content Generation Error", errorDetails, this.settings.uiLocale).open();
+                new Notice(formatI18n(i18n.notices.contentGenerationError, { message: errorMessage }), 10000);
+                this.openLocalizedErrorModal(i18n.errorModal.titles.contentGeneration, errorDetails);
                 
                 // Save error log
                 await saveErrorLog(this.app, useReporter, error, this.settings);
@@ -1019,6 +1032,7 @@ export default class NotemdPlugin extends Plugin {
         if (this.isBusy) { new Notice(this.getUiStrings().notices.notemdBusy); return; }
         this.isBusy = true;
         const useReporter = reporter || this.getReporter();
+        let i18n = this.getUiStrings();
         
         const maybeSidebar = useReporter as any;
         if (maybeSidebar instanceof NotemdSidebarView) {
@@ -1029,15 +1043,16 @@ export default class NotemdPlugin extends Plugin {
         }
 
         const activeFile = view.file;
-        if (!activeFile) { new Notice('No active file.'); this.isBusy = false; return; }
+        if (!activeFile) { new Notice(i18n.notices.noActiveFile); this.isBusy = false; return; }
         const selectedText = editor.getSelection();
         const topic = selectedText ? selectedText.trim() : activeFile.basename;
-        if (!topic) { new Notice('No topic found (select text or use note title).'); this.isBusy = false; return; }
+        if (!topic) { new Notice(i18n.notices.noTopicFound); this.isBusy = false; return; }
 
         this.updateStatusBar(`Researching: ${topic}`);
         useReporter.log(`Starting research for topic: "${topic}"`);
         try {
             await this.loadSettings();
+            i18n = this.getUiStrings();
             // Assuming researchAndSummarize is now in searchUtils and takes app, settings
             await researchAndSummarize(this.app, this.settings, editor, view, useReporter); // Call utility
             if (activeFile instanceof TFile) {
@@ -1060,8 +1075,8 @@ export default class NotemdPlugin extends Plugin {
             }
              if (!errorMessage.includes("cancelled by user")) {
                 console.error(`Error researching "${topic}":`, errorDetails);
-                new Notice(`Error during research: ${errorMessage}. See console.`, 10000);
-                new ErrorModal(this.app, "Research Error", errorDetails, this.settings.uiLocale).open();
+                new Notice(formatI18n(i18n.notices.researchError, { message: errorMessage }), 10000);
+                this.openLocalizedErrorModal(i18n.errorModal.titles.research, errorDetails);
                 
                 // Save error log
                 await saveErrorLog(this.app, useReporter, error, this.settings);
@@ -1088,6 +1103,7 @@ export default class NotemdPlugin extends Plugin {
         if (this.isBusy) { new Notice(this.getUiStrings().notices.notemdBusy); return null; }
         this.isBusy = true;
         const useReporter = reporter || this.getReporter();
+        let i18n = this.getUiStrings();
         
         const maybeSidebar = useReporter as any;
         if (maybeSidebar instanceof NotemdSidebarView) {
@@ -1099,6 +1115,7 @@ export default class NotemdPlugin extends Plugin {
 
         try {
             await this.loadSettings();
+            i18n = this.getUiStrings();
             const folderPath = folderPathOverride ?? await this.getFolderSelection();
             if (!folderPath) { useReporter.log("Folder selection cancelled."); useReporter.updateStatus("Cancelled", -1); throw new Error("Folder selection cancelled."); }
 
@@ -1116,13 +1133,12 @@ export default class NotemdPlugin extends Plugin {
 
             if (!useReporter.cancelled) {
                 if (errors.length > 0) {
-                    const errorSummary = `Batch generation finished with ${errors.length} error(s). Check 'error_processing_filename.log'.`;
+                    const errorSummary = formatI18n(i18n.notices.batchGenerationFinishedWithErrors, { count: errors.length });
                     useReporter.log(`⚠️ ${errorSummary}`); useReporter.updateStatus(errorSummary, -1);
                     this.updateStatusBar(`Batch generation complete with errors`); new Notice(errorSummary, 10000);
                 } else {
-                    const fileCount = this.app.vault.getMarkdownFiles().filter(f => f.path.startsWith(folderPath === '/' ? '' : folderPath + '/')).length; // Re-count for notice
                     useReporter.updateStatus('Batch generation complete!', 100); this.updateStatusBar('Batch generation complete');
-                    new Notice(`Successfully generated content for eligible files in "${folderPath}".`, 5000);
+                    new Notice(formatI18n(i18n.notices.batchGenerationSuccess, { folderPath }), 5000);
                     if (useReporter instanceof ProgressModal) setTimeout(() => useReporter.close(), 2000);
                 }
                 if (completeFolderPath) {
@@ -1133,7 +1149,7 @@ export default class NotemdPlugin extends Plugin {
                 }
             } else {
                  this.updateStatusBar('Batch generation cancelled');
-                 new Notice('Batch generation cancelled.');
+                 new Notice(i18n.notices.batchGenerationCancelled);
             }
 
         } catch (error: unknown) { // Changed to unknown
@@ -1146,8 +1162,8 @@ export default class NotemdPlugin extends Plugin {
             }
             if (!errorMessage.includes("cancelled")) {
                 console.error("Notemd Batch Generation Error:", errorDetails);
-                new Notice(`Error during batch generation: ${errorMessage}. See console.`, 10000);
-                new ErrorModal(this.app, "Notemd Batch Generation Error", errorDetails, this.settings.uiLocale).open();
+                new Notice(formatI18n(i18n.notices.batchGenerationError, { message: errorMessage }), 10000);
+                this.openLocalizedErrorModal(i18n.errorModal.titles.batchGeneration, errorDetails);
                 
                 // Save error log
                 await saveErrorLog(this.app, useReporter, error, this.settings);
@@ -1168,6 +1184,7 @@ export default class NotemdPlugin extends Plugin {
         if (this.isBusy) { new Notice(this.getUiStrings().notices.notemdBusy); return; }
         this.isBusy = true;
         const useReporter = reporter || this.getReporter();
+        let i18n = this.getUiStrings();
         
         const maybeSidebar = useReporter as any;
         if (maybeSidebar instanceof NotemdSidebarView) {
@@ -1181,6 +1198,7 @@ export default class NotemdPlugin extends Plugin {
         useReporter.log("Starting: Check & Remove Duplicate Concept Notes...");
         try {
             await this.loadSettings();
+            i18n = this.getUiStrings();
             await checkAndRemoveDuplicateConceptNotes(this.app, this.settings, useReporter); // Call utility
             // Status is updated within the utility function
             this.updateStatusBar("Duplicate check complete.");
@@ -1193,10 +1211,10 @@ export default class NotemdPlugin extends Plugin {
                 errorDetails = error.stack || error.message;
             }
             console.error("Error checking/removing duplicate concept notes:", errorDetails);
-            new Notice(`Error checking/removing duplicates: ${errorMessage}. See console.`, 10000);
+            new Notice(formatI18n(i18n.notices.duplicateCheckRemoveError, { message: errorMessage }), 10000);
             useReporter.log(`Error: ${errorMessage}`);
             useReporter.updateStatus('Error occurred', -1);
-            new ErrorModal(this.app, "Duplicate Check/Remove Error", errorDetails, this.settings.uiLocale).open();
+            this.openLocalizedErrorModal(i18n.errorModal.titles.duplicateCheckRemove, errorDetails);
         } finally {
             if (maybeSidebar instanceof NotemdSidebarView) {
                 maybeSidebar.finishProcessing();
@@ -1212,6 +1230,7 @@ export default class NotemdPlugin extends Plugin {
         if (this.isBusy) { new Notice(this.getUiStrings().notices.notemdBusy); return null; }
         this.isBusy = true;
         const useReporter = reporter || this.getReporter();
+        let i18n = this.getUiStrings();
         
         const maybeSidebar = useReporter as any;
         if (maybeSidebar instanceof NotemdSidebarView) {
@@ -1223,6 +1242,7 @@ export default class NotemdPlugin extends Plugin {
 
         try {
             await this.loadSettings(); // Load settings in case needed by future logic
+            i18n = this.getUiStrings();
             const folderPath = folderPathOverride ?? await this.getFolderSelection();
             if (!folderPath) { useReporter.log("Folder selection cancelled."); useReporter.updateStatus("Cancelled", -1); throw new Error("Folder selection cancelled."); }
 
@@ -1233,11 +1253,14 @@ export default class NotemdPlugin extends Plugin {
 
             if (!useReporter.cancelled) {
                 if (errors.length > 0) {
-                    const errorSummary = `Batch Mermaid fix finished with ${errors.length} error(s). Modified ${modifiedCount} files. Check console/log.`;
+                    const errorSummary = formatI18n(i18n.notices.batchMermaidFixFinishedWithErrors, {
+                        count: errors.length,
+                        modifiedCount
+                    });
                     useReporter.log(`⚠️ ${errorSummary}`); useReporter.updateStatus(errorSummary, -1);
                     this.updateStatusBar(`Batch fix complete with errors`); new Notice(errorSummary, 10000);
                 } else {
-                    const finalMessage = `Batch Mermaid fix complete! Modified ${modifiedCount} files.`;
+                    const finalMessage = formatI18n(i18n.notices.batchMermaidFixSuccess, { modifiedCount });
                     useReporter.updateStatus(finalMessage, 100); this.updateStatusBar('Batch fix complete');
                     new Notice(finalMessage, 5000);
                     if (useReporter instanceof ProgressModal) setTimeout(() => useReporter.close(), 2000);
@@ -1255,8 +1278,8 @@ export default class NotemdPlugin extends Plugin {
             }
             if (!errorMessage.includes("cancelled")) {
                 console.error("Notemd Batch Mermaid Fix Error:", errorDetails);
-                new Notice(`Error during batch fix: ${errorMessage}. See console.`, 10000);
-                new ErrorModal(this.app, "Notemd Batch Mermaid Fix Error", errorDetails, this.settings.uiLocale).open();
+                new Notice(formatI18n(i18n.notices.batchMermaidFixError, { message: errorMessage }), 10000);
+                this.openLocalizedErrorModal(i18n.errorModal.titles.batchMermaidFix, errorDetails);
                 
                 // Save error log
                 await saveErrorLog(this.app, useReporter, error, this.settings);
@@ -1276,6 +1299,7 @@ export default class NotemdPlugin extends Plugin {
         if (this.isBusy) { new Notice(this.getUiStrings().notices.notemdBusy); return; }
         this.isBusy = true;
         const useReporter = reporter || this.getReporter();
+        let i18n = this.getUiStrings();
         
         const maybeSidebar = useReporter as any;
         if (maybeSidebar instanceof NotemdSidebarView) {
@@ -1287,14 +1311,17 @@ export default class NotemdPlugin extends Plugin {
 
         try {
             await this.loadSettings();
+            i18n = this.getUiStrings();
             const modified = await fixFormulaFormatsInFile(this.app, file, useReporter);
 
             if (modified) {
-                useReporter.log(`✅ Fixed formulas in ${file.name}`);
-                new Notice(`Fixed formulas in ${file.name}`);
+                const message = formatI18n(i18n.notices.formulaFixSuccess, { file: file.name });
+                useReporter.log(`✅ ${message}`);
+                new Notice(message);
             } else {
-                useReporter.log(`No formula fixes needed for ${file.name}`);
-                new Notice(`No formula fixes needed for ${file.name}`);
+                const message = formatI18n(i18n.notices.formulaFixNotNeeded, { file: file.name });
+                useReporter.log(message);
+                new Notice(message);
             }
             useReporter.updateStatus('Formula fix complete!', 100);
             if (useReporter instanceof ProgressModal) setTimeout(() => useReporter.close(), 1000);
@@ -1306,7 +1333,7 @@ export default class NotemdPlugin extends Plugin {
             
             useReporter.log(`Error: ${errorMessage}`);
             useReporter.updateStatus('Error occurred', -1);
-            new Notice(`Error: ${errorMessage}`);
+            new Notice(formatI18n(i18n.notices.genericError, { message: errorMessage }));
             await saveErrorLog(this.app, useReporter, error, this.settings);
         } finally {
             if (maybeSidebar instanceof NotemdSidebarView) {
@@ -1320,6 +1347,7 @@ export default class NotemdPlugin extends Plugin {
         if (this.isBusy) { new Notice(this.getUiStrings().notices.notemdBusy); return; }
         this.isBusy = true;
         const useReporter = reporter || this.getReporter();
+        let i18n = this.getUiStrings();
         
         const maybeSidebar = useReporter as any;
         if (maybeSidebar instanceof NotemdSidebarView) {
@@ -1331,6 +1359,7 @@ export default class NotemdPlugin extends Plugin {
 
         try {
             await this.loadSettings();
+            i18n = this.getUiStrings();
             const folderPath = await this.getFolderSelection();
             if (!folderPath) { useReporter.log("Cancelled."); useReporter.updateStatus("Cancelled", -1); throw new Error("Cancelled"); }
 
@@ -1338,12 +1367,15 @@ export default class NotemdPlugin extends Plugin {
 
             if (!useReporter.cancelled) {
                 if (errors.length > 0) {
-                    const msg = `Batch fix finished with ${errors.length} errors. Modified ${modifiedCount} files.`;
+                    const msg = formatI18n(i18n.notices.batchFormulaFixFinishedWithErrors, {
+                        count: errors.length,
+                        modifiedCount
+                    });
                     useReporter.log(msg);
                     useReporter.updateStatus('Finished with errors', -1);
                     new Notice(msg);
                 } else {
-                    const msg = `Batch fix complete! Modified ${modifiedCount} files.`;
+                    const msg = formatI18n(i18n.notices.batchFormulaFixSuccess, { modifiedCount });
                     useReporter.log(msg);
                     useReporter.updateStatus('Complete', 100);
                     new Notice(msg);
@@ -1356,7 +1388,7 @@ export default class NotemdPlugin extends Plugin {
             if (!errorMessage.includes("Cancelled")) {
                 useReporter.log(`Error: ${errorMessage}`);
                 useReporter.updateStatus('Error occurred', -1);
-                new Notice(`Error: ${errorMessage}`);
+                new Notice(formatI18n(i18n.notices.genericError, { message: errorMessage }));
                 await saveErrorLog(this.app, useReporter, error, this.settings);
             }
         } finally {
@@ -1374,6 +1406,7 @@ export default class NotemdPlugin extends Plugin {
         }
         this.isBusy = true;
         const useReporter = reporter || this.getReporter();
+        let i18n = this.getUiStrings();
 
         const maybeSidebar = useReporter as any;
         if (maybeSidebar instanceof NotemdSidebarView) {
@@ -1387,6 +1420,7 @@ export default class NotemdPlugin extends Plugin {
 
         try {
             await this.loadSettings();
+            i18n = this.getUiStrings();
             let targetFolder = folder;
             if (!targetFolder) {
                 const folderPath = await this.getFolderSelection();
@@ -1417,8 +1451,8 @@ export default class NotemdPlugin extends Plugin {
                 errorMessage = error.message;
             }
             if (!errorMessage.includes("cancelled")) {
-                new Notice(`Failed to translate folder: ${errorMessage}. See console for details.`, 10000);
-                new ErrorModal(this.app, "Batch Translation Error", errorMessage, this.settings.uiLocale).open();
+                new Notice(formatI18n(i18n.notices.batchTranslationFailedWithMessage, { message: errorMessage }), 10000);
+                this.openLocalizedErrorModal(i18n.errorModal.titles.batchTranslation, errorMessage);
                 
                 // Save error log
                 await saveErrorLog(this.app, useReporter, error, this.settings);
@@ -1440,6 +1474,7 @@ export default class NotemdPlugin extends Plugin {
         }
         this.isBusy = true;
         const useReporter = reporter || this.getReporter();
+        let i18n = this.getUiStrings();
         
         const maybeSidebar = useReporter as any;
         if (maybeSidebar instanceof NotemdSidebarView) {
@@ -1453,6 +1488,7 @@ export default class NotemdPlugin extends Plugin {
 
         try {
             await this.loadSettings();
+            i18n = this.getUiStrings();
             const translateLanguage = resolveTaskLanguageCode(this.settings, 'translate');
             const outputPath = await translateFile(this.app, this.settings, file, translateLanguage, useReporter, true, signal);
             if (outputPath && this.settings.autoMermaidFixAfterGenerate) {
@@ -1477,8 +1513,8 @@ export default class NotemdPlugin extends Plugin {
             }
             if (!errorMessage.includes("cancelled by user")) {
                 console.error("Translation Error:", errorDetails);
-                new Notice(`Failed to translate file: ${errorMessage}. See console for details.`, 10000);
-                new ErrorModal(this.app, "Translation Error", errorDetails, this.settings.uiLocale).open();
+                new Notice(formatI18n(i18n.notices.failedTranslateFileWithMessage, { message: errorMessage }), 10000);
+                this.openLocalizedErrorModal(i18n.errorModal.titles.translation, errorDetails);
                 
                 // Save error log
                 await saveErrorLog(this.app, useReporter, error, this.settings);
@@ -1500,6 +1536,7 @@ export default class NotemdPlugin extends Plugin {
 		}
 		this.isBusy = true;
         const useReporter = reporter || this.getReporter();
+        let i18n = this.getUiStrings();
 
         const maybeSidebar = useReporter as any;
         if (maybeSidebar instanceof NotemdSidebarView) {
@@ -1511,6 +1548,8 @@ export default class NotemdPlugin extends Plugin {
         }
 
 		try {
+            await this.loadSettings();
+            i18n = this.getUiStrings();
 			const fileContent = await this.app.vault.read(file);
 			if (!fileContent.trim()) {
 				throw new Error("File is empty. Cannot summarize.");
@@ -1535,7 +1574,7 @@ export default class NotemdPlugin extends Plugin {
 
 			reporter.updateStatus('Mermaid diagram saved successfully!', 100);
 			reporter.log(`Mermaid diagram saved to: ${outputFilePath}`);
-			new Notice('Mermaid diagram summarization complete!');
+			new Notice(i18n.notices.mermaidSummarizationComplete);
 
 			// Open the new file in a split pane
 			if (outputFilePath) {
@@ -1546,11 +1585,11 @@ export default class NotemdPlugin extends Plugin {
 				}
 			}
 
-		} catch (error: any) {
+		} catch (error: unknown) {
 			const message = error instanceof Error ? error.message : String(error);
 			reporter.log(`Error during Mermaid summarization: ${message}`);
 			reporter.updateStatus('Error during summarization.', -1);
-			new Notice(`Summarization Error: ${message}`);
+			new Notice(formatI18n(i18n.notices.mermaidSummarizationError, { message }));
 			console.error("Summarization Error:", error);
             
             // Save error log
@@ -1567,6 +1606,7 @@ export default class NotemdPlugin extends Plugin {
         if (this.isBusy) { new Notice(this.getUiStrings().notices.notemdBusy); return; }
         this.isBusy = true;
         const useReporter = reporter || this.getReporter();
+        let i18n = this.getUiStrings();
         
         const maybeSidebar = useReporter as any;
         if (maybeSidebar instanceof NotemdSidebarView) {
@@ -1578,6 +1618,7 @@ export default class NotemdPlugin extends Plugin {
 
         try {
             await this.loadSettings();
+            i18n = this.getUiStrings();
             const activeFile = this.app.workspace.getActiveFile();
             if (!activeFile || !(activeFile instanceof TFile) || (activeFile.extension !== 'md' && activeFile.extension !== 'txt')) {
                 throw new Error("No active '.md' or '.txt' file to extract concepts from.");
@@ -1600,10 +1641,10 @@ export default class NotemdPlugin extends Plugin {
                     }
                 );
                 useReporter.updateStatus('Concept extraction complete!', 100);
-                new Notice(`Concept extraction complete! Found and created ${concepts.size} concept notes.`);
+                new Notice(formatI18n(i18n.notices.conceptExtractionSuccess, { count: concepts.size }));
             } else {
                 useReporter.updateStatus('No concepts found.', 100);
-                new Notice('No concepts found to extract.');
+                new Notice(i18n.notices.noConceptsFoundToExtract);
             }
 
             if (useReporter instanceof ProgressModal) setTimeout(() => useReporter.close(), 2000);
@@ -1615,8 +1656,8 @@ export default class NotemdPlugin extends Plugin {
                 errorMessage = error.message;
             }
             if (!errorMessage.includes("cancelled by user")) {
-                new Notice(`Error during concept extraction: ${errorMessage}.`, 10000);
-                new ErrorModal(this.app, "Concept Extraction Error", errorMessage, this.settings.uiLocale).open();
+                new Notice(formatI18n(i18n.notices.conceptExtractionError, { message: errorMessage }), 10000);
+                this.openLocalizedErrorModal(i18n.errorModal.titles.conceptExtraction, errorMessage);
                 
                 // Save error log
                 await saveErrorLog(this.app, useReporter, error, this.settings);
@@ -1635,6 +1676,7 @@ export default class NotemdPlugin extends Plugin {
         if (this.isBusy) { new Notice(this.getUiStrings().notices.notemdBusy); return; }
         this.isBusy = true;
         const useReporter = reporter || this.getReporter();
+        let i18n = this.getUiStrings();
         
         const maybeSidebar = useReporter as any;
         if (maybeSidebar instanceof NotemdSidebarView) {
@@ -1646,6 +1688,7 @@ export default class NotemdPlugin extends Plugin {
 
         try {
             await this.loadSettings();
+            i18n = this.getUiStrings();
             const folderPath = await this.getFolderSelection();
             if (!folderPath) { throw new Error("Folder selection cancelled."); }
 
@@ -1658,7 +1701,7 @@ export default class NotemdPlugin extends Plugin {
             );
 
             if (files.length === 0) {
-                new Notice(`No '.md' or '.txt' files found in selected folder: ${folderPath}`);
+                new Notice(formatI18n(i18n.notices.noMarkdownOrTextFilesFoundSelectedFolder, { folderPath }));
                 return;
             }
 
@@ -1670,7 +1713,7 @@ export default class NotemdPlugin extends Plugin {
             if (!this.settings.enableBatchParallelism || this.settings.batchConcurrency <= 1) {
                 for (let i = 0; i < files.length; i++) {
                     const file = files[i];
-                    if (useReporter.cancelled) { new Notice('Batch extraction cancelled.'); break; }
+                    if (useReporter.cancelled) { new Notice(i18n.notices.batchExtractionCancelled); break; }
 
                     const progress = Math.floor(((i) / files.length) * 100);
                     useReporter.updateStatus(`Processing ${i + 1}/${files.length}: ${file.name}`, progress);
@@ -1776,12 +1819,15 @@ export default class NotemdPlugin extends Plugin {
 
             if (!useReporter.cancelled) {
                 if (errors.length > 0) {
-                    const errorSummary = `Batch extraction finished with ${errors.length} error(s).`;
+                    const errorSummary = formatI18n(i18n.notices.batchExtractionFinishedWithErrors, { count: errors.length });
                     useReporter.log(`⚠️ ${errorSummary}`);
                     useReporter.updateStatus(errorSummary, -1);
                     new Notice(errorSummary, 10000);
                 } else {
-                    const successMessage = `Batch extraction complete! Found ${totalConcepts} concepts across ${files.length} files.`;
+                    const successMessage = formatI18n(i18n.notices.batchExtractionSuccess, {
+                        concepts: totalConcepts,
+                        files: files.length
+                    });
                     useReporter.updateStatus(successMessage, 100);
                     new Notice(successMessage);
                     if (useReporter instanceof ProgressModal) setTimeout(() => useReporter.close(), 2000);
@@ -1795,8 +1841,8 @@ export default class NotemdPlugin extends Plugin {
                 errorMessage = error.message;
             }
             if (!errorMessage.includes("cancelled")) {
-                new Notice(`Error during batch extraction: ${errorMessage}.`, 10000);
-                new ErrorModal(this.app, "Batch Concept Extraction Error", errorMessage, this.settings.uiLocale).open();
+                new Notice(formatI18n(i18n.notices.batchExtractionError, { message: errorMessage }), 10000);
+                this.openLocalizedErrorModal(i18n.errorModal.titles.batchConceptExtraction, errorMessage);
                 
                 // Save error log
                 await saveErrorLog(this.app, useReporter, error, this.settings);
@@ -1818,6 +1864,7 @@ export default class NotemdPlugin extends Plugin {
         }
         this.isBusy = true;
         const useReporter = reporter || this.getReporter();
+        let i18n = this.getUiStrings();
 
         const maybeSidebar = useReporter as any;
         if (maybeSidebar instanceof NotemdSidebarView) {
@@ -1848,8 +1895,8 @@ export default class NotemdPlugin extends Plugin {
                 errorMessage = error.message;
             }
             if (!errorMessage.includes("cancelled")) {
-                new Notice(`Error: ${errorMessage}. See console for details.`, 10000);
-                new ErrorModal(this.app, "Error", errorMessage, this.settings.uiLocale).open();
+                new Notice(formatI18n(i18n.notices.genericErrorSeeConsoleForDetails, { message: errorMessage }), 10000);
+                this.openLocalizedErrorModal(i18n.errorModal.titles.generic, errorMessage);
                 
                 // Save error log
                 await saveErrorLog(this.app, useReporter, error, this.settings);
@@ -1871,6 +1918,7 @@ export default class NotemdPlugin extends Plugin {
         }
         this.isBusy = true;
         const useReporter = reporter || this.getReporter();
+        let i18n = this.getUiStrings();
 
         const maybeSidebar = useReporter as any;
         if (maybeSidebar instanceof NotemdSidebarView) {
@@ -1882,6 +1930,7 @@ export default class NotemdPlugin extends Plugin {
 
         try {
             await this.loadSettings();
+            i18n = this.getUiStrings();
             const activeFile = this.app.workspace.getActiveFile();
             if (!activeFile || !(activeFile instanceof TFile) || (activeFile.extension !== 'md' && activeFile.extension !== 'txt')) {
                 throw new Error("No active '.md' or '.txt' file to process.");
@@ -1898,8 +1947,8 @@ export default class NotemdPlugin extends Plugin {
                 errorMessage = error.message;
             }
             if (!errorMessage.includes("cancelled")) {
-                new Notice(`Error: ${errorMessage}. See console for details.`, 10000);
-                new ErrorModal(this.app, "Extraction Error", errorMessage, this.settings.uiLocale).open();
+                new Notice(formatI18n(i18n.notices.genericErrorSeeConsoleForDetails, { message: errorMessage }), 10000);
+                this.openLocalizedErrorModal(i18n.errorModal.titles.extraction, errorMessage);
                 
                 // Save error log
                 await saveErrorLog(this.app, useReporter, error, this.settings);

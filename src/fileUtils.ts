@@ -14,13 +14,14 @@ import { resolveTaskLanguageName, shouldApplyAutoTranslation } from './i18n/task
 
 // --- Backlink and Note Management ---
 
-export async function handleFileRename(app: App, oldPath: string, newPath: string) {
+export async function handleFileRename(app: App, oldPath: string, newPath: string, uiLocale = 'auto') {
     const oldName = oldPath.split('/').pop()?.replace('.md', '') || '';
     const newName = newPath.split('/').pop()?.replace('.md', '') || '';
 
     if (!oldName || !newName || oldName === newName) return;
+    const i18n = getI18nStrings({ uiLocale });
 
-    new Notice(`Updating links for renamed file: ${newName}`, 5000);
+    new Notice(formatI18n(i18n.notices.updatingLinksForRenamedFile, { name: newName }), 5000);
 
     const escapedOldName = oldName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const linkRegex = new RegExp(`\\[\\[${escapedOldName}\\]\\]`, 'g');
@@ -49,18 +50,19 @@ export async function handleFileRename(app: App, oldPath: string, newPath: strin
     }
 
     if (updatedCount > 0) {
-        new Notice(`Updated links to "${newName}" in ${updatedCount} files.`, 5000);
+        new Notice(formatI18n(i18n.notices.updatedLinksForRenamedFile, { name: newName, count: updatedCount }), 5000);
     }
     if (errors.length > 0) {
-        new Notice(`Encountered ${errors.length} errors while updating links. Please check the developer console for more details.`, 10000);
+        new Notice(formatI18n(i18n.notices.updateLinksErrors, { count: errors.length }), 10000);
     }
 }
 
-export async function handleFileDelete(app: App, path: string) {
+export async function handleFileDelete(app: App, path: string, uiLocale = 'auto') {
     const fileName = path.split('/').pop()?.replace('.md', '') || '';
     if (!fileName) return;
+    const i18n = getI18nStrings({ uiLocale });
 
-    new Notice(`Removing links for deleted file: ${fileName}`, 5000);
+    new Notice(formatI18n(i18n.notices.removingLinksForDeletedFile, { name: fileName }), 5000);
 
     const escapedFileName = fileName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const linkRegex = new RegExp(`\\[\\[${escapedFileName}\\]\\]`, 'gi');
@@ -93,10 +95,10 @@ export async function handleFileDelete(app: App, path: string) {
     }
 
     if (updatedCount > 0) {
-        new Notice(`Removed links to "${fileName}" from ${updatedCount} files.`, 5000);
+        new Notice(formatI18n(i18n.notices.removedLinksForDeletedFile, { name: fileName, count: updatedCount }), 5000);
     }
     if (errors.length > 0) {
-        new Notice(`Encountered ${errors.length} errors while removing links. Please check the developer console for more details.`, 10000);
+        new Notice(formatI18n(i18n.notices.removeLinksErrors, { count: errors.length }), 10000);
     }
 }
 
@@ -109,6 +111,8 @@ export async function createConceptNotes(
     currentProcessingFileBasename: string | null,
     options?: { disableBacklink?: boolean; minimalTemplate?: boolean }
 ) {
+    const i18n = getI18nStrings({ uiLocale: settings.uiLocale });
+
     if (!settings.useCustomConceptNoteFolder || !settings.conceptNoteFolder) {
         return;
     }
@@ -183,11 +187,12 @@ export async function createConceptNotes(
     } catch (error: unknown) { // Changed to unknown
         const errorMessage = error instanceof Error ? error.message : String(error);
         console.error("Error creating concept notes:", error);
-        new Notice(`Error creating concept notes: ${errorMessage}. Please check the developer console for more details.`);
+        new Notice(formatI18n(i18n.notices.errorCreatingConceptNotes, { message: errorMessage }));
     }
 }
 
 async function generateConceptLog(app: App, settings: NotemdSettings, createdConcepts: string[]) {
+    const i18n = getI18nStrings({ uiLocale: settings.uiLocale });
     let logFolderPath = '';
     if (settings.useCustomConceptLogFolder && settings.conceptLogFolderPath) {
         logFolderPath = settings.conceptLogFolderPath;
@@ -212,22 +217,22 @@ async function generateConceptLog(app: App, settings: NotemdSettings, createdCon
         if (targetLogFolder && !app.vault.getAbstractFileByPath(targetLogFolder)) {
             await app.vault.createFolder(targetLogFolder);
         } else if (targetLogFolder && !(app.vault.getAbstractFileByPath(targetLogFolder) instanceof TFolder)) {
-            new Notice(`Concept log output path '${targetLogFolder}' exists but is not a folder. Cannot create log file.`);
+            new Notice(formatI18n(i18n.notices.conceptLogOutputNotFolder, { path: targetLogFolder }));
             return;
         }
 
         const existingLogFile = app.vault.getAbstractFileByPath(logFilePath);
         if (existingLogFile instanceof TFile) {
             await app.vault.modify(existingLogFile, logContent.trim());
-            new Notice(`Overwrote concept log file: ${logFilePath}`);
+            new Notice(formatI18n(i18n.notices.conceptLogFileOverwritten, { path: logFilePath }));
         } else {
             await app.vault.create(logFilePath, logContent.trim());
-            new Notice(`Created concept log file: ${logFilePath}`);
+            new Notice(formatI18n(i18n.notices.conceptLogFileCreated, { path: logFilePath }));
         }
     } catch (error: unknown) { // Changed to unknown
         const errorMessage = error instanceof Error ? error.message : String(error);
         console.error(`Error writing concept log file to ${logFilePath}:`, error);
-        new Notice(`Error writing concept log file: ${errorMessage}. Please check the developer console for more details.`);
+        new Notice(formatI18n(i18n.notices.conceptLogWriteError, { message: errorMessage }));
     }
 }
 
@@ -702,6 +707,7 @@ export async function generateContentForTitle(app: App, settings: NotemdSettings
  * @param progressReporter Interface for reporting progress.
  */
 export async function batchGenerateContentForTitles(app: App, settings: NotemdSettings, folderPath: string, progressReporter: ProgressReporter) {
+    const i18n = getI18nStrings({ uiLocale: settings.uiLocale });
     const folder = app.vault.getAbstractFileByPath(folderPath);
     if (!folder || !(folder instanceof TFolder)) throw new Error(`Selected path is not a valid folder: ${folderPath}`);
 
@@ -724,8 +730,12 @@ export async function batchGenerateContentForTitles(app: App, settings: NotemdSe
     });
 
     if (filesToProcess.length === 0) {
-        new Notice(`No eligible '.md' files found in "${folderPath}" (excluding '${completeFolderName}').`);
-        progressReporter.log(`No eligible '.md' files found in "${folderPath}" (excluding '${completeFolderName}').`);
+        const message = formatI18n(i18n.notices.noEligibleMarkdownFilesFoundExcluding, {
+            folderPath,
+            completeFolder: completeFolderName
+        });
+        new Notice(message);
+        progressReporter.log(message);
         progressReporter.updateStatus('No files found', 100);
         return { errors: [] }; // Return empty errors array
     }
@@ -741,7 +751,7 @@ export async function batchGenerateContentForTitles(app: App, settings: NotemdSe
         else { const targetFolderStat = await app.vault.adapter.stat(normalizedCompleteFolderPath); if (targetFolderStat?.type !== 'folder') throw new Error(`Path for 'complete' folder (${normalizedCompleteFolderPath}) exists but is not a directory.`); }
     } catch (folderError: unknown) { // Changed to unknown
         const errorMessage = folderError instanceof Error ? folderError.message : String(folderError);
-        new Notice(`Error ensuring 'complete' folder exists: ${errorMessage}`);
+        new Notice(formatI18n(i18n.notices.errorEnsuringCompleteFolder, { message: errorMessage }));
         progressReporter.log(`Error ensuring 'complete' folder exists at ${completeFolderPath}: ${errorMessage}`);
         throw folderError instanceof Error ? folderError : new Error(errorMessage); // Re-throw
     }
@@ -898,6 +908,7 @@ export async function fixMermaidSyntaxInFile(app: App, file: TFile, reporter: Pr
  * @returns Object containing errors array and modifiedCount.
  */
 export async function batchFixMermaidSyntaxInFolder(app: App, settings: NotemdSettings, folderPath: string, progressReporter: ProgressReporter): Promise<{ errors: { file: string; message: string }[], modifiedCount: number }> {
+    const i18n = getI18nStrings({ uiLocale: settings.uiLocale });
     const folder = app.vault.getAbstractFileByPath(folderPath);
     if (!folder || !(folder instanceof TFolder)) {
         throw new Error(`Selected path is not a valid folder: ${folderPath}`);
@@ -908,7 +919,7 @@ export async function batchFixMermaidSyntaxInFolder(app: App, settings: NotemdSe
     );
 
     if (filesToProcess.length === 0) {
-        new Notice(`No '.md' files found in selected folder: ${folderPath}`);
+        new Notice(formatI18n(i18n.notices.noMarkdownFilesFoundInSelectedFolder, { folderPath }));
         progressReporter.log(`No eligible files found in "${folderPath}".`);
         progressReporter.updateStatus('No files found', 100);
         return { errors: [], modifiedCount: 0 };
@@ -1084,6 +1095,7 @@ export async function batchFixMermaidSyntaxInFolder(app: App, settings: NotemdSe
  * Also appends a suggestion to enable debug mode if disabled.
  */
 export async function saveErrorLog(app: App, reporter: ProgressReporter, error: any, settings: NotemdSettings): Promise<void> {
+    const i18n = getI18nStrings({ uiLocale: settings.uiLocale });
     try {
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
         const filename = `Notemd_Error_Log_${timestamp}.txt`;
@@ -1115,7 +1127,7 @@ export async function saveErrorLog(app: App, reporter: ProgressReporter, error: 
 
         await app.vault.create(filename, fileContent);
         reporter.log(`Error log saved to: ${filename}`);
-        new Notice(`Error log saved: ${filename}`);
+        new Notice(formatI18n(i18n.notices.errorLogSaved, { filename }));
 
     } catch (saveError) {
         console.error("Failed to save error log:", saveError);
