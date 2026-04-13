@@ -30,7 +30,7 @@ import { getSystemPrompt } from './promptUtils';
 import { extractOriginalText } from './extractOriginalText';
 import { formatI18n, getI18nStrings } from './i18n';
 import { resolveTaskLanguageCode } from './i18n/taskLanguagePolicy';
-import { getSidebarActionLabel } from './workflowButtons';
+import { getSidebarActionLabel, SidebarActionId } from './workflowButtons';
 
 export default class NotemdPlugin extends Plugin {
     settings: NotemdSettings;
@@ -398,7 +398,7 @@ export default class NotemdPlugin extends Plugin {
 
                     await this.maybeAutoFixMermaidForFile(newFile, reporter, 'create wiki-link and generate');
 
-                    reporter.updateStatus('Wiki-Link & Generation complete!', 100);
+                    reporter.updateStatus(this.getActionCompleteText(uiStrings.commands.createWikiLinkAndGenerateNoteFromSelection), 100);
                     if (reporter instanceof ProgressModal) {
                         setTimeout(() => reporter.close(), 2000);
                     }
@@ -495,6 +495,45 @@ export default class NotemdPlugin extends Plugin {
         if (this.statusBarItem) {
             this.statusBarItem.setText(`Notemd: ${text}`);
         }
+    }
+
+    private getActionLabel(actionId: SidebarActionId): string {
+        return getSidebarActionLabel(this.getUiStrings(), actionId);
+    }
+
+    private getRunningActionText(label: string): string {
+        return formatI18n(this.getUiStrings().sidebar.status.runningAction, { label });
+    }
+
+    private getActionCompleteText(label: string): string {
+        return formatI18n(this.getUiStrings().sidebar.status.actionComplete, { label });
+    }
+
+    private getActionFailedText(message: string): string {
+        return formatI18n(this.getUiStrings().sidebar.status.actionFailed, { message });
+    }
+
+    private getStepStatusText(current: number, total: number, label: string): string {
+        return formatI18n(this.getUiStrings().sidebar.status.stepLabel, { current, total, label });
+    }
+
+    private startReporterAction(reporter: ProgressReporter, label: string): void {
+        const statusText = this.getRunningActionText(label);
+        const maybeSidebar = reporter as any;
+        if (maybeSidebar instanceof NotemdSidebarView) {
+            maybeSidebar.startProcessing(statusText);
+        } else {
+            reporter.clearDisplay();
+            reporter.updateStatus(statusText, 0);
+        }
+        this.updateStatusBar(statusText);
+    }
+
+    private failReporterAction(reporter: ProgressReporter, message: string): string {
+        const statusText = this.getActionFailedText(message);
+        reporter.updateStatus(statusText, -1);
+        this.updateStatusBar(statusText);
+        return statusText;
     }
 
     async refreshLocalizedUi(): Promise<void> {
@@ -680,14 +719,10 @@ export default class NotemdPlugin extends Plugin {
         this.isBusy = true;
         const useReporter = reporter || this.getReporter();
         let i18n = this.getUiStrings();
+        const actionLabel = this.getActionLabel('process-current-add-links');
         
         const maybeSidebar = useReporter as any;
-        if (maybeSidebar instanceof NotemdSidebarView) {
-            maybeSidebar.startProcessing('Processing current file...');
-        } else {
-            useReporter.clearDisplay();
-            useReporter.updateStatus('Processing current file...', 0);
-        }
+        this.startReporterAction(useReporter, actionLabel);
 
         try {
             await this.loadSettings(); // Load latest settings
@@ -697,7 +732,7 @@ export default class NotemdPlugin extends Plugin {
                 throw new Error("No active '.md' or '.txt' file to process.");
             }
 
-            this.updateStatusBar(`Processing: ${activeFile.name}`);
+            this.updateStatusBar(this.getRunningActionText(`${actionLabel}: ${activeFile.name}`));
 
             // Pass the ref object for currentProcessingFileBasename
             const outputPath = await processFile(this.app, this.settings, activeFile, useReporter, this.currentProcessingFileBasename);
@@ -710,13 +745,13 @@ export default class NotemdPlugin extends Plugin {
                 }
             }
 
-            this.updateStatusBar('Processing complete');
-            useReporter.updateStatus('Processing complete!', 100);
+            const completeText = this.getActionCompleteText(actionLabel);
+            this.updateStatusBar(completeText);
+            useReporter.updateStatus(completeText, 100);
             new Notice(i18n.notices.processingComplete);
             if (useReporter instanceof ProgressModal) setTimeout(() => useReporter.close(), 2000);
 
         } catch (error: unknown) { // Changed to unknown
-            this.updateStatusBar('Error occurred');
             let errorMessage = 'An unknown error occurred during processing.';
             let errorDetails = String(error);
             if (error instanceof Error) {
@@ -733,7 +768,7 @@ export default class NotemdPlugin extends Plugin {
                 await saveErrorLog(this.app, useReporter, error, this.settings);
             }
             useReporter.log(`Error: ${errorMessage}`);
-            useReporter.updateStatus('Error occurred', -1);
+            this.failReporterAction(useReporter, errorMessage);
             // Keep reporter open on error/cancellation
         } finally {
             if (maybeSidebar instanceof NotemdSidebarView) {
@@ -749,20 +784,20 @@ export default class NotemdPlugin extends Plugin {
         this.isBusy = true;
         const useReporter = reporter || this.getReporter();
         let i18n = this.getUiStrings();
+        const actionLabel = this.getActionLabel('process-folder-add-links');
         
         const maybeSidebar = useReporter as any;
-        if (maybeSidebar instanceof NotemdSidebarView) {
-            maybeSidebar.startProcessing('Processing folder...');
-        } else {
-            useReporter.clearDisplay();
-            useReporter.updateStatus('Processing folder...', 0);
-        }
+        this.startReporterAction(useReporter, actionLabel);
 
         try {
             await this.loadSettings();
             i18n = this.getUiStrings();
             const folderPath = folderPathOverride ?? await this.getFolderSelection();
-            if (!folderPath) { useReporter.log("Folder selection cancelled."); useReporter.updateStatus("Cancelled", -1); throw new Error("Folder selection cancelled."); }
+            if (!folderPath) {
+                useReporter.log(i18n.notices.batchProcessingCancelled);
+                useReporter.updateStatus(i18n.notices.batchProcessingCancelled, -1);
+                throw new Error(i18n.notices.batchProcessingCancelled);
+            }
 
             const folder = this.app.vault.getAbstractFileByPath(folderPath);
             if (!folder || !(folder instanceof TFolder)) throw new Error(`Invalid folder selected: ${folderPath}`);
@@ -773,24 +808,30 @@ export default class NotemdPlugin extends Plugin {
             );
 
             if (files.length === 0) {
-                new Notice(formatI18n(i18n.notices.noMarkdownOrTextFilesFoundSelectedFolder, { folderPath }));
-                useReporter.log(`No eligible files found in "${folderPath}".`);
-                useReporter.updateStatus('No files found', 100);
+                const noFilesMessage = formatI18n(i18n.notices.noMarkdownOrTextFilesFoundSelectedFolder, { folderPath });
+                new Notice(noFilesMessage);
+                useReporter.log(noFilesMessage);
+                useReporter.updateStatus(noFilesMessage, 100);
                 if (useReporter instanceof ProgressModal) setTimeout(() => useReporter.close(), 2000);
                 return; // Exit gracefully
             }
 
-            this.updateStatusBar(`Batch processing ${files.length} files...`);
-            useReporter.log(`Starting batch processing for ${files.length} files in "${folderPath}"...`);
+            this.updateStatusBar(this.getRunningActionText(actionLabel));
+            useReporter.log(this.getRunningActionText(actionLabel));
             const errors: { file: string; message: string }[] = [];
 
             if (!this.settings.enableBatchParallelism || this.settings.batchConcurrency <= 1) {
                 for (let i = 0; i < files.length; i++) {
                     const file = files[i];
-                    if (useReporter.cancelled) { new Notice(i18n.notices.batchProcessingCancelled); this.updateStatusBar('Cancelled'); useReporter.updateStatus('Cancelled', -1); break; }
+                    if (useReporter.cancelled) {
+                        new Notice(i18n.notices.batchProcessingCancelled);
+                        this.updateStatusBar(i18n.notices.batchProcessingCancelled);
+                        useReporter.updateStatus(i18n.notices.batchProcessingCancelled, -1);
+                        break;
+                    }
 
                     const progress = Math.floor(((i) / files.length) * 100);
-                    useReporter.updateStatus(`Processing ${i + 1}/${files.length}: ${file.name}`, progress);
+                    useReporter.updateStatus(this.getStepStatusText(i + 1, files.length, file.name), progress);
 
                     try {
                         // Pass the ref object
@@ -827,9 +868,12 @@ export default class NotemdPlugin extends Plugin {
                             updateStatus: (msg: string, percentage?: number) => {
                                 if (percentage !== undefined) {
                                     const overallProgress = Math.floor(((processedCount + (percentage / 100)) / files.length) * 100);
-                                    useReporter.updateStatus(`Batch: ${processedCount}/${files.length} (${file.name}: ${msg})`, overallProgress);
+                                    useReporter.updateStatus(
+                                        this.getStepStatusText(processedCount, files.length, `${file.name}: ${msg}`),
+                                        overallProgress
+                                    );
                                 } else {
-                                    useReporter.updateStatus(`Batch: ${processedCount}/${files.length} (${file.name}: ${msg})`);
+                                    useReporter.updateStatus(this.getStepStatusText(processedCount, files.length, `${file.name}: ${msg}`));
                                 }
                             },
                             cancelled: useReporter.cancelled,
@@ -883,16 +927,16 @@ export default class NotemdPlugin extends Plugin {
                 if (errors.length > 0) {
                     const errorSummary = formatI18n(i18n.notices.batchProcessingFinishedWithErrors, { count: errors.length });
                     useReporter.log(`⚠️ ${errorSummary}`); useReporter.updateStatus(errorSummary, -1);
-                    this.updateStatusBar(`Batch complete with errors`); new Notice(errorSummary, 10000);
+                    this.updateStatusBar(errorSummary); new Notice(errorSummary, 10000);
                 } else {
-                    useReporter.updateStatus('Batch processing complete!', 100); this.updateStatusBar('Batch complete');
+                    const completeText = this.getActionCompleteText(actionLabel);
+                    useReporter.updateStatus(completeText, 100); this.updateStatusBar(completeText);
                     new Notice(formatI18n(i18n.notices.batchProcessingSuccess, { count: files.length }), 5000);
                     if (useReporter instanceof ProgressModal) setTimeout(() => useReporter.close(), 2000);
                 }
             }
 
         } catch (error: unknown) { // Changed to unknown
-            this.updateStatusBar('Error occurred');
             let errorMessage = 'An unknown error occurred during batch processing.';
             let errorDetails = String(error);
             if (error instanceof Error) {
@@ -909,7 +953,7 @@ export default class NotemdPlugin extends Plugin {
                 await saveErrorLog(this.app, useReporter, error, this.settings);
             }
             useReporter.log(`Batch Error: ${errorMessage}`);
-            useReporter.updateStatus('Error occurred during batch processing', -1);
+            this.failReporterAction(useReporter, errorMessage);
         } finally {
             if (maybeSidebar instanceof NotemdSidebarView) {
                 maybeSidebar.finishProcessing();
@@ -935,21 +979,24 @@ export default class NotemdPlugin extends Plugin {
             if (!provider) throw new Error('No active provider configured');
             const providerI18n = this.getUiStrings().settings.providerConfig;
 
-            useReporter.log(`Testing connection to ${provider.name}...`);
-            useReporter.updateStatus(`Testing ${provider.name}...`, 50);
+            const runningStatus = formatI18n(providerI18n.testConnectionRunning, { provider: provider.name });
+            useReporter.log(runningStatus);
+            useReporter.updateStatus(runningStatus, 50);
             const testingNotice = new Notice(formatI18n(providerI18n.testConnectionRunning, { provider: provider.name }), 0);
 
             const result = await testAPI(provider, this.settings.enableApiErrorDebugMode); // Use utility function
             testingNotice.hide();
 
             if (result.success) {
-                useReporter.log(`✅ Success: ${result.message}`);
-                new Notice(formatI18n(providerI18n.testConnectionSuccess, { message: result.message }), 5000);
-                useReporter.updateStatus("Connection successful!", 100);
+                const successStatus = formatI18n(providerI18n.testConnectionSuccess, { message: result.message });
+                useReporter.log(successStatus);
+                new Notice(successStatus, 5000);
+                useReporter.updateStatus(successStatus, 100);
             } else {
-                useReporter.log(`❌ Failed: ${result.message}. Check console.`);
-                new Notice(formatI18n(providerI18n.testConnectionFailed, { message: result.message }), 10000);
-                useReporter.updateStatus("Connection failed.", -1);
+                const failedStatus = formatI18n(providerI18n.testConnectionFailed, { message: result.message });
+                useReporter.log(failedStatus);
+                new Notice(failedStatus, 10000);
+                useReporter.updateStatus(failedStatus, -1);
             }
         } catch (error: unknown) { // Changed to unknown
             let errorMessage = 'An unknown error occurred during connection test.';
@@ -960,9 +1007,10 @@ export default class NotemdPlugin extends Plugin {
             }
             const providerI18n = this.getUiStrings().settings.providerConfig;
             useReporter.log(`❌ ${errorMessage}`);
-            new Notice(formatI18n(providerI18n.testConnectionError, { message: errorMessage }), 10000);
+            const errorStatus = formatI18n(providerI18n.testConnectionError, { message: errorMessage });
+            new Notice(errorStatus, 10000);
             console.error('LLM Connection Test Error:', errorDetails); // Log details
-            useReporter.updateStatus("Connection test error.", -1);
+            useReporter.updateStatus(errorStatus, -1);
             this.openLocalizedErrorModal(this.getUiStrings().errorModal.titles.llmConnectionTest, errorDetails);
             
             // Save error log
@@ -979,16 +1027,10 @@ export default class NotemdPlugin extends Plugin {
         this.isBusy = true;
         const useReporter = reporter || this.getReporter();
         let i18n = this.getUiStrings();
+        const actionLabel = this.getActionLabel('generate-from-title');
         
         const maybeSidebar = useReporter as any;
-        if (maybeSidebar instanceof NotemdSidebarView) {
-            maybeSidebar.startProcessing(`Generating: ${file.name}`);
-        } else {
-            useReporter.clearDisplay();
-            useReporter.updateStatus(`Generating: ${file.name}`, 0);
-        }
-
-        this.updateStatusBar(`Generating: ${file.name}`);
+        this.startReporterAction(useReporter, `${actionLabel}: ${file.name}`);
         try {
             await this.loadSettings();
             i18n = this.getUiStrings();
@@ -996,12 +1038,12 @@ export default class NotemdPlugin extends Plugin {
 
             await this.maybeAutoFixMermaidForFile(file, useReporter, 'generate from title');
 
-            this.updateStatusBar('Generation complete');
-            useReporter.updateStatus('Content generation complete!', 100);
+            const completeText = this.getActionCompleteText(actionLabel);
+            this.updateStatusBar(completeText);
+            useReporter.updateStatus(completeText, 100);
             new Notice(formatI18n(i18n.notices.contentGenerationSuccess, { file: file.name }));
             if (useReporter instanceof ProgressModal) setTimeout(() => useReporter.close(), 2000);
         } catch (error: unknown) { // Changed to unknown
-            this.updateStatusBar('Error during generation');
             let errorMessage = 'An unknown error occurred during content generation.';
             let errorDetails = String(error);
             if (error instanceof Error) {
@@ -1018,7 +1060,7 @@ export default class NotemdPlugin extends Plugin {
                 await saveErrorLog(this.app, useReporter, error, this.settings);
             }
             useReporter.log(`Error generating content for ${file.name}: ${errorMessage}`);
-            useReporter.updateStatus('Error occurred', -1);
+            this.failReporterAction(useReporter, errorMessage);
         } finally {
             if (maybeSidebar instanceof NotemdSidebarView) {
                 maybeSidebar.finishProcessing();
@@ -1033,14 +1075,10 @@ export default class NotemdPlugin extends Plugin {
         this.isBusy = true;
         const useReporter = reporter || this.getReporter();
         let i18n = this.getUiStrings();
+        const actionLabel = this.getActionLabel('research-and-summarize');
         
         const maybeSidebar = useReporter as any;
-        if (maybeSidebar instanceof NotemdSidebarView) {
-            maybeSidebar.startProcessing('Researching and summarizing...');
-        } else {
-            useReporter.clearDisplay();
-            useReporter.updateStatus('Researching and summarizing...', 0);
-        }
+        this.startReporterAction(useReporter, actionLabel);
 
         const activeFile = view.file;
         if (!activeFile) { new Notice(i18n.notices.noActiveFile); this.isBusy = false; return; }
@@ -1048,7 +1086,7 @@ export default class NotemdPlugin extends Plugin {
         const topic = selectedText ? selectedText.trim() : activeFile.basename;
         if (!topic) { new Notice(i18n.notices.noTopicFound); this.isBusy = false; return; }
 
-        this.updateStatusBar(`Researching: ${topic}`);
+        this.updateStatusBar(this.getRunningActionText(`${actionLabel}: ${topic}`));
         useReporter.log(`Starting research for topic: "${topic}"`);
         try {
             await this.loadSettings();
@@ -1061,12 +1099,11 @@ export default class NotemdPlugin extends Plugin {
             // Success/error handling is now within researchAndSummarize
             // Update status bar based on final reporter state?
             if (!useReporter.cancelled) {
-                 this.updateStatusBar('Research complete');
+                 this.updateStatusBar(this.getActionCompleteText(actionLabel));
             } else {
-                 this.updateStatusBar('Research cancelled');
+                 this.updateStatusBar(i18n.sidebar.status.processingStopped);
             }
         } catch (error: unknown) { // Changed to unknown, Catch errors propagated from researchAndSummarize
-            this.updateStatusBar('Error during research');
             let errorMessage = 'An unknown error occurred during research.';
             let errorDetails = String(error);
             if (error instanceof Error) {
@@ -1085,7 +1122,7 @@ export default class NotemdPlugin extends Plugin {
             // If reporter wasn't used or failed early, log here
             if (!useReporter.cancelled) { // Avoid double logging cancellation
                  useReporter.log(`Error: ${errorMessage}`);
-                 useReporter.updateStatus('Error occurred', -1);
+                 this.failReporterAction(useReporter, errorMessage);
             }
         } finally {
             if (maybeSidebar instanceof NotemdSidebarView) {
@@ -1104,23 +1141,23 @@ export default class NotemdPlugin extends Plugin {
         this.isBusy = true;
         const useReporter = reporter || this.getReporter();
         let i18n = this.getUiStrings();
+        const actionLabel = this.getActionLabel('batch-generate-from-titles');
         
         const maybeSidebar = useReporter as any;
-        if (maybeSidebar instanceof NotemdSidebarView) {
-            maybeSidebar.startProcessing('Batch generating content...');
-        } else {
-            useReporter.clearDisplay();
-            useReporter.updateStatus('Batch generating content...', 0);
-        }
+        this.startReporterAction(useReporter, actionLabel);
 
         try {
             await this.loadSettings();
             i18n = this.getUiStrings();
             const folderPath = folderPathOverride ?? await this.getFolderSelection();
-            if (!folderPath) { useReporter.log("Folder selection cancelled."); useReporter.updateStatus("Cancelled", -1); throw new Error("Folder selection cancelled."); }
+            if (!folderPath) {
+                useReporter.log(i18n.notices.batchGenerationCancelled);
+                useReporter.updateStatus(i18n.notices.batchGenerationCancelled, -1);
+                throw new Error(i18n.notices.batchGenerationCancelled);
+            }
 
-            this.updateStatusBar(`Batch generating...`);
-            useReporter.log(`Starting batch generation for folder: "${folderPath}"...`);
+            this.updateStatusBar(this.getRunningActionText(actionLabel));
+            useReporter.log(this.getRunningActionText(actionLabel));
 
             const { errors } = await batchGenerateContentForTitles(this.app, this.settings, folderPath, useReporter); // Call utility
 
@@ -1135,9 +1172,10 @@ export default class NotemdPlugin extends Plugin {
                 if (errors.length > 0) {
                     const errorSummary = formatI18n(i18n.notices.batchGenerationFinishedWithErrors, { count: errors.length });
                     useReporter.log(`⚠️ ${errorSummary}`); useReporter.updateStatus(errorSummary, -1);
-                    this.updateStatusBar(`Batch generation complete with errors`); new Notice(errorSummary, 10000);
+                    this.updateStatusBar(errorSummary); new Notice(errorSummary, 10000);
                 } else {
-                    useReporter.updateStatus('Batch generation complete!', 100); this.updateStatusBar('Batch generation complete');
+                    const completeText = this.getActionCompleteText(actionLabel);
+                    useReporter.updateStatus(completeText, 100); this.updateStatusBar(completeText);
                     new Notice(formatI18n(i18n.notices.batchGenerationSuccess, { folderPath }), 5000);
                     if (useReporter instanceof ProgressModal) setTimeout(() => useReporter.close(), 2000);
                 }
@@ -1148,12 +1186,11 @@ export default class NotemdPlugin extends Plugin {
                     };
                 }
             } else {
-                 this.updateStatusBar('Batch generation cancelled');
+                 this.updateStatusBar(i18n.notices.batchGenerationCancelled);
                  new Notice(i18n.notices.batchGenerationCancelled);
             }
 
         } catch (error: unknown) { // Changed to unknown
-            this.updateStatusBar('Error during batch generation');
             let errorMessage = 'An unknown error occurred during batch generation.';
             let errorDetails = String(error);
             if (error instanceof Error) {
@@ -1169,7 +1206,7 @@ export default class NotemdPlugin extends Plugin {
                 await saveErrorLog(this.app, useReporter, error, this.settings);
             }
             useReporter.log(`Batch Error: ${errorMessage}`);
-            useReporter.updateStatus('Error occurred during batch generation', -1);
+            this.failReporterAction(useReporter, errorMessage);
         } finally {
             if (maybeSidebar instanceof NotemdSidebarView) {
                 maybeSidebar.finishProcessing();
@@ -1185,25 +1222,19 @@ export default class NotemdPlugin extends Plugin {
         this.isBusy = true;
         const useReporter = reporter || this.getReporter();
         let i18n = this.getUiStrings();
+        const actionLabel = this.getActionLabel('check-remove-duplicate-concepts');
         
         const maybeSidebar = useReporter as any;
-        if (maybeSidebar instanceof NotemdSidebarView) {
-            maybeSidebar.startProcessing('Checking duplicates...');
-        } else {
-            useReporter.clearDisplay();
-            useReporter.updateStatus('Checking duplicates...', 0);
-        }
+        this.startReporterAction(useReporter, actionLabel);
 
-        this.updateStatusBar("Checking duplicates...");
-        useReporter.log("Starting: Check & Remove Duplicate Concept Notes...");
+        useReporter.log(this.getRunningActionText(actionLabel));
         try {
             await this.loadSettings();
             i18n = this.getUiStrings();
             await checkAndRemoveDuplicateConceptNotes(this.app, this.settings, useReporter); // Call utility
             // Status is updated within the utility function
-            this.updateStatusBar("Duplicate check complete.");
+            this.updateStatusBar(this.getActionCompleteText(actionLabel));
         } catch (error: unknown) { // Changed to unknown
-            this.updateStatusBar('Error during duplicate check');
             let errorMessage = 'An unknown error occurred during duplicate check.';
             let errorDetails = String(error);
             if (error instanceof Error) {
@@ -1213,7 +1244,7 @@ export default class NotemdPlugin extends Plugin {
             console.error("Error checking/removing duplicate concept notes:", errorDetails);
             new Notice(formatI18n(i18n.notices.duplicateCheckRemoveError, { message: errorMessage }), 10000);
             useReporter.log(`Error: ${errorMessage}`);
-            useReporter.updateStatus('Error occurred', -1);
+            this.failReporterAction(useReporter, errorMessage);
             this.openLocalizedErrorModal(i18n.errorModal.titles.duplicateCheckRemove, errorDetails);
         } finally {
             if (maybeSidebar instanceof NotemdSidebarView) {
@@ -1231,23 +1262,24 @@ export default class NotemdPlugin extends Plugin {
         this.isBusy = true;
         const useReporter = reporter || this.getReporter();
         let i18n = this.getUiStrings();
+        const actionLabel = this.getActionLabel('batch-mermaid-fix');
         
         const maybeSidebar = useReporter as any;
-        if (maybeSidebar instanceof NotemdSidebarView) {
-            maybeSidebar.startProcessing('Batch fixing Mermaid syntax...');
-        } else {
-            useReporter.clearDisplay();
-            useReporter.updateStatus('Batch fixing Mermaid syntax...', 0);
-        }
+        this.startReporterAction(useReporter, actionLabel);
 
         try {
             await this.loadSettings(); // Load settings in case needed by future logic
             i18n = this.getUiStrings();
             const folderPath = folderPathOverride ?? await this.getFolderSelection();
-            if (!folderPath) { useReporter.log("Folder selection cancelled."); useReporter.updateStatus("Cancelled", -1); throw new Error("Folder selection cancelled."); }
+            if (!folderPath) {
+                const cancelledMessage = i18n.common.cancel;
+                useReporter.log(cancelledMessage);
+                useReporter.updateStatus(cancelledMessage, -1);
+                throw new Error(cancelledMessage);
+            }
 
-            this.updateStatusBar(`Batch fixing Mermaid syntax...`);
-            useReporter.log(`Starting batch Mermaid fix for folder: "${folderPath}"...`);
+            this.updateStatusBar(this.getRunningActionText(actionLabel));
+            useReporter.log(this.getRunningActionText(actionLabel));
 
             const { errors, modifiedCount } = await batchFixMermaidSyntaxInFolder(this.app, this.settings, folderPath, useReporter); // Call utility
 
@@ -1258,10 +1290,10 @@ export default class NotemdPlugin extends Plugin {
                         modifiedCount
                     });
                     useReporter.log(`⚠️ ${errorSummary}`); useReporter.updateStatus(errorSummary, -1);
-                    this.updateStatusBar(`Batch fix complete with errors`); new Notice(errorSummary, 10000);
+                    this.updateStatusBar(errorSummary); new Notice(errorSummary, 10000);
                 } else {
                     const finalMessage = formatI18n(i18n.notices.batchMermaidFixSuccess, { modifiedCount });
-                    useReporter.updateStatus(finalMessage, 100); this.updateStatusBar('Batch fix complete');
+                    useReporter.updateStatus(finalMessage, 100); this.updateStatusBar(this.getActionCompleteText(actionLabel));
                     new Notice(finalMessage, 5000);
                     if (useReporter instanceof ProgressModal) setTimeout(() => useReporter.close(), 2000);
                 }
@@ -1269,7 +1301,6 @@ export default class NotemdPlugin extends Plugin {
             }
 
         } catch (error: unknown) { // Changed to unknown
-            this.updateStatusBar('Error during batch fix');
             let errorMessage = 'An unknown error occurred during batch Mermaid fix.';
             let errorDetails = String(error);
             if (error instanceof Error) {
@@ -1285,7 +1316,7 @@ export default class NotemdPlugin extends Plugin {
                 await saveErrorLog(this.app, useReporter, error, this.settings);
             }
             useReporter.log(`Batch Fix Error: ${errorMessage}`);
-            useReporter.updateStatus('Error occurred during batch fix', -1);
+            this.failReporterAction(useReporter, errorMessage);
         } finally {
             if (maybeSidebar instanceof NotemdSidebarView) {
                 maybeSidebar.finishProcessing();
@@ -1300,14 +1331,10 @@ export default class NotemdPlugin extends Plugin {
         this.isBusy = true;
         const useReporter = reporter || this.getReporter();
         let i18n = this.getUiStrings();
+        const actionLabel = this.getActionLabel('fix-formula-current');
         
         const maybeSidebar = useReporter as any;
-        if (maybeSidebar instanceof NotemdSidebarView) {
-            maybeSidebar.startProcessing(`Fixing formulas in ${file.name}...`);
-        } else {
-            useReporter.clearDisplay();
-            useReporter.updateStatus(`Fixing formulas in ${file.name}...`, 0);
-        }
+        this.startReporterAction(useReporter, `${actionLabel}: ${file.name}`);
 
         try {
             await this.loadSettings();
@@ -1323,16 +1350,15 @@ export default class NotemdPlugin extends Plugin {
                 useReporter.log(message);
                 new Notice(message);
             }
-            useReporter.updateStatus('Formula fix complete!', 100);
+            useReporter.updateStatus(this.getActionCompleteText(actionLabel), 100);
             if (useReporter instanceof ProgressModal) setTimeout(() => useReporter.close(), 1000);
 
         } catch (error: unknown) {
-            this.updateStatusBar('Error during formula fix');
             let errorMessage = 'An unknown error occurred.';
             if (error instanceof Error) errorMessage = error.message;
             
             useReporter.log(`Error: ${errorMessage}`);
-            useReporter.updateStatus('Error occurred', -1);
+            this.failReporterAction(useReporter, errorMessage);
             new Notice(formatI18n(i18n.notices.genericError, { message: errorMessage }));
             await saveErrorLog(this.app, useReporter, error, this.settings);
         } finally {
@@ -1348,20 +1374,21 @@ export default class NotemdPlugin extends Plugin {
         this.isBusy = true;
         const useReporter = reporter || this.getReporter();
         let i18n = this.getUiStrings();
+        const actionLabel = this.getActionLabel('batch-fix-formula');
         
         const maybeSidebar = useReporter as any;
-        if (maybeSidebar instanceof NotemdSidebarView) {
-            maybeSidebar.startProcessing('Batch fixing formula formats...');
-        } else {
-            useReporter.clearDisplay();
-            useReporter.updateStatus('Batch fixing formula formats...', 0);
-        }
+        this.startReporterAction(useReporter, actionLabel);
 
         try {
             await this.loadSettings();
             i18n = this.getUiStrings();
             const folderPath = await this.getFolderSelection();
-            if (!folderPath) { useReporter.log("Cancelled."); useReporter.updateStatus("Cancelled", -1); throw new Error("Cancelled"); }
+            if (!folderPath) {
+                const cancelledMessage = i18n.common.cancel;
+                useReporter.log(cancelledMessage);
+                useReporter.updateStatus(cancelledMessage, -1);
+                throw new Error(cancelledMessage);
+            }
 
             const { modifiedCount, errors } = await batchFixFormulaFormatsInFolder(this.app, folderPath, useReporter);
 
@@ -1372,12 +1399,12 @@ export default class NotemdPlugin extends Plugin {
                         modifiedCount
                     });
                     useReporter.log(msg);
-                    useReporter.updateStatus('Finished with errors', -1);
+                    useReporter.updateStatus(msg, -1);
                     new Notice(msg);
                 } else {
                     const msg = formatI18n(i18n.notices.batchFormulaFixSuccess, { modifiedCount });
                     useReporter.log(msg);
-                    useReporter.updateStatus('Complete', 100);
+                    useReporter.updateStatus(this.getActionCompleteText(actionLabel), 100);
                     new Notice(msg);
                     if (useReporter instanceof ProgressModal) setTimeout(() => useReporter.close(), 2000);
                 }
@@ -1387,7 +1414,7 @@ export default class NotemdPlugin extends Plugin {
             if (error instanceof Error) errorMessage = error.message;
             if (!errorMessage.includes("Cancelled")) {
                 useReporter.log(`Error: ${errorMessage}`);
-                useReporter.updateStatus('Error occurred', -1);
+                this.failReporterAction(useReporter, errorMessage);
                 new Notice(formatI18n(i18n.notices.genericError, { message: errorMessage }));
                 await saveErrorLog(this.app, useReporter, error, this.settings);
             }
@@ -1407,16 +1434,10 @@ export default class NotemdPlugin extends Plugin {
         this.isBusy = true;
         const useReporter = reporter || this.getReporter();
         let i18n = this.getUiStrings();
+        const actionLabel = this.getActionLabel('batch-translate-folder');
 
         const maybeSidebar = useReporter as any;
-        if (maybeSidebar instanceof NotemdSidebarView) {
-            maybeSidebar.startProcessing("Batch translating...");
-        } else {
-            useReporter.clearDisplay();
-            useReporter.updateStatus("Batch translating...", 0);
-        }
-
-        this.updateStatusBar("Batch translating...");
+        this.startReporterAction(useReporter, actionLabel);
 
         try {
             await this.loadSettings();
@@ -1445,7 +1466,6 @@ export default class NotemdPlugin extends Plugin {
             }
 
         } catch (error: unknown) {
-            this.updateStatusBar("Batch translation failed");
             let errorMessage = 'An unknown error occurred during batch translation.';
             if (error instanceof Error) {
                 errorMessage = error.message;
@@ -1458,7 +1478,7 @@ export default class NotemdPlugin extends Plugin {
                 await saveErrorLog(this.app, useReporter, error, this.settings);
             }
             useReporter.log(`Error: ${errorMessage}`);
-            useReporter.updateStatus('Error occurred', -1);
+            this.failReporterAction(useReporter, errorMessage);
         } finally {
             if (maybeSidebar instanceof NotemdSidebarView) {
                 maybeSidebar.finishProcessing();
@@ -1475,16 +1495,10 @@ export default class NotemdPlugin extends Plugin {
         this.isBusy = true;
         const useReporter = reporter || this.getReporter();
         let i18n = this.getUiStrings();
+        const actionLabel = this.getActionLabel('translate-current-file');
         
         const maybeSidebar = useReporter as any;
-        if (maybeSidebar instanceof NotemdSidebarView) {
-            maybeSidebar.startProcessing("Translating...");
-        } else {
-            useReporter.clearDisplay();
-            useReporter.updateStatus("Translating...", 0);
-        }
-
-        this.updateStatusBar("Translating...");
+        this.startReporterAction(useReporter, `${actionLabel}: ${file.name}`);
 
         try {
             await this.loadSettings();
@@ -1499,12 +1513,11 @@ export default class NotemdPlugin extends Plugin {
             }
             
             // Update status and progress on success
-            this.updateStatusBar("Translation complete");
+            this.updateStatusBar(this.getActionCompleteText(actionLabel));
             useReporter.log("Translation complete.");
-            useReporter.updateStatus("Translation complete", 100);
+            useReporter.updateStatus(this.getActionCompleteText(actionLabel), 100);
 
         } catch (error: unknown) {
-            this.updateStatusBar("Translation failed");
             let errorMessage = 'An unknown error occurred during translation.';
             let errorDetails = String(error);
             if (error instanceof Error) {
@@ -1520,7 +1533,7 @@ export default class NotemdPlugin extends Plugin {
                 await saveErrorLog(this.app, useReporter, error, this.settings);
             }
             useReporter.log(`Error: ${errorMessage}`);
-            useReporter.updateStatus('Error occurred', -1);
+            this.failReporterAction(useReporter, errorMessage);
         } finally {
             if (maybeSidebar instanceof NotemdSidebarView) {
                 maybeSidebar.finishProcessing();
@@ -1537,15 +1550,11 @@ export default class NotemdPlugin extends Plugin {
 		this.isBusy = true;
         const useReporter = reporter || this.getReporter();
         let i18n = this.getUiStrings();
+        const actionLabel = this.getActionLabel('summarize-as-mermaid');
 
         const maybeSidebar = useReporter as any;
-        if (maybeSidebar instanceof NotemdSidebarView) {
-            maybeSidebar.startProcessing(`Summarizing ${file.name}...`);
-        } else {
-            useReporter.clearDisplay();
-		    reporter.log(`Starting Mermaid summarization for ${file.name}...`);
-		    reporter.updateStatus(`Summarizing ${file.name}...`, 5);
-        }
+        this.startReporterAction(useReporter, `${actionLabel}: ${file.name}`);
+        reporter.log(`Starting Mermaid summarization for ${file.name}...`);
 
 		try {
             await this.loadSettings();
@@ -1560,9 +1569,9 @@ export default class NotemdPlugin extends Plugin {
 
 			const prompt = this.getPromptForTask('summarizeToMermaid');
 
-            reporter.updateStatus('Calling LLM for summarization...', 20);
+            reporter.updateStatus(this.getStepStatusText(1, 3, actionLabel), 20);
             const mermaidContent = await callLLM(provider, prompt, fileContent, this.settings, reporter, modelName);
-            reporter.updateStatus('LLM call complete. Processing response...', 90);
+            reporter.updateStatus(this.getStepStatusText(2, 3, actionLabel), 90);
 
 			const outputFilePath = await saveMermaidSummaryFile(this.app, this.settings, file, mermaidContent, reporter);
             if (this.settings.autoMermaidFixAfterGenerate) {
@@ -1572,7 +1581,7 @@ export default class NotemdPlugin extends Plugin {
                 }
             }
 
-			reporter.updateStatus('Mermaid diagram saved successfully!', 100);
+			reporter.updateStatus(this.getActionCompleteText(actionLabel), 100);
 			reporter.log(`Mermaid diagram saved to: ${outputFilePath}`);
 			new Notice(i18n.notices.mermaidSummarizationComplete);
 
@@ -1588,7 +1597,7 @@ export default class NotemdPlugin extends Plugin {
 		} catch (error: unknown) {
 			const message = error instanceof Error ? error.message : String(error);
 			reporter.log(`Error during Mermaid summarization: ${message}`);
-			reporter.updateStatus('Error during summarization.', -1);
+			reporter.updateStatus(this.getActionFailedText(message), -1);
 			new Notice(formatI18n(i18n.notices.mermaidSummarizationError, { message }));
 			console.error("Summarization Error:", error);
             
@@ -1607,14 +1616,10 @@ export default class NotemdPlugin extends Plugin {
         this.isBusy = true;
         const useReporter = reporter || this.getReporter();
         let i18n = this.getUiStrings();
+        const actionLabel = this.getActionLabel('extract-concepts-current');
         
         const maybeSidebar = useReporter as any;
-        if (maybeSidebar instanceof NotemdSidebarView) {
-            maybeSidebar.startProcessing('Extracting concepts...');
-        } else {
-            useReporter.clearDisplay();
-            useReporter.updateStatus('Extracting concepts...', 0);
-        }
+        this.startReporterAction(useReporter, actionLabel);
 
         try {
             await this.loadSettings();
@@ -1624,7 +1629,7 @@ export default class NotemdPlugin extends Plugin {
                 throw new Error("No active '.md' or '.txt' file to extract concepts from.");
             }
 
-            this.updateStatusBar(`Extracting concepts: ${activeFile.name}`);
+            this.updateStatusBar(this.getRunningActionText(`${actionLabel}: ${activeFile.name}`));
 
             const concepts = await extractConceptsFromFile(this.app, this, activeFile, useReporter);
 
@@ -1640,17 +1645,16 @@ export default class NotemdPlugin extends Plugin {
                         minimalTemplate: this.settings.extractConceptsMinimalTemplate
                     }
                 );
-                useReporter.updateStatus('Concept extraction complete!', 100);
+                useReporter.updateStatus(this.getActionCompleteText(actionLabel), 100);
                 new Notice(formatI18n(i18n.notices.conceptExtractionSuccess, { count: concepts.size }));
             } else {
-                useReporter.updateStatus('No concepts found.', 100);
+                useReporter.updateStatus(i18n.notices.noConceptsFoundToExtract, 100);
                 new Notice(i18n.notices.noConceptsFoundToExtract);
             }
 
             if (useReporter instanceof ProgressModal) setTimeout(() => useReporter.close(), 2000);
 
         } catch (error: unknown) {
-            this.updateStatusBar('Error occurred');
             let errorMessage = 'An unknown error occurred during concept extraction.';
             if (error instanceof Error) {
                 errorMessage = error.message;
@@ -1663,7 +1667,7 @@ export default class NotemdPlugin extends Plugin {
                 await saveErrorLog(this.app, useReporter, error, this.settings);
             }
             useReporter.log(`Error: ${errorMessage}`);
-            useReporter.updateStatus('Error occurred', -1);
+            this.failReporterAction(useReporter, errorMessage);
         } finally {
             if (maybeSidebar instanceof NotemdSidebarView) {
                 maybeSidebar.finishProcessing();
@@ -1677,14 +1681,10 @@ export default class NotemdPlugin extends Plugin {
         this.isBusy = true;
         const useReporter = reporter || this.getReporter();
         let i18n = this.getUiStrings();
+        const actionLabel = this.getActionLabel('extract-concepts-folder');
         
         const maybeSidebar = useReporter as any;
-        if (maybeSidebar instanceof NotemdSidebarView) {
-            maybeSidebar.startProcessing('Batch extracting concepts...');
-        } else {
-            useReporter.clearDisplay();
-            useReporter.updateStatus('Batch extracting concepts...', 0);
-        }
+        this.startReporterAction(useReporter, actionLabel);
 
         try {
             await this.loadSettings();
@@ -1705,8 +1705,8 @@ export default class NotemdPlugin extends Plugin {
                 return;
             }
 
-            this.updateStatusBar(`Batch extracting concepts from ${files.length} files...`);
-            useReporter.log(`Starting batch concept extraction for ${files.length} files in "${folderPath}"...`);
+            this.updateStatusBar(this.getRunningActionText(actionLabel));
+            useReporter.log(this.getRunningActionText(actionLabel));
             const errors: { file: string; message: string }[] = [];
             let totalConcepts = 0;
 
@@ -1716,7 +1716,7 @@ export default class NotemdPlugin extends Plugin {
                     if (useReporter.cancelled) { new Notice(i18n.notices.batchExtractionCancelled); break; }
 
                     const progress = Math.floor(((i) / files.length) * 100);
-                    useReporter.updateStatus(`Processing ${i + 1}/${files.length}: ${file.name}`, progress);
+                    useReporter.updateStatus(this.getStepStatusText(i + 1, files.length, file.name), progress);
 
                     try {
                         const concepts = await extractConceptsFromFile(this.app, this, file, useReporter);
@@ -1757,9 +1757,12 @@ export default class NotemdPlugin extends Plugin {
                             updateStatus: (msg: string, percentage?: number) => {
                                 if (percentage !== undefined) {
                                     const overallProgress = Math.floor(((processedCount + (percentage / 100)) / files.length) * 100);
-                                    useReporter.updateStatus(`Batch: ${processedCount}/${files.length} (${file.name}: ${msg})`, overallProgress);
+                                    useReporter.updateStatus(
+                                        this.getStepStatusText(processedCount, files.length, `${file.name}: ${msg}`),
+                                        overallProgress
+                                    );
                                 } else {
-                                    useReporter.updateStatus(`Batch: ${processedCount}/${files.length} (${file.name}: ${msg})`);
+                                    useReporter.updateStatus(this.getStepStatusText(processedCount, files.length, `${file.name}: ${msg}`));
                                 }
                             },
                             cancelled: useReporter.cancelled,
@@ -1835,7 +1838,6 @@ export default class NotemdPlugin extends Plugin {
             }
 
         } catch (error: unknown) {
-            this.updateStatusBar('Error occurred');
             let errorMessage = 'An unknown error occurred during batch extraction.';
             if (error instanceof Error) {
                 errorMessage = error.message;
@@ -1848,7 +1850,7 @@ export default class NotemdPlugin extends Plugin {
                 await saveErrorLog(this.app, useReporter, error, this.settings);
             }
             useReporter.log(`Batch Error: ${errorMessage}`);
-            useReporter.updateStatus('Error occurred', -1);
+            this.failReporterAction(useReporter, errorMessage);
         } finally {
             if (maybeSidebar instanceof NotemdSidebarView) {
                 maybeSidebar.finishProcessing();
@@ -1865,14 +1867,10 @@ export default class NotemdPlugin extends Plugin {
         this.isBusy = true;
         const useReporter = reporter || this.getReporter();
         let i18n = this.getUiStrings();
+        const commandLabel = i18n.commands.extractConceptsAndGenerateTitles;
 
         const maybeSidebar = useReporter as any;
-        if (maybeSidebar instanceof NotemdSidebarView) {
-            maybeSidebar.startProcessing("Extracting concepts and generating titles...");
-        } else {
-            useReporter.clearDisplay();
-            useReporter.updateStatus("Extracting concepts and generating titles...", 0);
-        }
+        this.startReporterAction(useReporter, commandLabel);
 
         try {
             await this.extractConceptsCommand(useReporter);
@@ -1889,7 +1887,6 @@ export default class NotemdPlugin extends Plugin {
             }
 
         } catch (error: unknown) {
-            this.updateStatusBar("Error occurred");
             let errorMessage = 'An unknown error occurred during the process.';
             if (error instanceof Error) {
                 errorMessage = error.message;
@@ -1902,7 +1899,7 @@ export default class NotemdPlugin extends Plugin {
                 await saveErrorLog(this.app, useReporter, error, this.settings);
             }
             useReporter.log(`Error: ${errorMessage}`);
-            useReporter.updateStatus('Error occurred', -1);
+            this.failReporterAction(useReporter, errorMessage);
         } finally {
             if (maybeSidebar instanceof NotemdSidebarView) {
                 maybeSidebar.finishProcessing();
@@ -1919,14 +1916,10 @@ export default class NotemdPlugin extends Plugin {
         this.isBusy = true;
         const useReporter = reporter || this.getReporter();
         let i18n = this.getUiStrings();
+        const actionLabel = this.getActionLabel('extract-original-text');
 
         const maybeSidebar = useReporter as any;
-        if (maybeSidebar instanceof NotemdSidebarView) {
-            maybeSidebar.startProcessing("Extracting specific original text...");
-        } else {
-            useReporter.clearDisplay();
-            useReporter.updateStatus("Extracting specific original text...", 0);
-        }
+        this.startReporterAction(useReporter, actionLabel);
 
         try {
             await this.loadSettings();
@@ -1938,10 +1931,9 @@ export default class NotemdPlugin extends Plugin {
 
             await extractOriginalText(this.app, this, activeFile, useReporter);
             
-            useReporter.updateStatus('Extraction complete!', 100);
+            useReporter.updateStatus(this.getActionCompleteText(actionLabel), 100);
 
         } catch (error: unknown) {
-            this.updateStatusBar("Error occurred");
             let errorMessage = 'An unknown error occurred during extraction.';
             if (error instanceof Error) {
                 errorMessage = error.message;
@@ -1954,7 +1946,7 @@ export default class NotemdPlugin extends Plugin {
                 await saveErrorLog(this.app, useReporter, error, this.settings);
             }
             useReporter.log(`Error: ${errorMessage}`);
-            useReporter.updateStatus('Error occurred', -1);
+            this.failReporterAction(useReporter, errorMessage);
         } finally {
             if (maybeSidebar instanceof NotemdSidebarView) {
                 maybeSidebar.finishProcessing();

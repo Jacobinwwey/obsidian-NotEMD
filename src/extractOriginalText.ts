@@ -11,6 +11,7 @@ export async function extractOriginalText(
     reporter: ProgressReporter
 ): Promise<void> {
     const settings = plugin.settings;
+    const i18n = getI18nStrings({ uiLocale: settings.uiLocale });
     const questions = settings.extractQuestions.split('\n').map(q => q.trim()).filter(q => q.length > 0);
 
     if (questions.length === 0) {
@@ -27,7 +28,14 @@ export async function extractOriginalText(
 
     if (settings.extractOriginalTextMergedMode) {
         reporter.log(`Merged Query Mode: ON. Processing ${questions.length} questions in a single call.`);
-        reporter.updateStatus(`Extracting answers for ${questions.length} questions...`, 10);
+        reporter.updateStatus(
+            formatI18n(i18n.sidebar.status.stepLabel, {
+                current: 1,
+                total: questions.length,
+                label: i18n.sidebar.actions.extractOriginalText.label
+            }),
+            10
+        );
 
         const mergedQuestionsInput = questions.map((q, index) => `${index + 1}. ${q}`).join('\n\n');
         
@@ -53,7 +61,14 @@ export async function extractOriginalText(
             const question = questions[i];
             if (reporter.cancelled) break;
 
-            reporter.updateStatus(`Extracting answer for question ${i + 1}/${questions.length}...`, Math.floor((i / questions.length) * 100));
+            reporter.updateStatus(
+                formatI18n(i18n.sidebar.status.stepLabel, {
+                    current: i + 1,
+                    total: questions.length,
+                    label: i18n.sidebar.actions.extractOriginalText.label
+                }),
+                Math.floor((i / questions.length) * 100)
+            );
             reporter.log(`Processing question: "${question}"`);
 
             // Get prompt using the centralized utility
@@ -79,7 +94,14 @@ export async function extractOriginalText(
 
     if (reporter.cancelled) return;
 
-    reporter.updateStatus('Saving results...', 95);
+    reporter.updateStatus(
+        formatI18n(i18n.sidebar.status.stepLabel, {
+            current: questions.length,
+            total: questions.length,
+            label: i18n.sidebar.actions.extractOriginalText.label
+        }),
+        95
+    );
     
     const outputContent = results.join('\n\n');
     
@@ -123,6 +145,5 @@ export async function extractOriginalText(
 
     await app.vault.create(newFilePath, outputContent);
     reporter.log(`Created extracted file: ${newFilePath}`);
-    const i18n = getI18nStrings({ uiLocale: settings.uiLocale });
     new Notice(formatI18n(i18n.notices.extractionCompleteSavedTo, { path: newFilePath }));
 }

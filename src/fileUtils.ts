@@ -289,6 +289,16 @@ function getAllWords(content: string): Set<string> {
     return words;
 }
 
+type FileUtilsI18n = ReturnType<typeof getI18nStrings>;
+
+function formatStepStatus(i18n: FileUtilsI18n, current: number, total: number, label: string): string {
+    return formatI18n(i18n.sidebar.status.stepLabel, { current, total, label });
+}
+
+function formatRunningStatus(i18n: FileUtilsI18n, label: string): string {
+    return formatI18n(i18n.sidebar.status.runningAction, { label });
+}
+
 // --- Main File Processing Logic ---
 
 /**
@@ -309,6 +319,7 @@ export async function extractConceptsFromFile(
     const content = await app.vault.read(file);
     const allConcepts = new Set<string>();
     const settings = plugin.settings;
+    const i18n = getI18nStrings({ uiLocale: settings.uiLocale });
 
     // Determine provider and model
     const { provider, modelName } = plugin.getProviderAndModelForTask('extractConcepts');
@@ -325,7 +336,10 @@ export async function extractConceptsFromFile(
 
         const chunk = chunks[i];
         const chunkProgress = Math.floor(((i) / totalChunks) * 100);
-        progressReporter.updateStatus(`Extracting concepts from chunk ${i + 1}/${totalChunks}...`, chunkProgress);
+        progressReporter.updateStatus(
+            formatStepStatus(i18n, i + 1, totalChunks, i18n.sidebar.actions.extractConceptsCurrent.label),
+            chunkProgress
+        );
         progressReporter.log(`Processing chunk ${i + 1}/${totalChunks}...`);
 
         const prompt = getSystemPrompt(settings, 'extractConcepts');
@@ -370,6 +384,7 @@ export async function processFile(app: App, settings: NotemdSettings, file: TFil
     currentProcessingFileBasename.value = file.basename;
     progressReporter.log(`Starting processing for: ${file.name}`);
     const content = await app.vault.read(file);
+    const i18n = getI18nStrings({ uiLocale: settings.uiLocale });
 
     // Determine provider and model
     const provider = getProviderForTask('addLinks', settings);
@@ -389,7 +404,10 @@ export async function processFile(app: App, settings: NotemdSettings, file: TFil
 
         const chunk = chunks[i];
         const chunkProgress = Math.floor(((i) / totalChunks) * 100);
-        progressReporter.updateStatus(`Processing chunk ${i + 1}/${totalChunks}...`, chunkProgress);
+        progressReporter.updateStatus(
+            formatStepStatus(i18n, i + 1, totalChunks, i18n.sidebar.actions.processCurrentAddLinks.label),
+            chunkProgress
+        );
         progressReporter.log(`Processing chunk ${i + 1}/${totalChunks}...`);
 
         const prompt = getSystemPrompt(settings, 'addLinks');
@@ -415,7 +433,10 @@ export async function processFile(app: App, settings: NotemdSettings, file: TFil
     }
 
     // Join chunks
-    progressReporter.updateStatus('Merging processed chunks...', 90); // Update status before joining
+    progressReporter.updateStatus(
+        formatRunningStatus(i18n, i18n.sidebar.actions.processCurrentAddLinks.label),
+        90
+    ); // Update status before joining
     const processedContent = processedChunks.join('\n\n').replace(/\n{3,}/g, '\n\n').trim();
     // --- End LLM Processing with Chunking ---
 
@@ -599,18 +620,25 @@ async function saveOrMoveProcessedFile(app: App, settings: NotemdSettings, origi
  */
 export async function generateContentForTitle(app: App, settings: NotemdSettings, file: TFile, progressReporter: ProgressReporter) {
     const title = file.basename;
+    const i18n = getI18nStrings({ uiLocale: settings.uiLocale });
     const provider = getProviderForTask('generateTitle', settings);
     if (!provider) throw new Error('No valid LLM provider configured for "Generate from Title" task.');
     const modelName = getModelForTask('generateTitle', provider, settings);
 
-    progressReporter.updateStatus(`Generating content for "${title}"...`, 5);
+    progressReporter.updateStatus(
+        formatRunningStatus(i18n, `${i18n.sidebar.actions.generateFromTitle.label}: ${title}`),
+        5
+    );
     progressReporter.log(`Starting content generation for: ${file.name}`);
 
     let researchContext = '';
     if (settings.enableResearchInGenerateContent) {
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user before research.");
         progressReporter.log(`Research enabled for "${title}". Performing web search...`);
-        progressReporter.updateStatus(`Researching "${title}"...`, 10);
+        progressReporter.updateStatus(
+            formatRunningStatus(i18n, `${i18n.sidebar.actions.researchAndSummarize.label}: ${title}`),
+            10
+        );
         try {
             // Assuming _performResearch is imported or available
             const context = await _performResearch(app, settings, title, progressReporter);
@@ -618,7 +646,10 @@ export async function generateContentForTitle(app: App, settings: NotemdSettings
             if (context) {
                 researchContext = context;
                 progressReporter.log(`Research context obtained for "${title}".`);
-                progressReporter.updateStatus(`Summarizing research for "${title}"...`, 15);
+                progressReporter.updateStatus(
+                    formatRunningStatus(i18n, `${i18n.sidebar.actions.researchAndSummarize.label}: ${title}`),
+                    15
+                );
             } else {
                 progressReporter.log(`Warning: Research for "${title}" returned no results or failed.`);
             }
@@ -654,7 +685,7 @@ export async function generateContentForTitle(app: App, settings: NotemdSettings
     if (progressReporter.cancelled) throw new Error("Processing cancelled by user before API call.");
     progressReporter.log(`Calling ${provider.name} to generate content...`);
     const llmCallProgress = settings.enableResearchInGenerateContent ? 25 : 20;
-    progressReporter.updateStatus(`Calling ${provider.name}...`, llmCallProgress);
+    progressReporter.updateStatus(formatRunningStatus(i18n, provider.name), llmCallProgress);
 
     let generatedContent;
     try {
@@ -668,7 +699,10 @@ export async function generateContentForTitle(app: App, settings: NotemdSettings
 
     if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API call.");
     progressReporter.log(`Content received from ${provider.name}.`);
-    progressReporter.updateStatus('Applying post-processing...', 80);
+    progressReporter.updateStatus(
+        formatRunningStatus(i18n, i18n.sidebar.actions.generateFromTitle.label),
+        80
+    );
 
     let finalContent = generatedContent;
     try {
@@ -693,10 +727,16 @@ export async function generateContentForTitle(app: App, settings: NotemdSettings
     if (progressReporter.cancelled) throw new Error("Processing cancelled by user before saving.");
 
     progressReporter.log(`Replacing content in: ${file.name}`);
-    progressReporter.updateStatus('Saving content...', 95);
+    progressReporter.updateStatus(
+        formatRunningStatus(i18n, i18n.sidebar.actions.generateFromTitle.label),
+        95
+    );
     await app.vault.modify(file, contentToSave);
     progressReporter.log(`Content generated successfully for ${file.name}.`);
-    progressReporter.updateStatus('Content generated successfully!', 100);
+    progressReporter.updateStatus(
+        formatI18n(i18n.notices.contentGenerationSuccess, { file: file.name }),
+        100
+    );
 }
 
 /**
@@ -736,7 +776,7 @@ export async function batchGenerateContentForTitles(app: App, settings: NotemdSe
         });
         new Notice(message);
         progressReporter.log(message);
-        progressReporter.updateStatus('No files found', 100);
+        progressReporter.updateStatus(message, 100);
         return { errors: [] }; // Return empty errors array
     }
 
@@ -761,7 +801,15 @@ export async function batchGenerateContentForTitles(app: App, settings: NotemdSe
         for (let i = 0; i < filesToProcess.length; i++) {
             const file = filesToProcess[i];
             const progress = Math.floor(((i) / filesToProcess.length) * 100);
-            progressReporter.updateStatus(`Generating ${i + 1}/${filesToProcess.length}: ${file.name}`, progress);
+            progressReporter.updateStatus(
+                formatStepStatus(
+                    i18n,
+                    i + 1,
+                    filesToProcess.length,
+                    `${i18n.sidebar.actions.batchGenerateFromTitles.label}: ${file.name}`
+                ),
+                progress
+            );
             if (progressReporter.cancelled) { progressReporter.log('Cancellation requested, stopping batch processing.'); break; }
             await delay(1); // Yield
 
@@ -810,11 +858,17 @@ export async function batchGenerateContentForTitles(app: App, settings: NotemdSe
                 log: (msg: string) => progressReporter.log(`[${file.name}] ${msg}`),
                 updateStatus: (msg: string, percentage?: number) => {
                     // Update overall batch progress, maybe combine with active tasks
+                    const batchStatus = formatStepStatus(
+                        i18n,
+                        Math.min(processedCount + 1, filesToProcess.length),
+                        filesToProcess.length,
+                        `${file.name}: ${msg}`
+                    );
                     if (percentage !== undefined) {
                         const overallProgress = Math.floor(((processedCount + (percentage / 100)) / filesToProcess.length) * 100);
-                        progressReporter.updateStatus(`Batch: ${processedCount}/${filesToProcess.length} (${file.name}: ${msg})`, overallProgress);
+                        progressReporter.updateStatus(batchStatus, overallProgress);
                     } else {
-                        progressReporter.updateStatus(`Batch: ${processedCount}/${filesToProcess.length} (${file.name}: ${msg})`);
+                        progressReporter.updateStatus(batchStatus);
                     }
                 },
                 cancelled: progressReporter.cancelled,
@@ -919,9 +973,10 @@ export async function batchFixMermaidSyntaxInFolder(app: App, settings: NotemdSe
     );
 
     if (filesToProcess.length === 0) {
-        new Notice(formatI18n(i18n.notices.noMarkdownFilesFoundInSelectedFolder, { folderPath }));
+        const message = formatI18n(i18n.notices.noMarkdownFilesFoundInSelectedFolder, { folderPath });
+        new Notice(message);
         progressReporter.log(`No eligible files found in "${folderPath}".`);
-        progressReporter.updateStatus('No files found', 100);
+        progressReporter.updateStatus(message, 100);
         return { errors: [], modifiedCount: 0 };
     }
 
@@ -949,7 +1004,15 @@ export async function batchFixMermaidSyntaxInFolder(app: App, settings: NotemdSe
     for (let i = 0; i < filesToProcess.length; i++) {
         const file = filesToProcess[i];
         const progress = Math.floor(((i) / filesToProcess.length) * 100);
-        progressReporter.updateStatus(`Checking ${i + 1}/${filesToProcess.length}: ${file.name}`, progress);
+        progressReporter.updateStatus(
+            formatStepStatus(
+                i18n,
+                i + 1,
+                filesToProcess.length,
+                `${i18n.sidebar.actions.batchMermaidFix.label}: ${file.name}`
+            ),
+            progress
+        );
 
         if (progressReporter.cancelled) {
             progressReporter.log('Cancellation requested, stopping batch fix.');
@@ -1220,7 +1283,10 @@ export async function checkAndRemoveDuplicateConceptNotes(app: App, settings: No
     }
 
     progressReporter.log(`Using Concept Note Folder: ${conceptFolderPath}`);
-    progressReporter.updateStatus("Gathering files...", 10);
+    progressReporter.updateStatus(
+        formatRunningStatus(i18n, i18n.sidebar.actions.checkRemoveDuplicateConcepts.label),
+        10
+    );
     const allMarkdownFiles = app.vault.getMarkdownFiles();
     const conceptNotes = allMarkdownFiles.filter(f => f.path.startsWith(conceptFolderPath + '/'));
 
@@ -1282,7 +1348,10 @@ export async function checkAndRemoveDuplicateConceptNotes(app: App, settings: No
     const allFilesMap = new Map(allMarkdownFiles.map(f => [f.path, f])); // For easy lookup by path
 
     // ** 1. Exact Filename Matching **
-    progressReporter.updateStatus("Checking exact filename matches...", 20);
+    progressReporter.updateStatus(
+        formatStepStatus(i18n, 1, 5, i18n.sidebar.actions.checkRemoveDuplicateConcepts.label),
+        20
+    );
     const filenameMap = new Map<string, string[]>(); // Map basename -> list of full paths
     // Build map using only the files within the comparison scope
     notesToCompareAgainst.forEach(file => {
@@ -1315,7 +1384,10 @@ export async function checkAndRemoveDuplicateConceptNotes(app: App, settings: No
     });
 
     // ** 2. Plural Handling **
-    progressReporter.updateStatus("Checking plural variants...", 40);
+    progressReporter.updateStatus(
+        formatStepStatus(i18n, 2, 5, i18n.sidebar.actions.checkRemoveDuplicateConcepts.label),
+        40
+    );
     const comparisonBasenamesLower = new Set(notesToCompareAgainst.map(f => f.basename.toLowerCase()));
     // If checking within concept folder, add those basenames too
      if (settings.duplicateCheckScopeMode === 'concept_folder_only') {
@@ -1345,7 +1417,10 @@ export async function checkAndRemoveDuplicateConceptNotes(app: App, settings: No
     });
 
     // ** 3. Symbol Normalization Check **
-    progressReporter.updateStatus("Checking normalized names...", 60);
+    progressReporter.updateStatus(
+        formatStepStatus(i18n, 3, 5, i18n.sidebar.actions.checkRemoveDuplicateConcepts.label),
+        60
+    );
     const normalizedMap = new Map<string, string[]>(); // Map normalized name -> list of full paths
     // Build map using only files in comparison scope
     notesToCompareAgainst.forEach(file => {
@@ -1388,7 +1463,10 @@ export async function checkAndRemoveDuplicateConceptNotes(app: App, settings: No
     // ** 4. Single-Word Containment Check **
     // This check only makes sense when comparing against notes *outside* the concept folder.
     if (settings.duplicateCheckScopeMode !== 'concept_folder_only') {
-        progressReporter.updateStatus("Checking single-word containment...", 80);
+        progressReporter.updateStatus(
+            formatStepStatus(i18n, 4, 5, i18n.sidebar.actions.checkRemoveDuplicateConcepts.label),
+            80
+        );
         conceptNotes.forEach(cn => {
             if (filesToReport.has(cn.path)) return; // Skip already marked
             const words = cn.basename.split(/\s+/);
@@ -1411,7 +1489,10 @@ export async function checkAndRemoveDuplicateConceptNotes(app: App, settings: No
     }
 
     // --- Report Results & Confirm Deletion ---
-    progressReporter.updateStatus("Reporting results...", 95);
+    progressReporter.updateStatus(
+        formatStepStatus(i18n, 5, 5, i18n.sidebar.actions.checkRemoveDuplicateConcepts.label),
+        95
+    );
     if (filesToReport.size > 0) {
         const reportList = Array.from(filesToReport.entries()).map(([path, details]) => ({ path, reason: details.reason, counterparts: details.counterparts }));
         progressReporter.log(`--- Potential Duplicate Concept Notes Found (${filesToReport.size}) ---`);
@@ -1425,12 +1506,23 @@ export async function checkAndRemoveDuplicateConceptNotes(app: App, settings: No
         if (shouldDelete) {
             progressReporter.log("User confirmed deletion. Proceeding...");
             const totalToDelete = reportList.length;
-            progressReporter.updateStatus(`Deleting ${totalToDelete} files...`, 0);
+            progressReporter.updateStatus(
+                formatRunningStatus(i18n, i18n.sidebar.actions.checkRemoveDuplicateConcepts.label),
+                0
+            );
             let deletedCount = 0; let deletionErrors = 0;
             for (let i = 0; i < reportList.length; i++) {
                 const item = reportList[i];
                 const progressPercent = Math.floor(((i + 1) / totalToDelete) * 100);
-                progressReporter.updateStatus(`Deleting ${i + 1}/${totalToDelete}: ${item.path}`, progressPercent);
+                progressReporter.updateStatus(
+                    formatStepStatus(
+                        i18n,
+                        i + 1,
+                        totalToDelete,
+                        `${i18n.sidebar.actions.checkRemoveDuplicateConcepts.label}: ${item.path}`
+                    ),
+                    progressPercent
+                );
                 await delay(10); // Yield
                 try {
                     const fileToDelete = app.vault.getAbstractFileByPath(item.path);

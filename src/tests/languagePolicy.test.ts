@@ -89,9 +89,13 @@ describe('ui locale resolution', () => {
         expect(resolveUiLocale(settings, 'zh_cn')).toBe('zh-CN');
     });
 
+    test('supports expanded advertised locales by default', () => {
+        const settings = createSettings({ uiLocale: 'auto' });
+        expect(resolveUiLocale(settings, 'fr')).toBe('fr');
+    });
+
     test('falls back to en when unsupported', () => {
         const settings = createSettings({ uiLocale: 'auto' });
-        expect(resolveUiLocale(settings, 'fr')).toBe('en');
+        expect(resolveUiLocale(settings, 'xx')).toBe('en');
     });
 });
-

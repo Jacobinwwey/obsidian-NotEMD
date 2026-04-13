@@ -98,7 +98,14 @@ export async function translateFile(
 
             const chunk = chunks[i];
             const chunkProgress = Math.floor(((i) / totalChunks) * 100);
-            progressReporter.updateStatus(`Translating chunk ${i + 1}/${totalChunks}...`, chunkProgress);
+            progressReporter.updateStatus(
+                formatI18n(i18n.sidebar.status.stepLabel, {
+                    current: i + 1,
+                    total: totalChunks,
+                    label: i18n.sidebar.actions.translateCurrentFile.label
+                }),
+                chunkProgress
+            );
             progressReporter.log(`Translating chunk ${i + 1}/${totalChunks}...`);
 
             const translatedChunk = await callLLM(provider, prompt, chunk, settings, progressReporter, model, signal);
@@ -154,7 +161,7 @@ export async function translateFile(
     } catch (error: unknown) {
         if (error instanceof Error && error.name === 'AbortError') {
             progressReporter.log('Translation cancelled by user.');
-            progressReporter.updateStatus('Cancelled', -1);
+            progressReporter.updateStatus(i18n.sidebar.status.cancelling, -1);
             throw new Error('Translation cancelled by user.'); // Re-throw for main.ts to catch
         }
         
