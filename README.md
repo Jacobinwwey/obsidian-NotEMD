@@ -22,7 +22,7 @@ A Easy way to create your own Knowledge-base!
 
 Notemd enhances your Obsidian workflow by integrating with various Large Language Models (LLMs) to process your multi-languages notes, automatically generate wiki-links for key concepts, create corresponding concept notes, perform web research, helping you build powerful knowledge graphs and more.
 
-**Version:** 1.8.0
+**Version:** 1.8.1
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
@@ -62,10 +62,11 @@ That's it! Explore the settings to unlock more features like web research, trans
 | `UI Locale` | Plugin UI text only (settings, sidebar, notices, dialogs) | `auto` | Follows Obsidian locale; current UI catalogs are `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, `zh-TW`. |
 | `Task Output Language` | LLM-generated task output (links, summaries, generation, extraction, translation target) | `en` | Can be global or per-task when `Use different languages for tasks` is enabled. |
 | `Disable auto translation` | Non-Translate tasks keep source-language context | `false` | Explicit `Translate` tasks still enforce the configured target language. |
-| Locale fallback | Missing UI key resolution | locale -> `en` | Keeps UI stable when some keys are untranslated. |
+| Locale fallback | Missing UI key resolution | locale -> `en` | Implementation safety net; supported visible surfaces are regression-tested and should not silently fall back during normal use. |
 
-- Official docs are maintained in English and Simplified Chinese, with full support for over 30 languages.
-- All supported languages are linked in the header above.
+- Maintainer source docs are English and Simplified Chinese, and the published README translations are linked in the header above.
+- In-app UI locale coverage currently matches the explicit code catalog: `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, `zh-TW`.
+- English fallback remains an implementation safety net, but supported visible surfaces are regression-tested and should not silently fall back during normal use.
 - Further details and contributing guidelines are tracked in the [Language Hub](./docs/i18n/README.md).
 
 ## Features
@@ -685,7 +686,7 @@ MIT License - See [LICENSE](LICENSE) file for details.
 
 ---
 
-*Notemd v1.8.0 - Enhance your Obsidian knowledge graph with AI.*
+*Notemd v1.8.1 - Enhance your Obsidian knowledge graph with AI.*
 
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)
