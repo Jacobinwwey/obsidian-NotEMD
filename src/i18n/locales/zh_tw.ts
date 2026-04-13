@@ -376,23 +376,74 @@ export const STRINGS_ZH_TW: DeepPartial<NotemdEnglishStrings> = {
             utilities: '工具'
         },
         actions: {
-            processCurrentAddLinks: { label: '處理檔案（新增連結）' },
-            processFolderAddLinks: { label: '處理資料夾（新增連結）' },
-            generateFromTitle: { label: '從標題生成' },
-            batchGenerateFromTitles: { label: '從標題批次生成' },
-            researchAndSummarize: { label: '研究並摘要' },
-            summarizeAsMermaid: { label: '摘要為 Mermaid 圖表' },
-            translateCurrentFile: { label: '翻譯目前檔案' },
-            batchTranslateFolder: { label: '批次翻譯資料夾' },
-            extractConceptsCurrent: { label: '擷取概念（目前檔案）' },
-            extractConceptsFolder: { label: '擷取概念（資料夾）' },
-            extractOriginalText: { label: '擷取指定原文' },
-            batchMermaidFix: { label: '批次修復 Mermaid' },
-            fixFormulaCurrent: { label: '修復公式格式（目前）' },
-            batchFixFormula: { label: '批次修復公式格式' },
-            checkDuplicatesCurrent: { label: '檢查重複項（目前檔案）' },
-            checkRemoveDuplicateConcepts: { label: '檢查並移除重複項' },
-            testLlmConnection: { label: '測試 LLM 連線' }
+            processCurrentAddLinks: {
+                label: '處理檔案（新增連結）',
+                tooltip: '處理目前檔案並建立 Wiki 連結/概念筆記。'
+            },
+            processFolderAddLinks: {
+                label: '處理資料夾（新增連結）',
+                tooltip: '處理資料夾中所有符合條件的筆記。'
+            },
+            generateFromTitle: {
+                label: '從標題生成',
+                tooltip: '根據目前筆記標題生成筆記內容。'
+            },
+            batchGenerateFromTitles: {
+                label: '從標題批次生成',
+                tooltip: '根據資料夾中的筆記標題批次生成內容。'
+            },
+            researchAndSummarize: {
+                label: '研究並摘要',
+                tooltip: '研究所選主題/標題並追加摘要。'
+            },
+            summarizeAsMermaid: {
+                label: '摘要為 Mermaid 圖表',
+                tooltip: '根據目前筆記生成 Mermaid 圖表摘要。'
+            },
+            translateCurrentFile: {
+                label: '翻譯目前檔案',
+                tooltip: '將目前作用中的檔案翻譯為所選輸出語言。'
+            },
+            batchTranslateFolder: {
+                label: '批次翻譯資料夾',
+                tooltip: '翻譯資料夾中的所有 Markdown 檔案。'
+            },
+            extractConceptsCurrent: {
+                label: '擷取概念（目前檔案）',
+                tooltip: '僅從目前檔案擷取概念。'
+            },
+            extractConceptsFolder: {
+                label: '擷取概念（資料夾）',
+                tooltip: '從所選資料夾中的每個檔案擷取概念。'
+            },
+            extractOriginalText: {
+                label: '擷取指定原文',
+                tooltip: '依已設定問題擷取逐字原文摘錄。'
+            },
+            batchMermaidFix: {
+                label: '批次修復 Mermaid',
+                tooltip: '在所選資料夾上執行 Mermaid/LaTeX 批次語法修復。'
+            },
+            fixFormulaCurrent: {
+                label: '修復公式格式（目前）',
+                tooltip: '正規化目前檔案中的公式分隔符。'
+            },
+            batchFixFormula: {
+                label: '批次修復公式格式',
+                tooltip: '正規化所選資料夾中的公式分隔符。'
+            },
+            checkDuplicatesCurrent: {
+                label: '檢查重複項（目前檔案）',
+                tooltip: '偵測目前檔案中的重複術語。'
+            },
+            checkRemoveDuplicateConcepts: {
+                label: '檢查並移除重複項',
+                tooltip: '偵測並移除重複的概念筆記。'
+            },
+            testLlmConnection: {
+                label: '測試 LLM 連線',
+                tooltip: '測試目前提供者的連線與認證資訊。'
+            }
         },
         status: {
             runningAction: '正在執行「{label}」…',
