@@ -1,3 +1,4 @@
+import { SUPPORTED_UI_LOCALE_CODES } from './uiLocales';
 import { NotemdSettings } from '../types';
 
 export const UI_LOCALE_AUTO = 'auto';
@@ -45,7 +46,7 @@ export function resolveLanguageDisplayName(settings: NotemdSettings, languageCod
 export function resolveUiLocale(
     settings: { uiLocale: string },
     obsidianLocale: string | undefined | null,
-    supportedLocales: readonly string[] = ['en', 'zh-CN', 'zh-TW']
+    supportedLocales: readonly string[] = SUPPORTED_UI_LOCALE_CODES
 ): string {
     const normalizedSupported = supportedLocales.map(normalizeLocaleCode);
     const configured = normalizeLocaleCode(settings.uiLocale);

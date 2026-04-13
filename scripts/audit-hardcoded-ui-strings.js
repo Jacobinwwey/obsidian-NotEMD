@@ -45,7 +45,10 @@ const matchers = [
     { kind: 'title-text', regex: /titleEl\.setText\((['"`])/ },
     { kind: 'element-text', regex: /createEl\([^)]*\{\s*text:\s*(['"`])/ },
     { kind: 'name-prop', regex: /\bname:\s*(['"`])/ },
-    { kind: 'placeholder', regex: /\.setPlaceholder\((['"`])/ }
+    { kind: 'placeholder', regex: /\.setPlaceholder\((['"`])/ },
+    { kind: 'status-bar', regex: /updateStatusBar\((['"`])/ },
+    { kind: 'progress-status', regex: /\.updateStatus\((['"`])/ },
+    { kind: 'sidebar-start', regex: /\.startProcessing\((['"`])/ }
 ];
 
 function walk(entry, files = []) {
