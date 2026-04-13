@@ -203,6 +203,7 @@ export class NotemdSettingTab extends PluginSettingTab {
     }
 
     private renderProviderValidation(containerEl: HTMLElement, provider: LLMProviderConfig): void {
+        const i18n = getI18nStrings({ uiLocale: this.plugin.settings.uiLocale });
         const issues = getProviderValidationIssues(provider);
         if (issues.length === 0) {
             return;
@@ -213,7 +214,9 @@ export class NotemdSettingTab extends PluginSettingTab {
                 cls: `notemd-provider-validation notemd-provider-validation-${issue.level}`
             });
             callout.createEl('strong', {
-                text: issue.level === 'error' ? 'Configuration required' : 'Configuration warning'
+                text: issue.level === 'error'
+                    ? i18n.settings.providerConfig.validationRequired
+                    : i18n.settings.providerConfig.validationWarning
             });
             callout.createEl('p', { text: issue.message });
         });
@@ -257,13 +260,14 @@ export class NotemdSettingTab extends PluginSettingTab {
 
     private renderWorkflowVisualBuilder(containerEl: HTMLElement): void {
         const i18n = getI18nStrings({ uiLocale: this.plugin.settings.uiLocale });
+        const workflowI18n = i18n.settings.workflowBuilder;
         const resolution = resolveCustomWorkflowButtons(this.plugin.settings.customWorkflowButtonsDsl);
         const workflows = this.getWorkflowBuilderStateFromSettings();
         const builderWrap = containerEl.createDiv({ cls: 'notemd-workflow-builder' });
 
         if (resolution.errors.length > 0) {
             builderWrap.createDiv({
-                text: `Detected ${resolution.errors.length} DSL issue(s). Visual editor loaded fallback-safe workflow state.`,
+                text: formatI18n(workflowI18n.builderDslWarning, { count: resolution.errors.length }),
                 cls: 'notemd-workflow-builder-warning'
             });
         }
@@ -271,26 +275,28 @@ export class NotemdSettingTab extends PluginSettingTab {
         workflows.forEach((workflow, workflowIndex) => {
             const card = builderWrap.createDiv({ cls: 'notemd-workflow-card' });
             const cardHeader = card.createDiv({ cls: 'notemd-workflow-card-header' });
-            cardHeader.createEl('strong', { text: `Workflow ${workflowIndex + 1}` });
-            const deleteBtn = cardHeader.createEl('button', { text: 'Delete', cls: 'mod-warning' });
+            cardHeader.createEl('strong', {
+                text: formatI18n(workflowI18n.builderCardTitle, { index: workflowIndex + 1 })
+            });
+            const deleteBtn = cardHeader.createEl('button', { text: workflowI18n.deleteButton, cls: 'mod-warning' });
             deleteBtn.onclick = async () => {
                 const next = workflows.filter((_, i) => i !== workflowIndex);
                 await this.persistWorkflowBuilderState(next, {
-                    notice: 'Workflow removed.'
+                    notice: workflowI18n.workflowRemovedNotice
                 });
             };
 
             const nameRow = card.createDiv({ cls: 'notemd-workflow-row' });
-            nameRow.createEl('label', { text: 'Button name' });
+            nameRow.createEl('label', { text: workflowI18n.buttonNameLabel });
             const nameInput = nameRow.createEl('input', { type: 'text' });
             nameInput.value = workflow.name;
-            nameInput.placeholder = `Workflow ${workflowIndex + 1}`;
+            nameInput.placeholder = formatI18n(workflowI18n.buttonNamePlaceholder, { index: workflowIndex + 1 });
             nameInput.onblur = async () => {
                 const next = workflows.map((item, i) => i === workflowIndex ? { ...item, name: nameInput.value.trim() || item.name } : item);
                 await this.persistWorkflowBuilderState(next);
             };
 
-            const actionsTitle = card.createEl('p', { text: 'Action sequence', cls: 'notemd-workflow-subtitle' });
+            const actionsTitle = card.createEl('p', { text: workflowI18n.actionSequenceTitle, cls: 'notemd-workflow-subtitle' });
             actionsTitle.setAttr('aria-hidden', 'true');
 
             workflow.actions.forEach((actionId, actionIndex) => {
@@ -313,7 +319,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                     await this.persistWorkflowBuilderState(next);
                 };
 
-                const moveUp = actionRow.createEl('button', { text: '↑' });
+                const moveUp = actionRow.createEl('button', { text: workflowI18n.moveUp });
                 moveUp.disabled = actionIndex === 0;
                 moveUp.onclick = async () => {
                     const next = workflows.map((item, i) => {
@@ -327,7 +333,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                     await this.persistWorkflowBuilderState(next);
                 };
 
-                const moveDown = actionRow.createEl('button', { text: '↓' });
+                const moveDown = actionRow.createEl('button', { text: workflowI18n.moveDown });
                 moveDown.disabled = actionIndex === workflow.actions.length - 1;
                 moveDown.onclick = async () => {
                     const next = workflows.map((item, i) => {
@@ -341,7 +347,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                     await this.persistWorkflowBuilderState(next);
                 };
 
-                const removeAction = actionRow.createEl('button', { text: 'Remove' });
+                const removeAction = actionRow.createEl('button', { text: workflowI18n.removeAction });
                 removeAction.disabled = workflow.actions.length <= 1;
                 removeAction.onclick = async () => {
                     const next = workflows.map((item, i) => {
@@ -353,7 +359,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                 };
             });
 
-            const addActionButton = card.createEl('button', { text: 'Add action' });
+            const addActionButton = card.createEl('button', { text: workflowI18n.addAction });
             addActionButton.onclick = async () => {
                 const next = workflows.map((item, i) => {
                     if (i !== workflowIndex) return item;
@@ -364,22 +370,23 @@ export class NotemdSettingTab extends PluginSettingTab {
         });
 
         const toolbar = builderWrap.createDiv({ cls: 'notemd-workflow-builder-toolbar' });
-        const addWorkflowButton = toolbar.createEl('button', { text: 'Add workflow', cls: 'mod-cta' });
+        const addWorkflowButton = toolbar.createEl('button', { text: workflowI18n.addWorkflow, cls: 'mod-cta' });
         addWorkflowButton.onclick = async () => {
             const next = [...workflows, createEmptyWorkflowButton(workflows.length + 1)];
-            await this.persistWorkflowBuilderState(next, { notice: 'Workflow added.' });
+            await this.persistWorkflowBuilderState(next, { notice: workflowI18n.workflowAddedNotice });
         };
 
-        const resetWorkflowButton = toolbar.createEl('button', { text: 'Reset to default' });
+        const resetWorkflowButton = toolbar.createEl('button', { text: workflowI18n.resetDefault });
         resetWorkflowButton.onclick = async () => {
             this.plugin.settings.customWorkflowButtonsDsl = DEFAULT_SETTINGS.customWorkflowButtonsDsl;
             await this.plugin.saveSettings();
             this.display();
-            new Notice('Restored default one-click workflows.');
+            new Notice(workflowI18n.resetDefaultNotice);
         };
     }
 
     async exportProviderSettings(): Promise<void> {
+        const i18n = getI18nStrings({ uiLocale: this.plugin.settings.uiLocale });
         try {
             const providersToExport = this.plugin.settings.providers;
             const jsonData = JSON.stringify(providersToExport, null, 2); // Pretty print JSON
@@ -392,26 +399,28 @@ export class NotemdSettingTab extends PluginSettingTab {
                 }
             } catch (mkdirError) {
                 console.error("Error ensuring plugin directory exists:", mkdirError);
-                new Notice(`Error creating plugin directory: ${mkdirError.message}`);
+                const message = mkdirError instanceof Error ? mkdirError.message : String(mkdirError);
+                new Notice(formatI18n(i18n.settings.providerConfig.exportDirectoryError, { message }));
                 return;
             }
 
             await this.app.vault.adapter.write(this.providersFilePath, jsonData);
-            new Notice(`Provider settings exported successfully to ${this.providersFilePath}`);
+            new Notice(formatI18n(i18n.settings.providerConfig.exportSuccess, { path: this.providersFilePath }));
         } catch (error: unknown) {
             const message = error instanceof Error ? error.message : String(error);
             console.error("Error exporting provider settings:", error);
-            new Notice(`Error exporting settings: ${message}`);
+            new Notice(formatI18n(i18n.settings.providerConfig.exportError, { message }));
         }
     }
 
     async importProviderSettings(): Promise<void> {
+        const i18n = getI18nStrings({ uiLocale: this.plugin.settings.uiLocale });
         try {
             const filePath = this.providersFilePath;
             const fileExists = await this.app.vault.adapter.exists(filePath);
 
             if (!fileExists) {
-                new Notice(`Import file not found at ${filePath}. Please place your 'notemd-providers.json' file there.`);
+                new Notice(formatI18n(i18n.settings.providerConfig.importFileMissing, { path: filePath }));
                 return;
             }
 
@@ -419,7 +428,7 @@ export class NotemdSettingTab extends PluginSettingTab {
             const importedProviders = JSON.parse(jsonData) as LLMProviderConfig[];
 
             if (!Array.isArray(importedProviders)) {
-                throw new Error("Imported file does not contain a valid provider array.");
+                throw new Error(i18n.settings.providerConfig.importInvalidArray);
             }
 
             const existingProvidersMap = new Map(this.plugin.settings.providers.map(p => [p.name, p]));
@@ -444,17 +453,20 @@ export class NotemdSettingTab extends PluginSettingTab {
 
             if (!this.plugin.settings.providers.some(p => p.name === this.plugin.settings.activeProvider)) {
                 this.plugin.settings.activeProvider = DEFAULT_SETTINGS.activeProvider;
-                new Notice(`Active provider reset to default as previous one was not found after import.`);
+                new Notice(i18n.settings.providerConfig.activeProviderReset);
             }
 
             await this.plugin.saveSettings();
-            new Notice(`Successfully imported ${newCount} new and updated ${importedCount} existing provider settings.`);
+            new Notice(formatI18n(i18n.settings.providerConfig.importSuccess, {
+                newCount,
+                updatedCount: importedCount
+            }));
             this.display(); // Refresh display
 
         } catch (error: unknown) {
             const message = error instanceof Error ? error.message : String(error);
             console.error("Error importing provider settings:", error);
-            new Notice(`Error importing settings: ${message}`);
+            new Notice(formatI18n(i18n.settings.providerConfig.importError, { message }));
         }
     }
 
@@ -463,32 +475,42 @@ export class NotemdSettingTab extends PluginSettingTab {
         const { containerEl } = this;
         containerEl.empty();
         const i18n = getI18nStrings({ uiLocale: this.plugin.settings.uiLocale });
+        const providerI18n = i18n.settings.providerConfig;
+        const multiModelI18n = i18n.settings.multiModel;
+        const translationTaskI18n = i18n.settings.translationTask;
+        const mermaidTaskI18n = i18n.settings.mermaidTask;
+        const extractConceptsTaskI18n = i18n.settings.extractConceptsTask;
+        const stableApiI18n = i18n.settings.stableApi;
+        const workflowBuilderI18n = i18n.settings.workflowBuilder;
+        const generalOutputI18n = i18n.settings.generalOutput;
+        const contentGenerationI18n = i18n.settings.contentGeneration;
+        const customPromptsI18n = i18n.settings.customPrompts;
         const generateFromTitleTaskLabel = getSidebarActionLabel(i18n, 'generate-from-title');
         const researchAndSummarizeTaskLabel = getSidebarActionLabel(i18n, 'research-and-summarize');
         const summarizeAsMermaidTaskLabel = getSidebarActionLabel(i18n, 'summarize-as-mermaid');
         const extractOriginalTextTaskLabel = getSidebarActionLabel(i18n, 'extract-original-text');
 
         // --- Provider Configuration ---
-        new Setting(containerEl).setName('LLM providers').setHeading();
+        new Setting(containerEl).setName(providerI18n.heading).setHeading();
         const providerSupportCallout = containerEl.createDiv({ cls: 'notemd-provider-callout' });
         providerSupportCallout.createEl('strong', {
-            text: `Provider presets expanded to ${this.plugin.settings.providers.length} entries.`
+            text: formatI18n(providerI18n.summaryTitle, { count: this.plugin.settings.providers.length })
         });
         providerSupportCallout.createEl('p', {
-            text: 'OpenAI-compatible providers now share one runtime path. Built-in presets cover China-focused services such as Qwen, Doubao, Moonshot, GLM, MiniMax, Baidu Qianfan, and SiliconFlow, and the generic "OpenAI Compatible" preset can target LiteLLM, vLLM, Perplexity, Vercel AI Gateway, or your own proxy.'
+            text: providerI18n.summaryDesc
         });
 
         const providerMgmtSetting = new Setting(containerEl)
-            .setName('Manage provider configurations')
-            .setDesc('Export your current provider settings to a JSON file, or import settings from a file.');
+            .setName(providerI18n.manageName)
+            .setDesc(providerI18n.manageDesc);
         providerMgmtSetting.addButton(button => button
-            .setButtonText('Export providers').setTooltip('Save provider configurations').onClick(() => this.exportProviderSettings()));
+            .setButtonText(providerI18n.exportButton).setTooltip(providerI18n.exportTooltip).onClick(() => this.exportProviderSettings()));
         providerMgmtSetting.addButton(button => button
-            .setButtonText('Import providers').setTooltip('Load provider configurations (merges)').onClick(() => this.importProviderSettings()));
+            .setButtonText(providerI18n.importButton).setTooltip(providerI18n.importTooltip).onClick(() => this.importProviderSettings()));
 
         new Setting(containerEl)
-            .setName('Active provider')
-            .setDesc('Select the LLM provider to use for processing.')
+            .setName(providerI18n.activeProviderName)
+            .setDesc(providerI18n.activeProviderDesc)
             .addDropdown(dropdown => {
                 const providerNames = getOrderedProviderNames(this.plugin.settings.providers);
                 providerNames.forEach(name => dropdown.addOption(name, name));
@@ -504,7 +526,7 @@ export class NotemdSettingTab extends PluginSettingTab {
         const activeProvider = this.plugin.settings.providers.find(p => p.name === this.plugin.settings.activeProvider);
 
         if (activeProvider) {
-            new Setting(containerEl).setName(`${activeProvider.name} details`).setHeading();
+            new Setting(containerEl).setName(formatI18n(providerI18n.providerDetailsHeading, { provider: activeProvider.name })).setHeading();
             this.renderProviderSummary(containerEl, activeProvider);
             this.renderProviderValidation(containerEl, activeProvider);
 
@@ -513,36 +535,42 @@ export class NotemdSettingTab extends PluginSettingTab {
 
             if (apiKeyMode !== 'none') {
                 const apiKeyDescription = apiKeyMode === 'optional'
-                    ? `API key for ${activeProvider.name}. Optional for endpoints that allow placeholder or anonymous access.`
-                    : `API key for ${activeProvider.name}. ${activeProvider.name === 'LMStudio' ? "(Optional, often 'EMPTY')" : ""}`;
+                    ? formatI18n(providerI18n.apiKeyDescOptional, { provider: activeProvider.name })
+                    : formatI18n(providerI18n.apiKeyDescRequired, {
+                        provider: activeProvider.name,
+                        extra: activeProvider.name === 'LMStudio' ? providerI18n.apiKeyExtraLmStudio : ''
+                    });
                 new Setting(containerEl)
-                    .setName('API key')
+                    .setName(providerI18n.apiKeyName)
                     .setDesc(apiKeyDescription)
                     .addText(text => text
-                        .setPlaceholder(activeProvider.name === 'LMStudio' ? 'Usually EMPTY or leave blank' : 'Enter your API key')
+                        .setPlaceholder(activeProvider.name === 'LMStudio' ? providerI18n.apiKeyPlaceholderLmStudio : providerI18n.apiKeyPlaceholderDefault)
                         .setValue(activeProvider.apiKey)
                         .onChange(async (value) => { activeProvider.apiKey = value; await this.plugin.saveSettings(); }));
             }
 
             new Setting(containerEl)
-                .setName('Base URL / endpoint')
-                .setDesc(`The API endpoint for ${activeProvider.name}. ${activeProvider.name === 'Azure OpenAI' ? 'Required.' : ''}`)
+                .setName(providerI18n.baseUrlName)
+                .setDesc(formatI18n(providerI18n.baseUrlDesc, {
+                    provider: activeProvider.name,
+                    required: activeProvider.name === 'Azure OpenAI' ? providerI18n.baseUrlRequired : ''
+                }))
                 .addText(text => text
-                    .setPlaceholder(DEFAULT_SETTINGS.providers.find(p => p.name === activeProvider.name)?.baseUrl || 'Enter API Base URL')
+                    .setPlaceholder(DEFAULT_SETTINGS.providers.find(p => p.name === activeProvider.name)?.baseUrl || providerI18n.baseUrlPlaceholder)
                     .setValue(activeProvider.baseUrl)
                     .onChange(async (value) => { activeProvider.baseUrl = value; await this.plugin.saveSettings(); }));
 
             new Setting(containerEl)
-                .setName('Model')
-                .setDesc(`Model name to use with ${activeProvider.name}.`)
+                .setName(providerI18n.modelName)
+                .setDesc(formatI18n(providerI18n.modelDesc, { provider: activeProvider.name }))
                 .addText(text => text
-                    .setPlaceholder(DEFAULT_SETTINGS.providers.find(p => p.name === activeProvider.name)?.model || 'Enter model name')
+                    .setPlaceholder(DEFAULT_SETTINGS.providers.find(p => p.name === activeProvider.name)?.model || providerI18n.modelPlaceholder)
                     .setValue(activeProvider.model)
                     .onChange(async (value) => { activeProvider.model = value; await this.plugin.saveSettings(); }));
 
             new Setting(containerEl)
-                .setName('Temperature')
-                .setDesc('Controls randomness (0=deterministic, 1=creative).')
+                .setName(providerI18n.temperatureName)
+                .setDesc(providerI18n.temperatureDesc)
                 .addSlider(slider => slider
                     .setLimits(0, 1, 0.1)
                     .setValue(activeProvider.temperature)
@@ -551,52 +579,55 @@ export class NotemdSettingTab extends PluginSettingTab {
 
             if (activeProvider.name === 'Azure OpenAI') {
                 new Setting(containerEl)
-                    .setName('API version')
-                    .setDesc('Required API version for Azure OpenAI (e.g., 2024-02-15-preview)')
+                    .setName(providerI18n.apiVersionName)
+                    .setDesc(providerI18n.apiVersionDesc)
                     .addText(text => text
-                        .setPlaceholder('Enter API version')
+                        .setPlaceholder(providerI18n.apiVersionPlaceholder)
                         .setValue(activeProvider.apiVersion || '')
                         .onChange(async (value) => { activeProvider.apiVersion = value; await this.plugin.saveSettings(); }));
             }
 
             new Setting(containerEl)
-                .setName(`Test ${activeProvider.name} connection`)
-                .setDesc('Verify API key, endpoint, and model accessibility.')
+                .setName(formatI18n(providerI18n.testConnectionName, { provider: activeProvider.name }))
+                .setDesc(providerI18n.testConnectionDesc)
                 .addButton(button => button
-                    .setButtonText('Test connection').setCta()
+                    .setButtonText(providerI18n.testConnectionButton).setCta()
                     .onClick(async () => {
                         const blockingIssues = getProviderValidationIssues(activeProvider)
                             .filter(issue => issue.level === 'error')
                             .map(issue => issue.message);
                         if (hasBlockingProviderValidationIssues(activeProvider)) {
-                            new Notice(`Cannot test ${activeProvider.name}: ${blockingIssues.join(' ')}`, 8000);
+                            new Notice(formatI18n(providerI18n.testConnectionBlocked, {
+                                provider: activeProvider.name,
+                                issues: blockingIssues.join(' ')
+                            }), 8000);
                             return;
                         }
-                        button.setDisabled(true).setButtonText('Testing...');
-                        const testingNotice = new Notice(`Testing connection to ${activeProvider.name}...`, 0);
+                        button.setDisabled(true).setButtonText(providerI18n.testConnectionTesting);
+                        const testingNotice = new Notice(formatI18n(providerI18n.testConnectionRunning, { provider: activeProvider.name }), 0);
                         try {
                             const result = await testAPI(activeProvider, this.plugin.settings.enableApiErrorDebugMode); // Use imported testAPI
                             testingNotice.hide();
-                            if (result.success) { new Notice(`✅ Success: ${result.message}`, 5000); }
-                            else { new Notice(`❌ Failed: ${result.message}. Check console.`, 10000); }
+                            if (result.success) { new Notice(formatI18n(providerI18n.testConnectionSuccess, { message: result.message }), 5000); }
+                            else { new Notice(formatI18n(providerI18n.testConnectionFailed, { message: result.message }), 10000); }
                         } catch (error: unknown) {
                             const message = error instanceof Error ? error.message : String(error);
                             testingNotice.hide();
-                            new Notice(`Error during connection test: ${message}`, 10000);
+                            new Notice(formatI18n(providerI18n.testConnectionError, { message }), 10000);
                             console.error(`Error testing ${activeProvider.name} connection from settings:`, error);
                         } finally {
-                            button.setDisabled(false).setButtonText('Test connection');
+                            button.setDisabled(false).setButtonText(providerI18n.testConnectionButton);
                         }
                     }));
         } else {
-            containerEl.createEl('p', { text: 'Error: Could not find configuration for the active provider.', cls: 'notemd-error-text' });
+            containerEl.createEl('p', { text: providerI18n.missingActiveProvider, cls: 'notemd-error-text' });
         }
 
         // --- Multi-Model Settings ---
-        new Setting(containerEl).setName('Multi-model usage').setHeading();
+        new Setting(containerEl).setName(multiModelI18n.heading).setHeading();
         new Setting(containerEl)
-            .setName('Use different providers for tasks')
-                .setDesc('On: Select a specific LLM provider for each task below. Off: Use the single "Active Provider".')
+            .setName(multiModelI18n.usePerTaskProvidersName)
+                .setDesc(multiModelI18n.usePerTaskProvidersDesc)
             .addToggle(toggle => toggle
                 .setValue(this.plugin.settings.useMultiModelSettings)
                 .onChange(async (value) => {
@@ -618,7 +649,9 @@ export class NotemdSettingTab extends PluginSettingTab {
             const providerNames = getOrderedProviderNames(this.plugin.settings.providers);
             // Use the specific key types defined above
             const createTaskModelSettings = (providerSettingName: keyof NotemdSettings, modelSettingName: keyof NotemdSettings, taskDesc: string) => {
-                const taskSetting = new Setting(containerEl).setName(`${taskDesc} provider & model`).setDesc(`Select provider and optionally override model for "${taskDesc}".`);
+                const taskSetting = new Setting(containerEl)
+                    .setName(formatI18n(multiModelI18n.taskProviderModelLabel, { task: taskDesc }))
+                    .setDesc(formatI18n(multiModelI18n.taskProviderModelDesc, { task: taskDesc }));
                 taskSetting.addDropdown(dropdown => {
                     providerNames.forEach(name => dropdown.addOption(name, name));
                     // Use the typed key
@@ -630,9 +663,9 @@ export class NotemdSettingTab extends PluginSettingTab {
                 });
                 const selectedProviderName = this.plugin.settings[providerSettingName] as string;
                 const selectedProvider = this.plugin.settings.providers.find(p => p.name === selectedProviderName);
-                const defaultModel = selectedProvider ? selectedProvider.model : 'Provider not found';
+                const defaultModel = selectedProvider ? selectedProvider.model : multiModelI18n.providerNotFound;
                     // Use the typed key
-                    taskSetting.addText(text => text.setPlaceholder(`Default: ${defaultModel}`).setValue(this.plugin.settings[modelSettingName] as string || '').onChange(async (value) => {
+                    taskSetting.addText(text => text.setPlaceholder(formatI18n(multiModelI18n.taskModelPlaceholder, { model: defaultModel })).setValue(this.plugin.settings[modelSettingName] as string || '').onChange(async (value) => {
                         (this.plugin.settings as any)[modelSettingName] = value.trim() || undefined;
                         await this.plugin.saveSettings();
                     }));
@@ -647,12 +680,12 @@ export class NotemdSettingTab extends PluginSettingTab {
         }
 
         // --- Translate Task Settings ---
-        new Setting(containerEl).setName('Task: Translate').setHeading();
+        new Setting(containerEl).setName(translationTaskI18n.heading).setHeading();
 
         // New setting: Toggle for custom translation save path
         new Setting(containerEl)
-            .setName('Customise translation file save path')
-            .setDesc('On: Save translated files to a specified path. Off: Save in the same folder as the original file.')
+            .setName(translationTaskI18n.customSavePathName)
+            .setDesc(translationTaskI18n.customSavePathDesc)
             .addToggle(toggle => toggle
                 .setValue(this.plugin.settings.useCustomTranslationSavePath)
                 .onChange(async (value) => {
@@ -664,10 +697,10 @@ export class NotemdSettingTab extends PluginSettingTab {
         // Conditionally display the path input
         if (this.plugin.settings.useCustomTranslationSavePath) {
             new Setting(containerEl)
-                .setName('Translation save path')
-                .setDesc('The folder where translated files will be saved (relative to vault root).')
+                .setName(translationTaskI18n.savePathName)
+                .setDesc(translationTaskI18n.savePathDesc)
                 .addText(text => text
-                    .setPlaceholder('e.g., Translations')
+                    .setPlaceholder(translationTaskI18n.savePathPlaceholder)
                     .setValue(this.plugin.settings.translationSavePath)
                     .onChange(async (value) => {
                         this.plugin.settings.translationSavePath = value.trim();
@@ -676,8 +709,8 @@ export class NotemdSettingTab extends PluginSettingTab {
         }
 
         new Setting(containerEl)
-            .setName('Use custom suffix for translated files')
-            .setDesc('Enable to use a custom suffix instead of the default "_translated".')
+            .setName(translationTaskI18n.customSuffixToggleName)
+            .setDesc(translationTaskI18n.customSuffixToggleDesc)
             .addToggle(toggle => toggle
                 .setValue(this.plugin.settings.useCustomTranslationSuffix)
                 .onChange(async (value) => {
@@ -688,10 +721,10 @@ export class NotemdSettingTab extends PluginSettingTab {
 
         if (this.plugin.settings.useCustomTranslationSuffix) {
             new Setting(containerEl)
-                .setName('Custom Suffix')
-                .setDesc('The custom suffix to append to translated filenames.')
+                .setName(translationTaskI18n.customSuffixName)
+                .setDesc(translationTaskI18n.customSuffixDesc)
                 .addText(text => text
-                    .setPlaceholder('_my_translation')
+                    .setPlaceholder(translationTaskI18n.customSuffixPlaceholder)
                     .setValue(this.plugin.settings.translationCustomSuffix)
                     .onChange(async (value) => {
                         this.plugin.settings.translationCustomSuffix = value;
@@ -700,11 +733,11 @@ export class NotemdSettingTab extends PluginSettingTab {
         }
 
         // --- Summarize to Mermaid Task Settings ---
-        new Setting(containerEl).setName('Task: Summarise as Mermaid diagram').setHeading();
+        new Setting(containerEl).setName(mermaidTaskI18n.heading).setHeading();
 
         new Setting(containerEl)
-            .setName('Customise Mermaid summary save path')
-            .setDesc('On: Save Mermaid summary files to a specified path. Off: Save in the same folder as the original file.')
+            .setName(mermaidTaskI18n.customSavePathName)
+            .setDesc(mermaidTaskI18n.customSavePathDesc)
             .addToggle(toggle => toggle
                 .setValue(this.plugin.settings.useCustomSummarizeToMermaidSavePath)
                 .onChange(async (value) => {
@@ -715,10 +748,10 @@ export class NotemdSettingTab extends PluginSettingTab {
 
         if (this.plugin.settings.useCustomSummarizeToMermaidSavePath) {
             new Setting(containerEl)
-                .setName('Mermaid summary save path')
-                .setDesc('The folder where Mermaid summary files will be saved (relative to vault root).')
+                .setName(mermaidTaskI18n.savePathName)
+                .setDesc(mermaidTaskI18n.savePathDesc)
                 .addText(text => text
-                    .setPlaceholder('e.g., Summaries/Mermaid')
+                    .setPlaceholder(mermaidTaskI18n.savePathPlaceholder)
                     .setValue(this.plugin.settings.summarizeToMermaidSavePath)
                     .onChange(async (value) => {
                         this.plugin.settings.summarizeToMermaidSavePath = value.trim();
@@ -727,8 +760,8 @@ export class NotemdSettingTab extends PluginSettingTab {
         }
 
         new Setting(containerEl)
-            .setName('Use custom suffix for Mermaid summary files')
-            .setDesc('Enable to use a custom suffix instead of the default "_summ".')
+            .setName(mermaidTaskI18n.customSuffixToggleName)
+            .setDesc(mermaidTaskI18n.customSuffixToggleDesc)
             .addToggle(toggle => toggle
                 .setValue(this.plugin.settings.useCustomSummarizeToMermaidSuffix)
                 .onChange(async (value) => {
@@ -739,10 +772,10 @@ export class NotemdSettingTab extends PluginSettingTab {
 
         if (this.plugin.settings.useCustomSummarizeToMermaidSuffix) {
             new Setting(containerEl)
-                .setName('Custom Suffix')
-                .setDesc('The custom suffix to append to Mermaid summary filenames.')
+                .setName(mermaidTaskI18n.customSuffixName)
+                .setDesc(mermaidTaskI18n.customSuffixDesc)
                 .addText(text => text
-                    .setPlaceholder('_mermaid_summary')
+                    .setPlaceholder(mermaidTaskI18n.customSuffixPlaceholder)
                     .setValue(this.plugin.settings.summarizeToMermaidCustomSuffix)
                     .onChange(async (value) => {
                         this.plugin.settings.summarizeToMermaidCustomSuffix = value;
@@ -751,8 +784,8 @@ export class NotemdSettingTab extends PluginSettingTab {
         }
 
         new Setting(containerEl)
-            .setName('Translate to corresponding language when summarising')
-            .setDesc('If selected, the summary output will be translated into the user\'s selected translation language; if not selected, the default will be the original text language.')
+            .setName(mermaidTaskI18n.translateOutputName)
+            .setDesc(mermaidTaskI18n.translateOutputDesc)
             .addToggle(toggle => toggle
                 .setValue(this.plugin.settings.translateSummarizeToMermaidOutput)
                 .onChange(async (value) => {
@@ -761,11 +794,11 @@ export class NotemdSettingTab extends PluginSettingTab {
                 }));
 
         // --- Extract Concepts Task Settings ---
-        new Setting(containerEl).setName('Task: Extract Concepts').setHeading();
+        new Setting(containerEl).setName(extractConceptsTaskI18n.heading).setHeading();
 
         new Setting(containerEl)
-            .setName('Create minimal concept notes')
-            .setDesc('On: Newly created concept notes will only contain the title. Off: They may include other content like backlinks.')
+            .setName(extractConceptsTaskI18n.minimalName)
+            .setDesc(extractConceptsTaskI18n.minimalDesc)
             .addToggle(toggle => toggle
                 .setValue(this.plugin.settings.extractConceptsMinimalTemplate)
                 .onChange(async (value) => {
@@ -774,8 +807,8 @@ export class NotemdSettingTab extends PluginSettingTab {
                 }));
 
         new Setting(containerEl)
-            .setName('Add "Linked From" backlink')
-            .setDesc('On: Add a backlink to the source document in the concept note. Off: Do not add backlinks during extraction.')
+            .setName(extractConceptsTaskI18n.backlinkName)
+            .setDesc(extractConceptsTaskI18n.backlinkDesc)
             .addToggle(toggle => toggle
                 .setValue(this.plugin.settings.extractConceptsAddBacklink)
                 .onChange(async (value) => {
@@ -784,19 +817,19 @@ export class NotemdSettingTab extends PluginSettingTab {
                 }));
 
         // --- Stable API Call Settings ---
-        new Setting(containerEl).setName('Stable API calls').setHeading();
+        new Setting(containerEl).setName(stableApiI18n.heading).setHeading();
         new Setting(containerEl)
-            .setName('Enable stable API calls (retry logic)')
-            .setDesc('On: Automatically retry failed LLM API calls. Off: Fail on first error.')
+            .setName(stableApiI18n.enableName)
+            .setDesc(stableApiI18n.enableDesc)
             .addToggle(toggle => toggle.setValue(this.plugin.settings.enableStableApiCall).onChange(async (value) => { this.plugin.settings.enableStableApiCall = value; await this.plugin.saveSettings(); this.display(); }));
         if (this.plugin.settings.enableStableApiCall) {
-            new Setting(containerEl).setName('Retry interval (seconds)').setDesc('Wait time between retries.').addText(text => text.setPlaceholder(String(DEFAULT_SETTINGS.apiCallInterval)).setValue(String(this.plugin.settings.apiCallInterval)).onChange(async (value) => { const num = parseInt(value, 10); if (!isNaN(num) && num >= 1 && num <= 300) { this.plugin.settings.apiCallInterval = num; } else { this.plugin.settings.apiCallInterval = DEFAULT_SETTINGS.apiCallInterval; } await this.plugin.saveSettings(); this.display(); }));
-            new Setting(containerEl).setName('Maximum retries').setDesc('Max retry attempts.').addText(text => text.setPlaceholder(String(DEFAULT_SETTINGS.apiCallMaxRetries)).setValue(String(this.plugin.settings.apiCallMaxRetries)).onChange(async (value) => { const num = parseInt(value, 10); if (!isNaN(num) && num >= 0 && num <= 10) { this.plugin.settings.apiCallMaxRetries = num; } else { this.plugin.settings.apiCallMaxRetries = DEFAULT_SETTINGS.apiCallMaxRetries; } await this.plugin.saveSettings(); this.display(); }));
+            new Setting(containerEl).setName(stableApiI18n.retryIntervalName).setDesc(stableApiI18n.retryIntervalDesc).addText(text => text.setPlaceholder(String(DEFAULT_SETTINGS.apiCallInterval)).setValue(String(this.plugin.settings.apiCallInterval)).onChange(async (value) => { const num = parseInt(value, 10); if (!isNaN(num) && num >= 1 && num <= 300) { this.plugin.settings.apiCallInterval = num; } else { this.plugin.settings.apiCallInterval = DEFAULT_SETTINGS.apiCallInterval; } await this.plugin.saveSettings(); this.display(); }));
+            new Setting(containerEl).setName(stableApiI18n.maxRetriesName).setDesc(stableApiI18n.maxRetriesDesc).addText(text => text.setPlaceholder(String(DEFAULT_SETTINGS.apiCallMaxRetries)).setValue(String(this.plugin.settings.apiCallMaxRetries)).onChange(async (value) => { const num = parseInt(value, 10); if (!isNaN(num) && num >= 0 && num <= 10) { this.plugin.settings.apiCallMaxRetries = num; } else { this.plugin.settings.apiCallMaxRetries = DEFAULT_SETTINGS.apiCallMaxRetries; } await this.plugin.saveSettings(); this.display(); }));
         }
 
         new Setting(containerEl)
-            .setName('API error debugging mode')
-            .setDesc('On: Enable detailed error logging (DeepSeek-style) for all providers to help diagnose API issues. Off: Use standard concise error reporting.')
+            .setName(stableApiI18n.debugModeName)
+            .setDesc(stableApiI18n.debugModeDesc)
             .addToggle(toggle => toggle
                 .setValue(this.plugin.settings.enableApiErrorDebugMode)
                 .onChange(async (value) => {
@@ -827,8 +860,8 @@ export class NotemdSettingTab extends PluginSettingTab {
             }
 
             new Setting(containerEl)
-                .setName('Diagnostic call mode')
-                .setDesc('Select the runtime call path used by developer diagnostics for this provider.')
+                .setName(stableApiI18n.diagnosticCallModeName)
+                .setDesc(stableApiI18n.diagnosticCallModeDesc)
                 .addDropdown(dropdown => {
                     diagnosticModeOptions.forEach(option => {
                         dropdown.addOption(option.value, option.label);
@@ -850,8 +883,8 @@ export class NotemdSettingTab extends PluginSettingTab {
             }
 
             new Setting(containerEl)
-                .setName('Diagnostic timeout (seconds)')
-                .setDesc('Timeout for each developer diagnostic run (15-3600 seconds).')
+                .setName(stableApiI18n.diagnosticTimeoutName)
+                .setDesc(stableApiI18n.diagnosticTimeoutDesc)
                 .addText(text => text
                     .setPlaceholder(String(Math.floor(DEFAULT_SETTINGS.developerDiagnosticTimeoutMs / 1000)))
                     .setValue(String(Math.floor(this.sanitizeDeveloperDiagnosticTimeoutMs(this.plugin.settings.developerDiagnosticTimeoutMs) / 1000)))
@@ -866,8 +899,8 @@ export class NotemdSettingTab extends PluginSettingTab {
                     }));
 
             new Setting(containerEl)
-                .setName('Stability test runs')
-                .setDesc('How many repeated runs to execute in "Run stability test" (1-10).')
+                .setName(stableApiI18n.stabilityRunsName)
+                .setDesc(stableApiI18n.stabilityRunsDesc)
                 .addText(text => text
                     .setPlaceholder(String(DEFAULT_SETTINGS.developerDiagnosticStabilityRuns))
                     .setValue(String(this.sanitizeDeveloperDiagnosticRuns(this.plugin.settings.developerDiagnosticStabilityRuns)))
@@ -882,8 +915,8 @@ export class NotemdSettingTab extends PluginSettingTab {
                     }));
 
             new Setting(containerEl)
-                .setName('Developer provider diagnostic (long request)')
-                .setDesc('Run one long-request diagnostic with the selected call mode and save a full report to vault root.')
+                .setName(stableApiI18n.longRequestName)
+                .setDesc(stableApiI18n.longRequestDesc)
                 .addButton(button => button
                     .setButtonText(i18n.settings.developer.runDiagnostic)
                     .onClick(async () => {
@@ -897,20 +930,20 @@ export class NotemdSettingTab extends PluginSettingTab {
         }
 
         // --- General Settings ---
-        new Setting(containerEl).setName('Processed file output').setHeading();
-        new Setting(containerEl).setName('Customize processed file save path').setDesc('On: Save to specified path. Off: Save in original folder.').addToggle(toggle => toggle.setValue(this.plugin.settings.useCustomProcessedFileFolder).onChange(async (value) => { this.plugin.settings.useCustomProcessedFileFolder = value; await this.plugin.saveSettings(); this.display(); }));
+        new Setting(containerEl).setName(generalOutputI18n.processedHeading).setHeading();
+        new Setting(containerEl).setName(generalOutputI18n.processedSavePathName).setDesc(generalOutputI18n.processedSavePathDesc).addToggle(toggle => toggle.setValue(this.plugin.settings.useCustomProcessedFileFolder).onChange(async (value) => { this.plugin.settings.useCustomProcessedFileFolder = value; await this.plugin.saveSettings(); this.display(); }));
         if (this.plugin.settings.useCustomProcessedFileFolder) {
-            new Setting(containerEl).setName('Processed file folder path').setDesc('Relative path within vault.').addText(text => text.setPlaceholder('e.g., Processed/Notes').setValue(this.plugin.settings.processedFileFolder).onChange(async (value) => { /* Add validation */ this.plugin.settings.processedFileFolder = value.trim(); await this.plugin.saveSettings(); }));
+            new Setting(containerEl).setName(generalOutputI18n.processedFolderPathName).setDesc(generalOutputI18n.processedFolderPathDesc).addText(text => text.setPlaceholder(generalOutputI18n.processedFolderPathPlaceholder).setValue(this.plugin.settings.processedFileFolder).onChange(async (value) => { /* Add validation */ this.plugin.settings.processedFileFolder = value.trim(); await this.plugin.saveSettings(); }));
         }
-        new Setting(containerEl).setName('Move original file after processing').setDesc('On: Move original to processed folder. Off: Create copy named "_processed.md".').addToggle(toggle => toggle.setValue(this.plugin.settings.moveOriginalFileOnProcess).onChange(async (value) => { this.plugin.settings.moveOriginalFileOnProcess = value; await this.plugin.saveSettings(); }));
-        new Setting(containerEl).setName("Use custom output filename for 'Add links'").setDesc("On: Use custom suffix/replacement. Off: Use '_processed.md'.").addToggle(toggle => toggle.setValue(this.plugin.settings.useCustomAddLinksSuffix).onChange(async (value) => { this.plugin.settings.useCustomAddLinksSuffix = value; await this.plugin.saveSettings(); this.display(); }));
+        new Setting(containerEl).setName(generalOutputI18n.moveOriginalName).setDesc(generalOutputI18n.moveOriginalDesc).addToggle(toggle => toggle.setValue(this.plugin.settings.moveOriginalFileOnProcess).onChange(async (value) => { this.plugin.settings.moveOriginalFileOnProcess = value; await this.plugin.saveSettings(); }));
+        new Setting(containerEl).setName(generalOutputI18n.customAddLinksFilenameName).setDesc(generalOutputI18n.customAddLinksFilenameDesc).addToggle(toggle => toggle.setValue(this.plugin.settings.useCustomAddLinksSuffix).onChange(async (value) => { this.plugin.settings.useCustomAddLinksSuffix = value; await this.plugin.saveSettings(); this.display(); }));
         if (this.plugin.settings.useCustomAddLinksSuffix) {
-            new Setting(containerEl).setName("Custom suffix/replacement string").setDesc("Empty to overwrite original. Ex: '_linked'.").addText(text => text.setPlaceholder("Leave empty to overwrite").setValue(this.plugin.settings.addLinksCustomSuffix).onChange(async (value) => { this.plugin.settings.addLinksCustomSuffix = value; await this.plugin.saveSettings(); }));
+            new Setting(containerEl).setName(generalOutputI18n.addLinksSuffixName).setDesc(generalOutputI18n.addLinksSuffixDesc).addText(text => text.setPlaceholder(generalOutputI18n.addLinksSuffixPlaceholder).setValue(this.plugin.settings.addLinksCustomSuffix).onChange(async (value) => { this.plugin.settings.addLinksCustomSuffix = value; await this.plugin.saveSettings(); }));
         }
         // Add the new toggle for removing code fences
         new Setting(containerEl)
-            .setName("Remove code fences on 'Add links'")
-            .setDesc("On: Remove all ```markdown and ``` fences from the final output of 'Process File' and 'Process Folder'. Off: Keep code fences.")
+            .setName(generalOutputI18n.removeCodeFencesName)
+            .setDesc(generalOutputI18n.removeCodeFencesDesc)
             .addToggle(toggle => toggle
                 .setValue(this.plugin.settings.removeCodeFencesOnAddLinks)
                 .onChange(async (value) => {
@@ -918,37 +951,38 @@ export class NotemdSettingTab extends PluginSettingTab {
                     await this.plugin.saveSettings();
                 }));
 
-        new Setting(containerEl).setName('Concept note output').setHeading();
-        new Setting(containerEl).setName('Customize concept note path').setDesc('On: Create new concept notes in specified path. Off: Do not create automatically.').addToggle(toggle => toggle.setValue(this.plugin.settings.useCustomConceptNoteFolder).onChange(async (value) => { this.plugin.settings.useCustomConceptNoteFolder = value; await this.plugin.saveSettings(); this.display(); }));
+        new Setting(containerEl).setName(generalOutputI18n.conceptNoteHeading).setHeading();
+        new Setting(containerEl).setName(generalOutputI18n.conceptNotePathName).setDesc(generalOutputI18n.conceptNotePathDesc).addToggle(toggle => toggle.setValue(this.plugin.settings.useCustomConceptNoteFolder).onChange(async (value) => { this.plugin.settings.useCustomConceptNoteFolder = value; await this.plugin.saveSettings(); this.display(); }));
         if (this.plugin.settings.useCustomConceptNoteFolder) {
-            new Setting(containerEl).setName('Concept note folder path').setDesc('Relative path within vault.').addText(text => text.setPlaceholder('e.g., Concepts').setValue(this.plugin.settings.conceptNoteFolder).onChange(async (value) => { /* Add validation */ this.plugin.settings.conceptNoteFolder = value.trim(); await this.plugin.saveSettings(); }));
+            new Setting(containerEl).setName(generalOutputI18n.conceptNoteFolderName).setDesc(generalOutputI18n.conceptNoteFolderDesc).addText(text => text.setPlaceholder(generalOutputI18n.conceptNoteFolderPlaceholder).setValue(this.plugin.settings.conceptNoteFolder).onChange(async (value) => { /* Add validation */ this.plugin.settings.conceptNoteFolder = value.trim(); await this.plugin.saveSettings(); }));
         }
 
-        new Setting(containerEl).setName('Concept log file output').setHeading();
-        new Setting(containerEl).setName('Generate concept log file').setDesc('On: Log newly created concept notes.').addToggle(toggle => toggle.setValue(this.plugin.settings.generateConceptLogFile).onChange(async (value) => { this.plugin.settings.generateConceptLogFile = value; await this.plugin.saveSettings(); this.display(); }));
+        new Setting(containerEl).setName(generalOutputI18n.conceptLogHeading).setHeading();
+        new Setting(containerEl).setName(generalOutputI18n.generateConceptLogName).setDesc(generalOutputI18n.generateConceptLogDesc).addToggle(toggle => toggle.setValue(this.plugin.settings.generateConceptLogFile).onChange(async (value) => { this.plugin.settings.generateConceptLogFile = value; await this.plugin.saveSettings(); this.display(); }));
         if (this.plugin.settings.generateConceptLogFile) {
-            const logFolderSetting = new Setting(containerEl).setName('Customize log file save path');
-            let logFolderDesc = 'On: Save log to specified path.';
-            if (this.plugin.settings.useCustomConceptNoteFolder && this.plugin.settings.conceptNoteFolder) { logFolderDesc += ` Off: Save in Concept Note Folder ('${this.plugin.settings.conceptNoteFolder}')`; } else { logFolderDesc += ' Off: Save in vault root.'; }
+            const logFolderSetting = new Setting(containerEl).setName(generalOutputI18n.customLogPathName);
+            const logFolderDesc = this.plugin.settings.useCustomConceptNoteFolder && this.plugin.settings.conceptNoteFolder
+                ? formatI18n(generalOutputI18n.customLogPathDescWithConceptFolder, { folder: this.plugin.settings.conceptNoteFolder })
+                : generalOutputI18n.customLogPathDescVault;
             logFolderSetting.setDesc(logFolderDesc);
             logFolderSetting.addToggle(toggle => toggle.setValue(this.plugin.settings.useCustomConceptLogFolder).onChange(async (value) => { this.plugin.settings.useCustomConceptLogFolder = value; await this.plugin.saveSettings(); this.display(); }));
             if (this.plugin.settings.useCustomConceptLogFolder) {
-                new Setting(containerEl).setName('Concept log folder path').setDesc('Relative path. Required if custom path enabled.').addText(text => text.setPlaceholder('e.g., Logs/ConceptLogs').setValue(this.plugin.settings.conceptLogFolderPath).onChange(async (value) => { /* Add validation */ this.plugin.settings.conceptLogFolderPath = value.trim(); await this.plugin.saveSettings(); }));
+                new Setting(containerEl).setName(generalOutputI18n.conceptLogFolderName).setDesc(generalOutputI18n.conceptLogFolderDesc).addText(text => text.setPlaceholder(generalOutputI18n.conceptLogFolderPlaceholder).setValue(this.plugin.settings.conceptLogFolderPath).onChange(async (value) => { /* Add validation */ this.plugin.settings.conceptLogFolderPath = value.trim(); await this.plugin.saveSettings(); }));
             }
-            const logFileNameSetting = new Setting(containerEl).setName('Customize log file name');
-            logFileNameSetting.setDesc(`On: Use specified name. Off: Use "${DEFAULT_SETTINGS.conceptLogFileName}".`);
+            const logFileNameSetting = new Setting(containerEl).setName(generalOutputI18n.customLogFileNameToggleName);
+            logFileNameSetting.setDesc(formatI18n(generalOutputI18n.customLogFileNameToggleDesc, { defaultName: DEFAULT_SETTINGS.conceptLogFileName }));
             logFileNameSetting.addToggle(toggle => toggle.setValue(this.plugin.settings.useCustomConceptLogFileName).onChange(async (value) => { this.plugin.settings.useCustomConceptLogFileName = value; await this.plugin.saveSettings(); this.display(); }));
             if (this.plugin.settings.useCustomConceptLogFileName) {
-                new Setting(containerEl).setName('Concept log file name').setDesc('Name for the log file. Required if custom name enabled.').addText(text => text.setPlaceholder(DEFAULT_SETTINGS.conceptLogFileName).setValue(this.plugin.settings.conceptLogFileName).onChange(async (value) => { /* Add validation */ this.plugin.settings.conceptLogFileName = value.trim(); await this.plugin.saveSettings(); }));
+                new Setting(containerEl).setName(generalOutputI18n.conceptLogFileNameName).setDesc(generalOutputI18n.conceptLogFileNameDesc).addText(text => text.setPlaceholder(DEFAULT_SETTINGS.conceptLogFileName).setValue(this.plugin.settings.conceptLogFileName).onChange(async (value) => { /* Add validation */ this.plugin.settings.conceptLogFileName = value.trim(); await this.plugin.saveSettings(); }));
             }
         }
 
-        new Setting(containerEl).setName('Content generation & output').setHeading();
-        new Setting(containerEl).setName('Enable research in "Generate from title"').setDesc('On: Perform web research before generating.').addToggle(toggle => toggle.setValue(this.plugin.settings.enableResearchInGenerateContent).onChange(async (value) => { this.plugin.settings.enableResearchInGenerateContent = value; await this.plugin.saveSettings(); }));
+        new Setting(containerEl).setName(contentGenerationI18n.heading).setHeading();
+        new Setting(containerEl).setName(contentGenerationI18n.enableResearchName).setDesc(contentGenerationI18n.enableResearchDesc).addToggle(toggle => toggle.setValue(this.plugin.settings.enableResearchInGenerateContent).onChange(async (value) => { this.plugin.settings.enableResearchInGenerateContent = value; await this.plugin.saveSettings(); }));
         
         new Setting(containerEl)
-            .setName('Auto-run Mermaid syntax fix after generation')
-            .setDesc("On: Automatically run Mermaid syntax fix after Mermaid-related workflows (Generate, Research, Summarise as Mermaid, Process, Translate).")
+            .setName(contentGenerationI18n.autoMermaidFixName)
+            .setDesc(contentGenerationI18n.autoMermaidFixDesc)
             .addToggle(toggle => toggle
                 .setValue(this.plugin.settings.autoMermaidFixAfterGenerate)
                 .onChange(async (value) => {
@@ -956,14 +990,14 @@ export class NotemdSettingTab extends PluginSettingTab {
                     await this.plugin.saveSettings();
                 }));
 
-        new Setting(containerEl).setName('One-click workflow buttons').setHeading();
+        new Setting(containerEl).setName(workflowBuilderI18n.heading).setHeading();
 
         new Setting(containerEl)
-            .setName('Workflow error strategy')
-            .setDesc('Stop immediately on first failed step, or continue and finish remaining steps.')
+            .setName(workflowBuilderI18n.errorStrategyName)
+            .setDesc(workflowBuilderI18n.errorStrategyDesc)
             .addDropdown(dropdown => dropdown
-                .addOption('stop_on_error', 'Stop on first error')
-                .addOption('continue_on_error', 'Continue on error')
+                .addOption('stop_on_error', workflowBuilderI18n.errorStrategyStop)
+                .addOption('continue_on_error', workflowBuilderI18n.errorStrategyContinue)
                 .setValue(this.plugin.settings.customWorkflowErrorStrategy)
                 .onChange(async (value: 'stop_on_error' | 'continue_on_error') => {
                     this.plugin.settings.customWorkflowErrorStrategy = value;
@@ -971,13 +1005,13 @@ export class NotemdSettingTab extends PluginSettingTab {
                 }));
 
         new Setting(containerEl)
-            .setName('Visual workflow builder')
-            .setDesc('Create custom workflow buttons from built-in actions without writing DSL.');
+            .setName(workflowBuilderI18n.visualBuilderName)
+            .setDesc(workflowBuilderI18n.visualBuilderDesc);
         this.renderWorkflowVisualBuilder(containerEl);
 
         new Setting(containerEl)
-            .setName('Advanced DSL editor')
-            .setDesc("Optional: direct edit using Button Name::action-a>action-b format. Visual builder and DSL stay synchronized.")
+            .setName(workflowBuilderI18n.advancedDslName)
+            .setDesc(workflowBuilderI18n.advancedDslDesc)
             .addTextArea((text: TextAreaComponent) => {
                 text
                     .setPlaceholder(DEFAULT_SETTINGS.customWorkflowButtonsDsl)
@@ -992,12 +1026,12 @@ export class NotemdSettingTab extends PluginSettingTab {
         const parsedWorkflowButtons = resolveCustomWorkflowButtons(this.plugin.settings.customWorkflowButtonsDsl);
         if (parsedWorkflowButtons.errors.length > 0) {
             new Setting(containerEl)
-                .setName('Workflow DSL validation')
-                .setDesc(`Found ${parsedWorkflowButtons.errors.length} issue(s). Invalid lines are ignored in sidebar rendering.`);
+                .setName(workflowBuilderI18n.dslValidationName)
+                .setDesc(formatI18n(workflowBuilderI18n.dslValidationDesc, { count: parsedWorkflowButtons.errors.length }));
         }
 
         new Setting(containerEl)
-            .setName('Available workflow action IDs')
+            .setName(workflowBuilderI18n.availableActionIdsName)
             .setDesc(getWorkflowActionHelpText(i18n));
 
         // --- Extract Original Text Settings ---
@@ -1458,11 +1492,11 @@ export class NotemdSettingTab extends PluginSettingTab {
         // --- End Duplicate Check Scope ---
 
         // --- Custom Prompt Settings ---
-        new Setting(containerEl).setName('Custom prompt settings').setHeading();
+        new Setting(containerEl).setName(customPromptsI18n.heading).setHeading();
 
         new Setting(containerEl)
-            .setName('Enable custom prompts for specific tasks')
-            .setDesc('On: Allows you to override the default system prompts for selected tasks below. Off: Default prompts will always be used.')
+            .setName(customPromptsI18n.enableName)
+            .setDesc(customPromptsI18n.enableDesc)
             .addToggle(toggle => toggle
                 .setValue(this.plugin.settings.enableGlobalCustomPrompts)
                 .onChange(async (value) => {
@@ -1478,19 +1512,19 @@ export class NotemdSettingTab extends PluginSettingTab {
                 useCustomSettingKey: keyof Pick<NotemdSettings, 'useCustomPromptForAddLinks' | 'useCustomPromptForGenerateTitle' | 'useCustomPromptForResearchSummarize' | 'useCustomPromptForSummarizeToMermaid' | 'useCustomPromptForExtractConcepts' | 'useCustomPromptForTranslate' | 'useCustomPromptForExtractOriginalText'>,
                 customPromptSettingKey: keyof Pick<NotemdSettings, 'customPromptAddLinks' | 'customPromptGenerateTitle' | 'customPromptResearchSummarize' | 'customPromptSummarizeToMermaid' | 'customPromptExtractConcepts' | 'translatePrompt' | 'customPromptExtractOriginalText'>
             }> = [
-                { key: 'addLinks', name: 'Add Links (Process File/Folder)', useCustomSettingKey: 'useCustomPromptForAddLinks', customPromptSettingKey: 'customPromptAddLinks' },
+                { key: 'addLinks', name: getSidebarActionLabel(i18n, 'process-current-add-links'), useCustomSettingKey: 'useCustomPromptForAddLinks', customPromptSettingKey: 'customPromptAddLinks' },
                 { key: 'generateTitle', name: generateFromTitleTaskLabel, useCustomSettingKey: 'useCustomPromptForGenerateTitle', customPromptSettingKey: 'customPromptGenerateTitle' },
-                { key: 'researchSummarize', name: 'Research & Summarize', useCustomSettingKey: 'useCustomPromptForResearchSummarize', customPromptSettingKey: 'customPromptResearchSummarize' },
-                { key: 'summarizeToMermaid', name: 'Summarise as Mermaid diagram', useCustomSettingKey: 'useCustomPromptForSummarizeToMermaid', customPromptSettingKey: 'customPromptSummarizeToMermaid' },
-                { key: 'extractConcepts', name: 'Extract Concepts', useCustomSettingKey: 'useCustomPromptForExtractConcepts', customPromptSettingKey: 'customPromptExtractConcepts' },
-                { key: 'translate', name: 'Translate', useCustomSettingKey: 'useCustomPromptForTranslate', customPromptSettingKey: 'translatePrompt' },
+                { key: 'researchSummarize', name: researchAndSummarizeTaskLabel, useCustomSettingKey: 'useCustomPromptForResearchSummarize', customPromptSettingKey: 'customPromptResearchSummarize' },
+                { key: 'summarizeToMermaid', name: summarizeAsMermaidTaskLabel, useCustomSettingKey: 'useCustomPromptForSummarizeToMermaid', customPromptSettingKey: 'customPromptSummarizeToMermaid' },
+                { key: 'extractConcepts', name: getSidebarActionLabel(i18n, 'extract-concepts-current'), useCustomSettingKey: 'useCustomPromptForExtractConcepts', customPromptSettingKey: 'customPromptExtractConcepts' },
+                { key: 'translate', name: getSidebarActionLabel(i18n, 'translate-current-file'), useCustomSettingKey: 'useCustomPromptForTranslate', customPromptSettingKey: 'translatePrompt' },
                 { key: 'extractOriginalText', name: extractOriginalTextTaskLabel, useCustomSettingKey: 'useCustomPromptForExtractOriginalText', customPromptSettingKey: 'customPromptExtractOriginalText' },
             ];
 
             tasksToCustomize.forEach(task => {
                 new Setting(containerEl)
                     .setName(`Use custom prompt for "${task.name}"`)
-                    .setDesc(`On: Use your custom prompt below for this task. Off: Use the default prompt.`)
+                    .setDesc(customPromptsI18n.taskToggleDesc)
                     .addToggle(toggle => toggle
                         .setValue(this.plugin.settings[task.useCustomSettingKey])
                         .onChange(async (value) => {
@@ -1510,17 +1544,17 @@ export class NotemdSettingTab extends PluginSettingTab {
                         .setDisabled(true)
                         .inputEl.setAttrs({ rows: 5, style: 'width: 100%; font-family: monospace; font-size: 0.9em; margin-bottom: 5px;' });
 
-                    const copyButton = defaultPromptDisplay.createEl('button', { text: 'Copy Default Prompt' });
+                    const copyButton = defaultPromptDisplay.createEl('button', { text: customPromptsI18n.copyDefaultButton });
                     copyButton.onclick = () => {
                         navigator.clipboard.writeText(defaultPromptText);
-                        new Notice('Default prompt copied to clipboard!');
+                        new Notice(customPromptsI18n.copyDefaultNotice);
                     };
                     defaultPromptDisplay.style.marginBottom = "10px";
 
 
                     new Setting(containerEl)
                         .setName(`Custom prompt for "${task.name}"`)
-                        .setDesc('Enter your custom prompt. Placeholders like {TITLE} or {RESEARCH_CONTEXT_SECTION} will be replaced if applicable for the task. Refer to the default prompt for available placeholders.')
+                        .setDesc(customPromptsI18n.customPromptDesc)
                         .addTextArea(textarea => textarea
                             .setPlaceholder(`Enter your custom prompt for ${task.name}...`)
                             .setValue(this.plugin.settings[task.customPromptSettingKey])
