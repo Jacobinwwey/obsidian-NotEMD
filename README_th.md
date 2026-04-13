@@ -59,7 +59,7 @@ Notemd ช่วยยกระดับเวิร์กโฟลว์ใน 
 
 | ประเด็น | ขอบเขต | ค่าเริ่มต้น | หมายเหตุ |
 |---|---|---|---|
-| `UI Locale` | เฉพาะข้อความ UI ของปลั๊กอิน (การตั้งค่า, แถบข้าง, notices, dialogs) | `auto` | ตาม locale ของ Obsidian; แค็ตตาล็อก UI ปัจจุบันคือ `en`, `zh-CN`, `zh-TW` |
+| `UI Locale` | เฉพาะข้อความ UI ของปลั๊กอิน (การตั้งค่า, แถบข้าง, notices, dialogs) | `auto` | ตาม locale ของ Obsidian; แค็ตตาล็อก UI ปัจจุบันคือ `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, `zh-TW` |
 | `Task Output Language` | ผลลัพธ์ของงานที่สร้างโดย LLM (ลิงก์, บทสรุป, การสร้างเนื้อหา, การสกัด, ภาษาเป้าหมายของการแปล) | `en` | ตั้งค่าแบบ global หรือแยกตามงานได้เมื่อเปิด `Use different languages for tasks` |
 | `Disable auto translation` | งานที่ไม่ใช่ Translate จะคงบริบทภาษาต้นฉบับไว้ | `false` | งาน `Translate` แบบระบุชัดจะยังคงบังคับใช้ภาษาเป้าหมายที่กำหนดไว้ |
 | Locale fallback | การหา key ของ UI เมื่อคำแปลขาดหาย | locale -> `en` | ช่วยให้ UI เสถียรแม้บาง key ยังไม่ได้แปล |

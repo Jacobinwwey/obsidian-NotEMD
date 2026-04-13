@@ -59,7 +59,7 @@ Notemd आपके Obsidian वर्कफ़्लो को बेहतर 
 
 | विषय | दायरा | डिफ़ॉल्ट | नोट्स |
 |---|---|---|---|
-| `UI Locale` | केवल प्लगइन UI टेक्स्ट (settings, sidebar, notices, dialogs) | `auto` | Obsidian लोकेल का अनुसरण करता है; वर्तमान UI कैटलॉग `en`, `zh-CN`, `zh-TW` हैं। |
+| `UI Locale` | केवल प्लगइन UI टेक्स्ट (settings, sidebar, notices, dialogs) | `auto` | Obsidian लोकेल का अनुसरण करता है; वर्तमान UI कैटलॉग `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, `zh-TW` हैं। |
 | `Task Output Language` | LLM द्वारा उत्पन्न कार्य आउटपुट (लिंक, सारांश, जनरेशन, एक्सट्रैक्शन, अनुवाद लक्ष्य) | `en` | यह वैश्विक हो सकता है या प्रति-कार्य, जब `Use different languages for tasks` सक्षम हो। |
 | `Disable auto translation` | गैर-`Translate` कार्य स्रोत-भाषा संदर्भ बनाए रखते हैं | `false` | स्पष्ट `Translate` कार्य अभी भी कॉन्फ़िगर की गई लक्ष्य भाषा लागू करते हैं। |
 | लोकेल फ़ॉलबैक | अनुपलब्ध UI कुंजियों का समाधान | locale -> `en` | कुछ कुंजियाँ अनूदित न होने पर भी UI को स्थिर रखता है। |

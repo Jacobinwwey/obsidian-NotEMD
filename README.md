@@ -59,7 +59,7 @@ That's it! Explore the settings to unlock more features like web research, trans
 
 | Concern | Scope | Default | Notes |
 |---|---|---|---|
-| `UI Locale` | Plugin UI text only (settings, sidebar, notices, dialogs) | `auto` | Follows Obsidian locale; current UI catalogs are `en`, `zh-CN`, `zh-TW`. |
+| `UI Locale` | Plugin UI text only (settings, sidebar, notices, dialogs) | `auto` | Follows Obsidian locale; current UI catalogs are `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, `zh-TW`. |
 | `Task Output Language` | LLM-generated task output (links, summaries, generation, extraction, translation target) | `en` | Can be global or per-task when `Use different languages for tasks` is enabled. |
 | `Disable auto translation` | Non-Translate tasks keep source-language context | `false` | Explicit `Translate` tasks still enforce the configured target language. |
 | Locale fallback | Missing UI key resolution | locale -> `en` | Keeps UI stable when some keys are untranslated. |

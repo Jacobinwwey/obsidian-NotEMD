@@ -59,7 +59,7 @@ To je vše. Prozkoumejte nastavení a odemkněte další funkce, jako je webový
 
 | Oblast | Rozsah | Výchozí | Poznámky |
 |---|---|---|---|
-| `UI Locale` | Pouze text pluginového rozhraní, tedy settings, sidebar, notices a dialogs | `auto` | Řídí se locale Obsidianu; aktuální UI katalogy jsou `en`, `zh-CN`, `zh-TW`. |
+| `UI Locale` | Pouze text pluginového rozhraní, tedy settings, sidebar, notices a dialogs | `auto` | Řídí se locale Obsidianu; aktuální UI katalogy jsou `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, `zh-TW`. |
 | `Task Output Language` | Výstup úloh generovaný LLM, jako odkazy, shrnutí, generování, extrakce a cíl překladu | `en` | Může být globální nebo per-task, pokud je zapnuto `Use different languages for tasks`. |
 | `Disable auto translation` | Úlohy mimo Translate zachovávají kontext zdrojového jazyka | `false` | Explicitní úlohy `Translate` stále vynucují nakonfigurovaný cílový jazyk. |
 | Záložní locale | Řešení chybějících UI klíčů | locale -> `en` | Udržuje UI stabilní, když některé klíče ještě nejsou přeložené. |

@@ -59,7 +59,7 @@ To wszystko. Przejrzyj ustawienia, aby odblokować więcej funkcji, takich jak b
 
 | Zagadnienie | Zakres | Domyślnie | Uwagi |
 |---|---|---|---|
-| `UI Locale` | Tylko tekst interfejsu wtyczki (ustawienia, pasek boczny, powiadomienia, okna dialogowe) | `auto` | Podąża za językiem Obsidian; aktualne katalogi UI to `en`, `zh-CN` i `zh-TW`. |
+| `UI Locale` | Tylko tekst interfejsu wtyczki (ustawienia, pasek boczny, powiadomienia, okna dialogowe) | `auto` | Podąża za językiem Obsidian; aktualne katalogi UI to `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN` i `zh-TW`. |
 | `Task Output Language` | Wynik zadania generowany przez LLM (linki, podsumowania, generowanie, ekstrakcja, język docelowy tłumaczenia) | `en` | Może być globalny albo ustawiany per zadanie po włączeniu `Use different languages for tasks`. |
 | `Disable auto translation` | Zadania inne niż Translate zachowują kontekst języka źródłowego | `false` | Jawne zadania `Translate` nadal wymuszają skonfigurowany język docelowy. |
 | Locale fallback | Rozwiązywanie brakujących kluczy UI | locale -> `en` | Utrzymuje stabilność interfejsu, gdy część kluczy nie ma jeszcze tłumaczenia. |
