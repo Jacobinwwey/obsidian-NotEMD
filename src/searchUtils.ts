@@ -6,6 +6,7 @@ import { cleanupLatexDelimiters, refineMermaidBlocks } from './mermaidProcessor'
 import { ErrorModal } from './ui/ErrorModal';
 import { getSystemPrompt } from './promptUtils';
 import { SearchManager } from './search/SearchManager';
+import { formatI18n, getI18nStrings } from './i18n';
 import { resolveTaskLanguageCode } from './i18n/taskLanguagePolicy';
 
 /**
@@ -192,6 +193,7 @@ export async function _performResearch(app: App, settings: NotemdSettings, topic
  * @param progressReporter Interface for reporting progress.
  */
 export async function researchAndSummarize(app: App, settings: NotemdSettings, editor: Editor, view: MarkdownView, progressReporter: ProgressReporter): Promise<void> {
+    const i18n = getI18nStrings({ uiLocale: settings.uiLocale });
     progressReporter.log(`Entering researchAndSummarize function.`);
     const activeFile = view.file;
     if (!activeFile) {
@@ -204,7 +206,7 @@ export async function researchAndSummarize(app: App, settings: NotemdSettings, e
     const topic = selectedText ? selectedText.trim() : activeFile.basename;
 
     if (!topic || topic.trim() === '') {
-        new Notice('Please select the topic text in the editor first, or ensure the note has a title.');
+        new Notice(i18n.notices.selectTopicTextOrUseNoteTitle);
         progressReporter.log("Exiting researchAndSummarize: Topic is empty.");
         progressReporter.updateStatus("No topic selected", -1); // Indicate error state
         return;
@@ -222,7 +224,7 @@ export async function researchAndSummarize(app: App, settings: NotemdSettings, e
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user during research.");
 
         if (!researchContext) {
-            new Notice(`Research for "${topic}" failed or returned no results. Summary not generated.`);
+            new Notice(formatI18n(i18n.notices.researchFailedOrNoResults, { topic }));
             progressReporter.log(`_performResearch returned null or empty context for "${topic}".`);
             progressReporter.updateStatus('Research failed/No results', -1);
             // Note: Closing modal/reporter handled by caller
@@ -300,8 +302,8 @@ export async function researchAndSummarize(app: App, settings: NotemdSettings, e
         editor.setValue(currentContent.trim() + summaryHeader + summaryToAppend); // Use cleaned summary
 
         progressReporter.updateStatus('Research and summary complete!', 100);
-        new Notice(`Research summary for "${topic}" appended.`);
-        progressReporter.log(`Research summary for "${topic}" appended successfully.`);
+        new Notice(formatI18n(i18n.notices.researchSummaryAppended, { topic }));
+        progressReporter.log(formatI18n(i18n.notices.researchSummaryAppended, { topic }));
         // Note: Closing modal/reporter handled by caller
 
     } catch (error: unknown) {
@@ -316,10 +318,10 @@ export async function researchAndSummarize(app: App, settings: NotemdSettings, e
         } else {
             // Log other errors
             console.error(`Error researching "${topic}":`, errorDetails);
-            new Notice(`Error during research: ${message}. See console.`, 10000);
+            new Notice(formatI18n(i18n.notices.researchError, { message }), 10000);
             progressReporter.log(`Error in researchAndSummarize catch block: ${message}`);
             progressReporter.updateStatus('Error occurred', -1);
-            new ErrorModal(app, "Research Error", errorDetails, settings.uiLocale).open();
+            new ErrorModal(app, i18n.errorModal.titles.research, errorDetails, settings.uiLocale).open();
             // Do not re-throw non-cancellation errors here, let the function finish "unsuccessfully"
         }
     }
