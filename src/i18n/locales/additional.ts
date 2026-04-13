@@ -3841,6 +3841,384 @@ extendLocale(STRINGS_VI, {
     }
 });
 
+extendLocale(STRINGS_AR, {
+    settings: {
+        extractOriginalText: {
+            questionsName: 'أسئلة الاستخراج',
+            questionsDesc: 'أدخل قائمة الأسئلة لاستخراج النصوص المقابلة لها، سؤالًا في كل سطر.',
+            questionsPlaceholder: 'أدخل أسئلتك هنا...',
+            translateOutputName: 'ترجمة المخرجات إلى اللغة المقابلة',
+            translateOutputDesc: 'عند التفعيل، ستتضمن المخرجات ترجمة إلى لغة الاستخراج المحددة.',
+            mergedQueryName: 'وضع الاستعلام المدمج',
+            mergedQueryDesc: 'تشغيل: أرسل جميع الأسئلة في مطالبة LLM واحدة (أسرع/أوفر). إيقاف: عالج كل سؤال على حدة (دقة أعلى).',
+            customOutputName: 'تخصيص مسار حفظ النص المستخرج واسم الملف',
+            customOutputDesc: 'تشغيل: استخدم مجلدًا ولاحقة مخصصين للملفات المستخرجة. إيقاف: احفظ في المجلد الأصلي مع اللاحقة الافتراضية "_Extracted".',
+            savePathName: 'مسار حفظ الملف المستخرج',
+            savePathDesc: 'المجلد الذي ستُحفظ فيه الملفات المستخرجة (بالنسبة إلى جذر المستودع).',
+            savePathPlaceholder: 'مثال: ExtractedData',
+            customSuffixName: 'لاحقة مخصصة',
+            customSuffixDesc: 'اللاحقة المخصصة التي ستُلحق باسم الملف (مثل: "_MyExtract").'
+        }
+    }
+});
+
+extendLocale(STRINGS_DE, {
+    settings: {
+        extractOriginalText: {
+            questionsName: 'Fragen für die Extraktion',
+            questionsDesc: 'Geben Sie die Liste der Fragen ein, für die spezifischer Text extrahiert werden soll, jeweils eine pro Zeile.',
+            questionsPlaceholder: 'Geben Sie hier Ihre Fragen ein...',
+            translateOutputName: 'Ausgabe in die entsprechende Sprache übersetzen',
+            translateOutputDesc: 'Wenn ausgewählt, enthält die Ausgabe eine Übersetzung in die ausgewählte Extraktionssprache.',
+            mergedQueryName: 'Zusammengeführter Abfragemodus',
+            mergedQueryDesc: 'Ein: Alle Fragen in einem einzigen LLM-Prompt senden (schneller/günstiger). Aus: Jede Frage einzeln verarbeiten (höhere Genauigkeit).',
+            customOutputName: 'Speicherpfad und Dateiname für extrahierten Text anpassen',
+            customOutputDesc: 'Ein: Benutzerdefinierten Ordner und Suffix für extrahierte Dateien verwenden. Aus: Im Originalordner mit dem Standardsuffix "_Extracted" speichern.',
+            savePathName: 'Speicherpfad für extrahierte Dateien',
+            savePathDesc: 'Der Ordner, in dem extrahierte Dateien gespeichert werden (relativ zum Tresor-Stammverzeichnis).',
+            savePathPlaceholder: 'z. B. ExtractedData',
+            customSuffixName: 'Benutzerdefiniertes Suffix',
+            customSuffixDesc: 'Das benutzerdefinierte Suffix, das an den Dateinamen angehängt wird (z. B. "_MyExtract").'
+        }
+    }
+});
+
+extendLocale(STRINGS_ES, {
+    settings: {
+        extractOriginalText: {
+            questionsName: 'Preguntas para la extracción',
+            questionsDesc: 'Introduce la lista de preguntas para extraer el texto correspondiente, una por línea.',
+            questionsPlaceholder: 'Introduce aquí tus preguntas...',
+            translateOutputName: 'Traducir la salida al idioma correspondiente',
+            translateOutputDesc: 'Si se activa, la salida incluirá una traducción al idioma de extracción seleccionado.',
+            mergedQueryName: 'Modo de consulta combinada',
+            mergedQueryDesc: 'Activado: envía todas las preguntas en un único prompt de LLM (más rápido/más barato). Desactivado: procesa cada pregunta por separado (mayor precisión).',
+            customOutputName: 'Personalizar la ruta y el nombre del archivo del texto extraído',
+            customOutputDesc: 'Activado: usa carpeta y sufijo personalizados para los archivos extraídos. Desactivado: guarda en la carpeta original con el sufijo predeterminado "_Extracted".',
+            savePathName: 'Ruta de guardado del archivo extraído',
+            savePathDesc: 'La carpeta donde se guardarán los archivos extraídos (relativa a la raíz del vault).',
+            savePathPlaceholder: 'p. ej., ExtractedData',
+            customSuffixName: 'Sufijo personalizado',
+            customSuffixDesc: 'El sufijo personalizado que se añadirá al nombre del archivo (p. ej., "_MyExtract").'
+        }
+    }
+});
+
+extendLocale(STRINGS_FA, {
+    settings: {
+        extractOriginalText: {
+            questionsName: 'پرسش‌های استخراج',
+            questionsDesc: 'فهرست پرسش‌هایی را که می‌خواهید متن متناظرشان استخراج شود، هر کدام در یک خط، وارد کنید.',
+            questionsPlaceholder: 'پرسش‌های خود را اینجا وارد کنید...',
+            translateOutputName: 'ترجمهٔ خروجی به زبان متناظر',
+            translateOutputDesc: 'اگر فعال باشد، خروجی شامل ترجمه‌ای به زبان استخراج انتخاب‌شده خواهد بود.',
+            mergedQueryName: 'حالت پرس‌وجوی ادغام‌شده',
+            mergedQueryDesc: 'روشن: همهٔ پرسش‌ها را در یک پرامپت LLM ارسال می‌کند (سریع‌تر/کم‌هزینه‌تر). خاموش: هر پرسش را جداگانه پردازش می‌کند (دقت بالاتر).',
+            customOutputName: 'شخصی‌سازی مسیر ذخیره و نام فایل متن استخراج‌شده',
+            customOutputDesc: 'روشن: برای فایل‌های استخراج‌شده از پوشه و پسوند سفارشی استفاده می‌کند. خاموش: در پوشهٔ اصلی با پسوند پیش‌فرض "_Extracted" ذخیره می‌کند.',
+            savePathName: 'مسیر ذخیرهٔ فایل استخراج‌شده',
+            savePathDesc: 'پوشه‌ای که فایل‌های استخراج‌شده در آن ذخیره می‌شوند (نسبت به ریشهٔ vault).',
+            savePathPlaceholder: 'مثلاً: ExtractedData',
+            customSuffixName: 'پسوند سفارشی',
+            customSuffixDesc: 'پسوند سفارشی‌ای که به نام فایل افزوده می‌شود (برای نمونه "_MyExtract").'
+        }
+    }
+});
+
+extendLocale(STRINGS_FR, {
+    settings: {
+        extractOriginalText: {
+            questionsName: 'Questions d’extraction',
+            questionsDesc: 'Entrez la liste des questions pour lesquelles extraire un texte spécifique, une par ligne.',
+            questionsPlaceholder: 'Saisissez vos questions ici...',
+            translateOutputName: 'Traduire la sortie dans la langue correspondante',
+            translateOutputDesc: 'Si activé, la sortie inclura une traduction dans la langue d’extraction sélectionnée.',
+            mergedQueryName: 'Mode de requête fusionnée',
+            mergedQueryDesc: 'Activé : envoyer toutes les questions dans une seule invite LLM (plus rapide/moins coûteux). Désactivé : traiter chaque question individuellement (précision plus élevée).',
+            customOutputName: 'Personnaliser le chemin d’enregistrement et le nom du fichier du texte extrait',
+            customOutputDesc: 'Activé : utiliser un dossier et un suffixe personnalisés pour les fichiers extraits. Désactivé : enregistrer dans le dossier d’origine avec le suffixe par défaut "_Extracted".',
+            savePathName: 'Chemin d’enregistrement du fichier extrait',
+            savePathDesc: 'Le dossier où les fichiers extraits seront enregistrés (relatif à la racine du coffre).',
+            savePathPlaceholder: 'p. ex. ExtractedData',
+            customSuffixName: 'Suffixe personnalisé',
+            customSuffixDesc: 'Le suffixe personnalisé à ajouter au nom du fichier (p. ex. "_MyExtract").'
+        }
+    }
+});
+
+extendLocale(STRINGS_ID, {
+    settings: {
+        extractOriginalText: {
+            questionsName: 'Pertanyaan untuk ekstraksi',
+            questionsDesc: 'Masukkan daftar pertanyaan untuk mengekstrak teks yang sesuai, satu per baris.',
+            questionsPlaceholder: 'Masukkan pertanyaan Anda di sini...',
+            translateOutputName: 'Terjemahkan keluaran ke bahasa yang sesuai',
+            translateOutputDesc: 'Jika diaktifkan, keluaran akan menyertakan terjemahan ke bahasa ekstraksi yang dipilih.',
+            mergedQueryName: 'Mode kueri gabungan',
+            mergedQueryDesc: 'Aktif: kirim semua pertanyaan dalam satu prompt LLM (lebih cepat/lebih hemat). Nonaktif: proses setiap pertanyaan secara terpisah (presisi lebih tinggi).',
+            customOutputName: 'Sesuaikan jalur simpan dan nama file teks hasil ekstraksi',
+            customOutputDesc: 'Aktif: gunakan folder dan sufiks khusus untuk file hasil ekstraksi. Nonaktif: simpan di folder asli dengan sufiks default "_Extracted".',
+            savePathName: 'Jalur simpan file hasil ekstraksi',
+            savePathDesc: 'Folder tempat file hasil ekstraksi akan disimpan (relatif terhadap akar vault).',
+            savePathPlaceholder: 'mis., ExtractedData',
+            customSuffixName: 'Sufiks khusus',
+            customSuffixDesc: 'Sufiks khusus yang akan ditambahkan ke nama file (mis. "_MyExtract").'
+        }
+    }
+});
+
+extendLocale(STRINGS_IT, {
+    settings: {
+        extractOriginalText: {
+            questionsName: 'Domande per l’estrazione',
+            questionsDesc: 'Inserisci l’elenco delle domande per cui estrarre il testo corrispondente, una per riga.',
+            questionsPlaceholder: 'Inserisci qui le tue domande...',
+            translateOutputName: 'Traduci l’output nella lingua corrispondente',
+            translateOutputDesc: 'Se selezionato, l’output includerà una traduzione nella lingua di estrazione selezionata.',
+            mergedQueryName: 'Modalità query unificata',
+            mergedQueryDesc: 'Attiva: invia tutte le domande in un unico prompt LLM (più veloce/più economico). Disattiva: elabora ogni domanda singolarmente (maggiore precisione).',
+            customOutputName: 'Personalizza percorso di salvataggio e nome file del testo estratto',
+            customOutputDesc: 'Attiva: usa cartella e suffisso personalizzati per i file estratti. Disattiva: salva nella cartella originale con il suffisso predefinito "_Extracted".',
+            savePathName: 'Percorso di salvataggio del file estratto',
+            savePathDesc: 'La cartella in cui verranno salvati i file estratti (relativa alla radice del vault).',
+            savePathPlaceholder: 'es. ExtractedData',
+            customSuffixName: 'Suffisso personalizzato',
+            customSuffixDesc: 'Il suffisso personalizzato da aggiungere al nome file (ad es. "_MyExtract").'
+        }
+    }
+});
+
+extendLocale(STRINGS_JA, {
+    settings: {
+        extractOriginalText: {
+            questionsName: '抽出用の質問',
+            questionsDesc: '対応する原文を抽出したい質問一覧を、1 行に 1 件ずつ入力してください。',
+            questionsPlaceholder: 'ここに質問を入力...',
+            translateOutputName: '出力を対応する言語に翻訳',
+            translateOutputDesc: '有効にすると、出力には選択した抽出言語への翻訳が含まれます。',
+            mergedQueryName: '統合クエリモード',
+            mergedQueryDesc: 'オン: すべての質問を 1 つの LLM プロンプトで送信します（より速く、低コスト）。オフ: 各質問を個別に処理します（精度が高い）。',
+            customOutputName: '抽出テキストの保存パスとファイル名をカスタマイズ',
+            customOutputDesc: 'オン: 抽出ファイルにカスタムフォルダーとサフィックスを使用します。オフ: 元のフォルダーにデフォルトの "_Extracted" サフィックスで保存します。',
+            savePathName: '抽出ファイルの保存パス',
+            savePathDesc: '抽出ファイルを保存するフォルダー（Vault ルートからの相対パス）。',
+            savePathPlaceholder: '例: ExtractedData',
+            customSuffixName: 'カスタムサフィックス',
+            customSuffixDesc: 'ファイル名に追加するカスタムサフィックス（例: "_MyExtract"）。'
+        }
+    }
+});
+
+extendLocale(STRINGS_KO, {
+    settings: {
+        extractOriginalText: {
+            questionsName: '추출 질문',
+            questionsDesc: '해당 원문을 추출할 질문 목록을 한 줄에 하나씩 입력하세요.',
+            questionsPlaceholder: '여기에 질문을 입력하세요...',
+            translateOutputName: '출력을 해당 언어로 번역',
+            translateOutputDesc: '활성화하면 출력에 선택한 추출 언어 번역이 포함됩니다.',
+            mergedQueryName: '통합 질의 모드',
+            mergedQueryDesc: '켜기: 모든 질문을 하나의 LLM 프롬프트로 보냅니다(더 빠르고 저렴함). 끄기: 각 질문을 개별적으로 처리합니다(더 높은 정확도).',
+            customOutputName: '추출 텍스트 저장 경로 및 파일명 사용자 지정',
+            customOutputDesc: '켜기: 추출 파일에 사용자 지정 폴더와 접미사를 사용합니다. 끄기: 원본 폴더에 기본 "_Extracted" 접미사로 저장합니다.',
+            savePathName: '추출 파일 저장 경로',
+            savePathDesc: '추출 파일을 저장할 폴더입니다(Vault 루트 기준 상대 경로).',
+            savePathPlaceholder: '예: ExtractedData',
+            customSuffixName: '사용자 지정 접미사',
+            customSuffixDesc: '파일명에 추가할 사용자 지정 접미사입니다(예: "_MyExtract").'
+        }
+    }
+});
+
+extendLocale(STRINGS_NL, {
+    settings: {
+        extractOriginalText: {
+            questionsName: 'Vragen voor extractie',
+            questionsDesc: 'Voer de lijst met vragen in waarvoor specifieke tekst moet worden geëxtraheerd, één per regel.',
+            questionsPlaceholder: 'Voer hier uw vragen in...',
+            translateOutputName: 'Uitvoer vertalen naar de overeenkomstige taal',
+            translateOutputDesc: 'Indien geselecteerd, bevat de uitvoer een vertaling in de gekozen extractietaal.',
+            mergedQueryName: 'Samengevoegde querymodus',
+            mergedQueryDesc: 'Aan: dien alle vragen in één LLM-prompt in (sneller/goedkoper). Uit: verwerk elke vraag afzonderlijk (hogere precisie).',
+            customOutputName: 'Opslagpad en bestandsnaam van geëxtraheerde tekst aanpassen',
+            customOutputDesc: 'Aan: gebruik een aangepaste map en achtervoegsel voor geëxtraheerde bestanden. Uit: sla op in de oorspronkelijke map met het standaardsuffix "_Extracted".',
+            savePathName: 'Opslagpad voor geëxtraheerde bestanden',
+            savePathDesc: 'De map waarin geëxtraheerde bestanden worden opgeslagen (relatief aan de vault-hoofdmap).',
+            savePathPlaceholder: 'bijv. ExtractedData',
+            customSuffixName: 'Aangepast achtervoegsel',
+            customSuffixDesc: 'Het aangepaste achtervoegsel dat aan de bestandsnaam wordt toegevoegd (bijv. "_MyExtract").'
+        }
+    }
+});
+
+extendLocale(STRINGS_PL, {
+    settings: {
+        extractOriginalText: {
+            questionsName: 'Pytania do ekstrakcji',
+            questionsDesc: 'Wprowadź listę pytań, dla których ma zostać wyodrębniony odpowiedni tekst, po jednym w wierszu.',
+            questionsPlaceholder: 'Wpisz tutaj swoje pytania...',
+            translateOutputName: 'Przetłumacz wynik na odpowiadający język',
+            translateOutputDesc: 'Po włączeniu wynik będzie zawierał tłumaczenie na wybrany język ekstrakcji.',
+            mergedQueryName: 'Tryb scalonego zapytania',
+            mergedQueryDesc: 'Wł.: wyślij wszystkie pytania w jednym monicie LLM (szybciej/taniej). Wył.: przetwarzaj każde pytanie osobno (wyższa precyzja).',
+            customOutputName: 'Dostosuj ścieżkę zapisu i nazwę pliku wyodrębnionego tekstu',
+            customOutputDesc: 'Wł.: użyj niestandardowego folderu i sufiksu dla wyodrębnionych plików. Wył.: zapisz w oryginalnym folderze z domyślnym sufiksem "_Extracted".',
+            savePathName: 'Ścieżka zapisu wyodrębnionego pliku',
+            savePathDesc: 'Folder, w którym będą zapisywane wyodrębnione pliki (względem katalogu głównego vaultu).',
+            savePathPlaceholder: 'np. ExtractedData',
+            customSuffixName: 'Niestandardowy sufiks',
+            customSuffixDesc: 'Niestandardowy sufiks dodawany do nazwy pliku (np. "_MyExtract").'
+        }
+    }
+});
+
+extendLocale(STRINGS_PT, {
+    settings: {
+        extractOriginalText: {
+            questionsName: 'Perguntas para extração',
+            questionsDesc: 'Introduza a lista de perguntas para extrair o texto correspondente, uma por linha.',
+            questionsPlaceholder: 'Introduza aqui as suas perguntas...',
+            translateOutputName: 'Traduzir a saída para o idioma correspondente',
+            translateOutputDesc: 'Se ativado, a saída incluirá uma tradução para o idioma de extração selecionado.',
+            mergedQueryName: 'Modo de consulta combinada',
+            mergedQueryDesc: 'Ativado: envia todas as perguntas num único prompt LLM (mais rápido/mais barato). Desativado: processa cada pergunta individualmente (maior precisão).',
+            customOutputName: 'Personalizar caminho de gravação e nome do ficheiro do texto extraído',
+            customOutputDesc: 'Ativado: usar pasta e sufixo personalizados para os ficheiros extraídos. Desativado: guardar na pasta original com o sufixo predefinido "_Extracted".',
+            savePathName: 'Caminho de gravação do ficheiro extraído',
+            savePathDesc: 'A pasta onde os ficheiros extraídos serão guardados (relativo à raiz do vault).',
+            savePathPlaceholder: 'Ex.: ExtractedData',
+            customSuffixName: 'Sufixo personalizado',
+            customSuffixDesc: 'O sufixo personalizado a acrescentar ao nome do ficheiro (por ex. "_MyExtract").'
+        }
+    }
+});
+
+extendLocale(STRINGS_PT_BR, {
+    settings: {
+        extractOriginalText: {
+            questionsName: 'Perguntas para extração',
+            questionsDesc: 'Digite a lista de perguntas para extrair o texto correspondente, uma por linha.',
+            questionsPlaceholder: 'Digite suas perguntas aqui...',
+            translateOutputName: 'Traduzir a saída para o idioma correspondente',
+            translateOutputDesc: 'Se ativado, a saída incluirá uma tradução para o idioma de extração selecionado.',
+            mergedQueryName: 'Modo de consulta combinada',
+            mergedQueryDesc: 'Ativado: envia todas as perguntas em um único prompt LLM (mais rápido/mais barato). Desativado: processa cada pergunta individualmente (maior precisão).',
+            customOutputName: 'Personalizar caminho de salvamento e nome do arquivo do texto extraído',
+            customOutputDesc: 'Ativado: usar pasta e sufixo personalizados para os arquivos extraídos. Desativado: salvar na pasta original com o sufixo padrão "_Extracted".',
+            savePathName: 'Caminho de salvamento do arquivo extraído',
+            savePathDesc: 'A pasta onde os arquivos extraídos serão salvos (relativo à raiz do vault).',
+            savePathPlaceholder: 'Ex.: ExtractedData',
+            customSuffixName: 'Sufixo personalizado',
+            customSuffixDesc: 'O sufixo personalizado a acrescentar ao nome do arquivo (por ex. "_MyExtract").'
+        }
+    }
+});
+
+extendLocale(STRINGS_RU, {
+    settings: {
+        extractOriginalText: {
+            questionsName: 'Вопросы для извлечения',
+            questionsDesc: 'Введите список вопросов для извлечения соответствующего текста, по одному на строку.',
+            questionsPlaceholder: 'Введите ваши вопросы здесь...',
+            translateOutputName: 'Переводить вывод на соответствующий язык',
+            translateOutputDesc: 'Если включено, вывод будет включать перевод на выбранный язык извлечения.',
+            mergedQueryName: 'Режим объединенного запроса',
+            mergedQueryDesc: 'Вкл: отправлять все вопросы в одном запросе к LLM (быстрее/дешевле). Выкл: обрабатывать каждый вопрос отдельно (выше точность).',
+            customOutputName: 'Настроить путь сохранения и имя файла извлеченного текста',
+            customOutputDesc: 'Вкл: использовать пользовательскую папку и суффикс для извлеченных файлов. Выкл: сохранять в исходной папке с суффиксом по умолчанию "_Extracted".',
+            savePathName: 'Путь сохранения извлеченного файла',
+            savePathDesc: 'Папка, в которую будут сохраняться извлеченные файлы (относительно корня хранилища).',
+            savePathPlaceholder: 'Напр.: ExtractedData',
+            customSuffixName: 'Пользовательский суффикс',
+            customSuffixDesc: 'Пользовательский суффикс, добавляемый к имени файла (например, "_MyExtract").'
+        }
+    }
+});
+
+extendLocale(STRINGS_TH, {
+    settings: {
+        extractOriginalText: {
+            questionsName: 'คำถามสำหรับการดึงข้อความ',
+            questionsDesc: 'ป้อนรายการคำถามสำหรับดึงข้อความที่ตรงกัน โดยใส่ทีละบรรทัด',
+            questionsPlaceholder: 'ป้อนคำถามของคุณที่นี่...',
+            translateOutputName: 'แปลผลลัพธ์เป็นภาษาที่สอดคล้องกัน',
+            translateOutputDesc: 'เมื่อเปิดใช้งาน ผลลัพธ์จะมีคำแปลเป็นภาษาที่เลือกสำหรับการดึงข้อความ',
+            mergedQueryName: 'โหมดคำค้นแบบรวม',
+            mergedQueryDesc: 'เปิด: ส่งทุกคำถามในพรอมป์ LLM เดียว (เร็วกว่า/ประหยัดกว่า) ปิด: ประมวลผลแต่ละคำถามแยกกัน (แม่นยำกว่า)',
+            customOutputName: 'กำหนดเส้นทางบันทึกและชื่อไฟล์ของข้อความที่ดึงได้เอง',
+            customOutputDesc: 'เปิด: ใช้โฟลเดอร์และส่วนต่อท้ายแบบกำหนดเองสำหรับไฟล์ที่ดึงได้ ปิด: บันทึกในโฟลเดอร์เดิมพร้อมส่วนต่อท้ายเริ่มต้น "_Extracted"',
+            savePathName: 'เส้นทางบันทึกไฟล์ที่ดึงได้',
+            savePathDesc: 'โฟลเดอร์ที่จะบันทึกไฟล์ที่ดึงได้ (อ้างอิงจากราก vault)',
+            savePathPlaceholder: 'เช่น ExtractedData',
+            customSuffixName: 'ส่วนต่อท้ายแบบกำหนดเอง',
+            customSuffixDesc: 'ส่วนต่อท้ายแบบกำหนดเองที่จะเติมท้ายชื่อไฟล์ (เช่น "_MyExtract")'
+        }
+    }
+});
+
+extendLocale(STRINGS_TR, {
+    settings: {
+        extractOriginalText: {
+            questionsName: 'Çıkarma soruları',
+            questionsDesc: 'Belirli metni çıkarmak istediğiniz soruların listesini her satıra bir soru gelecek şekilde girin.',
+            questionsPlaceholder: 'Sorularınızı buraya girin...',
+            translateOutputName: 'Çıktıyı karşılık gelen dile çevir',
+            translateOutputDesc: 'Seçilirse çıktı, seçilen çıkarma dilinde bir çeviri içerecektir.',
+            mergedQueryName: 'Birleştirilmiş sorgu modu',
+            mergedQueryDesc: 'Açık: tüm soruları tek bir LLM isteminde gönderir (daha hızlı/daha ucuz). Kapalı: her soruyu ayrı işler (daha yüksek doğruluk).',
+            customOutputName: 'Çıkarılan metin için kayıt yolu ve dosya adını özelleştir',
+            customOutputDesc: 'Açık: çıkarılan dosyalar için özel klasör ve sonek kullanır. Kapalı: özgün klasöre varsayılan "_Extracted" sonekiyle kaydeder.',
+            savePathName: 'Çıkarılan dosya kayıt yolu',
+            savePathDesc: 'Çıkarılan dosyaların kaydedileceği klasör (vault köküne göre).',
+            savePathPlaceholder: 'Örn. ExtractedData',
+            customSuffixName: 'Özel sonek',
+            customSuffixDesc: 'Dosya adına eklenecek özel sonek (örn. "_MyExtract").'
+        }
+    }
+});
+
+extendLocale(STRINGS_UK, {
+    settings: {
+        extractOriginalText: {
+            questionsName: 'Питання для видобування',
+            questionsDesc: 'Введіть список питань для видобування відповідного тексту, по одному на рядок.',
+            questionsPlaceholder: 'Введіть свої питання тут...',
+            translateOutputName: 'Перекладати вивід відповідною мовою',
+            translateOutputDesc: 'Якщо ввімкнено, вивід міститиме переклад вибраною мовою видобування.',
+            mergedQueryName: 'Режим об’єднаного запиту',
+            mergedQueryDesc: 'Увімкнено: надсилати всі питання в одному LLM-запиті (швидше/дешевше). Вимкнено: обробляти кожне питання окремо (вища точність).',
+            customOutputName: 'Налаштувати шлях збереження й ім’я файла для видобутого тексту',
+            customOutputDesc: 'Увімкнено: використовувати власну папку та суфікс для видобутих файлів. Вимкнено: зберігати в початковій папці з типовим суфіксом "_Extracted".',
+            savePathName: 'Шлях збереження видобутого файла',
+            savePathDesc: 'Папка, куди зберігатимуться видобуті файли (відносно кореня vault).',
+            savePathPlaceholder: 'Напр.: ExtractedData',
+            customSuffixName: 'Користувацький суфікс',
+            customSuffixDesc: 'Користувацький суфікс, що додається до імені файла (напр. "_MyExtract").'
+        }
+    }
+});
+
+extendLocale(STRINGS_VI, {
+    settings: {
+        extractOriginalText: {
+            questionsName: 'Câu hỏi trích xuất',
+            questionsDesc: 'Nhập danh sách câu hỏi để trích xuất đoạn văn bản tương ứng, mỗi dòng một câu.',
+            questionsPlaceholder: 'Nhập câu hỏi của bạn tại đây...',
+            translateOutputName: 'Dịch đầu ra sang ngôn ngữ tương ứng',
+            translateOutputDesc: 'Nếu bật, đầu ra sẽ bao gồm bản dịch sang ngôn ngữ trích xuất đã chọn.',
+            mergedQueryName: 'Chế độ truy vấn gộp',
+            mergedQueryDesc: 'Bật: gửi tất cả câu hỏi trong một prompt LLM duy nhất (nhanh hơn/rẻ hơn). Tắt: xử lý từng câu hỏi riêng lẻ (độ chính xác cao hơn).',
+            customOutputName: 'Tùy chỉnh đường dẫn lưu và tên tệp của văn bản đã trích xuất',
+            customOutputDesc: 'Bật: dùng thư mục và hậu tố tùy chỉnh cho các tệp đã trích xuất. Tắt: lưu trong thư mục gốc với hậu tố mặc định "_Extracted".',
+            savePathName: 'Đường dẫn lưu tệp đã trích xuất',
+            savePathDesc: 'Thư mục sẽ lưu các tệp đã trích xuất (tương đối so với thư mục gốc của vault).',
+            savePathPlaceholder: 'Ví dụ: ExtractedData',
+            customSuffixName: 'Hậu tố tùy chỉnh',
+            customSuffixDesc: 'Hậu tố tùy chỉnh sẽ được thêm vào tên tệp (ví dụ: "_MyExtract").'
+        }
+    }
+});
+
 extendLocale(STRINGS_ES, {
     errorModal: {
         titles: {
