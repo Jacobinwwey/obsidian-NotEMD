@@ -49,6 +49,48 @@ describe('settings page i18n coverage', () => {
         }
     });
 
+    test('localizes provider, workflow, and task settings instead of hardcoding upper settings copy', () => {
+        const source = fs.readFileSync(settingsTabPath, 'utf8');
+
+        const hardcodedLabels = [
+            'LLM providers',
+            'Manage provider configurations',
+            'Active provider',
+            'Multi-model usage',
+            'Use different providers for tasks',
+            'Task: Translate',
+            'Customise translation file save path',
+            'Task: Summarise as Mermaid diagram',
+            'Customise Mermaid summary save path',
+            'Task: Extract Concepts',
+            'Create minimal concept notes',
+            'Stable API calls',
+            'Enable stable API calls (retry logic)',
+            'Processed file output',
+            'Customize processed file save path',
+            'Concept note output',
+            'Concept log file output',
+            'Content generation & output',
+            'Enable research in "Generate from title"',
+            'One-click workflow buttons',
+            'Workflow error strategy',
+            'Visual workflow builder',
+            'Advanced DSL editor',
+            'Workflow DSL validation',
+            'Available workflow action IDs',
+            'Custom prompt settings',
+            'Enable custom prompts for specific tasks',
+            'Button name',
+            'Action sequence',
+            'Add workflow',
+            'Reset to default'
+        ];
+
+        for (const label of hardcodedLabels) {
+            expect(source).not.toContain(label);
+        }
+    });
+
     test('ships catalog keys for the lower settings sections in english and chinese locales', () => {
         const en = getResolvedStrings('en');
         const zhCn = getResolvedStrings('zh-CN');
@@ -66,5 +108,29 @@ describe('settings page i18n coverage', () => {
         expect(zhCn.settings.webResearch.heading).not.toBe(en.settings.webResearch.heading);
         expect(zhTw.settings.batchMermaidFix.heading).not.toBe(en.settings.batchMermaidFix.heading);
         expect(zhTw.settings.focusedLearning.heading).not.toBe(en.settings.focusedLearning.heading);
+    });
+
+    test('ships catalog keys for upper settings sections in english and chinese locales', () => {
+        const en = getResolvedStrings('en');
+        const zhCn = getResolvedStrings('zh-CN');
+        const zhTw = getResolvedStrings('zh-TW');
+
+        expect(en.settings.providerConfig.heading).toBeDefined();
+        expect(en.settings.multiModel.heading).toBeDefined();
+        expect(en.settings.translationTask.heading).toBeDefined();
+        expect(en.settings.mermaidTask.heading).toBeDefined();
+        expect(en.settings.extractConceptsTask.heading).toBeDefined();
+        expect(en.settings.stableApi.heading).toBeDefined();
+        expect(en.settings.generalOutput.processedHeading).toBeDefined();
+        expect(en.settings.contentGeneration.heading).toBeDefined();
+        expect(en.settings.customPrompts.heading).toBeDefined();
+        expect(en.settings.workflowBuilder.heading).toBeDefined();
+
+        expect(zhCn.settings.providerConfig.heading).not.toBe(en.settings.providerConfig.heading);
+        expect(zhCn.settings.generalOutput.processedHeading).not.toBe(en.settings.generalOutput.processedHeading);
+        expect(zhCn.settings.workflowBuilder.heading).not.toBe(en.settings.workflowBuilder.heading);
+        expect(zhTw.settings.translationTask.heading).not.toBe(en.settings.translationTask.heading);
+        expect(zhTw.settings.contentGeneration.heading).not.toBe(en.settings.contentGeneration.heading);
+        expect(zhTw.settings.stableApi.heading).not.toBe(en.settings.stableApi.heading);
     });
 });
