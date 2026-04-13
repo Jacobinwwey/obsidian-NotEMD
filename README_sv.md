@@ -22,7 +22,7 @@ Ett enkelt sätt att bygga din egen kunskapsbas.
 
 Notemd förbättrar ditt Obsidian-arbetsflöde genom att integrera med olika stora språkmodeller (LLM:er) för att bearbeta dina flerspråkiga anteckningar, automatiskt generera wiki-länkar för viktiga begrepp, skapa motsvarande konceptanteckningar, utföra webbforskning och hjälpa dig att bygga kraftfulla kunskapsgrafer med mera.
 
-**Version:** 1.8.0
+**Version:** 1.8.1
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
@@ -64,8 +64,9 @@ Klart. Utforska inställningarna för att låsa upp fler funktioner som webbfors
 | `Disable auto translation` | Icke-Translate-uppgifter behåller källspråkets kontext | `false` | Explicita `Translate`-uppgifter tvingar fortfarande det konfigurerade målspråket. |
 | Locale-fallback | Upplösning av saknade UI-nycklar | locale -> `en` | Håller UI:t stabilt när vissa nycklar ännu inte är översatta. |
 
-- Officiell dokumentation underhålls på engelska och förenklad kinesiska, med fullt stöd för över 30 språk.
-- Alla språk som stöds är länkade i rubriken ovan.
+- De underhållna källdokumenten är engelska och förenklad kinesiska, och publicerade README-översättningar är länkade i rubriken ovan.
+- Stödet för UI-lokaler i appen motsvarar för närvarande exakt den uttryckliga katalogen i koden: `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, `zh-TW`.
+- Den engelska fallbacken finns kvar som ett säkerhetsnät i implementationen, men de synliga ytor som stöds täcks av regressionstester och ska inte tyst falla tillbaka till engelska vid normal användning.
 - Ytterligare detaljer och riktlinjer för bidrag spåras i [Language Hub](./docs/i18n/README.md).
 
 ## Funktioner
@@ -682,6 +683,6 @@ MIT License - Se filen [LICENSE](LICENSE) för detaljer.
 
 ---
 
-*Notemd v1.8.0 - Förbättra din Obsidian-kunskapsgraf med AI.*
+*Notemd v1.8.1 - Förbättra din Obsidian-kunskapsgraf med AI.*
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)
