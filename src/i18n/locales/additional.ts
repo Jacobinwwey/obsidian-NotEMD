@@ -5335,6 +5335,690 @@ extendLocale(STRINGS_VI, {
     }
 });
 
+extendLocale(STRINGS_AR, {
+    settings: {
+        generalOutput: {
+            processedSavePathName: 'تخصيص مسار حفظ الملف المعالَج',
+            processedSavePathDesc: 'تشغيل: احفظ في المسار المحدد. إيقاف: احفظ في المجلد الأصلي.',
+            processedFolderPathName: 'مسار مجلد الملف المعالَج',
+            processedFolderPathDesc: 'مسار نسبي داخل المستودع.',
+            processedFolderPathPlaceholder: 'مثال: Processed/Notes',
+            moveOriginalName: 'نقل الملف الأصلي بعد المعالجة',
+            moveOriginalDesc: 'تشغيل: انقل الأصل إلى مجلد المعالجة. إيقاف: أنشئ نسخة باسم "_processed.md".',
+            customAddLinksFilenameName: 'استخدام اسم ملف إخراج مخصص لـ "Add links"',
+            customAddLinksFilenameDesc: 'تشغيل: استخدم لاحقة/استبدالًا مخصصًا. إيقاف: استخدم "_processed.md".',
+            addLinksSuffixName: 'سلسلة لاحقة/استبدال مخصصة',
+            addLinksSuffixDesc: 'اتركه فارغًا للكتابة فوق الأصل. مثال: "_linked".',
+            addLinksSuffixPlaceholder: 'اتركه فارغًا للكتابة فوق الأصل',
+            removeCodeFencesName: 'إزالة حواجز الشيفرة عند "Add links"',
+            removeCodeFencesDesc: 'تشغيل: أزل جميع حواجز ```markdown و``` من المخرجات النهائية لـ "Process File" و"Process Folder". إيقاف: احتفظ بحواجز الشيفرة.',
+            conceptNotePathName: 'تخصيص مسار ملاحظات المفاهيم',
+            conceptNotePathDesc: 'تشغيل: أنشئ ملاحظات مفاهيم جديدة في المسار المحدد. إيقاف: لا تُنشأ تلقائيًا.',
+            conceptNoteFolderName: 'مسار مجلد ملاحظات المفاهيم',
+            conceptNoteFolderDesc: 'مسار نسبي داخل المستودع.',
+            conceptNoteFolderPlaceholder: 'مثال: Concepts',
+            generateConceptLogName: 'إنشاء ملف سجل المفاهيم',
+            generateConceptLogDesc: 'تشغيل: سجّل ملاحظات المفاهيم المنشأة حديثًا.',
+            customLogPathName: 'تخصيص مسار حفظ ملف السجل',
+            customLogPathDescWithConceptFolder: 'تشغيل: احفظ السجل في المسار المحدد. إيقاف: احفظه في مجلد ملاحظات المفاهيم ("{folder}").',
+            customLogPathDescVault: 'تشغيل: احفظ السجل في المسار المحدد. إيقاف: احفظه في جذر المستودع.',
+            conceptLogFolderName: 'مسار مجلد سجل المفاهيم',
+            conceptLogFolderDesc: 'مسار نسبي. مطلوب عند تفعيل المسار المخصص.',
+            conceptLogFolderPlaceholder: 'مثال: Logs/ConceptLogs',
+            customLogFileNameToggleName: 'تخصيص اسم ملف السجل',
+            customLogFileNameToggleDesc: 'تشغيل: استخدم الاسم المحدد. إيقاف: استخدم "{defaultName}".',
+            conceptLogFileNameName: 'اسم ملف سجل المفاهيم',
+            conceptLogFileNameDesc: 'اسم ملف السجل. مطلوب عند تفعيل الاسم المخصص.'
+        }
+    }
+});
+
+extendLocale(STRINGS_DE, {
+    settings: {
+        generalOutput: {
+            processedSavePathName: 'Speicherpfad für verarbeitete Datei anpassen',
+            processedSavePathDesc: 'Ein: Unter dem angegebenen Pfad speichern. Aus: Im ursprünglichen Ordner speichern.',
+            processedFolderPathName: 'Ordnerpfad für verarbeitete Datei',
+            processedFolderPathDesc: 'Relativer Pfad innerhalb des Vaults.',
+            processedFolderPathPlaceholder: 'z. B. Processed/Notes',
+            moveOriginalName: 'Originaldatei nach der Verarbeitung verschieben',
+            moveOriginalDesc: 'Ein: Original in den Verarbeitungsordner verschieben. Aus: Kopie mit dem Namen "_processed.md" erstellen.',
+            customAddLinksFilenameName: 'Benutzerdefinierten Ausgabedateinamen für "Add links" verwenden',
+            customAddLinksFilenameDesc: 'Ein: Benutzerdefiniertes Suffix/Ersetzung verwenden. Aus: "_processed.md" verwenden.',
+            addLinksSuffixName: 'Benutzerdefinierte Suffix-/Ersetzungszeichenfolge',
+            addLinksSuffixDesc: 'Leer lassen, um das Original zu überschreiben. Bsp.: "_linked".',
+            addLinksSuffixPlaceholder: 'Leer lassen, um zu überschreiben',
+            removeCodeFencesName: 'Codeblöcke bei "Add links" entfernen',
+            removeCodeFencesDesc: 'Ein: Alle ```markdown- und ```-Blöcke aus der Endausgabe von "Process File" und "Process Folder" entfernen. Aus: Codeblöcke beibehalten.',
+            conceptNotePathName: 'Pfad für Konzeptnotizen anpassen',
+            conceptNotePathDesc: 'Ein: Neue Konzeptnotizen im angegebenen Pfad erstellen. Aus: Nicht automatisch erstellen.',
+            conceptNoteFolderName: 'Ordnerpfad für Konzeptnotizen',
+            conceptNoteFolderDesc: 'Relativer Pfad innerhalb des Vaults.',
+            conceptNoteFolderPlaceholder: 'z. B. Concepts',
+            generateConceptLogName: 'Konzeptprotokolldatei erzeugen',
+            generateConceptLogDesc: 'Ein: Neu erstellte Konzeptnotizen protokollieren.',
+            customLogPathName: 'Speicherpfad für Protokolldatei anpassen',
+            customLogPathDescWithConceptFolder: 'Ein: Protokoll unter dem angegebenen Pfad speichern. Aus: Im Konzeptnotizen-Ordner ("{folder}") speichern.',
+            customLogPathDescVault: 'Ein: Protokoll unter dem angegebenen Pfad speichern. Aus: Im Vault-Stammverzeichnis speichern.',
+            conceptLogFolderName: 'Ordnerpfad für Konzeptprotokoll',
+            conceptLogFolderDesc: 'Relativer Pfad. Erforderlich, wenn ein benutzerdefinierter Pfad aktiviert ist.',
+            conceptLogFolderPlaceholder: 'z. B. Logs/ConceptLogs',
+            customLogFileNameToggleName: 'Dateiname des Protokolls anpassen',
+            customLogFileNameToggleDesc: 'Ein: Angegebenen Namen verwenden. Aus: "{defaultName}" verwenden.',
+            conceptLogFileNameName: 'Dateiname des Konzeptprotokolls',
+            conceptLogFileNameDesc: 'Name der Protokolldatei. Erforderlich, wenn ein benutzerdefinierter Name aktiviert ist.'
+        }
+    }
+});
+
+extendLocale(STRINGS_ES, {
+    settings: {
+        generalOutput: {
+            processedSavePathName: 'Personalizar la ruta de guardado del archivo procesado',
+            processedSavePathDesc: 'Activado: guardar en la ruta especificada. Desactivado: guardar en la carpeta original.',
+            processedFolderPathName: 'Ruta de la carpeta del archivo procesado',
+            processedFolderPathDesc: 'Ruta relativa dentro del vault.',
+            processedFolderPathPlaceholder: 'p. ej., Processed/Notes',
+            moveOriginalName: 'Mover el archivo original después del procesamiento',
+            moveOriginalDesc: 'Activado: mover el original a la carpeta de procesados. Desactivado: crear una copia llamada "_processed.md".',
+            customAddLinksFilenameName: 'Usar un nombre de archivo de salida personalizado para "Add links"',
+            customAddLinksFilenameDesc: 'Activado: usar un sufijo/reemplazo personalizado. Desactivado: usar "_processed.md".',
+            addLinksSuffixName: 'Cadena personalizada de sufijo/reemplazo',
+            addLinksSuffixDesc: 'Déjalo vacío para sobrescribir el original. Ej.: "_linked".',
+            addLinksSuffixPlaceholder: 'Déjalo vacío para sobrescribir',
+            removeCodeFencesName: 'Eliminar fences de código en "Add links"',
+            removeCodeFencesDesc: 'Activado: elimina todos los fences ```markdown y ``` de la salida final de "Process File" y "Process Folder". Desactivado: conserva los fences de código.',
+            conceptNotePathName: 'Personalizar la ruta de las notas de concepto',
+            conceptNotePathDesc: 'Activado: crear nuevas notas de concepto en la ruta especificada. Desactivado: no crearlas automáticamente.',
+            conceptNoteFolderName: 'Ruta de la carpeta de notas de concepto',
+            conceptNoteFolderDesc: 'Ruta relativa dentro del vault.',
+            conceptNoteFolderPlaceholder: 'p. ej., Concepts',
+            generateConceptLogName: 'Generar archivo de registro de conceptos',
+            generateConceptLogDesc: 'Activado: registrar las notas de concepto recién creadas.',
+            customLogPathName: 'Personalizar la ruta de guardado del archivo de registro',
+            customLogPathDescWithConceptFolder: 'Activado: guardar el registro en la ruta especificada. Desactivado: guardarlo en la carpeta de notas de concepto ("{folder}").',
+            customLogPathDescVault: 'Activado: guardar el registro en la ruta especificada. Desactivado: guardarlo en la raíz del vault.',
+            conceptLogFolderName: 'Ruta de la carpeta del registro de conceptos',
+            conceptLogFolderDesc: 'Ruta relativa. Obligatoria si está activada la ruta personalizada.',
+            conceptLogFolderPlaceholder: 'p. ej., Logs/ConceptLogs',
+            customLogFileNameToggleName: 'Personalizar el nombre del archivo de registro',
+            customLogFileNameToggleDesc: 'Activado: usar el nombre especificado. Desactivado: usar "{defaultName}".',
+            conceptLogFileNameName: 'Nombre del archivo de registro de conceptos',
+            conceptLogFileNameDesc: 'Nombre del archivo de registro. Obligatorio si está activado el nombre personalizado.'
+        }
+    }
+});
+
+extendLocale(STRINGS_FA, {
+    settings: {
+        generalOutput: {
+            processedSavePathName: 'سفارشی‌سازی مسیر ذخیرهٔ فایل پردازش‌شده',
+            processedSavePathDesc: 'روشن: در مسیر مشخص‌شده ذخیره شود. خاموش: در پوشهٔ اصلی ذخیره شود.',
+            processedFolderPathName: 'مسیر پوشهٔ فایل پردازش‌شده',
+            processedFolderPathDesc: 'مسیر نسبی درون vault.',
+            processedFolderPathPlaceholder: 'مثلاً: Processed/Notes',
+            moveOriginalName: 'انتقال فایل اصلی پس از پردازش',
+            moveOriginalDesc: 'روشن: فایل اصلی را به پوشهٔ فایل‌های پردازش‌شده منتقل می‌کند. خاموش: یک نسخه با نام "_processed.md" می‌سازد.',
+            customAddLinksFilenameName: 'استفاده از نام فایل خروجی سفارشی برای "Add links"',
+            customAddLinksFilenameDesc: 'روشن: از پسوند/جایگزینی سفارشی استفاده می‌کند. خاموش: از "_processed.md" استفاده می‌کند.',
+            addLinksSuffixName: 'رشتهٔ پسوند/جایگزینی سفارشی',
+            addLinksSuffixDesc: 'برای بازنویسی فایل اصلی خالی بگذارید. مثال: "_linked".',
+            addLinksSuffixPlaceholder: 'برای بازنویسی خالی بگذارید',
+            removeCodeFencesName: 'حذف حصارهای کد در "Add links"',
+            removeCodeFencesDesc: 'روشن: همهٔ حصارهای ```markdown و ``` را از خروجی نهایی "Process File" و "Process Folder" حذف می‌کند. خاموش: حصارهای کد را نگه می‌دارد.',
+            conceptNotePathName: 'سفارشی‌سازی مسیر یادداشت‌های مفهومی',
+            conceptNotePathDesc: 'روشن: یادداشت‌های مفهومی جدید را در مسیر مشخص‌شده می‌سازد. خاموش: به‌طور خودکار ایجاد نمی‌کند.',
+            conceptNoteFolderName: 'مسیر پوشهٔ یادداشت‌های مفهومی',
+            conceptNoteFolderDesc: 'مسیر نسبی درون vault.',
+            conceptNoteFolderPlaceholder: 'مثلاً: Concepts',
+            generateConceptLogName: 'ایجاد فایل گزارش مفاهیم',
+            generateConceptLogDesc: 'روشن: یادداشت‌های مفهومی تازه‌ساخته را ثبت می‌کند.',
+            customLogPathName: 'سفارشی‌سازی مسیر ذخیرهٔ فایل گزارش',
+            customLogPathDescWithConceptFolder: 'روشن: گزارش را در مسیر مشخص‌شده ذخیره می‌کند. خاموش: آن را در پوشهٔ یادداشت‌های مفهومی ("{folder}") ذخیره می‌کند.',
+            customLogPathDescVault: 'روشن: گزارش را در مسیر مشخص‌شده ذخیره می‌کند. خاموش: آن را در ریشهٔ vault ذخیره می‌کند.',
+            conceptLogFolderName: 'مسیر پوشهٔ گزارش مفاهیم',
+            conceptLogFolderDesc: 'مسیر نسبی. در صورت فعال بودن مسیر سفارشی الزامی است.',
+            conceptLogFolderPlaceholder: 'مثلاً: Logs/ConceptLogs',
+            customLogFileNameToggleName: 'سفارشی‌سازی نام فایل گزارش',
+            customLogFileNameToggleDesc: 'روشن: از نام تعیین‌شده استفاده می‌کند. خاموش: از "{defaultName}" استفاده می‌کند.',
+            conceptLogFileNameName: 'نام فایل گزارش مفاهیم',
+            conceptLogFileNameDesc: 'نام فایل گزارش. در صورت فعال بودن نام سفارشی الزامی است.'
+        }
+    }
+});
+
+extendLocale(STRINGS_FR, {
+    settings: {
+        generalOutput: {
+            processedSavePathName: 'Personnaliser le chemin d’enregistrement du fichier traité',
+            processedSavePathDesc: 'Activé : enregistrer à l’emplacement indiqué. Désactivé : enregistrer dans le dossier d’origine.',
+            processedFolderPathName: 'Chemin du dossier du fichier traité',
+            processedFolderPathDesc: 'Chemin relatif dans le coffre.',
+            processedFolderPathPlaceholder: 'p. ex. Processed/Notes',
+            moveOriginalName: 'Déplacer le fichier d’origine après traitement',
+            moveOriginalDesc: 'Activé : déplacer l’original dans le dossier des fichiers traités. Désactivé : créer une copie nommée "_processed.md".',
+            customAddLinksFilenameName: 'Utiliser un nom de fichier de sortie personnalisé pour "Add links"',
+            customAddLinksFilenameDesc: 'Activé : utiliser un suffixe/remplacement personnalisé. Désactivé : utiliser "_processed.md".',
+            addLinksSuffixName: 'Chaîne de suffixe/remplacement personnalisée',
+            addLinksSuffixDesc: 'Laisser vide pour écraser l’original. Ex. : "_linked".',
+            addLinksSuffixPlaceholder: 'Laisser vide pour écraser',
+            removeCodeFencesName: 'Retirer les blocs de code dans "Add links"',
+            removeCodeFencesDesc: 'Activé : retire tous les blocs ```markdown et ``` de la sortie finale de "Process File" et "Process Folder". Désactivé : conserve les blocs de code.',
+            conceptNotePathName: 'Personnaliser le chemin des notes de concept',
+            conceptNotePathDesc: 'Activé : créer les nouvelles notes de concept dans le chemin indiqué. Désactivé : ne pas les créer automatiquement.',
+            conceptNoteFolderName: 'Chemin du dossier des notes de concept',
+            conceptNoteFolderDesc: 'Chemin relatif dans le coffre.',
+            conceptNoteFolderPlaceholder: 'p. ex. Concepts',
+            generateConceptLogName: 'Générer le fichier journal des concepts',
+            generateConceptLogDesc: 'Activé : journaliser les notes de concept nouvellement créées.',
+            customLogPathName: 'Personnaliser le chemin d’enregistrement du fichier journal',
+            customLogPathDescWithConceptFolder: 'Activé : enregistrer le journal dans le chemin indiqué. Désactivé : l’enregistrer dans le dossier des notes de concept ("{folder}").',
+            customLogPathDescVault: 'Activé : enregistrer le journal dans le chemin indiqué. Désactivé : l’enregistrer à la racine du coffre.',
+            conceptLogFolderName: 'Chemin du dossier du journal des concepts',
+            conceptLogFolderDesc: 'Chemin relatif. Requis si un chemin personnalisé est activé.',
+            conceptLogFolderPlaceholder: 'p. ex. Logs/ConceptLogs',
+            customLogFileNameToggleName: 'Personnaliser le nom du fichier journal',
+            customLogFileNameToggleDesc: 'Activé : utiliser le nom indiqué. Désactivé : utiliser "{defaultName}".',
+            conceptLogFileNameName: 'Nom du fichier journal des concepts',
+            conceptLogFileNameDesc: 'Nom du fichier journal. Requis si le nom personnalisé est activé.'
+        }
+    }
+});
+
+extendLocale(STRINGS_ID, {
+    settings: {
+        generalOutput: {
+            processedSavePathName: 'Sesuaikan jalur simpan file yang diproses',
+            processedSavePathDesc: 'Aktif: simpan ke jalur yang ditentukan. Nonaktif: simpan di folder asli.',
+            processedFolderPathName: 'Jalur folder file yang diproses',
+            processedFolderPathDesc: 'Jalur relatif di dalam vault.',
+            processedFolderPathPlaceholder: 'mis. Processed/Notes',
+            moveOriginalName: 'Pindahkan file asli setelah diproses',
+            moveOriginalDesc: 'Aktif: pindahkan file asli ke folder hasil proses. Nonaktif: buat salinan bernama "_processed.md".',
+            customAddLinksFilenameName: 'Gunakan nama file keluaran kustom untuk "Add links"',
+            customAddLinksFilenameDesc: 'Aktif: gunakan sufiks/pengganti kustom. Nonaktif: gunakan "_processed.md".',
+            addLinksSuffixName: 'String sufiks/pengganti kustom',
+            addLinksSuffixDesc: 'Kosongkan untuk menimpa file asli. Contoh: "_linked".',
+            addLinksSuffixPlaceholder: 'Kosongkan untuk menimpa',
+            removeCodeFencesName: 'Hapus pagar kode pada "Add links"',
+            removeCodeFencesDesc: 'Aktif: hapus semua pagar ```markdown dan ``` dari keluaran akhir "Process File" dan "Process Folder". Nonaktif: pertahankan pagar kode.',
+            conceptNotePathName: 'Sesuaikan jalur catatan konsep',
+            conceptNotePathDesc: 'Aktif: buat catatan konsep baru di jalur yang ditentukan. Nonaktif: jangan buat otomatis.',
+            conceptNoteFolderName: 'Jalur folder catatan konsep',
+            conceptNoteFolderDesc: 'Jalur relatif di dalam vault.',
+            conceptNoteFolderPlaceholder: 'mis. Concepts',
+            generateConceptLogName: 'Buat file log konsep',
+            generateConceptLogDesc: 'Aktif: catat catatan konsep yang baru dibuat.',
+            customLogPathName: 'Sesuaikan jalur simpan file log',
+            customLogPathDescWithConceptFolder: 'Aktif: simpan log ke jalur yang ditentukan. Nonaktif: simpan di Folder Catatan Konsep ("{folder}").',
+            customLogPathDescVault: 'Aktif: simpan log ke jalur yang ditentukan. Nonaktif: simpan di akar vault.',
+            conceptLogFolderName: 'Jalur folder log konsep',
+            conceptLogFolderDesc: 'Jalur relatif. Wajib jika jalur kustom diaktifkan.',
+            conceptLogFolderPlaceholder: 'mis. Logs/ConceptLogs',
+            customLogFileNameToggleName: 'Sesuaikan nama file log',
+            customLogFileNameToggleDesc: 'Aktif: gunakan nama yang ditentukan. Nonaktif: gunakan "{defaultName}".',
+            conceptLogFileNameName: 'Nama file log konsep',
+            conceptLogFileNameDesc: 'Nama file log. Wajib jika nama kustom diaktifkan.'
+        }
+    }
+});
+
+extendLocale(STRINGS_IT, {
+    settings: {
+        generalOutput: {
+            processedSavePathName: 'Personalizza il percorso di salvataggio del file elaborato',
+            processedSavePathDesc: 'Attivo: salva nel percorso specificato. Disattivo: salva nella cartella originale.',
+            processedFolderPathName: 'Percorso cartella del file elaborato',
+            processedFolderPathDesc: 'Percorso relativo all’interno del vault.',
+            processedFolderPathPlaceholder: 'es. Processed/Notes',
+            moveOriginalName: 'Sposta il file originale dopo l’elaborazione',
+            moveOriginalDesc: 'Attivo: sposta l’originale nella cartella dei file elaborati. Disattivo: crea una copia chiamata "_processed.md".',
+            customAddLinksFilenameName: 'Usa un nome file di output personalizzato per "Add links"',
+            customAddLinksFilenameDesc: 'Attivo: usa un suffisso/sostituzione personalizzata. Disattivo: usa "_processed.md".',
+            addLinksSuffixName: 'Stringa di suffisso/sostituzione personalizzata',
+            addLinksSuffixDesc: 'Lascia vuoto per sovrascrivere l’originale. Es.: "_linked".',
+            addLinksSuffixPlaceholder: 'Lascia vuoto per sovrascrivere',
+            removeCodeFencesName: 'Rimuovi i blocchi di codice in "Add links"',
+            removeCodeFencesDesc: 'Attivo: rimuove tutti i blocchi ```markdown e ``` dall’output finale di "Process File" e "Process Folder". Disattivo: mantiene i blocchi di codice.',
+            conceptNotePathName: 'Personalizza il percorso delle note concetto',
+            conceptNotePathDesc: 'Attivo: crea nuove note concetto nel percorso specificato. Disattivo: non crearle automaticamente.',
+            conceptNoteFolderName: 'Percorso cartella note concetto',
+            conceptNoteFolderDesc: 'Percorso relativo all’interno del vault.',
+            conceptNoteFolderPlaceholder: 'es. Concepts',
+            generateConceptLogName: 'Genera file di log dei concetti',
+            generateConceptLogDesc: 'Attivo: registra le note concetto appena create.',
+            customLogPathName: 'Personalizza il percorso di salvataggio del file di log',
+            customLogPathDescWithConceptFolder: 'Attivo: salva il log nel percorso specificato. Disattivo: salvalo nella cartella delle note concetto ("{folder}").',
+            customLogPathDescVault: 'Attivo: salva il log nel percorso specificato. Disattivo: salvalo nella radice del vault.',
+            conceptLogFolderName: 'Percorso cartella log dei concetti',
+            conceptLogFolderDesc: 'Percorso relativo. Obbligatorio se il percorso personalizzato è attivo.',
+            conceptLogFolderPlaceholder: 'es. Logs/ConceptLogs',
+            customLogFileNameToggleName: 'Personalizza il nome del file di log',
+            customLogFileNameToggleDesc: 'Attivo: usa il nome specificato. Disattivo: usa "{defaultName}".',
+            conceptLogFileNameName: 'Nome file del log dei concetti',
+            conceptLogFileNameDesc: 'Nome del file di log. Obbligatorio se il nome personalizzato è attivo.'
+        }
+    }
+});
+
+extendLocale(STRINGS_JA, {
+    settings: {
+        generalOutput: {
+            processedSavePathName: '処理済みファイルの保存先をカスタマイズ',
+            processedSavePathDesc: 'オン: 指定したパスに保存します。オフ: 元のフォルダーに保存します。',
+            processedFolderPathName: '処理済みファイルのフォルダーパス',
+            processedFolderPathDesc: 'Vault 内の相対パスです。',
+            processedFolderPathPlaceholder: '例: Processed/Notes',
+            moveOriginalName: '処理後に元ファイルを移動',
+            moveOriginalDesc: 'オン: 元ファイルを処理済みフォルダーに移動します。オフ: "_processed.md" という名前のコピーを作成します。',
+            customAddLinksFilenameName: '"Add links" にカスタム出力ファイル名を使う',
+            customAddLinksFilenameDesc: 'オン: カスタムの接尾辞/置換を使います。オフ: "_processed.md" を使います。',
+            addLinksSuffixName: 'カスタム接尾辞/置換文字列',
+            addLinksSuffixDesc: '空欄にすると元ファイルを上書きします。例: "_linked"。',
+            addLinksSuffixPlaceholder: '上書きする場合は空欄のままにする',
+            removeCodeFencesName: '"Add links" でコードフェンスを削除',
+            removeCodeFencesDesc: 'オン: "Process File" と "Process Folder" の最終出力からすべての ```markdown と ``` フェンスを削除します。オフ: コードフェンスを保持します。',
+            conceptNotePathName: '概念ノートのパスをカスタマイズ',
+            conceptNotePathDesc: 'オン: 指定したパスに新しい概念ノートを作成します。オフ: 自動では作成しません。',
+            conceptNoteFolderName: '概念ノートのフォルダーパス',
+            conceptNoteFolderDesc: 'Vault 内の相対パスです。',
+            conceptNoteFolderPlaceholder: '例: Concepts',
+            generateConceptLogName: '概念ログファイルを生成',
+            generateConceptLogDesc: 'オン: 新しく作成された概念ノートを記録します。',
+            customLogPathName: 'ログファイルの保存先をカスタマイズ',
+            customLogPathDescWithConceptFolder: 'オン: 指定したパスにログを保存します。オフ: 概念ノートフォルダー ("{folder}") に保存します。',
+            customLogPathDescVault: 'オン: 指定したパスにログを保存します。オフ: Vault ルートに保存します。',
+            conceptLogFolderName: '概念ログフォルダーパス',
+            conceptLogFolderDesc: '相対パスです。カスタムパスを有効にした場合は必須です。',
+            conceptLogFolderPlaceholder: '例: Logs/ConceptLogs',
+            customLogFileNameToggleName: 'ログファイル名をカスタマイズ',
+            customLogFileNameToggleDesc: 'オン: 指定した名前を使います。オフ: "{defaultName}" を使います。',
+            conceptLogFileNameName: '概念ログファイル名',
+            conceptLogFileNameDesc: 'ログファイル名です。カスタム名を有効にした場合は必須です。'
+        }
+    }
+});
+
+extendLocale(STRINGS_KO, {
+    settings: {
+        generalOutput: {
+            processedSavePathName: '처리된 파일 저장 경로 사용자 지정',
+            processedSavePathDesc: '켜기: 지정한 경로에 저장합니다. 끄기: 원본 폴더에 저장합니다.',
+            processedFolderPathName: '처리된 파일 폴더 경로',
+            processedFolderPathDesc: 'Vault 내부의 상대 경로입니다.',
+            processedFolderPathPlaceholder: '예: Processed/Notes',
+            moveOriginalName: '처리 후 원본 파일 이동',
+            moveOriginalDesc: '켜기: 원본을 처리된 파일 폴더로 이동합니다. 끄기: "_processed.md"라는 복사본을 만듭니다.',
+            customAddLinksFilenameName: '"Add links"에 사용자 지정 출력 파일명 사용',
+            customAddLinksFilenameDesc: '켜기: 사용자 지정 접미사/대체 문자열을 사용합니다. 끄기: "_processed.md"를 사용합니다.',
+            addLinksSuffixName: '사용자 지정 접미사/대체 문자열',
+            addLinksSuffixDesc: '원본을 덮어쓰려면 비워 두세요. 예: "_linked".',
+            addLinksSuffixPlaceholder: '덮어쓰려면 비워 두세요',
+            removeCodeFencesName: '"Add links"에서 코드 펜스 제거',
+            removeCodeFencesDesc: '켜기: "Process File"과 "Process Folder"의 최종 출력에서 모든 ```markdown 및 ``` 펜스를 제거합니다. 끄기: 코드 펜스를 유지합니다.',
+            conceptNotePathName: '개념 노트 경로 사용자 지정',
+            conceptNotePathDesc: '켜기: 지정한 경로에 새 개념 노트를 만듭니다. 끄기: 자동으로 만들지 않습니다.',
+            conceptNoteFolderName: '개념 노트 폴더 경로',
+            conceptNoteFolderDesc: 'Vault 내부의 상대 경로입니다.',
+            conceptNoteFolderPlaceholder: '예: Concepts',
+            generateConceptLogName: '개념 로그 파일 생성',
+            generateConceptLogDesc: '켜기: 새로 만든 개념 노트를 기록합니다.',
+            customLogPathName: '로그 파일 저장 경로 사용자 지정',
+            customLogPathDescWithConceptFolder: '켜기: 지정한 경로에 로그를 저장합니다. 끄기: 개념 노트 폴더("{folder}")에 저장합니다.',
+            customLogPathDescVault: '켜기: 지정한 경로에 로그를 저장합니다. 끄기: Vault 루트에 저장합니다.',
+            conceptLogFolderName: '개념 로그 폴더 경로',
+            conceptLogFolderDesc: '상대 경로입니다. 사용자 지정 경로를 활성화하면 필수입니다.',
+            conceptLogFolderPlaceholder: '예: Logs/ConceptLogs',
+            customLogFileNameToggleName: '로그 파일 이름 사용자 지정',
+            customLogFileNameToggleDesc: '켜기: 지정한 이름을 사용합니다. 끄기: "{defaultName}"을 사용합니다.',
+            conceptLogFileNameName: '개념 로그 파일 이름',
+            conceptLogFileNameDesc: '로그 파일 이름입니다. 사용자 지정 이름이 활성화된 경우 필수입니다.'
+        }
+    }
+});
+
+extendLocale(STRINGS_NL, {
+    settings: {
+        generalOutput: {
+            processedSavePathName: 'Opslagpad voor verwerkt bestand aanpassen',
+            processedSavePathDesc: 'Aan: opslaan op het opgegeven pad. Uit: opslaan in de oorspronkelijke map.',
+            processedFolderPathName: 'Map-pad voor verwerkt bestand',
+            processedFolderPathDesc: 'Relatief pad binnen de vault.',
+            processedFolderPathPlaceholder: 'bijv. Processed/Notes',
+            moveOriginalName: 'Oorspronkelijk bestand verplaatsen na verwerking',
+            moveOriginalDesc: 'Aan: verplaats het origineel naar de map met verwerkte bestanden. Uit: maak een kopie met de naam "_processed.md".',
+            customAddLinksFilenameName: 'Aangepaste uitvoerbestandsnaam gebruiken voor "Add links"',
+            customAddLinksFilenameDesc: 'Aan: gebruik een aangepast achtervoegsel/vervanging. Uit: gebruik "_processed.md".',
+            addLinksSuffixName: 'Aangepaste achtervoegsel-/vervangingsreeks',
+            addLinksSuffixDesc: 'Leeg laten om het origineel te overschrijven. Voorbeeld: "_linked".',
+            addLinksSuffixPlaceholder: 'Leeg laten om te overschrijven',
+            removeCodeFencesName: 'Code fences verwijderen bij "Add links"',
+            removeCodeFencesDesc: 'Aan: verwijdert alle ```markdown- en ```-fences uit de einduitvoer van "Process File" en "Process Folder". Uit: behoudt de code fences.',
+            conceptNotePathName: 'Pad voor conceptnotities aanpassen',
+            conceptNotePathDesc: 'Aan: maak nieuwe conceptnotities aan op het opgegeven pad. Uit: niet automatisch aanmaken.',
+            conceptNoteFolderName: 'Map-pad voor conceptnotities',
+            conceptNoteFolderDesc: 'Relatief pad binnen de vault.',
+            conceptNoteFolderPlaceholder: 'bijv. Concepts',
+            generateConceptLogName: 'Conceptlogbestand genereren',
+            generateConceptLogDesc: 'Aan: log nieuw gemaakte conceptnotities.',
+            customLogPathName: 'Opslagpad voor logbestand aanpassen',
+            customLogPathDescWithConceptFolder: 'Aan: sla het log op in het opgegeven pad. Uit: sla het op in de map Conceptnotities ("{folder}").',
+            customLogPathDescVault: 'Aan: sla het log op in het opgegeven pad. Uit: sla het op in de hoofdmap van de vault.',
+            conceptLogFolderName: 'Map-pad voor conceptlog',
+            conceptLogFolderDesc: 'Relatief pad. Vereist als een aangepast pad is ingeschakeld.',
+            conceptLogFolderPlaceholder: 'bijv. Logs/ConceptLogs',
+            customLogFileNameToggleName: 'Naam van logbestand aanpassen',
+            customLogFileNameToggleDesc: 'Aan: gebruik de opgegeven naam. Uit: gebruik "{defaultName}".',
+            conceptLogFileNameName: 'Bestandsnaam van conceptlog',
+            conceptLogFileNameDesc: 'Naam van het logbestand. Vereist als een aangepaste naam is ingeschakeld.'
+        }
+    }
+});
+
+extendLocale(STRINGS_PL, {
+    settings: {
+        generalOutput: {
+            processedSavePathName: 'Dostosuj ścieżkę zapisu przetworzonego pliku',
+            processedSavePathDesc: 'Wł.: zapisz w podanej ścieżce. Wył.: zapisz w oryginalnym folderze.',
+            processedFolderPathName: 'Ścieżka folderu przetworzonego pliku',
+            processedFolderPathDesc: 'Ścieżka względna w obrębie vaultu.',
+            processedFolderPathPlaceholder: 'np. Processed/Notes',
+            moveOriginalName: 'Przenieś oryginalny plik po przetworzeniu',
+            moveOriginalDesc: 'Wł.: przenieś oryginał do folderu plików przetworzonych. Wył.: utwórz kopię o nazwie "_processed.md".',
+            customAddLinksFilenameName: 'Użyj niestandardowej nazwy pliku wyjściowego dla "Add links"',
+            customAddLinksFilenameDesc: 'Wł.: użyj niestandardowego sufiksu/zamiany. Wył.: użyj "_processed.md".',
+            addLinksSuffixName: 'Niestandardowy ciąg sufiksu/zamiany',
+            addLinksSuffixDesc: 'Pozostaw puste, aby nadpisać oryginał. Np.: "_linked".',
+            addLinksSuffixPlaceholder: 'Pozostaw puste, aby nadpisać',
+            removeCodeFencesName: 'Usuń bloki kodu przy "Add links"',
+            removeCodeFencesDesc: 'Wł.: usuwa wszystkie bloki ```markdown i ``` z końcowego wyniku "Process File" i "Process Folder". Wył.: zachowuje bloki kodu.',
+            conceptNotePathName: 'Dostosuj ścieżkę notatek pojęciowych',
+            conceptNotePathDesc: 'Wł.: twórz nowe notatki pojęciowe w podanej ścieżce. Wył.: nie twórz ich automatycznie.',
+            conceptNoteFolderName: 'Ścieżka folderu notatek pojęciowych',
+            conceptNoteFolderDesc: 'Ścieżka względna w obrębie vaultu.',
+            conceptNoteFolderPlaceholder: 'np. Concepts',
+            generateConceptLogName: 'Generuj plik dziennika pojęć',
+            generateConceptLogDesc: 'Wł.: zapisuj w dzienniku nowo utworzone notatki pojęciowe.',
+            customLogPathName: 'Dostosuj ścieżkę zapisu pliku dziennika',
+            customLogPathDescWithConceptFolder: 'Wł.: zapisuj dziennik w podanej ścieżce. Wył.: zapisuj go w folderze notatek pojęciowych ("{folder}").',
+            customLogPathDescVault: 'Wł.: zapisuj dziennik w podanej ścieżce. Wył.: zapisuj go w katalogu głównym vaultu.',
+            conceptLogFolderName: 'Ścieżka folderu dziennika pojęć',
+            conceptLogFolderDesc: 'Ścieżka względna. Wymagana, jeśli włączono ścieżkę niestandardową.',
+            conceptLogFolderPlaceholder: 'np. Logs/ConceptLogs',
+            customLogFileNameToggleName: 'Dostosuj nazwę pliku dziennika',
+            customLogFileNameToggleDesc: 'Wł.: użyj podanej nazwy. Wył.: użyj "{defaultName}".',
+            conceptLogFileNameName: 'Nazwa pliku dziennika pojęć',
+            conceptLogFileNameDesc: 'Nazwa pliku dziennika. Wymagana, jeśli włączono nazwę niestandardową.'
+        }
+    }
+});
+
+extendLocale(STRINGS_PT, {
+    settings: {
+        generalOutput: {
+            processedSavePathName: 'Personalizar o caminho de gravação do ficheiro processado',
+            processedSavePathDesc: 'Ligado: guardar no caminho especificado. Desligado: guardar na pasta original.',
+            processedFolderPathName: 'Caminho da pasta do ficheiro processado',
+            processedFolderPathDesc: 'Caminho relativo dentro do vault.',
+            processedFolderPathPlaceholder: 'Ex.: Processed/Notes',
+            moveOriginalName: 'Mover o ficheiro original após o processamento',
+            moveOriginalDesc: 'Ligado: mover o original para a pasta de processados. Desligado: criar uma cópia com o nome "_processed.md".',
+            customAddLinksFilenameName: 'Usar um nome de ficheiro de saída personalizado para "Add links"',
+            customAddLinksFilenameDesc: 'Ligado: usar um sufixo/substituição personalizado. Desligado: usar "_processed.md".',
+            addLinksSuffixName: 'Cadeia personalizada de sufixo/substituição',
+            addLinksSuffixDesc: 'Deixe vazio para sobrescrever o original. Ex.: "_linked".',
+            addLinksSuffixPlaceholder: 'Deixe vazio para sobrescrever',
+            removeCodeFencesName: 'Remover cercas de código em "Add links"',
+            removeCodeFencesDesc: 'Ligado: remove todas as cercas ```markdown e ``` da saída final de "Process File" e "Process Folder". Desligado: mantém as cercas de código.',
+            conceptNotePathName: 'Personalizar o caminho das notas de conceito',
+            conceptNotePathDesc: 'Ligado: criar novas notas de conceito no caminho especificado. Desligado: não criar automaticamente.',
+            conceptNoteFolderName: 'Caminho da pasta de notas de conceito',
+            conceptNoteFolderDesc: 'Caminho relativo dentro do vault.',
+            conceptNoteFolderPlaceholder: 'Ex.: Concepts',
+            generateConceptLogName: 'Gerar ficheiro de registo de conceitos',
+            generateConceptLogDesc: 'Ligado: registar as notas de conceito recém-criadas.',
+            customLogPathName: 'Personalizar o caminho de gravação do ficheiro de registo',
+            customLogPathDescWithConceptFolder: 'Ligado: guardar o registo no caminho especificado. Desligado: guardá-lo na Pasta de Notas de Conceito ("{folder}").',
+            customLogPathDescVault: 'Ligado: guardar o registo no caminho especificado. Desligado: guardá-lo na raiz do vault.',
+            conceptLogFolderName: 'Caminho da pasta do registo de conceitos',
+            conceptLogFolderDesc: 'Caminho relativo. Obrigatório se o caminho personalizado estiver ativado.',
+            conceptLogFolderPlaceholder: 'Ex.: Logs/ConceptLogs',
+            customLogFileNameToggleName: 'Personalizar o nome do ficheiro de registo',
+            customLogFileNameToggleDesc: 'Ligado: usar o nome especificado. Desligado: usar "{defaultName}".',
+            conceptLogFileNameName: 'Nome do ficheiro de registo de conceitos',
+            conceptLogFileNameDesc: 'Nome do ficheiro de registo. Obrigatório se o nome personalizado estiver ativado.'
+        }
+    }
+});
+
+extendLocale(STRINGS_PT_BR, {
+    settings: {
+        generalOutput: {
+            processedSavePathName: 'Personalizar o caminho de salvamento do arquivo processado',
+            processedSavePathDesc: 'Ativado: salvar no caminho especificado. Desativado: salvar na pasta original.',
+            processedFolderPathName: 'Caminho da pasta do arquivo processado',
+            processedFolderPathDesc: 'Caminho relativo dentro do vault.',
+            processedFolderPathPlaceholder: 'Ex.: Processed/Notes',
+            moveOriginalName: 'Mover o arquivo original após o processamento',
+            moveOriginalDesc: 'Ativado: mover o original para a pasta de processados. Desativado: criar uma cópia chamada "_processed.md".',
+            customAddLinksFilenameName: 'Usar um nome de arquivo de saída personalizado para "Add links"',
+            customAddLinksFilenameDesc: 'Ativado: usar um sufixo/substituição personalizado. Desativado: usar "_processed.md".',
+            addLinksSuffixName: 'Cadeia personalizada de sufixo/substituição',
+            addLinksSuffixDesc: 'Deixe em branco para sobrescrever o original. Ex.: "_linked".',
+            addLinksSuffixPlaceholder: 'Deixe em branco para sobrescrever',
+            removeCodeFencesName: 'Remover fences de código em "Add links"',
+            removeCodeFencesDesc: 'Ativado: remove todos os fences ```markdown e ``` da saída final de "Process File" e "Process Folder". Desativado: mantém os fences de código.',
+            conceptNotePathName: 'Personalizar o caminho das notas de conceito',
+            conceptNotePathDesc: 'Ativado: criar novas notas de conceito no caminho especificado. Desativado: não criar automaticamente.',
+            conceptNoteFolderName: 'Caminho da pasta de notas de conceito',
+            conceptNoteFolderDesc: 'Caminho relativo dentro do vault.',
+            conceptNoteFolderPlaceholder: 'Ex.: Concepts',
+            generateConceptLogName: 'Gerar arquivo de log de conceitos',
+            generateConceptLogDesc: 'Ativado: registrar as notas de conceito recém-criadas.',
+            customLogPathName: 'Personalizar o caminho de salvamento do arquivo de log',
+            customLogPathDescWithConceptFolder: 'Ativado: salvar o log no caminho especificado. Desativado: salvá-lo na pasta de notas de conceito ("{folder}").',
+            customLogPathDescVault: 'Ativado: salvar o log no caminho especificado. Desativado: salvá-lo na raiz do vault.',
+            conceptLogFolderName: 'Caminho da pasta do log de conceitos',
+            conceptLogFolderDesc: 'Caminho relativo. Obrigatório se o caminho personalizado estiver ativado.',
+            conceptLogFolderPlaceholder: 'Ex.: Logs/ConceptLogs',
+            customLogFileNameToggleName: 'Personalizar o nome do arquivo de log',
+            customLogFileNameToggleDesc: 'Ativado: usar o nome especificado. Desativado: usar "{defaultName}".',
+            conceptLogFileNameName: 'Nome do arquivo de log de conceitos',
+            conceptLogFileNameDesc: 'Nome do arquivo de log. Obrigatório se o nome personalizado estiver ativado.'
+        }
+    }
+});
+
+extendLocale(STRINGS_RU, {
+    settings: {
+        generalOutput: {
+            processedSavePathName: 'Настроить путь сохранения обработанного файла',
+            processedSavePathDesc: 'Вкл: сохранять по указанному пути. Выкл: сохранять в исходной папке.',
+            processedFolderPathName: 'Путь к папке обработанного файла',
+            processedFolderPathDesc: 'Относительный путь внутри vault.',
+            processedFolderPathPlaceholder: 'напр., Processed/Notes',
+            moveOriginalName: 'Перемещать исходный файл после обработки',
+            moveOriginalDesc: 'Вкл: перемещать оригинал в папку обработанных файлов. Выкл: создавать копию с именем "_processed.md".',
+            customAddLinksFilenameName: 'Использовать пользовательское имя выходного файла для "Add links"',
+            customAddLinksFilenameDesc: 'Вкл: использовать пользовательский суффикс/замену. Выкл: использовать "_processed.md".',
+            addLinksSuffixName: 'Пользовательская строка суффикса/замены',
+            addLinksSuffixDesc: 'Оставьте пустым, чтобы перезаписать оригинал. Пример: "_linked".',
+            addLinksSuffixPlaceholder: 'Оставьте пустым для перезаписи',
+            removeCodeFencesName: 'Удалять кодовые ограждения при "Add links"',
+            removeCodeFencesDesc: 'Вкл: удалять все ограждения ```markdown и ``` из итогового вывода "Process File" и "Process Folder". Выкл: сохранять кодовые ограждения.',
+            conceptNotePathName: 'Настроить путь заметок-концептов',
+            conceptNotePathDesc: 'Вкл: создавать новые заметки-концепты по указанному пути. Выкл: не создавать автоматически.',
+            conceptNoteFolderName: 'Путь к папке заметок-концептов',
+            conceptNoteFolderDesc: 'Относительный путь внутри vault.',
+            conceptNoteFolderPlaceholder: 'напр., Concepts',
+            generateConceptLogName: 'Создавать файл журнала концептов',
+            generateConceptLogDesc: 'Вкл: записывать в журнал новые заметки-концепты.',
+            customLogPathName: 'Настроить путь сохранения файла журнала',
+            customLogPathDescWithConceptFolder: 'Вкл: сохранять журнал по указанному пути. Выкл: сохранять его в папке заметок-концептов ("{folder}").',
+            customLogPathDescVault: 'Вкл: сохранять журнал по указанному пути. Выкл: сохранять его в корне vault.',
+            conceptLogFolderName: 'Путь к папке журнала концептов',
+            conceptLogFolderDesc: 'Относительный путь. Требуется, если включён пользовательский путь.',
+            conceptLogFolderPlaceholder: 'напр., Logs/ConceptLogs',
+            customLogFileNameToggleName: 'Настроить имя файла журнала',
+            customLogFileNameToggleDesc: 'Вкл: использовать указанное имя. Выкл: использовать "{defaultName}".',
+            conceptLogFileNameName: 'Имя файла журнала концептов',
+            conceptLogFileNameDesc: 'Имя файла журнала. Требуется, если включено пользовательское имя.'
+        }
+    }
+});
+
+extendLocale(STRINGS_TH, {
+    settings: {
+        generalOutput: {
+            processedSavePathName: 'กำหนดเส้นทางบันทึกไฟล์ที่ประมวลผลแล้วเอง',
+            processedSavePathDesc: 'เปิด: บันทึกไปยังเส้นทางที่ระบุ ปิด: บันทึกไว้ในโฟลเดอร์เดิม',
+            processedFolderPathName: 'เส้นทางโฟลเดอร์ของไฟล์ที่ประมวลผลแล้ว',
+            processedFolderPathDesc: 'เส้นทางสัมพัทธ์ภายใน vault',
+            processedFolderPathPlaceholder: 'เช่น Processed/Notes',
+            moveOriginalName: 'ย้ายไฟล์ต้นฉบับหลังประมวลผล',
+            moveOriginalDesc: 'เปิด: ย้ายไฟล์ต้นฉบับไปยังโฟลเดอร์ไฟล์ที่ประมวลผลแล้ว ปิด: สร้างสำเนาชื่อ "_processed.md"',
+            customAddLinksFilenameName: 'ใช้ชื่อไฟล์เอาต์พุตแบบกำหนดเองสำหรับ "Add links"',
+            customAddLinksFilenameDesc: 'เปิด: ใช้ส่วนต่อท้าย/การแทนที่แบบกำหนดเอง ปิด: ใช้ "_processed.md"',
+            addLinksSuffixName: 'สตริงส่วนต่อท้าย/การแทนที่แบบกำหนดเอง',
+            addLinksSuffixDesc: 'เว้นว่างไว้เพื่อเขียนทับต้นฉบับ ตัวอย่าง: "_linked"',
+            addLinksSuffixPlaceholder: 'เว้นว่างไว้เพื่อเขียนทับ',
+            removeCodeFencesName: 'ลบ code fences ใน "Add links"',
+            removeCodeFencesDesc: 'เปิด: ลบ fences ```markdown และ ``` ทั้งหมดจากเอาต์พุตสุดท้ายของ "Process File" และ "Process Folder" ปิด: คง code fences ไว้',
+            conceptNotePathName: 'กำหนดเส้นทางบันทึกโน้ตแนวคิดเอง',
+            conceptNotePathDesc: 'เปิด: สร้างโน้ตแนวคิดใหม่ในเส้นทางที่ระบุ ปิด: ไม่สร้างโดยอัตโนมัติ',
+            conceptNoteFolderName: 'เส้นทางโฟลเดอร์โน้ตแนวคิด',
+            conceptNoteFolderDesc: 'เส้นทางสัมพัทธ์ภายใน vault',
+            conceptNoteFolderPlaceholder: 'เช่น Concepts',
+            generateConceptLogName: 'สร้างไฟล์บันทึกแนวคิด',
+            generateConceptLogDesc: 'เปิด: บันทึกโน้ตแนวคิดที่เพิ่งสร้างใหม่',
+            customLogPathName: 'กำหนดเส้นทางบันทึกไฟล์ log เอง',
+            customLogPathDescWithConceptFolder: 'เปิด: บันทึก log ไปยังเส้นทางที่ระบุ ปิด: บันทึกไว้ในโฟลเดอร์โน้ตแนวคิด ("{folder}")',
+            customLogPathDescVault: 'เปิด: บันทึก log ไปยังเส้นทางที่ระบุ ปิด: บันทึกไว้ที่รากของ vault',
+            conceptLogFolderName: 'เส้นทางโฟลเดอร์บันทึกแนวคิด',
+            conceptLogFolderDesc: 'เส้นทางสัมพัทธ์ จำเป็นเมื่อเปิดใช้เส้นทางแบบกำหนดเอง',
+            conceptLogFolderPlaceholder: 'เช่น Logs/ConceptLogs',
+            customLogFileNameToggleName: 'กำหนดชื่อไฟล์ log เอง',
+            customLogFileNameToggleDesc: 'เปิด: ใช้ชื่อที่ระบุ ปิด: ใช้ "{defaultName}"',
+            conceptLogFileNameName: 'ชื่อไฟล์บันทึกแนวคิด',
+            conceptLogFileNameDesc: 'ชื่อไฟล์ log จำเป็นเมื่อเปิดใช้ชื่อแบบกำหนดเอง'
+        }
+    }
+});
+
+extendLocale(STRINGS_TR, {
+    settings: {
+        generalOutput: {
+            processedSavePathName: 'İşlenen dosya kayıt yolunu özelleştir',
+            processedSavePathDesc: 'Açık: belirtilen yola kaydet. Kapalı: özgün klasöre kaydet.',
+            processedFolderPathName: 'İşlenen dosya klasör yolu',
+            processedFolderPathDesc: 'Vault içindeki göreli yol.',
+            processedFolderPathPlaceholder: 'örn. Processed/Notes',
+            moveOriginalName: 'İşlemden sonra özgün dosyayı taşı',
+            moveOriginalDesc: 'Açık: özgün dosyayı işlenenler klasörüne taşı. Kapalı: "_processed.md" adlı bir kopya oluştur.',
+            customAddLinksFilenameName: '"Add links" için özel çıktı dosya adı kullan',
+            customAddLinksFilenameDesc: 'Açık: özel sonek/değiştirme kullan. Kapalı: "_processed.md" kullan.',
+            addLinksSuffixName: 'Özel sonek/değiştirme dizgesi',
+            addLinksSuffixDesc: 'Özgünü ezmek için boş bırakın. Örn.: "_linked".',
+            addLinksSuffixPlaceholder: 'Ezmek için boş bırakın',
+            removeCodeFencesName: '"Add links" sırasında kod çitlerini kaldır',
+            removeCodeFencesDesc: 'Açık: "Process File" ve "Process Folder" son çıktısından tüm ```markdown ve ``` çitlerini kaldırır. Kapalı: kod çitlerini korur.',
+            conceptNotePathName: 'Kavram notu yolunu özelleştir',
+            conceptNotePathDesc: 'Açık: yeni kavram notlarını belirtilen yolda oluşturur. Kapalı: otomatik olarak oluşturmaz.',
+            conceptNoteFolderName: 'Kavram notu klasör yolu',
+            conceptNoteFolderDesc: 'Vault içindeki göreli yol.',
+            conceptNoteFolderPlaceholder: 'örn. Concepts',
+            generateConceptLogName: 'Kavram günlük dosyası oluştur',
+            generateConceptLogDesc: 'Açık: yeni oluşturulan kavram notlarını günlüğe kaydeder.',
+            customLogPathName: 'Günlük dosyası kayıt yolunu özelleştir',
+            customLogPathDescWithConceptFolder: 'Açık: günlüğü belirtilen yola kaydet. Kapalı: Kavram Notu Klasörü\'ne ("{folder}") kaydet.',
+            customLogPathDescVault: 'Açık: günlüğü belirtilen yola kaydet. Kapalı: vault köküne kaydet.',
+            conceptLogFolderName: 'Kavram günlük klasör yolu',
+            conceptLogFolderDesc: 'Göreli yol. Özel yol etkinse gereklidir.',
+            conceptLogFolderPlaceholder: 'örn. Logs/ConceptLogs',
+            customLogFileNameToggleName: 'Günlük dosya adını özelleştir',
+            customLogFileNameToggleDesc: 'Açık: belirtilen adı kullan. Kapalı: "{defaultName}" kullan.',
+            conceptLogFileNameName: 'Kavram günlük dosya adı',
+            conceptLogFileNameDesc: 'Günlük dosyasının adı. Özel ad etkinse gereklidir.'
+        }
+    }
+});
+
+extendLocale(STRINGS_UK, {
+    settings: {
+        generalOutput: {
+            processedSavePathName: 'Налаштувати шлях збереження обробленого файла',
+            processedSavePathDesc: 'Увімкнено: зберігати у вказаний шлях. Вимкнено: зберігати в початкову папку.',
+            processedFolderPathName: 'Шлях до папки обробленого файла',
+            processedFolderPathDesc: 'Відносний шлях усередині vault.',
+            processedFolderPathPlaceholder: 'напр., Processed/Notes',
+            moveOriginalName: 'Переміщувати оригінальний файл після обробки',
+            moveOriginalDesc: 'Увімкнено: перемістити оригінал до папки оброблених файлів. Вимкнено: створити копію з назвою "_processed.md".',
+            customAddLinksFilenameName: 'Використовувати власну назву вихідного файла для "Add links"',
+            customAddLinksFilenameDesc: 'Увімкнено: використовувати власний суфікс/заміну. Вимкнено: використовувати "_processed.md".',
+            addLinksSuffixName: 'Користувацький рядок суфікса/заміни',
+            addLinksSuffixDesc: 'Залиште порожнім, щоб перезаписати оригінал. Напр.: "_linked".',
+            addLinksSuffixPlaceholder: 'Залиште порожнім для перезапису',
+            removeCodeFencesName: 'Видаляти кодові огорожі в "Add links"',
+            removeCodeFencesDesc: 'Увімкнено: видаляє всі огорожі ```markdown і ``` з фінального виводу "Process File" та "Process Folder". Вимкнено: зберігає кодові огорожі.',
+            conceptNotePathName: 'Налаштувати шлях нотаток-концептів',
+            conceptNotePathDesc: 'Увімкнено: створювати нові нотатки-концепти у вказаному шляху. Вимкнено: не створювати автоматично.',
+            conceptNoteFolderName: 'Шлях до папки нотаток-концептів',
+            conceptNoteFolderDesc: 'Відносний шлях усередині vault.',
+            conceptNoteFolderPlaceholder: 'напр., Concepts',
+            generateConceptLogName: 'Створювати файл журналу концептів',
+            generateConceptLogDesc: 'Увімкнено: журналювати щойно створені нотатки-концепти.',
+            customLogPathName: 'Налаштувати шлях збереження файла журналу',
+            customLogPathDescWithConceptFolder: 'Увімкнено: зберігати журнал у вказаний шлях. Вимкнено: зберігати його в папці нотаток-концептів ("{folder}").',
+            customLogPathDescVault: 'Увімкнено: зберігати журнал у вказаний шлях. Вимкнено: зберігати його в корені vault.',
+            conceptLogFolderName: 'Шлях до папки журналу концептів',
+            conceptLogFolderDesc: 'Відносний шлях. Обов’язково, якщо ввімкнено власний шлях.',
+            conceptLogFolderPlaceholder: 'напр., Logs/ConceptLogs',
+            customLogFileNameToggleName: 'Налаштувати назву файла журналу',
+            customLogFileNameToggleDesc: 'Увімкнено: використовувати вказану назву. Вимкнено: використовувати "{defaultName}".',
+            conceptLogFileNameName: 'Назва файла журналу концептів',
+            conceptLogFileNameDesc: 'Назва файла журналу. Обов’язково, якщо ввімкнено власну назву.'
+        }
+    }
+});
+
+extendLocale(STRINGS_VI, {
+    settings: {
+        generalOutput: {
+            processedSavePathName: 'Tùy chỉnh đường dẫn lưu tệp đã xử lý',
+            processedSavePathDesc: 'Bật: lưu vào đường dẫn đã chỉ định. Tắt: lưu trong thư mục gốc.',
+            processedFolderPathName: 'Đường dẫn thư mục của tệp đã xử lý',
+            processedFolderPathDesc: 'Đường dẫn tương đối trong vault.',
+            processedFolderPathPlaceholder: 'ví dụ: Processed/Notes',
+            moveOriginalName: 'Di chuyển tệp gốc sau khi xử lý',
+            moveOriginalDesc: 'Bật: di chuyển tệp gốc vào thư mục tệp đã xử lý. Tắt: tạo một bản sao có tên "_processed.md".',
+            customAddLinksFilenameName: 'Dùng tên tệp đầu ra tùy chỉnh cho "Add links"',
+            customAddLinksFilenameDesc: 'Bật: dùng hậu tố/thay thế tùy chỉnh. Tắt: dùng "_processed.md".',
+            addLinksSuffixName: 'Chuỗi hậu tố/thay thế tùy chỉnh',
+            addLinksSuffixDesc: 'Để trống để ghi đè tệp gốc. Ví dụ: "_linked".',
+            addLinksSuffixPlaceholder: 'Để trống để ghi đè',
+            removeCodeFencesName: 'Xóa code fences khi "Add links"',
+            removeCodeFencesDesc: 'Bật: xóa tất cả fences ```markdown và ``` khỏi đầu ra cuối cùng của "Process File" và "Process Folder". Tắt: giữ nguyên code fences.',
+            conceptNotePathName: 'Tùy chỉnh đường dẫn ghi chú khái niệm',
+            conceptNotePathDesc: 'Bật: tạo ghi chú khái niệm mới tại đường dẫn đã chỉ định. Tắt: không tạo tự động.',
+            conceptNoteFolderName: 'Đường dẫn thư mục ghi chú khái niệm',
+            conceptNoteFolderDesc: 'Đường dẫn tương đối trong vault.',
+            conceptNoteFolderPlaceholder: 'ví dụ: Concepts',
+            generateConceptLogName: 'Tạo tệp nhật ký khái niệm',
+            generateConceptLogDesc: 'Bật: ghi lại các ghi chú khái niệm mới được tạo.',
+            customLogPathName: 'Tùy chỉnh đường dẫn lưu tệp nhật ký',
+            customLogPathDescWithConceptFolder: 'Bật: lưu nhật ký vào đường dẫn đã chỉ định. Tắt: lưu trong thư mục Ghi chú Khái niệm ("{folder}").',
+            customLogPathDescVault: 'Bật: lưu nhật ký vào đường dẫn đã chỉ định. Tắt: lưu tại thư mục gốc của vault.',
+            conceptLogFolderName: 'Đường dẫn thư mục nhật ký khái niệm',
+            conceptLogFolderDesc: 'Đường dẫn tương đối. Bắt buộc nếu bật đường dẫn tùy chỉnh.',
+            conceptLogFolderPlaceholder: 'ví dụ: Logs/ConceptLogs',
+            customLogFileNameToggleName: 'Tùy chỉnh tên tệp nhật ký',
+            customLogFileNameToggleDesc: 'Bật: dùng tên đã chỉ định. Tắt: dùng "{defaultName}".',
+            conceptLogFileNameName: 'Tên tệp nhật ký khái niệm',
+            conceptLogFileNameDesc: 'Tên của tệp nhật ký. Bắt buộc nếu bật tên tùy chỉnh.'
+        }
+    }
+});
+
 extendLocale(STRINGS_ES, {
     errorModal: {
         titles: {
