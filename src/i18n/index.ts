@@ -1,14 +1,53 @@
 import { getLanguage } from 'obsidian';
-import { normalizeLocaleCode, resolveUiLocale } from './languageContext';
+import { normalizeLocaleCode, resolveUiLocale, UI_LOCALE_AUTO } from './languageContext';
 import { STRINGS_EN, NotemdEnglishStrings } from './locales/en';
 import { STRINGS_ZH_CN } from './locales/zh_cn';
 import { STRINGS_ZH_TW } from './locales/zh_tw';
+import {
+    STRINGS_AR,
+    STRINGS_DE,
+    STRINGS_ES,
+    STRINGS_FA,
+    STRINGS_FR,
+    STRINGS_ID,
+    STRINGS_IT,
+    STRINGS_JA,
+    STRINGS_KO,
+    STRINGS_NL,
+    STRINGS_PL,
+    STRINGS_PT,
+    STRINGS_PT_BR,
+    STRINGS_RU,
+    STRINGS_TH,
+    STRINGS_TR,
+    STRINGS_UK,
+    STRINGS_VI
+} from './locales/additional';
+import { SUPPORTED_UI_LOCALE_CODES } from './uiLocales';
 
 type TranslationStrings = NotemdEnglishStrings;
 type DeepPartial<T> = T extends object ? { [K in keyof T]?: DeepPartial<T[K]> } : T;
 
 const LANGUAGE_MAP: Record<string, DeepPartial<TranslationStrings>> = {
+    ar: STRINGS_AR,
+    de: STRINGS_DE,
     en: STRINGS_EN,
+    es: STRINGS_ES,
+    fa: STRINGS_FA,
+    fr: STRINGS_FR,
+    id: STRINGS_ID,
+    it: STRINGS_IT,
+    ja: STRINGS_JA,
+    ko: STRINGS_KO,
+    nl: STRINGS_NL,
+    pl: STRINGS_PL,
+    pt: STRINGS_PT,
+    'pt-BR': STRINGS_PT_BR,
+    ru: STRINGS_RU,
+    th: STRINGS_TH,
+    tr: STRINGS_TR,
+    uk: STRINGS_UK,
+    vi: STRINGS_VI,
     zh: STRINGS_ZH_CN,
     'zh-CN': STRINGS_ZH_CN,
     'zh-TW': STRINGS_ZH_TW
@@ -68,12 +107,16 @@ export function getCurrentObsidianLocale(): string {
     return normalizeLocaleCode(getLanguage());
 }
 
-export function getI18nStrings(settings?: { uiLocale: string }): TranslationStrings {
-    if (settings) {
-        const locale = resolveUiLocale(settings, getCurrentObsidianLocale(), Object.keys(LANGUAGE_MAP));
-        return getResolvedStrings(locale);
-    }
-    return getResolvedStrings(getCurrentObsidianLocale());
+export function getCurrentUiLocale(settings?: { uiLocale?: string }): string {
+    return resolveUiLocale(
+        { uiLocale: settings?.uiLocale ?? UI_LOCALE_AUTO },
+        getCurrentObsidianLocale(),
+        SUPPORTED_UI_LOCALE_CODES
+    );
+}
+
+export function getI18nStrings(settings?: { uiLocale?: string }): TranslationStrings {
+    return getResolvedStrings(getCurrentUiLocale(settings));
 }
 
 export function formatI18n(template: string, variables: Record<string, string | number>): string {

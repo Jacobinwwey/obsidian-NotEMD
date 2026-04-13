@@ -1,6 +1,8 @@
 import type { NotemdEnglishStrings } from './en';
 
-export const STRINGS_ZH_TW: Partial<NotemdEnglishStrings> = {
+type DeepPartial<T> = T extends object ? { [K in keyof T]?: DeepPartial<T[K]> } : T;
+
+export const STRINGS_ZH_TW: DeepPartial<NotemdEnglishStrings> = {
     common: {
         language: '語言',
         cancel: '取消',
@@ -10,9 +12,16 @@ export const STRINGS_ZH_TW: Partial<NotemdEnglishStrings> = {
         standby: '待命',
         unknownError: '未知錯誤'
     },
+    plugin: {
+        viewName: 'Notemd 工作台',
+        ribbonTooltip: '開啟 Notemd 側欄'
+    },
     settings: {
         language: {
             heading: '語言設定',
+            uiLocaleName: '介面語言',
+            uiLocaleDesc: '選擇外掛介面使用的語言。「自動」會跟隨目前 Obsidian 語言。',
+            uiLocaleAuto: '跟隨 Obsidian（自動）',
             outputName: '輸出語言',
             outputDesc: '選擇 LLM 輸出內容使用的語言。',
             perTaskName: '為不同任務選擇不同語言',
@@ -33,8 +42,55 @@ export const STRINGS_ZH_TW: Partial<NotemdEnglishStrings> = {
     sidebar: {
         heroTitle: 'Notemd 工作台',
         heroDesc: '執行單一動作或自訂一鍵工作流程，並查看即時進度與日誌。',
+        defaultWorkflowName: '一鍵擷取',
         quickWorkflowTitle: '快速工作流程',
         quickWorkflowDesc: '由內建動作組裝的自訂按鈕。',
+        sectionTitles: {
+            core: '核心流程',
+            generation: '生成與 Mermaid',
+            knowledge: '知識',
+            translation: '翻譯',
+            utilities: '工具'
+        },
+        actions: {
+            processCurrentAddLinks: { label: '處理檔案（新增連結）' },
+            processFolderAddLinks: { label: '處理資料夾（新增連結）' },
+            generateFromTitle: { label: '從標題生成' },
+            batchGenerateFromTitles: { label: '從標題批次生成' },
+            researchAndSummarize: { label: '研究並摘要' },
+            summarizeAsMermaid: { label: '摘要為 Mermaid 圖表' },
+            translateCurrentFile: { label: '翻譯目前檔案' },
+            batchTranslateFolder: { label: '批次翻譯資料夾' },
+            extractConceptsCurrent: { label: '擷取概念（目前檔案）' },
+            extractConceptsFolder: { label: '擷取概念（資料夾）' },
+            extractOriginalText: { label: '擷取指定原文' },
+            batchMermaidFix: { label: '批次修復 Mermaid' },
+            fixFormulaCurrent: { label: '修復公式格式（目前）' },
+            batchFixFormula: { label: '批次修復公式格式' },
+            checkDuplicatesCurrent: { label: '檢查重複項（目前檔案）' },
+            checkRemoveDuplicateConcepts: { label: '檢查並移除重複項' },
+            testLlmConnection: { label: '測試 LLM 連線' }
+        },
+        status: {
+            runningAction: '正在執行「{label}」…',
+            actionComplete: '「{label}」已完成',
+            actionFailed: '動作失敗：{message}',
+            workflowStart: '工作流程：{name}',
+            workflowComplete: '工作流程「{name}」已完成',
+            workflowFailed: '工作流程失敗',
+            workflowFailedLog: '工作流程失敗：{message}',
+            workflowFinishedWithErrors: '工作流程「{name}」已結束，含 {count} 個錯誤',
+            stepLabel: '[{current}/{total}] {label}',
+            stepLog: '步驟 {current}/{total}：{label}',
+            stepFailed: '步驟失敗：{message}',
+            processingActive: '處理中…（活動任務：{count}）',
+            timeRemaining: '預估剩餘時間：{time}',
+            timeRemainingCalculating: '預估剩餘時間：計算中…',
+            stopped: '已停止',
+            processingStopped: '處理已停止。',
+            cancelling: '正在取消…',
+            userRequestedCancellation: '使用者要求取消。'
+        },
         builtInActionsPrefix: '內建 {category} 動作。',
         logOutputTitle: '日誌輸出',
         copyLog: '複製日誌',
@@ -55,5 +111,16 @@ export const STRINGS_ZH_TW: Partial<NotemdEnglishStrings> = {
         copied: '已複製！',
         copySuccessNotice: '錯誤詳情已複製到剪貼簿！',
         copyFailedNotice: '複製錯誤詳情失敗，請查看主控台。'
+    },
+    progressModal: {
+        heading: 'Notemd 處理中',
+        starting: '正在啟動…',
+        cancelProgress: '取消',
+        timeRemaining: '預估剩餘時間：{time}',
+        timeRemainingCalculating: '預估剩餘時間：計算中…',
+        cancelledOrError: '已取消/錯誤',
+        processingStopped: '處理已停止。',
+        cancelling: '正在取消…',
+        userRequestedCancellation: '使用者要求取消。'
     }
 };

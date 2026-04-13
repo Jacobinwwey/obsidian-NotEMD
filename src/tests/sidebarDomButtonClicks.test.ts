@@ -1,4 +1,4 @@
-import { MarkdownView, TFile } from 'obsidian';
+import { getLanguage, MarkdownView, TFile } from 'obsidian';
 import { NotemdSidebarView } from '../ui/NotemdSidebarView';
 import { mockApp } from './__mocks__/app';
 
@@ -7,6 +7,7 @@ type MockPlugin = {
     settings: {
         availableLanguages: Array<{ code: string; name: string }>;
         language: string;
+        uiLocale: string;
         useCustomConceptNoteFolder: boolean;
         conceptNoteFolder: string;
         customWorkflowButtonsDsl: string;
@@ -130,6 +131,7 @@ function createPluginMock(): MockPlugin {
         settings: {
             availableLanguages: [{ code: 'en', name: 'English' }],
             language: 'en',
+            uiLocale: 'auto',
             useCustomConceptNoteFolder: true,
             conceptNoteFolder: 'Concepts',
             customWorkflowButtonsDsl: 'One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix',
@@ -179,6 +181,7 @@ describe('NotemdSidebarView DOM button wiring', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
+        (getLanguage as jest.Mock).mockReturnValue('en');
         (global as any).Option = function Option(text: string, value: string) {
             return { text, value };
         };
@@ -252,6 +255,20 @@ describe('NotemdSidebarView DOM button wiring', () => {
         expect(mockApp.vault.read).toHaveBeenCalledWith(txtFile);
         expect(plugin.checkAndRemoveDuplicateConceptNotesCommand).toHaveBeenCalled();
         expect(plugin.testLlmConnectionCommand).toHaveBeenCalled();
+    });
+
+    test('uses Obsidian locale for sidebar action labels when uiLocale is auto', async () => {
+        plugin.settings.uiLocale = 'auto';
+        plugin.settings.availableLanguages = [
+            { code: 'en', name: 'English' },
+            { code: 'zh-CN', name: '简体中文' }
+        ];
+        (getLanguage as jest.Mock).mockReturnValue('zh-cn');
+
+        await sidebar.onOpen();
+
+        expect(contentContainer.findButton('处理文件（添加链接）')).not.toBeNull();
+        expect(contentContainer.findButton('翻译当前文件')).not.toBeNull();
     });
 
     test('clicking default One-Click Extract workflow triggers chained commands', async () => {
