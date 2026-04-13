@@ -571,14 +571,14 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             case 'check-duplicates-current': {
                 const activeFile = this.plugin.app.workspace.getActiveFile();
                 if (!activeFile || !(activeFile instanceof TFile) || (activeFile.extension !== 'md' && activeFile.extension !== 'txt')) {
-                    throw new Error("No active '.md' or '.txt' file selected.");
+                    throw new Error(this.getStrings().notices.noActiveTextFileSelected);
                 }
 
                 const content = await this.plugin.app.vault.read(activeFile);
                 const duplicates = findDuplicates(content);
-                const message = `Found ${duplicates.size} potential duplicate terms.`;
+                const message = formatI18n(this.getStrings().notices.duplicateTermsFound, { count: duplicates.size });
                 reporter.log(message);
-                new Notice(`${message} Check log and console.`);
+                new Notice(formatI18n(this.getStrings().notices.duplicateTermsCheckLogConsole, { count: duplicates.size }));
                 if (duplicates.size > 0) {
                     reporter.log(`Potential duplicates: ${Array.from(duplicates).join(', ')}`);
                     console.log(`Potential duplicates in ${activeFile.name}:`, Array.from(duplicates));

@@ -5,6 +5,7 @@ import { callLLM, handleApiError } from './llmUtils';
 import { getSystemPrompt } from './promptUtils';
 import { ProgressModal } from './ui/ProgressModal';
 import { resolveLanguageDisplayName } from './i18n/languageContext';
+import { formatI18n, getI18nStrings } from './i18n';
 
 
 export async function batchTranslateFolder(
@@ -13,12 +14,13 @@ export async function batchTranslateFolder(
 	folder: TFolder,
 	targetLanguage: string
 ): Promise<void> {
+	const i18n = getI18nStrings({ uiLocale: settings.uiLocale });
 	const files = folder.children.filter(
 		(file): file is TFile => file instanceof TFile && file.extension === 'md'
 	);
 
 	if (files.length === 0) {
-		new Notice('No markdown files found in the selected folder.');
+		new Notice(i18n.notices.noMarkdownFilesFoundSelectedFolder);
 		return;
 	}
 
@@ -44,9 +46,9 @@ export async function batchTranslateFolder(
 	try {
         const tasks = files.map(file => () => processFile(file));
 		await concurrentProcessor(tasks);
-		new Notice(`Batch translation of ${files.length} files completed.`);
+		new Notice(formatI18n(i18n.notices.batchTranslationCompleted, { count: files.length }));
 	} catch (error) {
-		new Notice('Batch translation failed. See console for details.');
+		new Notice(i18n.notices.batchTranslationFailed);
 		console.error('Batch translation error:', error);
 	} finally {
 		progressModal.close();
@@ -63,16 +65,17 @@ export async function translateFile(
     openFile = false, // Default to false
     signal?: AbortSignal
 ): Promise<string | null> {
+    const i18n = getI18nStrings({ uiLocale: settings.uiLocale });
     const fileContent = await app.vault.read(file);
     if (!fileContent) {
-        new Notice('File is empty.');
+        new Notice(i18n.notices.fileEmpty);
         return null;
     }
 
     const provider = getProviderForTask('translate', settings);
 
     if (!provider) {
-        new Notice('No provider configured for translation.');
+        new Notice(i18n.notices.noTranslationProviderConfigured);
         return null;
     }
     const model = getModelForTask('translate', provider, settings);
@@ -115,7 +118,7 @@ export async function translateFile(
                     await app.vault.createFolder(savePath);
                 } catch (error) {
                     console.error(`Error creating translation folder at ${savePath}:`, error);
-                    new Notice(`Failed to create translation folder: ${savePath}. Defaulting to original file's folder.`);
+                    new Notice(formatI18n(i18n.notices.failedCreateTranslationFolder, { path: savePath }));
                     // Fallback to original folder if creation fails
                     savePath = file.parent ? file.parent.path : '/';
                 }
@@ -146,7 +149,7 @@ export async function translateFile(
             }
         }
 
-        new Notice(`Translated file saved to ${fullPath}`);
+        new Notice(formatI18n(i18n.notices.translatedFileSavedTo, { path: fullPath }));
         return fullPath;
     } catch (error: unknown) {
         if (error instanceof Error && error.name === 'AbortError') {
@@ -162,7 +165,7 @@ export async function translateFile(
             // handleApiError throws a formatted error. 
             // We log it and let it propagate or re-throw original if needed.
             console.error('Translation Error:', error);
-            new Notice('Failed to translate file. See console for details.');
+            new Notice(i18n.notices.failedTranslateFile);
             throw e; // Throw the formatted error from handleApiError
         }
     }
