@@ -9,10 +9,14 @@ describe('supported UI locale visible surface coverage', () => {
             { label: 'common.select', get: (strings: typeof en) => strings.common.select },
             { label: 'commands.checkDuplicatesCurrent', get: (strings: typeof en) => strings.commands.checkDuplicatesCurrent },
             { label: 'commands.extractConceptsAndGenerateTitles', get: (strings: typeof en) => strings.commands.extractConceptsAndGenerateTitles },
+            { label: 'commands.generateExperimentalDiagram', get: (strings: typeof en) => strings.commands.generateExperimentalDiagram },
+            { label: 'commands.previewExperimentalDiagram', get: (strings: typeof en) => strings.commands.previewExperimentalDiagram },
             {
                 label: 'commands.createWikiLinkAndGenerateNoteFromSelection',
                 get: (strings: typeof en) => strings.commands.createWikiLinkAndGenerateNoteFromSelection
             },
+            { label: 'sidebar.actions.generateExperimentalDiagram.label', get: (strings: typeof en) => strings.sidebar.actions.generateExperimentalDiagram.label },
+            { label: 'sidebar.actions.previewExperimentalDiagram.label', get: (strings: typeof en) => strings.sidebar.actions.previewExperimentalDiagram.label },
             { label: 'duplicateModal.title', get: (strings: typeof en) => strings.duplicateModal.title },
             { label: 'duplicateModal.intro', get: (strings: typeof en) => strings.duplicateModal.intro },
             { label: 'duplicateModal.reason', get: (strings: typeof en) => strings.duplicateModal.reason },

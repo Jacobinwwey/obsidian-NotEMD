@@ -24,6 +24,7 @@ import {
     STRINGS_VI
 } from './locales/additional';
 import { EXPERIMENTAL_DIAGRAM_PIPELINE_LOCALE_EXTENSIONS } from './locales/experimentalDiagramPipeline';
+import { DIAGRAM_ACTION_LOCALE_EXTENSIONS } from './locales/diagramActions';
 import { PREVIEW_MODAL_LOCALE_EXTENSIONS } from './locales/previewModal';
 import { SUPPORTED_UI_LOCALE_CODES } from './uiLocales';
 
@@ -89,6 +90,7 @@ function getLocaleLayers(locale: string): Array<DeepPartial<TranslationStrings>>
     return [
         LANGUAGE_MAP[locale],
         EXPERIMENTAL_DIAGRAM_PIPELINE_LOCALE_EXTENSIONS[locale],
+        DIAGRAM_ACTION_LOCALE_EXTENSIONS[locale],
         PREVIEW_MODAL_LOCALE_EXTENSIONS[locale]
     ].filter((value): value is DeepPartial<TranslationStrings> => Boolean(value));
 }
