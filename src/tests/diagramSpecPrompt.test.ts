@@ -19,6 +19,15 @@ describe('diagram spec prompt builder', () => {
         expect(prompt).toMatch(/Japanese/i);
     });
 
+    test('includes preferred chart type guidance when provided', () => {
+        const prompt = buildDiagramSpecPrompt({
+            preferredIntent: 'dataChart',
+            preferredChartType: 'line'
+        });
+
+        expect(prompt).toMatch(/Preferred chart template: line/i);
+    });
+
     test('documents the controlled data chart templates for layout hints', () => {
         const prompt = buildDiagramSpecPrompt();
 

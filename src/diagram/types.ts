@@ -1,3 +1,5 @@
+import { SupportedVegaLiteChartType } from './adapters/vega/schema';
+
 export type DiagramIntent =
     | 'mindmap'
     | 'flowchart'
@@ -87,6 +89,7 @@ export interface DiagramPlan {
     reasons: string[];
     renderTarget: RenderTarget;
     fallbackTargets: RenderTarget[];
+    preferredChartType?: SupportedVegaLiteChartType;
     mermaidDiagramType: MermaidDiagramType | null;
     legacyCompatibilityMode: boolean;
 }

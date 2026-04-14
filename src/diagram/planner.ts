@@ -6,6 +6,7 @@ import {
     MermaidDiagramType,
     RenderTarget
 } from './types';
+import { SupportedVegaLiteChartType } from './adapters/vega/schema';
 import { inferDiagramIntent } from './intent';
 
 function resolvePreferredRenderTarget(intent: DiagramIntent): RenderTarget {
@@ -60,6 +61,32 @@ function resolveFallbackTargets(
     return fallbackTargets;
 }
 
+function inferPreferredChartType(markdown: string, intent: DiagramIntent): SupportedVegaLiteChartType | undefined {
+    if (intent !== 'dataChart') {
+        return undefined;
+    }
+
+    const normalized = markdown.toLowerCase();
+
+    if (/\bvs\.?\b|\bversus\b|\bcorrelation\b|\bscatter\b|\bthroughput\b|\blatency\b/.test(normalized)) {
+        return 'scatter';
+    }
+
+    if (/%/.test(normalized) || /\bshare\b|\bmix\b|\bbreakdown\b|\bcomposition\b|\bportion\b|\bdistribution\b/.test(normalized)) {
+        return 'pie';
+    }
+
+    if (/\btop\b|\brank(?:ed|ing)?\b|\bleaderboard\b|\bissue(?:s)?\b/.test(normalized)) {
+        return 'table';
+    }
+
+    if (/\bday\b|\bdaily\b|\bweek\b|\bweekly\b|\bmonth\b|\bmonthly\b|\bquarter\b|\bquarterly\b|\byear\b|\byearly\b|\btrend\b|\bover time\b/.test(normalized)) {
+        return 'line';
+    }
+
+    return 'bar';
+}
+
 function buildIntentResult(markdown: string, requestedIntent?: DiagramIntent): DiagramIntentResult {
     if (!requestedIntent) {
         return inferDiagramIntent(markdown);
@@ -77,6 +104,7 @@ export function buildDiagramPlan(markdown: string, options: DiagramPlanOptions =
     const inferred = buildIntentResult(markdown, options.requestedIntent);
     const preferredTarget = resolvePreferredRenderTarget(inferred.intent);
     const preferredMermaidType = resolveMermaidDiagramType(inferred.intent);
+    const preferredChartType = inferPreferredChartType(markdown, inferred.intent);
     const fallbackTargets = resolveFallbackTargets(compatibilityMode, preferredTarget, preferredMermaidType);
 
     if (compatibilityMode === 'legacy-mermaid') {
@@ -86,6 +114,7 @@ export function buildDiagramPlan(markdown: string, options: DiagramPlanOptions =
             reasons: inferred.reasons,
             renderTarget: 'mermaid',
             fallbackTargets,
+            preferredChartType,
             mermaidDiagramType: preferredMermaidType ?? 'mindmap',
             legacyCompatibilityMode: true
         };
@@ -97,6 +126,7 @@ export function buildDiagramPlan(markdown: string, options: DiagramPlanOptions =
         reasons: inferred.reasons,
         renderTarget: preferredTarget,
         fallbackTargets,
+        preferredChartType,
         mermaidDiagramType: preferredMermaidType,
         legacyCompatibilityMode: false
     };

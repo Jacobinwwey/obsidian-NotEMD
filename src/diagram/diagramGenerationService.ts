@@ -70,15 +70,25 @@ function resolveLegacyCompatibleIntent(spec: DiagramSpec, plan: DiagramPlan): Di
 }
 
 function mergeSpecDefaults(spec: DiagramSpec, plan: DiagramPlan): DiagramSpec {
+    const resolvedIntent = resolveLegacyCompatibleIntent(spec, plan);
+    const normalizedLayoutHints = { ...(spec.layoutHints ?? {}) };
+
+    if (resolvedIntent !== 'dataChart') {
+        delete normalizedLayoutHints.chartType;
+    } else if (normalizedLayoutHints.chartType === undefined && plan.preferredChartType) {
+        normalizedLayoutHints.chartType = plan.preferredChartType;
+    }
+
     return {
         ...spec,
-        intent: resolveLegacyCompatibleIntent(spec, plan),
+        intent: resolvedIntent,
         title: spec.title?.trim() || 'Generated Diagram',
         nodes: spec.nodes ?? [],
         edges: spec.edges ?? [],
         sections: spec.sections ?? [],
         callouts: spec.callouts ?? [],
         dataSeries: spec.dataSeries ?? [],
+        layoutHints: Object.keys(normalizedLayoutHints).length > 0 ? normalizedLayoutHints : undefined,
         evidenceRefs: spec.evidenceRefs ?? []
     };
 }
@@ -94,6 +104,7 @@ export async function generateDiagramArtifact(
 
     const prompt = buildDiagramSpecPrompt({
         preferredIntent: plan.intent,
+        preferredChartType: plan.preferredChartType,
         targetLanguage: options.targetLanguage
     });
 

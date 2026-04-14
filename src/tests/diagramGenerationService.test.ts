@@ -75,6 +75,43 @@ describe('diagram generation service', () => {
         expect(artifact.artifact.content).toContain('mindmap');
     });
 
+    test('drops chart-only layout hints when legacy-mermaid compatibility coerces data charts', async () => {
+        const artifact = await generateDiagramArtifact(`# Weekly Signups
+
+| Week | Signups |
+| --- | --- |
+| 1 | 12 |
+| 2 | 19 |
+`, {
+            compatibilityMode: 'legacy-mermaid',
+            targetLanguage: 'en',
+            llmInvoker: async () => JSON.stringify({
+                intent: 'dataChart',
+                title: 'Weekly Signups',
+                nodes: [
+                    { id: 'week-1', label: 'Week 1: 12' },
+                    { id: 'week-2', label: 'Week 2: 19' }
+                ],
+                layoutHints: { chartType: 'pie' },
+                dataSeries: [
+                    {
+                        id: 'signups',
+                        label: 'Signups',
+                        points: [
+                            { x: 'Week 1', y: 12 },
+                            { x: 'Week 2', y: 19 }
+                        ]
+                    }
+                ]
+            })
+        });
+
+        expect(artifact.plan.legacyCompatibilityMode).toBe(true);
+        expect(artifact.spec.intent).toBe('mindmap');
+        expect(artifact.spec.layoutHints?.chartType).toBeUndefined();
+        expect(artifact.artifact.target).toBe('mermaid');
+    });
+
     test('falls back to html when the preferred renderer fails in best-fit mode', async () => {
         const failingMermaidRenderer: DiagramRenderer = {
             id: 'failing-mermaid',
@@ -142,5 +179,39 @@ describe('diagram generation service', () => {
                 ]
             })
         })).rejects.toThrow(/unsupported chartType/i);
+    });
+
+    test('injects planner chart defaults when the LLM omits chartType', async () => {
+        const result = await generateDiagramArtifact(`# Weekly Signups
+
+| Week | Signups |
+| --- | --- |
+| 1 | 12 |
+| 2 | 19 |
+| 3 | 27 |
+`, {
+            compatibilityMode: 'best-fit',
+            targetLanguage: 'en',
+            llmInvoker: async () => JSON.stringify({
+                intent: 'dataChart',
+                title: 'Weekly Signups',
+                nodes: [],
+                dataSeries: [
+                    {
+                        id: 'signups',
+                        label: 'Signups',
+                        points: [
+                            { x: 'Week 1', y: 12 },
+                            { x: 'Week 2', y: 19 },
+                            { x: 'Week 3', y: 27 }
+                        ]
+                    }
+                ]
+            })
+        });
+
+        expect(result.plan.preferredChartType).toBe('line');
+        expect(result.spec.layoutHints?.chartType).toBe('line');
+        expect(JSON.parse(result.artifact.content).mark).toBe('line');
     });
 });

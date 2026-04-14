@@ -1,8 +1,9 @@
-import { SUPPORTED_VEGA_LITE_CHART_TYPES } from '../adapters/vega/schema';
+import { SUPPORTED_VEGA_LITE_CHART_TYPES, SupportedVegaLiteChartType } from '../adapters/vega/schema';
 import { DiagramIntent } from '../types';
 
 export interface DiagramSpecPromptOptions {
     preferredIntent?: DiagramIntent;
+    preferredChartType?: SupportedVegaLiteChartType;
     targetLanguage?: string;
 }
 
@@ -11,6 +12,9 @@ export function buildDiagramSpecPrompt(options: DiagramSpecPromptOptions = {}): 
     const preferredIntentLine = options.preferredIntent
         ? `Preferred diagram intent: ${options.preferredIntent}. Follow it when the source content supports it.`
         : 'Preferred diagram intent: choose the most suitable intent from the supported list.';
+    const preferredChartTypeLine = options.preferredIntent === 'dataChart' && options.preferredChartType
+        ? `Preferred chart template: ${options.preferredChartType}. Use it when the extracted data supports it.`
+        : '';
 
     const targetLanguageLine = options.targetLanguage
         ? `Write all human-readable labels in ${options.targetLanguage}.`
@@ -36,6 +40,7 @@ Supported intents:
 - dataChart
 
 ${preferredIntentLine}
+${preferredChartTypeLine}
 ${targetLanguageLine}
 
 Required DiagramSpec fields:
