@@ -1,5 +1,6 @@
 import { App, TFile } from 'obsidian';
 import { RenderArtifact } from '../types';
+import { RenderWebviewTheme } from '../theme';
 import { renderJsonCanvasArtifactSvg } from './canvasPreview';
 import { renderMermaidArtifactSvg, MermaidPreviewDeps } from './mermaidPreview';
 import { PreviewPngRasterDeps, rasterizeSvgToPngArrayBuffer } from './pngPreview';
@@ -8,6 +9,7 @@ import { renderVegaLiteArtifactSvg, VegaLitePreviewDeps } from './vegaLitePrevie
 export interface PreviewSvgRenderDeps {
     mermaid?: MermaidPreviewDeps;
     vegaLiteDepsLoader?: () => Promise<VegaLitePreviewDeps>;
+    theme?: RenderWebviewTheme;
 }
 
 export interface PreviewPngExportDeps extends PreviewSvgRenderDeps {
@@ -48,9 +50,9 @@ export async function renderPreviewArtifactSvg(
         case 'mermaid':
             return renderMermaidArtifactSvg(artifact, deps.mermaid);
         case 'json-canvas':
-            return renderJsonCanvasArtifactSvg(artifact);
+            return renderJsonCanvasArtifactSvg(artifact, deps.theme);
         case 'vega-lite':
-            return renderVegaLiteArtifactSvg(artifact, deps.vegaLiteDepsLoader);
+            return renderVegaLiteArtifactSvg(artifact, deps.vegaLiteDepsLoader, deps.theme);
         default:
             throw new Error(`Preview SVG export is not supported for target "${artifact.target}".`);
     }

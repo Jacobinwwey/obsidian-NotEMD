@@ -10,14 +10,19 @@ export function buildRenderWebviewHtml(payload: RenderWebviewPayload): string {
     <title>Notemd Render Host</title>
     <style>
         :root {
-            color-scheme: light dark;
             font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+            --notemd-render-bg: transparent;
+            --notemd-render-text: #0f172a;
+            --notemd-render-border: rgba(148, 163, 184, 0.4);
+            --notemd-render-divider: rgba(148, 163, 184, 0.28);
+            --notemd-render-panel-bg: rgba(248, 250, 252, 0.96);
+            --notemd-render-source-text: rgba(15, 23, 42, 0.76);
         }
 
         body {
             margin: 0;
-            background: transparent;
-            color: var(--text-normal, #d8dee9);
+            background: var(--notemd-render-bg);
+            color: var(--notemd-render-text);
         }
 
         #app {
@@ -26,10 +31,23 @@ export function buildRenderWebviewHtml(payload: RenderWebviewPayload): string {
             box-sizing: border-box;
         }
 
+        body[data-render-theme="dark"] {
+            color-scheme: dark;
+            --notemd-render-text: #e2e8f0;
+            --notemd-render-border: rgba(148, 163, 184, 0.3);
+            --notemd-render-divider: rgba(148, 163, 184, 0.22);
+            --notemd-render-panel-bg: rgba(15, 23, 42, 0.88);
+            --notemd-render-source-text: rgba(226, 232, 240, 0.72);
+        }
+
+        body[data-render-theme="light"] {
+            color-scheme: light;
+        }
+
         .notemd-render-shell {
-            border: 1px solid rgba(127, 140, 141, 0.35);
+            border: 1px solid var(--notemd-render-border);
             border-radius: 12px;
-            background: rgba(28, 32, 36, 0.72);
+            background: var(--notemd-render-panel-bg);
             overflow: hidden;
         }
 
@@ -42,13 +60,13 @@ export function buildRenderWebviewHtml(payload: RenderWebviewPayload): string {
             font-size: 13px;
             text-transform: uppercase;
             letter-spacing: 0.08em;
-            border-bottom: 1px solid rgba(127, 140, 141, 0.25);
+            border-bottom: 1px solid var(--notemd-render-divider);
         }
 
         .notemd-render-source {
             font-size: 12px;
-            opacity: 0.8;
-            border-bottom: 1px solid rgba(127, 140, 141, 0.2);
+            color: var(--notemd-render-source-text);
+            border-bottom: 1px solid var(--notemd-render-divider);
         }
 
         .notemd-render-body {
@@ -61,7 +79,7 @@ export function buildRenderWebviewHtml(payload: RenderWebviewPayload): string {
         }
     </style>
 </head>
-<body>
+<body data-render-theme="${payload.resolvedTheme}" data-theme-source="${payload.theme}">
     <div id="app">${renderArtifactMarkup(payload)}</div>
 </body>
 </html>`;

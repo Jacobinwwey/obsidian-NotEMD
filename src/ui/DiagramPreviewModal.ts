@@ -29,6 +29,7 @@ export class DiagramPreviewModal extends Modal {
         const { contentEl } = this;
         contentEl.empty();
         contentEl.addClass('notemd-diagram-preview-modal');
+        contentEl.setAttribute('data-render-theme', this.session.payload.resolvedTheme ?? this.session.payload.theme);
 
         contentEl.createEl('h3', {
             text: formatI18n(i18n.previewModal.title, { target: this.session.payload.artifact.target })
@@ -90,7 +91,8 @@ export class DiagramPreviewModal extends Modal {
                     const outputPath = await saveDiagramPreviewSvg(
                         this.app,
                         this.session.payload.sourcePath as string,
-                        this.session.payload.artifact
+                        this.session.payload.artifact,
+                        { theme: this.session.payload.resolvedTheme ?? this.session.payload.theme }
                     );
                     new Notice(formatI18n(i18n.previewModal.exportSuccessNotice, { path: outputPath }));
                 } catch (error) {
@@ -113,7 +115,8 @@ export class DiagramPreviewModal extends Modal {
                     const outputPath = await saveDiagramPreviewPng(
                         this.app,
                         this.session.payload.sourcePath as string,
-                        this.session.payload.artifact
+                        this.session.payload.artifact,
+                        { theme: this.session.payload.resolvedTheme ?? this.session.payload.theme }
                     );
                     new Notice(formatI18n(i18n.previewModal.exportPngSuccessNotice, { path: outputPath }));
                 } catch (error) {
@@ -185,7 +188,9 @@ export class DiagramPreviewModal extends Modal {
 
     private async tryRenderCanvas(container: HTMLElement): Promise<boolean> {
         try {
-            const svg = await renderPreviewArtifactSvg(this.session.payload.artifact);
+            const svg = await renderPreviewArtifactSvg(this.session.payload.artifact, {
+                theme: this.session.payload.resolvedTheme ?? this.session.payload.theme
+            });
             container.empty();
             container.addClass('is-json-canvas');
             container.innerHTML = svg;
@@ -206,7 +211,9 @@ export class DiagramPreviewModal extends Modal {
 
     private async tryRenderVegaLite(container: HTMLElement): Promise<boolean> {
         try {
-            const svg = await renderPreviewArtifactSvg(this.session.payload.artifact);
+            const svg = await renderPreviewArtifactSvg(this.session.payload.artifact, {
+                theme: this.session.payload.resolvedTheme ?? this.session.payload.theme
+            });
             container.empty();
             container.addClass('is-vega-lite');
             container.innerHTML = svg;
