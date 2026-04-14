@@ -4,12 +4,10 @@ on:
   push:
     tags:
       - '*.*.*'
-      - 'v*.*.*'
-      - 'V*.*.*'
   workflow_dispatch:
     inputs:
       tag:
-        description: Existing git tag to publish or repair
+        description: Existing numeric x.x.x git tag to publish or repair
         required: true
         type: string
 
@@ -21,20 +19,31 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check out release ref
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          ref: ${{ github.event_name == 'workflow_dispatch' && format('refs/tags/{0}', inputs.tag) || github.ref }}
-
       - name: Resolve tag name
+        id: resolve_tag
         shell: bash
         run: |
           TAG_NAME="${GITHUB_REF_NAME}"
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             TAG_NAME="${{ inputs.tag }}"
           fi
+          echo "tag_name=$TAG_NAME" >> "$GITHUB_OUTPUT"
           echo "TAG_NAME=$TAG_NAME" >> "$GITHUB_ENV"
+
+      - name: Validate Obsidian release tag format
+        shell: bash
+        run: |
+          TAG_NAME="${{ steps.resolve_tag.outputs.tag_name }}"
+          if [[ ! "$TAG_NAME" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Obsidian releases must use numeric x.x.x tags without a v prefix: $TAG_NAME" >&2
+            exit 1
+          fi
+
+      - name: Check out release ref
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: refs/tags/${{ steps.resolve_tag.outputs.tag_name }}
 
       - name: Set up Node.js
         uses: actions/setup-node@v4

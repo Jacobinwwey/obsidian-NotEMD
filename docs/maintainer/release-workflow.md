@@ -41,6 +41,8 @@ Before publishing, ensure version references are aligned:
 - `README_zh.md`
 - `change.md`
 
+Release tags must use numeric `x.x.x` format. Do not add a `v` prefix: Obsidian community plugin publishing expects numeric tags only.
+
 ## 4. GitHub Release Requirements
 
 Release description must be fully bilingual:
@@ -66,6 +68,7 @@ The helper enforces the required packaged assets and `docs/releases/<tag>.md` be
 
 - If the release does not exist yet, it runs `gh release create ... --verify-tag`.
 - If the release already exists, it runs `gh release upload ... --clobber`.
+- If the tag is not numeric `x.x.x`, it fails immediately.
 
 That second path is the repair path for cases where a release body was published but plugin assets were not uploaded.
 
@@ -74,7 +77,8 @@ That second path is the repair path for cases where a release body was published
 The repository also ships `.github/workflows/release.yml`:
 
 - Push a git tag to publish the release automatically.
-- Use `workflow_dispatch` with a `tag` input to repair an existing release from CI.
+- Use `workflow_dispatch` with a numeric `x.x.x` `tag` input to repair an existing release from CI.
 - The workflow runs `npm ci`, `npm run build`, `npm test -- --runInBand`, `npm run audit:i18n-ui`, `git diff --check`, and finally `npm run release:github -- "$TAG_NAME"`.
+- The workflow validates `^[0-9]+\.[0-9]+\.[0-9]+$` before checkout/publish, so `v1.8.2`-style tags are rejected.
 
 The workflow intentionally reuses the checked-in release helper instead of duplicating asset lists or release-note logic inside YAML.
