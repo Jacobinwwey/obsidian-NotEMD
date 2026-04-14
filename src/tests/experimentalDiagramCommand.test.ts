@@ -132,6 +132,49 @@ describe('experimental diagram command', () => {
         expect(modalInstance.open).toHaveBeenCalledTimes(1);
     });
 
+    test('opens a diagram preview modal for saved canvas experimental artifacts', async () => {
+        jest.spyOn(diagramGenerationService, 'generateDiagramArtifact').mockResolvedValue({
+            plan: {
+                intent: 'canvasMap',
+                confidence: 0.88,
+                reasons: ['spatial note detected'],
+                renderTarget: 'json-canvas',
+                fallbackTargets: ['mermaid'],
+                mermaidDiagramType: null,
+                legacyCompatibilityMode: false
+            },
+            spec: {
+                intent: 'canvasMap',
+                title: 'Knowledge Map',
+                nodes: [{ id: 'root', label: 'Root' }]
+            },
+            artifact: {
+                target: 'json-canvas',
+                content: '{"nodes":[],"edges":[]}',
+                mimeType: 'application/json',
+                sourceIntent: 'canvasMap'
+            }
+        });
+        jest.spyOn(fileUtils, 'saveDiagramArtifactFile').mockResolvedValue('Notes/Topic_diagram.canvas');
+        const file = { name: 'Topic.md', basename: 'Topic', path: 'Notes/Topic.md', parent: { path: 'Notes' } } as any;
+
+        await (plugin as any).generateExperimentalDiagramCommand(file, reporter);
+
+        expect(DiagramPreviewModal).toHaveBeenCalledTimes(1);
+        expect(DiagramPreviewModal).toHaveBeenCalledWith(
+            mockApp,
+            expect.objectContaining({
+                payload: expect.objectContaining({
+                    artifact: expect.objectContaining({ target: 'json-canvas' }),
+                    sourcePath: 'Notes/Topic_diagram.canvas'
+                })
+            }),
+            plugin.settings.uiLocale
+        );
+        const modalInstance = (DiagramPreviewModal as jest.Mock).mock.results[0]?.value;
+        expect(modalInstance.open).toHaveBeenCalledTimes(1);
+    });
+
     test('preview command opens a modal without saving the generated artifact', async () => {
         jest.spyOn(diagramGenerationService, 'generateDiagramArtifact').mockResolvedValue({
             plan: {

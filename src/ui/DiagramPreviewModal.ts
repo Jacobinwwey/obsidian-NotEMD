@@ -1,9 +1,11 @@
 import { App, Modal, Notice } from 'obsidian';
 import mermaid from 'mermaid';
 import { formatI18n, getI18nStrings } from '../i18n';
+import { renderJsonCanvasArtifactSvg } from '../rendering/preview/canvasPreview';
 import { renderVegaLiteArtifactSvg } from '../rendering/preview/vegaLitePreview';
 import { RenderPreviewSession } from '../rendering/host/renderHost';
 import {
+    supportsInlineCanvasPreview,
     supportsInlineMermaidPreview,
     supportsInlineVegaLitePreview,
     unwrapMermaidFence
@@ -78,6 +80,13 @@ export class DiagramPreviewModal extends Modal {
             }
         }
 
+        if (supportsInlineCanvasPreview(this.session.payload.artifact)) {
+            const rendered = await this.tryRenderCanvas(container);
+            if (rendered) {
+                return;
+            }
+        }
+
         if (supportsInlineVegaLitePreview(this.session.payload.artifact)) {
             const rendered = await this.tryRenderVegaLite(container);
             if (rendered) {
@@ -103,6 +112,19 @@ export class DiagramPreviewModal extends Modal {
             return true;
         } catch (error) {
             console.error('Failed to render Mermaid preview. Falling back to srcdoc preview.', error);
+            return false;
+        }
+    }
+
+    private async tryRenderCanvas(container: HTMLElement): Promise<boolean> {
+        try {
+            const svg = await renderJsonCanvasArtifactSvg(this.session.payload.artifact);
+            container.empty();
+            container.addClass('is-json-canvas');
+            container.innerHTML = svg;
+            return true;
+        } catch (error) {
+            console.error('Failed to render JSON Canvas preview. Falling back to srcdoc preview.', error);
             return false;
         }
     }

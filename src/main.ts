@@ -36,6 +36,7 @@ import { getSidebarActionLabel, SidebarActionId } from './workflowButtons';
 import { generateDiagramArtifact } from './diagram/diagramGenerationService';
 import { RenderArtifact } from './rendering/types';
 import { IframeRenderHost } from './rendering/host/iframeRenderHost';
+import { supportsDiagramPreviewModal } from './ui/diagramPreview';
 
 export default class NotemdPlugin extends Plugin {
     settings: NotemdSettings;
@@ -65,7 +66,7 @@ export default class NotemdPlugin extends Plugin {
     }
 
     private supportsDiagramPreview(artifact: RenderArtifact): boolean {
-        return artifact.target === 'mermaid';
+        return supportsDiagramPreviewModal(artifact);
     }
 
     private openDiagramPreviewModal(artifact: RenderArtifact, sourcePath: string) {

@@ -145,6 +145,11 @@ That's it! Explore the settings to unlock more features like web research, trans
     - 
 <img width="596" height="239" alt="SUMM" src="https://github.com/user-attachments/assets/08f44a41-9ec0-472c-91ee-19c8477ec639" />
 
+- **Experimental Diagram Pipeline**:
+    - A spec-first diagram path can route note content into Mermaid, Obsidian JSON Canvas, or Vega-Lite instead of forcing every case through Mermaid text generation.
+    - Generated `.canvas` and `.json` artifacts are saved through the same output-path policy as Mermaid summaries, and preview surfaces now cover Mermaid, JSON Canvas, and Vega-Lite results.
+    - The existing Mermaid auto-fix path remains intact for Mermaid outputs only; non-Mermaid artifacts bypass the fixer instead of being pushed through incompatible post-processing.
+
 - **Simple Formula Format Correction**:
     - Quickly fixes single-line math formulas delimited by single `$` to standard double `$$` blocks.
     - **Single File**: Process the current file via the sidebar button or command palette.
