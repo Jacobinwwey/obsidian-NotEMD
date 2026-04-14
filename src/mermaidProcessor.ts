@@ -3,11 +3,14 @@ import {
     attachDirectionalNoteToConnection,
     buildLegacyConnectedNoteLines,
     cleanLegacyTargetedNoteContent,
+    mergeLegacyDoubleArrowLabelLine,
     parseDirectionalNoteDirective,
     parseLegacyForOfNoteDirective,
     parseLegacyStandaloneNoteDirective,
     parseLegacyTargetedNoteDirective,
     protectTopLevelBracketBlocks,
+    quoteLegacyUnquotedEdgeLabelLine,
+    rewriteLegacyQuotedLabelAfterSemicolonLine,
     restoreProtectedBracketBlocks
 } from './diagram/adapters/mermaid/legacyFixerUtils';
 
@@ -531,32 +534,7 @@ export function fixPlaceholderArtifacts(content: string): string {
 export function fixDoubleArrowLabels(content: string): string {
     const lines = content.split('\n');
     return lines.map(line => {
-        // Regex: Start -- L1 -- L2 (Arrow) End
-        // Arrow can be --> or ---
-        // We match non-greedy content between dashes.
-        // We use lookbehind (?<!-) and lookahead (?!>|-) to ensure we match exactly "--"
-        // and not parts of "---" or "-->".
-        
-        const regex = /^(.*?)\s*(?<!-)--(?!>|-)\s*((?:(?!-->|---|(?<!-)--(?!>|-)\s).)*?)\s*(?<!-)--(?!>|-)\s*((?:(?!-->|---|(?<!-)--(?!>|-)\s).)*?)\s*(-->|---)\s*(.*)$/;
-        
-        const match = line.match(regex);
-        if (match) {
-            const start = match[1];
-            let l1 = match[2].trim();
-            let l2 = match[3].trim();
-            const arrow = match[4]; // "-->" or "---"
-            const end = match[5];
-
-            // Strip quotes if present
-            if (l1.startsWith('"') && l1.endsWith('"')) l1 = l1.slice(1, -1);
-            if (l2.startsWith('"') && l2.endsWith('"')) l2 = l2.slice(1, -1);
-
-            // Combine with <br>
-            const combined = `${l1}<br>${l2}`;
-            
-            return `${start} -- "${combined}" ${arrow} ${end}`;
-        }
-        return line;
+        return mergeLegacyDoubleArrowLabelLine(line) ?? line;
     }).join('\n');
 }
 
@@ -569,32 +547,7 @@ export function fixDoubleArrowLabels(content: string): string {
 export function fixUnquotedEdgeLabels(content: string): string {
     const lines = content.split('\n');
     return lines.map(line => {
-        // Regex: (Start) -- (Label) --> (End)
-        // Label must NOT start with ".
-        // We need to be careful about `Node -- Node` (no label) which uses `---` or `-->` directly.
-        // This regex targets ` -- ` space-dash-dash-space specifically used for labels.
-        // Refined to use (?<!-)--(?!>|-) to avoid matching ---
-        
-        const regex = /^(.*?)\s*(?<!-)--(?!>|-)\s*([^">]+?)\s*-->\s*(.*)$/;
-        
-        // Exclude if it looks like `Node -- Node -->` (which is invalid anyway but...)
-        // We assume valid label text doesn't contain `-->` which regex enforces.
-        
-        const match = line.match(regex);
-        if (match) {
-            const start = match[1];
-            const label = match[2].trim();
-            const end = match[3];
-
-            // Double check it's not starting with quote (regex might miss if whitespace handled poorly)
-            if (label.startsWith('"')) return line;
-            
-            // Also ignore if label is empty (e.g. `A -- --> B` ? Invalid but possible typo)
-            if (!label) return line;
-
-            return `${start} -- "${label}" --> ${end}`;
-        }
-        return line;
+        return quoteLegacyUnquotedEdgeLabelLine(line) ?? line;
     }).join('\n');
 }
 
@@ -736,36 +689,7 @@ export function fixNestedMermaidQuotes(content: string): string {
 export function fixQuotedLabelsAfterSemicolon(content: string): string {
     const lines = content.split('\n');
     const processedLines = lines.map(line => {
-        // Regex to look for:
-        // 1. Everything before the arrow (Source)
-        // 2. The arrow (-->)
-        // 3. The target node (Target)
-        // 4. A semicolon
-        // 5. Optional whitespace
-        // 6. A quoted string ("Label")
-        // 7. Optional trailing content (ignored or kept?) -> usually assume end of meaningful instruction
-        
-        // We match `-->` specifically as per request.
-        if (!line.includes('-->')) return line;
-        
-        // Regex:
-        // ^(start) (-->) (target) (;)\s* " (label) " \s* $
-        const regex = /^(.*?)\s*(-->)\s*(.*?);\s*"([^"]+)"\s*$/;
-        
-        const match = line.match(regex);
-        if (match) {
-            const source = match[1].trim();
-            const arrow = match[2].trim(); // "-->"
-            const target = match[3].trim();
-            const label = match[4].trim(); // content inside quotes
-            
-            // Construct new line
-            // Source -- "Label" --> Target;
-            // We insert the label into the arrow.
-            return `${source} -- "${label}" ${arrow} ${target};`;
-        }
-        
-        return line;
+        return rewriteLegacyQuotedLabelAfterSemicolonLine(line) ?? line;
     });
     return processedLines.join('\n');
 }

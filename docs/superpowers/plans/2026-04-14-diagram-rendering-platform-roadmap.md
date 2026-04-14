@@ -30,7 +30,7 @@ Phase-2 requirements snapshot:
 | Task 0 | Delivered with explicit limits | `src/rendering/webview/*` 与 `src/rendering/host/iframeRenderHost.ts` 已落地，继续采用内联 `srcdoc` 方案；`scripts/audit-render-host-bundle.js`、release workflow 与单测已把“render host 必须由 `main.js` 自包含携带”的 smoke gate 固化下来，但 `esbuild.config.mjs` 仍是单入口，真正的 heavier-runtime isolation 仍未完成。 |
 | Task 1 | Delivered | `DiagramIntent`、`DiagramSpec`、validator、planner 和意图推断规则均已进入主线，并有单测覆盖。 |
 | Task 2 | Partial | spec-first prompt 与 service pipeline 已落地，`src/main.ts` 也新增了共享 `generateDiagramCommand` 执行器，并把 legacy Mermaid 保存、experimental save、experimental preview 三条命令收口到同一 orchestration path；但 public command surfaces 仍保留兼容双轨，真正的 surface-level command architecture 收口尚未完成。 |
-| Task 3 | Partial | Mermaid subtype adapters 与 `mermaid.parse` 校验已落地，flowchart pipe-label escaping 已前移到 adapter emit，legacy note directive parsing / edge-attachment / note-node formatting 也已开始下沉到 `src/diagram/adapters/mermaid/legacyFixerUtils.ts`；但 `src/mermaidProcessor.ts` 仍承担大量 legacy fixer 责任，adapter-driven fixer 拆分未完成。 |
+| Task 3 | Partial | Mermaid subtype adapters 与 `mermaid.parse` 校验已落地，flowchart pipe-label escaping 已前移到 adapter emit，legacy note directive parsing / edge-attachment / note-node formatting 与一批 edge-label merge/quote/rewrite helper 也已开始下沉到 `src/diagram/adapters/mermaid/legacyFixerUtils.ts`；但 `src/mermaidProcessor.ts` 仍承担大量 legacy fixer 责任，adapter-driven fixer 拆分未完成。 |
 | Task 4 | Delivered | renderer registry/service、cache、inline host、iframe preview session 与统一 preview modal 已落地。 |
 | Task 5 | Delivered | `.canvas` 输出、基础 deterministic layout、保存与预览链路已落地。 |
 | Task 6 | Partial | Vega-Lite controlled templates、planner chart defaults、preview/export 已落地，但“通过 iframe host 隔离渲染依赖”这一目标仍未完全成立。 |
@@ -371,7 +371,7 @@ Mermaid subtype adapters 已经覆盖 `mindmap`、`flowchart`、`sequenceDiagram
 
 最新进展是，部分原本依赖 legacy fixer 的语法保护已经开始前移到 adapter：例如 flowchart edge label 内的 `|` 现在会在 `src/diagram/adapters/mermaid/flowchartAdapter.ts` 中直接转义为 `&#124;`，而不是等 `fixMermaidPipes` 一类全局修补去救火。
 
-但 roadmap 原本更激进的目标还没完成：`src/mermaidProcessor.ts` 仍然是大型 legacy fixer，更多 adapter-specific fix 规则还没有真正成为主路径。当前现实是“adapter-driven emit + validate 已经存在，局部语法防御开始前移，部分通用保护逻辑、note directive parsing、edge-label attachment 与 note-node formatting 已下沉到 `src/diagram/adapters/mermaid/legacyFixerUtils.ts`，fixer decomposition 仍未完成”。
+但 roadmap 原本更激进的目标还没完成：`src/mermaidProcessor.ts` 仍然是大型 legacy fixer，更多 adapter-specific fix 规则还没有真正成为主路径。当前现实是“adapter-driven emit + validate 已经存在，局部语法防御开始前移，部分通用保护逻辑、note directive parsing、edge-label attachment、edge-label merge/quote/rewrite 与 note-node formatting 已下沉到 `src/diagram/adapters/mermaid/legacyFixerUtils.ts`，fixer decomposition 仍未完成”。
 
 - [ ] 将 Mermaid 修复逻辑从“全局文本修补”拆成“按图种 adapter 的 emit + validate + fix”。
 - [ ] 把 `mermaidProcessor.ts` 中通用能力下沉为有限工具函数，把图种特定规则挪进对应 adapter。
@@ -380,6 +380,7 @@ Mermaid subtype adapters 已经覆盖 `mindmap`、`flowchart`、`sequenceDiagram
 - [x] 将 bracket-block protect/restore 这类通用 legacy fixer 机制下沉到共享工具函数，避免在 `fixMermaidPipes` 与 `fixMalformedArrows` 中重复实现。
 - [x] 将 targeted note 内容清洗与 note-node line formatting 下沉到共享工具函数，减少 `fixNotesToNodes` / `fixTargetedNotes` 内部重复拼接逻辑。
 - [x] 将 directional / for-of / standalone / targeted note directive parsing 与 directional edge-label attachment 下沉到共享工具函数，减少 `fixMermaidNotes`、`fixNotesToNodes`、`fixTargetedNotes` 内的重复正则与 string surgery。
+- [x] 将 double-arrow merge、unquoted edge-label quote、quoted-label-after-semicolon rewrite 下沉到共享工具函数，减少 `fixDoubleArrowLabels`、`fixUnquotedEdgeLabels`、`fixQuotedLabelsAfterSemicolon` 内的重复 line-regex surgery。
 
 **Decisions:**
 

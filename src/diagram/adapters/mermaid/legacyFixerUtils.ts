@@ -151,3 +151,54 @@ export function parseLegacyTargetedNoteDirective(line: string): ParsedLegacyNode
         text: match[2]
     };
 }
+
+export function mergeLegacyDoubleArrowLabelLine(line: string): string | null {
+    const regex = /^(.*?)\s*(?<!-)--(?!>|-)\s*((?:(?!-->|---|(?<!-)--(?!>|-)\s).)*?)\s*(?<!-)--(?!>|-)\s*((?:(?!-->|---|(?<!-)--(?!>|-)\s).)*?)\s*(-->|---)\s*(.*)$/;
+    const match = line.match(regex);
+    if (!match) {
+        return null;
+    }
+
+    const start = match[1];
+    const arrow = match[4];
+    const end = match[5];
+    const label1 = stripWrappingDoubleQuotes(match[2].trim());
+    const label2 = stripWrappingDoubleQuotes(match[3].trim());
+
+    return `${start} -- "${label1}<br>${label2}" ${arrow} ${end}`;
+}
+
+export function quoteLegacyUnquotedEdgeLabelLine(line: string): string | null {
+    const regex = /^(.*?)\s*(?<!-)--(?!>|-)\s*([^">]+?)\s*-->\s*(.*)$/;
+    const match = line.match(regex);
+    if (!match) {
+        return null;
+    }
+
+    const start = match[1];
+    const label = match[2].trim();
+    const end = match[3];
+    if (!label || label.startsWith('"')) {
+        return null;
+    }
+
+    return `${start} -- "${label}" --> ${end}`;
+}
+
+export function rewriteLegacyQuotedLabelAfterSemicolonLine(line: string): string | null {
+    if (!line.includes('-->')) {
+        return null;
+    }
+
+    const match = line.match(/^(.*?)\s*(-->)\s*(.*?);\s*"([^"]+)"\s*$/);
+    if (!match) {
+        return null;
+    }
+
+    const source = match[1].trim();
+    const arrow = match[2].trim();
+    const target = match[3].trim();
+    const label = match[4].trim();
+
+    return `${source} -- "${label}" ${arrow} ${target};`;
+}
