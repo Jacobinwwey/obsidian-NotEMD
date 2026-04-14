@@ -1,4 +1,6 @@
 import {
+    supportsDiagramPreviewModal,
+    supportsInlineCanvasPreview,
     supportsInlineMermaidPreview,
     supportsInlineVegaLitePreview,
     unwrapMermaidFence
@@ -29,6 +31,22 @@ describe('diagram preview helpers', () => {
         })).toBe(false);
     });
 
+    test('uses inline preview path for json-canvas artifacts', () => {
+        expect(supportsInlineCanvasPreview({
+            target: 'json-canvas',
+            content: '{"nodes":[],"edges":[]}',
+            mimeType: 'application/json',
+            sourceIntent: 'canvasMap'
+        })).toBe(true);
+
+        expect(supportsInlineCanvasPreview({
+            target: 'html',
+            content: '<div>Preview</div>',
+            mimeType: 'text/html',
+            sourceIntent: 'flowchart'
+        })).toBe(false);
+    });
+
     test('uses inline preview path for vega-lite json artifacts', () => {
         expect(supportsInlineVegaLitePreview({
             target: 'vega-lite',
@@ -42,6 +60,29 @@ describe('diagram preview helpers', () => {
             content: '{"nodes":[]}',
             mimeType: 'application/json',
             sourceIntent: 'canvasMap'
+        })).toBe(false);
+    });
+
+    test('only marks shipped preview targets as preview-capable', () => {
+        expect(supportsDiagramPreviewModal({
+            target: 'json-canvas',
+            content: '{"nodes":[],"edges":[]}',
+            mimeType: 'application/json',
+            sourceIntent: 'canvasMap'
+        })).toBe(true);
+
+        expect(supportsDiagramPreviewModal({
+            target: 'vega-lite',
+            content: '{"mark":"bar"}',
+            mimeType: 'application/json',
+            sourceIntent: 'dataChart'
+        })).toBe(true);
+
+        expect(supportsDiagramPreviewModal({
+            target: 'html',
+            content: '<div>Preview</div>',
+            mimeType: 'text/html',
+            sourceIntent: 'flowchart'
         })).toBe(false);
     });
 });
