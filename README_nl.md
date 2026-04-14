@@ -234,6 +234,7 @@ Toegang tot de plugininstellingen via:
 ### Taalarchitectuur (interfacetaal en taakuitvoertaal)
 
 - **Interfacetaal** stuurt alleen de tekst van de plugininterface aan (instellingslabels, zijbalkknoppen, meldingen en dialoogvensters). De standaardmodus `auto` volgt de huidige UI-taal van Obsidian.
+- Regionale of schriftsysteemvarianten worden nu gekoppeld aan de dichtstbijzijnde gepubliceerde catalogus in plaats van direct terug te vallen op Engels. Bijvoorbeeld: `fr-CA` gebruikt Frans, `es-419` gebruikt Spaans, `pt-PT` gebruikt Portugees, `zh-Hans` gebruikt vereenvoudigd Chinees en `zh-Hant-HK` gebruikt traditioneel Chinees.
 - **Taakuitvoertaal** bepaalt de door het model gegenereerde taakoutput (links, samenvattingen, titelgeneratie, Mermaid-samenvatting, conceptextractie, vertaaldoel).
 - **Per-task language mode** laat elke taak zijn eigen outputtaal bepalen vanuit één uniforme beleidslaag in plaats van verspreide overrides per module.
 - **Automatische vertaling uitschakelen** houdt niet-Translate-taken in de taalcontext van de bron, terwijl expliciete Translate-taken nog steeds de geconfigureerde doeltaal afdwingen.

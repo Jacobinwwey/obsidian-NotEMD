@@ -234,6 +234,7 @@ Akses tetapan plugin melalui:
 ### Seni Bina Bahasa (bahasa antaramuka dan bahasa output tugasan)
 
 - **Bahasa Antaramuka** hanya mengawal teks antara muka plugin, termasuk label tetapan, butang bar sisi, notis, dan dialog. Mod lalai `auto` akan mengikut bahasa UI Obsidian semasa.
+- Varian serantau atau sistem tulisan kini dipetakan kepada katalog terbitan yang paling hampir, bukannya terus jatuh balik ke bahasa Inggeris. Contohnya, `fr-CA` menggunakan bahasa Perancis, `es-419` menggunakan bahasa Sepanyol, `pt-PT` menggunakan bahasa Portugis, `zh-Hans` menggunakan bahasa Cina Ringkas, dan `zh-Hant-HK` menggunakan bahasa Cina Tradisional.
 - **Bahasa Output Tugasan** mengawal output tugas yang dijana model, seperti pautan, ringkasan, penjanaan tajuk, ringkasan Mermaid, pengekstrakan konsep, dan sasaran terjemahan.
 - **Per-task language mode** membolehkan setiap tugas menentukan bahasa outputnya melalui satu lapisan dasar bahasa yang bersatu, dan bukannya override yang bertaburan di setiap modul.
 - **Nyahaktifkan terjemahan automatik** mengekalkan tugas bukan Translate dalam konteks bahasa sumber, manakala tugas Translate yang eksplisit masih memaksa bahasa sasaran yang dikonfigurasi.

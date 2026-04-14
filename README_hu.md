@@ -231,6 +231,7 @@ A bővítmény beállításai itt érhetők el:
 ### Nyelvi architektúra (felületi nyelv és feladatkimeneti nyelv)
 
 -   **Felületi nyelv** csak a bővítmény felületi szövegét szabályozza (beállításcímkék, oldalsáv-gombok, értesítések és párbeszédablakok). Az alapértelmezett `auto` mód az Obsidian aktuális felületi nyelvét követi.
+-   A regionális vagy írásrendszer szerinti változatok most a legközelebbi kiadott katalógusra oldódnak fel ahelyett, hogy azonnal angolra esnének vissza. Például a `fr-CA` francia nyelvet, az `es-419` spanyolt, a `pt-PT` portugált, a `zh-Hans` egyszerűsített kínait, a `zh-Hant-HK` pedig hagyományos kínait használ.
 -   **Feladatkimeneti nyelv** a modell által generált feladatkimenetet szabályozza (hivatkozások, összefoglalók, címgenerálás, Mermaid-összefoglaló, fogalomkivonatolás, fordítási célnyelv).
 -   **Per-task language mode** lehetővé teszi, hogy minden feladat ugyanabból az egységes szabályrétegből oldja fel a kimeneti nyelvet, ahelyett hogy modulonként szétszórt felülírásokra támaszkodna.
 -   **Automatikus fordítás kikapcsolása** a nem `Translate` feladatokat a forrásnyelvi kontextusban tartja, miközben az explicit `Translate` feladatok továbbra is a konfigurált célnyelvet kényszerítik.

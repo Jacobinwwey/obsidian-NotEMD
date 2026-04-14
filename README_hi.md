@@ -231,6 +231,7 @@ Notemd आपके Obsidian वर्कफ़्लो को बेहतर 
 ### भाषा आर्किटेक्चर (इंटरफ़ेस भाषा बनाम कार्य आउटपुट भाषा)
 
 -   **इंटरफ़ेस भाषा** केवल प्लगइन इंटरफ़ेस टेक्स्ट (सेटिंग्स लेबल, साइडबार बटन, नोटिस और डायलॉग) को नियंत्रित करता है। डिफ़ॉल्ट `auto` mode Obsidian की वर्तमान UI भाषा का अनुसरण करता है।
+-   क्षेत्रीय या लिपि-आधारित variants अब सीधे अंग्रेज़ी पर fallback होने के बजाय सबसे निकट के प्रकाशित catalog से map होते हैं। उदाहरण के लिए, `fr-CA` फ़्रेंच, `es-419` स्पेनिश, `pt-PT` पुर्तगाली, `zh-Hans` सरलीकृत चीनी और `zh-Hant-HK` पारंपरिक चीनी का उपयोग करता है।
 -   **कार्य आउटपुट भाषा** मॉडल द्वारा उत्पन्न task output (लिंक, सारांश, title generation, Mermaid summary, concept extraction, translation target) को नियंत्रित करता है।
 -   **Per-task language mode** प्रत्येक task को scattered per-module overrides के बजाय unified policy layer से अपनी output language निर्धारित करने देता है।
 -   **स्वचालित अनुवाद अक्षम करें** गैर-`Translate` कार्यों को source-language context में रखता है, जबकि explicit `Translate` कार्य अभी भी configured target language लागू करते हैं।

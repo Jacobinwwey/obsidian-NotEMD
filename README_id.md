@@ -235,6 +235,7 @@ Akses settings plugin melalui:
 ### Arsitektur Bahasa (locale UI vs bahasa output tugas)
 
 - **Locale UI** hanya mengontrol teks antarmuka plugin, seperti label pengaturan, tombol bilah samping, pemberitahuan, dan dialog. Mode default `auto` mengikuti bahasa UI Obsidian saat ini.
+- Varian regional atau sistem tulisan kini dipetakan ke katalog terbitan terdekat alih-alih langsung jatuh ke bahasa Inggris. Misalnya, `fr-CA` memakai bahasa Prancis, `es-419` memakai bahasa Spanyol, `pt-PT` memakai bahasa Portugis, `zh-Hans` memakai bahasa Mandarin Sederhana, dan `zh-Hant-HK` memakai bahasa Mandarin Tradisional.
 - **Bahasa output tugas** mengontrol output tugas yang dihasilkan model, seperti link, ringkasan, pembuatan judul, ringkasan Mermaid, ekstraksi konsep, dan target terjemahan.
 - **Mode bahasa per tugas** memungkinkan tiap tugas menentukan bahasa output-nya sendiri melalui satu lapisan kebijakan terpadu, bukan melalui penggantian yang tersebar di berbagai modul.
 - **Nonaktifkan terjemahan otomatis** menjaga tugas non-Translate tetap berada dalam konteks bahasa sumber, sedangkan tugas Translate yang eksplisit tetap memaksa bahasa target yang telah dikonfigurasi.

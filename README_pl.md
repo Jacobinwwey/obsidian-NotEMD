@@ -234,6 +234,7 @@ Dostęp do ustawień wtyczki:
 ### Architektura językowa (język interfejsu i język wyników zadań)
 
 - **Język interfejsu** kontroluje wyłącznie teksty interfejsu wtyczki, takie jak etykiety ustawień, przyciski paska bocznego, powiadomienia i okna dialogowe. Domyślny tryb `auto` podąża za aktualnym językiem interfejsu Obsidiana.
+- Warianty regionalne lub dotyczące systemu pisma są teraz mapowane do najbliższego opublikowanego katalogu zamiast od razu spadać do angielskiego. Na przykład `fr-CA` używa francuskiego, `es-419` hiszpańskiego, `pt-PT` portugalskiego, `zh-Hans` uproszczonego chińskiego, a `zh-Hant-HK` tradycyjnego chińskiego.
 - **Język wyników zadań** steruje wynikiem zadań generowanym przez model, takim jak linki, podsumowania, generowanie tytułów, podsumowania Mermaid, ekstrakcja pojęć i język docelowy tłumaczenia.
 - **Per-task language mode** pozwala każdemu zadaniu rozstrzygać swój język wyjściowy poprzez wspólną warstwę polityki zamiast rozproszonych nadpisań modułowych.
 - **Wyłącz automatyczne tłumaczenie** utrzymuje zadania inne niż Translate w kontekście języka źródłowego, podczas gdy jawne zadania Translate nadal wymuszają skonfigurowany język docelowy.

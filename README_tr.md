@@ -234,6 +234,7 @@ Eklenti ayarlarına erişim:
 ### Dil Mimarisi (Arayüz Dili ve Görev Çıktı Dili)
 
 - **Arayüz dili**, yalnızca eklenti arayüz metinlerini (ayar etiketleri, kenar çubuğu düğmeleri, bildirimler ve diyaloglar) kontrol eder. Varsayılan `auto` modu Obsidian'ın mevcut arayüz dilini izler.
+- Bölgesel veya yazı sistemi varyantları artık doğrudan İngilizceye düşmek yerine en yakın yayımlanmış kataloğa eşlenir. Örneğin `fr-CA` Fransızca, `es-419` İspanyolca, `pt-PT` Portekizce, `zh-Hans` Basitleştirilmiş Çince ve `zh-Hant-HK` Geleneksel Çince kullanır.
 - **Görev çıktı dili**, model tarafından üretilen görev çıktısını (bağlantılar, özetler, başlık üretimi, Mermaid özeti, kavram çıkarımı, çeviri hedefi) kontrol eder.
 - **Görev başına dil modu**, her görevin çıktı dilini farklı modüllerde dağınık geçersiz kılmalar yerine birleşik bir ilke katmanı üzerinden çözmesine olanak tanır.
 - **Otomatik çeviriyi devre dışı bırak**, Translate dışındaki görevleri kaynak dil bağlamında tutar; açık Translate görevleri ise yapılandırılmış hedef dili uygulamaya devam eder.

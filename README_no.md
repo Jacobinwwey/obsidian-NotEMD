@@ -234,6 +234,7 @@ Du finner plugininnstillingene via:
 ### Språkarkitektur (grensesnittsspråk og oppgaveutdataspråk)
 
 - **Grensesnittsspråk** styrer bare tekst i pluginens grensesnitt, som etiketter i innstillinger, knapper i sidepanelet, varsler og dialoger. Standardmodusen `auto` følger Obsidians nåværende UI-språk.
+- Regionale eller skriftspesifikke varianter blir nå knyttet til nærmeste publiserte katalog i stedet for å falle rett tilbake til engelsk. For eksempel bruker `fr-CA` fransk, `es-419` spansk, `pt-PT` portugisisk, `zh-Hans` forenklet kinesisk og `zh-Hant-HK` tradisjonell kinesisk.
 - **Oppgaveutdataspråk** styrer modellgenerert utdata for oppgaver, som lenker, sammendrag, tittelgenerering, Mermaid-sammendrag, konseptuttrekk og oversettelsesmål.
 - **Per-task language mode** lar hver oppgave avgjøre sitt eget utdata-språk fra et samlet policy-lag i stedet for spredte overstyringer i enkeltmoduler.
 - **Slå av automatisk oversettelse** gjør at oppgaver som ikke er Translate bevarer konteksten på kildespråket, mens eksplisitte Translate-oppgaver fortsatt håndhever det konfigurerte målspråket.
