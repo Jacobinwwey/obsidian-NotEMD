@@ -39,6 +39,12 @@ import { IframeRenderHost } from './rendering/host/iframeRenderHost';
 import { getRenderTargetDisplayName } from './rendering/targetLabel';
 import { supportsDiagramPreviewModal } from './ui/diagramPreview';
 
+type DiagramCommandExecutionMode = 'save-mermaid' | 'save-artifact' | 'preview-artifact';
+
+interface DiagramCommandOptions {
+    executionMode: DiagramCommandExecutionMode;
+}
+
 export default class NotemdPlugin extends Plugin {
     settings: NotemdSettings;
     statusBarItem: HTMLElement;
@@ -84,6 +90,17 @@ export default class NotemdPlugin extends Plugin {
         }
 
         return this.settings.experimentalDiagramCompatibilityMode;
+    }
+
+    private getDiagramCommandActionLabel(executionMode: DiagramCommandExecutionMode, i18n = this.getUiStrings()): string {
+        switch (executionMode) {
+            case 'save-mermaid':
+                return this.getActionLabel('summarize-as-mermaid');
+            case 'save-artifact':
+                return i18n.commands.generateExperimentalDiagram;
+            case 'preview-artifact':
+                return i18n.commands.previewExperimentalDiagram;
+        }
     }
 
     async onload() {
@@ -1594,70 +1611,94 @@ export default class NotemdPlugin extends Plugin {
     }
 
     async summarizeToMermaidCommand(file: TFile, reporter: ProgressReporter) {
-		if (this.isBusy) {
-			new Notice(this.getUiStrings().notices.anotherProcessRunning);
-			return;
-		}
-		this.isBusy = true;
+        await this.generateDiagramCommand(file, reporter, { executionMode: 'save-mermaid' });
+    }
+
+    async generateDiagramCommand(
+        file: TFile,
+        reporter?: ProgressReporter,
+        options: DiagramCommandOptions = { executionMode: 'save-artifact' }
+    ) {
+        if (this.isBusy) {
+            new Notice(this.getUiStrings().notices.anotherProcessRunning);
+            return;
+        }
+
+        this.isBusy = true;
         const useReporter = reporter || this.getReporter();
         let i18n = this.getUiStrings();
-        const actionLabel = this.getActionLabel('summarize-as-mermaid');
-
+        let actionLabel = this.getDiagramCommandActionLabel(options.executionMode, i18n);
         const maybeSidebar = useReporter as any;
-        this.startReporterAction(useReporter, `${actionLabel}: ${file.name}`);
-        reporter.log(`Starting Mermaid summarization for ${file.name}...`);
 
-		try {
+        this.startReporterAction(useReporter, `${actionLabel}: ${file.name}`);
+
+        switch (options.executionMode) {
+            case 'save-mermaid':
+                useReporter.log(`Starting Mermaid summarization for ${file.name}...`);
+                break;
+            case 'save-artifact':
+                useReporter.log(`Starting experimental diagram generation for ${file.name}...`);
+                break;
+            case 'preview-artifact':
+                useReporter.log(`Starting experimental diagram preview for ${file.name}...`);
+                break;
+        }
+
+        try {
             await this.loadSettings();
             i18n = this.getUiStrings();
-			const fileContent = await this.app.vault.read(file);
-			if (!fileContent.trim()) {
-				throw new Error("File is empty. Cannot summarize.");
-			}
+            actionLabel = this.getDiagramCommandActionLabel(options.executionMode, i18n);
 
-			const { provider, modelName } = this.getProviderAndModelForTask('summarizeToMermaid');
-			reporter.log(`Using provider: ${provider.name}, Model: ${modelName}`);
-            reporter.updateStatus(this.getStepStatusText(1, 3, actionLabel), 20);
-            const mermaidContent = await this.generateMermaidSummaryContent(fileContent, provider, modelName, reporter);
-            reporter.updateStatus(this.getStepStatusText(2, 3, actionLabel), 90);
-
-			const outputFilePath = await saveMermaidSummaryFile(this.app, this.settings, file, mermaidContent, reporter);
-            if (this.settings.autoMermaidFixAfterGenerate) {
-                const outputFile = this.app.vault.getAbstractFileByPath(outputFilePath);
-                if (outputFile instanceof TFile) {
-                    await this.maybeAutoFixMermaidForFile(outputFile, reporter, 'summarise as mermaid');
+            const fileContent = await this.app.vault.read(file);
+            if (!fileContent.trim()) {
+                switch (options.executionMode) {
+                    case 'save-mermaid':
+                        throw new Error('File is empty. Cannot summarize.');
+                    case 'save-artifact':
+                        throw new Error('File is empty. Cannot generate diagram.');
+                    case 'preview-artifact':
+                        throw new Error('File is empty. Cannot generate diagram preview.');
                 }
             }
 
-			reporter.updateStatus(this.getActionCompleteText(actionLabel), 100);
-			reporter.log(`Mermaid diagram saved to: ${outputFilePath}`);
-			new Notice(i18n.notices.mermaidSummarizationComplete);
+            const { provider, modelName } = this.getProviderAndModelForTask('summarizeToMermaid');
+            useReporter.log(`Using provider: ${provider.name}, Model: ${modelName}`);
 
-			// Open the new file in a split pane
-			if (outputFilePath) {
-				const newLeaf = this.app.workspace.getLeaf('split', 'vertical');
-				const newFile = this.app.vault.getAbstractFileByPath(outputFilePath);
-				if (newFile instanceof TFile) {
-					newLeaf.openFile(newFile);
-				}
-			}
+            if (options.executionMode === 'save-mermaid') {
+                await this.executeSaveMermaidDiagramCommand(file, fileContent, provider, modelName, useReporter, actionLabel, i18n);
+            } else {
+                await this.executeArtifactDiagramCommand(file, fileContent, provider, modelName, useReporter, actionLabel, i18n, options.executionMode);
+            }
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : String(error);
 
-		} catch (error: unknown) {
-			const message = error instanceof Error ? error.message : String(error);
-			reporter.log(`Error during Mermaid summarization: ${message}`);
-			reporter.updateStatus(this.getActionFailedText(message), -1);
-			new Notice(formatI18n(i18n.notices.mermaidSummarizationError, { message }));
-			console.error("Summarization Error:", error);
-            
-            // Save error log
-            await saveErrorLog(this.app, reporter, error, this.settings);
-		} finally {
+            switch (options.executionMode) {
+                case 'save-mermaid':
+                    useReporter.log(`Error during Mermaid summarization: ${message}`);
+                    new Notice(formatI18n(i18n.notices.mermaidSummarizationError, { message }));
+                    console.error('Summarization Error:', error);
+                    break;
+                case 'save-artifact':
+                    useReporter.log(`Error during experimental diagram generation: ${message}`);
+                    new Notice(formatI18n(i18n.notices.experimentalDiagramError, { message }));
+                    console.error('Experimental diagram generation error:', error);
+                    break;
+                case 'preview-artifact':
+                    useReporter.log(`Error during experimental diagram preview: ${message}`);
+                    new Notice(formatI18n(i18n.notices.experimentalDiagramError, { message }));
+                    console.error('Experimental diagram preview error:', error);
+                    break;
+            }
+
+            useReporter.updateStatus(this.getActionFailedText(message), -1);
+            await saveErrorLog(this.app, useReporter, error, this.settings);
+        } finally {
             if (maybeSidebar instanceof NotemdSidebarView) {
                 maybeSidebar.finishProcessing();
             }
-			this.isBusy = false;
-		}
-	}
+            this.isBusy = false;
+        }
+    }
 
     private async generateMermaidSummaryContent(
         fileContent: string,
@@ -1700,130 +1741,114 @@ export default class NotemdPlugin extends Plugin {
         }
     }
 
-    async generateExperimentalDiagramCommand(file: TFile, reporter: ProgressReporter) {
-        if (this.isBusy) {
-            new Notice(this.getUiStrings().notices.anotherProcessRunning);
-            return;
+    private async generateExperimentalDiagramArtifact(
+        fileContent: string,
+        provider: LLMProviderConfig,
+        modelName: string,
+        reporter: ProgressReporter
+    ) {
+        return generateDiagramArtifact(fileContent, {
+            compatibilityMode: this.resolveExperimentalDiagramCompatibilityMode(),
+            targetLanguage: resolveTaskLanguageCode(this.settings, 'summarizeToMermaid'),
+            llmInvoker: (systemPrompt, sourceMarkdown) =>
+                callLLM(provider, systemPrompt, sourceMarkdown, this.settings, reporter, modelName)
+        });
+    }
+
+    private async executeSaveMermaidDiagramCommand(
+        file: TFile,
+        fileContent: string,
+        provider: LLMProviderConfig,
+        modelName: string,
+        reporter: ProgressReporter,
+        actionLabel: string,
+        i18n = this.getUiStrings()
+    ) {
+        reporter.updateStatus(this.getStepStatusText(1, 3, actionLabel), 20);
+        const mermaidContent = await this.generateMermaidSummaryContent(fileContent, provider, modelName, reporter);
+        reporter.updateStatus(this.getStepStatusText(2, 3, actionLabel), 90);
+
+        const outputFilePath = await saveMermaidSummaryFile(this.app, this.settings, file, mermaidContent, reporter);
+        if (this.settings.autoMermaidFixAfterGenerate) {
+            const outputFile = this.app.vault.getAbstractFileByPath(outputFilePath);
+            if (outputFile instanceof TFile) {
+                await this.maybeAutoFixMermaidForFile(outputFile, reporter, 'summarise as mermaid');
+            }
         }
-        this.isBusy = true;
-        const useReporter = reporter || this.getReporter();
-        let i18n = this.getUiStrings();
-        const actionLabel = i18n.commands.generateExperimentalDiagram;
-        const maybeSidebar = useReporter as any;
-        this.startReporterAction(useReporter, `${actionLabel}: ${file.name}`);
-        reporter.log(`Starting experimental diagram generation for ${file.name}...`);
 
-        try {
-            await this.loadSettings();
-            i18n = this.getUiStrings();
-            const fileContent = await this.app.vault.read(file);
-            if (!fileContent.trim()) {
-                throw new Error('File is empty. Cannot generate diagram.');
+        reporter.updateStatus(this.getActionCompleteText(actionLabel), 100);
+        reporter.log(`Mermaid diagram saved to: ${outputFilePath}`);
+        new Notice(i18n.notices.mermaidSummarizationComplete);
+
+        if (outputFilePath) {
+            const newLeaf = this.app.workspace.getLeaf('split', 'vertical');
+            const newFile = this.app.vault.getAbstractFileByPath(outputFilePath);
+            if (newFile instanceof TFile) {
+                newLeaf.openFile(newFile);
             }
-
-            const { provider, modelName } = this.getProviderAndModelForTask('summarizeToMermaid');
-            reporter.log(`Using provider: ${provider.name}, Model: ${modelName}`);
-            reporter.updateStatus(this.getStepStatusText(1, 3, actionLabel), 20);
-
-            const result = await generateDiagramArtifact(fileContent, {
-                compatibilityMode: this.resolveExperimentalDiagramCompatibilityMode(),
-                targetLanguage: resolveTaskLanguageCode(this.settings, 'summarizeToMermaid'),
-                llmInvoker: (systemPrompt, sourceMarkdown) =>
-                    callLLM(provider, systemPrompt, sourceMarkdown, this.settings, reporter, modelName)
-            });
-
-            reporter.log(`Experimental diagram pipeline produced target "${result.artifact.target}" with intent "${result.spec.intent}".`);
-            reporter.updateStatus(this.getStepStatusText(2, 3, actionLabel), 85);
-
-            const outputFilePath = await saveDiagramArtifactFile(this.app, this.settings, file, result.artifact, reporter);
-            if (result.artifact.target === 'mermaid' && this.settings.autoMermaidFixAfterGenerate) {
-                const outputFile = this.app.vault.getAbstractFileByPath(outputFilePath);
-                if (outputFile instanceof TFile) {
-                    await this.maybeAutoFixMermaidForFile(outputFile, reporter, 'experimental diagram generation');
-                }
-            }
-
-            reporter.updateStatus(this.getActionCompleteText(actionLabel), 100);
-            reporter.log(`Experimental diagram saved to: ${outputFilePath}`);
-            new Notice(i18n.notices.experimentalDiagramComplete);
-
-            if (outputFilePath) {
-                const newLeaf = this.app.workspace.getLeaf('split', 'vertical');
-                const newFile = this.app.vault.getAbstractFileByPath(outputFilePath);
-                if (newFile instanceof TFile) {
-                    newLeaf.openFile(newFile);
-                }
-
-                if (this.supportsDiagramPreview(result.artifact)) {
-                    this.openDiagramPreviewModal(result.artifact, outputFilePath, true);
-                }
-            }
-        } catch (error: unknown) {
-            const message = error instanceof Error ? error.message : String(error);
-            reporter.log(`Error during experimental diagram generation: ${message}`);
-            reporter.updateStatus(this.getActionFailedText(message), -1);
-            new Notice(formatI18n(i18n.notices.experimentalDiagramError, { message }));
-            console.error('Experimental diagram generation error:', error);
-            await saveErrorLog(this.app, reporter, error, this.settings);
-        } finally {
-            if (maybeSidebar instanceof NotemdSidebarView) {
-                maybeSidebar.finishProcessing();
-            }
-            this.isBusy = false;
         }
     }
 
-    async previewExperimentalDiagramCommand(file: TFile, reporter: ProgressReporter) {
-        if (this.isBusy) {
-            new Notice(this.getUiStrings().notices.anotherProcessRunning);
-            return;
-        }
-        this.isBusy = true;
-        const useReporter = reporter || this.getReporter();
-        let i18n = this.getUiStrings();
-        const actionLabel = i18n.commands.previewExperimentalDiagram;
-        const maybeSidebar = useReporter as any;
-        this.startReporterAction(useReporter, `${actionLabel}: ${file.name}`);
-        useReporter.log(`Starting experimental diagram preview for ${file.name}...`);
+    private async executeArtifactDiagramCommand(
+        file: TFile,
+        fileContent: string,
+        provider: LLMProviderConfig,
+        modelName: string,
+        reporter: ProgressReporter,
+        actionLabel: string,
+        i18n: ReturnType<NotemdPlugin['getUiStrings']>,
+        executionMode: Extract<DiagramCommandExecutionMode, 'save-artifact' | 'preview-artifact'>
+    ) {
+        const totalSteps = executionMode === 'preview-artifact' ? 2 : 3;
+        const initialProgress = executionMode === 'preview-artifact' ? 25 : 20;
+        reporter.updateStatus(this.getStepStatusText(1, totalSteps, actionLabel), initialProgress);
 
-        try {
-            await this.loadSettings();
-            i18n = this.getUiStrings();
-            const fileContent = await this.app.vault.read(file);
-            if (!fileContent.trim()) {
-                throw new Error('File is empty. Cannot generate diagram preview.');
-            }
+        const result = await this.generateExperimentalDiagramArtifact(fileContent, provider, modelName, reporter);
 
-            const { provider, modelName } = this.getProviderAndModelForTask('summarizeToMermaid');
-            useReporter.log(`Using provider: ${provider.name}, Model: ${modelName}`);
-            useReporter.updateStatus(this.getStepStatusText(1, 2, actionLabel), 25);
-
-            const result = await generateDiagramArtifact(fileContent, {
-                compatibilityMode: this.resolveExperimentalDiagramCompatibilityMode(),
-                targetLanguage: resolveTaskLanguageCode(this.settings, 'summarizeToMermaid'),
-                llmInvoker: (systemPrompt, sourceMarkdown) =>
-                    callLLM(provider, systemPrompt, sourceMarkdown, this.settings, useReporter, modelName)
-            });
-
-            useReporter.log(`Experimental diagram preview produced target "${result.artifact.target}" with intent "${result.spec.intent}".`);
+        if (executionMode === 'preview-artifact') {
+            reporter.log(`Experimental diagram preview produced target "${result.artifact.target}" with intent "${result.spec.intent}".`);
             this.openDiagramPreviewModal(result.artifact, file.path, false);
 
-            useReporter.updateStatus(this.getActionCompleteText(actionLabel), 100);
-            useReporter.log(`Experimental diagram preview opened for: ${file.path}`);
+            reporter.updateStatus(this.getActionCompleteText(actionLabel), 100);
+            reporter.log(`Experimental diagram preview opened for: ${file.path}`);
             new Notice(i18n.notices.experimentalDiagramPreviewReady);
-        } catch (error: unknown) {
-            const message = error instanceof Error ? error.message : String(error);
-            useReporter.log(`Error during experimental diagram preview: ${message}`);
-            useReporter.updateStatus(this.getActionFailedText(message), -1);
-            new Notice(formatI18n(i18n.notices.experimentalDiagramError, { message }));
-            console.error('Experimental diagram preview error:', error);
-            await saveErrorLog(this.app, useReporter, error, this.settings);
-        } finally {
-            if (maybeSidebar instanceof NotemdSidebarView) {
-                maybeSidebar.finishProcessing();
-            }
-            this.isBusy = false;
+            return;
         }
+
+        reporter.log(`Experimental diagram pipeline produced target "${result.artifact.target}" with intent "${result.spec.intent}".`);
+        reporter.updateStatus(this.getStepStatusText(2, totalSteps, actionLabel), 85);
+
+        const outputFilePath = await saveDiagramArtifactFile(this.app, this.settings, file, result.artifact, reporter);
+        if (result.artifact.target === 'mermaid' && this.settings.autoMermaidFixAfterGenerate) {
+            const outputFile = this.app.vault.getAbstractFileByPath(outputFilePath);
+            if (outputFile instanceof TFile) {
+                await this.maybeAutoFixMermaidForFile(outputFile, reporter, 'experimental diagram generation');
+            }
+        }
+
+        reporter.updateStatus(this.getActionCompleteText(actionLabel), 100);
+        reporter.log(`Experimental diagram saved to: ${outputFilePath}`);
+        new Notice(i18n.notices.experimentalDiagramComplete);
+
+        if (outputFilePath) {
+            const newLeaf = this.app.workspace.getLeaf('split', 'vertical');
+            const newFile = this.app.vault.getAbstractFileByPath(outputFilePath);
+            if (newFile instanceof TFile) {
+                newLeaf.openFile(newFile);
+            }
+
+            if (this.supportsDiagramPreview(result.artifact)) {
+                this.openDiagramPreviewModal(result.artifact, outputFilePath, true);
+            }
+        }
+    }
+
+    async generateExperimentalDiagramCommand(file: TFile, reporter: ProgressReporter) {
+        await this.generateDiagramCommand(file, reporter, { executionMode: 'save-artifact' });
+    }
+
+    async previewExperimentalDiagramCommand(file: TFile, reporter: ProgressReporter) {
+        await this.generateDiagramCommand(file, reporter, { executionMode: 'preview-artifact' });
     }
 
     async extractConceptsCommand(reporter?: ProgressReporter) {
