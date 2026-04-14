@@ -11,12 +11,13 @@ import { DiagramRenderer } from '../rendering/types';
 
 function createForcedPlan(): DiagramPlan {
     return {
-        intent: 'flowchart',
+        intent: 'dataChart',
         confidence: 0.9,
         reasons: ['forced plan for fallback coverage'],
         renderTarget: 'vega-lite',
         fallbackTargets: ['mermaid', 'html'],
-        mermaidDiagramType: 'flowchart',
+        mermaidDiagramType: null,
+        preferredChartType: 'bar',
         legacyCompatibilityMode: false
     };
 }
@@ -65,9 +66,17 @@ describe('diagram generation fallback traversal', () => {
             targetLanguage: 'en',
             rendererService,
             llmInvoker: async () => JSON.stringify({
-                intent: 'flowchart',
+                intent: 'dataChart',
                 title: 'Release Flow',
-                nodes: [{ id: 'validate', label: 'Validate' }]
+                nodes: [],
+                layoutHints: { chartType: 'bar' },
+                dataSeries: [
+                    {
+                        id: 'release',
+                        label: 'Release',
+                        points: [{ x: 'Validate', y: 1 }]
+                    }
+                ]
             })
         });
 
@@ -93,9 +102,17 @@ describe('diagram generation fallback traversal', () => {
             targetLanguage: 'en',
             rendererService,
             llmInvoker: async () => JSON.stringify({
-                intent: 'flowchart',
+                intent: 'dataChart',
                 title: 'Release Flow',
-                nodes: [{ id: 'validate', label: 'Validate' }]
+                nodes: [],
+                layoutHints: { chartType: 'bar' },
+                dataSeries: [
+                    {
+                        id: 'release',
+                        label: 'Release',
+                        points: [{ x: 'Validate', y: 1 }]
+                    }
+                ]
             })
         })).rejects.toThrow('vega failed');
 
@@ -104,9 +121,17 @@ describe('diagram generation fallback traversal', () => {
             targetLanguage: 'en',
             rendererService,
             llmInvoker: async () => JSON.stringify({
-                intent: 'flowchart',
+                intent: 'dataChart',
                 title: 'Release Flow',
-                nodes: [{ id: 'validate', label: 'Validate' }]
+                nodes: [],
+                layoutHints: { chartType: 'bar' },
+                dataSeries: [
+                    {
+                        id: 'release',
+                        label: 'Release',
+                        points: [{ x: 'Validate', y: 1 }]
+                    }
+                ]
             })
         })).rejects.toThrow('mermaid failed');
 
@@ -115,9 +140,17 @@ describe('diagram generation fallback traversal', () => {
             targetLanguage: 'en',
             rendererService,
             llmInvoker: async () => JSON.stringify({
-                intent: 'flowchart',
+                intent: 'dataChart',
                 title: 'Release Flow',
-                nodes: [{ id: 'validate', label: 'Validate' }]
+                nodes: [],
+                layoutHints: { chartType: 'bar' },
+                dataSeries: [
+                    {
+                        id: 'release',
+                        label: 'Release',
+                        points: [{ x: 'Validate', y: 1 }]
+                    }
+                ]
             })
         })).rejects.toThrow('html failed');
     });
