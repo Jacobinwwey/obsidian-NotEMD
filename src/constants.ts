@@ -166,6 +166,8 @@ export const DEFAULT_SETTINGS: NotemdSettings = {
     enableMermaidErrorDetection: false,
     moveMermaidErrorFiles: false,
     mermaidErrorFolderPath: 'MermaidErrors',
+    enableExperimentalDiagramPipeline: false,
+    experimentalDiagramCompatibilityMode: 'legacy-mermaid',
 };
 
 // Constants for the Sidebar View

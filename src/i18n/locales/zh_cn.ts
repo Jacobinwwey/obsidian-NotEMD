@@ -56,6 +56,17 @@ export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
             heading: '开发者诊断',
             runDiagnostic: '运行诊断',
             runStability: '运行稳定性测试',
+            experimentalDiagramPipeline: {
+                heading: '实验性图形管线',
+                enableName: '启用 Spec-first Mermaid 管线',
+                enableDesc:
+                    '开：在旧 Mermaid prompt 之前先尝试新的 DiagramSpec -> renderer 管线。如果实验路径失败，Notemd 会自动回退到旧 Mermaid 生成流程。',
+                compatibilityName: '实验性兼容模式',
+                compatibilityDesc:
+                    '选择实验规划器选择图形目标的激进程度。“Legacy Mermaid” 会为当前命令保持 Mermaid 兼容输出；“Best fit” 会先尝试更匹配内容的图形意图，再在不支持时回退。',
+                compatibilityLegacy: 'Legacy Mermaid',
+                compatibilityBestFit: 'Best fit'
+            },
             diagnosticBlocked: '无法为 {provider} 运行开发者诊断：{issues}',
             diagnosticRunning: '正在为 {provider} 运行开发者诊断...',
             diagnosticSuccess: '开发者诊断成功（{callMode}）。报告已保存到：{path}',

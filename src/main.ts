@@ -31,6 +31,7 @@ import { extractOriginalText } from './extractOriginalText';
 import { formatI18n, getI18nStrings } from './i18n';
 import { resolveTaskLanguageCode } from './i18n/taskLanguagePolicy';
 import { getSidebarActionLabel, SidebarActionId } from './workflowButtons';
+import { generateDiagramArtifact } from './diagram/diagramGenerationService';
 
 export default class NotemdPlugin extends Plugin {
     settings: NotemdSettings;
@@ -1542,7 +1543,7 @@ export default class NotemdPlugin extends Plugin {
         }
     }
 
-	async summarizeToMermaidCommand(file: TFile, reporter: ProgressReporter) {
+    async summarizeToMermaidCommand(file: TFile, reporter: ProgressReporter) {
 		if (this.isBusy) {
 			new Notice(this.getUiStrings().notices.anotherProcessRunning);
 			return;
@@ -1566,11 +1567,8 @@ export default class NotemdPlugin extends Plugin {
 
 			const { provider, modelName } = this.getProviderAndModelForTask('summarizeToMermaid');
 			reporter.log(`Using provider: ${provider.name}, Model: ${modelName}`);
-
-			const prompt = this.getPromptForTask('summarizeToMermaid');
-
             reporter.updateStatus(this.getStepStatusText(1, 3, actionLabel), 20);
-            const mermaidContent = await callLLM(provider, prompt, fileContent, this.settings, reporter, modelName);
+            const mermaidContent = await this.generateMermaidSummaryContent(fileContent, provider, modelName, reporter);
             reporter.updateStatus(this.getStepStatusText(2, 3, actionLabel), 90);
 
 			const outputFilePath = await saveMermaidSummaryFile(this.app, this.settings, file, mermaidContent, reporter);
@@ -1610,6 +1608,42 @@ export default class NotemdPlugin extends Plugin {
 			this.isBusy = false;
 		}
 	}
+
+    private async generateMermaidSummaryContent(
+        fileContent: string,
+        provider: LLMProviderConfig,
+        modelName: string,
+        reporter: ProgressReporter
+    ): Promise<string> {
+        if (!this.settings.enableExperimentalDiagramPipeline) {
+            const prompt = this.getPromptForTask('summarizeToMermaid');
+            return callLLM(provider, prompt, fileContent, this.settings, reporter, modelName);
+        }
+
+        reporter.log('Experimental diagram pipeline enabled. Attempting spec-first Mermaid generation.');
+
+        try {
+            const result = await generateDiagramArtifact(fileContent, {
+                compatibilityMode: this.settings.experimentalDiagramCompatibilityMode,
+                targetLanguage: resolveTaskLanguageCode(this.settings, 'summarizeToMermaid'),
+                llmInvoker: (systemPrompt, sourceMarkdown) =>
+                    callLLM(provider, systemPrompt, sourceMarkdown, this.settings, reporter, modelName)
+            });
+
+            if (result.artifact.target !== 'mermaid') {
+                throw new Error(`Experimental diagram pipeline returned unsupported target "${result.artifact.target}" for Mermaid command.`);
+            }
+
+            reporter.log(`Experimental diagram pipeline succeeded with intent "${result.spec.intent}" and target "${result.artifact.target}".`);
+            return result.artifact.content;
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : String(error);
+            reporter.log(`Experimental diagram pipeline failed: ${message}`);
+            reporter.log('Falling back to legacy Mermaid prompt and fixer pipeline.');
+            const prompt = this.getPromptForTask('summarizeToMermaid');
+            return callLLM(provider, prompt, fileContent, this.settings, reporter, modelName);
+        }
+    }
 
     async extractConceptsCommand(reporter?: ProgressReporter) {
         if (this.isBusy) { new Notice(this.getUiStrings().notices.notemdBusy); return; }
