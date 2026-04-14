@@ -4,7 +4,7 @@
 
 [English](./README.md) | [简体中文](./README_zh.md) | [Español](./README_es.md) | [Français](./README_fr.md) | [Deutsch](./README_de.md) | [Italiano](./README_it.md) | [Português](./README_pt.md) | [繁體中文](./README_zh_Hant.md) | [日本語](./README_ja.md) | [한국어](./README_ko.md) | [Русский](./README_ru.md) | [العربية](./README_ar.md) | [हिन्दी](./README_hi.md) | [বাংলা](./README_bn.md) | [Nederlands](./README_nl.md) | [Svenska](./README_sv.md) | [Suomi](./README_fi.md) | [Dansk](./README_da.md) | [Norsk](./README_no.md) | [Polski](./README_pl.md) | [Türkçe](./README_tr.md) | [עברית](./README_he.md) | [ไทย](./README_th.md) | [Ελληνικά](./README_el.md) | [Čeština](./README_cs.md) | [Magyar](./README_hu.md) | [Română](./README_ro.md) | [Українська](./README_uk.md) | [Tiếng Việt](./README_vi.md) | [Bahasa Indonesia](./README_id.md) | [Bahasa Melayu](./README_ms.md)
 
-اقرأ الوثائق بلغات إضافية من: [Language Hub](./docs/i18n/README.md)
+اقرأ الوثائق بلغات إضافية من: [مركز اللغات](./docs/i18n/README.md)
 
 ```
 ==================================================
@@ -59,15 +59,15 @@
 
 | الجانب | النطاق | الافتراضي | الملاحظات |
 |---|---|---|---|
-| `UI Locale` | نص واجهة الإضافة فقط (الإعدادات، الشريط الجانبي، الإشعارات، الحوارات) | `auto` | يتبع لغة Obsidian الحالية؛ كتالوجات الواجهة الحالية هي `en` و `ar` و `de` و `es` و `fa` و `fr` و `id` و `it` و `ja` و `ko` و `nl` و `pl` و `pt` و `pt-BR` و `ru` و `th` و `tr` و `uk` و `vi` و `zh-CN` و `zh-TW`. |
-| `Task Output Language` | خرج المهام المولَّد بواسطة LLM (الروابط، الملخصات، التوليد، الاستخراج، وهدف الترجمة) | `en` | يمكن أن يكون عاما أو لكل مهمة عندما يتم تفعيل `Use different languages for tasks`. |
-| `Disable auto translation` | المهام غير الخاصة بالترجمة تحتفظ بسياق لغة المصدر | `false` | مهام `Translate` الصريحة تستمر في فرض اللغة الهدف المضبوطة. |
+| `لغة الواجهة` | نص واجهة الإضافة فقط (الإعدادات، الشريط الجانبي، الإشعارات، الحوارات) | `auto` | يتبع لغة Obsidian الحالية؛ كتالوجات الواجهة الحالية هي `en` و `ar` و `de` و `es` و `fa` و `fr` و `id` و `it` و `ja` و `ko` و `nl` و `pl` و `pt` و `pt-BR` و `ru` و `th` و `tr` و `uk` و `vi` و `zh-CN` و `zh-TW`. |
+| `لغة خرج المهام` | خرج المهام المولَّد بواسطة LLM (الروابط، الملخصات، التوليد، الاستخراج، وهدف الترجمة) | `en` | يمكن أن يكون عاما أو لكل مهمة عندما يتم تفعيل `استخدام لغات مختلفة للمهام`. |
+| `تعطيل الترجمة التلقائية` | المهام غير الخاصة بالترجمة تحتفظ بسياق لغة المصدر | `false` | مهام `Translate` الصريحة تستمر في فرض اللغة الهدف المضبوطة. |
 | اللغة الاحتياطية للواجهة | حل مفاتيح الواجهة الناقصة | locale -> `en` | يحافظ على استقرار الواجهة عندما تكون بعض المفاتيح غير مترجمة. |
 
 - الوثائق المصدرية التي تتم صيانتها هي الإنجليزية والصينية المبسطة، وروابط ترجمات README المنشورة موجودة في الترويسة أعلاه.
 - تغطية لغة الواجهة داخل التطبيق تطابق حالياً الكتالوج الصريح في الشيفرة تماماً: `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, `zh-TW`.
 - يظل الرجوع إلى الإنجليزية شبكة أمان على مستوى التنفيذ، لكن الأسطح المرئية المدعومة مغطاة باختبارات انحدار ولا ينبغي أن تعود بصمت إلى الإنجليزية أثناء الاستخدام العادي.
-- تتبع التفاصيل الإضافية وإرشادات المساهمة في [Language Hub](./docs/i18n/README.md).
+- تتبع التفاصيل الإضافية وإرشادات المساهمة في [مركز اللغات](./docs/i18n/README.md).
 
 ## الميزات
 
@@ -111,29 +111,29 @@
   - يدعم الترجمة بين لغات متعددة.
   - اللغة الهدف قابلة للتخصيص في الإعدادات أو من الـ UI.
   - يمكن فتح النص المترجم تلقائيا في pane على يمين النص الأصلي لسهولة القراءة.
-- **Batch Translate**:
+- **الترجمة المجمعة**:
   - ترجمة جميع الملفات داخل مجلد محدد.
   - يدعم المعالجة المتوازية عند تفعيل "Enable Batch Parallelism".
   - يستخدم custom prompts للترجمة إذا تم إعدادها.
   - يضيف خيار "Batch translate this folder" إلى قائمة السياق في file explorer.
-- **Disable auto translation**: عندما يتم تفعيل هذا الخيار، فإن المهام غير الخاصة بالترجمة لن تفرض لغة خرج محددة، وبذلك تحافظ على سياق اللغة الأصلية. أما مهمة `Translate` الصريحة فستستمر في تنفيذ الترجمة كما هو مضبوط.
+- **تعطيل الترجمة التلقائية**: عندما يتم تفعيل هذا الخيار، فإن المهام غير الخاصة بالترجمة لن تفرض لغة خرج محددة، وبذلك تحافظ على سياق اللغة الأصلية. أما مهمة `Translate` الصريحة فستستمر في تنفيذ الترجمة كما هو مضبوط.
 
 ### بحث الويب وتوليد المحتوى
-- **Web Research & Summarization**:
+- **البحث على الويب والتلخيص**:
   - إجراء بحث عبر Tavily، الذي يتطلب API key، أو عبر DuckDuckGo، وهو خيار تجريبي.
   - **صلابة بحث محسنة**: بحث DuckDuckGo يستخدم الآن منطق parsing محسنا يعتمد على DOMParser مع Regex fallback للتعامل مع تغييرات layout وضمان نتائج أكثر اعتمادية.
   - تلخيص نتائج البحث عبر LLM المهيأ.
   - يمكن تخصيص لغة خرج الملخص من الإعدادات.
   - يتم إلحاق الملخص بالملاحظة الحالية.
   - يوجد حد tokens قابل للتخصيص لمحتوى البحث الذي يرسل إلى LLM.
-- **Content Generation from Title**:
+- **توليد المحتوى من العنوان**:
   - استخدام عنوان الملاحظة لتوليد محتوى أولي عبر LLM مع استبدال المحتوى الحالي.
   - **بحث اختياري**: يمكن إعداد تنفيذ web research عبر المزود المختار لتوفير context إضافي عند التوليد.
 - **Batch Content Generation from Titles**: توليد المحتوى لجميع الملاحظات في مجلد محدد بناء على عناوينها، مع احترام إعداد البحث الاختياري. يتم نقل الملفات المعالجة بنجاح إلى **مجلد فرعي "complete" قابل للتخصيص** مثل `[foldername]_complete` أو اسم مخصص لتجنب إعادة المعالجة.
 - **ربط Mermaid Auto-Fix**: عندما يكون Mermaid auto-fix مفعلا، تقوم المسارات المتعلقة بتوليد Mermaid بإصلاح الملفات أو مجلدات الإخراج الناتجة تلقائيا بعد المعالجة. ويشمل ذلك Process وGenerate from Title وBatch Generate from Titles وResearch & Summarize وSummarise as Mermaid وTranslate.
 
 ### الميزات المساعدة
-- **Summarise as Mermaid diagram**:
+- **التلخيص كمخطط Mermaid**:
   - تسمح هذه الميزة بتلخيص محتوى الملاحظة في Mermaid diagram.
   - لغة خرج Mermaid قابلة للتخصيص في الإعدادات.
   - **Mermaid Output Folder**: يمكن تحديد المجلد الذي تحفظ فيه ملفات Mermaid الناتجة.
@@ -209,52 +209,52 @@
 **Settings** -> **Community Plugins** -> **Notemd** (اضغط على أيقونة الترس).
 
 ### إعداد مزود LLM
-1. **Active Provider**: اختر مزود LLM الذي تريد استخدامه من القائمة المنسدلة.
-2. **Provider Settings**: اضبط الإعدادات الخاصة بالمزود المحدد:
+1. **المزود النشط**: اختر مزود LLM الذي تريد استخدامه من القائمة المنسدلة.
+2. **إعدادات المزود**: اضبط الإعدادات الخاصة بالمزود المحدد:
    - **API Key**: مطلوب لمعظم المزودين السحابيين، مثل OpenAI وAnthropic وDeepSeek وQwen وQwen Code وDoubao وMoonshot وGLM وZ AI وMiniMax وHuawei Cloud MaaS وBaidu Qianfan وSiliconFlow وGoogle وMistral وAzure OpenAI وOpenRouter وxAI وGroq وTogether وFireworks وRequesty. لا يلزم لـ Ollama. وهو اختياري لـ LM Studio و preset `OpenAI Compatible` العامة إذا كان endpoint يقبل الوصول المجهول أو placeholder.
    - **Base URL / Endpoint**: عنوان API endpoint للخدمة. توجد قيم افتراضية، لكن قد تحتاج إلى تغييرها للموديلات المحلية (LMStudio وOllama)، أو للبوابات (OpenRouter وRequesty وOpenAI Compatible)، أو لنشر Azure المحدد. وهو **مطلوب لـ Azure OpenAI**.
    - **Model**: اسم أو معرف النموذج المحدد الذي تريد استخدامه، مثل `gpt-4o` أو `claude-3-5-sonnet-20240620` أو `google/gemini-flash-1.5` أو `grok-4` أو `moonshotai/kimi-k2-instruct-0905` أو `accounts/fireworks/models/kimi-k2p5` أو `anthropic/claude-3-7-sonnet-latest`. تأكد من توفر النموذج على endpoint الخاص بك.
    - **Temperature**: تتحكم في عشوائية الخرج. `0` يعني سلوكا أكثر حتمية و`1` أعلى إبداعا. القيم المنخفضة مثل `0.2-0.5` عادة أفضل للمهام المنظمة.
    - **API Version (Azure فقط)**: مطلوب لنشرات Azure OpenAI، مثل `2024-02-15-preview`.
-3. **Test Connection**: استخدم زر "Test Connection" للمزود النشط للتحقق من صحة الإعدادات. مزودو OpenAI-compatible يستخدمون الآن اختبارات provider-aware: endpoints مثل `Qwen` و `Qwen Code` و `Doubao` و `Moonshot` و `GLM` و `Z AI` و `MiniMax` و `Huawei Cloud MaaS` و `Baidu Qianfan` و `SiliconFlow` و `Groq` و `Together` و `Fireworks` و `LMStudio` و `OpenAI Compatible` تقوم باختبار `chat/completions` مباشرة، بينما يمكن للمزودين الذين يملكون endpoint `/models` موثوق أن يبدأوا بسرد النماذج. وإذا فشل أول probe بسبب انقطاع شبكي مؤقت مثل `ERR_CONNECTION_CLOSED`، يقوم Notemd تلقائيا بالانتقال إلى stable retry sequence بدلا من الفشل الفوري.
-4. **Manage Provider Configurations**: استخدم أزرار "Export Providers" و "Import Providers" لحفظ وتحميل إعدادات مزودي LLM إلى أو من ملف `notemd-providers.json` داخل مجلد إعدادات الإضافة. يفيد ذلك في النسخ الاحتياطي والمشاركة.
-5. **Preset Coverage**: بالإضافة إلى المزودين الأصليين، يتضمن Notemd الآن presets جاهزة لـ `Qwen` و `Qwen Code` و `Doubao` و `Moonshot` و `GLM` و `Z AI` و `MiniMax` و `Huawei Cloud MaaS` و `Baidu Qianfan` و `SiliconFlow` و `xAI` و `Groq` و `Together` و `Fireworks` و `Requesty` وهدف `OpenAI Compatible` عام لسيناريوهات LiteLLM و vLLM و Perplexity و Vercel AI Gateway أو custom proxies.
+3. **اختبار الاتصال**: استخدم زر "اختبار الاتصال" للمزود النشط للتحقق من صحة الإعدادات. مزودو OpenAI-compatible يستخدمون الآن اختبارات تراعي نوع المزود: endpoints مثل `Qwen` و `Qwen Code` و `Doubao` و `Moonshot` و `GLM` و `Z AI` و `MiniMax` و `Huawei Cloud MaaS` و `Baidu Qianfan` و `SiliconFlow` و `Groq` و `Together` و `Fireworks` و `LMStudio` و `OpenAI Compatible` تقوم باختبار `chat/completions` مباشرة، بينما يمكن للمزودين الذين يملكون endpoint `/models` موثوق أن يبدأوا بسرد النماذج. وإذا فشل أول probe بسبب انقطاع شبكي مؤقت مثل `ERR_CONNECTION_CLOSED`، يقوم Notemd تلقائيا بالانتقال إلى stable retry sequence بدلا من الفشل الفوري.
+4. **إدارة إعدادات المزودين**: استخدم زري "تصدير المزودين" و"استيراد المزودين" لحفظ وتحميل إعدادات مزودي LLM إلى أو من ملف `notemd-providers.json` داخل مجلد إعدادات الإضافة. يفيد ذلك في النسخ الاحتياطي والمشاركة.
+5. **نطاق الإعدادات المسبقة**: بالإضافة إلى المزودين الأصليين، يتضمن Notemd الآن إعدادات مسبقة جاهزة لـ `Qwen` و `Qwen Code` و `Doubao` و `Moonshot` و `GLM` و `Z AI` و `MiniMax` و `Huawei Cloud MaaS` و `Baidu Qianfan` و `SiliconFlow` و `xAI` و `Groq` و `Together` و `Fireworks` و `Requesty` وهدف `OpenAI Compatible` عام لسيناريوهات LiteLLM و vLLM و Perplexity و Vercel AI Gateway أو الوكلاء المخصصين.
 
 <img width="804" height="506" alt="LLM" src="https://github.com/user-attachments/assets/8caf42e3-43ad-456d-8b96-b63e7914e45f" />
 
 ### تهيئة متعددة النماذج
-- **Use Different Providers for Tasks**:
-  - **Disabled (الافتراضي)**: يستخدم "Active Provider" الواحد لكل المهام.
-  - **Enabled**: يسمح لك باختيار مزود محدد، ومعه اختياريا override لاسم النموذج لكل مهمة من المهام ("Add Links" و "Research & Summarize" و "Generate from Title" و "Translate" و "Extract Concepts"). وإذا تُرك حقل override model فارغا لمهمة ما، فسيستخدم النموذج الافتراضي المهيأ للمزود المختار لتلك المهمة.
-- **Select different languages for different tasks**:
-  - **Disabled (الافتراضي)**: يستخدم "Output language" واحدا لكل المهام.
-  - **Enabled**: يتيح لك اختيار لغة محددة لكل مهمة ("Add Links" و "Research & Summarize" و "Generate from Title" و "Summarise as Mermaid diagram" و "Extract Concepts").
+- **استخدام مزودين مختلفين للمهام**:
+  - **Disabled (الافتراضي)**: يستخدم "المزود النشط" الواحد لكل المهام.
+  - **مفعّل**: يسمح لك باختيار مزود محدد، ومعه اختياريا override لاسم النموذج لكل مهمة من المهام ("Add Links" و "Research & Summarize" و "Generate from Title" و "Translate" و "Extract Concepts"). وإذا تُرك حقل override model فارغا لمهمة ما، فسيستخدم النموذج الافتراضي المهيأ للمزود المختار لتلك المهمة.
+- **اختيار لغات مختلفة للمهام المختلفة**:
+  - **Disabled (الافتراضي)**: يستخدم لغة خرج واحدة لكل المهام.
+  - **مفعّل**: يتيح لك اختيار لغة محددة لكل مهمة ("Add Links" و "Research & Summarize" و "Generate from Title" و "Summarise as Mermaid diagram" و "Extract Concepts").
 
 <img width="817" height="428" alt="Multi-model" src="https://github.com/user-attachments/assets/85e6b854-c0ca-45cc-a55e-24638dceb120" />
 
-### بنية اللغة (UI Locale مقابل Task Output Language)
+### بنية اللغة (لغة الواجهة مقابل لغة خرج المهام)
 
-- يتحكم **UI Locale** فقط في نص واجهة الإضافة، مثل labels داخل الإعدادات وأزرار sidebar والإشعارات والحوارات. الوضع الافتراضي `auto` يتبع لغة واجهة Obsidian الحالية.
-- يتحكم **Task Output Language** في خرج المهام المولَّد بواسطة النموذج، مثل الروابط والملخصات وتوليد العناوين وMermaid summary واستخراج المفاهيم واللغة الهدف للترجمة.
-- يسمح **Per-task language mode** لكل مهمة بحل لغة الخرج الخاصة بها عبر policy layer موحّدة بدلا من وجود overrides متناثرة عبر الوحدات المختلفة.
-- يحافظ **Disable auto translation** على سياق اللغة الأصلية للمهام غير الخاصة بالترجمة، بينما تستمر مهام Translate الصريحة في فرض اللغة الهدف المضبوطة.
-- تتبع المسارات المتعلقة بـ Mermaid policy اللغة نفسها، ويمكنها الاستمرار في تشغيل Mermaid auto-fix عندما يكون مفعلا.
+- يتحكم **لغة الواجهة** فقط في نص واجهة الإضافة، مثل تسميات الإعدادات وأزرار الشريط الجانبي والإشعارات والحوارات. الوضع الافتراضي `auto` يتبع لغة واجهة Obsidian الحالية.
+- تتحكم **لغة خرج المهام** في خرج المهام المولَّد بواسطة النموذج، مثل الروابط والملخصات وتوليد العناوين وملخصات Mermaid واستخراج المفاهيم واللغة الهدف للترجمة.
+- يسمح **وضع اللغة لكل مهمة** لكل مهمة بحل لغة الخرج الخاصة بها عبر طبقة سياسات موحدة بدلا من وجود تجاوزات متناثرة عبر الوحدات المختلفة.
+- يحافظ **تعطيل الترجمة التلقائية** على سياق اللغة الأصلية للمهام غير الخاصة بالترجمة، بينما تستمر مهام Translate الصريحة في فرض اللغة الهدف المضبوطة.
+- تتبع المسارات المتعلقة بـ Mermaid السياسة اللغوية نفسها، ويمكنها الاستمرار في تشغيل Mermaid auto-fix عندما يكون مفعلا.
 
 ### إعدادات استدعاءات API المستقرة
-- **Enable Stable API Calls (Retry Logic)**:
+- **تفعيل استدعاءات API المستقرة (منطق إعادة المحاولة)**:
   - **Disabled (الافتراضي)**: أي فشل في استدعاء API يوقف المهمة الحالية مباشرة.
-  - **Enabled**: يعيد محاولة استدعاءات LLM الفاشلة تلقائيا، وهو مفيد مع الشبكات المتقطعة أو rate limits.
+  - **مفعّل**: يعيد محاولة استدعاءات LLM الفاشلة تلقائيا، وهو مفيد مع الشبكات المتقطعة أو rate limits.
   - **Connection Test Fallback**: حتى عندما لا تعمل الاستدعاءات العادية مسبقا في stable mode، فإن اختبارات الاتصال تتحول بعد أول فشل شبكي مؤقت إلى نفس retry sequence.
   - **Runtime Transport Fallback (Environment-Aware)**: الطلبات الطويلة التي تسقط مؤقتا عبر `requestUrl` تعاد محاولتها أولا باستخدام transport fallback يعتمد على البيئة. على desktop يستخدم Node `http/https`، وفي البيئات غير المكتبية يستخدم browser `fetch`. كما تستخدم هذه المحاولات parsing متدفقا واعيا بالبروتوكول عبر مسارات LLM المدمجة، بما في ذلك OpenAI-compatible SSE وAzure OpenAI SSE وAnthropic Messages SSE وGoogle Gemini SSE وOllama NDJSON، بحيث يمكن للبوابات البطيئة أن تعيد body chunks قبل انتهاء المهلة. أما entrypoints الأخرى ذات النمط OpenAI المباشر فتستخدم نفس fallback path المشترك.
   - **OpenAI-Compatible Stable Order**: في stable mode، تتبع كل محاولة لـ OpenAI-compatible الترتيب `direct streaming -> direct non-stream -> requestUrl (مع streamed fallback عند الحاجة)` قبل احتسابها محاولة فاشلة. وهذا يمنع الإخفاقات العدوانية عندما يكون transport mode واحد فقط هو المشكلة.
 - **Retry Interval (seconds)**: يظهر فقط عند تفعيل الميزة. يحدد زمن الانتظار بين المحاولات، من 1 إلى 300 ثانية. الافتراضي: 5.
 - **Maximum Retries**: يظهر فقط عند التفعيل. يحدد الحد الأقصى للمحاولات، من 0 إلى 10. الافتراضي: 3.
-- **API Error Debugging Mode**:
+- **وضع تصحيح أخطاء API**:
   - **Disabled (الافتراضي)**: يستخدم تقارير أخطاء مختصرة ومعيارية.
-  - **Enabled**: يفعّل logging تفصيليا للأخطاء عبر جميع المزودين والمهام، بما في ذلك Translate وSearch وConnection Tests. ويشمل ذلك HTTP status codes وraw response text وtransport timelines وsanitized request URLs والheaders ومدد المحاولات وresponse headers وpartial response bodies وparsed partial stream output وstack traces.
+  - **مفعّل**: يفعّل logging تفصيليا للأخطاء عبر جميع المزودين والمهام، بما في ذلك Translate وSearch وConnection Tests. ويشمل ذلك HTTP status codes وraw response text وtransport timelines وsanitized request URLs والheaders ومدد المحاولات وresponse headers وpartial response bodies وparsed partial stream output وstack traces.
 - **Developer Mode**:
   - **Disabled (الافتراضي)**: يخفي كل controls الخاصة بالمطورين.
-  - **Enabled**: يعرض developer diagnostics panel مخصصة داخل الإعدادات.
+  - **مفعّل**: يعرض developer diagnostics panel مخصصة داخل الإعدادات.
 - **Developer Provider Diagnostic (Long Request)**:
   - **Diagnostic Call Mode**: اختيار runtime path لكل probe. مزودو OpenAI-compatible يدعمون أوضاعا forced إضافية مثل `direct streaming` و `direct buffered` و `requestUrl-only` بالإضافة إلى أوضاع runtime.
   - **Run Diagnostic**: يشغل long-request probe واحدا بالـ call mode المحدد ويكتب ملف `Notemd_Provider_Diagnostic_*.txt` في جذر الـ vault.
@@ -269,24 +269,24 @@
 #### إخراج الملفات المعالجة
 - **Customize Processed File Save Path**:
   - **Disabled (الافتراضي)**: تحفظ الملفات المعالجة مثل `YourNote_processed.md` في **المجلد نفسه** الذي يوجد فيه الملف الأصلي.
-  - **Enabled**: يسمح لك بتحديد موقع حفظ مخصص.
+  - **مفعّل**: يسمح لك بتحديد موقع حفظ مخصص.
 - **Processed File Folder Path**: يظهر فقط عند تفعيل الخيار أعلاه. أدخل **مسارا نسبيا** داخل الـ vault، مثل `Processed Notes` أو `Output/LLM`، حيث سيتم حفظ الملفات المعالجة. سيتم إنشاء المجلدات إذا لم تكن موجودة. **لا تستخدم المسارات المطلقة مثل `C:\...` أو الرموز غير المسموح بها.**
 - **Use Custom Output Filename for 'Add Links'**:
   - **Disabled (الافتراضي)**: الملفات الناتجة عن أمر Add Links تستخدم اللاحقة الافتراضية `_processed.md` مثل `YourNote_processed.md`.
-  - **Enabled**: يتيح لك تخصيص اسم الملف الناتج باستخدام الإعداد أدناه.
+  - **مفعّل**: يتيح لك تخصيص اسم الملف الناتج باستخدام الإعداد أدناه.
 - **Custom Suffix/Replacement String**:
   - إذا تُرك الحقل **فارغا**، فسيتم **الكتابة فوق الملف الأصلي** بالمحتوى المعالج.
   - إذا أدخلت سلسلة مثل `_linked`، فسيتم إلحاقها باسم الملف الأصلي الأساسي، مثل `YourNote_linked.md`. تأكد من أن suffix لا يحتوي على رموز غير صالحة لأسماء الملفات.
 - **Remove Code Fences on Add Links**:
   - **Disabled (الافتراضي)**: تبقى code fences **(\`\\\`\`)** داخل المحتوى عند إضافة الروابط، بينما تزال **(\`\\\`markdown)** تلقائيا.
-  - **Enabled**: يزيل code fences من المحتوى قبل إضافة الروابط.
+  - **مفعّل**: يزيل code fences من المحتوى قبل إضافة الروابط.
 
 <img width="799" height="301" alt="Processed file output" src="https://github.com/user-attachments/assets/65d4e864-ff5f-402a-be90-e9c44b208903" />
 
 #### إخراج الملاحظات المفاهيمية
 - **Customize Concept Note Path**:
   - **Disabled (الافتراضي)**: يكون الإنشاء التلقائي لملاحظات `[[linked concepts]]` معطلا.
-  - **Enabled**: يسمح لك بتحديد المجلد الذي تنشأ فيه concept notes الجديدة.
+  - **مفعّل**: يسمح لك بتحديد المجلد الذي تنشأ فيه concept notes الجديدة.
 - **Concept Note Folder Path**: يظهر فقط عند التفعيل. أدخل **مسارا نسبيا** داخل الـ vault، مثل `Concepts` أو `Generated/Topics`. سيتم إنشاء المجلدات تلقائيا إذا لم تكن موجودة. **يجب تعبئة الحقل عند تفعيل الميزة.** **لا تستخدم المسارات المطلقة أو الرموز غير الصالحة.**
 
 <img width="800" height="145" alt="concept note output" src="https://github.com/user-attachments/assets/d0338341-7d67-4472-964c-75a0992165b8" />
@@ -294,9 +294,9 @@
 #### إخراج ملف سجل المفاهيم
 - **Generate Concept Log File**:
   - **Disabled (الافتراضي)**: لا يتم إنشاء log file.
-  - **Enabled**: ينشئ ملف سجل يسرد concept notes المنشأة حديثا بعد المعالجة. ويكون التنسيق كما يلي:
+  - **مفعّل**: ينشئ ملف سجل يسرد concept notes المنشأة حديثا بعد المعالجة. ويكون التنسيق كما يلي:
     ```
-    generate xx concepts md file
+    إنشاء xx ملف md للمفاهيم
     1. concepts1
     2. concepts2
     ...
@@ -304,17 +304,17 @@
     ```
 - **Customize Log File Save Path**: يظهر فقط إذا كان "Generate Concept Log File" مفعلا.
   - **Disabled (الافتراضي)**: يتم حفظ log file داخل **Concept Note Folder Path**، إذا كانت محددة، أو في جذر الـ vault خلاف ذلك.
-  - **Enabled**: يسمح لك بتحديد مجلد مخصص لحفظ السجل.
+  - **مفعّل**: يسمح لك بتحديد مجلد مخصص لحفظ السجل.
 - **Concept Log Folder Path**: يظهر فقط عندما يكون "Customize Log File Save Path" مفعلا. أدخل **مسارا نسبيا** داخل الـ vault، مثل `Logs/Notemd`. **يجب تعبئته إذا كانت الميزة مفعلة.**
 - **Customize Log File Name**: يظهر فقط إذا كان "Generate Concept Log File" مفعلا.
   - **Disabled (الافتراضي)**: اسم ملف السجل هو `Generate.log`.
-  - **Enabled**: يسمح لك بتحديد اسم مخصص.
+  - **مفعّل**: يسمح لك بتحديد اسم مخصص.
 - **Concept Log File Name**: يظهر فقط عندما يكون "Customize Log File Name" مفعلا. أدخل اسم الملف المطلوب، مثل `ConceptCreation.log`. **يجب تعبئته إذا كانت الميزة مفعلة.**
 
 <img width="809" height="281" alt="Concept log file output" src="https://github.com/user-attachments/assets/eef6f5d5-592d-4b8f-84b1-7404521a6e9b" />
 
 #### مهمة استخراج المفاهيم
-- **Create minimal concept notes**:
+- **إنشاء ملاحظات مفاهيمية دنيا**:
   - **On (الافتراضي)**: لا تحتوي concept notes الجديدة إلا على العنوان، مثل `# Concept`.
   - **Off**: قد تحتوي concept notes على محتوى إضافي، مثل backlink بعنوان "Linked From"، إذا لم يتم تعطيله في الإعداد التالي.
 - **Add "Linked From" backlink**:
@@ -345,7 +345,7 @@
 #### معلمات المعالجة
 - **Enable Batch Parallelism**:
   - **Disabled (الافتراضي)**: تتم مهام المعالجة الدفعية، مثل "Process Folder" أو "Batch Generate from Titles"، بشكل تسلسلي ملفا بعد ملف.
-  - **Enabled**: يسمح للإضافة بمعالجة عدة ملفات بالتوازي، ما قد يسرّع الأعمال الدفعية الكبيرة بصورة ملموسة.
+  - **مفعّل**: يسمح للإضافة بمعالجة عدة ملفات بالتوازي، ما قد يسرّع الأعمال الدفعية الكبيرة بصورة ملموسة.
 - **Batch Concurrency**: يظهر فقط عند تفعيل المعالجة المتوازية. يحدد الحد الأقصى لعدد الملفات المعالجة في وقت واحد. القيم الأعلى قد تكون أسرع، لكنها تستخدم موارد أكثر وقد تصطدم بـ API rate limits. الافتراضي: `1`، المجال: `1-20`.
 - **Batch Size**: يظهر فقط عند تفعيل المعالجة المتوازية. عدد الملفات التي تجمع في batch واحدة. الافتراضي: `50`، المجال: `10-200`.
 - **Delay Between Batches (ms)**: يظهر فقط عند تفعيل المعالجة المتوازية. تأخير اختياري بالميلي ثانية بين كل batch وأخرى، وهو مفيد للتحكم في rate limits. الافتراضي: `1000ms`.
@@ -354,16 +354,16 @@
 - **Enable Duplicate Detection**: يبدّل التحقق الأساسي من الكلمات المكررة داخل المحتوى المعالج، وتظهر النتائج في console. الافتراضي: مفعّل.
 - **Max Tokens**: أقصى عدد من tokens يجب أن تولدها LLM لكل response chunk. يؤثر في الكلفة ومستوى التفصيل. الافتراضي: `4096`.
 
-<img width="795" height="274" alt="Processing Parameters   Language settings" src="https://github.com/user-attachments/assets/74e4af76-3333-48fc-bb86-0a3ee61825d1" />
+<img width="795" height="274" alt="معلمات المعالجة   إعدادات اللغة" src="https://github.com/user-attachments/assets/74e4af76-3333-48fc-bb86-0a3ee61825d1" />
 
 #### الترجمة
 - **Default Target Language**: اختر اللغة الهدف الافتراضية التي تريد ترجمة ملاحظاتك إليها. يمكن override هذا الاختيار من الـ UI عند تشغيل أمر الترجمة. الافتراضي: English.
 - **Customise Translation File Save Path**:
   - **Disabled (الافتراضي)**: تحفظ الملفات المترجمة في **المجلد نفسه** الخاص بالملف الأصلي.
-  - **Enabled**: يسمح لك بتحديد **مسار نسبي** داخل الـ vault، مثل `Translations`، حيث تحفظ الملفات المترجمة. سيتم إنشاء المجلدات إذا لم تكن موجودة.
+  - **مفعّل**: يسمح لك بتحديد **مسار نسبي** داخل الـ vault، مثل `Translations`، حيث تحفظ الملفات المترجمة. سيتم إنشاء المجلدات إذا لم تكن موجودة.
 - **Use custom suffix for translated files**:
   - **Disabled (الافتراضي)**: تستخدم الملفات المترجمة suffix افتراضية هي `_translated.md`، مثل `YourNote_translated.md`.
-  - **Enabled**: يسمح لك بتحديد suffix مخصصة.
+  - **مفعّل**: يسمح لك بتحديد suffix مخصصة.
 - **Custom Suffix**: يظهر فقط عند تفعيل الخيار السابق. أدخل suffix مخصصة تريد إضافتها إلى أسماء الملفات المترجمة، مثل `_es` أو `_fr`.
 
 <img width="811" height="243" alt="translate" src="https://github.com/user-attachments/assets/57d21a72-e86c-4369-8be5-fd18cb734e2b" />
@@ -371,9 +371,9 @@
 #### توليد المحتوى
 - **Enable Research in "Generate from Title"**:
   - **Disabled (الافتراضي)**: تستخدم مهمة "Generate from Title" العنوان فقط كمدخل.
-  - **Enabled**: تجري بحثا على الويب باستخدام **Web Research Provider** المهيأ، وتضيف نتائجه كسياق ضمن prompt المرسلة إلى LLM.
+  - **مفعّل**: تجري بحثا على الويب باستخدام **Web Research Provider** المهيأ، وتضيف نتائجه كسياق ضمن prompt المرسلة إلى LLM.
 - **Auto-run Mermaid Syntax Fix after Generation**:
-  - **Enabled (الافتراضي)**: ينفذ تلقائيا تمريرة إصلاح Mermaid syntax بعد workflows المرتبطة بـ Mermaid مثل Process وGenerate from Title وBatch Generate from Titles وResearch & Summarize وSummarise as Mermaid وTranslate.
+  - **مفعّل (الافتراضي)**: ينفذ تلقائيا تمريرة إصلاح Mermaid syntax بعد workflows المرتبطة بـ Mermaid مثل Process وGenerate from Title وBatch Generate from Titles وResearch & Summarize وSummarise as Mermaid وTranslate.
   - **Disabled**: يترك Mermaid output المولَّد كما هو حتى تشغل `Batch Mermaid Fix` يدويا أو تضيفه إلى custom workflow.
 - **Output Language**:
   - اختر لغة الخرج المرغوبة لمهام "Generate from Title" و"Batch Generate from Title".
@@ -384,7 +384,7 @@
   - في **Custom Prompt Word** يمكنك إدخال الصياغة الخاصة بك.
 - **Use Custom Output Folder for 'Generate from Title'**:
   - **Disabled (الافتراضي)**: تنقل الملفات التي تم توليدها بنجاح إلى مجلد فرعي باسم `[OriginalFolderName]_complete` نسبة إلى والد المجلد الأصلي، أو `Vault_complete` إذا كان المجلد الأصلي هو جذر الـ vault.
-  - **Enabled**: يسمح لك بتحديد اسم مخصص للمجلد الفرعي الذي تنقل إليه الملفات المكتملة.
+  - **مفعّل**: يسمح لك بتحديد اسم مخصص للمجلد الفرعي الذي تنقل إليه الملفات المكتملة.
 - **Custom Output Folder Name**: يظهر فقط عند تفعيل الخيار السابق. أدخل اسم المجلد الفرعي المطلوب، مثل `Generated Content` أو `_complete`. لا يسمح بالرموز غير الصالحة. وإذا تُرك فارغا، يستخدم `_complete`.
 
 #### أزرار سير العمل بنقرة واحدة
@@ -400,11 +400,11 @@
 
 - **Enable Custom Prompts for Specific Tasks**:
   - **Disabled (الافتراضي)**: تستخدم الإضافة الـ prompts الافتراضية المدمجة لكل العمليات.
-  - **Enabled**: يفعّل القدرة على تعيين custom prompts للمهام المدرجة أدناه. وهو المفتاح الرئيسي لهذه الميزة.
+  - **مفعّل**: يفعّل القدرة على تعيين custom prompts للمهام المدرجة أدناه. وهو المفتاح الرئيسي لهذه الميزة.
 - **Use Custom Prompt for [Task Name]**:
   - لكل مهمة مدعومة ("Add Links" و "Generate from Title" و "Research & Summarize" و "Extract Concepts") يمكنك تفعيل أو تعطيل الـ custom prompt بشكل منفصل.
   - **Disabled**: تستخدم هذه المهمة الـ prompt الافتراضية.
-  - **Enabled**: تستخدم هذه المهمة النص الذي تكتبه في textarea المقابلة.
+  - **مفعّل**: تستخدم هذه المهمة النص الذي تكتبه في textarea المقابلة.
 - **Custom Prompt Text Area**:
   - **Default Prompt Display**: تعرض الإضافة الـ prompt الافتراضية كمرجع. ويمكنك استخدام زر **"Copy Default Prompt"** لنسخها كنقطة انطلاق.
   - **Custom Prompt Input**: هنا تكتب التعليمات الخاصة بك لـ LLM.
@@ -415,7 +415,7 @@
 
 <img width="794" height="174" alt="Content generation   output" src="https://github.com/user-attachments/assets/76d93942-980d-49ad-b9d4-1c73ea013d17" />
 
-<img width="866" height="646" alt="Duplicate check scope   Custom prompt settings" src="https://github.com/user-attachments/assets/1b37a523-ef00-4e40-94a0-43bbe0c78572" />
+<img width="866" height="646" alt="نطاق فحص التكرار   إعدادات الموجه المخصص" src="https://github.com/user-attachments/assets/1b37a523-ef00-4e40-94a0-43bbe0c78572" />
 
 #### نطاق فحص التكرار
 - **Duplicate Check Scope Mode**: يتحكم في الملفات التي ستتم مقارنتها مع الملاحظات الموجودة داخل Concept Note Folder بحثا عن duplicates محتملة.
@@ -439,7 +439,7 @@
 #### مجال التعلم المركّز
 - **Enable Focused Learning Domain**:
   - **Disabled (الافتراضي)**: تستخدم الـ prompts المرسلة إلى LLM التعليمات العامة القياسية.
-  - **Enabled**: يتيح لك تحديد مجال أو أكثر لتحسين الفهم السياقي للنموذج.
+  - **مفعّل**: يتيح لك تحديد مجال أو أكثر لتحسين الفهم السياقي للنموذج.
 - **Learning Domain**: يظهر فقط عند تفعيل الخيار السابق. أدخل مجال الدراسة الخاص بك، مثل `Materials Science` أو `Polymer Physics` أو `Machine Learning`. سيضيف ذلك سطرا في بداية الـ prompts مثل `Relevant Fields: [...]`، مما يساعد LLM على توليد روابط ومحتوى أكثر دقة وملاءمة لمجالك.
 
 <img width="595" height="143" alt="focused learning domain" src="https://github.com/user-attachments/assets/1bcc9707-5c10-4944-a61b-65fde0cd0404" />
@@ -449,7 +449,7 @@
 ### عمليات سير العمل السريعة والشريط الجانبي
 
 - افتح Notemd sidebar للوصول إلى الأقسام المجمعة الخاصة بالمعالجة الأساسية والتوليد والترجمة والمعرفة والأدوات.
-- استخدم قسم **Quick Workflows** أعلى الشريط الجانبي لتشغيل أزرار متعددة الخطوات مخصصة.
+- استخدم قسم **عمليات سير العمل السريعة** أعلى الشريط الجانبي لتشغيل أزرار متعددة الخطوات مخصصة.
 - يقوم workflow الافتراضي **One-Click Extract** بتشغيل `Process File (Add Links)` ثم `Batch Generate from Titles` ثم `Batch Mermaid Fix`.
 - يتم عرض تقدم workflow وسجلات كل خطوة والإخفاقات في الشريط الجانبي، مع footer مثبت يحافظ على بقاء progress bar ومنطقة السجلات مرئيتين حتى مع توسيع الأقسام.
 - تحافظ بطاقة التقدم على readability جيدة للنص الحالي ونسبة الإنجاز والوقت المتبقي، ويمكن إعادة ضبط هذه الـ workflows المخصصة أيضا من داخل الإعدادات.
@@ -477,7 +477,7 @@
 
 ### الميزات الجديدة
 
-1. **Summarise as Mermaid diagram**:
+1. **التلخيص كمخطط Mermaid**:
    - افتح الملاحظة التي تريد تلخيصها.
    - شغّل الأمر `Notemd: Summarise as Mermaid diagram` من Command Palette أو من زر sidebar.
    - ستنشئ الإضافة ملاحظة جديدة تحتوي على Mermaid diagram.
@@ -490,7 +490,7 @@
    - يحفظ المحتوى المترجم في **Translation Save Path** المهيأة مع suffix المناسبة، ويفتح في **pane جديدة إلى يمين** المحتوى الأصلي لتسهيل المقارنة.
    - يمكنك إلغاء هذه المهمة عبر زر sidebar أو زر الإلغاء في modal.
 
-3. **Batch Translate**:
+3. **الترجمة المجمعة**:
    - شغّل `Notemd: Batch Translate Folder` من Command Palette واختر مجلدا، أو انقر بزر الفأرة الأيمن على مجلد داخل file explorer واختر "Batch translate this folder".
    - تقوم الإضافة بترجمة جميع ملفات Markdown داخل المجلد المحدد.
    - تحفظ الملفات المترجمة في المسار المضبوط للترجمة، لكنها لا تفتح تلقائيا.
@@ -667,7 +667,7 @@
        ```
        يحتوي التقرير الناتج على توقيتات كل محاولة، مثل `First Byte` و `Duration`، بالإضافة إلى sanitized request metadata وresponse headers وraw أو partial body fragments وparsed stream fragments ونقاط الفشل على مستوى transport layer.
 - **مشاكل الاتصال مع LM Studio أو Ollama**:
-  - **فشل Test Connection**: تأكد من أن الخادم المحلي، سواء LM Studio أو Ollama، قيد التشغيل وأن النموذج المطلوب محمل أو متاح.
+  - **فشل اختبار الاتصال**: تأكد من أن الخادم المحلي، سواء LM Studio أو Ollama، قيد التشغيل وأن النموذج المطلوب محمل أو متاح.
   - **أخطاء CORS مع Ollama على Windows**: إذا ظهرت أخطاء CORS، فقد تحتاج إلى ضبط متغير البيئة `OLLAMA_ORIGINS`. مثلا يمكنك تشغيل `set OLLAMA_ORIGINS=*` في command prompt قبل تشغيل Ollama.
   - **فعّل CORS في LM Studio**: بالنسبة إلى LM Studio، يمكنك تفعيل CORS مباشرة من إعدادات الخادم، وقد يكون ذلك ضروريا إذا كان Obsidian يعمل داخل متصفح أو يخضع لسياسات origin صارمة.
 - **أخطاء إنشاء المجلدات ("File name cannot contain...")**:
@@ -683,8 +683,8 @@
 
 ## وثائق المشرف
 
-- [Release Workflow (English)](./docs/maintainer/release-workflow.md)
-- [Release Workflow (简体中文)](./docs/maintainer/release-workflow.zh-CN.md)
+- [سير عمل الإصدار (بالإنجليزية)](./docs/maintainer/release-workflow.md)
+- [سير عمل الإصدار (بالصينية المبسطة)](./docs/maintainer/release-workflow.zh-CN.md)
 
 ## الترخيص
 

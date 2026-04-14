@@ -59,10 +59,10 @@ Notemd mejora tu flujo de trabajo en Obsidian integrándose con varios Modelos d
 
 | Aspecto | Alcance | Predeterminado | Notas |
 |---|---|---|---|
-| `UI Locale` | Solo texto de la interfaz (ajustes, barra lateral, avisos) | `auto` | Sigue el idioma de Obsidian; los catálogos actuales son `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, `zh-TW`. |
-| `Task Output Language` | Salida de tareas generada por LLM (enlaces, resúmenes, generación, extracción, objetivo de traducción) | `en` | Puede ser global o por tarea cuando se activa `Usar diferentes idiomas para tareas`. |
-| `Disable auto translation` | Las tareas que no son de traducción mantienen el contexto original | `false` | Las tareas explícitas de `Traducir` siguen aplicando el idioma objetivo configurado. |
-| Locale fallback | Resolución de claves de UI faltantes | locale -> `en` | Mantiene la UI estable cuando algunas claves no están traducidas. |
+| `Idioma de la interfaz` | Solo texto de la interfaz (ajustes, barra lateral, avisos) | `auto` | Sigue el idioma de Obsidian; los catálogos actuales son `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, `zh-TW`. |
+| `Idioma de salida de tareas` | Salida de tareas generada por LLM (enlaces, resúmenes, generación, extracción, objetivo de traducción) | `en` | Puede ser global o por tarea cuando se activa `Usar diferentes idiomas para tareas`. |
+| `Desactivar la traducción automática` | Las tareas que no son de traducción mantienen el contexto original | `false` | Las tareas explícitas de `Traducir` siguen aplicando el idioma objetivo configurado. |
+| `Idioma de respaldo` | Resolución de claves de UI faltantes | locale -> `en` | Mantiene la UI estable cuando algunas claves no están traducidas. |
 
 - Los documentos fuente mantenidos son inglés y chino simplificado, y las traducciones README publicadas están enlazadas en el encabezado superior.
 - La cobertura de UI locale dentro de la aplicación coincide actualmente con el catálogo explícito del código: `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, `zh-TW`.
@@ -236,10 +236,10 @@ Accede a los ajustes del complemento a través de:
 
 <img width="817" height="428" alt="Multi-model" src="https://github.com/user-attachments/assets/85e6b854-c0ca-45cc-a55e-24638dceb120" />
 
-### Arquitectura de Idioma (UI Locale vs Task Output Language)
+### Arquitectura de Idioma (Idioma de la interfaz vs idioma de salida de tareas)
 
--   **UI Locale** controla solo el texto de la interfaz del complemento (etiquetas de ajustes, botones de la barra lateral, avisos y diálogos). El modo `auto` predeterminado sigue el idioma actual de la UI de Obsidian.
--   **Task Output Language** controla la salida de tareas generada por el modelo (enlaces, resúmenes, generación de títulos, resumen de Mermaid, extracción de conceptos, objetivo de traducción).
+-   **Idioma de la interfaz** controla solo el texto de la interfaz del complemento (etiquetas de ajustes, botones de la barra lateral, avisos y diálogos). El modo `auto` predeterminado sigue el idioma actual de la UI de Obsidian.
+-   **Idioma de salida de tareas** controla la salida de tareas generada por el modelo (enlaces, resúmenes, generación de títulos, resumen de Mermaid, extracción de conceptos, objetivo de traducción).
 -   **El modo de idioma por tarea** permite que cada tarea resuelva su propio idioma de salida desde una capa de política unificada en lugar de sobrescrituras dispersas por módulo.
 -   **Desactivar traducción automática** mantiene las tareas que no son de traducción en el contexto del idioma original, mientras que las tareas explícitas de traducción siguen aplicando el idioma de destino configurado.
 -   Las rutas de generación relacionadas con Mermaid siguen la misma política de idioma y aún pueden activar la auto-corrección de Mermaid cuando está activada.
@@ -448,7 +448,7 @@ Esta función te permite sobrescribir las instrucciones predeterminadas (prompts
 ### Flujos de Trabajo Rápidos y Barra Lateral
 
 -   Abre la barra lateral de Notemd para acceder a secciones de acciones agrupadas para procesamiento central, generación, traducción, conocimiento y utilidades.
--   Usa el área de **Quick Workflows** en la parte superior de la barra lateral para lanzar botones de varios pasos personalizados.
+-   Usa el área de **Flujos de trabajo rápidos** en la parte superior de la barra lateral para lanzar botones de varios pasos personalizados.
 -   El flujo de trabajo predeterminado **One-Click Extract** ejecuta `Procesar archivo (Añadir enlaces)` -> `Generación por lotes desde títulos` -> `Corrección de Mermaid por Lotes`.
 -   El progreso del flujo de trabajo, los registros por paso y los fallos se muestran en la barra lateral, con un pie de página anclado que protege la barra de progreso y el área de registro de ser desplazadas por secciones expandidas.
 -   La tarjeta de progreso mantiene legibles de un vistazo el texto de estado, una pastilla de porcentaje dedicada y el tiempo restante, y los mismos flujos de trabajo personalizados se pueden reconfigurar desde los ajustes.

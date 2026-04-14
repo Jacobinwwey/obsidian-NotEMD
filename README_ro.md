@@ -4,7 +4,7 @@
 
 [English](./README.md) | [简体中文](./README_zh.md) | [Español](./README_es.md) | [Français](./README_fr.md) | [Deutsch](./README_de.md) | [Italiano](./README_it.md) | [Português](./README_pt.md) | [繁體中文](./README_zh_Hant.md) | [日本語](./README_ja.md) | [한국어](./README_ko.md) | [Русский](./README_ru.md) | [العربية](./README_ar.md) | [हिन्दी](./README_hi.md) | [বাংলা](./README_bn.md) | [Nederlands](./README_nl.md) | [Svenska](./README_sv.md) | [Suomi](./README_fi.md) | [Dansk](./README_da.md) | [Norsk](./README_no.md) | [Polski](./README_pl.md) | [Türkçe](./README_tr.md) | [עברית](./README_he.md) | [ไทย](./README_th.md) | [Ελληνικά](./README_el.md) | [Čeština](./README_cs.md) | [Magyar](./README_hu.md) | [Română](./README_ro.md) | [Українська](./README_uk.md) | [Tiếng Việt](./README_vi.md) | [Bahasa Indonesia](./README_id.md) | [Bahasa Melayu](./README_ms.md)
 
-Citiți documentația și în alte limbi: [Language Hub](./docs/i18n/README.md)
+Citiți documentația și în alte limbi: [Hub lingvistic](./docs/i18n/README.md)
 
 ```
 ==================================================
@@ -59,15 +59,15 @@ Atât. Explorează setările pentru a debloca mai multe funcții, precum cerceta
 
 | Aspect | Domeniu | Implicit | Note |
 |---|---|---|---|
-| `UI Locale` | Doar textul interfeței pluginului (setări, sidebar, notificări, dialoguri) | `auto` | Urmează localizarea Obsidian; cataloagele actuale de UI sunt `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, `zh-TW`. |
-| `Task Output Language` | Ieșirea generată de LLM pentru sarcini (linkuri, rezumate, generare, extragere, ținta traducerii) | `en` | Poate fi globală sau per sarcină când `Use different languages for tasks` este activat. |
-| `Disable auto translation` | Sarcinile non-Translate păstrează contextul limbii sursă | `false` | Sarcinile explicite `Translate` aplică în continuare limba țintă configurată. |
+| `Limba interfeței` | Doar textul interfeței pluginului (setări, bara laterală, notificări, dialoguri) | `auto` | Urmează localizarea Obsidian; cataloagele actuale de UI sunt `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, `zh-TW`. |
+| `Limba ieșirii sarcinilor` | Ieșirea generată de LLM pentru sarcini (linkuri, rezumate, generare, extragere, ținta traducerii) | `en` | Poate fi globală sau per sarcină când `Folosește limbi diferite pentru sarcini` este activat. |
+| `Dezactivează traducerea automată` | Sarcinile non-Translate păstrează contextul limbii sursă | `false` | Sarcinile explicite `Translate` aplică în continuare limba țintă configurată. |
 | Fallback de localizare | Rezolvarea cheilor UI lipsă | locale -> `en` | Menține UI-ul stabil când unele chei nu sunt încă traduse. |
 
 - Documentele sursă întreținute sunt engleza și chineza simplificată, iar traducerile README publicate sunt legate în antetul de mai sus.
 - Acoperirea pentru UI locale din aplicație corespunde în prezent exact catalogului explicit din cod: `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, `zh-TW`.
 - Fallback-ul la engleză rămâne o plasă de siguranță la nivel de implementare, dar suprafețele vizibile suportate sunt acoperite de teste de regresie și nu ar trebui să revină tăcut la engleză în utilizarea normală.
-- Detalii suplimentare și ghidul de contribuție sunt urmărite în [Language Hub](./docs/i18n/README.md).
+- Detalii suplimentare și ghidul de contribuție sunt urmărite în [Hubul lingvistic](./docs/i18n/README.md).
 
 ## Funcționalități
 
@@ -116,7 +116,7 @@ Atât. Explorează setările pentru a debloca mai multe funcții, precum cerceta
     - Suportă procesare paralelă atunci când "Enable Batch Parallelism" este activat.
     - Folosește prompturi personalizate pentru traducere dacă sunt configurate.
 	- Adaugă opțiunea "Batch translate this folder" în meniul contextual din exploratorul de fișiere.
-- **Disable auto translation**: când această opțiune este activată, sarcinile non-Translate nu mai forțează ieșirile într-o anumită limbă, păstrând contextul limbii originale. Sarcina explicită "Translate" va continua să traducă potrivit configurației.
+- **Dezactivează traducerea automată**: când această opțiune este activată, sarcinile non-Translate nu mai forțează ieșirile într-o anumită limbă, păstrând contextul limbii originale. Sarcina explicită "Translate" va continua să traducă potrivit configurației.
 
 ### Cercetare web și generare de conținut
 - **Cercetare web și rezumare**:
@@ -133,7 +133,7 @@ Atât. Explorează setările pentru a debloca mai multe funcții, precum cerceta
 - **Cuplare cu Mermaid Auto-Fix**: când repararea automată Mermaid este activată, fluxurile de lucru legate de Mermaid repară automat fișierele generate sau folderele de ieșire după procesare. Asta acoperă fluxurile Process, Generate from Title, Batch Generate from Titles, Research & Summarize, Summarise as Mermaid și Translate.
 
 ### Funcții utilitare
-- **Summarise as Mermaid diagram**:
+- **Rezumă ca diagramă Mermaid**:
     - Această funcție îți permite să rezumi conținutul unei note într-o diagramă Mermaid.
     - Limba de ieșire a diagramei Mermaid poate fi personalizată din setări.
     - **Mermaid Output Folder**: configurează folderul în care vor fi salvate fișierele generate cu diagrame Mermaid.
@@ -206,51 +206,51 @@ Accesează setările pluginului prin:
 **Settings** -> **Community Plugins** -> **Notemd** (fă clic pe iconița rotiță).
 
 ### Configurarea furnizorului LLM
-1.  **Active Provider**: selectează furnizorul LLM pe care vrei să îl folosești din meniul dropdown.
-2.  **Provider Settings**: configurează setările specifice pentru furnizorul selectat:
+1.  **Furnizor activ**: selectează furnizorul LLM pe care vrei să îl folosești din meniul dropdown.
+2.  **Setările furnizorului**: configurează setările specifice pentru furnizorul selectat:
     *   **API Key**: necesară pentru majoritatea furnizorilor cloud (de exemplu OpenAI, Anthropic, DeepSeek, Qwen, Qwen Code, Doubao, Moonshot, GLM, Z AI, MiniMax, Huawei Cloud MaaS, Baidu Qianfan, SiliconFlow, Google, Mistral, Azure OpenAI, OpenRouter, xAI, Groq, Together, Fireworks, Requesty). Nu este necesară pentru Ollama. Este opțională pentru LM Studio și presetul generic `OpenAI Compatible` atunci când endpointul tău acceptă acces anonim sau placeholder.
     *   **Base URL / Endpoint**: endpointul API pentru serviciu. Valorile implicite sunt furnizate, dar poate fi nevoie să îl schimbi pentru modelele locale (LMStudio, Ollama), gateway-uri (OpenRouter, Requesty, OpenAI Compatible) sau deployment-uri Azure specifice. **Necesar pentru Azure OpenAI.**
     *   **Model**: numele/ID-ul modelului specific de folosit (de exemplu `gpt-4o`, `claude-3-5-sonnet-20240620`, `google/gemini-flash-1.5`, `grok-4`, `moonshotai/kimi-k2-instruct-0905`, `accounts/fireworks/models/kimi-k2p5`, `anthropic/claude-3-7-sonnet-latest`). Asigură-te că modelul este disponibil la endpointul/furnizorul tău.
     *   **Temperature**: controlează aleatorietatea ieșirii LLM-ului (0 = determinist, 1 = creativitate maximă). Valorile mai mici (de exemplu 0.2-0.5) sunt de obicei mai bune pentru sarcini structurate.
     *   **API Version (Azure Only)**: necesară pentru deployment-urile Azure OpenAI (de exemplu `2024-02-15-preview`).
-3.  **Test Connection**: folosește butonul "Test Connection" pentru furnizorul activ ca să verifici setările. Furnizorii OpenAI-compatible folosesc acum verificări conștiente de furnizor: endpointuri precum `Qwen`, `Qwen Code`, `Doubao`, `Moonshot`, `GLM`, `Z AI`, `MiniMax`, `Huawei Cloud MaaS`, `Baidu Qianfan`, `SiliconFlow`, `Groq`, `Together`, `Fireworks`, `LMStudio` și `OpenAI Compatible` sondează direct `chat/completions`, în timp ce furnizorii cu endpoint `/models` fiabil pot continua să folosească mai întâi listarea de modele. Dacă prima sondă eșuează printr-o deconectare tranzitorie de rețea precum `ERR_CONNECTION_CLOSED`, Notemd trece automat la secvența stabilă de retry în loc să eșueze imediat.
-4.  **Manage Provider Configurations**: folosește butoanele "Export Providers" și "Import Providers" pentru a salva/încărca setările furnizorilor LLM într-un fișier `notemd-providers.json` din directorul de configurare al pluginului. Asta permite backup și partajare ușoară.
-5.  **Preset Coverage**: pe lângă furnizorii originali, Notemd include acum preseturi pentru `Qwen`, `Qwen Code`, `Doubao`, `Moonshot`, `GLM`, `Z AI`, `MiniMax`, `Huawei Cloud MaaS`, `Baidu Qianfan`, `SiliconFlow`, `xAI`, `Groq`, `Together`, `Fireworks`, `Requesty` și o țintă generică `OpenAI Compatible` pentru LiteLLM, vLLM, Perplexity, Vercel AI Gateway sau proxy-uri personalizate.
+3.  **Testează conexiunea**: folosește butonul "Testează conexiunea" pentru furnizorul activ ca să verifici setările. Furnizorii OpenAI-compatible folosesc acum verificări conștiente de furnizor: endpointuri precum `Qwen`, `Qwen Code`, `Doubao`, `Moonshot`, `GLM`, `Z AI`, `MiniMax`, `Huawei Cloud MaaS`, `Baidu Qianfan`, `SiliconFlow`, `Groq`, `Together`, `Fireworks`, `LMStudio` și `OpenAI Compatible` sondează direct `chat/completions`, în timp ce furnizorii cu endpoint `/models` fiabil pot continua să folosească mai întâi listarea de modele. Dacă prima sondă eșuează printr-o deconectare tranzitorie de rețea precum `ERR_CONNECTION_CLOSED`, Notemd trece automat la secvența stabilă de retry în loc să eșueze imediat.
+4.  **Gestionează configurațiile furnizorilor**: folosește butoanele "Export Providers" și "Import Providers" pentru a salva/încărca setările furnizorilor LLM într-un fișier `notemd-providers.json` din directorul de configurare al pluginului. Asta permite backup și partajare ușoară.
+5.  **Acoperirea preseturilor**: pe lângă furnizorii originali, Notemd include acum preseturi pentru `Qwen`, `Qwen Code`, `Doubao`, `Moonshot`, `GLM`, `Z AI`, `MiniMax`, `Huawei Cloud MaaS`, `Baidu Qianfan`, `SiliconFlow`, `xAI`, `Groq`, `Together`, `Fireworks`, `Requesty` și o țintă generică `OpenAI Compatible` pentru LiteLLM, vLLM, Perplexity, Vercel AI Gateway sau proxy-uri personalizate.
 <img width="804" height="506" alt="LLM" src="https://github.com/user-attachments/assets/8caf42e3-43ad-456d-8b96-b63e7914e45f" />
 
 ### Configurare multi-model
--   **Use Different Providers for Tasks**:
-    *   **Disabled (Default)**: folosește un singur "Active Provider" (selectat mai sus) pentru toate sarcinile.
-    *   **Enabled**: îți permite să selectezi un furnizor specific *și* să suprascrii opțional numele modelului pentru fiecare sarcină ("Add Links", "Research & Summarize", "Generate from Title", "Translate", "Extract Concepts"). Dacă câmpul de suprascriere a modelului pentru o sarcină rămâne gol, se folosește modelul implicit configurat pentru furnizorul selectat al acelei sarcini.
--   **Select different languages for different tasks**:
-    *   **Disabled (Default)**: folosește o singură "Output language" pentru toate sarcinile.
-    *   **Enabled**: îți permite să selectezi o limbă specifică pentru fiecare sarcină ("Add Links", "Research & Summarize", "Generate from Title", "Summarise as Mermaid diagram", "Extract Concepts").
+-   **Folosește furnizori diferiți pentru sarcini**:
+    *   **Dezactivat (implicit)**: folosește un singur "furnizor activ" (selectat mai sus) pentru toate sarcinile.
+    *   **Activat**: îți permite să selectezi un furnizor specific *și* să suprascrii opțional numele modelului pentru fiecare sarcină ("Add Links", "Research & Summarize", "Generate from Title", "Translate", "Extract Concepts"). Dacă câmpul de suprascriere a modelului pentru o sarcină rămâne gol, se folosește modelul implicit configurat pentru furnizorul selectat al acelei sarcini.
+-   **Selectează limbi diferite pentru sarcini diferite**:
+    *   **Dezactivat (implicit)**: folosește o singură "limbă de ieșire" pentru toate sarcinile.
+    *   **Activat**: îți permite să selectezi o limbă specifică pentru fiecare sarcină ("Add Links", "Research & Summarize", "Generate from Title", "Summarise as Mermaid diagram", "Extract Concepts").
 
 <img width="817" height="428" alt="Multi-model" src="https://github.com/user-attachments/assets/85e6b854-c0ca-45cc-a55e-24638dceb120" />
 
-### Arhitectura limbii (UI Locale vs Task Output Language)
+### Arhitectura limbii (limba interfeței și limba ieșirii sarcinilor)
 
--   **UI Locale** controlează doar textul interfeței pluginului (etichete Settings, butoane din sidebar, notificări și dialoguri). Modul implicit `auto` urmează limba curentă a UI-ului din Obsidian.
--   **Task Output Language** controlează ieșirea generată de model pentru sarcini (linkuri, rezumate, generare de titluri, rezumat Mermaid, extragere de concepte, ținta traducerii).
+-   **Limba interfeței** controlează doar textul interfeței pluginului (etichete de setări, butoane din bara laterală, notificări și dialoguri). Modul implicit `auto` urmează limba curentă a UI-ului din Obsidian.
+-   **Limba ieșirii sarcinilor** controlează ieșirea generată de model pentru sarcini (linkuri, rezumate, generare de titluri, rezumat Mermaid, extragere de concepte, ținta traducerii).
 -   **Per-task language mode** permite fiecărei sarcini să-și rezolve propria limbă de ieșire dintr-un strat de politică unificat în locul suprascrierilor împrăștiate pe module.
--   **Disable auto translation** păstrează sarcinile non-Translate în contextul limbii sursă, în timp ce sarcinile explicite Translate aplică în continuare limba țintă configurată.
+-   **Dezactivează traducerea automată** păstrează sarcinile non-Translate în contextul limbii sursă, în timp ce sarcinile explicite Translate aplică în continuare limba țintă configurată.
 -   Căile de generare legate de Mermaid urmează aceeași politică lingvistică și pot declanșa în continuare Mermaid auto-fix atunci când este activat.
 
 ### Setări pentru apeluri API stabile
--   **Enable Stable API Calls (Retry Logic)**:
-    *   **Disabled (Default)**: o singură eroare de apel API va opri sarcina curentă.
-    *   **Enabled**: reîncearcă automat apelurile API LLM eșuate (util pentru probleme de rețea intermitente sau rate limits).
+-   **Activează apeluri API stabile (logică de reîncercare)**:
+    *   **Dezactivat (implicit)**: o singură eroare de apel API va opri sarcina curentă.
+    *   **Activat**: reîncearcă automat apelurile API LLM eșuate (util pentru probleme de rețea intermitente sau rate limits).
     *   **Connection Test Fallback**: chiar și atunci când apelurile normale nu rulează deja în mod stabil, testele de conexiune pentru furnizori trec acum în aceeași secvență de retry după prima eroare tranzitorie de rețea.
     *   **Runtime Transport Fallback (Environment-Aware)**: requesturile lungi de sarcini care sunt întrerupte tranzitoriu de `requestUrl` reîncearcă acum aceeași încercare mai întâi printr-un fallback conștient de mediu. Build-urile desktop folosesc Node `http/https`, iar mediile non-desktop folosesc `fetch` din browser. Aceste încercări fallback folosesc acum parsare cu streaming conștientă de protocol pentru căile LLM integrate, acoperind OpenAI-compatible SSE, Azure OpenAI SSE, Anthropic Messages SSE, Google Gemini SSE și ieșirea Ollama NDJSON, astfel încât gateway-urile lente să poată returna mai devreme bucăți de corp. Punctele de intrare rămase în stil OpenAI direct reutilizează aceeași cale fallback comună.
     *   **OpenAI-Compatible Stable Order**: în modul stabil, fiecare încercare OpenAI-compatible urmează acum secvența `direct streaming -> direct non-stream -> requestUrl (with streamed fallback when needed)` înainte de a fi contabilizată drept încercare eșuată. Asta previne eșecurile prea agresive atunci când doar un singur mod de transport este instabil.
 -   **Retry Interval (seconds)**: (vizibil doar când este activat) timpul de așteptare între încercările de retry (1-300 secunde). Implicit: 5.
 -   **Maximum Retries**: (vizibil doar când este activat) numărul maxim de încercări de retry (0-10). Implicit: 3.
--   **API Error Debugging Mode**:
-    *   **Disabled (Default)**: folosește raportare standard și concisă a erorilor.
-    *   **Enabled**: activează logare detaliată a erorilor (similară ieșirii verbose DeepSeek) pentru toți furnizorii și toate sarcinile (inclusiv Translate, Search și Connection Tests). Asta include coduri de stare HTTP, text brut de răspuns, cronologii de transport pentru requesturi, URL-uri și headere sanitizate, durate ale încercărilor, headere de răspuns, corpuri de răspuns parțiale, ieșire parțială de flux parsată și urme de stivă, ceea ce este critic pentru depanarea problemelor de conectare API și a resetărilor gateway-urilor upstream.
+-   **Mod de depanare a erorilor API**:
+    *   **Dezactivat (implicit)**: folosește raportare standard și concisă a erorilor.
+    *   **Activat**: activează logare detaliată a erorilor (similară ieșirii verbose DeepSeek) pentru toți furnizorii și toate sarcinile (inclusiv Translate, Search și Connection Tests). Asta include coduri de stare HTTP, text brut de răspuns, cronologii de transport pentru requesturi, URL-uri și headere sanitizate, durate ale încercărilor, headere de răspuns, corpuri de răspuns parțiale, ieșire parțială de flux parsată și urme de stivă, ceea ce este critic pentru depanarea problemelor de conectare API și a resetărilor gateway-urilor upstream.
 -   **Developer Mode**:
-    *   **Disabled (Default)**: ascunde toate controalele de diagnostic dedicate dezvoltatorilor față de utilizatorii obișnuiți.
-    *   **Enabled**: afișează un panou dedicat de diagnostic pentru dezvoltatori în Settings.
+    *   **Dezactivat (implicit)**: ascunde toate controalele de diagnostic dedicate dezvoltatorilor față de utilizatorii obișnuiți.
+    *   **Activat**: afișează un panou dedicat de diagnostic pentru dezvoltatori în Settings.
 -   **Developer Provider Diagnostic (Long Request)**:
     *   **Diagnostic Call Mode**: alege calea de rulare pentru fiecare sondă. Furnizorii OpenAI-compatible suportă și moduri forțate suplimentare (`direct streaming`, `direct buffered`, `requestUrl-only`) pe lângă modurile runtime.
     *   **Run Diagnostic**: rulează o singură sondă pentru request lung cu modul de apel selectat și scrie `Notemd_Provider_Diagnostic_*.txt` în rădăcina vaultului.
@@ -263,58 +263,58 @@ Accesează setările pluginului prin:
 
 #### Ieșirea fișierelor procesate
 -   **Customize Processed File Save Path**:
-    *   **Disabled (Default)**: fișierele procesate (de exemplu `YourNote_processed.md`) sunt salvate în *același folder* cu nota originală.
-    *   **Enabled**: îți permite să specifici o locație personalizată de salvare.
+    *   **Dezactivat (implicit)**: fișierele procesate (de exemplu `YourNote_processed.md`) sunt salvate în *același folder* cu nota originală.
+    *   **Activat**: îți permite să specifici o locație personalizată de salvare.
 -   **Processed File Folder Path**: (vizibil doar când setarea de mai sus este activată) introdu o *cale relativă* în interiorul vaultului tău (de exemplu `Processed Notes` sau `Output/LLM`) unde vor fi salvate fișierele procesate. Folderele vor fi create dacă nu există. **Nu folosi căi absolute (precum C:\...) sau caractere invalide.**
 -   **Use Custom Output Filename for 'Add Links'**:
-    *   **Disabled (Default)**: fișierele procesate create de comanda 'Add Links' folosesc sufixul implicit `_processed.md` (de exemplu `YourNote_processed.md`).
-    *   **Enabled**: îți permite să personalizezi numele fișierului de ieșire folosind setarea de mai jos.
+    *   **Dezactivat (implicit)**: fișierele procesate create de comanda 'Add Links' folosesc sufixul implicit `_processed.md` (de exemplu `YourNote_processed.md`).
+    *   **Activat**: îți permite să personalizezi numele fișierului de ieșire folosind setarea de mai jos.
 -   **Custom Suffix/Replacement String**: (vizibil doar când setarea de mai sus este activată) introdu șirul folosit pentru numele fișierului de ieșire.
     *   Dacă este lăsat **gol**, fișierul original va fi **suprascris** cu conținutul procesat.
     *   Dacă introduci un șir (de exemplu `_linked`), acesta va fi adăugat la numele de bază original (de exemplu `YourNote_linked.md`). Asigură-te că sufixul nu conține caractere invalide pentru nume de fișier.
 
 -   **Remove Code Fences on Add Links**:
-    *   **Disabled (Default)**: delimitatoarele de cod **(\`\\\`\`)** sunt păstrate în conținut când se adaugă linkuri, iar **(\`\\\`markdown)** va fi șters automat.
-    *   **Enabled**: elimină delimitatoarele de cod din conținut înainte de adăugarea linkurilor.
+    *   **Dezactivat (implicit)**: delimitatoarele de cod **(\`\\\`\`)** sunt păstrate în conținut când se adaugă linkuri, iar **(\`\\\`markdown)** va fi șters automat.
+    *   **Activat**: elimină delimitatoarele de cod din conținut înainte de adăugarea linkurilor.
 <img width="799" height="301" alt="Processed file output" src="https://github.com/user-attachments/assets/65d4e864-ff5f-402a-be90-e9c44b208903" />
 
 #### Ieșirea notelor de concept
 -   **Customize Concept Note Path**:
-    *   **Disabled (Default)**: crearea automată a notelor pentru `[[linked concepts]]` este dezactivată.
-    *   **Enabled**: îți permite să specifici un folder unde vor fi create note noi de concept.
+    *   **Dezactivat (implicit)**: crearea automată a notelor pentru `[[linked concepts]]` este dezactivată.
+    *   **Activat**: îți permite să specifici un folder unde vor fi create note noi de concept.
 -   **Concept Note Folder Path**: (vizibil doar când personalizarea de mai sus este activată) introdu o *cale relativă* în interiorul vaultului tău (de exemplu `Concepts` sau `Generated/Topics`) unde vor fi salvate noile note de concept. Folderele vor fi create dacă nu există. **Trebuie completat dacă personalizarea este activată.** **Nu folosi căi absolute sau caractere invalide.**
 <img width="800" height="145" alt="concept note output" src="https://github.com/user-attachments/assets/d0338341-7d67-4472-964c-75a0992165b8" />
 
 #### Ieșirea fișierului de jurnal al conceptelor
 -   **Generate Concept Log File**:
-    *   **Disabled (Default)**: nu se generează niciun fișier de jurnal.
-    *   **Enabled**: creează un fișier de jurnal care listează notele de concept nou create după procesare. Formatul este:
+    *   **Dezactivat (implicit)**: nu se generează niciun fișier de jurnal.
+    *   **Activat**: creează un fișier de jurnal care listează notele de concept nou create după procesare. Formatul este:
         ```
-        generate xx concepts md file
+        generează xx fișiere md de concepte
         1. concepts1
         2. concepts2
         ...
         n. conceptsn
         ```
 -   **Customize Log File Save Path**: (vizibil doar când "Generate Concept Log File" este activat)
-    *   **Disabled (Default)**: fișierul de jurnal este salvat în **Concept Note Folder Path** (dacă este specificat) sau în rădăcina vaultului în caz contrar.
-    *   **Enabled**: îți permite să specifici un folder personalizat pentru fișierul de jurnal.
+    *   **Dezactivat (implicit)**: fișierul de jurnal este salvat în **Concept Note Folder Path** (dacă este specificat) sau în rădăcina vaultului în caz contrar.
+    *   **Activat**: îți permite să specifici un folder personalizat pentru fișierul de jurnal.
 -   **Concept Log Folder Path**: (vizibil doar când "Customize Log File Save Path" este activat) introdu o *cale relativă* în interiorul vaultului tău (de exemplu `Logs/Notemd`) unde ar trebui salvat fișierul de jurnal. **Trebuie completat dacă personalizarea este activată.**
 -   **Customize Log File Name**: (vizibil doar când "Generate Concept Log File" este activat)
-    *   **Disabled (Default)**: fișierul de jurnal se numește `Generate.log`.
-    *   **Enabled**: îți permite să specifici un nume personalizat pentru fișierul de jurnal.
+    *   **Dezactivat (implicit)**: fișierul de jurnal se numește `Generate.log`.
+    *   **Activat**: îți permite să specifici un nume personalizat pentru fișierul de jurnal.
 -   **Concept Log File Name**: (vizibil doar când "Customize Log File Name" este activat) introdu numele de fișier dorit (de exemplu `ConceptCreation.log`). **Trebuie completat dacă personalizarea este activată.**
 <img width="809" height="281" alt="Concept log file output" src="https://github.com/user-attachments/assets/eef6f5d5-592d-4b8f-84b1-7404521a6e9b" />
 
-#### Sarcina Extract Concepts
--   **Create minimal concept notes**:
+#### Sarcina de extragere a conceptelor
+-   **Creează note minime de concept**:
     *   **On (Default)**: notele de concept nou create vor conține doar titlul (de exemplu `# Concept`).
     *   **Off**: notele de concept pot include conținut suplimentar, precum un backlink "Linked From", dacă acesta nu este dezactivat prin setarea de mai jos.
 -   **Add "Linked From" backlink**:
     *   **Off (Default)**: nu adaugă un backlink la documentul sursă în nota de concept în timpul extragerii.
     *   **On**: adaugă o secțiune "Linked From" cu un backlink către fișierul sursă.
 
-#### Extract Specific Original Text
+#### Extrage textul original specific
 -   **Questions for extraction**: introdu o listă de întrebări (una pe linie) pentru care vrei ca AI-ul să extragă răspunsuri verbatim din notele tale.
 -   **Translate output to corresponding language**:
     *   **Off (Default)**: produce doar textul extras în limba lui originală.
@@ -326,7 +326,7 @@ Accesează setările pluginului prin:
     *   **Off**: salvează în același folder cu fișierul original, cu sufixul `_Extracted`.
     *   **On**: îți permite să specifici un folder și un sufix de nume de fișier personalizate pentru ieșire.
 
-#### Batch Mermaid Fix
+#### Remediere Mermaid în lot
 -   **Enable Mermaid Error Detection**:
     *   **Off (Default)**: detectarea erorilor este omisă după procesare.
     *   **On**: scanează fișierele procesate pentru erori Mermaid rămase și generează un raport `mermaid_error_{foldername}.md`.
@@ -337,8 +337,8 @@ Accesează setările pluginului prin:
 
 #### Parametri de procesare
 -   **Enable Batch Parallelism**:
-    *   **Disabled (Default)**: sarcinile de procesare în lot (precum "Process Folder" sau "Batch Generate from Titles") procesează fișierele unul câte unul (serial).
-    *   **Enabled**: permite pluginului să proceseze mai multe fișiere simultan, ceea ce poate accelera semnificativ joburile mari în lot.
+    *   **Dezactivat (implicit)**: sarcinile de procesare în lot (precum "Process Folder" sau "Batch Generate from Titles") procesează fișierele unul câte unul (serial).
+    *   **Activat**: permite pluginului să proceseze mai multe fișiere simultan, ceea ce poate accelera semnificativ joburile mari în lot.
 -   **Batch Concurrency**: (vizibil doar când paralelismul este activat) setează numărul maxim de fișiere procesate în paralel. Un număr mai mare poate fi mai rapid, dar folosește mai multe resurse și poate atinge limitele API. (Implicit: 1, Interval: 1-20)
 -   **Batch Size**: (vizibil doar când paralelismul este activat) numărul de fișiere grupate într-un singur lot. (Implicit: 50, Interval: 10-200)
 -   **Delay Between Batches (ms)**: (vizibil doar când paralelismul este activat) o întârziere opțională în milisecunde între procesarea fiecărui lot, care poate ajuta la gestionarea rate-limit-urilor API. (Implicit: 1000ms)
@@ -351,21 +351,21 @@ Accesează setările pluginului prin:
 #### Traducere
 -   **Default Target Language**: selectează limba implicită în care vrei să îți traduci notele. Aceasta poate fi suprascrisă în UI când rulezi comanda de traducere. (Implicit: English)
 -   **Customise Translation File Save Path**:
-    *   **Disabled (Default)**: fișierele traduse sunt salvate în *același folder* cu nota originală.
-    *   **Enabled**: îți permite să specifici o *cale relativă* în interiorul vaultului tău (de exemplu `Translations`) unde vor fi salvate fișierele traduse. Folderele vor fi create dacă nu există.
+    *   **Dezactivat (implicit)**: fișierele traduse sunt salvate în *același folder* cu nota originală.
+    *   **Activat**: îți permite să specifici o *cale relativă* în interiorul vaultului tău (de exemplu `Translations`) unde vor fi salvate fișierele traduse. Folderele vor fi create dacă nu există.
 -   **Use custom suffix for translated files**:
-    *   **Disabled (Default)**: fișierele traduse folosesc sufixul implicit `_translated.md` (de exemplu `YourNote_translated.md`).
-    *   **Enabled**: îți permite să specifici un sufix personalizat.
+    *   **Dezactivat (implicit)**: fișierele traduse folosesc sufixul implicit `_translated.md` (de exemplu `YourNote_translated.md`).
+    *   **Activat**: îți permite să specifici un sufix personalizat.
 -   **Custom Suffix**: (vizibil doar când setarea de mai sus este activată) introdu sufixul personalizat de adăugat la numele fișierelor traduse (de exemplu `_es` sau `_fr`).
 <img width="811" height="243" alt="translate" src="https://github.com/user-attachments/assets/57d21a72-e86c-4369-8be5-fd18cb734e2b" />
 
 #### Generare de conținut
 -   **Enable Research in "Generate from Title"**:
-    *   **Disabled (Default)**: "Generate from Title" folosește doar titlul ca intrare.
-    *   **Enabled**: efectuează cercetare web folosind **Web Research Provider** configurat și include rezultatele drept context pentru LLM în timpul generării bazate pe titlu.
+    *   **Dezactivat (implicit)**: "Generate from Title" folosește doar titlul ca intrare.
+    *   **Activat**: efectuează cercetare web folosind **Web Research Provider** configurat și include rezultatele drept context pentru LLM în timpul generării bazate pe titlu.
 -   **Auto-run Mermaid Syntax Fix after Generation**:
-    *   **Enabled (Default)**: rulează automat o trecere de reparare a sintaxei Mermaid după fluxurile legate de Mermaid, precum Process, Generate from Title, Batch Generate from Titles, Research & Summarize, Summarise as Mermaid și Translate.
-    *   **Disabled**: lasă ieșirea Mermaid generată neatinsă, cu excepția cazului în care rulezi manual `Batch Mermaid Fix` sau îl adaugi într-un flux personalizat.
+    *   **Activat (implicit)**: rulează automat o trecere de reparare a sintaxei Mermaid după fluxurile legate de Mermaid, precum Process, Generate from Title, Batch Generate from Titles, Research & Summarize, Summarise as Mermaid și Translate.
+    *   **Dezactivat**: lasă ieșirea Mermaid generată neatinsă, cu excepția cazului în care rulezi manual `Batch Mermaid Fix` sau îl adaugi într-un flux personalizat.
 -   **Output Language**: (nou) selectează limba de ieșire dorită pentru sarcinile "Generate from Title" și "Batch Generate from Title".
     *   **English (Default)**: prompturile sunt procesate și ieșirea este generată în engleză.
     *   **Other Languages**: LLM-ul este instruit să își facă raționamentul în engleză, dar să furnizeze documentația finală în limba selectată (de exemplu Español, Français, 简体中文, 繁體中文, العربية, हिन्दी etc.).
@@ -373,11 +373,11 @@ Accesează setările pluginului prin:
     *   **Change Prompt Word**: îți permite să schimbi cuvântul de prompt pentru o sarcină specifică.
     *   **Custom Prompt Word**: introdu cuvântul de prompt personalizat pentru sarcină.
 -   **Use Custom Output Folder for 'Generate from Title'**:
-    *   **Disabled (Default)**: fișierele generate cu succes sunt mutate într-un subfolder numit `[OriginalFolderName]_complete` relativ la părintele folderului original (sau `Vault_complete` dacă folderul original era rădăcina).
-    *   **Enabled**: îți permite să specifici un nume personalizat pentru subfolderul în care sunt mutate fișierele finalizate.
+    *   **Dezactivat (implicit)**: fișierele generate cu succes sunt mutate într-un subfolder numit `[OriginalFolderName]_complete` relativ la părintele folderului original (sau `Vault_complete` dacă folderul original era rădăcina).
+    *   **Activat**: îți permite să specifici un nume personalizat pentru subfolderul în care sunt mutate fișierele finalizate.
 -   **Custom Output Folder Name**: (vizibil doar când setarea de mai sus este activată) introdu numele dorit pentru subfolder (de exemplu `Generated Content`, `_complete`). Caracterele invalide nu sunt permise. Implicit este `_complete` dacă este lăsat gol. Acest folder este creat relativ la directorul părinte al folderului original.
 
-#### Butoane de flux one-click
+#### Butoane de flux cu un singur clic
 -   **Visual Workflow Builder**: creează butoane personalizate de flux din acțiuni integrate fără a scrie manual DSL-ul.
 -   **Custom Workflow Buttons DSL**: utilizatorii avansați pot edita în continuare direct textul definiției fluxului. Un DSL invalid revine în siguranță la fluxul implicit și afișează un avertisment în UI-ul din sidebar/setări.
 -   **Workflow Error Strategy**:
@@ -385,17 +385,17 @@ Accesează setările pluginului prin:
     *   **Continue on Error**: continuă rularea pașilor ulteriori și raportează la final numărul de acțiuni eșuate.
 -   **Default Workflow Included**: `One-Click Extract` leagă `Process File (Add Links)`, `Batch Generate from Titles` și `Batch Mermaid Fix`.
 
-#### Setări pentru prompturi personalizate
+#### Setări pentru instrucțiuni personalizate
 Această funcție îți permite să suprascrii instrucțiunile implicite (prompturile) trimise către LLM pentru sarcini specifice, oferindu-ți control fin asupra ieșirii.
 
 -   **Enable Custom Prompts for Specific Tasks**:
-    *   **Disabled (Default)**: pluginul folosește prompturile implicite integrate pentru toate operațiunile.
-    *   **Enabled**: activează posibilitatea de a seta prompturi personalizate pentru sarcinile listate mai jos. Acesta este comutatorul principal pentru această funcție.
+    *   **Dezactivat (implicit)**: pluginul folosește prompturile implicite integrate pentru toate operațiunile.
+    *   **Activat**: activează posibilitatea de a seta prompturi personalizate pentru sarcinile listate mai jos. Acesta este comutatorul principal pentru această funcție.
 
 -   **Use Custom Prompt for [Task Name]**: (vizibil doar când setarea de mai sus este activată)
     *   Pentru fiecare sarcină acceptată ("Add Links", "Generate from Title", "Research & Summarize", "Extract Concepts"), poți activa sau dezactiva individual promptul tău personalizat.
     *   **Disabled**: această sarcină va folosi promptul implicit.
-    *   **Enabled**: această sarcină va folosi textul pe care îl furnizezi în zona de text "Custom Prompt" corespunzătoare de mai jos.
+    *   **Activat**: această sarcină va folosi textul pe care îl furnizezi în zona de text "Custom Prompt" corespunzătoare de mai jos.
 
 -   **Custom Prompt Text Area**: (vizibil doar când promptul personalizat pentru o sarcină este activat)
     *   **Default Prompt Display**: pentru referință, pluginul afișează promptul implicit pe care l-ar folosi în mod normal pentru sarcina respectivă. Poți folosi butonul **"Copy Default Prompt"** pentru a copia acest text ca punct de plecare pentru propriul tău prompt personalizat.
@@ -429,17 +429,17 @@ Această funcție îți permite să suprascrii instrucțiunile implicite (prompt
 
 #### Domeniu de învățare focalizat
 -   **Enable Focused Learning Domain**:
-    *   **Disabled (Default)**: prompturile trimise către LLM folosesc instrucțiunile standard, de uz general.
-    *   **Enabled**: îți permite să specifici unul sau mai multe domenii de studiu pentru a îmbunătăți înțelegerea contextuală a LLM-ului.
+    *   **Dezactivat (implicit)**: prompturile trimise către LLM folosesc instrucțiunile standard, de uz general.
+    *   **Activat**: îți permite să specifici unul sau mai multe domenii de studiu pentru a îmbunătăți înțelegerea contextuală a LLM-ului.
 -   **Learning Domain**: (vizibil doar când setarea de mai sus este activată) introdu domeniul/domeniile tale specifice, de exemplu 'Materials Science', 'Polymer Physics', 'Machine Learning'. Asta va adăuga o linie "Relevant Fields: [...]" la începutul prompturilor, ajutând LLM-ul să genereze linkuri și conținut mai precise și mai relevante pentru aria ta de studiu.
 <img width="595" height="143" alt="focused learning domain" src="https://github.com/user-attachments/assets/1bcc9707-5c10-4944-a61b-65fde0cd0404" />
 
 ## Ghid de utilizare
 
-### Fluxuri rapide și sidebar
+### Fluxuri rapide și bară laterală
 
 -   Deschide sidebarul Notemd pentru a accesa secțiuni grupate de acțiuni pentru procesarea de bază, generare, traducere, knowledge și utilitare.
--   Folosește zona **Quick Workflows** din partea de sus a sidebarului pentru a lansa butoane personalizate cu mai mulți pași.
+-   Folosește zona **Fluxuri de lucru rapide** din partea de sus a sidebarului pentru a lansa butoane personalizate cu mai mulți pași.
 -   Fluxul implicit **One-Click Extract** rulează `Process File (Add Links)` -> `Batch Generate from Titles` -> `Batch Mermaid Fix`.
 -   Progresul fluxului, logurile per pas și eșecurile sunt afișate în sidebar, cu un footer fix care împiedică bara de progres și zona de log să fie împinse afară când secțiunile sunt expandate.
 -   Cardul de progres păstrează lizibile dintr-o privire textul de stare, o pastilă dedicată procentului și timpul rămas, iar aceleași fluxuri personalizate pot fi reconfigurate din setări.
@@ -467,7 +467,7 @@ Aceasta este funcționalitatea de bază, axată pe identificarea conceptelor și
 
 ### Funcții noi
 
-1.  **Summarise as Mermaid diagram**:
+1.  **Rezumă ca diagramă Mermaid**:
     *   Deschide nota pe care vrei să o rezumi.
     *   Rulează comanda `Notemd: Summarise as Mermaid diagram` (din paleta de comenzi sau prin butonul din sidebar).
     *   Pluginul va genera o notă nouă cu diagrama Mermaid.
@@ -479,7 +479,7 @@ Aceasta este funcționalitatea de bază, axată pe identificarea conceptelor și
     *   Pluginul folosește **LLM Provider** configurat (pe baza setărilor Multi-Model) pentru a efectua traducerea.
     *   Conținutul tradus este salvat în **Translation Save Path** configurată, cu sufixul corespunzător, și este deschis într-un **panou nou în dreapta** conținutului original pentru comparație ușoară.
     *   Poți anula această sarcină din butonul din sidebar sau din butonul de anulare al ferestrei modale.
-3.  **Batch Translate**:
+3.  **Traducere în lot**:
     *   Rulează comanda `Notemd: Batch Translate Folder` din paleta de comenzi și selectează un folder sau fă clic dreapta pe un folder în exploratorul de fișiere și alege "Batch translate this folder".
     *   Pluginul va traduce toate fișierele Markdown din folderul selectat.
     *   Fișierele traduse sunt salvate în calea de traducere configurată, dar nu sunt deschise automat.
@@ -613,7 +613,7 @@ Notemd rulează local în interiorul Obsidian, dar unele funcții trimit request
 - Endpoint: API-ul Tavily sau endpointurile DuckDuckGo.
 - Date trimise: interogarea ta de cercetare și metadatele necesare ale requestului.
 
-### Diagnosticare pentru dezvoltatori și loguri de debug (opționale)
+### Diagnosticare pentru dezvoltatori și jurnale de depanare (opționale)
 
 - Trigger: modul API debug și acțiunile de diagnostic pentru dezvoltatori.
 - Stocare: logurile de diagnostic și de eroare sunt scrise în rădăcina vaultului tău (de exemplu `Notemd_Provider_Diagnostic_*.txt` și `Notemd_Error_Log_*.txt`).
@@ -655,7 +655,7 @@ Notemd rulează local în interiorul Obsidian, dar unele funcții trimit request
         ```
         Raportul generat conține timpi per încercare (`First Byte`, `Duration`), metadate de request sanitizate, headere de răspuns, fragmente brute/parțiale de corp, fragmente de flux parsate și puncte de eșec ale stratului de transport.
 -   **Probleme de conectare LM Studio/Ollama**:
-    *   **Test Connection Fails**: asigură-te că serverul local (LM Studio sau Ollama) rulează și că modelul corect este încărcat/disponibil.
+    *   **Testul conexiunii eșuează**: asigură-te că serverul local (LM Studio sau Ollama) rulează și că modelul corect este încărcat/disponibil.
     *   **CORS Errors (Ollama pe Windows)**: dacă întâlnești erori CORS (Cross-Origin Resource Sharing) când folosești Ollama pe Windows, poate fi nevoie să setezi variabila de mediu `OLLAMA_ORIGINS`. Poți face asta rulând `set OLLAMA_ORIGINS=*` în command prompt înainte de a porni Ollama. Asta permite requesturi din orice origine.
     *   **Enable CORS in LM Studio**: pentru LM Studio, poți activa CORS direct din setările serverului, ceea ce poate fi necesar dacă Obsidian rulează în browser sau are politici stricte de origine.
 -   **Erori la crearea folderelor ("File name cannot contain...")**:
@@ -671,8 +671,8 @@ Contribuțiile sunt binevenite. Consultă repository-ul GitHub pentru ghiduri: [
 
 ## Documentație pentru Întreținători
 
-- [Release Workflow (English)](./docs/maintainer/release-workflow.md)
-- [Release Workflow (简体中文)](./docs/maintainer/release-workflow.zh-CN.md)
+- [Flux de lansare (engleză)](./docs/maintainer/release-workflow.md)
+- [Flux de lansare (chineză simplificată)](./docs/maintainer/release-workflow.zh-CN.md)
 
 ## Licență
 
