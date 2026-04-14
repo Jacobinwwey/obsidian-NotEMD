@@ -104,6 +104,18 @@ export default class NotemdPlugin extends Plugin {
             }
         });
 
+        this.addCommand({
+            id: 'notemd-preview-experimental-diagram',
+            name: uiStrings.commands.previewExperimentalDiagram,
+            editorCallback: async (_editor: Editor, view: MarkdownView) => {
+                const file = view.file;
+                if (file) {
+                    const reporter = this.getReporter();
+                    await this.previewExperimentalDiagramCommand(file, reporter);
+                }
+            }
+        });
+
 		this.ribbonIconEl = this.addRibbonIcon(NOTEMD_SIDEBAR_ICON, uiStrings.plugin.ribbonTooltip, () => {
 			this.activateView();
 		});
@@ -1735,6 +1747,59 @@ export default class NotemdPlugin extends Plugin {
             new Notice(formatI18n(i18n.notices.experimentalDiagramError, { message }));
             console.error('Experimental diagram generation error:', error);
             await saveErrorLog(this.app, reporter, error, this.settings);
+        } finally {
+            if (maybeSidebar instanceof NotemdSidebarView) {
+                maybeSidebar.finishProcessing();
+            }
+            this.isBusy = false;
+        }
+    }
+
+    async previewExperimentalDiagramCommand(file: TFile, reporter: ProgressReporter) {
+        if (this.isBusy) {
+            new Notice(this.getUiStrings().notices.anotherProcessRunning);
+            return;
+        }
+        this.isBusy = true;
+        const useReporter = reporter || this.getReporter();
+        let i18n = this.getUiStrings();
+        const actionLabel = i18n.commands.previewExperimentalDiagram;
+        const maybeSidebar = useReporter as any;
+        this.startReporterAction(useReporter, `${actionLabel}: ${file.name}`);
+        useReporter.log(`Starting experimental diagram preview for ${file.name}...`);
+
+        try {
+            await this.loadSettings();
+            i18n = this.getUiStrings();
+            const fileContent = await this.app.vault.read(file);
+            if (!fileContent.trim()) {
+                throw new Error('File is empty. Cannot generate diagram preview.');
+            }
+
+            const { provider, modelName } = this.getProviderAndModelForTask('summarizeToMermaid');
+            useReporter.log(`Using provider: ${provider.name}, Model: ${modelName}`);
+            useReporter.updateStatus(this.getStepStatusText(1, 2, actionLabel), 25);
+
+            const result = await generateDiagramArtifact(fileContent, {
+                compatibilityMode: this.settings.experimentalDiagramCompatibilityMode,
+                targetLanguage: resolveTaskLanguageCode(this.settings, 'summarizeToMermaid'),
+                llmInvoker: (systemPrompt, sourceMarkdown) =>
+                    callLLM(provider, systemPrompt, sourceMarkdown, this.settings, useReporter, modelName)
+            });
+
+            useReporter.log(`Experimental diagram preview produced target "${result.artifact.target}" with intent "${result.spec.intent}".`);
+            this.openDiagramPreviewModal(result.artifact, file.path);
+
+            useReporter.updateStatus(this.getActionCompleteText(actionLabel), 100);
+            useReporter.log(`Experimental diagram preview opened for: ${file.path}`);
+            new Notice(i18n.notices.experimentalDiagramPreviewReady);
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : String(error);
+            useReporter.log(`Error during experimental diagram preview: ${message}`);
+            useReporter.updateStatus(this.getActionFailedText(message), -1);
+            new Notice(formatI18n(i18n.notices.experimentalDiagramError, { message }));
+            console.error('Experimental diagram preview error:', error);
+            await saveErrorLog(this.app, useReporter, error, this.settings);
         } finally {
             if (maybeSidebar instanceof NotemdSidebarView) {
                 maybeSidebar.finishProcessing();

@@ -131,4 +131,55 @@ describe('experimental diagram command', () => {
         const modalInstance = (DiagramPreviewModal as jest.Mock).mock.results[0]?.value;
         expect(modalInstance.open).toHaveBeenCalledTimes(1);
     });
+
+    test('preview command opens a modal without saving the generated artifact', async () => {
+        jest.spyOn(diagramGenerationService, 'generateDiagramArtifact').mockResolvedValue({
+            plan: {
+                intent: 'dataChart',
+                confidence: 0.92,
+                reasons: ['table metrics detected'],
+                renderTarget: 'vega-lite',
+                fallbackTargets: [],
+                mermaidDiagramType: null,
+                legacyCompatibilityMode: false
+            },
+            spec: {
+                intent: 'dataChart',
+                title: 'Weekly Signups',
+                nodes: [],
+                dataSeries: [
+                    {
+                        id: 'signups',
+                        label: 'Signups',
+                        points: [
+                            { x: 'Week 1', y: 12 },
+                            { x: 'Week 2', y: 19 }
+                        ]
+                    }
+                ]
+            },
+            artifact: {
+                target: 'vega-lite',
+                content: '{"mark":"bar"}',
+                mimeType: 'application/json',
+                sourceIntent: 'dataChart'
+            }
+        });
+        const file = { name: 'Topic.md', basename: 'Topic', path: 'Notes/Topic.md', parent: { path: 'Notes' } } as any;
+
+        await (plugin as any).previewExperimentalDiagramCommand(file, reporter);
+
+        expect(fileUtils.saveDiagramArtifactFile).not.toHaveBeenCalled();
+        expect(DiagramPreviewModal).toHaveBeenCalledTimes(1);
+        expect(DiagramPreviewModal).toHaveBeenCalledWith(
+            mockApp,
+            expect.objectContaining({
+                payload: expect.objectContaining({
+                    artifact: expect.objectContaining({ target: 'vega-lite' }),
+                    sourcePath: 'Notes/Topic.md'
+                })
+            }),
+            plugin.settings.uiLocale
+        );
+    });
 });
