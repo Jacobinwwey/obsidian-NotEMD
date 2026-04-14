@@ -4,6 +4,7 @@ import { renderMermaidArtifactSvg } from '../rendering/preview/mermaidPreview';
 import {
     renderPreviewArtifactSvg,
     saveDiagramPreviewSvg,
+    saveDiagramSourceArtifact,
     supportsPreviewSvgExport
 } from '../rendering/preview/previewExport';
 import { RenderPreviewSession } from '../rendering/host/renderHost';
@@ -51,6 +52,31 @@ export class DiagramPreviewModal extends Modal {
                 console.error('Failed to copy diagram source:', error);
             });
         };
+
+        if (this.session.payload.sourcePath && !this.session.payload.artifactSaved) {
+            const saveSourceButton = toolbar.createEl('button', {
+                text: i18n.previewModal.saveSource
+            });
+            saveSourceButton.onclick = async () => {
+                saveSourceButton.disabled = true;
+                saveSourceButton.setText(i18n.previewModal.savingSource);
+                try {
+                    const outputPath = await saveDiagramSourceArtifact(
+                        this.app,
+                        this.session.payload.sourcePath as string,
+                        this.session.payload.artifact
+                    );
+                    new Notice(formatI18n(i18n.previewModal.saveSourceSuccessNotice, { path: outputPath }));
+                } catch (error) {
+                    const message = error instanceof Error ? error.message : String(error);
+                    new Notice(formatI18n(i18n.previewModal.saveSourceFailedNotice, { message }));
+                    console.error('Failed to save diagram source artifact:', error);
+                } finally {
+                    saveSourceButton.disabled = false;
+                    saveSourceButton.setText(i18n.previewModal.saveSource);
+                }
+            };
+        }
 
         if (this.session.payload.sourcePath && supportsPreviewSvgExport(this.session.payload.artifact)) {
             const exportButton = toolbar.createEl('button', {

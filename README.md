@@ -149,6 +149,7 @@ That's it! Explore the settings to unlock more features like web research, trans
     - A spec-first diagram path can route note content into Mermaid, Obsidian JSON Canvas, or Vega-Lite instead of forcing every case through Mermaid text generation.
     - Generated `.canvas` and `.json` artifacts are saved through the same output-path policy as Mermaid summaries, and preview surfaces now cover Mermaid, JSON Canvas, and Vega-Lite results.
     - Preview modals can now export rendered Mermaid/Canvas/Vega-Lite output as `.svg` files beside the source note or beside the generated artifact, giving you a stable image handoff path without flattening everything into screenshots first.
+    - Preview-only runs can also persist the raw generated artifact beside the current note using target-aware extensions and suffixes (`_summ.md`, `_diagram.canvas`, `_diagram.json`), so validation and handoff do not require rerunning the LLM step.
     - The existing Mermaid auto-fix path remains intact for Mermaid outputs only; non-Mermaid artifacts bypass the fixer instead of being pushed through incompatible post-processing.
 
 - **Simple Formula Format Correction**:
