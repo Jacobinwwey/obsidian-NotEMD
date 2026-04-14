@@ -17,7 +17,8 @@ export const STRINGS_ZH_TW: DeepPartial<NotemdEnglishStrings> = {
         checkDuplicatesCurrent: '檢查目前檔案中的重複項',
         extractConceptsAndGenerateTitles: '擷取概念並生成標題',
         createWikiLinkAndGenerateNoteFromSelection: '從選取內容建立 Wiki-Link 並生成筆記',
-        generateExperimentalDiagram: '生成圖形（實驗性）'
+        generateExperimentalDiagram: '生成圖形（實驗性）',
+        previewExperimentalDiagram: '預覽圖形（實驗性）'
     },
     plugin: {
         viewName: 'Notemd 工作台',
@@ -574,6 +575,7 @@ export const STRINGS_ZH_TW: DeepPartial<NotemdEnglishStrings> = {
         mermaidSummarizationComplete: 'Mermaid 圖摘要完成！',
         mermaidSummarizationError: '摘要錯誤：{message}',
         experimentalDiagramComplete: '實驗性圖形生成完成！',
+        experimentalDiagramPreviewReady: '實驗性圖形預覽已就緒！',
         experimentalDiagramError: '實驗性圖形生成失敗：{message}',
         conceptExtractionSuccess: '概念擷取完成！共找到並建立了 {count} 個概念筆記。',
         noConceptsFoundToExtract: '找不到可擷取的概念。',
