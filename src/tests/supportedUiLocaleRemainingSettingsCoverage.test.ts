@@ -98,4 +98,16 @@ describe('supported UI locale remaining settings coverage', () => {
             { label: 'settings.customPrompts.customPromptPlaceholder', get: strings => strings.settings.customPrompts.customPromptPlaceholder }
         ]);
     });
+
+    test('ships localized experimental diagram pipeline settings copy for all advertised locales', () => {
+        assertLocalizedForAllAdvertisedLocales([
+            { label: 'settings.developer.experimentalDiagramPipeline.heading', get: strings => strings.settings.developer.experimentalDiagramPipeline.heading },
+            { label: 'settings.developer.experimentalDiagramPipeline.enableName', get: strings => strings.settings.developer.experimentalDiagramPipeline.enableName },
+            { label: 'settings.developer.experimentalDiagramPipeline.enableDesc', get: strings => strings.settings.developer.experimentalDiagramPipeline.enableDesc },
+            { label: 'settings.developer.experimentalDiagramPipeline.compatibilityName', get: strings => strings.settings.developer.experimentalDiagramPipeline.compatibilityName },
+            { label: 'settings.developer.experimentalDiagramPipeline.compatibilityDesc', get: strings => strings.settings.developer.experimentalDiagramPipeline.compatibilityDesc },
+            { label: 'settings.developer.experimentalDiagramPipeline.compatibilityLegacy', get: strings => strings.settings.developer.experimentalDiagramPipeline.compatibilityLegacy },
+            { label: 'settings.developer.experimentalDiagramPipeline.compatibilityBestFit', get: strings => strings.settings.developer.experimentalDiagramPipeline.compatibilityBestFit }
+        ]);
+    });
 });
