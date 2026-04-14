@@ -51,6 +51,17 @@ describe('i18n fallback and cache', () => {
         expect(resolved.common.cancel).toBe('Abbrechen');
     });
 
+    test('falls back from regional Obsidian locales to supported base catalogs', () => {
+        (getLanguage as jest.Mock).mockReturnValue('fr-CA');
+        const resolved = getI18nStrings({ uiLocale: 'auto' });
+        expect(resolved.common.cancel).toBe('Annuler');
+    });
+
+    test('maps Chinese script variants onto the correct catalog', () => {
+        expect(getResolvedStrings('zh-Hans')).toBe(getResolvedStrings('zh-CN'));
+        expect(getResolvedStrings('zh-Hant-HK')).toBe(getResolvedStrings('zh-TW'));
+    });
+
     test('supports manual ui locale override for regional variants', () => {
         (getLanguage as jest.Mock).mockReturnValue('en');
         const resolved = getI18nStrings({ uiLocale: 'pt-BR' });
