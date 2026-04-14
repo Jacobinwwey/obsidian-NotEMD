@@ -12,7 +12,8 @@ export const STRINGS_EN = {
     commands: {
         checkDuplicatesCurrent: 'Check for duplicates in current file',
         extractConceptsAndGenerateTitles: 'Extract Concepts and Generate Titles',
-        createWikiLinkAndGenerateNoteFromSelection: 'Create Wiki-Link & Generate Note from Selection'
+        createWikiLinkAndGenerateNoteFromSelection: 'Create Wiki-Link & Generate Note from Selection',
+        generateExperimentalDiagram: 'Generate diagram (experimental)'
     },
     plugin: {
         viewName: 'Notemd Workbench',
@@ -569,6 +570,8 @@ export const STRINGS_EN = {
         failedTranslateFileWithMessage: 'Failed to translate file: {message}. See console for details.',
         mermaidSummarizationComplete: 'Mermaid diagram summarization complete!',
         mermaidSummarizationError: 'Summarization Error: {message}',
+        experimentalDiagramComplete: 'Experimental diagram generation complete!',
+        experimentalDiagramError: 'Experimental diagram generation failed: {message}',
         conceptExtractionSuccess: 'Concept extraction complete! Found and created {count} concept notes.',
         noConceptsFoundToExtract: 'No concepts found to extract.',
         conceptExtractionError: 'Error during concept extraction: {message}.',
