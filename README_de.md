@@ -239,6 +239,7 @@ Rufen Sie die Plugin-Einstellungen auf über:
 ### Spracharchitektur (UI-Sprache vs. Aufgaben-Ausgabesprache)
 
 -   **UI-Sprache** steuert ausschließlich den Text der Plugin-Oberfläche (Einstellungsbeschriftungen, Schaltflächen in der Seitenleiste, Hinweise und Dialoge). Der Standardmodus `auto` folgt der aktuellen UI-Sprache von Obsidian.
+-   Regionale und Schriftvarianten werden nun dem nächstliegenden veröffentlichten Katalog zugeordnet, statt direkt auf Englisch zurückzufallen. Zum Beispiel verwendet `fr-CA` Französisch, `es-419` Spanisch, `pt-PT` Portugiesisch, `zh-Hans` vereinfachtes Chinesisch und `zh-Hant-HK` traditionelles Chinesisch.
 -   **Aufgaben-Ausgabesprache** steuert die vom Modell generierte Aufgabenausgabe (Links, Zusammenfassungen, Titelgenerierung, Mermaid-Zusammenfassung, Konzepteextraktion, Übersetzungsziel).
 -   **Der Modus "Sprache pro Aufgabe"** ermöglicht es jeder Aufgabe, ihre eigene Ausgabesprache über eine einheitliche Richtlinienschicht aufzulösen, anstatt über verstreute Überschreibungen pro Modul.
 -   **Automatische Übersetzung deaktivieren** hält Nicht-Übersetzungsaufgaben im ursprünglichen Sprachkontext, während explizite Übersetzungsaufgaben weiterhin die konfigurierte Zielsprache anwenden.
