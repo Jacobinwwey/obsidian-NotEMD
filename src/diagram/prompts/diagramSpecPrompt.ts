@@ -56,6 +56,8 @@ Validation rules:
 - Keep labels concise and faithful to the source.
 - Put verbatim evidence snippets into evidenceRefs when the source contains critical wording.
 - For dataChart intent, include dataSeries with explicit x and y values extracted from the source.
+- For dataChart intent, set layoutHints.chartType to one of: bar, line, area, point, scatter, pie, table.
+- Use scatter for paired numeric x/y observations, pie for part-to-whole categorical shares, and table when ranked/tabular rows communicate better than axes.
 
 Return a single valid DiagramSpec JSON object.`;
 }
