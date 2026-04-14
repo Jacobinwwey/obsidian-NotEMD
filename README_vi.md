@@ -234,6 +234,7 @@ Truy cập settings của tiện ích qua:
 ### Kiến trúc ngôn ngữ (Ngôn ngữ giao diện và ngôn ngữ đầu ra tác vụ)
 
 - **Ngôn ngữ giao diện** chỉ điều khiển văn bản giao diện của tiện ích, như nhãn cài đặt, nút thanh bên, thông báo và hộp thoại. Chế độ mặc định `auto` đi theo ngôn ngữ UI hiện tại của Obsidian.
+- Các biến thể theo vùng hoặc hệ chữ viết nay được ánh xạ tới catalog đã phát hành gần nhất thay vì rơi thẳng về tiếng Anh. Ví dụ, `fr-CA` dùng tiếng Pháp, `es-419` dùng tiếng Tây Ban Nha, `pt-PT` dùng tiếng Bồ Đào Nha, `zh-Hans` dùng tiếng Trung Giản thể, còn `zh-Hant-HK` dùng tiếng Trung Phồn thể.
 - **Ngôn ngữ đầu ra tác vụ** điều khiển đầu ra tác vụ do model tạo ra, như liên kết, bản tóm tắt, tạo tiêu đề, tóm tắt Mermaid, trích xuất khái niệm và ngôn ngữ đích khi dịch.
 - **Chế độ ngôn ngữ theo tác vụ** cho phép mỗi tác vụ tự quyết định ngôn ngữ đầu ra từ một lớp chính sách thống nhất thay vì các ghi đè rải rác theo từng module.
 - **Tắt dịch tự động** giữ các tác vụ không phải Translate trong ngữ cảnh ngôn ngữ nguồn, còn các tác vụ Translate rõ ràng vẫn áp dụng ngôn ngữ đích đã cấu hình.

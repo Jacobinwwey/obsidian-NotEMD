@@ -234,6 +234,7 @@ Pääset liitännäisen asetuksiin näin:
 ### Kieliarkkitehtuuri (käyttöliittymän kieli ja tehtävien tulostuskieli)
 
 - **Käyttöliittymän kieli** ohjaa vain liitännäisen käyttöliittymätekstejä, kuten asetusten nimikkeitä, sivupalkin painikkeita, ilmoituksia ja dialogeja. Oletusarvoinen `auto`-tila seuraa Obsidianin nykyistä käyttöliittymäkieltä.
+- Alueelliset ja kirjoitusjärjestelmään liittyvät variantit ratkaistaan nyt lähimpään julkaistuun kielikatalogiin sen sijaan, että ne putoaisivat suoraan englantiin. Esimerkiksi `fr-CA` käyttää ranskaa, `es-419` espanjaa, `pt-PT` portugalia, `zh-Hans` yksinkertaistettua kiinaa ja `zh-Hant-HK` perinteistä kiinaa.
 - **Tehtävien tulostuskieli** ohjaa mallin tuottamaa tehtäväulostuloa, kuten linkkejä, yhteenvetoja, otsikointia, Mermaid-yhteenvetoa, käsitepoimintaa ja käännöksen kohdekieltä.
 - **Per-task language mode** antaa kunkin tehtävän ratkaista oman ulostulokielensä yhtenäisen policy-kerroksen kautta hajautettujen moduulikohtaisten yliajojen sijaan.
 - **Poista automaattinen käännös käytöstä** pitää muut kuin Translate-tehtävät lähdekielen kontekstissa, kun taas eksplisiittiset Translate-tehtävät pakottavat edelleen määritetyn kohdekielen.

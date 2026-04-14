@@ -231,6 +231,7 @@ Accesează setările pluginului prin:
 ### Arhitectura limbii (limba interfeței și limba ieșirii sarcinilor)
 
 -   **Limba interfeței** controlează doar textul interfeței pluginului (etichete de setări, butoane din bara laterală, notificări și dialoguri). Modul implicit `auto` urmează limba curentă a UI-ului din Obsidian.
+-   Variantele regionale sau de sistem de scriere sunt acum mapate la cel mai apropiat catalog publicat, în loc să cadă direct la engleză. De exemplu, `fr-CA` folosește franceza, `es-419` folosește spaniola, `pt-PT` folosește portugheza, `zh-Hans` folosește chineza simplificată, iar `zh-Hant-HK` folosește chineza tradițională.
 -   **Limba ieșirii sarcinilor** controlează ieșirea generată de model pentru sarcini (linkuri, rezumate, generare de titluri, rezumat Mermaid, extragere de concepte, ținta traducerii).
 -   **Per-task language mode** permite fiecărei sarcini să-și rezolve propria limbă de ieșire dintr-un strat de politică unificat în locul suprascrierilor împrăștiate pe module.
 -   **Dezactivează traducerea automată** păstrează sarcinile non-Translate în contextul limbii sursă, în timp ce sarcinile explicite Translate aplică în continuare limba țintă configurată.

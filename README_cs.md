@@ -234,6 +234,7 @@ Přístup ke settings pluginu:
 ### Jazyková architektura (jazyk rozhraní a jazyk výstupu úloh)
 
 - **Jazyk rozhraní** řídí pouze text pluginového rozhraní, tedy štítky nastavení, tlačítka postranního panelu, oznámení a dialogy. Výchozí režim `auto` sleduje aktuální jazyk UI v Obsidianu.
+- Regionální a písmové varianty se nyní mapují na nejbližší vydaný katalog, místo aby rovnou spadly do angličtiny. Například `fr-CA` používá francouzštinu, `es-419` španělštinu, `pt-PT` portugalštinu, `zh-Hans` zjednodušenou čínštinu a `zh-Hant-HK` tradiční čínštinu.
 - **Jazyk výstupu úloh** řídí modelově generovaný výstup úloh, jako odkazy, shrnutí, generování názvů, Mermaid summary, extrakci konceptů a cílový jazyk překladu.
 - **Per-task language mode** umožňuje, aby si každá úloha určovala svůj výstupní jazyk z jedné společné policy vrstvy namísto rozptýlených override v jednotlivých modulech.
 - **Zakázat automatický překlad** drží úlohy mimo Translate v kontextu zdrojového jazyka, zatímco explicitní úlohy Translate stále vynucují nakonfigurovaný cílový jazyk.
