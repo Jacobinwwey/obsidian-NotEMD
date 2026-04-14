@@ -239,6 +239,7 @@ Acesse as configurações do plugin através de:
 ### Arquitetura de idioma (Idioma da interface vs idioma de saída das tarefas)
 
 -   **Idioma da interface** controla apenas o texto da interface do plugin (rótulos de configurações, botões da barra lateral, avisos e diálogos). O modo `auto` padrão segue o idioma atual da interface do Obsidian.
+-   Variantes regionais ou de escrita agora são resolvidas para o catálogo publicado mais próximo, em vez de cair direto para o inglês. Por exemplo, `fr-CA` usa francês, `es-419` usa espanhol, `pt-PT` usa português, `zh-Hans` usa chinês simplificado e `zh-Hant-HK` usa chinês tradicional.
 -   **Idioma de saída das tarefas** controla a saída de tarefas gerada pelo modelo (links, resumos, geração de títulos, resumo Mermaid, extração de conceitos, destino da tradução).
 -   **O modo de idioma por tarefa** permite que cada tarefa resolva seu próprio idioma de saída a partir de uma camada de política unificada, em vez de sobrescritas dispersas por módulo.
 -   **Desativar tradução automática** mantém as tarefas que não são de tradução no contexto do idioma original, enquanto tarefas explícitas de tradução ainda aplicam o idioma de destino configurado.

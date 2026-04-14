@@ -239,6 +239,7 @@ Accede a los ajustes del complemento a través de:
 ### Arquitectura de Idioma (Idioma de la interfaz vs idioma de salida de tareas)
 
 -   **Idioma de la interfaz** controla solo el texto de la interfaz del complemento (etiquetas de ajustes, botones de la barra lateral, avisos y diálogos). El modo `auto` predeterminado sigue el idioma actual de la UI de Obsidian.
+-   Las variantes regionales y de escritura ahora se resuelven al catálogo publicado más cercano en lugar de caer directamente al inglés. Por ejemplo, `fr-CA` usa francés, `es-419` usa español, `pt-PT` usa portugués, `zh-Hans` usa chino simplificado y `zh-Hant-HK` usa chino tradicional.
 -   **Idioma de salida de tareas** controla la salida de tareas generada por el modelo (enlaces, resúmenes, generación de títulos, resumen de Mermaid, extracción de conceptos, objetivo de traducción).
 -   **El modo de idioma por tarea** permite que cada tarea resuelva su propio idioma de salida desde una capa de política unificada en lugar de sobrescrituras dispersas por módulo.
 -   **Desactivar traducción automática** mantiene las tareas que no son de traducción en el contexto del idioma original, mientras que las tareas explícitas de traducción siguen aplicando el idioma de destino configurado.
