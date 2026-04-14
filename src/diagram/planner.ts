@@ -1,0 +1,81 @@
+import {
+    DiagramIntent,
+    DiagramIntentResult,
+    DiagramPlan,
+    DiagramPlanOptions,
+    MermaidDiagramType,
+    RenderTarget
+} from './types';
+import { inferDiagramIntent } from './intent';
+
+function resolvePreferredRenderTarget(intent: DiagramIntent): RenderTarget {
+    switch (intent) {
+        case 'canvasMap':
+            return 'json-canvas';
+        case 'dataChart':
+            return 'vega-lite';
+        default:
+            return 'mermaid';
+    }
+}
+
+function resolveMermaidDiagramType(intent: DiagramIntent): MermaidDiagramType | null {
+    switch (intent) {
+        case 'mindmap':
+            return 'mindmap';
+        case 'flowchart':
+            return 'flowchart';
+        case 'sequence':
+            return 'sequenceDiagram';
+        case 'classDiagram':
+            return 'classDiagram';
+        case 'erDiagram':
+            return 'erDiagram';
+        case 'stateDiagram':
+            return 'stateDiagram-v2';
+        default:
+            return null;
+    }
+}
+
+function buildIntentResult(markdown: string, requestedIntent?: DiagramIntent): DiagramIntentResult {
+    if (!requestedIntent) {
+        return inferDiagramIntent(markdown);
+    }
+
+    return {
+        intent: requestedIntent,
+        confidence: 0.95,
+        reasons: ['explicit intent requested']
+    };
+}
+
+export function buildDiagramPlan(markdown: string, options: DiagramPlanOptions = {}): DiagramPlan {
+    const compatibilityMode = options.compatibilityMode ?? 'best-fit';
+    const inferred = buildIntentResult(markdown, options.requestedIntent);
+    const preferredTarget = resolvePreferredRenderTarget(inferred.intent);
+    const preferredMermaidType = resolveMermaidDiagramType(inferred.intent);
+
+    if (compatibilityMode === 'legacy-mermaid') {
+        const fallbackTargets: RenderTarget[] = preferredTarget === 'mermaid' ? [] : [preferredTarget];
+        return {
+            intent: inferred.intent,
+            confidence: inferred.confidence,
+            reasons: inferred.reasons,
+            renderTarget: 'mermaid',
+            fallbackTargets,
+            mermaidDiagramType: preferredMermaidType ?? 'mindmap',
+            legacyCompatibilityMode: true
+        };
+    }
+
+    return {
+        intent: inferred.intent,
+        confidence: inferred.confidence,
+        reasons: inferred.reasons,
+        renderTarget: preferredTarget,
+        fallbackTargets: preferredTarget === 'mermaid' ? [] : ['mermaid'],
+        mermaidDiagramType: preferredMermaidType,
+        legacyCompatibilityMode: false
+    };
+}
