@@ -56,10 +56,15 @@ Release 必需资产：
 - `styles.css`
 - `README.md`
 
-## 5. 推荐发布命令模板
+## 5. 发布命令
 
 ```bash
-gh release create <tag> main.js manifest.json styles.css README.md \
-  --title "Notemd <tag>" \
-  --notes-file docs/releases/<tag>.md
+npm run release:github -- <tag>
 ```
+
+该辅助命令会在调用 GitHub 前强制校验必须打包的资产以及 `docs/releases/<tag>.md`：
+
+- 如果 release 尚不存在，则执行 `gh release create ... --verify-tag`。
+- 如果 release 已存在，则执行 `gh release upload ... --clobber`。
+
+第二条路径就是这类问题的修复路径：release 文案已发布，但插件安装资产未上传时，可直接补传。
