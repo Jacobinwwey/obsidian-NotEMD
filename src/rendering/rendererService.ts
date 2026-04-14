@@ -1,8 +1,15 @@
 import { DiagramSpec } from '../diagram/types';
 import { InlineRenderHost } from './host/inlineRenderHost';
-import { RenderHost } from './host/renderHost';
+import { PreviewCapableRenderHost, RenderHost, RenderPreviewSession } from './host/renderHost';
 import { RendererRegistry } from './rendererRegistry';
 import { RenderArtifact, RenderOptions } from './types';
+import { RenderWebviewPayloadOptions } from './webview/contract';
+
+function isPreviewCapableHost(host: RenderHost): host is PreviewCapableRenderHost {
+    return typeof (host as PreviewCapableRenderHost).createSession === 'function';
+}
+
+export interface PreviewRenderOptions extends RenderOptions, RenderWebviewPayloadOptions {}
 
 export class RendererService {
     private readonly host: RenderHost;
@@ -19,5 +26,17 @@ export class RendererService {
         }
 
         return this.host.render(renderer, spec);
+    }
+
+    async preparePreviewSession(
+        spec: DiagramSpec,
+        options: PreviewRenderOptions = {}
+    ): Promise<RenderPreviewSession | null> {
+        const artifact = await this.render(spec, options);
+        if (!isPreviewCapableHost(this.host)) {
+            return null;
+        }
+
+        return this.host.createSession(artifact, options);
     }
 }

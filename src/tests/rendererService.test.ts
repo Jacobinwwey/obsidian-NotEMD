@@ -1,4 +1,5 @@
 import { DiagramSpec } from '../diagram/types';
+import { IframeRenderHost } from '../rendering/host/iframeRenderHost';
 import { RendererRegistry } from '../rendering/rendererRegistry';
 import { RenderHost } from '../rendering/host/renderHost';
 import { MermaidRenderer } from '../rendering/renderers/mermaidRenderer';
@@ -57,5 +58,33 @@ describe('renderer service', () => {
         };
 
         await expect(service.render(spec, { target: 'vega-lite' })).rejects.toThrow(/No renderer registered/i);
+    });
+
+    test('returns null preview session when the host does not support preview sessions', async () => {
+        const registry = new RendererRegistry([new MermaidRenderer()]);
+        const service = new RendererService(registry);
+        const spec: DiagramSpec = {
+            intent: 'mindmap',
+            title: 'Platform',
+            nodes: [{ id: 'core', label: 'Core' }]
+        };
+
+        await expect(service.preparePreviewSession(spec)).resolves.toBeNull();
+    });
+
+    test('prepares a preview session through iframe-capable hosts', async () => {
+        const registry = new RendererRegistry([new MermaidRenderer()]);
+        const service = new RendererService(registry, new IframeRenderHost());
+        const spec: DiagramSpec = {
+            intent: 'mindmap',
+            title: 'Platform',
+            nodes: [{ id: 'core', label: 'Core' }]
+        };
+
+        const session = await service.preparePreviewSession(spec);
+
+        expect(session).not.toBeNull();
+        expect(session?.htmlSrcdoc).toContain('<!DOCTYPE html>');
+        expect(session?.payload.artifact.target).toBe('mermaid');
     });
 });
