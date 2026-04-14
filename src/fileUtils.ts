@@ -11,6 +11,7 @@ import { showDeletionConfirmationModal } from './ui/modals'; // Assuming this wi
 import mermaid from 'mermaid';
 import { formatI18n, getI18nStrings } from './i18n';
 import { resolveTaskLanguageName, shouldApplyAutoTranslation } from './i18n/taskLanguagePolicy';
+import { RenderArtifact } from './rendering/types';
 
 // --- Backlink and Note Management ---
 
@@ -1266,6 +1267,73 @@ export async function saveMermaidSummaryFile(app: App, settings: NotemdSettings,
     } else {
         await app.vault.create(outputPath, mermaidContent);
         progressReporter.log(`Created Mermaid summary file: ${outputPath}`);
+    }
+    return outputPath;
+}
+
+export async function saveDiagramArtifactFile(
+    app: App,
+    settings: NotemdSettings,
+    originalFile: TFile,
+    artifact: RenderArtifact,
+    progressReporter: ProgressReporter
+): Promise<string> {
+    let saveDir = '';
+    if (settings.useCustomSummarizeToMermaidSavePath && settings.summarizeToMermaidSavePath) {
+        saveDir = settings.summarizeToMermaidSavePath;
+    } else {
+        saveDir = originalFile.parent?.path || '';
+    }
+
+    saveDir = saveDir.replace(/^\/|\/$/g, '');
+    if (saveDir && !saveDir.endsWith('/')) saveDir += '/';
+
+    const targetSaveFolder = saveDir.replace(/\/$/, '');
+    const existingFolder = targetSaveFolder ? app.vault.getAbstractFileByPath(targetSaveFolder) : null;
+    if (targetSaveFolder && !existingFolder) {
+        await app.vault.createFolder(targetSaveFolder);
+        progressReporter.log(`Created diagram output folder: ${targetSaveFolder}`);
+    } else if (targetSaveFolder && !(existingFolder instanceof TFolder)) {
+        const errorMsg = `Diagram output path '${targetSaveFolder}' exists but is not a folder.`;
+        progressReporter.log(errorMsg);
+        new Notice(errorMsg, 10000);
+        throw new Error(errorMsg);
+    }
+
+    let suffix = '_diagram';
+    let extension = '.txt';
+    switch (artifact.target) {
+        case 'mermaid':
+            suffix = settings.useCustomSummarizeToMermaidSuffix && settings.summarizeToMermaidCustomSuffix
+                ? settings.summarizeToMermaidCustomSuffix
+                : DEFAULT_SETTINGS.summarizeToMermaidCustomSuffix;
+            if (suffix.toLowerCase().endsWith('.md')) {
+                suffix = suffix.substring(0, suffix.length - 3);
+            }
+            extension = '.md';
+            break;
+        case 'json-canvas':
+            extension = '.canvas';
+            break;
+        case 'vega-lite':
+            extension = '.json';
+            break;
+        case 'html':
+            extension = '.html';
+            break;
+    }
+
+    const outputFileName = `${originalFile.basename}${suffix}${extension}`;
+    const outputPath = `${saveDir}${outputFileName}`;
+    progressReporter.log(`Saving diagram artifact to: ${outputPath}`);
+
+    const existingOutputFile = app.vault.getAbstractFileByPath(outputPath);
+    if (existingOutputFile instanceof TFile) {
+        await app.vault.modify(existingOutputFile, artifact.content);
+        progressReporter.log(`Overwrote existing diagram artifact file: ${outputPath}`);
+    } else {
+        await app.vault.create(outputPath, artifact.content);
+        progressReporter.log(`Created diagram artifact file: ${outputPath}`);
     }
     return outputPath;
 }
