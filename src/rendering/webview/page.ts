@@ -1,14 +1,96 @@
 import { RenderWebviewPayload } from './contract';
 import { renderArtifactMarkup } from './renderFrame';
 
+function buildHtmlPreviewThemeShim(payload: RenderWebviewPayload): string {
+    const colorScheme = payload.resolvedTheme === 'dark' ? 'dark' : 'light';
+
+    return `<style id="notemd-html-preview-theme-shim">
+html, body {
+    margin: 0;
+    min-height: 100%;
+}
+
+body[data-render-theme="light"] {
+    color-scheme: light;
+    background: #f8fafc;
+    color: #0f172a;
+    --notemd-html-bg: #f8fafc;
+    --notemd-html-panel: rgba(255, 255, 255, 0.96);
+    --notemd-html-text: #0f172a;
+    --notemd-html-muted: #475569;
+    --notemd-html-border: rgba(148, 163, 184, 0.32);
+    --notemd-html-chip: rgba(59, 130, 246, 0.14);
+    --notemd-html-accent: #2563eb;
+}
+
+body[data-render-theme="dark"] {
+    color-scheme: dark;
+    background: #020617;
+    color: #e2e8f0;
+    --notemd-html-bg: #020617;
+    --notemd-html-panel: rgba(15, 23, 42, 0.96);
+    --notemd-html-text: #e2e8f0;
+    --notemd-html-muted: #94a3b8;
+    --notemd-html-border: rgba(148, 163, 184, 0.24);
+    --notemd-html-chip: rgba(96, 165, 250, 0.18);
+    --notemd-html-accent: #93c5fd;
+}
+
+body[data-render-theme] {
+    color-scheme: ${colorScheme};
+}
+</style>`;
+}
+
+function applyHtmlBodyThemeAttributes(html: string, payload: RenderWebviewPayload): string {
+    const bodyTagRegex = /<body\b([^>]*)>/i;
+    if (!bodyTagRegex.test(html)) {
+        return html;
+    }
+
+    return html.replace(bodyTagRegex, (_match, attrs: string) => {
+        const attrsWithoutTheme = attrs
+            .replace(/\sdata-render-theme=(["']).*?\1/gi, '')
+            .replace(/\sdata-theme-source=(["']).*?\1/gi, '');
+        return `<body${attrsWithoutTheme} data-render-theme="${payload.resolvedTheme}" data-theme-source="${payload.theme}">`;
+    });
+}
+
+function injectHtmlPreviewThemeShim(html: string, payload: RenderWebviewPayload): string {
+    const themeShim = buildHtmlPreviewThemeShim(payload);
+    const themedHtml = applyHtmlBodyThemeAttributes(html, payload);
+
+    if (/<style\b[^>]*id=(["'])notemd-html-preview-theme-shim\1/i.test(themedHtml)) {
+        return themedHtml;
+    }
+
+    if (/<\/head>/i.test(themedHtml)) {
+        return themedHtml.replace(/<\/head>/i, `${themeShim}\n</head>`);
+    }
+
+    if (/<html\b[^>]*>/i.test(themedHtml)) {
+        return themedHtml.replace(/<html\b([^>]*)>/i, `<html$1><head>${themeShim}</head>`);
+    }
+
+    return `<!DOCTYPE html>
+<html lang="en">
+<head>
+${themeShim}
+</head>
+<body data-render-theme="${payload.resolvedTheme}" data-theme-source="${payload.theme}">
+${themedHtml}
+</body>
+</html>`;
+}
+
 export function buildRenderWebviewHtml(payload: RenderWebviewPayload): string {
     if (payload.artifact.target === 'html' && payload.artifact.mimeType === 'text/html') {
         const trimmed = payload.artifact.content.trim();
         if (/^<!DOCTYPE html>/i.test(trimmed)) {
-            return trimmed;
+            return injectHtmlPreviewThemeShim(trimmed, payload);
         }
 
-        return `<!DOCTYPE html>
+        return injectHtmlPreviewThemeShim(`<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
@@ -17,7 +99,7 @@ export function buildRenderWebviewHtml(payload: RenderWebviewPayload): string {
 <body>
 ${payload.artifact.content}
 </body>
-</html>`;
+</html>`, payload);
     }
 
     return `<!DOCTYPE html>
