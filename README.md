@@ -149,6 +149,7 @@ That's it! Explore the settings to unlock more features like web research, trans
     - A spec-first diagram path can route note content into Mermaid, Obsidian JSON Canvas, or Vega-Lite instead of forcing every case through Mermaid text generation.
     - Current Mermaid adapter coverage in the spec-first path includes `mindmap`, `flowchart`, `sequenceDiagram`, `classDiagram`, `erDiagram`, and `stateDiagram-v2`.
     - Current Vega-Lite adapter coverage in the spec-first path includes cartesian `bar`, `line`, `area`, and `point` charts, plus controlled `scatter`, `pie`, and `table` layout hints that map onto safe built-in Vega-Lite templates.
+    - For `dataChart` plans, the planner now seeds preferred Vega-Lite chart templates (`line`, `pie`, `scatter`, `table`, or fallback `bar`) so omitted `layoutHints.chartType` values do not silently collapse to the wrong chart shape.
     - Generated Mermaid artifacts are now validated with `mermaid.parse` before the renderer returns them, so malformed diagrams fail early instead of quietly leaking into preview/export steps.
     - Generated `.canvas` and `.json` artifacts are saved through the same output-path policy as Mermaid summaries, and preview surfaces now cover Mermaid, JSON Canvas, and Vega-Lite results.
     - HTML fallback artifacts are now generated as dedicated `.html` summaries when a richer renderer is not available, and the preview modal can open them through the iframe fallback path instead of only showing escaped source text.
