@@ -66,4 +66,38 @@ describe('render webview page', () => {
         expect(html).toContain('<main>Preview</main>');
         expect(html).not.toContain('&lt;main&gt;Preview&lt;/main&gt;');
     });
+
+    test('injects resolved theme markers into html artifact previews', () => {
+        const html = buildRenderWebviewHtml({
+            artifact: {
+                target: 'html',
+                content: '<!DOCTYPE html><html><head></head><body><main>Preview</main></body></html>',
+                mimeType: 'text/html',
+                sourceIntent: 'flowchart'
+            },
+            theme: 'system',
+            resolvedTheme: 'dark'
+        });
+
+        expect(html).toContain('<body data-render-theme="dark" data-theme-source="system">');
+        expect(html).toContain('id="notemd-html-preview-theme-shim"');
+        expect(html).toContain('color-scheme: dark;');
+    });
+
+    test('wraps html fragments with theme-aware preview shell when no full document exists', () => {
+        const html = buildRenderWebviewHtml({
+            artifact: {
+                target: 'html',
+                content: '<section>Fragment</section>',
+                mimeType: 'text/html',
+                sourceIntent: 'flowchart'
+            },
+            theme: 'light',
+            resolvedTheme: 'light'
+        });
+
+        expect(html).toContain('<body data-render-theme="light" data-theme-source="light">');
+        expect(html).toContain('<section>Fragment</section>');
+        expect(html).toContain('id="notemd-html-preview-theme-shim"');
+    });
 });
