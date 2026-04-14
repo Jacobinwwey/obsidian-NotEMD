@@ -50,4 +50,20 @@ describe('render webview page', () => {
 
         expect(html).not.toContain('background: rgba(28, 32, 36, 0.72);');
     });
+
+    test('passes through html artifacts for iframe preview instead of escaping them as source text', () => {
+        const html = buildRenderWebviewHtml({
+            artifact: {
+                target: 'html',
+                content: '<!DOCTYPE html><html><body><main>Preview</main></body></html>',
+                mimeType: 'text/html',
+                sourceIntent: 'flowchart'
+            },
+            theme: 'dark',
+            resolvedTheme: 'dark'
+        });
+
+        expect(html).toContain('<main>Preview</main>');
+        expect(html).not.toContain('&lt;main&gt;Preview&lt;/main&gt;');
+    });
 });
