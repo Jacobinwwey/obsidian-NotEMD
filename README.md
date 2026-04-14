@@ -256,6 +256,7 @@ Access plugin settings via:
 ### Language Architecture (UI Locale vs Task Output Language)
 
 -   **UI Locale** controls only plugin interface text (Settings labels, sidebar buttons, notices, and dialogs). The default `auto` mode follows Obsidian's current UI language.
+    - Regional/script variants now resolve to the nearest shipped catalog instead of falling straight back to English. For example, `fr-CA` uses French, `es-419` uses Spanish, `pt-PT` uses Portuguese, `zh-Hans` uses Simplified Chinese, and `zh-Hant-HK` uses Traditional Chinese.
 -   **Task Output Language** controls model-generated task output (links, summaries, title generation, Mermaid summary, concept extraction, translation target).
 -   **Per-task language mode** lets each task resolve its own output language from a unified policy layer instead of scattered per-module overrides.
 -   **Disable auto translation** keeps non-Translate tasks in source-language context, while explicit Translate tasks still enforce the configured target language.

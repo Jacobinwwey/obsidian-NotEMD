@@ -1,5 +1,5 @@
 import { getLanguage } from 'obsidian';
-import { normalizeLocaleCode, resolveUiLocale, UI_LOCALE_AUTO } from './languageContext';
+import { normalizeLocaleCode, resolveSupportedLocaleCode, resolveUiLocale, UI_LOCALE_AUTO } from './languageContext';
 import { STRINGS_EN, NotemdEnglishStrings } from './locales/en';
 import { STRINGS_ZH_CN } from './locales/zh_cn';
 import { STRINGS_ZH_TW } from './locales/zh_tw';
@@ -94,7 +94,7 @@ function getLocaleLayers(locale: string): Array<DeepPartial<TranslationStrings>>
 }
 
 export function getResolvedStrings(locale: string): TranslationStrings {
-    const normalizedLocale = normalizeLocaleCode(locale);
+    const normalizedLocale = resolveSupportedLocaleCode(locale);
     if (normalizedLocale === 'en') {
         return STRINGS_EN;
     }

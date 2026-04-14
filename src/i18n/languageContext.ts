@@ -3,15 +3,39 @@ import { NotemdSettings } from '../types';
 
 export const UI_LOCALE_AUTO = 'auto';
 
+const CHINESE_TRADITIONAL_SEGMENTS = new Set(['hant', 'tw', 'hk', 'mo']);
+const CHINESE_SIMPLIFIED_SEGMENTS = new Set(['hans', 'cn', 'sg', 'my']);
+
 function normalizeChineseLocale(locale: string): string {
-    const lower = locale.toLowerCase();
-    if (lower === 'zh' || lower === 'zh-cn' || lower === 'zh_cn') {
+    const lower = locale.toLowerCase().replace(/_/g, '-');
+    const segments = lower.split('-').filter(Boolean);
+
+    if (segments.length <= 1) {
         return 'zh-CN';
     }
-    if (lower === 'zh-tw' || lower === 'zh_tw' || lower === 'zh-hant') {
+
+    const variants = segments.slice(1);
+    if (variants.some(segment => CHINESE_TRADITIONAL_SEGMENTS.has(segment))) {
         return 'zh-TW';
     }
-    return locale;
+    if (variants.some(segment => CHINESE_SIMPLIFIED_SEGMENTS.has(segment))) {
+        return 'zh-CN';
+    }
+
+    return 'zh-CN';
+}
+
+function normalizeLocaleSubtag(subtag: string): string {
+    if (/^\d+$/.test(subtag)) {
+        return subtag;
+    }
+    if (/^[a-z]{2}$/i.test(subtag)) {
+        return subtag.toUpperCase();
+    }
+    if (/^[a-z]{4}$/i.test(subtag)) {
+        return `${subtag[0].toUpperCase()}${subtag.slice(1).toLowerCase()}`;
+    }
+    return subtag.toLowerCase();
 }
 
 export function normalizeLocaleCode(locale: string | undefined | null): string {
@@ -24,21 +48,54 @@ export function normalizeLocaleCode(locale: string | undefined | null): string {
         return 'en';
     }
 
-    const unified = normalizeChineseLocale(trimmed.replace(/_/g, '-'));
-    const parts = unified.split('-');
+    const unified = trimmed.replace(/_/g, '-');
+    const parts = unified.split('-').filter(Boolean);
+    if (parts.length === 0) {
+        return 'en';
+    }
+
+    if (parts[0].toLowerCase() === 'zh') {
+        return normalizeChineseLocale(unified);
+    }
+
     if (parts.length === 1) {
         return parts[0].toLowerCase();
     }
 
-    return `${parts[0].toLowerCase()}-${parts[1].toUpperCase()}`;
+    return [
+        parts[0].toLowerCase(),
+        ...parts.slice(1).map(normalizeLocaleSubtag)
+    ].join('-');
+}
+
+export function resolveSupportedLocaleCode(
+    locale: string | undefined | null,
+    supportedLocales: readonly string[] = SUPPORTED_UI_LOCALE_CODES
+): string {
+    const normalized = normalizeLocaleCode(locale);
+    const normalizedSupported = supportedLocales.map(normalizeLocaleCode);
+
+    if (normalizedSupported.includes(normalized)) {
+        return normalized;
+    }
+
+    const [baseLanguage] = normalized.split('-');
+    if (normalizedSupported.includes(baseLanguage)) {
+        return baseLanguage;
+    }
+
+    return 'en';
 }
 
 export function languageCodesEqual(left: string | undefined | null, right: string | undefined | null): boolean {
-    return normalizeLocaleCode(left) === normalizeLocaleCode(right);
+    return resolveSupportedLocaleCode(left) === resolveSupportedLocaleCode(right);
 }
 
 export function resolveLanguageDisplayName(settings: NotemdSettings, languageCode: string): string {
-    const normalizedTarget = normalizeLocaleCode(languageCode);
+    const normalizedTarget = resolveSupportedLocaleCode(
+        languageCode,
+        settings.availableLanguages.map(language => language.code)
+    );
     const language = settings.availableLanguages.find(lang => languageCodesEqual(lang.code, normalizedTarget));
     return language?.name || normalizedTarget;
 }
@@ -48,17 +105,15 @@ export function resolveUiLocale(
     obsidianLocale: string | undefined | null,
     supportedLocales: readonly string[] = SUPPORTED_UI_LOCALE_CODES
 ): string {
-    const normalizedSupported = supportedLocales.map(normalizeLocaleCode);
-    const configured = normalizeLocaleCode(settings.uiLocale);
+    const configured = resolveSupportedLocaleCode(settings.uiLocale, supportedLocales);
 
-    if (configured !== UI_LOCALE_AUTO && normalizedSupported.includes(configured)) {
+    if (settings.uiLocale !== UI_LOCALE_AUTO && configured !== 'en') {
         return configured;
     }
 
-    const detected = normalizeLocaleCode(obsidianLocale);
-    if (normalizedSupported.includes(detected)) {
-        return detected;
+    if (settings.uiLocale !== UI_LOCALE_AUTO && normalizeLocaleCode(settings.uiLocale) === 'en') {
+        return 'en';
     }
 
-    return 'en';
+    return resolveSupportedLocaleCode(obsidianLocale, supportedLocales);
 }
