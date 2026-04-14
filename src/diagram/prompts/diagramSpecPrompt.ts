@@ -23,7 +23,7 @@ Output rules:
 - Do not wrap the JSON in markdown code fences.
 - Do not output Mermaid, Canvas, Vega-Lite, PlantUML, or any other renderer syntax.
 - Do not output explanations outside the DiagramSpec JSON payload.
-- Do not invent numeric data. If the source lacks reliable numeric values, leave dataSeries empty.
+- Do not invent numeric data. If the source lacks reliable numeric values, choose a non-dataChart intent and leave dataSeries empty.
 
 Supported intents:
 - mindmap
