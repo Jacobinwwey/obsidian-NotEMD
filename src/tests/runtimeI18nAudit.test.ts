@@ -83,15 +83,21 @@ describe('runtime i18n coverage', () => {
         expect(en.settings.developer.diagnosticSuccess).toBeDefined();
         expect(en.errorModal.titles.research).toBeDefined();
         expect(en.errorModal.titles.batchTranslation).toBeDefined();
+        expect(en.previewModal.exportSvg).toBeDefined();
+        expect(en.previewModal.exportSuccessNotice).toBeDefined();
 
         expect(zhCn.notices.processingComplete).not.toBe(en.notices.processingComplete);
         expect(zhCn.notices.updatingLinksForRenamedFile).not.toBe(en.notices.updatingLinksForRenamedFile);
         expect(zhCn.settings.developer.diagnosticSuccess).not.toBe(en.settings.developer.diagnosticSuccess);
         expect(zhCn.errorModal.titles.batchTranslation).not.toBe(en.errorModal.titles.batchTranslation);
+        expect(zhCn.previewModal.exportSvg).not.toBe(en.previewModal.exportSvg);
+        expect(zhCn.previewModal.exportSuccessNotice).not.toBe(en.previewModal.exportSuccessNotice);
 
         expect(zhTw.notices.researchSummaryAppended).not.toBe(en.notices.researchSummaryAppended);
         expect(zhTw.notices.batchMermaidFixSuccess).not.toBe(en.notices.batchMermaidFixSuccess);
         expect(zhTw.settings.developer.stabilityFinished).not.toBe(en.settings.developer.stabilityFinished);
         expect(zhTw.errorModal.titles.research).not.toBe(en.errorModal.titles.research);
+        expect(zhTw.previewModal.exportSvg).not.toBe(en.previewModal.exportSvg);
+        expect(zhTw.previewModal.exportSuccessNotice).not.toBe(en.previewModal.exportSuccessNotice);
     });
 });

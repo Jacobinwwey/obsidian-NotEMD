@@ -23,6 +23,7 @@ import {
     STRINGS_UK,
     STRINGS_VI
 } from './locales/additional';
+import { PREVIEW_MODAL_LOCALE_EXTENSIONS } from './locales/previewModal';
 import { SUPPORTED_UI_LOCALE_CODES } from './uiLocales';
 
 type TranslationStrings = NotemdEnglishStrings;
@@ -83,6 +84,13 @@ function mergeTranslationValues(base: unknown, override: unknown): unknown {
     return typeof override === typeof base ? override : base;
 }
 
+function getLocaleLayers(locale: string): Array<DeepPartial<TranslationStrings>> {
+    return [
+        LANGUAGE_MAP[locale],
+        PREVIEW_MODAL_LOCALE_EXTENSIONS[locale]
+    ].filter((value): value is DeepPartial<TranslationStrings> => Boolean(value));
+}
+
 export function getResolvedStrings(locale: string): TranslationStrings {
     const normalizedLocale = normalizeLocaleCode(locale);
     if (normalizedLocale === 'en') {
@@ -94,7 +102,10 @@ export function getResolvedStrings(locale: string): TranslationStrings {
         return cached;
     }
 
-    const merged = mergeTranslationValues(STRINGS_EN, LANGUAGE_MAP[normalizedLocale] || LANGUAGE_MAP.en) as TranslationStrings;
+    let merged: TranslationStrings = STRINGS_EN;
+    for (const layer of getLocaleLayers(normalizedLocale)) {
+        merged = mergeTranslationValues(merged, layer) as TranslationStrings;
+    }
     resolvedLanguageCache.set(normalizedLocale, merged);
     return merged;
 }
