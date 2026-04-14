@@ -214,4 +214,33 @@ describe('diagram generation service', () => {
         expect(result.spec.layoutHints?.chartType).toBe('line');
         expect(JSON.parse(result.artifact.content).mark).toBe('line');
     });
+
+    test('rejects ambiguous multi-series pie specs before renderer fallback', async () => {
+        await expect(generateDiagramArtifact(`# Traffic Mix
+
+Organic share: 40%
+Paid share: 25%
+`, {
+            compatibilityMode: 'best-fit',
+            targetLanguage: 'en',
+            llmInvoker: async () => JSON.stringify({
+                intent: 'dataChart',
+                title: 'Traffic Mix',
+                nodes: [],
+                layoutHints: { chartType: 'pie' },
+                dataSeries: [
+                    {
+                        id: 'current',
+                        label: 'Current',
+                        points: [{ x: 'Organic', y: 40 }]
+                    },
+                    {
+                        id: 'previous',
+                        label: 'Previous',
+                        points: [{ x: 'Paid', y: 25 }]
+                    }
+                ]
+            })
+        })).rejects.toThrow(/single data series/i);
+    });
 });
