@@ -66,8 +66,8 @@ export const STRINGS_ZH_TW: DeepPartial<NotemdEnglishStrings> = {
                 compatibilityName: '實驗性相容模式',
                 compatibilityDesc:
                     '選擇實驗性圖形生成與預覽選取圖形目標的積極程度。「Legacy Mermaid」會保持 Mermaid 相容輸出；「Best fit」會先嘗試更符合內容的圖形意圖，再在不支援時回退。標準「Summarise as Mermaid diagram」命令會始終將 spec-first 路徑固定為 Mermaid 相容輸出。',
-                compatibilityLegacy: 'Legacy Mermaid',
-                compatibilityBestFit: 'Best fit'
+                compatibilityLegacy: 'Mermaid 相容',
+                compatibilityBestFit: '最佳匹配'
             },
             diagnosticBlocked: '無法為 {provider} 執行開發者診斷：{issues}',
             diagnosticRunning: '正在為 {provider} 執行開發者診斷...',
