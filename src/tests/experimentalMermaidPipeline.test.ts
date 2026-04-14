@@ -59,6 +59,7 @@ describe('experimental mermaid pipeline integration', () => {
 
     test('uses experimental pipeline result when enabled and successful', async () => {
         plugin.settings.enableExperimentalDiagramPipeline = true;
+        plugin.settings.experimentalDiagramCompatibilityMode = 'best-fit';
         jest.spyOn(diagramGenerationService, 'generateDiagramArtifact').mockResolvedValue({
             plan: {
                 intent: 'flowchart',
@@ -96,6 +97,10 @@ describe('experimental mermaid pipeline integration', () => {
 
         expect(result).toContain('flowchart TD');
         expect(legacySpy).not.toHaveBeenCalled();
+        expect(diagramGenerationService.generateDiagramArtifact).toHaveBeenCalledWith('# Notes', expect.objectContaining({
+            compatibilityMode: 'legacy-mermaid'
+        }));
+        expect(reporter.log).toHaveBeenCalledWith(expect.stringMatching(/pins experimental compatibility mode to legacy-mermaid/i));
     });
 
     test('falls back to legacy path when experimental pipeline fails', async () => {
@@ -113,5 +118,12 @@ describe('experimental mermaid pipeline integration', () => {
         expect(result).toBe('legacy-output');
         expect(llmUtils.callLLM).toHaveBeenCalledTimes(1);
         expect(reporter.log).toHaveBeenCalledWith(expect.stringMatching(/falling back/i));
+    });
+
+    test('keeps best-fit compatibility for experimental diagram commands', () => {
+        plugin.settings.experimentalDiagramCompatibilityMode = 'best-fit';
+
+        expect((plugin as any).resolveExperimentalDiagramCompatibilityMode()).toBe('best-fit');
+        expect((plugin as any).resolveExperimentalDiagramCompatibilityMode(true)).toBe('legacy-mermaid');
     });
 });
