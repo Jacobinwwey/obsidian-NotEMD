@@ -18,8 +18,13 @@ export function supportsInlineVegaLitePreview(artifact: RenderArtifact): boolean
     return artifact.target === 'vega-lite' && artifact.mimeType === 'application/json';
 }
 
+export function supportsIframeHtmlPreview(artifact: RenderArtifact): boolean {
+    return artifact.target === 'html' && artifact.mimeType === 'text/html';
+}
+
 export function supportsDiagramPreviewModal(artifact: RenderArtifact): boolean {
     return supportsInlineMermaidPreview(artifact)
         || supportsInlineCanvasPreview(artifact)
-        || supportsInlineVegaLitePreview(artifact);
+        || supportsInlineVegaLitePreview(artifact)
+        || supportsIframeHtmlPreview(artifact);
 }

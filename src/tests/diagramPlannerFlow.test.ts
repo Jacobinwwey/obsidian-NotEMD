@@ -16,7 +16,7 @@ describe('diagram planner', () => {
         expect(result.intent).toBe('dataChart');
         expect(result.renderTarget).toBe('vega-lite');
         expect(result.mermaidDiagramType).toBeNull();
-        expect(result.fallbackTargets).toEqual([]);
+        expect(result.fallbackTargets).toEqual(['html']);
     });
 
     test('preserves legacy mermaid compatibility when requested', () => {
