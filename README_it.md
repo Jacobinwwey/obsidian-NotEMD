@@ -240,6 +240,7 @@ Accedi alle impostazioni del plugin tramite:
 ### Architettura linguistica (Lingua dell'interfaccia vs lingua di output delle attività)
 
 -   **Lingua dell'interfaccia** controlla esclusivamente il testo dell'interfaccia del plugin (etichette impostazioni, pulsanti barra laterale, avvisi e dialoghi). La modalità `auto` predefinita segue la lingua attuale della UI di Obsidian.
+-   Le varianti regionali o di scrittura ora vengono risolte al catalogo pubblicato più vicino invece di ricadere subito sull'inglese. Ad esempio, `fr-CA` usa il francese, `es-419` usa lo spagnolo, `pt-PT` usa il portoghese, `zh-Hans` usa il cinese semplificato e `zh-Hant-HK` usa il cinese tradizionale.
 -   **Lingua di output delle attività** controlla l'output delle attività generato dal modello (link, riassunti, generazione titoli, riassunto Mermaid, estrazione concetti, destinazione traduzione).
 -   **La modalità lingua per attività** consente a ogni attività di risolvere la propria lingua di output da un livello di policy unificato invece di sovrascritture sparse per modulo.
 -   **Disabilita traduzione automatica** mantiene le attività non di traduzione nel contesto della lingua originale, mentre le attività di traduzione esplicite applicano comunque la lingua di destinazione configurata.

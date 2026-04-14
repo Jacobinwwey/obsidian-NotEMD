@@ -240,6 +240,7 @@ Accédez aux réglages du plugin via :
 ### Architecture des Langues (Langue de l'interface vs langue de sortie des tâches)
 
 -   **Langue de l'interface** contrôle uniquement le texte de l'interface du plugin (étiquettes des réglages, boutons de la barre latérale, avis et fenêtres). Le mode `auto` par défaut suit la langue actuelle de l'interface d'Obsidian.
+-   Les variantes régionales ou d’écriture sont désormais résolues vers le catalogue publié le plus proche au lieu de retomber directement sur l’anglais. Par exemple, `fr-CA` utilise le français, `es-419` l’espagnol, `pt-PT` le portugais, `zh-Hans` le chinois simplifié et `zh-Hant-HK` le chinois traditionnel.
 -   **Langue de sortie des tâches** contrôle la sortie des tâches générée par le modèle (liens, résumés, génération de titres, résumé Mermaid, extraction de concepts, cible de traduction).
 -   **Le mode de langue par tâche** permet à chaque tâche de résoudre sa propre langue de sortie à partir d'une couche de politique unifiée au lieu de remplacements dispersés par module.
 -   **Désactiver la traduction automatique** garde les tâches non-traduction dans le contexte de la langue source, tandis que les tâches de traduction explicites appliquent toujours la langue cible configurée.

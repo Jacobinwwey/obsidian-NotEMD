@@ -106,4 +106,45 @@ describe('html renderer', () => {
         expect(artifact.content).not.toContain('<h2>Data</h2>');
         expect(artifact.content).not.toContain('<th>Series</th>');
     });
+
+    test('falls back to shipped base catalogs for regional output languages', async () => {
+        const renderer = new HtmlRenderer();
+        const spec: DiagramSpec = {
+            intent: 'flowchart',
+            title: 'Flux de publication',
+            outputLanguage: 'fr-CA',
+            nodes: [{ id: 'validate', label: 'Valider' }]
+        };
+
+        const artifact = await renderer.render(spec);
+
+        expect(artifact.content).toContain('<h2>Structure</h2>');
+        expect(artifact.content).toContain('Langue de sortie');
+        expect(artifact.content).not.toContain('Output language');
+    });
+
+    test('maps Chinese script-region variants onto the correct shipped catalog', async () => {
+        const renderer = new HtmlRenderer();
+        const spec: DiagramSpec = {
+            intent: 'dataChart',
+            title: '每週註冊量',
+            outputLanguage: 'zh-Hant-HK',
+            nodes: [],
+            dataSeries: [
+                {
+                    id: 'signups',
+                    label: '註冊量',
+                    points: [
+                        { x: '第 1 週', y: 12 }
+                    ]
+                }
+            ]
+        };
+
+        const artifact = await renderer.render(spec);
+
+        expect(artifact.content).toContain('<h2>資料</h2>');
+        expect(artifact.content).toContain('輸出語言');
+        expect(artifact.content).not.toContain('<h2>Data</h2>');
+    });
 });
