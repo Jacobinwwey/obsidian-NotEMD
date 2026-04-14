@@ -2,11 +2,14 @@ import {
     attachDirectionalNoteToConnection,
     buildLegacyConnectedNoteLines,
     cleanLegacyTargetedNoteContent,
+    mergeLegacyDoubleArrowLabelLine,
     parseDirectionalNoteDirective,
     parseLegacyForOfNoteDirective,
     parseLegacyStandaloneNoteDirective,
     parseLegacyTargetedNoteDirective,
     protectTopLevelBracketBlocks,
+    quoteLegacyUnquotedEdgeLabelLine,
+    rewriteLegacyQuotedLabelAfterSemicolonLine,
     restoreProtectedBracketBlocks
 } from '../diagram/adapters/mermaid/legacyFixerUtils';
 
@@ -79,5 +82,27 @@ describe('mermaid legacy fixer utils', () => {
             nodeId: 'Torque',
             text: '* General: τ = dL/dt[""]'
         });
+    });
+
+    test('merges double arrow label segments into a single quoted edge label', () => {
+        expect(mergeLegacyDoubleArrowLabelLine('G -- Label1 -- Label2 --- H;')).toBe(
+            'G -- "Label1<br>Label2" --- H;'
+        );
+        expect(mergeLegacyDoubleArrowLabelLine('B -- "Moderate Energy & Power" -- "Balanced Energy/Power<br>Widely Used" --> C;')).toBe(
+            'B -- "Moderate Energy & Power<br>Balanced Energy/Power<br>Widely Used" --> C;'
+        );
+    });
+
+    test('quotes legacy unquoted edge labels without touching valid quoted ones', () => {
+        expect(quoteLegacyUnquotedEdgeLabelLine('C -- Higher Energy, Lower Power --> D[Flow Battery];')).toBe(
+            'C -- "Higher Energy, Lower Power" --> D[Flow Battery];'
+        );
+        expect(quoteLegacyUnquotedEdgeLabelLine('C -- "Higher Energy, Lower Power" --> D[Flow Battery];')).toBeNull();
+    });
+
+    test('rewrites trailing quoted edge labels that appear after semicolons', () => {
+        expect(rewriteLegacyQuotedLabelAfterSemicolonLine('Levy --> Stationary; "Increments are stationary"')).toBe(
+            'Levy -- "Increments are stationary" --> Stationary;'
+        );
     });
 });
