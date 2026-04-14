@@ -23,6 +23,7 @@ import { fixFormulaFormatsInFile, batchFixFormulaFormatsInFolder } from './formu
 import { _performResearch, researchAndSummarize } from './searchUtils'; // Import _performResearch if needed directly, ensure researchAndSummarize is exported
 import { ProgressModal } from './ui/ProgressModal';
 import { ErrorModal } from './ui/ErrorModal';
+import { DiagramPreviewModal } from './ui/DiagramPreviewModal';
 import { NotemdSettingTab } from './ui/NotemdSettingTab';
 import { showDeletionConfirmationModal } from './ui/modals'; // Import the modal function
 import { NotemdSidebarView } from './ui/NotemdSidebarView';
@@ -33,6 +34,8 @@ import { formatI18n, getI18nStrings } from './i18n';
 import { resolveTaskLanguageCode } from './i18n/taskLanguagePolicy';
 import { getSidebarActionLabel, SidebarActionId } from './workflowButtons';
 import { generateDiagramArtifact } from './diagram/diagramGenerationService';
+import { RenderArtifact } from './rendering/types';
+import { IframeRenderHost } from './rendering/host/iframeRenderHost';
 
 export default class NotemdPlugin extends Plugin {
     settings: NotemdSettings;
@@ -59,6 +62,15 @@ export default class NotemdPlugin extends Plugin {
 
     private openLocalizedErrorModal(title: string, errorMessage: string) {
         new ErrorModal(this.app, title, errorMessage, this.settings.uiLocale).open();
+    }
+
+    private supportsDiagramPreview(artifact: RenderArtifact): boolean {
+        return artifact.target === 'mermaid';
+    }
+
+    private openDiagramPreviewModal(artifact: RenderArtifact, sourcePath: string) {
+        const session = new IframeRenderHost().createSession(artifact, { sourcePath });
+        new DiagramPreviewModal(this.app, session, this.settings.uiLocale).open();
     }
 
     async onload() {
@@ -1710,6 +1722,10 @@ export default class NotemdPlugin extends Plugin {
                 const newFile = this.app.vault.getAbstractFileByPath(outputFilePath);
                 if (newFile instanceof TFile) {
                     newLeaf.openFile(newFile);
+                }
+
+                if (this.supportsDiagramPreview(result.artifact)) {
+                    this.openDiagramPreviewModal(result.artifact, outputFilePath);
                 }
             }
         } catch (error: unknown) {

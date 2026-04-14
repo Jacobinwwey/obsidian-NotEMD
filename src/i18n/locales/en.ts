@@ -617,6 +617,13 @@ export const STRINGS_EN = {
         processingStopped: 'Processing stopped.',
         cancelling: 'Cancelling...',
         userRequestedCancellation: 'User requested cancellation.'
+    },
+    previewModal: {
+        title: '{target} preview',
+        copySource: 'Copy source',
+        copySuccessNotice: 'Diagram source copied to clipboard!',
+        copyFailedNotice: 'Failed to copy diagram source. See console.',
+        sourceFile: 'Saved file: {path}'
     }
 };
 
