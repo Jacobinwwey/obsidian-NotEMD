@@ -67,6 +67,12 @@ export const STRINGS_EN = {
             heading: 'LLM providers',
             summaryTitle: 'Provider presets expanded to {count} entries.',
             summaryDesc: 'OpenAI-compatible providers now share one runtime path. Built-in presets cover China-focused services such as Qwen, Doubao, Moonshot, GLM, MiniMax, Baidu Qianfan, and SiliconFlow, and the generic "OpenAI Compatible" preset can target LiteLLM, vLLM, Perplexity, Vercel AI Gateway, or your own proxy.',
+            categoryCloud: 'Cloud',
+            categoryGateway: 'Gateway',
+            categoryLocal: 'Local',
+            categoryOther: 'Provider',
+            presetSummaryTitle: '{provider} preset',
+            presetSummaryHint: 'Default endpoint: {baseUrl} · Default model: {model}',
             manageName: 'Manage provider configurations',
             manageDesc: 'Export your current provider settings to a JSON file, or import settings from a file.',
             exportButton: 'Export providers',
@@ -254,10 +260,14 @@ export const STRINGS_EN = {
             heading: 'Custom prompt settings',
             enableName: 'Enable custom prompts for specific tasks',
             enableDesc: 'On: Allows you to override the default system prompts for selected tasks below. Off: Default prompts will always be used.',
+            taskToggleName: 'Use custom prompt for "{task}"',
             taskToggleDesc: 'On: Use your custom prompt below for this task. Off: Use the default prompt.',
             copyDefaultButton: 'Copy Default Prompt',
             copyDefaultNotice: 'Default prompt copied to clipboard!',
-            customPromptDesc: 'Enter your custom prompt. Placeholders like {TITLE} or {RESEARCH_CONTEXT_SECTION} will be replaced if applicable for the task. Refer to the default prompt for available placeholders.'
+            defaultPromptLabel: 'Default prompt for "{task}":',
+            customPromptName: 'Custom prompt for "{task}"',
+            customPromptDesc: 'Enter your custom prompt. Placeholders like {TITLE} or {RESEARCH_CONTEXT_SECTION} will be replaced if applicable for the task. Refer to the default prompt for available placeholders.',
+            customPromptPlaceholder: 'Enter your custom prompt for {task}...'
         },
         generateTitleOutput: {
             useCustomFolderName: "Use custom output folder for 'Generate from title'",

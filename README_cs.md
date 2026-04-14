@@ -4,7 +4,7 @@
 
 [English](./README.md) | [简体中文](./README_zh.md) | [Español](./README_es.md) | [Français](./README_fr.md) | [Deutsch](./README_de.md) | [Italiano](./README_it.md) | [Português](./README_pt.md) | [繁體中文](./README_zh_Hant.md) | [日本語](./README_ja.md) | [한국어](./README_ko.md) | [Русский](./README_ru.md) | [العربية](./README_ar.md) | [हिन्दी](./README_hi.md) | [বাংলা](./README_bn.md) | [Nederlands](./README_nl.md) | [Svenska](./README_sv.md) | [Suomi](./README_fi.md) | [Dansk](./README_da.md) | [Norsk](./README_no.md) | [Polski](./README_pl.md) | [Türkçe](./README_tr.md) | [עברית](./README_he.md) | [ไทย](./README_th.md) | [Ελληνικά](./README_el.md) | [Čeština](./README_cs.md) | [Magyar](./README_hu.md) | [Română](./README_ro.md) | [Українська](./README_uk.md) | [Tiếng Việt](./README_vi.md) | [Bahasa Indonesia](./README_id.md) | [Bahasa Melayu](./README_ms.md)
 
-Přečtěte si dokumentaci v dalších jazycích: [Language Hub](./docs/i18n/README.md)
+Přečtěte si dokumentaci v dalších jazycích: [Jazykové centrum](./docs/i18n/README.md)
 
 ```
 ==================================================
@@ -59,15 +59,15 @@ To je vše. Prozkoumejte nastavení a odemkněte další funkce, jako je webový
 
 | Oblast | Rozsah | Výchozí | Poznámky |
 |---|---|---|---|
-| `UI Locale` | Pouze text pluginového rozhraní, tedy settings, sidebar, notices a dialogs | `auto` | Řídí se locale Obsidianu; aktuální UI katalogy jsou `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, `zh-TW`. |
-| `Task Output Language` | Výstup úloh generovaný LLM, jako odkazy, shrnutí, generování, extrakce a cíl překladu | `en` | Může být globální nebo per-task, pokud je zapnuto `Use different languages for tasks`. |
-| `Disable auto translation` | Úlohy mimo Translate zachovávají kontext zdrojového jazyka | `false` | Explicitní úlohy `Translate` stále vynucují nakonfigurovaný cílový jazyk. |
-| Záložní locale | Řešení chybějících UI klíčů | locale -> `en` | Udržuje UI stabilní, když některé klíče ještě nejsou přeložené. |
+| `Jazyk rozhraní` | Pouze text pluginového rozhraní, tedy nastavení, postranní panel, oznámení a dialogy | `auto` | Řídí se locale Obsidianu; aktuální UI katalogy jsou `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, `zh-TW`. |
+| `Jazyk výstupu úloh` | Výstup úloh generovaný LLM, jako odkazy, shrnutí, generování, extrakce a cíl překladu | `en` | Může být globální nebo per-task, pokud je zapnuto `Používat různé jazyky pro úlohy`. |
+| `Vypnout automatický překlad` | Úlohy mimo Translate zachovávají kontext zdrojového jazyka | `false` | Explicitní úlohy `Translate` stále vynucují nakonfigurovaný cílový jazyk. |
+| Záložní lokalizace | Řešení chybějících UI klíčů | locale -> `en` | Udržuje UI stabilní, když některé klíče ještě nejsou přeložené. |
 
 - Udržované zdrojové dokumenty jsou angličtina a zjednodušená čínština a publikované překlady README jsou odkazovány v záhlaví výše.
 - Pokrytí UI locale v aplikaci nyní přesně odpovídá explicitnímu katalogu v kódu: `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, `zh-TW`.
 - Anglický fallback zůstává implementační bezpečnostní sítí, ale podporované viditelné plochy jsou pokryty regresními testy a při běžném použití by se neměly tiše vracet do angličtiny.
-- Další detaily a pravidla pro přispívání jsou sledovány v [Language Hub](./docs/i18n/README.md).
+- Další detaily a pravidla pro přispívání jsou sledovány v [Jazykovém centru](./docs/i18n/README.md).
 
 ## Funkce
 
@@ -111,15 +111,15 @@ To je vše. Prozkoumejte nastavení a odemkněte další funkce, jako je webový
   - Podporuje překlad mezi mnoha jazyky.
   - Konfigurovatelný cílový jazyk v settings nebo UI.
   - Automaticky otevírá přeložený text vpravo od originálu pro pohodlnější čtení.
-- **Batch Translate**:
+- **Dávkový překlad**:
   - Přeložte všechny soubory ve vybrané složce.
   - Podporuje paralelní zpracování, pokud je povoleno "Enable Batch Parallelism".
   - Používá vlastní prompt pro překlad, pokud jste je nastavili.
   - Přidává volbu "Batch translate this folder" do kontextové nabídky file exploreru.
-- **Disable auto translation**: pokud je tato volba zapnuta, úlohy mimo Translate již nevynucují konkrétní jazyk výstupu a zachovávají kontext zdrojového jazyka. Explicitní úloha "Translate" stále provede překlad podle konfigurace.
+- **Zakázat automatický překlad**: pokud je tato volba zapnuta, úlohy mimo Translate již nevynucují konkrétní jazyk výstupu a zachovávají kontext zdrojového jazyka. Explicitní úloha "Translate" stále provede překlad podle konfigurace.
 
 ### Webový průzkum a generování obsahu
-- **Web Research & Summarization**:
+- **Webový výzkum a shrnutí**:
   - Provádějte webové vyhledávání pomocí Tavily, které vyžaduje API klíč, nebo DuckDuckGo, které je experimentální.
   - **Lepší robustnost vyhledávání**: vyhledávání DuckDuckGo nyní používá vylepšenou logiku parsování, `DOMParser` s Regex fallbackem, aby lépe zvládalo změny rozvržení a vracelo spolehlivé výsledky.
   - Shrnujte výsledky vyhledávání pomocí nakonfigurovaného LLM.
@@ -133,7 +133,7 @@ To je vše. Prozkoumejte nastavení a odemkněte další funkce, jako je webový
 - **Mermaid auto-fix coupling**: když je povolen Mermaid auto-fix, Mermaid-related workflow nyní po zpracování automaticky opravují vygenerované soubory nebo výstupní složky. To pokrývá Process, Generate from Title, Batch Generate from Titles, Research & Summarize, Summarise as Mermaid a Translate.
 
 ### Užitkové funkce
-- **Summarise as Mermaid diagram**:
+- **Shrnutí jako diagram Mermaid**:
   - Tato funkce vám umožní shrnout obsah poznámky do Mermaid diagramu.
   - Výstupní jazyk Mermaid diagramu lze přizpůsobit v settings.
   - **Mermaid Output Folder**: nastavte složku, kam budou ukládány vygenerované soubory Mermaid diagramů.
@@ -209,51 +209,51 @@ Přístup ke settings pluginu:
 **Settings** -> **Community Plugins** -> **Notemd** (klikněte na ikonu ozubeného kola).
 
 ### Konfigurace poskytovatele LLM
-1. **Active Provider**: vyberte z rozbalovacího seznamu poskytovatele LLM, kterého chcete používat.
-2. **Provider Settings**: nakonfigurujte konkrétní nastavení pro vybraného poskytovatele:
+1. **Aktivní poskytovatel**: vyberte z rozbalovacího seznamu poskytovatele LLM, kterého chcete používat.
+2. **Nastavení poskytovatele**: nakonfigurujte konkrétní nastavení pro vybraného poskytovatele:
    - **API Key**: vyžadován pro většinu cloudových poskytovatelů, například OpenAI, Anthropic, DeepSeek, Qwen, Qwen Code, Doubao, Moonshot, GLM, Z AI, MiniMax, Huawei Cloud MaaS, Baidu Qianfan, SiliconFlow, Google, Mistral, Azure OpenAI, OpenRouter, xAI, Groq, Together, Fireworks a Requesty. Není potřeba pro Ollama. Je volitelný pro LM Studio a obecný preset `OpenAI Compatible`, pokud váš endpoint přijímá anonymní nebo placeholder přístup.
    - **Base URL / Endpoint**: API endpoint služby. Výchozí hodnoty jsou dodány, ale může být nutné je změnit pro lokální modely, jako LMStudio a Ollama, gatewaye typu OpenRouter, Requesty a OpenAI Compatible, nebo pro konkrétní Azure deploymenty. **Povinné pro Azure OpenAI.**
    - **Model**: konkrétní název nebo ID modelu, který chcete použít, například `gpt-4o`, `claude-3-5-sonnet-20240620`, `google/gemini-flash-1.5`, `grok-4`, `moonshotai/kimi-k2-instruct-0905`, `accounts/fireworks/models/kimi-k2p5` nebo `anthropic/claude-3-7-sonnet-latest`. Ujistěte se, že je model u vašeho poskytovatele nebo endpointu dostupný.
    - **Temperature**: řídí náhodnost výstupu LLM, kde 0 = deterministické a 1 = maximální kreativita. Nižší hodnoty, například 0.2-0.5, bývají lepší pro strukturované úlohy.
    - **API Version (Azure Only)**: povinné pro Azure OpenAI deploymenty, například `2024-02-15-preview`.
-3. **Test Connection**: použijte tlačítko "Test Connection" pro aktivního poskytovatele, abyste ověřili svá settings. OpenAI-compatible poskytovatelé nyní používají provider-aware kontroly: endpointy jako `Qwen`, `Qwen Code`, `Doubao`, `Moonshot`, `GLM`, `Z AI`, `MiniMax`, `Huawei Cloud MaaS`, `Baidu Qianfan`, `SiliconFlow`, `Groq`, `Together`, `Fireworks`, `LMStudio` a `OpenAI Compatible` testují `chat/completions` přímo, zatímco poskytovatelé se spolehlivým `/models` endpointem mohou stále použít listing modelů jako první. Pokud první probe selže kvůli přechodnému síťovému odpojení, například `ERR_CONNECTION_CLOSED`, Notemd automaticky přejde na stabilní retry sekvenci místo okamžitého selhání.
-4. **Manage Provider Configurations**: použijte tlačítka "Export Providers" a "Import Providers" pro uložení nebo načtení settings poskytovatelů LLM do nebo z souboru `notemd-providers.json` ve konfiguračním adresáři pluginu. To usnadňuje backup a sdílení.
-5. **Preset Coverage**: kromě původních poskytovatelů nyní Notemd obsahuje předdefinované záznamy pro `Qwen`, `Qwen Code`, `Doubao`, `Moonshot`, `GLM`, `Z AI`, `MiniMax`, `Huawei Cloud MaaS`, `Baidu Qianfan`, `SiliconFlow`, `xAI`, `Groq`, `Together`, `Fireworks`, `Requesty` a obecný cíl `OpenAI Compatible` pro LiteLLM, vLLM, Perplexity, Vercel AI Gateway nebo vlastní proxy.
+3. **Otestovat připojení**: použijte tlačítko "Otestovat připojení" pro aktivního poskytovatele, abyste ověřili svá settings. OpenAI-compatible poskytovatelé nyní používají provider-aware kontroly: endpointy jako `Qwen`, `Qwen Code`, `Doubao`, `Moonshot`, `GLM`, `Z AI`, `MiniMax`, `Huawei Cloud MaaS`, `Baidu Qianfan`, `SiliconFlow`, `Groq`, `Together`, `Fireworks`, `LMStudio` a `OpenAI Compatible` testují `chat/completions` přímo, zatímco poskytovatelé se spolehlivým `/models` endpointem mohou stále použít listing modelů jako první. Pokud první probe selže kvůli přechodnému síťovému odpojení, například `ERR_CONNECTION_CLOSED`, Notemd automaticky přejde na stabilní retry sekvenci místo okamžitého selhání.
+4. **Spravovat konfigurace poskytovatelů**: použijte tlačítka "Export Providers" a "Import Providers" pro uložení nebo načtení settings poskytovatelů LLM do nebo z souboru `notemd-providers.json` ve konfiguračním adresáři pluginu. To usnadňuje backup a sdílení.
+5. **Pokrytí presetů**: kromě původních poskytovatelů nyní Notemd obsahuje předdefinované záznamy pro `Qwen`, `Qwen Code`, `Doubao`, `Moonshot`, `GLM`, `Z AI`, `MiniMax`, `Huawei Cloud MaaS`, `Baidu Qianfan`, `SiliconFlow`, `xAI`, `Groq`, `Together`, `Fireworks`, `Requesty` a obecný cíl `OpenAI Compatible` pro LiteLLM, vLLM, Perplexity, Vercel AI Gateway nebo vlastní proxy.
 <img width="804" height="506" alt="LLM" src="https://github.com/user-attachments/assets/8caf42e3-43ad-456d-8b96-b63e7914e45f" />
 
 ### Konfigurace více modelů
-- **Use Different Providers for Tasks**:
-  - **Disabled (Default)**: používá jediného "Active Provider", zvoleného výše, pro všechny úlohy.
-  - **Enabled**: umožňuje vybrat konkrétního poskytovatele a volitelně přepsat název modelu pro každou úlohu, například "Add Links", "Research & Summarize", "Generate from Title", "Translate" a "Extract Concepts". Pokud pole pro přepsání modelu u dané úlohy zůstane prázdné, použije se výchozí model nakonfigurovaný pro poskytovatele zvoleného pro tuto úlohu.
-- **Select different languages for different tasks**:
-  - **Disabled (Default)**: používá jeden "Output language" pro všechny úlohy.
-  - **Enabled**: umožňuje vybrat konkrétní jazyk pro každou úlohu, například "Add Links", "Research & Summarize", "Generate from Title", "Summarise as Mermaid diagram" a "Extract Concepts".
+- **Používat různé poskytovatele pro úlohy**:
+  - **Vypnuto (výchozí)**: používá jediného „aktivního poskytovatele“, zvoleného výše, pro všechny úlohy.
+  - **Zapnuto**: umožňuje vybrat konkrétního poskytovatele a volitelně přepsat název modelu pro každou úlohu, například "Add Links", "Research & Summarize", "Generate from Title", "Translate" a "Extract Concepts". Pokud pole pro přepsání modelu u dané úlohy zůstane prázdné, použije se výchozí model nakonfigurovaný pro poskytovatele zvoleného pro tuto úlohu.
+- **Vybrat různé jazyky pro různé úlohy**:
+  - **Vypnuto (výchozí)**: používá jeden výstupní jazyk pro všechny úlohy.
+  - **Zapnuto**: umožňuje vybrat konkrétní jazyk pro každou úlohu, například "Add Links", "Research & Summarize", "Generate from Title", "Summarise as Mermaid diagram" a "Extract Concepts".
 
 <img width="817" height="428" alt="Multi-model" src="https://github.com/user-attachments/assets/85e6b854-c0ca-45cc-a55e-24638dceb120" />
 
-### Jazyková architektura (UI Locale vs Task Output Language)
+### Jazyková architektura (jazyk rozhraní a jazyk výstupu úloh)
 
-- **UI Locale** řídí pouze text pluginového rozhraní, tedy štítky settings, tlačítka sidebaru, notices a dialogs. Výchozí režim `auto` sleduje aktuální jazyk UI v Obsidianu.
-- **Task Output Language** řídí modelově generovaný výstup úloh, jako odkazy, shrnutí, generování názvů, Mermaid summary, extrakci konceptů a cílový jazyk překladu.
+- **Jazyk rozhraní** řídí pouze text pluginového rozhraní, tedy štítky nastavení, tlačítka postranního panelu, oznámení a dialogy. Výchozí režim `auto` sleduje aktuální jazyk UI v Obsidianu.
+- **Jazyk výstupu úloh** řídí modelově generovaný výstup úloh, jako odkazy, shrnutí, generování názvů, Mermaid summary, extrakci konceptů a cílový jazyk překladu.
 - **Per-task language mode** umožňuje, aby si každá úloha určovala svůj výstupní jazyk z jedné společné policy vrstvy namísto rozptýlených override v jednotlivých modulech.
-- **Disable auto translation** drží úlohy mimo Translate v kontextu zdrojového jazyka, zatímco explicitní úlohy Translate stále vynucují nakonfigurovaný cílový jazyk.
+- **Zakázat automatický překlad** drží úlohy mimo Translate v kontextu zdrojového jazyka, zatímco explicitní úlohy Translate stále vynucují nakonfigurovaný cílový jazyk.
 - Mermaid-related generovací cesty následují stejnou jazykovou policy a při aktivaci mohou stále spouštět Mermaid auto-fix.
 
 ### Nastavení stabilních API volání
-- **Enable Stable API Calls (Retry Logic)**:
-  - **Disabled (Default)**: jediné selhání API callu zastaví aktuální úlohu.
-  - **Enabled**: automaticky opakuje neúspěšná volání LLM API, což je užitečné při přerušovaných síťových problémech nebo rate limitech.
+- **Povolit stabilní volání API (logika opakování)**:
+  - **Vypnuto (výchozí)**: jediné selhání API callu zastaví aktuální úlohu.
+  - **Zapnuto**: automaticky opakuje neúspěšná volání LLM API, což je užitečné při přerušovaných síťových problémech nebo rate limitech.
   - **Connection Test Fallback**: i když běžná volání ještě neběží ve stable mode, testy připojení poskytovatelů nyní po první přechodné síťové chybě přecházejí na stejnou retry sekvenci.
   - **Runtime Transport Fallback (Environment-Aware)**: dlouhé task requesty, které `requestUrl` přechodně shodí, nyní opakují stejný pokus nejprve přes environment-aware fallback. Desktop buildy používají Node `http/https`, non-desktop prostředí browserový `fetch`. Tyto fallback pokusy nyní používají protocol-aware streamed parsing napříč vestavěnými LLM cestami, včetně OpenAI-compatible SSE, Azure OpenAI SSE, Anthropic Messages SSE, Google Gemini SSE a Ollama NDJSON outputu, takže pomalé gatewaye mohou vracet body chuny dříve. Zbývající direct OpenAI-style provider entrypointy používají tutéž shared fallback path.
   - **OpenAI-Compatible Stable Order**: ve stable mode se každý OpenAI-compatible pokus nyní řídí sekvencí `direct streaming -> direct non-stream -> requestUrl (with streamed fallback when needed)` předtím, než je započítán jako neúspěšný pokus. To brání příliš agresivnímu selhání v situaci, kdy je flaky jen jeden transport mode.
 - **Retry Interval (seconds)**: viditelné pouze při zapnutí. Doba čekání mezi retry pokusy, 1-300 sekund. Výchozí: 5.
 - **Maximum Retries**: viditelné pouze při zapnutí. Maximální počet retry pokusů, 0-10. Výchozí: 3.
-- **API Error Debugging Mode**:
-  - **Disabled (Default)**: používá standardní a stručné hlášení chyb.
-  - **Enabled**: aktivuje detailní logování chyb, podobné podrobnému výstupu DeepSeek, pro všechny poskytovatele a úlohy, včetně Translate, Search a Connection Tests. Zahrnuje HTTP status kódy, surový text odpovědi, časovou osu přenosu requestů, sanitizované request URL a hlavičky, dobu trvání pokusů, hlavičky odpovědí, částečná těla odpovědí, parsovaný částečný stream výstup a trasování zásobníku, což je zásadní pro řešení problémů s API připojením a resetů z upstream gateway.
+- **Režim ladění chyb API**:
+  - **Vypnuto (výchozí)**: používá standardní a stručné hlášení chyb.
+  - **Zapnuto**: aktivuje detailní logování chyb, podobné podrobnému výstupu DeepSeek, pro všechny poskytovatele a úlohy, včetně Translate, Search a Connection Tests. Zahrnuje HTTP status kódy, surový text odpovědi, časovou osu přenosu requestů, sanitizované request URL a hlavičky, dobu trvání pokusů, hlavičky odpovědí, částečná těla odpovědí, parsovaný částečný stream výstup a trasování zásobníku, což je zásadní pro řešení problémů s API připojením a resetů z upstream gateway.
 - **Developer Mode**:
-  - **Disabled (Default)**: skrývá všechny diagnostické ovládací prvky určené pouze vývojářům před běžnými uživateli.
-  - **Enabled**: zobrazuje ve Settings vyhrazený panel diagnostiky pro vývojáře.
+  - **Vypnuto (výchozí)**: skrývá všechny diagnostické ovládací prvky určené pouze vývojářům před běžnými uživateli.
+  - **Zapnuto**: zobrazuje ve Settings vyhrazený panel diagnostiky pro vývojáře.
 - **Developer Provider Diagnostic (Long Request)**:
   - **Diagnostic Call Mode**: vyberte runtime path pro každý probe. OpenAI-compatible poskytovatelé podporují vedle runtime režimů i další vynucené režimy `direct streaming`, `direct buffered` a `requestUrl-only`.
   - **Run Diagnostic**: spustí jeden long-request probe se zvoleným call mode a zapíše `Notemd_Provider_Diagnostic_*.txt` do kořene vaultu.
@@ -266,58 +266,58 @@ Přístup ke settings pluginu:
 
 #### Výstup zpracovaného souboru
 - **Customize Processed File Save Path**:
-  - **Disabled (Default)**: zpracované soubory, například `YourNote_processed.md`, se ukládají do *stejné složky* jako původní poznámka.
-  - **Enabled**: umožňuje zadat vlastní umístění ukládání.
+  - **Vypnuto (výchozí)**: zpracované soubory, například `YourNote_processed.md`, se ukládají do *stejné složky* jako původní poznámka.
+  - **Zapnuto**: umožňuje zadat vlastní umístění ukládání.
 - **Processed File Folder Path**: viditelné jen při zapnutí předchozí volby. Zadejte *relativní cestu* uvnitř vaultu, například `Processed Notes` nebo `Output/LLM`, kam se mají ukládat zpracované soubory. Složky budou vytvořeny, pokud neexistují. **Nepoužívejte absolutní cesty, jako `C:\...`, ani neplatné znaky.**
 - **Use Custom Output Filename for 'Add Links'**:
-  - **Disabled (Default)**: zpracované soubory vytvořené příkazem "Add Links" používají výchozí suffix `_processed.md`, například `YourNote_processed.md`.
-  - **Enabled**: umožňuje přizpůsobit výstupní název souboru pomocí nastavení níže.
+  - **Vypnuto (výchozí)**: zpracované soubory vytvořené příkazem "Add Links" používají výchozí suffix `_processed.md`, například `YourNote_processed.md`.
+  - **Zapnuto**: umožňuje přizpůsobit výstupní název souboru pomocí nastavení níže.
 - **Custom Suffix/Replacement String**: viditelné jen při zapnutí předchozí volby. Zadejte řetězec, který se má použít ve výstupním názvu souboru.
   - Pokud zůstane pole **prázdné**, původní soubor bude **přepsán** zpracovaným obsahem.
   - Pokud zadáte řetězec, například `_linked`, přidá se k původnímu názvu, například `YourNote_linked.md`. Ujistěte se, že suffix neobsahuje neplatné znaky názvu souboru.
 
 - **Remove Code Fences on Add Links**:
-  - **Disabled (Default)**: code fences **(\`\\\`\`)** zůstávají v obsahu při přidávání odkazů a **(\`\\\`markdown)** je automaticky odstraněno.
-  - **Enabled**: odstraní code fences z obsahu ještě před přidáním odkazů.
+  - **Vypnuto (výchozí)**: code fences **(\`\\\`\`)** zůstávají v obsahu při přidávání odkazů a **(\`\\\`markdown)** je automaticky odstraněno.
+  - **Zapnuto**: odstraní code fences z obsahu ještě před přidáním odkazů.
 <img width="799" height="301" alt="Processed file output" src="https://github.com/user-attachments/assets/65d4e864-ff5f-402a-be90-e9c44b208903" />
 
-#### Výstup concept note
+#### Výstup konceptuální poznámky
 - **Customize Concept Note Path**:
-  - **Disabled (Default)**: automatické vytváření poznámek pro `[[linked concepts]]` je vypnuté.
-  - **Enabled**: umožňuje určit složku, ve které budou vytvářeny nové concept notes.
+  - **Vypnuto (výchozí)**: automatické vytváření poznámek pro `[[linked concepts]]` je vypnuté.
+  - **Zapnuto**: umožňuje určit složku, ve které budou vytvářeny nové concept notes.
 - **Concept Note Folder Path**: viditelné pouze při zapnutí předchozí volby. Zadejte *relativní cestu* uvnitř vaultu, například `Concepts` nebo `Generated/Topics`, kam se budou ukládat nové concept notes. Složky budou vytvořeny, pokud neexistují. **Musí být vyplněno, pokud je přizpůsobení zapnuté.** **Nepoužívejte absolutní cesty ani neplatné znaky.**
 <img width="800" height="145" alt="concept note output" src="https://github.com/user-attachments/assets/d0338341-7d67-4472-964c-75a0992165b8" />
 
 #### Výstup log souboru konceptů
 - **Generate Concept Log File**:
-  - **Disabled (Default)**: log soubor se nevytváří.
-  - **Enabled**: vytváří log soubor se seznamem nově vytvořených concept notes po zpracování. Formát je:
+  - **Vypnuto (výchozí)**: log soubor se nevytváří.
+  - **Zapnuto**: vytváří log soubor se seznamem nově vytvořených concept notes po zpracování. Formát je:
     ```
-    generate xx concepts md file
+    vygenerovat xx md souborů s koncepty
     1. concepts1
     2. concepts2
     ...
     n. conceptsn
     ```
 - **Customize Log File Save Path**: viditelné jen pokud je "Generate Concept Log File" zapnuto.
-  - **Disabled (Default)**: log soubor se ukládá do **Concept Note Folder Path**, pokud je zadána, nebo jinak do kořene vaultu.
-  - **Enabled**: umožňuje určit vlastní složku pro log soubor.
+  - **Vypnuto (výchozí)**: log soubor se ukládá do **Concept Note Folder Path**, pokud je zadána, nebo jinak do kořene vaultu.
+  - **Zapnuto**: umožňuje určit vlastní složku pro log soubor.
 - **Concept Log Folder Path**: viditelné jen pokud je "Customize Log File Save Path" zapnuto. Zadejte *relativní cestu* uvnitř vaultu, například `Logs/Notemd`, kam se má log soubor uložit. **Musí být vyplněno, pokud je přizpůsobení zapnuto.**
 - **Customize Log File Name**: viditelné jen pokud je "Generate Concept Log File" zapnuto.
-  - **Disabled (Default)**: log soubor se jmenuje `Generate.log`.
-  - **Enabled**: umožňuje zadat vlastní název log souboru.
+  - **Vypnuto (výchozí)**: log soubor se jmenuje `Generate.log`.
+  - **Zapnuto**: umožňuje zadat vlastní název log souboru.
 - **Concept Log File Name**: viditelné jen pokud je "Customize Log File Name" zapnuto. Zadejte požadovaný název souboru, například `ConceptCreation.log`. **Musí být vyplněno, pokud je přizpůsobení zapnuto.**
 <img width="809" height="281" alt="Concept log file output" src="https://github.com/user-attachments/assets/eef6f5d5-592d-4b8f-84b1-7404521a6e9b" />
 
-#### Úloha Extract Concepts
-- **Create minimal concept notes**:
+#### Úloha extrakce pojmů
+- **Vytvářet minimální poznámky ke konceptům**:
   - **On (Default)**: nově vytvořené concept notes budou obsahovat pouze titul, například `# Concept`.
   - **Off**: concept notes mohou obsahovat další obsah, například backlink "Linked From", pokud to není vypnuto nastavením níže.
 - **Add "Linked From" backlink**:
   - **Off (Default)**: během extrakce nepřidává backlink na zdrojový dokument do concept note.
   - **On**: přidává sekci "Linked From" s backlinkem na zdrojový soubor.
 
-#### Extract Specific Original Text
+#### Extrahovat konkrétní původní text
 - **Questions for extraction**: zadejte seznam otázek, jednu na řádek, pro které chcete, aby AI vyhledala doslovné odpovědi ve vašich poznámkách.
 - **Translate output to corresponding language**:
   - **Off (Default)**: vypíše pouze extrahovaný text v jeho původním jazyce.
@@ -329,7 +329,7 @@ Přístup ke settings pluginu:
   - **Off**: ukládá do stejné složky jako původní soubor se suffixem `_Extracted`.
   - **On**: umožňuje nastavit vlastní výstupní složku a suffix názvu souboru.
 
-#### Batch Mermaid Fix
+#### Dávková oprava Mermaid
 - **Enable Mermaid Error Detection**:
   - **Off (Default)**: detekce chyb se po zpracování přeskočí.
   - **On**: skenuje zpracované soubory na zbývající Mermaid syntax errors a generuje report `mermaid_error_{foldername}.md`.
@@ -340,8 +340,8 @@ Přístup ke settings pluginu:
 
 #### Parametry zpracování
 - **Enable Batch Parallelism**:
-  - **Disabled (Default)**: dávkové úlohy, například "Process Folder" nebo "Batch Generate from Titles", zpracovávají soubory jeden po druhém, sériově.
-  - **Enabled**: umožňuje pluginu zpracovávat více souborů současně, což může výrazně urychlit velké dávkové úlohy.
+  - **Vypnuto (výchozí)**: dávkové úlohy, například "Process Folder" nebo "Batch Generate from Titles", zpracovávají soubory jeden po druhém, sériově.
+  - **Zapnuto**: umožňuje pluginu zpracovávat více souborů současně, což může výrazně urychlit velké dávkové úlohy.
 - **Batch Concurrency**: viditelné jen při zapnutém parallelismu. Nastavuje maximální počet souborů zpracovávaných paralelně. Vyšší číslo může být rychlejší, ale používá více prostředků a může narazit na API rate limits. Výchozí: 1, rozsah: 1-20.
 - **Batch Size**: viditelné jen při zapnutém parallelismu. Počet souborů sdružených do jednoho batch. Výchozí: 50, rozsah: 10-200.
 - **Delay Between Batches (ms)**: viditelné jen při zapnutém parallelismu. Volitelná prodleva v milisekundách mezi zpracováním jednotlivých batchů, která může pomoci řídit API rate limits. Výchozí: 1000 ms.
@@ -354,21 +354,21 @@ Přístup ke settings pluginu:
 #### Překlad
 - **Default Target Language**: vyberte výchozí jazyk, do kterého chcete své poznámky překládat. To lze přepsat v UI při spuštění překladového příkazu. Výchozí: English.
 - **Customise Translation File Save Path**:
-  - **Disabled (Default)**: přeložené soubory se ukládají do *stejné složky* jako původní poznámka.
-  - **Enabled**: umožňuje určit *relativní cestu* ve vaultu, například `Translations`, kam se mají přeložené soubory ukládat. Složky budou vytvořeny, pokud neexistují.
+  - **Vypnuto (výchozí)**: přeložené soubory se ukládají do *stejné složky* jako původní poznámka.
+  - **Zapnuto**: umožňuje určit *relativní cestu* ve vaultu, například `Translations`, kam se mají přeložené soubory ukládat. Složky budou vytvořeny, pokud neexistují.
 - **Use custom suffix for translated files**:
-  - **Disabled (Default)**: přeložené soubory používají výchozí suffix `_translated.md`, například `YourNote_translated.md`.
-  - **Enabled**: umožňuje zadat vlastní suffix.
+  - **Vypnuto (výchozí)**: přeložené soubory používají výchozí suffix `_translated.md`, například `YourNote_translated.md`.
+  - **Zapnuto**: umožňuje zadat vlastní suffix.
 - **Custom Suffix**: viditelné jen při zapnutí předchozí volby. Zadejte vlastní suffix, který se připojí k názvu přeloženého souboru, například `_es` nebo `_fr`.
 <img width="811" height="243" alt="translate" src="https://github.com/user-attachments/assets/57d21a72-e86c-4369-8be5-fd18cb734e2b" />
 
 #### Generování obsahu
 - **Enable Research in "Generate from Title"**:
-  - **Disabled (Default)**: "Generate from Title" používá jako vstup pouze název.
-  - **Enabled**: provádí web research pomocí nakonfigurovaného **Web Research Provider** a zahrne zjištění jako kontext pro LLM při generování obsahu z názvu.
+  - **Vypnuto (výchozí)**: "Generate from Title" používá jako vstup pouze název.
+  - **Zapnuto**: provádí web research pomocí nakonfigurovaného **Web Research Provider** a zahrne zjištění jako kontext pro LLM při generování obsahu z názvu.
 - **Auto-run Mermaid Syntax Fix after Generation**:
-  - **Enabled (Default)**: automaticky spouští Mermaid syntax-fixing pass po Mermaid-related workflow, jako jsou Process, Generate from Title, Batch Generate from Titles, Research & Summarize, Summarise as Mermaid a Translate.
-  - **Disabled**: ponechává vygenerovaný Mermaid výstup beze změny, pokud nespustíte `Batch Mermaid Fix` ručně nebo jej nepřidáte do vlastního workflow.
+  - **Zapnuto (výchozí)**: automaticky spouští Mermaid syntax-fixing pass po Mermaid-related workflow, jako jsou Process, Generate from Title, Batch Generate from Titles, Research & Summarize, Summarise as Mermaid a Translate.
+  - **Vypnuto**: ponechává vygenerovaný Mermaid výstup beze změny, pokud nespustíte `Batch Mermaid Fix` ručně nebo jej nepřidáte do vlastního workflow.
 - **Output Language**: nové. Vyberte požadovaný výstupní jazyk pro úlohy "Generate from Title" a "Batch Generate from Title".
   - **English (Default)**: prompt se zpracovávají a výstup vzniká v angličtině.
   - **Other Languages**: LLM je instruováno, aby uvažovalo v angličtině, ale výslednou dokumentaci poskytlo ve vašem zvoleném jazyce, například Español, Français, 简体中文, 繁體中文, العربية, हिन्दी a podobně.
@@ -376,11 +376,11 @@ Přístup ke settings pluginu:
   - **Change Prompt Word**: umožňuje změnit prompt word pro konkrétní úlohu.
   - **Custom Prompt Word**: zadejte vlastní prompt word pro danou úlohu.
 - **Use Custom Output Folder for 'Generate from Title'**:
-  - **Disabled (Default)**: úspěšně vygenerované soubory jsou přesunuty do podsložky pojmenované `[OriginalFolderName]_complete` relativně k rodičovské složce původní složky, případně `Vault_complete`, pokud původní složka byla root.
-  - **Enabled**: umožňuje zadat vlastní název podsložky, do které budou přesunuty dokončené soubory.
+  - **Vypnuto (výchozí)**: úspěšně vygenerované soubory jsou přesunuty do podsložky pojmenované `[OriginalFolderName]_complete` relativně k rodičovské složce původní složky, případně `Vault_complete`, pokud původní složka byla root.
+  - **Zapnuto**: umožňuje zadat vlastní název podsložky, do které budou přesunuty dokončené soubory.
 - **Custom Output Folder Name**: viditelné jen při zapnutí předchozí volby. Zadejte požadovaný název podsložky, například `Generated Content` nebo `_complete`. Neplatné znaky nejsou povoleny. Pokud pole zůstane prázdné, použije se `_complete`. Tato složka se vytváří relativně k rodičovské složce původní složky.
 
-#### Tlačítka one-click workflow
+#### Tlačítka pracovního postupu na jedno kliknutí
 - **Visual Workflow Builder**: vytvářejte vlastní workflow tlačítka z vestavěných akcí bez ručního psaní DSL.
 - **Custom Workflow Buttons DSL**: pokročilí uživatelé mohou stále upravovat definiční text workflow přímo. Neplatné DSL bezpečně spadne zpět na výchozí workflow a zobrazí varování v UI sidebaru nebo settings.
 - **Workflow Error Strategy**:
@@ -388,17 +388,17 @@ Přístup ke settings pluginu:
   - **Continue on Error**: pokračuje v dalších krocích a na konci nahlásí počet neúspěšných akcí.
 - **Default Workflow Included**: `One-Click Extract` řetězí `Process File (Add Links)`, `Batch Generate from Titles` a `Batch Mermaid Fix`.
 
-#### Nastavení vlastních promptů
+#### Nastavení vlastních pokynů
 Tato funkce vám umožňuje přepsat výchozí instrukce, tedy prompty, posílané do LLM pro konkrétní úlohy, a poskytuje vám jemnozrnnou kontrolu nad výstupem.
 
 - **Enable Custom Prompts for Specific Tasks**:
-  - **Disabled (Default)**: plugin používá své vestavěné výchozí prompty pro všechny operace.
-  - **Enabled**: aktivuje možnost nastavit vlastní prompty pro úlohy vypsané níže. Jde o hlavní přepínač celé funkce.
+  - **Vypnuto (výchozí)**: plugin používá své vestavěné výchozí prompty pro všechny operace.
+  - **Zapnuto**: aktivuje možnost nastavit vlastní prompty pro úlohy vypsané níže. Jde o hlavní přepínač celé funkce.
 
 - **Use Custom Prompt for [Task Name]**: viditelné pouze při zapnutí předchozí volby.
   - U každé podporované úlohy, například "Add Links", "Generate from Title", "Research & Summarize" a "Extract Concepts", můžete vlastní prompt jednotlivě povolit nebo zakázat.
   - **Disabled**: tato konkrétní úloha použije výchozí prompt.
-  - **Enabled**: tato úloha použije text, který zadáte do odpovídajícího pole "Custom Prompt" níže.
+  - **Zapnuto**: tato úloha použije text, který zadáte do odpovídajícího pole "Custom Prompt" níže.
 
 - **Custom Prompt Text Area**: viditelné pouze tehdy, když je vlastní prompt u dané úlohy zapnut.
   - **Default Prompt Display**: pro referenci plugin zobrazuje výchozí prompt, který by pro danou úlohu normálně použil. Můžete využít tlačítko **"Copy Default Prompt"** a zkopírovat si tento text jako výchozí bod pro vlastní prompt.
@@ -420,7 +420,7 @@ Tato funkce vám umožňuje přepsat výchozí instrukce, tedy prompty, posílan
   - **Concept Folder Only**: porovnává concept notes jen s *ostatními poznámkami uvnitř Concept Note Folder*. To pomáhá nacházet duplicity čistě uvnitř generovaných konceptů.
 - **Include/Exclude Folders**: viditelné pouze pokud je Mode nastaven na 'Include' nebo 'Exclude'. Zadejte *relativní cesty* složek, které chcete zahrnout nebo vyloučit, **jednu cestu na řádek**. Cesty rozlišují velikost písmen a používají `/` jako oddělovač, například `Reference Material/Papers` nebo `Daily Notes`. Tyto složky nesmí být totožné s Concept Note Folder ani v ní ležet.
 
-#### Web Research Provider
+#### Poskytovatel webového průzkumu
 - **Search Provider**: vyberte mezi `Tavily`, který vyžaduje API klíč a je doporučený, a `DuckDuckGo`, který je experimentální a vyhledávač jej při automatizovaných požadavcích často blokuje. Používá se pro "Research & Summarize Topic" a volitelně i pro "Generate from Title".
 - **Tavily API Key**: viditelné jen pokud je zvoleno Tavily. Zadejte svůj API klíč z [tavily.com](https://tavily.com/).
 - **Tavily Max Results**: viditelné jen pokud je zvoleno Tavily. Maximální počet search výsledků, které má Tavily vrátit, 1-20. Výchozí: 5.
@@ -430,19 +430,19 @@ Tato funkce vám umožňuje přepsat výchozí instrukce, tedy prompty, posílan
 - **Max Research Content Tokens**: přibližný maximální počet tokenů z kombinovaných výsledků web research, snippets nebo fetched content, které mají být zahrnuty do sumarizačního promptu. Pomáhá řídit velikost context window a náklady. Výchozí: 3000.
 <img width="810" height="278" alt="Web research provider" src="https://github.com/user-attachments/assets/be0280eb-bb4e-4db0-bf69-91da3f0fd3c0" />
 
-#### Focused Learning Domain
+#### Zaměřená studijní oblast
 - **Enable Focused Learning Domain**:
-  - **Disabled (Default)**: prompty posílané do LLM používají standardní obecné instrukce.
-  - **Enabled**: umožňuje určit jednu nebo více oblastí studia, aby se zlepšilo kontextové porozumění LLM.
+  - **Vypnuto (výchozí)**: prompty posílané do LLM používají standardní obecné instrukce.
+  - **Zapnuto**: umožňuje určit jednu nebo více oblastí studia, aby se zlepšilo kontextové porozumění LLM.
 - **Learning Domain**: viditelné pouze při zapnutí předchozí volby. Zadejte své konkrétní obory, například 'Materials Science', 'Polymer Physics', 'Machine Learning'. To přidá na začátek promptů řádek "Relevant Fields: [...]", který pomůže LLM generovat přesnější a relevantnější links i obsah pro vaši konkrétní oblast.
 <img width="595" height="143" alt="focused learning domain" src="https://github.com/user-attachments/assets/1bcc9707-5c10-4944-a61b-65fde0cd0404" />
 
 ## Návod k použití
 
-### Quick Workflows a Sidebar
+### Rychlé pracovní postupy a postranní panel
 
 - Otevřete Notemd sidebar a získejte přístup ke seskupeným sekcím akcí pro základní zpracování, generování, překlad, znalosti a utility.
-- Použijte oblast **Quick Workflows** v horní části sidebaru pro spouštění vlastních multi-step tlačítek.
+- Použijte oblast **Rychlé pracovní postupy** v horní části sidebaru pro spouštění vlastních multi-step tlačítek.
 - Výchozí workflow **One-Click Extract** spouští `Process File (Add Links)` -> `Batch Generate from Titles` -> `Batch Mermaid Fix`.
 - Průběh workflow, logy jednotlivých kroků a selhání se zobrazují v sidebaru a připnutá patička chrání progress bar i log oblast před vytlačením rozbalenými sekcemi.
 - Karta průběhu udržuje status text, samostatný percentage pill i zbývající čas přehledně čitelné a stejné custom workflow lze znovu konfigurovat ze settings.
@@ -470,7 +470,7 @@ Toto je základní funkcionalita zaměřená na identifikaci konceptů a přidá
 
 ### Nové funkce
 
-1. **Summarise as Mermaid diagram**:
+1. **Shrnutí jako diagram Mermaid**:
    - Otevřete poznámku, kterou chcete shrnout.
    - Spusťte příkaz `Notemd: Summarise as Mermaid diagram` přes paletu příkazů nebo tlačítko v sidebaru.
    - Plugin vygeneruje novou poznámku s Mermaid diagramem.
@@ -482,7 +482,7 @@ Toto je základní funkcionalita zaměřená na identifikaci konceptů a přidá
    - Plugin používá nakonfigurovaného **LLM Provider**, podle Multi-Model settings, k provedení překladu.
    - Přeložený obsah se uloží do nastavené **Translation Save Path** s odpovídajícím suffixem a otevře se v **novém panelu vpravo** od původního obsahu pro snadné porovnání.
    - Tuto úlohu lze zrušit tlačítkem v sidebaru nebo tlačítkem cancel v modal okně.
-3. **Batch Translate**:
+3. **Dávkový překlad**:
    - Spusťte příkaz `Notemd: Batch Translate Folder` z palety příkazů a vyberte složku, nebo klikněte pravým tlačítkem na složku v průzkumníku souborů a zvolte "Batch translate this folder".
    - Plugin přeloží všechny Markdown soubory ve vybrané složce.
    - Přeložené soubory se ukládají do nastavené translation path, ale automaticky se neotevírají.
@@ -610,13 +610,13 @@ Notemd běží lokálně uvnitř Obsidianu, ale některé funkce odesílají odc
 - Odesílaná data: text promptu a task content potřebný ke zpracování.
 - Poznámka k datům: API klíče se konfigurují lokálně v settings pluginu a používají se k podepisování requestů z vašeho zařízení.
 
-### Web Research volání (volitelné)
+### Volání webového průzkumu (volitelné)
 
 - Trigger: když je web research zapnutý a je zvolen search provider.
 - Endpoint: Tavily API nebo DuckDuckGo endpointy.
 - Odesílaná data: váš research dotaz a potřebná request metadata.
 
-### Developer diagnostics a debug logy (volitelné)
+### Diagnostika pro vývojáře a ladicí logy (volitelné)
 
 - Trigger: API debug mode a developer diagnostic akce.
 - Uložení: diagnostic a error logy se zapisují do rootu vašeho vaultu, například `Notemd_Provider_Diagnostic_*.txt` a `Notemd_Error_Log_*.txt`.
@@ -658,7 +658,7 @@ Notemd běží lokálně uvnitř Obsidianu, ale některé funkce odesílají odc
        ```
        Vygenerovaný report obsahuje timing pro každý pokus, `First Byte` a `Duration`, sanitizovaná request metadata, response headers, raw nebo partial body fragmenty, parsované stream fragmenty a místa selhání transportní vrstvy.
 - **Potíže s připojením LM Studio/Ollama**:
-  - **Test Connection Fails**: ujistěte se, že lokální server, LM Studio nebo Ollama, běží a že je načten správný model nebo je dostupný.
+  - **Test připojení selže**: ujistěte se, že lokální server, LM Studio nebo Ollama, běží a že je načten správný model nebo je dostupný.
   - **CORS Errors, Ollama na Windows**: pokud při používání Ollama na Windows narazíte na CORS, tedy Cross-Origin Resource Sharing errors, může být potřeba nastavit environment proměnnou `OLLAMA_ORIGINS`. Uděláte to spuštěním `set OLLAMA_ORIGINS=*` v command promptu před startem Ollama. To umožní požadavky z libovolného originu.
   - **Enable CORS in LM Studio**: u LM Studio můžete CORS povolit přímo v server settings; může to být nutné, pokud Obsidian běží v browseru nebo má přísné origin policy.
 - **Chyby při vytváření složek ("File name cannot contain...")**:
@@ -674,8 +674,8 @@ Příspěvky jsou vítány. Pokyny najdete v GitHub repozitáři: [https://githu
 
 ## Dokumentace pro správce
 
-- [Release Workflow (English)](./docs/maintainer/release-workflow.md)
-- [Release Workflow (简体中文)](./docs/maintainer/release-workflow.zh-CN.md)
+- [Průběh vydání (angličtina)](./docs/maintainer/release-workflow.md)
+- [Průběh vydání (zjednodušená čínština)](./docs/maintainer/release-workflow.zh-CN.md)
 
 ## Licence
 

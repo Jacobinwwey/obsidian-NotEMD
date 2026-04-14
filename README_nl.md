@@ -4,7 +4,7 @@
 
 [English](./README.md) | [简体中文](./README_zh.md) | [Español](./README_es.md) | [Français](./README_fr.md) | [Deutsch](./README_de.md) | [Italiano](./README_it.md) | [Português](./README_pt.md) | [繁體中文](./README_zh_Hant.md) | [日本語](./README_ja.md) | [한국어](./README_ko.md) | [Русский](./README_ru.md) | [العربية](./README_ar.md) | [हिन्दी](./README_hi.md) | [বাংলা](./README_bn.md) | [Nederlands](./README_nl.md) | [Svenska](./README_sv.md) | [Suomi](./README_fi.md) | [Dansk](./README_da.md) | [Norsk](./README_no.md) | [Polski](./README_pl.md) | [Türkçe](./README_tr.md) | [עברית](./README_he.md) | [ไทย](./README_th.md) | [Ελληνικά](./README_el.md) | [Čeština](./README_cs.md) | [Magyar](./README_hu.md) | [Română](./README_ro.md) | [Українська](./README_uk.md) | [Tiếng Việt](./README_vi.md) | [Bahasa Indonesia](./README_id.md) | [Bahasa Melayu](./README_ms.md)
 
-Lees de documentatie in meer talen: [Language Hub](./docs/i18n/README.md)
+Lees de documentatie in meer talen: [Taalhub](./docs/i18n/README.md)
 
 ```
 ==================================================
@@ -36,7 +36,7 @@ Notemd verbetert je Obsidian-workflow door te integreren met verschillende Large
 - [Installatie](#installatie)
 - [Configuratie](#configuratie)
 - [Gebruikshandleiding](#gebruikshandleiding)
-- [Ondersteunde LLM-providers](#ondersteunde-llm-providers)
+- [Ondersteunde LLM-aanbieders](#ondersteunde-llm-aanbieders)
 - [Netwerkgebruik en gegevensverwerking](#netwerkgebruik-en-gegevensverwerking)
 - [Probleemoplossing](#probleemoplossing)
 - [Bijdragen](#bijdragen)
@@ -59,20 +59,20 @@ Dat is alles. Verken de instellingen om meer functies vrij te schakelen, zoals w
 
 | Onderdeel | Reikwijdte | Standaard | Opmerkingen |
 |---|---|---|---|
-| `UI Locale` | Alleen plugin-UI-tekst (instellingen, zijbalk, meldingen, dialoogvensters) | `auto` | Volgt de Obsidian-locale; huidige UI-catalogi zijn `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, `zh-TW`. |
-| `Task Output Language` | Door de LLM gegenereerde taakuitvoer (links, samenvattingen, generatie, extractie, vertaald doel) | `en` | Kan globaal zijn of per taak worden ingesteld wanneer `Use different languages for tasks` is ingeschakeld. |
-| `Disable auto translation` | Niet-Translate-taken behouden broncontext in de oorspronkelijke taal | `false` | Expliciete `Translate`-taken forceren nog steeds de geconfigureerde doeltaal. |
-| Locale fallback | Resolutie van ontbrekende UI-sleutels | locale -> `en` | Houdt de UI stabiel wanneer sommige sleutels nog niet vertaald zijn. |
+| `Interfacetaal` | Alleen plugin-UI-tekst (instellingen, zijbalk, meldingen, dialoogvensters) | `auto` | Volgt de Obsidian-locale; huidige UI-catalogi zijn `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, `zh-TW`. |
+| `Taakuitvoertaal` | Door de LLM gegenereerde taakuitvoer (links, samenvattingen, generatie, extractie, vertaald doel) | `en` | Kan globaal zijn of per taak worden ingesteld wanneer `Verschillende talen voor taken gebruiken` is ingeschakeld. |
+| `Automatische vertaling uitschakelen` | Niet-Translate-taken behouden broncontext in de oorspronkelijke taal | `false` | Expliciete `Translate`-taken forceren nog steeds de geconfigureerde doeltaal. |
+| `Taalfallback` | Resolutie van ontbrekende UI-sleutels | locale -> `en` | Houdt de UI stabiel wanneer sommige sleutels nog niet vertaald zijn. |
 
 - De onderhouden brondocumenten zijn Engels en Vereenvoudigd Chinees, en gepubliceerde README-vertalingen staan hierboven in de kop gelinkt.
 - De in-app dekking van UI-lokalen komt momenteel exact overeen met de expliciete catalogus in de code: `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, `zh-TW`.
 - De Engelse fallback blijft een implementatief veiligheidsnet, maar ondersteunde zichtbare oppervlakken zijn afgedekt door regressietests en zouden bij normaal gebruik niet stilletjes naar Engels moeten terugvallen.
-- Verdere details en richtlijnen voor bijdragen worden bijgehouden in de [Language Hub](./docs/i18n/README.md).
+- Verdere details en richtlijnen voor bijdragen worden bijgehouden in de [Taalhub](./docs/i18n/README.md).
 
 ## Functies
 
 ### AI-aangedreven documentverwerking
-- **Multi-LLM-ondersteuning**: Verbind met verschillende cloud- en lokale LLM-providers (zie [Ondersteunde LLM-providers](#ondersteunde-llm-providers)).
+- **Multi-LLM-ondersteuning**: Verbind met verschillende cloud- en lokale LLM-aanbieders (zie [Ondersteunde LLM-aanbieders](#ondersteunde-llm-aanbieders)).
 - **Slim chunken**: Splitst grote documenten automatisch op in beheersbare stukken op basis van woordenaantal.
 - **Behoud van inhoud**: Probeert de oorspronkelijke opmaak te behouden terwijl structuur en links worden toegevoegd.
 - **Voortgangsregistratie**: Realtime updates via de Notemd-zijbalk of een voortgangsvenster.
@@ -116,7 +116,7 @@ Dat is alles. Verken de instellingen om meer functies vrij te schakelen, zoals w
   - Ondersteunt parallelle verwerking wanneer "Enable Batch Parallelism" is ingeschakeld.
   - Gebruikt aangepaste prompts voor vertaling wanneer geconfigureerd.
   - Voegt een optie "Batch translate this folder" toe aan het contextmenu van de bestandsverkenner.
-- **Disable auto translation**: Wanneer deze optie is ingeschakeld, dwingen niet-Translate-taken geen output meer af in een specifieke taal, zodat de oorspronkelijke taalcontext behouden blijft. De expliciete taak "Translate" voert vertaling nog steeds uit zoals geconfigureerd.
+- **Automatische vertaling uitschakelen**: Wanneer deze optie is ingeschakeld, dwingen niet-Translate-taken geen output meer af in een specifieke taal, zodat de oorspronkelijke taalcontext behouden blijft. De expliciete taak "Translate" voert vertaling nog steeds uit zoals geconfigureerd.
 
 ### Webonderzoek en contentgeneratie
 - **Webonderzoek en samenvatting**:
@@ -133,7 +133,7 @@ Dat is alles. Verken de instellingen om meer functies vrij te schakelen, zoals w
 - **Koppeling met Mermaid auto-fix**: Wanneer Mermaid auto-fix is ingeschakeld, repareren Mermaid-gerelateerde workflows na verwerking automatisch gegenereerde bestanden of uitvoermappen. Dat geldt voor Process, Generate from Title, Batch Generate from Titles, Research & Summarize, Summarise as Mermaid en Translate.
 
 ### Hulpfuncties
-- **Summarise as Mermaid diagram**:
+- **Vat samen als Mermaid-diagram**:
   - Met deze functie kun je de inhoud van een notitie samenvatten in een Mermaid-diagram.
   - De outputtaal van het Mermaid-diagram kan in de instellingen worden aangepast.
   - **Mermaid-uitvoermap**: Configureer de map waarin gegenereerde Mermaid-diagrambestanden worden opgeslagen.
@@ -208,52 +208,52 @@ Dat is alles. Verken de instellingen om meer functies vrij te schakelen, zoals w
 Toegang tot de plugininstellingen via:
 **Settings** -> **Community Plugins** -> **Notemd** (klik op het tandwielpictogram).
 
-### LLM-providerconfiguratie
-1. **Active Provider**: Selecteer in de dropdown de LLM-provider die je wilt gebruiken.
-2. **Provider Settings**: Configureer de specifieke instellingen voor de gekozen provider:
+### LLM-aanbiederconfiguratie
+1. **Actieve provider**: Selecteer in de dropdown de LLM-provider die je wilt gebruiken.
+2. **Providerinstellingen**: Configureer de specifieke instellingen voor de gekozen provider:
    - **API Key**: Vereist voor de meeste cloudproviders (bijv. OpenAI, Anthropic, DeepSeek, Qwen, Qwen Code, Doubao, Moonshot, GLM, Z AI, MiniMax, Huawei Cloud MaaS, Baidu Qianfan, SiliconFlow, Google, Mistral, Azure OpenAI, OpenRouter, xAI, Groq, Together, Fireworks, Requesty). Niet nodig voor Ollama. Optioneel voor LM Studio en de generieke preset `OpenAI Compatible` wanneer je eindpunt anonieme of placeholdertoegang accepteert.
    - **Base URL / Endpoint**: Het API-eindpunt voor de dienst. Standaarden worden meegeleverd, maar je moet dit mogelijk aanpassen voor lokale modellen (LMStudio, Ollama), gateways (OpenRouter, Requesty, OpenAI Compatible) of specifieke Azure-deployments. **Vereist voor Azure OpenAI.**
    - **Model**: De specifieke modelnaam/model-ID die gebruikt moet worden (bijv. `gpt-4o`, `claude-3-5-sonnet-20240620`, `google/gemini-flash-1.5`, `grok-4`, `moonshotai/kimi-k2-instruct-0905`, `accounts/fireworks/models/kimi-k2p5`, `anthropic/claude-3-7-sonnet-latest`). Zorg ervoor dat het model beschikbaar is op je eindpunt/provider.
    - **Temperature**: Bepaalt de willekeur van de LLM-output (0 = deterministisch, 1 = maximale creativiteit). Lagere waarden (bijv. 0.2-0.5) zijn meestal beter voor gestructureerde taken.
    - **API Version (Azure Only)**: Vereist voor Azure OpenAI-deployments (bijv. `2024-02-15-preview`).
-3. **Test Connection**: Gebruik de knop "Test Connection" voor de actieve provider om je instellingen te controleren. OpenAI-compatibele providers gebruiken nu providerbewuste checks: eindpunten zoals `Qwen`, `Qwen Code`, `Doubao`, `Moonshot`, `GLM`, `Z AI`, `MiniMax`, `Huawei Cloud MaaS`, `Baidu Qianfan`, `SiliconFlow`, `Groq`, `Together`, `Fireworks`, `LMStudio` en `OpenAI Compatible` testen direct `chat/completions`, terwijl providers met een betrouwbaar `/models`-eindpunt nog steeds eerst modellisting kunnen gebruiken. Als de eerste probe faalt door een tijdelijke netwerkonderbreking zoals `ERR_CONNECTION_CLOSED`, schakelt Notemd automatisch over op de stabiele retry-sequentie in plaats van direct te falen.
-4. **Manage Provider Configurations**: Gebruik de knoppen "Export Providers" en "Import Providers" om je LLM-providerinstellingen op te slaan/in te laden naar/van een bestand `notemd-providers.json` in de configuratiemap van de plugin. Zo kun je ze eenvoudig back-uppen en delen.
-5. **Preset Coverage**: Naast de oorspronkelijke providers bevat Notemd nu presetvermeldingen voor `Qwen`, `Qwen Code`, `Doubao`, `Moonshot`, `GLM`, `Z AI`, `MiniMax`, `Huawei Cloud MaaS`, `Baidu Qianfan`, `SiliconFlow`, `xAI`, `Groq`, `Together`, `Fireworks`, `Requesty` en een generiek `OpenAI Compatible`-doel voor LiteLLM, vLLM, Perplexity, Vercel AI Gateway of aangepaste proxies.
+3. **Verbinding testen**: Gebruik de knop "Verbinding testen" voor de actieve provider om je instellingen te controleren. OpenAI-compatibele providers gebruiken nu providerbewuste checks: eindpunten zoals `Qwen`, `Qwen Code`, `Doubao`, `Moonshot`, `GLM`, `Z AI`, `MiniMax`, `Huawei Cloud MaaS`, `Baidu Qianfan`, `SiliconFlow`, `Groq`, `Together`, `Fireworks`, `LMStudio` en `OpenAI Compatible` testen direct `chat/completions`, terwijl providers met een betrouwbaar `/models`-eindpunt nog steeds eerst modellisting kunnen gebruiken. Als de eerste probe faalt door een tijdelijke netwerkonderbreking zoals `ERR_CONNECTION_CLOSED`, schakelt Notemd automatisch over op de stabiele retry-sequentie in plaats van direct te falen.
+4. **Providerconfiguraties beheren**: Gebruik de knoppen "Export Providers" en "Import Providers" om je LLM-providerinstellingen op te slaan/in te laden naar/van een bestand `notemd-providers.json` in de configuratiemap van de plugin. Zo kun je ze eenvoudig back-uppen en delen.
+5. **Presetdekking**: Naast de oorspronkelijke providers bevat Notemd nu presetvermeldingen voor `Qwen`, `Qwen Code`, `Doubao`, `Moonshot`, `GLM`, `Z AI`, `MiniMax`, `Huawei Cloud MaaS`, `Baidu Qianfan`, `SiliconFlow`, `xAI`, `Groq`, `Together`, `Fireworks`, `Requesty` en een generiek `OpenAI Compatible`-doel voor LiteLLM, vLLM, Perplexity, Vercel AI Gateway of aangepaste proxies.
 <img width="804" height="506" alt="LLM" src="https://github.com/user-attachments/assets/8caf42e3-43ad-456d-8b96-b63e7914e45f" />
 
 ### Multi-modelconfiguratie
-- **Use Different Providers for Tasks**:
-  - **Disabled (Default)**: Gebruikt de enkele "Active Provider" (hierboven geselecteerd) voor alle taken.
-  - **Enabled**: Laat je voor elke taak een specifieke provider kiezen en optioneel de modelnaam overschrijven ("Add Links", "Research & Summarize", "Generate from Title", "Translate", "Extract Concepts"). Als het override-veld voor het model van een taak leeg blijft, wordt het standaardmodel gebruikt dat is geconfigureerd voor de provider die voor die taak is gekozen.
-- **Select different languages for different tasks**:
-  - **Disabled (Default)**: Gebruikt één "Output language" voor alle taken.
-  - **Enabled**: Laat je voor elke taak een specifieke taal kiezen ("Add Links", "Research & Summarize", "Generate from Title", "Summarise as Mermaid diagram", "Extract Concepts").
+- **Gebruik verschillende providers voor taken**:
+  - **Uitgeschakeld (standaard)**: Gebruikt de enkele "actieve provider" (hierboven geselecteerd) voor alle taken.
+  - **Ingeschakeld**: Laat je voor elke taak een specifieke provider kiezen en optioneel de modelnaam overschrijven ("Add Links", "Research & Summarize", "Generate from Title", "Translate", "Extract Concepts"). Als het override-veld voor het model van een taak leeg blijft, wordt het standaardmodel gebruikt dat is geconfigureerd voor de provider die voor die taak is gekozen.
+- **Selecteer verschillende talen voor verschillende taken**:
+  - **Uitgeschakeld (standaard)**: Gebruikt één uitvoertaal voor alle taken.
+  - **Ingeschakeld**: Laat je voor elke taak een specifieke taal kiezen ("Add Links", "Research & Summarize", "Generate from Title", "Summarise as Mermaid diagram", "Extract Concepts").
 
 <img width="817" height="428" alt="Multi-model" src="https://github.com/user-attachments/assets/85e6b854-c0ca-45cc-a55e-24638dceb120" />
 
-### Taalarchitectuur (UI Locale versus Task Output Language)
+### Taalarchitectuur (interfacetaal en taakuitvoertaal)
 
-- **UI Locale** stuurt alleen de tekst van de plugininterface aan (instellingslabels, zijbalkknoppen, meldingen en dialoogvensters). De standaardmodus `auto` volgt de huidige UI-taal van Obsidian.
-- **Task Output Language** bepaalt de door het model gegenereerde taakoutput (links, samenvattingen, titelgeneratie, Mermaid-samenvatting, conceptextractie, vertaaldoel).
+- **Interfacetaal** stuurt alleen de tekst van de plugininterface aan (instellingslabels, zijbalkknoppen, meldingen en dialoogvensters). De standaardmodus `auto` volgt de huidige UI-taal van Obsidian.
+- **Taakuitvoertaal** bepaalt de door het model gegenereerde taakoutput (links, samenvattingen, titelgeneratie, Mermaid-samenvatting, conceptextractie, vertaaldoel).
 - **Per-task language mode** laat elke taak zijn eigen outputtaal bepalen vanuit één uniforme beleidslaag in plaats van verspreide overrides per module.
-- **Disable auto translation** houdt niet-Translate-taken in de taalcontext van de bron, terwijl expliciete Translate-taken nog steeds de geconfigureerde doeltaal afdwingen.
+- **Automatische vertaling uitschakelen** houdt niet-Translate-taken in de taalcontext van de bron, terwijl expliciete Translate-taken nog steeds de geconfigureerde doeltaal afdwingen.
 - Mermaid-gerelateerde generatiepaden volgen hetzelfde taalbeleid en kunnen, wanneer ingeschakeld, nog steeds Mermaid auto-fix activeren.
 
 ### Instellingen voor stabiele API-calls
-- **Enable Stable API Calls (Retry Logic)**:
-  - **Disabled (Default)**: Een enkele mislukte API-call stopt de huidige taak.
-  - **Enabled**: Probeert mislukte LLM API-calls automatisch opnieuw (handig bij intermitterende netwerkproblemen of rate limits).
+- **Schakel stabiele API-aanroepen in (retry-logica)**:
+  - **Uitgeschakeld (standaard)**: Een enkele mislukte API-call stopt de huidige taak.
+  - **Ingeschakeld**: Probeert mislukte LLM API-calls automatisch opnieuw (handig bij intermitterende netwerkproblemen of rate limits).
   - **Connection Test Fallback**: Zelfs wanneer normale calls niet al in stabiele modus draaien, schakelen providerverbindingstests nu naar dezelfde retry-sequentie na de eerste tijdelijke netwerkfout.
   - **Runtime Transport Fallback (Environment-Aware)**: Langlopende taakrequests die tijdelijk door `requestUrl` worden afgebroken, proberen dezelfde poging nu eerst opnieuw via een omgevingbewuste fallback. Desktopbuilds gebruiken Node `http/https`; niet-desktopomgevingen gebruiken browser-`fetch`. Die fallbackpogingen gebruiken nu protocolbewuste stream-parsing voor ingebouwde LLM-paden, inclusief OpenAI-compatibele SSE, Azure OpenAI SSE, Anthropic Messages SSE, Google Gemini SSE en Ollama NDJSON-output, zodat trage gateways eerder bodychunks kunnen teruggeven. De overige directe OpenAI-stijl providerpaden hergebruiken hetzelfde gedeelde fallbackpad.
   - **OpenAI-Compatible Stable Order**: In stabiele modus volgt elke OpenAI-compatibele poging nu `direct streaming -> direct non-stream -> requestUrl (met streamed fallback indien nodig)` voordat een poging als mislukt telt. Dat voorkomt overdreven agressieve failures wanneer slechts één transportmodus instabiel is.
 - **Retry Interval (seconds)**: (Alleen zichtbaar wanneer ingeschakeld) Wachttijd tussen retry-pogingen (1-300 seconden). Standaard: 5.
 - **Maximum Retries**: (Alleen zichtbaar wanneer ingeschakeld) Maximaal aantal retry-pogingen (0-10). Standaard: 3.
-- **API Error Debugging Mode**:
-  - **Disabled (Default)**: Gebruikt standaard, beknopte foutmeldingen.
-  - **Enabled**: Activeert gedetailleerde foutlogging (vergelijkbaar met de uitgebreide output van DeepSeek) voor alle providers en taken (inclusief Translate, Search en Connection Tests). Dit bevat HTTP-statuscodes, ruwe responstekst, request-transporttijdlijnen, geschoonde request-URL's en headers, duur per poging, response-headers, gedeeltelijke response-bodies, geparseerde gedeeltelijke streamoutput en stack traces, wat cruciaal is voor troubleshooting van API-verbindingsproblemen en resets van upstream-gateways.
+- **API-foutopsporingsmodus**:
+  - **Uitgeschakeld (standaard)**: Gebruikt standaard, beknopte foutmeldingen.
+  - **Ingeschakeld**: Activeert gedetailleerde foutlogging (vergelijkbaar met de uitgebreide output van DeepSeek) voor alle providers en taken (inclusief Translate, Search en Connection Tests). Dit bevat HTTP-statuscodes, ruwe responstekst, request-transporttijdlijnen, geschoonde request-URL's en headers, duur per poging, response-headers, gedeeltelijke response-bodies, geparseerde gedeeltelijke streamoutput en stack traces, wat cruciaal is voor troubleshooting van API-verbindingsproblemen en resets van upstream-gateways.
 - **Developer Mode**:
-  - **Disabled (Default)**: Verbergt alle diagnostische controls voor developers voor normale gebruikers.
-  - **Enabled**: Toont een apart developer-diagnostics-paneel in de instellingen.
+  - **Uitgeschakeld (standaard)**: Verbergt alle diagnostische controls voor developers voor normale gebruikers.
+  - **Ingeschakeld**: Toont een apart developer-diagnostics-paneel in de instellingen.
 - **Developer Provider Diagnostic (Long Request)**:
   - **Diagnostic Call Mode**: Kies het runtimepad per probe. OpenAI-compatibele providers ondersteunen extra geforceerde modi (`direct streaming`, `direct buffered`, `requestUrl-only`) naast runtime-modi.
   - **Run Diagnostic**: Voert één long-request-probe uit met de geselecteerde callmodus en schrijft `Notemd_Provider_Diagnostic_*.txt` weg in de root van de vault.
@@ -264,60 +264,60 @@ Toegang tot de plugininstellingen via:
 
 ### Algemene instellingen
 
-#### Processed File Output
+#### Uitvoer van verwerkt bestand
 - **Customize Processed File Save Path**:
-  - **Disabled (Default)**: Verwerkte bestanden (bijv. `YourNote_processed.md`) worden in **dezelfde map** opgeslagen als de oorspronkelijke notitie.
-  - **Enabled**: Laat je een aangepaste opslaglocatie opgeven.
+  - **Uitgeschakeld (standaard)**: Verwerkte bestanden (bijv. `YourNote_processed.md`) worden in **dezelfde map** opgeslagen als de oorspronkelijke notitie.
+  - **Ingeschakeld**: Laat je een aangepaste opslaglocatie opgeven.
 - **Processed File Folder Path**: (Alleen zichtbaar wanneer hierboven ingeschakeld) Voer een **relatief pad** binnen je vault in (bijv. `Processed Notes` of `Output/LLM`) waar verwerkte bestanden moeten worden opgeslagen. Mappen worden aangemaakt als ze niet bestaan. **Gebruik geen absolute paden (zoals C:\...) en geen ongeldige tekens.**
 - **Use Custom Output Filename for 'Add Links'**:
-  - **Disabled (Default)**: Verwerkte bestanden die zijn gemaakt door de opdracht 'Add Links' gebruiken de standaard `_processed.md`-suffix (bijv. `YourNote_processed.md`).
-  - **Enabled**: Laat je de uitvoerbestandsnaam aanpassen met de instelling hieronder.
+  - **Uitgeschakeld (standaard)**: Verwerkte bestanden die zijn gemaakt door de opdracht 'Add Links' gebruiken de standaard `_processed.md`-suffix (bijv. `YourNote_processed.md`).
+  - **Ingeschakeld**: Laat je de uitvoerbestandsnaam aanpassen met de instelling hieronder.
 - **Custom Suffix/Replacement String**: (Alleen zichtbaar wanneer hierboven ingeschakeld) Voer de string in die je voor de uitvoerbestandsnaam wilt gebruiken.
   - Als dit **leeg** blijft, wordt het oorspronkelijke bestand **overschreven** met de verwerkte inhoud.
   - Als je een string invoert (bijv. `_linked`), wordt die aan de oorspronkelijke basisnaam toegevoegd (bijv. `YourNote_linked.md`). Zorg ervoor dat de suffix geen ongeldige bestandsnaamtekens bevat.
 
 - **Remove Code Fences on Add Links**:
-  - **Disabled (Default)**: Code fences **(\`\`\`)** blijven in de inhoud aanwezig bij het toevoegen van links, en **(\`\`\`markdown)** wordt automatisch verwijderd.
-  - **Enabled**: Verwijdert code fences uit de inhoud voordat links worden toegevoegd.
+  - **Uitgeschakeld (standaard)**: Code fences **(\`\`\`)** blijven in de inhoud aanwezig bij het toevoegen van links, en **(\`\`\`markdown)** wordt automatisch verwijderd.
+  - **Ingeschakeld**: Verwijdert code fences uit de inhoud voordat links worden toegevoegd.
 <img width="799" height="301" alt="Processed file output" src="https://github.com/user-attachments/assets/65d4e864-ff5f-402a-be90-e9c44b208903" />
 
-#### Concept Note Output
+#### Uitvoer van conceptnotitie
 - **Customize Concept Note Path**:
-  - **Disabled (Default)**: Automatisch aanmaken van notities voor `[[linked concepts]]` is uitgeschakeld.
-  - **Enabled**: Laat je een map opgeven waarin nieuwe conceptnotities worden aangemaakt.
+  - **Uitgeschakeld (standaard)**: Automatisch aanmaken van notities voor `[[linked concepts]]` is uitgeschakeld.
+  - **Ingeschakeld**: Laat je een map opgeven waarin nieuwe conceptnotities worden aangemaakt.
 - **Concept Note Folder Path**: (Alleen zichtbaar wanneer hierboven ingeschakeld) Voer een **relatief pad** binnen je vault in (bijv. `Concepts` of `Generated/Topics`) waar nieuwe conceptnotities moeten worden opgeslagen. Mappen worden aangemaakt als ze niet bestaan. **Moet ingevuld zijn als aanpassing is ingeschakeld.** **Gebruik geen absolute paden of ongeldige tekens.**
 <img width="800" height="145" alt="concept note output" src="https://github.com/user-attachments/assets/d0338341-7d67-4472-964c-75a0992165b8" />
 
-#### Concept Log File Output
+#### Uitvoer van conceptlogbestand
 - **Generate Concept Log File**:
-  - **Disabled (Default)**: Er wordt geen logbestand gegenereerd.
-  - **Enabled**: Maakt na verwerking een logbestand aan met een lijst van nieuw aangemaakte conceptnotities. Het formaat is:
+  - **Uitgeschakeld (standaard)**: Er wordt geen logbestand gegenereerd.
+  - **Ingeschakeld**: Maakt na verwerking een logbestand aan met een lijst van nieuw aangemaakte conceptnotities. Het formaat is:
     ```
-    generate xx concepts md file
+    genereer xx concept-md-bestanden
     1. concepts1
     2. concepts2
     ...
     n. conceptsn
     ```
 - **Customize Log File Save Path**: (Alleen zichtbaar wanneer "Generate Concept Log File" is ingeschakeld)
-  - **Disabled (Default)**: Het logbestand wordt opgeslagen in de **Concept Note Folder Path** (indien opgegeven) of anders in de root van de vault.
-  - **Enabled**: Laat je een aangepaste map voor het logbestand opgeven.
+  - **Uitgeschakeld (standaard)**: Het logbestand wordt opgeslagen in de **Concept Note Folder Path** (indien opgegeven) of anders in de root van de vault.
+  - **Ingeschakeld**: Laat je een aangepaste map voor het logbestand opgeven.
 - **Concept Log Folder Path**: (Alleen zichtbaar wanneer "Customize Log File Save Path" is ingeschakeld) Voer een **relatief pad** binnen je vault in (bijv. `Logs/Notemd`) waar het logbestand moet worden opgeslagen. **Moet ingevuld zijn als aanpassing is ingeschakeld.**
 - **Customize Log File Name**: (Alleen zichtbaar wanneer "Generate Concept Log File" is ingeschakeld)
-  - **Disabled (Default)**: Het logbestand heet `Generate.log`.
-  - **Enabled**: Laat je een aangepaste naam voor het logbestand opgeven.
+  - **Uitgeschakeld (standaard)**: Het logbestand heet `Generate.log`.
+  - **Ingeschakeld**: Laat je een aangepaste naam voor het logbestand opgeven.
 - **Concept Log File Name**: (Alleen zichtbaar wanneer "Customize Log File Name" is ingeschakeld) Voer de gewenste bestandsnaam in (bijv. `ConceptCreation.log`). **Moet ingevuld zijn als aanpassing is ingeschakeld.**
 <img width="809" height="281" alt="Concept log file output" src="https://github.com/user-attachments/assets/eef6f5d5-592d-4b8f-84b1-7404521a6e9b" />
 
-#### Extract Concepts Task
-- **Create minimal concept notes**:
+#### Taak 'Concepten extraheren'
+- **Minimale conceptnotities maken**:
   - **On (Default)**: Nieuw aangemaakte conceptnotities bevatten alleen de titel (bijv. `# Concept`).
   - **Off**: Conceptnotities kunnen extra inhoud bevatten, zoals een backlink "Linked From", tenzij dit is uitgeschakeld met de instelling hieronder.
 - **Add "Linked From" backlink**:
   - **Off (Default)**: Voegt tijdens extractie geen backlink naar het bronbestand toe in de conceptnotitie.
   - **On**: Voegt een sectie "Linked From" toe met een backlink naar het bronbestand.
 
-#### Extract Specific Original Text
+#### Specifieke oorspronkelijke tekst extraheren
 - **Questions for extraction**: Voer een lijst vragen in (één per regel) waarvoor je wilt dat de AI letterlijke antwoorden uit je notities extraheert.
 - **Translate output to corresponding language**:
   - **Off (Default)**: Geeft alleen de geëxtraheerde tekst in de oorspronkelijke taal weer.
@@ -329,7 +329,7 @@ Toegang tot de plugininstellingen via:
   - **Off**: Slaat op in dezelfde map als het oorspronkelijke bestand met de suffix `_Extracted`.
   - **On**: Laat je een aangepaste uitvoermap en bestandsnaamsuffix opgeven.
 
-#### Batch Mermaid Fix
+#### Batchgewijze Mermaid-correctie
 - **Enable Mermaid Error Detection**:
   - **Off (Default)**: Foutdetectie wordt na verwerking overgeslagen.
   - **On**: Scant verwerkte bestanden op overgebleven Mermaid-syntaxfouten en genereert een rapport `mermaid_error_{foldername}.md`.
@@ -338,10 +338,10 @@ Toegang tot de plugininstellingen via:
   - **On**: Verplaatst bestanden die na de fixpoging nog Mermaid-syntaxfouten bevatten naar een aparte map voor handmatige review.
 - **Mermaid error folder path**: (Zichtbaar als bovenstaande is ingeschakeld) De map waar foutbestanden naartoe worden verplaatst.
 
-#### Processing Parameters
+#### Verwerkingsparameters
 - **Enable Batch Parallelism**:
-  - **Disabled (Default)**: Batchtaken (zoals "Process Folder" of "Batch Generate from Titles") verwerken bestanden één voor één (serieel).
-  - **Enabled**: Laat de plugin meerdere bestanden gelijktijdig verwerken, wat grote batchjobs aanzienlijk kan versnellen.
+  - **Uitgeschakeld (standaard)**: Batchtaken (zoals "Process Folder" of "Batch Generate from Titles") verwerken bestanden één voor één (serieel).
+  - **Ingeschakeld**: Laat de plugin meerdere bestanden gelijktijdig verwerken, wat grote batchjobs aanzienlijk kan versnellen.
 - **Batch Concurrency**: (Alleen zichtbaar wanneer parallelisme is ingeschakeld) Stelt het maximale aantal bestanden in dat parallel mag worden verwerkt. Een hoger getal kan sneller zijn, maar gebruikt meer resources en kan API-rate-limits raken. (Standaard: 1, bereik: 1-20)
 - **Batch Size**: (Alleen zichtbaar wanneer parallelisme is ingeschakeld) Het aantal bestanden dat in één batch wordt gegroepeerd. (Standaard: 50, bereik: 10-200)
 - **Delay Between Batches (ms)**: (Alleen zichtbaar wanneer parallelisme is ingeschakeld) Een optionele vertraging in milliseconden tussen batches, wat kan helpen bij het omgaan met API-rate-limits. (Standaard: 1000 ms)
@@ -351,23 +351,23 @@ Toegang tot de plugininstellingen via:
 - **Max Tokens**: Maximum aantal tokens dat de LLM per responsechunk mag genereren. Beinvloedt kosten en detailniveau. (Standaard: 4096)
 <img width="795" height="274" alt="Processing Parameters   Language settings" src="https://github.com/user-attachments/assets/74e4af76-3333-48fc-bb86-0a3ee61825d1" />
 
-#### Translation
+#### Vertaling
 - **Default Target Language**: Selecteer de standaardtaal waarin je je notities wilt vertalen. Dit kan in de UI worden overschreven wanneer je de vertaalopdracht uitvoert. (Standaard: Engels)
 - **Customise Translation File Save Path**:
-  - **Disabled (Default)**: Vertaalde bestanden worden opgeslagen in **dezelfde map** als de oorspronkelijke notitie.
-  - **Enabled**: Laat je een **relatief pad** binnen je vault opgeven (bijv. `Translations`) waar vertaalde bestanden moeten worden opgeslagen. Mappen worden aangemaakt als ze niet bestaan.
+  - **Uitgeschakeld (standaard)**: Vertaalde bestanden worden opgeslagen in **dezelfde map** als de oorspronkelijke notitie.
+  - **Ingeschakeld**: Laat je een **relatief pad** binnen je vault opgeven (bijv. `Translations`) waar vertaalde bestanden moeten worden opgeslagen. Mappen worden aangemaakt als ze niet bestaan.
 - **Use custom suffix for translated files**:
-  - **Disabled (Default)**: Vertaalde bestanden gebruiken de standaard `_translated.md`-suffix (bijv. `YourNote_translated.md`).
-  - **Enabled**: Laat je een aangepaste suffix opgeven.
+  - **Uitgeschakeld (standaard)**: Vertaalde bestanden gebruiken de standaard `_translated.md`-suffix (bijv. `YourNote_translated.md`).
+  - **Ingeschakeld**: Laat je een aangepaste suffix opgeven.
 - **Custom Suffix**: (Alleen zichtbaar wanneer hierboven ingeschakeld) Voer de aangepaste suffix in die moet worden toegevoegd aan vertaalde bestandsnamen (bijv. `_es` of `_fr`).
 <img width="811" height="243" alt="translate" src="https://github.com/user-attachments/assets/57d21a72-e86c-4369-8be5-fd18cb734e2b" />
 
-#### Content Generation
+#### Inhoudsgeneratie
 - **Enable Research in "Generate from Title"**:
-  - **Disabled (Default)**: "Generate from Title" gebruikt alleen de titel als input.
-  - **Enabled**: Voert webonderzoek uit met de geconfigureerde **Web Research Provider** en gebruikt de gevonden informatie als context voor de LLM tijdens generatie op basis van de titel.
+  - **Uitgeschakeld (standaard)**: "Generate from Title" gebruikt alleen de titel als input.
+  - **Ingeschakeld**: Voert webonderzoek uit met de geconfigureerde **Web Research Provider** en gebruikt de gevonden informatie als context voor de LLM tijdens generatie op basis van de titel.
 - **Auto-run Mermaid Syntax Fix after Generation**:
-  - **Enabled (Default)**: Voert automatisch een Mermaid-syntaxfix uit na Mermaid-gerelateerde workflows zoals Process, Generate from Title, Batch Generate from Titles, Research & Summarize, Summarise as Mermaid en Translate.
+  - **Ingeschakeld (standaard)**: Voert automatisch een Mermaid-syntaxfix uit na Mermaid-gerelateerde workflows zoals Process, Generate from Title, Batch Generate from Titles, Research & Summarize, Summarise as Mermaid en Translate.
   - **Disabled**: Laat gegenereerde Mermaid-output ongemoeid, tenzij je `Batch Mermaid Fix` handmatig uitvoert of toevoegt aan een aangepaste workflow.
 - **Output Language**: (Nieuw) Selecteer de gewenste outputtaal voor de taken "Generate from Title" en "Batch Generate from Title".
   - **English (Default)**: Prompts worden verwerkt en output wordt geproduceerd in het Engels.
@@ -376,11 +376,11 @@ Toegang tot de plugininstellingen via:
   - **Change Prompt Word**: Hiermee kun je het promptwoord voor een specifieke taak wijzigen.
   - **Custom Prompt Word**: Voer je aangepaste promptwoord voor de taak in.
 - **Use Custom Output Folder for 'Generate from Title'**:
-  - **Disabled (Default)**: Succesvol gegenereerde bestanden worden verplaatst naar een submap met de naam `[OriginalFolderName]_complete` ten opzichte van de bovenliggende map van de oorspronkelijke map (of `Vault_complete` als de oorspronkelijke map de root was).
-  - **Enabled**: Laat je een aangepaste naam opgeven voor de submap waar voltooide bestanden naartoe worden verplaatst.
+  - **Uitgeschakeld (standaard)**: Succesvol gegenereerde bestanden worden verplaatst naar een submap met de naam `[OriginalFolderName]_complete` ten opzichte van de bovenliggende map van de oorspronkelijke map (of `Vault_complete` als de oorspronkelijke map de root was).
+  - **Ingeschakeld**: Laat je een aangepaste naam opgeven voor de submap waar voltooide bestanden naartoe worden verplaatst.
 - **Custom Output Folder Name**: (Alleen zichtbaar wanneer hierboven ingeschakeld) Voer de gewenste naam in voor de submap (bijv. `Generated Content`, `_complete`). Ongeldige tekens zijn niet toegestaan. Standaard `_complete` wanneer leeg. Deze map wordt aangemaakt ten opzichte van de bovenliggende map van de oorspronkelijke map.
 
-#### One-click Workflow Buttons
+#### Workflowknoppen met één klik
 - **Visual Workflow Builder**: Maak aangepaste workflowknoppen op basis van ingebouwde acties zonder de DSL met de hand te schrijven.
 - **Custom Workflow Buttons DSL**: Gevorderde gebruikers kunnen de definitietekst van workflows nog steeds direct bewerken. Ongeldige DSL valt veilig terug op de standaardworkflow en toont een waarschuwing in de zijbalk/UI van de instellingen.
 - **Workflow Error Strategy**:
@@ -388,17 +388,17 @@ Toegang tot de plugininstellingen via:
   - **Continue on Error**: Gaat door met latere stappen en rapporteert aan het einde het aantal mislukte acties.
 - **Default Workflow Included**: `One-Click Extract` koppelt `Process File (Add Links)`, `Batch Generate from Titles` en `Batch Mermaid Fix`.
 
-#### Custom Prompt Settings
+#### Instellingen voor aangepaste instructies
 Met deze functie kun je de standaardinstructies (prompts) die naar de LLM worden gestuurd voor specifieke taken overschrijven, zodat je fijnmazige controle hebt over de output.
 
 - **Enable Custom Prompts for Specific Tasks**:
-  - **Disabled (Default)**: De plugin gebruikt voor alle bewerkingen de ingebouwde standaardprompts.
-  - **Enabled**: Activeert de mogelijkheid om aangepaste prompts in te stellen voor de hieronder genoemde taken. Dit is de hoofdschakelaar voor deze functie.
+  - **Uitgeschakeld (standaard)**: De plugin gebruikt voor alle bewerkingen de ingebouwde standaardprompts.
+  - **Ingeschakeld**: Activeert de mogelijkheid om aangepaste prompts in te stellen voor de hieronder genoemde taken. Dit is de hoofdschakelaar voor deze functie.
 
 - **Use Custom Prompt for [Task Name]**: (Alleen zichtbaar wanneer bovenstaande is ingeschakeld)
   - Voor elke ondersteunde taak ("Add Links", "Generate from Title", "Research & Summarize", "Extract Concepts") kun je je aangepaste prompt afzonderlijk in- of uitschakelen.
   - **Disabled**: Deze specifieke taak gebruikt de standaardprompt.
-  - **Enabled**: Deze taak gebruikt de tekst die jij invult in het corresponderende tekstgebied "Custom Prompt".
+  - **Ingeschakeld**: Deze taak gebruikt de tekst die jij invult in het corresponderende tekstgebied "Custom Prompt".
 
 - **Custom Prompt Text Area**: (Alleen zichtbaar wanneer de aangepaste prompt voor een taak is ingeschakeld)
   - **Default Prompt Display**: Ter referentie toont de plugin de standaardprompt die normaal voor deze taak zou worden gebruikt. Je kunt de knop **"Copy Default Prompt"** gebruiken om deze tekst te kopiëren als startpunt voor je eigen prompt.
@@ -412,7 +412,7 @@ Met deze functie kun je de standaardinstructies (prompts) die naar de LLM worden
 
 <img width="866" height="646" alt="Duplicate check scope   Custom prompt settings" src="https://github.com/user-attachments/assets/1b37a523-ef00-4e40-94a0-43bbe0c78572" />
 
-#### Duplicate Check Scope
+#### Reikwijdte van duplicaatcontrole
 - **Duplicate Check Scope Mode**: Bepaalt welke bestanden worden vergeleken met de notities in je Concept Note Folder op mogelijke duplicaten.
   - **Entire Vault (Default)**: Vergelijkt conceptnotities met alle andere notities in de vault (behalve de Concept Note Folder zelf).
   - **Include Specific Folders Only**: Vergelijkt conceptnotities alleen met notities in de hieronder opgegeven mappen.
@@ -420,7 +420,7 @@ Met deze functie kun je de standaardinstructies (prompts) die naar de LLM worden
   - **Concept Folder Only**: Vergelijkt conceptnotities alleen met **andere notities binnen de Concept Note Folder**. Dit helpt om duplicaten puur binnen je gegenereerde concepten te vinden.
 - **Include/Exclude Folders**: (Alleen zichtbaar wanneer Mode op 'Include' of 'Exclude' staat) Voer de **relatieve paden** in van de mappen die je wilt opnemen of uitsluiten, **één pad per regel**. Paden zijn hoofdlettergevoelig en gebruiken `/` als scheidingsteken (bijv. `Reference Material/Papers` of `Daily Notes`). Deze mappen mogen niet gelijk zijn aan of binnen de Concept Note Folder liggen.
 
-#### Web Research Provider
+#### Webonderzoeksaanbieder
 - **Search Provider**: Kies tussen `Tavily` (API-sleutel vereist, aanbevolen) en `DuckDuckGo` (experimenteel, wordt vaak geblokkeerd door de zoekmachine bij geautomatiseerde requests). Gebruikt voor "Research & Summarize Topic" en optioneel voor "Generate from Title".
 - **Tavily API Key**: (Alleen zichtbaar als Tavily is geselecteerd) Voer je API-sleutel in van [tavily.com](https://tavily.com/).
 - **Tavily Max Results**: (Alleen zichtbaar als Tavily is geselecteerd) Maximum aantal zoekresultaten dat Tavily mag teruggeven (1-20). Standaard: 5.
@@ -430,19 +430,19 @@ Met deze functie kun je de standaardinstructies (prompts) die naar de LLM worden
 - **Max Research Content Tokens**: Benaderend maximum aantal tokens uit gecombineerde webonderzoeksresultaten (snippets/opgehaalde inhoud) dat in de samenvattingsprompt wordt opgenomen. Helpt de grootte van het contextvenster en kosten te beheersen. (Standaard: 3000)
 <img width="810" height="278" alt="Web research provider" src="https://github.com/user-attachments/assets/be0280eb-bb4e-4db0-bf69-91da3f0fd3c0" />
 
-#### Focused Learning Domain
+#### Gericht leerdomein
 - **Enable Focused Learning Domain**:
-  - **Disabled (Default)**: Prompts die naar de LLM worden gestuurd gebruiken de standaard algemene instructies.
-  - **Enabled**: Laat je één of meer vakgebieden opgeven om het contextuele begrip van de LLM te verbeteren.
+  - **Uitgeschakeld (standaard)**: Prompts die naar de LLM worden gestuurd gebruiken de standaard algemene instructies.
+  - **Ingeschakeld**: Laat je één of meer vakgebieden opgeven om het contextuele begrip van de LLM te verbeteren.
 - **Learning Domain**: (Alleen zichtbaar wanneer bovenstaande is ingeschakeld) Voer je specifieke vakgebied(en) in, bijvoorbeeld 'Materials Science', 'Polymer Physics', 'Machine Learning'. Hierdoor wordt een regel "Relevant Fields: [...]" aan het begin van prompts toegevoegd, zodat de LLM nauwkeurigere en relevantere links en inhoud kan genereren voor jouw studiegebied.
 <img width="595" height="143" alt="focused learning domain" src="https://github.com/user-attachments/assets/1bcc9707-5c10-4944-a61b-65fde0cd0404" />
 
 ## Gebruikshandleiding
 
-### Quick Workflows en zijbalk
+### Snelle werkstromen en zijbalk
 
 - Open de Notemd-zijbalk om gegroepeerde actiesecties te zien voor core processing, generation, translation, knowledge en utilities.
-- Gebruik het gebied **Quick Workflows** bovenaan de zijbalk om aangepaste meerstapsknoppen te starten.
+- Gebruik het gebied **Snelle workflows** bovenaan de zijbalk om aangepaste meerstapsknoppen te starten.
 - De standaardworkflow **One-Click Extract** voert `Process File (Add Links)` -> `Batch Generate from Titles` -> `Batch Mermaid Fix` uit.
 - Workflowvoortgang, logs per stap en failures worden in de zijbalk getoond, met een vastgepinde footer die voorkomt dat de voortgangsbalk en het loggebied door uitgeklapte secties worden weggedrukt.
 - De voortgangskaart houdt statustekst, een aparte percentagepil en resterende tijd in één oogopslag leesbaar, en dezelfde aangepaste workflows kunnen opnieuw vanuit de instellingen worden geconfigureerd.
@@ -470,7 +470,7 @@ Dit is de kernfunctionaliteit, gericht op het identificeren van concepten en het
 
 ### Nieuwe functies
 
-1. **Summarise as Mermaid diagram**:
+1. **Vat samen als Mermaid-diagram**:
    - Open de notitie die je wilt samenvatten.
    - Voer de opdracht `Notemd: Summarise as Mermaid diagram` uit (via het command palette of de zijbalkknop).
    - De plugin genereert een nieuwe notitie met het Mermaid-diagram.
@@ -482,7 +482,7 @@ Dit is de kernfunctionaliteit, gericht op het identificeren van concepten en het
    - De plugin gebruikt de geconfigureerde **LLM Provider** (op basis van de Multi-Model-instellingen) om de vertaling uit te voeren.
    - De vertaalde inhoud wordt opgeslagen in de geconfigureerde **Translation Save Path** met de juiste suffix, en geopend in een **nieuw paneel rechts** van de oorspronkelijke inhoud voor eenvoudig vergelijken.
    - Je kunt deze taak annuleren via de zijbalkknop of de annuleerknop in het venster.
-3. **Batch Translate**:
+3. **Batchvertaling**:
    - Voer de opdracht `Notemd: Batch Translate Folder` uit via het command palette en selecteer een map, of klik met rechts op een map in de bestandsverkenner en kies "Batch translate this folder".
    - De plugin vertaalt alle Markdown-bestanden in de geselecteerde map.
    - Vertaalde bestanden worden opgeslagen op het geconfigureerde vertaalpad maar niet automatisch geopend.
@@ -562,7 +562,7 @@ Dit is de kernfunctionaliteit, gericht op het identificeren van concepten en het
     - De plugin rapporteert bestanden die nog fouten bevatten in een bestand `mermaid_error_{foldername}.md`.
     - Configureer optioneel dat de plugin deze problematische bestanden naar een aparte map verplaatst voor controle.
 
-## Ondersteunde LLM-providers
+## Ondersteunde LLM-aanbieders
 
 | Provider           | Type    | API-sleutel vereist    | Opmerkingen                                                           |
 |--------------------|---------|------------------------|------------------------------------------------------------------------|
@@ -603,7 +603,7 @@ Dit is de kernfunctionaliteit, gericht op het identificeren van concepten en het
 
 Notemd draait lokaal in Obsidian, maar sommige functies versturen uitgaande requests.
 
-### LLM-providercalls (configureerbaar)
+### LLM-aanbiederoproepen (configureerbaar)
 
 - Trigger: bestandsverwerking, generatie, vertaling, onderzoeksamenvatting, Mermaid-samenvatting en acties voor verbinding/diagnostiek.
 - Endpoint: je geconfigureerde provider-Base URL(s) in de Notemd-instellingen.
@@ -616,7 +616,7 @@ Notemd draait lokaal in Obsidian, maar sommige functies versturen uitgaande requ
 - Endpoint: Tavily API of DuckDuckGo-endpoints.
 - Verzonden data: je onderzoeksquery en vereiste requestmetadata.
 
-### Developer Diagnostics en debuglogs (optioneel)
+### Ontwikkelaarsdiagnostiek en foutopsporingslogboeken (optioneel)
 
 - Trigger: API-debugmodus en diagnostische acties voor developers.
 - Opslag: diagnostische en foutlogs worden opgeslagen in de root van je vault (bijvoorbeeld `Notemd_Provider_Diagnostic_*.txt` en `Notemd_Error_Log_*.txt`).
@@ -658,7 +658,7 @@ Notemd draait lokaal in Obsidian, maar sommige functies versturen uitgaande requ
        ```
        Het gegenereerde rapport bevat timing per poging (`First Byte`, `Duration`), geschoonde requestmetadata, response-headers, ruwe/gedeeltelijke bodyfragmenten, geparseerde streamfragmenten en de precieze punten waar transportfouten optreden.
 - **LM Studio/Ollama-verbindingsproblemen**:
-  - **Test Connection faalt**: Controleer of de lokale server (LM Studio of Ollama) actief is en of het juiste model geladen/beschikbaar is.
+  - **Verbindingstest faalt**: Controleer of de lokale server (LM Studio of Ollama) actief is en of het juiste model geladen/beschikbaar is.
   - **CORS-fouten (Ollama op Windows)**: Als je CORS-fouten (Cross-Origin Resource Sharing) krijgt bij gebruik van Ollama op Windows, moet je mogelijk de omgevingsvariabele `OLLAMA_ORIGINS` instellen. Dat kan met `set OLLAMA_ORIGINS=*` in je opdrachtprompt voordat je Ollama start. Dat staat requests vanaf elke origin toe.
   - **CORS inschakelen in LM Studio**: Voor LM Studio kun je CORS direct in de serverinstellingen inschakelen. Dat kan nodig zijn wanneer Obsidian in een browser draait of strikte origin policies hanteert.
 - **Fouten bij het aanmaken van mappen ("File name cannot contain...")**:
@@ -674,8 +674,8 @@ Bijdragen zijn welkom. Raadpleeg de GitHub-repository voor richtlijnen: [https:/
 
 ## Documentatie voor maintainers
 
-- [Release Workflow (English)](./docs/maintainer/release-workflow.md)
-- [Release Workflow (简体中文)](./docs/maintainer/release-workflow.zh-CN.md)
+- [Releaseworkflow (Engels)](./docs/maintainer/release-workflow.md)
+- [Releaseworkflow (Vereenvoudigd Chinees)](./docs/maintainer/release-workflow.zh-CN.md)
 
 ## Licentie
 

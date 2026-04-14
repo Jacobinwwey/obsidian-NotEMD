@@ -4,7 +4,7 @@
 
 [English](./README.md) | [简体中文](./README_zh.md) | [Español](./README_es.md) | [Français](./README_fr.md) | [Deutsch](./README_de.md) | [Italiano](./README_it.md) | [Português](./README_pt.md) | [繁體中文](./README_zh_Hant.md) | [日本語](./README_ja.md) | [한국어](./README_ko.md) | [Русский](./README_ru.md) | [العربية](./README_ar.md) | [हिन्दी](./README_hi.md) | [বাংলা](./README_bn.md) | [Nederlands](./README_nl.md) | [Svenska](./README_sv.md) | [Suomi](./README_fi.md) | [Dansk](./README_da.md) | [Norsk](./README_no.md) | [Polski](./README_pl.md) | [Türkçe](./README_tr.md) | [עברית](./README_he.md) | [ไทย](./README_th.md) | [Ελληνικά](./README_el.md) | [Čeština](./README_cs.md) | [Magyar](./README_hu.md) | [Română](./README_ro.md) | [Українська](./README_uk.md) | [Tiếng Việt](./README_vi.md) | [Bahasa Indonesia](./README_id.md) | [Bahasa Melayu](./README_ms.md)
 
-Daha fazla dilde belgeler için: [Language Hub](./docs/i18n/README.md)
+Daha fazla dilde belgeler için: [Dil Merkezi](./docs/i18n/README.md)
 
 ```
 ==================================================
@@ -59,15 +59,15 @@ Hepsi bu kadar. Web araştırması, çeviri ve içerik üretimi gibi daha fazla 
 
 | Konu | Kapsam | Varsayılan | Notlar |
 |---|---|---|---|
-| `UI Locale` | Yalnızca eklenti arayüzü metinleri (ayarlar, kenar çubuğu, bildirimler, diyaloglar) | `auto` | Obsidian yerel ayarını izler; mevcut arayüz katalogları `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN` ve `zh-TW`'dir. |
-| `Task Output Language` | LLM tarafından oluşturulan görev çıktısı (bağlantılar, özetler, üretim, çıkarım, çeviri hedefi) | `en` | `Use different languages for tasks` etkinse global ya da görev bazlı olabilir. |
-| `Disable auto translation` | Translate dışındaki görevler kaynak dil bağlamını korur | `false` | Açık `Translate` görevleri yine de yapılandırılmış hedef dili zorlar. |
-| Locale fallback | Eksik arayüz anahtarlarının çözümü | locale -> `en` | Bazı anahtarlar çevrilmemiş olsa bile arayüzü kararlı tutar. |
+| `Arayüz dili` | Yalnızca eklenti arayüzü metinleri (ayarlar, kenar çubuğu, bildirimler, diyaloglar) | `auto` | Obsidian yerel ayarını izler; mevcut arayüz katalogları `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN` ve `zh-TW`'dir. |
+| `Görev çıktı dili` | LLM tarafından oluşturulan görev çıktısı (bağlantılar, özetler, üretim, çıkarım, çeviri hedefi) | `en` | `Görevler için farklı diller kullan` etkinse genel ya da görev bazlı olabilir. |
+| `Otomatik çeviriyi devre dışı bırak` | Translate dışındaki görevler kaynak dil bağlamını korur | `false` | Açık `Translate` görevleri yine de yapılandırılmış hedef dili zorlar. |
+| `Yedek dil` | Eksik arayüz anahtarlarının çözümü | locale -> `en` | Bazı anahtarlar çevrilmemiş olsa bile arayüzü kararlı tutar. |
 
 - Bakımı yapılan kaynak belgeler İngilizce ve Basitleştirilmiş Çince'dir; yayımlanmış README çevirileri yukarıdaki başlıkta bağlantılanmıştır.
 - Uygulama içi UI yerel dil kapsamı şu anda koddaki açık katalogla tam olarak eşleşmektedir: `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, `zh-TW`.
 - İngilizce fallback uygulama düzeyinde bir güvenlik ağı olarak kalır, ancak desteklenen görünür yüzeyler regresyon testleriyle güvence altındadır ve normal kullanımda sessizce İngilizceye dönmemelidir.
-- Daha fazla ayrıntı ve katkı yönergeleri [Language Hub](./docs/i18n/README.md) üzerinden izlenir.
+- Daha fazla ayrıntı ve katkı yönergeleri [Dil Merkezi](./docs/i18n/README.md) üzerinden izlenir.
 
 ## Özellikler
 
@@ -111,12 +111,12 @@ Hepsi bu kadar. Web araştırması, çeviri ve içerik üretimi gibi daha fazla 
   - Birden çok dil arasında çeviri yapılmasını destekler.
   - Hedef dil ayarlardan veya arayüzden özelleştirilebilir.
   - Çevrilen metni kolay karşılaştırma için orijinal metnin sağ tarafında otomatik olarak açar.
-- **Batch Translate**:
+- **Toplu Çeviri**:
   - Seçilen klasördeki tüm dosyaları çevirir.
   - "Enable Batch Parallelism" açık olduğunda paralel işlemeyi destekler.
   - Yapılandırılmışsa çeviri için özel istemler kullanır.
   - Dosya gezgininin bağlam menüsüne "Batch translate this folder" seçeneğini ekler.
-- **Disable auto translation**: Bu seçenek etkin olduğunda, Translate dışındaki görevler artık çıktıyı belirli bir dile zorlamaz ve kaynak dil bağlamını korur. Açık "Translate" görevi ise yapılandırıldığı şekilde çeviriyi sürdürür.
+- **Otomatik çeviriyi devre dışı bırak**: Bu seçenek etkin olduğunda, Translate dışındaki görevler artık çıktıyı belirli bir dile zorlamaz ve kaynak dil bağlamını korur. Açık "Translate" görevi ise yapılandırıldığı şekilde çeviriyi sürdürür.
 
 ### Web Araştırması ve İçerik Oluşturma
 - **Web Araştırması ve Özetleme**:
@@ -133,7 +133,7 @@ Hepsi bu kadar. Web araştırması, çeviri ve içerik üretimi gibi daha fazla 
 - **Mermaid Auto-Fix Bağlantısı**: Mermaid auto-fix etkin olduğunda, Mermaid ile ilgili iş akışları artık işlem sonrası üretilen dosyaları veya çıktı klasörlerini otomatik olarak onarır. Bu kapsama Process, Generate from Title, Batch Generate from Titles, Research & Summarize, Summarise as Mermaid ve Translate akışları dahildir.
 
 ### Yardımcı Özellikler
-- **Summarise as Mermaid diagram**:
+- **Mermaid diyagramı olarak özetle**:
   - Bu özellik, bir notun içeriğini Mermaid diyagramı olarak özetlemenizi sağlar.
   - Mermaid diyagramının çıktı dili ayarlarda özelleştirilebilir.
   - **Mermaid Output Folder**: Oluşturulan Mermaid diyagram dosyalarının kaydedileceği klasörü yapılandırın.
@@ -209,38 +209,38 @@ Eklenti ayarlarına erişim:
 **Settings** -> **Community Plugins** -> **Notemd** (dişli simgesine tıklayın).
 
 ### LLM Sağlayıcı Yapılandırması
-1. **Active Provider**: Açılır listeden kullanmak istediğiniz LLM sağlayıcısını seçin.
-2. **Provider Settings**: Seçilen sağlayıcıya ait özel ayarları yapılandırın:
+1. **Etkin Sağlayıcı**: Açılır listeden kullanmak istediğiniz LLM sağlayıcısını seçin.
+2. **Sağlayıcı Ayarları**: Seçilen sağlayıcıya ait özel ayarları yapılandırın:
    - **API Key**: OpenAI, Anthropic, DeepSeek, Qwen, Qwen Code, Doubao, Moonshot, GLM, Z AI, MiniMax, Huawei Cloud MaaS, Baidu Qianfan, SiliconFlow, Google, Mistral, Azure OpenAI, OpenRouter, xAI, Groq, Together, Fireworks ve Requesty gibi çoğu bulut sağlayıcısı için gereklidir. Ollama için gerekmez. Uç noktanız anonim veya placeholder erişimini kabul ediyorsa LM Studio ve genel `OpenAI Compatible` ön ayarı için isteğe bağlıdır.
    - **Base URL / Endpoint**: Hizmetin API uç noktasıdır. Varsayılan değerler sağlanır; ancak LMStudio, Ollama gibi yerel modeller, OpenRouter, Requesty, OpenAI Compatible gibi gateway'ler veya belirli Azure deployment'ları için bunu değiştirmeniz gerekebilir. **Azure OpenAI için zorunludur.**
    - **Model**: Kullanılacak belirli model adı veya model ID'si, örneğin `gpt-4o`, `claude-3-5-sonnet-20240620`, `google/gemini-flash-1.5`, `grok-4`, `moonshotai/kimi-k2-instruct-0905`, `accounts/fireworks/models/kimi-k2p5` veya `anthropic/claude-3-7-sonnet-latest`. Modelin sağlayıcınızda veya uç noktanızda kullanılabilir olduğundan emin olun.
    - **Sıcaklık**: LLM çıktısının rastgeleliğini kontrol eder (0 = deterministik, 1 = maksimum yaratıcılık). Daha düşük değerler, örneğin 0.2-0.5, yapılandırılmış görevlerde genellikle daha iyi sonuç verir.
    - **API Version (Yalnızca Azure)**: Azure OpenAI deployment'ları için zorunludur, örneğin `2024-02-15-preview`.
-3. **Test Connection**: Ayarlarınızı doğrulamak için aktif sağlayıcı için "Test Connection" düğmesini kullanın. OpenAI-compatible sağlayıcılar artık sağlayıcı farkındalıklı kontroller kullanır: `Qwen`, `Qwen Code`, `Doubao`, `Moonshot`, `GLM`, `Z AI`, `MiniMax`, `Huawei Cloud MaaS`, `Baidu Qianfan`, `SiliconFlow`, `Groq`, `Together`, `Fireworks`, `LMStudio` ve `OpenAI Compatible` gibi uç noktalar `chat/completions` yolunu doğrudan test eder; güvenilir bir `/models` endpoint'i olan sağlayıcılar ise hâlâ önce model listelemeyi kullanabilir. İlk test `ERR_CONNECTION_CLOSED` gibi geçici ağ kopmasıyla başarısız olursa, Notemd artık hemen hata vermek yerine otomatik olarak kararlı yeniden deneme dizisine geçer.
-4. **Manage Provider Configurations**: LLM sağlayıcı ayarlarınızı eklentinin yapılandırma dizinindeki `notemd-providers.json` dosyasına kaydetmek veya oradan yüklemek için "Export Providers" ve "Import Providers" düğmelerini kullanın. Bu, yedekleme ve paylaşımı kolaylaştırır.
-5. **Preset Coverage**: Orijinal sağlayıcıların yanında Notemd artık `Qwen`, `Qwen Code`, `Doubao`, `Moonshot`, `GLM`, `Z AI`, `MiniMax`, `Huawei Cloud MaaS`, `Baidu Qianfan`, `SiliconFlow`, `xAI`, `Groq`, `Together`, `Fireworks`, `Requesty` ve LiteLLM, vLLM, Perplexity, Vercel AI Gateway veya özel proxy'ler için genel bir `OpenAI Compatible` hedefi içerir.
+3. **Bağlantıyı Test Et**: Ayarlarınızı doğrulamak için etkin sağlayıcıya ait "Bağlantıyı Test Et" düğmesini kullanın. OpenAI-compatible sağlayıcılar artık sağlayıcı farkındalıklı kontroller kullanır: `Qwen`, `Qwen Code`, `Doubao`, `Moonshot`, `GLM`, `Z AI`, `MiniMax`, `Huawei Cloud MaaS`, `Baidu Qianfan`, `SiliconFlow`, `Groq`, `Together`, `Fireworks`, `LMStudio` ve `OpenAI Compatible` gibi uç noktalar `chat/completions` yolunu doğrudan test eder; güvenilir bir `/models` endpoint'i olan sağlayıcılar ise hâlâ önce model listelemeyi kullanabilir. İlk test `ERR_CONNECTION_CLOSED` gibi geçici ağ kopmasıyla başarısız olursa, Notemd artık hemen hata vermek yerine otomatik olarak kararlı yeniden deneme dizisine geçer.
+4. **Sağlayıcı Yapılandırmalarını Yönet**: LLM sağlayıcı ayarlarınızı eklentinin yapılandırma dizinindeki `notemd-providers.json` dosyasına kaydetmek veya oradan yüklemek için "Dışa Aktar" ve "İçe Aktar" düğmelerini kullanın. Bu, yedekleme ve paylaşımı kolaylaştırır.
+5. **Hazır Ayar Kapsamı**: Orijinal sağlayıcıların yanında Notemd artık `Qwen`, `Qwen Code`, `Doubao`, `Moonshot`, `GLM`, `Z AI`, `MiniMax`, `Huawei Cloud MaaS`, `Baidu Qianfan`, `SiliconFlow`, `xAI`, `Groq`, `Together`, `Fireworks`, `Requesty` ve LiteLLM, vLLM, Perplexity, Vercel AI Gateway veya özel proxy'ler için genel bir `OpenAI Compatible` hedefi içerir.
 <img width="804" height="506" alt="LLM" src="https://github.com/user-attachments/assets/8caf42e3-43ad-456d-8b96-b63e7914e45f" />
 
 ### Çoklu Model Yapılandırması
-- **Use Different Providers for Tasks**:
-  - **Devre Dışı (Varsayılan)**: Yukarıda seçilen tek "Active Provider" tüm görevler için kullanılır.
+- **Görevler için farklı sağlayıcılar kullan**:
+  - **Devre Dışı (Varsayılan)**: Yukarıda seçilen tek "Etkin Sağlayıcı" tüm görevler için kullanılır.
   - **Etkin**: "Add Links", "Research & Summarize", "Generate from Title", "Translate" ve "Extract Concepts" gibi her görev için belirli bir sağlayıcı seçmenize ve isteğe bağlı olarak model adını geçersiz kılmanıza olanak tanır. Bir görev için model override alanı boş bırakılırsa, o görev için seçilen sağlayıcıya ait varsayılan model kullanılır.
-- **Select different languages for different tasks**:
-  - **Devre Dışı (Varsayılan)**: Tüm görevlerde tek bir "Output language" kullanır.
+- **Farklı görevler için farklı diller seç**:
+  - **Devre Dışı (Varsayılan)**: Tüm görevlerde tek bir çıktı dili kullanır.
   - **Etkin**: "Add Links", "Research & Summarize", "Generate from Title", "Summarise as Mermaid diagram" ve "Extract Concepts" gibi görevlerin her biri için ayrı dil seçmenize olanak tanır.
 
 <img width="817" height="428" alt="Multi-model" src="https://github.com/user-attachments/assets/85e6b854-c0ca-45cc-a55e-24638dceb120" />
 
-### Dil Mimarisi (UI Locale vs Task Output Language)
+### Dil Mimarisi (Arayüz Dili ve Görev Çıktı Dili)
 
-- **UI Locale**, yalnızca eklenti arayüz metinlerini (ayar etiketleri, kenar çubuğu düğmeleri, bildirimler ve diyaloglar) kontrol eder. Varsayılan `auto` modu Obsidian'ın mevcut arayüz dilini izler.
-- **Task Output Language**, model tarafından üretilen görev çıktısını (bağlantılar, özetler, başlık üretimi, Mermaid özeti, kavram çıkarımı, çeviri hedefi) kontrol eder.
-- **Per-task language mode**, her görevin çıktı dilini farklı modüllerde dağınık override'lar yerine birleşik bir politika katmanı üzerinden çözmesine olanak tanır.
-- **Disable auto translation**, Translate dışındaki görevleri kaynak dil bağlamında tutar; açık Translate görevleri ise yapılandırılmış hedef dili uygulamaya devam eder.
-- Mermaid ile ilgili üretim yolları da aynı dil politikasını izler ve etkinse Mermaid auto-fix'i tetiklemeye devam edebilir.
+- **Arayüz dili**, yalnızca eklenti arayüz metinlerini (ayar etiketleri, kenar çubuğu düğmeleri, bildirimler ve diyaloglar) kontrol eder. Varsayılan `auto` modu Obsidian'ın mevcut arayüz dilini izler.
+- **Görev çıktı dili**, model tarafından üretilen görev çıktısını (bağlantılar, özetler, başlık üretimi, Mermaid özeti, kavram çıkarımı, çeviri hedefi) kontrol eder.
+- **Görev başına dil modu**, her görevin çıktı dilini farklı modüllerde dağınık geçersiz kılmalar yerine birleşik bir ilke katmanı üzerinden çözmesine olanak tanır.
+- **Otomatik çeviriyi devre dışı bırak**, Translate dışındaki görevleri kaynak dil bağlamında tutar; açık Translate görevleri ise yapılandırılmış hedef dili uygulamaya devam eder.
+- Mermaid ile ilgili üretim yolları da aynı dil ilkesini izler ve etkinse Mermaid otomatik düzeltmesini tetiklemeye devam edebilir.
 
 ### Kararlı API Çağrı Ayarları
-- **Enable Stable API Calls (Retry Logic)**:
+- **Kararlı API Çağrılarını Etkinleştir (yeniden deneme mantığı)**:
   - **Devre Dışı (Varsayılan)**: Tek bir API çağrısı hatası mevcut görevi durdurur.
   - **Etkin**: Başarısız LLM API çağrılarını otomatik olarak yeniden dener; aralıklı ağ sorunları veya rate limit durumlarında yararlıdır.
   - **Bağlantı Testi Yedek Yolu**: Normal çağrılar zaten kararlı modda çalışmıyor olsa bile, sağlayıcı bağlantı testleri artık ilk geçici ağ hatasından sonra aynı yeniden deneme dizisine geçer.
@@ -248,7 +248,7 @@ Eklenti ayarlarına erişim:
   - **OpenAI-Compatible Kararlı Sıra**: Kararlı modda her OpenAI-compatible denemesi artık başarısız sayılmadan önce `direct streaming -> direct non-stream -> requestUrl (with streamed fallback when needed)` sırasını izler. Bu, yalnızca tek bir taşıma modu sorunlu olduğunda aşırı agresif hataları önler.
 - **Retry Interval (seconds)**: Yalnızca bu özellik etkin olduğunda görünür. Yeniden denemeler arasındaki bekleme süresi 1-300 saniyedir. Varsayılan: 5.
 - **Maximum Retries**: Yalnızca bu özellik etkin olduğunda görünür. Maksimum yeniden deneme sayısı 0-10'dur. Varsayılan: 3.
-- **API Error Debugging Mode**:
+- **API Hata Ayıklama Modu**:
   - **Devre Dışı (Varsayılan)**: Standart ve kısa hata raporlaması kullanır.
   - **Etkin**: Translate, Search ve Connection Tests dahil tüm sağlayıcılar ve görevler için DeepSeek benzeri ayrıntılı hata günlüklerini etkinleştirir. Bu kapsama HTTP durum kodları, ham yanıt metni, istek taşıma zaman çizelgeleri, temizlenmiş istek URL'leri ve başlıklar, deneme süreleri, yanıt başlıkları, kısmi yanıt gövdeleri, ayrıştırılmış kısmi akış çıktısı ve yığın izleri girer. Bu veriler API bağlantı sorunları ve upstream ağ geçidi sıfırlamalarını gidermede kritiktir.
 - **Developer Mode**:
@@ -293,7 +293,7 @@ Eklenti ayarlarına erişim:
   - **Devre Dışı (Varsayılan)**: Günlük dosyası oluşturulmaz.
   - **Etkin**: İşlemden sonra yeni oluşturulan kavram notalarını listeleyen bir günlük dosyası üretir. Biçim şöyledir:
     ```
-    generate xx concepts md file
+    xx kavram md dosyası oluştur
     1. concepts1
     2. concepts2
     ...
@@ -310,7 +310,7 @@ Eklenti ayarlarına erişim:
 <img width="809" height="281" alt="Concept log file output" src="https://github.com/user-attachments/assets/eef6f5d5-592d-4b8f-84b1-7404521a6e9b" />
 
 #### Kavram Çıkarma Görevi
-- **Create minimal concept notes**:
+- **En küçük kavram notlarını oluştur**:
   - **Açık (Varsayılan)**: Yeni oluşturulan kavram notaları yalnızca başlığı içerir, örneğin `# Kavram`.
   - **Kapalı**: Kavram notaları, alttaki ayarla kapatılmamışsa "Linked From" geri bağlantısı gibi ek içerik içerebilir.
 - **Add "Linked From" backlink**:
@@ -349,7 +349,7 @@ Eklenti ayarlarına erişim:
 - **Chunk Word Count**: LLM'e gönderilecek parça başına maksimum kelime sayısıdır. Büyük dosyalar için API çağrısı sayısını etkiler. Varsayılan: 3000.
 - **Enable Duplicate Detection**: İşlenmiş içerikte yinelenen sözcükler için temel denetimi açıp kapatır. Sonuçlar konsola yazılır. Varsayılan: Etkin.
 - **Max Tokens**: LLM'in yanıt parçası başına üretebileceği maksimum token sayısıdır. Maliyeti ve ayrıntı düzeyini etkiler. Varsayılan: 4096.
-<img width="795" height="274" alt="Processing Parameters   Language settings" src="https://github.com/user-attachments/assets/74e4af76-3333-48fc-bb86-0a3ee61825d1" />
+<img width="795" height="274" alt="İşleme parametreleri   Dil ayarları" src="https://github.com/user-attachments/assets/74e4af76-3333-48fc-bb86-0a3ee61825d1" />
 
 #### Çeviri
 - **Default Target Language**: Notlarınızı varsayılan olarak çevirmek istediğiniz dili seçin. Bu değer çeviri komutunu çalıştırırken arayüzden değiştirilebilir. Varsayılan: English.
@@ -410,7 +410,7 @@ Bu özellik, belirli görevler için LLM'e gönderilen varsayılan yönergeleri 
 
 <img width="794" height="174" alt="Content generation   output" src="https://github.com/user-attachments/assets/76d93942-980d-49ad-b9d4-1c73ea013d17" />
 
-<img width="866" height="646" alt="Duplicate check scope   Custom prompt settings" src="https://github.com/user-attachments/assets/1b37a523-ef00-4e40-94a0-43bbe0c78572" />
+<img width="866" height="646" alt="Yinelenen kontrol kapsamı   Özel istem ayarları" src="https://github.com/user-attachments/assets/1b37a523-ef00-4e40-94a0-43bbe0c78572" />
 
 #### Yinelenen Kontrol Kapsamı
 - **Duplicate Check Scope Mode**: **Concept Note Folder** içindeki notalar için potansiyel yinelenenleri bulmak amacıyla hangi dosyaların karşılaştırılacağını kontrol eder.
@@ -442,7 +442,7 @@ Bu özellik, belirli görevler için LLM'e gönderilen varsayılan yönergeleri 
 ### Hızlı İş Akışları ve Kenar Çubuğu
 
 - Çekirdek işleme, üretim, çeviri, bilgi ve yardımcı araçlar için gruplanmış eylem bölümlerine erişmek üzere Notemd kenar çubuğunu açın.
-- Kenar çubuğunun üst kısmındaki **Quick Workflows** alanını, özel çok adımlı düğmeleri başlatmak için kullanın.
+- Kenar çubuğunun üst kısmındaki **Hızlı İş Akışları** alanını, özel çok adımlı düğmeleri başlatmak için kullanın.
 - Varsayılan **One-Click Extract** iş akışı `Process File (Add Links)` -> `Batch Generate from Titles` -> `Batch Mermaid Fix` sırasını çalıştırır.
 - İş akışı ilerlemesi, adım bazlı günlükler ve hatalar kenar çubuğunda gösterilir. Sabitlenmiş alt bölüm, ilerleme çubuğu ve günlük alanının açılmış bölümler nedeniyle görünmez hale gelmesini engeller.
 - İlerleme kartı durum metnini, ayrı yüzde kapsülünü ve kalan süreyi tek bakışta okunabilir tutar; aynı özel iş akışları ayarlardan yeniden yapılandırılabilir.
@@ -470,7 +470,7 @@ Bu, kavramları tanımlamaya ve `[[wiki-links]]` eklemeye odaklanan temel işlev
 
 ### Yeni Özellikler
 
-1. **Summarise as Mermaid diagram**:
+1. **Mermaid diyagramı olarak özetle**:
    - Özetlemek istediğiniz notu açın.
    - `Notemd: Summarise as Mermaid diagram` komutunu çalıştırın (komut paleti veya kenar çubuğu düğmesiyle).
    - Eklenti Mermaid diyagramı içeren yeni bir not oluşturur.
@@ -482,7 +482,7 @@ Bu, kavramları tanımlamaya ve `[[wiki-links]]` eklemeye odaklanan temel işlev
    - Eklenti çeviriyi yapmak için Multi-Model ayarlarına göre yapılandırılmış **LLM Provider**'ı kullanır.
    - Çevrilen içerik, yapılandırılmış **Translation Save Path** içine uygun son ekle kaydedilir ve kolay karşılaştırma için **orijinal içeriğin sağında yeni bir bölmede** açılır.
    - Bu görev kenar çubuğu düğmesi veya modal iptal düğmesi ile iptal edilebilir.
-3. **Batch Translate**:
+3. **Toplu Çeviri**:
    - Komut paletinden `Notemd: Batch Translate Folder` komutunu çalıştırıp bir klasör seçin veya dosya gezgininde bir klasöre sağ tıklayıp "Batch translate this folder" seçeneğini kullanın.
    - Eklenti seçilen klasördeki tüm Markdown dosyalarını çevirir.
    - Çevrilen dosyalar yapılandırılmış çeviri yoluna kaydedilir, ancak otomatik olarak açılmaz.
@@ -658,7 +658,7 @@ Notemd, Obsidian içinde yerel olarak çalışır; ancak bazı özellikler dış
        ```
        Oluşturulan rapor deneme başına zamanlamayı (`First Byte`, `Duration`), temizlenmiş istek meta verisini, yanıt başlıklarını, ham/kısmi gövde parçalarını, ayrıştırılmış akış parçalarını ve taşıma katmanındaki hata noktalarını içerir.
 - **LM Studio/Ollama Bağlantı Sorunları**:
-  - **Test Connection Başarısız**: Yerel sunucunun (LM Studio veya Ollama) çalıştığından ve doğru modelin yüklü/erişilebilir olduğundan emin olun.
+  - **Bağlantı testi başarısız**: Yerel sunucunun (LM Studio veya Ollama) çalıştığından ve doğru modelin yüklü/erişilebilir olduğundan emin olun.
   - **CORS Hataları (Windows'ta Ollama)**: Windows'ta Ollama kullanırken CORS (Cross-Origin Resource Sharing) hatası alırsanız `OLLAMA_ORIGINS` ortam değişkenini ayarlamanız gerekebilir. Bunu Ollama'yı başlatmadan önce komut isteminde `set OLLAMA_ORIGINS=*` çalıştırarak yapabilirsiniz. Bu, her kaynaktan gelen isteklere izin verir.
   - **LM Studio'da CORS'u Etkinleştir**: LM Studio için CORS desteğini sunucu ayarlarından doğrudan açabilirsiniz; Obsidian bir tarayıcı içinde çalışıyorsa veya sıkı origin politikalarına sahipse bu gerekebilir.
 - **Klasör Oluşturma Hataları ("File name cannot contain...")**:
@@ -674,8 +674,8 @@ Katkılar memnuniyetle karşılanır. Yönergeler için GitHub deposuna bakın: 
 
 ## Bakımcı Dokümantasyonu
 
-- [Release Workflow (English)](./docs/maintainer/release-workflow.md)
-- [Release Workflow (简体中文)](./docs/maintainer/release-workflow.zh-CN.md)
+- [Sürüm İş Akışı (İngilizce)](./docs/maintainer/release-workflow.md)
+- [Sürüm İş Akışı (Basitleştirilmiş Çince)](./docs/maintainer/release-workflow.zh-CN.md)
 
 ## Lisans
 

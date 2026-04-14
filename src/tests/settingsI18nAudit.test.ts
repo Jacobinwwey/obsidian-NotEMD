@@ -80,6 +80,10 @@ describe('settings page i18n coverage', () => {
             'Available workflow action IDs',
             'Custom prompt settings',
             'Enable custom prompts for specific tasks',
+            'Use custom prompt for "',
+            'Default prompt for "',
+            'Custom prompt for "',
+            'Enter your custom prompt for ',
             'Button name',
             'Action sequence',
             'Add workflow',
@@ -132,5 +136,17 @@ describe('settings page i18n coverage', () => {
         expect(zhTw.settings.translationTask.heading).not.toBe(en.settings.translationTask.heading);
         expect(zhTw.settings.contentGeneration.heading).not.toBe(en.settings.contentGeneration.heading);
         expect(zhTw.settings.stableApi.heading).not.toBe(en.settings.stableApi.heading);
+    });
+
+    test('does not render raw english provider metadata or template literals in settings UI', () => {
+        const source = fs.readFileSync(settingsTabPath, 'utf8');
+
+        expect(source).not.toContain('definition.description');
+        expect(source).not.toContain('definition.setupHint');
+        expect(source).not.toContain("'OpenAI-compatible'");
+        expect(source).not.toContain('`Use custom prompt for "${task.name}"`');
+        expect(source).not.toContain('`Default prompt for "${task.name}":`');
+        expect(source).not.toContain('`Custom prompt for "${task.name}"`');
+        expect(source).not.toContain('`Enter your custom prompt for ${task.name}...`');
     });
 });

@@ -4,7 +4,7 @@
 
 [English](./README.md) | [简体中文](./README_zh.md) | [Español](./README_es.md) | [Français](./README_fr.md) | [Deutsch](./README_de.md) | [Italiano](./README_it.md) | [Português](./README_pt.md) | [繁體中文](./README_zh_Hant.md) | [日本語](./README_ja.md) | [한국어](./README_ko.md) | [Русский](./README_ru.md) | [العربية](./README_ar.md) | [हिन्दी](./README_hi.md) | [বাংলা](./README_bn.md) | [Nederlands](./README_nl.md) | [Svenska](./README_sv.md) | [Suomi](./README_fi.md) | [Dansk](./README_da.md) | [Norsk](./README_no.md) | [Polski](./README_pl.md) | [Türkçe](./README_tr.md) | [עברית](./README_he.md) | [ไทย](./README_th.md) | [Ελληνικά](./README_el.md) | [Čeština](./README_cs.md) | [Magyar](./README_hu.md) | [Română](./README_ro.md) | [Українська](./README_uk.md) | [Tiếng Việt](./README_vi.md) | [Bahasa Indonesia](./README_id.md) | [Bahasa Melayu](./README_ms.md)
 
-Dokumentation in weiteren Sprachen lesen: [Language Hub](./docs/i18n/README.md)
+Dokumentation in weiteren Sprachen lesen: [Sprachzentrum](./docs/i18n/README.md)
 
 ```
 ==================================================
@@ -33,7 +33,7 @@ Notemd verbessert Ihren Obsidian-Workflow durch die Integration verschiedener gr
 - [Schnellstart](#schnellstart)
 - [Sprachunterstützung](#sprachunterstützung)
 - [Funktionen](#funktionen)
-- [Installation](#installation)
+- [Installationsanleitung](#installation)
 - [Konfiguration](#konfiguration)
 - [Benutzerhandbuch](#benutzerhandbuch)
 - [Unterstützte LLM-Anbieter](#unterstützte-llm-anbieter)
@@ -59,15 +59,15 @@ Das ist alles! Erkunden Sie die Einstellungen, um weitere Funktionen wie Web-Rec
 
 | Aspekt | Umfang | Standard | Hinweise |
 |---|---|---|---|
-| `UI Locale` | Nur Text der Plugin-Oberfläche (Einstellungen, Seitenleiste, Hinweise, Dialoge) | `auto` | Folgt dem Obsidian-Gebietsschema; aktuelle Kataloge: `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, `zh-TW`. |
-| `Task Output Language` | Von LLM generierte Aufgabenausgabe (Links, Zusammenfassungen, Generierung, Extraktion, Übersetzungsziel) | `en` | Kann global oder pro Aufgabe eingestellt werden, wenn `Verschiedene Sprachen für Aufgaben verwenden` aktiviert ist. |
-| `Disable auto translation` | Nicht-Übersetzungsaufgaben behalten den Originalkontext bei | `false` | Explizite `Übersetzen`-Aufgaben erzwingen weiterhin die konfigurierte Zielsprache. |
-| Locale fallback | Auflösung fehlender UI-Schlüssel | locale -> `en` | Hält die UI stabil, wenn einige Schlüssel nicht übersetzt sind. |
+| `UI-Sprache` | Nur Text der Plugin-Oberfläche (Einstellungen, Seitenleiste, Hinweise, Dialoge) | `auto` | Folgt dem Obsidian-Gebietsschema; aktuelle Kataloge: `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, `zh-TW`. |
+| `Aufgaben-Ausgabesprache` | Von LLM generierte Aufgabenausgabe (Links, Zusammenfassungen, Generierung, Extraktion, Übersetzungsziel) | `en` | Kann global oder pro Aufgabe eingestellt werden, wenn `Verschiedene Sprachen für Aufgaben verwenden` aktiviert ist. |
+| `Automatische Übersetzung deaktivieren` | Nicht-Übersetzungsaufgaben behalten den Originalkontext bei | `false` | Explizite `Übersetzen`-Aufgaben erzwingen weiterhin die konfigurierte Zielsprache. |
+| `Sprach-Fallback` | Auflösung fehlender UI-Schlüssel | locale -> `en` | Hält die UI stabil, wenn einige Schlüssel nicht übersetzt sind. |
 
 - Die gepflegten Quelldokumente sind Englisch und vereinfachtes Chinesisch; veröffentlichte README-Übersetzungen sind oben im Kopfbereich verlinkt.
 - Die In-App-UI-Locale-Abdeckung entspricht derzeit genau dem expliziten Katalog im Code: `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, `zh-TW`.
 - Der englische Fallback bleibt ein Implementierungs-Sicherheitsnetz, aber unterstützte sichtbare Oberflächen sind per Regressionstests abgesichert und sollten im Normalbetrieb nicht stillschweigend auf Englisch zurückfallen.
-- Weitere Details und Richtlinien für Mitwirkende finden Sie im [Language Hub](./docs/i18n/README.md).
+- Weitere Details und Richtlinien für Mitwirkende finden Sie im [Sprachzentrum](./docs/i18n/README.md).
 
 ## Funktionen
 
@@ -236,10 +236,10 @@ Rufen Sie die Plugin-Einstellungen auf über:
 
 <img width="817" height="428" alt="Multi-model" src="https://github.com/user-attachments/assets/85e6b854-c0ca-45cc-a55e-24638dceb120" />
 
-### Spracharchitektur (UI Locale vs. Task Output Language)
+### Spracharchitektur (UI-Sprache vs. Aufgaben-Ausgabesprache)
 
--   **UI Locale** steuert ausschließlich den Text der Plugin-Oberfläche (Einstellungsbeschriftungen, Schaltflächen in der Seitenleiste, Hinweise und Dialoge). Der Standardmodus `auto` folgt der aktuellen UI-Sprache von Obsidian.
--   **Task Output Language** steuert die vom Modell generierte Aufgabenausgabe (Links, Zusammenfassungen, Titelgenerierung, Mermaid-Zusammenfassung, Konzepteextraktion, Übersetzungsziel).
+-   **UI-Sprache** steuert ausschließlich den Text der Plugin-Oberfläche (Einstellungsbeschriftungen, Schaltflächen in der Seitenleiste, Hinweise und Dialoge). Der Standardmodus `auto` folgt der aktuellen UI-Sprache von Obsidian.
+-   **Aufgaben-Ausgabesprache** steuert die vom Modell generierte Aufgabenausgabe (Links, Zusammenfassungen, Titelgenerierung, Mermaid-Zusammenfassung, Konzepteextraktion, Übersetzungsziel).
 -   **Der Modus "Sprache pro Aufgabe"** ermöglicht es jeder Aufgabe, ihre eigene Ausgabesprache über eine einheitliche Richtlinienschicht aufzulösen, anstatt über verstreute Überschreibungen pro Modul.
 -   **Automatische Übersetzung deaktivieren** hält Nicht-Übersetzungsaufgaben im ursprünglichen Sprachkontext, während explizite Übersetzungsaufgaben weiterhin die konfigurierte Zielsprache anwenden.
 -   Mermaid-bezogene Generierungspfade folgen derselben Sprachrichtlinie und können bei Aktivierung weiterhin den Mermaid Auto-Fix auslösen.
@@ -448,7 +448,7 @@ Diese Funktion ermöglicht es Ihnen, die Standardanweisungen (Prompts), die für
 ### Schnelle Workflows & Seitenleiste
 
 -   Öffnen Sie die Notemd-Seitenleiste, um auf gruppierte Aktionsbereiche für Kernverarbeitung, Generierung, Übersetzung, Wissen und Utilities zuzugreifen.
--   Verwenden Sie den Bereich **Quick Workflows** oben in der Seitenleiste, um benutzerdefinierte mehrstufige Schaltflächen zu starten.
+-   Verwenden Sie den Bereich **Schnelle Workflows** oben in der Seitenleiste, um benutzerdefinierte mehrstufige Schaltflächen zu starten.
 -   Der Standard-Workflow **One-Click Extract** führt `Datei verarbeiten (Links hinzufügen)` -> `Batch-Generierung aus Titeln` -> `Batch-Mermaid-Korrektur` aus.
 -   Der Workflow-Fortschritt, Protokolle pro Schritt und Fehler werden in der Seitenleiste angezeigt, wobei eine fixierte Fußzeile verhindert, dass der Fortschrittsbalken und der Protokollbereich durch erweiterte Abschnitte verdrängt werden.
 -   Die Fortschrittskarte hält den Statustext, eine dedizierte Prozentanzeige und die verbleibende Zeit auf einen Blick lesbar. Dieselben benutzerdefinierten Workflows können in den Einstellungen neu konfiguriert werden.

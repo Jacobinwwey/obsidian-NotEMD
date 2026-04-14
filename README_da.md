@@ -4,7 +4,7 @@
 
 [English](./README.md) | [简体中文](./README_zh.md) | [Español](./README_es.md) | [Français](./README_fr.md) | [Deutsch](./README_de.md) | [Italiano](./README_it.md) | [Português](./README_pt.md) | [繁體中文](./README_zh_Hant.md) | [日本語](./README_ja.md) | [한국어](./README_ko.md) | [Русский](./README_ru.md) | [العربية](./README_ar.md) | [हिन्दी](./README_hi.md) | [বাংলা](./README_bn.md) | [Nederlands](./README_nl.md) | [Svenska](./README_sv.md) | [Suomi](./README_fi.md) | [Dansk](./README_da.md) | [Norsk](./README_no.md) | [Polski](./README_pl.md) | [Türkçe](./README_tr.md) | [עברית](./README_he.md) | [ไทย](./README_th.md) | [Ελληνικά](./README_el.md) | [Čeština](./README_cs.md) | [Magyar](./README_hu.md) | [Română](./README_ro.md) | [Українська](./README_uk.md) | [Tiếng Việt](./README_vi.md) | [Bahasa Indonesia](./README_id.md) | [Bahasa Melayu](./README_ms.md)
 
-Læs dokumentation på flere sprog: [Language Hub](./docs/i18n/README.md)
+Læs dokumentation på flere sprog: [Sprogcenter](./docs/i18n/README.md)
 
 ```
 ==================================================
@@ -33,7 +33,7 @@ Notemd forbedrer dit Obsidian-workflow ved at integrere med forskellige store sp
 - [Hurtig start](#hurtig-start)
 - [Sprogunderstøttelse](#sprogunderstøttelse)
 - [Funktioner](#funktioner)
-- [Installation](#installation)
+- [Installationsvejledning](#installation)
 - [Konfiguration](#konfiguration)
 - [Brugervejledning](#brugervejledning)
 - [Understøttede LLM-udbydere](#understøttede-llm-udbydere)
@@ -59,15 +59,15 @@ Det er det. Udforsk indstillingerne for at låse op for flere funktioner som web
 
 | Aspekt | Omfang | Standard | Bemærkninger |
 |---|---|---|---|
-| `UI Locale` | Kun pluginets UI-tekst, som indstillinger, sidepanel, notifikationer og dialoger | `auto` | Følger Obsidians locale; nuværende UI-kataloger er `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN` og `zh-TW`. |
-| `Task Output Language` | LLM-genereret opgaveoutput, som links, opsummeringer, generering, ekstraktion og oversættelsesmål | `en` | Kan være globalt eller pr. opgave, når `Use different languages for tasks` er aktiveret. |
-| `Disable auto translation` | Ikke-Translate-opgaver bevarer kontekst på kildesproget | `false` | Eksplicitte `Translate`-opgaver håndhæver stadig det konfigurerede målsprog. |
-| Locale-fallback | Opløsning af manglende UI-nøgler | locale -> `en` | Holder UI'et stabilt, når enkelte nøgler endnu ikke er oversat. |
+| `Grænsefladesprog` | Kun pluginets UI-tekst, som indstillinger, sidepanel, notifikationer og dialoger | `auto` | Følger Obsidians locale; nuværende UI-kataloger er `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN` og `zh-TW`. |
+| `Opgaveoutputsprog` | LLM-genereret opgaveoutput, som links, opsummeringer, generering, ekstraktion og oversættelsesmål | `en` | Kan være globalt eller pr. opgave, når `Brug forskellige sprog til opgaver` er aktiveret. |
+| `Deaktiver automatisk oversættelse` | Ikke-Translate-opgaver bevarer kontekst på kildesproget | `false` | Eksplicitte `Translate`-opgaver håndhæver stadig det konfigurerede målsprog. |
+| Sprogfallback | Opløsning af manglende UI-nøgler | locale -> `en` | Holder UI'et stabilt, når enkelte nøgler endnu ikke er oversat. |
 
 - De vedligeholdte kildedokumenter er engelsk og forenklet kinesisk, og offentliggjorte README-oversættelser er linket i overskriften ovenfor.
 - Appens dækning af UI-lokaler matcher i øjeblikket præcist det eksplicitte katalog i koden: `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, `zh-TW`.
 - Engelsk fallback forbliver et implementeringsmæssigt sikkerhedsnet, men understøttede synlige flader er dækket af regressionstests og bør ikke stiltiende falde tilbage til engelsk under normal brug.
-- Yderligere detaljer og retningslinjer for bidrag spores i [Language Hub](./docs/i18n/README.md).
+- Yderligere detaljer og retningslinjer for bidrag spores i [Sprogcenter](./docs/i18n/README.md).
 
 ## Funktioner
 
@@ -116,7 +116,7 @@ Det er det. Udforsk indstillingerne for at låse op for flere funktioner som web
   - Understøtter parallel behandling, hvis "Enable Batch Parallelism" er aktiveret.
   - Bruger custom prompts til oversættelse, hvis det er konfigureret.
   - Tilføjer valgmuligheden "Batch translate this folder" til kontekstmenuen i filudforskeren.
-- **Disable auto translation**: Når dette er aktiveret, tvinger ikke-Translate-opgaver ikke længere output til et bestemt sprog, så den oprindelige sprogkontekst bevares. Den eksplicitte opgave `Translate` oversætter stadig i henhold til konfigurationen.
+- **Deaktiver automatisk oversættelse**: Når dette er aktiveret, tvinger ikke-Translate-opgaver ikke længere output til et bestemt sprog, så den oprindelige sprogkontekst bevares. Den eksplicitte opgave `Translate` oversætter stadig i henhold til konfigurationen.
 
 ### Webresearch og indholdsgenerering
 - **Webresearch og opsummering**:
@@ -133,7 +133,7 @@ Det er det. Udforsk indstillingerne for at låse op for flere funktioner som web
 - **Kobling til Mermaid auto-fix**: Når Mermaid auto-fix er aktiveret, reparerer Mermaid-relaterede workflows automatisk genererede filer eller outputmapper efter behandling. Det omfatter Process, Generate from Title, Batch Generate from Titles, Research & Summarize, Summarise as Mermaid og Translate.
 
 ### Hjælpefunktioner
-- **Summarise as Mermaid diagram**:
+- **Opsummer som Mermaid-diagram**:
   - Denne funktion gør det muligt at opsummere indholdet af en note som et Mermaid-diagram.
   - Output-sproget for Mermaid-diagrammet kan tilpasses i indstillingerne.
   - **Mermaid Output Folder**: Konfigurer mappen, hvor genererede Mermaid-diagramfiler skal gemmes.
@@ -209,38 +209,38 @@ Få adgang til pluginindstillingerne via:
 **Settings** -> **Community Plugins** -> **Notemd** (klik på tandhjulsikonet).
 
 ### Konfiguration af LLM-udbyder
-1. **Active Provider**: Vælg den LLM-udbyder, du vil bruge, i rullemenuen.
-2. **Provider Settings**: Konfigurer de specifikke indstillinger for den valgte udbyder:
+1. **Aktiv udbyder**: Vælg den LLM-udbyder, du vil bruge, i rullemenuen.
+2. **Udbyderindstillinger**: Konfigurer de specifikke indstillinger for den valgte udbyder:
    - **API Key**: Kræves for de fleste cloududbydere, for eksempel OpenAI, Anthropic, DeepSeek, Qwen, Qwen Code, Doubao, Moonshot, GLM, Z AI, MiniMax, Huawei Cloud MaaS, Baidu Qianfan, SiliconFlow, Google, Mistral, Azure OpenAI, OpenRouter, xAI, Groq, Together, Fireworks og Requesty. Ikke nødvendig for Ollama. Valgfri for LM Studio og den generiske preset `OpenAI Compatible`, når dit endpoint accepterer anonym eller placeholder-baseret adgang.
    - **Base URL / Endpoint**: API-endpointet for tjenesten. Standardværdier leveres, men du kan være nødt til at ændre dette for lokale modeller som LMStudio og Ollama, gateways som OpenRouter, Requesty og OpenAI Compatible eller specifikke Azure-deployments. **Kræves for Azure OpenAI.**
    - **Model**: Det specifikke modelnavn eller model-ID, der skal bruges, for eksempel `gpt-4o`, `claude-3-5-sonnet-20240620`, `google/gemini-flash-1.5`, `grok-4`, `moonshotai/kimi-k2-instruct-0905`, `accounts/fireworks/models/kimi-k2p5` eller `anthropic/claude-3-7-sonnet-latest`. Sørg for, at modellen er tilgængelig hos dit endpoint eller din udbyder.
    - **Temperature**: Styrer tilfældigheden i LLM'ens output (0 = deterministisk, 1 = maksimal kreativitet). Lavere værdier, for eksempel 0.2-0.5, er normalt bedre til strukturerede opgaver.
    - **API Version (kun Azure)**: Kræves til Azure OpenAI-deployments, for eksempel `2024-02-15-preview`.
-3. **Test Connection**: Brug knappen "Test Connection" for den aktive udbyder til at verificere dine indstillinger. OpenAI-compatible-udbydere bruger nu udbyderbevidste kontroller: endpoints som `Qwen`, `Qwen Code`, `Doubao`, `Moonshot`, `GLM`, `Z AI`, `MiniMax`, `Huawei Cloud MaaS`, `Baidu Qianfan`, `SiliconFlow`, `Groq`, `Together`, `Fireworks`, `LMStudio` og `OpenAI Compatible` tester `chat/completions` direkte, mens udbydere med et pålideligt `/models`-endpoint stadig kan bruge modellisting først. Hvis den første test fejler med en midlertidig netværksafbrydelse som `ERR_CONNECTION_CLOSED`, falder Notemd automatisk tilbage til den stabile retry-sekvens i stedet for at fejle med det samme.
-4. **Manage Provider Configurations**: Brug knapperne "Export Providers" og "Import Providers" til at gemme eller indlæse dine LLM-udbyderindstillinger til eller fra en `notemd-providers.json`-fil i pluginets konfigurationsmappe. Det gør backup og deling nemt.
-5. **Preset Coverage**: Ud over de oprindelige udbydere indeholder Notemd nu preset-poster for `Qwen`, `Qwen Code`, `Doubao`, `Moonshot`, `GLM`, `Z AI`, `MiniMax`, `Huawei Cloud MaaS`, `Baidu Qianfan`, `SiliconFlow`, `xAI`, `Groq`, `Together`, `Fireworks`, `Requesty` og et generisk mål `OpenAI Compatible` til LiteLLM, vLLM, Perplexity, Vercel AI Gateway eller tilpassede proxies.
+3. **Test forbindelse**: Brug knappen "Test forbindelse" for den aktive udbyder til at verificere dine indstillinger. OpenAI-compatible-udbydere bruger nu udbyderbevidste kontroller: endpoints som `Qwen`, `Qwen Code`, `Doubao`, `Moonshot`, `GLM`, `Z AI`, `MiniMax`, `Huawei Cloud MaaS`, `Baidu Qianfan`, `SiliconFlow`, `Groq`, `Together`, `Fireworks`, `LMStudio` og `OpenAI Compatible` tester `chat/completions` direkte, mens udbydere med et pålideligt `/models`-endpoint stadig kan bruge modellisting først. Hvis den første test fejler med en midlertidig netværksafbrydelse som `ERR_CONNECTION_CLOSED`, falder Notemd automatisk tilbage til den stabile retry-sekvens i stedet for at fejle med det samme.
+4. **Administrer udbyderkonfigurationer**: Brug knapperne "Export Providers" og "Import Providers" til at gemme eller indlæse dine LLM-udbyderindstillinger til eller fra en `notemd-providers.json`-fil i pluginets konfigurationsmappe. Det gør backup og deling nemt.
+5. **Preset-dækning**: Ud over de oprindelige udbydere indeholder Notemd nu preset-poster for `Qwen`, `Qwen Code`, `Doubao`, `Moonshot`, `GLM`, `Z AI`, `MiniMax`, `Huawei Cloud MaaS`, `Baidu Qianfan`, `SiliconFlow`, `xAI`, `Groq`, `Together`, `Fireworks`, `Requesty` og et generisk mål `OpenAI Compatible` til LiteLLM, vLLM, Perplexity, Vercel AI Gateway eller tilpassede proxies.
 <img width="804" height="506" alt="LLM" src="https://github.com/user-attachments/assets/8caf42e3-43ad-456d-8b96-b63e7914e45f" />
 
 ### Multi-model-konfiguration
-- **Use Different Providers for Tasks**:
-  - **Fra (standard)**: Bruger den enkelte "Active Provider", som er valgt ovenfor, til alle opgaver.
+- **Brug forskellige udbydere til opgaver**:
+  - **Fra (standard)**: Bruger den enkelte "aktive udbyder", som er valgt ovenfor, til alle opgaver.
   - **Til**: Giver dig mulighed for at vælge en specifik udbyder og valgfrit tilsidesætte modelnavnet for hver opgave, som "Add Links", "Research & Summarize", "Generate from Title", "Translate" og "Extract Concepts". Hvis feltet til model-override efterlades tomt, bruges standardmodellen, der er konfigureret for den udbyder, som er valgt til opgaven.
-- **Select different languages for different tasks**:
-  - **Fra (standard)**: Bruger det samme "Output language" til alle opgaver.
+- **Vælg forskellige sprog til forskellige opgaver**:
+  - **Fra (standard)**: Bruger det samme outputsprog til alle opgaver.
   - **Til**: Giver dig mulighed for at vælge et specifikt sprog for hver opgave, for eksempel "Add Links", "Research & Summarize", "Generate from Title", "Summarise as Mermaid diagram" og "Extract Concepts".
 
 <img width="817" height="428" alt="Multi-model" src="https://github.com/user-attachments/assets/85e6b854-c0ca-45cc-a55e-24638dceb120" />
 
-### Sprogarkitektur (UI Locale vs Task Output Language)
+### Sprogarkitektur (grænsefladesprog og opgaveoutputsprog)
 
-- **UI Locale** styrer kun tekst i pluginets grænseflade, som labels i indstillinger, knapper i sidepanelet, notifikationer og dialoger. Standardtilstanden `auto` følger Obsidians aktuelle UI-sprog.
-- **Task Output Language** styrer modelgenereret output for opgaver, som links, opsummeringer, titelgenerering, Mermaid-opsummering, begrebsudtræk og oversættelsesmål.
+- **Grænsefladesprog** styrer kun tekst i pluginets grænseflade, som etiketter i indstillinger, knapper i sidepanelet, notifikationer og dialoger. Standardtilstanden `auto` følger Obsidians aktuelle UI-sprog.
+- **Opgaveoutputsprog** styrer modelgenereret output for opgaver, som links, opsummeringer, titelgenerering, Mermaid-opsummering, begrebsudtræk og oversættelsesmål.
 - **Per-task language mode** lader hver opgave bestemme sit eget outputsprog ud fra et samlet policy-lag i stedet for spredte overrides på tværs af moduler.
-- **Disable auto translation** betyder, at ikke-Translate-opgaver bevarer konteksten på kildesproget, mens eksplicitte Translate-opgaver stadig håndhæver det konfigurerede målsprog.
+- **Deaktiver automatisk oversættelse** betyder, at ikke-Translate-opgaver bevarer konteksten på kildesproget, mens eksplicitte Translate-opgaver stadig håndhæver det konfigurerede målsprog.
 - Mermaid-relaterede genereringsstier følger den samme sprogpolitik og kan stadig udløse Mermaid auto-fix, når det er aktiveret.
 
-### Stable API Call Settings
-- **Enable Stable API Calls (Retry Logic)**:
+### Indstillinger for stabile API-kald
+- **Aktivér stabile API-kald (genforsøgslogik)**:
   - **Fra (standard)**: Ét enkelt mislykket API-kald stopper den aktuelle opgave.
   - **Til**: Genforsøger automatisk mislykkede LLM API-kald, hvilket er nyttigt ved ustabile netværksforbindelser eller rate limits.
   - **Connection Test Fallback**: Selv når almindelige kald ikke allerede kører i stable mode, skifter forbindelsestest nu til den samme retry-sekvens efter den første midlertidige netværksfejl.
@@ -248,7 +248,7 @@ Få adgang til pluginindstillingerne via:
   - **OpenAI-Compatible Stable Order**: I stable mode følger hvert OpenAI-compatible-forsøg nu `direct streaming -> direct non-stream -> requestUrl (with streamed fallback when needed)`, før forsøget tælles som mislykket. Det reducerer overaggressive fejl, når kun én transporttilstand er ustabil.
 - **Retry Interval (seconds)**: Kun synlig, når funktionen er aktiveret. Tiden mellem genforsøg, 1-300 sekunder. Standard: 5.
 - **Maximum Retries**: Kun synlig, når funktionen er aktiveret. Maksimalt antal genforsøg, 0-10. Standard: 3.
-- **API Error Debugging Mode**:
+- **Fejlfindingsfunktion for API-fejl**:
   - **Fra (standard)**: Bruger standardiseret, kortfattet fejlrappportering.
   - **Til**: Aktiverer detaljeret fejllogning, svarende til DeepSeeks udførlige output, for alle udbydere og opgaver, inklusive Translate, Search og Connection Tests. Det omfatter HTTP-statuskoder, rå response text, request transport timelines, sanerede request-URL'er og headers, forløbet tid pr. forsøg, response headers, partial response bodies, parsed partial stream output og stack traces, hvilket er afgørende ved fejlfinding af API-forbindelser og upstream gateway resets.
 - **Developer Mode**:
@@ -281,19 +281,19 @@ Få adgang til pluginindstillingerne via:
   - **Til**: Fjerner code fences fra indholdet, før links tilføjes.
 <img width="799" height="301" alt="Processed file output" src="https://github.com/user-attachments/assets/65d4e864-ff5f-402a-be90-e9c44b208903" />
 
-#### Output for konceptnoter
+#### Uddata for konceptnoter
 - **Customize Concept Note Path**:
   - **Fra (standard)**: Automatisk oprettelse af noter for `[[linked concepts]]` er deaktiveret.
   - **Til**: Giver dig mulighed for at angive en mappe, hvor nye konceptnoter skal oprettes.
 - **Concept Note Folder Path**: Kun synlig, når ovenstående er aktiveret. Indtast en *relativ sti* i dit vault, for eksempel `Concepts` eller `Generated/Topics`, hvor nye konceptnoter skal gemmes. Mapper oprettes automatisk, hvis de ikke findes. **Skal udfyldes, hvis tilpasning er aktiveret.** **Brug ikke absolutte stier eller ugyldige tegn.**
 <img width="800" height="145" alt="concept note output" src="https://github.com/user-attachments/assets/d0338341-7d67-4472-964c-75a0992165b8" />
 
-#### Output for concept log file
+#### Uddata for konceptlogfil
 - **Generate Concept Log File**:
   - **Fra (standard)**: Der genereres ingen logfil.
   - **Til**: Opretter en logfil, der viser nyoprettede konceptnoter efter behandling. Formatet er:
     ```
-    generate xx concepts md file
+    generer xx koncept-md-filer
     1. concepts1
     2. concepts2
     ...
@@ -309,15 +309,15 @@ Få adgang til pluginindstillingerne via:
 - **Concept Log File Name**: Kun synlig, når "Customize Log File Name" er aktiveret. Indtast det ønskede filnavn, for eksempel `ConceptCreation.log`. **Skal udfyldes, hvis tilpasning er aktiveret.**
 <img width="809" height="281" alt="Concept log file output" src="https://github.com/user-attachments/assets/eef6f5d5-592d-4b8f-84b1-7404521a6e9b" />
 
-#### Extract Concepts Task
-- **Create minimal concept notes**:
+#### Opgaven Udtræk begreber
+- **Opret minimale konceptnoter**:
   - **Til (standard)**: Nyoprettede konceptnoter indeholder kun titlen, for eksempel `# Begreb`.
   - **Fra**: Konceptnoter kan indeholde yderligere indhold, som en "Linked From"-backlink, hvis det ikke er deaktiveret af indstillingen nedenfor.
 - **Add "Linked From" backlink**:
   - **Fra (standard)**: Tilføjer ikke en backlink til kildedokumentet i konceptnoten under ekstraktion.
   - **Til**: Tilføjer en "Linked From"-sektion med en backlink til kildefilen.
 
-#### Extract Specific Original Text
+#### Udtræk specifik originaltekst
 - **Questions for extraction**: Indtast en liste med spørgsmål, ét pr. linje, som du vil have AI'en til at udtrække ordrette svar på fra dine noter.
 - **Translate output to corresponding language**:
   - **Fra (standard)**: Returnerer kun den udtrukne tekst på originalsproget.
@@ -329,7 +329,7 @@ Få adgang til pluginindstillingerne via:
   - **Fra**: Gemmer i samme mappe som originalfilen med suffixet `_Extracted`.
   - **Til**: Giver dig mulighed for at angive en tilpasset outputmappe og et filnavnssuffix.
 
-#### Batch Mermaid Fix
+#### Batchvis Mermaid-rettelse
 - **Enable Mermaid Error Detection**:
   - **Fra (standard)**: Fejldetektion springes over efter behandling.
   - **Til**: Scanner behandlede filer for tilbageværende Mermaid-syntaksfejl og genererer en rapport `mermaid_error_{foldername}.md`.
@@ -380,7 +380,7 @@ Få adgang til pluginindstillingerne via:
   - **Til**: Giver dig mulighed for at angive et tilpasset navn til undermappen, hvor færdige filer flyttes.
 - **Custom Output Folder Name**: Kun synlig, når ovenstående er aktiveret. Indtast det ønskede navn til undermappen, for eksempel `Generated Content` eller `_complete`. Ugyldige tegn er ikke tilladt. Hvis feltet efterlades tomt, bruges `_complete`. Mappen oprettes relativt til originalmappens overordnede mappe.
 
-#### One-click Workflow Buttons
+#### Workflowknapper med ét klik
 - **Visual Workflow Builder**: Opret brugerdefinerede workflow-knapper ud fra indbyggede handlinger uden at skrive DSL manuelt.
 - **Custom Workflow Buttons DSL**: Avancerede brugere kan stadig redigere workflow-definitionsteksten direkte. Ugyldig DSL falder sikkert tilbage til standardworkflowet og viser en advarsel i sidepanelet eller indstillings-UI'et.
 - **Workflow Error Strategy**:
@@ -388,7 +388,7 @@ Få adgang til pluginindstillingerne via:
   - **Continue on Error**: Fortsætter med senere trin og rapporterer antallet af mislykkede handlinger til sidst.
 - **Default Workflow Included**: `One-Click Extract` kæder `Process File (Add Links)`, `Batch Generate from Titles` og `Batch Mermaid Fix`.
 
-#### Custom Prompt Settings
+#### Indstillinger for brugerdefinerede instruktioner
 Denne funktion gør det muligt at tilsidesætte standardinstruktionerne, prompts, som sendes til LLM'en for specifikke opgaver, og giver dig finmasket kontrol over outputtet.
 
 - **Enable Custom Prompts for Specific Tasks**:
@@ -412,7 +412,7 @@ Denne funktion gør det muligt at tilsidesætte standardinstruktionerne, prompts
 
 <img width="866" height="646" alt="Duplicate check scope   Custom prompt settings" src="https://github.com/user-attachments/assets/1b37a523-ef00-4e40-94a0-43bbe0c78572" />
 
-#### Duplicate Check Scope
+#### Omfang for duplikatkontrol
 - **Duplicate Check Scope Mode**: Styrer, hvilke filer der sammenlignes med noterne i din **Concept Note Folder** for at finde potentielle dubletter.
   - **Entire Vault (standard)**: Sammenligner konceptnoter med alle andre noter i vaultet undtagen selve Concept Note Folder.
   - **Include Specific Folders Only**: Sammenligner kun konceptnoter med noter i de mapper, der er listet nedenfor.
@@ -420,7 +420,7 @@ Denne funktion gør det muligt at tilsidesætte standardinstruktionerne, prompts
   - **Concept Folder Only**: Sammenligner kun konceptnoter med *andre noter inden for Concept Note Folder*. Det hjælper med at finde dubletter udelukkende blandt dine genererede begreber.
 - **Include/Exclude Folders**: Kun synlig, hvis tilstanden er 'Include' eller 'Exclude'. Indtast de *relative stier* til de mapper, du vil inkludere eller ekskludere, **én sti pr. linje**. Stier er store/små bogstavsfølsomme og bruger `/` som separator, for eksempel `Reference Material/Papers` eller `Daily Notes`. Disse mapper kan ikke være identiske med eller ligge inde i Concept Note Folder.
 
-#### Web Research Provider
+#### Udbyder til webresearch
 - **Search Provider**: Vælg mellem `Tavily`, som kræver API-nøgle og anbefales, og `DuckDuckGo`, som er eksperimentel og ofte blokeres af søgemaskinen ved automatiserede forespørgsler. Bruges til "Research & Summarize Topic" og valgfrit til "Generate from Title".
 - **Tavily API Key**: Kun synlig, hvis Tavily er valgt. Indtast din API-nøgle fra [tavily.com](https://tavily.com/).
 - **Tavily Max Results**: Kun synlig, hvis Tavily er valgt. Maksimalt antal søgeresultater, som Tavily skal returnere, 1-20. Standard: 5.
@@ -430,7 +430,7 @@ Denne funktion gør det muligt at tilsidesætte standardinstruktionerne, prompts
 - **Max Research Content Tokens**: Omtrentligt maksimalt antal tokens fra kombinerede webresearchresultater, snippets og hentet indhold, der skal medtages i opsummeringsprompten. Hjælper med at styre context window size og omkostning. Standard: 3000.
 <img width="810" height="278" alt="Web research provider" src="https://github.com/user-attachments/assets/be0280eb-bb4e-4db0-bf69-91da3f0fd3c0" />
 
-#### Focused Learning Domain
+#### Fokuseret læringsdomæne
 - **Enable Focused Learning Domain**:
   - **Fra (standard)**: Prompts sendt til LLM'en bruger standardinstruktioner til generelle formål.
   - **Til**: Giver dig mulighed for at angive et eller flere fagområder for at forbedre LLM'ens kontekstuelle forståelse.
@@ -439,10 +439,10 @@ Denne funktion gør det muligt at tilsidesætte standardinstruktionerne, prompts
 
 ## Brugervejledning
 
-### Hurtige workflows og sidepanel
+### Hurtige arbejdsgange og sidepanel
 
 - Åbn Notemd-sidepanelet for at få adgang til grupperede handlingssektioner for kernebehandling, generering, oversættelse, viden og hjælpeværktøjer.
-- Brug området **Quick Workflows** øverst i sidepanelet til at starte brugerdefinerede knapper med flere trin.
+- Brug området **Hurtige arbejdsgange** øverst i sidepanelet til at starte brugerdefinerede knapper med flere trin.
 - Standardworkflowet **One-Click Extract** kører `Process File (Add Links)` -> `Batch Generate from Titles` -> `Batch Mermaid Fix`.
 - Workflow-fremdrift, logs pr. trin og fejl vises i sidepanelet med en fastgjort footer, der beskytter progress bar og logområdet mod at blive presset væk af udvidede sektioner.
 - Progress-kortet holder statustekst, en dedikeret procentindikator og resterende tid læsbar med et hurtigt blik, og de samme brugerdefinerede workflows kan omkonfigureres fra indstillingerne.
@@ -470,7 +470,7 @@ Dette er kernefunktionen, der fokuserer på at identificere begreber og tilføje
 
 ### Nye funktioner
 
-1. **Summarise as Mermaid diagram**:
+1. **Opsummer som Mermaid-diagram**:
    - Åbn den note, du vil opsummere.
    - Kør kommandoen `Notemd: Summarise as Mermaid diagram`, via command palette eller knappen i sidepanelet.
    - Pluginet genererer en ny note med Mermaid-diagrammet.
@@ -482,7 +482,7 @@ Dette er kernefunktionen, der fokuserer på at identificere begreber og tilføje
    - Pluginet bruger den konfigurerede **LLM Provider**, i henhold til Multi-Model-indstillingerne, til at udføre oversættelsen.
    - Det oversatte indhold gemmes på den konfigurerede **Translation Save Path** med det korrekte suffix og åbnes i **en ny rude til højre** for originalindholdet for nem sammenligning.
    - Du kan annullere denne opgave via knappen i sidepanelet eller modalens cancel-knap.
-3. **Batch Translate**:
+3. **Batchoversættelse**:
    - Kør kommandoen `Notemd: Batch Translate Folder` fra command palette og vælg en mappe, eller højreklik på en mappe i filudforskeren og vælg "Batch translate this folder".
    - Pluginet oversætter alle Markdown-filer i den valgte mappe.
    - Oversatte filer gemmes på den konfigurerede oversættelsessti, men åbnes ikke automatisk.
@@ -603,20 +603,20 @@ Dette er kernefunktionen, der fokuserer på at identificere begreber og tilføje
 
 Notemd kører lokalt inde i Obsidian, men nogle funktioner sender udgående anmodninger.
 
-### LLM Provider Calls (konfigurerbare)
+### Kald til LLM-udbydere (konfigurerbare)
 
 - Trigger: filbehandling, generering, oversættelse, research-opsummering, Mermaid-opsummering samt forbindelses- og diagnosehandlinger.
 - Endpoint: dine konfigurerede udbyder-Base-URL'er i Notemd-indstillingerne.
 - Sendte data: prompttekst og opgaveindhold, som kræves til behandlingen.
 - Bemærkning om datahåndtering: API-nøgler konfigureres lokalt i pluginindstillingerne og bruges til at signere anmodninger fra din enhed.
 
-### Web Research Calls (valgfrit)
+### Webresearch-kald (valgfrit)
 
 - Trigger: når webresearch er aktiveret, og en søgeudbyder er valgt.
 - Endpoint: Tavily API eller DuckDuckGo-endpoints.
 - Sendte data: din research-forespørgsel og påkrævet request-metadata.
 
-### Developer Diagnostics & Debug Logs (valgfrit)
+### Udviklerdiagnostik og fejlfindingslogge (valgfrit)
 
 - Trigger: API debug mode og diagnostiske handlinger for udviklere.
 - Lagring: diagnose- og fejllogs skrives til roden af dit vault, for eksempel `Notemd_Provider_Diagnostic_*.txt` og `Notemd_Error_Log_*.txt`.
@@ -658,7 +658,7 @@ Notemd kører lokalt inde i Obsidian, men nogle funktioner sender udgående anmo
        ```
        Den genererede rapport indeholder timing pr. forsøg, `First Byte` og `Duration`, saneret request-metadata, response headers, rå eller delvise body-fragmenter, parsede stream-fragmenter og fejlsteder på transportlaget.
 - **Problemer med LM Studio/Ollama-forbindelse**:
-  - **Test Connection fejler**: Sørg for, at den lokale server, LM Studio eller Ollama, kører, og at den korrekte model er indlæst eller tilgængelig.
+  - **Forbindelsestest mislykkes**: Sørg for, at den lokale server, LM Studio eller Ollama, kører, og at den korrekte model er indlæst eller tilgængelig.
   - **CORS-fejl, Ollama på Windows**: Hvis du får CORS-fejl, Cross-Origin Resource Sharing, når du bruger Ollama på Windows, kan det være nødvendigt at sætte miljøvariablen `OLLAMA_ORIGINS`. Det kan du gøre ved at køre `set OLLAMA_ORIGINS=*` i kommandoprompten, før du starter Ollama. Det tillader requests fra alle origins.
   - **Aktivér CORS i LM Studio**: For LM Studio kan du aktivere CORS direkte i serverindstillingerne, hvilket kan være nødvendigt, hvis Obsidian kører i en browser eller har strenge origin policies.
 - **Fejl ved oprettelse af mapper ("File name cannot contain...")**:
@@ -674,8 +674,8 @@ Bidrag er velkomne. Se GitHub-repositoriet for retningslinjer: [https://github.c
 
 ## Dokumentation for vedligeholdere
 
-- [Release Workflow (English)](./docs/maintainer/release-workflow.md)
-- [Release Workflow (简体中文)](./docs/maintainer/release-workflow.zh-CN.md)
+- [Releaseworkflow (engelsk)](./docs/maintainer/release-workflow.md)
+- [Releaseworkflow (forenklet kinesisk)](./docs/maintainer/release-workflow.zh-CN.md)
 
 ## Licens
 

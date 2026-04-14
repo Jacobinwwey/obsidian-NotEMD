@@ -59,10 +59,10 @@ Isso é tudo! Explore as configurações para desbloquear mais recursos como pes
 
 | Aspecto | Escopo | Padrão | Notas |
 |---|---|---|---|
-| `UI Locale` | Apenas texto da interface (configurações, barra lateral, avisos, diálogos) | `auto` | Segue o idioma do Obsidian; catálogos atuais: `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, `zh-TW`. |
-| `Task Output Language` | Saída de tarefas gerada por LLM (links, resumos, geração, extração, destino da tradução) | `en` | Pode ser global ou por tarefa quando `Usar idiomas diferentes para tarefas` estiver ativado. |
-| `Disable auto translation` | Tarefas que não são de tradução mantêm o contexto original | `false` | Tarefas explícitas de `Traduzir` ainda aplicam o idioma de destino configurado. |
-| Locale fallback | Resolução de chaves de UI ausentes | locale -> `en` | Mantém a UI estável quando algumas chaves não estão traduzidas. |
+| `Idioma da interface` | Apenas texto da interface (configurações, barra lateral, avisos, diálogos) | `auto` | Segue o idioma do Obsidian; catálogos atuais: `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, `zh-TW`. |
+| `Idioma de saída das tarefas` | Saída de tarefas gerada por LLM (links, resumos, geração, extração, destino da tradução) | `en` | Pode ser global ou por tarefa quando `Usar idiomas diferentes para tarefas` estiver ativado. |
+| `Desativar tradução automática` | Tarefas que não são de tradução mantêm o contexto original | `false` | Tarefas explícitas de `Traduzir` ainda aplicam o idioma de destino configurado. |
+| `Idioma de fallback` | Resolução de chaves de UI ausentes | locale -> `en` | Mantém a UI estável quando algumas chaves não estão traduzidas. |
 
 - Os documentos-fonte mantidos são inglês e chinês simplificado, e as traduções README publicadas estão ligadas no cabeçalho acima.
 - A cobertura de UI locale no app atualmente corresponde exatamente ao catálogo explícito do código: `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, `zh-TW`.
@@ -236,10 +236,10 @@ Acesse as configurações do plugin através de:
 
 <img width="817" height="428" alt="Multi-model" src="https://github.com/user-attachments/assets/85e6b854-c0ca-45cc-a55e-24638dceb120" />
 
-### Arquitetura de Idioma (UI Locale vs Task Output Language)
+### Arquitetura de idioma (Idioma da interface vs idioma de saída das tarefas)
 
--   **UI Locale** controla apenas o texto da interface do plugin (rótulos de configurações, botões da barra lateral, avisos e diálogos). O modo `auto` padrão segue o idioma atual da interface do Obsidian.
--   **Task Output Language** controla a saída de tarefas gerada pelo modelo (links, resumos, geração de títulos, resumo Mermaid, extração de conceitos, destino da tradução).
+-   **Idioma da interface** controla apenas o texto da interface do plugin (rótulos de configurações, botões da barra lateral, avisos e diálogos). O modo `auto` padrão segue o idioma atual da interface do Obsidian.
+-   **Idioma de saída das tarefas** controla a saída de tarefas gerada pelo modelo (links, resumos, geração de títulos, resumo Mermaid, extração de conceitos, destino da tradução).
 -   **O modo de idioma por tarefa** permite que cada tarefa resolva seu próprio idioma de saída a partir de uma camada de política unificada, em vez de sobrescritas dispersas por módulo.
 -   **Desativar tradução automática** mantém as tarefas que não são de tradução no contexto do idioma original, enquanto tarefas explícitas de tradução ainda aplicam o idioma de destino configurado.
 -   Caminhos de geração relacionados ao Mermaid seguem a mesma política de idioma e ainda podem acionar o Mermaid Auto-Fix quando ativado.
@@ -448,7 +448,7 @@ Este recurso permite sobrescrever as instruções padrão (prompts) enviadas ao 
 ### Fluxos de Trabalho Rápidos e Barra Lateral
 
 -   Abra a barra lateral do Notemd para acessar seções de ações agrupadas para processamento principal, geração, tradução, conhecimento e utilitários.
--   Use a área **Quick Workflows** no topo da barra lateral para lançar botões de vários passos personalizados.
+-   Use a área **Fluxos rápidos** no topo da barra lateral para lançar botões de vários passos personalizados.
 -   O fluxo de trabalho padrão **One-Click Extract** executa `Processar arquivo (Adicionar links)` -> `Geração em lote a partir de títulos` -> `Correção Mermaid em Lote`.
 -   O progresso do fluxo de trabalho, os logs por passo e as falhas são exibidos na barra lateral, com um rodapé fixo que protege a barra de progresso e a área de log de serem deslocadas por seções expandidas.
 -   O cartão de progresso mantém legíveis de relance o texto de status, um indicador de porcentagem dedicado e o tempo restante, e os mesmos fluxos de trabalho personalizados podem ser reconfigurados nas configurações.

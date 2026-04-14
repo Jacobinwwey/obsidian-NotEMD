@@ -29,9 +29,7 @@ const ignoreLinePatterns = [
     /i18n\./,
     /strings\./,
     /provider\.name/,
-    /task\.name/,
     /lang\.name/,
-    /definition\.description/,
     /issue\.message/,
     /Unsupported action:/,
     /console\./

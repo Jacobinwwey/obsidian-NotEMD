@@ -4,7 +4,7 @@
 
 [English](./README.md) | [简体中文](./README_zh.md) | [Español](./README_es.md) | [Français](./README_fr.md) | [Deutsch](./README_de.md) | [Italiano](./README_it.md) | [Português](./README_pt.md) | [繁體中文](./README_zh_Hant.md) | [日本語](./README_ja.md) | [한국어](./README_ko.md) | [Русский](./README_ru.md) | [العربية](./README_ar.md) | [हिन्दी](./README_hi.md) | [বাংলা](./README_bn.md) | [Nederlands](./README_nl.md) | [Svenska](./README_sv.md) | [Suomi](./README_fi.md) | [Dansk](./README_da.md) | [Norsk](./README_no.md) | [Polski](./README_pl.md) | [Türkçe](./README_tr.md) | [עברית](./README_he.md) | [ไทย](./README_th.md) | [Ελληνικά](./README_el.md) | [Čeština](./README_cs.md) | [Magyar](./README_hu.md) | [Română](./README_ro.md) | [Українська](./README_uk.md) | [Tiếng Việt](./README_vi.md) | [Bahasa Indonesia](./README_id.md) | [Bahasa Melayu](./README_ms.md)
 
-Baca dokumentasi dalam lebih banyak bahasa di: [Language Hub](./docs/i18n/README.md)
+Baca dokumentasi dalam lebih banyak bahasa di: [Pusat Bahasa](./docs/i18n/README.md)
 
 ```
 ==================================================
@@ -59,15 +59,15 @@ Selesai. Jelajahi pengaturan untuk membuka fitur tambahan seperti riset web, ter
 
 | Aspek | Cakupan | Default | Catatan |
 |---|---|---|---|
-| `UI Locale` | Teks UI plugin saja, seperti settings, sidebar, notice, dan dialog | `auto` | Mengikuti locale Obsidian; katalog UI saat ini adalah `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, dan `zh-TW`. |
-| `Task Output Language` | Output tugas yang dihasilkan LLM, seperti link, ringkasan, generasi, ekstraksi, dan target terjemahan | `en` | Bisa global atau per-task jika `Use different languages for tasks` diaktifkan. |
-| `Disable auto translation` | Tugas non-Translate mempertahankan konteks bahasa sumber | `false` | Tugas `Translate` eksplisit tetap memaksa bahasa target yang dikonfigurasi. |
+| `Bahasa antarmuka` | Teks UI plugin saja, seperti pengaturan, sidebar, pemberitahuan, dan dialog | `auto` | Mengikuti locale Obsidian; katalog UI saat ini adalah `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, dan `zh-TW`. |
+| `Bahasa output tugas` | Output tugas yang dihasilkan LLM, seperti link, ringkasan, generasi, ekstraksi, dan target terjemahan | `en` | Bisa global atau per-task jika `Gunakan bahasa berbeda untuk tugas` diaktifkan. |
+| `Nonaktifkan terjemahan otomatis` | Tugas non-Translate mempertahankan konteks bahasa sumber | `false` | Tugas `Translate` eksplisit tetap memaksa bahasa target yang dikonfigurasi. |
 | Locale cadangan | Resolusi key UI yang hilang | locale -> `en` | Menjaga UI tetap stabil ketika sebagian key belum diterjemahkan. |
 
 - Dokumen sumber yang dipelihara adalah bahasa Inggris dan Mandarin Sederhana, dan terjemahan README yang telah diterbitkan ditautkan pada header di atas.
 - Cakupan locale UI di dalam aplikasi saat ini persis sesuai dengan katalog eksplisit di kode: `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, `zh-TW`.
 - Fallback bahasa Inggris tetap menjadi jaring pengaman implementasi, tetapi permukaan UI yang didukung telah dicakup oleh regression tests dan tidak seharusnya diam-diam kembali ke bahasa Inggris saat penggunaan normal.
-- Detail tambahan dan panduan kontribusi dilacak di [Language Hub](./docs/i18n/README.md).
+- Detail tambahan dan panduan kontribusi dilacak di [Pusat Bahasa](./docs/i18n/README.md).
 
 ## Fitur
 
@@ -111,29 +111,29 @@ Selesai. Jelajahi pengaturan untuk membuka fitur tambahan seperti riset web, ter
   - Mendukung terjemahan antarbanyak bahasa.
   - Bahasa target dapat dikustomisasi dari settings atau UI.
   - Teks hasil terjemahan bisa dibuka otomatis di pane sebelah kanan dari teks asli agar mudah dibandingkan.
-- **Batch Translate**:
+- **Terjemahan batch**:
   - Menerjemahkan semua file dalam folder yang dipilih.
   - Mendukung pemrosesan paralel jika "Enable Batch Parallelism" aktif.
   - Menggunakan custom prompts untuk terjemahan jika sudah dikonfigurasi.
   - Menambahkan opsi "Batch translate this folder" ke menu konteks file explorer.
-- **Disable auto translation**: jika diaktifkan, tugas non-Translate tidak lagi memaksa output ke bahasa tertentu, sehingga konteks bahasa asli tetap terjaga. Tugas `Translate` eksplisit tetap menerjemahkan sesuai konfigurasi.
+- **Matikan terjemahan otomatis**: jika diaktifkan, tugas non-Translate tidak lagi memaksa output ke bahasa tertentu, sehingga konteks bahasa asli tetap terjaga. Tugas `Translate` eksplisit tetap menerjemahkan sesuai konfigurasi.
 
 ### Riset Web & Generasi Konten
-- **Web Research & Summarization**:
+- **Riset web dan peringkasan**:
   - Melakukan pencarian web menggunakan Tavily, yang memerlukan API key, atau DuckDuckGo, yang masih eksperimental.
   - **Search Robustness yang Lebih Baik**: DuckDuckGo search sekarang memiliki parsing logic yang lebih tangguh menggunakan DOMParser dengan Regex fallback untuk menghadapi perubahan layout.
   - Merangkum hasil pencarian menggunakan LLM yang dikonfigurasi.
   - Bahasa output ringkasan dapat diatur di settings.
   - Ringkasan ditambahkan ke catatan saat ini.
   - Tersedia batas token yang bisa dikonfigurasi untuk research content yang dikirim ke LLM.
-- **Content Generation from Title**:
+- **Pembuatan konten dari judul**:
   - Menggunakan judul catatan untuk menghasilkan konten awal lewat LLM, menggantikan konten yang sudah ada.
   - **Optional Research**: Anda dapat mengatur agar web research dilakukan terlebih dahulu menggunakan search provider yang dipilih lalu memasukkan hasilnya sebagai context ke prompt.
 - **Batch Content Generation from Titles**: menghasilkan konten untuk semua catatan di folder yang dipilih berdasarkan judul masing-masing, sambil tetap menghormati pengaturan riset opsional. File yang berhasil diproses dipindahkan ke **subfolder "complete" yang dapat dikonfigurasi**, seperti `[foldername]_complete` atau nama custom, untuk menghindari pemrosesan ulang.
 - **Mermaid Auto-Fix Coupling**: ketika Mermaid auto-fix diaktifkan, alur kerja terkait Mermaid secara otomatis memperbaiki generated files atau output folder setelah pemrosesan. Ini mencakup Process, Generate from Title, Batch Generate from Titles, Research & Summarize, Summarise as Mermaid, dan Translate.
 
 ### Fitur Utilitas
-- **Summarise as Mermaid diagram**:
+- **Ringkas sebagai diagram Mermaid**:
   - Fitur ini memungkinkan Anda merangkum isi catatan menjadi Mermaid diagram.
   - Bahasa output Mermaid dapat dikustomisasi di settings.
   - **Mermaid Output Folder**: Anda bisa menentukan folder tempat generated Mermaid files disimpan.
@@ -209,57 +209,57 @@ Akses settings plugin melalui:
 **Settings** -> **Community Plugins** -> **Notemd** (klik ikon gear).
 
 ### Konfigurasi Penyedia LLM
-1. **Active Provider**: pilih penyedia LLM yang ingin digunakan dari dropdown.
-2. **Provider Settings**: konfigurasikan settings spesifik untuk penyedia yang dipilih:
-   - **API Key**: diperlukan untuk sebagian besar penyedia cloud, seperti OpenAI, Anthropic, DeepSeek, Qwen, Qwen Code, Doubao, Moonshot, GLM, Z AI, MiniMax, Huawei Cloud MaaS, Baidu Qianfan, SiliconFlow, Google, Mistral, Azure OpenAI, OpenRouter, xAI, Groq, Together, Fireworks, dan Requesty. Tidak dibutuhkan untuk Ollama. Bersifat opsional untuk LM Studio dan preset `OpenAI Compatible` jika endpoint Anda menerima akses anonim atau placeholder.
-   - **Base URL / Endpoint**: endpoint API dari layanan. Default sudah disediakan, tetapi Anda mungkin perlu mengubahnya untuk model lokal, seperti LMStudio dan Ollama, untuk gateway, seperti OpenRouter, Requesty, dan OpenAI Compatible, atau untuk deployment Azure tertentu. **Wajib untuk Azure OpenAI.**
+1. **Penyedia aktif**: pilih penyedia LLM yang ingin digunakan dari dropdown.
+2. **Pengaturan penyedia**: konfigurasikan pengaturan spesifik untuk penyedia yang dipilih:
+   - **Kunci API**: diperlukan untuk sebagian besar penyedia cloud, seperti OpenAI, Anthropic, DeepSeek, Qwen, Qwen Code, Doubao, Moonshot, GLM, Z AI, MiniMax, Huawei Cloud MaaS, Baidu Qianfan, SiliconFlow, Google, Mistral, Azure OpenAI, OpenRouter, xAI, Groq, Together, Fireworks, dan Requesty. Tidak dibutuhkan untuk Ollama. Bersifat opsional untuk LM Studio dan preset `OpenAI Compatible` jika endpoint Anda menerima akses anonim atau placeholder.
+   - **URL dasar / endpoint**: endpoint API dari layanan. Default sudah disediakan, tetapi Anda mungkin perlu mengubahnya untuk model lokal, seperti LMStudio dan Ollama, untuk gateway seperti OpenRouter, Requesty, dan OpenAI Compatible, atau untuk deployment Azure tertentu. **Wajib untuk Azure OpenAI.**
    - **Model**: nama atau ID model spesifik yang akan digunakan, seperti `gpt-4o`, `claude-3-5-sonnet-20240620`, `google/gemini-flash-1.5`, `grok-4`, `moonshotai/kimi-k2-instruct-0905`, `accounts/fireworks/models/kimi-k2p5`, atau `anthropic/claude-3-7-sonnet-latest`. Pastikan model tersedia pada endpoint atau penyedia Anda.
-   - **Temperature**: mengatur tingkat randomness output LLM. `0` lebih deterministik, `1` paling kreatif. Nilai rendah seperti `0.2-0.5` biasanya lebih cocok untuk tugas terstruktur.
-   - **API Version (Azure Only)**: diperlukan untuk Azure OpenAI deployments, misalnya `2024-02-15-preview`.
-3. **Test Connection**: gunakan tombol "Test Connection" untuk penyedia aktif guna memverifikasi settings Anda. Penyedia OpenAI-compatible sekarang menggunakan pengecekan provider-aware: endpoint seperti `Qwen`, `Qwen Code`, `Doubao`, `Moonshot`, `GLM`, `Z AI`, `MiniMax`, `Huawei Cloud MaaS`, `Baidu Qianfan`, `SiliconFlow`, `Groq`, `Together`, `Fireworks`, `LMStudio`, dan `OpenAI Compatible` menguji `chat/completions` secara langsung, sedangkan penyedia yang mempunyai endpoint `/models` yang andal masih bisa memulai dengan listing models. Jika probe pertama gagal karena transient network disconnect seperti `ERR_CONNECTION_CLOSED`, Notemd otomatis berpindah ke stable retry sequence alih-alih langsung gagal.
-4. **Manage Provider Configurations**: gunakan tombol "Export Providers" dan "Import Providers" untuk menyimpan atau memuat settings penyedia LLM ke atau dari file `notemd-providers.json` di dalam direktori konfigurasi plugin. Ini memudahkan backup dan berbagi konfigurasi.
-5. **Preset Coverage**: selain penyedia asli, Notemd sekarang juga menyertakan preset untuk `Qwen`, `Qwen Code`, `Doubao`, `Moonshot`, `GLM`, `Z AI`, `MiniMax`, `Huawei Cloud MaaS`, `Baidu Qianfan`, `SiliconFlow`, `xAI`, `Groq`, `Together`, `Fireworks`, `Requesty`, serta target generik `OpenAI Compatible` untuk LiteLLM, vLLM, Perplexity, Vercel AI Gateway, atau custom proxies.
+   - **Temperatur**: mengatur tingkat keacakan output LLM. `0` lebih deterministik, `1` paling kreatif. Nilai rendah seperti `0.2-0.5` biasanya lebih cocok untuk tugas terstruktur.
+   - **Versi API (khusus Azure)**: diperlukan untuk deployment Azure OpenAI, misalnya `2024-02-15-preview`.
+3. **Uji koneksi**: gunakan tombol "Uji koneksi" untuk penyedia aktif guna memverifikasi pengaturan Anda. Penyedia OpenAI-compatible sekarang menggunakan pengecekan yang menyesuaikan jenis penyedia: endpoint seperti `Qwen`, `Qwen Code`, `Doubao`, `Moonshot`, `GLM`, `Z AI`, `MiniMax`, `Huawei Cloud MaaS`, `Baidu Qianfan`, `SiliconFlow`, `Groq`, `Together`, `Fireworks`, `LMStudio`, dan `OpenAI Compatible` menguji `chat/completions` secara langsung, sedangkan penyedia yang mempunyai endpoint `/models` yang andal masih bisa memulai dengan daftar model. Jika probe pertama gagal karena putus jaringan sementara seperti `ERR_CONNECTION_CLOSED`, Notemd otomatis berpindah ke urutan percobaan ulang stabil alih-alih langsung gagal.
+4. **Kelola konfigurasi penyedia**: gunakan tombol "Export Providers" dan "Import Providers" untuk menyimpan atau memuat pengaturan penyedia LLM ke atau dari file `notemd-providers.json` di dalam direktori konfigurasi plugin. Ini memudahkan backup dan berbagi konfigurasi.
+5. **Cakupan preset**: selain penyedia asli, Notemd sekarang juga menyertakan preset untuk `Qwen`, `Qwen Code`, `Doubao`, `Moonshot`, `GLM`, `Z AI`, `MiniMax`, `Huawei Cloud MaaS`, `Baidu Qianfan`, `SiliconFlow`, `xAI`, `Groq`, `Together`, `Fireworks`, `Requesty`, serta target generik `OpenAI Compatible` untuk LiteLLM, vLLM, Perplexity, Vercel AI Gateway, atau proxy kustom.
 
 <img width="804" height="506" alt="LLM" src="https://github.com/user-attachments/assets/8caf42e3-43ad-456d-8b96-b63e7914e45f" />
 
 ### Konfigurasi Multi-Model
-- **Use Different Providers for Tasks**:
-  - **Disabled (Default)**: menggunakan satu "Active Provider" untuk semua tugas.
-  - **Enabled**: memungkinkan Anda memilih penyedia spesifik dan, jika diinginkan, override nama model untuk setiap tugas, seperti "Add Links", "Research & Summarize", "Generate from Title", "Translate", dan "Extract Concepts". Jika field override model dibiarkan kosong, model default dari penyedia yang dipilih untuk tugas itu yang akan dipakai.
-- **Select different languages for different tasks**:
-  - **Disabled (Default)**: menggunakan satu "Output language" untuk semua tugas.
-  - **Enabled**: memungkinkan pemilihan bahasa spesifik untuk setiap tugas, seperti "Add Links", "Research & Summarize", "Generate from Title", "Summarise as Mermaid diagram", dan "Extract Concepts".
+- **Gunakan penyedia berbeda untuk tugas**:
+  - **Nonaktif (default)**: menggunakan satu "penyedia aktif" untuk semua tugas.
+  - **Aktif**: memungkinkan Anda memilih penyedia spesifik dan, jika diinginkan, mengganti nama model untuk setiap tugas, seperti "Add Links", "Research & Summarize", "Generate from Title", "Translate", dan "Extract Concepts". Jika field penggantian model dibiarkan kosong, model default dari penyedia yang dipilih untuk tugas itu yang akan dipakai.
+- **Pilih bahasa berbeda untuk tugas berbeda**:
+  - **Nonaktif (default)**: menggunakan satu "bahasa output" untuk semua tugas.
+  - **Aktif**: memungkinkan pemilihan bahasa spesifik untuk setiap tugas, seperti "Add Links", "Research & Summarize", "Generate from Title", "Summarise as Mermaid diagram", dan "Extract Concepts".
 
 <img width="817" height="428" alt="Multi-model" src="https://github.com/user-attachments/assets/85e6b854-c0ca-45cc-a55e-24638dceb120" />
 
-### Arsitektur Bahasa (UI Locale vs Task Output Language)
+### Arsitektur Bahasa (locale UI vs bahasa output tugas)
 
-- **UI Locale** hanya mengontrol teks antarmuka plugin, seperti label settings, tombol sidebar, notice, dan dialog. Mode default `auto` mengikuti bahasa UI Obsidian saat ini.
-- **Task Output Language** mengontrol output tugas yang dihasilkan model, seperti link, ringkasan, title generation, ringkasan Mermaid, concept extraction, dan target terjemahan.
-- **Per-task language mode** memungkinkan tiap tugas menyelesaikan bahasa output-nya sendiri melalui unified policy layer, bukan melalui override yang tersebar di berbagai modul.
-- **Disable auto translation** menjaga tugas non-Translate tetap berada dalam konteks bahasa sumber, sedangkan tugas Translate yang eksplisit tetap memaksa bahasa target yang telah dikonfigurasi.
+- **Locale UI** hanya mengontrol teks antarmuka plugin, seperti label pengaturan, tombol bilah samping, pemberitahuan, dan dialog. Mode default `auto` mengikuti bahasa UI Obsidian saat ini.
+- **Bahasa output tugas** mengontrol output tugas yang dihasilkan model, seperti link, ringkasan, pembuatan judul, ringkasan Mermaid, ekstraksi konsep, dan target terjemahan.
+- **Mode bahasa per tugas** memungkinkan tiap tugas menentukan bahasa output-nya sendiri melalui satu lapisan kebijakan terpadu, bukan melalui penggantian yang tersebar di berbagai modul.
+- **Nonaktifkan terjemahan otomatis** menjaga tugas non-Translate tetap berada dalam konteks bahasa sumber, sedangkan tugas Translate yang eksplisit tetap memaksa bahasa target yang telah dikonfigurasi.
 - Jalur generasi terkait Mermaid mengikuti kebijakan bahasa yang sama dan masih dapat memicu Mermaid auto-fix ketika diaktifkan.
 
 ### Pengaturan Panggilan API Stabil
-- **Enable Stable API Calls (Retry Logic)**:
-  - **Disabled (Default)**: satu kegagalan API akan menghentikan tugas saat ini.
-  - **Enabled**: otomatis mencoba ulang panggilan LLM API yang gagal. Ini berguna untuk network issue sesekali atau rate limit.
-  - **Connection Test Fallback**: bahkan ketika panggilan normal tidak berjalan di stable mode, tes koneksi akan berpindah ke retry sequence yang sama setelah transient network failure pertama.
-  - **Runtime Transport Fallback (Environment-Aware)**: request tugas yang berjalan lama dan putus sementara di `requestUrl` kini akan mengulang attempt yang sama lewat environment-aware fallback. Build desktop menggunakan Node `http/https`; lingkungan non-desktop menggunakan browser `fetch`. Fallback attempt tersebut sekarang memakai streamed parsing yang paham protokol di seluruh jalur LLM bawaan, mencakup OpenAI-compatible SSE, Azure OpenAI SSE, Anthropic Messages SSE, Google Gemini SSE, dan Ollama NDJSON, sehingga gateway lambat bisa mengembalikan body chunks lebih awal. Entrypoint lain bergaya OpenAI langsung memakai fallback path yang sama.
-  - **OpenAI-Compatible Stable Order**: dalam stable mode, setiap OpenAI-compatible attempt kini mengikuti urutan `direct streaming -> direct non-stream -> requestUrl (dengan streamed fallback bila perlu)` sebelum dihitung sebagai attempt gagal. Ini mencegah failure yang terlalu agresif ketika hanya satu transport mode yang bermasalah.
-- **Retry Interval (seconds)**: hanya terlihat saat fitur diaktifkan. Menentukan jeda antar retry attempt, dari 1 sampai 300 detik. Default: 5.
-- **Maximum Retries**: hanya terlihat saat fitur diaktifkan. Menentukan jumlah maksimum retry attempt, dari 0 sampai 10. Default: 3.
-- **API Error Debugging Mode**:
-  - **Disabled (Default)**: menggunakan pelaporan error yang ringkas dan standar.
-  - **Enabled**: mengaktifkan logging error yang detail untuk semua penyedia dan semua tugas, termasuk Translate, Search, dan Connection Tests. Logging ini mencakup HTTP status codes, raw response text, request transport timelines, sanitized request URLs dan headers, elapsed attempt durations, response headers, partial response bodies, parsed partial stream output, dan stack traces.
-- **Developer Mode**:
-  - **Disabled (Default)**: menyembunyikan semua developer-only diagnostics controls.
-  - **Enabled**: menampilkan developer diagnostics panel khusus di settings.
-- **Developer Provider Diagnostic (Long Request)**:
-  - **Diagnostic Call Mode**: memilih runtime path per probe. Penyedia OpenAI-compatible mendukung forced mode tambahan, seperti `direct streaming`, `direct buffered`, dan `requestUrl-only`, di samping runtime modes.
-  - **Run Diagnostic**: menjalankan satu long-request probe dengan call mode yang dipilih dan menulis `Notemd_Provider_Diagnostic_*.txt` di root vault.
-  - **Run Stability Test**: mengulangi probe untuk jumlah run yang dapat dikonfigurasi, dari 1 sampai 10, menggunakan call mode yang dipilih lalu menyimpan aggregated stability report.
-  - **Diagnostic Timeout**: timeout per run yang dapat dikonfigurasi, dari 15 sampai 3600 detik.
+- **Aktifkan panggilan API stabil (logika percobaan ulang)**:
+  - **Nonaktif (default)**: satu kegagalan API akan menghentikan tugas saat ini.
+  - **Aktif**: otomatis mencoba ulang panggilan LLM API yang gagal. Ini berguna untuk gangguan jaringan sesekali atau pembatasan laju.
+  - **Cadangan uji koneksi**: bahkan ketika panggilan normal tidak berjalan di stable mode, tes koneksi akan berpindah ke urutan percobaan ulang yang sama setelah kegagalan jaringan sementara pertama.
+  - **Cadangan transport saat runtime (berdasarkan lingkungan)**: request tugas yang berjalan lama dan putus sementara di `requestUrl` kini akan mengulang attempt yang sama lewat cadangan transport yang menyesuaikan lingkungan. Build desktop menggunakan Node `http/https`; lingkungan non-desktop menggunakan browser `fetch`. Attempt cadangan tersebut sekarang memakai parsing aliran yang paham protokol di seluruh jalur LLM bawaan, mencakup OpenAI-compatible SSE, Azure OpenAI SSE, Anthropic Messages SSE, Google Gemini SSE, dan Ollama NDJSON, sehingga gateway lambat bisa mengembalikan potongan body lebih awal. Entrypoint lain bergaya OpenAI langsung memakai jalur cadangan yang sama.
+  - **Urutan stabil untuk OpenAI-compatible**: dalam stable mode, setiap OpenAI-compatible attempt kini mengikuti urutan `direct streaming -> direct non-stream -> requestUrl (dengan streamed fallback bila perlu)` sebelum dihitung sebagai attempt gagal. Ini mencegah kegagalan yang terlalu agresif ketika hanya satu mode transport yang bermasalah.
+- **Interval percobaan ulang (detik)**: hanya terlihat saat fitur diaktifkan. Menentukan jeda antar percobaan ulang, dari 1 sampai 300 detik. Default: 5.
+- **Jumlah maksimum percobaan ulang**: hanya terlihat saat fitur diaktifkan. Menentukan jumlah maksimum percobaan ulang, dari 0 sampai 10. Default: 3.
+- **Mode debug kesalahan API**:
+  - **Nonaktif (default)**: menggunakan pelaporan error yang ringkas dan standar.
+  - **Aktif**: mengaktifkan logging error yang detail untuk semua penyedia dan semua tugas, termasuk Translate, Search, dan Connection Tests. Logging ini mencakup HTTP status codes, raw response text, request transport timelines, sanitized request URLs dan headers, elapsed attempt durations, response headers, partial response bodies, parsed partial stream output, dan stack traces.
+- **Mode pengembang**:
+  - **Nonaktif (default)**: menyembunyikan semua kontrol diagnostik khusus pengembang.
+  - **Aktif**: menampilkan panel diagnostik pengembang khusus di pengaturan.
+- **Diagnostik penyedia untuk pengembang (permintaan panjang)**:
+  - **Mode panggilan diagnostik**: memilih runtime path untuk setiap probe. Penyedia OpenAI-compatible mendukung forced mode tambahan, seperti `direct streaming`, `direct buffered`, dan `requestUrl-only`, di samping runtime mode biasa.
+  - **Jalankan diagnostik**: menjalankan satu long-request probe dengan call mode yang dipilih dan menulis `Notemd_Provider_Diagnostic_*.txt` di root vault.
+  - **Jalankan uji stabilitas**: mengulangi probe untuk jumlah run yang dapat dikonfigurasi, dari 1 sampai 10, menggunakan call mode yang dipilih lalu menyimpan aggregated stability report.
+  - **Batas waktu diagnostik**: batas waktu per run yang dapat dikonfigurasi, dari 15 sampai 3600 detik.
   - **Mengapa berguna**: lebih cepat daripada reproduksi manual ketika penyedia lolos "Test connection" tetapi gagal pada tugas nyata yang berjalan lama, misalnya terjemahan lewat gateway yang lambat.
 
 <img width="805" height="187" alt="stable API calls" src="https://github.com/user-attachments/assets/936454a7-b657-413c-8a2a-13d517f9c519" />
@@ -268,58 +268,58 @@ Akses settings plugin melalui:
 
 #### Output File yang Diproses
 - **Customize Processed File Save Path**:
-  - **Disabled (Default)**: processed files, misalnya `YourNote_processed.md`, disimpan di **folder yang sama** dengan file asli.
-  - **Enabled**: memungkinkan Anda menentukan lokasi simpan khusus.
+  - **Dinonaktifkan (bawaan)**: processed files, misalnya `YourNote_processed.md`, disimpan di **folder yang sama** dengan file asli.
+  - **Diaktifkan**: memungkinkan Anda menentukan lokasi simpan khusus.
 - **Processed File Folder Path**: hanya terlihat saat opsi di atas aktif. Masukkan **path relatif** di dalam vault, seperti `Processed Notes` atau `Output/LLM`, tempat file hasil pemrosesan akan disimpan. Folder akan dibuat jika belum ada. **Jangan gunakan path absolut seperti `C:\...` atau karakter yang tidak valid.**
 - **Use Custom Output Filename for 'Add Links'**:
-  - **Disabled (Default)**: processed files dari perintah Add Links menggunakan suffix default `_processed.md`, misalnya `YourNote_processed.md`.
-  - **Enabled**: memungkinkan Anda mengkustomisasi output filename dengan pengaturan di bawah.
+  - **Dinonaktifkan (bawaan)**: processed files dari perintah Add Links menggunakan suffix default `_processed.md`, misalnya `YourNote_processed.md`.
+  - **Diaktifkan**: memungkinkan Anda mengkustomisasi output filename dengan pengaturan di bawah.
 - **Custom Suffix/Replacement String**:
   - Jika field ini **kosong**, file asli akan **ditimpa** dengan konten yang telah diproses.
   - Jika Anda memasukkan string seperti `_linked`, string itu akan ditambahkan ke basename file, misalnya `YourNote_linked.md`. Pastikan suffix tidak mengandung karakter nama file yang tidak valid.
 - **Remove Code Fences on Add Links**:
-  - **Disabled (Default)**: code fences **(\`\\\`\`)** tetap dipertahankan saat menambahkan link, dan **(\`\\\`markdown)** dihapus otomatis.
-  - **Enabled**: menghapus code fences sebelum proses Add Links dijalankan.
+  - **Dinonaktifkan (bawaan)**: code fences **(\`\\\`\`)** tetap dipertahankan saat menambahkan link, dan **(\`\\\`markdown)** dihapus otomatis.
+  - **Diaktifkan**: menghapus code fences sebelum proses Add Links dijalankan.
 
 <img width="799" height="301" alt="Processed file output" src="https://github.com/user-attachments/assets/65d4e864-ff5f-402a-be90-e9c44b208903" />
 
 #### Output Catatan Konsep
 - **Customize Concept Note Path**:
-  - **Disabled (Default)**: pembuatan otomatis note untuk `[[linked concepts]]` dimatikan.
-  - **Enabled**: memungkinkan Anda memilih folder tempat concept notes baru akan dibuat.
+  - **Dinonaktifkan (bawaan)**: pembuatan otomatis note untuk `[[linked concepts]]` dimatikan.
+  - **Diaktifkan**: memungkinkan Anda memilih folder tempat concept notes baru akan dibuat.
 - **Concept Note Folder Path**: hanya terlihat ketika opsi di atas diaktifkan. Masukkan **path relatif** di dalam vault, misalnya `Concepts` atau `Generated/Topics`. Folder akan dibuat otomatis bila belum ada. **Harus diisi jika fitur kustomisasi diaktifkan.** **Jangan gunakan path absolut atau karakter yang tidak valid.**
 
 <img width="800" height="145" alt="concept note output" src="https://github.com/user-attachments/assets/d0338341-7d67-4472-964c-75a0992165b8" />
 
 #### Output File Log Konsep
 - **Generate Concept Log File**:
-  - **Disabled (Default)**: tidak ada log file yang dibuat.
-  - **Enabled**: membuat log file yang berisi daftar concept notes baru setelah pemrosesan. Formatnya adalah:
+  - **Dinonaktifkan (bawaan)**: tidak ada log file yang dibuat.
+  - **Diaktifkan**: membuat log file yang berisi daftar concept notes baru setelah pemrosesan. Formatnya adalah:
     ```
-    generate xx concepts md file
+    hasilkan xx file md konsep
     1. concepts1
     2. concepts2
     ...
     n. conceptsn
     ```
 - **Customize Log File Save Path**: terlihat hanya jika "Generate Concept Log File" aktif.
-  - **Disabled (Default)**: log file disimpan di **Concept Note Folder Path**, bila ada, atau di root vault jika tidak ada.
-  - **Enabled**: memungkinkan Anda memilih folder khusus untuk log file.
+  - **Dinonaktifkan (bawaan)**: log file disimpan di **Concept Note Folder Path**, bila ada, atau di root vault jika tidak ada.
+  - **Diaktifkan**: memungkinkan Anda memilih folder khusus untuk log file.
 - **Concept Log Folder Path**: terlihat hanya jika "Customize Log File Save Path" aktif. Masukkan **path relatif** di dalam vault, misalnya `Logs/Notemd`. **Harus diisi bila kustomisasi diaktifkan.**
 - **Customize Log File Name**: terlihat hanya jika "Generate Concept Log File" aktif.
-  - **Disabled (Default)**: log file bernama `Generate.log`.
-  - **Enabled**: memungkinkan Anda menentukan nama khusus.
+  - **Dinonaktifkan (bawaan)**: log file bernama `Generate.log`.
+  - **Diaktifkan**: memungkinkan Anda menentukan nama khusus.
 - **Concept Log File Name**: terlihat hanya jika "Customize Log File Name" aktif. Masukkan nama file yang diinginkan, seperti `ConceptCreation.log`. **Harus diisi bila kustomisasi diaktifkan.**
 
 <img width="809" height="281" alt="Concept log file output" src="https://github.com/user-attachments/assets/eef6f5d5-592d-4b8f-84b1-7404521a6e9b" />
 
 #### Tugas Ekstrak Konsep
-- **Create minimal concept notes**:
-  - **On (Default)**: concept notes yang baru dibuat hanya berisi judul, seperti `# Concept`.
-  - **Off**: concept notes dapat berisi konten tambahan, seperti backlink "Linked From", jika tidak dimatikan oleh pengaturan di bawah.
-- **Add "Linked From" backlink**:
-  - **Off (Default)**: tidak menambahkan backlink ke dokumen sumber selama extraction.
-  - **On**: menambahkan bagian "Linked From" yang berisi backlink ke file sumber.
+- **Buat concept note minimal**:
+  - **Aktif (default)**: concept notes yang baru dibuat hanya berisi judul, seperti `# Concept`.
+  - **Nonaktif**: concept notes dapat berisi konten tambahan, seperti backlink "Linked From", jika tidak dimatikan oleh pengaturan di bawah.
+- **Tambahkan backlink "Linked From"**:
+  - **Nonaktif (default)**: tidak menambahkan backlink ke dokumen sumber selama extraction.
+  - **Aktif**: menambahkan bagian "Linked From" yang berisi backlink ke file sumber.
 
 #### Ekstrak Teks Asli Tertentu
 - **Questions for extraction**: masukkan daftar pertanyaan, satu pertanyaan per baris, yang ingin dijawab dengan kutipan verbatim dari catatan Anda.
@@ -344,8 +344,8 @@ Akses settings plugin melalui:
 
 #### Parameter Pemrosesan
 - **Enable Batch Parallelism**:
-  - **Disabled (Default)**: tugas batch seperti "Process Folder" atau "Batch Generate from Titles" diproses secara serial, satu file pada satu waktu.
-  - **Enabled**: memungkinkan plugin memproses beberapa file secara paralel, sehingga batch besar bisa berjalan lebih cepat.
+  - **Dinonaktifkan (bawaan)**: tugas batch seperti "Process Folder" atau "Batch Generate from Titles" diproses secara serial, satu file pada satu waktu.
+  - **Diaktifkan**: memungkinkan plugin memproses beberapa file secara paralel, sehingga batch besar bisa berjalan lebih cepat.
 - **Batch Concurrency**: hanya terlihat jika parallelism aktif. Menentukan jumlah maksimum file yang diproses bersamaan. Nilai lebih tinggi bisa lebih cepat, tetapi menggunakan lebih banyak resource dan mungkin memicu API rate limits. Default: `1`, rentang: `1-20`.
 - **Batch Size**: hanya terlihat jika parallelism aktif. Jumlah file yang dikelompokkan ke satu batch. Default: `50`, rentang: `10-200`.
 - **Delay Between Batches (ms)**: hanya terlihat jika parallelism aktif. Delay opsional dalam milidetik antara satu batch dan batch berikutnya. Default: `1000ms`.
@@ -359,21 +359,21 @@ Akses settings plugin melalui:
 #### Terjemahan
 - **Default Target Language**: pilih bahasa target default yang Anda inginkan untuk terjemahan catatan. Pengaturan ini dapat dioverride di UI ketika perintah terjemahan dijalankan. Default: English.
 - **Customise Translation File Save Path**:
-  - **Disabled (Default)**: translated files disimpan di **folder yang sama** dengan file asli.
-  - **Enabled**: memungkinkan Anda menentukan **path relatif** di dalam vault, misalnya `Translations`, tempat translated files akan disimpan. Folder akan dibuat bila belum ada.
+  - **Dinonaktifkan (bawaan)**: translated files disimpan di **folder yang sama** dengan file asli.
+  - **Diaktifkan**: memungkinkan Anda menentukan **path relatif** di dalam vault, misalnya `Translations`, tempat translated files akan disimpan. Folder akan dibuat bila belum ada.
 - **Use custom suffix for translated files**:
-  - **Disabled (Default)**: translated files menggunakan suffix default `_translated.md`, misalnya `YourNote_translated.md`.
-  - **Enabled**: memungkinkan Anda menentukan suffix khusus.
+  - **Dinonaktifkan (bawaan)**: translated files menggunakan suffix default `_translated.md`, misalnya `YourNote_translated.md`.
+  - **Diaktifkan**: memungkinkan Anda menentukan suffix khusus.
 - **Custom Suffix**: hanya terlihat bila opsi di atas aktif. Masukkan suffix khusus untuk nama translated files, misalnya `_es` atau `_fr`.
 
 <img width="811" height="243" alt="translate" src="https://github.com/user-attachments/assets/57d21a72-e86c-4369-8be5-fd18cb734e2b" />
 
 #### Generasi Konten
 - **Enable Research in "Generate from Title"**:
-  - **Disabled (Default)**: "Generate from Title" hanya menggunakan judul sebagai input.
-  - **Enabled**: melakukan web research memakai **Web Research Provider** yang dikonfigurasi, lalu menyertakan temuan itu sebagai context dalam prompt untuk title-based generation.
+  - **Dinonaktifkan (bawaan)**: "Generate from Title" hanya menggunakan judul sebagai input.
+  - **Diaktifkan**: melakukan web research memakai **Web Research Provider** yang dikonfigurasi, lalu menyertakan temuan itu sebagai context dalam prompt untuk title-based generation.
 - **Auto-run Mermaid Syntax Fix after Generation**:
-  - **Enabled (Default)**: otomatis menjalankan proses perbaikan Mermaid syntax setelah workflow terkait Mermaid, seperti Process, Generate from Title, Batch Generate from Titles, Research & Summarize, Summarise as Mermaid, dan Translate.
+  - **Diaktifkan (bawaan)**: otomatis menjalankan proses perbaikan Mermaid syntax setelah workflow terkait Mermaid, seperti Process, Generate from Title, Batch Generate from Titles, Research & Summarize, Summarise as Mermaid, dan Translate.
   - **Disabled**: membiarkan Mermaid output tetap seperti yang dihasilkan sampai Anda menjalankan `Batch Mermaid Fix` secara manual atau menambahkannya ke custom workflow.
 - **Output Language**:
   - Pilih bahasa output yang diinginkan untuk tugas "Generate from Title" dan "Batch Generate from Title".
@@ -383,8 +383,8 @@ Akses settings plugin melalui:
   - Memungkinkan Anda mengubah kata atau frasa prompt untuk tugas tertentu.
   - Di **Custom Prompt Word**, Anda dapat memasukkan kata atau frasa prompt versi Anda sendiri.
 - **Use Custom Output Folder for 'Generate from Title'**:
-  - **Disabled (Default)**: file yang berhasil dihasilkan dipindahkan ke subfolder bernama `[OriginalFolderName]_complete` relatif terhadap parent folder asli, atau `Vault_complete` bila folder aslinya adalah root vault.
-  - **Enabled**: memungkinkan Anda menentukan nama custom untuk subfolder tempat file yang selesai dipindahkan.
+  - **Dinonaktifkan (bawaan)**: file yang berhasil dihasilkan dipindahkan ke subfolder bernama `[OriginalFolderName]_complete` relatif terhadap parent folder asli, atau `Vault_complete` bila folder aslinya adalah root vault.
+  - **Diaktifkan**: memungkinkan Anda menentukan nama custom untuk subfolder tempat file yang selesai dipindahkan.
 - **Custom Output Folder Name**: hanya terlihat bila opsi di atas aktif. Masukkan nama subfolder yang diinginkan, seperti `Generated Content` atau `_complete`. Karakter yang tidak valid tidak diperbolehkan. Bila dibiarkan kosong, `_complete` yang dipakai.
 
 #### Tombol Workflow Sekali Klik
@@ -399,12 +399,12 @@ Akses settings plugin melalui:
 Fitur ini memungkinkan Anda mengganti instruksi default yang dikirim ke LLM untuk tugas tertentu, sehingga Anda mendapatkan kontrol yang lebih detail terhadap output.
 
 - **Enable Custom Prompts for Specific Tasks**:
-  - **Disabled (Default)**: plugin memakai prompt bawaan untuk semua operasi.
-  - **Enabled**: mengaktifkan kemampuan untuk menetapkan custom prompts bagi tugas-tugas yang tercantum di bawah. Ini adalah master switch untuk fitur ini.
+  - **Dinonaktifkan (bawaan)**: plugin memakai prompt bawaan untuk semua operasi.
+  - **Diaktifkan**: mengaktifkan kemampuan untuk menetapkan custom prompts bagi tugas-tugas yang tercantum di bawah. Ini adalah master switch untuk fitur ini.
 - **Use Custom Prompt for [Task Name]**:
   - Untuk tiap tugas yang didukung, seperti "Add Links", "Generate from Title", "Research & Summarize", dan "Extract Concepts", Anda bisa mengaktifkan atau menonaktifkan custom prompt secara individual.
   - **Disabled**: tugas tertentu ini memakai prompt default.
-  - **Enabled**: tugas tersebut akan memakai teks yang Anda tulis pada "Custom Prompt" textarea terkait.
+  - **Diaktifkan**: tugas tersebut akan memakai teks yang Anda tulis pada "Custom Prompt" textarea terkait.
 - **Custom Prompt Text Area**:
   - **Default Prompt Display**: plugin menampilkan prompt default sebagai referensi. Anda dapat memakai tombol **"Copy Default Prompt"** untuk menyalinnya sebagai titik awal.
   - **Custom Prompt Input**: di sinilah Anda menulis instruksi khusus untuk LLM.
@@ -438,59 +438,59 @@ Fitur ini memungkinkan Anda mengganti instruksi default yang dikirim ke LLM untu
 
 #### Domain Pembelajaran Terfokus
 - **Enable Focused Learning Domain**:
-  - **Disabled (Default)**: prompt yang dikirim ke LLM memakai instruksi standar umum.
-  - **Enabled**: memungkinkan Anda menentukan satu atau lebih bidang studi untuk meningkatkan contextual understanding model.
+  - **Dinonaktifkan (bawaan)**: prompt yang dikirim ke LLM memakai instruksi standar umum.
+  - **Diaktifkan**: memungkinkan Anda menentukan satu atau lebih bidang studi untuk meningkatkan contextual understanding model.
 - **Learning Domain**: hanya terlihat jika opsi di atas aktif. Masukkan bidang Anda, misalnya `Materials Science`, `Polymer Physics`, atau `Machine Learning`. Ini akan menambahkan baris `Relevant Fields: [...]` di awal prompt, membantu LLM menghasilkan links dan konten yang lebih akurat untuk domain Anda.
 
 <img width="595" height="143" alt="focused learning domain" src="https://github.com/user-attachments/assets/1bcc9707-5c10-4944-a61b-65fde0cd0404" />
 
 ## Panduan Penggunaan
 
-### Workflow Cepat & Sidebar
+### Workflow Cepat & Bilah Samping
 
-- Buka Notemd sidebar untuk mengakses grouped action sections bagi core processing, generation, translation, knowledge, dan utilities.
-- Gunakan area **Quick Workflows** di bagian atas sidebar untuk meluncurkan tombol custom multi-step.
+- Buka bilah samping Notemd untuk mengakses section tindakan yang dikelompokkan untuk pemrosesan inti, generasi, terjemahan, pengetahuan, dan utilitas.
+- Gunakan area **Alur kerja cepat** di bagian atas bilah samping untuk meluncurkan tombol multi-langkah kustom.
 - Workflow default **One-Click Extract** menjalankan `Process File (Add Links)` -> `Batch Generate from Titles` -> `Batch Mermaid Fix`.
-- Workflow progress, per-step logs, dan failure ditampilkan di sidebar, dengan pinned footer yang menjaga progress bar dan log area tetap terlihat saat section-section dibuka.
-- Kartu progress mempertahankan status text, percentage pill khusus, dan sisa waktu yang mudah dibaca, dan custom workflows yang sama dapat dikonfigurasi ulang dari settings.
+- Progres workflow, log per langkah, dan kegagalan ditampilkan di bilah samping, dengan footer tetap yang menjaga progress bar dan area log tetap terlihat saat section dibuka.
+- Kartu progres mempertahankan teks status, pilar persentase khusus, dan sisa waktu yang mudah dibaca, dan workflow kustom yang sama dapat dikonfigurasi ulang dari pengaturan.
 
 ### Pemrosesan Asli (Menambahkan Wiki-Links)
 Ini adalah fungsi inti yang berfokus pada identifikasi konsep dan penambahan `[[wiki-links]]`.
 
 **Penting:** proses ini hanya bekerja pada file `.md` atau `.txt`. Anda dapat mengonversi file PDF ke MD secara gratis menggunakan [Mineru](https://github.com/opendatalab/MinerU) sebelum pemrosesan lebih lanjut.
 
-1. **Menggunakan Sidebar**:
-   - Buka Notemd Sidebar, melalui ikon tongkat sihir atau command palette.
+1. **Menggunakan bilah samping**:
+   - Buka Notemd Sidebar melalui ikon tongkat sihir atau command palette.
    - Buka file `.md` atau `.txt`.
    - Klik **"Process File (Add Links)"**.
    - Untuk memproses folder, klik **"Process Folder (Add Links)"**, pilih folder, lalu klik "Process".
-   - Progress ditampilkan di sidebar. Anda bisa membatalkan tugas lewat tombol "Cancel Processing".
-   - *Catatan untuk folder processing:* file diproses di latar belakang tanpa dibuka di editor.
+   - Progres ditampilkan di bilah samping. Anda bisa membatalkan tugas lewat tombol "Cancel Processing".
+   - *Catatan untuk pemrosesan folder:* file diproses di latar belakang tanpa dibuka di editor.
 
 <img width="618" height="154" alt="image" src="https://github.com/user-attachments/assets/fcfbcc9e-3c80-4e84-b9bb-e3a5cd66acaa" />
 
 2. **Menggunakan Command Palette** (`Ctrl+P` atau `Cmd+P`):
-   - **Single File**: buka file lalu jalankan `Notemd: Process Current File`.
-   - **Folder**: jalankan `Notemd: Process Folder`, lalu pilih folder. File akan diproses di background tanpa dibuka di editor.
-   - Progress modal muncul untuk aksi command palette dan menyediakan tombol cancel.
+   - **Satu file**: buka file lalu jalankan `Notemd: Process Current File`.
+   - **Folder**: jalankan `Notemd: Process Folder`, lalu pilih folder. File akan diproses di latar belakang tanpa dibuka di editor.
+   - Modal progres muncul untuk aksi command palette dan menyediakan tombol cancel.
    - *Catatan:* plugin otomatis menghapus baris awal `\boxed{` dan baris akhir `}` jika ditemukan dalam konten hasil akhir sebelum penyimpanan.
 
 ### Fitur Baru
 
-1. **Summarise as Mermaid diagram**:
+1. **Ringkas sebagai diagram Mermaid**:
    - Buka catatan yang ingin diringkas.
    - Jalankan perintah `Notemd: Summarise as Mermaid diagram`, melalui command palette atau tombol sidebar.
    - Plugin akan membuat catatan baru berisi Mermaid diagram.
 
 2. **Translate Note/Selection**:
    - Pilih teks di catatan untuk menerjemahkan bagian itu saja, atau jalankan perintah tanpa seleksi untuk menerjemahkan seluruh catatan.
-   - Jalankan `Notemd: Translate Note/Selection`, melalui command palette atau tombol sidebar.
-   - Akan muncul modal yang memungkinkan Anda mengonfirmasi atau mengubah **Target Language**, dengan default mengikuti setting di Configuration.
-   - Plugin menggunakan **LLM Provider** yang telah dikonfigurasi, berdasarkan Multi-Model settings, untuk menerjemahkan.
+   - Jalankan `Notemd: Translate Note/Selection` melalui command palette atau tombol bilah samping.
+   - Akan muncul modal yang memungkinkan Anda mengonfirmasi atau mengubah **Target Language**, dengan default mengikuti pengaturan di Configuration.
+   - Plugin menggunakan **LLM Provider** yang telah dikonfigurasi berdasarkan pengaturan multi-model untuk menerjemahkan.
    - Konten hasil terjemahan disimpan ke **Translation Save Path** yang sudah ditentukan dengan suffix yang sesuai dan dibuka di **pane baru di sisi kanan** konten asli agar mudah dibandingkan.
-   - Anda dapat membatalkan tugas ini lewat tombol sidebar atau modal cancel button.
+   - Anda dapat membatalkan tugas ini lewat tombol bilah samping atau tombol batal pada modal.
 
-3. **Batch Translate**:
+3. **Terjemahan batch**:
    - Jalankan `Notemd: Batch Translate Folder` dari command palette lalu pilih folder, atau klik kanan folder di file explorer dan pilih "Batch translate this folder".
    - Plugin akan menerjemahkan semua file Markdown di folder tersebut.
    - File hasil terjemahan disimpan ke path terjemahan yang sudah dikonfigurasi tetapi tidak dibuka otomatis.
@@ -500,44 +500,44 @@ Ini adalah fungsi inti yang berfokus pada identifikasi konsep dan penambahan `[[
 
 4. **Research & Summarize Topic**:
    - Pilih teks dalam catatan, atau pastikan catatan memiliki judul, yang akan dipakai sebagai topik pencarian.
-   - Jalankan `Notemd: Research and Summarize Topic`, melalui command palette atau tombol sidebar.
-   - Plugin menggunakan **Search Provider** yang telah dipilih, Tavily atau DuckDuckGo, dan **LLM Provider** yang sesuai, berdasarkan Multi-Model settings, untuk menemukan dan merangkum informasi.
+   - Jalankan `Notemd: Research and Summarize Topic` melalui command palette atau tombol bilah samping.
+   - Plugin menggunakan **Search Provider** yang telah dipilih, Tavily atau DuckDuckGo, dan **LLM Provider** yang sesuai berdasarkan pengaturan multi-model untuk menemukan dan merangkum informasi.
    - Ringkasan ditambahkan ke catatan saat ini.
-   - Tugas ini bisa dibatalkan melalui tombol sidebar atau modal cancel button.
+   - Tugas ini bisa dibatalkan melalui tombol bilah samping atau tombol batal pada modal.
    - *Catatan:* pencarian DuckDuckGo bisa gagal karena deteksi bot. Tavily lebih direkomendasikan.
 
 <img width="239" height="63" alt="image" src="https://github.com/user-attachments/assets/afcd0497-3ee3-41f2-9281-8bfbb448372d" />
 
 5. **Generate Content from Title**:
    - Buka catatan, dan catatan itu boleh kosong.
-   - Jalankan `Notemd: Generate Content from Title`, melalui command palette atau tombol sidebar.
-   - Plugin menggunakan **LLM Provider** yang sesuai, berdasarkan Multi-Model settings, untuk menghasilkan konten dari judul catatan dan menggantikan konten yang ada.
+   - Jalankan `Notemd: Generate Content from Title` melalui command palette atau tombol bilah samping.
+   - Plugin menggunakan **LLM Provider** yang sesuai berdasarkan pengaturan multi-model untuk menghasilkan konten dari judul catatan dan menggantikan konten yang ada.
    - Jika **"Enable Research in 'Generate from Title'"** diaktifkan, plugin akan melakukan web research lebih dahulu menggunakan **Web Research Provider** yang telah dipilih, lalu menyertakan hasilnya sebagai context dalam prompt.
-   - Anda dapat membatalkan tugas ini lewat sidebar atau modal.
+   - Anda dapat membatalkan tugas ini lewat bilah samping atau modal.
 
 6. **Batch Generate Content from Titles**:
-   - Jalankan `Notemd: Batch Generate Content from Titles`, melalui command palette atau tombol sidebar.
+   - Jalankan `Notemd: Batch Generate Content from Titles` melalui command palette atau tombol bilah samping.
    - Pilih folder yang berisi catatan-catatan yang ingin Anda proses.
    - Plugin akan memproses tiap file `.md` dalam folder, kecuali file `_processed.md` dan file yang berada di "complete" folder, menghasilkan konten berdasarkan judul dan menggantikan konten yang ada. File diproses di background tanpa dibuka di editor.
    - File yang berhasil diproses dipindahkan ke "complete" folder yang dikonfigurasi.
-   - Perintah ini menghormati setting **"Enable Research in 'Generate from Title'"** untuk setiap catatan.
-   - Anda dapat membatalkan tugas ini melalui sidebar atau modal.
-   - Progress dan hasil, termasuk jumlah file yang dimodifikasi serta error, ditampilkan dalam log sidebar atau modal.
+   - Perintah ini menghormati pengaturan **"Enable Research in 'Generate from Title'"** untuk setiap catatan.
+   - Anda dapat membatalkan tugas ini melalui bilah samping atau modal.
+   - Progres dan hasil, termasuk jumlah file yang dimodifikasi serta error, ditampilkan dalam log bilah samping atau modal.
 
 <img width="477" height="76" alt="image" src="https://github.com/user-attachments/assets/8c762d0a-be60-4811-b3e0-9d86c6ddfa4e" />
 
 7. **Check and Remove Duplicate Concept Notes**:
    - Pastikan **Concept Note Folder Path** telah dikonfigurasi dengan benar.
-   - Jalankan `Notemd: Check and Remove Duplicate Concept Notes`, melalui command palette atau tombol sidebar.
+   - Jalankan `Notemd: Check and Remove Duplicate Concept Notes` melalui command palette atau tombol bilah samping.
    - Plugin memindai concept note folder dan membandingkan nama file dengan catatan di luar folder menggunakan beberapa aturan, seperti exact match, bentuk jamak, normalisasi, dan containment.
    - Jika duplicate potensial ditemukan, sebuah modal akan menampilkan daftar file, alasan penandaan, dan file yang konflik.
    - Tinjau daftarnya dengan cermat. Klik **"Delete Files"** untuk memindahkan file ke system trash, atau **"Cancel"** untuk tidak melakukan perubahan.
-   - Progress dan hasil terlihat di sidebar atau modal log.
+   - Progres dan hasil terlihat di bilah samping atau log modal.
 
 8. **Extract Concepts (Pure Mode)**:
    - Fitur ini memungkinkan Anda mengekstrak konsep dari dokumen dan membuat concept notes yang sesuai **tanpa mengubah file asli**. Sangat cocok untuk mengisi knowledge base dari kumpulan dokumen.
-   - **Single File**: buka file lalu jalankan `Notemd: Extract concepts (create concept notes only)` dari command palette, atau klik tombol **"Extract concepts (current file)"** di sidebar.
-   - **Folder**: jalankan `Notemd: Batch extract concepts from folder` dari command palette atau klik tombol **"Extract concepts (folder)"** di sidebar, lalu pilih folder untuk memproses semua catatan di dalamnya.
+   - **Satu file**: buka file lalu jalankan `Notemd: Extract concepts (create concept notes only)` dari command palette, atau klik tombol **"Extract concepts (current file)"** di bilah samping.
+   - **Folder**: jalankan `Notemd: Batch extract concepts from folder` dari command palette atau klik tombol **"Extract concepts (folder)"** di bilah samping, lalu pilih folder untuk memproses semua catatan di dalamnya.
    - Plugin akan membaca file, mengenali konsep, dan membuat catatan baru untuk konsep itu di dalam **Concept Note Folder** Anda, tanpa mengubah file sumber.
 
 9. **Create Wiki-Link & Generate Note from Selection**:
@@ -556,7 +556,7 @@ Ini adalah fungsi inti yang berfokus pada identifikasi konsep dan penambahan `[[
     - Jalankan `Notemd: Extract Concepts and Generate Titles` dari command palette, dan sebaiknya beri hotkey.
     - Plugin akan:
       1. terlebih dahulu menjalankan tugas **"Extract concepts (current file)"** pada file aktif;
-      2. kemudian secara otomatis menjalankan **"Batch generate from titles"** pada folder yang telah Anda atur sebagai **Concept note folder path** di settings.
+      2. kemudian secara otomatis menjalankan **"Batch generate from titles"** pada folder yang telah Anda atur sebagai **Concept note folder path** di pengaturan.
     - Ini memungkinkan Anda membangun basis konsep dari satu dokumen sumber lalu langsung mengembangkan concept notes baru tersebut dengan konten AI dalam satu alur.
 
 11. **Extract Specific Original Text**:
@@ -667,7 +667,7 @@ Notemd berjalan secara lokal di dalam Obsidian, tetapi beberapa fitur mengirimka
        ```
        Report yang dihasilkan berisi timing setiap attempt, seperti `First Byte` dan `Duration`, sanitized request metadata, response headers, raw atau partial body fragments, parsed stream fragments, serta titik kegagalan pada transport layer.
 - **Masalah Koneksi LM Studio / Ollama**:
-  - **Test Connection Gagal**: pastikan local server, LM Studio atau Ollama, sedang berjalan dan model yang dibutuhkan sudah dimuat atau tersedia.
+  - **Uji koneksi gagal**: pastikan local server, LM Studio atau Ollama, sedang berjalan dan model yang dibutuhkan sudah dimuat atau tersedia.
   - **CORS Errors untuk Ollama di Windows**: jika Anda menemui CORS error saat menggunakan Ollama di Windows, Anda mungkin perlu menetapkan environment variable `OLLAMA_ORIGINS`. Misalnya dengan menjalankan `set OLLAMA_ORIGINS=*` di command prompt sebelum memulai Ollama.
   - **Aktifkan CORS di LM Studio**: untuk LM Studio, Anda dapat mengaktifkan CORS langsung dari server settings, yang kadang diperlukan jika Obsidian berjalan di browser atau berada di bawah origin policy yang ketat.
 - **Folder Creation Errors ("File name cannot contain...")**:
@@ -683,8 +683,8 @@ Kontribusi sangat diterima. Silakan lihat repositori GitHub untuk panduannya: [h
 
 ## Dokumen Maintainer
 
-- [Release Workflow (English)](./docs/maintainer/release-workflow.md)
-- [Release Workflow (简体中文)](./docs/maintainer/release-workflow.zh-CN.md)
+- [Alur Rilis (Bahasa Inggris)](./docs/maintainer/release-workflow.md)
+- [Alur Rilis (Tionghoa Sederhana)](./docs/maintainer/release-workflow.zh-CN.md)
 
 ## Lisensi
 
