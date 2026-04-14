@@ -94,6 +94,19 @@ describe('ui locale resolution', () => {
         expect(resolveUiLocale(settings, 'fr')).toBe('fr');
     });
 
+    test('falls back to supported base locale for regional Obsidian variants', () => {
+        const settings = createSettings({ uiLocale: 'auto' });
+        expect(resolveUiLocale(settings, 'fr-CA')).toBe('fr');
+        expect(resolveUiLocale(settings, 'es-419')).toBe('es');
+        expect(resolveUiLocale(settings, 'pt-PT')).toBe('pt');
+    });
+
+    test('maps Chinese script and region variants onto supported zh locales', () => {
+        const settings = createSettings({ uiLocale: 'auto' });
+        expect(resolveUiLocale(settings, 'zh-Hans')).toBe('zh-CN');
+        expect(resolveUiLocale(settings, 'zh-Hant-HK')).toBe('zh-TW');
+    });
+
     test('falls back to en when unsupported', () => {
         const settings = createSettings({ uiLocale: 'auto' });
         expect(resolveUiLocale(settings, 'xx')).toBe('en');
