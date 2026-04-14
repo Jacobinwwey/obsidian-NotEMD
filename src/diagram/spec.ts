@@ -1,0 +1,100 @@
+import { ValidationError } from '../types';
+import { DiagramDataSeries, DiagramNode, DiagramSpec } from './types';
+
+export interface DiagramSpecValidationResult {
+    valid: boolean;
+    errors: string[];
+}
+
+function collectNodeIds(nodes: DiagramNode[], ids: Set<string>, errors: string[]): void {
+    nodes.forEach(node => {
+        const id = node.id?.trim();
+        if (!id) {
+            errors.push('Diagram node is missing an id.');
+            return;
+        }
+        if (ids.has(id)) {
+            errors.push(`Diagram node id "${id}" is duplicated.`);
+        } else {
+            ids.add(id);
+        }
+
+        if (!node.label?.trim()) {
+            errors.push(`Diagram node "${id}" is missing a label.`);
+        }
+
+        if (node.children?.length) {
+            collectNodeIds(node.children, ids, errors);
+        }
+    });
+}
+
+function validateDataSeries(dataSeries: DiagramDataSeries[] | undefined, errors: string[]): void {
+    if (!dataSeries || dataSeries.length === 0) {
+        errors.push('Diagram intent "dataChart" requires at least one data series.');
+        return;
+    }
+
+    dataSeries.forEach(series => {
+        if (!series.id?.trim()) {
+            errors.push('Chart data series is missing an id.');
+        }
+        if (!series.label?.trim()) {
+            errors.push(`Chart data series "${series.id || 'unknown'}" is missing a label.`);
+        }
+        if (!series.points?.length) {
+            errors.push(`Chart data series "${series.id || 'unknown'}" is missing points.`);
+            return;
+        }
+
+        series.points.forEach((point, index) => {
+            if (point.x === '' || point.x === null || point.x === undefined) {
+                errors.push(`Chart data series "${series.id || 'unknown'}" point ${index + 1} is missing x.`);
+            }
+            if (typeof point.y !== 'number' || Number.isNaN(point.y)) {
+                errors.push(`Chart data series "${series.id || 'unknown'}" point ${index + 1} is missing a numeric y.`);
+            }
+        });
+    });
+}
+
+export function validateDiagramSpec(spec: DiagramSpec): DiagramSpecValidationResult {
+    const errors: string[] = [];
+
+    if (!spec.title?.trim()) {
+        errors.push('Diagram spec title is required.');
+    }
+
+    const nodeIds = new Set<string>();
+    collectNodeIds(spec.nodes ?? [], nodeIds, errors);
+
+    if (spec.intent !== 'dataChart' && nodeIds.size === 0) {
+        errors.push(`Diagram intent "${spec.intent}" requires at least one node.`);
+    }
+
+    (spec.edges ?? []).forEach((edge, index) => {
+        if (!nodeIds.has(edge.from)) {
+            errors.push(`Diagram edge ${index + 1} references missing source node "${edge.from}".`);
+        }
+        if (!nodeIds.has(edge.to)) {
+            errors.push(`Diagram edge ${index + 1} references missing target node "${edge.to}".`);
+        }
+    });
+
+    if (spec.intent === 'dataChart') {
+        validateDataSeries(spec.dataSeries, errors);
+    }
+
+    return {
+        valid: errors.length === 0,
+        errors
+    };
+}
+
+export function assertValidDiagramSpec(spec: DiagramSpec): DiagramSpec {
+    const result = validateDiagramSpec(spec);
+    if (!result.valid) {
+        throw new ValidationError(result.errors.join(' '), 'INVALID_INPUT');
+    }
+    return spec;
+}
