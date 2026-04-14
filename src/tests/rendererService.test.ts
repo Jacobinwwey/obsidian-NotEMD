@@ -25,6 +25,34 @@ describe('renderer service', () => {
         expect(result.content).toContain('flowchart TD');
     });
 
+    test('renders sequence and er specs through the mermaid renderer', async () => {
+        const registry = new RendererRegistry([new MermaidRenderer()]);
+        const service = new RendererService(registry);
+
+        const sequence = await service.render({
+            intent: 'sequence',
+            title: 'API flow',
+            nodes: [
+                { id: 'client', label: 'Client' },
+                { id: 'api', label: 'API' }
+            ],
+            edges: [{ from: 'client', to: 'api', label: 'POST /summaries' }]
+        });
+
+        const er = await service.render({
+            intent: 'erDiagram',
+            title: 'Vault graph',
+            nodes: [
+                { id: 'note', label: 'NOTE' },
+                { id: 'tag', label: 'TAG' }
+            ],
+            edges: [{ from: 'note', to: 'tag', relation: 'one-to-many', label: 'references' }]
+        });
+
+        expect(sequence.content).toContain('sequenceDiagram');
+        expect(er.content).toContain('erDiagram');
+    });
+
     test('delegates rendering through the configured host', async () => {
         const registry = new RendererRegistry([new MermaidRenderer()]);
         const host: RenderHost = {
