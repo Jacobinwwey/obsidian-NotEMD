@@ -24,6 +24,28 @@ export interface DiagramGenerationResult {
     artifact: Awaited<ReturnType<RendererService['render']>>;
 }
 
+function normalizeErrorMessage(error: unknown): string {
+    return error instanceof Error ? error.message : String(error);
+}
+
+async function renderWithFallbackTraversal(
+    rendererService: RendererService,
+    spec: DiagramSpec,
+    targets: Array<DiagramPlan['renderTarget']>
+): Promise<Awaited<ReturnType<RendererService['render']>>> {
+    const failures: string[] = [];
+
+    for (const target of targets) {
+        try {
+            return await rendererService.render(spec, { target });
+        } catch (error) {
+            failures.push(`${target}: ${normalizeErrorMessage(error)}`);
+        }
+    }
+
+    throw new Error(`Diagram rendering failed across targets: ${failures.join(' | ')}`);
+}
+
 function createDefaultRendererService(): RendererService {
     return new RendererService(new RendererRegistry([
         new MermaidRenderer(),
@@ -81,15 +103,8 @@ export async function generateDiagramArtifact(
     assertValidDiagramSpec(spec);
 
     const rendererService = options.rendererService ?? createDefaultRendererService();
-
-    try {
-        const artifact = await rendererService.render(spec, { target: plan.renderTarget });
-        return { plan, spec, artifact };
-    } catch (error) {
-        for (const fallbackTarget of plan.fallbackTargets) {
-            const artifact = await rendererService.render(spec, { target: fallbackTarget });
-            return { plan, spec, artifact };
-        }
-        throw error;
-    }
+    const targets = [plan.renderTarget, ...plan.fallbackTargets]
+        .filter((target, index, allTargets) => allTargets.indexOf(target) === index);
+    const artifact = await renderWithFallbackTraversal(rendererService, spec, targets);
+    return { plan, spec, artifact };
 }
