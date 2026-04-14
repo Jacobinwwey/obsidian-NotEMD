@@ -61,6 +61,16 @@
     background: var(--background-primary);
 }
 
+.notemd-diagram-preview-body.is-vega-lite {
+    background: #ffffff;
+}
+
+.notemd-diagram-preview-body svg {
+    display: block;
+    max-width: 100%;
+    height: auto;
+}
+
 .notemd-diagram-preview-frame {
     width: 100%;
     min-height: 520px;
