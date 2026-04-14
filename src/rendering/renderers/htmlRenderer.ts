@@ -2,6 +2,297 @@ import { assertValidDiagramSpec } from '../../diagram/spec';
 import { DiagramEdge, DiagramNode, DiagramSpec } from '../../diagram/types';
 import { DiagramRenderer, RenderArtifact } from '../types';
 
+interface HtmlRendererLabels {
+    structure: string;
+    relationships: string;
+    callouts: string;
+    evidence: string;
+    data: string;
+    x: string;
+    y: string;
+    series: string;
+    sourceLanguage: string;
+    outputLanguage: string;
+    noStructuralNodes: string;
+}
+
+const DEFAULT_LABELS: HtmlRendererLabels = {
+    structure: 'Structure',
+    relationships: 'Relationships',
+    callouts: 'Callouts',
+    evidence: 'Evidence',
+    data: 'Data',
+    x: 'X',
+    y: 'Y',
+    series: 'Series',
+    sourceLanguage: 'Source language',
+    outputLanguage: 'Output language',
+    noStructuralNodes: 'No structural nodes were generated for this diagram.'
+};
+
+const LABELS_BY_LOCALE: Record<string, HtmlRendererLabels> = {
+    ar: {
+        structure: 'البنية',
+        relationships: 'العلاقات',
+        callouts: 'الملاحظات',
+        evidence: 'الأدلة',
+        data: 'البيانات',
+        x: 'س',
+        y: 'ص',
+        series: 'السلسلة',
+        sourceLanguage: 'لغة المصدر',
+        outputLanguage: 'لغة الإخراج',
+        noStructuralNodes: 'لم يتم إنشاء عقد بنيوية لهذا المخطط.'
+    },
+    de: {
+        structure: 'Struktur',
+        relationships: 'Beziehungen',
+        callouts: 'Hinweise',
+        evidence: 'Belege',
+        data: 'Daten',
+        x: 'X',
+        y: 'Y',
+        series: 'Reihe',
+        sourceLanguage: 'Quellsprache',
+        outputLanguage: 'Ausgabesprache',
+        noStructuralNodes: 'Für dieses Diagramm wurden keine strukturellen Knoten erzeugt.'
+    },
+    es: {
+        structure: 'Estructura',
+        relationships: 'Relaciones',
+        callouts: 'Notas destacadas',
+        evidence: 'Evidencia',
+        data: 'Datos',
+        x: 'X',
+        y: 'Y',
+        series: 'Serie',
+        sourceLanguage: 'Idioma de origen',
+        outputLanguage: 'Idioma de salida',
+        noStructuralNodes: 'No se generaron nodos estructurales para este diagrama.'
+    },
+    fa: {
+        structure: 'ساختار',
+        relationships: 'روابط',
+        callouts: 'نکته‌ها',
+        evidence: 'شواهد',
+        data: 'داده‌ها',
+        x: 'ایکس',
+        y: 'وای',
+        series: 'سری',
+        sourceLanguage: 'زبان مبدأ',
+        outputLanguage: 'زبان خروجی',
+        noStructuralNodes: 'برای این نمودار هیچ گره ساختاری تولید نشد.'
+    },
+    fr: {
+        structure: 'Structure',
+        relationships: 'Relations',
+        callouts: 'Points clés',
+        evidence: 'Éléments de preuve',
+        data: 'Données',
+        x: 'X',
+        y: 'Y',
+        series: 'Série',
+        sourceLanguage: 'Langue source',
+        outputLanguage: 'Langue de sortie',
+        noStructuralNodes: 'Aucun nœud structurel n’a été généré pour ce diagramme.'
+    },
+    id: {
+        structure: 'Struktur',
+        relationships: 'Relasi',
+        callouts: 'Sorotan',
+        evidence: 'Bukti',
+        data: 'Data',
+        x: 'X',
+        y: 'Y',
+        series: 'Seri',
+        sourceLanguage: 'Bahasa sumber',
+        outputLanguage: 'Bahasa keluaran',
+        noStructuralNodes: 'Tidak ada simpul struktural yang dihasilkan untuk diagram ini.'
+    },
+    it: {
+        structure: 'Struttura',
+        relationships: 'Relazioni',
+        callouts: 'Richiami',
+        evidence: 'Evidenze',
+        data: 'Dati',
+        x: 'X',
+        y: 'Y',
+        series: 'Serie',
+        sourceLanguage: 'Lingua di origine',
+        outputLanguage: 'Lingua di output',
+        noStructuralNodes: 'Per questo diagramma non sono stati generati nodi strutturali.'
+    },
+    ja: {
+        structure: '構造',
+        relationships: '関係',
+        callouts: '注記',
+        evidence: '根拠',
+        data: 'データ',
+        x: 'X',
+        y: 'Y',
+        series: '系列',
+        sourceLanguage: '入力言語',
+        outputLanguage: '出力言語',
+        noStructuralNodes: 'この図では構造ノードが生成されませんでした。'
+    },
+    ko: {
+        structure: '구조',
+        relationships: '관계',
+        callouts: '주석',
+        evidence: '근거',
+        data: '데이터',
+        x: 'X',
+        y: 'Y',
+        series: '계열',
+        sourceLanguage: '입력 언어',
+        outputLanguage: '출력 언어',
+        noStructuralNodes: '이 다이어그램에는 구조 노드가 생성되지 않았습니다.'
+    },
+    nl: {
+        structure: 'Structuur',
+        relationships: 'Relaties',
+        callouts: 'Aandachtspunten',
+        evidence: 'Bewijs',
+        data: 'Gegevens',
+        x: 'X',
+        y: 'Y',
+        series: 'Reeks',
+        sourceLanguage: 'Brontaal',
+        outputLanguage: 'Uitvoertaal',
+        noStructuralNodes: 'Voor dit diagram zijn geen structurele knooppunten gegenereerd.'
+    },
+    pl: {
+        structure: 'Struktura',
+        relationships: 'Relacje',
+        callouts: 'Adnotacje',
+        evidence: 'Dowody',
+        data: 'Dane',
+        x: 'X',
+        y: 'Y',
+        series: 'Seria',
+        sourceLanguage: 'Język źródłowy',
+        outputLanguage: 'Język wyjściowy',
+        noStructuralNodes: 'Dla tego diagramu nie wygenerowano węzłów strukturalnych.'
+    },
+    pt: {
+        structure: 'Estrutura',
+        relationships: 'Relações',
+        callouts: 'Destaques',
+        evidence: 'Evidências',
+        data: 'Dados',
+        x: 'X',
+        y: 'Y',
+        series: 'Série',
+        sourceLanguage: 'Idioma de origem',
+        outputLanguage: 'Idioma de saída',
+        noStructuralNodes: 'Nenhum nó estrutural foi gerado para este diagrama.'
+    },
+    'pt-br': {
+        structure: 'Estrutura',
+        relationships: 'Relações',
+        callouts: 'Destaques',
+        evidence: 'Evidências',
+        data: 'Dados',
+        x: 'X',
+        y: 'Y',
+        series: 'Série',
+        sourceLanguage: 'Idioma de origem',
+        outputLanguage: 'Idioma de saída',
+        noStructuralNodes: 'Nenhum nó estrutural foi gerado para este diagrama.'
+    },
+    ru: {
+        structure: 'Структура',
+        relationships: 'Связи',
+        callouts: 'Примечания',
+        evidence: 'Подтверждения',
+        data: 'Данные',
+        x: 'X',
+        y: 'Y',
+        series: 'Серия',
+        sourceLanguage: 'Исходный язык',
+        outputLanguage: 'Язык вывода',
+        noStructuralNodes: 'Для этой диаграммы не было создано структурных узлов.'
+    },
+    th: {
+        structure: 'โครงสร้าง',
+        relationships: 'ความสัมพันธ์',
+        callouts: 'จุดสำคัญ',
+        evidence: 'หลักฐาน',
+        data: 'ข้อมูล',
+        x: 'X',
+        y: 'Y',
+        series: 'ชุดข้อมูล',
+        sourceLanguage: 'ภาษาต้นทาง',
+        outputLanguage: 'ภาษาผลลัพธ์',
+        noStructuralNodes: 'ไม่มีการสร้างโหนดเชิงโครงสร้างสำหรับไดอะแกรมนี้'
+    },
+    tr: {
+        structure: 'Yapı',
+        relationships: 'İlişkiler',
+        callouts: 'Notlar',
+        evidence: 'Kanıtlar',
+        data: 'Veri',
+        x: 'X',
+        y: 'Y',
+        series: 'Seri',
+        sourceLanguage: 'Kaynak dili',
+        outputLanguage: 'Çıktı dili',
+        noStructuralNodes: 'Bu diyagram için yapısal düğüm üretilmedi.'
+    },
+    uk: {
+        structure: 'Структура',
+        relationships: 'Зв’язки',
+        callouts: 'Примітки',
+        evidence: 'Підтвердження',
+        data: 'Дані',
+        x: 'X',
+        y: 'Y',
+        series: 'Серія',
+        sourceLanguage: 'Мова джерела',
+        outputLanguage: 'Мова виводу',
+        noStructuralNodes: 'Для цієї діаграми не було згенеровано структурних вузлів.'
+    },
+    vi: {
+        structure: 'Cấu trúc',
+        relationships: 'Quan hệ',
+        callouts: 'Điểm nhấn',
+        evidence: 'Bằng chứng',
+        data: 'Dữ liệu',
+        x: 'X',
+        y: 'Y',
+        series: 'Chuỗi',
+        sourceLanguage: 'Ngôn ngữ nguồn',
+        outputLanguage: 'Ngôn ngữ đầu ra',
+        noStructuralNodes: 'Không có nút cấu trúc nào được tạo cho sơ đồ này.'
+    },
+    'zh-cn': {
+        structure: '结构',
+        relationships: '关系',
+        callouts: '提示',
+        evidence: '依据',
+        data: '数据',
+        x: 'X',
+        y: 'Y',
+        series: '系列',
+        sourceLanguage: '源语言',
+        outputLanguage: '输出语言',
+        noStructuralNodes: '此图形未生成结构节点。'
+    },
+    'zh-tw': {
+        structure: '結構',
+        relationships: '關係',
+        callouts: '提示',
+        evidence: '依據',
+        data: '資料',
+        x: 'X',
+        y: 'Y',
+        series: '系列',
+        sourceLanguage: '來源語言',
+        outputLanguage: '輸出語言',
+        noStructuralNodes: '此圖形未產生結構節點。'
+    }
+};
+
 function escapeHtml(value: string): string {
     return value
         .replace(/&/g, '&amp;')
@@ -9,6 +300,30 @@ function escapeHtml(value: string): string {
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#39;');
+}
+
+function normalizeLocaleKey(locale?: string): string {
+    if (!locale?.trim()) {
+        return 'en';
+    }
+
+    const normalized = locale.trim().replace(/_/g, '-').toLowerCase();
+    if (normalized.startsWith('zh-tw') || normalized.startsWith('zh-hant')) {
+        return 'zh-tw';
+    }
+    if (normalized.startsWith('zh')) {
+        return 'zh-cn';
+    }
+    if (normalized.startsWith('pt-br')) {
+        return 'pt-br';
+    }
+
+    return normalized.split('-')[0];
+}
+
+function getHtmlRendererLabels(locale?: string): HtmlRendererLabels {
+    const key = normalizeLocaleKey(locale);
+    return LABELS_BY_LOCALE[key] ?? DEFAULT_LABELS;
 }
 
 function renderOptionalText(label: string, value?: string): string {
@@ -19,16 +334,16 @@ function renderOptionalText(label: string, value?: string): string {
     return `<p class="notemd-html-renderer-meta"><strong>${escapeHtml(label)}:</strong> ${escapeHtml(value.trim())}</p>`;
 }
 
-function renderNodeTree(nodes: DiagramNode[]): string {
+function renderNodeTree(nodes: DiagramNode[], labels: HtmlRendererLabels): string {
     if (nodes.length === 0) {
-        return '<p class="notemd-html-renderer-empty">No structural nodes were generated for this diagram.</p>';
+        return `<p class="notemd-html-renderer-empty">${escapeHtml(labels.noStructuralNodes)}</p>`;
     }
 
-    return `<ul class="notemd-html-renderer-node-tree">${nodes.map(renderNode).join('')}</ul>`;
+    return `<ul class="notemd-html-renderer-node-tree">${nodes.map(node => renderNode(node, labels)).join('')}</ul>`;
 }
 
-function renderNode(node: DiagramNode): string {
-    const children = node.children?.length ? renderNodeTree(node.children) : '';
+function renderNode(node: DiagramNode, labels: HtmlRendererLabels): string {
+    const children = node.children?.length ? renderNodeTree(node.children, labels) : '';
     const kind = node.kind?.trim()
         ? `<span class="notemd-html-renderer-chip">${escapeHtml(node.kind.trim())}</span>`
         : '';
@@ -51,57 +366,57 @@ function renderEdge(edge: DiagramEdge, labels: Map<string, string>): string {
     return `<li><strong>${escapeHtml(from)}</strong> → <strong>${escapeHtml(to)}</strong>${relation}${label}</li>`;
 }
 
-function renderEdges(edges: DiagramEdge[], labels: Map<string, string>): string {
+function renderEdges(edges: DiagramEdge[], labels: Map<string, string>, copy: HtmlRendererLabels): string {
     if (edges.length === 0) {
         return '';
     }
 
     return `<section class="notemd-html-renderer-section">
-        <h2>Relationships</h2>
+        <h2>${escapeHtml(copy.relationships)}</h2>
         <ul class="notemd-html-renderer-list">${edges.map(edge => renderEdge(edge, labels)).join('')}</ul>
     </section>`;
 }
 
-function renderCallouts(spec: DiagramSpec): string {
+function renderCallouts(spec: DiagramSpec, labels: HtmlRendererLabels): string {
     if (!spec.callouts?.length) {
         return '';
     }
 
     return `<section class="notemd-html-renderer-section">
-        <h2>Callouts</h2>
+        <h2>${escapeHtml(labels.callouts)}</h2>
         <ul class="notemd-html-renderer-list">${spec.callouts.map(callout => `
             <li><strong>${escapeHtml(callout.label)}</strong>: ${escapeHtml(callout.detail)}</li>
         `).join('')}</ul>
     </section>`;
 }
 
-function renderEvidenceRefs(spec: DiagramSpec): string {
+function renderEvidenceRefs(spec: DiagramSpec, labels: HtmlRendererLabels): string {
     if (!spec.evidenceRefs?.length) {
         return '';
     }
 
     return `<section class="notemd-html-renderer-section">
-        <h2>Evidence</h2>
+        <h2>${escapeHtml(labels.evidence)}</h2>
         <ul class="notemd-html-renderer-list">${spec.evidenceRefs.map(reference => `<li>${escapeHtml(reference)}</li>`).join('')}</ul>
     </section>`;
 }
 
-function renderDataSeries(spec: DiagramSpec): string {
+function renderDataSeries(spec: DiagramSpec, labels: HtmlRendererLabels): string {
     if (!spec.dataSeries?.length) {
         return '';
     }
 
     return `<section class="notemd-html-renderer-section">
-        <h2>Data</h2>
+        <h2>${escapeHtml(labels.data)}</h2>
         ${spec.dataSeries.map(series => `
             <article class="notemd-html-renderer-series">
                 <h3>${escapeHtml(series.label)}</h3>
                 <table>
                     <thead>
                         <tr>
-                            <th>X</th>
-                            <th>Y</th>
-                            <th>Series</th>
+                            <th>${escapeHtml(labels.x)}</th>
+                            <th>${escapeHtml(labels.y)}</th>
+                            <th>${escapeHtml(labels.series)}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -132,6 +447,7 @@ function collectNodeLabels(nodes: DiagramNode[], labels: Map<string, string> = n
 
 function renderHtmlDocument(spec: DiagramSpec): string {
     const nodeLabels = collectNodeLabels(spec.nodes);
+    const labels = getHtmlRendererLabels(spec.outputLanguage ?? spec.sourceLanguage);
 
     return `<!DOCTYPE html>
 <html lang="${escapeHtml(spec.outputLanguage || 'en')}">
@@ -305,19 +621,19 @@ function renderHtmlDocument(spec: DiagramSpec): string {
             <span class="notemd-html-renderer-intent">${escapeHtml(spec.intent)}</span>
             <h1>${escapeHtml(spec.title)}</h1>
             ${spec.summary?.trim() ? `<p>${escapeHtml(spec.summary.trim())}</p>` : ''}
-            ${renderOptionalText('Source language', spec.sourceLanguage)}
-            ${renderOptionalText('Output language', spec.outputLanguage)}
+            ${renderOptionalText(labels.sourceLanguage, spec.sourceLanguage)}
+            ${renderOptionalText(labels.outputLanguage, spec.outputLanguage)}
         </section>
 
         <section class="notemd-html-renderer-section">
-            <h2>Structure</h2>
-            ${renderNodeTree(spec.nodes)}
+            <h2>${escapeHtml(labels.structure)}</h2>
+            ${renderNodeTree(spec.nodes, labels)}
         </section>
 
-        ${renderEdges(spec.edges ?? [], nodeLabels)}
-        ${renderDataSeries(spec)}
-        ${renderCallouts(spec)}
-        ${renderEvidenceRefs(spec)}
+        ${renderEdges(spec.edges ?? [], nodeLabels, labels)}
+        ${renderDataSeries(spec, labels)}
+        ${renderCallouts(spec, labels)}
+        ${renderEvidenceRefs(spec, labels)}
     </main>
 </body>
 </html>`;

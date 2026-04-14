@@ -57,4 +57,53 @@ describe('html renderer', () => {
         expect(artifact.content).toContain('Week 1');
         expect(artifact.content).toContain('19');
     });
+
+    test('localizes fallback headings using output language', async () => {
+        const renderer = new HtmlRenderer();
+        const spec: DiagramSpec = {
+            intent: 'flowchart',
+            title: 'リリースフロー',
+            summary: '確認して公開する。',
+            sourceLanguage: 'en',
+            outputLanguage: 'ja',
+            nodes: [{ id: 'validate', label: '確認' }],
+            callouts: [{ label: '重要', detail: '承認が必要です。' }]
+        };
+
+        const artifact = await renderer.render(spec);
+
+        expect(artifact.content).toContain('<h2>構造</h2>');
+        expect(artifact.content).toContain('<h2>注記</h2>');
+        expect(artifact.content).toContain('入力言語');
+        expect(artifact.content).toContain('出力言語');
+        expect(artifact.content).not.toContain('<h2>Structure</h2>');
+        expect(artifact.content).not.toContain('<h2>Callouts</h2>');
+    });
+
+    test('localizes chart table labels using output language', async () => {
+        const renderer = new HtmlRenderer();
+        const spec: DiagramSpec = {
+            intent: 'dataChart',
+            title: '每周注册量',
+            outputLanguage: 'zh-CN',
+            nodes: [],
+            dataSeries: [
+                {
+                    id: 'signups',
+                    label: '注册量',
+                    points: [
+                        { x: '第 1 周', y: 12 },
+                        { x: '第 2 周', y: 19 }
+                    ]
+                }
+            ]
+        };
+
+        const artifact = await renderer.render(spec);
+
+        expect(artifact.content).toContain('<h2>数据</h2>');
+        expect(artifact.content).toContain('<th>系列</th>');
+        expect(artifact.content).not.toContain('<h2>Data</h2>');
+        expect(artifact.content).not.toContain('<th>Series</th>');
+    });
 });
