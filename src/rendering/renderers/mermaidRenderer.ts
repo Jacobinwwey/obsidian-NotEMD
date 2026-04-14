@@ -5,6 +5,7 @@ import { renderFlowchartMermaid } from '../../diagram/adapters/mermaid/flowchart
 import { renderMindmapMermaid } from '../../diagram/adapters/mermaid/mindmapAdapter';
 import { renderSequenceMermaid } from '../../diagram/adapters/mermaid/sequenceAdapter';
 import { renderStateMermaid } from '../../diagram/adapters/mermaid/stateAdapter';
+import { validateMermaidDefinition } from '../../diagram/adapters/mermaid/validator';
 import { DiagramRenderer, RenderArtifact } from '../types';
 
 export class MermaidRenderer implements DiagramRenderer {
@@ -22,59 +23,38 @@ export class MermaidRenderer implements DiagramRenderer {
 
     async render(spec: DiagramSpec): Promise<RenderArtifact> {
         if (spec.intent === 'mindmap') {
-            return {
-                target: this.target,
-                content: renderMindmapMermaid(spec),
-                mimeType: 'text/vnd.mermaid',
-                sourceIntent: spec.intent
-            };
+            return this.buildArtifact(spec, renderMindmapMermaid(spec));
         }
 
         if (spec.intent === 'flowchart') {
-            return {
-                target: this.target,
-                content: renderFlowchartMermaid(spec),
-                mimeType: 'text/vnd.mermaid',
-                sourceIntent: spec.intent
-            };
+            return this.buildArtifact(spec, renderFlowchartMermaid(spec));
         }
 
         if (spec.intent === 'sequence') {
-            return {
-                target: this.target,
-                content: renderSequenceMermaid(spec),
-                mimeType: 'text/vnd.mermaid',
-                sourceIntent: spec.intent
-            };
+            return this.buildArtifact(spec, renderSequenceMermaid(spec));
         }
 
         if (spec.intent === 'erDiagram') {
-            return {
-                target: this.target,
-                content: renderErMermaid(spec),
-                mimeType: 'text/vnd.mermaid',
-                sourceIntent: spec.intent
-            };
+            return this.buildArtifact(spec, renderErMermaid(spec));
         }
 
         if (spec.intent === 'classDiagram') {
-            return {
-                target: this.target,
-                content: renderClassMermaid(spec),
-                mimeType: 'text/vnd.mermaid',
-                sourceIntent: spec.intent
-            };
+            return this.buildArtifact(spec, renderClassMermaid(spec));
         }
 
         if (spec.intent === 'stateDiagram') {
-            return {
-                target: this.target,
-                content: renderStateMermaid(spec),
-                mimeType: 'text/vnd.mermaid',
-                sourceIntent: spec.intent
-            };
+            return this.buildArtifact(spec, renderStateMermaid(spec));
         }
 
         throw new Error(`MermaidRenderer does not support diagram intent "${spec.intent}".`);
+    }
+
+    private async buildArtifact(spec: DiagramSpec, content: string): Promise<RenderArtifact> {
+        return {
+            target: this.target,
+            content: await validateMermaidDefinition(content),
+            mimeType: 'text/vnd.mermaid',
+            sourceIntent: spec.intent
+        };
     }
 }
