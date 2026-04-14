@@ -53,6 +53,34 @@ describe('renderer service', () => {
         expect(er.content).toContain('erDiagram');
     });
 
+    test('renders class and state specs through the mermaid renderer', async () => {
+        const registry = new RendererRegistry([new MermaidRenderer()]);
+        const service = new RendererService(registry);
+
+        const classDiagram = await service.render({
+            intent: 'classDiagram',
+            title: 'Vault model',
+            nodes: [
+                { id: 'note', label: 'Note' },
+                { id: 'tag', label: 'Tag' }
+            ],
+            edges: [{ from: 'note', to: 'tag', label: 'references' }]
+        });
+
+        const stateDiagram = await service.render({
+            intent: 'stateDiagram',
+            title: 'Review flow',
+            nodes: [
+                { id: 'draft', label: 'Draft' },
+                { id: 'review', label: 'Review' }
+            ],
+            edges: [{ from: 'draft', to: 'review', label: 'submit' }]
+        });
+
+        expect(classDiagram.content).toContain('classDiagram');
+        expect(stateDiagram.content).toContain('stateDiagram-v2');
+    });
+
     test('delegates rendering through the configured host', async () => {
         const registry = new RendererRegistry([new MermaidRenderer()]);
         const host: RenderHost = {
