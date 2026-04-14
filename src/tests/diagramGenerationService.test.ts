@@ -114,4 +114,33 @@ describe('diagram generation service', () => {
         expect(result.artifact.target).toBe('html');
         expect(result.artifact.content).toContain('Release Flow');
     });
+
+    test('rejects unsupported data chart layout hints before renderer fallback', async () => {
+        await expect(generateDiagramArtifact(`# Weekly Signups
+
+| Week | Signups |
+| --- | --- |
+| 1 | 12 |
+| 2 | 19 |
+`, {
+            compatibilityMode: 'best-fit',
+            targetLanguage: 'en',
+            llmInvoker: async () => JSON.stringify({
+                intent: 'dataChart',
+                title: 'Weekly Signups',
+                nodes: [],
+                layoutHints: { chartType: 'radar' },
+                dataSeries: [
+                    {
+                        id: 'signups',
+                        label: 'Signups',
+                        points: [
+                            { x: 'Week 1', y: 12 },
+                            { x: 'Week 2', y: 19 }
+                        ]
+                    }
+                ]
+            })
+        })).rejects.toThrow(/unsupported chartType/i);
+    });
 });

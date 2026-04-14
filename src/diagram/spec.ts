@@ -1,4 +1,5 @@
 import { ValidationError } from '../types';
+import { isSupportedVegaLiteChartType, SUPPORTED_VEGA_LITE_CHART_TYPES } from './adapters/vega/schema';
 import { DiagramDataSeries, DiagramNode, DiagramSpec } from './types';
 
 export interface DiagramSpecValidationResult {
@@ -58,6 +59,20 @@ function validateDataSeries(dataSeries: DiagramDataSeries[] | undefined, errors:
     });
 }
 
+function validateDataChartLayoutHints(spec: DiagramSpec, errors: string[]): void {
+    const chartType = spec.layoutHints?.chartType;
+    if (chartType === undefined) {
+        return;
+    }
+
+    if (!isSupportedVegaLiteChartType(chartType)) {
+        errors.push(
+            `Diagram intent "dataChart" uses unsupported chartType "${String(chartType)}". `
+            + `Supported chart types: ${SUPPORTED_VEGA_LITE_CHART_TYPES.join(', ')}.`
+        );
+    }
+}
+
 export function validateDiagramSpec(spec: DiagramSpec): DiagramSpecValidationResult {
     const errors: string[] = [];
 
@@ -83,6 +98,7 @@ export function validateDiagramSpec(spec: DiagramSpec): DiagramSpecValidationRes
 
     if (spec.intent === 'dataChart') {
         validateDataSeries(spec.dataSeries, errors);
+        validateDataChartLayoutHints(spec, errors);
     }
 
     return {
