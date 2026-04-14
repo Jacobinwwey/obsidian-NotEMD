@@ -1,4 +1,8 @@
 import { generateDiagramArtifact } from '../diagram/diagramGenerationService';
+import { RendererRegistry } from '../rendering/rendererRegistry';
+import { RendererService } from '../rendering/rendererService';
+import { HtmlRenderer } from '../rendering/renderers/htmlRenderer';
+import { DiagramRenderer } from '../rendering/types';
 
 describe('diagram generation service', () => {
     test('generates mermaid content through the experimental pipeline when spec output is valid', async () => {
@@ -69,5 +73,45 @@ describe('diagram generation service', () => {
         expect(artifact.spec.intent).toBe('mindmap');
         expect(artifact.artifact.target).toBe('mermaid');
         expect(artifact.artifact.content).toContain('mindmap');
+    });
+
+    test('falls back to html when the preferred renderer fails in best-fit mode', async () => {
+        const failingMermaidRenderer: DiagramRenderer = {
+            id: 'failing-mermaid',
+            target: 'mermaid',
+            supports: (spec) => spec.intent === 'flowchart',
+            render: async () => {
+                throw new Error('mermaid parse failed');
+            }
+        };
+        const rendererService = new RendererService(new RendererRegistry([
+            failingMermaidRenderer,
+            new HtmlRenderer()
+        ]));
+
+        const result = await generateDiagramArtifact(`# Release Checklist
+
+1. Validate version
+2. If checks pass, publish release
+`, {
+            compatibilityMode: 'best-fit',
+            targetLanguage: 'en',
+            rendererService,
+            llmInvoker: async () => JSON.stringify({
+                intent: 'flowchart',
+                title: 'Release Flow',
+                nodes: [
+                    { id: 'validate', label: 'Validate version' },
+                    { id: 'publish', label: 'Publish release' }
+                ],
+                edges: [
+                    { from: 'validate', to: 'publish', label: 'pass' }
+                ]
+            })
+        });
+
+        expect(result.plan.fallbackTargets).toContain('html');
+        expect(result.artifact.target).toBe('html');
+        expect(result.artifact.content).toContain('Release Flow');
     });
 });

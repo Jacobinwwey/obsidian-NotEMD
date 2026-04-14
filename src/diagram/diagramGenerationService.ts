@@ -1,6 +1,7 @@
 import { MermaidRenderer } from '../rendering/renderers/mermaidRenderer';
 import { JsonCanvasRenderer } from '../rendering/renderers/jsonCanvasRenderer';
 import { VegaLiteRenderer } from '../rendering/renderers/vegaLiteRenderer';
+import { HtmlRenderer } from '../rendering/renderers/htmlRenderer';
 import { RendererRegistry } from '../rendering/rendererRegistry';
 import { RendererService } from '../rendering/rendererService';
 import { buildDiagramPlan } from './planner';
@@ -27,7 +28,8 @@ function createDefaultRendererService(): RendererService {
     return new RendererService(new RendererRegistry([
         new MermaidRenderer(),
         new JsonCanvasRenderer(),
-        new VegaLiteRenderer()
+        new VegaLiteRenderer(),
+        new HtmlRenderer()
     ]));
 }
 

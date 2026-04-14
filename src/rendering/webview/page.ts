@@ -2,6 +2,24 @@ import { RenderWebviewPayload } from './contract';
 import { renderArtifactMarkup } from './renderFrame';
 
 export function buildRenderWebviewHtml(payload: RenderWebviewPayload): string {
+    if (payload.artifact.target === 'html' && payload.artifact.mimeType === 'text/html') {
+        const trimmed = payload.artifact.content.trim();
+        if (/^<!DOCTYPE html>/i.test(trimmed)) {
+            return trimmed;
+        }
+
+        return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+</head>
+<body>
+${payload.artifact.content}
+</body>
+</html>`;
+    }
+
     return `<!DOCTYPE html>
 <html lang="en">
 <head>

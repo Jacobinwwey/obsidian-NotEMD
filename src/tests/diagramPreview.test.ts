@@ -63,7 +63,7 @@ describe('diagram preview helpers', () => {
         })).toBe(false);
     });
 
-    test('only marks shipped preview targets as preview-capable', () => {
+    test('marks modal preview targets, including html fallback artifacts, as preview-capable', () => {
         expect(supportsDiagramPreviewModal({
             target: 'json-canvas',
             content: '{"nodes":[],"edges":[]}',
@@ -83,6 +83,6 @@ describe('diagram preview helpers', () => {
             content: '<div>Preview</div>',
             mimeType: 'text/html',
             sourceIntent: 'flowchart'
-        })).toBe(false);
+        })).toBe(true);
     });
 });

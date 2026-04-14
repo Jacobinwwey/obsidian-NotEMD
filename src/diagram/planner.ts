@@ -47,11 +47,17 @@ function resolveFallbackTargets(
         return [];
     }
 
+    const fallbackTargets: RenderTarget[] = [];
+
     if (preferredTarget !== 'mermaid' && preferredMermaidType) {
-        return ['mermaid'];
+        fallbackTargets.push('mermaid');
     }
 
-    return [];
+    if (preferredTarget !== 'html') {
+        fallbackTargets.push('html');
+    }
+
+    return fallbackTargets;
 }
 
 function buildIntentResult(markdown: string, requestedIntent?: DiagramIntent): DiagramIntentResult {
