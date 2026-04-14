@@ -2,6 +2,7 @@ import { App, TFile, TFolder } from 'obsidian';
 import { NotemdSettings, ProgressReporter } from '../types';
 import { batchGenerateContentForTitles } from '../fileUtils';
 import { DEFAULT_SETTINGS } from '../constants';
+import { formatI18n, getI18nStrings } from '../i18n';
 
 // Mock dependencies
 jest.mock('../llmUtils', () => ({
@@ -74,6 +75,7 @@ describe('batchGenerateContentForTitles', () => {
 
     it('should process files serially when disabled', async () => {
         settings.enableBatchParallelism = false;
+        settings.uiLocale = 'en';
 
         const files = [
             { path: 'folder/file1.md', name: 'file1.md' },
@@ -93,7 +95,19 @@ describe('batchGenerateContentForTitles', () => {
 
         await batchGenerateContentForTitles(mockApp, settings, 'folder', mockProgressReporter);
 
-        expect(mockProgressReporter.updateStatus).toHaveBeenCalledWith('Generating 1/2: file1.md', 0);
-        expect(mockProgressReporter.updateStatus).toHaveBeenCalledWith('Generating 2/2: file2.md', 50);
+        const i18n = getI18nStrings({ uiLocale: settings.uiLocale });
+        const firstStepStatus = formatI18n(i18n.sidebar.status.stepLabel, {
+            current: 1,
+            total: 2,
+            label: `${i18n.sidebar.actions.batchGenerateFromTitles.label}: file1.md`,
+        });
+        const secondStepStatus = formatI18n(i18n.sidebar.status.stepLabel, {
+            current: 2,
+            total: 2,
+            label: `${i18n.sidebar.actions.batchGenerateFromTitles.label}: file2.md`,
+        });
+
+        expect(mockProgressReporter.updateStatus).toHaveBeenCalledWith(firstStepStatus, 0);
+        expect(mockProgressReporter.updateStatus).toHaveBeenCalledWith(secondStepStatus, 50);
     });
 });

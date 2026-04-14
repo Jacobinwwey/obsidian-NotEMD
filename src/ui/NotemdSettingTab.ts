@@ -5,7 +5,6 @@ import { DEFAULT_SETTINGS } from '../constants';
 import {
     getLLMProviderDefinition,
     getOrderedProviderNames,
-    getProviderCategoryLabel,
     getProviderValidationIssues,
     hasBlockingProviderValidationIssues
 } from '../llmProviders';
@@ -209,19 +208,36 @@ export class NotemdSettingTab extends PluginSettingTab {
             return;
         }
 
+        const providerConfigI18n = getI18nStrings({ uiLocale: this.plugin.settings.uiLocale }).settings.providerConfig;
         const callout = containerEl.createDiv({ cls: 'notemd-provider-callout' });
         const badgeRow = callout.createDiv({ cls: 'notemd-provider-badge-row' });
+        const categoryLabel = (() => {
+            switch (definition.category) {
+                case 'cloud':
+                    return providerConfigI18n.categoryCloud;
+                case 'gateway':
+                    return providerConfigI18n.categoryGateway;
+                case 'local':
+                    return providerConfigI18n.categoryLocal;
+                default:
+                    return providerConfigI18n.categoryOther;
+            }
+        })();
+
         badgeRow.createEl('span', {
-            text: getProviderCategoryLabel(definition.category),
+            text: categoryLabel,
             cls: 'notemd-provider-badge'
         });
-        badgeRow.createEl('span', {
-            text: definition.transport === 'openai-compatible' ? 'OpenAI-compatible' : definition.transport,
-            cls: 'notemd-provider-badge is-secondary'
-        });
 
-        callout.createEl('strong', { text: definition.description });
-        callout.createEl('p', { text: definition.setupHint });
+        callout.createEl('strong', {
+            text: formatI18n(providerConfigI18n.presetSummaryTitle, { provider: definition.name })
+        });
+        callout.createEl('p', {
+            text: formatI18n(providerConfigI18n.presetSummaryHint, {
+                baseUrl: definition.defaultConfig.baseUrl,
+                model: definition.defaultConfig.model
+            })
+        });
     }
 
     private renderProviderValidation(containerEl: HTMLElement, provider: LLMProviderConfig): void {
@@ -1545,7 +1561,7 @@ export class NotemdSettingTab extends PluginSettingTab {
 
             tasksToCustomize.forEach(task => {
                 new Setting(containerEl)
-                    .setName(`Use custom prompt for "${task.name}"`)
+                    .setName(formatI18n(customPromptsI18n.taskToggleName, { task: task.name }))
                     .setDesc(customPromptsI18n.taskToggleDesc)
                     .addToggle(toggle => toggle
                         .setValue(this.plugin.settings[task.useCustomSettingKey])
@@ -1556,12 +1572,12 @@ export class NotemdSettingTab extends PluginSettingTab {
                         }));
 
                 if (this.plugin.settings[task.useCustomSettingKey]) {
-                    
-
                     const defaultPromptDisplay = containerEl.createDiv();
-                    defaultPromptDisplay.createEl('p', { text: `Default prompt for "${task.name}":` });
+                    defaultPromptDisplay.createEl('p', {
+                        text: formatI18n(customPromptsI18n.defaultPromptLabel, { task: task.name })
+                    });
                     const defaultPromptText = getDefaultPrompt(task.key);
-                    const defaultPromptArea = new TextAreaComponent(defaultPromptDisplay)
+                    new TextAreaComponent(defaultPromptDisplay)
                         .setValue(defaultPromptText)
                         .setDisabled(true)
                         .inputEl.setAttrs({ rows: 5, style: 'width: 100%; font-family: monospace; font-size: 0.9em; margin-bottom: 5px;' });
@@ -1575,10 +1591,10 @@ export class NotemdSettingTab extends PluginSettingTab {
 
 
                     new Setting(containerEl)
-                        .setName(`Custom prompt for "${task.name}"`)
+                        .setName(formatI18n(customPromptsI18n.customPromptName, { task: task.name }))
                         .setDesc(customPromptsI18n.customPromptDesc)
                         .addTextArea(textarea => textarea
-                            .setPlaceholder(`Enter your custom prompt for ${task.name}...`)
+                            .setPlaceholder(formatI18n(customPromptsI18n.customPromptPlaceholder, { task: task.name }))
                             .setValue(this.plugin.settings[task.customPromptSettingKey])
                             .onChange(async (value) => {
                                 (this.plugin.settings as any)[task.customPromptSettingKey] = value;

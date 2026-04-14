@@ -70,6 +70,12 @@ export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
             heading: 'LLM 提供商',
             summaryTitle: '提供商预设已扩展到 {count} 项。',
             summaryDesc: 'OpenAI-compatible 提供商现在共享同一条运行时路径。内置预设覆盖 Qwen、Doubao、Moonshot、GLM、MiniMax、Baidu Qianfan、SiliconFlow 等中国常用服务，通用的 “OpenAI Compatible” 预设也可指向 LiteLLM、vLLM、Perplexity、Vercel AI Gateway 或你自己的代理。',
+            categoryCloud: '云端',
+            categoryGateway: '网关',
+            categoryLocal: '本地',
+            categoryOther: '提供商',
+            presetSummaryTitle: '{provider} 预设',
+            presetSummaryHint: '默认 endpoint：{baseUrl} · 默认模型：{model}',
             manageName: '管理提供商配置',
             manageDesc: '将当前提供商配置导出为 JSON 文件，或从文件导入配置。',
             exportButton: '导出提供商',
@@ -257,10 +263,14 @@ export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
             heading: '自定义 Prompt 设置',
             enableName: '为特定任务启用自定义 Prompt',
             enableDesc: '开：允许你为下方所选任务覆盖默认系统 Prompt。关：始终使用默认 Prompt。',
+            taskToggleName: '为“{task}”使用自定义 Prompt',
             taskToggleDesc: '开：对此任务使用你下方填写的自定义 Prompt。关：使用默认 Prompt。',
             copyDefaultButton: '复制默认 Prompt',
             copyDefaultNotice: '默认 Prompt 已复制到剪贴板！',
-            customPromptDesc: '输入你的自定义 Prompt。若该任务支持，{TITLE} 或 {RESEARCH_CONTEXT_SECTION} 等占位符会被替换。可参考默认 Prompt 了解可用占位符。'
+            defaultPromptLabel: '“{task}”的默认 Prompt：',
+            customPromptName: '“{task}”的自定义 Prompt',
+            customPromptDesc: '输入你的自定义 Prompt。若该任务支持，{TITLE} 或 {RESEARCH_CONTEXT_SECTION} 等占位符会被替换。可参考默认 Prompt 了解可用占位符。',
+            customPromptPlaceholder: '输入用于 {task} 的自定义 Prompt...'
         },
         generateTitleOutput: {
             useCustomFolderName: '为“从标题生成”使用自定义输出文件夹',

@@ -85,4 +85,17 @@ describe('supported UI locale remaining settings coverage', () => {
             { label: 'settings.duplicateScope.invalidPathsNotSaved', get: strings => strings.settings.duplicateScope.invalidPathsNotSaved }
         ]);
     });
+
+    test('ships localized custom prompt settings copy for all advertised locales', () => {
+        assertLocalizedForAllAdvertisedLocales([
+            { label: 'settings.customPrompts.taskToggleName', get: strings => strings.settings.customPrompts.taskToggleName },
+            { label: 'settings.customPrompts.taskToggleDesc', get: strings => strings.settings.customPrompts.taskToggleDesc },
+            { label: 'settings.customPrompts.copyDefaultButton', get: strings => strings.settings.customPrompts.copyDefaultButton },
+            { label: 'settings.customPrompts.copyDefaultNotice', get: strings => strings.settings.customPrompts.copyDefaultNotice },
+            { label: 'settings.customPrompts.defaultPromptLabel', get: strings => strings.settings.customPrompts.defaultPromptLabel },
+            { label: 'settings.customPrompts.customPromptName', get: strings => strings.settings.customPrompts.customPromptName },
+            { label: 'settings.customPrompts.customPromptDesc', get: strings => strings.settings.customPrompts.customPromptDesc },
+            { label: 'settings.customPrompts.customPromptPlaceholder', get: strings => strings.settings.customPrompts.customPromptPlaceholder }
+        ]);
+    });
 });

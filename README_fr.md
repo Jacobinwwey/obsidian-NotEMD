@@ -34,8 +34,8 @@ Notemd améliore votre flux de travail Obsidian en s'intégrant à divers modèl
 - [Démarrage Rapide](#démarrage-rapide)
 - [Support Linguistique](#support-linguistique)
 - [Fonctionnalités](#fonctionnalités)
-- [Installation](#installation)
-- [Configuration](#configuration)
+- [Guide d'installation](#installation)
+- [Paramétrage](#configuration)
 - [Guide d'Utilisation](#guide-dutilisation)
 - [Fournisseurs LLM Supportés](#fournisseurs-llm-supportés)
 - [Utilisation du Réseau et Manipulation des Données](#utilisation-du-réseau-et-manipulation-des-données)
@@ -60,10 +60,10 @@ C'est tout ! Explorez les réglages pour débloquer plus de fonctionnalités com
 
 | Aspect | Portée | Par Défaut | Notes |
 |---|---|---|---|
-| `UI Locale` | Texte de l'interface uniquement (réglages, barre latérale, avis, dialogues) | `auto` | Suit la langue d'Obsidian ; catalogues actuels : `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, `zh-TW`. |
-| `Task Output Language` | Sortie des tâches générée par LLM (liens, résumés, génération, extraction, cible de traduction) | `en` | Peut être global ou par tâche quand `Utiliser différentes langues pour les tâches` est activé. |
-| `Disable auto translation` | Les tâches non-traduction gardent le contexte original | `false` | Les tâches de `Traduction` explicites appliquent toujours la langue cible configurée. |
-| Locale fallback | Résolution de clés d'interface manquantes | locale -> `en` | Maintient l'interface stable quand certaines clés ne sont pas traduites. |
+| `Langue de l'interface` | Texte de l'interface uniquement (réglages, barre latérale, avis, dialogues) | `auto` | Suit la langue d'Obsidian ; catalogues actuels : `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, `zh-TW`. |
+| `Langue de sortie des tâches` | Sortie des tâches générée par LLM (liens, résumés, génération, extraction, cible de traduction) | `en` | Peut être global ou par tâche quand `Utiliser différentes langues pour les tâches` est activé. |
+| `Désactiver la traduction automatique` | Les tâches non-traduction gardent le contexte original | `false` | Les tâches de `Traduction` explicites appliquent toujours la langue cible configurée. |
+| `Langue de secours` | Résolution de clés d'interface manquantes | locale -> `en` | Maintient l'interface stable quand certaines clés ne sont pas traduites. |
 
 - Les documents source maintenus sont l'anglais et le chinois simplifié, et les traductions README publiées sont liées dans l'en-tête ci-dessus.
 - La couverture des locales d'interface intégrées correspond actuellement exactement au catalogue explicite du code : `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, `zh-TW`.
@@ -237,10 +237,10 @@ Accédez aux réglages du plugin via :
 
 <img width="817" height="428" alt="Multi-model" src="https://github.com/user-attachments/assets/85e6b854-c0ca-45cc-a55e-24638dceb120" />
 
-### Architecture des Langues (UI Locale vs Task Output Language)
+### Architecture des Langues (Langue de l'interface vs langue de sortie des tâches)
 
--   **UI Locale** contrôle uniquement le texte de l'interface du plugin (étiquettes des réglages, boutons de la barre latérale, avis et fenêtres). Le mode `auto` par défaut suit la langue actuelle de l'interface d'Obsidian.
--   **Task Output Language** contrôle la sortie des tâches générée par le modèle (liens, résumés, génération de titres, résumé Mermaid, extraction de concepts, cible de traduction).
+-   **Langue de l'interface** contrôle uniquement le texte de l'interface du plugin (étiquettes des réglages, boutons de la barre latérale, avis et fenêtres). Le mode `auto` par défaut suit la langue actuelle de l'interface d'Obsidian.
+-   **Langue de sortie des tâches** contrôle la sortie des tâches générée par le modèle (liens, résumés, génération de titres, résumé Mermaid, extraction de concepts, cible de traduction).
 -   **Le mode de langue par tâche** permet à chaque tâche de résoudre sa propre langue de sortie à partir d'une couche de politique unifiée au lieu de remplacements dispersés par module.
 -   **Désactiver la traduction automatique** garde les tâches non-traduction dans le contexte de la langue source, tandis que les tâches de traduction explicites appliquent toujours la langue cible configurée.
 -   Les chemins de génération liés à Mermaid suivent la même politique de langue et peuvent toujours déclencher l'auto-correction Mermaid lorsqu'elle est activée.
@@ -446,10 +446,10 @@ Cette fonctionnalité vous permet de remplacer les instructions par défaut (pro
 
 ## Guide d'Utilisation
 
-### Workflows Rapides & Barre Latérale
+### Flux Rapides et Barre Latérale
 
 -   Ouvrez la barre latérale Notemd pour accéder aux sections d'actions groupées pour le traitement de base, la génération, la traduction, la connaissance et les utilitaires.
--   Utilisez la zone **Quick Workflows** en haut de la barre latérale pour lancer des boutons multi-étapes personnalisés.
+-   Utilisez la zone **Flux rapides** en haut de la barre latérale pour lancer des boutons multi-étapes personnalisés.
 -   Le workflow par défaut **One-Click Extract** lance `Traiter le fichier (Ajout de liens)` -> `Génération en masse depuis titres` -> `Correction Mermaid en masse`.
 -   La progression du workflow, les journaux par étape et les échecs sont affichés dans la barre latérale, avec un pied de page épinglé qui protège la barre de progression et la zone de journal d'être masquées par les sections déployées.
 -   La carte de progression permet de lire en un coup d'œil le texte de statut, une pilule de pourcentage dédiée et le temps restant, et les mêmes workflows personnalisés peuvent être reconfigurés depuis les réglages.

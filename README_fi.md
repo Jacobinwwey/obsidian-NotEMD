@@ -4,7 +4,7 @@
 
 [English](./README.md) | [简体中文](./README_zh.md) | [Español](./README_es.md) | [Français](./README_fr.md) | [Deutsch](./README_de.md) | [Italiano](./README_it.md) | [Português](./README_pt.md) | [繁體中文](./README_zh_Hant.md) | [日本語](./README_ja.md) | [한국어](./README_ko.md) | [Русский](./README_ru.md) | [العربية](./README_ar.md) | [हिन्दी](./README_hi.md) | [বাংলা](./README_bn.md) | [Nederlands](./README_nl.md) | [Svenska](./README_sv.md) | [Suomi](./README_fi.md) | [Dansk](./README_da.md) | [Norsk](./README_no.md) | [Polski](./README_pl.md) | [Türkçe](./README_tr.md) | [עברית](./README_he.md) | [ไทย](./README_th.md) | [Ελληνικά](./README_el.md) | [Čeština](./README_cs.md) | [Magyar](./README_hu.md) | [Română](./README_ro.md) | [Українська](./README_uk.md) | [Tiếng Việt](./README_vi.md) | [Bahasa Indonesia](./README_id.md) | [Bahasa Melayu](./README_ms.md)
 
-Lue dokumentaatio muilla kielillä: [Language Hub](./docs/i18n/README.md)
+Lue dokumentaatio muilla kielillä: [Kielikeskus](./docs/i18n/README.md)
 
 ```
 ==================================================
@@ -59,10 +59,10 @@ Siinä kaikki. Tutki asetuksia avataksesi lisää ominaisuuksia, kuten verkkotut
 
 | Asia | Laajuus | Oletus | Huomautukset |
 |---|---|---|---|
-| `UI Locale` | Vain liitännäisen käyttöliittymätekstit (asetukset, sivupalkki, ilmoitukset, dialogit) | `auto` | Seuraa Obsidianin kieliasetusta; tämänhetkiset UI-käännöskatalogit ovat `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN` ja `zh-TW`. |
-| `Task Output Language` | LLM:n generoima tehtäväulostulo (linkit, yhteenvedot, generointi, poiminta, käännöskohde) | `en` | Voi olla globaali tai tehtäväkohtainen, kun `Use different languages for tasks` on käytössä. |
-| `Disable auto translation` | Muut kuin `Translate`-tehtävät säilyttävät lähdekielen kontekstin | `false` | Erilliset `Translate`-tehtävät pakottavat edelleen määritetyn kohdekielen. |
-| Locale fallback | Puuttuvien UI-avainten ratkaisu | locale -> `en` | Pitää käyttöliittymän vakaana, vaikka osa avaimista olisi vielä kääntämättä. |
+| `Käyttöliittymän kieli` | Vain liitännäisen käyttöliittymätekstit (asetukset, sivupalkki, ilmoitukset, dialogit) | `auto` | Seuraa Obsidianin kieliasetusta; tämänhetkiset UI-käännöskatalogit ovat `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN` ja `zh-TW`. |
+| `Tehtävien tulostuskieli` | LLM:n generoima tehtäväulostulo (linkit, yhteenvedot, generointi, poiminta, käännöskohde) | `en` | Voi olla globaali tai tehtäväkohtainen, kun `Käytä eri kieliä tehtäville` on käytössä. |
+| `Poista automaattinen käännös käytöstä` | Muut kuin `Translate`-tehtävät säilyttävät lähdekielen kontekstin | `false` | Erilliset `Translate`-tehtävät pakottavat edelleen määritetyn kohdekielen. |
+| Varakieli | Puuttuvien UI-avainten ratkaisu | locale -> `en` | Pitää käyttöliittymän vakaana, vaikka osa avaimista olisi vielä kääntämättä. |
 
 - Ylläpidetyt lähdedokumentit ovat englanti ja yksinkertaistettu kiina, ja julkaistut README-käännökset on linkitetty yllä olevaan otsakkeeseen.
 - Sovelluksen UI-locale-kattavuus vastaa tällä hetkellä täsmälleen koodin eksplisiittistä katalogia: `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, `zh-TW`.
@@ -111,12 +111,12 @@ Siinä kaikki. Tutki asetuksia avataksesi lisää ominaisuuksia, kuten verkkotut
   - Tukee kääntämistä useiden kielten välillä.
   - Kohdekieli on mukautettavissa asetuksissa tai käyttöliittymässä.
   - Avaa käännetyn tekstin automaattisesti alkuperäisen tekstin oikealle puolelle helppoa vertailua varten.
-- **Batch Translate**:
+- **Eräkäännös**:
   - Käännä kaikki valitun kansion tiedostot.
   - Tukee rinnakkaista käsittelyä, kun "Enable Batch Parallelism" on käytössä.
   - Käyttää kääntämiseen mukautettuja promptteja, jos ne on määritetty.
   - Lisää tiedostoselaimen kontekstivalikkoon vaihtoehdon "Batch translate this folder".
-- **Disable auto translation**: Kun tämä vaihtoehto on käytössä, muut kuin Translate-tehtävät eivät enää pakota ulostuloa tietylle kielelle, vaan säilyttävät lähdekielen kontekstin. Nimenomainen "Translate"-tehtävä suorittaa silti käännöksen määritetyllä tavalla.
+- **Poista automaattinen käännös käytöstä**: Kun tämä vaihtoehto on käytössä, muut kuin Translate-tehtävät eivät enää pakota ulostuloa tietylle kielelle, vaan säilyttävät lähdekielen kontekstin. Nimenomainen "Translate"-tehtävä suorittaa silti käännöksen määritetyllä tavalla.
 
 ### Verkkotutkimus ja sisällön luonti
 - **Verkkotutkimus ja yhteenveto**:
@@ -209,38 +209,38 @@ Pääset liitännäisen asetuksiin näin:
 **Settings** -> **Community Plugins** -> **Notemd** (napsauta rataskuvaketta).
 
 ### LLM-tarjoajan määritykset
-1. **Active Provider**: Valitse pudotusvalikosta LLM-tarjoaja, jota haluat käyttää.
-2. **Provider Settings**: Määritä valitun tarjoajan asetukset:
+1. **Aktiivinen tarjoaja**: Valitse pudotusvalikosta LLM-tarjoaja, jota haluat käyttää.
+2. **Tarjoajan asetukset**: Määritä valitun tarjoajan asetukset:
    - **API Key**: Vaaditaan useimmille pilvipalveluntarjoajille, kuten OpenAI, Anthropic, DeepSeek, Qwen, Qwen Code, Doubao, Moonshot, GLM, Z AI, MiniMax, Huawei Cloud MaaS, Baidu Qianfan, SiliconFlow, Google, Mistral, Azure OpenAI, OpenRouter, xAI, Groq, Together, Fireworks ja Requesty. Ei tarvita Ollamalle. Valinnainen LM Studiolle ja yleiselle `OpenAI Compatible` -esiasetukselle, kun päätepiste hyväksyy anonyymin tai placeholder-pohjaisen pääsyn.
    - **Base URL / Endpoint**: Palvelun API-päätepiste. Oletusarvot sisältyvät, mutta saatat joutua vaihtamaan tämän paikallisille malleille, kuten LMStudio ja Ollama, gateway-palveluille, kuten OpenRouter, Requesty ja OpenAI Compatible, tai tietyille Azure-julkaisuille. **Pakollinen Azure OpenAI:lle.**
    - **Model**: Käytettävän mallin nimi tai ID, esimerkiksi `gpt-4o`, `claude-3-5-sonnet-20240620`, `google/gemini-flash-1.5`, `grok-4`, `moonshotai/kimi-k2-instruct-0905`, `accounts/fireworks/models/kimi-k2p5` tai `anthropic/claude-3-7-sonnet-latest`. Varmista, että malli on saatavilla tarjoajallasi tai päätepisteessäsi.
    - **Temperature**: Säätelee LLM:n ulostulon satunnaisuutta, 0 = deterministinen, 1 = maksimaalinen luovuus. Alemmat arvot, kuten 0.2-0.5, ovat yleensä parempia rakenteisiin tehtäviin.
    - **API Version (vain Azure)**: Vaaditaan Azure OpenAI -julkaisuille, esimerkiksi `2024-02-15-preview`.
-3. **Test Connection**: Käytä aktiivisen tarjoajan "Test Connection" -painiketta asetusten tarkistamiseen. OpenAI-compatible-tarjoajat käyttävät nyt tarjoajatietoisia tarkistuksia: päätepisteet kuten `Qwen`, `Qwen Code`, `Doubao`, `Moonshot`, `GLM`, `Z AI`, `MiniMax`, `Huawei Cloud MaaS`, `Baidu Qianfan`, `SiliconFlow`, `Groq`, `Together`, `Fireworks`, `LMStudio` ja `OpenAI Compatible` testaavat `chat/completions`-polun suoraan, kun taas tarjoajat, joilla on luotettava `/models`-päätepiste, voivat edelleen aloittaa mallilistauksella. Jos ensimmäinen testi epäonnistuu tilapäisen verkkokatkoksen, kuten `ERR_CONNECTION_CLOSED`, vuoksi, Notemd siirtyy automaattisesti vakaaseen uudelleenyrityssekvenssiin välittömän epäonnistumisen sijaan.
-4. **Manage Provider Configurations**: Käytä "Export Providers" ja "Import Providers" -painikkeita tallentaaksesi tai ladataksesi LLM-tarjoajien asetukset `notemd-providers.json`-tiedostoon liitännäisen määrityskansiossa. Tämä helpottaa varmuuskopiointia ja jakamista.
-5. **Preset Coverage**: Alkuperäisten tarjoajien lisäksi Notemd sisältää nyt esiasetetut merkinnät kohteille `Qwen`, `Qwen Code`, `Doubao`, `Moonshot`, `GLM`, `Z AI`, `MiniMax`, `Huawei Cloud MaaS`, `Baidu Qianfan`, `SiliconFlow`, `xAI`, `Groq`, `Together`, `Fireworks`, `Requesty` ja yleisen `OpenAI Compatible` -kohteen LiteLLM:lle, vLLM:lle, Perplexitylle, Vercel AI Gatewaylle tai mukautetuille välityspalvelimille.
+3. **Testaa yhteys**: Käytä aktiivisen tarjoajan "Testaa yhteys" -painiketta asetusten tarkistamiseen. OpenAI-compatible-tarjoajat käyttävät nyt tarjoajatietoisia tarkistuksia: päätepisteet kuten `Qwen`, `Qwen Code`, `Doubao`, `Moonshot`, `GLM`, `Z AI`, `MiniMax`, `Huawei Cloud MaaS`, `Baidu Qianfan`, `SiliconFlow`, `Groq`, `Together`, `Fireworks`, `LMStudio` ja `OpenAI Compatible` testaavat `chat/completions`-polun suoraan, kun taas tarjoajat, joilla on luotettava `/models`-päätepiste, voivat edelleen aloittaa mallilistauksella. Jos ensimmäinen testi epäonnistuu tilapäisen verkkokatkoksen, kuten `ERR_CONNECTION_CLOSED`, vuoksi, Notemd siirtyy automaattisesti vakaaseen uudelleenyrityssekvenssiin välittömän epäonnistumisen sijaan.
+4. **Hallitse tarjoajamäärityksiä**: Käytä "Export Providers" ja "Import Providers" -painikkeita tallentaaksesi tai ladataksesi LLM-tarjoajien asetukset `notemd-providers.json`-tiedostoon liitännäisen määrityskansiossa. Tämä helpottaa varmuuskopiointia ja jakamista.
+5. **Esiasetusten kattavuus**: Alkuperäisten tarjoajien lisäksi Notemd sisältää nyt esiasetetut merkinnät kohteille `Qwen`, `Qwen Code`, `Doubao`, `Moonshot`, `GLM`, `Z AI`, `MiniMax`, `Huawei Cloud MaaS`, `Baidu Qianfan`, `SiliconFlow`, `xAI`, `Groq`, `Together`, `Fireworks`, `Requesty` ja yleisen `OpenAI Compatible` -kohteen LiteLLM:lle, vLLM:lle, Perplexitylle, Vercel AI Gatewaylle tai mukautetuille välityspalvelimille.
 <img width="804" height="506" alt="LLM" src="https://github.com/user-attachments/assets/8caf42e3-43ad-456d-8b96-b63e7914e45f" />
 
 ### Monimallimääritys
-- **Use Different Providers for Tasks**:
-  - **Pois käytöstä (oletus)**: Käyttää yhtä "Active Provider" -asetusta kaikkiin tehtäviin.
+- **Käytä eri palveluntarjoajia eri tehtäville**:
+  - **Pois käytöstä (oletus)**: Käyttää yhtä "aktiivinen tarjoaja" -asetusta kaikkiin tehtäviin.
   - **Käytössä**: Mahdollistaa tietyn tarjoajan valinnan ja mallinimen valinnaisen yliajon jokaiselle tehtävälle, kuten "Add Links", "Research & Summarize", "Generate from Title", "Translate" ja "Extract Concepts". Jos tehtävän model override -kenttä jätetään tyhjäksi, käytetään kyseiselle tehtävälle valitun tarjoajan oletusmallia.
-- **Select different languages for different tasks**:
-  - **Pois käytöstä (oletus)**: Käyttää samaa "Output language" -asetusta kaikille tehtäville.
+- **Valitse eri kieliä eri tehtäville**:
+  - **Pois käytöstä (oletus)**: Käyttää samaa tulostuskieltä kaikille tehtäville.
   - **Käytössä**: Mahdollistaa tietyn kielen valinnan jokaiselle tehtävälle, kuten "Add Links", "Research & Summarize", "Generate from Title", "Summarise as Mermaid diagram" ja "Extract Concepts".
 
 <img width="817" height="428" alt="Multi-model" src="https://github.com/user-attachments/assets/85e6b854-c0ca-45cc-a55e-24638dceb120" />
 
-### Kieliarkkitehtuuri (UI Locale vs Task Output Language)
+### Kieliarkkitehtuuri (käyttöliittymän kieli ja tehtävien tulostuskieli)
 
-- **UI Locale** ohjaa vain liitännäisen käyttöliittymätekstejä, kuten asetusten nimikkeitä, sivupalkin painikkeita, ilmoituksia ja dialogeja. Oletusarvoinen `auto`-tila seuraa Obsidianin nykyistä käyttöliittymäkieltä.
-- **Task Output Language** ohjaa mallin tuottamaa tehtäväulostuloa, kuten linkkejä, yhteenvetoja, otsikointia, Mermaid-yhteenvetoa, käsitepoimintaa ja käännöksen kohdekieltä.
+- **Käyttöliittymän kieli** ohjaa vain liitännäisen käyttöliittymätekstejä, kuten asetusten nimikkeitä, sivupalkin painikkeita, ilmoituksia ja dialogeja. Oletusarvoinen `auto`-tila seuraa Obsidianin nykyistä käyttöliittymäkieltä.
+- **Tehtävien tulostuskieli** ohjaa mallin tuottamaa tehtäväulostuloa, kuten linkkejä, yhteenvetoja, otsikointia, Mermaid-yhteenvetoa, käsitepoimintaa ja käännöksen kohdekieltä.
 - **Per-task language mode** antaa kunkin tehtävän ratkaista oman ulostulokielensä yhtenäisen policy-kerroksen kautta hajautettujen moduulikohtaisten yliajojen sijaan.
-- **Disable auto translation** pitää muut kuin Translate-tehtävät lähdekielen kontekstissa, kun taas eksplisiittiset Translate-tehtävät pakottavat edelleen määritetyn kohdekielen.
+- **Poista automaattinen käännös käytöstä** pitää muut kuin Translate-tehtävät lähdekielen kontekstissa, kun taas eksplisiittiset Translate-tehtävät pakottavat edelleen määritetyn kohdekielen.
 - Mermaidiin liittyvät generointipolut noudattavat samaa kielipolitiikkaa ja voivat edelleen käynnistää Mermaid auto-fixin, kun ominaisuus on käytössä.
 
 ### Vakaiden API-kutsujen asetukset
-- **Enable Stable API Calls (Retry Logic)**:
+- **Ota vakaat API-kutsut käyttöön (uudelleenyrityslogiikka)**:
   - **Pois käytöstä (oletus)**: Yksi epäonnistunut API-kutsu pysäyttää nykyisen tehtävän.
   - **Käytössä**: Yrittää epäonnistuneet LLM API -kutsut automaattisesti uudelleen. Hyödyllinen katkonaisissa verkkoyhteyksissä tai rate limit -tilanteissa.
   - **Connection Test Fallback**: Vaikka tavalliset kutsut eivät muuten käyttäisi stable modea, tarjoajan yhteystestit vaihtavat nyt samaan uudelleenyrityssekvenssiin ensimmäisen tilapäisen verkkovirheen jälkeen.
@@ -248,7 +248,7 @@ Pääset liitännäisen asetuksiin näin:
   - **OpenAI-Compatible Stable Order**: Stable modessa jokainen OpenAI-compatible-yritys noudattaa nyt järjestystä `direct streaming -> direct non-stream -> requestUrl (with streamed fallback when needed)` ennen kuin yritys merkitään epäonnistuneeksi. Tämä estää liian aggressiiviset virheet tilanteissa, joissa vain yksi siirtotapa on epävakaa.
 - **Retry Interval (seconds)**: Näkyy vain, kun toiminto on käytössä. Uudelleenyritysten välinen aika, 1-300 sekuntia. Oletus: 5.
 - **Maximum Retries**: Näkyy vain, kun toiminto on käytössä. Uudelleenyritysten enimmäismäärä, 0-10. Oletus: 3.
-- **API Error Debugging Mode**:
+- **API-virheiden virheenkorjaustila**:
   - **Pois käytöstä (oletus)**: Käyttää vakiomuotoista, tiivistä virheraportointia.
   - **Käytössä**: Ottaa käyttöön yksityiskohtaisen virhelokituksen, joka muistuttaa DeepSeekin laajaa tulostusta, kaikille tarjoajille ja tehtäville, mukaan lukien Translate, Search ja Connection Tests. Mukana ovat HTTP-tilakoodit, raaka vastausteksti, pyyntöjen siirtotapaaikajanat, anonymisoidut pyyntö-URL:t ja headerit, yrityskohtainen kesto, vastausotsikot, osittaiset vastausrungot, jäsennetty osittainen stream-ulostulo ja stack tracit, mikä on ratkaisevaa API-yhteysongelmien ja upstream gateway -resetointien vianetsinnässä.
 - **Developer Mode**:
@@ -293,7 +293,7 @@ Pääset liitännäisen asetuksiin näin:
   - **Pois käytöstä (oletus)**: Lokitiedostoa ei luoda.
   - **Käytössä**: Luo lokitiedoston, jossa luetellaan käsittelyn aikana luodut uudet käsite-muistiinpanot. Muoto on:
     ```
-    generate xx concepts md file
+    luo xx käsite-md-tiedostoa
     1. concepts1
     2. concepts2
     ...
@@ -309,8 +309,8 @@ Pääset liitännäisen asetuksiin näin:
 - **Concept Log File Name**: Näkyy vain, kun "Customize Log File Name" on käytössä. Anna haluttu tiedostonimi, esimerkiksi `ConceptCreation.log`. **Kenttä on pakollinen, jos mukautus on käytössä.**
 <img width="809" height="281" alt="Concept log file output" src="https://github.com/user-attachments/assets/eef6f5d5-592d-4b8f-84b1-7404521a6e9b" />
 
-#### "Extract Concepts" -tehtävä
-- **Create minimal concept notes**:
+#### Käsitteiden poimintatehtävä
+- **Luo minimaaliset käsite-muistiinpanot**:
   - **Päällä (oletus)**: Uudet käsite-muistiinpanot sisältävät vain otsikon, esimerkiksi `# Käsite`.
   - **Pois päältä**: Käsite-muistiinpanot voivat sisältää lisäsisältöä, kuten "Linked From" -takaisinviittauksen, jos sitä ei ole poistettu käytöstä alla olevalla asetuksella.
 - **Add "Linked From" backlink**:
@@ -388,7 +388,7 @@ Pääset liitännäisen asetuksiin näin:
   - **Continue on Error**: Jatkaa myöhempiä askeleita ja raportoi lopuksi epäonnistuneiden toimintojen lukumäärän.
 - **Default Workflow Included**: `One-Click Extract` ketjuttaa `Process File (Add Links)`, `Batch Generate from Titles` ja `Batch Mermaid Fix`.
 
-#### Mukautettujen promptien asetukset
+#### Mukautettujen kehotteiden asetukset
 Tämän ominaisuuden avulla voit ohittaa oletusohjeet, eli tietyille tehtäville LLM:lle lähetettävät promptit, ja hallita ulostuloa tarkasti.
 
 - **Enable Custom Prompts for Specific Tasks**:
@@ -442,7 +442,7 @@ Tämän ominaisuuden avulla voit ohittaa oletusohjeet, eli tietyille tehtäville
 ### Pikatyönkulut ja sivupalkki
 
 - Avaa Notemd-sivupalkki päästäksesi käsiksi ryhmiteltyihin toimintoihin, jotka kattavat ydinkäsittelyn, generoinnin, kääntämisen, tiedonhallinnan ja apuominaisuudet.
-- Käytä sivupalkin yläosan **Quick Workflows** -aluetta käynnistääksesi mukautettuja monivaihepainikkeita.
+- Käytä sivupalkin yläosan **Pikatyönkulut** -aluetta käynnistääksesi mukautettuja monivaihepainikkeita.
 - Oletustyönkulku **One-Click Extract** suorittaa `Process File (Add Links)` -> `Batch Generate from Titles` -> `Batch Mermaid Fix`.
 - Työnkulun eteneminen, vaihekohtaiset lokit ja epäonnistumiset näkyvät sivupalkissa, jonka kiinnitetty alatunniste estää edistymispalkin ja lokialueen puristumisen näkymättömiin laajennettujen osioiden vuoksi.
 - Edistymiskortti näyttää tilatekstin, erillisen prosentti-indikaattorin ja jäljellä olevan ajan yhdellä silmäyksellä, ja samat mukautetut työnkulut voidaan määrittää uudelleen asetuksista.
@@ -470,7 +470,7 @@ Tämä on ydinominaisuus, joka keskittyy käsitteiden tunnistamiseen ja `[[wiki-
 
 ### Uudet ominaisuudet
 
-1. **Summarise as Mermaid diagram**:
+1. **Tiivistä Mermaid-kaavioksi**:
    - Avaa muistiinpano, jonka haluat tiivistää.
    - Suorita komento `Notemd: Summarise as Mermaid diagram` komentopaletista tai sivupalkin painikkeesta.
    - Liitännäinen luo uuden muistiinpanon Mermaid-kaaviolla.
@@ -482,7 +482,7 @@ Tämä on ydinominaisuus, joka keskittyy käsitteiden tunnistamiseen ja `[[wiki-
    - Liitännäinen käyttää määritettyä **LLM Provider** -asetusta Multi-Model-asetusten mukaisesti käännöksen suorittamiseen.
    - Käännetty sisältö tallennetaan määritettyyn **Translation Save Path** -polkuun oikealla päätteellä ja avataan **uuteen paneeliin alkuperäisen sisällön oikealle puolelle** helppoa vertailua varten.
    - Voit perua tämän tehtävän sivupalkin painikkeesta tai modaalin peruutuspainikkeesta.
-3. **Batch Translate**:
+3. **Eräkäännös**:
    - Suorita komentopaletista `Notemd: Batch Translate Folder` ja valitse kansio, tai napsauta kansiota oikealla tiedostoselaimessa ja valitse "Batch translate this folder".
    - Liitännäinen kääntää kaikki valitun kansion Markdown-tiedostot.
    - Käännetyt tiedostot tallennetaan määritettyyn käännöspolkuun, mutta niitä ei avata automaattisesti.
@@ -616,7 +616,7 @@ Notemd toimii paikallisesti Obsidianin sisällä, mutta osa ominaisuuksista läh
 - Päätepiste: Tavily API tai DuckDuckGo-päätepisteet.
 - Lähetettävät tiedot: tutkimuskyselysi ja vaadittu pyyntömetadata.
 
-### Kehittäjädiagnostiikka ja debug-lokit (valinnainen)
+### Kehittäjädiagnostiikka ja virheenjäljityslokit (valinnainen)
 
 - Laukaisin: API debug mode ja kehittäjien diagnostiikkatoiminnot.
 - Tallennus: diagnostiikka- ja virhelokit kirjoitetaan vaultin juureen, esimerkiksi `Notemd_Provider_Diagnostic_*.txt` ja `Notemd_Error_Log_*.txt`.
@@ -658,7 +658,7 @@ Notemd toimii paikallisesti Obsidianin sisällä, mutta osa ominaisuuksista läh
        ```
        Luotu raportti sisältää yrityskohtaiset ajat (`First Byte`, `Duration`), anonymisoidun pyyntömetadatan, vastausotsikot, raaka- tai osittaiset body-fragmentit, jäsennetyt stream-fragmentit ja siirtokerroksen epäonnistumiskohdat.
 - **LM Studio/Ollama -yhteysongelmat**:
-  - **Test Connection epäonnistuu**: Varmista, että paikallinen palvelin (LM Studio tai Ollama) on käynnissä ja että oikea malli on ladattu tai saatavilla.
+  - **Yhteystesti epäonnistuu**: Varmista, että paikallinen palvelin (LM Studio tai Ollama) on käynnissä ja että oikea malli on ladattu tai saatavilla.
   - **CORS-virheet (Ollama Windowsissa)**: Jos kohtaat CORS-virheitä (Cross-Origin Resource Sharing) käyttäessäsi Ollamaa Windowsissa, saatat joutua asettamaan ympäristömuuttujan `OLLAMA_ORIGINS`. Voit tehdä tämän suorittamalla `set OLLAMA_ORIGINS=*` komentokehotteessa ennen Ollaman käynnistämistä. Tämä sallii pyynnöt mistä tahansa alkuperästä.
   - **Ota CORS käyttöön LM Studiossa**: LM Studiossa CORS voidaan ottaa käyttöön suoraan palvelinasetuksista, mikä voi olla tarpeen, jos Obsidian toimii selaimessa tai sillä on tiukat origin-käytännöt.
 - **Kansionluontivirheet ("File name cannot contain...")**:
@@ -674,8 +674,8 @@ Osallistuminen on tervetullutta. Katso ohjeet GitHub-repositoriosta: [https://gi
 
 ## Ylläpitäjien dokumentaatio
 
-- [Release Workflow (English)](./docs/maintainer/release-workflow.md)
-- [Release Workflow (简体中文)](./docs/maintainer/release-workflow.zh-CN.md)
+- [Julkaisutyönkulku (englanti)](./docs/maintainer/release-workflow.md)
+- [Julkaisutyönkulku (yksinkertaistettu kiina)](./docs/maintainer/release-workflow.zh-CN.md)
 
 ## Lisenssi
 

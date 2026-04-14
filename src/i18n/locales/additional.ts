@@ -3410,6 +3410,420 @@ extendLocale(STRINGS_TR, {
 });
 
 extendLocale(STRINGS_AR, {
+    settings: {
+        providerConfig: {
+            categoryCloud: 'سحابي',
+            categoryGateway: 'بوابة',
+            categoryLocal: 'محلي',
+            categoryOther: 'مزوّد',
+            presetSummaryTitle: 'الإعداد المسبق لـ {provider}',
+            presetSummaryHint: 'نقطة النهاية الافتراضية: {baseUrl} · النموذج الافتراضي: {model}'
+        },
+        customPrompts: {
+            taskToggleName: 'استخدام مطالبة مخصصة لـ "{task}"',
+            taskToggleDesc: 'تشغيل: استخدم مطالبتك المخصصة أدناه لهذه المهمة. إيقاف: استخدم المطالبة الافتراضية.',
+            copyDefaultButton: 'نسخ المطالبة الافتراضية',
+            copyDefaultNotice: 'تم نسخ المطالبة الافتراضية إلى الحافظة!',
+            defaultPromptLabel: 'المطالبة الافتراضية لـ "{task}":',
+            customPromptName: 'مطالبة مخصصة لـ "{task}"',
+            customPromptDesc: 'أدخل مطالبتك المخصصة. سيتم استبدال العناصر النائبة مثل {TITLE} أو {RESEARCH_CONTEXT_SECTION} عند الحاجة لهذه المهمة. راجع المطالبة الافتراضية لمعرفة العناصر المتاحة.',
+            customPromptPlaceholder: 'أدخل مطالبتك المخصصة لـ {task}...'
+        }
+    }
+});
+
+extendLocale(STRINGS_DE, {
+    settings: {
+        providerConfig: {
+            categoryCloud: 'Cloud-Dienst',
+            categoryGateway: 'Gateway-Dienst',
+            categoryLocal: 'Lokal',
+            categoryOther: 'Anbieter',
+            presetSummaryTitle: '{provider}-Voreinstellung',
+            presetSummaryHint: 'Standard-Endpunkt: {baseUrl} · Standardmodell: {model}'
+        },
+        customPrompts: {
+            taskToggleName: 'Benutzerdefinierten Prompt für "{task}" verwenden',
+            taskToggleDesc: 'An: Verwenden Sie für diese Aufgabe Ihren benutzerdefinierten Prompt unten. Aus: Verwenden Sie den Standard-Prompt.',
+            copyDefaultButton: 'Standard-Prompt kopieren',
+            copyDefaultNotice: 'Standard-Prompt in die Zwischenablage kopiert!',
+            defaultPromptLabel: 'Standard-Prompt für "{task}":',
+            customPromptName: 'Benutzerdefinierter Prompt für "{task}"',
+            customPromptDesc: 'Geben Sie Ihren benutzerdefinierten Prompt ein. Platzhalter wie {TITLE} oder {RESEARCH_CONTEXT_SECTION} werden ersetzt, sofern sie für die Aufgabe gelten. Hinweise auf verfügbare Platzhalter finden Sie im Standard-Prompt.',
+            customPromptPlaceholder: 'Geben Sie Ihren benutzerdefinierten Prompt für {task} ein...'
+        }
+    }
+});
+
+extendLocale(STRINGS_ES, {
+    settings: {
+        providerConfig: {
+            categoryCloud: 'Nube',
+            categoryGateway: 'Pasarela',
+            categoryLocal: 'Entorno local',
+            categoryOther: 'Proveedor',
+            presetSummaryTitle: 'Preajuste de {provider}',
+            presetSummaryHint: 'Endpoint predeterminado: {baseUrl} · Modelo predeterminado: {model}'
+        },
+        customPrompts: {
+            taskToggleName: 'Usar prompt personalizado para "{task}"',
+            taskToggleDesc: 'Activado: usa tu prompt personalizado de abajo para esta tarea. Desactivado: usa el prompt predeterminado.',
+            copyDefaultButton: 'Copiar prompt predeterminado',
+            copyDefaultNotice: '¡Prompt predeterminado copiado al portapapeles!',
+            defaultPromptLabel: 'Prompt predeterminado para "{task}":',
+            customPromptName: 'Prompt personalizado para "{task}"',
+            customPromptDesc: 'Introduce tu prompt personalizado. Los marcadores como {TITLE} o {RESEARCH_CONTEXT_SECTION} se sustituirán si aplican a la tarea. Consulta el prompt predeterminado para ver los marcadores disponibles.',
+            customPromptPlaceholder: 'Introduce tu prompt personalizado para {task}...'
+        }
+    }
+});
+
+extendLocale(STRINGS_FA, {
+    settings: {
+        providerConfig: {
+            categoryCloud: 'ابری',
+            categoryGateway: 'درگاه',
+            categoryLocal: 'محلی',
+            categoryOther: 'ارائه‌دهنده',
+            presetSummaryTitle: 'پیش‌تنظیم {provider}',
+            presetSummaryHint: 'endpoint پیش‌فرض: {baseUrl} · مدل پیش‌فرض: {model}'
+        },
+        customPrompts: {
+            taskToggleName: 'استفاده از پرامپت سفارشی برای "{task}"',
+            taskToggleDesc: 'روشن: برای این کار از پرامپت سفارشی زیر استفاده شود. خاموش: از پرامپت پیش‌فرض استفاده شود.',
+            copyDefaultButton: 'کپی پرامپت پیش‌فرض',
+            copyDefaultNotice: 'پرامپت پیش‌فرض در کلیپ‌بورد کپی شد!',
+            defaultPromptLabel: 'پرامپت پیش‌فرض برای "{task}":',
+            customPromptName: 'پرامپت سفارشی برای "{task}"',
+            customPromptDesc: 'پرامپت سفارشی خود را وارد کنید. placeholderهایی مانند {TITLE} یا {RESEARCH_CONTEXT_SECTION} در صورت نیاز برای این کار جایگزین می‌شوند. برای دیدن placeholderهای قابل استفاده به پرامپت پیش‌فرض مراجعه کنید.',
+            customPromptPlaceholder: 'پرامپت سفارشی خود را برای {task} وارد کنید...'
+        }
+    }
+});
+
+extendLocale(STRINGS_FR, {
+    settings: {
+        providerConfig: {
+            categoryCloud: 'Nuage',
+            categoryGateway: 'Passerelle',
+            categoryLocal: 'Machine locale',
+            categoryOther: 'Fournisseur',
+            presetSummaryTitle: 'Préréglage {provider}',
+            presetSummaryHint: 'Point de terminaison par défaut : {baseUrl} · Modèle par défaut : {model}'
+        },
+        customPrompts: {
+            taskToggleName: 'Utiliser un prompt personnalisé pour "{task}"',
+            taskToggleDesc: 'Activé : utilisez votre prompt personnalisé ci-dessous pour cette tâche. Désactivé : utilisez le prompt par défaut.',
+            copyDefaultButton: 'Copier le prompt par défaut',
+            copyDefaultNotice: 'Prompt par défaut copié dans le presse-papiers !',
+            defaultPromptLabel: 'Prompt par défaut pour "{task}" :',
+            customPromptName: 'Prompt personnalisé pour "{task}"',
+            customPromptDesc: 'Saisissez votre prompt personnalisé. Les espaces réservés comme {TITLE} ou {RESEARCH_CONTEXT_SECTION} seront remplacés s’ils s’appliquent à la tâche. Consultez le prompt par défaut pour voir les espaces réservés disponibles.',
+            customPromptPlaceholder: 'Saisissez votre prompt personnalisé pour {task}...'
+        }
+    }
+});
+
+extendLocale(STRINGS_ID, {
+    settings: {
+        providerConfig: {
+            categoryCloud: 'Awan',
+            categoryGateway: 'Gerbang',
+            categoryLocal: 'Lokal',
+            categoryOther: 'Penyedia',
+            presetSummaryTitle: 'Preset {provider}',
+            presetSummaryHint: 'Endpoint default: {baseUrl} · Model default: {model}'
+        },
+        customPrompts: {
+            taskToggleName: 'Gunakan prompt kustom untuk "{task}"',
+            taskToggleDesc: 'Aktif: gunakan prompt kustom Anda di bawah untuk tugas ini. Nonaktif: gunakan prompt default.',
+            copyDefaultButton: 'Salin prompt default',
+            copyDefaultNotice: 'Prompt default disalin ke clipboard!',
+            defaultPromptLabel: 'Prompt default untuk "{task}":',
+            customPromptName: 'Prompt kustom untuk "{task}"',
+            customPromptDesc: 'Masukkan prompt kustom Anda. Placeholder seperti {TITLE} atau {RESEARCH_CONTEXT_SECTION} akan diganti jika berlaku untuk tugas ini. Lihat prompt default untuk mengetahui placeholder yang tersedia.',
+            customPromptPlaceholder: 'Masukkan prompt kustom Anda untuk {task}...'
+        }
+    }
+});
+
+extendLocale(STRINGS_IT, {
+    settings: {
+        providerConfig: {
+            categoryCloud: 'Servizio cloud',
+            categoryGateway: 'Gateway API',
+            categoryLocal: 'Locale',
+            categoryOther: 'Fornitore',
+            presetSummaryTitle: 'Preset {provider}',
+            presetSummaryHint: 'Endpoint predefinito: {baseUrl} · Modello predefinito: {model}'
+        },
+        customPrompts: {
+            taskToggleName: 'Usa un prompt personalizzato per "{task}"',
+            taskToggleDesc: 'Attivo: usa il prompt personalizzato qui sotto per questa attività. Disattivo: usa il prompt predefinito.',
+            copyDefaultButton: 'Copia prompt predefinito',
+            copyDefaultNotice: 'Prompt predefinito copiato negli appunti!',
+            defaultPromptLabel: 'Prompt predefinito per "{task}":',
+            customPromptName: 'Prompt personalizzato per "{task}"',
+            customPromptDesc: 'Inserisci il tuo prompt personalizzato. I segnaposto come {TITLE} o {RESEARCH_CONTEXT_SECTION} verranno sostituiti se applicabili all’attività. Consulta il prompt predefinito per i segnaposto disponibili.',
+            customPromptPlaceholder: 'Inserisci il tuo prompt personalizzato per {task}...'
+        }
+    }
+});
+
+extendLocale(STRINGS_JA, {
+    settings: {
+        providerConfig: {
+            categoryCloud: 'クラウド',
+            categoryGateway: 'ゲートウェイ',
+            categoryLocal: 'ローカル',
+            categoryOther: 'プロバイダー',
+            presetSummaryTitle: '{provider} プリセット',
+            presetSummaryHint: '既定の endpoint: {baseUrl} · 既定のモデル: {model}'
+        },
+        customPrompts: {
+            taskToggleName: '「{task}」にカスタムプロンプトを使う',
+            taskToggleDesc: 'オン: このタスクでは下のカスタムプロンプトを使います。オフ: 既定のプロンプトを使います。',
+            copyDefaultButton: '既定のプロンプトをコピー',
+            copyDefaultNotice: '既定のプロンプトをクリップボードにコピーしました。',
+            defaultPromptLabel: '「{task}」の既定プロンプト:',
+            customPromptName: '「{task}」のカスタムプロンプト',
+            customPromptDesc: 'カスタムプロンプトを入力してください。{TITLE} や {RESEARCH_CONTEXT_SECTION} などのプレースホルダーは、このタスクで使える場合に置き換えられます。利用できるプレースホルダーは既定のプロンプトを参照してください。',
+            customPromptPlaceholder: '{task} 用のカスタムプロンプトを入力してください...'
+        }
+    }
+});
+
+extendLocale(STRINGS_KO, {
+    settings: {
+        providerConfig: {
+            categoryCloud: '클라우드',
+            categoryGateway: '게이트웨이',
+            categoryLocal: '로컬',
+            categoryOther: '프로바이더',
+            presetSummaryTitle: '{provider} 프리셋',
+            presetSummaryHint: '기본 endpoint: {baseUrl} · 기본 모델: {model}'
+        },
+        customPrompts: {
+            taskToggleName: '"{task}"에 사용자 정의 프롬프트 사용',
+            taskToggleDesc: '켜기: 이 작업에는 아래의 사용자 정의 프롬프트를 사용합니다. 끄기: 기본 프롬프트를 사용합니다.',
+            copyDefaultButton: '기본 프롬프트 복사',
+            copyDefaultNotice: '기본 프롬프트가 클립보드에 복사되었습니다!',
+            defaultPromptLabel: '"{task}"의 기본 프롬프트:',
+            customPromptName: '"{task}"의 사용자 정의 프롬프트',
+            customPromptDesc: '사용자 정의 프롬프트를 입력하세요. {TITLE} 또는 {RESEARCH_CONTEXT_SECTION} 같은 placeholder는 이 작업에 적용될 때 치환됩니다. 사용 가능한 placeholder는 기본 프롬프트를 참고하세요.',
+            customPromptPlaceholder: '{task}용 사용자 정의 프롬프트를 입력하세요...'
+        }
+    }
+});
+
+extendLocale(STRINGS_NL, {
+    settings: {
+        providerConfig: {
+            categoryCloud: 'Cloudservice',
+            categoryGateway: 'Gatewaydienst',
+            categoryLocal: 'Lokaal',
+            categoryOther: 'Aanbieder',
+            presetSummaryTitle: 'Voorinstelling voor {provider}',
+            presetSummaryHint: 'Standaard-endpoint: {baseUrl} · Standaardmodel: {model}'
+        },
+        customPrompts: {
+            taskToggleName: 'Aangepaste prompt gebruiken voor "{task}"',
+            taskToggleDesc: 'Aan: gebruik je aangepaste prompt hieronder voor deze taak. Uit: gebruik de standaardprompt.',
+            copyDefaultButton: 'Standaardprompt kopiëren',
+            copyDefaultNotice: 'Standaardprompt naar het klembord gekopieerd!',
+            defaultPromptLabel: 'Standaardprompt voor "{task}":',
+            customPromptName: 'Aangepaste prompt voor "{task}"',
+            customPromptDesc: 'Voer je aangepaste prompt in. Plaatshouders zoals {TITLE} of {RESEARCH_CONTEXT_SECTION} worden vervangen als ze voor deze taak gelden. Zie de standaardprompt voor beschikbare plaatshouders.',
+            customPromptPlaceholder: 'Voer je aangepaste prompt in voor {task}...'
+        }
+    }
+});
+
+extendLocale(STRINGS_PL, {
+    settings: {
+        providerConfig: {
+            categoryCloud: 'Chmura',
+            categoryGateway: 'Brama',
+            categoryLocal: 'Lokalny',
+            categoryOther: 'Dostawca',
+            presetSummaryTitle: 'Ustawienie wstępne {provider}',
+            presetSummaryHint: 'Domyślny endpoint: {baseUrl} · Domyślny model: {model}'
+        },
+        customPrompts: {
+            taskToggleName: 'Użyj własnego promptu dla "{task}"',
+            taskToggleDesc: 'Włączone: użyj poniżej własnego promptu dla tego zadania. Wyłączone: użyj domyślnego promptu.',
+            copyDefaultButton: 'Kopiuj domyślny prompt',
+            copyDefaultNotice: 'Domyślny prompt skopiowano do schowka!',
+            defaultPromptLabel: 'Domyślny prompt dla "{task}":',
+            customPromptName: 'Własny prompt dla "{task}"',
+            customPromptDesc: 'Wprowadź własny prompt. Symbole zastępcze, takie jak {TITLE} lub {RESEARCH_CONTEXT_SECTION}, zostaną podmienione, jeśli mają zastosowanie do tego zadania. Sprawdź domyślny prompt, aby zobaczyć dostępne symbole zastępcze.',
+            customPromptPlaceholder: 'Wprowadź własny prompt dla {task}...'
+        }
+    }
+});
+
+extendLocale(STRINGS_PT, {
+    settings: {
+        providerConfig: {
+            categoryCloud: 'Nuvem',
+            categoryGateway: 'Gateway de API',
+            categoryLocal: 'Instância local',
+            categoryOther: 'Fornecedor',
+            presetSummaryTitle: 'Predefinição de {provider}',
+            presetSummaryHint: 'Endpoint predefinido: {baseUrl} · Modelo predefinido: {model}'
+        },
+        customPrompts: {
+            taskToggleName: 'Usar prompt personalizado para "{task}"',
+            taskToggleDesc: 'Ativado: use o seu prompt personalizado abaixo para esta tarefa. Desativado: use o prompt predefinido.',
+            copyDefaultButton: 'Copiar prompt predefinido',
+            copyDefaultNotice: 'Prompt predefinido copiado para a área de transferência!',
+            defaultPromptLabel: 'Prompt predefinido para "{task}":',
+            customPromptName: 'Prompt personalizado para "{task}"',
+            customPromptDesc: 'Introduza o seu prompt personalizado. Marcadores como {TITLE} ou {RESEARCH_CONTEXT_SECTION} serão substituídos quando se aplicarem a esta tarefa. Consulte o prompt predefinido para ver os marcadores disponíveis.',
+            customPromptPlaceholder: 'Introduza o seu prompt personalizado para {task}...'
+        }
+    }
+});
+
+extendLocale(STRINGS_PT_BR, {
+    settings: {
+        providerConfig: {
+            categoryCloud: 'Nuvem',
+            categoryGateway: 'Gateway de API',
+            categoryLocal: 'Instância local',
+            categoryOther: 'Provedor',
+            presetSummaryTitle: 'Predefinição de {provider}',
+            presetSummaryHint: 'Endpoint padrão: {baseUrl} · Modelo padrão: {model}'
+        },
+        customPrompts: {
+            taskToggleName: 'Usar prompt personalizado para "{task}"',
+            taskToggleDesc: 'Ativado: use seu prompt personalizado abaixo para esta tarefa. Desativado: use o prompt padrão.',
+            copyDefaultButton: 'Copiar prompt padrão',
+            copyDefaultNotice: 'Prompt padrão copiado para a área de transferência!',
+            defaultPromptLabel: 'Prompt padrão para "{task}":',
+            customPromptName: 'Prompt personalizado para "{task}"',
+            customPromptDesc: 'Digite seu prompt personalizado. Marcadores como {TITLE} ou {RESEARCH_CONTEXT_SECTION} serão substituídos quando se aplicarem a esta tarefa. Consulte o prompt padrão para ver os marcadores disponíveis.',
+            customPromptPlaceholder: 'Digite seu prompt personalizado para {task}...'
+        }
+    }
+});
+
+extendLocale(STRINGS_RU, {
+    settings: {
+        providerConfig: {
+            categoryCloud: 'Облачный',
+            categoryGateway: 'Шлюз',
+            categoryLocal: 'Локальный',
+            categoryOther: 'Провайдер',
+            presetSummaryTitle: 'Предустановка {provider}',
+            presetSummaryHint: 'Базовый endpoint: {baseUrl} · Модель по умолчанию: {model}'
+        },
+        customPrompts: {
+            taskToggleName: 'Использовать пользовательский prompt для "{task}"',
+            taskToggleDesc: 'Вкл.: использовать ваш пользовательский prompt ниже для этой задачи. Выкл.: использовать стандартный prompt.',
+            copyDefaultButton: 'Скопировать стандартный prompt',
+            copyDefaultNotice: 'Стандартный prompt скопирован в буфер обмена!',
+            defaultPromptLabel: 'Стандартный prompt для "{task}":',
+            customPromptName: 'Пользовательский prompt для "{task}"',
+            customPromptDesc: 'Введите свой пользовательский prompt. Плейсхолдеры вроде {TITLE} или {RESEARCH_CONTEXT_SECTION} будут заменены, если они применимы к этой задаче. Доступные плейсхолдеры смотрите в стандартном prompt.',
+            customPromptPlaceholder: 'Введите пользовательский prompt для {task}...'
+        }
+    }
+});
+
+extendLocale(STRINGS_TH, {
+    settings: {
+        providerConfig: {
+            categoryCloud: 'คลาวด์',
+            categoryGateway: 'เกตเวย์',
+            categoryLocal: 'ภายในเครื่อง',
+            categoryOther: 'ผู้ให้บริการ',
+            presetSummaryTitle: 'พรีเซ็ต {provider}',
+            presetSummaryHint: 'endpoint เริ่มต้น: {baseUrl} · โมเดลเริ่มต้น: {model}'
+        },
+        customPrompts: {
+            taskToggleName: 'ใช้พรอมป์ต์แบบกำหนดเองสำหรับ "{task}"',
+            taskToggleDesc: 'เปิด: ใช้พรอมป์ต์แบบกำหนดเองด้านล่างสำหรับงานนี้ ปิด: ใช้พรอมป์ต์เริ่มต้น',
+            copyDefaultButton: 'คัดลอกพรอมป์ต์เริ่มต้น',
+            copyDefaultNotice: 'คัดลอกพรอมป์ต์เริ่มต้นไปยังคลิปบอร์ดแล้ว!',
+            defaultPromptLabel: 'พรอมป์ต์เริ่มต้นสำหรับ "{task}":',
+            customPromptName: 'พรอมป์ต์แบบกำหนดเองสำหรับ "{task}"',
+            customPromptDesc: 'ป้อนพรอมป์ต์แบบกำหนดเองของคุณ placeholder อย่าง {TITLE} หรือ {RESEARCH_CONTEXT_SECTION} จะถูกแทนที่เมื่อใช้ได้กับงานนี้ ดูพรอมป์ต์เริ่มต้นเพื่อดู placeholder ที่รองรับ',
+            customPromptPlaceholder: 'ป้อนพรอมป์ต์แบบกำหนดเองของคุณสำหรับ {task}...'
+        }
+    }
+});
+
+extendLocale(STRINGS_TR, {
+    settings: {
+        providerConfig: {
+            categoryCloud: 'Bulut',
+            categoryGateway: 'Ağ geçidi',
+            categoryLocal: 'Yerel',
+            categoryOther: 'Sağlayıcı',
+            presetSummaryTitle: '{provider} ön ayarı',
+            presetSummaryHint: 'Varsayılan endpoint: {baseUrl} · Varsayılan model: {model}'
+        },
+        customPrompts: {
+            taskToggleName: '"{task}" için özel istem kullan',
+            taskToggleDesc: 'Açık: bu görev için aşağıdaki özel isteminizi kullanın. Kapalı: varsayılan istemi kullanın.',
+            copyDefaultButton: 'Varsayılan istemi kopyala',
+            copyDefaultNotice: 'Varsayılan istem panoya kopyalandı!',
+            defaultPromptLabel: '"{task}" için varsayılan istem:',
+            customPromptName: '"{task}" için özel istem',
+            customPromptDesc: 'Özel isteminizi girin. {TITLE} veya {RESEARCH_CONTEXT_SECTION} gibi placeholderlar bu görev için uygunsa değiştirilir. Kullanılabilir placeholderlar için varsayılan isteme bakın.',
+            customPromptPlaceholder: '{task} için özel isteminizi girin...'
+        }
+    }
+});
+
+extendLocale(STRINGS_UK, {
+    settings: {
+        providerConfig: {
+            categoryCloud: 'Хмарний',
+            categoryGateway: 'Шлюз',
+            categoryLocal: 'Локальний',
+            categoryOther: 'Провайдер',
+            presetSummaryTitle: 'Попереднє налаштування {provider}',
+            presetSummaryHint: 'Типовий endpoint: {baseUrl} · Типова модель: {model}'
+        },
+        customPrompts: {
+            taskToggleName: 'Використовувати власний prompt для "{task}"',
+            taskToggleDesc: 'Увімкнено: використовувати ваш власний prompt нижче для цього завдання. Вимкнено: використовувати стандартний prompt.',
+            copyDefaultButton: 'Скопіювати стандартний prompt',
+            copyDefaultNotice: 'Стандартний prompt скопійовано до буфера обміну!',
+            defaultPromptLabel: 'Стандартний prompt для "{task}":',
+            customPromptName: 'Власний prompt для "{task}"',
+            customPromptDesc: 'Введіть власний prompt. Плейсхолдери на кшталт {TITLE} або {RESEARCH_CONTEXT_SECTION} буде замінено, якщо вони застосовні до цього завдання. Дивіться стандартний prompt, щоб побачити доступні плейсхолдери.',
+            customPromptPlaceholder: 'Введіть власний prompt для {task}...'
+        }
+    }
+});
+
+extendLocale(STRINGS_VI, {
+    settings: {
+        providerConfig: {
+            categoryCloud: 'Đám mây',
+            categoryGateway: 'Cổng',
+            categoryLocal: 'Cục bộ',
+            categoryOther: 'Nhà cung cấp',
+            presetSummaryTitle: 'Thiết lập sẵn {provider}',
+            presetSummaryHint: 'Endpoint mặc định: {baseUrl} · Mô hình mặc định: {model}'
+        },
+        customPrompts: {
+            taskToggleName: 'Dùng prompt tùy chỉnh cho "{task}"',
+            taskToggleDesc: 'Bật: dùng prompt tùy chỉnh bên dưới cho tác vụ này. Tắt: dùng prompt mặc định.',
+            copyDefaultButton: 'Sao chép prompt mặc định',
+            copyDefaultNotice: 'Đã sao chép prompt mặc định vào bộ nhớ tạm!',
+            defaultPromptLabel: 'Prompt mặc định cho "{task}":',
+            customPromptName: 'Prompt tùy chỉnh cho "{task}"',
+            customPromptDesc: 'Nhập prompt tùy chỉnh của bạn. Các placeholder như {TITLE} hoặc {RESEARCH_CONTEXT_SECTION} sẽ được thay thế nếu áp dụng cho tác vụ này. Hãy xem prompt mặc định để biết các placeholder có sẵn.',
+            customPromptPlaceholder: 'Nhập prompt tùy chỉnh của bạn cho {task}...'
+        }
+    }
+});
+
+extendLocale(STRINGS_AR, {
     sidebar: {
         actions: {
             processCurrentAddLinks: { tooltip: 'يعالج الملف الحالي وينشئ روابط ويكي/ملاحظات مفاهيم.' },

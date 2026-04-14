@@ -4,7 +4,7 @@
 
 [English](./README.md) | [简体中文](./README_zh.md) | [Español](./README_es.md) | [Français](./README_fr.md) | [Deutsch](./README_de.md) | [Italiano](./README_it.md) | [Português](./README_pt.md) | [繁體中文](./README_zh_Hant.md) | [日本語](./README_ja.md) | [한국어](./README_ko.md) | [Русский](./README_ru.md) | [العربية](./README_ar.md) | [हिन्दी](./README_hi.md) | [বাংলা](./README_bn.md) | [Nederlands](./README_nl.md) | [Svenska](./README_sv.md) | [Suomi](./README_fi.md) | [Dansk](./README_da.md) | [Norsk](./README_no.md) | [Polski](./README_pl.md) | [Türkçe](./README_tr.md) | [עברית](./README_he.md) | [ไทย](./README_th.md) | [Ελληνικά](./README_el.md) | [Čeština](./README_cs.md) | [Magyar](./README_hu.md) | [Română](./README_ro.md) | [Українська](./README_uk.md) | [Tiếng Việt](./README_vi.md) | [Bahasa Indonesia](./README_id.md) | [Bahasa Melayu](./README_ms.md)
 
-Czytaj dokumentację w innych językach: [Language Hub](./docs/i18n/README.md)
+Czytaj dokumentację w innych językach: [Centrum języków](./docs/i18n/README.md)
 
 ```
 ==================================================
@@ -59,15 +59,15 @@ To wszystko. Przejrzyj ustawienia, aby odblokować więcej funkcji, takich jak b
 
 | Zagadnienie | Zakres | Domyślnie | Uwagi |
 |---|---|---|---|
-| `UI Locale` | Tylko tekst interfejsu wtyczki (ustawienia, pasek boczny, powiadomienia, okna dialogowe) | `auto` | Podąża za językiem Obsidian; aktualne katalogi UI to `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN` i `zh-TW`. |
-| `Task Output Language` | Wynik zadania generowany przez LLM (linki, podsumowania, generowanie, ekstrakcja, język docelowy tłumaczenia) | `en` | Może być globalny albo ustawiany per zadanie po włączeniu `Use different languages for tasks`. |
-| `Disable auto translation` | Zadania inne niż Translate zachowują kontekst języka źródłowego | `false` | Jawne zadania `Translate` nadal wymuszają skonfigurowany język docelowy. |
-| Locale fallback | Rozwiązywanie brakujących kluczy UI | locale -> `en` | Utrzymuje stabilność interfejsu, gdy część kluczy nie ma jeszcze tłumaczenia. |
+| `Język interfejsu` | Tylko tekst interfejsu wtyczki (ustawienia, pasek boczny, powiadomienia, okna dialogowe) | `auto` | Podąża za językiem Obsidian; aktualne katalogi UI to `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN` i `zh-TW`. |
+| `Język wyników zadań` | Wynik zadania generowany przez LLM (linki, podsumowania, generowanie, ekstrakcja, język docelowy tłumaczenia) | `en` | Może być globalny albo ustawiany per zadanie po włączeniu `Używaj różnych języków dla zadań`. |
+| `Wyłącz automatyczne tłumaczenie` | Zadania inne niż Translate zachowują kontekst języka źródłowego | `false` | Jawne zadania `Translate` nadal wymuszają skonfigurowany język docelowy. |
+| Język zapasowy | Rozwiązywanie brakujących kluczy UI | locale -> `en` | Utrzymuje stabilność interfejsu, gdy część kluczy nie ma jeszcze tłumaczenia. |
 
 - Utrzymywane dokumenty źródłowe to angielski i uproszczony chiński, a opublikowane tłumaczenia README są podlinkowane w nagłówku powyżej.
 - Zakres obsługiwanych locale interfejsu w aplikacji jest obecnie dokładnie zgodny z jawnym katalogiem w kodzie: `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, `zh-TW`.
 - Angielski fallback pozostaje siatką bezpieczeństwa implementacji, ale obsługiwane widoczne powierzchnie są objęte testami regresyjnymi i nie powinny po cichu wracać do angielskiego podczas normalnego użycia.
-- Dodatkowe szczegóły i wytyczne dotyczące współtworzenia są śledzone w [Language Hub](./docs/i18n/README.md).
+- Dodatkowe szczegóły i wytyczne dotyczące współtworzenia są śledzone w [Centrum języków](./docs/i18n/README.md).
 
 ## Funkcje
 
@@ -111,12 +111,12 @@ To wszystko. Przejrzyj ustawienia, aby odblokować więcej funkcji, takich jak b
   - Obsługuje tłumaczenie między wieloma językami.
   - Konfigurowalny język docelowy w ustawieniach lub UI.
   - Automatycznie otwiera przetłumaczony tekst po prawej stronie oryginału dla wygodniejszego czytania.
-- **Batch Translate**:
+- **Tłumaczenie wsadowe**:
   - Tłumacz wszystkie pliki w wybranym folderze.
   - Obsługuje przetwarzanie równoległe, gdy włączone jest "Enable Batch Parallelism".
   - Używa niestandardowych promptów do tłumaczenia, jeśli zostały skonfigurowane.
   - Dodaje opcję "Batch translate this folder" do menu kontekstowego eksploratora plików.
-- **Disable auto translation**: Gdy ta opcja jest włączona, zadania inne niż Translate nie wymuszają już określonego języka wyjściowego i zachowują kontekst języka źródłowego. Jawne zadanie "Translate" nadal wykonuje tłumaczenie zgodnie z konfiguracją.
+- **Wyłącz automatyczne tłumaczenie**: Gdy ta opcja jest włączona, zadania inne niż Translate nie wymuszają już określonego języka wyjściowego i zachowują kontekst języka źródłowego. Jawne zadanie "Translate" nadal wykonuje tłumaczenie zgodnie z konfiguracją.
 
 ### Badania w sieci i generowanie treści
 - **Badania w sieci i podsumowania**:
@@ -133,7 +133,7 @@ To wszystko. Przejrzyj ustawienia, aby odblokować więcej funkcji, takich jak b
 - **Sprzężenie z Mermaid auto-fix**: Gdy Mermaid auto-fix jest włączone, przepływy związane z Mermaid automatycznie naprawiają wygenerowane pliki lub foldery wyjściowe po przetworzeniu. Obejmuje to Process, Generate from Title, Batch Generate from Titles, Research & Summarize, Summarise as Mermaid i Translate.
 
 ### Funkcje pomocnicze
-- **Summarise as Mermaid diagram**:
+- **Podsumuj jako diagram Mermaid**:
   - Ta funkcja pozwala podsumować treść notatki w formie diagramu Mermaid.
   - Język wyjściowy diagramu Mermaid można ustawić w konfiguracji.
   - **Mermaid Output Folder**: Skonfiguruj folder, w którym mają być zapisywane wygenerowane pliki diagramów Mermaid.
@@ -209,38 +209,38 @@ Dostęp do ustawień wtyczki:
 **Settings** -> **Community Plugins** -> **Notemd** (kliknij ikonę koła zębatego).
 
 ### Konfiguracja dostawcy LLM
-1. **Active Provider**: Wybierz z listy rozwijanej dostawcę LLM, którego chcesz używać.
-2. **Provider Settings**: Skonfiguruj szczegółowe ustawienia dla wybranego dostawcy:
+1. **Aktywny dostawca**: Wybierz z listy rozwijanej dostawcę LLM, którego chcesz używać.
+2. **Ustawienia dostawcy**: Skonfiguruj szczegółowe ustawienia dla wybranego dostawcy:
    - **API Key**: Wymagany dla większości dostawców chmurowych, takich jak OpenAI, Anthropic, DeepSeek, Qwen, Qwen Code, Doubao, Moonshot, GLM, Z AI, MiniMax, Huawei Cloud MaaS, Baidu Qianfan, SiliconFlow, Google, Mistral, Azure OpenAI, OpenRouter, xAI, Groq, Together, Fireworks oraz Requesty. Nie jest wymagany dla Ollama. Opcjonalny dla LM Studio i ogólnego presetu `OpenAI Compatible`, jeśli endpoint akceptuje dostęp anonimowy lub placeholderowy.
    - **Base URL / Endpoint**: Endpoint API dla usługi. Dostarczane są wartości domyślne, ale może być konieczna zmiana dla modeli lokalnych, takich jak LMStudio i Ollama, gatewayów takich jak OpenRouter, Requesty i OpenAI Compatible, albo dla konkretnych wdrożeń Azure. **Wymagany dla Azure OpenAI.**
    - **Model**: Konkretna nazwa albo ID modelu, którego chcesz użyć, na przykład `gpt-4o`, `claude-3-5-sonnet-20240620`, `google/gemini-flash-1.5`, `grok-4`, `moonshotai/kimi-k2-instruct-0905`, `accounts/fireworks/models/kimi-k2p5` albo `anthropic/claude-3-7-sonnet-latest`. Upewnij się, że model jest dostępny u Twojego dostawcy lub endpointu.
    - **Temperature**: Steruje losowością wyjścia LLM, gdzie 0 = deterministycznie, a 1 = maksymalna kreatywność. Niższe wartości, na przykład 0.2-0.5, zwykle lepiej sprawdzają się w zadaniach strukturalnych.
    - **API Version (tylko Azure)**: Wymagany dla wdrożeń Azure OpenAI, na przykład `2024-02-15-preview`.
-3. **Test Connection**: Użyj przycisku "Test Connection" dla aktywnego dostawcy, aby zweryfikować ustawienia. Dostawcy OpenAI-compatible używają teraz kontroli świadomych dostawcy: endpointy takie jak `Qwen`, `Qwen Code`, `Doubao`, `Moonshot`, `GLM`, `Z AI`, `MiniMax`, `Huawei Cloud MaaS`, `Baidu Qianfan`, `SiliconFlow`, `Groq`, `Together`, `Fireworks`, `LMStudio` oraz `OpenAI Compatible` testują bezpośrednio `chat/completions`, a dostawcy z niezawodnym endpointem `/models` mogą nadal najpierw użyć listowania modeli. Jeśli pierwszy test zakończy się przejściowym rozłączeniem sieciowym, takim jak `ERR_CONNECTION_CLOSED`, Notemd automatycznie przełączy się na stabilną sekwencję ponawiania zamiast od razu kończyć się błędem.
-4. **Manage Provider Configurations**: Użyj przycisków "Export Providers" i "Import Providers", aby zapisać albo wczytać ustawienia dostawców LLM do lub z pliku `notemd-providers.json` w katalogu konfiguracji wtyczki. Ułatwia to tworzenie kopii zapasowych i współdzielenie konfiguracji.
-5. **Preset Coverage**: Oprócz pierwotnych dostawców Notemd zawiera teraz predefiniowane wpisy dla `Qwen`, `Qwen Code`, `Doubao`, `Moonshot`, `GLM`, `Z AI`, `MiniMax`, `Huawei Cloud MaaS`, `Baidu Qianfan`, `SiliconFlow`, `xAI`, `Groq`, `Together`, `Fireworks`, `Requesty` oraz ogólnego celu `OpenAI Compatible` dla LiteLLM, vLLM, Perplexity, Vercel AI Gateway albo niestandardowych proxy.
+3. **Test połączenia**: Użyj przycisku "Test połączenia" dla aktywnego dostawcy, aby zweryfikować ustawienia. Dostawcy OpenAI-compatible używają teraz kontroli świadomych dostawcy: endpointy takie jak `Qwen`, `Qwen Code`, `Doubao`, `Moonshot`, `GLM`, `Z AI`, `MiniMax`, `Huawei Cloud MaaS`, `Baidu Qianfan`, `SiliconFlow`, `Groq`, `Together`, `Fireworks`, `LMStudio` oraz `OpenAI Compatible` testują bezpośrednio `chat/completions`, a dostawcy z niezawodnym endpointem `/models` mogą nadal najpierw użyć listowania modeli. Jeśli pierwszy test zakończy się przejściowym rozłączeniem sieciowym, takim jak `ERR_CONNECTION_CLOSED`, Notemd automatycznie przełączy się na stabilną sekwencję ponawiania zamiast od razu kończyć się błędem.
+4. **Zarządzanie konfiguracjami dostawców**: Użyj przycisków "Export Providers" i "Import Providers", aby zapisać albo wczytać ustawienia dostawców LLM do lub z pliku `notemd-providers.json` w katalogu konfiguracji wtyczki. Ułatwia to tworzenie kopii zapasowych i współdzielenie konfiguracji.
+5. **Zakres presetów**: Oprócz pierwotnych dostawców Notemd zawiera teraz predefiniowane wpisy dla `Qwen`, `Qwen Code`, `Doubao`, `Moonshot`, `GLM`, `Z AI`, `MiniMax`, `Huawei Cloud MaaS`, `Baidu Qianfan`, `SiliconFlow`, `xAI`, `Groq`, `Together`, `Fireworks`, `Requesty` oraz ogólnego celu `OpenAI Compatible` dla LiteLLM, vLLM, Perplexity, Vercel AI Gateway albo niestandardowych proxy.
 <img width="804" height="506" alt="LLM" src="https://github.com/user-attachments/assets/8caf42e3-43ad-456d-8b96-b63e7914e45f" />
 
 ### Konfiguracja wielu modeli
-- **Use Different Providers for Tasks**:
-  - **Wyłączone (domyślnie)**: Używa pojedynczego "Active Provider" wybranego powyżej dla wszystkich zadań.
+- **Używaj różnych dostawców dla zadań**:
+  - **Wyłączone (domyślnie)**: Używa pojedynczego "aktywnego dostawcy" wybranego powyżej dla wszystkich zadań.
   - **Włączone**: Pozwala wybrać konkretnego dostawcę i opcjonalnie nadpisać nazwę modelu dla każdego zadania, takiego jak "Add Links", "Research & Summarize", "Generate from Title", "Translate" i "Extract Concepts". Jeżeli pole nadpisania modelu pozostaje puste, używany jest domyślny model skonfigurowany dla dostawcy wybranego dla danego zadania.
-- **Select different languages for different tasks**:
-  - **Wyłączone (domyślnie)**: Używa jednego "Output language" dla wszystkich zadań.
+- **Wybieraj różne języki dla różnych zadań**:
+  - **Wyłączone (domyślnie)**: Używa jednego języka wyników dla wszystkich zadań.
   - **Włączone**: Pozwala wybrać konkretny język dla każdego zadania, na przykład "Add Links", "Research & Summarize", "Generate from Title", "Summarise as Mermaid diagram" oraz "Extract Concepts".
 
 <img width="817" height="428" alt="Multi-model" src="https://github.com/user-attachments/assets/85e6b854-c0ca-45cc-a55e-24638dceb120" />
 
-### Architektura językowa (UI Locale vs Task Output Language)
+### Architektura językowa (język interfejsu i język wyników zadań)
 
-- **UI Locale** kontroluje wyłącznie teksty interfejsu wtyczki, takie jak etykiety ustawień, przyciski paska bocznego, powiadomienia i okna dialogowe. Domyślny tryb `auto` podąża za aktualnym językiem interfejsu Obsidiana.
-- **Task Output Language** steruje wynikiem zadań generowanym przez model, takim jak linki, podsumowania, generowanie tytułów, podsumowania Mermaid, ekstrakcja pojęć i język docelowy tłumaczenia.
+- **Język interfejsu** kontroluje wyłącznie teksty interfejsu wtyczki, takie jak etykiety ustawień, przyciski paska bocznego, powiadomienia i okna dialogowe. Domyślny tryb `auto` podąża za aktualnym językiem interfejsu Obsidiana.
+- **Język wyników zadań** steruje wynikiem zadań generowanym przez model, takim jak linki, podsumowania, generowanie tytułów, podsumowania Mermaid, ekstrakcja pojęć i język docelowy tłumaczenia.
 - **Per-task language mode** pozwala każdemu zadaniu rozstrzygać swój język wyjściowy poprzez wspólną warstwę polityki zamiast rozproszonych nadpisań modułowych.
-- **Disable auto translation** utrzymuje zadania inne niż Translate w kontekście języka źródłowego, podczas gdy jawne zadania Translate nadal wymuszają skonfigurowany język docelowy.
+- **Wyłącz automatyczne tłumaczenie** utrzymuje zadania inne niż Translate w kontekście języka źródłowego, podczas gdy jawne zadania Translate nadal wymuszają skonfigurowany język docelowy.
 - Ścieżki generowania związane z Mermaid podlegają tej samej polityce językowej i nadal mogą uruchamiać Mermaid auto-fix, gdy funkcja jest aktywna.
 
 ### Ustawienia stabilnych wywołań API
-- **Enable Stable API Calls (Retry Logic)**:
+- **Włącz stabilne wywołania API (logika ponawiania)**:
   - **Wyłączone (domyślnie)**: Pojedyncza awaria wywołania API zatrzyma bieżące zadanie.
   - **Włączone**: Automatycznie ponawia nieudane wywołania LLM API, co jest przydatne przy niestabilnej sieci albo rate limitach.
   - **Awaryjna ścieżka testu połączenia**: Nawet gdy zwykłe wywołania nie działają jeszcze w trybie stabilnym, testy połączenia dostawców przełączają się teraz na tę samą sekwencję ponawiania po pierwszym przejściowym błędzie sieciowym.
@@ -248,7 +248,7 @@ Dostęp do ustawień wtyczki:
   - **Stabilna kolejność dla OpenAI-compatible**: W trybie stabilnym każda próba OpenAI-compatible przebiega teraz w kolejności `direct streaming -> direct non-stream -> requestUrl (with streamed fallback when needed)` zanim zostanie uznana za nieudaną. Ogranicza to zbyt agresywne błędy, gdy niestabilny jest tylko jeden tryb transportu.
 - **Retry Interval (seconds)**: Widoczne tylko po włączeniu funkcji. Czas pomiędzy próbami, od 1 do 300 sekund. Domyślnie: 5.
 - **Maximum Retries**: Widoczne tylko po włączeniu funkcji. Maksymalna liczba ponowień, od 0 do 10. Domyślnie: 3.
-- **API Error Debugging Mode**:
+- **Tryb debugowania błędów API**:
   - **Wyłączone (domyślnie)**: Używa standardowego, zwięzłego raportowania błędów.
   - **Włączone**: Aktywuje szczegółowe logowanie błędów, podobne do rozwiniętych logów DeepSeek, dla wszystkich dostawców i zadań, w tym Translate, Search i Connection Tests. Obejmuje to kody statusu HTTP, surowy tekst odpowiedzi, osie czasu transportu żądań, oczyszczone URL-e i nagłówki, czas trwania prób, nagłówki odpowiedzi, częściowe treści odpowiedzi, sparsowany częściowy strumień i ślady stosu, co jest kluczowe przy diagnozowaniu problemów z połączeniem API i resetami gatewaya upstream.
 - **Developer Mode**:
@@ -293,7 +293,7 @@ Dostęp do ustawień wtyczki:
   - **Wyłączone (domyślnie)**: Plik logu nie jest tworzony.
   - **Włączone**: Tworzy plik logu z listą nowo utworzonych notatek pojęciowych po przetwarzaniu. Format:
     ```
-    generate xx concepts md file
+    wygeneruj xx plików md z pojęciami
     1. concepts1
     2. concepts2
     ...
@@ -310,7 +310,7 @@ Dostęp do ustawień wtyczki:
 <img width="809" height="281" alt="Concept log file output" src="https://github.com/user-attachments/assets/eef6f5d5-592d-4b8f-84b1-7404521a6e9b" />
 
 #### Zadanie ekstrakcji pojęć
-- **Create minimal concept notes**:
+- **Twórz minimalne notatki pojęciowe**:
   - **Włączone (domyślnie)**: Nowo tworzone notatki pojęciowe będą zawierać wyłącznie tytuł, na przykład `# Pojęcie`.
   - **Wyłączone**: Notatki pojęciowe mogą zawierać dodatkową treść, taką jak backlink "Linked From", jeśli nie została wyłączona ustawieniem poniżej.
 - **Add "Linked From" backlink**:
@@ -380,7 +380,7 @@ Dostęp do ustawień wtyczki:
   - **Włączone**: Pozwala określić własną nazwę podfolderu, do którego będą przenoszone ukończone pliki.
 - **Custom Output Folder Name**: Widoczne tylko po włączeniu powyższej opcji. Wpisz oczekiwaną nazwę podfolderu, na przykład `Generated Content` albo `_complete`. Niedozwolone znaki nie są akceptowane. Jeśli pole pozostanie puste, użyte zostanie `_complete`. Folder zostanie utworzony względem nadrzędnego katalogu oryginalnego folderu.
 
-#### Przyciski przepływu pracy One-click
+#### Przyciski przepływu pracy jednym kliknięciem
 - **Visual Workflow Builder**: Twórz niestandardowe przyciski workflow z wbudowanych akcji bez ręcznego pisania DSL.
 - **Custom Workflow Buttons DSL**: Zaawansowani użytkownicy nadal mogą bezpośrednio edytować tekst definicji workflow. Niepoprawny DSL bezpiecznie wraca do domyślnego workflow i pokazuje ostrzeżenie w pasku bocznym albo w UI ustawień.
 - **Workflow Error Strategy**:
@@ -388,7 +388,7 @@ Dostęp do ustawień wtyczki:
   - **Continue on Error**: Kontynuuje kolejne kroki i raportuje liczbę nieudanych akcji na końcu.
 - **Default Workflow Included**: `One-Click Extract` łączy `Process File (Add Links)`, `Batch Generate from Titles` i `Batch Mermaid Fix`.
 
-#### Ustawienia niestandardowych promptów
+#### Ustawienia niestandardowych instrukcji
 Ta funkcja pozwala nadpisać domyślne instrukcje, czyli prompty wysyłane do LLM dla konkretnych zadań, i zapewnia bardziej precyzyjną kontrolę nad wynikiem.
 
 - **Enable Custom Prompts for Specific Tasks**:
@@ -439,10 +439,10 @@ Ta funkcja pozwala nadpisać domyślne instrukcje, czyli prompty wysyłane do LL
 
 ## Instrukcja użytkowania
 
-### Szybkie workflow i pasek boczny
+### Szybkie przepływy pracy i pasek boczny
 
 - Otwórz pasek boczny Notemd, aby uzyskać dostęp do pogrupowanych sekcji działań dla głównego przetwarzania, generowania, tłumaczenia, wiedzy i narzędzi pomocniczych.
-- Użyj obszaru **Quick Workflows** na górze paska bocznego, aby uruchamiać własne wieloetapowe przyciski.
+- Użyj obszaru **Szybkie przepływy pracy** na górze paska bocznego, aby uruchamiać własne wieloetapowe przyciski.
 - Domyślny workflow **One-Click Extract** uruchamia `Process File (Add Links)` -> `Batch Generate from Titles` -> `Batch Mermaid Fix`.
 - Postęp workflow, logi dla poszczególnych kroków i błędy są widoczne w pasku bocznym, z przypiętą stopką chroniącą pasek postępu i obszar logów przed zepchnięciem przez rozwinięte sekcje.
 - Karta postępu utrzymuje tekst statusu, osobny wskaźnik procentowy i pozostały czas czytelne na pierwszy rzut oka, a te same niestandardowe workflow można rekonfigurować z poziomu ustawień.
@@ -470,7 +470,7 @@ To główna funkcjonalność skupiająca się na identyfikowaniu pojęć i dodaw
 
 ### Nowe funkcje
 
-1. **Summarise as Mermaid diagram**:
+1. **Podsumuj jako diagram Mermaid**:
    - Otwórz notatkę, którą chcesz podsumować.
    - Uruchom komendę `Notemd: Summarise as Mermaid diagram` z palety poleceń albo przyciskiem na pasku bocznym.
    - Wtyczka wygeneruje nową notatkę z diagramem Mermaid.
@@ -482,7 +482,7 @@ To główna funkcjonalność skupiająca się na identyfikowaniu pojęć i dodaw
    - Wtyczka używa skonfigurowanego **LLM Provider** zgodnie z ustawieniami Multi-Model do wykonania tłumaczenia.
    - Przetłumaczona treść jest zapisywana w skonfigurowanym **Translation Save Path** z odpowiednim sufiksem i otwierana w **nowym panelu po prawej stronie** oryginalnej treści, aby ułatwić porównanie.
    - To zadanie można anulować przyciskiem na pasku bocznym albo przyciskiem anulowania w modalu.
-3. **Batch Translate**:
+3. **Tłumaczenie wsadowe**:
    - Uruchom komendę `Notemd: Batch Translate Folder` z palety poleceń i wybierz folder albo kliknij prawym przyciskiem folder w eksploratorze plików i wybierz "Batch translate this folder".
    - Wtyczka przetłumaczy wszystkie pliki Markdown w wybranym folderze.
    - Przetłumaczone pliki są zapisywane w skonfigurowanej ścieżce tłumaczenia, ale nie są otwierane automatycznie.
@@ -616,7 +616,7 @@ Notemd działa lokalnie wewnątrz Obsidiana, ale niektóre funkcje wysyłają ż
 - Endpoint: Tavily API albo endpointy DuckDuckGo.
 - Wysyłane dane: Twoje zapytanie badawcze oraz wymagane metadane żądania.
 
-### Diagnostyka deweloperska i logi debugowania (opcjonalne)
+### Diagnostyka deweloperska i dzienniki śledzenia błędów (opcjonalne)
 
 - Trigger: API debug mode i akcje diagnostyczne dewelopera.
 - Przechowywanie: logi diagnostyczne i błędów są zapisywane w katalogu głównym vaultu, na przykład `Notemd_Provider_Diagnostic_*.txt` i `Notemd_Error_Log_*.txt`.
@@ -658,7 +658,7 @@ Notemd działa lokalnie wewnątrz Obsidiana, ale niektóre funkcje wysyłają ż
        ```
        Wygenerowany raport zawiera czasy dla każdej próby (`First Byte`, `Duration`), oczyszczone metadane żądań, nagłówki odpowiedzi, surowe albo częściowe fragmenty treści odpowiedzi, sparsowane fragmenty strumienia i miejsca awarii na warstwie transportu.
 - **Problemy z połączeniem LM Studio/Ollama**:
-  - **Test Connection kończy się błędem**: Upewnij się, że lokalny serwer (LM Studio albo Ollama) działa, a odpowiedni model jest załadowany albo dostępny.
+  - **Test połączenia kończy się błędem**: Upewnij się, że lokalny serwer (LM Studio albo Ollama) działa, a odpowiedni model jest załadowany albo dostępny.
   - **Błędy CORS (Ollama na Windowsie)**: Jeśli podczas używania Ollama na Windowsie pojawiają się błędy CORS (Cross-Origin Resource Sharing), może być konieczne ustawienie zmiennej środowiskowej `OLLAMA_ORIGINS`. Możesz to zrobić, uruchamiając `set OLLAMA_ORIGINS=*` w wierszu poleceń przed startem Ollama. Umożliwia to żądania z dowolnego origin.
   - **Włącz CORS w LM Studio**: W przypadku LM Studio możesz włączyć CORS bezpośrednio w ustawieniach serwera, co może być niezbędne, jeśli Obsidian działa w przeglądarce albo ma restrykcyjne zasady origin.
 - **Błędy tworzenia folderów ("File name cannot contain...")**:
@@ -674,8 +674,8 @@ Wkład jest mile widziany. Wskazówki znajdziesz w repozytorium GitHub: [https:/
 
 ## Dokumentacja dla opiekunów
 
-- [Release Workflow (English)](./docs/maintainer/release-workflow.md)
-- [Release Workflow (简体中文)](./docs/maintainer/release-workflow.zh-CN.md)
+- [Przepływ wydania (angielski)](./docs/maintainer/release-workflow.md)
+- [Przepływ wydania (uproszczony chiński)](./docs/maintainer/release-workflow.zh-CN.md)
 
 ## Licencja
 

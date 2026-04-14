@@ -4,7 +4,7 @@
 
 [English](./README.md) | [简体中文](./README_zh.md) | [Español](./README_es.md) | [Français](./README_fr.md) | [Deutsch](./README_de.md) | [Italiano](./README_it.md) | [Português](./README_pt.md) | [繁體中文](./README_zh_Hant.md) | [日本語](./README_ja.md) | [한국어](./README_ko.md) | [Русский](./README_ru.md) | [العربية](./README_ar.md) | [हिन्दी](./README_hi.md) | [বাংলা](./README_bn.md) | [Nederlands](./README_nl.md) | [Svenska](./README_sv.md) | [Suomi](./README_fi.md) | [Dansk](./README_da.md) | [Norsk](./README_no.md) | [Polski](./README_pl.md) | [Türkçe](./README_tr.md) | [עברית](./README_he.md) | [ไทย](./README_th.md) | [Ελληνικά](./README_el.md) | [Čeština](./README_cs.md) | [Magyar](./README_hu.md) | [Română](./README_ro.md) | [Українська](./README_uk.md) | [Tiếng Việt](./README_vi.md) | [Bahasa Indonesia](./README_id.md) | [Bahasa Melayu](./README_ms.md)
 
-Leggi la documentazione in altre lingue: [Language Hub](./docs/i18n/README.md)
+Leggi la documentazione in altre lingue: [Centro lingue](./docs/i18n/README.md)
 
 ```
 ==================================================
@@ -60,15 +60,15 @@ Notemd potenzia il tuo flusso di lavoro su Obsidian integrandosi con vari Modell
 
 | Aspetto | Ambito | Predefinito | Note |
 |---|---|---|---|
-| `UI Locale` | Solo testo dell'interfaccia del plugin (impostazioni, barra laterale, avvisi, dialoghi) | `auto` | Segue la lingua di Obsidian; i cataloghi attuali sono `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, `zh-TW`. |
-| `Task Output Language` | Output delle attività generato dall'LLM (link, riassunti, generazione, estrazione, destinazione traduzione) | `en` | Può essere globale o per singola attività quando `Usa lingue diverse per le attività` è attivato. |
-| `Disable auto translation` | Le attività non di traduzione mantengono il contesto originale | `false` | Le attività esplicite di `Traduci` applicano comunque la lingua di destinazione configurata. |
-| Locale fallback | Risoluzione chiavi UI mancanti | locale -> `en` | Mantiene la UI stabile quando alcune chiavi non sono tradotte. |
+| `Lingua dell'interfaccia` | Solo testo dell'interfaccia del plugin (impostazioni, barra laterale, avvisi, dialoghi) | `auto` | Segue la lingua di Obsidian; i cataloghi attuali sono `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, `zh-TW`. |
+| `Lingua di output delle attività` | Output delle attività generato dall'LLM (link, riassunti, generazione, estrazione, destinazione traduzione) | `en` | Può essere globale o per singola attività quando `Usa lingue diverse per le attività` è attivato. |
+| `Disattiva la traduzione automatica` | Le attività non di traduzione mantengono il contesto originale | `false` | Le attività esplicite di `Traduci` applicano comunque la lingua di destinazione configurata. |
+| `Lingua di fallback` | Risoluzione chiavi UI mancanti | locale -> `en` | Mantiene la UI stabile quando alcune chiavi non sono tradotte. |
 
 - I documenti sorgente mantenuti sono inglese e cinese semplificato, e le traduzioni README pubblicate sono collegate nell'intestazione sopra.
 - La copertura delle UI locale nell'app corrisponde attualmente esattamente al catalogo esplicito presente nel codice: `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, `zh-TW`.
 - Il fallback all'inglese resta una rete di sicurezza implementativa, ma le superfici visibili supportate sono coperte da test di regressione e non dovrebbero ricadere silenziosamente sull'inglese nell'uso normale.
-- Ulteriori dettagli e linee guida per i contributori sono disponibili nel [Language Hub](./docs/i18n/README.md).
+- Ulteriori dettagli e linee guida per i contributori sono disponibili nel [Centro lingue](./docs/i18n/README.md).
 
 ## Caratteristiche
 
@@ -237,10 +237,10 @@ Accedi alle impostazioni del plugin tramite:
 
 <img width="817" height="428" alt="Multi-model" src="https://github.com/user-attachments/assets/85e6b854-c0ca-45cc-a55e-24638dceb120" />
 
-### Architettura Lingua (UI Locale vs Task Output Language)
+### Architettura linguistica (Lingua dell'interfaccia vs lingua di output delle attività)
 
--   **UI Locale** controlla esclusivamente il testo dell'interfaccia del plugin (etichette impostazioni, pulsanti barra laterale, avvisi e dialoghi). La modalità `auto` predefinita segue la lingua attuale della UI di Obsidian.
--   **Task Output Language** controlla l'output delle attività generato dal modello (link, riassunti, generazione titoli, riassunto Mermaid, estrazione concetti, destinazione traduzione).
+-   **Lingua dell'interfaccia** controlla esclusivamente il testo dell'interfaccia del plugin (etichette impostazioni, pulsanti barra laterale, avvisi e dialoghi). La modalità `auto` predefinita segue la lingua attuale della UI di Obsidian.
+-   **Lingua di output delle attività** controlla l'output delle attività generato dal modello (link, riassunti, generazione titoli, riassunto Mermaid, estrazione concetti, destinazione traduzione).
 -   **La modalità lingua per attività** consente a ogni attività di risolvere la propria lingua di output da un livello di policy unificato invece di sovrascritture sparse per modulo.
 -   **Disabilita traduzione automatica** mantiene le attività non di traduzione nel contesto della lingua originale, mentre le attività di traduzione esplicite applicano comunque la lingua di destinazione configurata.
 -   I percorsi di generazione relativi a Mermaid seguono la stessa policy linguistica e possono ancora attivare l'auto-fix Mermaid quando abilitato.
@@ -446,10 +446,10 @@ Questa funzione ti consente di sovrascrivere le istruzioni predefinite (prompt) 
 
 ## Guia all'Uso
 
-### Workflow Rapidi e Barra Laterale
+### Flussi rapidi e barra laterale
 
 -   Apri la barra laterale Notemd per accedere alle sezioni di azioni raggruppate per elaborazione centrale, generazione, traduzione, conoscenza e utility.
--   Usa l'area **Quick Workflows** in alto nella barra laterale per lanciare pulsanti multi-passaggio personalizzati.
+-   Usa l'area **Flussi rapidi** in alto nella barra laterale per lanciare pulsanti multi-passaggio personalizzati.
 -   Il workflow predefinito **One-Click Extract** esegue `Elabora file (Aggiungi link)` -> `Generazione batch da titoli` -> `Correzione Mermaid Batch`.
 -   Il progresso del workflow, i log per passaggio e i fallimenti sono visualizzati nella barra laterale, con un piè di pagina ancorato che protegge la barra di progresso e l'area dei log dallo scorrimento causato dalle sezioni espanse.
 -   La scheda di progresso mantiene leggibili a colpo d'occhio il testo di stato, un indicatore di percentuale dedicato e il tempo rimanente; gli stessi workflow personalizzati possono essere riconfigurati dalle impostazioni.

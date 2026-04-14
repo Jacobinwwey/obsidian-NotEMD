@@ -4,7 +4,7 @@
 
 [English](./README.md) | [简体中文](./README_zh.md) | [Español](./README_es.md) | [Français](./README_fr.md) | [Deutsch](./README_de.md) | [Italiano](./README_it.md) | [Português](./README_pt.md) | [繁體中文](./README_zh_Hant.md) | [日本語](./README_ja.md) | [한국어](./README_ko.md) | [Русский](./README_ru.md) | [العربية](./README_ar.md) | [हिन्दी](./README_hi.md) | [বাংলা](./README_bn.md) | [Nederlands](./README_nl.md) | [Svenska](./README_sv.md) | [Suomi](./README_fi.md) | [Dansk](./README_da.md) | [Norsk](./README_no.md) | [Polski](./README_pl.md) | [Türkçe](./README_tr.md) | [עברית](./README_he.md) | [ไทย](./README_th.md) | [Ελληνικά](./README_el.md) | [Čeština](./README_cs.md) | [Magyar](./README_hu.md) | [Română](./README_ro.md) | [Українська](./README_uk.md) | [Tiếng Việt](./README_vi.md) | [Bahasa Indonesia](./README_id.md) | [Bahasa Melayu](./README_ms.md)
 
-Đọc tài liệu bằng nhiều ngôn ngữ hơn tại: [Language Hub](./docs/i18n/README.md)
+Đọc tài liệu bằng nhiều ngôn ngữ hơn tại: [Trung tâm ngôn ngữ](./docs/i18n/README.md)
 
 ```
 ==================================================
@@ -59,15 +59,15 @@ Vậy là xong. Hãy khám phá phần settings để mở khóa thêm các tín
 
 | Mối quan tâm | Phạm vi | Mặc định | Ghi chú |
 |---|---|---|---|
-| `UI Locale` | Chỉ văn bản giao diện của tiện ích, gồm settings, sidebar, notices và dialogs | `auto` | Đi theo locale của Obsidian; các UI catalog hiện có là `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, `zh-TW`. |
-| `Task Output Language` | Đầu ra tác vụ do LLM tạo ra, gồm liên kết, tóm tắt, tạo nội dung, trích xuất và ngôn ngữ đích khi dịch | `en` | Có thể dùng chung hoặc theo từng tác vụ khi bật `Use different languages for tasks`. |
-| `Disable auto translation` | Các tác vụ không phải Translate giữ nguyên ngữ cảnh ngôn ngữ nguồn | `false` | Các tác vụ `Translate` rõ ràng vẫn áp dụng bắt buộc ngôn ngữ đích đã cấu hình. |
+| `Ngôn ngữ giao diện` | Chỉ văn bản giao diện của tiện ích, gồm cài đặt, thanh bên, thông báo và hộp thoại | `auto` | Đi theo locale của Obsidian; các UI catalog hiện có là `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, `zh-TW`. |
+| `Ngôn ngữ đầu ra tác vụ` | Đầu ra tác vụ do LLM tạo ra, gồm liên kết, tóm tắt, tạo nội dung, trích xuất và ngôn ngữ đích khi dịch | `en` | Có thể dùng chung hoặc theo từng tác vụ khi bật `Dùng các ngôn ngữ khác nhau cho từng tác vụ`. |
+| `Tắt dịch tự động` | Các tác vụ không phải Translate giữ nguyên ngữ cảnh ngôn ngữ nguồn | `false` | Các tác vụ `Translate` rõ ràng vẫn áp dụng bắt buộc ngôn ngữ đích đã cấu hình. |
 | Locale dự phòng | Giải quyết các khóa UI bị thiếu | locale -> `en` | Giữ UI ổn định khi vẫn còn khóa chưa được dịch. |
 
 - Tài liệu nguồn được duy trì là tiếng Anh và tiếng Trung giản thể, và các bản dịch README đã xuất bản được liên kết ở phần đầu trang phía trên.
 - Phạm vi hỗ trợ UI locale trong ứng dụng hiện khớp chính xác với danh mục tường minh trong mã: `en`, `ar`, `de`, `es`, `fa`, `fr`, `id`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `pt-BR`, `ru`, `th`, `tr`, `uk`, `vi`, `zh-CN`, `zh-TW`.
 - Fallback tiếng Anh vẫn là lưới an toàn ở tầng triển khai, nhưng các bề mặt hiển thị được hỗ trợ đã được bao phủ bằng regression tests và không nên âm thầm quay về tiếng Anh trong sử dụng bình thường.
-- Thông tin chi tiết hơn và hướng dẫn đóng góp được theo dõi trong [Language Hub](./docs/i18n/README.md).
+- Thông tin chi tiết hơn và hướng dẫn đóng góp được theo dõi trong [Trung tâm ngôn ngữ](./docs/i18n/README.md).
 
 ## Tính năng
 
@@ -95,7 +95,7 @@ Vậy là xong. Hãy khám phá phần settings để mở khóa thêm các tín
 - **Ánh xạ CTA chỉ cho hành động trên một file**: kiểu CTA nhiều màu giờ chỉ dành cho các hành động single-file. Các hành động ở mức batch hoặc folder và các workflow pha trộn dùng kiểu không-CTA để giảm nhầm lẫn về phạm vi thao tác.
 - **Workflow one-click tùy chỉnh**: biến các công cụ sidebar tích hợp sẵn thành các nút tùy chỉnh có thể tái sử dụng với tên gọi riêng và chuỗi hành động riêng. Workflow mặc định `One-Click Extract` có sẵn ngay sau khi cài đặt.
 
-### Mở rộng knowledge graph
+### Mở rộng đồ thị tri thức
 - **Tự động tạo wiki-link**: xác định các khái niệm quan trọng và thêm `[[wiki-links]]` vào các ghi chú đã xử lý dựa trên đầu ra của LLM.
 - **Tạo concept note, tùy chọn và có thể cấu hình**: tự động tạo các ghi chú mới cho những khái niệm được phát hiện trong thư mục vault đã chỉ định.
 - **Đường dẫn đầu ra có thể cấu hình**: thiết lập các đường dẫn tương đối riêng biệt trong vault để lưu file đã xử lý và concept note mới được tạo.
@@ -111,15 +111,15 @@ Vậy là xong. Hãy khám phá phần settings để mở khóa thêm các tín
   - Hỗ trợ dịch giữa nhiều ngôn ngữ.
   - Có thể cấu hình ngôn ngữ đích trong settings hoặc trong UI.
   - Tự động mở nội dung đã dịch ở panel bên phải nội dung gốc để đọc và so sánh thuận tiện hơn.
-- **Batch Translate**:
+- **Dịch hàng loạt**:
   - Dịch tất cả file trong thư mục đã chọn.
   - Hỗ trợ xử lý song song khi bật "Enable Batch Parallelism".
   - Dùng custom prompt cho dịch thuật nếu bạn đã cấu hình.
   - Thêm mục "Batch translate this folder" vào menu chuột phải trong file explorer.
-- **Disable auto translation**: khi tùy chọn này được bật, các tác vụ không phải Translate sẽ không còn ép đầu ra sang một ngôn ngữ cụ thể nữa và sẽ giữ nguyên ngữ cảnh ngôn ngữ nguồn. Tác vụ "Translate" rõ ràng vẫn dịch theo cấu hình đã thiết lập.
+- **Tắt dịch tự động**: khi tùy chọn này được bật, các tác vụ không phải Translate sẽ không còn ép đầu ra sang một ngôn ngữ cụ thể nữa và sẽ giữ nguyên ngữ cảnh ngôn ngữ nguồn. Tác vụ "Translate" rõ ràng vẫn dịch theo cấu hình đã thiết lập.
 
 ### Nghiên cứu web và tạo nội dung
-- **Web Research & Summarization**:
+- **Nghiên cứu web và tóm tắt**:
   - Thực hiện tìm kiếm web bằng Tavily, cần API key, hoặc DuckDuckGo, ở trạng thái thực nghiệm.
   - **Tăng độ bền của tìm kiếm**: tìm kiếm DuckDuckGo giờ dùng logic parsing được cải thiện, `DOMParser` kèm Regex fallback, để xử lý khi bố cục thay đổi và giữ kết quả đáng tin cậy.
   - Tóm tắt kết quả tìm kiếm bằng LLM đã cấu hình.
@@ -133,7 +133,7 @@ Vậy là xong. Hãy khám phá phần settings để mở khóa thêm các tín
 - **Ghép với Mermaid auto-fix**: khi Mermaid auto-fix được bật, các luồng liên quan đến Mermaid sẽ tự động sửa file tạo ra hoặc thư mục đầu ra sau khi xử lý. Điều này bao phủ Process, Generate from Title, Batch Generate from Titles, Research & Summarize, Summarise as Mermaid và Translate.
 
 ### Tính năng tiện ích
-- **Summarise as Mermaid diagram**:
+- **Tóm tắt thành sơ đồ Mermaid**:
   - Tính năng này cho phép bạn tóm tắt nội dung của một ghi chú thành Mermaid diagram.
   - Có thể tùy chỉnh ngôn ngữ đầu ra của Mermaid diagram trong settings.
   - **Mermaid Output Folder**: cấu hình thư mục nơi các file Mermaid diagram được tạo sẽ được lưu.
@@ -209,51 +209,51 @@ Truy cập settings của tiện ích qua:
 **Settings** -> **Community Plugins** -> **Notemd** (nhấp biểu tượng bánh răng).
 
 ### Cấu hình nhà cung cấp LLM
-1. **Active Provider**: chọn nhà cung cấp LLM bạn muốn dùng từ menu dropdown.
-2. **Provider Settings**: cấu hình các setting cụ thể cho nhà cung cấp đã chọn:
+1. **Nhà cung cấp đang hoạt động**: chọn nhà cung cấp LLM bạn muốn dùng từ menu thả xuống.
+2. **Cài đặt nhà cung cấp**: cấu hình các mục cụ thể cho nhà cung cấp đã chọn:
    - **API Key**: bắt buộc với hầu hết nhà cung cấp đám mây, ví dụ OpenAI, Anthropic, DeepSeek, Qwen, Qwen Code, Doubao, Moonshot, GLM, Z AI, MiniMax, Huawei Cloud MaaS, Baidu Qianfan, SiliconFlow, Google, Mistral, Azure OpenAI, OpenRouter, xAI, Groq, Together, Fireworks và Requesty. Không cần cho Ollama. Tùy chọn đối với LM Studio và preset chung `OpenAI Compatible` khi endpoint của bạn chấp nhận truy cập ẩn danh hoặc placeholder.
    - **Base URL / Endpoint**: API endpoint của dịch vụ. Đã có giá trị mặc định, nhưng bạn có thể cần đổi giá trị này cho model cục bộ như LMStudio và Ollama, các gateway như OpenRouter, Requesty và OpenAI Compatible, hoặc các Azure deployment cụ thể. **Bắt buộc đối với Azure OpenAI.**
    - **Model**: tên hoặc ID model cụ thể cần dùng, ví dụ `gpt-4o`, `claude-3-5-sonnet-20240620`, `google/gemini-flash-1.5`, `grok-4`, `moonshotai/kimi-k2-instruct-0905`, `accounts/fireworks/models/kimi-k2p5` hoặc `anthropic/claude-3-7-sonnet-latest`. Hãy chắc chắn model này có sẵn tại endpoint hoặc nhà cung cấp của bạn.
    - **Temperature**: điều khiển độ ngẫu nhiên trong đầu ra của LLM, 0 = quyết định, 1 = sáng tạo tối đa. Giá trị thấp hơn, ví dụ 0.2-0.5, thường tốt hơn cho các tác vụ có cấu trúc.
    - **API Version (Azure Only)**: bắt buộc cho Azure OpenAI deployment, ví dụ `2024-02-15-preview`.
-3. **Test Connection**: dùng nút "Test Connection" cho nhà cung cấp đang hoạt động để xác minh settings của bạn. Các nhà cung cấp OpenAI-compatible hiện dùng kiểm tra nhận biết nhà cung cấp: các endpoint như `Qwen`, `Qwen Code`, `Doubao`, `Moonshot`, `GLM`, `Z AI`, `MiniMax`, `Huawei Cloud MaaS`, `Baidu Qianfan`, `SiliconFlow`, `Groq`, `Together`, `Fireworks`, `LMStudio` và `OpenAI Compatible` sẽ probe `chat/completions` trực tiếp, còn các nhà cung cấp có `/models` endpoint đáng tin cậy vẫn có thể dùng model listing trước. Nếu lần probe đầu tiên thất bại do ngắt mạng tạm thời như `ERR_CONNECTION_CLOSED`, Notemd sẽ tự động rơi về chuỗi retry ổn định thay vì báo lỗi ngay lập tức.
-4. **Manage Provider Configurations**: dùng các nút "Export Providers" và "Import Providers" để lưu hoặc nạp settings của nhà cung cấp LLM vào hoặc từ file `notemd-providers.json` trong thư mục cấu hình của tiện ích. Điều này giúp backup và chia sẻ dễ dàng hơn.
-5. **Preset Coverage**: ngoài các nhà cung cấp gốc, Notemd hiện còn bao gồm các preset cho `Qwen`, `Qwen Code`, `Doubao`, `Moonshot`, `GLM`, `Z AI`, `MiniMax`, `Huawei Cloud MaaS`, `Baidu Qianfan`, `SiliconFlow`, `xAI`, `Groq`, `Together`, `Fireworks`, `Requesty` và một mục tiêu `OpenAI Compatible` chung dành cho LiteLLM, vLLM, Perplexity, Vercel AI Gateway hoặc custom proxy.
+3. **Kiểm tra kết nối**: dùng nút "Kiểm tra kết nối" cho nhà cung cấp đang hoạt động để xác minh cấu hình của bạn. Các nhà cung cấp OpenAI-compatible hiện dùng kiểm tra nhận biết nhà cung cấp: các endpoint như `Qwen`, `Qwen Code`, `Doubao`, `Moonshot`, `GLM`, `Z AI`, `MiniMax`, `Huawei Cloud MaaS`, `Baidu Qianfan`, `SiliconFlow`, `Groq`, `Together`, `Fireworks`, `LMStudio` và `OpenAI Compatible` sẽ probe `chat/completions` trực tiếp, còn các nhà cung cấp có `/models` endpoint đáng tin cậy vẫn có thể dùng danh sách model trước. Nếu lần probe đầu tiên thất bại do ngắt mạng tạm thời như `ERR_CONNECTION_CLOSED`, Notemd sẽ tự động rơi về chuỗi retry ổn định thay vì báo lỗi ngay lập tức.
+4. **Quản lý cấu hình nhà cung cấp**: dùng các nút "Xuất nhà cung cấp" và "Nhập nhà cung cấp" để lưu hoặc nạp cấu hình nhà cung cấp LLM vào hoặc từ file `notemd-providers.json` trong thư mục cấu hình của tiện ích. Điều này giúp sao lưu và chia sẻ dễ dàng hơn.
+5. **Phạm vi preset**: ngoài các nhà cung cấp gốc, Notemd hiện còn bao gồm các preset cho `Qwen`, `Qwen Code`, `Doubao`, `Moonshot`, `GLM`, `Z AI`, `MiniMax`, `Huawei Cloud MaaS`, `Baidu Qianfan`, `SiliconFlow`, `xAI`, `Groq`, `Together`, `Fireworks`, `Requesty` và một mục tiêu `OpenAI Compatible` chung dành cho LiteLLM, vLLM, Perplexity, Vercel AI Gateway hoặc proxy tùy chỉnh.
 <img width="804" height="506" alt="LLM" src="https://github.com/user-attachments/assets/8caf42e3-43ad-456d-8b96-b63e7914e45f" />
 
 ### Cấu hình đa mô hình
-- **Use Different Providers for Tasks**:
-  - **Disabled (Default)**: dùng một "Active Provider" duy nhất được chọn ở trên cho mọi tác vụ.
-  - **Enabled**: cho phép bạn chọn một nhà cung cấp cụ thể và tùy chọn override tên model cho từng tác vụ, như "Add Links", "Research & Summarize", "Generate from Title", "Translate" và "Extract Concepts". Nếu trường override model cho một tác vụ để trống, tiện ích sẽ dùng model mặc định đã cấu hình cho nhà cung cấp được chọn của tác vụ đó.
-- **Select different languages for different tasks**:
-  - **Disabled (Default)**: dùng một "Output language" duy nhất cho mọi tác vụ.
-  - **Enabled**: cho phép bạn chọn một ngôn ngữ cụ thể cho từng tác vụ, như "Add Links", "Research & Summarize", "Generate from Title", "Summarise as Mermaid diagram" và "Extract Concepts".
+- **Sử dụng các nhà cung cấp khác nhau cho từng tác vụ**:
+  - **Tắt (mặc định)**: dùng một "Nhà cung cấp đang hoạt động" duy nhất được chọn ở trên cho mọi tác vụ.
+  - **Bật**: cho phép bạn chọn một nhà cung cấp cụ thể và tùy chọn override tên model cho từng tác vụ, như "Add Links", "Research & Summarize", "Generate from Title", "Translate" và "Extract Concepts". Nếu trường override model cho một tác vụ để trống, tiện ích sẽ dùng model mặc định đã cấu hình cho nhà cung cấp được chọn của tác vụ đó.
+- **Chọn các ngôn ngữ khác nhau cho từng tác vụ**:
+  - **Tắt (mặc định)**: dùng một ngôn ngữ đầu ra duy nhất cho mọi tác vụ.
+  - **Bật**: cho phép bạn chọn một ngôn ngữ cụ thể cho từng tác vụ, như "Add Links", "Research & Summarize", "Generate from Title", "Summarise as Mermaid diagram" và "Extract Concepts".
 
 <img width="817" height="428" alt="Multi-model" src="https://github.com/user-attachments/assets/85e6b854-c0ca-45cc-a55e-24638dceb120" />
 
-### Kiến trúc ngôn ngữ (UI Locale vs Task Output Language)
+### Kiến trúc ngôn ngữ (Ngôn ngữ giao diện và ngôn ngữ đầu ra tác vụ)
 
-- **UI Locale** chỉ điều khiển văn bản giao diện của tiện ích, như nhãn settings, nút sidebar, notices và dialogs. Chế độ mặc định `auto` đi theo ngôn ngữ UI hiện tại của Obsidian.
-- **Task Output Language** điều khiển đầu ra tác vụ do model tạo ra, như liên kết, bản tóm tắt, tạo tiêu đề, Mermaid summary, trích xuất khái niệm và ngôn ngữ đích khi dịch.
-- **Per-task language mode** cho phép mỗi tác vụ tự quyết định ngôn ngữ đầu ra từ một policy layer thống nhất thay vì các override rải rác theo từng module.
-- **Disable auto translation** giữ các tác vụ không phải Translate trong ngữ cảnh ngôn ngữ nguồn, còn các tác vụ Translate rõ ràng vẫn áp dụng ngôn ngữ đích đã cấu hình.
-- Các đường sinh nội dung liên quan tới Mermaid cũng đi theo cùng chính sách ngôn ngữ và vẫn có thể kích hoạt Mermaid auto-fix khi được bật.
+- **Ngôn ngữ giao diện** chỉ điều khiển văn bản giao diện của tiện ích, như nhãn cài đặt, nút thanh bên, thông báo và hộp thoại. Chế độ mặc định `auto` đi theo ngôn ngữ UI hiện tại của Obsidian.
+- **Ngôn ngữ đầu ra tác vụ** điều khiển đầu ra tác vụ do model tạo ra, như liên kết, bản tóm tắt, tạo tiêu đề, tóm tắt Mermaid, trích xuất khái niệm và ngôn ngữ đích khi dịch.
+- **Chế độ ngôn ngữ theo tác vụ** cho phép mỗi tác vụ tự quyết định ngôn ngữ đầu ra từ một lớp chính sách thống nhất thay vì các ghi đè rải rác theo từng module.
+- **Tắt dịch tự động** giữ các tác vụ không phải Translate trong ngữ cảnh ngôn ngữ nguồn, còn các tác vụ Translate rõ ràng vẫn áp dụng ngôn ngữ đích đã cấu hình.
+- Các đường sinh nội dung liên quan tới Mermaid cũng đi theo cùng chính sách ngôn ngữ và vẫn có thể kích hoạt Mermaid tự sửa khi được bật.
 
-### Cài đặt stable API call
-- **Enable Stable API Calls (Retry Logic)**:
-  - **Disabled (Default)**: một lỗi API call duy nhất sẽ dừng tác vụ hiện tại.
-  - **Enabled**: tự động retry các LLM API call thất bại, hữu ích cho lỗi mạng chập chờn hoặc rate limit.
+### Cài đặt cuộc gọi API ổn định
+- **Bật các lệnh gọi API ổn định (logic thử lại)**:
+  - **Tắt (mặc định)**: một lỗi API call duy nhất sẽ dừng tác vụ hiện tại.
+  - **Bật**: tự động retry các LLM API call thất bại, hữu ích cho lỗi mạng chập chờn hoặc rate limit.
   - **Connection Test Fallback**: ngay cả khi các lời gọi thông thường chưa chạy sẵn trong stable mode, các bài test kết nối nhà cung cấp giờ cũng chuyển sang cùng chuỗi retry đó sau lỗi mạng tạm thời đầu tiên.
   - **Runtime Transport Fallback (Environment-Aware)**: các long-running task request bị `requestUrl` làm rớt tạm thời giờ sẽ thử lại chính attempt đó trước qua một fallback nhận biết môi trường. Bản desktop dùng Node `http/https`, môi trường non-desktop dùng `fetch` của trình duyệt. Các fallback attempt này giờ dùng protocol-aware streaming parsing trên các đường LLM tích hợp sẵn, bao phủ OpenAI-compatible SSE, Azure OpenAI SSE, Anthropic Messages SSE, Google Gemini SSE và đầu ra Ollama NDJSON, nhờ đó các gateway chậm có thể trả body chunk sớm hơn. Các direct OpenAI-style provider entrypoint còn lại cũng tái sử dụng cùng shared fallback path đó.
   - **OpenAI-Compatible Stable Order**: trong stable mode, mỗi OpenAI-compatible attempt giờ sẽ đi theo thứ tự `direct streaming -> direct non-stream -> requestUrl (with streamed fallback when needed)` trước khi bị tính là thất bại. Điều này ngăn các lỗi quá hung hăng khi chỉ có một transport mode bị chập chờn.
 - **Retry Interval (seconds)**: chỉ hiển thị khi đã bật. Thời gian chờ giữa các lần retry, từ 1 đến 300 giây. Mặc định: 5.
 - **Maximum Retries**: chỉ hiển thị khi đã bật. Số lần retry tối đa, từ 0 đến 10. Mặc định: 3.
-- **API Error Debugging Mode**:
-  - **Disabled (Default)**: dùng kiểu báo lỗi tiêu chuẩn và gọn.
-  - **Enabled**: kích hoạt error logging chi tiết, tương tự verbose output của DeepSeek, cho mọi nhà cung cấp và tác vụ, gồm Translate, Search và Connection Tests. Điều này bao gồm HTTP status code, raw response text, request transport timeline, request URL và header đã được làm sạch, elapsed attempt duration, response header, partial response body, partial stream output đã parse và stack trace, rất quan trọng để khắc phục sự cố kết nối API và các lần reset từ upstream gateway.
+- **Chế độ gỡ lỗi lỗi API**:
+  - **Tắt (mặc định)**: dùng kiểu báo lỗi tiêu chuẩn và gọn.
+  - **Bật**: kích hoạt error logging chi tiết, tương tự verbose output của DeepSeek, cho mọi nhà cung cấp và tác vụ, gồm Translate, Search và Connection Tests. Điều này bao gồm HTTP status code, raw response text, request transport timeline, request URL và header đã được làm sạch, elapsed attempt duration, response header, partial response body, partial stream output đã parse và stack trace, rất quan trọng để khắc phục sự cố kết nối API và các lần reset từ upstream gateway.
 - **Developer Mode**:
-  - **Disabled (Default)**: ẩn toàn bộ điều khiển chẩn đoán chỉ dành cho developer khỏi người dùng thông thường.
-  - **Enabled**: hiển thị một developer diagnostics panel riêng trong Settings.
+  - **Tắt (mặc định)**: ẩn toàn bộ điều khiển chẩn đoán chỉ dành cho developer khỏi người dùng thông thường.
+  - **Bật**: hiển thị một developer diagnostics panel riêng trong Settings.
 - **Developer Provider Diagnostic (Long Request)**:
   - **Diagnostic Call Mode**: chọn runtime path cho từng probe. Các nhà cung cấp OpenAI-compatible hỗ trợ thêm các mode ép buộc `direct streaming`, `direct buffered` và `requestUrl-only`, ngoài các runtime mode.
   - **Run Diagnostic**: chạy một long-request probe với call mode đã chọn và ghi `Notemd_Provider_Diagnostic_*.txt` vào thư mục gốc của vault.
@@ -266,58 +266,58 @@ Truy cập settings của tiện ích qua:
 
 #### Đầu ra file đã xử lý
 - **Customize Processed File Save Path**:
-  - **Disabled (Default)**: các file đã xử lý, ví dụ `YourNote_processed.md`, được lưu trong *chính thư mục* của ghi chú gốc.
-  - **Enabled**: cho phép bạn chỉ định vị trí lưu tùy chỉnh.
+  - **Tắt (mặc định)**: các file đã xử lý, ví dụ `YourNote_processed.md`, được lưu trong *chính thư mục* của ghi chú gốc.
+  - **Bật**: cho phép bạn chỉ định vị trí lưu tùy chỉnh.
 - **Processed File Folder Path**: chỉ hiển thị khi bật tùy chọn trên. Nhập *đường dẫn tương đối* trong vault, ví dụ `Processed Notes` hoặc `Output/LLM`, nơi các file đã xử lý sẽ được lưu. Thư mục sẽ được tạo nếu chưa tồn tại. **Không dùng đường dẫn tuyệt đối như `C:\...` hoặc ký tự không hợp lệ.**
 - **Use Custom Output Filename for 'Add Links'**:
-  - **Disabled (Default)**: các file được tạo bởi lệnh 'Add Links' dùng suffix mặc định `_processed.md`, ví dụ `YourNote_processed.md`.
-  - **Enabled**: cho phép bạn tùy chỉnh tên file đầu ra qua cài đặt bên dưới.
+  - **Tắt (mặc định)**: các file được tạo bởi lệnh 'Add Links' dùng suffix mặc định `_processed.md`, ví dụ `YourNote_processed.md`.
+  - **Bật**: cho phép bạn tùy chỉnh tên file đầu ra qua cài đặt bên dưới.
 - **Custom Suffix/Replacement String**: chỉ hiển thị khi bật tùy chọn trên. Nhập chuỗi cần dùng cho tên file đầu ra.
   - Nếu để **trống**, file gốc sẽ bị **ghi đè** bằng nội dung đã xử lý.
   - Nếu nhập một chuỗi, ví dụ `_linked`, nó sẽ được nối vào tên gốc, ví dụ `YourNote_linked.md`. Hãy chắc chắn suffix không chứa ký tự không hợp lệ của tên file.
 
 - **Remove Code Fences on Add Links**:
-  - **Disabled (Default)**: code fence **(\`\\\`\`)** được giữ lại trong nội dung khi thêm liên kết, còn **(\`\\\`markdown)** sẽ bị xóa tự động.
-  - **Enabled**: xóa code fence khỏi nội dung trước khi thêm liên kết.
+  - **Tắt (mặc định)**: code fence **(\`\\\`\`)** được giữ lại trong nội dung khi thêm liên kết, còn **(\`\\\`markdown)** sẽ bị xóa tự động.
+  - **Bật**: xóa code fence khỏi nội dung trước khi thêm liên kết.
 <img width="799" height="301" alt="Processed file output" src="https://github.com/user-attachments/assets/65d4e864-ff5f-402a-be90-e9c44b208903" />
 
-#### Đầu ra concept note
+#### Đầu ra ghi chú khái niệm
 - **Customize Concept Note Path**:
-  - **Disabled (Default)**: việc tự động tạo ghi chú cho `[[linked concepts]]` bị tắt.
-  - **Enabled**: cho phép bạn chỉ định một thư mục nơi các concept note mới sẽ được tạo.
+  - **Tắt (mặc định)**: việc tự động tạo ghi chú cho `[[linked concepts]]` bị tắt.
+  - **Bật**: cho phép bạn chỉ định một thư mục nơi các concept note mới sẽ được tạo.
 - **Concept Note Folder Path**: chỉ hiển thị khi bật tùy chọn trên. Nhập *đường dẫn tương đối* trong vault, ví dụ `Concepts` hoặc `Generated/Topics`, nơi concept note mới sẽ được lưu. Thư mục sẽ được tạo nếu chưa tồn tại. **Bắt buộc phải điền nếu đã bật tùy chỉnh.** **Không dùng đường dẫn tuyệt đối hoặc ký tự không hợp lệ.**
 <img width="800" height="145" alt="concept note output" src="https://github.com/user-attachments/assets/d0338341-7d67-4472-964c-75a0992165b8" />
 
 #### Đầu ra file log khái niệm
 - **Generate Concept Log File**:
-  - **Disabled (Default)**: không tạo file log.
-  - **Enabled**: tạo một file log liệt kê các concept note mới được tạo sau khi xử lý. Định dạng là:
+  - **Tắt (mặc định)**: không tạo file log.
+  - **Bật**: tạo một file log liệt kê các concept note mới được tạo sau khi xử lý. Định dạng là:
     ```
-    generate xx concepts md file
+    tạo xx tệp md khái niệm
     1. concepts1
     2. concepts2
     ...
     n. conceptsn
     ```
 - **Customize Log File Save Path**: chỉ hiển thị khi bật "Generate Concept Log File".
-  - **Disabled (Default)**: file log được lưu trong **Concept Note Folder Path**, nếu có chỉ định, hoặc ở thư mục gốc của vault nếu không.
-  - **Enabled**: cho phép chỉ định thư mục tùy chỉnh cho file log.
+  - **Tắt (mặc định)**: file log được lưu trong **Concept Note Folder Path**, nếu có chỉ định, hoặc ở thư mục gốc của vault nếu không.
+  - **Bật**: cho phép chỉ định thư mục tùy chỉnh cho file log.
 - **Concept Log Folder Path**: chỉ hiển thị khi bật "Customize Log File Save Path". Nhập *đường dẫn tương đối* trong vault, ví dụ `Logs/Notemd`, nơi file log sẽ được lưu. **Bắt buộc phải điền nếu đã bật tùy chỉnh.**
 - **Customize Log File Name**: chỉ hiển thị khi bật "Generate Concept Log File".
-  - **Disabled (Default)**: file log có tên `Generate.log`.
-  - **Enabled**: cho phép đặt tên tùy chỉnh cho file log.
+  - **Tắt (mặc định)**: file log có tên `Generate.log`.
+  - **Bật**: cho phép đặt tên tùy chỉnh cho file log.
 - **Concept Log File Name**: chỉ hiển thị khi bật "Customize Log File Name". Nhập tên file mong muốn, ví dụ `ConceptCreation.log`. **Bắt buộc phải điền nếu đã bật tùy chỉnh.**
 <img width="809" height="281" alt="Concept log file output" src="https://github.com/user-attachments/assets/eef6f5d5-592d-4b8f-84b1-7404521a6e9b" />
 
-#### Tác vụ Extract Concepts
-- **Create minimal concept notes**:
+#### Tác vụ trích xuất khái niệm
+- **Tạo ghi chú khái niệm tối giản**:
   - **On (Default)**: concept note mới tạo sẽ chỉ chứa tiêu đề, ví dụ `# Concept`.
   - **Off**: concept note có thể chứa nội dung bổ sung, như backlink "Linked From", nếu không bị tắt bởi cài đặt bên dưới.
 - **Add "Linked From" backlink**:
   - **Off (Default)**: không thêm backlink về tài liệu nguồn trong concept note khi extract.
   - **On**: thêm section "Linked From" kèm backlink tới file nguồn.
 
-#### Extract Specific Original Text
+#### Trích xuất văn bản gốc cụ thể
 - **Questions for extraction**: nhập danh sách câu hỏi, mỗi câu một dòng, mà bạn muốn AI trích xuất câu trả lời nguyên văn từ ghi chú của mình.
 - **Translate output to corresponding language**:
   - **Off (Default)**: chỉ xuất phần văn bản đã trích xuất bằng ngôn ngữ gốc của nó.
@@ -329,7 +329,7 @@ Truy cập settings của tiện ích qua:
   - **Off**: lưu trong cùng thư mục với file gốc với suffix `_Extracted`.
   - **On**: cho phép chỉ định thư mục đầu ra và suffix tên file tùy chỉnh.
 
-#### Batch Mermaid Fix
+#### Sửa Mermaid hàng loạt
 - **Enable Mermaid Error Detection**:
   - **Off (Default)**: bỏ qua bước phát hiện lỗi sau khi xử lý.
   - **On**: quét file đã xử lý để tìm lỗi cú pháp Mermaid còn sót lại và tạo báo cáo `mermaid_error_{foldername}.md`.
@@ -340,8 +340,8 @@ Truy cập settings của tiện ích qua:
 
 #### Tham số xử lý
 - **Enable Batch Parallelism**:
-  - **Disabled (Default)**: các tác vụ batch, như "Process Folder" hoặc "Batch Generate from Titles", xử lý file lần lượt từng cái, theo kiểu tuần tự.
-  - **Enabled**: cho phép tiện ích xử lý nhiều file đồng thời, giúp tăng tốc đáng kể với batch job lớn.
+  - **Tắt (mặc định)**: các tác vụ batch, như "Process Folder" hoặc "Batch Generate from Titles", xử lý file lần lượt từng cái, theo kiểu tuần tự.
+  - **Bật**: cho phép tiện ích xử lý nhiều file đồng thời, giúp tăng tốc đáng kể với batch job lớn.
 - **Batch Concurrency**: chỉ hiển thị khi bật parallelism. Đặt số lượng file tối đa được xử lý song song. Giá trị cao hơn có thể nhanh hơn nhưng dùng nhiều tài nguyên hơn và có thể chạm rate limit của API. Mặc định: 1, phạm vi: 1-20.
 - **Batch Size**: chỉ hiển thị khi bật parallelism. Số file được gom vào một batch. Mặc định: 50, phạm vi: 10-200.
 - **Delay Between Batches (ms)**: chỉ hiển thị khi bật parallelism. Độ trễ tùy chọn tính bằng mili giây giữa các batch, giúp kiểm soát API rate limit. Mặc định: 1000 ms.
@@ -349,26 +349,26 @@ Truy cập settings của tiện ích qua:
 - **Chunk Word Count**: số từ tối đa cho mỗi chunk gửi tới LLM. Ảnh hưởng tới số lượng API call đối với file lớn. Mặc định: 3000.
 - **Enable Duplicate Detection**: bật hoặc tắt việc kiểm tra cơ bản các từ trùng lặp trong nội dung đã xử lý, kết quả hiện trong console. Mặc định: bật.
 - **Max Tokens**: số token tối đa mà LLM nên tạo ra cho mỗi response chunk. Ảnh hưởng đến chi phí và mức độ chi tiết. Mặc định: 4096.
-<img width="795" height="274" alt="Processing Parameters   Language settings" src="https://github.com/user-attachments/assets/74e4af76-3333-48fc-bb86-0a3ee61825d1" />
+<img width="795" height="274" alt="Tham số xử lý   Cài đặt ngôn ngữ" src="https://github.com/user-attachments/assets/74e4af76-3333-48fc-bb86-0a3ee61825d1" />
 
 #### Dịch thuật
 - **Default Target Language**: chọn ngôn ngữ mặc định mà bạn muốn dịch ghi chú sang. Bạn có thể override trong UI khi chạy lệnh dịch. Mặc định: English.
 - **Customise Translation File Save Path**:
-  - **Disabled (Default)**: file đã dịch được lưu trong *cùng thư mục* với ghi chú gốc.
-  - **Enabled**: cho phép chỉ định *đường dẫn tương đối* trong vault, ví dụ `Translations`, nơi file dịch sẽ được lưu. Thư mục sẽ được tạo nếu chưa tồn tại.
+  - **Tắt (mặc định)**: file đã dịch được lưu trong *cùng thư mục* với ghi chú gốc.
+  - **Bật**: cho phép chỉ định *đường dẫn tương đối* trong vault, ví dụ `Translations`, nơi file dịch sẽ được lưu. Thư mục sẽ được tạo nếu chưa tồn tại.
 - **Use custom suffix for translated files**:
-  - **Disabled (Default)**: file dịch dùng suffix mặc định `_translated.md`, ví dụ `YourNote_translated.md`.
-  - **Enabled**: cho phép chỉ định suffix tùy chỉnh.
+  - **Tắt (mặc định)**: file dịch dùng suffix mặc định `_translated.md`, ví dụ `YourNote_translated.md`.
+  - **Bật**: cho phép chỉ định suffix tùy chỉnh.
 - **Custom Suffix**: chỉ hiển thị khi bật tùy chọn trên. Nhập suffix tùy chỉnh cần nối vào tên file dịch, ví dụ `_es` hoặc `_fr`.
 <img width="811" height="243" alt="translate" src="https://github.com/user-attachments/assets/57d21a72-e86c-4369-8be5-fd18cb734e2b" />
 
 #### Tạo nội dung
 - **Enable Research in "Generate from Title"**:
-  - **Disabled (Default)**: "Generate from Title" chỉ dùng tiêu đề làm đầu vào.
-  - **Enabled**: thực hiện web research bằng **Web Research Provider** đã cấu hình và đưa kết quả vào làm context cho LLM trong khi tạo nội dung từ tiêu đề.
+  - **Tắt (mặc định)**: "Generate from Title" chỉ dùng tiêu đề làm đầu vào.
+  - **Bật**: thực hiện web research bằng **Web Research Provider** đã cấu hình và đưa kết quả vào làm context cho LLM trong khi tạo nội dung từ tiêu đề.
 - **Auto-run Mermaid Syntax Fix after Generation**:
-  - **Enabled (Default)**: tự động chạy một lượt sửa cú pháp Mermaid sau các workflow liên quan đến Mermaid, như Process, Generate from Title, Batch Generate from Titles, Research & Summarize, Summarise as Mermaid và Translate.
-  - **Disabled**: giữ nguyên đầu ra Mermaid được tạo, trừ khi bạn tự chạy `Batch Mermaid Fix` hoặc thêm nó vào một custom workflow.
+  - **Bật (mặc định)**: tự động chạy một lượt sửa cú pháp Mermaid sau các workflow liên quan đến Mermaid, như Process, Generate from Title, Batch Generate from Titles, Research & Summarize, Summarise as Mermaid và Translate.
+  - **Tắt**: giữ nguyên đầu ra Mermaid được tạo, trừ khi bạn tự chạy `Batch Mermaid Fix` hoặc thêm nó vào một custom workflow.
 - **Output Language**: mới. Chọn ngôn ngữ đầu ra mong muốn cho các tác vụ "Generate from Title" và "Batch Generate from Title".
   - **English (Default)**: prompt được xử lý và đầu ra được tạo bằng tiếng Anh.
   - **Other Languages**: LLM được hướng dẫn suy luận bằng tiếng Anh nhưng trả tài liệu cuối cùng bằng ngôn ngữ bạn đã chọn, ví dụ Español, Français, 简体中文, 繁體中文, العربية, हिन्दी v.v.
@@ -376,11 +376,11 @@ Truy cập settings của tiện ích qua:
   - **Change Prompt Word**: cho phép bạn thay đổi prompt word cho một tác vụ cụ thể.
   - **Custom Prompt Word**: nhập prompt word tùy chỉnh cho tác vụ đó.
 - **Use Custom Output Folder for 'Generate from Title'**:
-  - **Disabled (Default)**: các file được tạo thành công được chuyển đến một subfolder tên `[OriginalFolderName]_complete` nằm tương đối so với thư mục cha của thư mục gốc, hoặc `Vault_complete` nếu thư mục gốc là thư mục root.
-  - **Enabled**: cho phép bạn chỉ định tên tùy chỉnh cho subfolder nơi các file hoàn thành được chuyển vào.
+  - **Tắt (mặc định)**: các file được tạo thành công được chuyển đến một subfolder tên `[OriginalFolderName]_complete` nằm tương đối so với thư mục cha của thư mục gốc, hoặc `Vault_complete` nếu thư mục gốc là thư mục root.
+  - **Bật**: cho phép bạn chỉ định tên tùy chỉnh cho subfolder nơi các file hoàn thành được chuyển vào.
 - **Custom Output Folder Name**: chỉ hiển thị khi bật tùy chọn trên. Nhập tên mong muốn cho subfolder, ví dụ `Generated Content` hoặc `_complete`. Không cho phép ký tự không hợp lệ. Nếu để trống, sẽ dùng `_complete` làm mặc định. Thư mục này được tạo tương đối với thư mục cha của thư mục gốc.
 
-#### Nút one-click workflow
+#### Nút quy trình làm việc một lần nhấp
 - **Visual Workflow Builder**: tạo các workflow button tùy chỉnh từ các hành động tích hợp sẵn mà không cần tự viết DSL.
 - **Custom Workflow Buttons DSL**: người dùng nâng cao vẫn có thể chỉnh trực tiếp văn bản định nghĩa workflow. DSL không hợp lệ sẽ rơi về workflow mặc định một cách an toàn và hiển thị cảnh báo trong UI của sidebar hoặc settings.
 - **Workflow Error Strategy**:
@@ -388,17 +388,17 @@ Truy cập settings của tiện ích qua:
   - **Continue on Error**: tiếp tục chạy các bước phía sau và báo số hành động thất bại ở cuối.
 - **Default Workflow Included**: `One-Click Extract` nối `Process File (Add Links)`, `Batch Generate from Titles` và `Batch Mermaid Fix`.
 
-#### Cài đặt custom prompt
+#### Cài đặt lời nhắc tùy chỉnh
 Tính năng này cho phép bạn ghi đè các chỉ dẫn mặc định, tức prompt, được gửi tới LLM cho các tác vụ cụ thể, giúp bạn kiểm soát đầu ra ở mức chi tiết.
 
 - **Enable Custom Prompts for Specific Tasks**:
-  - **Disabled (Default)**: tiện ích dùng prompt mặc định tích hợp sẵn cho mọi thao tác.
-  - **Enabled**: bật khả năng đặt custom prompt cho các tác vụ được liệt kê bên dưới. Đây là công tắc tổng của tính năng này.
+  - **Tắt (mặc định)**: tiện ích dùng prompt mặc định tích hợp sẵn cho mọi thao tác.
+  - **Bật**: bật khả năng đặt custom prompt cho các tác vụ được liệt kê bên dưới. Đây là công tắc tổng của tính năng này.
 
 - **Use Custom Prompt for [Task Name]**: chỉ hiển thị khi bật tùy chọn trên.
   - Với từng tác vụ được hỗ trợ, như "Add Links", "Generate from Title", "Research & Summarize" và "Extract Concepts", bạn có thể bật hoặc tắt custom prompt một cách độc lập.
-  - **Disabled**: tác vụ cụ thể này sẽ dùng prompt mặc định.
-  - **Enabled**: tác vụ này sẽ dùng văn bản bạn cung cấp trong vùng "Custom Prompt" tương ứng bên dưới.
+  - **Tắt**: tác vụ cụ thể này sẽ dùng prompt mặc định.
+  - **Bật**: tác vụ này sẽ dùng văn bản bạn cung cấp trong vùng "Custom Prompt" tương ứng bên dưới.
 
 - **Custom Prompt Text Area**: chỉ hiển thị khi custom prompt của tác vụ được bật.
   - **Default Prompt Display**: để tham khảo, tiện ích hiển thị prompt mặc định mà lẽ ra nó sẽ dùng cho tác vụ. Bạn có thể dùng nút **"Copy Default Prompt"** để sao chép prompt đó làm điểm xuất phát cho prompt riêng của mình.
@@ -410,7 +410,7 @@ Tính năng này cho phép bạn ghi đè các chỉ dẫn mặc định, tức 
 
 <img width="794" height="174" alt="Content generation   output" src="https://github.com/user-attachments/assets/76d93942-980d-49ad-b9d4-1c73ea013d17" />
 
-<img width="866" height="646" alt="Duplicate check scope   Custom prompt settings" src="https://github.com/user-attachments/assets/1b37a523-ef00-4e40-94a0-43bbe0c78572" />
+<img width="866" height="646" alt="Phạm vi kiểm tra trùng lặp   Cài đặt lời nhắc tùy chỉnh" src="https://github.com/user-attachments/assets/1b37a523-ef00-4e40-94a0-43bbe0c78572" />
 
 #### Phạm vi kiểm tra trùng lặp
 - **Duplicate Check Scope Mode**: điều khiển file nào sẽ được đối chiếu với các ghi chú trong Concept Note Folder của bạn để tìm duplicate tiềm năng.
@@ -432,18 +432,18 @@ Tính năng này cho phép bạn ghi đè các chỉ dẫn mặc định, tức 
 
 #### Miền học tập tập trung
 - **Enable Focused Learning Domain**:
-  - **Disabled (Default)**: prompt gửi tới LLM sẽ dùng các chỉ dẫn chuẩn, mang tính tổng quát.
-  - **Enabled**: cho phép bạn chỉ định một hoặc nhiều lĩnh vực nghiên cứu để cải thiện khả năng hiểu ngữ cảnh của LLM.
+  - **Tắt (mặc định)**: prompt gửi tới LLM sẽ dùng các chỉ dẫn chuẩn, mang tính tổng quát.
+  - **Bật**: cho phép bạn chỉ định một hoặc nhiều lĩnh vực nghiên cứu để cải thiện khả năng hiểu ngữ cảnh của LLM.
 - **Learning Domain**: chỉ hiển thị khi bật tùy chọn trên. Nhập lĩnh vực cụ thể của bạn, ví dụ 'Materials Science', 'Polymer Physics', 'Machine Learning'. Điều này sẽ thêm một dòng "Relevant Fields: [...]" vào đầu prompt, giúp LLM tạo các link và nội dung chính xác, phù hợp hơn với chuyên ngành của bạn.
 <img width="595" height="143" alt="focused learning domain" src="https://github.com/user-attachments/assets/1bcc9707-5c10-4944-a61b-65fde0cd0404" />
 
 
 ## Hướng dẫn sử dụng
 
-### Quick Workflows và Sidebar
+### Quy trình nhanh và thanh bên
 
 - Mở Notemd sidebar để truy cập các section hành động được nhóm lại cho xử lý cốt lõi, tạo nội dung, dịch thuật, tri thức và tiện ích.
-- Dùng khu vực **Quick Workflows** ở đầu sidebar để khởi chạy các multi-step button tùy chỉnh.
+- Dùng khu vực **Quy trình nhanh** ở đầu thanh bên để khởi chạy các nút nhiều bước tùy chỉnh.
 - Workflow mặc định **One-Click Extract** chạy `Process File (Add Links)` -> `Batch Generate from Titles` -> `Batch Mermaid Fix`.
 - Tiến độ workflow, log theo từng bước và các lỗi được hiển thị trong sidebar, với một footer ghim cố định để giữ cho progress bar và vùng log không bị ép mất khi nhiều section được mở rộng.
 - Thẻ tiến độ giữ cho status text, percentage pill riêng biệt và thời gian còn lại dễ đọc ngay lập tức, đồng thời cùng những custom workflow đó cũng có thể được cấu hình lại từ settings.
@@ -471,7 +471,7 @@ Tính năng này cho phép bạn ghi đè các chỉ dẫn mặc định, tức 
 
 ### Tính năng mới
 
-1. **Summarise as Mermaid diagram**:
+1. **Tóm tắt thành sơ đồ Mermaid**:
    - Mở ghi chú mà bạn muốn tóm tắt.
    - Chạy lệnh `Notemd: Summarise as Mermaid diagram` qua bảng lệnh hoặc nút trong sidebar.
    - Tiện ích sẽ tạo một ghi chú mới chứa Mermaid diagram.
@@ -483,7 +483,7 @@ Tính năng này cho phép bạn ghi đè các chỉ dẫn mặc định, tức 
    - Tiện ích dùng **LLM Provider** đã cấu hình, theo Multi-Model settings, để thực hiện việc dịch.
    - Nội dung được dịch sẽ được lưu vào **Translation Save Path** đã cấu hình, với suffix phù hợp, rồi mở trong **một pane mới ở bên phải** nội dung gốc để tiện so sánh.
    - Bạn có thể hủy tác vụ này qua nút trong sidebar hoặc nút cancel của modal.
-3. **Batch Translate**:
+3. **Dịch hàng loạt**:
    - Chạy lệnh `Notemd: Batch Translate Folder` từ bảng lệnh và chọn một thư mục, hoặc nhấp chuột phải vào một thư mục trong file explorer rồi chọn "Batch translate this folder".
    - Tiện ích sẽ dịch tất cả Markdown file trong thư mục đã chọn.
    - Các file đã dịch được lưu vào translation path đã cấu hình nhưng không tự động mở ra.
@@ -617,7 +617,7 @@ Notemd chạy cục bộ bên trong Obsidian, nhưng một số tính năng sẽ
 - Endpoint: Tavily API hoặc DuckDuckGo endpoint.
 - Dữ liệu được gửi: truy vấn nghiên cứu của bạn cùng các request metadata cần thiết.
 
-### Chẩn đoán dành cho developer và debug log (tùy chọn)
+### Chẩn đoán cho nhà phát triển và nhật ký gỡ lỗi (tùy chọn)
 
 - Trigger: API debug mode và các hành động developer diagnostic.
 - Lưu trữ: diagnostic log và error log được ghi vào thư mục gốc của vault, ví dụ `Notemd_Provider_Diagnostic_*.txt` và `Notemd_Error_Log_*.txt`.
@@ -659,7 +659,7 @@ Notemd chạy cục bộ bên trong Obsidian, nhưng một số tính năng sẽ
        ```
        Báo cáo được tạo ra bao gồm timing cho từng attempt, `First Byte` và `Duration`, request metadata đã được làm sạch, response headers, raw hoặc partial body fragment, stream fragment đã parse và các điểm thất bại ở lớp transport.
 - **Sự cố kết nối LM Studio/Ollama**:
-  - **Test Connection Fails**: bảo đảm máy chủ cục bộ, LM Studio hoặc Ollama, đang chạy và đúng model đã được nạp hoặc sẵn sàng.
+  - **Kiểm tra kết nối thất bại**: bảo đảm máy chủ cục bộ, LM Studio hoặc Ollama, đang chạy và đúng model đã được nạp hoặc sẵn sàng.
   - **CORS Errors, Ollama trên Windows**: nếu bạn gặp CORS, tức Cross-Origin Resource Sharing error, khi dùng Ollama trên Windows, bạn có thể cần đặt biến môi trường `OLLAMA_ORIGINS`. Bạn làm điều này bằng cách chạy `set OLLAMA_ORIGINS=*` trong command prompt trước khi khởi động Ollama. Cách này cho phép yêu cầu từ mọi origin.
   - **Bật CORS trong LM Studio**: với LM Studio, bạn có thể bật CORS ngay trong server settings; điều này có thể cần thiết nếu Obsidian đang chạy trong trình duyệt hoặc chịu origin policy nghiêm ngặt.
 - **Lỗi tạo thư mục ("File name cannot contain...")**:
@@ -675,8 +675,8 @@ Mọi đóng góp đều được hoan nghênh. Vui lòng tham khảo kho GitHub
 
 ## Tài liệu dành cho người bảo trì
 
-- [Release Workflow (English)](./docs/maintainer/release-workflow.md)
-- [Release Workflow (简体中文)](./docs/maintainer/release-workflow.zh-CN.md)
+- [Quy trình phát hành (Tiếng Anh)](./docs/maintainer/release-workflow.md)
+- [Quy trình phát hành (Tiếng Trung giản thể)](./docs/maintainer/release-workflow.zh-CN.md)
 
 ## Giấy phép
 
