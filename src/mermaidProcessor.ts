@@ -1,7 +1,12 @@
 import mermaid from 'mermaid';
 import {
+    attachDirectionalNoteToConnection,
     buildLegacyConnectedNoteLines,
     cleanLegacyTargetedNoteContent,
+    parseDirectionalNoteDirective,
+    parseLegacyForOfNoteDirective,
+    parseLegacyStandaloneNoteDirective,
+    parseLegacyTargetedNoteDirective,
     protectTopLevelBracketBlocks,
     restoreProtectedBracketBlocks
 } from './diagram/adapters/mermaid/legacyFixerUtils';
@@ -607,66 +612,27 @@ export function fixNotesToNodes(content: string): string {
     const resultLines: string[] = [];
     let standaloneCounter = 1;
 
-    // Regex for targeted notes (standard mermaid: note right of ...)
-    const targetedRegex = /^\s*note\s+(?:right|left|top|bottom)\s+of\s+([a-zA-Z0-9_]+)\s*:\s*(.*)$/i;
-    
-    // Regex for "note for/of Node Content" (User Extension)
-    // Matches: note for Node "Content"
-    const noteForOfRegex = /^\s*note\s+(?:for|of)\s+([a-zA-Z0-9_]+)\s+(.*)$/i;
-    
-    // Regex for standalone notes (note : Content)
-    // Sometimes people write `note "Content"` which is handled elsewhere, but `note :` is specific.
-    const standaloneRegex = /^\s*note\s*:\s*(.*)$/i;
-
     for (const line of lines) {
-        // Check Targeted (Standard)
-        const tMatch = line.match(targetedRegex);
-        if (tMatch) {
-            const nodeId = tMatch[1];
-            const text = tMatch[2].trim();
-            
-            // Format: NoteA["Note: ..."]
-            // If text is already quoted, strip them?
-            // User example: `Very High...` -> `["Note: Very High..."]`
-            let cleanText = text;
-            if (cleanText.startsWith('"') && cleanText.endsWith('"')) {
-                cleanText = cleanText.slice(1, -1);
-            }
+        const directionalNote = parseDirectionalNoteDirective(line);
+        if (directionalNote) {
+            const cleanText = directionalNote.text.startsWith('"') && directionalNote.text.endsWith('"')
+                ? directionalNote.text.slice(1, -1)
+                : directionalNote.text;
 
-            resultLines.push(...buildLegacyConnectedNoteLines(nodeId, `Note: ${cleanText}`));
+            resultLines.push(...buildLegacyConnectedNoteLines(directionalNote.nodeId, `Note: ${cleanText}`));
             continue;
         }
 
-        // Check Targeted (Note For/Of - User Extension)
-        const nfMatch = line.match(noteForOfRegex);
-        if (nfMatch) {
-            const nodeId = nfMatch[1];
-            let text = nfMatch[2].trim();
-
-            // Handle artifact where line ends with ]
-            if (text.endsWith(']')) {
-                 text = text.slice(0, -1).trim();
-            }
-
-            // Clean quotes
-            if (text.startsWith('"') && text.endsWith('"')) {
-                text = text.slice(1, -1);
-            }
-            
-            // User requested format: NoteM00[" Gaussian Intensity Profile"] (with leading space)
-            resultLines.push(...buildLegacyConnectedNoteLines(nodeId, ` ${text}`));
+        const forOfNote = parseLegacyForOfNoteDirective(line);
+        if (forOfNote) {
+            resultLines.push(...buildLegacyConnectedNoteLines(forOfNote.nodeId, ` ${forOfNote.text}`));
             continue;
         }
 
-        // Check Standalone
-        const sMatch = line.match(standaloneRegex);
-        if (sMatch) {
-            let text = sMatch[1].trim();
-             if (text.startsWith('"') && text.endsWith('"')) {
-                text = text.slice(1, -1);
-            }
+        const standaloneNote = parseLegacyStandaloneNoteDirective(line);
+        if (standaloneNote) {
             const noteId = `Note${standaloneCounter++}`;
-            resultLines.push(`${noteId}["${text}"]`);
+            resultLines.push(`${noteId}["${standaloneNote}"]`);
             continue;
         }
 
@@ -1242,19 +1208,17 @@ export function fixMermaidNotes(content: string): string {
     const lines = content.split('\n');
     const notesToProcess: { lineIndex: number; nodeId: string; text: string; }[] = [];
 
-    // 1. Identify all notes
-    // Regex allows "note right/left/top/bottom of Node: Text"
-    const noteRegex = /^\s*note\s+(right|left|top|bottom)\s+of\s+([a-zA-Z0-9_]+)\s*:\s*(.*)$/i;
-
     lines.forEach((line, index) => {
-        const match = line.match(noteRegex);
-        if (match) {
-            notesToProcess.push({
-                lineIndex: index,
-                nodeId: match[2],
-                text: match[3].trim()
-            });
+        const parsedNote = parseDirectionalNoteDirective(line);
+        if (!parsedNote) {
+            return;
         }
+
+        notesToProcess.push({
+            lineIndex: index,
+            nodeId: parsedNote.nodeId,
+            text: parsedNote.text
+        });
     });
 
     if (notesToProcess.length === 0) return content;
@@ -1270,30 +1234,9 @@ export function fixMermaidNotes(content: string): string {
         for (let j = lineIndex - 1; j >= 0; j--) {
             if (linesToDelete.has(j)) continue;
 
-            const line = lines[j];
-            
-            // Check for Node as SOURCE (Outgoing)
-            // Regex: Start or space(s) + NodeID + word boundary + optional brackets + space + (---|-->)
-            const sourceRegex = new RegExp(`(?:^|\\s+)${nodeId}\\b(?:\\[.*?\\])?\\s*(---|-->)`);
-            
-            // Check for Node as TARGET (Incoming)
-            // Regex: (---|-->) + space + NodeID + word boundary + optional brackets + (semicolon, end, or space)
-            const targetRegex = new RegExp(`(---|-->)\\s*${nodeId}\\b(?:\\[.*?\\])?(?:;|$|\\s)`);
-
-            // Apply replacement
-            // Priority: Source (Outgoing) first, then Target (Incoming)
-            
-            if (sourceRegex.test(line)) {
-                const escapedText = text.replace(/"/g, '\\"');
-                lines[j] = line.replace(sourceRegex, (match) => {
-                    return match.replace(/\s*(---|-->)$/, (fullMatch, arrow) => ` -- "${escapedText}" ${arrow}`);
-                });
-                found = true;
-            } else if (targetRegex.test(line)) {
-                const escapedText = text.replace(/"/g, '\\"');
-                lines[j] = line.replace(targetRegex, (match) => {
-                     return match.replace(/^(---|-->)/, (arrow) => `-- "${escapedText}" ${arrow}`);
-                });
+            const rewrittenLine = attachDirectionalNoteToConnection(lines[j], nodeId, text);
+            if (rewrittenLine) {
+                lines[j] = rewrittenLine;
                 found = true;
             }
 
@@ -1801,16 +1744,11 @@ export function fixMisplacedPipes(content: string): string {
 export function fixTargetedNotes(content: string): string {
     const lines = content.split('\n');
     const processedLines = lines.flatMap(line => {
-        // Regex: note (NodeID) "(Content)"
-        // Use greedy match (.*) to handle potential unescaped quotes inside, assuming line ends with quote.
-        const regex = /^\s*note\s+([a-zA-Z0-9_]+)\s+"(.*)"\s*$/;
-        
-        const match = line.match(regex);
-        if (match) {
-            const nodeId = match[1];
-            const noteContent = cleanLegacyTargetedNoteContent(match[2]);
+        const targetedNote = parseLegacyTargetedNoteDirective(line);
+        if (targetedNote) {
+            const noteContent = cleanLegacyTargetedNoteContent(targetedNote.text);
 
-            return buildLegacyConnectedNoteLines(nodeId, noteContent);
+            return buildLegacyConnectedNoteLines(targetedNote.nodeId, noteContent);
         }
         return [line];
     });
