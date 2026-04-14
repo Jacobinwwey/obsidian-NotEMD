@@ -55,6 +55,17 @@ function createDefaultRendererService(): RendererService {
     ]));
 }
 
+function resolveRenderTargetForIntent(intent: DiagramIntent): DiagramPlan['renderTarget'] {
+    switch (intent) {
+        case 'canvasMap':
+            return 'json-canvas';
+        case 'dataChart':
+            return 'vega-lite';
+        default:
+            return 'mermaid';
+    }
+}
+
 function resolveLegacyCompatibleIntent(spec: DiagramSpec, plan: DiagramPlan): DiagramIntent {
     const requestedIntent = spec.intent || plan.intent;
 
@@ -93,6 +104,26 @@ function mergeSpecDefaults(spec: DiagramSpec, plan: DiagramPlan): DiagramSpec {
     };
 }
 
+function assertPlanCompatibility(
+    spec: DiagramSpec,
+    plan: DiagramPlan,
+    options: Pick<DiagramGenerationOptions, 'compatibilityMode' | 'requestedIntent'>
+): void {
+    if (options.requestedIntent && options.compatibilityMode !== 'legacy-mermaid' && spec.intent !== options.requestedIntent) {
+        throw new Error(
+            `Diagram spec intent "${spec.intent}" does not match requested intent "${options.requestedIntent}".`
+        );
+    }
+
+    const specTarget = resolveRenderTargetForIntent(spec.intent);
+    if (specTarget !== plan.renderTarget) {
+        throw new Error(
+            `Diagram spec intent "${spec.intent}" does not match planner route `
+            + `"${plan.intent}" targeting "${plan.renderTarget}".`
+        );
+    }
+}
+
 export async function generateDiagramArtifact(
     markdown: string,
     options: DiagramGenerationOptions
@@ -112,6 +143,7 @@ export async function generateDiagramArtifact(
     const parsedSpec = parseDiagramSpecResponse(rawResponse);
     const spec = mergeSpecDefaults(parsedSpec, plan);
     assertValidDiagramSpec(spec);
+    assertPlanCompatibility(spec, plan, options);
 
     const rendererService = options.rendererService ?? createDefaultRendererService();
     const targets = [plan.renderTarget, ...plan.fallbackTargets]
