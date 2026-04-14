@@ -627,8 +627,12 @@ export const STRINGS_EN = {
     previewModal: {
         title: '{target} preview',
         copySource: 'Copy source',
+        exportSvg: 'Export SVG',
+        exportingSvg: 'Exporting...',
         copySuccessNotice: 'Diagram source copied to clipboard!',
         copyFailedNotice: 'Failed to copy diagram source. See console.',
+        exportSuccessNotice: 'Diagram preview exported to {path}',
+        exportFailedNotice: 'Failed to export diagram preview: {message}',
         sourceFile: 'Saved file: {path}'
     }
 };
