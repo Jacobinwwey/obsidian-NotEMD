@@ -94,4 +94,23 @@ describe('diagram spec validation', () => {
 
         expect(result.valid).toBe(true);
     });
+
+    test('rejects chart layout hints on non-chart intents', () => {
+        const spec: DiagramSpec = {
+            intent: 'flowchart',
+            title: 'Release Flow',
+            nodes: [
+                { id: 'start', label: 'Start' },
+                { id: 'publish', label: 'Publish' }
+            ],
+            edges: [{ from: 'start', to: 'publish' }],
+            layoutHints: { chartType: 'pie' }
+        };
+
+        const result = validateDiagramSpec(spec);
+
+        expect(result.valid).toBe(false);
+        expect(result.errors.join(' ')).toMatch(/chartType/i);
+        expect(result.errors.join(' ')).toMatch(/dataChart/i);
+    });
 });

@@ -73,6 +73,12 @@ function validateDataChartLayoutHints(spec: DiagramSpec, errors: string[]): void
     }
 }
 
+function validateNonChartLayoutHints(spec: DiagramSpec, errors: string[]): void {
+    if (spec.layoutHints?.chartType !== undefined) {
+        errors.push(`Diagram spec uses layoutHints.chartType but intent "${spec.intent}" is not "dataChart".`);
+    }
+}
+
 export function validateDiagramSpec(spec: DiagramSpec): DiagramSpecValidationResult {
     const errors: string[] = [];
 
@@ -99,6 +105,8 @@ export function validateDiagramSpec(spec: DiagramSpec): DiagramSpecValidationRes
     if (spec.intent === 'dataChart') {
         validateDataSeries(spec.dataSeries, errors);
         validateDataChartLayoutHints(spec, errors);
+    } else {
+        validateNonChartLayoutHints(spec, errors);
     }
 
     return {
