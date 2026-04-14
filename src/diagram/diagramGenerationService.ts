@@ -31,10 +31,24 @@ function createDefaultRendererService(): RendererService {
     ]));
 }
 
+function resolveLegacyCompatibleIntent(spec: DiagramSpec, plan: DiagramPlan): DiagramIntent {
+    const requestedIntent = spec.intent || plan.intent;
+
+    if (!plan.legacyCompatibilityMode || plan.renderTarget !== 'mermaid') {
+        return requestedIntent;
+    }
+
+    if (requestedIntent === 'mindmap' || requestedIntent === 'flowchart') {
+        return requestedIntent;
+    }
+
+    return plan.mermaidDiagramType === 'flowchart' ? 'flowchart' : 'mindmap';
+}
+
 function mergeSpecDefaults(spec: DiagramSpec, plan: DiagramPlan): DiagramSpec {
     return {
         ...spec,
-        intent: spec.intent || plan.intent,
+        intent: resolveLegacyCompatibleIntent(spec, plan),
         title: spec.title?.trim() || 'Generated Diagram',
         nodes: spec.nodes ?? [],
         edges: spec.edges ?? [],
