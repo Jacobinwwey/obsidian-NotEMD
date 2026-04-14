@@ -1,5 +1,6 @@
 import { assertValidDiagramSpec } from '../../spec';
 import { DiagramSpec } from '../../types';
+import { isSupportedVegaLiteChartType, SupportedVegaLiteChartType } from './schema';
 
 type VegaLiteValue = {
     x: string | number;
@@ -18,15 +19,10 @@ type VegaLiteSpec = {
     config?: Record<string, unknown>;
 };
 
-type SupportedChartType = 'bar' | 'line' | 'area' | 'point' | 'scatter' | 'pie' | 'table';
-
-function normalizeChartType(spec: DiagramSpec): SupportedChartType {
+function normalizeChartType(spec: DiagramSpec): SupportedVegaLiteChartType {
     const chartType = spec.layoutHints?.chartType;
-    if (
-        typeof chartType === 'string'
-        && ['bar', 'line', 'area', 'point', 'scatter', 'pie', 'table'].includes(chartType)
-    ) {
-        return chartType as SupportedChartType;
+    if (isSupportedVegaLiteChartType(chartType)) {
+        return chartType;
     }
     return 'bar';
 }

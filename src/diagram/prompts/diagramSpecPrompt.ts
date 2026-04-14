@@ -1,3 +1,4 @@
+import { SUPPORTED_VEGA_LITE_CHART_TYPES } from '../adapters/vega/schema';
 import { DiagramIntent } from '../types';
 
 export interface DiagramSpecPromptOptions {
@@ -6,6 +7,7 @@ export interface DiagramSpecPromptOptions {
 }
 
 export function buildDiagramSpecPrompt(options: DiagramSpecPromptOptions = {}): string {
+    const supportedChartTypes = SUPPORTED_VEGA_LITE_CHART_TYPES.join(', ');
     const preferredIntentLine = options.preferredIntent
         ? `Preferred diagram intent: ${options.preferredIntent}. Follow it when the source content supports it.`
         : 'Preferred diagram intent: choose the most suitable intent from the supported list.';
@@ -56,7 +58,7 @@ Validation rules:
 - Keep labels concise and faithful to the source.
 - Put verbatim evidence snippets into evidenceRefs when the source contains critical wording.
 - For dataChart intent, include dataSeries with explicit x and y values extracted from the source.
-- For dataChart intent, set layoutHints.chartType to one of: bar, line, area, point, scatter, pie, table.
+- For dataChart intent, set layoutHints.chartType to one of: ${supportedChartTypes}.
 - Use scatter for paired numeric x/y observations, pie for part-to-whole categorical shares, and table when ranked/tabular rows communicate better than axes.
 
 Return a single valid DiagramSpec JSON object.`;
