@@ -1,5 +1,5 @@
 import { DEFAULT_SETTINGS } from '../constants';
-import { resolveUiLocale } from '../i18n/languageContext';
+import { resolveLanguageDisplayName, resolveUiLocale } from '../i18n/languageContext';
 import {
     resolveTaskLanguageCode,
     resolveTaskLanguageName,
@@ -61,6 +61,11 @@ describe('task language policy', () => {
         });
 
         expect(resolveTaskLanguageName(settings, 'addLinks')).toBe('简体中文');
+    });
+
+    test('keeps unsupported language codes visible instead of collapsing them to English', () => {
+        const settings = createSettings();
+        expect(resolveLanguageDisplayName(settings, 'xx')).toBe('xx');
     });
 
     test('disableAutoTranslation is ignored for explicit translate task', () => {

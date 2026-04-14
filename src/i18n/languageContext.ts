@@ -38,6 +38,25 @@ function normalizeLocaleSubtag(subtag: string): string {
     return subtag.toLowerCase();
 }
 
+function findSupportedLocaleCode(
+    locale: string | undefined | null,
+    supportedLocales: readonly string[]
+): string | null {
+    const normalized = normalizeLocaleCode(locale);
+    const normalizedSupported = supportedLocales.map(normalizeLocaleCode);
+
+    if (normalizedSupported.includes(normalized)) {
+        return normalized;
+    }
+
+    const [baseLanguage] = normalized.split('-');
+    if (normalizedSupported.includes(baseLanguage)) {
+        return baseLanguage;
+    }
+
+    return null;
+}
+
 export function normalizeLocaleCode(locale: string | undefined | null): string {
     if (!locale) {
         return 'en';
@@ -72,30 +91,18 @@ export function resolveSupportedLocaleCode(
     locale: string | undefined | null,
     supportedLocales: readonly string[] = SUPPORTED_UI_LOCALE_CODES
 ): string {
-    const normalized = normalizeLocaleCode(locale);
-    const normalizedSupported = supportedLocales.map(normalizeLocaleCode);
-
-    if (normalizedSupported.includes(normalized)) {
-        return normalized;
-    }
-
-    const [baseLanguage] = normalized.split('-');
-    if (normalizedSupported.includes(baseLanguage)) {
-        return baseLanguage;
-    }
-
-    return 'en';
+    return findSupportedLocaleCode(locale, supportedLocales) ?? 'en';
 }
 
 export function languageCodesEqual(left: string | undefined | null, right: string | undefined | null): boolean {
-    return resolveSupportedLocaleCode(left) === resolveSupportedLocaleCode(right);
+    return normalizeLocaleCode(left) === normalizeLocaleCode(right);
 }
 
 export function resolveLanguageDisplayName(settings: NotemdSettings, languageCode: string): string {
-    const normalizedTarget = resolveSupportedLocaleCode(
+    const normalizedTarget = findSupportedLocaleCode(
         languageCode,
         settings.availableLanguages.map(language => language.code)
-    );
+    ) ?? normalizeLocaleCode(languageCode);
     const language = settings.availableLanguages.find(lang => languageCodesEqual(lang.code, normalizedTarget));
     return language?.name || normalizedTarget;
 }
