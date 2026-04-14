@@ -18,4 +18,13 @@ describe('diagram spec prompt builder', () => {
         expect(prompt).toMatch(/flowchart/i);
         expect(prompt).toMatch(/Japanese/i);
     });
+
+    test('documents the controlled data chart templates for layout hints', () => {
+        const prompt = buildDiagramSpecPrompt();
+
+        expect(prompt).toMatch(/layoutHints\.chartType/i);
+        expect(prompt).toMatch(/scatter/i);
+        expect(prompt).toMatch(/pie/i);
+        expect(prompt).toMatch(/table/i);
+    });
 });
