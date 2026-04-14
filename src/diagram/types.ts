@@ -1,14 +1,22 @@
 import { SupportedVegaLiteChartType } from './adapters/vega/schema';
 
-export type DiagramIntent =
-    | 'mindmap'
-    | 'flowchart'
-    | 'sequence'
-    | 'classDiagram'
-    | 'erDiagram'
-    | 'stateDiagram'
-    | 'canvasMap'
-    | 'dataChart';
+export const SUPPORTED_DIAGRAM_INTENTS = [
+    'mindmap',
+    'flowchart',
+    'sequence',
+    'classDiagram',
+    'erDiagram',
+    'stateDiagram',
+    'canvasMap',
+    'dataChart'
+] as const;
+
+export type DiagramIntent = typeof SUPPORTED_DIAGRAM_INTENTS[number];
+
+export function isSupportedDiagramIntent(value: unknown): value is DiagramIntent {
+    return typeof value === 'string'
+        && (SUPPORTED_DIAGRAM_INTENTS as readonly string[]).includes(value);
+}
 
 export type RenderTarget = 'mermaid' | 'json-canvas' | 'vega-lite' | 'html';
 

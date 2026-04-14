@@ -1,6 +1,6 @@
 import { ValidationError } from '../types';
 import { isSupportedVegaLiteChartType, SUPPORTED_VEGA_LITE_CHART_TYPES } from './adapters/vega/schema';
-import { DiagramDataSeries, DiagramNode, DiagramSpec } from './types';
+import { DiagramDataSeries, DiagramNode, DiagramSpec, isSupportedDiagramIntent, SUPPORTED_DIAGRAM_INTENTS } from './types';
 
 export interface DiagramSpecValidationResult {
     valid: boolean;
@@ -59,6 +59,15 @@ function validateDataSeries(dataSeries: DiagramDataSeries[] | undefined, errors:
     });
 }
 
+function validateDiagramIntent(spec: DiagramSpec, errors: string[]): void {
+    if (!isSupportedDiagramIntent(spec.intent)) {
+        errors.push(
+            `Diagram spec uses unsupported diagram intent "${String(spec.intent)}". `
+            + `Supported intents: ${SUPPORTED_DIAGRAM_INTENTS.join(', ')}.`
+        );
+    }
+}
+
 function validateDataChartLayoutHints(spec: DiagramSpec, errors: string[]): void {
     const chartType = spec.layoutHints?.chartType;
     if (chartType === undefined) {
@@ -110,6 +119,8 @@ function validateNonChartLayoutHints(spec: DiagramSpec, errors: string[]): void 
 
 export function validateDiagramSpec(spec: DiagramSpec): DiagramSpecValidationResult {
     const errors: string[] = [];
+
+    validateDiagramIntent(spec, errors);
 
     if (!spec.title?.trim()) {
         errors.push('Diagram spec title is required.');

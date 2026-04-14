@@ -181,6 +181,24 @@ describe('diagram generation service', () => {
         })).rejects.toThrow(/unsupported chartType/i);
     });
 
+    test('rejects unsupported diagram intents before renderer fallback', async () => {
+        await expect(generateDiagramArtifact(`# Weekly Signups
+
+| Week | Signups |
+| --- | --- |
+| 1 | 12 |
+| 2 | 19 |
+`, {
+            compatibilityMode: 'best-fit',
+            targetLanguage: 'en',
+            llmInvoker: async () => JSON.stringify({
+                intent: 'radarChart',
+                title: 'Weekly Signups',
+                nodes: [{ id: 'metrics', label: 'Metrics' }]
+            })
+        })).rejects.toThrow(/unsupported diagram intent/i);
+    });
+
     test('injects planner chart defaults when the LLM omits chartType', async () => {
         const result = await generateDiagramArtifact(`# Weekly Signups
 
