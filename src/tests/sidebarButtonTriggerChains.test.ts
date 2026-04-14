@@ -60,6 +60,7 @@ function createPluginMock() {
         }),
         researchAndSummarizeCommand: jest.fn().mockResolvedValue(undefined),
         summarizeToMermaidCommand: jest.fn().mockResolvedValue(undefined),
+        generateExperimentalDiagramCommand: jest.fn().mockResolvedValue(undefined),
         previewExperimentalDiagramCommand: jest.fn().mockResolvedValue(undefined),
         translateFileCommand: jest.fn().mockResolvedValue(undefined),
         batchTranslateFolderCommand: jest.fn().mockResolvedValue(undefined),
@@ -113,6 +114,7 @@ describe('NotemdSidebarView button trigger chains', () => {
             'batch-generate-from-titles',
             'research-and-summarize',
             'summarize-as-mermaid',
+            'generate-experimental-diagram',
             'preview-experimental-diagram',
             'translate-current-file',
             'batch-translate-folder',
@@ -178,6 +180,11 @@ describe('NotemdSidebarView button trigger chains', () => {
     test('summarize-as-mermaid triggers summarizeToMermaidCommand', async () => {
         await executeAction('summarize-as-mermaid', reporter);
         expect(plugin.summarizeToMermaidCommand).toHaveBeenCalledWith(activeMdFile, reporter);
+    });
+
+    test('generate-experimental-diagram triggers generateExperimentalDiagramCommand', async () => {
+        await executeAction('generate-experimental-diagram', reporter);
+        expect(plugin.generateExperimentalDiagramCommand).toHaveBeenCalledWith(activeMdFile, reporter);
     });
 
     test('preview-experimental-diagram triggers previewExperimentalDiagramCommand', async () => {
