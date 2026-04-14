@@ -2,7 +2,9 @@ import { TFile } from 'obsidian';
 import {
     buildDiagramSourceArtifactPath,
     buildDiagramPreviewExportPath,
+    buildDiagramPreviewPngExportPath,
     renderPreviewArtifactSvg,
+    saveDiagramPreviewPng,
     saveDiagramSourceArtifact,
     saveDiagramPreviewSvg,
     supportsPreviewSvgExport
@@ -21,6 +23,11 @@ describe('diagram preview export helpers', () => {
         expect(buildDiagramPreviewExportPath('Notes/Topic_diagram.canvas')).toBe('Notes/Topic_diagram_preview.svg');
         expect(buildDiagramPreviewExportPath('Topic.md')).toBe('Topic_preview.svg');
         expect(buildDiagramPreviewExportPath('Notes/Topic_preview.svg')).toBe('Notes/Topic_preview.svg');
+    });
+
+    test('builds a stable png export path beside the source file', () => {
+        expect(buildDiagramPreviewPngExportPath('Notes/Topic_diagram.canvas')).toBe('Notes/Topic_diagram_preview.png');
+        expect(buildDiagramPreviewPngExportPath('Topic.md')).toBe('Topic_preview.png');
     });
 
     test('builds a target-aware raw artifact path beside the source note', () => {
@@ -124,6 +131,49 @@ describe('diagram preview export helpers', () => {
 
         expect(outputPath).toBe('Notes/Topic_diagram.json');
         expect(mockApp.vault.create).toHaveBeenCalledWith('Notes/Topic_diagram.json', '{"mark":"bar"}');
+    });
+
+    test('saves a png preview artifact beside the source file', async () => {
+        const outputPath = await saveDiagramPreviewPng(mockApp, 'Notes/Topic.md', {
+            target: 'mermaid',
+            content: '```mermaid\nflowchart TD\nA --> B\n```',
+            mimeType: 'text/vnd.mermaid',
+            sourceIntent: 'flowchart'
+        }, {
+            mermaid: {
+                initialize: jest.fn(),
+                render: jest.fn().mockResolvedValue({ svg: '<svg width="40" height="20"></svg>' })
+            },
+            pngRaster: {
+                createBlob: (parts, options) => new Blob(parts, options),
+                createImage: () => {
+                    const image = {
+                        onload: null as null | (() => void),
+                        onerror: null as null | ((event?: unknown) => void),
+                        set src(_value: string) {
+                            this.onload?.();
+                        }
+                    };
+                    return image;
+                },
+                createCanvas: () => ({
+                    width: 80,
+                    height: 40,
+                    getContext: () => ({
+                        scale: jest.fn(),
+                        drawImage: jest.fn()
+                    }),
+                    toBlob: (callback: (blob: Blob | null) => void) => callback(new Blob(['png'], { type: 'image/png' }))
+                }),
+                createObjectURL: () => 'blob:png',
+                revokeObjectURL: jest.fn(),
+                blobToArrayBuffer: async () => new ArrayBuffer(12),
+                getScale: () => 2
+            }
+        });
+
+        expect(outputPath).toBe('Notes/Topic_preview.png');
+        expect(mockApp.vault.createBinary).toHaveBeenCalledWith('Notes/Topic_preview.png', expect.any(ArrayBuffer));
     });
 
     test('rejects unsupported export targets', async () => {

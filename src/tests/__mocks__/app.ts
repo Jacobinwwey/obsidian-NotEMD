@@ -7,6 +7,8 @@ export const mockApp = {
         getAbstractFileByPath: jest.fn(),
         read: jest.fn().mockResolvedValue(''),
         modify: jest.fn().mockResolvedValue(undefined),
+        createBinary: jest.fn().mockResolvedValue(undefined),
+        modifyBinary: jest.fn().mockResolvedValue(undefined),
         rename: jest.fn(),
         delete: jest.fn(),
         trash: jest.fn(),
