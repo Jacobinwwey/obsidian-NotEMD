@@ -21,6 +21,7 @@ type MockPlugin = {
     batchGenerateContentForTitlesCommand: jest.Mock<Promise<any>, [any, string?]>;
     researchAndSummarizeCommand: jest.Mock<Promise<void>, [any, any, any]>;
     summarizeToMermaidCommand: jest.Mock<Promise<void>, [any, any]>;
+    generateExperimentalDiagramCommand: jest.Mock<Promise<void>, [any, any]>;
     previewExperimentalDiagramCommand: jest.Mock<Promise<void>, [any, any]>;
     translateFileCommand: jest.Mock<Promise<void>, [any, any, any]>;
     batchTranslateFolderCommand: jest.Mock<Promise<void>, [any?, any?]>;
@@ -149,6 +150,7 @@ function createPluginMock(): MockPlugin {
         }),
         researchAndSummarizeCommand: jest.fn().mockResolvedValue(undefined),
         summarizeToMermaidCommand: jest.fn().mockResolvedValue(undefined),
+        generateExperimentalDiagramCommand: jest.fn().mockResolvedValue(undefined),
         previewExperimentalDiagramCommand: jest.fn().mockResolvedValue(undefined),
         translateFileCommand: jest.fn().mockResolvedValue(undefined),
         batchTranslateFolderCommand: jest.fn().mockResolvedValue(undefined),
@@ -226,6 +228,7 @@ describe('NotemdSidebarView DOM button wiring', () => {
         await clickButton('Batch generate from titles');
         await clickButton('Research & summarize');
         await clickButton('Summarise as Mermaid diagram');
+        await clickButton('Generate diagram (experimental)');
         await clickButton('Preview diagram (experimental)');
         await clickButton('Translate current file');
         await clickButton('Batch translate folder');
@@ -247,6 +250,7 @@ describe('NotemdSidebarView DOM button wiring', () => {
         expect(plugin.batchGenerateContentForTitlesCommand).toHaveBeenCalled();
         expect(plugin.researchAndSummarizeCommand).toHaveBeenCalledWith(editor, mdView, expect.anything());
         expect(plugin.summarizeToMermaidCommand).toHaveBeenCalledWith(mdFile, expect.anything());
+        expect(plugin.generateExperimentalDiagramCommand).toHaveBeenCalledWith(mdFile, expect.anything());
         expect(plugin.previewExperimentalDiagramCommand).toHaveBeenCalledWith(mdFile, expect.anything());
         expect(plugin.translateFileCommand).toHaveBeenCalledWith(mdFile, expect.anything(), expect.anything());
         expect(plugin.batchTranslateFolderCommand).toHaveBeenCalled();
@@ -289,6 +293,7 @@ describe('NotemdSidebarView DOM button wiring', () => {
 
         const processCurrent = contentContainer.findButton('Process file (add links)');
         const translateCurrent = contentContainer.findButton('Translate current file');
+        const generateDiagram = contentContainer.findButton('Generate diagram (experimental)');
         const previewDiagram = contentContainer.findButton('Preview diagram (experimental)');
         const batchGenerate = contentContainer.findButton('Batch generate from titles');
         const batchTranslate = contentContainer.findButton('Batch translate folder');
@@ -296,6 +301,7 @@ describe('NotemdSidebarView DOM button wiring', () => {
 
         expect(processCurrent).not.toBeNull();
         expect(translateCurrent).not.toBeNull();
+        expect(generateDiagram).not.toBeNull();
         expect(previewDiagram).not.toBeNull();
         expect(batchGenerate).not.toBeNull();
         expect(batchTranslate).not.toBeNull();
@@ -303,6 +309,7 @@ describe('NotemdSidebarView DOM button wiring', () => {
 
         expect(processCurrent?.cls).toContain('mod-cta');
         expect(translateCurrent?.cls).toContain('mod-cta');
+        expect(generateDiagram?.cls).toContain('mod-cta');
         expect(previewDiagram?.cls).toContain('mod-cta');
         expect(batchGenerate?.cls).not.toContain('mod-cta');
         expect(batchTranslate?.cls).not.toContain('mod-cta');
