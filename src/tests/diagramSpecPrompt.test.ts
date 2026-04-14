@@ -27,4 +27,10 @@ describe('diagram spec prompt builder', () => {
         expect(prompt).toMatch(/pie/i);
         expect(prompt).toMatch(/table/i);
     });
+
+    test('requires non-chart fallback when reliable numeric data is missing', () => {
+        const prompt = buildDiagramSpecPrompt();
+
+        expect(prompt).toMatch(/choose a non-dataChart intent/i);
+    });
 });
