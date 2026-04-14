@@ -36,6 +36,7 @@ import { getSidebarActionLabel, SidebarActionId } from './workflowButtons';
 import { generateDiagramArtifact } from './diagram/diagramGenerationService';
 import { RenderArtifact } from './rendering/types';
 import { IframeRenderHost } from './rendering/host/iframeRenderHost';
+import { getRenderTargetDisplayName } from './rendering/targetLabel';
 import { supportsDiagramPreviewModal } from './ui/diagramPreview';
 
 export default class NotemdPlugin extends Plugin {
@@ -70,7 +71,10 @@ export default class NotemdPlugin extends Plugin {
     }
 
     private openDiagramPreviewModal(artifact: RenderArtifact, sourcePath: string, artifactSaved = false) {
-        const session = new IframeRenderHost().createSession(artifact, { sourcePath, artifactSaved });
+        const i18n = this.getUiStrings();
+        const targetLabel = getRenderTargetDisplayName(artifact.target);
+        const previewTitle = formatI18n(i18n.previewModal.title, { target: targetLabel });
+        const session = new IframeRenderHost().createSession(artifact, { sourcePath, artifactSaved, previewTitle });
         new DiagramPreviewModal(this.app, session, this.settings.uiLocale).open();
     }
 

@@ -14,6 +14,7 @@ import {
     supportsInlineMermaidPreview,
     supportsInlineVegaLitePreview,
 } from './diagramPreview';
+import { getRenderTargetDisplayName } from '../rendering/targetLabel';
 
 export class DiagramPreviewModal extends Modal {
     constructor(
@@ -32,7 +33,10 @@ export class DiagramPreviewModal extends Modal {
         contentEl.setAttribute('data-render-theme', this.session.payload.resolvedTheme ?? this.session.payload.theme);
 
         contentEl.createEl('h3', {
-            text: formatI18n(i18n.previewModal.title, { target: this.session.payload.artifact.target })
+            text: this.session.payload.previewTitle
+                || formatI18n(i18n.previewModal.title, {
+                    target: getRenderTargetDisplayName(this.session.payload.artifact.target)
+                })
         });
 
         const toolbar = contentEl.createDiv({ cls: 'notemd-diagram-preview-toolbar' });
