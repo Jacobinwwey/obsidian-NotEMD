@@ -12,6 +12,10 @@ export function sanitizeMermaidText(value: string): string {
         .trim();
 }
 
+export function sanitizeMermaidPipeEdgeLabel(value: string): string {
+    return sanitizeMermaidText(value).replace(/\|/g, '&#124;');
+}
+
 export function sanitizeMermaidIdentifier(value: string): string {
     const normalized = value.replace(/[^A-Za-z0-9_]/g, '_');
     return normalized || 'node';
