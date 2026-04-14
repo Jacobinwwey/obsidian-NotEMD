@@ -1,5 +1,5 @@
 /*
- * Notemd v1.7.6
+ * Notemd v1.8.2
  */
 
 :root {
@@ -59,6 +59,10 @@
 
 .notemd-diagram-preview-body.is-mermaid {
     background: var(--background-primary);
+}
+
+.notemd-diagram-preview-body.is-json-canvas {
+    background: #f8fafc;
 }
 
 .notemd-diagram-preview-body.is-vega-lite {
