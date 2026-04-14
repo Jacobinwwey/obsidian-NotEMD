@@ -371,12 +371,13 @@ Mermaid subtype adapters 已经覆盖 `mindmap`、`flowchart`、`sequenceDiagram
 
 最新进展是，部分原本依赖 legacy fixer 的语法保护已经开始前移到 adapter：例如 flowchart edge label 内的 `|` 现在会在 `src/diagram/adapters/mermaid/flowchartAdapter.ts` 中直接转义为 `&#124;`，而不是等 `fixMermaidPipes` 一类全局修补去救火。
 
-但 roadmap 原本更激进的目标还没完成：`src/mermaidProcessor.ts` 仍然是大型 legacy fixer，更多 adapter-specific fix 规则还没有真正成为主路径。当前现实是“adapter-driven emit + validate 已经存在，局部语法防御开始前移，fixer decomposition 仍未完成”。
+但 roadmap 原本更激进的目标还没完成：`src/mermaidProcessor.ts` 仍然是大型 legacy fixer，更多 adapter-specific fix 规则还没有真正成为主路径。当前现实是“adapter-driven emit + validate 已经存在，局部语法防御开始前移，部分通用保护逻辑已下沉到 `src/diagram/adapters/mermaid/legacyFixerUtils.ts`，fixer decomposition 仍未完成”。
 
 - [ ] 将 Mermaid 修复逻辑从“全局文本修补”拆成“按图种 adapter 的 emit + validate + fix”。
 - [ ] 把 `mermaidProcessor.ts` 中通用能力下沉为有限工具函数，把图种特定规则挪进对应 adapter。
 - [ ] 保留批量修复能力，但只作为 legacy fallback，不再作为主生成路径的必要步骤。
 - [x] 将 flowchart pipe-label 转义从 legacy fixer 前移到 adapter emit 阶段。
+- [x] 将 bracket-block protect/restore 这类通用 legacy fixer 机制下沉到共享工具函数，避免在 `fixMermaidPipes` 与 `fixMalformedArrows` 中重复实现。
 
 **Decisions:**
 

@@ -1,4 +1,8 @@
 import mermaid from 'mermaid';
+import {
+    protectTopLevelBracketBlocks,
+    restoreProtectedBracketBlocks
+} from './diagram/adapters/mermaid/legacyFixerUtils';
 
 /**
  * Checks if the content contains any Mermaid syntax errors using mermaid.parse.
@@ -1121,31 +1125,8 @@ export function fixMermaidPipes(content: string): string {
             return line;
         }
 
-        // 1. Protect Bracketed Content [...]
-        const placeholders: string[] = [];
-        let protectedLine = '';
-        let depth = 0;
-        let currentBlock = '';
-        
-        for (let i = 0; i < line.length; i++) {
-            const char = line[i];
-            if (char === '[') {
-                if (depth === 0) protectedLine += '___BRACKET_BLOCK_' + placeholders.length + '___';
-                depth++;
-                currentBlock += char;
-            } else if (char === ']') {
-                depth--;
-                currentBlock += char;
-                if (depth === 0) {
-                    placeholders.push(currentBlock);
-                    currentBlock = '';
-                }
-            } else {
-                if (depth > 0) currentBlock += char;
-                else protectedLine += char;
-            }
-        }
-        if (depth > 0) protectedLine += currentBlock;
+        const protectedBlocks = protectTopLevelBracketBlocks(line);
+        let protectedLine = protectedBlocks.protectedText;
 
         // 2. Fix Pipes in Protected Line
         // Regex: (Arrow)(Space)(Content Ending in Pipe)(Space)(NodeStart)
@@ -1183,13 +1164,7 @@ export function fixMermaidPipes(content: string): string {
             return `${arrow}${space1}|"${inner}"|${space2}`;
         });
 
-        // 3. Restore Bracketed Content
-        placeholders.forEach((block, index) => {
-            const placeholder = '___BRACKET_BLOCK_' + index + '___';
-            protectedLine = protectedLine.split(placeholder).join(block);
-        });
-
-        return protectedLine;
+        return restoreProtectedBracketBlocks(protectedLine, protectedBlocks.blocks);
     });
 
     return processedLines.join('\n');
@@ -1209,41 +1184,8 @@ export function fixMalformedArrows(content: string): string {
             return line;
         }
 
-        // 1. Protect Bracketed Content [...]
-        // We use a placeholder to hide content inside top-level brackets
-        const placeholders: string[] = [];
-        let protectedLine = '';
-        let depth = 0;
-        let currentBlock = '';
-        
-        for (let i = 0; i < line.length; i++) {
-            const char = line[i];
-            
-            if (char === '[') {
-                if (depth === 0) {
-                    protectedLine += '___BRACKET_BLOCK_' + placeholders.length + '___';
-                }
-                depth++;
-                currentBlock += char;
-            } else if (char === ']') {
-                depth--;
-                currentBlock += char;
-                if (depth === 0) {
-                    placeholders.push(currentBlock);
-                    currentBlock = '';
-                }
-            } else {
-                if (depth > 0) {
-                    currentBlock += char;
-                } else {
-                    protectedLine += char;
-                }
-            }
-        }
-        // Handle unclosed brackets (append remaining)
-        if (depth > 0) {
-            protectedLine += currentBlock;
-        }
+        const protectedBlocks = protectTopLevelBracketBlocks(line);
+        let protectedLine = protectedBlocks.protectedText;
 
         // 2. Perform Replacements on Protected Line
         // Fix A: ` -->"` -> `" -->`
@@ -1256,13 +1198,7 @@ export function fixMalformedArrows(content: string): string {
         // Quote-dash-dash-space
         protectedLine = protectedLine.replace(/"-- /g, '--" ');
 
-        // 3. Restore Bracketed Content
-        placeholders.forEach((block, index) => {
-            const placeholder = '___BRACKET_BLOCK_' + index + '___';
-            protectedLine = protectedLine.split(placeholder).join(block);
-        });
-
-        return protectedLine;
+        return restoreProtectedBracketBlocks(protectedLine, protectedBlocks.blocks);
     });
 
     return processedLines.join('\n');
