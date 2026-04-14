@@ -23,6 +23,7 @@ import {
     STRINGS_UK,
     STRINGS_VI
 } from './locales/additional';
+import { EXPERIMENTAL_DIAGRAM_PIPELINE_LOCALE_EXTENSIONS } from './locales/experimentalDiagramPipeline';
 import { PREVIEW_MODAL_LOCALE_EXTENSIONS } from './locales/previewModal';
 import { SUPPORTED_UI_LOCALE_CODES } from './uiLocales';
 
@@ -87,6 +88,7 @@ function mergeTranslationValues(base: unknown, override: unknown): unknown {
 function getLocaleLayers(locale: string): Array<DeepPartial<TranslationStrings>> {
     return [
         LANGUAGE_MAP[locale],
+        EXPERIMENTAL_DIAGRAM_PIPELINE_LOCALE_EXTENSIONS[locale],
         PREVIEW_MODAL_LOCALE_EXTENSIONS[locale]
     ].filter((value): value is DeepPartial<TranslationStrings> => Boolean(value));
 }
