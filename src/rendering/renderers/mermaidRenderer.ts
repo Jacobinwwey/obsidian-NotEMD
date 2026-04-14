@@ -1,8 +1,10 @@
+import { renderClassMermaid } from '../../diagram/adapters/mermaid/classAdapter';
 import { DiagramSpec } from '../../diagram/types';
 import { renderErMermaid } from '../../diagram/adapters/mermaid/erAdapter';
 import { renderFlowchartMermaid } from '../../diagram/adapters/mermaid/flowchartAdapter';
 import { renderMindmapMermaid } from '../../diagram/adapters/mermaid/mindmapAdapter';
 import { renderSequenceMermaid } from '../../diagram/adapters/mermaid/sequenceAdapter';
+import { renderStateMermaid } from '../../diagram/adapters/mermaid/stateAdapter';
 import { DiagramRenderer, RenderArtifact } from '../types';
 
 export class MermaidRenderer implements DiagramRenderer {
@@ -13,7 +15,9 @@ export class MermaidRenderer implements DiagramRenderer {
         return spec.intent === 'mindmap'
             || spec.intent === 'flowchart'
             || spec.intent === 'sequence'
-            || spec.intent === 'erDiagram';
+            || spec.intent === 'classDiagram'
+            || spec.intent === 'erDiagram'
+            || spec.intent === 'stateDiagram';
     }
 
     async render(spec: DiagramSpec): Promise<RenderArtifact> {
@@ -48,6 +52,24 @@ export class MermaidRenderer implements DiagramRenderer {
             return {
                 target: this.target,
                 content: renderErMermaid(spec),
+                mimeType: 'text/vnd.mermaid',
+                sourceIntent: spec.intent
+            };
+        }
+
+        if (spec.intent === 'classDiagram') {
+            return {
+                target: this.target,
+                content: renderClassMermaid(spec),
+                mimeType: 'text/vnd.mermaid',
+                sourceIntent: spec.intent
+            };
+        }
+
+        if (spec.intent === 'stateDiagram') {
+            return {
+                target: this.target,
+                content: renderStateMermaid(spec),
                 mimeType: 'text/vnd.mermaid',
                 sourceIntent: spec.intent
             };
