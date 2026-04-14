@@ -5,6 +5,7 @@ import {
     indent,
     mermaidFence,
     sanitizeMermaidIdentifier,
+    sanitizeMermaidPipeEdgeLabel,
     sanitizeMermaidText
 } from './base';
 
@@ -33,7 +34,7 @@ export function renderFlowchartMermaid(spec: DiagramSpec): string {
     (spec.edges ?? []).forEach(edge => {
         const fromId = nodeIdMap.get(edge.from) ?? sanitizeMermaidIdentifier(edge.from);
         const toId = nodeIdMap.get(edge.to) ?? sanitizeMermaidIdentifier(edge.to);
-        const label = edge.label ? `|${sanitizeMermaidText(edge.label)}| ` : '';
+        const label = edge.label ? `|${sanitizeMermaidPipeEdgeLabel(edge.label)}| ` : '';
         lines.push(`${indent(1)}${fromId} -->${label}${toId}`);
     });
 
