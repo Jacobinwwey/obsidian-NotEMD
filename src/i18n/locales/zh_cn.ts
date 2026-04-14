@@ -423,6 +423,10 @@ export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
                 label: '总结为 Mermaid 图表',
                 tooltip: '根据当前笔记生成 Mermaid 图表摘要。'
             },
+            previewExperimentalDiagram: {
+                label: '预览图形（实验性）',
+                tooltip: '生成实验性图形预览，但不保存产物文件。'
+            },
             translateCurrentFile: {
                 label: '翻译当前文件',
                 tooltip: '将当前活动文件翻译为所选输出语言。'
