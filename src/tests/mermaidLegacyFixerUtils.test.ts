@@ -1,4 +1,6 @@
 import {
+    buildLegacyConnectedNoteLines,
+    cleanLegacyTargetedNoteContent,
     protectTopLevelBracketBlocks,
     restoreProtectedBracketBlocks
 } from '../diagram/adapters/mermaid/legacyFixerUtils';
@@ -25,5 +27,17 @@ describe('mermaid legacy fixer utils', () => {
 
         expect(result.protectedText).toBe('A --> B["Alpha"');
         expect(result.blocks).toEqual([]);
+    });
+
+    test('builds connected legacy note-node lines from a source node id', () => {
+        expect(buildLegacyConnectedNoteLines('Torque', 'General relation')).toEqual([
+            'NoteTorque["General relation"]',
+            'Torque -.- NoteTorque'
+        ]);
+    });
+
+    test('cleans targeted note artifacts before rendering note nodes', () => {
+        expect(cleanLegacyTargetedNoteContent('Data[""]')).toBe('Data');
+        expect(cleanLegacyTargetedNoteContent('Value[\\"\\"\\]')).toBe('Value');
     });
 });
