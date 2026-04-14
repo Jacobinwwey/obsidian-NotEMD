@@ -3,6 +3,24 @@ export interface ProtectedBracketBlocksResult {
     blocks: string[];
 }
 
+export interface ParsedLegacyNodeNoteDirective {
+    nodeId: string;
+    text: string;
+}
+
+const DIRECTIONAL_NOTE_REGEX = /^\s*note\s+(?:right|left|top|bottom)\s+of\s+([a-zA-Z0-9_]+)\s*:\s*(.*)$/i;
+const LEGACY_NOTE_FOR_OF_REGEX = /^\s*note\s+(?:for|of)\s+([a-zA-Z0-9_]+)\s+(.*)$/i;
+const LEGACY_STANDALONE_NOTE_REGEX = /^\s*note\s*:\s*(.*)$/i;
+const LEGACY_TARGETED_NOTE_REGEX = /^\s*note\s+([a-zA-Z0-9_]+)\s+"(.*)"\s*$/;
+
+function stripWrappingDoubleQuotes(text: string): string {
+    if (text.startsWith('"') && text.endsWith('"')) {
+        return text.slice(1, -1);
+    }
+
+    return text;
+}
+
 export function protectTopLevelBracketBlocks(text: string): ProtectedBracketBlocksResult {
     const blocks: string[] = [];
     let protectedText = '';
@@ -62,4 +80,74 @@ export function buildLegacyConnectedNoteLines(nodeId: string, content: string): 
 
 export function cleanLegacyTargetedNoteContent(content: string): string {
     return content.replace(/\[(?:\\?"){2}\\?\]/g, '');
+}
+
+export function parseDirectionalNoteDirective(line: string): ParsedLegacyNodeNoteDirective | null {
+    const match = line.match(DIRECTIONAL_NOTE_REGEX);
+    if (!match) {
+        return null;
+    }
+
+    return {
+        nodeId: match[1],
+        text: match[2].trim()
+    };
+}
+
+export function attachDirectionalNoteToConnection(line: string, nodeId: string, text: string): string | null {
+    const escapedText = text.replace(/"/g, '\\"');
+    const sourceRegex = new RegExp(`(?:^|\\s+)${nodeId}\\b(?:\\[.*?\\])?\\s*(---|-->)`);
+    const targetRegex = new RegExp(`(---|-->)\\s*${nodeId}\\b(?:\\[.*?\\])?(?:;|$|\\s)`);
+
+    if (sourceRegex.test(line)) {
+        return line.replace(sourceRegex, (match) => {
+            return match.replace(/\s*(---|-->)$/, (_arrowMatch, arrow) => ` -- "${escapedText}" ${arrow}`);
+        });
+    }
+
+    if (targetRegex.test(line)) {
+        return line.replace(targetRegex, (match) => {
+            return match.replace(/^(---|-->)/, (arrow) => `-- "${escapedText}" ${arrow}`);
+        });
+    }
+
+    return null;
+}
+
+export function parseLegacyForOfNoteDirective(line: string): ParsedLegacyNodeNoteDirective | null {
+    const match = line.match(LEGACY_NOTE_FOR_OF_REGEX);
+    if (!match) {
+        return null;
+    }
+
+    let text = match[2].trim();
+    if (text.endsWith(']')) {
+        text = text.slice(0, -1).trim();
+    }
+
+    return {
+        nodeId: match[1],
+        text: stripWrappingDoubleQuotes(text)
+    };
+}
+
+export function parseLegacyStandaloneNoteDirective(line: string): string | null {
+    const match = line.match(LEGACY_STANDALONE_NOTE_REGEX);
+    if (!match) {
+        return null;
+    }
+
+    return stripWrappingDoubleQuotes(match[1].trim());
+}
+
+export function parseLegacyTargetedNoteDirective(line: string): ParsedLegacyNodeNoteDirective | null {
+    const match = line.match(LEGACY_TARGETED_NOTE_REGEX);
+    if (!match) {
+        return null;
+    }
+
+    return {
+        nodeId: match[1],
+        text: match[2]
+    };
 }
