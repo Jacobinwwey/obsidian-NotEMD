@@ -8,6 +8,7 @@ describe('GitHub release workflow', () => {
     const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
     const releaseScriptRelativePath = path.join('scripts', 'release', 'publish-github-release.js');
     const releaseScriptPath = path.join(repoRoot, releaseScriptRelativePath);
+    const releaseWorkflowPath = path.join(repoRoot, '.github', 'workflows', 'release.yml');
 
     test('exposes a checked-in GitHub release helper and notes for the current version', () => {
         expect(packageJson.scripts['release:github']).toBe(`node ${releaseScriptRelativePath}`);
@@ -15,6 +16,26 @@ describe('GitHub release workflow', () => {
 
         const currentReleaseNotesPath = path.join(repoRoot, 'docs', 'releases', `${packageJson.version}.md`);
         expect(fs.existsSync(currentReleaseNotesPath)).toBe(true);
+    });
+
+    test('checks in a GitHub Actions workflow that reuses the release helper for tag and manual publishing', () => {
+        expect(fs.existsSync(releaseWorkflowPath)).toBe(true);
+
+        const workflow = fs.readFileSync(releaseWorkflowPath, 'utf8');
+
+        expect(workflow).toContain('workflow_dispatch:');
+        expect(workflow).toContain('push:');
+        expect(workflow).toContain("- '*.*.*'");
+        expect(workflow).toContain("- 'v*.*.*'");
+        expect(workflow).toContain("- 'V*.*.*'");
+        expect(workflow).toContain('contents: write');
+        expect(workflow).toContain('npm ci');
+        expect(workflow).toContain('npm run build');
+        expect(workflow).toContain('npm test -- --runInBand');
+        expect(workflow).toContain('npm run audit:i18n-ui');
+        expect(workflow).toContain('npm run release:github -- "$TAG_NAME"');
+        expect(workflow).toContain("github.event_name == 'workflow_dispatch'");
+        expect(workflow).toContain('inputs.tag');
     });
 
     const maybeDescribeReleaseScript = fs.existsSync(releaseScriptPath) ? describe : describe.skip;

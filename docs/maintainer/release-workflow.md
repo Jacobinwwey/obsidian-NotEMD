@@ -68,3 +68,13 @@ The helper enforces the required packaged assets and `docs/releases/<tag>.md` be
 - If the release already exists, it runs `gh release upload ... --clobber`.
 
 That second path is the repair path for cases where a release body was published but plugin assets were not uploaded.
+
+## 6. CI Automation
+
+The repository also ships `.github/workflows/release.yml`:
+
+- Push a git tag to publish the release automatically.
+- Use `workflow_dispatch` with a `tag` input to repair an existing release from CI.
+- The workflow runs `npm ci`, `npm run build`, `npm test -- --runInBand`, `npm run audit:i18n-ui`, `git diff --check`, and finally `npm run release:github -- "$TAG_NAME"`.
+
+The workflow intentionally reuses the checked-in release helper instead of duplicating asset lists or release-note logic inside YAML.
