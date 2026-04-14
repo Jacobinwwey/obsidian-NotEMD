@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
 
+const OBSIDIAN_RELEASE_TAG_PATTERN = /^\d+\.\d+\.\d+$/;
 const REQUIRED_RELEASE_ASSETS = ['main.js', 'manifest.json', 'styles.css', 'README.md'];
 
 function ensureFileExists(filePath) {
@@ -10,10 +11,20 @@ function ensureFileExists(filePath) {
     }
 }
 
+function validateReleaseTag(tag) {
+    if (!OBSIDIAN_RELEASE_TAG_PATTERN.test(tag)) {
+        throw new Error(
+            `Invalid release tag "${tag}". Obsidian releases must use numeric x.x.x tags without a v prefix.`
+        );
+    }
+}
+
 function resolveReleaseInputs(repoRoot, tag) {
     if (!tag) {
         throw new Error('Usage: node scripts/release/publish-github-release.js <tag> [--dry-run]');
     }
+
+    validateReleaseTag(tag);
 
     const assets = REQUIRED_RELEASE_ASSETS.map((assetName) => path.join(repoRoot, assetName));
     assets.forEach(ensureFileExists);
@@ -94,9 +105,11 @@ if (require.main === module) {
 }
 
 module.exports = {
+    OBSIDIAN_RELEASE_TAG_PATTERN,
     REQUIRED_RELEASE_ASSETS,
     buildGhReleaseCommand,
     hasExistingRelease,
     main,
-    resolveReleaseInputs
+    resolveReleaseInputs,
+    validateReleaseTag
 };

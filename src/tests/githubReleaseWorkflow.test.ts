@@ -26,16 +26,17 @@ describe('GitHub release workflow', () => {
         expect(workflow).toContain('workflow_dispatch:');
         expect(workflow).toContain('push:');
         expect(workflow).toContain("- '*.*.*'");
-        expect(workflow).toContain("- 'v*.*.*'");
-        expect(workflow).toContain("- 'V*.*.*'");
+        expect(workflow).not.toContain("- 'v*.*.*'");
+        expect(workflow).not.toContain("- 'V*.*.*'");
         expect(workflow).toContain('contents: write');
         expect(workflow).toContain('npm ci');
         expect(workflow).toContain('npm run build');
         expect(workflow).toContain('npm test -- --runInBand');
         expect(workflow).toContain('npm run audit:i18n-ui');
         expect(workflow).toContain('npm run release:github -- "$TAG_NAME"');
-        expect(workflow).toContain("github.event_name == 'workflow_dispatch'");
+        expect(workflow).toContain('if [ "${{ github.event_name }}" = "workflow_dispatch" ]');
         expect(workflow).toContain('inputs.tag');
+        expect(workflow).toContain("^[0-9]+\\.[0-9]+\\.[0-9]+$");
     });
 
     const maybeDescribeReleaseScript = fs.existsSync(releaseScriptPath) ? describe : describe.skip;
@@ -145,6 +146,23 @@ describe('GitHub release workflow', () => {
 
                 expect(() => resolveReleaseInputs(tempRoot, '1.8.2')).toThrow(
                     path.join(tempRoot, 'README.md')
+                );
+            } finally {
+                fs.rmSync(tempRoot, { recursive: true, force: true });
+            }
+        });
+
+        test('rejects non-numeric tags that Obsidian cannot publish correctly', () => {
+            const tempRoot = createTempRepoRoot();
+            try {
+                writeFile(tempRoot, 'main.js');
+                writeFile(tempRoot, 'manifest.json');
+                writeFile(tempRoot, 'styles.css');
+                writeFile(tempRoot, 'README.md');
+                writeFile(tempRoot, path.join('docs', 'releases', 'v1.8.2.md'));
+
+                expect(() => resolveReleaseInputs(tempRoot, 'v1.8.2')).toThrow(
+                    'numeric x.x.x tags'
                 );
             } finally {
                 fs.rmSync(tempRoot, { recursive: true, force: true });
