@@ -1,4 +1,8 @@
-import { supportsInlineMermaidPreview, unwrapMermaidFence } from '../ui/diagramPreview';
+import {
+    supportsInlineMermaidPreview,
+    supportsInlineVegaLitePreview,
+    unwrapMermaidFence
+} from '../ui/diagramPreview';
 
 describe('diagram preview helpers', () => {
     test('unwraps mermaid fenced blocks for inline mermaid rendering', () => {
@@ -22,6 +26,22 @@ describe('diagram preview helpers', () => {
             content: '{"mark":"bar"}',
             mimeType: 'application/json',
             sourceIntent: 'dataChart'
+        })).toBe(false);
+    });
+
+    test('uses inline preview path for vega-lite json artifacts', () => {
+        expect(supportsInlineVegaLitePreview({
+            target: 'vega-lite',
+            content: '{"mark":"bar"}',
+            mimeType: 'application/json',
+            sourceIntent: 'dataChart'
+        })).toBe(true);
+
+        expect(supportsInlineVegaLitePreview({
+            target: 'json-canvas',
+            content: '{"nodes":[]}',
+            mimeType: 'application/json',
+            sourceIntent: 'canvasMap'
         })).toBe(false);
     });
 });

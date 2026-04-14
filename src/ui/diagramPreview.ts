@@ -9,3 +9,7 @@ export function unwrapMermaidFence(content: string): string {
 export function supportsInlineMermaidPreview(artifact: RenderArtifact): boolean {
     return artifact.target === 'mermaid' && artifact.mimeType === 'text/vnd.mermaid';
 }
+
+export function supportsInlineVegaLitePreview(artifact: RenderArtifact): boolean {
+    return artifact.target === 'vega-lite' && artifact.mimeType === 'application/json';
+}
