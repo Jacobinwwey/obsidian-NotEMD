@@ -1,5 +1,7 @@
 import mermaid from 'mermaid';
 import {
+    buildLegacyConnectedNoteLines,
+    cleanLegacyTargetedNoteContent,
     protectTopLevelBracketBlocks,
     restoreProtectedBracketBlocks
 } from './diagram/adapters/mermaid/legacyFixerUtils';
@@ -622,7 +624,6 @@ export function fixNotesToNodes(content: string): string {
         if (tMatch) {
             const nodeId = tMatch[1];
             const text = tMatch[2].trim();
-            const noteId = `Note${nodeId}`;
             
             // Format: NoteA["Note: ..."]
             // If text is already quoted, strip them?
@@ -631,9 +632,8 @@ export function fixNotesToNodes(content: string): string {
             if (cleanText.startsWith('"') && cleanText.endsWith('"')) {
                 cleanText = cleanText.slice(1, -1);
             }
-            
-            resultLines.push(`${noteId}["Note: ${cleanText}"]`);
-            resultLines.push(`${nodeId} -.- ${noteId}`);
+
+            resultLines.push(...buildLegacyConnectedNoteLines(nodeId, `Note: ${cleanText}`));
             continue;
         }
 
@@ -648,16 +648,13 @@ export function fixNotesToNodes(content: string): string {
                  text = text.slice(0, -1).trim();
             }
 
-            const noteId = `Note${nodeId}`;
-
             // Clean quotes
             if (text.startsWith('"') && text.endsWith('"')) {
                 text = text.slice(1, -1);
             }
             
             // User requested format: NoteM00[" Gaussian Intensity Profile"] (with leading space)
-            resultLines.push(`${noteId}[" ${text}"]`);
-            resultLines.push(`${nodeId} -.- ${noteId}`);
+            resultLines.push(...buildLegacyConnectedNoteLines(nodeId, ` ${text}`));
             continue;
         }
 
@@ -1811,21 +1808,9 @@ export function fixTargetedNotes(content: string): string {
         const match = line.match(regex);
         if (match) {
             const nodeId = match[1];
-            let content = match[2];
-            
-            // Clean content: remove [""] if present
-            content = content.replace(/\[""\]/g, '');
-            // Handle potentially escaped versions if they exist
-            content = content.replace(/\[\\""\\""\]/g, '');
-            content = content.replace(/\[\\"\\"\]/g, '');
+            const noteContent = cleanLegacyTargetedNoteContent(match[2]);
 
-            const noteId = `Note${nodeId}`;
-            
-            // Return two lines
-            return [
-                `${noteId}["${content}"]`,
-                `${nodeId} -.- ${noteId}`
-            ];
+            return buildLegacyConnectedNoteLines(nodeId, noteContent);
         }
         return [line];
     });

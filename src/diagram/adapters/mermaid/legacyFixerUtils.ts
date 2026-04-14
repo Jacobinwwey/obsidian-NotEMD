@@ -51,3 +51,15 @@ export function restoreProtectedBracketBlocks(text: string, blocks: string[]): s
         return restored.split(placeholder).join(block);
     }, text);
 }
+
+export function buildLegacyConnectedNoteLines(nodeId: string, content: string): [string, string] {
+    const noteId = `Note${nodeId}`;
+    return [
+        `${noteId}["${content}"]`,
+        `${nodeId} -.- ${noteId}`
+    ];
+}
+
+export function cleanLegacyTargetedNoteContent(content: string): string {
+    return content.replace(/\[(?:\\?"){2}\\?\]/g, '');
+}
