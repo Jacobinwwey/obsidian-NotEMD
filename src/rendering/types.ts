@@ -1,4 +1,5 @@
 import { DiagramIntent, DiagramSpec, RenderTarget } from '../diagram/types';
+import { RenderWebviewTheme } from './theme';
 
 export interface RenderArtifact {
     target: RenderTarget;
@@ -9,6 +10,7 @@ export interface RenderArtifact {
 
 export interface RenderOptions {
     target?: RenderTarget;
+    theme?: RenderWebviewTheme;
 }
 
 export interface DiagramRenderer {

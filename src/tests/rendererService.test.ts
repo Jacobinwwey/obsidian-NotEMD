@@ -48,6 +48,62 @@ describe('renderer service', () => {
         expect(result.content).toBe('stubbed');
     });
 
+    test('reuses cached artifacts for repeated renders with the same target and theme', async () => {
+        const registry = new RendererRegistry([new MermaidRenderer()]);
+        const host: RenderHost = {
+            render: jest.fn().mockResolvedValue({
+                target: 'mermaid',
+                content: 'cached',
+                mimeType: 'text/plain',
+                sourceIntent: 'mindmap'
+            })
+        };
+        const service = new RendererService(registry, host);
+        const spec: DiagramSpec = {
+            intent: 'mindmap',
+            title: 'Platform',
+            nodes: [{ id: 'core', label: 'Core' }]
+        };
+
+        const first = await service.render(spec, { target: 'mermaid', theme: 'dark' } as any);
+        const second = await service.render(spec, { target: 'mermaid', theme: 'dark' } as any);
+
+        expect(first).toBe(second);
+        expect(host.render).toHaveBeenCalledTimes(1);
+    });
+
+    test('does not reuse cached artifacts when preview theme changes', async () => {
+        const registry = new RendererRegistry([new MermaidRenderer()]);
+        const host: RenderHost = {
+            render: jest.fn()
+                .mockResolvedValueOnce({
+                    target: 'mermaid',
+                    content: 'dark',
+                    mimeType: 'text/plain',
+                    sourceIntent: 'mindmap'
+                })
+                .mockResolvedValueOnce({
+                    target: 'mermaid',
+                    content: 'light',
+                    mimeType: 'text/plain',
+                    sourceIntent: 'mindmap'
+                })
+        };
+        const service = new RendererService(registry, host);
+        const spec: DiagramSpec = {
+            intent: 'mindmap',
+            title: 'Platform',
+            nodes: [{ id: 'core', label: 'Core' }]
+        };
+
+        const darkResult = await service.render(spec, { target: 'mermaid', theme: 'dark' } as any);
+        const lightResult = await service.render(spec, { target: 'mermaid', theme: 'light' } as any);
+
+        expect(darkResult.content).toBe('dark');
+        expect(lightResult.content).toBe('light');
+        expect(host.render).toHaveBeenCalledTimes(2);
+    });
+
     test('throws when the requested target is not supported', async () => {
         const registry = new RendererRegistry([new MermaidRenderer()]);
         const service = new RendererService(registry);
@@ -86,5 +142,37 @@ describe('renderer service', () => {
         expect(session).not.toBeNull();
         expect(session?.htmlSrcdoc).toContain('<!DOCTYPE html>');
         expect(session?.payload.artifact.target).toBe('mermaid');
+    });
+
+    test('reuses cached artifact when preparing repeated preview sessions', async () => {
+        const registry = new RendererRegistry([new MermaidRenderer()]);
+        const host = {
+            render: jest.fn().mockResolvedValue({
+                target: 'mermaid',
+                content: 'mindmap\n  root((Platform))',
+                mimeType: 'text/vnd.mermaid',
+                sourceIntent: 'mindmap'
+            }),
+            createSession: jest.fn((artifact, options) => ({
+                htmlSrcdoc: '<!DOCTYPE html><html></html>',
+                payload: {
+                    artifact,
+                    theme: options?.theme ?? 'system',
+                    resolvedTheme: options?.theme === 'dark' ? 'dark' : 'light'
+                }
+            }))
+        };
+        const service = new RendererService(registry, host as any);
+        const spec: DiagramSpec = {
+            intent: 'mindmap',
+            title: 'Platform',
+            nodes: [{ id: 'core', label: 'Core' }]
+        };
+
+        await service.preparePreviewSession(spec, { theme: 'dark' } as any);
+        await service.preparePreviewSession(spec, { theme: 'dark' } as any);
+
+        expect(host.render).toHaveBeenCalledTimes(1);
+        expect(host.createSession).toHaveBeenCalledTimes(2);
     });
 });
