@@ -84,4 +84,20 @@ describe('saveDiagramArtifactFile', () => {
 
         expect(path).toBe('Generated/Diagrams/Source_diagram.canvas');
     });
+
+    test('saves vega-lite artifacts as json files', async () => {
+        const reporter = createReporter();
+        const path = await saveDiagramArtifactFile(mockApp, mockSettings, originalFile, {
+            target: 'vega-lite',
+            content: '{"$schema":"https://vega.github.io/schema/vega-lite/v5.json"}',
+            mimeType: 'application/json',
+            sourceIntent: 'dataChart'
+        }, reporter);
+
+        expect(path).toBe('Notes/Source_diagram.json');
+        expect(mockApp.vault.create).toHaveBeenCalledWith(
+            'Notes/Source_diagram.json',
+            '{"$schema":"https://vega.github.io/schema/vega-lite/v5.json"}'
+        );
+    });
 });
