@@ -109,6 +109,7 @@ function createSession(artifactOverrides: Partial<any> = {}, sourcePath = 'Notes
                 ...artifactOverrides
             },
             theme,
+            previewTitle: 'Mermaid preview',
             sourcePath,
             artifactSaved: false
         }
@@ -269,5 +270,23 @@ describe('diagram preview modal', () => {
         expect(buttons.some(button => button.text === '导出 SVG')).toBe(true);
         expect(buttons.some(button => button.text === '导出 PNG')).toBe(true);
         expect(buttons.some(button => button.text === '保存源码文件')).toBe(true);
+    });
+
+    test('renders localized preview title when session provides one', async () => {
+        const modal = new DiagramPreviewModal(mockApp, {
+            ...createSession(),
+            payload: {
+                ...createSession().payload,
+                previewTitle: 'Mermaid 预览'
+            }
+        }, 'zh-CN') as any;
+        modal.app = mockApp;
+        modal.contentEl = createMockElement();
+        modal.close = jest.fn();
+
+        modal.onOpen();
+        await flushPromises();
+
+        expect(modal.contentEl.children.some((child: MockElement) => child.tag === 'h3' && child.text === 'Mermaid 预览')).toBe(true);
     });
 });

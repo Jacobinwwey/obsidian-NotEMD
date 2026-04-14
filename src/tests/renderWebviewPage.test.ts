@@ -15,9 +15,26 @@ describe('render webview page', () => {
         });
 
         expect(html).toContain('<!DOCTYPE html>');
-        expect(html).toContain('vega-lite preview');
+        expect(html).toContain('Vega-Lite preview');
         expect(html).toContain('Notes/Weekly Signups.md');
         expect(html).toContain('&quot;mark&quot;: &quot;bar&quot;');
+    });
+
+    test('uses explicit localized preview titles when provided in the payload', () => {
+        const html = buildRenderWebviewHtml({
+            artifact: {
+                target: 'mermaid',
+                content: 'flowchart TD\nA --> B',
+                mimeType: 'text/vnd.mermaid',
+                sourceIntent: 'flowchart'
+            },
+            previewTitle: 'Mermaid 预览',
+            theme: 'light',
+            resolvedTheme: 'light'
+        });
+
+        expect(html).toContain('Mermaid 预览');
+        expect(html).not.toContain('Mermaid preview');
     });
 
     test('escapes mermaid source content before embedding it into srcdoc', () => {

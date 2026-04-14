@@ -16,8 +16,9 @@ describe('iframe render host', () => {
         });
 
         expect(session.htmlSrcdoc).toContain('<!DOCTYPE html>');
-        expect(session.htmlSrcdoc).toContain('vega-lite preview');
+        expect(session.htmlSrcdoc).toContain('Vega-Lite preview');
         expect(session.payload.theme).toBe('dark');
+        expect(session.payload.previewTitle).toBe('Vega-Lite preview');
         expect(session.payload.sourcePath).toBe('Notes/Weekly Signups.md');
         expect(session.payload.artifactSaved).toBe(true);
         expect(session.payload.artifact.target).toBe('vega-lite');
@@ -48,6 +49,7 @@ describe('iframe render host', () => {
         expect(renderer.render).toHaveBeenCalledWith(spec);
         expect(session.htmlSrcdoc).toContain('mindmap');
         expect(session.payload.theme).toBe('system');
+        expect(session.payload.previewTitle).toBe('Mermaid preview');
         expect(session.payload.artifact.content).toContain('mindmap');
     });
 });
