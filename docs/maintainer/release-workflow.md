@@ -23,6 +23,8 @@ Run:
 ```bash
 npm run build
 npm test -- --runInBand
+npm run audit:i18n-ui
+npm run audit:render-host
 obsidian help
 obsidian-cli help
 git diff --check
@@ -78,7 +80,7 @@ The repository also ships `.github/workflows/release.yml`:
 
 - Push a git tag to publish the release automatically.
 - Use `workflow_dispatch` with a numeric `x.x.x` `tag` input to repair an existing release from CI.
-- The workflow runs `npm ci`, `npm run build`, `npm test -- --runInBand`, `npm run audit:i18n-ui`, `git diff --check`, and finally `npm run release:github -- "$TAG_NAME"`.
+- The workflow runs `npm ci`, `npm run build`, `npm test -- --runInBand`, `npm run audit:i18n-ui`, `npm run audit:render-host`, `git diff --check`, and finally `npm run release:github -- "$TAG_NAME"`.
 - The workflow validates `^[0-9]+\.[0-9]+\.[0-9]+$` before checkout/publish, so `v1.8.2`-style tags are rejected.
 
 The workflow intentionally reuses the checked-in release helper instead of duplicating asset lists or release-note logic inside YAML.

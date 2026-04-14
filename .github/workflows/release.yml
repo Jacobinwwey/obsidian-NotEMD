@@ -63,6 +63,9 @@ jobs:
       - name: Audit UI i18n surfaces
         run: npm run audit:i18n-ui
 
+      - name: Audit render-host bundle packaging
+        run: npm run audit:render-host
+
       - name: Check diff hygiene
         run: git diff --check
 
