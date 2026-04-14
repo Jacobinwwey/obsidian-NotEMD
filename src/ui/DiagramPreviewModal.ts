@@ -3,6 +3,7 @@ import { formatI18n, getI18nStrings } from '../i18n';
 import { renderMermaidArtifactSvg } from '../rendering/preview/mermaidPreview';
 import {
     renderPreviewArtifactSvg,
+    saveDiagramPreviewPng,
     saveDiagramPreviewSvg,
     saveDiagramSourceArtifact,
     supportsPreviewSvgExport
@@ -99,6 +100,29 @@ export class DiagramPreviewModal extends Modal {
                 } finally {
                     exportButton.disabled = false;
                     exportButton.setText(i18n.previewModal.exportSvg);
+                }
+            };
+
+            const exportPngButton = toolbar.createEl('button', {
+                text: i18n.previewModal.exportPng
+            });
+            exportPngButton.onclick = async () => {
+                exportPngButton.disabled = true;
+                exportPngButton.setText(i18n.previewModal.exportingPng);
+                try {
+                    const outputPath = await saveDiagramPreviewPng(
+                        this.app,
+                        this.session.payload.sourcePath as string,
+                        this.session.payload.artifact
+                    );
+                    new Notice(formatI18n(i18n.previewModal.exportPngSuccessNotice, { path: outputPath }));
+                } catch (error) {
+                    const message = error instanceof Error ? error.message : String(error);
+                    new Notice(formatI18n(i18n.previewModal.exportPngFailedNotice, { message }));
+                    console.error('Failed to export diagram preview PNG:', error);
+                } finally {
+                    exportPngButton.disabled = false;
+                    exportPngButton.setText(i18n.previewModal.exportPng);
                 }
             };
         }

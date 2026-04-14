@@ -12,12 +12,16 @@ describe('supported UI locale preview modal coverage', () => {
             { label: 'previewModal.savingSource', get: (strings: typeof en) => strings.previewModal.savingSource },
             { label: 'previewModal.exportSvg', get: (strings: typeof en) => strings.previewModal.exportSvg },
             { label: 'previewModal.exportingSvg', get: (strings: typeof en) => strings.previewModal.exportingSvg },
+            { label: 'previewModal.exportPng', get: (strings: typeof en) => strings.previewModal.exportPng },
+            { label: 'previewModal.exportingPng', get: (strings: typeof en) => strings.previewModal.exportingPng },
             { label: 'previewModal.copySuccessNotice', get: (strings: typeof en) => strings.previewModal.copySuccessNotice },
             { label: 'previewModal.copyFailedNotice', get: (strings: typeof en) => strings.previewModal.copyFailedNotice },
             { label: 'previewModal.saveSourceSuccessNotice', get: (strings: typeof en) => strings.previewModal.saveSourceSuccessNotice },
             { label: 'previewModal.saveSourceFailedNotice', get: (strings: typeof en) => strings.previewModal.saveSourceFailedNotice },
             { label: 'previewModal.exportSuccessNotice', get: (strings: typeof en) => strings.previewModal.exportSuccessNotice },
             { label: 'previewModal.exportFailedNotice', get: (strings: typeof en) => strings.previewModal.exportFailedNotice },
+            { label: 'previewModal.exportPngSuccessNotice', get: (strings: typeof en) => strings.previewModal.exportPngSuccessNotice },
+            { label: 'previewModal.exportPngFailedNotice', get: (strings: typeof en) => strings.previewModal.exportPngFailedNotice },
             { label: 'previewModal.sourceFile', get: (strings: typeof en) => strings.previewModal.sourceFile }
         ];
 

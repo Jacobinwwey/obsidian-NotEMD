@@ -14,6 +14,7 @@ jest.mock('../rendering/preview/previewExport', () => {
         ...actual,
         renderPreviewArtifactSvg: jest.fn().mockResolvedValue('<svg><rect /></svg>'),
         saveDiagramPreviewSvg: jest.fn().mockResolvedValue('Notes/Topic_preview.svg'),
+        saveDiagramPreviewPng: jest.fn().mockResolvedValue('Notes/Topic_preview.png'),
         saveDiagramSourceArtifact: jest.fn().mockResolvedValue('Notes/Topic_diagram.json')
     };
 });
@@ -143,8 +144,10 @@ describe('diagram preview modal', () => {
 
         const buttons = collectButtons(modal.contentEl);
         const exportButton = buttons.find(button => button.text === 'Export SVG');
+        const exportPngButton = buttons.find(button => button.text === 'Export PNG');
 
         expect(exportButton).toBeDefined();
+        expect(exportPngButton).toBeDefined();
         expect(mermaidPreview.renderMermaidArtifactSvg).toHaveBeenCalledWith(
             expect.objectContaining({ target: 'mermaid' })
         );
@@ -159,6 +162,29 @@ describe('diagram preview modal', () => {
         expect(Notice).toHaveBeenCalledWith('Diagram preview exported to Notes/Topic_preview.svg');
         expect(exportButton?.text).toBe('Export SVG');
         expect(exportButton?.disabled).toBe(false);
+    });
+
+    test('shows png export button and saves png preview on click', async () => {
+        const modal = new DiagramPreviewModal(mockApp, createSession(), 'en') as any;
+        modal.app = mockApp;
+        modal.contentEl = createMockElement();
+        modal.close = jest.fn();
+
+        modal.onOpen();
+        await flushPromises();
+
+        const buttons = collectButtons(modal.contentEl);
+        const exportPngButton = buttons.find(button => button.text === 'Export PNG');
+        expect(exportPngButton).toBeDefined();
+
+        await exportPngButton?.onclick?.();
+
+        expect(previewExport.saveDiagramPreviewPng).toHaveBeenCalledWith(
+            mockApp,
+            'Notes/Topic.md',
+            expect.objectContaining({ target: 'mermaid' })
+        );
+        expect(Notice).toHaveBeenCalledWith('Diagram PNG exported to Notes/Topic_preview.png');
     });
 
     test('shows save-source button for unsaved preview artifacts and writes target file on click', async () => {
@@ -204,6 +230,7 @@ describe('diagram preview modal', () => {
 
         const buttons = collectButtons(modal.contentEl);
         expect(buttons.some(button => button.text === 'Export SVG')).toBe(false);
+        expect(buttons.some(button => button.text === 'Export PNG')).toBe(false);
     });
 
     test('hides save-source button when preview already points at saved artifact', async () => {
@@ -236,6 +263,7 @@ describe('diagram preview modal', () => {
 
         const buttons = collectButtons(modal.contentEl);
         expect(buttons.some(button => button.text === '导出 SVG')).toBe(true);
+        expect(buttons.some(button => button.text === '导出 PNG')).toBe(true);
         expect(buttons.some(button => button.text === '保存源码文件')).toBe(true);
     });
 });

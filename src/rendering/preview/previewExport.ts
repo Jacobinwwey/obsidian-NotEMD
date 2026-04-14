@@ -2,11 +2,16 @@ import { App, TFile } from 'obsidian';
 import { RenderArtifact } from '../types';
 import { renderJsonCanvasArtifactSvg } from './canvasPreview';
 import { renderMermaidArtifactSvg, MermaidPreviewDeps } from './mermaidPreview';
+import { PreviewPngRasterDeps, rasterizeSvgToPngArrayBuffer } from './pngPreview';
 import { renderVegaLiteArtifactSvg, VegaLitePreviewDeps } from './vegaLitePreview';
 
 export interface PreviewSvgRenderDeps {
     mermaid?: MermaidPreviewDeps;
     vegaLiteDepsLoader?: () => Promise<VegaLitePreviewDeps>;
+}
+
+export interface PreviewPngExportDeps extends PreviewSvgRenderDeps {
+    pngRaster?: PreviewPngRasterDeps;
 }
 
 interface ArtifactPathSpec {
@@ -63,6 +68,18 @@ export function buildDiagramPreviewExportPath(sourcePath: string): string {
     return dir ? `${dir}/${normalizedBase}.svg` : `${normalizedBase}.svg`;
 }
 
+export function buildDiagramPreviewPngExportPath(sourcePath: string): string {
+    const trimmedPath = sourcePath.trim().replace(/\/+$/, '');
+    const lastSlashIndex = trimmedPath.lastIndexOf('/');
+    const dir = lastSlashIndex >= 0 ? trimmedPath.slice(0, lastSlashIndex) : '';
+    const fileName = lastSlashIndex >= 0 ? trimmedPath.slice(lastSlashIndex + 1) : trimmedPath;
+    const withoutExtension = fileName.replace(/\.[^./]+$/, '');
+    const normalizedBase = withoutExtension.endsWith('_preview')
+        ? withoutExtension
+        : `${withoutExtension}_preview`;
+    return dir ? `${dir}/${normalizedBase}.png` : `${normalizedBase}.png`;
+}
+
 export function buildDiagramSourceArtifactPath(sourcePath: string, artifact: RenderArtifact): string {
     const trimmedPath = sourcePath.trim().replace(/\/+$/, '');
     const lastSlashIndex = trimmedPath.lastIndexOf('/');
@@ -88,6 +105,26 @@ export async function saveDiagramPreviewSvg(
         await app.vault.modify(existingFile, svg);
     } else {
         await app.vault.create(outputPath, svg);
+    }
+
+    return outputPath;
+}
+
+export async function saveDiagramPreviewPng(
+    app: App,
+    sourcePath: string,
+    artifact: RenderArtifact,
+    deps: PreviewPngExportDeps = {}
+): Promise<string> {
+    const outputPath = buildDiagramPreviewPngExportPath(sourcePath);
+    const svg = await renderPreviewArtifactSvg(artifact, deps);
+    const png = await rasterizeSvgToPngArrayBuffer(svg, deps.pngRaster);
+    const existingFile = app.vault.getAbstractFileByPath(outputPath);
+
+    if (existingFile instanceof TFile) {
+        await app.vault.modifyBinary(existingFile, png);
+    } else {
+        await app.vault.createBinary(outputPath, png);
     }
 
     return outputPath;

@@ -631,12 +631,16 @@ export const STRINGS_EN = {
         savingSource: 'Saving...',
         exportSvg: 'Export SVG',
         exportingSvg: 'Exporting...',
+        exportPng: 'Export PNG',
+        exportingPng: 'Exporting PNG...',
         copySuccessNotice: 'Diagram source copied to clipboard!',
         copyFailedNotice: 'Failed to copy diagram source. See console.',
         saveSourceSuccessNotice: 'Diagram source saved to {path}',
         saveSourceFailedNotice: 'Failed to save diagram source: {message}',
         exportSuccessNotice: 'Diagram preview exported to {path}',
         exportFailedNotice: 'Failed to export diagram preview: {message}',
+        exportPngSuccessNotice: 'Diagram PNG exported to {path}',
+        exportPngFailedNotice: 'Failed to export diagram PNG: {message}',
         sourceFile: 'Saved file: {path}'
     }
 };
