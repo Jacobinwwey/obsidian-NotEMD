@@ -33,6 +33,7 @@ describe('GitHub release workflow', () => {
         expect(workflow).toContain('npm run build');
         expect(workflow).toContain('npm test -- --runInBand');
         expect(workflow).toContain('npm run audit:i18n-ui');
+        expect(workflow).toContain('npm run audit:render-host');
         expect(workflow).toContain('npm run release:github -- "$TAG_NAME"');
         expect(workflow).toContain('if [ "${{ github.event_name }}" = "workflow_dispatch" ]');
         expect(workflow).toContain('inputs.tag');
