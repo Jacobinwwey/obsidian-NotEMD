@@ -423,6 +423,10 @@ export const STRINGS_ZH_TW: DeepPartial<NotemdEnglishStrings> = {
                 label: '摘要為 Mermaid 圖表',
                 tooltip: '根據目前筆記生成 Mermaid 圖表摘要。'
             },
+            generateExperimentalDiagram: {
+                label: '生成圖形（實驗性）',
+                tooltip: '為目前筆記生成並儲存實驗性圖形產物檔案。'
+            },
             previewExperimentalDiagram: {
                 label: '預覽圖形（實驗性）',
                 tooltip: '生成實驗性圖形預覽，但不儲存產物檔案。'

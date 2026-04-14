@@ -9,6 +9,7 @@ export const SIDEBAR_ACTION_DEFINITIONS = [
     { id: 'batch-generate-from-titles', label: 'Batch generate from titles', translationKey: 'batchGenerateFromTitles', category: 'generation' },
     { id: 'research-and-summarize', label: 'Research & summarize', translationKey: 'researchAndSummarize', category: 'generation' },
     { id: 'summarize-as-mermaid', label: 'Summarise as Mermaid diagram', translationKey: 'summarizeAsMermaid', category: 'generation' },
+    { id: 'generate-experimental-diagram', label: 'Generate diagram (experimental)', translationKey: 'generateExperimentalDiagram', category: 'generation' },
     { id: 'preview-experimental-diagram', label: 'Preview diagram (experimental)', translationKey: 'previewExperimentalDiagram', category: 'generation' },
     { id: 'translate-current-file', label: 'Translate current file', translationKey: 'translateCurrentFile', category: 'translation' },
     { id: 'batch-translate-folder', label: 'Batch translate folder', translationKey: 'batchTranslateFolder', category: 'translation' },
