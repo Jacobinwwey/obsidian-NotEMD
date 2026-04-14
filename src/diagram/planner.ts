@@ -38,6 +38,22 @@ function resolveMermaidDiagramType(intent: DiagramIntent): MermaidDiagramType | 
     }
 }
 
+function resolveFallbackTargets(
+    compatibilityMode: 'best-fit' | 'legacy-mermaid',
+    preferredTarget: RenderTarget,
+    preferredMermaidType: MermaidDiagramType | null
+): RenderTarget[] {
+    if (compatibilityMode === 'legacy-mermaid') {
+        return [];
+    }
+
+    if (preferredTarget !== 'mermaid' && preferredMermaidType) {
+        return ['mermaid'];
+    }
+
+    return [];
+}
+
 function buildIntentResult(markdown: string, requestedIntent?: DiagramIntent): DiagramIntentResult {
     if (!requestedIntent) {
         return inferDiagramIntent(markdown);
@@ -55,9 +71,9 @@ export function buildDiagramPlan(markdown: string, options: DiagramPlanOptions =
     const inferred = buildIntentResult(markdown, options.requestedIntent);
     const preferredTarget = resolvePreferredRenderTarget(inferred.intent);
     const preferredMermaidType = resolveMermaidDiagramType(inferred.intent);
+    const fallbackTargets = resolveFallbackTargets(compatibilityMode, preferredTarget, preferredMermaidType);
 
     if (compatibilityMode === 'legacy-mermaid') {
-        const fallbackTargets: RenderTarget[] = preferredTarget === 'mermaid' ? [] : [preferredTarget];
         return {
             intent: inferred.intent,
             confidence: inferred.confidence,
@@ -74,7 +90,7 @@ export function buildDiagramPlan(markdown: string, options: DiagramPlanOptions =
         confidence: inferred.confidence,
         reasons: inferred.reasons,
         renderTarget: preferredTarget,
-        fallbackTargets: preferredTarget === 'mermaid' ? [] : ['mermaid'],
+        fallbackTargets,
         mermaidDiagramType: preferredMermaidType,
         legacyCompatibilityMode: false
     };
