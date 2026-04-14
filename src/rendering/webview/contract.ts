@@ -6,11 +6,13 @@ export interface RenderWebviewPayload {
     artifact: RenderArtifact;
     theme: RenderWebviewTheme;
     sourcePath?: string;
+    artifactSaved?: boolean;
 }
 
 export interface RenderWebviewPayloadOptions {
     theme?: RenderWebviewTheme;
     sourcePath?: string;
+    artifactSaved?: boolean;
 }
 
 export function createRenderWebviewPayload(
@@ -20,6 +22,7 @@ export function createRenderWebviewPayload(
     return {
         artifact,
         theme: options.theme ?? 'system',
-        sourcePath: options.sourcePath
+        sourcePath: options.sourcePath,
+        artifactSaved: options.artifactSaved ?? false
     };
 }

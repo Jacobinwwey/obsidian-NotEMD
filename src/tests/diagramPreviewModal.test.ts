@@ -13,7 +13,8 @@ jest.mock('../rendering/preview/previewExport', () => {
     return {
         ...actual,
         renderPreviewArtifactSvg: jest.fn().mockResolvedValue('<svg><rect /></svg>'),
-        saveDiagramPreviewSvg: jest.fn().mockResolvedValue('Notes/Topic_preview.svg')
+        saveDiagramPreviewSvg: jest.fn().mockResolvedValue('Notes/Topic_preview.svg'),
+        saveDiagramSourceArtifact: jest.fn().mockResolvedValue('Notes/Topic_diagram.json')
     };
 });
 
@@ -107,7 +108,8 @@ function createSession(artifactOverrides: Partial<any> = {}, sourcePath = 'Notes
                 ...artifactOverrides
             },
             theme: 'system',
-            sourcePath
+            sourcePath,
+            artifactSaved: false
         }
     } as any;
 }
@@ -159,6 +161,34 @@ describe('diagram preview modal', () => {
         expect(exportButton?.disabled).toBe(false);
     });
 
+    test('shows save-source button for unsaved preview artifacts and writes target file on click', async () => {
+        const modal = new DiagramPreviewModal(mockApp, createSession({
+            target: 'vega-lite',
+            content: '{"mark":"bar"}',
+            mimeType: 'application/json',
+            sourceIntent: 'dataChart'
+        }), 'en') as any;
+        modal.app = mockApp;
+        modal.contentEl = createMockElement();
+        modal.close = jest.fn();
+
+        modal.onOpen();
+        await flushPromises();
+
+        const buttons = collectButtons(modal.contentEl);
+        const saveButton = buttons.find(button => button.text === 'Save source file');
+        expect(saveButton).toBeDefined();
+
+        await saveButton?.onclick?.();
+
+        expect(previewExport.saveDiagramSourceArtifact).toHaveBeenCalledWith(
+            mockApp,
+            'Notes/Topic.md',
+            expect.objectContaining({ target: 'vega-lite' })
+        );
+        expect(Notice).toHaveBeenCalledWith('Diagram source saved to Notes/Topic_diagram.json');
+    });
+
     test('hides export button for non-svg preview targets', async () => {
         const modal = new DiagramPreviewModal(mockApp, createSession({
             target: 'html',
@@ -176,6 +206,25 @@ describe('diagram preview modal', () => {
         expect(buttons.some(button => button.text === 'Export SVG')).toBe(false);
     });
 
+    test('hides save-source button when preview already points at saved artifact', async () => {
+        const modal = new DiagramPreviewModal(mockApp, {
+            ...createSession(),
+            payload: {
+                ...createSession().payload,
+                artifactSaved: true
+            }
+        }, 'en') as any;
+        modal.app = mockApp;
+        modal.contentEl = createMockElement();
+        modal.close = jest.fn();
+
+        modal.onOpen();
+        await flushPromises();
+
+        const buttons = collectButtons(modal.contentEl);
+        expect(buttons.some(button => button.text === 'Save source file')).toBe(false);
+    });
+
     test('uses localized export label for chinese preview modal', async () => {
         const modal = new DiagramPreviewModal(mockApp, createSession(), 'zh-CN') as any;
         modal.app = mockApp;
@@ -187,5 +236,6 @@ describe('diagram preview modal', () => {
 
         const buttons = collectButtons(modal.contentEl);
         expect(buttons.some(button => button.text === '导出 SVG')).toBe(true);
+        expect(buttons.some(button => button.text === '保存源码文件')).toBe(true);
     });
 });

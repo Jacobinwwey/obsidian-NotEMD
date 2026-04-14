@@ -69,8 +69,8 @@ export default class NotemdPlugin extends Plugin {
         return supportsDiagramPreviewModal(artifact);
     }
 
-    private openDiagramPreviewModal(artifact: RenderArtifact, sourcePath: string) {
-        const session = new IframeRenderHost().createSession(artifact, { sourcePath });
+    private openDiagramPreviewModal(artifact: RenderArtifact, sourcePath: string, artifactSaved = false) {
+        const session = new IframeRenderHost().createSession(artifact, { sourcePath, artifactSaved });
         new DiagramPreviewModal(this.app, session, this.settings.uiLocale).open();
     }
 
@@ -1738,7 +1738,7 @@ export default class NotemdPlugin extends Plugin {
                 }
 
                 if (this.supportsDiagramPreview(result.artifact)) {
-                    this.openDiagramPreviewModal(result.artifact, outputFilePath);
+                    this.openDiagramPreviewModal(result.artifact, outputFilePath, true);
                 }
             }
         } catch (error: unknown) {
@@ -1789,7 +1789,7 @@ export default class NotemdPlugin extends Plugin {
             });
 
             useReporter.log(`Experimental diagram preview produced target "${result.artifact.target}" with intent "${result.spec.intent}".`);
-            this.openDiagramPreviewModal(result.artifact, file.path);
+            this.openDiagramPreviewModal(result.artifact, file.path, false);
 
             useReporter.updateStatus(this.getActionCompleteText(actionLabel), 100);
             useReporter.log(`Experimental diagram preview opened for: ${file.path}`);

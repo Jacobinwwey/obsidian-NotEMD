@@ -123,7 +123,8 @@ describe('experimental diagram command', () => {
             expect.objectContaining({
                 payload: expect.objectContaining({
                     artifact: expect.objectContaining({ target: 'mermaid' }),
-                    sourcePath: 'Notes/Topic_diagram.md'
+                    sourcePath: 'Notes/Topic_diagram.md',
+                    artifactSaved: true
                 })
             }),
             plugin.settings.uiLocale
@@ -166,7 +167,8 @@ describe('experimental diagram command', () => {
             expect.objectContaining({
                 payload: expect.objectContaining({
                     artifact: expect.objectContaining({ target: 'json-canvas' }),
-                    sourcePath: 'Notes/Topic_diagram.canvas'
+                    sourcePath: 'Notes/Topic_diagram.canvas',
+                    artifactSaved: true
                 })
             }),
             plugin.settings.uiLocale
@@ -219,7 +221,8 @@ describe('experimental diagram command', () => {
             expect.objectContaining({
                 payload: expect.objectContaining({
                     artifact: expect.objectContaining({ target: 'vega-lite' }),
-                    sourcePath: 'Notes/Topic.md'
+                    sourcePath: 'Notes/Topic.md',
+                    artifactSaved: false
                 })
             }),
             plugin.settings.uiLocale

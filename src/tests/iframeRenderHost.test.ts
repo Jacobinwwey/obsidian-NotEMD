@@ -11,13 +11,15 @@ describe('iframe render host', () => {
             sourceIntent: 'dataChart'
         }, {
             theme: 'dark',
-            sourcePath: 'Notes/Weekly Signups.md'
+            sourcePath: 'Notes/Weekly Signups.md',
+            artifactSaved: true
         });
 
         expect(session.htmlSrcdoc).toContain('<!DOCTYPE html>');
         expect(session.htmlSrcdoc).toContain('vega-lite preview');
         expect(session.payload.theme).toBe('dark');
         expect(session.payload.sourcePath).toBe('Notes/Weekly Signups.md');
+        expect(session.payload.artifactSaved).toBe(true);
         expect(session.payload.artifact.target).toBe('vega-lite');
     });
 
