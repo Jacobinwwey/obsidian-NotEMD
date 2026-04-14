@@ -10,11 +10,30 @@ describe('mermaid preview renderer', () => {
             content: '```mermaid\nflowchart TD\nA --> B\n```',
             mimeType: 'text/vnd.mermaid',
             sourceIntent: 'flowchart'
-        }, { initialize, render });
+        }, { initialize, render }, 'dark');
 
-        expect(initialize).toHaveBeenCalledWith(expect.objectContaining({ startOnLoad: false }));
+        expect(initialize).toHaveBeenCalledWith(expect.objectContaining({
+            startOnLoad: false,
+            theme: 'dark'
+        }));
         expect(render).toHaveBeenCalledWith(expect.any(String), 'flowchart TD\nA --> B');
         expect(svg).toContain('<svg>');
+    });
+
+    test('uses default mermaid theme for light previews', async () => {
+        const initialize = jest.fn();
+        const render = jest.fn().mockResolvedValue({ svg: '<svg><g /></svg>' });
+
+        await renderMermaidArtifactSvg({
+            target: 'mermaid',
+            content: 'mindmap\n  root((Core))',
+            mimeType: 'text/vnd.mermaid',
+            sourceIntent: 'mindmap'
+        }, { initialize, render }, 'light');
+
+        expect(initialize).toHaveBeenCalledWith(expect.objectContaining({
+            theme: 'default'
+        }));
     });
 
     test('rejects non-mermaid artifacts', async () => {

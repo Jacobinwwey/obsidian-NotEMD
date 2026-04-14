@@ -48,7 +48,7 @@ export async function renderPreviewArtifactSvg(
 ): Promise<string> {
     switch (artifact.target) {
         case 'mermaid':
-            return renderMermaidArtifactSvg(artifact, deps.mermaid);
+            return renderMermaidArtifactSvg(artifact, deps.mermaid, deps.theme);
         case 'json-canvas':
             return renderJsonCanvasArtifactSvg(artifact, deps.theme);
         case 'vega-lite':
