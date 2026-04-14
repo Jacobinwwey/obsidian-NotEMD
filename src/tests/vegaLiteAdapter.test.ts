@@ -54,4 +54,83 @@ describe('vega-lite adapter', () => {
         expect(parsed.encoding.color.field).toBe('series');
         expect(parsed.data.values).toHaveLength(2);
     });
+
+    test('maps scatter chart hints onto point marks with quantitative axes', () => {
+        const spec: DiagramSpec = {
+            intent: 'dataChart',
+            title: 'Latency vs Throughput',
+            nodes: [],
+            layoutHints: { chartType: 'scatter' },
+            dataSeries: [
+                {
+                    id: 'bench',
+                    label: 'Benchmark',
+                    points: [
+                        { x: 120, y: 45 },
+                        { x: 180, y: 70 }
+                    ]
+                }
+            ]
+        };
+
+        const output = renderVegaLiteSpec(spec);
+        const parsed = JSON.parse(output);
+
+        expect(parsed.mark).toBe('point');
+        expect(parsed.encoding.x.type).toBe('quantitative');
+        expect(parsed.encoding.y.type).toBe('quantitative');
+    });
+
+    test('renders pie chart hints with theta and color encodings', () => {
+        const spec: DiagramSpec = {
+            intent: 'dataChart',
+            title: 'Traffic Mix',
+            nodes: [],
+            layoutHints: { chartType: 'pie' },
+            dataSeries: [
+                {
+                    id: 'traffic',
+                    label: 'Traffic',
+                    points: [
+                        { x: 'Organic', y: 40 },
+                        { x: 'Paid', y: 25 }
+                    ]
+                }
+            ]
+        };
+
+        const output = renderVegaLiteSpec(spec);
+        const parsed = JSON.parse(output);
+
+        expect(parsed.mark).toBe('arc');
+        expect(parsed.encoding.theta.field).toBe('y');
+        expect(parsed.encoding.color.field).toBe('x');
+    });
+
+    test('renders table chart hints with text marks and row ordering', () => {
+        const spec: DiagramSpec = {
+            intent: 'dataChart',
+            title: 'Top Issues',
+            nodes: [],
+            layoutHints: { chartType: 'table' },
+            dataSeries: [
+                {
+                    id: 'issues',
+                    label: 'Issues',
+                    points: [
+                        { x: 'Timeouts', y: 12 },
+                        { x: 'Retries', y: 7 }
+                    ]
+                }
+            ]
+        };
+
+        const output = renderVegaLiteSpec(spec);
+        const parsed = JSON.parse(output);
+
+        expect(parsed.mark.type).toBe('text');
+        expect(parsed.encoding.row.field).toBe('x');
+        expect(parsed.encoding.text.field).toBe('y');
+        expect(parsed.config.axis).toBeUndefined();
+    });
 });
