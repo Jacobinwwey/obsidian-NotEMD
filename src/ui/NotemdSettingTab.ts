@@ -888,6 +888,7 @@ export class NotemdSettingTab extends PluginSettingTab {
 
         if (this.plugin.settings.enableDeveloperMode && activeProvider) {
             new Setting(containerEl).setName(i18n.settings.developer.heading).setHeading();
+            const experimentalDiagramI18n = i18n.settings.developer.experimentalDiagramPipeline;
 
             const diagnosticModeOptions = getProviderDiagnosticCallModeOptions(activeProvider);
             const modeSet = new Set(diagnosticModeOptions.map(option => option.value));
@@ -951,6 +952,33 @@ export class NotemdSettingTab extends PluginSettingTab {
                         }
                         await this.plugin.saveSettings();
                     }));
+
+            new Setting(containerEl).setName(experimentalDiagramI18n.heading).setHeading();
+
+            new Setting(containerEl)
+                .setName(experimentalDiagramI18n.enableName)
+                .setDesc(experimentalDiagramI18n.enableDesc)
+                .addToggle(toggle => toggle
+                    .setValue(this.plugin.settings.enableExperimentalDiagramPipeline)
+                    .onChange(async (value) => {
+                        this.plugin.settings.enableExperimentalDiagramPipeline = value;
+                        await this.plugin.saveSettings();
+                        this.display();
+                    }));
+
+            new Setting(containerEl)
+                .setName(experimentalDiagramI18n.compatibilityName)
+                .setDesc(experimentalDiagramI18n.compatibilityDesc)
+                .addDropdown(dropdown => {
+                    dropdown.addOption('legacy-mermaid', experimentalDiagramI18n.compatibilityLegacy);
+                    dropdown.addOption('best-fit', experimentalDiagramI18n.compatibilityBestFit);
+                    dropdown
+                        .setValue(this.plugin.settings.experimentalDiagramCompatibilityMode)
+                        .onChange(async (value: 'legacy-mermaid' | 'best-fit') => {
+                            this.plugin.settings.experimentalDiagramCompatibilityMode = value;
+                            await this.plugin.saveSettings();
+                        });
+                });
 
             new Setting(containerEl)
                 .setName(stableApiI18n.longRequestName)
