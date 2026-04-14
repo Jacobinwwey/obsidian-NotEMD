@@ -1,6 +1,11 @@
 import {
+    attachDirectionalNoteToConnection,
     buildLegacyConnectedNoteLines,
     cleanLegacyTargetedNoteContent,
+    parseDirectionalNoteDirective,
+    parseLegacyForOfNoteDirective,
+    parseLegacyStandaloneNoteDirective,
+    parseLegacyTargetedNoteDirective,
     protectTopLevelBracketBlocks,
     restoreProtectedBracketBlocks
 } from '../diagram/adapters/mermaid/legacyFixerUtils';
@@ -39,5 +44,40 @@ describe('mermaid legacy fixer utils', () => {
     test('cleans targeted note artifacts before rendering note nodes', () => {
         expect(cleanLegacyTargetedNoteContent('Data[""]')).toBe('Data');
         expect(cleanLegacyTargetedNoteContent('Value[\\"\\"\\]')).toBe('Value');
+    });
+
+    test('parses directional note directives with attached node id and text', () => {
+        expect(parseDirectionalNoteDirective('note right of Detect : FID St1, t2 is acquired')).toEqual({
+            nodeId: 'Detect',
+            text: 'FID St1, t2 is acquired'
+        });
+    });
+
+    test('attaches directional notes to outgoing or incoming mermaid connections', () => {
+        expect(attachDirectionalNoteToConnection('Evol --> Mix[Mixing];', 'Evol', 't1 is systematically incremented')).toBe(
+            'Evol -- "t1 is systematically incremented" --> Mix[Mixing];'
+        );
+        expect(attachDirectionalNoteToConnection('Mix --> Detect["Detection t2"];', 'Detect', 'FID St1, t2 is acquired')).toBe(
+            'Mix -- "FID St1, t2 is acquired" --> Detect["Detection t2"];'
+        );
+    });
+
+    test('parses legacy note for/of directives while trimming bracket artifacts', () => {
+        expect(parseLegacyForOfNoteDirective('note for M00 "Gaussian Intensity Profile"]')).toEqual({
+            nodeId: 'M00',
+            text: 'Gaussian Intensity Profile'
+        });
+        expect(parseLegacyForOfNoteDirective('note of M01 "Two-Lobe Intensity Profile"')).toEqual({
+            nodeId: 'M01',
+            text: 'Two-Lobe Intensity Profile'
+        });
+    });
+
+    test('parses standalone and targeted quoted note directives', () => {
+        expect(parseLegacyStandaloneNoteDirective('note : "General relation"')).toBe('General relation');
+        expect(parseLegacyTargetedNoteDirective('note Torque "* General: τ = dL/dt[\"\"]"')).toEqual({
+            nodeId: 'Torque',
+            text: '* General: τ = dL/dt[""]'
+        });
     });
 });

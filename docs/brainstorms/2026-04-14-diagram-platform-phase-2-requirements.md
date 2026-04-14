@@ -16,6 +16,8 @@ That drift creates two concrete risks:
 
 The next phase should therefore optimize for productization and boundary hardening, not renderer-count growth.
 
+Recent stabilization work already moved part of the remaining Mermaid legacy surface in that direction: render-host bundle audit is now release-gated, command orchestration is partially unified in `src/main.ts`, and shared note-directive parsing / note attachment helpers have started to move out of `src/mermaidProcessor.ts` into `src/diagram/adapters/mermaid/legacyFixerUtils.ts`. The open problem is no longer whether decomposition should start, but how aggressively to finish the remaining sunset boundary without breaking legacy repair coverage.
+
 ## Requirements
 
 **Truth-Source Alignment**
