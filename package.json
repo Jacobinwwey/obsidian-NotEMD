@@ -11,6 +11,7 @@
 		"lint": "eslint . --ext .ts",
 		"diagnose:llm": "node scripts/diagnose-llm-provider.js",
 		"audit:i18n-ui": "node scripts/audit-hardcoded-ui-strings.js",
+		"release:github": "node scripts/release/publish-github-release.js",
 		"regression:language-baseline": "bash scripts/regression/language-support-baseline.sh",
 		"regression:language-compare": "bash scripts/regression/language-support-compare.sh"
 	},

@@ -56,10 +56,15 @@ Required release assets:
 - `styles.css`
 - `README.md`
 
-## 5. Suggested Release Command Pattern
+## 5. Publish Command
 
 ```bash
-gh release create <tag> main.js manifest.json styles.css README.md \
-  --title "Notemd <tag>" \
-  --notes-file docs/releases/<tag>.md
+npm run release:github -- <tag>
 ```
+
+The helper enforces the required packaged assets and `docs/releases/<tag>.md` before invoking GitHub:
+
+- If the release does not exist yet, it runs `gh release create ... --verify-tag`.
+- If the release already exists, it runs `gh release upload ... --clobber`.
+
+That second path is the repair path for cases where a release body was published but plugin assets were not uploaded.
