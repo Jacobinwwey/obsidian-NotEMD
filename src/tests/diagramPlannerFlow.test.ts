@@ -16,6 +16,7 @@ describe('diagram planner', () => {
         expect(result.intent).toBe('dataChart');
         expect(result.renderTarget).toBe('vega-lite');
         expect(result.mermaidDiagramType).toBeNull();
+        expect(result.preferredChartType).toBe('line');
         expect(result.fallbackTargets).toEqual(['html']);
     });
 
@@ -33,6 +34,53 @@ describe('diagram planner', () => {
         expect(result.intent).toBe('dataChart');
         expect(result.renderTarget).toBe('mermaid');
         expect(result.mermaidDiagramType).toBe('mindmap');
+        expect(result.preferredChartType).toBe('line');
         expect(result.legacyCompatibilityMode).toBe(true);
+    });
+
+    test('infers pie charts for part-to-whole metric summaries', () => {
+        const markdown = `# Traffic Mix
+
+Organic share: 40%
+Paid share: 25%
+Referral share: 35%
+`;
+
+        const result = buildDiagramPlan(markdown, {
+            compatibilityMode: 'best-fit',
+            requestedIntent: 'dataChart'
+        });
+
+        expect(result.preferredChartType).toBe('pie');
+    });
+
+    test('infers scatter charts for paired numeric comparisons', () => {
+        const markdown = `# Latency vs Throughput
+
+Compare latency versus throughput across benchmark runs.
+`;
+
+        const result = buildDiagramPlan(markdown, {
+            compatibilityMode: 'best-fit',
+            requestedIntent: 'dataChart'
+        });
+
+        expect(result.preferredChartType).toBe('scatter');
+    });
+
+    test('infers table charts for ranked issue summaries', () => {
+        const markdown = `# Top Issues
+
+Top ranked issues this week:
+- Timeouts: 12
+- Retries: 7
+`;
+
+        const result = buildDiagramPlan(markdown, {
+            compatibilityMode: 'best-fit',
+            requestedIntent: 'dataChart'
+        });
+
+        expect(result.preferredChartType).toBe('table');
     });
 });
