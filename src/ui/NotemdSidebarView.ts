@@ -34,6 +34,7 @@ const SINGLE_FILE_ACTION_IDS = new Set<SidebarActionId>([
     'generate-from-title',
     'research-and-summarize',
     'summarize-as-mermaid',
+    'preview-experimental-diagram',
     'translate-current-file',
     'extract-concepts-current',
     'extract-original-text',
@@ -518,6 +519,14 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
                     throw new Error('No active Markdown file selected.');
                 }
                 await this.plugin.summarizeToMermaidCommand(activeFile, reporter);
+                break;
+            }
+            case 'preview-experimental-diagram': {
+                const activeFile = this.plugin.app.workspace.getActiveFile();
+                if (!activeFile || !(activeFile instanceof TFile) || activeFile.extension !== 'md') {
+                    throw new Error('No active Markdown file selected.');
+                }
+                await this.plugin.previewExperimentalDiagramCommand(activeFile, reporter);
                 break;
             }
             case 'translate-current-file': {

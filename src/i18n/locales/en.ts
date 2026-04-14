@@ -420,6 +420,10 @@ export const STRINGS_EN = {
                 label: 'Summarise as Mermaid diagram',
                 tooltip: 'Generate a Mermaid diagram summary from current note.'
             },
+            previewExperimentalDiagram: {
+                label: 'Preview diagram (experimental)',
+                tooltip: 'Generate an experimental diagram preview without saving the artifact.'
+            },
             translateCurrentFile: {
                 label: 'Translate current file',
                 tooltip: 'Translate the active file into selected output language.'
