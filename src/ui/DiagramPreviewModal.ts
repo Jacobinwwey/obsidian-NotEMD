@@ -1,8 +1,13 @@
 import { App, Modal, Notice } from 'obsidian';
 import mermaid from 'mermaid';
 import { formatI18n, getI18nStrings } from '../i18n';
+import { renderVegaLiteArtifactSvg } from '../rendering/preview/vegaLitePreview';
 import { RenderPreviewSession } from '../rendering/host/renderHost';
-import { supportsInlineMermaidPreview, unwrapMermaidFence } from './diagramPreview';
+import {
+    supportsInlineMermaidPreview,
+    supportsInlineVegaLitePreview,
+    unwrapMermaidFence
+} from './diagramPreview';
 
 function createPreviewId(): string {
     return `notemd-preview-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -73,6 +78,13 @@ export class DiagramPreviewModal extends Modal {
             }
         }
 
+        if (supportsInlineVegaLitePreview(this.session.payload.artifact)) {
+            const rendered = await this.tryRenderVegaLite(container);
+            if (rendered) {
+                return;
+            }
+        }
+
         this.renderIframePreview(container);
     }
 
@@ -101,5 +113,18 @@ export class DiagramPreviewModal extends Modal {
         iframe.setAttribute('sandbox', 'allow-same-origin');
         iframe.setAttribute('referrerpolicy', 'no-referrer');
         iframe.srcdoc = this.session.htmlSrcdoc;
+    }
+
+    private async tryRenderVegaLite(container: HTMLElement): Promise<boolean> {
+        try {
+            const svg = await renderVegaLiteArtifactSvg(this.session.payload.artifact);
+            container.empty();
+            container.addClass('is-vega-lite');
+            container.innerHTML = svg;
+            return true;
+        } catch (error) {
+            console.error('Failed to render Vega-Lite preview. Falling back to srcdoc preview.', error);
+            return false;
+        }
     }
 }
