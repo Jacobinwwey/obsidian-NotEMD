@@ -114,6 +114,19 @@ describe('diagram spec validation', () => {
         expect(result.errors.join(' ')).toMatch(/dataChart/i);
     });
 
+    test('rejects unsupported diagram intents from model output', () => {
+        const spec = {
+            intent: 'radarChart',
+            title: 'Weekly Metrics',
+            nodes: [{ id: 'metrics', label: 'Metrics' }]
+        } as unknown as DiagramSpec;
+
+        const result = validateDiagramSpec(spec);
+
+        expect(result.valid).toBe(false);
+        expect(result.errors.join(' ')).toMatch(/unsupported diagram intent/i);
+    });
+
     test('rejects scatter charts when x values are not numeric', () => {
         const spec: DiagramSpec = {
             intent: 'dataChart',
