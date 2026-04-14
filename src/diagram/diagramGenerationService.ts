@@ -1,4 +1,5 @@
 import { MermaidRenderer } from '../rendering/renderers/mermaidRenderer';
+import { JsonCanvasRenderer } from '../rendering/renderers/jsonCanvasRenderer';
 import { RendererRegistry } from '../rendering/rendererRegistry';
 import { RendererService } from '../rendering/rendererService';
 import { buildDiagramPlan } from './planner';
@@ -22,7 +23,10 @@ export interface DiagramGenerationResult {
 }
 
 function createDefaultRendererService(): RendererService {
-    return new RendererService(new RendererRegistry([new MermaidRenderer()]));
+    return new RendererService(new RendererRegistry([
+        new MermaidRenderer(),
+        new JsonCanvasRenderer()
+    ]));
 }
 
 function mergeSpecDefaults(spec: DiagramSpec, plan: DiagramPlan): DiagramSpec {

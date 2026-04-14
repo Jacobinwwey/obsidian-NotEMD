@@ -16,7 +16,8 @@ export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
     commands: {
         checkDuplicatesCurrent: '检查当前文件中的重复项',
         extractConceptsAndGenerateTitles: '提取概念并生成标题',
-        createWikiLinkAndGenerateNoteFromSelection: '从选中文本创建 Wiki-Link 并生成笔记'
+        createWikiLinkAndGenerateNoteFromSelection: '从选中文本创建 Wiki-Link 并生成笔记',
+        generateExperimentalDiagram: '生成图形（实验性）'
     },
     plugin: {
         viewName: 'Notemd 工作台',
@@ -572,6 +573,8 @@ export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
         failedTranslateFileWithMessage: '翻译文件失败：{message}。请查看控制台了解详情。',
         mermaidSummarizationComplete: 'Mermaid 图摘要完成！',
         mermaidSummarizationError: '摘要错误：{message}',
+        experimentalDiagramComplete: '实验性图形生成完成！',
+        experimentalDiagramError: '实验性图形生成失败：{message}',
         conceptExtractionSuccess: '概念提取完成！共找到并创建了 {count} 个概念笔记。',
         noConceptsFoundToExtract: '未找到可提取的概念。',
         conceptExtractionError: '概念提取过程中出错：{message}。',

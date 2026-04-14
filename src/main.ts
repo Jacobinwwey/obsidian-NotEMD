@@ -13,6 +13,7 @@ import {
     batchFixMermaidSyntaxInFolder,
     findDuplicates,
     saveMermaidSummaryFile,
+    saveDiagramArtifactFile,
     extractConceptsFromFile,
     createConceptNotes,
     fixMermaidSyntaxInFile,
@@ -78,6 +79,18 @@ export default class NotemdPlugin extends Plugin {
 				}
 			},
 		});
+
+        this.addCommand({
+            id: 'notemd-generate-experimental-diagram',
+            name: uiStrings.commands.generateExperimentalDiagram,
+            editorCallback: async (_editor: Editor, view: MarkdownView) => {
+                const file = view.file;
+                if (file) {
+                    const reporter = this.getReporter();
+                    await this.generateExperimentalDiagramCommand(file, reporter);
+                }
+            }
+        });
 
 		this.ribbonIconEl = this.addRibbonIcon(NOTEMD_SIDEBAR_ICON, uiStrings.plugin.ribbonTooltip, () => {
 			this.activateView();
@@ -1642,6 +1655,75 @@ export default class NotemdPlugin extends Plugin {
             reporter.log('Falling back to legacy Mermaid prompt and fixer pipeline.');
             const prompt = this.getPromptForTask('summarizeToMermaid');
             return callLLM(provider, prompt, fileContent, this.settings, reporter, modelName);
+        }
+    }
+
+    async generateExperimentalDiagramCommand(file: TFile, reporter: ProgressReporter) {
+        if (this.isBusy) {
+            new Notice(this.getUiStrings().notices.anotherProcessRunning);
+            return;
+        }
+        this.isBusy = true;
+        const useReporter = reporter || this.getReporter();
+        let i18n = this.getUiStrings();
+        const actionLabel = i18n.commands.generateExperimentalDiagram;
+        const maybeSidebar = useReporter as any;
+        this.startReporterAction(useReporter, `${actionLabel}: ${file.name}`);
+        reporter.log(`Starting experimental diagram generation for ${file.name}...`);
+
+        try {
+            await this.loadSettings();
+            i18n = this.getUiStrings();
+            const fileContent = await this.app.vault.read(file);
+            if (!fileContent.trim()) {
+                throw new Error('File is empty. Cannot generate diagram.');
+            }
+
+            const { provider, modelName } = this.getProviderAndModelForTask('summarizeToMermaid');
+            reporter.log(`Using provider: ${provider.name}, Model: ${modelName}`);
+            reporter.updateStatus(this.getStepStatusText(1, 3, actionLabel), 20);
+
+            const result = await generateDiagramArtifact(fileContent, {
+                compatibilityMode: this.settings.experimentalDiagramCompatibilityMode,
+                targetLanguage: resolveTaskLanguageCode(this.settings, 'summarizeToMermaid'),
+                llmInvoker: (systemPrompt, sourceMarkdown) =>
+                    callLLM(provider, systemPrompt, sourceMarkdown, this.settings, reporter, modelName)
+            });
+
+            reporter.log(`Experimental diagram pipeline produced target "${result.artifact.target}" with intent "${result.spec.intent}".`);
+            reporter.updateStatus(this.getStepStatusText(2, 3, actionLabel), 85);
+
+            const outputFilePath = await saveDiagramArtifactFile(this.app, this.settings, file, result.artifact, reporter);
+            if (result.artifact.target === 'mermaid' && this.settings.autoMermaidFixAfterGenerate) {
+                const outputFile = this.app.vault.getAbstractFileByPath(outputFilePath);
+                if (outputFile instanceof TFile) {
+                    await this.maybeAutoFixMermaidForFile(outputFile, reporter, 'experimental diagram generation');
+                }
+            }
+
+            reporter.updateStatus(this.getActionCompleteText(actionLabel), 100);
+            reporter.log(`Experimental diagram saved to: ${outputFilePath}`);
+            new Notice(i18n.notices.experimentalDiagramComplete);
+
+            if (outputFilePath) {
+                const newLeaf = this.app.workspace.getLeaf('split', 'vertical');
+                const newFile = this.app.vault.getAbstractFileByPath(outputFilePath);
+                if (newFile instanceof TFile) {
+                    newLeaf.openFile(newFile);
+                }
+            }
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : String(error);
+            reporter.log(`Error during experimental diagram generation: ${message}`);
+            reporter.updateStatus(this.getActionFailedText(message), -1);
+            new Notice(formatI18n(i18n.notices.experimentalDiagramError, { message }));
+            console.error('Experimental diagram generation error:', error);
+            await saveErrorLog(this.app, reporter, error, this.settings);
+        } finally {
+            if (maybeSidebar instanceof NotemdSidebarView) {
+                maybeSidebar.finishProcessing();
+            }
+            this.isBusy = false;
         }
     }
 
