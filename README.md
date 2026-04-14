@@ -151,6 +151,14 @@ That's it! Explore the settings to unlock more features like web research, trans
     - Preview modals can now export rendered Mermaid/Canvas/Vega-Lite output as `.svg` and `.png` files beside the source note or beside the generated artifact, giving you stable image handoff paths without flattening everything into screenshots first.
     - Preview-only runs can also persist the raw generated artifact beside the current note using target-aware extensions and suffixes (`_summ.md`, `_diagram.canvas`, `_diagram.json`), so validation and handoff do not require rerunning the LLM step.
     - The existing Mermaid auto-fix path remains intact for Mermaid outputs only; non-Mermaid artifacts bypass the fixer instead of being pushed through incompatible post-processing.
+    - Preview UI strings continue to follow the plugin UI locale (`uiLocale: auto` follows Obsidian), and preview/export theme defaults to the active Obsidian light/dark theme so JSON Canvas and Vega-Lite previews do not stay locked to a light palette on dark installs.
+
+| Target | Generated artifact | Inline preview | Export SVG | Export PNG | Save raw source | Notes |
+| --- | --- | --- | --- | --- | --- | --- |
+| Mermaid | `_summ.md` | Yes | Yes | Yes | Yes | Mermaid auto-fix remains available for Mermaid-only flows. |
+| JSON Canvas | `_diagram.canvas` | Yes | Yes | Yes | Yes | Preview/export uses a theme-aware Canvas palette. |
+| Vega-Lite | `_diagram.json` | Yes | Yes | Yes | Yes | Preview/export uses a theme-aware Vega-Lite config patch. |
+| HTML | `_diagram.html` | Fallback iframe/srcdoc only | No | No | Yes | Current pipeline does not promise raster/vector export for HTML artifacts yet. |
 
 - **Simple Formula Format Correction**:
     - Quickly fixes single-line math formulas delimited by single `$` to standard double `$$` blocks.
@@ -677,6 +685,11 @@ Notemd runs locally inside Obsidian, but some features send outbound requests.
     *   Check for invalid characters: `* " \ / < > : | ? # ^ [ ]`. Note that `\` is invalid even on Windows for Obsidian paths. Use `/` as the path separator.
 -   **Performance Problems**: Processing large files or many files can take time. Reduce the "Chunk Word Count" setting for potentially faster (but more numerous) API calls. Try a different LLM provider or model.
 -   **Unexpected Linking**: The quality of linking depends heavily on the LLM and the prompt. Experiment with different models or temperature settings.
+-   **Diagram Preview / Export Issues**:
+    1.  Mermaid, JSON Canvas, and Vega-Lite artifacts support inline preview plus `.svg` / `.png` export. HTML artifacts currently support fallback preview and raw-source save only.
+    2.  Preview/export theme follows the active Obsidian light/dark theme when the preview session is using `system`. If you switch Obsidian theme while the preview modal is already open, close and reopen the modal before exporting so the new theme is baked into the snapshot.
+    3.  Exported `_preview.svg` and `_preview.png` files are snapshots. Re-export after editing the source artifact or changing theme if the saved preview is stale.
+    4.  Invalid JSON Canvas or Vega-Lite artifacts surface explicit preview errors. Save the raw artifact first if you need to inspect or repair the generated `.canvas` / `.json` content manually.
 
 ## Contributing
 

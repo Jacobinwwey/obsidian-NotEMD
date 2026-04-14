@@ -62,11 +62,11 @@
 }
 
 .notemd-diagram-preview-body.is-json-canvas {
-    background: #f8fafc;
+    background: var(--notemd-surface-alt);
 }
 
 .notemd-diagram-preview-body.is-vega-lite {
-    background: #ffffff;
+    background: var(--notemd-surface-alt);
 }
 
 .notemd-diagram-preview-body svg {

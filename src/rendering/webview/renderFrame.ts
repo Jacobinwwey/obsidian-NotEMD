@@ -26,7 +26,7 @@ export function renderArtifactMarkup(payload: RenderWebviewPayload): string {
         ? `<div class="notemd-render-source">${escapeHtml(payload.sourcePath)}</div>`
         : '';
 
-    return `<section class="notemd-render-shell" data-render-target="${escapeHtml(payload.artifact.target)}" data-render-theme="${escapeHtml(payload.theme)}">
+    return `<section class="notemd-render-shell" data-render-target="${escapeHtml(payload.artifact.target)}" data-render-theme="${escapeHtml(payload.resolvedTheme)}" data-theme-source="${escapeHtml(payload.theme)}">
     <header class="notemd-render-header">${escapeHtml(`${payload.artifact.target} preview`)}</header>
     ${sourceMarkup}
     <pre class="notemd-render-body">${escapeHtml(formatArtifactContent(payload))}</pre>

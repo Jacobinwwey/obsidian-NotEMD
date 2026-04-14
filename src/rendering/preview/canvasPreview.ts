@@ -1,4 +1,5 @@
 import { RenderArtifact } from '../types';
+import { RenderWebviewTheme, resolveRenderTheme } from '../theme';
 
 type CanvasSide = 'right' | 'left' | 'top' | 'bottom';
 
@@ -34,6 +35,14 @@ interface Point {
 
 const PREVIEW_PADDING = 48;
 const PREVIEW_MIN_SIZE = 240;
+
+interface CanvasPreviewPalette {
+    surface: string;
+    nodeSurface: string;
+    stroke: string;
+    text: string;
+    edgeLabelStroke: string;
+}
 
 function escapeXml(value: string): string {
     return value
@@ -183,12 +192,34 @@ function renderCanvasEdge(edge: CanvasEdge, nodeIndex: Map<string, CanvasNode>):
 </g>`;
 }
 
-export async function renderJsonCanvasArtifactSvg(artifact: RenderArtifact): Promise<string> {
+function getCanvasPreviewPalette(theme: RenderWebviewTheme): CanvasPreviewPalette {
+    return resolveRenderTheme(theme) === 'dark'
+        ? {
+            surface: '#0f172a',
+            nodeSurface: '#111827',
+            stroke: '#2dd4bf',
+            text: '#e2e8f0',
+            edgeLabelStroke: '#0f172a'
+        }
+        : {
+            surface: '#f8fafc',
+            nodeSurface: '#ffffff',
+            stroke: '#0f766e',
+            text: '#0f172a',
+            edgeLabelStroke: '#f8fafc'
+        };
+}
+
+export async function renderJsonCanvasArtifactSvg(
+    artifact: RenderArtifact,
+    theme: RenderWebviewTheme = 'system'
+): Promise<string> {
     if (artifact.target !== 'json-canvas') {
         throw new Error(`renderJsonCanvasArtifactSvg only supports json-canvas artifacts, received "${artifact.target}".`);
     }
 
     const document = parseJsonCanvasArtifactContent(artifact.content);
+    const palette = getCanvasPreviewPalette(theme);
     const bounds = buildCanvasBounds(document.nodes);
     const viewBoxX = bounds.minX - PREVIEW_PADDING;
     const viewBoxY = bounds.minY - PREVIEW_PADDING;
@@ -205,25 +236,25 @@ export async function renderJsonCanvasArtifactSvg(artifact: RenderArtifact): Pro
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBoxX} ${viewBoxY} ${viewBoxWidth} ${viewBoxHeight}" role="img" aria-label="JSON Canvas preview">
 <defs>
     <marker id="notemd-canvas-arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
-        <path d="M0,0 L12,6 L0,12 z" fill="#0f766e" />
+        <path d="M0,0 L12,6 L0,12 z" fill="${palette.stroke}" />
     </marker>
     <style>
-        .notemd-canvas-surface { fill: #f8fafc; }
-        .notemd-canvas-node rect { fill: #ffffff; stroke: #0f766e; stroke-width: 2; }
+        .notemd-canvas-surface { fill: ${palette.surface}; }
+        .notemd-canvas-node rect { fill: ${palette.nodeSurface}; stroke: ${palette.stroke}; stroke-width: 2; }
         .notemd-canvas-node-text,
         .notemd-canvas-edge-label,
         .notemd-canvas-empty {
-            fill: #0f172a;
+            fill: ${palette.text};
             font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
             font-size: 15px;
         }
         .notemd-canvas-edge line {
-            stroke: #0f766e;
+            stroke: ${palette.stroke};
             stroke-width: 2.25;
         }
         .notemd-canvas-edge-label {
             paint-order: stroke;
-            stroke: #f8fafc;
+            stroke: ${palette.edgeLabelStroke};
             stroke-width: 6;
             stroke-linejoin: round;
         }
