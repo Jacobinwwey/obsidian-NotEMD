@@ -23,6 +23,9 @@ export function inferDiagramIntent(markdown: string): DiagramIntentResult {
     const chartReasons: string[] = [];
     const hasMarkdownTable = /\|.+\|/.test(normalized) && /\|\s*-+\s*\|/.test(normalized);
     const numericCells = (normalized.match(/\|\s*\d+(?:\.\d+)?\s*\|/g) ?? []).length;
+    const percentValues = (normalized.match(/\b\d+(?:\.\d+)?%/g) ?? []).length;
+    const numericTokens = (normalized.match(/\b\d+(?:\.\d+)?\b/g) ?? []).length;
+    const rankedNumericLines = (normalized.match(/^\s*(?:[-*]|\d+\.)\s+[^:\n]+:\s*\d+(?:\.\d+)?%?\s*$/gm) ?? []).length;
     const chartKeywords = countMatches(normalized, [
         /\bmetric(s)?\b/g,
         /\btrend(s)?\b/g,
@@ -33,6 +36,31 @@ export function inferDiagramIntent(markdown: string): DiagramIntentResult {
         /\brevenue\b/g,
         /\bcount\b/g
     ]);
+    const shareKeywords = countMatches(normalized, [
+        /\bshare\b/g,
+        /\bmix\b/g,
+        /\bbreakdown\b/g,
+        /\bdistribution\b/g,
+        /\bcomposition\b/g,
+        /\bportion\b/g
+    ]);
+    const comparisonKeywords = countMatches(normalized, [
+        /\bvs\.?\b/g,
+        /\bversus\b/g,
+        /\bcompare\b/g,
+        /\bcomparison\b/g,
+        /\blatency\b/g,
+        /\bthroughput\b/g,
+        /\bcorrelation\b/g
+    ]);
+    const rankingKeywords = countMatches(normalized, [
+        /\btop\b/g,
+        /\brank(?:ed|ing)?\b/g,
+        /\bissue(?:s)?\b/g,
+        /\bleaderboard\b/g,
+        /\bhighest\b/g,
+        /\blowest\b/g
+    ]);
     if (hasMarkdownTable) {
         chartReasons.push('markdown table detected');
     }
@@ -41,6 +69,24 @@ export function inferDiagramIntent(markdown: string): DiagramIntentResult {
     }
     if (chartKeywords > 0) {
         chartReasons.push('metric-oriented keywords detected');
+    }
+    if (shareKeywords > 0) {
+        chartReasons.push('part-to-whole keywords detected');
+    }
+    if (percentValues >= 2) {
+        chartReasons.push('percentage values detected');
+    }
+    if (comparisonKeywords > 0) {
+        chartReasons.push('comparison vocabulary detected');
+    }
+    if (comparisonKeywords > 0 && numericTokens >= 4) {
+        chartReasons.push('paired numeric values detected');
+    }
+    if (rankingKeywords > 0) {
+        chartReasons.push('ranking keywords detected');
+    }
+    if (rankedNumericLines >= 2) {
+        chartReasons.push('ranked numeric items detected');
     }
     if (chartReasons.length >= 2) {
         return scoreResult('dataChart', 0.88, chartReasons);
