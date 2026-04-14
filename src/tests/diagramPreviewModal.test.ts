@@ -149,7 +149,9 @@ describe('diagram preview modal', () => {
         expect(exportButton).toBeDefined();
         expect(exportPngButton).toBeDefined();
         expect(mermaidPreview.renderMermaidArtifactSvg).toHaveBeenCalledWith(
-            expect.objectContaining({ target: 'mermaid' })
+            expect.objectContaining({ target: 'mermaid' }),
+            undefined,
+            'dark'
         );
 
         await exportButton?.onclick?.();

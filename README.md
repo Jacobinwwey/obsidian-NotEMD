@@ -151,7 +151,7 @@ That's it! Explore the settings to unlock more features like web research, trans
     - Preview modals can now export rendered Mermaid/Canvas/Vega-Lite output as `.svg` and `.png` files beside the source note or beside the generated artifact, giving you stable image handoff paths without flattening everything into screenshots first.
     - Preview-only runs can also persist the raw generated artifact beside the current note using target-aware extensions and suffixes (`_summ.md`, `_diagram.canvas`, `_diagram.json`), so validation and handoff do not require rerunning the LLM step.
     - The existing Mermaid auto-fix path remains intact for Mermaid outputs only; non-Mermaid artifacts bypass the fixer instead of being pushed through incompatible post-processing.
-    - Preview UI strings continue to follow the plugin UI locale (`uiLocale: auto` follows Obsidian), and preview/export theme defaults to the active Obsidian light/dark theme so JSON Canvas and Vega-Lite previews do not stay locked to a light palette on dark installs.
+    - Preview UI strings continue to follow the plugin UI locale (`uiLocale: auto` follows Obsidian), and preview/export theme defaults to the active Obsidian light/dark theme so Mermaid, JSON Canvas, and Vega-Lite previews do not stay locked to the wrong palette after a theme switch.
 
 | Target | Generated artifact | Inline preview | Export SVG | Export PNG | Save raw source | Notes |
 | --- | --- | --- | --- | --- | --- | --- |

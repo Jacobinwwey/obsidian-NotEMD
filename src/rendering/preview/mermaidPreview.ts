@@ -1,5 +1,6 @@
 import mermaid from 'mermaid';
 import { RenderArtifact } from '../types';
+import { RenderWebviewTheme, resolveRenderTheme } from '../theme';
 
 export interface MermaidPreviewDeps {
     initialize(config: Record<string, unknown>): void;
@@ -18,7 +19,8 @@ function unwrapMermaidFence(content: string): string {
 
 export async function renderMermaidArtifactSvg(
     artifact: RenderArtifact,
-    deps: MermaidPreviewDeps = mermaid as unknown as MermaidPreviewDeps
+    deps: MermaidPreviewDeps = mermaid as unknown as MermaidPreviewDeps,
+    theme: RenderWebviewTheme = 'system'
 ): Promise<string> {
     if (artifact.target !== 'mermaid') {
         throw new Error(`renderMermaidArtifactSvg only supports mermaid artifacts, received "${artifact.target}".`);
@@ -26,7 +28,8 @@ export async function renderMermaidArtifactSvg(
 
     deps.initialize({
         startOnLoad: false,
-        securityLevel: 'loose'
+        securityLevel: 'loose',
+        theme: resolveRenderTheme(theme) === 'dark' ? 'dark' : 'default'
     });
 
     const source = unwrapMermaidFence(artifact.content);

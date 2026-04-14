@@ -74,6 +74,7 @@ describe('diagram preview export helpers', () => {
     });
 
     test('renders preview svg through the target-specific renderer', async () => {
+        const initialize = jest.fn();
         await expect(renderPreviewArtifactSvg({
             target: 'mermaid',
             content: '```mermaid\nflowchart TD\nA --> B\n```',
@@ -81,10 +82,12 @@ describe('diagram preview export helpers', () => {
             sourceIntent: 'flowchart'
         }, {
             mermaid: {
-                initialize: jest.fn(),
+                initialize,
                 render: jest.fn().mockResolvedValue({ svg: '<svg><path /></svg>' })
-            }
+            },
+            theme: 'dark'
         })).resolves.toContain('<svg>');
+        expect(initialize).toHaveBeenCalledWith(expect.objectContaining({ theme: 'dark' }));
     });
 
     test('saves a new exported preview svg beside the source file', async () => {

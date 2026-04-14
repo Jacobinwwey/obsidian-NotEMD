@@ -175,7 +175,11 @@ export class DiagramPreviewModal extends Modal {
 
     private async tryRenderMermaid(container: HTMLElement): Promise<boolean> {
         try {
-            const svg = await renderMermaidArtifactSvg(this.session.payload.artifact);
+            const svg = await renderMermaidArtifactSvg(
+                this.session.payload.artifact,
+                undefined,
+                this.session.payload.resolvedTheme ?? this.session.payload.theme
+            );
             container.empty();
             container.addClass('is-mermaid');
             container.innerHTML = svg;
