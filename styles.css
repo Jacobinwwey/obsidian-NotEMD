@@ -27,6 +27,47 @@
     font-family: var(--notemd-sidebar-font);
 }
 
+.notemd-diagram-preview-modal {
+    padding: 1em;
+    max-width: 920px;
+    width: min(92vw, 920px);
+    font-family: var(--notemd-sidebar-font);
+}
+
+.notemd-diagram-preview-toolbar {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.6em;
+    margin-bottom: 0.8em;
+}
+
+.notemd-diagram-preview-source-path {
+    margin: 0 0 0.8em;
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+.notemd-diagram-preview-body {
+    min-height: 360px;
+    max-height: 72vh;
+    overflow: auto;
+    border: 1px solid var(--notemd-border);
+    border-radius: 12px;
+    background: var(--notemd-surface-alt);
+    padding: 1em;
+}
+
+.notemd-diagram-preview-body.is-mermaid {
+    background: var(--background-primary);
+}
+
+.notemd-diagram-preview-frame {
+    width: 100%;
+    min-height: 520px;
+    border: 0;
+    background: transparent;
+}
+
 .notemd-status-container {
     margin-bottom: 1em;
 }

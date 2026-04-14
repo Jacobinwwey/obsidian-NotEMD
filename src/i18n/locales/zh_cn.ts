@@ -620,5 +620,12 @@ export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
         processingStopped: '处理已停止。',
         cancelling: '正在取消…',
         userRequestedCancellation: '用户请求取消。'
+    },
+    previewModal: {
+        title: '{target} 预览',
+        copySource: '复制源码',
+        copySuccessNotice: '图形源码已复制到剪贴板！',
+        copyFailedNotice: '复制图形源码失败，请查看控制台。',
+        sourceFile: '已保存文件：{path}'
     }
 };
