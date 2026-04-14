@@ -1,19 +1,17 @@
 import { App, Modal, Notice } from 'obsidian';
-import mermaid from 'mermaid';
 import { formatI18n, getI18nStrings } from '../i18n';
-import { renderJsonCanvasArtifactSvg } from '../rendering/preview/canvasPreview';
-import { renderVegaLiteArtifactSvg } from '../rendering/preview/vegaLitePreview';
+import { renderMermaidArtifactSvg } from '../rendering/preview/mermaidPreview';
+import {
+    renderPreviewArtifactSvg,
+    saveDiagramPreviewSvg,
+    supportsPreviewSvgExport
+} from '../rendering/preview/previewExport';
 import { RenderPreviewSession } from '../rendering/host/renderHost';
 import {
     supportsInlineCanvasPreview,
     supportsInlineMermaidPreview,
     supportsInlineVegaLitePreview,
-    unwrapMermaidFence
 } from './diagramPreview';
-
-function createPreviewId(): string {
-    return `notemd-preview-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-}
 
 export class DiagramPreviewModal extends Modal {
     constructor(
@@ -53,6 +51,31 @@ export class DiagramPreviewModal extends Modal {
                 console.error('Failed to copy diagram source:', error);
             });
         };
+
+        if (this.session.payload.sourcePath && supportsPreviewSvgExport(this.session.payload.artifact)) {
+            const exportButton = toolbar.createEl('button', {
+                text: i18n.previewModal.exportSvg
+            });
+            exportButton.onclick = async () => {
+                exportButton.disabled = true;
+                exportButton.setText(i18n.previewModal.exportingSvg);
+                try {
+                    const outputPath = await saveDiagramPreviewSvg(
+                        this.app,
+                        this.session.payload.sourcePath as string,
+                        this.session.payload.artifact
+                    );
+                    new Notice(formatI18n(i18n.previewModal.exportSuccessNotice, { path: outputPath }));
+                } catch (error) {
+                    const message = error instanceof Error ? error.message : String(error);
+                    new Notice(formatI18n(i18n.previewModal.exportFailedNotice, { message }));
+                    console.error('Failed to export diagram preview SVG:', error);
+                } finally {
+                    exportButton.disabled = false;
+                    exportButton.setText(i18n.previewModal.exportSvg);
+                }
+            };
+        }
 
         const closeButton = toolbar.createEl('button', { text: i18n.common.close });
         closeButton.onclick = () => this.close();
@@ -99,16 +122,10 @@ export class DiagramPreviewModal extends Modal {
 
     private async tryRenderMermaid(container: HTMLElement): Promise<boolean> {
         try {
-            mermaid.initialize({
-                startOnLoad: false,
-                securityLevel: 'loose'
-            });
-
-            const source = unwrapMermaidFence(this.session.payload.artifact.content);
-            const result = await (mermaid as any).render(createPreviewId(), source);
+            const svg = await renderMermaidArtifactSvg(this.session.payload.artifact);
             container.empty();
             container.addClass('is-mermaid');
-            container.innerHTML = result.svg;
+            container.innerHTML = svg;
             return true;
         } catch (error) {
             console.error('Failed to render Mermaid preview. Falling back to srcdoc preview.', error);
@@ -118,7 +135,7 @@ export class DiagramPreviewModal extends Modal {
 
     private async tryRenderCanvas(container: HTMLElement): Promise<boolean> {
         try {
-            const svg = await renderJsonCanvasArtifactSvg(this.session.payload.artifact);
+            const svg = await renderPreviewArtifactSvg(this.session.payload.artifact);
             container.empty();
             container.addClass('is-json-canvas');
             container.innerHTML = svg;
@@ -139,7 +156,7 @@ export class DiagramPreviewModal extends Modal {
 
     private async tryRenderVegaLite(container: HTMLElement): Promise<boolean> {
         try {
-            const svg = await renderVegaLiteArtifactSvg(this.session.payload.artifact);
+            const svg = await renderPreviewArtifactSvg(this.session.payload.artifact);
             container.empty();
             container.addClass('is-vega-lite');
             container.innerHTML = svg;
