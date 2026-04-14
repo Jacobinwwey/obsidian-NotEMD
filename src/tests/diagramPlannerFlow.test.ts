@@ -54,6 +54,21 @@ Referral share: 35%
         expect(result.preferredChartType).toBe('pie');
     });
 
+    test('routes part-to-whole summaries to best-fit pie charts without an explicit intent', () => {
+        const markdown = `# Traffic Mix
+
+Organic share: 40%
+Paid share: 25%
+Referral share: 35%
+`;
+
+        const result = buildDiagramPlan(markdown, { compatibilityMode: 'best-fit' });
+
+        expect(result.intent).toBe('dataChart');
+        expect(result.renderTarget).toBe('vega-lite');
+        expect(result.preferredChartType).toBe('pie');
+    });
+
     test('infers scatter charts for paired numeric comparisons', () => {
         const markdown = `# Latency vs Throughput
 
@@ -65,6 +80,20 @@ Compare latency versus throughput across benchmark runs.
             requestedIntent: 'dataChart'
         });
 
+        expect(result.preferredChartType).toBe('scatter');
+    });
+
+    test('routes paired numeric comparisons to best-fit scatter charts without an explicit intent', () => {
+        const markdown = `# Latency vs Throughput
+
+Run A: latency 120 ms, throughput 45 req/s
+Run B: latency 180 ms, throughput 70 req/s
+`;
+
+        const result = buildDiagramPlan(markdown, { compatibilityMode: 'best-fit' });
+
+        expect(result.intent).toBe('dataChart');
+        expect(result.renderTarget).toBe('vega-lite');
         expect(result.preferredChartType).toBe('scatter');
     });
 
@@ -81,6 +110,21 @@ Top ranked issues this week:
             requestedIntent: 'dataChart'
         });
 
+        expect(result.preferredChartType).toBe('table');
+    });
+
+    test('routes ranked issue summaries to best-fit tables without an explicit intent', () => {
+        const markdown = `# Top Issues
+
+- Timeouts: 12
+- Retries: 7
+- Rate limits: 4
+`;
+
+        const result = buildDiagramPlan(markdown, { compatibilityMode: 'best-fit' });
+
+        expect(result.intent).toBe('dataChart');
+        expect(result.renderTarget).toBe('vega-lite');
         expect(result.preferredChartType).toBe('table');
     });
 });

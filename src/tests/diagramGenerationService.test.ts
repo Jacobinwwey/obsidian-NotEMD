@@ -233,6 +233,40 @@ describe('diagram generation service', () => {
         expect(JSON.parse(result.artifact.content).mark).toBe('line');
     });
 
+    test('fails fast when the LLM intent escapes the planner render family in best-fit mode', async () => {
+        await expect(generateDiagramArtifact(`# Traffic Mix
+
+Organic share: 40%
+Paid share: 25%
+Referral share: 35%
+`, {
+            compatibilityMode: 'best-fit',
+            targetLanguage: 'en',
+            llmInvoker: async () => JSON.stringify({
+                intent: 'flowchart',
+                title: 'Traffic Mix',
+                nodes: [{ id: 'mix', label: 'Traffic mix' }]
+            })
+        })).rejects.toThrow(/does not match planner route "dataChart"/i);
+    });
+
+    test('fails fast when the LLM ignores an explicit requested intent', async () => {
+        await expect(generateDiagramArtifact(`# Release Checklist
+
+1. Validate version
+2. If checks pass, publish release
+`, {
+            compatibilityMode: 'best-fit',
+            requestedIntent: 'sequence',
+            targetLanguage: 'en',
+            llmInvoker: async () => JSON.stringify({
+                intent: 'flowchart',
+                title: 'Release Flow',
+                nodes: [{ id: 'validate', label: 'Validate version' }]
+            })
+        })).rejects.toThrow(/does not match requested intent "sequence"/i);
+    });
+
     test('rejects ambiguous multi-series pie specs before renderer fallback', async () => {
         await expect(generateDiagramArtifact(`# Traffic Mix
 
