@@ -234,6 +234,7 @@ Få adgang til pluginindstillingerne via:
 ### Sprogarkitektur (grænsefladesprog og opgaveoutputsprog)
 
 - **Grænsefladesprog** styrer kun tekst i pluginets grænseflade, som etiketter i indstillinger, knapper i sidepanelet, notifikationer og dialoger. Standardtilstanden `auto` følger Obsidians aktuelle UI-sprog.
+- Regionale og skriftspecifikke varianter bliver nu løst til det nærmeste udgivne katalog i stedet for at falde direkte tilbage til engelsk. For eksempel bruger `fr-CA` fransk, `es-419` spansk, `pt-PT` portugisisk, `zh-Hans` forenklet kinesisk og `zh-Hant-HK` traditionelt kinesisk.
 - **Opgaveoutputsprog** styrer modelgenereret output for opgaver, som links, opsummeringer, titelgenerering, Mermaid-opsummering, begrebsudtræk og oversættelsesmål.
 - **Per-task language mode** lader hver opgave bestemme sit eget outputsprog ud fra et samlet policy-lag i stedet for spredte overrides på tværs af moduler.
 - **Deaktiver automatisk oversættelse** betyder, at ikke-Translate-opgaver bevarer konteksten på kildesproget, mens eksplicitte Translate-opgaver stadig håndhæver det konfigurerede målsprog.
