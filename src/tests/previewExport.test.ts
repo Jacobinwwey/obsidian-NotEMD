@@ -1,7 +1,9 @@
 import { TFile } from 'obsidian';
 import {
+    buildDiagramSourceArtifactPath,
     buildDiagramPreviewExportPath,
     renderPreviewArtifactSvg,
+    saveDiagramSourceArtifact,
     saveDiagramPreviewSvg,
     supportsPreviewSvgExport
 } from '../rendering/preview/previewExport';
@@ -19,6 +21,22 @@ describe('diagram preview export helpers', () => {
         expect(buildDiagramPreviewExportPath('Notes/Topic_diagram.canvas')).toBe('Notes/Topic_diagram_preview.svg');
         expect(buildDiagramPreviewExportPath('Topic.md')).toBe('Topic_preview.svg');
         expect(buildDiagramPreviewExportPath('Notes/Topic_preview.svg')).toBe('Notes/Topic_preview.svg');
+    });
+
+    test('builds a target-aware raw artifact path beside the source note', () => {
+        expect(buildDiagramSourceArtifactPath('Notes/Topic.md', {
+            target: 'mermaid',
+            content: '',
+            mimeType: 'text/vnd.mermaid',
+            sourceIntent: 'flowchart'
+        })).toBe('Notes/Topic_summ.md');
+
+        expect(buildDiagramSourceArtifactPath('Notes/Topic.md', {
+            target: 'json-canvas',
+            content: '',
+            mimeType: 'application/json',
+            sourceIntent: 'canvasMap'
+        })).toBe('Notes/Topic_diagram.canvas');
     });
 
     test('reports which artifact targets support svg export', () => {
@@ -94,6 +112,18 @@ describe('diagram preview export helpers', () => {
             expect.any(TFile),
             expect.stringContaining('<svg')
         );
+    });
+
+    test('saves a raw preview artifact file with target-specific extension', async () => {
+        const outputPath = await saveDiagramSourceArtifact(mockApp, 'Notes/Topic.md', {
+            target: 'vega-lite',
+            content: '{"mark":"bar"}',
+            mimeType: 'application/json',
+            sourceIntent: 'dataChart'
+        });
+
+        expect(outputPath).toBe('Notes/Topic_diagram.json');
+        expect(mockApp.vault.create).toHaveBeenCalledWith('Notes/Topic_diagram.json', '{"mark":"bar"}');
     });
 
     test('rejects unsupported export targets', async () => {
