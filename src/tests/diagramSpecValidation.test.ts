@@ -113,4 +113,81 @@ describe('diagram spec validation', () => {
         expect(result.errors.join(' ')).toMatch(/chartType/i);
         expect(result.errors.join(' ')).toMatch(/dataChart/i);
     });
+
+    test('rejects scatter charts when x values are not numeric', () => {
+        const spec: DiagramSpec = {
+            intent: 'dataChart',
+            title: 'Latency vs Throughput',
+            nodes: [],
+            layoutHints: { chartType: 'scatter' },
+            dataSeries: [
+                {
+                    id: 'bench',
+                    label: 'Benchmark',
+                    points: [
+                        { x: 'slow', y: 45 },
+                        { x: 'fast', y: 70 }
+                    ]
+                }
+            ]
+        };
+
+        const result = validateDiagramSpec(spec);
+
+        expect(result.valid).toBe(false);
+        expect(result.errors.join(' ')).toMatch(/scatter/i);
+        expect(result.errors.join(' ')).toMatch(/numeric x/i);
+    });
+
+    test('rejects pie charts with multiple series', () => {
+        const spec: DiagramSpec = {
+            intent: 'dataChart',
+            title: 'Traffic Mix',
+            nodes: [],
+            layoutHints: { chartType: 'pie' },
+            dataSeries: [
+                {
+                    id: 'current',
+                    label: 'Current',
+                    points: [{ x: 'Organic', y: 40 }]
+                },
+                {
+                    id: 'previous',
+                    label: 'Previous',
+                    points: [{ x: 'Paid', y: 25 }]
+                }
+            ]
+        };
+
+        const result = validateDiagramSpec(spec);
+
+        expect(result.valid).toBe(false);
+        expect(result.errors.join(' ')).toMatch(/pie/i);
+        expect(result.errors.join(' ')).toMatch(/single data series/i);
+    });
+
+    test('rejects pie charts with negative values', () => {
+        const spec: DiagramSpec = {
+            intent: 'dataChart',
+            title: 'Traffic Mix',
+            nodes: [],
+            layoutHints: { chartType: 'pie' },
+            dataSeries: [
+                {
+                    id: 'traffic',
+                    label: 'Traffic',
+                    points: [
+                        { x: 'Organic', y: 40 },
+                        { x: 'Paid', y: -25 }
+                    ]
+                }
+            ]
+        };
+
+        const result = validateDiagramSpec(spec);
+
+        expect(result.valid).toBe(false);
+        expect(result.errors.join(' ')).toMatch(/pie/i);
+        expect(result.errors.join(' ')).toMatch(/non-negative/i);
+    });
 });

@@ -70,6 +70,35 @@ function validateDataChartLayoutHints(spec: DiagramSpec, errors: string[]): void
             `Diagram intent "dataChart" uses unsupported chartType "${String(chartType)}". `
             + `Supported chart types: ${SUPPORTED_VEGA_LITE_CHART_TYPES.join(', ')}.`
         );
+        return;
+    }
+
+    if (chartType === 'scatter') {
+        spec.dataSeries?.forEach(series => {
+            series.points.forEach((point, index) => {
+                if (typeof point.x !== 'number' || Number.isNaN(point.x)) {
+                    errors.push(
+                        `Scatter chart series "${series.id || 'unknown'}" point ${index + 1} requires a numeric x value.`
+                    );
+                }
+            });
+        });
+    }
+
+    if (chartType === 'pie') {
+        if ((spec.dataSeries?.length ?? 0) !== 1) {
+            errors.push('Pie chart layoutHints.chartType requires a single data series.');
+        }
+
+        spec.dataSeries?.forEach(series => {
+            series.points.forEach((point, index) => {
+                if (point.y < 0) {
+                    errors.push(
+                        `Pie chart series "${series.id || 'unknown'}" point ${index + 1} must use a non-negative y value.`
+                    );
+                }
+            });
+        });
     }
 }
 
