@@ -148,7 +148,9 @@ That's it! Explore the settings to unlock more features like web research, trans
 - **Experimental Diagram Pipeline**:
     - A spec-first diagram path can route note content into Mermaid, Obsidian JSON Canvas, or Vega-Lite instead of forcing every case through Mermaid text generation.
     - Current Mermaid adapter coverage in the spec-first path includes `mindmap`, `flowchart`, `sequenceDiagram`, `classDiagram`, `erDiagram`, and `stateDiagram-v2`.
+    - Generated Mermaid artifacts are now validated with `mermaid.parse` before the renderer returns them, so malformed diagrams fail early instead of quietly leaking into preview/export steps.
     - Generated `.canvas` and `.json` artifacts are saved through the same output-path policy as Mermaid summaries, and preview surfaces now cover Mermaid, JSON Canvas, and Vega-Lite results.
+    - HTML fallback artifacts are now generated as dedicated `.html` summaries when a richer renderer is not available, and the preview modal can open them through the iframe fallback path instead of only showing escaped source text.
     - Preview modals can now export rendered Mermaid/Canvas/Vega-Lite output as `.svg` and `.png` files beside the source note or beside the generated artifact, giving you stable image handoff paths without flattening everything into screenshots first.
     - Preview-only runs can also persist the raw generated artifact beside the current note using target-aware extensions and suffixes (`_summ.md`, `_diagram.canvas`, `_diagram.json`), so validation and handoff do not require rerunning the LLM step.
     - The existing Mermaid auto-fix path remains intact for Mermaid outputs only; non-Mermaid artifacts bypass the fixer instead of being pushed through incompatible post-processing.
@@ -159,7 +161,7 @@ That's it! Explore the settings to unlock more features like web research, trans
 | Mermaid | `_summ.md` | Yes | Yes | Yes | Yes | Mermaid auto-fix remains available for Mermaid-only flows. |
 | JSON Canvas | `_diagram.canvas` | Yes | Yes | Yes | Yes | Preview/export uses a theme-aware Canvas palette. |
 | Vega-Lite | `_diagram.json` | Yes | Yes | Yes | Yes | Preview/export uses a theme-aware Vega-Lite config patch. |
-| HTML | `_diagram.html` | Fallback iframe/srcdoc only | No | No | Yes | Current pipeline does not promise raster/vector export for HTML artifacts yet. |
+| HTML | `_diagram.html` | Yes (iframe fallback) | No | No | Yes | Current pipeline does not promise raster/vector export for HTML artifacts yet. |
 
 - **Simple Formula Format Correction**:
     - Quickly fixes single-line math formulas delimited by single `$` to standard double `$$` blocks.
@@ -687,10 +689,10 @@ Notemd runs locally inside Obsidian, but some features send outbound requests.
 -   **Performance Problems**: Processing large files or many files can take time. Reduce the "Chunk Word Count" setting for potentially faster (but more numerous) API calls. Try a different LLM provider or model.
 -   **Unexpected Linking**: The quality of linking depends heavily on the LLM and the prompt. Experiment with different models or temperature settings.
 -   **Diagram Preview / Export Issues**:
-    1.  Mermaid, JSON Canvas, and Vega-Lite artifacts support inline preview plus `.svg` / `.png` export. HTML artifacts currently support fallback preview and raw-source save only.
+    1.  Mermaid, JSON Canvas, and Vega-Lite artifacts support inline preview plus `.svg` / `.png` export. HTML artifacts support iframe fallback preview and raw-source save only.
     2.  Preview/export theme follows the active Obsidian light/dark theme when the preview session is using `system`. If you switch Obsidian theme while the preview modal is already open, close and reopen the modal before exporting so the new theme is baked into the snapshot.
     3.  Exported `_preview.svg` and `_preview.png` files are snapshots. Re-export after editing the source artifact or changing theme if the saved preview is stale.
-    4.  Invalid JSON Canvas or Vega-Lite artifacts surface explicit preview errors. Save the raw artifact first if you need to inspect or repair the generated `.canvas` / `.json` content manually.
+    4.  Invalid Mermaid artifacts now fail early with explicit validation errors before preview/export. Invalid JSON Canvas or Vega-Lite artifacts surface explicit preview errors. Save the raw artifact first if you need to inspect or repair the generated `.md`, `.canvas`, `.json`, or `.html` content manually.
 
 ## Contributing
 
