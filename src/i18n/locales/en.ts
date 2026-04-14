@@ -53,6 +53,17 @@ export const STRINGS_EN = {
             heading: 'Developer diagnostics',
             runDiagnostic: 'Run diagnostic',
             runStability: 'Run stability test',
+            experimentalDiagramPipeline: {
+                heading: 'Experimental diagram pipeline',
+                enableName: 'Enable spec-first Mermaid pipeline',
+                enableDesc:
+                    'On: Try the new DiagramSpec -> renderer pipeline before the legacy Mermaid prompt. If the experimental path fails, Notemd falls back to the legacy Mermaid generation flow automatically.',
+                compatibilityName: 'Experimental compatibility mode',
+                compatibilityDesc:
+                    'Choose how aggressively the experimental planner selects diagram targets. "Legacy Mermaid" keeps Mermaid-compatible output for the current command. "Best fit" may choose richer intents first, then fall back when unsupported.',
+                compatibilityLegacy: 'Legacy Mermaid',
+                compatibilityBestFit: 'Best fit'
+            },
             diagnosticBlocked: 'Cannot run developer diagnostic for {provider}: {issues}',
             diagnosticRunning: 'Running developer diagnostic for {provider}...',
             diagnosticSuccess: 'Developer diagnostic succeeded ({callMode}). Report saved to: {path}',

@@ -145,6 +145,8 @@ export interface NotemdSettings {
     enableMermaidErrorDetection: boolean; // New
     moveMermaidErrorFiles: boolean; // New
     mermaidErrorFolderPath: string; // New
+    enableExperimentalDiagramPipeline: boolean;
+    experimentalDiagramCompatibilityMode: 'legacy-mermaid' | 'best-fit';
 }
 
 // Defines the keys for tasks that can have custom prompts

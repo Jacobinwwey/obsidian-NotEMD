@@ -107,4 +107,6 @@ export const mockSettings: NotemdSettings = {
     enableMermaidErrorDetection: false,
     moveMermaidErrorFiles: false,
     mermaidErrorFolderPath: '',
+    enableExperimentalDiagramPipeline: false,
+    experimentalDiagramCompatibilityMode: 'legacy-mermaid',
 };
