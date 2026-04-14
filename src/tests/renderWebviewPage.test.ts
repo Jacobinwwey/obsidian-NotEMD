@@ -10,6 +10,7 @@ describe('render webview page', () => {
                 sourceIntent: 'dataChart'
             },
             theme: 'dark',
+            resolvedTheme: 'dark',
             sourcePath: 'Notes/Weekly Signups.md'
         });
 
@@ -27,10 +28,26 @@ describe('render webview page', () => {
                 mimeType: 'text/vnd.mermaid',
                 sourceIntent: 'flowchart'
             },
-            theme: 'system'
+            theme: 'system',
+            resolvedTheme: 'light'
         });
 
         expect(html).toContain('&lt;Unsafe&gt;');
         expect(html).not.toContain('<Unsafe>');
+    });
+
+    test('does not hardcode dark shell colors for light themed sessions', () => {
+        const html = buildRenderWebviewHtml({
+            artifact: {
+                target: 'vega-lite',
+                content: '{"mark":"bar"}',
+                mimeType: 'application/json',
+                sourceIntent: 'dataChart'
+            },
+            theme: 'light',
+            resolvedTheme: 'light'
+        });
+
+        expect(html).not.toContain('background: rgba(28, 32, 36, 0.72);');
     });
 });

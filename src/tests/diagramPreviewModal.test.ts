@@ -97,7 +97,7 @@ function collectButtons(root: MockElement): MockElement[] {
     return buttons;
 }
 
-function createSession(artifactOverrides: Partial<any> = {}, sourcePath = 'Notes/Topic.md') {
+function createSession(artifactOverrides: Partial<any> = {}, sourcePath = 'Notes/Topic.md', theme = 'system') {
     return {
         htmlSrcdoc: '<!DOCTYPE html><html></html>',
         payload: {
@@ -108,7 +108,7 @@ function createSession(artifactOverrides: Partial<any> = {}, sourcePath = 'Notes
                 sourceIntent: 'flowchart',
                 ...artifactOverrides
             },
-            theme: 'system',
+            theme,
             sourcePath,
             artifactSaved: false
         }
@@ -134,7 +134,7 @@ describe('diagram preview modal', () => {
     });
 
     test('shows export button for preview-capable artifacts and saves svg on click', async () => {
-        const modal = new DiagramPreviewModal(mockApp, createSession(), 'en') as any;
+        const modal = new DiagramPreviewModal(mockApp, createSession({}, 'Notes/Topic.md', 'dark'), 'en') as any;
         modal.app = mockApp;
         modal.contentEl = createMockElement();
         modal.close = jest.fn();
@@ -157,7 +157,8 @@ describe('diagram preview modal', () => {
         expect(previewExport.saveDiagramPreviewSvg).toHaveBeenCalledWith(
             mockApp,
             'Notes/Topic.md',
-            expect.objectContaining({ target: 'mermaid' })
+            expect.objectContaining({ target: 'mermaid' }),
+            expect.objectContaining({ theme: 'dark' })
         );
         expect(Notice).toHaveBeenCalledWith('Diagram preview exported to Notes/Topic_preview.svg');
         expect(exportButton?.text).toBe('Export SVG');
@@ -165,7 +166,7 @@ describe('diagram preview modal', () => {
     });
 
     test('shows png export button and saves png preview on click', async () => {
-        const modal = new DiagramPreviewModal(mockApp, createSession(), 'en') as any;
+        const modal = new DiagramPreviewModal(mockApp, createSession({}, 'Notes/Topic.md', 'dark'), 'en') as any;
         modal.app = mockApp;
         modal.contentEl = createMockElement();
         modal.close = jest.fn();
@@ -182,7 +183,8 @@ describe('diagram preview modal', () => {
         expect(previewExport.saveDiagramPreviewPng).toHaveBeenCalledWith(
             mockApp,
             'Notes/Topic.md',
-            expect.objectContaining({ target: 'mermaid' })
+            expect.objectContaining({ target: 'mermaid' }),
+            expect.objectContaining({ theme: 'dark' })
         );
         expect(Notice).toHaveBeenCalledWith('Diagram PNG exported to Notes/Topic_preview.png');
     });
