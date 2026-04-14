@@ -65,7 +65,7 @@ export const STRINGS_ZH_TW: DeepPartial<NotemdEnglishStrings> = {
                     '開：在舊 Mermaid prompt 之前先嘗試新的 DiagramSpec -> renderer 管線。如果實驗路徑失敗，Notemd 會自動回退到舊 Mermaid 生成流程。',
                 compatibilityName: '實驗性相容模式',
                 compatibilityDesc:
-                    '選擇實驗規劃器選取圖形目標的積極程度。「Legacy Mermaid」會為目前命令保留 Mermaid 相容輸出；「Best fit」會先嘗試更符合內容的圖形意圖，再在不支援時回退。',
+                    '選擇實驗性圖形生成與預覽選取圖形目標的積極程度。「Legacy Mermaid」會保持 Mermaid 相容輸出；「Best fit」會先嘗試更符合內容的圖形意圖，再在不支援時回退。標準「Summarise as Mermaid diagram」命令會始終將 spec-first 路徑固定為 Mermaid 相容輸出。',
                 compatibilityLegacy: 'Legacy Mermaid',
                 compatibilityBestFit: 'Best fit'
             },

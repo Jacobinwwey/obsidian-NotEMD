@@ -74,6 +74,14 @@ export default class NotemdPlugin extends Plugin {
         new DiagramPreviewModal(this.app, session, this.settings.uiLocale).open();
     }
 
+    private resolveExperimentalDiagramCompatibilityMode(requireMermaidOutput = false): 'legacy-mermaid' | 'best-fit' {
+        if (requireMermaidOutput) {
+            return 'legacy-mermaid';
+        }
+
+        return this.settings.experimentalDiagramCompatibilityMode;
+    }
+
     async onload() {
         await this.loadSettings();
         const uiStrings = this.getUiStrings();
@@ -1661,8 +1669,13 @@ export default class NotemdPlugin extends Plugin {
         reporter.log('Experimental diagram pipeline enabled. Attempting spec-first Mermaid generation.');
 
         try {
+            const compatibilityMode = this.resolveExperimentalDiagramCompatibilityMode(true);
+            if (this.settings.experimentalDiagramCompatibilityMode !== compatibilityMode) {
+                reporter.log('Mermaid command pins experimental compatibility mode to legacy-mermaid to guarantee Mermaid output.');
+            }
+
             const result = await generateDiagramArtifact(fileContent, {
-                compatibilityMode: this.settings.experimentalDiagramCompatibilityMode,
+                compatibilityMode,
                 targetLanguage: resolveTaskLanguageCode(this.settings, 'summarizeToMermaid'),
                 llmInvoker: (systemPrompt, sourceMarkdown) =>
                     callLLM(provider, systemPrompt, sourceMarkdown, this.settings, reporter, modelName)
@@ -1709,7 +1722,7 @@ export default class NotemdPlugin extends Plugin {
             reporter.updateStatus(this.getStepStatusText(1, 3, actionLabel), 20);
 
             const result = await generateDiagramArtifact(fileContent, {
-                compatibilityMode: this.settings.experimentalDiagramCompatibilityMode,
+                compatibilityMode: this.resolveExperimentalDiagramCompatibilityMode(),
                 targetLanguage: resolveTaskLanguageCode(this.settings, 'summarizeToMermaid'),
                 llmInvoker: (systemPrompt, sourceMarkdown) =>
                     callLLM(provider, systemPrompt, sourceMarkdown, this.settings, reporter, modelName)
@@ -1782,7 +1795,7 @@ export default class NotemdPlugin extends Plugin {
             useReporter.updateStatus(this.getStepStatusText(1, 2, actionLabel), 25);
 
             const result = await generateDiagramArtifact(fileContent, {
-                compatibilityMode: this.settings.experimentalDiagramCompatibilityMode,
+                compatibilityMode: this.resolveExperimentalDiagramCompatibilityMode(),
                 targetLanguage: resolveTaskLanguageCode(this.settings, 'summarizeToMermaid'),
                 llmInvoker: (systemPrompt, sourceMarkdown) =>
                     callLLM(provider, systemPrompt, sourceMarkdown, this.settings, useReporter, modelName)

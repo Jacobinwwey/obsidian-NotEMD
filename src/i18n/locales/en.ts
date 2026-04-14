@@ -62,7 +62,7 @@ export const STRINGS_EN = {
                     'On: Try the new DiagramSpec -> renderer pipeline before the legacy Mermaid prompt. If the experimental path fails, Notemd falls back to the legacy Mermaid generation flow automatically.',
                 compatibilityName: 'Experimental compatibility mode',
                 compatibilityDesc:
-                    'Choose how aggressively the experimental planner selects diagram targets. "Legacy Mermaid" keeps Mermaid-compatible output for the current command. "Best fit" may choose richer intents first, then fall back when unsupported.',
+                    'Choose how aggressively experimental diagram generation and preview select diagram targets. "Legacy Mermaid" keeps Mermaid-compatible output. "Best fit" may choose richer intents first, then fall back when unsupported. The standard "Summarise as Mermaid" command always pins the spec-first path to Mermaid-compatible output.',
                 compatibilityLegacy: 'Legacy Mermaid',
                 compatibilityBestFit: 'Best fit'
             },
