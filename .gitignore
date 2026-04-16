@@ -30,3 +30,7 @@ skills
 
 # local git worktrees
 .worktrees
+
+# vitepress local docs artifacts
+docs/.vitepress/cache
+docs/.vitepress/dist
