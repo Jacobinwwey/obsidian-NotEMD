@@ -315,7 +315,8 @@ Expected: the compare script returns `0` before work may continue.
 **Files:**
 - Modify: `README.md`
 - Modify: `README_zh.md`
-- Modify: `docs/superpowers/plans/2026-04-09-language-support-first-principles-multiphase.md`
+- Modify: `docs/superpowers/plans/2026-04-09-language-support-first-principles-multiphase.en.md`
+- Modify: `docs/superpowers/plans/2026-04-09-language-support-first-principles-multiphase.zh-CN.md`
 
 - [ ] **Step 1: Document the language-support architecture**
 Explain the definitions and usage of `UI Locale` versus `Task Output Language`.
