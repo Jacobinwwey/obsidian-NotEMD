@@ -6,6 +6,7 @@
 [English](./README.md) | [简体中文](./README_zh.md) | [Español](./README_es.md) | [Français](./README_fr.md) | [Deutsch](./README_de.md) | [Italiano](./README_it.md) | [Português](./README_pt.md) | [繁體中文](./README_zh_Hant.md) | [日本語](./README_ja.md) | [한국어](./README_ko.md) | [Русский](./README_ru.md) | [العربية](./README_ar.md) | [हिन्दी](./README_hi.md) | [বাংলা](./README_bn.md) | [Nederlands](./README_nl.md) | [Svenska](./README_sv.md) | [Suomi](./README_fi.md) | [Dansk](./README_da.md) | [Norsk](./README_no.md) | [Polski](./README_pl.md) | [Türkçe](./README_tr.md) | [עברית](./README_he.md) | [ไทย](./README_th.md) | [Ελληνικά](./README_el.md) | [Čeština](./README_cs.md) | [Magyar](./README_hu.md) | [Română](./README_ro.md) | [Українська](./README_uk.md) | [Tiếng Việt](./README_vi.md) | [Bahasa Indonesia](./README_id.md) | [Bahasa Melayu](./README_ms.md)
 
 更多语言文档：请查看 [语言中心](./docs/i18n/README_zh.md)
+浏览仓库文档：请查看 [文档中心](./docs/README.zh-CN.md)
 
 ```
 =============================================
@@ -23,7 +24,7 @@
 
 Notemd 通过与各种大型语言模型 (LLM) 集成来增强您的 Obsidian 工作流程，支持多语言笔记处理，自动为关键概念生成维基链接、创建相应的概念笔记、执行网页搜索与摘要、翻译内容、总结为Mermaid脑图等，助力构建强大的知识图谱。
 
-**版本:** 1.8.1
+**版本:** 1.8.2
 
 ![image](https://img.shields.io/github/v/release/Jacobinwwey/obsidian-NotEMD?label=Version&link=https%3A%2F%2Fgithub.com%2Jacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest) ![image](https://img.shields.io/github/downloads/Jacobinwwey/obsidian-NotEMD/total?logo=Obsidian&label=Downloads&labelColor=%237C3AED&color=%235b5b5b&link=https%3A%2F%2Fgithub.com%2Jacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest)
 
@@ -760,6 +761,6 @@ MIT许可证 - 详情请见[LICENSE](LICENSE)。
 
 ---
 
-*Notemd v1.8.1 - 用AI提升你的Obsidian知识图谱。*
+*Notemd v1.8.2 - 用AI提升你的Obsidian知识图谱。*
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)

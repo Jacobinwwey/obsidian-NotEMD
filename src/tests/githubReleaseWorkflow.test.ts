@@ -15,7 +15,9 @@ describe('GitHub release workflow', () => {
         expect(fs.existsSync(releaseScriptPath)).toBe(true);
 
         const currentReleaseNotesPath = path.join(repoRoot, 'docs', 'releases', `${packageJson.version}.md`);
+        const currentReleaseNotesZhPath = path.join(repoRoot, 'docs', 'releases', `${packageJson.version}.zh-CN.md`);
         expect(fs.existsSync(currentReleaseNotesPath)).toBe(true);
+        expect(fs.existsSync(currentReleaseNotesZhPath)).toBe(true);
     });
 
     test('checks in a GitHub Actions workflow that reuses the release helper for tag and manual publishing', () => {
@@ -43,6 +45,11 @@ describe('GitHub release workflow', () => {
     const maybeDescribeReleaseScript = fs.existsSync(releaseScriptPath) ? describe : describe.skip;
 
     maybeDescribeReleaseScript('publish-github-release helper', () => {
+        let composeReleaseNotesFile: (args: {
+            tag: string;
+            englishNotesFile: string;
+            chineseNotesFile: string;
+        }) => string;
         let buildGhReleaseCommand: (args: {
             tag: string;
             title: string;
@@ -53,12 +60,13 @@ describe('GitHub release workflow', () => {
         let resolveReleaseInputs: (repoRoot: string, tag: string) => {
             tag: string;
             title: string;
-            notesFile: string;
+            englishNotesFile: string;
+            chineseNotesFile: string;
             assets: string[];
         };
 
         beforeAll(() => {
-            ({ buildGhReleaseCommand, resolveReleaseInputs } = require(releaseScriptPath));
+            ({ buildGhReleaseCommand, composeReleaseNotesFile, resolveReleaseInputs } = require(releaseScriptPath));
         });
 
         function createTempRepoRoot(): string {
@@ -81,15 +89,18 @@ describe('GitHub release workflow', () => {
                 writeFile(tempRoot, 'manifest.json');
                 writeFile(tempRoot, 'styles.css');
                 writeFile(tempRoot, 'README.md');
-                const notesFile = writeFile(tempRoot, path.join('docs', 'releases', '1.8.2.md'));
+                const englishNotesFile = writeFile(tempRoot, path.join('docs', 'releases', '1.8.2.md'));
+                const chineseNotesFile = writeFile(tempRoot, path.join('docs', 'releases', '1.8.2.zh-CN.md'));
 
                 const inputs = resolveReleaseInputs(tempRoot, '1.8.2');
-                const command = buildGhReleaseCommand({ ...inputs, releaseExists: false });
+                const notesFile = composeReleaseNotesFile(inputs);
+                const command = buildGhReleaseCommand({ ...inputs, notesFile, releaseExists: false });
 
                 expect(inputs).toEqual({
                     tag: '1.8.2',
                     title: 'Notemd 1.8.2',
-                    notesFile,
+                    englishNotesFile,
+                    chineseNotesFile,
                     assets: [
                         path.join(tempRoot, 'main.js'),
                         path.join(tempRoot, 'manifest.json'),
@@ -97,6 +108,17 @@ describe('GitHub release workflow', () => {
                         path.join(tempRoot, 'README.md')
                     ]
                 });
+                expect(fs.readFileSync(notesFile, 'utf8')).toBe(
+                    [
+                        'docs/releases/1.8.2.md',
+                        '',
+                        '---',
+                        '',
+                        'docs/releases/1.8.2.zh-CN.md',
+                        ''
+                    ].join('\n')
+                );
+                expect(command).toContain('--notes-file');
                 expect(command).toEqual([
                     'release',
                     'create',
@@ -108,7 +130,7 @@ describe('GitHub release workflow', () => {
                     '--title',
                     'Notemd 1.8.2',
                     '--notes-file',
-                    notesFile,
+                    expect.any(String),
                     '--verify-tag'
                 ]);
             } finally {
@@ -144,6 +166,7 @@ describe('GitHub release workflow', () => {
                 writeFile(tempRoot, 'manifest.json');
                 writeFile(tempRoot, 'styles.css');
                 writeFile(tempRoot, path.join('docs', 'releases', '1.8.2.md'));
+                writeFile(tempRoot, path.join('docs', 'releases', '1.8.2.zh-CN.md'));
 
                 expect(() => resolveReleaseInputs(tempRoot, '1.8.2')).toThrow(
                     path.join(tempRoot, 'README.md')
@@ -161,6 +184,7 @@ describe('GitHub release workflow', () => {
                 writeFile(tempRoot, 'styles.css');
                 writeFile(tempRoot, 'README.md');
                 writeFile(tempRoot, path.join('docs', 'releases', 'v1.8.2.md'));
+                writeFile(tempRoot, path.join('docs', 'releases', 'v1.8.2.zh-CN.md'));
 
                 expect(() => resolveReleaseInputs(tempRoot, 'v1.8.2')).toThrow(
                     'numeric x.x.x tags'

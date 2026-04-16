@@ -1,20 +1,20 @@
-# Notemd 语言支持第一性原理多阶段执行计划
+# Notemd Language Support First-Principles Multiphase Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** 在不破坏现有功能鲁棒性的前提下，分阶段把 Notemd 从“任务输出语言配置”升级为“UI i18n + 统一语言策略 + 可回归验证”的完整语言支持体系。
+**Goal:** Upgrade Notemd, in phases and without weakening existing robustness, from "task output language settings" into a complete language-support system covering UI i18n, a unified language policy, and reproducible regression gates.
 
-**Architecture:** 采用“语言域建模 -> i18n 基础设施 -> UI 文案迁移 -> 任务语言策略收敛 -> 回归门禁”五层架构。UI Locale 与 Task Output Language 明确分离，所有任务语言决策统一收口到策略层，所有改动按阶段执行并强制执行前后同口径比对。
+**Architecture:** Use a five-layer architecture: language-domain modeling -> i18n infrastructure -> UI-string migration -> task-language-policy convergence -> regression gates. `UI Locale` and `Task Output Language` are explicitly separated, all task-language decisions converge in one policy layer, and every phase must follow the same before/after comparison discipline.
 
-**Tech Stack:** TypeScript, Obsidian Plugin API, Jest, ESLint, npm scripts, Obsidian CLI (`obsidian`/`obsidian-cli`)
+**Tech Stack:** TypeScript, Obsidian Plugin API, Jest, ESLint, npm scripts, Obsidian CLI (`obsidian` / `obsidian-cli`)
 
 ---
 
-## 执行状态（2026-04-09）
+## Execution Status (2026-04-09)
 
-This plan has been implemented on `main` in commit `88202c5`.
+This plan has already been implemented on `main` in commit `88202c5`.
 
-### 证据索引
+### Evidence Index
 
 - Baseline and phase logs:
   - `docs/superpowers/baselines/2026-04-09-language-support/`
@@ -28,26 +28,26 @@ This plan has been implemented on `main` in commit `88202c5`.
   - `task9-obsidian-help.txt`
   - `task9-obsidian-cli-help.txt`
 
-### 最终门禁结果
+### Final Gate Outcome
 
 - `npm run build`: PASS
 - Targeted regression matrix: PASS
 - Full `npm test -- --runInBand`: PASS
 - `npm run regression:language-compare`: PASS
 - `git diff --check`: PASS
-- `obsidian help`: executed with local desktop/config caveats captured in logs
-- `obsidian-cli help`: unavailable in current environment (`command not found`), captured in logs
+- `obsidian help`: executed, with local desktop/config caveats captured in logs
+- `obsidian-cli help`: unavailable in the current environment (`command not found`), captured in logs
 
-## 阶段边界与鲁棒性规则（必须遵守）
+## Phase Boundaries And Robustness Rule (Must Follow)
 
-- 每个阶段都必须执行：`修改前基线 -> 最小改动 -> 修改后回归 -> 基线对比 -> 提交`。
-- 每个阶段至少保留两份日志：`*-before.txt` 与 `*-after.txt`，放到 `docs/superpowers/baselines/<date>-language-support/`。
-- 如果阶段回归失败，禁止进入下一阶段；先在当前阶段内修复并重新比对。
-- 对同一功能使用同一测试入口做前后对比，避免“换口径通过”。
+- Every phase must follow: `before-change baseline -> minimal change -> after-change regression -> baseline comparison -> commit`.
+- Every phase must preserve at least two logs, `*-before.txt` and `*-after.txt`, under `docs/superpowers/baselines/<date>-language-support/`.
+- If regression fails in a phase, do not move to the next phase; fix the current phase first and rerun the comparison.
+- Use the same test entrypoints before and after changes so the pass signal does not come from changing the measurement method.
 
 ---
 
-### Task 0: 冻结基线快照（当前现实）
+### Task 0: Freeze Baseline Snapshot (Current Reality)
 
 **Files:**
 - Create/Update: `docs/superpowers/baselines/2026-04-09-language-support/environment-before.txt`
@@ -63,7 +63,7 @@ obsidian-cli help
 node -v
 npm -v
 ```
-Expected: 命令可执行（允许 Obsidian CLI 输出本地配置告警）。
+Expected: the commands are executable, while allowing local Obsidian CLI caveats.
 
 - [ ] **Step 2: Capture build baseline**
 Run:
@@ -71,7 +71,7 @@ Run:
 cd /home/jacob/obsidian-NotEMD
 npm run build
 ```
-Expected: 当前基线允许失败，但必须记录失败原因（当前已知：`ref/notebook-navigator` 被 `tsconfig` include 扫入导致 `TS6059`）。
+Expected: the current baseline may fail, but the failure cause must be recorded. The known cause at the time was `TS6059` from `ref/notebook-navigator` being pulled into `tsconfig` include scope.
 
 - [ ] **Step 3: Capture targeted functional baseline**
 Run:
@@ -79,11 +79,11 @@ Run:
 cd /home/jacob/obsidian-NotEMD
 npm test -- --runInBand src/tests/workflowButtons.test.ts src/tests/sidebarDomButtonClicks.test.ts src/tests/llmUtilsProviderSupport.test.ts src/tests/providerDiagnostics.test.ts
 ```
-Expected: PASS；作为语言支持改造期间的关键行为基线。
+Expected: PASS. This is the critical behavior baseline during the language-support migration.
 
 ---
 
-### Task 1: 引入语言域模型（单一事实源）
+### Task 1: Introduce Language Domain Model (Single Source Of Truth)
 
 **Files:**
 - Create: `src/i18n/languageContext.ts`
@@ -93,24 +93,24 @@ Expected: PASS；作为语言支持改造期间的关键行为基线。
 - Test: `src/tests/languagePolicy.test.ts`
 
 - [ ] **Step 1: Write failing tests for policy rules**
-覆盖：全局语言、按任务语言、禁用自动翻译、Translate 任务例外、Mermaid 特殊策略。
+Cover global language, per-task language, disable-auto-translation behavior, translate-task exceptions, and Mermaid-specific policy behavior.
 
 - [ ] **Step 2: Run tests to verify failure**
 Run:
 ```bash
 npm test -- --runInBand src/tests/languagePolicy.test.ts
 ```
-Expected: FAIL（策略层尚未实现）。
+Expected: FAIL because the policy layer does not exist yet.
 
-- [ ] **Step 3: Implement minimal policy layer**
-实现统一入口：`resolveTaskLanguage(taskKey, settings)` 与 `resolveUiLocale(settings, obsidianLocale)`。
+- [ ] **Step 3: Implement the minimal policy layer**
+Implement unified entrypoints: `resolveTaskLanguage(taskKey, settings)` and `resolveUiLocale(settings, obsidianLocale)`.
 
 - [ ] **Step 4: Re-run tests**
 Run:
 ```bash
 npm test -- --runInBand src/tests/languagePolicy.test.ts
 ```
-Expected: PASS。
+Expected: PASS.
 
 - [ ] **Step 5: Before/after comparison**
 Run:
@@ -124,7 +124,7 @@ grep -E "PASS|FAIL" docs/superpowers/baselines/2026-04-09-language-support/task1
 
 ---
 
-### Task 2: 构建 UI i18n 基础设施（语言目录 + 回退）
+### Task 2: Build UI i18n Infrastructure (Catalog + Fallback)
 
 **Files:**
 - Create: `src/i18n/index.ts`
@@ -134,32 +134,32 @@ grep -E "PASS|FAIL" docs/superpowers/baselines/2026-04-09-language-support/task1
 - Modify: `src/main.ts`
 - Test: `src/tests/i18nFallback.test.ts`
 
-- [ ] **Step 1: Write failing tests for fallback chain**
-覆盖：`zh-CN -> zh -> en`、缺失 key 回退、变量插值、缓存稳定性。
+- [ ] **Step 1: Write failing fallback-chain tests**
+Cover `zh-CN -> zh -> en`, missing-key fallback, variable interpolation, and cache stability.
 
 - [ ] **Step 2: Verify failure**
 Run:
 ```bash
 npm test -- --runInBand src/tests/i18nFallback.test.ts
 ```
-Expected: FAIL。
+Expected: FAIL.
 
-- [ ] **Step 3: Implement i18n core**
-参考：`ref/notebook-navigator/src/i18n/index.ts` 的 `LANGUAGE_MAP + deep-merge fallback` 模式，但保持 Notemd 自身简洁边界。
+- [ ] **Step 3: Implement the i18n core**
+Use the `LANGUAGE_MAP + deep-merge fallback` pattern seen in `ref/notebook-navigator/src/i18n/index.ts`, but keep Notemd's own boundary small and maintainable.
 
 - [ ] **Step 4: Re-run tests**
 Run:
 ```bash
 npm test -- --runInBand src/tests/i18nFallback.test.ts
 ```
-Expected: PASS。
+Expected: PASS.
 
-- [ ] **Step 5: Compare with pre-change baseline**
-保存并对比本任务前后日志，确认 i18n 引入没有影响既有 provider/mermaid/workflow 测试。
+- [ ] **Step 5: Compare with the pre-change baseline**
+Save and compare before/after logs for this task, and confirm the i18n introduction does not regress existing provider / Mermaid / workflow tests.
 
 ---
 
-### Task 3: 将设置页 UI 文案迁移到 i18n（高影响表面）
+### Task 3: Migrate Settings UI Strings To i18n (High-Impact Surface)
 
 **Files:**
 - Modify: `src/ui/NotemdSettingTab.ts`
@@ -168,32 +168,32 @@ Expected: PASS。
 - Test: `src/tests/providerDiagnostics.test.ts`
 - Test: `src/tests/sidebarDomButtonClicks.test.ts`
 
-- [ ] **Step 1: Capture before snapshot (settings-related tests)**
+- [ ] **Step 1: Capture the before snapshot for settings-related tests**
 Run:
 ```bash
 npm test -- --runInBand src/tests/providerDiagnostics.test.ts src/tests/sidebarDomButtonClicks.test.ts > docs/superpowers/baselines/2026-04-09-language-support/task3-before.txt 2>&1
 ```
 
 - [ ] **Step 2: Replace hardcoded UI labels with `strings` access**
-范围：Language settings、Developer diagnostics、Workflow builder、Provider config notices。
+Scope: language settings, developer diagnostics, workflow builder, and provider-configuration notices.
 
-- [ ] **Step 3: Run same tests after change**
+- [ ] **Step 3: Run the same tests after the change**
 Run:
 ```bash
 npm test -- --runInBand src/tests/providerDiagnostics.test.ts src/tests/sidebarDomButtonClicks.test.ts > docs/superpowers/baselines/2026-04-09-language-support/task3-after.txt 2>&1
 ```
-Expected: PASS。
+Expected: PASS.
 
-- [ ] **Step 4: Diff compare**
+- [ ] **Step 4: Diff comparison**
 Run:
 ```bash
 diff -u docs/superpowers/baselines/2026-04-09-language-support/task3-before.txt docs/superpowers/baselines/2026-04-09-language-support/task3-after.txt | sed -n '1,200p'
 ```
-Expected: 只接受文案相关差异，不接受行为失败差异。
+Expected: only copy-related differences are acceptable; behavior failures are not.
 
 ---
 
-### Task 4: 迁移侧边栏与提示文案（运行时 UX 表面）
+### Task 4: Migrate Sidebar And Notice Strings (Runtime UX Surface)
 
 **Files:**
 - Modify: `src/ui/NotemdSidebarView.ts`
@@ -211,21 +211,21 @@ npm test -- --runInBand src/tests/sidebarDomButtonClicks.test.ts src/tests/sideb
 ```
 
 - [ ] **Step 2: Migrate runtime-facing strings**
-包括：hero 标题、按钮文本、取消提示、log 操作提示、错误模态按钮文案。
+Cover hero title, button text, cancellation notices, log-operation notices, and error-modal button copy.
 
-- [ ] **Step 3: Re-run same tests**
+- [ ] **Step 3: Re-run the same tests**
 Run:
 ```bash
 npm test -- --runInBand src/tests/sidebarDomButtonClicks.test.ts src/tests/sidebarButtonTriggerChains.test.ts > docs/superpowers/baselines/2026-04-09-language-support/task4-after.txt 2>&1
 ```
-Expected: PASS。
+Expected: PASS.
 
 - [ ] **Step 4: Compare and gate**
-只要出现 FAIL 或 open-handle 恶化，必须回滚到本阶段内修复。
+Any FAIL or worse open-handle behavior must be fixed before moving on.
 
 ---
 
-### Task 5: 统一 Prompt 与处理链路中的任务语言决策
+### Task 5: Unify Task Language Decision In Prompt And Processing Paths
 
 **Files:**
 - Modify: `src/promptUtils.ts`
@@ -237,31 +237,31 @@ Expected: PASS。
 - Test: `src/tests/processFile.test.ts`
 - Test: `src/tests/workflowButtons.test.ts`
 
-- [ ] **Step 1: Capture before behavior tests**
+- [ ] **Step 1: Capture before-change behavior tests**
 Run:
 ```bash
 npm test -- --runInBand src/tests/languagePolicy.test.ts src/tests/processFile.test.ts src/tests/workflowButtons.test.ts > docs/superpowers/baselines/2026-04-09-language-support/task5-before.txt 2>&1
 ```
 
 - [ ] **Step 2: Remove scattered language decisions**
-将 `fileUtils/searchUtils/promptUtils` 内分散逻辑收敛到 `taskLanguagePolicy`。
+Converge language logic from `fileUtils`, `searchUtils`, and `promptUtils` into `taskLanguagePolicy`.
 
 - [ ] **Step 3: Add explicit assertions for previously implicit behavior**
-确保 `disableAutoTranslation`、task-specific language、translate task 例外逻辑可测。
+Make `disableAutoTranslation`, task-specific language, and translate-task exception behavior directly testable.
 
-- [ ] **Step 4: Run same test set after change**
+- [ ] **Step 4: Run the same test set after the change**
 Run:
 ```bash
 npm test -- --runInBand src/tests/languagePolicy.test.ts src/tests/processFile.test.ts src/tests/workflowButtons.test.ts > docs/superpowers/baselines/2026-04-09-language-support/task5-after.txt 2>&1
 ```
-Expected: PASS。
+Expected: PASS.
 
 - [ ] **Step 5: Compare before/after**
-仅允许预期日志文本差异；禁止功能路径变化导致断言减少。
+Only expected log-text differences are acceptable; assertion coverage must not shrink because of path changes.
 
 ---
 
-### Task 6: 增加 Locale 格式化与 RTL 安全保护
+### Task 6: Add Locale Formatting And RTL Safety
 
 **Files:**
 - Modify: `styles.css`
@@ -269,22 +269,22 @@ Expected: PASS。
 - Modify: `src/ui/NotemdSidebarView.ts`
 - Test: `src/tests/sidebarDomButtonClicks.test.ts`
 
-- [ ] **Step 1: Add RTL and text-direction safe rules**
-引入最小必要规则，避免破坏现有 panel 布局。
+- [ ] **Step 1: Add RTL-safe and text-direction rules**
+Introduce only the minimum CSS required so existing panel layout does not regress.
 
-- [ ] **Step 2: Add formatting helper tests**
-新增日期/时间格式 fallback 基础测试。
+- [ ] **Step 2: Add formatting-helper tests**
+Add baseline tests for date/time-format fallback behavior.
 
-- [ ] **Step 3: Validate sidebar layout tests**
+- [ ] **Step 3: Validate sidebar-layout tests**
 Run:
 ```bash
 npm test -- --runInBand src/tests/sidebarDomButtonClicks.test.ts
 ```
-Expected: PASS（尤其是 docked footer / log 区域可见性相关断言）。
+Expected: PASS, especially for docked footer and log-surface assertions.
 
 ---
 
-### Task 7: 构建用于前后对比的回归脚手架
+### Task 7: Build Regression Harness For Before/After Comparisons
 
 **Files:**
 - Create: `scripts/regression/language-support-baseline.sh`
@@ -293,11 +293,11 @@ Expected: PASS（尤其是 docked footer / log 区域可见性相关断言）。
 - Create: `docs/superpowers/baselines/README.md`
 - Test: `src/tests/llmUtilsProviderSupport.test.ts`
 
-- [ ] **Step 1: Script baseline capture command**
-把关键命令统一封装，确保团队可重复执行。
+- [ ] **Step 1: Script the baseline-capture command**
+Wrap the critical commands so the team can rerun them reproducibly.
 
-- [ ] **Step 2: Script compare gate**
-自动检查 PASS/FAIL 统计和关键错误关键字（`TS6059`, `ERR_CONNECTION_CLOSED`, `socket hang up` 仅允许在 mock 日志中出现）。
+- [ ] **Step 2: Script the compare gate**
+Automatically check PASS/FAIL counts and key error keywords. `TS6059`, `ERR_CONNECTION_CLOSED`, and `socket hang up` are only acceptable inside mock logs.
 
 - [ ] **Step 3: Verify scripts locally**
 Run:
@@ -306,56 +306,56 @@ npm run test -- --runInBand src/tests/llmUtilsProviderSupport.test.ts
 bash scripts/regression/language-support-baseline.sh
 bash scripts/regression/language-support-compare.sh
 ```
-Expected: compare script 返回 0 才允许继续。
+Expected: the compare script returns `0` before work may continue.
 
 ---
 
-### Task 8: 同步文档与发布流程
+### Task 8: Documentation And Release Process Sync
 
 **Files:**
 - Modify: `README.md`
 - Modify: `README_zh.md`
 - Modify: `docs/superpowers/plans/2026-04-09-language-support-first-principles-multiphase.md`
 
-- [ ] **Step 1: Document language support architecture**
-包含 UI Locale vs Task Output Language 的定义与使用方式。
+- [ ] **Step 1: Document the language-support architecture**
+Explain the definitions and usage of `UI Locale` versus `Task Output Language`.
 
-- [ ] **Step 2: Document regression workflow**
-明确每个阶段必须保存 before/after logs。
+- [ ] **Step 2: Document the regression workflow**
+Explicitly require every phase to preserve before/after logs.
 
-- [ ] **Step 3: Release note requirement sync**
-确保发布说明继续保持中英双语独立段落要求。
+- [ ] **Step 3: Sync release-note requirements**
+Ensure the release-description rule still requires independent English and Chinese sections.
 
 ---
 
-### Task 9: 最终验证门禁（禁止半途交付）
+### Task 9: Final Verification Gate (No Halfway Delivery)
 
 **Files:**
 - Verify: modified files in `src/`, `styles.css`, `README.md`, `README_zh.md`, `scripts/regression/`, `docs/superpowers/`
 
-- [ ] **Step 1: Restore build sanity for cloned `ref/` directory**
-若保留 `ref/notebook-navigator` 在仓库中，需在 `tsconfig.json` 排除 `ref/**`，确保构建不受参考仓库影响。
+- [ ] **Step 1: Restore build sanity for cloned `ref/` directories**
+If `ref/notebook-navigator` stays in the repository, exclude `ref/**` from `tsconfig.json` so the reference repo cannot break normal builds.
 
 - [ ] **Step 2: Run build**
 Run:
 ```bash
 npm run build
 ```
-Expected: PASS。
+Expected: PASS.
 
-- [ ] **Step 3: Run targeted regression matrix**
+- [ ] **Step 3: Run the targeted regression matrix**
 Run:
 ```bash
 npm test -- --runInBand src/tests/workflowButtons.test.ts src/tests/sidebarDomButtonClicks.test.ts src/tests/llmUtilsProviderSupport.test.ts src/tests/providerDiagnostics.test.ts src/tests/languagePolicy.test.ts src/tests/i18nFallback.test.ts
 ```
-Expected: PASS。
+Expected: PASS.
 
 - [ ] **Step 4: Run full tests**
 Run:
 ```bash
 npm test -- --runInBand
 ```
-Expected: PASS（若存在已知 open-handle warning，需记录并确保未恶化）。
+Expected: PASS. If a known open-handle warning remains, record it and confirm it has not worsened.
 
 - [ ] **Step 5: Obsidian CLI sanity check**
 Run:
@@ -363,25 +363,25 @@ Run:
 obsidian help
 obsidian-cli help
 ```
-Expected: 命令可执行。
+Expected: the commands are executable.
 
-- [ ] **Step 6: Diff quality check**
+- [ ] **Step 6: Diff-quality check**
 Run:
 ```bash
 git diff --check
 ```
-Expected: PASS。
+Expected: PASS.
 
 - [ ] **Step 7: Commit by phase**
-每个阶段独立提交，禁止跨阶段混杂提交。
+Each phase must be committed independently. Do not mix phases in one commit.
 
 - [ ] **Step 8: Release handoff**
-版本发布前必须附带：测试摘要、before/after 对比结论、风险余项。
+Before release, include a test summary, before/after comparison conclusion, and remaining risk items.
 
 ---
 
-## 面向工程师的执行说明
+## Execution Notes For Engineers
 
-- 参考实现：`/home/jacob/obsidian-NotEMD/ref/notebook-navigator/src/i18n/index.ts`。
-- 但 Notemd 不做全量照抄；只迁移“可维护的最小核心”（map + fallback + centralized strings + tests）。
-- 每个阶段都要先跑“阶段前”测试并保存日志，任何“先改再补日志”的流程视为不合规。
+- Reference implementation: `/home/jacob/obsidian-NotEMD/ref/notebook-navigator/src/i18n/index.ts`.
+- Notemd should not copy it wholesale. Only migrate the maintainable minimal core: map + fallback + centralized strings + tests.
+- Every phase must run the "before phase" tests and preserve logs first. "Change first, add logs later" is non-compliant.
