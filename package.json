@@ -6,6 +6,9 @@
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
 		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
+		"docs:dev": "npm exec vitepress@1.6.4 dev docs",
+		"docs:build": "npm exec vitepress@1.6.4 build docs",
+		"docs:preview": "npm exec vitepress@1.6.4 preview docs/.vitepress/dist",
 		"version": "node version-bump.mjs && git add manifest.json versions.json",
 		"test": "jest",
 		"lint": "eslint . --ext .ts",
