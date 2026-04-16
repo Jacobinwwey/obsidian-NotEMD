@@ -23,7 +23,7 @@ Recent stabilization work already moved part of the remaining Mermaid legacy sur
 **Truth-Source Alignment**
 
 - R1. The repository must contain a durable document that states which diagram-platform capabilities are shipped, experimental, partially complete, and intentionally deferred.
-- R2. `docs/superpowers/plans/2026-04-14-diagram-rendering-platform-roadmap.md` must be updated section by section so each task reflects current implementation status, evidence, and remaining gaps.
+- R2. `docs/superpowers/plans/2026-04-14-diagram-rendering-platform-roadmap.en.md` must be updated section by section so each task reflects current implementation status, evidence, and remaining gaps.
 - R3. User-facing and maintainer-facing documentation must not claim renderer isolation, packaging guarantees, or command consolidation beyond what the current code actually delivers.
 
 **Productization Direction**
