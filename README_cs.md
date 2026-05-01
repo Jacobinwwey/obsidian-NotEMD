@@ -684,7 +684,7 @@ Licence MIT. Podrobnosti naleznete v souboru [LICENSE](LICENSE).
 
 ---
 
-*Notemd v1.8.1 - Vylepšete svůj graf znalostí v Obsidianu pomocí AI.*
+*Notemd v1.8.3 - Vylepšete svůj graf znalostí v Obsidianu pomocí AI.*
 
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)

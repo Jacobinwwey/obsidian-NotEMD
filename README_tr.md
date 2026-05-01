@@ -684,6 +684,6 @@ MIT Lisansı - Ayrıntılar için [LICENSE](LICENSE) dosyasına bakın.
 
 ---
 
-*Notemd v1.8.1 - Obsidian bilgi grafiğinizi yapay zeka ile geliştirin.*
+*Notemd v1.8.3 - Obsidian bilgi grafiğinizi yapay zeka ile geliştirin.*
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)

@@ -681,6 +681,6 @@ MIT লাইসেন্স - বিস্তারিত জানতে [LICE
 
 ---
 
-*Notemd v1.8.1 - AI-এর সাহায্যে আপনার Obsidian knowledge graph আরও উন্নত করুন।*
+*Notemd v1.8.3 - AI-এর সাহায্যে আপনার Obsidian knowledge graph আরও উন্নত করুন।*
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)

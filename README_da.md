@@ -684,6 +684,6 @@ MIT License - Se filen [LICENSE](LICENSE) for detaljer.
 
 ---
 
-*Notemd v1.8.1 - Forbedr din Obsidian-vidensgraf med AI.*
+*Notemd v1.8.3 - Forbedr din Obsidian-vidensgraf med AI.*
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)

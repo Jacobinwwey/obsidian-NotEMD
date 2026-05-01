@@ -681,6 +681,6 @@
 
 ---
 
-*Notemd v1.8.1 - Βελτιώστε το γράφημα γνώσης σας στο Obsidian με AI.*
+*Notemd v1.8.3 - Βελτιώστε το γράφημα γνώσης σας στο Obsidian με AI.*
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)

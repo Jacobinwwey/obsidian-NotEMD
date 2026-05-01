@@ -693,6 +693,6 @@ MIT License. Lihat file [LICENSE](LICENSE) untuk detailnya.
 
 ---
 
-*Notemd v1.8.1 - Tingkatkan knowledge graph Obsidian Anda dengan AI.*
+*Notemd v1.8.3 - Tingkatkan knowledge graph Obsidian Anda dengan AI.*
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)

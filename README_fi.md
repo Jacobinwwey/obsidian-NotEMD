@@ -684,6 +684,6 @@ MIT License - Katso lisätiedot tiedostosta [LICENSE](LICENSE).
 
 ---
 
-*Notemd v1.8.1 - Paranna Obsidian-tietograafiasi tekoälyn avulla.*
+*Notemd v1.8.3 - Paranna Obsidian-tietograafiasi tekoälyn avulla.*
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)

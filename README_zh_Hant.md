@@ -760,6 +760,6 @@ MIT 授權條款 - 詳情請見 [LICENSE](LICENSE)。
 
 ---
 
-*Notemd v1.8.1 - 用 AI 提升你的 Obsidian 知識圖譜。*
+*Notemd v1.8.3 - 用 AI 提升你的 Obsidian 知識圖譜。*
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)

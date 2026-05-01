@@ -763,6 +763,8 @@ MIT许可证 - 详情请见[LICENSE](LICENSE)。
 
 ---
 
+如果您喜欢使用 Notemd，请考虑 [⭐ 给 GitHub 加星](https://github.com/Jacobinwwey/obsidian-NotEMD) 或 [☕️ 请喝杯咖啡](https://ko-fi.com/jacobinwwey)。
+
 *Notemd v1.8.3 - 用AI提升你的Obsidian知识图谱。*
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)

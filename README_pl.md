@@ -684,6 +684,6 @@ MIT License - szczegóły znajdują się w pliku [LICENSE](LICENSE).
 
 ---
 
-*Notemd v1.8.1 - Rozwijaj swój graf wiedzy w Obsidianie dzięki AI.*
+*Notemd v1.8.3 - Rozwijaj swój graf wiedzy w Obsidianie dzięki AI.*
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)

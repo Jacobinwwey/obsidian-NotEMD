@@ -690,7 +690,7 @@ MIT 라이선스 - 자세한 내용은 [LICENSE](LICENSE) 파일을 참조하세
 
 ---
 
-*Notemd v1.8.1 - AI로 Obsidian 지식 그래프를 강화하세요.*
+*Notemd v1.8.3 - AI로 Obsidian 지식 그래프를 강화하세요.*
 
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)

@@ -681,6 +681,6 @@ MIT licenc - a részletekért lásd a [LICENSE](LICENSE) fájlt.
 
 ---
 
-*Notemd v1.8.1 - Fejlessze az Obsidian tudásgráfját mesterséges intelligenciával.*
+*Notemd v1.8.3 - Fejlessze az Obsidian tudásgráfját mesterséges intelligenciával.*
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)

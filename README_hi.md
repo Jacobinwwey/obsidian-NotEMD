@@ -681,6 +681,6 @@ MIT लाइसेंस - विवरण के लिए [LICENSE](LICENSE) 
 
 ---
 
-*Notemd v1.8.1 - AI के साथ अपने Obsidian knowledge graph को बेहतर बनाएँ।*
+*Notemd v1.8.3 - AI के साथ अपने Obsidian knowledge graph को बेहतर बनाएँ।*
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)

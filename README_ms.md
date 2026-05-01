@@ -684,7 +684,7 @@ Lesen MIT - lihat fail [LICENSE](LICENSE) untuk butiran.
 
 ---
 
-*Notemd v1.8.1 - Perkayakan graf pengetahuan Obsidian anda dengan AI.*
+*Notemd v1.8.3 - Perkayakan graf pengetahuan Obsidian anda dengan AI.*
 
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)
