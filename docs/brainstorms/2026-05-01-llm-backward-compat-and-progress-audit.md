@@ -419,3 +419,20 @@ Notebook navigator's first-install flow:
 - Sponsor ask should be a single line at the bottom, not the focus
 - The primary CTA should be "Configure LLM" to drive functionality adoption
 - Follow notebook-navigator's pattern: use `Modal` base class, `mod-cta` class for primary button, auto-focus management
+## 2026-05-01 — LLM Response Cache (post-v1.8.3)
+
+Implemented in-memory LLM response caching (notebook-navigator pattern #2):
+
+- Cache key: (provider.name, model, temperature, prompt, content)
+- TTL: 5 minutes
+- Scope: all 5 transport runtimes
+- `clearLlmResponseCache()` exported for test isolation
+- Zero config change — transparent to existing callers
+
+Reduces API costs for repeated processing of identical content.
+Tests: all 108 suites, 512 tests pass (excluding untracked files).
+
+Next from improvement priorities:
+- [ ] 3. Per-setting sync toggle for API key locality (low-medium)
+- [ ] 4. Batch pipeline with resume (medium)
+- [x] 2. LLM response caching (medium) — DONE
