@@ -3147,6 +3147,35 @@ export function callOpenAICompatibleApi(provider: LLMProviderConfig, modelName: 
     return callApiWithRetry(provider, modelName, prompt, content, settings, progressReporter, executeOpenAICompatibleApi, signal);
 }
 
+
+// ── LLM Response Cache ──
+const llmResponseCache = new Map<string, { response: string; timestamp: number }>();
+const LLM_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
+function buildCacheKey(provider: LLMProviderConfig, modelName: string, prompt: string, content: string): string {
+    const parts = [provider.name, modelName, String(provider.temperature ?? 0), prompt, content];
+    return parts.join('\x00');
+}
+
+function getCachedResponse(key: string): string | undefined {
+    const entry = llmResponseCache.get(key);
+    if (!entry) return undefined;
+    if (Date.now() - entry.timestamp > LLM_CACHE_TTL_MS) {
+        llmResponseCache.delete(key);
+        return undefined;
+    }
+    return entry.response;
+}
+
+export function clearLlmResponseCache(): void {
+    llmResponseCache.clear();
+}
+
+function setCachedResponse(key: string, response: string): void {
+    llmResponseCache.set(key, { response, timestamp: Date.now() });
+}
+
+
 export async function callLLM(
     provider: LLMProviderConfig,
     prompt: string,
@@ -3154,23 +3183,41 @@ export async function callLLM(
     settings: NotemdSettings,
     progressReporter: ProgressReporter,
     modelName?: string,
-    signal?: AbortSignal // Add optional signal
+    signal?: AbortSignal
 ): Promise<string> {
     const modelToUse = modelName || provider.model;
+
+    // Check cache for repeated identical calls
+    const cacheKey = buildCacheKey(provider, modelToUse, prompt, content);
+    const cached = getCachedResponse(cacheKey);
+    if (cached) {
+        return cached;
+    }
+
     const providerDefinition = getLLMProviderDefinition(provider.name);
 
+    let result: string;
     switch (providerDefinition?.transport) {
         case 'openai-compatible':
-            return callOpenAICompatibleApi(provider, modelToUse, prompt, content, progressReporter, settings, signal);
+            result = await callOpenAICompatibleApi(provider, modelToUse, prompt, content, progressReporter, settings, signal);
+            break;
         case 'anthropic':
-            return callAnthropicApi(provider, modelToUse, prompt, content, progressReporter, settings, signal);
+            result = await callAnthropicApi(provider, modelToUse, prompt, content, progressReporter, settings, signal);
+            break;
         case 'google':
-            return callGoogleApi(provider, modelToUse, prompt, content, progressReporter, settings, signal);
+            result = await callGoogleApi(provider, modelToUse, prompt, content, progressReporter, settings, signal);
+            break;
         case 'azure-openai':
-            return callAzureOpenAIApi(provider, modelToUse, prompt, content, progressReporter, settings, signal);
+            result = await callAzureOpenAIApi(provider, modelToUse, prompt, content, progressReporter, settings, signal);
+            break;
         case 'ollama':
-            return callOllamaApi(provider, modelToUse, prompt, content, progressReporter, settings, signal);
+            result = await callOllamaApi(provider, modelToUse, prompt, content, progressReporter, settings, signal);
+            break;
         default:
             throw new Error(`Provider ${provider.name} not supported`);
     }
+
+    // Cache successful result
+    setCachedResponse(cacheKey, result);
+    return result;
 }
