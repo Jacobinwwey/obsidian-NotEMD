@@ -687,6 +687,8 @@ MIT License - ดูรายละเอียดได้ในไฟล์ [L
 
 ---
 
+If you love using Notemd, please consider [⭐ Give a Star on GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) or [☕️ Buy Me a Coffee](https://ko-fi.com/jacobinwwey).
+
 *Notemd v1.8.3 - ยกระดับกราฟความรู้ใน Obsidian ของคุณด้วย AI*
 
 

@@ -685,6 +685,8 @@ Giấy phép MIT. Xem file [LICENSE](LICENSE) để biết chi tiết.
 
 ---
 
+If you love using Notemd, please consider [⭐ Give a Star on GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) or [☕️ Buy Me a Coffee](https://ko-fi.com/jacobinwwey).
+
 *Notemd v1.8.3 - Nâng cấp knowledge graph Obsidian của bạn bằng AI.*
 
 

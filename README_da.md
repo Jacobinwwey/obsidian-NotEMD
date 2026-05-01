@@ -22,6 +22,8 @@ En nem m√•de at opbygge din egen vidensbase p√•.
 
 Notemd forbedrer dit Obsidian-workflow ved at integrere med forskellige store sprogmodeller (LLM'er) til at behandle dine flersprogede noter, automatisk generere wiki-links til n√∏glebegreber, oprette tilsvarende konceptnoter, udf√∏re webresearch og hj√¶lpe dig med at opbygge st√¶rke vidensgrafer med mere.
 
+If\ you\ love\ using\ Notemd\,\ please\ consider\ \[\‚\≠\ê\ Give\ a\ Star\ on\ GitHub\]\(https\:\/\/github\.com\/Jacobinwwey\/obsidian\-NotEMD\)\ or\ \[\‚\ò\ï\Ô\∏\è\ Buy\ Me\ a\ Coffee\]\(https\:\/\/ko\-fi\.com\/jacobinwwey\)\.
+
 **Version:** 1.8.1
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
@@ -683,6 +685,8 @@ Bidrag er velkomne. Se GitHub-repositoriet for retningslinjer: [https://github.c
 MIT License - Se filen [LICENSE](LICENSE) for detaljer.
 
 ---
+
+If you love using Notemd, please consider [‚≠ê Give a Star on GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) or [‚òïÔ∏è Buy Me a Coffee](https://ko-fi.com/jacobinwwey).
 
 *Notemd v1.8.3 - Forbedr din Obsidian-vidensgraf med AI.*
 

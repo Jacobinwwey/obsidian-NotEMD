@@ -681,6 +681,8 @@ MIT লাইসেন্স - বিস্তারিত জানতে [LICE
 
 ---
 
+If you love using Notemd, please consider [⭐ Give a Star on GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) or [☕️ Buy Me a Coffee](https://ko-fi.com/jacobinwwey).
+
 *Notemd v1.8.3 - AI-এর সাহায্যে আপনার Obsidian knowledge graph আরও উন্নত করুন।*
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)

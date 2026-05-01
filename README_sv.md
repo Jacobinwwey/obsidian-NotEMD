@@ -22,6 +22,8 @@ Ett enkelt sätt att bygga din egen kunskapsbas.
 
 Notemd förbättrar ditt Obsidian-arbetsflöde genom att integrera med olika stora språkmodeller (LLM:er) för att bearbeta dina flerspråkiga anteckningar, automatiskt generera wiki-länkar för viktiga begrepp, skapa motsvarande konceptanteckningar, utföra webbforskning och hjälpa dig att bygga kraftfulla kunskapsgrafer med mera.
 
+If\ you\ love\ using\ Notemd\,\ please\ consider\ \[\�\�\�\ Give\ a\ Star\ on\ GitHub\]\(https\:\/\/github\.com\/Jacobinwwey\/obsidian\-NotEMD\)\ or\ \[\�\�\�\�\�\�\ Buy\ Me\ a\ Coffee\]\(https\:\/\/ko\-fi\.com\/jacobinwwey\)\.
+
 **Version:** 1.8.1
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
@@ -683,6 +685,8 @@ Bidrag är välkomna. Se GitHub-repositoryt för riktlinjer: [https://github.com
 MIT License - Se filen [LICENSE](LICENSE) för detaljer.
 
 ---
+
+If you love using Notemd, please consider [⭐ Give a Star on GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) or [☕️ Buy Me a Coffee](https://ko-fi.com/jacobinwwey).
 
 *Notemd v1.8.3 - Förbättra din Obsidian-kunskapsgraf med AI.*
 

@@ -690,6 +690,8 @@ MIT 라이선스 - 자세한 내용은 [LICENSE](LICENSE) 파일을 참조하세
 
 ---
 
+If you love using Notemd, please consider [⭐ Give a Star on GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) or [☕️ Buy Me a Coffee](https://ko-fi.com/jacobinwwey).
+
 *Notemd v1.8.3 - AI로 Obsidian 지식 그래프를 강화하세요.*
 
 
