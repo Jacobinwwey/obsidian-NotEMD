@@ -218,3 +218,72 @@ All CI-equivalent checks pass:
 ## Next Steps
 
 Commit to main. Tag v1.8.2 when ready. Begin command convergence in next batch.
+
+
+## Cross-Reference: notebook-navigator Design Patterns
+
+Reference: `https://github.com/johansan/notebook-navigator` (v2.5.6)
+
+notebook-navigator is a notes browser plugin (React, IndexedDB, virtual scrolling, 100K+ notes scale). It has zero LLM integration. The cross-reference value is in its **engineering patterns**, not its feature surface.
+
+### Pattern 1: Service Layer with Dependency Injection
+
+**NN approach:** 23 service classes in `src/services/` organized into sub-directories. `ServicesContext` provides singleton access via React contexts. Each service has single ownership, clear lifetime, and explicit dependencies.
+
+**NotEMD gap:** `src/llmUtils.ts` (~3000 lines) and `src/fileUtils.ts` are monolithic utility files with no service boundaries. All functions are exported globally with no dependency injection.
+
+**Improvement angle:** Extract a `LlmService` (wrapping `callLLM`, `testAPI`, `resolveProviderTokenLimit`) and a `FileProcessingService` (wrapping `processFile`, batch ops, concept extraction). Keep the existing exported function signatures for backward compat; add service-class wrappers that delegate to them internally.
+
+**Priority:** Low. Not blocking v1.8.2. Value is in maintainability, not user-facing behavior.
+
+### Pattern 2: Layered Storage with Cache Invalidation
+
+**NN approach:** IndexedDB (persistent) → MemoryFileCache (synchronous mirror) → LRU caches (preview text, feature images). mtime-based incremental updates. Cache rebuild on vault change.
+
+**NotEMD gap:** No caching layer. LLM responses are re-fetched on every call. Diagram outputs are regenerated from scratch. `RenderCache` exists for diagram rendering but is in-memory only, session-scoped.
+
+**Improvement angle:** Persist LLM responses keyed by (provider, model, prompt hash, content hash) to reduce API costs for repeated processing. Cache diagram specs keyed by (markdown hash, intent, target). Obsidian's `localStorage` or vault-adjacent JSON files are sufficient (IndexedDB is overkill for NotEMD's single-file processing model).
+
+**Priority:** Medium. Cost savings on API calls, faster re-processing. Post-v1.8.2.
+
+### Pattern 3: Per-Setting Sync Toggle
+
+**NN approach:** Each setting has a sync toggle (cloud icon). When enabled → `data.json` (synced across devices). When disabled → `localStorage` (device-specific). No global sync flag; per-setting granularity.
+
+**NotEMD gap:** All settings stored in `data.json`. Provider API keys sync across devices (potential security concern if vault is shared). Workflow preferences also sync (may not be desired).
+
+**Improvement angle:** Add a `localOnly` flag to `LLMProviderConfig`. When set, the provider config (including API key) is stored in Obsidian's `localStorage` instead of `data.json`. This keeps API keys device-local while allowing workflow settings to sync.
+
+**Priority:** Low-Medium. Security improvement. Not urgent.
+
+### Pattern 4: Pipeline Processing with Completion Signals
+
+**NN approach:** Metadata pipeline has three layers (vault sync → derived content → tree indexing) with explicit completion signals. Background processing with progress tracking.
+
+**NotEMD gap:** Batch processing (`processFolder`, `batchTranslate`, `batchGenerateContent`) runs sequentially with basic progress reporting. No pipeline stages, no completion signals, no resume-after-interrupt.
+
+**Improvement angle:** Structure batch processing as pipeline stages: (1) file discovery + mtime check, (2) LLM processing with retry, (3) file write + metadata update. Track per-file completion so interrupted batches can resume. Add a progress store (vault-adjacent JSON) to persist batch state across Obsidian restarts.
+
+**Priority:** Medium. Resilient batch processing. Post-v1.8.2.
+
+### Pattern 5: Architecture Documentation
+
+**NN approach:** 8 dedicated architecture docs covering startup process, metadata pipeline, storage architecture, rendering architecture, scroll orchestration, service architecture. All include Mermaid diagrams. Updated with dates.
+
+**NotEMD state:** 36 docs pages. Strong on plans/brainstorms/roadmaps. Weaker on architecture walkthroughs. No single-page architecture overview showing the full system.
+
+**Improvement angle:** Add a `docs/architecture.md` (bilingual) showing: provider registry → token resolution → transport dispatch → LLM call → response parsing, and diagram pipeline: spec prompt → LLM invocation → spec parse → renderer dispatch → preview/export. Include Mermaid diagrams. This makes the system understandable without reading source.
+
+**Priority:** Low. Documentation quality. Not urgent.
+
+### Improvement Priority Summary
+
+| # | Pattern | Priority | Effort | Blocking v1.8.2? |
+|---|---|---|---|---|
+| 1 | Service layer + DI | Low | High | No |
+| 2 | LLM response caching | Medium | Medium | No |
+| 3 | Per-setting sync toggle | Low-Medium | Low | No |
+| 4 | Batch pipeline with resume | Medium | Medium | No |
+| 5 | Architecture overview doc | Low | Low | No |
+
+None block v1.8.2. All are post-release improvements.

@@ -149,3 +149,62 @@ v1.8.2 的范围边界：
 ## 下一步
 
 提交至 main。准备就绪后标记 v1.8.2。下一批次开始命令收敛。
+
+
+## 交叉参考：notebook-navigator 设计模式
+
+参考：`https://github.com/johansan/notebook-navigator` (v2.5.6)
+
+notebook-navigator 是一个笔记浏览器插件（React、IndexedDB、虚拟滚动、10 万+ 笔记规模）。无 LLM 集成。交叉参考价值在于其**工程模式**，而非功能表面。
+
+### 模式 1：带依赖注入的服务层
+
+**NN 方案：** 23 个服务类组织于 `src/services/` 的子目录中。`ServicesContext` 通过 React 上下文提供单例访问。每个服务有单一所有权、明确生命周期和显式依赖。
+
+**NotEMD 缺口：** `src/llmUtils.ts`（约 3000 行）和 `src/fileUtils.ts` 是单体工具文件，无服务边界。所有函数全局导出，无依赖注入。
+
+**改进角度：** 提取 `LlmService`（包装 `callLLM`、`testAPI`、`resolveProviderTokenLimit`）和 `FileProcessingService`（包装 `processFile`、批量操作、概念提取）。为向后兼容保留现有导出函数签名；内部委托给服务类包装。不阻塞 v1.8.2。可维护性改进。
+
+### 模式 2：带缓存失效的分层存储
+
+**NN 方案：** IndexedDB（持久化）→ MemoryFileCache（同步镜像）→ LRU 缓存（预览文本、特征图像）。基于 mtime 的增量更新。vault 变更时缓存重建。
+
+**NotEMD 缺口：** 无缓存层。每次调用重新获取 LLM 响应。图表输出从零重新生成。`RenderCache` 存在但仅限内存，会话作用域。
+
+**改进角度：** 按 (provider, model, prompt hash, content hash) 为键缓存 LLM 响应，降低重复处理的 API 成本。按 (markdown hash, intent, target) 为键缓存图表规格。Obsidian 的 `localStorage` 或 vault 邻近 JSON 文件足够（IndexedDB 对 NotEMD 的单文件处理模型过度设计）。v1.8.2 后。
+
+### 模式 3：逐项设置同步开关
+
+**NN 方案：** 每个设置均有同步开关（云图标）。启用 → `data.json`（跨设备同步）。禁用 → `localStorage`（设备本地）。非全局同步标记；逐项粒度。
+
+**NotEMD 缺口：** 所有设置存储于 `data.json`。提供商 API 密钥跨设备同步（若 vault 共享存在安全隐患）。工作流偏好也同步（可能不需要）。
+
+**改进角度：** 在 `LLMProviderConfig` 中添加 `localOnly` 标记。设置时，提供商配置（含 API 密钥）存入 Obsidian 的 `localStorage` 而非 `data.json`。API 密钥保持设备本地，工作流设置可同步。
+
+### 模式 4：带完成信号的管道处理
+
+**NN 方案：** 元数据管道有 3 层（vault 同步 → 派生内容 → 树索引），带显式完成信号。后台处理带进度跟踪。
+
+**NotEMD 缺口：** 批量处理（`processFolder`、`batchTranslate`、`batchGenerateContent`）顺序执行，基本进度报告。无管道阶段、无完成信号、无中断后恢复。
+
+**改进角度：** 批量处理结构化为管道阶段：(1) 文件发现 + mtime 检查，(2) LLM 处理含重试，(3) 文件写入 + 元数据更新。跟踪逐文件完成状态以便中断后可恢复。添加进度存储（vault 邻近 JSON）在 Obsidian 重启间持久化批量状态。
+
+### 模式 5：架构文档
+
+**NN 方案：** 8 份专用架构文档，覆盖启动过程、元数据管道、存储架构、渲染架构、滚动编排、服务架构。全部含 Mermaid 图表。附日期。
+
+**NotEMD 现状：** 36 份文档页面。计划/头脑风暴/路线图强。架构 walkthrough 弱。无单页架构总览展示全系统。
+
+**改进角度：** 添加 `docs/architecture.md`（双语），展示：提供商注册 → 令牌解析 → 传输分发 → LLM 调用 → 响应解析，以及图表管道：spec prompt → LLM 调用 → spec 解析 → 渲染器分发 → 预览/导出。含 Mermaid 图表。使系统无需阅读源码即可理解。
+
+### 改进优先级汇总
+
+| # | 模式 | 优先级 | 工程量 | 阻塞 v1.8.2？ |
+|---|---|---|---|---|
+| 1 | 服务层 + DI | 低 | 高 | 否 |
+| 2 | LLM 响应缓存 | 中 | 中 | 否 |
+| 3 | 逐项设置同步开关 | 低-中 | 低 | 否 |
+| 4 | 批量管道含恢复 | 中 | 中 | 否 |
+| 5 | 架构总览文档 | 低 | 低 | 否 |
+
+全部不阻塞 v1.8.2。均为发布后改进。

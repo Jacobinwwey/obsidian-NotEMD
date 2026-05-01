@@ -8,6 +8,19 @@
 
 **技术栈：** TypeScript、Obsidian Plugin API、Mermaid、Jest、ESLint、esbuild、基于 iframe 的渲染宿主、JSON Canvas、Vega-Lite、SVG/HTML 预览链路
 
+
+### notebook-navigator 设计参考（交叉分析）
+
+[notebook-navigator](https://github.com/johansan/notebook-navigator) (v2.5.6) 是一个笔记浏览器插件，具有扎实的工程模式。识别出五项 v1.8.2 后的改进角度：
+
+1. **带 DI 的服务层** — NotEMD 的单体工具文件可通过服务分解获益。低优先级。
+2. **LLM 响应缓存** — 按 (provider, model, prompt hash, content hash) 为键缓存 LLM 响应以降低 API 成本。中优先级。
+3. **逐项设置同步开关** — 允许提供商 API 密钥保持设备本地，同时工作流设置同步。低-中优先级。
+4. **批量管道含恢复** — 批量处理结构化为管道阶段，带逐文件完成跟踪。中优先级。
+5. **架构总览文档** — 单页系统架构图。低优先级。
+
+完整分析见 `docs/brainstorms/2026-05-01-llm-backward-compat-and-progress-audit.zh-CN.md`。全部不阻塞 v1.8.2。
+
 ---
 
 ## 执行状态（2026-04-14）

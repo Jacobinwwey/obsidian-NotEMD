@@ -8,6 +8,19 @@
 
 **Tech Stack:** TypeScript, Obsidian Plugin API, Mermaid, Jest, ESLint, esbuild, iframe-based render host, JSON Canvas, Vega-Lite, SVG/HTML preview pipeline
 
+
+### notebook-navigator Design Reference (Cross-Reference)
+
+[notebook-navigator](https://github.com/johansan/notebook-navigator) (v2.5.6) is a notes browser plugin with strong engineering patterns. Five improvement angles identified for post-v1.8.2:
+
+1. **Service layer with DI** — NotEMD's monolithic utility files could benefit from service decomposition. Low priority.
+2. **LLM response caching** — Persist LLM responses by (provider, model, prompt hash, content hash) to reduce API costs. Medium priority.
+3. **Per-setting sync toggle** — Allow provider API keys to be device-local while workflow settings sync. Low-medium priority.
+4. **Batch pipeline with resume** — Structure batch processing as pipeline stages with per-file completion tracking. Medium priority.
+5. **Architecture overview doc** — Single-page system architecture diagram. Low priority.
+
+Full analysis in `docs/brainstorms/2026-05-01-llm-backward-compat-and-progress-audit.md`. None block v1.8.2.
+
 ---
 
 ## Execution Status (2026-04-14)
@@ -45,6 +58,7 @@ Scope: all 5 transport runtimes (OpenAI-compatible, Anthropic, Google, Azure Ope
 All existing provider configs, transport protocols, and settings UI remain unchanged. The only behavioral difference for users: unknown models with default `maxTokens` now defer to the API provider instead of being capped at 8192. Provider-specific maxOutputTokens overrides continue to clamp to known model ceilings when available.
 
 ---
+
 
 ### Current Snapshot
 
