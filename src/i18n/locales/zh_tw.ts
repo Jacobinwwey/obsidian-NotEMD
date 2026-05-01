@@ -79,6 +79,12 @@ export const STRINGS_ZH_TW: DeepPartial<NotemdEnglishStrings> = {
             stabilityFinished: '開發者穩定性診斷完成（{callMode}）：{successCount}/{runs} 次成功。報告：{path}',
             stabilityFailedBeforeReport: '開發者穩定性診斷在產生報告前失敗：{message}'
         },
+sponsor: {
+            heading: '支援開發',
+            desc: 'Notemd 是免費開源插件。如果您覺得有用，請考慮支持其開發。',
+            githubButton: 'GitHub 贊助',
+            coffeeButton: '請喝杯咖啡',
+        },
         providerConfig: {
             heading: 'LLM 提供者',
             summaryTitle: '提供者預設已擴充到 {count} 項。',

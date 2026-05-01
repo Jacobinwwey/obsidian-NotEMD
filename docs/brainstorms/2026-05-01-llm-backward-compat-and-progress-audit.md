@@ -287,3 +287,71 @@ notebook-navigator is a notes browser plugin (React, IndexedDB, virtual scrollin
 | 5 | Architecture overview doc | Low | Low | No |
 
 None block v1.8.2. All are post-release improvements.
+
+
+## notebook-navigator Sponsor/Funding Design Reference
+
+### NN Design Summary
+
+notebook-navigator implements a complete, tasteful sponsor prompting system at 3 touchpoints:
+
+**1. manifest.json (`fundingUrl`)**
+```json
+"fundingUrl": "https://github.com/sponsors/johansan/"
+```
+Obsidian natively surfaces this in the Community Plugins browser. Zero code required. Single line.
+
+**2. Settings General Tab — "Support Development" Section**
+Positioned at the top of the General settings tab (above all functional settings). Contains:
+- A heading row: "Support Development" with description text
+- Two buttons side by side: "Sponsor on GitHub ❤️" + "Buy Me a Coffee ☕"
+- Both buttons use `window.open()` to external URLs
+- CSS classes for consistent button styling (`nn-support-button`)
+- i18n strings for heading, description, button text in all 22 locales
+- Buttons are styled distinctly from functional settings buttons (color/accent)
+
+**3. "What's New" Modal**
+Shown after version update. Contains at the bottom:
+- A divider line
+- A support message paragraph (i18n)
+- A "Buy Me a Coffee ☕" button (linked to buymeacoffee.com)
+- A "Thanks!" CTA button (closes modal, `mod-cta` class for primary styling)
+- Coffee emoji as icon on the support button
+- Focus management: "Thanks!" button auto-focused after modal opens
+
+### NotEMD Current State
+
+| Touchpoint | NN | NotEMD |
+|---|---|---|
+| `manifest.json` fundingUrl | ✓ | ✗ Missing |
+| Settings sponsor section | ✓ (top of General tab, 2 buttons) | ✗ Missing |
+| What's New modal | ✓ (support message + coffee button) | ✗ Missing |
+| i18n sponsor strings | ✓ (22 locales) | ✗ Missing |
+| README sponsor link | ✓ | ✗ Missing |
+| `.github/FUNDING.yml` | ✗ (uses manifest only) | ✗ Missing |
+
+### Recommended Improvements (Priority Order)
+
+1. **Add `fundingUrl` to `manifest.json`** — Zero code. Immediate Obsidian community plugin browser visibility. Effort: 1 line.
+
+2. **Add sponsor section to NotemdSettingTab** — Position at the top of General/Provider tab. Two buttons: GitHub Sponsor + Buy Me a Coffee. Use existing `Setting` API (no React needed). Effort: ~30 lines + i18n keys.
+
+3. **Add sponsor link to README (both languages)** — Simple badge or inline link at the bottom. Effort: 2 lines per README.
+
+4. **Add `.github/FUNDING.yml`** — GitHub-native sponsor button on repo page. Effort: 2 lines.
+
+5. **Consider "What's New" modal** — Deferred. Requires release notes infrastructure. NN's implementation is substantial (~300 lines). Not urgent.
+
+### Implementation Plan (v1.8.2-ready)
+
+All items below are non-breaking, zero-risk additions that can ship in v1.8.2:
+
+- [ ] `manifest.json`: add `"fundingUrl": "https://github.com/sponsors/Jacobinwwey"`
+- [ ] `src/ui/NotemdSettingTab.ts`: add sponsor section at top of first tab with 2 buttons
+- [ ] `src/i18n/locales/en.ts`: add `sponsorHeading`, `sponsorDesc`, `sponsorGitHubButton`, `sponsorCoffeeButton`
+- [ ] `src/i18n/locales/zh_cn.ts`: same keys, Chinese text
+- [ ] `src/i18n/locales/zh_tw.ts`: same keys, Traditional Chinese text
+- [ ] `README.md` + `README_zh.md`: add sponsor badge or link line
+- [ ] `.github/FUNDING.yml`: add `github: [Jacobinwwey]`
+
+Implement inline. Verify build + audit + tests. Commit.
