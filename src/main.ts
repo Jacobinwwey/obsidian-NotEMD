@@ -24,6 +24,7 @@ import { _performResearch, researchAndSummarize } from './searchUtils'; // Impor
 import { ProgressModal } from './ui/ProgressModal';
 import { ErrorModal } from './ui/ErrorModal';
 import { DiagramPreviewModal } from './ui/DiagramPreviewModal';
+import { WelcomeModal } from './ui/WelcomeModal';
 import { NotemdSettingTab } from './ui/NotemdSettingTab';
 import { showDeletionConfirmationModal } from './ui/modals'; // Import the modal function
 import { NotemdSidebarView } from './ui/NotemdSidebarView';
@@ -105,6 +106,16 @@ export default class NotemdPlugin extends Plugin {
 
     async onload() {
         await this.loadSettings();
+
+        // Show welcome modal on first install
+        if (this.settings._firstLaunch === undefined || this.settings._firstLaunch) {
+            this.settings._firstLaunch = false;
+            await this.saveSettings();
+            // Delay slightly so the Obsidian layout is ready
+            setTimeout(() => {
+                new WelcomeModal(this.app, this.settings.uiLocale).open();
+            }, 500);
+        }
         const uiStrings = this.getUiStrings();
 
         // --- Sidebar View ---

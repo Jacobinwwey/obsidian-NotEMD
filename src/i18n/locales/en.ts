@@ -76,6 +76,15 @@ export const STRINGS_EN = {
             stabilityFinished: 'Developer stability diagnostic finished ({callMode}): {successCount}/{runs} succeeded. Report: {path}',
             stabilityFailedBeforeReport: 'Developer stability diagnostic failed before report generation: {message}'
         },
+welcome: {
+            title: 'Welcome to Notemd',
+            introText: 'Notemd enhances your Obsidian workflow with LLM-powered processing: generate wiki-links, extract concepts, translate notes, create diagrams, and more.',
+            setupHint: 'To get started, configure an LLM provider in the settings. DeepSeek, OpenAI, Anthropic, Google, and many more are supported.',
+            sponsorText: 'Notemd is free and open source. If you find it useful, please consider supporting development.',
+            configureButton: 'Configure LLM',
+            sponsorButton: 'Sponsor on GitHub',
+            closeButton: 'Get Started',
+        },
         sponsor: {
             heading: 'Support Development',
             desc: 'Notemd is free and open source. If you find it useful, please consider supporting its development.',

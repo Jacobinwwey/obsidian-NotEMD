@@ -79,6 +79,15 @@ export const STRINGS_ZH_TW: DeepPartial<NotemdEnglishStrings> = {
             stabilityFinished: '開發者穩定性診斷完成（{callMode}）：{successCount}/{runs} 次成功。報告：{path}',
             stabilityFailedBeforeReport: '開發者穩定性診斷在產生報告前失敗：{message}'
         },
+welcome: {
+            title: '歡迎使用 Notemd',
+            introText: 'Notemd 透過 LLM 增強您的 Obsidian 工作流程：生成維基連結、提取概念、翻譯筆記、建立圖表等。',
+            setupHint: '如需開始，請在設定中配置 LLM 提供商。支援 DeepSeek、OpenAI、Anthropic、Google 等眾多提供商。',
+            sponsorText: 'Notemd 是免費開源插件。如果您覺得有用，請考慮支持開發。',
+            configureButton: '配置 LLM',
+            sponsorButton: 'GitHub 贊助',
+            closeButton: '開始使用',
+        },
 sponsor: {
             heading: '支援開發',
             desc: 'Notemd 是免費開源插件。如果您覺得有用，請考慮支持其開發。',

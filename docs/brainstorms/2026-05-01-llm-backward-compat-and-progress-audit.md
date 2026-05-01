@@ -355,3 +355,67 @@ All items below are non-breaking, zero-risk additions that can ship in v1.8.2:
 - [ ] `.github/FUNDING.yml`: add `github: [Jacobinwwey]`
 
 Implement inline. Verify build + audit + tests. Commit.
+
+## v1.8.3 Release Plan: Sponsor + LLM Call Prioritization
+
+### notebook-navigator First-Install Pattern
+
+Notebook navigator's first-install flow:
+1. `loadSettings()` returns `isFirstLaunch: boolean`
+2. If first launch: `WelcomeModal` opens with developer greeting, video tutorial recommendation, and a "Maybe later" dismiss
+3. Sponsor is deliberately NOT in the Welcome modal — it appears in the settings tab and "What's New" modal separately
+4. Version-tracking via `lastShownVersion` triggers "What's New" on update, not first install
+5. Philosophy: onboard → educate → ask for support later
+
+### NotEMD v1.8.3 Implementation Plan
+
+**Already shipped in v1.8.2:**
+- [x] `manifest.json` fundingUrl
+- [x] Settings sponsor section (GitHub + Coffee buttons)
+- [x] `.github/FUNDING.yml`
+- [x] Cline-aligned unknown-model token resolution
+- [x] Diagram edge field normalization
+
+**v1.8.3 scope:**
+
+1. **Welcome Modal (first install)**
+   - Detect first launch via `settings.version === undefined` or `lastShownVersion === undefined`
+   - Modal content: developer greeting, plugin capabilities overview, LLM setup hint, sponsor note at bottom
+   - Buttons: "Configure LLM" (opens settings), "Learn More" (opens docs), "Close"
+   - i18n across en/zh-cn/zh-tw
+   - File: `src/ui/WelcomeModal.ts`
+   - Integration: `src/main.ts` onload after settings load
+
+2. **What's New Modal (version update)**
+   - Track `lastShownVersion` in settings
+   - On version change: show release notes modal
+   - Bottom: sponsor message with coffee button
+   - File: `src/ui/WhatsNewModal.ts`
+
+3. **Sponsor Touchpoint Audit**
+   - Ensure sponsor messaging is present but not aggressive
+   - Settings tab: already done
+   - Welcome modal: soft mention at bottom
+   - What's New modal: coffee button
+   - README: add sponsor badge
+
+4. **LLM Call Hardening (already shipped)**
+   - Cline-aligned token resolution: shipped in v1.8.2
+   - Edge normalization: shipped in v1.8.2
+   - Live chain tests: available for manual execution
+
+### Priority Order for Implementation
+
+| # | Feature | Effort | Impact |
+|---|---|---|---|
+| 1 | Welcome Modal + first-launch detection | ~80 lines | High — first impression |
+| 2 | `lastShownVersion` tracking | ~10 lines | Low — enables future What's New |
+| 3 | What's New Modal | ~120 lines | Medium — user engagement |
+| 4 | README sponsor badge | ~2 lines | Low — repo visibility |
+
+### Implementation Notes
+
+- Welcome modal should NOT block plugin functionality — the plugin must continue working even if the modal is dismissed
+- Sponsor ask should be a single line at the bottom, not the focus
+- The primary CTA should be "Configure LLM" to drive functionality adoption
+- Follow notebook-navigator's pattern: use `Modal` base class, `mod-cta` class for primary button, auto-focus management
