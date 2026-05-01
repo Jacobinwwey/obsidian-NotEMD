@@ -693,6 +693,6 @@ MIT License — подробности см. в файле [LICENSE](LICENSE).
 
 ---
 
-*Notemd v1.8.1 — усиливайте граф знаний Obsidian с помощью ИИ.*
+*Notemd v1.8.3 — усиливайте граф знаний Obsidian с помощью ИИ.*
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)

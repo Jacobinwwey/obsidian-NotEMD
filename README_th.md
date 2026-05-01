@@ -687,7 +687,7 @@ MIT License - ดูรายละเอียดได้ในไฟล์ [L
 
 ---
 
-*Notemd v1.8.1 - ยกระดับกราฟความรู้ใน Obsidian ของคุณด้วย AI*
+*Notemd v1.8.3 - ยกระดับกราฟความรู้ใน Obsidian ของคุณด้วย AI*
 
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)
