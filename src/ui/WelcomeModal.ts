@@ -26,7 +26,11 @@ export class WelcomeModal extends Modal {
         body.createEl('p', { text: w.introText, cls: 'notemd-welcome-text' });
         body.createEl('p', { text: w.setupHint, cls: 'notemd-welcome-text' });
 
-        const sponsorLine = body.createEl('p', { text: w.sponsorText, cls: 'notemd-welcome-sponsor' });
+        body.createEl('p', { text: w.sponsorText, cls: 'notemd-welcome-sponsor' });
+
+        if (w.closingText) {
+            body.createEl('p', { text: w.closingText, cls: 'notemd-welcome-closing' });
+        }
 
         const buttonContainer = this.contentEl.createDiv({ cls: 'notemd-welcome-buttons' });
 
@@ -37,7 +41,6 @@ export class WelcomeModal extends Modal {
         configureBtn.setAttr('type', 'button');
         configureBtn.addEventListener('click', () => {
             this.close();
-            // Open Obsidian settings to the Notemd tab
             (this.app as any).setting?.openTabById?.('notemd');
         });
 
@@ -49,6 +52,16 @@ export class WelcomeModal extends Modal {
             window.open('https://github.com/sponsors/Jacobinwwey', '_blank');
         });
 
+        if (w.coffeeButton) {
+            const coffeeBtn = buttonContainer.createEl('button', {
+                text: w.coffeeButton,
+            });
+            coffeeBtn.setAttr('type', 'button');
+            coffeeBtn.addEventListener('click', () => {
+                window.open('https://buymeacoffee.com/jacobhxx', '_blank');
+            });
+        }
+
         const closeBtn = buttonContainer.createEl('button', {
             text: w.closeButton,
         });
@@ -57,7 +70,6 @@ export class WelcomeModal extends Modal {
             this.close();
         });
 
-        // Focus the primary CTA
         requestAnimationFrame(() => {
             configureBtn.focus();
         });
