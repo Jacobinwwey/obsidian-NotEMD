@@ -547,7 +547,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                 text: i18n.settings.sponsor.coffeeButton,
             });
             coffeeBtn.addEventListener('click', () => {
-                window.open('https://buymeacoffee.com/jacobhxx', '_blank');
+                window.open('https://ko-fi.com/jacobinwwey', '_blank');
             });
 
             containerEl.createEl('hr');
