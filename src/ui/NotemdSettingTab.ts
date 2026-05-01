@@ -540,7 +540,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                 cls: 'mod-cta'
             });
             githubBtn.addEventListener('click', () => {
-                window.open('https://github.com/sponsors/Jacobinwwey', '_blank');
+                window.open('https://github.com/Jacobinwwey/obsidian-NotEMD', '_blank');
             });
 
             const coffeeBtn = sponsorButtonRow.createEl('button', {

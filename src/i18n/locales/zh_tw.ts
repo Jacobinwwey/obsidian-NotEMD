@@ -85,7 +85,7 @@ export const STRINGS_ZH_TW: DeepPartial<NotemdEnglishStrings> = {
             setupHint: '如需開始，請在設定中配置 LLM 提供商。支援 DeepSeek、OpenAI、Anthropic、Google 等眾多提供商。',
             sponsorText: 'Notemd 是免費開源插件。如果您覺得有用，請考慮支持開發。',
             configureButton: '配置 LLM',
-            sponsorButton: 'GitHub 贊助',
+            sponsorButton: '給 GitHub 加星',
             closeButton: '開始使用',
             closingText: '願 NoteMD 伴您遨遊於真理的無垠海洋，繼續指引您的學習與前行。諸事順遂，求知之心與您同在。',
             coffeeButton: '請喝杯咖啡',
@@ -93,7 +93,7 @@ export const STRINGS_ZH_TW: DeepPartial<NotemdEnglishStrings> = {
         sponsor: {
             heading: '支援開發',
             desc: 'Notemd 是免費開源插件。如果您覺得有用，請考慮支持其開發。',
-            githubButton: 'GitHub 贊助',
+            githubButton: '給 GitHub 加星',
             coffeeButton: '請喝杯咖啡',
         },
         providerConfig: {

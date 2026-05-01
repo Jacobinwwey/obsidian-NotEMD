@@ -82,7 +82,7 @@ export const STRINGS_EN = {
             setupHint: 'To get started, configure an LLM provider in the settings. DeepSeek, OpenAI, Anthropic, Google, and many more are supported.',
             sponsorText: 'Notemd is free and open source. If you find it useful, please consider supporting development.',
             configureButton: 'Configure LLM',
-            sponsorButton: 'Sponsor on GitHub',
+            sponsorButton: 'Give a Star on GitHub',
             closeButton: 'Get Started',
             closingText: 'May NoteMD accompany you on your journey through the boundless ocean of truth, and continue to guide your learning and progress. All wishes for your life, may the pursuit of knowledge be with you.',
             coffeeButton: 'Buy Me a Coffee',
@@ -90,7 +90,7 @@ export const STRINGS_EN = {
         sponsor: {
             heading: 'Support Development',
             desc: 'Notemd is free and open source. If you find it useful, please consider supporting its development.',
-            githubButton: 'Sponsor on GitHub',
+            githubButton: 'Give a Star on GitHub',
             coffeeButton: 'Buy Me a Coffee',
         },
         providerConfig: {
