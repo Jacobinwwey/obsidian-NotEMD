@@ -49,7 +49,7 @@ export class WelcomeModal extends Modal {
         });
         sponsorBtn.setAttr('type', 'button');
         sponsorBtn.addEventListener('click', () => {
-            window.open('https://github.com/sponsors/Jacobinwwey', '_blank');
+            window.open('https://github.com/Jacobinwwey/obsidian-NotEMD', '_blank');
         });
 
         if (w.coffeeButton) {
