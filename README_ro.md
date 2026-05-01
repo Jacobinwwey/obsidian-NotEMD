@@ -681,6 +681,8 @@ Licență MIT - vezi fișierul [LICENSE](LICENSE) pentru detalii.
 
 ---
 
+If you love using Notemd, please consider [⭐ Give a Star on GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) or [☕️ Buy Me a Coffee](https://ko-fi.com/jacobinwwey).
+
 *Notemd v1.8.3 - Îmbunătățește-ți graful de cunoștințe din Obsidian cu AI.*
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)
