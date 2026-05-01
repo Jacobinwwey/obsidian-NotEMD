@@ -1,6 +1,6 @@
 import { Notice, requestUrl } from 'obsidian';
 import { LLMProviderConfig, NotemdSettings, ProgressReporter } from './types';
-import { getLLMProviderDefinition } from './llmProviders';
+import { getKnownModelMaxOutputTokens, getLLMProviderDefinition } from './llmProviders';
 import { DEFAULT_SETTINGS } from './constants';
 import { cancellableDelay } from './utils';
 import { ErrorModal } from './ui/ErrorModal'; // Import ErrorModal
@@ -44,6 +44,94 @@ function shouldUseCombinedUserPrompt(providerName: string, modelName: string): b
         default:
             return isOpenAIReasoningModel(modelName);
     }
+}
+
+function resolveProviderTokenLimit(
+    provider: LLMProviderConfig,
+    modelName: string,
+    fallbackMaxTokens: number,
+    options?: { connectionTest?: boolean }
+): number | undefined {
+    if (options?.connectionTest) {
+        return 1;
+    }
+
+    const knownModelMaxTokens = getKnownModelMaxOutputTokens(provider.name, modelName);
+    const providerOverride = Number(provider.maxOutputTokens);
+    if (Number.isFinite(providerOverride) && providerOverride > 0) {
+        if (typeof knownModelMaxTokens === 'number' && knownModelMaxTokens > 0) {
+            return Math.min(providerOverride, knownModelMaxTokens);
+        }
+        return providerOverride;
+    }
+
+    if (Number.isFinite(fallbackMaxTokens) && fallbackMaxTokens > 0) {
+        if (typeof knownModelMaxTokens === 'number' && knownModelMaxTokens > 0) {
+            // Preserve manual user choices below the known model ceiling, but treat the untouched
+            // global default as "auto" so supported models can use their real max output cap.
+            if (fallbackMaxTokens === DEFAULT_SETTINGS.maxTokens) {
+                return knownModelMaxTokens;
+            }
+            return Math.min(fallbackMaxTokens, knownModelMaxTokens);
+        }
+        if (fallbackMaxTokens === DEFAULT_SETTINGS.maxTokens) {
+            return undefined;
+        }
+        return fallbackMaxTokens;
+    }
+
+    if (typeof knownModelMaxTokens === 'number' && knownModelMaxTokens > 0) {
+        return knownModelMaxTokens;
+    }
+
+    return undefined;
+}
+
+function resolveProviderTopP(provider: LLMProviderConfig): number | undefined {
+    const topP = Number(provider.topP);
+    if (!Number.isFinite(topP)) {
+        return undefined;
+    }
+
+    if (topP < 0 || topP > 1) {
+        return undefined;
+    }
+
+    return topP;
+}
+
+function normalizeReasoningEffort(effort: unknown): 'low' | 'medium' | 'high' | undefined {
+    if (typeof effort !== 'string') {
+        return undefined;
+    }
+
+    const normalized = effort.trim().toLowerCase();
+    switch (normalized) {
+        case 'low':
+        case 'medium':
+        case 'high':
+            return normalized;
+        case 'none':
+        case '':
+        default:
+            return undefined;
+    }
+}
+
+function supportsReasoningEffort(provider: LLMProviderConfig, modelName: string): boolean {
+    if (provider.name === 'DeepSeek') {
+        return true;
+    }
+
+    if (provider.name === 'OpenAI' || provider.name === 'OpenAI Compatible' || provider.name === 'Azure OpenAI') {
+        return isOpenAIReasoningModel(modelName);
+    }
+
+    return false;
+}
+
+function shouldEnableDeepSeekThinking(provider: LLMProviderConfig): boolean {
+    return provider.name === 'DeepSeek' && provider.thinkingEnabled === true;
 }
 
 function buildOpenAICompatibleHeaders(provider: LLMProviderConfig): Record<string, string> {
@@ -2045,19 +2133,33 @@ function buildOpenAICompatibleRequestBody(
     temperature: number,
     options?: { connectionTest?: boolean }
 ) {
+    const isConnectionTest = options?.connectionTest === true;
     const requestBody: any = {
         model: modelName,
         messages: buildOpenAICompatibleMessages(provider.name, modelName, prompt, content)
     };
 
-    const tokenLimit = options?.connectionTest ? 1 : maxTokens;
+    const tokenLimit = resolveProviderTokenLimit(provider, modelName, maxTokens, options);
     const deterministicTemperature = options?.connectionTest ? 0 : temperature;
+    const topP = isConnectionTest ? undefined : resolveProviderTopP(provider);
+    const reasoningEffort = !isConnectionTest && supportsReasoningEffort(provider, modelName)
+        ? normalizeReasoningEffort(provider.reasoningEffort)
+        : undefined;
     const isDeepSeekProvider = provider.name === 'DeepSeek';
     const isReasoningModel = shouldUseCombinedUserPrompt(provider.name, modelName);
 
     if (isDeepSeekProvider) {
         if (typeof tokenLimit === 'number' && tokenLimit > 0) {
-            requestBody.max_completion_tokens = tokenLimit;
+            requestBody.max_tokens = tokenLimit;
+        }
+        if (!isConnectionTest && shouldEnableDeepSeekThinking(provider)) {
+            requestBody.thinking = { type: 'enabled' };
+        }
+        if (reasoningEffort) {
+            requestBody.reasoning_effort = reasoningEffort;
+        }
+        if (typeof topP === 'number') {
+            requestBody.top_p = topP;
         }
         if (!isDeepSeekReasoningModel(modelName)) {
             requestBody.temperature = deterministicTemperature;
@@ -2065,15 +2167,24 @@ function buildOpenAICompatibleRequestBody(
         return requestBody;
     }
 
+    if (typeof tokenLimit === 'number' && tokenLimit > 0) {
+        requestBody.max_tokens = tokenLimit;
+    }
+
     if (!isReasoningModel) {
         if (typeof deterministicTemperature === 'number') {
             requestBody.temperature = deterministicTemperature;
         }
-        if (typeof tokenLimit === 'number' && tokenLimit > 0) {
-            requestBody.max_tokens = tokenLimit;
-        }
     } else if (provider.name === 'OpenRouter' && modelName.toLowerCase().includes('deepseek')) {
         requestBody.temperature = 0.7;
+    }
+
+    if (typeof topP === 'number') {
+        requestBody.top_p = topP;
+    }
+
+    if (reasoningEffort) {
+        requestBody.reasoning_effort = reasoningEffort;
     }
 
     return requestBody;
@@ -2089,17 +2200,28 @@ function extractOpenAICompatibleText(providerName: string, data: any, fallbackTe
 
     const message = choice?.message;
     const rawContent = message?.content;
+    const reasoningContent = typeof message?.reasoning_content === 'string'
+        ? message.reasoning_content
+        : typeof message?.reasoning === 'string'
+            ? message.reasoning
+            : '';
 
     const messageContent = extractTextLikeContent(rawContent);
     if (messageContent.trim()) {
         return messageContent;
     }
 
-    if (typeof message?.reasoning === 'string' && message.reasoning.trim()) {
-        return message.reasoning;
+    if (reasoningContent.trim()) {
+        const finishReason = choice?.finish_reason;
+        if (finishReason === 'length') {
+            throw new Error(
+                `${providerName} returned reasoning output but no final content before hitting the output token limit. Increase the provider Max tokens override or disable thinking mode.`
+            );
+        }
+        throw new Error(`${providerName} returned reasoning output but no final content.`);
     }
 
-    if (fallbackText?.trim()) {
+    if (!choice && fallbackText?.trim()) {
         return fallbackText;
     }
 
@@ -2573,12 +2695,13 @@ async function executeOpenAIApi(provider: LLMProviderConfig, modelName: string, 
 async function executeAnthropicApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings, signal?: AbortSignal): Promise<string> {
     if (!provider.apiKey) throw new Error(`API key is missing for Anthropic provider.`);
     const url = `${provider.baseUrl}/v1/messages`;
+    const tokenLimit = resolveProviderTokenLimit(provider, modelName, settings.maxTokens);
     const requestBody = {
         model: modelName,
         system: prompt, // Pass the prompt as the system message
         messages: [{ role: 'user', content: content }],
         temperature: provider.temperature,
-        max_tokens: settings.maxTokens
+        max_tokens: tokenLimit
     };
     const requestBodyJson = JSON.stringify(requestBody);
     const streamRequestBodyJson = JSON.stringify({
@@ -2639,9 +2762,10 @@ async function executeGoogleApi(provider: LLMProviderConfig, modelName: string, 
     const streamUrl = new URL(urlWithKey);
     streamUrl.pathname = streamUrl.pathname.replace(':generateContent', ':streamGenerateContent');
     streamUrl.searchParams.set('alt', 'sse');
+    const tokenLimit = resolveProviderTokenLimit(provider, modelName, settings.maxTokens);
     const requestBody = {
         contents: [{ role: 'user', parts: [{ text: `${prompt}\n\n${content}` }] }],
-        generationConfig: { temperature: provider.temperature, maxOutputTokens: settings.maxTokens }
+        generationConfig: { temperature: provider.temperature, maxOutputTokens: tokenLimit }
     };
     const requestBodyJson = JSON.stringify(requestBody);
 
@@ -2694,10 +2818,11 @@ async function executeAzureOpenAIApi(provider: LLMProviderConfig, modelName: str
     if (!provider.apiKey) throw new Error(`API key is missing for Azure OpenAI provider.`);
     if (!provider.apiVersion || !provider.baseUrl) { throw new Error('API version and Base URL are required for Azure OpenAI'); }
     const url = `${provider.baseUrl}/openai/deployments/${modelName}/chat/completions?api-version=${provider.apiVersion}`;
+    const tokenLimit = resolveProviderTokenLimit(provider, modelName, settings.maxTokens);
     const requestBody = {
         messages: [{ role: 'system', content: prompt }, { role: 'user', content: content }],
         temperature: provider.temperature,
-        max_tokens: settings.maxTokens
+        max_tokens: tokenLimit
     };
     const requestBodyJson = JSON.stringify(requestBody);
     const streamRequestBodyJson = JSON.stringify({
@@ -2744,10 +2869,11 @@ async function executeLMStudioApi(provider: LLMProviderConfig, modelName: string
 async function executeOllamaApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings, signal?: AbortSignal): Promise<string> {
     // Note: Ollama does not use API keys.
     const url = `${provider.baseUrl}/chat`;
+    const tokenLimit = resolveProviderTokenLimit(provider, modelName, settings.maxTokens);
     const requestBody = {
         model: modelName,
         messages: [{ role: 'system', content: prompt }, { role: 'user', content: content }],
-        options: { temperature: provider.temperature, num_predict: settings.maxTokens },
+        options: { temperature: provider.temperature, num_predict: tokenLimit },
         stream: false
     };
     const requestBodyJson = JSON.stringify(requestBody);

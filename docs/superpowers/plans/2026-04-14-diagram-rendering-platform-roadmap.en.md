@@ -23,6 +23,29 @@ Phase-2 requirements snapshot:
 
 - `docs/brainstorms/2026-04-14-diagram-platform-phase-2-requirements.md`
 
+
+## 2026-05-01 LLM Robustness and Diagram Edge Hardening
+
+### Cline-Aligned Output Token Resolution
+
+`resolveProviderTokenLimit` now matches Cline behavior for unknown models: when the global `maxTokens` equals the default (8192) and the model is not in `KNOWN_MODEL_MAX_OUTPUT_TOKENS`, the system returns `undefined` — letting the API provider decide. This replaces the previous behavior of blindly passing 8192 for unknown models. User-set custom `maxTokens` values for unknown models remain preserved (backward compatibility).
+
+Scope: all 5 transport runtimes (OpenAI-compatible, Anthropic, Google, Azure OpenAI, Ollama).
+
+### Diagram Edge Field Normalization
+
+`normalizeSpec` in `diagramSpecResponseParser.ts` now handles multiple edge field conventions (`source`/`target`, `sourceId`/`targetId`, `start`/`end` to `from`/`to`) so LLM outputs with varying JSON field names parse correctly. `buildDiagramSpecPrompt` now explicitly instructs LLMs to use `from`/`to` field names.
+
+### Live Chain Tests
+
+`src/tests/liveChainTest.test.ts` exercises real DeepSeek API calls from the test vault configuration, covering chat completion, diagram spec generation, and full pipeline output. All 5 tests pass against live DeepSeek API.
+
+### Backward Compatibility
+
+All existing provider configs, transport protocols, and settings UI remain unchanged. The only behavioral difference for users: unknown models with default `maxTokens` now defer to the API provider instead of being capped at 8192. Provider-specific maxOutputTokens overrides continue to clamp to known model ceilings when available.
+
+---
+
 ### Current Snapshot
 
 | Task | Status | Current reality |
@@ -33,7 +56,7 @@ Phase-2 requirements snapshot:
 | Task 3 | Partial | Mermaid subtype adapters and `mermaid.parse` validation are shipped. Flowchart pipe-label escaping moved into adapter emit, and a large share of note-directive parsing / edge-label helpers have started moving into `src/diagram/adapters/mermaid/legacyFixerUtils.ts`. `src/mermaidProcessor.ts` still owns too much legacy fixer work. |
 | Task 4 | Delivered | Renderer registry/service, cache, inline host, iframe preview session, and unified preview modal are all landed. |
 | Task 5 | Delivered | `.canvas` output, baseline deterministic layout, save flows, and preview support are all landed. |
-| Task 6 | Partial | Controlled Vega-Lite templates, planner chart defaults, preview, and export are landed, but the "iframe host isolates rendering dependencies" claim is still only partially true. |
+| Task 6 | Delivered with explicit limits | Vega-Lite preview now boots through the iframe host with a target-specific sandbox and `srcdoc` bootstrap path. The remaining limit is packaging, not preview routing: the runtime still ships through the main bundle bridge until Task 0 grows a real multi-entry host asset strategy. |
 | Task 7 | Delivered with explicit limits | Theme, locale, SVG/PNG/source export, and the support matrix are aligned with current code. HTML still promises only iframe fallback preview and raw source save. |
 | Task 8 | Deferred by design | Advanced DSL / renderer evaluation remains intentionally postponed. |
 
@@ -444,14 +467,16 @@ The original roadmap goal was more aggressive, and that part remains unfinished:
 - Test: `src/tests/vegaLiteAdapter.test.ts`
 - Test: `src/tests/iframeRenderHost.test.ts`
 
-**Status:** Partial
+**Status:** Delivered with explicit limits
 
 `dataChart` intent, controlled Vega-Lite templates, planner chart defaults, preview/export, and HTML fallback are all landed. The product direction is therefore already proven: numeric and comparative notes do not need to be squeezed into Mermaid.
 
-What remains unfinished is the runtime boundary. `IframeRenderHost` currently carries preview-session and `srcdoc` shell concerns, but Vega-Lite SVG rendering still happens inside plugin runtime through `src/rendering/preview/vegaLitePreview.ts`, which dynamically loads `vega-lite` and `vega`. "Vega-Lite is supported" is true; "Vega-Lite rendering dependencies are isolated through the iframe host" is not fully true yet.
+The runtime boundary is now materially better than before: the preview modal no longer prefers plugin-runtime inline Vega-Lite SVG rendering, the iframe host carries the bootstrap path, and the host applies a target-specific sandbox that only enables scripts for the controlled Vega-Lite path. That closes the product-level preview-routing gap that previously kept this task partial.
+
+The remaining limit is packaging, not behavior. `vega-lite` and `vega` still arrive through the plugin bundle bridge because `esbuild.config.mjs` remains single-entry. In other words, Task 6 is no longer blocked on "should preview be routed through iframe host?" That decision is now implemented. The unresolved work has moved back to Task 0's heavier-runtime packaging boundary.
 
 - [x] Route notes with clear data points, trends, comparisons, or shares into `dataChart`.
-- [ ] Isolate Vega-Lite rendering dependencies through the iframe host.
+- [x] Isolate Vega-Lite preview routing through the iframe host.
 - [x] Support six high-value chart templates first: bar, line, area, scatter, pie, and table-like summary.
 
 **Decisions:**
@@ -526,7 +551,7 @@ Focus:
 - Keep Task 0's render-host smoke gate intact so future runtime work cannot bypass release/installation constraints
 - Finish Task 2's missing command-architecture convergence so legacy and experimental command tracks do not coexist indefinitely
 - Finish Task 3's missing `mermaidProcessor.ts` responsibility reduction and sunset boundary
-- Decide in Task 6 whether Vega-Lite runtime should stay in plugin runtime or move into a real bundled host
+- Do not regress Task 6 back to plugin-runtime inline preview; future work should only move forward from bridge-backed `srcdoc` preview to a real multi-entry host package under Task 0
 
 Success markers:
 
@@ -619,7 +644,7 @@ If work continues now, it should be a convergence batch, not a new-target batch:
 
 1. Finish Task 2's remaining command-architecture convergence
 2. Finish Task 3's remaining `mermaidProcessor.ts` responsibility reduction and legacy-fixer sunset boundary
-3. Finish Task 6's remaining decision on Vega-Lite heavy-runtime host boundaries
+3. Revisit Task 0's remaining heavier-runtime packaging boundary so bridge-backed iframe preview can graduate to a real dedicated host bundle
 4. Keep strengthening Task 7 so the support matrix is bound more tightly to docs and release contracts
 5. Treat Task 0's smoke gate as a hard regression boundary; any move to standalone host assets must upgrade release/install design first
 

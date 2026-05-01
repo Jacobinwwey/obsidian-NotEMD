@@ -17,7 +17,10 @@ describe('render webview page', () => {
         expect(html).toContain('<!DOCTYPE html>');
         expect(html).toContain('Vega-Lite preview');
         expect(html).toContain('Notes/Weekly Signups.md');
-        expect(html).toContain('&quot;mark&quot;: &quot;bar&quot;');
+        expect(html).toContain('notemd-vega-lite-mount');
+        expect(html).toContain('notemd-vega-lite-spec');
+        expect(html).toContain('notemd-render-host-bootstrap');
+        expect(html).toContain('window.parent.__NOTEMD_RENDER_BRIDGE__');
     });
 
     test('uses explicit localized preview titles when provided in the payload', () => {
@@ -66,6 +69,23 @@ describe('render webview page', () => {
         });
 
         expect(html).not.toContain('background: rgba(28, 32, 36, 0.72);');
+    });
+
+    test('keeps a raw-source fallback inside vega-lite iframe previews', () => {
+        const html = buildRenderWebviewHtml({
+            artifact: {
+                target: 'vega-lite',
+                content: '{"mark":"bar"}',
+                mimeType: 'application/json',
+                sourceIntent: 'dataChart'
+            },
+            theme: 'dark',
+            resolvedTheme: 'dark'
+        });
+
+        expect(html).toContain('&quot;mark&quot;: &quot;bar&quot;');
+        expect(html).toContain('notemd-render-fallback');
+        expect(html).toContain('notemd-vega-lite-error');
     });
 
     test('passes through html artifacts for iframe preview instead of escaping them as source text', () => {

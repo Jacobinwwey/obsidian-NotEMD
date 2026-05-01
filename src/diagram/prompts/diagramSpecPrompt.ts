@@ -59,10 +59,12 @@ Required DiagramSpec fields:
 
 Validation rules:
 - Use stable node ids.
-- Reference only existing node ids in edges.
+- Reference only existing node ids in edges. Edge objects must use "from" and "to" fields (not "source"/"target").
 - Keep labels concise and faithful to the source.
 - Put verbatim evidence snippets into evidenceRefs when the source contains critical wording.
-- For dataChart intent, include dataSeries with explicit x and y values extracted from the source.
+- For dataChart intent, every dataSeries[] entry must include dataSeries[].id, dataSeries[].label, and dataSeries[].points.
+- For dataChart intent, every points[] entry must include points[].x and a numeric points[].y extracted from the source.
+- Even single-series charts must include both series id and series label.
 - For dataChart intent, set layoutHints.chartType to one of: ${supportedChartTypes}.
 - Use scatter for paired numeric x/y observations, pie for part-to-whole categorical shares, and table when ranked/tabular rows communicate better than axes.
 

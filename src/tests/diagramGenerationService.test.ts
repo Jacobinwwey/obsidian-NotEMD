@@ -233,6 +233,45 @@ describe('diagram generation service', () => {
         expect(JSON.parse(result.artifact.content).mark).toBe('line');
     });
 
+    test('normalizes incomplete chart series metadata before validation', async () => {
+        const result = await generateDiagramArtifact(`# Weekly Signups Snapshot
+
+- Monday: 12
+- Tuesday: 18
+- Wednesday: 9
+`, {
+            compatibilityMode: 'best-fit',
+            targetLanguage: 'en',
+            llmInvoker: async () => JSON.stringify({
+                intent: 'dataChart',
+                title: 'Weekly Signups Snapshot',
+                nodes: [],
+                dataSeries: [
+                    {
+                        values: [
+                            { label: 'Monday', value: '12' },
+                            { label: 'Tuesday', value: 18 },
+                            { label: 'Wednesday', value: '9' }
+                        ]
+                    }
+                ]
+            })
+        });
+
+        expect(result.spec.dataSeries).toEqual([
+            {
+                id: 'weekly-signups-snapshot',
+                label: 'Weekly Signups Snapshot',
+                points: [
+                    { x: 'Monday', y: 12, series: 'Weekly Signups Snapshot' },
+                    { x: 'Tuesday', y: 18, series: 'Weekly Signups Snapshot' },
+                    { x: 'Wednesday', y: 9, series: 'Weekly Signups Snapshot' }
+                ]
+            }
+        ]);
+        expect(result.artifact.target).toBe('vega-lite');
+    });
+
     test('fails fast when the LLM intent escapes the planner render family in best-fit mode', async () => {
         await expect(generateDiagramArtifact(`# Traffic Mix
 

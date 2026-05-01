@@ -1,5 +1,6 @@
 import { RenderWebviewPayload } from './contract';
 import { renderArtifactMarkup } from './renderFrame';
+import { ensureRenderHostBridge } from './bootstrap';
 
 function buildHtmlPreviewThemeShim(payload: RenderWebviewPayload): string {
     const colorScheme = payload.resolvedTheme === 'dark' ? 'dark' : 'light';
@@ -102,6 +103,10 @@ ${payload.artifact.content}
 </html>`, payload);
     }
 
+    if (payload.artifact.target === 'vega-lite') {
+        ensureRenderHostBridge();
+    }
+
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -176,6 +181,53 @@ ${payload.artifact.content}
             font: 12px/1.5 "IBM Plex Mono", "SFMono-Regular", monospace;
             white-space: pre-wrap;
             word-break: break-word;
+        }
+
+        .notemd-render-host-body {
+            padding: 14px;
+        }
+
+        .notemd-render-mount {
+            overflow: auto;
+        }
+
+        .notemd-render-mount svg {
+            display: block;
+            max-width: 100%;
+            height: auto;
+        }
+
+        .notemd-render-error {
+            margin: 0 0 12px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(248, 113, 113, 0.28);
+            background: rgba(248, 113, 113, 0.1);
+            color: inherit;
+            font: 12px/1.5 "IBM Plex Mono", "SFMono-Regular", monospace;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .notemd-render-fallback {
+            border-top: 1px solid var(--notemd-render-divider);
+            padding-top: 12px;
+        }
+
+        .notemd-render-fallback > summary {
+            cursor: pointer;
+            font-size: 12px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--notemd-render-source-text);
+        }
+
+        .notemd-render-fallback[open] > summary {
+            margin-bottom: 10px;
+        }
+
+        .notemd-render-fallback .notemd-render-body {
+            padding: 0;
         }
     </style>
 </head>

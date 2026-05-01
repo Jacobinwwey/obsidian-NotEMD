@@ -220,6 +220,37 @@ describe('diagram preview modal', () => {
         expect(Notice).toHaveBeenCalledWith('Diagram source saved to Notes/Topic_diagram.json');
     });
 
+    test('routes vega-lite previews through iframe host instead of plugin-runtime svg rendering', async () => {
+        const modal = new DiagramPreviewModal(mockApp, {
+            ...createSession({
+                target: 'vega-lite',
+                content: '{"mark":"bar"}',
+                mimeType: 'application/json',
+                sourceIntent: 'dataChart'
+            }, 'Notes/Topic.md', 'dark'),
+            htmlSrcdoc: '<!DOCTYPE html><html><body><div id="notemd-vega-lite-mount"></div></body></html>'
+        }, 'en') as any;
+        modal.app = mockApp;
+        modal.contentEl = createMockElement();
+        modal.close = jest.fn();
+
+        modal.onOpen();
+        await flushPromises();
+
+        expect(previewExport.renderPreviewArtifactSvg).not.toHaveBeenCalledWith(
+            expect.objectContaining({ target: 'vega-lite' }),
+            expect.anything()
+        );
+
+        const iframe = modal.contentEl.children
+            .flatMap((child: MockElement) => child.children)
+            .find((child: MockElement) => child.tag === 'iframe');
+
+        expect(iframe).toBeDefined();
+        expect(iframe?.sandbox).toBe('allow-scripts allow-same-origin');
+        expect(iframe?.srcdoc).toContain('notemd-vega-lite-mount');
+    });
+
     test('hides export button for non-svg preview targets', async () => {
         const modal = new DiagramPreviewModal(mockApp, createSession({
             target: 'html',
@@ -236,6 +267,12 @@ describe('diagram preview modal', () => {
         const buttons = collectButtons(modal.contentEl);
         expect(buttons.some(button => button.text === 'Export SVG')).toBe(false);
         expect(buttons.some(button => button.text === 'Export PNG')).toBe(false);
+
+        const iframe = modal.contentEl.children
+            .flatMap((child: MockElement) => child.children)
+            .find((child: MockElement) => child.tag === 'iframe');
+
+        expect(iframe?.sandbox).toBe('allow-same-origin');
     });
 
     test('hides save-source button when preview already points at saved artifact', async () => {
