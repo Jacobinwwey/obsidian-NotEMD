@@ -681,6 +681,6 @@ Licență MIT - vezi fișierul [LICENSE](LICENSE) pentru detalii.
 
 ---
 
-*Notemd v1.8.1 - Îmbunătățește-ți graful de cunoștințe din Obsidian cu AI.*
+*Notemd v1.8.3 - Îmbunătățește-ți graful de cunoștințe din Obsidian cu AI.*
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)

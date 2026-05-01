@@ -685,7 +685,7 @@ Giấy phép MIT. Xem file [LICENSE](LICENSE) để biết chi tiết.
 
 ---
 
-*Notemd v1.8.1 - Nâng cấp knowledge graph Obsidian của bạn bằng AI.*
+*Notemd v1.8.3 - Nâng cấp knowledge graph Obsidian của bạn bằng AI.*
 
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)

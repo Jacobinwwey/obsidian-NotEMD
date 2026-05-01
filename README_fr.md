@@ -691,7 +691,7 @@ Licence MIT - Voir le fichier [LICENSE](LICENSE) pour plus de détails.
 
 ---
 
-*Notemd v1.8.1 - Améliorez votre graphe de connaissances Obsidian avec l'IA.*
+*Notemd v1.8.3 - Améliorez votre graphe de connaissances Obsidian avec l'IA.*
 
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)

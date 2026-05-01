@@ -684,7 +684,7 @@ MIT-licentie - Zie het bestand [LICENSE](LICENSE) voor details.
 
 ---
 
-*Notemd v1.8.1 - Verrijk je Obsidian-kennisgrafiek met AI.*
+*Notemd v1.8.3 - Verrijk je Obsidian-kennisgrafiek met AI.*
 
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)
