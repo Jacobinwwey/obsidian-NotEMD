@@ -528,6 +528,31 @@ export class NotemdSettingTab extends PluginSettingTab {
         const summarizeAsMermaidTaskLabel = getSidebarActionLabel(i18n, 'summarize-as-mermaid');
         const extractOriginalTextTaskLabel = getSidebarActionLabel(i18n, 'extract-original-text');
 
+        // --- Sponsor Support ---
+        if (i18n.settings.sponsor) {
+            const sponsorHeading = containerEl.createEl('h2', { text: i18n.settings.sponsor.heading });
+            sponsorHeading.style.marginTop = '0';
+            containerEl.createEl('p', { text: i18n.settings.sponsor.desc, cls: 'setting-item-description' });
+
+            const sponsorButtonRow = containerEl.createDiv({ cls: 'notemd-sponsor-buttons' });
+            const githubBtn = sponsorButtonRow.createEl('button', {
+                text: i18n.settings.sponsor.githubButton,
+                cls: 'mod-cta'
+            });
+            githubBtn.addEventListener('click', () => {
+                window.open('https://github.com/sponsors/Jacobinwwey', '_blank');
+            });
+
+            const coffeeBtn = sponsorButtonRow.createEl('button', {
+                text: i18n.settings.sponsor.coffeeButton,
+            });
+            coffeeBtn.addEventListener('click', () => {
+                window.open('https://buymeacoffee.com/jacobhxx', '_blank');
+            });
+
+            containerEl.createEl('hr');
+        }
+
         // --- Provider Configuration ---
         new Setting(containerEl).setName(providerI18n.heading).setHeading();
         const providerSupportCallout = containerEl.createDiv({ cls: 'notemd-provider-callout' });
