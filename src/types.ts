@@ -151,6 +151,7 @@ export interface NotemdSettings {
     mermaidErrorFolderPath: string; // New
     enableExperimentalDiagramPipeline: boolean;
     experimentalDiagramCompatibilityMode: 'legacy-mermaid' | 'best-fit';
+    _firstLaunch?: boolean;
 }
 
 // Defines the keys for tasks that can have custom prompts
