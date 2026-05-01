@@ -34,7 +34,25 @@ export const STRINGS_AR: LocaleStrings = {
     plugin: { viewName: 'مساحة عمل Notemd', ribbonTooltip: 'فتح الشريط الجانبي لـ Notemd' },
     folderPicker: { title: 'اختر مجلدًا', vaultRoot: '(جذر المستودع)', selectAction: 'اختيار' },
     settings: {
-        language: {
+
+        welcome: {
+            title: 'مرحبًا بك في Notemd',
+            introText: 'Notemd يعزز سير عملك في Obsidian من خلال المعالجة المدعومة بـ LLM: إنشاء روابط ويكي، استخراج المفاهيم، ترجمة الملاحظات، إنشاء الرسوم البيانية، والمزيد.',
+            setupHint: 'للبدء، قم بتكوين مزود LLM في الإعدادات. يدعم DeepSeek وOpenAI وAnthropic وGoogle والعديد غيرهم.',
+            sponsorText: 'Notemd مجاني ومفتوح المصدر. إذا وجدته مفيدًا، يرجى التفكير في دعم التطوير.',
+            configureButton: 'تكوين LLM',
+            sponsorButton: 'راعي على GitHub',
+            closeButton: 'ابدأ',
+            closingText: 'May NoteMD accompany you on your journey through the boundless ocean of truth, and continue to guide your learning and progress. All wishes for your life, may the pursuit of knowledge be with you.',
+            coffeeButton: 'اشترِ لي قهوة',
+        },
+        sponsor: {
+            heading: 'راعي على GitHub',
+            desc: 'Notemd مجاني ومفتوح المصدر. إذا وجدته مفيدًا، يرجى التفكير في دعم التطوير.',
+            githubButton: 'راعي على GitHub',
+            coffeeButton: 'اشترِ لي قهوة',
+        },
+language: {
             heading: 'إعدادات اللغة',
             uiLocaleName: 'لغة الواجهة',
             uiLocaleDesc: 'اختر اللغة المستخدمة لواجهة الإضافة. يتبع خيار "تلقائي" لغة Obsidian الحالية.',
@@ -129,7 +147,25 @@ export const STRINGS_DE: LocaleStrings = {
     plugin: { viewName: 'Notemd-Arbeitsbereich', ribbonTooltip: 'Notemd-Seitenleiste öffnen' },
     folderPicker: { title: 'Ordner auswählen', vaultRoot: '(Tresorwurzel)', selectAction: 'Auswählen' },
     settings: {
-        language: {
+
+        welcome: {
+            title: 'Willkommen bei Notemd',
+            introText: 'Notemd verbessert Ihren Obsidian-Workflow mit LLM-gestützter Verarbeitung: Wiki-Links generieren, Konzepte extrahieren, Notizen übersetzen, Diagramme erstellen und mehr.',
+            setupHint: 'Um zu beginnen, konfigurieren Sie einen LLM-Anbieter in den Einstellungen. DeepSeek, OpenAI, Anthropic, Google und viele mehr werden unterstützt.',
+            sponsorText: 'Notemd ist kostenlos und Open Source. Wenn Sie es nützlich finden, unterstützen Sie bitte die Entwicklung.',
+            configureButton: 'LLM konfigurieren',
+            sponsorButton: 'Auf GitHub sponsern',
+            closeButton: 'Loslegen',
+            closingText: 'May NoteMD accompany you on your journey through the boundless ocean of truth, and continue to guide your learning and progress. All wishes for your life, may the pursuit of knowledge be with you.',
+            coffeeButton: 'Kaffee spendieren',
+        },
+        sponsor: {
+            heading: 'Auf GitHub sponsern',
+            desc: 'Notemd ist kostenlos und Open Source. Wenn Sie es nützlich finden, unterstützen Sie bitte die Entwicklung.',
+            githubButton: 'Auf GitHub sponsern',
+            coffeeButton: 'Kaffee spendieren',
+        },
+language: {
             heading: 'Spracheinstellungen',
             uiLocaleName: 'UI-Sprache',
             uiLocaleDesc: 'Wählen Sie die Sprache für die Plugin-Oberfläche. "Auto" folgt der aktuellen Obsidian-Sprache.',
@@ -224,7 +260,25 @@ export const STRINGS_ES: LocaleStrings = {
     plugin: { viewName: 'Espacio de trabajo de Notemd', ribbonTooltip: 'Abrir la barra lateral de Notemd' },
     folderPicker: { title: 'Seleccionar carpeta', vaultRoot: '(Raíz del vault)', selectAction: 'Seleccionar' },
     settings: {
-        language: {
+
+        welcome: {
+            title: 'Bienvenido a Notemd',
+            introText: 'Notemd mejora su flujo de trabajo en Obsidian con procesamiento impulsado por LLM: generar enlaces wiki, extraer conceptos, traducir notas, crear diagramas y más.',
+            setupHint: 'Para comenzar, configure un proveedor LLM en la configuración. DeepSeek, OpenAI, Anthropic, Google y muchos más son compatibles.',
+            sponsorText: 'Notemd es gratuito y de código abierto. Si le resulta útil, considere apoyar el desarrollo.',
+            configureButton: 'Configurar LLM',
+            sponsorButton: 'Patrocinar en GitHub',
+            closeButton: 'Comenzar',
+            closingText: 'May NoteMD accompany you on your journey through the boundless ocean of truth, and continue to guide your learning and progress. All wishes for your life, may the pursuit of knowledge be with you.',
+            coffeeButton: 'Invítame a un café',
+        },
+        sponsor: {
+            heading: 'Patrocinar en GitHub',
+            desc: 'Notemd es gratuito y de código abierto. Si le resulta útil, considere apoyar el desarrollo.',
+            githubButton: 'Patrocinar en GitHub',
+            coffeeButton: 'Invítame a un café',
+        },
+language: {
             heading: 'Configuración de idioma',
             uiLocaleName: 'Idioma de la interfaz',
             uiLocaleDesc: 'Selecciona el idioma usado por la interfaz del plugin. "Auto" sigue el idioma actual de Obsidian.',
@@ -319,7 +373,25 @@ export const STRINGS_FA: LocaleStrings = {
     plugin: { viewName: 'میزکار Notemd', ribbonTooltip: 'باز کردن نوار کناری Notemd' },
     folderPicker: { title: 'انتخاب پوشه', vaultRoot: '(ریشه خزانه)', selectAction: 'انتخاب' },
     settings: {
-        language: {
+
+        welcome: {
+            title: 'به Notemd خوش آمدید',
+            introText: 'Notemd گردش کار Obsidian شما را با پردازش مبتنی بر LLM تقویت می‌کند: ایجاد پیوندهای ویکی، استخراج مفاهیم، ترجمه یادداشت‌ها، ایجاد نمودارها و موارد دیگر.',
+            setupHint: 'برای شروع، یک ارائه‌دهنده LLM را در تنظیمات پیکربندی کنید. DeepSeek، OpenAI، Anthropic، Google و بسیاری دیگر پشتیبانی می‌شوند.',
+            sponsorText: 'Notemd رایگان و متن‌باز است. اگر مفید یافتید، لطفاً از توسعه حمایت کنید.',
+            configureButton: 'پیکربندی LLM',
+            sponsorButton: 'حمایت در GitHub',
+            closeButton: 'شروع کنید',
+            closingText: 'May NoteMD accompany you on your journey through the boundless ocean of truth, and continue to guide your learning and progress. All wishes for your life, may the pursuit of knowledge be with you.',
+            coffeeButton: 'برام قهوه بخر',
+        },
+        sponsor: {
+            heading: 'حمایت در GitHub',
+            desc: 'Notemd رایگان و متن‌باز است. اگر مفید یافتید، لطفاً از توسعه حمایت کنید.',
+            githubButton: 'حمایت در GitHub',
+            coffeeButton: 'برام قهوه بخر',
+        },
+language: {
             heading: 'تنظیمات زبان',
             uiLocaleName: 'زبان رابط کاربری',
             uiLocaleDesc: 'زبانی را که برای رابط افزونه استفاده می‌شود انتخاب کنید. گزینهٔ «خودکار» از زبان فعلی Obsidian پیروی می‌کند.',
@@ -414,7 +486,25 @@ export const STRINGS_FR: LocaleStrings = {
     plugin: { viewName: 'Espace de travail Notemd', ribbonTooltip: 'Ouvrir le panneau latéral Notemd' },
     folderPicker: { title: 'Sélectionner un dossier', vaultRoot: '(Racine du coffre)', selectAction: 'Sélectionner' },
     settings: {
-        language: {
+
+        welcome: {
+            title: 'Bienvenue sur Notemd',
+            introText: 'Notemd améliore votre flux de travail Obsidian avec un traitement basé sur LLM : générer des liens wiki, extraire des concepts, traduire des notes, créer des diagrammes, et plus.',
+            setupHint: 'Pour commencer, configurez un fournisseur LLM dans les paramètres. DeepSeek, OpenAI, Anthropic, Google et bien d\'autres sont pris en charge.',
+            sponsorText: 'Notemd est gratuit et open source. Si vous le trouvez utile, veuillez envisager de soutenir le développement.',
+            configureButton: 'Configurer LLM',
+            sponsorButton: 'Sponsoriser sur GitHub',
+            closeButton: 'Commencer',
+            closingText: 'May NoteMD accompany you on your journey through the boundless ocean of truth, and continue to guide your learning and progress. All wishes for your life, may the pursuit of knowledge be with you.',
+            coffeeButton: 'Offrez-moi un café',
+        },
+        sponsor: {
+            heading: 'Sponsoriser sur GitHub',
+            desc: 'Notemd est gratuit et open source. Si vous le trouvez utile, veuillez envisager de soutenir le développement.',
+            githubButton: 'Sponsoriser sur GitHub',
+            coffeeButton: 'Offrez-moi un café',
+        },
+language: {
             heading: 'Paramètres de langue',
             uiLocaleName: 'Langue de l’interface',
             uiLocaleDesc: 'Choisissez la langue utilisée pour l’interface du plugin. "Auto" suit la langue actuelle d’Obsidian.',
@@ -509,7 +599,25 @@ export const STRINGS_ID: LocaleStrings = {
     plugin: { viewName: 'Ruang kerja Notemd', ribbonTooltip: 'Buka bilah sisi Notemd' },
     folderPicker: { title: 'Pilih folder', vaultRoot: '(Akar vault)', selectAction: 'Pilih' },
     settings: {
-        language: {
+
+        welcome: {
+            title: 'Selamat datang di Notemd',
+            introText: 'Notemd meningkatkan alur kerja Obsidian Anda dengan pemrosesan bertenaga LLM: menghasilkan tautan wiki, mengekstrak konsep, menerjemahkan catatan, membuat diagram, dan lainnya.',
+            setupHint: 'Untuk memulai, konfigurasikan penyedia LLM di pengaturan. DeepSeek, OpenAI, Anthropic, Google, dan banyak lagi didukung.',
+            sponsorText: 'Notemd gratis dan sumber terbuka. Jika Anda merasa berguna, mohon pertimbangkan untuk mendukung pengembangan.',
+            configureButton: 'Konfigurasi LLM',
+            sponsorButton: 'Sponsor di GitHub',
+            closeButton: 'Mulai',
+            closingText: 'May NoteMD accompany you on your journey through the boundless ocean of truth, and continue to guide your learning and progress. All wishes for your life, may the pursuit of knowledge be with you.',
+            coffeeButton: 'Traktir saya kopi',
+        },
+        sponsor: {
+            heading: 'Sponsor di GitHub',
+            desc: 'Notemd gratis dan sumber terbuka. Jika Anda merasa berguna, mohon pertimbangkan untuk mendukung pengembangan.',
+            githubButton: 'Sponsor di GitHub',
+            coffeeButton: 'Traktir saya kopi',
+        },
+language: {
             heading: 'Pengaturan bahasa',
             uiLocaleName: 'Bahasa UI',
             uiLocaleDesc: 'Pilih bahasa yang digunakan untuk antarmuka plugin. "Otomatis" mengikuti bahasa Obsidian saat ini.',
@@ -604,7 +712,25 @@ export const STRINGS_IT: LocaleStrings = {
     plugin: { viewName: 'Area di lavoro Notemd', ribbonTooltip: 'Apri la barra laterale di Notemd' },
     folderPicker: { title: 'Seleziona cartella', vaultRoot: '(Radice del vault)', selectAction: 'Seleziona' },
     settings: {
-        language: {
+
+        welcome: {
+            title: 'Benvenuto su Notemd',
+            introText: 'Notemd migliora il tuo flusso di lavoro Obsidian con elaborazione basata su LLM: genera link wiki, estrai concetti, traduci note, crea diagrammi e altro.',
+            setupHint: 'Per iniziare, configura un provider LLM nelle impostazioni. DeepSeek, OpenAI, Anthropic, Google e molti altri sono supportati.',
+            sponsorText: 'Notemd è gratuito e open source. Se lo trovi utile, considera di supportare lo sviluppo.',
+            configureButton: 'Configura LLM',
+            sponsorButton: 'Sponsorizza su GitHub',
+            closeButton: 'Inizia',
+            closingText: 'May NoteMD accompany you on your journey through the boundless ocean of truth, and continue to guide your learning and progress. All wishes for your life, may the pursuit of knowledge be with you.',
+            coffeeButton: 'Offrimi un caffè',
+        },
+        sponsor: {
+            heading: 'Sponsorizza su GitHub',
+            desc: 'Notemd è gratuito e open source. Se lo trovi utile, considera di supportare lo sviluppo.',
+            githubButton: 'Sponsorizza su GitHub',
+            coffeeButton: 'Offrimi un caffè',
+        },
+language: {
             heading: 'Impostazioni lingua',
             uiLocaleName: 'Lingua dell’interfaccia',
             uiLocaleDesc: 'Seleziona la lingua usata dall’interfaccia del plugin. "Auto" segue la lingua corrente di Obsidian.',
@@ -699,7 +825,25 @@ export const STRINGS_JA: LocaleStrings = {
     plugin: { viewName: 'Notemd ワークベンチ', ribbonTooltip: 'Notemd サイドバーを開く' },
     folderPicker: { title: 'フォルダーを選択', vaultRoot: '(Vault ルート)', selectAction: '選択' },
     settings: {
-        language: {
+
+        welcome: {
+            title: 'Notemdへようこそ',
+            introText: 'NotemdはLLM駆動の処理でObsidianのワークフローを強化します：ウィキリンクの生成、概念の抽出、ノートの翻訳、図の作成など。',
+            setupHint: '開始するには、設定でLLMプロバイダーを構成してください。DeepSeek、OpenAI、Anthropic、Googleなど多数対応。',
+            sponsorText: 'Notemdは無料のオープンソースです。お役に立てましたら、開発支援をご検討ください。',
+            configureButton: 'LLMを設定',
+            sponsorButton: 'GitHubでスポンサー',
+            closeButton: '始める',
+            closingText: 'May NoteMD accompany you on your journey through the boundless ocean of truth, and continue to guide your learning and progress. All wishes for your life, may the pursuit of knowledge be with you.',
+            coffeeButton: 'コーヒーをおごる',
+        },
+        sponsor: {
+            heading: 'GitHubでスポンサー',
+            desc: 'Notemdは無料のオープンソースです。お役に立てましたら、開発支援をご検討ください。',
+            githubButton: 'GitHubでスポンサー',
+            coffeeButton: 'コーヒーをおごる',
+        },
+language: {
             heading: '言語設定',
             uiLocaleName: 'UI 言語',
             uiLocaleDesc: 'プラグインのインターフェースで使う言語を選択します。"Auto" は現在の Obsidian 言語に従います。',
@@ -794,7 +938,25 @@ export const STRINGS_KO: LocaleStrings = {
     plugin: { viewName: 'Notemd 워크벤치', ribbonTooltip: 'Notemd 사이드바 열기' },
     folderPicker: { title: '폴더 선택', vaultRoot: '(Vault 루트)', selectAction: '선택' },
     settings: {
-        language: {
+
+        welcome: {
+            title: 'Notemd에 오신 것을 환영합니다',
+            introText: 'Notemd는 LLM 기반 처리로 Obsidian 워크플로우를 향상시킵니다: 위키 링크 생성, 개념 추출, 노트 번역, 다이어그램 생성 등.',
+            setupHint: '시작하려면 설정에서 LLM 제공자를 구성하세요. DeepSeek, OpenAI, Anthropic, Google 등 다양한 제공자가 지원됩니다.',
+            sponsorText: 'Notemd는 무료 오픈소스입니다. 유용하셨다면 개발 지원을 고려해 주세요.',
+            configureButton: 'LLM 구성',
+            sponsorButton: 'GitHub에서 후원',
+            closeButton: '시작하기',
+            closingText: 'May NoteMD accompany you on your journey through the boundless ocean of truth, and continue to guide your learning and progress. All wishes for your life, may the pursuit of knowledge be with you.',
+            coffeeButton: '커피 한잔 사주기',
+        },
+        sponsor: {
+            heading: 'GitHub에서 후원',
+            desc: 'Notemd는 무료 오픈소스입니다. 유용하셨다면 개발 지원을 고려해 주세요.',
+            githubButton: 'GitHub에서 후원',
+            coffeeButton: '커피 한잔 사주기',
+        },
+language: {
             heading: '언어 설정',
             uiLocaleName: 'UI 언어',
             uiLocaleDesc: '플러그인 인터페이스에 사용할 언어를 선택합니다. "자동"은 현재 Obsidian 언어를 따릅니다.',
@@ -889,7 +1051,25 @@ export const STRINGS_NL: LocaleStrings = {
     plugin: { viewName: 'Notemd-werkruimte', ribbonTooltip: 'Notemd-zijbalk openen' },
     folderPicker: { title: 'Map selecteren', vaultRoot: '(Vault-hoofdmap)', selectAction: 'Selecteren' },
     settings: {
-        language: {
+
+        welcome: {
+            title: 'Welkom bij Notemd',
+            introText: 'Notemd verbetert uw Obsidian-workflow met LLM-aangedreven verwerking: wiki-links genereren, concepten extraheren, notities vertalen, diagrammen maken en meer.',
+            setupHint: 'Configureer een LLM-provider in de instellingen om te beginnen. DeepSeek, OpenAI, Anthropic, Google en vele andere worden ondersteund.',
+            sponsorText: 'Notemd is gratis en open source. Als u het nuttig vindt, overweeg dan om de ontwikkeling te steunen.',
+            configureButton: 'LLM configureren',
+            sponsorButton: 'Sponsor op GitHub',
+            closeButton: 'Aan de slag',
+            closingText: 'May NoteMD accompany you on your journey through the boundless ocean of truth, and continue to guide your learning and progress. All wishes for your life, may the pursuit of knowledge be with you.',
+            coffeeButton: 'Traktatie op koffie',
+        },
+        sponsor: {
+            heading: 'Sponsor op GitHub',
+            desc: 'Notemd is gratis en open source. Als u het nuttig vindt, overweeg dan om de ontwikkeling te steunen.',
+            githubButton: 'Sponsor op GitHub',
+            coffeeButton: 'Traktatie op koffie',
+        },
+language: {
             heading: 'Taalinstellingen',
             uiLocaleName: 'UI-taal',
             uiLocaleDesc: 'Kies de taal voor de plugininterface. "Auto" volgt de huidige Obsidian-taal.',
@@ -984,7 +1164,25 @@ export const STRINGS_PL: LocaleStrings = {
     plugin: { viewName: 'Panel roboczy Notemd', ribbonTooltip: 'Otwórz pasek boczny Notemd' },
     folderPicker: { title: 'Wybierz folder', vaultRoot: '(Główny katalog skarbca)', selectAction: 'Wybierz' },
     settings: {
-        language: {
+
+        welcome: {
+            title: 'Witamy w Notemd',
+            introText: 'Notemd usprawnia przepływ pracy w Obsidian dzięki przetwarzaniu opartemu na LLM: generowanie linków wiki, wyodrębnianie koncepcji, tłumaczenie notatek, tworzenie diagramów i więcej.',
+            setupHint: 'Aby rozpocząć, skonfiguruj dostawcę LLM w ustawieniach. DeepSeek, OpenAI, Anthropic, Google i wiele innych są obsługiwane.',
+            sponsorText: 'Notemd jest darmowy i open source. Jeśli uważasz go za przydatny, rozważ wsparcie rozwoju.',
+            configureButton: 'Skonfiguruj LLM',
+            sponsorButton: 'Sponsoruj na GitHub',
+            closeButton: 'Zacznij',
+            closingText: 'May NoteMD accompany you on your journey through the boundless ocean of truth, and continue to guide your learning and progress. All wishes for your life, may the pursuit of knowledge be with you.',
+            coffeeButton: 'Postaw kawę',
+        },
+        sponsor: {
+            heading: 'Sponsoruj na GitHub',
+            desc: 'Notemd jest darmowy i open source. Jeśli uważasz go za przydatny, rozważ wsparcie rozwoju.',
+            githubButton: 'Sponsoruj na GitHub',
+            coffeeButton: 'Postaw kawę',
+        },
+language: {
             heading: 'Ustawienia języka',
             uiLocaleName: 'Język interfejsu',
             uiLocaleDesc: 'Wybierz język interfejsu wtyczki. „Auto” podąża za bieżącym językiem Obsidian.',
@@ -1079,7 +1277,25 @@ export const STRINGS_PT: LocaleStrings = {
     plugin: { viewName: 'Área de trabalho do Notemd', ribbonTooltip: 'Abrir barra lateral do Notemd' },
     folderPicker: { title: 'Selecionar pasta', vaultRoot: '(Raiz do cofre)', selectAction: 'Selecionar' },
     settings: {
-        language: {
+
+        welcome: {
+            title: 'Bem-vindo ao Notemd',
+            introText: 'O Notemd melhora o seu fluxo de trabalho no Obsidian com processamento baseado em LLM: gerar links wiki, extrair conceitos, traduzir notas, criar diagramas e muito mais.',
+            setupHint: 'Para começar, configure um fornecedor LLM nas definições. DeepSeek, OpenAI, Anthropic, Google e muitos outros são suportados.',
+            sponsorText: 'O Notemd é gratuito e de código aberto. Se o achar útil, considere apoiar o desenvolvimento.',
+            configureButton: 'Configurar LLM',
+            sponsorButton: 'Patrocinar no GitHub',
+            closeButton: 'Começar',
+            closingText: 'May NoteMD accompany you on your journey through the boundless ocean of truth, and continue to guide your learning and progress. All wishes for your life, may the pursuit of knowledge be with you.',
+            coffeeButton: 'Pague-me um café',
+        },
+        sponsor: {
+            heading: 'Patrocinar no GitHub',
+            desc: 'O Notemd é gratuito e de código aberto. Se o achar útil, considere apoiar o desenvolvimento.',
+            githubButton: 'Patrocinar no GitHub',
+            coffeeButton: 'Pague-me um café',
+        },
+language: {
             heading: 'Configurações de idioma',
             uiLocaleName: 'Idioma da interface',
             uiLocaleDesc: 'Selecione o idioma usado pela interface do plugin. "Auto" segue o idioma atual do Obsidian.',
@@ -1174,7 +1390,25 @@ export const STRINGS_PT_BR: LocaleStrings = {
     plugin: { viewName: 'Área de trabalho do Notemd', ribbonTooltip: 'Abrir barra lateral do Notemd' },
     folderPicker: { title: 'Selecionar pasta', vaultRoot: '(Raiz do cofre)', selectAction: 'Selecionar' },
     settings: {
-        language: {
+
+        welcome: {
+            title: 'Bem-vindo ao Notemd',
+            introText: 'O Notemd aprimora seu fluxo de trabalho no Obsidian com processamento baseado em LLM: gerar links wiki, extrair conceitos, traduzir notas, criar diagramas e muito mais.',
+            setupHint: 'Para começar, configure um provedor LLM nas configurações. DeepSeek, OpenAI, Anthropic, Google e muitos outros são suportados.',
+            sponsorText: 'O Notemd é gratuito e de código aberto. Se você achar útil, considere apoiar o desenvolvimento.',
+            configureButton: 'Configurar LLM',
+            sponsorButton: 'Patrocinar no GitHub',
+            closeButton: 'Começar',
+            closingText: 'May NoteMD accompany you on your journey through the boundless ocean of truth, and continue to guide your learning and progress. All wishes for your life, may the pursuit of knowledge be with you.',
+            coffeeButton: 'Me pague um café',
+        },
+        sponsor: {
+            heading: 'Patrocinar no GitHub',
+            desc: 'O Notemd é gratuito e de código aberto. Se você achar útil, considere apoiar o desenvolvimento.',
+            githubButton: 'Patrocinar no GitHub',
+            coffeeButton: 'Me pague um café',
+        },
+language: {
             heading: 'Configurações de idioma',
             uiLocaleName: 'Idioma da interface',
             uiLocaleDesc: 'Selecione o idioma usado pela interface do plugin. "Auto" segue o idioma atual do Obsidian.',
@@ -1269,7 +1503,25 @@ export const STRINGS_RU: LocaleStrings = {
     plugin: { viewName: 'Рабочее пространство Notemd', ribbonTooltip: 'Открыть боковую панель Notemd' },
     folderPicker: { title: 'Выбрать папку', vaultRoot: '(Корень хранилища)', selectAction: 'Выбрать' },
     settings: {
-        language: {
+
+        welcome: {
+            title: 'Добро пожаловать в Notemd',
+            introText: 'Notemd улучшает ваш рабочий процесс в Obsidian с помощью обработки на основе LLM: генерация вики-ссылок, извлечение концепций, перевод заметок, создание диаграмм и многое другое.',
+            setupHint: 'Чтобы начать, настройте провайдера LLM в настройках. Поддерживаются DeepSeek, OpenAI, Anthropic, Google и многие другие.',
+            sponsorText: 'Notemd бесплатен и имеет открытый исходный код. Если он вам полезен, пожалуйста, поддержите разработку.',
+            configureButton: 'Настроить LLM',
+            sponsorButton: 'Спонсировать на GitHub',
+            closeButton: 'Начать',
+            closingText: 'May NoteMD accompany you on your journey through the boundless ocean of truth, and continue to guide your learning and progress. All wishes for your life, may the pursuit of knowledge be with you.',
+            coffeeButton: 'Купить кофе',
+        },
+        sponsor: {
+            heading: 'Спонсировать на GitHub',
+            desc: 'Notemd бесплатен и имеет открытый исходный код. Если он вам полезен, пожалуйста, поддержите разработку.',
+            githubButton: 'Спонсировать на GitHub',
+            coffeeButton: 'Купить кофе',
+        },
+language: {
             heading: 'Настройки языка',
             uiLocaleName: 'Язык интерфейса',
             uiLocaleDesc: 'Выберите язык интерфейса плагина. Режим "Авто" следует текущему языку Obsidian.',
@@ -1364,7 +1616,25 @@ export const STRINGS_TH: LocaleStrings = {
     plugin: { viewName: 'พื้นที่ทำงาน Notemd', ribbonTooltip: 'เปิดแถบด้านข้าง Notemd' },
     folderPicker: { title: 'เลือกโฟลเดอร์', vaultRoot: '(รากของ vault)', selectAction: 'เลือก' },
     settings: {
-        language: {
+
+        welcome: {
+            title: 'ยินดีต้อนรับสู่ Notemd',
+            introText: 'Notemd ปรับปรุงเวิร์กโฟลว์ Obsidian ของคุณด้วยการประมวลผลที่ขับเคลื่อนด้วย LLM: สร้างลิงก์วิกิ แยกแนวคิด แปลบันทึก สร้างไดอะแกรม และอื่นๆ',
+            setupHint: 'ในการเริ่มต้น ให้กำหนดค่าผู้ให้บริการ LLM ในการตั้งค่า รองรับ DeepSeek, OpenAI, Anthropic, Google และอื่นๆ อีกมากมาย',
+            sponsorText: 'Notemd ฟรีและเป็นโอเพนซอร์ส หากคุณพบว่ามีประโยชน์ โปรดพิจารณาสนับสนุนการพัฒนา',
+            configureButton: 'กำหนดค่า LLM',
+            sponsorButton: 'สนับสนุนบน GitHub',
+            closeButton: 'เริ่มต้น',
+            closingText: 'May NoteMD accompany you on your journey through the boundless ocean of truth, and continue to guide your learning and progress. All wishes for your life, may the pursuit of knowledge be with you.',
+            coffeeButton: 'เลี้ยงกาแฟฉัน',
+        },
+        sponsor: {
+            heading: 'สนับสนุนบน GitHub',
+            desc: 'Notemd ฟรีและเป็นโอเพนซอร์ส หากคุณพบว่ามีประโยชน์ โปรดพิจารณาสนับสนุนการพัฒนา',
+            githubButton: 'สนับสนุนบน GitHub',
+            coffeeButton: 'เลี้ยงกาแฟฉัน',
+        },
+language: {
             heading: 'การตั้งค่าภาษา',
             uiLocaleName: 'ภาษา UI',
             uiLocaleDesc: 'เลือกภาษาที่ใช้กับส่วนติดต่อของปลั๊กอิน ค่า "อัตโนมัติ" จะตามภาษาปัจจุบันของ Obsidian',
@@ -1459,7 +1729,25 @@ export const STRINGS_TR: LocaleStrings = {
     plugin: { viewName: 'Notemd çalışma alanı', ribbonTooltip: 'Notemd kenar çubuğunu aç' },
     folderPicker: { title: 'Klasör seç', vaultRoot: '(Vault kökü)', selectAction: 'Seç' },
     settings: {
-        language: {
+
+        welcome: {
+            title: 'Notemd\'e Hoş Geldiniz',
+            introText: 'Notemd, LLM destekli işleme ile Obsidian iş akışınızı geliştirir: wiki bağlantıları oluşturma, kavramları çıkarma, notları çevirme, diyagramlar oluşturma ve daha fazlası.',
+            setupHint: 'Başlamak için ayarlarda bir LLM sağlayıcısı yapılandırın. DeepSeek, OpenAI, Anthropic, Google ve çok daha fazlası desteklenir.',
+            sponsorText: 'Notemd ücretsiz ve açık kaynaktır. Yararlı bulursanız, lütfen geliştirmeyi desteklemeyi düşünün.',
+            configureButton: 'LLM\'yi Yapılandır',
+            sponsorButton: 'GitHub\'da Sponsor Ol',
+            closeButton: 'Başlayın',
+            closingText: 'May NoteMD accompany you on your journey through the boundless ocean of truth, and continue to guide your learning and progress. All wishes for your life, may the pursuit of knowledge be with you.',
+            coffeeButton: 'Bana kahve ısmarla',
+        },
+        sponsor: {
+            heading: 'GitHub\'da Sponsor Ol',
+            desc: 'Notemd ücretsiz ve açık kaynaktır. Yararlı bulursanız, lütfen geliştirmeyi desteklemeyi düşünün.',
+            githubButton: 'GitHub\'da Sponsor Ol',
+            coffeeButton: 'Bana kahve ısmarla',
+        },
+language: {
             heading: 'Dil ayarları',
             uiLocaleName: 'Arayüz dili',
             uiLocaleDesc: 'Eklenti arayüzünde kullanılacak dili seçin. "Otomatik", mevcut Obsidian dilini takip eder.',
@@ -1554,7 +1842,25 @@ export const STRINGS_UK: LocaleStrings = {
     plugin: { viewName: 'Робочий простір Notemd', ribbonTooltip: 'Відкрити бічну панель Notemd' },
     folderPicker: { title: 'Вибрати теку', vaultRoot: '(Корінь сховища)', selectAction: 'Вибрати' },
     settings: {
-        language: {
+
+        welcome: {
+            title: 'Ласкаво просимо до Notemd',
+            introText: 'Notemd покращує ваш робочий процес в Obsidian за допомогою обробки на основі LLM: генерація вікі-посилань, вилучення концепцій, переклад нотаток, створення діаграм та багато іншого.',
+            setupHint: 'Щоб почати, налаштуйте постачальника LLM у налаштуваннях. Підтримуються DeepSeek, OpenAI, Anthropic, Google та багато інших.',
+            sponsorText: 'Notemd безкоштовний і з відкритим кодом. Якщо він вам корисний, будь ласка, підтримайте розробку.',
+            configureButton: 'Налаштувати LLM',
+            sponsorButton: 'Спонсорувати на GitHub',
+            closeButton: 'Почати',
+            closingText: 'May NoteMD accompany you on your journey through the boundless ocean of truth, and continue to guide your learning and progress. All wishes for your life, may the pursuit of knowledge be with you.',
+            coffeeButton: 'Купити каву',
+        },
+        sponsor: {
+            heading: 'Спонсорувати на GitHub',
+            desc: 'Notemd безкоштовний і з відкритим кодом. Якщо він вам корисний, будь ласка, підтримайте розробку.',
+            githubButton: 'Спонсорувати на GitHub',
+            coffeeButton: 'Купити каву',
+        },
+language: {
             heading: 'Налаштування мови',
             uiLocaleName: 'Мова інтерфейсу',
             uiLocaleDesc: 'Виберіть мову інтерфейсу плагіна. Режим "Авто" наслідує поточну мову Obsidian.',
@@ -1649,7 +1955,25 @@ export const STRINGS_VI: LocaleStrings = {
     plugin: { viewName: 'Không gian làm việc Notemd', ribbonTooltip: 'Mở thanh bên Notemd' },
     folderPicker: { title: 'Chọn thư mục', vaultRoot: '(Gốc vault)', selectAction: 'Chọn' },
     settings: {
-        language: {
+
+        welcome: {
+            title: 'Chào mừng đến với Notemd',
+            introText: 'Notemd nâng cao quy trình làm việc Obsidian của bạn với xử lý dựa trên LLM: tạo liên kết wiki, trích xuất khái niệm, dịch ghi chú, tạo sơ đồ và hơn thế nữa.',
+            setupHint: 'Để bắt đầu, hãy cấu hình nhà cung cấp LLM trong cài đặt. DeepSeek, OpenAI, Anthropic, Google và nhiều nhà cung cấp khác được hỗ trợ.',
+            sponsorText: 'Notemd miễn phí và mã nguồn mở. Nếu bạn thấy hữu ích, hãy cân nhắc hỗ trợ phát triển.',
+            configureButton: 'Cấu hình LLM',
+            sponsorButton: 'Tài trợ trên GitHub',
+            closeButton: 'Bắt đầu',
+            closingText: 'May NoteMD accompany you on your journey through the boundless ocean of truth, and continue to guide your learning and progress. All wishes for your life, may the pursuit of knowledge be with you.',
+            coffeeButton: 'Mua cho tôi cà phê',
+        },
+        sponsor: {
+            heading: 'Tài trợ trên GitHub',
+            desc: 'Notemd miễn phí và mã nguồn mở. Nếu bạn thấy hữu ích, hãy cân nhắc hỗ trợ phát triển.',
+            githubButton: 'Tài trợ trên GitHub',
+            coffeeButton: 'Mua cho tôi cà phê',
+        },
+language: {
             heading: 'Cài đặt ngôn ngữ',
             uiLocaleName: 'Ngôn ngữ giao diện',
             uiLocaleDesc: 'Chọn ngôn ngữ dùng cho giao diện plugin. "Tự động" sẽ theo ngôn ngữ Obsidian hiện tại.',

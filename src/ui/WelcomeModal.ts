@@ -58,7 +58,7 @@ export class WelcomeModal extends Modal {
             });
             coffeeBtn.setAttr('type', 'button');
             coffeeBtn.addEventListener('click', () => {
-                window.open('https://buymeacoffee.com/jacobhxx', '_blank');
+                window.open('https://ko-fi.com/jacobinwwey', '_blank');
             });
         }
 
