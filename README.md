@@ -1,4 +1,7 @@
-![image](https://img.shields.io/github/v/release/Jacobinwwey/obsidian-NotEMD?label=Version&link=https%3A%2F%2Fgithub.com%2Jacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest) ![image](https://img.shields.io/github/downloads/Jacobinwwey/obsidian-NotEMD/total?logo=Obsidian&label=Downloads&labelColor=%237C3AED&color=%235b5b5b&link=https%3A%2F%2Fgithub.com%2Jacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest)
+![GitHub Release](https://img.shields.io/github/v/release/Jacobinwwey/obsidian-NotEMD?label=Version&link=https%3A%2F%2Fgithub.com%2Jacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest) ![GitHub Downloads](https://img.shields.io/github/downloads/Jacobinwwey/obsidian-NotEMD/total?logo=Obsidian&label=Downloads&labelColor=%237C3AED&color=%235b5b5b&link=https%3A%2F%2Fgithub.com%2Jacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest)
+
+![Obsidian Downloads](https://img.shields.io/badge/dynamic/json?logo=obsidian&color=%23483699&label=Downloads&query=%24%5B%22notemd%22%5D.downloads&url=https%3A%2F%2Fraw.githubusercontent.com%2Fobsidianmd%2Fobsidian-releases%2Fmaster%2Fcommunity-plugin-stats.json)
+![GitHub Repo stars](https://img.shields.io/github/stars/Jacobinwwey/obsidian-NotEMD?style=social)
 
 # Notemd Plugin for Obsidian
 
@@ -697,6 +700,8 @@ Notemd runs locally inside Obsidian, but some features send outbound requests.
     2.  Preview/export theme follows the active Obsidian light/dark theme when the preview session is using `system`. If you switch Obsidian theme while the preview modal is already open, close and reopen the modal before exporting so the new theme is baked into the snapshot.
     3.  Exported `_preview.svg` and `_preview.png` files are snapshots. Re-export after editing the source artifact or changing theme if the saved preview is stale.
     4.  Invalid Mermaid artifacts now fail early with explicit validation errors before preview/export. Invalid JSON Canvas or Vega-Lite artifacts surface explicit preview errors. Save the raw artifact first if you need to inspect or repair the generated `.md`, `.canvas`, `.json`, or `.html` content manually.
+
+If you love using Notemd, please consider [⭐ Give a Star on GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) or [☕️ Buy Me a Coffee](https://ko-fi.com/jacobinwwey).
 
 ## Contributing
 
