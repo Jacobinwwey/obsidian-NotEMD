@@ -23,6 +23,8 @@ A Easy way to create your own Knowledge-base!
 
 Notemd enhances your Obsidian workflow by integrating with various Large Language Models (LLMs) to process your multi-languages notes, automatically generate wiki-links for key concepts, create corresponding concept notes, perform web research, helping you build powerful knowledge graphs and more.
 
+If you love using Notemd, please consider [⭐ Give a Star on GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) or [☕️ Buy Me a Coffee](https://ko-fi.com/jacobinwwey).
+
 **Version:** 1.8.3
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
@@ -698,7 +700,6 @@ Notemd runs locally inside Obsidian, but some features send outbound requests.
     3.  Exported `_preview.svg` and `_preview.png` files are snapshots. Re-export after editing the source artifact or changing theme if the saved preview is stale.
     4.  Invalid Mermaid artifacts now fail early with explicit validation errors before preview/export. Invalid JSON Canvas or Vega-Lite artifacts surface explicit preview errors. Save the raw artifact first if you need to inspect or repair the generated `.md`, `.canvas`, `.json`, or `.html` content manually.
 
-If you love using Notemd, please consider [⭐ Give a Star on GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) or [☕️ Buy Me a Coffee](https://ko-fi.com/jacobinwwey).
 
 ## Contributing
 
@@ -714,8 +715,6 @@ Contributions are welcome! Please refer to the GitHub repository for guidelines:
 MIT License - See [LICENSE](LICENSE) file for details.
 
 ---
-
-If you love using Notemd, please consider [⭐ Give a Star on GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) or [☕️ Buy Me a Coffee](https://ko-fi.com/jacobinwwey).
 
 *Notemd v1.8.3 - Enhance your Obsidian knowledge graph with AI.*
 
