@@ -22,6 +22,252 @@ export interface LLMProviderValidationIssue {
     message: string;
 }
 
+const DEEPSEEK_RECOMMENDED_THINKING_OUTPUT_TOKENS = 8000;
+
+const KNOWN_MODEL_MAX_OUTPUT_TOKENS: Partial<Record<string, Record<string, number>>> = {
+    'DeepSeek': {
+        'deepseek-v3': 8_000,
+        'deepseek-r1': 8_000
+    },
+    'OpenAI': {
+        'chatgpt-4o-latest': 16_384,
+        'gpt-4.1': 32_768,
+        'gpt-4.1-mini': 32_768,
+        'gpt-4.1-nano': 32_768,
+        'gpt-4o': 4_096,
+        'gpt-4o-mini': 16_384,
+        'gpt-5-2025-08-07': 8_192,
+        'gpt-5-chat-latest': 8_192,
+        'gpt-5-codex': 8_192,
+        'gpt-5-mini-2025-08-07': 8_192,
+        'gpt-5-nano-2025-08-07': 8_192,
+        'gpt-5.1': 8_192,
+        'gpt-5.1-2025-11-13': 8_192,
+        'gpt-5.1-chat-latest': 8_192,
+        'gpt-5.1-codex': 8_192,
+        'gpt-5.2': 8_192,
+        'gpt-5.2-codex': 8_192,
+        'o1-mini': 65_536,
+        'o1-preview': 32_768,
+        'o3-mini': 100_000,
+        'o4-mini': 100_000
+    },
+    'Anthropic': {
+        'claude-3-5-sonnet-20240620': 8_192,
+        'claude-3-5-haiku-20241022': 8_192,
+        'claude-3-5-sonnet-20241022': 8_192,
+        'claude-3-7-sonnet-20250219': 128_000,
+        'claude-3-haiku-20240307': 4_096,
+        'claude-3-opus-20240229': 4_096,
+        'claude-haiku-4-5-20251001': 64_000,
+        'claude-opus-4-1-20250805': 32_000,
+        'claude-opus-4-20250514': 32_000,
+        'claude-opus-4-5-20251101': 64_000,
+        'claude-opus-4-6': 128_000,
+        'claude-opus-4-6:1m': 128_000,
+        'claude-opus-4-6:1m:fast': 128_000,
+        'claude-opus-4-6:fast': 128_000,
+        'claude-opus-4-7': 128_000,
+        'claude-opus-4-7:1m': 128_000,
+        'claude-sonnet-4-20250514': 64_000,
+        'claude-sonnet-4-20250514:1m': 64_000,
+        'claude-sonnet-4-5-20250929': 64_000,
+        'claude-sonnet-4-5-20250929:1m': 64_000,
+        'claude-sonnet-4-6': 64_000,
+        'claude-sonnet-4-6:1m': 64_000
+    },
+    'Google': {
+        'gemini-1.5-flash-002': 8_192,
+        'gemini-1.5-flash-8b-exp-0827': 8_192,
+        'gemini-1.5-flash-exp-0827': 8_192,
+        'gemini-1.5-pro-002': 8_192,
+        'gemini-1.5-pro-exp-0827': 8_192,
+        'gemini-2.0-flash-001': 8_192,
+        'gemini-2.0-flash-exp': 8_192,
+        'gemini-2.0-flash-lite-preview-02-05': 8_192,
+        'gemini-2.0-flash-thinking-exp-01-21': 65_536,
+        'gemini-2.0-flash-thinking-exp-1219': 8_192,
+        'gemini-2.0-pro-exp-02-05': 8_192,
+        'gemini-2.5-flash': 65_536,
+        'gemini-2.5-flash-lite-preview-06-17': 64_000,
+        'gemini-2.5-pro': 65_536,
+        'gemini-3-flash-preview': 65_536,
+        'gemini-3-pro-preview': 65_536,
+        'gemini-3.1-pro-preview': 65_536,
+        'gemini-exp-1206': 8_192
+    },
+    'Azure OpenAI': {
+        'chatgpt-4o-latest': 16_384,
+        'gpt-4.1': 32_768,
+        'gpt-4.1-mini': 32_768,
+        'gpt-4.1-nano': 32_768,
+        'gpt-4o': 4_096,
+        'gpt-4o-mini': 16_384
+    },
+    'Qwen': {
+        'deepseek-r1': 8_000,
+        'deepseek-v3': 8_000,
+        'qwen-coder-plus': 129_024,
+        'qwen-coder-plus-latest': 129_024,
+        'qwen-max': 30_720,
+        'qwen-max-latest': 30_720,
+        'qwen-plus': 129_024,
+        'qwen-plus-latest': 16_384,
+        'qwen-turbo': 1_000_000,
+        'qwen-turbo-latest': 16_384,
+        'qwen-vl-max': 30_720,
+        'qwen-vl-max-latest': 129_024,
+        'qwen-vl-plus': 6_000,
+        'qwen-vl-plus-latest': 129_024,
+        'qwen2.5-coder-0.5b-instruct': 8_192,
+        'qwen2.5-coder-1.5b-instruct': 8_192,
+        'qwen2.5-coder-14b-instruct': 8_192,
+        'qwen2.5-coder-32b-instruct': 8_192,
+        'qwen2.5-coder-3b-instruct': 8_192,
+        'qwen2.5-coder-7b-instruct': 8_192,
+        'qwen3-0.6b': 8_192,
+        'qwen3-1.7b': 8_192,
+        'qwen3-14b': 8_192,
+        'qwen3-235b-a22b': 16_384,
+        'qwen3-30b-a3b': 16_384,
+        'qwen3-32b': 16_384,
+        'qwen3-4b': 8_192,
+        'qwen3-8b': 8_192,
+        'qwen3-coder-480b-a35b-instruct': 65_536,
+        'qwen3-coder-plus': 65_536,
+        'qwq-plus': 8_192,
+        'qwq-plus-latest': 8_192
+    },
+    'Qwen Code': {
+        'qwen3-coder-flash': 65_536,
+        'qwen3-coder-plus': 65_536
+    },
+    'Doubao': {
+        'deepseek-r1-250120': 32_768,
+        'deepseek-v3-250324': 12_288,
+        'doubao-1-5-pro-256k-250115': 12_288,
+        'doubao-1-5-pro-32k-250115': 12_288
+    },
+    'Moonshot': {
+        'kimi-k2-0711-preview': 32_000,
+        'kimi-k2-0905-preview': 16_384,
+        'kimi-k2-thinking': 32_000,
+        'kimi-k2-thinking-turbo': 32_000,
+        'kimi-k2-turbo-preview': 32_000,
+        'kimi-k2.5': 32_000
+    },
+    'GLM': {
+        'glm-4.5': 98_304,
+        'glm-4.5-air': 98_304,
+        'glm-4.6': 128_000,
+        'glm-4.7': 131_000,
+        'glm-5': 128_000,
+        'glm-5.1': 128_000
+    },
+    'Z AI': {
+        'glm-4.5': 98_304,
+        'glm-4.5-air': 98_304,
+        'glm-4.6': 128_000,
+        'glm-4.7': 131_000,
+        'glm-5': 128_000,
+        'glm-5.1': 128_000
+    },
+    'MiniMax': {
+        'minimax-m2': 128_000,
+        'minimax-m2.1': 128_000,
+        'minimax-m2.1-lightning': 128_000,
+        'minimax-m2.5': 128_000,
+        'minimax-m2.5-highspeed': 128_000,
+        'minimax-m2.7': 128_000,
+        'minimax-m2.7-highspeed': 128_000
+    },
+    'OpenRouter': {
+        'anthropic/claude-3.7-sonnet': 64_000,
+        'anthropic/claude-3-7-sonnet': 64_000,
+        'anthropic/claude-3.7-sonnet:beta': 64_000,
+        'anthropic/claude-3-7-sonnet:beta': 64_000,
+        'anthropic/claude-3.7-sonnet:thinking': 64_000,
+        'anthropic/claude-3.5-sonnet': 8_192,
+        'anthropic/claude-3.5-sonnet:beta': 8_192,
+        'anthropic/claude-3.5-sonnet-20240620': 8_192,
+        'anthropic/claude-3.5-sonnet-20240620:beta': 8_192,
+        'google/gemini-2.0-flash-exp': 8_192
+    },
+    'Requesty': {
+        'anthropic/claude-3-7-sonnet-latest': 8_192
+    },
+    'Mistral': {
+        'codestral-2501': 256_000,
+        'devstral-2512': 256_000,
+        'devstral-medium-latest': 128_000,
+        'devstral-small-2505': 128_000,
+        'labs-devstral-small-2512': 256_000,
+        'ministral-14b-2512': 256_000,
+        'ministral-3b-2410': 128_000,
+        'ministral-8b-2410': 128_000,
+        'mistral-large-2411': 128_000,
+        'mistral-large-2512': 256_000,
+        'mistral-medium-latest': 128_000,
+        'mistral-small-2501': 32_000,
+        'mistral-small-latest': 128_000,
+        'open-codestral-mamba': 256_000,
+        'open-mistral-nemo-2407': 128_000,
+        'pixtral-12b-2409': 128_000,
+        'pixtral-large-2411': 131_000
+    },
+    'xAI': {
+        'grok-2': 8_192,
+        'grok-2-1212': 8_192,
+        'grok-2-latest': 8_192,
+        'grok-2-vision': 8_192,
+        'grok-2-vision-1212': 8_192,
+        'grok-2-vision-latest': 8_192,
+        'grok-3': 8_192,
+        'grok-3-beta': 8_192,
+        'grok-3-fast': 8_192,
+        'grok-3-fast-beta': 8_192,
+        'grok-3-mini': 8_192,
+        'grok-3-mini-beta': 8_192,
+        'grok-3-mini-fast': 8_192,
+        'grok-3-mini-fast-beta': 8_192,
+        'grok-4': 8_192,
+        'grok-4-fast-reasoning': 30_000,
+        'grok-beta': 8_192,
+        'grok-vision-beta': 8_192
+    },
+    'Groq': {
+        'compound-beta': 8_192,
+        'compound-beta-mini': 8_192,
+        'deepseek-r1-distill-llama-70b': 131_072,
+        'llama-3.1-8b-instant': 131_072,
+        'llama-3.3-70b-versatile': 32_768,
+        'meta-llama/llama-4-maverick-17b-128e-instruct': 8_192,
+        'meta-llama/llama-4-scout-17b-16e-instruct': 8_192,
+        'moonshotai/kimi-k2-instruct': 16_384,
+        'moonshotai/kimi-k2-instruct-0905': 16_384,
+        'openai/gpt-oss-120b': 32_766,
+        'openai/gpt-oss-20b': 32_766
+    },
+    'Fireworks': {
+        'accounts/fireworks/models/deepseek-v3p2': 16_384,
+        'accounts/fireworks/models/glm-4p7': 16_384,
+        'accounts/fireworks/models/glm-5': 16_384,
+        'accounts/fireworks/models/gpt-oss-120b': 16_384,
+        'accounts/fireworks/models/kimi-k2p5': 16_384,
+        'accounts/fireworks/models/minimax-m2p1': 16_384,
+        'accounts/fireworks/models/minimax-m2p5': 16_384,
+        'accounts/fireworks/models/qwen3-vl-30b-a3b-instruct': 32_768,
+        'accounts/fireworks/models/qwen3-vl-30b-a3b-thinking': 32_768
+    },
+    'Huawei Cloud MaaS': {
+        'deepseek-r1': 16_384,
+        'deepseek-r1-250528': 16_384,
+        'deepseek-v3': 16_384,
+        'qwen3-235b-a22b': 8_192,
+        'qwen3-32b': 8_192
+    }
+};
+
 export const LLM_PROVIDER_DEFINITIONS: LLMProviderDefinition[] = [
     {
         name: 'DeepSeek',
@@ -29,13 +275,13 @@ export const LLM_PROVIDER_DEFINITIONS: LLMProviderDefinition[] = [
         transport: 'openai-compatible',
         apiKeyMode: 'required',
         apiTestMode: 'models-then-chat',
-        description: 'DeepSeek native endpoint with reasoning-model quirks handled automatically.',
-        setupHint: 'Best for DeepSeek-hosted chat/reasoning models such as deepseek-reasoner and deepseek-chat.',
+        description: 'DeepSeek native OpenAI-compatible endpoint for current V4 chat/reasoning models.',
+        setupHint: 'Use the official base URL https://api.deepseek.com with current model IDs such as deepseek-v4-pro or deepseek-v4-flash. Legacy aliases deepseek-chat and deepseek-reasoner are being retired upstream.',
         defaultConfig: {
             name: 'DeepSeek',
             apiKey: '',
-            baseUrl: 'https://api.deepseek.com/v1',
-            model: 'deepseek-reasoner',
+            baseUrl: 'https://api.deepseek.com',
+            model: 'deepseek-v4-pro',
             temperature: 0.5
         }
     },
@@ -433,6 +679,23 @@ export function getLLMProviderDefinition(name: string): LLMProviderDefinition | 
     return PROVIDER_MAP.get(name);
 }
 
+function normalizeModelId(modelName: string): string {
+    return modelName.trim().toLowerCase();
+}
+
+export function getKnownModelMaxOutputTokens(providerName: string, modelName: string): number | undefined {
+    if (!modelName.trim()) {
+        return undefined;
+    }
+
+    const providerModels = KNOWN_MODEL_MAX_OUTPUT_TOKENS[providerName];
+    if (!providerModels) {
+        return undefined;
+    }
+
+    return providerModels[normalizeModelId(modelName)];
+}
+
 export function createDefaultProviders(): LLMProviderConfig[] {
     return LLM_PROVIDER_DEFINITIONS.map(definition => ({ ...definition.defaultConfig }));
 }
@@ -445,31 +708,64 @@ function looksLikeDoubaoEndpointId(model: string): boolean {
     return /^ep-[a-z0-9-]{8,}$/i.test(model.trim());
 }
 
-export function getProviderValidationIssues(provider: Pick<LLMProviderConfig, 'name' | 'model' | 'baseUrl'>): LLMProviderValidationIssue[] {
-    if (provider.name !== 'Doubao') {
-        return [];
+function resolveEffectiveOutputTokenLimit(
+    provider: Pick<LLMProviderConfig, 'maxOutputTokens'>,
+    fallbackMaxTokens?: number
+): number | undefined {
+    const providerOverride = Number(provider.maxOutputTokens);
+    if (Number.isFinite(providerOverride) && providerOverride > 0) {
+        return providerOverride;
     }
 
-    const normalizedModel = (provider.model || '').trim();
-    if (!normalizedModel || normalizedModel === 'ep-xxxxxxxxxxxxxxxx') {
-        return [{
-            level: 'error',
-            message: 'Doubao needs a real Ark endpoint ID in the model field before testing or running tasks.'
-        }];
+    if (Number.isFinite(fallbackMaxTokens) && fallbackMaxTokens! > 0) {
+        return fallbackMaxTokens;
     }
 
-    if (!looksLikeDoubaoEndpointId(normalizedModel)) {
-        return [{
-            level: 'warning',
-            message: 'Doubao usually expects an Ark endpoint ID such as ep-xxxxxxxx. If you are intentionally using a raw model ID, verify that your Ark deployment accepts it.'
-        }];
-    }
-
-    return [];
+    return undefined;
 }
 
-export function hasBlockingProviderValidationIssues(provider: Pick<LLMProviderConfig, 'name' | 'model' | 'baseUrl'>): boolean {
-    return getProviderValidationIssues(provider).some(issue => issue.level === 'error');
+export function getProviderValidationIssues(
+    provider: Pick<LLMProviderConfig, 'name' | 'model' | 'baseUrl' | 'maxOutputTokens' | 'thinkingEnabled'>,
+    fallbackMaxTokens?: number
+): LLMProviderValidationIssue[] {
+    const issues: LLMProviderValidationIssue[] = [];
+
+    if (provider.name === 'Doubao') {
+        const normalizedModel = (provider.model || '').trim();
+        if (!normalizedModel || normalizedModel === 'ep-xxxxxxxxxxxxxxxx') {
+            issues.push({
+                level: 'error',
+                message: 'Doubao needs a real Ark endpoint ID in the model field before testing or running tasks.'
+            });
+            return issues;
+        }
+
+        if (!looksLikeDoubaoEndpointId(normalizedModel)) {
+            issues.push({
+                level: 'warning',
+                message: 'Doubao usually expects an Ark endpoint ID such as ep-xxxxxxxx. If you are intentionally using a raw model ID, verify that your Ark deployment accepts it.'
+            });
+        }
+    }
+
+    if (provider.name === 'DeepSeek' && provider.thinkingEnabled === true) {
+        const effectiveMaxTokens = resolveEffectiveOutputTokenLimit(provider, fallbackMaxTokens);
+        if (typeof effectiveMaxTokens === 'number' && effectiveMaxTokens < DEEPSEEK_RECOMMENDED_THINKING_OUTPUT_TOKENS) {
+            issues.push({
+                level: 'warning',
+                message: `DeepSeek thinking mode can consume the output cap before the final answer. Raise Max Output Tokens to at least ${DEEPSEEK_RECOMMENDED_THINKING_OUTPUT_TOKENS} for long-form tasks, or disable thinking if you want a smaller cap.`
+            });
+        }
+    }
+
+    return issues;
+}
+
+export function hasBlockingProviderValidationIssues(
+    provider: Pick<LLMProviderConfig, 'name' | 'model' | 'baseUrl' | 'maxOutputTokens' | 'thinkingEnabled'>,
+    fallbackMaxTokens?: number
+): boolean {
+    return getProviderValidationIssues(provider, fallbackMaxTokens).some(issue => issue.level === 'error');
 }
 
 export function getOrderedProviderNames(providers: LLMProviderConfig[]): string[] {

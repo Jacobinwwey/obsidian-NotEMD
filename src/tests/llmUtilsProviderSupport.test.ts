@@ -14,6 +14,8 @@ import {
     handleApiError,
     testAPI
 } from '../llmUtils';
+import { createDefaultProviders } from '../llmProviders';
+import { DEFAULT_SETTINGS } from '../constants';
 import { ProgressReporter, LLMProviderConfig, NotemdSettings } from '../types';
 import { mockSettings } from './__mocks__/settings';
 
@@ -576,6 +578,304 @@ describe('llmUtils expanded provider support', () => {
         expect(requestBody.model).toBe('DeepSeek-V3');
     });
 
+    test('callLLM sends DeepSeek advanced provider settings using current chat/completions fields', async () => {
+        const provider: LLMProviderConfig = {
+            name: 'DeepSeek',
+            apiKey: 'deepseek-key',
+            baseUrl: 'https://api.deepseek.com',
+            model: 'deepseek-v4-pro',
+            temperature: 0.2,
+            maxOutputTokens: 3210,
+            topP: 0.65,
+            reasoningEffort: 'high',
+            thinkingEnabled: true
+        };
+
+        (requestUrl as jest.Mock).mockResolvedValue({
+            status: 200,
+            json: { choices: [{ message: { content: 'deepseek-advanced-ok' } }] },
+            text: '{"choices":[{"message":{"content":"deepseek-advanced-ok"}}]}'
+        });
+
+        const result = await callLLM(provider, 'System prompt', 'Need careful reasoning', settings, reporter);
+
+        expect(result).toBe('deepseek-advanced-ok');
+
+        const requestBody = JSON.parse((requestUrl as jest.Mock).mock.calls[0][0].body);
+        expect(requestBody).toEqual(expect.objectContaining({
+            model: 'deepseek-v4-pro',
+            max_tokens: 3210,
+            top_p: 0.65,
+            reasoning_effort: 'high',
+            thinking: { type: 'enabled' },
+            temperature: 0.2
+        }));
+        expect(requestBody.max_completion_tokens).toBeUndefined();
+    });
+
+    test('callLLM keeps reasoning-model safeguards while still applying OpenAI provider overrides', async () => {
+        const provider: LLMProviderConfig = {
+            name: 'OpenAI',
+            apiKey: 'openai-key',
+            baseUrl: 'https://api.openai.com/v1',
+            model: 'gpt-5.4',
+            temperature: 0.6,
+            maxOutputTokens: 4096,
+            topP: 0.8,
+            reasoningEffort: 'high'
+        };
+
+        (requestUrl as jest.Mock).mockResolvedValue({
+            status: 200,
+            json: { choices: [{ message: { content: 'openai-reasoning-ok' } }] },
+            text: '{"choices":[{"message":{"content":"openai-reasoning-ok"}}]}'
+        });
+
+        const result = await callLLM(provider, 'System prompt', 'Need careful reasoning', settings, reporter);
+
+        expect(result).toBe('openai-reasoning-ok');
+
+        const requestBody = JSON.parse((requestUrl as jest.Mock).mock.calls[0][0].body);
+        expect(requestBody).toEqual(expect.objectContaining({
+            model: 'gpt-5.4',
+            max_tokens: 4096,
+            top_p: 0.8,
+            reasoning_effort: 'high'
+        }));
+        expect(requestBody.temperature).toBeUndefined();
+        expect(requestBody.messages).toEqual([
+            {
+                role: 'user',
+                content: 'System prompt\n\nNeed careful reasoning'
+            }
+        ]);
+    });
+
+    test('callLLM uses the known model max when the global max token setting is still at the default auto baseline', async () => {
+        const provider = createDefaultProviders().find(candidate => candidate.name === 'Qwen Code');
+
+        expect(provider).toBeDefined();
+
+        const configuredProvider: LLMProviderConfig = {
+            ...provider!,
+            apiKey: 'qwen-code-key'
+        };
+
+        (requestUrl as jest.Mock).mockResolvedValue({
+            status: 200,
+            json: { choices: [{ message: { content: 'qwen-code-ok' } }] },
+            text: '{"choices":[{"message":{"content":"qwen-code-ok"}}]}'
+        });
+
+        const result = await callLLM(
+            configuredProvider,
+            'System prompt',
+            'Return a large code sample',
+            { ...settings, maxTokens: DEFAULT_SETTINGS.maxTokens },
+            reporter
+        );
+
+        expect(result).toBe('qwen-code-ok');
+
+        const requestBody = JSON.parse((requestUrl as jest.Mock).mock.calls[0][0].body);
+        expect(requestBody).toEqual(expect.objectContaining({
+            model: 'qwen3-coder-plus',
+            max_tokens: 65_536
+        }));
+    });
+
+    test('callLLM preserves a user-selected max token setting when it is already below the known model max', async () => {
+        const provider = createDefaultProviders().find(candidate => candidate.name === 'Qwen Code');
+
+        expect(provider).toBeDefined();
+
+        const configuredProvider: LLMProviderConfig = {
+            ...provider!,
+            apiKey: 'qwen-code-key'
+        };
+
+        (requestUrl as jest.Mock).mockResolvedValue({
+            status: 200,
+            json: { choices: [{ message: { content: 'qwen-code-low-ok' } }] },
+            text: '{"choices":[{"message":{"content":"qwen-code-low-ok"}}]}'
+        });
+
+        await expect(
+            callLLM(configuredProvider, 'System prompt', 'Keep a small cap', { ...settings, maxTokens: 4_096 }, reporter)
+        ).resolves.toBe('qwen-code-low-ok');
+
+        const requestBody = JSON.parse((requestUrl as jest.Mock).mock.calls[0][0].body);
+        expect(requestBody.max_tokens).toBe(4_096);
+    });
+
+    test('callLLM defers to API provider for unknown models when maxTokens is default (Cline-aligned)', async () => {
+        const provider: LLMProviderConfig = {
+            name: 'OpenAI',
+            apiKey: 'openai-key',
+            baseUrl: 'https://api.openai.com/v1',
+            model: 'unknown-openai-model',
+            temperature: 0.5
+        };
+
+        (requestUrl as jest.Mock).mockResolvedValue({
+            status: 200,
+            json: { choices: [{ message: { content: 'unknown-model-ok' } }] },
+            text: '{"choices":[{"message":{"content":"unknown-model-ok"}}]}'
+        });
+
+        await expect(
+            callLLM(provider, 'System prompt', 'Unknown model content', { ...settings, maxTokens: DEFAULT_SETTINGS.maxTokens }, reporter)
+        ).resolves.toBe('unknown-model-ok');
+
+        const requestBody = JSON.parse((requestUrl as jest.Mock).mock.calls[0][0].body);
+        expect(requestBody.max_tokens).toBeUndefined();
+    });
+
+
+    test('callLLM preserves user maxTokens for unknown models when custom value is set (backward-compatible)', async () => {
+        const provider: LLMProviderConfig = {
+            name: 'OpenAI',
+            apiKey: 'openai-key',
+            baseUrl: 'https://api.openai.com/v1',
+            model: 'unknown-openai-model',
+            temperature: 0.5
+        };
+
+        (requestUrl as jest.Mock).mockResolvedValue({
+            status: 200,
+            json: { choices: [{ message: { content: 'unknown-custom-ok' } }] },
+            text: '{"choices":[{"message":{"content":"unknown-custom-ok"}}]}'
+        });
+
+        await expect(
+            callLLM(provider, 'System prompt', 'Unknown model with custom cap', { ...settings, maxTokens: 4_096 }, reporter)
+        ).resolves.toBe('unknown-custom-ok');
+
+        const requestBody = JSON.parse((requestUrl as jest.Mock).mock.calls[0][0].body);
+        expect(requestBody.max_tokens).toBe(4_096);
+    });
+    test.each([
+        {
+            name: 'Anthropic',
+            provider: {
+                name: 'Anthropic',
+                apiKey: 'anthropic-key',
+                baseUrl: 'https://api.anthropic.com',
+                model: 'claude-3-5-sonnet-20240620',
+                temperature: 0.5,
+                maxOutputTokens: 12_345
+            } as LLMProviderConfig,
+            response: {
+                status: 200,
+                json: { content: [{ text: 'anthropic-cap-ok' }] },
+                text: '{"content":[{"text":"anthropic-cap-ok"}]}'
+            },
+            assertBody: (requestBody: any) => {
+                expect(requestBody.max_tokens).toBe(8_192);
+            }
+        },
+        {
+            name: 'Google',
+            provider: {
+                name: 'Google',
+                apiKey: 'google-key',
+                baseUrl: 'https://generativelanguage.googleapis.com/v1',
+                model: 'gemini-2.0-flash-exp',
+                temperature: 0.5,
+                maxOutputTokens: 9_876
+            } as LLMProviderConfig,
+            response: {
+                status: 200,
+                json: { candidates: [{ content: { parts: [{ text: 'google-cap-ok' }] } }] },
+                text: '{"candidates":[{"content":{"parts":[{"text":"google-cap-ok"}]}}]}'
+            },
+            assertBody: (requestBody: any) => {
+                expect(requestBody.generationConfig.maxOutputTokens).toBe(8_192);
+            }
+        },
+        {
+            name: 'Azure OpenAI',
+            provider: {
+                name: 'Azure OpenAI',
+                apiKey: 'azure-key',
+                baseUrl: 'https://azure.example.com',
+                model: 'gpt-4o',
+                temperature: 0.5,
+                apiVersion: '2025-01-01-preview',
+                maxOutputTokens: 7_654
+            } as LLMProviderConfig,
+            response: {
+                status: 200,
+                json: { choices: [{ message: { content: 'azure-cap-ok' } }] },
+                text: '{"choices":[{"message":{"content":"azure-cap-ok"}}]}'
+            },
+            assertBody: (requestBody: any) => {
+                expect(requestBody.max_tokens).toBe(4_096);
+            }
+        },
+        {
+            name: 'Ollama',
+            provider: {
+                name: 'Ollama',
+                apiKey: '',
+                baseUrl: 'http://localhost:11434/api',
+                model: 'llama3',
+                temperature: 0.7,
+                maxOutputTokens: 4_321
+            } as LLMProviderConfig,
+            response: {
+                status: 200,
+                json: { message: { content: 'ollama-cap-ok' } },
+                text: '{"message":{"content":"ollama-cap-ok"}}'
+            },
+            assertBody: (requestBody: any) => {
+                expect(requestBody.options.num_predict).toBe(4_321);
+            }
+        }
+    ])('callLLM clamps provider maxOutputTokens overrides to the known model max for $name transport', async ({ provider, response, assertBody }) => {
+        (requestUrl as jest.Mock).mockResolvedValue(response);
+
+        await expect(
+            callLLM(provider, 'System prompt', 'Override content', { ...settings, maxTokens: 4_096 }, reporter)
+        ).resolves.toEqual(expect.any(String));
+
+        const requestBody = JSON.parse((requestUrl as jest.Mock).mock.calls[0][0].body);
+        assertBody(requestBody);
+    });
+
+    test('callLLM fails clearly when DeepSeek thinking mode exhausts tokens before final content', async () => {
+        const provider: LLMProviderConfig = {
+            name: 'DeepSeek',
+            apiKey: 'deepseek-key',
+            baseUrl: 'https://api.deepseek.com',
+            model: 'deepseek-v4-pro',
+            temperature: 0.2,
+            maxOutputTokens: 256,
+            topP: 0.65,
+            reasoningEffort: 'high',
+            thinkingEnabled: true
+        };
+
+        (requestUrl as jest.Mock).mockResolvedValue({
+            status: 200,
+            json: {
+                choices: [{
+                    message: {
+                        role: 'assistant',
+                        content: '',
+                        reasoning_content: 'thinking only'
+                    },
+                    finish_reason: 'length'
+                }]
+            },
+            text: '{"choices":[{"message":{"role":"assistant","content":"","reasoning_content":"thinking only"},"finish_reason":"length"}]}'
+        });
+
+        await expect(callLLM(provider, 'System prompt', 'Need careful reasoning', settings, reporter)).rejects.toThrow(
+            'DeepSeek returned reasoning output but no final content before hitting the output token limit. Increase the provider Max tokens override or disable thinking mode.'
+        );
+    });
+
     test('callLLM retries after both requestUrl and desktop fallback fail on the first transient OpenAI disconnect', async () => {
         jest.useFakeTimers();
 
@@ -1028,6 +1328,47 @@ describe('llmUtils expanded provider support', () => {
 
         const requestBody = JSON.parse((requestUrl as jest.Mock).mock.calls[0][0].body);
         expect(requestBody.model).toBe('DeepSeek-V3');
+    });
+
+    test('testAPI keeps DeepSeek connection probes minimal even when advanced provider settings are enabled', async () => {
+        const provider: LLMProviderConfig = {
+            name: 'DeepSeek',
+            apiKey: 'deepseek-key',
+            baseUrl: 'https://api.deepseek.com',
+            model: 'deepseek-v4-pro',
+            temperature: 0.2,
+            maxOutputTokens: 256,
+            topP: 0.65,
+            reasoningEffort: 'high',
+            thinkingEnabled: true
+        };
+
+        (requestUrl as jest.Mock)
+            .mockResolvedValueOnce({
+                status: 500,
+                json: { error: { message: 'models probe failed' } },
+                text: '{"error":{"message":"models probe failed"}}'
+            })
+            .mockResolvedValueOnce({
+                status: 200,
+                json: { choices: [{ message: { content: 'ok' } }] },
+                text: '{"choices":[{"message":{"content":"ok"}}]}'
+            });
+
+        const result = await testAPI(provider);
+
+        expect(result.success).toBe(true);
+        expect(requestUrl).toHaveBeenCalledTimes(2);
+
+        const requestBody = JSON.parse((requestUrl as jest.Mock).mock.calls[1][0].body);
+        expect(requestBody).toEqual(expect.objectContaining({
+            model: 'deepseek-v4-pro',
+            max_tokens: 1,
+            temperature: 0
+        }));
+        expect(requestBody.top_p).toBeUndefined();
+        expect(requestBody.reasoning_effort).toBeUndefined();
+        expect(requestBody.thinking).toBeUndefined();
     });
 
     test('testAPI uses direct chat probing for Baidu Qianfan', async () => {

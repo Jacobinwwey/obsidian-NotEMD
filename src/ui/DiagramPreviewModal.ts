@@ -168,10 +168,8 @@ export class DiagramPreviewModal extends Modal {
         }
 
         if (supportsInlineVegaLitePreview(this.session.payload.artifact)) {
-            const rendered = await this.tryRenderVegaLite(container);
-            if (rendered) {
-                return;
-            }
+            this.renderIframePreview(container);
+            return;
         }
 
         this.renderIframePreview(container);
@@ -212,23 +210,16 @@ export class DiagramPreviewModal extends Modal {
     private renderIframePreview(container: HTMLElement): void {
         container.empty();
         const iframe = container.createEl('iframe', { cls: 'notemd-diagram-preview-frame' });
-        iframe.setAttribute('sandbox', 'allow-same-origin');
+        iframe.setAttribute('sandbox', this.getIframeSandboxPolicy());
         iframe.setAttribute('referrerpolicy', 'no-referrer');
         iframe.srcdoc = this.session.htmlSrcdoc;
     }
 
-    private async tryRenderVegaLite(container: HTMLElement): Promise<boolean> {
-        try {
-            const svg = await renderPreviewArtifactSvg(this.session.payload.artifact, {
-                theme: this.session.payload.resolvedTheme ?? this.session.payload.theme
-            });
-            container.empty();
-            container.addClass('is-vega-lite');
-            container.innerHTML = svg;
-            return true;
-        } catch (error) {
-            console.error('Failed to render Vega-Lite preview. Falling back to srcdoc preview.', error);
-            return false;
+    private getIframeSandboxPolicy(): string {
+        if (this.session.payload.artifact.target === 'vega-lite') {
+            return 'allow-scripts allow-same-origin';
         }
+
+        return 'allow-same-origin';
     }
 }

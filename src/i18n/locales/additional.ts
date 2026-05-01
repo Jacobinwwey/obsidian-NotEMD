@@ -3412,6 +3412,294 @@ extendLocale(STRINGS_TR, {
 extendLocale(STRINGS_AR, {
     settings: {
         providerConfig: {
+            maxOutputTokensDesc: 'حد أقصى اختياري لرموز الإخراج لهذا المزوّد فقط. اتركه فارغًا لاستخدام إعداد الحد الأقصى العام للرموز.',
+            topPName: 'قيمة Top-p',
+            topPDesc: 'تجاوز اختياري لأخذ العينات الاحتمالية لطلبات OpenAI-compatible. اتركه فارغًا لاستخدام القيمة الافتراضية للمزوّد.',
+            reasoningEffortName: 'جهد الاستدلال',
+            reasoningEffortDesc: 'تلميح اختياري لنماذج الاستدلال المتوافقة. القيم المدعومة: none و low و medium و high.',
+            topPPlaceholder: '0.0 - 1.0',
+            reasoningEffortPlaceholder: 'none | low | medium | high',
+            thinkingEnabledName: 'تفعيل وضع التفكير',
+            thinkingEnabledDesc: 'لـ DeepSeek فقط. يرسل thinking: { type: "enabled" } في طلبات chat/completions.'
+        }
+    }
+});
+
+extendLocale(STRINGS_DE, {
+    settings: {
+        providerConfig: {
+            maxOutputTokensDesc: 'Optionale nur für diesen Anbieter geltende Obergrenze für Ausgabetokens. Leer lassen, um die globale Einstellung für maximale Tokens zu verwenden.',
+            topPName: 'Top-p-Wert',
+            topPDesc: 'Optionale Nucleus-Sampling-Überschreibung für OpenAI-compatible-Anfragen. Leer lassen, um den Standard des Anbieters zu verwenden.',
+            reasoningEffortName: 'Reasoning-Aufwand',
+            reasoningEffortDesc: 'Optionaler Hinweis für kompatible Reasoning-Modelle. Unterstützte Werte: none, low, medium, high.',
+            topPPlaceholder: '0.0 - 1.0',
+            reasoningEffortPlaceholder: 'none | low | medium | high',
+            thinkingEnabledName: 'Thinking-Modus aktivieren',
+            thinkingEnabledDesc: 'Nur für DeepSeek. Sendet thinking: { type: "enabled" } bei chat/completions-Anfragen.'
+        }
+    }
+});
+
+extendLocale(STRINGS_ES, {
+    settings: {
+        providerConfig: {
+            maxOutputTokensDesc: 'Límite opcional de tokens de salida solo para este proveedor. Déjalo vacío para usar la opción global de tokens máximos.',
+            topPName: 'Valor Top-p',
+            topPDesc: 'Sobrescritura opcional de nucleus sampling para solicitudes OpenAI-compatible. Déjalo vacío para mantener el valor predeterminado del proveedor.',
+            reasoningEffortName: 'Esfuerzo de razonamiento',
+            reasoningEffortDesc: 'Pista opcional para modelos de razonamiento compatibles. Valores admitidos: none, low, medium, high.',
+            topPPlaceholder: '0.0 - 1.0',
+            reasoningEffortPlaceholder: 'none | low | medium | high',
+            thinkingEnabledName: 'Activar modo thinking',
+            thinkingEnabledDesc: 'Solo para DeepSeek. Envía thinking: { type: "enabled" } en solicitudes chat/completions.'
+        }
+    }
+});
+
+extendLocale(STRINGS_FA, {
+    settings: {
+        providerConfig: {
+            maxOutputTokensDesc: 'سقف اختیاری توکن خروجی فقط برای این ارائه‌دهنده. برای استفاده از تنظیم سراسری حداکثر توکن، آن را خالی بگذارید.',
+            topPName: 'مقدار Top-p',
+            topPDesc: 'بازنویسی اختیاری nucleus sampling برای درخواست‌های OpenAI-compatible. برای استفاده از مقدار پیش‌فرض ارائه‌دهنده خالی بگذارید.',
+            reasoningEffortName: 'شدت استدلال',
+            reasoningEffortDesc: 'راهنمای اختیاری برای مدل‌های استدلالی سازگار. مقادیر پشتیبانی‌شده: none، low، medium، high.',
+            topPPlaceholder: '0.0 - 1.0',
+            reasoningEffortPlaceholder: 'none | low | medium | high',
+            thinkingEnabledName: 'فعال‌سازی حالت Thinking',
+            thinkingEnabledDesc: 'فقط برای DeepSeek. در درخواست‌های chat/completions مقدار thinking: { type: "enabled" } را ارسال می‌کند.'
+        }
+    }
+});
+
+extendLocale(STRINGS_FR, {
+    settings: {
+        providerConfig: {
+            maxOutputTokensDesc: 'Plafond optionnel de jetons de sortie pour ce fournisseur uniquement. Laissez vide pour utiliser le réglage global de jetons max.',
+            topPName: 'Valeur Top-p',
+            topPDesc: 'Surcharge optionnelle du nucleus sampling pour les requêtes OpenAI-compatible. Laissez vide pour conserver la valeur par défaut du fournisseur.',
+            reasoningEffortName: 'Effort de raisonnement',
+            reasoningEffortDesc: 'Indication facultative pour les modèles de raisonnement compatibles. Valeurs prises en charge : none, low, medium, high.',
+            topPPlaceholder: '0.0 - 1.0',
+            reasoningEffortPlaceholder: 'none | low | medium | high',
+            thinkingEnabledName: 'Activer le mode thinking',
+            thinkingEnabledDesc: 'DeepSeek uniquement. Envoie thinking: { type: "enabled" } dans les requêtes chat/completions.'
+        }
+    }
+});
+
+extendLocale(STRINGS_ID, {
+    settings: {
+        providerConfig: {
+            maxOutputTokensDesc: 'Batas token keluaran opsional khusus untuk penyedia ini. Biarkan kosong untuk memakai pengaturan token maksimum global.',
+            topPName: 'Nilai Top-p',
+            topPDesc: 'Override nucleus sampling opsional untuk permintaan OpenAI-compatible. Biarkan kosong untuk memakai default penyedia.',
+            reasoningEffortName: 'Tingkat reasoning',
+            reasoningEffortDesc: 'Petunjuk opsional untuk model reasoning yang kompatibel. Nilai yang didukung: none, low, medium, high.',
+            topPPlaceholder: '0.0 - 1.0',
+            reasoningEffortPlaceholder: 'none | low | medium | high',
+            thinkingEnabledName: 'Aktifkan mode thinking',
+            thinkingEnabledDesc: 'Hanya untuk DeepSeek. Mengirim thinking: { type: "enabled" } pada permintaan chat/completions.'
+        }
+    }
+});
+
+extendLocale(STRINGS_IT, {
+    settings: {
+        providerConfig: {
+            maxOutputTokensDesc: 'Limite opzionale dei token di output valido solo per questo provider. Lascia vuoto per usare l’impostazione globale dei token massimi.',
+            topPName: 'Valore Top-p',
+            topPDesc: 'Override opzionale del nucleus sampling per richieste OpenAI-compatible. Lascia vuoto per mantenere il valore predefinito del provider.',
+            reasoningEffortName: 'Intensità del ragionamento',
+            reasoningEffortDesc: 'Suggerimento opzionale per modelli di ragionamento compatibili. Valori supportati: none, low, medium, high.',
+            topPPlaceholder: '0.0 - 1.0',
+            reasoningEffortPlaceholder: 'none | low | medium | high',
+            thinkingEnabledName: 'Abilita modalità thinking',
+            thinkingEnabledDesc: 'Solo per DeepSeek. Invia thinking: { type: "enabled" } nelle richieste chat/completions.'
+        }
+    }
+});
+
+extendLocale(STRINGS_JA, {
+    settings: {
+        providerConfig: {
+            maxOutputTokensDesc: 'このプロバイダー専用の任意の出力トークン上限です。空欄の場合は全体の最大トークン設定を使います。',
+            topPName: 'Top-p 値',
+            topPDesc: 'OpenAI-compatible リクエスト向けの任意の nucleus sampling 上書きです。空欄の場合はプロバイダー既定値を使います。',
+            reasoningEffortName: '推論強度',
+            reasoningEffortDesc: '対応する推論モデル向けの任意ヒントです。使用可能な値: none、low、medium、high。',
+            topPPlaceholder: '0.0 - 1.0',
+            reasoningEffortPlaceholder: 'none | low | medium | high',
+            thinkingEnabledName: 'Thinking モードを有効化',
+            thinkingEnabledDesc: 'DeepSeek 専用です。chat/completions リクエストで thinking: { type: "enabled" } を送信します。'
+        }
+    }
+});
+
+extendLocale(STRINGS_KO, {
+    settings: {
+        providerConfig: {
+            maxOutputTokensDesc: '이 공급자에만 적용되는 선택적 출력 토큰 상한입니다. 비워 두면 전역 최대 토큰 설정을 사용합니다.',
+            topPName: 'Top-p 값',
+            topPDesc: 'OpenAI-compatible 요청용 선택적 nucleus sampling 재정의입니다. 비워 두면 공급자 기본값을 유지합니다.',
+            reasoningEffortName: '추론 강도',
+            reasoningEffortDesc: '호환되는 추론 모델용 선택적 힌트입니다. 지원 값: none, low, medium, high.',
+            topPPlaceholder: '0.0 - 1.0',
+            reasoningEffortPlaceholder: 'none | low | medium | high',
+            thinkingEnabledName: 'Thinking 모드 활성화',
+            thinkingEnabledDesc: 'DeepSeek 전용입니다. chat/completions 요청에 thinking: { type: "enabled" } 를 전송합니다.'
+        }
+    }
+});
+
+extendLocale(STRINGS_NL, {
+    settings: {
+        providerConfig: {
+            maxOutputTokensDesc: 'Optionele uitvoertokenlimiet alleen voor deze provider. Laat leeg om de globale instelling voor maximale tokens te gebruiken.',
+            topPName: 'Top-p-waarde',
+            topPDesc: 'Optionele nucleus-sampling-override voor OpenAI-compatible-verzoeken. Laat leeg om de standaard van de provider te gebruiken.',
+            reasoningEffortName: 'Reasoning-inspanning',
+            reasoningEffortDesc: 'Optionele hint voor compatibele reasoning-modellen. Ondersteunde waarden: none, low, medium, high.',
+            topPPlaceholder: '0.0 - 1.0',
+            reasoningEffortPlaceholder: 'none | low | medium | high',
+            thinkingEnabledName: 'Thinking-modus inschakelen',
+            thinkingEnabledDesc: 'Alleen voor DeepSeek. Verstuurt thinking: { type: "enabled" } bij chat/completions-verzoeken.'
+        }
+    }
+});
+
+extendLocale(STRINGS_PL, {
+    settings: {
+        providerConfig: {
+            maxOutputTokensDesc: 'Opcjonalny limit tokenów wyjściowych tylko dla tego dostawcy. Pozostaw puste, aby użyć globalnego ustawienia maksymalnej liczby tokenów.',
+            topPName: 'Wartość Top-p',
+            topPDesc: 'Opcjonalne nadpisanie nucleus sampling dla żądań OpenAI-compatible. Pozostaw puste, aby użyć domyślnej wartości dostawcy.',
+            reasoningEffortName: 'Intensywność rozumowania',
+            reasoningEffortDesc: 'Opcjonalna wskazówka dla zgodnych modeli rozumujących. Obsługiwane wartości: none, low, medium, high.',
+            topPPlaceholder: '0.0 - 1.0',
+            reasoningEffortPlaceholder: 'none | low | medium | high',
+            thinkingEnabledName: 'Włącz tryb thinking',
+            thinkingEnabledDesc: 'Tylko dla DeepSeek. Wysyła thinking: { type: "enabled" } w żądaniach chat/completions.'
+        }
+    }
+});
+
+extendLocale(STRINGS_PT, {
+    settings: {
+        providerConfig: {
+            maxOutputTokensDesc: 'Limite opcional de tokens de saída apenas para este fornecedor. Deixe em branco para usar a definição global de tokens máximos.',
+            topPName: 'Valor Top-p',
+            topPDesc: 'Substituição opcional de nucleus sampling para pedidos OpenAI-compatible. Deixe em branco para manter o valor predefinido do fornecedor.',
+            reasoningEffortName: 'Esforço de raciocínio',
+            reasoningEffortDesc: 'Sugestão opcional para modelos de raciocínio compatíveis. Valores suportados: none, low, medium, high.',
+            topPPlaceholder: '0.0 - 1.0',
+            reasoningEffortPlaceholder: 'none | low | medium | high',
+            thinkingEnabledName: 'Ativar modo thinking',
+            thinkingEnabledDesc: 'Apenas para DeepSeek. Envia thinking: { type: "enabled" } em pedidos chat/completions.'
+        }
+    }
+});
+
+extendLocale(STRINGS_PT_BR, {
+    settings: {
+        providerConfig: {
+            maxOutputTokensDesc: 'Limite opcional de tokens de saída só para este provedor. Deixe em branco para usar a configuração global de tokens máximos.',
+            topPName: 'Valor Top-p',
+            topPDesc: 'Sobrescrita opcional de nucleus sampling para requisições OpenAI-compatible. Deixe em branco para manter o padrão do provedor.',
+            reasoningEffortName: 'Esforço de raciocínio',
+            reasoningEffortDesc: 'Dica opcional para modelos de raciocínio compatíveis. Valores suportados: none, low, medium, high.',
+            topPPlaceholder: '0.0 - 1.0',
+            reasoningEffortPlaceholder: 'none | low | medium | high',
+            thinkingEnabledName: 'Ativar modo thinking',
+            thinkingEnabledDesc: 'Somente para DeepSeek. Envia thinking: { type: "enabled" } em requisições chat/completions.'
+        }
+    }
+});
+
+extendLocale(STRINGS_RU, {
+    settings: {
+        providerConfig: {
+            maxOutputTokensDesc: 'Необязательный лимит выходных токенов только для этого провайдера. Оставьте пустым, чтобы использовать глобальную настройку максимума токенов.',
+            topPName: 'Значение Top-p',
+            topPDesc: 'Необязательное переопределение nucleus sampling для запросов OpenAI-compatible. Оставьте пустым, чтобы использовать значение провайдера по умолчанию.',
+            reasoningEffortName: 'Интенсивность рассуждения',
+            reasoningEffortDesc: 'Необязательная подсказка для совместимых reasoning-моделей. Поддерживаемые значения: none, low, medium, high.',
+            topPPlaceholder: '0.0 - 1.0',
+            reasoningEffortPlaceholder: 'none | low | medium | high',
+            thinkingEnabledName: 'Включить режим thinking',
+            thinkingEnabledDesc: 'Только для DeepSeek. Отправляет thinking: { type: "enabled" } в запросах chat/completions.'
+        }
+    }
+});
+
+extendLocale(STRINGS_TH, {
+    settings: {
+        providerConfig: {
+            maxOutputTokensDesc: 'ขีดจำกัดโทเคนขาออกแบบกำหนดเฉพาะผู้ให้บริการนี้ หากเว้นว่างจะใช้การตั้งค่าโทเคนสูงสุดแบบรวม',
+            topPName: 'ค่า Top-p',
+            topPDesc: 'การกำหนด nucleus sampling แบบเลือกได้สำหรับคำขอ OpenAI-compatible หากเว้นว่างจะใช้ค่าเริ่มต้นของผู้ให้บริการ',
+            reasoningEffortName: 'ระดับการให้เหตุผล',
+            reasoningEffortDesc: 'คำใบ้เพิ่มเติมสำหรับโมเดล reasoning ที่รองรับ ค่าที่รองรับ: none, low, medium, high',
+            topPPlaceholder: '0.0 - 1.0',
+            reasoningEffortPlaceholder: 'none | low | medium | high',
+            thinkingEnabledName: 'เปิดใช้โหมด thinking',
+            thinkingEnabledDesc: 'ใช้กับ DeepSeek เท่านั้น โดยจะส่ง thinking: { type: "enabled" } ในคำขอ chat/completions'
+        }
+    }
+});
+
+extendLocale(STRINGS_TR, {
+    settings: {
+        providerConfig: {
+            maxOutputTokensDesc: 'Yalnızca bu sağlayıcı için isteğe bağlı çıktı token sınırı. Boş bırakırsanız genel maksimum token ayarı kullanılır.',
+            topPName: 'Top-p değeri',
+            topPDesc: 'OpenAI-compatible istekleri için isteğe bağlı nucleus sampling geçersiz kılması. Boş bırakırsanız sağlayıcının varsayılanı kullanılır.',
+            reasoningEffortName: 'Akıl yürütme düzeyi',
+            reasoningEffortDesc: 'Uyumlu akıl yürütme modelleri için isteğe bağlı ipucu. Desteklenen değerler: none, low, medium, high.',
+            topPPlaceholder: '0.0 - 1.0',
+            reasoningEffortPlaceholder: 'none | low | medium | high',
+            thinkingEnabledName: 'Thinking modunu etkinleştir',
+            thinkingEnabledDesc: 'Yalnızca DeepSeek içindir. chat/completions isteklerinde thinking: { type: "enabled" } gönderir.'
+        }
+    }
+});
+
+extendLocale(STRINGS_UK, {
+    settings: {
+        providerConfig: {
+            maxOutputTokensDesc: 'Необов’язкове обмеження вихідних токенів лише для цього провайдера. Залиште порожнім, щоб використовувати глобальне налаштування максимальних токенів.',
+            topPName: 'Значення Top-p',
+            topPDesc: 'Необов’язкове перевизначення nucleus sampling для запитів OpenAI-compatible. Залиште порожнім, щоб зберегти значення провайдера за замовчуванням.',
+            reasoningEffortName: 'Інтенсивність міркування',
+            reasoningEffortDesc: 'Необов’язкова підказка для сумісних reasoning-моделей. Підтримувані значення: none, low, medium, high.',
+            topPPlaceholder: '0.0 - 1.0',
+            reasoningEffortPlaceholder: 'none | low | medium | high',
+            thinkingEnabledName: 'Увімкнути режим thinking',
+            thinkingEnabledDesc: 'Лише для DeepSeek. Надсилає thinking: { type: "enabled" } у запитах chat/completions.'
+        }
+    }
+});
+
+extendLocale(STRINGS_VI, {
+    settings: {
+        providerConfig: {
+            maxOutputTokensDesc: 'Giới hạn token đầu ra tùy chọn chỉ cho nhà cung cấp này. Để trống để dùng thiết lập token tối đa toàn cục.',
+            topPName: 'Giá trị Top-p',
+            topPDesc: 'Ghi đè nucleus sampling tùy chọn cho các yêu cầu OpenAI-compatible. Để trống để giữ mặc định của nhà cung cấp.',
+            reasoningEffortName: 'Mức độ suy luận',
+            reasoningEffortDesc: 'Gợi ý tùy chọn cho các mô hình suy luận tương thích. Giá trị hỗ trợ: none, low, medium, high.',
+            topPPlaceholder: '0.0 - 1.0',
+            reasoningEffortPlaceholder: 'none | low | medium | high',
+            thinkingEnabledName: 'Bật chế độ thinking',
+            thinkingEnabledDesc: 'Chỉ dành cho DeepSeek. Gửi thinking: { type: "enabled" } trong các yêu cầu chat/completions.'
+        }
+    }
+});
+
+extendLocale(STRINGS_AR, {
+    settings: {
+        providerConfig: {
             categoryCloud: 'سحابي',
             categoryGateway: 'بوابة',
             categoryLocal: 'محلي',

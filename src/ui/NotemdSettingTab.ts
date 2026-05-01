@@ -99,7 +99,7 @@ export class NotemdSettingTab extends PluginSettingTab {
         callMode: ProviderDiagnosticCallMode
     ): Promise<void> {
         const i18n = getI18nStrings({ uiLocale: this.plugin.settings.uiLocale });
-        const blockingIssues = getProviderValidationIssues(provider)
+        const blockingIssues = getProviderValidationIssues(provider, this.plugin.settings.maxTokens)
             .filter(issue => issue.level === 'error')
             .map(issue => issue.message);
 
@@ -152,7 +152,7 @@ export class NotemdSettingTab extends PluginSettingTab {
         callMode: ProviderDiagnosticCallMode
     ): Promise<void> {
         const i18n = getI18nStrings({ uiLocale: this.plugin.settings.uiLocale });
-        const blockingIssues = getProviderValidationIssues(provider)
+        const blockingIssues = getProviderValidationIssues(provider, this.plugin.settings.maxTokens)
             .filter(issue => issue.level === 'error')
             .map(issue => issue.message);
 
@@ -242,7 +242,7 @@ export class NotemdSettingTab extends PluginSettingTab {
 
     private renderProviderValidation(containerEl: HTMLElement, provider: LLMProviderConfig): void {
         const i18n = getI18nStrings({ uiLocale: this.plugin.settings.uiLocale });
-        const issues = getProviderValidationIssues(provider);
+        const issues = getProviderValidationIssues(provider, this.plugin.settings.maxTokens);
         if (issues.length === 0) {
             return;
         }
@@ -570,6 +570,7 @@ export class NotemdSettingTab extends PluginSettingTab {
 
             const providerDefinition = getLLMProviderDefinition(activeProvider.name);
             const apiKeyMode = providerDefinition?.apiKeyMode ?? 'required';
+            const isOpenAICompatible = providerDefinition?.transport === 'openai-compatible';
 
             if (apiKeyMode !== 'none') {
                 const apiKeyDescription = apiKeyMode === 'optional'
@@ -615,6 +616,73 @@ export class NotemdSettingTab extends PluginSettingTab {
                     .onChange(async (value) => { activeProvider.temperature = value; await this.plugin.saveSettings(); })
                     .setDynamicTooltip());
 
+            const showManualOutputTokenOverride =
+                this.plugin.settings.enableDeveloperMode || activeProvider.maxOutputTokens !== undefined;
+
+            if (showManualOutputTokenOverride) {
+                new Setting(containerEl)
+                    .setName(i18n.settings.processing.maxTokensName)
+                    .setDesc(providerI18n.maxOutputTokensDesc)
+                    .addText(text => text
+                        .setPlaceholder(String(this.plugin.settings.maxTokens))
+                        .setValue(activeProvider.maxOutputTokens !== undefined ? String(activeProvider.maxOutputTokens) : '')
+                        .onChange(async (value) => {
+                            const parsed = Number.parseInt(value.trim(), 10);
+                            if (Number.isFinite(parsed) && parsed > 0) {
+                                activeProvider.maxOutputTokens = parsed;
+                            } else {
+                                delete activeProvider.maxOutputTokens;
+                            }
+                            await this.plugin.saveSettings();
+                        }));
+            }
+
+            if (isOpenAICompatible) {
+                new Setting(containerEl)
+                    .setName(providerI18n.topPName)
+                    .setDesc(providerI18n.topPDesc)
+                    .addText(text => text
+                        .setPlaceholder(providerI18n.topPPlaceholder)
+                        .setValue(activeProvider.topP !== undefined ? String(activeProvider.topP) : '')
+                        .onChange(async (value) => {
+                            const parsed = Number.parseFloat(value.trim());
+                            if (Number.isFinite(parsed) && parsed >= 0 && parsed <= 1) {
+                                activeProvider.topP = parsed;
+                            } else {
+                                delete activeProvider.topP;
+                            }
+                            await this.plugin.saveSettings();
+                        }));
+
+                new Setting(containerEl)
+                    .setName(providerI18n.reasoningEffortName)
+                    .setDesc(providerI18n.reasoningEffortDesc)
+                    .addText(text => text
+                        .setPlaceholder(providerI18n.reasoningEffortPlaceholder)
+                        .setValue(activeProvider.reasoningEffort || '')
+                        .onChange(async (value) => {
+                            const normalized = value.trim().toLowerCase();
+                            if (['none', 'low', 'medium', 'high'].includes(normalized)) {
+                                activeProvider.reasoningEffort = normalized;
+                            } else {
+                                delete activeProvider.reasoningEffort;
+                            }
+                            await this.plugin.saveSettings();
+                        }));
+            }
+
+            if (activeProvider.name === 'DeepSeek') {
+                new Setting(containerEl)
+                    .setName(providerI18n.thinkingEnabledName)
+                    .setDesc(providerI18n.thinkingEnabledDesc)
+                    .addToggle(toggle => toggle
+                        .setValue(activeProvider.thinkingEnabled === true)
+                        .onChange(async (value) => {
+                            activeProvider.thinkingEnabled = value;
+                            await this.plugin.saveSettings();
+                        }));
+            }
+
             if (activeProvider.name === 'Azure OpenAI') {
                 new Setting(containerEl)
                     .setName(providerI18n.apiVersionName)
@@ -631,10 +699,10 @@ export class NotemdSettingTab extends PluginSettingTab {
                 .addButton(button => button
                     .setButtonText(providerI18n.testConnectionButton).setCta()
                     .onClick(async () => {
-                        const blockingIssues = getProviderValidationIssues(activeProvider)
+                        const blockingIssues = getProviderValidationIssues(activeProvider, this.plugin.settings.maxTokens)
                             .filter(issue => issue.level === 'error')
                             .map(issue => issue.message);
-                        if (hasBlockingProviderValidationIssues(activeProvider)) {
+                        if (hasBlockingProviderValidationIssues(activeProvider, this.plugin.settings.maxTokens)) {
                             new Notice(formatI18n(providerI18n.testConnectionBlocked, {
                                 provider: activeProvider.name,
                                 issues: blockingIssues.join(' ')

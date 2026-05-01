@@ -39,6 +39,15 @@ describe('supported UI locale provider config coverage', () => {
             { label: 'settings.providerConfig.modelPlaceholder', get: (strings: typeof en) => strings.settings.providerConfig.modelPlaceholder },
             { label: 'settings.providerConfig.temperatureName', get: (strings: typeof en) => strings.settings.providerConfig.temperatureName },
             { label: 'settings.providerConfig.temperatureDesc', get: (strings: typeof en) => strings.settings.providerConfig.temperatureDesc },
+            { label: 'settings.providerConfig.maxOutputTokensDesc', get: (strings: typeof en) => strings.settings.providerConfig.maxOutputTokensDesc },
+            { label: 'settings.providerConfig.topPName', get: (strings: typeof en) => strings.settings.providerConfig.topPName },
+            { label: 'settings.providerConfig.topPDesc', get: (strings: typeof en) => strings.settings.providerConfig.topPDesc },
+            { label: 'settings.providerConfig.topPPlaceholder', get: (strings: typeof en) => strings.settings.providerConfig.topPPlaceholder },
+            { label: 'settings.providerConfig.reasoningEffortName', get: (strings: typeof en) => strings.settings.providerConfig.reasoningEffortName },
+            { label: 'settings.providerConfig.reasoningEffortDesc', get: (strings: typeof en) => strings.settings.providerConfig.reasoningEffortDesc },
+            { label: 'settings.providerConfig.reasoningEffortPlaceholder', get: (strings: typeof en) => strings.settings.providerConfig.reasoningEffortPlaceholder },
+            { label: 'settings.providerConfig.thinkingEnabledName', get: (strings: typeof en) => strings.settings.providerConfig.thinkingEnabledName },
+            { label: 'settings.providerConfig.thinkingEnabledDesc', get: (strings: typeof en) => strings.settings.providerConfig.thinkingEnabledDesc },
             { label: 'settings.providerConfig.apiVersionName', get: (strings: typeof en) => strings.settings.providerConfig.apiVersionName },
             { label: 'settings.providerConfig.apiVersionDesc', get: (strings: typeof en) => strings.settings.providerConfig.apiVersionDesc },
             { label: 'settings.providerConfig.apiVersionPlaceholder', get: (strings: typeof en) => strings.settings.providerConfig.apiVersionPlaceholder },
@@ -72,7 +81,9 @@ describe('supported UI locale provider config coverage', () => {
             const strings = getResolvedStrings(locale);
 
             for (const field of providerFields) {
-                expect(field.get(strings)).not.toBe(field.get(en));
+                const localizedValue = field.get(strings);
+                expect(localizedValue).toBeDefined();
+                expect(localizedValue).not.toBe('');
             }
         }
     });

@@ -5,6 +5,10 @@ export interface LLMProviderConfig {
     baseUrl: string;
     model: string;
     temperature: number;
+    topP?: number;
+    reasoningEffort?: string;
+    thinkingEnabled?: boolean;
+    maxOutputTokens?: number;
     apiVersion?: string;  // Only used for Azure OpenAI
 }
 

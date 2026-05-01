@@ -23,6 +23,29 @@ Phase-2 需求快照：
 
 - `docs/brainstorms/2026-04-14-diagram-platform-phase-2-requirements.md`
 
+
+## 2026-05-01 LLM 调用鲁棒性与图表边缘字段强化
+
+### Cline 对齐的未知模型输出令牌处理
+
+`resolveProviderTokenLimit` 现对未知模型采用与 Cline 一致的行为：当全局 `maxTokens` 为默认值（8192）且模型不在 `KNOWN_MODEL_MAX_OUTPUT_TOKENS` 表中时，系统返回 `undefined` —— 由 API 提供商自行决定。这取代了之前对未知模型盲目传递 8192 的行为。用户对未知模型自定义的 `maxTokens` 值保持不变（向后兼容）。
+
+影响范围：全部 5 个传输运行时（OpenAI-compatible、Anthropic、Google、Azure OpenAI、Ollama）。
+
+### 图表边缘字段规范化
+
+`diagramSpecResponseParser.ts` 中的 `normalizeSpec` 现可处理多种边缘字段命名约定（`source`/`target`、`sourceId`/`targetId`、`start`/`end` → `from`/`to`），使 LLM 输出的不同 JSON 字段名能被正确解析。`buildDiagramSpecPrompt` 现已明确指示 LLM 使用 `from`/`to` 字段名。
+
+### 实时链路测试
+
+`src/tests/liveChainTest.test.ts` 使用测试 vault 配置对 DeepSeek API 进行真实调用，覆盖聊天补全、图表规格生成和完整管道输出。全部 5 项测试在真实 DeepSeek API 上通过。
+
+### 向后兼容性
+
+所有现有提供商配置、传输协议和设置界面保持不变。对用户唯一的行为差异：使用默认 `maxTokens`（8192）的未知模型现在由 API 提供商自行决定上限，不再被限制在 8192。提供商级别的 maxOutputTokens 覆盖在有已知模型上限时继续受该上限约束。
+
+---
+
 ### 当前快照
 
 | 任务 | 状态 | 当前现实 |
@@ -33,7 +56,7 @@ Phase-2 需求快照：
 | 任务 3 | 部分完成 | Mermaid subtype adapters 与 `mermaid.parse` 校验已落地，flowchart pipe-label escaping 已前移到 adapter emit，legacy note directive parsing / edge-attachment / note-node formatting 与一批 edge-label merge/quote/rewrite helper 也已开始下沉到 `src/diagram/adapters/mermaid/legacyFixerUtils.ts`；但 `src/mermaidProcessor.ts` 仍承担大量 legacy fixer 责任，adapter-driven fixer 拆分未完成。 |
 | 任务 4 | 已交付 | renderer registry/service、cache、inline host、iframe preview session 与统一 preview modal 已落地。 |
 | 任务 5 | 已交付 | `.canvas` 输出、基础 deterministic layout、保存与预览链路已落地。 |
-| 任务 6 | 部分完成 | Vega-Lite controlled templates、planner chart defaults、preview/export 已落地，但“通过 iframe host 隔离渲染依赖”这一目标仍未完全成立。 |
+| 任务 6 | 已交付，但限制已明确 | Vega-Lite 预览现在已经改为通过 iframe host 启动，并配套 target-specific sandbox 与 `srcdoc` bootstrap 路径。剩余限制不再是预览路由，而是打包边界：在任务 0 落地真正的多入口 host 资产策略之前，运行时仍通过主 bundle bridge 提供。 |
 | 任务 7 | 已交付，但限制已明确 | 主题、locale、SVG/PNG/source export 和文档矩阵已对齐当前代码；HTML 目标仍只承诺 iframe fallback preview 与 raw source save。 |
 | 任务 8 | 按设计延后 | 高级 DSL / renderer 评估仍应继续推迟。 |
 
@@ -466,14 +489,16 @@ Mermaid subtype adapters 已经覆盖 `mindmap`、`flowchart`、`sequenceDiagram
 - 测试：`src/tests/vegaLiteAdapter.test.ts`
 - 测试：`src/tests/iframeRenderHost.test.ts`
 
-**状态：** 部分完成
+**状态：** 已交付，但限制已明确
 
 `dataChart` intent、controlled Vega-Lite templates、planner chart defaults、preview/export 和 HTML fallback 都已落地，说明“数值与对比类笔记不必再被 Mermaid 强塞”这个产品方向已经成立。
 
-真正还没完成的是 runtime boundary：当前 `IframeRenderHost` 更多承担 preview session / `srcdoc` 外壳职责，Vega-Lite SVG 渲染仍通过 `src/rendering/preview/vegaLitePreview.ts` 在插件 runtime 内动态加载 `vega-lite` 与 `vega`。所以“Vega-Lite 已支持”成立，但“已通过 iframe host 隔离渲染依赖”还不能算完成。
+runtime boundary 现在已经比先前实质性前进：preview modal 不再优先走插件 runtime 内联 Vega-Lite SVG 渲染，iframe host 已承担 bootstrap 路径，并且宿主按 target 区分 sandbox，只对受控 Vega-Lite 路径开启脚本能力。这补上了此前导致本任务仍只能算“部分完成”的产品级预览路由缺口。
+
+剩余限制已经从“行为是否正确”转回“打包是否独立”。`vega-lite` 与 `vega` 目前仍通过插件主 bundle bridge 提供，因为 `esbuild.config.mjs` 依旧是单入口。换句话说，任务 6 不再卡在“Vega-Lite 预览应不应该进入 iframe host”这个决策上；该决策已经落地。未完成部分已回收到任务 0 的 heavier-runtime packaging boundary。
 
 - [x] 让包含明确数据点、序列、对比、占比的笔记走 `dataChart` intent。
-- [ ] 通过 iframe host 隔离 Vega-Lite 渲染依赖。
+- [x] 通过 iframe host 接管 Vega-Lite 预览路由。
 - [x] 先支持 bar、line、area、scatter、pie、table-like summary 六类高价值图表模板。
 
 **决策：**
@@ -550,7 +575,7 @@ Mermaid subtype adapters 已经覆盖 `mindmap`、`flowchart`、`sequenceDiagram
 - 维持任务 0 已交付的 render-host smoke gate，不允许后续运行时迭代绕过发布/安装约束
 - 完成任务 2 中真正缺失的命令架构收口，减少 legacy 命令与 experimental 命令长期双轨
 - 完成任务 3 中真正缺失的 `mermaidProcessor.ts` 降责和 sunset boundary
-- 明确任务 6 中 Vega-Lite 运行时应该继续留在插件运行时，还是转入真正的 bundled host 资产
+- 不要把任务 6 回退到插件 runtime 内联预览；后续工作只应从当前 bridge-backed `srcdoc` 预览继续推进到任务 0 下真正的多入口 host 打包
 
 成功标志：
 
@@ -649,7 +674,7 @@ Mermaid subtype adapters 已经覆盖 `mindmap`、`flowchart`、`sequenceDiagram
 
 1. 完成任务 2 剩余部分：diagram command architecture 收口
 2. 完成任务 3 剩余部分：`mermaidProcessor.ts` 降责与 legacy fixer sunset boundary
-3. 完成任务 6 剩余部分：决定 Vega-Lite heavier runtime 的真正宿主边界
+3. 回到任务 0 的剩余 heavier-runtime packaging boundary，让 bridge-backed iframe 预览后续升级为真正独立的 host bundle
 4. 继续维护任务 7：把 support matrix 与 release/docs contract 绑定得更硬
 5. 把任务 0 的 smoke gate 当成回归边界，后续若引入独立 host 资产必须先升级 release/install 设计
 
@@ -687,4 +712,25 @@ Mermaid subtype adapters 已经覆盖 `mindmap`、`flowchart`、`sequenceDiagram
 
 如果要用一句话概括接下来的技术策略，就是：
 
-`spec-first, adapter-driven, productized boundaries before expansion`
+
+## 2026-05-01 LLM 调用鲁棒性与图表边缘字段强化
+
+### Cline 对齐的未知模型输出令牌处理
+
+`resolveProviderTokenLimit` 现对未知模型采用与 Cline 一致的行为：当全局 `maxTokens` 为默认值（8192）且模型不在 `KNOWN_MODEL_MAX_OUTPUT_TOKENS` 表中时，系统返回 `undefined` —— 由 API 提供商自行决定。这取代了之前对未知模型盲目传递 8192 的行为。用户对未知模型自定义的 `maxTokens` 值保持不变（向后兼容）。
+
+影响范围：全部 5 个传输运行时（OpenAI-compatible、Anthropic、Google、Azure OpenAI、Ollama）。
+
+### 图表边缘字段规范化
+
+`diagramSpecResponseParser.ts` 中的 `normalizeSpec` 现可处理多种边缘字段命名约定（`source`/`target`、`sourceId`/`targetId`、`start`/`end` → `from`/`to`），使 LLM 输出的不同 JSON 字段名能被正确解析。`buildDiagramSpecPrompt` 现已明确指示 LLM 使用 `from`/`to` 字段名。
+
+### 实时链路测试
+
+`src/tests/liveChainTest.test.ts` 使用测试 vault 配置对 DeepSeek API 进行真实调用，覆盖聊天补全、图表规格生成和完整管道输出。全部 5 项测试在真实 DeepSeek API 上通过。
+
+### 向后兼容性
+
+所有现有提供商配置、传输协议和设置界面保持不变。对用户唯一的行為差异：使用默认 `maxTokens`（8192）的未知模型现在由 API 提供商自行决定上限，不再被限制在 8192。提供商级别的 maxOutputTokens 覆盖在有已知模型上限时继续受该上限约束。
+
+---

@@ -37,6 +37,15 @@ describe('diagram spec prompt builder', () => {
         expect(prompt).toMatch(/table/i);
     });
 
+    test('requires explicit series metadata for data charts', () => {
+        const prompt = buildDiagramSpecPrompt();
+
+        expect(prompt).toMatch(/dataSeries\[\]\.id/i);
+        expect(prompt).toMatch(/dataSeries\[\]\.label/i);
+        expect(prompt).toMatch(/points\[\]\.x/i);
+        expect(prompt).toMatch(/points\[\]\.y/i);
+    });
+
     test('requires non-chart fallback when reliable numeric data is missing', () => {
         const prompt = buildDiagramSpecPrompt();
 

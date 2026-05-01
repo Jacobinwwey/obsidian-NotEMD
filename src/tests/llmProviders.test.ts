@@ -1,5 +1,6 @@
 import {
     createDefaultProviders,
+    getKnownModelMaxOutputTokens,
     getLLMProviderDefinition,
     getOrderedProviderNames,
     isOpenAICompatibleProvider
@@ -111,8 +112,42 @@ describe('llmProviders registry', () => {
     });
 
     test('selected china-focused preset defaults stay aligned with current cline model defaults', () => {
+        expect(getLLMProviderDefinition('DeepSeek')?.defaultConfig.baseUrl).toBe('https://api.deepseek.com');
+        expect(getLLMProviderDefinition('DeepSeek')?.defaultConfig.model).toBe('deepseek-v4-pro');
         expect(getLLMProviderDefinition('Qwen')?.defaultConfig.model).toBe('qwen3-235b-a22b');
         expect(getLLMProviderDefinition('Moonshot')?.defaultConfig.model).toBe('kimi-k2-0905-preview');
         expect(getLLMProviderDefinition('MiniMax')?.defaultConfig.model).toBe('MiniMax-M2.7');
+    });
+
+    test('known model metadata exposes cline-aligned max output token caps per provider/model pair', () => {
+        expect(getKnownModelMaxOutputTokens('OpenAI', 'gpt-4o')).toBe(4_096);
+        expect(getKnownModelMaxOutputTokens('OpenAI', 'gpt-4.1')).toBe(32_768);
+        expect(getKnownModelMaxOutputTokens('DeepSeek', 'deepseek-v3')).toBe(8_000);
+        expect(getKnownModelMaxOutputTokens('DeepSeek', 'deepseek-r1')).toBe(8_000);
+        expect(getKnownModelMaxOutputTokens('Anthropic', 'claude-3-5-sonnet-20240620')).toBe(8_192);
+        expect(getKnownModelMaxOutputTokens('Anthropic', 'claude-sonnet-4-6')).toBe(64_000);
+        expect(getKnownModelMaxOutputTokens('Google', 'gemini-2.0-flash-exp')).toBe(8_192);
+        expect(getKnownModelMaxOutputTokens('Google', 'gemini-2.5-pro')).toBe(65_536);
+        expect(getKnownModelMaxOutputTokens('Azure OpenAI', 'gpt-4o')).toBe(4_096);
+        expect(getKnownModelMaxOutputTokens('Qwen', 'qwen3-235b-a22b')).toBe(16_384);
+        expect(getKnownModelMaxOutputTokens('Qwen', 'qwen-plus')).toBe(129_024);
+        expect(getKnownModelMaxOutputTokens('Qwen Code', 'qwen3-coder-plus')).toBe(65_536);
+        expect(getKnownModelMaxOutputTokens('Doubao', 'deepseek-r1-250120')).toBe(32_768);
+        expect(getKnownModelMaxOutputTokens('Moonshot', 'kimi-k2-0905-preview')).toBe(16_384);
+        expect(getKnownModelMaxOutputTokens('Moonshot', 'kimi-k2.5')).toBe(32_000);
+        expect(getKnownModelMaxOutputTokens('GLM', 'glm-5')).toBe(128_000);
+        expect(getKnownModelMaxOutputTokens('Z AI', 'glm-5')).toBe(128_000);
+        expect(getKnownModelMaxOutputTokens('MiniMax', 'MiniMax-M2.7')).toBe(128_000);
+        expect(getKnownModelMaxOutputTokens('Mistral', 'devstral-2512')).toBe(256_000);
+        expect(getKnownModelMaxOutputTokens('xAI', 'grok-4')).toBe(8_192);
+        expect(getKnownModelMaxOutputTokens('OpenRouter', 'anthropic/claude-3.7-sonnet')).toBe(64_000);
+        expect(getKnownModelMaxOutputTokens('Requesty', 'anthropic/claude-3-7-sonnet-latest')).toBe(8_192);
+        expect(getKnownModelMaxOutputTokens('Groq', 'moonshotai/kimi-k2-instruct-0905')).toBe(16_384);
+        expect(getKnownModelMaxOutputTokens('Groq', 'deepseek-r1-distill-llama-70b')).toBe(131_072);
+        expect(getKnownModelMaxOutputTokens('Fireworks', 'accounts/fireworks/models/kimi-k2p5')).toBe(16_384);
+        expect(getKnownModelMaxOutputTokens('Fireworks', 'accounts/fireworks/models/qwen3-vl-30b-a3b-thinking')).toBe(32_768);
+        expect(getKnownModelMaxOutputTokens('Huawei Cloud MaaS', 'DeepSeek-V3')).toBe(16_384);
+        expect(getKnownModelMaxOutputTokens('OpenAI', 'unknown-model')).toBeUndefined();
+        expect(getKnownModelMaxOutputTokens('Unknown Provider', 'gpt-4o')).toBeUndefined();
     });
 });
