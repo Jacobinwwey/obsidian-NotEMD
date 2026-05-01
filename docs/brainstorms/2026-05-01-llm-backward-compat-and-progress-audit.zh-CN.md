@@ -93,9 +93,13 @@ LLM 调用层已完成以下更新：
 | 公共命令表面已整合 | ✗（双命令 ID 仍共存） |
 | `promptUtils.ts` 旧版 Mermaid 提示已退役 | ✗ |
 
+**硬性约束：** `promptUtils.ts` 中的旧版 Mermaid 提示词为原场景专门调优。任何扩展或退役必须完全保留原场景的可用性。跨版本稳定性和用户体验连续性优先于清理。命令 ID 整合仍是下一目标；提示退役需先经过真实 Obsidian 验证。不阻塞 v1.8.2。
+
 ### 任务 3：Mermaid 适配器 V2 — 部分完成（按用户指令暂缓）
 
-按用户指令，MermaidProcessor 分解为稳定性暂缓。当前状态：
+按用户指令，MermaidProcessor 分解为稳定性暂缓。
+
+**硬性约束：** 每个子任务必须在真实 Obsidian 实例中独立验证后方可推进。图表输出图像必须保存、检查并确认完整正确。仅凭单元测试不足以跨越任何子任务边界。当前状态：
 - 子类型适配器覆盖 mindmap、flowchart、sequence、class、ER、state
 - 管道转义在适配器发射阶段处理
 - `legacyFixerUtils.ts` 已从 `mermaidProcessor.ts` 提取

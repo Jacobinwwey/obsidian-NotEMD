@@ -95,11 +95,13 @@ All types, validators, planner, intent router landed. Tests pass.
 | Public command surfaces consolidated | ✗ | Dual command IDs still coexist (`summarize-as-mermaid` + `generate-experimental-diagram`) |
 | `promptUtils.ts` legacy Mermaid prompt retired | ✗ | Still contains `mindmap`-bound legacy prompt |
 
-**Next:** Command ID consolidation and prompt retirement. Not blocking v1.8.2.
+**Hard Constraint:** The legacy Mermaid prompt in `promptUtils.ts` was specifically tuned for the original scenario. Any extension or retirement MUST fully preserve the original scenario's usability. Cross-version stability and user experience continuity take priority over cleanup. Command ID consolidation remains the next target; prompt retirement requires real Obsidian verification first. Not blocking v1.8.2.
 
 ### Task 3: Mermaid Adapter V2 — Partial (excluded per user directive)
 
-Per user instruction, MermaidProcessor decomposition is deferred for robustness. Current state:
+Per user instruction, MermaidProcessor decomposition is deferred for robustness.
+
+**Hard Constraint:** Each sub-task MUST be individually verified in a real Obsidian instance before proceeding. Diagram output images MUST be saved, checked, and confirmed complete and correct. Unit tests alone are not sufficient to advance beyond any sub-task boundary. Current state:
 - Subtype adapters cover mindmap, flowchart, sequence, class, ER, state
 - Pipe-label escaping in adapter emit
 - `legacyFixerUtils.ts` extracted from `mermaidProcessor.ts`
