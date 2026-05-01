@@ -69,4 +69,47 @@ describe('provider validation', () => {
         expect(getProviderValidationIssues(provider)).toEqual([]);
         expect(hasBlockingProviderValidationIssues(provider)).toBe(false);
     });
+
+    test('DeepSeek thinking mode warns when the effective output cap is too low', () => {
+        const provider = {
+            name: 'DeepSeek',
+            apiKey: 'test-key',
+            baseUrl: 'https://api.deepseek.com',
+            model: 'deepseek-v4-pro',
+            temperature: 0.5,
+            thinkingEnabled: true,
+            maxOutputTokens: 2048
+        };
+
+        const issues = getProviderValidationIssues(provider, 8192);
+
+        expect(issues).toEqual([
+            expect.objectContaining({
+                level: 'warning'
+            })
+        ]);
+        expect(issues[0].message).toContain('Raise Max Output Tokens to at least 8000');
+        expect(hasBlockingProviderValidationIssues(provider, 8192)).toBe(false);
+    });
+
+    test('DeepSeek thinking mode inherits the global cap when no provider override is set', () => {
+        const provider = {
+            name: 'DeepSeek',
+            apiKey: 'test-key',
+            baseUrl: 'https://api.deepseek.com',
+            model: 'deepseek-v4-pro',
+            temperature: 0.5,
+            thinkingEnabled: true
+        };
+
+        const lowGlobalIssues = getProviderValidationIssues(provider, 2048);
+        expect(lowGlobalIssues).toEqual([
+            expect.objectContaining({
+                level: 'warning'
+            })
+        ]);
+
+        expect(getProviderValidationIssues(provider, 8192)).toEqual([]);
+        expect(hasBlockingProviderValidationIssues(provider, 8192)).toBe(false);
+    });
 });

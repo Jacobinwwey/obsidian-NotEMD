@@ -7,6 +7,7 @@ This document summarizes the major functional and architectural changes implemen
 ## [Unreleased]
 
 ### English
+*   **Model-Aware Output Token Caps**: Added Cline-aligned known-model max-output-token metadata and now resolve the effective output cap from the actual selected model instead of hardcoded provider defaults. When the global max-token setting is still at the stock default, supported models automatically use their true known ceiling; when users set a custom global or provider-specific cap, requests are clamped to the model’s known maximum. This now applies across OpenAI-compatible providers plus Anthropic, Google, Azure OpenAI, and Ollama runtimes.
 *   **Developer-Mode Diagnostics Panel**: Added a dedicated Settings developer panel gated by a new Developer mode switch, so normal users do not see developer-only controls.
 *   **Selectable Diagnostic Call Modes + Stability Runs**: Developer diagnostics can now run with selectable call modes (including OpenAI-compatible forced transport modes) and can execute repeated stability runs with aggregated reporting.
 *   **OpenAI-Compatible Non-Stream Stage In Stable Mode**: After a primary direct streaming failure, stable-mode OpenAI-compatible calls now attempt direct non-stream transport before falling back to `requestUrl`. This captures providers that return valid buffered responses but are unstable on streaming sockets.
@@ -20,6 +21,7 @@ This document summarizes the major functional and architectural changes implemen
 *   **Docs and Agent Guide Alignment**: Updated both READMEs and `AGENTS.md` so in-plugin diagnostics and CLI diagnostics are documented and required to stay semantically aligned.
 
 ### Chinese (中文)
+*   **模型感知的输出 Token 上限**: 新增与 Cline 对齐的已知模型最大输出 Token 元数据，并且运行时现在会根据用户实际选择的模型来解析有效输出上限，而不是依赖硬编码的 provider 默认值。当全局最大 Token 仍保持插件默认值时，已支持模型会自动使用其真实已知上限；当用户手动设置全局或 provider 级上限时，请求会被钳制到该模型的已知最大值。此行为现已覆盖 OpenAI-compatible 路径以及 Anthropic、Google、Azure OpenAI、Ollama 运行时。
 *   **开发者模式诊断面板**: 设置页新增由“Developer mode”开关控制的独立开发者面板，默认对普通用户隐藏开发者专用控件。
 *   **可选诊断调用方式与稳定性多轮测试**: 开发者诊断现在可选择调用方式（含 OpenAI-compatible 的强制传输模式），并支持按指定轮次执行稳定性测试并输出聚合报告。
 *   **OpenAI-compatible 稳定模式新增非流式阶段**: 当主直连流式传输失败后，稳定模式下的 OpenAI-compatible 调用现在会先尝试直连非流式传输，再回退到 `requestUrl`。这能覆盖“流式链路不稳定但非流式可正常返回”的 Provider 场景。
@@ -409,3 +411,32 @@ This document summarizes the major functional and architectural changes implemen
     *   最后，使用“根据标题生成内容”功能，由 LLM 自动为该笔记生成内容。
 *   **新设置：“生成后自动修复Mermaid语法”**: 添加了一个设置，用于在内容生成任务后自动对笔记运行语法修复，以确保生成的Mermaid图表有效。
 *   **更新文档**: 更新了 `README.md` 和 `README_zh.md`，以全面记录所有新设置和“从选中文本创建维基链接并生成笔记”的新命令。
+
+## 2026-05-01 — Cline-Aligned Output Token Handling and Diagram Pipeline Hardening
+
+### Cline-Aligned Unknown Model maxOutputTokens
+
+Problem: `resolveProviderTokenLimit` passed the global `maxTokens` setting (default 8192) for completely unknown models not in `KNOWN_MODEL_MAX_OUTPUT_TOKENS`. This was incorrect — forcing a fixed cap on models the system doesn't understand risks silently limiting output on high-capability models, or requesting unsupported `max_tokens` values on constrained models.
+
+Fix: When a model is not known (no entry in `KNOWN_MODEL_MAX_OUTPUT_TOKENS`) AND the global `maxTokens` setting equals the default (untouched), the system now returns `undefined` — letting the API provider decide. This matches Cline's behavior exactly. User-set custom `maxTokens` values for unknown models are preserved (backward compatibility).
+
+Scope: `resolveProviderTokenLimit` in `src/llmUtils.ts`. Affects all transports (OpenAI-compatible, Anthropic, Google, Azure OpenAI, Ollama).
+
+Tests: Added 2 tests in `src/tests/llmUtilsProviderSupport.test.ts`:
+- Unknown model + default → `max_tokens` not sent (API decides)
+- Unknown model + custom value → user's value passed through
+
+### Diagram Edge Field Normalization
+
+Problem: Live LLM testing against DeepSeek revealed that LLM outputs use `source`/`target` edge field names, but `DiagramEdge` expects `from`/`to`. This caused validation failures when LLMs returned valid specs with the "wrong" field names.
+
+Fix:
+- `normalizeSpec` in `src/diagram/diagramSpecResponseParser.ts` now normalizes multiple edge field conventions: `from`/`source`/`sourceId`/`start` → `from`, `to`/`target`/`targetId`/`end` → `to`
+- `buildDiagramSpecPrompt` in `src/diagram/prompts/diagramSpecPrompt.ts` now explicitly instructs LLMs to use `from`/`to` field names
+
+### Live LLM Chain Tests
+
+New test file `src/tests/liveChainTest.test.ts` (untracked, for manual execution):
+- Tests real DeepSeek API calls from the test vault configuration
+- Verifies chat completion, diagram spec generation, and full diagram pipeline
+- All 5 tests pass against live DeepSeek API

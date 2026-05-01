@@ -17,6 +17,8 @@ describe('iframe render host', () => {
 
         expect(session.htmlSrcdoc).toContain('<!DOCTYPE html>');
         expect(session.htmlSrcdoc).toContain('Vega-Lite preview');
+        expect(session.htmlSrcdoc).toContain('notemd-vega-lite-mount');
+        expect(session.htmlSrcdoc).toContain('notemd-render-host-bootstrap');
         expect(session.payload.theme).toBe('dark');
         expect(session.payload.previewTitle).toBe('Vega-Lite preview');
         expect(session.payload.sourcePath).toBe('Notes/Weekly Signups.md');
