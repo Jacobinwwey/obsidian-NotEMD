@@ -1,3 +1,4 @@
+import { clearLlmResponseCache } from '../llmUtils';
 import { EventEmitter } from 'events';
 import * as http from 'http';
 import * as https from 'https';
@@ -385,6 +386,7 @@ describe('llmUtils expanded provider support', () => {
     let settings: NotemdSettings;
 
     beforeEach(() => {
+    clearLlmResponseCache();
         reporter = createReporter();
         settings = { ...mockSettings, maxTokens: 2048 };
         (requestUrl as jest.Mock).mockReset();
