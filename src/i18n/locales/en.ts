@@ -76,6 +76,12 @@ export const STRINGS_EN = {
             stabilityFinished: 'Developer stability diagnostic finished ({callMode}): {successCount}/{runs} succeeded. Report: {path}',
             stabilityFailedBeforeReport: 'Developer stability diagnostic failed before report generation: {message}'
         },
+        sponsor: {
+            heading: 'Support Development',
+            desc: 'Notemd is free and open source. If you find it useful, please consider supporting its development.',
+            githubButton: 'Sponsor on GitHub',
+            coffeeButton: 'Buy Me a Coffee',
+        },
         providerConfig: {
             heading: 'LLM providers',
             summaryTitle: 'Provider presets expanded to {count} entries.',
