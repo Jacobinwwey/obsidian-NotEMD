@@ -1,3 +1,60 @@
+## 1.8.3
+
+### Highlights
+
+- First-install Welcome Modal with i18n across all 22 locales
+- Sponsor support: Give a Star on GitHub + Buy Me a Coffee (ko-fi)
+- Cline-aligned output token resolution for unknown models
+- Diagram edge field normalization for LLM JSON output compatibility
+- Hard constraints documented for MermaidProcessor decomposition and legacy prompt retirement
+- notebook-navigator cross-reference analysis with 5 improvement angles identified
+
+### New Features
+
+- **Welcome Modal**: Shown on first install with plugin capabilities overview, LLM setup hint, closing poetic message, and sponsor buttons. Fully i18n-backed (22 locales).
+- **Sponsor Support**: Settings tab sponsor section with GitHub Star + ko-fi Coffee buttons. manifest.json fundingUrl for native Obsidian community browser display.
+
+### Fixes
+
+- **Cline-aligned token resolution**: Unknown models with default maxTokens now defer to the API provider instead of being capped at 8192.
+- **Diagram edge normalization**: LLM outputs using `source`/`target` edge fields are now normalized to `from`/`to`, fixing validation failures with real API responses.
+
+### Chores
+
+- Hard constraints codified for MermaidProcessor decomposition: each sub-task requires real Obsidian verification with saved image validation.
+- Legacy prompt retirement gated: original scenario usability must be fully preserved.
+- notebook-navigator design reference analysis added to audit docs and roadmap.
+- ko-fi link: https://ko-fi.com/jacobinwwey
+
+---
+
+## 1.8.3
+
+### 亮点
+
+- 首次安装欢迎弹窗，覆盖全部 22 种语言
+- 赞助支持：给 GitHub 加星 + 请喝杯咖啡（ko-fi）
+- Cline 对齐的未知模型输出令牌处理
+- 图表边缘字段规范化，兼容 LLM JSON 输出
+- MermaidProcessor 分解和旧版提示退役的硬性约束已文档化
+- notebook-navigator 交叉参考分析，识别 5 项改进方向
+
+### 新功能
+
+- **欢迎弹窗**：首次安装时展示，包含插件能力概述、LLM 配置提示、结语诗句和赞助按钮。22 种语言完整 i18n。
+- **赞助支持**：设置页赞助板块，含 GitHub 加星 + ko-fi 咖啡按钮。manifest.json fundingUrl 支持 Obsidian 社区插件浏览器原生展示。
+
+### 修复
+
+- **Cline 对齐令牌解析**：未知模型使用默认 maxTokens 时现在由 API 提供商自行决定，不再被限制在 8192。
+- **图表边缘规范化**：LLM 输出使用 `source`/`target` 边缘字段现被规范化为 `from`/`to`，修复真实 API 响应的验证失败。
+
+### 杂项
+
+- MermaidProcessor 分解硬性约束：每个子任务需真实 Obsidian 验证及图像保存核验。
+- 旧版提示退役门槛：必须完全保留原场景可用性。
+- notebook-navigator 设计参考分析已添加至审计文档和路线图。
+- ko-fi 链接：https://ko-fi.com/jacobinwwey
 # Notemd Change Log
 
 This document summarizes the major functional and architectural changes implemented.
