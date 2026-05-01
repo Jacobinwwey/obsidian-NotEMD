@@ -22,6 +22,8 @@ Ein einfacher Weg, Ihre eigene Wissensdatenbank zu erstellen!
 
 Notemd verbessert Ihren Obsidian-Workflow durch die Integration verschiedener gro√üer Sprachmodelle (LLMs), um Ihre mehrsprachigen Notizen zu verarbeiten, automatisch Wiki-Links f√ºr Schl√ºsselkonzepte zu generieren, entsprechende Konzeptnotizen zu erstellen, Web-Recherchen durchzuf√ºhren und Ihnen dabei zu helfen, leistungsstarke Wissensgraphen aufzubauen.
 
+If\ you\ love\ using\ Notemd\,\ please\ consider\ \[\‚\≠\ê\ Give\ a\ Star\ on\ GitHub\]\(https\:\/\/github\.com\/Jacobinwwey\/obsidian\-NotEMD\)\ or\ \[\‚\ò\ï\Ô\∏\è\ Buy\ Me\ a\ Coffee\]\(https\:\/\/ko\-fi\.com\/jacobinwwey\)\.
+
 **Version:** 1.8.1
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
@@ -689,6 +691,8 @@ Beitr√§ge sind willkommen! Bitte schauen Sie im GitHub-Repository nach Richtlini
 MIT-Lizenz - Siehe Datei [LICENSE](LICENSE) f√ºr Details.
 
 ---
+
+If you love using Notemd, please consider [‚≠ê Give a Star on GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) or [‚òïÔ∏è Buy Me a Coffee](https://ko-fi.com/jacobinwwey).
 
 *Notemd v1.8.3 - Verbessern Sie Ihren Obsidian-Wissensgraphen mit KI.*
 

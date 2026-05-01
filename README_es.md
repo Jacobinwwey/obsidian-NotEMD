@@ -690,6 +690,8 @@ Licencia MIT - Ver el archivo [LICENSE](LICENSE) para más detalles.
 
 ---
 
+If you love using Notemd, please consider [⭐ Give a Star on GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) or [☕️ Buy Me a Coffee](https://ko-fi.com/jacobinwwey).
+
 *Notemd v1.8.3 - Mejora tu grafo de conocimiento en Obsidian con IA.*
 
 
