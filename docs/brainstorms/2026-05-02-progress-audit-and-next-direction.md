@@ -160,3 +160,38 @@ Priority order for post-v1.8.3 work, respecting hard constraints:
 3. Update audit doc with final state
 4. Verify CI clean
 5. Commit and push to main
+
+## Acceptance Criteria: Diagram Generation
+
+All 8 diagram intents MUST pass the following acceptance gate before release:
+
+### Gate: Live LLM Verification
+
+Run: `npm test -- --runInBand src/tests/liveAllDiagramIntents.test.ts`
+
+| Intent | Render Target | Node Labels | Edge References | Content Non-Empty |
+|---|---|---|---|---|
+| `mindmap` | mermaid | ✓ required | ✓ required | ✓ required |
+| `flowchart` | mermaid | ✓ required | ✓ required | ✓ required |
+| `sequence` | mermaid | ✓ required | ✓ required | ✓ required |
+| `classDiagram` | mermaid | ✓ required | ✓ required | ✓ required |
+| `erDiagram` | mermaid | ✓ required | ✓ required | ✓ required |
+| `stateDiagram` | mermaid | ✓ required | ✓ required | ✓ required |
+| `canvasMap` | json-canvas | ✓ required | ✓ required | ✓ required |
+| `dataChart` | vega-lite | N/A (data-driven) | N/A | ✓ required |
+
+### Last Verified: 2026-05-02
+
+All 8 intents passed against live DeepSeek API (deepseek-v4-pro).
+Total duration: ~226 seconds.
+
+### Regression Gate
+
+Any change to `src/diagram/` must re-run this test suite before merge.
+CI should block PRs that modify `src/diagram/` without passing this gate.
+
+### Hard Constraints (Reminder)
+
+1. MermaidProcessor decomposition: each sub-task requires real Obsidian verification with saved/checked images
+2. Legacy prompt retirement: must preserve original scenario usability
+3. All 8 diagram intents must pass live verification before release
