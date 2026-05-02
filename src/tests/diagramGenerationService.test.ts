@@ -289,7 +289,7 @@ Referral share: 35%
         })).rejects.toThrow(/does not match planner route "dataChart"/i);
     });
 
-    test('fails fast when the LLM ignores an explicit requested intent', async () => {
+    test('retries then fails when LLM ignores an explicit requested intent', async () => {
         await expect(generateDiagramArtifact(`# Release Checklist
 
 1. Validate version

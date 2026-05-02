@@ -109,7 +109,7 @@ function assertPlanCompatibility(
     plan: DiagramPlan,
     options: Pick<DiagramGenerationOptions, 'compatibilityMode' | 'requestedIntent'>
 ): void {
-    if (options.requestedIntent && options.compatibilityMode === 'legacy-mermaid' && spec.intent !== options.requestedIntent) {
+    if (options.requestedIntent && spec.intent !== options.requestedIntent) {
         throw new Error(
             `Diagram spec intent "${spec.intent}" does not match requested intent "${options.requestedIntent}".`
         );
@@ -135,14 +135,32 @@ export async function generateDiagramArtifact(
 
     const prompt = buildDiagramSpecPrompt({
         preferredIntent: plan.intent,
+        requiredIntent: options.requestedIntent,
         preferredChartType: plan.preferredChartType,
         targetLanguage: options.targetLanguage
     });
 
-    const rawResponse = await options.llmInvoker(prompt, markdown);
-    const parsedSpec = parseDiagramSpecResponse(rawResponse);
-    const spec = mergeSpecDefaults(parsedSpec, plan);
+    let rawResponse = await options.llmInvoker(prompt, markdown);
+    let parsedSpec = parseDiagramSpecResponse(rawResponse);
+    let spec = mergeSpecDefaults(parsedSpec, plan);
     assertValidDiagramSpec(spec);
+
+    // If user requested a specific intent and LLM returned a different one, retry with stronger prompt
+    if (options.requestedIntent && spec.intent !== options.requestedIntent) {
+        const retryPrompt = buildDiagramSpecPrompt({
+            preferredIntent: plan.intent,
+            requiredIntent: options.requestedIntent,
+            preferredChartType: plan.preferredChartType,
+            targetLanguage: options.targetLanguage
+        }) + `\n\nCRITICAL: Your previous response used intent "${spec.intent}" but the required intent is "${options.requestedIntent}". This is incorrect. You MUST use "${options.requestedIntent}" as the diagram intent. Do not choose any other intent. Regenerate the DiagramSpec with the correct intent.`;
+
+        rawResponse = await options.llmInvoker(retryPrompt, markdown);
+        parsedSpec = parseDiagramSpecResponse(rawResponse);
+        spec = mergeSpecDefaults(parsedSpec, plan);
+        assertValidDiagramSpec(spec);
+        assertPlanCompatibility(spec, plan, options);
+    }
+
     assertPlanCompatibility(spec, plan, options);
 
     const rendererService = options.rendererService ?? createDefaultRendererService();
