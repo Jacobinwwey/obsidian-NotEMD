@@ -649,7 +649,6 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             { value: 'classDiagram', label: i18n.settings.developer.experimentalDiagramPipeline.intentClassDiagram },
             { value: 'erDiagram', label: i18n.settings.developer.experimentalDiagramPipeline.intentErDiagram },
             { value: 'stateDiagram', label: i18n.settings.developer.experimentalDiagramPipeline.intentStateDiagram },
-            { value: 'canvasMap', label: i18n.settings.developer.experimentalDiagramPipeline.intentCanvasMap },
             { value: 'dataChart', label: i18n.settings.developer.experimentalDiagramPipeline.intentDataChart },
         ];
 

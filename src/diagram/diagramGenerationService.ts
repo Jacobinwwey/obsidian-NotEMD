@@ -172,6 +172,32 @@ export async function generateDiagramArtifact(
     const rendererService = options.rendererService ?? createDefaultRendererService();
     const targets = [plan.renderTarget, ...plan.fallbackTargets]
         .filter((target, index, allTargets) => allTargets.indexOf(target) === index);
-    const artifact = await renderWithFallbackTraversal(rendererService, spec, targets);
+
+    let artifact: Awaited<ReturnType<RendererService['render']>>;
+    try {
+        artifact = await renderWithFallbackTraversal(rendererService, spec, targets);
+    } catch (renderError: unknown) {
+        const errorMsg = renderError instanceof Error ? renderError.message : String(renderError);
+        // If Mermaid parse failed, retry once with the LLM asking for valid Mermaid syntax
+        if (errorMsg.includes('Mermaid diagram failed validation') || errorMsg.includes('Parse error')) {
+            const retryPrompt = buildDiagramSpecPrompt({
+                preferredIntent: spec.intent,
+                requiredIntent: options.requestedIntent,
+                preferredChartType: plan.preferredChartType,
+                targetLanguage: options.targetLanguage
+            }) + `\n\nCRITICAL: Your previous diagram spec rendered invalid Mermaid syntax. The error was: ${errorMsg}. Please regenerate the DiagramSpec with valid, well-formed content. Ensure entity names have no trailing spaces, all braces are properly closed, and the syntax follows standard Mermaid conventions.`;
+
+            const retryResponse = await options.llmInvoker(retryPrompt, markdown);
+            const retryParsedSpec = parseDiagramSpecResponse(retryResponse);
+            const retrySpec = mergeSpecDefaults(retryParsedSpec, plan);
+            assertValidDiagramSpec(retrySpec);
+            assertPlanCompatibility(retrySpec, plan, options);
+
+            artifact = await renderWithFallbackTraversal(rendererService, retrySpec, targets);
+        } else {
+            throw renderError;
+        }
+    }
+
     return { plan, spec, artifact };
 }
