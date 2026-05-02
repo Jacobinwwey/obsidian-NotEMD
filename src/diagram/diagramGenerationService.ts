@@ -109,7 +109,7 @@ function assertPlanCompatibility(
     plan: DiagramPlan,
     options: Pick<DiagramGenerationOptions, 'compatibilityMode' | 'requestedIntent'>
 ): void {
-    if (options.requestedIntent && options.compatibilityMode !== 'legacy-mermaid' && spec.intent !== options.requestedIntent) {
+    if (options.requestedIntent && options.compatibilityMode === 'legacy-mermaid' && spec.intent !== options.requestedIntent) {
         throw new Error(
             `Diagram spec intent "${spec.intent}" does not match requested intent "${options.requestedIntent}".`
         );
