@@ -23,7 +23,7 @@ Một cách dễ dàng để xây dựng cơ sở tri thức của riêng bạn.
 
 Notemd nâng cấp quy trình làm việc trong Obsidian bằng cách tích hợp với nhiều Mô hình Ngôn ngữ Lớn, LLM, để xử lý ghi chú đa ngôn ngữ, tự động tạo wiki-link cho các khái niệm chính, tạo concept note tương ứng, thực hiện nghiên cứu web và giúp bạn xây dựng knowledge graph mạnh mẽ cùng nhiều khả năng khác.
 
-**Phiên bản:** 1.8.1
+**Phiên bản:** 1.8.3
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />

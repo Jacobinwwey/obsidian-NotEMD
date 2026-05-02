@@ -23,7 +23,7 @@ O modalitate simplă de a-ți crea propria bază de cunoștințe.
 
 Notemd îți îmbunătățește fluxul de lucru din Obsidian prin integrarea cu diverse modele lingvistice mari (LLM) pentru a procesa note multilingve, a genera automat wiki-link-uri pentru conceptele cheie, a crea note de concept corespunzătoare, a face cercetare web și a te ajuta să construiești grafuri de cunoștințe puternice și multe altele.
 
-**Versiune:** 1.8.1
+**Versiune:** 1.8.3
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />

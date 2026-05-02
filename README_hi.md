@@ -23,7 +23,7 @@
 
 Notemd आपके Obsidian वर्कफ़्लो को बेहतर बनाता है। यह विभिन्न बड़े भाषा मॉडल (LLMs) के साथ एकीकृत होकर आपके बहुभाषी नोट्स को संसाधित करता है, मुख्य अवधारणाओं के लिए स्वचालित रूप से wiki-links बनाता है, संबंधित concept notes तैयार करता है, वेब शोध करता है और शक्तिशाली ज्ञान ग्राफ़ बनाने में आपकी मदद करता है।
 
-**संस्करण:** 1.8.1
+**संस्करण:** 1.8.3
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />

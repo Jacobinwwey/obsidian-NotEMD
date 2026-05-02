@@ -23,7 +23,7 @@ Prosty sposób na stworzenie własnej bazy wiedzy.
 
 Notemd usprawnia pracę w Obsidianie, integrując się z różnymi dużymi modelami językowymi (LLM), aby przetwarzać wielojęzyczne notatki, automatycznie generować wiki-linki dla kluczowych pojęć, tworzyć odpowiadające im notatki pojęciowe, prowadzić badania w sieci i pomagać budować rozbudowane grafy wiedzy i nie tylko.
 
-**Wersja:** 1.8.1
+**Wersja:** 1.8.3
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />

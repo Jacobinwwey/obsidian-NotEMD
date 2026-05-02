@@ -23,7 +23,7 @@
 
 Notemd ช่วยยกระดับเวิร์กโฟลว์ใน Obsidian ของคุณด้วยการเชื่อมต่อกับ Large Language Models (LLMs) หลายประเภท เพื่อประมวลผลโน้ตหลายภาษาของคุณ สร้าง `[[wiki-links]]` สำหรับแนวคิดสำคัญโดยอัตโนมัติ สร้างโน้ตแนวคิดที่เกี่ยวข้อง ทำเว็บรีเสิร์ช และช่วยให้คุณสร้างกราฟความรู้ที่ทรงพลังยิ่งขึ้น
 
-**เวอร์ชัน:** 1.8.1
+**เวอร์ชัน:** 1.8.3
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />

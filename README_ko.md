@@ -23,7 +23,7 @@
 
 Notemd는 다양한 거대 언어 모델(LLM)과 통합되어 다국어 노트를 처리하고, 주요 개념에 대한 위키 링크를 자동으로 생성하며, 대응하는 개념 노트를 만들고, 웹 리서치를 수행하는 등 Obsidian 워크플로우를 강화하여 강력한 지식 그래프를 구축할 수 있도록 돕습니다.
 
-**버전:** 1.8.1
+**버전:** 1.8.3
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />

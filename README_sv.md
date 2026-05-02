@@ -25,7 +25,7 @@ Notemd f√∂rb√§ttrar ditt Obsidian-arbetsfl√∂de genom att integrera med olika sto
 
 If\ you\ love\ using\ Notemd\,\ please\ consider\ \[\‚\≠\ê\ Give\ a\ Star\ on\ GitHub\]\(https\:\/\/github\.com\/Jacobinwwey\/obsidian\-NotEMD\)\ or\ \[\‚\ò\ï\Ô\∏\è\ Buy\ Me\ a\ Coffee\]\(https\:\/\/ko\-fi\.com\/jacobinwwey\)\.
 
-**Version:** 1.8.1
+**Version:** 1.8.3
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
