@@ -173,7 +173,9 @@ export async function generateDiagramArtifact(
 
     const rendererService = options.rendererService ?? createDefaultRendererService();
     const targets = [plan.renderTarget, ...plan.fallbackTargets]
-        .filter((target, index, allTargets) => allTargets.indexOf(target) === index);
+        .filter((target, index, allTargets) => allTargets.indexOf(target) === index)
+        // When user explicitly chose an intent, don't fall back to HTML — let retry handle failures
+        .filter(target => !(options.requestedIntent && target === 'html'));
 
     let artifact: Awaited<ReturnType<RendererService['render']>>;
     let renderError: string | undefined;
