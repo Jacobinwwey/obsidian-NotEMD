@@ -2,6 +2,16 @@
 
 > **给代理执行者：** 必须使用 `superpowers:subagent-driven-development`（推荐）或 `superpowers:executing-plans`，按任务逐步执行本计划。步骤继续使用复选框 `- [ ]` 语法跟踪。
 
+## 2026-05-02 进展更新
+
+notebook-navigator 全部交叉参考模式已完成（4/5 已实现，1 项延期）。
+8 种图表意图已通过实时 API 验证。README 对齐合约测试已添加（121 项）。
+欢迎弹窗 + 赞助方支持 + Cline 对齐令牌 + 边缘规范化已交付。
+
+后续：命令表面整合、运行时打包。
+
+---
+
 **目标：** 将 Notemd 从“LLM 直接生成 Mermaid 文本并事后修补”的单一路径，升级为“图形意图识别 + 中间规格 + 专门渲染 + 多格式输出”的可扩展图形平台，在 Obsidian 内稳定支持更多图像与图表类型。
 
 **架构：** 采用四层架构：`Intent Plane` 负责识别笔记更适合的图形表达；`Spec Plane` 让 LLM 输出结构化 `DiagramSpec` 而不是直接输出语法；`Adapter Plane` 负责不同目标格式的生成、校验与最小修复；`Rendering Plane` 提供专门渲染宿主、缓存、预览、主题和导出能力。该方案有意避免把 `markdown-viewer` 整体照抄进 Notemd，而是吸收其 registry/host/cache 思想，并按 Obsidian 插件约束做渐进式落地。
