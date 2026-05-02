@@ -36,6 +36,7 @@ import { resolveTaskLanguageCode } from './i18n/taskLanguagePolicy';
 import { getSidebarActionLabel, SidebarActionId } from './workflowButtons';
 import { generateDiagramArtifact } from './diagram/diagramGenerationService';
 import { RenderArtifact } from './rendering/types';
+import { DiagramIntent } from './diagram/types';
 import { IframeRenderHost } from './rendering/host/iframeRenderHost';
 import { getRenderTargetDisplayName } from './rendering/targetLabel';
 import { supportsDiagramPreviewModal } from './ui/diagramPreview';
@@ -1731,6 +1732,7 @@ export default class NotemdPlugin extends Plugin {
             }
 
             const result = await generateDiagramArtifact(fileContent, {
+                requestedIntent: this.settings.preferredDiagramIntent as DiagramIntent | undefined,
                 compatibilityMode,
                 targetLanguage: resolveTaskLanguageCode(this.settings, 'summarizeToMermaid'),
                 llmInvoker: (systemPrompt, sourceMarkdown) =>
@@ -1759,6 +1761,7 @@ export default class NotemdPlugin extends Plugin {
         reporter: ProgressReporter
     ) {
         return generateDiagramArtifact(fileContent, {
+            requestedIntent: this.settings.preferredDiagramIntent as DiagramIntent | undefined,
             compatibilityMode: this.resolveExperimentalDiagramCompatibilityMode(),
             targetLanguage: resolveTaskLanguageCode(this.settings, 'summarizeToMermaid'),
             llmInvoker: (systemPrompt, sourceMarkdown) =>

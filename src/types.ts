@@ -151,6 +151,7 @@ export interface NotemdSettings {
     mermaidErrorFolderPath: string; // New
     enableExperimentalDiagramPipeline: boolean;
     experimentalDiagramCompatibilityMode: 'legacy-mermaid' | 'best-fit';
+    preferredDiagramIntent?: string;
     _firstLaunch?: boolean;
 }
 
