@@ -1065,6 +1065,27 @@ export class NotemdSettingTab extends PluginSettingTab {
                 .addDropdown(dropdown => {
                     dropdown.addOption('legacy-mermaid', experimentalDiagramI18n.compatibilityLegacy);
                     dropdown.addOption('best-fit', experimentalDiagramI18n.compatibilityBestFit);
+
+            new Setting(containerEl)
+                .setName(experimentalDiagramI18n.intentName)
+                .setDesc(experimentalDiagramI18n.intentDesc)
+                .addDropdown(dropdown => {
+                    dropdown.addOption('auto', experimentalDiagramI18n.intentAuto);
+                    dropdown.addOption('mindmap', experimentalDiagramI18n.intentMindmap);
+                    dropdown.addOption('flowchart', experimentalDiagramI18n.intentFlowchart);
+                    dropdown.addOption('sequence', experimentalDiagramI18n.intentSequence);
+                    dropdown.addOption('classDiagram', experimentalDiagramI18n.intentClassDiagram);
+                    dropdown.addOption('erDiagram', experimentalDiagramI18n.intentErDiagram);
+                    dropdown.addOption('stateDiagram', experimentalDiagramI18n.intentStateDiagram);
+                    dropdown.addOption('canvasMap', experimentalDiagramI18n.intentCanvasMap);
+                    dropdown.addOption('dataChart', experimentalDiagramI18n.intentDataChart);
+                    dropdown
+                        .setValue(this.plugin.settings.preferredDiagramIntent || 'auto')
+                        .onChange(async (value: string) => {
+                            this.plugin.settings.preferredDiagramIntent = value === 'auto' ? undefined : value;
+                            await this.plugin.saveSettings();
+                        });
+                });
                     dropdown
                         .setValue(this.plugin.settings.experimentalDiagramCompatibilityMode)
                         .onChange(async (value: 'legacy-mermaid' | 'best-fit') => {
