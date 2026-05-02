@@ -23,7 +23,7 @@ Lea los documentos en más idiomas: [Centro de Idiomas](./docs/i18n/README.md)
 
 Notemd mejora tu flujo de trabajo en Obsidian integrándose con varios Modelos de Lenguaje de Gran Tamaño (LLM) para procesar tus notas multilingües, generar automáticamente enlaces wiki para conceptos clave, crear notas de conceptos correspondientes, realizar investigación web, ayudándote a construir potentes grafos de conocimiento y más.
 
-**Versión:** 1.8.1
+**Versión:** 1.8.3
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />

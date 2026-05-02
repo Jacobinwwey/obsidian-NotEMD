@@ -23,7 +23,7 @@ Cara mudah untuk membangun knowledge base Anda sendiri.
 
 Notemd meningkatkan alur kerja Obsidian Anda dengan mengintegrasikan berbagai Large Language Model (LLM) untuk memproses catatan multi-bahasa, membuat wiki-link otomatis untuk konsep penting, membuat concept note yang sesuai, melakukan riset web, dan membantu Anda membangun knowledge graph yang kuat.
 
-**Versi:** 1.8.1
+**Versi:** 1.8.3
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
