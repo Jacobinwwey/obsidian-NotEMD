@@ -3,6 +3,7 @@ import { JsonCanvasRenderer } from '../rendering/renderers/jsonCanvasRenderer';
 import { VegaLiteRenderer } from '../rendering/renderers/vegaLiteRenderer';
 import { HtmlRenderer } from '../rendering/renderers/htmlRenderer';
 import { RendererRegistry } from '../rendering/rendererRegistry';
+import { RenderArtifact } from '../rendering/types';
 import { RendererService } from '../rendering/rendererService';
 import { buildDiagramPlan } from './planner';
 import { buildDiagramSpecPrompt } from './prompts/diagramSpecPrompt';
@@ -22,6 +23,7 @@ export interface DiagramGenerationResult {
     plan: DiagramPlan;
     spec: DiagramSpec;
     artifact: Awaited<ReturnType<RendererService['render']>>;
+    renderError?: string;
 }
 
 function normalizeErrorMessage(error: unknown): string {
@@ -174,6 +176,7 @@ export async function generateDiagramArtifact(
         .filter((target, index, allTargets) => allTargets.indexOf(target) === index);
 
     let artifact: Awaited<ReturnType<RendererService['render']>>;
+    let renderError: string | undefined;
     try {
         artifact = await renderWithFallbackTraversal(rendererService, spec, targets);
     } catch (renderError: unknown) {
@@ -193,11 +196,25 @@ export async function generateDiagramArtifact(
             assertValidDiagramSpec(retrySpec);
             assertPlanCompatibility(retrySpec, plan, options);
 
-            artifact = await renderWithFallbackTraversal(rendererService, retrySpec, targets);
+            try {
+                artifact = await renderWithFallbackTraversal(rendererService, retrySpec, targets);
+            } catch (retryError: unknown) {
+                const retryMsg = retryError instanceof Error ? retryError.message : String(retryError);
+                const rawMermaid = spec.nodes?.length
+                    ? `\`\`\`mermaid\\n${spec.intent}\\n${spec.nodes.map((n: any) => `    ${n.id}[${n.label || n.id}]`).join('\\n')}\\n\`\`\``
+                    : `// ${retryMsg}`;
+                artifact = {
+                    target: plan.renderTarget as any,
+                    content: rawMermaid,
+                    mimeType: 'text/vnd.mermaid' as const,
+                    sourceIntent: spec.intent
+                };
+                renderError = `Mermaid rendering failed after retry: ${retryMsg}. The diagram may need manual fixing.`;
+            }
         } else {
             throw renderError;
         }
     }
 
-    return { plan, spec, artifact };
+    return { plan, spec, artifact, renderError };
 }

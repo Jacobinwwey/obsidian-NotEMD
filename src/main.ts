@@ -1867,6 +1867,11 @@ export default class NotemdPlugin extends Plugin {
 
         const result = await this.generateExperimentalDiagramArtifact(fileContent, provider, modelName, reporter);
 
+        if (result.renderError) {
+            reporter.log(`Warning: ${result.renderError}`);
+            new Notice(`Diagram may need manual fixing — see log for details.`, 8000);
+        }
+
         if (executionMode === 'preview-artifact') {
             reporter.log(`Experimental diagram preview produced target "${result.artifact.target}" with intent "${result.spec.intent}".`);
             this.openDiagramPreviewModal(result.artifact, file.path, false);
