@@ -1320,7 +1320,7 @@ export async function saveDiagramArtifactFile(
             extension = '.canvas';
             break;
         case 'vega-lite':
-            extension = '.json';
+            extension = '.md';
             break;
         case 'html':
             extension = '.html';
@@ -1333,11 +1333,25 @@ export async function saveDiagramArtifactFile(
 
     const existingOutputFile = app.vault.getAbstractFileByPath(outputPath);
     if (existingOutputFile instanceof TFile) {
-        const finalContent = artifact.target === 'mermaid' ? ensureTrailingNewlines(artifact.content) : artifact.content;
+        let finalContent = artifact.content;
+        if (artifact.target === 'mermaid') {
+            finalContent = ensureTrailingNewlines(artifact.content);
+        } else if (artifact.target === 'vega-lite') {
+            // Wrap Vega-Lite JSON in a readable markdown file
+            const vlTitle = artifact.sourceIntent || 'Data Chart';
+            finalContent = `# ${vlTitle}\n\n> Preview this chart using the "Preview diagram" command in Notemd.\n\n\`\`\`vega-lite\n${artifact.content}\n\`\`\`\n`;
+        }
         await app.vault.modify(existingOutputFile, finalContent);
         progressReporter.log(`Overwrote existing diagram artifact file: ${outputPath}`);
     } else {
-        const finalContent = artifact.target === 'mermaid' ? ensureTrailingNewlines(artifact.content) : artifact.content;
+        let finalContent = artifact.content;
+        if (artifact.target === 'mermaid') {
+            finalContent = ensureTrailingNewlines(artifact.content);
+        } else if (artifact.target === 'vega-lite') {
+            // Wrap Vega-Lite JSON in a readable markdown file
+            const vlTitle = artifact.sourceIntent || 'Data Chart';
+            finalContent = `# ${vlTitle}\n\n> Preview this chart using the "Preview diagram" command in Notemd.\n\n\`\`\`vega-lite\n${artifact.content}\n\`\`\`\n`;
+        }
         await app.vault.create(outputPath, finalContent);
         progressReporter.log(`Created diagram artifact file: ${outputPath}`);
     }
