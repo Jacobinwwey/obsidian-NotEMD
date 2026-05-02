@@ -1,5 +1,5 @@
-![GitHub Release](https://img.shields.io/github/v/release/Jacobinwwey/obsidian-NotEMD?label=Version&link=https%3A%2F%2Fgithub.com%2FJacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest) ![GitHub Downloads](https://img.shields.io/github/downloads/Jacobinwwey/obsidian-NotEMD/total?logo=Obsidian&label=Downloads&labelColor=%237C3AED&color=%235b5b5b&link=https%3A%2F%2Fgithub.com%2FJacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest)
-![Obsidian Downloads](https://img.shields.io/badge/dynamic/json?logo=obsidian&color=%23483699&label=Downloads&query=%24%5B%22notemd%22%5D.downloads&url=https%3A%2F%2Fraw.githubusercontent.com%2Fobsidianmd%2Fobsidian-releases%2Fmaster%2Fcommunity-plugin-stats.json) ![GitHub Repo stars](https://img.shields.io/github/stars/Jacobinwwey/obsidian-NotEMD?style=social)
+![GitHub Release](https://img.shields.io/github/v/release/Jacobinwwey/obsidian-NotEMD?label=Version&link=https%3A%2F%2Fgithub.com%2FJacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest) ![GitHub Downloads](https://img.shields.io/github/downloads/Jacobinwwey/obsidian-NotEMD/total?logo=Obsidian&label=Downloads&labelColor=%237C3AED&color=%235b5b5b&link=https%3A%2F%2Fgithub.com%2FJacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest)	![GitHub Repo stars](https://img.shields.io/github/stars/Jacobinwwey/obsidian-NotEMD?style=social)
+![Obsidian Downloads](https://img.shields.io/badge/dynamic/json?logo=obsidian&color=%23483699&label=Downloads&query=%24%5B%22notemd%22%5D.downloads&url=https%3A%2F%2Fraw.githubusercontent.com%2Fobsidianmd%2Fobsidian-releases%2Fmaster%2Fcommunity-plugin-stats.json)
 
 # Notemd-plugin til Obsidian
 
@@ -23,7 +23,7 @@ En nem m√•de at opbygge din egen vidensbase p√•.
 
 Notemd forbedrer dit Obsidian-workflow ved at integrere med forskellige store sprogmodeller (LLM'er) til at behandle dine flersprogede noter, automatisk generere wiki-links til n√∏glebegreber, oprette tilsvarende konceptnoter, udf√∏re webresearch og hj√¶lpe dig med at opbygge st√¶rke vidensgrafer med mere.
 
-If\ you\ love\ using\ Notemd\,\ please\ consider\ \[\‚\≠\ê\ Give\ a\ Star\ on\ GitHub\]\(https\:\/\/github\.com\/Jacobinwwey\/obsidian\-NotEMD\)\ or\ \[\‚\ò\ï\Ô\∏\è\ Buy\ Me\ a\ Coffee\]\(https\:\/\/ko\-fi\.com\/jacobinwwey\)\.
+If\ you\ love\ using\ Notemd\,\ please\ consider\ \[\ÔøΩ\ÔøΩ\ÔøΩ\ Give\ a\ Star\ on\ GitHub\]\(https\:\/\/github\.com\/Jacobinwwey\/obsidian\-NotEMD\)\ or\ \[\ÔøΩ\ÔøΩ\ÔøΩ\ÔøΩ\ÔøΩ\ÔøΩ\ Buy\ Me\ a\ Coffee\]\(https\:\/\/ko\-fi\.com\/jacobinwwey\)\.
 
 **Version:** 1.8.3
 
