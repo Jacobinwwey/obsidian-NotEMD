@@ -23,6 +23,8 @@ Een eenvoudige manier om je eigen kennisbank op te bouwen!
 
 Notemd verbetert je Obsidian-workflow door te integreren met verschillende Large Language Models (LLM's) om je meertalige notities te verwerken, automatisch wiki-links voor kernconcepten te genereren, bijbehorende conceptnotities te maken, webonderzoek uit te voeren en je te helpen krachtige kennisgrafieken op te bouwen.
 
+If you love using Notemd, please consider [⭐ Give a Star on GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) or [☕️ Buy Me a Coffee](https://ko-fi.com/jacobinwwey).
+
 **Versie:** 1.8.3
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
@@ -685,7 +687,6 @@ MIT-licentie - Zie het bestand [LICENSE](LICENSE) voor details.
 
 ---
 
-If you love using Notemd, please consider [⭐ Give a Star on GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) or [☕️ Buy Me a Coffee](https://ko-fi.com/jacobinwwey).
 
 *Notemd v1.8.3 - Verrijk je Obsidian-kennisgrafiek met AI.*
 

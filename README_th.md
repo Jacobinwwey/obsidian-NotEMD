@@ -23,6 +23,8 @@
 
 Notemd ช่วยยกระดับเวิร์กโฟลว์ใน Obsidian ของคุณด้วยการเชื่อมต่อกับ Large Language Models (LLMs) หลายประเภท เพื่อประมวลผลโน้ตหลายภาษาของคุณ สร้าง `[[wiki-links]]` สำหรับแนวคิดสำคัญโดยอัตโนมัติ สร้างโน้ตแนวคิดที่เกี่ยวข้อง ทำเว็บรีเสิร์ช และช่วยให้คุณสร้างกราฟความรู้ที่ทรงพลังยิ่งขึ้น
 
+If you love using Notemd, please consider [⭐ Give a Star on GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) or [☕️ Buy Me a Coffee](https://ko-fi.com/jacobinwwey).
+
 **เวอร์ชัน:** 1.8.3
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
@@ -688,7 +690,6 @@ MIT License - ดูรายละเอียดได้ในไฟล์ [L
 
 ---
 
-If you love using Notemd, please consider [⭐ Give a Star on GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) or [☕️ Buy Me a Coffee](https://ko-fi.com/jacobinwwey).
 
 *Notemd v1.8.3 - ยกระดับกราฟความรู้ใน Obsidian ของคุณด้วย AI*
 

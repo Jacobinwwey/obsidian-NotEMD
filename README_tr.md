@@ -23,6 +23,8 @@ Kendi bilgi tabanınızı oluşturmanın kolay bir yolu.
 
 Notemd, çok dilli notlarınızı işlemek, anahtar kavramlar için otomatik wiki bağlantıları oluşturmak, ilgili kavram notları üretmek, web araştırması yapmak ve güçlü bilgi grafikleri kurmanıza yardımcı olmak için çeşitli büyük dil modelleriyle (LLM) entegre olarak Obsidian iş akışınızı geliştirir.
 
+If you love using Notemd, please consider [⭐ Give a Star on GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) or [☕️ Buy Me a Coffee](https://ko-fi.com/jacobinwwey).
+
 **Sürüm:** 1.8.3
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
@@ -685,7 +687,6 @@ MIT Lisansı - Ayrıntılar için [LICENSE](LICENSE) dosyasına bakın.
 
 ---
 
-If you love using Notemd, please consider [⭐ Give a Star on GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) or [☕️ Buy Me a Coffee](https://ko-fi.com/jacobinwwey).
 
 *Notemd v1.8.3 - Obsidian bilgi grafiğinizi yapay zeka ile geliştirin.*
 
