@@ -522,3 +522,27 @@ All 5 notebook-navigator cross-reference patterns are complete.
 Service layer decomposition (pattern #1) is the only remaining item — deferred
 as a post-v1.8.x architectural refactoring that requires careful boundary design
 and should not be rushed.
+
+## 2026-05-02 — Comprehensive Progress Audit
+
+A full end-to-end audit was conducted comparing current code against all plan requirements and hard constraints. Key findings documented in `docs/brainstorms/2026-05-02-progress-audit-and-next-direction.md`.
+
+### Current State Summary
+
+- **Roadmap Tasks**: 7 of 8 tasks delivered or partially delivered. Task 8 (advanced engines) correctly deferred.
+- **Notebook-navigator patterns**: 4 of 5 implemented. Pattern #1 (service layer) deferred.
+- **Hard constraints**: Both still active — MermaidProcessor decomposition and legacy prompt retirement require real Obsidian verification.
+- **Test coverage**: 110 suites, 708 tests (including new README alignment contract test).
+- **Live verification**: All 8 diagram intents verified against live DeepSeek API.
+
+### Next Immediate Direction
+
+1. Command surface consolidation (unify 3 diagram commands)
+2. Runtime packaging (multi-entry build for heavy runtimes)
+
+Both can proceed without real Obsidian testing. Remaining items blocked by hard constraints.
+
+### CI Status
+
+All local CI-equivalent checks pass. Remote release workflow (1.8.3) completed successfully.
+No CI errors to fix.
