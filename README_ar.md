@@ -23,6 +23,8 @@
 
 يقوم Notemd بتوسيع سير العمل داخل Obsidian من خلال التكامل مع نماذج لغوية كبيرة متعددة (LLMs) لمعالجة ملاحظاتك متعددة اللغات، وإنشاء wiki-links تلقائيا للمفاهيم الأساسية، وإنشاء concept notes مقابلة، وإجراء بحث ويب وغير ذلك، بما يساعدك على بناء رسوم معرفية قوية.
 
+If you love using Notemd, please consider [⭐ Give a Star on GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) or [☕️ Buy Me a Coffee](https://ko-fi.com/jacobinwwey).
+
 **الإصدار:** 1.8.3
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
@@ -694,7 +696,6 @@
 
 ---
 
-If you love using Notemd, please consider [⭐ Give a Star on GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) or [☕️ Buy Me a Coffee](https://ko-fi.com/jacobinwwey).
 
 *Notemd v1.8.3 - عزّز الرسم المعرفي في Obsidian باستخدام الذكاء الاصطناعي.*
 

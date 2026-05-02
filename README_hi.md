@@ -23,6 +23,8 @@
 
 Notemd आपके Obsidian वर्कफ़्लो को बेहतर बनाता है। यह विभिन्न बड़े भाषा मॉडल (LLMs) के साथ एकीकृत होकर आपके बहुभाषी नोट्स को संसाधित करता है, मुख्य अवधारणाओं के लिए स्वचालित रूप से wiki-links बनाता है, संबंधित concept notes तैयार करता है, वेब शोध करता है और शक्तिशाली ज्ञान ग्राफ़ बनाने में आपकी मदद करता है।
 
+If you love using Notemd, please consider [⭐ Give a Star on GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) or [☕️ Buy Me a Coffee](https://ko-fi.com/jacobinwwey).
+
 **संस्करण:** 1.8.3
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
@@ -682,7 +684,6 @@ MIT लाइसेंस - विवरण के लिए [LICENSE](LICENSE) 
 
 ---
 
-If you love using Notemd, please consider [⭐ Give a Star on GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) or [☕️ Buy Me a Coffee](https://ko-fi.com/jacobinwwey).
 
 *Notemd v1.8.3 - AI के साथ अपने Obsidian knowledge graph को बेहतर बनाएँ।*
 
