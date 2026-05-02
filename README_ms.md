@@ -23,6 +23,8 @@ Cara mudah untuk membina pangkalan pengetahuan anda sendiri.
 
 Notemd meningkatkan aliran kerja Obsidian anda dengan menyepadukan pelbagai Large Language Model (LLM) untuk memproses nota berbilang bahasa anda, menjana wiki-link secara automatik untuk konsep utama, mencipta nota konsep yang sepadan, menjalankan penyelidikan web, dan membantu anda membina graf pengetahuan yang kukuh.
 
+If you love using Notemd, please consider [⭐ Give a Star on GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) or [☕️ Buy Me a Coffee](https://ko-fi.com/jacobinwwey).
+
 **Versi:** 1.8.3
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
@@ -685,7 +687,6 @@ Lesen MIT - lihat fail [LICENSE](LICENSE) untuk butiran.
 
 ---
 
-If you love using Notemd, please consider [⭐ Give a Star on GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) or [☕️ Buy Me a Coffee](https://ko-fi.com/jacobinwwey).
 
 *Notemd v1.8.3 - Perkayakan graf pengetahuan Obsidian anda dengan AI.*
 

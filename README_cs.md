@@ -23,6 +23,8 @@ Snadný způsob, jak si vytvořit vlastní znalostní bázi.
 
 Notemd vylepšuje váš pracovní postup v Obsidianu integrací s různými velkými jazykovými modely, LLM, aby zpracovával vaše vícejazyčné poznámky, automaticky vytvářel wiki-links pro klíčové koncepty, generoval odpovídající concept notes, prováděl webový průzkum a pomáhal vám budovat silné grafy znalostí a další.
 
+If you love using Notemd, please consider [⭐ Give a Star on GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) or [☕️ Buy Me a Coffee](https://ko-fi.com/jacobinwwey).
+
 **Verze:** 1.8.3
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
@@ -685,7 +687,6 @@ Licence MIT. Podrobnosti naleznete v souboru [LICENSE](LICENSE).
 
 ---
 
-If you love using Notemd, please consider [⭐ Give a Star on GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) or [☕️ Buy Me a Coffee](https://ko-fi.com/jacobinwwey).
 
 *Notemd v1.8.3 - Vylepšete svůj graf znalostí v Obsidianu pomocí AI.*
 
