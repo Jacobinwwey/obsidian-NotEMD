@@ -17,7 +17,7 @@ describe('mermaid validator', () => {
     test('validates fenced mermaid and preserves fenced output', async () => {
         const result = await validateMermaidDefinition('```mermaid\nflowchart TD\nA-->B\n```');
 
-        expect(result).toBe('```mermaid\nflowchart TD\nA-->B\n```');
+        expect(result).toBe('```mermaid\nflowchart TD\nA-->B\n```\n\n\n');
         expect(mermaid.initialize).toHaveBeenCalledWith({ startOnLoad: false, suppressErrorRendering: true });
         expect(mermaid.parse).toHaveBeenCalledWith('flowchart TD\nA-->B');
     });
@@ -25,14 +25,14 @@ describe('mermaid validator', () => {
     test('wraps unfenced mermaid definitions before returning them', async () => {
         const result = await validateMermaidDefinition('sequenceDiagram\nAlice->>Bob: Ping');
 
-        expect(result).toBe('```mermaid\nsequenceDiagram\nAlice->>Bob: Ping\n```');
+        expect(result).toBe('```mermaid\nsequenceDiagram\nAlice->>Bob: Ping\n```\n\n\n');
         expect(mermaid.parse).toHaveBeenCalledWith('sequenceDiagram\nAlice->>Bob: Ping');
     });
 
     test('normalizes windows line endings before validation', async () => {
         const result = await validateMermaidDefinition('```mermaid\r\nflowchart TD\r\nA-->B\r\n```');
 
-        expect(result).toBe('```mermaid\nflowchart TD\nA-->B\n```');
+        expect(result).toBe('```mermaid\nflowchart TD\nA-->B\n```\n\n\n');
         expect(mermaid.parse).toHaveBeenCalledWith('flowchart TD\nA-->B');
     });
 
