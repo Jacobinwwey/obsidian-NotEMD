@@ -23,7 +23,7 @@ Helppo tapa rakentaa oma tietopohjasi.
 
 Notemd parantaa Obsidian-työnkulkuasi integroimalla erilaisia suuria kielimalleja (LLM) monikielisten muistiinpanojesi käsittelyyn, luomalla automaattisesti wiki-linkkejä keskeisille käsitteille, luomalla niitä vastaavia käsite-muistiinpanoja, tekemällä verkkotutkimusta ja auttamalla sinua rakentamaan tehokkaita tietograafeja ja paljon muuta.
 
-If you love using Notemd, please consider [⭐ Give a Star on GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) or [☕️ Buy Me a Coffee](https://ko-fi.com/jacobinwwey).
+Jos rakastat Notemdin käyttöä, harkitse [⭐ tähden antamista GitHubissa](https://github.com/Jacobinwwey/obsidian-NotEMD) tai [☕️ osta minulle kahvi](https://ko-fi.com/jacobinwwey).
 
 **Versio:** 1.8.3
 

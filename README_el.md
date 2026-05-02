@@ -23,7 +23,7 @@
 
 Το Notemd βελτιώνει τη ροή εργασίας σας στο Obsidian ενσωματώνοντας διάφορα Μεγάλα Γλωσσικά Μοντέλα (LLMs) για την επεξεργασία πολύγλωσσων σημειώσεων, την αυτόματη δημιουργία wiki-links για βασικές έννοιες, τη δημιουργία αντίστοιχων concept notes, την εκτέλεση έρευνας στον ιστό και τη βοήθεια στην οικοδόμηση ισχυρών γραφημάτων γνώσης και πολλά ακόμη.
 
-If you love using Notemd, please consider [⭐ Give a Star on GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) or [☕️ Buy Me a Coffee](https://ko-fi.com/jacobinwwey).
+Αν αγαπάτε να χρησιμοποιείτε το Notemd, παρακαλούμε σκεφτείτε [⭐ να δώσετε ένα αστέρι στο GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) ή [☕️ να μου αγοράσετε έναν καφέ](https://ko-fi.com/jacobinwwey).
 
 **Έκδοση:** 1.8.3
 

@@ -25,7 +25,7 @@ Notemd förbättrar ditt Obsidian-arbetsflöde genom att integrera med olika sto
 
 If\ you\ love\ using\ Notemd\,\ please\ consider\ \[\�\�\�\ Give\ a\ Star\ on\ GitHub\]\(https\:\/\/github\.com\/Jacobinwwey\/obsidian\-NotEMD\)\ or\ \[\�\�\�\�\�\�\ Buy\ Me\ a\ Coffee\]\(https\:\/\/ko\-fi\.com\/jacobinwwey\)\.
 
-If you love using Notemd, please consider [⭐ Give a Star on GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) or [☕️ Buy Me a Coffee](https://ko-fi.com/jacobinwwey).
+Om du älskar att använda Notemd, överväg att [⭐ ge en stjärna på GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) eller [☕️ köp en kaffe till mig](https://ko-fi.com/jacobinwwey).
 
 **Version:** 1.8.3
 

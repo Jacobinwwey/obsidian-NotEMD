@@ -23,7 +23,7 @@
 
 Notemd 通過與各種大型語言模型 (LLM) 集成來增強您的 Obsidian 工作流程，支援多語言筆記處理，自動為關鍵概念生成維基連結、建立對應的概念筆記、執行網頁搜尋與摘要、翻譯內容、總結為 Mermaid 腦圖等，助力構建強大的知識圖譜。
 
-If you love using Notemd, please consider [⭐ Give a Star on GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) or [☕️ Buy Me a Coffee](https://ko-fi.com/jacobinwwey).
+如果您喜歡使用 Notemd，請考慮 [⭐ 給 GitHub 加星](https://github.com/Jacobinwwey/obsidian-NotEMD) 或 [☕️ 請喝杯咖啡](https://ko-fi.com/jacobinwwey)。
 
 **版本:** 1.8.3
 

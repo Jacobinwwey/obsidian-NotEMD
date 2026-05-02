@@ -23,7 +23,7 @@ Một cách dễ dàng để xây dựng cơ sở tri thức của riêng bạn.
 
 Notemd nâng cấp quy trình làm việc trong Obsidian bằng cách tích hợp với nhiều Mô hình Ngôn ngữ Lớn, LLM, để xử lý ghi chú đa ngôn ngữ, tự động tạo wiki-link cho các khái niệm chính, tạo concept note tương ứng, thực hiện nghiên cứu web và giúp bạn xây dựng knowledge graph mạnh mẽ cùng nhiều khả năng khác.
 
-If you love using Notemd, please consider [⭐ Give a Star on GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) or [☕️ Buy Me a Coffee](https://ko-fi.com/jacobinwwey).
+Nếu bạn yêu thích sử dụng Notemd, hãy cân nhắc [⭐ tặng một Sao trên GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) hoặc [☕️ mua cho tôi một ly cà phê](https://ko-fi.com/jacobinwwey).
 
 **Phiên bản:** 1.8.3
 
