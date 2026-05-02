@@ -491,3 +491,34 @@ Implemented notebook-navigator pattern #3:
 
 All medium and low-medium priority items from notebook-navigator cross-reference are now complete.
 Remaining: service layer + DI (architectural), architecture overview doc (documentation).
+
+## 2026-05-02 — Architecture Overview Documentation
+
+Created bilingual architecture docs (notebook-navigator pattern #5):
+
+- `docs/architecture.md` — English
+- `docs/architecture.zh-CN.md` — 简体中文
+- System architecture flowchart (Mermaid)
+- LLM calling pipeline sequence diagram (Mermaid)
+- Diagram rendering platform flowchart (Mermaid)
+- Token resolution decision tree
+- Transport protocol table
+- Diagram intent support matrix
+- Module responsibility map
+- Key design decisions summary
+
+### Final Progress
+
+| # | Pattern | Priority | Status |
+|---|---|---|---|
+| 2 | LLM response caching | Medium | ✓ |
+| 4 | Batch pipeline with resume | Medium | ✓ |
+| 3 | Per-setting sync toggle | Low-Medium | ✓ |
+| 1 | Service layer + DI | Low | Deferred (architectural) |
+| 5 | Architecture overview doc | Low | ✓ |
+| — | Preferred diagram intent selector | — | ✓ |
+
+All 5 notebook-navigator cross-reference patterns are complete.
+Service layer decomposition (pattern #1) is the only remaining item — deferred
+as a post-v1.8.x architectural refactoring that requires careful boundary design
+and should not be rushed.
