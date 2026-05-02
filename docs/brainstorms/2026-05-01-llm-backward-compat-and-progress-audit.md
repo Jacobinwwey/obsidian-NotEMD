@@ -433,6 +433,36 @@ Reduces API costs for repeated processing of identical content.
 Tests: all 108 suites, 512 tests pass (excluding untracked files).
 
 Next from improvement priorities:
-- [ ] 3. Per-setting sync toggle for API key locality (low-medium)
-- [ ] 4. Batch pipeline with resume (medium)
 - [x] 2. LLM response caching (medium) — DONE
+- [x] 4. Batch pipeline with resume (medium) — DONE (BatchProgressStore)
+- [x] 2. LLM response caching (medium) — DONE
+
+
+## 2026-05-02 — Batch Progress Store and Diagram Intent Selector
+
+### Batch Progress Store (notebook-navigator pattern #4)
+- `BatchProgressStore` class: persists batch state to `.obsidian/notemd-batch-progress.json`
+- Tracks per-file completion with atomic writes (tmp + rename)
+- Integration in `processFolderWithNotemdCommand`:
+  - Start batch with file list
+  - Mark each file completed after processing
+  - Finish/cleanup after batch succeeds
+- Enables future resume-after-interrupt UI
+
+### Preferred Diagram Intent Selector (Settings UI)
+- New setting: `preferredDiagramIntent` (auto-detect or 8 specific types)
+- Dropdown in Experimental Diagram Pipeline settings section
+- Passed as `requestedIntent` to both Mermaid and experimental diagram paths
+- i18n: en, zh-cn, zh-tw locales
+
+### Improvement Progress
+
+| # | Pattern | Priority | Status |
+|---|---|---|---|
+| 2 | LLM response caching | Medium | ✓ Done |
+| 4 | Batch pipeline with resume | Medium | ✓ Done (progress store; resume UI deferred) |
+| 3 | Per-setting sync toggle | Low-Medium | Pending |
+| 1 | Service layer + DI | Low | Pending |
+| 5 | Architecture overview doc | Low | Pending |
+
+Next: per-setting sync toggle for API key locality (security improvement).
