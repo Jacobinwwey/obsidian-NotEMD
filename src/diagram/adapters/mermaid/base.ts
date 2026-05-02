@@ -29,7 +29,7 @@ export function assertMermaidSpecIntent(spec: DiagramSpec, allowedIntents: Diagr
 }
 
 export function mermaidFence(lines: string[]): string {
-    return `\`\`\`mermaid\n${lines.join('\n')}\n\`\`\``;
+    return `\`\`\`mermaid\n${lines.join('\n')}\n\`\`\`\n\n\n`;
 }
 
 export function indent(level: number): string {
