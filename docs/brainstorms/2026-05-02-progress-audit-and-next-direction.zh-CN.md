@@ -83,3 +83,38 @@ topic: progress-audit-next-direction
 3. 旧版提示退役 — 需真实 Obsidian 验证原 Mermaid 场景。
 4. MermaidProcessor sunset — 需真实 Obsidian 验证及图像保存。
 5. PlantUML 评估 — 按 R10 推迟。
+
+## 验收标准：图表生成
+
+全部 8 种图表意图在发布前必须通过以下验收门槛：
+
+### 门槛：实时 LLM 验证
+
+运行：`npm test -- --runInBand src/tests/liveAllDiagramIntents.test.ts`
+
+| 意图 | 渲染目标 | 节点标签 | 边缘引用 | 内容非空 |
+|---|---|---|---|---|
+| `mindmap` | mermaid | ✓ 必需 | ✓ 必需 | ✓ 必需 |
+| `flowchart` | mermaid | ✓ 必需 | ✓ 必需 | ✓ 必需 |
+| `sequence` | mermaid | ✓ 必需 | ✓ 必需 | ✓ 必需 |
+| `classDiagram` | mermaid | ✓ 必需 | ✓ 必需 | ✓ 必需 |
+| `erDiagram` | mermaid | ✓ 必需 | ✓ 必需 | ✓ 必需 |
+| `stateDiagram` | mermaid | ✓ 必需 | ✓ 必需 | ✓ 必需 |
+| `canvasMap` | json-canvas | ✓ 必需 | ✓ 必需 | ✓ 必需 |
+| `dataChart` | vega-lite | 不适用（数据驱动） | 不适用 | ✓ 必需 |
+
+### 最近验证：2026-05-02
+
+全部 8 种意图针对实时 DeepSeek API (deepseek-v4-pro) 通过。
+总耗时：约 226 秒。
+
+### 回归门槛
+
+任何对 `src/diagram/` 的修改必须在合并前重新运行此测试套件。
+修改 `src/diagram/` 但未通过此门槛的 PR，CI 应阻止合并。
+
+### 硬性约束（提醒）
+
+1. MermaidProcessor 分解：每个子任务需真实 Obsidian 验证及图像保存核验
+2. 旧版提示退役：必须保留原场景可用性
+3. 全部 8 种图表意图必须通过实时验证方可发布
