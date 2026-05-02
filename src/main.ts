@@ -29,6 +29,7 @@ import { NotemdSettingTab } from './ui/NotemdSettingTab';
 import { showDeletionConfirmationModal } from './ui/modals'; // Import the modal function
 import { NotemdSidebarView } from './ui/NotemdSidebarView';
 import { translateFile, batchTranslateFolder } from './translate';
+import { BatchProgressStore } from './batchProgressStore';
 import { getSystemPrompt } from './promptUtils';
 import { extractOriginalText } from './extractOriginalText';
 import { formatI18n, getI18nStrings } from './i18n';
@@ -859,6 +860,12 @@ export default class NotemdPlugin extends Plugin {
     }
 
     /** Command: Process Folder (Add Links) */
+
+    private getBatchProgressStore(): BatchProgressStore {
+        const vaultRoot = (this.app.vault.adapter as any).getBasePath?.() || (this.app.vault.adapter as any).basePath || '.';
+        return new BatchProgressStore(vaultRoot);
+    }
+
     async processFolderWithNotemdCommand(reporter?: ProgressReporter, folderPathOverride?: string) {
         if (this.isBusy) { new Notice(this.getUiStrings().notices.notemdBusy); return; }
         this.isBusy = true;
@@ -900,6 +907,10 @@ export default class NotemdPlugin extends Plugin {
             useReporter.log(this.getRunningActionText(actionLabel));
             const errors: { file: string; message: string }[] = [];
 
+            const batchId = `process-folder-${Date.now()}`;
+            const progressStore = this.getBatchProgressStore();
+            progressStore.start(batchId, 'process-folder', folderPath, files);
+
             if (!this.settings.enableBatchParallelism || this.settings.batchConcurrency <= 1) {
                 for (let i = 0; i < files.length; i++) {
                     const file = files[i];
@@ -916,6 +927,7 @@ export default class NotemdPlugin extends Plugin {
                     try {
                         // Pass the ref object
                         await processFile(this.app, this.settings, file, useReporter, this.currentProcessingFileBasename);
+                        progressStore.markCompleted(file.path);
                     } catch (fileError: unknown) {
                         const message = fileError instanceof Error ? fileError.message : String(fileError);
                         const stack = fileError instanceof Error ? fileError.stack : undefined;
