@@ -23,7 +23,7 @@ Egyszerű módja annak, hogy létrehozza saját tudásbázisát.
 
 A Notemd az Obsidian munkafolyamatát fejleszti azáltal, hogy különféle nagy nyelvi modellekkel (LLM-ekkel) integrálódik a többnyelvű jegyzetek feldolgozásához, automatikusan wiki-linkeket hoz létre a kulcsfontosságú fogalmakhoz, elkészíti a hozzájuk tartozó fogalomjegyzeteket, webes kutatást végez, és segít erőteljes tudásgráfok felépítésében.
 
-**Verzió:** 1.8.1
+**Verzió:** 1.8.3
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
