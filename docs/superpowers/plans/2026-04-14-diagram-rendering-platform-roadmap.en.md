@@ -2,6 +2,16 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
+## 2026-05-02 Progress Update
+
+All notebook-navigator cross-reference patterns complete (4/5 implemented, 1 deferred).
+8 diagram intents verified against live API. README alignment contract test (121 tests) added.
+Welcome modal + sponsor support + Cline-aligned tokens + edge normalization shipped.
+
+Next: command surface consolidation, runtime packaging.
+
+---
+
 **Goal:** Evolve Notemd from a single Mermaid-text generation path into an extensible diagram platform built around intent detection, structured specs, specialized renderers, and multi-format output inside Obsidian.
 
 **Architecture:** Use four layers: an `Intent Plane` to decide the best diagram expression, a `Spec Plane` to make the LLM emit structured `DiagramSpec` data instead of syntax text, an `Adapter Plane` to generate and validate concrete targets, and a `Rendering Plane` to handle host execution, caching, preview, theme, and export. The roadmap deliberately borrows registry / host / cache ideas from the markdown-viewer stack without cloning that codebase wholesale into an Obsidian plugin.
