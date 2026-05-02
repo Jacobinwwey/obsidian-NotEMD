@@ -635,6 +635,37 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         };
     }
 
+    private buildDiagramIntentSelector(parent: HTMLElement) {
+        const i18n = this.getStrings();
+        const row = parent.createDiv({ cls: 'notemd-inline-control' });
+        row.createEl('label', { text: i18n.settings.developer.experimentalDiagramPipeline.intentName, cls: 'notemd-inline-label' });
+        const selector = row.createEl('select', { cls: 'notemd-language-select' });
+
+        const intents = [
+            { value: 'auto', label: i18n.settings.developer.experimentalDiagramPipeline.intentAuto },
+            { value: 'mindmap', label: i18n.settings.developer.experimentalDiagramPipeline.intentMindmap },
+            { value: 'flowchart', label: i18n.settings.developer.experimentalDiagramPipeline.intentFlowchart },
+            { value: 'sequence', label: i18n.settings.developer.experimentalDiagramPipeline.intentSequence },
+            { value: 'classDiagram', label: i18n.settings.developer.experimentalDiagramPipeline.intentClassDiagram },
+            { value: 'erDiagram', label: i18n.settings.developer.experimentalDiagramPipeline.intentErDiagram },
+            { value: 'stateDiagram', label: i18n.settings.developer.experimentalDiagramPipeline.intentStateDiagram },
+            { value: 'canvasMap', label: i18n.settings.developer.experimentalDiagramPipeline.intentCanvasMap },
+            { value: 'dataChart', label: i18n.settings.developer.experimentalDiagramPipeline.intentDataChart },
+        ];
+
+        intents.forEach(item => {
+            selector.add(new Option(item.label, item.value));
+        });
+
+        selector.value = this.plugin.settings.preferredDiagramIntent || 'auto';
+        selector.onchange = async () => {
+            const newValue = selector.value === 'auto' ? undefined : selector.value;
+            this.plugin.settings.preferredDiagramIntent = newValue;
+            await this.plugin.saveSettings();
+            const displayName = intents.find(i => i.value === selector.value)?.label || selector.value;
+        };
+    }
+
     async onOpen() {
         const i18n = this.getStrings();
         const container = this.containerEl.children[1] as HTMLElement;
@@ -703,6 +734,10 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             defs.forEach(def => {
                 this.createActionButton(body, def.id, def.category);
             });
+
+            if (category === 'generation') {
+                this.buildDiagramIntentSelector(body);
+            }
 
             if (category === 'translation') {
                 this.buildLanguageSelector(body);
