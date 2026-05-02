@@ -23,7 +23,7 @@ Prosty sposób na stworzenie własnej bazy wiedzy.
 
 Notemd usprawnia pracę w Obsidianie, integrując się z różnymi dużymi modelami językowymi (LLM), aby przetwarzać wielojęzyczne notatki, automatycznie generować wiki-linki dla kluczowych pojęć, tworzyć odpowiadające im notatki pojęciowe, prowadzić badania w sieci i pomagać budować rozbudowane grafy wiedzy i nie tylko.
 
-If you love using Notemd, please consider [⭐ Give a Star on GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) or [☕️ Buy Me a Coffee](https://ko-fi.com/jacobinwwey).
+Jeśli kochasz korzystać z Notemd, rozważ [⭐ danie gwiazdki na GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) lub [☕️ kup mi kawę](https://ko-fi.com/jacobinwwey).
 
 **Wersja:** 1.8.3
 
