@@ -11,6 +11,21 @@ function errorMessage(error: unknown): string {
     return 'Unknown Mermaid parse error';
 }
 
+function sanitizeMermaidContent(definition: string): string {
+    // Remove trailing whitespace from each line (common LLM output issue)
+    let sanitized = definition.split('\n').map(line => line.trimEnd()).join('\n');
+
+    // Fix ER diagram entity names with trailing spaces (common LLM quirk)
+    // Pattern: entity names at the start of lines with trailing space before attributes
+    sanitized = sanitized.replace(/^(\s+)([A-Z_][A-Z0-9_]*)\s+$/gm, '$1$2');
+
+    // Fix ER diagram entity attribute indentation
+    sanitized = sanitized.replace(/^( {4})([a-z][a-z0-9_]*)\s+([a-z][a-z0-9_]*\b)/gm, '$1$2 $3');
+
+    return sanitized.trim();
+}
+
+
 export function normalizeMermaidDefinition(content: string): string {
     const normalizedContent = content.replace(/\r\n?/g, '\n');
     const trimmed = normalizedContent.trim();
@@ -19,7 +34,8 @@ export function normalizeMermaidDefinition(content: string): string {
     }
 
     const fencedMatch = trimmed.match(MERMAID_FENCE_REGEX);
-    return (fencedMatch ? fencedMatch[1] : trimmed).trim();
+    const raw = (fencedMatch ? fencedMatch[1] : trimmed).trim();
+    return sanitizeMermaidContent(raw);
 }
 
 export async function validateMermaidDefinition(content: string): Promise<string> {
