@@ -1087,7 +1087,6 @@ export class NotemdSettingTab extends PluginSettingTab {
                     dropdown.addOption('classDiagram', experimentalDiagramI18n.intentClassDiagram);
                     dropdown.addOption('erDiagram', experimentalDiagramI18n.intentErDiagram);
                     dropdown.addOption('stateDiagram', experimentalDiagramI18n.intentStateDiagram);
-                    dropdown.addOption('canvasMap', experimentalDiagramI18n.intentCanvasMap);
                     dropdown.addOption('dataChart', experimentalDiagramI18n.intentDataChart);
                     dropdown
                         .setValue(this.plugin.settings.preferredDiagramIntent || 'auto')
