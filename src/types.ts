@@ -9,6 +9,7 @@ export interface LLMProviderConfig {
     reasoningEffort?: string;
     thinkingEnabled?: boolean;
     maxOutputTokens?: number;
+    localOnly?: boolean;
     apiVersion?: string;  // Only used for Azure OpenAI
 }
 

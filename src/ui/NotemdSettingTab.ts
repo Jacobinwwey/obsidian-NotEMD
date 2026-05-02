@@ -752,6 +752,16 @@ export class NotemdSettingTab extends PluginSettingTab {
                     }));
         } else {
             containerEl.createEl('p', { text: providerI18n.missingActiveProvider, cls: 'notemd-error-text' });
+
+            new Setting(containerEl)
+                .setName(providerI18n.localOnlyName)
+                .setDesc(providerI18n.localOnlyDesc)
+                .addToggle(toggle => toggle
+                    .setValue(activeProvider!.localOnly === true)
+                    .onChange(async (value) => {
+                        activeProvider!.localOnly = value;
+                        await this.plugin.saveSettings();
+                    }));
         }
 
         // --- Multi-Model Settings ---

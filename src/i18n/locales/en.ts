@@ -126,6 +126,7 @@ export const STRINGS_EN = {
             apiKeyName: 'API key',
             apiKeyDescRequired: 'API key for {provider}.{extra}',
             apiKeyDescOptional: 'API key for {provider}. Optional for endpoints that allow placeholder or anonymous access.',
+                localOnlyName: 'Store on this device only',                localOnlyDesc: 'On: Provider config (including API key) stays on this device and is not synced across devices. Off: Config synced via Obsidian Sync or vault sync.',
             apiKeyExtraLmStudio: " (Optional, often 'EMPTY')",
             apiKeyPlaceholderDefault: 'Enter your API key',
             apiKeyPlaceholderLmStudio: 'Usually EMPTY or leave blank',

@@ -129,6 +129,7 @@ export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
             apiKeyName: 'API Key',
             apiKeyDescRequired: '{provider} 的 API Key。{extra}',
             apiKeyDescOptional: '{provider} 的 API Key。对于允许匿名或占位符访问的 endpoint 为可选。',
+                localOnlyName: '仅存储在此设备',                localOnlyDesc: '开：提供商配置（含 API 密钥）仅保留在此设备，不跨设备同步。关：通过 Obsidian Sync 或 vault 同步进行配置同步。',
             apiKeyExtraLmStudio: '（可选，通常为“EMPTY”）',
             apiKeyPlaceholderDefault: '输入你的 API Key',
             apiKeyPlaceholderLmStudio: '通常填写 EMPTY 或留空',
