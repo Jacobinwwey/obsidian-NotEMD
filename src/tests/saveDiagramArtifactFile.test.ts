@@ -45,7 +45,7 @@ describe('saveDiagramArtifactFile', () => {
         }, reporter);
 
         expect(path).toBe('Notes/Source_summ.md');
-        expect(mockApp.vault.create).toHaveBeenCalledWith('Notes/Source_summ.md', '```mermaid\nmindmap\n```');
+        expect(mockApp.vault.create).toHaveBeenCalledWith('Notes/Source_summ.md', '```mermaid\nmindmap\n```\n\n\n');
     });
 
     test('saves json-canvas artifacts with canvas extension and target-specific suffix', async () => {

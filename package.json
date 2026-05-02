@@ -46,7 +46,7 @@
 		"typescript": "^5.9.3"
 	},
 	"dependencies": {
-		"mermaid": "^11.12.2",
+		"mermaid": "11.4.1",
 		"vega": "^6.2.0",
 		"vega-lite": "^6.4.2"
 	}

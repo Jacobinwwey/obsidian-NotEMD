@@ -15,6 +15,10 @@ import { RenderArtifact } from './rendering/types';
 
 // --- Backlink and Note Management ---
 
+function ensureTrailingNewlines(content: string): string {
+    return content.replace(/\n+$/, '') + '\n\n\n';
+}
+
 export async function handleFileRename(app: App, oldPath: string, newPath: string, uiLocale = 'auto') {
     const oldName = oldPath.split('/').pop()?.replace('.md', '') || '';
     const newName = newPath.split('/').pop()?.replace('.md', '') || '';
@@ -1262,10 +1266,10 @@ export async function saveMermaidSummaryFile(app: App, settings: NotemdSettings,
 
     const existingOutputFile = app.vault.getAbstractFileByPath(outputPath);
     if (existingOutputFile instanceof TFile) {
-        await app.vault.modify(existingOutputFile, mermaidContent);
+        await app.vault.modify(existingOutputFile, ensureTrailingNewlines(mermaidContent));
         progressReporter.log(`Overwrote existing Mermaid summary file: ${outputPath}`);
     } else {
-        await app.vault.create(outputPath, mermaidContent);
+        await app.vault.create(outputPath, ensureTrailingNewlines(mermaidContent));
         progressReporter.log(`Created Mermaid summary file: ${outputPath}`);
     }
     return outputPath;
@@ -1329,10 +1333,12 @@ export async function saveDiagramArtifactFile(
 
     const existingOutputFile = app.vault.getAbstractFileByPath(outputPath);
     if (existingOutputFile instanceof TFile) {
-        await app.vault.modify(existingOutputFile, artifact.content);
+        const finalContent = artifact.target === 'mermaid' ? ensureTrailingNewlines(artifact.content) : artifact.content;
+        await app.vault.modify(existingOutputFile, finalContent);
         progressReporter.log(`Overwrote existing diagram artifact file: ${outputPath}`);
     } else {
-        await app.vault.create(outputPath, artifact.content);
+        const finalContent = artifact.target === 'mermaid' ? ensureTrailingNewlines(artifact.content) : artifact.content;
+        await app.vault.create(outputPath, finalContent);
         progressReporter.log(`Created diagram artifact file: ${outputPath}`);
     }
     return outputPath;
