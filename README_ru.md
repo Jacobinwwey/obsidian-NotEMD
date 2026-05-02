@@ -23,7 +23,7 @@
 
 Notemd расширяет рабочий процесс в Obsidian, интегрируясь с различными большими языковыми моделями (LLM) для обработки многоязычных заметок, автоматического создания wiki-ссылок для ключевых понятий, генерации соответствующих concept-note, выполнения веб-исследований и многого другого, чтобы вы могли строить мощные графы знаний.
 
-If you love using Notemd, please consider [⭐ Give a Star on GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) or [☕️ Buy Me a Coffee](https://ko-fi.com/jacobinwwey).
+Если вам нравится использовать Notemd, пожалуйста, поставьте [⭐ звезду на GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) или [☕️ купите мне кофе](https://ko-fi.com/jacobinwwey).
 
 **Версия:** 1.8.3
 

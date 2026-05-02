@@ -25,7 +25,7 @@ Notemd verbessert Ihren Obsidian-Workflow durch die Integration verschiedener gr
 
 If\ you\ love\ using\ Notemd\,\ please\ consider\ \[\�\�\�\ Give\ a\ Star\ on\ GitHub\]\(https\:\/\/github\.com\/Jacobinwwey\/obsidian\-NotEMD\)\ or\ \[\�\�\�\�\�\�\ Buy\ Me\ a\ Coffee\]\(https\:\/\/ko\-fi\.com\/jacobinwwey\)\.
 
-If you love using Notemd, please consider [⭐ Give a Star on GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) or [☕️ Buy Me a Coffee](https://ko-fi.com/jacobinwwey).
+Wenn du Notemd gerne nutzt, erwäge bitte [⭐ einen Stern auf GitHub zu geben](https://github.com/Jacobinwwey/obsidian-NotEMD) oder [☕️ mir einen Kaffee zu kaufen](https://ko-fi.com/jacobinwwey).
 
 **Version:** 1.8.3
 
