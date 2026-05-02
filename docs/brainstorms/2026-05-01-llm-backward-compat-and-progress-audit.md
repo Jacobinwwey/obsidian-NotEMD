@@ -466,3 +466,28 @@ Next from improvement priorities:
 | 5 | Architecture overview doc | Low | Pending |
 
 Next: per-setting sync toggle for API key locality (security improvement).
+
+## 2026-05-02 — Per-Setting Sync Toggle for API Key Locality
+
+Implemented notebook-navigator pattern #3:
+
+- `LLMProviderConfig.localOnly?: boolean` flag
+- When enabled, provider config (including API key) stored in `localStorage`
+- Filtered out from `data.json` on save
+- Merged back on load
+- Settings UI toggle in provider details section
+- i18n: en, zh-cn, zh-tw
+
+### Improvement Progress (Updated)
+
+| # | Pattern | Priority | Status |
+|---|---|---|---|
+| 2 | LLM response caching | Medium | ✓ Done |
+| 4 | Batch pipeline with resume | Medium | ✓ Done |
+| 3 | Per-setting sync toggle | Low-Medium | ✓ Done |
+| 1 | Service layer + DI | Low | Pending |
+| 5 | Architecture overview doc | Low | Pending |
+| — | Preferred diagram intent selector | — | ✓ Done |
+
+All medium and low-medium priority items from notebook-navigator cross-reference are now complete.
+Remaining: service layer + DI (architectural), architecture overview doc (documentation).
