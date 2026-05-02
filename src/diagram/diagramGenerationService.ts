@@ -94,8 +94,14 @@ function mergeSpecDefaults(spec: DiagramSpec, plan: DiagramPlan): DiagramSpec {
         ...spec,
         intent: resolvedIntent,
         title: spec.title?.trim() || 'Generated Diagram',
-        nodes: spec.nodes ?? [],
-        edges: spec.edges ?? [],
+        nodes: (spec.nodes ?? []).map(node => ({
+            ...node,
+            label: node.label?.trim() || node.id || 'Untitled'
+        })),
+        edges: (spec.edges ?? []).map(edge => ({
+            ...edge,
+            label: edge.label?.trim() || undefined
+        })),
         sections: spec.sections ?? [],
         callouts: spec.callouts ?? [],
         dataSeries: spec.dataSeries ?? [],
