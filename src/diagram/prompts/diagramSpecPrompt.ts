@@ -3,13 +3,16 @@ import { DiagramIntent } from '../types';
 
 export interface DiagramSpecPromptOptions {
     preferredIntent?: DiagramIntent;
+    requiredIntent?: DiagramIntent;
     preferredChartType?: SupportedVegaLiteChartType;
     targetLanguage?: string;
 }
 
 export function buildDiagramSpecPrompt(options: DiagramSpecPromptOptions = {}): string {
     const supportedChartTypes = SUPPORTED_VEGA_LITE_CHART_TYPES.join(', ');
-    const preferredIntentLine = options.preferredIntent
+    const preferredIntentLine = options.requiredIntent
+        ? `REQUIRED diagram intent: ${options.requiredIntent}. You MUST use this exact intent. Do not choose any other intent under any circumstances.`
+        : options.preferredIntent
         ? `Preferred diagram intent: ${options.preferredIntent}. Follow it when the source content supports it.`
         : 'Preferred diagram intent: choose the most suitable intent from the supported list.';
     const preferredChartTypeLine = options.preferredIntent === 'dataChart' && options.preferredChartType
