@@ -106,6 +106,24 @@ export default class NotemdPlugin extends Plugin {
         }
     }
 
+    private registerEditorDiagramCommand(
+        id: string,
+        name: string,
+        handler: (file: TFile, reporter: ProgressReporter) => Promise<void>
+    ) {
+        this.addCommand({
+            id,
+            name,
+            editorCallback: async (_editor: Editor, view: MarkdownView) => {
+                const file = view.file;
+                if (file) {
+                    const reporter = this.getReporter();
+                    await handler.call(this, file, reporter);
+                }
+            }
+        });
+    }
+
     async onload() {
         await this.loadSettings();
 
@@ -123,41 +141,37 @@ export default class NotemdPlugin extends Plugin {
         // --- Sidebar View ---
         this.registerView(NOTEMD_SIDEBAR_VIEW_TYPE, (leaf) => new NotemdSidebarView(leaf, this));
 
-		this.addCommand({
-			id: 'notemd-summarize-as-mermaid',
-			name: getSidebarActionLabel(uiStrings, 'summarize-as-mermaid'),
-			editorCallback: async (editor: Editor, view: MarkdownView) => {
-				const file = view.file;
-				if (file) {
-					const reporter = this.getReporter();
-					await this.summarizeToMermaidCommand(file, reporter);
-				}
-			},
-		});
+        this.registerEditorDiagramCommand(
+            'notemd-summarize-as-mermaid',
+            getSidebarActionLabel(uiStrings, 'summarize-as-mermaid'),
+            this.summarizeToMermaidCommand
+        );
 
-        this.addCommand({
-            id: 'notemd-generate-experimental-diagram',
-            name: uiStrings.commands.generateExperimentalDiagram,
-            editorCallback: async (_editor: Editor, view: MarkdownView) => {
-                const file = view.file;
-                if (file) {
-                    const reporter = this.getReporter();
-                    await this.generateExperimentalDiagramCommand(file, reporter);
-                }
-            }
-        });
+        this.registerEditorDiagramCommand(
+            'notemd-generate-diagram',
+            uiStrings.commands.generateExperimentalDiagram,
+            this.generateExperimentalDiagramCommand
+        );
 
-        this.addCommand({
-            id: 'notemd-preview-experimental-diagram',
-            name: uiStrings.commands.previewExperimentalDiagram,
-            editorCallback: async (_editor: Editor, view: MarkdownView) => {
-                const file = view.file;
-                if (file) {
-                    const reporter = this.getReporter();
-                    await this.previewExperimentalDiagramCommand(file, reporter);
-                }
-            }
-        });
+        this.registerEditorDiagramCommand(
+            'notemd-preview-diagram',
+            uiStrings.commands.previewExperimentalDiagram,
+            this.previewExperimentalDiagramCommand
+        );
+
+        // Legacy compatibility aliases remain registered until downstream workflows
+        // and docs fully converge on the canonical diagram command ids.
+        this.registerEditorDiagramCommand(
+            'notemd-generate-experimental-diagram',
+            uiStrings.commands.generateExperimentalDiagram,
+            this.generateExperimentalDiagramCommand
+        );
+
+        this.registerEditorDiagramCommand(
+            'notemd-preview-experimental-diagram',
+            uiStrings.commands.previewExperimentalDiagram,
+            this.previewExperimentalDiagramCommand
+        );
 
 		this.ribbonIconEl = this.addRibbonIcon(NOTEMD_SIDEBAR_ICON, uiStrings.plugin.ribbonTooltip, () => {
 			this.activateView();
