@@ -17,6 +17,8 @@ The "8 diagram intents verified against live API" note above should now be read 
 This also needs to be explicit:
 
 - remote `main` does not currently have normal push/PR CI; `.github/workflows/release.yml` runs only on numeric tag pushes or `workflow_dispatch`
+- `commits/main/status` currently returns `pending` with zero statuses, but `main` has no check suites, no check runs, and no branch protection; Actions runs are the real CI signal here
+- the latest successful `1.8.3` release run still surfaced GitHub's Node 20 JavaScript-action deprecation warning, so this pass upgrades `actions/checkout` and `actions/setup-node` to `v6`
 - the runtime still supports 8 intents, but the preferred-intent UI selector currently exposes only a subset; `mindmap` and `canvasMap` are not current first-class UI choices
 - `preview-experimental-diagram` now previews a saved `vega-lite` fenced artifact locally, so command-surface unification remains partial rather than complete
 - Drawnix should be treated as a data-boundary / conversion-boundary reference, not as the next host to embed; see `docs/brainstorms/2026-05-03-drawnix-feasibility-and-integration-direction.md`
@@ -56,6 +58,7 @@ The purpose of this update is therefore not to redefine direction, but to turn t
 Phase-2 requirements snapshot:
 
 - `docs/brainstorms/2026-04-14-diagram-platform-phase-2-requirements.md`
+- `docs/brainstorms/2026-05-03-mainline-stabilization-and-ci-hardening-requirements.md`
 
 
 ## 2026-05-01 LLM Robustness and Diagram Edge Hardening
@@ -92,7 +95,7 @@ All existing provider configs, transport protocols, and settings UI remain uncha
 | Task 4 | Delivered | Renderer registry/service, cache, inline host, iframe preview session, and unified preview modal are all landed. |
 | Task 5 | Delivered | `.canvas` output, baseline deterministic layout, save flows, and preview support are all landed. |
 | Task 6 | Delivered with explicit limits | Vega-Lite preview now boots through the iframe host with a target-specific sandbox and `srcdoc` bootstrap path. The remaining limit is packaging, not preview routing: the runtime still ships through the main bundle bridge until Task 0 grows a real multi-entry host asset strategy. |
-| Task 7 | Delivered with explicit limits | Theme, locale, SVG/PNG/source export, and the support matrix are aligned with current code. HTML still promises only iframe fallback preview and raw source save. |
+| Task 7 | Delivered with explicit limits | Theme, locale, SVG/PNG/source export, and the support matrix are aligned with current code. HTML still promises only iframe fallback preview and raw source save. The release workflow now also pins supported `actions/checkout@v6` and `actions/setup-node@v6` majors so the release path does not inherit the older Node 20 JavaScript-action deprecation warning. |
 | Task 8 | Deferred by design | Advanced DSL / renderer evaluation remains intentionally postponed. |
 
 ### Evidence Index

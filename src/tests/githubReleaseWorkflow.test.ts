@@ -31,6 +31,8 @@ describe('GitHub release workflow', () => {
         expect(workflow).not.toContain("- 'v*.*.*'");
         expect(workflow).not.toContain("- 'V*.*.*'");
         expect(workflow).toContain('contents: write');
+        expect(workflow).toContain('actions/checkout@v6');
+        expect(workflow).toContain('actions/setup-node@v6');
         expect(workflow).toContain('npm ci');
         expect(workflow).toContain('npm run build');
         expect(workflow).toContain('npm test -- --runInBand');

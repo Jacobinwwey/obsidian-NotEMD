@@ -32,11 +32,14 @@ Drawnix 不是一个轻量 renderer，而是一个完整白板应用栈：
 
 - `type: 'drawnix'`
 - `version`
+- `source: 'web'`
 - `elements: PlaitElement[]`
 - `viewport`
 - `theme`
 
 这说明 Drawnix 的价值首先在**白板数据模型**，而不是某个 UI 组件。
+
+`packages/drawnix/src/data/json.ts` 也强化了这一点：JSON 路径是一等导入/导出边界，而不是随手附带的调试格式。
 
 ### 2. 转换能力是惰性加载的独立模块
 
@@ -46,6 +49,8 @@ Drawnix 不是一个轻量 renderer，而是一个完整白板应用栈：
 - `@plait-board/mermaid-to-drawnix`
 
 这说明它们自己也把“转换能力”视作重模块，而不是默认常驻主路径。这一点对 Notemd 很重要：如果未来要借鉴，也应该沿用“隔离、按需加载”的思路。
+
+同时，这些转换弹窗最后都会把结果插回 Drawnix 自己的交互式 board，也就是说它们默认服务的仍然是一个浏览器白板产品边界，而不是外部插件里的轻量后台 adapter。
 
 ### 3. 分层思路值得借鉴
 
@@ -66,6 +71,12 @@ Drawnix 代码中大量直接依赖：
 - `localStorage`
 - `browser-fs-access`
 - `MobileDetect`
+
+具体证据：
+
+- `packages/drawnix/src/drawnix.tsx` 直接搭建完整 React board shell，并使用 `window.navigator.userAgent` 做终端检测
+- `packages/drawnix/src/data/filesystem.ts` 直接依赖 `browser-fs-access`
+- `packages/drawnix/src/data/json.ts` 通过浏览器文件选择/保存流程处理 `.drawnix` 打开与导出
 
 这意味着它默认运行在完整浏览器宿主中，具备文件系统选择器、DOM 覆盖层、浏览器存储和交互式菜单系统。Notemd 目前的可控边界是：
 
@@ -107,6 +118,17 @@ Notemd 当前主线是：
 
 这会削弱 Notemd 现有路线图里最重要的一步：**先让 LLM 产出结构化语义，再做 target-specific adapter。**
 
+### 4. 鲁棒性不只取决于 schema，还取决于几何与布局归属
+
+`.drawnix` 容器本身是清晰 JSON，但真正的兼容性还取决于谁来负责：
+
+- Plait element 选型
+- point 生成与 board geometry
+- viewport 默认值
+- theme 翻译
+
+也就是说，“能写出 JSON”不等于“能稳定导出可用白板”。如果 Notemd 真要做这条线，必须由自己的 adapter 明确接管 semantic-to-board projection；只复用文件格式但不拥有投影逻辑，会得到脆弱且难排错的结果。
+
 ## 可行性矩阵
 
 | 方向 | 可行性 | 风险 | 结论 |
@@ -117,6 +139,7 @@ Notemd 当前主线是：
 | 借鉴 `.drawnix` 数据格式作为未来导出目标 | 中 | 中 | 可作为后续候选 |
 | 在隔离路径中试验 `mermaid-to-drawnix` / `markdown-to-drawnix` | 中低 | 中高 | 仅限实验性原型 |
 | 基于 `DiagramSpec -> PlaitElement[]` 自建 adapter | 中 | 中 | 如果未来要 board export，这是更合理的方向 |
+| 直接输出 `DiagramSpec -> DrawnixExportedData` | 中 | 中 | 强于宿主嵌入，但仍需要自己负责 geometry/layout 决策 |
 
 ## 对 Notemd 的建议结论
 

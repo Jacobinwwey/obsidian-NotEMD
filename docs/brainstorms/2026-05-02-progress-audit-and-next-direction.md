@@ -11,6 +11,7 @@ Reference documents:
 - `docs/superpowers/plans/2026-04-14-diagram-rendering-platform-roadmap.en.md`
 - `docs/brainstorms/2026-04-14-diagram-platform-phase-2-requirements.md`
 - `docs/brainstorms/2026-05-01-llm-backward-compat-and-progress-audit.md`
+- `docs/brainstorms/2026-05-03-mainline-stabilization-and-ci-hardening-requirements.md`
 - `docs/brainstorms/2026-05-03-drawnix-feasibility-and-integration-direction.md`
 
 ## Reality Corrections (2026-05-03)
@@ -20,13 +21,19 @@ This audit is not a redesign pass. It is a repo-truth alignment pass. The bigges
 1. **Remote `main` does not currently have a normal push/PR CI pipeline.**
    `.github/workflows/release.yml` runs only for numeric `x.x.x` tag pushes and `workflow_dispatch`. `main@c2d3511` has no failing status. The recent red runs came from the `1.8.3` release flow and were already repaired by the successful follow-up release run on 2026-05-01.
 
-2. **"Live verification for all 8 intents" is not a tracked repo gate today.**
+2. **The `pending` commit-status response on `main` is not a real failing check.**
+   As of 2026-05-03, `commits/main/status` returns `state: pending` with `statuses: []`, while `check-runs`, `check-suites`, and branch protection are all empty for `main`. In this repository, GitHub Actions runs are the authoritative CI signal, not the commit-status endpoint by itself.
+
+3. **The release workflow had a future failure vector even after the last successful repair run.**
+   The latest successful `1.8.3` release run still emitted GitHub's Node 20 JavaScript-action deprecation warning for `actions/checkout@v4` and `actions/setup-node@v4`. This pass upgrades those actions to `v6` so the release path does not drift toward a time-bomb CI failure.
+
+4. **"Live verification for all 8 intents" is not a tracked repo gate today.**
    The live test files such as `src/tests/liveAllDiagramIntents.test.ts` were removed from mainline in `92d3ad3` as accidentally committed live tests. The 2026-05-02 DeepSeek run is historical local evidence, not a stable repo-enforced gate.
 
-3. **Runtime support for 8 intents is not the same thing as UI exposure.**
+5. **Runtime support for 8 intents is not the same thing as UI exposure.**
    `SUPPORTED_DIAGRAM_INTENTS` still includes `mindmap / flowchart / sequence / classDiagram / erDiagram / stateDiagram / canvasMap / dataChart`, but the settings/sidebar selector currently exposes only `auto + flowchart + sequence + classDiagram + erDiagram + stateDiagram + dataChart`. `mindmap` and `canvasMap` remain runtime capabilities, not current first-class UI choices.
 
-4. **Command orchestration is partially unified, not fully unified.**
+6. **Command orchestration is partially unified, not fully unified.**
    Legacy Mermaid save and experimental save still route through shared diagram orchestration, but `previewExperimentalDiagramCommand` now reads a local `vega-lite` fenced block and previews it directly. That matches the current saved artifact shape for `dataChart`, but it is not the final command-surface end state.
 
 ## Roadmap Task Status
@@ -40,7 +47,7 @@ This audit is not a redesign pass. It is a repo-truth alignment pass. The bigges
 | Task 4 | Rendering platform | Delivered. Registry, service, cache, preview modal, inline host, and iframe host landed. | None. |
 | Task 5 | JSON Canvas | Delivered. `.canvas` artifact, layout, save, and preview path are usable. | None. |
 | Task 6 | Vega-Lite | Delivered with limits. `dataChart` uses iframe-host preview and now saves as Markdown fenced `vega-lite`. | Still depends on the single-entry main-bundle bridge. |
-| Task 7 | Theme / export / release | Delivered. Theme resolution, SVG/PNG/source export, and release asset rules exist. | No major gap. |
+| Task 7 | Theme / export / release | Delivered, with current hardening applied. Theme resolution, SVG/PNG/source export, release asset rules, and release workflow action pins are in place. | No major product gap, but ordinary `main` CI is still intentionally absent. |
 | Task 8 | Advanced engines | Correctly deferred (R10). | Evaluation gate still not met. |
 
 ## notebook-navigator Cross-Reference Completion
@@ -80,6 +87,7 @@ This audit is not a redesign pass. It is a repo-truth alignment pass. The bigges
 
 **Infrastructure**
 - Progress persistence, architecture docs, release workflow, and README alignment tests are all on mainline.
+- The release path now has a specific hardening rule: keep GitHub-maintained workflow actions on supported majors, or release CI will fail for reasons unrelated to plugin code.
 - The missing piece is now a secret-free, machine-free live verification harness, not another generic unit-test layer.
 
 ## Verification Gates
@@ -93,6 +101,12 @@ These can be reproduced from the repository today and should be treated as the a
 - `npm run audit:i18n-ui`
 - `npm run audit:render-host`
 - `git diff --check`
+
+For remote truth:
+
+- normal `main` pushes currently have no automatic GitHub Actions workflow
+- release-tag truth comes from `.github/workflows/release.yml`
+- `commits/<sha>/status` is not authoritative here when it only returns `pending` plus zero statuses
 
 ### Historical local evidence, not current CI
 
@@ -135,18 +149,21 @@ Short version:
 3. **Runtime packaging (Task 0 remainder)**
    Build a real multi-entry or isolated-asset strategy for heavy runtimes such as Vega-Lite.
 
-4. **Keep workspace hygiene**
+4. **Release workflow maintenance**
+   Treat GitHub workflow action-major refresh as part of release-path ownership. Do not wait for deprecation warnings to turn into actual failed release jobs.
+
+5. **Keep workspace hygiene**
    `ref/` and `coverage/` are local analysis/build artifacts, not repo deliverables. The mainline expectation is a clean worktree.
 
 ### Blocked by hard constraints
 
-5. **Legacy prompt retirement**
+6. **Legacy prompt retirement**
    Requires real Obsidian regression verification of the original Mermaid scenario.
 
-6. **MermaidProcessor sunset**
+7. **MermaidProcessor sunset**
    Must be split incrementally with screenshot/file validation, not just Jest coverage.
 
-7. **Drawnix integration**
+8. **Drawnix integration**
    Today it is a reference source and a possible future export target, not a mainline priority.
 
 ## Acceptance Criteria: Diagram Platform
