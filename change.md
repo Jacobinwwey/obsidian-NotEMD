@@ -8,25 +8,31 @@ This document summarizes the major functional and architectural changes implemen
 
 ### Highlights
 
-- Release workflow hardening: GitHub Actions majors pinned to supported versions to avoid the Node 20 deprecation path
-- Progress docs and roadmap corrected to match current code and remote workflow truth
-- Drawnix audited as a reference boundary instead of a near-term embedded host target
-- New mainline stabilization and CI hardening requirements document added
+- Diagram intent controls added across settings and sidebar/workbench flows
+- Batch progress persistence and per-setting sync locality controls added
+- Mermaid/preview/export reliability significantly hardened
+- Release workflow and multilingual docs aligned with the real codebase delta
 - Version metadata synchronized for the 1.8.4 release
 
 ### New Features
 
-- **Release Workflow Hardening**: `.github/workflows/release.yml` now pins supported `actions/checkout` and `actions/setup-node` majors, and maintainer docs explain how to read `main` truth correctly.
-- **Mainline Truth Alignment**: Progress and roadmap docs now distinguish ordinary `main` workflow truth from release-tag workflow truth, including the `pending` commit-status / zero-status edge case.
+- **Diagram Intent Control**: Added preferred diagram intent selectors in settings and the Notemd Workbench/sidebar path.
+- **Batch Progress Store**: Long-running batch flows now persist progress for better interrupt/resume behavior.
+- **Sync Locality Control**: Added per-setting sync toggles so secret-like provider values can remain local.
+- **LLM Response Cache**: Added in-memory caching for repeated identical LLM calls in the same session.
 
 ### Fixes
 
-- **Documentation Drift**: Updated roadmap, maintainer release workflow docs, Drawnix audit notes, and phase-2 requirements references to match current reality.
-- **Version Sync**: Bumped `package.json`, `manifest.json`, `versions.json`, and README version banners to `1.8.4`.
+- **Diagram Enforcement**: Explicit diagram intent now blocks HTML fallback, retries with the requested type, and backfills missing node labels from ids.
+- **Mermaid Stability**: Sanitized trailing whitespace, added parse-error retry, and aligned boundary handling with Obsidian Mermaid 11.4.1 expectations.
+- **Artifact Saving**: Mermaid retry failures now still save best-effort output; Vega-Lite exports now save readable `.md` artifacts instead of raw `.json`.
+- **Release Workflow Hardening**: `.github/workflows/release.yml` now pins supported `actions/checkout` and `actions/setup-node` majors.
+- **README Contract Coverage**: Added dedicated tests to keep localized README version/sponsor/badge alignment from drifting again.
 
 ### Chores
 
 - Added `docs/releases/1.8.4.md` and `docs/releases/1.8.4.zh-CN.md`.
+- Refreshed architecture, progress, Drawnix feasibility, and maintainer release-workflow docs.
 - Added `docs/brainstorms/2026-05-03-mainline-stabilization-and-ci-hardening-requirements*.md`.
 - Kept the existing `1.8.3` historical entry below for traceability.
 
