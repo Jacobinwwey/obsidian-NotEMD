@@ -50,6 +50,21 @@ topic: progress-audit-next-direction
 | 任务 7 | 主题 / 导出 / release | 已交付，并已补当前加固。主题、SVG/PNG/source 导出、release 资产约束与 workflow action pin 已存在。 | 没有重大产品差距，但普通 `main` CI 仍是刻意缺失状态。 |
 | 任务 8 | 高级引擎 | 按设计推迟（R10）。 | 评估门未满足。 |
 
+## Roadmap 长周期交叉印证
+
+如果把 `docs/superpowers/plans/2026-04-14-diagram-rendering-platform-roadmap.en.md` 视为一份中长期路线图来读，当前剩余工作已经清晰分成三层：
+
+1. **平台底座已交付**
+   `DiagramSpec`、renderer registry/service、Mermaid 子类型 adapters、JSON Canvas、Vega-Lite 预览、theme/export 对齐，以及 release 加固，都不再是“未来目标”，而是主线现实。它们应被视为已完成底座，而不是待建能力。
+
+2. **仍待完成的边界加固**
+   路线图里真正还活着的技术债，现在集中在命令表面 canonical 化、维护者本地语义核验、以及重型运行时的真实打包隔离。这三类问题仍然阻碍“平台成熟度”，但已经不再阻碍“平台是否存在”。
+
+3. **更长期的可选扩展**
+   服务层拆分、更完整的 board-style export、以及高级引擎探索，仍然是有效方向，但它们已经后置于上述稳定化工作，不应再与当前批次争夺优先级。
+
+这意味着，这份路线图不应再被解读为“继续建设平台”，而应被解读为“先把平台硬化完成，再决定要不要向外扩展”。
+
 ## notebook-navigator 交叉参考完成情况
 
 | # | 模式 | 状态 | 说明 |
@@ -154,6 +169,18 @@ topic: progress-audit-next-direction
 
 5. **工作区卫生保持**
    `ref/` 与 `coverage/` 应视为本地分析 / 构建产物，而不是待提交内容。主线需要持续保持干净工作树。
+
+### 建议落地顺序
+
+结合 roadmap 原始长期意图与当前代码现实，最稳妥的未来落地顺序应为：
+
+1. 先把命令表面 canonical 化
+2. 再把维护者本地语义核验 runbook 正式落盘
+3. 然后收紧重型运行时的打包边界
+4. 完成以上三项后，再重开 legacy prompt 退役与 MermaidProcessor sunset
+5. 最后才重新评估 board-style export 或高级引擎探索
+
+这个顺序既保留了 roadmap 的长期目标，也尊重了当前主线已经交付的事实。
 
 ### 受硬性约束阻塞
 

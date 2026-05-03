@@ -21,6 +21,16 @@ The codebase now has a real diagram platform, but the remaining risks are bounda
 
 This batch should therefore stabilize what already exists instead of expanding into new engines or host integrations.
 
+## Roadmap Cross-Validation
+
+Cross-checking against `docs/superpowers/plans/2026-04-14-diagram-rendering-platform-roadmap.en.md` narrows the true next-batch scope further:
+
+- the platform itself is no longer the thing to build
+- the active gap is maturity at the command, verification, and packaging boundaries
+- future expansion work should remain explicitly downstream of those boundaries
+
+That means this plan is not a detour from the roadmap. It is the current execution form of the roadmap.
+
 ## Requirement Traceability
 
 Source documents:
@@ -135,6 +145,16 @@ Make the documents explicit that Drawnix integration is not the next batch, and 
 
 - [ ] **Step 3: Avoid accidental host creep**
 Remove or rewrite any wording that implies full-host embedding is under active consideration for the next release batch.
+
+## Ordered Execution Rule
+
+This plan should be executed in this order unless a later code reality invalidates the sequence:
+
+1. Task 1: command surface consolidation
+2. Task 2: maintainer-local semantic verification runbook
+3. Task 3: runtime packaging boundary audit
+4. only after Tasks 1-3, resume any legacy prompt or MermaidProcessor reduction
+5. only after those, reopen board-style export or advanced-engine exploration
 
 ## Test Strategy
 

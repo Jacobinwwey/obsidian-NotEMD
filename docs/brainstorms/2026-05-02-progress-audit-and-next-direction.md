@@ -50,6 +50,21 @@ This audit is not a redesign pass. It is a repo-truth alignment pass. The bigges
 | Task 7 | Theme / export / release | Delivered, with current hardening applied. Theme resolution, SVG/PNG/source export, release asset rules, and release workflow action pins are in place. | No major product gap, but ordinary `main` CI is still intentionally absent. |
 | Task 8 | Advanced engines | Correctly deferred (R10). | Evaluation gate still not met. |
 
+## Roadmap Long-Horizon Cross-Check
+
+Reading `docs/superpowers/plans/2026-04-14-diagram-rendering-platform-roadmap.en.md` as a long-horizon document, the remaining work now falls into three clearly different buckets:
+
+1. **Platform foundations already delivered**
+   `DiagramSpec`, renderer registry/service, Mermaid subtype adapters, JSON Canvas, Vega-Lite preview, theme/export alignment, and release hardening are no longer speculative goals. They are mainline reality and should be treated as finished foundation, not future roadmap work.
+
+2. **Boundary-hardening work still required**
+   The roadmap's still-live technical debt is now concentrated in command-surface canonicalization, maintainer-local semantic verification, and true packaging isolation for heavy runtimes. These are the only medium-term items that still materially block "platform maturity" as opposed to "feature existence".
+
+3. **Longer-term optional extensions**
+   Service-layer decomposition, richer board-style export, and advanced engines remain valid future directions, but they are now downstream of the stability work above. They should not compete with the current stabilization batch for ownership or attention.
+
+This means the roadmap should no longer be interpreted as "build the platform". It should be interpreted as "finish hardening the platform, then decide whether to extend it".
+
 ## notebook-navigator Cross-Reference Completion
 
 | # | Pattern | Status | Notes |
@@ -154,6 +169,18 @@ Short version:
 
 5. **Keep workspace hygiene**
    `ref/` and `coverage/` are local analysis/build artifacts, not repo deliverables. The mainline expectation is a clean worktree.
+
+### Ordered landing sequence
+
+The most defensible future landing order, after cross-checking roadmap intent against current code, is:
+
+1. canonicalize the command surface
+2. publish the maintainer-local semantic verification runbook
+3. tighten the heavy-runtime packaging boundary
+4. only then revisit legacy prompt retirement and MermaidProcessor sunset
+5. only after those, re-open board-style export or advanced-engine exploration
+
+That sequence preserves the roadmap's long-term intent while respecting what the codebase has already delivered.
 
 ### Blocked by hard constraints
 
