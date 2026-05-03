@@ -38,7 +38,7 @@ The next durable artifact should therefore not be another broad roadmap rewrite.
 ## Success Criteria
 
 - A maintainer can read the updated progress docs and choose the next execution batch without re-auditing the entire codebase.
-- The release workflow no longer carries the specific GitHub warning path caused by `actions/checkout@v4` and `actions/setup-node@v4`.
+- The release workflow no longer carries the specific GitHub warning path caused by `actions/checkout@v4` and `actions/setup-node@v4`, and the hardened path is reflected by the successful `1.8.4` release run on 2026-05-03.
 - The repository clearly documents that Drawnix is a reference boundary, not a near-term host integration target.
 - `main` remains clean and the documented repo-level verification gates still pass.
 
@@ -58,7 +58,8 @@ The next durable artifact should therefore not be another broad roadmap rewrite.
 ## Dependencies / Assumptions
 
 - `.github/workflows/release.yml` is the only active GitHub Actions workflow today.
-- The latest successful release run (`25215799596`) is the concrete evidence for the JavaScript-action deprecation warning on this repository.
+- The successful `1.8.3` repair run (`25215799596`) is the concrete evidence for the older JavaScript-action deprecation warning on this repository.
+- The successful `1.8.4` release run (`25274341984`) is the concrete evidence that the hardened `actions/checkout@v6` and `actions/setup-node@v6` path is now green.
 - Current upstream releases for `actions/checkout` and `actions/setup-node` provide supported major versions that can replace the older pins without redesigning the release process.
 
 ## Outstanding Questions

@@ -19,13 +19,13 @@ topic: progress-audit-next-direction
 这次审计重点不是重新设计 diagram platform，而是把“代码真实状态、远端 workflow、进度文档、外部参考项目结论”重新对齐。以下几项必须明确写清：
 
 1. **远端 `main` 当前没有常规 push/PR CI。**
-   `.github/workflows/release.yml` 只在数字 `x.x.x` tag push 或 `workflow_dispatch` 时运行。`main@c2d3511` 没有失败状态。最近的红灯来自 `1.8.3` 发布流，但已在 `2026-05-01` 的后续 release run 中修复。
+   `.github/workflows/release.yml` 只在数字 `x.x.x` tag push 或 `workflow_dispatch` 时运行。截至 `2026-05-03`，`main` 指向 `09ef239`（`docs(release): align 1.8.4 notes with shipped delta`），该分支本身仍没有普通 push/PR workflow。最近的红灯来自 `1.8.3` 发布流，随后已被 `2026-05-03` 的 `1.8.4` 成功 release run（`25274341984`）覆盖。
 
 2. **`main` 上的 commit-status `pending` 不是一个真实失败检查。**
-   截至 `2026-05-03`，`commits/main/status` 返回的是 `state: pending` 且 `statuses: []`，但 `main` 同时没有 branch protection、没有 `check-runs`、也没有 `check-suites`。对这个仓库来说，GitHub Actions runs 才是远端 CI 真值源，单独看 commit-status API 会误判。
+   截至 `2026-05-03`，`commits/main/status` 返回的是 `state: pending` 且 `statuses: []`，同时 `main` 没有 branch protection，也没有普通分支级 required checks。但同一个 `main@09ef239` commit 已经通过 `1.8.4` tag 触发的 release 路径挂上了成功的 `check_suite` / `check_run`。对这个仓库来说，GitHub Actions runs 与 `check-suites` / `check-runs` 才是远端 CI 真值源，单独看 commit-status API 会误判。
 
 3. **release workflow 在最新成功 run 后仍带有未来失效风险。**
-   最新一次成功的 `1.8.3` release run 仍携带 GitHub 官方的 Node 20 JavaScript-action 弃用告警，指向 `actions/checkout@v4` 与 `actions/setup-node@v4`。本次已把它们升级到 `v6`，避免 release 路径继续保留时间炸弹。
+   更早那次成功的 `1.8.3` 修复 run（`25215799596`）仍携带 GitHub 官方的 Node 20 JavaScript-action 弃用告警，指向 `actions/checkout@v4` 与 `actions/setup-node@v4`。当前 `.github/workflows/release.yml` 已固定为 `actions/checkout@v6` 与 `actions/setup-node@v6`，而新的 `1.8.4` release run（`25274341984`）已在这条加固后的路径上成功完成。
 
 4. **“8 种图表意图实时验证”目前不是仓库内受控门槛。**
    相关 live test 文件（如 `src/tests/liveAllDiagramIntents.test.ts`）已在 `92d3ad3` 以“accidentally committed live test files”名义移出主线。2026-05-02 的 DeepSeek 实时验证应视为一次本地历史证据，而不是当前仓库能持续执行、CI 能强制覆盖的门槛。
@@ -125,7 +125,7 @@ topic: progress-audit-next-direction
    它是 Nx monorepo + React 19 + Plait/Slate + browser-fs-access + browser storage 的完整白板应用栈，明显超出当前 Obsidian 插件边界。
 
 2. **真正值得借鉴的是数据边界和转换边界。**
-   Drawnix 的 `.drawnix` 导出模型、`markdown-to-drawnix` / `mermaid-to-drawnix` 的惰性加载方式，以及 app shell / board / text renderer 分层思想，都有参考价值。
+   Drawnix 在 `ref/drawnix/packages/drawnix/src/data/types.ts` 中定义的 `.drawnix` 导出模型、`ref/drawnix/packages/drawnix/src/data/json.ts` 中的浏览器文件导入/导出边界、`markdown-to-drawnix` / `mermaid-to-drawnix` 的惰性加载方式，以及 app shell / board / text renderer 分层思想，都有参考价值。
 
 3. **如果未来要支持 board-style 导出，应该直接做 `DiagramSpec -> PlaitElement[]` 适配器，而不是 `DiagramSpec -> Mermaid -> mermaid-to-drawnix` 的绕路方案。**
    否则会把现有 spec-first 语义层重新降级回字符串中间态。

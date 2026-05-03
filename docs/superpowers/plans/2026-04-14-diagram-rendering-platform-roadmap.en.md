@@ -17,8 +17,8 @@ The "8 diagram intents verified against live API" note above should now be read 
 This also needs to be explicit:
 
 - remote `main` does not currently have normal push/PR CI; `.github/workflows/release.yml` runs only on numeric tag pushes or `workflow_dispatch`
-- `commits/main/status` currently returns `pending` with zero statuses, but `main` has no check suites, no check runs, and no branch protection; Actions runs are the real CI signal here
-- the latest successful `1.8.3` release run still surfaced GitHub's Node 20 JavaScript-action deprecation warning, so this pass upgrades `actions/checkout` and `actions/setup-node` to `v6`
+- `commits/main/status` currently returns `pending` with zero statuses, while branch protection is disabled and no ordinary branch-scoped required checks exist; the same `main@09ef239` commit does have a successful release-driven `check_suite` / `check_run`, so Actions runs plus checks are the real CI signal here
+- the successful `1.8.3` repair run surfaced GitHub's Node 20 JavaScript-action deprecation warning, and the current `1.8.4` success run demonstrates the hardened `actions/checkout@v6` and `actions/setup-node@v6` path
 - the runtime still supports 8 intents, but the preferred-intent UI selector currently exposes only a subset; `mindmap` and `canvasMap` are not current first-class UI choices
 - `preview-experimental-diagram` now previews a saved `vega-lite` fenced artifact locally, so command-surface unification remains partial rather than complete
 - Drawnix should be treated as a data-boundary / conversion-boundary reference, not as the next host to embed; see `docs/brainstorms/2026-05-03-drawnix-feasibility-and-integration-direction.md`
@@ -73,9 +73,9 @@ Scope: all 5 transport runtimes (OpenAI-compatible, Anthropic, Google, Azure Ope
 
 `normalizeSpec` in `diagramSpecResponseParser.ts` now handles multiple edge field conventions (`source`/`target`, `sourceId`/`targetId`, `start`/`end` to `from`/`to`) so LLM outputs with varying JSON field names parse correctly. `buildDiagramSpecPrompt` now explicitly instructs LLMs to use `from`/`to` field names.
 
-### Live Chain Tests
+### Historical Live Verification
 
-`src/tests/liveChainTest.test.ts` exercises real DeepSeek API calls from the test vault configuration, covering chat completion, diagram spec generation, and full pipeline output. All 5 tests pass against live DeepSeek API.
+The earlier DeepSeek live-chain proof should now be treated as historical local evidence, not as a tracked repo-level test surface. The live test files are no longer on `main`, and current documentation must not imply that `src/tests/liveChainTest.test.ts` is still a maintained, runnable gate.
 
 ### Backward Compatibility
 
