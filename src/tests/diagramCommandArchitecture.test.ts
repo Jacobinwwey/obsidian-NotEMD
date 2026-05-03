@@ -75,15 +75,25 @@ describe('diagram command architecture', () => {
         }));
     });
 
-    test('routes experimental preview command through the shared diagram command', async () => {
-        const sharedSpy = jest
-            .spyOn(plugin as any, 'generateDiagramCommand')
-            .mockResolvedValue(undefined);
+    test('preview command reads vega-lite from file without calling generateDiagramCommand', async () => {
+        const vlContent = '{"mark":"bar"}';
+        const fileContent = '# Test\n\n```vega-lite\n' + vlContent + '\n```\n';
+        (mockApp.vault.read as jest.Mock).mockResolvedValue(fileContent);
+
+        const sharedSpy = jest.spyOn(plugin as any, 'generateDiagramCommand');
+        const previewSpy = jest.spyOn(plugin as any, 'openDiagramPreviewModal').mockImplementation(() => undefined);
 
         await (plugin as any).previewExperimentalDiagramCommand(file, reporter);
 
-        expect(sharedSpy).toHaveBeenCalledWith(file, reporter, expect.objectContaining({
-            executionMode: 'preview-artifact'
-        }));
+        // Should NOT call generateDiagramCommand — preview reads directly from file
+        expect(sharedSpy).not.toHaveBeenCalled();
+        expect(previewSpy).toHaveBeenCalledWith(
+            expect.objectContaining({
+                target: 'vega-lite',
+                content: vlContent
+            }),
+            file.path,
+            false
+        );
     });
 });

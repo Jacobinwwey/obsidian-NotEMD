@@ -10,6 +10,17 @@ Welcome modal + sponsor support + Cline-aligned tokens + edge normalization ship
 
 Next: command surface consolidation, runtime packaging.
 
+## 2026-05-03 Reality Correction
+
+The "8 diagram intents verified against live API" note above should now be read as **historical local evidence**, not as a sustainable tracked repo gate. The live test files were removed from mainline in `92d3ad3` because they depended on a local vault path, live secrets, and nondeterministic network calls.
+
+This also needs to be explicit:
+
+- remote `main` does not currently have normal push/PR CI; `.github/workflows/release.yml` runs only on numeric tag pushes or `workflow_dispatch`
+- the runtime still supports 8 intents, but the preferred-intent UI selector currently exposes only a subset; `mindmap` and `canvasMap` are not current first-class UI choices
+- `preview-experimental-diagram` now previews a saved `vega-lite` fenced artifact locally, so command-surface unification remains partial rather than complete
+- Drawnix should be treated as a data-boundary / conversion-boundary reference, not as the next host to embed; see `docs/brainstorms/2026-05-03-drawnix-feasibility-and-integration-direction.md`
+
 ---
 
 **Goal:** Evolve Notemd from a single Mermaid-text generation path into an extensible diagram platform built around intent detection, structured specs, specialized renderers, and multi-format output inside Obsidian.

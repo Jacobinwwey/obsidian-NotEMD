@@ -1,5 +1,5 @@
 ---
-date: 2026-05-02
+date: 2026-05-03
 topic: progress-audit-next-direction
 ---
 
@@ -11,187 +11,162 @@ Reference documents:
 - `docs/superpowers/plans/2026-04-14-diagram-rendering-platform-roadmap.en.md`
 - `docs/brainstorms/2026-04-14-diagram-platform-phase-2-requirements.md`
 - `docs/brainstorms/2026-05-01-llm-backward-compat-and-progress-audit.md`
+- `docs/brainstorms/2026-05-03-drawnix-feasibility-and-integration-direction.md`
 
-### Roadmap Task Status
+## Reality Corrections (2026-05-03)
+
+This audit is not a redesign pass. It is a repo-truth alignment pass. The biggest risks are now documentation drift and overstated gates, not missing platform ideas.
+
+1. **Remote `main` does not currently have a normal push/PR CI pipeline.**
+   `.github/workflows/release.yml` runs only for numeric `x.x.x` tag pushes and `workflow_dispatch`. `main@c2d3511` has no failing status. The recent red runs came from the `1.8.3` release flow and were already repaired by the successful follow-up release run on 2026-05-01.
+
+2. **"Live verification for all 8 intents" is not a tracked repo gate today.**
+   The live test files such as `src/tests/liveAllDiagramIntents.test.ts` were removed from mainline in `92d3ad3` as accidentally committed live tests. The 2026-05-02 DeepSeek run is historical local evidence, not a stable repo-enforced gate.
+
+3. **Runtime support for 8 intents is not the same thing as UI exposure.**
+   `SUPPORTED_DIAGRAM_INTENTS` still includes `mindmap / flowchart / sequence / classDiagram / erDiagram / stateDiagram / canvasMap / dataChart`, but the settings/sidebar selector currently exposes only `auto + flowchart + sequence + classDiagram + erDiagram + stateDiagram + dataChart`. `mindmap` and `canvasMap` remain runtime capabilities, not current first-class UI choices.
+
+4. **Command orchestration is partially unified, not fully unified.**
+   Legacy Mermaid save and experimental save still route through shared diagram orchestration, but `previewExperimentalDiagramCommand` now reads a local `vega-lite` fenced block and previews it directly. That matches the current saved artifact shape for `dataChart`, but it is not the final command-surface end state.
+
+## Roadmap Task Status
 
 | Task | Plan Target | Current Reality | Gap |
 |---|---|---|---|
-| Task 0 | Build/packaging substrate | Delivered with limits. `srcdoc` host in `main.js`. Smoke gate active. Multi-entry build deferred. | Heavy-runtime packaging not started. No blocker. |
-| Task 1 | Diagram domain model | Delivered. `DiagramIntent`, `DiagramSpec`, validators, planner all landed. | None. |
-| Task 2 | Spec-first pipeline | Partial. Internal orchestration unified (`generateDiagramCommand`). Public command surface still has 3 IDs. `promptUtils.ts` legacy prompt still present. | Command consolidation + prompt retirement. Hard constraint: must preserve original scenario usability. |
-| Task 3 | Mermaid adapter V2 | Partial. Subtype adapters cover all 6 Mermaid intents. `legacyFixerUtils.ts` extracted. `mermaidProcessor.ts` still owns too much. | Hard constraint: each sub-task must be verified in real Obsidian with saved images. |
-| Task 4 | Rendering platform | Delivered. Registry, service, cache, iframe/inline hosts, preview modal all landed. | None. |
-| Task 5 | JSON Canvas | Delivered. `.canvas` output, layout, save, preview. | None. |
-| Task 6 | Vega-Lite | Delivered with limits. `dataChart` intent, iframe-host preview with sandbox. Runtime through main bundle bridge. | Packaging boundary (Task 0). |
-| Task 7 | Theme/export/release | Delivered. Theme resolution, SVG/PNG/source export, support matrix. | None. |
-| Task 8 | Advanced engines | Correctly deferred (R10). | Evaluation gate not met. |
+| Task 0 | Build/packaging substrate | Delivered with limits. `srcdoc` host is inside `main.js`, and the render-host smoke gate is in place. | Real multi-entry / heavy-runtime isolation has not started. |
+| Task 1 | Diagram domain model | Delivered. `DiagramIntent`, `DiagramSpec`, validators, and planner are on the mainline. | None. |
+| Task 2 | Spec-first pipeline | Partial. Shared orchestration exists, but public command surface still exposes 3 IDs, preview now has a local `vega-lite` branch, and the legacy Mermaid prompt still exists in `promptUtils.ts`. | Command consolidation + prompt retirement while preserving original Mermaid usability. |
+| Task 3 | Mermaid adapter V2 | Partial. All 6 Mermaid subtype adapters landed and `legacyFixerUtils.ts` extracted part of the fixer load. | `mermaidProcessor.ts` still owns too much; each split step requires real Obsidian image verification. |
+| Task 4 | Rendering platform | Delivered. Registry, service, cache, preview modal, inline host, and iframe host landed. | None. |
+| Task 5 | JSON Canvas | Delivered. `.canvas` artifact, layout, save, and preview path are usable. | None. |
+| Task 6 | Vega-Lite | Delivered with limits. `dataChart` uses iframe-host preview and now saves as Markdown fenced `vega-lite`. | Still depends on the single-entry main-bundle bridge. |
+| Task 7 | Theme / export / release | Delivered. Theme resolution, SVG/PNG/source export, and release asset rules exist. | No major gap. |
+| Task 8 | Advanced engines | Correctly deferred (R10). | Evaluation gate still not met. |
 
-### Notebook-Navigator Cross-Reference Completion
+## notebook-navigator Cross-Reference Completion
 
-All 5 patterns from `docs/brainstorms/2026-05-01-llm-backward-compat-and-progress-audit.md` are now implemented:
-
-| # | Pattern | Status | Evidence |
+| # | Pattern | Status | Notes |
 |---|---|---|---|
-| 1 | Service layer + DI | Deferred | Architectural refactoring, not blocking |
-| 2 | LLM response caching | Done | `src/llmUtils.ts` — 5-min TTL Map cache |
-| 3 | Per-setting sync toggle | Done | `localOnly` flag, localStorage isolation |
-| 4 | Batch pipeline with resume | Done | `src/batchProgressStore.ts` — atomic JSON state |
-| 5 | Architecture overview doc | Done | `docs/architecture.md` + `.zh-CN.md` with Mermaid diagrams |
+| 1 | Service layer + DI | Deferred | Architectural refactor, not blocking |
+| 2 | LLM response caching | Done | Landed in `src/llmUtils.ts` |
+| 3 | Per-setting sync toggle | Done | `localOnly` isolation exists |
+| 4 | Batch pipeline with resume | Done | `src/batchProgressStore.ts` landed |
+| 5 | Architecture overview doc | Done | `docs/architecture.md` + `.zh-CN.md` |
 
-### Additional Deliverables (v1.8.3+)
+## Additional Delivered Capability (v1.8.3+)
 
-| Feature | Status | Evidence |
+| Feature | Status | Notes |
 |---|---|---|
-| Welcome modal (first install) | Done | `src/ui/WelcomeModal.ts`, 22 locales |
-| Sponsor support (GitHub Star + ko-fi) | Done | Settings + welcome modal + README badges |
-| Cline-aligned token resolution | Done | `resolveProviderTokenLimit` unknown-model fallback |
-| Diagram edge field normalization | Done | `normalizeSpec` handles source/target → from/to |
-| Preferred diagram intent selector | Done | Settings dropdown + sidebar quick-access |
-| README i18n alignment contract test | Done | 121 tests covering all 30 README files |
-| Live diagram intent testing | Done | All 8 intents verified against live DeepSeek API |
+| Welcome modal (first install) | Done | 22 locales |
+| Sponsor support (GitHub Star + ko-fi) | Done | Settings + welcome modal + README |
+| Cline-aligned token resolution | Done | Unknown-model default cap now defers to provider |
+| Diagram edge normalization | Done | `source/target/sourceId/targetId/start/end -> from/to` |
+| Preferred diagram intent selector | Partial | UI exposes a subset, not every runtime intent |
+| README i18n alignment contract test | Done | Stable repo-level gate |
+| 8-intent live API verification | Historical local evidence only | Not a tracked repo gate today |
 
-### Architecture Advancement Since v1.8.2
+## Architecture Advancement
 
-**LLM Layer:**
-- Response caching reduces API costs for repeated calls
-- Token resolution now Cline-aligned for unknown models
-- Provider config isolation (`localOnly`) for security
-- 25 providers, 5 transports, 22 locales — all stable
+**LLM layer**
+- Response caching reduces repeated API cost.
+- Unknown-model output token resolution now matches Cline semantics.
+- Provider config can stay local instead of forcing all sensitive values into sync.
 
-**Diagram Platform:**
-- 8 diagram intents with live-verified output
-- Intent selector in both settings and sidebar
-- Edge normalization handles multiple LLM JSON conventions
-- Iframe-host preview with sandbox for Vega-Lite
-- JSON Canvas as first-class non-Mermaid target
+**Diagram platform**
+- The runtime still supports 8 intents.
+- The main extension seam is now `DiagramSpec -> adapter -> renderer`, not direct Mermaid text generation.
+- `dataChart` is no longer just "save JSON"; it now saves a Markdown fenced `vega-lite` artifact and previews locally.
+- `canvasMap` is supported but intentionally not exposed as a current preferred selector option, which is a healthy separation between runtime capability and product surface.
 
-**Infrastructure:**
-- Batch progress store for interrupt-resume
-- Architecture documentation with Mermaid diagrams
-- README alignment contract test (121 tests)
-- Welcome modal with full i18n
+**Infrastructure**
+- Progress persistence, architecture docs, release workflow, and README alignment tests are all on mainline.
+- The missing piece is now a secret-free, machine-free live verification harness, not another generic unit-test layer.
 
-## Current Architecture Map
+## Verification Gates
 
-```
-src/
-├── main.ts (2212 lines) — Plugin entrypoint, command orchestration
-├── llmProviders.ts — 25 provider definitions, KNOWN_MODEL table
-├── llmUtils.ts — Transport dispatch, token resolution, cache, retry
-├── batchProgressStore.ts — Interrupt-resume batch state
-├── fileUtils.ts — File processing, Mermaid repair
-├── searchUtils.ts — Web research
-├── translate.ts — Translation pipeline
-├── promptUtils.ts — Task prompts (legacy + spec-first)
-├── providerDiagnostics.ts — LLM diagnostics
-├── types.ts — Settings, provider config types
-├── diagram/
-│   ├── types.ts — DiagramIntent, DiagramSpec, DiagramEdge
-│   ├── spec.ts — Validator, assertValidDiagramSpec
-│   ├── planner.ts — Intent inference, plan building
-│   ├── diagramGenerationService.ts — Orchestrator
-│   ├── diagramSpecResponseParser.ts — JSON parser + normalizer
-│   ├── prompts/diagramSpecPrompt.ts — LLM prompt
-│   └── adapters/
-│       ├── mermaid/ — 6 subtype adapters + validator + legacy utils
-│       ├── canvas/ — JSON Canvas adapter
-│       └── vega/ — Vega-Lite adapter + schema
-├── rendering/
-│   ├── rendererRegistry.ts — Renderer registration
-│   ├── rendererService.ts — Dispatch to renderers
-│   ├── cache/renderCache.ts — Diagram render cache
-│   ├── host/ — InlineRenderHost, IframeRenderHost
-│   ├── renderers/ — Mermaid, JSON Canvas, Vega-Lite, HTML
-│   ├── preview/ — SVG/PNG export
-│   └── webview/ — Iframe bootstrap, page, renderFrame
-├── ui/
-│   ├── NotemdSettingTab.ts — Settings UI
-│   ├── NotemdSidebarView.ts — Workbench
-│   ├── WelcomeModal.ts — First-install modal
-│   ├── DiagramPreviewModal.ts — Diagram preview
-│   └── ... — ProgressModal, ErrorModal, modals
-├── i18n/
-│   ├── index.ts — getI18nStrings, locale resolution
-│   ├── taskLanguagePolicy.ts — Per-task language
-│   └── locales/ — en, zh_cn, zh_tw, additional (18 locales)
-└── tests/ — 110 suites, 708 tests
-```
+### Sustainable repo-level gates
 
-## Verification Gate
+These can be reproduced from the repository today and should be treated as the actual mainline gates:
 
-All CI-equivalent checks pass:
-- `npm run build` ✓
-- `npm test -- --runInBand` ✓ (110 suites, 708 tests)
-- `npm run audit:i18n-ui` ✓
-- `npm run audit:render-host` ✓
-- `git diff --check` ✓
-- Live DeepSeek API: all 8 diagram intents verified ✓
+- `npm run build`
+- `npm test -- --runInBand`
+- `npm run audit:i18n-ui`
+- `npm run audit:render-host`
+- `git diff --check`
+
+### Historical local evidence, not current CI
+
+These are useful directional signals, but they should no longer be documented as hard automated repo gates:
+
+- A local DeepSeek verification run covered all 8 intents on 2026-05-02
+- The harness was removed from mainline because it depended on a local vault path, live secrets, and nondeterministic network calls
+
+## Drawnix Reference Conclusion
+
+See: `docs/brainstorms/2026-05-03-drawnix-feasibility-and-integration-direction.md`
+
+Short version:
+
+1. **Do not embed the full Drawnix host into Notemd.**
+   It is an Nx monorepo + React 19 + Plait/Slate + browser-fs-access + browser-storage whiteboard application stack. That is far outside the current Obsidian plugin boundary.
+
+2. **What is useful is the data boundary and conversion boundary.**
+   The `.drawnix` export model, the lazy-loaded `markdown-to-drawnix` / `mermaid-to-drawnix` converters, and the app-shell / board / text-renderer layering are all good reference material.
+
+3. **If Notemd ever wants board-style export, the right move is `DiagramSpec -> PlaitElement[]`, not `DiagramSpec -> Mermaid -> mermaid-to-drawnix`.**
+   Otherwise the current spec-first semantic layer gets downgraded back into a string round-trip.
 
 ## Hard Constraints (Still Active)
 
-1. **MermaidProcessor decomposition**: Each sub-task must be individually verified in real Obsidian with saved/checked images. Unit tests insufficient.
-2. **Legacy prompt retirement**: Original `promptUtils.ts` Mermaid prompt was specifically tuned. Extensions must fully preserve original scenario usability.
-3. **Backward compatibility**: Existing provider configs, transports, and settings must work unchanged.
+1. **MermaidProcessor decomposition**: each sub-task must be verified independently in real Obsidian with saved image checks. Unit tests alone are not enough.
+2. **Legacy prompt retirement**: the original Mermaid prompt in `promptUtils.ts` was tuned for the old scenario. Any retirement or merge must preserve that usability.
+3. **Backward compatibility**: existing provider configs, transports, and settings must remain intact.
 
 ## Next Direction
 
-Priority order for post-v1.8.3 work, respecting hard constraints:
+### Immediate
 
-### Immediate (can proceed without real Obsidian testing)
+1. **Command surface consolidation**
+   Collapse `summarize-as-mermaid`, `generate-experimental-diagram`, and `preview-experimental-diagram` into one coherent command surface. Old IDs can survive only as aliases.
 
-1. **Command surface consolidation** — Unify `summarize-as-mermaid`, `generate-experimental-diagram`, `preview-experimental-diagram` into a single `generate-diagram` command with mode parameter. Keep old IDs as aliases for backward compat.
-   - Effort: Medium. Risk: Low (aliased old IDs).
-   - Files: `src/main.ts`, `src/ui/NotemdSidebarView.ts`, `src/workflowButtons.ts`
+2. **Create a sustainable live verification runbook / harness**
+   Convert "one maintainer's local proof" into a repeatable maintainer workflow that does not depend on hard-coded vault paths or private secrets in tracked files.
 
-2. **Runtime packaging (Task 0 remaining)** — Multi-entry build for Vega-Lite heavy runtime.
-   - Effort: High. Risk: Medium (release asset packaging changes).
-   - Files: `esbuild.config.mjs`, release workflow, `src/rendering/webview/`
+3. **Runtime packaging (Task 0 remainder)**
+   Build a real multi-entry or isolated-asset strategy for heavy runtimes such as Vega-Lite.
 
-### Blocked by Hard Constraints
+4. **Keep workspace hygiene**
+   `ref/` and `coverage/` are local analysis/build artifacts, not repo deliverables. The mainline expectation is a clean worktree.
 
-3. **Legacy prompt retirement** — Requires real Obsidian verification of original Mermaid scenario.
-4. **MermaidProcessor sunset** — Requires real Obsidian verification with saved image validation.
-5. **PlantUML evaluation** — Deferred per R10 until platform exits experimental gating.
+### Blocked by hard constraints
 
-## Next Commit Plan
+5. **Legacy prompt retirement**
+   Requires real Obsidian regression verification of the original Mermaid scenario.
 
-1. Write this progress document (bilingual)
-2. Update roadmap docs with latest status
-3. Update audit doc with final state
-4. Verify CI clean
-5. Commit and push to main
+6. **MermaidProcessor sunset**
+   Must be split incrementally with screenshot/file validation, not just Jest coverage.
 
-## Acceptance Criteria: Diagram Generation
+7. **Drawnix integration**
+   Today it is a reference source and a possible future export target, not a mainline priority.
 
-All 8 diagram intents MUST pass the following acceptance gate before release:
+## Acceptance Criteria: Diagram Platform
 
-### Gate: Live LLM Verification
+Release readiness should satisfy two layers:
 
-Run: `npm test -- --runInBand src/tests/liveAllDiagramIntents.test.ts`
+### Layer 1: repo-enforced gates
 
-| Intent | Render Target | Node Labels | Edge References | Content Non-Empty |
-|---|---|---|---|---|
-| `mindmap` | mermaid | ✓ required | ✓ required | ✓ required |
-| `flowchart` | mermaid | ✓ required | ✓ required | ✓ required |
-| `sequence` | mermaid | ✓ required | ✓ required | ✓ required |
-| `classDiagram` | mermaid | ✓ required | ✓ required | ✓ required |
-| `erDiagram` | mermaid | ✓ required | ✓ required | ✓ required |
-| `stateDiagram` | mermaid | ✓ required | ✓ required | ✓ required |
-| `canvasMap` | json-canvas | ✓ required | ✓ required | ✓ required |
-| `dataChart` | vega-lite | N/A (data-driven) | N/A | ✓ required |
+- `npm run build`
+- `npm test -- --runInBand`
+- `npm run audit:i18n-ui`
+- `npm run audit:render-host`
+- `git diff --check`
 
-### Last Verified: 2026-05-02
+### Layer 2: maintainer-local semantic verification
 
-All 8 intents passed against live DeepSeek API (deepseek-v4-pro).
-Total duration: ~226 seconds.
+When a change touches `src/diagram/`, `src/mermaidProcessor.ts`, or actual render behavior:
 
-### Regression Gate
+- sample Mermaid / JSON Canvas / Vega-Lite behavior in real Obsidian
+- save and inspect output files or images
+- explicitly record this as "maintainer-local semantic verification", not as current automated CI
 
-Any change to `src/diagram/` must re-run this test suite before merge.
-CI should block PRs that modify `src/diagram/` without passing this gate.
-
-### Hard Constraints (Reminder)
-
-1. MermaidProcessor decomposition: each sub-task requires real Obsidian verification with saved/checked images
-2. Legacy prompt retirement: must preserve original scenario usability
-3. All 8 diagram intents must pass live verification before release
+The next missing deliverable is not "add another live test file". It is turning that semantic check into a repeatable maintainer process.

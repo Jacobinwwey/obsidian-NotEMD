@@ -1,5 +1,5 @@
 ---
-date: 2026-05-02
+date: 2026-05-03
 topic: progress-audit-next-direction
 ---
 
@@ -11,110 +11,160 @@ topic: progress-audit-next-direction
 - `docs/superpowers/plans/2026-04-14-diagram-rendering-platform-roadmap.zh-CN.md`
 - `docs/brainstorms/2026-04-14-diagram-platform-phase-2-requirements.zh-CN.md`
 - `docs/brainstorms/2026-05-01-llm-backward-compat-and-progress-audit.zh-CN.md`
+- `docs/brainstorms/2026-05-03-drawnix-feasibility-and-integration-direction.zh-CN.md`
 
-### 路线图任务状态
+## 仓库事实校正（2026-05-03）
+
+这次审计重点不是重新设计 diagram platform，而是把“代码真实状态、远端 workflow、进度文档、外部参考项目结论”重新对齐。以下几项必须明确写清：
+
+1. **远端 `main` 当前没有常规 push/PR CI。**
+   `.github/workflows/release.yml` 只在数字 `x.x.x` tag push 或 `workflow_dispatch` 时运行。`main@c2d3511` 没有失败状态。最近的红灯来自 `1.8.3` 发布流，但已在 `2026-05-01` 的后续 release run 中修复。
+
+2. **“8 种图表意图实时验证”目前不是仓库内受控门槛。**
+   相关 live test 文件（如 `src/tests/liveAllDiagramIntents.test.ts`）已在 `92d3ad3` 以“accidentally committed live test files”名义移出主线。2026-05-02 的 DeepSeek 实时验证应视为一次本地历史证据，而不是当前仓库能持续执行、CI 能强制覆盖的门槛。
+
+3. **运行时支持 8 种意图，不等于 UI 首选项全部暴露。**
+   `SUPPORTED_DIAGRAM_INTENTS` 仍覆盖 `mindmap / flowchart / sequence / classDiagram / erDiagram / stateDiagram / canvasMap / dataChart`，但设置页与侧边栏当前只暴露 `auto + flowchart + sequence + classDiagram + erDiagram + stateDiagram + dataChart`。`mindmap` 与 `canvasMap` 仍属运行时能力，不是当前 UI 首选图表选择器的一部分。
+
+4. **命令编排“部分统一”，不是“完全统一”。**
+   `generateExperimentalDiagramCommand` 与 legacy Mermaid 保存命令仍经过共享 `generateDiagramCommand` 编排，但 `previewExperimentalDiagramCommand` 现在直接读取当前 Markdown 中的 `vega-lite` 围栏并本地预览，不再走共享 LLM 生成路径。这是为了匹配当前 `dataChart` 产物以 Markdown fenced block 保存的现实，而不是最终命令收口形态。
+
+## 路线图任务状态
 
 | 任务 | 方案目标 | 当前实际 | 差距 |
 |---|---|---|---|
-| 任务 0 | 构建与打包底座 | 已交付（有限制）。`srcdoc` 宿主在 `main.js` 中。烟雾门已激活。多入口构建延期。 | 重型运行时打包未开始。无阻塞。 |
-| 任务 1 | 图表领域模型 | 已交付。`DiagramIntent`、`DiagramSpec`、验证器、规划器已落地。 | 无。 |
-| 任务 2 | 规格优先管道 | 部分完成。内部编排已统一（`generateDiagramCommand`）。公共命令表面仍有 3 个 ID。`promptUtils.ts` 旧版提示仍存在。 | 命令整合 + 提示退役。硬性约束：必须保留原场景可用性。 |
-| 任务 3 | Mermaid 适配器 V2 | 部分完成。子类型适配器覆盖全部 6 种 Mermaid 意图。`legacyFixerUtils.ts` 已提取。`mermaidProcessor.ts` 仍承担过多。 | 硬性约束：每个子任务需真实 Obsidian 验证及图像保存。 |
-| 任务 4-7 | 渲染平台/Canvas/Vega-Lite/导出 | 已交付。 | 无重大差距。 |
+| 任务 0 | 构建与打包底座 | 已交付（有限制）。`srcdoc` 宿主在 `main.js` 中，`audit:render-host` 烟雾门已存在。 | 真正的多入口 / 重型运行时隔离尚未开始。 |
+| 任务 1 | 图表领域模型 | 已交付。`DiagramIntent`、`DiagramSpec`、验证器、规划器已进入主线。 | 无。 |
+| 任务 2 | 规格优先管道 | 部分完成。共享执行器已存在，但公共命令表面仍保留 3 个 ID，preview 路径也已针对 `vega-lite` fenced artifact 做局部分叉。`promptUtils.ts` 旧版 Mermaid 提示仍在。 | 命令收口 + 旧提示退役；且必须保留原 Mermaid 场景可用性。 |
+| 任务 3 | Mermaid 适配器 V2 | 部分完成。6 个 Mermaid 子类型 adapter 已落地，`legacyFixerUtils.ts` 已抽出一部分职责。 | `mermaidProcessor.ts` 仍过重；每个拆分子任务都需要真实 Obsidian 图像核验。 |
+| 任务 4 | 渲染平台 | 已交付。registry / service / cache / preview modal / inline + iframe host 已落地。 | 无。 |
+| 任务 5 | JSON Canvas | 已交付。`.canvas` 产物、基础 layout、保存与预览链路已可用。 | 无。 |
+| 任务 6 | Vega-Lite | 已交付（有限制）。`dataChart` 使用 iframe-host 预览，保存产物为 Markdown fenced `vega-lite`。 | 仍依赖单入口主 bundle bridge；重型运行时未独立打包。 |
+| 任务 7 | 主题 / 导出 / release | 已交付。主题、SVG/PNG/source 导出和 release 资产约束已存在。 | 无重大差距。 |
 | 任务 8 | 高级引擎 | 按设计推迟（R10）。 | 评估门未满足。 |
 
-### notebook-navigator 交叉参考完成情况
+## notebook-navigator 交叉参考完成情况
 
-全部 5 项模式已实现：
+| # | 模式 | 状态 | 说明 |
+|---|---|---|---|
+| 1 | 服务层 + DI | 延期 | 属于架构重构，不阻塞当前交付 |
+| 2 | LLM 响应缓存 | ✓ | 已落地到 `src/llmUtils.ts` |
+| 3 | 逐项设置同步开关 | ✓ | 已有 `localOnly` 隔离 |
+| 4 | 批量管道含中断恢复 | ✓ | `src/batchProgressStore.ts` 已落地 |
+| 5 | 架构总览文档 | ✓ | `docs/architecture.md` 与 `docs/architecture.zh-CN.md` |
 
-| # | 模式 | 状态 |
+## v1.8.3+ 已落地主能力
+
+| 功能 | 状态 | 备注 |
 |---|---|---|
-| 1 | 服务层 + DI | 延期（架构重构，不阻塞） |
-| 2 | LLM 响应缓存 | ✓ |
-| 3 | 逐项设置同步开关 | ✓ |
-| 4 | 批量管道含中断恢复 | ✓ |
-| 5 | 架构总览文档 | ✓ |
+| 欢迎弹窗（首次安装） | ✓ | 22 种语言 |
+| 赞助方支持（GitHub Star + ko-fi） | ✓ | 设置页 + 欢迎弹窗 + README |
+| Cline 对齐令牌解析 | ✓ | 未知模型默认 8192 改为 provider 决策 |
+| 图表边缘字段规范化 | ✓ | `source/target/sourceId/targetId/start/end -> from/to` |
+| 首选图表类型选择器 | 部分完成 | 当前 UI 暴露子集，不等于全部运行时意图 |
+| README i18n 对齐合约测试 | ✓ | 仓库内稳定门槛 |
+| 8 意图实时 API 验证 | 仅本地历史证据 | 当前不属于仓库内可持续执行门槛 |
 
-### v1.8.3+ 额外交付
+## 架构推进现状
 
-| 功能 | 状态 |
-|---|---|
-| 欢迎弹窗（首次安装） | ✓ 22 种语言 |
-| 赞助方支持（GitHub Star + ko-fi） | ✓ |
-| Cline 对齐令牌解析 | ✓ |
-| 图表边缘字段规范化 | ✓ |
-| 首选图表类型选择器 | ✓ 设置 + 侧边栏 |
-| README i18n 对齐合约测试 | ✓ 121 项测试 |
-| 全 8 种图表意图实时测试 | ✓ 全部通过 |
+**LLM 层：**
+- 响应缓存已落地，可减少重复 API 成本。
+- 未知模型输出 token 决策已与 Cline 对齐。
+- 提供商配置支持本地隔离，不强制所有敏感配置参与同步。
 
-### 架构进展
+**图表平台：**
+- 运行时仍支持 8 种图表意图。
+- `DiagramSpec -> adapter -> renderer` 的主链已经成立，核心扩展点不再绑死在 Mermaid 文本。
+- `dataChart` 已经不再只是“保存 JSON”，而是保存为 Markdown fenced `vega-lite` 并支持本地预览。
+- `canvasMap` 是已支持但未在当前 UI 中首选暴露的目标，说明“运行时能力”和“产品默认表面”已开始分层。
 
-**LLM 层：** 响应缓存、Cline 对齐令牌解析、提供商本地存储隔离。25 个提供商、5 个传输协议、22 种语言环境。
+**基础设施：**
+- 进度状态持久化、架构文档、release workflow、README 对齐测试都在主线。
+- 当前真正缺的是“secret-free / machine-free”的 live verification harness，而不是更多单元测试框架。
 
-**图表平台：** 8 种图表意图通过实时验证。意图选择器覆盖设置和侧边栏。边缘规范化处理多种 LLM JSON 约定。
+## 当前验证门
 
-**基础设施：** 批量进度存储、架构文档（Mermaid 图表）、README 对齐测试（121 项）、欢迎弹窗。
+### 仓库内可持续执行门
 
-## 验证门
+以下门槛可以在当前仓库中稳定复现，应视为主线真实门槛：
 
-全部 CI 等效检查通过：
-- `npm run build` ✓
-- `npm test -- --runInBand` ✓（110 套件，708 项测试）
-- `npm run audit:i18n-ui` ✓
-- `npm run audit:render-host` ✓
-- `git diff --check` ✓
-- 实时 DeepSeek API：全部 8 种图表意图验证通过 ✓
+- `npm run build`
+- `npm test -- --runInBand`
+- `npm run audit:i18n-ui`
+- `npm run audit:render-host`
+- `git diff --check`
+
+### 本地历史证据，不等于当前 CI 门
+
+以下结论可以作为方向判断的参考，但不能再被文档表述成“仓库当前的硬性自动门槛”：
+
+- 2026-05-02 曾对全部 8 种图表意图做过一次实时 DeepSeek API 验证
+- 相关 harness 已从主线删除，原因是它依赖本地 vault 路径、真实密钥和非确定性网络调用
+
+## Drawnix 外部参考结论
+
+详见：`docs/brainstorms/2026-05-03-drawnix-feasibility-and-integration-direction.zh-CN.md`
+
+短结论：
+
+1. **不应把 Drawnix 整体宿主嵌入 Notemd。**
+   它是 Nx monorepo + React 19 + Plait/Slate + browser-fs-access + browser storage 的完整白板应用栈，明显超出当前 Obsidian 插件边界。
+
+2. **真正值得借鉴的是数据边界和转换边界。**
+   Drawnix 的 `.drawnix` 导出模型、`markdown-to-drawnix` / `mermaid-to-drawnix` 的惰性加载方式，以及 app shell / board / text renderer 分层思想，都有参考价值。
+
+3. **如果未来要支持 board-style 导出，应该直接做 `DiagramSpec -> PlaitElement[]` 适配器，而不是 `DiagramSpec -> Mermaid -> mermaid-to-drawnix` 的绕路方案。**
+   否则会把现有 spec-first 语义层重新降级回字符串中间态。
 
 ## 硬性约束（仍生效）
 
-1. **MermaidProcessor 分解**：每个子任务必须在真实 Obsidian 中独立验证，图像保存核验。仅凭单元测试不足以推进。
-2. **旧版提示退役**：原 `promptUtils.ts` Mermaid 提示词为原场景专门调优。扩展必须完全保留原场景可用性。
-3. **向后兼容性**：现有提供商配置、传输协议和设置必须不变。
+1. **MermaidProcessor 分解**：每个子任务必须在真实 Obsidian 中独立验证并保存图像核验。仅靠单元测试不足以推进。
+2. **旧版提示退役**：`promptUtils.ts` 原 Mermaid 提示词为旧场景专门调优，任何退役或合并都必须保留旧场景可用性。
+3. **向后兼容性**：现有 provider 配置、transport 协议和设置项不能被破坏。
 
-## 后续方向
+## 后续推进方向
 
-### 可立即推进（无需真实 Obsidian 测试）
+### 立即可推进
 
-1. **命令表面整合** — 将三条图表命令统一为一条，旧 ID 保留为别名。
-2. **运行时打包（任务 0 剩余）** — 为 Vega-Lite 重型运行时建立多入口构建。
+1. **命令表面整合**
+   将 `summarize-as-mermaid`、`generate-experimental-diagram`、`preview-experimental-diagram` 收口为统一 command surface，旧 ID 仅保留别名职责。
+
+2. **建立可持续的 live verification runbook / harness**
+   先把“本地一次性验证”升级为不依赖硬编码 vault 路径和私钥文件的维护者流程，再决定是否需要恢复受控的集成测试。
+
+3. **运行时打包（任务 0 剩余）**
+   为 Vega-Lite 等重型运行时建立真正的多入口或独立资产策略。
+
+4. **工作区卫生保持**
+   `ref/` 与 `coverage/` 应视为本地分析 / 构建产物，而不是待提交内容。主线需要持续保持干净工作树。
 
 ### 受硬性约束阻塞
 
-3. 旧版提示退役 — 需真实 Obsidian 验证原 Mermaid 场景。
-4. MermaidProcessor sunset — 需真实 Obsidian 验证及图像保存。
-5. PlantUML 评估 — 按 R10 推迟。
+5. **旧版提示退役**
+   必须先用真实 Obsidian 回归原 Mermaid 场景。
 
-## 验收标准：图表生成
+6. **MermaidProcessor sunset**
+   必须逐块拆分、逐块截图验收，不能只靠 Jest。
 
-全部 8 种图表意图在发布前必须通过以下验收门槛：
+7. **Drawnix 集成**
+   当前只适合作为外部参考和未来导出目标候选，不应抢占主线优先级。
 
-### 门槛：实时 LLM 验证
+## 验收标准：图表平台
 
-运行：`npm test -- --runInBand src/tests/liveAllDiagramIntents.test.ts`
+发布前至少需要同时满足两层验收：
 
-| 意图 | 渲染目标 | 节点标签 | 边缘引用 | 内容非空 |
-|---|---|---|---|---|
-| `mindmap` | mermaid | ✓ 必需 | ✓ 必需 | ✓ 必需 |
-| `flowchart` | mermaid | ✓ 必需 | ✓ 必需 | ✓ 必需 |
-| `sequence` | mermaid | ✓ 必需 | ✓ 必需 | ✓ 必需 |
-| `classDiagram` | mermaid | ✓ 必需 | ✓ 必需 | ✓ 必需 |
-| `erDiagram` | mermaid | ✓ 必需 | ✓ 必需 | ✓ 必需 |
-| `stateDiagram` | mermaid | ✓ 必需 | ✓ 必需 | ✓ 必需 |
-| `canvasMap` | json-canvas | ✓ 必需 | ✓ 必需 | ✓ 必需 |
-| `dataChart` | vega-lite | 不适用（数据驱动） | 不适用 | ✓ 必需 |
+### 层 1：仓库内硬门
 
-### 最近验证：2026-05-02
+- `npm run build`
+- `npm test -- --runInBand`
+- `npm run audit:i18n-ui`
+- `npm run audit:render-host`
+- `git diff --check`
 
-全部 8 种意图针对实时 DeepSeek API (deepseek-v4-pro) 通过。
-总耗时：约 226 秒。
+### 层 2：维护者本地语义核验（当改动触及 `src/diagram/`、`src/mermaidProcessor.ts` 或实际渲染行为时）
 
-### 回归门槛
+- 真实 Obsidian 中抽样验证 Mermaid / JSON Canvas / Vega-Lite
+- 保存并检查输出图像或产物文件
+- 明确记录这是“本地语义核验”，而不是仓库当前自动 CI
 
-任何对 `src/diagram/` 的修改必须在合并前重新运行此测试套件。
-修改 `src/diagram/` 但未通过此门槛的 PR，CI 应阻止合并。
-
-### 硬性约束（提醒）
-
-1. MermaidProcessor 分解：每个子任务需真实 Obsidian 验证及图像保存核验
-2. 旧版提示退役：必须保留原场景可用性
-3. 全部 8 种图表意图必须通过实时验证方可发布
+当前最需要补的不是“再写一批 live test 文件”，而是把这层核验从一次性个人脚本，升级为可重复执行的维护者流程。
