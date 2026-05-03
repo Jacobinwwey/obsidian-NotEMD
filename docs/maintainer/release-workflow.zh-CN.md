@@ -33,6 +33,7 @@ git diff --check
 ```
 
 如果本地环境缺少 `obsidian-cli`，请在发布说明或交接证据中明确记录。
+如果改动触及图表语义，还必须执行 `docs/maintainer/diagram-semantic-verification.zh-CN.md` 中定义的维护者本地语义核验层。
 
 ## 3. 版本同步
 
@@ -92,3 +93,13 @@ npm run release:github -- <tag>
 - 工作流会在 checkout 与 publish 前校验 `^[0-9]+\.[0-9]+\.[0-9]+$`，因此会拒绝 `v1.8.2` 这类 tag。
 
 工作流刻意复用仓库内的 release 辅助脚本，而不是在 YAML 中重复维护资产清单或 release notes 逻辑，避免两套规则漂移。
+
+## 8. 图表语义层
+
+凡是会影响 renderer 行为的改动，都还需要仓库 CI 之外的一层验证：
+
+- 使用 `docs/maintainer/diagram-semantic-verification.zh-CN.md`
+- 在真实本地 vault 中验证受影响的 Mermaid / JSON Canvas / Vega-Lite 路径
+- 在 release handoff 或 PR 说明中记录证据
+
+当改动触及图表生成或预览行为时，仅靠自动化检查并不足够。

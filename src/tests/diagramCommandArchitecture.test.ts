@@ -38,6 +38,20 @@ describe('diagram command architecture', () => {
         plugin.settings = {
             ...mockSettings
         };
+        plugin.settings._firstLaunch = false;
+        plugin.loadSettings = jest.fn().mockResolvedValue(undefined);
+        plugin.saveSettings = jest.fn().mockResolvedValue(undefined);
+        plugin.registerView = jest.fn();
+        plugin.registerEvent = jest.fn();
+        plugin.addRibbonIcon = jest.fn(() => ({
+            setAttribute: jest.fn()
+        })) as any;
+        plugin.addStatusBarItem = jest.fn(() => ({
+            setText: jest.fn(),
+            empty: jest.fn()
+        })) as any;
+        plugin.addSettingTab = jest.fn();
+        plugin.getReporter = jest.fn(() => reporter);
         reporter = createReporter();
         file = {
             name: 'Topic.md',
@@ -95,5 +109,53 @@ describe('diagram command architecture', () => {
             file.path,
             false
         );
+    });
+
+    test('exposes canonical stable diagram command ids alongside legacy compatibility aliases', async () => {
+        const commandCalls: Array<{ id: string; name: string }> = [];
+        plugin.addCommand = jest.fn((command: any) => {
+            commandCalls.push({ id: command.id, name: command.name });
+        }) as any;
+
+        await plugin.onload();
+
+        const ids = commandCalls.map(command => command.id);
+        expect(ids).toContain('notemd-generate-diagram');
+        expect(ids).toContain('notemd-preview-diagram');
+        expect(ids).toContain('notemd-summarize-as-mermaid');
+        expect(ids).toContain('notemd-generate-experimental-diagram');
+        expect(ids).toContain('notemd-preview-experimental-diagram');
+    });
+
+    test('canonical generate command delegates to the experimental save flow', async () => {
+        const canonicalCall = jest
+            .spyOn(plugin as any, 'generateExperimentalDiagramCommand')
+            .mockResolvedValue(undefined);
+        plugin.addCommand = jest.fn((command: any) => {
+            if (command.id === 'notemd-generate-diagram') {
+                command.editorCallback({}, { file } as any);
+            }
+        }) as any;
+
+        plugin.onload();
+        await Promise.resolve();
+
+        expect(canonicalCall).toHaveBeenCalledWith(file, expect.anything());
+    });
+
+    test('canonical preview command delegates to the preview flow', async () => {
+        const canonicalCall = jest
+            .spyOn(plugin as any, 'previewExperimentalDiagramCommand')
+            .mockResolvedValue(undefined);
+        plugin.addCommand = jest.fn((command: any) => {
+            if (command.id === 'notemd-preview-diagram') {
+                command.editorCallback({}, { file } as any);
+            }
+        }) as any;
+
+        plugin.onload();
+        await Promise.resolve();
+
+        expect(canonicalCall).toHaveBeenCalledWith(file, expect.anything());
     });
 });

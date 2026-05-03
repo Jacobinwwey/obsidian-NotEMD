@@ -33,6 +33,7 @@ git diff --check
 ```
 
 If `obsidian-cli` is unavailable in the local environment, record it in release notes or release-handoff evidence.
+If the change affects diagram semantics, also run the maintainer-local semantic layer in `docs/maintainer/diagram-semantic-verification.md`.
 
 ## 3. Version Synchronization
 
@@ -92,3 +93,13 @@ The repository also ships `.github/workflows/release.yml`:
 - The workflow validates `^[0-9]+\.[0-9]+\.[0-9]+$` before checkout and publish, so `v1.8.2`-style tags are rejected.
 
 The workflow intentionally reuses the checked-in release helper instead of duplicating asset lists or release-note logic inside YAML.
+
+## 8. Diagram Semantic Layer
+
+Renderer-affecting changes need one more layer beyond repo CI:
+
+- use `docs/maintainer/diagram-semantic-verification.md`
+- verify affected Mermaid / JSON Canvas / Vega-Lite flows in a real local vault
+- record evidence in release handoff or PR notes
+
+Automated checks alone are not sufficient when the change touches diagram generation or preview behavior.

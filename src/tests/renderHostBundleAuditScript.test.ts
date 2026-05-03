@@ -69,5 +69,22 @@ describe('render host bundle audit script', () => {
                 fs.rmSync(tempRoot, { recursive: true, force: true });
             }
         });
+
+        test('rejects stray render-host output files outside the main bundle', () => {
+            const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-render-host-audit-'));
+            try {
+                fs.writeFileSync(path.join(tempRoot, 'main.js'), `
+                    const htmlSrcdoc = "<!DOCTYPE html>";
+                    const title = "Notemd Render Host";
+                    const shell = "notemd-render-shell";
+                    const themeShim = "notemd-html-preview-theme-shim";
+                `, 'utf8');
+                fs.writeFileSync(path.join(tempRoot, 'render-host.html'), '<html></html>', 'utf8');
+
+                expect(() => auditRenderHostBundle(tempRoot)).toThrow('render-host.html');
+            } finally {
+                fs.rmSync(tempRoot, { recursive: true, force: true });
+            }
+        });
     });
 });
