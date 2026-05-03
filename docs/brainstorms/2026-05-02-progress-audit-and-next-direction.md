@@ -19,13 +19,13 @@ Reference documents:
 This audit is not a redesign pass. It is a repo-truth alignment pass. The biggest risks are now documentation drift and overstated gates, not missing platform ideas.
 
 1. **Remote `main` does not currently have a normal push/PR CI pipeline.**
-   `.github/workflows/release.yml` runs only for numeric `x.x.x` tag pushes and `workflow_dispatch`. `main@c2d3511` has no failing status. The recent red runs came from the `1.8.3` release flow and were already repaired by the successful follow-up release run on 2026-05-01.
+   `.github/workflows/release.yml` runs only for numeric `x.x.x` tag pushes and `workflow_dispatch`. As of 2026-05-03, `main` points to `09ef239` (`docs(release): align 1.8.4 notes with shipped delta`) and there is still no ordinary push/PR workflow for that branch. The recent red runs came from the `1.8.3` release flow and were later superseded by the successful `1.8.4` release run (`25274341984`) on 2026-05-03.
 
 2. **The `pending` commit-status response on `main` is not a real failing check.**
-   As of 2026-05-03, `commits/main/status` returns `state: pending` with `statuses: []`, while `check-runs`, `check-suites`, and branch protection are all empty for `main`. In this repository, GitHub Actions runs are the authoritative CI signal, not the commit-status endpoint by itself.
+   As of 2026-05-03, `commits/main/status` returns `state: pending` with `statuses: []`, while branch protection is disabled and no ordinary branch-scoped required checks exist. The same `main@09ef239` commit does already have a successful GitHub Actions `check_suite` / `check_run` attached through the `1.8.4` tag-driven release path. In this repository, GitHub Actions runs plus `check-suites` / `check-runs` are the authoritative CI signal, not the commit-status endpoint by itself.
 
 3. **The release workflow had a future failure vector even after the last successful repair run.**
-   The latest successful `1.8.3` release run still emitted GitHub's Node 20 JavaScript-action deprecation warning for `actions/checkout@v4` and `actions/setup-node@v4`. This pass upgrades those actions to `v6` so the release path does not drift toward a time-bomb CI failure.
+   The earlier successful `1.8.3` repair run (`25215799596`) still emitted GitHub's Node 20 JavaScript-action deprecation warning for `actions/checkout@v4` and `actions/setup-node@v4`. The current `.github/workflows/release.yml` now pins `actions/checkout@v6` and `actions/setup-node@v6`, and the newer `1.8.4` release run (`25274341984`) completed successfully on that hardened path.
 
 4. **"Live verification for all 8 intents" is not a tracked repo gate today.**
    The live test files such as `src/tests/liveAllDiagramIntents.test.ts` were removed from mainline in `92d3ad3` as accidentally committed live tests. The 2026-05-02 DeepSeek run is historical local evidence, not a stable repo-enforced gate.
@@ -125,7 +125,7 @@ Short version:
    It is an Nx monorepo + React 19 + Plait/Slate + browser-fs-access + browser-storage whiteboard application stack. That is far outside the current Obsidian plugin boundary.
 
 2. **What is useful is the data boundary and conversion boundary.**
-   The `.drawnix` export model, the lazy-loaded `markdown-to-drawnix` / `mermaid-to-drawnix` converters, and the app-shell / board / text-renderer layering are all good reference material.
+   The `.drawnix` export model from `ref/drawnix/packages/drawnix/src/data/types.ts`, the browser file import/export boundary in `ref/drawnix/packages/drawnix/src/data/json.ts`, the lazy-loaded `markdown-to-drawnix` / `mermaid-to-drawnix` converters, and the app-shell / board / text-renderer layering are all good reference material.
 
 3. **If Notemd ever wants board-style export, the right move is `DiagramSpec -> PlaitElement[]`, not `DiagramSpec -> Mermaid -> mermaid-to-drawnix`.**
    Otherwise the current spec-first semantic layer gets downgraded back into a string round-trip.

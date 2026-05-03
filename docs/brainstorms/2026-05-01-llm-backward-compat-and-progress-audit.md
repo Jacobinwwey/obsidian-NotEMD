@@ -533,7 +533,7 @@ A full end-to-end audit was conducted comparing current code against all plan re
 - **Notebook-navigator patterns**: 4 of 5 implemented. Pattern #1 (service layer) deferred.
 - **Hard constraints**: Both still active — MermaidProcessor decomposition and legacy prompt retirement require real Obsidian verification.
 - **Test coverage**: 110 suites, 708 tests (including new README alignment contract test).
-- **Live verification**: All 8 diagram intents verified against live DeepSeek API.
+- **Live verification**: historical local DeepSeek verification covered all 8 diagram intents, but those live tests are no longer tracked on `main` as repo-enforced gates.
 
 ### Next Immediate Direction
 
@@ -544,5 +544,5 @@ Both can proceed without real Obsidian testing. Remaining items blocked by hard 
 
 ### CI Status
 
-All local CI-equivalent checks pass. Remote release workflow (1.8.3) completed successfully.
-No CI errors to fix.
+All local CI-equivalent checks pass. Remote release workflow has since been hardened and is green on the `1.8.4` release path (`25274341984`), while `main` still intentionally lacks ordinary push/PR CI.
+The remaining CI-related work is documentation truth-source clarity, not an unresolved failing branch pipeline.

@@ -41,6 +41,8 @@ Drawnix 不是一个轻量 renderer，而是一个完整白板应用栈：
 
 `packages/drawnix/src/data/json.ts` 也强化了这一点：JSON 路径是一等导入/导出边界，而不是随手附带的调试格式。
 
+`apps/web/src/app/app.tsx` 还表明它通过 `localforage` 持久化主画板状态，这进一步说明 Drawnix 默认依赖浏览器原生持久化层，而不是 Obsidian 插件的存储边界。
+
 ### 2. 转换能力是惰性加载的独立模块
 
 `markdown-to-drawnix.tsx` 与 `mermaid-to-drawnix.tsx` 都在运行时动态导入：
