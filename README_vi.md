@@ -25,7 +25,7 @@ Notemd nâng cấp quy trình làm việc trong Obsidian bằng cách tích hợ
 
 Nếu bạn yêu thích sử dụng Notemd, hãy cân nhắc [⭐ tặng một Sao trên GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) hoặc [☕️ mua cho tôi một ly cà phê](https://ko-fi.com/jacobinwwey).
 
-**Phiên bản:** 1.8.3
+**Phiên bản:** 1.8.4
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
@@ -689,7 +689,7 @@ Giấy phép MIT. Xem file [LICENSE](LICENSE) để biết chi tiết.
 ---
 
 
-*Notemd v1.8.3 - Nâng cấp knowledge graph Obsidian của bạn bằng AI.*
+*Notemd v1.8.4 - Nâng cấp knowledge graph Obsidian của bạn bằng AI.*
 
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)
