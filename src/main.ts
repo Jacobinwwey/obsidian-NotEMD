@@ -1851,6 +1851,22 @@ export default class NotemdPlugin extends Plugin {
         }
     }
 
+
+    private extractVegaLiteFromMarkdown(content: string): string | null {
+        const fenceRegex = /```vega-lite\s*\n([\s\S]*?)\n```/i;
+        const match = content.match(fenceRegex);
+        return match ? match[1].trim() : null;
+    }
+
+    private buildVegaLitePreviewArtifact(vlContent: string): RenderArtifact {
+        return {
+            target: 'vega-lite' as const,
+            content: vlContent,
+            mimeType: 'application/json' as const,
+            sourceIntent: 'dataChart' as DiagramIntent
+        };
+    }
+
     private async executeArtifactDiagramCommand(
         file: TFile,
         fileContent: string,
@@ -1869,7 +1885,7 @@ export default class NotemdPlugin extends Plugin {
 
         if (result.renderError) {
             reporter.log(`Warning: ${result.renderError}`);
-            new Notice(`Diagram may need manual fixing — see log for details.`, 8000);
+            new Notice(i18n.notices.experimentalDiagramManualFixHint, 8000);
         }
 
         if (executionMode === 'preview-artifact') {
@@ -1915,7 +1931,33 @@ export default class NotemdPlugin extends Plugin {
     }
 
     async previewExperimentalDiagramCommand(file: TFile, reporter: ProgressReporter) {
-        await this.generateDiagramCommand(file, reporter, { executionMode: 'preview-artifact' });
+        // Preview Vega-Lite content from current file without calling LLM
+        const i18n = this.getUiStrings();
+        const actionLabel = i18n.commands.previewExperimentalDiagram;
+        this.startReporterAction(reporter, `${actionLabel}: ${file.name}`);
+        reporter.log(`Starting Vega-Lite preview for ${file.name}...`);
+
+        try {
+            const fileContent = await this.app.vault.read(file);
+            const vlContent = this.extractVegaLiteFromMarkdown(fileContent);
+            if (!vlContent) {
+                throw new Error("No \\`\\`\\`vega-lite code fence found in this file. Use the \"Generate diagram\" command first to create Vega-Lite content.");
+            }
+
+            const artifact = this.buildVegaLitePreviewArtifact(vlContent);
+            this.openDiagramPreviewModal(artifact, file.path, false);
+
+            reporter.updateStatus(this.getActionCompleteText(actionLabel), 100);
+            reporter.log(`Vega-Lite preview opened for: ${file.path}`);
+            new Notice(i18n.notices.experimentalDiagramPreviewReady);
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : String(error);
+            reporter.log(`Error during Vega-Lite preview: ${message}`);
+            new Notice(formatI18n(i18n.notices.experimentalDiagramError, { message }));
+            console.error("Vega-Lite preview error:", error);
+            reporter.updateStatus(this.getActionFailedText(message), -1);
+            await saveErrorLog(this.app, reporter, error, this.settings);
+        }
     }
 
     async extractConceptsCommand(reporter?: ProgressReporter) {

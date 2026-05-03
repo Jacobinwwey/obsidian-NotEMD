@@ -1081,7 +1081,6 @@ export class NotemdSettingTab extends PluginSettingTab {
                 .setDesc(experimentalDiagramI18n.intentDesc)
                 .addDropdown(dropdown => {
                     dropdown.addOption('auto', experimentalDiagramI18n.intentAuto);
-                    dropdown.addOption('mindmap', experimentalDiagramI18n.intentMindmap);
                     dropdown.addOption('flowchart', experimentalDiagramI18n.intentFlowchart);
                     dropdown.addOption('sequence', experimentalDiagramI18n.intentSequence);
                     dropdown.addOption('classDiagram', experimentalDiagramI18n.intentClassDiagram);

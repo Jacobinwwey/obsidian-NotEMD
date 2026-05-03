@@ -622,6 +622,7 @@ export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
         mermaidSummarizationError: '摘要错误：{message}',
         experimentalDiagramComplete: '实验性图形生成完成！',
         experimentalDiagramPreviewReady: '实验性图形预览已就绪！',
+        experimentalDiagramManualFixHint: '图形可能仍需手动修复，请查看日志了解详情。',
         experimentalDiagramError: '实验性图形生成失败：{message}',
         conceptExtractionSuccess: '概念提取完成！共找到并创建了 {count} 个概念笔记。',
         noConceptsFoundToExtract: '未找到可提取的概念。',

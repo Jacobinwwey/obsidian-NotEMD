@@ -85,6 +85,7 @@ The repository also ships `.github/workflows/release.yml`:
 
 - Push a git tag to publish the release automatically.
 - Use `workflow_dispatch` with a numeric `x.x.x` `tag` input to repair an existing release from CI.
+- This workflow does **not** run automatically for ordinary `main` pushes or PRs; pre-merge verification is still a local maintainer responsibility.
 - The workflow runs `npm ci`, `npm run build`, `npm test -- --runInBand`, `npm run audit:i18n-ui`, `npm run audit:render-host`, `git diff --check`, and finally `npm run release:github -- "$TAG_NAME"`.
 - The workflow validates `^[0-9]+\.[0-9]+\.[0-9]+$` before checkout and publish, so `v1.8.2`-style tags are rejected.
 

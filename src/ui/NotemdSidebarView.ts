@@ -643,7 +643,6 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
 
         const intents = [
             { value: 'auto', label: i18n.settings.developer.experimentalDiagramPipeline.intentAuto },
-            { value: 'mindmap', label: i18n.settings.developer.experimentalDiagramPipeline.intentMindmap },
             { value: 'flowchart', label: i18n.settings.developer.experimentalDiagramPipeline.intentFlowchart },
             { value: 'sequence', label: i18n.settings.developer.experimentalDiagramPipeline.intentSequence },
             { value: 'classDiagram', label: i18n.settings.developer.experimentalDiagramPipeline.intentClassDiagram },

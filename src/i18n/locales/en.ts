@@ -619,6 +619,7 @@ export const STRINGS_EN = {
         mermaidSummarizationError: 'Summarization Error: {message}',
         experimentalDiagramComplete: 'Experimental diagram generation complete!',
         experimentalDiagramPreviewReady: 'Experimental diagram preview is ready!',
+        experimentalDiagramManualFixHint: 'Diagram may need manual fixing. See log for details.',
         experimentalDiagramError: 'Experimental diagram generation failed: {message}',
         conceptExtractionSuccess: 'Concept extraction complete! Found and created {count} concept notes.',
         noConceptsFoundToExtract: 'No concepts found to extract.',

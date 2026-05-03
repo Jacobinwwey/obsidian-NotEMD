@@ -177,39 +177,11 @@ describe('experimental diagram command', () => {
         expect(modalInstance.open).toHaveBeenCalledTimes(1);
     });
 
-    test('preview command opens a modal without saving the generated artifact', async () => {
-        jest.spyOn(diagramGenerationService, 'generateDiagramArtifact').mockResolvedValue({
-            plan: {
-                intent: 'dataChart',
-                confidence: 0.92,
-                reasons: ['table metrics detected'],
-                renderTarget: 'vega-lite',
-                fallbackTargets: [],
-                mermaidDiagramType: null,
-                legacyCompatibilityMode: false
-            },
-            spec: {
-                intent: 'dataChart',
-                title: 'Weekly Signups',
-                nodes: [],
-                dataSeries: [
-                    {
-                        id: 'signups',
-                        label: 'Signups',
-                        points: [
-                            { x: 'Week 1', y: 12 },
-                            { x: 'Week 2', y: 19 }
-                        ]
-                    }
-                ]
-            },
-            artifact: {
-                target: 'vega-lite',
-                content: '{"mark":"bar"}',
-                mimeType: 'application/json',
-                sourceIntent: 'dataChart'
-            }
-        });
+    test('preview command extracts vega-lite from file and opens modal without calling LLM', async () => {
+        const vlContent = '{"mark":"bar","data":{"values":[{"x":"A","y":10}]}}';
+        const fileContent = `# Test Chart\n\n\`\`\`vega-lite\n${vlContent}\n\`\`\`\n`;
+        (mockApp.vault.read as jest.Mock).mockResolvedValue(fileContent);
+
         const file = { name: 'Topic.md', basename: 'Topic', path: 'Notes/Topic.md', parent: { path: 'Notes' } } as any;
 
         await (plugin as any).previewExperimentalDiagramCommand(file, reporter);
@@ -220,7 +192,7 @@ describe('experimental diagram command', () => {
             mockApp,
             expect.objectContaining({
                 payload: expect.objectContaining({
-                    artifact: expect.objectContaining({ target: 'vega-lite' }),
+                    artifact: expect.objectContaining({ target: 'vega-lite', content: vlContent }),
                     sourcePath: 'Notes/Topic.md',
                     artifactSaved: false
                 })

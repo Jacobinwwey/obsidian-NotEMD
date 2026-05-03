@@ -11,6 +11,7 @@
 
 # npm
 node_modules
+coverage
 
 # Don't include the compiled main.js file in the repo.
 # They should be uploaded to GitHub releases instead.
@@ -27,6 +28,7 @@ data.json
 
 #skills
 skills
+ref
 
 # local git worktrees
 .worktrees
