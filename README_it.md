@@ -26,7 +26,7 @@ Notemd potenzia il tuo flusso di lavoro su Obsidian integrandosi con vari Modell
 
 Se ami usare Notemd, per favore considera di [⭐ dare una stella su GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) o [☕️ offrirmi un caffè](https://ko-fi.com/jacobinwwey).
 
-**Versione:** 1.8.3
+**Versione:** 1.8.4
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
@@ -695,7 +695,7 @@ Licenza MIT - Vedi il file [LICENSE](LICENSE) per i dettagli.
 ---
 
 
-*Notemd v1.8.3 - Migliora il tuo grafo di conoscenza su Obsidian con l'IA.*
+*Notemd v1.8.4 - Migliora il tuo grafo di conoscenza su Obsidian con l'IA.*
 
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)
