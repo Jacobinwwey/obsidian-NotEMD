@@ -32,11 +32,14 @@ In practice it behaves like a browser-native product whiteboard SaaS, not like a
 
 - `type: 'drawnix'`
 - `version`
+- `source: 'web'`
 - `elements: PlaitElement[]`
 - `viewport`
 - `theme`
 
 That means the most useful Drawnix asset is its **board data model**, not a specific UI widget.
+
+`packages/drawnix/src/data/json.ts` reinforces that conclusion: the JSON path is a first-class import/export boundary, not an incidental debug format.
 
 ### 2. Conversion capabilities are isolated and lazy-loaded
 
@@ -46,6 +49,8 @@ That means the most useful Drawnix asset is its **board data model**, not a spec
 - `@plait-board/mermaid-to-drawnix`
 
 That is an important signal: even Drawnix treats conversion as a heavy optional capability, not as an always-on mainline dependency.
+
+Those dialogs also convert into live board elements inside the app shell, which means they are designed for an interactive browser product boundary, not for a lightweight background adapter embedded in another host.
 
 ### 3. Layering is worth studying
 
@@ -66,6 +71,12 @@ The Drawnix codebase directly depends on:
 - `localStorage`
 - `browser-fs-access`
 - `MobileDetect`
+
+Concrete evidence:
+
+- `packages/drawnix/src/drawnix.tsx` builds a full React board shell with toolbars, popups, dialogs, and `window.navigator.userAgent` detection.
+- `packages/drawnix/src/data/filesystem.ts` hard-depends on `browser-fs-access`.
+- `packages/drawnix/src/data/json.ts` routes `.drawnix` open/save through browser file-picker flows.
 
 That assumes a full browser host with file pickers, DOM overlays, browser storage, and rich interactive menus. Notemd's controlled boundary is much narrower:
 
@@ -107,6 +118,17 @@ it creates two regressions:
 
 That would undercut the most important improvement in the current roadmap: **LLMs should emit structured semantics first, then target-specific adapters should render from that structure.**
 
+### 4. Robustness depends on geometry/layout ownership, not only schema compatibility
+
+The `.drawnix` container format is straightforward JSON, but practical compatibility still depends on who owns:
+
+- Plait element selection
+- point generation / board geometry
+- viewport defaults
+- theme translation
+
+So "we can emit JSON" is not enough. A robust Notemd integration would need an adapter that owns semantic-to-board projection explicitly. Reusing the file format without owning that projection would create fragile, hard-to-debug exports.
+
 ## Feasibility Matrix
 
 | Direction | Feasibility | Risk | Conclusion |
@@ -117,6 +139,7 @@ That would undercut the most important improvement in the current roadmap: **LLM
 | Use `.drawnix` as a future export target | Medium | Medium | Reasonable future option |
 | Prototype isolated `mermaid-to-drawnix` / `markdown-to-drawnix` use | Medium-low | Medium-high | Experimental only |
 | Build a native `DiagramSpec -> PlaitElement[]` adapter | Medium | Medium | Best long-term option if board export ever matters |
+| Emit `DiagramSpec -> DrawnixExportedData` directly | Medium | Medium | Stronger than host embed, but still requires owned geometry/layout decisions |
 
 ## Recommended Direction for Notemd
 
