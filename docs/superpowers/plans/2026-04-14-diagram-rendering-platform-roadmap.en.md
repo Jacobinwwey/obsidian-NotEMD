@@ -55,6 +55,16 @@ This roadmap is no longer just a speculative plan. `main` already contains the d
 
 The purpose of this update is therefore not to redefine direction, but to turn the roadmap into a real progress ledger and the control point for the next execution batch.
 
+## Long-Horizon Interpretation (2026-05-03)
+
+This roadmap should now be read in three layers:
+
+- **Delivered platform foundations**: Tasks 1, 4, 5, most of 6, and the release/export baseline in 7 are already real on `main`.
+- **Still-live maturity work**: Task 0 remainder, Task 2 surface consolidation, and Task 3 legacy-boundary reduction remain the active engineering agenda.
+- **Future-option work**: Task 8 and any Drawnix-adjacent board export work are downstream choices, not current obligations.
+
+That interpretation matters because it changes the strategic reading of the document: the product no longer needs a new diagram platform initiative. It needs a stabilization-and-boundary-hardening initiative.
+
 Phase-2 requirements snapshot:
 
 - `docs/brainstorms/2026-04-14-diagram-platform-phase-2-requirements.md`
@@ -97,6 +107,17 @@ All existing provider configs, transport protocols, and settings UI remain uncha
 | Task 6 | Delivered with explicit limits | Vega-Lite preview now boots through the iframe host with a target-specific sandbox and `srcdoc` bootstrap path. The remaining limit is packaging, not preview routing: the runtime still ships through the main bundle bridge until Task 0 grows a real multi-entry host asset strategy. |
 | Task 7 | Delivered with explicit limits | Theme, locale, SVG/PNG/source export, and the support matrix are aligned with current code. HTML still promises only iframe fallback preview and raw source save. The release workflow now also pins supported `actions/checkout@v6` and `actions/setup-node@v6` majors so the release path does not inherit the older Node 20 JavaScript-action deprecation warning. |
 | Task 8 | Deferred by design | Advanced DSL / renderer evaluation remains intentionally postponed. |
+
+### Cross-Validated Medium-Term Agenda
+
+Cross-checking this roadmap against current code, tests, and the 2026-05-03 audit documents yields a narrower medium-term agenda than the original plan implied:
+
+1. canonicalize the diagram command surface without breaking legacy behavior
+2. publish and adopt a maintainer-local semantic verification runbook
+3. tighten the real packaging boundary for heavy runtimes
+4. only then resume legacy prompt retirement and MermaidProcessor reduction
+
+Everything else is either already delivered or intentionally future-scoped.
 
 ### Evidence Index
 
