@@ -27,6 +27,7 @@ The next durable artifact should therefore not be another broad roadmap rewrite.
 - R4. The next implementation batch must prioritize command-surface consolidation before any new renderer family or host-level integration work.
 - R5. The next implementation batch must define a sustainable maintainer-local semantic verification runbook or harness that does not rely on tracked secrets, hard-coded vault paths, or accidentally committed live tests.
 - R6. Runtime packaging isolation remains an explicit milestone: heavier preview runtimes must not be described as isolated until they ship through a verified multi-entry or dedicated-asset strategy.
+- R6.1. Interpretation of the long-horizon requirements in `docs/superpowers/plans/2026-04-14-diagram-rendering-platform-roadmap.en.md` must converge from "keep building the platform" to "finish boundary hardening first, then decide whether to extend the platform."
 
 **External Reference Boundary**
 - R7. Drawnix must remain a local reference project under `ref/`, not a shipped dependency or embedded host in Notemd.
@@ -54,6 +55,7 @@ The next durable artifact should therefore not be another broad roadmap rewrite.
 - Treat the apparent `main` CI problem as a truth-source problem first, not as proof of an actual failing branch pipeline.
 - Fix the release workflow's future-breakage vector now instead of waiting for GitHub's Node 20 JavaScript-action deprecation schedule to turn a warning into a failure.
 - Keep Drawnix at the adapter/data-boundary level; do not let it pull Notemd into a second hosted front-end application boundary.
+- Fix the next-stage landing order as: command surface -> maintainer-local semantic verification -> runtime packaging boundary -> legacy prompt / MermaidProcessor reduction -> longer-horizon expansion.
 
 ## Dependencies / Assumptions
 
