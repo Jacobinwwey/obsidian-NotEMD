@@ -11,6 +11,7 @@ topic: progress-audit-next-direction
 - `docs/superpowers/plans/2026-04-14-diagram-rendering-platform-roadmap.zh-CN.md`
 - `docs/brainstorms/2026-04-14-diagram-platform-phase-2-requirements.zh-CN.md`
 - `docs/brainstorms/2026-05-01-llm-backward-compat-and-progress-audit.zh-CN.md`
+- `docs/brainstorms/2026-05-03-mainline-stabilization-and-ci-hardening-requirements.zh-CN.md`
 - `docs/brainstorms/2026-05-03-drawnix-feasibility-and-integration-direction.zh-CN.md`
 
 ## 仓库事实校正（2026-05-03）
@@ -20,13 +21,19 @@ topic: progress-audit-next-direction
 1. **远端 `main` 当前没有常规 push/PR CI。**
    `.github/workflows/release.yml` 只在数字 `x.x.x` tag push 或 `workflow_dispatch` 时运行。`main@c2d3511` 没有失败状态。最近的红灯来自 `1.8.3` 发布流，但已在 `2026-05-01` 的后续 release run 中修复。
 
-2. **“8 种图表意图实时验证”目前不是仓库内受控门槛。**
+2. **`main` 上的 commit-status `pending` 不是一个真实失败检查。**
+   截至 `2026-05-03`，`commits/main/status` 返回的是 `state: pending` 且 `statuses: []`，但 `main` 同时没有 branch protection、没有 `check-runs`、也没有 `check-suites`。对这个仓库来说，GitHub Actions runs 才是远端 CI 真值源，单独看 commit-status API 会误判。
+
+3. **release workflow 在最新成功 run 后仍带有未来失效风险。**
+   最新一次成功的 `1.8.3` release run 仍携带 GitHub 官方的 Node 20 JavaScript-action 弃用告警，指向 `actions/checkout@v4` 与 `actions/setup-node@v4`。本次已把它们升级到 `v6`，避免 release 路径继续保留时间炸弹。
+
+4. **“8 种图表意图实时验证”目前不是仓库内受控门槛。**
    相关 live test 文件（如 `src/tests/liveAllDiagramIntents.test.ts`）已在 `92d3ad3` 以“accidentally committed live test files”名义移出主线。2026-05-02 的 DeepSeek 实时验证应视为一次本地历史证据，而不是当前仓库能持续执行、CI 能强制覆盖的门槛。
 
-3. **运行时支持 8 种意图，不等于 UI 首选项全部暴露。**
+5. **运行时支持 8 种意图，不等于 UI 首选项全部暴露。**
    `SUPPORTED_DIAGRAM_INTENTS` 仍覆盖 `mindmap / flowchart / sequence / classDiagram / erDiagram / stateDiagram / canvasMap / dataChart`，但设置页与侧边栏当前只暴露 `auto + flowchart + sequence + classDiagram + erDiagram + stateDiagram + dataChart`。`mindmap` 与 `canvasMap` 仍属运行时能力，不是当前 UI 首选图表选择器的一部分。
 
-4. **命令编排“部分统一”，不是“完全统一”。**
+6. **命令编排“部分统一”，不是“完全统一”。**
    `generateExperimentalDiagramCommand` 与 legacy Mermaid 保存命令仍经过共享 `generateDiagramCommand` 编排，但 `previewExperimentalDiagramCommand` 现在直接读取当前 Markdown 中的 `vega-lite` 围栏并本地预览，不再走共享 LLM 生成路径。这是为了匹配当前 `dataChart` 产物以 Markdown fenced block 保存的现实，而不是最终命令收口形态。
 
 ## 路线图任务状态
@@ -40,7 +47,7 @@ topic: progress-audit-next-direction
 | 任务 4 | 渲染平台 | 已交付。registry / service / cache / preview modal / inline + iframe host 已落地。 | 无。 |
 | 任务 5 | JSON Canvas | 已交付。`.canvas` 产物、基础 layout、保存与预览链路已可用。 | 无。 |
 | 任务 6 | Vega-Lite | 已交付（有限制）。`dataChart` 使用 iframe-host 预览，保存产物为 Markdown fenced `vega-lite`。 | 仍依赖单入口主 bundle bridge；重型运行时未独立打包。 |
-| 任务 7 | 主题 / 导出 / release | 已交付。主题、SVG/PNG/source 导出和 release 资产约束已存在。 | 无重大差距。 |
+| 任务 7 | 主题 / 导出 / release | 已交付，并已补当前加固。主题、SVG/PNG/source 导出、release 资产约束与 workflow action pin 已存在。 | 没有重大产品差距，但普通 `main` CI 仍是刻意缺失状态。 |
 | 任务 8 | 高级引擎 | 按设计推迟（R10）。 | 评估门未满足。 |
 
 ## notebook-navigator 交叉参考完成情况
@@ -80,6 +87,7 @@ topic: progress-audit-next-direction
 
 **基础设施：**
 - 进度状态持久化、架构文档、release workflow、README 对齐测试都在主线。
+- release 路径现在还多了一条维护要求：GitHub 官方 workflow actions 的 major 版本要跟上支持窗口，不能等弃用告警演变成真实失败。
 - 当前真正缺的是“secret-free / machine-free”的 live verification harness，而不是更多单元测试框架。
 
 ## 当前验证门
@@ -93,6 +101,12 @@ topic: progress-audit-next-direction
 - `npm run audit:i18n-ui`
 - `npm run audit:render-host`
 - `git diff --check`
+
+对应远端真值：
+
+- 普通 `main` push 当前没有自动 GitHub Actions workflow
+- release-tag 真值来自 `.github/workflows/release.yml`
+- 当 `commits/<sha>/status` 只返回 `pending` 与零条 status 时，它不是这个仓库的权威 CI 信号
 
 ### 本地历史证据，不等于当前 CI 门
 
@@ -135,18 +149,21 @@ topic: progress-audit-next-direction
 3. **运行时打包（任务 0 剩余）**
    为 Vega-Lite 等重型运行时建立真正的多入口或独立资产策略。
 
-4. **工作区卫生保持**
+4. **release workflow 维护**
+   将 GitHub workflow action major 版本更新视为 release 路径所有权的一部分，不要等弃用告警演变成真实失败 job。
+
+5. **工作区卫生保持**
    `ref/` 与 `coverage/` 应视为本地分析 / 构建产物，而不是待提交内容。主线需要持续保持干净工作树。
 
 ### 受硬性约束阻塞
 
-5. **旧版提示退役**
+6. **旧版提示退役**
    必须先用真实 Obsidian 回归原 Mermaid 场景。
 
-6. **MermaidProcessor sunset**
+7. **MermaidProcessor sunset**
    必须逐块拆分、逐块截图验收，不能只靠 Jest。
 
-7. **Drawnix 集成**
+8. **Drawnix 集成**
    当前只适合作为外部参考和未来导出目标候选，不应抢占主线优先级。
 
 ## 验收标准：图表平台
