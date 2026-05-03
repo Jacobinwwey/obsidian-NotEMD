@@ -41,6 +41,8 @@ That means the most useful Drawnix asset is its **board data model**, not a spec
 
 `packages/drawnix/src/data/json.ts` reinforces that conclusion: the JSON path is a first-class import/export boundary, not an incidental debug format.
 
+`apps/web/src/app/app.tsx` also shows that persisted board state is managed through `localforage`, reinforcing that Drawnix assumes a browser-native persistence layer rather than an Obsidian plugin storage boundary.
+
 ### 2. Conversion capabilities are isolated and lazy-loaded
 
 `markdown-to-drawnix.tsx` and `mermaid-to-drawnix.tsx` both dynamically import:
