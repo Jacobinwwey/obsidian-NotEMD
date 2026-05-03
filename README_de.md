@@ -27,7 +27,7 @@ If\ you\ love\ using\ Notemd\,\ please\ consider\ \[\�\�\�\ Give\ a\ Star\
 
 Wenn du Notemd gerne nutzt, erwäge bitte [⭐ einen Stern auf GitHub zu geben](https://github.com/Jacobinwwey/obsidian-NotEMD) oder [☕️ mir einen Kaffee zu kaufen](https://ko-fi.com/jacobinwwey).
 
-**Version:** 1.8.3
+**Version:** 1.8.4
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
@@ -696,7 +696,7 @@ MIT-Lizenz - Siehe Datei [LICENSE](LICENSE) für Details.
 ---
 
 
-*Notemd v1.8.3 - Verbessern Sie Ihren Obsidian-Wissensgraphen mit KI.*
+*Notemd v1.8.4 - Verbessern Sie Ihren Obsidian-Wissensgraphen mit KI.*
 
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)

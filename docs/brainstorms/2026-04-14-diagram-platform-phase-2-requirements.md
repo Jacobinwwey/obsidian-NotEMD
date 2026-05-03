@@ -62,7 +62,7 @@ Recent stabilization work already moved part of the remaining Mermaid legacy sur
 
 ## Dependencies / Assumptions
 
-- `README.md` and `docs/releases/1.8.3.md` already document the current experimental diagram feature set and should remain aligned with code.
+- `README.md` and `docs/releases/1.8.4.md` already document the current experimental diagram feature set and should remain aligned with code.
 - `ref/**` remains local reference material only and is outside shipped scope.
 - Full repository verification for release-quality changes now uses `npm run build`, `npm test -- --runInBand`, `npm run audit:i18n-ui`, `npm run audit:render-host`, and `git diff --check`.
 

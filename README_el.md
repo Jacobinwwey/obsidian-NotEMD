@@ -25,7 +25,7 @@
 
 Αν αγαπάτε να χρησιμοποιείτε το Notemd, παρακαλούμε σκεφτείτε [⭐ να δώσετε ένα αστέρι στο GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) ή [☕️ να μου αγοράσετε έναν καφέ](https://ko-fi.com/jacobinwwey).
 
-**Έκδοση:** 1.8.3
+**Έκδοση:** 1.8.4
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
@@ -685,6 +685,6 @@
 ---
 
 
-*Notemd v1.8.3 - Βελτιώστε το γράφημα γνώσης σας στο Obsidian με AI.*
+*Notemd v1.8.4 - Βελτιώστε το γράφημα γνώσης σας στο Obsidian με AI.*
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)

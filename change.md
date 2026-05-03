@@ -1,3 +1,37 @@
+# Notemd Change Log
+
+This document summarizes the major functional and architectural changes implemented.
+
+---
+
+## 1.8.4
+
+### Highlights
+
+- Release workflow hardening: GitHub Actions majors pinned to supported versions to avoid the Node 20 deprecation path
+- Progress docs and roadmap corrected to match current code and remote workflow truth
+- Drawnix audited as a reference boundary instead of a near-term embedded host target
+- New mainline stabilization and CI hardening requirements document added
+- Version metadata synchronized for the 1.8.4 release
+
+### New Features
+
+- **Release Workflow Hardening**: `.github/workflows/release.yml` now pins supported `actions/checkout` and `actions/setup-node` majors, and maintainer docs explain how to read `main` truth correctly.
+- **Mainline Truth Alignment**: Progress and roadmap docs now distinguish ordinary `main` workflow truth from release-tag workflow truth, including the `pending` commit-status / zero-status edge case.
+
+### Fixes
+
+- **Documentation Drift**: Updated roadmap, maintainer release workflow docs, Drawnix audit notes, and phase-2 requirements references to match current reality.
+- **Version Sync**: Bumped `package.json`, `manifest.json`, `versions.json`, and README version banners to `1.8.4`.
+
+### Chores
+
+- Added `docs/releases/1.8.4.md` and `docs/releases/1.8.4.zh-CN.md`.
+- Added `docs/brainstorms/2026-05-03-mainline-stabilization-and-ci-hardening-requirements*.md`.
+- Kept the existing `1.8.3` historical entry below for traceability.
+
+---
+
 ## 1.8.3
 
 ### Highlights
@@ -55,11 +89,6 @@
 - 旧版提示退役门槛：必须完全保留原场景可用性。
 - notebook-navigator 设计参考分析已添加至审计文档和路线图。
 - ko-fi 链接：https://ko-fi.com/jacobinwwey
-# Notemd Change Log
-
-This document summarizes the major functional and architectural changes implemented.
-
----
 
 ## [Unreleased]
 

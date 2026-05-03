@@ -25,7 +25,7 @@ Notemd, çok dilli notlarınızı işlemek, anahtar kavramlar için otomatik wik
 
 Notemd kullanmayı seviyorsanız, lütfen [⭐ GitHub'da yıldız vermeyi](https://github.com/Jacobinwwey/obsidian-NotEMD) veya [☕️ bana kahve almayı](https://ko-fi.com/jacobinwwey) düşünün.
 
-**Sürüm:** 1.8.3
+**Sürüm:** 1.8.4
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
@@ -688,6 +688,6 @@ MIT Lisansı - Ayrıntılar için [LICENSE](LICENSE) dosyasına bakın.
 ---
 
 
-*Notemd v1.8.3 - Obsidian bilgi grafiğinizi yapay zeka ile geliştirin.*
+*Notemd v1.8.4 - Obsidian bilgi grafiğinizi yapay zeka ile geliştirin.*
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)

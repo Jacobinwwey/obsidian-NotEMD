@@ -25,7 +25,7 @@ Notemd आपके Obsidian वर्कफ़्लो को बेहतर 
 
 यदि आप Notemd का उपयोग करना पसंद करते हैं, तो कृपया [⭐ GitHub पर स्टार दें](https://github.com/Jacobinwwey/obsidian-NotEMD) या [☕️ मुझे कॉफी खरीदें](https://ko-fi.com/jacobinwwey).
 
-**संस्करण:** 1.8.3
+**संस्करण:** 1.8.4
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
@@ -685,6 +685,6 @@ MIT लाइसेंस - विवरण के लिए [LICENSE](LICENSE) 
 ---
 
 
-*Notemd v1.8.3 - AI के साथ अपने Obsidian knowledge graph को बेहतर बनाएँ।*
+*Notemd v1.8.4 - AI के साथ अपने Obsidian knowledge graph को बेहतर बनाएँ।*
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)

@@ -25,7 +25,7 @@ Notemd ช่วยยกระดับเวิร์กโฟลว์ใน 
 
 ถ้าคุณรักการใช้ Notemd โปรดพิจารณา [⭐ ให้ดาวบน GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) หรือ [☕️ ซื้อกาแฟให้ฉัน](https://ko-fi.com/jacobinwwey).
 
-**เวอร์ชัน:** 1.8.3
+**เวอร์ชัน:** 1.8.4
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
@@ -691,7 +691,7 @@ MIT License - ดูรายละเอียดได้ในไฟล์ [L
 ---
 
 
-*Notemd v1.8.3 - ยกระดับกราฟความรู้ใน Obsidian ของคุณด้วย AI*
+*Notemd v1.8.4 - ยกระดับกราฟความรู้ใน Obsidian ของคุณด้วย AI*
 
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)
