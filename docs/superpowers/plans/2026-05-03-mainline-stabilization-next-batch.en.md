@@ -60,23 +60,23 @@ Carried-forward constraints:
 - Test: `src/tests/sidebarButtonTriggerChains.test.ts`
 - Test: `src/tests/workflowButtons.test.ts`
 
-- [ ] **Step 1: Write failing tests for the intended stable command model**
+- [x] **Step 1: Write failing tests for the intended stable command model**
 Add coverage that describes the canonical command mapping, alias behavior, and the expected relationship between sidebar/workflow IDs and plugin command IDs.
 
-- [ ] **Step 2: Verify the focused failures**
+- [x] **Step 2: Verify the focused failures**
 Run:
 ```bash
 npm test -- --runInBand src/tests/sidebarDomButtonClicks.test.ts src/tests/sidebarButtonTriggerChains.test.ts src/tests/workflowButtons.test.ts
 ```
 Expected: FAIL for the new canonical-surface expectations.
 
-- [ ] **Step 3: Implement the smallest orchestration change**
+- [x] **Step 3: Implement the smallest orchestration change**
 Keep old IDs as compatibility aliases where needed, but route user-facing labeling and internal execution toward one coherent diagram surface.
 
-- [ ] **Step 4: Re-run focused tests**
+- [x] **Step 4: Re-run focused tests**
 Run the same command and confirm the new surface contract passes.
 
-- [ ] **Step 5: Re-check command documentation drift**
+- [x] **Step 5: Re-check command documentation drift**
 Update any user-facing strings or maintainer notes that still imply three independent long-term diagram commands.
 
 ### Task 2: Maintainer-Local Semantic Verification Runbook
@@ -88,16 +88,16 @@ Update any user-facing strings or maintainer notes that still imply three indepe
 - Modify: `docs/maintainer/release-workflow.zh-CN.md`
 - Test/Verify: `README.md`, `README_zh.md` only if wording needs alignment
 
-- [ ] **Step 1: Define the maintained semantic verification scope**
+- [x] **Step 1: Define the maintained semantic verification scope**
 Document what must be checked locally when changes touch `src/diagram/`, `src/mermaidProcessor.ts`, or renderer behavior: Mermaid, JSON Canvas, and Vega-Lite sample flows.
 
-- [ ] **Step 2: Keep the runbook secret-free**
+- [x] **Step 2: Keep the runbook secret-free**
 The runbook must not require tracked credentials, checked-in vault paths, or committed live test files. It should describe operator-owned setup and evidence capture, not automate unsafe local secrets.
 
-- [ ] **Step 3: Define evidence expectations**
+- [x] **Step 3: Define evidence expectations**
 Specify what counts as sufficient evidence: output file checks, screenshots, or saved artifacts, and how maintainers should record that evidence in release handoff or PR context.
 
-- [ ] **Step 4: Cross-link release workflow**
+- [x] **Step 4: Cross-link release workflow**
 Make the release workflow document explicitly distinguish repo-enforced gates from maintainer-local semantic verification.
 
 ### Task 3: Runtime Packaging Boundary Audit
@@ -109,16 +109,16 @@ Make the release workflow document explicitly distinguish repo-enforced gates fr
 - Test: any packaging-focused test already covering render host delivery
 - Docs: `docs/superpowers/plans/2026-04-14-diagram-rendering-platform-roadmap.en.md`
 
-- [ ] **Step 1: Write failing audit coverage for the intended boundary**
+- [x] **Step 1: Write failing audit coverage for the intended boundary**
 Describe the packaging fact you want to be true next, such as explicit heavy-runtime asset ownership or a clearer single-bundle guarantee.
 
-- [ ] **Step 2: Verify failure**
+- [x] **Step 2: Verify failure**
 Run the focused packaging audit tests before changing build logic.
 
-- [ ] **Step 3: Implement the minimal packaging clarification or isolation step**
+- [x] **Step 3: Implement the minimal packaging clarification or isolation step**
 Either tighten the current single-bundle contract or introduce the first real multi-entry boundary. Do not claim more isolation than the build now proves.
 
-- [ ] **Step 4: Re-run audit and build checks**
+- [x] **Step 4: Re-run audit and build checks**
 At minimum:
 ```bash
 npm run build

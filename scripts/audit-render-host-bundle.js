@@ -16,6 +16,12 @@ const DISALLOWED_RENDER_HOST_PATTERNS = [
     /render-host\.(?:html|js)/i
 ];
 
+const DISALLOWED_RENDER_HOST_OUTPUT_FILES = [
+    'render-host.html',
+    'render-host.js',
+    'rendering-webview/index.html'
+];
+
 function resolveBundlePath(projectRoot = process.cwd()) {
     return path.join(projectRoot, 'main.js');
 }
@@ -43,6 +49,15 @@ function auditRenderHostBundle(projectRoot = process.cwd()) {
         throw new Error(`Render host bundle audit failed: built bundle not found at ${bundlePath}. Run npm run build first.`);
     }
 
+    for (const relativePath of DISALLOWED_RENDER_HOST_OUTPUT_FILES) {
+        const candidatePath = path.join(projectRoot, relativePath);
+        if (fs.existsSync(candidatePath)) {
+            throw new Error(
+                `Render host bundle audit failed for ${bundlePath}: unexpected standalone render-host output file "${relativePath}".`
+            );
+        }
+    }
+
     const bundleSource = fs.readFileSync(bundlePath, 'utf8');
     auditRenderHostBundleSource(bundleSource, bundlePath);
     return bundlePath;
@@ -56,6 +71,7 @@ if (require.main === module) {
 module.exports = {
     REQUIRED_RENDER_HOST_MARKERS,
     DISALLOWED_RENDER_HOST_PATTERNS,
+    DISALLOWED_RENDER_HOST_OUTPUT_FILES,
     resolveBundlePath,
     auditRenderHostBundleSource,
     auditRenderHostBundle
