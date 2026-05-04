@@ -1964,12 +1964,27 @@ export default class NotemdPlugin extends Plugin {
             const prompt = this.getPromptForTask('summarizeToMermaid');
             const mermaidContent = await callLLM(provider, prompt, input.sourceMarkdown, settings, reporter, modelName);
             return {
+                plan: {
+                    intent: (input.requestedIntent || 'mindmap') as DiagramIntent,
+                    confidence: 1,
+                    reasons: ['legacy mermaid compatibility path'],
+                    renderTarget: 'mermaid' as const,
+                    fallbackTargets: [],
+                    mermaidDiagramType: null,
+                    legacyCompatibilityMode: true
+                },
+                spec: {
+                    intent: (input.requestedIntent || 'mindmap') as DiagramIntent,
+                    title: input.sourcePath || 'Generated Diagram',
+                    nodes: []
+                },
                 artifact: {
                     target: 'mermaid' as const,
                     content: mermaidContent,
                     mimeType: 'text/vnd.mermaid',
                     sourceIntent: (input.requestedIntent || 'mindmap') as DiagramIntent
-                }
+                },
+                renderError: undefined
             };
         }
 
@@ -1998,12 +2013,27 @@ export default class NotemdPlugin extends Plugin {
             const prompt = this.getPromptForTask('summarizeToMermaid');
             const mermaidContent = await callLLM(provider, prompt, input.sourceMarkdown, settings, reporter, modelName);
             return {
+                plan: {
+                    intent: (input.requestedIntent || 'mindmap') as DiagramIntent,
+                    confidence: 1,
+                    reasons: ['legacy mermaid fallback path'],
+                    renderTarget: 'mermaid' as const,
+                    fallbackTargets: [],
+                    mermaidDiagramType: null,
+                    legacyCompatibilityMode: true
+                },
+                spec: {
+                    intent: (input.requestedIntent || 'mindmap') as DiagramIntent,
+                    title: input.sourcePath || 'Generated Diagram',
+                    nodes: []
+                },
                 artifact: {
                     target: 'mermaid' as const,
                     content: mermaidContent,
                     mimeType: 'text/vnd.mermaid',
                     sourceIntent: (input.requestedIntent || 'mindmap') as DiagramIntent
-                }
+                },
+                renderError: undefined
             };
         }
     }
