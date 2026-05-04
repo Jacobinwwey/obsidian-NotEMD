@@ -52,6 +52,7 @@ import {
     runProviderDiagnosticProbe,
     runProviderDiagnosticStabilityProbe
 } from './providerDiagnostics';
+import { buildCliInvocationContract } from './cliContracts';
 
 type DiagramCommandExecutionMode = 'save-mermaid' | 'save-artifact' | 'preview-artifact';
 
@@ -360,6 +361,17 @@ export default class NotemdPlugin extends Plugin {
                 const outputPath = `${this.app.vault.configDir}/plugins/${this.manifest.id}/notemd-cli-capabilities.json`;
                 await this.app.vault.adapter.write(outputPath, JSON.stringify(manifest, null, 2));
                 new Notice(`CLI capability manifest exported to ${outputPath}`);
+            }
+        });
+
+        this.addCommand({
+            id: 'export-cli-invocation-contract',
+            name: 'Export CLI invocation contract',
+            callback: async () => {
+                const contract = buildCliInvocationContract();
+                const outputPath = `${this.app.vault.configDir}/plugins/${this.manifest.id}/notemd-cli-contract.json`;
+                await this.app.vault.adapter.write(outputPath, JSON.stringify(contract, null, 2));
+                new Notice(`CLI invocation contract exported to ${outputPath}`);
             }
         });
 
