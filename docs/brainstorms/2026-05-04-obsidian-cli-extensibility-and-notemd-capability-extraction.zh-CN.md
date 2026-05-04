@@ -30,7 +30,7 @@ Notemd 现在已经有一批能力，实际规模明显超过“某个 Obsidian 
 **能力分类**
 - R1. 仓库必须明确区分：哪些 Notemd 能力是宿主无关、适合未来 CLI 化的；哪些能力仍然绑定 Obsidian UI/runtime 表面。
 - R2. 分类必须基于当前代码事实，而不是愿景。凡是声称“适合 CLI 化”的能力，都必须先核对它是否仍直接依赖 `App`、`Editor`、`MarkdownView`、`Notice`、modal 流程或插件自己的文件选择 UX。
-- R3. 进度文档与架构文档必须明确写清：本机上的 `obsidian-cli` 当前只是调试/桌面包装层，不是通用插件执行宿主。
+- R3. 进度文档与架构文档必须明确区分本机 `obsidian-cli` 包装器和底层官方 `obsidian` CLI：后者已经具备插件命令触发能力，但仍缺少稳健自动化所需的类型化集成表面。
 
 **适合 CLI 抽取的能力目标**
 - R4. 下一条架构 seam 应优先围绕以下能力抽取可复用 operation：
@@ -47,7 +47,7 @@ Notemd 现在已经有一批能力，实际规模明显超过“某个 Obsidian 
   - 阶段 1：抽取宿主无关的 Notemd operations
   - 阶段 2：定义 `obsidian-cli` 可调用的插件/operation invocation contract
   - 阶段 3：把少量 operation 暴露为稳定 CLI 命令或子命令
-- R8. 仓库必须明确避免假设当前 `obsidian-cli` 已经能直接加载任意插件命令。任何暗示这一点的文档都要纠正。
+- R8. 仓库必须明确避免把“今天已经能触发插件命令”误判为“集成已经足够完善”。命令触发能力已经存在，但参数契约、能力发现、输出语义和自动化稳定性仍需单独设计。
 - R9. 第一批面向 CLI 的集成目标必须优先选择非交互、可留证据、易自动化的能力：诊断、产物生成、配置检查/导出、dry-run 风格能力报告，而不是先做会直接改编辑器内容的流程。
 
 **设置与扩展模型**
@@ -66,7 +66,7 @@ Notemd 现在已经有一批能力，实际规模明显超过“某个 Obsidian 
 ## 成功标准
 
 - 维护者可以直接指向一份能力矩阵，解释哪些 Notemd 功能适合未来 CLI 暴露、哪些被插件宿主耦合阻塞、以及阻塞原因。
-- 文档不再暗示 `obsidian-cli` 已经支持调试包装范围之外的插件命令执行。
+- 文档必须准确区分“官方 CLI 已可触发插件命令”和“项目仍缺少成熟插件自动化契约”这两层事实。
 - 下一轮规划可以直接拆解一批具体 operation-extraction 工作，而不需要从头发明 CLI 范围和产品行为。
 - 仓库继续把“本地机器 wrapper”“插件命令表面”“未来 CLI 扩展性”维持为三层边界，而不是塌成一个不稳定接口。
 
@@ -80,14 +80,14 @@ Notemd 现在已经有一批能力，实际规模明显超过“某个 Obsidian 
 
 ## 关键决策
 
-- 把当前 `obsidian-cli` 当成宿主约束，而不是把它误读为“插件能力已经可以直接 CLI 暴露”的证据。
+- 把当前官方 CLI 的命令触发能力视作可用底座，而不是把它误读为“Notemd 的能力已经天然适合自动化 CLI 暴露”。
 - 先抽 operation，再暴露 command。否则项目只会在插件 UI 和 CLI 两边重复 orchestration 逻辑。
 - 第一批 CLI 适配优先选择非交互、可确定、可产出文件/证据的能力。
 - 编辑器绑定、预览绑定、modal 绑定的流程，在形成明确宿主无关契约前继续留在插件宿主里。
 
 ## 依赖与假设
 
-- 当前宿主证据来自 `obsidian-cli help`、`obsidian-cli doctor`，以及本机包装脚本 `/usr/local/sbin/obsidian-cli` 与 `/usr/local/libexec/obsidian-launch`。
+- 当前宿主证据来自 `obsidian-cli help`、`obsidian-cli doctor`、`obsidian --help`、`obsidian commands filter=notemd`，以及本机包装脚本 `/usr/local/sbin/obsidian-cli` 与 `/usr/local/libexec/obsidian-launch`。
 - 当前代码证据表明 `src/main.ts` 仍掌握命令注册、busy-state orchestration、reporter 生命周期，以及大量依赖 `App` / `Editor` / `MarkdownView` 的流程。
 - 可复用的低层 building block 已经部分存在于 `src/providerDiagnostics.ts`、`src/diagram/diagramGenerationService.ts`、`src/workflowButtons.ts`、`src/batchProgressStore.ts` 和部分 `src/llmUtils.ts` 中，但它们还没有被组织成真正的宿主无关 operation 层。
 
