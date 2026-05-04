@@ -47,6 +47,7 @@ describe('provider diagnostic command surface', () => {
         expect(ids).toContain('export-provider-profiles');
         expect(ids).toContain('import-provider-profiles');
         expect(ids).toContain('export-cli-capability-manifest');
+        expect(ids).toContain('export-cli-invocation-contract');
     });
 
     test('developer diagnostic command uses operation-layer input derived from current settings', async () => {
