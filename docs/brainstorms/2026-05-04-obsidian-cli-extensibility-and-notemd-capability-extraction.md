@@ -15,7 +15,7 @@ Notemd already contains several capabilities that are larger than a single Obsid
 - structured workflow action IDs and serializable workflow definitions
 - per-provider local-only storage semantics
 
-At the same time, the current host reality is narrower than the product ambition. On this machine, `obsidian-cli` is a stable desktop/debug wrapper with `help`, `version`, `vaults`, `vault`, `doctor`, `native`, `gui`, and `debug` subcommands. It is **not** yet a plugin-command host, and it does not expose a stable extension protocol for third-party plugin capabilities.
+At the same time, the current host reality is still narrower than the product ambition. On this machine, the local `obsidian-cli` wrapper is a stable desktop/debug wrapper with `help`, `version`, `vaults`, `vault`, `doctor`, `native`, `gui`, and `debug` subcommands. The underlying official `obsidian` CLI can already list and trigger plugin commands, but it still does not expose a stable extension protocol for typed third-party plugin capabilities.
 
 That means the next durable move is not "add some Notemd commands to `obsidian-cli`" directly. The next move is to define:
 
