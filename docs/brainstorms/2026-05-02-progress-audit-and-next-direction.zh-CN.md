@@ -106,9 +106,9 @@ topic: progress-audit-next-direction
 - 当前真正缺的是“secret-free / machine-free”的 live verification harness，而不是更多单元测试框架。
 
 **CLI 扩展性：**
-- 本机上的 `obsidian-cli` 当前只是稳定的调试/桌面包装器，不是插件 operation 宿主。
+- 本机上的稳定包装器 `obsidian-cli` 仍主要是调试/桌面入口，但底层官方 `obsidian` CLI 现在已经支持 `commands` 与 `command id=<command-id>`，可列出并触发插件注册命令。
 - Notemd 里真正有 CLI 潜力的 seam 在更低层：`src/providerDiagnostics.ts`、`src/diagram/diagramGenerationService.ts`、`src/workflowButtons.ts`、`src/batchProgressStore.ts`，以及 `localOnly` 这类设置/序列化语义。
-- 因此，项目当前还不能把插件 command IDs 或 sidebar actions 直接当成公共 CLI 表面。必须先抽宿主无关 operation，再定义 CLI 调用契约。
+- 因此，项目当前仍不能把插件 command IDs 或 sidebar actions 直接当成稳定工程 CLI 表面。必须先抽宿主无关 operation，再在 command-trigger 层之上定义类型化 CLI 调用契约。
 
 ## 当前验证门
 

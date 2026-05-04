@@ -30,7 +30,7 @@ Without that boundary work, CLI ambitions will keep collapsing back into `src/ma
 **Capability Classification**
 - R1. The repository must explicitly distinguish between Notemd capabilities that are host-agnostic and CLI-suitable versus capabilities that remain tied to Obsidian UI/runtime surfaces.
 - R2. The classification must be grounded in current code, not aspiration. In particular, any CLI-suitable claim must reflect whether the current implementation still depends directly on `App`, `Editor`, `MarkdownView`, `Notice`, modal flows, or plugin-owned file-selection UX.
-- R3. Progress and architecture documents must state plainly that `obsidian-cli` on this host is currently a debug/desktop wrapper, not a general plugin execution host.
+- R3. Progress and architecture documents must distinguish between the local `obsidian-cli` wrapper and the underlying official `obsidian` CLI. The official CLI already exposes plugin command triggering, but it still lacks the typed integration surface needed for robust plugin automation.
 
 **CLI-Suitable Capability Extraction Targets**
 - R4. The next architecture seam must prioritize extracting reusable operations for:
@@ -47,7 +47,7 @@ Without that boundary work, CLI ambitions will keep collapsing back into `src/ma
   - Phase 1: extract host-agnostic Notemd operations
   - Phase 2: define a plugin/operation invocation contract that `obsidian-cli` could call
   - Phase 3: expose selected operations as stable CLI commands or subcommands
-- R8. The repository must explicitly avoid assuming that current `obsidian-cli` wrappers can already load arbitrary plugin commands. Any document that implies this today must be corrected.
+- R8. The repository must explicitly avoid treating today's official plugin command triggering surface as sufficient integration by itself. Command execution exists, but argument contracts, capability discovery, output semantics, and automation-grade stability still need design.
 - R9. The first CLI-oriented integration targets should be non-interactive and evidence-friendly: diagnostics, artifact generation, config inspection/export, and dry-run style capability reports before editor-mutating flows.
 
 **Settings and Extensibility Model**
@@ -66,7 +66,7 @@ Without that boundary work, CLI ambitions will keep collapsing back into `src/ma
 ## Success Criteria
 
 - A maintainer can point to a written capability matrix and explain which Notemd features are ready for future CLI exposure, which are blocked by plugin-host coupling, and why.
-- The docs no longer imply that `obsidian-cli` already supports plugin-command execution beyond its current wrapper/debug scope.
+- The docs accurately distinguish between "official CLI can trigger plugin commands" and "the project still lacks a mature plugin automation contract".
 - The next planning phase can decompose a concrete operation-extraction batch without inventing product behavior or CLI scope from scratch.
 - The repository continues to keep local machine wrappers, plugin command surfaces, and future CLI extensibility as separate layers rather than collapsing them into one unstable interface.
 
@@ -80,14 +80,14 @@ Without that boundary work, CLI ambitions will keep collapsing back into `src/ma
 
 ## Key Decisions
 
-- Treat current `obsidian-cli` as a host constraint, not as proof that plugin operations are already CLI-exposable.
+- Treat today's official CLI command-trigger support as an enabling substrate, not as proof that Notemd operations are already well-designed for automation.
 - Extract operations before exposing commands. Otherwise the project will duplicate orchestration logic across plugin UI and CLI surfaces.
 - Prefer non-interactive, deterministic, artifact-producing capabilities as the first CLI-fit targets.
 - Keep editor-bound, preview-bound, and modal-bound flows behind the plugin host until explicit host-neutral contracts exist.
 
 ## Dependencies / Assumptions
 
-- Current host evidence comes from `obsidian-cli help`, `obsidian-cli doctor`, and the local wrapper scripts `/usr/local/sbin/obsidian-cli` plus `/usr/local/libexec/obsidian-launch`.
+- Current host evidence comes from `obsidian-cli help`, `obsidian-cli doctor`, `obsidian --help`, `obsidian commands filter=notemd`, and the local wrapper scripts `/usr/local/sbin/obsidian-cli` plus `/usr/local/libexec/obsidian-launch`.
 - Current code evidence shows that `src/main.ts` still owns command registration, busy-state orchestration, reporter lifecycle, and many `App`/`Editor`/`MarkdownView`-bound flows.
 - Reusable lower-level building blocks already exist in places such as `src/providerDiagnostics.ts`, `src/diagram/diagramGenerationService.ts`, `src/workflowButtons.ts`, `src/batchProgressStore.ts`, and parts of `src/llmUtils.ts`, but they are not yet assembled into a host-neutral operation layer.
 

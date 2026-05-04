@@ -214,11 +214,11 @@ flowchart LR
 
 当前宿主事实必须明确写清：
 
-- 本机上的 `obsidian-cli` 只是桌面/调试入口包装器，暴露的是 `help`、`version`、`vaults`、`vault`、`doctor`、`native`、`gui`、`debug`
-- 它目前不是通用插件执行宿主
-- 它当前也没有“通过命令 ID 调用某个插件能力”的稳定协议
+- 本机上的稳定包装器 `obsidian-cli` 暴露的是 `help`、`version`、`vaults`、`vault`、`doctor`、`native`、`gui`、`debug` 等桌面/调试入口
+- 底层官方 `obsidian` CLI 实际已经支持 `commands` 与 `command id=<command-id>`，并且可以列出/执行插件注册命令
+- 但这仍然只是**命令触发表面**，不是成熟的插件集成协议：它还缺少类型化参数、返回结果契约、能力元数据和稳定自动化语义
 
-因此，Notemd 的未来 CLI 路线不能写成“把 sidebar 按钮搬到终端”。真正值得抽取的是已经开始具备独立形态的低层能力：
+因此，Notemd 的未来 CLI 路线仍不能停留在“把 sidebar 按钮搬到终端”。真正值得抽取的是已经开始具备独立形态的低层能力：
 
 - `src/providerDiagnostics.ts`
 - `src/diagram/diagramGenerationService.ts`
@@ -226,7 +226,7 @@ flowchart LR
 - `src/batchProgressStore.ts`
 - `LLMProviderConfig.localOnly` 这类 config/profile 语义
 
-当前架构缺口在于：`src/main.ts` 仍持有过多 orchestration、UI 生命周期和 Obsidian runtime 耦合。在形成宿主无关 operation 层之前，插件 command IDs 与 sidebar action IDs 仍然只是产品表面，不应被当成公共 CLI API。
+当前架构缺口在于：`src/main.ts` 仍持有过多 orchestration、UI 生命周期和 Obsidian runtime 耦合。在形成宿主无关 operation 层之前，插件 command IDs 虽然已经可以被官方 CLI 触发，但它们仍然只是产品表面，不应被当成稳定工程 API。
 
 ## 关键设计决策
 
