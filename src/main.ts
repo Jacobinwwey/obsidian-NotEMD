@@ -35,7 +35,11 @@ import { extractOriginalText } from './extractOriginalText';
 import { formatI18n, getI18nStrings } from './i18n';
 import { resolveTaskLanguageCode } from './i18n/taskLanguagePolicy';
 import { getSidebarActionLabel, SidebarActionId } from './workflowButtons';
-import { generateDiagramArtifact } from './diagram/diagramGenerationService';
+import {
+    buildDiagramOperationInput,
+    DiagramOperationInput,
+    generateDiagramArtifact
+} from './diagram/diagramGenerationService';
 import { RenderArtifact } from './rendering/types';
 import { DiagramIntent } from './diagram/types';
 import { IframeRenderHost } from './rendering/host/iframeRenderHost';
@@ -1863,11 +1867,18 @@ export default class NotemdPlugin extends Plugin {
 
             const { provider, modelName } = this.getProviderAndModelForTask('summarizeToMermaid');
             useReporter.log(`Using provider: ${provider.name}, Model: ${modelName}`);
+            const operationInput = buildDiagramOperationInput({
+                sourcePath: file.path,
+                sourceMarkdown: fileContent,
+                executionMode: options.executionMode,
+                settings: this.settings,
+                targetLanguage: resolveTaskLanguageCode(this.settings, 'summarizeToMermaid')
+            });
 
             if (options.executionMode === 'save-mermaid') {
-                await this.executeSaveMermaidDiagramCommand(file, fileContent, provider, modelName, useReporter, actionLabel, i18n);
+                await this.executeSaveMermaidDiagramCommand(file, operationInput, provider, modelName, useReporter, actionLabel, i18n);
             } else {
-                await this.executeArtifactDiagramCommand(file, fileContent, provider, modelName, useReporter, actionLabel, i18n, options.executionMode);
+                await this.executeArtifactDiagramCommand(file, operationInput, provider, modelName, useReporter, actionLabel, i18n, options.executionMode);
             }
         } catch (error: unknown) {
             const message = error instanceof Error ? error.message : String(error);
@@ -1942,6 +1953,61 @@ export default class NotemdPlugin extends Plugin {
         }
     }
 
+    private async generateDiagramOperation(
+        input: DiagramOperationInput,
+        settings: NotemdSettings,
+        provider: LLMProviderConfig,
+        modelName: string,
+        reporter: ProgressReporter
+    ) {
+        if (input.outputMode === 'mermaid' && !settings.enableExperimentalDiagramPipeline) {
+            const prompt = this.getPromptForTask('summarizeToMermaid');
+            const mermaidContent = await callLLM(provider, prompt, input.sourceMarkdown, settings, reporter, modelName);
+            return {
+                artifact: {
+                    target: 'mermaid' as const,
+                    content: mermaidContent,
+                    mimeType: 'text/vnd.mermaid',
+                    sourceIntent: (input.requestedIntent || 'mindmap') as DiagramIntent
+                }
+            };
+        }
+
+        reporter.log(`Generating diagram operation in ${input.outputMode} mode.`);
+
+        try {
+            if (input.outputMode === 'mermaid' && settings.experimentalDiagramCompatibilityMode !== input.compatibilityMode) {
+                reporter.log('Mermaid command pins experimental compatibility mode to legacy-mermaid to guarantee Mermaid output.');
+            }
+
+            return await generateDiagramArtifact(input.sourceMarkdown, {
+                requestedIntent: input.requestedIntent,
+                compatibilityMode: input.compatibilityMode,
+                targetLanguage: input.targetLanguage,
+                llmInvoker: (systemPrompt, sourceMarkdown) =>
+                    callLLM(provider, systemPrompt, sourceMarkdown, settings, reporter, modelName)
+            });
+        } catch (error: unknown) {
+            if (input.outputMode !== 'mermaid') {
+                throw error;
+            }
+
+            const message = error instanceof Error ? error.message : String(error);
+            reporter.log(`Experimental diagram pipeline failed: ${message}`);
+            reporter.log('Falling back to legacy Mermaid prompt and fixer pipeline.');
+            const prompt = this.getPromptForTask('summarizeToMermaid');
+            const mermaidContent = await callLLM(provider, prompt, input.sourceMarkdown, settings, reporter, modelName);
+            return {
+                artifact: {
+                    target: 'mermaid' as const,
+                    content: mermaidContent,
+                    mimeType: 'text/vnd.mermaid',
+                    sourceIntent: (input.requestedIntent || 'mindmap') as DiagramIntent
+                }
+            };
+        }
+    }
+
     private async generateExperimentalDiagramArtifact(
         fileContent: string,
         provider: LLMProviderConfig,
@@ -1959,7 +2025,7 @@ export default class NotemdPlugin extends Plugin {
 
     private async executeSaveMermaidDiagramCommand(
         file: TFile,
-        fileContent: string,
+        operationInput: DiagramOperationInput,
         provider: LLMProviderConfig,
         modelName: string,
         reporter: ProgressReporter,
@@ -1967,7 +2033,8 @@ export default class NotemdPlugin extends Plugin {
         i18n = this.getUiStrings()
     ) {
         reporter.updateStatus(this.getStepStatusText(1, 3, actionLabel), 20);
-        const mermaidContent = await this.generateMermaidSummaryContent(fileContent, provider, modelName, reporter);
+        const result = await this.generateDiagramOperation(operationInput, this.settings, provider, modelName, reporter);
+        const mermaidContent = result.artifact.content;
         reporter.updateStatus(this.getStepStatusText(2, 3, actionLabel), 90);
 
         const outputFilePath = await saveMermaidSummaryFile(this.app, this.settings, file, mermaidContent, reporter);
@@ -2009,7 +2076,7 @@ export default class NotemdPlugin extends Plugin {
 
     private async executeArtifactDiagramCommand(
         file: TFile,
-        fileContent: string,
+        operationInput: DiagramOperationInput,
         provider: LLMProviderConfig,
         modelName: string,
         reporter: ProgressReporter,
@@ -2021,7 +2088,7 @@ export default class NotemdPlugin extends Plugin {
         const initialProgress = executionMode === 'preview-artifact' ? 25 : 20;
         reporter.updateStatus(this.getStepStatusText(1, totalSteps, actionLabel), initialProgress);
 
-        const result = await this.generateExperimentalDiagramArtifact(fileContent, provider, modelName, reporter);
+        const result = await this.generateDiagramOperation(operationInput, this.settings, provider, modelName, reporter);
 
         if (result.renderError) {
             reporter.log(`Warning: ${result.renderError}`);

@@ -5,6 +5,7 @@ import { HtmlRenderer } from '../rendering/renderers/htmlRenderer';
 import { RendererRegistry } from '../rendering/rendererRegistry';
 import { RenderArtifact } from '../rendering/types';
 import { RendererService } from '../rendering/rendererService';
+import { NotemdSettings } from '../types';
 import { buildDiagramPlan } from './planner';
 import { buildDiagramSpecPrompt } from './prompts/diagramSpecPrompt';
 import { assertValidDiagramSpec } from './spec';
@@ -17,6 +18,51 @@ export interface DiagramGenerationOptions {
     requestedIntent?: DiagramIntent;
     llmInvoker: (systemPrompt: string, sourceMarkdown: string) => Promise<string>;
     rendererService?: RendererService;
+}
+
+export type DiagramOperationOutputMode = 'artifact' | 'mermaid';
+export type DiagramOperationExecutionMode = 'save-mermaid' | 'save-artifact' | 'preview-artifact';
+
+export interface DiagramOperationInput {
+    sourcePath?: string;
+    sourceMarkdown: string;
+    requestedIntent?: DiagramIntent;
+    compatibilityMode: 'best-fit' | 'legacy-mermaid';
+    outputMode: DiagramOperationOutputMode;
+    targetLanguage?: string;
+}
+
+export interface BuildDiagramOperationInputParams {
+    sourcePath?: string;
+    sourceMarkdown: string;
+    executionMode: DiagramOperationExecutionMode;
+    settings: Pick<NotemdSettings, 'preferredDiagramIntent' | 'experimentalDiagramCompatibilityMode' | 'summarizeToMermaidLanguage'>;
+    targetLanguage?: string;
+}
+
+export function resolveDiagramOperationCompatibilityMode(
+    executionMode: DiagramOperationExecutionMode,
+    configuredMode: 'best-fit' | 'legacy-mermaid'
+): 'best-fit' | 'legacy-mermaid' {
+    if (executionMode === 'save-mermaid') {
+        return 'legacy-mermaid';
+    }
+
+    return configuredMode;
+}
+
+export function buildDiagramOperationInput(params: BuildDiagramOperationInputParams): DiagramOperationInput {
+    return {
+        sourcePath: params.sourcePath,
+        sourceMarkdown: params.sourceMarkdown,
+        requestedIntent: params.settings.preferredDiagramIntent as DiagramIntent | undefined,
+        compatibilityMode: resolveDiagramOperationCompatibilityMode(
+            params.executionMode,
+            params.settings.experimentalDiagramCompatibilityMode
+        ),
+        outputMode: params.executionMode === 'save-mermaid' ? 'mermaid' : 'artifact',
+        targetLanguage: params.targetLanguage ?? params.settings.summarizeToMermaidLanguage
+    };
 }
 
 export interface DiagramGenerationResult {

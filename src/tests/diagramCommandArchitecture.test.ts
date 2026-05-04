@@ -65,6 +65,10 @@ describe('diagram command architecture', () => {
         expect(typeof (plugin as any).generateDiagramCommand).toBe('function');
     });
 
+    test('exposes a shared generateDiagramOperation entrypoint below command wiring', () => {
+        expect(typeof (plugin as any).generateDiagramOperation).toBe('function');
+    });
+
     test('keeps summarizeToMermaidCommand as a compatibility alias over the shared diagram command', async () => {
         const sharedSpy = jest
             .spyOn(plugin as any, 'generateDiagramCommand')
@@ -87,6 +91,35 @@ describe('diagram command architecture', () => {
         expect(sharedSpy).toHaveBeenCalledWith(file, reporter, expect.objectContaining({
             executionMode: 'save-artifact'
         }));
+    });
+
+    test('shared diagram command shapes operation input before delegating artifact execution', async () => {
+        (mockApp.vault.read as jest.Mock).mockResolvedValue('# Topic');
+        const legacyArtifactSpy = jest.spyOn(plugin as any, 'generateExperimentalDiagramArtifact');
+        jest.spyOn(plugin as any, 'executeArtifactDiagramCommand').mockResolvedValue(undefined);
+        jest.spyOn(plugin as any, 'getProviderAndModelForTask').mockReturnValue({
+            provider: mockSettings.providers[0],
+            modelName: mockSettings.providers[0].model
+        });
+
+        await (plugin as any).generateDiagramCommand(file, reporter, { executionMode: 'save-artifact' });
+
+        expect(legacyArtifactSpy).not.toHaveBeenCalled();
+        expect((plugin as any).executeArtifactDiagramCommand).toHaveBeenCalledWith(
+            file,
+            expect.objectContaining({
+                sourcePath: 'Notes/Topic.md',
+                sourceMarkdown: '# Topic',
+                outputMode: 'artifact',
+                compatibilityMode: mockSettings.experimentalDiagramCompatibilityMode
+            }),
+            mockSettings.providers[0],
+            mockSettings.providers[0].model,
+            reporter,
+            expect.any(String),
+            expect.anything(),
+            'save-artifact'
+        );
     });
 
     test('preview command reads vega-lite from file without calling generateDiagramCommand', async () => {
