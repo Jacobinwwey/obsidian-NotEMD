@@ -2,6 +2,9 @@ import {
     SIDEBAR_ACTION_DEFINITIONS,
     createEmptyWorkflowButton,
     DEFAULT_CUSTOM_WORKFLOW_BUTTONS_DSL,
+    getSidebarActionAutomationLevel,
+    getSidebarActionRequiredContext,
+    getSidebarActionSideEffectClass,
     parseCustomWorkflowButtonsDsl,
     resolveCustomWorkflowButtons,
     serializeCustomWorkflowButtons
@@ -75,5 +78,19 @@ describe('workflowButtons parser', () => {
         const actionIds = SIDEBAR_ACTION_DEFINITIONS.map(def => def.id);
         expect(actionIds).not.toContain('run-developer-provider-diagnostic');
         expect(actionIds).not.toContain('run-developer-provider-stability-diagnostic');
+    });
+
+    test('exposes automation metadata for current action ids', () => {
+        expect(getSidebarActionAutomationLevel('test-llm-connection')).toBe('safe');
+        expect(getSidebarActionRequiredContext('test-llm-connection')).toBe('none');
+        expect(getSidebarActionSideEffectClass('test-llm-connection')).toBe('read-only');
+
+        expect(getSidebarActionAutomationLevel('generate-experimental-diagram')).toBe('requires-active-file');
+        expect(getSidebarActionRequiredContext('generate-experimental-diagram')).toBe('active-file');
+        expect(getSidebarActionSideEffectClass('generate-experimental-diagram')).toBe('write-file');
+
+        expect(getSidebarActionAutomationLevel('preview-experimental-diagram')).toBe('interactive-ui');
+        expect(getSidebarActionRequiredContext('preview-experimental-diagram')).toBe('preview-ui');
+        expect(getSidebarActionSideEffectClass('preview-experimental-diagram')).toBe('preview-ui');
     });
 });
