@@ -1,5 +1,5 @@
 ---
-date: 2026-05-03
+date: 2026-05-04
 topic: progress-audit-next-direction
 ---
 
@@ -14,15 +14,15 @@ Reference documents:
 - `docs/brainstorms/2026-05-03-mainline-stabilization-and-ci-hardening-requirements.md`
 - `docs/brainstorms/2026-05-03-drawnix-feasibility-and-integration-direction.md`
 
-## Reality Corrections (2026-05-03)
+## Reality Corrections (2026-05-04)
 
 This audit is not a redesign pass. It is a repo-truth alignment pass. The biggest risks are now documentation drift and overstated gates, not missing platform ideas.
 
 1. **Remote `main` does not currently have a normal push/PR CI pipeline.**
-   `.github/workflows/release.yml` runs only for numeric `x.x.x` tag pushes and `workflow_dispatch`. As of 2026-05-03, `main` points to `09ef239` (`docs(release): align 1.8.4 notes with shipped delta`) and there is still no ordinary push/PR workflow for that branch. The recent red runs came from the `1.8.3` release flow and were later superseded by the successful `1.8.4` release run (`25274341984`) on 2026-05-03.
+   `.github/workflows/release.yml` runs only for numeric `x.x.x` tag pushes and `workflow_dispatch`. As of 2026-05-04, `main` points to `dd77126` (`fix(diagram): land command surface and verification runbook`) and there is still no ordinary push/PR workflow for that branch. The recent red runs came from the `1.8.3` release flow and were later superseded by the successful `1.8.4` release run (`25274341984`) on 2026-05-03.
 
 2. **The `pending` commit-status response on `main` is not a real failing check.**
-   As of 2026-05-03, `commits/main/status` returns `state: pending` with `statuses: []`, while branch protection is disabled and no ordinary branch-scoped required checks exist. The same `main@09ef239` commit does already have a successful GitHub Actions `check_suite` / `check_run` attached through the `1.8.4` tag-driven release path. In this repository, GitHub Actions runs plus `check-suites` / `check-runs` are the authoritative CI signal, not the commit-status endpoint by itself.
+   As of 2026-05-04, `commits/main/status` still returns `state: pending` with `statuses: []`, while branch protection is disabled and no ordinary branch-scoped required checks exist. The same pattern still holds on `main@dd77126`: zero statuses and zero check suites on the branch tip do not indicate a real failing branch pipeline. In this repository, GitHub Actions runs plus release-driven checks are the authoritative CI signal when they exist; the commit-status endpoint by itself is not.
 
 3. **The release workflow had a future failure vector even after the last successful repair run.**
    The earlier successful `1.8.3` repair run (`25215799596`) still emitted GitHub's Node 20 JavaScript-action deprecation warning for `actions/checkout@v4` and `actions/setup-node@v4`. The current `.github/workflows/release.yml` now pins `actions/checkout@v6` and `actions/setup-node@v6`, and the newer `1.8.4` release run (`25274341984`) completed successfully on that hardened path.
@@ -105,6 +105,11 @@ This means the roadmap should no longer be interpreted as "build the platform". 
 - The release path now has a specific hardening rule: keep GitHub-maintained workflow actions on supported majors, or release CI will fail for reasons unrelated to plugin code.
 - The missing piece is now a secret-free, machine-free live verification harness, not another generic unit-test layer.
 
+**CLI extensibility**
+- `obsidian-cli` is currently a stable debug/desktop wrapper on this host, not a plugin operation host.
+- The meaningful CLI-ready seams in Notemd are lower-level pieces such as `src/providerDiagnostics.ts`, `src/diagram/diagramGenerationService.ts`, `src/workflowButtons.ts`, `src/batchProgressStore.ts`, and selected serialization/config semantics like `localOnly`.
+- The project is therefore not ready to treat current plugin command IDs or sidebar actions as a public CLI surface. First extract host-neutral operations; only then define CLI invocation contracts.
+
 ## Verification Gates
 
 ### Sustainable repo-level gates
@@ -170,6 +175,9 @@ Short version:
 5. **Keep workspace hygiene**
    `ref/` and `coverage/` are local analysis/build artifacts, not repo deliverables. The mainline expectation is a clean worktree.
 
+6. **Start CLI capability extraction at the operation boundary**
+   Do not bolt Notemd directly onto `obsidian-cli` command names. First extract reusable non-UI operations for diagnostics, diagram generation, workflow metadata, and config/profile handling.
+
 ### Ordered landing sequence
 
 The most defensible future landing order, after cross-checking roadmap intent against current code, is:
@@ -177,8 +185,9 @@ The most defensible future landing order, after cross-checking roadmap intent ag
 1. canonicalize the command surface
 2. publish the maintainer-local semantic verification runbook
 3. tighten the heavy-runtime packaging boundary
-4. only then revisit legacy prompt retirement and MermaidProcessor sunset
-5. only after those, re-open board-style export or advanced-engine exploration
+4. extract host-neutral operations for future CLI integration
+5. only then revisit legacy prompt retirement and MermaidProcessor sunset
+6. only after those, re-open board-style export, advanced-engine exploration, or first-class CLI command exposure
 
 That sequence preserves the roadmap's long-term intent while respecting what the codebase has already delivered.
 

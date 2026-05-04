@@ -210,6 +210,24 @@ flowchart LR
 | `src/batchProgressStore.ts` | Interrupt-resume batch state persistence |
 | `src/providerDiagnostics.ts` | LLM provider connection diagnostics |
 
+## CLI Boundary Reality
+
+Current host evidence matters:
+
+- `obsidian-cli` on this machine is a stable wrapper around desktop/debug entrypoints (`help`, `version`, `vaults`, `vault`, `doctor`, `native`, `gui`, `debug`)
+- it is not yet a generic plugin execution host
+- it does not currently expose a protocol for "invoke this plugin capability by command ID"
+
+That means Notemd's future CLI story cannot be "reuse sidebar buttons from the terminal". The real extraction targets are lower-level capabilities that already have partial independent shape:
+
+- `src/providerDiagnostics.ts`
+- `src/diagram/diagramGenerationService.ts`
+- `src/workflowButtons.ts`
+- `src/batchProgressStore.ts`
+- config/profile semantics such as `LLMProviderConfig.localOnly`
+
+The architectural gap is that `src/main.ts` still owns too much orchestration, UI lifecycle, and Obsidian runtime coupling. Until a host-neutral operation layer exists, plugin command IDs and sidebar action IDs remain product surfaces, not public CLI APIs.
+
 ## Key Design Decisions
 
 1. **Spec-first diagram generation**: LLM emits structured `DiagramSpec` JSON, not raw Mermaid syntax. Decouples intent from renderer.

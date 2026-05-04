@@ -1,5 +1,5 @@
 ---
-date: 2026-05-03
+date: 2026-05-04
 topic: progress-audit-next-direction
 ---
 
@@ -14,15 +14,15 @@ topic: progress-audit-next-direction
 - `docs/brainstorms/2026-05-03-mainline-stabilization-and-ci-hardening-requirements.zh-CN.md`
 - `docs/brainstorms/2026-05-03-drawnix-feasibility-and-integration-direction.zh-CN.md`
 
-## 仓库事实校正（2026-05-03）
+## 仓库事实校正（2026-05-04）
 
 这次审计重点不是重新设计 diagram platform，而是把“代码真实状态、远端 workflow、进度文档、外部参考项目结论”重新对齐。以下几项必须明确写清：
 
 1. **远端 `main` 当前没有常规 push/PR CI。**
-   `.github/workflows/release.yml` 只在数字 `x.x.x` tag push 或 `workflow_dispatch` 时运行。截至 `2026-05-03`，`main` 指向 `09ef239`（`docs(release): align 1.8.4 notes with shipped delta`），该分支本身仍没有普通 push/PR workflow。最近的红灯来自 `1.8.3` 发布流，随后已被 `2026-05-03` 的 `1.8.4` 成功 release run（`25274341984`）覆盖。
+   `.github/workflows/release.yml` 只在数字 `x.x.x` tag push 或 `workflow_dispatch` 时运行。截至 `2026-05-04`，`main` 指向 `dd77126`（`fix(diagram): land command surface and verification runbook`），该分支本身仍没有普通 push/PR workflow。最近的红灯来自 `1.8.3` 发布流，随后已被 `2026-05-03` 的 `1.8.4` 成功 release run（`25274341984`）覆盖。
 
 2. **`main` 上的 commit-status `pending` 不是一个真实失败检查。**
-   截至 `2026-05-03`，`commits/main/status` 返回的是 `state: pending` 且 `statuses: []`，同时 `main` 没有 branch protection，也没有普通分支级 required checks。但同一个 `main@09ef239` commit 已经通过 `1.8.4` tag 触发的 release 路径挂上了成功的 `check_suite` / `check_run`。对这个仓库来说，GitHub Actions runs 与 `check-suites` / `check-runs` 才是远端 CI 真值源，单独看 commit-status API 会误判。
+   截至 `2026-05-04`，`commits/main/status` 仍返回 `state: pending` 且 `statuses: []`，同时 `main` 没有 branch protection，也没有普通分支级 required checks。这个模式在 `main@dd77126` 上也继续成立：零 status、零 check suite 并不等于“主分支有真实失败流水线”。对这个仓库来说，当 release-driven checks 存在时，GitHub Actions runs 才是远端 CI 真值源，单独看 commit-status API 会误判。
 
 3. **release workflow 在最新成功 run 后仍带有未来失效风险。**
    更早那次成功的 `1.8.3` 修复 run（`25215799596`）仍携带 GitHub 官方的 Node 20 JavaScript-action 弃用告警，指向 `actions/checkout@v4` 与 `actions/setup-node@v4`。当前 `.github/workflows/release.yml` 已固定为 `actions/checkout@v6` 与 `actions/setup-node@v6`，而新的 `1.8.4` release run（`25274341984`）已在这条加固后的路径上成功完成。
@@ -105,6 +105,11 @@ topic: progress-audit-next-direction
 - release 路径现在还多了一条维护要求：GitHub 官方 workflow actions 的 major 版本要跟上支持窗口，不能等弃用告警演变成真实失败。
 - 当前真正缺的是“secret-free / machine-free”的 live verification harness，而不是更多单元测试框架。
 
+**CLI 扩展性：**
+- 本机上的 `obsidian-cli` 当前只是稳定的调试/桌面包装器，不是插件 operation 宿主。
+- Notemd 里真正有 CLI 潜力的 seam 在更低层：`src/providerDiagnostics.ts`、`src/diagram/diagramGenerationService.ts`、`src/workflowButtons.ts`、`src/batchProgressStore.ts`，以及 `localOnly` 这类设置/序列化语义。
+- 因此，项目当前还不能把插件 command IDs 或 sidebar actions 直接当成公共 CLI 表面。必须先抽宿主无关 operation，再定义 CLI 调用契约。
+
 ## 当前验证门
 
 ### 仓库内可持续执行门
@@ -170,6 +175,9 @@ topic: progress-audit-next-direction
 5. **工作区卫生保持**
    `ref/` 与 `coverage/` 应视为本地分析 / 构建产物，而不是待提交内容。主线需要持续保持干净工作树。
 
+6. **从 operation 边界启动 CLI 能力抽取**
+   不要把 Notemd 直接绑定到 `obsidian-cli` 的命令名上。应先抽出可复用的非 UI operation，用于 diagnostics、diagram generation、workflow metadata 和 config/profile 处理。
+
 ### 建议落地顺序
 
 结合 roadmap 原始长期意图与当前代码现实，最稳妥的未来落地顺序应为：
@@ -177,8 +185,9 @@ topic: progress-audit-next-direction
 1. 先把命令表面 canonical 化
 2. 再把维护者本地语义核验 runbook 正式落盘
 3. 然后收紧重型运行时的打包边界
-4. 完成以上三项后，再重开 legacy prompt 退役与 MermaidProcessor sunset
-5. 最后才重新评估 board-style export 或高级引擎探索
+4. 再抽出面向未来 CLI 的宿主无关 operations
+5. 完成以上四项后，再重开 legacy prompt 退役与 MermaidProcessor sunset
+6. 最后才重新评估 board-style export、高级引擎探索，或 first-class CLI command 暴露
 
 这个顺序既保留了 roadmap 的长期目标，也尊重了当前主线已经交付的事实。
 

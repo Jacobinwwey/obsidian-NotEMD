@@ -210,6 +210,24 @@ flowchart LR
 | `src/batchProgressStore.ts` | 中断恢复批量状态持久化 |
 | `src/providerDiagnostics.ts` | LLM 提供商连接诊断 |
 
+## CLI 边界现实
+
+当前宿主事实必须明确写清：
+
+- 本机上的 `obsidian-cli` 只是桌面/调试入口包装器，暴露的是 `help`、`version`、`vaults`、`vault`、`doctor`、`native`、`gui`、`debug`
+- 它目前不是通用插件执行宿主
+- 它当前也没有“通过命令 ID 调用某个插件能力”的稳定协议
+
+因此，Notemd 的未来 CLI 路线不能写成“把 sidebar 按钮搬到终端”。真正值得抽取的是已经开始具备独立形态的低层能力：
+
+- `src/providerDiagnostics.ts`
+- `src/diagram/diagramGenerationService.ts`
+- `src/workflowButtons.ts`
+- `src/batchProgressStore.ts`
+- `LLMProviderConfig.localOnly` 这类 config/profile 语义
+
+当前架构缺口在于：`src/main.ts` 仍持有过多 orchestration、UI 生命周期和 Obsidian runtime 耦合。在形成宿主无关 operation 层之前，插件 command IDs 与 sidebar action IDs 仍然只是产品表面，不应被当成公共 CLI API。
+
 ## 关键设计决策
 
 1. **规格优先图表生成**：LLM 输出结构化 `DiagramSpec` JSON，而非原始 Mermaid 语法。解耦意图与渲染器。

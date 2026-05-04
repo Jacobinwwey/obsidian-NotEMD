@@ -115,9 +115,18 @@ Cross-checking this roadmap against current code, tests, and the 2026-05-03 audi
 1. canonicalize the diagram command surface without breaking legacy behavior
 2. publish and adopt a maintainer-local semantic verification runbook
 3. tighten the real packaging boundary for heavy runtimes
-4. only then resume legacy prompt retirement and MermaidProcessor reduction
+4. extract host-neutral operations for future CLI extensibility instead of binding directly to plugin command IDs
+5. only then resume legacy prompt retirement and MermaidProcessor reduction
 
 Everything else is either already delivered or intentionally future-scoped.
+
+## CLI Extensibility Reality Check (2026-05-04)
+
+The repository now needs one more reality correction: future CLI extensibility is a boundary-hardening problem, not a command-labeling problem.
+
+- The current host `obsidian-cli` on the maintainer machine is a debug/desktop wrapper, not a plugin operation host.
+- Notemd already contains lower-level seams that are better future CLI targets than the current UI command layer: provider diagnostics, diagram generation core, workflow/action metadata, batch progress persistence, and config/profile semantics such as `localOnly`.
+- Therefore the next CLI-oriented work should not expose current sidebar actions or plugin command IDs as a public terminal API. It should first extract host-neutral operations from `src/main.ts`.
 
 ### Evidence Index
 
