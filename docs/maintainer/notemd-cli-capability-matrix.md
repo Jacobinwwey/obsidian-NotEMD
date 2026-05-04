@@ -30,6 +30,8 @@ Observed host facts:
 | Command ID | Current Purpose | Automation Level | Why It Is Not Yet a Stable Engineering API | Proposed Future Operation ID |
 |---|---|---|---|---|
 | `notemd:test-llm-connection` | Test active provider connectivity | `safe` | Current output is UI-oriented rather than contract-oriented | `provider.diagnostic.run` |
+| `notemd:run-developer-provider-diagnostic` | Run long-request provider diagnostic | `safe` | Better suited for automation than `test-llm-connection`, but still lacks a public typed result surface | `provider.diagnostic.run` |
+| `notemd:run-developer-provider-stability-diagnostic` | Run repeated provider stability diagnostic | `safe` | Better suited for automation than UI-only diagnostics, but still lacks a public typed result surface | `provider.diagnostic.stability-run` |
 | `notemd:notemd-generate-diagram` | Generate spec-first artifact from active file | `requires-active-file` | Depends on active file, plugin state, and save/open side effects | `diagram.generate` |
 | `notemd:notemd-summarize-as-mermaid` | Save Mermaid output for active file | `requires-active-file` | Depends on active file + plugin-managed save/output semantics | `diagram.generate-mermaid` |
 | `notemd:notemd-preview-diagram` | Preview saved/sourced diagram | `interactive-ui` | Preview modal is UI-only and not automation-stable | `diagram.preview` |

@@ -41,6 +41,13 @@ import { DiagramIntent } from './diagram/types';
 import { IframeRenderHost } from './rendering/host/iframeRenderHost';
 import { getRenderTargetDisplayName } from './rendering/targetLabel';
 import { supportsDiagramPreviewModal } from './ui/diagramPreview';
+import {
+    buildProviderDiagnosticFileName,
+    buildProviderDiagnosticOperationInput,
+    ProviderDiagnosticCallMode,
+    runProviderDiagnosticProbe,
+    runProviderDiagnosticStabilityProbe
+} from './providerDiagnostics';
 
 type DiagramCommandExecutionMode = 'save-mermaid' | 'save-artifact' | 'preview-artifact';
 
@@ -104,6 +111,43 @@ export default class NotemdPlugin extends Plugin {
             case 'preview-artifact':
                 return i18n.commands.previewExperimentalDiagram;
         }
+    }
+
+    private sanitizeDeveloperDiagnosticTimeoutMs(rawValue: number): number {
+        if (!Number.isFinite(rawValue)) {
+            return DEFAULT_SETTINGS.developerDiagnosticTimeoutMs;
+        }
+
+        const normalized = Math.floor(rawValue);
+        if (normalized < 15_000) {
+            return 15_000;
+        }
+        return Math.min(normalized, 60 * 60 * 1000);
+    }
+
+    private sanitizeDeveloperDiagnosticRuns(rawValue: number): number {
+        if (!Number.isFinite(rawValue)) {
+            return DEFAULT_SETTINGS.developerDiagnosticStabilityRuns;
+        }
+
+        const normalized = Math.floor(rawValue);
+        if (normalized < 1) {
+            return 1;
+        }
+        return Math.min(normalized, 10);
+    }
+
+    private async saveProviderDiagnosticReport(providerName: string, reportContent: string): Promise<string> {
+        const baseFileName = buildProviderDiagnosticFileName(providerName, new Date());
+        const existing = this.app.vault.getAbstractFileByPath(baseFileName);
+
+        if (existing instanceof TFile) {
+            await this.app.vault.modify(existing, reportContent);
+            return existing.path;
+        }
+
+        const created = await this.app.vault.create(baseFileName, reportContent);
+        return created.path;
     }
 
     private registerEditorDiagramCommand(
@@ -267,6 +311,22 @@ export default class NotemdPlugin extends Plugin {
                     new Notice(uiStrings.notices.noActiveProviderConfigured);
                 }
                 return false;
+            }
+        });
+
+        this.addCommand({
+            id: 'run-developer-provider-diagnostic',
+            name: `${uiStrings.settings.developer.runDiagnostic} (${getSidebarActionLabel(uiStrings, 'test-llm-connection')})`,
+            callback: async () => {
+                await this.runDeveloperProviderDiagnosticCommand();
+            }
+        });
+
+        this.addCommand({
+            id: 'run-developer-provider-stability-diagnostic',
+            name: `${uiStrings.settings.developer.runStability} (${getSidebarActionLabel(uiStrings, 'test-llm-connection')})`,
+            callback: async () => {
+                await this.runDeveloperProviderStabilityDiagnosticCommand();
             }
         });
 
@@ -1161,6 +1221,72 @@ export default class NotemdPlugin extends Plugin {
             this.isBusy = false;
             // No need to call useReporter.updateButtonStates() here
         }
+    }
+
+    async runDeveloperProviderDiagnosticCommand(): Promise<void> {
+        await this.loadSettings();
+        const i18n = this.getUiStrings();
+        const provider = this.settings.providers.find(p => p.name === this.settings.activeProvider);
+
+        if (!provider) {
+            new Notice(i18n.notices.noActiveProviderConfigured, 8000);
+            return;
+        }
+
+        const input = buildProviderDiagnosticOperationInput(provider, this.settings);
+        const timeoutMs = this.sanitizeDeveloperDiagnosticTimeoutMs(input.timeoutMs);
+        const callMode = input.callMode as ProviderDiagnosticCallMode;
+
+        const result = await runProviderDiagnosticProbe(provider, this.settings, {
+            callMode,
+            timeoutMs
+        });
+        const reportPath = await this.saveProviderDiagnosticReport(provider.name, result.report);
+
+        if (result.success) {
+            new Notice(formatI18n(i18n.settings.developer.diagnosticSuccess, {
+                callMode: result.callMode,
+                path: reportPath
+            }), 8000);
+        } else {
+            new Notice(formatI18n(i18n.settings.developer.diagnosticCapturedFailure, {
+                callMode: result.callMode,
+                path: reportPath
+            }), 12000);
+        }
+    }
+
+    async runDeveloperProviderStabilityDiagnosticCommand(): Promise<void> {
+        await this.loadSettings();
+        const i18n = this.getUiStrings();
+        const provider = this.settings.providers.find(p => p.name === this.settings.activeProvider);
+
+        if (!provider) {
+            new Notice(i18n.notices.noActiveProviderConfigured, 8000);
+            return;
+        }
+
+        const input = buildProviderDiagnosticOperationInput(provider, this.settings);
+        const timeoutMs = this.sanitizeDeveloperDiagnosticTimeoutMs(input.timeoutMs);
+        const runs = this.sanitizeDeveloperDiagnosticRuns(input.stabilityRuns);
+        const callMode = input.callMode as ProviderDiagnosticCallMode;
+
+        const result = await runProviderDiagnosticStabilityProbe(provider, this.settings, {
+            callMode,
+            timeoutMs,
+            runs
+        });
+        const reportPath = await this.saveProviderDiagnosticReport(`${provider.name}_stability`, result.report);
+
+        new Notice(
+            formatI18n(i18n.settings.developer.stabilityFinished, {
+                callMode: result.callMode,
+                successCount: result.successCount,
+                runs: result.runs,
+                path: reportPath
+            }),
+            12000
+        );
     }
 
     /** Command: Generate Content from Title */
