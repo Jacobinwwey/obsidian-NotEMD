@@ -9,6 +9,7 @@ describe('operations registry', () => {
             'provider.diagnostic.run',
             'provider.diagnostic.stability-run',
             'diagram.generate',
+            'diagram.preview',
             'provider.profile.export',
             'provider.profile.import'
         ]));
@@ -19,9 +20,14 @@ describe('operations registry', () => {
 
         expect(definition).toEqual(expect.objectContaining({
             id: 'provider.diagnostic.run',
+            version: 1,
             automationLevel: 'safe',
             requiredContext: 'none',
-            sideEffectClass: 'read-only'
+            sideEffectClass: 'read-only',
+            commandBindings: expect.arrayContaining([
+                expect.objectContaining({ commandId: 'test-llm-connection', mappingKind: 'future-target' }),
+                expect.objectContaining({ commandId: 'run-developer-provider-diagnostic', mappingKind: 'exact' })
+            ])
         }));
     });
 
@@ -30,9 +36,28 @@ describe('operations registry', () => {
 
         expect(definition).toEqual(expect.objectContaining({
             id: 'diagram.generate',
-            automationLevel: 'requires-active-file',
-            requiredContext: 'active-file',
-            sideEffectClass: 'write-file'
+            version: 1,
+            automationLevel: 'safe',
+            requiredContext: 'none',
+            sideEffectClass: 'read-only',
+            commandBindings: expect.arrayContaining([
+                expect.objectContaining({
+                    commandId: 'notemd-generate-diagram',
+                    mappingKind: 'exact',
+                    defaultInput: expect.objectContaining({ outputMode: 'artifact' })
+                }),
+                expect.objectContaining({
+                    commandId: 'notemd-summarize-as-mermaid',
+                    mappingKind: 'exact',
+                    defaultInput: expect.objectContaining({ outputMode: 'mermaid' })
+                })
+            ]),
+            inputSchema: expect.objectContaining({
+                required: expect.arrayContaining(['sourceMarkdown', 'compatibilityMode', 'outputMode'])
+            }),
+            resultSchema: expect.objectContaining({
+                required: expect.arrayContaining(['plan', 'spec', 'artifact'])
+            })
         }));
     });
 });

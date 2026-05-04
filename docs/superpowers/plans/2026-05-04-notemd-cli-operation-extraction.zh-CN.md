@@ -42,6 +42,14 @@
 - 第一批 CLI-grade contract 不纳入 UI-only 流程
 - 随着 CLI 方向推进，`src/main.ts` 要缩小而不是继续膨胀
 
+## 当前主线状态（2026-05-04）
+
+- `src/operations/types.ts` 已承接共享 operation 元数据原语，不再把这些定义埋在 sidebar/workflow 代码里。
+- `src/operations/registry.ts` 现在是已抽取 operation definition、command binding、mapping kind 与部分 input/result schema 的中心事实源。
+- `src/operations/capabilityManifest.ts` 与 `src/cliContracts.ts` 现在都从这份 registry 派生，减少了一条主要元数据漂移路径。
+- `diagram.generate` 现在已经和 provider diagnostics 一样拥有类型化 invocation contract。
+- 现有 Obsidian 命令仍保持注册状态，并继续支持快捷键与官方 CLI 触发，同时底层 operation 层继续演进。
+
 ## 短期交付（0-2 周）
 
 ### 目标
@@ -66,6 +74,9 @@
   - `ProgressSink`
   - `AutomationLevel`
 - 保持这些类型不依赖 Obsidian UI 类
+- 实施状态：
+  - 共享原语已在 `src/operations/types.ts` 落地
+  - workflow 元数据现在改为导入这些原语，而不是在本地重复定义
 
 **ST2. Provider diagnostic operation**
 - 将当前 `src/providerDiagnostics.ts` 封装到稳定 operation 入口后面
@@ -144,6 +155,10 @@
   - artifact metadata
   - saved path
   - render warnings
+- 实施状态：
+  - 共享 `DiagramOperationInput` 整形已落地
+  - `diagram.generate` 现在已进入 registry 驱动的类型化 invocation contract
+  - 剩余缺口：把 save/preview 宿主适配逻辑继续从 `src/main.ts` 抽离出去
 
 **MT2. Host adapter 拆分**
 - 新增 plugin adapter，负责解析 active file、vault state、settings
@@ -157,6 +172,10 @@
   - required context
   - side-effect class
   - parameter expectations
+- 实施状态：
+  - sidebar action metadata 仍是 command-surface 语义的来源
+  - 新 operation registry 现在承接跨表面的 command binding、mapping kind（`exact` / `future-target` / `legacy-alias`）以及 manifest/contract 导出输入
+  - 旧 command alias 仍保留注册以兼容现有流程，但已刻意排除在 capability-manifest 导出之外
 
 **MT4. Config/profile 边界**
 - 将 plugin-owned state 与可导入导出的 automation profile state 分离
@@ -243,6 +262,11 @@
 5. config/profile extraction
 6. typed invocation layer
 7. optional richer transport
+
+进度说明：
+
+- 第 1-4 项已在主线上部分落地。
+- 下一步最稳妥的推进点是 MT2：继续把 host adapter 从 `src/main.ts` 中拆出，避免 command wrapper 仍成为进入已抽取 operation 的唯一运行时入口。
 
 ## 退出标准
 

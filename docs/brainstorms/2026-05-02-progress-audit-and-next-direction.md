@@ -110,6 +110,9 @@ This means the roadmap should no longer be interpreted as "build the platform". 
 - The meaningful CLI-ready seams in Notemd are lower-level pieces such as `src/providerDiagnostics.ts`, `src/diagram/diagramGenerationService.ts`, `src/workflowButtons.ts`, `src/batchProgressStore.ts`, and selected serialization/config semantics like `localOnly`.
 - The project is therefore still not ready to treat current plugin command IDs or sidebar actions as a stable engineering CLI surface. First extract host-neutral operations; only then define typed CLI invocation contracts above the command-trigger layer.
 - The first concrete delivery is now in place for provider diagnostics: a shared operation-input builder exists, and developer diagnostic commands are registered so the same path can be reached from command palette, hotkey bindings, settings UI, and official CLI command triggering.
+- The extraction line is now materially stronger: `src/operations/types.ts`, `src/operations/registry.ts`, `src/operations/capabilityManifest.ts`, and `src/cliContracts.ts` now centralize operation metadata, command-binding mapping kind, capability discovery, and typed contract export.
+- `diagram.generate` is no longer just a future note in the plan; it now participates in the typed invocation contract, while preview remains intentionally outside the non-interactive contract set.
+- The remaining architectural gap is narrower and more concrete: command wrappers in `src/main.ts` still own too much host-adapter logic for save/preview flows.
 
 ## Verification Gates
 
@@ -176,8 +179,8 @@ Short version:
 5. **Keep workspace hygiene**
    `ref/` and `coverage/` are local analysis/build artifacts, not repo deliverables. The mainline expectation is a clean worktree.
 
-6. **Start CLI capability extraction at the operation boundary**
-   Do not bolt Notemd directly onto `obsidian-cli` command names. First extract reusable non-UI operations for diagnostics, diagram generation, workflow metadata, and config/profile handling.
+6. **Split host adapters out of `src/main.ts`**
+   The operation registry and typed contracts now exist. The next move is to peel save/preview/config adapters away from command wrappers so the registry stops being documentation-only metadata.
 
 ### Ordered landing sequence
 
@@ -186,9 +189,9 @@ The most defensible future landing order, after cross-checking roadmap intent ag
 1. canonicalize the command surface
 2. publish the maintainer-local semantic verification runbook
 3. tighten the heavy-runtime packaging boundary
-4. extract host-neutral operations for future CLI integration
+4. finish host-adapter extraction for the new operation registry
 5. only then revisit legacy prompt retirement and MermaidProcessor sunset
-6. only after those, re-open board-style export, advanced-engine exploration, or first-class CLI command exposure
+6. only after those, re-open board-style export, advanced-engine exploration, or richer first-class CLI command exposure
 
 That sequence preserves the roadmap's long-term intent while respecting what the codebase has already delivered.
 

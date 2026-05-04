@@ -24,17 +24,18 @@ Observed host facts:
 - `obsidian commands filter=notemd` lists current plugin commands
 - official CLI can trigger them with `obsidian command id=<command-id>`
 - this is a trigger surface only, not a mature typed integration layer
+- the registry-backed capability export now keeps command palette, hotkey, and official CLI trigger surfaces attached to the same command bindings
 
 ## Current Command Matrix
 
-| Command ID | Current Purpose | Automation Level | Why It Is Not Yet a Stable Engineering API | Proposed Future Operation ID |
+| Command ID | Current Purpose | Automation Level | Why It Is Not Yet a Stable Engineering API | Registry Operation Mapping |
 |---|---|---|---|---|
-| `notemd:test-llm-connection` | Test active provider connectivity | `safe` | Current output is UI-oriented rather than contract-oriented | `provider.diagnostic.run` |
-| `notemd:run-developer-provider-diagnostic` | Run long-request provider diagnostic | `safe` | Better suited for automation than `test-llm-connection`, but still lacks a public typed result surface | `provider.diagnostic.run` |
-| `notemd:run-developer-provider-stability-diagnostic` | Run repeated provider stability diagnostic | `safe` | Better suited for automation than UI-only diagnostics, but still lacks a public typed result surface | `provider.diagnostic.stability-run` |
-| `notemd:notemd-generate-diagram` | Generate spec-first artifact from active file | `requires-active-file` | Depends on active file, plugin state, and save/open side effects | `diagram.generate` |
-| `notemd:notemd-summarize-as-mermaid` | Save Mermaid output for active file | `requires-active-file` | Depends on active file + plugin-managed save/output semantics | `diagram.generate-mermaid` |
-| `notemd:notemd-preview-diagram` | Preview saved/sourced diagram | `interactive-ui` | Preview modal is UI-only and not automation-stable | `diagram.preview` |
+| `notemd:test-llm-connection` | Test active provider connectivity | `safe` | Current output is UI-oriented rather than contract-oriented | `provider.diagnostic.run` (`future-target`) |
+| `notemd:run-developer-provider-diagnostic` | Run long-request provider diagnostic | `safe` | Better suited for automation than `test-llm-connection`, but still lacks a public typed result surface | `provider.diagnostic.run` (`exact`) |
+| `notemd:run-developer-provider-stability-diagnostic` | Run repeated provider stability diagnostic | `safe` | Better suited for automation than UI-only diagnostics, but still lacks a public typed result surface | `provider.diagnostic.stability-run` (`exact`) |
+| `notemd:notemd-generate-diagram` | Generate spec-first artifact from active file | `requires-active-file` | Depends on active file, plugin state, and save/open side effects | `diagram.generate` (`exact`, `defaultInput.outputMode=artifact`) |
+| `notemd:notemd-summarize-as-mermaid` | Save Mermaid output for active file | `requires-active-file` | Depends on active file + plugin-managed save/output semantics | `diagram.generate` (`exact`, `defaultInput.outputMode=mermaid`) |
+| `notemd:notemd-preview-diagram` | Preview saved/sourced diagram | `interactive-ui` | Preview modal is UI-only and not automation-stable | `diagram.preview` (`exact`) |
 | `notemd:process-with-notemd` | Process current file and add links | `requires-active-file` | Depends on active file and plugin-owned mutation flow | `file.process.add-links` |
 | `notemd:process-folder-with-notemd` | Batch process folder | `interactive-ui` | Folder selection and batch UX remain plugin-host driven | `file.process-folder.add-links` |
 | `notemd:generate-content-from-title` | Generate note content from title | `requires-active-file` | Uses active file and writeback flow | `content.generate-from-title` |
@@ -52,6 +53,13 @@ Observed host facts:
 | `notemd:check-for-duplicates` | Check current note duplicates | `requires-active-file` | Result is console/notice-oriented | `duplicate.check-file` |
 | `notemd:check-and-remove-duplicate-concept-notes` | Remove duplicate concept notes | `interactive-ui` | Destructive flow requires stronger contract and confirmation model | `concept.dedupe` |
 
+## Registry Status
+
+- `src/operations/registry.ts` is now the central metadata source for extracted operations, command bindings, mapping kind, and selected input/result schemas.
+- `src/operations/capabilityManifest.ts` now flattens those command bindings into the exported capability manifest.
+- `src/cliContracts.ts` now builds the invocation contract from the same registry, which removes one major drift path between docs, command discovery, and contract export.
+- Legacy aliases remain registered for compatibility, but they are intentionally excluded from capability-manifest export.
+
 ## First Extraction Targets
 
 These are the best near-term candidates for host-neutral operations.
@@ -60,7 +68,7 @@ These are the best near-term candidates for host-neutral operations.
 |---|---|---|---|
 | P0 | Provider diagnostics | Already close to operation shape; deterministic inputs/outputs | `src/providerDiagnostics.ts`, `src/llmUtils.ts` |
 | P0 | Diagram generation | Spec-first core already exists | `src/diagram/diagramGenerationService.ts`, `src/diagram/*` |
-| P1 | Capability discovery | Needed before expanding automation surface | `src/workflowButtons.ts`, command registry in `src/main.ts` |
+| P1 | Capability discovery | Needed before expanding automation surface | `src/operations/registry.ts`, `src/operations/capabilityManifest.ts`, `src/cliContracts.ts` |
 | P1 | Config/profile export | Needed to make CLI usage reproducible | `src/types.ts`, `src/constants.ts`, provider settings |
 | P2 | Batch execution state | Valuable, but needs adapter cleanup first | `src/batchProgressStore.ts`, batch flows in `src/main.ts` |
 
@@ -79,6 +87,8 @@ These are the best near-term candidates for host-neutral operations.
 ## Recommended Engineering Rule
 
 Do not promote a Notemd command to “CLI supported” only because `obsidian command id=<id>` works.
+
+Do not promote it only because it is hotkey-bindable either. Command palette, hotkey, and official CLI triggering are useful surfaces, but they are still not the contract.
 
 Promote it only when all of the following are true:
 
