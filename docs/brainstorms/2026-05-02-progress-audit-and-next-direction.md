@@ -106,9 +106,9 @@ This means the roadmap should no longer be interpreted as "build the platform". 
 - The missing piece is now a secret-free, machine-free live verification harness, not another generic unit-test layer.
 
 **CLI extensibility**
-- `obsidian-cli` is currently a stable debug/desktop wrapper on this host, not a plugin operation host.
+- The local stable wrapper `obsidian-cli` is still mainly a debug/desktop wrapper, but the underlying official `obsidian` CLI now supports `commands` and `command id=<command-id>` for plugin-registered commands.
 - The meaningful CLI-ready seams in Notemd are lower-level pieces such as `src/providerDiagnostics.ts`, `src/diagram/diagramGenerationService.ts`, `src/workflowButtons.ts`, `src/batchProgressStore.ts`, and selected serialization/config semantics like `localOnly`.
-- The project is therefore not ready to treat current plugin command IDs or sidebar actions as a public CLI surface. First extract host-neutral operations; only then define CLI invocation contracts.
+- The project is therefore still not ready to treat current plugin command IDs or sidebar actions as a stable engineering CLI surface. First extract host-neutral operations; only then define typed CLI invocation contracts above the command-trigger layer.
 
 ## Verification Gates
 

@@ -124,9 +124,9 @@ Everything else is either already delivered or intentionally future-scoped.
 
 The repository now needs one more reality correction: future CLI extensibility is a boundary-hardening problem, not a command-labeling problem.
 
-- The current host `obsidian-cli` on the maintainer machine is a debug/desktop wrapper, not a plugin operation host.
+- The local stable wrapper `obsidian-cli` on the maintainer machine is still a debug/desktop wrapper, but the underlying official `obsidian` CLI already supports listing and executing plugin-registered commands.
 - Notemd already contains lower-level seams that are better future CLI targets than the current UI command layer: provider diagnostics, diagram generation core, workflow/action metadata, batch progress persistence, and config/profile semantics such as `localOnly`.
-- Therefore the next CLI-oriented work should not expose current sidebar actions or plugin command IDs as a public terminal API. It should first extract host-neutral operations from `src/main.ts`.
+- Therefore the next CLI-oriented work should not stop at exposing current sidebar actions or plugin command IDs as a public terminal API. It should first extract host-neutral operations from `src/main.ts`, then define typed invocation contracts above the raw command-trigger layer.
 
 ### Evidence Index
 

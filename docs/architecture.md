@@ -214,11 +214,11 @@ flowchart LR
 
 Current host evidence matters:
 
-- `obsidian-cli` on this machine is a stable wrapper around desktop/debug entrypoints (`help`, `version`, `vaults`, `vault`, `doctor`, `native`, `gui`, `debug`)
-- it is not yet a generic plugin execution host
-- it does not currently expose a protocol for "invoke this plugin capability by command ID"
+- the local stable wrapper `obsidian-cli` on this machine exposes desktop/debug entrypoints such as `help`, `version`, `vaults`, `vault`, `doctor`, `native`, `gui`, and `debug`
+- the underlying official `obsidian` CLI already supports `commands` and `command id=<command-id>`, and it can list/execute plugin-registered commands
+- however, this is still only a **command trigger surface**, not a mature plugin integration protocol with typed arguments, result contracts, capability metadata, or stable automation semantics
 
-That means Notemd's future CLI story cannot be "reuse sidebar buttons from the terminal". The real extraction targets are lower-level capabilities that already have partial independent shape:
+That means Notemd's future CLI story still cannot stop at "reuse sidebar buttons from the terminal". The real extraction targets are lower-level capabilities that already have partial independent shape:
 
 - `src/providerDiagnostics.ts`
 - `src/diagram/diagramGenerationService.ts`
@@ -226,7 +226,7 @@ That means Notemd's future CLI story cannot be "reuse sidebar buttons from the t
 - `src/batchProgressStore.ts`
 - config/profile semantics such as `LLMProviderConfig.localOnly`
 
-The architectural gap is that `src/main.ts` still owns too much orchestration, UI lifecycle, and Obsidian runtime coupling. Until a host-neutral operation layer exists, plugin command IDs and sidebar action IDs remain product surfaces, not public CLI APIs.
+The architectural gap is that `src/main.ts` still owns too much orchestration, UI lifecycle, and Obsidian runtime coupling. Until a host-neutral operation layer exists, plugin command IDs can be triggered from the official CLI, but they still remain product surfaces rather than stable engineering APIs.
 
 ## Key Design Decisions
 
