@@ -335,6 +335,24 @@ export default class NotemdPlugin extends Plugin {
         });
 
         this.addCommand({
+            id: 'export-provider-profiles',
+            name: uiStrings.commands.exportProviderProfiles,
+            callback: async () => {
+                const tab = new NotemdSettingTab(this.app, this);
+                await tab.exportProviderSettings();
+            }
+        });
+
+        this.addCommand({
+            id: 'import-provider-profiles',
+            name: uiStrings.commands.importProviderProfiles,
+            callback: async () => {
+                const tab = new NotemdSettingTab(this.app, this);
+                await tab.importProviderSettings();
+            }
+        });
+
+        this.addCommand({
             id: 'generate-content-from-title',
             name: getSidebarActionLabel(uiStrings, 'generate-from-title'),
             checkCallback: (checking: boolean) => {
