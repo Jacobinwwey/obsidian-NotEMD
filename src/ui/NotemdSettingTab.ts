@@ -10,6 +10,7 @@ import {
 } from '../llmProviders';
 import { testAPI } from '../llmUtils'; // Import testAPI
 import { getDefaultPrompt } from '../promptUtils'; // Import for default prompts
+import { buildProviderProfileExport, parseProviderProfileImport } from '../providerProfiles';
 import {
     buildProviderDiagnosticFileName,
     getProviderDiagnosticCallModeOptions,
@@ -315,8 +316,8 @@ export class NotemdSettingTab extends PluginSettingTab {
     async exportProviderSettings(): Promise<void> {
         const i18n = getI18nStrings({ uiLocale: this.plugin.settings.uiLocale });
         try {
-            const providersToExport = this.plugin.settings.providers;
-            const jsonData = JSON.stringify(providersToExport, null, 2); // Pretty print JSON
+            const profile = buildProviderProfileExport(this.plugin.settings.providers);
+            const jsonData = JSON.stringify(profile, null, 2);
 
             const pluginConfigDir = this.app.vault.configDir + '/plugins/' + this.plugin.manifest.id;
             try {
@@ -352,31 +353,17 @@ export class NotemdSettingTab extends PluginSettingTab {
             }
 
             const jsonData = await this.app.vault.adapter.read(filePath);
-            const importedProviders = JSON.parse(jsonData) as LLMProviderConfig[];
-
-            if (!Array.isArray(importedProviders)) {
-                throw new Error(i18n.settings.providerConfig.importInvalidArray);
+            let importSummary;
+            try {
+                importSummary = parseProviderProfileImport(jsonData, this.plugin.settings.providers);
+            } catch (error: unknown) {
+                const message = error instanceof Error ? error.message : String(error);
+                throw new Error(message === 'Imported file does not contain a valid provider array.'
+                    ? i18n.settings.providerConfig.importInvalidArray
+                    : message);
             }
 
-            const existingProvidersMap = new Map(this.plugin.settings.providers.map(p => [p.name, p]));
-            let importedCount = 0;
-            let newCount = 0;
-
-            importedProviders.forEach(importedProvider => {
-                if (importedProvider && typeof importedProvider.name === 'string') {
-                    if (existingProvidersMap.has(importedProvider.name)) {
-                        existingProvidersMap.set(importedProvider.name, importedProvider);
-                        importedCount++;
-                    } else {
-                        existingProvidersMap.set(importedProvider.name, importedProvider);
-                        newCount++;
-                    }
-                } else {
-                    console.warn("Skipping invalid provider object during import:", importedProvider);
-                }
-            });
-
-            this.plugin.settings.providers = Array.from(existingProvidersMap.values());
+            this.plugin.settings.providers = importSummary.importedProviders;
 
             if (!this.plugin.settings.providers.some(p => p.name === this.plugin.settings.activeProvider)) {
                 this.plugin.settings.activeProvider = DEFAULT_SETTINGS.activeProvider;
@@ -385,8 +372,8 @@ export class NotemdSettingTab extends PluginSettingTab {
 
             await this.plugin.saveSettings();
             new Notice(formatI18n(i18n.settings.providerConfig.importSuccess, {
-                newCount,
-                updatedCount: importedCount
+                newCount: importSummary.newCount,
+                updatedCount: importSummary.updatedCount
             }));
             this.display(); // Refresh display
 
