@@ -34,7 +34,7 @@ import { getSystemPrompt } from './promptUtils';
 import { extractOriginalText } from './extractOriginalText';
 import { formatI18n, getI18nStrings } from './i18n';
 import { resolveTaskLanguageCode } from './i18n/taskLanguagePolicy';
-import { buildCliCapabilityManifest, getSidebarActionLabel, SidebarActionId } from './workflowButtons';
+import { getSidebarActionLabel, SidebarActionId } from './workflowButtons';
 import {
     buildDiagramOperationInput,
     DiagramOperationInput,
@@ -53,6 +53,7 @@ import {
     runProviderDiagnosticStabilityProbe
 } from './providerDiagnostics';
 import { buildCliInvocationContract } from './cliContracts';
+import { buildCliCapabilityManifest } from './operations/capabilityManifest';
 
 type DiagramCommandExecutionMode = 'save-mermaid' | 'save-artifact' | 'preview-artifact';
 
@@ -357,7 +358,7 @@ export default class NotemdPlugin extends Plugin {
             id: 'export-cli-capability-manifest',
             name: 'Export CLI capability manifest',
             callback: async () => {
-                const manifest = buildCliCapabilityManifest();
+                const manifest = buildCliCapabilityManifest(this.manifest.id);
                 const outputPath = `${this.app.vault.configDir}/plugins/${this.manifest.id}/notemd-cli-capabilities.json`;
                 await this.app.vault.adapter.write(outputPath, JSON.stringify(manifest, null, 2));
                 new Notice(`CLI capability manifest exported to ${outputPath}`);

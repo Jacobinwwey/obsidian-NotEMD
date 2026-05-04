@@ -42,6 +42,14 @@ Carried-forward constraints:
 - keep UI-only flows out of the first CLI-grade contract
 - keep `src/main.ts` shrinking, not growing, as the CLI direction advances
 
+## Current Mainline Status (2026-05-04)
+
+- `src/operations/types.ts` now holds shared operation metadata primitives instead of leaving them buried in sidebar/workflow code.
+- `src/operations/registry.ts` is now the central source of truth for extracted operation definitions, command bindings, mapping kind, and selected input/result schemas.
+- `src/operations/capabilityManifest.ts` and `src/cliContracts.ts` now both build from that registry, which removes one major metadata drift path.
+- `diagram.generate` now has a typed invocation contract alongside provider diagnostics.
+- Existing Obsidian commands remain registered, hotkey-bindable, and official-CLI-triggerable while the deeper operation layer continues to mature.
+
 ## Short-Term Delivery (0-2 weeks)
 
 ### Objective
@@ -66,6 +74,9 @@ Create the first CLI-grade seams without changing product behavior.
   - `ProgressSink`
   - `AutomationLevel`
 - Keep these free of Obsidian UI classes
+- Implementation status:
+  - shared primitives delivered in `src/operations/types.ts`
+  - workflow metadata now imports those primitives instead of redefining them locally
 
 **ST2. Provider diagnostic operation**
 - Extract the current `src/providerDiagnostics.ts` surface behind a stable operation entry
@@ -144,6 +155,10 @@ Build a reusable operation layer for the most valuable Notemd capabilities.
   - artifact metadata
   - saved path
   - render warnings
+- Implementation status:
+  - shared `DiagramOperationInput` shaping is delivered
+  - `diagram.generate` now has a registry-backed typed invocation contract
+  - remaining gap: extract save/preview host adapters out of `src/main.ts`
 
 **MT2. Host adapter split**
 - Add a plugin adapter that resolves active file, vault state, and settings
@@ -157,6 +172,10 @@ Build a reusable operation layer for the most valuable Notemd capabilities.
   - required context
   - side-effect class
   - parameter expectations
+- Implementation status:
+  - sidebar action metadata is still the command-surface source
+  - the new operation registry now owns cross-surface command bindings, mapping kind (`exact` / `future-target` / `legacy-alias`), and manifest/contract export inputs
+  - legacy command aliases remain registered for compatibility but are intentionally excluded from capability-manifest export
 
 **MT4. Config/profile boundary**
 - Separate plugin-owned state from exportable/importable automation profile state
@@ -243,6 +262,11 @@ Expose a mature, automation-grade Notemd integration surface above the official 
 5. config/profile extraction
 6. typed invocation layer
 7. optional richer transport
+
+Progress note:
+
+- Items 1-4 are now partially landed on mainline.
+- The next defensible move is MT2: split host adapters out of `src/main.ts` so command wrappers stop being the only runtime path into the extracted operations.
 
 ## Exit Criteria
 

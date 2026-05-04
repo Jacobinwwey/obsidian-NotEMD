@@ -110,6 +110,9 @@ topic: progress-audit-next-direction
 - Notemd 里真正有 CLI 潜力的 seam 在更低层：`src/providerDiagnostics.ts`、`src/diagram/diagramGenerationService.ts`、`src/workflowButtons.ts`、`src/batchProgressStore.ts`，以及 `localOnly` 这类设置/序列化语义。
 - 因此，项目当前仍不能把插件 command IDs 或 sidebar actions 直接当成稳定工程 CLI 表面。必须先抽宿主无关 operation，再在 command-trigger 层之上定义类型化 CLI 调用契约。
 - 第一批具体交付已经落地在 provider diagnostics：现在已有共享 operation-input builder，并新增了开发者诊断命令，因此同一实现路径已经可被命令面板、快捷键绑定、设置页按钮和官方 CLI 命令触发共同复用。
+- 抽取链路现在已经更具体：`src/operations/types.ts`、`src/operations/registry.ts`、`src/operations/capabilityManifest.ts` 与 `src/cliContracts.ts` 已集中承接 operation 元数据、command-binding mapping kind、capability discovery 与类型化契约导出。
+- `diagram.generate` 不再只是计划中的 future item；它已经进入类型化 invocation contract，而 preview 仍被刻意留在非交互契约之外。
+- 剩余架构缺口也更明确了：`src/main.ts` 里的 command wrapper 仍持有过多 save/preview 宿主适配逻辑。
 
 ## 当前验证门
 
@@ -176,8 +179,8 @@ topic: progress-audit-next-direction
 5. **工作区卫生保持**
    `ref/` 与 `coverage/` 应视为本地分析 / 构建产物，而不是待提交内容。主线需要持续保持干净工作树。
 
-6. **从 operation 边界启动 CLI 能力抽取**
-   不要把 Notemd 直接绑定到 `obsidian-cli` 的命令名上。应先抽出可复用的非 UI operation，用于 diagnostics、diagram generation、workflow metadata 和 config/profile 处理。
+6. **继续把 host adapter 从 `src/main.ts` 拆出去**
+   operation registry 与类型化契约已经存在。下一步应把 save/preview/config 适配层从 command wrapper 中剥离，避免 registry 仍停留在“只提供文档元数据”。
 
 ### 建议落地顺序
 
@@ -186,9 +189,9 @@ topic: progress-audit-next-direction
 1. 先把命令表面 canonical 化
 2. 再把维护者本地语义核验 runbook 正式落盘
 3. 然后收紧重型运行时的打包边界
-4. 再抽出面向未来 CLI 的宿主无关 operations
+4. 完成围绕新 operation registry 的 host-adapter 抽离
 5. 完成以上四项后，再重开 legacy prompt 退役与 MermaidProcessor sunset
-6. 最后才重新评估 board-style export、高级引擎探索，或 first-class CLI command 暴露
+6. 最后才重新评估 board-style export、高级引擎探索，或更丰富的 first-class CLI command 暴露
 
 这个顺序既保留了 roadmap 的长期目标，也尊重了当前主线已经交付的事实。
 
