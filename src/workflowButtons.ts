@@ -6,6 +6,19 @@ export type AutomationLevel = 'safe' | 'requires-active-file' | 'requires-select
 export type RequiredContext = 'none' | 'active-file' | 'editor-selection' | 'folder-selection' | 'preview-ui';
 export type SideEffectClass = 'read-only' | 'write-file' | 'batch-write' | 'preview-ui' | 'destructive';
 
+export interface CliCapabilityCommand {
+    id: string;
+    operationId: string;
+    automationLevel: AutomationLevel;
+    requiredContext: RequiredContext;
+    sideEffectClass: SideEffectClass;
+}
+
+export interface CliCapabilityManifest {
+    version: 1;
+    commands: CliCapabilityCommand[];
+}
+
 export const SIDEBAR_ACTION_DEFINITIONS = [
     { id: 'process-current-add-links', label: 'Process file (add links)', translationKey: 'processCurrentAddLinks', category: 'core', automationLevel: 'requires-active-file', requiredContext: 'active-file', sideEffectClass: 'write-file' },
     { id: 'process-folder-add-links', label: 'Process folder (add links)', translationKey: 'processFolderAddLinks', category: 'core', automationLevel: 'interactive-ui', requiredContext: 'folder-selection', sideEffectClass: 'batch-write' },
@@ -72,6 +85,70 @@ export function getSidebarActionRequiredContext(actionId: SidebarActionId): Requ
 
 export function getSidebarActionSideEffectClass(actionId: SidebarActionId): SideEffectClass | undefined {
     return getSidebarActionDefinition(actionId)?.sideEffectClass;
+}
+
+export function buildCliCapabilityManifest(): CliCapabilityManifest {
+    return {
+        version: 1,
+        commands: [
+            {
+                id: 'notemd:test-llm-connection',
+                operationId: 'provider.diagnostic.run',
+                automationLevel: getSidebarActionAutomationLevel('test-llm-connection')!,
+                requiredContext: getSidebarActionRequiredContext('test-llm-connection')!,
+                sideEffectClass: getSidebarActionSideEffectClass('test-llm-connection')!
+            },
+            {
+                id: 'notemd:run-developer-provider-diagnostic',
+                operationId: 'provider.diagnostic.run',
+                automationLevel: 'safe',
+                requiredContext: 'none',
+                sideEffectClass: 'read-only'
+            },
+            {
+                id: 'notemd:run-developer-provider-stability-diagnostic',
+                operationId: 'provider.diagnostic.stability-run',
+                automationLevel: 'safe',
+                requiredContext: 'none',
+                sideEffectClass: 'read-only'
+            },
+            {
+                id: 'notemd:notemd-generate-diagram',
+                operationId: 'diagram.generate',
+                automationLevel: getSidebarActionAutomationLevel('generate-experimental-diagram')!,
+                requiredContext: getSidebarActionRequiredContext('generate-experimental-diagram')!,
+                sideEffectClass: getSidebarActionSideEffectClass('generate-experimental-diagram')!
+            },
+            {
+                id: 'notemd:notemd-summarize-as-mermaid',
+                operationId: 'diagram.generate-mermaid',
+                automationLevel: getSidebarActionAutomationLevel('summarize-as-mermaid')!,
+                requiredContext: getSidebarActionRequiredContext('summarize-as-mermaid')!,
+                sideEffectClass: getSidebarActionSideEffectClass('summarize-as-mermaid')!
+            },
+            {
+                id: 'notemd:notemd-preview-diagram',
+                operationId: 'diagram.preview',
+                automationLevel: getSidebarActionAutomationLevel('preview-experimental-diagram')!,
+                requiredContext: getSidebarActionRequiredContext('preview-experimental-diagram')!,
+                sideEffectClass: getSidebarActionSideEffectClass('preview-experimental-diagram')!
+            },
+            {
+                id: 'notemd:export-provider-profiles',
+                operationId: 'provider.profile.export',
+                automationLevel: 'safe',
+                requiredContext: 'none',
+                sideEffectClass: 'read-only'
+            },
+            {
+                id: 'notemd:import-provider-profiles',
+                operationId: 'provider.profile.import',
+                automationLevel: 'safe',
+                requiredContext: 'none',
+                sideEffectClass: 'write-file'
+            }
+        ]
+    };
 }
 
 export function getSidebarActionLabel(strings: NotemdEnglishStrings, actionId: SidebarActionId): string {
