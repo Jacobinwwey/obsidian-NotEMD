@@ -44,6 +44,8 @@ describe('provider diagnostic command surface', () => {
         const ids = addCommandSpy.mock.calls.map((call: any[]) => call[0]?.id);
         expect(ids).toContain('run-developer-provider-diagnostic');
         expect(ids).toContain('run-developer-provider-stability-diagnostic');
+        expect(ids).toContain('export-provider-profiles');
+        expect(ids).toContain('import-provider-profiles');
     });
 
     test('developer diagnostic command uses operation-layer input derived from current settings', async () => {
