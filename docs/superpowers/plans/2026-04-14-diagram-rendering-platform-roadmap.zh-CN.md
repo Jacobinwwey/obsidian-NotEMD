@@ -114,9 +114,18 @@ Phase-2 需求快照：
 1. 在不破坏 legacy 行为的前提下 canonical 化图表命令表面
 2. 正式发布并采用维护者本地语义核验 runbook
 3. 收紧重型运行时的真实打包边界
-4. 完成上述三项后，再恢复 legacy prompt 退役与 MermaidProcessor 缩编
+4. 为未来 CLI 扩展性抽取宿主无关 operations，而不是直接绑定现有插件命令 ID
+5. 完成上述四项后，再恢复 legacy prompt 退役与 MermaidProcessor 缩编
 
 除此之外，其余事项要么已交付，要么本就属于远期选择。
+
+## CLI 扩展性现实校正（2026-05-04）
+
+仓库现在还需要补一条现实校正：未来 CLI 扩展性首先是边界加固问题，不是命令命名问题。
+
+- 维护机上的 `obsidian-cli` 当前只是调试/桌面包装器，不是插件 operation 宿主。
+- Notemd 已经存在一些比现有 UI 命令层更适合未来 CLI 的低层 seam：provider diagnostics、diagram generation core、workflow/action metadata、batch progress 持久化，以及 `localOnly` 这类 config/profile 语义。
+- 因此，下一批 CLI 相关工作不应直接把 sidebar actions 或插件 command IDs 暴露成公共终端 API，而应先从 `src/main.ts` 中抽出宿主无关 operations。
 
 ### 证据索引
 
