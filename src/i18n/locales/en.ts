@@ -13,6 +13,8 @@ export const STRINGS_EN = {
         checkDuplicatesCurrent: 'Check for duplicates in current file',
         extractConceptsAndGenerateTitles: 'Extract Concepts and Generate Titles',
         createWikiLinkAndGenerateNoteFromSelection: 'Create Wiki-Link & Generate Note from Selection',
+        exportProviderProfiles: 'Export provider profiles',
+        importProviderProfiles: 'Import provider profiles',
         generateExperimentalDiagram: 'Generate diagram (experimental)',
         previewExperimentalDiagram: 'Preview diagram (experimental)'
     },
