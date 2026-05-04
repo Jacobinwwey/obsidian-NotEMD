@@ -711,6 +711,9 @@ Contributions are welcome! Please refer to the GitHub repository for guidelines:
 - [Release Workflow (English)](./docs/maintainer/release-workflow.md)
 - [Release Workflow (简体中文)](./docs/maintainer/release-workflow.zh-CN.md)
 
+- Links
+- [Linux DO：学AI，上L站！]([https://github.com/Jacobinwwey/obsidian-NotEMD](https://linux.do/)) 
+
 ## License
 
 MIT License - See [LICENSE](LICENSE) file for details.
