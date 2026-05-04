@@ -82,6 +82,10 @@
   - elapsed time
   - warnings
   - debug summary
+- 当前进展：
+  - 共享 operation-input builder 已落地
+  - 开发者诊断命令包装层已落地
+  - 同一诊断路径现在已经可被设置页按钮、命令面板、快捷键和官方 CLI 命令触发共同复用
 
 **ST3. Capability matrix 作为事实源**
 - 将现有插件命令分类为：

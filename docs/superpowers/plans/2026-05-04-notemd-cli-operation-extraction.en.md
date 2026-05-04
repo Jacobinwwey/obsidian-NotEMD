@@ -82,6 +82,10 @@ Create the first CLI-grade seams without changing product behavior.
   - elapsed time
   - warnings
   - debug summary
+- Implementation status:
+  - shared operation-input builder delivered
+  - developer diagnostic command wrappers delivered
+  - the same diagnostic path is now reachable from settings UI, command palette, hotkeys, and official CLI command triggering
 
 **ST3. Capability matrix as source-of-truth**
 - Classify all current plugin commands into:

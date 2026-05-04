@@ -1,4 +1,5 @@
 import {
+    SIDEBAR_ACTION_DEFINITIONS,
     createEmptyWorkflowButton,
     DEFAULT_CUSTOM_WORKFLOW_BUTTONS_DSL,
     parseCustomWorkflowButtonsDsl,
@@ -68,5 +69,11 @@ describe('workflowButtons parser', () => {
         const item = createEmptyWorkflowButton(3);
         expect(item.name).toBe('Workflow 3');
         expect(item.actions).toEqual(['process-current-add-links']);
+    });
+
+    test('developer diagnostics stay out of sidebar workflow action ids', () => {
+        const actionIds = SIDEBAR_ACTION_DEFINITIONS.map(def => def.id);
+        expect(actionIds).not.toContain('run-developer-provider-diagnostic');
+        expect(actionIds).not.toContain('run-developer-provider-stability-diagnostic');
     });
 });
