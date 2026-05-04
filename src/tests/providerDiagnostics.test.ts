@@ -4,6 +4,7 @@ import {
     DEFAULT_PROVIDER_DIAGNOSTIC_TIMEOUT_MS,
     buildDefaultProviderDiagnosticPayload,
     buildProviderDiagnosticFileName,
+    buildProviderDiagnosticOperationInput,
     getProviderDiagnosticCallModeOptions,
     runProviderDiagnosticProbe,
     runProviderDiagnosticStabilityProbe
@@ -148,6 +149,16 @@ describe('provider diagnostics runtime helper', () => {
     test('builds safe report filename', () => {
         const name = buildProviderDiagnosticFileName('OpenAI Compatible/Proxy', new Date('2026-03-30T01:02:03.456Z'));
         expect(name).toBe('Notemd_Provider_Diagnostic_OpenAI_Compatible_Proxy_2026-03-30T01-02-03-456Z.txt');
+    });
+
+    test('builds operation input from provider and plugin settings', () => {
+        const input = buildProviderDiagnosticOperationInput(provider, mockSettings);
+
+        expect(input.providerName).toBe('OpenAI');
+        expect(input.model).toBe('gpt-4.1');
+        expect(input.callMode).toBe('runtime-stable');
+        expect(input.timeoutMs).toBe(mockSettings.developerDiagnosticTimeoutMs);
+        expect(input.stabilityRuns).toBe(mockSettings.developerDiagnosticStabilityRuns);
     });
 
     test('runs stability probe for selected call mode and aggregates success/failure', async () => {

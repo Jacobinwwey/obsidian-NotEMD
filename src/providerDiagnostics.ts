@@ -73,6 +73,14 @@ export interface ProviderDiagnosticProbeOptions {
     callOpenAICompatibleDiagnosticImpl?: OpenAICompatibleDiagnosticFn;
 }
 
+export interface ProviderDiagnosticOperationInput {
+    providerName: string;
+    model: string;
+    callMode: ProviderDiagnosticCallMode;
+    timeoutMs: number;
+    stabilityRuns: number;
+}
+
 export interface ProviderDiagnosticProbeResult {
     success: boolean;
     elapsedMs: number;
@@ -184,6 +192,19 @@ export function buildProviderDiagnosticFileName(providerName: string, now: Date)
 
     const timestamp = now.toISOString().replace(/[:.]/g, '-');
     return `Notemd_Provider_Diagnostic_${safeProviderName}_${timestamp}.txt`;
+}
+
+export function buildProviderDiagnosticOperationInput(
+    provider: LLMProviderConfig,
+    settings: NotemdSettings
+): ProviderDiagnosticOperationInput {
+    return {
+        providerName: provider.name,
+        model: provider.model,
+        callMode: (settings.developerDiagnosticCallMode as ProviderDiagnosticCallMode) || DEFAULT_PROVIDER_DIAGNOSTIC_CALL_MODE,
+        timeoutMs: settings.developerDiagnosticTimeoutMs ?? DEFAULT_PROVIDER_DIAGNOSTIC_TIMEOUT_MS,
+        stabilityRuns: settings.developerDiagnosticStabilityRuns ?? DEFAULT_PROVIDER_DIAGNOSTIC_STABILITY_RUNS
+    };
 }
 
 function createInMemoryProgressReporter(logs: string[]): ProgressReporter {

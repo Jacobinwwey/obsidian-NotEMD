@@ -13,9 +13,7 @@ import { getDefaultPrompt } from '../promptUtils'; // Import for default prompts
 import {
     buildProviderDiagnosticFileName,
     getProviderDiagnosticCallModeOptions,
-    ProviderDiagnosticCallMode,
-    runProviderDiagnosticProbe,
-    runProviderDiagnosticStabilityProbe
+    ProviderDiagnosticCallMode
 } from '../providerDiagnostics';
 import {
     createEmptyWorkflowButton,
@@ -91,115 +89,6 @@ export class NotemdSettingTab extends PluginSettingTab {
             return 1;
         }
         return Math.min(normalized, 10);
-    }
-
-    private async runDeveloperProviderDiagnostic(
-        provider: LLMProviderConfig,
-        buttonControl: ButtonComponent,
-        callMode: ProviderDiagnosticCallMode
-    ): Promise<void> {
-        const i18n = getI18nStrings({ uiLocale: this.plugin.settings.uiLocale });
-        const blockingIssues = getProviderValidationIssues(provider, this.plugin.settings.maxTokens)
-            .filter(issue => issue.level === 'error')
-            .map(issue => issue.message);
-
-        if (blockingIssues.length > 0) {
-            new Notice(formatI18n(i18n.settings.developer.diagnosticBlocked, {
-                provider: provider.name,
-                issues: blockingIssues.join(' ')
-            }), 10000);
-            return;
-        }
-
-        buttonControl.setDisabled(true).setButtonText(i18n.settings.developer.runDiagnostic);
-        const runningNotice = new Notice(formatI18n(i18n.settings.developer.diagnosticRunning, {
-            provider: provider.name
-        }), 0);
-        const timeoutMs = this.sanitizeDeveloperDiagnosticTimeoutMs(this.plugin.settings.developerDiagnosticTimeoutMs);
-
-        try {
-            const result = await runProviderDiagnosticProbe(provider, this.plugin.settings, {
-                callMode,
-                timeoutMs
-            });
-            const reportPath = await this.saveProviderDiagnosticReport(provider.name, result.report);
-            runningNotice.hide();
-
-            if (result.success) {
-                new Notice(formatI18n(i18n.settings.developer.diagnosticSuccess, {
-                    callMode: result.callMode,
-                    path: reportPath
-                }), 8000);
-            } else {
-                new Notice(formatI18n(i18n.settings.developer.diagnosticCapturedFailure, {
-                    callMode: result.callMode,
-                    path: reportPath
-                }), 12000);
-            }
-        } catch (error: unknown) {
-            const message = error instanceof Error ? error.message : String(error);
-            runningNotice.hide();
-            new Notice(formatI18n(i18n.settings.developer.diagnosticFailedBeforeReport, { message }), 12000);
-            console.error('Developer provider diagnostic failed:', error);
-        } finally {
-            buttonControl.setDisabled(false).setButtonText(i18n.settings.developer.runDiagnostic);
-        }
-    }
-
-    private async runDeveloperProviderStabilityDiagnostic(
-        provider: LLMProviderConfig,
-        buttonControl: ButtonComponent,
-        callMode: ProviderDiagnosticCallMode
-    ): Promise<void> {
-        const i18n = getI18nStrings({ uiLocale: this.plugin.settings.uiLocale });
-        const blockingIssues = getProviderValidationIssues(provider, this.plugin.settings.maxTokens)
-            .filter(issue => issue.level === 'error')
-            .map(issue => issue.message);
-
-        if (blockingIssues.length > 0) {
-            new Notice(formatI18n(i18n.settings.developer.stabilityBlocked, {
-                provider: provider.name,
-                issues: blockingIssues.join(' ')
-            }), 10000);
-            return;
-        }
-
-        const runs = this.sanitizeDeveloperDiagnosticRuns(this.plugin.settings.developerDiagnosticStabilityRuns);
-        const timeoutMs = this.sanitizeDeveloperDiagnosticTimeoutMs(this.plugin.settings.developerDiagnosticTimeoutMs);
-        buttonControl.setDisabled(true).setButtonText(i18n.settings.developer.runStability);
-        const runningNotice = new Notice(
-            formatI18n(i18n.settings.developer.stabilityRunning, {
-                provider: provider.name,
-                runs
-            }),
-            0
-        );
-
-        try {
-            const result = await runProviderDiagnosticStabilityProbe(provider, this.plugin.settings, {
-                callMode,
-                timeoutMs,
-                runs
-            });
-            const reportPath = await this.saveProviderDiagnosticReport(`${provider.name}_stability`, result.report);
-            runningNotice.hide();
-            new Notice(
-                formatI18n(i18n.settings.developer.stabilityFinished, {
-                    callMode: result.callMode,
-                    successCount: result.successCount,
-                    runs: result.runs,
-                    path: reportPath
-                }),
-                12000
-            );
-        } catch (error: unknown) {
-            const message = error instanceof Error ? error.message : String(error);
-            runningNotice.hide();
-            new Notice(formatI18n(i18n.settings.developer.stabilityFailedBeforeReport, { message }), 12000);
-            console.error('Developer provider stability diagnostic failed:', error);
-        } finally {
-            buttonControl.setDisabled(false).setButtonText(i18n.settings.developer.runStability);
-        }
     }
 
     private renderProviderSummary(containerEl: HTMLElement, provider: LLMProviderConfig): void {
@@ -1108,12 +997,16 @@ export class NotemdSettingTab extends PluginSettingTab {
                 .addButton(button => button
                     .setButtonText(i18n.settings.developer.runDiagnostic)
                     .onClick(async () => {
-                        await this.runDeveloperProviderDiagnostic(activeProvider, button, effectiveCallMode);
+                        this.plugin.settings.developerDiagnosticCallMode = effectiveCallMode;
+                        await this.plugin.saveSettings();
+                        await this.plugin.runDeveloperProviderDiagnosticCommand();
                     }))
                 .addButton(button => button
                     .setButtonText(i18n.settings.developer.runStability)
                     .onClick(async () => {
-                        await this.runDeveloperProviderStabilityDiagnostic(activeProvider, button, effectiveCallMode);
+                        this.plugin.settings.developerDiagnosticCallMode = effectiveCallMode;
+                        await this.plugin.saveSettings();
+                        await this.plugin.runDeveloperProviderStabilityDiagnosticCommand();
                     }));
         }
 

@@ -109,6 +109,7 @@ This means the roadmap should no longer be interpreted as "build the platform". 
 - The local stable wrapper `obsidian-cli` is still mainly a debug/desktop wrapper, but the underlying official `obsidian` CLI now supports `commands` and `command id=<command-id>` for plugin-registered commands.
 - The meaningful CLI-ready seams in Notemd are lower-level pieces such as `src/providerDiagnostics.ts`, `src/diagram/diagramGenerationService.ts`, `src/workflowButtons.ts`, `src/batchProgressStore.ts`, and selected serialization/config semantics like `localOnly`.
 - The project is therefore still not ready to treat current plugin command IDs or sidebar actions as a stable engineering CLI surface. First extract host-neutral operations; only then define typed CLI invocation contracts above the command-trigger layer.
+- The first concrete delivery is now in place for provider diagnostics: a shared operation-input builder exists, and developer diagnostic commands are registered so the same path can be reached from command palette, hotkey bindings, settings UI, and official CLI command triggering.
 
 ## Verification Gates
 
