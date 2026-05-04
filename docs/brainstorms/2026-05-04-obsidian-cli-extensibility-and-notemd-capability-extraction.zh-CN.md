@@ -15,7 +15,7 @@ Notemd 现在已经有一批能力，实际规模明显超过“某个 Obsidian 
 - 结构化 workflow action ID 与可序列化 workflow 定义
 - provider 级 `localOnly` 本地存储语义
 
-但宿主现实比产品想象更窄。本机上的 `obsidian-cli` 当前只是稳定的桌面/调试包装器，暴露的是 `help`、`version`、`vaults`、`vault`、`doctor`、`native`、`gui`、`debug` 等调试入口。它**不是**插件能力宿主，也没有给第三方插件开放稳定的扩展协议。
+但宿主现实比产品想象更窄。本机上的本地 `obsidian-cli` 包装器当前只是稳定的桌面/调试入口，暴露的是 `help`、`version`、`vaults`、`vault`、`doctor`、`native`、`gui`、`debug` 等子命令。底层官方 `obsidian` CLI 已经可以列出并触发插件命令，但它仍然没有给第三方插件开放稳定、类型化的扩展协议。
 
 这意味着下一步最有价值的动作，不是直接“给 `obsidian-cli` 塞几个 Notemd 命令”，而是先明确三件事：
 
