@@ -34,7 +34,7 @@ import { getSystemPrompt } from './promptUtils';
 import { extractOriginalText } from './extractOriginalText';
 import { formatI18n, getI18nStrings } from './i18n';
 import { resolveTaskLanguageCode } from './i18n/taskLanguagePolicy';
-import { getSidebarActionLabel, SidebarActionId } from './workflowButtons';
+import { buildCliCapabilityManifest, getSidebarActionLabel, SidebarActionId } from './workflowButtons';
 import {
     buildDiagramOperationInput,
     DiagramOperationInput,
@@ -349,6 +349,17 @@ export default class NotemdPlugin extends Plugin {
             callback: async () => {
                 const tab = new NotemdSettingTab(this.app, this);
                 await tab.importProviderSettings();
+            }
+        });
+
+        this.addCommand({
+            id: 'export-cli-capability-manifest',
+            name: 'Export CLI capability manifest',
+            callback: async () => {
+                const manifest = buildCliCapabilityManifest();
+                const outputPath = `${this.app.vault.configDir}/plugins/${this.manifest.id}/notemd-cli-capabilities.json`;
+                await this.app.vault.adapter.write(outputPath, JSON.stringify(manifest, null, 2));
+                new Notice(`CLI capability manifest exported to ${outputPath}`);
             }
         });
 
