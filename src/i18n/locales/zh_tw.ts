@@ -17,6 +17,8 @@ export const STRINGS_ZH_TW: DeepPartial<NotemdEnglishStrings> = {
         checkDuplicatesCurrent: '檢查目前檔案中的重複項',
         extractConceptsAndGenerateTitles: '擷取概念並生成標題',
         createWikiLinkAndGenerateNoteFromSelection: '從選取內容建立 Wiki-Link 並生成筆記',
+        exportProviderProfiles: '匯出提供者設定檔',
+        importProviderProfiles: '匯入提供者設定檔',
         generateExperimentalDiagram: '生成圖形（實驗性）',
         previewExperimentalDiagram: '預覽圖形（實驗性）'
     },
