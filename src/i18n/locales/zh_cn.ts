@@ -19,6 +19,8 @@ export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
         createWikiLinkAndGenerateNoteFromSelection: '从选中文本创建 Wiki-Link 并生成笔记',
         exportProviderProfiles: '导出提供商配置档案',
         importProviderProfiles: '导入提供商配置档案',
+        exportCliCapabilityManifest: '导出 CLI 能力清单',
+        exportCliInvocationContract: '导出 CLI 调用契约',
         generateExperimentalDiagram: '生成图形（实验性）',
         previewExperimentalDiagram: '预览图形（实验性）'
     },
@@ -607,6 +609,8 @@ export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
         batchMermaidFixFinishedWithErrors: '批量 Mermaid 修复结束，共有 {count} 个错误。已修改 {modifiedCount} 个文件。请检查控制台/日志。',
         batchMermaidFixSuccess: '批量 Mermaid 修复完成！已修改 {modifiedCount} 个文件。',
         batchMermaidFixError: '批量修复过程中出错：{message}。请查看控制台。',
+        cliCapabilityManifestExported: 'CLI 能力清单已导出到 {path}',
+        cliInvocationContractExported: 'CLI 调用契约已导出到 {path}',
         formulaFixSuccess: '已修复 {file} 中的公式格式',
         formulaFixNotNeeded: '{file} 无需修复公式格式',
         batchFormulaFixFinishedWithErrors: '批量修复结束，共有 {count} 个错误。已修改 {modifiedCount} 个文件。',
