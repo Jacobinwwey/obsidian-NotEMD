@@ -10,7 +10,6 @@ import {
     generateContentForTitle,
     batchGenerateContentForTitles,
     batchFixMermaidSyntaxInFolder,
-    findDuplicates,
     saveMermaidSummaryFile,
     saveDiagramArtifactFile,
     extractConceptsFromFile,
@@ -86,6 +85,7 @@ import {
 import {
     runBatchFixFormulaFormatsCommandWithHost,
     runBatchMermaidFixCommandWithHost,
+    runCheckDuplicatesCurrentCommandWithHost,
     runCheckAndRemoveDuplicateConceptNotesCommandWithHost,
     runFixFormulaFormatsCommandWithHost,
     UtilityCommandHost
@@ -276,6 +276,8 @@ export default class NotemdPlugin extends Plugin {
     private createUtilityCommandHost(): UtilityCommandHost {
         return {
             getApp: () => this.app,
+            getActiveFile: () => this.app.workspace.getActiveFile(),
+            readFile: (file) => this.app.vault.read(file),
             loadSettings: () => this.loadSettings(),
             getSettings: () => this.settings,
             getUiStrings: () => this.getUiStrings(),
@@ -290,6 +292,7 @@ export default class NotemdPlugin extends Plugin {
             getRunningActionText: (label) => this.getRunningActionText(label),
             getActionCompleteText: (label) => this.getActionCompleteText(label),
             showNotice: (message, duration) => new Notice(message, duration),
+            logInfo: (message, details) => console.log(message, details),
             logError: (message, details) => console.error(message, details),
             openErrorModal: (title, details) => this.openLocalizedErrorModal(title, details),
             saveErrorLog: (error, reporter) => saveErrorLog(this.app, reporter, error, this.settings),
@@ -458,32 +461,7 @@ export default class NotemdPlugin extends Plugin {
                 const condition = activeFile && (activeFile.extension === 'md' || activeFile.extension === 'txt');
                 if (condition) {
                     if (!checking) {
-                        // This command is simple and doesn't use the full reporter/busy state
-                        // We need to ensure activeFile is valid here if it was captured in an outer scope for check,
-                        // or re-fetch it. Given the example, it's safer to re-evaluate.
-                        const currentActiveFile = this.app.workspace.getActiveFile();
-                        if (currentActiveFile && (currentActiveFile.extension === 'md' || currentActiveFile.extension === 'txt')) {
-                            (async () => { // Wrap async logic
-                                try {
-                                    const content = await this.app.vault.read(currentActiveFile);
-                                    const duplicates = findDuplicates(content); // Use utility
-                                    const message = formatI18n(uiStrings.notices.duplicateTermsCheckConsole, { count: duplicates.size });
-                                    new Notice(message);
-                                    if (duplicates.size > 0) {
-                                        console.log(`Potential duplicates in ${currentActiveFile.name}:`, Array.from(duplicates));
-                                    }
-                                } catch (error: unknown) {
-                                    let errorMessage = uiStrings.common.unknownError;
-                                    if (error instanceof Error) {
-                                        errorMessage = error.message;
-                                    }
-                                    new Notice(formatI18n(uiStrings.notices.duplicateCheckError, { message: errorMessage }));
-                                    console.error("Error checking duplicates:", error);
-                                }
-                            })();
-                        } else if (!checking) { // If file became invalid between check and action
-                             new Notice(uiStrings.notices.noActiveTextFileSelected);
-                        }
+                        void this.checkDuplicatesCurrentCommand();
                     }
                     return true;
                 }
@@ -1244,6 +1222,11 @@ export default class NotemdPlugin extends Plugin {
     async checkAndRemoveDuplicateConceptNotesCommand(reporter?: ProgressReporter) {
         await runCheckAndRemoveDuplicateConceptNotesCommandWithHost(this.createUtilityCommandHost(), reporter);
     }
+
+    async checkDuplicatesCurrentCommand(reporter?: ProgressReporter) {
+        return runCheckDuplicatesCurrentCommandWithHost(this.createUtilityCommandHost(), reporter);
+    }
+
     /** Command: Batch Fix Mermaid Syntax */
     async batchMermaidFixCommand(
         reporter?: ProgressReporter,

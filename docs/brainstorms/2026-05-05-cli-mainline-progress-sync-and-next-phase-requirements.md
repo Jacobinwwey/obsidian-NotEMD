@@ -11,15 +11,15 @@ As of May 5, 2026, Notemd's CLI-oriented mainline has moved past the "command tr
 
 - latest remote `main` already includes the operation registry, capability/contract export, and the first diagram / provider / config-profile host-adapter extractions
 - this clean-worktree round further moved translation, concept extraction, original-text extraction, and the `extract-concepts-and-generate-titles` composite command into `src/operations/noteProcessingCommandHostAdapter.ts`
-- the same clean-worktree round also landed note-processing registry onboarding, injected batch-translation reporters, output-path returns for original-text extraction, and a new `src/operations/utilityCommandHostAdapter.ts` for duplicate cleanup / Mermaid fix / formula fix command orchestration
+- the same clean-worktree round also landed note-processing registry onboarding, the first utility-command registry batch, injected batch-translation reporters, output-path returns for original-text extraction, and a new `src/operations/utilityCommandHostAdapter.ts` for duplicate checks / duplicate cleanup / Mermaid fix / formula fix command orchestration
 - `src/fileUtils.ts` and `src/extractOriginalText.ts` no longer require the concrete `NotemdPlugin` class and now accept narrower runtime contexts
 - the composite command had two real defects before this round: outer `isBusy` short-circuited the inner extraction command, and batch generation did not force the configured concept folder. Both are now fixed
 
 This is still not the CLI-ready end state. The remaining gaps have shifted again from "too much wrapper code in `src/main.ts`" to three harder boundaries:
 
-1. `src/operations/registry.ts` now includes the first note-processing operation set, but it still does not yet cover utility commands such as duplicate cleanup, Mermaid repair, or formula repair.
+1. `src/operations/registry.ts`, `src/operations/capabilityManifest.ts`, and `src/cliContracts.ts` now cover the first note-processing and utility-command batches, but they still do not yet cover the remaining process / generate / research long-tail automation surfaces.
 2. `src/translate.ts`, `src/fileUtils.ts`, `src/extractOriginalText.ts`, and `src/formulaFixer.ts` still own `App` / `Notice` / vault-write side effects, so the operation contract is cleaner than before but still not host-neutral.
-3. `src/main.ts` is materially thinner, but a long tail of non-registry command surfaces still remains after the note-processing and utility-host extraction rounds.
+3. `src/main.ts` is materially thinner, but a long tail of direct execution surfaces and sidebar-specific read paths still remains after the note-processing and utility-host extraction rounds.
 
 The next phase therefore should not focus on "more CLI commands". It should turn the extracted host adapters into a discoverable, typed, constrained operation surface.
 
@@ -30,15 +30,20 @@ The next phase therefore should not focus on "more CLI commands". It should turn
 - R2. No document may continue to describe "translation/extraction wrappers still live in `src/main.ts`" as a current fact.
 
 **Next-phase priority**
-- R3. The next phase must prioritize onboarding note-processing capabilities into `src/operations/registry.ts`, `src/operations/capabilityManifest.ts`, and `src/cliContracts.ts` before adding new CLI subcommands.
-- R4. That first note-processing onboarding batch is now landed for:
+- R3. The next phase must prioritize onboarding the remaining automation-facing command families into `src/operations/registry.ts`, `src/operations/capabilityManifest.ts`, and `src/cliContracts.ts` before adding new CLI subcommands.
+- R4. The first landed registry-backed operation batches now include:
   - `translate.file`
   - `translate.folder-batch`
   - `concept.extract-file`
   - `concept.extract-folder`
   - `content.extract-original-text`
   - `workflow.extract-and-generate`
-- R5. The next registry batch must extend the same modeling discipline to utility commands and any remaining automation-facing surfaces, including explicit `automationLevel`, `requiredContext`, `sideEffectClass`, input schema, result schema, and alias policy.
+  - `duplicate.check-file`
+  - `concept.dedupe`
+  - `mermaid.batch-fix`
+  - `formula.fix-file`
+  - `formula.batch-fix`
+- R5. The next registry batch must extend the same modeling discipline to the remaining automation-facing surfaces, including explicit `automationLevel`, `requiredContext`, `sideEffectClass`, input schema, result schema, and alias policy.
 
 **Host-side effect tightening**
 - R6. The batch-translation path in `src/translate.ts` has now stopped treating `ProgressModal` as the only valid execution carrier by accepting injected reporters; the next phase must continue lifting notice shaping and result semantics upward so CLI and maintainer automation have a cleaner non-UI path.
@@ -46,7 +51,7 @@ The next phase therefore should not focus on "more CLI commands". It should turn
 - R8. Flows that still depend on active file, folder picker, or preview UI must not be mislabeled as `safe`; until contracts are complete they remain `requires-active-file`, `requires-vault-path`, or `interactive-ui`.
 
 **Remaining `src/main.ts` slimming**
-- R9. The duplicate / concept-note cleanup, batch Mermaid fix, and single / batch formula fix command families are now extracted into `src/operations/utilityCommandHostAdapter.ts`.
+- R9. The current-file duplicate check, duplicate / concept-note cleanup, batch Mermaid fix, and single / batch formula fix command families are now extracted into `src/operations/utilityCommandHostAdapter.ts`.
 - R10. The next `src/main.ts` slimming slice should therefore target the remaining long-tail command surfaces that still own reporter/notice lifecycle inline, rather than reopening already-extracted families.
 
 **Mainline and workspace hygiene**
@@ -56,7 +61,7 @@ The next phase therefore should not focus on "more CLI commands". It should turn
 ## Success Criteria
 
 - A maintainer can read the latest requirements, progress, and architecture docs and distinguish clearly between landed host-adapter extraction and the still-open registry / utility side-effect work.
-- Note-processing capabilities are now registry-backed instead of staying as loose command descriptions, and the next operation-onboarding phase is clearly narrowed to utility-command coverage plus deeper side-effect boundaries.
+- Note-processing capabilities and the first utility batch are now registry-backed instead of staying as loose command descriptions, and the next operation-onboarding phase is clearly narrowed to the remaining automation-facing surfaces plus deeper side-effect boundaries.
 - Documentation no longer reports the old `extractConceptsAndGenerateTitles` behavior; the composite flow now uses the shared host-adapter path and the configured concept folder.
 - All mainline sync and code work happens in a clean worktree and passes the full repository verification gate.
 
@@ -69,7 +74,7 @@ The next phase therefore should not focus on "more CLI commands". It should turn
 
 ## Key Decisions
 
-- Note-processing registry onboarding is now complete for the first batch; the next highest-leverage work is utility-command registry coverage plus deeper result/side-effect cleanup.
+- Note-processing registry onboarding and the first utility registry batch are now complete; the next highest-leverage work is the remaining automation-facing surface coverage plus deeper result/side-effect cleanup.
 - Host-adapter extraction is now mature enough that repeating `src/main.ts` wrapper moves blindly would be low leverage; the next real problems are schema, capability, and side-effect boundaries.
 - The composite-command bug proved that "delegator extraction only" is insufficient; shared busy-state and chained-command behavior must be validated explicitly.
 
@@ -77,15 +82,15 @@ The next phase therefore should not focus on "more CLI commands". It should turn
 
 - The clean worktree is already based on the latest remote `main` and already contains the registry, capability-contract, and first provider/diagram/config-profile extraction work.
 - `src/operations/noteProcessingCommandHostAdapter.ts` now carries the process / generate / research / translate / extract command wrappers for note-processing flows.
-- The capability registry now includes the first note-processing operation batch; the primary structural gap has moved to utility-command coverage and richer result semantics.
+- The capability registry now includes the first note-processing and utility operation batches; the primary structural gap has moved to remaining surface coverage and richer result semantics.
 
 ## Open Questions
 
 ### Deferred To Planning
-- [R5][Technical] Should utility command IDs be normalized by task family before onboarding them into the registry?
+- [R5][Technical] Should the remaining long-tail command IDs be normalized by task family before onboarding them into the registry?
 - [R6][Technical] Should `batchTranslateFolder()` stop emitting success notices directly once the host layer owns more result semantics?
 - [R7][Technical] Should original-text extraction, concept-note creation, and formula-fix file writes be normalized into richer result objects before further CLI exposure?
 
 ## Next Step
 
--> Move into the next implementation plan: utility-command registry coverage, deeper utility side-effect tightening, and the next remaining long-tail `src/main.ts` command-host slimming slice.
+-> Move into the next implementation plan: remaining automation-surface registry coverage, deeper utility side-effect tightening, and the next remaining long-tail `src/main.ts` / sidebar command-host slimming slice.

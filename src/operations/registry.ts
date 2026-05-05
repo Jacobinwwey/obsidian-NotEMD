@@ -233,6 +233,85 @@ const EXTRACT_AND_GENERATE_RESULT_SCHEMA: OperationSchema = {
     }
 };
 
+const DUPLICATE_CHECK_FILE_INPUT_SCHEMA: OperationSchema = {
+    type: 'object',
+    properties: {
+        sourcePath: { type: 'string' }
+    }
+};
+
+const DUPLICATE_CHECK_FILE_RESULT_SCHEMA: OperationSchema = {
+    type: 'object',
+    properties: {
+        sourcePath: { type: 'string' },
+        duplicateCount: { type: 'number' },
+        duplicates: STRING_ARRAY_SCHEMA
+    }
+};
+
+const CONCEPT_DEDUPE_INPUT_SCHEMA: OperationSchema = {
+    type: 'object',
+    properties: {
+        conceptFolderPath: { type: 'string' },
+        duplicateCheckScopeMode: { type: 'string' }
+    }
+};
+
+const CONCEPT_DEDUPE_RESULT_SCHEMA: OperationSchema = {
+    type: 'object',
+    properties: {
+        conceptFolderPath: { type: 'string' },
+        removedCount: { type: 'number' }
+    }
+};
+
+const BATCH_MERMAID_FIX_INPUT_SCHEMA: OperationSchema = {
+    type: 'object',
+    properties: {
+        folderPath: { type: 'string' }
+    }
+};
+
+const BATCH_MERMAID_FIX_RESULT_SCHEMA: OperationSchema = {
+    type: 'object',
+    properties: {
+        folderPath: { type: 'string' },
+        modifiedCount: { type: 'number' },
+        errors: ERROR_ARRAY_SCHEMA
+    }
+};
+
+const FIX_FORMULA_FILE_INPUT_SCHEMA: OperationSchema = {
+    type: 'object',
+    properties: {
+        sourcePath: { type: 'string' }
+    }
+};
+
+const FIX_FORMULA_FILE_RESULT_SCHEMA: OperationSchema = {
+    type: 'object',
+    properties: {
+        sourcePath: { type: 'string' },
+        modified: { type: 'boolean' }
+    }
+};
+
+const BATCH_FIX_FORMULA_INPUT_SCHEMA: OperationSchema = {
+    type: 'object',
+    properties: {
+        folderPath: { type: 'string' }
+    }
+};
+
+const BATCH_FIX_FORMULA_RESULT_SCHEMA: OperationSchema = {
+    type: 'object',
+    properties: {
+        folderPath: { type: 'string' },
+        modifiedCount: { type: 'number' },
+        errors: ERROR_ARRAY_SCHEMA
+    }
+};
+
 const OPERATION_DEFINITIONS: OperationDefinition[] = [
     {
         version: 1,
@@ -383,6 +462,66 @@ const OPERATION_DEFINITIONS: OperationDefinition[] = [
         ],
         inputSchema: EXTRACT_AND_GENERATE_INPUT_SCHEMA,
         resultSchema: EXTRACT_AND_GENERATE_RESULT_SCHEMA
+    },
+    {
+        version: 1,
+        id: 'duplicate.check-file',
+        automationLevel: 'requires-active-file',
+        requiredContext: 'active-file',
+        sideEffectClass: 'read-only',
+        commandBindings: [
+            createWorkflowCommandBinding('check-for-duplicates', 'check-duplicates-current')
+        ],
+        inputSchema: DUPLICATE_CHECK_FILE_INPUT_SCHEMA,
+        resultSchema: DUPLICATE_CHECK_FILE_RESULT_SCHEMA
+    },
+    {
+        version: 1,
+        id: 'concept.dedupe',
+        automationLevel: 'interactive-ui',
+        requiredContext: 'folder-selection',
+        sideEffectClass: 'destructive',
+        commandBindings: [
+            createWorkflowCommandBinding('check-and-remove-duplicate-concept-notes', 'check-remove-duplicate-concepts')
+        ],
+        inputSchema: CONCEPT_DEDUPE_INPUT_SCHEMA,
+        resultSchema: CONCEPT_DEDUPE_RESULT_SCHEMA
+    },
+    {
+        version: 1,
+        id: 'mermaid.batch-fix',
+        automationLevel: 'interactive-ui',
+        requiredContext: 'folder-selection',
+        sideEffectClass: 'batch-write',
+        commandBindings: [
+            createWorkflowCommandBinding('batch-mermaid-fix', 'batch-mermaid-fix')
+        ],
+        inputSchema: BATCH_MERMAID_FIX_INPUT_SCHEMA,
+        resultSchema: BATCH_MERMAID_FIX_RESULT_SCHEMA
+    },
+    {
+        version: 1,
+        id: 'formula.fix-file',
+        automationLevel: 'requires-active-file',
+        requiredContext: 'active-file',
+        sideEffectClass: 'write-file',
+        commandBindings: [
+            createWorkflowCommandBinding('fix-formula-formats', 'fix-formula-current')
+        ],
+        inputSchema: FIX_FORMULA_FILE_INPUT_SCHEMA,
+        resultSchema: FIX_FORMULA_FILE_RESULT_SCHEMA
+    },
+    {
+        version: 1,
+        id: 'formula.batch-fix',
+        automationLevel: 'interactive-ui',
+        requiredContext: 'folder-selection',
+        sideEffectClass: 'batch-write',
+        commandBindings: [
+            createWorkflowCommandBinding('batch-fix-formula-formats', 'batch-fix-formula')
+        ],
+        inputSchema: BATCH_FIX_FORMULA_INPUT_SCHEMA,
+        resultSchema: BATCH_FIX_FORMULA_RESULT_SCHEMA
     },
     {
         version: 1,

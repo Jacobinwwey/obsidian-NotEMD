@@ -16,6 +16,11 @@ describe('operations registry', () => {
             'concept.extract-folder',
             'content.extract-original-text',
             'workflow.extract-and-generate',
+            'duplicate.check-file',
+            'concept.dedupe',
+            'mermaid.batch-fix',
+            'formula.fix-file',
+            'formula.batch-fix',
             'provider.profile.export',
             'provider.profile.import'
         ]));
@@ -132,6 +137,97 @@ describe('operations registry', () => {
                     completeFolderPath: expect.any(Object)
                 })
             })
+        }));
+    });
+
+    test('returns structured metadata for utility operations', () => {
+        const checkDuplicates = getOperationDefinition('duplicate.check-file');
+        const dedupeConcepts = getOperationDefinition('concept.dedupe');
+        const batchMermaidFix = getOperationDefinition('mermaid.batch-fix');
+        const fixFormulaFile = getOperationDefinition('formula.fix-file');
+        const batchFixFormula = getOperationDefinition('formula.batch-fix');
+
+        expect(checkDuplicates).toEqual(expect.objectContaining({
+            id: 'duplicate.check-file',
+            version: 1,
+            automationLevel: 'requires-active-file',
+            requiredContext: 'active-file',
+            sideEffectClass: 'read-only',
+            commandBindings: expect.arrayContaining([
+                expect.objectContaining({
+                    commandId: 'check-for-duplicates',
+                    mappingKind: 'exact'
+                })
+            ]),
+            inputSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    sourcePath: expect.any(Object)
+                })
+            }),
+            resultSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    duplicateCount: expect.any(Object),
+                    duplicates: expect.any(Object)
+                })
+            })
+        }));
+
+        expect(dedupeConcepts).toEqual(expect.objectContaining({
+            id: 'concept.dedupe',
+            version: 1,
+            automationLevel: 'interactive-ui',
+            requiredContext: 'folder-selection',
+            sideEffectClass: 'destructive',
+            commandBindings: expect.arrayContaining([
+                expect.objectContaining({
+                    commandId: 'check-and-remove-duplicate-concept-notes',
+                    mappingKind: 'exact'
+                })
+            ])
+        }));
+
+        expect(batchMermaidFix).toEqual(expect.objectContaining({
+            id: 'mermaid.batch-fix',
+            version: 1,
+            automationLevel: 'interactive-ui',
+            requiredContext: 'folder-selection',
+            sideEffectClass: 'batch-write',
+            commandBindings: expect.arrayContaining([
+                expect.objectContaining({
+                    commandId: 'batch-mermaid-fix',
+                    mappingKind: 'exact'
+                })
+            ])
+        }));
+
+        expect(fixFormulaFile).toEqual(expect.objectContaining({
+            id: 'formula.fix-file',
+            version: 1,
+            automationLevel: 'requires-active-file',
+            requiredContext: 'active-file',
+            sideEffectClass: 'write-file',
+            commandBindings: expect.arrayContaining([
+                expect.objectContaining({
+                    commandId: 'fix-formula-formats',
+                    mappingKind: 'exact'
+                })
+            ])
+        }));
+
+        expect(batchFixFormula).toEqual(expect.objectContaining({
+            id: 'formula.batch-fix',
+            version: 1,
+            automationLevel: 'interactive-ui',
+            requiredContext: 'folder-selection',
+            sideEffectClass: 'batch-write',
+            commandBindings: expect.arrayContaining([
+                expect.objectContaining({
+                    commandId: 'batch-fix-formula-formats',
+                    mappingKind: 'exact'
+                })
+            ])
         }));
     });
 });
