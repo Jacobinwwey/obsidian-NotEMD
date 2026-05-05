@@ -243,7 +243,7 @@ flowchart LR
 - `src/operations/utilityCommandHostAdapter.ts` 现在也已承接当前文件 duplicate check、duplicate cleanup、batch Mermaid fix 与 single/batch formula fix 的 command orchestration；`check-for-duplicates` 已不再内联写在命令注册里
 - `src/translate.ts` 现在已允许 batch translation 注入外部 reporter，不再把 `ProgressModal` 固化成唯一执行载体；`src/extractOriginalText.ts` 现在也会返回输出路径，便于 host adapter 显式完成 reporter 生命周期
 - `src/fileUtils.ts` 与 `src/extractOriginalText.ts` 现在已经接受更窄的 runtime context，而不是直接依赖具体 `NotemdPlugin` 类，这说明边界正在从 wrapper 抽离继续推进到 utility 对宿主类型耦合的削弱
-- `src/main.ts` 现在主要保留命令注册与少量直接执行表面；当前 registry 已覆盖第一批 note-processing 与 utility operations，真正的下一阶段缺口已经转向剩余 automation-facing surfaces，以及更细的 notice/result/vault-write side-effect 收口
+- `src/main.ts` 现在主要保留命令注册与少量直接执行表面；当前 registry 已覆盖 diagram/provider/config-profile 以及 process/generate/research/translation/extraction/utility 这几批 operations，真正的下一阶段缺口已经转向剩余 selection-driven/export surfaces，以及更细的 notice/result/vault-write side-effect 收口
 
 ## 关键设计决策
 
