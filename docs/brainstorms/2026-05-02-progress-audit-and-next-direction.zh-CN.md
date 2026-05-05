@@ -119,7 +119,8 @@ topic: progress-audit-next-direction
 - provider diagnostic host adapter 也已落地：`src/operations/providerDiagnosticCommandHostAdapter.ts` 现在承接开发者诊断命令的 settings 装载、报告落盘接线与面向用户的 notice 整形，`src/main.ts` 不再内联持有这套编排。
 - config/profile host adapter 也已落地：`src/operations/configProfileCommandHostAdapter.ts` 现在承接导入导出状态持久化、CLI 导出 notice 整形与导入导出错误映射，`src/main.ts` 也不再内联持有这组 CLI 邻接编排。
 - provider connection-test host adapter 也已落地：`src/operations/providerConnectionTestCommandHostAdapter.ts` 现在已同时承接 `test-llm-connection` 与设置页 provider 测试流，两个表面都不再各自保留平行的 `testAPI` 编排。
-- 剩余架构缺口进一步收窄：`src/main.ts` 现在主要还保留命令注册，以及更广义的非 CLI 交互与批处理宿主副作用，这比此前 save/preview-heavy 的 command wrapper 更适合作为下一批抽离 seam。
+- note-processing host adapter 第一批也已落地：`src/operations/noteProcessingCommandHostAdapter.ts` 现在已承接 `generate-from-title` 与 `research-and-summarize` 的 busy-guard、reporter 生命周期、notice/error-log 编排，`src/main.ts` 不再内联保留这两条命令包装。
+- 剩余架构缺口进一步收窄：`src/main.ts` 现在主要还保留命令注册，以及 `processWithNotemdCommand`、`processFolderWithNotemdCommand` 等更广义的非 CLI 交互与批处理宿主副作用，这比此前 save/preview-heavy 的 command wrapper 更适合作为下一批抽离 seam。
 
 ## 当前验证门
 
@@ -187,7 +188,7 @@ topic: progress-audit-next-direction
    `ref/` 与 `coverage/` 应视为本地分析 / 构建产物，而不是待提交内容。主线需要持续保持干净工作树。
 
 6. **继续把 host adapter 从 `src/main.ts` 拆出去**
-   save/preview、第一批 config/profile 与 report persistence slice 已从“计划”变成“现实”。下一步应继续把未来 CLI host wiring 从 `src/main.ts` 中剥离，避免 registry 停在元数据与执行核心抽离的半程状态。
+   save/preview、第一批 config/profile、provider test，以及 `generate-from-title` / `research-and-summarize` slice 已从“计划”变成“现实”。下一步应继续把 `processWithNotemdCommand`、`processFolderWithNotemdCommand` 与未来 CLI host wiring 从 `src/main.ts` 中剥离，避免 registry 停在元数据与执行核心抽离的半程状态。
 
 ### 建议落地顺序
 

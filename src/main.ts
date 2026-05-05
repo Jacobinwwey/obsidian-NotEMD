@@ -73,6 +73,11 @@ import {
     runExportProviderProfilesCommandWithHost,
     runImportProviderProfilesCommandWithHost
 } from './operations/configProfileCommandHostAdapter';
+import {
+    NoteProcessingCommandHost,
+    runGenerateContentForTitleCommandWithHost,
+    runResearchAndSummarizeCommandWithHost
+} from './operations/noteProcessingCommandHostAdapter';
 
 type DiagramCommandExecutionMode = 'save-mermaid' | 'save-artifact' | 'preview-artifact';
 
@@ -196,6 +201,40 @@ export default class NotemdPlugin extends Plugin {
             defaultActiveProvider: DEFAULT_SETTINGS.activeProvider,
             configHost: this.createPluginConfigCommandHost(),
             logError: (message, error) => console.error(message, error)
+        };
+    }
+
+    private createNoteProcessingCommandHost(): NoteProcessingCommandHost {
+        return {
+            getApp: () => this.app,
+            loadSettings: () => this.loadSettings(),
+            getSettings: () => this.settings,
+            getUiStrings: () => this.getUiStrings(),
+            getActionLabel: (actionId) => this.getActionLabel(actionId),
+            getReporter: () => this.getReporter(),
+            isBusy: () => this.isBusy,
+            setBusy: (busy) => this.setBusy(busy),
+            startReporterAction: (reporter, label) => this.startReporterAction(reporter, label),
+            failReporterAction: (reporter, message) => this.failReporterAction(reporter, message),
+            updateStatusBar: (message) => this.updateStatusBar(message),
+            getRunningActionText: (label) => this.getRunningActionText(label),
+            getActionCompleteText: (label) => this.getActionCompleteText(label),
+            showNotice: (message, duration) => new Notice(message, duration),
+            logError: (message, details) => console.error(message, details),
+            openErrorModal: (title, details) => this.openLocalizedErrorModal(title, details),
+            saveErrorLog: (error, reporter) => saveErrorLog(this.app, reporter, error, this.settings),
+            maybeAutoFixMermaidForFile: (file, reporter, reason) =>
+                this.maybeAutoFixMermaidForFile(file, reporter, reason),
+            completeReporter: (reporter) => {
+                if (reporter instanceof ProgressModal) {
+                    setTimeout(() => reporter.close(), 2000);
+                }
+            },
+            finalizeReporter: (reporter) => {
+                if (reporter instanceof NotemdSidebarView) {
+                    reporter.finishProcessing();
+                }
+            }
         };
     }
 
@@ -1337,113 +1376,12 @@ export default class NotemdPlugin extends Plugin {
 
     /** Command: Generate Content from Title */
     async generateContentForTitleCommand(file: TFile, reporter?: ProgressReporter) {
-        if (this.isBusy) { new Notice(this.getUiStrings().notices.notemdBusy); return; }
-        this.isBusy = true;
-        const useReporter = reporter || this.getReporter();
-        let i18n = this.getUiStrings();
-        const actionLabel = this.getActionLabel('generate-from-title');
-
-        const maybeSidebar = useReporter as any;
-        this.startReporterAction(useReporter, `${actionLabel}: ${file.name}`);
-        try {
-            await this.loadSettings();
-            i18n = this.getUiStrings();
-            await generateContentForTitle(this.app, this.settings, file, useReporter); // Call utility
-
-            await this.maybeAutoFixMermaidForFile(file, useReporter, 'generate from title');
-
-            const completeText = this.getActionCompleteText(actionLabel);
-            this.updateStatusBar(completeText);
-            useReporter.updateStatus(completeText, 100);
-            new Notice(formatI18n(i18n.notices.contentGenerationSuccess, { file: file.name }));
-            if (useReporter instanceof ProgressModal) setTimeout(() => useReporter.close(), 2000);
-        } catch (error: unknown) { // Changed to unknown
-            let errorMessage = 'An unknown error occurred during content generation.';
-            let errorDetails = String(error);
-            if (error instanceof Error) {
-                errorMessage = error.message;
-                errorDetails = error.stack || error.message;
-            }
-            // Check if it's a cancellation error before logging/showing modal
-            if (!errorMessage.includes("cancelled by user")) {
-                console.error(`Error generating content for ${file.name}:`, errorDetails);
-                new Notice(formatI18n(i18n.notices.contentGenerationError, { message: errorMessage }), 10000);
-                this.openLocalizedErrorModal(i18n.errorModal.titles.contentGeneration, errorDetails);
-
-                // Save error log
-                await saveErrorLog(this.app, useReporter, error, this.settings);
-            }
-            useReporter.log(`Error generating content for ${file.name}: ${errorMessage}`);
-            this.failReporterAction(useReporter, errorMessage);
-        } finally {
-            if (maybeSidebar instanceof NotemdSidebarView) {
-                maybeSidebar.finishProcessing();
-            }
-            this.isBusy = false;
-        }
+        await runGenerateContentForTitleCommandWithHost(this.createNoteProcessingCommandHost(), file, reporter);
     }
 
     /** Command: Research and Summarize Topic */
     async researchAndSummarizeCommand(editor: Editor, view: MarkdownView, reporter?: ProgressReporter) {
-        if (this.isBusy) { new Notice(this.getUiStrings().notices.notemdBusy); return; }
-        this.isBusy = true;
-        const useReporter = reporter || this.getReporter();
-        let i18n = this.getUiStrings();
-        const actionLabel = this.getActionLabel('research-and-summarize');
-
-        const maybeSidebar = useReporter as any;
-        this.startReporterAction(useReporter, actionLabel);
-
-        const activeFile = view.file;
-        if (!activeFile) { new Notice(i18n.notices.noActiveFile); this.isBusy = false; return; }
-        const selectedText = editor.getSelection();
-        const topic = selectedText ? selectedText.trim() : activeFile.basename;
-        if (!topic) { new Notice(i18n.notices.noTopicFound); this.isBusy = false; return; }
-
-        this.updateStatusBar(this.getRunningActionText(`${actionLabel}: ${topic}`));
-        useReporter.log(`Starting research for topic: "${topic}"`);
-        try {
-            await this.loadSettings();
-            i18n = this.getUiStrings();
-            // Assuming researchAndSummarize is now in searchUtils and takes app, settings
-            await researchAndSummarize(this.app, this.settings, editor, view, useReporter); // Call utility
-            if (activeFile instanceof TFile) {
-                await this.maybeAutoFixMermaidForFile(activeFile, useReporter, 'research & summarize');
-            }
-            // Success/error handling is now within researchAndSummarize
-            // Update status bar based on final reporter state?
-            if (!useReporter.cancelled) {
-                 this.updateStatusBar(this.getActionCompleteText(actionLabel));
-            } else {
-                 this.updateStatusBar(i18n.sidebar.status.processingStopped);
-            }
-        } catch (error: unknown) { // Changed to unknown, Catch errors propagated from researchAndSummarize
-            let errorMessage = 'An unknown error occurred during research.';
-            let errorDetails = String(error);
-            if (error instanceof Error) {
-                errorMessage = error.message;
-                errorDetails = error.stack || error.message;
-            }
-             if (!errorMessage.includes("cancelled by user")) {
-                console.error(`Error researching "${topic}":`, errorDetails);
-                new Notice(formatI18n(i18n.notices.researchError, { message: errorMessage }), 10000);
-                this.openLocalizedErrorModal(i18n.errorModal.titles.research, errorDetails);
-
-                // Save error log
-                await saveErrorLog(this.app, useReporter, error, this.settings);
-            }
-            // Reporter status should already be set by the utility function if it's used
-            // If reporter wasn't used or failed early, log here
-            if (!useReporter.cancelled) { // Avoid double logging cancellation
-                 useReporter.log(`Error: ${errorMessage}`);
-                 this.failReporterAction(useReporter, errorMessage);
-            }
-        } finally {
-            if (maybeSidebar instanceof NotemdSidebarView) {
-                maybeSidebar.finishProcessing();
-            }
-            this.isBusy = false;
-        }
+        await runResearchAndSummarizeCommandWithHost(this.createNoteProcessingCommandHost(), editor, view, reporter);
     }
 
     /** Command: Batch Generate Content from Titles */
