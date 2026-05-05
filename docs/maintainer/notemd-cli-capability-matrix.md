@@ -33,11 +33,15 @@ Observed host facts:
 | `notemd:test-llm-connection` | Test active provider connectivity | `safe` | Current output is UI-oriented rather than contract-oriented | `provider.diagnostic.run` (`future-target`) |
 | `notemd:run-developer-provider-diagnostic` | Run long-request provider diagnostic | `safe` | Better suited for automation than `test-llm-connection`, but still lacks a public typed result surface | `provider.diagnostic.run` (`exact`) |
 | `notemd:run-developer-provider-stability-diagnostic` | Run repeated provider stability diagnostic | `safe` | Better suited for automation than UI-only diagnostics, but still lacks a public typed result surface | `provider.diagnostic.stability-run` (`exact`) |
+| `notemd:export-provider-profiles` | Export provider profile snapshot | `safe` | Deterministic and machine-readable, but still writes into plugin-managed config path semantics | `provider.profile.export` |
+| `notemd:import-provider-profiles` | Import provider profile snapshot | `safe` | Machine-readable, but mutates active provider state and plugin settings | `provider.profile.import` |
+| `notemd:export-cli-capability-manifest` | Export command capability manifest | `safe` | Deterministic export, but still tied to plugin config-path write semantics | `cli.capability-manifest.export` |
+| `notemd:export-cli-invocation-contract` | Export typed invocation contract | `safe` | Deterministic export, but still tied to plugin config-path write semantics | `cli.invocation-contract.export` |
 | `notemd:notemd-generate-diagram` | Generate spec-first artifact from active file | `requires-active-file` | Depends on active file, plugin state, and save/open side effects | `diagram.generate` (`exact`, `defaultInput.outputMode=artifact`) |
 | `notemd:notemd-summarize-as-mermaid` | Save Mermaid output for active file | `requires-active-file` | Depends on active file + plugin-managed save/output semantics | `diagram.generate` (`exact`, `defaultInput.outputMode=mermaid`) |
 | `notemd:notemd-preview-diagram` | Preview saved/sourced diagram | `interactive-ui` | Preview modal is UI-only and not automation-stable | `diagram.preview` (`exact`) |
-| `notemd:process-with-notemd` | Process current file and add links | `requires-active-file` | Depends on active file and plugin-owned mutation flow | `file.process.add-links` |
-| `notemd:process-folder-with-notemd` | Batch process folder | `interactive-ui` | Folder selection and batch UX remain plugin-host driven | `file.process-folder.add-links` |
+| `notemd:process-with-notemd` | Process current file and add links | `requires-active-file` | Depends on active file and plugin-owned mutation flow | `file.process-add-links` |
+| `notemd:process-folder-with-notemd` | Batch process folder | `interactive-ui` | Folder selection and batch UX remain plugin-host driven | `file.process-folder-add-links` |
 | `notemd:generate-content-from-title` | Generate note content from title | `requires-active-file` | Uses active file and writeback flow | `content.generate-from-title` |
 | `notemd:batch-generate-content-from-titles` | Batch title generation | `interactive-ui` | Folder selection, completion-folder behavior, progress UI | `content.batch-generate-from-titles` |
 | `notemd:research-and-summarize-topic` | Research selected text / active note title | `requires-selection` | Depends on active editor or active note name | `research.summarize-topic` |
@@ -59,7 +63,7 @@ Observed host facts:
 - `src/operations/registry.ts` is now the central metadata source for extracted operations, command bindings, mapping kind, and selected input/result schemas.
 - `src/operations/capabilityManifest.ts` now flattens those command bindings into the exported capability manifest.
 - `src/cliContracts.ts` now builds the invocation contract from the same registry, which removes one major drift path between docs, command discovery, and contract export.
-- The registry now includes the main note-processing and utility operation batches as well: `file.process-add-links`, `file.process-folder-add-links`, `content.generate-from-title`, `content.batch-generate-from-titles`, `research.summarize-topic`, `translate.file`, `translate.folder-batch`, `concept.extract-file`, `concept.extract-folder`, `content.extract-original-text`, `workflow.extract-and-generate`, `duplicate.check-file`, `concept.dedupe`, `mermaid.batch-fix`, `formula.fix-file`, and `formula.batch-fix`.
+- The registry now includes the main note-processing, utility, selection, and export operation batches as well: `editor.create-link-and-generate`, `file.process-add-links`, `file.process-folder-add-links`, `content.generate-from-title`, `content.batch-generate-from-titles`, `research.summarize-topic`, `translate.file`, `translate.folder-batch`, `concept.extract-file`, `concept.extract-folder`, `content.extract-original-text`, `workflow.extract-and-generate`, `duplicate.check-file`, `concept.dedupe`, `mermaid.batch-fix`, `formula.fix-file`, `formula.batch-fix`, `provider.profile.export`, `provider.profile.import`, `cli.capability-manifest.export`, and `cli.invocation-contract.export`.
 - Legacy aliases remain registered for compatibility, but they are intentionally excluded from capability-manifest export.
 
 ## Next Extraction Targets
@@ -68,11 +72,10 @@ These are the best remaining candidates for registry-backed or more host-neutral
 
 | Priority | Candidate | Why First | Existing Building Blocks |
 |---|---|---|---|
-| P0 | Provider diagnostics | Already close to operation shape; deterministic inputs/outputs | `src/providerDiagnostics.ts`, `src/llmUtils.ts` |
-| P0 | Diagram generation | Spec-first core already exists | `src/diagram/diagramGenerationService.ts`, `src/diagram/*` |
-| P1 | Selection-driven concept generation | Still missing from the shared registry/capability/contract surface | `create-wiki-link-and-generate-from-selection`, editor-selection flows |
-| P1 | CLI export commands | Capability/contract export is useful automation, but the export commands themselves are not modeled as operations yet | `src/operations/configProfileCommandHostAdapter.ts`, export commands in `src/main.ts` |
-| P2 | Result-surface tightening for write-heavy flows | Registry exists, but write-heavy operations still leak host/UI semantics | `src/fileUtils.ts`, `src/translate.ts`, `src/extractOriginalText.ts` |
+| P0 | Result-surface tightening for write-heavy flows | Coverage now exists, but many operations still leak host/UI semantics and shallow result shapes | `src/fileUtils.ts`, `src/translate.ts`, `src/extractOriginalText.ts`, `src/formulaFixer.ts` |
+| P1 | Remaining direct-read/sidebar surfaces | `src/main.ts` still owns long-tail direct execution and sidebar-only read paths not yet modeled as operations | remaining command surfaces in `src/main.ts`, `src/workflowButtons.ts` |
+| P1 | Contract enrichment for selection/export and config flows | Export/selection operations are now modeled, but future operation invokers need richer path/context semantics than command-trigger parity alone | `src/operations/registry.ts`, `src/operations/configProfileCommands.ts`, `src/operations/noteProcessingCommandHostAdapter.ts` |
+| P2 | Workflow/settings packaging | Workflow DSL and output-path toggles remain useful metadata but not yet stable public interfaces | `src/workflowButtons.ts`, settings-driven output controls |
 
 ## Settings Readiness
 

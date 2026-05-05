@@ -24,12 +24,17 @@ function createReporter(): ProgressReporter {
 function createUiStrings() {
     return {
         commands: {
-            extractConceptsAndGenerateTitles: 'Extract concepts and generate titles'
+            extractConceptsAndGenerateTitles: 'Extract concepts and generate titles',
+            createWikiLinkAndGenerateNoteFromSelection: 'Create Wiki-Link & Generate Note from Selection'
         },
         notices: {
             notemdBusy: 'Notemd busy',
             noActiveFile: 'No active file',
             noTopicFound: 'No topic found',
+            selectValidWord: 'Select a valid word (2+ chars).',
+            setConceptNoteFolder: 'Set Concept Note Folder in settings.',
+            generatedContentForWord: 'Generated content for [[{word}]]!',
+            genericError: 'Error: {message}',
             batchTranslationFailedWithMessage: 'Batch translation failed: {message}',
             failedTranslateFileWithMessage: 'Translation failed: {message}',
             processingComplete: 'Processing complete',
@@ -197,6 +202,66 @@ describe('note processing command host adapter', () => {
         expect(host.completeReporter).toHaveBeenCalledWith(reporter);
         expect(host.finalizeReporter).toHaveBeenCalledWith(reporter);
         expect(host.setBusy).toHaveBeenLastCalledWith(false);
+        expect(getBusy()).toBe(false);
+    });
+
+    test('create wiki-link and generate command reuses host orchestration and writes generated note path', async () => {
+        const reporter = createReporter();
+        const { host, getBusy } = createHost(reporter);
+        const editor = {
+            getSelection: jest.fn(() => 'Alpha'),
+            replaceSelection: jest.fn()
+        } as any;
+        const view = {
+            file: {
+                basename: 'Topic'
+            }
+        } as any;
+        const createdFile = Object.assign(new (TFile as any)(), {
+            name: 'Alpha.md',
+            basename: 'Alpha',
+            path: 'Concepts/Alpha.md',
+            extension: 'md'
+        });
+        host.getSettings.mockReturnValue({
+            ...mockSettings,
+            useCustomConceptNoteFolder: true,
+            conceptNoteFolder: 'Concepts'
+        });
+        host.getFileByPath
+            .mockReturnValueOnce(null)
+            .mockReturnValueOnce(createdFile);
+        const createNotesImpl = jest.fn().mockResolvedValue(undefined);
+        const generateImpl = jest.fn().mockResolvedValue(undefined);
+        const { runCreateWikiLinkAndGenerateFromSelectionCommandWithHost } = loadModule();
+
+        const result = await runCreateWikiLinkAndGenerateFromSelectionCommandWithHost(
+            host,
+            editor,
+            view,
+            reporter,
+            createNotesImpl,
+            generateImpl
+        );
+
+        expect(editor.replaceSelection).toHaveBeenCalledWith('[[Alpha]]');
+        expect(createNotesImpl).toHaveBeenCalledWith(
+            host.getApp(),
+            host.getSettings(),
+            new Set(['Alpha']),
+            'Topic',
+            { minimalTemplate: false }
+        );
+        expect(generateImpl).toHaveBeenCalledWith(host.getApp(), host.getSettings(), createdFile, reporter);
+        expect(host.maybeAutoFixMermaidForFile).toHaveBeenCalledWith(createdFile, reporter, 'create wiki-link and generate');
+        expect(host.showNotice).toHaveBeenCalledWith('Generated content for [[Alpha]]!');
+        expect(host.completeReporter).toHaveBeenCalledWith(reporter);
+        expect(host.finalizeReporter).toHaveBeenCalledWith(reporter);
+        expect(result).toEqual({
+            notePath: 'Concepts/Alpha.md',
+            word: 'Alpha',
+            created: true
+        });
         expect(getBusy()).toBe(false);
     });
 

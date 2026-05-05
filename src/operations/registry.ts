@@ -388,6 +388,72 @@ const BATCH_FIX_FORMULA_RESULT_SCHEMA: OperationSchema = {
     }
 };
 
+const CREATE_LINK_AND_GENERATE_INPUT_SCHEMA: OperationSchema = {
+    type: 'object',
+    properties: {
+        sourcePath: { type: 'string' },
+        selectionText: { type: 'string' },
+        conceptFolderPath: { type: 'string' }
+    }
+};
+
+const CREATE_LINK_AND_GENERATE_RESULT_SCHEMA: OperationSchema = {
+    type: 'object',
+    properties: {
+        notePath: { type: 'string' },
+        word: { type: 'string' },
+        created: { type: 'boolean' }
+    }
+};
+
+const EMPTY_OBJECT_INPUT_SCHEMA: OperationSchema = {
+    type: 'object',
+    properties: {}
+};
+
+const PROVIDER_PROFILE_IMPORT_INPUT_SCHEMA: OperationSchema = {
+    type: 'object',
+    properties: {
+        inputPath: { type: 'string' }
+    }
+};
+
+const PROVIDER_PROFILE_EXPORT_RESULT_SCHEMA: OperationSchema = {
+    type: 'object',
+    properties: {
+        outputPath: { type: 'string' },
+        profile: { type: 'object' }
+    }
+};
+
+const PROVIDER_PROFILE_IMPORT_RESULT_SCHEMA: OperationSchema = {
+    type: 'object',
+    properties: {
+        inputPath: { type: 'string' },
+        importedProviders: { type: 'array' },
+        activeProvider: { type: 'string' },
+        activeProviderReset: { type: 'boolean' },
+        newCount: { type: 'number' },
+        updatedCount: { type: 'number' }
+    }
+};
+
+const CLI_CAPABILITY_MANIFEST_EXPORT_RESULT_SCHEMA: OperationSchema = {
+    type: 'object',
+    properties: {
+        outputPath: { type: 'string' },
+        manifest: { type: 'object' }
+    }
+};
+
+const CLI_INVOCATION_CONTRACT_EXPORT_RESULT_SCHEMA: OperationSchema = {
+    type: 'object',
+    properties: {
+        outputPath: { type: 'string' },
+        contract: { type: 'object' }
+    }
+};
+
 const OPERATION_DEFINITIONS: OperationDefinition[] = [
     {
         version: 1,
@@ -462,6 +528,22 @@ const OPERATION_DEFINITIONS: OperationDefinition[] = [
                 includeInCapabilityManifest: false
             })
         ]
+    },
+    {
+        version: 1,
+        id: 'editor.create-link-and-generate',
+        automationLevel: 'requires-selection',
+        requiredContext: 'editor-selection',
+        sideEffectClass: 'write-file',
+        commandBindings: [
+            createStaticCommandBinding('create-wiki-link-and-generate-from-selection', {
+                automationLevel: 'requires-selection',
+                requiredContext: 'editor-selection',
+                sideEffectClass: 'write-file'
+            })
+        ],
+        inputSchema: CREATE_LINK_AND_GENERATE_INPUT_SCHEMA,
+        resultSchema: CREATE_LINK_AND_GENERATE_RESULT_SCHEMA
     },
     {
         version: 1,
@@ -661,17 +743,51 @@ const OPERATION_DEFINITIONS: OperationDefinition[] = [
     },
     {
         version: 1,
+        id: 'cli.capability-manifest.export',
+        automationLevel: 'safe',
+        requiredContext: 'none',
+        sideEffectClass: 'write-file',
+        commandBindings: [
+            createStaticCommandBinding('export-cli-capability-manifest', {
+                automationLevel: 'safe',
+                requiredContext: 'none',
+                sideEffectClass: 'write-file'
+            })
+        ],
+        inputSchema: EMPTY_OBJECT_INPUT_SCHEMA,
+        resultSchema: CLI_CAPABILITY_MANIFEST_EXPORT_RESULT_SCHEMA
+    },
+    {
+        version: 1,
+        id: 'cli.invocation-contract.export',
+        automationLevel: 'safe',
+        requiredContext: 'none',
+        sideEffectClass: 'write-file',
+        commandBindings: [
+            createStaticCommandBinding('export-cli-invocation-contract', {
+                automationLevel: 'safe',
+                requiredContext: 'none',
+                sideEffectClass: 'write-file'
+            })
+        ],
+        inputSchema: EMPTY_OBJECT_INPUT_SCHEMA,
+        resultSchema: CLI_INVOCATION_CONTRACT_EXPORT_RESULT_SCHEMA
+    },
+    {
+        version: 1,
         id: 'provider.profile.export',
         automationLevel: 'safe',
         requiredContext: 'none',
-        sideEffectClass: 'read-only',
+        sideEffectClass: 'write-file',
         commandBindings: [
             createStaticCommandBinding('export-provider-profiles', {
                 automationLevel: 'safe',
                 requiredContext: 'none',
-                sideEffectClass: 'read-only'
+                sideEffectClass: 'write-file'
             })
-        ]
+        ],
+        inputSchema: EMPTY_OBJECT_INPUT_SCHEMA,
+        resultSchema: PROVIDER_PROFILE_EXPORT_RESULT_SCHEMA
     },
     {
         version: 1,
@@ -685,7 +801,9 @@ const OPERATION_DEFINITIONS: OperationDefinition[] = [
                 requiredContext: 'none',
                 sideEffectClass: 'write-file'
             })
-        ]
+        ],
+        inputSchema: PROVIDER_PROFILE_IMPORT_INPUT_SCHEMA,
+        resultSchema: PROVIDER_PROFILE_IMPORT_RESULT_SCHEMA
     }
 ];
 

@@ -12,12 +12,13 @@ topic: cli-mainline-progress-sync-and-next-phase-requirements
 - 最新远端 `main` 已包含 operation registry、capability/contract 导出，以及第一批 diagram / provider / config-profile host adapter 抽离。
 - 本轮 clean worktree 已继续把翻译、概念提取、原文提取与 `extract-concepts-and-generate-titles` 组合命令下沉到 `src/operations/noteProcessingCommandHostAdapter.ts`。
 - 同一轮 clean worktree 也已落地 note-processing registry onboarding、第一批 utility-command registry、process / generate / research 长尾 registry batch、batch translation 的 injected reporter、original-text extraction 的输出路径返回，以及承接 duplicate check / duplicate cleanup / Mermaid fix / formula fix 的 `src/operations/utilityCommandHostAdapter.ts`。
+- 这一轮后续切片也已补齐剩余 selection/export registry 缺口：`editor.create-link-and-generate`、`provider.profile.export`、`provider.profile.import`、`cli.capability-manifest.export` 与 `cli.invocation-contract.export` 现在都已进入共享 registry/capability/contract 表面。
 - `src/fileUtils.ts` 与 `src/extractOriginalText.ts` 不再强耦合具体 `NotemdPlugin` 类，而是改为接受更窄的 runtime context。
 - 组合命令此前存在两个真实缺陷：外层先置 `isBusy` 导致内部 `extractConceptsCommand()` 直接早退，以及批量生成阶段没有强制使用配置中的概念目录。本轮已一起修复。
 
 但这还不是 CLI-ready 终态。当前剩余问题已经再次转移到三类更实质的边界：
 
-1. `src/operations/registry.ts`、`src/operations/capabilityManifest.ts` 与 `src/cliContracts.ts` 已覆盖 process / generate / research / translation / extraction / utility 这些 command families，但仍未覆盖剩余 selection-driven concept generation surface 与 CLI export command surfaces。
+1. `src/operations/registry.ts`、`src/operations/capabilityManifest.ts` 与 `src/cliContracts.ts` 现在已覆盖 process / generate / research / translation / extraction / utility / selection / export 这些 command families，但大量 write-heavy operation 仍只有浅层 schema，还缺更丰富的 machine-readable result 语义。
 2. `src/translate.ts`、`src/fileUtils.ts`、`src/extractOriginalText.ts` 与 `src/formulaFixer.ts` 仍持有 `App` / `Notice` / vault 写入等宿主副作用，operation contract 虽更干净但仍未宿主中立。
 3. `src/main.ts` 虽已显著收缩，但 note-processing 与 utility-host 两轮抽离之后仍有直接执行表面与 sidebar 专属 read-path 尚未进入 registry/contract 体系。
 
@@ -30,8 +31,9 @@ topic: cli-mainline-progress-sync-and-next-phase-requirements
 - R2. 任何文档都不得继续把“翻译/抽取 wrapper 仍留在 `src/main.ts`”描述为当前事实。
 
 **下一阶段优先级**
-- R3. 下一阶段必须优先把剩余 automation-facing command families 纳入 `src/operations/registry.ts`、`src/operations/capabilityManifest.ts` 与 `src/cliContracts.ts`，而不是先增加新的 CLI 子命令。
+- R3. 下一阶段必须优先收紧现有 operation contract、宿主副作用边界与剩余 direct-read command surfaces，而不是先增加新的 CLI 子命令。
 - R4. 当前已经落地的 registry-backed operation 第一批包括：
+  - `editor.create-link-and-generate`
   - `translate.file`
   - `translate.folder-batch`
   - `concept.extract-file`
@@ -48,12 +50,16 @@ topic: cli-mainline-progress-sync-and-next-phase-requirements
   - `mermaid.batch-fix`
   - `formula.fix-file`
   - `formula.batch-fix`
-- R5. 下一批 registry onboarding 必须把同样的建模纪律扩展到剩余 automation-facing surfaces，重点就是 selection-driven concept generation 与 CLI export command surfaces，并显式写出 `automationLevel`、`requiredContext`、`sideEffectClass`、输入 schema、结果 schema，以及 alias policy。
+  - `provider.profile.export`
+  - `provider.profile.import`
+  - `cli.capability-manifest.export`
+  - `cli.invocation-contract.export`
+- R5. 下一批 contract-tightening 必须把同样的建模纪律从“补覆盖面”推进到“补结果语义”，重点是 write-heavy operation 更丰富的 result schema、在合理场景下的可选 path/context override，以及剩余 direct-read/sidebar surfaces 的 alias policy。
 
 **宿主副作用收口**
 - R6. `src/translate.ts` 的批量翻译流程现在已经支持 injected reporter，不再把 `ProgressModal` 当成唯一执行载体；下一阶段必须继续把 notice 整形与结果语义上提，为 CLI / maintainer automation 留出更干净的无 UI 路径。
 - R7. `src/fileUtils.ts`、`src/extractOriginalText.ts` 与 `src/formulaFixer.ts` 中与 `Notice`、vault 落盘、目录创建、输出命名冲突处理相关的逻辑，必须继续向显式 host effect 或结果对象收口，避免 operation core 隐式写 UI 文案。
-- R8. 对 active-file / folder-picker / preview 绑定较重的流程，不得被误标为 `safe`；在 contract 未补齐前只能维持为 `requires-active-file`、`requires-vault-path` 或 `interactive-ui`。
+- R8. 对 active-file / folder-picker / preview 绑定较重的流程，不得被误标为 `safe`；在 contract 未补齐前只能维持为 `requires-active-file`、`folder-selection` 或 `interactive-ui`。
 
 **剩余 `src/main.ts` 瘦身方向**
 - R9. 当前文件 duplicate check、duplicate / concept-note cleanup、batch Mermaid fix 与 single / batch formula fix 现已抽入 `src/operations/utilityCommandHostAdapter.ts`。
@@ -66,7 +72,7 @@ topic: cli-mainline-progress-sync-and-next-phase-requirements
 ## 成功标准
 
 - 维护者只看最新 requirements / progress / architecture 文档，就能清楚区分“已经落地的 host adapter 抽离”和“尚未完成的 registry / utility side-effect 收口”。
-- process / generate / research / translation / extraction / utility 能力现在已进入 registry-backed operation 范围，下一阶段 operation onboarding 已明确收敛为 selection-driven/export surfaces 覆盖与更深的副作用边界整理。
+- process / generate / research / translation / extraction / utility / selection / export 能力现在都已进入 registry-backed operation 范围，下一阶段已明确收敛为更深的结果/副作用边界整理，以及剩余 direct-read/sidebar surfaces 的收口。
 - 文档不再误报 `extractConceptsAndGenerateTitles` 的旧行为；组合命令当前已使用同一 host adapter 路径并对齐配置中的概念目录。
 - 所有主线同步与代码变更都在干净工作树中完成，并通过完整仓库验证门。
 
@@ -79,7 +85,7 @@ topic: cli-mainline-progress-sync-and-next-phase-requirements
 
 ## 关键决策
 
-- note-processing registry onboarding、第一批 utility registry 与 process / generate / research registry batch 现已完成，下一阶段最高杠杆工作变为 selection-driven/export surfaces 覆盖与更深的 result/side-effect 收口。
+- note-processing registry onboarding、第一批 utility registry、process / generate / research registry batch，以及 selection/export registry batch 现已完成，下一阶段最高杠杆工作变为更深的 result/side-effect 收口。
 - host adapter 抽离已经足够成熟，不应再盲目重复搬运 `src/main.ts` wrapper；下一阶段真正要解决的是 schema、capability 与 side-effect 边界。
 - 组合命令的真实 bug 已经证明：只做“表面 delegator 抽离”不够，必须验证组合路径与共享 busy-state 的实际行为。
 
@@ -87,7 +93,7 @@ topic: cli-mainline-progress-sync-and-next-phase-requirements
 
 - 当前 clean worktree 已基于最新远端 `main`，且包含 registry / capability contract / provider/diagram/config-profile 第一批抽离成果。
 - `src/operations/noteProcessingCommandHostAdapter.ts` 现在已经承接 process / generate / research / translate / extract 全套 note-processing command wrapper。
-- 当前 capability registry 已纳入 note-processing、process/generate/research 与 utility operation definitions；主要结构缺口已转向 selection-driven/export surface 覆盖与更丰富的结果语义。
+- 当前 capability registry 已纳入 note-processing、process/generate/research、utility、selection 与 export operation definitions；主要结构缺口已转向更丰富的结果语义与更深的宿主副作用收口。
 
 ## 未决问题
 
@@ -98,4 +104,4 @@ topic: cli-mainline-progress-sync-and-next-phase-requirements
 
 ## 下一步
 
--> 进入新的实施计划，优先完成 selection-driven/export-surface registry 覆盖、更深的 utility side-effect 收口，以及剩余 `src/main.ts` / sidebar command-host 瘦身。
+-> 进入新的实施计划，优先完成更深的 utility side-effect 收口、write-heavy contract 增强，以及剩余 `src/main.ts` / sidebar command-host 瘦身。

@@ -124,10 +124,11 @@ topic: progress-audit-next-direction
 - 组合命令的真实行为也已对齐：`extract-concepts-and-generate-titles` 不再被外层 `isBusy` 自己拦住，也不再忽略配置中的概念目录。
 - note-processing registry onboarding 也已落地：`src/operations/registry.ts`、`src/operations/capabilityManifest.ts` 与 `src/cliContracts.ts` 现在已把 `translate.file`、`translate.folder-batch`、`concept.extract-file`、`concept.extract-folder`、`content.extract-original-text` 与 `workflow.extract-and-generate` 纳入一等 operation 元数据，而不是继续停留在零散命令描述。
 - note-processing 长尾 registry batch 也已落地：同一套 registry/manifest/contract 路径现在也已暴露 `file.process-add-links`、`file.process-folder-add-links`、`content.generate-from-title`、`content.batch-generate-from-titles` 与 `research.summarize-topic`，CLI capability matrix 里此前的 process / generate / research placeholder mapping 已转成真实 registry-backed operation。
+- selection/export registry batch 也已落地：同一套 operation surface 现在也已覆盖 `editor.create-link-and-generate`、`provider.profile.export`、`provider.profile.import`、`cli.capability-manifest.export` 与 `cli.invocation-contract.export`，旧的“selection/export surfaces 仍缺失”判断已不再是当前事实。
 - translation/extraction utility 边界也继续收口了一步：`batchTranslateFolder()` 现在已支持注入外部 reporter，不再把 `ProgressModal` 当成唯一载体；`extractOriginalText()` 现在也会返回输出路径，host adapter 可以显式接管成功完成语义。
 - 下一批 utility host adapter 也已落地：`src/operations/utilityCommandHostAdapter.ts` 现在承接 duplicate cleanup、batch Mermaid fix 与 single/batch formula fix 的 command orchestration，这些 `src/main.ts` wrapper 也已收缩为 delegator。
 - `src/fileUtils.ts` 与 `src/extractOriginalText.ts` 现在都接受更窄的 runtime context，而不是直接依赖具体 `NotemdPlugin` 类。这说明边界已经开始从“抽 wrapper”推进到“削弱 utility 对宿主类的类型耦合”。
-- 剩余架构缺口因此再次转移：下一批不应继续停留在 `src/main.ts` wrapper 搬运，而应优先处理 selection-driven/export surfaces 的 registry 覆盖、更深的 notice/result/vault-write side-effect 收口，以及 `src/main.ts` / sidebar 里剩余的长尾直接读写命令面。
+- 剩余架构缺口因此再次转移：下一批不应继续停留在 `src/main.ts` wrapper 搬运，而应优先处理更深的 notice/result/vault-write side-effect 收口、write-heavy flow 更丰富的 machine-readable result 语义，以及 `src/main.ts` / sidebar 里剩余的长尾直接读写命令面。
 
 ## 当前验证门
 
