@@ -10,9 +10,7 @@ import {
 } from '../llmProviders';
 import { testAPI } from '../llmUtils'; // Import testAPI
 import { getDefaultPrompt } from '../promptUtils'; // Import for default prompts
-import { buildProviderProfileExport, parseProviderProfileImport } from '../providerProfiles';
 import {
-    buildProviderDiagnosticFileName,
     getProviderDiagnosticCallModeOptions,
     ProviderDiagnosticCallMode
 } from '../providerDiagnostics';
@@ -41,31 +39,6 @@ export class NotemdSettingTab extends PluginSettingTab {
     constructor(app: App, plugin: NotemdPlugin) {
         super(app, plugin);
         this.plugin = plugin;
-    }
-
-    // Define the path for the providers JSON file within the plugin's config directory
-    private get providersFilePath(): string {
-        const pluginConfigDir = this.app.vault.configDir + '/plugins/' + this.plugin.manifest.id;
-        return `${pluginConfigDir}/notemd-providers.json`;
-    }
-
-    private async saveProviderDiagnosticReport(providerName: string, reportContent: string): Promise<string> {
-        const baseFileName = buildProviderDiagnosticFileName(providerName, new Date());
-        const fileSuffix = '.txt';
-        const fileStem = baseFileName.endsWith(fileSuffix)
-            ? baseFileName.slice(0, -fileSuffix.length)
-            : baseFileName;
-
-        let candidatePath = baseFileName;
-        let index = 1;
-
-        while (await this.app.vault.adapter.exists(candidatePath)) {
-            candidatePath = `${fileStem}_${index}${fileSuffix}`;
-            index += 1;
-        }
-
-        await this.app.vault.create(candidatePath, reportContent);
-        return candidatePath;
     }
 
     private sanitizeDeveloperDiagnosticTimeoutMs(rawValue: number): number {
@@ -314,74 +287,12 @@ export class NotemdSettingTab extends PluginSettingTab {
     }
 
     async exportProviderSettings(): Promise<void> {
-        const i18n = getI18nStrings({ uiLocale: this.plugin.settings.uiLocale });
-        try {
-            const profile = buildProviderProfileExport(this.plugin.settings.providers);
-            const jsonData = JSON.stringify(profile, null, 2);
-
-            const pluginConfigDir = this.app.vault.configDir + '/plugins/' + this.plugin.manifest.id;
-            try {
-                const dirExists = await this.app.vault.adapter.exists(pluginConfigDir);
-                if (!dirExists) {
-                    await this.app.vault.adapter.mkdir(pluginConfigDir);
-                }
-            } catch (mkdirError) {
-                console.error("Error ensuring plugin directory exists:", mkdirError);
-                const message = mkdirError instanceof Error ? mkdirError.message : String(mkdirError);
-                new Notice(formatI18n(i18n.settings.providerConfig.exportDirectoryError, { message }));
-                return;
-            }
-
-            await this.app.vault.adapter.write(this.providersFilePath, jsonData);
-            new Notice(formatI18n(i18n.settings.providerConfig.exportSuccess, { path: this.providersFilePath }));
-        } catch (error: unknown) {
-            const message = error instanceof Error ? error.message : String(error);
-            console.error("Error exporting provider settings:", error);
-            new Notice(formatI18n(i18n.settings.providerConfig.exportError, { message }));
-        }
+        await this.plugin.exportProviderProfilesCommand();
     }
 
     async importProviderSettings(): Promise<void> {
-        const i18n = getI18nStrings({ uiLocale: this.plugin.settings.uiLocale });
-        try {
-            const filePath = this.providersFilePath;
-            const fileExists = await this.app.vault.adapter.exists(filePath);
-
-            if (!fileExists) {
-                new Notice(formatI18n(i18n.settings.providerConfig.importFileMissing, { path: filePath }));
-                return;
-            }
-
-            const jsonData = await this.app.vault.adapter.read(filePath);
-            let importSummary;
-            try {
-                importSummary = parseProviderProfileImport(jsonData, this.plugin.settings.providers);
-            } catch (error: unknown) {
-                const message = error instanceof Error ? error.message : String(error);
-                throw new Error(message === 'Imported file does not contain a valid provider array.'
-                    ? i18n.settings.providerConfig.importInvalidArray
-                    : message);
-            }
-
-            this.plugin.settings.providers = importSummary.importedProviders;
-
-            if (!this.plugin.settings.providers.some(p => p.name === this.plugin.settings.activeProvider)) {
-                this.plugin.settings.activeProvider = DEFAULT_SETTINGS.activeProvider;
-                new Notice(i18n.settings.providerConfig.activeProviderReset);
-            }
-
-            await this.plugin.saveSettings();
-            new Notice(formatI18n(i18n.settings.providerConfig.importSuccess, {
-                newCount: importSummary.newCount,
-                updatedCount: importSummary.updatedCount
-            }));
-            this.display(); // Refresh display
-
-        } catch (error: unknown) {
-            const message = error instanceof Error ? error.message : String(error);
-            console.error("Error importing provider settings:", error);
-            new Notice(formatI18n(i18n.settings.providerConfig.importError, { message }));
-        }
+        await this.plugin.importProviderProfilesCommand();
+        this.display();
     }
 
 

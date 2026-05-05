@@ -50,6 +50,7 @@ Carried-forward constraints:
 - `diagram.generate` now has a typed invocation contract alongside provider diagnostics.
 - The first MT2 execution split is landed: `src/operations/diagramGenerateOperation.ts` now owns the reusable diagram execution path, and `src/operations/providerDiagnosticCommand.ts` now owns provider-diagnostic command orchestration below `src/main.ts`.
 - The second MT2 host-adapter slice is now landed: `src/operations/diagramCommandHostAdapter.ts` owns Mermaid/artifact save completion, preview completion, and direct Vega-Lite preview orchestration below `src/main.ts`.
+- The first config/profile extraction slice is now landed: `src/operations/configProfileCommands.ts` now owns provider-profile import/export plus CLI capability/contract export orchestration, and both `src/main.ts` and `src/ui/NotemdSettingTab.ts` now reuse that same command path.
 - Existing Obsidian commands remain registered, hotkey-bindable, and official-CLI-triggerable while the deeper operation layer continues to mature.
 
 ## Short-Term Delivery (0-2 weeks)
@@ -162,7 +163,8 @@ Build a reusable operation layer for the most valuable Notemd capabilities.
   - `diagram.generate` now has a registry-backed typed invocation contract
   - reusable execution now lives in `src/operations/diagramGenerateOperation.ts`
   - save/preview host adapters now live in `src/operations/diagramCommandHostAdapter.ts`
-  - remaining gap: consolidate config/profile host adapters and add a CLI-facing host adapter without reintroducing Obsidian coupling into operations
+  - provider-profile import/export and CLI contract/capability export now live in `src/operations/configProfileCommands.ts`
+  - remaining gap: finish provider-diagnostic report persistence extraction and add a CLI-facing host adapter without reintroducing Obsidian coupling into operations
 
 **MT2. Host adapter split**
 - Add a plugin adapter that resolves active file, vault state, and settings
@@ -270,7 +272,7 @@ Expose a mature, automation-grade Notemd integration surface above the official 
 Progress note:
 
 - Items 1-4 are now partially landed on mainline.
-- The next defensible move is still MT2, but it is now narrower: config/profile adapters and a CLI-facing host adapter should follow the already-landed execution and save/preview extractions so `src/main.ts` stops being the last concentrated host-effects boundary.
+- The next defensible move is still MT2, but it is now narrower: provider-diagnostic report persistence and a CLI-facing host adapter should follow the already-landed execution, save/preview, and config/profile extractions so `src/main.ts` stops being the last concentrated host-effects boundary.
 
 ## Exit Criteria
 
