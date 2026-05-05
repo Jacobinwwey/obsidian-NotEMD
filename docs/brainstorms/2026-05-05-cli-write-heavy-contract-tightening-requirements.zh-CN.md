@@ -5,7 +5,9 @@ topic: cli-write-heavy-contract-tightening
 
 # CLI 写入型契约收口需求
 
-> 更新（2026-05-05，当天稍后）：第一批 direct-surface wrapper 已经落地。`testLlmConnectionCommand`、`generateDiagramCommand` 与 `previewExperimentalDiagramCommand` 现在都通过 host adapter 代理，并返回结构化结果。当前开放问题已经下移到 diagram/provider command-core 收敛，以及 preview/provider-test 是否升级为 typed contract 的决策。
+> 更新（2026-05-05，当天稍后）：第一批 direct-surface wrapper 已经落地。`testLlmConnectionCommand`、`generateDiagramCommand` 与 `previewExperimentalDiagramCommand` 现在都通过 host adapter 代理，并返回结构化结果。当前开放问题已经下移到 diagram/provider command-core 收敛。
+>
+> 更新（2026-05-05，当天更晚）：registry/capability/contract 路径现在也已导出 `provider.connection.test` 与 `diagram.preview` 的 typed operation surface。剩余问题不再是这些 seam 要不要存在，而是 diagram wrapper 之下的 save/artifact 分支是否值得继续提升为额外 typed boundary。
 
 ## 问题框架
 
@@ -29,7 +31,7 @@ topic: cli-write-heavy-contract-tightening
 
 这意味着，write-heavy 批次已经不再是未完成工作。当前真正的压力点只剩：
 
-- `src/main.ts`，这里仍保留 provider connection test、diagram save/generation、Vega-Lite preview 等非平凡 direct command surfaces
+- `src/main.ts`，这里仍保留 provider connection test 后续流程、diagram save/generation、Vega-Lite preview 等更深层 command-core 逻辑
 - selection/export 与 workflow/settings 表面，它们的 contract 深度仍落后于 write-heavy proof set
 - 以及一个典型误区：在更大的写入型家族还没稳定之前，就过早引入全局统一结果 envelope
 
@@ -82,17 +84,17 @@ topic: cli-write-heavy-contract-tightening
 
 **当前事实同步**
 - R1. 当前进度文档与架构文档必须把完整 write-heavy 家族描述为已交付 proof，而不是待完成工作。
-- R2. 当前文档必须精确点名剩余 direct surfaces：`src/main.ts` 中的 `testLlmConnectionCommand`、`generateDiagramCommand` 及其 save/artifact 分支、`previewExperimentalDiagramCommand`。
+- R2. 当前文档必须精确点名剩余更深层 seam：`src/main.ts` 中的 `executeSaveMermaidDiagramCommand`、`executeArtifactDiagramCommand`，以及已经落地的 `provider.connection.test` / `diagram.preview` typed wrapper 之下仍然存在的 save/artifact follow-through。
 
 **短期收口**
-- R3. 下一批 P0 实施必须优先处理 `src/main.ts` 中剩余 direct command surfaces，重点包括 `testLlmConnectionCommand`、`generateDiagramCommand` 与 `previewExperimentalDiagramCommand`。
-- R4. 这些表面要么返回可比于 write-heavy proof set 的结构化结果与显式副作用边界，要么被明确标记为 command-only surface。
-- R5. 这些流程的成功 notice、preview-only 文案与 save/open 分叉应继续向 host adapter 收口，而不是继续内联保留在 `src/main.ts` 中。
-- R6. `src/operations/registry.ts`、`src/operations/capabilityManifest.ts` 与 `src/cliContracts.ts` 只有在新 direct-surface seam 足够 deterministic 时才应继续扩展。
+- R3. 下一批 P0 实施必须优先处理 `src/main.ts` 中剩余更深层的 diagram/provider command core，重点包括 `executeSaveMermaidDiagramCommand`、`executeArtifactDiagramCommand`，以及已经落地 wrapper 之下仍然存在的 save/artifact follow-through。
+- R4. 这些更深层 seam 要么返回可比于 write-heavy proof set 的结构化结果与显式副作用边界，要么被明确标记为现有 typed operation 之下的 internal command-core branch。
+- R5. 这些流程的成功 notice、preview-only 文案与 save/open 分叉应继续向 host adapter 或 operation-layer boundary 收口，而不是继续内联保留在 `src/main.ts` 中。
+- R6. `src/operations/registry.ts`、`src/operations/capabilityManifest.ts` 与 `src/cliContracts.ts` 只有在更深层 save/artifact seam 足够 deterministic 时才应继续扩展；`diagram.preview` 仍应保持 `interactive-ui`，`provider.connection.test` 仍应保持 `safe`。
 
 **中期收敛**
-- R7. direct-surface 批次之后，下一批实施必须转向 packaging isolation 与 maintainer-local semantic verification 的后续硬化。
-- R8. diagram save/generate/preview 与 provider connection-test 要么获得与其它家族同等级的 operation/result discoverability，要么在文档中明确声明为 automation-grade CLI contract 之外的 command-only surface。
+- R7. 更深层 diagram/provider command-core 批次之后，下一批实施必须转向 packaging isolation 与 maintainer-local semantic verification 的后续硬化。
+- R8. diagram save/generate/preview 与 provider connection-test 要么在现有 wrapper 之下继续深化 operation/result discoverability，要么在文档中明确声明为 automation-grade CLI contract 之外的 internal command-core branch。
 - R9. 在至少有一条 `src/fileUtils.ts` 家族和一条 direct-surface 家族都稳定之前，项目应继续优先 family-local result object，而不是急着合并成全局 envelope。
 
 **长期命令面收敛**
@@ -120,20 +122,20 @@ topic: cli-write-heavy-contract-tightening
 ## 关键决策
 
 - 把已交付的 write-heavy 切片当成证明，而不是下一目标。
-- 继续优先 family-specific result object；等更大的 `src/fileUtils.ts` 家族也建模成功后，再决定是否值得上全局 envelope。
-- 把剩余 `src/main.ts` direct surfaces 视为 `src/fileUtils.ts` 之后的下一收敛问题，而不是之前。
+- 继续优先 family-specific result object；等更大的 `src/fileUtils.ts` 家族与至少一条更深层 diagram/provider seam 都建模成功后，再决定是否值得上全局 envelope。
+- 把剩余 `src/main.ts` diagram/provider command-core branch 视为 `src/fileUtils.ts` 之后的下一收敛问题，而不是之前。
 
 ## 依赖 / 假设
 
 - 当前事实已通过 `src/main.ts`、`src/translate.ts`、`src/formulaFixer.ts`、`src/fileUtils.ts`、`src/operations/registry.ts` 与 2026-05 的 brainstorm 文档核对。
 - `content.extract-original-text`、`translate.*`、`formula.*`、`mermaid.batch-fix`、`concept.dedupe` 与 process/generate 子切片已经提供目标模式：utility core 输出 richer result，成功/no-file/confirmation 语义交给 host adapter。
-- 当前 registry 已覆盖下一批所需 operation IDs；剩余工作主要是 contract 深度与 host-side effect 上提。
+- 当前 registry 已覆盖下一批所需 operation IDs，也已包含 `provider.connection.test` 与 `diagram.preview`；剩余工作主要是这些 typed seam 之下更深层的 contract 深度与 host-side effect 上提。
 
 ## 未决问题
 
 ### 延后到规划阶段
-- [影响 R4][Technical] 哪些 direct surfaces 足够 deterministic，值得第一批先升为 registry-backed typed result？
-- [影响 R5][Technical] 第一个 direct-surface seam 应该是 diagram save/generate/preview、provider connection-test，还是二者之间更小的公共 adapter 边界？
+- [影响 R4][Technical] 哪些更深层 diagram save/artifact 分支已经足够 deterministic，值得继续提升为额外 typed operation boundary？
+- [影响 R5][Technical] 第一个更深层 seam 应该先做 save-Mermaid、artifact generation，还是先做两者共享的更小公共边界？
 - [影响 R8][Technical] direct-surface 批次之后，workflow/settings packaging 与 maintainer semantic verification 谁的杠杆更高？
 
 ## 下一步

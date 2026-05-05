@@ -38,7 +38,7 @@ topic: cli-mainline-progress-sync-and-next-phase-requirements
 剩余问题现在已经更窄，也更难：
 
 1. 先前最高价值的公共 direct command surface 已不再内联。`testLlmConnectionCommand`、`generateDiagramCommand` 与 `previewExperimentalDiagramCommand` 现在都通过 host adapter 代理，并返回结构化结果。
-2. 真正剩余的缺口已经下移一层：`src/main.ts` 仍持有 `executeSaveMermaidDiagramCommand` 与 `executeArtifactDiagramCommand`，而 `diagram.preview` 与 provider connection-test 是否进入 automation contract 也还没有定论。
+2. 真正剩余的缺口已经下移一层：`src/main.ts` 仍持有 `executeSaveMermaidDiagramCommand` 与 `executeArtifactDiagramCommand`，但 `diagram.preview` 与 provider connection-test 的 typed contract 已经落地。当前剩余问题变成这些 wrapper 之下的 save/artifact 分支是否还需要继续下探 contract depth。
 3. selection/export 与 workflow/settings surfaces 仍需要超出 command-trigger parity 的更深 contract depth。
 4. packaging isolation 与 maintainer-local semantic verification 仍然重要，但它们现在已经排在更深一层的 diagram/provider contract 决策之后，而不是阻塞项。
 
@@ -74,7 +74,7 @@ topic: cli-mainline-progress-sync-and-next-phase-requirements
   - `provider.profile.import`
   - `cli.capability-manifest.export`
   - `cli.invocation-contract.export`
-- R5. 下一批 contract-tightening 现在必须转向更深层的 diagram/provider command core，重点覆盖 `executeSaveMermaidDiagramCommand`、`executeArtifactDiagramCommand`，以及 `diagram.preview` 与 provider connection-test 是否进入 typed automation contract 的决策，同时保持新落地 wrapper 批次与 write-heavy proof set 稳定、文档对齐且 registry 一致。
+- R5. 下一批 contract-tightening 现在必须转向更深层的 diagram/provider command core，重点覆盖 `executeSaveMermaidDiagramCommand`、`executeArtifactDiagramCommand`，以及新落地 `diagram.preview` / `provider.connection.test` schema 之下 save/artifact 分支是否还需要更深 contract depth，同时保持 wrapper 批次与 write-heavy proof set 稳定、文档对齐且 registry 一致。
 
 **宿主副作用收口**
 - R6. `file.process-add-links`、`file.process-folder-add-links`、`content.generate-from-title`、`content.batch-generate-from-titles`、`mermaid.batch-fix`、`concept.dedupe`、`translate.*`、`formula.*` 与 `content.extract-original-text` 现在应被视作已交付 proof slice。当前应保留这些 family-local result object 与 host-owned success/no-file/confirmation 语义，等待剩余 direct surfaces 补齐。
@@ -83,7 +83,7 @@ topic: cli-mainline-progress-sync-and-next-phase-requirements
 
 **剩余 `src/main.ts` 瘦身**
 - R9. note-processing 与 utility host-adapter 抽离现在已经足够完整，回头重开这些家族只会制造 churn。下一批 `src/main.ts` 瘦身应只瞄准剩余更深层的 diagram/provider helper。
-- R10. diagram save/generate/preview 与 provider connection-test 要么获得与已抽取家族同等级的 discoverable operation/result 边界，要么在文档中明确声明为 command-only surface。公共 wrapper 已经落地；当前开放问题是更深层 contract 是否要被提升为 typed automation exposure。
+- R10. diagram save/generate/preview 与 provider connection-test 要么获得与已抽取家族同等级的 discoverable operation/result 边界，要么在文档中明确声明为 command-only surface。公共 wrapper 与 typed `diagram.preview` / `provider.connection.test` contract 已经落地；当前开放问题是更深层 save/artifact internals 是否还值得继续提升为额外 typed boundary。
 
 **主线与工作区卫生**
 - R11. `main` 集成必须继续在干净 worktree 或干净分支上完成，不能清理或复用 dirty root worktree。
@@ -118,7 +118,7 @@ topic: cli-mainline-progress-sync-and-next-phase-requirements
 ## 未决问题
 
 ### 延后到规划阶段
-- [影响 R5][Technical] 下一批更深层 contract 工作应把 `diagram.preview`、provider connection-test、两者同时，还是两者都不，提升为 typed automation exposure？
+- [影响 R5][Technical] 下一批更深层 contract 工作应把 save/artifact 执行拆成额外 typed operation boundary，还是继续把这些分支保留在 `diagram.generate` / `diagram.preview` 之下？
 - [影响 R7][Technical] 哪些 direct surfaces 值得升级为 registry-backed operations，哪些应继续保留 command-only 语义？
 - [影响 R10][Technical] direct-surface 批次之后，selection/export contract 增强与 maintainer semantic verification 谁的杠杆更高？
 
