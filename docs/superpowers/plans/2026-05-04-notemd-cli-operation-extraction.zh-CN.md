@@ -55,7 +55,7 @@
 - provider diagnostic host adaptation 也已抽离：`src/operations/providerDiagnosticCommandHostAdapter.ts` 现在承接开发者诊断命令的 settings 装载、报告落盘接线与 notice 整形逻辑。
 - config/profile host adaptation 也已抽离：`src/operations/configProfileCommandHostAdapter.ts` 现在承接 CLI 邻接的导入导出状态持久化、notice 整形与错误映射逻辑。
 - provider connection-test host adaptation 也已抽离：`src/operations/providerConnectionTestCommandHostAdapter.ts` 现在承接共享 provider 测试的 settings 装载与 notice/report 编排逻辑，并已被命令路径与设置页共同复用。
-- note-processing host adaptation 也已抽离一批：`src/operations/noteProcessingCommandHostAdapter.ts` 现在承接 `process-current-add-links`、`process-folder-add-links`、`generate-from-title` 与 `research-and-summarize` 的 busy-guard、reporter 生命周期、notice/error-log 编排，`src/main.ts` 不再内联保留这批命令包装。
+- note-processing host adaptation 也已抽离一批：`src/operations/noteProcessingCommandHostAdapter.ts` 现在承接 `process-current-add-links`、`process-folder-add-links`、`batch-generate-from-titles`、`generate-from-title` 与 `research-and-summarize` 的 busy-guard、reporter 生命周期、notice/error-log 编排，`src/main.ts` 不再内联保留这批命令包装。
 - 现有 Obsidian 命令仍保持注册状态，并继续支持快捷键与官方 CLI 触发，同时底层 operation 层继续演进。
 
 ## 短期交付（0-2 周）
@@ -174,7 +174,7 @@
   - config/profile host adaptation 现在已落在 `src/operations/configProfileCommandHostAdapter.ts`
   - provider connection-test host adaptation 现在已落在 `src/operations/providerConnectionTestCommandHostAdapter.ts`
   - note-processing host adaptation 第一批现在已落在 `src/operations/noteProcessingCommandHostAdapter.ts`
-  - 剩余缺口：继续收缩 `batchGenerateContentForTitlesCommand`、翻译/抽取类命令及其他批处理宿主副作用，且不能把 Obsidian 耦合重新塞回 operation 层
+  - 剩余缺口：继续收缩翻译/抽取类命令及其他批处理宿主副作用，且不能把 Obsidian 耦合重新塞回 operation 层
 
 **MT2. Host adapter 拆分**
 - 新增 plugin adapter，负责解析 active file、vault state、settings
@@ -282,7 +282,7 @@
 进度说明：
 
 - 第 1-4 项已在主线上部分落地。
-- 下一步最稳妥的推进点仍是 MT2，但范围已经继续缩小：provider diagnostic、config/profile、共享 provider test，以及 `process-current-add-links` / `process-folder-add-links` / `generate-from-title` / `research-and-summarize` host adaptation 都已落地，下一批应继续把 `batchGenerateContentForTitlesCommand`、翻译/抽取类命令与其他批处理宿主副作用从 `src/main.ts` 剥离出去。
+- 下一步最稳妥的推进点仍是 MT2，但范围已经继续缩小：provider diagnostic、config/profile、共享 provider test，以及 `process-current-add-links` / `process-folder-add-links` / `batch-generate-from-titles` / `generate-from-title` / `research-and-summarize` host adaptation 都已落地，下一批应继续把翻译/抽取类命令与其他批处理宿主副作用从 `src/main.ts` 剥离出去。
 
 ## 退出标准
 
