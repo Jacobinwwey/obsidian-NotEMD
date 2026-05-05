@@ -1,4 +1,4 @@
-import { App, TFile, Notice } from 'obsidian';
+import { App, TFile } from 'obsidian';
 import { LLMProviderConfig, NotemdSettings, ProgressReporter, TaskKey } from './types';
 import { callLLM } from './llmUtils';
 import { formatI18n, getI18nStrings } from './i18n';
@@ -11,12 +11,21 @@ export interface ExtractOriginalTextPluginContext {
     getPromptForTask: (taskKey: Extract<TaskKey, 'extractOriginalText' | 'extractOriginalTextMerged'>, replacements?: Record<string, string>) => string;
 }
 
+export interface ExtractOriginalTextResult {
+    sourcePath: string;
+    outputPath: string;
+    outputDirectory: string;
+    outputSuffix: string;
+    questionCount: number;
+    mergedMode: boolean;
+}
+
 export async function extractOriginalText(
     app: App,
     plugin: ExtractOriginalTextPluginContext,
     file: TFile,
     reporter: ProgressReporter
-): Promise<string | null> {
+): Promise<ExtractOriginalTextResult | null> {
     const settings = plugin.settings;
     const i18n = getI18nStrings({ uiLocale: settings.uiLocale });
     const questions = settings.extractQuestions.split('\n').map(q => q.trim()).filter(q => q.length > 0);
@@ -152,6 +161,13 @@ export async function extractOriginalText(
 
     await app.vault.create(newFilePath, outputContent);
     reporter.log(`Created extracted file: ${newFilePath}`);
-    new Notice(formatI18n(i18n.notices.extractionCompleteSavedTo, { path: newFilePath }));
-    return newFilePath;
+
+    return {
+        sourcePath: file.path,
+        outputPath: newFilePath,
+        outputDirectory: targetSaveFolder,
+        outputSuffix: suffix,
+        questionCount: questions.length,
+        mergedMode: settings.extractOriginalTextMergedMode
+    };
 }

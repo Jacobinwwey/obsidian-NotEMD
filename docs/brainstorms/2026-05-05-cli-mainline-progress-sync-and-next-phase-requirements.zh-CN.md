@@ -13,12 +13,13 @@ topic: cli-mainline-progress-sync-and-next-phase-requirements
 - 本轮 clean worktree 已继续把翻译、概念提取、原文提取与 `extract-concepts-and-generate-titles` 组合命令下沉到 `src/operations/noteProcessingCommandHostAdapter.ts`。
 - 同一轮 clean worktree 也已落地 note-processing registry onboarding、第一批 utility-command registry、process / generate / research 长尾 registry batch、batch translation 的 injected reporter、original-text extraction 的输出路径返回，以及承接 duplicate check / duplicate cleanup / Mermaid fix / formula fix 的 `src/operations/utilityCommandHostAdapter.ts`。
 - 这一轮后续切片也已补齐剩余 selection/export registry 缺口：`editor.create-link-and-generate`、`provider.profile.export`、`provider.profile.import`、`cli.capability-manifest.export` 与 `cli.invocation-contract.export` 现在都已进入共享 registry/capability/contract 表面。
+- 下一步跟进切片也已开始 contract enrichment：`extractOriginalText()` 现在返回更丰富的 machine-readable result object，成功 notice 也已从 utility core 上提到 `src/operations/noteProcessingCommandHostAdapter.ts`
 - `src/fileUtils.ts` 与 `src/extractOriginalText.ts` 不再强耦合具体 `NotemdPlugin` 类，而是改为接受更窄的 runtime context。
 - 组合命令此前存在两个真实缺陷：外层先置 `isBusy` 导致内部 `extractConceptsCommand()` 直接早退，以及批量生成阶段没有强制使用配置中的概念目录。本轮已一起修复。
 
 但这还不是 CLI-ready 终态。当前剩余问题已经再次转移到三类更实质的边界：
 
-1. `src/operations/registry.ts`、`src/operations/capabilityManifest.ts` 与 `src/cliContracts.ts` 现在已覆盖 process / generate / research / translation / extraction / utility / selection / export 这些 command families，但大量 write-heavy operation 仍只有浅层 schema，还缺更丰富的 machine-readable result 语义。
+1. `src/operations/registry.ts`、`src/operations/capabilityManifest.ts` 与 `src/cliContracts.ts` 现在已覆盖 process / generate / research / translation / extraction / utility / selection / export 这些 command families，但大量 write-heavy operation 仍只有浅层 schema，还缺更丰富的 machine-readable result 语义。`content.extract-original-text` 现在已成为这条 enrichment 路径的第一批落地样本。
 2. `src/translate.ts`、`src/fileUtils.ts`、`src/extractOriginalText.ts` 与 `src/formulaFixer.ts` 仍持有 `App` / `Notice` / vault 写入等宿主副作用，operation contract 虽更干净但仍未宿主中立。
 3. `src/main.ts` 虽已显著收缩，但 note-processing 与 utility-host 两轮抽离之后仍有直接执行表面与 sidebar 专属 read-path 尚未进入 registry/contract 体系。
 

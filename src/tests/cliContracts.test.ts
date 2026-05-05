@@ -238,7 +238,12 @@ describe('CLI invocation contract', () => {
             resultSchema: expect.objectContaining({
                 type: 'object',
                 properties: expect.objectContaining({
-                    outputPath: expect.any(Object)
+                    sourcePath: expect.any(Object),
+                    outputPath: expect.any(Object),
+                    outputDirectory: expect.any(Object),
+                    outputSuffix: expect.any(Object),
+                    questionCount: expect.any(Object),
+                    mergedMode: expect.any(Object)
                 })
             })
         }));

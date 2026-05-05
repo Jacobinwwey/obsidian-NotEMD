@@ -49,7 +49,7 @@
 | `notemd:batch-translate-folder` | 批量翻译文件夹 | `interactive-ui` | 文件夹选择和进度 UI 需要先拆 adapter | `translate.folder-batch` |
 | `notemd:extract-concepts-from-current-file` | 从活动文件提取概念 | `requires-active-file` | 依赖活动文件和 note-creation 副作用 | `concept.extract-file` |
 | `notemd:batch-extract-concepts-from-folder` | 从文件夹批量提取概念 | `interactive-ui` | 文件夹选择和进度 UI 仍宿主绑定 | `concept.extract-folder` |
-| `notemd:extract-original-text` | 从活动文件提取配置好的原文片段 | `requires-active-file` | 依赖活动文件、配置问题集与输出笔记写入副作用 | `content.extract-original-text` |
+| `notemd:extract-original-text` | 从活动文件提取配置好的原文片段 | `requires-active-file` | 现在已有结构化结果，但 active-file 依赖与输出路径持久化仍绑定宿主/设置 | `content.extract-original-text` |
 | `notemd:extract-concepts-and-generate-titles` | 提取概念并生成标题的复合流程 | `requires-active-file` | 复合 workflow 尚无显式 typed contract | `workflow.extract-and-generate` |
 | `notemd:create-wiki-link-and-generate-from-selection` | 基于选区创建概念笔记并生成内容 | `requires-selection` | 编辑器选区是内生依赖 | `editor.create-link-and-generate` |
 | `notemd:batch-mermaid-fix` | 批量 Mermaid 修复 | `interactive-ui` | 文件夹选择、内容改写和报告副作用都仍然绑定宿主 | `mermaid.batch-fix` |
@@ -64,6 +64,7 @@
 - `src/operations/capabilityManifest.ts` 现在从同一 registry 展平 capability manifest。
 - `src/cliContracts.ts` 现在也从同一 registry 生成 invocation contract，减少了文档、命令发现与契约导出之间的漂移路径。
 - registry 现在也已纳入主要 note-processing、utility、selection 与 export operations：`editor.create-link-and-generate`、`file.process-add-links`、`file.process-folder-add-links`、`content.generate-from-title`、`content.batch-generate-from-titles`、`research.summarize-topic`、`translate.file`、`translate.folder-batch`、`concept.extract-file`、`concept.extract-folder`、`content.extract-original-text`、`workflow.extract-and-generate`、`duplicate.check-file`、`concept.dedupe`、`mermaid.batch-fix`、`formula.fix-file`、`formula.batch-fix`、`provider.profile.export`、`provider.profile.import`、`cli.capability-manifest.export` 与 `cli.invocation-contract.export`。
+- `content.extract-original-text` 现在也是这批 write-heavy path 里第一条返回更丰富 machine-readable result、且不再由 utility core 直接发 success notice 的路径。
 - 旧命令别名仍保留注册以保证兼容，但会被刻意排除在 capability manifest 导出之外。
 
 ## 下一批抽取目标

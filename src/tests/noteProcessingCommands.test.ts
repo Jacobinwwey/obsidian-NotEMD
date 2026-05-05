@@ -464,7 +464,14 @@ describe('note processing command surface', () => {
             .mockResolvedValue(undefined);
         const utilitySpy = jest
             .spyOn(extractOriginalTextModule, 'extractOriginalText')
-            .mockResolvedValue('Notes/Topic_Extracted.md');
+            .mockResolvedValue({
+                sourcePath: 'Notes/Topic.md',
+                outputPath: 'Notes/Topic_Extracted.md',
+                outputDirectory: 'Notes',
+                outputSuffix: '_Extracted',
+                questionCount: 1,
+                mergedMode: false
+            });
 
         await (plugin as any).extractOriginalTextCommand(reporter);
 
