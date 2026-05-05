@@ -6,6 +6,7 @@ describe('operations registry', () => {
         const ids = definitions.map(definition => definition.id);
 
         expect(ids).toEqual(expect.arrayContaining([
+            'provider.connection.test',
             'provider.diagnostic.run',
             'provider.diagnostic.stability-run',
             'diagram.generate',
@@ -34,6 +35,36 @@ describe('operations registry', () => {
         ]));
     });
 
+    test('returns structured metadata for provider connection test', () => {
+        const definition = getOperationDefinition('provider.connection.test');
+
+        expect(definition).toEqual(expect.objectContaining({
+            id: 'provider.connection.test',
+            version: 1,
+            automationLevel: 'safe',
+            requiredContext: 'none',
+            sideEffectClass: 'read-only',
+            commandBindings: expect.arrayContaining([
+                expect.objectContaining({ commandId: 'test-llm-connection', mappingKind: 'exact' })
+            ]),
+            inputSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    providerName: expect.any(Object)
+                })
+            }),
+            resultSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    kind: expect.any(Object),
+                    statusMessage: expect.any(Object),
+                    providerName: expect.any(Object),
+                    success: expect.any(Object)
+                })
+            })
+        }));
+    });
+
     test('returns structured metadata for provider diagnostic run', () => {
         const definition = getOperationDefinition('provider.diagnostic.run');
 
@@ -44,7 +75,6 @@ describe('operations registry', () => {
             requiredContext: 'none',
             sideEffectClass: 'read-only',
             commandBindings: expect.arrayContaining([
-                expect.objectContaining({ commandId: 'test-llm-connection', mappingKind: 'future-target' }),
                 expect.objectContaining({ commandId: 'run-developer-provider-diagnostic', mappingKind: 'exact' })
             ])
         }));
@@ -76,6 +106,39 @@ describe('operations registry', () => {
             }),
             resultSchema: expect.objectContaining({
                 required: expect.arrayContaining(['plan', 'spec', 'artifact'])
+            })
+        }));
+    });
+
+    test('returns typed metadata for diagram preview', () => {
+        const definition = getOperationDefinition('diagram.preview');
+
+        expect(definition).toEqual(expect.objectContaining({
+            id: 'diagram.preview',
+            version: 1,
+            automationLevel: 'interactive-ui',
+            requiredContext: 'preview-ui',
+            sideEffectClass: 'preview-ui',
+            commandBindings: expect.arrayContaining([
+                expect.objectContaining({
+                    commandId: 'notemd-preview-diagram',
+                    mappingKind: 'exact'
+                })
+            ]),
+            inputSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    sourcePath: expect.any(Object),
+                    sourceMarkdown: expect.any(Object)
+                })
+            }),
+            resultSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    sourcePath: expect.any(Object),
+                    previewOpened: expect.any(Object),
+                    artifact: expect.any(Object)
+                })
             })
         }));
     });

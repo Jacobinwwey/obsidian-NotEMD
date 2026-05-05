@@ -5,7 +5,9 @@ topic: cli-write-heavy-contract-tightening
 
 # CLI Write-Heavy Contract Tightening Requirements
 
-> Update (2026-05-05, later same day): the first direct-surface wrapper batch is now landed. `testLlmConnectionCommand`, `generateDiagramCommand`, and `previewExperimentalDiagramCommand` now delegate through host adapters and return structured results. The open problem has moved one layer deeper to diagram/provider command-core convergence and the typed-contract decision for preview/provider-test exposure.
+> Update (2026-05-05, later same day): the first direct-surface wrapper batch is now landed. `testLlmConnectionCommand`, `generateDiagramCommand`, and `previewExperimentalDiagramCommand` now delegate through host adapters and return structured results. The open problem moved one layer deeper to diagram/provider command-core convergence.
+>
+> Update (2026-05-05, later later same day): the registry/capability/contract path now also exports typed operation surfaces for `provider.connection.test` and `diagram.preview`. The remaining question is no longer whether those seams should exist, but whether deeper save/artifact branches under the current diagram wrappers deserve additional typed boundaries.
 
 ## Problem Frame
 
@@ -29,7 +31,7 @@ The previous requirements passes already answered the broad extraction question,
 
 That means the write-heavy batch is no longer open work. The real pressure points are now:
 
-- `src/main.ts`, which still keeps non-trivial direct command surfaces for provider connection test, diagram save/generation, and Vega-Lite preview
+- `src/main.ts`, which still keeps non-trivial deeper command-core logic for provider connection test follow-through, diagram save/generation, and Vega-Lite preview
 - selection/export and workflow/settings surfaces, which still have shallower contract depth than the write-heavy proof set
 - the temptation to introduce a shared global result envelope before the larger write-heavy family has stabilized
 
@@ -82,17 +84,17 @@ The proof slice is already in place for `content.extract-original-text`, `transl
 
 **Current-State Truth**
 - R1. Current progress and architecture docs must describe the full write-heavy family as delivered proof, not as pending work.
-- R2. Current docs must name the verified remaining direct surfaces precisely: `testLlmConnectionCommand`, `generateDiagramCommand` plus its save/artifact branches, and `previewExperimentalDiagramCommand` in `src/main.ts`.
+- R2. Current docs must name the verified remaining deeper seams precisely: `executeSaveMermaidDiagramCommand`, `executeArtifactDiagramCommand`, and the save/artifact follow-through that still sits below the already-landed `provider.connection.test` / `diagram.preview` typed wrappers in `src/main.ts`.
 
 **Short-Term Hardening**
-- R3. The next P0 implementation batch must prioritize the remaining direct command surfaces in `src/main.ts`, especially `testLlmConnectionCommand`, `generateDiagramCommand`, and `previewExperimentalDiagramCommand`.
-- R4. Those surfaces must either gain structured results and explicit side-effect boundaries comparable to the write-heavy proof set, or be documented deliberately as command-only surfaces.
-- R5. Success notices, preview-only messaging, and any remaining save/open branching for those surfaces must keep converging toward host adapters rather than staying inline in `src/main.ts`.
-- R6. `src/operations/registry.ts`, `src/operations/capabilityManifest.ts`, and `src/cliContracts.ts` must be extended only where the new direct-surface seams become deterministic enough for typed invocation contracts.
+- R3. The next P0 implementation batch must prioritize the remaining deeper diagram/provider command core in `src/main.ts`, especially `executeSaveMermaidDiagramCommand`, `executeArtifactDiagramCommand`, and any save/artifact follow-through that still sits below the already-landed wrappers.
+- R4. Those deeper seams must either gain structured results and explicit side-effect boundaries comparable to the write-heavy proof set, or be documented deliberately as internal command-core branches beneath existing typed operations.
+- R5. Success notices, preview-only messaging, and any remaining save/open branching for those deeper seams must keep converging toward host adapters or operation-layer boundaries rather than staying inline in `src/main.ts`.
+- R6. `src/operations/registry.ts`, `src/operations/capabilityManifest.ts`, and `src/cliContracts.ts` must be extended only where the deeper save/artifact seams become deterministic enough for richer typed invocation contracts; `diagram.preview` should remain `interactive-ui`, and `provider.connection.test` should remain `safe`.
 
 **Mid-Term Convergence**
-- R7. After the direct-surface batch, the next implementation batch must shift toward packaging isolation and maintainer-local semantic verification hardening.
-- R8. Diagram save/generate/preview and provider connection-test flows must either gain the same operation/result discoverability as other families or be explicitly documented as command-only surfaces outside the automation-grade CLI contract.
+- R7. After the deeper diagram/provider command-core batch, the next implementation batch must shift toward packaging isolation and maintainer-local semantic verification hardening.
+- R8. Diagram save/generate/preview and provider connection-test flows must either deepen the current operation/result discoverability beneath existing wrappers or be explicitly documented as internal command-core branches outside the automation-grade CLI contract.
 - R9. The project should continue to prefer family-local result objects until at least one direct-surface family also demonstrates stable semantics.
 
 **Long-Term Command-Surface Convergence**
@@ -120,20 +122,20 @@ The proof slice is already in place for `content.extract-original-text`, `transl
 ## Key Decisions
 
 - Use the delivered write-heavy slices as proof, not as the next work target.
-- Prefer family-specific result objects first; defer a shared global envelope until the larger `src/fileUtils.ts` family is modeled successfully.
-- Treat remaining `src/main.ts` direct surfaces as the next convergence problem after the larger write-heavy batch, not before it.
+- Prefer family-specific result objects first; defer a shared global envelope until the larger `src/fileUtils.ts` family and at least one deeper diagram/provider seam are modeled successfully.
+- Treat remaining `src/main.ts` diagram/provider command-core branches as the next convergence problem after the larger write-heavy batch, not before it.
 
 ## Dependencies / Assumptions
 
 - Current truth was verified against `src/main.ts`, `src/translate.ts`, `src/formulaFixer.ts`, `src/fileUtils.ts`, `src/operations/registry.ts`, and the May 2026 brainstorm documents.
 - `content.extract-original-text`, `translate.*`, `formula.*`, `mermaid.batch-fix`, `concept.dedupe`, and the process/generate sub-slice already demonstrate the target pattern: richer result object out of the utility core, success/no-file/confirmation semantics in the host adapter.
-- The current registry already covers the operation IDs needed for the next batch; the remaining work is mostly contract depth and host-side effect relocation.
+- The current registry already covers the operation IDs needed for the next batch, including `provider.connection.test` and `diagram.preview`; the remaining work is mostly deeper contract depth and host-side effect relocation beneath those typed seams.
 
 ## Outstanding Questions
 
 ### Deferred To Planning
-- [Affects R4][Technical] Which direct surfaces are deterministic enough to deserve registry-backed typed results first, and which should remain command-only?
-- [Affects R5][Technical] Should the first direct-surface seam be diagram save/generate/preview, provider connection-test, or a minimal shared adapter boundary across both?
+- [Affects R4][Technical] Which deeper diagram save/artifact branches are deterministic enough to deserve additional typed operation boundaries, and which should remain internal beneath `diagram.generate` / `diagram.preview`?
+- [Affects R5][Technical] Should the first deeper seam be save-Mermaid, artifact generation, or a minimal shared boundary below both wrappers?
 - [Affects R8][Technical] After the direct-surface batch, is workflow/settings packaging or maintainer semantic verification the higher-leverage follow-up?
 
 ## Next Steps

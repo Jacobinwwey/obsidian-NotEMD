@@ -79,6 +79,30 @@ const PROVIDER_DIAGNOSTIC_STABILITY_RESULT_SCHEMA: OperationSchema = {
     }
 };
 
+const PROVIDER_CONNECTION_TEST_INPUT_SCHEMA: OperationSchema = {
+    type: 'object',
+    properties: {
+        providerName: { type: 'string' },
+        enableApiErrorDebugMode: { type: 'boolean' }
+    }
+};
+
+const PROVIDER_CONNECTION_TEST_RESULT_SCHEMA: OperationSchema = {
+    type: 'object',
+    properties: {
+        kind: {
+            type: 'string',
+            enum: ['success', 'failure', 'error']
+        },
+        statusMessage: { type: 'string' },
+        providerName: { type: 'string' },
+        success: { type: 'boolean' },
+        message: { type: 'string' },
+        errorMessage: { type: 'string' },
+        errorDetails: { type: 'string' }
+    }
+};
+
 const DIAGRAM_GENERATE_INPUT_SCHEMA: OperationSchema = {
     type: 'object',
     required: ['sourceMarkdown', 'compatibilityMode', 'outputMode'],
@@ -106,6 +130,26 @@ const DIAGRAM_GENERATE_RESULT_SCHEMA: OperationSchema = {
         spec: { type: 'object' },
         artifact: { type: 'object' },
         renderError: { type: 'string' }
+    }
+};
+
+const DIAGRAM_PREVIEW_INPUT_SCHEMA: OperationSchema = {
+    type: 'object',
+    required: ['sourceMarkdown'],
+    properties: {
+        sourcePath: { type: 'string' },
+        sourceMarkdown: { type: 'string' }
+    }
+};
+
+const DIAGRAM_PREVIEW_RESULT_SCHEMA: OperationSchema = {
+    type: 'object',
+    required: ['artifact', 'previewOpened'],
+    properties: {
+        sourcePath: { type: 'string' },
+        actionLabel: { type: 'string' },
+        artifact: { type: 'object' },
+        previewOpened: { type: 'boolean' }
     }
 };
 
@@ -590,9 +634,6 @@ const OPERATION_DEFINITIONS: OperationDefinition[] = [
         requiredContext: 'none',
         sideEffectClass: 'read-only',
         commandBindings: [
-            createWorkflowCommandBinding('test-llm-connection', 'test-llm-connection', {
-                mappingKind: 'future-target'
-            }),
             createStaticCommandBinding('run-developer-provider-diagnostic', {
                 automationLevel: 'safe',
                 requiredContext: 'none',
@@ -655,7 +696,21 @@ const OPERATION_DEFINITIONS: OperationDefinition[] = [
                 mappingKind: 'legacy-alias',
                 includeInCapabilityManifest: false
             })
-        ]
+        ],
+        inputSchema: DIAGRAM_PREVIEW_INPUT_SCHEMA,
+        resultSchema: DIAGRAM_PREVIEW_RESULT_SCHEMA
+    },
+    {
+        version: 1,
+        id: 'provider.connection.test',
+        automationLevel: 'safe',
+        requiredContext: 'none',
+        sideEffectClass: 'read-only',
+        commandBindings: [
+            createWorkflowCommandBinding('test-llm-connection', 'test-llm-connection')
+        ],
+        inputSchema: PROVIDER_CONNECTION_TEST_INPUT_SCHEMA,
+        resultSchema: PROVIDER_CONNECTION_TEST_RESULT_SCHEMA
     },
     {
         version: 1,

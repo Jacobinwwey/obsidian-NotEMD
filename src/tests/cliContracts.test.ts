@@ -4,6 +4,7 @@ describe('CLI invocation contract', () => {
     test('exports versioned typed contracts for registry-backed operations', () => {
         const contract = buildCliInvocationContract();
         const operationIds = contract.operations.map(operation => operation.operationId);
+        const providerConnectionTest = contract.operations.find(operation => operation.operationId === 'provider.connection.test');
         const providerProfileExport = contract.operations.find(operation => operation.operationId === 'provider.profile.export');
         const providerProfileImport = contract.operations.find(operation => operation.operationId === 'provider.profile.import');
         const cliCapabilityExport = contract.operations.find(operation => operation.operationId === 'cli.capability-manifest.export');
@@ -23,12 +24,15 @@ describe('CLI invocation contract', () => {
         const batchMermaidFix = contract.operations.find(operation => operation.operationId === 'mermaid.batch-fix');
         const fixFormulaFile = contract.operations.find(operation => operation.operationId === 'formula.fix-file');
         const batchFixFormula = contract.operations.find(operation => operation.operationId === 'formula.batch-fix');
+        const diagramPreview = contract.operations.find(operation => operation.operationId === 'diagram.preview');
 
         expect(contract.version).toBe(1);
         expect(operationIds).toEqual(expect.arrayContaining([
+            'provider.connection.test',
             'provider.diagnostic.run',
             'provider.diagnostic.stability-run',
             'diagram.generate',
+            'diagram.preview',
             'provider.profile.export',
             'provider.profile.import',
             'cli.capability-manifest.export',
@@ -66,6 +70,44 @@ describe('CLI invocation contract', () => {
         expect(contract.operations[2].resultSchema).toEqual(expect.objectContaining({
             type: 'object',
             required: expect.arrayContaining(['plan', 'spec', 'artifact'])
+        }));
+
+        expect(providerConnectionTest).toEqual(expect.objectContaining({
+            operationId: 'provider.connection.test',
+            inputSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    providerName: expect.any(Object)
+                })
+            }),
+            resultSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    kind: expect.any(Object),
+                    statusMessage: expect.any(Object),
+                    providerName: expect.any(Object),
+                    success: expect.any(Object)
+                })
+            })
+        }));
+
+        expect(diagramPreview).toEqual(expect.objectContaining({
+            operationId: 'diagram.preview',
+            inputSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    sourcePath: expect.any(Object),
+                    sourceMarkdown: expect.any(Object)
+                })
+            }),
+            resultSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    sourcePath: expect.any(Object),
+                    previewOpened: expect.any(Object),
+                    artifact: expect.any(Object)
+                })
+            })
         }));
 
         expect(providerProfileExport).toEqual(expect.objectContaining({

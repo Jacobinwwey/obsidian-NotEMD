@@ -40,6 +40,7 @@ describe('CLI capability manifest', () => {
     test('captures code-backed metadata for mapped sidebar actions', () => {
         const manifest = buildCliCapabilityManifest();
         const diagram = manifest.commands.find(command => command.id === 'notemd:notemd-generate-diagram');
+        const diagramPreview = manifest.commands.find(command => command.id === 'notemd:notemd-preview-diagram');
         const diagnostic = manifest.commands.find(command => command.id === 'notemd:test-llm-connection');
         const mermaid = manifest.commands.find(command => command.id === 'notemd:notemd-summarize-as-mermaid');
         const providerProfileExport = manifest.commands.find(command => command.id === 'notemd:export-provider-profiles');
@@ -81,10 +82,19 @@ describe('CLI capability manifest', () => {
         }));
 
         expect(diagnostic).toEqual(expect.objectContaining({
-            mappingKind: 'future-target',
+            operationId: 'provider.connection.test',
+            mappingKind: 'exact',
             automationLevel: getSidebarActionAutomationLevel('test-llm-connection'),
             requiredContext: getSidebarActionRequiredContext('test-llm-connection'),
             sideEffectClass: getSidebarActionSideEffectClass('test-llm-connection')
+        }));
+
+        expect(diagramPreview).toEqual(expect.objectContaining({
+            operationId: 'diagram.preview',
+            automationLevel: getSidebarActionAutomationLevel('preview-experimental-diagram'),
+            requiredContext: getSidebarActionRequiredContext('preview-experimental-diagram'),
+            sideEffectClass: getSidebarActionSideEffectClass('preview-experimental-diagram'),
+            mappingKind: 'exact'
         }));
 
         expect(providerProfileExport).toEqual(expect.objectContaining({
