@@ -41,10 +41,11 @@ Observed host facts:
 | `notemd:generate-content-from-title` | Generate note content from title | `requires-active-file` | Uses active file and writeback flow | `content.generate-from-title` |
 | `notemd:batch-generate-content-from-titles` | Batch title generation | `interactive-ui` | Folder selection, completion-folder behavior, progress UI | `content.batch-generate-from-titles` |
 | `notemd:research-and-summarize-topic` | Research selected text / active note title | `requires-selection` | Depends on active editor or active note name | `research.summarize-topic` |
-| `notemd:translate-file` | Translate current note/selection | `requires-selection` | Current command contract is editor-context first | `translate.file` |
+| `notemd:translate-file` | Translate current active note | `requires-active-file` | Current command path reads the active file and writes a translated sibling/output note | `translate.file` |
 | `notemd:batch-translate-folder` | Batch translate a folder | `interactive-ui` | Folder selection and progress UI need adapter separation | `translate.folder-batch` |
 | `notemd:extract-concepts-from-current-file` | Extract concepts from active file | `requires-active-file` | Active file + note-creation side effects | `concept.extract-file` |
 | `notemd:batch-extract-concepts-from-folder` | Extract concepts across folder | `interactive-ui` | Folder selection and progress UI still host-bound | `concept.extract-folder` |
+| `notemd:extract-original-text` | Extract configured source snippets from active file | `requires-active-file` | Active file + configured questions + output-note write side effects | `content.extract-original-text` |
 | `notemd:extract-concepts-and-generate-titles` | Compound extract+generate flow | `requires-active-file` | Composite workflow without explicit typed contract | `workflow.extract-and-generate` |
 | `notemd:create-wiki-link-and-generate-from-selection` | Selection-driven concept note generation | `requires-selection` | Editor selection is intrinsic | `editor.create-link-and-generate` |
 | `notemd:batch-mermaid-fix` | Batch Mermaid repair | `interactive-ui` | Folder selection + mutation + report side effects | `mermaid.batch-fix` |
@@ -58,6 +59,7 @@ Observed host facts:
 - `src/operations/registry.ts` is now the central metadata source for extracted operations, command bindings, mapping kind, and selected input/result schemas.
 - `src/operations/capabilityManifest.ts` now flattens those command bindings into the exported capability manifest.
 - `src/cliContracts.ts` now builds the invocation contract from the same registry, which removes one major drift path between docs, command discovery, and contract export.
+- The registry now includes the first note-processing operation set as well: `translate.file`, `translate.folder-batch`, `concept.extract-file`, `concept.extract-folder`, `content.extract-original-text`, and `workflow.extract-and-generate`.
 - Legacy aliases remain registered for compatibility, but they are intentionally excluded from capability-manifest export.
 
 ## First Extraction Targets

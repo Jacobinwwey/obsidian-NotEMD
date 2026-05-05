@@ -240,8 +240,10 @@ The gap is smaller than before:
 - `src/operations/configProfileCommandHostAdapter.ts` now carries config/profile state persistence, CLI export notice shaping, and import/export error mapping below the command layer
 - `src/operations/providerConnectionTestCommandHostAdapter.ts` now carries shared provider connection test loading and notice/reporter orchestration, and is now reused by both the command path and the settings tab
 - `src/operations/noteProcessingCommandHostAdapter.ts` now carries not only `process-current-add-links`, `process-folder-add-links`, `batch-generate-from-titles`, `generate-from-title`, and `research-and-summarize`, but also `translate-current-file`, `batch-translate-folder`, `extract-concepts-current`, `extract-concepts-folder`, `extract-original-text`, and `extract-concepts-and-generate-titles`
+- `src/operations/utilityCommandHostAdapter.ts` now carries duplicate cleanup, batch Mermaid fix, and single/batch formula-fix command orchestration below `src/main.ts`
+- `src/translate.ts` now accepts injected reporters for batch-translation flows instead of hard-wiring `ProgressModal` as the only execution carrier, and `src/extractOriginalText.ts` now returns its output path so host adapters can own reporter completion more explicitly
 - `src/fileUtils.ts` and `src/extractOriginalText.ts` now accept narrower runtime contexts instead of the concrete `NotemdPlugin` class, which shows the boundary work has moved beyond wrapper extraction into utility host-coupling reduction
-- `src/main.ts` now mainly retains command registration plus the still-inline `duplicate` / `batch Mermaid fix` / `formula fix` command orchestration; the next real gap is note-processing registry onboarding and utility side-effect tightening rather than more wrapper moves
+- `src/main.ts` now mainly retains command registration and remaining direct execution surfaces; the next real gap is broader registry coverage for utility commands plus deeper notice/result/vault-write side-effect tightening rather than more wrapper moves
 
 ## Key Design Decisions
 
