@@ -125,6 +125,82 @@ const ERROR_ARRAY_SCHEMA: OperationSchema = {
     }
 };
 
+const PROCESS_FILE_INPUT_SCHEMA: OperationSchema = {
+    type: 'object',
+    properties: {
+        sourcePath: { type: 'string' }
+    }
+};
+
+const PROCESS_FILE_RESULT_SCHEMA: OperationSchema = {
+    type: 'object',
+    properties: {
+        sourcePath: { type: 'string' },
+        outputPath: { type: 'string' }
+    }
+};
+
+const PROCESS_FOLDER_INPUT_SCHEMA: OperationSchema = {
+    type: 'object',
+    properties: {
+        folderPath: { type: 'string' }
+    }
+};
+
+const PROCESS_FOLDER_RESULT_SCHEMA: OperationSchema = {
+    type: 'object',
+    properties: {
+        folderPath: { type: 'string' },
+        processedFileCount: { type: 'number' },
+        errors: ERROR_ARRAY_SCHEMA
+    }
+};
+
+const GENERATE_FROM_TITLE_INPUT_SCHEMA: OperationSchema = {
+    type: 'object',
+    properties: {
+        sourcePath: { type: 'string' }
+    }
+};
+
+const GENERATE_FROM_TITLE_RESULT_SCHEMA: OperationSchema = {
+    type: 'object',
+    properties: {
+        sourcePath: { type: 'string' }
+    }
+};
+
+const BATCH_GENERATE_FROM_TITLES_INPUT_SCHEMA: OperationSchema = {
+    type: 'object',
+    properties: {
+        folderPath: { type: 'string' }
+    }
+};
+
+const BATCH_GENERATE_FROM_TITLES_RESULT_SCHEMA: OperationSchema = {
+    type: 'object',
+    properties: {
+        sourceFolderPath: { type: 'string' },
+        completeFolderPath: { type: 'string' }
+    }
+};
+
+const RESEARCH_SUMMARIZE_INPUT_SCHEMA: OperationSchema = {
+    type: 'object',
+    properties: {
+        sourcePath: { type: 'string' },
+        topic: { type: 'string' }
+    }
+};
+
+const RESEARCH_SUMMARIZE_RESULT_SCHEMA: OperationSchema = {
+    type: 'object',
+    properties: {
+        sourcePath: { type: 'string' },
+        topic: { type: 'string' }
+    }
+};
+
 const TRANSLATE_FILE_INPUT_SCHEMA: OperationSchema = {
     type: 'object',
     properties: {
@@ -386,6 +462,66 @@ const OPERATION_DEFINITIONS: OperationDefinition[] = [
                 includeInCapabilityManifest: false
             })
         ]
+    },
+    {
+        version: 1,
+        id: 'file.process-add-links',
+        automationLevel: 'requires-active-file',
+        requiredContext: 'active-file',
+        sideEffectClass: 'write-file',
+        commandBindings: [
+            createWorkflowCommandBinding('process-with-notemd', 'process-current-add-links')
+        ],
+        inputSchema: PROCESS_FILE_INPUT_SCHEMA,
+        resultSchema: PROCESS_FILE_RESULT_SCHEMA
+    },
+    {
+        version: 1,
+        id: 'file.process-folder-add-links',
+        automationLevel: 'interactive-ui',
+        requiredContext: 'folder-selection',
+        sideEffectClass: 'batch-write',
+        commandBindings: [
+            createWorkflowCommandBinding('process-folder-with-notemd', 'process-folder-add-links')
+        ],
+        inputSchema: PROCESS_FOLDER_INPUT_SCHEMA,
+        resultSchema: PROCESS_FOLDER_RESULT_SCHEMA
+    },
+    {
+        version: 1,
+        id: 'content.generate-from-title',
+        automationLevel: 'requires-active-file',
+        requiredContext: 'active-file',
+        sideEffectClass: 'write-file',
+        commandBindings: [
+            createWorkflowCommandBinding('generate-content-from-title', 'generate-from-title')
+        ],
+        inputSchema: GENERATE_FROM_TITLE_INPUT_SCHEMA,
+        resultSchema: GENERATE_FROM_TITLE_RESULT_SCHEMA
+    },
+    {
+        version: 1,
+        id: 'content.batch-generate-from-titles',
+        automationLevel: 'interactive-ui',
+        requiredContext: 'folder-selection',
+        sideEffectClass: 'batch-write',
+        commandBindings: [
+            createWorkflowCommandBinding('batch-generate-content-from-titles', 'batch-generate-from-titles')
+        ],
+        inputSchema: BATCH_GENERATE_FROM_TITLES_INPUT_SCHEMA,
+        resultSchema: BATCH_GENERATE_FROM_TITLES_RESULT_SCHEMA
+    },
+    {
+        version: 1,
+        id: 'research.summarize-topic',
+        automationLevel: 'requires-selection',
+        requiredContext: 'editor-selection',
+        sideEffectClass: 'write-file',
+        commandBindings: [
+            createWorkflowCommandBinding('research-and-summarize-topic', 'research-and-summarize')
+        ],
+        inputSchema: RESEARCH_SUMMARIZE_INPUT_SCHEMA,
+        resultSchema: RESEARCH_SUMMARIZE_RESULT_SCHEMA
     },
     {
         version: 1,

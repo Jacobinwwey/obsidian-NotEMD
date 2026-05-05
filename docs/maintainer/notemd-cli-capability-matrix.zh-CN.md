@@ -59,20 +59,20 @@
 - `src/operations/registry.ts` 已成为已抽取 operation、command binding、mapping kind 与部分 input/result schema 的中心元数据源。
 - `src/operations/capabilityManifest.ts` 现在从同一 registry 展平 capability manifest。
 - `src/cliContracts.ts` 现在也从同一 registry 生成 invocation contract，减少了文档、命令发现与契约导出之间的漂移路径。
-- registry 现在也已纳入第一批 note-processing 与 utility operations：`translate.file`、`translate.folder-batch`、`concept.extract-file`、`concept.extract-folder`、`content.extract-original-text`、`workflow.extract-and-generate`、`duplicate.check-file`、`concept.dedupe`、`mermaid.batch-fix`、`formula.fix-file` 与 `formula.batch-fix`。
+- registry 现在也已纳入主要 note-processing 与 utility operations：`file.process-add-links`、`file.process-folder-add-links`、`content.generate-from-title`、`content.batch-generate-from-titles`、`research.summarize-topic`、`translate.file`、`translate.folder-batch`、`concept.extract-file`、`concept.extract-folder`、`content.extract-original-text`、`workflow.extract-and-generate`、`duplicate.check-file`、`concept.dedupe`、`mermaid.batch-fix`、`formula.fix-file` 与 `formula.batch-fix`。
 - 旧命令别名仍保留注册以保证兼容，但会被刻意排除在 capability manifest 导出之外。
 
-## 第一批抽取目标
+## 下一批抽取目标
 
-这些是最值得优先抽成宿主无关 operations 的能力。
+这些是下一阶段最值得优先纳入 registry-backed 或继续宿主去耦的能力。
 
 | 优先级 | 候选能力 | 为什么先做 | 现有基础 |
 |---|---|---|---|
 | P0 | Provider diagnostics | 已接近 operation 形态；输入输出清晰 | `src/providerDiagnostics.ts`, `src/llmUtils.ts` |
 | P0 | Diagram generation | spec-first core 已存在 | `src/diagram/diagramGenerationService.ts`, `src/diagram/*` |
-| P1 | Capability discovery | 在扩大自动化表面之前必须补齐 | `src/operations/registry.ts`, `src/operations/capabilityManifest.ts`, `src/cliContracts.ts` |
-| P1 | Config/profile export | 让 CLI 使用可复现 | `src/types.ts`, `src/constants.ts`, provider settings |
-| P2 | Batch execution state | 价值高，但需要先清理 adapter 耦合 | `src/batchProgressStore.ts`, `src/main.ts` 中 batch flows |
+| P1 | 选区驱动概念生成 | 仍未进入共享 registry/capability/contract 表面 | `create-wiki-link-and-generate-from-selection`、editor-selection 流 |
+| P1 | CLI 导出命令面 | capability/contract 导出本身很适合自动化，但导出命令本身还没建模成 operation | `src/operations/configProfileCommandHostAdapter.ts`、`src/main.ts` 中导出命令 |
+| P2 | write-heavy flow 的结果面收口 | registry 已有，但写入型 operation 仍泄漏宿主/UI 语义 | `src/fileUtils.ts`, `src/translate.ts`, `src/extractOriginalText.ts` |
 
 ## 设置就绪度
 

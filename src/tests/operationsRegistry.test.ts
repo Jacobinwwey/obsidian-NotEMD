@@ -10,6 +10,11 @@ describe('operations registry', () => {
             'provider.diagnostic.stability-run',
             'diagram.generate',
             'diagram.preview',
+            'file.process-add-links',
+            'file.process-folder-add-links',
+            'content.generate-from-title',
+            'content.batch-generate-from-titles',
+            'research.summarize-topic',
             'translate.file',
             'translate.folder-batch',
             'concept.extract-file',
@@ -73,9 +78,109 @@ describe('operations registry', () => {
     });
 
     test('returns structured metadata for note-processing operations', () => {
+        const processCurrent = getOperationDefinition('file.process-add-links');
+        const processFolder = getOperationDefinition('file.process-folder-add-links');
+        const generateFromTitle = getOperationDefinition('content.generate-from-title');
+        const batchGenerate = getOperationDefinition('content.batch-generate-from-titles');
+        const researchSummarize = getOperationDefinition('research.summarize-topic');
         const translateFile = getOperationDefinition('translate.file');
         const extractOriginalText = getOperationDefinition('content.extract-original-text');
         const extractAndGenerate = getOperationDefinition('workflow.extract-and-generate');
+
+        expect(processCurrent).toEqual(expect.objectContaining({
+            id: 'file.process-add-links',
+            version: 1,
+            automationLevel: 'requires-active-file',
+            requiredContext: 'active-file',
+            sideEffectClass: 'write-file',
+            commandBindings: expect.arrayContaining([
+                expect.objectContaining({
+                    commandId: 'process-with-notemd',
+                    mappingKind: 'exact'
+                })
+            ]),
+            inputSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    sourcePath: expect.any(Object)
+                })
+            }),
+            resultSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    outputPath: expect.any(Object)
+                })
+            })
+        }));
+
+        expect(processFolder).toEqual(expect.objectContaining({
+            id: 'file.process-folder-add-links',
+            version: 1,
+            automationLevel: 'interactive-ui',
+            requiredContext: 'folder-selection',
+            sideEffectClass: 'batch-write',
+            commandBindings: expect.arrayContaining([
+                expect.objectContaining({
+                    commandId: 'process-folder-with-notemd',
+                    mappingKind: 'exact'
+                })
+            ])
+        }));
+
+        expect(generateFromTitle).toEqual(expect.objectContaining({
+            id: 'content.generate-from-title',
+            version: 1,
+            automationLevel: 'requires-active-file',
+            requiredContext: 'active-file',
+            sideEffectClass: 'write-file',
+            commandBindings: expect.arrayContaining([
+                expect.objectContaining({
+                    commandId: 'generate-content-from-title',
+                    mappingKind: 'exact'
+                })
+            ])
+        }));
+
+        expect(batchGenerate).toEqual(expect.objectContaining({
+            id: 'content.batch-generate-from-titles',
+            version: 1,
+            automationLevel: 'interactive-ui',
+            requiredContext: 'folder-selection',
+            sideEffectClass: 'batch-write',
+            commandBindings: expect.arrayContaining([
+                expect.objectContaining({
+                    commandId: 'batch-generate-content-from-titles',
+                    mappingKind: 'exact'
+                })
+            ]),
+            resultSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    sourceFolderPath: expect.any(Object),
+                    completeFolderPath: expect.any(Object)
+                })
+            })
+        }));
+
+        expect(researchSummarize).toEqual(expect.objectContaining({
+            id: 'research.summarize-topic',
+            version: 1,
+            automationLevel: 'requires-selection',
+            requiredContext: 'editor-selection',
+            sideEffectClass: 'write-file',
+            commandBindings: expect.arrayContaining([
+                expect.objectContaining({
+                    commandId: 'research-and-summarize-topic',
+                    mappingKind: 'exact'
+                })
+            ]),
+            inputSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    topic: expect.any(Object)
+                })
+            })
+        }));
 
         expect(translateFile).toEqual(expect.objectContaining({
             id: 'translate.file',

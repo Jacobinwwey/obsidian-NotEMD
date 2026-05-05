@@ -59,20 +59,20 @@ Observed host facts:
 - `src/operations/registry.ts` is now the central metadata source for extracted operations, command bindings, mapping kind, and selected input/result schemas.
 - `src/operations/capabilityManifest.ts` now flattens those command bindings into the exported capability manifest.
 - `src/cliContracts.ts` now builds the invocation contract from the same registry, which removes one major drift path between docs, command discovery, and contract export.
-- The registry now includes the first note-processing and utility operation batches as well: `translate.file`, `translate.folder-batch`, `concept.extract-file`, `concept.extract-folder`, `content.extract-original-text`, `workflow.extract-and-generate`, `duplicate.check-file`, `concept.dedupe`, `mermaid.batch-fix`, `formula.fix-file`, and `formula.batch-fix`.
+- The registry now includes the main note-processing and utility operation batches as well: `file.process-add-links`, `file.process-folder-add-links`, `content.generate-from-title`, `content.batch-generate-from-titles`, `research.summarize-topic`, `translate.file`, `translate.folder-batch`, `concept.extract-file`, `concept.extract-folder`, `content.extract-original-text`, `workflow.extract-and-generate`, `duplicate.check-file`, `concept.dedupe`, `mermaid.batch-fix`, `formula.fix-file`, and `formula.batch-fix`.
 - Legacy aliases remain registered for compatibility, but they are intentionally excluded from capability-manifest export.
 
-## First Extraction Targets
+## Next Extraction Targets
 
-These are the best near-term candidates for host-neutral operations.
+These are the best remaining candidates for registry-backed or more host-neutral operations.
 
 | Priority | Candidate | Why First | Existing Building Blocks |
 |---|---|---|---|
 | P0 | Provider diagnostics | Already close to operation shape; deterministic inputs/outputs | `src/providerDiagnostics.ts`, `src/llmUtils.ts` |
 | P0 | Diagram generation | Spec-first core already exists | `src/diagram/diagramGenerationService.ts`, `src/diagram/*` |
-| P1 | Capability discovery | Needed before expanding automation surface | `src/operations/registry.ts`, `src/operations/capabilityManifest.ts`, `src/cliContracts.ts` |
-| P1 | Config/profile export | Needed to make CLI usage reproducible | `src/types.ts`, `src/constants.ts`, provider settings |
-| P2 | Batch execution state | Valuable, but needs adapter cleanup first | `src/batchProgressStore.ts`, batch flows in `src/main.ts` |
+| P1 | Selection-driven concept generation | Still missing from the shared registry/capability/contract surface | `create-wiki-link-and-generate-from-selection`, editor-selection flows |
+| P1 | CLI export commands | Capability/contract export is useful automation, but the export commands themselves are not modeled as operations yet | `src/operations/configProfileCommandHostAdapter.ts`, export commands in `src/main.ts` |
+| P2 | Result-surface tightening for write-heavy flows | Registry exists, but write-heavy operations still leak host/UI semantics | `src/fileUtils.ts`, `src/translate.ts`, `src/extractOriginalText.ts` |
 
 ## Settings Readiness
 
