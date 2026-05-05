@@ -113,7 +113,8 @@ This means the roadmap should no longer be interpreted as "build the platform". 
 - The extraction line is now materially stronger: `src/operations/types.ts`, `src/operations/registry.ts`, `src/operations/capabilityManifest.ts`, and `src/cliContracts.ts` now centralize operation metadata, command-binding mapping kind, capability discovery, and typed contract export.
 - `diagram.generate` is no longer just a future note in the plan; it now participates in the typed invocation contract, while preview remains intentionally outside the non-interactive contract set.
 - The first MT2 host-adapter slice is now landed: `src/operations/diagramGenerateOperation.ts` carries the reusable diagram execution path, and `src/operations/providerDiagnosticCommand.ts` carries provider-diagnostic command orchestration below `src/main.ts`.
-- The remaining architectural gap is narrower and more concrete: command wrappers in `src/main.ts` still own too much host-adapter logic for save/preview flows.
+- The second MT2 host-adapter slice is now landed as well: `src/operations/diagramCommandHostAdapter.ts` owns Mermaid/artifact save completion and direct Vega-Lite preview orchestration below `src/main.ts`.
+- The remaining architectural gap is now narrower still: `src/main.ts` mainly retains host-adapter construction plus config/profile-oriented side effects, which is a far more defensible next extraction seam than the earlier save/preview-heavy command wrappers.
 
 ## Verification Gates
 
@@ -181,7 +182,7 @@ Short version:
    `ref/` and `coverage/` are local analysis/build artifacts, not repo deliverables. The mainline expectation is a clean worktree.
 
 6. **Split host adapters out of `src/main.ts`**
-   The first adapter slice is now real, not just planned. The next move is to peel save/preview/config adapters away from command wrappers so the registry stops at neither metadata nor execution-core extraction.
+   The save/preview slice is now real, not just planned. The next move is to peel config/profile adapters and future CLI host wiring away from `src/main.ts` so the registry stops at neither metadata nor execution-core extraction.
 
 ### Ordered landing sequence
 

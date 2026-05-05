@@ -11,6 +11,8 @@ describe('supported UI locale visible surface coverage', () => {
             { label: 'commands.extractConceptsAndGenerateTitles', get: (strings: typeof en) => strings.commands.extractConceptsAndGenerateTitles },
             { label: 'commands.generateExperimentalDiagram', get: (strings: typeof en) => strings.commands.generateExperimentalDiagram },
             { label: 'commands.previewExperimentalDiagram', get: (strings: typeof en) => strings.commands.previewExperimentalDiagram },
+            { label: 'commands.exportCliCapabilityManifest', get: (strings: typeof en) => strings.commands.exportCliCapabilityManifest },
+            { label: 'commands.exportCliInvocationContract', get: (strings: typeof en) => strings.commands.exportCliInvocationContract },
             {
                 label: 'commands.createWikiLinkAndGenerateNoteFromSelection',
                 get: (strings: typeof en) => strings.commands.createWikiLinkAndGenerateNoteFromSelection

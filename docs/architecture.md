@@ -232,7 +232,8 @@ The gap is smaller than before:
 
 - `src/operations/diagramGenerateOperation.ts` now carries reusable diagram execution below the command layer
 - `src/operations/providerDiagnosticCommand.ts` now carries provider-diagnostic command orchestration below the command layer
-- `src/main.ts` still owns save/open/preview host effects, which is the next extraction target
+- `src/operations/diagramCommandHostAdapter.ts` now carries Mermaid/artifact save completion plus direct Vega-Lite preview orchestration below the command layer
+- `src/main.ts` now mainly retains host-adapter construction and config/profile-oriented host effects, which is the next extraction target
 
 ## Key Design Decisions
 

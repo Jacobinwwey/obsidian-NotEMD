@@ -23,6 +23,7 @@ import {
     STRINGS_UK,
     STRINGS_VI
 } from './locales/additional';
+import { CLI_EXPORT_ACTION_LOCALE_EXTENSIONS } from './locales/cliExportActions';
 import { EXPERIMENTAL_DIAGRAM_PIPELINE_LOCALE_EXTENSIONS } from './locales/experimentalDiagramPipeline';
 import { DIAGRAM_ACTION_LOCALE_EXTENSIONS } from './locales/diagramActions';
 import { PREVIEW_MODAL_LOCALE_EXTENSIONS } from './locales/previewModal';
@@ -89,6 +90,7 @@ function mergeTranslationValues(base: unknown, override: unknown): unknown {
 function getLocaleLayers(locale: string): Array<DeepPartial<TranslationStrings>> {
     return [
         LANGUAGE_MAP[locale],
+        CLI_EXPORT_ACTION_LOCALE_EXTENSIONS[locale],
         EXPERIMENTAL_DIAGRAM_PIPELINE_LOCALE_EXTENSIONS[locale],
         DIAGRAM_ACTION_LOCALE_EXTENSIONS[locale],
         PREVIEW_MODAL_LOCALE_EXTENSIONS[locale]

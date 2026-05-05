@@ -42,13 +42,14 @@ Carried-forward constraints:
 - keep UI-only flows out of the first CLI-grade contract
 - keep `src/main.ts` shrinking, not growing, as the CLI direction advances
 
-## Current Mainline Status (2026-05-04)
+## Current Mainline Status (2026-05-05)
 
 - `src/operations/types.ts` now holds shared operation metadata primitives instead of leaving them buried in sidebar/workflow code.
 - `src/operations/registry.ts` is now the central source of truth for extracted operation definitions, command bindings, mapping kind, and selected input/result schemas.
 - `src/operations/capabilityManifest.ts` and `src/cliContracts.ts` now both build from that registry, which removes one major metadata drift path.
 - `diagram.generate` now has a typed invocation contract alongside provider diagnostics.
 - The first MT2 execution split is landed: `src/operations/diagramGenerateOperation.ts` now owns the reusable diagram execution path, and `src/operations/providerDiagnosticCommand.ts` now owns provider-diagnostic command orchestration below `src/main.ts`.
+- The second MT2 host-adapter slice is now landed: `src/operations/diagramCommandHostAdapter.ts` owns Mermaid/artifact save completion, preview completion, and direct Vega-Lite preview orchestration below `src/main.ts`.
 - Existing Obsidian commands remain registered, hotkey-bindable, and official-CLI-triggerable while the deeper operation layer continues to mature.
 
 ## Short-Term Delivery (0-2 weeks)
@@ -160,7 +161,8 @@ Build a reusable operation layer for the most valuable Notemd capabilities.
   - shared `DiagramOperationInput` shaping is delivered
   - `diagram.generate` now has a registry-backed typed invocation contract
   - reusable execution now lives in `src/operations/diagramGenerateOperation.ts`
-  - remaining gap: extract save/preview host adapters out of `src/main.ts`
+  - save/preview host adapters now live in `src/operations/diagramCommandHostAdapter.ts`
+  - remaining gap: consolidate config/profile host adapters and add a CLI-facing host adapter without reintroducing Obsidian coupling into operations
 
 **MT2. Host adapter split**
 - Add a plugin adapter that resolves active file, vault state, and settings
@@ -268,7 +270,7 @@ Expose a mature, automation-grade Notemd integration surface above the official 
 Progress note:
 
 - Items 1-4 are now partially landed on mainline.
-- The next defensible move is still MT2, but it is now narrower: save/preview/config adapters should follow the already-landed execution extractions so command wrappers stop being the only runtime path into the extracted operations.
+- The next defensible move is still MT2, but it is now narrower: config/profile adapters and a CLI-facing host adapter should follow the already-landed execution and save/preview extractions so `src/main.ts` stops being the last concentrated host-effects boundary.
 
 ## Exit Criteria
 

@@ -3,6 +3,7 @@ import { ProgressReporter } from '../types';
 import { mockApp } from './__mocks__/app';
 import { mockSettings } from './__mocks__/settings';
 import * as diagramGenerateOperation from '../operations/diagramGenerateOperation';
+import * as diagramCommandHostAdapter from '../operations/diagramCommandHostAdapter';
 import * as fileUtils from '../fileUtils';
 
 function createReporter(): ProgressReporter {
@@ -170,26 +171,64 @@ describe('diagram command architecture', () => {
         expect(saveSpy).toHaveBeenCalled();
     });
 
+    test('mermaid save execution delegates host side effects to extracted diagram host adapter module', async () => {
+        jest.spyOn(diagramGenerateOperation, 'runDiagramGenerateOperation').mockResolvedValue({
+            artifact: {
+                target: 'mermaid',
+                content: 'graph TD',
+                mimeType: 'text/vnd.mermaid',
+                sourceIntent: 'mindmap'
+            }
+        } as any);
+        const completeSpy = jest
+            .spyOn(diagramCommandHostAdapter, 'completeMermaidDiagramCommand')
+            .mockResolvedValue('Notes/Topic_diagram.md');
+
+        await (plugin as any).executeSaveMermaidDiagramCommand(
+            file,
+            {
+                sourcePath: file.path,
+                sourceMarkdown: '# Topic',
+                compatibilityMode: 'legacy-mermaid',
+                outputMode: 'mermaid'
+            },
+            mockSettings.providers[0],
+            mockSettings.providers[0].model,
+            reporter,
+            'Summarise as Mermaid diagram',
+            (plugin as any).getUiStrings()
+        );
+
+        expect(completeSpy).toHaveBeenCalledWith(expect.objectContaining({
+            file,
+            mermaidContent: 'graph TD',
+            actionLabel: 'Summarise as Mermaid diagram'
+        }));
+    });
+
     test('preview command reads vega-lite from file without calling generateDiagramCommand', async () => {
         const vlContent = '{"mark":"bar"}';
         const fileContent = '# Test\n\n```vega-lite\n' + vlContent + '\n```\n';
         (mockApp.vault.read as jest.Mock).mockResolvedValue(fileContent);
 
         const sharedSpy = jest.spyOn(plugin as any, 'generateDiagramCommand');
-        const previewSpy = jest.spyOn(plugin as any, 'openDiagramPreviewModal').mockImplementation(() => undefined);
+        const previewSpy = jest
+            .spyOn(diagramCommandHostAdapter, 'previewVegaLiteArtifactFromMarkdown')
+            .mockReturnValue({
+                target: 'vega-lite',
+                content: vlContent,
+                mimeType: 'application/json',
+                sourceIntent: 'dataChart'
+            } as any);
 
         await (plugin as any).previewExperimentalDiagramCommand(file, reporter);
 
         // Should NOT call generateDiagramCommand — preview reads directly from file
         expect(sharedSpy).not.toHaveBeenCalled();
-        expect(previewSpy).toHaveBeenCalledWith(
-            expect.objectContaining({
-                target: 'vega-lite',
-                content: vlContent
-            }),
-            file.path,
-            false
-        );
+        expect(previewSpy).toHaveBeenCalledWith(expect.objectContaining({
+            sourceMarkdown: fileContent,
+            sourcePath: file.path
+        }));
     });
 
     test('exposes canonical stable diagram command ids alongside legacy compatibility aliases', async () => {
