@@ -1,12 +1,16 @@
 import { App, Editor, MarkdownView, TFile, TFolder } from 'obsidian';
 import { BatchProgressStore } from '../batchProgressStore';
 import {
+    BatchGenerateContentForTitlesResult,
+    BatchProcessFolderResult,
     batchGenerateContentForTitles,
     ConceptExtractionPluginContext,
     createConceptNotes,
     extractConceptsFromFile,
+    GenerateContentForTitleResult,
     processFile,
-    generateContentForTitle
+    generateContentForTitle,
+    ProcessFileResult
 } from '../fileUtils';
 import { ExtractOriginalTextPluginContext, ExtractOriginalTextResult, extractOriginalText } from '../extractOriginalText';
 import { formatI18n } from '../i18n';
@@ -55,6 +59,7 @@ export interface NoteProcessingCommandUiStrings {
         batchGenerationFinishedWithErrors: string;
         batchGenerationSuccess: string;
         batchGenerationError: string;
+        noEligibleMarkdownFilesFoundExcluding: string;
         contentGenerationSuccess: string;
         contentGenerationError: string;
         researchError: string;
@@ -218,10 +223,10 @@ async function runBatchGenerateContentForTitlesCommandCoreWithHost(
     useReporter: ProgressReporter,
     folderPathOverride?: string,
     batchGenerateContentForTitlesImpl: typeof batchGenerateContentForTitles = batchGenerateContentForTitles
-): Promise<{ sourceFolderPath: string; completeFolderPath: string } | null> {
+): Promise<BatchGenerateContentForTitlesResult | null> {
     let uiStrings = host.getUiStrings();
     const actionLabel = host.getActionLabel('batch-generate-from-titles');
-    let commandResult: { sourceFolderPath: string; completeFolderPath: string } | null = null;
+    let commandResult: BatchGenerateContentForTitlesResult | null = null;
 
     await host.loadSettings();
     uiStrings = host.getUiStrings();
@@ -235,29 +240,46 @@ async function runBatchGenerateContentForTitlesCommandCoreWithHost(
     host.updateStatusBar(host.getRunningActionText(actionLabel));
     useReporter.log(host.getRunningActionText(actionLabel));
 
-    const { errors } = await batchGenerateContentForTitlesImpl(
+    commandResult = await batchGenerateContentForTitlesImpl(
         host.getApp(),
         host.getSettings(),
         folderPath,
         useReporter
     );
 
-    const completeFolderPath = host.resolveCompleteFolderPath(folderPath);
-    if (!completeFolderPath) {
-        useReporter.log('Could not determine completed folder path for Mermaid fix.');
-    } else {
-        await host.maybeAutoFixMermaidForFolder(completeFolderPath, useReporter, 'batch generate from titles');
-    }
-
-    if (useReporter.cancelled) {
-        host.updateStatusBar(uiStrings.notices.batchGenerationCancelled);
-        host.showNotice(uiStrings.notices.batchGenerationCancelled);
+    if (!commandResult) {
         return null;
     }
 
-    if (errors.length > 0) {
+    if (commandResult.processedFileCount === 0) {
+        const message = formatI18n(uiStrings.notices.noEligibleMarkdownFilesFoundExcluding, {
+            folderPath,
+            completeFolder: commandResult.completeFolderPath.split('/').pop() || commandResult.completeFolderPath
+        });
+        useReporter.log(message);
+        useReporter.updateStatus(message, 100);
+        host.updateStatusBar(message);
+        host.showNotice(message);
+        return commandResult;
+    }
+
+    if (commandResult.generatedCount > 0) {
+        await host.maybeAutoFixMermaidForFolder(
+            commandResult.completeFolderPath,
+            useReporter,
+            'batch generate from titles'
+        );
+    }
+
+    if (useReporter.cancelled || commandResult.cancelled) {
+        host.updateStatusBar(uiStrings.notices.batchGenerationCancelled);
+        host.showNotice(uiStrings.notices.batchGenerationCancelled);
+        return commandResult;
+    }
+
+    if (commandResult.errors.length > 0) {
         const errorSummary = formatI18n(uiStrings.notices.batchGenerationFinishedWithErrors, {
-            count: errors.length
+            count: commandResult.errors.length
         });
         useReporter.log(`⚠️ ${errorSummary}`);
         useReporter.updateStatus(errorSummary, -1);
@@ -271,13 +293,6 @@ async function runBatchGenerateContentForTitlesCommandCoreWithHost(
             folderPath
         }), 5000);
         host.completeReporter(useReporter);
-    }
-
-    if (completeFolderPath) {
-        commandResult = {
-            sourceFolderPath: folderPath,
-            completeFolderPath
-        };
     }
 
     return commandResult;
@@ -809,8 +824,9 @@ export async function runGenerateContentForTitleCommandWithHost(
     file: TFile,
     reporter?: ProgressReporter,
     generateContentForTitleImpl: typeof generateContentForTitle = generateContentForTitle
-): Promise<void> {
+): Promise<GenerateContentForTitleResult | null> {
     const actionLabel = host.getActionLabel('generate-from-title');
+    let commandResult: GenerateContentForTitleResult | null = null;
 
     await runBusyReporterCommandWithHost(
         host,
@@ -822,7 +838,7 @@ export async function runGenerateContentForTitleCommandWithHost(
             try {
                 await host.loadSettings();
                 uiStrings = host.getUiStrings();
-                await generateContentForTitleImpl(host.getApp(), host.getSettings(), file, useReporter);
+                commandResult = await generateContentForTitleImpl(host.getApp(), host.getSettings(), file, useReporter);
                 await host.maybeAutoFixMermaidForFile(file, useReporter, 'generate from title');
 
                 const completeText = host.getActionCompleteText(actionLabel);
@@ -852,6 +868,8 @@ export async function runGenerateContentForTitleCommandWithHost(
             }
         }
     );
+
+    return commandResult;
 }
 
 export async function runCreateWikiLinkAndGenerateFromSelectionCommandWithHost(
@@ -1016,9 +1034,9 @@ export async function runBatchGenerateContentForTitlesCommandWithHost(
     reporter?: ProgressReporter,
     folderPathOverride?: string,
     batchGenerateContentForTitlesImpl: typeof batchGenerateContentForTitles = batchGenerateContentForTitles
-): Promise<{ sourceFolderPath: string; completeFolderPath: string } | null> {
+): Promise<BatchGenerateContentForTitlesResult | null> {
     const actionLabel = host.getActionLabel('batch-generate-from-titles');
-    let commandResult: { sourceFolderPath: string; completeFolderPath: string } | null = null;
+    let commandResult: BatchGenerateContentForTitlesResult | null = null;
 
     await runBusyReporterCommandWithHost(host, actionLabel, reporter, async (useReporter) => {
         let uiStrings = host.getUiStrings();
@@ -1057,8 +1075,9 @@ export async function runProcessWithNotemdCommandWithHost(
     host: NoteProcessingCommandHost,
     reporter?: ProgressReporter,
     processFileImpl: typeof processFile = processFile
-): Promise<void> {
+): Promise<ProcessFileResult | null> {
     const actionLabel = host.getActionLabel('process-current-add-links');
+    let commandResult: ProcessFileResult | null = null;
 
     await runBusyReporterCommandWithHost(host, actionLabel, reporter, async (useReporter) => {
         let uiStrings = host.getUiStrings();
@@ -1072,7 +1091,7 @@ export async function runProcessWithNotemdCommandWithHost(
             }
 
             host.updateStatusBar(host.getRunningActionText(`${actionLabel}: ${activeFile.name}`));
-            const outputPath = await processFileImpl(
+            commandResult = await processFileImpl(
                 host.getApp(),
                 host.getSettings(),
                 activeFile,
@@ -1080,12 +1099,12 @@ export async function runProcessWithNotemdCommandWithHost(
                 host.currentProcessingFileBasename
             );
 
-            if (outputPath && host.getSettings().autoMermaidFixAfterGenerate) {
-                const outputFile = host.getFileByPath(outputPath);
+            if (commandResult && host.getSettings().autoMermaidFixAfterGenerate) {
+                const outputFile = host.getFileByPath(commandResult.outputPath);
                 if (outputFile) {
                     await host.maybeAutoFixMermaidForFile(outputFile, useReporter, 'process current file');
                 } else {
-                    useReporter.log(`Skipped Mermaid auto-fix: output file not found at ${outputPath}`);
+                    useReporter.log(`Skipped Mermaid auto-fix: output file not found at ${commandResult.outputPath}`);
                 }
             }
 
@@ -1113,6 +1132,8 @@ export async function runProcessWithNotemdCommandWithHost(
             host.failReporterAction(useReporter, errorMessage);
         }
     });
+
+    return commandResult;
 }
 
 export async function runProcessFolderWithNotemdCommandWithHost(
@@ -1120,8 +1141,9 @@ export async function runProcessFolderWithNotemdCommandWithHost(
     reporter?: ProgressReporter,
     folderPathOverride?: string,
     processFileImpl: typeof processFile = processFile
-): Promise<void> {
+): Promise<BatchProcessFolderResult | null> {
     const actionLabel = host.getActionLabel('process-folder-add-links');
+    let commandResult: BatchProcessFolderResult | null = null;
 
     await runBusyReporterCommandWithHost(host, actionLabel, reporter, async (useReporter) => {
         let uiStrings = host.getUiStrings();
@@ -1147,6 +1169,16 @@ export async function runProcessFolderWithNotemdCommandWithHost(
                 (file.path === folderPath || file.path.startsWith(folderPath === '/' ? '' : `${folderPath}/`))
             );
 
+            const batchCommandResult: BatchProcessFolderResult = {
+                folderPath,
+                processedFileCount: files.length,
+                savedCount: 0,
+                cancelled: false,
+                fileResults: [],
+                errors: []
+            };
+            commandResult = batchCommandResult;
+
             if (files.length === 0) {
                 const noFilesMessage = formatI18n(uiStrings.notices.noMarkdownOrTextFilesFoundSelectedFolder, {
                     folderPath
@@ -1160,8 +1192,6 @@ export async function runProcessFolderWithNotemdCommandWithHost(
 
             host.updateStatusBar(host.getRunningActionText(actionLabel));
             useReporter.log(host.getRunningActionText(actionLabel));
-            const errors: Array<{ file: string; message: string }> = [];
-
             const batchId = `process-folder-${Date.now()}`;
             const progressStore = host.getBatchProgressStore();
             progressStore.start(batchId, 'process-folder', folderPath, files);
@@ -1180,13 +1210,15 @@ export async function runProcessFolderWithNotemdCommandWithHost(
                     useReporter.updateStatus(host.getStepStatusText(index + 1, files.length, file.name), progress);
 
                     try {
-                        await processFileImpl(
+                        const fileResult = await processFileImpl(
                             host.getApp(),
                             settings,
                             file,
                             useReporter,
                             host.currentProcessingFileBasename
                         );
+                        batchCommandResult.fileResults.push(fileResult);
+                        batchCommandResult.savedCount += 1;
                         progressStore.markCompleted(file.path);
                     } catch (fileError: unknown) {
                         const message = fileError instanceof Error ? fileError.message : String(fileError);
@@ -1194,7 +1226,7 @@ export async function runProcessFolderWithNotemdCommandWithHost(
                         const errorMessage = `Error processing ${file.name}: ${message}`;
                         host.logError(errorMessage, stack || String(fileError));
                         useReporter.log(`❌ ${errorMessage}`);
-                        errors.push({ file: file.name, message });
+                        batchCommandResult.errors.push({ file: file.name, message });
 
                         const timestamp = new Date().toISOString();
                         const logEntry = `[${timestamp}] Error processing ${file.path}:\nMessage: ${message}\nStack Trace:\n${stack || fileError}\n\n`;
@@ -1248,14 +1280,14 @@ export async function runProcessFolderWithNotemdCommandWithHost(
                         };
 
                         try {
-                            await processFileImpl(
+                            const fileResult = await processFileImpl(
                                 host.getApp(),
                                 settings,
                                 file,
                                 fileProgressReporter,
                                 host.currentProcessingFileBasename
                             );
-                            return { file, success: true };
+                            return { file, success: true, result: fileResult };
                         } catch (fileError: unknown) {
                             const errorMessage = fileError instanceof Error ? fileError.message : String(fileError);
                             fileProgressReporter.log(`❌ Error processing ${file.name}: ${errorMessage}`);
@@ -1267,12 +1299,24 @@ export async function runProcessFolderWithNotemdCommandWithHost(
                     processedCount += batch.length;
 
                     results.forEach(result => {
-                        const typedResult = result as { success: boolean; file: TFile; error?: unknown };
+                        const typedResult = result as {
+                            success: boolean;
+                            file: TFile;
+                            error?: unknown;
+                            result?: ProcessFileResult;
+                        };
+                        if (typedResult.success && typedResult.result) {
+                            batchCommandResult.fileResults.push(typedResult.result);
+                            batchCommandResult.savedCount += 1;
+                            progressStore.markCompleted(typedResult.file.path);
+                            return;
+                        }
+
                         if (!typedResult.success && typedResult.error) {
                             const errorMessage = typedResult.error instanceof Error
                                 ? typedResult.error.message
                                 : String(typedResult.error);
-                            errors.push({ file: typedResult.file.name, message: errorMessage });
+                            batchCommandResult.errors.push({ file: typedResult.file.name, message: errorMessage });
                         }
                     });
 
@@ -1288,7 +1332,7 @@ export async function runProcessFolderWithNotemdCommandWithHost(
                 }
             }
 
-            if (!useReporter.cancelled) {
+            if (!useReporter.cancelled && batchCommandResult.savedCount > 0) {
                 const mermaidFixTargetFolder = (settings.useCustomProcessedFileFolder && settings.processedFileFolder)
                     ? settings.processedFileFolder
                     : folderPath;
@@ -1296,9 +1340,9 @@ export async function runProcessFolderWithNotemdCommandWithHost(
             }
 
             if (!useReporter.cancelled) {
-                if (errors.length > 0) {
+                if (commandResult.errors.length > 0) {
                     const errorSummary = formatI18n(uiStrings.notices.batchProcessingFinishedWithErrors, {
-                        count: errors.length
+                        count: commandResult.errors.length
                     });
                     useReporter.log(`⚠️ ${errorSummary}`);
                     useReporter.updateStatus(errorSummary, -1);
@@ -1309,10 +1353,14 @@ export async function runProcessFolderWithNotemdCommandWithHost(
                     useReporter.updateStatus(completeText, 100);
                     host.updateStatusBar(completeText);
                     host.showNotice(formatI18n(uiStrings.notices.batchProcessingSuccess, {
-                        count: files.length
+                        count: commandResult.savedCount
                     }), 5000);
                     host.completeReporter(useReporter);
                 }
+            }
+
+            if (commandResult) {
+                commandResult.cancelled = useReporter.cancelled;
             }
         } catch (error: unknown) {
             const { errorMessage, errorDetails } = normalizeError(
@@ -1333,4 +1381,6 @@ export async function runProcessFolderWithNotemdCommandWithHost(
             host.failReporterAction(useReporter, errorMessage);
         }
     });
+
+    return commandResult;
 }

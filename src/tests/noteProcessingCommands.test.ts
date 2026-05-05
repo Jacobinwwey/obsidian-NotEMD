@@ -54,6 +54,18 @@ function createPlugin(): NotemdPlugin {
     return plugin;
 }
 
+function createGenerateContentResult(overrides?: Partial<fileUtils.GenerateContentForTitleResult>): fileUtils.GenerateContentForTitleResult {
+    return {
+        sourcePath: 'Notes/Topic.md',
+        outputPath: 'Notes/Topic.md',
+        title: 'Topic',
+        researchEnabled: false,
+        researchContextUsed: false,
+        modified: true,
+        ...overrides
+    };
+}
+
 describe('note processing command surface', () => {
     beforeEach(() => {
         jest.clearAllMocks();
@@ -84,10 +96,10 @@ describe('note processing command surface', () => {
 
         const hostSpy = jest
             .spyOn(noteProcessingCommandHostAdapter, 'runGenerateContentForTitleCommandWithHost')
-            .mockResolvedValue(undefined);
+            .mockResolvedValue(null);
         const utilitySpy = jest
             .spyOn(fileUtils, 'generateContentForTitle')
-            .mockResolvedValue(undefined);
+            .mockResolvedValue(createGenerateContentResult());
 
         await (plugin as any).generateContentForTitleCommand(file, reporter);
 
@@ -192,7 +204,11 @@ describe('note processing command surface', () => {
             .mockResolvedValue(undefined);
         const generateSpy = jest
             .spyOn(fileUtils, 'generateContentForTitle')
-            .mockResolvedValue(undefined);
+            .mockResolvedValue(createGenerateContentResult({
+                sourcePath: 'Concepts/Alpha.md',
+                outputPath: 'Concepts/Alpha.md',
+                title: 'Alpha'
+            }));
 
         const result = await (plugin as any).createWikiLinkAndGenerateFromSelectionCommand(editor, view, reporter);
 
@@ -240,12 +256,42 @@ describe('note processing command surface', () => {
 
         const hostSpy = jest
             .spyOn(noteProcessingCommandHostAdapter, 'runProcessWithNotemdCommandWithHost')
-            .mockResolvedValue(undefined);
+            .mockResolvedValue({
+                sourcePath: 'Notes/Topic.md',
+                requestedOutputFolderPath: 'Notes',
+                outputFolderPath: 'Notes',
+                outputFolderCreated: false,
+                usedCustomOutputFolder: false,
+                outputPath: 'Notes/Topic_processed.md',
+                created: true,
+                overwritten: false,
+                movedOriginalFile: false,
+                moveOriginalFile: false,
+                chunkCount: 1,
+                conceptCount: 2,
+                conceptNoteFolderPath: 'Concepts',
+                removedCodeFences: false
+            });
         const utilitySpy = jest
             .spyOn(fileUtils, 'processFile')
-            .mockResolvedValue('Notes/Topic_processed.md');
+            .mockResolvedValue({
+                sourcePath: 'Notes/Topic.md',
+                requestedOutputFolderPath: 'Notes',
+                outputFolderPath: 'Notes',
+                outputFolderCreated: false,
+                usedCustomOutputFolder: false,
+                outputPath: 'Notes/Topic_processed.md',
+                created: true,
+                overwritten: false,
+                movedOriginalFile: false,
+                moveOriginalFile: false,
+                chunkCount: 1,
+                conceptCount: 2,
+                conceptNoteFolderPath: 'Concepts',
+                removedCodeFences: false
+            });
 
-        await (plugin as any).processWithNotemdCommand(reporter);
+        const result = await (plugin as any).processWithNotemdCommand(reporter);
 
         expect(hostSpy).toHaveBeenCalledWith(expect.objectContaining({
             getActiveFile: expect.any(Function),
@@ -254,6 +300,10 @@ describe('note processing command surface', () => {
             maybeAutoFixMermaidForFile: expect.any(Function),
             completeReporter: expect.any(Function)
         }), reporter);
+        expect(result).toEqual(expect.objectContaining({
+            outputPath: 'Notes/Topic_processed.md',
+            conceptCount: 2
+        }));
         expect(utilitySpy).not.toHaveBeenCalled();
     });
 
@@ -281,12 +331,51 @@ describe('note processing command surface', () => {
 
         const hostSpy = jest
             .spyOn(noteProcessingCommandHostAdapter, 'runProcessFolderWithNotemdCommandWithHost')
-            .mockResolvedValue(undefined);
+            .mockResolvedValue({
+                folderPath: 'Concepts',
+                processedFileCount: 1,
+                savedCount: 1,
+                cancelled: false,
+                fileResults: [
+                    {
+                        sourcePath: 'Concepts/Topic.md',
+                        requestedOutputFolderPath: 'Concepts',
+                        outputFolderPath: 'Concepts',
+                        outputFolderCreated: false,
+                        usedCustomOutputFolder: false,
+                        outputPath: 'Concepts/Topic_processed.md',
+                        created: true,
+                        overwritten: false,
+                        movedOriginalFile: false,
+                        moveOriginalFile: false,
+                        chunkCount: 1,
+                        conceptCount: 2,
+                        conceptNoteFolderPath: 'Concepts',
+                        removedCodeFences: false
+                    }
+                ],
+                errors: []
+            });
         const utilitySpy = jest
             .spyOn(fileUtils, 'processFile')
-            .mockResolvedValue('Concepts/Topic_processed.md');
+            .mockResolvedValue({
+                sourcePath: 'Concepts/Topic.md',
+                requestedOutputFolderPath: 'Concepts',
+                outputFolderPath: 'Concepts',
+                outputFolderCreated: false,
+                usedCustomOutputFolder: false,
+                outputPath: 'Concepts/Topic_processed.md',
+                created: true,
+                overwritten: false,
+                movedOriginalFile: false,
+                moveOriginalFile: false,
+                chunkCount: 1,
+                conceptCount: 2,
+                conceptNoteFolderPath: 'Concepts',
+                removedCodeFences: false
+            });
 
-        await (plugin as any).processFolderWithNotemdCommand(reporter, 'Concepts');
+        const result = await (plugin as any).processFolderWithNotemdCommand(reporter, 'Concepts');
 
         expect(hostSpy).toHaveBeenCalledWith(expect.objectContaining({
             getFolderByPath: expect.any(Function),
@@ -296,6 +385,11 @@ describe('note processing command surface', () => {
             maybeAutoFixMermaidForFolder: expect.any(Function),
             appendVaultLog: expect.any(Function)
         }), reporter, 'Concepts');
+        expect(result).toEqual(expect.objectContaining({
+            processedFileCount: 1,
+            savedCount: 1,
+            fileResults: expect.any(Array)
+        }));
         expect(utilitySpy).not.toHaveBeenCalled();
     });
 
@@ -308,11 +402,28 @@ describe('note processing command surface', () => {
             .spyOn(noteProcessingCommandHostAdapter, 'runBatchGenerateContentForTitlesCommandWithHost')
             .mockResolvedValue({
                 sourceFolderPath: 'Concepts',
-                completeFolderPath: 'Concepts_complete'
+                completeFolderPath: 'Concepts_complete',
+                completeFolderCreated: true,
+                processedFileCount: 1,
+                generatedCount: 1,
+                movedCount: 1,
+                cancelled: false,
+                fileResults: [],
+                errors: []
             });
         const utilitySpy = jest
             .spyOn(fileUtils, 'batchGenerateContentForTitles')
-            .mockResolvedValue({ errors: [] });
+            .mockResolvedValue({
+                sourceFolderPath: 'Concepts',
+                completeFolderPath: 'Concepts_complete',
+                completeFolderCreated: true,
+                processedFileCount: 1,
+                generatedCount: 1,
+                movedCount: 1,
+                cancelled: false,
+                fileResults: [],
+                errors: []
+            });
 
         const result = await (plugin as any).batchGenerateContentForTitlesCommand(reporter, 'Concepts');
 
@@ -324,7 +435,14 @@ describe('note processing command surface', () => {
         }), reporter, 'Concepts');
         expect(result).toEqual({
             sourceFolderPath: 'Concepts',
-            completeFolderPath: 'Concepts_complete'
+            completeFolderPath: 'Concepts_complete',
+            completeFolderCreated: true,
+            processedFileCount: 1,
+            generatedCount: 1,
+            movedCount: 1,
+            cancelled: false,
+            fileResults: [],
+            errors: []
         });
         expect(utilitySpy).not.toHaveBeenCalled();
     });

@@ -136,7 +136,19 @@ const PROCESS_FILE_RESULT_SCHEMA: OperationSchema = {
     type: 'object',
     properties: {
         sourcePath: { type: 'string' },
-        outputPath: { type: 'string' }
+        requestedOutputFolderPath: { type: 'string' },
+        outputFolderPath: { type: 'string' },
+        outputFolderCreated: { type: 'boolean' },
+        usedCustomOutputFolder: { type: 'boolean' },
+        outputPath: { type: 'string' },
+        created: { type: 'boolean' },
+        overwritten: { type: 'boolean' },
+        movedOriginalFile: { type: 'boolean' },
+        moveOriginalFile: { type: 'boolean' },
+        chunkCount: { type: 'number' },
+        conceptCount: { type: 'number' },
+        conceptNoteFolderPath: { type: 'string' },
+        removedCodeFences: { type: 'boolean' }
     }
 };
 
@@ -152,6 +164,12 @@ const PROCESS_FOLDER_RESULT_SCHEMA: OperationSchema = {
     properties: {
         folderPath: { type: 'string' },
         processedFileCount: { type: 'number' },
+        savedCount: { type: 'number' },
+        cancelled: { type: 'boolean' },
+        fileResults: {
+            type: 'array',
+            items: PROCESS_FILE_RESULT_SCHEMA
+        },
         errors: ERROR_ARRAY_SCHEMA
     }
 };
@@ -166,7 +184,12 @@ const GENERATE_FROM_TITLE_INPUT_SCHEMA: OperationSchema = {
 const GENERATE_FROM_TITLE_RESULT_SCHEMA: OperationSchema = {
     type: 'object',
     properties: {
-        sourcePath: { type: 'string' }
+        sourcePath: { type: 'string' },
+        outputPath: { type: 'string' },
+        title: { type: 'string' },
+        researchEnabled: { type: 'boolean' },
+        researchContextUsed: { type: 'boolean' },
+        modified: { type: 'boolean' }
     }
 };
 
@@ -181,7 +204,31 @@ const BATCH_GENERATE_FROM_TITLES_RESULT_SCHEMA: OperationSchema = {
     type: 'object',
     properties: {
         sourceFolderPath: { type: 'string' },
-        completeFolderPath: { type: 'string' }
+        completeFolderPath: { type: 'string' },
+        completeFolderCreated: { type: 'boolean' },
+        processedFileCount: { type: 'number' },
+        generatedCount: { type: 'number' },
+        movedCount: { type: 'number' },
+        cancelled: { type: 'boolean' },
+        fileResults: {
+            type: 'array',
+            items: {
+                type: 'object',
+                properties: {
+                    sourcePath: { type: 'string' },
+                    outputPath: { type: 'string' },
+                    title: { type: 'string' },
+                    researchEnabled: { type: 'boolean' },
+                    researchContextUsed: { type: 'boolean' },
+                    modified: { type: 'boolean' },
+                    completeDestinationPath: { type: 'string' },
+                    movedToCompleteFolder: { type: 'boolean' },
+                    skippedMoveBecauseDestinationExists: { type: 'boolean' },
+                    skippedMoveBecauseSourceMissing: { type: 'boolean' }
+                }
+            }
+        },
+        errors: ERROR_ARRAY_SCHEMA
     }
 };
 

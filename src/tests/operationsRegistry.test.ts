@@ -141,7 +141,19 @@ describe('operations registry', () => {
             resultSchema: expect.objectContaining({
                 type: 'object',
                 properties: expect.objectContaining({
-                    outputPath: expect.any(Object)
+                    requestedOutputFolderPath: expect.any(Object),
+                    outputFolderPath: expect.any(Object),
+                    outputFolderCreated: expect.any(Object),
+                    usedCustomOutputFolder: expect.any(Object),
+                    outputPath: expect.any(Object),
+                    created: expect.any(Object),
+                    overwritten: expect.any(Object),
+                    movedOriginalFile: expect.any(Object),
+                    moveOriginalFile: expect.any(Object),
+                    chunkCount: expect.any(Object),
+                    conceptCount: expect.any(Object),
+                    conceptNoteFolderPath: expect.any(Object),
+                    removedCodeFences: expect.any(Object)
                 })
             })
         }));
@@ -204,7 +216,14 @@ describe('operations registry', () => {
                 type: 'object',
                 properties: expect.objectContaining({
                     sourceFolderPath: expect.any(Object),
-                    completeFolderPath: expect.any(Object)
+                    completeFolderPath: expect.any(Object),
+                    completeFolderCreated: expect.any(Object),
+                    processedFileCount: expect.any(Object),
+                    generatedCount: expect.any(Object),
+                    movedCount: expect.any(Object),
+                    cancelled: expect.any(Object),
+                    fileResults: expect.any(Object),
+                    errors: expect.any(Object)
                 })
             })
         }));
