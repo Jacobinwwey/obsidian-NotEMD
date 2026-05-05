@@ -198,17 +198,17 @@ topic: progress-audit-next-direction
 5. **工作区卫生保持**
    `ref/` 与 `coverage/` 应视为本地分析 / 构建产物，而不是待提交内容。主线需要持续保持干净工作树。
 
-6. **把下一阶段重心转到剩余 direct command surfaces**
-   note-processing registry onboarding、utility host extraction、`translate/formula` proof slice、process/generate 子切片，以及 `src/fileUtils.ts` 的剩余尾部现在都已足够完整。下一步应把 `testLlmConnectionCommand`、`generateDiagramCommand` 与 `previewExperimentalDiagramCommand` 收口到同等级的 discoverable operation/result 预期上。
+6. **先落地 direct-surface wrapper 批次，再谈别的**
+   这一批现在已经落地：`testLlmConnectionCommand` 已委托给 `runInteractiveProviderConnectionTestCommandWithHost`，`generateDiagramCommand` 与 `previewExperimentalDiagramCommand` 已委托给 `runGenerateDiagramCommandWithHost` 与 `runPreviewExperimentalDiagramCommandWithHost`。provider/diagram 的公共入口现在都具备结构化 result，并由 host adapter 承接生命周期编排，不再把临时 busy/reporter 逻辑散落在 `src/main.ts` 里。
 
-7. **然后继续清空剩余高价值 direct command surfaces**
-   现在已核实的高价值剩余直接命令面主要是 `testLlmConnectionCommand`、`generateDiagramCommand` 及其 save/artifact 分支、以及 `previewExperimentalDiagramCommand`。在 write-heavy result contracts 收紧之前，优先级高于重开已抽离 utility families 的 wrapper 搬运。
+7. **下一阶段向下一层收敛**
+   现在剩余的高价值缺口已经不是这些公共 direct command method 本身，而是更深层的 diagram command core（`executeSaveMermaidDiagramCommand`、`executeArtifactDiagramCommand`），以及 `diagram.preview` 与 provider connection-test 是否进入 typed automation contract 的决策。这个优先级高于重开已抽离 utility family。
 
 ### 建议落地顺序
 
 结合 roadmap 原始长期意图与当前代码现实，最稳妥的未来落地顺序应为：
 
-1. 先处理 `src/main.ts` 剩余 direct command surfaces，其中最高价值目标是 `testLlmConnectionCommand`、`generateDiagramCommand` 与 `previewExperimentalDiagramCommand`
+1. 先完成更深层的 diagram/provider command-core 收敛，并决定 `diagram.preview` 与 provider connection-test 是保持 command-only 还是升级为 typed automation contract
 2. 然后继续维护者本地语义核验与重型运行时打包边界的后续硬化
 3. 在这些边界项稳定后，再继续 selection/export contract 增强与 workflow/settings packaging 清理
 4. 完成这些边界工作后，再重开 legacy prompt 退役、MermaidProcessor sunset，或更丰富的 first-class CLI command 暴露

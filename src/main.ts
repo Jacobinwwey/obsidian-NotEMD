@@ -35,10 +35,7 @@ import { getSystemPrompt } from './promptUtils';
 import { formatI18n, getI18nStrings } from './i18n';
 import { resolveTaskLanguageCode } from './i18n/taskLanguagePolicy';
 import { getSidebarActionLabel, SidebarActionId } from './workflowButtons';
-import {
-    buildDiagramOperationInput,
-    DiagramOperationInput
-} from './diagram/diagramGenerationService';
+import { DiagramOperationInput } from './diagram/diagramGenerationService';
 import { RenderArtifact } from './rendering/types';
 import { IframeRenderHost } from './rendering/host/iframeRenderHost';
 import { getRenderTargetDisplayName } from './rendering/targetLabel';
@@ -47,8 +44,14 @@ import { runDiagramGenerateOperation } from './operations/diagramGenerateOperati
 import {
     completeArtifactDiagramCommand,
     completeMermaidDiagramCommand,
+    DiagramCommandExecutionDetails,
     DiagramCommandHostAdapter,
-    previewVegaLiteArtifactFromMarkdown
+    DiagramCommandExecutionMode,
+    DiagramCommandOptions,
+    DiagramCommandRunHost,
+    DiagramCommandUiStrings,
+    runGenerateDiagramCommandWithHost,
+    runPreviewExperimentalDiagramCommandWithHost
 } from './operations/diagramCommandHostAdapter';
 import {
     PluginConfigCommandHost
@@ -62,8 +65,8 @@ import {
     runProviderDiagnosticStabilityCommandWithHost
 } from './operations/providerDiagnosticCommandHostAdapter';
 import {
-    ProviderConnectionTestCommandHost,
-    runTestLlmConnectionCommandWithHost
+    InteractiveProviderConnectionTestCommandHost,
+    runInteractiveProviderConnectionTestCommandWithHost
 } from './operations/providerConnectionTestCommandHostAdapter';
 import {
     ConfigProfileCommandHost,
@@ -96,12 +99,6 @@ import {
     runFixFormulaFormatsCommandWithHost,
     UtilityCommandHost
 } from './operations/utilityCommandHostAdapter';
-
-type DiagramCommandExecutionMode = 'save-mermaid' | 'save-artifact' | 'preview-artifact';
-
-interface DiagramCommandOptions {
-    executionMode: DiagramCommandExecutionMode;
-}
 
 export default class NotemdPlugin extends Plugin {
     settings: NotemdSettings;
@@ -197,15 +194,50 @@ export default class NotemdPlugin extends Plugin {
         };
     }
 
-    private createProviderConnectionTestCommandHost(): ProviderConnectionTestCommandHost {
+    private createProviderConnectionTestCommandHost(): InteractiveProviderConnectionTestCommandHost {
         return {
             loadSettings: () => this.loadSettings(),
             getSettings: () => this.settings,
             getUiStrings: () => this.getUiStrings(),
+            getReporter: () => this.getReporter(),
+            isBusy: () => this.isBusy,
+            setBusy: (busy) => this.setBusy(busy),
+            getBusyNotice: () => this.getUiStrings().notices.cannotTestConnectionWhileProcessing,
             showNotice: (message, duration) => new Notice(message, duration),
             logError: (message, details) => console.error(message, details),
             openErrorModal: (title, details) => this.openLocalizedErrorModal(title, details),
             saveErrorLog: (error, reporter) => saveErrorLog(this.app, reporter, error, this.settings)
+        };
+    }
+
+    private createDiagramCommandRunHost(): DiagramCommandRunHost {
+        return {
+            loadSettings: () => this.loadSettings(),
+            getSettings: () => this.settings,
+            getUiStrings: () => this.getUiStrings(),
+            getReporter: () => this.getReporter(),
+            isBusy: () => this.isBusy,
+            setBusy: (busy) => this.setBusy(busy),
+            getBusyNotice: () => this.getUiStrings().notices.anotherProcessRunning,
+            startReporterAction: (reporter, label) => this.startReporterAction(reporter, label),
+            finalizeReporter: (reporter) => {
+                if (reporter instanceof NotemdSidebarView) {
+                    reporter.finishProcessing();
+                }
+            },
+            getActionLabel: (executionMode, i18n) => this.getDiagramCommandActionLabel(executionMode, i18n),
+            getActionCompleteText: (label) => this.getActionCompleteText(label),
+            getActionFailedText: (message) => this.getActionFailedText(message),
+            readFile: (file) => this.app.vault.read(file),
+            getProviderAndModelForTask: (task) => this.getProviderAndModelForTask(task),
+            getTaskLanguageCode: (task) => resolveTaskLanguageCode(this.settings, task),
+            executeSaveMermaidCommand: (file, operationInput, provider, modelName, reporter, actionLabel, i18n) =>
+                this.executeSaveMermaidDiagramCommand(file, operationInput, provider, modelName, reporter, actionLabel, i18n),
+            executeArtifactCommand: (file, operationInput, provider, modelName, reporter, actionLabel, i18n, executionMode) =>
+                this.executeArtifactDiagramCommand(file, operationInput, provider, modelName, reporter, actionLabel, i18n, executionMode),
+            createDiagramHostAdapter: () => this.createDiagramCommandHostAdapter(),
+            saveErrorLog: (error, reporter) => saveErrorLog(this.app, reporter, error, this.settings),
+            logError: (message, details) => console.error(message, details)
         };
     }
 
@@ -323,7 +355,10 @@ export default class NotemdPlugin extends Plugin {
         }
     }
 
-    private getDiagramCommandActionLabel(executionMode: DiagramCommandExecutionMode, i18n = this.getUiStrings()): string {
+    private getDiagramCommandActionLabel(
+        executionMode: DiagramCommandExecutionMode,
+        i18n: DiagramCommandUiStrings = this.getUiStrings()
+    ): string {
         switch (executionMode) {
             case 'save-mermaid':
                 return this.getActionLabel('summarize-as-mermaid');
@@ -408,7 +443,9 @@ export default class NotemdPlugin extends Plugin {
         this.registerEditorDiagramCommand(
             'notemd-preview-diagram',
             uiStrings.commands.previewExperimentalDiagram,
-            this.previewExperimentalDiagramCommand
+            async (file, reporter) => {
+                await this.previewExperimentalDiagramCommand(file, reporter);
+            }
         );
 
         // Legacy compatibility aliases remain registered until downstream workflows
@@ -422,7 +459,9 @@ export default class NotemdPlugin extends Plugin {
         this.registerEditorDiagramCommand(
             'notemd-preview-experimental-diagram',
             uiStrings.commands.previewExperimentalDiagram,
-            this.previewExperimentalDiagramCommand
+            async (file, reporter) => {
+                await this.previewExperimentalDiagramCommand(file, reporter);
+            }
         );
 
 		this.ribbonIconEl = this.addRibbonIcon(NOTEMD_SIDEBAR_ICON, uiStrings.plugin.ribbonTooltip, () => {
@@ -1105,18 +1144,10 @@ export default class NotemdPlugin extends Plugin {
     /** Command: Test LLM Connection */
     // This command handler now uses the reporter for UI feedback
     async testLlmConnectionCommand(reporter?: ProgressReporter) {
-        const i18n = this.getUiStrings();
-        if (this.isBusy) { new Notice(i18n.notices.cannotTestConnectionWhileProcessing); return; }
-        this.isBusy = true; // Prevent other actions during test
-        const useReporter = reporter || this.getReporter();
-        if (!reporter) useReporter.clearDisplay();
-
-        try {
-            await runTestLlmConnectionCommandWithHost(this.createProviderConnectionTestCommandHost(), useReporter);
-        } finally {
-            this.isBusy = false;
-            // No need to call useReporter.updateButtonStates() here
-        }
+        return runInteractiveProviderConnectionTestCommandWithHost(
+            this.createProviderConnectionTestCommandHost(),
+            reporter
+        );
     }
 
     async runDeveloperProviderDiagnosticCommand(): Promise<void> {
@@ -1229,92 +1260,12 @@ export default class NotemdPlugin extends Plugin {
         reporter?: ProgressReporter,
         options: DiagramCommandOptions = { executionMode: 'save-artifact' }
     ) {
-        if (this.isBusy) {
-            new Notice(this.getUiStrings().notices.anotherProcessRunning);
-            return;
-        }
-
-        this.isBusy = true;
-        const useReporter = reporter || this.getReporter();
-        let i18n = this.getUiStrings();
-        let actionLabel = this.getDiagramCommandActionLabel(options.executionMode, i18n);
-        const maybeSidebar = useReporter as any;
-
-        this.startReporterAction(useReporter, `${actionLabel}: ${file.name}`);
-
-        switch (options.executionMode) {
-            case 'save-mermaid':
-                useReporter.log(`Starting Mermaid summarization for ${file.name}...`);
-                break;
-            case 'save-artifact':
-                useReporter.log(`Starting experimental diagram generation for ${file.name}...`);
-                break;
-            case 'preview-artifact':
-                useReporter.log(`Starting experimental diagram preview for ${file.name}...`);
-                break;
-        }
-
-        try {
-            await this.loadSettings();
-            i18n = this.getUiStrings();
-            actionLabel = this.getDiagramCommandActionLabel(options.executionMode, i18n);
-
-            const fileContent = await this.app.vault.read(file);
-            if (!fileContent.trim()) {
-                switch (options.executionMode) {
-                    case 'save-mermaid':
-                        throw new Error('File is empty. Cannot summarize.');
-                    case 'save-artifact':
-                        throw new Error('File is empty. Cannot generate diagram.');
-                    case 'preview-artifact':
-                        throw new Error('File is empty. Cannot generate diagram preview.');
-                }
-            }
-
-            const { provider, modelName } = this.getProviderAndModelForTask('summarizeToMermaid');
-            useReporter.log(`Using provider: ${provider.name}, Model: ${modelName}`);
-            const operationInput = buildDiagramOperationInput({
-                sourcePath: file.path,
-                sourceMarkdown: fileContent,
-                executionMode: options.executionMode,
-                settings: this.settings,
-                targetLanguage: resolveTaskLanguageCode(this.settings, 'summarizeToMermaid')
-            });
-
-            if (options.executionMode === 'save-mermaid') {
-                await this.executeSaveMermaidDiagramCommand(file, operationInput, provider, modelName, useReporter, actionLabel, i18n);
-            } else {
-                await this.executeArtifactDiagramCommand(file, operationInput, provider, modelName, useReporter, actionLabel, i18n, options.executionMode);
-            }
-        } catch (error: unknown) {
-            const message = error instanceof Error ? error.message : String(error);
-
-            switch (options.executionMode) {
-                case 'save-mermaid':
-                    useReporter.log(`Error during Mermaid summarization: ${message}`);
-                    new Notice(formatI18n(i18n.notices.mermaidSummarizationError, { message }));
-                    console.error('Summarization Error:', error);
-                    break;
-                case 'save-artifact':
-                    useReporter.log(`Error during experimental diagram generation: ${message}`);
-                    new Notice(formatI18n(i18n.notices.experimentalDiagramError, { message }));
-                    console.error('Experimental diagram generation error:', error);
-                    break;
-                case 'preview-artifact':
-                    useReporter.log(`Error during experimental diagram preview: ${message}`);
-                    new Notice(formatI18n(i18n.notices.experimentalDiagramError, { message }));
-                    console.error('Experimental diagram preview error:', error);
-                    break;
-            }
-
-            useReporter.updateStatus(this.getActionFailedText(message), -1);
-            await saveErrorLog(this.app, useReporter, error, this.settings);
-        } finally {
-            if (maybeSidebar instanceof NotemdSidebarView) {
-                maybeSidebar.finishProcessing();
-            }
-            this.isBusy = false;
-        }
+        return runGenerateDiagramCommandWithHost(
+            this.createDiagramCommandRunHost(),
+            file,
+            reporter,
+            options
+        );
     }
 
     private async executeSaveMermaidDiagramCommand(
@@ -1324,8 +1275,8 @@ export default class NotemdPlugin extends Plugin {
         modelName: string,
         reporter: ProgressReporter,
         actionLabel: string,
-        i18n = this.getUiStrings()
-    ) {
+        i18n: DiagramCommandUiStrings = this.getUiStrings()
+    ): Promise<DiagramCommandExecutionDetails> {
         reporter.updateStatus(this.getStepStatusText(1, 3, actionLabel), 20);
         const result = await runDiagramGenerateOperation({
             input: operationInput,
@@ -1335,7 +1286,7 @@ export default class NotemdPlugin extends Plugin {
             reporter,
             getLegacyMermaidPrompt: () => this.getPromptForTask('summarizeToMermaid')
         });
-        await completeMermaidDiagramCommand({
+        const outputPath = await completeMermaidDiagramCommand({
             host: this.createDiagramCommandHostAdapter(),
             file,
             reporter,
@@ -1346,6 +1297,11 @@ export default class NotemdPlugin extends Plugin {
             getStepStatusText: (current, total, label) => this.getStepStatusText(current, total, label),
             getActionCompleteText: (label) => this.getActionCompleteText(label)
         });
+        return {
+            generation: result,
+            outputPath,
+            previewOpened: false
+        };
     }
 
     private async executeArtifactDiagramCommand(
@@ -1355,9 +1311,9 @@ export default class NotemdPlugin extends Plugin {
         modelName: string,
         reporter: ProgressReporter,
         actionLabel: string,
-        i18n: ReturnType<NotemdPlugin['getUiStrings']>,
+        i18n: DiagramCommandUiStrings,
         executionMode: Extract<DiagramCommandExecutionMode, 'save-artifact' | 'preview-artifact'>
-    ) {
+    ): Promise<DiagramCommandExecutionDetails> {
         const totalSteps = executionMode === 'preview-artifact' ? 2 : 3;
         const initialProgress = executionMode === 'preview-artifact' ? 25 : 20;
         reporter.updateStatus(this.getStepStatusText(1, totalSteps, actionLabel), initialProgress);
@@ -1370,7 +1326,7 @@ export default class NotemdPlugin extends Plugin {
             reporter,
             getLegacyMermaidPrompt: () => this.getPromptForTask('summarizeToMermaid')
         });
-        await completeArtifactDiagramCommand({
+        const outputPath = await completeArtifactDiagramCommand({
             host: this.createDiagramCommandHostAdapter(),
             file,
             reporter,
@@ -1384,6 +1340,11 @@ export default class NotemdPlugin extends Plugin {
             getStepStatusText: (current, total, label) => this.getStepStatusText(current, total, label),
             getActionCompleteText: (label) => this.getActionCompleteText(label)
         });
+        return {
+            generation: result,
+            outputPath,
+            previewOpened: executionMode === 'preview-artifact' || this.supportsDiagramPreview(result.artifact)
+        };
     }
 
     async generateExperimentalDiagramCommand(file: TFile, reporter: ProgressReporter) {
@@ -1391,31 +1352,11 @@ export default class NotemdPlugin extends Plugin {
     }
 
     async previewExperimentalDiagramCommand(file: TFile, reporter: ProgressReporter) {
-        // Preview Vega-Lite content from current file without calling LLM
-        const i18n = this.getUiStrings();
-        const actionLabel = i18n.commands.previewExperimentalDiagram;
-        this.startReporterAction(reporter, `${actionLabel}: ${file.name}`);
-        reporter.log(`Starting Vega-Lite preview for ${file.name}...`);
-
-        try {
-            const fileContent = await this.app.vault.read(file);
-            previewVegaLiteArtifactFromMarkdown({
-                host: this.createDiagramCommandHostAdapter(),
-                sourceMarkdown: fileContent,
-                sourcePath: file.path
-            });
-
-            reporter.updateStatus(this.getActionCompleteText(actionLabel), 100);
-            reporter.log(`Vega-Lite preview opened for: ${file.path}`);
-            new Notice(i18n.notices.experimentalDiagramPreviewReady);
-        } catch (error: unknown) {
-            const message = error instanceof Error ? error.message : String(error);
-            reporter.log(`Error during Vega-Lite preview: ${message}`);
-            new Notice(formatI18n(i18n.notices.experimentalDiagramError, { message }));
-            console.error("Vega-Lite preview error:", error);
-            reporter.updateStatus(this.getActionFailedText(message), -1);
-            await saveErrorLog(this.app, reporter, error, this.settings);
-        }
+        return runPreviewExperimentalDiagramCommandWithHost(
+            this.createDiagramCommandRunHost(),
+            file,
+            reporter
+        );
     }
 
     async extractConceptsCommand(reporter?: ProgressReporter) {

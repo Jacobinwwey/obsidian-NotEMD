@@ -5,6 +5,8 @@ topic: cli-write-heavy-contract-tightening
 
 # CLI 写入型契约收口需求
 
+> 更新（2026-05-05，当天稍后）：第一批 direct-surface wrapper 已经落地。`testLlmConnectionCommand`、`generateDiagramCommand` 与 `previewExperimentalDiagramCommand` 现在都通过 host adapter 代理，并返回结构化结果。当前开放问题已经下移到 diagram/provider command-core 收敛，以及 preview/provider-test 是否升级为 typed contract 的决策。
+
 ## 问题框架
 
 前几轮需求已经把“大范围抽取”问题解决掉，而最新代码也已经把最小证明批次补齐：

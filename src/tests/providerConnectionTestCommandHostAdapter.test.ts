@@ -1,6 +1,7 @@
 import { STRINGS_EN } from '../i18n/locales/en';
 import { mockSettings } from './__mocks__/settings';
 import {
+    runInteractiveProviderConnectionTestCommandWithHost,
     runProviderConnectionTestWithHost,
     runTestLlmConnectionCommandWithHost
 } from '../operations/providerConnectionTestCommandHostAdapter';
@@ -34,6 +35,61 @@ function createReporter() {
 }
 
 describe('provider connection test command host adapter', () => {
+    test('interactive wrapper short-circuits while host is busy', async () => {
+        const reporter = createReporter();
+        const { host } = createHost();
+        const interactiveHost = {
+            ...host,
+            getReporter: jest.fn(() => reporter),
+            isBusy: jest.fn(() => true),
+            setBusy: jest.fn(),
+            getBusyNotice: jest.fn(() => 'busy now')
+        };
+        const testApiSpy = jest.fn();
+
+        const result = await runInteractiveProviderConnectionTestCommandWithHost(
+            interactiveHost as any,
+            undefined,
+            testApiSpy as any
+        );
+
+        expect(result).toBeNull();
+        expect(testApiSpy).not.toHaveBeenCalled();
+        expect(interactiveHost.showNotice).toHaveBeenCalledWith('busy now');
+        expect(interactiveHost.setBusy).not.toHaveBeenCalled();
+    });
+
+    test('interactive wrapper uses host reporter and clears display before delegated run', async () => {
+        const reporter = createReporter();
+        const { host } = createHost();
+        const interactiveHost = {
+            ...host,
+            getReporter: jest.fn(() => reporter),
+            isBusy: jest.fn(() => false),
+            setBusy: jest.fn(),
+            getBusyNotice: jest.fn(() => 'busy now')
+        };
+        const testApiSpy = jest.fn().mockResolvedValue({
+            success: true,
+            message: 'pong'
+        });
+
+        const result = await runInteractiveProviderConnectionTestCommandWithHost(
+            interactiveHost as any,
+            undefined,
+            testApiSpy as any
+        );
+
+        expect(interactiveHost.setBusy).toHaveBeenNthCalledWith(1, true);
+        expect(reporter.clearDisplay).toHaveBeenCalledTimes(1);
+        expect(testApiSpy).toHaveBeenCalledWith(mockSettings.providers[0], mockSettings.enableApiErrorDebugMode);
+        expect(interactiveHost.setBusy).toHaveBeenLastCalledWith(false);
+        expect(result).toMatchObject({
+            kind: 'success',
+            statusMessage: '✅ Success: pong'
+        });
+    });
+
     test('runs provider connection test and reports success through extracted host adapter', async () => {
         const { host, runningNotice } = createHost();
         const reporter = createReporter();

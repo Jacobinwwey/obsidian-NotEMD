@@ -109,7 +109,7 @@ describe('provider diagnostic command surface', () => {
             cancelled: false
         };
         const commandSpy = jest
-            .spyOn(providerConnectionTestCommandHostAdapter, 'runTestLlmConnectionCommandWithHost')
+            .spyOn(providerConnectionTestCommandHostAdapter, 'runInteractiveProviderConnectionTestCommandWithHost')
             .mockResolvedValue({
                 kind: 'success',
                 statusMessage: 'ok',
@@ -123,6 +123,10 @@ describe('provider diagnostic command surface', () => {
             loadSettings: expect.any(Function),
             getSettings: expect.any(Function),
             getUiStrings: expect.any(Function),
+            getReporter: expect.any(Function),
+            isBusy: expect.any(Function),
+            setBusy: expect.any(Function),
+            getBusyNotice: expect.any(Function),
             showNotice: expect.any(Function),
             logError: expect.any(Function),
             openErrorModal: expect.any(Function),

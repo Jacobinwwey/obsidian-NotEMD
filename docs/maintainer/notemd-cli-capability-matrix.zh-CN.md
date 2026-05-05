@@ -74,7 +74,7 @@
 
 | 优先级 | 候选能力 | 为什么先做 | 现有基础 |
 |---|---|---|---|
-| P0 | 剩余 direct-read/sidebar surfaces | `src/main.ts` 仍持有长尾 direct execution 与 sidebar-only read path；最高价值样本是 `testLlmConnectionCommand`、`generateDiagramCommand` 与 `previewExperimentalDiagramCommand` | `src/main.ts` 剩余命令面、`src/workflowButtons.ts` |
+| P0 | Diagram/provider command-core 收敛 | 公共 provider-test 与 diagram command wrapper 已经改为通过 host adapter 代理，但 `src/main.ts` 仍持有更深层的 `executeSaveMermaidDiagramCommand` / `executeArtifactDiagramCommand` helper，以及 `diagram.preview` 与 provider connection-test 是否进入 typed automation contract 的决策 | `src/operations/diagramCommandHostAdapter.ts`、`src/operations/providerConnectionTestCommandHostAdapter.ts`、`src/main.ts` 中的 diagram helper |
 | P1 | selection/export 与 config flow 的 contract 增强 | 这些 operation 已建模，但未来 operation invoker 需要比 command-trigger 对等更丰富的 path/context 语义 | `src/operations/registry.ts`, `src/operations/configProfileCommands.ts`, `src/operations/noteProcessingCommandHostAdapter.ts` |
 | P1 | workflow/settings 打包 | Workflow DSL 与 output-path toggles 仍是有价值 metadata，但还不是稳定公共接口 | `src/workflowButtons.ts`, 设置驱动的输出控制 |
 | P2 | maintainer 语义验证与打包硬化 | 重型运行时隔离与维护者本地 runbook 仍重要，但在命令面收口后才是下一层问题 | `docs/maintainer/*`, render-host bundle 流程, release 验证路径 |
