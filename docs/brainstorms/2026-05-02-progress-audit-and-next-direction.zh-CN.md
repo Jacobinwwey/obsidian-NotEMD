@@ -127,8 +127,9 @@ topic: progress-audit-next-direction
 - selection/export registry batch 也已落地：同一套 operation surface 现在也已覆盖 `editor.create-link-and-generate`、`provider.profile.export`、`provider.profile.import`、`cli.capability-manifest.export` 与 `cli.invocation-contract.export`，旧的“selection/export surfaces 仍缺失”判断已不再是当前事实。
 - translation/extraction utility 边界也继续收口了一步：`batchTranslateFolder()` 现在已支持注入外部 reporter，不再把 `ProgressModal` 当成唯一载体；`extractOriginalText()` 现在会返回结构化结果对象，成功 notice 也已由 host adapter 显式接管。
 - 下一批 utility host adapter 也已落地：`src/operations/utilityCommandHostAdapter.ts` 现在承接 duplicate cleanup、batch Mermaid fix 与 single/batch formula fix 的 command orchestration，这些 `src/main.ts` wrapper 也已收缩为 delegator。
+- 最小剩余 write-heavy contract 批次也已落地：`src/translate.ts` 现在会返回 `TranslateFileResult` / `BatchTranslateFolderResult`，`src/formulaFixer.ts` 现在会返回 `FormulaFixFileResult` / `BatchFormulaFixResult`，host adapter 现在承接它们的成功 notice，`src/operations/registry.ts` 也已直接导出 richer 的 `translate.*` / `formula.*` result schema。
 - `src/fileUtils.ts` 与 `src/extractOriginalText.ts` 现在都接受更窄的 runtime context，而不是直接依赖具体 `NotemdPlugin` 类。这说明边界已经开始从“抽 wrapper”推进到“削弱 utility 对宿主类的类型耦合”。
-- 剩余架构缺口因此再次转移：下一批不应继续停留在 `src/main.ts` wrapper 搬运，而应优先处理更深的 notice/result/vault-write side-effect 收口、write-heavy flow 更丰富的 machine-readable result 语义，以及 `src/main.ts` / sidebar 里剩余的长尾直接读写命令面。
+- 剩余架构缺口因此再次转移：下一批不应继续停留在 `src/main.ts` wrapper 搬运，而应优先处理更大的 `src/fileUtils.ts` 写入型家族，再处理 `src/main.ts` / sidebar 里剩余的长尾直接读写命令面，而不是回头重开已经落地的 translate/formula 工作。
 
 ## 当前验证门
 
@@ -195,8 +196,8 @@ topic: progress-audit-next-direction
 5. **工作区卫生保持**
    `ref/` 与 `coverage/` 应视为本地分析 / 构建产物，而不是待提交内容。主线需要持续保持干净工作树。
 
-6. **把下一阶段重心转到 write-heavy contract tightening**
-   note-processing registry onboarding 与 utility host extraction 现在基本已经完成。下一步应先把 `translate.file`、`translate.folder-batch`、`formula.fix-file` 与 `formula.batch-fix` 的 machine-readable result、`Notice` / reporter / 目录创建等宿主副作用边界继续收紧，再进入更大的 `src/fileUtils.ts` write-heavy seams。
+6. **把下一阶段重心转到更大的 `src/fileUtils.ts` contract 批次**
+   note-processing registry onboarding、utility host extraction 与 `translate/formula` proof slice 现在都已足够完整。下一步应先把 `processFile`、`generateContentForTitle`、`batchGenerateContentForTitles`、`batchFixMermaidSyntaxInFolder` 与 `checkAndRemoveDuplicateConceptNotes` 的 machine-readable result、`Notice` / reporter / 破坏性副作用边界继续收紧。
 
 7. **然后继续清空剩余高价值 direct command surfaces**
    现在已核实的高价值剩余直接命令面主要是 `testLlmConnectionCommand`、`generateDiagramCommand` 及其 save/artifact 分支、以及 `previewExperimentalDiagramCommand`。在 write-heavy result contracts 收紧之前，优先级高于重开已抽离 utility families 的 wrapper 搬运。
@@ -205,12 +206,11 @@ topic: progress-audit-next-direction
 
 结合 roadmap 原始长期意图与当前代码现实，最稳妥的未来落地顺序应为：
 
-1. 先收紧 `translate.file`、`translate.folder-batch`、`formula.fix-file` 与 `formula.batch-fix` 的结果契约，以及由宿主接管的成功语义
-2. 再收紧 `src/fileUtils.ts` 中更大的 write-heavy families，重点覆盖 processed-file 保存、标题生成、概念笔记创建、重复清理与聚合错误语义
-3. 然后处理 `src/main.ts` 剩余 direct command surfaces，其中最高价值目标是 `testLlmConnectionCommand`、`generateDiagramCommand` 与 `previewExperimentalDiagramCommand`
-4. 在以上三项稳定后，再继续维护者本地语义核验与重型运行时打包边界的后续硬化
-5. 完成这些边界工作后，再重开 legacy prompt 退役、MermaidProcessor sunset，或更丰富的 first-class CLI command 暴露
-6. 最后才重新评估 board-style export 与高级引擎探索
+1. 先收紧 `src/fileUtils.ts` 中更大的 write-heavy families，重点覆盖 processed-file 保存、标题生成、Mermaid 修复、重复清理与聚合错误语义
+2. 然后处理 `src/main.ts` 剩余 direct command surfaces，其中最高价值目标是 `testLlmConnectionCommand`、`generateDiagramCommand` 与 `previewExperimentalDiagramCommand`
+3. 在以上两项稳定后，再继续维护者本地语义核验与重型运行时打包边界的后续硬化
+4. 完成这些边界工作后，再重开 legacy prompt 退役、MermaidProcessor sunset，或更丰富的 first-class CLI command 暴露
+5. 最后才重新评估 board-style export 与高级引擎探索
 
 这个顺序既保留了 roadmap 的长期目标，也尊重了当前主线已经交付的事实。
 

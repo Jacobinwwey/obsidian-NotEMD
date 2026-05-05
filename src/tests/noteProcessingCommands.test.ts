@@ -345,7 +345,19 @@ describe('note processing command surface', () => {
             .mockResolvedValue(undefined);
         const utilitySpy = jest
             .spyOn(translateUtils, 'translateFile')
-            .mockResolvedValue('Translations/Topic_en.md');
+            .mockResolvedValue({
+                sourcePath: 'Notes/Topic.md',
+                targetLanguage: 'en',
+                requestedOutputFolderPath: 'Translations',
+                outputFolderPath: 'Translations',
+                outputFolderCreated: false,
+                usedFallbackOutputFolder: false,
+                outputPath: 'Translations/Topic_en.md',
+                created: true,
+                overwritten: false,
+                openedInWorkspace: true,
+                chunkCount: 1
+            });
 
         await (plugin as any).translateFileCommand(file, reporter.abortController?.signal, reporter);
 
@@ -373,8 +385,28 @@ describe('note processing command surface', () => {
             .spyOn(translateUtils, 'batchTranslateFolder')
             .mockResolvedValue({
                 folderPath: 'Concepts',
+                requestedOutputFolderPath: 'Concepts',
                 outputFolderPath: 'Concepts',
+                outputFolderCreated: false,
+                targetLanguage: 'en',
+                processedFileCount: 1,
                 translatedCount: 1,
+                cancelled: false,
+                fileResults: [
+                    {
+                        sourcePath: 'Concepts/Topic.md',
+                        targetLanguage: 'en',
+                        requestedOutputFolderPath: 'Concepts',
+                        outputFolderPath: 'Concepts',
+                        outputFolderCreated: false,
+                        usedFallbackOutputFolder: false,
+                        outputPath: 'Concepts/Topic_en.md',
+                        created: true,
+                        overwritten: false,
+                        openedInWorkspace: false,
+                        chunkCount: 1
+                    }
+                ],
                 errors: []
             });
 
@@ -594,7 +626,12 @@ describe('note processing command surface', () => {
             .mockResolvedValue(undefined);
         const utilitySpy = jest
             .spyOn(formulaFixer, 'fixFormulaFormatsInFile')
-            .mockResolvedValue(true);
+            .mockResolvedValue({
+                sourcePath: 'Notes/Topic.md',
+                outputPath: 'Notes/Topic.md',
+                modified: true,
+                replacementCount: 2
+            });
 
         await (plugin as any).fixFormulaFormatsCommand(file, reporter);
 
@@ -618,7 +655,21 @@ describe('note processing command surface', () => {
             .mockResolvedValue(undefined);
         const utilitySpy = jest
             .spyOn(formulaFixer, 'batchFixFormulaFormatsInFolder')
-            .mockResolvedValue({ modifiedCount: 1, errors: [] });
+            .mockResolvedValue({
+                folderPath: 'Notes',
+                processedFileCount: 1,
+                modifiedCount: 1,
+                cancelled: false,
+                fileResults: [
+                    {
+                        sourcePath: 'Notes/A.md',
+                        outputPath: 'Notes/A.md',
+                        modified: true,
+                        replacementCount: 1
+                    }
+                ],
+                errors: []
+            });
 
         await (plugin as any).batchFixFormulaFormatsCommand(reporter);
 

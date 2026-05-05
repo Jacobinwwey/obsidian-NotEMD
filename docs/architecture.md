@@ -242,11 +242,12 @@ The gap is smaller than before:
 - `src/operations/noteProcessingCommandHostAdapter.ts` now carries not only `process-current-add-links`, `process-folder-add-links`, `batch-generate-from-titles`, `generate-from-title`, and `research-and-summarize`, but also `translate-current-file`, `batch-translate-folder`, `extract-concepts-current`, `extract-concepts-folder`, `extract-original-text`, and `extract-concepts-and-generate-titles`
 - `src/operations/utilityCommandHostAdapter.ts` now carries current-file duplicate checks, duplicate cleanup, batch Mermaid fix, and single/batch formula-fix command orchestration below `src/main.ts`; `check-for-duplicates` is no longer inlined inside command registration
 - `src/operations/registry.ts` now also covers the remaining selection/export-adjacent automation seams: `editor.create-link-and-generate`, `provider.profile.export`, `provider.profile.import`, `cli.capability-manifest.export`, and `cli.invocation-contract.export` now share the same registry/capability/contract surface as the earlier batches
-- `src/translate.ts` now accepts injected reporters for batch-translation flows instead of hard-wiring `ProgressModal` as the only execution carrier, and `src/extractOriginalText.ts` now returns a structured extraction result while its success notice has been lifted to the host adapter; `content.extract-original-text` is now the first concrete write-heavy proof of richer result semantics
+- Write-heavy contract enrichment is now proven across three families: `src/translate.ts` returns `TranslateFileResult` / `BatchTranslateFolderResult`, `src/formulaFixer.ts` returns `FormulaFixFileResult` / `BatchFormulaFixResult`, and `src/extractOriginalText.ts` returns a structured extraction result; success notices for translation, formula fix, and original-text extraction now live in host adapters rather than utility cores
+- `src/operations/registry.ts` now models the richer `translate.*` and `formula.*` result schemas directly, so capability export and invocation-contract export no longer flatten those flows into path-only or count-only semantics
 - `src/fileUtils.ts` and `src/extractOriginalText.ts` now accept narrower runtime contexts instead of the concrete `NotemdPlugin` class, which shows the boundary work has moved beyond wrapper extraction into utility host-coupling reduction
-- `src/main.ts` now mainly retains command registration and remaining direct execution surfaces; the registry already covers diagram/provider/config-profile plus process/generate/research/translation/extraction/utility/selection/export batches, so the next real gap is deeper notice/result/vault-write side-effect tightening, richer write-heavy result contracts, and the remaining direct-read/sidebar surfaces rather than more wrapper moves
+- `src/main.ts` now mainly retains command registration and remaining direct execution surfaces; the registry already covers diagram/provider/config-profile plus process/generate/research/translation/extraction/utility/selection/export batches, so the next real gap is the larger write-heavy `src/fileUtils.ts` family plus the remaining direct-read/sidebar surfaces rather than more wrapper moves
 - The verified highest-value remaining direct surfaces are `testLlmConnectionCommand`, `generateDiagramCommand` plus its save/artifact branches, and `previewExperimentalDiagramCommand`
-- The ordered convergence path is now explicit: tighten `translate.*` and `formula.*` first, then the larger write-heavy families in `src/fileUtils.ts`, and only then finish the remaining direct-read/sidebar surfaces
+- The ordered convergence path is now explicit: tighten the larger write-heavy families in `src/fileUtils.ts` first, then finish the remaining direct-read/sidebar surfaces, and only then reopen packaging/semantic-verification convergence work
 
 ## Key Design Decisions
 
@@ -260,7 +261,7 @@ The gap is smaller than before:
 ## Verification
 
 - `npm run build` — TypeScript compilation + esbuild bundle
-- `npm test -- --runInBand` — the full Jest matrix currently covers 129 suites and 823 tests
+- `npm test -- --runInBand` — the full Jest matrix currently covers 133 suites and 846 tests; in a `/.worktrees/` checkout use `npx jest --runInBand --config /tmp/notemd-worktree-jest.cjs` because the repo Jest ignore pattern excludes worktree paths
 - `npm run audit:i18n-ui` — No hardcoded UI strings
 - `npm run audit:render-host` — Render host self-contained in main.js
 - `git diff --check` — Whitespace hygiene
