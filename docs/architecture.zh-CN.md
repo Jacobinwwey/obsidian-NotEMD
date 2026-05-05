@@ -238,7 +238,8 @@ flowchart LR
 - `src/operations/providerDiagnosticCommandHostAdapter.ts` 现在承接开发者诊断命令的宿主装载、报告落盘接线与 notice 整形逻辑
 - `src/operations/configProfileCommandHostAdapter.ts` 现在承接 config/profile 状态持久化、CLI 导出 notice 整形与导入导出错误映射逻辑
 - `src/operations/providerConnectionTestCommandHostAdapter.ts` 现在承接共享 provider 连接测试的 settings 装载与 notice/reporter 编排逻辑，并已被命令路径与设置页共同复用
-- `src/main.ts` 现在主要保留命令注册，以及更广义的非 CLI 交互与批处理宿主副作用，这正是下一批抽离目标
+- `src/operations/noteProcessingCommandHostAdapter.ts` 现在承接 `generate-from-title` 与 `research-and-summarize` 的 busy-guard、reporter 生命周期、notice/error-log 编排逻辑
+- `src/main.ts` 现在主要保留命令注册，以及 `processWithNotemdCommand`、`processFolderWithNotemdCommand` 等更广义的非 CLI 交互与批处理宿主副作用，这正是下一批抽离目标
 
 ## 关键设计决策
 

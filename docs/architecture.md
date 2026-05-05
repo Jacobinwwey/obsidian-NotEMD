@@ -238,7 +238,8 @@ The gap is smaller than before:
 - `src/operations/providerDiagnosticCommandHostAdapter.ts` now carries developer-diagnostic host loading, report-persistence wiring, and notice shaping below the command layer
 - `src/operations/configProfileCommandHostAdapter.ts` now carries config/profile state persistence, CLI export notice shaping, and import/export error mapping below the command layer
 - `src/operations/providerConnectionTestCommandHostAdapter.ts` now carries shared provider connection test loading and notice/reporter orchestration, and is now reused by both the command path and the settings tab
-- `src/main.ts` now mainly retains command registration plus broader non-CLI interactive and batch host effects, which are the next extraction targets
+- `src/operations/noteProcessingCommandHostAdapter.ts` now carries the busy guard, reporter lifecycle, and notice/error-log orchestration for `generate-from-title` and `research-and-summarize`
+- `src/main.ts` now mainly retains command registration plus `processWithNotemdCommand`, `processFolderWithNotemdCommand`, and the broader non-CLI interactive/batch host effects, which are the next extraction targets
 
 ## Key Design Decisions
 
