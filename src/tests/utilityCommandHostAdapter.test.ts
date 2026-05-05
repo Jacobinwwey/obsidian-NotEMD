@@ -1,4 +1,5 @@
 import { TFile } from 'obsidian';
+import * as fileUtils from '../fileUtils';
 import { mockSettings } from './__mocks__/settings';
 import { ProgressReporter } from '../types';
 
@@ -28,6 +29,9 @@ function createUiStrings() {
         },
         notices: {
             notemdBusy: 'Notemd busy',
+            duplicateTermsCheckConsole: 'Found {count} potential duplicate terms. Check console.',
+            duplicateCheckError: 'Error checking duplicates: {message}',
+            noActiveTextFileSelected: "No active '.md' or '.txt' file selected.",
             duplicateCheckRemoveError: 'Duplicate cleanup failed: {message}',
             batchMermaidFixFinishedWithErrors: 'Mermaid fix finished with {count} errors after {modifiedCount} fixes',
             batchMermaidFixSuccess: 'Fixed Mermaid in {modifiedCount} files',
@@ -53,6 +57,8 @@ function createHost(reporter: ProgressReporter, initiallyBusy = false) {
     return {
         host: {
             getApp: jest.fn(() => ({ vault: {}, workspace: {} })),
+            getActiveFile: jest.fn(() => null),
+            readFile: jest.fn().mockResolvedValue(''),
             loadSettings: jest.fn().mockResolvedValue(undefined),
             getSettings: jest.fn(() => mockSettings),
             getUiStrings: jest.fn(() => createUiStrings()),
@@ -85,6 +91,7 @@ function createHost(reporter: ProgressReporter, initiallyBusy = false) {
             getRunningActionText: jest.fn((label: string) => `Running ${label}`),
             getActionCompleteText: jest.fn((label: string) => `Done ${label}`),
             showNotice: jest.fn(),
+            logInfo: jest.fn(),
             logError: jest.fn(),
             openErrorModal: jest.fn(),
             saveErrorLog: jest.fn().mockResolvedValue(undefined),
@@ -113,6 +120,35 @@ describe('utility command host adapter', () => {
         expect(host.completeReporter).toHaveBeenCalledWith(reporter);
         expect(host.finalizeReporter).toHaveBeenCalledWith(reporter);
         expect(getBusy()).toBe(false);
+    });
+
+    test('check duplicates current command reads active file and reports duplicate summary through extracted host flow', async () => {
+        const reporter = createReporter();
+        const { host } = createHost(reporter);
+        const file = Object.assign(new (TFile as any)(), {
+            name: 'Topic.md',
+            basename: 'Topic',
+            path: 'Notes/Topic.md',
+            extension: 'md'
+        });
+        host.getActiveFile = jest.fn(() => file);
+        host.readFile = jest.fn().mockResolvedValue('alpha alpha beta');
+        host.logInfo = jest.fn();
+
+        const duplicateSpy = jest.spyOn(fileUtils, 'findDuplicates').mockReturnValue(new Set(['alpha']));
+        const { runCheckDuplicatesCurrentCommandWithHost } = loadModule();
+
+        const result = await runCheckDuplicatesCurrentCommandWithHost(host as any, reporter);
+
+        expect(host.readFile).toHaveBeenCalledWith(file);
+        expect(duplicateSpy).toHaveBeenCalledWith('alpha alpha beta');
+        expect(host.showNotice).toHaveBeenCalledWith('Found 1 potential duplicate terms. Check console.');
+        expect(host.logInfo).toHaveBeenCalledWith('Potential duplicates in Topic.md:', ['alpha']);
+        expect(result).toEqual({
+            sourcePath: 'Notes/Topic.md',
+            duplicateCount: 1,
+            duplicates: ['alpha']
+        });
     });
 
     test('batch mermaid fix command resolves folder and reports success through extracted host flow', async () => {

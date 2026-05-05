@@ -1,6 +1,6 @@
 # Notemd CLI Capability Matrix
 
-> Updated: 2026-05-04
+> Updated: 2026-05-05
 
 This matrix is a maintainer control document. It distinguishes:
 
@@ -59,7 +59,7 @@ Observed host facts:
 - `src/operations/registry.ts` is now the central metadata source for extracted operations, command bindings, mapping kind, and selected input/result schemas.
 - `src/operations/capabilityManifest.ts` now flattens those command bindings into the exported capability manifest.
 - `src/cliContracts.ts` now builds the invocation contract from the same registry, which removes one major drift path between docs, command discovery, and contract export.
-- The registry now includes the first note-processing operation set as well: `translate.file`, `translate.folder-batch`, `concept.extract-file`, `concept.extract-folder`, `content.extract-original-text`, and `workflow.extract-and-generate`.
+- The registry now includes the first note-processing and utility operation batches as well: `translate.file`, `translate.folder-batch`, `concept.extract-file`, `concept.extract-folder`, `content.extract-original-text`, `workflow.extract-and-generate`, `duplicate.check-file`, `concept.dedupe`, `mermaid.batch-fix`, `formula.fix-file`, and `formula.batch-fix`.
 - Legacy aliases remain registered for compatibility, but they are intentionally excluded from capability-manifest export.
 
 ## First Extraction Targets

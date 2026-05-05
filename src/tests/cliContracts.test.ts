@@ -7,6 +7,11 @@ describe('CLI invocation contract', () => {
         const translateFile = contract.operations.find(operation => operation.operationId === 'translate.file');
         const extractOriginalText = contract.operations.find(operation => operation.operationId === 'content.extract-original-text');
         const extractAndGenerate = contract.operations.find(operation => operation.operationId === 'workflow.extract-and-generate');
+        const checkDuplicates = contract.operations.find(operation => operation.operationId === 'duplicate.check-file');
+        const dedupeConcepts = contract.operations.find(operation => operation.operationId === 'concept.dedupe');
+        const batchMermaidFix = contract.operations.find(operation => operation.operationId === 'mermaid.batch-fix');
+        const fixFormulaFile = contract.operations.find(operation => operation.operationId === 'formula.fix-file');
+        const batchFixFormula = contract.operations.find(operation => operation.operationId === 'formula.batch-fix');
 
         expect(contract.version).toBe(1);
         expect(operationIds).toEqual(expect.arrayContaining([
@@ -18,7 +23,12 @@ describe('CLI invocation contract', () => {
             'concept.extract-file',
             'concept.extract-folder',
             'content.extract-original-text',
-            'workflow.extract-and-generate'
+            'workflow.extract-and-generate',
+            'duplicate.check-file',
+            'concept.dedupe',
+            'mermaid.batch-fix',
+            'formula.fix-file',
+            'formula.batch-fix'
         ]));
         expect(contract.operations[0].inputSchema).toEqual(expect.objectContaining({
             type: 'object',
@@ -76,6 +86,83 @@ describe('CLI invocation contract', () => {
                 properties: expect.objectContaining({
                     conceptFolderPath: expect.any(Object),
                     completeFolderPath: expect.any(Object)
+                })
+            })
+        }));
+
+        expect(checkDuplicates).toEqual(expect.objectContaining({
+            operationId: 'duplicate.check-file',
+            resultSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    duplicateCount: expect.any(Object),
+                    duplicates: expect.any(Object)
+                })
+            })
+        }));
+
+        expect(dedupeConcepts).toEqual(expect.objectContaining({
+            operationId: 'concept.dedupe',
+            inputSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    conceptFolderPath: expect.any(Object)
+                })
+            }),
+            resultSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    removedCount: expect.any(Object)
+                })
+            })
+        }));
+
+        expect(batchMermaidFix).toEqual(expect.objectContaining({
+            operationId: 'mermaid.batch-fix',
+            inputSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    folderPath: expect.any(Object)
+                })
+            }),
+            resultSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    modifiedCount: expect.any(Object),
+                    errors: expect.any(Object)
+                })
+            })
+        }));
+
+        expect(fixFormulaFile).toEqual(expect.objectContaining({
+            operationId: 'formula.fix-file',
+            inputSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    sourcePath: expect.any(Object)
+                })
+            }),
+            resultSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    modified: expect.any(Object)
+                })
+            })
+        }));
+
+        expect(batchFixFormula).toEqual(expect.objectContaining({
+            operationId: 'formula.batch-fix',
+            inputSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    folderPath: expect.any(Object)
+                })
+            }),
+            resultSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    modifiedCount: expect.any(Object),
+                    errors: expect.any(Object)
                 })
             })
         }));

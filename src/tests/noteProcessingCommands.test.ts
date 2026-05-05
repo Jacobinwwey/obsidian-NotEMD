@@ -451,6 +451,39 @@ describe('note processing command surface', () => {
         expect(utilitySpy).not.toHaveBeenCalled();
     });
 
+    test('check duplicates current command delegates to extracted utility host adapter', async () => {
+        const utilityCommandHostAdapter = require('../operations/utilityCommandHostAdapter');
+        const plugin = createPlugin();
+        const reporter = createReporter();
+
+        const hostSpy = jest
+            .spyOn(utilityCommandHostAdapter, 'runCheckDuplicatesCurrentCommandWithHost')
+            .mockResolvedValue({
+                sourcePath: 'Notes/Topic.md',
+                duplicateCount: 1,
+                duplicates: ['alpha']
+            });
+        const utilitySpy = jest
+            .spyOn(fileUtils, 'findDuplicates')
+            .mockReturnValue(new Set(['alpha']));
+
+        const result = await (plugin as any).checkDuplicatesCurrentCommand(reporter);
+
+        expect(hostSpy).toHaveBeenCalledWith(expect.objectContaining({
+            getActiveFile: expect.any(Function),
+            readFile: expect.any(Function),
+            getUiStrings: expect.any(Function),
+            showNotice: expect.any(Function),
+            logInfo: expect.any(Function)
+        }), reporter);
+        expect(result).toEqual({
+            sourcePath: 'Notes/Topic.md',
+            duplicateCount: 1,
+            duplicates: ['alpha']
+        });
+        expect(utilitySpy).not.toHaveBeenCalled();
+    });
+
     test('batch mermaid fix command delegates to extracted utility host adapter', async () => {
         const utilityCommandHostAdapter = require('../operations/utilityCommandHostAdapter');
         const plugin = createPlugin();
