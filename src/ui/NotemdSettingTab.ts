@@ -8,7 +8,6 @@ import {
     getProviderValidationIssues,
     hasBlockingProviderValidationIssues
 } from '../llmProviders';
-import { testAPI } from '../llmUtils'; // Import testAPI
 import { getDefaultPrompt } from '../promptUtils'; // Import for default prompts
 import {
     getProviderDiagnosticCallModeOptions,
@@ -27,6 +26,7 @@ import {
 import { UI_LOCALE_AUTO } from '../i18n/languageContext';
 import { SUPPORTED_UI_LOCALES } from '../i18n/uiLocales';
 import { formatI18n, getI18nStrings } from '../i18n';
+import { runProviderConnectionTestWithHost } from '../operations/providerConnectionTestCommandHostAdapter';
 
 // Define specific key types for settings accessed dynamically
 type ProviderSettingKey = 'addLinksProvider' | 'researchProvider' | 'generateTitleProvider' | 'translateProvider';
@@ -63,6 +63,20 @@ export class NotemdSettingTab extends PluginSettingTab {
             return 1;
         }
         return Math.min(normalized, 10);
+    }
+
+    private createSilentReporter() {
+        return {
+            log: () => {},
+            updateStatus: () => {},
+            requestCancel: () => {},
+            clearDisplay: () => {},
+            get cancelled() {
+                return false;
+            },
+            activeTasks: 0,
+            updateActiveTasks: () => {}
+        };
     }
 
     private renderProviderSummary(containerEl: HTMLElement, provider: LLMProviderConfig): void {
@@ -522,15 +536,16 @@ export class NotemdSettingTab extends PluginSettingTab {
                             return;
                         }
                         button.setDisabled(true).setButtonText(providerI18n.testConnectionTesting);
-                        const testingNotice = new Notice(formatI18n(providerI18n.testConnectionRunning, { provider: activeProvider.name }), 0);
                         try {
-                            const result = await testAPI(activeProvider, this.plugin.settings.enableApiErrorDebugMode); // Use imported testAPI
-                            testingNotice.hide();
-                            if (result.success) { new Notice(formatI18n(providerI18n.testConnectionSuccess, { message: result.message }), 5000); }
-                            else { new Notice(formatI18n(providerI18n.testConnectionFailed, { message: result.message }), 10000); }
+                            await runProviderConnectionTestWithHost({
+                                loadSettings: async () => {},
+                                getSettings: () => this.plugin.settings,
+                                getUiStrings: () => getI18nStrings({ uiLocale: this.plugin.settings.uiLocale }),
+                                showNotice: (message, duration) => new Notice(message, duration),
+                                logError: (_message, details) => console.error(`Error testing ${activeProvider.name} connection from settings:`, details)
+                            }, this.createSilentReporter());
                         } catch (error: unknown) {
                             const message = error instanceof Error ? error.message : String(error);
-                            testingNotice.hide();
                             new Notice(formatI18n(providerI18n.testConnectionError, { message }), 10000);
                             console.error(`Error testing ${activeProvider.name} connection from settings:`, error);
                         } finally {

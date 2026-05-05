@@ -28,8 +28,8 @@ export interface ProviderConnectionTestCommandHost {
     getUiStrings: () => ProviderConnectionTestCommandUiStrings;
     showNotice: (message: string, duration?: number) => ProviderConnectionTestNoticeHandle | void;
     logError: (message: string, details: string) => void;
-    openErrorModal: (title: string, details: string) => void;
-    saveErrorLog: (error: unknown, reporter: ProgressReporter) => Promise<void>;
+    openErrorModal?: (title: string, details: string) => void;
+    saveErrorLog?: (error: unknown, reporter: ProgressReporter) => Promise<void>;
 }
 
 export type ProviderConnectionTestCommandResult =
@@ -69,7 +69,7 @@ function normalizeError(error: unknown): { errorMessage: string; errorDetails: s
     };
 }
 
-export async function runTestLlmConnectionCommandWithHost(
+export async function runProviderConnectionTestWithHost(
     host: ProviderConnectionTestCommandHost,
     reporter: ProgressReporter,
     testApiImpl: typeof testAPI = testAPI
@@ -120,8 +120,8 @@ export async function runTestLlmConnectionCommandWithHost(
         host.showNotice(errorStatus, 10000);
         host.logError('LLM Connection Test Error:', errorDetails);
         reporter.updateStatus(errorStatus, -1);
-        host.openErrorModal(uiStrings.errorModal.titles.llmConnectionTest, errorDetails);
-        await host.saveErrorLog(error, reporter);
+        host.openErrorModal?.(uiStrings.errorModal.titles.llmConnectionTest, errorDetails);
+        await host.saveErrorLog?.(error, reporter);
         return {
             kind: 'error',
             statusMessage: errorStatus,
@@ -129,4 +129,12 @@ export async function runTestLlmConnectionCommandWithHost(
             errorDetails
         };
     }
+}
+
+export async function runTestLlmConnectionCommandWithHost(
+    host: ProviderConnectionTestCommandHost,
+    reporter: ProgressReporter,
+    testApiImpl: typeof testAPI = testAPI
+): Promise<ProviderConnectionTestCommandResult> {
+    return runProviderConnectionTestWithHost(host, reporter, testApiImpl);
 }

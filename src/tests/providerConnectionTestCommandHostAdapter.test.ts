@@ -1,6 +1,9 @@
 import { STRINGS_EN } from '../i18n/locales/en';
 import { mockSettings } from './__mocks__/settings';
-import { runTestLlmConnectionCommandWithHost } from '../operations/providerConnectionTestCommandHostAdapter';
+import {
+    runProviderConnectionTestWithHost,
+    runTestLlmConnectionCommandWithHost
+} from '../operations/providerConnectionTestCommandHostAdapter';
 
 function createHost() {
     const runningNotice = {
@@ -111,6 +114,29 @@ describe('provider connection test command host adapter', () => {
         expect(result).toMatchObject({
             kind: 'error',
             statusMessage: 'Error during connection test: No active provider configured'
+        });
+    });
+
+    test('supports settings-tab style reuse without modal or error-log handlers', async () => {
+        const { runningNotice } = createHost();
+        const reporter = createReporter();
+        const host = {
+            loadSettings: jest.fn().mockResolvedValue(undefined),
+            getSettings: jest.fn(() => mockSettings),
+            getUiStrings: jest.fn(() => STRINGS_EN),
+            showNotice: jest.fn().mockReturnValue(runningNotice),
+            logError: jest.fn()
+        };
+        const testApiSpy = jest.fn().mockRejectedValue(new Error('settings failure'));
+
+        const result = await runProviderConnectionTestWithHost(host as any, reporter as any, testApiSpy as any);
+
+        expect(host.showNotice).toHaveBeenNthCalledWith(1, 'Testing connection to DeepSeek...', 0);
+        expect(host.showNotice).toHaveBeenNthCalledWith(2, 'Error during connection test: settings failure', 10000);
+        expect(host.logError).toHaveBeenCalledWith('LLM Connection Test Error:', expect.stringContaining('settings failure'));
+        expect(result).toMatchObject({
+            kind: 'error',
+            statusMessage: 'Error during connection test: settings failure'
         });
     });
 });
