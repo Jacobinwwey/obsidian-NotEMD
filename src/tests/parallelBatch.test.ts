@@ -19,6 +19,7 @@ const mockApp = {
         getAbstractFileByPath: jest.fn(),
         getMarkdownFiles: jest.fn(),
         createFolder: jest.fn(),
+        modify: jest.fn(),
         rename: jest.fn(),
         adapter: {
             exists: jest.fn(),
@@ -59,18 +60,42 @@ describe('batchGenerateContentForTitles', () => {
         (mockApp.vault.getAbstractFileByPath as jest.Mock).mockImplementation((path: string) => {
             if (path === 'folder') {
                 const folder = new TFolder();
-                Object.assign(folder, { path: 'folder', children: [] });
+                Object.assign(folder, { path: 'folder', name: 'folder', children: [] });
                 return folder;
             }
             return null;
         });
         (mockApp.vault.getMarkdownFiles as jest.Mock).mockReturnValue(files);
-        (mockApp.vault.adapter.exists as jest.Mock).mockResolvedValue(false);
+        (mockApp.vault.adapter.exists as jest.Mock).mockImplementation(async (path: string) => {
+            if (path === 'folder_complete') return false;
+            if (path === 'folder_complete/file1.md' || path === 'folder_complete/file2.md') return false;
+            if (path === 'folder/file1.md' || path === 'folder/file2.md') return true;
+            return false;
+        });
 
-        await batchGenerateContentForTitles(mockApp, settings, 'folder', mockProgressReporter);
+        const result = await batchGenerateContentForTitles(mockApp, settings, 'folder', mockProgressReporter);
 
         expect(mockProgressReporter.log).toHaveBeenCalledWith('Processing batch 1/1 (2 files)');
         expect(mockProgressReporter.updateActiveTasks).toHaveBeenCalledTimes(4); // 2 tasks, each call increments and decrements
+        expect(result).toEqual(expect.objectContaining({
+            sourceFolderPath: 'folder',
+            completeFolderPath: 'folder_complete',
+            completeFolderCreated: true,
+            processedFileCount: 2,
+            generatedCount: 2,
+            movedCount: 2,
+            cancelled: false,
+            fileResults: expect.arrayContaining([
+                expect.objectContaining({
+                    sourcePath: 'folder/file1.md',
+                    outputPath: 'folder/file1.md',
+                    completeDestinationPath: 'folder_complete/file1.md',
+                    movedToCompleteFolder: true,
+                    modified: true
+                })
+            ]),
+            errors: []
+        }));
     });
 
     it('should process files serially when disabled', async () => {
@@ -85,15 +110,20 @@ describe('batchGenerateContentForTitles', () => {
         (mockApp.vault.getAbstractFileByPath as jest.Mock).mockImplementation((path: string) => {
             if (path === 'folder') {
                 const folder = new TFolder();
-                Object.assign(folder, { path: 'folder', children: [] });
+                Object.assign(folder, { path: 'folder', name: 'folder', children: [] });
                 return folder;
             }
             return null;
         });
         (mockApp.vault.getMarkdownFiles as jest.Mock).mockReturnValue(files);
-        (mockApp.vault.adapter.exists as jest.Mock).mockResolvedValue(false);
+        (mockApp.vault.adapter.exists as jest.Mock).mockImplementation(async (path: string) => {
+            if (path === 'folder_complete') return false;
+            if (path === 'folder_complete/file1.md' || path === 'folder_complete/file2.md') return false;
+            if (path === 'folder/file1.md' || path === 'folder/file2.md') return true;
+            return false;
+        });
 
-        await batchGenerateContentForTitles(mockApp, settings, 'folder', mockProgressReporter);
+        const result = await batchGenerateContentForTitles(mockApp, settings, 'folder', mockProgressReporter);
 
         const i18n = getI18nStrings({ uiLocale: settings.uiLocale });
         const firstStepStatus = formatI18n(i18n.sidebar.status.stepLabel, {
@@ -109,5 +139,53 @@ describe('batchGenerateContentForTitles', () => {
 
         expect(mockProgressReporter.updateStatus).toHaveBeenCalledWith(firstStepStatus, 0);
         expect(mockProgressReporter.updateStatus).toHaveBeenCalledWith(secondStepStatus, 50);
+        expect(result).toEqual(expect.objectContaining({
+            sourceFolderPath: 'folder',
+            completeFolderPath: 'folder_complete',
+            completeFolderCreated: true,
+            processedFileCount: 2,
+            generatedCount: 2,
+            movedCount: 2,
+            cancelled: false,
+            fileResults: expect.arrayContaining([
+                expect.objectContaining({
+                    sourcePath: 'folder/file2.md',
+                    outputPath: 'folder/file2.md',
+                    completeDestinationPath: 'folder_complete/file2.md',
+                    movedToCompleteFolder: true,
+                    modified: true
+                })
+            ]),
+            errors: []
+        }));
+    });
+
+    it('should return a non-success batch result when no eligible files exist', async () => {
+        settings.enableBatchParallelism = false;
+        settings.uiLocale = 'en';
+
+        (mockApp.vault.getAbstractFileByPath as jest.Mock).mockImplementation((path: string) => {
+            if (path === 'folder') {
+                const folder = new TFolder();
+                Object.assign(folder, { path: 'folder', name: 'folder', children: [] });
+                return folder;
+            }
+            return null;
+        });
+        (mockApp.vault.getMarkdownFiles as jest.Mock).mockReturnValue([]);
+
+        const result = await batchGenerateContentForTitles(mockApp, settings, 'folder', mockProgressReporter);
+
+        expect(result).toEqual({
+            sourceFolderPath: 'folder',
+            completeFolderPath: 'folder_complete',
+            completeFolderCreated: false,
+            processedFileCount: 0,
+            generatedCount: 0,
+            movedCount: 0,
+            cancelled: false,
+            fileResults: [],
+            errors: []
+        });
     });
 });

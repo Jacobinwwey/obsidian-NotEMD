@@ -40,10 +40,10 @@
 | `notemd:notemd-generate-diagram` | 从活动文件生成 spec-first artifact | `requires-active-file` | 依赖活动文件、插件状态和保存/打开副作用 | `diagram.generate`（`exact`，`defaultInput.outputMode=artifact`） |
 | `notemd:notemd-summarize-as-mermaid` | 为活动文件保存 Mermaid 输出 | `requires-active-file` | 依赖活动文件与插件管理的保存语义 | `diagram.generate`（`exact`，`defaultInput.outputMode=mermaid`） |
 | `notemd:notemd-preview-diagram` | 预览已保存/已生成图表 | `interactive-ui` | Preview modal 属于 UI-only 流程，不具备自动化稳定性 | `diagram.preview`（`exact`） |
-| `notemd:process-with-notemd` | 处理当前文件并加链接 | `requires-active-file` | 依赖活动文件和插件侧内容改写流程 | `file.process-add-links` |
-| `notemd:process-folder-with-notemd` | 批量处理文件夹 | `interactive-ui` | 依赖 folder selection 和 batch UX | `file.process-folder-add-links` |
-| `notemd:generate-content-from-title` | 从标题生成内容 | `requires-active-file` | 使用活动文件并回写内容 | `content.generate-from-title` |
-| `notemd:batch-generate-content-from-titles` | 批量标题生成 | `interactive-ui` | 文件夹选择、完成目录和进度 UI 仍然绑定宿主 | `content.batch-generate-from-titles` |
+| `notemd:process-with-notemd` | 处理当前文件并加链接 | `requires-active-file` | 结构化文件结果已存在，但 active-file 依赖、概念笔记创建、输出路径策略与 vault 改写副作用仍阻碍稳定自动化 | `file.process-add-links` |
+| `notemd:process-folder-with-notemd` | 批量处理文件夹 | `interactive-ui` | 结构化批量结果已存在，且包含 `savedCount` / `errors` / `cancelled`，但文件夹选择、批量改写执行与后置 Mermaid auto-fix 仍由宿主驱动 | `file.process-folder-add-links` |
+| `notemd:generate-content-from-title` | 从标题生成内容 | `requires-active-file` | 结构化结果已存在，但 active-file 依赖、内容回写语义与可选 research 副作用仍绑定插件宿主 | `content.generate-from-title` |
+| `notemd:batch-generate-content-from-titles` | 批量标题生成 | `interactive-ui` | 结构化批量结果已存在，且包含 complete-folder move 语义与聚合错误，但文件夹选择、进度 UI 与 vault 改写仍需要宿主协调 | `content.batch-generate-from-titles` |
 | `notemd:research-and-summarize-topic` | 对选中文本 / 活动笔记标题做研究总结 | `requires-selection` | 依赖活动编辑器或活动笔记标题 | `research.summarize-topic` |
 | `notemd:translate-file` | 翻译当前活动笔记 | `requires-active-file` | 结构化结果与宿主接管的成功 notice 已存在，但 active-file 依赖、设置驱动的输出路径策略与 vault 写入副作用仍阻碍稳定自动化 | `translate.file` |
 | `notemd:batch-translate-folder` | 批量翻译文件夹 | `interactive-ui` | 文件夹选择仍然是交互式流程；结构化批量结果与宿主接管的成功 notice 已存在，但 folder picker 依赖与批量写入执行仍不适合稳定自动化 | `translate.folder-batch` |
@@ -64,8 +64,8 @@
 - `src/operations/capabilityManifest.ts` 现在从同一 registry 展平 capability manifest。
 - `src/cliContracts.ts` 现在也从同一 registry 生成 invocation contract，减少了文档、命令发现与契约导出之间的漂移路径。
 - registry 现在也已纳入主要 note-processing、utility、selection 与 export operations：`editor.create-link-and-generate`、`file.process-add-links`、`file.process-folder-add-links`、`content.generate-from-title`、`content.batch-generate-from-titles`、`research.summarize-topic`、`translate.file`、`translate.folder-batch`、`concept.extract-file`、`concept.extract-folder`、`content.extract-original-text`、`workflow.extract-and-generate`、`duplicate.check-file`、`concept.dedupe`、`mermaid.batch-fix`、`formula.fix-file`、`formula.batch-fix`、`provider.profile.export`、`provider.profile.import`、`cli.capability-manifest.export` 与 `cli.invocation-contract.export`。
-- `translate.*`、`formula.*` 与 `content.extract-original-text` 现在已经组成第一批被验证的 write-heavy contract-enrichment 模式：utility core 返回结构化结果，host adapter 接管本地化成功 notice，registry 直接导出 richer schema。
-- 下一阶段 contract deepening 顺序现在也已明确：先 `src/fileUtils.ts` write-heavy flows，再剩余 direct-read/sidebar surfaces，最后 packaging / semantic verification 的后续收敛。
+- `file.process-add-links`、`file.process-folder-add-links`、`content.generate-from-title`、`content.batch-generate-from-titles`、`translate.*`、`formula.*` 与 `content.extract-original-text` 现在已经组成当前已验证的 write-heavy contract-enrichment proof set：utility core 返回结构化结果，host adapter 接管本地化成功/no-file notice，registry 直接导出 richer schema。
+- 下一阶段 contract deepening 顺序现在也已明确：先完成 `src/fileUtils.ts` 剩余尾部，再处理剩余 direct-read/sidebar surfaces，最后做 packaging / semantic verification 的后续收敛。
 - 旧命令别名仍保留注册以保证兼容，但会被刻意排除在 capability manifest 导出之外。
 
 ## 下一批抽取目标
@@ -74,7 +74,7 @@
 
 | 优先级 | 候选能力 | 为什么先做 | 现有基础 |
 |---|---|---|---|
-| P0 | `src/fileUtils.ts` write-heavy flow tightening | 当前剩余最大副作用核心；需要为 processed files、标题生成、Mermaid 修复与重复清理补齐显式 created/overwritten/moved/error 语义 | `src/fileUtils.ts`, `src/extractOriginalText.ts` |
+| P0 | `src/fileUtils.ts` 剩余尾部收口 | process/generate 契约已落地；当前最高杠杆缺口是 Mermaid 批量修复、破坏性 concept dedupe，以及跨家族结果词汇的最终收敛 | `src/fileUtils.ts`, `src/operations/noteProcessingCommandHostAdapter.ts`, `src/operations/utilityCommandHostAdapter.ts` |
 | P1 | 剩余 direct-read/sidebar surfaces | `src/main.ts` 仍持有长尾 direct execution 与 sidebar-only read path；最高价值样本是 `testLlmConnectionCommand`、`generateDiagramCommand` 与 `previewExperimentalDiagramCommand` | `src/main.ts` 剩余命令面、`src/workflowButtons.ts` |
 | P2 | selection/export 与 config flow 的 contract 增强 | 这些 operation 已建模，但未来 operation invoker 需要比 command-trigger 对等更丰富的 path/context 语义 | `src/operations/registry.ts`, `src/operations/configProfileCommands.ts`, `src/operations/noteProcessingCommandHostAdapter.ts` |
 | P2 | workflow/settings 打包 | Workflow DSL 与 output-path toggles 仍是有价值 metadata，但还不是稳定公共接口 | `src/workflowButtons.ts`, 设置驱动的输出控制 |

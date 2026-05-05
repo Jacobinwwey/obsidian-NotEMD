@@ -19,6 +19,63 @@ export interface ConceptExtractionPluginContext {
     ) => { provider: LLMProviderConfig; modelName: string };
 }
 
+export interface ProcessFileSaveResult {
+    requestedOutputFolderPath: string;
+    outputFolderPath: string;
+    outputFolderCreated: boolean;
+    usedCustomOutputFolder: boolean;
+    outputPath: string;
+    created: boolean;
+    overwritten: boolean;
+    movedOriginalFile: boolean;
+}
+
+export interface ProcessFileResult extends ProcessFileSaveResult {
+    sourcePath: string;
+    moveOriginalFile: boolean;
+    chunkCount: number;
+    conceptCount: number;
+    conceptNoteFolderPath: string;
+    removedCodeFences: boolean;
+}
+
+export interface BatchProcessFolderResult {
+    folderPath: string;
+    processedFileCount: number;
+    savedCount: number;
+    cancelled: boolean;
+    fileResults: ProcessFileResult[];
+    errors: Array<{ file: string; message: string }>;
+}
+
+export interface GenerateContentForTitleResult {
+    sourcePath: string;
+    outputPath: string;
+    title: string;
+    researchEnabled: boolean;
+    researchContextUsed: boolean;
+    modified: boolean;
+}
+
+export interface BatchGenerateContentFileResult extends GenerateContentForTitleResult {
+    completeDestinationPath: string;
+    movedToCompleteFolder: boolean;
+    skippedMoveBecauseDestinationExists: boolean;
+    skippedMoveBecauseSourceMissing: boolean;
+}
+
+export interface BatchGenerateContentForTitlesResult {
+    sourceFolderPath: string;
+    completeFolderPath: string;
+    completeFolderCreated: boolean;
+    processedFileCount: number;
+    generatedCount: number;
+    movedCount: number;
+    cancelled: boolean;
+    fileResults: BatchGenerateContentFileResult[];
+    errors: Array<{ file: string; message: string }>;
+}
+
 // --- Backlink and Note Management ---
 
 function ensureTrailingNewlines(content: string): string {
@@ -391,197 +448,192 @@ export async function extractConceptsFromFile(
  * @param progressReporter Progress reporter instance.
  * @param currentProcessingFileBasename Ref object to hold the current file basename.
  */
-export async function processFile(app: App, settings: NotemdSettings, file: TFile, progressReporter: ProgressReporter, currentProcessingFileBasename: { value: string | null }): Promise<string | null> {
+export async function processFile(
+    app: App,
+    settings: NotemdSettings,
+    file: TFile,
+    progressReporter: ProgressReporter,
+    currentProcessingFileBasename: { value: string | null }
+): Promise<ProcessFileResult> {
     currentProcessingFileBasename.value = file.basename;
-    progressReporter.log(`Starting processing for: ${file.name}`);
-    const content = await app.vault.read(file);
-    const i18n = getI18nStrings({ uiLocale: settings.uiLocale });
-
-    // Determine provider and model
-    const provider = getProviderForTask('addLinks', settings);
-    if (!provider) throw new Error('No valid LLM provider configured for "Add Links" task.');
-    const modelName = getModelForTask('addLinks', provider, settings);
-
-    // --- LLM Processing with Chunking ---
-    const chunks = splitContent(content, settings); // Pass the full settings object
-    let processedChunks: string[] = [];
-    const totalChunks = chunks.length;
-    progressReporter.log(`Splitting content into ${totalChunks} chunks.`);
-
-    for (let i = 0; i < totalChunks; i++) {
-        if (progressReporter.cancelled) {
-            throw new Error("Processing cancelled by user during chunk processing.");
-        }
-
-        const chunk = chunks[i];
-        const chunkProgress = Math.floor(((i) / totalChunks) * 100);
-        progressReporter.updateStatus(
-            formatStepStatus(i18n, i + 1, totalChunks, i18n.sidebar.actions.processCurrentAddLinks.label),
-            chunkProgress
-        );
-        progressReporter.log(`Processing chunk ${i + 1}/${totalChunks}...`);
-
-        const prompt = getSystemPrompt(settings, 'addLinks');
-
-        try {
-            const responseText = await callLLM(provider, prompt, chunk, settings, progressReporter, modelName);
-            processedChunks.push(responseText);
-            progressReporter.log(`Chunk ${i + 1} processed successfully.`);
-        } catch (error: unknown) {
-            const errorMessage = error instanceof Error ? error.message : String(error);
-            console.error(`LLM processing error on chunk ${i + 1} for ${file.name}:`, error);
-            progressReporter.log(`Error processing chunk ${i + 1}: ${errorMessage}`);
-            // Continue processing other files in the batch
-            currentProcessingFileBasename.value = null;
-            return null;
-        }
-    } // End chunk loop
-
-    if (progressReporter.cancelled) {
-        progressReporter.log(`Processing cancelled for ${file.name} after LLM calls.`);
-        currentProcessingFileBasename.value = null;
-        return null; // Exit if cancelled after loop
-    }
-
-    // Join chunks
-    progressReporter.updateStatus(
-        formatRunningStatus(i18n, i18n.sidebar.actions.processCurrentAddLinks.label),
-        90
-    ); // Update status before joining
-    const processedContent = processedChunks.join('\n\n').replace(/\n{3,}/g, '\n\n').trim();
-    // --- End LLM Processing with Chunking ---
-
-
-    // --- Concept Extraction and Note Creation ---
-    // Extract concepts from the LLM-processed content (which should contain [[links]])
-    progressReporter.log(`Extracting concepts and creating notes for: ${file.name}...`);
-    const concepts = new Set<string>();
-    const linkRegex = /\[\[([^\[\]]+)\]\]/g; // Find [[links]]
-    let match;
-    const withLinks = processedContent; // Use the aggregated content
-
-    while ((match = linkRegex.exec(withLinks)) !== null) {
-        const concept = match[1].trim();
-        // Basic filtering
-        if (concept && concept.length > 1 && !/^\d+$/.test(concept)) {
-            concepts.add(concept);
-        }
-    }
-
-    // Create notes if setting is enabled and concepts were found
-    if (settings.useCustomConceptNoteFolder && settings.conceptNoteFolder && concepts.size > 0) {
-        progressReporter.log(`Found ${concepts.size} concepts. Creating/updating notes...`);
-        try {
-            // Pass the current file's basename for backlinking
-            await createConceptNotes(app, settings, concepts, file.basename);
-        } catch (conceptError: unknown) {
-            const errorMsg = conceptError instanceof Error ? conceptError.message : String(conceptError);
-            progressReporter.log(`⚠️ Error during concept note creation: ${errorMsg}`);
-            // Don't stop the whole process, just log the warning
-        }
-    } else if (concepts.size > 0) {
-        progressReporter.log(`Found ${concepts.size} concepts, but concept note creation is disabled or folder not set.`);
-    } else {
-        progressReporter.log(`No concepts found in LLM output to create notes for.`);
-    }
-    // --- End Concept Extraction ---
-
-
-    // Duplicate Handling (Operates on the content with links)
-    progressReporter.log(`Checking for duplicates in: ${file.name}...`);
-    await handleDuplicates(withLinks, settings);
-    if (progressReporter.cancelled) {
-        progressReporter.log(`Processing cancelled for ${file.name} after duplicate check.`);
-        currentProcessingFileBasename.value = null;
-        return null;
-    }
-
-    // Post-Processing (Mermaid/LaTeX)
-    progressReporter.log(`Cleaning Mermaid/LaTeX for: ${file.name}`);
-    let finalContent = withLinks;
     try {
-        finalContent = cleanupLatexDelimiters(finalContent);
-        finalContent = await refineMermaidBlocks(finalContent);
-    } catch (cleanupError: unknown) { // Changed to unknown
-        const errorMessage = cleanupError instanceof Error ? cleanupError.message : String(cleanupError);
-        progressReporter.log(`Warning: Error during Mermaid/LaTeX cleanup for ${file.name}: ${errorMessage}`);
-    }
-    if (progressReporter.cancelled) {
-        progressReporter.log(`Processing cancelled for ${file.name} after post-processing.`);
+        progressReporter.log(`Starting processing for: ${file.name}`);
+        const content = await app.vault.read(file);
+        const i18n = getI18nStrings({ uiLocale: settings.uiLocale });
+
+        const provider = getProviderForTask('addLinks', settings);
+        if (!provider) throw new Error('No valid LLM provider configured for "Add Links" task.');
+        const modelName = getModelForTask('addLinks', provider, settings);
+
+        const chunks = splitContent(content, settings);
+        const processedChunks: string[] = [];
+        const totalChunks = chunks.length;
+        progressReporter.log(`Splitting content into ${totalChunks} chunks.`);
+
+        for (let i = 0; i < totalChunks; i++) {
+            if (progressReporter.cancelled) {
+                throw new Error('Processing cancelled by user during chunk processing.');
+            }
+
+            const chunk = chunks[i];
+            const chunkProgress = Math.floor((i / totalChunks) * 100);
+            progressReporter.updateStatus(
+                formatStepStatus(i18n, i + 1, totalChunks, i18n.sidebar.actions.processCurrentAddLinks.label),
+                chunkProgress
+            );
+            progressReporter.log(`Processing chunk ${i + 1}/${totalChunks}...`);
+
+            const prompt = getSystemPrompt(settings, 'addLinks');
+
+            try {
+                const responseText = await callLLM(provider, prompt, chunk, settings, progressReporter, modelName);
+                processedChunks.push(responseText);
+                progressReporter.log(`Chunk ${i + 1} processed successfully.`);
+            } catch (error: unknown) {
+                const errorMessage = error instanceof Error ? error.message : String(error);
+                console.error(`LLM processing error on chunk ${i + 1} for ${file.name}:`, error);
+                progressReporter.log(`Error processing chunk ${i + 1}: ${errorMessage}`);
+                throw error instanceof Error ? error : new Error(errorMessage);
+            }
+        }
+
+        if (progressReporter.cancelled) {
+            throw new Error(`Processing cancelled for ${file.name} after LLM calls.`);
+        }
+
+        progressReporter.updateStatus(
+            formatRunningStatus(i18n, i18n.sidebar.actions.processCurrentAddLinks.label),
+            90
+        );
+        const processedContent = processedChunks.join('\n\n').replace(/\n{3,}/g, '\n\n').trim();
+
+        progressReporter.log(`Extracting concepts and creating notes for: ${file.name}...`);
+        const concepts = new Set<string>();
+        const linkRegex = /\[\[([^\[\]]+)\]\]/g;
+        let match;
+        const withLinks = processedContent;
+
+        while ((match = linkRegex.exec(withLinks)) !== null) {
+            const concept = match[1].trim();
+            if (concept && concept.length > 1 && !/^\d+$/.test(concept)) {
+                concepts.add(concept);
+            }
+        }
+
+        if (settings.useCustomConceptNoteFolder && settings.conceptNoteFolder && concepts.size > 0) {
+            progressReporter.log(`Found ${concepts.size} concepts. Creating/updating notes...`);
+            try {
+                await createConceptNotes(app, settings, concepts, file.basename);
+            } catch (conceptError: unknown) {
+                const errorMsg = conceptError instanceof Error ? conceptError.message : String(conceptError);
+                progressReporter.log(`⚠️ Error during concept note creation: ${errorMsg}`);
+            }
+        } else if (concepts.size > 0) {
+            progressReporter.log(`Found ${concepts.size} concepts, but concept note creation is disabled or folder not set.`);
+        } else {
+            progressReporter.log('No concepts found in LLM output to create notes for.');
+        }
+
+        progressReporter.log(`Checking for duplicates in: ${file.name}...`);
+        await handleDuplicates(withLinks, settings);
+        if (progressReporter.cancelled) {
+            throw new Error(`Processing cancelled for ${file.name} after duplicate check.`);
+        }
+
+        progressReporter.log(`Cleaning Mermaid/LaTeX for: ${file.name}`);
+        let finalContent = withLinks;
+        try {
+            finalContent = cleanupLatexDelimiters(finalContent);
+            finalContent = await refineMermaidBlocks(finalContent);
+        } catch (cleanupError: unknown) {
+            const errorMessage = cleanupError instanceof Error ? cleanupError.message : String(cleanupError);
+            progressReporter.log(`Warning: Error during Mermaid/LaTeX cleanup for ${file.name}: ${errorMessage}`);
+        }
+        if (progressReporter.cancelled) {
+            throw new Error(`Processing cancelled for ${file.name} after post-processing.`);
+        }
+
+        const lines = finalContent.split('\n');
+        if (lines.length > 0 && lines[0].trim() === '\\boxed{') {
+            lines.shift();
+            if (lines.length > 0 && lines[lines.length - 1].trim() === '}') lines.pop();
+            finalContent = lines.join('\n');
+        }
+        if (progressReporter.cancelled) {
+            throw new Error(`Processing cancelled for ${file.name} before saving.`);
+        }
+
+        const removedCodeFences = settings.removeCodeFencesOnAddLinks;
+        if (removedCodeFences) {
+            progressReporter.log('Removing all code fences (```markdown and ```)...');
+            finalContent = finalContent.replace(/```markdown/g, '');
+            finalContent = finalContent.replace(/```/g, '');
+        } else {
+            progressReporter.log('Removing only ```markdown specifiers...');
+            finalContent = finalContent.replace(/```markdown/g, '');
+        }
+
+        const saveResult = await saveOrMoveProcessedFile(app, settings, file, finalContent, progressReporter);
+
+        progressReporter.log(`Finished processing: ${file.name}`);
+        return {
+            sourcePath: file.path,
+            moveOriginalFile: settings.moveOriginalFileOnProcess,
+            chunkCount: totalChunks,
+            conceptCount: concepts.size,
+            conceptNoteFolderPath: settings.useCustomConceptNoteFolder && settings.conceptNoteFolder
+                ? settings.conceptNoteFolder
+                : '',
+            removedCodeFences,
+            ...saveResult
+        };
+    } finally {
         currentProcessingFileBasename.value = null;
-        return null;
     }
-
-    // Remove \boxed{ wrapper
-    const lines = finalContent.split('\n');
-    if (lines.length > 0 && lines[0].trim() === '\\boxed{') {
-        lines.shift();
-        if (lines.length > 0 && lines[lines.length - 1].trim() === '}') lines.pop();
-        finalContent = lines.join('\n');
-    }
-    if (progressReporter.cancelled) {
-        progressReporter.log(`Processing cancelled for ${file.name} before saving.`);
-        currentProcessingFileBasename.value = null;
-        return null;
-    }
-
-    // Conditionally remove all code fences if setting is enabled
-    if (settings.removeCodeFencesOnAddLinks) {
-        progressReporter.log(`Removing all code fences (\`\`\`markdown and \`\`\`)...`);
-        // Remove ```markdown first, then remove any remaining ```
-        finalContent = finalContent.replace(/```markdown/g, '');
-        finalContent = finalContent.replace(/```/g, '');
-    } else {
-        // Original cleanup: Only remove ```markdown specifier, keep the fences
-        progressReporter.log(`Removing only \`\`\`markdown specifiers...`);
-        finalContent = finalContent.replace(/```markdown/g, ''); // Delete ```markdown 
-    }
-
-    // Determine Output Path & Save/Move
-    const savedOutputPath = await saveOrMoveProcessedFile(app, settings, file, finalContent, progressReporter);
-
-    progressReporter.log(`Finished processing: ${file.name}`);
-    currentProcessingFileBasename.value = null; // Clear after processing
-    return savedOutputPath;
 }
 
 /**
  * Handles saving or moving the processed file based on settings.
  */
-async function saveOrMoveProcessedFile(app: App, settings: NotemdSettings, originalFile: TFile, processedContent: string, progressReporter: ProgressReporter): Promise<string> {
-    let processedFileSaveDir = '';
-    if (settings.useCustomProcessedFileFolder && settings.processedFileFolder) {
-        processedFileSaveDir = settings.processedFileFolder;
-    } else {
-        processedFileSaveDir = originalFile.parent?.path || '';
-    }
-    processedFileSaveDir = processedFileSaveDir.replace(/^\/|\/$/g, '');
+async function saveOrMoveProcessedFile(
+    app: App,
+    settings: NotemdSettings,
+    originalFile: TFile,
+    processedContent: string,
+    progressReporter: ProgressReporter
+): Promise<ProcessFileSaveResult> {
+    const usedCustomOutputFolder = settings.useCustomProcessedFileFolder && Boolean(settings.processedFileFolder);
+    const requestedOutputFolderPath = usedCustomOutputFolder
+        ? settings.processedFileFolder!.replace(/^\/|\/$/g, '')
+        : ((originalFile.parent?.path || '').replace(/^\/|\/$/g, ''));
+    let processedFileSaveDir = requestedOutputFolderPath;
     if (processedFileSaveDir && !processedFileSaveDir.endsWith('/')) processedFileSaveDir += '/';
-    if (originalFile.parent?.path === '/' && !(settings.useCustomProcessedFileFolder && settings.processedFileFolder)) processedFileSaveDir = '';
+    if (originalFile.parent?.path === '/' && !usedCustomOutputFolder) processedFileSaveDir = '';
 
     const targetSaveFolder = processedFileSaveDir.replace(/\/$/, '');
+    let outputFolderCreated = false;
     if (targetSaveFolder && !app.vault.getAbstractFileByPath(targetSaveFolder)) {
         try {
             await app.vault.createFolder(targetSaveFolder);
+            outputFolderCreated = true;
             progressReporter.log(`Created processed file output folder: ${targetSaveFolder}`);
         } catch (folderError: unknown) {
             const errorMessage = folderError instanceof Error ? folderError.message : String(folderError);
             const errorMsg = `Error creating processed file output folder ${targetSaveFolder}: ${errorMessage}. Please check folder permissions and path validity.`;
             progressReporter.log(errorMsg);
-            new Notice(errorMsg, 10000);
-            throw folderError instanceof Error ? folderError : new Error(errorMessage); // Re-throw
+            throw folderError instanceof Error ? folderError : new Error(errorMessage);
         }
     } else if (targetSaveFolder && !(app.vault.getAbstractFileByPath(targetSaveFolder) instanceof TFolder)) {
         const errorMsg = `Processed file output path '${targetSaveFolder}' exists but is not a folder.`;
         progressReporter.log(errorMsg);
-        new Notice(errorMsg, 10000);
         throw new Error(errorMsg);
     }
 
     if (settings.moveOriginalFileOnProcess) {
         const targetPath = `${processedFileSaveDir}${originalFile.name}`;
         progressReporter.log(`Processing mode: Move & Overwrite original file.`);
-        if (targetPath !== originalFile.path) {
+        const movedOriginalFile = targetPath !== originalFile.path;
+        if (movedOriginalFile) {
             progressReporter.log(`Moving original file to: ${targetPath}`);
             const existingTargetFile = app.vault.getAbstractFileByPath(targetPath);
             if (existingTargetFile) throw new Error(`File already exists at target move path: ${targetPath}. Cannot move original file.`);
@@ -594,7 +646,16 @@ async function saveOrMoveProcessedFile(app: App, settings: NotemdSettings, origi
             await app.vault.modify(originalFile, processedContent);
             progressReporter.log(`Overwrote original file: ${originalFile.path}`);
         }
-        return targetPath;
+        return {
+            requestedOutputFolderPath,
+            outputFolderPath: targetSaveFolder,
+            outputFolderCreated,
+            usedCustomOutputFolder,
+            outputPath: targetPath,
+            created: false,
+            overwritten: true,
+            movedOriginalFile
+        };
     } else {
         let outputPath: string; let logAction: string;
         if (settings.useCustomAddLinksSuffix) {
@@ -608,16 +669,29 @@ async function saveOrMoveProcessedFile(app: App, settings: NotemdSettings, origi
             outputPath = `${processedFileSaveDir}${originalFile.basename}_processed.md`; logAction = `Saving processed file with default suffix: ${outputPath}`; progressReporter.log(`Processing mode: Create/Overwrite default processed copy.`);
         }
         progressReporter.log(logAction);
+        const existingOutputFile = outputPath === originalFile.path
+            ? app.vault.getAbstractFileByPath(originalFile.path)
+            : app.vault.getAbstractFileByPath(outputPath);
+        const created = !(existingOutputFile instanceof TFile);
+        const overwritten = !created;
         if (outputPath === originalFile.path) {
             const fileToModify = app.vault.getAbstractFileByPath(originalFile.path);
             if (fileToModify instanceof TFile) { await app.vault.modify(fileToModify, processedContent); progressReporter.log(`Overwrote original file: ${outputPath}`); }
-            else { console.error(`Error: Tried to overwrite original file ${originalFile.path}, but it was not found.`); progressReporter.log(`Error: Could not find original file ${originalFile.path} to overwrite.`); }
+            else { throw new Error(`Could not find original file ${originalFile.path} to overwrite.`); }
         } else {
-            const existingOutputFile = app.vault.getAbstractFileByPath(outputPath);
             if (existingOutputFile instanceof TFile) { await app.vault.modify(existingOutputFile, processedContent); progressReporter.log(`Overwrote existing file: ${outputPath}`); }
             else { await app.vault.create(outputPath, processedContent); progressReporter.log(`Created processed file: ${outputPath}`); }
         }
-        return outputPath;
+        return {
+            requestedOutputFolderPath,
+            outputFolderPath: targetSaveFolder,
+            outputFolderCreated,
+            usedCustomOutputFolder,
+            outputPath,
+            created,
+            overwritten,
+            movedOriginalFile: false
+        };
     }
 }
 
@@ -629,7 +703,12 @@ async function saveOrMoveProcessedFile(app: App, settings: NotemdSettings, origi
  * @param file The TFile object to process.
  * @param progressReporter Interface for reporting progress (Modal or Sidebar).
  */
-export async function generateContentForTitle(app: App, settings: NotemdSettings, file: TFile, progressReporter: ProgressReporter) {
+export async function generateContentForTitle(
+    app: App,
+    settings: NotemdSettings,
+    file: TFile,
+    progressReporter: ProgressReporter
+): Promise<GenerateContentForTitleResult> {
     const title = file.basename;
     const i18n = getI18nStrings({ uiLocale: settings.uiLocale });
     const provider = getProviderForTask('generateTitle', settings);
@@ -748,6 +827,15 @@ export async function generateContentForTitle(app: App, settings: NotemdSettings
         formatI18n(i18n.notices.contentGenerationSuccess, { file: file.name }),
         100
     );
+
+    return {
+        sourcePath: file.path,
+        outputPath: file.path,
+        title,
+        researchEnabled: settings.enableResearchInGenerateContent,
+        researchContextUsed: Boolean(researchContext),
+        modified: true
+    };
 }
 
 /**
@@ -757,7 +845,64 @@ export async function generateContentForTitle(app: App, settings: NotemdSettings
  * @param folderPath Path of the folder to process.
  * @param progressReporter Interface for reporting progress.
  */
-export async function batchGenerateContentForTitles(app: App, settings: NotemdSettings, folderPath: string, progressReporter: ProgressReporter) {
+async function moveGeneratedFileToCompleteFolder(
+    app: App,
+    file: TFile,
+    completeFolderPath: string,
+    progressReporter: ProgressReporter
+): Promise<{
+    completeDestinationPath: string;
+    movedToCompleteFolder: boolean;
+    skippedMoveBecauseDestinationExists: boolean;
+    skippedMoveBecauseSourceMissing: boolean;
+}> {
+    const normalizedCompletePathForMove = completeFolderPath
+        ? (completeFolderPath.endsWith('/') ? completeFolderPath : `${completeFolderPath}/`)
+        : '';
+    const completeDestinationPath = `${normalizedCompletePathForMove}${file.name}`;
+    const destinationExists = await app.vault.adapter.exists(completeDestinationPath);
+    if (destinationExists) {
+        progressReporter.log(`⚠️ File already exists at destination, skipping move: ${completeDestinationPath}`);
+        return {
+            completeDestinationPath,
+            movedToCompleteFolder: false,
+            skippedMoveBecauseDestinationExists: true,
+            skippedMoveBecauseSourceMissing: false
+        };
+    }
+
+    const sourceExists = await app.vault.adapter.exists(file.path);
+    if (!sourceExists) {
+        progressReporter.log(`⚠️ Source file ${file.path} not found, skipping move.`);
+        return {
+            completeDestinationPath,
+            movedToCompleteFolder: false,
+            skippedMoveBecauseDestinationExists: false,
+            skippedMoveBecauseSourceMissing: true
+        };
+    }
+
+    if (progressReporter.cancelled) {
+        progressReporter.log(`⚠️ Cancellation requested before moving ${file.name}. Skipping move.`);
+        throw new Error('cancelled by user');
+    }
+
+    await app.vault.rename(file, completeDestinationPath);
+    progressReporter.log(`✅ Moved processed file to: ${completeDestinationPath}`);
+    return {
+        completeDestinationPath,
+        movedToCompleteFolder: true,
+        skippedMoveBecauseDestinationExists: false,
+        skippedMoveBecauseSourceMissing: false
+    };
+}
+
+export async function batchGenerateContentForTitles(
+    app: App,
+    settings: NotemdSettings,
+    folderPath: string,
+    progressReporter: ProgressReporter
+): Promise<BatchGenerateContentForTitlesResult> {
     const i18n = getI18nStrings({ uiLocale: settings.uiLocale });
     const folder = app.vault.getAbstractFileByPath(folderPath);
     if (!folder || !(folder instanceof TFolder)) throw new Error(`Selected path is not a valid folder: ${folderPath}`);
@@ -780,29 +925,47 @@ export async function batchGenerateContentForTitles(app: App, settings: NotemdSe
         return isInSelectedFolder && !isInCompleteFolder && !f.name.endsWith('_processed.md');
     });
 
+    const result: BatchGenerateContentForTitlesResult = {
+        sourceFolderPath: folderPath,
+        completeFolderPath,
+        completeFolderCreated: false,
+        processedFileCount: filesToProcess.length,
+        generatedCount: 0,
+        movedCount: 0,
+        cancelled: false,
+        fileResults: [],
+        errors: []
+    };
+
     if (filesToProcess.length === 0) {
-        const message = formatI18n(i18n.notices.noEligibleMarkdownFilesFoundExcluding, {
+        progressReporter.log(formatI18n(i18n.notices.noEligibleMarkdownFilesFoundExcluding, {
             folderPath,
             completeFolder: completeFolderName
-        });
-        new Notice(message);
-        progressReporter.log(message);
-        progressReporter.updateStatus(message, 100);
-        return { errors: [] }; // Return empty errors array
+        }));
+        progressReporter.updateStatus(
+            formatI18n(i18n.notices.noEligibleMarkdownFilesFoundExcluding, {
+                folderPath,
+                completeFolder: completeFolderName
+            }),
+            100
+        );
+        return result;
     }
 
     progressReporter.log(`Starting batch content generation for ${filesToProcess.length} files in "${folderPath}"...`);
-    const errors: { file: string; message: string }[] = [];
 
     // Ensure Complete Folder Exists
     try {
         const normalizedCompleteFolderPath = completeFolderPath.endsWith('/') && completeFolderPath !== '/' ? completeFolderPath.slice(0, -1) : completeFolderPath;
         const targetFolderExists = await app.vault.adapter.exists(normalizedCompleteFolderPath);
-        if (!targetFolderExists) { await app.vault.createFolder(normalizedCompleteFolderPath); progressReporter.log(`Created 'complete' folder: ${normalizedCompleteFolderPath}`); }
+        if (!targetFolderExists) {
+            await app.vault.createFolder(normalizedCompleteFolderPath);
+            result.completeFolderCreated = true;
+            progressReporter.log(`Created 'complete' folder: ${normalizedCompleteFolderPath}`);
+        }
         else { const targetFolderStat = await app.vault.adapter.stat(normalizedCompleteFolderPath); if (targetFolderStat?.type !== 'folder') throw new Error(`Path for 'complete' folder (${normalizedCompleteFolderPath}) exists but is not a directory.`); }
     } catch (folderError: unknown) { // Changed to unknown
         const errorMessage = folderError instanceof Error ? folderError.message : String(folderError);
-        new Notice(formatI18n(i18n.notices.errorEnsuringCompleteFolder, { message: errorMessage }));
         progressReporter.log(`Error ensuring 'complete' folder exists at ${completeFolderPath}: ${errorMessage}`);
         throw folderError instanceof Error ? folderError : new Error(errorMessage); // Re-throw
     }
@@ -825,29 +988,26 @@ export async function batchGenerateContentForTitles(app: App, settings: NotemdSe
             await delay(1); // Yield
 
             try {
-                await generateContentForTitle(app, settings, file, progressReporter);
+                const fileResult = await generateContentForTitle(app, settings, file, progressReporter);
                 await delay(1); // Yield
-
-                // Move Successfully Processed File (existing logic)
-                const normalizedCompletePathForMove = completeFolderPath ? (completeFolderPath.endsWith('/') ? completeFolderPath : completeFolderPath + '/') : '';
-                const destinationPath = `${normalizedCompletePathForMove}${file.name}`;
-                const destExists = await app.vault.adapter.exists(destinationPath);
-                if (destExists) { progressReporter.log(`⚠️ File already exists at destination, skipping move: ${destinationPath}`); }
-                else {
-                    const sourceExists = await app.vault.adapter.exists(file.path);
-                    if (sourceExists) {
-                        if (progressReporter.cancelled) { progressReporter.log(`⚠️ Cancellation requested before moving ${file.name}. Skipping move.`); break; }
-                        else { await app.vault.rename(file, destinationPath); progressReporter.log(`✅ Moved processed file to: ${destinationPath}`); }
-                    } else { progressReporter.log(`⚠️ Source file ${file.path} not found, skipping move.`); }
+                const moveResult = await moveGeneratedFileToCompleteFolder(app, file, completeFolderPath, progressReporter);
+                result.fileResults.push({
+                    ...fileResult,
+                    ...moveResult
+                });
+                result.generatedCount += 1;
+                if (moveResult.movedToCompleteFolder) {
+                    result.movedCount += 1;
                 }
             } catch (fileError: unknown) {
                 const errorMessage = fileError instanceof Error ? fileError.message : String(fileError);
-                // ... error handling ...
+                result.errors.push({ file: file.name, message: errorMessage });
                 if (errorMessage.includes("cancelled by user")) { break; }
             }
             if (progressReporter.cancelled) { break; }
         }
-        return { errors };
+        result.cancelled = progressReporter.cancelled;
+        return result;
     }
 
     // --- Parallel Processing Logic ---
@@ -855,7 +1015,6 @@ export async function batchGenerateContentForTitles(app: App, settings: NotemdSe
     const processor = createConcurrentProcessor(concurrency, settings.apiCallIntervalMs, progressReporter);
     const fileBatches = chunkArray(filesToProcess, settings.batchSize);
 
-    let allErrors: { file: string; message: string }[] = [];
     let processedCount = 0;
 
     for (let b = 0; b < fileBatches.length; b++) {
@@ -891,28 +1050,16 @@ export async function batchGenerateContentForTitles(app: App, settings: NotemdSe
             };
 
             try {
-                // generateContentForTitle already handles its own LLM calls and internal delays
-                await generateContentForTitle(app, settings, file, fileProgressReporter);
-                // Move/save immediately after LLM (still serial per result, but parallel LLM)
-                // This part needs to be carefully managed to avoid race conditions on vault writes
-                // For now, assume generateContentForTitle handles its own saving, or we need a separate serial queue for vault ops.
-                // Given the current `generateContentForTitle` modifies the file directly (`app.vault.modify(file, contentToSave)`),
-                // this is safe as Obsidian's vault operations are typically atomic per file.
-
-                // Move Successfully Processed File (existing logic, adapted for parallel context)
-                const normalizedCompletePathForMove = completeFolderPath ? (completeFolderPath.endsWith('/') ? completeFolderPath : completeFolderPath + '/') : '';
-                const destinationPath = `${normalizedCompletePathForMove}${file.name}`;
-                const destExists = await app.vault.adapter.exists(destinationPath);
-                if (destExists) { fileProgressReporter.log(`⚠️ File already exists at destination, skipping move: ${destinationPath}`); }
-                else {
-                    const sourceExists = await app.vault.adapter.exists(file.path);
-                    if (sourceExists) {
-                        if (progressReporter.cancelled) { fileProgressReporter.log(`⚠️ Cancellation requested before moving ${file.name}. Skipping move.`); throw new Error("cancelled by user"); }
-                        else { await app.vault.rename(file, destinationPath); fileProgressReporter.log(`✅ Moved processed file to: ${destinationPath}`); }
-                    } else { fileProgressReporter.log(`⚠️ Source file ${file.path} not found, skipping move.`); }
-                }
-
-                return { file, success: true };
+                const fileResult = await generateContentForTitle(app, settings, file, fileProgressReporter);
+                const moveResult = await moveGeneratedFileToCompleteFolder(app, file, completeFolderPath, fileProgressReporter);
+                return {
+                    file,
+                    success: true,
+                    result: {
+                        ...fileResult,
+                        ...moveResult
+                    }
+                };
             } catch (e: unknown) {
                 const errorMessage = e instanceof Error ? e.message : String(e);
                 fileProgressReporter.log(`❌ Error processing ${file.name}: ${errorMessage}`);
@@ -924,10 +1071,26 @@ export async function batchGenerateContentForTitles(app: App, settings: NotemdSe
         processedCount += batch.length; // Update count for overall progress
 
         results.forEach(r => {
-            const result = r as { success: boolean; file: TFile; error?: any };
-            if (!result.success && result.error) {
-                const error = result.error as { file?: TFile, message: string };
-                allErrors.push({ file: error.file?.name || 'Unknown file', message: String(error.message) });
+            const taskResult = r as {
+                success: boolean;
+                file: TFile;
+                error?: unknown;
+                result?: BatchGenerateContentFileResult;
+            };
+            if (taskResult.success && taskResult.result) {
+                result.fileResults.push(taskResult.result);
+                result.generatedCount += 1;
+                if (taskResult.result.movedToCompleteFolder) {
+                    result.movedCount += 1;
+                }
+                return;
+            }
+
+            if (!taskResult.success && taskResult.error) {
+                const errorMessage = taskResult.error instanceof Error
+                    ? taskResult.error.message
+                    : String(taskResult.error);
+                result.errors.push({ file: taskResult.file.name, message: errorMessage });
             }
         });
 
@@ -942,7 +1105,8 @@ export async function batchGenerateContentForTitles(app: App, settings: NotemdSe
             await delay(settings.batchInterDelayMs);
         }
     }
-    return { errors: allErrors };
+    result.cancelled = progressReporter.cancelled;
+    return result;
 }
 
 /**

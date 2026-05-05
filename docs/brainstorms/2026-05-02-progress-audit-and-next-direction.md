@@ -128,8 +128,9 @@ This means the roadmap should no longer be interpreted as "build the platform". 
 - Translation/extraction utility boundary work has moved another step as well: `batchTranslateFolder()` now accepts an injected reporter instead of treating `ProgressModal` as the only carrier, and `extractOriginalText()` now returns a structured result object while the host adapter owns the success notice explicitly.
 - The next host-adapter batch is now landed too: `src/operations/utilityCommandHostAdapter.ts` now carries duplicate cleanup, batch Mermaid fix, and single/batch formula-fix command orchestration, so those wrappers in `src/main.ts` are now thin delegators as well.
 - The smallest remaining write-heavy contract batch is now landed too: `src/translate.ts` now returns `TranslateFileResult` / `BatchTranslateFolderResult`, `src/formulaFixer.ts` now returns `FormulaFixFileResult` / `BatchFormulaFixResult`, host adapters now own their success notices, and `src/operations/registry.ts` exports the richer `translate.*` / `formula.*` result schemas directly.
+- The first `src/fileUtils.ts` contract slice is now landed too: `processFile()` returns `ProcessFileResult`, `generateContentForTitle()` returns `GenerateContentForTitleResult`, `batchGenerateContentForTitles()` returns `BatchGenerateContentForTitlesResult`, `runProcessFolderWithNotemdCommandWithHost()` now reports `savedCount` / `errors` / `cancelled`, and the batch-generate no-file branch is now a host-owned notice rather than a utility-owned pseudo-success path.
 - `src/fileUtils.ts` and `src/extractOriginalText.ts` now accept narrower runtime contexts instead of the concrete `NotemdPlugin` class. Boundary work has therefore advanced from "wrapper extraction" into "utility host-coupling reduction".
-- The remaining architectural gap has moved again: the next phase should prioritize the larger `src/fileUtils.ts` write-heavy family, then the still-inline sidebar/direct-read command surfaces in `src/main.ts`, rather than reopening already-landed translate/formula work or doing more wrapper-only moves.
+- The remaining architectural gap has moved again: the next phase should finish the remaining `src/fileUtils.ts` tail (`batchFixMermaidSyntaxInFolder` plus `checkAndRemoveDuplicateConceptNotes`), then the still-inline sidebar/direct-read command surfaces in `src/main.ts`, rather than reopening already-landed process/generate/translate/formula work or doing more wrapper-only moves.
 
 ## Verification Gates
 
@@ -196,8 +197,8 @@ Short version:
 5. **Keep workspace hygiene**
    `ref/` and `coverage/` are local analysis/build artifacts, not repo deliverables. The mainline expectation is a clean worktree.
 
-6. **Move the next phase toward the larger `src/fileUtils.ts` contract batch**
-   Note-processing registry onboarding, utility host extraction, and the `translate/formula` proof slice are now complete enough. The next step should harden `processFile`, `generateContentForTitle`, `batchGenerateContentForTitles`, `batchFixMermaidSyntaxInFolder`, and `checkAndRemoveDuplicateConceptNotes` around richer machine-readable results plus cleaner `Notice` / reporter / destructive-side-effect boundaries.
+6. **Finish the remaining `src/fileUtils.ts` tail first**
+   Note-processing registry onboarding, utility host extraction, the `translate/formula` proof slice, and the first process/generate sub-slice are now complete enough. The next step should harden `batchFixMermaidSyntaxInFolder` and `checkAndRemoveDuplicateConceptNotes`, while keeping the newly-landed `processFile` / `generateContentForTitle` / `batchGenerateContentForTitles` result contracts stable and registry-aligned.
 
 7. **Keep draining the remaining high-value direct command surfaces after that**
    The verified highest-value remaining direct surfaces are now `testLlmConnectionCommand`, `generateDiagramCommand` plus its save/artifact branches, and `previewExperimentalDiagramCommand`. They matter more than reopening already-extracted utility families before the write-heavy result contracts are tightened.
@@ -206,7 +207,7 @@ Short version:
 
 The most defensible future landing order, after cross-checking roadmap intent against current code, is:
 
-1. first tighten the larger write-heavy families in `src/fileUtils.ts`, especially processed-file saving, title generation, Mermaid repair, duplicate cleanup, and aggregated error semantics
+1. first finish the remaining `src/fileUtils.ts` tail, especially Mermaid repair, duplicate cleanup, and cross-family result-vocabulary stabilization around the already-landed processed-file and title-generation contracts
 2. then converge the remaining direct command surfaces in `src/main.ts`, with `testLlmConnectionCommand`, `generateDiagramCommand`, and `previewExperimentalDiagramCommand` as the highest-value targets
 3. after those two items stabilize, continue follow-up hardening for maintainer-local semantic verification and heavy-runtime packaging boundaries
 4. after those boundary items, reopen legacy prompt retirement, MermaidProcessor sunset, or richer first-class CLI exposure

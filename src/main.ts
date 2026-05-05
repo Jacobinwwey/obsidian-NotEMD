@@ -4,9 +4,13 @@ import { DEFAULT_SETTINGS, NOTEMD_SIDEBAR_VIEW_TYPE, NOTEMD_SIDEBAR_ICON } from 
 import { retry } from './utils';
 import { callLLM } from './llmUtils';
 import {
+    BatchGenerateContentForTitlesResult,
+    BatchProcessFolderResult,
     handleFileRename,
     handleFileDelete,
+    GenerateContentForTitleResult,
     processFile,
+    ProcessFileResult,
     batchGenerateContentForTitles,
     batchFixMermaidSyntaxInFolder,
     saveMermaidSummaryFile,
@@ -1069,8 +1073,8 @@ export default class NotemdPlugin extends Plugin {
     // These methods contain the core logic initiated by commands or sidebar buttons.
 
     /** Command: Process Current File (Add Links) */
-    async processWithNotemdCommand(reporter?: ProgressReporter) {
-        await runProcessWithNotemdCommandWithHost(this.createNoteProcessingCommandHost(), reporter);
+    async processWithNotemdCommand(reporter?: ProgressReporter): Promise<ProcessFileResult | null> {
+        return runProcessWithNotemdCommandWithHost(this.createNoteProcessingCommandHost(), reporter);
     }
 
     /** Command: Process Folder (Add Links) */
@@ -1080,8 +1084,11 @@ export default class NotemdPlugin extends Plugin {
         return new BatchProgressStore(vaultRoot);
     }
 
-    async processFolderWithNotemdCommand(reporter?: ProgressReporter, folderPathOverride?: string) {
-        await runProcessFolderWithNotemdCommandWithHost(
+    async processFolderWithNotemdCommand(
+        reporter?: ProgressReporter,
+        folderPathOverride?: string
+    ): Promise<BatchProcessFolderResult | null> {
+        return runProcessFolderWithNotemdCommandWithHost(
             this.createNoteProcessingCommandHost(),
             reporter,
             folderPathOverride
@@ -1138,8 +1145,11 @@ export default class NotemdPlugin extends Plugin {
     }
 
     /** Command: Generate Content from Title */
-    async generateContentForTitleCommand(file: TFile, reporter?: ProgressReporter) {
-        await runGenerateContentForTitleCommandWithHost(this.createNoteProcessingCommandHost(), file, reporter);
+    async generateContentForTitleCommand(
+        file: TFile,
+        reporter?: ProgressReporter
+    ): Promise<GenerateContentForTitleResult | null> {
+        return runGenerateContentForTitleCommandWithHost(this.createNoteProcessingCommandHost(), file, reporter);
     }
 
     async createWikiLinkAndGenerateFromSelectionCommand(
@@ -1164,7 +1174,7 @@ export default class NotemdPlugin extends Plugin {
     async batchGenerateContentForTitlesCommand(
         reporter?: ProgressReporter,
         folderPathOverride?: string
-    ): Promise<{ sourceFolderPath: string; completeFolderPath: string } | null> {
+    ): Promise<BatchGenerateContentForTitlesResult | null> {
         return runBatchGenerateContentForTitlesCommandWithHost(
             this.createNoteProcessingCommandHost(),
             reporter,

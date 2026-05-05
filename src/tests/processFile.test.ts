@@ -40,11 +40,27 @@ describe('processFile', () => {
         const llmResponse = 'This is a test file about [[AI]] and [[machine learning]].';
         jest.spyOn(llmUtils, 'callLLM').mockResolvedValue(llmResponse);
 
-        await processFile(mockApp, settings, mockFile, mockReporter, { value: null });
+        const result = await processFile(mockApp, settings, mockFile, mockReporter, { value: null });
 
         expect(mockApp.vault.read).toHaveBeenCalledWith(mockFile);
         expect(llmUtils.callLLM).toHaveBeenCalled();
         expect(mockApp.vault.create).toHaveBeenCalledWith('test_processed.md', llmResponse);
+        expect(result).toEqual({
+            sourcePath: 'test.md',
+            requestedOutputFolderPath: '',
+            outputFolderPath: '',
+            outputFolderCreated: false,
+            usedCustomOutputFolder: false,
+            outputPath: 'test_processed.md',
+            created: true,
+            overwritten: false,
+            movedOriginalFile: false,
+            moveOriginalFile: false,
+            chunkCount: 1,
+            conceptCount: 2,
+            conceptNoteFolderPath: 'Concepts',
+            removedCodeFences: false
+        });
     });
 
     it('should create concept notes for extracted concepts', async () => {
