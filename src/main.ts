@@ -40,10 +40,7 @@ import { RenderArtifact } from './rendering/types';
 import { IframeRenderHost } from './rendering/host/iframeRenderHost';
 import { getRenderTargetDisplayName } from './rendering/targetLabel';
 import { supportsDiagramPreviewModal } from './ui/diagramPreview';
-import { runDiagramGenerateOperation } from './operations/diagramGenerateOperation';
 import {
-    completeArtifactDiagramCommand,
-    completeMermaidDiagramCommand,
     DiagramCommandExecutionDetails,
     DiagramCommandHostAdapter,
     DiagramCommandExecutionMode,
@@ -53,6 +50,11 @@ import {
     runGenerateDiagramCommandWithHost,
     runPreviewExperimentalDiagramCommandWithHost
 } from './operations/diagramCommandHostAdapter';
+import {
+    DiagramCommandExecutionHost,
+    runArtifactDiagramExecutionWithHost,
+    runSaveMermaidDiagramExecutionWithHost
+} from './operations/diagramCommandExecution';
 import {
     PluginConfigCommandHost
 } from './operations/configProfileCommands';
@@ -238,6 +240,16 @@ export default class NotemdPlugin extends Plugin {
             createDiagramHostAdapter: () => this.createDiagramCommandHostAdapter(),
             saveErrorLog: (error, reporter) => saveErrorLog(this.app, reporter, error, this.settings),
             logError: (message, details) => console.error(message, details)
+        };
+    }
+
+    private createDiagramCommandExecutionHost(): DiagramCommandExecutionHost {
+        return {
+            getSettings: () => this.settings,
+            getLegacyMermaidPrompt: () => this.getPromptForTask('summarizeToMermaid'),
+            createDiagramHostAdapter: () => this.createDiagramCommandHostAdapter(),
+            getStepStatusText: (current, total, label) => this.getStepStatusText(current, total, label),
+            getActionCompleteText: (label) => this.getActionCompleteText(label)
         };
     }
 
@@ -1277,31 +1289,15 @@ export default class NotemdPlugin extends Plugin {
         actionLabel: string,
         i18n: DiagramCommandUiStrings = this.getUiStrings()
     ): Promise<DiagramCommandExecutionDetails> {
-        reporter.updateStatus(this.getStepStatusText(1, 3, actionLabel), 20);
-        const result = await runDiagramGenerateOperation({
-            input: operationInput,
-            settings: this.settings,
+        return runSaveMermaidDiagramExecutionWithHost(this.createDiagramCommandExecutionHost(), {
+            file,
+            operationInput,
             provider,
             modelName,
             reporter,
-            getLegacyMermaidPrompt: () => this.getPromptForTask('summarizeToMermaid')
-        });
-        const outputPath = await completeMermaidDiagramCommand({
-            host: this.createDiagramCommandHostAdapter(),
-            file,
-            reporter,
-            mermaidContent: result.artifact.content,
             actionLabel,
-            completeNotice: i18n.notices.mermaidSummarizationComplete,
-            autoFixAfterGenerate: this.settings.autoMermaidFixAfterGenerate,
-            getStepStatusText: (current, total, label) => this.getStepStatusText(current, total, label),
-            getActionCompleteText: (label) => this.getActionCompleteText(label)
+            i18n
         });
-        return {
-            generation: result,
-            outputPath,
-            previewOpened: false
-        };
     }
 
     private async executeArtifactDiagramCommand(
@@ -1314,37 +1310,16 @@ export default class NotemdPlugin extends Plugin {
         i18n: DiagramCommandUiStrings,
         executionMode: Extract<DiagramCommandExecutionMode, 'save-artifact' | 'preview-artifact'>
     ): Promise<DiagramCommandExecutionDetails> {
-        const totalSteps = executionMode === 'preview-artifact' ? 2 : 3;
-        const initialProgress = executionMode === 'preview-artifact' ? 25 : 20;
-        reporter.updateStatus(this.getStepStatusText(1, totalSteps, actionLabel), initialProgress);
-
-        const result = await runDiagramGenerateOperation({
-            input: operationInput,
-            settings: this.settings,
+        return runArtifactDiagramExecutionWithHost(this.createDiagramCommandExecutionHost(), {
+            file,
+            operationInput,
             provider,
             modelName,
             reporter,
-            getLegacyMermaidPrompt: () => this.getPromptForTask('summarizeToMermaid')
-        });
-        const outputPath = await completeArtifactDiagramCommand({
-            host: this.createDiagramCommandHostAdapter(),
-            file,
-            reporter,
-            result,
             actionLabel,
-            executionMode,
-            completeNotice: i18n.notices.experimentalDiagramComplete,
-            previewReadyNotice: i18n.notices.experimentalDiagramPreviewReady,
-            manualFixHintNotice: i18n.notices.experimentalDiagramManualFixHint,
-            autoFixAfterGenerate: this.settings.autoMermaidFixAfterGenerate,
-            getStepStatusText: (current, total, label) => this.getStepStatusText(current, total, label),
-            getActionCompleteText: (label) => this.getActionCompleteText(label)
+            i18n,
+            executionMode
         });
-        return {
-            generation: result,
-            outputPath,
-            previewOpened: executionMode === 'preview-artifact' || this.supportsDiagramPreview(result.artifact)
-        };
     }
 
     async generateExperimentalDiagramCommand(file: TFile, reporter: ProgressReporter) {

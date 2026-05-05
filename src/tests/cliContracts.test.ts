@@ -9,6 +9,7 @@ describe('CLI invocation contract', () => {
         const providerProfileImport = contract.operations.find(operation => operation.operationId === 'provider.profile.import');
         const cliCapabilityExport = contract.operations.find(operation => operation.operationId === 'cli.capability-manifest.export');
         const cliContractExport = contract.operations.find(operation => operation.operationId === 'cli.invocation-contract.export');
+        const diagramGenerate = contract.operations.find(operation => operation.operationId === 'diagram.generate');
         const createWikiAndGenerate = contract.operations.find(operation => operation.operationId === 'editor.create-link-and-generate');
         const processCurrent = contract.operations.find(operation => operation.operationId === 'file.process-add-links');
         const processFolder = contract.operations.find(operation => operation.operationId === 'file.process-folder-add-links');
@@ -69,7 +70,18 @@ describe('CLI invocation contract', () => {
         }));
         expect(contract.operations[2].resultSchema).toEqual(expect.objectContaining({
             type: 'object',
-            required: expect.arrayContaining(['plan', 'spec', 'artifact'])
+            required: expect.arrayContaining(['plan', 'spec', 'artifact', 'outputPath', 'previewOpened'])
+        }));
+
+        expect(diagramGenerate).toEqual(expect.objectContaining({
+            operationId: 'diagram.generate',
+            resultSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    outputPath: expect.any(Object),
+                    previewOpened: expect.any(Object)
+                })
+            })
         }));
 
         expect(providerConnectionTest).toEqual(expect.objectContaining({
