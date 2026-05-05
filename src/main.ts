@@ -1,19 +1,17 @@
 import { App, Editor, MarkdownView, Modal, Notice, Plugin, TFile, TFolder, PluginSettingTab, Setting, WorkspaceLeaf } from 'obsidian';
 import { NotemdSettings, ProgressReporter, LLMProviderConfig, TaskKey } from './types';
 import { DEFAULT_SETTINGS, NOTEMD_SIDEBAR_VIEW_TYPE, NOTEMD_SIDEBAR_ICON } from './constants';
-import { retry, normalizeNameForFilePath } from './utils';
+import { retry } from './utils';
 import { callLLM } from './llmUtils';
 import {
     handleFileRename,
     handleFileDelete,
     processFile,
-    generateContentForTitle,
     batchGenerateContentForTitles,
     batchFixMermaidSyntaxInFolder,
     saveMermaidSummaryFile,
     saveDiagramArtifactFile,
     extractConceptsFromFile,
-    createConceptNotes,
     fixMermaidSyntaxInFile,
     saveErrorLog // Import
 } from './fileUtils';
@@ -77,6 +75,7 @@ import {
     runExtractConceptsCommandWithHost,
     runExtractOriginalTextCommandWithHost,
     runGenerateContentForTitleCommandWithHost,
+    runCreateWikiLinkAndGenerateFromSelectionCommandWithHost,
     runProcessFolderWithNotemdCommandWithHost,
     runProcessWithNotemdCommandWithHost,
     runResearchAndSummarizeCommandWithHost,
@@ -730,66 +729,8 @@ export default class NotemdPlugin extends Plugin {
             id: 'create-wiki-link-and-generate-from-selection',
             name: uiStrings.commands.createWikiLinkAndGenerateNoteFromSelection,
             editorCallback: async (editor: Editor, view: MarkdownView) => {
-                const word = editor.getSelection().trim();
-                if (!word || word.length < 2) {
-                    new Notice(uiStrings.notices.selectValidWord);
-                    return;
-                }
-
-                // Replace selection with wiki-link
-                editor.replaceSelection(`[[${word}]]`);
-
-                if (!this.settings.useCustomConceptNoteFolder || !this.settings.conceptNoteFolder) {
-                    new Notice(uiStrings.notices.setConceptNoteFolder);
-                    return;
-                }
-
-                const safeName = normalizeNameForFilePath(word);
-                const notePath = `${this.settings.conceptNoteFolder}/${safeName}.md`;
-                const existingFile = this.app.vault.getAbstractFileByPath(notePath);
-
-                let newFile: TFile;
-                const reporter = this.getReporter();
-
-                try {
-                    if (existingFile instanceof TFile) {
-                        // Add backlink to existing (reuse createConceptNotes logic)
-                        await createConceptNotes(this.app, this.settings, new Set([word]), view.file?.basename || null, { disableBacklink: false });
-                        newFile = existingFile;
-                        reporter.log(`Updated existing note: ${notePath}`);
-                    } else {
-                        // Create blank note (reuse createConceptNotes minimal template)
-                        await createConceptNotes(this.app, this.settings, new Set([word]), view.file?.basename || null, { minimalTemplate: false });
-                        const createdFile = this.app.vault.getAbstractFileByPath(notePath);
-                        if (createdFile instanceof TFile) {
-                            newFile = createdFile;
-                        } else {
-                            throw new Error("Failed to create note.");
-                        }
-                        reporter.log(`Created blank note: ${notePath}`);
-                    }
-
-                    // Auto-run Generate from Title
-                    if (this.isBusy) throw new Error('Busy');
-                    this.isBusy = true;
-                    await generateContentForTitle(this.app, this.settings, newFile, reporter);
-
-                    await this.maybeAutoFixMermaidForFile(newFile, reporter, 'create wiki-link and generate');
-
-                    reporter.updateStatus(this.getActionCompleteText(uiStrings.commands.createWikiLinkAndGenerateNoteFromSelection), 100);
-                    if (reporter instanceof ProgressModal) {
-                        setTimeout(() => reporter.close(), 2000);
-                    }
-
-                    new Notice(formatI18n(uiStrings.notices.generatedContentForWord, { word }));
-                } catch (error: any) {
-                    const message = error instanceof Error ? error.message : String(error);
-                    new Notice(formatI18n(uiStrings.notices.genericError, { message }));
-                    reporter.log(formatI18n(uiStrings.notices.genericError, { message }));
-                } finally {
-                    this.isBusy = false;
-                }
-            },
+                await this.createWikiLinkAndGenerateFromSelectionCommand(editor, view);
+            }
         });
 
         // --- Settings Tab ---
@@ -1199,6 +1140,19 @@ export default class NotemdPlugin extends Plugin {
     /** Command: Generate Content from Title */
     async generateContentForTitleCommand(file: TFile, reporter?: ProgressReporter) {
         await runGenerateContentForTitleCommandWithHost(this.createNoteProcessingCommandHost(), file, reporter);
+    }
+
+    async createWikiLinkAndGenerateFromSelectionCommand(
+        editor: Editor,
+        view: MarkdownView,
+        reporter?: ProgressReporter
+    ) {
+        return runCreateWikiLinkAndGenerateFromSelectionCommandWithHost(
+            this.createNoteProcessingCommandHost(),
+            editor,
+            view,
+            reporter
+        );
     }
 
     /** Command: Research and Summarize Topic */

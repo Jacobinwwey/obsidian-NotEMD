@@ -33,11 +33,15 @@
 | `notemd:test-llm-connection` | 检查当前 provider 连通性 | `safe` | 当前输出仍偏 UI，而不是结果契约 | `provider.diagnostic.run`（`future-target`） |
 | `notemd:run-developer-provider-diagnostic` | 运行长请求 provider 诊断 | `safe` | 比 `test-llm-connection` 更接近自动化，但仍缺少公开的类型化结果表面 | `provider.diagnostic.run`（`exact`） |
 | `notemd:run-developer-provider-stability-diagnostic` | 运行多次 provider 稳定性诊断 | `safe` | 比纯 UI 诊断更适合自动化，但仍缺少公开的类型化结果表面 | `provider.diagnostic.stability-run`（`exact`） |
+| `notemd:export-provider-profiles` | 导出 provider profile 快照 | `safe` | 确定性且 machine-readable，但仍绑定插件管理的 config 路径语义 | `provider.profile.export` |
+| `notemd:import-provider-profiles` | 导入 provider profile 快照 | `safe` | machine-readable，但会改动 active provider 状态与插件设置 | `provider.profile.import` |
+| `notemd:export-cli-capability-manifest` | 导出命令 capability manifest | `safe` | 导出确定，但仍绑定插件 config-path 写入语义 | `cli.capability-manifest.export` |
+| `notemd:export-cli-invocation-contract` | 导出类型化 invocation contract | `safe` | 导出确定，但仍绑定插件 config-path 写入语义 | `cli.invocation-contract.export` |
 | `notemd:notemd-generate-diagram` | 从活动文件生成 spec-first artifact | `requires-active-file` | 依赖活动文件、插件状态和保存/打开副作用 | `diagram.generate`（`exact`，`defaultInput.outputMode=artifact`） |
 | `notemd:notemd-summarize-as-mermaid` | 为活动文件保存 Mermaid 输出 | `requires-active-file` | 依赖活动文件与插件管理的保存语义 | `diagram.generate`（`exact`，`defaultInput.outputMode=mermaid`） |
 | `notemd:notemd-preview-diagram` | 预览已保存/已生成图表 | `interactive-ui` | Preview modal 属于 UI-only 流程，不具备自动化稳定性 | `diagram.preview`（`exact`） |
-| `notemd:process-with-notemd` | 处理当前文件并加链接 | `requires-active-file` | 依赖活动文件和插件侧内容改写流程 | `file.process.add-links` |
-| `notemd:process-folder-with-notemd` | 批量处理文件夹 | `interactive-ui` | 依赖 folder selection 和 batch UX | `file.process-folder.add-links` |
+| `notemd:process-with-notemd` | 处理当前文件并加链接 | `requires-active-file` | 依赖活动文件和插件侧内容改写流程 | `file.process-add-links` |
+| `notemd:process-folder-with-notemd` | 批量处理文件夹 | `interactive-ui` | 依赖 folder selection 和 batch UX | `file.process-folder-add-links` |
 | `notemd:generate-content-from-title` | 从标题生成内容 | `requires-active-file` | 使用活动文件并回写内容 | `content.generate-from-title` |
 | `notemd:batch-generate-content-from-titles` | 批量标题生成 | `interactive-ui` | 文件夹选择、完成目录和进度 UI 仍然绑定宿主 | `content.batch-generate-from-titles` |
 | `notemd:research-and-summarize-topic` | 对选中文本 / 活动笔记标题做研究总结 | `requires-selection` | 依赖活动编辑器或活动笔记标题 | `research.summarize-topic` |
@@ -59,7 +63,7 @@
 - `src/operations/registry.ts` 已成为已抽取 operation、command binding、mapping kind 与部分 input/result schema 的中心元数据源。
 - `src/operations/capabilityManifest.ts` 现在从同一 registry 展平 capability manifest。
 - `src/cliContracts.ts` 现在也从同一 registry 生成 invocation contract，减少了文档、命令发现与契约导出之间的漂移路径。
-- registry 现在也已纳入主要 note-processing 与 utility operations：`file.process-add-links`、`file.process-folder-add-links`、`content.generate-from-title`、`content.batch-generate-from-titles`、`research.summarize-topic`、`translate.file`、`translate.folder-batch`、`concept.extract-file`、`concept.extract-folder`、`content.extract-original-text`、`workflow.extract-and-generate`、`duplicate.check-file`、`concept.dedupe`、`mermaid.batch-fix`、`formula.fix-file` 与 `formula.batch-fix`。
+- registry 现在也已纳入主要 note-processing、utility、selection 与 export operations：`editor.create-link-and-generate`、`file.process-add-links`、`file.process-folder-add-links`、`content.generate-from-title`、`content.batch-generate-from-titles`、`research.summarize-topic`、`translate.file`、`translate.folder-batch`、`concept.extract-file`、`concept.extract-folder`、`content.extract-original-text`、`workflow.extract-and-generate`、`duplicate.check-file`、`concept.dedupe`、`mermaid.batch-fix`、`formula.fix-file`、`formula.batch-fix`、`provider.profile.export`、`provider.profile.import`、`cli.capability-manifest.export` 与 `cli.invocation-contract.export`。
 - 旧命令别名仍保留注册以保证兼容，但会被刻意排除在 capability manifest 导出之外。
 
 ## 下一批抽取目标
@@ -68,11 +72,10 @@
 
 | 优先级 | 候选能力 | 为什么先做 | 现有基础 |
 |---|---|---|---|
-| P0 | Provider diagnostics | 已接近 operation 形态；输入输出清晰 | `src/providerDiagnostics.ts`, `src/llmUtils.ts` |
-| P0 | Diagram generation | spec-first core 已存在 | `src/diagram/diagramGenerationService.ts`, `src/diagram/*` |
-| P1 | 选区驱动概念生成 | 仍未进入共享 registry/capability/contract 表面 | `create-wiki-link-and-generate-from-selection`、editor-selection 流 |
-| P1 | CLI 导出命令面 | capability/contract 导出本身很适合自动化，但导出命令本身还没建模成 operation | `src/operations/configProfileCommandHostAdapter.ts`、`src/main.ts` 中导出命令 |
-| P2 | write-heavy flow 的结果面收口 | registry 已有，但写入型 operation 仍泄漏宿主/UI 语义 | `src/fileUtils.ts`, `src/translate.ts`, `src/extractOriginalText.ts` |
+| P0 | write-heavy flow 的结果面收口 | 覆盖面已有，但很多 operation 仍泄漏宿主/UI 语义，结果 schema 也偏浅 | `src/fileUtils.ts`, `src/translate.ts`, `src/extractOriginalText.ts`, `src/formulaFixer.ts` |
+| P1 | 剩余 direct-read/sidebar surfaces | `src/main.ts` 仍持有长尾 direct execution 与 sidebar-only read path，尚未建模为 operation | `src/main.ts` 剩余命令面、`src/workflowButtons.ts` |
+| P1 | selection/export 与 config flow 的 contract 增强 | 这些 operation 已建模，但未来 operation invoker 需要比 command-trigger 对等更丰富的 path/context 语义 | `src/operations/registry.ts`, `src/operations/configProfileCommands.ts`, `src/operations/noteProcessingCommandHostAdapter.ts` |
+| P2 | workflow/settings 打包 | Workflow DSL 与 output-path toggles 仍是有价值 metadata，但还不是稳定公共接口 | `src/workflowButtons.ts`, 设置驱动的输出控制 |
 
 ## 设置就绪度
 

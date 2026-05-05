@@ -10,6 +10,7 @@ describe('operations registry', () => {
             'provider.diagnostic.stability-run',
             'diagram.generate',
             'diagram.preview',
+            'editor.create-link-and-generate',
             'file.process-add-links',
             'file.process-folder-add-links',
             'content.generate-from-title',
@@ -26,6 +27,8 @@ describe('operations registry', () => {
             'mermaid.batch-fix',
             'formula.fix-file',
             'formula.batch-fix',
+            'cli.capability-manifest.export',
+            'cli.invocation-contract.export',
             'provider.profile.export',
             'provider.profile.import'
         ]));
@@ -78,6 +81,7 @@ describe('operations registry', () => {
     });
 
     test('returns structured metadata for note-processing operations', () => {
+        const createWikiAndGenerate = getOperationDefinition('editor.create-link-and-generate');
         const processCurrent = getOperationDefinition('file.process-add-links');
         const processFolder = getOperationDefinition('file.process-folder-add-links');
         const generateFromTitle = getOperationDefinition('content.generate-from-title');
@@ -86,6 +90,34 @@ describe('operations registry', () => {
         const translateFile = getOperationDefinition('translate.file');
         const extractOriginalText = getOperationDefinition('content.extract-original-text');
         const extractAndGenerate = getOperationDefinition('workflow.extract-and-generate');
+
+        expect(createWikiAndGenerate).toEqual(expect.objectContaining({
+            id: 'editor.create-link-and-generate',
+            version: 1,
+            automationLevel: 'requires-selection',
+            requiredContext: 'editor-selection',
+            sideEffectClass: 'write-file',
+            commandBindings: expect.arrayContaining([
+                expect.objectContaining({
+                    commandId: 'create-wiki-link-and-generate-from-selection',
+                    mappingKind: 'exact'
+                })
+            ]),
+            inputSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    selectionText: expect.any(Object)
+                })
+            }),
+            resultSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    notePath: expect.any(Object),
+                    word: expect.any(Object),
+                    created: expect.any(Object)
+                })
+            })
+        }));
 
         expect(processCurrent).toEqual(expect.objectContaining({
             id: 'file.process-add-links',
@@ -333,6 +365,102 @@ describe('operations registry', () => {
                     mappingKind: 'exact'
                 })
             ])
+        }));
+    });
+
+    test('returns structured metadata for config export operations', () => {
+        const providerProfileExport = getOperationDefinition('provider.profile.export');
+        const providerProfileImport = getOperationDefinition('provider.profile.import');
+        const cliCapabilityExport = getOperationDefinition('cli.capability-manifest.export');
+        const cliContractExport = getOperationDefinition('cli.invocation-contract.export');
+
+        expect(providerProfileExport).toEqual(expect.objectContaining({
+            id: 'provider.profile.export',
+            version: 1,
+            automationLevel: 'safe',
+            requiredContext: 'none',
+            sideEffectClass: 'write-file',
+            commandBindings: expect.arrayContaining([
+                expect.objectContaining({
+                    commandId: 'export-provider-profiles',
+                    mappingKind: 'exact'
+                })
+            ]),
+            resultSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    outputPath: expect.any(Object)
+                })
+            })
+        }));
+
+        expect(providerProfileImport).toEqual(expect.objectContaining({
+            id: 'provider.profile.import',
+            version: 1,
+            automationLevel: 'safe',
+            requiredContext: 'none',
+            sideEffectClass: 'write-file',
+            commandBindings: expect.arrayContaining([
+                expect.objectContaining({
+                    commandId: 'import-provider-profiles',
+                    mappingKind: 'exact'
+                })
+            ]),
+            inputSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    inputPath: expect.any(Object)
+                })
+            }),
+            resultSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    inputPath: expect.any(Object),
+                    activeProvider: expect.any(Object)
+                })
+            })
+        }));
+
+        expect(cliCapabilityExport).toEqual(expect.objectContaining({
+            id: 'cli.capability-manifest.export',
+            version: 1,
+            automationLevel: 'safe',
+            requiredContext: 'none',
+            sideEffectClass: 'write-file',
+            commandBindings: expect.arrayContaining([
+                expect.objectContaining({
+                    commandId: 'export-cli-capability-manifest',
+                    mappingKind: 'exact'
+                })
+            ]),
+            resultSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    outputPath: expect.any(Object),
+                    manifest: expect.any(Object)
+                })
+            })
+        }));
+
+        expect(cliContractExport).toEqual(expect.objectContaining({
+            id: 'cli.invocation-contract.export',
+            version: 1,
+            automationLevel: 'safe',
+            requiredContext: 'none',
+            sideEffectClass: 'write-file',
+            commandBindings: expect.arrayContaining([
+                expect.objectContaining({
+                    commandId: 'export-cli-invocation-contract',
+                    mappingKind: 'exact'
+                })
+            ]),
+            resultSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    outputPath: expect.any(Object),
+                    contract: expect.any(Object)
+                })
+            })
         }));
     });
 });

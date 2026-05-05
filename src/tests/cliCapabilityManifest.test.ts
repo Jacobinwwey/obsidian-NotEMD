@@ -14,6 +14,11 @@ describe('CLI capability manifest', () => {
         expect(ids).toContain('notemd:run-developer-provider-diagnostic');
         expect(ids).toContain('notemd:notemd-generate-diagram');
         expect(ids).toContain('notemd:notemd-summarize-as-mermaid');
+        expect(ids).toContain('notemd:export-provider-profiles');
+        expect(ids).toContain('notemd:import-provider-profiles');
+        expect(ids).toContain('notemd:export-cli-capability-manifest');
+        expect(ids).toContain('notemd:export-cli-invocation-contract');
+        expect(ids).toContain('notemd:create-wiki-link-and-generate-from-selection');
         expect(ids).toContain('notemd:process-with-notemd');
         expect(ids).toContain('notemd:process-folder-with-notemd');
         expect(ids).toContain('notemd:generate-content-from-title');
@@ -37,6 +42,11 @@ describe('CLI capability manifest', () => {
         const diagram = manifest.commands.find(command => command.id === 'notemd:notemd-generate-diagram');
         const diagnostic = manifest.commands.find(command => command.id === 'notemd:test-llm-connection');
         const mermaid = manifest.commands.find(command => command.id === 'notemd:notemd-summarize-as-mermaid');
+        const providerProfileExport = manifest.commands.find(command => command.id === 'notemd:export-provider-profiles');
+        const providerProfileImport = manifest.commands.find(command => command.id === 'notemd:import-provider-profiles');
+        const cliCapabilityExport = manifest.commands.find(command => command.id === 'notemd:export-cli-capability-manifest');
+        const cliContractExport = manifest.commands.find(command => command.id === 'notemd:export-cli-invocation-contract');
+        const createWikiAndGenerate = manifest.commands.find(command => command.id === 'notemd:create-wiki-link-and-generate-from-selection');
         const translateFile = manifest.commands.find(command => command.id === 'notemd:translate-file');
         const processCurrent = manifest.commands.find(command => command.id === 'notemd:process-with-notemd');
         const processFolder = manifest.commands.find(command => command.id === 'notemd:process-folder-with-notemd');
@@ -75,6 +85,46 @@ describe('CLI capability manifest', () => {
             automationLevel: getSidebarActionAutomationLevel('test-llm-connection'),
             requiredContext: getSidebarActionRequiredContext('test-llm-connection'),
             sideEffectClass: getSidebarActionSideEffectClass('test-llm-connection')
+        }));
+
+        expect(providerProfileExport).toEqual(expect.objectContaining({
+            operationId: 'provider.profile.export',
+            automationLevel: 'safe',
+            requiredContext: 'none',
+            sideEffectClass: 'write-file',
+            mappingKind: 'exact'
+        }));
+
+        expect(providerProfileImport).toEqual(expect.objectContaining({
+            operationId: 'provider.profile.import',
+            automationLevel: 'safe',
+            requiredContext: 'none',
+            sideEffectClass: 'write-file',
+            mappingKind: 'exact'
+        }));
+
+        expect(cliCapabilityExport).toEqual(expect.objectContaining({
+            operationId: 'cli.capability-manifest.export',
+            automationLevel: 'safe',
+            requiredContext: 'none',
+            sideEffectClass: 'write-file',
+            mappingKind: 'exact'
+        }));
+
+        expect(cliContractExport).toEqual(expect.objectContaining({
+            operationId: 'cli.invocation-contract.export',
+            automationLevel: 'safe',
+            requiredContext: 'none',
+            sideEffectClass: 'write-file',
+            mappingKind: 'exact'
+        }));
+
+        expect(createWikiAndGenerate).toEqual(expect.objectContaining({
+            operationId: 'editor.create-link-and-generate',
+            automationLevel: 'requires-selection',
+            requiredContext: 'editor-selection',
+            sideEffectClass: 'write-file',
+            mappingKind: 'exact'
         }));
 
         expect(processCurrent).toEqual(expect.objectContaining({
