@@ -43,11 +43,6 @@ import { RenderArtifact } from './rendering/types';
 import { IframeRenderHost } from './rendering/host/iframeRenderHost';
 import { getRenderTargetDisplayName } from './rendering/targetLabel';
 import { supportsDiagramPreviewModal } from './ui/diagramPreview';
-import {
-    executeProviderDiagnosticCommand,
-    executeProviderDiagnosticStabilityCommand,
-    MissingActiveProviderError
-} from './operations/providerDiagnosticCommand';
 import { runDiagramGenerateOperation } from './operations/diagramGenerateOperation';
 import {
     completeArtifactDiagramCommand,
@@ -64,9 +59,13 @@ import {
     PluginConfigCommandHost
 } from './operations/configProfileCommands';
 import {
-    persistProviderDiagnosticReport,
     ProviderDiagnosticReportHost
 } from './operations/providerDiagnosticReportPersistence';
+import {
+    ProviderDiagnosticCommandHost,
+    runProviderDiagnosticCommandWithHost,
+    runProviderDiagnosticStabilityCommandWithHost
+} from './operations/providerDiagnosticCommandHostAdapter';
 
 type DiagramCommandExecutionMode = 'save-mermaid' | 'save-artifact' | 'preview-artifact';
 
@@ -154,6 +153,17 @@ export default class NotemdPlugin extends Plugin {
             create: async (path, content) => {
                 await this.app.vault.create(path, content);
             }
+        };
+    }
+
+    private createProviderDiagnosticCommandHost(): ProviderDiagnosticCommandHost {
+        return {
+            loadSettings: () => this.loadSettings(),
+            getSettings: () => this.settings,
+            getUiStrings: () => this.getUiStrings(),
+            sanitizeTimeoutMs: (rawValue) => this.sanitizeDeveloperDiagnosticTimeoutMs(rawValue),
+            sanitizeRuns: (rawValue) => this.sanitizeDeveloperDiagnosticRuns(rawValue),
+            reportHost: this.createProviderDiagnosticReportHost()
         };
     }
 
@@ -1298,75 +1308,13 @@ export default class NotemdPlugin extends Plugin {
     }
 
     async runDeveloperProviderDiagnosticCommand(): Promise<void> {
-        await this.loadSettings();
-        const i18n = this.getUiStrings();
-
-        try {
-            const execution = await executeProviderDiagnosticCommand({
-                settings: this.settings,
-                sanitizeTimeoutMs: (rawValue) => this.sanitizeDeveloperDiagnosticTimeoutMs(rawValue),
-                sanitizeRuns: (rawValue) => this.sanitizeDeveloperDiagnosticRuns(rawValue),
-                saveReport: (providerName, reportContent) => persistProviderDiagnosticReport({
-                    providerName,
-                    reportContent,
-                    host: this.createProviderDiagnosticReportHost()
-                })
-            });
-
-            if (execution.result.success) {
-                new Notice(formatI18n(i18n.settings.developer.diagnosticSuccess, {
-                    callMode: execution.result.callMode,
-                    path: execution.reportPath
-                }), 8000);
-            } else {
-                new Notice(formatI18n(i18n.settings.developer.diagnosticCapturedFailure, {
-                    callMode: execution.result.callMode,
-                    path: execution.reportPath
-                }), 12000);
-            }
-        } catch (error: unknown) {
-            if (error instanceof MissingActiveProviderError) {
-                new Notice(i18n.notices.noActiveProviderConfigured, 8000);
-                return;
-            }
-
-            throw error;
-        }
+        const result = await runProviderDiagnosticCommandWithHost(this.createProviderDiagnosticCommandHost());
+        new Notice(result.notice.message, result.notice.duration);
     }
 
     async runDeveloperProviderStabilityDiagnosticCommand(): Promise<void> {
-        await this.loadSettings();
-        const i18n = this.getUiStrings();
-
-        try {
-            const execution = await executeProviderDiagnosticStabilityCommand({
-                settings: this.settings,
-                sanitizeTimeoutMs: (rawValue) => this.sanitizeDeveloperDiagnosticTimeoutMs(rawValue),
-                sanitizeRuns: (rawValue) => this.sanitizeDeveloperDiagnosticRuns(rawValue),
-                saveReport: (providerName, reportContent) => persistProviderDiagnosticReport({
-                    providerName,
-                    reportContent,
-                    host: this.createProviderDiagnosticReportHost()
-                })
-            });
-
-            new Notice(
-                formatI18n(i18n.settings.developer.stabilityFinished, {
-                    callMode: execution.result.callMode,
-                    successCount: execution.result.successCount,
-                    runs: execution.result.runs,
-                    path: execution.reportPath
-                }),
-                12000
-            );
-        } catch (error: unknown) {
-            if (error instanceof MissingActiveProviderError) {
-                new Notice(i18n.notices.noActiveProviderConfigured, 8000);
-                return;
-            }
-
-            throw error;
-        }
+        const result = await runProviderDiagnosticStabilityCommandWithHost(this.createProviderDiagnosticCommandHost());
+        new Notice(result.notice.message, result.notice.duration);
     }
 
     async exportProviderProfilesCommand(): Promise<void> {
