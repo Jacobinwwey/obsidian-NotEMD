@@ -52,6 +52,7 @@ Carried-forward constraints:
 - The second MT2 host-adapter slice is now landed: `src/operations/diagramCommandHostAdapter.ts` owns Mermaid/artifact save completion, preview completion, and direct Vega-Lite preview orchestration below `src/main.ts`.
 - The first config/profile extraction slice is now landed: `src/operations/configProfileCommands.ts` now owns provider-profile import/export plus CLI capability/contract export orchestration, and both `src/main.ts` and `src/ui/NotemdSettingTab.ts` now reuse that same command path.
 - Provider-diagnostic report persistence is now extracted as well: `src/operations/providerDiagnosticReportPersistence.ts` now owns collision-safe diagnostic report file creation below `src/main.ts`.
+- Provider-diagnostic host adaptation is now extracted as well: `src/operations/providerDiagnosticCommandHostAdapter.ts` now owns developer-diagnostic settings loading, report-persistence wiring, and notice shaping below `src/main.ts`.
 - Existing Obsidian commands remain registered, hotkey-bindable, and official-CLI-triggerable while the deeper operation layer continues to mature.
 
 ## Short-Term Delivery (0-2 weeks)
@@ -166,7 +167,8 @@ Build a reusable operation layer for the most valuable Notemd capabilities.
   - save/preview host adapters now live in `src/operations/diagramCommandHostAdapter.ts`
   - provider-profile import/export and CLI contract/capability export now live in `src/operations/configProfileCommands.ts`
   - provider-diagnostic report persistence now lives in `src/operations/providerDiagnosticReportPersistence.ts`
-  - remaining gap: add a reusable CLI-facing host adapter without reintroducing Obsidian coupling into operations
+  - provider-diagnostic host adaptation now lives in `src/operations/providerDiagnosticCommandHostAdapter.ts`
+  - remaining gap: continue shrinking config/profile persistence and other host-effects in `src/main.ts` without reintroducing Obsidian coupling into operations
 
 **MT2. Host adapter split**
 - Add a plugin adapter that resolves active file, vault state, and settings
@@ -274,7 +276,7 @@ Expose a mature, automation-grade Notemd integration surface above the official 
 Progress note:
 
 - Items 1-4 are now partially landed on mainline.
-- The next defensible move is still MT2, but it is now narrower: a reusable CLI-facing host adapter should follow the already-landed execution, save/preview, config/profile, and report-persistence extractions so `src/main.ts` stops being the last concentrated host-effects boundary.
+- The next defensible move is still MT2, but it is now narrower: provider-diagnostic host adaptation is already landed, so the next batch should peel config/profile state persistence and the remaining CLI-adjacent host effects away from `src/main.ts`.
 
 ## Exit Criteria
 

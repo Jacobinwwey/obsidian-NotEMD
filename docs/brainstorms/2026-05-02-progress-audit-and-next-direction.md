@@ -116,7 +116,8 @@ This means the roadmap should no longer be interpreted as "build the platform". 
 - The second MT2 host-adapter slice is now landed as well: `src/operations/diagramCommandHostAdapter.ts` owns Mermaid/artifact save completion and direct Vega-Lite preview orchestration below `src/main.ts`.
 - The first config/profile slice is now landed too: `src/operations/configProfileCommands.ts` owns provider-profile import/export and CLI capability/contract export orchestration, and the settings tab now reuses the same command path instead of keeping a parallel implementation.
 - Provider-diagnostic report persistence is now landed too: `src/operations/providerDiagnosticReportPersistence.ts` owns collision-safe diagnostic report file creation, so `src/main.ts` no longer carries that file-path policy inline.
-- The remaining architectural gap is now narrower still: `src/main.ts` mainly retains host-adapter construction and user-surface notices around extracted operations, which is a far more defensible next seam than the earlier save/preview-heavy command wrappers.
+- Provider-diagnostic host adaptation is now landed too: `src/operations/providerDiagnosticCommandHostAdapter.ts` owns settings loading, report-persistence wiring, and user-surface notice shaping for developer diagnostics, so `src/main.ts` no longer carries that orchestration inline.
+- The remaining architectural gap is now narrower still: `src/main.ts` mainly retains command registration plus config/profile state persistence and other user-surface host effects, which is a far more defensible next seam than the earlier save/preview-heavy command wrappers.
 
 ## Verification Gates
 
