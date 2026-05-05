@@ -345,12 +345,21 @@ describe('note processing command host adapter', () => {
 
         await runBatchTranslateFolderCommandWithHost(host, reporter, undefined, batchTranslateImpl);
 
-        expect(batchTranslateImpl).toHaveBeenCalledWith(host.getApp(), host.getSettings(), folder, 'en');
+        expect(batchTranslateImpl).toHaveBeenCalledWith(
+            host.getApp(),
+            host.getSettings(),
+            folder,
+            'en',
+            expect.objectContaining({
+                reporter
+            })
+        );
         expect(host.maybeAutoFixMermaidForFolder).toHaveBeenCalledWith(
             'Translations',
             reporter,
             'batch translate folder'
         );
+        expect(host.completeReporter).toHaveBeenCalledWith(reporter);
         expect(host.finalizeReporter).toHaveBeenCalledWith(reporter);
         expect(getBusy()).toBe(false);
     });
@@ -430,7 +439,7 @@ describe('note processing command host adapter', () => {
             extension: 'md'
         });
         host.getActiveFile.mockReturnValue(activeFile);
-        const extractOriginalImpl = jest.fn().mockResolvedValue(undefined);
+        const extractOriginalImpl = jest.fn().mockResolvedValue('Notes/Topic_Extracted.md');
         const { runExtractOriginalTextCommandWithHost } = loadModule();
 
         await runExtractOriginalTextCommandWithHost(host, reporter, extractOriginalImpl);
@@ -442,6 +451,7 @@ describe('note processing command host adapter', () => {
             reporter
         );
         expect(reporter.updateStatus).toHaveBeenCalledWith('Done Extract original text', 100);
+        expect(host.completeReporter).toHaveBeenCalledWith(reporter);
         expect(host.finalizeReporter).toHaveBeenCalledWith(reporter);
         expect(getBusy()).toBe(false);
     });

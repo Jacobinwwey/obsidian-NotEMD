@@ -302,12 +302,22 @@ export async function runBatchTranslateFolderCommandWithHost(
             }
 
             const translateLanguage = host.getTaskLanguageCode('translate');
-            await batchTranslateFolderImpl(host.getApp(), host.getSettings(), targetFolder, translateLanguage);
+            await batchTranslateFolderImpl(
+                host.getApp(),
+                host.getSettings(),
+                targetFolder,
+                translateLanguage,
+                { reporter: useReporter }
+            );
             if (!useReporter.cancelled) {
                 const mermaidFixTarget = (host.getSettings().useCustomTranslationSavePath && host.getSettings().translationSavePath)
                     ? host.getSettings().translationSavePath
                     : targetFolder.path;
                 await host.maybeAutoFixMermaidForFolder(mermaidFixTarget, useReporter, 'batch translate folder');
+                const completeText = host.getActionCompleteText(actionLabel);
+                useReporter.updateStatus(completeText, 100);
+                host.updateStatusBar(completeText);
+                host.completeReporter(useReporter);
             }
         } catch (error: unknown) {
             const { errorMessage } = normalizeError(
@@ -712,8 +722,11 @@ export async function runExtractOriginalTextCommandWithHost(
                 throw new Error("No active '.md' or '.txt' file to process.");
             }
 
-            await extractOriginalTextImpl(host.getApp(), host.getPluginRuntime(), activeFile, useReporter);
-            useReporter.updateStatus(host.getActionCompleteText(actionLabel), 100);
+            const outputPath = await extractOriginalTextImpl(host.getApp(), host.getPluginRuntime(), activeFile, useReporter);
+            if (outputPath && !useReporter.cancelled) {
+                useReporter.updateStatus(host.getActionCompleteText(actionLabel), 100);
+                host.completeReporter(useReporter);
+            }
         } catch (error: unknown) {
             const { errorMessage } = normalizeError(
                 error,

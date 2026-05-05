@@ -9,7 +9,6 @@ import {
     processFile,
     generateContentForTitle,
     batchGenerateContentForTitles,
-    checkAndRemoveDuplicateConceptNotes,
     batchFixMermaidSyntaxInFolder,
     findDuplicates,
     saveMermaidSummaryFile,
@@ -19,7 +18,6 @@ import {
     fixMermaidSyntaxInFile,
     saveErrorLog // Import
 } from './fileUtils';
-import { fixFormulaFormatsInFile, batchFixFormulaFormatsInFolder } from './formulaFixer';
 import { _performResearch, researchAndSummarize } from './searchUtils'; // Import _performResearch if needed directly, ensure researchAndSummarize is exported
 import { ProgressModal } from './ui/ProgressModal';
 import { ErrorModal } from './ui/ErrorModal';
@@ -85,6 +83,13 @@ import {
     runResearchAndSummarizeCommandWithHost,
     runTranslateFileCommandWithHost
 } from './operations/noteProcessingCommandHostAdapter';
+import {
+    runBatchFixFormulaFormatsCommandWithHost,
+    runBatchMermaidFixCommandWithHost,
+    runCheckAndRemoveDuplicateConceptNotesCommandWithHost,
+    runFixFormulaFormatsCommandWithHost,
+    UtilityCommandHost
+} from './operations/utilityCommandHostAdapter';
 
 type DiagramCommandExecutionMode = 'save-mermaid' | 'save-artifact' | 'preview-artifact';
 
@@ -255,6 +260,39 @@ export default class NotemdPlugin extends Plugin {
             maybeAutoFixMermaidForFolder: (folderPath, reporter, reason) =>
                 this.maybeAutoFixMermaidForFolder(folderPath, reporter, reason),
             appendVaultLog: (path, content) => this.app.vault.adapter.append(path, content),
+            completeReporter: (reporter) => {
+                if (reporter instanceof ProgressModal) {
+                    setTimeout(() => reporter.close(), 2000);
+                }
+            },
+            finalizeReporter: (reporter) => {
+                if (reporter instanceof NotemdSidebarView) {
+                    reporter.finishProcessing();
+                }
+            }
+        };
+    }
+
+    private createUtilityCommandHost(): UtilityCommandHost {
+        return {
+            getApp: () => this.app,
+            loadSettings: () => this.loadSettings(),
+            getSettings: () => this.settings,
+            getUiStrings: () => this.getUiStrings(),
+            getActionLabel: (actionId) => this.getActionLabel(actionId),
+            getReporter: () => this.getReporter(),
+            getFolderSelection: () => this.getFolderSelection(),
+            isBusy: () => this.isBusy,
+            setBusy: (busy) => this.setBusy(busy),
+            startReporterAction: (reporter, label) => this.startReporterAction(reporter, label),
+            failReporterAction: (reporter, message) => this.failReporterAction(reporter, message),
+            updateStatusBar: (message) => this.updateStatusBar(message),
+            getRunningActionText: (label) => this.getRunningActionText(label),
+            getActionCompleteText: (label) => this.getActionCompleteText(label),
+            showNotice: (message, duration) => new Notice(message, duration),
+            logError: (message, details) => console.error(message, details),
+            openErrorModal: (title, details) => this.openLocalizedErrorModal(title, details),
+            saveErrorLog: (error, reporter) => saveErrorLog(this.app, reporter, error, this.settings),
             completeReporter: (reporter) => {
                 if (reporter instanceof ProgressModal) {
                     setTimeout(() => reporter.close(), 2000);
@@ -687,6 +725,22 @@ export default class NotemdPlugin extends Plugin {
                 if (activeFile && activeFile.extension === 'md') {
                     if (!checking) {
                         this.extractConceptsAndGenerateTitlesCommand();
+                    }
+                    return true;
+                }
+                return false;
+            }
+        });
+
+        this.addCommand({
+            id: 'extract-original-text',
+            name: getSidebarActionLabel(uiStrings, 'extract-original-text'),
+            checkCallback: (checking: boolean) => {
+                const activeFile = this.app.workspace.getActiveFile();
+                const condition = activeFile && (activeFile.extension === 'md' || activeFile.extension === 'txt');
+                if (condition) {
+                    if (!checking) {
+                        this.extractOriginalTextCommand();
                     }
                     return true;
                 }
@@ -1188,212 +1242,22 @@ export default class NotemdPlugin extends Plugin {
 
     /** Command: Check and Remove Duplicate Concept Notes */
     async checkAndRemoveDuplicateConceptNotesCommand(reporter?: ProgressReporter) {
-        if (this.isBusy) { new Notice(this.getUiStrings().notices.notemdBusy); return; }
-        this.isBusy = true;
-        const useReporter = reporter || this.getReporter();
-        let i18n = this.getUiStrings();
-        const actionLabel = this.getActionLabel('check-remove-duplicate-concepts');
-
-        const maybeSidebar = useReporter as any;
-        this.startReporterAction(useReporter, actionLabel);
-
-        useReporter.log(this.getRunningActionText(actionLabel));
-        try {
-            await this.loadSettings();
-            i18n = this.getUiStrings();
-            await checkAndRemoveDuplicateConceptNotes(this.app, this.settings, useReporter); // Call utility
-            // Status is updated within the utility function
-            this.updateStatusBar(this.getActionCompleteText(actionLabel));
-        } catch (error: unknown) { // Changed to unknown
-            let errorMessage = 'An unknown error occurred during duplicate check.';
-            let errorDetails = String(error);
-            if (error instanceof Error) {
-                errorMessage = error.message;
-                errorDetails = error.stack || error.message;
-            }
-            console.error("Error checking/removing duplicate concept notes:", errorDetails);
-            new Notice(formatI18n(i18n.notices.duplicateCheckRemoveError, { message: errorMessage }), 10000);
-            useReporter.log(`Error: ${errorMessage}`);
-            this.failReporterAction(useReporter, errorMessage);
-            this.openLocalizedErrorModal(i18n.errorModal.titles.duplicateCheckRemove, errorDetails);
-        } finally {
-            if (maybeSidebar instanceof NotemdSidebarView) {
-                maybeSidebar.finishProcessing();
-            }
-            this.isBusy = false;
-        }
+        await runCheckAndRemoveDuplicateConceptNotesCommandWithHost(this.createUtilityCommandHost(), reporter);
     }
     /** Command: Batch Fix Mermaid Syntax */
     async batchMermaidFixCommand(
         reporter?: ProgressReporter,
         folderPathOverride?: string
     ): Promise<{ folderPath: string; modifiedCount: number } | null> {
-        if (this.isBusy) { new Notice(this.getUiStrings().notices.notemdBusy); return null; }
-        this.isBusy = true;
-        const useReporter = reporter || this.getReporter();
-        let i18n = this.getUiStrings();
-        const actionLabel = this.getActionLabel('batch-mermaid-fix');
-
-        const maybeSidebar = useReporter as any;
-        this.startReporterAction(useReporter, actionLabel);
-
-        try {
-            await this.loadSettings(); // Load settings in case needed by future logic
-            i18n = this.getUiStrings();
-            const folderPath = folderPathOverride ?? await this.getFolderSelection();
-            if (!folderPath) {
-                const cancelledMessage = i18n.common.cancel;
-                useReporter.log(cancelledMessage);
-                useReporter.updateStatus(cancelledMessage, -1);
-                throw new Error(cancelledMessage);
-            }
-
-            this.updateStatusBar(this.getRunningActionText(actionLabel));
-            useReporter.log(this.getRunningActionText(actionLabel));
-
-            const { errors, modifiedCount } = await batchFixMermaidSyntaxInFolder(this.app, this.settings, folderPath, useReporter); // Call utility
-
-            if (!useReporter.cancelled) {
-                if (errors.length > 0) {
-                    const errorSummary = formatI18n(i18n.notices.batchMermaidFixFinishedWithErrors, {
-                        count: errors.length,
-                        modifiedCount
-                    });
-                    useReporter.log(`⚠️ ${errorSummary}`); useReporter.updateStatus(errorSummary, -1);
-                    this.updateStatusBar(errorSummary); new Notice(errorSummary, 10000);
-                } else {
-                    const finalMessage = formatI18n(i18n.notices.batchMermaidFixSuccess, { modifiedCount });
-                    useReporter.updateStatus(finalMessage, 100); this.updateStatusBar(this.getActionCompleteText(actionLabel));
-                    new Notice(finalMessage, 5000);
-                    if (useReporter instanceof ProgressModal) setTimeout(() => useReporter.close(), 2000);
-                }
-                return { folderPath, modifiedCount };
-            }
-
-        } catch (error: unknown) { // Changed to unknown
-            let errorMessage = 'An unknown error occurred during batch Mermaid fix.';
-            let errorDetails = String(error);
-            if (error instanceof Error) {
-                errorMessage = error.message;
-                errorDetails = error.stack || error.message;
-            }
-            if (!errorMessage.includes("cancelled")) {
-                console.error("Notemd Batch Mermaid Fix Error:", errorDetails);
-                new Notice(formatI18n(i18n.notices.batchMermaidFixError, { message: errorMessage }), 10000);
-                this.openLocalizedErrorModal(i18n.errorModal.titles.batchMermaidFix, errorDetails);
-
-                // Save error log
-                await saveErrorLog(this.app, useReporter, error, this.settings);
-            }
-            useReporter.log(`Batch Fix Error: ${errorMessage}`);
-            this.failReporterAction(useReporter, errorMessage);
-        } finally {
-            if (maybeSidebar instanceof NotemdSidebarView) {
-                maybeSidebar.finishProcessing();
-            }
-            this.isBusy = false;
-        }
-        return null;
+        return runBatchMermaidFixCommandWithHost(this.createUtilityCommandHost(), reporter, folderPathOverride);
     }
 
     async fixFormulaFormatsCommand(file: TFile, reporter?: ProgressReporter) {
-        if (this.isBusy) { new Notice(this.getUiStrings().notices.notemdBusy); return; }
-        this.isBusy = true;
-        const useReporter = reporter || this.getReporter();
-        let i18n = this.getUiStrings();
-        const actionLabel = this.getActionLabel('fix-formula-current');
-
-        const maybeSidebar = useReporter as any;
-        this.startReporterAction(useReporter, `${actionLabel}: ${file.name}`);
-
-        try {
-            await this.loadSettings();
-            i18n = this.getUiStrings();
-            const modified = await fixFormulaFormatsInFile(this.app, file, useReporter);
-
-            if (modified) {
-                const message = formatI18n(i18n.notices.formulaFixSuccess, { file: file.name });
-                useReporter.log(`✅ ${message}`);
-                new Notice(message);
-            } else {
-                const message = formatI18n(i18n.notices.formulaFixNotNeeded, { file: file.name });
-                useReporter.log(message);
-                new Notice(message);
-            }
-            useReporter.updateStatus(this.getActionCompleteText(actionLabel), 100);
-            if (useReporter instanceof ProgressModal) setTimeout(() => useReporter.close(), 1000);
-
-        } catch (error: unknown) {
-            let errorMessage = 'An unknown error occurred.';
-            if (error instanceof Error) errorMessage = error.message;
-
-            useReporter.log(`Error: ${errorMessage}`);
-            this.failReporterAction(useReporter, errorMessage);
-            new Notice(formatI18n(i18n.notices.genericError, { message: errorMessage }));
-            await saveErrorLog(this.app, useReporter, error, this.settings);
-        } finally {
-            if (maybeSidebar instanceof NotemdSidebarView) {
-                maybeSidebar.finishProcessing();
-            }
-            this.isBusy = false;
-        }
+        await runFixFormulaFormatsCommandWithHost(this.createUtilityCommandHost(), file, reporter);
     }
 
     async batchFixFormulaFormatsCommand(reporter?: ProgressReporter) {
-        if (this.isBusy) { new Notice(this.getUiStrings().notices.notemdBusy); return; }
-        this.isBusy = true;
-        const useReporter = reporter || this.getReporter();
-        let i18n = this.getUiStrings();
-        const actionLabel = this.getActionLabel('batch-fix-formula');
-
-        const maybeSidebar = useReporter as any;
-        this.startReporterAction(useReporter, actionLabel);
-
-        try {
-            await this.loadSettings();
-            i18n = this.getUiStrings();
-            const folderPath = await this.getFolderSelection();
-            if (!folderPath) {
-                const cancelledMessage = i18n.common.cancel;
-                useReporter.log(cancelledMessage);
-                useReporter.updateStatus(cancelledMessage, -1);
-                throw new Error(cancelledMessage);
-            }
-
-            const { modifiedCount, errors } = await batchFixFormulaFormatsInFolder(this.app, folderPath, useReporter);
-
-            if (!useReporter.cancelled) {
-                if (errors.length > 0) {
-                    const msg = formatI18n(i18n.notices.batchFormulaFixFinishedWithErrors, {
-                        count: errors.length,
-                        modifiedCount
-                    });
-                    useReporter.log(msg);
-                    useReporter.updateStatus(msg, -1);
-                    new Notice(msg);
-                } else {
-                    const msg = formatI18n(i18n.notices.batchFormulaFixSuccess, { modifiedCount });
-                    useReporter.log(msg);
-                    useReporter.updateStatus(this.getActionCompleteText(actionLabel), 100);
-                    new Notice(msg);
-                    if (useReporter instanceof ProgressModal) setTimeout(() => useReporter.close(), 2000);
-                }
-            }
-        } catch (error: unknown) {
-            let errorMessage = 'An unknown error occurred.';
-            if (error instanceof Error) errorMessage = error.message;
-            if (!errorMessage.includes("Cancelled")) {
-                useReporter.log(`Error: ${errorMessage}`);
-                this.failReporterAction(useReporter, errorMessage);
-                new Notice(formatI18n(i18n.notices.genericError, { message: errorMessage }));
-                await saveErrorLog(this.app, useReporter, error, this.settings);
-            }
-        } finally {
-            if (maybeSidebar instanceof NotemdSidebarView) {
-                maybeSidebar.finishProcessing();
-            }
-            this.isBusy = false;
-        }
+        await runBatchFixFormulaFormatsCommandWithHost(this.createUtilityCommandHost(), reporter);
     }
 
     async batchTranslateFolderCommand(folder?: TFolder, reporter?: ProgressReporter) {

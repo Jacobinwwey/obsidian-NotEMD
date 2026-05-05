@@ -1,0 +1,307 @@
+import { App, TFile } from 'obsidian';
+import {
+    batchFixMermaidSyntaxInFolder,
+    checkAndRemoveDuplicateConceptNotes
+} from '../fileUtils';
+import {
+    batchFixFormulaFormatsInFolder,
+    fixFormulaFormatsInFile
+} from '../formulaFixer';
+import { formatI18n } from '../i18n';
+import { NotemdSettings, ProgressReporter } from '../types';
+import { SidebarActionId } from '../workflowButtons';
+
+export interface UtilityCommandUiStrings {
+    common: {
+        cancel: string;
+    };
+    notices: {
+        notemdBusy: string;
+        duplicateCheckRemoveError: string;
+        batchMermaidFixFinishedWithErrors: string;
+        batchMermaidFixSuccess: string;
+        batchMermaidFixError: string;
+        formulaFixSuccess: string;
+        formulaFixNotNeeded: string;
+        genericError: string;
+        batchFormulaFixFinishedWithErrors: string;
+        batchFormulaFixSuccess: string;
+    };
+    errorModal: {
+        titles: {
+            duplicateCheckRemove: string;
+            batchMermaidFix: string;
+        };
+    };
+}
+
+export interface UtilityCommandHost {
+    getApp: () => App;
+    loadSettings: () => Promise<void>;
+    getSettings: () => NotemdSettings;
+    getUiStrings: () => UtilityCommandUiStrings;
+    getActionLabel: (actionId: SidebarActionId) => string;
+    getReporter: () => ProgressReporter;
+    getFolderSelection: () => Promise<string | null>;
+    isBusy: () => boolean;
+    setBusy: (busy: boolean) => void;
+    startReporterAction: (reporter: ProgressReporter, label: string) => void;
+    failReporterAction: (reporter: ProgressReporter, message: string) => string;
+    updateStatusBar: (message: string) => void;
+    getRunningActionText: (label: string) => string;
+    getActionCompleteText: (label: string) => string;
+    showNotice: (message: string, duration?: number) => void;
+    logError: (message: string, details: string) => void;
+    openErrorModal: (title: string, details: string) => void;
+    saveErrorLog: (error: unknown, reporter: ProgressReporter) => Promise<void>;
+    completeReporter: (reporter: ProgressReporter) => void;
+    finalizeReporter: (reporter: ProgressReporter) => void;
+}
+
+function normalizeError(
+    error: unknown,
+    fallbackMessage: string
+): { errorMessage: string; errorDetails: string } {
+    if (error instanceof Error) {
+        return {
+            errorMessage: error.message,
+            errorDetails: error.stack || error.message
+        };
+    }
+
+    return {
+        errorMessage: fallbackMessage,
+        errorDetails: String(error)
+    };
+}
+
+function isCancellationError(errorMessage: string): boolean {
+    return errorMessage.toLowerCase().includes('cancel');
+}
+
+async function runBusyReporterCommandWithHost(
+    host: UtilityCommandHost,
+    actionLabel: string,
+    reporter: ProgressReporter | undefined,
+    run: (useReporter: ProgressReporter) => Promise<void>
+): Promise<void> {
+    if (host.isBusy()) {
+        host.showNotice(host.getUiStrings().notices.notemdBusy);
+        return;
+    }
+
+    const useReporter = reporter || host.getReporter();
+    host.setBusy(true);
+    host.startReporterAction(useReporter, actionLabel);
+
+    try {
+        await run(useReporter);
+    } finally {
+        host.finalizeReporter(useReporter);
+        host.setBusy(false);
+    }
+}
+
+export async function runCheckAndRemoveDuplicateConceptNotesCommandWithHost(
+    host: UtilityCommandHost,
+    reporter?: ProgressReporter,
+    checkAndRemoveDuplicateConceptNotesImpl: typeof checkAndRemoveDuplicateConceptNotes = checkAndRemoveDuplicateConceptNotes
+): Promise<void> {
+    const actionLabel = host.getActionLabel('check-remove-duplicate-concepts');
+
+    await runBusyReporterCommandWithHost(host, actionLabel, reporter, async (useReporter) => {
+        let uiStrings = host.getUiStrings();
+        useReporter.log(host.getRunningActionText(actionLabel));
+
+        try {
+            await host.loadSettings();
+            uiStrings = host.getUiStrings();
+            await checkAndRemoveDuplicateConceptNotesImpl(host.getApp(), host.getSettings(), useReporter);
+            host.updateStatusBar(host.getActionCompleteText(actionLabel));
+            host.completeReporter(useReporter);
+        } catch (error: unknown) {
+            const { errorMessage, errorDetails } = normalizeError(
+                error,
+                'An unknown error occurred during duplicate check.'
+            );
+            host.logError('Error checking/removing duplicate concept notes:', errorDetails);
+            host.showNotice(formatI18n(uiStrings.notices.duplicateCheckRemoveError, {
+                message: errorMessage
+            }), 10000);
+            useReporter.log(`Error: ${errorMessage}`);
+            host.failReporterAction(useReporter, errorMessage);
+            host.openErrorModal(uiStrings.errorModal.titles.duplicateCheckRemove, errorDetails);
+        }
+    });
+}
+
+export async function runBatchMermaidFixCommandWithHost(
+    host: UtilityCommandHost,
+    reporter?: ProgressReporter,
+    folderPathOverride?: string,
+    batchFixMermaidSyntaxInFolderImpl: typeof batchFixMermaidSyntaxInFolder = batchFixMermaidSyntaxInFolder
+): Promise<{ folderPath: string; modifiedCount: number } | null> {
+    const actionLabel = host.getActionLabel('batch-mermaid-fix');
+    let commandResult: { folderPath: string; modifiedCount: number } | null = null;
+
+    await runBusyReporterCommandWithHost(host, actionLabel, reporter, async (useReporter) => {
+        let uiStrings = host.getUiStrings();
+
+        try {
+            await host.loadSettings();
+            uiStrings = host.getUiStrings();
+            const folderPath = folderPathOverride ?? await host.getFolderSelection();
+            if (!folderPath) {
+                const cancelledMessage = uiStrings.common.cancel;
+                useReporter.log(cancelledMessage);
+                useReporter.updateStatus(cancelledMessage, -1);
+                throw new Error(cancelledMessage);
+            }
+
+            host.updateStatusBar(host.getRunningActionText(actionLabel));
+            useReporter.log(host.getRunningActionText(actionLabel));
+
+            const { errors, modifiedCount } = await batchFixMermaidSyntaxInFolderImpl(
+                host.getApp(),
+                host.getSettings(),
+                folderPath,
+                useReporter
+            );
+
+            if (!useReporter.cancelled) {
+                if (errors.length > 0) {
+                    const errorSummary = formatI18n(uiStrings.notices.batchMermaidFixFinishedWithErrors, {
+                        count: errors.length,
+                        modifiedCount
+                    });
+                    useReporter.log(`⚠️ ${errorSummary}`);
+                    useReporter.updateStatus(errorSummary, -1);
+                    host.updateStatusBar(errorSummary);
+                    host.showNotice(errorSummary, 10000);
+                } else {
+                    const finalMessage = formatI18n(uiStrings.notices.batchMermaidFixSuccess, { modifiedCount });
+                    useReporter.updateStatus(finalMessage, 100);
+                    host.updateStatusBar(host.getActionCompleteText(actionLabel));
+                    host.showNotice(finalMessage, 5000);
+                    host.completeReporter(useReporter);
+                }
+                commandResult = { folderPath, modifiedCount };
+            }
+        } catch (error: unknown) {
+            const { errorMessage, errorDetails } = normalizeError(
+                error,
+                'An unknown error occurred during batch Mermaid fix.'
+            );
+
+            if (!isCancellationError(errorMessage)) {
+                host.logError('Notemd Batch Mermaid Fix Error:', errorDetails);
+                host.showNotice(formatI18n(uiStrings.notices.batchMermaidFixError, {
+                    message: errorMessage
+                }), 10000);
+                host.openErrorModal(uiStrings.errorModal.titles.batchMermaidFix, errorDetails);
+                await host.saveErrorLog(error, useReporter);
+            }
+
+            useReporter.log(`Batch Fix Error: ${errorMessage}`);
+            host.failReporterAction(useReporter, errorMessage);
+        }
+    });
+
+    return commandResult;
+}
+
+export async function runFixFormulaFormatsCommandWithHost(
+    host: UtilityCommandHost,
+    file: TFile,
+    reporter?: ProgressReporter,
+    fixFormulaFormatsInFileImpl: typeof fixFormulaFormatsInFile = fixFormulaFormatsInFile
+): Promise<void> {
+    const actionLabel = host.getActionLabel('fix-formula-current');
+
+    await runBusyReporterCommandWithHost(host, `${actionLabel}: ${file.name}`, reporter, async (useReporter) => {
+        let uiStrings = host.getUiStrings();
+
+        try {
+            await host.loadSettings();
+            uiStrings = host.getUiStrings();
+            const modified = await fixFormulaFormatsInFileImpl(host.getApp(), file, useReporter);
+
+            if (modified) {
+                const message = formatI18n(uiStrings.notices.formulaFixSuccess, { file: file.name });
+                useReporter.log(`✅ ${message}`);
+                host.showNotice(message);
+            } else {
+                const message = formatI18n(uiStrings.notices.formulaFixNotNeeded, { file: file.name });
+                useReporter.log(message);
+                host.showNotice(message);
+            }
+
+            useReporter.updateStatus(host.getActionCompleteText(actionLabel), 100);
+            host.updateStatusBar(host.getActionCompleteText(actionLabel));
+            host.completeReporter(useReporter);
+        } catch (error: unknown) {
+            const { errorMessage } = normalizeError(error, 'An unknown error occurred.');
+            useReporter.log(`Error: ${errorMessage}`);
+            host.failReporterAction(useReporter, errorMessage);
+            host.showNotice(formatI18n(uiStrings.notices.genericError, { message: errorMessage }));
+            await host.saveErrorLog(error, useReporter);
+        }
+    });
+}
+
+export async function runBatchFixFormulaFormatsCommandWithHost(
+    host: UtilityCommandHost,
+    reporter?: ProgressReporter,
+    batchFixFormulaFormatsInFolderImpl: typeof batchFixFormulaFormatsInFolder = batchFixFormulaFormatsInFolder
+): Promise<void> {
+    const actionLabel = host.getActionLabel('batch-fix-formula');
+
+    await runBusyReporterCommandWithHost(host, actionLabel, reporter, async (useReporter) => {
+        let uiStrings = host.getUiStrings();
+
+        try {
+            await host.loadSettings();
+            uiStrings = host.getUiStrings();
+            const folderPath = await host.getFolderSelection();
+            if (!folderPath) {
+                const cancelledMessage = uiStrings.common.cancel;
+                useReporter.log(cancelledMessage);
+                useReporter.updateStatus(cancelledMessage, -1);
+                throw new Error(cancelledMessage);
+            }
+
+            const { modifiedCount, errors } = await batchFixFormulaFormatsInFolderImpl(
+                host.getApp(),
+                folderPath,
+                useReporter
+            );
+
+            if (!useReporter.cancelled) {
+                if (errors.length > 0) {
+                    const message = formatI18n(uiStrings.notices.batchFormulaFixFinishedWithErrors, {
+                        count: errors.length,
+                        modifiedCount
+                    });
+                    useReporter.log(message);
+                    useReporter.updateStatus(message, -1);
+                    host.showNotice(message);
+                } else {
+                    const message = formatI18n(uiStrings.notices.batchFormulaFixSuccess, { modifiedCount });
+                    useReporter.log(message);
+                    useReporter.updateStatus(host.getActionCompleteText(actionLabel), 100);
+                    host.updateStatusBar(host.getActionCompleteText(actionLabel));
+                    host.showNotice(message);
+                    host.completeReporter(useReporter);
+                }
+            }
+        } catch (error: unknown) {
+            const { errorMessage } = normalizeError(error, 'An unknown error occurred.');
+            if (!isCancellationError(errorMessage)) {
+                useReporter.log(`Error: ${errorMessage}`);
+                host.failReporterAction(useReporter, errorMessage);
+                host.showNotice(formatI18n(uiStrings.notices.genericError, { message: errorMessage }));
+                await host.saveErrorLog(error, useReporter);
+            }
+        }
+    });
+}

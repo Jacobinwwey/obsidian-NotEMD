@@ -16,7 +16,7 @@ export async function extractOriginalText(
     plugin: ExtractOriginalTextPluginContext,
     file: TFile,
     reporter: ProgressReporter
-): Promise<void> {
+): Promise<string | null> {
     const settings = plugin.settings;
     const i18n = getI18nStrings({ uiLocale: settings.uiLocale });
     const questions = settings.extractQuestions.split('\n').map(q => q.trim()).filter(q => q.length > 0);
@@ -99,7 +99,7 @@ export async function extractOriginalText(
         }
     }
 
-    if (reporter.cancelled) return;
+    if (reporter.cancelled) return null;
 
     reporter.updateStatus(
         formatI18n(i18n.sidebar.status.stepLabel, {
@@ -153,4 +153,5 @@ export async function extractOriginalText(
     await app.vault.create(newFilePath, outputContent);
     reporter.log(`Created extracted file: ${newFilePath}`);
     new Notice(formatI18n(i18n.notices.extractionCompleteSavedTo, { path: newFilePath }));
+    return newFilePath;
 }
