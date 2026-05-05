@@ -233,7 +233,8 @@ flowchart LR
 - `src/operations/diagramGenerateOperation.ts` 现在承接命令层之下可复用的 diagram 执行逻辑
 - `src/operations/providerDiagnosticCommand.ts` 现在承接命令层之下的 provider diagnostic command orchestration
 - `src/operations/diagramCommandHostAdapter.ts` 现在承接 Mermaid/artifact 保存收尾与直接 Vega-Lite 预览编排
-- `src/main.ts` 现在主要保留 host-adapter 构造与 config/profile 侧宿主副作用，这正是下一批抽离目标
+- `src/operations/configProfileCommands.ts` 现在承接 provider profile 导入导出与 CLI capability/contract 导出编排
+- `src/main.ts` 现在主要保留 host-adapter 构造与 provider-diagnostic report persistence，这正是下一批抽离目标
 
 ## 关键设计决策
 

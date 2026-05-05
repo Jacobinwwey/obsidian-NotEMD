@@ -114,7 +114,8 @@ This means the roadmap should no longer be interpreted as "build the platform". 
 - `diagram.generate` is no longer just a future note in the plan; it now participates in the typed invocation contract, while preview remains intentionally outside the non-interactive contract set.
 - The first MT2 host-adapter slice is now landed: `src/operations/diagramGenerateOperation.ts` carries the reusable diagram execution path, and `src/operations/providerDiagnosticCommand.ts` carries provider-diagnostic command orchestration below `src/main.ts`.
 - The second MT2 host-adapter slice is now landed as well: `src/operations/diagramCommandHostAdapter.ts` owns Mermaid/artifact save completion and direct Vega-Lite preview orchestration below `src/main.ts`.
-- The remaining architectural gap is now narrower still: `src/main.ts` mainly retains host-adapter construction plus config/profile-oriented side effects, which is a far more defensible next extraction seam than the earlier save/preview-heavy command wrappers.
+- The first config/profile slice is now landed too: `src/operations/configProfileCommands.ts` owns provider-profile import/export and CLI capability/contract export orchestration, and the settings tab now reuses the same command path instead of keeping a parallel implementation.
+- The remaining architectural gap is now narrower still: `src/main.ts` mainly retains host-adapter construction plus provider-diagnostic report persistence, which is a far more defensible next extraction seam than the earlier save/preview-heavy command wrappers.
 
 ## Verification Gates
 
@@ -182,7 +183,7 @@ Short version:
    `ref/` and `coverage/` are local analysis/build artifacts, not repo deliverables. The mainline expectation is a clean worktree.
 
 6. **Split host adapters out of `src/main.ts`**
-   The save/preview slice is now real, not just planned. The next move is to peel config/profile adapters and future CLI host wiring away from `src/main.ts` so the registry stops at neither metadata nor execution-core extraction.
+   The save/preview and first config/profile slices are now real, not just planned. The next move is to peel provider-diagnostic report persistence and future CLI host wiring away from `src/main.ts` so the registry stops at neither metadata nor execution-core extraction.
 
 ### Ordered landing sequence
 
