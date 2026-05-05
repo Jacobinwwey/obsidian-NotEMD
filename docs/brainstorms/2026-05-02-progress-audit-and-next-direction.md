@@ -198,17 +198,17 @@ Short version:
 5. **Keep workspace hygiene**
    `ref/` and `coverage/` are local analysis/build artifacts, not repo deliverables. The mainline expectation is a clean worktree.
 
-6. **Move the next phase toward the remaining direct command surfaces**
-   Note-processing registry onboarding, utility host extraction, the `translate/formula` proof slice, the process/generate sub-slice, and the remaining `src/fileUtils.ts` tail are now complete enough. The next step should converge `testLlmConnectionCommand`, `generateDiagramCommand`, and `previewExperimentalDiagramCommand` onto the same discoverable operation/result boundary expectations where feasible.
+6. **Land the direct-surface wrapper batch before reopening anything else**
+   That batch is now landed: `testLlmConnectionCommand` delegates to `runInteractiveProviderConnectionTestCommandWithHost`, while `generateDiagramCommand` and `previewExperimentalDiagramCommand` delegate to `runGenerateDiagramCommandWithHost` and `runPreviewExperimentalDiagramCommandWithHost`. The provider/diagram public entrypoints now share structured results and host-owned lifecycle orchestration instead of keeping ad-hoc busy/reporter logic inline in `src/main.ts`.
 
-7. **Keep draining the remaining high-value direct command surfaces after that**
-   The verified highest-value remaining direct surfaces are now `testLlmConnectionCommand`, `generateDiagramCommand` plus its save/artifact branches, and `previewExperimentalDiagramCommand`. They matter more than reopening already-extracted utility families before the write-heavy result contracts are tightened.
+7. **Shift the next phase one layer deeper**
+   The next high-value gap is no longer the public direct command methods themselves. It is now the deeper diagram command core (`executeSaveMermaidDiagramCommand`, `executeArtifactDiagramCommand`) plus the contract decision for `diagram.preview` and provider connection-test automation exposure. That matters more than reopening already-extracted utility families.
 
 ### Ordered landing sequence
 
 The most defensible future landing order, after cross-checking roadmap intent against current code, is:
 
-1. first converge the remaining direct command surfaces in `src/main.ts`, with `testLlmConnectionCommand`, `generateDiagramCommand`, and `previewExperimentalDiagramCommand` as the highest-value targets
+1. first finish deeper diagram/provider command-core convergence and decide whether `diagram.preview` plus provider connection-test stay command-only or become typed automation contracts
 2. then continue follow-up hardening for maintainer-local semantic verification and heavy-runtime packaging boundaries
 3. after those boundary items stabilize, continue selection/export contract enrichment and workflow/settings packaging cleanup
 4. after those boundary items, reopen legacy prompt retirement, MermaidProcessor sunset, or richer first-class CLI exposure

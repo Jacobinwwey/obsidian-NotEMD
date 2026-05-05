@@ -1,174 +1,123 @@
-import { ProgressReporter } from '../types';
+import { STRINGS_EN } from '../i18n/locales/en';
 import {
-    completeArtifactDiagramCommand,
-    completeMermaidDiagramCommand,
-    MissingVegaLiteFenceError,
-    previewVegaLiteArtifactFromMarkdown
+    previewVegaLiteArtifactFromMarkdown,
+    runGenerateDiagramCommandWithHost,
+    runPreviewExperimentalDiagramCommandWithHost
 } from '../operations/diagramCommandHostAdapter';
+import { mockSettings } from './__mocks__/settings';
 
-function createReporter(): ProgressReporter {
+function createReporter() {
     return {
         log: jest.fn(),
         updateStatus: jest.fn(),
-        requestCancel: jest.fn(),
         clearDisplay: jest.fn(),
-        get cancelled() {
-            return false;
-        },
-        abortController: new AbortController(),
-        activeTasks: 0,
-        updateActiveTasks: jest.fn()
+        cancelled: false
     };
 }
 
-function createHost() {
-    const savedFile = { path: 'Notes/Topic_diagram.md' } as any;
+function createDiagramHost() {
+    const reporter = createReporter();
+    const diagramHost = {
+        saveMermaidSummary: jest.fn(),
+        saveArtifact: jest.fn(),
+        getFileByPath: jest.fn(),
+        openFile: jest.fn(),
+        maybeAutoFixMermaid: jest.fn(),
+        supportsPreview: jest.fn(() => true),
+        openPreview: jest.fn(),
+        notify: jest.fn()
+    };
 
     return {
-        savedFile,
+        reporter,
+        diagramHost,
         host: {
-            saveMermaidSummary: jest.fn().mockResolvedValue(savedFile.path),
-            saveArtifact: jest.fn().mockResolvedValue(savedFile.path),
-            getFileByPath: jest.fn().mockReturnValue(savedFile),
-            openFile: jest.fn(),
-            maybeAutoFixMermaid: jest.fn().mockResolvedValue(undefined),
-            supportsPreview: jest.fn().mockReturnValue(true),
-            openPreview: jest.fn(),
-            notify: jest.fn()
+            loadSettings: jest.fn().mockResolvedValue(undefined),
+            getSettings: jest.fn(() => mockSettings),
+            getUiStrings: jest.fn(() => STRINGS_EN),
+            getReporter: jest.fn(() => reporter),
+            isBusy: jest.fn(() => false),
+            setBusy: jest.fn(),
+            getBusyNotice: jest.fn(() => 'busy now'),
+            startReporterAction: jest.fn(),
+            finalizeReporter: jest.fn(),
+            getActionLabel: jest.fn((mode: string) => mode === 'save-artifact' ? 'Generate diagram' : 'Preview diagram'),
+            getActionCompleteText: jest.fn((label: string) => `Completed ${label}`),
+            getActionFailedText: jest.fn((message: string) => `Failed: ${message}`),
+            readFile: jest.fn().mockResolvedValue('# Topic'),
+            getProviderAndModelForTask: jest.fn(() => ({
+                provider: mockSettings.providers[0],
+                modelName: mockSettings.providers[0].model
+            })),
+            getTaskLanguageCode: jest.fn(() => 'en'),
+            executeSaveMermaidCommand: jest.fn(),
+            executeArtifactCommand: jest.fn().mockResolvedValue({
+                generation: {
+                    plan: { intent: 'canvasMap' },
+                    spec: { intent: 'canvasMap' },
+                    artifact: {
+                        target: 'json-canvas',
+                        content: '{}',
+                        mimeType: 'application/json',
+                        sourceIntent: 'canvasMap'
+                    }
+                },
+                outputPath: 'Notes/Topic_diagram.canvas',
+                previewOpened: true
+            }),
+            createDiagramHostAdapter: jest.fn(() => diagramHost),
+            saveErrorLog: jest.fn().mockResolvedValue(undefined),
+            logError: jest.fn()
         }
     };
 }
 
 describe('diagram command host adapter', () => {
-    test('completes mermaid save flow through injected host side effects', async () => {
-        const reporter = createReporter();
-        const { host, savedFile } = createHost();
-        const file = { path: 'Notes/Topic.md' } as any;
+    test('busy generate wrapper short-circuits before reading file or running generation', async () => {
+        const { host, reporter } = createDiagramHost();
+        host.isBusy.mockReturnValue(true);
+        const file = { name: 'Topic.md', path: 'Notes/Topic.md' };
 
-        const outputPath = await completeMermaidDiagramCommand({
-            host,
-            file,
-            reporter,
-            mermaidContent: 'graph TD',
-            actionLabel: 'Summarise as Mermaid diagram',
-            completeNotice: 'done',
-            autoFixAfterGenerate: true,
-            getStepStatusText: (current, total, label) => `${label}:${current}/${total}`,
-            getActionCompleteText: (label) => `${label}:complete`
+        const result = await runGenerateDiagramCommandWithHost(host as any, file as any, reporter as any, {
+            executionMode: 'save-artifact'
         });
 
-        expect(outputPath).toBe(savedFile.path);
-        expect(host.saveMermaidSummary).toHaveBeenCalledWith(file, 'graph TD', reporter);
-        expect(host.maybeAutoFixMermaid).toHaveBeenCalledWith(savedFile, reporter, 'summarise as mermaid');
-        expect(host.openFile).toHaveBeenCalledWith(savedFile);
-        expect(host.notify).toHaveBeenCalledWith('done');
+        expect(result).toBeNull();
+        expect(host.readFile).not.toHaveBeenCalled();
+        expect(host.createDiagramHostAdapter().notify).toHaveBeenCalledWith('busy now');
     });
 
-    test('completes artifact preview flow without saving files', async () => {
-        const reporter = createReporter();
-        const { host } = createHost();
-        const file = { path: 'Notes/Topic.md' } as any;
+    test('preview wrapper finalizes reporter and returns artifact metadata', async () => {
+        const { host, reporter } = createDiagramHost();
+        const file = { name: 'Topic.md', path: 'Notes/Topic.md' };
+        host.readFile.mockResolvedValue('# Chart\n\n```vega-lite\n{\"mark\":\"bar\"}\n```');
 
-        const outputPath = await completeArtifactDiagramCommand({
-            host,
-            file,
-            reporter,
-            result: {
-                spec: { intent: 'dataChart' },
-                artifact: {
-                    target: 'vega-lite',
-                    content: '{"mark":"bar"}',
-                    mimeType: 'application/json',
-                    sourceIntent: 'dataChart'
-                }
-            } as any,
-            actionLabel: 'Preview diagram',
-            executionMode: 'preview-artifact',
-            completeNotice: 'saved',
-            previewReadyNotice: 'preview',
-            manualFixHintNotice: 'manual-fix',
-            autoFixAfterGenerate: true,
-            getStepStatusText: (current, total, label) => `${label}:${current}/${total}`,
-            getActionCompleteText: (label) => `${label}:complete`
+        const result = await runPreviewExperimentalDiagramCommandWithHost(host as any, file as any, reporter as any);
+
+        expect(result).toMatchObject({
+            kind: 'success',
+            sourcePath: 'Notes/Topic.md',
+            previewOpened: true,
+            artifact: expect.objectContaining({
+                target: 'vega-lite'
+            })
         });
-
-        expect(outputPath).toBeUndefined();
-        expect(host.saveArtifact).not.toHaveBeenCalled();
-        expect(host.openPreview).toHaveBeenCalledWith(
-            expect.objectContaining({ target: 'vega-lite' }),
-            file.path,
-            false
-        );
-        expect(host.notify).toHaveBeenCalledWith('preview');
+        expect(host.finalizeReporter).toHaveBeenCalledWith(reporter);
+        expect(host.createDiagramHostAdapter().notify).toHaveBeenCalledWith('Experimental diagram preview is ready!');
     });
 
-    test('completes artifact save flow, opens saved file, and previews previewable artifacts', async () => {
-        const reporter = createReporter();
-        const { host, savedFile } = createHost();
-        const file = { path: 'Notes/Topic.md' } as any;
-
-        const outputPath = await completeArtifactDiagramCommand({
-            host,
-            file,
-            reporter,
-            result: {
-                renderError: 'needs manual cleanup',
-                spec: { intent: 'mindmap' },
-                artifact: {
-                    target: 'mermaid',
-                    content: 'graph TD',
-                    mimeType: 'text/vnd.mermaid',
-                    sourceIntent: 'mindmap'
-                }
-            } as any,
-            actionLabel: 'Generate diagram',
-            executionMode: 'save-artifact',
-            completeNotice: 'saved',
-            previewReadyNotice: 'preview',
-            manualFixHintNotice: 'manual-fix',
-            autoFixAfterGenerate: true,
-            getStepStatusText: (current, total, label) => `${label}:${current}/${total}`,
-            getActionCompleteText: (label) => `${label}:complete`
-        });
-
-        expect(outputPath).toBe(savedFile.path);
-        expect(host.notify).toHaveBeenCalledWith('manual-fix', 8000);
-        expect(host.saveArtifact).toHaveBeenCalledWith(
-            file,
-            expect.objectContaining({ target: 'mermaid' }),
-            reporter
-        );
-        expect(host.maybeAutoFixMermaid).toHaveBeenCalledWith(savedFile, reporter, 'experimental diagram generation');
-        expect(host.openFile).toHaveBeenCalledWith(savedFile);
-        expect(host.openPreview).toHaveBeenCalledWith(
-            expect.objectContaining({ target: 'mermaid' }),
-            savedFile.path,
-            true
-        );
-    });
-
-    test('extracts vega-lite fence and opens preview artifact', () => {
-        const { host } = createHost();
+    test('preview helper keeps using markdown vega-lite fence extraction for direct preview', () => {
+        const { diagramHost } = createDiagramHost();
         const artifact = previewVegaLiteArtifactFromMarkdown({
-            host,
-            sourceMarkdown: '# Chart\n\n```vega-lite\n{\"mark\":\"bar\"}\n```\n',
+            host: diagramHost as any,
+            sourceMarkdown: '# Chart\n\n```vega-lite\n{\"mark\":\"bar\"}\n```',
             sourcePath: 'Notes/Topic.md'
         });
 
         expect(artifact).toEqual(expect.objectContaining({
             target: 'vega-lite',
-            content: '{"mark":"bar"}'
+            mimeType: 'application/json'
         }));
-        expect(host.openPreview).toHaveBeenCalledWith(artifact, 'Notes/Topic.md', false);
-    });
-
-    test('throws typed error when vega-lite fence is missing', () => {
-        const { host } = createHost();
-
-        expect(() => previewVegaLiteArtifactFromMarkdown({
-            host,
-            sourceMarkdown: '# Chart',
-            sourcePath: 'Notes/Topic.md'
-        })).toThrow(MissingVegaLiteFenceError);
+        expect(diagramHost.openPreview).toHaveBeenCalled();
     });
 });

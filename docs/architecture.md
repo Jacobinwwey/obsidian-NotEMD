@@ -233,12 +233,12 @@ The gap is smaller than before:
 
 - `src/operations/diagramGenerateOperation.ts` now carries reusable diagram execution below the command layer
 - `src/operations/providerDiagnosticCommand.ts` now carries provider-diagnostic command orchestration below the command layer
-- `src/operations/diagramCommandHostAdapter.ts` now carries Mermaid/artifact save completion plus direct Vega-Lite preview orchestration below the command layer
+- `src/operations/diagramCommandHostAdapter.ts` now carries Mermaid/artifact save completion, direct Vega-Lite preview orchestration, and the public diagram command wrappers (`runGenerateDiagramCommandWithHost`, `runPreviewExperimentalDiagramCommandWithHost`) below the command layer
 - `src/operations/configProfileCommands.ts` now carries provider-profile import/export plus CLI capability/contract export orchestration below the command layer
 - `src/operations/providerDiagnosticReportPersistence.ts` now carries collision-safe provider-diagnostic report file creation below the command layer
 - `src/operations/providerDiagnosticCommandHostAdapter.ts` now carries developer-diagnostic host loading, report-persistence wiring, and notice shaping below the command layer
 - `src/operations/configProfileCommandHostAdapter.ts` now carries config/profile state persistence, CLI export notice shaping, and import/export error mapping below the command layer
-- `src/operations/providerConnectionTestCommandHostAdapter.ts` now carries shared provider connection test loading and notice/reporter orchestration, and is now reused by both the command path and the settings tab
+- `src/operations/providerConnectionTestCommandHostAdapter.ts` now carries shared provider connection test loading plus both the raw test runner and the interactive busy/reporter wrapper, and is now reused by the command path and the settings tab
 - `src/operations/noteProcessingCommandHostAdapter.ts` now carries not only `process-current-add-links`, `process-folder-add-links`, `batch-generate-from-titles`, `generate-from-title`, and `research-and-summarize`, but also `translate-current-file`, `batch-translate-folder`, `extract-concepts-current`, `extract-concepts-folder`, `extract-original-text`, and `extract-concepts-and-generate-titles`
 - `src/operations/utilityCommandHostAdapter.ts` now carries current-file duplicate checks, duplicate cleanup, batch Mermaid fix, and single/batch formula-fix command orchestration below `src/main.ts`; `check-for-duplicates` is no longer inlined inside command registration
 - `src/operations/utilityCommandHostAdapter.ts` now also owns duplicate-deletion confirmation plus the no-file/success notice semantics for duplicate cleanup and batch Mermaid repair, so those user-surface effects no longer leak from `src/fileUtils.ts`
@@ -248,9 +248,10 @@ The gap is smaller than before:
 - The remaining `src/fileUtils.ts` tail is now landed too: `batchFixMermaidSyntaxInFolder()` returns `BatchMermaidFixResult`, `checkAndRemoveDuplicateConceptNotes()` returns `ConceptDedupeResult`, destructive confirmation is injected from the host adapter, and batch Mermaid no-file handling is now host-owned instead of utility-owned
 - `src/operations/registry.ts` now models the richer `file.process-add-links`, `file.process-folder-add-links`, `content.generate-from-title`, `content.batch-generate-from-titles`, `mermaid.batch-fix`, `concept.dedupe`, `translate.*`, and `formula.*` result schemas directly, so capability export and invocation-contract export no longer flatten those flows into path-only or count-only semantics
 - `src/fileUtils.ts` and `src/extractOriginalText.ts` now accept narrower runtime contexts instead of the concrete `NotemdPlugin` class, which shows the boundary work has moved beyond wrapper extraction into utility host-coupling reduction
-- `src/main.ts` now mainly retains command registration and remaining direct execution surfaces; the registry already covers diagram/provider/config-profile plus process/generate/research/translation/extraction/utility/selection/export batches, so the next real gap is no longer `src/fileUtils.ts`, but the remaining direct-read/sidebar surfaces plus follow-up packaging/semantic-verification convergence
-- The verified highest-value remaining direct surfaces are `testLlmConnectionCommand`, `generateDiagramCommand` plus its save/artifact branches, and `previewExperimentalDiagramCommand`
-- The ordered convergence path is now explicit: finish the remaining direct-read/sidebar surfaces first, then packaging/semantic-verification convergence work, and only then reopen stronger public CLI claims or broader architectural reshaping
+- `src/main.ts` now mainly retains command registration, host construction, and the deeper diagram execution helpers; the previous highest-value public direct command surfaces now delegate through host adapters instead of inlining busy/reporter/preview lifecycle logic
+- The newly-landed direct-surface wrapper batch covers `testLlmConnectionCommand`, `generateDiagramCommand`, and `previewExperimentalDiagramCommand`; each now returns a structured result boundary instead of remaining fire-and-forget UI glue
+- The next real gap is no longer the public command entrypoints themselves, but the deeper `executeSaveMermaidDiagramCommand` / `executeArtifactDiagramCommand` helpers plus the still-open contract decision for `diagram.preview` and provider connection-test automation exposure
+- The ordered convergence path is now explicit: finish deeper diagram/provider command-core convergence first, then packaging/semantic-verification convergence work, and only then reopen stronger public CLI claims or broader architectural reshaping
 
 ## Key Design Decisions
 
@@ -264,7 +265,7 @@ The gap is smaller than before:
 ## Verification
 
 - `npm run build` — TypeScript compilation + esbuild bundle
-- `npm test -- --runInBand` — the full Jest matrix currently covers 133 suites and 846 tests; in a `/.worktrees/` checkout use `npx jest --runInBand --config /tmp/notemd-worktree-jest.cjs` because the repo Jest ignore pattern excludes worktree paths
+- `npm test -- --runInBand` — the full Jest matrix currently covers 134 suites and 853 tests; in a `/.worktrees/` checkout use `npx jest --runInBand --config /tmp/notemd-worktree-jest.cjs` because the repo Jest ignore pattern excludes worktree paths
 - `npm run audit:i18n-ui` — No hardcoded UI strings
 - `npm run audit:render-host` — Render host self-contained in main.js
 - `git diff --check` — Whitespace hygiene
