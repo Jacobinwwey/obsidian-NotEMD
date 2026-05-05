@@ -124,11 +124,13 @@ const DIAGRAM_GENERATE_INPUT_SCHEMA: OperationSchema = {
 
 const DIAGRAM_GENERATE_RESULT_SCHEMA: OperationSchema = {
     type: 'object',
-    required: ['plan', 'spec', 'artifact'],
+    required: ['plan', 'spec', 'artifact', 'outputPath', 'previewOpened'],
     properties: {
         plan: { type: 'object' },
         spec: { type: 'object' },
         artifact: { type: 'object' },
+        outputPath: { type: 'string' },
+        previewOpened: { type: 'boolean' },
         renderError: { type: 'string' }
     }
 };

@@ -130,8 +130,9 @@ topic: progress-audit-next-direction
 - 最小剩余 write-heavy contract 批次也已落地：`src/translate.ts` 现在会返回 `TranslateFileResult` / `BatchTranslateFolderResult`，`src/formulaFixer.ts` 现在会返回 `FormulaFixFileResult` / `BatchFormulaFixResult`，host adapter 现在承接它们的成功 notice，`src/operations/registry.ts` 也已直接导出 richer 的 `translate.*` / `formula.*` result schema。
 - 第一批 `src/fileUtils.ts` contract 子切片也已落地：`processFile()` 现在返回 `ProcessFileResult`，`generateContentForTitle()` 返回 `GenerateContentForTitleResult`，`batchGenerateContentForTitles()` 返回 `BatchGenerateContentForTitlesResult`，`runProcessFolderWithNotemdCommandWithHost()` 现在会报告 `savedCount` / `errors` / `cancelled`，批量生成的无文件分支也已从 utility-owned 伪成功路径改为 host-owned notice。
 - `src/fileUtils.ts` 的剩余尾部现在也已落地：`batchFixMermaidSyntaxInFolder()` 返回 `BatchMermaidFixResult`，`checkAndRemoveDuplicateConceptNotes()` 返回 `ConceptDedupeResult`，duplicate deletion confirmation 已改为由 host 注入，`mermaid.batch-fix` / `concept.dedupe` 的 richer schema 也已进入 registry。
+- 更深层的 diagram command-core 切片现在也已落地：`src/operations/diagramCommandExecution.ts` 现在承接 `src/main.ts` 之下的 Mermaid-save 与 artifact-save 执行流程，而 `src/operations/registry.ts` 现在也已把 `diagram.generate` 的 `outputPath` 与 `previewOpened` 纳入 result schema，在不新增 operation ID 的前提下先补齐保存后续链路。
 - `src/fileUtils.ts` 与 `src/extractOriginalText.ts` 现在都接受更窄的 runtime context，而不是直接依赖具体 `NotemdPlugin` 类。这说明边界已经开始从“抽 wrapper”推进到“削弱 utility 对宿主类的类型耦合”。
-- 剩余架构缺口因此再次转移：下一批应转向 `src/main.ts` 中更深层的 diagram/provider command core，重点处理 `executeSaveMermaidDiagramCommand` / `executeArtifactDiagramCommand` 及新落地 typed wrapper 之下 save/artifact 分支是否还要继续下探 contract depth，然后再进入 packaging / semantic verification 的后续硬化，而不是回头重开已经落地的 write-heavy families。
+- 剩余架构缺口因此再次转移：实质性的 diagram execution 已不再内联留在 `src/main.ts`。下一批应转向现在位于 `src/operations/diagramCommandExecution.ts` 中的内部 save/artifact 分支，判断是否还要继续下探 typed boundary，然后再进入 packaging / semantic verification 的后续硬化，而不是回头重开已经落地的 write-heavy families。
 
 ## 当前验证门
 
@@ -184,7 +185,7 @@ topic: progress-audit-next-direction
 ### 立即可推进
 
 1. **更深层 diagram/provider command-core 收敛**
-   保持现有 command ID 稳定，但把剩余 `executeSaveMermaidDiagramCommand` / `executeArtifactDiagramCommand` 逻辑继续向更清晰的 operation/result boundary 收口，位置放在已经落地的 wrapper 与 typed contract 之下。
+   保持现有 command ID 稳定，但继续收紧现在已进入 `src/operations/diagramCommandExecution.ts` 的 save/artifact follow-through，判断当前带 `outputPath` / `previewOpened` 的 `diagram.generate` contract 是否已经足够，还是还需要新增更细的 typed branch boundary。
 
 2. **建立可持续的 live verification runbook / harness**
    先把“本地一次性验证”升级为不依赖硬编码 vault 路径和私钥文件的维护者流程，再决定是否需要恢复受控的集成测试。
@@ -202,13 +203,13 @@ topic: progress-audit-next-direction
    这一批现在已经落地：`testLlmConnectionCommand` 已委托给 `runInteractiveProviderConnectionTestCommandWithHost`，`generateDiagramCommand` 与 `previewExperimentalDiagramCommand` 已委托给 `runGenerateDiagramCommandWithHost` 与 `runPreviewExperimentalDiagramCommandWithHost`。provider/diagram 的公共入口现在都具备结构化 result，并由 host adapter 承接生命周期编排，不再把临时 busy/reporter 逻辑散落在 `src/main.ts` 里。
 
 7. **下一阶段向下一层收敛**
-   现在剩余的高价值缺口已经不是这些公共 direct command method 本身。`diagram.preview` 与 `provider.connection.test` 的 typed contract 已经落地，真正剩余的是更深层的 diagram command core（`executeSaveMermaidDiagramCommand`、`executeArtifactDiagramCommand`），以及这些内部 save/artifact 分支是否值得继续提升为额外 typed boundary。这个优先级高于重开已抽离 utility family。
+   现在剩余的高价值缺口已经不是这些公共 direct command method 本身。`diagram.preview` 与 `provider.connection.test` 的 typed contract 已经落地，`diagram.generate` 也已补上 `outputPath` / `previewOpened`。真正剩余的是 `src/operations/diagramCommandExecution.ts` 中内部 save/artifact 分支是否值得继续提升为额外 typed boundary。这个优先级高于重开已抽离 utility family。
 
 ### 建议落地顺序
 
 结合 roadmap 原始长期意图与当前代码现实，最稳妥的未来落地顺序应为：
 
-1. 先完成更深层的 diagram/provider command-core 收敛，并决定内部 save/artifact 分支是继续保留在 `diagram.generate` / `diagram.preview` 之下，还是提升为额外 typed operation boundary
+1. 先完成更深层的 diagram/provider command-core 收敛，并决定 `src/operations/diagramCommandExecution.ts` 中的内部 save/artifact 分支是继续保留在 `diagram.generate` / `diagram.preview` 之下，还是提升为额外 typed operation boundary
 2. 然后继续维护者本地语义核验与重型运行时打包边界的后续硬化
 3. 在这些边界项稳定后，再继续 selection/export contract 增强与 workflow/settings packaging 清理
 4. 完成这些边界工作后，再重开 legacy prompt 退役、MermaidProcessor sunset，或更丰富的 first-class CLI command 暴露

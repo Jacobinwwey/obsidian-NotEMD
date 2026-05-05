@@ -130,8 +130,9 @@ This means the roadmap should no longer be interpreted as "build the platform". 
 - The smallest remaining write-heavy contract batch is now landed too: `src/translate.ts` now returns `TranslateFileResult` / `BatchTranslateFolderResult`, `src/formulaFixer.ts` now returns `FormulaFixFileResult` / `BatchFormulaFixResult`, host adapters now own their success notices, and `src/operations/registry.ts` exports the richer `translate.*` / `formula.*` result schemas directly.
 - The first `src/fileUtils.ts` contract slice is now landed too: `processFile()` returns `ProcessFileResult`, `generateContentForTitle()` returns `GenerateContentForTitleResult`, `batchGenerateContentForTitles()` returns `BatchGenerateContentForTitlesResult`, `runProcessFolderWithNotemdCommandWithHost()` now reports `savedCount` / `errors` / `cancelled`, and the batch-generate no-file branch is now a host-owned notice rather than a utility-owned pseudo-success path.
 - The remaining `src/fileUtils.ts` tail is now landed too: `batchFixMermaidSyntaxInFolder()` returns `BatchMermaidFixResult`, `checkAndRemoveDuplicateConceptNotes()` returns `ConceptDedupeResult`, the duplicate-deletion confirmation is now host-injected, and `mermaid.batch-fix` / `concept.dedupe` now export richer schemas from the registry as well.
+- The deeper diagram command-core slice is now landed too: `src/operations/diagramCommandExecution.ts` now owns Mermaid-save and artifact-save execution below `src/main.ts`, while `src/operations/registry.ts` now exports `outputPath` and `previewOpened` in the `diagram.generate` result schema to document saved-output follow-through without adding new operation IDs yet.
 - `src/fileUtils.ts` and `src/extractOriginalText.ts` now accept narrower runtime contexts instead of the concrete `NotemdPlugin` class. Boundary work has therefore advanced from "wrapper extraction" into "utility host-coupling reduction".
-- The remaining architectural gap has moved again: the next phase should target the deeper diagram/provider command core in `src/main.ts`, especially `executeSaveMermaidDiagramCommand` / `executeArtifactDiagramCommand` and any richer save/artifact branch contract depth below the newly-landed typed wrappers, then the packaging/semantic-verification follow-up work rather than reopening already-landed write-heavy families.
+- The remaining architectural gap has moved again: substantive diagram execution is no longer owned inline by `src/main.ts`. The next phase should target whether the internal save/artifact branches now living in `src/operations/diagramCommandExecution.ts` deserve further typed boundaries, then the packaging/semantic-verification follow-up work rather than reopening already-landed write-heavy families.
 
 ## Verification Gates
 
@@ -184,7 +185,7 @@ Short version:
 ### Immediate
 
 1. **Deeper diagram/provider command-core convergence**
-   Keep the current command IDs stable, but finish moving the remaining `executeSaveMermaidDiagramCommand` / `executeArtifactDiagramCommand` logic toward clearer operation/result boundaries below the already-landed wrappers and typed contracts.
+   Keep the current command IDs stable, but finish tightening the save/artifact follow-through that now lives in `src/operations/diagramCommandExecution.ts`, deciding whether the current `diagram.generate` contract with `outputPath` / `previewOpened` is enough or whether additional typed branch boundaries are justified.
 
 2. **Create a sustainable live verification runbook / harness**
    Convert "one maintainer's local proof" into a repeatable maintainer workflow that does not depend on hard-coded vault paths or private secrets in tracked files.
@@ -202,13 +203,13 @@ Short version:
    That batch is now landed: `testLlmConnectionCommand` delegates to `runInteractiveProviderConnectionTestCommandWithHost`, while `generateDiagramCommand` and `previewExperimentalDiagramCommand` delegate to `runGenerateDiagramCommandWithHost` and `runPreviewExperimentalDiagramCommandWithHost`. The provider/diagram public entrypoints now share structured results and host-owned lifecycle orchestration instead of keeping ad-hoc busy/reporter logic inline in `src/main.ts`.
 
 7. **Shift the next phase one layer deeper**
-   The next high-value gap is no longer the public direct command methods themselves. Typed contracts are already in place for `diagram.preview` and `provider.connection.test`. The remaining work is the deeper diagram command core (`executeSaveMermaidDiagramCommand`, `executeArtifactDiagramCommand`) and whether their internal save/artifact branches deserve additional typed boundaries. That matters more than reopening already-extracted utility families.
+   The next high-value gap is no longer the public direct command methods themselves. Typed contracts are already in place for `diagram.preview` and `provider.connection.test`, and `diagram.generate` now also reports `outputPath` / `previewOpened`. The remaining work is whether the internal save/artifact branches now housed in `src/operations/diagramCommandExecution.ts` deserve additional typed boundaries. That matters more than reopening already-extracted utility families.
 
 ### Ordered landing sequence
 
 The most defensible future landing order, after cross-checking roadmap intent against current code, is:
 
-1. first finish deeper diagram/provider command-core convergence and decide whether the internal save/artifact branches should stay beneath `diagram.generate` / `diagram.preview` or be promoted into additional typed operation boundaries
+1. first finish deeper diagram/provider command-core convergence and decide whether the internal save/artifact branches in `src/operations/diagramCommandExecution.ts` should stay beneath `diagram.generate` / `diagram.preview` or be promoted into additional typed operation boundaries
 2. then continue follow-up hardening for maintainer-local semantic verification and heavy-runtime packaging boundaries
 3. after those boundary items stabilize, continue selection/export contract enrichment and workflow/settings packaging cleanup
 4. after those boundary items, reopen legacy prompt retirement, MermaidProcessor sunset, or richer first-class CLI exposure

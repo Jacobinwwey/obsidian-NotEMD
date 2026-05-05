@@ -105,7 +105,11 @@ describe('operations registry', () => {
                 required: expect.arrayContaining(['sourceMarkdown', 'compatibilityMode', 'outputMode'])
             }),
             resultSchema: expect.objectContaining({
-                required: expect.arrayContaining(['plan', 'spec', 'artifact'])
+                required: expect.arrayContaining(['plan', 'spec', 'artifact', 'outputPath', 'previewOpened']),
+                properties: expect.objectContaining({
+                    outputPath: expect.any(Object),
+                    previewOpened: expect.any(Object)
+                })
             })
         }));
     });
