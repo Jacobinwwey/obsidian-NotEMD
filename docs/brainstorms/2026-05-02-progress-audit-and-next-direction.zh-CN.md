@@ -112,6 +112,7 @@ topic: progress-audit-next-direction
 - 第一批具体交付已经落地在 provider diagnostics：现在已有共享 operation-input builder，并新增了开发者诊断命令，因此同一实现路径已经可被命令面板、快捷键绑定、设置页按钮和官方 CLI 命令触发共同复用。
 - 抽取链路现在已经更具体：`src/operations/types.ts`、`src/operations/registry.ts`、`src/operations/capabilityManifest.ts` 与 `src/cliContracts.ts` 已集中承接 operation 元数据、command-binding mapping kind、capability discovery 与类型化契约导出。
 - `diagram.generate` 不再只是计划中的 future item；它已经进入类型化 invocation contract，而 preview 仍被刻意留在非交互契约之外。
+- 第一批 MT2 host-adapter 抽离也已经落地：`src/operations/diagramGenerateOperation.ts` 负责可复用的 diagram 执行路径，`src/operations/providerDiagnosticCommand.ts` 负责 `src/main.ts` 之下的 provider diagnostic command orchestration。
 - 剩余架构缺口也更明确了：`src/main.ts` 里的 command wrapper 仍持有过多 save/preview 宿主适配逻辑。
 
 ## 当前验证门
@@ -180,7 +181,7 @@ topic: progress-audit-next-direction
    `ref/` 与 `coverage/` 应视为本地分析 / 构建产物，而不是待提交内容。主线需要持续保持干净工作树。
 
 6. **继续把 host adapter 从 `src/main.ts` 拆出去**
-   operation registry 与类型化契约已经存在。下一步应把 save/preview/config 适配层从 command wrapper 中剥离，避免 registry 仍停留在“只提供文档元数据”。
+   第一批 adapter slice 已从“计划”变成“现实”。下一步应把 save/preview/config 适配层继续从 command wrapper 中剥离，避免 registry 停在元数据与执行核心抽离的半程状态。
 
 ### 建议落地顺序
 
