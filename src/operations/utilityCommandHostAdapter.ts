@@ -1,6 +1,7 @@
 import { App, TFile } from 'obsidian';
 import {
     batchFixMermaidSyntaxInFolder,
+    findDuplicates,
     checkAndRemoveDuplicateConceptNotes
 } from '../fileUtils';
 import {
@@ -17,6 +18,9 @@ export interface UtilityCommandUiStrings {
     };
     notices: {
         notemdBusy: string;
+        duplicateTermsCheckConsole: string;
+        duplicateCheckError: string;
+        noActiveTextFileSelected: string;
         duplicateCheckRemoveError: string;
         batchMermaidFixFinishedWithErrors: string;
         batchMermaidFixSuccess: string;
@@ -37,6 +41,8 @@ export interface UtilityCommandUiStrings {
 
 export interface UtilityCommandHost {
     getApp: () => App;
+    getActiveFile: () => TFile | null;
+    readFile: (file: TFile) => Promise<string>;
     loadSettings: () => Promise<void>;
     getSettings: () => NotemdSettings;
     getUiStrings: () => UtilityCommandUiStrings;
@@ -51,6 +57,7 @@ export interface UtilityCommandHost {
     getRunningActionText: (label: string) => string;
     getActionCompleteText: (label: string) => string;
     showNotice: (message: string, duration?: number) => void;
+    logInfo: (message: string, details?: unknown) => void;
     logError: (message: string, details: string) => void;
     openErrorModal: (title: string, details: string) => void;
     saveErrorLog: (error: unknown, reporter: ProgressReporter) => Promise<void>;
@@ -133,6 +140,52 @@ export async function runCheckAndRemoveDuplicateConceptNotesCommandWithHost(
             host.openErrorModal(uiStrings.errorModal.titles.duplicateCheckRemove, errorDetails);
         }
     });
+}
+
+export async function runCheckDuplicatesCurrentCommandWithHost(
+    host: UtilityCommandHost,
+    reporter?: ProgressReporter,
+    findDuplicatesImpl: typeof findDuplicates = findDuplicates
+): Promise<{ sourcePath: string; duplicateCount: number; duplicates: string[] } | null> {
+    const uiStrings = host.getUiStrings();
+    const activeFile = host.getActiveFile();
+
+    if (!activeFile || (activeFile.extension !== 'md' && activeFile.extension !== 'txt')) {
+        host.showNotice(uiStrings.notices.noActiveTextFileSelected);
+        return null;
+    }
+
+    try {
+        const content = await host.readFile(activeFile);
+        const duplicates = Array.from(findDuplicatesImpl(content));
+        const message = formatI18n(uiStrings.notices.duplicateTermsCheckConsole, {
+            count: duplicates.length
+        });
+
+        reporter?.log(message);
+        host.showNotice(message);
+
+        if (duplicates.length > 0) {
+            const summary = `Potential duplicates in ${activeFile.name}:`;
+            reporter?.log(`Potential duplicates: ${duplicates.join(', ')}`);
+            host.logInfo(summary, duplicates);
+        }
+
+        return {
+            sourcePath: activeFile.path,
+            duplicateCount: duplicates.length,
+            duplicates
+        };
+    } catch (error: unknown) {
+        const { errorMessage, errorDetails } = normalizeError(
+            error,
+            'An unknown error occurred while checking duplicates.'
+        );
+        reporter?.log(`Error: ${errorMessage}`);
+        host.showNotice(formatI18n(uiStrings.notices.duplicateCheckError, { message: errorMessage }));
+        host.logError('Error checking duplicates:', errorDetails);
+        return null;
+    }
 }
 
 export async function runBatchMermaidFixCommandWithHost(

@@ -1,6 +1,6 @@
 # Notemd CLI 能力矩阵
 
-> 更新：2026-05-04
+> 更新：2026-05-05
 
 这是一份维护者控制文档，用来区分：
 
@@ -59,7 +59,7 @@
 - `src/operations/registry.ts` 已成为已抽取 operation、command binding、mapping kind 与部分 input/result schema 的中心元数据源。
 - `src/operations/capabilityManifest.ts` 现在从同一 registry 展平 capability manifest。
 - `src/cliContracts.ts` 现在也从同一 registry 生成 invocation contract，减少了文档、命令发现与契约导出之间的漂移路径。
-- registry 现在也已纳入第一批 note-processing operations：`translate.file`、`translate.folder-batch`、`concept.extract-file`、`concept.extract-folder`、`content.extract-original-text` 与 `workflow.extract-and-generate`。
+- registry 现在也已纳入第一批 note-processing 与 utility operations：`translate.file`、`translate.folder-batch`、`concept.extract-file`、`concept.extract-folder`、`content.extract-original-text`、`workflow.extract-and-generate`、`duplicate.check-file`、`concept.dedupe`、`mermaid.batch-fix`、`formula.fix-file` 与 `formula.batch-fix`。
 - 旧命令别名仍保留注册以保证兼容，但会被刻意排除在 capability manifest 导出之外。
 
 ## 第一批抽取目标
