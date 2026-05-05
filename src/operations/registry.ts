@@ -288,7 +288,10 @@ const EXTRACT_ORIGINAL_TEXT_RESULT_SCHEMA: OperationSchema = {
     properties: {
         sourcePath: { type: 'string' },
         outputPath: { type: 'string' },
-        questionCount: { type: 'number' }
+        outputDirectory: { type: 'string' },
+        outputSuffix: { type: 'string' },
+        questionCount: { type: 'number' },
+        mergedMode: { type: 'boolean' }
     }
 };
 

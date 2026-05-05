@@ -252,7 +252,18 @@ describe('operations registry', () => {
                     commandId: 'extract-original-text',
                     mappingKind: 'exact'
                 })
-            ])
+            ]),
+            resultSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    sourcePath: expect.any(Object),
+                    outputPath: expect.any(Object),
+                    outputDirectory: expect.any(Object),
+                    outputSuffix: expect.any(Object),
+                    questionCount: expect.any(Object),
+                    mergedMode: expect.any(Object)
+                })
+            })
         }));
 
         expect(extractAndGenerate).toEqual(expect.objectContaining({
