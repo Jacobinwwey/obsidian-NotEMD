@@ -1,0 +1,119 @@
+import { LLMProviderConfig } from '../types';
+import {
+    buildPluginConfigFilePath,
+    executeExportCliCapabilityManifestCommand,
+    executeExportCliInvocationContractCommand,
+    executeExportProviderProfilesCommand,
+    executeImportProviderProfilesCommand,
+    MissingProviderProfileImportFileError
+} from '../operations/configProfileCommands';
+
+function createHost() {
+    return {
+        configDir: '.obsidian',
+        exists: jest.fn().mockResolvedValue(false),
+        mkdir: jest.fn().mockResolvedValue(undefined),
+        read: jest.fn().mockResolvedValue(''),
+        write: jest.fn().mockResolvedValue(undefined)
+    };
+}
+
+describe('config/profile commands', () => {
+    const providers: LLMProviderConfig[] = [
+        {
+            name: 'DeepSeek',
+            apiKey: 'test',
+            baseUrl: 'https://deepseek.test',
+            model: 'deepseek-chat',
+            temperature: 0.3,
+            localOnly: true
+        }
+    ];
+
+    test('builds plugin config file paths under plugin-scoped config directory', () => {
+        expect(buildPluginConfigFilePath('.obsidian', 'notemd-test', 'notemd-providers.json'))
+            .toBe('.obsidian/plugins/notemd-test/notemd-providers.json');
+    });
+
+    test('exports provider profiles through plugin config host and preserves localOnly', async () => {
+        const host = createHost();
+
+        const result = await executeExportProviderProfilesCommand({
+            pluginId: 'notemd-test',
+            providers,
+            host,
+            now: new Date('2026-05-05T12:00:00.000Z')
+        });
+
+        expect(host.mkdir).toHaveBeenCalledWith('.obsidian/plugins/notemd-test');
+        expect(host.write).toHaveBeenCalledWith(
+            '.obsidian/plugins/notemd-test/notemd-providers.json',
+            expect.stringContaining('"localOnly": true')
+        );
+        expect(result.outputPath).toBe('.obsidian/plugins/notemd-test/notemd-providers.json');
+        expect(result.profile.exportedAt).toBe('2026-05-05T12:00:00.000Z');
+    });
+
+    test('imports provider profiles and falls back to first imported provider when active/default are unavailable', async () => {
+        const host = createHost();
+        host.exists.mockResolvedValue(true);
+        host.read.mockResolvedValue(JSON.stringify({
+            formatVersion: 1,
+            exportedAt: '2026-05-05T12:00:00.000Z',
+            providers: [
+                {
+                    name: 'OpenAI',
+                    apiKey: 'new',
+                    baseUrl: 'https://openai.test',
+                    model: 'gpt-4.1',
+                    temperature: 0.2,
+                    localOnly: false
+                }
+            ]
+        }));
+
+        const result = await executeImportProviderProfilesCommand({
+            pluginId: 'notemd-test',
+            existingProviders: [],
+            activeProvider: 'DeepSeek',
+            defaultActiveProvider: 'DeepSeek',
+            host
+        });
+
+        expect(result.activeProvider).toBe('OpenAI');
+        expect(result.activeProviderReset).toBe(true);
+        expect(result.importedProviders).toHaveLength(1);
+    });
+
+    test('throws typed error when provider profile import file is missing', async () => {
+        const host = createHost();
+
+        await expect(executeImportProviderProfilesCommand({
+            pluginId: 'notemd-test',
+            existingProviders: providers,
+            activeProvider: 'DeepSeek',
+            defaultActiveProvider: 'DeepSeek',
+            host
+        })).rejects.toBeInstanceOf(MissingProviderProfileImportFileError);
+    });
+
+    test('exports CLI capability manifest and invocation contract through shared host pathing', async () => {
+        const host = createHost();
+        host.exists.mockResolvedValue(true);
+
+        const capabilityResult = await executeExportCliCapabilityManifestCommand({
+            pluginId: 'notemd-test',
+            host,
+            buildCliCapabilityManifestImpl: jest.fn().mockReturnValue({ version: 1, commands: [] }) as any
+        });
+        const contractResult = await executeExportCliInvocationContractCommand({
+            pluginId: 'notemd-test',
+            host,
+            buildCliInvocationContractImpl: jest.fn().mockReturnValue({ version: 1, operations: [] }) as any
+        });
+
+        expect(capabilityResult.outputPath).toBe('.obsidian/plugins/notemd-test/notemd-cli-capabilities.json');
+        expect(contractResult.outputPath).toBe('.obsidian/plugins/notemd-test/notemd-cli-contract.json');
+        expect(host.write).toHaveBeenCalledTimes(2);
+    });
+});

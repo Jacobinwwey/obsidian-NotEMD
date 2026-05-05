@@ -44,8 +44,6 @@ import { IframeRenderHost } from './rendering/host/iframeRenderHost';
 import { getRenderTargetDisplayName } from './rendering/targetLabel';
 import { supportsDiagramPreviewModal } from './ui/diagramPreview';
 import { buildProviderDiagnosticFileName } from './providerDiagnostics';
-import { buildCliInvocationContract } from './cliContracts';
-import { buildCliCapabilityManifest } from './operations/capabilityManifest';
 import {
     executeProviderDiagnosticCommand,
     executeProviderDiagnosticStabilityCommand,
@@ -58,6 +56,14 @@ import {
     DiagramCommandHostAdapter,
     previewVegaLiteArtifactFromMarkdown
 } from './operations/diagramCommandHostAdapter';
+import {
+    executeExportCliCapabilityManifestCommand,
+    executeExportCliInvocationContractCommand,
+    executeExportProviderProfilesCommand,
+    executeImportProviderProfilesCommand,
+    MissingProviderProfileImportFileError,
+    PluginConfigCommandHost
+} from './operations/configProfileCommands';
 
 type DiagramCommandExecutionMode = 'save-mermaid' | 'save-artifact' | 'preview-artifact';
 
@@ -126,6 +132,16 @@ export default class NotemdPlugin extends Plugin {
             notify: (message, duration) => {
                 new Notice(message, duration);
             }
+        };
+    }
+
+    private createPluginConfigCommandHost(): PluginConfigCommandHost {
+        return {
+            configDir: this.app.vault.configDir,
+            exists: (path) => this.app.vault.adapter.exists(path),
+            mkdir: (path) => this.app.vault.adapter.mkdir(path),
+            read: (path) => this.app.vault.adapter.read(path),
+            write: (path, content) => this.app.vault.adapter.write(path, content)
         };
     }
 
@@ -361,8 +377,7 @@ export default class NotemdPlugin extends Plugin {
             id: 'export-provider-profiles',
             name: uiStrings.commands.exportProviderProfiles,
             callback: async () => {
-                const tab = new NotemdSettingTab(this.app, this);
-                await tab.exportProviderSettings();
+                await this.exportProviderProfilesCommand();
             }
         });
 
@@ -370,8 +385,7 @@ export default class NotemdPlugin extends Plugin {
             id: 'import-provider-profiles',
             name: uiStrings.commands.importProviderProfiles,
             callback: async () => {
-                const tab = new NotemdSettingTab(this.app, this);
-                await tab.importProviderSettings();
+                await this.importProviderProfilesCommand();
             }
         });
 
@@ -379,10 +393,7 @@ export default class NotemdPlugin extends Plugin {
             id: 'export-cli-capability-manifest',
             name: uiStrings.commands.exportCliCapabilityManifest,
             callback: async () => {
-                const manifest = buildCliCapabilityManifest(this.manifest.id);
-                const outputPath = `${this.app.vault.configDir}/plugins/${this.manifest.id}/notemd-cli-capabilities.json`;
-                await this.app.vault.adapter.write(outputPath, JSON.stringify(manifest, null, 2));
-                new Notice(formatI18n(uiStrings.notices.cliCapabilityManifestExported, { path: outputPath }));
+                await this.exportCliCapabilityManifestCommand();
             }
         });
 
@@ -390,10 +401,7 @@ export default class NotemdPlugin extends Plugin {
             id: 'export-cli-invocation-contract',
             name: uiStrings.commands.exportCliInvocationContract,
             callback: async () => {
-                const contract = buildCliInvocationContract();
-                const outputPath = `${this.app.vault.configDir}/plugins/${this.manifest.id}/notemd-cli-contract.json`;
-                await this.app.vault.adapter.write(outputPath, JSON.stringify(contract, null, 2));
-                new Notice(formatI18n(uiStrings.notices.cliInvocationContractExported, { path: outputPath }));
+                await this.exportCliInvocationContractCommand();
             }
         });
 
@@ -1352,6 +1360,81 @@ export default class NotemdPlugin extends Plugin {
 
             throw error;
         }
+    }
+
+    async exportProviderProfilesCommand(): Promise<void> {
+        await this.loadSettings();
+        const i18n = this.getUiStrings();
+
+        try {
+            const execution = await executeExportProviderProfilesCommand({
+                pluginId: this.manifest.id,
+                providers: this.settings.providers,
+                host: this.createPluginConfigCommandHost()
+            });
+
+            new Notice(formatI18n(i18n.settings.providerConfig.exportSuccess, { path: execution.outputPath }));
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : String(error);
+            console.error('Error exporting provider settings:', error);
+            new Notice(formatI18n(i18n.settings.providerConfig.exportError, { message }));
+        }
+    }
+
+    async importProviderProfilesCommand(): Promise<void> {
+        await this.loadSettings();
+        const i18n = this.getUiStrings();
+
+        try {
+            const execution = await executeImportProviderProfilesCommand({
+                pluginId: this.manifest.id,
+                existingProviders: this.settings.providers,
+                activeProvider: this.settings.activeProvider,
+                defaultActiveProvider: DEFAULT_SETTINGS.activeProvider,
+                host: this.createPluginConfigCommandHost()
+            });
+
+            this.settings.providers = execution.importedProviders;
+            this.settings.activeProvider = execution.activeProvider;
+            if (execution.activeProviderReset) {
+                new Notice(i18n.settings.providerConfig.activeProviderReset);
+            }
+
+            await this.saveSettings();
+            new Notice(formatI18n(i18n.settings.providerConfig.importSuccess, {
+                newCount: execution.newCount,
+                updatedCount: execution.updatedCount
+            }));
+        } catch (error: unknown) {
+            if (error instanceof MissingProviderProfileImportFileError) {
+                new Notice(formatI18n(i18n.settings.providerConfig.importFileMissing, { path: error.inputPath }));
+                return;
+            }
+
+            const message = error instanceof Error ? error.message : String(error);
+            console.error('Error importing provider settings:', error);
+            new Notice(formatI18n(i18n.settings.providerConfig.importError, { message }));
+        }
+    }
+
+    async exportCliCapabilityManifestCommand(): Promise<void> {
+        await this.loadSettings();
+        const i18n = this.getUiStrings();
+        const execution = await executeExportCliCapabilityManifestCommand({
+            pluginId: this.manifest.id,
+            host: this.createPluginConfigCommandHost()
+        });
+        new Notice(formatI18n(i18n.notices.cliCapabilityManifestExported, { path: execution.outputPath }));
+    }
+
+    async exportCliInvocationContractCommand(): Promise<void> {
+        await this.loadSettings();
+        const i18n = this.getUiStrings();
+        const execution = await executeExportCliInvocationContractCommand({
+            pluginId: this.manifest.id,
+            host: this.createPluginConfigCommandHost()
+        });
+        new Notice(formatI18n(i18n.notices.cliInvocationContractExported, { path: execution.outputPath }));
     }
 
     /** Command: Generate Content from Title */
