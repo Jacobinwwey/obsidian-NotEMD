@@ -52,6 +52,7 @@
 - 第二批 MT2 host-adapter slice 也已落地：`src/operations/diagramCommandHostAdapter.ts` 现在承接 Mermaid/artifact 保存收尾、preview 收尾以及直接 Vega-Lite 预览编排。
 - 第一批 config/profile 抽离也已落地：`src/operations/configProfileCommands.ts` 现在承接 provider profile 导入导出与 CLI capability/contract 导出编排，`src/main.ts` 与 `src/ui/NotemdSettingTab.ts` 已共用同一条命令路径。
 - provider diagnostic report persistence 也已抽离：`src/operations/providerDiagnosticReportPersistence.ts` 现在承接带冲突规避的诊断报告文件落盘逻辑。
+- provider diagnostic host adaptation 也已抽离：`src/operations/providerDiagnosticCommandHostAdapter.ts` 现在承接开发者诊断命令的 settings 装载、报告落盘接线与 notice 整形逻辑。
 - 现有 Obsidian 命令仍保持注册状态，并继续支持快捷键与官方 CLI 触发，同时底层 operation 层继续演进。
 
 ## 短期交付（0-2 周）
@@ -166,7 +167,8 @@
   - save/preview 宿主适配逻辑现已落在 `src/operations/diagramCommandHostAdapter.ts`
   - provider profile 导入导出与 CLI contract/capability 导出现在已落在 `src/operations/configProfileCommands.ts`
   - provider diagnostic report persistence 现在已落在 `src/operations/providerDiagnosticReportPersistence.ts`
-  - 剩余缺口：补上可复用 CLI-facing host adapter，且不能把 Obsidian 耦合重新塞回 operation 层
+  - provider diagnostic host adaptation 现在已落在 `src/operations/providerDiagnosticCommandHostAdapter.ts`
+  - 剩余缺口：继续收缩 `src/main.ts` 中的 config/profile 持久化与其他宿主副作用，且不能把 Obsidian 耦合重新塞回 operation 层
 
 **MT2. Host adapter 拆分**
 - 新增 plugin adapter，负责解析 active file、vault state、settings
@@ -274,7 +276,7 @@
 进度说明：
 
 - 第 1-4 项已在主线上部分落地。
-- 下一步最稳妥的推进点仍是 MT2，但范围已经缩小：在已落地执行层、save/preview adapter、config/profile adapter 与 report persistence 抽离的基础上，继续推进可复用 CLI-facing host adapter，让 `src/main.ts` 不再成为宿主副作用的最后集中边界。
+- 下一步最稳妥的推进点仍是 MT2，但范围已经缩小：provider diagnostic host adaptation 已落地，下一批应继续把 config/profile 状态持久化与剩余 CLI 邻接宿主副作用从 `src/main.ts` 剥离出去。
 
 ## 退出标准
 
