@@ -45,16 +45,16 @@
 | `notemd:generate-content-from-title` | 从标题生成内容 | `requires-active-file` | 使用活动文件并回写内容 | `content.generate-from-title` |
 | `notemd:batch-generate-content-from-titles` | 批量标题生成 | `interactive-ui` | 文件夹选择、完成目录和进度 UI 仍然绑定宿主 | `content.batch-generate-from-titles` |
 | `notemd:research-and-summarize-topic` | 对选中文本 / 活动笔记标题做研究总结 | `requires-selection` | 依赖活动编辑器或活动笔记标题 | `research.summarize-topic` |
-| `notemd:translate-file` | 翻译当前活动笔记 | `requires-active-file` | 当前命令路径会读取活动文件并写回相邻/输出翻译笔记 | `translate.file` |
-| `notemd:batch-translate-folder` | 批量翻译文件夹 | `interactive-ui` | 文件夹选择和进度 UI 需要先拆 adapter | `translate.folder-batch` |
+| `notemd:translate-file` | 翻译当前活动笔记 | `requires-active-file` | host adapter 与 registry mapping 已存在，但 active-file 依赖、写入副作用与偏浅的结果语义仍阻碍稳定自动化 | `translate.file` |
+| `notemd:batch-translate-folder` | 批量翻译文件夹 | `interactive-ui` | 文件夹选择仍然是交互式流程；reporter 注入已存在，但批量结果与成功 notice 语义仍偏浅 | `translate.folder-batch` |
 | `notemd:extract-concepts-from-current-file` | 从活动文件提取概念 | `requires-active-file` | 依赖活动文件和 note-creation 副作用 | `concept.extract-file` |
 | `notemd:batch-extract-concepts-from-folder` | 从文件夹批量提取概念 | `interactive-ui` | 文件夹选择和进度 UI 仍宿主绑定 | `concept.extract-folder` |
 | `notemd:extract-original-text` | 从活动文件提取配置好的原文片段 | `requires-active-file` | 现在已有结构化结果，但 active-file 依赖与输出路径持久化仍绑定宿主/设置 | `content.extract-original-text` |
 | `notemd:extract-concepts-and-generate-titles` | 提取概念并生成标题的复合流程 | `requires-active-file` | 复合 workflow 尚无显式 typed contract | `workflow.extract-and-generate` |
 | `notemd:create-wiki-link-and-generate-from-selection` | 基于选区创建概念笔记并生成内容 | `requires-selection` | 编辑器选区是内生依赖 | `editor.create-link-and-generate` |
 | `notemd:batch-mermaid-fix` | 批量 Mermaid 修复 | `interactive-ui` | 文件夹选择、内容改写和报告副作用都仍然绑定宿主 | `mermaid.batch-fix` |
-| `notemd:fix-formula-formats` | 修复当前文件公式格式 | `requires-active-file` | 活动文件内容改写契约尚未外部化 | `formula.fix-file` |
-| `notemd:batch-fix-formula-formats` | 批量公式修复 | `interactive-ui` | 文件夹选择和进度/报告副作用仍存在 | `formula.batch-fix` |
+| `notemd:fix-formula-formats` | 修复当前文件公式格式 | `requires-active-file` | host adapter 已存在，但结果语义仍接近 boolean，文件改写副作用对自动化仍不够显式 | `formula.fix-file` |
+| `notemd:batch-fix-formula-formats` | 批量公式修复 | `interactive-ui` | host adapter 已存在，但文件夹选择与 count/report 副作用仍需要更丰富的 batch-result 语义 | `formula.batch-fix` |
 | `notemd:check-for-duplicates` | 检查当前笔记重复项 | `requires-active-file` | 结果目前偏 console/notice 输出 | `duplicate.check-file` |
 | `notemd:check-and-remove-duplicate-concept-notes` | 删除重复概念笔记 | `interactive-ui` | 破坏性流程需要更强的契约和确认模型 | `concept.dedupe` |
 
@@ -65,6 +65,7 @@
 - `src/cliContracts.ts` 现在也从同一 registry 生成 invocation contract，减少了文档、命令发现与契约导出之间的漂移路径。
 - registry 现在也已纳入主要 note-processing、utility、selection 与 export operations：`editor.create-link-and-generate`、`file.process-add-links`、`file.process-folder-add-links`、`content.generate-from-title`、`content.batch-generate-from-titles`、`research.summarize-topic`、`translate.file`、`translate.folder-batch`、`concept.extract-file`、`concept.extract-folder`、`content.extract-original-text`、`workflow.extract-and-generate`、`duplicate.check-file`、`concept.dedupe`、`mermaid.batch-fix`、`formula.fix-file`、`formula.batch-fix`、`provider.profile.export`、`provider.profile.import`、`cli.capability-manifest.export` 与 `cli.invocation-contract.export`。
 - `content.extract-original-text` 现在也是这批 write-heavy path 里第一条返回更丰富 machine-readable result、且不再由 utility core 直接发 success notice 的路径。
+- 下一阶段 contract deepening 顺序现在也已明确：先 `translate.*` 与 `formula.*`，再 `src/fileUtils.ts` write-heavy flows，最后剩余 direct-read/sidebar surfaces。
 - 旧命令别名仍保留注册以保证兼容，但会被刻意排除在 capability manifest 导出之外。
 
 ## 下一批抽取目标
@@ -73,9 +74,10 @@
 
 | 优先级 | 候选能力 | 为什么先做 | 现有基础 |
 |---|---|---|---|
-| P0 | write-heavy flow 的结果面收口 | 覆盖面已有，但很多 operation 仍泄漏宿主/UI 语义，结果 schema 也偏浅 | `src/fileUtils.ts`, `src/translate.ts`, `src/extractOriginalText.ts`, `src/formulaFixer.ts` |
-| P1 | 剩余 direct-read/sidebar surfaces | `src/main.ts` 仍持有长尾 direct execution 与 sidebar-only read path，尚未建模为 operation | `src/main.ts` 剩余命令面、`src/workflowButtons.ts` |
-| P1 | selection/export 与 config flow 的 contract 增强 | 这些 operation 已建模，但未来 operation invoker 需要比 command-trigger 对等更丰富的 path/context 语义 | `src/operations/registry.ts`, `src/operations/configProfileCommands.ts`, `src/operations/noteProcessingCommandHostAdapter.ts` |
+| P0 | `translate.*` 与 `formula.*` contract tightening | 它们是剩余最小的 write-heavy families；adapter 已存在，但结果语义与宿主接管的成功整形仍然滞后 | `src/translate.ts`, `src/formulaFixer.ts`, `src/operations/noteProcessingCommandHostAdapter.ts`, `src/operations/utilityCommandHostAdapter.ts` |
+| P1 | `src/fileUtils.ts` write-heavy flow tightening | translation/formula 之后最大的副作用核心；需要显式 created/overwritten/moved/error 语义 | `src/fileUtils.ts`, `src/extractOriginalText.ts` |
+| P1 | 剩余 direct-read/sidebar surfaces | `src/main.ts` 仍持有长尾 direct execution 与 sidebar-only read path；最高价值样本是 `testLlmConnectionCommand`、`generateDiagramCommand` 与 `previewExperimentalDiagramCommand` | `src/main.ts` 剩余命令面、`src/workflowButtons.ts` |
+| P2 | selection/export 与 config flow 的 contract 增强 | 这些 operation 已建模，但未来 operation invoker 需要比 command-trigger 对等更丰富的 path/context 语义 | `src/operations/registry.ts`, `src/operations/configProfileCommands.ts`, `src/operations/noteProcessingCommandHostAdapter.ts` |
 | P2 | workflow/settings 打包 | Workflow DSL 与 output-path toggles 仍是有价值 metadata，但还不是稳定公共接口 | `src/workflowButtons.ts`, 设置驱动的输出控制 |
 
 ## 设置就绪度
