@@ -1,4 +1,5 @@
 import NotemdPlugin from '../main';
+import { TFile, TFolder } from 'obsidian';
 import { ProgressReporter } from '../types';
 import { mockApp } from './__mocks__/app';
 import { mockSettings } from './__mocks__/settings';
@@ -145,6 +146,79 @@ describe('note processing command surface', () => {
             completeReporter: expect.any(Function),
             finalizeReporter: expect.any(Function)
         }), editor, view, reporter);
+        expect(utilitySpy).not.toHaveBeenCalled();
+    });
+
+    test('process current command delegates to extracted note-processing host adapter', async () => {
+        const noteProcessingCommandHostAdapter = require('../operations/noteProcessingCommandHostAdapter');
+        const plugin = createPlugin();
+        const reporter = createReporter();
+        const activeFile = Object.assign(new (TFile as any)(), {
+            name: 'Topic.md',
+            basename: 'Topic',
+            path: 'Notes/Topic.md',
+            extension: 'md'
+        });
+        (mockApp.workspace.getActiveFile as jest.Mock).mockReturnValue(activeFile);
+
+        const hostSpy = jest
+            .spyOn(noteProcessingCommandHostAdapter, 'runProcessWithNotemdCommandWithHost')
+            .mockResolvedValue(undefined);
+        const utilitySpy = jest
+            .spyOn(fileUtils, 'processFile')
+            .mockResolvedValue('Notes/Topic_processed.md');
+
+        await (plugin as any).processWithNotemdCommand(reporter);
+
+        expect(hostSpy).toHaveBeenCalledWith(expect.objectContaining({
+            getActiveFile: expect.any(Function),
+            getFileByPath: expect.any(Function),
+            currentProcessingFileBasename: expect.any(Object),
+            maybeAutoFixMermaidForFile: expect.any(Function),
+            completeReporter: expect.any(Function)
+        }), reporter);
+        expect(utilitySpy).not.toHaveBeenCalled();
+    });
+
+    test('process folder command delegates to extracted note-processing host adapter', async () => {
+        const noteProcessingCommandHostAdapter = require('../operations/noteProcessingCommandHostAdapter');
+        const plugin = createPlugin();
+        const reporter = createReporter();
+        const folder = Object.assign(new (TFolder as any)(), {
+            name: 'Concepts',
+            path: 'Concepts'
+        });
+        const file = Object.assign(new (TFile as any)(), {
+            name: 'Topic.md',
+            basename: 'Topic',
+            path: 'Concepts/Topic.md',
+            extension: 'md'
+        });
+        (mockApp.vault.getAbstractFileByPath as jest.Mock).mockImplementation((path: string) => {
+            if (path === 'Concepts') {
+                return folder;
+            }
+            return null;
+        });
+        (mockApp.vault.getFiles as jest.Mock).mockReturnValue([file]);
+
+        const hostSpy = jest
+            .spyOn(noteProcessingCommandHostAdapter, 'runProcessFolderWithNotemdCommandWithHost')
+            .mockResolvedValue(undefined);
+        const utilitySpy = jest
+            .spyOn(fileUtils, 'processFile')
+            .mockResolvedValue('Concepts/Topic_processed.md');
+
+        await (plugin as any).processFolderWithNotemdCommand(reporter, 'Concepts');
+
+        expect(hostSpy).toHaveBeenCalledWith(expect.objectContaining({
+            getFolderByPath: expect.any(Function),
+            getFiles: expect.any(Function),
+            getFolderSelection: expect.any(Function),
+            getBatchProgressStore: expect.any(Function),
+            maybeAutoFixMermaidForFolder: expect.any(Function),
+            appendVaultLog: expect.any(Function)
+        }), reporter, 'Concepts');
         expect(utilitySpy).not.toHaveBeenCalled();
     });
 });

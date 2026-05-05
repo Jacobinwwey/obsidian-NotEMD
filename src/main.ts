@@ -76,6 +76,8 @@ import {
 import {
     NoteProcessingCommandHost,
     runGenerateContentForTitleCommandWithHost,
+    runProcessFolderWithNotemdCommandWithHost,
+    runProcessWithNotemdCommandWithHost,
     runResearchAndSummarizeCommandWithHost
 } from './operations/noteProcessingCommandHostAdapter';
 
@@ -209,6 +211,23 @@ export default class NotemdPlugin extends Plugin {
             getApp: () => this.app,
             loadSettings: () => this.loadSettings(),
             getSettings: () => this.settings,
+            getActiveFile: () => {
+                const activeFile = this.app.workspace.getActiveFile();
+                return activeFile instanceof TFile ? activeFile : null;
+            },
+            getFileByPath: (path) => {
+                const abstractFile = this.app.vault.getAbstractFileByPath(path);
+                return abstractFile instanceof TFile ? abstractFile : null;
+            },
+            getFolderByPath: (path) => {
+                const abstractFile = this.app.vault.getAbstractFileByPath(path);
+                return abstractFile instanceof TFolder ? abstractFile : null;
+            },
+            getFiles: () => this.app.vault.getFiles(),
+            getFolderSelection: () => this.getFolderSelection(),
+            getStepStatusText: (current, total, label) => this.getStepStatusText(current, total, label),
+            currentProcessingFileBasename: this.currentProcessingFileBasename,
+            getBatchProgressStore: () => this.getBatchProgressStore(),
             getUiStrings: () => this.getUiStrings(),
             getActionLabel: (actionId) => this.getActionLabel(actionId),
             getReporter: () => this.getReporter(),
@@ -225,6 +244,9 @@ export default class NotemdPlugin extends Plugin {
             saveErrorLog: (error, reporter) => saveErrorLog(this.app, reporter, error, this.settings),
             maybeAutoFixMermaidForFile: (file, reporter, reason) =>
                 this.maybeAutoFixMermaidForFile(file, reporter, reason),
+            maybeAutoFixMermaidForFolder: (folderPath, reporter, reason) =>
+                this.maybeAutoFixMermaidForFolder(folderPath, reporter, reason),
+            appendVaultLog: (path, content) => this.app.vault.adapter.append(path, content),
             completeReporter: (reporter) => {
                 if (reporter instanceof ProgressModal) {
                     setTimeout(() => reporter.close(), 2000);
@@ -1067,67 +1089,7 @@ export default class NotemdPlugin extends Plugin {
 
     /** Command: Process Current File (Add Links) */
     async processWithNotemdCommand(reporter?: ProgressReporter) {
-        if (this.isBusy) { new Notice(this.getUiStrings().notices.notemdBusy); return; }
-        this.isBusy = true;
-        const useReporter = reporter || this.getReporter();
-        let i18n = this.getUiStrings();
-        const actionLabel = this.getActionLabel('process-current-add-links');
-
-        const maybeSidebar = useReporter as any;
-        this.startReporterAction(useReporter, actionLabel);
-
-        try {
-            await this.loadSettings(); // Load latest settings
-            i18n = this.getUiStrings();
-            const activeFile = this.app.workspace.getActiveFile();
-            if (!activeFile || !(activeFile instanceof TFile) || (activeFile.extension !== 'md' && activeFile.extension !== 'txt')) {
-                throw new Error("No active '.md' or '.txt' file to process.");
-            }
-
-            this.updateStatusBar(this.getRunningActionText(`${actionLabel}: ${activeFile.name}`));
-
-            // Pass the ref object for currentProcessingFileBasename
-            const outputPath = await processFile(this.app, this.settings, activeFile, useReporter, this.currentProcessingFileBasename);
-            if (outputPath && this.settings.autoMermaidFixAfterGenerate) {
-                const outputFile = this.app.vault.getAbstractFileByPath(outputPath);
-                if (outputFile instanceof TFile) {
-                    await this.maybeAutoFixMermaidForFile(outputFile, useReporter, 'process current file');
-                } else {
-                    useReporter.log(`Skipped Mermaid auto-fix: output file not found at ${outputPath}`);
-                }
-            }
-
-            const completeText = this.getActionCompleteText(actionLabel);
-            this.updateStatusBar(completeText);
-            useReporter.updateStatus(completeText, 100);
-            new Notice(i18n.notices.processingComplete);
-            if (useReporter instanceof ProgressModal) setTimeout(() => useReporter.close(), 2000);
-
-        } catch (error: unknown) { // Changed to unknown
-            let errorMessage = 'An unknown error occurred during processing.';
-            let errorDetails = String(error);
-            if (error instanceof Error) {
-                errorMessage = error.message;
-                errorDetails = error.stack || error.message;
-            }
-            console.error("Notemd Processing Error:", errorDetails);
-            // Check if it's a cancellation error before showing notice/modal
-            if (!errorMessage.includes("cancelled by user")) {
-                new Notice(formatI18n(i18n.notices.processingError, { message: errorMessage }), 10000);
-                this.openLocalizedErrorModal(i18n.errorModal.titles.processing, errorDetails);
-
-                // Save error log
-                await saveErrorLog(this.app, useReporter, error, this.settings);
-            }
-            useReporter.log(`Error: ${errorMessage}`);
-            this.failReporterAction(useReporter, errorMessage);
-            // Keep reporter open on error/cancellation
-        } finally {
-            if (maybeSidebar instanceof NotemdSidebarView) {
-                maybeSidebar.finishProcessing();
-            }
-            this.isBusy = false;
-        }
+        await runProcessWithNotemdCommandWithHost(this.createNoteProcessingCommandHost(), reporter);
     }
 
     /** Command: Process Folder (Add Links) */
@@ -1138,191 +1100,11 @@ export default class NotemdPlugin extends Plugin {
     }
 
     async processFolderWithNotemdCommand(reporter?: ProgressReporter, folderPathOverride?: string) {
-        if (this.isBusy) { new Notice(this.getUiStrings().notices.notemdBusy); return; }
-        this.isBusy = true;
-        const useReporter = reporter || this.getReporter();
-        let i18n = this.getUiStrings();
-        const actionLabel = this.getActionLabel('process-folder-add-links');
-
-        const maybeSidebar = useReporter as any;
-        this.startReporterAction(useReporter, actionLabel);
-
-        try {
-            await this.loadSettings();
-            i18n = this.getUiStrings();
-            const folderPath = folderPathOverride ?? await this.getFolderSelection();
-            if (!folderPath) {
-                useReporter.log(i18n.notices.batchProcessingCancelled);
-                useReporter.updateStatus(i18n.notices.batchProcessingCancelled, -1);
-                throw new Error(i18n.notices.batchProcessingCancelled);
-            }
-
-            const folder = this.app.vault.getAbstractFileByPath(folderPath);
-            if (!folder || !(folder instanceof TFolder)) throw new Error(`Invalid folder selected: ${folderPath}`);
-
-            const files = this.app.vault.getFiles().filter(f =>
-                (f.extension === 'md' || f.extension === 'txt') &&
-                (f.path === folderPath || f.path.startsWith(folderPath === '/' ? '' : folderPath + '/'))
-            );
-
-            if (files.length === 0) {
-                const noFilesMessage = formatI18n(i18n.notices.noMarkdownOrTextFilesFoundSelectedFolder, { folderPath });
-                new Notice(noFilesMessage);
-                useReporter.log(noFilesMessage);
-                useReporter.updateStatus(noFilesMessage, 100);
-                if (useReporter instanceof ProgressModal) setTimeout(() => useReporter.close(), 2000);
-                return; // Exit gracefully
-            }
-
-            this.updateStatusBar(this.getRunningActionText(actionLabel));
-            useReporter.log(this.getRunningActionText(actionLabel));
-            const errors: { file: string; message: string }[] = [];
-
-            const batchId = `process-folder-${Date.now()}`;
-            const progressStore = this.getBatchProgressStore();
-            progressStore.start(batchId, 'process-folder', folderPath, files);
-
-            if (!this.settings.enableBatchParallelism || this.settings.batchConcurrency <= 1) {
-                for (let i = 0; i < files.length; i++) {
-                    const file = files[i];
-                    if (useReporter.cancelled) {
-                        new Notice(i18n.notices.batchProcessingCancelled);
-                        this.updateStatusBar(i18n.notices.batchProcessingCancelled);
-                        useReporter.updateStatus(i18n.notices.batchProcessingCancelled, -1);
-                        break;
-                    }
-
-                    const progress = Math.floor(((i) / files.length) * 100);
-                    useReporter.updateStatus(this.getStepStatusText(i + 1, files.length, file.name), progress);
-
-                    try {
-                        // Pass the ref object
-                        await processFile(this.app, this.settings, file, useReporter, this.currentProcessingFileBasename);
-                        progressStore.markCompleted(file.path);
-                    } catch (fileError: unknown) {
-                        const message = fileError instanceof Error ? fileError.message : String(fileError);
-                        const stack = fileError instanceof Error ? fileError.stack : undefined;
-                        const errorMsg = `Error processing ${file.name}: ${message}`;
-                        console.error(errorMsg, fileError);
-                        useReporter.log(`❌ ${errorMsg}`);
-                        errors.push({ file: file.name, message: message });
-                        // Log silently
-                        const timestamp = new Date().toISOString();
-                        const logEntry = `[${timestamp}] Error processing ${file.path}:\nMessage: ${message}\nStack Trace:\n${stack || fileError}\n\n`;
-                        try { await this.app.vault.adapter.append('error_processing_filename.log', logEntry); }
-                        catch (logError) { console.error("Failed to write to error log:", logError); useReporter.log("⚠️ Failed to write error details to log file."); }
-                        if (message.includes("cancelled by user")) break; // Exit loop on cancellation
-                    }
-                } // End loop
-            } else {
-                const concurrency = Math.min(this.settings.batchConcurrency, 20); // Cap
-                const processor = createConcurrentProcessor(concurrency, this.settings.apiCallIntervalMs, useReporter);
-                const fileBatches = chunkArray(files, this.settings.batchSize);
-                let processedCount = 0;
-
-                for (let b = 0; b < fileBatches.length; b++) {
-                    const batch = fileBatches[b];
-                    useReporter.log(`Processing batch ${b + 1}/${fileBatches.length} (${batch.length} files)`);
-                    if (useReporter.cancelled) break;
-
-                    const tasks = batch.map(file => async () => {
-                        const fileProgressReporter: ProgressReporter = {
-                            log: (msg: string) => useReporter.log(`[${file.name}] ${msg}`),
-                            updateStatus: (msg: string, percentage?: number) => {
-                                if (percentage !== undefined) {
-                                    const overallProgress = Math.floor(((processedCount + (percentage / 100)) / files.length) * 100);
-                                    useReporter.updateStatus(
-                                        this.getStepStatusText(processedCount, files.length, `${file.name}: ${msg}`),
-                                        overallProgress
-                                    );
-                                } else {
-                                    useReporter.updateStatus(this.getStepStatusText(processedCount, files.length, `${file.name}: ${msg}`));
-                                }
-                            },
-                            cancelled: useReporter.cancelled,
-                            requestCancel: () => useReporter.requestCancel(),
-                            clearDisplay: () => { },
-                            abortController: useReporter.abortController,
-                            activeTasks: useReporter.activeTasks,
-                            updateActiveTasks: (delta: number) => useReporter.updateActiveTasks(delta),
-                        };
-
-                        try {
-                            await processFile(this.app, this.settings, file, fileProgressReporter, this.currentProcessingFileBasename);
-                            return { file, success: true };
-                        } catch (e: unknown) {
-                            const errorMessage = e instanceof Error ? e.message : String(e);
-                            fileProgressReporter.log(`❌ Error processing ${file.name}: ${errorMessage}`);
-                            return { file, success: false, error: e };
-                        }
-                    });
-
-                    const results = await processor(tasks);
-                    processedCount += batch.length;
-
-                    results.forEach(r => {
-                        const result = r as { success: boolean; file: TFile; error?: any };
-                        if (!result.success && result.error) {
-                            const errorMessage = result.error.message || String(result.error);
-                            errors.push({ file: result.file.name, message: errorMessage });
-                        }
-                    });
-
-                    if (useReporter.cancelled) {
-                        useReporter.log('Cancellation requested, stopping batch processing.');
-                        break;
-                    }
-
-                    if (this.settings.batchInterDelayMs > 0 && b < fileBatches.length - 1) {
-                        useReporter.log(`Delaying for ${this.settings.batchInterDelayMs}ms before next batch...`);
-                        await delay(this.settings.batchInterDelayMs);
-                    }
-                }
-            }
-            if (!useReporter.cancelled) {
-                const mermaidFixTargetFolder = (this.settings.useCustomProcessedFileFolder && this.settings.processedFileFolder)
-                    ? this.settings.processedFileFolder
-                    : folderPath;
-                await this.maybeAutoFixMermaidForFolder(mermaidFixTargetFolder, useReporter, 'process folder');
-            }
-
-            if (!useReporter.cancelled) {
-                if (errors.length > 0) {
-                    const errorSummary = formatI18n(i18n.notices.batchProcessingFinishedWithErrors, { count: errors.length });
-                    useReporter.log(`⚠️ ${errorSummary}`); useReporter.updateStatus(errorSummary, -1);
-                    this.updateStatusBar(errorSummary); new Notice(errorSummary, 10000);
-                } else {
-                    const completeText = this.getActionCompleteText(actionLabel);
-                    useReporter.updateStatus(completeText, 100); this.updateStatusBar(completeText);
-                    new Notice(formatI18n(i18n.notices.batchProcessingSuccess, { count: files.length }), 5000);
-                    if (useReporter instanceof ProgressModal) setTimeout(() => useReporter.close(), 2000);
-                }
-            }
-
-        } catch (error: unknown) { // Changed to unknown
-            let errorMessage = 'An unknown error occurred during batch processing.';
-            let errorDetails = String(error);
-            if (error instanceof Error) {
-                errorMessage = error.message;
-                errorDetails = error.stack || error.message;
-            }
-            console.error("Notemd Batch Processing Error:", errorDetails);
-            // Check if it's a cancellation error before showing notice/modal
-            if (!errorMessage.includes("cancelled")) {
-                new Notice(formatI18n(i18n.notices.batchProcessingError, { message: errorMessage }), 10000);
-                this.openLocalizedErrorModal(i18n.errorModal.titles.batchProcessing, errorDetails);
-
-                // Save error log
-                await saveErrorLog(this.app, useReporter, error, this.settings);
-            }
-            useReporter.log(`Batch Error: ${errorMessage}`);
-            this.failReporterAction(useReporter, errorMessage);
-        } finally {
-            if (maybeSidebar instanceof NotemdSidebarView) {
-                maybeSidebar.finishProcessing();
-            }
-            this.isBusy = false;
-        }
+        await runProcessFolderWithNotemdCommandWithHost(
+            this.createNoteProcessingCommandHost(),
+            reporter,
+            folderPathOverride
+        );
     }
 
     // Note: The simple 'Check Duplicates' command logic is now directly in onload()
