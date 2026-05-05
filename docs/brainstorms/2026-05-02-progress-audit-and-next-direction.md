@@ -111,7 +111,7 @@ This means the roadmap should no longer be interpreted as "build the platform". 
 - The project is therefore still not ready to treat current plugin command IDs or sidebar actions as a stable engineering CLI surface. First extract host-neutral operations; only then define typed CLI invocation contracts above the command-trigger layer.
 - The first concrete delivery is now in place for provider diagnostics: a shared operation-input builder exists, and developer diagnostic commands are registered so the same path can be reached from command palette, hotkey bindings, settings UI, and official CLI command triggering.
 - The extraction line is now materially stronger: `src/operations/types.ts`, `src/operations/registry.ts`, `src/operations/capabilityManifest.ts`, and `src/cliContracts.ts` now centralize operation metadata, command-binding mapping kind, capability discovery, and typed contract export.
-- `diagram.generate` is no longer just a future note in the plan; it now participates in the typed invocation contract, while preview remains intentionally outside the non-interactive contract set.
+- `diagram.generate` is no longer just a future note in the plan; it now participates in the typed invocation contract, and the same registry/contract path now also exports typed operation surfaces for `diagram.preview` and `provider.connection.test` while preserving their constrained automation levels.
 - The first MT2 host-adapter slice is now landed: `src/operations/diagramGenerateOperation.ts` carries the reusable diagram execution path, and `src/operations/providerDiagnosticCommand.ts` carries provider-diagnostic command orchestration below `src/main.ts`.
 - The second MT2 host-adapter slice is now landed as well: `src/operations/diagramCommandHostAdapter.ts` owns Mermaid/artifact save completion and direct Vega-Lite preview orchestration below `src/main.ts`.
 - The first config/profile slice is now landed too: `src/operations/configProfileCommands.ts` owns provider-profile import/export and CLI capability/contract export orchestration, and the settings tab now reuses the same command path instead of keeping a parallel implementation.
@@ -131,7 +131,7 @@ This means the roadmap should no longer be interpreted as "build the platform". 
 - The first `src/fileUtils.ts` contract slice is now landed too: `processFile()` returns `ProcessFileResult`, `generateContentForTitle()` returns `GenerateContentForTitleResult`, `batchGenerateContentForTitles()` returns `BatchGenerateContentForTitlesResult`, `runProcessFolderWithNotemdCommandWithHost()` now reports `savedCount` / `errors` / `cancelled`, and the batch-generate no-file branch is now a host-owned notice rather than a utility-owned pseudo-success path.
 - The remaining `src/fileUtils.ts` tail is now landed too: `batchFixMermaidSyntaxInFolder()` returns `BatchMermaidFixResult`, `checkAndRemoveDuplicateConceptNotes()` returns `ConceptDedupeResult`, the duplicate-deletion confirmation is now host-injected, and `mermaid.batch-fix` / `concept.dedupe` now export richer schemas from the registry as well.
 - `src/fileUtils.ts` and `src/extractOriginalText.ts` now accept narrower runtime contexts instead of the concrete `NotemdPlugin` class. Boundary work has therefore advanced from "wrapper extraction" into "utility host-coupling reduction".
-- The remaining architectural gap has moved again: the next phase should target the still-inline sidebar/direct-read command surfaces in `src/main.ts`, then the packaging/semantic-verification follow-up work, rather than reopening already-landed write-heavy families or doing more wrapper-only moves.
+- The remaining architectural gap has moved again: the next phase should target the deeper diagram/provider command core in `src/main.ts`, especially `executeSaveMermaidDiagramCommand` / `executeArtifactDiagramCommand` and any richer save/artifact branch contract depth below the newly-landed typed wrappers, then the packaging/semantic-verification follow-up work rather than reopening already-landed write-heavy families.
 
 ## Verification Gates
 
@@ -183,8 +183,8 @@ Short version:
 
 ### Immediate
 
-1. **Command surface consolidation**
-   Collapse `summarize-as-mermaid`, `generate-experimental-diagram`, and `preview-experimental-diagram` into one coherent command surface. Old IDs can survive only as aliases.
+1. **Deeper diagram/provider command-core convergence**
+   Keep the current command IDs stable, but finish moving the remaining `executeSaveMermaidDiagramCommand` / `executeArtifactDiagramCommand` logic toward clearer operation/result boundaries below the already-landed wrappers and typed contracts.
 
 2. **Create a sustainable live verification runbook / harness**
    Convert "one maintainer's local proof" into a repeatable maintainer workflow that does not depend on hard-coded vault paths or private secrets in tracked files.
@@ -202,13 +202,13 @@ Short version:
    That batch is now landed: `testLlmConnectionCommand` delegates to `runInteractiveProviderConnectionTestCommandWithHost`, while `generateDiagramCommand` and `previewExperimentalDiagramCommand` delegate to `runGenerateDiagramCommandWithHost` and `runPreviewExperimentalDiagramCommandWithHost`. The provider/diagram public entrypoints now share structured results and host-owned lifecycle orchestration instead of keeping ad-hoc busy/reporter logic inline in `src/main.ts`.
 
 7. **Shift the next phase one layer deeper**
-   The next high-value gap is no longer the public direct command methods themselves. It is now the deeper diagram command core (`executeSaveMermaidDiagramCommand`, `executeArtifactDiagramCommand`) plus the contract decision for `diagram.preview` and provider connection-test automation exposure. That matters more than reopening already-extracted utility families.
+   The next high-value gap is no longer the public direct command methods themselves. Typed contracts are already in place for `diagram.preview` and `provider.connection.test`. The remaining work is the deeper diagram command core (`executeSaveMermaidDiagramCommand`, `executeArtifactDiagramCommand`) and whether their internal save/artifact branches deserve additional typed boundaries. That matters more than reopening already-extracted utility families.
 
 ### Ordered landing sequence
 
 The most defensible future landing order, after cross-checking roadmap intent against current code, is:
 
-1. first finish deeper diagram/provider command-core convergence and decide whether `diagram.preview` plus provider connection-test stay command-only or become typed automation contracts
+1. first finish deeper diagram/provider command-core convergence and decide whether the internal save/artifact branches should stay beneath `diagram.generate` / `diagram.preview` or be promoted into additional typed operation boundaries
 2. then continue follow-up hardening for maintainer-local semantic verification and heavy-runtime packaging boundaries
 3. after those boundary items stabilize, continue selection/export contract enrichment and workflow/settings packaging cleanup
 4. after those boundary items, reopen legacy prompt retirement, MermaidProcessor sunset, or richer first-class CLI exposure

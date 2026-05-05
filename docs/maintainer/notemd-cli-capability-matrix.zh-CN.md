@@ -30,16 +30,16 @@
 
 | Command ID | 当前用途 | Automation Level | 为什么它现在还不是稳定工程 API | Registry operation 映射 |
 |---|---|---|---|---|
-| `notemd:test-llm-connection` | 检查当前 provider 连通性 | `safe` | 当前输出仍偏 UI，而不是结果契约 | `provider.diagnostic.run`（`future-target`） |
-| `notemd:run-developer-provider-diagnostic` | 运行长请求 provider 诊断 | `safe` | 比 `test-llm-connection` 更接近自动化，但仍缺少公开的类型化结果表面 | `provider.diagnostic.run`（`exact`） |
-| `notemd:run-developer-provider-stability-diagnostic` | 运行多次 provider 稳定性诊断 | `safe` | 比纯 UI 诊断更适合自动化，但仍缺少公开的类型化结果表面 | `provider.diagnostic.stability-run`（`exact`） |
+| `notemd:test-llm-connection` | 检查当前 provider 连通性 | `safe` | 现在已经具备类型化 input/result schema，但交互式 busy/reporter 路径与 notice 文案仍属于宿主 UI 语义 | `provider.connection.test`（`exact`） |
+| `notemd:run-developer-provider-diagnostic` | 运行长请求 provider 诊断 | `safe` | 现在已经具备类型化 input/result schema，但长请求网络行为与诊断报告落盘仍更接近 maintainer-grade surface，而不是稳定 public API | `provider.diagnostic.run`（`exact`） |
+| `notemd:run-developer-provider-stability-diagnostic` | 运行多次 provider 稳定性诊断 | `safe` | 现在已经具备类型化 input/result schema，但重复真实 provider 调用仍更接近 maintainer-grade diagnostic surface，而不是稳定 public API | `provider.diagnostic.stability-run`（`exact`） |
 | `notemd:export-provider-profiles` | 导出 provider profile 快照 | `safe` | 确定性且 machine-readable，但仍绑定插件管理的 config 路径语义 | `provider.profile.export` |
 | `notemd:import-provider-profiles` | 导入 provider profile 快照 | `safe` | machine-readable，但会改动 active provider 状态与插件设置 | `provider.profile.import` |
 | `notemd:export-cli-capability-manifest` | 导出命令 capability manifest | `safe` | 导出确定，但仍绑定插件 config-path 写入语义 | `cli.capability-manifest.export` |
 | `notemd:export-cli-invocation-contract` | 导出类型化 invocation contract | `safe` | 导出确定，但仍绑定插件 config-path 写入语义 | `cli.invocation-contract.export` |
 | `notemd:notemd-generate-diagram` | 从活动文件生成 spec-first artifact | `requires-active-file` | 依赖活动文件、插件状态和保存/打开副作用 | `diagram.generate`（`exact`，`defaultInput.outputMode=artifact`） |
 | `notemd:notemd-summarize-as-mermaid` | 为活动文件保存 Mermaid 输出 | `requires-active-file` | 依赖活动文件与插件管理的保存语义 | `diagram.generate`（`exact`，`defaultInput.outputMode=mermaid`） |
-| `notemd:notemd-preview-diagram` | 预览已保存/已生成图表 | `interactive-ui` | Preview modal 属于 UI-only 流程，不具备自动化稳定性 | `diagram.preview`（`exact`） |
+| `notemd:notemd-preview-diagram` | 预览已保存/已生成图表 | `interactive-ui` | 现在已经具备类型化 input/result schema 来描述 preview artifact 边界，但打开 preview modal 仍属于 UI-only 流程，不具备自动化稳定性 | `diagram.preview`（`exact`） |
 | `notemd:process-with-notemd` | 处理当前文件并加链接 | `requires-active-file` | 结构化文件结果已存在，但 active-file 依赖、概念笔记创建、输出路径策略与 vault 改写副作用仍阻碍稳定自动化 | `file.process-add-links` |
 | `notemd:process-folder-with-notemd` | 批量处理文件夹 | `interactive-ui` | 结构化批量结果已存在，且包含 `savedCount` / `errors` / `cancelled`，但文件夹选择、批量改写执行与后置 Mermaid auto-fix 仍由宿主驱动 | `file.process-folder-add-links` |
 | `notemd:generate-content-from-title` | 从标题生成内容 | `requires-active-file` | 结构化结果已存在，但 active-file 依赖、内容回写语义与可选 research 副作用仍绑定插件宿主 | `content.generate-from-title` |
@@ -74,7 +74,7 @@
 
 | 优先级 | 候选能力 | 为什么先做 | 现有基础 |
 |---|---|---|---|
-| P0 | Diagram/provider command-core 收敛 | 公共 provider-test 与 diagram command wrapper 已经改为通过 host adapter 代理，但 `src/main.ts` 仍持有更深层的 `executeSaveMermaidDiagramCommand` / `executeArtifactDiagramCommand` helper，以及 `diagram.preview` 与 provider connection-test 是否进入 typed automation contract 的决策 | `src/operations/diagramCommandHostAdapter.ts`、`src/operations/providerConnectionTestCommandHostAdapter.ts`、`src/main.ts` 中的 diagram helper |
+| P0 | Diagram/provider command-core 收敛 | 公共 provider-test 与 diagram command wrapper 已经改为通过 host adapter 代理，`provider.connection.test` 与 `diagram.preview` 也已经具备 typed contract；当前剩余缺口是更深层的 `executeSaveMermaidDiagramCommand` / `executeArtifactDiagramCommand` core，以及其下 save/artifact 分支是否还需要更深 contract depth | `src/operations/diagramCommandHostAdapter.ts`、`src/operations/providerConnectionTestCommandHostAdapter.ts`、`src/main.ts` 中的 diagram helper |
 | P1 | selection/export 与 config flow 的 contract 增强 | 这些 operation 已建模，但未来 operation invoker 需要比 command-trigger 对等更丰富的 path/context 语义 | `src/operations/registry.ts`, `src/operations/configProfileCommands.ts`, `src/operations/noteProcessingCommandHostAdapter.ts` |
 | P1 | workflow/settings 打包 | Workflow DSL 与 output-path toggles 仍是有价值 metadata，但还不是稳定公共接口 | `src/workflowButtons.ts`, 设置驱动的输出控制 |
 | P2 | maintainer 语义验证与打包硬化 | 重型运行时隔离与维护者本地 runbook 仍重要，但在命令面收口后才是下一层问题 | `docs/maintainer/*`, render-host bundle 流程, release 验证路径 |
