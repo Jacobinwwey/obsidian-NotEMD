@@ -127,8 +127,9 @@ This means the roadmap should no longer be interpreted as "build the platform". 
 - The selection/export registry batch is now landed too: the same operation surface now also covers `editor.create-link-and-generate`, `provider.profile.export`, `provider.profile.import`, `cli.capability-manifest.export`, and `cli.invocation-contract.export`, so the old "selection/export surfaces still missing" gap is no longer current.
 - Translation/extraction utility boundary work has moved another step as well: `batchTranslateFolder()` now accepts an injected reporter instead of treating `ProgressModal` as the only carrier, and `extractOriginalText()` now returns a structured result object while the host adapter owns the success notice explicitly.
 - The next host-adapter batch is now landed too: `src/operations/utilityCommandHostAdapter.ts` now carries duplicate cleanup, batch Mermaid fix, and single/batch formula-fix command orchestration, so those wrappers in `src/main.ts` are now thin delegators as well.
+- The smallest remaining write-heavy contract batch is now landed too: `src/translate.ts` now returns `TranslateFileResult` / `BatchTranslateFolderResult`, `src/formulaFixer.ts` now returns `FormulaFixFileResult` / `BatchFormulaFixResult`, host adapters now own their success notices, and `src/operations/registry.ts` exports the richer `translate.*` / `formula.*` result schemas directly.
 - `src/fileUtils.ts` and `src/extractOriginalText.ts` now accept narrower runtime contexts instead of the concrete `NotemdPlugin` class. Boundary work has therefore advanced from "wrapper extraction" into "utility host-coupling reduction".
-- The remaining architectural gap has moved again: the next phase should prioritize deeper notice/result/vault-write side-effect tightening, richer machine-readable result semantics for write-heavy flows, and the still-inline sidebar/direct-read command surfaces in `src/main.ts` rather than more wrapper-only moves.
+- The remaining architectural gap has moved again: the next phase should prioritize the larger `src/fileUtils.ts` write-heavy family, then the still-inline sidebar/direct-read command surfaces in `src/main.ts`, rather than reopening already-landed translate/formula work or doing more wrapper-only moves.
 
 ## Verification Gates
 
@@ -195,8 +196,8 @@ Short version:
 5. **Keep workspace hygiene**
    `ref/` and `coverage/` are local analysis/build artifacts, not repo deliverables. The mainline expectation is a clean worktree.
 
-6. **Move the next phase toward write-heavy contract tightening**
-   Note-processing registry onboarding and utility host extraction are now largely complete. The next step should harden `translate.file`, `translate.folder-batch`, `formula.fix-file`, and `formula.batch-fix` around richer machine-readable results plus cleaner `Notice` / reporter / folder-creation host effects, then move into the larger write-heavy seams in `src/fileUtils.ts`.
+6. **Move the next phase toward the larger `src/fileUtils.ts` contract batch**
+   Note-processing registry onboarding, utility host extraction, and the `translate/formula` proof slice are now complete enough. The next step should harden `processFile`, `generateContentForTitle`, `batchGenerateContentForTitles`, `batchFixMermaidSyntaxInFolder`, and `checkAndRemoveDuplicateConceptNotes` around richer machine-readable results plus cleaner `Notice` / reporter / destructive-side-effect boundaries.
 
 7. **Keep draining the remaining high-value direct command surfaces after that**
    The verified highest-value remaining direct surfaces are now `testLlmConnectionCommand`, `generateDiagramCommand` plus its save/artifact branches, and `previewExperimentalDiagramCommand`. They matter more than reopening already-extracted utility families before the write-heavy result contracts are tightened.
@@ -205,12 +206,11 @@ Short version:
 
 The most defensible future landing order, after cross-checking roadmap intent against current code, is:
 
-1. first tighten `translate.file`, `translate.folder-batch`, `formula.fix-file`, and `formula.batch-fix` around richer result contracts and cleaner host-owned success semantics
-2. then tighten the larger write-heavy families in `src/fileUtils.ts`, especially processed-file saving, title generation, concept-note creation, duplicate cleanup, and aggregated error semantics
-3. then converge the remaining direct command surfaces in `src/main.ts`, with `testLlmConnectionCommand`, `generateDiagramCommand`, and `previewExperimentalDiagramCommand` as the highest-value targets
-4. after those three items stabilize, continue follow-up hardening for maintainer-local semantic verification and heavy-runtime packaging boundaries
-5. after those boundary items, reopen legacy prompt retirement, MermaidProcessor sunset, or richer first-class CLI exposure
-6. only after that, re-evaluate board-style export and advanced-engine exploration
+1. first tighten the larger write-heavy families in `src/fileUtils.ts`, especially processed-file saving, title generation, Mermaid repair, duplicate cleanup, and aggregated error semantics
+2. then converge the remaining direct command surfaces in `src/main.ts`, with `testLlmConnectionCommand`, `generateDiagramCommand`, and `previewExperimentalDiagramCommand` as the highest-value targets
+3. after those two items stabilize, continue follow-up hardening for maintainer-local semantic verification and heavy-runtime packaging boundaries
+4. after those boundary items, reopen legacy prompt retirement, MermaidProcessor sunset, or richer first-class CLI exposure
+5. only after that, re-evaluate board-style export and advanced-engine exploration
 
 That sequence preserves the roadmap's long-term intent while respecting what the codebase has already delivered.
 

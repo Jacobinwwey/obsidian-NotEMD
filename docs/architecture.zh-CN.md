@@ -242,11 +242,12 @@ flowchart LR
 - `src/operations/noteProcessingCommandHostAdapter.ts` 现在不仅承接 `process-current-add-links`、`process-folder-add-links`、`batch-generate-from-titles`、`generate-from-title` 与 `research-and-summarize`，还继续承接 `translate-current-file`、`batch-translate-folder`、`extract-concepts-current`、`extract-concepts-folder`、`extract-original-text` 与 `extract-concepts-and-generate-titles` 的 busy-guard、reporter 生命周期、notice/error-log 编排逻辑
 - `src/operations/utilityCommandHostAdapter.ts` 现在也已承接当前文件 duplicate check、duplicate cleanup、batch Mermaid fix 与 single/batch formula fix 的 command orchestration；`check-for-duplicates` 已不再内联写在命令注册里
 - `src/operations/registry.ts` 现在也已覆盖剩余 selection/export 邻接自动化表面：`editor.create-link-and-generate`、`provider.profile.export`、`provider.profile.import`、`cli.capability-manifest.export` 与 `cli.invocation-contract.export` 已进入与前几批相同的 registry/capability/contract 表面
-- `src/translate.ts` 现在已允许 batch translation 注入外部 reporter，不再把 `ProgressModal` 固化成唯一执行载体；`src/extractOriginalText.ts` 现在会返回结构化提取结果，成功 notice 也已上提到 host adapter；`content.extract-original-text` 已成为第一条具体证明 write-heavy richer result semantics 可行的路径
+- write-heavy contract enrichment 现在已经在三条家族上完成验证：`src/translate.ts` 会返回 `TranslateFileResult` / `BatchTranslateFolderResult`，`src/formulaFixer.ts` 会返回 `FormulaFixFileResult` / `BatchFormulaFixResult`，`src/extractOriginalText.ts` 也会返回结构化提取结果；翻译、公式修复、原文提取这三类成功 notice 现在都由 host adapter 承接，不再留在 utility core
+- `src/operations/registry.ts` 现在也直接建模了 `translate.*` 与 `formula.*` 的 richer result schema，因此 capability export 与 invocation-contract export 不再把这两类流程压平成仅路径或仅计数语义
 - `src/fileUtils.ts` 与 `src/extractOriginalText.ts` 现在已经接受更窄的 runtime context，而不是直接依赖具体 `NotemdPlugin` 类，这说明边界正在从 wrapper 抽离继续推进到 utility 对宿主类型耦合的削弱
-- `src/main.ts` 现在主要保留命令注册与少量直接执行表面；当前 registry 已覆盖 diagram/provider/config-profile 以及 process/generate/research/translation/extraction/utility/selection/export 这些 operations，真正的下一阶段缺口已经转向更细的 notice/result/vault-write side-effect 收口、write-heavy flow 更丰富的结果契约，以及剩余 direct-read/sidebar 表面
+- `src/main.ts` 现在主要保留命令注册与少量直接执行表面；当前 registry 已覆盖 diagram/provider/config-profile 以及 process/generate/research/translation/extraction/utility/selection/export 这些 operations，真正的下一阶段缺口已经转向更大的 `src/fileUtils.ts` 写入型家族，以及剩余 direct-read/sidebar 表面，而不是继续重复 wrapper 搬运
 - 当前已核实的高价值剩余直接命令面是 `testLlmConnectionCommand`、`generateDiagramCommand` 及其 save/artifact 分支、以及 `previewExperimentalDiagramCommand`
-- 下一阶段顺序已经明确：先收紧 `translate.*` 与 `formula.*`，再收紧 `src/fileUtils.ts` 中更大的 write-heavy families，最后再处理剩余 direct-read/sidebar surfaces
+- 下一阶段顺序已经明确：先收紧 `src/fileUtils.ts` 中更大的 write-heavy families，再处理剩余 direct-read/sidebar surfaces，最后再重开 packaging / semantic verification 的后续收敛
 
 ## 关键设计决策
 
@@ -260,7 +261,7 @@ flowchart LR
 ## 验证
 
 - `npm run build` — TypeScript 编译 + esbuild 打包
-- `npm test -- --runInBand` — 完整 Jest 矩阵当前为 129 套件、823 项测试
+- `npm test -- --runInBand` — 完整 Jest 矩阵当前为 133 套件、846 项测试；若在 `/.worktrees/` checkout 中验证，请改用 `npx jest --runInBand --config /tmp/notemd-worktree-jest.cjs`，因为仓库默认 Jest ignore 规则会排除 worktree 路径
 - `npm run audit:i18n-ui` — 无硬编码 UI 字符串
 - `npm run audit:render-host` — 渲染宿主自包含于 main.js
 - `git diff --check` — 空白符卫生

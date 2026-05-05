@@ -2,6 +2,22 @@ import { App, TFile, TFolder } from 'obsidian';
 import { ProgressReporter } from './types';
 import { delay } from './utils';
 
+export interface FormulaFixFileResult {
+    sourcePath: string;
+    outputPath: string;
+    modified: boolean;
+    replacementCount: number;
+}
+
+export interface BatchFormulaFixResult {
+    folderPath: string;
+    processedFileCount: number;
+    modifiedCount: number;
+    cancelled: boolean;
+    fileResults: FormulaFixFileResult[];
+    errors: { file: string; message: string }[];
+}
+
 /**
  * Fixes single-line math formulas delimited by single '$' to double '$$'
  * Matches: ^(\s*)\$(\s*)$
@@ -21,23 +37,35 @@ export function fixFormulaFormats(content: string): string {
     return content.replace(pattern, '$1$$$$$2');
 }
 
+function countFormulaFormatReplacements(content: string): number {
+    return (content.match(/^(\s*)\$(\s*)$/gm) || []).length;
+}
+
 /**
  * Fixes formula formats in a single file.
  * Reads the file, applies fixFormulaFormats, and writes back if changed.
  */
-export async function fixFormulaFormatsInFile(app: App, file: TFile, reporter?: ProgressReporter): Promise<boolean> {
+export async function fixFormulaFormatsInFile(
+    app: App,
+    file: TFile,
+    reporter?: ProgressReporter
+): Promise<FormulaFixFileResult> {
     try {
         const content = await app.vault.read(file);
+        const replacementCount = countFormulaFormatReplacements(content);
         const newContent = fixFormulaFormats(content);
         
         if (newContent !== content) {
             await app.vault.modify(file, newContent);
             if (reporter) reporter.log(`Fixed formulas in ${file.name}`);
-            return true;
-        } else {
-            // if (reporter) reporter.log(`No formula fixes needed for ${file.name}`);
-            return false;
         }
+
+        return {
+            sourcePath: file.path,
+            outputPath: file.path,
+            modified: newContent !== content,
+            replacementCount
+        };
     } catch (error) {
         const msg = `Error processing formulas in ${file.name}: ${error}`;
         if (reporter) reporter.log(msg);
@@ -53,7 +81,7 @@ export async function batchFixFormulaFormatsInFolder(
     app: App, 
     folderPath: string, 
     reporter: ProgressReporter
-): Promise<{ modifiedCount: number; errors: { file: string; message: string }[] }> {
+): Promise<BatchFormulaFixResult> {
     
     const folder = app.vault.getAbstractFileByPath(folderPath);
     if (!folder || !(folder instanceof TFolder)) {
@@ -67,11 +95,19 @@ export async function batchFixFormulaFormatsInFolder(
 
     if (files.length === 0) {
         reporter.log(`No eligible files found in ${folderPath}`);
-        return { modifiedCount: 0, errors: [] };
+        return {
+            folderPath,
+            processedFileCount: 0,
+            modifiedCount: 0,
+            cancelled: false,
+            fileResults: [],
+            errors: []
+        };
     }
 
     let modifiedCount = 0;
     const errors: { file: string; message: string }[] = [];
+    const fileResults: FormulaFixFileResult[] = [];
 
     for (let i = 0; i < files.length; i++) {
         const file = files[i];
@@ -81,8 +117,9 @@ export async function batchFixFormulaFormatsInFolder(
         reporter.updateStatus(`Checking formulas in ${file.name}...`, progress);
 
         try {
-            const modified = await fixFormulaFormatsInFile(app, file, reporter);
-            if (modified) modifiedCount++;
+            const fileResult = await fixFormulaFormatsInFile(app, file, reporter);
+            fileResults.push(fileResult);
+            if (fileResult.modified) modifiedCount++;
         } catch (error: any) {
             const message = error.message || String(error);
             errors.push({ file: file.name, message });
@@ -93,5 +130,12 @@ export async function batchFixFormulaFormatsInFolder(
         if (i % 10 === 0) await delay(10);
     }
 
-    return { modifiedCount, errors };
+    return {
+        folderPath,
+        processedFileCount: files.length,
+        modifiedCount,
+        cancelled: reporter.cancelled,
+        fileResults,
+        errors
+    };
 }

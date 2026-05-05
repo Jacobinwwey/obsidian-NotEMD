@@ -15,6 +15,7 @@ describe('CLI invocation contract', () => {
         const batchGenerate = contract.operations.find(operation => operation.operationId === 'content.batch-generate-from-titles');
         const researchSummarize = contract.operations.find(operation => operation.operationId === 'research.summarize-topic');
         const translateFile = contract.operations.find(operation => operation.operationId === 'translate.file');
+        const translateFolder = contract.operations.find(operation => operation.operationId === 'translate.folder-batch');
         const extractOriginalText = contract.operations.find(operation => operation.operationId === 'content.extract-original-text');
         const extractAndGenerate = contract.operations.find(operation => operation.operationId === 'workflow.extract-and-generate');
         const checkDuplicates = contract.operations.find(operation => operation.operationId === 'duplicate.check-file');
@@ -73,6 +74,20 @@ describe('CLI invocation contract', () => {
                 type: 'object',
                 properties: expect.objectContaining({
                     outputPath: expect.any(Object)
+                })
+            })
+        }));
+
+        expect(translateFolder).toEqual(expect.objectContaining({
+            operationId: 'translate.folder-batch',
+            resultSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    processedFileCount: expect.any(Object),
+                    translatedCount: expect.any(Object),
+                    cancelled: expect.any(Object),
+                    fileResults: expect.any(Object),
+                    errors: expect.any(Object)
                 })
             })
         }));
@@ -222,7 +237,11 @@ describe('CLI invocation contract', () => {
             resultSchema: expect.objectContaining({
                 type: 'object',
                 properties: expect.objectContaining({
-                    outputPath: expect.any(Object)
+                    outputPath: expect.any(Object),
+                    created: expect.any(Object),
+                    overwritten: expect.any(Object),
+                    openedInWorkspace: expect.any(Object),
+                    chunkCount: expect.any(Object)
                 })
             })
         }));
@@ -314,7 +333,9 @@ describe('CLI invocation contract', () => {
             resultSchema: expect.objectContaining({
                 type: 'object',
                 properties: expect.objectContaining({
-                    modified: expect.any(Object)
+                    outputPath: expect.any(Object),
+                    modified: expect.any(Object),
+                    replacementCount: expect.any(Object)
                 })
             })
         }));
@@ -330,7 +351,11 @@ describe('CLI invocation contract', () => {
             resultSchema: expect.objectContaining({
                 type: 'object',
                 properties: expect.objectContaining({
+                    folderPath: expect.any(Object),
+                    processedFileCount: expect.any(Object),
                     modifiedCount: expect.any(Object),
+                    cancelled: expect.any(Object),
+                    fileResults: expect.any(Object),
                     errors: expect.any(Object)
                 })
             })

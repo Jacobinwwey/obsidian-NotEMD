@@ -215,7 +215,15 @@ const TRANSLATE_FILE_RESULT_SCHEMA: OperationSchema = {
     properties: {
         sourcePath: { type: 'string' },
         targetLanguage: { type: 'string' },
-        outputPath: { type: 'string' }
+        requestedOutputFolderPath: { type: 'string' },
+        outputFolderPath: { type: 'string' },
+        outputFolderCreated: { type: 'boolean' },
+        usedFallbackOutputFolder: { type: 'boolean' },
+        outputPath: { type: 'string' },
+        created: { type: 'boolean' },
+        overwritten: { type: 'boolean' },
+        openedInWorkspace: { type: 'boolean' },
+        chunkCount: { type: 'number' }
     }
 };
 
@@ -231,8 +239,17 @@ const TRANSLATE_FOLDER_RESULT_SCHEMA: OperationSchema = {
     type: 'object',
     properties: {
         folderPath: { type: 'string' },
+        requestedOutputFolderPath: { type: 'string' },
         outputFolderPath: { type: 'string' },
+        outputFolderCreated: { type: 'boolean' },
+        targetLanguage: { type: 'string' },
+        processedFileCount: { type: 'number' },
         translatedCount: { type: 'number' },
+        cancelled: { type: 'boolean' },
+        fileResults: {
+            type: 'array',
+            items: TRANSLATE_FILE_RESULT_SCHEMA
+        },
         errors: ERROR_ARRAY_SCHEMA
     }
 };
@@ -371,7 +388,9 @@ const FIX_FORMULA_FILE_RESULT_SCHEMA: OperationSchema = {
     type: 'object',
     properties: {
         sourcePath: { type: 'string' },
-        modified: { type: 'boolean' }
+        outputPath: { type: 'string' },
+        modified: { type: 'boolean' },
+        replacementCount: { type: 'number' }
     }
 };
 
@@ -386,7 +405,13 @@ const BATCH_FIX_FORMULA_RESULT_SCHEMA: OperationSchema = {
     type: 'object',
     properties: {
         folderPath: { type: 'string' },
+        processedFileCount: { type: 'number' },
         modifiedCount: { type: 'number' },
+        cancelled: { type: 'boolean' },
+        fileResults: {
+            type: 'array',
+            items: FIX_FORMULA_FILE_RESULT_SCHEMA
+        },
         errors: ERROR_ARRAY_SCHEMA
     }
 };
