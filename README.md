@@ -720,4 +720,4 @@ MIT License - See [LICENSE](LICENSE) file for details.
 
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)
-### Links: [Linux DO：学AI，上L站！](https://linux.do/)
+#### Friendly Links: [Linux DO：学AI，上L站！](https://linux.do/)
