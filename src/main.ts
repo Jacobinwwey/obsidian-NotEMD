@@ -51,11 +51,6 @@ import {
     previewVegaLiteArtifactFromMarkdown
 } from './operations/diagramCommandHostAdapter';
 import {
-    executeExportCliCapabilityManifestCommand,
-    executeExportCliInvocationContractCommand,
-    executeExportProviderProfilesCommand,
-    executeImportProviderProfilesCommand,
-    MissingProviderProfileImportFileError,
     PluginConfigCommandHost
 } from './operations/configProfileCommands';
 import {
@@ -66,6 +61,14 @@ import {
     runProviderDiagnosticCommandWithHost,
     runProviderDiagnosticStabilityCommandWithHost
 } from './operations/providerDiagnosticCommandHostAdapter';
+import {
+    ConfigProfileCommandHost,
+    ConfigProfileCommandNotice,
+    runExportCliCapabilityManifestCommandWithHost,
+    runExportCliInvocationContractCommandWithHost,
+    runExportProviderProfilesCommandWithHost,
+    runImportProviderProfilesCommandWithHost
+} from './operations/configProfileCommandHostAdapter';
 
 type DiagramCommandExecutionMode = 'save-mermaid' | 'save-artifact' | 'preview-artifact';
 
@@ -165,6 +168,25 @@ export default class NotemdPlugin extends Plugin {
             sanitizeRuns: (rawValue) => this.sanitizeDeveloperDiagnosticRuns(rawValue),
             reportHost: this.createProviderDiagnosticReportHost()
         };
+    }
+
+    private createConfigProfileCommandHost(): ConfigProfileCommandHost {
+        return {
+            loadSettings: () => this.loadSettings(),
+            saveSettings: () => this.saveSettings(),
+            getSettings: () => this.settings,
+            getUiStrings: () => this.getUiStrings(),
+            pluginId: this.manifest.id,
+            defaultActiveProvider: DEFAULT_SETTINGS.activeProvider,
+            configHost: this.createPluginConfigCommandHost(),
+            logError: (message, error) => console.error(message, error)
+        };
+    }
+
+    private showCommandNotices(notices: ConfigProfileCommandNotice[]): void {
+        for (const notice of notices) {
+            new Notice(notice.message, notice.duration);
+        }
     }
 
     private getDiagramCommandActionLabel(executionMode: DiagramCommandExecutionMode, i18n = this.getUiStrings()): string {
@@ -1318,78 +1340,23 @@ export default class NotemdPlugin extends Plugin {
     }
 
     async exportProviderProfilesCommand(): Promise<void> {
-        await this.loadSettings();
-        const i18n = this.getUiStrings();
-
-        try {
-            const execution = await executeExportProviderProfilesCommand({
-                pluginId: this.manifest.id,
-                providers: this.settings.providers,
-                host: this.createPluginConfigCommandHost()
-            });
-
-            new Notice(formatI18n(i18n.settings.providerConfig.exportSuccess, { path: execution.outputPath }));
-        } catch (error: unknown) {
-            const message = error instanceof Error ? error.message : String(error);
-            console.error('Error exporting provider settings:', error);
-            new Notice(formatI18n(i18n.settings.providerConfig.exportError, { message }));
-        }
+        const result = await runExportProviderProfilesCommandWithHost(this.createConfigProfileCommandHost());
+        this.showCommandNotices(result.notices);
     }
 
     async importProviderProfilesCommand(): Promise<void> {
-        await this.loadSettings();
-        const i18n = this.getUiStrings();
-
-        try {
-            const execution = await executeImportProviderProfilesCommand({
-                pluginId: this.manifest.id,
-                existingProviders: this.settings.providers,
-                activeProvider: this.settings.activeProvider,
-                defaultActiveProvider: DEFAULT_SETTINGS.activeProvider,
-                host: this.createPluginConfigCommandHost()
-            });
-
-            this.settings.providers = execution.importedProviders;
-            this.settings.activeProvider = execution.activeProvider;
-            if (execution.activeProviderReset) {
-                new Notice(i18n.settings.providerConfig.activeProviderReset);
-            }
-
-            await this.saveSettings();
-            new Notice(formatI18n(i18n.settings.providerConfig.importSuccess, {
-                newCount: execution.newCount,
-                updatedCount: execution.updatedCount
-            }));
-        } catch (error: unknown) {
-            if (error instanceof MissingProviderProfileImportFileError) {
-                new Notice(formatI18n(i18n.settings.providerConfig.importFileMissing, { path: error.inputPath }));
-                return;
-            }
-
-            const message = error instanceof Error ? error.message : String(error);
-            console.error('Error importing provider settings:', error);
-            new Notice(formatI18n(i18n.settings.providerConfig.importError, { message }));
-        }
+        const result = await runImportProviderProfilesCommandWithHost(this.createConfigProfileCommandHost());
+        this.showCommandNotices(result.notices);
     }
 
     async exportCliCapabilityManifestCommand(): Promise<void> {
-        await this.loadSettings();
-        const i18n = this.getUiStrings();
-        const execution = await executeExportCliCapabilityManifestCommand({
-            pluginId: this.manifest.id,
-            host: this.createPluginConfigCommandHost()
-        });
-        new Notice(formatI18n(i18n.notices.cliCapabilityManifestExported, { path: execution.outputPath }));
+        const result = await runExportCliCapabilityManifestCommandWithHost(this.createConfigProfileCommandHost());
+        this.showCommandNotices(result.notices);
     }
 
     async exportCliInvocationContractCommand(): Promise<void> {
-        await this.loadSettings();
-        const i18n = this.getUiStrings();
-        const execution = await executeExportCliInvocationContractCommand({
-            pluginId: this.manifest.id,
-            host: this.createPluginConfigCommandHost()
-        });
-        new Notice(formatI18n(i18n.notices.cliInvocationContractExported, { path: execution.outputPath }));
+        const result = await runExportCliInvocationContractCommandWithHost(this.createConfigProfileCommandHost());
+        this.showCommandNotices(result.notices);
     }
 
     /** Command: Generate Content from Title */

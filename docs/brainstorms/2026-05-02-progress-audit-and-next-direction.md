@@ -117,7 +117,8 @@ This means the roadmap should no longer be interpreted as "build the platform". 
 - The first config/profile slice is now landed too: `src/operations/configProfileCommands.ts` owns provider-profile import/export and CLI capability/contract export orchestration, and the settings tab now reuses the same command path instead of keeping a parallel implementation.
 - Provider-diagnostic report persistence is now landed too: `src/operations/providerDiagnosticReportPersistence.ts` owns collision-safe diagnostic report file creation, so `src/main.ts` no longer carries that file-path policy inline.
 - Provider-diagnostic host adaptation is now landed too: `src/operations/providerDiagnosticCommandHostAdapter.ts` owns settings loading, report-persistence wiring, and user-surface notice shaping for developer diagnostics, so `src/main.ts` no longer carries that orchestration inline.
-- The remaining architectural gap is now narrower still: `src/main.ts` mainly retains command registration plus config/profile state persistence and other user-surface host effects, which is a far more defensible next seam than the earlier save/preview-heavy command wrappers.
+- Config/profile host adaptation is now landed too: `src/operations/configProfileCommandHostAdapter.ts` owns import/export state persistence, CLI export notice shaping, and import/export error mapping, so `src/main.ts` no longer carries that CLI-adjacent orchestration inline either.
+- The remaining architectural gap is now narrower still: `src/main.ts` mainly retains command registration plus broader non-CLI interactive and batch host effects, which is a far more defensible next seam than the earlier save/preview-heavy command wrappers.
 
 ## Verification Gates
 
