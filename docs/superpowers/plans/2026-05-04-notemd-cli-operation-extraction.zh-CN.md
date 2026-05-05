@@ -48,6 +48,7 @@
 - `src/operations/registry.ts` 现在是已抽取 operation definition、command binding、mapping kind 与部分 input/result schema 的中心事实源。
 - `src/operations/capabilityManifest.ts` 与 `src/cliContracts.ts` 现在都从这份 registry 派生，减少了一条主要元数据漂移路径。
 - `diagram.generate` 现在已经和 provider diagnostics 一样拥有类型化 invocation contract。
+- 第一批 MT2 执行层拆分已经落地：`src/operations/diagramGenerateOperation.ts` 现在承接可复用的 diagram 执行路径，`src/operations/providerDiagnosticCommand.ts` 现在承接 `src/main.ts` 之下的 provider diagnostic command orchestration。
 - 现有 Obsidian 命令仍保持注册状态，并继续支持快捷键与官方 CLI 触发，同时底层 operation 层继续演进。
 
 ## 短期交付（0-2 周）
@@ -158,6 +159,7 @@
 - 实施状态：
   - 共享 `DiagramOperationInput` 整形已落地
   - `diagram.generate` 现在已进入 registry 驱动的类型化 invocation contract
+  - 可复用执行路径现已落在 `src/operations/diagramGenerateOperation.ts`
   - 剩余缺口：把 save/preview 宿主适配逻辑继续从 `src/main.ts` 抽离出去
 
 **MT2. Host adapter 拆分**
@@ -266,7 +268,7 @@
 进度说明：
 
 - 第 1-4 项已在主线上部分落地。
-- 下一步最稳妥的推进点是 MT2：继续把 host adapter 从 `src/main.ts` 中拆出，避免 command wrapper 仍成为进入已抽取 operation 的唯一运行时入口。
+- 下一步最稳妥的推进点仍是 MT2，但范围已经缩小：在已落地执行层抽离的基础上，继续把 save/preview/config adapter 从 `src/main.ts` 中拆出，避免 command wrapper 仍成为进入已抽取 operation 的唯一运行时入口。
 
 ## 退出标准
 
