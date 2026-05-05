@@ -140,7 +140,7 @@ Ennyi az egész. Fedezze fel a beállításokat, hogy további lehetőségeket n
     - A Mermaid-diagram kimeneti nyelve a beállításokban testreszabható.
     - **Mermaid Output Folder**: állítsa be azt a mappát, ahová a generált Mermaid-diagramfájlok kerülnek.
     - **Translate Summarize to Mermaid Output**: opcionálisan lefordítja a generált Mermaid-diagram tartalmát a konfigurált célnyelvre.
-    - 
+    -
 <img width="596" height="239" alt="SUMM" src="https://github.com/user-attachments/assets/08f44a41-9ec0-472c-91ee-19c8477ec639" />
 
 - **Egyszerű képletformázási javítás**:
@@ -685,5 +685,17 @@ MIT licenc - a részletekért lásd a [LICENSE](LICENSE) fájlt.
 
 
 *Notemd v1.8.4 - Fejlessze az Obsidian tudásgráfját mesterséges intelligenciával.*
+
+
+<!-- repo-chronicle:start -->
+## Fejlesztési Krónika
+
+Ez a negyedéves krónika megőrzi a [repo-saga](https://github.com/teee32/repo-saga) eredeti vizuális stílusát; a negyedéves felosztást most már maga a repo-saga állítja elő.
+
+![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.hu.svg)
+
+_Utoljára a jelenlegi munkafából frissítve: 2026-05-05. A legutóbbi commit dátuma: 2026-05-05._
+<!-- repo-chronicle:end -->
+
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)

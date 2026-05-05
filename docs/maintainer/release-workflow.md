@@ -23,6 +23,8 @@ npm run regression:language-compare
 Run:
 
 ```bash
+npm run chronicle:sync-repo-saga
+npm run chronicle:update
 npm run build
 npm test -- --runInBand
 npm run audit:i18n-ui
@@ -86,10 +88,14 @@ The repository also ships `.github/workflows/release.yml`:
 
 - Push a git tag to publish the release automatically.
 - Use `workflow_dispatch` with a numeric `x.x.x` `tag` input to repair an existing release from CI.
+- The same workflow now regenerates the quarterly development chronicle after publish, refreshes every root `README*.md` chronicle block, rewrites each localized `docs/repo-saga/notemd-development-history.<locale>.svg`, refreshes the English alias `docs/repo-saga/notemd-development-history.svg`, and pushes that documentation-only update back to `main`.
+- `npm run chronicle:sync-repo-saga` assembles `.cache/repo-saga-upstream` from the two upstream `repo-saga` branches we currently depend on: `feat/timeline-granularity` for quarter slicing and `feat-locale-i18n` for locale expansion.
 - This workflow does **not** run automatically for ordinary `main` pushes or PRs; pre-merge verification is still a local maintainer responsibility.
 - `main` currently has no branch protection and no ordinary push/PR workflow. If the commit-status API shows `pending` with zero statuses on `main`, treat GitHub Actions runs plus `check-suites` / `check-runs` as the real source of truth; release-tag runs may still attach successful checks to the same commit.
 - The workflow now pins `actions/checkout@v6` and `actions/setup-node@v6` so the release path does not keep the older Node 20 JavaScript-action runtime warning alive.
-- The workflow runs `npm ci`, `npm run build`, `npm test -- --runInBand`, `npm run audit:i18n-ui`, `npm run audit:render-host`, `git diff --check`, and finally `npm run release:github -- "$TAG_NAME"`.
+- The publish job runs `npm ci`, `npm run build`, `npm test -- --runInBand`, `npm run audit:i18n-ui`, `npm run audit:render-host`, `git diff --check`, and finally `npm run release:github -- "$TAG_NAME"`.
+- The follow-up chronicle job runs `node scripts/repo-saga/update-quarterly-saga.mjs --tag "$TAG_NAME"` on `main`, then commits the refreshed `README*.md` blocks plus localized quarterly SVG set if anything changed.
+- The chronicle refresh script itself now rebuilds its local `repo-saga` cache by copying the granularity branch as the base and overlaying the locale/i18n branch files before invoking the `repo-saga` CLI.
 - The workflow validates `^[0-9]+\.[0-9]+\.[0-9]+$` before checkout and publish, so `v1.8.2`-style tags are rejected.
 
 The workflow intentionally reuses the checked-in release helper instead of duplicating asset lists or release-note logic inside YAML.

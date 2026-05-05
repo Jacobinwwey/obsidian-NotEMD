@@ -690,4 +690,16 @@ Lesen MIT - lihat fail [LICENSE](LICENSE) untuk butiran.
 *Notemd v1.8.4 - Perkayakan graf pengetahuan Obsidian anda dengan AI.*
 
 
+
+<!-- repo-chronicle:start -->
+## Kronik Pembangunan
+
+Kronik suku tahunan ini mengekalkan gaya visual asal [repo-saga](https://github.com/teee32/repo-saga); pembahagian suku kini dijana terus oleh repo-saga sendiri.
+
+![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.ms.svg)
+
+_Kali terakhir disegarkan daripada salinan kerja semasa pada 2026-05-05. Tarikh commit terkini: 2026-05-05._
+<!-- repo-chronicle:end -->
+
+
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)

@@ -689,4 +689,16 @@ MIT License - Katso lisätiedot tiedostosta [LICENSE](LICENSE).
 
 *Notemd v1.8.4 - Paranna Obsidian-tietograafiasi tekoälyn avulla.*
 
+
+<!-- repo-chronicle:start -->
+## Kehityskronikka
+
+Tämä neljännesvuosittainen kronikka säilyttää [repo-saga](https://github.com/teee32/repo-saga)-projektin alkuperäisen visuaalisen tyylin; repo-saga tuottaa nyt neljännesjaon suoraan itse.
+
+![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.fi.svg)
+
+_Päivitetty viimeksi nykyisestä työhakemistosta 2026-05-05. Viimeisimmän commitin päivämäärä: 2026-05-05._
+<!-- repo-chronicle:end -->
+
+
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)

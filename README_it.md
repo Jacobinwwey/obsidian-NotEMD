@@ -145,7 +145,7 @@ Se ami usare Notemd, per favore considera di [⭐ dare una stella su GitHub](htt
     - La lingua di output del diagramma Mermaid può essere personalizzata nelle impostazioni.
     - **Cartella Output Mermaid**: Configura la cartella dove verranno salvati i file dei diagrammi Mermaid generati.
     - **Traduci Riassunto in Output Mermaid**: Traduce opzionalmente il contenuto del diagramma Mermaid generato nella lingua di destinazione configurata.
-    
+
 <img width="596" height="239" alt="SUMM" src="https://github.com/user-attachments/assets/08f44a41-9ec0-472c-91ee-19c8477ec639" />
 
 - **Correzione Semplice Formato Formule**:
@@ -680,7 +680,7 @@ Notemd viene eseguito localmente all'interno di Obsidian, ma alcune funzioni inv
 
 ## Contribuire
 
-I contributi sono i benvenuti! Fai riferimento alla repository GitHub per le linee guida: [https://github.com/Jacobinwwey/obsidian-NotEMD](https://github.com/Jacobinwwey/obsidian-NotEMD) 
+I contributi sono i benvenuti! Fai riferimento alla repository GitHub per le linee guida: [https://github.com/Jacobinwwey/obsidian-NotEMD](https://github.com/Jacobinwwey/obsidian-NotEMD)
 
 ## Documentazione per i Manutentori
 
@@ -695,6 +695,18 @@ Licenza MIT - Vedi il file [LICENSE](LICENSE) per i dettagli.
 
 
 *Notemd v1.8.4 - Migliora il tuo grafo di conoscenza su Obsidian con l'IA.*
+
+
+
+<!-- repo-chronicle:start -->
+## Cronaca Dello Sviluppo
+
+Questa cronaca trimestrale mantiene lo stile visivo originale di [repo-saga](https://github.com/teee32/repo-saga); ora è repo-saga stesso a generare direttamente la suddivisione per trimestre.
+
+![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.it.svg)
+
+_Aggiornato l'ultima volta dall'albero di lavoro il 2026-05-05. Data dell'ultimo commit: 2026-05-05._
+<!-- repo-chronicle:end -->
 
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)

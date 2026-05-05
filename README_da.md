@@ -691,4 +691,16 @@ MIT License - Se filen [LICENSE](LICENSE) for detaljer.
 
 *Notemd v1.8.4 - Forbedr din Obsidian-vidensgraf med AI.*
 
+
+<!-- repo-chronicle:start -->
+## Udviklingskrønike
+
+Denne kvartalsvise krønike bevarer den oprindelige visuelle stil fra [repo-saga](https://github.com/teee32/repo-saga); kun era-opdelingen er ændret fra år til kvartal.
+
+![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.da.svg)
+
+_Senest opdateret fra det aktuelle arbejdstræ den 2026-05-05. Seneste commit-dato: 2026-05-05._
+<!-- repo-chronicle:end -->
+
+
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)

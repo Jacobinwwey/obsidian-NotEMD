@@ -140,7 +140,7 @@ Notemd आपके Obsidian वर्कफ़्लो को बेहतर 
     - Mermaid diagram की output language settings में बदली जा सकती है।
     - **Mermaid Output Folder**: वह folder कॉन्फ़िगर करें जहाँ generated Mermaid diagram files सहेजी जाएँगी।
     - **Translate Summarize to Mermaid Output**: generated Mermaid diagram content को configured target language में वैकल्पिक रूप से अनुवाद करता है।
-    - 
+    -
 <img width="596" height="239" alt="SUMM" src="https://github.com/user-attachments/assets/08f44a41-9ec0-472c-91ee-19c8477ec639" />
 
 - **सरल सूत्र प्रारूप सुधार**:
@@ -685,5 +685,17 @@ MIT लाइसेंस - विवरण के लिए [LICENSE](LICENSE) 
 
 
 *Notemd v1.8.4 - AI के साथ अपने Obsidian knowledge graph को बेहतर बनाएँ।*
+
+
+<!-- repo-chronicle:start -->
+## विकास कालक्रम
+
+यह त्रैमासिक कालक्रम [repo-saga](https://github.com/teee32/repo-saga) की मूल दृश्य शैली को बनाए रखता है; अब तिमाही विभाजन सीधे repo-saga स्वयं उत्पन्न करता है।
+
+![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.hi.svg)
+
+_इसे 2026-05-05 को वर्तमान वर्किंग ट्री से अंतिम बार रीफ़्रेश किया गया। नवीनतम कमिट तिथि: 2026-05-05।_
+<!-- repo-chronicle:end -->
+
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)

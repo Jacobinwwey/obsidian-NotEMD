@@ -691,4 +691,16 @@ Giấy phép MIT. Xem file [LICENSE](LICENSE) để biết chi tiết.
 *Notemd v1.8.4 - Nâng cấp knowledge graph Obsidian của bạn bằng AI.*
 
 
+
+<!-- repo-chronicle:start -->
+## Biên Niên Sử Phát Triển
+
+Biên niên sử theo quý này giữ nguyên phong cách hình ảnh gốc của [repo-saga](https://github.com/teee32/repo-saga); việc chia theo quý nay do chính repo-saga tạo trực tiếp.
+
+![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.vi.svg)
+
+_Lần làm mới gần nhất từ bản làm việc hiện tại vào 2026-05-05. Ngày commit mới nhất: 2026-05-05._
+<!-- repo-chronicle:end -->
+
+
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)

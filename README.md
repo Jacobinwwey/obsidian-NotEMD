@@ -145,7 +145,7 @@ That's it! Explore the settings to unlock more features like web research, trans
     - The output language of the Mermaid diagram can be customized in the settings.
     - **Mermaid Output Folder**: Configure the folder where the generated Mermaid diagram files will be saved.
     - **Translate Summarize to Mermaid Output**: Optionally translate the generated Mermaid diagram content into the configured target language.
-    - 
+    -
 <img width="596" height="239" alt="SUMM" src="https://github.com/user-attachments/assets/08f44a41-9ec0-472c-91ee-19c8477ec639" />
 
 - **Experimental Diagram Pipeline**:
@@ -703,7 +703,7 @@ Notemd runs locally inside Obsidian, but some features send outbound requests.
 
 ## Contributing
 
-Contributions are welcome! Please refer to the GitHub repository for guidelines: [https://github.com/Jacobinwwey/obsidian-NotEMD](https://github.com/Jacobinwwey/obsidian-NotEMD) 
+Contributions are welcome! Please refer to the GitHub repository for guidelines: [https://github.com/Jacobinwwey/obsidian-NotEMD](https://github.com/Jacobinwwey/obsidian-NotEMD)
 
 ## Maintainer Docs
 
@@ -717,6 +717,17 @@ MIT License - See [LICENSE](LICENSE) file for details.
 ---
 
 *Notemd v1.8.4 - Enhance your Obsidian knowledge graph with AI.*
+
+
+<!-- repo-chronicle:start -->
+## Development Chronicle
+
+Quarterly chronicle rendered in the original [repo-saga](https://github.com/teee32/repo-saga) visual style. The slicing is now produced directly by repo-saga itself with quarter granularity.
+
+![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.en.svg)
+
+_Last refreshed from the working tree on 2026-05-05. Latest commit date: 2026-05-05._
+<!-- repo-chronicle:end -->
 
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)

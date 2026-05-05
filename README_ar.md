@@ -698,4 +698,16 @@
 
 *Notemd v1.8.4 - عزّز الرسم المعرفي في Obsidian باستخدام الذكاء الاصطناعي.*
 
+
+<!-- repo-chronicle:start -->
+## السجل التطوري
+
+يُعرض هذا السجل الفصلي بأسلوب [repo-saga](https://github.com/teee32/repo-saga) الأصلي، مع تغيير تقسيم العصور فقط من سنوي إلى ربعي.
+
+![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.ar.svg)
+
+_تم آخر تحديث من شجرة العمل في 2026-05-05. تاريخ أحدث التزام: 2026-05-05._
+<!-- repo-chronicle:end -->
+
+
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)

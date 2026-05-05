@@ -7,7 +7,7 @@ describe('render host bundle audit script', () => {
     const packageJsonPath = path.join(repoRoot, 'package.json');
     const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
     const workflowPath = path.join(repoRoot, '.github', 'workflows', 'release.yml');
-    const scriptRelativePath = path.join('scripts', 'audit-render-host-bundle.js');
+    const scriptRelativePath = path.posix.join('scripts', 'audit-render-host-bundle.js');
     const scriptPath = path.join(repoRoot, scriptRelativePath);
 
     test('registers a dedicated render-host audit in package scripts and release workflow', () => {
