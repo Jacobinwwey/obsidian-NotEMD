@@ -54,6 +54,7 @@
 - provider diagnostic report persistence 也已抽离：`src/operations/providerDiagnosticReportPersistence.ts` 现在承接带冲突规避的诊断报告文件落盘逻辑。
 - provider diagnostic host adaptation 也已抽离：`src/operations/providerDiagnosticCommandHostAdapter.ts` 现在承接开发者诊断命令的 settings 装载、报告落盘接线与 notice 整形逻辑。
 - config/profile host adaptation 也已抽离：`src/operations/configProfileCommandHostAdapter.ts` 现在承接 CLI 邻接的导入导出状态持久化、notice 整形与错误映射逻辑。
+- provider connection-test host adaptation 也已抽离：`src/operations/providerConnectionTestCommandHostAdapter.ts` 现在承接命令路径 settings 装载、临时 notice 编排、reporter 更新与 modal/log 持久化逻辑。
 - 现有 Obsidian 命令仍保持注册状态，并继续支持快捷键与官方 CLI 触发，同时底层 operation 层继续演进。
 
 ## 短期交付（0-2 周）
@@ -170,7 +171,8 @@
   - provider diagnostic report persistence 现在已落在 `src/operations/providerDiagnosticReportPersistence.ts`
   - provider diagnostic host adaptation 现在已落在 `src/operations/providerDiagnosticCommandHostAdapter.ts`
   - config/profile host adaptation 现在已落在 `src/operations/configProfileCommandHostAdapter.ts`
-  - 剩余缺口：继续收缩 `src/main.ts` 中更广义的非 CLI 交互与批处理宿主副作用，且不能把 Obsidian 耦合重新塞回 operation 层
+  - provider connection-test host adaptation 现在已落在 `src/operations/providerConnectionTestCommandHostAdapter.ts`
+  - 剩余缺口：继续收缩 `src/main.ts` 中仅设置页仍在使用的 provider 测试路径，以及更广义的非 CLI 交互与批处理宿主副作用，且不能把 Obsidian 耦合重新塞回 operation 层
 
 **MT2. Host adapter 拆分**
 - 新增 plugin adapter，负责解析 active file、vault state、settings
@@ -278,7 +280,7 @@
 进度说明：
 
 - 第 1-4 项已在主线上部分落地。
-- 下一步最稳妥的推进点仍是 MT2，但范围已经缩小：provider diagnostic 与 config/profile host adaptation 已落地，下一批应继续把更广义的非 CLI 交互与批处理宿主副作用从 `src/main.ts` 剥离出去。
+- 下一步最稳妥的推进点仍是 MT2，但范围已经缩小：provider diagnostic、config/profile 与命令路径 provider test host adaptation 已落地，下一批应继续把仅设置页仍在使用的 provider 测试流，以及更广义的非 CLI 交互与批处理宿主副作用从 `src/main.ts` 剥离出去。
 
 ## 退出标准
 

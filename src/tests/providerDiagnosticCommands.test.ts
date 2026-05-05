@@ -3,6 +3,7 @@ import { Notice } from 'obsidian';
 import { mockApp } from './__mocks__/app';
 import { mockSettings } from './__mocks__/settings';
 import * as configProfileCommandHostAdapter from '../operations/configProfileCommandHostAdapter';
+import * as providerConnectionTestCommandHostAdapter from '../operations/providerConnectionTestCommandHostAdapter';
 import * as providerDiagnosticCommandHostAdapter from '../operations/providerDiagnosticCommandHostAdapter';
 
 function createManifest() {
@@ -90,6 +91,43 @@ describe('provider diagnostic command surface', () => {
             })
         );
         expect(Notice).toHaveBeenCalledWith('diag ok', 8000);
+    });
+
+    test('test connection command delegates to extracted provider connection host adapter', async () => {
+        const plugin = new NotemdPlugin(mockApp, createManifest() as any);
+        plugin.app = mockApp;
+        (plugin as any).manifest = createManifest();
+        plugin.settings = {
+            ...mockSettings,
+            _firstLaunch: false
+        };
+        plugin.loadSettings = jest.fn().mockResolvedValue(undefined);
+        const reporter = {
+            log: jest.fn(),
+            updateStatus: jest.fn(),
+            clearDisplay: jest.fn(),
+            cancelled: false
+        };
+        const commandSpy = jest
+            .spyOn(providerConnectionTestCommandHostAdapter, 'runTestLlmConnectionCommandWithHost')
+            .mockResolvedValue({
+                kind: 'success',
+                statusMessage: 'ok',
+                provider: mockSettings.providers[0],
+                result: { success: true, message: 'ok' }
+            } as any);
+
+        await (plugin as any).testLlmConnectionCommand(reporter);
+
+        expect(commandSpy).toHaveBeenCalledWith(expect.objectContaining({
+            loadSettings: expect.any(Function),
+            getSettings: expect.any(Function),
+            getUiStrings: expect.any(Function),
+            showNotice: expect.any(Function),
+            logError: expect.any(Function),
+            openErrorModal: expect.any(Function),
+            saveErrorLog: expect.any(Function)
+        }), reporter);
     });
 
     test('developer stability diagnostic delegates to extracted provider diagnostic host adapter', async () => {
