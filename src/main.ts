@@ -4,8 +4,11 @@ import { DEFAULT_SETTINGS, NOTEMD_SIDEBAR_VIEW_TYPE, NOTEMD_SIDEBAR_ICON } from 
 import { retry } from './utils';
 import { callLLM } from './llmUtils';
 import {
+    BatchMermaidFixResult,
     BatchGenerateContentForTitlesResult,
     BatchProcessFolderResult,
+    ConceptDedupeCandidate,
+    ConceptDedupeResult,
     handleFileRename,
     handleFileDelete,
     GenerateContentForTitleResult,
@@ -295,6 +298,8 @@ export default class NotemdPlugin extends Plugin {
             getRunningActionText: (label) => this.getRunningActionText(label),
             getActionCompleteText: (label) => this.getActionCompleteText(label),
             showNotice: (message, duration) => new Notice(message, duration),
+            confirmConceptDeletion: (reportList: ConceptDedupeCandidate[], uiLocale: string) =>
+                showDeletionConfirmationModal(this.app, reportList, uiLocale),
             logInfo: (message, details) => console.log(message, details),
             logError: (message, details) => console.error(message, details),
             openErrorModal: (title, details) => this.openLocalizedErrorModal(title, details),
@@ -1183,8 +1188,8 @@ export default class NotemdPlugin extends Plugin {
     }
 
     /** Command: Check and Remove Duplicate Concept Notes */
-    async checkAndRemoveDuplicateConceptNotesCommand(reporter?: ProgressReporter) {
-        await runCheckAndRemoveDuplicateConceptNotesCommandWithHost(this.createUtilityCommandHost(), reporter);
+    async checkAndRemoveDuplicateConceptNotesCommand(reporter?: ProgressReporter): Promise<ConceptDedupeResult | null> {
+        return runCheckAndRemoveDuplicateConceptNotesCommandWithHost(this.createUtilityCommandHost(), reporter);
     }
 
     async checkDuplicatesCurrentCommand(reporter?: ProgressReporter) {
@@ -1195,7 +1200,7 @@ export default class NotemdPlugin extends Plugin {
     async batchMermaidFixCommand(
         reporter?: ProgressReporter,
         folderPathOverride?: string
-    ): Promise<{ folderPath: string; modifiedCount: number } | null> {
+    ): Promise<BatchMermaidFixResult | null> {
         return runBatchMermaidFixCommandWithHost(this.createUtilityCommandHost(), reporter, folderPathOverride);
     }
 
