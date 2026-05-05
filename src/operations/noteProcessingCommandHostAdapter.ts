@@ -12,6 +12,7 @@ import { ExtractOriginalTextPluginContext, extractOriginalText } from '../extrac
 import { formatI18n } from '../i18n';
 import { researchAndSummarize } from '../searchUtils';
 import { batchTranslateFolder, translateFile } from '../translate';
+import { normalizeNameForFilePath } from '../utils';
 import { chunkArray, createConcurrentProcessor, delay } from '../utils';
 import { NotemdSettings, ProgressReporter, TaskKey } from '../types';
 import { SidebarActionId } from '../workflowButtons';
@@ -21,11 +22,16 @@ export interface NoteProcessingPluginRuntime extends ConceptExtractionPluginCont
 export interface NoteProcessingCommandUiStrings {
     commands: {
         extractConceptsAndGenerateTitles: string;
+        createWikiLinkAndGenerateNoteFromSelection: string;
     };
     notices: {
         notemdBusy: string;
         noActiveFile: string;
         noTopicFound: string;
+        selectValidWord: string;
+        setConceptNoteFolder: string;
+        generatedContentForWord: string;
+        genericError: string;
         batchTranslationFailedWithMessage: string;
         failedTranslateFileWithMessage: string;
         processingComplete: string;
@@ -795,6 +801,98 @@ export async function runGenerateContentForTitleCommandWithHost(
             }
         }
     );
+}
+
+export async function runCreateWikiLinkAndGenerateFromSelectionCommandWithHost(
+    host: NoteProcessingCommandHost,
+    editor: Editor,
+    view: MarkdownView,
+    reporter?: ProgressReporter,
+    createConceptNotesImpl: typeof createConceptNotes = createConceptNotes,
+    generateContentForTitleImpl: typeof generateContentForTitle = generateContentForTitle,
+    normalizeNameForFilePathImpl: typeof normalizeNameForFilePath = normalizeNameForFilePath
+): Promise<{ notePath: string; word: string; created: boolean } | null> {
+    const actionLabel = host.getUiStrings().commands.createWikiLinkAndGenerateNoteFromSelection;
+    let commandResult: { notePath: string; word: string; created: boolean } | null = null;
+
+    await runBusyReporterCommandWithHost(host, actionLabel, reporter, async (useReporter) => {
+        let uiStrings = host.getUiStrings();
+        const word = editor.getSelection().trim();
+
+        if (!word || word.length < 2) {
+            host.showNotice(uiStrings.notices.selectValidWord);
+            return;
+        }
+
+        editor.replaceSelection(`[[${word}]]`);
+        await host.loadSettings();
+        uiStrings = host.getUiStrings();
+
+        if (!host.getSettings().useCustomConceptNoteFolder || !host.getSettings().conceptNoteFolder) {
+            host.showNotice(uiStrings.notices.setConceptNoteFolder);
+            return;
+        }
+
+        const safeName = normalizeNameForFilePathImpl(word);
+        const notePath = `${host.getSettings().conceptNoteFolder}/${safeName}.md`;
+
+        try {
+            let newFile = host.getFileByPath(notePath);
+            let created = false;
+
+            if (newFile) {
+                await createConceptNotesImpl(
+                    host.getApp(),
+                    host.getSettings(),
+                    new Set([word]),
+                    view.file?.basename || null,
+                    { disableBacklink: false }
+                );
+                useReporter.log(`Updated existing note: ${notePath}`);
+            } else {
+                await createConceptNotesImpl(
+                    host.getApp(),
+                    host.getSettings(),
+                    new Set([word]),
+                    view.file?.basename || null,
+                    { minimalTemplate: false }
+                );
+                newFile = host.getFileByPath(notePath);
+                if (!newFile) {
+                    throw new Error('Failed to create note.');
+                }
+                created = true;
+                useReporter.log(`Created blank note: ${notePath}`);
+            }
+
+            await generateContentForTitleImpl(host.getApp(), host.getSettings(), newFile, useReporter);
+            await host.maybeAutoFixMermaidForFile(newFile, useReporter, 'create wiki-link and generate');
+
+            const completeText = host.getActionCompleteText(actionLabel);
+            host.updateStatusBar(completeText);
+            useReporter.updateStatus(completeText, 100);
+            host.showNotice(formatI18n(uiStrings.notices.generatedContentForWord, { word }));
+            host.completeReporter(useReporter);
+
+            commandResult = {
+                notePath,
+                word,
+                created
+            };
+        } catch (error: unknown) {
+            const { errorMessage, errorDetails } = normalizeError(
+                error,
+                'An unknown error occurred during concept note generation.'
+            );
+            const message = formatI18n(uiStrings.notices.genericError, { message: errorMessage });
+            host.logError('Create wiki-link and generate error:', errorDetails);
+            host.showNotice(message);
+            useReporter.log(message);
+            host.failReporterAction(useReporter, errorMessage);
+        }
+    });
+
+    return commandResult;
 }
 
 export async function runResearchAndSummarizeCommandWithHost(

@@ -4,6 +4,11 @@ describe('CLI invocation contract', () => {
     test('exports versioned typed contracts for registry-backed operations', () => {
         const contract = buildCliInvocationContract();
         const operationIds = contract.operations.map(operation => operation.operationId);
+        const providerProfileExport = contract.operations.find(operation => operation.operationId === 'provider.profile.export');
+        const providerProfileImport = contract.operations.find(operation => operation.operationId === 'provider.profile.import');
+        const cliCapabilityExport = contract.operations.find(operation => operation.operationId === 'cli.capability-manifest.export');
+        const cliContractExport = contract.operations.find(operation => operation.operationId === 'cli.invocation-contract.export');
+        const createWikiAndGenerate = contract.operations.find(operation => operation.operationId === 'editor.create-link-and-generate');
         const processCurrent = contract.operations.find(operation => operation.operationId === 'file.process-add-links');
         const processFolder = contract.operations.find(operation => operation.operationId === 'file.process-folder-add-links');
         const generateFromTitle = contract.operations.find(operation => operation.operationId === 'content.generate-from-title');
@@ -23,6 +28,11 @@ describe('CLI invocation contract', () => {
             'provider.diagnostic.run',
             'provider.diagnostic.stability-run',
             'diagram.generate',
+            'provider.profile.export',
+            'provider.profile.import',
+            'cli.capability-manifest.export',
+            'cli.invocation-contract.export',
+            'editor.create-link-and-generate',
             'file.process-add-links',
             'file.process-folder-add-links',
             'content.generate-from-title',
@@ -55,6 +65,73 @@ describe('CLI invocation contract', () => {
         expect(contract.operations[2].resultSchema).toEqual(expect.objectContaining({
             type: 'object',
             required: expect.arrayContaining(['plan', 'spec', 'artifact'])
+        }));
+
+        expect(providerProfileExport).toEqual(expect.objectContaining({
+            operationId: 'provider.profile.export',
+            resultSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    outputPath: expect.any(Object)
+                })
+            })
+        }));
+
+        expect(providerProfileImport).toEqual(expect.objectContaining({
+            operationId: 'provider.profile.import',
+            inputSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    inputPath: expect.any(Object)
+                })
+            }),
+            resultSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    inputPath: expect.any(Object),
+                    activeProvider: expect.any(Object)
+                })
+            })
+        }));
+
+        expect(cliCapabilityExport).toEqual(expect.objectContaining({
+            operationId: 'cli.capability-manifest.export',
+            resultSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    outputPath: expect.any(Object),
+                    manifest: expect.any(Object)
+                })
+            })
+        }));
+
+        expect(cliContractExport).toEqual(expect.objectContaining({
+            operationId: 'cli.invocation-contract.export',
+            resultSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    outputPath: expect.any(Object),
+                    contract: expect.any(Object)
+                })
+            })
+        }));
+
+        expect(createWikiAndGenerate).toEqual(expect.objectContaining({
+            operationId: 'editor.create-link-and-generate',
+            inputSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    selectionText: expect.any(Object)
+                })
+            }),
+            resultSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    notePath: expect.any(Object),
+                    word: expect.any(Object),
+                    created: expect.any(Object)
+                })
+            })
         }));
 
         expect(processCurrent).toEqual(expect.objectContaining({

@@ -69,6 +69,7 @@ describe('note processing command surface', () => {
 
         const ids = addCommandSpy.mock.calls.map((call: any[]) => call[0]?.id);
         expect(ids).toContain('extract-original-text');
+        expect(ids).toContain('create-wiki-link-and-generate-from-selection');
     });
 
     test('generate from title command delegates to extracted note-processing host adapter', async () => {
@@ -162,6 +163,67 @@ describe('note processing command surface', () => {
             finalizeReporter: expect.any(Function)
         }), editor, view, reporter);
         expect(utilitySpy).not.toHaveBeenCalled();
+    });
+
+    test('create wiki-link and generate command delegates to extracted note-processing host adapter', async () => {
+        const noteProcessingCommandHostAdapter = require('../operations/noteProcessingCommandHostAdapter');
+        const plugin = createPlugin();
+        const reporter = createReporter();
+        const editor = {
+            getSelection: jest.fn(() => 'Alpha'),
+            replaceSelection: jest.fn()
+        } as any;
+        const view = {
+            file: {
+                basename: 'Topic',
+                path: 'Notes/Topic.md'
+            }
+        } as any;
+
+        const hostSpy = jest
+            .spyOn(noteProcessingCommandHostAdapter, 'runCreateWikiLinkAndGenerateFromSelectionCommandWithHost')
+            .mockResolvedValue({
+                notePath: 'Concepts/Alpha.md',
+                word: 'Alpha',
+                created: true
+            });
+        const createNotesSpy = jest
+            .spyOn(fileUtils, 'createConceptNotes')
+            .mockResolvedValue(undefined);
+        const generateSpy = jest
+            .spyOn(fileUtils, 'generateContentForTitle')
+            .mockResolvedValue(undefined);
+
+        const result = await (plugin as any).createWikiLinkAndGenerateFromSelectionCommand(editor, view, reporter);
+
+        expect(hostSpy).toHaveBeenCalledWith(expect.objectContaining({
+            getApp: expect.any(Function),
+            loadSettings: expect.any(Function),
+            getSettings: expect.any(Function),
+            getUiStrings: expect.any(Function),
+            getFileByPath: expect.any(Function),
+            getReporter: expect.any(Function),
+            isBusy: expect.any(Function),
+            setBusy: expect.any(Function),
+            startReporterAction: expect.any(Function),
+            failReporterAction: expect.any(Function),
+            updateStatusBar: expect.any(Function),
+            getActionCompleteText: expect.any(Function),
+            showNotice: expect.any(Function),
+            logError: expect.any(Function),
+            openErrorModal: expect.any(Function),
+            saveErrorLog: expect.any(Function),
+            maybeAutoFixMermaidForFile: expect.any(Function),
+            completeReporter: expect.any(Function),
+            finalizeReporter: expect.any(Function)
+        }), editor, view, reporter);
+        expect(result).toEqual({
+            notePath: 'Concepts/Alpha.md',
+            word: 'Alpha',
+            created: true
+        });
+        expect(createNotesSpy).not.toHaveBeenCalled();
+        expect(generateSpy).not.toHaveBeenCalled();
     });
 
     test('process current command delegates to extracted note-processing host adapter', async () => {
