@@ -11,7 +11,7 @@ import {
 import { ExtractOriginalTextPluginContext, ExtractOriginalTextResult, extractOriginalText } from '../extractOriginalText';
 import { formatI18n } from '../i18n';
 import { researchAndSummarize } from '../searchUtils';
-import { batchTranslateFolder, translateFile } from '../translate';
+import { BatchTranslateFolderResult, batchTranslateFolder, TranslateFileResult, translateFile } from '../translate';
 import { normalizeNameForFilePath } from '../utils';
 import { chunkArray, createConcurrentProcessor, delay } from '../utils';
 import { NotemdSettings, ProgressReporter, TaskKey } from '../types';
@@ -33,7 +33,9 @@ export interface NoteProcessingCommandUiStrings {
         generatedContentForWord: string;
         genericError: string;
         batchTranslationFailedWithMessage: string;
+        batchTranslationCompleted: string;
         failedTranslateFileWithMessage: string;
+        translatedFileSavedTo: string;
         processingComplete: string;
         processingError: string;
         batchProcessingCancelled: string;
@@ -286,8 +288,9 @@ export async function runBatchTranslateFolderCommandWithHost(
     reporter?: ProgressReporter,
     folder?: TFolder,
     batchTranslateFolderImpl: typeof batchTranslateFolder = batchTranslateFolder
-): Promise<void> {
+): Promise<BatchTranslateFolderResult | null> {
     const actionLabel = host.getActionLabel('batch-translate-folder');
+    let commandResult: BatchTranslateFolderResult | null = null;
 
     await runBusyReporterCommandWithHost(host, actionLabel, reporter, async (useReporter) => {
         let uiStrings = host.getUiStrings();
@@ -309,21 +312,51 @@ export async function runBatchTranslateFolderCommandWithHost(
             }
 
             const translateLanguage = host.getTaskLanguageCode('translate');
-            await batchTranslateFolderImpl(
+            commandResult = await batchTranslateFolderImpl(
                 host.getApp(),
                 host.getSettings(),
                 targetFolder,
                 translateLanguage,
                 { reporter: useReporter }
             );
-            if (!useReporter.cancelled) {
-                const mermaidFixTarget = (host.getSettings().useCustomTranslationSavePath && host.getSettings().translationSavePath)
-                    ? host.getSettings().translationSavePath
-                    : targetFolder.path;
-                await host.maybeAutoFixMermaidForFolder(mermaidFixTarget, useReporter, 'batch translate folder');
+
+            if (!commandResult || useReporter.cancelled || commandResult.cancelled) {
+                return;
+            }
+
+            if (commandResult.processedFileCount === 0) {
+                const message = formatI18n(uiStrings.notices.noMarkdownOrTextFilesFoundSelectedFolder, {
+                    folderPath: targetFolder.path
+                });
+                useReporter.log(message);
+                useReporter.updateStatus(message, -1);
+                host.showNotice(message);
+                return;
+            }
+
+            if (commandResult.translatedCount > 0) {
+                await host.maybeAutoFixMermaidForFolder(
+                    commandResult.outputFolderPath,
+                    useReporter,
+                    'batch translate folder'
+                );
+            }
+
+            if (commandResult.errors.length > 0) {
+                const errorSummary = formatI18n(uiStrings.notices.batchProcessingFinishedWithErrors, {
+                    count: commandResult.errors.length
+                });
+                useReporter.log(`⚠️ ${errorSummary}`);
+                useReporter.updateStatus(errorSummary, -1);
+                host.updateStatusBar(errorSummary);
+                host.showNotice(errorSummary, 10000);
+            } else {
                 const completeText = host.getActionCompleteText(actionLabel);
                 useReporter.updateStatus(completeText, 100);
                 host.updateStatusBar(completeText);
+                host.showNotice(formatI18n(uiStrings.notices.batchTranslationCompleted, {
+                    count: commandResult.translatedCount
+                }), 5000);
                 host.completeReporter(useReporter);
             }
         } catch (error: unknown) {
@@ -344,6 +377,8 @@ export async function runBatchTranslateFolderCommandWithHost(
             host.failReporterAction(useReporter, errorMessage);
         }
     });
+
+    return commandResult;
 }
 
 export async function runTranslateFileCommandWithHost(
@@ -352,8 +387,9 @@ export async function runTranslateFileCommandWithHost(
     signal?: AbortSignal,
     reporter?: ProgressReporter,
     translateFileImpl: typeof translateFile = translateFile
-): Promise<void> {
+): Promise<TranslateFileResult | null> {
     const actionLabel = host.getActionLabel('translate-current-file');
+    let commandResult: TranslateFileResult | null = null;
 
     await runBusyReporterCommandWithHost(
         host,
@@ -366,7 +402,7 @@ export async function runTranslateFileCommandWithHost(
                 await host.loadSettings();
                 uiStrings = host.getUiStrings();
                 const translateLanguage = host.getTaskLanguageCode('translate');
-                const outputPath = await translateFileImpl(
+                commandResult = await translateFileImpl(
                     host.getApp(),
                     host.getSettings(),
                     file,
@@ -376,17 +412,23 @@ export async function runTranslateFileCommandWithHost(
                     signal
                 );
 
-                if (outputPath && host.getSettings().autoMermaidFixAfterGenerate) {
-                    const outputFile = host.getFileByPath(outputPath);
+                if (commandResult && host.getSettings().autoMermaidFixAfterGenerate) {
+                    const outputFile = host.getFileByPath(commandResult.outputPath);
                     if (outputFile) {
                         await host.maybeAutoFixMermaidForFile(outputFile, useReporter, 'translate current file');
                     }
                 }
 
+                if (commandResult) {
+                    host.showNotice(formatI18n(uiStrings.notices.translatedFileSavedTo, {
+                        path: commandResult.outputPath
+                    }));
+                }
                 const completeText = host.getActionCompleteText(actionLabel);
                 host.updateStatusBar(completeText);
                 useReporter.log('Translation complete.');
                 useReporter.updateStatus(completeText, 100);
+                host.completeReporter(useReporter);
             } catch (error: unknown) {
                 const { errorMessage, errorDetails } = normalizeError(
                     error,
@@ -407,6 +449,8 @@ export async function runTranslateFileCommandWithHost(
             }
         }
     );
+
+    return commandResult;
 }
 
 export async function runExtractConceptsCommandWithHost(

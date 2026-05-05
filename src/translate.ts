@@ -1,11 +1,24 @@
-import { App, TFile, TFolder, Notice } from 'obsidian';
+import { App, TFile, TFolder } from 'obsidian';
 import { NotemdSettings, ProgressReporter } from './types';
 import { getProviderForTask, getModelForTask, splitContent, createConcurrentProcessor } from './utils';
 import { callLLM, handleApiError } from './llmUtils';
 import { getSystemPrompt } from './promptUtils';
-import { ProgressModal } from './ui/ProgressModal';
 import { resolveLanguageDisplayName } from './i18n/languageContext';
 import { formatI18n, getI18nStrings } from './i18n';
+
+export interface TranslateFileResult {
+    sourcePath: string;
+    targetLanguage: string;
+    requestedOutputFolderPath: string;
+    outputFolderPath: string;
+    outputFolderCreated: boolean;
+    usedFallbackOutputFolder: boolean;
+    outputPath: string;
+    created: boolean;
+    overwritten: boolean;
+    openedInWorkspace: boolean;
+    chunkCount: number;
+}
 
 export interface BatchTranslateFolderOptions {
     reporter?: ProgressReporter;
@@ -13,48 +26,115 @@ export interface BatchTranslateFolderOptions {
 
 export interface BatchTranslateFolderResult {
     folderPath: string;
+    requestedOutputFolderPath: string;
     outputFolderPath: string;
+    outputFolderCreated: boolean;
+    targetLanguage: string;
+    processedFileCount: number;
     translatedCount: number;
+    cancelled: boolean;
+    fileResults: TranslateFileResult[];
     errors: Array<{ file: string; message: string }>;
+}
+
+function createNoopReporter(): ProgressReporter {
+    return {
+        log: () => undefined,
+        updateStatus: () => undefined,
+        requestCancel: () => undefined,
+        clearDisplay: () => undefined,
+        get cancelled() {
+            return false;
+        },
+        abortController: new AbortController(),
+        activeTasks: 0,
+        updateActiveTasks: () => undefined
+    };
+}
+
+async function resolveTranslationOutputFolder(
+    app: App,
+    settings: NotemdSettings,
+    sourceParentPath: string | null | undefined
+): Promise<{
+    requestedOutputFolderPath: string;
+    outputFolderPath: string;
+    outputFolderCreated: boolean;
+    usedFallbackOutputFolder: boolean;
+}> {
+    const fallbackOutputFolderPath = sourceParentPath || '/';
+    const requestedOutputFolderPath = (settings.useCustomTranslationSavePath && settings.translationSavePath)
+        ? settings.translationSavePath
+        : fallbackOutputFolderPath;
+    let outputFolderPath = requestedOutputFolderPath;
+    let outputFolderCreated = false;
+    let usedFallbackOutputFolder = false;
+
+    if (settings.useCustomTranslationSavePath && settings.translationSavePath) {
+        const existingFolder = app.vault.getAbstractFileByPath(outputFolderPath);
+        if (!existingFolder) {
+            try {
+                await app.vault.createFolder(outputFolderPath);
+                outputFolderCreated = true;
+            } catch (error) {
+                console.error(`Error creating translation folder at ${outputFolderPath}:`, error);
+                outputFolderPath = fallbackOutputFolderPath;
+                usedFallbackOutputFolder = true;
+            }
+        }
+    }
+
+    return {
+        requestedOutputFolderPath,
+        outputFolderPath,
+        outputFolderCreated,
+        usedFallbackOutputFolder
+    };
 }
 
 export async function batchTranslateFolder(
 	app: App,
 	settings: NotemdSettings,
 	folder: TFolder,
-	targetLanguage: string,
+    targetLanguage: string,
     options: BatchTranslateFolderOptions = {}
 ): Promise<BatchTranslateFolderResult> {
-	const i18n = getI18nStrings({ uiLocale: settings.uiLocale });
 	const files = folder.children.filter(
 		(file): file is TFile => file instanceof TFile && file.extension === 'md'
 	);
-    const outputFolderPath = (settings.useCustomTranslationSavePath && settings.translationSavePath)
-        ? settings.translationSavePath
-        : folder.path;
     const result: BatchTranslateFolderResult = {
         folderPath: folder.path,
-        outputFolderPath,
+        requestedOutputFolderPath: (settings.useCustomTranslationSavePath && settings.translationSavePath)
+            ? settings.translationSavePath
+            : folder.path,
+        outputFolderPath: (settings.useCustomTranslationSavePath && settings.translationSavePath)
+            ? settings.translationSavePath
+            : folder.path,
+        outputFolderCreated: false,
+        targetLanguage,
+        processedFileCount: files.length,
         translatedCount: 0,
+        cancelled: false,
+        fileResults: [],
         errors: []
     };
 
 	if (files.length === 0) {
-		new Notice(i18n.notices.noMarkdownFilesFoundSelectedFolder);
 		return result;
 	}
 
-	const progressReporter = options.reporter ?? new ProgressModal(app, settings.uiLocale);
-    const ownsReporter = !options.reporter;
-    if (ownsReporter && progressReporter instanceof ProgressModal) {
-        progressReporter.open();
-    }
-
+	const progressReporter = options.reporter ?? createNoopReporter();
 
 	const processFile = async (file: TFile) => {
 		try {
-			await translateFile(app, settings, file, targetLanguage, progressReporter, false);
+			const fileResult = await translateFile(app, settings, file, targetLanguage, progressReporter, false);
+            if (!fileResult) {
+                return;
+            }
 			progressReporter.log(`Successfully translated ${file.name}`);
+            result.fileResults.push(fileResult);
+            result.outputFolderPath = fileResult.outputFolderPath;
+            result.outputFolderCreated = result.outputFolderCreated || fileResult.outputFolderCreated;
             result.translatedCount += 1;
 		} catch (error) {
             const errorMessage = error instanceof Error ? error.message : String(error);
@@ -69,15 +149,9 @@ export async function batchTranslateFolder(
 		progressReporter
 	);
 
-	try {
-        const tasks = files.map(file => () => processFile(file));
-		await concurrentProcessor(tasks);
-		new Notice(formatI18n(i18n.notices.batchTranslationCompleted, { count: files.length }));
-	} finally {
-        if (ownsReporter && progressReporter instanceof ProgressModal) {
-            progressReporter.close();
-        }
-	}
+    const tasks = files.map(file => () => processFile(file));
+	await concurrentProcessor(tasks);
+    result.cancelled = progressReporter.cancelled;
 
     return result;
 }
@@ -91,19 +165,17 @@ export async function translateFile(
     progressReporter: ProgressReporter,
     openFile = false, // Default to false
     signal?: AbortSignal
-): Promise<string | null> {
+): Promise<TranslateFileResult | null> {
     const i18n = getI18nStrings({ uiLocale: settings.uiLocale });
     const fileContent = await app.vault.read(file);
     if (!fileContent) {
-        new Notice(i18n.notices.fileEmpty);
-        return null;
+        throw new Error(i18n.notices.fileEmpty);
     }
 
     const provider = getProviderForTask('translate', settings);
 
     if (!provider) {
-        new Notice(i18n.notices.noTranslationProviderConfigured);
-        return null;
+        throw new Error(i18n.notices.noTranslationProviderConfigured);
     }
     const model = getModelForTask('translate', provider, settings);
 
@@ -140,27 +212,8 @@ export async function translateFile(
         }
 
         const translatedText = translatedChunks.join('\n\n');
-
-        let savePath: string;
-
-        if (settings.useCustomTranslationSavePath && settings.translationSavePath) {
-            savePath = settings.translationSavePath;
-            // Ensure the custom directory exists
-            const dir = app.vault.getAbstractFileByPath(savePath);
-            if (!dir) {
-                try {
-                    await app.vault.createFolder(savePath);
-                } catch (error) {
-                    console.error(`Error creating translation folder at ${savePath}:`, error);
-                    new Notice(formatI18n(i18n.notices.failedCreateTranslationFolder, { path: savePath }));
-                    // Fallback to original folder if creation fails
-                    savePath = file.parent ? file.parent.path : '/';
-                }
-            }
-        } else {
-            // Default: Save in the same folder as the original file
-            savePath = file.parent ? file.parent.path : '/';
-        }
+        const outputFolder = await resolveTranslationOutputFolder(app, settings, file.parent?.path);
+        const savePath = outputFolder.outputFolderPath;
 
         const suffix = settings.useCustomTranslationSuffix ? settings.translationCustomSuffix : `_${targetLanguage}`;
         const fileName = `${file.basename}${suffix}.md`;
@@ -168,23 +221,37 @@ export async function translateFile(
         // Handle root path correctly
         const fullPath = savePath === '/' || savePath === '' ? fileName : `${savePath}/${fileName}`;
 
-
         const existingFile = app.vault.getAbstractFileByPath(fullPath);
+        const overwritten = Boolean(existingFile);
+        const created = !existingFile;
         if (existingFile) {
             await app.vault.modify(existingFile as TFile, translatedText);
         } else {
             await app.vault.create(fullPath, translatedText);
         }
         
+        let openedInWorkspace = false;
         if (openFile) {
             const newFile = app.vault.getAbstractFileByPath(fullPath);
             if (newFile instanceof TFile) {
                 await app.workspace.getLeaf(true).openFile(newFile);
+                openedInWorkspace = true;
             }
         }
 
-        new Notice(formatI18n(i18n.notices.translatedFileSavedTo, { path: fullPath }));
-        return fullPath;
+        return {
+            sourcePath: file.path,
+            targetLanguage,
+            requestedOutputFolderPath: outputFolder.requestedOutputFolderPath,
+            outputFolderPath: outputFolder.outputFolderPath,
+            outputFolderCreated: outputFolder.outputFolderCreated,
+            usedFallbackOutputFolder: outputFolder.usedFallbackOutputFolder,
+            outputPath: fullPath,
+            created,
+            overwritten,
+            openedInWorkspace,
+            chunkCount: totalChunks
+        };
     } catch (error: unknown) {
         if (error instanceof Error && error.name === 'AbortError') {
             progressReporter.log('Translation cancelled by user.');
@@ -199,7 +266,6 @@ export async function translateFile(
             // handleApiError throws a formatted error. 
             // We log it and let it propagate or re-throw original if needed.
             console.error('Translation Error:', error);
-            new Notice(i18n.notices.failedTranslateFile);
             throw e; // Throw the formatted error from handleApiError
         }
     }

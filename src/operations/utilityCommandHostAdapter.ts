@@ -6,6 +6,8 @@ import {
 } from '../fileUtils';
 import {
     batchFixFormulaFormatsInFolder,
+    BatchFormulaFixResult,
+    FormulaFixFileResult,
     fixFormulaFormatsInFile
 } from '../formulaFixer';
 import { formatI18n } from '../i18n';
@@ -268,8 +270,9 @@ export async function runFixFormulaFormatsCommandWithHost(
     file: TFile,
     reporter?: ProgressReporter,
     fixFormulaFormatsInFileImpl: typeof fixFormulaFormatsInFile = fixFormulaFormatsInFile
-): Promise<void> {
+): Promise<FormulaFixFileResult | null> {
     const actionLabel = host.getActionLabel('fix-formula-current');
+    let commandResult: FormulaFixFileResult | null = null;
 
     await runBusyReporterCommandWithHost(host, `${actionLabel}: ${file.name}`, reporter, async (useReporter) => {
         let uiStrings = host.getUiStrings();
@@ -277,9 +280,9 @@ export async function runFixFormulaFormatsCommandWithHost(
         try {
             await host.loadSettings();
             uiStrings = host.getUiStrings();
-            const modified = await fixFormulaFormatsInFileImpl(host.getApp(), file, useReporter);
+            commandResult = await fixFormulaFormatsInFileImpl(host.getApp(), file, useReporter);
 
-            if (modified) {
+            if (commandResult.modified) {
                 const message = formatI18n(uiStrings.notices.formulaFixSuccess, { file: file.name });
                 useReporter.log(`✅ ${message}`);
                 host.showNotice(message);
@@ -300,14 +303,17 @@ export async function runFixFormulaFormatsCommandWithHost(
             await host.saveErrorLog(error, useReporter);
         }
     });
+
+    return commandResult;
 }
 
 export async function runBatchFixFormulaFormatsCommandWithHost(
     host: UtilityCommandHost,
     reporter?: ProgressReporter,
     batchFixFormulaFormatsInFolderImpl: typeof batchFixFormulaFormatsInFolder = batchFixFormulaFormatsInFolder
-): Promise<void> {
+): Promise<BatchFormulaFixResult | null> {
     const actionLabel = host.getActionLabel('batch-fix-formula');
+    let commandResult: BatchFormulaFixResult | null = null;
 
     await runBusyReporterCommandWithHost(host, actionLabel, reporter, async (useReporter) => {
         let uiStrings = host.getUiStrings();
@@ -323,23 +329,25 @@ export async function runBatchFixFormulaFormatsCommandWithHost(
                 throw new Error(cancelledMessage);
             }
 
-            const { modifiedCount, errors } = await batchFixFormulaFormatsInFolderImpl(
+            commandResult = await batchFixFormulaFormatsInFolderImpl(
                 host.getApp(),
                 folderPath,
                 useReporter
             );
 
-            if (!useReporter.cancelled) {
-                if (errors.length > 0) {
+            if (!useReporter.cancelled && commandResult) {
+                if (commandResult.errors.length > 0) {
                     const message = formatI18n(uiStrings.notices.batchFormulaFixFinishedWithErrors, {
-                        count: errors.length,
-                        modifiedCount
+                        count: commandResult.errors.length,
+                        modifiedCount: commandResult.modifiedCount
                     });
                     useReporter.log(message);
                     useReporter.updateStatus(message, -1);
                     host.showNotice(message);
                 } else {
-                    const message = formatI18n(uiStrings.notices.batchFormulaFixSuccess, { modifiedCount });
+                    const message = formatI18n(uiStrings.notices.batchFormulaFixSuccess, {
+                        modifiedCount: commandResult.modifiedCount
+                    });
                     useReporter.log(message);
                     useReporter.updateStatus(host.getActionCompleteText(actionLabel), 100);
                     host.updateStatusBar(host.getActionCompleteText(actionLabel));
@@ -357,4 +365,6 @@ export async function runBatchFixFormulaFormatsCommandWithHost(
             }
         }
     });
+
+    return commandResult;
 }

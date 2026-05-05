@@ -88,6 +88,7 @@ describe('operations registry', () => {
         const batchGenerate = getOperationDefinition('content.batch-generate-from-titles');
         const researchSummarize = getOperationDefinition('research.summarize-topic');
         const translateFile = getOperationDefinition('translate.file');
+        const translateFolder = getOperationDefinition('translate.folder-batch');
         const extractOriginalText = getOperationDefinition('content.extract-original-text');
         const extractAndGenerate = getOperationDefinition('workflow.extract-and-generate');
 
@@ -141,6 +142,20 @@ describe('operations registry', () => {
                 type: 'object',
                 properties: expect.objectContaining({
                     outputPath: expect.any(Object)
+                })
+            })
+        }));
+
+        expect(translateFolder).toEqual(expect.objectContaining({
+            id: 'translate.folder-batch',
+            resultSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    processedFileCount: expect.any(Object),
+                    translatedCount: expect.any(Object),
+                    cancelled: expect.any(Object),
+                    fileResults: expect.any(Object),
+                    errors: expect.any(Object)
                 })
             })
         }));
@@ -236,7 +251,11 @@ describe('operations registry', () => {
             resultSchema: expect.objectContaining({
                 type: 'object',
                 properties: expect.objectContaining({
-                    outputPath: expect.any(Object)
+                    outputPath: expect.any(Object),
+                    created: expect.any(Object),
+                    overwritten: expect.any(Object),
+                    openedInWorkspace: expect.any(Object),
+                    chunkCount: expect.any(Object)
                 })
             })
         }));
@@ -361,7 +380,16 @@ describe('operations registry', () => {
                     commandId: 'fix-formula-formats',
                     mappingKind: 'exact'
                 })
-            ])
+            ]),
+            resultSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    sourcePath: expect.any(Object),
+                    outputPath: expect.any(Object),
+                    modified: expect.any(Object),
+                    replacementCount: expect.any(Object)
+                })
+            })
         }));
 
         expect(batchFixFormula).toEqual(expect.objectContaining({
@@ -375,7 +403,18 @@ describe('operations registry', () => {
                     commandId: 'batch-fix-formula-formats',
                     mappingKind: 'exact'
                 })
-            ])
+            ]),
+            resultSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    folderPath: expect.any(Object),
+                    processedFileCount: expect.any(Object),
+                    modifiedCount: expect.any(Object),
+                    cancelled: expect.any(Object),
+                    fileResults: expect.any(Object),
+                    errors: expect.any(Object)
+                })
+            })
         }));
     });
 

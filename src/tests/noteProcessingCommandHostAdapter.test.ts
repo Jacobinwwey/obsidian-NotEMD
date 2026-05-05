@@ -36,7 +36,9 @@ function createUiStrings() {
             generatedContentForWord: 'Generated content for [[{word}]]!',
             genericError: 'Error: {message}',
             batchTranslationFailedWithMessage: 'Batch translation failed: {message}',
+            batchTranslationCompleted: 'Translated {count} files',
             failedTranslateFileWithMessage: 'Translation failed: {message}',
+            translatedFileSavedTo: 'Translated file saved to {path}',
             processingComplete: 'Processing complete',
             processingError: 'Processing failed: {message}',
             batchProcessingCancelled: 'Batch cancelled',
@@ -367,10 +369,22 @@ describe('note processing command host adapter', () => {
             autoMermaidFixAfterGenerate: true
         });
         host.getFileByPath.mockReturnValue(translatedFile);
-        const translateImpl = jest.fn().mockResolvedValue('Translations/Topic_en.md');
+        const translateImpl = jest.fn().mockResolvedValue({
+            sourcePath: 'Notes/Topic.md',
+            targetLanguage: 'en',
+            requestedOutputFolderPath: 'Translations',
+            outputFolderPath: 'Translations',
+            outputFolderCreated: false,
+            usedFallbackOutputFolder: false,
+            outputPath: 'Translations/Topic_en.md',
+            created: true,
+            overwritten: false,
+            openedInWorkspace: true,
+            chunkCount: 1
+        });
         const { runTranslateFileCommandWithHost } = loadModule();
 
-        await runTranslateFileCommandWithHost(host, file, undefined, reporter, translateImpl);
+        const result = await runTranslateFileCommandWithHost(host, file, undefined, reporter, translateImpl);
 
         expect(host.setBusy).toHaveBeenNthCalledWith(1, true);
         expect(translateImpl).toHaveBeenCalledWith(
@@ -387,7 +401,12 @@ describe('note processing command host adapter', () => {
             reporter,
             'translate current file'
         );
+        expect(host.showNotice).toHaveBeenCalledWith('Translated file saved to Translations/Topic_en.md');
         expect(reporter.updateStatus).toHaveBeenCalledWith('Done Translate file', 100);
+        expect(result).toEqual(expect.objectContaining({
+            outputPath: 'Translations/Topic_en.md',
+            openedInWorkspace: true
+        }));
         expect(host.finalizeReporter).toHaveBeenCalledWith(reporter);
         expect(getBusy()).toBe(false);
     });
@@ -406,10 +425,35 @@ describe('note processing command host adapter', () => {
             useCustomTranslationSavePath: true,
             translationSavePath: 'Translations'
         });
-        const batchTranslateImpl = jest.fn().mockResolvedValue(undefined);
+        const batchTranslateImpl = jest.fn().mockResolvedValue({
+            folderPath: 'Concepts',
+            requestedOutputFolderPath: 'Translations',
+            outputFolderPath: 'Translations',
+            outputFolderCreated: false,
+            targetLanguage: 'en',
+            processedFileCount: 1,
+            translatedCount: 1,
+            cancelled: false,
+            fileResults: [
+                {
+                    sourcePath: 'Concepts/Topic.md',
+                    targetLanguage: 'en',
+                    requestedOutputFolderPath: 'Translations',
+                    outputFolderPath: 'Translations',
+                    outputFolderCreated: false,
+                    usedFallbackOutputFolder: false,
+                    outputPath: 'Translations/Topic_en.md',
+                    created: true,
+                    overwritten: false,
+                    openedInWorkspace: false,
+                    chunkCount: 1
+                }
+            ],
+            errors: []
+        });
         const { runBatchTranslateFolderCommandWithHost } = loadModule();
 
-        await runBatchTranslateFolderCommandWithHost(host, reporter, undefined, batchTranslateImpl);
+        const result = await runBatchTranslateFolderCommandWithHost(host, reporter, undefined, batchTranslateImpl);
 
         expect(batchTranslateImpl).toHaveBeenCalledWith(
             host.getApp(),
@@ -425,6 +469,11 @@ describe('note processing command host adapter', () => {
             reporter,
             'batch translate folder'
         );
+        expect(host.showNotice).toHaveBeenCalledWith('Translated 1 files', 5000);
+        expect(result).toEqual(expect.objectContaining({
+            translatedCount: 1,
+            fileResults: expect.any(Array)
+        }));
         expect(host.completeReporter).toHaveBeenCalledWith(reporter);
         expect(host.finalizeReporter).toHaveBeenCalledWith(reporter);
         expect(getBusy()).toBe(false);

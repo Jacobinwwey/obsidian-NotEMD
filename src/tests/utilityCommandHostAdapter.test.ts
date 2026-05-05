@@ -177,14 +177,23 @@ describe('utility command host adapter', () => {
             path: 'Notes/Topic.md',
             extension: 'md'
         });
-        const fixImpl = jest.fn().mockResolvedValue(true);
+        const fixImpl = jest.fn().mockResolvedValue({
+            sourcePath: 'Notes/Topic.md',
+            outputPath: 'Notes/Topic.md',
+            modified: true,
+            replacementCount: 2
+        });
         const { runFixFormulaFormatsCommandWithHost } = loadModule();
 
-        await runFixFormulaFormatsCommandWithHost(host, file, reporter, fixImpl);
+        const result = await runFixFormulaFormatsCommandWithHost(host, file, reporter, fixImpl);
 
         expect(fixImpl).toHaveBeenCalledWith(host.getApp(), file, reporter);
         expect(host.showNotice).toHaveBeenCalledWith('Fixed formulas in Topic.md');
         expect(reporter.updateStatus).toHaveBeenCalledWith('Done Fix formulas', 100);
+        expect(result).toEqual(expect.objectContaining({
+            modified: true,
+            replacementCount: 2
+        }));
         expect(host.completeReporter).toHaveBeenCalledWith(reporter);
         expect(host.finalizeReporter).toHaveBeenCalledWith(reporter);
         expect(getBusy()).toBe(false);
@@ -194,13 +203,31 @@ describe('utility command host adapter', () => {
         const reporter = createReporter();
         const { host, getBusy } = createHost(reporter);
         host.getFolderSelection.mockResolvedValue('Notes');
-        const batchFixImpl = jest.fn().mockResolvedValue({ modifiedCount: 3, errors: [] });
+        const batchFixImpl = jest.fn().mockResolvedValue({
+            folderPath: 'Notes',
+            processedFileCount: 3,
+            modifiedCount: 3,
+            cancelled: false,
+            fileResults: [
+                {
+                    sourcePath: 'Notes/A.md',
+                    outputPath: 'Notes/A.md',
+                    modified: true,
+                    replacementCount: 1
+                }
+            ],
+            errors: []
+        });
         const { runBatchFixFormulaFormatsCommandWithHost } = loadModule();
 
-        await runBatchFixFormulaFormatsCommandWithHost(host, reporter, batchFixImpl);
+        const result = await runBatchFixFormulaFormatsCommandWithHost(host, reporter, batchFixImpl);
 
         expect(batchFixImpl).toHaveBeenCalledWith(host.getApp(), 'Notes', reporter);
         expect(host.showNotice).toHaveBeenCalledWith('Fixed formulas in 3 files');
+        expect(result).toEqual(expect.objectContaining({
+            modifiedCount: 3,
+            fileResults: expect.any(Array)
+        }));
         expect(host.completeReporter).toHaveBeenCalledWith(reporter);
         expect(host.finalizeReporter).toHaveBeenCalledWith(reporter);
         expect(getBusy()).toBe(false);
