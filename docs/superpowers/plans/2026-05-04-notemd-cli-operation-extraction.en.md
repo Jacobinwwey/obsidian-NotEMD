@@ -55,6 +55,7 @@ Carried-forward constraints:
 - Provider-diagnostic host adaptation is now extracted as well: `src/operations/providerDiagnosticCommandHostAdapter.ts` now owns developer-diagnostic settings loading, report-persistence wiring, and notice shaping below `src/main.ts`.
 - Config/profile host adaptation is now extracted as well: `src/operations/configProfileCommandHostAdapter.ts` now owns CLI-adjacent import/export state persistence, notice shaping, and error mapping below `src/main.ts`.
 - Provider connection-test host adaptation is now extracted as well: `src/operations/providerConnectionTestCommandHostAdapter.ts` now owns shared provider-test loading and notice/report orchestration, and is reused by both the command path and the settings tab.
+- The first note-processing host-adaptation slice is now extracted as well: `src/operations/noteProcessingCommandHostAdapter.ts` now owns the busy guard, reporter lifecycle, and notice/error-log orchestration for `generate-from-title` and `research-and-summarize`, so `src/main.ts` no longer carries those inline command wrappers.
 - Existing Obsidian commands remain registered, hotkey-bindable, and official-CLI-triggerable while the deeper operation layer continues to mature.
 
 ## Short-Term Delivery (0-2 weeks)
@@ -172,7 +173,8 @@ Build a reusable operation layer for the most valuable Notemd capabilities.
   - provider-diagnostic host adaptation now lives in `src/operations/providerDiagnosticCommandHostAdapter.ts`
   - config/profile host adaptation now lives in `src/operations/configProfileCommandHostAdapter.ts`
   - provider connection-test host adaptation now lives in `src/operations/providerConnectionTestCommandHostAdapter.ts`
-  - remaining gap: continue shrinking the broader non-CLI interactive and batch host-effects in `src/main.ts` without reintroducing Obsidian coupling into operations
+  - the first note-processing host adaptation now lives in `src/operations/noteProcessingCommandHostAdapter.ts`
+  - remaining gap: continue shrinking `processWithNotemdCommand`, `processFolderWithNotemdCommand`, and the remaining batch host effects in `src/main.ts` without reintroducing Obsidian coupling into operations
 
 **MT2. Host adapter split**
 - Add a plugin adapter that resolves active file, vault state, and settings
@@ -280,7 +282,7 @@ Expose a mature, automation-grade Notemd integration surface above the official 
 Progress note:
 
 - Items 1-4 are now partially landed on mainline.
-- The next defensible move is still MT2, but it is now narrower: provider-diagnostic, config/profile, and shared provider-test host adaptation are already landed, so the next batch should peel broader non-CLI interactive and batch host effects away from `src/main.ts`.
+- The next defensible move is still MT2, but it is now narrower still: provider-diagnostic, config/profile, shared provider-test, and `generate-from-title` / `research-and-summarize` host adaptation are already landed, so the next batch should peel `processWithNotemdCommand`, `processFolderWithNotemdCommand`, and the remaining batch host effects away from `src/main.ts`.
 
 ## Exit Criteria
 
