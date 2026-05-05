@@ -28,23 +28,29 @@ topic: cli-mainline-progress-sync-and-next-phase-requirements
   - `generateContentForTitle()` 返回 `GenerateContentForTitleResult`
   - `batchGenerateContentForTitles()` 返回带 complete-folder move 语义与聚合错误的 `BatchGenerateContentForTitlesResult`
   - 批量生成的无文件 notice 现在改由 `src/operations/noteProcessingCommandHostAdapter.ts` 承接，不再留在 `src/fileUtils.ts`
+- 当前跟进切片也已落下 `src/fileUtils.ts` 的剩余尾部：
+  - `batchFixMermaidSyntaxInFolder()` 返回 `BatchMermaidFixResult`
+  - `checkAndRemoveDuplicateConceptNotes()` 返回 `ConceptDedupeResult`
+  - duplicate deletion confirmation 现在由 `src/operations/utilityCommandHostAdapter.ts` 注入
+  - batch Mermaid 的无文件 notice 现在也由 `src/operations/utilityCommandHostAdapter.ts` 承接
+  - `src/operations/registry.ts` 现在也已导出 `mermaid.batch-fix` 与 `concept.dedupe` 的 richer result schema
 
 剩余问题现在已经更窄，也更难：
 
-1. `src/fileUtils.ts` 仍是当前最大的 write-heavy core，但最高杠杆的未完成尾部现在已经收敛到 `batchFixMermaidSyntaxInFolder` 与 `checkAndRemoveDuplicateConceptNotes`；process/generate 子切片现在应被视为已交付 proof，而不是待办范围。
-2. `src/main.ts` 仍持有最高价值的剩余 direct command surfaces：`testLlmConnectionCommand`、`generateDiagramCommand` 及其 save/artifact 分支、以及 `previewExperimentalDiagramCommand`。
-3. 打包隔离与 maintainer-local semantic verification 仍然重要，但它们现在已经是 operation-contract 收口之后的后续问题，而不是前置阻塞。
+1. `src/main.ts` 仍持有最高价值的剩余 direct command surfaces：`testLlmConnectionCommand`、`generateDiagramCommand` 及其 save/artifact 分支、以及 `previewExperimentalDiagramCommand`。
+2. selection/export 与 workflow/settings 表面仍需要比 command-trigger 对等更深的 contract 语义。
+3. 打包隔离与 maintainer-local semantic verification 仍然重要，但它们现在已经是 command-surface 收口之后的后续问题，而不是前置阻塞。
 
-因此，下一阶段重点不应再是“继续加 CLI 命令”，也不应再把 `translate/formula` 或 process/generate 当成未完成批次。真正的下一步应先完成 `src/fileUtils.ts` 的剩余尾部，再处理剩余 direct command surfaces。
+因此，下一阶段重点不应再是“继续加 CLI 命令”，也不应再把任何 write-heavy `src/fileUtils.ts` 批次当成未完成范围。真正的下一步应先处理剩余 direct command surfaces，再收口 packaging / semantic-verification 后续工作。
 
 ## 需求
 
 **事实同步**
-- R1. `docs/brainstorms/2026-05-02-progress-audit-and-next-direction.*`、`docs/architecture*` 与 `docs/maintainer/notemd-cli-capability-matrix*` 必须对齐到 2026-05-05 的代码现实，明确写出：process/generate/translate/formula 流程现在都已具备结构化结果，相关成功/no-file notice 也已进入 host adapter。
-- R2. 任何文档都不得继续把 `translate/formula` 或 process/generate contract pass 写成仅处于计划中或进行中。
+- R1. `docs/brainstorms/2026-05-02-progress-audit-and-next-direction.*`、`docs/architecture*` 与 `docs/maintainer/notemd-cli-capability-matrix*` 必须对齐到 2026-05-05 的代码现实，明确写出：process/generate/translate/formula/mermaid/dedupe 流程现在都已具备结构化结果，相关成功/no-file/confirmation 语义也已进入 host adapter。
+- R2. 任何文档都不得继续把任何 write-heavy `src/fileUtils.ts` contract pass 写成仅处于计划中或进行中。
 
 **下一阶段优先级**
-- R3. 下一阶段固定顺序现在改为 `src/fileUtils.ts` 剩余尾部 -> `src/main.ts` 剩余 direct command surfaces -> packaging / semantic-verification 收敛`。
+- R3. 下一阶段固定顺序现在改为 `src/main.ts` 剩余 direct command surfaces -> packaging / semantic-verification 收敛 -> 更广的 CLI/public surface refinement`。
 - R4. 当前已经落地的 registry-backed operation 第一批包括：
   - `editor.create-link-and-generate`
   - `translate.file`
@@ -67,10 +73,10 @@ topic: cli-mainline-progress-sync-and-next-phase-requirements
   - `provider.profile.import`
   - `cli.capability-manifest.export`
   - `cli.invocation-contract.export`
-- R5. 下一批 contract-tightening 现在必须转向 `src/fileUtils.ts` 的剩余尾部，重点覆盖 `batchFixMermaidSyntaxInFolder` 与 `checkAndRemoveDuplicateConceptNotes`，同时保持 `processFile`、`generateContentForTitle` 与 `batchGenerateContentForTitles` 已落地契约稳定、文档对齐且 registry 一致。
+- R5. 下一批 contract-tightening 现在必须转向剩余 direct command surfaces，重点覆盖 `testLlmConnectionCommand`、`generateDiagramCommand` 与 `previewExperimentalDiagramCommand`，同时保持新落地 write-heavy proof set 稳定、文档对齐且 registry 一致。
 
 **宿主副作用收口**
-- R6. `file.process-add-links`、`file.process-folder-add-links`、`content.generate-from-title`、`content.batch-generate-from-titles`、`translate.*`、`formula.*` 与 `content.extract-original-text` 现在应被视作已交付 proof slice。当前应保留这些 family-local result object 与 host-owned success/no-file 语义，等待 `src/fileUtils.ts` 剩余尾部补齐。
+- R6. `file.process-add-links`、`file.process-folder-add-links`、`content.generate-from-title`、`content.batch-generate-from-titles`、`mermaid.batch-fix`、`concept.dedupe`、`translate.*`、`formula.*` 与 `content.extract-original-text` 现在应被视作已交付 proof slice。当前应保留这些 family-local result object 与 host-owned success/no-file/confirmation 语义，等待剩余 direct surfaces 补齐。
 - R7. `src/fileUtils.ts` 必须继续把 `Notice`、vault 落盘、目录创建、输出冲突处理与破坏性确认语义，向显式 host effect 或结构化结果对象收口，避免 operation core 泄漏 UI 文案。
 - R8. 仍依赖 active file、folder picker、破坏性确认或 preview UI 的流程，不得误标为 `safe`；在 contract 未补齐前只能维持为 `requires-active-file`、`interactive-ui` 或其它受限等级。
 
@@ -84,8 +90,8 @@ topic: cli-mainline-progress-sync-and-next-phase-requirements
 
 ## 成功标准
 
-- 维护者只看最新 requirements / progress / architecture 文档，就能清楚区分已交付 proof set（`file.process-add-links`、`file.process-folder-add-links`、`content.generate-from-title`、`content.batch-generate-from-titles`、`translate.*`、`formula.*`、`content.extract-original-text`）与仍未完成的 `src/fileUtils.ts` 剩余尾部 / direct-surface 工作。
-- 文档不再报错旧顺序；下一波推进现在已经明确是 `src/fileUtils.ts` 剩余尾部优先、direct surfaces 次之。
+- 维护者只看最新 requirements / progress / architecture 文档，就能清楚区分已交付 write-heavy proof set（`file.process-add-links`、`file.process-folder-add-links`、`content.generate-from-title`、`content.batch-generate-from-titles`、`mermaid.batch-fix`、`concept.dedupe`、`translate.*`、`formula.*`、`content.extract-original-text`）与仍未完成的 direct-surface 工作。
+- 文档不再报错旧顺序；下一波推进现在已经明确是 direct surfaces 优先、packaging/semantic-verification 次之。
 - 所有主线同步与代码工作都在干净工作树中完成，并通过完整仓库验证门。
 
 ## 范围边界
@@ -97,7 +103,7 @@ topic: cli-mainline-progress-sync-and-next-phase-requirements
 
 ## 关键决策
 
-- `translate/formula` contract-tightening proof slice 与第一批 process/generate 子切片现已交付；在 `src/fileUtils.ts` 剩余尾部之前重开它们只会制造 churn，而不是推进。
+- 整个 write-heavy contract-tightening 批次现已交付；在剩余 direct-surface 工作之前重开它们只会制造 churn，而不是推进。
 - 当前仍优先接受 family-local result object；共享全局 envelope 依然过早。
 - direct-surface slimming 仍重要，但它排在下一批 write-heavy contract 之后，因为单纯搬 wrapper 并不能显著改善 CLI contract。
 
@@ -106,15 +112,15 @@ topic: cli-mainline-progress-sync-and-next-phase-requirements
 - 当前 clean worktree 已基于最新远端 `main`，并已包含 registry、capability-contract 与第一批 provider/diagram/config-profile 抽离成果。
 - `src/operations/noteProcessingCommandHostAdapter.ts` 现在已经承接 process / generate / research / translate / extract 这批 note-processing command wrapper。
 - `src/operations/utilityCommandHostAdapter.ts` 现在已经承接 duplicate cleanup、Mermaid batch fix 与 formula-fix command wrapper。
-- capability registry 已覆盖 note-processing、process/generate/research、utility、selection 与 export operation batches；主要结构缺口已转向 `src/fileUtils.ts` 的剩余尾部与剩余 direct surfaces。
+- capability registry 已覆盖 note-processing、process/generate/research、utility、selection 与 export operation batches；主要结构缺口已转向剩余 direct surfaces 与 packaging/semantic-verification 后续工作。
 
 ## 未决问题
 
 ### 延后到规划阶段
-- [影响 R5][Technical] Mermaid repair 与 duplicate cleanup 是否应尽量复用新的 process/generate 结果词汇，还是再保留一轮完全 family-local？
-- [影响 R7][Technical] 剩余破坏性确认 / 报告语义应立即上提到 utility host adapter，还是等 direct-surface 批次之后再继续收口？
-- [影响 R10][Technical] `src/fileUtils.ts` 之后，下一批更该先做 diagram command surfaces，还是 provider connection-test flows？
+- [影响 R5][Technical] 下一批 direct-surface 收口应先从 diagram save/generate/preview 开始，还是 provider connection-test，或两者做最小公共 seam？
+- [影响 R7][Technical] 哪些 direct surfaces 值得升级为 registry-backed operations，哪些应继续保留 command-only 语义？
+- [影响 R10][Technical] direct-surface 批次之后，selection/export contract 增强与 maintainer semantic verification 谁的杠杆更高？
 
 ## 下一步
 
--> 进入 `/ce:plan`，规划 `src/fileUtils.ts` 剩余尾部与 direct-surface 收敛顺序。
+-> 进入 `/ce:plan`，规划剩余 direct-surface 收敛批次。

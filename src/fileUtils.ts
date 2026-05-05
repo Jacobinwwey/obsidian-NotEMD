@@ -6,7 +6,6 @@ import { normalizeNameForFilePath, splitContent, getProviderForTask, getModelFor
 import { callLLM } from './llmUtils';
 import { refineMermaidBlocks, cleanupLatexDelimiters, deepDebugMermaid, applyDeepDebugToMermaidBlocks, checkMermaidErrors } from './mermaidProcessor'; // Assuming this will be moved or imported correctly later
 import { _performResearch } from './searchUtils'; // Assuming this will be moved or imported correctly later
-import { showDeletionConfirmationModal } from './ui/modals'; // Assuming this will be moved or imported correctly later
 import mermaid from 'mermaid';
 import { formatI18n, getI18nStrings } from './i18n';
 import { resolveTaskLanguageName, shouldApplyAutoTranslation } from './i18n/taskLanguagePolicy';
@@ -73,6 +72,62 @@ export interface BatchGenerateContentForTitlesResult {
     movedCount: number;
     cancelled: boolean;
     fileResults: BatchGenerateContentFileResult[];
+    errors: Array<{ file: string; message: string }>;
+}
+
+export interface BatchMermaidFixFileResult {
+    sourcePath: string;
+    currentPath: string;
+    modified: boolean;
+    initialErrorCount: number;
+    finalErrorCount: number;
+    deepDebugApplied: boolean;
+    movedToErrorFolder: boolean;
+    errorFolderDestinationPath: string;
+    skippedMoveBecauseDestinationExists: boolean;
+}
+
+export interface BatchMermaidFixResult {
+    folderPath: string;
+    processedFileCount: number;
+    modifiedCount: number;
+    movedErrorFileCount: number;
+    remainingErrorFileCount: number;
+    reportPath: string;
+    reportCreated: boolean;
+    cancelled: boolean;
+    fileResults: BatchMermaidFixFileResult[];
+    errors: Array<{ file: string; message: string }>;
+}
+
+export interface ConceptDedupeCandidate {
+    path: string;
+    reason: string;
+    counterparts: string[];
+}
+
+export interface ConceptDedupeFileResult {
+    path: string;
+    deleted: boolean;
+    skippedBecauseMissing: boolean;
+}
+
+export interface ConceptDedupeOptions {
+    confirmDeletion?: (reportList: ConceptDedupeCandidate[], uiLocale: string) => Promise<boolean>;
+}
+
+export interface ConceptDedupeResult {
+    conceptFolderPath: string;
+    duplicateCheckScopeMode: string;
+    conceptNoteCount: number;
+    comparedNoteCount: number;
+    candidateCount: number;
+    deletionRequested: boolean;
+    deletionConfirmed: boolean;
+    removedCount: number;
+    cancelled: boolean;
+    candidates: ConceptDedupeCandidate[];
+    fileResults: ConceptDedupeFileResult[];
     errors: Array<{ file: string; message: string }>;
 }
 
@@ -1134,9 +1189,14 @@ export async function fixMermaidSyntaxInFile(app: App, file: TFile, reporter: Pr
  * @param settings The plugin settings.
  * @param folderPath Path of the folder to process.
  * @param progressReporter Interface for reporting progress.
- * @returns Object containing errors array and modifiedCount.
+ * @returns Structured batch result for maintainer automation and host-owned notices.
  */
-export async function batchFixMermaidSyntaxInFolder(app: App, settings: NotemdSettings, folderPath: string, progressReporter: ProgressReporter): Promise<{ errors: { file: string; message: string }[], modifiedCount: number }> {
+export async function batchFixMermaidSyntaxInFolder(
+    app: App,
+    settings: NotemdSettings,
+    folderPath: string,
+    progressReporter: ProgressReporter
+): Promise<BatchMermaidFixResult> {
     const i18n = getI18nStrings({ uiLocale: settings.uiLocale });
     const folder = app.vault.getAbstractFileByPath(folderPath);
     if (!folder || !(folder instanceof TFolder)) {
@@ -1147,17 +1207,25 @@ export async function batchFixMermaidSyntaxInFolder(app: App, settings: NotemdSe
         f.path.startsWith(folderPath === '/' ? '' : folderPath + '/')
     );
 
+    const result: BatchMermaidFixResult = {
+        folderPath,
+        processedFileCount: filesToProcess.length,
+        modifiedCount: 0,
+        movedErrorFileCount: 0,
+        remainingErrorFileCount: 0,
+        reportPath: '',
+        reportCreated: false,
+        cancelled: false,
+        fileResults: [],
+        errors: []
+    };
+
     if (filesToProcess.length === 0) {
-        const message = formatI18n(i18n.notices.noMarkdownFilesFoundInSelectedFolder, { folderPath });
-        new Notice(message);
         progressReporter.log(`No eligible files found in "${folderPath}".`);
-        progressReporter.updateStatus(message, 100);
-        return { errors: [], modifiedCount: 0 };
+        return result;
     }
 
     progressReporter.log(`Starting batch Mermaid/LaTeX fix for ${filesToProcess.length} files in "${folderPath}"...`);
-    const errors: { file: string; message: string }[] = [];
-    let modifiedCount = 0;
     const mermaidErrors: { filename: string; count: number }[] = [];
 
     // Ensure error folder exists if moving is enabled
@@ -1169,8 +1237,10 @@ export async function batchFixMermaidSyntaxInFolder(app: App, settings: NotemdSe
                 try {
                     await app.vault.createFolder(errorMoveFolder);
                     progressReporter.log(`Created Mermaid error folder: ${errorMoveFolder}`);
-                } catch (e: any) {
-                    progressReporter.log(`Error creating error folder: ${e.message}`);
+                } catch (e: unknown) {
+                    const errorMessage = e instanceof Error ? e.message : String(e);
+                    progressReporter.log(`Error creating error folder: ${errorMessage}`);
+                    result.errors.push({ file: errorMoveFolder, message: errorMessage });
                 }
             }
         }
@@ -1196,16 +1266,29 @@ export async function batchFixMermaidSyntaxInFolder(app: App, settings: NotemdSe
         await delay(1); // Yield
 
         try {
+            const fileResult: BatchMermaidFixFileResult = {
+                sourcePath: file.path,
+                currentPath: file.path,
+                modified: false,
+                initialErrorCount: 0,
+                finalErrorCount: 0,
+                deepDebugApplied: false,
+                movedToErrorFolder: false,
+                errorFolderDestinationPath: '',
+                skippedMoveBecauseDestinationExists: false
+            };
             // 1. Detect Errors (Read-only check)
             let content = await app.vault.read(file);
             let initialErrorCount = await checkMermaidErrors(content);
+            fileResult.initialErrorCount = initialErrorCount;
+            fileResult.finalErrorCount = initialErrorCount;
 
             if (initialErrorCount > 0) {
                 progressReporter.log(`⚠️ ${initialErrorCount} Mermaid error(s) detected in ${file.name}. Applying fixes...`);
 
                 // 2. Apply Standard Fix (Refine Mermaid Blocks)
                 if (await fixMermaidSyntaxInFile(app, file, progressReporter)) {
-                    modifiedCount++;
+                    fileResult.modified = true;
                     // Refresh content after fix
                     content = await app.vault.read(file);
                 }
@@ -1232,24 +1315,26 @@ export async function batchFixMermaidSyntaxInFolder(app: App, settings: NotemdSe
                     };
 
                     fileErrorCount = await validateContent(content);
+                    fileResult.finalErrorCount = fileErrorCount;
 
                     if (fileErrorCount > 0) {
                          progressReporter.log(`⚠️ Errors persist in ${file.name}. Attempting Deep Debug...`);
                          const deepDebugged = applyDeepDebugToMermaidBlocks(content);
                          
                          if (deepDebugged !== content) {
+                             fileResult.deepDebugApplied = true;
                              // Apply deep debug changes
                              await app.vault.modify(file, deepDebugged);
                              progressReporter.log(`Applied Deep Debug fixes to ${file.name}`);
+                             fileResult.modified = true;
                              
                              // Re-run standard fix (to handle the new brackets/quotes introduced by deep debug if any)
-                             if (await fixMermaidSyntaxInFile(app, file, progressReporter)) {
-                                 modifiedCount++;
-                             }
+                             await fixMermaidSyntaxInFile(app, file, progressReporter);
                              
                              // Re-validate final state
                              content = await app.vault.read(file);
                              fileErrorCount = await validateContent(content);
+                             fileResult.finalErrorCount = fileErrorCount;
                              
                              if (fileErrorCount === 0) {
                                  progressReporter.log(`✅ Deep Debug successfully resolved errors in ${file.name}`);
@@ -1260,20 +1345,28 @@ export async function batchFixMermaidSyntaxInFolder(app: App, settings: NotemdSe
                     }
 
                     if (fileErrorCount > 0) {
+                        result.remainingErrorFileCount += 1;
                         mermaidErrors.push({ filename: file.name, count: fileErrorCount });
                         // Move file if enabled
                         if (errorMoveFolder) {
                             const destPath = `${errorMoveFolder}/${file.name}`;
+                            fileResult.errorFolderDestinationPath = destPath;
                             if (file.parent?.path !== errorMoveFolder) {
                                 try {
                                     if (app.vault.getAbstractFileByPath(destPath)) {
                                         progressReporter.log(`⚠️ Destination ${destPath} exists. Skipping move for ${file.name}.`);
+                                        fileResult.skippedMoveBecauseDestinationExists = true;
                                     } else {
                                         await app.vault.rename(file, destPath);
                                         progressReporter.log(`Moved error file to: ${destPath}`);
+                                        fileResult.movedToErrorFolder = true;
+                                        fileResult.currentPath = destPath;
+                                        result.movedErrorFileCount += 1;
                                     }
-                                } catch (moveErr: any) {
-                                    progressReporter.log(`Error moving file ${file.name}: ${moveErr.message}`);
+                                } catch (moveErr: unknown) {
+                                    const errorMessage = moveErr instanceof Error ? moveErr.message : String(moveErr);
+                                    progressReporter.log(`Error moving file ${file.name}: ${errorMessage}`);
+                                    result.errors.push({ file: file.name, message: errorMessage });
                                 }
                             }
                         }
@@ -1283,12 +1376,17 @@ export async function batchFixMermaidSyntaxInFolder(app: App, settings: NotemdSe
                 progressReporter.log(`✅ No Mermaid errors detected in ${file.name}. Skipping.`);
             }
 
+            if (fileResult.modified) {
+                result.modifiedCount += 1;
+            }
+            result.fileResults.push(fileResult);
+
         } catch (fileError: unknown) {
             const errorMessage = fileError instanceof Error ? fileError.message : String(fileError);
             const errorMsg = `Error fixing syntax in ${file.name}: ${errorMessage}`;
             console.error(errorMsg, fileError);
             progressReporter.log(`❌ ${errorMsg}`);
-            errors.push({ file: file.name, message: errorMessage });
+            result.errors.push({ file: file.name, message: errorMessage });
             // Log error silently
             const timestamp = new Date().toISOString();
             const errorDetails = fileError instanceof Error ? fileError.stack || fileError.message : String(fileError);
@@ -1320,12 +1418,17 @@ export async function batchFixMermaidSyntaxInFolder(app: App, settings: NotemdSe
                 await app.vault.create(reportFileName, reportContent);
             }
             progressReporter.log(`Generated error report: ${reportFileName}`);
-        } catch (reportErr: any) {
-            progressReporter.log(`Error generating report file: ${reportErr.message}`);
+            result.reportPath = reportFileName;
+            result.reportCreated = true;
+        } catch (reportErr: unknown) {
+            const errorMessage = reportErr instanceof Error ? reportErr.message : String(reportErr);
+            progressReporter.log(`Error generating report file: ${errorMessage}`);
+            result.errors.push({ file: reportFileName, message: errorMessage });
         }
     }
 
-    return { errors, modifiedCount }; // Return collected errors and count
+    result.cancelled = progressReporter.cancelled;
+    return result;
 }
 
 /**
@@ -1528,7 +1631,12 @@ export async function saveDiagramArtifactFile(
     return outputPath;
 }
 
-export async function checkAndRemoveDuplicateConceptNotes(app: App, settings: NotemdSettings, progressReporter: ProgressReporter) {
+export async function checkAndRemoveDuplicateConceptNotes(
+    app: App,
+    settings: NotemdSettings,
+    progressReporter: ProgressReporter,
+    options: ConceptDedupeOptions = {}
+): Promise<ConceptDedupeResult> {
     const i18n = getI18nStrings({ uiLocale: settings.uiLocale });
 
     if (!settings.useCustomConceptNoteFolder || !settings.conceptNoteFolder) {
@@ -1540,6 +1648,21 @@ export async function checkAndRemoveDuplicateConceptNotes(app: App, settings: No
         throw new Error(`Concept Note Folder path "${conceptFolderPath}" is invalid or not a folder.`);
     }
 
+    const result: ConceptDedupeResult = {
+        conceptFolderPath,
+        duplicateCheckScopeMode: settings.duplicateCheckScopeMode,
+        conceptNoteCount: 0,
+        comparedNoteCount: 0,
+        candidateCount: 0,
+        deletionRequested: false,
+        deletionConfirmed: false,
+        removedCount: 0,
+        cancelled: false,
+        candidates: [],
+        fileResults: [],
+        errors: []
+    };
+
     progressReporter.log(`Using Concept Note Folder: ${conceptFolderPath}`);
     progressReporter.updateStatus(
         formatRunningStatus(i18n, i18n.sidebar.actions.checkRemoveDuplicateConcepts.label),
@@ -1547,6 +1670,7 @@ export async function checkAndRemoveDuplicateConceptNotes(app: App, settings: No
     );
     const allMarkdownFiles = app.vault.getMarkdownFiles();
     const conceptNotes = allMarkdownFiles.filter(f => f.path.startsWith(conceptFolderPath + '/'));
+    result.conceptNoteCount = conceptNotes.length;
 
     // --- Determine the scope for comparison based on refined settings ---
     let notesToCompareAgainst: TFile[]; // This will hold the files to check against
@@ -1599,7 +1723,11 @@ export async function checkAndRemoveDuplicateConceptNotes(app: App, settings: No
     }
     // --- End scope determination ---
 
-    if (conceptNotes.length === 0) throw new Error("No concept notes found in the specified folder.");
+    if (conceptNotes.length === 0) {
+        progressReporter.log("No concept notes found in the specified folder.");
+        return result;
+    }
+    result.comparedNoteCount = notesToCompareAgainst.length;
     progressReporter.log(`Found ${conceptNotes.length} concept notes to check.`);
     progressReporter.log(`Comparing against ${notesToCompareAgainst.length} notes in the defined scope.`);
     const filesToReport = new Map<string, { reason: string; counterparts: string[] }>();
@@ -1752,14 +1880,23 @@ export async function checkAndRemoveDuplicateConceptNotes(app: App, settings: No
         95
     );
     if (filesToReport.size > 0) {
-        const reportList = Array.from(filesToReport.entries()).map(([path, details]) => ({ path, reason: details.reason, counterparts: details.counterparts }));
+        const reportList: ConceptDedupeCandidate[] = Array.from(filesToReport.entries()).map(([path, details]) => ({
+            path,
+            reason: details.reason,
+            counterparts: details.counterparts
+        }));
+        result.candidates = reportList;
+        result.candidateCount = reportList.length;
         progressReporter.log(`--- Potential Duplicate Concept Notes Found (${filesToReport.size}) ---`);
         reportList.forEach(item => { progressReporter.log(`- ${item.path} (Reason: ${item.reason}, Conflicts: ${item.counterparts.join(', ') || 'N/A'})`); });
         progressReporter.log(`--------------------------------------------------`);
         progressReporter.log("Review the list above.");
 
-        // Assuming showDeletionConfirmationModal is imported from ui/modals.ts
-        const shouldDelete = await showDeletionConfirmationModal(app, reportList, settings.uiLocale);
+        result.deletionRequested = true;
+        const shouldDelete = options.confirmDeletion
+            ? await options.confirmDeletion(reportList, settings.uiLocale)
+            : false;
+        result.deletionConfirmed = shouldDelete;
 
         if (shouldDelete) {
             progressReporter.log("User confirmed deletion. Proceeding...");
@@ -1771,6 +1908,10 @@ export async function checkAndRemoveDuplicateConceptNotes(app: App, settings: No
             let deletedCount = 0; let deletionErrors = 0;
             for (let i = 0; i < reportList.length; i++) {
                 const item = reportList[i];
+                if (progressReporter.cancelled) {
+                    result.cancelled = true;
+                    break;
+                }
                 const progressPercent = Math.floor(((i + 1) / totalToDelete) * 100);
                 progressReporter.updateStatus(
                     formatStepStatus(
@@ -1784,12 +1925,34 @@ export async function checkAndRemoveDuplicateConceptNotes(app: App, settings: No
                 await delay(10); // Yield
                 try {
                     const fileToDelete = app.vault.getAbstractFileByPath(item.path);
-                    if (fileToDelete instanceof TFile) { await app.vault.trash(fileToDelete, true); progressReporter.log(`[DELETED] ${item.path}`); deletedCount++; }
-                    else { progressReporter.log(`[SKIP] File not found or not a file: ${item.path}`); }
-                } catch (deleteError: unknown) { // Changed to unknown
+                    if (fileToDelete instanceof TFile) {
+                        await app.vault.trash(fileToDelete, true);
+                        progressReporter.log(`[DELETED] ${item.path}`);
+                        deletedCount++;
+                        result.removedCount += 1;
+                        result.fileResults.push({
+                            path: item.path,
+                            deleted: true,
+                            skippedBecauseMissing: false
+                        });
+                    } else {
+                        progressReporter.log(`[SKIP] File not found or not a file: ${item.path}`);
+                        result.fileResults.push({
+                            path: item.path,
+                            deleted: false,
+                            skippedBecauseMissing: true
+                        });
+                    }
+                } catch (deleteError: unknown) {
                     const errorMessage = deleteError instanceof Error ? deleteError.message : String(deleteError);
                     progressReporter.log(`[ERROR] Failed to delete ${item.path}: ${errorMessage}`);
                     deletionErrors++;
+                    result.errors.push({ file: item.path, message: errorMessage });
+                    result.fileResults.push({
+                        path: item.path,
+                        deleted: false,
+                        skippedBecauseMissing: false
+                    });
                 }
             }
             const finalMessage = formatI18n(i18n.notices.deletionCompleteSummary, {
@@ -1797,15 +1960,18 @@ export async function checkAndRemoveDuplicateConceptNotes(app: App, settings: No
                 total: reportList.length,
                 errors: deletionErrors
             });
-            progressReporter.log(finalMessage); new Notice(finalMessage); progressReporter.updateStatus(finalMessage, 100);
+            progressReporter.log(finalMessage);
+            progressReporter.updateStatus(finalMessage, 100);
         } else {
             progressReporter.log("Deletion cancelled by user.");
-            new Notice(i18n.notices.duplicateDeletionCancelled);
+            result.cancelled = true;
             progressReporter.updateStatus(i18n.notices.duplicateCheckCompleteCancelled, 100);
         }
     } else {
         progressReporter.log("No potential duplicate concept notes found.");
-        new Notice(i18n.notices.noPotentialDuplicateConceptNotesFound);
         progressReporter.updateStatus(i18n.notices.duplicateCheckComplete, 100);
     }
+
+    result.cancelled = result.cancelled || progressReporter.cancelled;
+    return result;
 }
