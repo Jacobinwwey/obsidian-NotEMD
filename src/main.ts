@@ -2,7 +2,7 @@ import { App, Editor, MarkdownView, Modal, Notice, Plugin, TFile, TFolder, Plugi
 import { NotemdSettings, ProgressReporter, LLMProviderConfig, TaskKey } from './types';
 import { DEFAULT_SETTINGS, NOTEMD_SIDEBAR_VIEW_TYPE, NOTEMD_SIDEBAR_ICON } from './constants';
 import { delay, createConcurrentProcessor, chunkArray, retry, normalizeNameForFilePath } from './utils';
-import { testAPI, callLLM } from './llmUtils';
+import { callLLM } from './llmUtils';
 import {
     handleFileRename,
     handleFileDelete,
@@ -61,6 +61,10 @@ import {
     runProviderDiagnosticCommandWithHost,
     runProviderDiagnosticStabilityCommandWithHost
 } from './operations/providerDiagnosticCommandHostAdapter';
+import {
+    ProviderConnectionTestCommandHost,
+    runTestLlmConnectionCommandWithHost
+} from './operations/providerConnectionTestCommandHostAdapter';
 import {
     ConfigProfileCommandHost,
     ConfigProfileCommandNotice,
@@ -167,6 +171,18 @@ export default class NotemdPlugin extends Plugin {
             sanitizeTimeoutMs: (rawValue) => this.sanitizeDeveloperDiagnosticTimeoutMs(rawValue),
             sanitizeRuns: (rawValue) => this.sanitizeDeveloperDiagnosticRuns(rawValue),
             reportHost: this.createProviderDiagnosticReportHost()
+        };
+    }
+
+    private createProviderConnectionTestCommandHost(): ProviderConnectionTestCommandHost {
+        return {
+            loadSettings: () => this.loadSettings(),
+            getSettings: () => this.settings,
+            getUiStrings: () => this.getUiStrings(),
+            showNotice: (message, duration) => new Notice(message, duration),
+            logError: (message, details) => console.error(message, details),
+            openErrorModal: (title, details) => this.openLocalizedErrorModal(title, details),
+            saveErrorLog: (error, reporter) => saveErrorLog(this.app, reporter, error, this.settings)
         };
     }
 
@@ -1282,47 +1298,7 @@ export default class NotemdPlugin extends Plugin {
         if (!reporter) useReporter.clearDisplay();
 
         try {
-            await this.loadSettings();
-            const provider = this.settings.providers.find(p => p.name === this.settings.activeProvider);
-            if (!provider) throw new Error('No active provider configured');
-            const providerI18n = this.getUiStrings().settings.providerConfig;
-
-            const runningStatus = formatI18n(providerI18n.testConnectionRunning, { provider: provider.name });
-            useReporter.log(runningStatus);
-            useReporter.updateStatus(runningStatus, 50);
-            const testingNotice = new Notice(formatI18n(providerI18n.testConnectionRunning, { provider: provider.name }), 0);
-
-            const result = await testAPI(provider, this.settings.enableApiErrorDebugMode); // Use utility function
-            testingNotice.hide();
-
-            if (result.success) {
-                const successStatus = formatI18n(providerI18n.testConnectionSuccess, { message: result.message });
-                useReporter.log(successStatus);
-                new Notice(successStatus, 5000);
-                useReporter.updateStatus(successStatus, 100);
-            } else {
-                const failedStatus = formatI18n(providerI18n.testConnectionFailed, { message: result.message });
-                useReporter.log(failedStatus);
-                new Notice(failedStatus, 10000);
-                useReporter.updateStatus(failedStatus, -1);
-            }
-        } catch (error: unknown) { // Changed to unknown
-            let errorMessage = 'An unknown error occurred during connection test.';
-            let errorDetails = String(error);
-            if (error instanceof Error) {
-                errorMessage = error.message;
-                errorDetails = error.stack || error.message;
-            }
-            const providerI18n = this.getUiStrings().settings.providerConfig;
-            useReporter.log(`❌ ${errorMessage}`);
-            const errorStatus = formatI18n(providerI18n.testConnectionError, { message: errorMessage });
-            new Notice(errorStatus, 10000);
-            console.error('LLM Connection Test Error:', errorDetails); // Log details
-            useReporter.updateStatus(errorStatus, -1);
-            this.openLocalizedErrorModal(this.getUiStrings().errorModal.titles.llmConnectionTest, errorDetails);
-
-            // Save error log
-            await saveErrorLog(this.app, useReporter, error, this.settings);
+            await runTestLlmConnectionCommandWithHost(this.createProviderConnectionTestCommandHost(), useReporter);
         } finally {
             this.isBusy = false;
             // No need to call useReporter.updateButtonStates() here
