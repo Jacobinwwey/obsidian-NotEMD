@@ -55,7 +55,8 @@
 - provider diagnostic host adaptation 也已抽离：`src/operations/providerDiagnosticCommandHostAdapter.ts` 现在承接开发者诊断命令的 settings 装载、报告落盘接线与 notice 整形逻辑。
 - config/profile host adaptation 也已抽离：`src/operations/configProfileCommandHostAdapter.ts` 现在承接 CLI 邻接的导入导出状态持久化、notice 整形与错误映射逻辑。
 - provider connection-test host adaptation 也已抽离：`src/operations/providerConnectionTestCommandHostAdapter.ts` 现在承接共享 provider 测试的 settings 装载与 notice/report 编排逻辑，并已被命令路径与设置页共同复用。
-- note-processing host adaptation 也已抽离一批：`src/operations/noteProcessingCommandHostAdapter.ts` 现在承接 `process-current-add-links`、`process-folder-add-links`、`batch-generate-from-titles`、`generate-from-title` 与 `research-and-summarize` 的 busy-guard、reporter 生命周期、notice/error-log 编排，`src/main.ts` 不再内联保留这批命令包装。
+- note-processing host adaptation 现已继续扩到第二批：`src/operations/noteProcessingCommandHostAdapter.ts` 现在除了承接 `process-current-add-links`、`process-folder-add-links`、`batch-generate-from-titles`、`generate-from-title` 与 `research-and-summarize` 外，也继续承接 `translate-current-file`、`batch-translate-folder`、`extract-concepts-current`、`extract-concepts-folder`、`extract-original-text` 与 `extract-concepts-and-generate-titles` 的 busy-guard、reporter 生命周期与 notice/error-log 编排。
+- `src/fileUtils.ts` 与 `src/extractOriginalText.ts` 现在也已接受更窄的 runtime context，而不是直接依赖具体 `NotemdPlugin` 类。
 - 现有 Obsidian 命令仍保持注册状态，并继续支持快捷键与官方 CLI 触发，同时底层 operation 层继续演进。
 
 ## 短期交付（0-2 周）

@@ -14,7 +14,7 @@ Reference documents:
 - `docs/brainstorms/2026-05-03-mainline-stabilization-and-ci-hardening-requirements.md`
 - `docs/brainstorms/2026-05-03-drawnix-feasibility-and-integration-direction.md`
 
-## Reality Corrections (2026-05-04)
+## Reality Corrections (2026-05-05)
 
 This audit is not a redesign pass. It is a repo-truth alignment pass. The biggest risks are now documentation drift and overstated gates, not missing platform ideas.
 
@@ -120,7 +120,10 @@ This means the roadmap should no longer be interpreted as "build the platform". 
 - Config/profile host adaptation is now landed too: `src/operations/configProfileCommandHostAdapter.ts` owns import/export state persistence, CLI export notice shaping, and import/export error mapping, so `src/main.ts` no longer carries that CLI-adjacent orchestration inline either.
 - Provider connection-test host adaptation is now landed too: `src/operations/providerConnectionTestCommandHostAdapter.ts` now backs both `test-llm-connection` and the settings-tab provider test flow, so neither surface keeps a parallel `testAPI` orchestration path anymore.
 - The first note-processing host-adapter slice is now landed too: `src/operations/noteProcessingCommandHostAdapter.ts` now owns the busy guard, reporter lifecycle, and notice/error-log orchestration for `process-current-add-links`, `process-folder-add-links`, `batch-generate-from-titles`, `generate-from-title`, and `research-and-summarize`, so `src/main.ts` no longer carries those inline wrappers.
-- The remaining architectural gap is now narrower still: `src/main.ts` mainly retains command registration plus the translation/extraction wrappers and the broader non-CLI interactive/batch host effects, which is a far more defensible next seam than the earlier save/preview-heavy command wrappers.
+- The second note-processing host-adapter slice is now landed too: the same file now additionally owns command-host orchestration for `translate-current-file`, `batch-translate-folder`, `extract-concepts-current`, `extract-concepts-folder`, `extract-original-text`, and `extract-concepts-and-generate-titles`, so the translation/extraction wrappers in `src/main.ts` are now thin delegators.
+- The composite command path is now corrected as well: `extract-concepts-and-generate-titles` no longer blocks itself on outer `isBusy`, and it no longer ignores the configured concept-note folder during batch generation.
+- `src/fileUtils.ts` and `src/extractOriginalText.ts` now accept narrower runtime contexts instead of the concrete `NotemdPlugin` class. Boundary work has therefore advanced from "wrapper extraction" into "utility host-coupling reduction".
+- The remaining architectural gap has moved again: the next phase should prioritize note-processing operation registry onboarding, translation/extraction utility side-effect tightening, and the still-inline `duplicate` / `batch Mermaid fix` / `formula fix` command orchestration in `src/main.ts`.
 
 ## Verification Gates
 
@@ -187,19 +190,22 @@ Short version:
 5. **Keep workspace hygiene**
    `ref/` and `coverage/` are local analysis/build artifacts, not repo deliverables. The mainline expectation is a clean worktree.
 
-6. **Split host adapters out of `src/main.ts`**
-   The save/preview, first config/profile, provider-test, and `process-current-add-links` / `process-folder-add-links` / `batch-generate-from-titles` / `generate-from-title` / `research-and-summarize` slices are now real, not just planned. The next move is to peel the translation/extraction wrappers and future CLI host wiring away from `src/main.ts` so the registry stops at neither metadata nor execution-core extraction.
+6. **Move the next phase toward registry and utility boundaries**
+   Translation/extraction wrappers are no longer the main gap. The next step should onboard note-processing capabilities into `src/operations/registry.ts`, `src/operations/capabilityManifest.ts`, and `src/cliContracts.ts`, while tightening `ProgressModal` / `Notice` / vault-write host effects in `src/translate.ts`, `src/fileUtils.ts`, and `src/extractOriginalText.ts`.
+
+7. **Keep draining the remaining high-value inline command hosts**
+   `checkAndRemoveDuplicateConceptNotesCommand`, `batchMermaidFixCommand`, `fixFormulaFormatsCommand`, and `batchFixFormulaFormatsCommand` are now the most valuable remaining `src/main.ts` extraction targets. They matter more than moving already-thin translation/extraction delegators around again.
 
 ### Ordered landing sequence
 
 The most defensible future landing order, after cross-checking roadmap intent against current code, is:
 
-1. canonicalize the command surface
-2. publish the maintainer-local semantic verification runbook
-3. tighten the heavy-runtime packaging boundary
-4. finish host-adapter extraction for the new operation registry
-5. only then revisit legacy prompt retirement and MermaidProcessor sunset
-6. only after those, re-open board-style export, advanced-engine exploration, or richer first-class CLI command exposure
+1. first onboard note-processing operations into the registry / capability / contract layer
+2. then keep tightening host-side effects inside translation/extraction utilities
+3. then drain the remaining `duplicate` / `batch Mermaid fix` / `formula fix` inline command hosts
+4. after those three items stabilize, continue follow-up hardening for maintainer-local semantic verification and heavy-runtime packaging boundaries
+5. after those boundary items, reopen legacy prompt retirement, MermaidProcessor sunset, or richer first-class CLI exposure
+6. only after that, re-evaluate board-style export and advanced-engine exploration
 
 That sequence preserves the roadmap's long-term intent while respecting what the codebase has already delivered.
 

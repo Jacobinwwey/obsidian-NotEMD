@@ -1,6 +1,6 @@
 # Notemd Architecture Overview
 
-> Updated: 2026-05-02
+> Updated: 2026-05-05
 
 ## System Architecture
 
@@ -207,6 +207,7 @@ flowchart LR
 | `src/rendering/` | Render host, preview, export, theme |
 | `src/ui/` | Settings tab, sidebar, modals, welcome screen |
 | `src/i18n/` | 22 locales, task language policy |
+| `src/operations/` | Operation registry, host adapters, capability/contract export, reusable command orchestration |
 | `src/batchProgressStore.ts` | Interrupt-resume batch state persistence |
 | `src/providerDiagnostics.ts` | LLM provider connection diagnostics |
 
@@ -238,8 +239,9 @@ The gap is smaller than before:
 - `src/operations/providerDiagnosticCommandHostAdapter.ts` now carries developer-diagnostic host loading, report-persistence wiring, and notice shaping below the command layer
 - `src/operations/configProfileCommandHostAdapter.ts` now carries config/profile state persistence, CLI export notice shaping, and import/export error mapping below the command layer
 - `src/operations/providerConnectionTestCommandHostAdapter.ts` now carries shared provider connection test loading and notice/reporter orchestration, and is now reused by both the command path and the settings tab
-- `src/operations/noteProcessingCommandHostAdapter.ts` now carries the busy guard, reporter lifecycle, and notice/error-log orchestration for `process-current-add-links`, `process-folder-add-links`, `batch-generate-from-titles`, `generate-from-title`, and `research-and-summarize`
-- `src/main.ts` now mainly retains command registration plus the translation/extraction wrappers and the broader non-CLI interactive/batch host effects, which are the next extraction targets
+- `src/operations/noteProcessingCommandHostAdapter.ts` now carries not only `process-current-add-links`, `process-folder-add-links`, `batch-generate-from-titles`, `generate-from-title`, and `research-and-summarize`, but also `translate-current-file`, `batch-translate-folder`, `extract-concepts-current`, `extract-concepts-folder`, `extract-original-text`, and `extract-concepts-and-generate-titles`
+- `src/fileUtils.ts` and `src/extractOriginalText.ts` now accept narrower runtime contexts instead of the concrete `NotemdPlugin` class, which shows the boundary work has moved beyond wrapper extraction into utility host-coupling reduction
+- `src/main.ts` now mainly retains command registration plus the still-inline `duplicate` / `batch Mermaid fix` / `formula fix` command orchestration; the next real gap is note-processing registry onboarding and utility side-effect tightening rather than more wrapper moves
 
 ## Key Design Decisions
 
@@ -253,7 +255,7 @@ The gap is smaller than before:
 ## Verification
 
 - `npm run build` — TypeScript compilation + esbuild bundle
-- `npm test -- --runInBand` — 127 suites, 795 tests
+- `npm test -- --runInBand` — the full Jest matrix currently covers 129 suites and 823 tests
 - `npm run audit:i18n-ui` — No hardcoded UI strings
 - `npm run audit:render-host` — Render host self-contained in main.js
 - `git diff --check` — Whitespace hygiene

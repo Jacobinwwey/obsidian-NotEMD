@@ -55,7 +55,8 @@ Carried-forward constraints:
 - Provider-diagnostic host adaptation is now extracted as well: `src/operations/providerDiagnosticCommandHostAdapter.ts` now owns developer-diagnostic settings loading, report-persistence wiring, and notice shaping below `src/main.ts`.
 - Config/profile host adaptation is now extracted as well: `src/operations/configProfileCommandHostAdapter.ts` now owns CLI-adjacent import/export state persistence, notice shaping, and error mapping below `src/main.ts`.
 - Provider connection-test host adaptation is now extracted as well: `src/operations/providerConnectionTestCommandHostAdapter.ts` now owns shared provider-test loading and notice/report orchestration, and is reused by both the command path and the settings tab.
-- The first note-processing host-adaptation slice is now extracted as well: `src/operations/noteProcessingCommandHostAdapter.ts` now owns the busy guard, reporter lifecycle, and notice/error-log orchestration for `process-current-add-links`, `process-folder-add-links`, `batch-generate-from-titles`, `generate-from-title`, and `research-and-summarize`, so `src/main.ts` no longer carries those inline command wrappers.
+- The note-processing host-adaptation line has now advanced into its second slice: `src/operations/noteProcessingCommandHostAdapter.ts` now owns not only `process-current-add-links`, `process-folder-add-links`, `batch-generate-from-titles`, `generate-from-title`, and `research-and-summarize`, but also `translate-current-file`, `batch-translate-folder`, `extract-concepts-current`, `extract-concepts-folder`, `extract-original-text`, and `extract-concepts-and-generate-titles`.
+- `src/fileUtils.ts` and `src/extractOriginalText.ts` now also accept narrower runtime contexts instead of the concrete `NotemdPlugin` class.
 - Existing Obsidian commands remain registered, hotkey-bindable, and official-CLI-triggerable while the deeper operation layer continues to mature.
 
 ## Short-Term Delivery (0-2 weeks)

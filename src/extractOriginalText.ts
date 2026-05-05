@@ -1,12 +1,19 @@
 import { App, TFile, Notice } from 'obsidian';
-import { NotemdSettings, ProgressReporter } from './types';
+import { LLMProviderConfig, NotemdSettings, ProgressReporter, TaskKey } from './types';
 import { callLLM } from './llmUtils';
-import NotemdPlugin from './main'; // Import the plugin class to access helper methods
 import { formatI18n, getI18nStrings } from './i18n';
+
+export interface ExtractOriginalTextPluginContext {
+    settings: NotemdSettings;
+    getProviderAndModelForTask: (
+        taskKey: Extract<TaskKey, 'extractConcepts' | 'extractOriginalText'>
+    ) => { provider: LLMProviderConfig; modelName: string };
+    getPromptForTask: (taskKey: Extract<TaskKey, 'extractOriginalText' | 'extractOriginalTextMerged'>, replacements?: Record<string, string>) => string;
+}
 
 export async function extractOriginalText(
     app: App,
-    plugin: NotemdPlugin, // Pass plugin instance
+    plugin: ExtractOriginalTextPluginContext,
     file: TFile,
     reporter: ProgressReporter
 ): Promise<void> {
