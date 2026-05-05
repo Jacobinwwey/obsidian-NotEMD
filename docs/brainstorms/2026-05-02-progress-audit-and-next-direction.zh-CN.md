@@ -195,19 +195,19 @@ topic: progress-audit-next-direction
 5. **工作区卫生保持**
    `ref/` 与 `coverage/` 应视为本地分析 / 构建产物，而不是待提交内容。主线需要持续保持干净工作树。
 
-6. **把下一阶段重心转到 registry 与 utility 边界**
-   翻译/抽取类命令 wrapper 已不再是主缺口。下一步应优先把 note-processing 能力纳入 `src/operations/registry.ts` / `src/operations/capabilityManifest.ts` / `src/cliContracts.ts`，并继续收紧 `src/translate.ts`、`src/fileUtils.ts`、`src/extractOriginalText.ts` 中的 `ProgressModal` / `Notice` / vault 写入等宿主副作用边界。
+6. **把下一阶段重心转到 write-heavy contract tightening**
+   note-processing registry onboarding 与 utility host extraction 现在基本已经完成。下一步应先把 `translate.file`、`translate.folder-batch`、`formula.fix-file` 与 `formula.batch-fix` 的 machine-readable result、`Notice` / reporter / 目录创建等宿主副作用边界继续收紧，再进入更大的 `src/fileUtils.ts` write-heavy seams。
 
-7. **继续清空剩余高价值 inline command host**
-   `checkAndRemoveDuplicateConceptNotesCommand`、`batchMermaidFixCommand`、`fixFormulaFormatsCommand` 与 `batchFixFormulaFormatsCommand` 现在是 `src/main.ts` 中最值得继续抽离的命令编排热点，比继续搬运已经瘦身的翻译/抽取 wrapper 更有价值。
+7. **然后继续清空剩余高价值 direct command surfaces**
+   现在已核实的高价值剩余直接命令面主要是 `testLlmConnectionCommand`、`generateDiagramCommand` 及其 save/artifact 分支、以及 `previewExperimentalDiagramCommand`。在 write-heavy result contracts 收紧之前，优先级高于重开已抽离 utility families 的 wrapper 搬运。
 
 ### 建议落地顺序
 
 结合 roadmap 原始长期意图与当前代码现实，最稳妥的未来落地顺序应为：
 
-1. 先把 note-processing operation 纳入 registry / capability / contract
-2. 再把 translation/extraction utility 的宿主副作用继续显式化
-3. 然后清空 `duplicate` / `batch Mermaid fix` / `formula fix` 等剩余高价值 inline command host
+1. 先收紧 `translate.file`、`translate.folder-batch`、`formula.fix-file` 与 `formula.batch-fix` 的结果契约，以及由宿主接管的成功语义
+2. 再收紧 `src/fileUtils.ts` 中更大的 write-heavy families，重点覆盖 processed-file 保存、标题生成、概念笔记创建、重复清理与聚合错误语义
+3. 然后处理 `src/main.ts` 剩余 direct command surfaces，其中最高价值目标是 `testLlmConnectionCommand`、`generateDiagramCommand` 与 `previewExperimentalDiagramCommand`
 4. 在以上三项稳定后，再继续维护者本地语义核验与重型运行时打包边界的后续硬化
 5. 完成这些边界工作后，再重开 legacy prompt 退役、MermaidProcessor sunset，或更丰富的 first-class CLI command 暴露
 6. 最后才重新评估 board-style export 与高级引擎探索

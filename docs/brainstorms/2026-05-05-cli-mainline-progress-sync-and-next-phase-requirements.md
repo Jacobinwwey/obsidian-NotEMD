@@ -14,14 +14,15 @@ As of May 5, 2026, Notemd's CLI-oriented mainline has moved past the "command tr
 - the same clean-worktree round also landed note-processing registry onboarding, the first utility-command registry batch, the long-tail process / generate / research registry batch, injected batch-translation reporters, output-path returns for original-text extraction, and a new `src/operations/utilityCommandHostAdapter.ts` for duplicate checks / duplicate cleanup / Mermaid fix / formula fix command orchestration
 - this follow-up slice also closed the remaining selection/export registry gap: `editor.create-link-and-generate`, `provider.profile.export`, `provider.profile.import`, `cli.capability-manifest.export`, and `cli.invocation-contract.export` now participate in the shared registry/capability/contract surface
 - the next follow-up slice has now started contract enrichment too: `extractOriginalText()` returns a richer machine-readable result object, and the success notice moved out of the utility core into `src/operations/noteProcessingCommandHostAdapter.ts`
+- a deeper comparison against the prior May 4-5 requirements and the current code now makes the next batch ordering explicit as well: `translate.*` plus `formula.*` should move before the larger `src/fileUtils.ts` slice, while the remaining direct command surfaces in `src/main.ts` should come last
 - `src/fileUtils.ts` and `src/extractOriginalText.ts` no longer require the concrete `NotemdPlugin` class and now accept narrower runtime contexts
 - the composite command had two real defects before this round: outer `isBusy` short-circuited the inner extraction command, and batch generation did not force the configured concept folder. Both are now fixed
 
 This is still not the CLI-ready end state. The remaining gaps have shifted again from "too much wrapper code in `src/main.ts`" to three harder boundaries:
 
 1. `src/operations/registry.ts`, `src/operations/capabilityManifest.ts`, and `src/cliContracts.ts` now cover the process / generate / research / translation / extraction / utility / selection / export command families, but many write-heavy operations still expose only shallow schemas rather than richer machine-readable result semantics. `content.extract-original-text` is now the first concrete example of that enrichment path.
-2. `src/translate.ts`, `src/fileUtils.ts`, `src/extractOriginalText.ts`, and `src/formulaFixer.ts` still own `App` / `Notice` / vault-write side effects, so the operation contract is cleaner than before but still not host-neutral.
-3. `src/main.ts` is materially thinner, but a long tail of direct execution surfaces and sidebar-specific read paths still remains after the note-processing and utility-host extraction rounds.
+2. `src/translate.ts`, `src/fileUtils.ts`, `src/extractOriginalText.ts`, and `src/formulaFixer.ts` still own `App` / `Notice` / vault-write side effects, so the operation contract is cleaner than before but still not host-neutral. The smallest remaining write-heavy families are now `translate.*` and `formula.*`.
+3. `src/main.ts` is materially thinner, but a long tail of direct execution surfaces and sidebar-specific read paths still remains after the note-processing and utility-host extraction rounds. The verified highest-value direct surfaces now are `testLlmConnectionCommand`, `generateDiagramCommand` and its save/artifact branches, plus `previewExperimentalDiagramCommand`.
 
 The next phase therefore should not focus on "more CLI commands". It should turn the extracted host adapters into a discoverable, typed, constrained operation surface.
 
@@ -32,7 +33,7 @@ The next phase therefore should not focus on "more CLI commands". It should turn
 - R2. No document may continue to describe "translation/extraction wrappers still live in `src/main.ts`" as a current fact.
 
 **Next-phase priority**
-- R3. The next phase must prioritize tightening the already-onboarded operation contracts, side-effect seams, and remaining direct-read command surfaces before adding new CLI subcommands.
+- R3. The next phase must prioritize tightening the already-onboarded operation contracts, side-effect seams, and remaining direct-read command surfaces before adding new CLI subcommands. The fixed order is now `translate/formula -> fileUtils write-heavy flows -> remaining direct command surfaces`.
 - R4. The first landed registry-backed operation batches now include:
   - `editor.create-link-and-generate`
   - `translate.file`
@@ -55,7 +56,7 @@ The next phase therefore should not focus on "more CLI commands". It should turn
   - `provider.profile.import`
   - `cli.capability-manifest.export`
   - `cli.invocation-contract.export`
-- R5. The next contract-tightening batch must extend the same modeling discipline from mere coverage into richer result semantics for write-heavy operations, optional path/context overrides where justified, and explicit alias policy for any remaining direct-read/sidebar surfaces.
+- R5. The next contract-tightening batch must extend the same modeling discipline from mere coverage into richer result semantics for write-heavy operations, optional path/context overrides where justified, and explicit alias policy for any remaining direct-read/sidebar surfaces. The next concrete requirements are captured in `docs/brainstorms/2026-05-05-cli-write-heavy-contract-tightening-requirements.md`.
 
 **Host-side effect tightening**
 - R6. The batch-translation path in `src/translate.ts` has now stopped treating `ProgressModal` as the only valid execution carrier by accepting injected reporters; the next phase must continue lifting notice shaping and result semantics upward so CLI and maintainer automation have a cleaner non-UI path.
@@ -86,7 +87,7 @@ The next phase therefore should not focus on "more CLI commands". It should turn
 
 ## Key Decisions
 
-- Note-processing registry onboarding, the first utility registry batch, the long-tail process / generate / research registry batch, and the selection/export registry batch are now complete; the next highest-leverage work is deeper result/side-effect cleanup.
+- Note-processing registry onboarding, the first utility registry batch, the long-tail process / generate / research registry batch, and the selection/export registry batch are now complete; the next highest-leverage work is deeper result/side-effect cleanup, starting with `translate.*` and `formula.*`.
 - Host-adapter extraction is now mature enough that repeating `src/main.ts` wrapper moves blindly would be low leverage; the next real problems are schema, capability, and side-effect boundaries.
 - The composite-command bug proved that "delegator extraction only" is insufficient; shared busy-state and chained-command behavior must be validated explicitly.
 
@@ -94,7 +95,7 @@ The next phase therefore should not focus on "more CLI commands". It should turn
 
 - The clean worktree is already based on the latest remote `main` and already contains the registry, capability-contract, and first provider/diagram/config-profile extraction work.
 - `src/operations/noteProcessingCommandHostAdapter.ts` now carries the process / generate / research / translate / extract command wrappers for note-processing flows.
-- The capability registry now includes note-processing, process/generate/research, utility, selection, and export operation batches; the primary structural gap has moved to richer result semantics and deeper host-side effect cleanup.
+- The capability registry now includes note-processing, process/generate/research, utility, selection, and export operation batches; the primary structural gap has moved to richer result semantics and deeper host-side effect cleanup, with `translate/formula` now identified as the smallest safe proof slice.
 
 ## Open Questions
 
@@ -105,4 +106,4 @@ The next phase therefore should not focus on "more CLI commands". It should turn
 
 ## Next Step
 
--> Move into the next implementation plan: deeper utility side-effect tightening, richer write-heavy contracts, and the next remaining `src/main.ts` / sidebar command-host slimming slice.
+-> See `docs/brainstorms/2026-05-05-cli-write-heavy-contract-tightening-requirements.md`, then move into `/ce:plan` for the `translate/formula` contract-tightening batch.

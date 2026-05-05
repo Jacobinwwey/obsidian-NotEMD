@@ -195,19 +195,19 @@ Short version:
 5. **Keep workspace hygiene**
    `ref/` and `coverage/` are local analysis/build artifacts, not repo deliverables. The mainline expectation is a clean worktree.
 
-6. **Move the next phase toward registry and utility boundaries**
-   Translation/extraction wrappers are no longer the main gap. The next step should onboard note-processing capabilities into `src/operations/registry.ts`, `src/operations/capabilityManifest.ts`, and `src/cliContracts.ts`, while tightening `ProgressModal` / `Notice` / vault-write host effects in `src/translate.ts`, `src/fileUtils.ts`, and `src/extractOriginalText.ts`.
+6. **Move the next phase toward write-heavy contract tightening**
+   Note-processing registry onboarding and utility host extraction are now largely complete. The next step should harden `translate.file`, `translate.folder-batch`, `formula.fix-file`, and `formula.batch-fix` around richer machine-readable results plus cleaner `Notice` / reporter / folder-creation host effects, then move into the larger write-heavy seams in `src/fileUtils.ts`.
 
-7. **Keep draining the remaining high-value inline command hosts**
-   `checkAndRemoveDuplicateConceptNotesCommand`, `batchMermaidFixCommand`, `fixFormulaFormatsCommand`, and `batchFixFormulaFormatsCommand` are now the most valuable remaining `src/main.ts` extraction targets. They matter more than moving already-thin translation/extraction delegators around again.
+7. **Keep draining the remaining high-value direct command surfaces after that**
+   The verified highest-value remaining direct surfaces are now `testLlmConnectionCommand`, `generateDiagramCommand` plus its save/artifact branches, and `previewExperimentalDiagramCommand`. They matter more than reopening already-extracted utility families before the write-heavy result contracts are tightened.
 
 ### Ordered landing sequence
 
 The most defensible future landing order, after cross-checking roadmap intent against current code, is:
 
-1. first onboard note-processing operations into the registry / capability / contract layer
-2. then keep tightening host-side effects inside translation/extraction utilities
-3. then drain the remaining `duplicate` / `batch Mermaid fix` / `formula fix` inline command hosts
+1. first tighten `translate.file`, `translate.folder-batch`, `formula.fix-file`, and `formula.batch-fix` around richer result contracts and cleaner host-owned success semantics
+2. then tighten the larger write-heavy families in `src/fileUtils.ts`, especially processed-file saving, title generation, concept-note creation, duplicate cleanup, and aggregated error semantics
+3. then converge the remaining direct command surfaces in `src/main.ts`, with `testLlmConnectionCommand`, `generateDiagramCommand`, and `previewExperimentalDiagramCommand` as the highest-value targets
 4. after those three items stabilize, continue follow-up hardening for maintainer-local semantic verification and heavy-runtime packaging boundaries
 5. after those boundary items, reopen legacy prompt retirement, MermaidProcessor sunset, or richer first-class CLI exposure
 6. only after that, re-evaluate board-style export and advanced-engine exploration
