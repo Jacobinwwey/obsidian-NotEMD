@@ -250,7 +250,7 @@ flowchart LR
 - `src/fileUtils.ts` 与 `src/extractOriginalText.ts` 现在已经接受更窄的 runtime context，而不是直接依赖具体 `NotemdPlugin` 类，这说明边界正在从 wrapper 抽离继续推进到 utility 对宿主类型耦合的削弱
 - `src/main.ts` 现在主要保留命令注册、host 构造，以及更深一层的 diagram 执行 helper；先前最高价值的公共 direct command surface 现在已经改为通过 host adapter 代理，不再内联 busy/reporter/preview 生命周期逻辑
 - 新落地的 direct-surface wrapper 批次已经覆盖 `testLlmConnectionCommand`、`generateDiagramCommand` 与 `previewExperimentalDiagramCommand`；这些表面现在都具备结构化 result 边界，而不是 fire-and-forget 的 UI glue
-- 当前真正剩余的缺口已经不是公共 command entrypoint 本身：`diagram.preview` 与 `provider.connection.test` 现已具备 typed contract，剩余压力点转为更深层的 `executeSaveMermaidDiagramCommand` / `executeArtifactDiagramCommand` helper，以及这些 wrapper 之下 save/artifact 分支是否还需要更深 contract depth
+- 当前真正剩余的缺口已经不是公共 command entrypoint 本身：`diagram.preview` 与 `provider.connection.test` 现已具备 typed contract，save/artifact 的实质执行路径也已进入 `src/operations/diagramCommandExecution.ts`。剩余压力点转为 `diagram.generate` 之下的内部 save/artifact 分支是否还值得继续细化 typed boundary，以及当前已落地的 `outputPath` / `previewOpened` result 字段之后还要不要继续下探。
 - 下一阶段顺序已经明确：先收敛更深层的 diagram/provider command-core，再做 packaging / semantic verification 的后续收敛，最后才重开更强 public CLI 声明或更大规模的结构重排
 
 ## 关键设计决策

@@ -37,8 +37,8 @@
 | `notemd:import-provider-profiles` | 导入 provider profile 快照 | `safe` | machine-readable，但会改动 active provider 状态与插件设置 | `provider.profile.import` |
 | `notemd:export-cli-capability-manifest` | 导出命令 capability manifest | `safe` | 导出确定，但仍绑定插件 config-path 写入语义 | `cli.capability-manifest.export` |
 | `notemd:export-cli-invocation-contract` | 导出类型化 invocation contract | `safe` | 导出确定，但仍绑定插件 config-path 写入语义 | `cli.invocation-contract.export` |
-| `notemd:notemd-generate-diagram` | 从活动文件生成 spec-first artifact | `requires-active-file` | 依赖活动文件、插件状态和保存/打开副作用 | `diagram.generate`（`exact`，`defaultInput.outputMode=artifact`） |
-| `notemd:notemd-summarize-as-mermaid` | 为活动文件保存 Mermaid 输出 | `requires-active-file` | 依赖活动文件与插件管理的保存语义 | `diagram.generate`（`exact`，`defaultInput.outputMode=mermaid`） |
+| `notemd:notemd-generate-diagram` | 从活动文件生成 spec-first artifact | `requires-active-file` | 类型化结果现在已包含 `outputPath` 与 `previewOpened`，但 active-file 依赖、插件状态与保存/打开副作用仍使它不能直接宣称为稳定 public API | `diagram.generate`（`exact`，`defaultInput.outputMode=artifact`） |
+| `notemd:notemd-summarize-as-mermaid` | 为活动文件保存 Mermaid 输出 | `requires-active-file` | 类型化结果现在已包含 `outputPath` 与 `previewOpened`，但 active-file 依赖与插件管理的保存语义仍使它不能直接宣称为稳定 public API | `diagram.generate`（`exact`，`defaultInput.outputMode=mermaid`） |
 | `notemd:notemd-preview-diagram` | 预览已保存/已生成图表 | `interactive-ui` | 现在已经具备类型化 input/result schema 来描述 preview artifact 边界，但打开 preview modal 仍属于 UI-only 流程，不具备自动化稳定性 | `diagram.preview`（`exact`） |
 | `notemd:process-with-notemd` | 处理当前文件并加链接 | `requires-active-file` | 结构化文件结果已存在，但 active-file 依赖、概念笔记创建、输出路径策略与 vault 改写副作用仍阻碍稳定自动化 | `file.process-add-links` |
 | `notemd:process-folder-with-notemd` | 批量处理文件夹 | `interactive-ui` | 结构化批量结果已存在，且包含 `savedCount` / `errors` / `cancelled`，但文件夹选择、批量改写执行与后置 Mermaid auto-fix 仍由宿主驱动 | `file.process-folder-add-links` |
@@ -74,7 +74,7 @@
 
 | 优先级 | 候选能力 | 为什么先做 | 现有基础 |
 |---|---|---|---|
-| P0 | Diagram/provider command-core 收敛 | 公共 provider-test 与 diagram command wrapper 已经改为通过 host adapter 代理，`provider.connection.test` 与 `diagram.preview` 也已经具备 typed contract；当前剩余缺口是更深层的 `executeSaveMermaidDiagramCommand` / `executeArtifactDiagramCommand` core，以及其下 save/artifact 分支是否还需要更深 contract depth | `src/operations/diagramCommandHostAdapter.ts`、`src/operations/providerConnectionTestCommandHostAdapter.ts`、`src/main.ts` 中的 diagram helper |
+| P0 | Diagram/provider command-core 收敛 | 公共 provider-test 与 diagram command wrapper 已经改为通过 host adapter 代理，`provider.connection.test` 与 `diagram.preview` 已具备 typed contract，`diagram.generate` 也已暴露 `outputPath` / `previewOpened`。当前剩余缺口是 `src/operations/diagramCommandExecution.ts` 中内部 save/artifact 分支是否还值得继续拆成更细的 typed boundary | `src/operations/diagramCommandHostAdapter.ts`、`src/operations/diagramCommandExecution.ts`、`src/operations/providerConnectionTestCommandHostAdapter.ts` |
 | P1 | selection/export 与 config flow 的 contract 增强 | 这些 operation 已建模，但未来 operation invoker 需要比 command-trigger 对等更丰富的 path/context 语义 | `src/operations/registry.ts`, `src/operations/configProfileCommands.ts`, `src/operations/noteProcessingCommandHostAdapter.ts` |
 | P1 | workflow/settings 打包 | Workflow DSL 与 output-path toggles 仍是有价值 metadata，但还不是稳定公共接口 | `src/workflowButtons.ts`, 设置驱动的输出控制 |
 | P2 | maintainer 语义验证与打包硬化 | 重型运行时隔离与维护者本地 runbook 仍重要，但在命令面收口后才是下一层问题 | `docs/maintainer/*`, render-host bundle 流程, release 验证路径 |
