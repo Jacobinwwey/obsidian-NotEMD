@@ -1,7 +1,7 @@
 import NotemdPlugin from '../main';
 import { mockApp } from './__mocks__/app';
 import { mockSettings } from './__mocks__/settings';
-import * as providerDiagnostics from '../providerDiagnostics';
+import * as providerDiagnosticCommand from '../operations/providerDiagnosticCommand';
 
 function createManifest() {
     return {
@@ -50,7 +50,7 @@ describe('provider diagnostic command surface', () => {
         expect(ids).toContain('export-cli-invocation-contract');
     });
 
-    test('developer diagnostic command uses operation-layer input derived from current settings', async () => {
+    test('developer diagnostic command delegates to extracted provider diagnostic command operation', async () => {
         const plugin = new NotemdPlugin(mockApp, createManifest() as any);
         plugin.app = mockApp;
         plugin.settings = {
@@ -60,26 +60,34 @@ describe('provider diagnostic command surface', () => {
         };
         plugin.loadSettings = jest.fn().mockResolvedValue(undefined);
 
-        const probeSpy = jest.spyOn(providerDiagnostics, 'runProviderDiagnosticProbe').mockResolvedValue({
-            success: true,
-            elapsedMs: 1,
-            callMode: 'runtime-stable',
-            requestedCallMode: 'runtime-stable',
-            logs: [],
-            report: 'ok'
-        });
-        const saveSpy = jest.spyOn(plugin as any, 'saveProviderDiagnosticReport').mockResolvedValue('vault/diag.txt');
+        const commandSpy = jest.spyOn(providerDiagnosticCommand, 'executeProviderDiagnosticCommand').mockResolvedValue({
+            input: {
+                providerName: 'DeepSeek',
+                model: mockSettings.providers[0].model,
+                callMode: 'runtime-stable',
+                timeoutMs: mockSettings.developerDiagnosticTimeoutMs,
+                stabilityRuns: mockSettings.developerDiagnosticStabilityRuns
+            },
+            provider: mockSettings.providers[0],
+            reportPath: 'vault/diag.txt',
+            result: {
+                success: true,
+                elapsedMs: 1,
+                callMode: 'runtime-stable',
+                requestedCallMode: 'runtime-stable',
+                logs: [],
+                report: 'ok'
+            }
+        } as any);
 
         await (plugin as any).runDeveloperProviderDiagnosticCommand();
 
-        expect(probeSpy).toHaveBeenCalledWith(
-            expect.objectContaining({ name: 'DeepSeek' }),
-            expect.any(Object),
+        expect(commandSpy).toHaveBeenCalledWith(
             expect.objectContaining({
-                callMode: 'runtime-stable',
-                timeoutMs: mockSettings.developerDiagnosticTimeoutMs
+                settings: expect.objectContaining({ activeProvider: 'DeepSeek' }),
+                saveReport: expect.any(Function),
+                sanitizeTimeoutMs: expect.any(Function)
             })
         );
-        expect(saveSpy).toHaveBeenCalledWith('DeepSeek', 'ok');
     });
 });

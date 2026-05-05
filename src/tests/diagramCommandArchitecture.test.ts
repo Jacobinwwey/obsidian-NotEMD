@@ -2,6 +2,8 @@ import NotemdPlugin from '../main';
 import { ProgressReporter } from '../types';
 import { mockApp } from './__mocks__/app';
 import { mockSettings } from './__mocks__/settings';
+import * as diagramGenerateOperation from '../operations/diagramGenerateOperation';
+import * as fileUtils from '../fileUtils';
 
 function createReporter(): ProgressReporter {
     return {
@@ -53,6 +55,7 @@ describe('diagram command architecture', () => {
         plugin.addSettingTab = jest.fn();
         plugin.getReporter = jest.fn(() => reporter);
         reporter = createReporter();
+        (mockApp.workspace.getLeaf as any) = jest.fn(() => ({ openFile: jest.fn() }));
         file = {
             name: 'Topic.md',
             basename: 'Topic',
@@ -63,10 +66,6 @@ describe('diagram command architecture', () => {
 
     test('exposes a shared generateDiagramCommand entrypoint for command consolidation', () => {
         expect(typeof (plugin as any).generateDiagramCommand).toBe('function');
-    });
-
-    test('exposes a shared generateDiagramOperation entrypoint below command wiring', () => {
-        expect(typeof (plugin as any).generateDiagramOperation).toBe('function');
     });
 
     test('keeps summarizeToMermaidCommand as a compatibility alias over the shared diagram command', async () => {
@@ -95,7 +94,6 @@ describe('diagram command architecture', () => {
 
     test('shared diagram command shapes operation input before delegating artifact execution', async () => {
         (mockApp.vault.read as jest.Mock).mockResolvedValue('# Topic');
-        const legacyArtifactSpy = jest.spyOn(plugin as any, 'generateExperimentalDiagramArtifact');
         jest.spyOn(plugin as any, 'executeArtifactDiagramCommand').mockResolvedValue(undefined);
         jest.spyOn(plugin as any, 'getProviderAndModelForTask').mockReturnValue({
             provider: mockSettings.providers[0],
@@ -104,7 +102,6 @@ describe('diagram command architecture', () => {
 
         await (plugin as any).generateDiagramCommand(file, reporter, { executionMode: 'save-artifact' });
 
-        expect(legacyArtifactSpy).not.toHaveBeenCalled();
         expect((plugin as any).executeArtifactDiagramCommand).toHaveBeenCalledWith(
             file,
             expect.objectContaining({
@@ -120,6 +117,57 @@ describe('diagram command architecture', () => {
             expect.anything(),
             'save-artifact'
         );
+    });
+
+    test('artifact execution delegates to extracted diagram generate operation module', async () => {
+        const runSpy = jest.spyOn(diagramGenerateOperation, 'runDiagramGenerateOperation').mockResolvedValue({
+            plan: {
+                intent: 'flowchart',
+                confidence: 1,
+                reasons: [],
+                renderTarget: 'mermaid',
+                fallbackTargets: [],
+                mermaidDiagramType: 'flowchart',
+                legacyCompatibilityMode: false
+            },
+            spec: {
+                intent: 'flowchart',
+                title: 'Topic',
+                nodes: []
+            },
+            artifact: {
+                target: 'mermaid',
+                content: 'graph TD',
+                mimeType: 'text/vnd.mermaid',
+                sourceIntent: 'flowchart'
+            }
+        } as any);
+        jest.spyOn(plugin as any, 'maybeAutoFixMermaidForFile').mockResolvedValue(undefined);
+        jest.spyOn(plugin as any, 'openDiagramPreviewModal').mockImplementation(() => undefined);
+        const saveSpy = jest.spyOn(fileUtils, 'saveDiagramArtifactFile').mockResolvedValue('Notes/Topic_diagram.md');
+
+        await (plugin as any).executeArtifactDiagramCommand(
+            file,
+            {
+                sourcePath: file.path,
+                sourceMarkdown: '# Topic',
+                compatibilityMode: 'best-fit',
+                outputMode: 'artifact'
+            },
+            mockSettings.providers[0],
+            mockSettings.providers[0].model,
+            reporter,
+            'Generate diagram',
+            (plugin as any).getUiStrings(),
+            'save-artifact'
+        );
+
+        expect(runSpy).toHaveBeenCalledWith(expect.objectContaining({
+            input: expect.objectContaining({ outputMode: 'artifact' }),
+            provider: mockSettings.providers[0],
+            modelName: mockSettings.providers[0].model
+        }));
+        expect(saveSpy).toHaveBeenCalled();
     });
 
     test('preview command reads vega-lite from file without calling generateDiagramCommand', async () => {

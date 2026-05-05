@@ -228,6 +228,12 @@ That means Notemd's future CLI story still cannot stop at "reuse sidebar buttons
 
 The architectural gap is that `src/main.ts` still owns too much orchestration, UI lifecycle, and Obsidian runtime coupling. Until a host-neutral operation layer exists, plugin command IDs can be triggered from the official CLI, but they still remain product surfaces rather than stable engineering APIs.
 
+The gap is smaller than before:
+
+- `src/operations/diagramGenerateOperation.ts` now carries reusable diagram execution below the command layer
+- `src/operations/providerDiagnosticCommand.ts` now carries provider-diagnostic command orchestration below the command layer
+- `src/main.ts` still owns save/open/preview host effects, which is the next extraction target
+
 ## Key Design Decisions
 
 1. **Spec-first diagram generation**: LLM emits structured `DiagramSpec` JSON, not raw Mermaid syntax. Decouples intent from renderer.

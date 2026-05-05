@@ -37,23 +37,22 @@ import { resolveTaskLanguageCode } from './i18n/taskLanguagePolicy';
 import { getSidebarActionLabel, SidebarActionId } from './workflowButtons';
 import {
     buildDiagramOperationInput,
-    DiagramOperationInput,
-    generateDiagramArtifact
+    DiagramOperationInput
 } from './diagram/diagramGenerationService';
 import { RenderArtifact } from './rendering/types';
 import { DiagramIntent } from './diagram/types';
 import { IframeRenderHost } from './rendering/host/iframeRenderHost';
 import { getRenderTargetDisplayName } from './rendering/targetLabel';
 import { supportsDiagramPreviewModal } from './ui/diagramPreview';
-import {
-    buildProviderDiagnosticFileName,
-    buildProviderDiagnosticOperationInput,
-    ProviderDiagnosticCallMode,
-    runProviderDiagnosticProbe,
-    runProviderDiagnosticStabilityProbe
-} from './providerDiagnostics';
+import { buildProviderDiagnosticFileName } from './providerDiagnostics';
 import { buildCliInvocationContract } from './cliContracts';
 import { buildCliCapabilityManifest } from './operations/capabilityManifest';
+import {
+    executeProviderDiagnosticCommand,
+    executeProviderDiagnosticStabilityCommand,
+    MissingActiveProviderError
+} from './operations/providerDiagnosticCommand';
+import { runDiagramGenerateOperation } from './operations/diagramGenerateOperation';
 
 type DiagramCommandExecutionMode = 'save-mermaid' | 'save-artifact' | 'preview-artifact';
 
@@ -98,14 +97,6 @@ export default class NotemdPlugin extends Plugin {
         const previewTitle = formatI18n(i18n.previewModal.title, { target: targetLabel });
         const session = new IframeRenderHost().createSession(artifact, { sourcePath, artifactSaved, previewTitle });
         new DiagramPreviewModal(this.app, session, this.settings.uiLocale).open();
-    }
-
-    private resolveExperimentalDiagramCompatibilityMode(requireMermaidOutput = false): 'legacy-mermaid' | 'best-fit' {
-        if (requireMermaidOutput) {
-            return 'legacy-mermaid';
-        }
-
-        return this.settings.experimentalDiagramCompatibilityMode;
     }
 
     private getDiagramCommandActionLabel(executionMode: DiagramCommandExecutionMode, i18n = this.getUiStrings()): string {
@@ -1272,67 +1263,65 @@ export default class NotemdPlugin extends Plugin {
     async runDeveloperProviderDiagnosticCommand(): Promise<void> {
         await this.loadSettings();
         const i18n = this.getUiStrings();
-        const provider = this.settings.providers.find(p => p.name === this.settings.activeProvider);
 
-        if (!provider) {
-            new Notice(i18n.notices.noActiveProviderConfigured, 8000);
-            return;
-        }
+        try {
+            const execution = await executeProviderDiagnosticCommand({
+                settings: this.settings,
+                sanitizeTimeoutMs: (rawValue) => this.sanitizeDeveloperDiagnosticTimeoutMs(rawValue),
+                sanitizeRuns: (rawValue) => this.sanitizeDeveloperDiagnosticRuns(rawValue),
+                saveReport: (providerName, reportContent) => this.saveProviderDiagnosticReport(providerName, reportContent)
+            });
 
-        const input = buildProviderDiagnosticOperationInput(provider, this.settings);
-        const timeoutMs = this.sanitizeDeveloperDiagnosticTimeoutMs(input.timeoutMs);
-        const callMode = input.callMode as ProviderDiagnosticCallMode;
+            if (execution.result.success) {
+                new Notice(formatI18n(i18n.settings.developer.diagnosticSuccess, {
+                    callMode: execution.result.callMode,
+                    path: execution.reportPath
+                }), 8000);
+            } else {
+                new Notice(formatI18n(i18n.settings.developer.diagnosticCapturedFailure, {
+                    callMode: execution.result.callMode,
+                    path: execution.reportPath
+                }), 12000);
+            }
+        } catch (error: unknown) {
+            if (error instanceof MissingActiveProviderError) {
+                new Notice(i18n.notices.noActiveProviderConfigured, 8000);
+                return;
+            }
 
-        const result = await runProviderDiagnosticProbe(provider, this.settings, {
-            callMode,
-            timeoutMs
-        });
-        const reportPath = await this.saveProviderDiagnosticReport(provider.name, result.report);
-
-        if (result.success) {
-            new Notice(formatI18n(i18n.settings.developer.diagnosticSuccess, {
-                callMode: result.callMode,
-                path: reportPath
-            }), 8000);
-        } else {
-            new Notice(formatI18n(i18n.settings.developer.diagnosticCapturedFailure, {
-                callMode: result.callMode,
-                path: reportPath
-            }), 12000);
+            throw error;
         }
     }
 
     async runDeveloperProviderStabilityDiagnosticCommand(): Promise<void> {
         await this.loadSettings();
         const i18n = this.getUiStrings();
-        const provider = this.settings.providers.find(p => p.name === this.settings.activeProvider);
 
-        if (!provider) {
-            new Notice(i18n.notices.noActiveProviderConfigured, 8000);
-            return;
+        try {
+            const execution = await executeProviderDiagnosticStabilityCommand({
+                settings: this.settings,
+                sanitizeTimeoutMs: (rawValue) => this.sanitizeDeveloperDiagnosticTimeoutMs(rawValue),
+                sanitizeRuns: (rawValue) => this.sanitizeDeveloperDiagnosticRuns(rawValue),
+                saveReport: (providerName, reportContent) => this.saveProviderDiagnosticReport(providerName, reportContent)
+            });
+
+            new Notice(
+                formatI18n(i18n.settings.developer.stabilityFinished, {
+                    callMode: execution.result.callMode,
+                    successCount: execution.result.successCount,
+                    runs: execution.result.runs,
+                    path: execution.reportPath
+                }),
+                12000
+            );
+        } catch (error: unknown) {
+            if (error instanceof MissingActiveProviderError) {
+                new Notice(i18n.notices.noActiveProviderConfigured, 8000);
+                return;
+            }
+
+            throw error;
         }
-
-        const input = buildProviderDiagnosticOperationInput(provider, this.settings);
-        const timeoutMs = this.sanitizeDeveloperDiagnosticTimeoutMs(input.timeoutMs);
-        const runs = this.sanitizeDeveloperDiagnosticRuns(input.stabilityRuns);
-        const callMode = input.callMode as ProviderDiagnosticCallMode;
-
-        const result = await runProviderDiagnosticStabilityProbe(provider, this.settings, {
-            callMode,
-            timeoutMs,
-            runs
-        });
-        const reportPath = await this.saveProviderDiagnosticReport(`${provider.name}_stability`, result.report);
-
-        new Notice(
-            formatI18n(i18n.settings.developer.stabilityFinished, {
-                callMode: result.callMode,
-                successCount: result.successCount,
-                runs: result.runs,
-                path: reportPath
-            }),
-            12000
-        );
     }
 
     /** Command: Generate Content from Title */
@@ -1953,148 +1942,6 @@ export default class NotemdPlugin extends Plugin {
         }
     }
 
-    private async generateMermaidSummaryContent(
-        fileContent: string,
-        provider: LLMProviderConfig,
-        modelName: string,
-        reporter: ProgressReporter
-    ): Promise<string> {
-        if (!this.settings.enableExperimentalDiagramPipeline) {
-            const prompt = this.getPromptForTask('summarizeToMermaid');
-            return callLLM(provider, prompt, fileContent, this.settings, reporter, modelName);
-        }
-
-        reporter.log('Experimental diagram pipeline enabled. Attempting spec-first Mermaid generation.');
-
-        try {
-            const compatibilityMode = this.resolveExperimentalDiagramCompatibilityMode(true);
-            if (this.settings.experimentalDiagramCompatibilityMode !== compatibilityMode) {
-                reporter.log('Mermaid command pins experimental compatibility mode to legacy-mermaid to guarantee Mermaid output.');
-            }
-
-            const result = await generateDiagramArtifact(fileContent, {
-                requestedIntent: this.settings.preferredDiagramIntent as DiagramIntent | undefined,
-                compatibilityMode,
-                targetLanguage: resolveTaskLanguageCode(this.settings, 'summarizeToMermaid'),
-                llmInvoker: (systemPrompt, sourceMarkdown) =>
-                    callLLM(provider, systemPrompt, sourceMarkdown, this.settings, reporter, modelName)
-            });
-
-            if (result.artifact.target !== 'mermaid') {
-                throw new Error(`Experimental diagram pipeline returned unsupported target "${result.artifact.target}" for Mermaid command.`);
-            }
-
-            reporter.log(`Experimental diagram pipeline succeeded with intent "${result.spec.intent}" and target "${result.artifact.target}".`);
-            return result.artifact.content;
-        } catch (error: unknown) {
-            const message = error instanceof Error ? error.message : String(error);
-            reporter.log(`Experimental diagram pipeline failed: ${message}`);
-            reporter.log('Falling back to legacy Mermaid prompt and fixer pipeline.');
-            const prompt = this.getPromptForTask('summarizeToMermaid');
-            return callLLM(provider, prompt, fileContent, this.settings, reporter, modelName);
-        }
-    }
-
-    private async generateDiagramOperation(
-        input: DiagramOperationInput,
-        settings: NotemdSettings,
-        provider: LLMProviderConfig,
-        modelName: string,
-        reporter: ProgressReporter
-    ) {
-        if (input.outputMode === 'mermaid' && !settings.enableExperimentalDiagramPipeline) {
-            const prompt = this.getPromptForTask('summarizeToMermaid');
-            const mermaidContent = await callLLM(provider, prompt, input.sourceMarkdown, settings, reporter, modelName);
-            return {
-                plan: {
-                    intent: (input.requestedIntent || 'mindmap') as DiagramIntent,
-                    confidence: 1,
-                    reasons: ['legacy mermaid compatibility path'],
-                    renderTarget: 'mermaid' as const,
-                    fallbackTargets: [],
-                    mermaidDiagramType: null,
-                    legacyCompatibilityMode: true
-                },
-                spec: {
-                    intent: (input.requestedIntent || 'mindmap') as DiagramIntent,
-                    title: input.sourcePath || 'Generated Diagram',
-                    nodes: []
-                },
-                artifact: {
-                    target: 'mermaid' as const,
-                    content: mermaidContent,
-                    mimeType: 'text/vnd.mermaid',
-                    sourceIntent: (input.requestedIntent || 'mindmap') as DiagramIntent
-                },
-                renderError: undefined
-            };
-        }
-
-        reporter.log(`Generating diagram operation in ${input.outputMode} mode.`);
-
-        try {
-            if (input.outputMode === 'mermaid' && settings.experimentalDiagramCompatibilityMode !== input.compatibilityMode) {
-                reporter.log('Mermaid command pins experimental compatibility mode to legacy-mermaid to guarantee Mermaid output.');
-            }
-
-            return await generateDiagramArtifact(input.sourceMarkdown, {
-                requestedIntent: input.requestedIntent,
-                compatibilityMode: input.compatibilityMode,
-                targetLanguage: input.targetLanguage,
-                llmInvoker: (systemPrompt, sourceMarkdown) =>
-                    callLLM(provider, systemPrompt, sourceMarkdown, settings, reporter, modelName)
-            });
-        } catch (error: unknown) {
-            if (input.outputMode !== 'mermaid') {
-                throw error;
-            }
-
-            const message = error instanceof Error ? error.message : String(error);
-            reporter.log(`Experimental diagram pipeline failed: ${message}`);
-            reporter.log('Falling back to legacy Mermaid prompt and fixer pipeline.');
-            const prompt = this.getPromptForTask('summarizeToMermaid');
-            const mermaidContent = await callLLM(provider, prompt, input.sourceMarkdown, settings, reporter, modelName);
-            return {
-                plan: {
-                    intent: (input.requestedIntent || 'mindmap') as DiagramIntent,
-                    confidence: 1,
-                    reasons: ['legacy mermaid fallback path'],
-                    renderTarget: 'mermaid' as const,
-                    fallbackTargets: [],
-                    mermaidDiagramType: null,
-                    legacyCompatibilityMode: true
-                },
-                spec: {
-                    intent: (input.requestedIntent || 'mindmap') as DiagramIntent,
-                    title: input.sourcePath || 'Generated Diagram',
-                    nodes: []
-                },
-                artifact: {
-                    target: 'mermaid' as const,
-                    content: mermaidContent,
-                    mimeType: 'text/vnd.mermaid',
-                    sourceIntent: (input.requestedIntent || 'mindmap') as DiagramIntent
-                },
-                renderError: undefined
-            };
-        }
-    }
-
-    private async generateExperimentalDiagramArtifact(
-        fileContent: string,
-        provider: LLMProviderConfig,
-        modelName: string,
-        reporter: ProgressReporter
-    ) {
-        return generateDiagramArtifact(fileContent, {
-            requestedIntent: this.settings.preferredDiagramIntent as DiagramIntent | undefined,
-            compatibilityMode: this.resolveExperimentalDiagramCompatibilityMode(),
-            targetLanguage: resolveTaskLanguageCode(this.settings, 'summarizeToMermaid'),
-            llmInvoker: (systemPrompt, sourceMarkdown) =>
-                callLLM(provider, systemPrompt, sourceMarkdown, this.settings, reporter, modelName)
-        });
-    }
-
     private async executeSaveMermaidDiagramCommand(
         file: TFile,
         operationInput: DiagramOperationInput,
@@ -2105,7 +1952,14 @@ export default class NotemdPlugin extends Plugin {
         i18n = this.getUiStrings()
     ) {
         reporter.updateStatus(this.getStepStatusText(1, 3, actionLabel), 20);
-        const result = await this.generateDiagramOperation(operationInput, this.settings, provider, modelName, reporter);
+        const result = await runDiagramGenerateOperation({
+            input: operationInput,
+            settings: this.settings,
+            provider,
+            modelName,
+            reporter,
+            getLegacyMermaidPrompt: () => this.getPromptForTask('summarizeToMermaid')
+        });
         const mermaidContent = result.artifact.content;
         reporter.updateStatus(this.getStepStatusText(2, 3, actionLabel), 90);
 
@@ -2160,7 +2014,14 @@ export default class NotemdPlugin extends Plugin {
         const initialProgress = executionMode === 'preview-artifact' ? 25 : 20;
         reporter.updateStatus(this.getStepStatusText(1, totalSteps, actionLabel), initialProgress);
 
-        const result = await this.generateDiagramOperation(operationInput, this.settings, provider, modelName, reporter);
+        const result = await runDiagramGenerateOperation({
+            input: operationInput,
+            settings: this.settings,
+            provider,
+            modelName,
+            reporter,
+            getLegacyMermaidPrompt: () => this.getPromptForTask('summarizeToMermaid')
+        });
 
         if (result.renderError) {
             reporter.log(`Warning: ${result.renderError}`);
