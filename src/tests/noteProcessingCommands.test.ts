@@ -66,6 +66,40 @@ function createGenerateContentResult(overrides?: Partial<fileUtils.GenerateConte
     };
 }
 
+function createConceptDedupeResult(overrides?: Partial<fileUtils.ConceptDedupeResult>): fileUtils.ConceptDedupeResult {
+    return {
+        conceptFolderPath: 'Concepts',
+        duplicateCheckScopeMode: 'vault',
+        conceptNoteCount: 1,
+        comparedNoteCount: 2,
+        candidateCount: 0,
+        deletionRequested: false,
+        deletionConfirmed: false,
+        removedCount: 0,
+        cancelled: false,
+        candidates: [],
+        fileResults: [],
+        errors: [],
+        ...overrides
+    };
+}
+
+function createBatchMermaidFixResult(overrides?: Partial<fileUtils.BatchMermaidFixResult>): fileUtils.BatchMermaidFixResult {
+    return {
+        folderPath: 'Concepts',
+        processedFileCount: 1,
+        modifiedCount: 1,
+        movedErrorFileCount: 0,
+        remainingErrorFileCount: 0,
+        reportPath: '',
+        reportCreated: false,
+        cancelled: false,
+        fileResults: [],
+        errors: [],
+        ...overrides
+    };
+}
+
 describe('note processing command surface', () => {
     beforeEach(() => {
         jest.clearAllMocks();
@@ -639,10 +673,15 @@ describe('note processing command surface', () => {
 
         const hostSpy = jest
             .spyOn(utilityCommandHostAdapter, 'runCheckAndRemoveDuplicateConceptNotesCommandWithHost')
-            .mockResolvedValue(undefined);
+            .mockResolvedValue(createConceptDedupeResult({
+                candidateCount: 1,
+                deletionRequested: true,
+                deletionConfirmed: true,
+                removedCount: 1
+            }));
         const utilitySpy = jest
             .spyOn(fileUtils, 'checkAndRemoveDuplicateConceptNotes')
-            .mockResolvedValue(undefined);
+            .mockResolvedValue(createConceptDedupeResult());
 
         await (plugin as any).checkAndRemoveDuplicateConceptNotesCommand(reporter);
 
@@ -661,6 +700,7 @@ describe('note processing command surface', () => {
             getRunningActionText: expect.any(Function),
             getActionCompleteText: expect.any(Function),
             showNotice: expect.any(Function),
+            confirmConceptDeletion: expect.any(Function),
             logError: expect.any(Function),
             openErrorModal: expect.any(Function),
             saveErrorLog: expect.any(Function),
@@ -710,10 +750,18 @@ describe('note processing command surface', () => {
 
         const hostSpy = jest
             .spyOn(utilityCommandHostAdapter, 'runBatchMermaidFixCommandWithHost')
-            .mockResolvedValue({ folderPath: 'Concepts', modifiedCount: 2 });
+            .mockResolvedValue(createBatchMermaidFixResult({
+                folderPath: 'Concepts',
+                processedFileCount: 2,
+                modifiedCount: 2
+            }));
         const utilitySpy = jest
             .spyOn(fileUtils, 'batchFixMermaidSyntaxInFolder')
-            .mockResolvedValue({ errors: [], modifiedCount: 2 });
+            .mockResolvedValue(createBatchMermaidFixResult({
+                folderPath: 'Concepts',
+                processedFileCount: 2,
+                modifiedCount: 2
+            }));
 
         const result = await (plugin as any).batchMermaidFixCommand(reporter, 'Concepts');
 
@@ -724,7 +772,11 @@ describe('note processing command surface', () => {
             completeReporter: expect.any(Function),
             finalizeReporter: expect.any(Function)
         }), reporter, 'Concepts');
-        expect(result).toEqual({ folderPath: 'Concepts', modifiedCount: 2 });
+        expect(result).toEqual(expect.objectContaining({
+            folderPath: 'Concepts',
+            processedFileCount: 2,
+            modifiedCount: 2
+        }));
         expect(utilitySpy).not.toHaveBeenCalled();
     });
 

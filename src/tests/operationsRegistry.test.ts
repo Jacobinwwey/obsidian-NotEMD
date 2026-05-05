@@ -371,7 +371,20 @@ describe('operations registry', () => {
                     commandId: 'check-and-remove-duplicate-concept-notes',
                     mappingKind: 'exact'
                 })
-            ])
+            ]),
+            resultSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    candidateCount: expect.any(Object),
+                    deletionRequested: expect.any(Object),
+                    deletionConfirmed: expect.any(Object),
+                    removedCount: expect.any(Object),
+                    cancelled: expect.any(Object),
+                    candidates: expect.any(Object),
+                    fileResults: expect.any(Object),
+                    errors: expect.any(Object)
+                })
+            })
         }));
 
         expect(batchMermaidFix).toEqual(expect.objectContaining({
@@ -385,7 +398,21 @@ describe('operations registry', () => {
                     commandId: 'batch-mermaid-fix',
                     mappingKind: 'exact'
                 })
-            ])
+            ]),
+            resultSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    processedFileCount: expect.any(Object),
+                    modifiedCount: expect.any(Object),
+                    movedErrorFileCount: expect.any(Object),
+                    remainingErrorFileCount: expect.any(Object),
+                    reportPath: expect.any(Object),
+                    reportCreated: expect.any(Object),
+                    cancelled: expect.any(Object),
+                    fileResults: expect.any(Object),
+                    errors: expect.any(Object)
+                })
+            })
         }));
 
         expect(fixFormulaFile).toEqual(expect.objectContaining({

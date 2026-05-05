@@ -52,11 +52,11 @@
 | `notemd:extract-original-text` | 从活动文件提取配置好的原文片段 | `requires-active-file` | 现在已有结构化结果，但 active-file 依赖与输出路径持久化仍绑定宿主/设置 | `content.extract-original-text` |
 | `notemd:extract-concepts-and-generate-titles` | 提取概念并生成标题的复合流程 | `requires-active-file` | 复合 workflow 尚无显式 typed contract | `workflow.extract-and-generate` |
 | `notemd:create-wiki-link-and-generate-from-selection` | 基于选区创建概念笔记并生成内容 | `requires-selection` | 编辑器选区是内生依赖 | `editor.create-link-and-generate` |
-| `notemd:batch-mermaid-fix` | 批量 Mermaid 修复 | `interactive-ui` | 文件夹选择、内容改写和报告副作用都仍然绑定宿主 | `mermaid.batch-fix` |
+| `notemd:batch-mermaid-fix` | 批量 Mermaid 修复 | `interactive-ui` | 结构化批量结果现已存在，但文件夹选择、可变修复流程、报告生成与可选错误文件移动仍需要交互式宿主语义 | `mermaid.batch-fix` |
 | `notemd:fix-formula-formats` | 修复当前文件公式格式 | `requires-active-file` | 结构化文件结果已存在，但 active-file 依赖与直接 vault 改写副作用仍阻碍稳定自动化 | `formula.fix-file` |
 | `notemd:batch-fix-formula-formats` | 批量公式修复 | `interactive-ui` | 结构化批量结果已存在，但文件夹选择与批量改写执行仍需要交互式宿主语义 | `formula.batch-fix` |
 | `notemd:check-for-duplicates` | 检查当前笔记重复项 | `requires-active-file` | 结果目前偏 console/notice 输出 | `duplicate.check-file` |
-| `notemd:check-and-remove-duplicate-concept-notes` | 删除重复概念笔记 | `interactive-ui` | 破坏性流程需要更强的契约和确认模型 | `concept.dedupe` |
+| `notemd:check-and-remove-duplicate-concept-notes` | 删除重复概念笔记 | `interactive-ui` | 结构化扫描/删除结果现已存在，确认流程也已上提到 host，但破坏性确认与文件夹范围改写仍不适合稳定自动化 | `concept.dedupe` |
 
 ## Registry 当前状态
 
@@ -64,8 +64,8 @@
 - `src/operations/capabilityManifest.ts` 现在从同一 registry 展平 capability manifest。
 - `src/cliContracts.ts` 现在也从同一 registry 生成 invocation contract，减少了文档、命令发现与契约导出之间的漂移路径。
 - registry 现在也已纳入主要 note-processing、utility、selection 与 export operations：`editor.create-link-and-generate`、`file.process-add-links`、`file.process-folder-add-links`、`content.generate-from-title`、`content.batch-generate-from-titles`、`research.summarize-topic`、`translate.file`、`translate.folder-batch`、`concept.extract-file`、`concept.extract-folder`、`content.extract-original-text`、`workflow.extract-and-generate`、`duplicate.check-file`、`concept.dedupe`、`mermaid.batch-fix`、`formula.fix-file`、`formula.batch-fix`、`provider.profile.export`、`provider.profile.import`、`cli.capability-manifest.export` 与 `cli.invocation-contract.export`。
-- `file.process-add-links`、`file.process-folder-add-links`、`content.generate-from-title`、`content.batch-generate-from-titles`、`translate.*`、`formula.*` 与 `content.extract-original-text` 现在已经组成当前已验证的 write-heavy contract-enrichment proof set：utility core 返回结构化结果，host adapter 接管本地化成功/no-file notice，registry 直接导出 richer schema。
-- 下一阶段 contract deepening 顺序现在也已明确：先完成 `src/fileUtils.ts` 剩余尾部，再处理剩余 direct-read/sidebar surfaces，最后做 packaging / semantic verification 的后续收敛。
+- `file.process-add-links`、`file.process-folder-add-links`、`content.generate-from-title`、`content.batch-generate-from-titles`、`mermaid.batch-fix`、`concept.dedupe`、`translate.*`、`formula.*` 与 `content.extract-original-text` 现在已经组成当前已验证的 write-heavy contract-enrichment proof set：utility core 返回结构化结果，host adapter 接管本地化成功/no-file/confirmation 语义，registry 直接导出 richer schema。
+- 下一阶段 contract deepening 顺序现在也已明确：先处理剩余 direct-read/sidebar surfaces，再做 packaging / semantic verification 的后续收敛，最后才重开更强的 CLI/public surface 声明。
 - 旧命令别名仍保留注册以保证兼容，但会被刻意排除在 capability manifest 导出之外。
 
 ## 下一批抽取目标
@@ -74,10 +74,10 @@
 
 | 优先级 | 候选能力 | 为什么先做 | 现有基础 |
 |---|---|---|---|
-| P0 | `src/fileUtils.ts` 剩余尾部收口 | process/generate 契约已落地；当前最高杠杆缺口是 Mermaid 批量修复、破坏性 concept dedupe，以及跨家族结果词汇的最终收敛 | `src/fileUtils.ts`, `src/operations/noteProcessingCommandHostAdapter.ts`, `src/operations/utilityCommandHostAdapter.ts` |
-| P1 | 剩余 direct-read/sidebar surfaces | `src/main.ts` 仍持有长尾 direct execution 与 sidebar-only read path；最高价值样本是 `testLlmConnectionCommand`、`generateDiagramCommand` 与 `previewExperimentalDiagramCommand` | `src/main.ts` 剩余命令面、`src/workflowButtons.ts` |
-| P2 | selection/export 与 config flow 的 contract 增强 | 这些 operation 已建模，但未来 operation invoker 需要比 command-trigger 对等更丰富的 path/context 语义 | `src/operations/registry.ts`, `src/operations/configProfileCommands.ts`, `src/operations/noteProcessingCommandHostAdapter.ts` |
-| P2 | workflow/settings 打包 | Workflow DSL 与 output-path toggles 仍是有价值 metadata，但还不是稳定公共接口 | `src/workflowButtons.ts`, 设置驱动的输出控制 |
+| P0 | 剩余 direct-read/sidebar surfaces | `src/main.ts` 仍持有长尾 direct execution 与 sidebar-only read path；最高价值样本是 `testLlmConnectionCommand`、`generateDiagramCommand` 与 `previewExperimentalDiagramCommand` | `src/main.ts` 剩余命令面、`src/workflowButtons.ts` |
+| P1 | selection/export 与 config flow 的 contract 增强 | 这些 operation 已建模，但未来 operation invoker 需要比 command-trigger 对等更丰富的 path/context 语义 | `src/operations/registry.ts`, `src/operations/configProfileCommands.ts`, `src/operations/noteProcessingCommandHostAdapter.ts` |
+| P1 | workflow/settings 打包 | Workflow DSL 与 output-path toggles 仍是有价值 metadata，但还不是稳定公共接口 | `src/workflowButtons.ts`, 设置驱动的输出控制 |
+| P2 | maintainer 语义验证与打包硬化 | 重型运行时隔离与维护者本地 runbook 仍重要，但在命令面收口后才是下一层问题 | `docs/maintainer/*`, render-host bundle 流程, release 验证路径 |
 
 ## 设置就绪度
 

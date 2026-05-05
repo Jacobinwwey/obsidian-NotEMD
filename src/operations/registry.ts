@@ -404,7 +404,37 @@ const CONCEPT_DEDUPE_RESULT_SCHEMA: OperationSchema = {
     type: 'object',
     properties: {
         conceptFolderPath: { type: 'string' },
-        removedCount: { type: 'number' }
+        duplicateCheckScopeMode: { type: 'string' },
+        conceptNoteCount: { type: 'number' },
+        comparedNoteCount: { type: 'number' },
+        candidateCount: { type: 'number' },
+        deletionRequested: { type: 'boolean' },
+        deletionConfirmed: { type: 'boolean' },
+        removedCount: { type: 'number' },
+        cancelled: { type: 'boolean' },
+        candidates: {
+            type: 'array',
+            items: {
+                type: 'object',
+                properties: {
+                    path: { type: 'string' },
+                    reason: { type: 'string' },
+                    counterparts: STRING_ARRAY_SCHEMA
+                }
+            }
+        },
+        fileResults: {
+            type: 'array',
+            items: {
+                type: 'object',
+                properties: {
+                    path: { type: 'string' },
+                    deleted: { type: 'boolean' },
+                    skippedBecauseMissing: { type: 'boolean' }
+                }
+            }
+        },
+        errors: ERROR_ARRAY_SCHEMA
     }
 };
 
@@ -419,7 +449,30 @@ const BATCH_MERMAID_FIX_RESULT_SCHEMA: OperationSchema = {
     type: 'object',
     properties: {
         folderPath: { type: 'string' },
+        processedFileCount: { type: 'number' },
         modifiedCount: { type: 'number' },
+        movedErrorFileCount: { type: 'number' },
+        remainingErrorFileCount: { type: 'number' },
+        reportPath: { type: 'string' },
+        reportCreated: { type: 'boolean' },
+        cancelled: { type: 'boolean' },
+        fileResults: {
+            type: 'array',
+            items: {
+                type: 'object',
+                properties: {
+                    sourcePath: { type: 'string' },
+                    currentPath: { type: 'string' },
+                    modified: { type: 'boolean' },
+                    initialErrorCount: { type: 'number' },
+                    finalErrorCount: { type: 'number' },
+                    deepDebugApplied: { type: 'boolean' },
+                    movedToErrorFolder: { type: 'boolean' },
+                    errorFolderDestinationPath: { type: 'string' },
+                    skippedMoveBecauseDestinationExists: { type: 'boolean' }
+                }
+            }
+        },
         errors: ERROR_ARRAY_SCHEMA
     }
 };

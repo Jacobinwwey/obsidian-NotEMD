@@ -52,11 +52,11 @@ Observed host facts:
 | `notemd:extract-original-text` | Extract configured source snippets from active file | `requires-active-file` | Structured result now exists, but active-file dependency and output-path persistence remain host/settings bound | `content.extract-original-text` |
 | `notemd:extract-concepts-and-generate-titles` | Compound extract+generate flow | `requires-active-file` | Composite workflow without explicit typed contract | `workflow.extract-and-generate` |
 | `notemd:create-wiki-link-and-generate-from-selection` | Selection-driven concept note generation | `requires-selection` | Editor selection is intrinsic | `editor.create-link-and-generate` |
-| `notemd:batch-mermaid-fix` | Batch Mermaid repair | `interactive-ui` | Folder selection + mutation + report side effects | `mermaid.batch-fix` |
+| `notemd:batch-mermaid-fix` | Batch Mermaid repair | `interactive-ui` | Structured batch result now exists, but folder selection, mutable repair flow, report generation, and optional error-file moves still require interactive host semantics | `mermaid.batch-fix` |
 | `notemd:fix-formula-formats` | Fix formulas in current file | `requires-active-file` | Structured file result now exists, but active-file dependency and inline vault mutation still block stable automation | `formula.fix-file` |
 | `notemd:batch-fix-formula-formats` | Batch formula repair | `interactive-ui` | Structured batch result now exists, but folder selection and mutating batch execution still require interactive host semantics | `formula.batch-fix` |
 | `notemd:check-for-duplicates` | Check current note duplicates | `requires-active-file` | Result is console/notice-oriented | `duplicate.check-file` |
-| `notemd:check-and-remove-duplicate-concept-notes` | Remove duplicate concept notes | `interactive-ui` | Destructive flow requires stronger contract and confirmation model | `concept.dedupe` |
+| `notemd:check-and-remove-duplicate-concept-notes` | Remove duplicate concept notes | `interactive-ui` | Structured scan/delete result now exists and confirmation is host-owned, but destructive confirmation plus folder-scoped mutation still keep it out of stable automation | `concept.dedupe` |
 
 ## Registry Status
 
@@ -64,8 +64,8 @@ Observed host facts:
 - `src/operations/capabilityManifest.ts` now flattens those command bindings into the exported capability manifest.
 - `src/cliContracts.ts` now builds the invocation contract from the same registry, which removes one major drift path between docs, command discovery, and contract export.
 - The registry now includes the main note-processing, utility, selection, and export operation batches as well: `editor.create-link-and-generate`, `file.process-add-links`, `file.process-folder-add-links`, `content.generate-from-title`, `content.batch-generate-from-titles`, `research.summarize-topic`, `translate.file`, `translate.folder-batch`, `concept.extract-file`, `concept.extract-folder`, `content.extract-original-text`, `workflow.extract-and-generate`, `duplicate.check-file`, `concept.dedupe`, `mermaid.batch-fix`, `formula.fix-file`, `formula.batch-fix`, `provider.profile.export`, `provider.profile.import`, `cli.capability-manifest.export`, and `cli.invocation-contract.export`.
-- `file.process-add-links`, `file.process-folder-add-links`, `content.generate-from-title`, `content.batch-generate-from-titles`, `translate.*`, `formula.*`, and `content.extract-original-text` now form the current proof set for write-heavy contract enrichment: utility cores return structured results, host adapters own localized success/no-file notices, and the registry exports the richer schemas directly.
-- The next contract-deepening order is now explicit: finish the remaining `src/fileUtils.ts` tail first, the remaining direct-read/sidebar surfaces second, and packaging/semantic-verification convergence last.
+- `file.process-add-links`, `file.process-folder-add-links`, `content.generate-from-title`, `content.batch-generate-from-titles`, `mermaid.batch-fix`, `concept.dedupe`, `translate.*`, `formula.*`, and `content.extract-original-text` now form the current proof set for write-heavy contract enrichment: utility cores return structured results, host adapters own localized success/no-file/confirmation semantics, and the registry exports the richer schemas directly.
+- The next contract-deepening order is now explicit: remaining direct-read/sidebar surfaces first, packaging/semantic-verification convergence second, and broader CLI/public-surface claims last.
 - Legacy aliases remain registered for compatibility, but they are intentionally excluded from capability-manifest export.
 
 ## Next Extraction Targets
@@ -74,10 +74,10 @@ These are the best remaining candidates for registry-backed or more host-neutral
 
 | Priority | Candidate | Why First | Existing Building Blocks |
 |---|---|---|---|
-| P0 | Remaining `src/fileUtils.ts` tail tightening | Process/generate contracts are now landed; the remaining high-leverage gap is Mermaid batch repair plus destructive concept dedupe, alongside cross-family result-vocabulary stabilization | `src/fileUtils.ts`, `src/operations/noteProcessingCommandHostAdapter.ts`, `src/operations/utilityCommandHostAdapter.ts` |
-| P1 | Remaining direct-read/sidebar surfaces | `src/main.ts` still owns long-tail direct execution and sidebar-only read paths; highest-value examples are `testLlmConnectionCommand`, `generateDiagramCommand`, and `previewExperimentalDiagramCommand` | remaining command surfaces in `src/main.ts`, `src/workflowButtons.ts` |
-| P2 | Contract enrichment for selection/export and config flows | Export/selection operations are now modeled, but future operation invokers need richer path/context semantics than command-trigger parity alone | `src/operations/registry.ts`, `src/operations/configProfileCommands.ts`, `src/operations/noteProcessingCommandHostAdapter.ts` |
-| P2 | Workflow/settings packaging | Workflow DSL and output-path toggles remain useful metadata but not yet stable public interfaces | `src/workflowButtons.ts`, settings-driven output controls |
+| P0 | Remaining direct-read/sidebar surfaces | `src/main.ts` still owns long-tail direct execution and sidebar-only read paths; highest-value examples are `testLlmConnectionCommand`, `generateDiagramCommand`, and `previewExperimentalDiagramCommand` | remaining command surfaces in `src/main.ts`, `src/workflowButtons.ts` |
+| P1 | Contract enrichment for selection/export and config flows | Export/selection operations are now modeled, but future operation invokers need richer path/context semantics than command-trigger parity alone | `src/operations/registry.ts`, `src/operations/configProfileCommands.ts`, `src/operations/noteProcessingCommandHostAdapter.ts` |
+| P1 | Workflow/settings packaging | Workflow DSL and output-path toggles remain useful metadata but not yet stable public interfaces | `src/workflowButtons.ts`, settings-driven output controls |
+| P2 | Maintainer semantic verification + packaging hardening | Heavy-runtime isolation and maintainer-local runbooks still matter after command-surface convergence, but no longer block contract depth | `docs/maintainer/*`, render-host bundle workflow, release verification path |
 
 ## Settings Readiness
 

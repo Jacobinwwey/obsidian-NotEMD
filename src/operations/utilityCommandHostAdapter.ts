@@ -1,6 +1,9 @@
 import { App, TFile } from 'obsidian';
 import {
+    BatchMermaidFixResult,
     batchFixMermaidSyntaxInFolder,
+    ConceptDedupeCandidate,
+    ConceptDedupeResult,
     findDuplicates,
     checkAndRemoveDuplicateConceptNotes
 } from '../fileUtils';
@@ -24,6 +27,10 @@ export interface UtilityCommandUiStrings {
         duplicateCheckError: string;
         noActiveTextFileSelected: string;
         duplicateCheckRemoveError: string;
+        noPotentialDuplicateConceptNotesFound: string;
+        duplicateDeletionCancelled: string;
+        deletionCompleteSummary: string;
+        noMarkdownFilesFoundInSelectedFolder: string;
         batchMermaidFixFinishedWithErrors: string;
         batchMermaidFixSuccess: string;
         batchMermaidFixError: string;
@@ -59,6 +66,7 @@ export interface UtilityCommandHost {
     getRunningActionText: (label: string) => string;
     getActionCompleteText: (label: string) => string;
     showNotice: (message: string, duration?: number) => void;
+    confirmConceptDeletion: (reportList: ConceptDedupeCandidate[], uiLocale: string) => Promise<boolean>;
     logInfo: (message: string, details?: unknown) => void;
     logError: (message: string, details: string) => void;
     openErrorModal: (title: string, details: string) => void;
@@ -115,8 +123,9 @@ export async function runCheckAndRemoveDuplicateConceptNotesCommandWithHost(
     host: UtilityCommandHost,
     reporter?: ProgressReporter,
     checkAndRemoveDuplicateConceptNotesImpl: typeof checkAndRemoveDuplicateConceptNotes = checkAndRemoveDuplicateConceptNotes
-): Promise<void> {
+): Promise<ConceptDedupeResult | null> {
     const actionLabel = host.getActionLabel('check-remove-duplicate-concepts');
+    let commandResult: ConceptDedupeResult | null = null;
 
     await runBusyReporterCommandWithHost(host, actionLabel, reporter, async (useReporter) => {
         let uiStrings = host.getUiStrings();
@@ -125,7 +134,27 @@ export async function runCheckAndRemoveDuplicateConceptNotesCommandWithHost(
         try {
             await host.loadSettings();
             uiStrings = host.getUiStrings();
-            await checkAndRemoveDuplicateConceptNotesImpl(host.getApp(), host.getSettings(), useReporter);
+            commandResult = await checkAndRemoveDuplicateConceptNotesImpl(
+                host.getApp(),
+                host.getSettings(),
+                useReporter,
+                {
+                    confirmDeletion: (reportList, uiLocale) => host.confirmConceptDeletion(reportList, uiLocale)
+                }
+            );
+
+            if (commandResult.candidateCount === 0) {
+                host.showNotice(uiStrings.notices.noPotentialDuplicateConceptNotesFound);
+            } else if (commandResult.cancelled && !commandResult.deletionConfirmed) {
+                host.showNotice(uiStrings.notices.duplicateDeletionCancelled);
+            } else {
+                host.showNotice(formatI18n(uiStrings.notices.deletionCompleteSummary, {
+                    deleted: commandResult.removedCount,
+                    total: commandResult.candidateCount,
+                    errors: commandResult.errors.length
+                }));
+            }
+
             host.updateStatusBar(host.getActionCompleteText(actionLabel));
             host.completeReporter(useReporter);
         } catch (error: unknown) {
@@ -142,6 +171,8 @@ export async function runCheckAndRemoveDuplicateConceptNotesCommandWithHost(
             host.openErrorModal(uiStrings.errorModal.titles.duplicateCheckRemove, errorDetails);
         }
     });
+
+    return commandResult;
 }
 
 export async function runCheckDuplicatesCurrentCommandWithHost(
@@ -195,9 +226,9 @@ export async function runBatchMermaidFixCommandWithHost(
     reporter?: ProgressReporter,
     folderPathOverride?: string,
     batchFixMermaidSyntaxInFolderImpl: typeof batchFixMermaidSyntaxInFolder = batchFixMermaidSyntaxInFolder
-): Promise<{ folderPath: string; modifiedCount: number } | null> {
+): Promise<BatchMermaidFixResult | null> {
     const actionLabel = host.getActionLabel('batch-mermaid-fix');
-    let commandResult: { folderPath: string; modifiedCount: number } | null = null;
+    let commandResult: BatchMermaidFixResult | null = null;
 
     await runBusyReporterCommandWithHost(host, actionLabel, reporter, async (useReporter) => {
         let uiStrings = host.getUiStrings();
@@ -216,31 +247,40 @@ export async function runBatchMermaidFixCommandWithHost(
             host.updateStatusBar(host.getRunningActionText(actionLabel));
             useReporter.log(host.getRunningActionText(actionLabel));
 
-            const { errors, modifiedCount } = await batchFixMermaidSyntaxInFolderImpl(
+            commandResult = await batchFixMermaidSyntaxInFolderImpl(
                 host.getApp(),
                 host.getSettings(),
                 folderPath,
                 useReporter
             );
 
-            if (!useReporter.cancelled) {
-                if (errors.length > 0) {
+            if (!useReporter.cancelled && commandResult) {
+                if (commandResult.processedFileCount === 0) {
+                    const message = formatI18n(uiStrings.notices.noMarkdownFilesFoundInSelectedFolder, { folderPath });
+                    useReporter.log(message);
+                    useReporter.updateStatus(message, 100);
+                    host.updateStatusBar(message);
+                    host.showNotice(message);
+                    host.completeReporter(useReporter);
+                } else if (commandResult.errors.length > 0 || commandResult.remainingErrorFileCount > 0) {
+                    const issueCount = commandResult.errors.length + commandResult.remainingErrorFileCount;
                     const errorSummary = formatI18n(uiStrings.notices.batchMermaidFixFinishedWithErrors, {
-                        count: errors.length,
-                        modifiedCount
+                        count: issueCount,
+                        modifiedCount: commandResult.modifiedCount
                     });
                     useReporter.log(`⚠️ ${errorSummary}`);
                     useReporter.updateStatus(errorSummary, -1);
                     host.updateStatusBar(errorSummary);
                     host.showNotice(errorSummary, 10000);
                 } else {
-                    const finalMessage = formatI18n(uiStrings.notices.batchMermaidFixSuccess, { modifiedCount });
+                    const finalMessage = formatI18n(uiStrings.notices.batchMermaidFixSuccess, {
+                        modifiedCount: commandResult.modifiedCount
+                    });
                     useReporter.updateStatus(finalMessage, 100);
                     host.updateStatusBar(host.getActionCompleteText(actionLabel));
                     host.showNotice(finalMessage, 5000);
                     host.completeReporter(useReporter);
                 }
-                commandResult = { folderPath, modifiedCount };
             }
         } catch (error: unknown) {
             const { errorMessage, errorDetails } = normalizeError(

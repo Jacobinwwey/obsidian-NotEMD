@@ -28,23 +28,29 @@ As of May 5, 2026, Notemd's CLI-oriented mainline is no longer blocked on broad 
   - `generateContentForTitle()` returns `GenerateContentForTitleResult`
   - `batchGenerateContentForTitles()` returns `BatchGenerateContentForTitlesResult` with complete-folder move semantics and aggregated errors
   - the no-file batch-generation notice now lives in `src/operations/noteProcessingCommandHostAdapter.ts`, not inside `src/fileUtils.ts`
+- the current follow-up slice has now landed the remaining `src/fileUtils.ts` tail as well:
+  - `batchFixMermaidSyntaxInFolder()` returns `BatchMermaidFixResult`
+  - `checkAndRemoveDuplicateConceptNotes()` returns `ConceptDedupeResult`
+  - duplicate-deletion confirmation is now injected from `src/operations/utilityCommandHostAdapter.ts`
+  - batch Mermaid no-file notice now also lives in `src/operations/utilityCommandHostAdapter.ts`
+  - `src/operations/registry.ts` now exports richer result schemas for `mermaid.batch-fix` and `concept.dedupe`
 
 The remaining problem is now narrower and harder:
 
-1. `src/fileUtils.ts` is still the largest remaining write-heavy core, but the highest-leverage open tail is now `batchFixMermaidSyntaxInFolder` plus `checkAndRemoveDuplicateConceptNotes`; the process/generate sub-slice should now be treated as landed proof rather than pending scope.
-2. `src/main.ts` still owns the highest-value remaining direct command surfaces: `testLlmConnectionCommand`, `generateDiagramCommand` plus its save/artifact branches, and `previewExperimentalDiagramCommand`.
-3. Packaging isolation and maintainer-local semantic verification still matter, but they are now downstream of operation-contract hardening rather than blockers for it.
+1. `src/main.ts` still owns the highest-value remaining direct command surfaces: `testLlmConnectionCommand`, `generateDiagramCommand` plus its save/artifact branches, and `previewExperimentalDiagramCommand`.
+2. Selection/export and workflow/settings surfaces still need further contract depth beyond command-trigger parity.
+3. Packaging isolation and maintainer-local semantic verification still matter, but they are now downstream of command-surface convergence rather than blockers for it.
 
-The next phase therefore should not focus on "more CLI commands" and should no longer focus on `translate/formula` or process/generate as open batches. The next durable move is to finish the remaining `src/fileUtils.ts` tail first, then finish the remaining direct command surfaces.
+The next phase therefore should not focus on "more CLI commands" and should no longer focus on any write-heavy `src/fileUtils.ts` batch as open work. The next durable move is to finish the remaining direct command surfaces first, then converge packaging/semantic-verification follow-up work.
 
 ## Requirements
 
 **Truth sync**
-- R1. `docs/brainstorms/2026-05-02-progress-audit-and-next-direction.*`, `docs/architecture*`, and `docs/maintainer/notemd-cli-capability-matrix*` must be aligned to the May 5, 2026 code reality: process/generate/translate/formula flows now expose structured results, and the relevant success/no-file notices now live in host adapters.
-- R2. No document may continue to describe `translate/formula` or the process/generate contract pass as merely planned or in-progress.
+- R1. `docs/brainstorms/2026-05-02-progress-audit-and-next-direction.*`, `docs/architecture*`, and `docs/maintainer/notemd-cli-capability-matrix*` must be aligned to the May 5, 2026 code reality: process/generate/translate/formula/mermaid/dedupe flows now expose structured results, and the relevant success/no-file/confirmation semantics now live in host adapters.
+- R2. No document may continue to describe any write-heavy `src/fileUtils.ts` contract pass as merely planned or in-progress.
 
 **Next-phase priority**
-- R3. The next implementation order is now fixed as `remaining src/fileUtils.ts tail -> remaining direct command surfaces in src/main.ts -> packaging / semantic-verification convergence`.
+- R3. The next implementation order is now fixed as `remaining direct command surfaces in src/main.ts -> packaging / semantic-verification convergence -> broader CLI/public-surface refinement`.
 - R4. The first landed registry-backed operation batches now include:
   - `editor.create-link-and-generate`
   - `translate.file`
@@ -67,10 +73,10 @@ The next phase therefore should not focus on "more CLI commands" and should no l
   - `provider.profile.import`
   - `cli.capability-manifest.export`
   - `cli.invocation-contract.export`
-- R5. The next contract-tightening batch must now target the remaining `src/fileUtils.ts` tail, especially `batchFixMermaidSyntaxInFolder` and `checkAndRemoveDuplicateConceptNotes`, while keeping `processFile`, `generateContentForTitle`, and `batchGenerateContentForTitles` stable, documented, and registry-aligned.
+- R5. The next contract-tightening batch must now target the remaining direct command surfaces, especially `testLlmConnectionCommand`, `generateDiagramCommand`, and `previewExperimentalDiagramCommand`, while keeping the newly-landed write-heavy proof set stable, documented, and registry-aligned.
 
 **Host-side effect tightening**
-- R6. `file.process-add-links`, `file.process-folder-add-links`, `content.generate-from-title`, `content.batch-generate-from-titles`, `translate.*`, `formula.*`, and `content.extract-original-text` now act as proof slices. Preserve their family-local result objects and host-owned success/no-file semantics while the remaining `src/fileUtils.ts` tail catches up.
+- R6. `file.process-add-links`, `file.process-folder-add-links`, `content.generate-from-title`, `content.batch-generate-from-titles`, `mermaid.batch-fix`, `concept.dedupe`, `translate.*`, `formula.*`, and `content.extract-original-text` now act as proof slices. Preserve their family-local result objects and host-owned success/no-file/confirmation semantics while the remaining direct surfaces catch up.
 - R7. `src/fileUtils.ts` must keep moving `Notice`, vault persistence, folder creation, output collision handling, and destructive-confirmation semantics toward explicit host effects or structured result objects instead of leaking UI wording from operation cores.
 - R8. Flows that still depend on active file, folder picker, destructive confirmation, or preview UI must not be mislabeled as `safe`; until contracts are complete they remain `requires-active-file`, `interactive-ui`, or another constrained level.
 
@@ -84,8 +90,8 @@ The next phase therefore should not focus on "more CLI commands" and should no l
 
 ## Success Criteria
 
-- A maintainer can read the latest requirements, progress, and architecture docs and distinguish clearly between the delivered proof set (`file.process-add-links`, `file.process-folder-add-links`, `content.generate-from-title`, `content.batch-generate-from-titles`, `translate.*`, `formula.*`, `content.extract-original-text`) and the still-open remaining `src/fileUtils.ts` tail / direct-surface work.
-- Documentation no longer reports the old execution order; the next wave is now remaining `src/fileUtils.ts` tail first and direct surfaces second.
+- A maintainer can read the latest requirements, progress, and architecture docs and distinguish clearly between the delivered write-heavy proof set (`file.process-add-links`, `file.process-folder-add-links`, `content.generate-from-title`, `content.batch-generate-from-titles`, `mermaid.batch-fix`, `concept.dedupe`, `translate.*`, `formula.*`, `content.extract-original-text`) and the still-open direct-surface work.
+- Documentation no longer reports the old execution order; the next wave is now direct surfaces first and packaging/semantic-verification second.
 - All mainline sync and code work happens in a clean worktree and passes the full repository verification gate.
 
 ## Scope Boundaries
@@ -97,7 +103,7 @@ The next phase therefore should not focus on "more CLI commands" and should no l
 
 ## Key Decisions
 
-- The `translate/formula` contract-tightening proof slice and the first process/generate sub-slice are now delivered; reopening them before the remaining `src/fileUtils.ts` tail would be churn, not progress.
+- The full write-heavy contract-tightening batch is now delivered; reopening it before the remaining direct-surface work would be churn, not progress.
 - Family-local result objects remain the preferred modeling choice for now. A shared global envelope is still premature.
 - Direct-surface slimming remains important, but it follows the next write-heavy batch because wrapper movement alone would not improve CLI contracts enough.
 
@@ -106,15 +112,15 @@ The next phase therefore should not focus on "more CLI commands" and should no l
 - The clean worktree is already based on the latest remote `main` and already contains the registry, capability-contract, and first provider/diagram/config-profile extraction work.
 - `src/operations/noteProcessingCommandHostAdapter.ts` now carries the process / generate / research / translate / extract command wrappers for note-processing flows.
 - `src/operations/utilityCommandHostAdapter.ts` now carries duplicate cleanup, Mermaid batch fix, and formula-fix command wrappers.
-- The capability registry already covers note-processing, process/generate/research, utility, selection, and export operation batches; the primary structural gap has moved to the remaining `src/fileUtils.ts` tail plus the remaining direct surfaces.
+- The capability registry already covers note-processing, process/generate/research, utility, selection, and export operation batches; the primary structural gap has moved to the remaining direct surfaces plus the packaging/semantic-verification follow-up work.
 
 ## Open Questions
 
 ### Deferred To Planning
-- [R5][Technical] Should Mermaid repair and duplicate cleanup reuse the new process/generate result vocabulary where possible, or stay fully family-local for one more batch?
-- [R7][Technical] How much of the remaining destructive/report semantics should be pushed into utility host adapters immediately versus deferred until after the direct-surface batch?
-- [R10][Technical] After the `src/fileUtils.ts` batch, should the next convergence target be diagram command surfaces or provider connection-test flows?
+- [R5][Technical] Should the next direct-surface batch start with diagram save/generate/preview, or provider connection-test, or a minimal seam across both?
+- [R7][Technical] Which direct surfaces should become registry-backed operations versus remain intentionally command-only?
+- [R10][Technical] After the direct-surface batch, should workflow/settings packaging or maintainer semantic verification be the next higher-leverage follow-up?
 
 ## Next Step
 
--> Move into `/ce:plan` for the remaining `src/fileUtils.ts` tail plus direct-surface convergence ordering.
+-> Move into `/ce:plan` for the remaining direct-surface convergence batch.

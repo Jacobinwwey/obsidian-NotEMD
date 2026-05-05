@@ -326,7 +326,14 @@ describe('CLI invocation contract', () => {
             resultSchema: expect.objectContaining({
                 type: 'object',
                 properties: expect.objectContaining({
-                    removedCount: expect.any(Object)
+                    candidateCount: expect.any(Object),
+                    deletionRequested: expect.any(Object),
+                    deletionConfirmed: expect.any(Object),
+                    removedCount: expect.any(Object),
+                    cancelled: expect.any(Object),
+                    candidates: expect.any(Object),
+                    fileResults: expect.any(Object),
+                    errors: expect.any(Object)
                 })
             })
         }));
@@ -342,7 +349,14 @@ describe('CLI invocation contract', () => {
             resultSchema: expect.objectContaining({
                 type: 'object',
                 properties: expect.objectContaining({
+                    processedFileCount: expect.any(Object),
                     modifiedCount: expect.any(Object),
+                    movedErrorFileCount: expect.any(Object),
+                    remainingErrorFileCount: expect.any(Object),
+                    reportPath: expect.any(Object),
+                    reportCreated: expect.any(Object),
+                    cancelled: expect.any(Object),
+                    fileResults: expect.any(Object),
                     errors: expect.any(Object)
                 })
             })
