@@ -3,8 +3,8 @@ module.exports = {
   testEnvironment: 'node',
   moduleFileExtensions: ['ts', 'js', 'json'],
   testMatch: ['**/tests/**/*.test.ts'],
-  testPathIgnorePatterns: ['/node_modules/', '/ref/', '/.worktrees/'],
-  modulePathIgnorePatterns: ['<rootDir>/.worktrees/', '<rootDir>/ref/'],
+  testPathIgnorePatterns: ['/node_modules/', '/ref/', '/.worktrees/', '/.cache/', '/.tmp_repo_saga_tool/'],
+  modulePathIgnorePatterns: ['<rootDir>/.worktrees/', '<rootDir>/.cache/', '<rootDir>/.tmp_repo_saga_tool/', '<rootDir>/ref/'],
   moduleNameMapper: {
     '^obsidian$': '<rootDir>/src/__mocks__/obsidian.ts',
     '^mermaid$': '<rootDir>/src/__mocks__/mermaid.ts'

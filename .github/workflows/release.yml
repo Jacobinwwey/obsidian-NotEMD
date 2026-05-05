@@ -73,3 +73,51 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npm run release:github -- "$TAG_NAME"
+
+  refresh_chronicle:
+    needs: publish
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Resolve tag name
+        id: resolve_tag
+        shell: bash
+        run: |
+          TAG_NAME="${GITHUB_REF_NAME}"
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TAG_NAME="${{ inputs.tag }}"
+          fi
+          echo "tag_name=$TAG_NAME" >> "$GITHUB_OUTPUT"
+          echo "TAG_NAME=$TAG_NAME" >> "$GITHUB_ENV"
+
+      - name: Check out main
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: main
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Refresh quarterly development chronicle
+        run: node scripts/repo-saga/update-quarterly-saga.mjs --tag "$TAG_NAME"
+
+      - name: Commit chronicle refresh
+        shell: bash
+        run: |
+          if git diff --quiet -- README.md README_*.md docs/repo-saga/*.svg; then
+            echo "Chronicle already up to date."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add README.md README_*.md docs/repo-saga/*.svg
+          git commit -m "docs: refresh quarterly chronicle for $TAG_NAME"
+          git push origin HEAD:main

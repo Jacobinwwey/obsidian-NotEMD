@@ -690,4 +690,16 @@ MIT-licentie - Zie het bestand [LICENSE](LICENSE) voor details.
 *Notemd v1.8.4 - Verrijk je Obsidian-kennisgrafiek met AI.*
 
 
+
+<!-- repo-chronicle:start -->
+## Ontwikkelingskroniek
+
+Deze kwartaalchroniek behoudt de oorspronkelijke visuele stijl van [repo-saga](https://github.com/teee32/repo-saga); de kwartaalindeling wordt nu rechtstreeks door repo-saga zelf gegenereerd.
+
+![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.nl.svg)
+
+_Laatst vernieuwd vanuit de werkboom op 2026-05-05. Datum van de laatste commit: 2026-05-05._
+<!-- repo-chronicle:end -->
+
+
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)
