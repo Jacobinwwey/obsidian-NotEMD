@@ -221,4 +221,34 @@ describe('note processing command surface', () => {
         }), reporter, 'Concepts');
         expect(utilitySpy).not.toHaveBeenCalled();
     });
+
+    test('batch generate command delegates to extracted note-processing host adapter', async () => {
+        const noteProcessingCommandHostAdapter = require('../operations/noteProcessingCommandHostAdapter');
+        const plugin = createPlugin();
+        const reporter = createReporter();
+
+        const hostSpy = jest
+            .spyOn(noteProcessingCommandHostAdapter, 'runBatchGenerateContentForTitlesCommandWithHost')
+            .mockResolvedValue({
+                sourceFolderPath: 'Concepts',
+                completeFolderPath: 'Concepts_complete'
+            });
+        const utilitySpy = jest
+            .spyOn(fileUtils, 'batchGenerateContentForTitles')
+            .mockResolvedValue({ errors: [] });
+
+        const result = await (plugin as any).batchGenerateContentForTitlesCommand(reporter, 'Concepts');
+
+        expect(hostSpy).toHaveBeenCalledWith(expect.objectContaining({
+            getFolderSelection: expect.any(Function),
+            resolveCompleteFolderPath: expect.any(Function),
+            maybeAutoFixMermaidForFolder: expect.any(Function),
+            completeReporter: expect.any(Function)
+        }), reporter, 'Concepts');
+        expect(result).toEqual({
+            sourceFolderPath: 'Concepts',
+            completeFolderPath: 'Concepts_complete'
+        });
+        expect(utilitySpy).not.toHaveBeenCalled();
+    });
 });
