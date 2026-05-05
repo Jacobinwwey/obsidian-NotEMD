@@ -32,6 +32,13 @@ export interface ProviderConnectionTestCommandHost {
     saveErrorLog?: (error: unknown, reporter: ProgressReporter) => Promise<void>;
 }
 
+export interface InteractiveProviderConnectionTestCommandHost extends ProviderConnectionTestCommandHost {
+    getReporter: () => ProgressReporter;
+    isBusy: () => boolean;
+    setBusy: (busy: boolean) => void;
+    getBusyNotice: () => string;
+}
+
 export type ProviderConnectionTestCommandResult =
     | {
         kind: 'success' | 'failure';
@@ -137,4 +144,27 @@ export async function runTestLlmConnectionCommandWithHost(
     testApiImpl: typeof testAPI = testAPI
 ): Promise<ProviderConnectionTestCommandResult> {
     return runProviderConnectionTestWithHost(host, reporter, testApiImpl);
+}
+
+export async function runInteractiveProviderConnectionTestCommandWithHost(
+    host: InteractiveProviderConnectionTestCommandHost,
+    reporter?: ProgressReporter,
+    testApiImpl: typeof testAPI = testAPI
+): Promise<ProviderConnectionTestCommandResult | null> {
+    if (host.isBusy()) {
+        host.showNotice(host.getBusyNotice());
+        return null;
+    }
+
+    const useReporter = reporter ?? host.getReporter();
+    if (!reporter) {
+        useReporter.clearDisplay();
+    }
+
+    host.setBusy(true);
+    try {
+        return await runTestLlmConnectionCommandWithHost(host, useReporter, testApiImpl);
+    } finally {
+        host.setBusy(false);
+    }
 }

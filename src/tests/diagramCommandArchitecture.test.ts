@@ -95,7 +95,15 @@ describe('diagram command architecture', () => {
 
     test('shared diagram command shapes operation input before delegating artifact execution', async () => {
         (mockApp.vault.read as jest.Mock).mockResolvedValue('# Topic');
-        jest.spyOn(plugin as any, 'executeArtifactDiagramCommand').mockResolvedValue(undefined);
+        jest.spyOn(plugin as any, 'executeArtifactDiagramCommand').mockResolvedValue({
+            generation: {
+                plan: {} as any,
+                spec: {} as any,
+                artifact: {} as any
+            },
+            outputPath: 'Notes/Topic_diagram.canvas',
+            previewOpened: true
+        });
         jest.spyOn(plugin as any, 'getProviderAndModelForTask').mockReturnValue({
             provider: mockSettings.providers[0],
             modelName: mockSettings.providers[0].model
@@ -117,6 +125,46 @@ describe('diagram command architecture', () => {
             expect.any(String),
             expect.anything(),
             'save-artifact'
+        );
+    });
+
+    test('generate command delegates busy and orchestration to extracted diagram host adapter wrapper', async () => {
+        const commandSpy = jest
+            .spyOn(diagramCommandHostAdapter, 'runGenerateDiagramCommandWithHost')
+            .mockResolvedValue({
+                kind: 'success',
+                executionMode: 'save-artifact',
+                sourcePath: 'Notes/Topic.md',
+                actionLabel: 'Generate diagram',
+                operationInput: {
+                    sourcePath: 'Notes/Topic.md',
+                    sourceMarkdown: '# Topic',
+                    compatibilityMode: 'best-fit',
+                    outputMode: 'artifact'
+                },
+                generation: {
+                    plan: {} as any,
+                    spec: {} as any,
+                    artifact: {} as any
+                },
+                outputPath: 'Notes/Topic_diagram.canvas',
+                previewOpened: true
+            } as any);
+
+        await (plugin as any).generateDiagramCommand(file, reporter, { executionMode: 'save-artifact' });
+
+        expect(commandSpy).toHaveBeenCalledWith(
+            expect.objectContaining({
+                getReporter: expect.any(Function),
+                isBusy: expect.any(Function),
+                setBusy: expect.any(Function),
+                startReporterAction: expect.any(Function),
+                createDiagramHostAdapter: expect.any(Function),
+                executeArtifactCommand: expect.any(Function)
+            }),
+            file,
+            reporter,
+            { executionMode: 'save-artifact' }
         );
     });
 
@@ -207,28 +255,56 @@ describe('diagram command architecture', () => {
     });
 
     test('preview command reads vega-lite from file without calling generateDiagramCommand', async () => {
-        const vlContent = '{"mark":"bar"}';
-        const fileContent = '# Test\n\n```vega-lite\n' + vlContent + '\n```\n';
-        (mockApp.vault.read as jest.Mock).mockResolvedValue(fileContent);
-
         const sharedSpy = jest.spyOn(plugin as any, 'generateDiagramCommand');
         const previewSpy = jest
-            .spyOn(diagramCommandHostAdapter, 'previewVegaLiteArtifactFromMarkdown')
-            .mockReturnValue({
-                target: 'vega-lite',
-                content: vlContent,
-                mimeType: 'application/json',
-                sourceIntent: 'dataChart'
+            .spyOn(diagramCommandHostAdapter, 'runPreviewExperimentalDiagramCommandWithHost')
+            .mockResolvedValue({
+                kind: 'success',
+                sourcePath: 'Notes/Topic.md',
+                actionLabel: 'Preview diagram',
+                artifact: {
+                    target: 'vega-lite',
+                    content: '{"mark":"bar"}',
+                    mimeType: 'application/json',
+                    sourceIntent: 'dataChart'
+                },
+                previewOpened: true
             } as any);
 
         await (plugin as any).previewExperimentalDiagramCommand(file, reporter);
 
-        // Should NOT call generateDiagramCommand — preview reads directly from file
         expect(sharedSpy).not.toHaveBeenCalled();
-        expect(previewSpy).toHaveBeenCalledWith(expect.objectContaining({
-            sourceMarkdown: fileContent,
-            sourcePath: file.path
-        }));
+        expect(previewSpy).toHaveBeenCalled();
+    });
+
+    test('preview command delegates lifecycle and preview orchestration to extracted diagram host adapter wrapper', async () => {
+        const commandSpy = jest
+            .spyOn(diagramCommandHostAdapter, 'runPreviewExperimentalDiagramCommandWithHost')
+            .mockResolvedValue({
+                kind: 'success',
+                sourcePath: 'Notes/Topic.md',
+                actionLabel: 'Preview diagram',
+                artifact: {
+                    target: 'vega-lite',
+                    content: '{"mark":"bar"}',
+                    mimeType: 'application/json',
+                    sourceIntent: 'dataChart'
+                },
+                previewOpened: true
+            } as any);
+
+        await (plugin as any).previewExperimentalDiagramCommand(file, reporter);
+
+        expect(commandSpy).toHaveBeenCalledWith(
+            expect.objectContaining({
+                startReporterAction: expect.any(Function),
+                finalizeReporter: expect.any(Function),
+                createDiagramHostAdapter: expect.any(Function),
+                saveErrorLog: expect.any(Function)
+            }),
+            file,
+            reporter
+        );
     });
 
     test('exposes canonical stable diagram command ids alongside legacy compatibility aliases', async () => {

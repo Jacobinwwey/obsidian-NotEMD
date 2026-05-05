@@ -233,12 +233,12 @@ flowchart LR
 
 - `src/operations/diagramGenerateOperation.ts` 现在承接命令层之下可复用的 diagram 执行逻辑
 - `src/operations/providerDiagnosticCommand.ts` 现在承接命令层之下的 provider diagnostic command orchestration
-- `src/operations/diagramCommandHostAdapter.ts` 现在承接 Mermaid/artifact 保存收尾与直接 Vega-Lite 预览编排
+- `src/operations/diagramCommandHostAdapter.ts` 现在承接 Mermaid/artifact 保存收尾、直接 Vega-Lite 预览编排，以及公共 diagram command wrapper（`runGenerateDiagramCommandWithHost`、`runPreviewExperimentalDiagramCommandWithHost`）
 - `src/operations/configProfileCommands.ts` 现在承接 provider profile 导入导出与 CLI capability/contract 导出编排
 - `src/operations/providerDiagnosticReportPersistence.ts` 现在承接带冲突规避的 provider diagnostic report 文件创建逻辑
 - `src/operations/providerDiagnosticCommandHostAdapter.ts` 现在承接开发者诊断命令的宿主装载、报告落盘接线与 notice 整形逻辑
 - `src/operations/configProfileCommandHostAdapter.ts` 现在承接 config/profile 状态持久化、CLI 导出 notice 整形与导入导出错误映射逻辑
-- `src/operations/providerConnectionTestCommandHostAdapter.ts` 现在承接共享 provider 连接测试的 settings 装载与 notice/reporter 编排逻辑，并已被命令路径与设置页共同复用
+- `src/operations/providerConnectionTestCommandHostAdapter.ts` 现在承接共享 provider 连接测试的 settings 装载，以及底层测试 runner 与交互式 busy/reporter wrapper，并已被命令路径与设置页共同复用
 - `src/operations/noteProcessingCommandHostAdapter.ts` 现在不仅承接 `process-current-add-links`、`process-folder-add-links`、`batch-generate-from-titles`、`generate-from-title` 与 `research-and-summarize`，还继续承接 `translate-current-file`、`batch-translate-folder`、`extract-concepts-current`、`extract-concepts-folder`、`extract-original-text` 与 `extract-concepts-and-generate-titles` 的 busy-guard、reporter 生命周期、notice/error-log 编排逻辑
 - `src/operations/utilityCommandHostAdapter.ts` 现在也已承接当前文件 duplicate check、duplicate cleanup、batch Mermaid fix 与 single/batch formula fix 的 command orchestration；`check-for-duplicates` 已不再内联写在命令注册里
 - `src/operations/utilityCommandHostAdapter.ts` 现在也已承接 duplicate cleanup 与 batch Mermaid fix 的删除确认、无文件 notice 与成功 notice 语义，这些用户侧效果已不再从 `src/fileUtils.ts` 泄漏出来
@@ -248,9 +248,10 @@ flowchart LR
 - `src/fileUtils.ts` 的剩余尾部现在也已落地：`batchFixMermaidSyntaxInFolder()` 返回 `BatchMermaidFixResult`，`checkAndRemoveDuplicateConceptNotes()` 返回 `ConceptDedupeResult`，破坏性确认由 host adapter 注入，batch Mermaid 的无文件处理也已从 utility-owned 改为 host-owned
 - `src/operations/registry.ts` 现在也直接建模了 `file.process-add-links`、`file.process-folder-add-links`、`content.generate-from-title`、`content.batch-generate-from-titles`、`mermaid.batch-fix`、`concept.dedupe`、`translate.*` 与 `formula.*` 的 richer result schema，因此 capability export 与 invocation-contract export 不再把这些流程压平成仅路径或仅计数语义
 - `src/fileUtils.ts` 与 `src/extractOriginalText.ts` 现在已经接受更窄的 runtime context，而不是直接依赖具体 `NotemdPlugin` 类，这说明边界正在从 wrapper 抽离继续推进到 utility 对宿主类型耦合的削弱
-- `src/main.ts` 现在主要保留命令注册与少量直接执行表面；当前 registry 已覆盖 diagram/provider/config-profile 以及 process/generate/research/translation/extraction/utility/selection/export 这些 operations，真正的下一阶段缺口已不再是 `src/fileUtils.ts`，而是剩余 direct-read/sidebar 表面以及后续 packaging/semantic verification 收敛
-- 当前已核实的高价值剩余直接命令面是 `testLlmConnectionCommand`、`generateDiagramCommand` 及其 save/artifact 分支、以及 `previewExperimentalDiagramCommand`
-- 下一阶段顺序已经明确：先处理剩余 direct-read/sidebar surfaces，再做 packaging / semantic verification 的后续收敛，最后才重开更强 public CLI 声明或更大规模的结构重排
+- `src/main.ts` 现在主要保留命令注册、host 构造，以及更深一层的 diagram 执行 helper；先前最高价值的公共 direct command surface 现在已经改为通过 host adapter 代理，不再内联 busy/reporter/preview 生命周期逻辑
+- 新落地的 direct-surface wrapper 批次已经覆盖 `testLlmConnectionCommand`、`generateDiagramCommand` 与 `previewExperimentalDiagramCommand`；这些表面现在都具备结构化 result 边界，而不是 fire-and-forget 的 UI glue
+- 当前真正剩余的缺口已经不是公共 command entrypoint 本身，而是更深层的 `executeSaveMermaidDiagramCommand` / `executeArtifactDiagramCommand` helper，以及 `diagram.preview` 与 provider connection-test 是否进入 typed automation contract 的决策
+- 下一阶段顺序已经明确：先收敛更深层的 diagram/provider command-core，再做 packaging / semantic verification 的后续收敛，最后才重开更强 public CLI 声明或更大规模的结构重排
 
 ## 关键设计决策
 
@@ -264,7 +265,7 @@ flowchart LR
 ## 验证
 
 - `npm run build` — TypeScript 编译 + esbuild 打包
-- `npm test -- --runInBand` — 完整 Jest 矩阵当前为 133 套件、846 项测试；若在 `/.worktrees/` checkout 中验证，请改用 `npx jest --runInBand --config /tmp/notemd-worktree-jest.cjs`，因为仓库默认 Jest ignore 规则会排除 worktree 路径
+- `npm test -- --runInBand` — 完整 Jest 矩阵当前为 134 套件、853 项测试；若在 `/.worktrees/` checkout 中验证，请改用 `npx jest --runInBand --config /tmp/notemd-worktree-jest.cjs`，因为仓库默认 Jest ignore 规则会排除 worktree 路径
 - `npm run audit:i18n-ui` — 无硬编码 UI 字符串
 - `npm run audit:render-host` — 渲染宿主自包含于 main.js
 - `git diff --check` — 空白符卫生

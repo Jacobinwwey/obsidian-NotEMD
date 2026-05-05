@@ -5,6 +5,8 @@ topic: cli-write-heavy-contract-tightening
 
 # CLI Write-Heavy Contract Tightening Requirements
 
+> Update (2026-05-05, later same day): the first direct-surface wrapper batch is now landed. `testLlmConnectionCommand`, `generateDiagramCommand`, and `previewExperimentalDiagramCommand` now delegate through host adapters and return structured results. The open problem has moved one layer deeper to diagram/provider command-core convergence and the typed-contract decision for preview/provider-test exposure.
+
 ## Problem Frame
 
 The previous requirements passes already answered the broad extraction question, and the most recent code now closes the smallest proof batch as well:
