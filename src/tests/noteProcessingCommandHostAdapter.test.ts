@@ -1,3 +1,4 @@
+import { TFile, TFolder } from 'obsidian';
 import { mockSettings } from './__mocks__/settings';
 import { ProgressReporter } from '../types';
 
@@ -26,6 +27,13 @@ function createUiStrings() {
             notemdBusy: 'Notemd busy',
             noActiveFile: 'No active file',
             noTopicFound: 'No topic found',
+            processingComplete: 'Processing complete',
+            processingError: 'Processing failed: {message}',
+            batchProcessingCancelled: 'Batch cancelled',
+            noMarkdownOrTextFilesFoundSelectedFolder: 'No markdown files in {folderPath}',
+            batchProcessingFinishedWithErrors: 'Batch finished with {count} errors',
+            batchProcessingSuccess: 'Processed {count} files',
+            batchProcessingError: 'Batch processing failed: {message}',
             contentGenerationSuccess: 'Generated {file}',
             contentGenerationError: 'Content generation failed: {message}',
             researchError: 'Research failed: {message}'
@@ -38,7 +46,9 @@ function createUiStrings() {
         errorModal: {
             titles: {
                 contentGeneration: 'Content Generation Error',
-                research: 'Research Error'
+                research: 'Research Error',
+                processing: 'Processing Error',
+                batchProcessing: 'Batch Processing Error'
             }
         }
     };
@@ -46,14 +56,32 @@ function createUiStrings() {
 
 function createHost(reporter: ProgressReporter, initiallyBusy = false) {
     let busy = initiallyBusy;
+    const batchProgressStore = {
+        start: jest.fn(),
+        markCompleted: jest.fn()
+    };
 
     return {
         host: {
             getApp: jest.fn(() => ({ vault: {}, workspace: {} })),
             loadSettings: jest.fn().mockResolvedValue(undefined),
             getSettings: jest.fn(() => mockSettings),
+            getActiveFile: jest.fn(() => null),
+            getFileByPath: jest.fn(() => null),
+            getFolderByPath: jest.fn(() => null),
+            getFiles: jest.fn(() => []),
+            getFolderSelection: jest.fn().mockResolvedValue(null),
+            getStepStatusText: jest.fn((current: number, total: number, label: string) => `${current}/${total} ${label}`),
+            currentProcessingFileBasename: { value: null },
+            getBatchProgressStore: jest.fn(() => batchProgressStore),
             getUiStrings: jest.fn(() => createUiStrings()),
             getActionLabel: jest.fn((actionId: string) => {
+                if (actionId === 'process-current-add-links') {
+                    return 'Process file';
+                }
+                if (actionId === 'process-folder-add-links') {
+                    return 'Process folder';
+                }
                 if (actionId === 'generate-from-title') {
                     return 'Generate from title';
                 }
@@ -80,9 +108,12 @@ function createHost(reporter: ProgressReporter, initiallyBusy = false) {
             openErrorModal: jest.fn(),
             saveErrorLog: jest.fn().mockResolvedValue(undefined),
             maybeAutoFixMermaidForFile: jest.fn().mockResolvedValue(undefined),
+            maybeAutoFixMermaidForFolder: jest.fn().mockResolvedValue(undefined),
+            appendVaultLog: jest.fn().mockResolvedValue(undefined),
             completeReporter: jest.fn(),
             finalizeReporter: jest.fn()
         },
+        getBatchProgressStore: () => batchProgressStore,
         getBusy: () => busy
     };
 }
@@ -154,6 +185,67 @@ describe('note processing command host adapter', () => {
         expect(host.completeReporter).not.toHaveBeenCalled();
         expect(host.finalizeReporter).toHaveBeenCalledWith(reporter);
         expect(host.setBusy).toHaveBeenLastCalledWith(false);
+        expect(getBusy()).toBe(false);
+    });
+
+    test('process current command reuses host orchestration and auto-fixes generated output file', async () => {
+        const reporter = createReporter();
+        const { host, getBusy } = createHost(reporter);
+        const activeFile = Object.assign(new (TFile as any)(), {
+            name: 'Topic.md',
+            basename: 'Topic',
+            path: 'Notes/Topic.md',
+            extension: 'md'
+        });
+        const outputFile = Object.assign(new (TFile as any)(), {
+            name: 'Topic_processed.md',
+            basename: 'Topic_processed',
+            path: 'Processed/Topic_processed.md',
+            extension: 'md'
+        });
+        host.getActiveFile.mockReturnValue(activeFile);
+        host.getFileByPath.mockReturnValue(outputFile);
+        host.getSettings.mockReturnValue({
+            ...mockSettings,
+            autoMermaidFixAfterGenerate: true
+        });
+        const processFileImpl = jest.fn().mockResolvedValue('Processed/Topic_processed.md');
+        const { runProcessWithNotemdCommandWithHost } = loadModule();
+
+        await runProcessWithNotemdCommandWithHost(host, reporter, processFileImpl);
+
+        expect(processFileImpl).toHaveBeenCalledWith(
+            host.getApp(),
+            host.getSettings(),
+            activeFile,
+            reporter,
+            host.currentProcessingFileBasename
+        );
+        expect(host.maybeAutoFixMermaidForFile).toHaveBeenCalledWith(outputFile, reporter, 'process current file');
+        expect(host.showNotice).toHaveBeenCalledWith('Processing complete');
+        expect(host.completeReporter).toHaveBeenCalledWith(reporter);
+        expect(host.finalizeReporter).toHaveBeenCalledWith(reporter);
+        expect(getBusy()).toBe(false);
+    });
+
+    test('process folder command reports empty folders through shared host cleanup path', async () => {
+        const reporter = createReporter();
+        const { host, getBusy, getBatchProgressStore } = createHost(reporter);
+        const folder = Object.assign(new (TFolder as any)(), {
+            name: 'Concepts',
+            path: 'Concepts'
+        });
+        host.getFolderByPath.mockReturnValue(folder);
+        host.getFiles.mockReturnValue([]);
+        const { runProcessFolderWithNotemdCommandWithHost } = loadModule();
+
+        await runProcessFolderWithNotemdCommandWithHost(host, reporter, 'Concepts');
+
+        expect(host.showNotice).toHaveBeenCalledWith('No markdown files in Concepts');
+        expect(reporter.updateStatus).toHaveBeenCalledWith('No markdown files in Concepts', 100);
+        expect(getBatchProgressStore().start).not.toHaveBeenCalled();
+        expect(host.completeReporter).toHaveBeenCalledWith(reporter);
+        expect(host.finalizeReporter).toHaveBeenCalledWith(reporter);
         expect(getBusy()).toBe(false);
     });
 });

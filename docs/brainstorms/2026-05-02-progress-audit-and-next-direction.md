@@ -119,8 +119,8 @@ This means the roadmap should no longer be interpreted as "build the platform". 
 - Provider-diagnostic host adaptation is now landed too: `src/operations/providerDiagnosticCommandHostAdapter.ts` owns settings loading, report-persistence wiring, and user-surface notice shaping for developer diagnostics, so `src/main.ts` no longer carries that orchestration inline.
 - Config/profile host adaptation is now landed too: `src/operations/configProfileCommandHostAdapter.ts` owns import/export state persistence, CLI export notice shaping, and import/export error mapping, so `src/main.ts` no longer carries that CLI-adjacent orchestration inline either.
 - Provider connection-test host adaptation is now landed too: `src/operations/providerConnectionTestCommandHostAdapter.ts` now backs both `test-llm-connection` and the settings-tab provider test flow, so neither surface keeps a parallel `testAPI` orchestration path anymore.
-- The first note-processing host-adapter slice is now landed too: `src/operations/noteProcessingCommandHostAdapter.ts` now owns the busy guard, reporter lifecycle, and notice/error-log orchestration for `generate-from-title` and `research-and-summarize`, so `src/main.ts` no longer carries those inline wrappers.
-- The remaining architectural gap is now narrower still: `src/main.ts` mainly retains command registration plus `processWithNotemdCommand`, `processFolderWithNotemdCommand`, and the broader non-CLI interactive/batch host effects, which is a far more defensible next seam than the earlier save/preview-heavy command wrappers.
+- The first note-processing host-adapter slice is now landed too: `src/operations/noteProcessingCommandHostAdapter.ts` now owns the busy guard, reporter lifecycle, and notice/error-log orchestration for `process-current-add-links`, `process-folder-add-links`, `generate-from-title`, and `research-and-summarize`, so `src/main.ts` no longer carries those inline wrappers.
+- The remaining architectural gap is now narrower still: `src/main.ts` mainly retains command registration plus `batchGenerateContentForTitlesCommand`, the translation/extraction wrappers, and the broader non-CLI interactive/batch host effects, which is a far more defensible next seam than the earlier save/preview-heavy command wrappers.
 
 ## Verification Gates
 
@@ -188,7 +188,7 @@ Short version:
    `ref/` and `coverage/` are local analysis/build artifacts, not repo deliverables. The mainline expectation is a clean worktree.
 
 6. **Split host adapters out of `src/main.ts`**
-   The save/preview, first config/profile, provider-test, and `generate-from-title` / `research-and-summarize` slices are now real, not just planned. The next move is to peel `processWithNotemdCommand`, `processFolderWithNotemdCommand`, and future CLI host wiring away from `src/main.ts` so the registry stops at neither metadata nor execution-core extraction.
+   The save/preview, first config/profile, provider-test, and `process-current-add-links` / `process-folder-add-links` / `generate-from-title` / `research-and-summarize` slices are now real, not just planned. The next move is to peel `batchGenerateContentForTitlesCommand`, the translation/extraction wrappers, and future CLI host wiring away from `src/main.ts` so the registry stops at neither metadata nor execution-core extraction.
 
 ### Ordered landing sequence
 
