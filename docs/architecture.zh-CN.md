@@ -236,7 +236,8 @@ flowchart LR
 - `src/operations/configProfileCommands.ts` 现在承接 provider profile 导入导出与 CLI capability/contract 导出编排
 - `src/operations/providerDiagnosticReportPersistence.ts` 现在承接带冲突规避的 provider diagnostic report 文件创建逻辑
 - `src/operations/providerDiagnosticCommandHostAdapter.ts` 现在承接开发者诊断命令的宿主装载、报告落盘接线与 notice 整形逻辑
-- `src/main.ts` 现在主要保留命令注册，以及更少量的 config/profile 状态持久化与其他面向用户的宿主副作用，这正是下一批抽离目标
+- `src/operations/configProfileCommandHostAdapter.ts` 现在承接 config/profile 状态持久化、CLI 导出 notice 整形与导入导出错误映射逻辑
+- `src/main.ts` 现在主要保留命令注册，以及更广义的非 CLI 交互与批处理宿主副作用，这正是下一批抽离目标
 
 ## 关键设计决策
 
@@ -250,7 +251,7 @@ flowchart LR
 ## 验证
 
 - `npm run build` — TypeScript 编译 + esbuild 打包
-- `npm test -- --runInBand` — 124 套件，782 项测试
+- `npm test -- --runInBand` — 125 套件，788 项测试
 - `npm run audit:i18n-ui` — 无硬编码 UI 字符串
 - `npm run audit:render-host` — 渲染宿主自包含于 main.js
 - `git diff --check` — 空白符卫生

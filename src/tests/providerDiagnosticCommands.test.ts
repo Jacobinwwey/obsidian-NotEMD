@@ -2,7 +2,7 @@ import NotemdPlugin from '../main';
 import { Notice } from 'obsidian';
 import { mockApp } from './__mocks__/app';
 import { mockSettings } from './__mocks__/settings';
-import * as configProfileCommands from '../operations/configProfileCommands';
+import * as configProfileCommandHostAdapter from '../operations/configProfileCommandHostAdapter';
 import * as providerDiagnosticCommandHostAdapter from '../operations/providerDiagnosticCommandHostAdapter';
 
 function createManifest() {
@@ -129,7 +129,7 @@ describe('provider diagnostic command surface', () => {
         expect(Notice).toHaveBeenCalledWith('stability ok', 12000);
     });
 
-    test('provider profile export command delegates to extracted config/profile operation', async () => {
+    test('provider profile export command delegates to extracted config/profile host adapter', async () => {
         const plugin = new NotemdPlugin(mockApp, createManifest() as any);
         plugin.app = mockApp;
         (plugin as any).manifest = createManifest();
@@ -139,22 +139,32 @@ describe('provider diagnostic command surface', () => {
         };
         plugin.loadSettings = jest.fn().mockResolvedValue(undefined);
         const commandSpy = jest
-            .spyOn(configProfileCommands, 'executeExportProviderProfilesCommand')
+            .spyOn(configProfileCommandHostAdapter, 'runExportProviderProfilesCommandWithHost')
             .mockResolvedValue({
-                outputPath: '.obsidian/plugins/notemd-test/notemd-providers.json',
-                profile: { providers: mockSettings.providers, formatVersion: 1, exportedAt: '2026-05-05T00:00:00.000Z' }
+                kind: 'success',
+                notices: [{ message: 'profiles exported' }],
+                execution: {
+                    outputPath: '.obsidian/plugins/notemd-test/notemd-providers.json',
+                    profile: { providers: mockSettings.providers, formatVersion: 1, exportedAt: '2026-05-05T00:00:00.000Z' }
+                }
             } as any);
 
         await (plugin as any).exportProviderProfilesCommand();
 
         expect(commandSpy).toHaveBeenCalledWith(expect.objectContaining({
+            loadSettings: expect.any(Function),
+            saveSettings: expect.any(Function),
+            getSettings: expect.any(Function),
+            getUiStrings: expect.any(Function),
             pluginId: 'notemd-test',
-            providers: mockSettings.providers,
-            host: expect.objectContaining({ configDir: '.obsidian' })
+            defaultActiveProvider: expect.any(String),
+            configHost: expect.objectContaining({ configDir: '.obsidian' }),
+            logError: expect.any(Function)
         }));
+        expect(Notice).toHaveBeenCalledWith('profiles exported', undefined);
     });
 
-    test('provider profile import command delegates to extracted config/profile operation and persists imported state', async () => {
+    test('provider profile import command delegates to extracted config/profile host adapter', async () => {
         const plugin = new NotemdPlugin(mockApp, createManifest() as any);
         plugin.app = mockApp;
         (plugin as any).manifest = createManifest();
@@ -165,37 +175,46 @@ describe('provider diagnostic command surface', () => {
         plugin.loadSettings = jest.fn().mockResolvedValue(undefined);
         plugin.saveSettings = jest.fn().mockResolvedValue(undefined);
         const commandSpy = jest
-            .spyOn(configProfileCommands, 'executeImportProviderProfilesCommand')
+            .spyOn(configProfileCommandHostAdapter, 'runImportProviderProfilesCommandWithHost')
             .mockResolvedValue({
-                inputPath: '.obsidian/plugins/notemd-test/notemd-providers.json',
-                importedProviders: [
-                    ...mockSettings.providers,
-                    {
-                        name: 'OpenAI',
-                        apiKey: 'new',
-                        baseUrl: 'https://openai.test',
-                        model: 'gpt-4.1',
-                        temperature: 0.2
-                    }
-                ],
-                newCount: 1,
-                updatedCount: 1,
-                activeProvider: 'OpenAI',
-                activeProviderReset: true
+                kind: 'success',
+                notices: [{ message: 'active reset' }, { message: 'profiles imported' }],
+                execution: {
+                    inputPath: '.obsidian/plugins/notemd-test/notemd-providers.json',
+                    importedProviders: [
+                        ...mockSettings.providers,
+                        {
+                            name: 'OpenAI',
+                            apiKey: 'new',
+                            baseUrl: 'https://openai.test',
+                            model: 'gpt-4.1',
+                            temperature: 0.2
+                        }
+                    ],
+                    newCount: 1,
+                    updatedCount: 1,
+                    activeProvider: 'OpenAI',
+                    activeProviderReset: true
+                }
             } as any);
 
         await (plugin as any).importProviderProfilesCommand();
 
         expect(commandSpy).toHaveBeenCalledWith(expect.objectContaining({
             pluginId: 'notemd-test',
-            activeProvider: mockSettings.activeProvider,
-            host: expect.objectContaining({ configDir: '.obsidian' })
+            loadSettings: expect.any(Function),
+            saveSettings: expect.any(Function),
+            getSettings: expect.any(Function),
+            getUiStrings: expect.any(Function),
+            defaultActiveProvider: expect.any(String),
+            configHost: expect.objectContaining({ configDir: '.obsidian' }),
+            logError: expect.any(Function)
         }));
-        expect(plugin.settings.activeProvider).toBe('OpenAI');
-        expect(plugin.saveSettings).toHaveBeenCalled();
+        expect(Notice).toHaveBeenCalledWith('active reset', undefined);
+        expect(Notice).toHaveBeenCalledWith('profiles imported', undefined);
     });
 
-    test('CLI capability manifest export command delegates to extracted config/profile operation', async () => {
+    test('CLI capability manifest export command delegates to extracted config/profile host adapter', async () => {
         const plugin = new NotemdPlugin(mockApp, createManifest() as any);
         plugin.app = mockApp;
         (plugin as any).manifest = createManifest();
@@ -205,21 +224,31 @@ describe('provider diagnostic command surface', () => {
         };
         plugin.loadSettings = jest.fn().mockResolvedValue(undefined);
         const commandSpy = jest
-            .spyOn(configProfileCommands, 'executeExportCliCapabilityManifestCommand')
+            .spyOn(configProfileCommandHostAdapter, 'runExportCliCapabilityManifestCommandWithHost')
             .mockResolvedValue({
-                outputPath: '.obsidian/plugins/notemd-test/notemd-cli-capabilities.json',
-                manifest: { version: 1, commands: [] }
+                kind: 'success',
+                notices: [{ message: 'capabilities exported' }],
+                execution: {
+                    outputPath: '.obsidian/plugins/notemd-test/notemd-cli-capabilities.json',
+                    manifest: { version: 1, commands: [] }
+                }
             } as any);
 
         await (plugin as any).exportCliCapabilityManifestCommand();
 
         expect(commandSpy).toHaveBeenCalledWith(expect.objectContaining({
             pluginId: 'notemd-test',
-            host: expect.objectContaining({ configDir: '.obsidian' })
+            loadSettings: expect.any(Function),
+            saveSettings: expect.any(Function),
+            getSettings: expect.any(Function),
+            getUiStrings: expect.any(Function),
+            configHost: expect.objectContaining({ configDir: '.obsidian' }),
+            logError: expect.any(Function)
         }));
+        expect(Notice).toHaveBeenCalledWith('capabilities exported', undefined);
     });
 
-    test('CLI invocation contract export command delegates to extracted config/profile operation', async () => {
+    test('CLI invocation contract export command delegates to extracted config/profile host adapter', async () => {
         const plugin = new NotemdPlugin(mockApp, createManifest() as any);
         plugin.app = mockApp;
         (plugin as any).manifest = createManifest();
@@ -229,17 +258,27 @@ describe('provider diagnostic command surface', () => {
         };
         plugin.loadSettings = jest.fn().mockResolvedValue(undefined);
         const commandSpy = jest
-            .spyOn(configProfileCommands, 'executeExportCliInvocationContractCommand')
+            .spyOn(configProfileCommandHostAdapter, 'runExportCliInvocationContractCommandWithHost')
             .mockResolvedValue({
-                outputPath: '.obsidian/plugins/notemd-test/notemd-cli-contract.json',
-                contract: { version: 1, operations: [] }
+                kind: 'success',
+                notices: [{ message: 'contract exported' }],
+                execution: {
+                    outputPath: '.obsidian/plugins/notemd-test/notemd-cli-contract.json',
+                    contract: { version: 1, operations: [] }
+                }
             } as any);
 
         await (plugin as any).exportCliInvocationContractCommand();
 
         expect(commandSpy).toHaveBeenCalledWith(expect.objectContaining({
             pluginId: 'notemd-test',
-            host: expect.objectContaining({ configDir: '.obsidian' })
+            loadSettings: expect.any(Function),
+            saveSettings: expect.any(Function),
+            getSettings: expect.any(Function),
+            getUiStrings: expect.any(Function),
+            configHost: expect.objectContaining({ configDir: '.obsidian' }),
+            logError: expect.any(Function)
         }));
+        expect(Notice).toHaveBeenCalledWith('contract exported', undefined);
     });
 });
