@@ -58,6 +58,7 @@ function createUiStrings() {
             batchGenerationFinishedWithErrors: 'Batch generation finished with {count} errors',
             batchGenerationSuccess: 'Generated content in {folderPath}',
             batchGenerationError: 'Batch generation failed: {message}',
+            noEligibleMarkdownFilesFoundExcluding: `No eligible '.md' files found in "{folderPath}" (excluding '{completeFolder}').`,
             contentGenerationSuccess: 'Generated {file}',
             contentGenerationError: 'Content generation failed: {message}',
             researchError: 'Research failed: {message}',
@@ -192,10 +193,17 @@ describe('note processing command host adapter', () => {
             basename: 'Topic',
             path: 'Notes/Topic.md'
         };
-        const generateImpl = jest.fn().mockResolvedValue(undefined);
+        const generateImpl = jest.fn().mockResolvedValue({
+            sourcePath: 'Notes/Topic.md',
+            outputPath: 'Notes/Topic.md',
+            title: 'Topic',
+            researchEnabled: false,
+            researchContextUsed: false,
+            modified: true
+        });
         const { runGenerateContentForTitleCommandWithHost } = loadModule();
 
-        await runGenerateContentForTitleCommandWithHost(host, file, reporter, generateImpl);
+        const result = await runGenerateContentForTitleCommandWithHost(host, file, reporter, generateImpl);
 
         expect(host.setBusy).toHaveBeenNthCalledWith(1, true);
         expect(generateImpl).toHaveBeenCalledWith(host.getApp(), mockSettings, file, reporter);
@@ -205,6 +213,14 @@ describe('note processing command host adapter', () => {
         expect(host.completeReporter).toHaveBeenCalledWith(reporter);
         expect(host.finalizeReporter).toHaveBeenCalledWith(reporter);
         expect(host.setBusy).toHaveBeenLastCalledWith(false);
+        expect(result).toEqual({
+            sourcePath: 'Notes/Topic.md',
+            outputPath: 'Notes/Topic.md',
+            title: 'Topic',
+            researchEnabled: false,
+            researchContextUsed: false,
+            modified: true
+        });
         expect(getBusy()).toBe(false);
     });
 
@@ -330,10 +346,25 @@ describe('note processing command host adapter', () => {
             ...mockSettings,
             autoMermaidFixAfterGenerate: true
         });
-        const processFileImpl = jest.fn().mockResolvedValue('Processed/Topic_processed.md');
+        const processFileImpl = jest.fn().mockResolvedValue({
+            sourcePath: 'Notes/Topic.md',
+            requestedOutputFolderPath: 'Processed',
+            outputFolderPath: 'Processed',
+            outputFolderCreated: false,
+            usedCustomOutputFolder: true,
+            outputPath: 'Processed/Topic_processed.md',
+            created: true,
+            overwritten: false,
+            movedOriginalFile: false,
+            moveOriginalFile: false,
+            chunkCount: 1,
+            conceptCount: 2,
+            conceptNoteFolderPath: 'Concepts',
+            removedCodeFences: false
+        });
         const { runProcessWithNotemdCommandWithHost } = loadModule();
 
-        await runProcessWithNotemdCommandWithHost(host, reporter, processFileImpl);
+        const result = await runProcessWithNotemdCommandWithHost(host, reporter, processFileImpl);
 
         expect(processFileImpl).toHaveBeenCalledWith(
             host.getApp(),
@@ -346,6 +377,11 @@ describe('note processing command host adapter', () => {
         expect(host.showNotice).toHaveBeenCalledWith('Processing complete');
         expect(host.completeReporter).toHaveBeenCalledWith(reporter);
         expect(host.finalizeReporter).toHaveBeenCalledWith(reporter);
+        expect(result).toEqual(expect.objectContaining({
+            outputPath: 'Processed/Topic_processed.md',
+            conceptCount: 2,
+            created: true
+        }));
         expect(getBusy()).toBe(false);
     });
 
@@ -647,7 +683,30 @@ describe('note processing command host adapter', () => {
     test('batch generate command returns resolved folders and reuses shared reporter cleanup', async () => {
         const reporter = createReporter();
         const { host, getBusy } = createHost(reporter);
-        const batchGenerateImpl = jest.fn().mockResolvedValue({ errors: [] });
+        const batchGenerateImpl = jest.fn().mockResolvedValue({
+            sourceFolderPath: 'Concepts',
+            completeFolderPath: 'Concepts_complete',
+            completeFolderCreated: true,
+            processedFileCount: 2,
+            generatedCount: 2,
+            movedCount: 2,
+            cancelled: false,
+            fileResults: [
+                {
+                    sourcePath: 'Concepts/A.md',
+                    outputPath: 'Concepts/A.md',
+                    title: 'A',
+                    researchEnabled: false,
+                    researchContextUsed: false,
+                    modified: true,
+                    completeDestinationPath: 'Concepts_complete/A.md',
+                    movedToCompleteFolder: true,
+                    skippedMoveBecauseDestinationExists: false,
+                    skippedMoveBecauseSourceMissing: false
+                }
+            ],
+            errors: []
+        });
         const { runBatchGenerateContentForTitlesCommandWithHost } = loadModule();
 
         const result = await runBatchGenerateContentForTitlesCommandWithHost(
@@ -658,7 +717,6 @@ describe('note processing command host adapter', () => {
         );
 
         expect(batchGenerateImpl).toHaveBeenCalledWith(host.getApp(), host.getSettings(), 'Concepts', reporter);
-        expect(host.resolveCompleteFolderPath).toHaveBeenCalledWith('Concepts');
         expect(host.maybeAutoFixMermaidForFolder).toHaveBeenCalledWith(
             'Concepts_complete',
             reporter,
@@ -668,8 +726,62 @@ describe('note processing command host adapter', () => {
         expect(host.completeReporter).toHaveBeenCalledWith(reporter);
         expect(result).toEqual({
             sourceFolderPath: 'Concepts',
-            completeFolderPath: 'Concepts_complete'
+            completeFolderPath: 'Concepts_complete',
+            completeFolderCreated: true,
+            processedFileCount: 2,
+            generatedCount: 2,
+            movedCount: 2,
+            cancelled: false,
+            fileResults: [
+                {
+                    sourcePath: 'Concepts/A.md',
+                    outputPath: 'Concepts/A.md',
+                    title: 'A',
+                    researchEnabled: false,
+                    researchContextUsed: false,
+                    modified: true,
+                    completeDestinationPath: 'Concepts_complete/A.md',
+                    movedToCompleteFolder: true,
+                    skippedMoveBecauseDestinationExists: false,
+                    skippedMoveBecauseSourceMissing: false
+                }
+            ],
+            errors: []
         });
+        expect(host.finalizeReporter).toHaveBeenCalledWith(reporter);
+        expect(getBusy()).toBe(false);
+    });
+
+    test('batch generate command does not report success when no eligible files exist', async () => {
+        const reporter = createReporter();
+        const { host, getBusy } = createHost(reporter);
+        const batchGenerateImpl = jest.fn().mockResolvedValue({
+            sourceFolderPath: 'Concepts',
+            completeFolderPath: 'Concepts_complete',
+            completeFolderCreated: false,
+            processedFileCount: 0,
+            generatedCount: 0,
+            movedCount: 0,
+            cancelled: false,
+            fileResults: [],
+            errors: []
+        });
+        const { runBatchGenerateContentForTitlesCommandWithHost } = loadModule();
+
+        const result = await runBatchGenerateContentForTitlesCommandWithHost(
+            host,
+            reporter,
+            'Concepts',
+            batchGenerateImpl
+        );
+
+        expect(host.showNotice).toHaveBeenCalledWith("No eligible '.md' files found in \"Concepts\" (excluding 'Concepts_complete').");
+        expect(host.maybeAutoFixMermaidForFolder).not.toHaveBeenCalled();
+        expect(host.completeReporter).not.toHaveBeenCalled();
+        expect(result).toEqual(expect.objectContaining({
+            processedFileCount: 0,
+            generatedCount: 0
+        }));
         expect(host.finalizeReporter).toHaveBeenCalledWith(reporter);
         expect(getBusy()).toBe(false);
     });
