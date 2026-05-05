@@ -15,6 +15,8 @@ export const STRINGS_EN = {
         createWikiLinkAndGenerateNoteFromSelection: 'Create Wiki-Link & Generate Note from Selection',
         exportProviderProfiles: 'Export provider profiles',
         importProviderProfiles: 'Import provider profiles',
+        exportCliCapabilityManifest: 'Export CLI capability manifest',
+        exportCliInvocationContract: 'Export CLI invocation contract',
         generateExperimentalDiagram: 'Generate diagram (experimental)',
         previewExperimentalDiagram: 'Preview diagram (experimental)'
     },
@@ -604,6 +606,8 @@ export const STRINGS_EN = {
         batchMermaidFixFinishedWithErrors: 'Batch Mermaid fix finished with {count} error(s). Modified {modifiedCount} files. Check console/log.',
         batchMermaidFixSuccess: 'Batch Mermaid fix complete! Modified {modifiedCount} files.',
         batchMermaidFixError: 'Error during batch fix: {message}. See console.',
+        cliCapabilityManifestExported: 'CLI capability manifest exported to {path}',
+        cliInvocationContractExported: 'CLI invocation contract exported to {path}',
         formulaFixSuccess: 'Fixed formulas in {file}',
         formulaFixNotNeeded: 'No formula fixes needed for {file}',
         batchFormulaFixFinishedWithErrors: 'Batch fix finished with {count} errors. Modified {modifiedCount} files.',

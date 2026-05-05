@@ -80,6 +80,8 @@ describe('runtime i18n coverage', () => {
         expect(en.notices.updatingLinksForRenamedFile).toBeDefined();
         expect(en.notices.researchSummaryAppended).toBeDefined();
         expect(en.notices.batchMermaidFixSuccess).toBeDefined();
+        expect(en.notices.cliCapabilityManifestExported).toBeDefined();
+        expect(en.notices.cliInvocationContractExported).toBeDefined();
         expect(en.settings.developer.diagnosticSuccess).toBeDefined();
         expect(en.errorModal.titles.research).toBeDefined();
         expect(en.errorModal.titles.batchTranslation).toBeDefined();
@@ -92,6 +94,7 @@ describe('runtime i18n coverage', () => {
 
         expect(zhCn.notices.processingComplete).not.toBe(en.notices.processingComplete);
         expect(zhCn.notices.updatingLinksForRenamedFile).not.toBe(en.notices.updatingLinksForRenamedFile);
+        expect(zhCn.notices.cliCapabilityManifestExported).not.toBe(en.notices.cliCapabilityManifestExported);
         expect(zhCn.settings.developer.diagnosticSuccess).not.toBe(en.settings.developer.diagnosticSuccess);
         expect(zhCn.errorModal.titles.batchTranslation).not.toBe(en.errorModal.titles.batchTranslation);
         expect(zhCn.previewModal.exportSvg).not.toBe(en.previewModal.exportSvg);
@@ -103,6 +106,7 @@ describe('runtime i18n coverage', () => {
 
         expect(zhTw.notices.researchSummaryAppended).not.toBe(en.notices.researchSummaryAppended);
         expect(zhTw.notices.batchMermaidFixSuccess).not.toBe(en.notices.batchMermaidFixSuccess);
+        expect(zhTw.notices.cliInvocationContractExported).not.toBe(en.notices.cliInvocationContractExported);
         expect(zhTw.settings.developer.stabilityFinished).not.toBe(en.settings.developer.stabilityFinished);
         expect(zhTw.errorModal.titles.research).not.toBe(en.errorModal.titles.research);
         expect(zhTw.previewModal.exportSvg).not.toBe(en.previewModal.exportSvg);

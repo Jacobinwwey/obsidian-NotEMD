@@ -42,13 +42,14 @@
 - 第一批 CLI-grade contract 不纳入 UI-only 流程
 - 随着 CLI 方向推进，`src/main.ts` 要缩小而不是继续膨胀
 
-## 当前主线状态（2026-05-04）
+## 当前主线状态（2026-05-05）
 
 - `src/operations/types.ts` 已承接共享 operation 元数据原语，不再把这些定义埋在 sidebar/workflow 代码里。
 - `src/operations/registry.ts` 现在是已抽取 operation definition、command binding、mapping kind 与部分 input/result schema 的中心事实源。
 - `src/operations/capabilityManifest.ts` 与 `src/cliContracts.ts` 现在都从这份 registry 派生，减少了一条主要元数据漂移路径。
 - `diagram.generate` 现在已经和 provider diagnostics 一样拥有类型化 invocation contract。
 - 第一批 MT2 执行层拆分已经落地：`src/operations/diagramGenerateOperation.ts` 现在承接可复用的 diagram 执行路径，`src/operations/providerDiagnosticCommand.ts` 现在承接 `src/main.ts` 之下的 provider diagnostic command orchestration。
+- 第二批 MT2 host-adapter slice 也已落地：`src/operations/diagramCommandHostAdapter.ts` 现在承接 Mermaid/artifact 保存收尾、preview 收尾以及直接 Vega-Lite 预览编排。
 - 现有 Obsidian 命令仍保持注册状态，并继续支持快捷键与官方 CLI 触发，同时底层 operation 层继续演进。
 
 ## 短期交付（0-2 周）
@@ -160,7 +161,8 @@
   - 共享 `DiagramOperationInput` 整形已落地
   - `diagram.generate` 现在已进入 registry 驱动的类型化 invocation contract
   - 可复用执行路径现已落在 `src/operations/diagramGenerateOperation.ts`
-  - 剩余缺口：把 save/preview 宿主适配逻辑继续从 `src/main.ts` 抽离出去
+  - save/preview 宿主适配逻辑现已落在 `src/operations/diagramCommandHostAdapter.ts`
+  - 剩余缺口：继续整合 config/profile host adapter，并补上 CLI-facing host adapter，且不能把 Obsidian 耦合重新塞回 operation 层
 
 **MT2. Host adapter 拆分**
 - 新增 plugin adapter，负责解析 active file、vault state、settings
@@ -268,7 +270,7 @@
 进度说明：
 
 - 第 1-4 项已在主线上部分落地。
-- 下一步最稳妥的推进点仍是 MT2，但范围已经缩小：在已落地执行层抽离的基础上，继续把 save/preview/config adapter 从 `src/main.ts` 中拆出，避免 command wrapper 仍成为进入已抽取 operation 的唯一运行时入口。
+- 下一步最稳妥的推进点仍是 MT2，但范围已经缩小：在已落地执行层与 save/preview adapter 抽离的基础上，继续推进 config/profile adapter 与 CLI-facing host adapter，让 `src/main.ts` 不再成为宿主副作用的最后集中边界。
 
 ## 退出标准
 

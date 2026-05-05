@@ -40,7 +40,6 @@ import {
     DiagramOperationInput
 } from './diagram/diagramGenerationService';
 import { RenderArtifact } from './rendering/types';
-import { DiagramIntent } from './diagram/types';
 import { IframeRenderHost } from './rendering/host/iframeRenderHost';
 import { getRenderTargetDisplayName } from './rendering/targetLabel';
 import { supportsDiagramPreviewModal } from './ui/diagramPreview';
@@ -53,6 +52,12 @@ import {
     MissingActiveProviderError
 } from './operations/providerDiagnosticCommand';
 import { runDiagramGenerateOperation } from './operations/diagramGenerateOperation';
+import {
+    completeArtifactDiagramCommand,
+    completeMermaidDiagramCommand,
+    DiagramCommandHostAdapter,
+    previewVegaLiteArtifactFromMarkdown
+} from './operations/diagramCommandHostAdapter';
 
 type DiagramCommandExecutionMode = 'save-mermaid' | 'save-artifact' | 'preview-artifact';
 
@@ -97,6 +102,31 @@ export default class NotemdPlugin extends Plugin {
         const previewTitle = formatI18n(i18n.previewModal.title, { target: targetLabel });
         const session = new IframeRenderHost().createSession(artifact, { sourcePath, artifactSaved, previewTitle });
         new DiagramPreviewModal(this.app, session, this.settings.uiLocale).open();
+    }
+
+    private createDiagramCommandHostAdapter(): DiagramCommandHostAdapter {
+        return {
+            saveMermaidSummary: (file, mermaidContent, reporter) =>
+                saveMermaidSummaryFile(this.app, this.settings, file, mermaidContent, reporter),
+            saveArtifact: (file, artifact, reporter) =>
+                saveDiagramArtifactFile(this.app, this.settings, file, artifact, reporter),
+            getFileByPath: (path) => {
+                const abstractFile = this.app.vault.getAbstractFileByPath(path);
+                return abstractFile instanceof TFile ? abstractFile : null;
+            },
+            openFile: (file) => {
+                const leaf = this.app.workspace.getLeaf('split', 'vertical');
+                leaf.openFile(file);
+            },
+            maybeAutoFixMermaid: (file, reporter, reason) =>
+                this.maybeAutoFixMermaidForFile(file, reporter, reason),
+            supportsPreview: (artifact) => this.supportsDiagramPreview(artifact),
+            openPreview: (artifact, sourcePath, artifactSaved = false) =>
+                this.openDiagramPreviewModal(artifact, sourcePath, artifactSaved),
+            notify: (message, duration) => {
+                new Notice(message, duration);
+            }
+        };
     }
 
     private getDiagramCommandActionLabel(executionMode: DiagramCommandExecutionMode, i18n = this.getUiStrings()): string {
@@ -347,23 +377,23 @@ export default class NotemdPlugin extends Plugin {
 
         this.addCommand({
             id: 'export-cli-capability-manifest',
-            name: 'Export CLI capability manifest',
+            name: uiStrings.commands.exportCliCapabilityManifest,
             callback: async () => {
                 const manifest = buildCliCapabilityManifest(this.manifest.id);
                 const outputPath = `${this.app.vault.configDir}/plugins/${this.manifest.id}/notemd-cli-capabilities.json`;
                 await this.app.vault.adapter.write(outputPath, JSON.stringify(manifest, null, 2));
-                new Notice(`CLI capability manifest exported to ${outputPath}`);
+                new Notice(formatI18n(uiStrings.notices.cliCapabilityManifestExported, { path: outputPath }));
             }
         });
 
         this.addCommand({
             id: 'export-cli-invocation-contract',
-            name: 'Export CLI invocation contract',
+            name: uiStrings.commands.exportCliInvocationContract,
             callback: async () => {
                 const contract = buildCliInvocationContract();
                 const outputPath = `${this.app.vault.configDir}/plugins/${this.manifest.id}/notemd-cli-contract.json`;
                 await this.app.vault.adapter.write(outputPath, JSON.stringify(contract, null, 2));
-                new Notice(`CLI invocation contract exported to ${outputPath}`);
+                new Notice(formatI18n(uiStrings.notices.cliInvocationContractExported, { path: outputPath }));
             }
         });
 
@@ -1960,44 +1990,17 @@ export default class NotemdPlugin extends Plugin {
             reporter,
             getLegacyMermaidPrompt: () => this.getPromptForTask('summarizeToMermaid')
         });
-        const mermaidContent = result.artifact.content;
-        reporter.updateStatus(this.getStepStatusText(2, 3, actionLabel), 90);
-
-        const outputFilePath = await saveMermaidSummaryFile(this.app, this.settings, file, mermaidContent, reporter);
-        if (this.settings.autoMermaidFixAfterGenerate) {
-            const outputFile = this.app.vault.getAbstractFileByPath(outputFilePath);
-            if (outputFile instanceof TFile) {
-                await this.maybeAutoFixMermaidForFile(outputFile, reporter, 'summarise as mermaid');
-            }
-        }
-
-        reporter.updateStatus(this.getActionCompleteText(actionLabel), 100);
-        reporter.log(`Mermaid diagram saved to: ${outputFilePath}`);
-        new Notice(i18n.notices.mermaidSummarizationComplete);
-
-        if (outputFilePath) {
-            const newLeaf = this.app.workspace.getLeaf('split', 'vertical');
-            const newFile = this.app.vault.getAbstractFileByPath(outputFilePath);
-            if (newFile instanceof TFile) {
-                newLeaf.openFile(newFile);
-            }
-        }
-    }
-
-
-    private extractVegaLiteFromMarkdown(content: string): string | null {
-        const fenceRegex = /```vega-lite\s*\n([\s\S]*?)\n```/i;
-        const match = content.match(fenceRegex);
-        return match ? match[1].trim() : null;
-    }
-
-    private buildVegaLitePreviewArtifact(vlContent: string): RenderArtifact {
-        return {
-            target: 'vega-lite' as const,
-            content: vlContent,
-            mimeType: 'application/json' as const,
-            sourceIntent: 'dataChart' as DiagramIntent
-        };
+        await completeMermaidDiagramCommand({
+            host: this.createDiagramCommandHostAdapter(),
+            file,
+            reporter,
+            mermaidContent: result.artifact.content,
+            actionLabel,
+            completeNotice: i18n.notices.mermaidSummarizationComplete,
+            autoFixAfterGenerate: this.settings.autoMermaidFixAfterGenerate,
+            getStepStatusText: (current, total, label) => this.getStepStatusText(current, total, label),
+            getActionCompleteText: (label) => this.getActionCompleteText(label)
+        });
     }
 
     private async executeArtifactDiagramCommand(
@@ -2022,48 +2025,20 @@ export default class NotemdPlugin extends Plugin {
             reporter,
             getLegacyMermaidPrompt: () => this.getPromptForTask('summarizeToMermaid')
         });
-
-        if (result.renderError) {
-            reporter.log(`Warning: ${result.renderError}`);
-            new Notice(i18n.notices.experimentalDiagramManualFixHint, 8000);
-        }
-
-        if (executionMode === 'preview-artifact') {
-            reporter.log(`Experimental diagram preview produced target "${result.artifact.target}" with intent "${result.spec.intent}".`);
-            this.openDiagramPreviewModal(result.artifact, file.path, false);
-
-            reporter.updateStatus(this.getActionCompleteText(actionLabel), 100);
-            reporter.log(`Experimental diagram preview opened for: ${file.path}`);
-            new Notice(i18n.notices.experimentalDiagramPreviewReady);
-            return;
-        }
-
-        reporter.log(`Experimental diagram pipeline produced target "${result.artifact.target}" with intent "${result.spec.intent}".`);
-        reporter.updateStatus(this.getStepStatusText(2, totalSteps, actionLabel), 85);
-
-        const outputFilePath = await saveDiagramArtifactFile(this.app, this.settings, file, result.artifact, reporter);
-        if (result.artifact.target === 'mermaid' && this.settings.autoMermaidFixAfterGenerate) {
-            const outputFile = this.app.vault.getAbstractFileByPath(outputFilePath);
-            if (outputFile instanceof TFile) {
-                await this.maybeAutoFixMermaidForFile(outputFile, reporter, 'experimental diagram generation');
-            }
-        }
-
-        reporter.updateStatus(this.getActionCompleteText(actionLabel), 100);
-        reporter.log(`Experimental diagram saved to: ${outputFilePath}`);
-        new Notice(i18n.notices.experimentalDiagramComplete);
-
-        if (outputFilePath) {
-            const newLeaf = this.app.workspace.getLeaf('split', 'vertical');
-            const newFile = this.app.vault.getAbstractFileByPath(outputFilePath);
-            if (newFile instanceof TFile) {
-                newLeaf.openFile(newFile);
-            }
-
-            if (this.supportsDiagramPreview(result.artifact)) {
-                this.openDiagramPreviewModal(result.artifact, outputFilePath, true);
-            }
-        }
+        await completeArtifactDiagramCommand({
+            host: this.createDiagramCommandHostAdapter(),
+            file,
+            reporter,
+            result,
+            actionLabel,
+            executionMode,
+            completeNotice: i18n.notices.experimentalDiagramComplete,
+            previewReadyNotice: i18n.notices.experimentalDiagramPreviewReady,
+            manualFixHintNotice: i18n.notices.experimentalDiagramManualFixHint,
+            autoFixAfterGenerate: this.settings.autoMermaidFixAfterGenerate,
+            getStepStatusText: (current, total, label) => this.getStepStatusText(current, total, label),
+            getActionCompleteText: (label) => this.getActionCompleteText(label)
+        });
     }
 
     async generateExperimentalDiagramCommand(file: TFile, reporter: ProgressReporter) {
@@ -2079,13 +2054,11 @@ export default class NotemdPlugin extends Plugin {
 
         try {
             const fileContent = await this.app.vault.read(file);
-            const vlContent = this.extractVegaLiteFromMarkdown(fileContent);
-            if (!vlContent) {
-                throw new Error("No \\`\\`\\`vega-lite code fence found in this file. Use the \"Generate diagram\" command first to create Vega-Lite content.");
-            }
-
-            const artifact = this.buildVegaLitePreviewArtifact(vlContent);
-            this.openDiagramPreviewModal(artifact, file.path, false);
+            previewVegaLiteArtifactFromMarkdown({
+                host: this.createDiagramCommandHostAdapter(),
+                sourceMarkdown: fileContent,
+                sourcePath: file.path
+            });
 
             reporter.updateStatus(this.getActionCompleteText(actionLabel), 100);
             reporter.log(`Vega-Lite preview opened for: ${file.path}`);
