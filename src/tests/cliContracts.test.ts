@@ -4,6 +4,11 @@ describe('CLI invocation contract', () => {
     test('exports versioned typed contracts for registry-backed operations', () => {
         const contract = buildCliInvocationContract();
         const operationIds = contract.operations.map(operation => operation.operationId);
+        const processCurrent = contract.operations.find(operation => operation.operationId === 'file.process-add-links');
+        const processFolder = contract.operations.find(operation => operation.operationId === 'file.process-folder-add-links');
+        const generateFromTitle = contract.operations.find(operation => operation.operationId === 'content.generate-from-title');
+        const batchGenerate = contract.operations.find(operation => operation.operationId === 'content.batch-generate-from-titles');
+        const researchSummarize = contract.operations.find(operation => operation.operationId === 'research.summarize-topic');
         const translateFile = contract.operations.find(operation => operation.operationId === 'translate.file');
         const extractOriginalText = contract.operations.find(operation => operation.operationId === 'content.extract-original-text');
         const extractAndGenerate = contract.operations.find(operation => operation.operationId === 'workflow.extract-and-generate');
@@ -18,6 +23,11 @@ describe('CLI invocation contract', () => {
             'provider.diagnostic.run',
             'provider.diagnostic.stability-run',
             'diagram.generate',
+            'file.process-add-links',
+            'file.process-folder-add-links',
+            'content.generate-from-title',
+            'content.batch-generate-from-titles',
+            'research.summarize-topic',
             'translate.file',
             'translate.folder-batch',
             'concept.extract-file',
@@ -45,6 +55,83 @@ describe('CLI invocation contract', () => {
         expect(contract.operations[2].resultSchema).toEqual(expect.objectContaining({
             type: 'object',
             required: expect.arrayContaining(['plan', 'spec', 'artifact'])
+        }));
+
+        expect(processCurrent).toEqual(expect.objectContaining({
+            operationId: 'file.process-add-links',
+            inputSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    sourcePath: expect.any(Object)
+                })
+            }),
+            resultSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    outputPath: expect.any(Object)
+                })
+            })
+        }));
+
+        expect(processFolder).toEqual(expect.objectContaining({
+            operationId: 'file.process-folder-add-links',
+            inputSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    folderPath: expect.any(Object)
+                })
+            }),
+            resultSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    processedFileCount: expect.any(Object),
+                    errors: expect.any(Object)
+                })
+            })
+        }));
+
+        expect(generateFromTitle).toEqual(expect.objectContaining({
+            operationId: 'content.generate-from-title',
+            inputSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    sourcePath: expect.any(Object)
+                })
+            }),
+            resultSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    sourcePath: expect.any(Object)
+                })
+            })
+        }));
+
+        expect(batchGenerate).toEqual(expect.objectContaining({
+            operationId: 'content.batch-generate-from-titles',
+            resultSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    sourceFolderPath: expect.any(Object),
+                    completeFolderPath: expect.any(Object)
+                })
+            })
+        }));
+
+        expect(researchSummarize).toEqual(expect.objectContaining({
+            operationId: 'research.summarize-topic',
+            inputSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    topic: expect.any(Object)
+                })
+            }),
+            resultSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    sourcePath: expect.any(Object),
+                    topic: expect.any(Object)
+                })
+            })
         }));
 
         expect(translateFile).toEqual(expect.objectContaining({

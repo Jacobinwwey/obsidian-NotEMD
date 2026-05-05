@@ -243,7 +243,7 @@ The gap is smaller than before:
 - `src/operations/utilityCommandHostAdapter.ts` now carries current-file duplicate checks, duplicate cleanup, batch Mermaid fix, and single/batch formula-fix command orchestration below `src/main.ts`; `check-for-duplicates` is no longer inlined inside command registration
 - `src/translate.ts` now accepts injected reporters for batch-translation flows instead of hard-wiring `ProgressModal` as the only execution carrier, and `src/extractOriginalText.ts` now returns its output path so host adapters can own reporter completion more explicitly
 - `src/fileUtils.ts` and `src/extractOriginalText.ts` now accept narrower runtime contexts instead of the concrete `NotemdPlugin` class, which shows the boundary work has moved beyond wrapper extraction into utility host-coupling reduction
-- `src/main.ts` now mainly retains command registration and remaining direct execution surfaces; the registry already covers the first note-processing and utility batches, so the next real gap is the remaining automation-facing surfaces plus deeper notice/result/vault-write side-effect tightening rather than more wrapper moves
+- `src/main.ts` now mainly retains command registration and remaining direct execution surfaces; the registry already covers diagram/provider/config-profile plus process/generate/research/translation/extraction/utility batches, so the next real gap is the remaining selection-driven/export surfaces plus deeper notice/result/vault-write side-effect tightening rather than more wrapper moves
 
 ## Key Design Decisions
 

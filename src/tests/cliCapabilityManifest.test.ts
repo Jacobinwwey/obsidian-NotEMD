@@ -14,6 +14,11 @@ describe('CLI capability manifest', () => {
         expect(ids).toContain('notemd:run-developer-provider-diagnostic');
         expect(ids).toContain('notemd:notemd-generate-diagram');
         expect(ids).toContain('notemd:notemd-summarize-as-mermaid');
+        expect(ids).toContain('notemd:process-with-notemd');
+        expect(ids).toContain('notemd:process-folder-with-notemd');
+        expect(ids).toContain('notemd:generate-content-from-title');
+        expect(ids).toContain('notemd:batch-generate-content-from-titles');
+        expect(ids).toContain('notemd:research-and-summarize-topic');
         expect(ids).toContain('notemd:translate-file');
         expect(ids).toContain('notemd:batch-translate-folder');
         expect(ids).toContain('notemd:extract-concepts-from-current-file');
@@ -33,6 +38,11 @@ describe('CLI capability manifest', () => {
         const diagnostic = manifest.commands.find(command => command.id === 'notemd:test-llm-connection');
         const mermaid = manifest.commands.find(command => command.id === 'notemd:notemd-summarize-as-mermaid');
         const translateFile = manifest.commands.find(command => command.id === 'notemd:translate-file');
+        const processCurrent = manifest.commands.find(command => command.id === 'notemd:process-with-notemd');
+        const processFolder = manifest.commands.find(command => command.id === 'notemd:process-folder-with-notemd');
+        const generateFromTitle = manifest.commands.find(command => command.id === 'notemd:generate-content-from-title');
+        const batchGenerate = manifest.commands.find(command => command.id === 'notemd:batch-generate-content-from-titles');
+        const researchSummarize = manifest.commands.find(command => command.id === 'notemd:research-and-summarize-topic');
         const batchTranslate = manifest.commands.find(command => command.id === 'notemd:batch-translate-folder');
         const extractCurrent = manifest.commands.find(command => command.id === 'notemd:extract-concepts-from-current-file');
         const extractFolder = manifest.commands.find(command => command.id === 'notemd:batch-extract-concepts-from-folder');
@@ -65,6 +75,46 @@ describe('CLI capability manifest', () => {
             automationLevel: getSidebarActionAutomationLevel('test-llm-connection'),
             requiredContext: getSidebarActionRequiredContext('test-llm-connection'),
             sideEffectClass: getSidebarActionSideEffectClass('test-llm-connection')
+        }));
+
+        expect(processCurrent).toEqual(expect.objectContaining({
+            operationId: 'file.process-add-links',
+            automationLevel: getSidebarActionAutomationLevel('process-current-add-links'),
+            requiredContext: getSidebarActionRequiredContext('process-current-add-links'),
+            sideEffectClass: getSidebarActionSideEffectClass('process-current-add-links'),
+            mappingKind: 'exact'
+        }));
+
+        expect(processFolder).toEqual(expect.objectContaining({
+            operationId: 'file.process-folder-add-links',
+            automationLevel: getSidebarActionAutomationLevel('process-folder-add-links'),
+            requiredContext: getSidebarActionRequiredContext('process-folder-add-links'),
+            sideEffectClass: getSidebarActionSideEffectClass('process-folder-add-links'),
+            mappingKind: 'exact'
+        }));
+
+        expect(generateFromTitle).toEqual(expect.objectContaining({
+            operationId: 'content.generate-from-title',
+            automationLevel: getSidebarActionAutomationLevel('generate-from-title'),
+            requiredContext: getSidebarActionRequiredContext('generate-from-title'),
+            sideEffectClass: getSidebarActionSideEffectClass('generate-from-title'),
+            mappingKind: 'exact'
+        }));
+
+        expect(batchGenerate).toEqual(expect.objectContaining({
+            operationId: 'content.batch-generate-from-titles',
+            automationLevel: getSidebarActionAutomationLevel('batch-generate-from-titles'),
+            requiredContext: getSidebarActionRequiredContext('batch-generate-from-titles'),
+            sideEffectClass: getSidebarActionSideEffectClass('batch-generate-from-titles'),
+            mappingKind: 'exact'
+        }));
+
+        expect(researchSummarize).toEqual(expect.objectContaining({
+            operationId: 'research.summarize-topic',
+            automationLevel: getSidebarActionAutomationLevel('research-and-summarize'),
+            requiredContext: getSidebarActionRequiredContext('research-and-summarize'),
+            sideEffectClass: getSidebarActionSideEffectClass('research-and-summarize'),
+            mappingKind: 'exact'
         }));
 
         expect(translateFile).toEqual(expect.objectContaining({
