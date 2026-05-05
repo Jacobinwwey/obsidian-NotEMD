@@ -1,7 +1,6 @@
 import { getSystemPrompt } from './promptUtils';
 import { App, TFile, TFolder, Notice, Vault } from 'obsidian';
-import NotemdPlugin from './main';
-import { NotemdSettings, ProgressReporter } from './types';
+import { LLMProviderConfig, NotemdSettings, ProgressReporter, TaskKey } from './types';
 import { DEFAULT_SETTINGS } from './constants';
 import { normalizeNameForFilePath, splitContent, getProviderForTask, getModelForTask, delay, createConcurrentProcessor, chunkArray, retry } from './utils'; // Added delay import
 import { callLLM } from './llmUtils';
@@ -12,6 +11,13 @@ import mermaid from 'mermaid';
 import { formatI18n, getI18nStrings } from './i18n';
 import { resolveTaskLanguageName, shouldApplyAutoTranslation } from './i18n/taskLanguagePolicy';
 import { RenderArtifact } from './rendering/types';
+
+export interface ConceptExtractionPluginContext {
+    settings: NotemdSettings;
+    getProviderAndModelForTask: (
+        taskKey: Extract<TaskKey, 'extractConcepts' | 'extractOriginalText'>
+    ) => { provider: LLMProviderConfig; modelName: string };
+}
 
 // --- Backlink and Note Management ---
 
@@ -316,7 +322,7 @@ function formatRunningStatus(i18n: FileUtilsI18n, label: string): string {
  */
 export async function extractConceptsFromFile(
     app: App,
-    plugin: NotemdPlugin,
+    plugin: ConceptExtractionPluginContext,
     file: TFile,
     progressReporter: ProgressReporter
 ): Promise<Set<string>> {

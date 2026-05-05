@@ -1,7 +1,7 @@
 import { App, Editor, MarkdownView, Modal, Notice, Plugin, TFile, TFolder, PluginSettingTab, Setting, WorkspaceLeaf } from 'obsidian';
 import { NotemdSettings, ProgressReporter, LLMProviderConfig, TaskKey } from './types';
 import { DEFAULT_SETTINGS, NOTEMD_SIDEBAR_VIEW_TYPE, NOTEMD_SIDEBAR_ICON } from './constants';
-import { delay, createConcurrentProcessor, chunkArray, retry, normalizeNameForFilePath } from './utils';
+import { retry, normalizeNameForFilePath } from './utils';
 import { callLLM } from './llmUtils';
 import {
     handleFileRename,
@@ -28,10 +28,8 @@ import { WelcomeModal } from './ui/WelcomeModal';
 import { NotemdSettingTab } from './ui/NotemdSettingTab';
 import { showDeletionConfirmationModal } from './ui/modals'; // Import the modal function
 import { NotemdSidebarView } from './ui/NotemdSidebarView';
-import { translateFile, batchTranslateFolder } from './translate';
 import { BatchProgressStore } from './batchProgressStore';
 import { getSystemPrompt } from './promptUtils';
-import { extractOriginalText } from './extractOriginalText';
 import { formatI18n, getI18nStrings } from './i18n';
 import { resolveTaskLanguageCode } from './i18n/taskLanguagePolicy';
 import { getSidebarActionLabel, SidebarActionId } from './workflowButtons';
@@ -75,11 +73,17 @@ import {
 } from './operations/configProfileCommandHostAdapter';
 import {
     NoteProcessingCommandHost,
+    runBatchExtractConceptsForFolderCommandWithHost,
     runBatchGenerateContentForTitlesCommandWithHost,
+    runBatchTranslateFolderCommandWithHost,
+    runExtractConceptsAndGenerateTitlesCommandWithHost,
+    runExtractConceptsCommandWithHost,
+    runExtractOriginalTextCommandWithHost,
     runGenerateContentForTitleCommandWithHost,
     runProcessFolderWithNotemdCommandWithHost,
     runProcessWithNotemdCommandWithHost,
-    runResearchAndSummarizeCommandWithHost
+    runResearchAndSummarizeCommandWithHost,
+    runTranslateFileCommandWithHost
 } from './operations/noteProcessingCommandHostAdapter';
 
 type DiagramCommandExecutionMode = 'save-mermaid' | 'save-artifact' | 'preview-artifact';
@@ -212,6 +216,7 @@ export default class NotemdPlugin extends Plugin {
             getApp: () => this.app,
             loadSettings: () => this.loadSettings(),
             getSettings: () => this.settings,
+            getPluginRuntime: () => this,
             getActiveFile: () => {
                 const activeFile = this.app.workspace.getActiveFile();
                 return activeFile instanceof TFile ? activeFile : null;
@@ -226,6 +231,7 @@ export default class NotemdPlugin extends Plugin {
             },
             getFiles: () => this.app.vault.getFiles(),
             getFolderSelection: () => this.getFolderSelection(),
+            getTaskLanguageCode: (task) => resolveTaskLanguageCode(this.settings, task),
             resolveCompleteFolderPath: (sourceFolderPath) => this.resolveCompleteFolderPath(sourceFolderPath),
             getStepStatusText: (current, total, label) => this.getStepStatusText(current, total, label),
             currentProcessingFileBasename: this.currentProcessingFileBasename,
@@ -1391,119 +1397,11 @@ export default class NotemdPlugin extends Plugin {
     }
 
     async batchTranslateFolderCommand(folder?: TFolder, reporter?: ProgressReporter) {
-        if (this.isBusy) {
-            new Notice(this.getUiStrings().notices.notemdBusy);
-            return;
-        }
-        this.isBusy = true;
-        const useReporter = reporter || this.getReporter();
-        let i18n = this.getUiStrings();
-        const actionLabel = this.getActionLabel('batch-translate-folder');
-
-        const maybeSidebar = useReporter as any;
-        this.startReporterAction(useReporter, actionLabel);
-
-        try {
-            await this.loadSettings();
-            i18n = this.getUiStrings();
-            let targetFolder = folder;
-            if (!targetFolder) {
-                const folderPath = await this.getFolderSelection();
-                if (!folderPath) {
-                    throw new Error("Folder selection cancelled.");
-                }
-                const abstractFile = this.app.vault.getAbstractFileByPath(folderPath);
-                if (!(abstractFile instanceof TFolder)) {
-                    throw new Error("Invalid folder selected.");
-                }
-                targetFolder = abstractFile;
-            }
-            const resolvedTargetFolder = targetFolder as TFolder;
-
-            const translateLanguage = resolveTaskLanguageCode(this.settings, 'translate');
-            await batchTranslateFolder(this.app, this.settings, resolvedTargetFolder, translateLanguage);
-            if (!useReporter.cancelled) {
-                const mermaidFixTarget = (this.settings.useCustomTranslationSavePath && this.settings.translationSavePath)
-                    ? this.settings.translationSavePath
-                    : resolvedTargetFolder.path;
-                await this.maybeAutoFixMermaidForFolder(mermaidFixTarget, useReporter, 'batch translate folder');
-            }
-
-        } catch (error: unknown) {
-            let errorMessage = 'An unknown error occurred during batch translation.';
-            if (error instanceof Error) {
-                errorMessage = error.message;
-            }
-            if (!errorMessage.includes("cancelled")) {
-                new Notice(formatI18n(i18n.notices.batchTranslationFailedWithMessage, { message: errorMessage }), 10000);
-                this.openLocalizedErrorModal(i18n.errorModal.titles.batchTranslation, errorMessage);
-
-                // Save error log
-                await saveErrorLog(this.app, useReporter, error, this.settings);
-            }
-            useReporter.log(`Error: ${errorMessage}`);
-            this.failReporterAction(useReporter, errorMessage);
-        } finally {
-            if (maybeSidebar instanceof NotemdSidebarView) {
-                maybeSidebar.finishProcessing();
-            }
-            this.isBusy = false;
-        }
+        await runBatchTranslateFolderCommandWithHost(this.createNoteProcessingCommandHost(), reporter, folder);
     }
 
     async translateFileCommand(file: TFile, signal?: AbortSignal, reporter?: ProgressReporter) {
-        if (this.isBusy) {
-            new Notice(this.getUiStrings().notices.notemdBusy);
-            return;
-        }
-        this.isBusy = true;
-        const useReporter = reporter || this.getReporter();
-        let i18n = this.getUiStrings();
-        const actionLabel = this.getActionLabel('translate-current-file');
-
-        const maybeSidebar = useReporter as any;
-        this.startReporterAction(useReporter, `${actionLabel}: ${file.name}`);
-
-        try {
-            await this.loadSettings();
-            i18n = this.getUiStrings();
-            const translateLanguage = resolveTaskLanguageCode(this.settings, 'translate');
-            const outputPath = await translateFile(this.app, this.settings, file, translateLanguage, useReporter, true, signal);
-            if (outputPath && this.settings.autoMermaidFixAfterGenerate) {
-                const outputFile = this.app.vault.getAbstractFileByPath(outputPath);
-                if (outputFile instanceof TFile) {
-                    await this.maybeAutoFixMermaidForFile(outputFile, useReporter, 'translate current file');
-                }
-            }
-
-            // Update status and progress on success
-            this.updateStatusBar(this.getActionCompleteText(actionLabel));
-            useReporter.log("Translation complete.");
-            useReporter.updateStatus(this.getActionCompleteText(actionLabel), 100);
-
-        } catch (error: unknown) {
-            let errorMessage = 'An unknown error occurred during translation.';
-            let errorDetails = String(error);
-            if (error instanceof Error) {
-                errorMessage = error.message;
-                errorDetails = error.stack || error.message;
-            }
-            if (!errorMessage.includes("cancelled by user")) {
-                console.error("Translation Error:", errorDetails);
-                new Notice(formatI18n(i18n.notices.failedTranslateFileWithMessage, { message: errorMessage }), 10000);
-                this.openLocalizedErrorModal(i18n.errorModal.titles.translation, errorDetails);
-
-                // Save error log
-                await saveErrorLog(this.app, useReporter, error, this.settings);
-            }
-            useReporter.log(`Error: ${errorMessage}`);
-            this.failReporterAction(useReporter, errorMessage);
-        } finally {
-            if (maybeSidebar instanceof NotemdSidebarView) {
-                maybeSidebar.finishProcessing();
-            }
-            this.isBusy = false;
-        }
+        await runTranslateFileCommandWithHost(this.createNoteProcessingCommandHost(), file, signal, reporter);
     }
 
     async summarizeToMermaidCommand(file: TFile, reporter: ProgressReporter) {
@@ -1705,347 +1603,19 @@ export default class NotemdPlugin extends Plugin {
     }
 
     async extractConceptsCommand(reporter?: ProgressReporter) {
-        if (this.isBusy) { new Notice(this.getUiStrings().notices.notemdBusy); return; }
-        this.isBusy = true;
-        const useReporter = reporter || this.getReporter();
-        let i18n = this.getUiStrings();
-        const actionLabel = this.getActionLabel('extract-concepts-current');
-
-        const maybeSidebar = useReporter as any;
-        this.startReporterAction(useReporter, actionLabel);
-
-        try {
-            await this.loadSettings();
-            i18n = this.getUiStrings();
-            const activeFile = this.app.workspace.getActiveFile();
-            if (!activeFile || !(activeFile instanceof TFile) || (activeFile.extension !== 'md' && activeFile.extension !== 'txt')) {
-                throw new Error("No active '.md' or '.txt' file to extract concepts from.");
-            }
-
-            this.updateStatusBar(this.getRunningActionText(`${actionLabel}: ${activeFile.name}`));
-
-            const concepts = await extractConceptsFromFile(this.app, this, activeFile, useReporter);
-
-            if (concepts.size > 0) {
-                useReporter.log(`Found ${concepts.size} concepts. Creating concept notes...`);
-                await createConceptNotes(
-                    this.app,
-                    this.settings,
-                    concepts,
-                    activeFile.basename, // Pass the basename of the active file
-                    {
-                        disableBacklink: !this.settings.extractConceptsAddBacklink,
-                        minimalTemplate: this.settings.extractConceptsMinimalTemplate
-                    }
-                );
-                useReporter.updateStatus(this.getActionCompleteText(actionLabel), 100);
-                new Notice(formatI18n(i18n.notices.conceptExtractionSuccess, { count: concepts.size }));
-            } else {
-                useReporter.updateStatus(i18n.notices.noConceptsFoundToExtract, 100);
-                new Notice(i18n.notices.noConceptsFoundToExtract);
-            }
-
-            if (useReporter instanceof ProgressModal) setTimeout(() => useReporter.close(), 2000);
-
-        } catch (error: unknown) {
-            let errorMessage = 'An unknown error occurred during concept extraction.';
-            if (error instanceof Error) {
-                errorMessage = error.message;
-            }
-            if (!errorMessage.includes("cancelled by user")) {
-                new Notice(formatI18n(i18n.notices.conceptExtractionError, { message: errorMessage }), 10000);
-                this.openLocalizedErrorModal(i18n.errorModal.titles.conceptExtraction, errorMessage);
-
-                // Save error log
-                await saveErrorLog(this.app, useReporter, error, this.settings);
-            }
-            useReporter.log(`Error: ${errorMessage}`);
-            this.failReporterAction(useReporter, errorMessage);
-        } finally {
-            if (maybeSidebar instanceof NotemdSidebarView) {
-                maybeSidebar.finishProcessing();
-            }
-            this.isBusy = false;
-        }
+        await runExtractConceptsCommandWithHost(this.createNoteProcessingCommandHost(), reporter);
     }
 
     async batchExtractConceptsForFolderCommand(reporter?: ProgressReporter) {
-        if (this.isBusy) { new Notice(this.getUiStrings().notices.notemdBusy); return; }
-        this.isBusy = true;
-        const useReporter = reporter || this.getReporter();
-        let i18n = this.getUiStrings();
-        const actionLabel = this.getActionLabel('extract-concepts-folder');
-
-        const maybeSidebar = useReporter as any;
-        this.startReporterAction(useReporter, actionLabel);
-
-        try {
-            await this.loadSettings();
-            i18n = this.getUiStrings();
-            const folderPath = await this.getFolderSelection();
-            if (!folderPath) { throw new Error("Folder selection cancelled."); }
-
-            const folder = this.app.vault.getAbstractFileByPath(folderPath);
-            if (!folder || !(folder instanceof TFolder)) throw new Error(`Invalid folder selected: ${folderPath}`);
-
-            const files = this.app.vault.getFiles().filter(f =>
-                (f.extension === 'md' || f.extension === 'txt') &&
-                (f.path.startsWith(folderPath === '/' ? '' : folderPath + '/'))
-            );
-
-            if (files.length === 0) {
-                new Notice(formatI18n(i18n.notices.noMarkdownOrTextFilesFoundSelectedFolder, { folderPath }));
-                return;
-            }
-
-            this.updateStatusBar(this.getRunningActionText(actionLabel));
-            useReporter.log(this.getRunningActionText(actionLabel));
-            const errors: { file: string; message: string }[] = [];
-            let totalConcepts = 0;
-
-            if (!this.settings.enableBatchParallelism || this.settings.batchConcurrency <= 1) {
-                for (let i = 0; i < files.length; i++) {
-                    const file = files[i];
-                    if (useReporter.cancelled) { new Notice(i18n.notices.batchExtractionCancelled); break; }
-
-                    const progress = Math.floor(((i) / files.length) * 100);
-                    useReporter.updateStatus(this.getStepStatusText(i + 1, files.length, file.name), progress);
-
-                    try {
-                        const concepts = await extractConceptsFromFile(this.app, this, file, useReporter);
-                        if (concepts.size > 0) {
-                            totalConcepts += concepts.size;
-                            await createConceptNotes(
-                                this.app,
-                                this.settings,
-                                concepts,
-                                file.basename, // Pass the basename of the current file
-                                {
-                                    disableBacklink: !this.settings.extractConceptsAddBacklink,
-                                    minimalTemplate: this.settings.extractConceptsMinimalTemplate
-                                }
-                            );
-                        }
-                    } catch (fileError: unknown) {
-                        const message = fileError instanceof Error ? fileError.message : String(fileError);
-                        errors.push({ file: file.name, message: message });
-                        useReporter.log(`❌ Error processing ${file.name}: ${message}`);
-                        if (message.includes("cancelled by user")) break;
-                    }
-                }
-            } else {
-                const concurrency = Math.min(this.settings.batchConcurrency, 20); // Cap
-                const processor = createConcurrentProcessor(concurrency, this.settings.apiCallIntervalMs, useReporter);
-                const fileBatches = chunkArray(files, this.settings.batchSize);
-                let processedCount = 0;
-
-                for (let b = 0; b < fileBatches.length; b++) {
-                    const batch = fileBatches[b];
-                    useReporter.log(`Processing batch ${b + 1}/${fileBatches.length} (${batch.length} files)`);
-                    if (useReporter.cancelled) break;
-
-                    const tasks = batch.map(file => async () => {
-                        const fileProgressReporter: ProgressReporter = {
-                            log: (msg: string) => useReporter.log(`[${file.name}] ${msg}`),
-                            updateStatus: (msg: string, percentage?: number) => {
-                                if (percentage !== undefined) {
-                                    const overallProgress = Math.floor(((processedCount + (percentage / 100)) / files.length) * 100);
-                                    useReporter.updateStatus(
-                                        this.getStepStatusText(processedCount, files.length, `${file.name}: ${msg}`),
-                                        overallProgress
-                                    );
-                                } else {
-                                    useReporter.updateStatus(this.getStepStatusText(processedCount, files.length, `${file.name}: ${msg}`));
-                                }
-                            },
-                            cancelled: useReporter.cancelled,
-                            requestCancel: () => useReporter.requestCancel(),
-                            clearDisplay: () => { },
-                            abortController: useReporter.abortController,
-                            activeTasks: useReporter.activeTasks,
-                            updateActiveTasks: (delta: number) => useReporter.updateActiveTasks(delta),
-                        };
-
-                        try {
-                            const concepts = await extractConceptsFromFile(this.app, this, file, fileProgressReporter);
-                            if (concepts.size > 0) {
-                                totalConcepts += concepts.size;
-                                await createConceptNotes(
-                                    this.app,
-                                    this.settings,
-                                    concepts,
-                                    file.basename, // Pass the basename of the current file
-                                    {
-                                        disableBacklink: !this.settings.extractConceptsAddBacklink,
-                                        minimalTemplate: this.settings.extractConceptsMinimalTemplate
-                                    }
-                                );
-                            }
-                            return { file, success: true };
-                        } catch (e: unknown) {
-                            const errorMessage = e instanceof Error ? e.message : String(e);
-                            fileProgressReporter.log(`❌ Error processing ${file.name}: ${errorMessage}`);
-                            return { file, success: false, error: e };
-                        }
-                    });
-
-                    const results = await processor(tasks);
-                    processedCount += batch.length;
-
-                    results.forEach(r => {
-                        const result = r as { success: boolean; file: TFile; error?: any };
-                        if (!result.success && result.error) {
-                            const errorMessage = result.error.message || String(result.error);
-                            errors.push({ file: result.file.name, message: errorMessage });
-                        }
-                    });
-
-                    if (useReporter.cancelled) {
-                        useReporter.log('Cancellation requested, stopping batch processing.');
-                        break;
-                    }
-
-                    if (this.settings.batchInterDelayMs > 0 && b < fileBatches.length - 1) {
-                        useReporter.log(`Delaying for ${this.settings.batchInterDelayMs}ms before next batch...`);
-                        await delay(this.settings.batchInterDelayMs);
-                    }
-                }
-            }
-
-
-            if (!useReporter.cancelled) {
-                if (errors.length > 0) {
-                    const errorSummary = formatI18n(i18n.notices.batchExtractionFinishedWithErrors, { count: errors.length });
-                    useReporter.log(`⚠️ ${errorSummary}`);
-                    useReporter.updateStatus(errorSummary, -1);
-                    new Notice(errorSummary, 10000);
-                } else {
-                    const successMessage = formatI18n(i18n.notices.batchExtractionSuccess, {
-                        concepts: totalConcepts,
-                        files: files.length
-                    });
-                    useReporter.updateStatus(successMessage, 100);
-                    new Notice(successMessage);
-                    if (useReporter instanceof ProgressModal) setTimeout(() => useReporter.close(), 2000);
-                }
-            }
-
-        } catch (error: unknown) {
-            let errorMessage = 'An unknown error occurred during batch extraction.';
-            if (error instanceof Error) {
-                errorMessage = error.message;
-            }
-            if (!errorMessage.includes("cancelled")) {
-                new Notice(formatI18n(i18n.notices.batchExtractionError, { message: errorMessage }), 10000);
-                this.openLocalizedErrorModal(i18n.errorModal.titles.batchConceptExtraction, errorMessage);
-
-                // Save error log
-                await saveErrorLog(this.app, useReporter, error, this.settings);
-            }
-            useReporter.log(`Batch Error: ${errorMessage}`);
-            this.failReporterAction(useReporter, errorMessage);
-        } finally {
-            if (maybeSidebar instanceof NotemdSidebarView) {
-                maybeSidebar.finishProcessing();
-            }
-            this.isBusy = false;
-        }
+        await runBatchExtractConceptsForFolderCommandWithHost(this.createNoteProcessingCommandHost(), reporter);
     }
 
     async extractConceptsAndGenerateTitlesCommand(reporter?: ProgressReporter) {
-        if (this.isBusy) {
-            new Notice(this.getUiStrings().notices.notemdBusy);
-            return;
-        }
-        this.isBusy = true;
-        const useReporter = reporter || this.getReporter();
-        let i18n = this.getUiStrings();
-        const commandLabel = i18n.commands.extractConceptsAndGenerateTitles;
-
-        const maybeSidebar = useReporter as any;
-        this.startReporterAction(useReporter, commandLabel);
-
-        try {
-            await this.extractConceptsCommand(useReporter);
-
-            if (this.settings.useCustomConceptNoteFolder && this.settings.conceptNoteFolder) {
-                const conceptFolder = this.app.vault.getAbstractFileByPath(this.settings.conceptNoteFolder);
-                if (conceptFolder instanceof TFolder) {
-                    await this.batchGenerateContentForTitlesCommand(useReporter);
-                } else {
-                    throw new Error("Concept note folder not found.");
-                }
-            } else {
-                throw new Error("Concept note folder not set.");
-            }
-
-        } catch (error: unknown) {
-            let errorMessage = 'An unknown error occurred during the process.';
-            if (error instanceof Error) {
-                errorMessage = error.message;
-            }
-            if (!errorMessage.includes("cancelled")) {
-                new Notice(formatI18n(i18n.notices.genericErrorSeeConsoleForDetails, { message: errorMessage }), 10000);
-                this.openLocalizedErrorModal(i18n.errorModal.titles.generic, errorMessage);
-
-                // Save error log
-                await saveErrorLog(this.app, useReporter, error, this.settings);
-            }
-            useReporter.log(`Error: ${errorMessage}`);
-            this.failReporterAction(useReporter, errorMessage);
-        } finally {
-            if (maybeSidebar instanceof NotemdSidebarView) {
-                maybeSidebar.finishProcessing();
-            }
-            this.isBusy = false;
-        }
+        await runExtractConceptsAndGenerateTitlesCommandWithHost(this.createNoteProcessingCommandHost(), reporter);
     }
 
     async extractOriginalTextCommand(reporter?: ProgressReporter) {
-        if (this.isBusy) {
-            new Notice(this.getUiStrings().notices.notemdBusy);
-            return;
-        }
-        this.isBusy = true;
-        const useReporter = reporter || this.getReporter();
-        let i18n = this.getUiStrings();
-        const actionLabel = this.getActionLabel('extract-original-text');
-
-        const maybeSidebar = useReporter as any;
-        this.startReporterAction(useReporter, actionLabel);
-
-        try {
-            await this.loadSettings();
-            i18n = this.getUiStrings();
-            const activeFile = this.app.workspace.getActiveFile();
-            if (!activeFile || !(activeFile instanceof TFile) || (activeFile.extension !== 'md' && activeFile.extension !== 'txt')) {
-                throw new Error("No active '.md' or '.txt' file to process.");
-            }
-
-            await extractOriginalText(this.app, this, activeFile, useReporter);
-
-            useReporter.updateStatus(this.getActionCompleteText(actionLabel), 100);
-
-        } catch (error: unknown) {
-            let errorMessage = 'An unknown error occurred during extraction.';
-            if (error instanceof Error) {
-                errorMessage = error.message;
-            }
-            if (!errorMessage.includes("cancelled")) {
-                new Notice(formatI18n(i18n.notices.genericErrorSeeConsoleForDetails, { message: errorMessage }), 10000);
-                this.openLocalizedErrorModal(i18n.errorModal.titles.extraction, errorMessage);
-
-                // Save error log
-                await saveErrorLog(this.app, useReporter, error, this.settings);
-            }
-            useReporter.log(`Error: ${errorMessage}`);
-            this.failReporterAction(useReporter, errorMessage);
-        } finally {
-            if (maybeSidebar instanceof NotemdSidebarView) {
-                maybeSidebar.finishProcessing();
-            }
-            this.isBusy = false;
-        }
+        await runExtractOriginalTextCommandWithHost(this.createNoteProcessingCommandHost(), reporter);
     }
 
 } // End of NotemdPlugin class

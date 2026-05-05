@@ -14,7 +14,7 @@ topic: progress-audit-next-direction
 - `docs/brainstorms/2026-05-03-mainline-stabilization-and-ci-hardening-requirements.zh-CN.md`
 - `docs/brainstorms/2026-05-03-drawnix-feasibility-and-integration-direction.zh-CN.md`
 
-## 仓库事实校正（2026-05-04）
+## 仓库事实校正（2026-05-05）
 
 这次审计重点不是重新设计 diagram platform，而是把“代码真实状态、远端 workflow、进度文档、外部参考项目结论”重新对齐。以下几项必须明确写清：
 
@@ -120,7 +120,10 @@ topic: progress-audit-next-direction
 - config/profile host adapter 也已落地：`src/operations/configProfileCommandHostAdapter.ts` 现在承接导入导出状态持久化、CLI 导出 notice 整形与导入导出错误映射，`src/main.ts` 也不再内联持有这组 CLI 邻接编排。
 - provider connection-test host adapter 也已落地：`src/operations/providerConnectionTestCommandHostAdapter.ts` 现在已同时承接 `test-llm-connection` 与设置页 provider 测试流，两个表面都不再各自保留平行的 `testAPI` 编排。
 - note-processing host adapter 第一批也已落地：`src/operations/noteProcessingCommandHostAdapter.ts` 现在已承接 `process-current-add-links`、`process-folder-add-links`、`batch-generate-from-titles`、`generate-from-title` 与 `research-and-summarize` 的 busy-guard、reporter 生命周期、notice/error-log 编排，`src/main.ts` 不再内联保留这批命令包装。
-- 剩余架构缺口进一步收窄：`src/main.ts` 现在主要还保留命令注册，以及翻译/抽取类命令等更广义的非 CLI 交互与批处理宿主副作用，这比此前 save/preview-heavy 的 command wrapper 更适合作为下一批抽离 seam。
+- note-processing host adapter 第二批也已落地：同一文件现在已继续承接 `translate-current-file`、`batch-translate-folder`、`extract-concepts-current`、`extract-concepts-folder`、`extract-original-text` 与 `extract-concepts-and-generate-titles` 的 command-host 编排，`src/main.ts` 里的翻译/抽取 wrapper 现已收缩为 delegator。
+- 组合命令的真实行为也已对齐：`extract-concepts-and-generate-titles` 不再被外层 `isBusy` 自己拦住，也不再忽略配置中的概念目录。
+- `src/fileUtils.ts` 与 `src/extractOriginalText.ts` 现在都接受更窄的 runtime context，而不是直接依赖具体 `NotemdPlugin` 类。这说明边界已经开始从“抽 wrapper”推进到“削弱 utility 对宿主类的类型耦合”。
+- 剩余架构缺口因此再次转移：下一批不应继续停留在 `src/main.ts` wrapper 搬运，而应优先处理 note-processing operation registry onboarding、translation/extraction utility side-effect 收口，以及 `duplicate` / `batch Mermaid fix` / `formula fix` 这类仍在 `src/main.ts` 内联持有的命令编排。
 
 ## 当前验证门
 
@@ -187,19 +190,22 @@ topic: progress-audit-next-direction
 5. **工作区卫生保持**
    `ref/` 与 `coverage/` 应视为本地分析 / 构建产物，而不是待提交内容。主线需要持续保持干净工作树。
 
-6. **继续把 host adapter 从 `src/main.ts` 拆出去**
-   save/preview、第一批 config/profile、provider test，以及 `process-current-add-links` / `process-folder-add-links` / `batch-generate-from-titles` / `generate-from-title` / `research-and-summarize` slice 已从“计划”变成“现实”。下一步应继续把翻译/抽取类命令与未来 CLI host wiring 从 `src/main.ts` 中剥离，避免 registry 停在元数据与执行核心抽离的半程状态。
+6. **把下一阶段重心转到 registry 与 utility 边界**
+   翻译/抽取类命令 wrapper 已不再是主缺口。下一步应优先把 note-processing 能力纳入 `src/operations/registry.ts` / `src/operations/capabilityManifest.ts` / `src/cliContracts.ts`，并继续收紧 `src/translate.ts`、`src/fileUtils.ts`、`src/extractOriginalText.ts` 中的 `ProgressModal` / `Notice` / vault 写入等宿主副作用边界。
+
+7. **继续清空剩余高价值 inline command host**
+   `checkAndRemoveDuplicateConceptNotesCommand`、`batchMermaidFixCommand`、`fixFormulaFormatsCommand` 与 `batchFixFormulaFormatsCommand` 现在是 `src/main.ts` 中最值得继续抽离的命令编排热点，比继续搬运已经瘦身的翻译/抽取 wrapper 更有价值。
 
 ### 建议落地顺序
 
 结合 roadmap 原始长期意图与当前代码现实，最稳妥的未来落地顺序应为：
 
-1. 先把命令表面 canonical 化
-2. 再把维护者本地语义核验 runbook 正式落盘
-3. 然后收紧重型运行时的打包边界
-4. 完成围绕新 operation registry 的 host-adapter 抽离
-5. 完成以上四项后，再重开 legacy prompt 退役与 MermaidProcessor sunset
-6. 最后才重新评估 board-style export、高级引擎探索，或更丰富的 first-class CLI command 暴露
+1. 先把 note-processing operation 纳入 registry / capability / contract
+2. 再把 translation/extraction utility 的宿主副作用继续显式化
+3. 然后清空 `duplicate` / `batch Mermaid fix` / `formula fix` 等剩余高价值 inline command host
+4. 在以上三项稳定后，再继续维护者本地语义核验与重型运行时打包边界的后续硬化
+5. 完成这些边界工作后，再重开 legacy prompt 退役、MermaidProcessor sunset，或更丰富的 first-class CLI command 暴露
+6. 最后才重新评估 board-style export 与高级引擎探索
 
 这个顺序既保留了 roadmap 的长期目标，也尊重了当前主线已经交付的事实。
 
