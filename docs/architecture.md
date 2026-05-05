@@ -236,7 +236,8 @@ The gap is smaller than before:
 - `src/operations/configProfileCommands.ts` now carries provider-profile import/export plus CLI capability/contract export orchestration below the command layer
 - `src/operations/providerDiagnosticReportPersistence.ts` now carries collision-safe provider-diagnostic report file creation below the command layer
 - `src/operations/providerDiagnosticCommandHostAdapter.ts` now carries developer-diagnostic host loading, report-persistence wiring, and notice shaping below the command layer
-- `src/main.ts` now mainly retains command registration plus a smaller set of config/profile state persistence and other user-surface host effects, which is the next extraction target
+- `src/operations/configProfileCommandHostAdapter.ts` now carries config/profile state persistence, CLI export notice shaping, and import/export error mapping below the command layer
+- `src/main.ts` now mainly retains command registration plus broader non-CLI interactive and batch host effects, which is the next extraction target
 
 ## Key Design Decisions
 
@@ -250,7 +251,7 @@ The gap is smaller than before:
 ## Verification
 
 - `npm run build` — TypeScript compilation + esbuild bundle
-- `npm test -- --runInBand` — 124 suites, 782 tests
+- `npm test -- --runInBand` — 125 suites, 788 tests
 - `npm run audit:i18n-ui` — No hardcoded UI strings
 - `npm run audit:render-host` — Render host self-contained in main.js
 - `git diff --check` — Whitespace hygiene

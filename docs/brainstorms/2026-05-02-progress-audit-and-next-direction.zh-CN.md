@@ -117,7 +117,8 @@ topic: progress-audit-next-direction
 - 第一批 config/profile slice 也已落地：`src/operations/configProfileCommands.ts` 现在承接 provider profile 导入导出与 CLI capability/contract 导出编排，设置页不再保留一套平行实现。
 - provider diagnostic report persistence 也已落地：`src/operations/providerDiagnosticReportPersistence.ts` 现在承接带冲突规避的诊断报告文件创建逻辑，`src/main.ts` 不再内联持有这套路径策略。
 - provider diagnostic host adapter 也已落地：`src/operations/providerDiagnosticCommandHostAdapter.ts` 现在承接开发者诊断命令的 settings 装载、报告落盘接线与面向用户的 notice 整形，`src/main.ts` 不再内联持有这套编排。
-- 剩余架构缺口进一步收窄：`src/main.ts` 现在主要还保留命令注册，以及 config/profile 状态持久化和其他面向用户的宿主副作用，这比此前 save/preview-heavy 的 command wrapper 更适合作为下一批抽离 seam。
+- config/profile host adapter 也已落地：`src/operations/configProfileCommandHostAdapter.ts` 现在承接导入导出状态持久化、CLI 导出 notice 整形与导入导出错误映射，`src/main.ts` 也不再内联持有这组 CLI 邻接编排。
+- 剩余架构缺口进一步收窄：`src/main.ts` 现在主要还保留命令注册，以及更广义的非 CLI 交互与批处理宿主副作用，这比此前 save/preview-heavy 的 command wrapper 更适合作为下一批抽离 seam。
 
 ## 当前验证门
 
