@@ -43,7 +43,6 @@ import { RenderArtifact } from './rendering/types';
 import { IframeRenderHost } from './rendering/host/iframeRenderHost';
 import { getRenderTargetDisplayName } from './rendering/targetLabel';
 import { supportsDiagramPreviewModal } from './ui/diagramPreview';
-import { buildProviderDiagnosticFileName } from './providerDiagnostics';
 import {
     executeProviderDiagnosticCommand,
     executeProviderDiagnosticStabilityCommand,
@@ -64,6 +63,10 @@ import {
     MissingProviderProfileImportFileError,
     PluginConfigCommandHost
 } from './operations/configProfileCommands';
+import {
+    persistProviderDiagnosticReport,
+    ProviderDiagnosticReportHost
+} from './operations/providerDiagnosticReportPersistence';
 
 type DiagramCommandExecutionMode = 'save-mermaid' | 'save-artifact' | 'preview-artifact';
 
@@ -145,6 +148,15 @@ export default class NotemdPlugin extends Plugin {
         };
     }
 
+    private createProviderDiagnosticReportHost(): ProviderDiagnosticReportHost {
+        return {
+            exists: (path) => this.app.vault.adapter.exists(path),
+            create: async (path, content) => {
+                await this.app.vault.create(path, content);
+            }
+        };
+    }
+
     private getDiagramCommandActionLabel(executionMode: DiagramCommandExecutionMode, i18n = this.getUiStrings()): string {
         switch (executionMode) {
             case 'save-mermaid':
@@ -178,19 +190,6 @@ export default class NotemdPlugin extends Plugin {
             return 1;
         }
         return Math.min(normalized, 10);
-    }
-
-    private async saveProviderDiagnosticReport(providerName: string, reportContent: string): Promise<string> {
-        const baseFileName = buildProviderDiagnosticFileName(providerName, new Date());
-        const existing = this.app.vault.getAbstractFileByPath(baseFileName);
-
-        if (existing instanceof TFile) {
-            await this.app.vault.modify(existing, reportContent);
-            return existing.path;
-        }
-
-        const created = await this.app.vault.create(baseFileName, reportContent);
-        return created.path;
     }
 
     private registerEditorDiagramCommand(
@@ -1307,7 +1306,11 @@ export default class NotemdPlugin extends Plugin {
                 settings: this.settings,
                 sanitizeTimeoutMs: (rawValue) => this.sanitizeDeveloperDiagnosticTimeoutMs(rawValue),
                 sanitizeRuns: (rawValue) => this.sanitizeDeveloperDiagnosticRuns(rawValue),
-                saveReport: (providerName, reportContent) => this.saveProviderDiagnosticReport(providerName, reportContent)
+                saveReport: (providerName, reportContent) => persistProviderDiagnosticReport({
+                    providerName,
+                    reportContent,
+                    host: this.createProviderDiagnosticReportHost()
+                })
             });
 
             if (execution.result.success) {
@@ -1340,7 +1343,11 @@ export default class NotemdPlugin extends Plugin {
                 settings: this.settings,
                 sanitizeTimeoutMs: (rawValue) => this.sanitizeDeveloperDiagnosticTimeoutMs(rawValue),
                 sanitizeRuns: (rawValue) => this.sanitizeDeveloperDiagnosticRuns(rawValue),
-                saveReport: (providerName, reportContent) => this.saveProviderDiagnosticReport(providerName, reportContent)
+                saveReport: (providerName, reportContent) => persistProviderDiagnosticReport({
+                    providerName,
+                    reportContent,
+                    host: this.createProviderDiagnosticReportHost()
+                })
             });
 
             new Notice(

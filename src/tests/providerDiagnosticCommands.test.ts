@@ -3,6 +3,7 @@ import { mockApp } from './__mocks__/app';
 import { mockSettings } from './__mocks__/settings';
 import * as providerDiagnosticCommand from '../operations/providerDiagnosticCommand';
 import * as configProfileCommands from '../operations/configProfileCommands';
+import * as providerDiagnosticReportPersistence from '../operations/providerDiagnosticReportPersistence';
 
 function createManifest() {
     return {
@@ -62,26 +63,32 @@ describe('provider diagnostic command surface', () => {
             _firstLaunch: false
         };
         plugin.loadSettings = jest.fn().mockResolvedValue(undefined);
+        const reportSpy = jest
+            .spyOn(providerDiagnosticReportPersistence, 'persistProviderDiagnosticReport')
+            .mockResolvedValue('vault/diag.txt');
 
-        const commandSpy = jest.spyOn(providerDiagnosticCommand, 'executeProviderDiagnosticCommand').mockResolvedValue({
-            input: {
-                providerName: 'DeepSeek',
-                model: mockSettings.providers[0].model,
-                callMode: 'runtime-stable',
-                timeoutMs: mockSettings.developerDiagnosticTimeoutMs,
-                stabilityRuns: mockSettings.developerDiagnosticStabilityRuns
-            },
-            provider: mockSettings.providers[0],
-            reportPath: 'vault/diag.txt',
-            result: {
-                success: true,
-                elapsedMs: 1,
-                callMode: 'runtime-stable',
-                requestedCallMode: 'runtime-stable',
-                logs: [],
-                report: 'ok'
-            }
-        } as any);
+        const commandSpy = jest.spyOn(providerDiagnosticCommand, 'executeProviderDiagnosticCommand').mockImplementation(async (params: any) => {
+            const reportPath = await params.saveReport('DeepSeek', 'ok');
+            return {
+                input: {
+                    providerName: 'DeepSeek',
+                    model: mockSettings.providers[0].model,
+                    callMode: 'runtime-stable',
+                    timeoutMs: mockSettings.developerDiagnosticTimeoutMs,
+                    stabilityRuns: mockSettings.developerDiagnosticStabilityRuns
+                },
+                provider: mockSettings.providers[0],
+                reportPath,
+                result: {
+                    success: true,
+                    elapsedMs: 1,
+                    callMode: 'runtime-stable',
+                    requestedCallMode: 'runtime-stable',
+                    logs: [],
+                    report: 'ok'
+                }
+            };
+        });
 
         await (plugin as any).runDeveloperProviderDiagnosticCommand();
 
@@ -92,6 +99,62 @@ describe('provider diagnostic command surface', () => {
                 sanitizeTimeoutMs: expect.any(Function)
             })
         );
+        expect(reportSpy).toHaveBeenCalledWith(expect.objectContaining({
+            providerName: 'DeepSeek',
+            reportContent: 'ok'
+        }));
+    });
+
+    test('developer stability diagnostic delegates persistence to extracted report operation', async () => {
+        const plugin = new NotemdPlugin(mockApp, createManifest() as any);
+        plugin.app = mockApp;
+        (plugin as any).manifest = createManifest();
+        plugin.settings = {
+            ...mockSettings,
+            enableDeveloperMode: true,
+            _firstLaunch: false
+        };
+        plugin.loadSettings = jest.fn().mockResolvedValue(undefined);
+        const reportSpy = jest
+            .spyOn(providerDiagnosticReportPersistence, 'persistProviderDiagnosticReport')
+            .mockResolvedValue('vault/stability.txt');
+
+        const commandSpy = jest.spyOn(providerDiagnosticCommand, 'executeProviderDiagnosticStabilityCommand').mockImplementation(async (params: any) => {
+            const reportPath = await params.saveReport('DeepSeek_stability', 'stable');
+            return {
+                input: {
+                    providerName: 'DeepSeek',
+                    model: mockSettings.providers[0].model,
+                    callMode: 'runtime-stable',
+                    timeoutMs: mockSettings.developerDiagnosticTimeoutMs,
+                    stabilityRuns: mockSettings.developerDiagnosticStabilityRuns
+                },
+                provider: mockSettings.providers[0],
+                reportPath,
+                result: {
+                    runs: 3,
+                    callMode: 'runtime-stable',
+                    requestedCallMode: 'runtime-stable',
+                    successCount: 3,
+                    failureCount: 0,
+                    totalElapsedMs: 10,
+                    runResults: [],
+                    report: 'stable'
+                }
+            };
+        });
+
+        await (plugin as any).runDeveloperProviderStabilityDiagnosticCommand();
+
+        expect(commandSpy).toHaveBeenCalledWith(expect.objectContaining({
+            settings: expect.objectContaining({ activeProvider: 'DeepSeek' }),
+            saveReport: expect.any(Function),
+            sanitizeRuns: expect.any(Function)
+        }));
+        expect(reportSpy).toHaveBeenCalledWith(expect.objectContaining({
+            providerName: 'DeepSeek_stability',
+            reportContent: 'stable'
+        }));
     });
 
     test('provider profile export command delegates to extracted config/profile operation', async () => {
