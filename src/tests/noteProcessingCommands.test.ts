@@ -5,6 +5,8 @@ import { mockApp } from './__mocks__/app';
 import { mockSettings } from './__mocks__/settings';
 import * as fileUtils from '../fileUtils';
 import * as searchUtils from '../searchUtils';
+import * as translateUtils from '../translate';
+import * as extractOriginalTextModule from '../extractOriginalText';
 
 function createManifest() {
     return {
@@ -249,6 +251,147 @@ describe('note processing command surface', () => {
             sourceFolderPath: 'Concepts',
             completeFolderPath: 'Concepts_complete'
         });
+        expect(utilitySpy).not.toHaveBeenCalled();
+    });
+
+    test('translate current file command delegates to extracted note-processing host adapter', async () => {
+        const noteProcessingCommandHostAdapter = require('../operations/noteProcessingCommandHostAdapter');
+        const plugin = createPlugin();
+        const reporter = createReporter();
+        const file = Object.assign(new (TFile as any)(), {
+            name: 'Topic.md',
+            basename: 'Topic',
+            path: 'Notes/Topic.md',
+            extension: 'md'
+        });
+
+        const hostSpy = jest
+            .spyOn(noteProcessingCommandHostAdapter, 'runTranslateFileCommandWithHost')
+            .mockResolvedValue(undefined);
+        const utilitySpy = jest
+            .spyOn(translateUtils, 'translateFile')
+            .mockResolvedValue('Translations/Topic_en.md');
+
+        await (plugin as any).translateFileCommand(file, reporter.abortController?.signal, reporter);
+
+        expect(hostSpy).toHaveBeenCalledWith(expect.objectContaining({
+            getTaskLanguageCode: expect.any(Function),
+            getPluginRuntime: expect.any(Function),
+            maybeAutoFixMermaidForFile: expect.any(Function)
+        }), file, reporter.abortController?.signal, reporter);
+        expect(utilitySpy).not.toHaveBeenCalled();
+    });
+
+    test('batch translate folder command delegates to extracted note-processing host adapter', async () => {
+        const noteProcessingCommandHostAdapter = require('../operations/noteProcessingCommandHostAdapter');
+        const plugin = createPlugin();
+        const reporter = createReporter();
+        const folder = Object.assign(new (TFolder as any)(), {
+            name: 'Concepts',
+            path: 'Concepts'
+        });
+
+        const hostSpy = jest
+            .spyOn(noteProcessingCommandHostAdapter, 'runBatchTranslateFolderCommandWithHost')
+            .mockResolvedValue(undefined);
+        const utilitySpy = jest
+            .spyOn(translateUtils, 'batchTranslateFolder')
+            .mockResolvedValue(undefined);
+
+        await (plugin as any).batchTranslateFolderCommand(folder, reporter);
+
+        expect(hostSpy).toHaveBeenCalledWith(expect.objectContaining({
+            getTaskLanguageCode: expect.any(Function),
+            getFolderByPath: expect.any(Function),
+            maybeAutoFixMermaidForFolder: expect.any(Function)
+        }), reporter, folder);
+        expect(utilitySpy).not.toHaveBeenCalled();
+    });
+
+    test('extract current concepts command delegates to extracted note-processing host adapter', async () => {
+        const noteProcessingCommandHostAdapter = require('../operations/noteProcessingCommandHostAdapter');
+        const plugin = createPlugin();
+        const reporter = createReporter();
+
+        const hostSpy = jest
+            .spyOn(noteProcessingCommandHostAdapter, 'runExtractConceptsCommandWithHost')
+            .mockResolvedValue(undefined);
+        const extractSpy = jest
+            .spyOn(fileUtils, 'extractConceptsFromFile')
+            .mockResolvedValue(new Set());
+
+        await (plugin as any).extractConceptsCommand(reporter);
+
+        expect(hostSpy).toHaveBeenCalledWith(expect.objectContaining({
+            getActiveFile: expect.any(Function),
+            getPluginRuntime: expect.any(Function),
+            completeReporter: expect.any(Function)
+        }), reporter);
+        expect(extractSpy).not.toHaveBeenCalled();
+    });
+
+    test('batch extract concepts command delegates to extracted note-processing host adapter', async () => {
+        const noteProcessingCommandHostAdapter = require('../operations/noteProcessingCommandHostAdapter');
+        const plugin = createPlugin();
+        const reporter = createReporter();
+
+        const hostSpy = jest
+            .spyOn(noteProcessingCommandHostAdapter, 'runBatchExtractConceptsForFolderCommandWithHost')
+            .mockResolvedValue(undefined);
+        const extractSpy = jest
+            .spyOn(fileUtils, 'extractConceptsFromFile')
+            .mockResolvedValue(new Set());
+
+        await (plugin as any).batchExtractConceptsForFolderCommand(reporter);
+
+        expect(hostSpy).toHaveBeenCalledWith(expect.objectContaining({
+            getFolderSelection: expect.any(Function),
+            getFiles: expect.any(Function),
+            getPluginRuntime: expect.any(Function)
+        }), reporter);
+        expect(extractSpy).not.toHaveBeenCalled();
+    });
+
+    test('extract concepts and generate titles command delegates to extracted note-processing host adapter', async () => {
+        const noteProcessingCommandHostAdapter = require('../operations/noteProcessingCommandHostAdapter');
+        const plugin = createPlugin();
+        const reporter = createReporter();
+
+        const hostSpy = jest
+            .spyOn(noteProcessingCommandHostAdapter, 'runExtractConceptsAndGenerateTitlesCommandWithHost')
+            .mockResolvedValue(undefined);
+        const extractSpy = jest
+            .spyOn(fileUtils, 'extractConceptsFromFile')
+            .mockResolvedValue(new Set());
+
+        await (plugin as any).extractConceptsAndGenerateTitlesCommand(reporter);
+
+        expect(hostSpy).toHaveBeenCalledWith(expect.objectContaining({
+            getPluginRuntime: expect.any(Function),
+            getFolderByPath: expect.any(Function),
+            getActionLabel: expect.any(Function)
+        }), reporter);
+        expect(extractSpy).not.toHaveBeenCalled();
+    });
+
+    test('extract original text command delegates to extracted note-processing host adapter', async () => {
+        const noteProcessingCommandHostAdapter = require('../operations/noteProcessingCommandHostAdapter');
+        const plugin = createPlugin();
+        const reporter = createReporter();
+
+        const hostSpy = jest
+            .spyOn(noteProcessingCommandHostAdapter, 'runExtractOriginalTextCommandWithHost')
+            .mockResolvedValue(undefined);
+        const utilitySpy = jest
+            .spyOn(extractOriginalTextModule, 'extractOriginalText')
+            .mockResolvedValue(undefined);
+
+        await (plugin as any).extractOriginalTextCommand(reporter);
+
+        expect(hostSpy).toHaveBeenCalledWith(expect.objectContaining({
+            getActiveFile: expect.any(Function),
+            getPluginRuntime: expect.any(Function)
+        }), reporter);
         expect(utilitySpy).not.toHaveBeenCalled();
     });
 });

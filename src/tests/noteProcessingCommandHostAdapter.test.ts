@@ -23,10 +23,15 @@ function createReporter(): ProgressReporter {
 
 function createUiStrings() {
     return {
+        commands: {
+            extractConceptsAndGenerateTitles: 'Extract concepts and generate titles'
+        },
         notices: {
             notemdBusy: 'Notemd busy',
             noActiveFile: 'No active file',
             noTopicFound: 'No topic found',
+            batchTranslationFailedWithMessage: 'Batch translation failed: {message}',
+            failedTranslateFileWithMessage: 'Translation failed: {message}',
             processingComplete: 'Processing complete',
             processingError: 'Processing failed: {message}',
             batchProcessingCancelled: 'Batch cancelled',
@@ -34,6 +39,14 @@ function createUiStrings() {
             batchProcessingFinishedWithErrors: 'Batch finished with {count} errors',
             batchProcessingSuccess: 'Processed {count} files',
             batchProcessingError: 'Batch processing failed: {message}',
+            conceptExtractionSuccess: 'Extracted {count} concepts',
+            noConceptsFoundToExtract: 'No concepts found',
+            conceptExtractionError: 'Concept extraction failed: {message}',
+            batchExtractionCancelled: 'Batch extraction cancelled',
+            batchExtractionFinishedWithErrors: 'Batch extraction finished with {count} errors',
+            batchExtractionSuccess: 'Extracted {concepts} concepts from {files} files',
+            batchExtractionError: 'Batch extraction failed: {message}',
+            genericErrorSeeConsoleForDetails: 'Generic error: {message}',
             batchGenerationCancelled: 'Batch generation cancelled',
             batchGenerationFinishedWithErrors: 'Batch generation finished with {count} errors',
             batchGenerationSuccess: 'Generated content in {folderPath}',
@@ -53,6 +66,12 @@ function createUiStrings() {
                 research: 'Research Error',
                 processing: 'Processing Error',
                 batchProcessing: 'Batch Processing Error',
+                batchTranslation: 'Batch Translation Error',
+                translation: 'Translation Error',
+                conceptExtraction: 'Concept Extraction Error',
+                batchConceptExtraction: 'Batch Concept Extraction Error',
+                extraction: 'Extraction Error',
+                generic: 'Generic Error',
                 batchGeneration: 'Batch Generation Error'
             }
         }
@@ -65,17 +84,27 @@ function createHost(reporter: ProgressReporter, initiallyBusy = false) {
         start: jest.fn(),
         markCompleted: jest.fn()
     };
+    const pluginRuntime = {
+        settings: mockSettings,
+        getProviderAndModelForTask: jest.fn(() => ({
+            provider: mockSettings.providers[0],
+            modelName: mockSettings.providers[0].model
+        })),
+        getPromptForTask: jest.fn(() => 'prompt')
+    };
 
     return {
         host: {
             getApp: jest.fn(() => ({ vault: {}, workspace: {} })),
             loadSettings: jest.fn().mockResolvedValue(undefined),
             getSettings: jest.fn(() => mockSettings),
+            getPluginRuntime: jest.fn(() => pluginRuntime),
             getActiveFile: jest.fn(() => null),
-            getFileByPath: jest.fn(() => null),
-            getFolderByPath: jest.fn(() => null),
-            getFiles: jest.fn(() => []),
+            getFileByPath: jest.fn((_path: string): TFile | null => null),
+            getFolderByPath: jest.fn((_path: string): TFolder | null => null),
+            getFiles: jest.fn((): TFile[] => []),
             getFolderSelection: jest.fn().mockResolvedValue(null),
+            getTaskLanguageCode: jest.fn(() => 'en'),
             getStepStatusText: jest.fn((current: number, total: number, label: string) => `${current}/${total} ${label}`),
             currentProcessingFileBasename: { value: null },
             getBatchProgressStore: jest.fn(() => batchProgressStore),
@@ -96,6 +125,21 @@ function createHost(reporter: ProgressReporter, initiallyBusy = false) {
                 }
                 if (actionId === 'research-and-summarize') {
                     return 'Research & summarize';
+                }
+                if (actionId === 'translate-current-file') {
+                    return 'Translate file';
+                }
+                if (actionId === 'batch-translate-folder') {
+                    return 'Batch translate';
+                }
+                if (actionId === 'extract-concepts-current') {
+                    return 'Extract concepts';
+                }
+                if (actionId === 'extract-concepts-folder') {
+                    return 'Extract folder concepts';
+                }
+                if (actionId === 'extract-original-text') {
+                    return 'Extract original text';
                 }
                 return actionId;
             }),
@@ -232,6 +276,207 @@ describe('note processing command host adapter', () => {
         );
         expect(host.maybeAutoFixMermaidForFile).toHaveBeenCalledWith(outputFile, reporter, 'process current file');
         expect(host.showNotice).toHaveBeenCalledWith('Processing complete');
+        expect(host.completeReporter).toHaveBeenCalledWith(reporter);
+        expect(host.finalizeReporter).toHaveBeenCalledWith(reporter);
+        expect(getBusy()).toBe(false);
+    });
+
+    test('translate file command reuses shared host orchestration and auto-fixes translated output', async () => {
+        const reporter = createReporter();
+        const { host, getBusy } = createHost(reporter);
+        const file = Object.assign(new (TFile as any)(), {
+            name: 'Topic.md',
+            basename: 'Topic',
+            path: 'Notes/Topic.md',
+            extension: 'md'
+        });
+        const translatedFile = Object.assign(new (TFile as any)(), {
+            name: 'Topic_en.md',
+            basename: 'Topic_en',
+            path: 'Translations/Topic_en.md',
+            extension: 'md'
+        });
+        host.getSettings.mockReturnValue({
+            ...mockSettings,
+            autoMermaidFixAfterGenerate: true
+        });
+        host.getFileByPath.mockReturnValue(translatedFile);
+        const translateImpl = jest.fn().mockResolvedValue('Translations/Topic_en.md');
+        const { runTranslateFileCommandWithHost } = loadModule();
+
+        await runTranslateFileCommandWithHost(host, file, undefined, reporter, translateImpl);
+
+        expect(host.setBusy).toHaveBeenNthCalledWith(1, true);
+        expect(translateImpl).toHaveBeenCalledWith(
+            host.getApp(),
+            host.getSettings(),
+            file,
+            'en',
+            reporter,
+            true,
+            undefined
+        );
+        expect(host.maybeAutoFixMermaidForFile).toHaveBeenCalledWith(
+            translatedFile,
+            reporter,
+            'translate current file'
+        );
+        expect(reporter.updateStatus).toHaveBeenCalledWith('Done Translate file', 100);
+        expect(host.finalizeReporter).toHaveBeenCalledWith(reporter);
+        expect(getBusy()).toBe(false);
+    });
+
+    test('batch translate command resolves selected folder and reuses host cleanup path', async () => {
+        const reporter = createReporter();
+        const { host, getBusy } = createHost(reporter);
+        const folder = Object.assign(new (TFolder as any)(), {
+            name: 'Concepts',
+            path: 'Concepts'
+        });
+        host.getFolderSelection.mockResolvedValue('Concepts');
+        host.getFolderByPath.mockReturnValue(folder);
+        host.getSettings.mockReturnValue({
+            ...mockSettings,
+            useCustomTranslationSavePath: true,
+            translationSavePath: 'Translations'
+        });
+        const batchTranslateImpl = jest.fn().mockResolvedValue(undefined);
+        const { runBatchTranslateFolderCommandWithHost } = loadModule();
+
+        await runBatchTranslateFolderCommandWithHost(host, reporter, undefined, batchTranslateImpl);
+
+        expect(batchTranslateImpl).toHaveBeenCalledWith(host.getApp(), host.getSettings(), folder, 'en');
+        expect(host.maybeAutoFixMermaidForFolder).toHaveBeenCalledWith(
+            'Translations',
+            reporter,
+            'batch translate folder'
+        );
+        expect(host.finalizeReporter).toHaveBeenCalledWith(reporter);
+        expect(getBusy()).toBe(false);
+    });
+
+    test('extract concepts command creates concept notes through extracted host flow', async () => {
+        const reporter = createReporter();
+        const { host, getBusy } = createHost(reporter);
+        const activeFile = Object.assign(new (TFile as any)(), {
+            name: 'Topic.md',
+            basename: 'Topic',
+            path: 'Notes/Topic.md',
+            extension: 'md'
+        });
+        host.getActiveFile.mockReturnValue(activeFile);
+        const extractImpl = jest.fn().mockResolvedValue(new Set(['Alpha', 'Beta']));
+        const createNotesImpl = jest.fn().mockResolvedValue(undefined);
+        const { runExtractConceptsCommandWithHost } = loadModule();
+
+        await runExtractConceptsCommandWithHost(host, reporter, extractImpl, createNotesImpl);
+
+        expect(extractImpl).toHaveBeenCalledWith(host.getApp(), host.getPluginRuntime(), activeFile, reporter);
+        expect(createNotesImpl).toHaveBeenCalledWith(
+            host.getApp(),
+            host.getSettings(),
+            new Set(['Alpha', 'Beta']),
+            'Topic',
+            { disableBacklink: true, minimalTemplate: true }
+        );
+        expect(host.showNotice).toHaveBeenCalledWith('Extracted 2 concepts');
+        expect(host.completeReporter).toHaveBeenCalledWith(reporter);
+        expect(host.finalizeReporter).toHaveBeenCalledWith(reporter);
+        expect(getBusy()).toBe(false);
+    });
+
+    test('batch extract concepts command aggregates per-file concepts and completes reporter', async () => {
+        const reporter = createReporter();
+        const { host, getBusy } = createHost(reporter);
+        const file = Object.assign(new (TFile as any)(), {
+            name: 'Topic.md',
+            basename: 'Topic',
+            path: 'Concepts/Topic.md',
+            extension: 'md'
+        });
+        host.getFolderSelection.mockResolvedValue('Concepts');
+        host.getFolderByPath.mockReturnValue(Object.assign(new (TFolder as any)(), {
+            name: 'Concepts',
+            path: 'Concepts'
+        }));
+        host.getFiles.mockReturnValue([file]);
+        const extractImpl = jest.fn().mockResolvedValue(new Set(['Alpha']));
+        const createNotesImpl = jest.fn().mockResolvedValue(undefined);
+        const { runBatchExtractConceptsForFolderCommandWithHost } = loadModule();
+
+        await runBatchExtractConceptsForFolderCommandWithHost(host, reporter, extractImpl, createNotesImpl);
+
+        expect(extractImpl).toHaveBeenCalledWith(host.getApp(), host.getPluginRuntime(), file, reporter);
+        expect(createNotesImpl).toHaveBeenCalledWith(
+            host.getApp(),
+            host.getSettings(),
+            new Set(['Alpha']),
+            'Topic',
+            { disableBacklink: true, minimalTemplate: true }
+        );
+        expect(host.showNotice).toHaveBeenCalledWith('Extracted 1 concepts from 1 files');
+        expect(host.completeReporter).toHaveBeenCalledWith(reporter);
+        expect(host.finalizeReporter).toHaveBeenCalledWith(reporter);
+        expect(getBusy()).toBe(false);
+    });
+
+    test('extract original text command delegates through extracted host flow', async () => {
+        const reporter = createReporter();
+        const { host, getBusy } = createHost(reporter);
+        const activeFile = Object.assign(new (TFile as any)(), {
+            name: 'Topic.md',
+            basename: 'Topic',
+            path: 'Notes/Topic.md',
+            extension: 'md'
+        });
+        host.getActiveFile.mockReturnValue(activeFile);
+        const extractOriginalImpl = jest.fn().mockResolvedValue(undefined);
+        const { runExtractOriginalTextCommandWithHost } = loadModule();
+
+        await runExtractOriginalTextCommandWithHost(host, reporter, extractOriginalImpl);
+
+        expect(extractOriginalImpl).toHaveBeenCalledWith(
+            host.getApp(),
+            host.getPluginRuntime(),
+            activeFile,
+            reporter
+        );
+        expect(reporter.updateStatus).toHaveBeenCalledWith('Done Extract original text', 100);
+        expect(host.finalizeReporter).toHaveBeenCalledWith(reporter);
+        expect(getBusy()).toBe(false);
+    });
+
+    test('extract concepts and generate titles command reuses extracted flows without tripping busy guard', async () => {
+        const reporter = createReporter();
+        const { host, getBusy } = createHost(reporter);
+        const activeFile = Object.assign(new (TFile as any)(), {
+            name: 'Topic.md',
+            basename: 'Topic',
+            path: 'Notes/Topic.md',
+            extension: 'md'
+        });
+        const conceptFolder = Object.assign(new (TFolder as any)(), {
+            name: 'Concepts',
+            path: 'Concepts'
+        });
+        host.getActiveFile.mockReturnValue(activeFile);
+        host.getFolderByPath.mockImplementation((path: string) => path === 'Concepts' ? conceptFolder : null);
+        const extractImpl = jest.fn().mockResolvedValue(new Set(['Alpha']));
+        const createNotesImpl = jest.fn().mockResolvedValue(undefined);
+        const batchGenerateImpl = jest.fn().mockResolvedValue({ errors: [] });
+        const { runExtractConceptsAndGenerateTitlesCommandWithHost } = loadModule();
+
+        await runExtractConceptsAndGenerateTitlesCommandWithHost(
+            host,
+            reporter,
+            extractImpl,
+            createNotesImpl,
+            batchGenerateImpl
+        );
+
+        expect(extractImpl).toHaveBeenCalledWith(host.getApp(), host.getPluginRuntime(), activeFile, reporter);
+        expect(batchGenerateImpl).toHaveBeenCalledWith(host.getApp(), host.getSettings(), 'Concepts', reporter);
+        expect(host.showNotice).not.toHaveBeenCalledWith('Notemd busy');
         expect(host.completeReporter).toHaveBeenCalledWith(reporter);
         expect(host.finalizeReporter).toHaveBeenCalledWith(reporter);
         expect(getBusy()).toBe(false);

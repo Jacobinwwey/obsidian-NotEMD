@@ -1,6 +1,6 @@
 # Notemd 系统架构总览
 
-> 更新：2026-05-02
+> 更新：2026-05-05
 
 ## 系统架构
 
@@ -207,6 +207,7 @@ flowchart LR
 | `src/rendering/` | 渲染宿主、预览、导出、主题 |
 | `src/ui/` | 设置标签页、侧边栏、弹窗、欢迎页 |
 | `src/i18n/` | 22 种语言、任务语言策略 |
+| `src/operations/` | operation registry、host adapter、capability/contract 导出、可复用命令编排 |
 | `src/batchProgressStore.ts` | 中断恢复批量状态持久化 |
 | `src/providerDiagnostics.ts` | LLM 提供商连接诊断 |
 
@@ -238,8 +239,9 @@ flowchart LR
 - `src/operations/providerDiagnosticCommandHostAdapter.ts` 现在承接开发者诊断命令的宿主装载、报告落盘接线与 notice 整形逻辑
 - `src/operations/configProfileCommandHostAdapter.ts` 现在承接 config/profile 状态持久化、CLI 导出 notice 整形与导入导出错误映射逻辑
 - `src/operations/providerConnectionTestCommandHostAdapter.ts` 现在承接共享 provider 连接测试的 settings 装载与 notice/reporter 编排逻辑，并已被命令路径与设置页共同复用
-- `src/operations/noteProcessingCommandHostAdapter.ts` 现在承接 `process-current-add-links`、`process-folder-add-links`、`batch-generate-from-titles`、`generate-from-title` 与 `research-and-summarize` 的 busy-guard、reporter 生命周期、notice/error-log 编排逻辑
-- `src/main.ts` 现在主要保留命令注册，以及翻译/抽取类命令等更广义的非 CLI 交互与批处理宿主副作用，这正是下一批抽离目标
+- `src/operations/noteProcessingCommandHostAdapter.ts` 现在不仅承接 `process-current-add-links`、`process-folder-add-links`、`batch-generate-from-titles`、`generate-from-title` 与 `research-and-summarize`，还继续承接 `translate-current-file`、`batch-translate-folder`、`extract-concepts-current`、`extract-concepts-folder`、`extract-original-text` 与 `extract-concepts-and-generate-titles` 的 busy-guard、reporter 生命周期、notice/error-log 编排逻辑
+- `src/fileUtils.ts` 与 `src/extractOriginalText.ts` 现在已经接受更窄的 runtime context，而不是直接依赖具体 `NotemdPlugin` 类，这说明边界正在从 wrapper 抽离继续推进到 utility 对宿主类型耦合的削弱
+- `src/main.ts` 现在主要保留命令注册，以及 `duplicate` / `batch Mermaid fix` / `formula fix` 等尚未抽离的非 CLI 命令编排；真正的下一阶段缺口已经转向 note-processing registry onboarding 与 utility side-effect 收口
 
 ## 关键设计决策
 
@@ -253,7 +255,7 @@ flowchart LR
 ## 验证
 
 - `npm run build` — TypeScript 编译 + esbuild 打包
-- `npm test -- --runInBand` — 127 套件，795 项测试
+- `npm test -- --runInBand` — 完整 Jest 矩阵当前为 129 套件、823 项测试
 - `npm run audit:i18n-ui` — 无硬编码 UI 字符串
 - `npm run audit:render-host` — 渲染宿主自包含于 main.js
 - `git diff --check` — 空白符卫生
