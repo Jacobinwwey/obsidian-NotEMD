@@ -8,7 +8,7 @@ import {
     processFile,
     generateContentForTitle
 } from '../fileUtils';
-import { ExtractOriginalTextPluginContext, extractOriginalText } from '../extractOriginalText';
+import { ExtractOriginalTextPluginContext, ExtractOriginalTextResult, extractOriginalText } from '../extractOriginalText';
 import { formatI18n } from '../i18n';
 import { researchAndSummarize } from '../searchUtils';
 import { batchTranslateFolder, translateFile } from '../translate';
@@ -56,6 +56,7 @@ export interface NoteProcessingCommandUiStrings {
         contentGenerationSuccess: string;
         contentGenerationError: string;
         researchError: string;
+        extractionCompleteSavedTo: string;
     };
     sidebar: {
         status: {
@@ -714,8 +715,9 @@ export async function runExtractOriginalTextCommandWithHost(
     host: NoteProcessingCommandHost,
     reporter?: ProgressReporter,
     extractOriginalTextImpl: typeof extractOriginalText = extractOriginalText
-): Promise<void> {
+): Promise<ExtractOriginalTextResult | null> {
     const actionLabel = host.getActionLabel('extract-original-text');
+    let commandResult: ExtractOriginalTextResult | null = null;
 
     await runBusyReporterCommandWithHost(host, actionLabel, reporter, async (useReporter) => {
         let uiStrings = host.getUiStrings();
@@ -728,9 +730,12 @@ export async function runExtractOriginalTextCommandWithHost(
                 throw new Error("No active '.md' or '.txt' file to process.");
             }
 
-            const outputPath = await extractOriginalTextImpl(host.getApp(), host.getPluginRuntime(), activeFile, useReporter);
-            if (outputPath && !useReporter.cancelled) {
+            commandResult = await extractOriginalTextImpl(host.getApp(), host.getPluginRuntime(), activeFile, useReporter);
+            if (commandResult && !useReporter.cancelled) {
                 useReporter.updateStatus(host.getActionCompleteText(actionLabel), 100);
+                host.showNotice(formatI18n(uiStrings.notices.extractionCompleteSavedTo, {
+                    path: commandResult.outputPath
+                }));
                 host.completeReporter(useReporter);
             }
         } catch (error: unknown) {
@@ -751,6 +756,8 @@ export async function runExtractOriginalTextCommandWithHost(
             host.failReporterAction(useReporter, errorMessage);
         }
     });
+
+    return commandResult;
 }
 
 export async function runGenerateContentForTitleCommandWithHost(

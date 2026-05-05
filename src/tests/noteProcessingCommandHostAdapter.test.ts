@@ -58,7 +58,8 @@ function createUiStrings() {
             batchGenerationError: 'Batch generation failed: {message}',
             contentGenerationSuccess: 'Generated {file}',
             contentGenerationError: 'Content generation failed: {message}',
-            researchError: 'Research failed: {message}'
+            researchError: 'Research failed: {message}',
+            extractionCompleteSavedTo: 'Extraction complete. Saved to {path}'
         },
         sidebar: {
             status: {
@@ -504,10 +505,17 @@ describe('note processing command host adapter', () => {
             extension: 'md'
         });
         host.getActiveFile.mockReturnValue(activeFile);
-        const extractOriginalImpl = jest.fn().mockResolvedValue('Notes/Topic_Extracted.md');
+        const extractOriginalImpl = jest.fn().mockResolvedValue({
+            sourcePath: 'Notes/Topic.md',
+            outputPath: 'Notes/Topic_Extracted.md',
+            outputDirectory: 'Notes',
+            outputSuffix: '_Extracted',
+            questionCount: 1,
+            mergedMode: false
+        });
         const { runExtractOriginalTextCommandWithHost } = loadModule();
 
-        await runExtractOriginalTextCommandWithHost(host, reporter, extractOriginalImpl);
+        const result = await runExtractOriginalTextCommandWithHost(host, reporter, extractOriginalImpl);
 
         expect(extractOriginalImpl).toHaveBeenCalledWith(
             host.getApp(),
@@ -516,8 +524,17 @@ describe('note processing command host adapter', () => {
             reporter
         );
         expect(reporter.updateStatus).toHaveBeenCalledWith('Done Extract original text', 100);
+        expect(host.showNotice).toHaveBeenCalledWith('Extraction complete. Saved to Notes/Topic_Extracted.md');
         expect(host.completeReporter).toHaveBeenCalledWith(reporter);
         expect(host.finalizeReporter).toHaveBeenCalledWith(reporter);
+        expect(result).toEqual({
+            sourcePath: 'Notes/Topic.md',
+            outputPath: 'Notes/Topic_Extracted.md',
+            outputDirectory: 'Notes',
+            outputSuffix: '_Extracted',
+            questionCount: 1,
+            mergedMode: false
+        });
         expect(getBusy()).toBe(false);
     });
 

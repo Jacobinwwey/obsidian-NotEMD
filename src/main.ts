@@ -1416,7 +1416,7 @@ export default class NotemdPlugin extends Plugin {
     }
 
     async extractOriginalTextCommand(reporter?: ProgressReporter) {
-        await runExtractOriginalTextCommandWithHost(this.createNoteProcessingCommandHost(), reporter);
+        return runExtractOriginalTextCommandWithHost(this.createNoteProcessingCommandHost(), reporter);
     }
 
 } // End of NotemdPlugin class

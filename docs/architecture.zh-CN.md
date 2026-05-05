@@ -242,7 +242,7 @@ flowchart LR
 - `src/operations/noteProcessingCommandHostAdapter.ts` 现在不仅承接 `process-current-add-links`、`process-folder-add-links`、`batch-generate-from-titles`、`generate-from-title` 与 `research-and-summarize`，还继续承接 `translate-current-file`、`batch-translate-folder`、`extract-concepts-current`、`extract-concepts-folder`、`extract-original-text` 与 `extract-concepts-and-generate-titles` 的 busy-guard、reporter 生命周期、notice/error-log 编排逻辑
 - `src/operations/utilityCommandHostAdapter.ts` 现在也已承接当前文件 duplicate check、duplicate cleanup、batch Mermaid fix 与 single/batch formula fix 的 command orchestration；`check-for-duplicates` 已不再内联写在命令注册里
 - `src/operations/registry.ts` 现在也已覆盖剩余 selection/export 邻接自动化表面：`editor.create-link-and-generate`、`provider.profile.export`、`provider.profile.import`、`cli.capability-manifest.export` 与 `cli.invocation-contract.export` 已进入与前几批相同的 registry/capability/contract 表面
-- `src/translate.ts` 现在已允许 batch translation 注入外部 reporter，不再把 `ProgressModal` 固化成唯一执行载体；`src/extractOriginalText.ts` 现在也会返回输出路径，便于 host adapter 显式完成 reporter 生命周期
+- `src/translate.ts` 现在已允许 batch translation 注入外部 reporter，不再把 `ProgressModal` 固化成唯一执行载体；`src/extractOriginalText.ts` 现在会返回结构化提取结果，成功 notice 也已上提到 host adapter
 - `src/fileUtils.ts` 与 `src/extractOriginalText.ts` 现在已经接受更窄的 runtime context，而不是直接依赖具体 `NotemdPlugin` 类，这说明边界正在从 wrapper 抽离继续推进到 utility 对宿主类型耦合的削弱
 - `src/main.ts` 现在主要保留命令注册与少量直接执行表面；当前 registry 已覆盖 diagram/provider/config-profile 以及 process/generate/research/translation/extraction/utility/selection/export 这些 operations，真正的下一阶段缺口已经转向更细的 notice/result/vault-write side-effect 收口、write-heavy flow 更丰富的结果契约，以及剩余 direct-read/sidebar 表面
 

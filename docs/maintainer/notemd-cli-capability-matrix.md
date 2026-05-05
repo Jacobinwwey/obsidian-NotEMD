@@ -49,7 +49,7 @@ Observed host facts:
 | `notemd:batch-translate-folder` | Batch translate a folder | `interactive-ui` | Folder selection and progress UI need adapter separation | `translate.folder-batch` |
 | `notemd:extract-concepts-from-current-file` | Extract concepts from active file | `requires-active-file` | Active file + note-creation side effects | `concept.extract-file` |
 | `notemd:batch-extract-concepts-from-folder` | Extract concepts across folder | `interactive-ui` | Folder selection and progress UI still host-bound | `concept.extract-folder` |
-| `notemd:extract-original-text` | Extract configured source snippets from active file | `requires-active-file` | Active file + configured questions + output-note write side effects | `content.extract-original-text` |
+| `notemd:extract-original-text` | Extract configured source snippets from active file | `requires-active-file` | Structured result now exists, but active-file dependency and output-path persistence remain host/settings bound | `content.extract-original-text` |
 | `notemd:extract-concepts-and-generate-titles` | Compound extract+generate flow | `requires-active-file` | Composite workflow without explicit typed contract | `workflow.extract-and-generate` |
 | `notemd:create-wiki-link-and-generate-from-selection` | Selection-driven concept note generation | `requires-selection` | Editor selection is intrinsic | `editor.create-link-and-generate` |
 | `notemd:batch-mermaid-fix` | Batch Mermaid repair | `interactive-ui` | Folder selection + mutation + report side effects | `mermaid.batch-fix` |
@@ -64,6 +64,7 @@ Observed host facts:
 - `src/operations/capabilityManifest.ts` now flattens those command bindings into the exported capability manifest.
 - `src/cliContracts.ts` now builds the invocation contract from the same registry, which removes one major drift path between docs, command discovery, and contract export.
 - The registry now includes the main note-processing, utility, selection, and export operation batches as well: `editor.create-link-and-generate`, `file.process-add-links`, `file.process-folder-add-links`, `content.generate-from-title`, `content.batch-generate-from-titles`, `research.summarize-topic`, `translate.file`, `translate.folder-batch`, `concept.extract-file`, `concept.extract-folder`, `content.extract-original-text`, `workflow.extract-and-generate`, `duplicate.check-file`, `concept.dedupe`, `mermaid.batch-fix`, `formula.fix-file`, `formula.batch-fix`, `provider.profile.export`, `provider.profile.import`, `cli.capability-manifest.export`, and `cli.invocation-contract.export`.
+- `content.extract-original-text` is now also the first write-heavy path in this batch that returns a richer machine-readable result and no longer emits its success notice directly from the utility core.
 - Legacy aliases remain registered for compatibility, but they are intentionally excluded from capability-manifest export.
 
 ## Next Extraction Targets
