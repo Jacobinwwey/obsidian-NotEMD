@@ -115,7 +115,8 @@ topic: progress-audit-next-direction
 - 第一批 MT2 host-adapter 抽离也已经落地：`src/operations/diagramGenerateOperation.ts` 负责可复用的 diagram 执行路径，`src/operations/providerDiagnosticCommand.ts` 负责 `src/main.ts` 之下的 provider diagnostic command orchestration。
 - 第二批 MT2 host-adapter slice 也已落地：`src/operations/diagramCommandHostAdapter.ts` 现在负责 Mermaid/artifact 保存收尾与直接 Vega-Lite 预览编排。
 - 第一批 config/profile slice 也已落地：`src/operations/configProfileCommands.ts` 现在承接 provider profile 导入导出与 CLI capability/contract 导出编排，设置页不再保留一套平行实现。
-- 剩余架构缺口进一步收窄：`src/main.ts` 现在主要还保留 host-adapter 构造与 provider-diagnostic report persistence，这比此前 save/preview-heavy 的 command wrapper 更适合作为下一批抽离 seam。
+- provider diagnostic report persistence 也已落地：`src/operations/providerDiagnosticReportPersistence.ts` 现在承接带冲突规避的诊断报告文件创建逻辑，`src/main.ts` 不再内联持有这套路径策略。
+- 剩余架构缺口进一步收窄：`src/main.ts` 现在主要还保留 host-adapter 构造与面向用户的 notice 编排，这比此前 save/preview-heavy 的 command wrapper 更适合作为下一批抽离 seam。
 
 ## 当前验证门
 
@@ -183,7 +184,7 @@ topic: progress-audit-next-direction
    `ref/` 与 `coverage/` 应视为本地分析 / 构建产物，而不是待提交内容。主线需要持续保持干净工作树。
 
 6. **继续把 host adapter 从 `src/main.ts` 拆出去**
-   save/preview 与第一批 config/profile slice 已从“计划”变成“现实”。下一步应继续把 provider-diagnostic report persistence 与未来 CLI host wiring 从 `src/main.ts` 中剥离，避免 registry 停在元数据与执行核心抽离的半程状态。
+   save/preview、第一批 config/profile 与 report persistence slice 已从“计划”变成“现实”。下一步应继续把未来 CLI host wiring 从 `src/main.ts` 中剥离，避免 registry 停在元数据与执行核心抽离的半程状态。
 
 ### 建议落地顺序
 

@@ -234,7 +234,8 @@ The gap is smaller than before:
 - `src/operations/providerDiagnosticCommand.ts` now carries provider-diagnostic command orchestration below the command layer
 - `src/operations/diagramCommandHostAdapter.ts` now carries Mermaid/artifact save completion plus direct Vega-Lite preview orchestration below the command layer
 - `src/operations/configProfileCommands.ts` now carries provider-profile import/export plus CLI capability/contract export orchestration below the command layer
-- `src/main.ts` now mainly retains host-adapter construction and provider-diagnostic report persistence, which is the next extraction target
+- `src/operations/providerDiagnosticReportPersistence.ts` now carries collision-safe provider-diagnostic report file creation below the command layer
+- `src/main.ts` now mainly retains host-adapter construction and user-surface notices around extracted operations, which is the next extraction target
 
 ## Key Design Decisions
 
