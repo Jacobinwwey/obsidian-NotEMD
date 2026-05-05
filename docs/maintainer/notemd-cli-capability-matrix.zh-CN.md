@@ -41,10 +41,11 @@
 | `notemd:generate-content-from-title` | 从标题生成内容 | `requires-active-file` | 使用活动文件并回写内容 | `content.generate-from-title` |
 | `notemd:batch-generate-content-from-titles` | 批量标题生成 | `interactive-ui` | 文件夹选择、完成目录和进度 UI 仍然绑定宿主 | `content.batch-generate-from-titles` |
 | `notemd:research-and-summarize-topic` | 对选中文本 / 活动笔记标题做研究总结 | `requires-selection` | 依赖活动编辑器或活动笔记标题 | `research.summarize-topic` |
-| `notemd:translate-file` | 翻译当前笔记/选区 | `requires-selection` | 当前命令契约本质上是 editor-context first | `translate.file` |
+| `notemd:translate-file` | 翻译当前活动笔记 | `requires-active-file` | 当前命令路径会读取活动文件并写回相邻/输出翻译笔记 | `translate.file` |
 | `notemd:batch-translate-folder` | 批量翻译文件夹 | `interactive-ui` | 文件夹选择和进度 UI 需要先拆 adapter | `translate.folder-batch` |
 | `notemd:extract-concepts-from-current-file` | 从活动文件提取概念 | `requires-active-file` | 依赖活动文件和 note-creation 副作用 | `concept.extract-file` |
 | `notemd:batch-extract-concepts-from-folder` | 从文件夹批量提取概念 | `interactive-ui` | 文件夹选择和进度 UI 仍宿主绑定 | `concept.extract-folder` |
+| `notemd:extract-original-text` | 从活动文件提取配置好的原文片段 | `requires-active-file` | 依赖活动文件、配置问题集与输出笔记写入副作用 | `content.extract-original-text` |
 | `notemd:extract-concepts-and-generate-titles` | 提取概念并生成标题的复合流程 | `requires-active-file` | 复合 workflow 尚无显式 typed contract | `workflow.extract-and-generate` |
 | `notemd:create-wiki-link-and-generate-from-selection` | 基于选区创建概念笔记并生成内容 | `requires-selection` | 编辑器选区是内生依赖 | `editor.create-link-and-generate` |
 | `notemd:batch-mermaid-fix` | 批量 Mermaid 修复 | `interactive-ui` | 文件夹选择、内容改写和报告副作用都仍然绑定宿主 | `mermaid.batch-fix` |
@@ -58,6 +59,7 @@
 - `src/operations/registry.ts` 已成为已抽取 operation、command binding、mapping kind 与部分 input/result schema 的中心元数据源。
 - `src/operations/capabilityManifest.ts` 现在从同一 registry 展平 capability manifest。
 - `src/cliContracts.ts` 现在也从同一 registry 生成 invocation contract，减少了文档、命令发现与契约导出之间的漂移路径。
+- registry 现在也已纳入第一批 note-processing operations：`translate.file`、`translate.folder-batch`、`concept.extract-file`、`concept.extract-folder`、`content.extract-original-text` 与 `workflow.extract-and-generate`。
 - 旧命令别名仍保留注册以保证兼容，但会被刻意排除在 capability manifest 导出之外。
 
 ## 第一批抽取目标

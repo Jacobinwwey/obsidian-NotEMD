@@ -7,52 +7,79 @@ import { ProgressModal } from './ui/ProgressModal';
 import { resolveLanguageDisplayName } from './i18n/languageContext';
 import { formatI18n, getI18nStrings } from './i18n';
 
+export interface BatchTranslateFolderOptions {
+    reporter?: ProgressReporter;
+}
+
+export interface BatchTranslateFolderResult {
+    folderPath: string;
+    outputFolderPath: string;
+    translatedCount: number;
+    errors: Array<{ file: string; message: string }>;
+}
 
 export async function batchTranslateFolder(
 	app: App,
 	settings: NotemdSettings,
 	folder: TFolder,
-	targetLanguage: string
-): Promise<void> {
+	targetLanguage: string,
+    options: BatchTranslateFolderOptions = {}
+): Promise<BatchTranslateFolderResult> {
 	const i18n = getI18nStrings({ uiLocale: settings.uiLocale });
 	const files = folder.children.filter(
 		(file): file is TFile => file instanceof TFile && file.extension === 'md'
 	);
+    const outputFolderPath = (settings.useCustomTranslationSavePath && settings.translationSavePath)
+        ? settings.translationSavePath
+        : folder.path;
+    const result: BatchTranslateFolderResult = {
+        folderPath: folder.path,
+        outputFolderPath,
+        translatedCount: 0,
+        errors: []
+    };
 
 	if (files.length === 0) {
 		new Notice(i18n.notices.noMarkdownFilesFoundSelectedFolder);
-		return;
+		return result;
 	}
 
-	const progressModal = new ProgressModal(app, settings.uiLocale);
-	progressModal.open();
+	const progressReporter = options.reporter ?? new ProgressModal(app, settings.uiLocale);
+    const ownsReporter = !options.reporter;
+    if (ownsReporter && progressReporter instanceof ProgressModal) {
+        progressReporter.open();
+    }
 
 
 	const processFile = async (file: TFile) => {
 		try {
-			await translateFile(app, settings, file, targetLanguage, progressModal, false);
-			progressModal.log(`Successfully translated ${file.name}`);
+			await translateFile(app, settings, file, targetLanguage, progressReporter, false);
+			progressReporter.log(`Successfully translated ${file.name}`);
+            result.translatedCount += 1;
 		} catch (error) {
-			progressModal.log(`Failed to translate ${file.name}: ${error.message}`);
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            result.errors.push({ file: file.name, message: errorMessage });
+			progressReporter.log(`Failed to translate ${file.name}: ${errorMessage}`);
 		}
 	};
 
 	const concurrentProcessor = createConcurrentProcessor(
 		settings.batchConcurrency,
         settings.apiCallIntervalMs,
-		progressModal
+		progressReporter
 	);
 
 	try {
         const tasks = files.map(file => () => processFile(file));
 		await concurrentProcessor(tasks);
 		new Notice(formatI18n(i18n.notices.batchTranslationCompleted, { count: files.length }));
-	} catch (error) {
-		new Notice(i18n.notices.batchTranslationFailed);
-		console.error('Batch translation error:', error);
 	} finally {
-		progressModal.close();
+        if (ownsReporter && progressReporter instanceof ProgressModal) {
+            progressReporter.close();
+        }
 	}
+
+    return result;
 }
 
 

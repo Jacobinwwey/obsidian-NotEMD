@@ -240,8 +240,10 @@ flowchart LR
 - `src/operations/configProfileCommandHostAdapter.ts` 现在承接 config/profile 状态持久化、CLI 导出 notice 整形与导入导出错误映射逻辑
 - `src/operations/providerConnectionTestCommandHostAdapter.ts` 现在承接共享 provider 连接测试的 settings 装载与 notice/reporter 编排逻辑，并已被命令路径与设置页共同复用
 - `src/operations/noteProcessingCommandHostAdapter.ts` 现在不仅承接 `process-current-add-links`、`process-folder-add-links`、`batch-generate-from-titles`、`generate-from-title` 与 `research-and-summarize`，还继续承接 `translate-current-file`、`batch-translate-folder`、`extract-concepts-current`、`extract-concepts-folder`、`extract-original-text` 与 `extract-concepts-and-generate-titles` 的 busy-guard、reporter 生命周期、notice/error-log 编排逻辑
+- `src/operations/utilityCommandHostAdapter.ts` 现在也已承接 duplicate cleanup、batch Mermaid fix 与 single/batch formula fix 的 command orchestration，`src/main.ts` 不再内联持有这批逻辑
+- `src/translate.ts` 现在已允许 batch translation 注入外部 reporter，不再把 `ProgressModal` 固化成唯一执行载体；`src/extractOriginalText.ts` 现在也会返回输出路径，便于 host adapter 显式完成 reporter 生命周期
 - `src/fileUtils.ts` 与 `src/extractOriginalText.ts` 现在已经接受更窄的 runtime context，而不是直接依赖具体 `NotemdPlugin` 类，这说明边界正在从 wrapper 抽离继续推进到 utility 对宿主类型耦合的削弱
-- `src/main.ts` 现在主要保留命令注册，以及 `duplicate` / `batch Mermaid fix` / `formula fix` 等尚未抽离的非 CLI 命令编排；真正的下一阶段缺口已经转向 note-processing registry onboarding 与 utility side-effect 收口
+- `src/main.ts` 现在主要保留命令注册与少量直接执行表面；真正的下一阶段缺口已经转向 utility commands 的 registry 覆盖，以及更细的 notice/result/vault-write side-effect 收口
 
 ## 关键设计决策
 

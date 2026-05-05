@@ -109,6 +109,130 @@ const DIAGRAM_GENERATE_RESULT_SCHEMA: OperationSchema = {
     }
 };
 
+const STRING_ARRAY_SCHEMA: OperationSchema = {
+    type: 'array',
+    items: { type: 'string' }
+};
+
+const ERROR_ARRAY_SCHEMA: OperationSchema = {
+    type: 'array',
+    items: {
+        type: 'object',
+        properties: {
+            file: { type: 'string' },
+            message: { type: 'string' }
+        }
+    }
+};
+
+const TRANSLATE_FILE_INPUT_SCHEMA: OperationSchema = {
+    type: 'object',
+    properties: {
+        sourcePath: { type: 'string' },
+        targetLanguage: { type: 'string' },
+        openOutputFile: { type: 'boolean' }
+    }
+};
+
+const TRANSLATE_FILE_RESULT_SCHEMA: OperationSchema = {
+    type: 'object',
+    properties: {
+        sourcePath: { type: 'string' },
+        targetLanguage: { type: 'string' },
+        outputPath: { type: 'string' }
+    }
+};
+
+const TRANSLATE_FOLDER_INPUT_SCHEMA: OperationSchema = {
+    type: 'object',
+    properties: {
+        folderPath: { type: 'string' },
+        targetLanguage: { type: 'string' }
+    }
+};
+
+const TRANSLATE_FOLDER_RESULT_SCHEMA: OperationSchema = {
+    type: 'object',
+    properties: {
+        folderPath: { type: 'string' },
+        outputFolderPath: { type: 'string' },
+        translatedCount: { type: 'number' },
+        errors: ERROR_ARRAY_SCHEMA
+    }
+};
+
+const EXTRACT_CONCEPTS_FILE_INPUT_SCHEMA: OperationSchema = {
+    type: 'object',
+    properties: {
+        sourcePath: { type: 'string' },
+        conceptFolderPath: { type: 'string' }
+    }
+};
+
+const EXTRACT_CONCEPTS_FILE_RESULT_SCHEMA: OperationSchema = {
+    type: 'object',
+    properties: {
+        sourcePath: { type: 'string' },
+        conceptCount: { type: 'number' },
+        createdNotePaths: STRING_ARRAY_SCHEMA
+    }
+};
+
+const EXTRACT_CONCEPTS_FOLDER_INPUT_SCHEMA: OperationSchema = {
+    type: 'object',
+    properties: {
+        folderPath: { type: 'string' },
+        conceptFolderPath: { type: 'string' }
+    }
+};
+
+const EXTRACT_CONCEPTS_FOLDER_RESULT_SCHEMA: OperationSchema = {
+    type: 'object',
+    properties: {
+        folderPath: { type: 'string' },
+        processedFileCount: { type: 'number' },
+        conceptCount: { type: 'number' },
+        createdNotePaths: STRING_ARRAY_SCHEMA,
+        errors: ERROR_ARRAY_SCHEMA
+    }
+};
+
+const EXTRACT_ORIGINAL_TEXT_INPUT_SCHEMA: OperationSchema = {
+    type: 'object',
+    properties: {
+        sourcePath: { type: 'string' },
+        outputDirectory: { type: 'string' },
+        outputSuffix: { type: 'string' },
+        questions: STRING_ARRAY_SCHEMA
+    }
+};
+
+const EXTRACT_ORIGINAL_TEXT_RESULT_SCHEMA: OperationSchema = {
+    type: 'object',
+    properties: {
+        sourcePath: { type: 'string' },
+        outputPath: { type: 'string' },
+        questionCount: { type: 'number' }
+    }
+};
+
+const EXTRACT_AND_GENERATE_INPUT_SCHEMA: OperationSchema = {
+    type: 'object',
+    properties: {
+        sourcePath: { type: 'string' },
+        conceptFolderPath: { type: 'string' }
+    }
+};
+
+const EXTRACT_AND_GENERATE_RESULT_SCHEMA: OperationSchema = {
+    type: 'object',
+    properties: {
+        sourcePath: { type: 'string' },
+        conceptFolderPath: { type: 'string' },
+        completeFolderPath: { type: 'string' }
+    }
+};
+
 const OPERATION_DEFINITIONS: OperationDefinition[] = [
     {
         version: 1,
@@ -183,6 +307,82 @@ const OPERATION_DEFINITIONS: OperationDefinition[] = [
                 includeInCapabilityManifest: false
             })
         ]
+    },
+    {
+        version: 1,
+        id: 'translate.file',
+        automationLevel: 'requires-active-file',
+        requiredContext: 'active-file',
+        sideEffectClass: 'write-file',
+        commandBindings: [
+            createWorkflowCommandBinding('translate-file', 'translate-current-file')
+        ],
+        inputSchema: TRANSLATE_FILE_INPUT_SCHEMA,
+        resultSchema: TRANSLATE_FILE_RESULT_SCHEMA
+    },
+    {
+        version: 1,
+        id: 'translate.folder-batch',
+        automationLevel: 'interactive-ui',
+        requiredContext: 'folder-selection',
+        sideEffectClass: 'batch-write',
+        commandBindings: [
+            createWorkflowCommandBinding('batch-translate-folder', 'batch-translate-folder')
+        ],
+        inputSchema: TRANSLATE_FOLDER_INPUT_SCHEMA,
+        resultSchema: TRANSLATE_FOLDER_RESULT_SCHEMA
+    },
+    {
+        version: 1,
+        id: 'concept.extract-file',
+        automationLevel: 'requires-active-file',
+        requiredContext: 'active-file',
+        sideEffectClass: 'write-file',
+        commandBindings: [
+            createWorkflowCommandBinding('extract-concepts-from-current-file', 'extract-concepts-current')
+        ],
+        inputSchema: EXTRACT_CONCEPTS_FILE_INPUT_SCHEMA,
+        resultSchema: EXTRACT_CONCEPTS_FILE_RESULT_SCHEMA
+    },
+    {
+        version: 1,
+        id: 'concept.extract-folder',
+        automationLevel: 'interactive-ui',
+        requiredContext: 'folder-selection',
+        sideEffectClass: 'batch-write',
+        commandBindings: [
+            createWorkflowCommandBinding('batch-extract-concepts-from-folder', 'extract-concepts-folder')
+        ],
+        inputSchema: EXTRACT_CONCEPTS_FOLDER_INPUT_SCHEMA,
+        resultSchema: EXTRACT_CONCEPTS_FOLDER_RESULT_SCHEMA
+    },
+    {
+        version: 1,
+        id: 'content.extract-original-text',
+        automationLevel: 'requires-active-file',
+        requiredContext: 'active-file',
+        sideEffectClass: 'write-file',
+        commandBindings: [
+            createWorkflowCommandBinding('extract-original-text', 'extract-original-text')
+        ],
+        inputSchema: EXTRACT_ORIGINAL_TEXT_INPUT_SCHEMA,
+        resultSchema: EXTRACT_ORIGINAL_TEXT_RESULT_SCHEMA
+    },
+    {
+        version: 1,
+        id: 'workflow.extract-and-generate',
+        automationLevel: 'requires-active-file',
+        requiredContext: 'active-file',
+        sideEffectClass: 'batch-write',
+        commandBindings: [
+            createStaticCommandBinding('extract-concepts-and-generate-titles', {
+                automationLevel: 'requires-active-file',
+                requiredContext: 'active-file',
+                sideEffectClass: 'batch-write'
+            })
+        ],
+        inputSchema: EXTRACT_AND_GENERATE_INPUT_SCHEMA,
+        resultSchema: EXTRACT_AND_GENERATE_RESULT_SCHEMA
     },
     {
         version: 1,

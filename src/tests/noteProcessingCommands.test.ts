@@ -7,6 +7,7 @@ import * as fileUtils from '../fileUtils';
 import * as searchUtils from '../searchUtils';
 import * as translateUtils from '../translate';
 import * as extractOriginalTextModule from '../extractOriginalText';
+import * as formulaFixer from '../formulaFixer';
 
 function createManifest() {
     return {
@@ -56,6 +57,18 @@ function createPlugin(): NotemdPlugin {
 describe('note processing command surface', () => {
     beforeEach(() => {
         jest.clearAllMocks();
+    });
+
+    test('registers extract original text as a real command for hotkey and command-palette parity', async () => {
+        const plugin = createPlugin();
+        plugin.registerExtensions = jest.fn();
+        const addCommandSpy = jest.fn();
+        (plugin as any).addCommand = addCommandSpy;
+
+        await plugin.onload();
+
+        const ids = addCommandSpy.mock.calls.map((call: any[]) => call[0]?.id);
+        expect(ids).toContain('extract-original-text');
     });
 
     test('generate from title command delegates to extracted note-processing host adapter', async () => {
@@ -296,7 +309,12 @@ describe('note processing command surface', () => {
             .mockResolvedValue(undefined);
         const utilitySpy = jest
             .spyOn(translateUtils, 'batchTranslateFolder')
-            .mockResolvedValue(undefined);
+            .mockResolvedValue({
+                folderPath: 'Concepts',
+                outputFolderPath: 'Concepts',
+                translatedCount: 1,
+                errors: []
+            });
 
         await (plugin as any).batchTranslateFolderCommand(folder, reporter);
 
@@ -384,13 +402,130 @@ describe('note processing command surface', () => {
             .mockResolvedValue(undefined);
         const utilitySpy = jest
             .spyOn(extractOriginalTextModule, 'extractOriginalText')
-            .mockResolvedValue(undefined);
+            .mockResolvedValue('Notes/Topic_Extracted.md');
 
         await (plugin as any).extractOriginalTextCommand(reporter);
 
         expect(hostSpy).toHaveBeenCalledWith(expect.objectContaining({
             getActiveFile: expect.any(Function),
             getPluginRuntime: expect.any(Function)
+        }), reporter);
+        expect(utilitySpy).not.toHaveBeenCalled();
+    });
+
+    test('duplicate cleanup command delegates to extracted utility host adapter', async () => {
+        const utilityCommandHostAdapter = require('../operations/utilityCommandHostAdapter');
+        const plugin = createPlugin();
+        const reporter = createReporter();
+
+        const hostSpy = jest
+            .spyOn(utilityCommandHostAdapter, 'runCheckAndRemoveDuplicateConceptNotesCommandWithHost')
+            .mockResolvedValue(undefined);
+        const utilitySpy = jest
+            .spyOn(fileUtils, 'checkAndRemoveDuplicateConceptNotes')
+            .mockResolvedValue(undefined);
+
+        await (plugin as any).checkAndRemoveDuplicateConceptNotesCommand(reporter);
+
+        expect(hostSpy).toHaveBeenCalledWith(expect.objectContaining({
+            getApp: expect.any(Function),
+            loadSettings: expect.any(Function),
+            getSettings: expect.any(Function),
+            getUiStrings: expect.any(Function),
+            getActionLabel: expect.any(Function),
+            getReporter: expect.any(Function),
+            isBusy: expect.any(Function),
+            setBusy: expect.any(Function),
+            startReporterAction: expect.any(Function),
+            failReporterAction: expect.any(Function),
+            updateStatusBar: expect.any(Function),
+            getRunningActionText: expect.any(Function),
+            getActionCompleteText: expect.any(Function),
+            showNotice: expect.any(Function),
+            logError: expect.any(Function),
+            openErrorModal: expect.any(Function),
+            saveErrorLog: expect.any(Function),
+            completeReporter: expect.any(Function),
+            finalizeReporter: expect.any(Function)
+        }), reporter);
+        expect(utilitySpy).not.toHaveBeenCalled();
+    });
+
+    test('batch mermaid fix command delegates to extracted utility host adapter', async () => {
+        const utilityCommandHostAdapter = require('../operations/utilityCommandHostAdapter');
+        const plugin = createPlugin();
+        const reporter = createReporter();
+
+        const hostSpy = jest
+            .spyOn(utilityCommandHostAdapter, 'runBatchMermaidFixCommandWithHost')
+            .mockResolvedValue({ folderPath: 'Concepts', modifiedCount: 2 });
+        const utilitySpy = jest
+            .spyOn(fileUtils, 'batchFixMermaidSyntaxInFolder')
+            .mockResolvedValue({ errors: [], modifiedCount: 2 });
+
+        const result = await (plugin as any).batchMermaidFixCommand(reporter, 'Concepts');
+
+        expect(hostSpy).toHaveBeenCalledWith(expect.objectContaining({
+            getFolderSelection: expect.any(Function),
+            getActionLabel: expect.any(Function),
+            showNotice: expect.any(Function),
+            completeReporter: expect.any(Function),
+            finalizeReporter: expect.any(Function)
+        }), reporter, 'Concepts');
+        expect(result).toEqual({ folderPath: 'Concepts', modifiedCount: 2 });
+        expect(utilitySpy).not.toHaveBeenCalled();
+    });
+
+    test('fix formula command delegates to extracted utility host adapter', async () => {
+        const utilityCommandHostAdapter = require('../operations/utilityCommandHostAdapter');
+        const plugin = createPlugin();
+        const reporter = createReporter();
+        const file = Object.assign(new (TFile as any)(), {
+            name: 'Topic.md',
+            basename: 'Topic',
+            path: 'Notes/Topic.md',
+            extension: 'md'
+        });
+
+        const hostSpy = jest
+            .spyOn(utilityCommandHostAdapter, 'runFixFormulaFormatsCommandWithHost')
+            .mockResolvedValue(undefined);
+        const utilitySpy = jest
+            .spyOn(formulaFixer, 'fixFormulaFormatsInFile')
+            .mockResolvedValue(true);
+
+        await (plugin as any).fixFormulaFormatsCommand(file, reporter);
+
+        expect(hostSpy).toHaveBeenCalledWith(expect.objectContaining({
+            getApp: expect.any(Function),
+            getActionLabel: expect.any(Function),
+            showNotice: expect.any(Function),
+            completeReporter: expect.any(Function),
+            finalizeReporter: expect.any(Function)
+        }), file, reporter);
+        expect(utilitySpy).not.toHaveBeenCalled();
+    });
+
+    test('batch formula fix command delegates to extracted utility host adapter', async () => {
+        const utilityCommandHostAdapter = require('../operations/utilityCommandHostAdapter');
+        const plugin = createPlugin();
+        const reporter = createReporter();
+
+        const hostSpy = jest
+            .spyOn(utilityCommandHostAdapter, 'runBatchFixFormulaFormatsCommandWithHost')
+            .mockResolvedValue(undefined);
+        const utilitySpy = jest
+            .spyOn(formulaFixer, 'batchFixFormulaFormatsInFolder')
+            .mockResolvedValue({ modifiedCount: 1, errors: [] });
+
+        await (plugin as any).batchFixFormulaFormatsCommand(reporter);
+
+        expect(hostSpy).toHaveBeenCalledWith(expect.objectContaining({
+            getFolderSelection: expect.any(Function),
+            getActionLabel: expect.any(Function),
+            showNotice: expect.any(Function),
+            completeReporter: expect.any(Function),
+            finalizeReporter: expect.any(Function)
         }), reporter);
         expect(utilitySpy).not.toHaveBeenCalled();
     });
