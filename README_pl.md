@@ -689,4 +689,16 @@ MIT License - szczegóły znajdują się w pliku [LICENSE](LICENSE).
 
 *Notemd v1.8.4 - Rozwijaj swój graf wiedzy w Obsidianie dzięki AI.*
 
+
+<!-- repo-chronicle:start -->
+## Kronika Rozwoju
+
+Ta kwartalna kronika zachowuje oryginalny styl wizualny [repo-saga](https://github.com/teee32/repo-saga); podział kwartalny jest teraz generowany bezpośrednio przez samo repo-saga.
+
+![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.pl.svg)
+
+_Ostatnio odświeżono z bieżącego drzewa roboczego: 2026-05-05. Data ostatniego commita: 2026-05-05._
+<!-- repo-chronicle:end -->
+
+
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)

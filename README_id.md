@@ -698,4 +698,16 @@ MIT License. Lihat file [LICENSE](LICENSE) untuk detailnya.
 
 *Notemd v1.8.4 - Tingkatkan knowledge graph Obsidian Anda dengan AI.*
 
+
+<!-- repo-chronicle:start -->
+## Kronik Pengembangan
+
+Kronik triwulanan ini mempertahankan gaya visual asli [repo-saga](https://github.com/teee32/repo-saga); pembagian triwulan kini dihasilkan langsung oleh repo-saga itu sendiri.
+
+![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.id.svg)
+
+_Terakhir diperbarui dari salinan kerja saat ini pada 2026-05-05. Tanggal commit terbaru: 2026-05-05._
+<!-- repo-chronicle:end -->
+
+
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)

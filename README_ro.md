@@ -140,7 +140,7 @@ Atât. Explorează setările pentru a debloca mai multe funcții, precum cerceta
     - Limba de ieșire a diagramei Mermaid poate fi personalizată din setări.
     - **Mermaid Output Folder**: configurează folderul în care vor fi salvate fișierele generate cu diagrame Mermaid.
     - **Translate Summarize to Mermaid Output**: traduce opțional conținutul diagramei Mermaid generate în limba țintă configurată.
-    - 
+    -
 <img width="596" height="239" alt="SUMM" src="https://github.com/user-attachments/assets/08f44a41-9ec0-472c-91ee-19c8477ec639" />
 
 - **Corectarea simplă a formatării formulelor**:
@@ -685,5 +685,17 @@ Licență MIT - vezi fișierul [LICENSE](LICENSE) pentru detalii.
 
 
 *Notemd v1.8.4 - Îmbunătățește-ți graful de cunoștințe din Obsidian cu AI.*
+
+
+<!-- repo-chronicle:start -->
+## Cronica Dezvoltării
+
+Această cronică trimestrială păstrează stilul vizual original al [repo-saga](https://github.com/teee32/repo-saga); împărțirea trimestrială este acum generată direct de repo-saga însuși.
+
+![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.ro.svg)
+
+_Actualizat ultima dată din arborele de lucru la 2026-05-05. Data ultimului commit: 2026-05-05._
+<!-- repo-chronicle:end -->
+
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)

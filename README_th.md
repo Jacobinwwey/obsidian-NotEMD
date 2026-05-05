@@ -693,4 +693,16 @@ MIT License - ดูรายละเอียดได้ในไฟล์ [L
 *Notemd v1.8.4 - ยกระดับกราฟความรู้ใน Obsidian ของคุณด้วย AI*
 
 
+
+<!-- repo-chronicle:start -->
+## พงศาวดารการพัฒนา
+
+พงศาวดารรายไตรมาสนี้คงสไตล์ภาพต้นฉบับของ [repo-saga](https://github.com/teee32/repo-saga) ไว้ และตอนนี้ repo-saga จะสร้างการแบ่งรายไตรมาสโดยตรงเอง
+
+![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.th.svg)
+
+_รีเฟรชล่าสุดจากชุดไฟล์ทำงานปัจจุบันเมื่อ 2026-05-05 วันที่คอมมิตล่าสุด: 2026-05-05_
+<!-- repo-chronicle:end -->
+
+
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)

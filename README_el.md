@@ -140,7 +140,7 @@
     - Η γλώσσα εξόδου του διαγράμματος Mermaid μπορεί να προσαρμοστεί από τις ρυθμίσεις.
     - **Mermaid Output Folder**: ρυθμίστε τον φάκελο στον οποίο θα αποθηκεύονται τα παραγόμενα αρχεία διαγραμμάτων Mermaid.
     - **Translate Summarize to Mermaid Output**: προαιρετικά μεταφράζει το παραγόμενο περιεχόμενο του διαγράμματος Mermaid στη διαμορφωμένη γλώσσα στόχο.
-    - 
+    -
 <img width="596" height="239" alt="SUMM" src="https://github.com/user-attachments/assets/08f44a41-9ec0-472c-91ee-19c8477ec639" />
 
 - **Απλή διόρθωση μορφοποίησης τύπων**:
@@ -685,5 +685,17 @@
 
 
 *Notemd v1.8.4 - Βελτιώστε το γράφημα γνώσης σας στο Obsidian με AI.*
+
+
+<!-- repo-chronicle:start -->
+## Χρονικό Ανάπτυξης
+
+Αυτό το τριμηνιαίο χρονικό διατηρεί το αρχικό οπτικό ύφος του [repo-saga](https://github.com/teee32/repo-saga), αλλάζει μόνο η διαίρεση των εποχών από έτη σε τρίμηνα.
+
+![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.el.svg)
+
+_Τελευταία ανανέωση από το τρέχον αντίγραφο εργασίας στις 2026-05-05. Ημερομηνία τελευταίου commit: 2026-05-05._
+<!-- repo-chronicle:end -->
+
 
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)

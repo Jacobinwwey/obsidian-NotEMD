@@ -689,4 +689,16 @@ MIT Lisansı - Ayrıntılar için [LICENSE](LICENSE) dosyasına bakın.
 
 *Notemd v1.8.4 - Obsidian bilgi grafiğinizi yapay zeka ile geliştirin.*
 
+
+<!-- repo-chronicle:start -->
+## Gelişim Kroniği
+
+Bu üç aylık kronik, [repo-saga](https://github.com/teee32/repo-saga) özgün görsel stilini korur; çeyreklik dilimleme artık doğrudan repo-saga tarafından üretilir.
+
+![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.tr.svg)
+
+_Çalışma ağacından son yenileme tarihi: 2026-05-05. En son commit tarihi: 2026-05-05._
+<!-- repo-chronicle:end -->
+
+
 ![Star History Chart](https://api.star-history.com/svg?repos=Jacobinwwey/obsidian-NotEMD&type=Date)

@@ -32,6 +32,8 @@ ref
 
 # local git worktrees
 .worktrees
+.cache
+.tmp_repo_saga_tool
 
 # vitepress local docs artifacts
 docs/.vitepress/cache

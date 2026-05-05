@@ -6,6 +6,9 @@ function walkMarkdownFiles(dir: string): string[] {
     return entries.flatMap((entry) => {
         const fullPath = path.join(dir, entry.name);
         if (entry.isDirectory()) {
+            if (entry.name.startsWith('.')) {
+                return [];
+            }
             return walkMarkdownFiles(fullPath);
         }
 

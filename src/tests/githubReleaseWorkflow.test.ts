@@ -6,12 +6,14 @@ describe('GitHub release workflow', () => {
     const repoRoot = path.join(__dirname, '..', '..');
     const packageJsonPath = path.join(repoRoot, 'package.json');
     const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
-    const releaseScriptRelativePath = path.join('scripts', 'release', 'publish-github-release.js');
+    const releaseScriptRelativePath = path.posix.join('scripts', 'release', 'publish-github-release.js');
     const releaseScriptPath = path.join(repoRoot, releaseScriptRelativePath);
     const releaseWorkflowPath = path.join(repoRoot, '.github', 'workflows', 'release.yml');
 
     test('exposes a checked-in GitHub release helper and notes for the current version', () => {
         expect(packageJson.scripts['release:github']).toBe(`node ${releaseScriptRelativePath}`);
+        expect(packageJson.scripts['chronicle:sync-repo-saga']).toBe('node scripts/repo-saga/update-quarterly-saga.mjs --sync-only');
+        expect(packageJson.scripts['chronicle:update']).toBe('node scripts/repo-saga/update-quarterly-saga.mjs');
         expect(fs.existsSync(releaseScriptPath)).toBe(true);
 
         const currentReleaseNotesPath = path.join(repoRoot, 'docs', 'releases', `${packageJson.version}.md`);
@@ -42,6 +44,13 @@ describe('GitHub release workflow', () => {
         expect(workflow).toContain('if [ "${{ github.event_name }}" = "workflow_dispatch" ]');
         expect(workflow).toContain('inputs.tag');
         expect(workflow).toContain("^[0-9]+\\.[0-9]+\\.[0-9]+$");
+        expect(workflow).toContain('refresh_chronicle:');
+        expect(workflow).toContain('needs: publish');
+        expect(workflow).toContain('ref: main');
+        expect(workflow).toContain('node scripts/repo-saga/update-quarterly-saga.mjs --tag "$TAG_NAME"');
+        expect(workflow).toContain('git diff --quiet -- README.md README_*.md docs/repo-saga/*.svg');
+        expect(workflow).toContain('git add README.md README_*.md docs/repo-saga/*.svg');
+        expect(workflow).toContain('git push origin HEAD:main');
     });
 
     const maybeDescribeReleaseScript = fs.existsSync(releaseScriptPath) ? describe : describe.skip;
@@ -91,8 +100,10 @@ describe('GitHub release workflow', () => {
                 writeFile(tempRoot, 'manifest.json');
                 writeFile(tempRoot, 'styles.css');
                 writeFile(tempRoot, 'README.md');
-                const englishNotesFile = writeFile(tempRoot, path.join('docs', 'releases', '1.8.2.md'));
-                const chineseNotesFile = writeFile(tempRoot, path.join('docs', 'releases', '1.8.2.zh-CN.md'));
+                const englishNotesRelativePath = path.posix.join('docs', 'releases', '1.8.2.md');
+                const chineseNotesRelativePath = path.posix.join('docs', 'releases', '1.8.2.zh-CN.md');
+                const englishNotesFile = writeFile(tempRoot, englishNotesRelativePath);
+                const chineseNotesFile = writeFile(tempRoot, chineseNotesRelativePath);
 
                 const inputs = resolveReleaseInputs(tempRoot, '1.8.2');
                 const notesFile = composeReleaseNotesFile(inputs);
@@ -112,11 +123,11 @@ describe('GitHub release workflow', () => {
                 });
                 expect(fs.readFileSync(notesFile, 'utf8')).toBe(
                     [
-                        'docs/releases/1.8.2.md',
+                        englishNotesRelativePath,
                         '',
                         '---',
                         '',
-                        'docs/releases/1.8.2.zh-CN.md',
+                        chineseNotesRelativePath,
                         ''
                     ].join('\n')
                 );
