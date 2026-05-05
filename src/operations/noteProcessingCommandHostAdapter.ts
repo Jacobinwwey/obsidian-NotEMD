@@ -1,6 +1,6 @@
 import { App, Editor, MarkdownView, TFile, TFolder } from 'obsidian';
 import { BatchProgressStore } from '../batchProgressStore';
-import { processFile, generateContentForTitle } from '../fileUtils';
+import { batchGenerateContentForTitles, processFile, generateContentForTitle } from '../fileUtils';
 import { formatI18n } from '../i18n';
 import { researchAndSummarize } from '../searchUtils';
 import { chunkArray, createConcurrentProcessor, delay } from '../utils';
@@ -19,6 +19,10 @@ export interface NoteProcessingCommandUiStrings {
         batchProcessingFinishedWithErrors: string;
         batchProcessingSuccess: string;
         batchProcessingError: string;
+        batchGenerationCancelled: string;
+        batchGenerationFinishedWithErrors: string;
+        batchGenerationSuccess: string;
+        batchGenerationError: string;
         contentGenerationSuccess: string;
         contentGenerationError: string;
         researchError: string;
@@ -34,6 +38,7 @@ export interface NoteProcessingCommandUiStrings {
             research: string;
             processing: string;
             batchProcessing: string;
+            batchGeneration: string;
         };
     };
 }
@@ -47,6 +52,7 @@ export interface NoteProcessingCommandHost {
     getFolderByPath: (path: string) => TFolder | null;
     getFiles: () => TFile[];
     getFolderSelection: () => Promise<string | null>;
+    resolveCompleteFolderPath: (sourceFolderPath: string) => string | null;
     getStepStatusText: (current: number, total: number, label: string) => string;
     currentProcessingFileBasename: { value: string | null };
     getBatchProgressStore: () => Pick<BatchProgressStore, 'start' | 'markCompleted'>;
@@ -228,6 +234,97 @@ export async function runResearchAndSummarizeCommandWithHost(
             }
         }
     });
+}
+
+export async function runBatchGenerateContentForTitlesCommandWithHost(
+    host: NoteProcessingCommandHost,
+    reporter?: ProgressReporter,
+    folderPathOverride?: string,
+    batchGenerateContentForTitlesImpl: typeof batchGenerateContentForTitles = batchGenerateContentForTitles
+): Promise<{ sourceFolderPath: string; completeFolderPath: string } | null> {
+    const actionLabel = host.getActionLabel('batch-generate-from-titles');
+    let commandResult: { sourceFolderPath: string; completeFolderPath: string } | null = null;
+
+    await runBusyReporterCommandWithHost(host, actionLabel, reporter, async (useReporter) => {
+        let uiStrings = host.getUiStrings();
+
+        try {
+            await host.loadSettings();
+            uiStrings = host.getUiStrings();
+            const folderPath = folderPathOverride ?? await host.getFolderSelection();
+            if (!folderPath) {
+                useReporter.log(uiStrings.notices.batchGenerationCancelled);
+                useReporter.updateStatus(uiStrings.notices.batchGenerationCancelled, -1);
+                throw new Error(uiStrings.notices.batchGenerationCancelled);
+            }
+
+            host.updateStatusBar(host.getRunningActionText(actionLabel));
+            useReporter.log(host.getRunningActionText(actionLabel));
+
+            const { errors } = await batchGenerateContentForTitlesImpl(
+                host.getApp(),
+                host.getSettings(),
+                folderPath,
+                useReporter
+            );
+
+            const completeFolderPath = host.resolveCompleteFolderPath(folderPath);
+            if (!completeFolderPath) {
+                useReporter.log('Could not determine completed folder path for Mermaid fix.');
+            } else {
+                await host.maybeAutoFixMermaidForFolder(completeFolderPath, useReporter, 'batch generate from titles');
+            }
+
+            if (!useReporter.cancelled) {
+                if (errors.length > 0) {
+                    const errorSummary = formatI18n(uiStrings.notices.batchGenerationFinishedWithErrors, {
+                        count: errors.length
+                    });
+                    useReporter.log(`⚠️ ${errorSummary}`);
+                    useReporter.updateStatus(errorSummary, -1);
+                    host.updateStatusBar(errorSummary);
+                    host.showNotice(errorSummary, 10000);
+                } else {
+                    const completeText = host.getActionCompleteText(actionLabel);
+                    useReporter.updateStatus(completeText, 100);
+                    host.updateStatusBar(completeText);
+                    host.showNotice(formatI18n(uiStrings.notices.batchGenerationSuccess, {
+                        folderPath
+                    }), 5000);
+                    host.completeReporter(useReporter);
+                }
+
+                if (completeFolderPath) {
+                    commandResult = {
+                        sourceFolderPath: folderPath,
+                        completeFolderPath
+                    };
+                }
+            } else {
+                host.updateStatusBar(uiStrings.notices.batchGenerationCancelled);
+                host.showNotice(uiStrings.notices.batchGenerationCancelled);
+            }
+        } catch (error: unknown) {
+            const { errorMessage, errorDetails } = normalizeError(
+                error,
+                'An unknown error occurred during batch generation.'
+            );
+
+            if (!errorMessage.includes('cancelled')) {
+                host.logError('Notemd Batch Generation Error:', errorDetails);
+                host.showNotice(formatI18n(uiStrings.notices.batchGenerationError, {
+                    message: errorMessage
+                }), 10000);
+                host.openErrorModal(uiStrings.errorModal.titles.batchGeneration, errorDetails);
+                await host.saveErrorLog(error, useReporter);
+            }
+
+            useReporter.log(`Batch Error: ${errorMessage}`);
+            host.failReporterAction(useReporter, errorMessage);
+        }
+    });
+
+    return commandResult;
 }
 
 export async function runProcessWithNotemdCommandWithHost(

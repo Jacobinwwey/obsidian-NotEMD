@@ -75,6 +75,7 @@ import {
 } from './operations/configProfileCommandHostAdapter';
 import {
     NoteProcessingCommandHost,
+    runBatchGenerateContentForTitlesCommandWithHost,
     runGenerateContentForTitleCommandWithHost,
     runProcessFolderWithNotemdCommandWithHost,
     runProcessWithNotemdCommandWithHost,
@@ -225,6 +226,7 @@ export default class NotemdPlugin extends Plugin {
             },
             getFiles: () => this.app.vault.getFiles(),
             getFolderSelection: () => this.getFolderSelection(),
+            resolveCompleteFolderPath: (sourceFolderPath) => this.resolveCompleteFolderPath(sourceFolderPath),
             getStepStatusText: (current, total, label) => this.getStepStatusText(current, total, label),
             currentProcessingFileBasename: this.currentProcessingFileBasename,
             getBatchProgressStore: () => this.getBatchProgressStore(),
@@ -1171,83 +1173,11 @@ export default class NotemdPlugin extends Plugin {
         reporter?: ProgressReporter,
         folderPathOverride?: string
     ): Promise<{ sourceFolderPath: string; completeFolderPath: string } | null> {
-        if (this.isBusy) { new Notice(this.getUiStrings().notices.notemdBusy); return null; }
-        this.isBusy = true;
-        const useReporter = reporter || this.getReporter();
-        let i18n = this.getUiStrings();
-        const actionLabel = this.getActionLabel('batch-generate-from-titles');
-
-        const maybeSidebar = useReporter as any;
-        this.startReporterAction(useReporter, actionLabel);
-
-        try {
-            await this.loadSettings();
-            i18n = this.getUiStrings();
-            const folderPath = folderPathOverride ?? await this.getFolderSelection();
-            if (!folderPath) {
-                useReporter.log(i18n.notices.batchGenerationCancelled);
-                useReporter.updateStatus(i18n.notices.batchGenerationCancelled, -1);
-                throw new Error(i18n.notices.batchGenerationCancelled);
-            }
-
-            this.updateStatusBar(this.getRunningActionText(actionLabel));
-            useReporter.log(this.getRunningActionText(actionLabel));
-
-            const { errors } = await batchGenerateContentForTitles(this.app, this.settings, folderPath, useReporter); // Call utility
-
-            const completeFolderPath = this.resolveCompleteFolderPath(folderPath);
-            if (!completeFolderPath) {
-                useReporter.log("Could not determine completed folder path for Mermaid fix.");
-            } else {
-                await this.maybeAutoFixMermaidForFolder(completeFolderPath, useReporter, 'batch generate from titles');
-            }
-
-            if (!useReporter.cancelled) {
-                if (errors.length > 0) {
-                    const errorSummary = formatI18n(i18n.notices.batchGenerationFinishedWithErrors, { count: errors.length });
-                    useReporter.log(`⚠️ ${errorSummary}`); useReporter.updateStatus(errorSummary, -1);
-                    this.updateStatusBar(errorSummary); new Notice(errorSummary, 10000);
-                } else {
-                    const completeText = this.getActionCompleteText(actionLabel);
-                    useReporter.updateStatus(completeText, 100); this.updateStatusBar(completeText);
-                    new Notice(formatI18n(i18n.notices.batchGenerationSuccess, { folderPath }), 5000);
-                    if (useReporter instanceof ProgressModal) setTimeout(() => useReporter.close(), 2000);
-                }
-                if (completeFolderPath) {
-                    return {
-                        sourceFolderPath: folderPath,
-                        completeFolderPath
-                    };
-                }
-            } else {
-                 this.updateStatusBar(i18n.notices.batchGenerationCancelled);
-                 new Notice(i18n.notices.batchGenerationCancelled);
-            }
-
-        } catch (error: unknown) { // Changed to unknown
-            let errorMessage = 'An unknown error occurred during batch generation.';
-            let errorDetails = String(error);
-            if (error instanceof Error) {
-                errorMessage = error.message;
-                errorDetails = error.stack || error.message;
-            }
-            if (!errorMessage.includes("cancelled")) {
-                console.error("Notemd Batch Generation Error:", errorDetails);
-                new Notice(formatI18n(i18n.notices.batchGenerationError, { message: errorMessage }), 10000);
-                this.openLocalizedErrorModal(i18n.errorModal.titles.batchGeneration, errorDetails);
-
-                // Save error log
-                await saveErrorLog(this.app, useReporter, error, this.settings);
-            }
-            useReporter.log(`Batch Error: ${errorMessage}`);
-            this.failReporterAction(useReporter, errorMessage);
-        } finally {
-            if (maybeSidebar instanceof NotemdSidebarView) {
-                maybeSidebar.finishProcessing();
-            }
-            this.isBusy = false;
-        }
-        return null;
+        return runBatchGenerateContentForTitlesCommandWithHost(
+            this.createNoteProcessingCommandHost(),
+            reporter,
+            folderPathOverride
+        );
     }
 
     /** Command: Check and Remove Duplicate Concept Notes */

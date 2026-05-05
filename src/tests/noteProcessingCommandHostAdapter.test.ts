@@ -34,6 +34,10 @@ function createUiStrings() {
             batchProcessingFinishedWithErrors: 'Batch finished with {count} errors',
             batchProcessingSuccess: 'Processed {count} files',
             batchProcessingError: 'Batch processing failed: {message}',
+            batchGenerationCancelled: 'Batch generation cancelled',
+            batchGenerationFinishedWithErrors: 'Batch generation finished with {count} errors',
+            batchGenerationSuccess: 'Generated content in {folderPath}',
+            batchGenerationError: 'Batch generation failed: {message}',
             contentGenerationSuccess: 'Generated {file}',
             contentGenerationError: 'Content generation failed: {message}',
             researchError: 'Research failed: {message}'
@@ -48,7 +52,8 @@ function createUiStrings() {
                 contentGeneration: 'Content Generation Error',
                 research: 'Research Error',
                 processing: 'Processing Error',
-                batchProcessing: 'Batch Processing Error'
+                batchProcessing: 'Batch Processing Error',
+                batchGeneration: 'Batch Generation Error'
             }
         }
     };
@@ -74,6 +79,7 @@ function createHost(reporter: ProgressReporter, initiallyBusy = false) {
             getStepStatusText: jest.fn((current: number, total: number, label: string) => `${current}/${total} ${label}`),
             currentProcessingFileBasename: { value: null },
             getBatchProgressStore: jest.fn(() => batchProgressStore),
+            resolveCompleteFolderPath: jest.fn(() => 'Concepts_complete'),
             getUiStrings: jest.fn(() => createUiStrings()),
             getActionLabel: jest.fn((actionId: string) => {
                 if (actionId === 'process-current-add-links') {
@@ -84,6 +90,9 @@ function createHost(reporter: ProgressReporter, initiallyBusy = false) {
                 }
                 if (actionId === 'generate-from-title') {
                     return 'Generate from title';
+                }
+                if (actionId === 'batch-generate-from-titles') {
+                    return 'Batch generate';
                 }
                 if (actionId === 'research-and-summarize') {
                     return 'Research & summarize';
@@ -245,6 +254,36 @@ describe('note processing command host adapter', () => {
         expect(reporter.updateStatus).toHaveBeenCalledWith('No markdown files in Concepts', 100);
         expect(getBatchProgressStore().start).not.toHaveBeenCalled();
         expect(host.completeReporter).toHaveBeenCalledWith(reporter);
+        expect(host.finalizeReporter).toHaveBeenCalledWith(reporter);
+        expect(getBusy()).toBe(false);
+    });
+
+    test('batch generate command returns resolved folders and reuses shared reporter cleanup', async () => {
+        const reporter = createReporter();
+        const { host, getBusy } = createHost(reporter);
+        const batchGenerateImpl = jest.fn().mockResolvedValue({ errors: [] });
+        const { runBatchGenerateContentForTitlesCommandWithHost } = loadModule();
+
+        const result = await runBatchGenerateContentForTitlesCommandWithHost(
+            host,
+            reporter,
+            'Concepts',
+            batchGenerateImpl
+        );
+
+        expect(batchGenerateImpl).toHaveBeenCalledWith(host.getApp(), host.getSettings(), 'Concepts', reporter);
+        expect(host.resolveCompleteFolderPath).toHaveBeenCalledWith('Concepts');
+        expect(host.maybeAutoFixMermaidForFolder).toHaveBeenCalledWith(
+            'Concepts_complete',
+            reporter,
+            'batch generate from titles'
+        );
+        expect(host.showNotice).toHaveBeenCalledWith('Generated content in Concepts', 5000);
+        expect(host.completeReporter).toHaveBeenCalledWith(reporter);
+        expect(result).toEqual({
+            sourceFolderPath: 'Concepts',
+            completeFolderPath: 'Concepts_complete'
+        });
         expect(host.finalizeReporter).toHaveBeenCalledWith(reporter);
         expect(getBusy()).toBe(false);
     });
