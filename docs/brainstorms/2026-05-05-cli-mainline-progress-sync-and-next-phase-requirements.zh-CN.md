@@ -38,7 +38,7 @@ topic: cli-mainline-progress-sync-and-next-phase-requirements
 剩余问题现在已经更窄，也更难：
 
 1. 先前最高价值的公共 direct command surface 已不再内联。`testLlmConnectionCommand`、`generateDiagramCommand` 与 `previewExperimentalDiagramCommand` 现在都通过 host adapter 代理，并返回结构化结果。
-2. 真正剩余的缺口已经下移一层：实质性的 save/artifact execution 现在已进入 `src/operations/diagramCommandExecution.ts`，而 `diagram.preview` 与 provider connection-test 的 typed contract 也已落地。当前剩余问题变成：在 `diagram.generate` 已补上 `outputPath` 与 `previewOpened` 之后，这些内部 save/artifact 分支是否还需要继续下探 contract depth。
+2. 真正剩余的缺口已经下移一层：实质性的 save/artifact execution 现在已进入 `src/operations/diagramCommandExecution.ts`，而 `diagram.preview` 与 provider connection-test 的 typed contract 也已落地。当前剩余问题变成：在 `diagram.generate` 已暴露 wrapper-result 字段（`kind`、`executionMode`、`sourcePath`、`actionLabel`、`operationInput`、`generation`、`outputPath`、`previewOpened`）之后，这些内部 save/artifact 分支是否还需要继续下探 contract depth。
 3. selection/export 与 workflow/settings surfaces 仍需要超出 command-trigger parity 的更深 contract depth。
 4. packaging isolation 与 maintainer-local semantic verification 仍然重要，但它们现在已经排在更深一层的 diagram/provider contract 决策之后，而不是阻塞项。
 
@@ -74,7 +74,7 @@ topic: cli-mainline-progress-sync-and-next-phase-requirements
   - `provider.profile.import`
   - `cli.capability-manifest.export`
   - `cli.invocation-contract.export`
-- R5. 下一批 contract-tightening 现在必须转向更深层的 diagram/provider command core，重点覆盖现在位于 `src/operations/diagramCommandExecution.ts` 中的内部 save/artifact 分支，以及新落地的 `diagram.generate.outputPath` / `diagram.generate.previewOpened` 字段与 `diagram.preview` / `provider.connection.test` schema 之后是否还需要更深 contract depth，同时保持 wrapper 批次与 write-heavy proof set 稳定、文档对齐且 registry 一致。
+- R5. 下一批 contract-tightening 现在必须转向更深层的 diagram/provider command core，重点覆盖现在位于 `src/operations/diagramCommandExecution.ts` 中的内部 save/artifact 分支，以及新落地的 `diagram.generate` wrapper envelope 与 `diagram.preview` / `provider.connection.test` schema 之后是否还需要更深 contract depth，同时保持 wrapper 批次与 write-heavy proof set 稳定、文档对齐且 registry 一致。
 
 **宿主副作用收口**
 - R6. `file.process-add-links`、`file.process-folder-add-links`、`content.generate-from-title`、`content.batch-generate-from-titles`、`mermaid.batch-fix`、`concept.dedupe`、`translate.*`、`formula.*` 与 `content.extract-original-text` 现在应被视作已交付 proof slice。当前应保留这些 family-local result object 与 host-owned success/no-file/confirmation 语义，等待剩余 direct surfaces 补齐。
@@ -83,7 +83,7 @@ topic: cli-mainline-progress-sync-and-next-phase-requirements
 
 **剩余 `src/main.ts` 瘦身**
 - R9. note-processing 与 utility host-adapter 抽离现在已经足够完整，回头重开这些家族只会制造 churn。下一批 `src/main.ts` 瘦身应只瞄准剩余更深层的 diagram/provider helper。
-- R10. diagram save/generate/preview 与 provider connection-test 要么获得与已抽取家族同等级的 discoverable operation/result 边界，要么在文档中明确声明为 command-only surface。公共 wrapper、typed `diagram.preview` / `provider.connection.test` contract，以及更深一层的 `diagram.generate` 输出后续字段都已经落地；当前开放问题是剩余 save/artifact internals 是否还值得继续提升为额外 typed boundary。
+- R10. diagram save/generate/preview 与 provider connection-test 要么获得与已抽取家族同等级的 discoverable operation/result 边界，要么在文档中明确声明为 command-only surface。公共 wrapper、typed `diagram.preview` / `provider.connection.test` contract，以及更深一层的 `diagram.generate` wrapper-result 字段都已经落地；当前开放问题是剩余 save/artifact internals 是否还值得继续提升为额外 typed boundary。
 
 **主线与工作区卫生**
 - R11. `main` 集成必须继续在干净 worktree 或干净分支上完成，不能清理或复用 dirty root worktree。
