@@ -124,14 +124,23 @@ const DIAGRAM_GENERATE_INPUT_SCHEMA: OperationSchema = {
 
 const DIAGRAM_GENERATE_RESULT_SCHEMA: OperationSchema = {
     type: 'object',
-    required: ['plan', 'spec', 'artifact', 'outputPath', 'previewOpened'],
+    required: ['kind', 'executionMode', 'sourcePath', 'actionLabel'],
     properties: {
-        plan: { type: 'object' },
-        spec: { type: 'object' },
-        artifact: { type: 'object' },
+        kind: {
+            type: 'string',
+            enum: ['success', 'error']
+        },
+        executionMode: {
+            type: 'string',
+            enum: ['save-mermaid', 'save-artifact', 'preview-artifact']
+        },
+        sourcePath: { type: 'string' },
+        actionLabel: { type: 'string' },
+        operationInput: { type: 'object' },
+        generation: { type: 'object' },
         outputPath: { type: 'string' },
         previewOpened: { type: 'boolean' },
-        renderError: { type: 'string' }
+        errorMessage: { type: 'string' }
     }
 };
 
@@ -146,12 +155,17 @@ const DIAGRAM_PREVIEW_INPUT_SCHEMA: OperationSchema = {
 
 const DIAGRAM_PREVIEW_RESULT_SCHEMA: OperationSchema = {
     type: 'object',
-    required: ['artifact', 'previewOpened'],
+    required: ['kind', 'sourcePath', 'actionLabel'],
     properties: {
+        kind: {
+            type: 'string',
+            enum: ['success', 'error']
+        },
         sourcePath: { type: 'string' },
         actionLabel: { type: 'string' },
         artifact: { type: 'object' },
-        previewOpened: { type: 'boolean' }
+        previewOpened: { type: 'boolean' },
+        errorMessage: { type: 'string' }
     }
 };
 

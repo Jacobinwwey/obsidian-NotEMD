@@ -38,7 +38,7 @@ As of May 5, 2026, Notemd's CLI-oriented mainline is no longer blocked on broad 
 The remaining problem is now narrower and harder:
 
 1. The previous highest-value public direct command surfaces are no longer inlined. `testLlmConnectionCommand`, `generateDiagramCommand`, and `previewExperimentalDiagramCommand` now delegate through host adapters and return structured results.
-2. The real remaining gap is one layer deeper: substantive save/artifact execution now lives in `src/operations/diagramCommandExecution.ts`, and the typed contract decision for `diagram.preview` plus provider connection-test is already landed. The remaining question is how much deeper save/artifact branch contract depth should move below the current `diagram.generate` result shape now that `outputPath` and `previewOpened` are exported too.
+2. The real remaining gap is one layer deeper: substantive save/artifact execution now lives in `src/operations/diagramCommandExecution.ts`, and the typed contract decision for `diagram.preview` plus provider connection-test is already landed. The remaining question is how much deeper save/artifact branch contract depth should move below the current `diagram.generate` wrapper-result shape now that the envelope fields (`kind`, `executionMode`, `sourcePath`, `actionLabel`, `operationInput`, `generation`, `outputPath`, `previewOpened`) are exported too.
 3. Selection/export and workflow/settings surfaces still need further contract depth beyond command-trigger parity.
 4. Packaging isolation and maintainer-local semantic verification still matter, but they are now downstream of the deeper diagram/provider contract decision rather than blockers for it.
 
@@ -74,7 +74,7 @@ The next phase therefore should not focus on "more CLI commands" and should no l
   - `provider.profile.import`
   - `cli.capability-manifest.export`
   - `cli.invocation-contract.export`
-- R5. The next contract-tightening batch must now target the deeper diagram/provider command core, especially the internal save/artifact branches now housed in `src/operations/diagramCommandExecution.ts`, and any richer branch contract depth beyond the newly-landed `diagram.generate.outputPath` / `diagram.generate.previewOpened` fields and `diagram.preview` / `provider.connection.test` schemas, while keeping the wrapper batch and write-heavy proof set stable, documented, and registry-aligned.
+- R5. The next contract-tightening batch must now target the deeper diagram/provider command core, especially the internal save/artifact branches now housed in `src/operations/diagramCommandExecution.ts`, and any richer branch contract depth beyond the newly-landed `diagram.generate` wrapper envelope plus the `diagram.preview` / `provider.connection.test` schemas, while keeping the wrapper batch and write-heavy proof set stable, documented, and registry-aligned.
 
 **Host-side effect tightening**
 - R6. `file.process-add-links`, `file.process-folder-add-links`, `content.generate-from-title`, `content.batch-generate-from-titles`, `mermaid.batch-fix`, `concept.dedupe`, `translate.*`, `formula.*`, and `content.extract-original-text` now act as proof slices. Preserve their family-local result objects and host-owned success/no-file/confirmation semantics while the remaining direct surfaces catch up.
@@ -83,7 +83,7 @@ The next phase therefore should not focus on "more CLI commands" and should no l
 
 **Remaining `src/main.ts` slimming**
 - R9. Note-processing and utility host-adapter extraction is now broad enough that reopening those families would be low leverage. The next `src/main.ts` slimming slice should target only the remaining deeper diagram/provider helpers.
-- R10. Diagram save/generate/preview and provider connection-test flows must either gain the same discoverable operation/result boundary as the extracted families or be documented explicitly as command-only surfaces. The public wrappers, typed `diagram.preview` / `provider.connection.test` contracts, and the deeper `diagram.generate` output follow-through fields are now landed; the open question is whether the remaining save/artifact internals deserve additional typed boundaries.
+- R10. Diagram save/generate/preview and provider connection-test flows must either gain the same discoverable operation/result boundary as the extracted families or be documented explicitly as command-only surfaces. The public wrappers, typed `diagram.preview` / `provider.connection.test` contracts, and the deeper `diagram.generate` wrapper-result fields are now landed; the open question is whether the remaining save/artifact internals deserve additional typed boundaries.
 
 **Mainline and workspace hygiene**
 - R11. `main` integration must continue to happen from a clean worktree or clean branch. Do not clean or reuse the dirty root worktree.
