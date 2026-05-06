@@ -70,7 +70,7 @@ describe('CLI invocation contract', () => {
         }));
         expect(contract.operations[2].resultSchema).toEqual(expect.objectContaining({
             type: 'object',
-            required: expect.arrayContaining(['plan', 'spec', 'artifact', 'outputPath', 'previewOpened'])
+            required: expect.arrayContaining(['kind', 'executionMode', 'sourcePath', 'actionLabel'])
         }));
 
         expect(diagramGenerate).toEqual(expect.objectContaining({
@@ -78,8 +78,15 @@ describe('CLI invocation contract', () => {
             resultSchema: expect.objectContaining({
                 type: 'object',
                 properties: expect.objectContaining({
+                    kind: expect.any(Object),
+                    executionMode: expect.any(Object),
+                    sourcePath: expect.any(Object),
+                    actionLabel: expect.any(Object),
+                    operationInput: expect.any(Object),
+                    generation: expect.any(Object),
                     outputPath: expect.any(Object),
-                    previewOpened: expect.any(Object)
+                    previewOpened: expect.any(Object),
+                    errorMessage: expect.any(Object)
                 })
             })
         }));
@@ -114,10 +121,14 @@ describe('CLI invocation contract', () => {
             }),
             resultSchema: expect.objectContaining({
                 type: 'object',
+                required: expect.arrayContaining(['kind', 'sourcePath', 'actionLabel']),
                 properties: expect.objectContaining({
+                    kind: expect.any(Object),
                     sourcePath: expect.any(Object),
+                    actionLabel: expect.any(Object),
                     previewOpened: expect.any(Object),
-                    artifact: expect.any(Object)
+                    artifact: expect.any(Object),
+                    errorMessage: expect.any(Object)
                 })
             })
         }));
