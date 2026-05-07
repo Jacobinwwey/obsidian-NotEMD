@@ -570,6 +570,10 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
                 await this.plugin.extractOriginalTextCommand(reporter);
                 break;
             }
+            case 'batch-extract-original-text': {
+                await this.plugin.batchExtractOriginalTextCommand(reporter);
+                break;
+            }
             case 'batch-mermaid-fix': {
                 const folderOverride = context?.lastGeneratedCompleteFolderPath || context?.preferredFolderPath || undefined;
                 await this.plugin.batchMermaidFixCommand(reporter, folderOverride);

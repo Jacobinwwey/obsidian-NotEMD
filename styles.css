@@ -27,6 +27,83 @@
     font-family: var(--notemd-sidebar-font);
 }
 
+.notemd-welcome-modal {
+    width: min(92vw, 760px);
+    max-width: 760px;
+    font-family: var(--notemd-sidebar-font);
+}
+
+.notemd-welcome-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9em;
+}
+
+.notemd-welcome-text,
+.notemd-welcome-sponsor,
+.notemd-welcome-closing {
+    margin: 0;
+    line-height: 1.6;
+}
+
+.notemd-welcome-release-notes {
+    border: 1px solid var(--notemd-border);
+    border-radius: 14px;
+    background:
+        linear-gradient(180deg,
+            color-mix(in srgb, var(--notemd-surface) 78%, #ffffff 22%) 0%,
+            color-mix(in srgb, var(--notemd-surface-alt) 90%, #ecfeff 10%) 100%);
+    padding: 1em;
+}
+
+.notemd-welcome-release-notes-heading {
+    margin: 0 0 0.35em;
+}
+
+.notemd-welcome-release-notes-intro {
+    margin: 0 0 0.8em;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+.notemd-welcome-release-notes-scroll {
+    max-height: min(32vh, 280px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8em;
+    padding-right: 0.2em;
+}
+
+.notemd-welcome-release-note {
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--background-primary) 88%, #f0fdfa 12%);
+    border: 1px solid color-mix(in srgb, var(--notemd-border) 84%, #ffffff 16%);
+    padding: 0.8em 0.9em;
+}
+
+.notemd-welcome-release-note-title {
+    margin: 0 0 0.45em;
+    font-size: 14px;
+}
+
+.notemd-welcome-release-note-list {
+    margin: 0;
+    padding-left: 1.2em;
+}
+
+.notemd-welcome-release-note-item {
+    margin: 0.32em 0;
+    line-height: 1.5;
+}
+
+.notemd-welcome-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6em;
+    margin-top: 1em;
+}
+
 .notemd-diagram-preview-modal {
     padding: 1em;
     max-width: 920px;

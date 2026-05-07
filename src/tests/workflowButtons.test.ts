@@ -78,6 +78,7 @@ describe('workflowButtons parser', () => {
         const actionIds = SIDEBAR_ACTION_DEFINITIONS.map(def => def.id);
         expect(actionIds).not.toContain('run-developer-provider-diagnostic');
         expect(actionIds).not.toContain('run-developer-provider-stability-diagnostic');
+        expect(actionIds).toContain('batch-extract-original-text');
     });
 
     test('exposes automation metadata for current action ids', () => {

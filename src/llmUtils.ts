@@ -151,6 +151,32 @@ function buildOpenAICompatibleHeaders(provider: LLMProviderConfig): Record<strin
     return headers;
 }
 
+function trimTrailingSlashes(value: string): string {
+    return value.replace(/\/+$/, '');
+}
+
+function normalizeOpenAICompatibleBaseUrl(baseUrl: string): string {
+    const trimmed = trimTrailingSlashes(baseUrl.trim());
+    if (!trimmed) {
+        return trimmed;
+    }
+
+    if (trimmed.endsWith('/chat/completions')) {
+        return trimmed.slice(0, -'/chat/completions'.length);
+    }
+
+    if (trimmed.endsWith('/models')) {
+        return trimmed.slice(0, -'/models'.length);
+    }
+
+    return trimmed;
+}
+
+function buildOpenAICompatibleUrl(baseUrl: string, path: 'chat/completions' | 'models'): string {
+    const normalizedBaseUrl = normalizeOpenAICompatibleBaseUrl(baseUrl);
+    return `${normalizedBaseUrl}/${path}`;
+}
+
 const TRANSIENT_NETWORK_ERROR_PATTERNS = [
     'err_connection_closed',
     'err_connection_reset',
@@ -2245,10 +2271,11 @@ async function testOpenAICompatibleAPI(provider: LLMProviderConfig): Promise<{ s
     let response;
     const headers = buildOpenAICompatibleHeaders(provider);
     const apiTestMode = getLLMProviderDefinition(provider.name)?.apiTestMode ?? 'chat-only';
+    const normalizedBaseUrl = normalizeOpenAICompatibleBaseUrl(provider.baseUrl);
 
     if (apiTestMode === 'models-then-chat') {
         let response;
-        const modelsUrl = `${provider.baseUrl}/models`;
+        const modelsUrl = buildOpenAICompatibleUrl(provider.baseUrl, 'models');
 
         try {
             const modelsRequest = {
@@ -2266,11 +2293,11 @@ async function testOpenAICompatibleAPI(provider: LLMProviderConfig): Promise<{ s
         }
 
         if (response && response.status >= 200 && response.status < 300) {
-            return { success: true, message: `Successfully connected to ${provider.name} at ${provider.baseUrl}.` };
+            return { success: true, message: `Successfully connected to ${provider.name} at ${normalizedBaseUrl}.` };
         }
     }
 
-    const chatUrl = `${provider.baseUrl}/chat/completions`;
+    const chatUrl = buildOpenAICompatibleUrl(provider.baseUrl, 'chat/completions');
     const responseBody = buildOpenAICompatibleRequestBody(
         provider,
         provider.model,
@@ -2301,7 +2328,7 @@ async function testOpenAICompatibleAPI(provider: LLMProviderConfig): Promise<{ s
         throw new Error(`${provider.name} API error: ${response.status} - ${errorText}`);
     }
 
-    return { success: true, message: `Successfully connected to ${provider.name} at ${provider.baseUrl} using model '${provider.model}'.` };
+    return { success: true, message: `Successfully connected to ${provider.name} at ${normalizedBaseUrl} using model '${provider.model}'.` };
 }
 
 
@@ -2934,7 +2961,7 @@ async function executeXaiApi(provider: LLMProviderConfig, modelName: string, pro
 async function executeOpenAICompatibleApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings, signal?: AbortSignal): Promise<string> {
     ensureProviderApiKey(provider);
 
-    const url = `${provider.baseUrl}/chat/completions`;
+    const url = buildOpenAICompatibleUrl(provider.baseUrl, 'chat/completions');
     const requestBody = buildOpenAICompatibleRequestBody(
         provider,
         modelName,
@@ -2994,7 +3021,7 @@ export async function callOpenAICompatibleDiagnosticWithMode(
 ): Promise<string> {
     ensureProviderApiKey(provider);
 
-    const url = `${provider.baseUrl}/chat/completions`;
+    const url = buildOpenAICompatibleUrl(provider.baseUrl, 'chat/completions');
     const requestBody = buildOpenAICompatibleRequestBody(
         provider,
         modelName,

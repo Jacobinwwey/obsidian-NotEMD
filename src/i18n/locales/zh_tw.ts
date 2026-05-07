@@ -9,6 +9,7 @@ export const STRINGS_ZH_TW: DeepPartial<NotemdEnglishStrings> = {
         cancel: '取消',
         close: '關閉',
         copy: '複製',
+        configure: '進行設定',
         ready: '就緒',
         standby: '待命',
         unknownError: '未知錯誤'
@@ -98,6 +99,8 @@ export const STRINGS_ZH_TW: DeepPartial<NotemdEnglishStrings> = {
             title: '歡迎使用 Notemd',
             introText: 'Notemd 透過 LLM 增強您的 Obsidian 工作流程：生成維基連結、提取概念、翻譯筆記、建立圖表等。',
             setupHint: '如需開始，請在設定中配置 LLM 提供商。支援 DeepSeek、OpenAI、Anthropic、Google 等眾多提供商。',
+            releaseNotesHeading: '最近更新',
+            releaseNotesIntro: '查看最近兩個版本的重要更新，幫助你快速了解目前功能變化。',
             sponsorText: 'Notemd 是免費開源插件。如果您覺得有用，請考慮支持開發。',
             configureButton: '配置 LLM',
             sponsorButton: '給 GitHub 加星',
@@ -114,7 +117,7 @@ export const STRINGS_ZH_TW: DeepPartial<NotemdEnglishStrings> = {
         providerConfig: {
             heading: 'LLM 提供者',
             summaryTitle: '提供者預設已擴充到 {count} 項。',
-            summaryDesc: 'OpenAI-compatible 提供者現在共用同一條執行期路徑。內建預設涵蓋 Qwen、Doubao、Moonshot、GLM、MiniMax、Baidu Qianfan、SiliconFlow 等中國常用服務，而通用的「OpenAI Compatible」預設也可指向 LiteLLM、vLLM、Perplexity、Vercel AI Gateway 或你自己的代理。',
+            summaryDesc: 'OpenAI-compatible 提供者現在共用同一條執行期路徑。內建預設涵蓋 Qwen、Doubao、Moonshot、Xiaomi MiMo、GLM、MiniMax、Baidu Qianfan、SiliconFlow 等中國常用服務，而通用的「OpenAI Compatible」預設也可指向 LiteLLM、vLLM、Perplexity、Vercel AI Gateway 或你自己的代理。',
             categoryCloud: '雲端',
             categoryGateway: '閘道',
             categoryLocal: '本機',
@@ -338,6 +341,8 @@ export const STRINGS_ZH_TW: DeepPartial<NotemdEnglishStrings> = {
             questionsName: '擷取問題',
             questionsDesc: '輸入要擷取對應原文的問題列表，每行一個。',
             questionsPlaceholder: '在此輸入你的問題……',
+            batchModeName: '為目前資料夾啟用批次擷取',
+            batchModeDesc: '新增資料夾層級命令，對所選資料夾中的所有符合條件檔案執行「擷取指定原文」。',
             translateOutputName: '將輸出翻譯為對應語言',
             translateOutputDesc: '啟用後，輸出會包含所選擷取語言的翻譯內容。',
             mergedQueryName: '合併查詢模式',
@@ -376,7 +381,7 @@ export const STRINGS_ZH_TW: DeepPartial<NotemdEnglishStrings> = {
         processing: {
             heading: '處理參數',
             chunkWordCountName: '分塊詞數',
-            chunkWordCountDesc: '送往 LLM 的每個分塊最大詞數。',
+            chunkWordCountDesc: '送往 LLM 的每個分塊最大詞數。建議約為「最大 Token 數」的 1/3。',
             maxTokensName: '最大 Token 數',
             maxTokensDesc: 'LLM 每次回應可產生的最大 Token 數。',
             duplicateDetectionName: '啟用重複檢測',
@@ -493,6 +498,10 @@ export const STRINGS_ZH_TW: DeepPartial<NotemdEnglishStrings> = {
                 label: '擷取指定原文',
                 tooltip: '依已設定問題擷取逐字原文摘錄。'
             },
+            batchExtractOriginalText: {
+                label: '批次擷取指定原文',
+                tooltip: '對所選資料夾中的所有符合條件檔案擷取已設定問題對應的原文片段。'
+            },
             batchMermaidFix: {
                 label: '批次修復 Mermaid',
                 tooltip: '在所選資料夾上執行 Mermaid/LaTeX 批次語法修復。'
@@ -581,6 +590,12 @@ export const STRINGS_ZH_TW: DeepPartial<NotemdEnglishStrings> = {
         noTopicFound: '找不到主題（請先選取文字，或使用筆記標題）。',
         selectValidWord: '請選取有效的詞語（至少 2 個字元）。',
         selectTopicTextOrUseNoteTitle: '請先在編輯器中選取主題文字，或確認筆記有標題。',
+        conceptNotePathRequiredTitle: '需要設定概念筆記路徑',
+        conceptNotePathRequiredBody: '目前操作需要先開啟「自訂概念筆記路徑」，並依規則設定「概念筆記資料夾路徑」，否則無法正常產生概念筆記檔案。',
+        conceptNotePathRequiredActionList: '受影響的動作：{actions}',
+        conceptNotePathRequiredConfigureHint: '點擊「進行設定」後會跳轉到 Notemd 設定中的概念筆記輸出位置。',
+        conceptNotePathWarningSuppressedOnce: '本次執行已略過概念筆記路徑提示。',
+        conceptNotePathWarningSuppressedForever: '後續執行將不再提示概念筆記路徑設定。',
         researchFailedOrNoResults: '「{topic}」的研究失敗或未返回結果，未產生摘要。',
         researchSummaryAppended: '已附加「{topic}」的研究摘要。',
         researchError: '研究過程中發生錯誤：{message}。請查看主控台。',

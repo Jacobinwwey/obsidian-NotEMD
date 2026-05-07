@@ -20,6 +20,15 @@ export interface ExtractOriginalTextResult {
     mergedMode: boolean;
 }
 
+export interface BatchExtractOriginalTextResult {
+    folderPath: string;
+    processedFileCount: number;
+    extractedCount: number;
+    cancelled: boolean;
+    fileResults: ExtractOriginalTextResult[];
+    errors: Array<{ file: string; message: string }>;
+}
+
 export async function extractOriginalText(
     app: App,
     plugin: ExtractOriginalTextPluginContext,

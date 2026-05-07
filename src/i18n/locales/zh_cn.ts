@@ -9,6 +9,7 @@ export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
         cancel: '取消',
         close: '关闭',
         copy: '复制',
+        configure: '进行配置',
         ready: '就绪',
         standby: '待命',
         unknownError: '未知错误'
@@ -98,6 +99,8 @@ export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
             title: '欢迎使用 Notemd',
             introText: 'Notemd 通过 LLM 增强您的 Obsidian 工作流：生成维基链接、提取概念、翻译笔记、创建图表等。',
             setupHint: '如需开始，请在设置中配置 LLM 提供商。支持 DeepSeek、OpenAI、Anthropic、Google 等众多提供商。',
+            releaseNotesHeading: '最近更新',
+            releaseNotesIntro: '查看最近两个版本的重要更新，帮助你快速了解当前功能变化。',
             sponsorText: 'Notemd 是免费开源插件。如果您觉得有用，请考虑支持开发。',
             configureButton: '配置 LLM',
             sponsorButton: '给 GitHub 加星',
@@ -114,7 +117,7 @@ export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
         providerConfig: {
             heading: 'LLM 提供商',
             summaryTitle: '提供商预设已扩展到 {count} 项。',
-            summaryDesc: 'OpenAI-compatible 提供商现在共享同一条运行时路径。内置预设覆盖 Qwen、Doubao、Moonshot、GLM、MiniMax、Baidu Qianfan、SiliconFlow 等中国常用服务，通用的 “OpenAI Compatible” 预设也可指向 LiteLLM、vLLM、Perplexity、Vercel AI Gateway 或你自己的代理。',
+            summaryDesc: 'OpenAI-compatible 提供商现在共享同一条运行时路径。内置预设覆盖 Qwen、Doubao、Moonshot、Xiaomi MiMo、GLM、MiniMax、Baidu Qianfan、SiliconFlow 等中国常用服务，通用的 “OpenAI Compatible” 预设也可指向 LiteLLM、vLLM、Perplexity、Vercel AI Gateway 或你自己的代理。',
             categoryCloud: '云端',
             categoryGateway: '网关',
             categoryLocal: '本地',
@@ -338,6 +341,8 @@ export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
             questionsName: '提取问题',
             questionsDesc: '输入要提取对应原文的问题列表，每行一个。',
             questionsPlaceholder: '在此输入你的问题……',
+            batchModeName: '为当前文件夹启用批量提取',
+            batchModeDesc: '新增文件夹级命令，对所选文件夹中的所有符合条件文件执行“提取指定原文”。',
             translateOutputName: '将输出翻译为对应语言',
             translateOutputDesc: '启用后，输出将包含所选提取语言的译文。',
             mergedQueryName: '合并查询模式',
@@ -376,7 +381,7 @@ export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
         processing: {
             heading: '处理参数',
             chunkWordCountName: '分块词数',
-            chunkWordCountDesc: '发送给 LLM 的每个分块最大词数。',
+            chunkWordCountDesc: '发送给 LLM 的每个分块最大词数。推荐约为“最大 Token 数”的 1/3。',
             maxTokensName: '最大 Token 数',
             maxTokensDesc: 'LLM 每次响应可生成的最大 Token 数。',
             duplicateDetectionName: '启用重复检测',
@@ -493,6 +498,10 @@ export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
                 label: '提取指定原文',
                 tooltip: '按已配置问题提取逐字原文摘录。'
             },
+            batchExtractOriginalText: {
+                label: '批量提取指定原文',
+                tooltip: '对所选文件夹中的所有符合条件文件提取已配置问题对应的原文片段。'
+            },
             batchMermaidFix: {
                 label: '批量修复 Mermaid',
                 tooltip: '在所选文件夹上运行 Mermaid/LaTeX 批量语法修复。'
@@ -581,6 +590,12 @@ export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
         noTopicFound: '未找到主题（请先选中文本，或使用笔记标题）。',
         selectValidWord: '请选择有效词语（至少 2 个字符）。',
         selectTopicTextOrUseNoteTitle: '请先在编辑器中选中主题文本，或确保笔记有标题。',
+        conceptNotePathRequiredTitle: '需要配置概念笔记路径',
+        conceptNotePathRequiredBody: '当前操作需要先开启“自定义概念笔记路径”，并按规则配置“概念笔记文件夹路径”，否则无法正常生成概念笔记文件。',
+        conceptNotePathRequiredActionList: '受影响的动作：{actions}',
+        conceptNotePathRequiredConfigureHint: '点击“进行配置”后将跳转到 Notemd 设置中的概念笔记输出位置。',
+        conceptNotePathWarningSuppressedOnce: '本次运行已跳过概念笔记路径提示。',
+        conceptNotePathWarningSuppressedForever: '后续运行将不再提示概念笔记路径配置。',
         researchFailedOrNoResults: '对“{topic}”的研究失败或未返回结果，未生成摘要。',
         researchSummaryAppended: '已追加“{topic}”的研究摘要。',
         researchError: '研究过程中出错：{message}。请查看控制台。',

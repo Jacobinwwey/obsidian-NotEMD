@@ -493,6 +493,36 @@ describe('llmUtils expanded provider support', () => {
         expect(requestBody.model).toBe('qwen3-coder-plus');
     });
 
+    test('callLLM routes Xiaomi MiMo through the OpenAI-compatible runtime', async () => {
+        const provider: LLMProviderConfig = {
+            name: 'Xiaomi MiMo',
+            apiKey: 'mimo-key',
+            baseUrl: 'https://api.xiaomimimo.com/v1',
+            model: 'mimo-v2.5-pro',
+            temperature: 1.0
+        };
+
+        (requestUrl as jest.Mock).mockResolvedValue({
+            status: 200,
+            json: { choices: [{ message: { content: 'mimo-ok' } }] },
+            text: '{"choices":[{"message":{"content":"mimo-ok"}}]}'
+        });
+
+        const result = await callLLM(provider, 'System prompt', 'Provider content', settings, reporter);
+
+        expect(result).toBe('mimo-ok');
+        expect(requestUrl).toHaveBeenCalledWith(expect.objectContaining({
+            url: 'https://api.xiaomimimo.com/v1/chat/completions',
+            method: 'POST',
+            headers: expect.objectContaining({
+                Authorization: 'Bearer mimo-key'
+            })
+        }));
+
+        const requestBody = JSON.parse((requestUrl as jest.Mock).mock.calls[0][0].body);
+        expect(requestBody.model).toBe('mimo-v2.5-pro');
+    });
+
     test('callLLM routes SiliconFlow through the OpenAI-compatible runtime', async () => {
         const provider: LLMProviderConfig = {
             name: 'SiliconFlow',
@@ -1276,6 +1306,37 @@ describe('llmUtils expanded provider support', () => {
         expect(requestBody.model).toBe('qwen3-coder-plus');
     });
 
+    test('testAPI uses direct chat probing for Xiaomi MiMo', async () => {
+        const provider: LLMProviderConfig = {
+            name: 'Xiaomi MiMo',
+            apiKey: 'mimo-key',
+            baseUrl: 'https://api.xiaomimimo.com/v1',
+            model: 'mimo-v2.5-pro',
+            temperature: 1.0
+        };
+
+        (requestUrl as jest.Mock).mockResolvedValue({
+            status: 200,
+            json: { choices: [{ message: { content: 'ok' } }] },
+            text: '{"choices":[{"message":{"content":"ok"}}]}'
+        });
+
+        const result = await testAPI(provider);
+
+        expect(result.success).toBe(true);
+        expect(requestUrl).toHaveBeenCalledTimes(1);
+        expect(requestUrl).toHaveBeenCalledWith(expect.objectContaining({
+            url: 'https://api.xiaomimimo.com/v1/chat/completions',
+            method: 'POST',
+            headers: expect.objectContaining({
+                Authorization: 'Bearer mimo-key'
+            })
+        }));
+
+        const requestBody = JSON.parse((requestUrl as jest.Mock).mock.calls[0][0].body);
+        expect(requestBody.model).toBe('mimo-v2.5-pro');
+    });
+
     test('testAPI uses direct chat probing for Z AI', async () => {
         const provider: LLMProviderConfig = {
             name: 'Z AI',
@@ -1485,6 +1546,16 @@ describe('llmUtils expanded provider support', () => {
                 baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
                 model: 'qwen3-coder-plus',
                 temperature: 0.2
+            } as LLMProviderConfig
+        },
+        {
+            name: 'Xiaomi MiMo',
+            provider: {
+                name: 'Xiaomi MiMo',
+                apiKey: 'mimo-key',
+                baseUrl: 'https://api.xiaomimimo.com/v1',
+                model: 'mimo-v2.5-pro',
+                temperature: 1.0
             } as LLMProviderConfig
         },
         {

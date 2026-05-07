@@ -65,6 +65,85 @@ export class NotemdSettingTab extends PluginSettingTab {
         return Math.min(normalized, 10);
     }
 
+    private sanitizePositiveInteger(rawValue: string, fallback: number, min = 1, max?: number): number {
+        const parsed = Number.parseInt(rawValue.trim(), 10);
+        if (!Number.isFinite(parsed)) {
+            return fallback;
+        }
+
+        const normalized = Math.floor(parsed);
+        if (normalized < min) {
+            return fallback;
+        }
+        if (typeof max === 'number' && normalized > max) {
+            return fallback;
+        }
+        return normalized;
+    }
+
+    private addDeferredTextSetting(
+        setting: Setting,
+        options: {
+            placeholder?: string;
+            value: string;
+            onCommit: (value: string) => Promise<void>;
+        }
+    ): void {
+        setting.addText(text => {
+            text.setPlaceholder(options.placeholder || '').setValue(options.value);
+
+            let lastCommittedValue = options.value;
+
+            const commit = async () => {
+                const nextValue = text.getValue();
+                if (nextValue === lastCommittedValue) {
+                    return;
+                }
+                await options.onCommit(nextValue);
+                lastCommittedValue = nextValue;
+            };
+
+            text.inputEl.addEventListener('blur', () => {
+                void commit();
+            });
+            text.inputEl.addEventListener('keydown', (event: KeyboardEvent) => {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    void commit();
+                    text.inputEl.blur();
+                }
+            });
+        });
+    }
+
+    private addDeferredNumberSetting(
+        setting: Setting,
+        options: {
+            placeholder?: string;
+            value: number;
+            onCommit: (rawValue: string) => Promise<string | void>;
+        }
+    ): void {
+        this.addDeferredTextSetting(setting, {
+            placeholder: options.placeholder,
+            value: String(options.value),
+            onCommit: async (rawValue) => {
+                const normalized = await options.onCommit(rawValue);
+                if (typeof normalized === 'string') {
+                    const input = setting.controlEl.querySelector('input');
+                    if (input) {
+                        input.value = normalized;
+                    }
+                }
+            }
+        });
+    }
+
+    private markSection(setting: Setting, sectionKey: string): Setting {
+        setting.settingEl.setAttr('data-notemd-setting-section', sectionKey);
+        return setting;
+    }
+
     private createSilentReporter() {
         return {
             log: () => {},
@@ -622,6 +701,177 @@ export class NotemdSettingTab extends PluginSettingTab {
             createTaskModelSettings('extractOriginalTextProvider', 'extractOriginalTextModel', extractOriginalTextTaskLabel);
         }
 
+        // --- General Settings ---
+        this.markSection(new Setting(containerEl).setName(generalOutputI18n.processedHeading).setHeading(), 'processed-output');
+        new Setting(containerEl).setName(generalOutputI18n.processedSavePathName).setDesc(generalOutputI18n.processedSavePathDesc).addToggle(toggle => toggle.setValue(this.plugin.settings.useCustomProcessedFileFolder).onChange(async (value) => { this.plugin.settings.useCustomProcessedFileFolder = value; await this.plugin.saveSettings(); this.display(); }));
+        if (this.plugin.settings.useCustomProcessedFileFolder) {
+            this.addDeferredTextSetting(
+                new Setting(containerEl).setName(generalOutputI18n.processedFolderPathName).setDesc(generalOutputI18n.processedFolderPathDesc),
+                {
+                    placeholder: generalOutputI18n.processedFolderPathPlaceholder,
+                    value: this.plugin.settings.processedFileFolder,
+                    onCommit: async (value) => {
+                        this.plugin.settings.processedFileFolder = value.trim();
+                        await this.plugin.saveSettings();
+                    }
+                }
+            );
+        }
+        new Setting(containerEl).setName(generalOutputI18n.moveOriginalName).setDesc(generalOutputI18n.moveOriginalDesc).addToggle(toggle => toggle.setValue(this.plugin.settings.moveOriginalFileOnProcess).onChange(async (value) => { this.plugin.settings.moveOriginalFileOnProcess = value; await this.plugin.saveSettings(); }));
+        new Setting(containerEl).setName(generalOutputI18n.customAddLinksFilenameName).setDesc(generalOutputI18n.customAddLinksFilenameDesc).addToggle(toggle => toggle.setValue(this.plugin.settings.useCustomAddLinksSuffix).onChange(async (value) => { this.plugin.settings.useCustomAddLinksSuffix = value; await this.plugin.saveSettings(); this.display(); }));
+        if (this.plugin.settings.useCustomAddLinksSuffix) {
+            this.addDeferredTextSetting(
+                new Setting(containerEl).setName(generalOutputI18n.addLinksSuffixName).setDesc(generalOutputI18n.addLinksSuffixDesc),
+                {
+                    placeholder: generalOutputI18n.addLinksSuffixPlaceholder,
+                    value: this.plugin.settings.addLinksCustomSuffix,
+                    onCommit: async (value) => {
+                        this.plugin.settings.addLinksCustomSuffix = value;
+                        await this.plugin.saveSettings();
+                    }
+                }
+            );
+        }
+        new Setting(containerEl)
+            .setName(generalOutputI18n.removeCodeFencesName)
+            .setDesc(generalOutputI18n.removeCodeFencesDesc)
+            .addToggle(toggle => toggle
+                .setValue(this.plugin.settings.removeCodeFencesOnAddLinks)
+                .onChange(async (value) => {
+                    this.plugin.settings.removeCodeFencesOnAddLinks = value;
+                    await this.plugin.saveSettings();
+                }));
+
+        this.markSection(new Setting(containerEl).setName(generalOutputI18n.conceptNoteHeading).setHeading(), 'concept-note-output');
+        new Setting(containerEl).setName(generalOutputI18n.conceptNotePathName).setDesc(generalOutputI18n.conceptNotePathDesc).addToggle(toggle => toggle.setValue(this.plugin.settings.useCustomConceptNoteFolder).onChange(async (value) => { this.plugin.settings.useCustomConceptNoteFolder = value; await this.plugin.saveSettings(); this.display(); }));
+        if (this.plugin.settings.useCustomConceptNoteFolder) {
+            this.addDeferredTextSetting(
+                new Setting(containerEl).setName(generalOutputI18n.conceptNoteFolderName).setDesc(generalOutputI18n.conceptNoteFolderDesc),
+                {
+                    placeholder: generalOutputI18n.conceptNoteFolderPlaceholder,
+                    value: this.plugin.settings.conceptNoteFolder,
+                    onCommit: async (value) => {
+                        this.plugin.settings.conceptNoteFolder = value.trim();
+                        await this.plugin.saveSettings();
+                    }
+                }
+            );
+        }
+
+        new Setting(containerEl).setName(generalOutputI18n.conceptLogHeading).setHeading();
+        new Setting(containerEl).setName(generalOutputI18n.generateConceptLogName).setDesc(generalOutputI18n.generateConceptLogDesc).addToggle(toggle => toggle.setValue(this.plugin.settings.generateConceptLogFile).onChange(async (value) => { this.plugin.settings.generateConceptLogFile = value; await this.plugin.saveSettings(); this.display(); }));
+        if (this.plugin.settings.generateConceptLogFile) {
+            const logFolderSetting = new Setting(containerEl).setName(generalOutputI18n.customLogPathName);
+            const logFolderDesc = this.plugin.settings.useCustomConceptNoteFolder && this.plugin.settings.conceptNoteFolder
+                ? formatI18n(generalOutputI18n.customLogPathDescWithConceptFolder, { folder: this.plugin.settings.conceptNoteFolder })
+                : generalOutputI18n.customLogPathDescVault;
+            logFolderSetting.setDesc(logFolderDesc);
+            logFolderSetting.addToggle(toggle => toggle.setValue(this.plugin.settings.useCustomConceptLogFolder).onChange(async (value) => { this.plugin.settings.useCustomConceptLogFolder = value; await this.plugin.saveSettings(); this.display(); }));
+            if (this.plugin.settings.useCustomConceptLogFolder) {
+                this.addDeferredTextSetting(
+                    new Setting(containerEl).setName(generalOutputI18n.conceptLogFolderName).setDesc(generalOutputI18n.conceptLogFolderDesc),
+                    {
+                        placeholder: generalOutputI18n.conceptLogFolderPlaceholder,
+                        value: this.plugin.settings.conceptLogFolderPath,
+                        onCommit: async (value) => {
+                            this.plugin.settings.conceptLogFolderPath = value.trim();
+                            await this.plugin.saveSettings();
+                        }
+                    }
+                );
+            }
+            const logFileNameSetting = new Setting(containerEl).setName(generalOutputI18n.customLogFileNameToggleName);
+            logFileNameSetting.setDesc(formatI18n(generalOutputI18n.customLogFileNameToggleDesc, { defaultName: DEFAULT_SETTINGS.conceptLogFileName }));
+            logFileNameSetting.addToggle(toggle => toggle.setValue(this.plugin.settings.useCustomConceptLogFileName).onChange(async (value) => { this.plugin.settings.useCustomConceptLogFileName = value; await this.plugin.saveSettings(); this.display(); }));
+            if (this.plugin.settings.useCustomConceptLogFileName) {
+                this.addDeferredTextSetting(
+                    new Setting(containerEl).setName(generalOutputI18n.conceptLogFileNameName).setDesc(generalOutputI18n.conceptLogFileNameDesc),
+                    {
+                        placeholder: DEFAULT_SETTINGS.conceptLogFileName,
+                        value: this.plugin.settings.conceptLogFileName,
+                        onCommit: async (value) => {
+                            this.plugin.settings.conceptLogFileName = value.trim();
+                            await this.plugin.saveSettings();
+                        }
+                    }
+                );
+            }
+        }
+
+        new Setting(containerEl).setName(i18n.settings.processing.heading).setHeading();
+        this.addDeferredNumberSetting(
+            new Setting(containerEl)
+                .setName(i18n.settings.processing.maxTokensName)
+                .setDesc(i18n.settings.processing.maxTokensDesc),
+            {
+                placeholder: String(DEFAULT_SETTINGS.maxTokens),
+                value: this.plugin.settings.maxTokens,
+                onCommit: async (rawValue) => {
+                    const previousMaxTokens = this.plugin.settings.maxTokens;
+                    const previousRecommendedChunk = Math.max(1, Math.floor(previousMaxTokens / 3));
+                    const nextMaxTokens = this.sanitizePositiveInteger(rawValue, DEFAULT_SETTINGS.maxTokens, 1);
+                    this.plugin.settings.maxTokens = nextMaxTokens;
+
+                    const currentChunk = this.plugin.settings.chunkWordCount;
+                    if (currentChunk === DEFAULT_SETTINGS.chunkWordCount || currentChunk === previousRecommendedChunk) {
+                        this.plugin.settings.chunkWordCount = Math.max(1, Math.floor(nextMaxTokens / 3));
+                    }
+
+                    await this.plugin.saveSettings();
+                    return String(this.plugin.settings.maxTokens);
+                }
+            }
+        );
+        this.addDeferredNumberSetting(
+            new Setting(containerEl)
+                .setName(i18n.settings.processing.chunkWordCountName)
+                .setDesc(i18n.settings.processing.chunkWordCountDesc),
+            {
+                placeholder: String(Math.max(1, Math.floor(this.plugin.settings.maxTokens / 3))),
+                value: this.plugin.settings.chunkWordCount,
+                onCommit: async (rawValue) => {
+                    this.plugin.settings.chunkWordCount = this.sanitizePositiveInteger(rawValue, DEFAULT_SETTINGS.chunkWordCount, 50);
+                    await this.plugin.saveSettings();
+                    return String(this.plugin.settings.chunkWordCount);
+                }
+            }
+        );
+        new Setting(containerEl)
+            .setName(i18n.settings.processing.duplicateDetectionName)
+            .setDesc(i18n.settings.processing.duplicateDetectionDesc)
+            .addToggle(toggle => toggle
+                .setValue(this.plugin.settings.enableDuplicateDetection)
+                .onChange(async (value) => {
+                    this.plugin.settings.enableDuplicateDetection = value;
+                    await this.plugin.saveSettings();
+                }));
+
+        new Setting(containerEl).setName(i18n.settings.batchProcessing.heading).setHeading();
+        new Setting(containerEl)
+            .setName(i18n.settings.batchProcessing.parallelismName)
+            .setDesc(i18n.settings.batchProcessing.parallelismDesc)
+            .addToggle(t => t
+                .setValue(this.plugin.settings.enableBatchParallelism)
+                .onChange(async (v) => {
+                    this.plugin.settings.enableBatchParallelism = v;
+                    await this.plugin.saveSettings();
+                    this.display();
+                }));
+
+        if (this.plugin.settings.enableBatchParallelism) {
+            new Setting(containerEl)
+                .setName(i18n.settings.batchProcessing.concurrencyName)
+                .setDesc(i18n.settings.batchProcessing.concurrencyDesc)
+                .addSlider(s => s
+                    .setLimits(1, 20, 1)
+                    .setValue(this.plugin.settings.batchConcurrency)
+                    .setDynamicTooltip()
+                    .onChange(async (v) => {
+                        this.plugin.settings.batchConcurrency = Math.floor(v);
+                        await this.plugin.saveSettings();
+                    }));
+        }
+
         // --- Translate Task Settings ---
         new Setting(containerEl).setName(translationTaskI18n.heading).setHeading();
 
@@ -639,16 +889,19 @@ export class NotemdSettingTab extends PluginSettingTab {
 
         // Conditionally display the path input
         if (this.plugin.settings.useCustomTranslationSavePath) {
-            new Setting(containerEl)
-                .setName(translationTaskI18n.savePathName)
-                .setDesc(translationTaskI18n.savePathDesc)
-                .addText(text => text
-                    .setPlaceholder(translationTaskI18n.savePathPlaceholder)
-                    .setValue(this.plugin.settings.translationSavePath)
-                    .onChange(async (value) => {
+            this.addDeferredTextSetting(
+                new Setting(containerEl)
+                    .setName(translationTaskI18n.savePathName)
+                    .setDesc(translationTaskI18n.savePathDesc),
+                {
+                    placeholder: translationTaskI18n.savePathPlaceholder,
+                    value: this.plugin.settings.translationSavePath,
+                    onCommit: async (value) => {
                         this.plugin.settings.translationSavePath = value.trim();
                         await this.plugin.saveSettings();
-                    }));
+                    }
+                }
+            );
         }
 
         new Setting(containerEl)
@@ -663,16 +916,19 @@ export class NotemdSettingTab extends PluginSettingTab {
                 }));
 
         if (this.plugin.settings.useCustomTranslationSuffix) {
-            new Setting(containerEl)
-                .setName(translationTaskI18n.customSuffixName)
-                .setDesc(translationTaskI18n.customSuffixDesc)
-                .addText(text => text
-                    .setPlaceholder(translationTaskI18n.customSuffixPlaceholder)
-                    .setValue(this.plugin.settings.translationCustomSuffix)
-                    .onChange(async (value) => {
+            this.addDeferredTextSetting(
+                new Setting(containerEl)
+                    .setName(translationTaskI18n.customSuffixName)
+                    .setDesc(translationTaskI18n.customSuffixDesc),
+                {
+                    placeholder: translationTaskI18n.customSuffixPlaceholder,
+                    value: this.plugin.settings.translationCustomSuffix,
+                    onCommit: async (value) => {
                         this.plugin.settings.translationCustomSuffix = value;
                         await this.plugin.saveSettings();
-                    }));
+                    }
+                }
+            );
         }
 
         // --- Summarize to Mermaid Task Settings ---
@@ -690,16 +946,19 @@ export class NotemdSettingTab extends PluginSettingTab {
                 }));
 
         if (this.plugin.settings.useCustomSummarizeToMermaidSavePath) {
-            new Setting(containerEl)
-                .setName(mermaidTaskI18n.savePathName)
-                .setDesc(mermaidTaskI18n.savePathDesc)
-                .addText(text => text
-                    .setPlaceholder(mermaidTaskI18n.savePathPlaceholder)
-                    .setValue(this.plugin.settings.summarizeToMermaidSavePath)
-                    .onChange(async (value) => {
+            this.addDeferredTextSetting(
+                new Setting(containerEl)
+                    .setName(mermaidTaskI18n.savePathName)
+                    .setDesc(mermaidTaskI18n.savePathDesc),
+                {
+                    placeholder: mermaidTaskI18n.savePathPlaceholder,
+                    value: this.plugin.settings.summarizeToMermaidSavePath,
+                    onCommit: async (value) => {
                         this.plugin.settings.summarizeToMermaidSavePath = value.trim();
                         await this.plugin.saveSettings();
-                    }));
+                    }
+                }
+            );
         }
 
         new Setting(containerEl)
@@ -714,16 +973,19 @@ export class NotemdSettingTab extends PluginSettingTab {
                 }));
 
         if (this.plugin.settings.useCustomSummarizeToMermaidSuffix) {
-            new Setting(containerEl)
-                .setName(mermaidTaskI18n.customSuffixName)
-                .setDesc(mermaidTaskI18n.customSuffixDesc)
-                .addText(text => text
-                    .setPlaceholder(mermaidTaskI18n.customSuffixPlaceholder)
-                    .setValue(this.plugin.settings.summarizeToMermaidCustomSuffix)
-                    .onChange(async (value) => {
+            this.addDeferredTextSetting(
+                new Setting(containerEl)
+                    .setName(mermaidTaskI18n.customSuffixName)
+                    .setDesc(mermaidTaskI18n.customSuffixDesc),
+                {
+                    placeholder: mermaidTaskI18n.customSuffixPlaceholder,
+                    value: this.plugin.settings.summarizeToMermaidCustomSuffix,
+                    onCommit: async (value) => {
                         this.plugin.settings.summarizeToMermaidCustomSuffix = value;
                         await this.plugin.saveSettings();
-                    }));
+                    }
+                }
+            );
         }
 
         new Setting(containerEl)
@@ -766,8 +1028,30 @@ export class NotemdSettingTab extends PluginSettingTab {
             .setDesc(stableApiI18n.enableDesc)
             .addToggle(toggle => toggle.setValue(this.plugin.settings.enableStableApiCall).onChange(async (value) => { this.plugin.settings.enableStableApiCall = value; await this.plugin.saveSettings(); this.display(); }));
         if (this.plugin.settings.enableStableApiCall) {
-            new Setting(containerEl).setName(stableApiI18n.retryIntervalName).setDesc(stableApiI18n.retryIntervalDesc).addText(text => text.setPlaceholder(String(DEFAULT_SETTINGS.apiCallInterval)).setValue(String(this.plugin.settings.apiCallInterval)).onChange(async (value) => { const num = parseInt(value, 10); if (!isNaN(num) && num >= 1 && num <= 300) { this.plugin.settings.apiCallInterval = num; } else { this.plugin.settings.apiCallInterval = DEFAULT_SETTINGS.apiCallInterval; } await this.plugin.saveSettings(); this.display(); }));
-            new Setting(containerEl).setName(stableApiI18n.maxRetriesName).setDesc(stableApiI18n.maxRetriesDesc).addText(text => text.setPlaceholder(String(DEFAULT_SETTINGS.apiCallMaxRetries)).setValue(String(this.plugin.settings.apiCallMaxRetries)).onChange(async (value) => { const num = parseInt(value, 10); if (!isNaN(num) && num >= 0 && num <= 10) { this.plugin.settings.apiCallMaxRetries = num; } else { this.plugin.settings.apiCallMaxRetries = DEFAULT_SETTINGS.apiCallMaxRetries; } await this.plugin.saveSettings(); this.display(); }));
+            this.addDeferredNumberSetting(
+                new Setting(containerEl).setName(stableApiI18n.retryIntervalName).setDesc(stableApiI18n.retryIntervalDesc),
+                {
+                    placeholder: String(DEFAULT_SETTINGS.apiCallInterval),
+                    value: this.plugin.settings.apiCallInterval,
+                    onCommit: async (rawValue) => {
+                        this.plugin.settings.apiCallInterval = this.sanitizePositiveInteger(rawValue, DEFAULT_SETTINGS.apiCallInterval, 1, 300);
+                        await this.plugin.saveSettings();
+                        return String(this.plugin.settings.apiCallInterval);
+                    }
+                }
+            );
+            this.addDeferredNumberSetting(
+                new Setting(containerEl).setName(stableApiI18n.maxRetriesName).setDesc(stableApiI18n.maxRetriesDesc),
+                {
+                    placeholder: String(DEFAULT_SETTINGS.apiCallMaxRetries),
+                    value: this.plugin.settings.apiCallMaxRetries,
+                    onCommit: async (rawValue) => {
+                        this.plugin.settings.apiCallMaxRetries = this.sanitizePositiveInteger(rawValue, DEFAULT_SETTINGS.apiCallMaxRetries, 0, 10);
+                        await this.plugin.saveSettings();
+                        return String(this.plugin.settings.apiCallMaxRetries);
+                    }
+                }
+            );
         }
 
         new Setting(containerEl)
@@ -829,10 +1113,16 @@ export class NotemdSettingTab extends PluginSettingTab {
             new Setting(containerEl)
                 .setName(stableApiI18n.diagnosticTimeoutName)
                 .setDesc(stableApiI18n.diagnosticTimeoutDesc)
-                .addText(text => text
-                    .setPlaceholder(String(Math.floor(DEFAULT_SETTINGS.developerDiagnosticTimeoutMs / 1000)))
-                    .setValue(String(Math.floor(this.sanitizeDeveloperDiagnosticTimeoutMs(this.plugin.settings.developerDiagnosticTimeoutMs) / 1000)))
-                    .onChange(async (value) => {
+                .addText(text => {
+                    text
+                        .setPlaceholder(String(Math.floor(DEFAULT_SETTINGS.developerDiagnosticTimeoutMs / 1000)))
+                        .setValue(String(Math.floor(this.sanitizeDeveloperDiagnosticTimeoutMs(this.plugin.settings.developerDiagnosticTimeoutMs) / 1000)));
+                    let lastCommitted = text.getValue();
+                    const commit = async () => {
+                        const value = text.getValue();
+                        if (value === lastCommitted) {
+                            return;
+                        }
                         const num = Number.parseInt(value, 10);
                         if (Number.isFinite(num)) {
                             this.plugin.settings.developerDiagnosticTimeoutMs = this.sanitizeDeveloperDiagnosticTimeoutMs(num * 1000);
@@ -840,15 +1130,32 @@ export class NotemdSettingTab extends PluginSettingTab {
                             this.plugin.settings.developerDiagnosticTimeoutMs = DEFAULT_SETTINGS.developerDiagnosticTimeoutMs;
                         }
                         await this.plugin.saveSettings();
-                    }));
+                        text.setValue(String(Math.floor(this.plugin.settings.developerDiagnosticTimeoutMs / 1000)));
+                        lastCommitted = text.getValue();
+                    };
+                    text.inputEl.addEventListener('blur', () => { void commit(); });
+                    text.inputEl.addEventListener('keydown', (event: KeyboardEvent) => {
+                        if (event.key === 'Enter') {
+                            event.preventDefault();
+                            void commit();
+                            text.inputEl.blur();
+                        }
+                    });
+                });
 
             new Setting(containerEl)
                 .setName(stableApiI18n.stabilityRunsName)
                 .setDesc(stableApiI18n.stabilityRunsDesc)
-                .addText(text => text
-                    .setPlaceholder(String(DEFAULT_SETTINGS.developerDiagnosticStabilityRuns))
-                    .setValue(String(this.sanitizeDeveloperDiagnosticRuns(this.plugin.settings.developerDiagnosticStabilityRuns)))
-                    .onChange(async (value) => {
+                .addText(text => {
+                    text
+                        .setPlaceholder(String(DEFAULT_SETTINGS.developerDiagnosticStabilityRuns))
+                        .setValue(String(this.sanitizeDeveloperDiagnosticRuns(this.plugin.settings.developerDiagnosticStabilityRuns)));
+                    let lastCommitted = text.getValue();
+                    const commit = async () => {
+                        const value = text.getValue();
+                        if (value === lastCommitted) {
+                            return;
+                        }
                         const num = Number.parseInt(value, 10);
                         if (Number.isFinite(num)) {
                             this.plugin.settings.developerDiagnosticStabilityRuns = this.sanitizeDeveloperDiagnosticRuns(num);
@@ -856,7 +1163,18 @@ export class NotemdSettingTab extends PluginSettingTab {
                             this.plugin.settings.developerDiagnosticStabilityRuns = DEFAULT_SETTINGS.developerDiagnosticStabilityRuns;
                         }
                         await this.plugin.saveSettings();
-                    }));
+                        text.setValue(String(this.plugin.settings.developerDiagnosticStabilityRuns));
+                        lastCommitted = text.getValue();
+                    };
+                    text.inputEl.addEventListener('blur', () => { void commit(); });
+                    text.inputEl.addEventListener('keydown', (event: KeyboardEvent) => {
+                        if (event.key === 'Enter') {
+                            event.preventDefault();
+                            void commit();
+                            text.inputEl.blur();
+                        }
+                    });
+                });
 
             new Setting(containerEl).setName(experimentalDiagramI18n.heading).setHeading();
 
@@ -921,54 +1239,6 @@ export class NotemdSettingTab extends PluginSettingTab {
                         await this.plugin.saveSettings();
                         await this.plugin.runDeveloperProviderStabilityDiagnosticCommand();
                     }));
-        }
-
-        // --- General Settings ---
-        new Setting(containerEl).setName(generalOutputI18n.processedHeading).setHeading();
-        new Setting(containerEl).setName(generalOutputI18n.processedSavePathName).setDesc(generalOutputI18n.processedSavePathDesc).addToggle(toggle => toggle.setValue(this.plugin.settings.useCustomProcessedFileFolder).onChange(async (value) => { this.plugin.settings.useCustomProcessedFileFolder = value; await this.plugin.saveSettings(); this.display(); }));
-        if (this.plugin.settings.useCustomProcessedFileFolder) {
-            new Setting(containerEl).setName(generalOutputI18n.processedFolderPathName).setDesc(generalOutputI18n.processedFolderPathDesc).addText(text => text.setPlaceholder(generalOutputI18n.processedFolderPathPlaceholder).setValue(this.plugin.settings.processedFileFolder).onChange(async (value) => { /* Add validation */ this.plugin.settings.processedFileFolder = value.trim(); await this.plugin.saveSettings(); }));
-        }
-        new Setting(containerEl).setName(generalOutputI18n.moveOriginalName).setDesc(generalOutputI18n.moveOriginalDesc).addToggle(toggle => toggle.setValue(this.plugin.settings.moveOriginalFileOnProcess).onChange(async (value) => { this.plugin.settings.moveOriginalFileOnProcess = value; await this.plugin.saveSettings(); }));
-        new Setting(containerEl).setName(generalOutputI18n.customAddLinksFilenameName).setDesc(generalOutputI18n.customAddLinksFilenameDesc).addToggle(toggle => toggle.setValue(this.plugin.settings.useCustomAddLinksSuffix).onChange(async (value) => { this.plugin.settings.useCustomAddLinksSuffix = value; await this.plugin.saveSettings(); this.display(); }));
-        if (this.plugin.settings.useCustomAddLinksSuffix) {
-            new Setting(containerEl).setName(generalOutputI18n.addLinksSuffixName).setDesc(generalOutputI18n.addLinksSuffixDesc).addText(text => text.setPlaceholder(generalOutputI18n.addLinksSuffixPlaceholder).setValue(this.plugin.settings.addLinksCustomSuffix).onChange(async (value) => { this.plugin.settings.addLinksCustomSuffix = value; await this.plugin.saveSettings(); }));
-        }
-        // Add the new toggle for removing code fences
-        new Setting(containerEl)
-            .setName(generalOutputI18n.removeCodeFencesName)
-            .setDesc(generalOutputI18n.removeCodeFencesDesc)
-            .addToggle(toggle => toggle
-                .setValue(this.plugin.settings.removeCodeFencesOnAddLinks)
-                .onChange(async (value) => {
-                    this.plugin.settings.removeCodeFencesOnAddLinks = value;
-                    await this.plugin.saveSettings();
-                }));
-
-        new Setting(containerEl).setName(generalOutputI18n.conceptNoteHeading).setHeading();
-        new Setting(containerEl).setName(generalOutputI18n.conceptNotePathName).setDesc(generalOutputI18n.conceptNotePathDesc).addToggle(toggle => toggle.setValue(this.plugin.settings.useCustomConceptNoteFolder).onChange(async (value) => { this.plugin.settings.useCustomConceptNoteFolder = value; await this.plugin.saveSettings(); this.display(); }));
-        if (this.plugin.settings.useCustomConceptNoteFolder) {
-            new Setting(containerEl).setName(generalOutputI18n.conceptNoteFolderName).setDesc(generalOutputI18n.conceptNoteFolderDesc).addText(text => text.setPlaceholder(generalOutputI18n.conceptNoteFolderPlaceholder).setValue(this.plugin.settings.conceptNoteFolder).onChange(async (value) => { /* Add validation */ this.plugin.settings.conceptNoteFolder = value.trim(); await this.plugin.saveSettings(); }));
-        }
-
-        new Setting(containerEl).setName(generalOutputI18n.conceptLogHeading).setHeading();
-        new Setting(containerEl).setName(generalOutputI18n.generateConceptLogName).setDesc(generalOutputI18n.generateConceptLogDesc).addToggle(toggle => toggle.setValue(this.plugin.settings.generateConceptLogFile).onChange(async (value) => { this.plugin.settings.generateConceptLogFile = value; await this.plugin.saveSettings(); this.display(); }));
-        if (this.plugin.settings.generateConceptLogFile) {
-            const logFolderSetting = new Setting(containerEl).setName(generalOutputI18n.customLogPathName);
-            const logFolderDesc = this.plugin.settings.useCustomConceptNoteFolder && this.plugin.settings.conceptNoteFolder
-                ? formatI18n(generalOutputI18n.customLogPathDescWithConceptFolder, { folder: this.plugin.settings.conceptNoteFolder })
-                : generalOutputI18n.customLogPathDescVault;
-            logFolderSetting.setDesc(logFolderDesc);
-            logFolderSetting.addToggle(toggle => toggle.setValue(this.plugin.settings.useCustomConceptLogFolder).onChange(async (value) => { this.plugin.settings.useCustomConceptLogFolder = value; await this.plugin.saveSettings(); this.display(); }));
-            if (this.plugin.settings.useCustomConceptLogFolder) {
-                new Setting(containerEl).setName(generalOutputI18n.conceptLogFolderName).setDesc(generalOutputI18n.conceptLogFolderDesc).addText(text => text.setPlaceholder(generalOutputI18n.conceptLogFolderPlaceholder).setValue(this.plugin.settings.conceptLogFolderPath).onChange(async (value) => { /* Add validation */ this.plugin.settings.conceptLogFolderPath = value.trim(); await this.plugin.saveSettings(); }));
-            }
-            const logFileNameSetting = new Setting(containerEl).setName(generalOutputI18n.customLogFileNameToggleName);
-            logFileNameSetting.setDesc(formatI18n(generalOutputI18n.customLogFileNameToggleDesc, { defaultName: DEFAULT_SETTINGS.conceptLogFileName }));
-            logFileNameSetting.addToggle(toggle => toggle.setValue(this.plugin.settings.useCustomConceptLogFileName).onChange(async (value) => { this.plugin.settings.useCustomConceptLogFileName = value; await this.plugin.saveSettings(); this.display(); }));
-            if (this.plugin.settings.useCustomConceptLogFileName) {
-                new Setting(containerEl).setName(generalOutputI18n.conceptLogFileNameName).setDesc(generalOutputI18n.conceptLogFileNameDesc).addText(text => text.setPlaceholder(DEFAULT_SETTINGS.conceptLogFileName).setValue(this.plugin.settings.conceptLogFileName).onChange(async (value) => { /* Add validation */ this.plugin.settings.conceptLogFileName = value.trim(); await this.plugin.saveSettings(); }));
-            }
         }
 
         new Setting(containerEl).setName(contentGenerationI18n.heading).setHeading();
@@ -1043,6 +1313,10 @@ export class NotemdSettingTab extends PluginSettingTab {
                 .inputEl.setAttrs({ rows: 6, style: 'width: 100%;' }));
 
         new Setting(containerEl)
+            .setName(i18n.settings.extractOriginalText.batchModeName)
+            .setDesc(i18n.settings.extractOriginalText.batchModeDesc);
+
+        new Setting(containerEl)
             .setName(i18n.settings.generateTitleOutput.useCustomFolderName)
             .setDesc(i18n.settings.generateTitleOutput.useCustomFolderDesc)
             .addToggle(toggle => toggle
@@ -1053,17 +1327,19 @@ export class NotemdSettingTab extends PluginSettingTab {
                     this.display();
                 }));
         if (this.plugin.settings.useCustomGenerateTitleOutputFolder) {
-            new Setting(containerEl)
-                .setName(i18n.settings.generateTitleOutput.customFolderName)
-                .setDesc(i18n.settings.generateTitleOutput.customFolderDesc)
-                .addText(text => text
-                    .setPlaceholder(DEFAULT_SETTINGS.generateTitleOutputFolderName)
-                    .setValue(this.plugin.settings.generateTitleOutputFolderName)
-                    .onChange(async (value) => {
+            this.addDeferredTextSetting(
+                new Setting(containerEl)
+                    .setName(i18n.settings.generateTitleOutput.customFolderName)
+                    .setDesc(i18n.settings.generateTitleOutput.customFolderDesc),
+                {
+                    placeholder: DEFAULT_SETTINGS.generateTitleOutputFolderName,
+                    value: this.plugin.settings.generateTitleOutputFolderName,
+                    onCommit: async (value) => {
                         this.plugin.settings.generateTitleOutputFolderName = value.trim() || DEFAULT_SETTINGS.generateTitleOutputFolderName;
                         await this.plugin.saveSettings();
-                        this.display();
-                    }));
+                    }
+                }
+            );
         }
 
         new Setting(containerEl).setName(i18n.settings.webResearch.heading).setHeading();
@@ -1080,32 +1356,33 @@ export class NotemdSettingTab extends PluginSettingTab {
                     this.display();
                 }));
         if (this.plugin.settings.searchProvider === 'tavily') {
-            new Setting(containerEl)
-                .setName(i18n.settings.webResearch.tavilyApiKeyName)
-                .setDesc(i18n.settings.webResearch.tavilyApiKeyDesc)
-                .addText(text => text
-                    .setPlaceholder(i18n.settings.webResearch.tavilyApiKeyPlaceholder)
-                    .setValue(this.plugin.settings.tavilyApiKey)
-                    .onChange(async (value) => {
+            this.addDeferredTextSetting(
+                new Setting(containerEl)
+                    .setName(i18n.settings.webResearch.tavilyApiKeyName)
+                    .setDesc(i18n.settings.webResearch.tavilyApiKeyDesc),
+                {
+                    placeholder: i18n.settings.webResearch.tavilyApiKeyPlaceholder,
+                    value: this.plugin.settings.tavilyApiKey,
+                    onCommit: async (value) => {
                         this.plugin.settings.tavilyApiKey = value.trim();
                         await this.plugin.saveSettings();
-                    }));
-            new Setting(containerEl)
-                .setName(i18n.settings.webResearch.tavilyMaxResultsName)
-                .setDesc(i18n.settings.webResearch.tavilyMaxResultsDesc)
-                .addText(text => text
-                    .setPlaceholder(String(DEFAULT_SETTINGS.tavilyMaxResults))
-                    .setValue(String(this.plugin.settings.tavilyMaxResults))
-                    .onChange(async (value) => {
-                        const num = parseInt(value, 10);
-                        if (!isNaN(num) && num >= 1 && num <= 20) {
-                            this.plugin.settings.tavilyMaxResults = num;
-                        } else {
-                            this.plugin.settings.tavilyMaxResults = DEFAULT_SETTINGS.tavilyMaxResults;
-                        }
+                    }
+                }
+            );
+            this.addDeferredNumberSetting(
+                new Setting(containerEl)
+                    .setName(i18n.settings.webResearch.tavilyMaxResultsName)
+                    .setDesc(i18n.settings.webResearch.tavilyMaxResultsDesc),
+                {
+                    placeholder: String(DEFAULT_SETTINGS.tavilyMaxResults),
+                    value: this.plugin.settings.tavilyMaxResults,
+                    onCommit: async (rawValue) => {
+                        this.plugin.settings.tavilyMaxResults = this.sanitizePositiveInteger(rawValue, DEFAULT_SETTINGS.tavilyMaxResults, 1, 20);
                         await this.plugin.saveSettings();
-                        this.display();
-                    }));
+                        return String(this.plugin.settings.tavilyMaxResults);
+                    }
+                }
+            );
             new Setting(containerEl)
                 .setName(i18n.settings.webResearch.tavilySearchDepthName)
                 .setDesc(i18n.settings.webResearch.tavilySearchDepthDesc)
@@ -1141,96 +1418,20 @@ export class NotemdSettingTab extends PluginSettingTab {
                         await this.plugin.saveSettings();
                     }));
         }
-        new Setting(containerEl)
-            .setName(i18n.settings.webResearch.maxResearchTokensName)
-            .setDesc(i18n.settings.webResearch.maxResearchTokensDesc)
-            .addText(text => text
-                .setPlaceholder(String(DEFAULT_SETTINGS.maxResearchContentTokens))
-                .setValue(String(this.plugin.settings.maxResearchContentTokens))
-                .onChange(async (value) => {
-                    const num = parseInt(value, 10);
-                    if (!isNaN(num) && num > 100) {
-                        this.plugin.settings.maxResearchContentTokens = num;
-                    } else {
-                        this.plugin.settings.maxResearchContentTokens = DEFAULT_SETTINGS.maxResearchContentTokens;
-                    }
-                    await this.plugin.saveSettings();
-                    this.display();
-                }));
-
-        new Setting(containerEl).setName(i18n.settings.processing.heading).setHeading();
-
-        new Setting(containerEl)
-            .setName(i18n.settings.processing.chunkWordCountName)
-            .setDesc(i18n.settings.processing.chunkWordCountDesc)
-            .addText(text => text
-                .setPlaceholder(String(DEFAULT_SETTINGS.chunkWordCount))
-                .setValue(String(this.plugin.settings.chunkWordCount))
-                .onChange(async (value) => {
-                    const num = parseInt(value, 10);
-                    if (!isNaN(num) && num > 50) {
-                        this.plugin.settings.chunkWordCount = num;
-                    } else {
-                        this.plugin.settings.chunkWordCount = DEFAULT_SETTINGS.chunkWordCount;
-                    }
-                    await this.plugin.saveSettings();
-                    this.display();
-                }));
-        
-        new Setting(containerEl)
-            .setName(i18n.settings.processing.maxTokensName)
-            .setDesc(i18n.settings.processing.maxTokensDesc)
-            .addText(text => text
-                .setPlaceholder(String(DEFAULT_SETTINGS.maxTokens))
-                .setValue(String(this.plugin.settings.maxTokens))
-                .onChange(async (value) => {
-                    const num = parseInt(value, 10);
-                    if (!isNaN(num) && num > 0) {
-                        this.plugin.settings.maxTokens = num;
-                    } else {
-                        this.plugin.settings.maxTokens = DEFAULT_SETTINGS.maxTokens;
-                    }
-                    await this.plugin.saveSettings();
-                    this.display();
-                }));
-
-        // --- Batch execution ---
-        new Setting(containerEl).setName(i18n.settings.batchProcessing.heading).setHeading();
-
-        new Setting(containerEl)
-            .setName(i18n.settings.batchProcessing.parallelismName)
-            .setDesc(i18n.settings.batchProcessing.parallelismDesc)
-            .addToggle(t => t
-                .setValue(this.plugin.settings.enableBatchParallelism)
-                .onChange(async (v) => {
-                    this.plugin.settings.enableBatchParallelism = v;
-                    await this.plugin.saveSettings();
-                    this.display();
-                }));
-
-        if (this.plugin.settings.enableBatchParallelism) {
+        this.addDeferredNumberSetting(
             new Setting(containerEl)
-                .setName(i18n.settings.batchProcessing.concurrencyName)
-                .setDesc(i18n.settings.batchProcessing.concurrencyDesc)
-                .addSlider(s => s
-                    .setLimits(1, 20, 1)
-                    .setValue(this.plugin.settings.batchConcurrency)
-                    .setDynamicTooltip()
-                    .onChange(async (v) => {
-                        this.plugin.settings.batchConcurrency = Math.floor(v);
-                        await this.plugin.saveSettings();
-                    }));
-        }
-
-        new Setting(containerEl)
-            .setName(i18n.settings.processing.duplicateDetectionName)
-            .setDesc(i18n.settings.processing.duplicateDetectionDesc)
-            .addToggle(toggle => toggle
-                .setValue(this.plugin.settings.enableDuplicateDetection)
-                .onChange(async (value) => {
-                    this.plugin.settings.enableDuplicateDetection = value;
+                .setName(i18n.settings.webResearch.maxResearchTokensName)
+                .setDesc(i18n.settings.webResearch.maxResearchTokensDesc),
+            {
+                placeholder: String(DEFAULT_SETTINGS.maxResearchContentTokens),
+                value: this.plugin.settings.maxResearchContentTokens,
+                onCommit: async (rawValue) => {
+                    this.plugin.settings.maxResearchContentTokens = this.sanitizePositiveInteger(rawValue, DEFAULT_SETTINGS.maxResearchContentTokens, 100);
                     await this.plugin.saveSettings();
-                }));
+                    return String(this.plugin.settings.maxResearchContentTokens);
+                }
+            }
+        );
 
 
         new Setting(containerEl).setName(i18n.settings.language.heading).setHeading();
@@ -1356,27 +1557,33 @@ export class NotemdSettingTab extends PluginSettingTab {
                 }));
 
         if (this.plugin.settings.extractOriginalTextUseCustomOutput) {
-            new Setting(containerEl)
-                .setName(i18n.settings.extractOriginalText.savePathName)
-                .setDesc(i18n.settings.extractOriginalText.savePathDesc)
-                .addText(text => text
-                    .setPlaceholder(i18n.settings.extractOriginalText.savePathPlaceholder)
-                    .setValue(this.plugin.settings.extractOriginalTextCustomPath)
-                    .onChange(async (value) => {
+            this.addDeferredTextSetting(
+                new Setting(containerEl)
+                    .setName(i18n.settings.extractOriginalText.savePathName)
+                    .setDesc(i18n.settings.extractOriginalText.savePathDesc),
+                {
+                    placeholder: i18n.settings.extractOriginalText.savePathPlaceholder,
+                    value: this.plugin.settings.extractOriginalTextCustomPath,
+                    onCommit: async (value) => {
                         this.plugin.settings.extractOriginalTextCustomPath = value.trim();
                         await this.plugin.saveSettings();
-                    }));
+                    }
+                }
+            );
 
-            new Setting(containerEl)
-                .setName(i18n.settings.extractOriginalText.customSuffixName)
-                .setDesc(i18n.settings.extractOriginalText.customSuffixDesc)
-                .addText(text => text
-                    .setPlaceholder(i18n.settings.extractOriginalText.customSuffixPlaceholder)
-                    .setValue(this.plugin.settings.extractOriginalTextCustomSuffix)
-                    .onChange(async (value) => {
+            this.addDeferredTextSetting(
+                new Setting(containerEl)
+                    .setName(i18n.settings.extractOriginalText.customSuffixName)
+                    .setDesc(i18n.settings.extractOriginalText.customSuffixDesc),
+                {
+                    placeholder: i18n.settings.extractOriginalText.customSuffixPlaceholder,
+                    value: this.plugin.settings.extractOriginalTextCustomSuffix,
+                    onCommit: async (value) => {
                         this.plugin.settings.extractOriginalTextCustomSuffix = value.trim();
                         await this.plugin.saveSettings();
-                    }));
+                    }
+                }
+            );
         }
 
         // --- Mermaid Batch Fix ---
@@ -1405,16 +1612,19 @@ export class NotemdSettingTab extends PluginSettingTab {
                 }));
 
         if (this.plugin.settings.moveMermaidErrorFiles) {
-            new Setting(containerEl)
-                .setName(i18n.settings.batchMermaidFix.errorFolderPathName)
-                .setDesc(i18n.settings.batchMermaidFix.errorFolderPathDesc)
-                .addText(text => text
-                    .setPlaceholder(i18n.settings.batchMermaidFix.errorFolderPathPlaceholder)
-                    .setValue(this.plugin.settings.mermaidErrorFolderPath)
-                    .onChange(async (value) => {
+            this.addDeferredTextSetting(
+                new Setting(containerEl)
+                    .setName(i18n.settings.batchMermaidFix.errorFolderPathName)
+                    .setDesc(i18n.settings.batchMermaidFix.errorFolderPathDesc),
+                {
+                    placeholder: i18n.settings.batchMermaidFix.errorFolderPathPlaceholder,
+                    value: this.plugin.settings.mermaidErrorFolderPath,
+                    onCommit: async (value) => {
                         this.plugin.settings.mermaidErrorFolderPath = value.trim();
                         await this.plugin.saveSettings();
-                    }));
+                    }
+                }
+            );
         }
 
         // --- Duplicate Check Scope ---
@@ -1578,16 +1788,19 @@ export class NotemdSettingTab extends PluginSettingTab {
                 }));
 
         if (this.plugin.settings.enableFocusedLearning) {
-            new Setting(containerEl)
-                .setName(i18n.settings.focusedLearning.domainName)
-                .setDesc(i18n.settings.focusedLearning.domainDesc)
-                .addText(text => text
-                    .setPlaceholder(i18n.settings.focusedLearning.domainPlaceholder)
-                    .setValue(this.plugin.settings.focusedLearningDomain)
-                    .onChange(async (value) => {
+            this.addDeferredTextSetting(
+                new Setting(containerEl)
+                    .setName(i18n.settings.focusedLearning.domainName)
+                    .setDesc(i18n.settings.focusedLearning.domainDesc),
+                {
+                    placeholder: i18n.settings.focusedLearning.domainPlaceholder,
+                    value: this.plugin.settings.focusedLearningDomain,
+                    onCommit: async (value) => {
                         this.plugin.settings.focusedLearningDomain = value;
                         await this.plugin.saveSettings();
-                    }));
+                    }
+                }
+            );
         }
     }
 }
