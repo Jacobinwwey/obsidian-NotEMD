@@ -28,6 +28,7 @@ type MockPlugin = {
     extractConceptsCommand: jest.Mock<Promise<void>, [any]>;
     batchExtractConceptsForFolderCommand: jest.Mock<Promise<void>, [any]>;
     extractOriginalTextCommand: jest.Mock<Promise<void>, [any]>;
+    batchExtractOriginalTextCommand: jest.Mock<Promise<void>, [any]>;
     batchMermaidFixCommand: jest.Mock<Promise<void>, [any, string?]>;
     fixFormulaFormatsCommand: jest.Mock<Promise<void>, [any, any]>;
     batchFixFormulaFormatsCommand: jest.Mock<Promise<void>, [any]>;
@@ -157,6 +158,7 @@ function createPluginMock(): MockPlugin {
         extractConceptsCommand: jest.fn().mockResolvedValue(undefined),
         batchExtractConceptsForFolderCommand: jest.fn().mockResolvedValue(undefined),
         extractOriginalTextCommand: jest.fn().mockResolvedValue(undefined),
+        batchExtractOriginalTextCommand: jest.fn().mockResolvedValue(undefined),
         batchMermaidFixCommand: jest.fn().mockResolvedValue(undefined),
         fixFormulaFormatsCommand: jest.fn().mockResolvedValue(undefined),
         batchFixFormulaFormatsCommand: jest.fn().mockResolvedValue(undefined),
@@ -235,6 +237,7 @@ describe('NotemdSidebarView DOM button wiring', () => {
         await clickButton('Extract concepts (current file)');
         await clickButton('Extract concepts (folder)');
         await clickButton('Extract specific original text');
+        await clickButton('Batch extract specific original text');
         await clickButton('Batch Mermaid fix');
 
         (mockApp.workspace.getActiveFile as jest.Mock).mockReturnValue(txtFile);
@@ -257,6 +260,7 @@ describe('NotemdSidebarView DOM button wiring', () => {
         expect(plugin.extractConceptsCommand).toHaveBeenCalled();
         expect(plugin.batchExtractConceptsForFolderCommand).toHaveBeenCalled();
         expect(plugin.extractOriginalTextCommand).toHaveBeenCalled();
+        expect(plugin.batchExtractOriginalTextCommand).toHaveBeenCalled();
         expect(plugin.batchMermaidFixCommand).toHaveBeenCalled();
         expect(plugin.fixFormulaFormatsCommand).toHaveBeenCalledWith(txtFile, expect.anything());
         expect(plugin.batchFixFormulaFormatsCommand).toHaveBeenCalled();

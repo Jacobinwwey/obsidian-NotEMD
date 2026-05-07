@@ -67,6 +67,7 @@ function createPluginMock() {
         extractConceptsCommand: jest.fn().mockResolvedValue(undefined),
         batchExtractConceptsForFolderCommand: jest.fn().mockResolvedValue(undefined),
         extractOriginalTextCommand: jest.fn().mockResolvedValue(undefined),
+        batchExtractOriginalTextCommand: jest.fn().mockResolvedValue(undefined),
         batchMermaidFixCommand: jest.fn().mockResolvedValue(undefined),
         fixFormulaFormatsCommand: jest.fn().mockResolvedValue(undefined),
         batchFixFormulaFormatsCommand: jest.fn().mockResolvedValue(undefined),
@@ -121,6 +122,7 @@ describe('NotemdSidebarView button trigger chains', () => {
             'extract-concepts-current',
             'extract-concepts-folder',
             'extract-original-text',
+            'batch-extract-original-text',
             'batch-mermaid-fix',
             'fix-formula-current',
             'batch-fix-formula',
@@ -222,6 +224,11 @@ describe('NotemdSidebarView button trigger chains', () => {
     test('extract-original-text triggers extractOriginalTextCommand', async () => {
         await executeAction('extract-original-text', reporter);
         expect(plugin.extractOriginalTextCommand).toHaveBeenCalledWith(reporter);
+    });
+
+    test('batch-extract-original-text triggers batchExtractOriginalTextCommand', async () => {
+        await executeAction('batch-extract-original-text', reporter);
+        expect(plugin.batchExtractOriginalTextCommand).toHaveBeenCalledWith(reporter);
     });
 
     test('batch-mermaid-fix triggers batchMermaidFixCommand with latest complete folder from context', async () => {

@@ -28,7 +28,7 @@ import { ErrorModal } from './ui/ErrorModal';
 import { DiagramPreviewModal } from './ui/DiagramPreviewModal';
 import { WelcomeModal } from './ui/WelcomeModal';
 import { NotemdSettingTab } from './ui/NotemdSettingTab';
-import { showDeletionConfirmationModal } from './ui/modals'; // Import the modal function
+import { showConceptNotePathWarningModal, showDeletionConfirmationModal } from './ui/modals'; // Import the modal function
 import { NotemdSidebarView } from './ui/NotemdSidebarView';
 import { BatchProgressStore } from './batchProgressStore';
 import { getSystemPrompt } from './promptUtils';
@@ -80,6 +80,7 @@ import {
 } from './operations/configProfileCommandHostAdapter';
 import {
     NoteProcessingCommandHost,
+    runBatchExtractOriginalTextCommandWithHost,
     runBatchExtractConceptsForFolderCommandWithHost,
     runBatchGenerateContentForTitlesCommandWithHost,
     runBatchTranslateFolderCommandWithHost,
@@ -107,6 +108,7 @@ export default class NotemdPlugin extends Plugin {
     statusBarItem: HTMLElement;
     private ribbonIconEl: HTMLElement | null = null;
     private isBusy: boolean = false;
+    private suppressConceptNotePathWarningOnce = false;
     currentProcessingFileBasename: { value: string | null } = { value: null }; // Keep track of the file being processed
 
     public getIsBusy(): boolean {
@@ -123,6 +125,55 @@ export default class NotemdPlugin extends Plugin {
 
     private getUiStrings() {
         return getI18nStrings({ uiLocale: this.settings?.uiLocale || 'auto' });
+    }
+
+    public clearConceptNotePathWarningSuppressionOnce(): void {
+        this.suppressConceptNotePathWarningOnce = false;
+    }
+
+    public async openSettingsAtSection(sectionKey?: string): Promise<void> {
+        (this.app as any).setting?.openTabById?.('notemd');
+        if (!sectionKey) {
+            return;
+        }
+
+        window.requestAnimationFrame(() => {
+            const target = document.querySelector<HTMLElement>(`[data-notemd-setting-section="${sectionKey}"]`);
+            if (target) {
+                target.scrollIntoView({ block: 'start', behavior: 'smooth' });
+            }
+        });
+    }
+
+    public async ensureConceptNotePathConfiguredForActions(actionLabels: string[]): Promise<boolean> {
+        if (this.settings.suppressConceptNotePathWarningForever || this.suppressConceptNotePathWarningOnce) {
+            return true;
+        }
+
+        if (this.settings.useCustomConceptNoteFolder && this.settings.conceptNoteFolder.trim()) {
+            return true;
+        }
+
+        const choice = await showConceptNotePathWarningModal(this.app, {
+            uiLocale: this.settings.uiLocale,
+            actions: actionLabels
+        });
+
+        if (choice === 'configure') {
+            await this.openSettingsAtSection('concept-note-output');
+            return false;
+        }
+
+        if (choice === 'skip-forever') {
+            this.settings.suppressConceptNotePathWarningForever = true;
+            await this.saveSettings();
+            new Notice(this.getUiStrings().notices.conceptNotePathWarningSuppressedForever);
+            return true;
+        }
+
+        this.suppressConceptNotePathWarningOnce = true;
+        new Notice(this.getUiStrings().notices.conceptNotePathWarningSuppressedOnce);
+        return true;
     }
 
     private openLocalizedErrorModal(title: string, errorMessage: string) {
@@ -301,6 +352,8 @@ export default class NotemdPlugin extends Plugin {
             updateStatusBar: (message) => this.updateStatusBar(message),
             getRunningActionText: (label) => this.getRunningActionText(label),
             getActionCompleteText: (label) => this.getActionCompleteText(label),
+            ensureConceptNotePathConfiguredForActions: (actionLabels) =>
+                this.ensureConceptNotePathConfiguredForActions(actionLabels),
             showNotice: (message, duration) => new Notice(message, duration),
             logError: (message, details) => console.error(message, details),
             openErrorModal: (title, details) => this.openLocalizedErrorModal(title, details),
@@ -782,6 +835,14 @@ export default class NotemdPlugin extends Plugin {
                     return true;
                 }
                 return false;
+            }
+        });
+
+        this.addCommand({
+            id: 'batch-extract-original-text',
+            name: getSidebarActionLabel(uiStrings, 'batch-extract-original-text'),
+            callback: async () => {
+                await this.batchExtractOriginalTextCommand();
             }
         });
 
@@ -1348,6 +1409,10 @@ export default class NotemdPlugin extends Plugin {
 
     async extractOriginalTextCommand(reporter?: ProgressReporter) {
         return runExtractOriginalTextCommandWithHost(this.createNoteProcessingCommandHost(), reporter);
+    }
+
+    async batchExtractOriginalTextCommand(reporter?: ProgressReporter) {
+        return runBatchExtractOriginalTextCommandWithHost(this.createNoteProcessingCommandHost(), reporter);
     }
 
 } // End of NotemdPlugin class

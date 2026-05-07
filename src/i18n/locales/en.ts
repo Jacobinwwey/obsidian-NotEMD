@@ -5,6 +5,7 @@ export const STRINGS_EN = {
         cancel: 'Cancel',
         close: 'Close',
         copy: 'Copy',
+        configure: 'Configure',
         ready: 'Ready',
         standby: 'Standby',
         unknownError: 'Unknown error'
@@ -95,6 +96,8 @@ export const STRINGS_EN = {
             title: 'Welcome to Notemd',
             introText: 'Notemd enhances your Obsidian workflow with LLM-powered processing: generate wiki-links, extract concepts, translate notes, create diagrams, and more.',
             setupHint: 'To get started, configure an LLM provider in the settings. DeepSeek, OpenAI, Anthropic, Google, and many more are supported.',
+            releaseNotesHeading: 'Recent updates',
+            releaseNotesIntro: 'Review the most important changes from the latest two releases to get up to speed quickly.',
             sponsorText: 'Notemd is free and open source. If you find it useful, please consider supporting development.',
             configureButton: 'Configure LLM',
             sponsorButton: 'Give a Star on GitHub',
@@ -111,7 +114,7 @@ export const STRINGS_EN = {
         providerConfig: {
             heading: 'LLM providers',
             summaryTitle: 'Provider presets expanded to {count} entries.',
-            summaryDesc: 'OpenAI-compatible providers now share one runtime path. Built-in presets cover China-focused services such as Qwen, Doubao, Moonshot, GLM, MiniMax, Baidu Qianfan, and SiliconFlow, and the generic "OpenAI Compatible" preset can target LiteLLM, vLLM, Perplexity, Vercel AI Gateway, or your own proxy.',
+            summaryDesc: 'OpenAI-compatible providers now share one runtime path. Built-in presets cover China-focused services such as Qwen, Doubao, Moonshot, Xiaomi MiMo, GLM, MiniMax, Baidu Qianfan, and SiliconFlow, and the generic "OpenAI Compatible" preset can target LiteLLM, vLLM, Perplexity, Vercel AI Gateway, or your own proxy.',
             categoryCloud: 'Cloud',
             categoryGateway: 'Gateway',
             categoryLocal: 'Local',
@@ -335,6 +338,8 @@ export const STRINGS_EN = {
             questionsName: 'Questions for extraction',
             questionsDesc: 'Enter the list of questions to extract specific text for, separated by newlines.',
             questionsPlaceholder: 'Enter your questions here...',
+            batchModeName: 'Enable batch extraction for current folder',
+            batchModeDesc: 'Adds a folder-level command to run "Extract specific original text" on every eligible file in a selected folder.',
             translateOutputName: 'Translate output to corresponding language',
             translateOutputDesc: 'If selected, the output will include a translation in the selected extraction language.',
             mergedQueryName: 'Merged query mode',
@@ -373,7 +378,7 @@ export const STRINGS_EN = {
         processing: {
             heading: 'Processing parameters',
             chunkWordCountName: 'Chunk word count',
-            chunkWordCountDesc: 'Max words per chunk sent to LLM.',
+            chunkWordCountDesc: 'Max words per chunk sent to LLM. Recommended: about one third of Max tokens.',
             maxTokensName: 'Max tokens',
             maxTokensDesc: 'Max tokens LLM should generate per response.',
             duplicateDetectionName: 'Enable duplicate detection',
@@ -486,14 +491,18 @@ export const STRINGS_EN = {
                 label: 'Extract concepts (folder)',
                 tooltip: 'Extract concepts from every file in a selected folder.'
             },
-            extractOriginalText: {
-                label: 'Extract specific original text',
-                tooltip: 'Extract verbatim source excerpts for configured questions.'
+        extractOriginalText: {
+            label: 'Extract specific original text',
+            tooltip: 'Extract verbatim source excerpts for configured questions.'
+        },
+            batchExtractOriginalText: {
+                label: 'Batch extract specific original text',
+                tooltip: 'Extract configured source excerpts from every eligible file in a selected folder.'
             },
-            batchMermaidFix: {
-                label: 'Batch Mermaid fix',
-                tooltip: 'Run Mermaid/LaTeX batch syntax fix on selected folder.'
-            },
+        batchMermaidFix: {
+            label: 'Batch Mermaid fix',
+            tooltip: 'Run Mermaid/LaTeX batch syntax fix on selected folder.'
+        },
             fixFormulaCurrent: {
                 label: 'Fix formula formats (current)',
                 tooltip: 'Normalize formula delimiters in current file.'
@@ -578,6 +587,12 @@ export const STRINGS_EN = {
         noTopicFound: 'No topic found (select text or use note title).',
         selectValidWord: 'Select a valid word (2+ chars).',
         selectTopicTextOrUseNoteTitle: 'Please select the topic text in the editor first, or ensure the note has a title.',
+        conceptNotePathRequiredTitle: 'Concept note path configuration required',
+        conceptNotePathRequiredBody: 'This action needs "Customize concept note path" enabled and "Concept note folder path" configured before concept notes can be created normally.',
+        conceptNotePathRequiredActionList: 'Affected actions: {actions}',
+        conceptNotePathRequiredConfigureHint: 'Choose "Configure" to jump to the Notemd settings section for concept note output.',
+        conceptNotePathWarningSuppressedOnce: 'Concept note path warning skipped for this run.',
+        conceptNotePathWarningSuppressedForever: 'Concept note path warning disabled for future runs.',
         researchFailedOrNoResults: 'Research for "{topic}" failed or returned no results. Summary not generated.',
         researchSummaryAppended: 'Research summary for "{topic}" appended.',
         researchError: 'Error during research: {message}. See console.',

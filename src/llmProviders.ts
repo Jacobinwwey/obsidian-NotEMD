@@ -156,6 +156,11 @@ const KNOWN_MODEL_MAX_OUTPUT_TOKENS: Partial<Record<string, Record<string, numbe
         'kimi-k2-turbo-preview': 32_000,
         'kimi-k2.5': 32_000
     },
+    'Xiaomi MiMo': {
+        'mimo-v2.5-pro': 65_536,
+        'mimo-v2.5': 65_536,
+        'mimo-v2-omni': 65_536
+    },
     'GLM': {
         'glm-4.5': 98_304,
         'glm-4.5-air': 98_304,
@@ -347,6 +352,22 @@ export const LLM_PROVIDER_DEFINITIONS: LLMProviderDefinition[] = [
             baseUrl: 'https://api.moonshot.cn/v1',
             model: 'kimi-k2-0905-preview',
             temperature: 0.3
+        }
+    },
+    {
+        name: 'Xiaomi MiMo',
+        category: 'cloud',
+        transport: 'openai-compatible',
+        apiKeyMode: 'required',
+        apiTestMode: 'chat-only',
+        description: 'Xiaomi MiMo OpenAI-compatible endpoint for MiMo chat, coding, and multimodal models.',
+        setupHint: 'Use the MiMo OpenAI-compatible base URL such as https://api.xiaomimimo.com/v1 or your token-plan endpoint, with model IDs like mimo-v2.5-pro.',
+        defaultConfig: {
+            name: 'Xiaomi MiMo',
+            apiKey: '',
+            baseUrl: 'https://api.xiaomimimo.com/v1',
+            model: 'mimo-v2.5-pro',
+            temperature: 1.0
         }
     },
     {

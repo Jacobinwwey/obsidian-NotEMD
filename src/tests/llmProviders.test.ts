@@ -17,6 +17,7 @@ describe('llmProviders registry', () => {
             'Qwen Code',
             'Doubao',
             'Moonshot',
+            'Xiaomi MiMo',
             'GLM',
             'Z AI',
             'MiniMax',
@@ -58,6 +59,7 @@ describe('llmProviders registry', () => {
         expect(isOpenAICompatibleProvider('Qwen Code')).toBe(true);
         expect(isOpenAICompatibleProvider('Doubao')).toBe(true);
         expect(isOpenAICompatibleProvider('Moonshot')).toBe(true);
+        expect(isOpenAICompatibleProvider('Xiaomi MiMo')).toBe(true);
         expect(isOpenAICompatibleProvider('GLM')).toBe(true);
         expect(isOpenAICompatibleProvider('Z AI')).toBe(true);
         expect(isOpenAICompatibleProvider('MiniMax')).toBe(true);
@@ -82,6 +84,10 @@ describe('llmProviders registry', () => {
             apiTestMode: 'chat-only'
         }));
         expect(getLLMProviderDefinition('Moonshot')).toEqual(expect.objectContaining({
+            transport: 'openai-compatible',
+            apiTestMode: 'chat-only'
+        }));
+        expect(getLLMProviderDefinition('Xiaomi MiMo')).toEqual(expect.objectContaining({
             transport: 'openai-compatible',
             apiTestMode: 'chat-only'
         }));
@@ -116,6 +122,8 @@ describe('llmProviders registry', () => {
         expect(getLLMProviderDefinition('DeepSeek')?.defaultConfig.model).toBe('deepseek-v4-pro');
         expect(getLLMProviderDefinition('Qwen')?.defaultConfig.model).toBe('qwen3-235b-a22b');
         expect(getLLMProviderDefinition('Moonshot')?.defaultConfig.model).toBe('kimi-k2-0905-preview');
+        expect(getLLMProviderDefinition('Xiaomi MiMo')?.defaultConfig.baseUrl).toBe('https://api.xiaomimimo.com/v1');
+        expect(getLLMProviderDefinition('Xiaomi MiMo')?.defaultConfig.model).toBe('mimo-v2.5-pro');
         expect(getLLMProviderDefinition('MiniMax')?.defaultConfig.model).toBe('MiniMax-M2.7');
     });
 

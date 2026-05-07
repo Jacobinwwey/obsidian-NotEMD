@@ -35,6 +35,9 @@ ref
 .cache
 .tmp_repo_saga_tool
 
+# local trellis workflow state
+.trellis/
+
 # vitepress local docs artifacts
 docs/.vitepress/cache
 docs/.vitepress/dist
