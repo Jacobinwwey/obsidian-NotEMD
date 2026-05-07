@@ -36,6 +36,10 @@ git diff --check
 
 如果本地环境缺少 `obsidian-cli`，请在发布说明或交接证据中明确记录。
 如果改动触及图表语义，还必须执行 `docs/maintainer/diagram-semantic-verification.zh-CN.md` 中定义的维护者本地语义核验层。
+推荐辅助命令：
+```bash
+npm run verify:diagram-semantics -- --vault "<vault-name>" --commit "<sha>" --version "<plugin-version>" --output ~/tmp/notemd-diagram-check.md
+```
 
 ## 3. 版本同步
 
@@ -105,6 +109,7 @@ npm run release:github -- <tag>
 凡是会影响 renderer 行为的改动，都还需要仓库 CI 之外的一层验证：
 
 - 使用 `docs/maintainer/diagram-semantic-verification.zh-CN.md`
+- 如需可复用的交接模板，可先执行 `npm run verify:diagram-semantics -- --vault "<vault-name>" --commit "<sha>" --version "<plugin-version>" --output ~/tmp/notemd-diagram-check.md`
 - 在真实本地 vault 中验证受影响的 Mermaid / JSON Canvas / Vega-Lite 路径
 - 在 release handoff 或 PR 说明中记录证据
 

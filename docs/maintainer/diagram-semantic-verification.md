@@ -4,6 +4,14 @@ Language: **English** | [简体中文](./diagram-semantic-verification.zh-CN.md)
 
 This document defines the maintainer-local semantic verification layer for diagram-related changes. It complements repo-enforced checks; it does not replace them.
 
+Template helper:
+
+```bash
+npm run verify:diagram-semantics -- --vault "<vault-name>" --commit "<sha>" --version "<plugin-version>" --output ~/tmp/notemd-diagram-check.md
+```
+
+The helper is secret-free. It generates a Markdown checklist template plus vault-aware CLI commands and surface evidence sections; it does not launch Obsidian, read local secrets, or rely on tracked vault paths.
+
 ## 1. When This Runbook Is Required
 
 Run this verification when a change touches any of the following:
@@ -101,6 +109,10 @@ Recommended evidence:
 Use this sequence unless the change is more narrowly scoped:
 
 1. Run repo gates first.
+   Or generate a ready-to-fill checklist first:
+   ```bash
+   npm run verify:diagram-semantics -- --vault "<vault-name>" --commit "<sha>" --version "<plugin-version>" --output ~/tmp/notemd-diagram-check.md
+   ```
 2. Reload the plugin in the local test vault.
 3. Confirm plugin availability and command exposure via CLI.
 4. Exercise the affected diagram path(s) in real Obsidian.
