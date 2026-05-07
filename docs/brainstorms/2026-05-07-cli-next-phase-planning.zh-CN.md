@@ -192,4 +192,4 @@ CLI 的下一阶段应保持 `diagram.generate`、`diagram.preview` 与 `provide
 
 ## 下一步
 
--> 将本文件与任务目录中的 research 纪要作为历史依据，然后在没有新宿主无关边界出现的前提下，优先从 packaging / semantic-verification 收敛启动下一份实现 PRD。
+-> 将本文件与任务目录中的 research 纪要作为历史依据，然后从“剩余的 packaging / semantic-verification 收敛缺口”启动下一份实现 PRD。semantic-verification 这一侧现在已经有了已检入的 helper（`npm run verify:diagram-semantics`），所以下一步更高杠杆的跟进应进一步收窄到 packaging 边界证明，以及任何仍然存在的 contract-promotion 决策，除非后续又发现了新的宿主无关边界，才需要重开更深层的 diagram contract 工作。

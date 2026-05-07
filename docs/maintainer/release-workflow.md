@@ -36,6 +36,10 @@ git diff --check
 
 If `obsidian-cli` is unavailable in the local environment, record it in release notes or release-handoff evidence.
 If the change affects diagram semantics, also run the maintainer-local semantic layer in `docs/maintainer/diagram-semantic-verification.md`.
+Recommended helper:
+```bash
+npm run verify:diagram-semantics -- --vault "<vault-name>" --commit "<sha>" --version "<plugin-version>" --output ~/tmp/notemd-diagram-check.md
+```
 
 ## 3. Version Synchronization
 
@@ -105,6 +109,7 @@ The workflow intentionally reuses the checked-in release helper instead of dupli
 Renderer-affecting changes need one more layer beyond repo CI:
 
 - use `docs/maintainer/diagram-semantic-verification.md`
+- generate a reusable checklist with `npm run verify:diagram-semantics -- --vault "<vault-name>" --commit "<sha>" --version "<plugin-version>" --output ~/tmp/notemd-diagram-check.md` when you need a durable handoff artifact
 - verify affected Mermaid / JSON Canvas / Vega-Lite flows in a real local vault
 - record evidence in release handoff or PR notes
 

@@ -252,6 +252,7 @@ flowchart LR
 - 新落地的 direct-surface wrapper 批次已经覆盖 `testLlmConnectionCommand`、`generateDiagramCommand` 与 `previewExperimentalDiagramCommand`；这些表面现在都具备结构化 result 边界，而不是 fire-and-forget 的 UI glue
 - 最新一层细化是：`diagram.generate` 应被理解为“宿主无关 generation contract”，而不是对当前 active-file 命令的另一种命名。它在 operation-level 上的 `safe` / `read-only` 元数据描述的是显式的 `sourceMarkdown -> DiagramGenerationResult` core；映射过去的 command binding 仍然要如实保留 `requires-active-file` / `write-file` 语义。
 - 当前真正剩余的缺口因此已经不是公共 command entrypoint 本身：`diagram.preview` 与 `provider.connection.test` 现已具备 typed contract，save/artifact 的实质执行路径也已进入 `src/operations/diagramCommandExecution.ts`，而 `diagram.generate` 现在也会返回显式的 follow-through 细节（`kind`、`outputPath`、`previewOpened`、`autoFixAttempted`、`artifactTarget`），同时继续保留向后兼容的顶层 `outputPath` / `previewOpened` 字段。
+- 维护者本地语义核验层现在也不再只是文字说明：`npm run verify:diagram-semantics` 已能生成无 secrets 的 Markdown 检查模板，其中包含仓库硬门、vault 感知的 CLI 检查命令，以及 Mermaid / JSON Canvas / Vega-Lite 的证据区块，不依赖仓库中跟踪的 vault 路径或 live 凭据。
 - 下一阶段顺序已经明确：先把 `diagram.generate` 保持为宿主无关 core，把这批已落地的 typed follow-through 视作其下的 command-completion 层，再做 packaging / semantic verification 的后续收敛，最后才重开更强 public CLI 声明或更大规模的结构重排。
 
 ## 关键设计决策
