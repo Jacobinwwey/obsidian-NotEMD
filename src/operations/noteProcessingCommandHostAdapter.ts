@@ -12,7 +12,12 @@ import {
     generateContentForTitle,
     ProcessFileResult
 } from '../fileUtils';
-import { ExtractOriginalTextPluginContext, ExtractOriginalTextResult, extractOriginalText } from '../extractOriginalText';
+import {
+    BatchExtractOriginalTextResult,
+    ExtractOriginalTextPluginContext,
+    ExtractOriginalTextResult,
+    extractOriginalText
+} from '../extractOriginalText';
 import { formatI18n } from '../i18n';
 import { researchAndSummarize } from '../searchUtils';
 import { BatchTranslateFolderResult, batchTranslateFolder, TranslateFileResult, translateFile } from '../translate';
@@ -64,6 +69,10 @@ export interface NoteProcessingCommandUiStrings {
         contentGenerationError: string;
         researchError: string;
         extractionCompleteSavedTo: string;
+        batchExtractOriginalTextCancelled?: string;
+        batchExtractOriginalTextFinishedWithErrors?: string;
+        batchExtractOriginalTextSuccess?: string;
+        batchExtractOriginalTextError?: string;
     };
     sidebar: {
         status: {
@@ -112,6 +121,7 @@ export interface NoteProcessingCommandHost {
     updateStatusBar: (message: string) => void;
     getRunningActionText: (label: string) => string;
     getActionCompleteText: (label: string) => string;
+    ensureConceptNotePathConfiguredForActions: (actionLabels: string[]) => Promise<boolean>;
     showNotice: (message: string, duration?: number) => void;
     logError: (message: string, details: string) => void;
     openErrorModal: (title: string, details: string) => void;
@@ -121,6 +131,26 @@ export interface NoteProcessingCommandHost {
     appendVaultLog: (path: string, content: string) => Promise<void>;
     completeReporter: (reporter: ProgressReporter) => void;
     finalizeReporter: (reporter: ProgressReporter) => void;
+}
+
+function actionRequiresConceptNotePath(actionId: SidebarActionId): boolean {
+    return actionId === 'process-current-add-links'
+        || actionId === 'process-folder-add-links'
+        || actionId === 'extract-concepts-current'
+        || actionId === 'extract-concepts-folder';
+}
+
+async function ensureConceptNotePathIfNeeded(
+    host: NoteProcessingCommandHost,
+    actionIds: SidebarActionId[]
+): Promise<boolean> {
+    const relevantActions = actionIds.filter(actionRequiresConceptNotePath);
+    if (relevantActions.length === 0) {
+        return true;
+    }
+
+    const labels = relevantActions.map(actionId => host.getActionLabel(actionId));
+    return host.ensureConceptNotePathConfiguredForActions(labels);
 }
 
 function normalizeError(
@@ -478,6 +508,9 @@ export async function runExtractConceptsCommandWithHost(
 
     await runBusyReporterCommandWithHost(host, actionLabel, reporter, async (useReporter) => {
         try {
+            if (!(await ensureConceptNotePathIfNeeded(host, ['extract-concepts-current']))) {
+                return;
+            }
             await runExtractConceptsCommandCoreWithHost(
                 host,
                 useReporter,
@@ -518,6 +551,9 @@ export async function runBatchExtractConceptsForFolderCommandWithHost(
         let uiStrings = host.getUiStrings();
 
         try {
+            if (!(await ensureConceptNotePathIfNeeded(host, ['extract-concepts-folder']))) {
+                return;
+            }
             await host.loadSettings();
             uiStrings = host.getUiStrings();
             const settings = host.getSettings();
@@ -725,6 +761,9 @@ export async function runExtractConceptsAndGenerateTitlesCommandWithHost(
         let uiStrings = host.getUiStrings();
 
         try {
+            if (!(await ensureConceptNotePathIfNeeded(host, ['extract-concepts-current']))) {
+                return;
+            }
             await runExtractConceptsCommandCoreWithHost(
                 host,
                 useReporter,
@@ -812,6 +851,130 @@ export async function runExtractOriginalTextCommandWithHost(
             }
 
             useReporter.log(`Error: ${errorMessage}`);
+            host.failReporterAction(useReporter, errorMessage);
+        }
+    });
+
+    return commandResult;
+}
+
+export async function runBatchExtractOriginalTextCommandWithHost(
+    host: NoteProcessingCommandHost,
+    reporter?: ProgressReporter,
+    extractOriginalTextImpl: typeof extractOriginalText = extractOriginalText
+): Promise<BatchExtractOriginalTextResult | null> {
+    const actionLabel = host.getActionLabel('batch-extract-original-text');
+    let commandResult: BatchExtractOriginalTextResult | null = null;
+
+    await runBusyReporterCommandWithHost(host, actionLabel, reporter, async (useReporter) => {
+        let uiStrings = host.getUiStrings();
+
+        try {
+            await host.loadSettings();
+            uiStrings = host.getUiStrings();
+            const folderPath = await host.getFolderSelection();
+            if (!folderPath) {
+                const cancelledMessage = uiStrings.notices.batchExtractOriginalTextCancelled || uiStrings.notices.batchProcessingCancelled;
+                useReporter.log(cancelledMessage);
+                useReporter.updateStatus(cancelledMessage, -1);
+                throw new Error(cancelledMessage);
+            }
+
+            const folder = host.getFolderByPath(folderPath);
+            if (!folder) {
+                throw new Error(`Invalid folder selected: ${folderPath}`);
+            }
+
+            const files = host.getFiles().filter(file =>
+                (file.extension === 'md' || file.extension === 'txt') &&
+                (file.path === folderPath || file.path.startsWith(folderPath === '/' ? '' : `${folderPath}/`))
+            );
+
+            commandResult = {
+                folderPath,
+                processedFileCount: files.length,
+                extractedCount: 0,
+                cancelled: false,
+                fileResults: [],
+                errors: []
+            };
+
+            if (files.length === 0) {
+                const noFilesMessage = formatI18n(uiStrings.notices.noMarkdownOrTextFilesFoundSelectedFolder, {
+                    folderPath
+                });
+                useReporter.log(noFilesMessage);
+                useReporter.updateStatus(noFilesMessage, 100);
+                host.showNotice(noFilesMessage);
+                host.completeReporter(useReporter);
+                return;
+            }
+
+            host.updateStatusBar(host.getRunningActionText(actionLabel));
+            useReporter.log(host.getRunningActionText(actionLabel));
+
+            for (let index = 0; index < files.length; index++) {
+                const file = files[index];
+                if (useReporter.cancelled) {
+                    break;
+                }
+
+                const progress = Math.floor((index / files.length) * 100);
+                useReporter.updateStatus(host.getStepStatusText(index + 1, files.length, file.name), progress);
+
+                try {
+                    const result = await extractOriginalTextImpl(host.getApp(), host.getPluginRuntime(), file, useReporter);
+                    if (result) {
+                        commandResult.fileResults.push(result);
+                        commandResult.extractedCount += 1;
+                    }
+                } catch (fileError: unknown) {
+                    const message = fileError instanceof Error ? fileError.message : String(fileError);
+                    commandResult.errors.push({ file: file.name, message });
+                    useReporter.log(`❌ Error extracting from ${file.name}: ${message}`);
+                    if (message.includes('cancelled by user')) {
+                        break;
+                    }
+                }
+            }
+
+            commandResult.cancelled = useReporter.cancelled;
+
+            if (!useReporter.cancelled) {
+                if (commandResult.errors.length > 0) {
+                    const errorSummary = formatI18n(
+                        uiStrings.notices.batchExtractOriginalTextFinishedWithErrors || uiStrings.notices.batchProcessingFinishedWithErrors,
+                        { count: commandResult.errors.length }
+                    );
+                    useReporter.log(`⚠️ ${errorSummary}`);
+                    useReporter.updateStatus(errorSummary, -1);
+                    host.showNotice(errorSummary, 10000);
+                } else {
+                    const successMessage = formatI18n(
+                        uiStrings.notices.batchExtractOriginalTextSuccess || uiStrings.notices.batchProcessingSuccess,
+                        { count: commandResult.extractedCount }
+                    );
+                    useReporter.updateStatus(successMessage, 100);
+                    host.showNotice(successMessage);
+                    host.completeReporter(useReporter);
+                }
+            }
+        } catch (error: unknown) {
+            const { errorMessage } = normalizeError(
+                error,
+                'An unknown error occurred during batch extraction of original text.'
+            );
+
+            if (!errorMessage.includes('cancelled')) {
+                host.showNotice(formatI18n(
+                    uiStrings.notices.batchExtractOriginalTextError || uiStrings.notices.genericErrorSeeConsoleForDetails,
+                    { message: errorMessage }
+                ), 10000);
+                host.openErrorModal(uiStrings.errorModal.titles.extraction, errorMessage);
+                await host.saveErrorLog(error, useReporter);
+            }
+
+            useReporter.log(`Batch Error: ${errorMessage}`);
             host.failReporterAction(useReporter, errorMessage);
         }
     });
@@ -1083,6 +1246,9 @@ export async function runProcessWithNotemdCommandWithHost(
         let uiStrings = host.getUiStrings();
 
         try {
+            if (!(await ensureConceptNotePathIfNeeded(host, ['process-current-add-links']))) {
+                return;
+            }
             await host.loadSettings();
             uiStrings = host.getUiStrings();
             const activeFile = host.getActiveFile();
@@ -1149,6 +1315,9 @@ export async function runProcessFolderWithNotemdCommandWithHost(
         let uiStrings = host.getUiStrings();
 
         try {
+            if (!(await ensureConceptNotePathIfNeeded(host, ['process-folder-add-links']))) {
+                return;
+            }
             await host.loadSettings();
             uiStrings = host.getUiStrings();
             const settings = host.getSettings();

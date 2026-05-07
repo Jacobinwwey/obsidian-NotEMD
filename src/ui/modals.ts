@@ -61,3 +61,64 @@ export function showDeletionConfirmationModal(
         modal.open();
     });
 }
+
+export type ConceptNotePathWarningChoice = 'configure' | 'skip-once' | 'skip-forever';
+
+export function showConceptNotePathWarningModal(
+    app: App,
+    options: {
+        uiLocale?: string;
+        actions: string[];
+    }
+): Promise<ConceptNotePathWarningChoice> {
+    return new Promise((resolve) => {
+        const i18n = getI18nStrings({ uiLocale: options.uiLocale });
+        const modal = new Modal(app);
+        modal.titleEl.setText(i18n.notices.conceptNotePathRequiredTitle);
+        modal.contentEl.addClass('notemd-concept-path-warning-modal');
+
+        modal.contentEl.createEl('p', {
+            text: i18n.notices.conceptNotePathRequiredBody
+        });
+        modal.contentEl.createEl('p', {
+            text: formatI18n(i18n.notices.conceptNotePathRequiredActionList, {
+                actions: options.actions.join(' / ')
+            }),
+            cls: 'setting-item-description'
+        });
+        modal.contentEl.createEl('p', {
+            text: i18n.notices.conceptNotePathRequiredConfigureHint,
+            cls: 'setting-item-description'
+        });
+
+        const buttonContainer = modal.contentEl.createDiv({ cls: 'modal-button-container' });
+
+        const configureButton = buttonContainer.createEl('button', {
+            text: i18n.common.configure,
+            cls: 'mod-cta'
+        });
+        configureButton.onclick = () => {
+            modal.close();
+            resolve('configure');
+        };
+
+        const skipOnceButton = buttonContainer.createEl('button', {
+            text: options.uiLocale?.toLowerCase().startsWith('zh') ? '本次不提示' : 'Skip once'
+        });
+        skipOnceButton.onclick = () => {
+            modal.close();
+            resolve('skip-once');
+        };
+
+        const skipForeverButton = buttonContainer.createEl('button', {
+            text: options.uiLocale?.toLowerCase().startsWith('zh') ? '不再提示' : 'Do not show again'
+        });
+        skipForeverButton.onclick = () => {
+            modal.close();
+            resolve('skip-forever');
+        };
+
+        modal.onClose = () => resolve('skip-once');
+        modal.open();
+    });
+}

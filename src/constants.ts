@@ -7,7 +7,7 @@ export const DEFAULT_SETTINGS: NotemdSettings = {
     providers: createDefaultProviders(),
     activeProvider: 'DeepSeek',
     // Concept Note Defaults
-    useCustomConceptNoteFolder: false,
+    useCustomConceptNoteFolder: true,
     conceptNoteFolder: '',
     // Processed File Defaults
     useCustomProcessedFileFolder: false,
@@ -161,9 +161,10 @@ export const DEFAULT_SETTINGS: NotemdSettings = {
     extractOriginalTextUseCustomOutput: false,
     extractOriginalTextCustomPath: '',
     extractOriginalTextCustomSuffix: '_Extracted',
+    suppressConceptNotePathWarningForever: false,
     useCustomPromptForExtractOriginalText: false,
     customPromptExtractOriginalText: '',
-    enableMermaidErrorDetection: false,
+    enableMermaidErrorDetection: true,
     moveMermaidErrorFiles: false,
     mermaidErrorFolderPath: 'MermaidErrors',
     enableExperimentalDiagramPipeline: false,

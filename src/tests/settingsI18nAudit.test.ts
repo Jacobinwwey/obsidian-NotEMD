@@ -149,4 +149,14 @@ describe('settings page i18n coverage', () => {
         expect(source).not.toContain('`Custom prompt for "${task.name}"`');
         expect(source).not.toContain('`Enter your custom prompt for ${task.name}...`');
     });
+
+    test('keeps conditional text inputs from forcing a settings-tab redraw on each keystroke', () => {
+        const source = fs.readFileSync(settingsTabPath, 'utf8');
+
+        expect(source).not.toContain('generateTitleOutputFolderName = value.trim() || DEFAULT_SETTINGS.generateTitleOutputFolderName;\n                        await this.plugin.saveSettings();\n                        this.display();');
+        expect(source).not.toContain('translationSavePath = value.trim();\n                        await this.plugin.saveSettings();\n                        this.display();');
+        expect(source).not.toContain('summarizeToMermaidSavePath = value.trim();\n                        await this.plugin.saveSettings();\n                        this.display();');
+        expect(source).not.toContain('extractOriginalTextCustomPath = value.trim();\n                        await this.plugin.saveSettings();\n                        this.display();');
+        expect(source).not.toContain('mermaidErrorFolderPath = value.trim();\n                        await this.plugin.saveSettings();\n                        this.display();');
+    });
 });

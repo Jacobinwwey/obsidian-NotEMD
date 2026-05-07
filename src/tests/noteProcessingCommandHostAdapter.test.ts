@@ -150,6 +150,9 @@ function createHost(reporter: ProgressReporter, initiallyBusy = false) {
                 if (actionId === 'extract-original-text') {
                     return 'Extract original text';
                 }
+                if (actionId === 'batch-extract-original-text') {
+                    return 'Batch extract original text';
+                }
                 return actionId;
             }),
             getReporter: jest.fn(() => reporter),
@@ -165,6 +168,7 @@ function createHost(reporter: ProgressReporter, initiallyBusy = false) {
             updateStatusBar: jest.fn(),
             getRunningActionText: jest.fn((label: string) => `Running ${label}`),
             getActionCompleteText: jest.fn((label: string) => `Done ${label}`),
+            ensureConceptNotePathConfiguredForActions: jest.fn().mockResolvedValue(true),
             showNotice: jest.fn(),
             logError: jest.fn(),
             openErrorModal: jest.fn(),
@@ -222,6 +226,66 @@ describe('note processing command host adapter', () => {
             modified: true
         });
         expect(getBusy()).toBe(false);
+    });
+
+    test('process command stops early when concept note path guard redirects to settings', async () => {
+        const reporter = createReporter();
+        const { host } = createHost(reporter);
+        host.ensureConceptNotePathConfiguredForActions.mockResolvedValue(false);
+        host.getActiveFile.mockImplementation(() => ({
+            name: 'Topic.md',
+            basename: 'Topic',
+            path: 'Notes/Topic.md',
+            extension: 'md'
+        } as any));
+        const processImpl = jest.fn();
+        const { runProcessWithNotemdCommandWithHost } = loadModule();
+
+        const result = await runProcessWithNotemdCommandWithHost(host, reporter, processImpl);
+
+        expect(host.ensureConceptNotePathConfiguredForActions).toHaveBeenCalledWith(['Process file']);
+        expect(processImpl).not.toHaveBeenCalled();
+        expect(result).toBeNull();
+    });
+
+    test('batch extract original text command processes folder files', async () => {
+        const reporter = createReporter();
+        const { host } = createHost(reporter);
+        host.getFolderSelection.mockResolvedValue('Notes');
+        host.getFolderByPath.mockReturnValue({ path: 'Notes' } as any);
+        host.getFiles.mockReturnValue([
+            { name: 'A.md', basename: 'A', path: 'Notes/A.md', extension: 'md' } as any,
+            { name: 'B.txt', basename: 'B', path: 'Notes/B.txt', extension: 'txt' } as any
+        ]);
+
+        const extractImpl = jest.fn()
+            .mockResolvedValueOnce({
+                sourcePath: 'Notes/A.md',
+                outputPath: 'Notes/A_Extracted.md',
+                outputDirectory: 'Notes',
+                outputSuffix: '_Extracted',
+                questionCount: 1,
+                mergedMode: false
+            })
+            .mockResolvedValueOnce({
+                sourcePath: 'Notes/B.txt',
+                outputPath: 'Notes/B_Extracted.md',
+                outputDirectory: 'Notes',
+                outputSuffix: '_Extracted',
+                questionCount: 1,
+                mergedMode: false
+            });
+
+        const { runBatchExtractOriginalTextCommandWithHost } = loadModule();
+        const result = await runBatchExtractOriginalTextCommandWithHost(host, reporter, extractImpl);
+
+        expect(extractImpl).toHaveBeenCalledTimes(2);
+        expect(result).toEqual(expect.objectContaining({
+            folderPath: 'Notes',
+            processedFileCount: 2,
+            extractedCount: 2,
+            cancelled: false
+        }));
     });
 
     test('create wiki-link and generate command reuses host orchestration and writes generated note path', async () => {

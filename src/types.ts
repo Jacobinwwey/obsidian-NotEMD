@@ -145,6 +145,7 @@ export interface NotemdSettings {
     extractOriginalTextUseCustomOutput: boolean; // New
     extractOriginalTextCustomPath: string; // New
     extractOriginalTextCustomSuffix: string; // New
+    suppressConceptNotePathWarningForever: boolean;
     useCustomPromptForExtractOriginalText: boolean;
     customPromptExtractOriginalText: string;
     enableMermaidErrorDetection: boolean; // New
