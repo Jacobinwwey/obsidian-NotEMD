@@ -13,6 +13,7 @@ topic: progress-audit-next-direction
 - `docs/brainstorms/2026-05-01-llm-backward-compat-and-progress-audit.zh-CN.md`
 - `docs/brainstorms/2026-05-03-mainline-stabilization-and-ci-hardening-requirements.zh-CN.md`
 - `docs/brainstorms/2026-05-03-drawnix-feasibility-and-integration-direction.zh-CN.md`
+- `docs/brainstorms/2026-05-07-cli-next-phase-planning.zh-CN.md`
 
 ## 仓库事实校正（2026-05-05）
 
@@ -35,6 +36,9 @@ topic: progress-audit-next-direction
 
 6. **命令编排“部分统一”，不是“完全统一”。**
    `generateExperimentalDiagramCommand` 与 legacy Mermaid 保存命令仍经过共享 `generateDiagramCommand` 编排，但 `previewExperimentalDiagramCommand` 现在直接读取当前 Markdown 中的 `vega-lite` 围栏并本地预览，不再走共享 LLM 生成路径。这是为了匹配当前 `dataChart` 产物以 Markdown fenced block 保存的现实，而不是最终命令收口形态。
+
+7. **`diagram.generate` 被标成 `safe`，不等于当前出货 diagram 命令就是 `safe`。**
+   截至 2026-05-07，`src/operations/registry.ts` 是刻意把 `diagram.generate` 作为宿主无关 generation core（`sourceMarkdown -> DiagramGenerationResult`）导出，并赋予 `safe` / `read-only` 语义；但映射过去的 command binding 仍继续如实携带来自 `src/workflowButtons.ts` 的 `requires-active-file` / `write-file` 元数据。所以下一阶段真正要补的是 core 之下的 typed follow-through，而不是重命名当前出货命令表面。
 
 ## 路线图任务状态
 
@@ -142,6 +146,7 @@ topic: progress-audit-next-direction
 - 更深层的 diagram command-core 切片现在也已落地：`src/operations/diagramCommandExecution.ts` 现在承接 `src/main.ts` 之下的 Mermaid-save 与 artifact-save 执行流程，而 `src/operations/registry.ts` 现在也已把 `diagram.generate` 的 `outputPath` 与 `previewOpened` 纳入 result schema，在不新增 operation ID 的前提下先补齐保存后续链路。
 - `src/fileUtils.ts` 与 `src/extractOriginalText.ts` 现在都接受更窄的 runtime context，而不是直接依赖具体 `NotemdPlugin` 类。这说明边界已经开始从“抽 wrapper”推进到“削弱 utility 对宿主类的类型耦合”。
 - 剩余架构缺口因此再次转移：实质性的 diagram execution 已不再内联留在 `src/main.ts`。下一批应转向现在位于 `src/operations/diagramCommandExecution.ts` 中的内部 save/artifact 分支，判断是否还要继续下探 typed boundary，然后再进入 packaging / semantic verification 的后续硬化，而不是回头重开已经落地的 write-heavy families。
+- 最新一层收紧是：这已经是“分层问题”，而不是“命令数量问题”。应先把 `diagram.generate` 保持为宿主无关 core，再把其下的 save/artifact/preview follow-through 显式类型化，之后才考虑要不要继续提升为新的 top-level operation ID。
 
 ## 当前验证门
 
@@ -193,8 +198,8 @@ topic: progress-audit-next-direction
 
 ### 立即可推进
 
-1. **更深层 diagram/provider command-core 收敛**
-   保持现有 command ID 稳定，但继续收紧现在已进入 `src/operations/diagramCommandExecution.ts` 的 save/artifact follow-through，判断当前带 `outputPath` / `previewOpened` 的 `diagram.generate` contract 是否已经足够，还是还需要新增更细的 typed branch boundary。
+1. **更深层 diagram/provider command-core 分层**
+   保持现有 command ID 稳定，并继续把 `diagram.generate` 视作宿主无关 generation contract，然后收紧现在已进入 `src/operations/diagramCommandExecution.ts` 的 save/artifact follow-through，判断当前带 `outputPath` / `previewOpened` 的 `diagram.generate` contract 是否已经足够，还是还需要更明确的 typed follow-through structure 或额外 branch boundary。
 
 2. **建立可持续的 live verification runbook / harness**
    先把“本地一次性验证”升级为不依赖硬编码 vault 路径和私钥文件的维护者流程，再决定是否需要恢复受控的集成测试。
@@ -212,13 +217,13 @@ topic: progress-audit-next-direction
    这一批现在已经落地：`testLlmConnectionCommand` 已委托给 `runInteractiveProviderConnectionTestCommandWithHost`，`generateDiagramCommand` 与 `previewExperimentalDiagramCommand` 已委托给 `runGenerateDiagramCommandWithHost` 与 `runPreviewExperimentalDiagramCommandWithHost`。provider/diagram 的公共入口现在都具备结构化 result，并由 host adapter 承接生命周期编排，不再把临时 busy/reporter 逻辑散落在 `src/main.ts` 里。
 
 7. **下一阶段向下一层收敛**
-   现在剩余的高价值缺口已经不是这些公共 direct command method 本身。`diagram.preview` 与 `provider.connection.test` 的 typed contract 已经落地，`diagram.generate` 也已补上 `outputPath` / `previewOpened`。真正剩余的是 `src/operations/diagramCommandExecution.ts` 中内部 save/artifact 分支是否值得继续提升为额外 typed boundary。这个优先级高于重开已抽离 utility family。
+   现在剩余的高价值缺口已经不是这些公共 direct command method 本身。`diagram.preview` 与 `provider.connection.test` 的 typed contract 已经落地，`diagram.generate` 也已补上 `outputPath` / `previewOpened`。真正剩余的是如何把这一宿主无关 core 之下的 save/artifact/preview follow-through 显式类型化，然后再决定其中哪些分支是否值得继续提升为额外 typed boundary。这个优先级高于重开已抽离 utility family。
 
 ### 建议落地顺序
 
 结合 roadmap 原始长期意图与当前代码现实，最稳妥的未来落地顺序应为：
 
-1. 先完成更深层的 diagram/provider command-core 收敛，并决定 `src/operations/diagramCommandExecution.ts` 中的内部 save/artifact 分支是继续保留在 `diagram.generate` / `diagram.preview` 之下，还是提升为额外 typed operation boundary
+1. 先完成更深层的 diagram/provider command-core 分层，并决定 `src/operations/diagramCommandExecution.ts` 中的内部 save/artifact 分支是继续作为 `diagram.generate` / `diagram.preview` 之下的 typed follow-through 细节，还是提升为额外 typed operation boundary
 2. 然后继续维护者本地语义核验与重型运行时打包边界的后续硬化
 3. 在这些边界项稳定后，再继续 selection/export contract 增强与 workflow/settings packaging 清理
 4. 完成这些边界工作后，再重开 legacy prompt 退役、MermaidProcessor sunset，或更丰富的 first-class CLI command 暴露
