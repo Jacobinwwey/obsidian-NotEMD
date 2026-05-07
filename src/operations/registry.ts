@@ -138,6 +138,19 @@ const DIAGRAM_GENERATE_RESULT_SCHEMA: OperationSchema = {
         actionLabel: { type: 'string' },
         operationInput: { type: 'object' },
         generation: { type: 'object' },
+        followThrough: {
+            type: 'object',
+            properties: {
+                kind: {
+                    type: 'string',
+                    enum: ['save-mermaid', 'save-artifact', 'preview-artifact']
+                },
+                outputPath: { type: 'string' },
+                previewOpened: { type: 'boolean' },
+                autoFixAttempted: { type: 'boolean' },
+                artifactTarget: { type: 'string' }
+            }
+        },
         outputPath: { type: 'string' },
         previewOpened: { type: 'boolean' },
         errorMessage: { type: 'string' }

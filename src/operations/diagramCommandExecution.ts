@@ -65,6 +65,13 @@ export async function runSaveMermaidDiagramExecutionWithHost(
 
     return {
         generation: result,
+        followThrough: {
+            kind: 'save-mermaid',
+            outputPath,
+            previewOpened: false,
+            autoFixAttempted: settings.autoMermaidFixAfterGenerate,
+            artifactTarget: result.artifact.target
+        },
         outputPath,
         previewOpened: false
     };
@@ -105,9 +112,22 @@ export async function runArtifactDiagramExecutionWithHost(
         getActionCompleteText: host.getActionCompleteText
     });
 
+    const previewOpened = params.executionMode === 'preview-artifact' || diagramHost.supportsPreview(result.artifact);
+    const autoFixAttempted =
+        params.executionMode === 'save-artifact'
+        && result.artifact.target === 'mermaid'
+        && settings.autoMermaidFixAfterGenerate;
+
     return {
         generation: result,
+        followThrough: {
+            kind: params.executionMode,
+            outputPath,
+            previewOpened,
+            autoFixAttempted,
+            artifactTarget: result.artifact.target
+        },
         outputPath,
-        previewOpened: params.executionMode === 'preview-artifact' || diagramHost.supportsPreview(result.artifact)
+        previewOpened
     };
 }
