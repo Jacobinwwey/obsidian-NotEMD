@@ -62,6 +62,13 @@ function createDiagramHost() {
                         sourceIntent: 'canvasMap'
                     }
                 },
+                followThrough: {
+                    kind: 'save-artifact',
+                    outputPath: 'Notes/Topic_diagram.canvas',
+                    previewOpened: true,
+                    autoFixAttempted: false,
+                    artifactTarget: 'json-canvas'
+                },
                 outputPath: 'Notes/Topic_diagram.canvas',
                 previewOpened: true
             }),
@@ -85,6 +92,38 @@ describe('diagram command host adapter', () => {
         expect(result).toBeNull();
         expect(host.readFile).not.toHaveBeenCalled();
         expect(host.createDiagramHostAdapter().notify).toHaveBeenCalledWith('busy now');
+    });
+
+    test('generate wrapper returns follow-through details from the execution host', async () => {
+        const { host, reporter } = createDiagramHost();
+        const file = { name: 'Topic.md', path: 'Notes/Topic.md' };
+
+        const result = await runGenerateDiagramCommandWithHost(host as any, file as any, reporter as any, {
+            executionMode: 'save-artifact'
+        });
+
+        expect(result).toEqual({
+            kind: 'success',
+            executionMode: 'save-artifact',
+            sourcePath: 'Notes/Topic.md',
+            actionLabel: 'Generate diagram',
+            operationInput: expect.objectContaining({
+                sourcePath: 'Notes/Topic.md',
+                outputMode: 'artifact'
+            }),
+            generation: expect.objectContaining({
+                artifact: expect.objectContaining({ target: 'json-canvas' })
+            }),
+            followThrough: {
+                kind: 'save-artifact',
+                outputPath: 'Notes/Topic_diagram.canvas',
+                previewOpened: true,
+                autoFixAttempted: false,
+                artifactTarget: 'json-canvas'
+            },
+            outputPath: 'Notes/Topic_diagram.canvas',
+            previewOpened: true
+        });
     });
 
     test('preview wrapper finalizes reporter and returns artifact metadata', async () => {

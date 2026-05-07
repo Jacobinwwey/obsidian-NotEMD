@@ -5,6 +5,8 @@ topic: cli-next-phase-planning
 
 # CLI Next-Phase Planning
 
+> Update (2026-05-07, later): the recommended direction in this planning note is now landed at the current contract depth. `diagram.generate` still acts as the host-neutral generation core, and the command-completion layer beneath it is now explicit through a typed `followThrough` result shape. The next wave should focus on packaging / semantic-verification convergence and only revisit larger exported boundaries if a later branch proves genuinely host-neutral.
+
 ## Problem Frame
 
 The May 4-5 brainstorm set already settled the broad question:
@@ -20,7 +22,7 @@ That means the next CLI phase is no longer "add more commands" and it is no long
 - the remaining mixed behavior now lives in `src/operations/diagramCommandExecution.ts` and `src/operations/diagramCommandHostAdapter.ts`, where generated artifacts are saved, reopened, previewed, auto-fixed, and announced to the user.
 - the actual shipped commands still truthfully inherit `requires-active-file`, `write-file`, or `interactive-ui` semantics from `src/workflowButtons.ts`.
 
-The next planning step therefore is a layering decision: make the core-generation contract and host follow-through contract explicit without reopening already-landed write-heavy families or prematurely multiplying top-level operation IDs.
+The next planning step therefore was a layering decision: make the core-generation contract and host follow-through contract explicit without reopening already-landed write-heavy families or prematurely multiplying top-level operation IDs. That decision has now been implemented; the rest of this document remains useful as the rationale for why the current shape looks the way it does.
 
 ## Code Truth Snapshot
 
@@ -51,7 +53,7 @@ Those are real host/file/UI semantics. They should not be collapsed back into th
 - `notemd-summarize-as-mermaid` -> `requires-active-file` / `write-file`
 - `notemd-preview-diagram` -> `interactive-ui` / `preview-ui`
 
-That split is directionally correct, but the next phase should make the meaning more explicit so maintainers do not read "safe/read-only" as if it described the shipped commands rather than the core operation.
+That split was directionally correct, and the follow-up implementation now makes the meaning more explicit by adding a typed `followThrough` shape beneath the exported `diagram.generate` result while keeping the command bindings unchanged.
 
 ### `provider.connection.test` is the local reference pattern
 
@@ -98,6 +100,8 @@ Choose Approach 3.
 
 The next CLI phase should keep `diagram.generate`, `diagram.preview`, and `provider.connection.test` as the stable top-level frame, then make the diagram completion/follow-through layer explicit and typed beneath that frame.
 
+That explicit follow-through layer is now landed.
+
 In practice, that means:
 
 1. keep the host-neutral generation core separate from save/open/preview follow-through
@@ -123,6 +127,10 @@ In practice, that means:
 2. Keep these as internal typed execution boundaries first.
 3. Promote any branch to a new top-level operation only if it proves to be host-neutral and command-independent.
 
+Implementation update:
+- `diagram.generate` now returns `followThrough.kind`, `followThrough.outputPath`, `followThrough.previewOpened`, `followThrough.autoFixAttempted`, and `followThrough.artifactTarget`
+- backward-compatible top-level `outputPath` and `previewOpened` remain exported for now
+
 ### Stage 3: Lock the boundary in metadata and tests
 
 1. Keep `src/operations/registry.ts`, `src/operations/capabilityManifest.ts`, and `src/cliContracts.ts` aligned to the intended layer they describe.
@@ -135,6 +143,8 @@ In practice, that means:
 2. maintainer-local semantic verification hardening
 3. selection/export and workflow/settings contract enrichment
 4. broader CLI/public-surface decisions
+
+This stage is now the active next-wave direction.
 
 ## Requirements
 
@@ -150,7 +160,7 @@ In practice, that means:
 ## Success Criteria
 
 - A maintainer can explain why `diagram.generate` can stay `safe` / `read-only` while the real shipped diagram commands remain `requires-active-file` / `write-file`.
-- The next implementation PRD can state clearly whether save/artifact follow-through is becoming typed internal execution detail or a larger exported contract.
+- The next implementation PRD can now start from the landed `followThrough` contract and state whether that structure is sufficient or whether any larger exported contract is justified later.
 - The repo docs no longer describe the next CLI phase as command-count growth.
 
 ## Scope Boundaries
@@ -163,7 +173,7 @@ In practice, that means:
 ## Key Decisions
 
 - Keep the top-level operation frame stable for now.
-- Prefer typed internal completion/follow-through structures before new top-level operation IDs.
+- Prefer typed internal completion/follow-through structures before new top-level operation IDs. This preference is now reflected in the landed implementation.
 - Use `provider.connection.test` as the local reference for how typed core contracts and interactive wrappers should coexist.
 
 ## Dependencies / Assumptions
@@ -176,10 +186,10 @@ In practice, that means:
 
 ### Deferred To Implementation Planning
 
-- Should `diagram.generate` keep optional follow-through fields like `outputPath` and `previewOpened` at the top result level, or should those fields move under a clearer completion/follow-through shape?
+- Should `diagram.generate` keep the backward-compatible top-level `outputPath` and `previewOpened` fields long-term, or should a later cleanup rely only on the clearer `followThrough` shape?
 - Which diagram completion branches are typed enough to deserve stronger internal execution contracts first?
-- After the layering correction lands, is selection/export/workflow contract enrichment or packaging/maintainer verification the higher-leverage next follow-up?
+- After the layering correction has landed, is selection/export/workflow contract enrichment or packaging/maintainer verification the higher-leverage next follow-up?
 
 ## Next Step
 
--> Start the next implementation PRD for diagram/provider contract layering, using this document plus the task-local research note as the phase-2 handoff.
+-> Use this document plus the task-local research note as history/rationale, then start the next implementation PRD from packaging / semantic-verification convergence unless a newly discovered host-neutral boundary justifies reopening deeper diagram contract work.

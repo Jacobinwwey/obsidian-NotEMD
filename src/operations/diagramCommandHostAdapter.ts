@@ -41,8 +41,17 @@ export interface DiagramCommandUiStrings {
 
 export interface DiagramCommandExecutionDetails {
     generation: DiagramGenerationResult;
+    followThrough: DiagramCommandFollowThroughDetails;
     outputPath?: string;
     previewOpened: boolean;
+}
+
+export interface DiagramCommandFollowThroughDetails {
+    kind: 'save-mermaid' | 'save-artifact' | 'preview-artifact';
+    outputPath?: string;
+    previewOpened: boolean;
+    autoFixAttempted: boolean;
+    artifactTarget: string;
 }
 
 export type DiagramCommandRunResult =
@@ -53,6 +62,7 @@ export type DiagramCommandRunResult =
         actionLabel: string;
         operationInput: DiagramOperationInput;
         generation: DiagramGenerationResult;
+        followThrough: DiagramCommandFollowThroughDetails;
         outputPath?: string;
         previewOpened: boolean;
     }
@@ -369,6 +379,7 @@ export async function runGenerateDiagramCommandWithHost(
             actionLabel,
             operationInput,
             generation: executionDetails.generation,
+            followThrough: executionDetails.followThrough,
             outputPath: executionDetails.outputPath,
             previewOpened: executionDetails.previewOpened
         };

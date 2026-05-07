@@ -41,3 +41,4 @@ ref
 # vitepress local docs artifacts
 docs/.vitepress/cache
 docs/.vitepress/dist
+docs/.obsidian/

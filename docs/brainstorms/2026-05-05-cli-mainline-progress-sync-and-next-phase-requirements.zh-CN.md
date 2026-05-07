@@ -5,7 +5,7 @@ topic: cli-mainline-progress-sync-and-next-phase-requirements
 
 # CLI 主线进展同步与下一阶段需求
 
-> 更新（2026-05-07）：下一阶段结论现在更精确了。`diagram.generate` 应继续保持为宿主无关 generation core，而 Mermaid/artifact 的保存、预览、重开与 notice 则应被明确为其下的类型化 follow-through 层。下一轮实现应优先引入内部 execution/result structure，而不是急着新增更多 top-level operation ID。
+> 更新（2026-05-07，更晚一些）：这一步 follow-through 决策现已落地。`diagram.generate` 继续保持为宿主无关 generation core，而 Mermaid/artifact 的保存与 preview 完成现在通过显式的类型化 `followThrough` 结果结构暴露出来，同时保留向后兼容的顶层 `outputPath` / `previewOpened`。下一轮实现应转向 packaging / semantic-verification 收敛，除非后续真的出现足够宿主无关的新导出边界。
 
 ## 问题框架
 
@@ -40,11 +40,11 @@ topic: cli-mainline-progress-sync-and-next-phase-requirements
 剩余问题现在已经更窄，也更难：
 
 1. 先前最高价值的公共 direct command surface 已不再内联。`testLlmConnectionCommand`、`generateDiagramCommand` 与 `previewExperimentalDiagramCommand` 现在都通过 host adapter 代理，并返回结构化结果。
-2. 真正剩余的缺口已经下移一层：实质性的 save/artifact execution 现在已进入 `src/operations/diagramCommandExecution.ts`，而 `diagram.preview` 与 provider connection-test 的 typed contract 也已落地。当前剩余问题不再是“继续加命令”，而是：在 `diagram.generate` 已暴露 wrapper-result 字段（`kind`、`executionMode`、`sourcePath`、`actionLabel`、`operationInput`、`generation`、`outputPath`、`previewOpened`）之后，如何把其下的 save/artifact/preview follow-through 更明确地类型化。
+2. 更深层的 diagram command-core 切片现在又前进了一步：实质性的 save/artifact execution 已进入 `src/operations/diagramCommandExecution.ts`，而 `diagram.generate` 现在也会返回显式的 `followThrough` 细节（`kind`、`outputPath`、`previewOpened`、`autoFixAttempted`、`artifactTarget`），并继续保留已有的 wrapper-result 字段。
 3. selection/export 与 workflow/settings surfaces 仍需要超出 command-trigger parity 的更深 contract depth。
-4. packaging isolation 与 maintainer-local semantic verification 仍然重要，但它们现在已经排在更深一层的 diagram/provider contract 决策之后，而不是阻塞项。
+4. packaging isolation 与 maintainer-local semantic verification 现在已经成为下一批更高杠杆工作，因为“把 `diagram.generate` 之下的 follow-through 类型化”这一步已经不再只是计划。
 
-因此，下一阶段重点不应再是“继续加 CLI 命令”，也不应再把任何 write-heavy `src/fileUtils.ts` 批次当成未完成范围。真正的下一步应先处理更深一层的 diagram/provider command-core，再收口 packaging / semantic-verification 后续工作。
+因此，下一阶段重点不应再是“继续加 CLI 命令”，也不应再把任何 write-heavy `src/fileUtils.ts` 批次当成未完成范围。真正的下一步应把 diagram/provider command-core 分层视作已达到当前 contract 深度，然后收口 packaging / semantic-verification 后续工作。
 
 ## 需求
 
@@ -76,7 +76,7 @@ topic: cli-mainline-progress-sync-and-next-phase-requirements
   - `provider.profile.import`
   - `cli.capability-manifest.export`
   - `cli.invocation-contract.export`
-- R5. 下一批 contract-tightening 现在必须转向更深层的 diagram/provider command core，重点覆盖现在位于 `src/operations/diagramCommandExecution.ts` 中的内部 save/artifact 分支。应先把 `diagram.generate` 视为宿主无关 generation contract，再判断其下更丰富的 typed follow-through structure 是否已经足够，还是其中某个分支真的值得提升为新的导出 operation boundary；同时保持 wrapper 批次与 write-heavy proof set 稳定、文档对齐且 registry 一致。
+- R5. 下一批 contract-tightening 现在必须先保持这批新落地的更深层 diagram/provider command core 稳定：`src/operations/diagramCommandExecution.ts` 现在已经会在 `diagram.generate` 之下返回显式 typed follow-through。后续工作只需判断这一已落地结构是否已经足够，还是未来真的有某个分支值得提升为新的导出 operation boundary。
 
 **宿主副作用收口**
 - R6. `file.process-add-links`、`file.process-folder-add-links`、`content.generate-from-title`、`content.batch-generate-from-titles`、`mermaid.batch-fix`、`concept.dedupe`、`translate.*`、`formula.*` 与 `content.extract-original-text` 现在应被视作已交付 proof slice。当前应保留这些 family-local result object 与 host-owned success/no-file/confirmation 语义，等待剩余 direct surfaces 补齐。
@@ -86,7 +86,7 @@ topic: cli-mainline-progress-sync-and-next-phase-requirements
 
 **剩余 `src/main.ts` 瘦身**
 - R9. note-processing 与 utility host-adapter 抽离现在已经足够完整，回头重开这些家族只会制造 churn。下一批 `src/main.ts` 瘦身应只瞄准剩余更深层的 diagram/provider helper。
-- R10. diagram save/generate/preview 与 provider connection-test 要么获得与已抽取家族同等级的 discoverable operation/result 边界，要么在文档中明确声明为 command-only surface。公共 wrapper、typed `diagram.preview` / `provider.connection.test` contract，以及更深一层的 `diagram.generate` wrapper-result 字段都已经落地；当前开放问题是剩余 save/artifact internals 是否还值得继续提升为额外 typed boundary。
+- R10. diagram save/generate/preview 与 provider connection-test 要么获得与已抽取家族同等级的 discoverable operation/result 边界，要么在文档中明确声明为 command-only surface。公共 wrapper、typed `diagram.preview` / `provider.connection.test` contract，以及带显式 `followThrough` 的更丰富 `diagram.generate` result shape 现已落地；当前开放问题只剩未来是否还有分支值得继续提升为额外 exported boundary。
 
 **主线与工作区卫生**
 - R11. `main` 集成必须继续在干净 worktree 或干净分支上完成，不能清理或复用 dirty root worktree。
@@ -109,7 +109,7 @@ topic: cli-mainline-progress-sync-and-next-phase-requirements
 
 - 整个 write-heavy contract-tightening 批次现已交付，第一批 direct-surface wrapper 也已交付；在更深层 diagram/provider contract 工作之前重开它们只会制造 churn，而不是推进。
 - 当前仍优先接受 family-local result object；共享全局 envelope 依然过早。
-- direct-surface slimming 仍重要，但当前更准确的重点是把已经落地的 `diagram.generate` core 之下的 follow-through 显式化，而不是追求命令数量增长或过早引入新的 operation ID。
+- direct-surface slimming 仍重要，但当前更准确的重点已经落地：`diagram.generate` core 之下的 follow-through 现已显式类型化，所以下一批更高杠杆工作应转向 packaging/semantic-verification，而不是追求命令数量增长或过早引入新的 operation ID。
 
 ## 依赖与假设
 
@@ -121,7 +121,7 @@ topic: cli-mainline-progress-sync-and-next-phase-requirements
 ## 未决问题
 
 ### 延后到规划阶段
-- [影响 R5][Technical] 下一批更深层 contract 工作应把现在位于 `src/operations/diagramCommandExecution.ts` 中的 save/artifact 执行继续保留为 `diagram.generate` / `diagram.preview` 之下的 typed follow-through，还是其中某个分支已经成熟到值得升级为额外的导出 operation boundary？
+- [影响 R5][Technical] 新落地的 `diagram.generate.followThrough` 形态是否已经足够满足当前 contract 深度，还是未来真的会有某个分支成熟到值得升级为额外的导出 operation boundary？
 - [影响 R7][Technical] 哪些 direct surfaces 值得升级为 registry-backed operations，哪些应继续保留 command-only 语义？
 - [影响 R10][Technical] direct-surface 批次之后，selection/export contract 增强与 maintainer semantic verification 谁的杠杆更高？
 
