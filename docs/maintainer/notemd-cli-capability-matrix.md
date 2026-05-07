@@ -1,6 +1,6 @@
 # Notemd CLI Capability Matrix
 
-> Updated: 2026-05-05
+> Updated: 2026-05-07
 
 This matrix is a maintainer control document. It distinguishes:
 
@@ -65,7 +65,7 @@ Observed host facts:
 - `src/cliContracts.ts` now builds the invocation contract from the same registry, which removes one major drift path between docs, command discovery, and contract export.
 - The registry now includes the main note-processing, utility, selection, and export operation batches as well: `editor.create-link-and-generate`, `file.process-add-links`, `file.process-folder-add-links`, `content.generate-from-title`, `content.batch-generate-from-titles`, `research.summarize-topic`, `translate.file`, `translate.folder-batch`, `concept.extract-file`, `concept.extract-folder`, `content.extract-original-text`, `workflow.extract-and-generate`, `duplicate.check-file`, `concept.dedupe`, `mermaid.batch-fix`, `formula.fix-file`, `formula.batch-fix`, `provider.profile.export`, `provider.profile.import`, `cli.capability-manifest.export`, and `cli.invocation-contract.export`.
 - `file.process-add-links`, `file.process-folder-add-links`, `content.generate-from-title`, `content.batch-generate-from-titles`, `mermaid.batch-fix`, `concept.dedupe`, `translate.*`, `formula.*`, and `content.extract-original-text` now form the current proof set for write-heavy contract enrichment: utility cores return structured results, host adapters own localized success/no-file/confirmation semantics, and the registry exports the richer schemas directly.
-- The next contract-deepening order is now explicit: remaining direct-read/sidebar surfaces first, packaging/semantic-verification convergence second, and broader CLI/public-surface claims last.
+- The next contract-deepening order is now more precise: keep `diagram.generate` as the host-neutral generation core, make save/artifact/preview follow-through explicit beneath it, then move to packaging/semantic-verification convergence, and only after that revisit broader CLI/public-surface claims.
 - Legacy aliases remain registered for compatibility, but they are intentionally excluded from capability-manifest export.
 
 ## Next Extraction Targets
@@ -74,7 +74,7 @@ These are the best remaining candidates for registry-backed or more host-neutral
 
 | Priority | Candidate | Why First | Existing Building Blocks |
 |---|---|---|---|
-| P0 | Diagram/provider command-core convergence | Public provider-test and diagram command wrappers now delegate through host adapters, typed contracts already exist for `provider.connection.test` plus `diagram.preview`, and `diagram.generate` now exposes the full wrapper envelope instead of only the inner generation payload. The remaining gap is whether the internal save/artifact branches in `src/operations/diagramCommandExecution.ts` deserve further typed boundaries beyond that current operation shape | `src/operations/diagramCommandHostAdapter.ts`, `src/operations/diagramCommandExecution.ts`, `src/operations/providerConnectionTestCommandHostAdapter.ts` |
+| P0 | Diagram/provider command-core layering | Public provider-test and diagram command wrappers now delegate through host adapters, typed contracts already exist for `provider.connection.test` plus `diagram.preview`, and `diagram.generate` already has a host-neutral generation core behind it. The remaining gap is to make the save/artifact/preview follow-through explicit and typed beneath that core, preferably before inventing new top-level operation IDs | `src/operations/diagramGenerateOperation.ts`, `src/operations/diagramCommandHostAdapter.ts`, `src/operations/diagramCommandExecution.ts`, `src/operations/providerConnectionTestCommandHostAdapter.ts` |
 | P1 | Contract enrichment for selection/export and config flows | Export/selection operations are now modeled, but future operation invokers need richer path/context semantics than command-trigger parity alone | `src/operations/registry.ts`, `src/operations/configProfileCommands.ts`, `src/operations/noteProcessingCommandHostAdapter.ts` |
 | P1 | Workflow/settings packaging | Workflow DSL and output-path toggles remain useful metadata but not yet stable public interfaces | `src/workflowButtons.ts`, settings-driven output controls |
 | P2 | Maintainer semantic verification + packaging hardening | Heavy-runtime isolation and maintainer-local runbooks still matter after command-surface convergence, but no longer block contract depth | `docs/maintainer/*`, render-host bundle workflow, release verification path |

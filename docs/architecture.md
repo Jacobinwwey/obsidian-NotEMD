@@ -1,6 +1,6 @@
 # Notemd Architecture Overview
 
-> Updated: 2026-05-05
+> Updated: 2026-05-07
 
 ## System Architecture
 
@@ -250,22 +250,24 @@ The gap is smaller than before:
 - `src/fileUtils.ts` and `src/extractOriginalText.ts` now accept narrower runtime contexts instead of the concrete `NotemdPlugin` class, which shows the boundary work has moved beyond wrapper extraction into utility host-coupling reduction
 - `src/main.ts` now mainly retains command registration, host construction, and the deeper diagram execution helpers; the previous highest-value public direct command surfaces now delegate through host adapters instead of inlining busy/reporter/preview lifecycle logic
 - The newly-landed direct-surface wrapper batch covers `testLlmConnectionCommand`, `generateDiagramCommand`, and `previewExperimentalDiagramCommand`; each now returns a structured result boundary instead of remaining fire-and-forget UI glue
-- The next real gap is no longer the public command entrypoints themselves: typed contracts already exist for `diagram.preview` and `provider.connection.test`, and the substantive save/artifact execution path now lives in `src/operations/diagramCommandExecution.ts`. The remaining pressure point is whether the internal save/artifact branches beneath `diagram.generate` deserve further typed boundaries beyond the now-landed wrapper-envelope fields such as `kind`, `executionMode`, `sourcePath`, `actionLabel`, `operationInput`, `generation`, `outputPath`, and `previewOpened`.
-- The ordered convergence path is now explicit: finish deeper diagram/provider command-core convergence first, then packaging/semantic-verification convergence work, and only then reopen stronger public CLI claims or broader architectural reshaping
+- The latest refinement is that `diagram.generate` should be read as the host-neutral generation contract, not as a synonym for the shipped active-file commands. Its operation-level `safe` / `read-only` metadata describes the explicit `sourceMarkdown -> DiagramGenerationResult` core, while the mapped command bindings still truthfully carry `requires-active-file` / `write-file` semantics.
+- The next real gap is therefore no longer the public command entrypoints themselves: typed contracts already exist for `diagram.preview` and `provider.connection.test`, and the substantive save/artifact execution path now lives in `src/operations/diagramCommandExecution.ts`. The remaining pressure point is to make the save/artifact/preview follow-through beneath `diagram.generate` explicit and typed, rather than jumping straight to more top-level CLI commands or additional operation IDs.
+- The ordered convergence path is now explicit: keep `diagram.generate` as the host-neutral core, tighten the follow-through beneath it, then move to packaging/semantic-verification convergence work, and only after that reopen stronger public CLI claims or broader architectural reshaping
 
 ## Key Design Decisions
 
 1. **Spec-first diagram generation**: LLM emits structured `DiagramSpec` JSON, not raw Mermaid syntax. Decouples intent from renderer.
-2. **Transport-driven dispatch**: 21 OpenAI-compatible providers share one runtime. No per-provider code paths.
+2. **Transport-driven dispatch**: OpenAI-compatible providers share one runtime. No per-provider code paths.
 3. **Cline-aligned token resolution**: Unknown models defer to API provider. Known models use metadata table.
-4. **Iframe-host preview**: Vega-Lite and HTML rendered in sandboxed iframe. Mermaid rendered inline.
-5. **LocalOnly provider storage**: API keys can be device-local while workflow settings sync.
-6. **Response caching**: Identical LLM calls within 5-minute TTL return cached results.
+4. **Operation-core vs command-binding split**: Registry operation metadata can describe a host-neutral reusable core even when the shipped commands remain active-file, write-file, or preview-bound surfaces. `diagram.generate` is the current proof case.
+5. **Iframe-host preview**: Vega-Lite and HTML rendered in sandboxed iframe. Mermaid rendered inline.
+6. **LocalOnly provider storage**: API keys can be device-local while workflow settings sync.
+7. **Response caching**: Identical LLM calls within 5-minute TTL return cached results.
 
 ## Verification
 
 - `npm run build` — TypeScript compilation + esbuild bundle
-- `npm test -- --runInBand` — the full Jest matrix currently covers 134 suites and 853 tests; in a `/.worktrees/` checkout use `npx jest --runInBand --config /tmp/notemd-worktree-jest.cjs` because the repo Jest ignore pattern excludes worktree paths
+- `npm test -- --runInBand` — the full Jest matrix currently covers 137 suites and 871 tests; in a `/.worktrees/` checkout use `npx jest --runInBand --config /tmp/notemd-worktree-jest.cjs` because the repo Jest ignore pattern excludes worktree paths
 - `npm run audit:i18n-ui` — No hardcoded UI strings
 - `npm run audit:render-host` — Render host self-contained in main.js
 - `git diff --check` — Whitespace hygiene
