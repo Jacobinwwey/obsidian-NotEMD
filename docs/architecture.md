@@ -118,7 +118,7 @@ User config (maxTokens, provider.maxOutputTokens)
 
 | Transport | Provider Count | Protocol |
 |---|---|---|
-| `openai-compatible` | 21 providers | OpenAI Chat Completions API |
+| `openai-compatible` | 22 providers | OpenAI Chat Completions API |
 | `anthropic` | 1 | Anthropic Messages API |
 | `google` | 1 | Google Gemini API |
 | `azure-openai` | 1 | Azure OpenAI Deployment API |
@@ -197,7 +197,7 @@ flowchart LR
 | Module | Responsibility |
 |---|---|
 | `src/main.ts` | Plugin entrypoint, command registration, orchestration |
-| `src/llmProviders.ts` | 25 provider definitions, metadata, KNOWN_MODEL table |
+| `src/llmProviders.ts` | 26 provider definitions, metadata, KNOWN_MODEL table |
 | `src/llmUtils.ts` | Transport dispatch, token resolution, retry, response cache |
 | `src/fileUtils.ts` | File processing, Mermaid repair, concept extraction |
 | `src/searchUtils.ts` | Web research, Tavily/DuckDuckGo integration |
