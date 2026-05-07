@@ -96,6 +96,13 @@ describe('diagram command execution', () => {
         }));
         expect(result).toEqual({
             generation,
+            followThrough: {
+                kind: 'save-mermaid',
+                outputPath: 'Notes/Topic_diagram.md',
+                previewOpened: false,
+                autoFixAttempted: mockSettings.autoMermaidFixAfterGenerate,
+                artifactTarget: 'mermaid'
+            },
             outputPath: 'Notes/Topic_diagram.md',
             previewOpened: false
         });
@@ -151,7 +158,63 @@ describe('diagram command execution', () => {
         }));
         expect(result).toEqual({
             generation,
+            followThrough: {
+                kind: 'save-artifact',
+                outputPath: 'Notes/Topic_diagram.canvas',
+                previewOpened: true,
+                autoFixAttempted: false,
+                artifactTarget: 'json-canvas'
+            },
             outputPath: 'Notes/Topic_diagram.canvas',
+            previewOpened: true
+        });
+    });
+
+    test('preview artifact execution keeps preview follow-through explicit without claiming auto-fix ran', async () => {
+        const reporter = createReporter();
+        const { host } = createExecutionHost();
+        const file = { path: 'Notes/Topic.md' } as any;
+        const generation = {
+            plan: { intent: 'mindmap' },
+            spec: { intent: 'mindmap' },
+            artifact: {
+                target: 'mermaid',
+                content: 'graph TD',
+                mimeType: 'text/vnd.mermaid',
+                sourceIntent: 'mindmap'
+            }
+        } as any;
+        jest.spyOn(diagramGenerateOperation, 'runDiagramGenerateOperation').mockResolvedValue(generation);
+        jest
+            .spyOn(diagramCommandHostAdapter, 'completeArtifactDiagramCommand')
+            .mockResolvedValue(undefined);
+
+        const result = await runArtifactDiagramExecutionWithHost(host as any, {
+            file,
+            operationInput: {
+                sourcePath: 'Notes/Topic.md',
+                sourceMarkdown: '# Topic',
+                compatibilityMode: 'best-fit',
+                outputMode: 'artifact'
+            },
+            provider: mockSettings.providers[0],
+            modelName: mockSettings.providers[0].model,
+            reporter: reporter as any,
+            actionLabel: 'Preview diagram',
+            i18n: STRINGS_EN as any,
+            executionMode: 'preview-artifact'
+        });
+
+        expect(result).toEqual({
+            generation,
+            followThrough: {
+                kind: 'preview-artifact',
+                outputPath: undefined,
+                previewOpened: true,
+                autoFixAttempted: false,
+                artifactTarget: 'mermaid'
+            },
+            outputPath: undefined,
             previewOpened: true
         });
     });

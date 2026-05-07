@@ -5,7 +5,7 @@ topic: cli-mainline-progress-sync-and-next-phase-requirements
 
 # CLI Mainline Progress Sync And Next-Phase Requirements
 
-> Update (2026-05-07): the next-phase decision is now more precise. `diagram.generate` should stay as the host-neutral generation core, while Mermaid/artifact save plus preview/open/notices become the explicit typed follow-through layer beneath it. The next implementation wave should prefer internal execution/result structures before inventing more top-level operation IDs.
+> Update (2026-05-07, later): that follow-through decision is now landed. `diagram.generate` stays the host-neutral generation core, and Mermaid/artifact save plus preview completion now surface through an explicit typed `followThrough` result shape beneath it while preserving backward-compatible top-level `outputPath` / `previewOpened`. The next implementation wave should move to packaging / semantic-verification convergence unless a genuinely host-neutral exported boundary emerges later.
 
 ## Problem Frame
 
@@ -40,11 +40,11 @@ As of May 5, 2026, Notemd's CLI-oriented mainline is no longer blocked on broad 
 The remaining problem is now narrower and harder:
 
 1. The previous highest-value public direct command surfaces are no longer inlined. `testLlmConnectionCommand`, `generateDiagramCommand`, and `previewExperimentalDiagramCommand` now delegate through host adapters and return structured results.
-2. The real remaining gap is one layer deeper: substantive save/artifact execution now lives in `src/operations/diagramCommandExecution.ts`, and the typed contract decision for `diagram.preview` plus provider connection-test is already landed. The remaining question is no longer "add more commands", but how explicitly the save/artifact/preview follow-through should be typed beneath the current `diagram.generate` host-neutral core now that the envelope fields (`kind`, `executionMode`, `sourcePath`, `actionLabel`, `operationInput`, `generation`, `outputPath`, `previewOpened`) are exported too.
+2. The deeper diagram command-core slice has now advanced one step further: substantive save/artifact execution lives in `src/operations/diagramCommandExecution.ts`, and `diagram.generate` now returns explicit `followThrough` details (`kind`, `outputPath`, `previewOpened`, `autoFixAttempted`, `artifactTarget`) in addition to the already-exported wrapper fields.
 3. Selection/export and workflow/settings surfaces still need further contract depth beyond command-trigger parity.
-4. Packaging isolation and maintainer-local semantic verification still matter, but they are now downstream of the deeper diagram/provider contract decision rather than blockers for it.
+4. Packaging isolation and maintainer-local semantic verification now become the highest-leverage next batch, because the immediate "type the diagram follow-through beneath `diagram.generate`" step is no longer merely planned.
 
-The next phase therefore should not focus on "more CLI commands" and should no longer focus on any write-heavy `src/fileUtils.ts` batch as open work. The next durable move is to finish the deeper diagram/provider command-core convergence first, then converge packaging/semantic-verification follow-up work.
+The next phase therefore should not focus on "more CLI commands" and should no longer focus on any write-heavy `src/fileUtils.ts` batch as open work. The next durable move is to treat the diagram/provider command-core layering step as landed at the current contract depth, then converge packaging/semantic-verification follow-up work.
 
 ## Requirements
 
@@ -76,7 +76,7 @@ The next phase therefore should not focus on "more CLI commands" and should no l
   - `provider.profile.import`
   - `cli.capability-manifest.export`
   - `cli.invocation-contract.export`
-- R5. The next contract-tightening batch must now target the deeper diagram/provider command core, especially the internal save/artifact branches now housed in `src/operations/diagramCommandExecution.ts`. Treat `diagram.generate` as the host-neutral generation contract, then decide whether richer typed follow-through structures beneath it are enough or whether any branch truly deserves a new exported operation boundary. Keep the wrapper batch and write-heavy proof set stable, documented, and registry-aligned.
+- R5. The next contract-tightening batch must keep the newly landed deeper diagram/provider command core stable: `src/operations/diagramCommandExecution.ts` now returns explicit typed follow-through details beneath `diagram.generate`. Future work should decide only whether that landed structure is sufficient or whether any branch later proves worthy of a new exported operation boundary.
 
 **Host-side effect tightening**
 - R6. `file.process-add-links`, `file.process-folder-add-links`, `content.generate-from-title`, `content.batch-generate-from-titles`, `mermaid.batch-fix`, `concept.dedupe`, `translate.*`, `formula.*`, and `content.extract-original-text` now act as proof slices. Preserve their family-local result objects and host-owned success/no-file/confirmation semantics while the remaining direct surfaces catch up.
@@ -86,7 +86,7 @@ The next phase therefore should not focus on "more CLI commands" and should no l
 
 **Remaining `src/main.ts` slimming**
 - R9. Note-processing and utility host-adapter extraction is now broad enough that reopening those families would be low leverage. The next `src/main.ts` slimming slice should target only the remaining deeper diagram/provider helpers.
-- R10. Diagram save/generate/preview and provider connection-test flows must either gain the same discoverable operation/result boundary as the extracted families or be documented explicitly as command-only surfaces. The public wrappers, typed `diagram.preview` / `provider.connection.test` contracts, and the deeper `diagram.generate` wrapper-result fields are now landed; the open question is whether the remaining save/artifact internals deserve additional typed boundaries.
+- R10. Diagram save/generate/preview and provider connection-test flows must either gain the same discoverable operation/result boundary as the extracted families or be documented explicitly as command-only surfaces. The public wrappers, typed `diagram.preview` / `provider.connection.test` contracts, and the richer `diagram.generate` result shape with explicit `followThrough` are now landed; the remaining question is only whether any later branch deserves additional exported boundaries.
 
 **Mainline and workspace hygiene**
 - R11. `main` integration must continue to happen from a clean worktree or clean branch. Do not clean or reuse the dirty root worktree.
@@ -109,7 +109,7 @@ The next phase therefore should not focus on "more CLI commands" and should no l
 
 - The full write-heavy contract-tightening batch is now delivered, and the first direct-surface wrapper batch is now delivered too; reopening either before the deeper diagram/provider contract work would be churn, not progress.
 - Family-local result objects remain the preferred modeling choice for now. A shared global envelope is still premature.
-- Direct-surface slimming remains important, but the current refinement is to formalize the follow-through beneath the already-landed `diagram.generate` core rather than chasing command-count growth or premature new operation IDs.
+- Direct-surface slimming remains important, but the current refinement is now landed: the follow-through beneath the already-landed `diagram.generate` core is explicit and typed, so the next leverage point shifts to packaging/semantic-verification rather than command-count growth or premature new operation IDs.
 
 ## Dependencies And Assumptions
 
@@ -121,7 +121,7 @@ The next phase therefore should not focus on "more CLI commands" and should no l
 ## Open Questions
 
 ### Deferred To Planning
-- [R5][Technical] Should the next deeper contract batch keep the save/artifact execution that now lives in `src/operations/diagramCommandExecution.ts` as typed follow-through beneath `diagram.generate` / `diagram.preview`, or is any branch mature enough to justify an additional exported operation boundary?
+- [R5][Technical] Is the newly landed `diagram.generate.followThrough` shape sufficient for the current contract depth, or does any branch later prove mature enough to justify an additional exported operation boundary?
 - [R7][Technical] Which direct surfaces should become registry-backed operations versus remain intentionally command-only?
 - [R10][Technical] After the direct-surface batch, should workflow/settings packaging or maintainer semantic verification be the next higher-leverage follow-up?
 

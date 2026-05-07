@@ -113,6 +113,7 @@ describe('operations registry', () => {
                     actionLabel: expect.any(Object),
                     operationInput: expect.any(Object),
                     generation: expect.any(Object),
+                    followThrough: expect.any(Object),
                     outputPath: expect.any(Object),
                     previewOpened: expect.any(Object),
                     errorMessage: expect.any(Object)

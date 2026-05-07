@@ -37,8 +37,8 @@
 | `notemd:import-provider-profiles` | 导入 provider profile 快照 | `safe` | machine-readable，但会改动 active provider 状态与插件设置 | `provider.profile.import` |
 | `notemd:export-cli-capability-manifest` | 导出命令 capability manifest | `safe` | 导出确定，但仍绑定插件 config-path 写入语义 | `cli.capability-manifest.export` |
 | `notemd:export-cli-invocation-contract` | 导出类型化 invocation contract | `safe` | 导出确定，但仍绑定插件 config-path 写入语义 | `cli.invocation-contract.export` |
-| `notemd:notemd-generate-diagram` | 从活动文件生成 spec-first artifact | `requires-active-file` | 类型化结果现在已暴露完整 wrapper envelope（`kind`、`executionMode`、`sourcePath`、`actionLabel`、`operationInput`、`generation`、`outputPath`、`previewOpened`），但 active-file 依赖、插件状态与保存/打开副作用仍使它不能直接宣称为稳定 public API | `diagram.generate`（`exact`，`defaultInput.outputMode=artifact`） |
-| `notemd:notemd-summarize-as-mermaid` | 为活动文件保存 Mermaid 输出 | `requires-active-file` | 类型化结果现在已暴露完整 wrapper envelope（`kind`、`executionMode`、`sourcePath`、`actionLabel`、`operationInput`、`generation`、`outputPath`、`previewOpened`），但 active-file 依赖与插件管理的保存语义仍使它不能直接宣称为稳定 public API | `diagram.generate`（`exact`，`defaultInput.outputMode=mermaid`） |
+| `notemd:notemd-generate-diagram` | 从活动文件生成 spec-first artifact | `requires-active-file` | 类型化结果现在已暴露完整 wrapper envelope，并额外包含显式 follow-through 细节（`kind`、`executionMode`、`sourcePath`、`actionLabel`、`operationInput`、`generation`、`followThrough`、`outputPath`、`previewOpened`），但 active-file 依赖、插件状态与保存/打开副作用仍使它不能直接宣称为稳定 public API | `diagram.generate`（`exact`，`defaultInput.outputMode=artifact`） |
+| `notemd:notemd-summarize-as-mermaid` | 为活动文件保存 Mermaid 输出 | `requires-active-file` | 类型化结果现在已暴露完整 wrapper envelope，并额外包含显式 follow-through 细节（`kind`、`executionMode`、`sourcePath`、`actionLabel`、`operationInput`、`generation`、`followThrough`、`outputPath`、`previewOpened`），但 active-file 依赖与插件管理的保存语义仍使它不能直接宣称为稳定 public API | `diagram.generate`（`exact`，`defaultInput.outputMode=mermaid`） |
 | `notemd:notemd-preview-diagram` | 预览已保存/已生成图表 | `interactive-ui` | 现在已经具备类型化 input/result schema 来描述 preview artifact 边界，但打开 preview modal 仍属于 UI-only 流程，不具备自动化稳定性 | `diagram.preview`（`exact`） |
 | `notemd:process-with-notemd` | 处理当前文件并加链接 | `requires-active-file` | 结构化文件结果已存在，但 active-file 依赖、概念笔记创建、输出路径策略与 vault 改写副作用仍阻碍稳定自动化 | `file.process-add-links` |
 | `notemd:process-folder-with-notemd` | 批量处理文件夹 | `interactive-ui` | 结构化批量结果已存在，且包含 `savedCount` / `errors` / `cancelled`，但文件夹选择、批量改写执行与后置 Mermaid auto-fix 仍由宿主驱动 | `file.process-folder-add-links` |
@@ -65,7 +65,8 @@
 - `src/cliContracts.ts` 现在也从同一 registry 生成 invocation contract，减少了文档、命令发现与契约导出之间的漂移路径。
 - registry 现在也已纳入主要 note-processing、utility、selection 与 export operations：`editor.create-link-and-generate`、`file.process-add-links`、`file.process-folder-add-links`、`content.generate-from-title`、`content.batch-generate-from-titles`、`research.summarize-topic`、`translate.file`、`translate.folder-batch`、`concept.extract-file`、`concept.extract-folder`、`content.extract-original-text`、`workflow.extract-and-generate`、`duplicate.check-file`、`concept.dedupe`、`mermaid.batch-fix`、`formula.fix-file`、`formula.batch-fix`、`provider.profile.export`、`provider.profile.import`、`cli.capability-manifest.export` 与 `cli.invocation-contract.export`。
 - `file.process-add-links`、`file.process-folder-add-links`、`content.generate-from-title`、`content.batch-generate-from-titles`、`mermaid.batch-fix`、`concept.dedupe`、`translate.*`、`formula.*` 与 `content.extract-original-text` 现在已经组成当前已验证的 write-heavy contract-enrichment proof set：utility core 返回结构化结果，host adapter 接管本地化成功/no-file/confirmation 语义，registry 直接导出 richer schema。
-- 下一阶段 contract deepening 顺序现在也已更精确：先把 `diagram.generate` 保持为宿主无关 generation core，并把其下的 save/artifact/preview follow-through 显式化，再处理 packaging / semantic verification 的后续收敛，最后才重开更强的 CLI/public surface 声明。
+- `diagram.generate` 现在已经在宿主无关 generation core 之下携带显式 typed follow-through：`followThrough.kind` 用来区分 Mermaid 保存、artifact 保存与 preview 完成，同时继续保留向后兼容的顶层 `outputPath` / `previewOpened`。
+- 下一阶段 contract deepening 顺序现在也已更精确：先把 `diagram.generate` 保持为宿主无关 generation core，并把其下的 typed follow-through 视作已落地，再处理 packaging / semantic verification 的后续收敛，最后才重开更强的 CLI/public surface 声明。
 - 旧命令别名仍保留注册以保证兼容，但会被刻意排除在 capability manifest 导出之外。
 
 ## 下一批抽取目标
@@ -74,7 +75,7 @@
 
 | 优先级 | 候选能力 | 为什么先做 | 现有基础 |
 |---|---|---|---|
-| P0 | Diagram/provider command-core 分层 | 公共 provider-test 与 diagram command wrapper 已经改为通过 host adapter 代理，`provider.connection.test` 与 `diagram.preview` 已具备 typed contract，而 `diagram.generate` 背后也已存在宿主无关 generation core。当前剩余缺口是把 save/artifact/preview follow-through 在该 core 之下显式类型化，并优先完成这一步，而不是过早新增 top-level operation ID | `src/operations/diagramGenerateOperation.ts`、`src/operations/diagramCommandHostAdapter.ts`、`src/operations/diagramCommandExecution.ts`、`src/operations/providerConnectionTestCommandHostAdapter.ts` |
+| P0 | Packaging / semantic-verification 收敛 | 公共 provider-test 与 diagram command wrapper 已经改为通过 host adapter 代理，`provider.connection.test` 与 `diagram.preview` 已具备 typed contract，而 `diagram.generate` 现在也同时具备宿主无关 generation core 与显式 typed follow-through。所以下一批更高杠杆的工作已转向 packaging isolation、semantic verification，以及是否还有必要继续提升更大 contract boundary，而不是立刻再拆 diagram operation | `docs/maintainer/*`、`src/operations/diagramGenerateOperation.ts`、`src/operations/diagramCommandHostAdapter.ts`、`src/operations/diagramCommandExecution.ts` |
 | P1 | selection/export 与 config flow 的 contract 增强 | 这些 operation 已建模，但未来 operation invoker 需要比 command-trigger 对等更丰富的 path/context 语义 | `src/operations/registry.ts`, `src/operations/configProfileCommands.ts`, `src/operations/noteProcessingCommandHostAdapter.ts` |
 | P1 | workflow/settings 打包 | Workflow DSL 与 output-path toggles 仍是有价值 metadata，但还不是稳定公共接口 | `src/workflowButtons.ts`, 设置驱动的输出控制 |
 | P2 | maintainer 语义验证与打包硬化 | 重型运行时隔离与维护者本地 runbook 仍重要，但在命令面收口后才是下一层问题 | `docs/maintainer/*`, render-host bundle 流程, release 验证路径 |

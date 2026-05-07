@@ -5,6 +5,8 @@ topic: cli-next-phase-planning
 
 # CLI 下一阶段规划
 
+> 更新（2026-05-07，更晚一些）：本规划文档给出的推荐方向已经在当前 contract 深度上落地。`diagram.generate` 仍保持为宿主无关 generation core，而其下的 command-completion 层现在已经通过类型化 `followThrough` 结果结构显式化。下一波工作应转向 packaging / semantic-verification 收敛，只有后续某个分支真的证明自己足够宿主无关时，才再考虑更大的导出边界。
+
 ## 问题框架
 
 5 月 4-5 日这一组 brainstorm 文档其实已经把大方向定下来了：
@@ -20,7 +22,7 @@ topic: cli-next-phase-planning
 - 当前剩余的混合语义主要位于 `src/operations/diagramCommandExecution.ts` 与 `src/operations/diagramCommandHostAdapter.ts` 中，负责把生成结果继续保存、重开、预览、自动修复并提示给用户。
 - 实际出货的命令依然如实地沿用 `src/workflowButtons.ts` 中的 `requires-active-file`、`write-file` 或 `interactive-ui` 语义。
 
-所以，当前规划的核心不是“增加命令数量”，而是做一次分层澄清：把 core-generation contract 与 host follow-through contract 明确拆开，同时避免重开已经完成的 write-heavy 家族，也避免过早膨胀 top-level operation ID。
+所以，当前规划的核心曾经是做一次分层澄清：把 core-generation contract 与 host follow-through contract 明确拆开，同时避免重开已经完成的 write-heavy 家族，也避免过早膨胀 top-level operation ID。这一决策现在已经实现，本文其余内容仍可作为当前实现形态的设计依据。
 
 ## 代码事实快照
 
@@ -51,7 +53,7 @@ topic: cli-next-phase-planning
 - `notemd-summarize-as-mermaid` -> `requires-active-file` / `write-file`
 - `notemd-preview-diagram` -> `interactive-ui` / `preview-ui`
 
-这在方向上是对的，但下一阶段应该把“这里描述的是 core operation，不是出货命令本身”说得更清楚，避免维护者把 `safe/read-only` 误读成对 shipped command 的描述。
+这在方向上是对的，而后续实现现在也已经把“这里描述的是 core operation，不是出货命令本身”说得更清楚：导出的 `diagram.generate` 结果之下新增了类型化 `followThrough` 结构，但 command binding 本身保持不变。
 
 ### `provider.connection.test` 是本地最成熟的参考模式
 
@@ -98,6 +100,8 @@ topic: cli-next-phase-planning
 
 CLI 的下一阶段应保持 `diagram.generate`、`diagram.preview` 与 `provider.connection.test` 这组 top-level frame 稳定，然后把 diagram completion/follow-through 层在这组 frame 之下显式类型化。
 
+这一步现在已经落地。
+
 落到工程上，就是：
 
 1. 继续把宿主无关 generation core 与 save/open/preview follow-through 分离
@@ -123,6 +127,10 @@ CLI 的下一阶段应保持 `diagram.generate`、`diagram.preview` 与 `provide
 2. 优先把这些能力落成“内部类型化执行边界”。
 3. 只有当某个分支已经证明自己是宿主无关且可脱离命令上下文独立调用时，才提升为新的 top-level operation。
 
+实现更新：
+- `diagram.generate` 现在会返回 `followThrough.kind`、`followThrough.outputPath`、`followThrough.previewOpened`、`followThrough.autoFixAttempted` 与 `followThrough.artifactTarget`
+- 为了兼容现有调用方，顶层 `outputPath` 与 `previewOpened` 目前仍继续导出
+
 ### 阶段 3：用元数据和测试把边界锁住
 
 1. 保持 `src/operations/registry.ts`、`src/operations/capabilityManifest.ts` 与 `src/cliContracts.ts` 明确描述各自所属层级。
@@ -135,6 +143,8 @@ CLI 的下一阶段应保持 `diagram.generate`、`diagram.preview` 与 `provide
 2. maintainer-local semantic verification 硬化
 3. selection/export 与 workflow/settings contract 增强
 4. 更广的 CLI/public-surface 决策
+
+这一阶段现在已经成为当前的实际下一波方向。
 
 ## 需求
 
@@ -150,7 +160,7 @@ CLI 的下一阶段应保持 `diagram.generate`、`diagram.preview` 与 `provide
 ## 成功标准
 
 - 维护者能够解释清楚：为什么 `diagram.generate` 可以保持 `safe` / `read-only`，而真实出货的 diagram commands 仍然必须是 `requires-active-file` / `write-file`。
-- 下一份实现 PRD 可以明确写出：save/artifact follow-through 是要变成类型化的内部执行细节，还是更大的导出契约。
+- 下一份实现 PRD 现在可以从已落地的 `followThrough` 契约出发，再判断它是否已经足够，还是未来真的需要更大的导出契约。
 - 仓库文档不再把 CLI 下一阶段写成“命令数量增长”。
 
 ## 范围边界
@@ -163,7 +173,7 @@ CLI 的下一阶段应保持 `diagram.generate`、`diagram.preview` 与 `provide
 ## 关键决策
 
 - 目前先保持 top-level operation frame 稳定。
-- 优先引入 typed internal completion/follow-through structure，而不是新增 top-level operation ID。
+- 优先引入 typed internal completion/follow-through structure，而不是新增 top-level operation ID。这一偏好现在已经反映在落地实现中。
 - 用 `provider.connection.test` 作为“typed core 与 interactive wrapper 并存”的本地参考模式。
 
 ## 依赖 / 假设
@@ -176,10 +186,10 @@ CLI 的下一阶段应保持 `diagram.generate`、`diagram.preview` 与 `provide
 
 ### 延后到实现规划
 
-- `diagram.generate` 结果顶层是否还应继续保留 `outputPath`、`previewOpened` 这样的 optional follow-through 字段，还是应转移到更明确的 completion/follow-through shape 下？
+- `diagram.generate` 结果顶层是否还应长期继续保留 `outputPath`、`previewOpened` 这样的兼容字段，还是未来应只保留更明确的 `followThrough` 结构？
 - 哪些 diagram completion 分支最值得先提升为更强的内部 typed execution contract？
-- 在这轮 layering correction 落地后，selection/export/workflow contract 增强 与 packaging/maintainer verification，哪一个才是下一步更高杠杆的跟进项？
+- 在这轮 layering correction 已落地后，selection/export/workflow contract 增强 与 packaging/maintainer verification，哪一个才是下一步更高杠杆的跟进项？
 
 ## 下一步
 
--> 基于本文件与任务目录中的 research 纪要，启动 diagram/provider contract layering 的下一份实现 PRD。
+-> 将本文件与任务目录中的 research 纪要作为历史依据，然后在没有新宿主无关边界出现的前提下，优先从 packaging / semantic-verification 收敛启动下一份实现 PRD。
