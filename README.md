@@ -86,7 +86,7 @@ That's it! Explore the settings to unlock more features like web research, trans
 - **Runtime Environment Transport Fallback**: When a long-running provider request is dropped by `requestUrl` with transient network errors such as `ERR_CONNECTION_CLOSED`, Notemd now retries the same attempt through environment-specific fallback transport before entering the configured retry loop: desktop builds use Node `http/https`, while non-desktop environments use browser `fetch`. This reduces false failures on slow gateways and reverse proxies.
 - **OpenAI-Compatible Stable Long-Request Chain Hardening**: In stable mode, OpenAI-compatible calls now use an explicit 3-stage order for each attempt: primary direct streaming transport, then direct non-stream transport, then `requestUrl` fallback (which can still upgrade to streamed parsing when needed). This reduces false negatives where providers complete buffered responses but streaming pipes are unstable.
 - **Protocol-Aware Streaming Fallback Across LLM APIs**: Long-running fallback attempts now upgrade to protocol-aware streamed parsing across every built-in LLM path, not just OpenAI-compatible endpoints. Notemd now handles OpenAI/Azure-style SSE, Anthropic Messages streaming, Google Gemini SSE responses, and Ollama NDJSON streams on both desktop `http/https` and non-desktop `fetch`, and the remaining direct OpenAI-style provider entrypoints reuse that same shared fallback path.
-- **China-Ready Provider Presets**: Built-in presets now cover `Qwen`, `Qwen Code`, `Doubao`, `Moonshot`, `GLM`, `Z AI`, `MiniMax`, `Huawei Cloud MaaS`, `Baidu Qianfan`, and `SiliconFlow` in addition to the existing global and local providers.
+- **China-Ready Provider Presets**: Built-in presets now cover `Qwen`, `Qwen Code`, `Doubao`, `Moonshot`, `Xiaomi MiMo`, `GLM`, `Z AI`, `MiniMax`, `Huawei Cloud MaaS`, `Baidu Qianfan`, and `SiliconFlow` in addition to the existing global and local providers.
 - **Reliable Batch Processing**: Improved concurrent processing logic with **staggered API calls** to prevent rate-limiting errors and ensure stable performance during large batch jobs. The new implementation ensures that tasks are initiated at different intervals rather than all at once.
 - **Accurate Progress Reporting**: Fixed a bug where the progress bar could get stuck, ensuring that the UI always reflects the true status of the operation.
 - **Robust Parallel Batch Processing**: Resolved an issue where parallel batch operations would stall prematurely, ensuring all files are processed reliably and efficiently.
@@ -97,6 +97,7 @@ That's it! Explore the settings to unlock more features like web research, trans
 - **Sidebar Interaction & Readability Polish**: Sidebar buttons now provide clearer hover/press/focus feedback, and colorful CTA buttons (including `One-Click Extract` and `Batch generate from titles`) use stronger text contrast for better readability across themes.
 - **Single-File CTA Mapping**: Colorful CTA styling is now reserved for single-file actions only. Batch/folder-level actions and mixed workflows use non-CTA styling to reduce action-scope misclicks.
 - **Custom One-Click Workflows**: Turn built-in sidebar utilities into reusable custom buttons with user-defined names and assembled action chains. A default `One-Click Extract` workflow is included out of the box.
+- **Welcome Modal Release Digest**: On first install, the welcome modal now includes the latest two release summaries in a scrollable panel so new users can quickly see what changed before configuring providers.
 
 
 ### Knowledge Graph Enhancement
@@ -236,14 +237,14 @@ Access plugin settings via:
 ### LLM Provider Configuration
 1.  **Active Provider**: Select the LLM provider you want to use from the dropdown menu.
 2.  **Provider Settings**: Configure the specific settings for the selected provider:
-    *   **API Key**: Required for most cloud providers (e.g., OpenAI, Anthropic, DeepSeek, Qwen, Qwen Code, Doubao, Moonshot, GLM, Z AI, MiniMax, Huawei Cloud MaaS, Baidu Qianfan, SiliconFlow, Google, Mistral, Azure OpenAI, OpenRouter, xAI, Groq, Together, Fireworks, Requesty). Not needed for Ollama. Optional for LM Studio and the generic `OpenAI Compatible` preset when your endpoint accepts anonymous or placeholder access.
+    *   **API Key**: Required for most cloud providers (e.g., OpenAI, Anthropic, DeepSeek, Qwen, Qwen Code, Doubao, Moonshot, Xiaomi MiMo, GLM, Z AI, MiniMax, Huawei Cloud MaaS, Baidu Qianfan, SiliconFlow, Google, Mistral, Azure OpenAI, OpenRouter, xAI, Groq, Together, Fireworks, Requesty). Not needed for Ollama. Optional for LM Studio and the generic `OpenAI Compatible` preset when your endpoint accepts anonymous or placeholder access.
     *   **Base URL / Endpoint**: The API endpoint for the service. Defaults are provided, but you may need to change this for local models (LMStudio, Ollama), gateways (OpenRouter, Requesty, OpenAI Compatible), or specific Azure deployments. **Required for Azure OpenAI.**
     *   **Model**: The specific model name/ID to use (e.g., `gpt-4o`, `claude-3-5-sonnet-20240620`, `google/gemini-flash-1.5`, `grok-4`, `moonshotai/kimi-k2-instruct-0905`, `accounts/fireworks/models/kimi-k2p5`, `anthropic/claude-3-7-sonnet-latest`). Ensure the model is available at your endpoint/provider.
     *   **Temperature**: Controls the randomness of the LLM's output (0=deterministic, 1=max creativity). Lower values (e.g., 0.2-0.5) are generally better for structured tasks.
     *   **API Version (Azure Only)**: Required for Azure OpenAI deployments (e.g., `2024-02-15-preview`).
-3.  **Test Connection**: Use the "Test Connection" button for the active provider to verify your settings. OpenAI-compatible providers now use provider-aware checks: endpoints such as `Qwen`, `Qwen Code`, `Doubao`, `Moonshot`, `GLM`, `Z AI`, `MiniMax`, `Huawei Cloud MaaS`, `Baidu Qianfan`, `SiliconFlow`, `Groq`, `Together`, `Fireworks`, `LMStudio`, and `OpenAI Compatible` probe `chat/completions` directly, while providers with a reliable `/models` endpoint can still use model listing first. If the first probe fails with a transient network disconnect such as `ERR_CONNECTION_CLOSED`, Notemd automatically falls back to the stable retry sequence instead of failing immediately.
+3.  **Test Connection**: Use the "Test Connection" button for the active provider to verify your settings. OpenAI-compatible providers now use provider-aware checks: endpoints such as `Qwen`, `Qwen Code`, `Doubao`, `Moonshot`, `Xiaomi MiMo`, `GLM`, `Z AI`, `MiniMax`, `Huawei Cloud MaaS`, `Baidu Qianfan`, `SiliconFlow`, `Groq`, `Together`, `Fireworks`, `LMStudio`, and `OpenAI Compatible` probe `chat/completions` directly, while providers with a reliable `/models` endpoint can still use model listing first. If the first probe fails with a transient network disconnect such as `ERR_CONNECTION_CLOSED`, Notemd automatically falls back to the stable retry sequence instead of failing immediately.
 4.  **Manage Provider Configurations**: Use the "Export Providers" and "Import Providers" buttons to save/load your LLM provider settings to/from a `notemd-providers.json` file within the plugin's configuration directory. This allows for easy backup and sharing.
-5.  **Preset Coverage**: In addition to the original providers, Notemd now includes preset entries for `Qwen`, `Qwen Code`, `Doubao`, `Moonshot`, `GLM`, `Z AI`, `MiniMax`, `Huawei Cloud MaaS`, `Baidu Qianfan`, `SiliconFlow`, `xAI`, `Groq`, `Together`, `Fireworks`, `Requesty`, and a generic `OpenAI Compatible` target for LiteLLM, vLLM, Perplexity, Vercel AI Gateway, or custom proxies.
+5.  **Preset Coverage**: In addition to the original providers, Notemd now includes preset entries for `Qwen`, `Qwen Code`, `Doubao`, `Moonshot`, `Xiaomi MiMo`, `GLM`, `Z AI`, `MiniMax`, `Huawei Cloud MaaS`, `Baidu Qianfan`, `SiliconFlow`, `xAI`, `Groq`, `Together`, `Fireworks`, `Requesty`, and a generic `OpenAI Compatible` target for LiteLLM, vLLM, Perplexity, Vercel AI Gateway, or custom proxies.
 <img width="804" height="506" alt="LLM" src="https://github.com/user-attachments/assets/8caf42e3-43ad-456d-8b96-b63e7914e45f" />
 
 ### Multi-Model Configuration
@@ -309,9 +310,10 @@ Access plugin settings via:
 
 #### Concept Note Output
 -   **Customize Concept Note Path**:
-    *   **Disabled (Default)**: Automatic creation of notes for `[[linked concepts]]` is disabled.
-    *   **Enabled**: Allows you to specify a folder where new concept notes will be created.
+    *   **Disabled**: Automatic creation of notes for `[[linked concepts]]` is disabled.
+    *   **Enabled (Default)**: Allows you to specify a folder where new concept notes will be created.
 -   **Concept Note Folder Path**: (Visible only when the above is enabled) Enter a *relative path* within your vault (e.g., `Concepts` or `Generated/Topics`) where new concept notes should be saved. Folders will be created if they don't exist. **Must be filled if customization is enabled.** **Do not use absolute paths or invalid characters.**
+-   **Prerequisite Guidance Modal**: Flows that need concept-note creation, including **Process File/Folder (Add Links)** and **Extract Concepts**, now warn you when this setting is not configured correctly. The modal offers **Configure**, **Skip once**, and **Do not show again**.
 <img width="800" height="145" alt="concept note output" src="https://github.com/user-attachments/assets/d0338341-7d67-4472-964c-75a0992165b8" />
 
 #### Concept Log File Output
@@ -345,6 +347,7 @@ Access plugin settings via:
 
 #### Extract Specific Original Text
 -   **Questions for extraction**: Enter a list of questions (one per line) that you want the AI to extract verbatim answers for from your notes.
+-   **Batch Extract Specific Original Text**: In addition to the single-file command, the sidebar/workflow builder now supports running the same configured extraction questions across all `.md` and `.txt` files in a selected folder.
 -   **Translate output to corresponding language**:
     *   **Off (Default)**: Outputs only the extracted text in its original language.
     *   **On**: Appends a translation of the extracted text in the language selected for this task.
@@ -357,8 +360,8 @@ Access plugin settings via:
 
 #### Batch Mermaid Fix
 -   **Enable Mermaid Error Detection**:
-    *   **Off (Default)**: Error detection is skipped after processing.
-    *   **On**: Scans processed files for remaining Mermaid syntax errors and generates a `mermaid_error_{foldername}.md` report.
+    *   **Off**: Error detection is skipped after processing.
+    *   **On (Default)**: Scans processed files for remaining Mermaid syntax errors and generates a `mermaid_error_{foldername}.md` report.
 -   **Move files with Mermaid errors to specified folder**:
     *   **Off**: Files with errors remain in place.
     *   **On**: Moves any files that still contain Mermaid syntax errors after the fix attempt to a dedicated folder for manual review.
@@ -372,9 +375,9 @@ Access plugin settings via:
 -   **Batch Size**: (Visible only when parallelism is enabled) The number of files to group into a single batch. (Default: 50, Range: 10-200)
 -   **Delay Between Batches (ms)**: (Visible only when parallelism is enabled) An optional delay in milliseconds between processing each batch, which can help manage API rate limits. (Default: 1000ms)
 -   **API Call Interval (ms)**: Minimum delay in milliseconds *before and after* each individual LLM API call. Crucial for low-rate APIs or to prevent 429 errors. Set to 0 for no artificial delay. (Default: 500ms)
--   **Chunk Word Count**: Maximum words per chunk sent to the LLM. Affects the number of API calls for large files. (Default: 3000)
+-   **Max Tokens**: Maximum tokens the LLM should generate per response chunk. Affects cost and detail. (Default: 8192)
+-   **Chunk Word Count**: Maximum words per chunk sent to the LLM. Affects the number of API calls for large files. Recommended: about one third of **Max Tokens**. If you have not customized it yet, changing **Max Tokens** auto-fills the recommended chunk size for you. (Default: 3000)
 -   **Enable Duplicate Detection**: Toggles the basic check for duplicate words within processed content (results in console). (Default: Enabled)
--   **Max Tokens**: Maximum tokens the LLM should generate per response chunk. Affects cost and detail. (Default: 4096)
 <img width="795" height="274" alt="Processing Parameters   Language settings" src="https://github.com/user-attachments/assets/74e4af76-3333-48fc-bb86-0a3ee61825d1" />
 
 #### Translation
@@ -580,6 +583,7 @@ This is the core functionality focused on identifying concepts and adding `[[wik
 10. **Extract Specific Original Text**:
     *   Configure your questions in the settings under "Extract Specific Original Text".
     *   Use the "Extract Specific Original Text" button in the sidebar to process the active file.
+    *   Use the "Batch Extract Specific Original Text" sidebar/workflow action to process every supported file in a selected folder with the same configured questions.
     *   **Merged Mode**: Enables faster processing by sending all questions in one prompt.
     *   **Translation**: Optionally translates the extracted text to your configured language.
     *   **Custom Output**: Configure where and how the extracted file is saved.
@@ -598,6 +602,7 @@ This is the core functionality focused on identifying concepts and adding `[[wik
 | Qwen Code          | Cloud   | Yes                    | DashScope coding-focused preset for Qwen coder models                 |
 | Doubao             | Cloud   | Yes                    | Volcengine Ark preset; usually set the model field to your endpoint ID |
 | Moonshot           | Cloud   | Yes                    | Official Kimi / Moonshot endpoint                                     |
+| Xiaomi MiMo        | Cloud   | Yes                    | Xiaomi MiMo OpenAI-compatible endpoint for chat, coding, and multimodal models |
 | GLM                | Cloud   | Yes                    | Official Zhipu BigModel OpenAI-compatible endpoint                    |
 | Z AI               | Cloud   | Yes                    | International GLM/Zhipu OpenAI-compatible endpoint; complements `GLM` |
 | MiniMax            | Cloud   | Yes                    | Official MiniMax chat-completions endpoint                            |

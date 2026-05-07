@@ -20,6 +20,9 @@ This document summarizes the major functional and architectural changes implemen
 - **Batch Progress Store**: Long-running batch flows now persist progress for better interrupt/resume behavior.
 - **Sync Locality Control**: Added per-setting sync toggles so secret-like provider values can remain local.
 - **LLM Response Cache**: Added in-memory caching for repeated identical LLM calls in the same session.
+- **Batch Extract Specific Original Text**: Added a folder-scoped batch action for the configured original-text extraction workflow so the same question set can run across all eligible files in a selected folder.
+- **Xiaomi MiMo Preset**: Added a first-class `Xiaomi MiMo` OpenAI-compatible preset with MiMo defaults and shared-runtime coverage.
+- **Welcome Modal Release Digest**: The first-install welcome modal now embeds the latest two release summaries in a scrollable panel so new users can see what changed without leaving the plugin.
 
 ### Fixes
 
@@ -28,12 +31,17 @@ This document summarizes the major functional and architectural changes implemen
 - **Artifact Saving**: Mermaid retry failures now still save best-effort output; Vega-Lite exports now save readable `.md` artifacts instead of raw `.json`.
 - **Release Workflow Hardening**: `.github/workflows/release.yml` now pins supported `actions/checkout` and `actions/setup-node` majors.
 - **README Contract Coverage**: Added dedicated tests to keep localized README version/sponsor/badge alignment from drifting again.
+- **Concept-Note Path Guardrails**: Add-links / concept-extraction flows now warn when concept-note path prerequisites are not configured and can deep-link users into the correct settings section.
+- **OpenAI-Compatible Endpoint Normalization**: Base URLs that already include `/chat/completions` or `/models` are now normalized before request assembly.
+- **Settings Input Focus Stability**: Remaining conditional settings inputs now commit on blur/Enter instead of redrawing mid-typing, fixing the one-digit blur regression.
+- **Safer Defaults And Processing Guidance**: `Customize Concept Note Path` and `Enable Mermaid Error Detection` now default to enabled; `Max Tokens` is ordered before `Chunk Word Count`, and the chunk field now documents and auto-fills the recommended one-third ratio when users have not customized it.
 
 ### Chores
 
 - Added `docs/releases/1.8.4.md` and `docs/releases/1.8.4.zh-CN.md`.
 - Refreshed architecture, progress, Drawnix feasibility, and maintainer release-workflow docs.
 - Added `docs/brainstorms/2026-05-03-mainline-stabilization-and-ci-hardening-requirements*.md`.
+- Added `.trellis/` to `.gitignore` and concise local-workflow-state protection rules to `AGENTS.md`.
 - Kept the existing `1.8.3` historical entry below for traceability.
 
 ---

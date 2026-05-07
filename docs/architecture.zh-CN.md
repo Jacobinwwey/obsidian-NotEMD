@@ -118,7 +118,7 @@ sequenceDiagram
 
 | 传输协议 | 提供商数量 | 协议 |
 |---|---|---|
-| `openai-compatible` | 21 个提供商 | OpenAI Chat Completions API |
+| `openai-compatible` | 22 个提供商 | OpenAI Chat Completions API |
 | `anthropic` | 1 个 | Anthropic Messages API |
 | `google` | 1 个 | Google Gemini API |
 | `azure-openai` | 1 个 | Azure OpenAI Deployment API |
@@ -197,7 +197,7 @@ flowchart LR
 | 模块 | 职责 |
 |---|---|
 | `src/main.ts` | 插件入口、命令注册、流程编排 |
-| `src/llmProviders.ts` | 25 个提供商定义、元数据、KNOWN_MODEL 表 |
+| `src/llmProviders.ts` | 26 个提供商定义、元数据、KNOWN_MODEL 表 |
 | `src/llmUtils.ts` | 传输分发、令牌解析、重试、响应缓存 |
 | `src/fileUtils.ts` | 文件处理、Mermaid 修复、概念提取 |
 | `src/searchUtils.ts` | 网络搜索、Tavily/DuckDuckGo 集成 |

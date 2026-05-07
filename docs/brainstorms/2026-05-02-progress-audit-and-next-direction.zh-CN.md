@@ -80,9 +80,15 @@ topic: progress-audit-next-direction
 | 功能 | 状态 | 备注 |
 |---|---|---|
 | 欢迎弹窗（首次安装） | ✓ | 22 种语言 |
+| 欢迎弹窗最近更新摘要 | ✓ | 首次打开时展示最近两个版本摘要，支持滚动查看 |
 | 赞助方支持（GitHub Star + ko-fi） | ✓ | 设置页 + 欢迎弹窗 + README |
 | Cline 对齐令牌解析 | ✓ | 未知模型默认 8192 改为 provider 决策 |
 | 图表边缘字段规范化 | ✓ | `source/target/sourceId/targetId/start/end -> from/to` |
+| Xiaomi MiMo Provider 预设 | ✓ | 继续复用共享 OpenAI-compatible 运行时，并补齐直连 chat 探测 |
+| 批量提取特定原始内容 | ✓ | 侧边栏 / 工作流动作现已支持文件夹级 `.md` / `.txt` 提取 |
+| 概念笔记路径引导弹窗 | ✓ | 添加链接 / 提取概念流程可跳转设置，也可本次或永久忽略 |
+| 设置输入框焦点稳定性 | ✓ | 剩余输入过程中重绘的字段现已改为 blur / Enter 提交 |
+| 更安全的概念 / Mermaid 默认值 | ✓ | 概念笔记路径与 Mermaid 错误检测现默认开启 |
 | 首选图表类型选择器 | 部分完成 | 当前 UI 暴露子集，不等于全部运行时意图 |
 | README i18n 对齐合约测试 | ✓ | 仓库内稳定门槛 |
 | 8 意图实时 API 验证 | 仅本地历史证据 | 当前不属于仓库内可持续执行门槛 |
@@ -93,6 +99,8 @@ topic: progress-audit-next-direction
 - 响应缓存已落地，可减少重复 API 成本。
 - 未知模型输出 token 决策已与 Cline 对齐。
 - 提供商配置支持本地隔离，不强制所有敏感配置参与同步。
+- OpenAI-compatible endpoint 现在支持归一化已包含 `/chat/completions` 与 `/models` 的文档地址，减少自定义 Provider 时的路径拼接错误。
+- 中国区 OpenAI-compatible 预设面也已扩展到 `Xiaomi MiMo`，且没有引入额外 transport 分支。
 
 **图表平台：**
 - 运行时仍支持 8 种图表意图。
@@ -104,6 +112,7 @@ topic: progress-audit-next-direction
 - 进度状态持久化、架构文档、release workflow、README 对齐测试都在主线。
 - release 路径现在还多了一条维护要求：GitHub 官方 workflow actions 的 major 版本要跟上支持窗口，不能等弃用告警演变成真实失败。
 - 当前真正缺的是“secret-free / machine-free”的 live verification harness，而不是更多单元测试框架。
+- 本地工作流状态卫生也已明确：`.trellis/` 现被视为应保留的本地状态，并通过忽略策略避免在同步或发布准备时被误删。
 
 **CLI 扩展性：**
 - 本机上的稳定包装器 `obsidian-cli` 仍主要是调试/桌面入口，但底层官方 `obsidian` CLI 现在已经支持 `commands` 与 `command id=<command-id>`，可列出并触发插件注册命令。

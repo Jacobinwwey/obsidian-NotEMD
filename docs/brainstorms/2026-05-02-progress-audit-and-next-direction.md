@@ -80,9 +80,15 @@ This means the roadmap should no longer be interpreted as "build the platform". 
 | Feature | Status | Notes |
 |---|---|---|
 | Welcome modal (first install) | Done | 22 locales |
+| Welcome modal recent release digest | Done | Shows the latest two release summaries in a scrollable panel on first open |
 | Sponsor support (GitHub Star + ko-fi) | Done | Settings + welcome modal + README |
 | Cline-aligned token resolution | Done | Unknown-model default cap now defers to provider |
 | Diagram edge normalization | Done | `source/target/sourceId/targetId/start/end -> from/to` |
+| Xiaomi MiMo provider preset | Done | Shared OpenAI-compatible runtime plus direct chat-based connection probing |
+| Batch extract specific original text | Done | Sidebar/workflow action now covers folder-scoped `.md` / `.txt` extraction |
+| Concept-note path guidance modal | Done | Add-links / concept-extraction flows can deep-link into settings or be suppressed once/forever |
+| Settings input focus stability | Done | Remaining redraw-on-type fields now commit on blur/Enter instead |
+| Safer concept/Mermaid defaults | Done | Concept-note path and Mermaid error detection now default to enabled |
 | Preferred diagram intent selector | Partial | UI exposes a subset, not every runtime intent |
 | README i18n alignment contract test | Done | Stable repo-level gate |
 | 8-intent live API verification | Historical local evidence only | Not a tracked repo gate today |
@@ -93,6 +99,8 @@ This means the roadmap should no longer be interpreted as "build the platform". 
 - Response caching reduces repeated API cost.
 - Unknown-model output token resolution now matches Cline semantics.
 - Provider config can stay local instead of forcing all sensitive values into sync.
+- OpenAI-compatible endpoint normalization now tolerates pasted `/chat/completions` and `/models` documentation URLs instead of duplicating path segments.
+- The built-in OpenAI-compatible preset surface now also includes `Xiaomi MiMo`, extending the China-focused provider set without adding a special transport branch.
 
 **Diagram platform**
 - The runtime still supports 8 intents.
@@ -104,6 +112,7 @@ This means the roadmap should no longer be interpreted as "build the platform". 
 - Progress persistence, architecture docs, release workflow, and README alignment tests are all on mainline.
 - The release path now has a specific hardening rule: keep GitHub-maintained workflow actions on supported majors, or release CI will fail for reasons unrelated to plugin code.
 - The missing piece is now a secret-free, machine-free live verification harness, not another generic unit-test layer.
+- Local workflow-state hygiene is now also explicit: `.trellis/` is treated as ignored local state and should be preserved rather than deleted during sync or release-prep work.
 
 **CLI extensibility**
 - The local stable wrapper `obsidian-cli` is still mainly a debug/desktop wrapper, but the underlying official `obsidian` CLI now supports `commands` and `command id=<command-id>` for plugin-registered commands.
