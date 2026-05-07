@@ -161,6 +161,15 @@ So "we can emit JSON" is not enough. A robust Notemd integration would need an a
    - lazy-loaded
    - out of the default mainline flow
 
+### Scope control for the next batch
+
+This audit should now be read as a hard scope boundary, not just background research:
+
+- full Drawnix host embedding is out of scope for the current roadmap batch
+- replacing Notemd's current preview host with Drawnix is out of scope
+- absorbing Drawnix board-editing UI into the plugin is out of scope
+- the strongest acceptable near-term experiment is an isolated export or adapter boundary after command/runtime stabilization, not before
+
 ## Relationship to Current Priorities
 
 The Drawnix audit does not challenge the current roadmap. It reinforces it:
