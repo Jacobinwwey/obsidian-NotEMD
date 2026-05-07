@@ -1,6 +1,6 @@
 # Notemd 系统架构总览
 
-> 更新：2026-05-05
+> 更新：2026-05-07
 
 ## 系统架构
 
@@ -250,22 +250,24 @@ flowchart LR
 - `src/fileUtils.ts` 与 `src/extractOriginalText.ts` 现在已经接受更窄的 runtime context，而不是直接依赖具体 `NotemdPlugin` 类，这说明边界正在从 wrapper 抽离继续推进到 utility 对宿主类型耦合的削弱
 - `src/main.ts` 现在主要保留命令注册、host 构造，以及更深一层的 diagram 执行 helper；先前最高价值的公共 direct command surface 现在已经改为通过 host adapter 代理，不再内联 busy/reporter/preview 生命周期逻辑
 - 新落地的 direct-surface wrapper 批次已经覆盖 `testLlmConnectionCommand`、`generateDiagramCommand` 与 `previewExperimentalDiagramCommand`；这些表面现在都具备结构化 result 边界，而不是 fire-and-forget 的 UI glue
-- 当前真正剩余的缺口已经不是公共 command entrypoint 本身：`diagram.preview` 与 `provider.connection.test` 现已具备 typed contract，save/artifact 的实质执行路径也已进入 `src/operations/diagramCommandExecution.ts`。剩余压力点转为 `diagram.generate` 之下的内部 save/artifact 分支是否还值得继续细化 typed boundary，以及当前已经落地的 wrapper-envelope 字段 `kind`、`executionMode`、`sourcePath`、`actionLabel`、`operationInput`、`generation`、`outputPath` 与 `previewOpened` 之后还要不要继续下探。
-- 下一阶段顺序已经明确：先收敛更深层的 diagram/provider command-core，再做 packaging / semantic verification 的后续收敛，最后才重开更强 public CLI 声明或更大规模的结构重排
+- 最新一层细化是：`diagram.generate` 应被理解为“宿主无关 generation contract”，而不是对当前 active-file 命令的另一种命名。它在 operation-level 上的 `safe` / `read-only` 元数据描述的是显式的 `sourceMarkdown -> DiagramGenerationResult` core；映射过去的 command binding 仍然要如实保留 `requires-active-file` / `write-file` 语义。
+- 当前真正剩余的缺口因此已经不是公共 command entrypoint 本身：`diagram.preview` 与 `provider.connection.test` 现已具备 typed contract，save/artifact 的实质执行路径也已进入 `src/operations/diagramCommandExecution.ts`。剩余压力点转为：如何把 `diagram.generate` 之下的 save/artifact/preview follow-through 显式类型化，而不是直接跳去新增更多 top-level CLI command 或 operation ID。
+- 下一阶段顺序已经明确：先把 `diagram.generate` 保持为宿主无关 core，并继续收紧其下的 follow-through，再做 packaging / semantic verification 的后续收敛，最后才重开更强 public CLI 声明或更大规模的结构重排
 
 ## 关键设计决策
 
 1. **规格优先图表生成**：LLM 输出结构化 `DiagramSpec` JSON，而非原始 Mermaid 语法。解耦意图与渲染器。
-2. **传输驱动分发**：21 个 OpenAI-compatible 提供商共享一个运行时。无逐提供商代码路径。
+2. **传输驱动分发**：OpenAI-compatible 提供商共享一个运行时。无逐提供商代码路径。
 3. **Cline 对齐令牌解析**：未知模型由 API 提供商自行决定。已知模型使用元数据表。
-4. **Iframe 宿主预览**：Vega-Lite 和 HTML 在沙盒 iframe 中渲染。Mermaid 内联渲染。
-5. **本地存储提供商配置**：API 密钥可设备本地保留，工作流设置可同步。
-6. **响应缓存**：5 分钟 TTL 内相同 LLM 调用返回缓存结果。
+4. **operation-core 与 command-binding 分层**：registry 中的 operation 元数据可以描述可复用的宿主无关 core，而当前出货命令本身仍保留 active-file、write-file 或 preview-bound 的真实产品语义。`diagram.generate` 是当前最明确的证明案例。
+5. **Iframe 宿主预览**：Vega-Lite 和 HTML 在沙盒 iframe 中渲染。Mermaid 内联渲染。
+6. **本地存储提供商配置**：API 密钥可设备本地保留，工作流设置可同步。
+7. **响应缓存**：5 分钟 TTL 内相同 LLM 调用返回缓存结果。
 
 ## 验证
 
 - `npm run build` — TypeScript 编译 + esbuild 打包
-- `npm test -- --runInBand` — 完整 Jest 矩阵当前为 134 套件、853 项测试；若在 `/.worktrees/` checkout 中验证，请改用 `npx jest --runInBand --config /tmp/notemd-worktree-jest.cjs`，因为仓库默认 Jest ignore 规则会排除 worktree 路径
+- `npm test -- --runInBand` — 完整 Jest 矩阵当前为 137 套件、871 项测试；若在 `/.worktrees/` checkout 中验证，请改用 `npx jest --runInBand --config /tmp/notemd-worktree-jest.cjs`，因为仓库默认 Jest ignore 规则会排除 worktree 路径
 - `npm run audit:i18n-ui` — 无硬编码 UI 字符串
 - `npm run audit:render-host` — 渲染宿主自包含于 main.js
 - `git diff --check` — 空白符卫生

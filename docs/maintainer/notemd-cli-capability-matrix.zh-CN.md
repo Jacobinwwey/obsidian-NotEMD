@@ -1,6 +1,6 @@
 # Notemd CLI 能力矩阵
 
-> 更新：2026-05-05
+> 更新：2026-05-07
 
 这是一份维护者控制文档，用来区分：
 
@@ -65,7 +65,7 @@
 - `src/cliContracts.ts` 现在也从同一 registry 生成 invocation contract，减少了文档、命令发现与契约导出之间的漂移路径。
 - registry 现在也已纳入主要 note-processing、utility、selection 与 export operations：`editor.create-link-and-generate`、`file.process-add-links`、`file.process-folder-add-links`、`content.generate-from-title`、`content.batch-generate-from-titles`、`research.summarize-topic`、`translate.file`、`translate.folder-batch`、`concept.extract-file`、`concept.extract-folder`、`content.extract-original-text`、`workflow.extract-and-generate`、`duplicate.check-file`、`concept.dedupe`、`mermaid.batch-fix`、`formula.fix-file`、`formula.batch-fix`、`provider.profile.export`、`provider.profile.import`、`cli.capability-manifest.export` 与 `cli.invocation-contract.export`。
 - `file.process-add-links`、`file.process-folder-add-links`、`content.generate-from-title`、`content.batch-generate-from-titles`、`mermaid.batch-fix`、`concept.dedupe`、`translate.*`、`formula.*` 与 `content.extract-original-text` 现在已经组成当前已验证的 write-heavy contract-enrichment proof set：utility core 返回结构化结果，host adapter 接管本地化成功/no-file/confirmation 语义，registry 直接导出 richer schema。
-- 下一阶段 contract deepening 顺序现在也已明确：先处理剩余 direct-read/sidebar surfaces，再做 packaging / semantic verification 的后续收敛，最后才重开更强的 CLI/public surface 声明。
+- 下一阶段 contract deepening 顺序现在也已更精确：先把 `diagram.generate` 保持为宿主无关 generation core，并把其下的 save/artifact/preview follow-through 显式化，再处理 packaging / semantic verification 的后续收敛，最后才重开更强的 CLI/public surface 声明。
 - 旧命令别名仍保留注册以保证兼容，但会被刻意排除在 capability manifest 导出之外。
 
 ## 下一批抽取目标
@@ -74,7 +74,7 @@
 
 | 优先级 | 候选能力 | 为什么先做 | 现有基础 |
 |---|---|---|---|
-| P0 | Diagram/provider command-core 收敛 | 公共 provider-test 与 diagram command wrapper 已经改为通过 host adapter 代理，`provider.connection.test` 与 `diagram.preview` 已具备 typed contract，`diagram.generate` 也已暴露完整 wrapper envelope，而不只是内部 generation payload。当前剩余缺口是 `src/operations/diagramCommandExecution.ts` 中内部 save/artifact 分支是否还值得继续拆成更细的 typed boundary | `src/operations/diagramCommandHostAdapter.ts`、`src/operations/diagramCommandExecution.ts`、`src/operations/providerConnectionTestCommandHostAdapter.ts` |
+| P0 | Diagram/provider command-core 分层 | 公共 provider-test 与 diagram command wrapper 已经改为通过 host adapter 代理，`provider.connection.test` 与 `diagram.preview` 已具备 typed contract，而 `diagram.generate` 背后也已存在宿主无关 generation core。当前剩余缺口是把 save/artifact/preview follow-through 在该 core 之下显式类型化，并优先完成这一步，而不是过早新增 top-level operation ID | `src/operations/diagramGenerateOperation.ts`、`src/operations/diagramCommandHostAdapter.ts`、`src/operations/diagramCommandExecution.ts`、`src/operations/providerConnectionTestCommandHostAdapter.ts` |
 | P1 | selection/export 与 config flow 的 contract 增强 | 这些 operation 已建模，但未来 operation invoker 需要比 command-trigger 对等更丰富的 path/context 语义 | `src/operations/registry.ts`, `src/operations/configProfileCommands.ts`, `src/operations/noteProcessingCommandHostAdapter.ts` |
 | P1 | workflow/settings 打包 | Workflow DSL 与 output-path toggles 仍是有价值 metadata，但还不是稳定公共接口 | `src/workflowButtons.ts`, 设置驱动的输出控制 |
 | P2 | maintainer 语义验证与打包硬化 | 重型运行时隔离与维护者本地 runbook 仍重要，但在命令面收口后才是下一层问题 | `docs/maintainer/*`, render-host bundle 流程, release 验证路径 |
