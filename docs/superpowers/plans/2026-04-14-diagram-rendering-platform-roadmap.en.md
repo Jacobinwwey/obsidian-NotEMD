@@ -21,7 +21,7 @@ This also needs to be explicit:
 - the successful `1.8.3` repair run surfaced GitHub's Node 20 JavaScript-action deprecation warning, and the current `1.8.4` success run demonstrates the hardened `actions/checkout@v6` and `actions/setup-node@v6` path
 - the runtime still supports 8 intents, but the preferred-intent UI selector currently exposes only a subset; `mindmap` and `canvasMap` are not current first-class UI choices
 - `preview-experimental-diagram` now previews a saved `vega-lite` fenced artifact locally, so command-surface unification remains partial rather than complete
-- Drawnix should be treated as a data-boundary / conversion-boundary reference, not as the next host to embed; see `docs/brainstorms/2026-05-03-drawnix-feasibility-and-integration-direction.md`
+- Drawnix should be treated as a data-boundary / conversion-boundary reference, not as the next host to embed; see `docs/brainstorms/2026-05-03-drawnix-feasibility-and-integration-direction.md`. Full Drawnix host embedding is not part of the current roadmap batch.
 
 ---
 
@@ -114,7 +114,7 @@ Cross-checking this roadmap against current code, tests, and the 2026-05-03 audi
 
 1. canonicalize the diagram command surface without breaking legacy behavior
 2. publish and adopt a maintainer-local semantic verification runbook
-3. tighten the real packaging boundary for heavy runtimes
+3. tighten the real packaging boundary for heavy runtimes, starting from the currently enforced single-entry `main.js` + `srcdoc` host contract
 4. extract host-neutral operations for future CLI extensibility instead of binding directly to plugin command IDs
 5. only then resume legacy prompt retirement and MermaidProcessor reduction
 
@@ -342,7 +342,7 @@ The repository now carries an inline `srcdoc` preview host through `src/renderin
 
 The missing smoke gate is now in place: `scripts/audit-render-host-bundle.js` inspects built `main.js` directly and requires key markers such as `htmlSrcdoc`, `Notemd Render Host`, `notemd-render-shell`, and `notemd-html-preview-theme-shim`. It also rejects undeclared external render-host asset dependencies such as `rendering-webview/index.html`. `.github/workflows/release.yml` already includes that audit in the release gate.
 
-Remaining limitation: `esbuild.config.mjs` is still single-entry. The current smoke gate proves only that the existing `srcdoc` host stays self-contained; it does not prove that a truly independent heavy-runtime bundle can be packaged and installed correctly.
+Remaining limitation: `esbuild.config.mjs` is still single-entry. The current smoke gate proves only that the existing `srcdoc` host stays self-contained inside `main.js`; it does not prove that a truly independent heavy-runtime bundle can be packaged, installed, and shipped correctly as a separate release asset.
 
 - [x] Define the render-asset directory contract so future HTML/JS/CSS does not sprawl into the plugin root.
 - [x] Lock the production bundle-carrying behavior so preview pages continue shipping inside `main.js`.
@@ -354,6 +354,7 @@ Remaining limitation: `esbuild.config.mjs` is still single-entry. The current sm
 - Phase 1 should use `iframe srcdoc` or another inline-page contract so the preview host is self-contained inside `main.js`.
 - If a later phase truly needs a heavier independent runtime bundle, release packaging and installation write-out must be designed at the same time.
 - The smoke gate should continue to enforce the self-contained `srcdoc` host until the release asset model changes deliberately.
+- Current roadmap truth: packaging remains single-entry today. The enforced boundary is "self-contained render host inside `main.js`", not "standalone render-host asset package already shipped".
 
 **Exit Criteria:**
 

@@ -129,8 +129,8 @@ npm test -- --runInBand src/tests/renderHostBundleAuditScript.test.ts
 npm run audit:render-host
 ```
 
-- [ ] **步骤 5：同步更新路线图表述**
-如果打包仍是单入口，就明确写清；如果第一个隔离边界已经真实存在，就写出具体的资产边界。
+- [x] **步骤 5：同步更新路线图表述**
+当前打包仍然是单入口，这一点现在已经在路线图和配套文档中明确写清：当前真正落地并被强制约束的边界，是由 `main.js` 自包含携带的 `srcdoc` host，而不是已发布的独立 render-host 资产包。
 
 ### 任务 4：把 Drawnix 边界固化为稳定非目标
 
@@ -140,13 +140,13 @@ npm run audit:render-host
 - 修改：`docs/superpowers/plans/2026-04-14-diagram-rendering-platform-roadmap.en.md`
 - 修改：`docs/superpowers/plans/2026-04-14-diagram-rendering-platform-roadmap.zh-CN.md`
 
-- [ ] **步骤 1：保留代码支撑的结论**
+- [x] **步骤 1：保留代码支撑的结论**
 保留已经核实的证据：Drawnix 导出模型、浏览器文件系统边界、浏览器持久化、app shell UI 复杂度，以及惰性加载的转换模块。
 
-- [ ] **步骤 2：把研究结论转化为范围控制**
+- [x] **步骤 2：把研究结论转化为范围控制**
 明确文档层面的结论：Drawnix 不是下一批次工作，近期唯一合理的方向也只能是在命令/运行时稳定化之后，再做 adapter / data-boundary 级实验。
 
-- [ ] **步骤 3：避免宿主级范围蔓延**
+- [x] **步骤 3：避免宿主级范围蔓延**
 删除或重写任何暗示“下一版可能整体嵌入宿主”的表述。
 
 ## 固定执行顺序

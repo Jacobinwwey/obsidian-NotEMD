@@ -129,8 +129,8 @@ npm test -- --runInBand src/tests/renderHostBundleAuditScript.test.ts
 npm run audit:render-host
 ```
 
-- [ ] **Step 5: Update roadmap wording to match the new reality**
-If packaging remains single-entry, say so plainly. If the first isolated boundary is real, document the exact asset boundary that now exists.
+- [x] **Step 5: Update roadmap wording to match the new reality**
+Packaging still remains single-entry today. The roadmap and supporting docs now say that plainly: the current enforced boundary is a self-contained `srcdoc` host carried inside `main.js`, not a shipped standalone render-host asset package.
 
 ### Task 4: Drawnix Boundary Capture As A Stable Non-Goal
 
@@ -140,13 +140,13 @@ If packaging remains single-entry, say so plainly. If the first isolated boundar
 - Modify: `docs/superpowers/plans/2026-04-14-diagram-rendering-platform-roadmap.en.md`
 - Modify: `docs/superpowers/plans/2026-04-14-diagram-rendering-platform-roadmap.zh-CN.md`
 
-- [ ] **Step 1: Keep the code-backed conclusions explicit**
+- [x] **Step 1: Keep the code-backed conclusions explicit**
 Preserve the verified evidence: Drawnix export model, browser file-system boundary, browser persistence, app-shell UI complexity, and lazy-loaded conversion modules.
 
-- [ ] **Step 2: Turn the research result into scope control**
+- [x] **Step 2: Turn the research result into scope control**
 Make the documents explicit that Drawnix integration is not the next batch, and that the only plausible near-future work is adapter/data-boundary experimentation after command/runtime stabilization.
 
-- [ ] **Step 3: Avoid accidental host creep**
+- [x] **Step 3: Avoid accidental host creep**
 Remove or rewrite any wording that implies full-host embedding is under active consideration for the next release batch.
 
 ## Ordered Execution Rule
