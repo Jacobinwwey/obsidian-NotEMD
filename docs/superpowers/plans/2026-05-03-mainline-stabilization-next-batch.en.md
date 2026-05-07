@@ -100,6 +100,9 @@ Specify what counts as sufficient evidence: output file checks, screenshots, or 
 - [x] **Step 4: Cross-link release workflow**
 Make the release workflow document explicitly distinguish repo-enforced gates from maintainer-local semantic verification.
 
+- [x] **Step 5: Check in a reusable helper**
+Add a secret-free `npm run verify:diagram-semantics` helper that generates the Markdown checklist template, repo gates, vault-aware CLI checks, and Mermaid / JSON Canvas / Vega-Lite evidence sections without launching Obsidian or relying on tracked vault paths.
+
 ### Task 3: Runtime Packaging Boundary Audit
 
 **Files:**

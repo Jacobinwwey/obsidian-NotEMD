@@ -100,6 +100,9 @@ npm test -- --runInBand src/tests/sidebarDomButtonClicks.test.ts src/tests/sideb
 - [x] **步骤 4：与发布流程交叉引用**
 让 release workflow 文档明确区分“仓库内硬门”和“维护者本地语义核验”。
 
+- [x] **步骤 5：检入可复用 helper**
+新增一个无 secrets 的 `npm run verify:diagram-semantics` helper，用来生成 Markdown 检查模板、仓库硬门、vault 感知的 CLI 检查命令，以及 Mermaid / JSON Canvas / Vega-Lite 的证据区块；它不会启动 Obsidian，也不依赖仓库中跟踪的 vault 路径。
+
 ### 任务 3：运行时打包边界审计
 
 **文件：**

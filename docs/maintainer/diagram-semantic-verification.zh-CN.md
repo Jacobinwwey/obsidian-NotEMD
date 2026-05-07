@@ -4,6 +4,14 @@
 
 此文档定义图表相关改动的维护者本地语义核验层。它补充仓库内硬门，不替代它们。
 
+模板辅助命令：
+
+```bash
+npm run verify:diagram-semantics -- --vault "<vault-name>" --commit "<sha>" --version "<plugin-version>" --output ~/tmp/notemd-diagram-check.md
+```
+
+这个 helper 不依赖 secrets。它只会生成 Markdown 核验模板、vault 感知的 CLI 命令清单，以及各语义表面的证据区块；不会启动 Obsidian、不会读取本地凭据，也不会依赖仓库中跟踪的 vault 路径。
+
 ## 1. 何时必须使用本 Runbook
 
 当改动触及以下任一范围时，必须执行本核验：
@@ -101,6 +109,10 @@ obsidian commands vault=<vault-name> filter=notemd
 除非改动范围更窄，否则按以下顺序执行：
 
 1. 先跑仓库内硬门。
+   或先生成一份可直接填写的检查模板：
+   ```bash
+   npm run verify:diagram-semantics -- --vault "<vault-name>" --commit "<sha>" --version "<plugin-version>" --output ~/tmp/notemd-diagram-check.md
+   ```
 2. 在本地测试 vault 中 reload 插件。
 3. 通过 CLI 确认插件可用与命令暴露状态。
 4. 在真实 Obsidian 中实际走受影响的图表路径。

@@ -192,4 +192,4 @@ This stage is now the active next-wave direction.
 
 ## Next Step
 
--> Use this document plus the task-local research note as history/rationale, then start the next implementation PRD from packaging / semantic-verification convergence unless a newly discovered host-neutral boundary justifies reopening deeper diagram contract work.
+-> Use this document plus the task-local research note as history/rationale, then start the next implementation PRD from the remaining packaging / semantic-verification convergence gap. The semantic-verification side now has a checked-in helper (`npm run verify:diagram-semantics`), so the next highest-leverage follow-through should narrow toward packaging-boundary proof and any surviving contract-promotion decisions unless a newly discovered host-neutral boundary justifies reopening deeper diagram contract work.
