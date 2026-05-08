@@ -5,6 +5,11 @@ describe('supported UI locale visible surface coverage', () => {
     test('ships localized commands, duplicate modal copy, and settings headings for all advertised locales', () => {
         const en = getResolvedStrings('en');
 
+        expect(en.commands.generateExperimentalDiagram).toBe('Generate diagram');
+        expect(en.commands.previewExperimentalDiagram).toBe('Preview diagram');
+        expect(en.sidebar.actions.generateExperimentalDiagram.label).toBe('Generate diagram');
+        expect(en.sidebar.actions.previewExperimentalDiagram.label).toBe('Preview diagram');
+
         const visibleFields = [
             { label: 'common.select', get: (strings: typeof en) => strings.common.select },
             { label: 'commands.checkDuplicatesCurrent', get: (strings: typeof en) => strings.commands.checkDuplicatesCurrent },

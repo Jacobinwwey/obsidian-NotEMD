@@ -67,9 +67,9 @@ describe('CLI capability manifest', () => {
 
         expect(diagram).toEqual(expect.objectContaining({
             operationId: 'diagram.generate',
-            automationLevel: getSidebarActionAutomationLevel('generate-experimental-diagram'),
-            requiredContext: getSidebarActionRequiredContext('generate-experimental-diagram'),
-            sideEffectClass: getSidebarActionSideEffectClass('generate-experimental-diagram')
+            automationLevel: getSidebarActionAutomationLevel('generate-diagram'),
+            requiredContext: getSidebarActionRequiredContext('generate-diagram'),
+            sideEffectClass: getSidebarActionSideEffectClass('generate-diagram')
         }));
 
         expect(mermaid).toEqual(expect.objectContaining({
@@ -91,9 +91,9 @@ describe('CLI capability manifest', () => {
 
         expect(diagramPreview).toEqual(expect.objectContaining({
             operationId: 'diagram.preview',
-            automationLevel: getSidebarActionAutomationLevel('preview-experimental-diagram'),
-            requiredContext: getSidebarActionRequiredContext('preview-experimental-diagram'),
-            sideEffectClass: getSidebarActionSideEffectClass('preview-experimental-diagram'),
+            automationLevel: getSidebarActionAutomationLevel('preview-diagram'),
+            requiredContext: getSidebarActionRequiredContext('preview-diagram'),
+            sideEffectClass: getSidebarActionSideEffectClass('preview-diagram'),
             mappingKind: 'exact'
         }));
 

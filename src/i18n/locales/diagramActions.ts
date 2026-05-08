@@ -5,324 +5,324 @@ type DeepPartial<T> = T extends object ? { [K in keyof T]?: DeepPartial<T[K]> } 
 export const DIAGRAM_ACTION_LOCALE_EXTENSIONS: Record<string, DeepPartial<NotemdEnglishStrings>> = {
     ar: {
         commands: {
-            generateExperimentalDiagram: 'إنشاء مخطط (تجريبي)',
-            previewExperimentalDiagram: 'معاينة مخطط (تجريبي)'
+            generateExperimentalDiagram: 'إنشاء مخطط',
+            previewExperimentalDiagram: 'معاينة مخطط'
         },
         sidebar: {
             actions: {
                 generateExperimentalDiagram: {
-                    label: 'إنشاء مخطط (تجريبي)',
-                    tooltip: 'أنشئ واحفظ ناتج مخطط تجريبي للملاحظة الحالية.'
+                    label: 'إنشاء مخطط',
+                    tooltip: 'أنشئ واحفظ ناتج مخطط للملاحظة الحالية.'
                 },
                 previewExperimentalDiagram: {
-                    label: 'معاينة مخطط (تجريبي)',
-                    tooltip: 'أنشئ معاينة لمخطط تجريبي دون حفظ الناتج.'
+                    label: 'معاينة مخطط',
+                    tooltip: 'أنشئ معاينة لمخطط دون حفظ الناتج.'
                 }
             }
         }
     },
     de: {
         commands: {
-            generateExperimentalDiagram: 'Diagramm generieren (experimentell)',
-            previewExperimentalDiagram: 'Diagrammvorschau (experimentell)'
+            generateExperimentalDiagram: 'Diagramm generieren',
+            previewExperimentalDiagram: 'Diagrammvorschau'
         },
         sidebar: {
             actions: {
                 generateExperimentalDiagram: {
-                    label: 'Diagramm generieren (experimentell)',
-                    tooltip: 'Erzeugt und speichert ein experimentelles Diagramm-Artefakt für die aktuelle Notiz.'
+                    label: 'Diagramm generieren',
+                    tooltip: 'Erzeugt und speichert ein Diagramm-Artefakt für die aktuelle Notiz.'
                 },
                 previewExperimentalDiagram: {
-                    label: 'Diagrammvorschau (experimentell)',
-                    tooltip: 'Erzeugt eine experimentelle Diagrammvorschau, ohne das Artefakt zu speichern.'
+                    label: 'Diagrammvorschau',
+                    tooltip: 'Erzeugt eine Diagrammvorschau, ohne das Artefakt zu speichern.'
                 }
             }
         }
     },
     es: {
         commands: {
-            generateExperimentalDiagram: 'Generar diagrama (experimental)',
-            previewExperimentalDiagram: 'Vista previa de diagrama (experimental)'
+            generateExperimentalDiagram: 'Generar diagrama',
+            previewExperimentalDiagram: 'Vista previa de diagrama'
         },
         sidebar: {
             actions: {
                 generateExperimentalDiagram: {
-                    label: 'Generar diagrama (experimental)',
-                    tooltip: 'Genera y guarda un artefacto de diagrama experimental para la nota actual.'
+                    label: 'Generar diagrama',
+                    tooltip: 'Genera y guarda un artefacto de diagrama para la nota actual.'
                 },
                 previewExperimentalDiagram: {
-                    label: 'Vista previa de diagrama (experimental)',
-                    tooltip: 'Genera una vista previa de diagrama experimental sin guardar el artefacto.'
+                    label: 'Vista previa de diagrama',
+                    tooltip: 'Genera una vista previa de diagrama sin guardar el artefacto.'
                 }
             }
         }
     },
     fa: {
         commands: {
-            generateExperimentalDiagram: 'ایجاد نمودار (آزمایشی)',
-            previewExperimentalDiagram: 'پیش نمایش نمودار (آزمایشی)'
+            generateExperimentalDiagram: 'ایجاد نمودار',
+            previewExperimentalDiagram: 'پیش نمایش نمودار'
         },
         sidebar: {
             actions: {
                 generateExperimentalDiagram: {
-                    label: 'ایجاد نمودار (آزمایشی)',
-                    tooltip: 'برای یادداشت فعلی یک خروجی نمودار آزمایشی تولید و ذخیره می‌کند.'
+                    label: 'ایجاد نمودار',
+                    tooltip: 'برای یادداشت فعلی یک خروجی نمودار تولید و ذخیره می‌کند.'
                 },
                 previewExperimentalDiagram: {
-                    label: 'پیش نمایش نمودار (آزمایشی)',
-                    tooltip: 'بدون ذخیره خروجی، پیش نمایش نمودار آزمایشی ایجاد می‌کند.'
+                    label: 'پیش نمایش نمودار',
+                    tooltip: 'بدون ذخیره خروجی، پیش نمایش نمودار ایجاد می‌کند.'
                 }
             }
         }
     },
     fr: {
         commands: {
-            generateExperimentalDiagram: 'Generer un diagramme (experimental)',
-            previewExperimentalDiagram: 'Apercu du diagramme (experimental)'
+            generateExperimentalDiagram: 'Generer un diagramme',
+            previewExperimentalDiagram: 'Apercu du diagramme'
         },
         sidebar: {
             actions: {
                 generateExperimentalDiagram: {
-                    label: 'Generer un diagramme (experimental)',
-                    tooltip: 'Genere et enregistre un artefact de diagramme experimental pour la note actuelle.'
+                    label: 'Generer un diagramme',
+                    tooltip: 'Genere et enregistre un artefact de diagramme pour la note actuelle.'
                 },
                 previewExperimentalDiagram: {
-                    label: 'Apercu du diagramme (experimental)',
-                    tooltip: 'Genere un apercu de diagramme experimental sans enregistrer l artefact.'
+                    label: 'Apercu du diagramme',
+                    tooltip: 'Genere un apercu de diagramme sans enregistrer l artefact.'
                 }
             }
         }
     },
     id: {
         commands: {
-            generateExperimentalDiagram: 'Buat diagram (eksperimental)',
-            previewExperimentalDiagram: 'Pratinjau diagram (eksperimental)'
+            generateExperimentalDiagram: 'Buat diagram',
+            previewExperimentalDiagram: 'Pratinjau diagram'
         },
         sidebar: {
             actions: {
                 generateExperimentalDiagram: {
-                    label: 'Buat diagram (eksperimental)',
-                    tooltip: 'Buat dan simpan artefak diagram eksperimental untuk catatan saat ini.'
+                    label: 'Buat diagram',
+                    tooltip: 'Buat dan simpan artefak diagram untuk catatan saat ini.'
                 },
                 previewExperimentalDiagram: {
-                    label: 'Pratinjau diagram (eksperimental)',
-                    tooltip: 'Buat pratinjau diagram eksperimental tanpa menyimpan artefaknya.'
+                    label: 'Pratinjau diagram',
+                    tooltip: 'Buat pratinjau diagram tanpa menyimpan artefaknya.'
                 }
             }
         }
     },
     it: {
         commands: {
-            generateExperimentalDiagram: 'Genera diagramma (sperimentale)',
-            previewExperimentalDiagram: 'Anteprima diagramma (sperimentale)'
+            generateExperimentalDiagram: 'Genera diagramma',
+            previewExperimentalDiagram: 'Anteprima diagramma'
         },
         sidebar: {
             actions: {
                 generateExperimentalDiagram: {
-                    label: 'Genera diagramma (sperimentale)',
-                    tooltip: 'Genera e salva un artefatto di diagramma sperimentale per la nota corrente.'
+                    label: 'Genera diagramma',
+                    tooltip: 'Genera e salva un artefatto di diagramma per la nota corrente.'
                 },
                 previewExperimentalDiagram: {
-                    label: 'Anteprima diagramma (sperimentale)',
-                    tooltip: 'Genera un anteprima del diagramma sperimentale senza salvare l artefatto.'
+                    label: 'Anteprima diagramma',
+                    tooltip: 'Genera un anteprima del diagramma senza salvare l artefatto.'
                 }
             }
         }
     },
     ja: {
         commands: {
-            generateExperimentalDiagram: '図を生成（実験的）',
-            previewExperimentalDiagram: '図をプレビュー（実験的）'
+            generateExperimentalDiagram: '図を生成',
+            previewExperimentalDiagram: '図をプレビュー'
         },
         sidebar: {
             actions: {
                 generateExperimentalDiagram: {
-                    label: '図を生成（実験的）',
-                    tooltip: '現在のノートに対して実験的な図の生成物を作成して保存します。'
+                    label: '図を生成',
+                    tooltip: '現在のノートに対して図の生成物を作成して保存します。'
                 },
                 previewExperimentalDiagram: {
-                    label: '図をプレビュー（実験的）',
-                    tooltip: '生成物を保存せずに実験的な図のプレビューを生成します。'
+                    label: '図をプレビュー',
+                    tooltip: '生成物を保存せずに図のプレビューを生成します。'
                 }
             }
         }
     },
     ko: {
         commands: {
-            generateExperimentalDiagram: '다이어그램 생성(실험적)',
-            previewExperimentalDiagram: '다이어그램 미리보기(실험적)'
+            generateExperimentalDiagram: '다이어그램 생성',
+            previewExperimentalDiagram: '다이어그램 미리보기'
         },
         sidebar: {
             actions: {
                 generateExperimentalDiagram: {
-                    label: '다이어그램 생성(실험적)',
-                    tooltip: '현재 노트에 대한 실험적 다이어그램 산출물을 생성하고 저장합니다.'
+                    label: '다이어그램 생성',
+                    tooltip: '현재 노트에 대한 다이어그램 산출물을 생성하고 저장합니다.'
                 },
                 previewExperimentalDiagram: {
-                    label: '다이어그램 미리보기(실험적)',
-                    tooltip: '산출물을 저장하지 않고 실험적 다이어그램 미리보기를 생성합니다.'
+                    label: '다이어그램 미리보기',
+                    tooltip: '산출물을 저장하지 않고 다이어그램 미리보기를 생성합니다.'
                 }
             }
         }
     },
     nl: {
         commands: {
-            generateExperimentalDiagram: 'Diagram genereren (experimenteel)',
-            previewExperimentalDiagram: 'Diagramvoorbeeld (experimenteel)'
+            generateExperimentalDiagram: 'Diagram genereren',
+            previewExperimentalDiagram: 'Diagramvoorbeeld'
         },
         sidebar: {
             actions: {
                 generateExperimentalDiagram: {
-                    label: 'Diagram genereren (experimenteel)',
-                    tooltip: 'Genereer en sla een experimenteel diagramartefact op voor de huidige notitie.'
+                    label: 'Diagram genereren',
+                    tooltip: 'Genereer en sla een diagramartefact op voor de huidige notitie.'
                 },
                 previewExperimentalDiagram: {
-                    label: 'Diagramvoorbeeld (experimenteel)',
-                    tooltip: 'Genereer een experimentele diagramweergave zonder het artefact op te slaan.'
+                    label: 'Diagramvoorbeeld',
+                    tooltip: 'Genereer een diagramweergave zonder het artefact op te slaan.'
                 }
             }
         }
     },
     pl: {
         commands: {
-            generateExperimentalDiagram: 'Generuj diagram (eksperymentalnie)',
-            previewExperimentalDiagram: 'Podglad diagramu (eksperymentalnie)'
+            generateExperimentalDiagram: 'Generuj diagram',
+            previewExperimentalDiagram: 'Podglad diagramu'
         },
         sidebar: {
             actions: {
                 generateExperimentalDiagram: {
-                    label: 'Generuj diagram (eksperymentalnie)',
-                    tooltip: 'Generuje i zapisuje eksperymentalny artefakt diagramu dla biezacej notatki.'
+                    label: 'Generuj diagram',
+                    tooltip: 'Generuje i zapisuje artefakt diagramu dla biezacej notatki.'
                 },
                 previewExperimentalDiagram: {
-                    label: 'Podglad diagramu (eksperymentalnie)',
-                    tooltip: 'Generuje podglad eksperymentalnego diagramu bez zapisywania artefaktu.'
+                    label: 'Podglad diagramu',
+                    tooltip: 'Generuje podglad diagramu bez zapisywania artefaktu.'
                 }
             }
         }
     },
     pt: {
         commands: {
-            generateExperimentalDiagram: 'Gerar diagrama (experimental)',
-            previewExperimentalDiagram: 'Pre-visualizar diagrama (experimental)'
+            generateExperimentalDiagram: 'Gerar diagrama',
+            previewExperimentalDiagram: 'Pre-visualizar diagrama'
         },
         sidebar: {
             actions: {
                 generateExperimentalDiagram: {
-                    label: 'Gerar diagrama (experimental)',
-                    tooltip: 'Gera e salva um artefato de diagrama experimental para a nota atual.'
+                    label: 'Gerar diagrama',
+                    tooltip: 'Gera e salva um artefato de diagrama para a nota atual.'
                 },
                 previewExperimentalDiagram: {
-                    label: 'Pre-visualizar diagrama (experimental)',
-                    tooltip: 'Gera uma pre-visualizacao de diagrama experimental sem salvar o artefato.'
+                    label: 'Pre-visualizar diagrama',
+                    tooltip: 'Gera uma pre-visualizacao de diagrama sem salvar o artefato.'
                 }
             }
         }
     },
     'pt-BR': {
         commands: {
-            generateExperimentalDiagram: 'Gerar diagrama (experimental)',
-            previewExperimentalDiagram: 'Pre-visualizar diagrama (experimental)'
+            generateExperimentalDiagram: 'Gerar diagrama',
+            previewExperimentalDiagram: 'Pre-visualizar diagrama'
         },
         sidebar: {
             actions: {
                 generateExperimentalDiagram: {
-                    label: 'Gerar diagrama (experimental)',
-                    tooltip: 'Gera e salva um artefato de diagrama experimental para a nota atual.'
+                    label: 'Gerar diagrama',
+                    tooltip: 'Gera e salva um artefato de diagrama para a nota atual.'
                 },
                 previewExperimentalDiagram: {
-                    label: 'Pre-visualizar diagrama (experimental)',
-                    tooltip: 'Gera uma pre-visualizacao de diagrama experimental sem salvar o artefato.'
+                    label: 'Pre-visualizar diagrama',
+                    tooltip: 'Gera uma pre-visualizacao de diagrama sem salvar o artefato.'
                 }
             }
         }
     },
     ru: {
         commands: {
-            generateExperimentalDiagram: 'Создать диаграмму (экспериментально)',
-            previewExperimentalDiagram: 'Предпросмотр диаграммы (экспериментально)'
+            generateExperimentalDiagram: 'Создать диаграмму',
+            previewExperimentalDiagram: 'Предпросмотр диаграммы'
         },
         sidebar: {
             actions: {
                 generateExperimentalDiagram: {
-                    label: 'Создать диаграмму (экспериментально)',
-                    tooltip: 'Создает и сохраняет экспериментальный артефакт диаграммы для текущей заметки.'
+                    label: 'Создать диаграмму',
+                    tooltip: 'Создает и сохраняет артефакт диаграммы для текущей заметки.'
                 },
                 previewExperimentalDiagram: {
-                    label: 'Предпросмотр диаграммы (экспериментально)',
-                    tooltip: 'Создает предпросмотр экспериментальной диаграммы без сохранения артефакта.'
+                    label: 'Предпросмотр диаграммы',
+                    tooltip: 'Создает предпросмотр диаграммы без сохранения артефакта.'
                 }
             }
         }
     },
     th: {
         commands: {
-            generateExperimentalDiagram: 'สร้างไดอะแกรม (ทดลอง)',
-            previewExperimentalDiagram: 'ดูตัวอย่างไดอะแกรม (ทดลอง)'
+            generateExperimentalDiagram: 'สร้างไดอะแกรม',
+            previewExperimentalDiagram: 'ดูตัวอย่างไดอะแกรม'
         },
         sidebar: {
             actions: {
                 generateExperimentalDiagram: {
-                    label: 'สร้างไดอะแกรม (ทดลอง)',
-                    tooltip: 'สร้างและบันทึกผลลัพธ์ไดอะแกรมแบบทดลองสำหรับโน้ตปัจจุบัน'
+                    label: 'สร้างไดอะแกรม',
+                    tooltip: 'สร้างและบันทึกผลลัพธ์ไดอะแกรมสำหรับโน้ตปัจจุบัน'
                 },
                 previewExperimentalDiagram: {
-                    label: 'ดูตัวอย่างไดอะแกรม (ทดลอง)',
-                    tooltip: 'สร้างตัวอย่างไดอะแกรมแบบทดลองโดยไม่บันทึกไฟล์ผลลัพธ์'
+                    label: 'ดูตัวอย่างไดอะแกรม',
+                    tooltip: 'สร้างตัวอย่างไดอะแกรมโดยไม่บันทึกไฟล์ผลลัพธ์'
                 }
             }
         }
     },
     tr: {
         commands: {
-            generateExperimentalDiagram: 'Diyagram olustur (deneysel)',
-            previewExperimentalDiagram: 'Diyagram onizle (deneysel)'
+            generateExperimentalDiagram: 'Diyagram olustur',
+            previewExperimentalDiagram: 'Diyagram onizle'
         },
         sidebar: {
             actions: {
                 generateExperimentalDiagram: {
-                    label: 'Diyagram olustur (deneysel)',
-                    tooltip: 'Gecerli not icin deneysel bir diyagram ciktisi olusturur ve kaydeder.'
+                    label: 'Diyagram olustur',
+                    tooltip: 'Gecerli not icin bir diyagram ciktisi olusturur ve kaydeder.'
                 },
                 previewExperimentalDiagram: {
-                    label: 'Diyagram onizle (deneysel)',
-                    tooltip: 'Ciktiyi kaydetmeden deneysel bir diyagram onizlemesi olusturur.'
+                    label: 'Diyagram onizle',
+                    tooltip: 'Ciktiyi kaydetmeden bir diyagram onizlemesi olusturur.'
                 }
             }
         }
     },
     uk: {
         commands: {
-            generateExperimentalDiagram: 'Створити діаграму (експериментально)',
-            previewExperimentalDiagram: 'Попередній перегляд діаграми (експериментально)'
+            generateExperimentalDiagram: 'Створити діаграму',
+            previewExperimentalDiagram: 'Попередній перегляд діаграми'
         },
         sidebar: {
             actions: {
                 generateExperimentalDiagram: {
-                    label: 'Створити діаграму (експериментально)',
-                    tooltip: 'Створює та зберігає експериментальний артефакт діаграми для поточної нотатки.'
+                    label: 'Створити діаграму',
+                    tooltip: 'Створює та зберігає артефакт діаграми для поточної нотатки.'
                 },
                 previewExperimentalDiagram: {
-                    label: 'Попередній перегляд діаграми (експериментально)',
-                    tooltip: 'Створює попередній перегляд експериментальної діаграми без збереження артефакту.'
+                    label: 'Попередній перегляд діаграми',
+                    tooltip: 'Створює попередній перегляд діаграми без збереження артефакту.'
                 }
             }
         }
     },
     vi: {
         commands: {
-            generateExperimentalDiagram: 'Tao so do (thu nghiem)',
-            previewExperimentalDiagram: 'Xem truoc so do (thu nghiem)'
+            generateExperimentalDiagram: 'Tao so do',
+            previewExperimentalDiagram: 'Xem truoc so do'
         },
         sidebar: {
             actions: {
                 generateExperimentalDiagram: {
-                    label: 'Tao so do (thu nghiem)',
-                    tooltip: 'Tao va luu san pham so do thu nghiem cho ghi chu hien tai.'
+                    label: 'Tao so do',
+                    tooltip: 'Tao va luu san pham so do cho ghi chu hien tai.'
                 },
                 previewExperimentalDiagram: {
-                    label: 'Xem truoc so do (thu nghiem)',
-                    tooltip: 'Tao ban xem truoc so do thu nghiem ma khong luu san pham.'
+                    label: 'Xem truoc so do',
+                    tooltip: 'Tao ban xem truoc so do ma khong luu san pham.'
                 }
             }
         }

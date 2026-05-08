@@ -21,6 +21,8 @@ type MockPlugin = {
     batchGenerateContentForTitlesCommand: jest.Mock<Promise<any>, [any, string?]>;
     researchAndSummarizeCommand: jest.Mock<Promise<void>, [any, any, any]>;
     summarizeToMermaidCommand: jest.Mock<Promise<void>, [any, any]>;
+    generateDiagramCommand: jest.Mock<Promise<void>, [any, any, any]>;
+    previewDiagramCommand: jest.Mock<Promise<void>, [any, any]>;
     generateExperimentalDiagramCommand: jest.Mock<Promise<void>, [any, any]>;
     previewExperimentalDiagramCommand: jest.Mock<Promise<void>, [any, any]>;
     translateFileCommand: jest.Mock<Promise<void>, [any, any, any]>;
@@ -151,6 +153,8 @@ function createPluginMock(): MockPlugin {
         }),
         researchAndSummarizeCommand: jest.fn().mockResolvedValue(undefined),
         summarizeToMermaidCommand: jest.fn().mockResolvedValue(undefined),
+        generateDiagramCommand: jest.fn().mockResolvedValue(undefined),
+        previewDiagramCommand: jest.fn().mockResolvedValue(undefined),
         generateExperimentalDiagramCommand: jest.fn().mockResolvedValue(undefined),
         previewExperimentalDiagramCommand: jest.fn().mockResolvedValue(undefined),
         translateFileCommand: jest.fn().mockResolvedValue(undefined),
@@ -230,8 +234,8 @@ describe('NotemdSidebarView DOM button wiring', () => {
         await clickButton('Batch generate from titles');
         await clickButton('Research & summarize');
         await clickButton('Summarise as Mermaid diagram');
-        await clickButton('Generate diagram (experimental)');
-        await clickButton('Preview diagram (experimental)');
+        await clickButton('Generate diagram');
+        await clickButton('Preview diagram');
         await clickButton('Translate current file');
         await clickButton('Batch translate folder');
         await clickButton('Extract concepts (current file)');
@@ -253,8 +257,14 @@ describe('NotemdSidebarView DOM button wiring', () => {
         expect(plugin.batchGenerateContentForTitlesCommand).toHaveBeenCalled();
         expect(plugin.researchAndSummarizeCommand).toHaveBeenCalledWith(editor, mdView, expect.anything());
         expect(plugin.summarizeToMermaidCommand).toHaveBeenCalledWith(mdFile, expect.anything());
-        expect(plugin.generateExperimentalDiagramCommand).toHaveBeenCalledWith(mdFile, expect.anything());
-        expect(plugin.previewExperimentalDiagramCommand).toHaveBeenCalledWith(mdFile, expect.anything());
+        expect(plugin.generateDiagramCommand).toHaveBeenCalledWith(
+            mdFile,
+            expect.anything(),
+            expect.objectContaining({ executionMode: 'save-artifact' })
+        );
+        expect(plugin.previewDiagramCommand).toHaveBeenCalledWith(mdFile, expect.anything());
+        expect(plugin.generateExperimentalDiagramCommand).not.toHaveBeenCalled();
+        expect(plugin.previewExperimentalDiagramCommand).not.toHaveBeenCalled();
         expect(plugin.translateFileCommand).toHaveBeenCalledWith(mdFile, expect.anything(), expect.anything());
         expect(plugin.batchTranslateFolderCommand).toHaveBeenCalled();
         expect(plugin.extractConceptsCommand).toHaveBeenCalled();
@@ -297,8 +307,8 @@ describe('NotemdSidebarView DOM button wiring', () => {
 
         const processCurrent = contentContainer.findButton('Process file (add links)');
         const translateCurrent = contentContainer.findButton('Translate current file');
-        const generateDiagram = contentContainer.findButton('Generate diagram (experimental)');
-        const previewDiagram = contentContainer.findButton('Preview diagram (experimental)');
+        const generateDiagram = contentContainer.findButton('Generate diagram');
+        const previewDiagram = contentContainer.findButton('Preview diagram');
         const batchGenerate = contentContainer.findButton('Batch generate from titles');
         const batchTranslate = contentContainer.findButton('Batch translate folder');
         const workflowDefault = contentContainer.findButton('One-Click Extract');

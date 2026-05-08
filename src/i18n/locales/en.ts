@@ -18,8 +18,8 @@ export const STRINGS_EN = {
         importProviderProfiles: 'Import provider profiles',
         exportCliCapabilityManifest: 'Export CLI capability manifest',
         exportCliInvocationContract: 'Export CLI invocation contract',
-        generateExperimentalDiagram: 'Generate diagram (experimental)',
-        previewExperimentalDiagram: 'Preview diagram (experimental)'
+        generateExperimentalDiagram: 'Generate diagram',
+        previewExperimentalDiagram: 'Preview diagram'
     },
     plugin: {
         viewName: 'Notemd Workbench',
@@ -468,12 +468,12 @@ export const STRINGS_EN = {
                 tooltip: 'Generate a Mermaid diagram summary from current note.'
             },
             generateExperimentalDiagram: {
-                label: 'Generate diagram (experimental)',
-                tooltip: 'Generate and save an experimental diagram artifact for the current note.'
+                label: 'Generate diagram',
+                tooltip: 'Generate and save a diagram artifact for the current note.'
             },
             previewExperimentalDiagram: {
-                label: 'Preview diagram (experimental)',
-                tooltip: 'Generate an experimental diagram preview without saving the artifact.'
+                label: 'Preview diagram',
+                tooltip: 'Generate a diagram preview without saving the artifact.'
             },
             translateCurrentFile: {
                 label: 'Translate current file',
@@ -638,10 +638,10 @@ export const STRINGS_EN = {
         failedTranslateFileWithMessage: 'Failed to translate file: {message}. See console for details.',
         mermaidSummarizationComplete: 'Mermaid diagram summarization complete!',
         mermaidSummarizationError: 'Summarization Error: {message}',
-        experimentalDiagramComplete: 'Experimental diagram generation complete!',
-        experimentalDiagramPreviewReady: 'Experimental diagram preview is ready!',
+        experimentalDiagramComplete: 'Diagram generation complete!',
+        experimentalDiagramPreviewReady: 'Diagram preview is ready!',
         experimentalDiagramManualFixHint: 'Diagram may need manual fixing. See log for details.',
-        experimentalDiagramError: 'Experimental diagram generation failed: {message}',
+        experimentalDiagramError: 'Diagram generation failed: {message}',
         conceptExtractionSuccess: 'Concept extraction complete! Found and created {count} concept notes.',
         noConceptsFoundToExtract: 'No concepts found to extract.',
         conceptExtractionError: 'Error during concept extraction: {message}.',

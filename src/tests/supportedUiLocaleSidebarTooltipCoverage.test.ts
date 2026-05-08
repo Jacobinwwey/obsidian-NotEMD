@@ -5,6 +5,9 @@ describe('supported UI locale sidebar tooltip coverage', () => {
     test('ships localized sidebar action tooltips for all advertised locales', () => {
         const en = getResolvedStrings('en');
 
+        expect(en.sidebar.actions.generateExperimentalDiagram.tooltip).toBe('Generate and save a diagram artifact for the current note.');
+        expect(en.sidebar.actions.previewExperimentalDiagram.tooltip).toBe('Generate a diagram preview without saving the artifact.');
+
         const tooltipFields = [
             { label: 'sidebar.actions.processCurrentAddLinks.tooltip', get: (strings: typeof en) => strings.sidebar.actions.processCurrentAddLinks.tooltip },
             { label: 'sidebar.actions.processFolderAddLinks.tooltip', get: (strings: typeof en) => strings.sidebar.actions.processFolderAddLinks.tooltip },
