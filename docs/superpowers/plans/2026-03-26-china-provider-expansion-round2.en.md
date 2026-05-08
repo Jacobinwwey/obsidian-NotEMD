@@ -10,6 +10,28 @@
 
 ---
 
+## Progress Alignment Update (2026-05-08)
+
+This round-2 plan is delivered and should now be read as a historical release log.
+
+Delivered outcomes:
+
+- `Qwen Code`, `Z AI`, and `Huawei Cloud MaaS` are all present as first-class presets in `src/llmProviders.ts`.
+- Routing and connection-test behavior for this provider set is covered in `src/tests/llmProviders.test.ts` and `src/tests/llmUtilsProviderSupport.test.ts`.
+- Documentation and changelog updates for the round-2 scope are landed (`README.md`, `README_zh.md`, `change.md`).
+
+Follow-up progress beyond this plan is also landed:
+
+- Additional presets in the same China-facing direction are now shipped (`Baidu Qianfan`, `SiliconFlow`, `Xiaomi MiMo`).
+- Shared transport behavior remains metadata-driven through the OpenAI-compatible runtime path with chat-first probing where required.
+
+Remaining real gaps:
+
+1. Keep preset defaults, test coverage, and docs aligned as upstream provider catalogs evolve.
+2. Continue broader packaging/semantic-verification convergence separately from provider list growth.
+
+---
+
 ## File Structure
 
 ### Core Provider Metadata

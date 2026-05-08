@@ -15,6 +15,24 @@
 
 ---
 
+## 进度对齐更新（2026-05-08）
+
+这份计划现在主要是历史实施台账。文档里描述的抽取路线在 `main` 上已经大部分落地。
+
+已落地事实：
+
+- `src/operations/noteProcessingCommandHostAdapter.ts` 与 `src/operations/utilityCommandHostAdapter.ts` 已承接此前内联在 `src/main.ts` 中的 write-heavy 命令宿主副作用。
+- `src/operations/registry.ts`、`src/tests/operationsRegistry.test.ts`、`src/tests/cliCapabilityManifest.test.ts` 与 `src/tests/cliContracts.test.ts` 已覆盖 note-processing + utility operation 家族（`translate.*`、`concept.*`、`content.extract-original-text`、`workflow.extract-and-generate`、`duplicate.*`、`mermaid.batch-fix`、`formula.*`）。
+- diagram/provider command-core layering 在当前深度已显式化：`diagram.generate` 已返回类型化 `followThrough` 细节，同时 command binding 继续保持真实的 `requires-active-file` / `interactive-ui` 语义。
+
+真实剩余缺口：
+
+1. Heavy-runtime packaging isolation 仍未实现。当前可交付边界仍是单入口 `main.js` + 内联 `srcdoc` host。
+2. packaging/semantic-verification 收敛需要持续保持 helper 模板、维护者文档与 repo gate 的真值一致。
+3. workflow/settings 与 selection/export 的 contract 增强，应在 packaging 边界工作稳定后继续推进。
+
+---
+
 ## 问题界定
 
 官方 `obsidian` CLI 现在已经能列出并执行插件注册命令。这件事有价值，但远远不够：
@@ -42,7 +60,7 @@
 - 第一批 CLI-grade contract 不纳入 UI-only 流程
 - 随着 CLI 方向推进，`src/main.ts` 要缩小而不是继续膨胀
 
-## 当前主线状态（2026-05-05）
+## 当前主线状态（2026-05-08）
 
 - `src/operations/types.ts` 已承接共享 operation 元数据原语，不再把这些定义埋在 sidebar/workflow 代码里。
 - `src/operations/registry.ts` 现在是已抽取 operation definition、command binding、mapping kind 与部分 input/result schema 的中心事实源。
@@ -175,7 +193,7 @@
   - config/profile host adaptation 现在已落在 `src/operations/configProfileCommandHostAdapter.ts`
   - provider connection-test host adaptation 现在已落在 `src/operations/providerConnectionTestCommandHostAdapter.ts`
   - note-processing host adaptation 第一批现在已落在 `src/operations/noteProcessingCommandHostAdapter.ts`
-  - 剩余缺口：继续收缩翻译/抽取类命令及其他批处理宿主副作用，且不能把 Obsidian 耦合重新塞回 operation 层
+  - 剩余缺口：在保持 operation/command 分层真实的前提下，把下一波重心转向 packaging/semantic-verification 收敛，以及后续 workflow/settings contract 增强
 
 **MT2. Host adapter 拆分**
 - 新增 plugin adapter，负责解析 active file、vault state、settings
@@ -282,8 +300,8 @@
 
 进度说明：
 
-- 第 1-4 项已在主线上部分落地。
-- 下一步最稳妥的推进点仍是 MT2，但范围已经继续缩小：provider diagnostic、config/profile、共享 provider test，以及 `process-current-add-links` / `process-folder-add-links` / `batch-generate-from-titles` / `generate-from-title` / `research-and-summarize` host adaptation 都已落地，下一批应继续把翻译/抽取类命令与其他批处理宿主副作用从 `src/main.ts` 剥离出去。
+- 第 1-5 项在当前 contract 深度上已经落地，包括 note-processing + utility registry onboarding，以及类型化的 `diagram.generate.followThrough` 命令收尾元数据。
+- 下一步不再是翻译/抽取 wrapper 剥离。真实的后续缺口是先做 packaging/semantic-verification convergence 硬化，再基于 packaging 边界推进 workflow/settings 与 selection/export 的 contract 决策。
 
 ## 退出标准
 

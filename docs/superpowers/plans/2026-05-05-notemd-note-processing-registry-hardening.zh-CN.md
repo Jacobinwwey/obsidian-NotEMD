@@ -10,12 +10,30 @@
 
 ---
 
+## 进度对齐更新（2026-05-08）
+
+这份计划现在主要是历史记录。核心 hardening 切片已经在 `main` 上落地。
+
+状态快照：
+
+- 任务 1（note-processing registry onboarding）：已落地。相关 operation ID 与 binding 已进入 `src/operations/registry.ts`，并由 `src/tests/operationsRegistry.test.ts`、`src/tests/cliCapabilityManifest.test.ts`、`src/tests/cliContracts.test.ts` 锁定。
+- 任务 3（`src/main.ts` 剩余 host-adapter 抽离顺序）：针对原计划指定家族已基本落地。duplicate cleanup、Mermaid batch fix 与 formula-fix 流程现在通过 `src/operations/utilityCommandHostAdapter.ts` 路由。
+- 任务 2（utility side-effect tightening）：已部分超出原范围并落地。family-local result object 与 host-owned notice 的覆盖范围已经比原计划基线更广。
+
+真实剩余缺口：
+
+1. 不应再把 wrapper 抽离作为主线主题重开，优先保持已落地 host-adapter 边界稳定。
+2. 持续保持 packaging/semantic-verification 收敛与当前单入口 packaging 真值一致。
+3. workflow/settings 与 selection/export 的 contract 提升，应在 packaging 边界稳定约束下推进。
+
+---
+
 ## 当前基线
 
 - `src/operations/noteProcessingCommandHostAdapter.ts` 已承接 process / generate / research / translate / extract 系列 wrapper。
 - `src/main.ts` 中翻译与抽取 wrapper 已瘦身为 delegator。
 - `src/fileUtils.ts` 与 `src/extractOriginalText.ts` 已接受窄 runtime context，而不是具体 `NotemdPlugin` 类。
-- 剩余缺口不在 wrapper 层，而在 registry onboarding 与 utility side-effect 收口。
+- 草案编写时的缺口描述：剩余问题已从 wrapper 抽离转向 registry onboarding 与 utility side-effect 收口。该缺口目前已大部分关闭；见上方 2026-05-08 对齐更新。
 
 ### 任务 1：Note-Processing Operation Registry Onboarding
 
@@ -104,7 +122,7 @@
 明确哪些承诺已由代码兑现，哪些缺口已转移，哪些旧说法必须删除。
 
 - [ ] **步骤 2：写清后续方向**
-短期写 registry onboarding；中期写 utility side-effect 收口与剩余 host-adapter 抽离；长期再谈 richer CLI transport。
+历史草案方向：短期 registry onboarding；中期 utility side-effect 收口与剩余 host-adapter 抽离；长期再谈 richer CLI transport。
 
 - [ ] **步骤 3：保持双语同步**
 每次修改 EN/ZH 同步完成，避免只更新单语版本。
@@ -112,14 +130,14 @@
 ## 短中长期推进顺序
 
 **短期（本批次后立即执行）**
-- note-processing registry onboarding
-- translation/extraction utility side-effect tightening
-- clean worktree fast-forward `main`
+- 维持已落地 note-processing + utility registry 语义稳定
+- 在持续重构中保持 result-shape 与 host-effect 边界不回退
+- 持续保持 clean-worktree mainline 同步纪律
 
 **中期（2-6 周）**
-- remaining `src/main.ts` host-adapter extraction
-- note-processing capability manifest / invocation contract 完整化
-- 更清晰的 dry-run / machine-readable result surface
+- packaging / semantic-verification convergence 硬化
+- 基于 packaging 边界推进 workflow/settings contract 收敛
+- 维护者 helper、文档与 release 检查口径一致性强化
 
 **长期（6 周以上）**
 - richer CLI transport 评估（file bridge / local IPC / REST）
