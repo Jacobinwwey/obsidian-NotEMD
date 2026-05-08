@@ -8,8 +8,8 @@ const PACKAGE_MANAGER_SHIM_DIR_NAME = '.notemd-package-manager-bin';
 function packageManagerCandidates() {
     return [
         { command: 'pnpm', versionArgs: ['--version'], prefix: [] },
-        { command: 'corepack', versionArgs: ['--version'], prefix: ['pnpm'] },
-        { command: 'bun', versionArgs: ['--version'], prefix: ['x', 'pnpm'] }
+        { command: 'corepack', versionArgs: ['pnpm', '--version'], prefix: ['pnpm'] },
+        { command: 'bun', versionArgs: ['x', 'pnpm', '--version'], prefix: ['x', 'pnpm'] }
     ];
 }
 

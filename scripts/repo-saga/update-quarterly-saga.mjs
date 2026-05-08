@@ -507,13 +507,28 @@ function captureCommand(command, args, cwd) {
 }
 
 function runPnpmCommand(args, cwd) {
+  let lastError = null;
   for (const candidate of packageManagerCandidates()) {
     if (!commandExists(candidate.command, candidate.versionArgs)) {
       continue;
     }
     const runtime = buildPackageManagerRuntime(candidate, cwd);
-    runCommand(candidate.command, [...candidate.prefix, ...args], cwd, { env: runtime.env });
-    return;
+    try {
+      runCommand(candidate.command, [...candidate.prefix, ...args], cwd, { env: runtime.env });
+      return;
+    } catch (error) {
+      lastError = error;
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.warn(
+        `Package manager candidate ${candidate.command} failed while running ${args.join(" ")}; trying next fallback. Error: ${errorMessage}`,
+      );
+    }
+  }
+  if (lastError) {
+    const message = lastError instanceof Error ? lastError.message : String(lastError);
+    throw new Error(
+      `Could not execute repo-saga build command "${args.join(" ")}" with any package manager fallback. Last error: ${message}`,
+    );
   }
   throw new Error("Could not find pnpm, corepack, or bun to build repo-saga integration cache.");
 }
