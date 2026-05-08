@@ -11,6 +11,7 @@ npm run verify:diagram-semantics -- --vault "<vault-name>" --commit "<sha>" --ve
 ```
 
 The helper is secret-free. It generates a Markdown checklist template plus vault-aware CLI commands, an explicit packaging-boundary section, and surface evidence sections; it does not launch Obsidian, read local secrets, or rely on tracked vault paths.
+Its packaging boundary line is derived from current `entryPoints` / `outfile` values in `esbuild.config.mjs`; if parsing fails, the helper emits explicit placeholder wording so boundary drift is visible.
 
 ## 1. When This Runbook Is Required
 
