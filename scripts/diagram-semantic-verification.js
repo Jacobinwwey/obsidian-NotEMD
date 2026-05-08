@@ -58,6 +58,70 @@ const USAGE_TEXT = [
     'Supported surfaces: mermaid, json-canvas, vega-lite'
 ].join('\n');
 
+function parseQuotedArrayLiteralValue(source, key) {
+    const match = source.match(new RegExp(`${key}\\s*:\\s*\\[([\\s\\S]*?)\\]`, 'm'));
+    if (!match) {
+        return [];
+    }
+
+    const values = [];
+    const valuePattern = /["']([^"']+)["']/g;
+    let valueMatch = valuePattern.exec(match[1]);
+    while (valueMatch) {
+        values.push(valueMatch[1]);
+        valueMatch = valuePattern.exec(match[1]);
+    }
+    return values;
+}
+
+function parseQuotedScalarValue(source, key) {
+    const match = source.match(new RegExp(`${key}\\s*:\\s*["']([^"']+)["']`, 'm'));
+    return match ? match[1] : '';
+}
+
+function resolvePackagingBoundaryFacts({
+    esbuildConfigPath = path.resolve(__dirname, '..', 'esbuild.config.mjs')
+} = {}) {
+    try {
+        const source = fs.readFileSync(esbuildConfigPath, 'utf8');
+        const entryPoints = parseQuotedArrayLiteralValue(source, 'entryPoints');
+        const outfile = parseQuotedScalarValue(source, 'outfile');
+
+        return {
+            sourcePath: esbuildConfigPath,
+            entryPoints: entryPoints.length > 0 ? entryPoints : ['<unknown-entry>'],
+            outfile: outfile || '<unknown-outfile>',
+            resolvedFromConfig: entryPoints.length > 0 || Boolean(outfile)
+        };
+    } catch {
+        return {
+            sourcePath: esbuildConfigPath,
+            entryPoints: ['<unknown-entry>'],
+            outfile: '<unknown-outfile>',
+            resolvedFromConfig: false
+        };
+    }
+}
+
+function buildPackagingBoundaryChecklistLines(packagingFacts = resolvePackagingBoundaryFacts()) {
+    const entrySummary = packagingFacts.entryPoints.join(', ');
+    const entryCount = packagingFacts.entryPoints.length;
+    const configFileName = path.basename(packagingFacts.sourcePath);
+    const sourceDescriptor = packagingFacts.resolvedFromConfig
+        ? `resolved from \`${configFileName}\``
+        : `fallback placeholder because \`${configFileName}\` could not be parsed`;
+    const singleEntryLine = entryCount === 1
+        ? `- [ ] Confirm the current build truth is still single-entry (${sourceDescriptor}): \`${entrySummary} -> ${packagingFacts.outfile}\` only.`
+        : `- [ ] Confirm current build entrypoint count before making packaging claims (${sourceDescriptor}): \`${entrySummary}\` -> \`${packagingFacts.outfile}\`.`;
+
+    return [
+        singleEntryLine,
+        '- [ ] Confirm `npm run audit:render-host` only proves the current self-contained `main.js` + inline `srcdoc` host contract.',
+        '- [ ] Confirm no release note, handoff, or PR summary claims that true heavy-runtime isolation is already implemented.',
+        '- [ ] If the change depends on stronger packaging guarantees, record that true heavy-runtime isolation is still pending and requires later multi-entry or dedicated-asset work.'
+    ];
+}
+
 function normalizeSurfaceId(value) {
     return value.trim().toLowerCase().replace(/[\s_]+/g, '-');
 }
@@ -102,7 +166,7 @@ function buildEnvironmentCheckCommands(vaultName) {
     return commands;
 }
 
-function buildSemanticVerificationTemplate({ vaultName, commit, version, surfaces }) {
+function buildSemanticVerificationTemplate({ vaultName, commit, version, surfaces, packagingFacts }) {
     const repoGates = [
         'npm run build',
         'npm test -- --runInBand',
@@ -132,17 +196,10 @@ function buildSemanticVerificationTemplate({ vaultName, commit, version, surface
         headerLines.push(`- [ ] \`${command}\``);
     }
 
-    headerLines.push(
-        '',
-        '## Packaging Boundary',
-        '',
-        '- [ ] Confirm the current build truth is still single-entry: `esbuild.config.mjs` ships `src/main.ts -> main.js` only.',
-        '- [ ] Confirm `npm run audit:render-host` only proves the current self-contained `main.js` + inline `srcdoc` host contract.',
-        '- [ ] Confirm no release note, handoff, or PR summary claims that true heavy-runtime isolation is already implemented.',
-        '- [ ] If the change depends on stronger packaging guarantees, record that true heavy-runtime isolation is still pending and requires later multi-entry or dedicated-asset work.',
-        '',
-        '## Surface Evidence'
-    );
+    const packagingChecklistLines = buildPackagingBoundaryChecklistLines(packagingFacts);
+    headerLines.push('', '## Packaging Boundary', '');
+    headerLines.push(...packagingChecklistLines);
+    headerLines.push('', '## Surface Evidence');
 
     for (const surface of surfaces) {
         const definition = SURFACE_DEFINITIONS.find((candidate) => candidate.id === surface.id);
@@ -273,9 +330,11 @@ module.exports = {
     SURFACE_DEFINITIONS,
     USAGE_TEXT,
     buildEnvironmentCheckCommands,
+    buildPackagingBoundaryChecklistLines,
     buildSemanticVerificationTemplate,
     main,
     parseArgs,
+    resolvePackagingBoundaryFacts,
     resolveRequestedSurfaces,
     writeSemanticVerificationTemplate
 };

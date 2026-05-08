@@ -37,6 +37,18 @@ describe('diagram semantic verification helper', () => {
     maybeDescribeHelper('helper module', () => {
         let resolveRequestedSurfaces: (surfaces?: string[]) => Array<{ id: string; label: string }>;
         let buildEnvironmentCheckCommands: (vaultName?: string) => string[];
+        let resolvePackagingBoundaryFacts: (args?: { esbuildConfigPath?: string }) => {
+            sourcePath: string;
+            entryPoints: string[];
+            outfile: string;
+            resolvedFromConfig: boolean;
+        };
+        let buildPackagingBoundaryChecklistLines: (packagingFacts?: {
+            sourcePath: string;
+            entryPoints: string[];
+            outfile: string;
+            resolvedFromConfig: boolean;
+        }) => string[];
         let buildSemanticVerificationTemplate: (args: {
             vaultName?: string;
             commit: string;
@@ -58,6 +70,8 @@ describe('diagram semantic verification helper', () => {
                 parseArgs,
                 resolveRequestedSurfaces,
                 buildEnvironmentCheckCommands,
+                resolvePackagingBoundaryFacts,
+                buildPackagingBoundaryChecklistLines,
                 buildSemanticVerificationTemplate,
                 writeSemanticVerificationTemplate
             } = require(scriptPath));
@@ -109,6 +123,36 @@ describe('diagram semantic verification helper', () => {
             ]);
         });
 
+        test('resolves packaging facts from esbuild config and falls back safely when parsing fails', () => {
+            const factsFromRepo = resolvePackagingBoundaryFacts({
+                esbuildConfigPath: path.join(repoRoot, 'esbuild.config.mjs')
+            });
+            expect(factsFromRepo.entryPoints).toContain('src/main.ts');
+            expect(factsFromRepo.outfile).toBe('main.js');
+            expect(factsFromRepo.resolvedFromConfig).toBe(true);
+
+            const fallbackFacts = resolvePackagingBoundaryFacts({
+                esbuildConfigPath: path.join(repoRoot, 'scripts', 'missing-esbuild.config.mjs')
+            });
+            expect(fallbackFacts.entryPoints).toEqual(['<unknown-entry>']);
+            expect(fallbackFacts.outfile).toBe('<unknown-outfile>');
+            expect(fallbackFacts.resolvedFromConfig).toBe(false);
+        });
+
+        test('builds packaging-boundary checklist lines from resolved config facts', () => {
+            const lines = buildPackagingBoundaryChecklistLines({
+                sourcePath: path.join(repoRoot, 'esbuild.config.mjs'),
+                entryPoints: ['src/main.ts'],
+                outfile: 'main.js',
+                resolvedFromConfig: true
+            });
+
+            expect(lines[0]).toContain('single-entry');
+            expect(lines[0]).toContain('`src/main.ts -> main.js`');
+            expect(lines[1]).toContain('`npm run audit:render-host` only proves the current self-contained `main.js` + inline `srcdoc` host contract');
+            expect(lines[3]).toContain('true heavy-runtime isolation is still pending');
+        });
+
         test('builds a markdown template with repo gates, packaging-boundary guidance, and per-surface evidence sections', () => {
             const template = buildSemanticVerificationTemplate({
                 vaultName: 'Research Vault',
@@ -124,6 +168,7 @@ describe('diagram semantic verification helper', () => {
             expect(template).toContain('npm run build');
             expect(template).toContain('obsidian plugin id=notemd vault=\"Research Vault\"');
             expect(template).toContain('## Packaging Boundary');
+            expect(template).toContain('`src/main.ts -> main.js`');
             expect(template).toContain('`npm run audit:render-host` only proves the current self-contained `main.js` + inline `srcdoc` host contract');
             expect(template).toContain('true heavy-runtime isolation is still pending');
             expect(template).toContain('## Mermaid');
