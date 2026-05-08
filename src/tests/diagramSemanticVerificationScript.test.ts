@@ -68,6 +68,16 @@ describe('diagram semantic verification helper', () => {
             outputTargetStatus: 'outfile' | 'outdir' | 'unknown' | 'ambiguous';
             resolvedFromConfig: boolean;
         }) => string[];
+        let resolveReleasePackagingContractFacts: (args?: { releaseHelperPath?: string }) => {
+            sourcePath: string;
+            requiredAssets: string[];
+            resolvedFromReleaseHelper: boolean;
+        };
+        let buildReleasePackagingContractChecklistLines: (releaseFacts?: {
+            sourcePath: string;
+            requiredAssets: string[];
+            resolvedFromReleaseHelper: boolean;
+        }) => string[];
         let buildSemanticVerificationTemplate: (args: {
             vaultName?: string;
             commit: string;
@@ -80,6 +90,11 @@ describe('diagram semantic verification helper', () => {
                 outdir: string;
                 outputTargetStatus: 'outfile' | 'outdir' | 'unknown' | 'ambiguous';
                 resolvedFromConfig: boolean;
+            };
+            releasePackagingFacts?: {
+                sourcePath: string;
+                requiredAssets: string[];
+                resolvedFromReleaseHelper: boolean;
             };
         }) => string;
         let writeSemanticVerificationTemplate: (template: string, outputPath?: string) => string | null;
@@ -99,6 +114,8 @@ describe('diagram semantic verification helper', () => {
                 buildEnvironmentCheckCommands,
                 resolvePackagingBoundaryFacts,
                 buildPackagingBoundaryChecklistLines,
+                resolveReleasePackagingContractFacts,
+                buildReleasePackagingContractChecklistLines,
                 buildSemanticVerificationTemplate,
                 writeSemanticVerificationTemplate
             } = require(scriptPath));
@@ -396,6 +413,34 @@ const context = await esbuild.context({
             expect(lines.some((line) => line.includes('true heavy-runtime isolation is still pending'))).toBe(true);
         });
 
+        test('keeps release packaging contract checklist aligned with release helper asset requirements', () => {
+            const releaseHelperPath = path.join(repoRoot, 'scripts', 'release', 'publish-github-release.js');
+            const { REQUIRED_RELEASE_ASSETS } = require(releaseHelperPath) as { REQUIRED_RELEASE_ASSETS: string[] };
+
+            const facts = resolveReleasePackagingContractFacts({ releaseHelperPath });
+            expect(facts.requiredAssets).toEqual(REQUIRED_RELEASE_ASSETS);
+            expect(facts.resolvedFromReleaseHelper).toBe(true);
+
+            const lines = buildReleasePackagingContractChecklistLines(facts);
+            for (const assetName of REQUIRED_RELEASE_ASSETS) {
+                expect(lines[0]).toContain(`\`${assetName}\``);
+            }
+            expect(lines[1]).toContain('docs/releases/<tag>.md');
+            expect(lines[1]).toContain('docs/releases/<tag>.zh-CN.md');
+        });
+
+        test('falls back to default release packaging contract wording when release helper cannot be loaded', () => {
+            const facts = resolveReleasePackagingContractFacts({
+                releaseHelperPath: path.join(repoRoot, 'scripts', 'release', 'missing-release-helper.js')
+            });
+            expect(facts.requiredAssets).toEqual(['main.js', 'manifest.json', 'styles.css', 'README.md']);
+            expect(facts.resolvedFromReleaseHelper).toBe(false);
+
+            const lines = buildReleasePackagingContractChecklistLines(facts);
+            expect(lines[0]).toContain('fallback default');
+            expect(lines[0]).toContain('missing-release-helper.js');
+        });
+
         test('builds a markdown template with repo gates, packaging-boundary guidance, and per-surface evidence sections', () => {
             const template = buildSemanticVerificationTemplate({
                 vaultName: 'Research Vault',
@@ -414,6 +459,12 @@ const context = await esbuild.context({
             expect(template).toContain('`src/main.ts -> main.js`');
             expect(template).toContain('`npm run audit:render-host` only proves the current self-contained `main.js` + inline `srcdoc` host contract');
             expect(template).toContain('true heavy-runtime isolation is still pending');
+            expect(template).toContain('## Packaging Contract');
+            expect(template).toContain('`main.js`');
+            expect(template).toContain('`manifest.json`');
+            expect(template).toContain('`styles.css`');
+            expect(template).toContain('`README.md`');
+            expect(template).toContain('docs/releases/<tag>.zh-CN.md');
             expect(template).toContain('## Mermaid');
             expect(template).toContain('## Vega-Lite');
             expect(template).not.toContain('## JSON Canvas');
