@@ -57,6 +57,7 @@ describe('diagram semantic verification helper', () => {
             entryPoints: string[];
             outfile: string;
             outdir: string;
+            outputTargetStatus: 'outfile' | 'outdir' | 'unknown';
             resolvedFromConfig: boolean;
         };
         let buildPackagingBoundaryChecklistLines: (packagingFacts?: {
@@ -64,6 +65,7 @@ describe('diagram semantic verification helper', () => {
             entryPoints: string[];
             outfile: string;
             outdir: string;
+            outputTargetStatus: 'outfile' | 'outdir' | 'unknown';
             resolvedFromConfig: boolean;
         }) => string[];
         let buildSemanticVerificationTemplate: (args: {
@@ -76,6 +78,7 @@ describe('diagram semantic verification helper', () => {
                 entryPoints: string[];
                 outfile: string;
                 outdir: string;
+                outputTargetStatus: 'outfile' | 'outdir' | 'unknown';
                 resolvedFromConfig: boolean;
             };
         }) => string;
@@ -154,6 +157,7 @@ describe('diagram semantic verification helper', () => {
             expect(factsFromRepo.entryPoints).toContain('src/main.ts');
             expect(factsFromRepo.outfile).toBe('main.js');
             expect(factsFromRepo.outdir).toBe('');
+            expect(factsFromRepo.outputTargetStatus).toBe('outfile');
             expect(factsFromRepo.resolvedFromConfig).toBe(true);
 
             const fallbackFacts = resolvePackagingBoundaryFacts({
@@ -162,6 +166,7 @@ describe('diagram semantic verification helper', () => {
             expect(fallbackFacts.entryPoints).toEqual(['<unknown-entry>']);
             expect(fallbackFacts.outfile).toBe('<unknown-outfile>');
             expect(fallbackFacts.outdir).toBe('');
+            expect(fallbackFacts.outputTargetStatus).toBe('unknown');
             expect(fallbackFacts.resolvedFromConfig).toBe(false);
         });
 
@@ -187,6 +192,7 @@ const context = await esbuild.context({
                 expect(facts.entryPoints).toEqual(['src/main.ts', 'src/rendering/host/bootstrap.ts']);
                 expect(facts.outfile).toBe('');
                 expect(facts.outdir).toBe('dist');
+                expect(facts.outputTargetStatus).toBe('outdir');
                 expect(facts.resolvedFromConfig).toBe(true);
 
                 const lines = buildPackagingBoundaryChecklistLines(facts);
@@ -217,6 +223,7 @@ const context = await esbuild.context({
                 expect(facts.entryPoints).toEqual(['src/main.ts']);
                 expect(facts.outfile).toBe('');
                 expect(facts.outdir).toBe('');
+                expect(facts.outputTargetStatus).toBe('unknown');
                 expect(facts.resolvedFromConfig).toBe(true);
 
                 const lines = buildPackagingBoundaryChecklistLines(facts);
@@ -263,6 +270,7 @@ const context = await esbuild.context({
                 entryPoints: ['src/main.ts'],
                 outfile: 'main.js',
                 outdir: '',
+                outputTargetStatus: 'outfile',
                 resolvedFromConfig: true
             });
 
