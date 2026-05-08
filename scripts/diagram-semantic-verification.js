@@ -95,6 +95,97 @@ function parseQuotedScalarValue(source, key) {
     return match ? match[2] : '';
 }
 
+function extractEsbuildContextOptionsSource(source) {
+    const contextCallMatch = source.match(/esbuild\.context\s*\(/m);
+    if (!contextCallMatch || contextCallMatch.index === undefined) {
+        return '';
+    }
+
+    let index = contextCallMatch.index + contextCallMatch[0].length;
+    while (index < source.length && /\s/.test(source[index])) {
+        index += 1;
+    }
+    if (source[index] !== '{') {
+        return '';
+    }
+
+    let depth = 0;
+    let objectStart = -1;
+    let inString = '';
+    let escaping = false;
+    let inLineComment = false;
+    let inBlockComment = false;
+
+    for (let cursor = index; cursor < source.length; cursor += 1) {
+        const char = source[cursor];
+        const nextChar = source[cursor + 1];
+
+        if (inLineComment) {
+            if (char === '\n') {
+                inLineComment = false;
+            }
+            continue;
+        }
+
+        if (inBlockComment) {
+            if (char === '*' && nextChar === '/') {
+                inBlockComment = false;
+                cursor += 1;
+            }
+            continue;
+        }
+
+        if (inString) {
+            if (escaping) {
+                escaping = false;
+                continue;
+            }
+            if (char === '\\') {
+                escaping = true;
+                continue;
+            }
+            if (char === inString) {
+                inString = '';
+            }
+            continue;
+        }
+
+        if (char === '/' && nextChar === '/') {
+            inLineComment = true;
+            cursor += 1;
+            continue;
+        }
+
+        if (char === '/' && nextChar === '*') {
+            inBlockComment = true;
+            cursor += 1;
+            continue;
+        }
+
+        if (char === '"' || char === '\'' || char === '`') {
+            inString = char;
+            continue;
+        }
+
+        if (char === '{') {
+            if (depth === 0) {
+                objectStart = cursor;
+            }
+            depth += 1;
+            continue;
+        }
+
+        if (char === '}') {
+            depth -= 1;
+            if (depth === 0 && objectStart >= 0) {
+                return source.slice(objectStart, cursor + 1);
+            }
+        }
+    }
+
+    return '';
+}
+
 function resolveOutputTargetStatus({ outfile, outdir }) {
     if (outfile && outdir) {
         return 'ambiguous';
@@ -113,11 +204,13 @@ function resolvePackagingBoundaryFacts({
 } = {}) {
     try {
         const source = fs.readFileSync(esbuildConfigPath, 'utf8');
-        const arrayEntryPoints = parseQuotedArrayLiteralValue(source, 'entryPoints');
-        const objectEntryPoints = parseQuotedObjectLiteralValues(source, 'entryPoints');
+        const contextOptionsSource = extractEsbuildContextOptionsSource(source);
+        const parsingSource = contextOptionsSource || source;
+        const arrayEntryPoints = parseQuotedArrayLiteralValue(parsingSource, 'entryPoints');
+        const objectEntryPoints = parseQuotedObjectLiteralValues(parsingSource, 'entryPoints');
         const entryPoints = arrayEntryPoints.length > 0 ? arrayEntryPoints : objectEntryPoints;
-        const outfile = parseQuotedScalarValue(source, 'outfile');
-        const outdir = parseQuotedScalarValue(source, 'outdir');
+        const outfile = parseQuotedScalarValue(parsingSource, 'outfile');
+        const outdir = parseQuotedScalarValue(parsingSource, 'outdir');
         const outputTargetStatus = resolveOutputTargetStatus({ outfile, outdir });
 
         return {

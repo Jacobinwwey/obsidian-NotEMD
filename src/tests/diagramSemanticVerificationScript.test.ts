@@ -259,6 +259,36 @@ const context = await esbuild.context({
             }
         });
 
+        test('prefers esbuild.context options instead of unrelated same-name keys in file', () => {
+            const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-esbuild-context-scope-'));
+            const configPath = path.join(tempRoot, 'esbuild.config.mjs');
+            fs.writeFileSync(
+                configPath,
+                `const unrelated = {
+    entryPoints: ["src/decoy.ts"],
+    outfile: "decoy.js",
+    outdir: "decoy-dist"
+};
+import esbuild from "esbuild";
+const context = await esbuild.context({
+    entryPoints: ["src/main.ts"],
+    outfile: "main.js"
+});
+`,
+                'utf8'
+            );
+
+            try {
+                const facts = resolvePackagingBoundaryFacts({ esbuildConfigPath: configPath });
+                expect(facts.entryPoints).toEqual(['src/main.ts']);
+                expect(facts.outfile).toBe('main.js');
+                expect(facts.outdir).toBe('');
+                expect(facts.outputTargetStatus).toBe('outfile');
+            } finally {
+                fs.rmSync(tempRoot, { recursive: true, force: true });
+            }
+        });
+
         test('flags unresolved output targets when entry points parse but outfile/outdir are missing', () => {
             const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-esbuild-missing-output-'));
             const configPath = path.join(tempRoot, 'esbuild.config.mjs');

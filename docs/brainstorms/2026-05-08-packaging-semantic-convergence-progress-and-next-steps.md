@@ -1,0 +1,100 @@
+---
+date: 2026-05-08
+topic: packaging-semantic-convergence-progress-and-next-steps
+---
+
+# Packaging / Semantic Convergence Deep Comparison And Next-Step Plan
+
+## 1. Scope And Baseline
+
+This comparison reconciles current `main` with prior requirement sources:
+
+1. `.trellis/tasks/05-08-packaging-semantic-verification-convergence/prd.md` (R1-R6 + acceptance criteria)
+2. `docs/superpowers/plans/2026-05-03-mainline-stabilization-next-batch.*`
+3. `docs/superpowers/plans/2026-04-14-diagram-rendering-platform-roadmap.*`
+4. `docs/brainstorms/2026-05-02-progress-audit-and-next-direction.*`
+
+Goals:
+
+- verify doc claims vs shipped code truth
+- verify helper/test/docs anti-drift closure
+- define the transition gate from convergence hardening to real packaging-boundary implementation
+
+## 2. Requirement Mapping (Code Evidence)
+
+### PRD R1-R6 Mapping
+
+| Requirement | Current evidence | Status | Notes |
+|---|---|---|---|
+| R1 Preserve architecture truth and avoid overclaiming isolation | `scripts/diagram-semantic-verification.js` checklist + `docs/maintainer/release-workflow*.md` | Met | Explicitly states `audit:render-host` only proves `main.js + srcdoc` containment |
+| R2 Do not reopen `diagram.generate/preview/provider.connection.test` contract depth | Recent diffs touch helper/tests/docs only | Met | No operation semantic changes |
+| R3 Upgrade helper with durable packaging-boundary checklist | `buildPackagingBoundaryChecklistLines()` | Met | Covers `outfile/outdir/unknown/ambiguous` states |
+| R4 Keep release/semantic docs aligned | `docs/maintainer/diagram-semantic-verification*.md` + `release-workflow*.md` | Met | Bilingual docs synced |
+| R5 Add regression coverage to prevent silent drift | `src/tests/diagramSemanticVerificationScript.test.ts` | Met | Covers array/object/backtick/unknown/ambiguous/context-scope |
+| R6 Keep host/CLI claims honest | Gate always records `obsidian help` and `obsidian-cli help` execution evidence | Met | Maintains evidence-first host validation |
+
+### Acceptance Criteria Mapping
+
+| Criterion | Evidence | Status |
+|---|---|---|
+| Template includes explicit packaging-boundary section with current truth | `npm run verify:diagram-semantics` output | Met |
+| Maintainer docs remain aligned with template truth | `docs/maintainer/*` wording sync | Met |
+| Tests lock helper/docs shape | focused script test + full suite | Met |
+| No command/operation semantic drift | diff scope + full gate | Met |
+
+## 3. Architecture Progress vs Prior Plans
+
+### Completed convergence layer
+
+1. **Helper evolved into a stateful boundary checker**
+   `outputTargetStatus` now distinguishes `outfile`, `outdir`, `unknown`, and `ambiguous`.
+2. **Parser hardening landed**
+   Supports `"..."`, `'...'`, and `` `...` `` literals; supports array/object `entryPoints`; scopes parsing to `esbuild.context({...})` options to avoid decoy keys.
+3. **Verification closure is now repeatable**
+   helper behavior -> regression tests -> maintainer doc sync -> release wording alignment.
+
+### Still open beyond convergence hardening
+
+1. **True heavy-runtime packaging isolation**
+   Not implemented yet; current truth is still single-entry `main.js + inline srcdoc`.
+2. **Stronger machine-free semantic harness**
+   Current model remains maintainer-local semantic checks + helper template + repo CI baseline.
+
+## 4. Concrete Next-Step Plan (Persisted)
+
+### Stage A: keep convergence stable (short cycle)
+
+1. Require test-first updates for helper changes in `diagramSemanticVerificationScript.test.ts`.
+2. Require bilingual maintainer doc sync for boundary wording changes.
+3. Keep current full gate chain: `build + full test + audits + diff-check + obsidian/obsidian-cli checks`.
+
+### Stage B: pre-implementation packaging research (mid cycle)
+
+1. Define minimum viable multi-entry/dedicated-asset packaging direction in `esbuild.config.mjs` terms without immediate runtime rollout.
+2. Define release-asset, install write-out, and fallback contracts before implementation.
+3. Persist those contracts in the next PRD before touching runtime packaging.
+
+### Stage C: real packaging-boundary implementation (later)
+
+1. Land minimal multi-entry or dedicated host asset path.
+2. Extend `audit:render-host` and semantic helper wording to the new truth.
+3. Re-run doc/test/implementation three-way alignment in the same batch.
+
+## 5. Risks And Controls
+
+1. **Risk:** helper parser regresses on future config shapes  
+   **Control:** add representative regression fixtures before merging parser changes.
+2. **Risk:** docs outpace implementation again  
+   **Control:** every “landed” statement must cite code paths and test surfaces.
+3. **Risk:** premature heavy-runtime packaging work destabilizes CI  
+   **Control:** finish Stage B contract definition before Stage C runtime changes.
+
+## 6. Conclusion
+
+Current `main` has reached a stable packaging/semantic convergence layer:
+
+- helper communicates boundary truth with explicit exceptional-state handling
+- docs/tests/script stay aligned
+- CI gate remains green and repeatable
+
+Next leverage should move to Stage B -> Stage C real packaging boundary work, not reopening already converged semantic-layer mechanics.
