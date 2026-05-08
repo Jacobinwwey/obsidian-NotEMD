@@ -4,6 +4,7 @@ import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import packageManagerRuntime from "../lib/package-manager-runtime.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -20,6 +21,7 @@ const repoSagaForkUrl = "https://github.com/Jacobinwwey/repo-saga.git";
 const repoSagaIntegrationStamp = path.join(upstreamRoot, ".notemd-repo-saga-integration.json");
 const repoSagaIntegrationVersion = 3;
 const repoSagaSourceInput = repoRoot.split(path.sep).join("/");
+const { buildPackageManagerRuntime, packageManagerCandidates } = packageManagerRuntime;
 const repoSagaSources = [
   {
     label: "timeline-granularity",
@@ -489,10 +491,11 @@ function runRepoSagaCli(locale, outDir) {
   );
 }
 
-function runCommand(command, args, cwd) {
+function runCommand(command, args, cwd, options = {}) {
   execFileSync(command, args, {
     cwd,
     stdio: "inherit",
+    env: options.env ?? process.env,
   });
 }
 
@@ -508,18 +511,11 @@ function runPnpmCommand(args, cwd) {
     if (!commandExists(candidate.command, candidate.versionArgs)) {
       continue;
     }
-    runCommand(candidate.command, [...candidate.prefix, ...args], cwd);
+    const runtime = buildPackageManagerRuntime(candidate, cwd);
+    runCommand(candidate.command, [...candidate.prefix, ...args], cwd, { env: runtime.env });
     return;
   }
   throw new Error("Could not find pnpm, corepack, or bun to build repo-saga integration cache.");
-}
-
-function packageManagerCandidates() {
-  return [
-    { command: "pnpm", versionArgs: ["--version"], prefix: [] },
-    { command: "corepack", versionArgs: ["--version"], prefix: ["pnpm"] },
-    { command: "bun", versionArgs: ["--version"], prefix: ["x", "pnpm"] },
-  ];
 }
 
 function commandExists(command, args) {
