@@ -10,6 +10,28 @@
 
 ---
 
+## 进度对齐更新（2026-05-08）
+
+这份第二轮计划已交付完成，现在应作为历史发布记录来阅读。
+
+已交付结果：
+
+- `Qwen Code`、`Z AI`、`Huawei Cloud MaaS` 已作为一等预设进入 `src/llmProviders.ts`。
+- 这批 Provider 的路由与连接测试行为已由 `src/tests/llmProviders.test.ts` 和 `src/tests/llmUtilsProviderSupport.test.ts` 覆盖。
+- 对应文档与变更记录更新已落地（`README.md`、`README_zh.md`、`change.md`）。
+
+超出本计划的后续进展也已落地：
+
+- 同方向的更多中国区预设已发布（`Baidu Qianfan`、`SiliconFlow`、`Xiaomi MiMo`）。
+- 共享 transport 行为继续保持 metadata-driven，必要场景下通过 chat-first probing 走 OpenAI-compatible 统一运行时路径。
+
+真实剩余缺口：
+
+1. 随上游 provider 目录演进，持续保持预设默认值、测试覆盖与文档说明同步。
+2. 将更广泛的 packaging/semantic-verification convergence 与 provider 列表增长分离推进。
+
+---
+
 ## 文件结构
 
 ### 核心 Provider 元数据

@@ -10,6 +10,30 @@
 
 ---
 
+## 进度对齐更新（2026-05-08）
+
+这份计划已交付完成，当前主要用于历史追踪。
+
+已落地结果：
+
+- 项目级 `AGENTS.md` 已存在，并持续演进为执行规范入口。
+- Doubao 模型字段校验与设置页 warning/连接测试门禁已落地，并由 `src/tests/providerValidation.test.ts` 覆盖。
+- `Baidu Qianfan` 与 `SiliconFlow` 预设元数据已落地到 `src/llmProviders.ts`。
+- 该批 Provider 的运行时路由与连接测试覆盖已由 `src/tests/llmProviders.test.ts` 和 `src/tests/llmUtilsProviderSupport.test.ts` 锁定。
+- README / README_zh 的 Provider 使用说明已和已交付行为同步。
+
+超出原计划范围、现已落地：
+
+- 更多中国区导向预设也已发布，包括 `Qwen Code`、`Z AI`、`Huawei Cloud MaaS`、`Xiaomi MiMo`。
+- Provider 扩展继续保持 transport-driven，共享 OpenAI-compatible 运行时路径，而不是按 provider 名称分叉实现。
+
+真实剩余缺口：
+
+1. 随着预设继续扩张，持续防止 provider 元数据 / 文档 / 测试漂移。
+2. 将 packaging/semantic-verification convergence 作为独立轨道持续推进，不与 provider 扩展混线。
+
+---
+
 ### 任务 1：新增项目级 AGENTS 指南
 
 **文件：**

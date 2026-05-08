@@ -10,6 +10,30 @@
 
 ---
 
+## Progress Alignment Update (2026-05-08)
+
+This plan is delivered and now serves as historical traceability.
+
+Landed outcomes:
+
+- Project-level `AGENTS.md` exists and has continued to evolve as the execution authority.
+- Doubao model-field validation and settings warning/gating are landed, with dedicated coverage in `src/tests/providerValidation.test.ts`.
+- Provider presets and metadata for `Baidu Qianfan` and `SiliconFlow` are landed in `src/llmProviders.ts`.
+- Runtime routing and connection-test coverage for the provider batch is locked in `src/tests/llmProviders.test.ts` and `src/tests/llmUtilsProviderSupport.test.ts`.
+- README / README_zh provider guidance has been synchronized with the shipped behavior.
+
+Beyond-original-scope progress now also landed:
+
+- Additional China-facing presets are already shipped, including `Qwen Code`, `Z AI`, `Huawei Cloud MaaS`, and `Xiaomi MiMo`.
+- Provider support remains transport-driven under the shared OpenAI-compatible runtime path rather than provider-name forks.
+
+Remaining real gaps:
+
+1. Keep provider metadata/docs/tests drift-free as presets continue to expand.
+2. Continue packaging/semantic-verification convergence work as a separate track from provider expansion.
+
+---
+
 ### Task 1: Add Project-Level AGENTS Guide
 
 **Files:**

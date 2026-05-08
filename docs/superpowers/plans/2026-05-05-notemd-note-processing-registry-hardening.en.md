@@ -10,12 +10,30 @@
 
 ---
 
+## Progress Alignment Update (2026-05-08)
+
+This plan is now mostly historical. The core hardening slice has already landed on `main`.
+
+Status snapshot:
+
+- Task 1 (note-processing registry onboarding): landed. Operation IDs and bindings are now present in `src/operations/registry.ts` and locked by `src/tests/operationsRegistry.test.ts`, `src/tests/cliCapabilityManifest.test.ts`, and `src/tests/cliContracts.test.ts`.
+- Task 3 (remaining `src/main.ts` host-adapter extraction order): largely landed for the planned families. Duplicate cleanup, Mermaid batch fix, and formula-fix flows now route through `src/operations/utilityCommandHostAdapter.ts`.
+- Task 2 (utility side-effect tightening): partially landed beyond the original scope baseline. Family-local result objects and host-owned notices are now broader than this plan originally assumed.
+
+Remaining real gaps:
+
+1. Do not reopen wrapper-extraction work as a primary theme; preserve landed host-adapter boundaries.
+2. Keep packaging/semantic-verification convergence aligned with current single-entry packaging truth.
+3. Promote workflow/settings and selection/export contracts only when packaging-boundary work provides stable constraints.
+
+---
+
 ## Current Baseline
 
 - `src/operations/noteProcessingCommandHostAdapter.ts` already owns the process / generate / research / translate / extract wrappers.
 - `src/main.ts` has already shrunk its translation/extraction command bodies to delegators.
 - `src/fileUtils.ts` and `src/extractOriginalText.ts` already accept narrow runtime contexts instead of the concrete `NotemdPlugin` class.
-- The remaining gap is no longer wrapper extraction. It is registry onboarding plus utility side-effect tightening.
+- Draft-time gap statement: the remaining gap had moved from wrapper extraction to registry onboarding plus utility side-effect tightening. This gap is now mostly closed; see the 2026-05-08 alignment update above.
 
 ### Task 1: Note-Processing Operation Registry Onboarding
 
@@ -104,7 +122,7 @@ After each command family is extracted, rerun the relevant focused tests immedia
 State clearly which plan promises are now code reality, which gaps have moved, and which older statements must be deleted.
 
 - [ ] **Step 2: Write the next direction explicitly**
-Short term: registry onboarding. Mid term: utility side-effect tightening and remaining host-adapter extraction. Long term: richer CLI transport.
+Historical draft-time direction: short term registry onboarding, mid-term utility side-effect tightening plus remaining host-adapter extraction, long-term richer CLI transport.
 
 - [ ] **Step 3: Keep EN/ZH in sync**
 Every change lands in both languages in the same slice.
@@ -112,14 +130,14 @@ Every change lands in both languages in the same slice.
 ## Short / Mid / Long Horizon
 
 **Short term**
-- note-processing registry onboarding
-- translation/extraction utility side-effect tightening
-- clean-worktree fast-forward of `main`
+- keep landed note-processing + utility registry semantics stable
+- preserve result-shape and host-effect boundaries under ongoing refactors
+- maintain clean-worktree mainline sync discipline
 
 **Mid term**
-- remaining `src/main.ts` host-adapter extraction
-- fuller note-processing capability-manifest / invocation-contract coverage
-- clearer dry-run and machine-readable result surfaces
+- packaging / semantic-verification convergence hardening
+- packaging-boundary-aware workflow/settings contract refinement
+- maintainer validation flow consistency across helper, docs, and release checks
 
 **Long term**
 - richer CLI transport evaluation (file bridge / local IPC / REST)
