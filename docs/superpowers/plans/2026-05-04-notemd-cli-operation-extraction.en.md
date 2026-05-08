@@ -15,6 +15,24 @@
 
 ---
 
+## Progress Alignment Update (2026-05-08)
+
+This plan is now mostly a historical implementation ledger. The extraction path described here is largely landed on `main`.
+
+Landed reality:
+
+- `src/operations/noteProcessingCommandHostAdapter.ts` and `src/operations/utilityCommandHostAdapter.ts` now hold the write-heavy command host effects that were previously inlined in `src/main.ts`.
+- `src/operations/registry.ts`, `src/tests/operationsRegistry.test.ts`, `src/tests/cliCapabilityManifest.test.ts`, and `src/tests/cliContracts.test.ts` now cover the note-processing + utility operation families (`translate.*`, `concept.*`, `content.extract-original-text`, `workflow.extract-and-generate`, `duplicate.*`, `mermaid.batch-fix`, `formula.*`).
+- Diagram/provider command-core layering is now explicit at the current depth: `diagram.generate` returns typed `followThrough` details, while command bindings keep truthful `requires-active-file` / `interactive-ui` semantics.
+
+Remaining real gaps:
+
+1. Heavy-runtime packaging isolation is still not implemented. Current shipping boundary remains single-entry `main.js` plus inline `srcdoc` host.
+2. Packaging/semantic-verification convergence must stay aligned as helper templates, maintainer docs, and repo gates evolve.
+3. Workflow/settings and selection/export contract enrichment should continue only after packaging-boundary work stabilizes.
+
+---
+
 ## Problem Frame
 
 The official `obsidian` CLI can already list and execute plugin-registered commands. That is useful, but insufficient:
@@ -42,7 +60,7 @@ Carried-forward constraints:
 - keep UI-only flows out of the first CLI-grade contract
 - keep `src/main.ts` shrinking, not growing, as the CLI direction advances
 
-## Current Mainline Status (2026-05-05)
+## Current Mainline Status (2026-05-08)
 
 - `src/operations/types.ts` now holds shared operation metadata primitives instead of leaving them buried in sidebar/workflow code.
 - `src/operations/registry.ts` is now the central source of truth for extracted operation definitions, command bindings, mapping kind, and selected input/result schemas.
@@ -175,7 +193,7 @@ Build a reusable operation layer for the most valuable Notemd capabilities.
   - config/profile host adaptation now lives in `src/operations/configProfileCommandHostAdapter.ts`
   - provider connection-test host adaptation now lives in `src/operations/providerConnectionTestCommandHostAdapter.ts`
   - the first note-processing host adaptation now lives in `src/operations/noteProcessingCommandHostAdapter.ts`
-  - remaining gap: continue shrinking the translation/extraction command wrappers and the remaining batch host effects in `src/main.ts` without reintroducing Obsidian coupling into operations
+  - remaining gap: keep operation/command layering honest while pushing the next wave on packaging/semantic-verification convergence and later workflow/settings contract enrichment
 
 **MT2. Host adapter split**
 - Add a plugin adapter that resolves active file, vault state, and settings
@@ -282,8 +300,8 @@ Expose a mature, automation-grade Notemd integration surface above the official 
 
 Progress note:
 
-- Items 1-4 are now partially landed on mainline.
-- The next defensible move is still MT2, but it is now narrower still: provider-diagnostic, config/profile, shared provider-test, and host adaptation for `process-current-add-links` / `process-folder-add-links` / `batch-generate-from-titles` / `generate-from-title` / `research-and-summarize` are already landed, so the next batch should peel the translation/extraction wrappers and the remaining batch host effects away from `src/main.ts`.
+- Items 1-5 are now landed at the current contract depth, including note-processing + utility registry onboarding and typed `diagram.generate.followThrough` command-completion metadata.
+- The next defensible move is no longer translation/extraction wrapper peeling. The authentic next gaps are packaging/semantic-verification convergence hardening first, then packaging-boundary-driven workflow/settings and selection/export contract decisions.
 
 ## Exit Criteria
 
