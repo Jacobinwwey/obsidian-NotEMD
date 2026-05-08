@@ -24,7 +24,7 @@ Notemd verbetert je Obsidian-workflow door te integreren met verschillende Large
 
 Als je Notemd graag gebruikt, overweeg dan [⭐ een ster te geven op GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) of [☕️ koop een koffie voor mij](https://ko-fi.com/jacobinwwey).
 
-**Versie:** 1.8.4
+**Versie:** 1.8.5
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
@@ -687,7 +687,7 @@ MIT-licentie - Zie het bestand [LICENSE](LICENSE) voor details.
 ---
 
 
-*Notemd v1.8.4 - Verrijk je Obsidian-kennisgrafiek met AI.*
+*Notemd v1.8.5 - Verrijk je Obsidian-kennisgrafiek met AI.*
 
 
 
@@ -698,7 +698,7 @@ Deze kwartaalchroniek behoudt de oorspronkelijke visuele stijl van [repo-saga](h
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.nl.svg)
 
-_Laatst vernieuwd vanuit de werkboom op 2026-05-05. Datum van de laatste commit: 2026-05-05._
+_Laatst vernieuwd vanuit de werkboom op 2026-05-08. Datum van de laatste commit: 2026-05-07._
 <!-- repo-chronicle:end -->
 
 

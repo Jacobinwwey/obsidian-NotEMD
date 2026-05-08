@@ -46,6 +46,35 @@ This document summarizes the major functional and architectural changes implemen
 
 ---
 
+## 1.8.5
+
+### Highlights
+
+- Diagram command, sidebar action, workflow-builder, and workbench-visible copy now converge on canonical `Generate diagram` / `Preview diagram` wording while preserving legacy compatibility IDs.
+- The `1.8.5` release truth is now synchronized across packaged assets, welcome-modal release digest, README metadata, and bilingual release notes.
+- The next CLI implementation wave now includes the first checked-in packaging / semantic-verification convergence slice instead of leaving that phase only in brainstorm notes and task scaffolding.
+
+### New Features
+
+- **Canonical Diagram Labels**: Sidebar buttons, workflow-builder action help, command labels, localized tooltips, and workbench-visible notices now consistently present the canonical diagram action names.
+- **Release Digest Refresh**: The first-install welcome modal now advertises `1.8.5` and `1.8.4` as the latest two updates, keeping the in-plugin onboarding summary aligned with the actual shipped release.
+- **Maintainer Semantic Verification Helper**: The repo now ships `npm run verify:diagram-semantics`, which generates secret-free checklist templates with repo gates, vault-aware CLI checks, packaging-boundary reminders, and per-surface evidence sections.
+- **Next-Phase Task Seeded**: Added a dedicated Trellis task shell for packaging / semantic-verification convergence so the next implementation batch can land with persisted context instead of ad-hoc chat memory.
+
+### Fixes
+
+- **Legacy Experimental Copy Cleanup**: Removed the remaining user-visible `experimental diagram` wording from diagram action labels, workbench logs, and completion/error notices where the runtime is already canonical internally.
+- **Release Truth Alignment**: Version markers in `package.json`, `manifest.json`, `versions.json`, `README.md`, `README_zh.md`, and release-note references are now synchronized for `1.8.5`.
+- **Welcome Modal Freshness**: The built-in recent-release digest no longer lags one patch behind the shipped plugin version.
+- **Packaging-Boundary Truth Lock**: Maintainer docs and generated verification templates now explicitly state that `audit:render-host` proves the current single-entry `main.js` + inline `srcdoc` contract, not finished heavy-runtime isolation.
+
+### Chores
+
+- Added `docs/releases/1.8.5.md` and `docs/releases/1.8.5.zh-CN.md`.
+- Kept the packaging / semantic-verification convergence direction anchored in current maintainer docs, generated helper output, and active Trellis task scaffolding.
+
+---
+
 ## 1.8.3
 
 ### Highlights
