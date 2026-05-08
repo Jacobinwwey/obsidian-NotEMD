@@ -65,10 +65,10 @@ function parseQuotedArrayLiteralValue(source, key) {
     }
 
     const values = [];
-    const valuePattern = /["']([^"']+)["']/g;
+    const valuePattern = /(["'`])([^"'`]+)\1/g;
     let valueMatch = valuePattern.exec(match[1]);
     while (valueMatch) {
-        values.push(valueMatch[1]);
+        values.push(valueMatch[2]);
         valueMatch = valuePattern.exec(match[1]);
     }
     return values;
@@ -81,18 +81,18 @@ function parseQuotedObjectLiteralValues(source, key) {
     }
 
     const values = [];
-    const valuePattern = /:\s*["']([^"']+)["']/g;
+    const valuePattern = /:\s*(["'`])([^"'`]+)\1/g;
     let valueMatch = valuePattern.exec(match[1]);
     while (valueMatch) {
-        values.push(valueMatch[1]);
+        values.push(valueMatch[2]);
         valueMatch = valuePattern.exec(match[1]);
     }
     return values;
 }
 
 function parseQuotedScalarValue(source, key) {
-    const match = source.match(new RegExp(`${key}\\s*:\\s*["']([^"']+)["']`, 'm'));
-    return match ? match[1] : '';
+    const match = source.match(new RegExp(`${key}\\s*:\\s*(["'\`])([^"'\`]+)\\1`, 'm'));
+    return match ? match[2] : '';
 }
 
 function resolveOutputTargetStatus({ outfile, outdir }) {
