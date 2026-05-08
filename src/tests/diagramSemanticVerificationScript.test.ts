@@ -57,7 +57,7 @@ describe('diagram semantic verification helper', () => {
             entryPoints: string[];
             outfile: string;
             outdir: string;
-            outputTargetStatus: 'outfile' | 'outdir' | 'unknown';
+            outputTargetStatus: 'outfile' | 'outdir' | 'unknown' | 'ambiguous';
             resolvedFromConfig: boolean;
         };
         let buildPackagingBoundaryChecklistLines: (packagingFacts?: {
@@ -65,7 +65,7 @@ describe('diagram semantic verification helper', () => {
             entryPoints: string[];
             outfile: string;
             outdir: string;
-            outputTargetStatus: 'outfile' | 'outdir' | 'unknown';
+            outputTargetStatus: 'outfile' | 'outdir' | 'unknown' | 'ambiguous';
             resolvedFromConfig: boolean;
         }) => string[];
         let buildSemanticVerificationTemplate: (args: {
@@ -78,7 +78,7 @@ describe('diagram semantic verification helper', () => {
                 entryPoints: string[];
                 outfile: string;
                 outdir: string;
-                outputTargetStatus: 'outfile' | 'outdir' | 'unknown';
+                outputTargetStatus: 'outfile' | 'outdir' | 'unknown' | 'ambiguous';
                 resolvedFromConfig: boolean;
             };
         }) => string;
@@ -229,6 +229,38 @@ const context = await esbuild.context({
                 const lines = buildPackagingBoundaryChecklistLines(facts);
                 expect(lines[0]).toContain('<unknown-output>');
                 expect(lines.some((line) => line.includes('output target was not resolved automatically'))).toBe(true);
+            } finally {
+                fs.rmSync(tempRoot, { recursive: true, force: true });
+            }
+        });
+
+        test('flags ambiguous output targets when both outfile and outdir are present', () => {
+            const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-esbuild-ambiguous-output-'));
+            const configPath = path.join(tempRoot, 'esbuild.config.mjs');
+            fs.writeFileSync(
+                configPath,
+                `import esbuild from "esbuild";
+const context = await esbuild.context({
+    entryPoints: ["src/main.ts"],
+    outfile: "main.js",
+    outdir: "dist"
+});
+`,
+                'utf8'
+            );
+
+            try {
+                const facts = resolvePackagingBoundaryFacts({ esbuildConfigPath: configPath });
+                expect(facts.entryPoints).toEqual(['src/main.ts']);
+                expect(facts.outfile).toBe('main.js');
+                expect(facts.outdir).toBe('dist');
+                expect(facts.outputTargetStatus).toBe('ambiguous');
+                expect(facts.resolvedFromConfig).toBe(true);
+
+                const lines = buildPackagingBoundaryChecklistLines(facts);
+                expect(lines[0]).toContain('outfile=main.js');
+                expect(lines[0]).toContain('outdir=dist/...');
+                expect(lines.some((line) => line.includes('both `outfile` and `outdir`'))).toBe(true);
             } finally {
                 fs.rmSync(tempRoot, { recursive: true, force: true });
             }
