@@ -50,5 +50,8 @@ describe('repo-saga chronicle coverage', () => {
         expect(source).toContain('recloneSourceRepo(source);');
         expect(source).toContain('assertWithinRepoSagaCacheRoot');
         expect(source).toContain('non-fast-forward or stale local state');
+        expect(source).toContain('let lastError = null;');
+        expect(source).toContain('trying next fallback');
+        expect(source).toContain('Could not execute repo-saga build command');
     });
 });

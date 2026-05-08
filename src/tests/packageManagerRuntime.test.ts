@@ -15,8 +15,8 @@ describe('package manager runtime helper', () => {
     test('prefers native pnpm before fallback wrappers', () => {
         expect(packageManagerCandidates()).toEqual([
             { command: 'pnpm', versionArgs: ['--version'], prefix: [] },
-            { command: 'corepack', versionArgs: ['--version'], prefix: ['pnpm'] },
-            { command: 'bun', versionArgs: ['--version'], prefix: ['x', 'pnpm'] }
+            { command: 'corepack', versionArgs: ['pnpm', '--version'], prefix: ['pnpm'] },
+            { command: 'bun', versionArgs: ['x', 'pnpm', '--version'], prefix: ['x', 'pnpm'] }
         ]);
     });
 
@@ -41,11 +41,11 @@ describe('package manager runtime helper', () => {
 
     test.each([
         {
-            candidate: { command: 'corepack', versionArgs: ['--version'], prefix: ['pnpm'] },
+            candidate: { command: 'corepack', versionArgs: ['pnpm', '--version'], prefix: ['pnpm'] },
             expectedSnippet: 'exec corepack pnpm "$@"'
         },
         {
-            candidate: { command: 'bun', versionArgs: ['--version'], prefix: ['x', 'pnpm'] },
+            candidate: { command: 'bun', versionArgs: ['x', 'pnpm', '--version'], prefix: ['x', 'pnpm'] },
             expectedSnippet: 'exec bun x pnpm "$@"'
         }
     ])('creates an inheritable pnpm shim for $candidate.command fallbacks', ({ candidate, expectedSnippet }) => {
