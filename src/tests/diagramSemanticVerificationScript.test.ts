@@ -38,9 +38,9 @@ describe('diagram semantic verification helper', () => {
         expect(runbookZh).toContain('npm run verify:diagram-semantics');
         expect(runbook).toContain('single-entry');
         expect(runbookZh).toContain('单入口');
-        expect(runbook).toContain('derived from current `entryPoints` / `outfile` values in `esbuild.config.mjs`');
+        expect(runbook).toContain('derived from current `entryPoints` / `outfile` / `outdir` values in `esbuild.config.mjs`');
         expect(runbookZh).toContain('`esbuild.config.mjs`');
-        expect(runbookZh).toContain('`entryPoints` / `outfile`');
+        expect(runbookZh).toContain('`entryPoints` / `outfile` / `outdir`');
         expect(releaseWorkflow).toContain('verify:diagram-semantics');
         expect(releaseWorkflowZh).toContain('verify:diagram-semantics');
         expect(releaseWorkflow).toContain('does not prove true heavy-runtime isolation');
@@ -56,12 +56,14 @@ describe('diagram semantic verification helper', () => {
             sourcePath: string;
             entryPoints: string[];
             outfile: string;
+            outdir: string;
             resolvedFromConfig: boolean;
         };
         let buildPackagingBoundaryChecklistLines: (packagingFacts?: {
             sourcePath: string;
             entryPoints: string[];
             outfile: string;
+            outdir: string;
             resolvedFromConfig: boolean;
         }) => string[];
         let buildSemanticVerificationTemplate: (args: {
@@ -73,6 +75,7 @@ describe('diagram semantic verification helper', () => {
                 sourcePath: string;
                 entryPoints: string[];
                 outfile: string;
+                outdir: string;
                 resolvedFromConfig: boolean;
             };
         }) => string;
@@ -150,6 +153,7 @@ describe('diagram semantic verification helper', () => {
             });
             expect(factsFromRepo.entryPoints).toContain('src/main.ts');
             expect(factsFromRepo.outfile).toBe('main.js');
+            expect(factsFromRepo.outdir).toBe('');
             expect(factsFromRepo.resolvedFromConfig).toBe(true);
 
             const fallbackFacts = resolvePackagingBoundaryFacts({
@@ -157,7 +161,42 @@ describe('diagram semantic verification helper', () => {
             });
             expect(fallbackFacts.entryPoints).toEqual(['<unknown-entry>']);
             expect(fallbackFacts.outfile).toBe('<unknown-outfile>');
+            expect(fallbackFacts.outdir).toBe('');
             expect(fallbackFacts.resolvedFromConfig).toBe(false);
+        });
+
+        test('supports object entryPoints plus outdir packaging configs', () => {
+            const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-esbuild-shape-'));
+            const configPath = path.join(tempRoot, 'esbuild.config.mjs');
+            fs.writeFileSync(
+                configPath,
+                `import esbuild from "esbuild";
+const context = await esbuild.context({
+    entryPoints: {
+        main: "src/main.ts",
+        host: "src/rendering/host/bootstrap.ts"
+    },
+    outdir: "dist"
+});
+`,
+                'utf8'
+            );
+
+            try {
+                const facts = resolvePackagingBoundaryFacts({ esbuildConfigPath: configPath });
+                expect(facts.entryPoints).toEqual(['src/main.ts', 'src/rendering/host/bootstrap.ts']);
+                expect(facts.outfile).toBe('');
+                expect(facts.outdir).toBe('dist');
+                expect(facts.resolvedFromConfig).toBe(true);
+
+                const lines = buildPackagingBoundaryChecklistLines(facts);
+                expect(lines[0]).toContain('entrypoint count');
+                expect(lines[0]).toContain('src/main.ts');
+                expect(lines[0]).toContain('src/rendering/host/bootstrap.ts');
+                expect(lines[0]).toContain('dist/...');
+            } finally {
+                fs.rmSync(tempRoot, { recursive: true, force: true });
+            }
         });
 
         test('keeps packaging facts and checklist wording aligned with the current esbuild config shape', () => {
@@ -195,6 +234,7 @@ describe('diagram semantic verification helper', () => {
                 sourcePath: path.join(repoRoot, 'esbuild.config.mjs'),
                 entryPoints: ['src/main.ts'],
                 outfile: 'main.js',
+                outdir: '',
                 resolvedFromConfig: true
             });
 

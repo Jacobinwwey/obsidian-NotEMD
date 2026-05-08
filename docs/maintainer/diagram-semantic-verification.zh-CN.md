@@ -11,7 +11,7 @@ npm run verify:diagram-semantics -- --vault "<vault-name>" --commit "<sha>" --ve
 ```
 
 这个 helper 不依赖 secrets。它只会生成 Markdown 核验模板、vault 感知的 CLI 命令清单、显式的 packaging-boundary 区块，以及各语义表面的证据区块；不会启动 Obsidian、不会读取本地凭据，也不会依赖仓库中跟踪的 vault 路径。
-其中 packaging-boundary 首行会从 `esbuild.config.mjs` 当前的 `entryPoints` / `outfile` 自动提取；若解析失败，helper 会输出显式占位提示，避免边界真值静默漂移。
+其中 packaging-boundary 首行会从 `esbuild.config.mjs` 当前的 `entryPoints` / `outfile` / `outdir` 自动提取；若解析失败，helper 会输出显式占位提示，避免边界真值静默漂移。
 
 ## 1. 何时必须使用本 Runbook
 
