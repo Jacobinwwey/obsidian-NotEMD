@@ -52,13 +52,15 @@ Goals:
    Supports `"..."`, `'...'`, and `` `...` `` literals; supports array/object `entryPoints`; scopes parsing to `esbuild.context({...})` options to avoid decoy keys.
 3. **Verification closure is now repeatable**
    helper behavior -> regression tests -> maintainer doc sync -> release wording alignment.
+4. **Stage-B contract definition has started with executable release-truth wiring**
+   The helper template now includes a `Packaging Contract` section that derives required release assets from `scripts/release/publish-github-release.js` and keeps dual-language release-note file expectations explicit.
 
 ### Still open beyond convergence hardening
 
 1. **True heavy-runtime packaging isolation**
    Not implemented yet; current truth is still single-entry `main.js + inline srcdoc`.
-2. **Stronger machine-free semantic harness**
-   Current model remains maintainer-local semantic checks + helper template + repo CI baseline.
+2. **Broader Stage-B contract promotion**
+   Packaging contract truth is now captured in the helper, but workflow/settings and selection/export contract promotion still depends on later packaging-boundary implementation constraints.
 
 ## 4. Concrete Next-Step Plan (Persisted)
 

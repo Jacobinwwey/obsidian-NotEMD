@@ -10,11 +10,12 @@ Template helper:
 npm run verify:diagram-semantics -- --vault "<vault-name>" --commit "<sha>" --version "<plugin-version>" --output ~/tmp/notemd-diagram-check.md
 ```
 
-The helper is secret-free. It generates a Markdown checklist template plus vault-aware CLI commands, an explicit packaging-boundary section, and surface evidence sections; it does not launch Obsidian, read local secrets, or rely on tracked vault paths.
+The helper is secret-free. It generates a Markdown checklist template plus vault-aware CLI commands, an explicit packaging-boundary section, a packaging-contract section, and surface evidence sections; it does not launch Obsidian, read local secrets, or rely on tracked vault paths.
 Its packaging boundary line is derived from current `entryPoints` / `outfile` / `outdir` values in `esbuild.config.mjs`; if parsing fails, the helper emits explicit placeholder wording so boundary drift is visible.
 If `entryPoints` are parsed but output target detection cannot resolve either `outfile` or `outdir`, the checklist now adds an explicit manual-confirmation line before packaging claims can be made.
 When output target detection succeeds, the checklist line now records whether the current truth came from `outfile` or `outdir` so packaging claims remain explicit.
 If both `outfile` and `outdir` are detected together, the checklist now treats that as ambiguous and requires explicit manual confirmation before packaging claims.
+Its packaging-contract section tracks release-asset and release-notes contract truth from `scripts/release/publish-github-release.js` so Stage-B contract definition stays aligned with release enforcement.
 
 ## 1. When This Runbook Is Required
 
@@ -125,7 +126,7 @@ Use this sequence unless the change is more narrowly scoped:
 5. Save evidence for each affected surface.
 6. Record results in PR notes, release handoff, or maintainer log.
 
-The generated helper template now also includes a packaging-boundary section. Do not skip it when the change touches render-host, preview, or heavier runtime behavior: it is the explicit reminder that today's packaging model is still single-entry, not true heavy-runtime isolation.
+The generated helper template now also includes packaging-boundary and packaging-contract sections. Do not skip either section when the change touches render-host, preview, or heavier runtime behavior: they are the explicit reminders that today's packaging model is still single-entry, not true heavy-runtime isolation, and that release packaging constraints must stay in sync.
 
 ## 6. Evidence Format
 

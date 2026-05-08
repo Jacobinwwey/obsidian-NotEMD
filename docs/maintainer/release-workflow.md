@@ -40,8 +40,8 @@ Recommended helper:
 ```bash
 npm run verify:diagram-semantics -- --vault "<vault-name>" --commit "<sha>" --version "<plugin-version>" --output ~/tmp/notemd-diagram-check.md
 ```
-The helper reads packaging entry/output facts from `esbuild.config.mjs`; keep that file as the packaging truth source when evaluating renderer-boundary claims.
-Treat the helper's packaging-boundary section as required truth maintenance for renderer-affecting changes: `npm run audit:render-host` does not prove true heavy-runtime isolation; it only proves the current self-contained `main.js` + inline `srcdoc` host contract.
+The helper reads packaging entry/output facts from `esbuild.config.mjs` and release packaging contract facts from `scripts/release/publish-github-release.js`; keep those files as packaging truth sources when evaluating renderer-boundary claims.
+Treat the helper's packaging-boundary and packaging-contract sections as required truth maintenance for renderer-affecting changes: `npm run audit:render-host` does not prove true heavy-runtime isolation; it only proves the current self-contained `main.js` + inline `srcdoc` host contract.
 
 ## 3. Version Synchronization
 
