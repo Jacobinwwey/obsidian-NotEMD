@@ -95,6 +95,16 @@ function parseQuotedScalarValue(source, key) {
     return match ? match[1] : '';
 }
 
+function resolveOutputTargetStatus({ outfile, outdir }) {
+    if (outfile) {
+        return 'outfile';
+    }
+    if (outdir) {
+        return 'outdir';
+    }
+    return 'unknown';
+}
+
 function resolvePackagingBoundaryFacts({
     esbuildConfigPath = path.resolve(__dirname, '..', 'esbuild.config.mjs')
 } = {}) {
@@ -105,12 +115,14 @@ function resolvePackagingBoundaryFacts({
         const entryPoints = arrayEntryPoints.length > 0 ? arrayEntryPoints : objectEntryPoints;
         const outfile = parseQuotedScalarValue(source, 'outfile');
         const outdir = parseQuotedScalarValue(source, 'outdir');
+        const outputTargetStatus = resolveOutputTargetStatus({ outfile, outdir });
 
         return {
             sourcePath: esbuildConfigPath,
             entryPoints: entryPoints.length > 0 ? entryPoints : ['<unknown-entry>'],
             outfile,
             outdir,
+            outputTargetStatus,
             resolvedFromConfig: entryPoints.length > 0 || Boolean(outfile) || Boolean(outdir)
         };
     } catch {
@@ -119,6 +131,7 @@ function resolvePackagingBoundaryFacts({
             entryPoints: ['<unknown-entry>'],
             outfile: '<unknown-outfile>',
             outdir: '',
+            outputTargetStatus: 'unknown',
             resolvedFromConfig: false
         };
     }
@@ -127,12 +140,13 @@ function resolvePackagingBoundaryFacts({
 function buildPackagingBoundaryChecklistLines(packagingFacts = resolvePackagingBoundaryFacts()) {
     const entrySummary = packagingFacts.entryPoints.join(', ');
     const entryCount = packagingFacts.entryPoints.length;
-    const outputDescriptor = packagingFacts.outfile
+    const outputTargetStatus = packagingFacts.outputTargetStatus || resolveOutputTargetStatus(packagingFacts);
+    const outputDescriptor = outputTargetStatus === 'outfile'
         ? packagingFacts.outfile
-        : (packagingFacts.outdir ? `${packagingFacts.outdir}/...` : '<unknown-output>');
-    const outputResolutionLine = outputDescriptor === '<unknown-output>'
+        : (outputTargetStatus === 'outdir' ? `${packagingFacts.outdir}/...` : '<unknown-output>');
+    const outputResolutionLine = outputTargetStatus === 'unknown'
         ? '- [ ] Build config output target was not resolved automatically; manually confirm whether this build uses `outfile` or `outdir` before making packaging claims.'
-        : '- [ ] Confirm build output target still matches packaging expectations (`outfile`/`outdir`) for this change.';
+        : `- [ ] Confirm build output target still matches packaging expectations (\`${outputTargetStatus}\`) for this change.`;
     const configFileName = path.basename(packagingFacts.sourcePath);
     const sourceDescriptor = packagingFacts.resolvedFromConfig
         ? `resolved from \`${configFileName}\``
