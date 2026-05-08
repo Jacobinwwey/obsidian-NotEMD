@@ -10,11 +10,12 @@
 npm run verify:diagram-semantics -- --vault "<vault-name>" --commit "<sha>" --version "<plugin-version>" --output ~/tmp/notemd-diagram-check.md
 ```
 
-这个 helper 不依赖 secrets。它只会生成 Markdown 核验模板、vault 感知的 CLI 命令清单、显式的 packaging-boundary 区块，以及各语义表面的证据区块；不会启动 Obsidian、不会读取本地凭据，也不会依赖仓库中跟踪的 vault 路径。
+这个 helper 不依赖 secrets。它只会生成 Markdown 核验模板、vault 感知的 CLI 命令清单、显式的 packaging-boundary 区块、packaging-contract 区块，以及各语义表面的证据区块；不会启动 Obsidian、不会读取本地凭据，也不会依赖仓库中跟踪的 vault 路径。
 其中 packaging-boundary 首行会从 `esbuild.config.mjs` 当前的 `entryPoints` / `outfile` / `outdir` 自动提取；若解析失败，helper 会输出显式占位提示，避免边界真值静默漂移。
 如果已解析到 `entryPoints`，但无法确定 `outfile` 与 `outdir`，检查清单会额外生成一条“必须人工确认输出目标”的提示，再允许下结论。
 如果输出目标已成功识别，清单会明确标记当前依据来自 `outfile` 还是 `outdir`，避免打包边界结论含糊。
 如果同时识别到 `outfile` 和 `outdir`，清单会将其视为歧义状态，并要求先人工确认有效输出目标，再给出打包结论。
+其中 packaging-contract 区块会从 `scripts/release/publish-github-release.js` 同步 release 资产与 release notes 契约真值，保证 Stage B 的契约定义与发布约束保持一致。
 
 ## 1. 何时必须使用本 Runbook
 
@@ -125,7 +126,7 @@ obsidian commands vault=<vault-name> filter=notemd
 5. 保存每个受影响表面的证据。
 6. 将结果记录到 PR 说明、release handoff 或维护者日志中。
 
-helper 现在还会额外生成一个 packaging-boundary 区块。只要改动触及 render-host、preview 或更重的运行时行为，就不应跳过这一段：它明确提醒当前打包模型仍是单入口，而不是真正完成了 heavy-runtime isolation。
+helper 现在还会额外生成 packaging-boundary 与 packaging-contract 两个区块。只要改动触及 render-host、preview 或更重的运行时行为，就不应跳过这两段：它们会明确提醒当前打包模型仍是单入口，而不是真正完成了 heavy-runtime isolation，同时 release 打包约束也必须保持同步。
 
 ## 6. 证据格式
 

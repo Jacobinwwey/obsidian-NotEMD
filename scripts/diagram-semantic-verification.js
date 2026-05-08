@@ -37,6 +37,8 @@ const SURFACE_DEFINITIONS = [
     }
 ];
 
+const DEFAULT_REQUIRED_RELEASE_ASSETS = ['main.js', 'manifest.json', 'styles.css', 'README.md'];
+
 const NORMALIZED_SURFACE_LOOKUP = new Map(
     SURFACE_DEFINITIONS.flatMap((surface) =>
         surface.aliases.map((alias) => [alias.toLowerCase(), surface])
@@ -233,6 +235,37 @@ function resolvePackagingBoundaryFacts({
     }
 }
 
+function normalizeRelativePath(filePath, basePath = path.resolve(__dirname, '..')) {
+    return path.relative(basePath, filePath).split(path.sep).join('/');
+}
+
+function resolveReleasePackagingContractFacts({
+    releaseHelperPath = path.resolve(__dirname, 'release', 'publish-github-release.js')
+} = {}) {
+    try {
+        const releaseHelper = require(releaseHelperPath);
+        const requiredAssets = Array.isArray(releaseHelper.REQUIRED_RELEASE_ASSETS)
+            ? releaseHelper.REQUIRED_RELEASE_ASSETS.filter((asset) => typeof asset === 'string' && asset.length > 0)
+            : [];
+
+        if (requiredAssets.length > 0) {
+            return {
+                sourcePath: releaseHelperPath,
+                requiredAssets,
+                resolvedFromReleaseHelper: true
+            };
+        }
+    } catch {
+        // fall through to default facts
+    }
+
+    return {
+        sourcePath: releaseHelperPath,
+        requiredAssets: [...DEFAULT_REQUIRED_RELEASE_ASSETS],
+        resolvedFromReleaseHelper: false
+    };
+}
+
 function buildPackagingBoundaryChecklistLines(packagingFacts = resolvePackagingBoundaryFacts()) {
     const entrySummary = packagingFacts.entryPoints.join(', ');
     const entryCount = packagingFacts.entryPoints.length;
@@ -263,6 +296,22 @@ function buildPackagingBoundaryChecklistLines(packagingFacts = resolvePackagingB
         '- [ ] Confirm `npm run audit:render-host` only proves the current self-contained `main.js` + inline `srcdoc` host contract.',
         '- [ ] Confirm no release note, handoff, or PR summary claims that true heavy-runtime isolation is already implemented.',
         '- [ ] If the change depends on stronger packaging guarantees, record that true heavy-runtime isolation is still pending and requires later multi-entry or dedicated-asset work.'
+    ];
+}
+
+function buildReleasePackagingContractChecklistLines(
+    releaseFacts = resolveReleasePackagingContractFacts()
+) {
+    const releaseHelperPath = normalizeRelativePath(releaseFacts.sourcePath);
+    const sourceDescriptor = releaseFacts.resolvedFromReleaseHelper
+        ? `derived from \`${releaseHelperPath}\``
+        : `fallback default because \`${releaseHelperPath}\` could not be loaded`;
+    const requiredAssets = releaseFacts.requiredAssets.map((asset) => `\`${asset}\``).join(', ');
+
+    return [
+        `- [ ] Confirm release asset contract remains ${sourceDescriptor}: ${requiredAssets}.`,
+        '- [ ] Confirm release notes contract remains dual-file: `docs/releases/<tag>.md` and `docs/releases/<tag>.zh-CN.md`.',
+        '- [ ] If packaging output shape changes (for example, moving from `outfile` to `outdir`), update release-helper tests and maintainer docs in the same change.'
     ];
 }
 
@@ -310,7 +359,14 @@ function buildEnvironmentCheckCommands(vaultName) {
     return commands;
 }
 
-function buildSemanticVerificationTemplate({ vaultName, commit, version, surfaces, packagingFacts }) {
+function buildSemanticVerificationTemplate({
+    vaultName,
+    commit,
+    version,
+    surfaces,
+    packagingFacts,
+    releasePackagingFacts
+}) {
     const repoGates = [
         'npm run build',
         'npm test -- --runInBand',
@@ -341,8 +397,11 @@ function buildSemanticVerificationTemplate({ vaultName, commit, version, surface
     }
 
     const packagingChecklistLines = buildPackagingBoundaryChecklistLines(packagingFacts);
+    const releasePackagingChecklistLines = buildReleasePackagingContractChecklistLines(releasePackagingFacts);
     headerLines.push('', '## Packaging Boundary', '');
     headerLines.push(...packagingChecklistLines);
+    headerLines.push('', '## Packaging Contract', '');
+    headerLines.push(...releasePackagingChecklistLines);
     headerLines.push('', '## Surface Evidence');
 
     for (const surface of surfaces) {
@@ -475,10 +534,12 @@ module.exports = {
     USAGE_TEXT,
     buildEnvironmentCheckCommands,
     buildPackagingBoundaryChecklistLines,
+    buildReleasePackagingContractChecklistLines,
     buildSemanticVerificationTemplate,
     main,
     parseArgs,
     resolvePackagingBoundaryFacts,
+    resolveReleasePackagingContractFacts,
     resolveRequestedSurfaces,
     writeSemanticVerificationTemplate
 };

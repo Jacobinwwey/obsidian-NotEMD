@@ -52,13 +52,15 @@ topic: packaging-semantic-convergence-progress-and-next-steps
    支持 `"..."`、`'...'`、`` `...` `` 三种字面量；支持 array/object `entryPoints`；支持上下文作用域解析（优先 `esbuild.context({...})`，避免同名 decoy 字段污染）。
 3. **验证闭环完整**
    helper 行为 -> 测试锁定 -> maintainer 文档同步 -> release 说明对齐，形成可重复演进路径。
+4. **Stage B 契约定义已开始进入可执行落地**
+   helper 模板现在新增 `Packaging Contract` 区块：从 `scripts/release/publish-github-release.js` 同步 release 必需资产，并显式检查双语 release notes 文件契约。
 
 ### 尚未进入实现层的边界
 
 1. **真正的 heavy-runtime packaging isolation**
    仍未进入多入口资产落地，当前仍是单入口 `main.js` + inline `srcdoc`。
-2. **machine-free semantic harness**
-   当前仍是“维护者本地流程 + helper 模板 + CI 基础门禁”，尚未引入更强自动化语义验证器。
+2. **更广泛的 Stage B 契约提升**
+   虽然 packaging contract 真值已进入 helper，但 workflow/settings 与 selection/export 的契约提升仍依赖后续真实 packaging-boundary 约束落地。
 
 ## 4. 下一阶段具体落盘方案（执行顺序）
 
