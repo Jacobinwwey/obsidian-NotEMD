@@ -706,7 +706,7 @@ Diese quartalsweise Chronik behält den ursprünglichen visuellen Stil von [repo
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.de.svg)
 
-_Zuletzt am 2026-05-08 aus dem aktuellen Arbeitsbaum aktualisiert. Datum des letzten Commits: 2026-05-07._
+_Zuletzt für das Release-Tag `1.8.5` am 2026-05-08 aktualisiert. Datum des letzten Commits: 2026-05-08._
 <!-- repo-chronicle:end -->
 
 

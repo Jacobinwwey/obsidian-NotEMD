@@ -699,7 +699,7 @@ Denne kvartalsvise krønike bevarer den oprindelige visuelle stil fra [repo-saga
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.da.svg)
 
-_Senest opdateret fra det aktuelle arbejdstræ den 2026-05-08. Seneste commit-dato: 2026-05-07._
+_Senest opdateret for udgivelsestagget `1.8.5` den 2026-05-08. Seneste commit-dato: 2026-05-08._
 <!-- repo-chronicle:end -->
 
 
