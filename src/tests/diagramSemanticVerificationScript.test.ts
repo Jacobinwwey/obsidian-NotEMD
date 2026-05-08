@@ -205,6 +205,60 @@ const context = await esbuild.context({
             }
         });
 
+        test('supports backtick-quoted array entryPoints and outfile values', () => {
+            const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-esbuild-backtick-array-'));
+            const configPath = path.join(tempRoot, 'esbuild.config.mjs');
+            fs.writeFileSync(
+                configPath,
+                `import esbuild from "esbuild";
+const context = await esbuild.context({
+    entryPoints: [\`src/main.ts\`, \`src/rendering/host/bootstrap.ts\`],
+    outfile: \`main.js\`
+});
+`,
+                'utf8'
+            );
+
+            try {
+                const facts = resolvePackagingBoundaryFacts({ esbuildConfigPath: configPath });
+                expect(facts.entryPoints).toEqual(['src/main.ts', 'src/rendering/host/bootstrap.ts']);
+                expect(facts.outfile).toBe('main.js');
+                expect(facts.outdir).toBe('');
+                expect(facts.outputTargetStatus).toBe('outfile');
+                expect(facts.resolvedFromConfig).toBe(true);
+            } finally {
+                fs.rmSync(tempRoot, { recursive: true, force: true });
+            }
+        });
+
+        test('supports backtick-quoted object entryPoints and outdir values', () => {
+            const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-esbuild-backtick-object-'));
+            const configPath = path.join(tempRoot, 'esbuild.config.mjs');
+            fs.writeFileSync(
+                configPath,
+                `import esbuild from "esbuild";
+const context = await esbuild.context({
+    entryPoints: {
+        main: \`src/main.ts\`
+    },
+    outdir: \`dist\`
+});
+`,
+                'utf8'
+            );
+
+            try {
+                const facts = resolvePackagingBoundaryFacts({ esbuildConfigPath: configPath });
+                expect(facts.entryPoints).toEqual(['src/main.ts']);
+                expect(facts.outfile).toBe('');
+                expect(facts.outdir).toBe('dist');
+                expect(facts.outputTargetStatus).toBe('outdir');
+                expect(facts.resolvedFromConfig).toBe(true);
+            } finally {
+                fs.rmSync(tempRoot, { recursive: true, force: true });
+            }
+        });
+
         test('flags unresolved output targets when entry points parse but outfile/outdir are missing', () => {
             const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-esbuild-missing-output-'));
             const configPath = path.join(tempRoot, 'esbuild.config.mjs');
