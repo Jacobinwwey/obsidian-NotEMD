@@ -93,6 +93,20 @@ describe('diagram command architecture', () => {
         }));
     });
 
+    test('exposes previewDiagramCommand as the canonical preview entrypoint', () => {
+        expect(typeof (plugin as any).previewDiagramCommand).toBe('function');
+    });
+
+    test('keeps previewExperimentalDiagramCommand as a compatibility alias over previewDiagramCommand', async () => {
+        const previewSpy = jest
+            .spyOn(plugin as any, 'previewDiagramCommand')
+            .mockResolvedValue(undefined);
+
+        await (plugin as any).previewExperimentalDiagramCommand(file, reporter);
+
+        expect(previewSpy).toHaveBeenCalledWith(file, reporter);
+    });
+
     test('shared diagram command shapes operation input before delegating artifact execution', async () => {
         (mockApp.vault.read as jest.Mock).mockResolvedValue('# Topic');
         jest.spyOn(plugin as any, 'executeArtifactDiagramCommand').mockResolvedValue({
@@ -254,10 +268,10 @@ describe('diagram command architecture', () => {
         }));
     });
 
-    test('preview command reads vega-lite from file without calling generateDiagramCommand', async () => {
+    test('canonical preview command reads vega-lite from file without calling generateDiagramCommand', async () => {
         const sharedSpy = jest.spyOn(plugin as any, 'generateDiagramCommand');
         const previewSpy = jest
-            .spyOn(diagramCommandHostAdapter, 'runPreviewExperimentalDiagramCommandWithHost')
+            .spyOn(diagramCommandHostAdapter, 'runPreviewDiagramCommandWithHost')
             .mockResolvedValue({
                 kind: 'success',
                 sourcePath: 'Notes/Topic.md',
@@ -271,15 +285,15 @@ describe('diagram command architecture', () => {
                 previewOpened: true
             } as any);
 
-        await (plugin as any).previewExperimentalDiagramCommand(file, reporter);
+        await (plugin as any).previewDiagramCommand(file, reporter);
 
         expect(sharedSpy).not.toHaveBeenCalled();
         expect(previewSpy).toHaveBeenCalled();
     });
 
-    test('preview command delegates lifecycle and preview orchestration to extracted diagram host adapter wrapper', async () => {
+    test('canonical preview command delegates lifecycle and preview orchestration to extracted diagram host adapter wrapper', async () => {
         const commandSpy = jest
-            .spyOn(diagramCommandHostAdapter, 'runPreviewExperimentalDiagramCommandWithHost')
+            .spyOn(diagramCommandHostAdapter, 'runPreviewDiagramCommandWithHost')
             .mockResolvedValue({
                 kind: 'success',
                 sourcePath: 'Notes/Topic.md',
@@ -293,7 +307,7 @@ describe('diagram command architecture', () => {
                 previewOpened: true
             } as any);
 
-        await (plugin as any).previewExperimentalDiagramCommand(file, reporter);
+        await (plugin as any).previewDiagramCommand(file, reporter);
 
         expect(commandSpy).toHaveBeenCalledWith(
             expect.objectContaining({
@@ -323,9 +337,9 @@ describe('diagram command architecture', () => {
         expect(ids).toContain('notemd-preview-experimental-diagram');
     });
 
-    test('canonical generate command delegates to the experimental save flow', async () => {
+    test('canonical generate command delegates to the canonical save flow', async () => {
         const canonicalCall = jest
-            .spyOn(plugin as any, 'generateExperimentalDiagramCommand')
+            .spyOn(plugin as any, 'generateDiagramCommand')
             .mockResolvedValue(undefined);
         plugin.addCommand = jest.fn((command: any) => {
             if (command.id === 'notemd-generate-diagram') {
@@ -336,12 +350,16 @@ describe('diagram command architecture', () => {
         plugin.onload();
         await Promise.resolve();
 
-        expect(canonicalCall).toHaveBeenCalledWith(file, expect.anything());
+        expect(canonicalCall).toHaveBeenCalledWith(
+            file,
+            expect.anything(),
+            expect.objectContaining({ executionMode: 'save-artifact' })
+        );
     });
 
-    test('canonical preview command delegates to the preview flow', async () => {
+    test('canonical preview command delegates to the canonical preview flow', async () => {
         const canonicalCall = jest
-            .spyOn(plugin as any, 'previewExperimentalDiagramCommand')
+            .spyOn(plugin as any, 'previewDiagramCommand')
             .mockResolvedValue(undefined);
         plugin.addCommand = jest.fn((command: any) => {
             if (command.id === 'notemd-preview-diagram') {

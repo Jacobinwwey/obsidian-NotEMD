@@ -42,6 +42,15 @@ describe('workflowButtons parser', () => {
         expect(result.errors[0]).toContain('Unknown action');
     });
 
+    test('normalizes legacy experimental diagram action ids to canonical workflow actions', () => {
+        const dsl = 'Diagram Flow::generate-experimental-diagram>preview-experimental-diagram';
+        const result = parseCustomWorkflowButtonsDsl(dsl);
+
+        expect(result.errors).toEqual([]);
+        expect(result.buttons).toHaveLength(1);
+        expect(result.buttons[0].actions).toEqual(['generate-diagram', 'preview-diagram']);
+    });
+
     test('resolveCustomWorkflowButtons falls back to default when DSL is invalid', () => {
         const result = resolveCustomWorkflowButtons('Broken line without separator');
 
@@ -86,12 +95,12 @@ describe('workflowButtons parser', () => {
         expect(getSidebarActionRequiredContext('test-llm-connection')).toBe('none');
         expect(getSidebarActionSideEffectClass('test-llm-connection')).toBe('read-only');
 
-        expect(getSidebarActionAutomationLevel('generate-experimental-diagram')).toBe('requires-active-file');
-        expect(getSidebarActionRequiredContext('generate-experimental-diagram')).toBe('active-file');
-        expect(getSidebarActionSideEffectClass('generate-experimental-diagram')).toBe('write-file');
+        expect(getSidebarActionAutomationLevel('generate-diagram')).toBe('requires-active-file');
+        expect(getSidebarActionRequiredContext('generate-diagram')).toBe('active-file');
+        expect(getSidebarActionSideEffectClass('generate-diagram')).toBe('write-file');
 
-        expect(getSidebarActionAutomationLevel('preview-experimental-diagram')).toBe('interactive-ui');
-        expect(getSidebarActionRequiredContext('preview-experimental-diagram')).toBe('preview-ui');
-        expect(getSidebarActionSideEffectClass('preview-experimental-diagram')).toBe('preview-ui');
+        expect(getSidebarActionAutomationLevel('preview-diagram')).toBe('interactive-ui');
+        expect(getSidebarActionRequiredContext('preview-diagram')).toBe('preview-ui');
+        expect(getSidebarActionSideEffectClass('preview-diagram')).toBe('preview-ui');
     });
 });

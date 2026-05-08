@@ -3,6 +3,11 @@ import { AutomationLevel, RequiredContext, SideEffectClass } from './operations/
 
 type SidebarActionTranslationKey = keyof NotemdEnglishStrings['sidebar']['actions'];
 
+const LEGACY_SIDEBAR_ACTION_ALIASES = {
+    'generate-experimental-diagram': 'generate-diagram',
+    'preview-experimental-diagram': 'preview-diagram'
+} as const;
+
 export const SIDEBAR_ACTION_DEFINITIONS = [
     { id: 'process-current-add-links', label: 'Process file (add links)', translationKey: 'processCurrentAddLinks', category: 'core', automationLevel: 'requires-active-file', requiredContext: 'active-file', sideEffectClass: 'write-file' },
     { id: 'process-folder-add-links', label: 'Process folder (add links)', translationKey: 'processFolderAddLinks', category: 'core', automationLevel: 'interactive-ui', requiredContext: 'folder-selection', sideEffectClass: 'batch-write' },
@@ -10,8 +15,8 @@ export const SIDEBAR_ACTION_DEFINITIONS = [
     { id: 'batch-generate-from-titles', label: 'Batch generate from titles', translationKey: 'batchGenerateFromTitles', category: 'generation', automationLevel: 'interactive-ui', requiredContext: 'folder-selection', sideEffectClass: 'batch-write' },
     { id: 'research-and-summarize', label: 'Research & summarize', translationKey: 'researchAndSummarize', category: 'generation', automationLevel: 'requires-selection', requiredContext: 'editor-selection', sideEffectClass: 'write-file' },
     { id: 'summarize-as-mermaid', label: 'Summarise as Mermaid diagram', translationKey: 'summarizeAsMermaid', category: 'generation', automationLevel: 'requires-active-file', requiredContext: 'active-file', sideEffectClass: 'write-file' },
-    { id: 'generate-experimental-diagram', label: 'Generate diagram (experimental)', translationKey: 'generateExperimentalDiagram', category: 'generation', automationLevel: 'requires-active-file', requiredContext: 'active-file', sideEffectClass: 'write-file' },
-    { id: 'preview-experimental-diagram', label: 'Preview diagram (experimental)', translationKey: 'previewExperimentalDiagram', category: 'generation', automationLevel: 'interactive-ui', requiredContext: 'preview-ui', sideEffectClass: 'preview-ui' },
+    { id: 'generate-diagram', label: 'Generate diagram', translationKey: 'generateExperimentalDiagram', category: 'generation', automationLevel: 'requires-active-file', requiredContext: 'active-file', sideEffectClass: 'write-file' },
+    { id: 'preview-diagram', label: 'Preview diagram', translationKey: 'previewExperimentalDiagram', category: 'generation', automationLevel: 'interactive-ui', requiredContext: 'preview-ui', sideEffectClass: 'preview-ui' },
     { id: 'translate-current-file', label: 'Translate current file', translationKey: 'translateCurrentFile', category: 'translation', automationLevel: 'requires-active-file', requiredContext: 'active-file', sideEffectClass: 'write-file' },
     { id: 'batch-translate-folder', label: 'Batch translate folder', translationKey: 'batchTranslateFolder', category: 'translation', automationLevel: 'interactive-ui', requiredContext: 'folder-selection', sideEffectClass: 'batch-write' },
     { id: 'extract-concepts-current', label: 'Extract concepts (current file)', translationKey: 'extractConceptsCurrent', category: 'knowledge', automationLevel: 'requires-active-file', requiredContext: 'active-file', sideEffectClass: 'write-file' },
@@ -28,6 +33,8 @@ export const SIDEBAR_ACTION_DEFINITIONS = [
 
 export type SidebarActionId = typeof SIDEBAR_ACTION_DEFINITIONS[number]['id'];
 export type ActionCategory = typeof SIDEBAR_ACTION_DEFINITIONS[number]['category'];
+export type LegacySidebarActionId = keyof typeof LEGACY_SIDEBAR_ACTION_ALIASES;
+export type SidebarActionLookupId = SidebarActionId | LegacySidebarActionId;
 
 export interface CustomWorkflowButton {
     id: string;
@@ -56,23 +63,27 @@ export const DEFAULT_CUSTOM_WORKFLOW_BUTTON_NAME = 'One-Click Extract';
 export const DEFAULT_CUSTOM_WORKFLOW_BUTTONS_DSL =
     `${DEFAULT_CUSTOM_WORKFLOW_BUTTON_NAME}::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix`;
 
-export function getSidebarActionDefinition(actionId: SidebarActionId) {
-    return ACTION_DEFINITION_MAP.get(actionId);
+export function normalizeSidebarActionId(actionId: SidebarActionLookupId): SidebarActionId {
+    return (LEGACY_SIDEBAR_ACTION_ALIASES[actionId as LegacySidebarActionId] ?? actionId) as SidebarActionId;
 }
 
-export function getSidebarActionAutomationLevel(actionId: SidebarActionId): AutomationLevel | undefined {
+export function getSidebarActionDefinition(actionId: SidebarActionLookupId) {
+    return ACTION_DEFINITION_MAP.get(normalizeSidebarActionId(actionId));
+}
+
+export function getSidebarActionAutomationLevel(actionId: SidebarActionLookupId): AutomationLevel | undefined {
     return getSidebarActionDefinition(actionId)?.automationLevel;
 }
 
-export function getSidebarActionRequiredContext(actionId: SidebarActionId): RequiredContext | undefined {
+export function getSidebarActionRequiredContext(actionId: SidebarActionLookupId): RequiredContext | undefined {
     return getSidebarActionDefinition(actionId)?.requiredContext;
 }
 
-export function getSidebarActionSideEffectClass(actionId: SidebarActionId): SideEffectClass | undefined {
+export function getSidebarActionSideEffectClass(actionId: SidebarActionLookupId): SideEffectClass | undefined {
     return getSidebarActionDefinition(actionId)?.sideEffectClass;
 }
 
-export function getSidebarActionLabel(strings: NotemdEnglishStrings, actionId: SidebarActionId): string {
+export function getSidebarActionLabel(strings: NotemdEnglishStrings, actionId: SidebarActionLookupId): string {
     const definition = getSidebarActionDefinition(actionId);
     if (!definition) {
         return actionId;
@@ -81,7 +92,7 @@ export function getSidebarActionLabel(strings: NotemdEnglishStrings, actionId: S
     return strings.sidebar.actions[definition.translationKey as SidebarActionTranslationKey]?.label || definition.label;
 }
 
-export function getSidebarActionTooltip(strings: NotemdEnglishStrings, actionId: SidebarActionId): string {
+export function getSidebarActionTooltip(strings: NotemdEnglishStrings, actionId: SidebarActionLookupId): string {
     const definition = getSidebarActionDefinition(actionId);
     if (!definition) {
         return actionId;
@@ -109,7 +120,8 @@ function parseActions(rawActions: string): SidebarActionId[] {
     return rawActions
         .split('>')
         .map(part => part.trim())
-        .filter(Boolean) as SidebarActionId[];
+        .filter(Boolean)
+        .map(part => normalizeSidebarActionId(part as SidebarActionLookupId));
 }
 
 export function parseCustomWorkflowButtonsDsl(dsl: string): ParsedWorkflowButtonsResult {

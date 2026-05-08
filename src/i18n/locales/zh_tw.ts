@@ -22,8 +22,8 @@ export const STRINGS_ZH_TW: DeepPartial<NotemdEnglishStrings> = {
         importProviderProfiles: '匯入提供者設定檔',
         exportCliCapabilityManifest: '匯出 CLI 能力清單',
         exportCliInvocationContract: '匯出 CLI 呼叫契約',
-        generateExperimentalDiagram: '生成圖形（實驗性）',
-        previewExperimentalDiagram: '預覽圖形（實驗性）'
+        generateExperimentalDiagram: '生成圖形',
+        previewExperimentalDiagram: '預覽圖形'
     },
     plugin: {
         viewName: 'Notemd 工作台',
@@ -471,12 +471,12 @@ export const STRINGS_ZH_TW: DeepPartial<NotemdEnglishStrings> = {
                 tooltip: '根據目前筆記生成 Mermaid 圖表摘要。'
             },
             generateExperimentalDiagram: {
-                label: '生成圖形（實驗性）',
-                tooltip: '為目前筆記生成並儲存實驗性圖形產物檔案。'
+                label: '生成圖形',
+                tooltip: '為目前筆記生成並儲存圖形產物檔案。'
             },
             previewExperimentalDiagram: {
-                label: '預覽圖形（實驗性）',
-                tooltip: '生成實驗性圖形預覽，但不儲存產物檔案。'
+                label: '預覽圖形',
+                tooltip: '生成圖形預覽，但不儲存產物檔案。'
             },
             translateCurrentFile: {
                 label: '翻譯目前檔案',
@@ -641,10 +641,10 @@ export const STRINGS_ZH_TW: DeepPartial<NotemdEnglishStrings> = {
         failedTranslateFileWithMessage: '翻譯檔案失敗：{message}。請查看主控台以取得詳細資訊。',
         mermaidSummarizationComplete: 'Mermaid 圖摘要完成！',
         mermaidSummarizationError: '摘要錯誤：{message}',
-        experimentalDiagramComplete: '實驗性圖形生成完成！',
-        experimentalDiagramPreviewReady: '實驗性圖形預覽已就緒！',
+        experimentalDiagramComplete: '圖形生成完成！',
+        experimentalDiagramPreviewReady: '圖形預覽已就緒！',
         experimentalDiagramManualFixHint: '圖形可能仍需手動修復，請查看日誌以取得詳細資訊。',
-        experimentalDiagramError: '實驗性圖形生成失敗：{message}',
+        experimentalDiagramError: '圖形生成失敗：{message}',
         conceptExtractionSuccess: '概念擷取完成！共找到並建立了 {count} 個概念筆記。',
         noConceptsFoundToExtract: '找不到可擷取的概念。',
         conceptExtractionError: '概念擷取過程中發生錯誤：{message}。',

@@ -2,7 +2,7 @@ import { STRINGS_EN } from '../i18n/locales/en';
 import {
     previewVegaLiteArtifactFromMarkdown,
     runGenerateDiagramCommandWithHost,
-    runPreviewExperimentalDiagramCommandWithHost
+    runPreviewDiagramCommandWithHost
 } from '../operations/diagramCommandHostAdapter';
 import { mockSettings } from './__mocks__/settings';
 
@@ -131,7 +131,7 @@ describe('diagram command host adapter', () => {
         const file = { name: 'Topic.md', path: 'Notes/Topic.md' };
         host.readFile.mockResolvedValue('# Chart\n\n```vega-lite\n{\"mark\":\"bar\"}\n```');
 
-        const result = await runPreviewExperimentalDiagramCommandWithHost(host as any, file as any, reporter as any);
+        const result = await runPreviewDiagramCommandWithHost(host as any, file as any, reporter as any);
 
         expect(result).toMatchObject({
             kind: 'success',
@@ -142,7 +142,7 @@ describe('diagram command host adapter', () => {
             })
         });
         expect(host.finalizeReporter).toHaveBeenCalledWith(reporter);
-        expect(host.createDiagramHostAdapter().notify).toHaveBeenCalledWith('Experimental diagram preview is ready!');
+        expect(host.createDiagramHostAdapter().notify).toHaveBeenCalledWith('Diagram preview is ready!');
     });
 
     test('preview helper keeps using markdown vega-lite fence extraction for direct preview', () => {
