@@ -24,7 +24,7 @@ Notemd meningkatkan alur kerja Obsidian Anda dengan mengintegrasikan berbagai La
 
 Jika Anda suka menggunakan Notemd, mohon pertimbangkan untuk [⭐ memberi Bintang di GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) atau [☕️ membelikan saya kopi](https://ko-fi.com/jacobinwwey).
 
-**Versi:** 1.8.4
+**Versi:** 1.8.5
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
@@ -696,7 +696,7 @@ MIT License. Lihat file [LICENSE](LICENSE) untuk detailnya.
 ---
 
 
-*Notemd v1.8.4 - Tingkatkan knowledge graph Obsidian Anda dengan AI.*
+*Notemd v1.8.5 - Tingkatkan knowledge graph Obsidian Anda dengan AI.*
 
 
 <!-- repo-chronicle:start -->
@@ -706,7 +706,7 @@ Kronik triwulanan ini mempertahankan gaya visual asli [repo-saga](https://github
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.id.svg)
 
-_Terakhir diperbarui dari salinan kerja saat ini pada 2026-05-05. Tanggal commit terbaru: 2026-05-05._
+_Terakhir diperbarui dari salinan kerja saat ini pada 2026-05-08. Tanggal commit terbaru: 2026-05-07._
 <!-- repo-chronicle:end -->
 
 
