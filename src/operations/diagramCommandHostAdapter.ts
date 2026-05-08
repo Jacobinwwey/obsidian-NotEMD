@@ -74,7 +74,7 @@ export type DiagramCommandRunResult =
         errorMessage: string;
     };
 
-export type PreviewExperimentalDiagramCommandResult =
+export type PreviewDiagramCommandResult =
     | {
         kind: 'success';
         sourcePath: string;
@@ -88,6 +88,8 @@ export type PreviewExperimentalDiagramCommandResult =
         actionLabel: string;
         errorMessage: string;
     };
+
+export type PreviewExperimentalDiagramCommandResult = PreviewDiagramCommandResult;
 
 export interface DiagramCommandRunHost {
     loadSettings: () => Promise<void>;
@@ -221,27 +223,27 @@ export async function completeArtifactDiagramCommand(
 
     if (params.executionMode === 'preview-artifact') {
         params.reporter.log(
-            `Experimental diagram preview produced target "${params.result.artifact.target}" with intent "${params.result.spec.intent}".`
+            `Diagram preview produced target "${params.result.artifact.target}" with intent "${params.result.spec.intent}".`
         );
         params.host.openPreview(params.result.artifact, params.file.path, false);
         params.reporter.updateStatus(params.getActionCompleteText(params.actionLabel), 100);
-        params.reporter.log(`Experimental diagram preview opened for: ${params.file.path}`);
+        params.reporter.log(`Diagram preview opened for: ${params.file.path}`);
         params.host.notify(params.previewReadyNotice);
         return undefined;
     }
 
     params.reporter.log(
-        `Experimental diagram pipeline produced target "${params.result.artifact.target}" with intent "${params.result.spec.intent}".`
+        `Diagram pipeline produced target "${params.result.artifact.target}" with intent "${params.result.spec.intent}".`
     );
     params.reporter.updateStatus(params.getStepStatusText(2, 3, params.actionLabel), 85);
 
     const outputFilePath = await params.host.saveArtifact(params.file, params.result.artifact, params.reporter);
     if (params.result.artifact.target === 'mermaid' && params.autoFixAfterGenerate) {
-        await maybeAutoFixGeneratedMermaid(params.host, outputFilePath, params.reporter, 'experimental diagram generation');
+        await maybeAutoFixGeneratedMermaid(params.host, outputFilePath, params.reporter, 'diagram generation');
     }
 
     params.reporter.updateStatus(params.getActionCompleteText(params.actionLabel), 100);
-    params.reporter.log(`Experimental diagram saved to: ${outputFilePath}`);
+    params.reporter.log(`Diagram saved to: ${outputFilePath}`);
     params.host.notify(params.completeNotice);
     maybeOpenSavedFile(params.host, outputFilePath);
 
@@ -303,10 +305,10 @@ function logDiagramCommandStart(
             reporter.log(`Starting Mermaid summarization for ${fileName}...`);
             break;
         case 'save-artifact':
-            reporter.log(`Starting experimental diagram generation for ${fileName}...`);
+            reporter.log(`Starting diagram generation for ${fileName}...`);
             break;
         case 'preview-artifact':
-            reporter.log(`Starting experimental diagram preview for ${fileName}...`);
+            reporter.log(`Starting diagram preview for ${fileName}...`);
             break;
     }
 }
@@ -393,14 +395,14 @@ export async function runGenerateDiagramCommandWithHost(
                 host.logError('Summarization Error:', error);
                 break;
             case 'save-artifact':
-                useReporter.log(`Error during experimental diagram generation: ${message}`);
+                useReporter.log(`Error during diagram generation: ${message}`);
                 diagramHost.notify(formatI18n(i18n.notices.experimentalDiagramError, { message }));
-                host.logError('Experimental diagram generation error:', error);
+                host.logError('Diagram generation error:', error);
                 break;
             case 'preview-artifact':
-                useReporter.log(`Error during experimental diagram preview: ${message}`);
+                useReporter.log(`Error during diagram preview: ${message}`);
                 diagramHost.notify(formatI18n(i18n.notices.experimentalDiagramError, { message }));
-                host.logError('Experimental diagram preview error:', error);
+                host.logError('Diagram preview error:', error);
                 break;
         }
 
@@ -420,7 +422,7 @@ export async function runGenerateDiagramCommandWithHost(
     }
 }
 
-export async function runPreviewExperimentalDiagramCommandWithHost(
+export async function runPreviewDiagramCommandWithHost(
     host: Pick<
         DiagramCommandRunHost,
         | 'getUiStrings'
@@ -438,7 +440,7 @@ export async function runPreviewExperimentalDiagramCommandWithHost(
     >,
     file: TFile,
     reporter: ProgressReporter
-): Promise<PreviewExperimentalDiagramCommandResult | null> {
+): Promise<PreviewDiagramCommandResult | null> {
     const diagramHost = host.createDiagramHostAdapter();
     const i18n = host.getUiStrings();
     const actionLabel = host.getActionLabel('preview-artifact', i18n);
@@ -488,3 +490,5 @@ export async function runPreviewExperimentalDiagramCommandWithHost(
         host.finalizeReporter(reporter);
     }
 }
+
+export const runPreviewExperimentalDiagramCommandWithHost = runPreviewDiagramCommandWithHost;

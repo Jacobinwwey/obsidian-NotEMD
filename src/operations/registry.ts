@@ -695,7 +695,7 @@ const OPERATION_DEFINITIONS: OperationDefinition[] = [
         requiredContext: 'none',
         sideEffectClass: 'read-only',
         commandBindings: [
-            createWorkflowCommandBinding('notemd-generate-diagram', 'generate-experimental-diagram', {
+            createWorkflowCommandBinding('notemd-generate-diagram', 'generate-diagram', {
                 defaultInput: { outputMode: 'artifact' }
             }),
             createWorkflowCommandBinding('notemd-summarize-as-mermaid', 'summarize-as-mermaid', {
@@ -704,7 +704,7 @@ const OPERATION_DEFINITIONS: OperationDefinition[] = [
                     compatibilityMode: 'legacy-mermaid'
                 }
             }),
-            createWorkflowCommandBinding('notemd-generate-experimental-diagram', 'generate-experimental-diagram', {
+            createWorkflowCommandBinding('notemd-generate-experimental-diagram', 'generate-diagram', {
                 mappingKind: 'legacy-alias',
                 includeInCapabilityManifest: false,
                 defaultInput: { outputMode: 'artifact' }
@@ -720,8 +720,8 @@ const OPERATION_DEFINITIONS: OperationDefinition[] = [
         requiredContext: 'preview-ui',
         sideEffectClass: 'preview-ui',
         commandBindings: [
-            createWorkflowCommandBinding('notemd-preview-diagram', 'preview-experimental-diagram'),
-            createWorkflowCommandBinding('notemd-preview-experimental-diagram', 'preview-experimental-diagram', {
+            createWorkflowCommandBinding('notemd-preview-diagram', 'preview-diagram'),
+            createWorkflowCommandBinding('notemd-preview-experimental-diagram', 'preview-diagram', {
                 mappingKind: 'legacy-alias',
                 includeInCapabilityManifest: false
             })

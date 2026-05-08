@@ -48,7 +48,7 @@ import {
     DiagramCommandRunHost,
     DiagramCommandUiStrings,
     runGenerateDiagramCommandWithHost,
-    runPreviewExperimentalDiagramCommandWithHost
+    runPreviewDiagramCommandWithHost
 } from './operations/diagramCommandHostAdapter';
 import {
     DiagramCommandExecutionHost,
@@ -502,14 +502,16 @@ export default class NotemdPlugin extends Plugin {
         this.registerEditorDiagramCommand(
             'notemd-generate-diagram',
             uiStrings.commands.generateExperimentalDiagram,
-            this.generateExperimentalDiagramCommand
+            async (file, reporter) => {
+                await this.generateDiagramCommand(file, reporter, { executionMode: 'save-artifact' });
+            }
         );
 
         this.registerEditorDiagramCommand(
             'notemd-preview-diagram',
             uiStrings.commands.previewExperimentalDiagram,
             async (file, reporter) => {
-                await this.previewExperimentalDiagramCommand(file, reporter);
+                await this.previewDiagramCommand(file, reporter);
             }
         );
 
@@ -1387,12 +1389,16 @@ export default class NotemdPlugin extends Plugin {
         await this.generateDiagramCommand(file, reporter, { executionMode: 'save-artifact' });
     }
 
-    async previewExperimentalDiagramCommand(file: TFile, reporter: ProgressReporter) {
-        return runPreviewExperimentalDiagramCommandWithHost(
+    async previewDiagramCommand(file: TFile, reporter: ProgressReporter) {
+        return runPreviewDiagramCommandWithHost(
             this.createDiagramCommandRunHost(),
             file,
             reporter
         );
+    }
+
+    async previewExperimentalDiagramCommand(file: TFile, reporter: ProgressReporter) {
+        return this.previewDiagramCommand(file, reporter);
     }
 
     async extractConceptsCommand(reporter?: ProgressReporter) {

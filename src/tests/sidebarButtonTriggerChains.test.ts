@@ -60,6 +60,8 @@ function createPluginMock() {
         }),
         researchAndSummarizeCommand: jest.fn().mockResolvedValue(undefined),
         summarizeToMermaidCommand: jest.fn().mockResolvedValue(undefined),
+        generateDiagramCommand: jest.fn().mockResolvedValue(undefined),
+        previewDiagramCommand: jest.fn().mockResolvedValue(undefined),
         generateExperimentalDiagramCommand: jest.fn().mockResolvedValue(undefined),
         previewExperimentalDiagramCommand: jest.fn().mockResolvedValue(undefined),
         translateFileCommand: jest.fn().mockResolvedValue(undefined),
@@ -115,8 +117,8 @@ describe('NotemdSidebarView button trigger chains', () => {
             'batch-generate-from-titles',
             'research-and-summarize',
             'summarize-as-mermaid',
-            'generate-experimental-diagram',
-            'preview-experimental-diagram',
+            'generate-diagram',
+            'preview-diagram',
             'translate-current-file',
             'batch-translate-folder',
             'extract-concepts-current',
@@ -184,14 +186,20 @@ describe('NotemdSidebarView button trigger chains', () => {
         expect(plugin.summarizeToMermaidCommand).toHaveBeenCalledWith(activeMdFile, reporter);
     });
 
-    test('generate-experimental-diagram triggers generateExperimentalDiagramCommand', async () => {
-        await executeAction('generate-experimental-diagram', reporter);
-        expect(plugin.generateExperimentalDiagramCommand).toHaveBeenCalledWith(activeMdFile, reporter);
+    test('generate-diagram triggers canonical generateDiagramCommand', async () => {
+        await executeAction('generate-diagram', reporter);
+        expect(plugin.generateDiagramCommand).toHaveBeenCalledWith(
+            activeMdFile,
+            reporter,
+            expect.objectContaining({ executionMode: 'save-artifact' })
+        );
+        expect(plugin.generateExperimentalDiagramCommand).not.toHaveBeenCalled();
     });
 
-    test('preview-experimental-diagram triggers previewExperimentalDiagramCommand', async () => {
-        await executeAction('preview-experimental-diagram', reporter);
-        expect(plugin.previewExperimentalDiagramCommand).toHaveBeenCalledWith(activeMdFile, reporter);
+    test('preview-diagram triggers canonical previewDiagramCommand', async () => {
+        await executeAction('preview-diagram', reporter);
+        expect(plugin.previewDiagramCommand).toHaveBeenCalledWith(activeMdFile, reporter);
+        expect(plugin.previewExperimentalDiagramCommand).not.toHaveBeenCalled();
     });
 
     test('translate-current-file triggers translateFileCommand', async () => {

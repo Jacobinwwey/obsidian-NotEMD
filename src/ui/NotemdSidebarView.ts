@@ -9,6 +9,7 @@ import {
     getLocalizedWorkflowButtonName,
     getSidebarActionLabel,
     getSidebarActionTooltip,
+    normalizeSidebarActionId,
     resolveCustomWorkflowButtons,
     SIDEBAR_ACTION_DEFINITIONS,
     SidebarActionId
@@ -34,8 +35,8 @@ const SINGLE_FILE_ACTION_IDS = new Set<SidebarActionId>([
     'generate-from-title',
     'research-and-summarize',
     'summarize-as-mermaid',
-    'generate-experimental-diagram',
-    'preview-experimental-diagram',
+    'generate-diagram',
+    'preview-diagram',
     'translate-current-file',
     'extract-concepts-current',
     'extract-original-text',
@@ -464,7 +465,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         reporter: ProgressReporter,
         context?: WorkflowExecutionContext
     ): Promise<void> {
-        switch (actionId) {
+        switch (normalizeSidebarActionId(actionId)) {
             case 'process-current-add-links': {
                 await this.plugin.processWithNotemdCommand(reporter);
                 if (context && !context.preferredFolderPath) {
@@ -522,20 +523,20 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
                 await this.plugin.summarizeToMermaidCommand(activeFile, reporter);
                 break;
             }
-            case 'generate-experimental-diagram': {
+            case 'generate-diagram': {
                 const activeFile = this.plugin.app.workspace.getActiveFile();
                 if (!activeFile || !(activeFile instanceof TFile) || activeFile.extension !== 'md') {
                     throw new Error('No active Markdown file selected.');
                 }
-                await this.plugin.generateExperimentalDiagramCommand(activeFile, reporter);
+                await this.plugin.generateDiagramCommand(activeFile, reporter, { executionMode: 'save-artifact' });
                 break;
             }
-            case 'preview-experimental-diagram': {
+            case 'preview-diagram': {
                 const activeFile = this.plugin.app.workspace.getActiveFile();
                 if (!activeFile || !(activeFile instanceof TFile) || activeFile.extension !== 'md') {
                     throw new Error('No active Markdown file selected.');
                 }
-                await this.plugin.previewExperimentalDiagramCommand(activeFile, reporter);
+                await this.plugin.previewDiagramCommand(activeFile, reporter);
                 break;
             }
             case 'translate-current-file': {
