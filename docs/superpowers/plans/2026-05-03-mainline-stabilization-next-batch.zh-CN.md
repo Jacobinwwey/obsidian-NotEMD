@@ -209,5 +209,6 @@ npm run audit:render-host
 - 任务 3 已以“真值收紧切片”形式落地，而不是真正多入口隔离：helper 模板与维护者文档现在都明确记录，`audit:render-host` 证明的是当前单入口 `main.js` + 内联 `srcdoc` 契约，而不是真正完成了 heavy-runtime isolation。
 - 任务 4 已以范围控制方式落地：路线图和进度文档现已把 Drawnix 固定为受约束的未来 adapter/export 参考，而不是活跃的整体宿主集成目标。
 - 支撑这一批的 release 侧 CI hardening 也已不再只是计划：`repo-saga` 编年史刷新现在已有检入的 package-manager runtime helper 与回归测试，因此在 GitHub Actions 里即使 `pnpm` 只能通过 `corepack` 一类 fallback 访问，也能继续重建上游 workspace。
+- 后续防漂移硬化也已落地：semantic helper 的 packaging 清单会从 `esbuild.config.mjs` 自动提取入口/输出事实，对应测试已锁定该对齐关系；同时 package-manager fallback 现在会按执行失败逐候选重试（`pnpm`、`corepack pnpm`、`bun x pnpm`），以保持 CI 编年史刷新链路稳健。
 
 因此，这份计划之后真正剩下的工作已经不再是“补第一版 runbook”或“补第一版 packaging 澄清”。这些基础片段现在已经检入。剩余工作是保持这套已检入真值不漂移，并进一步判断下一个真实实现批次应优先落在 heavy-runtime packaging isolation，还是后续更窄的 contract-promotion 切片。

@@ -2,6 +2,18 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 
+function parseEsbuildFactsIndependently(source: string): { entryPoints: string[]; outfile: string } {
+    const entryPointsMatch = source.match(/entryPoints\s*:\s*\[([\s\S]*?)\]/m);
+    const entryPoints = entryPointsMatch
+        ? Array.from(entryPointsMatch[1].matchAll(/["']([^"']+)["']/g), (match) => match[1])
+        : [];
+    const outfileMatch = source.match(/outfile\s*:\s*["']([^"']+)["']/m);
+    return {
+        entryPoints,
+        outfile: outfileMatch ? outfileMatch[1] : ''
+    };
+}
+
 describe('diagram semantic verification helper', () => {
     const repoRoot = path.join(__dirname, '..', '..');
     const packageJsonPath = path.join(repoRoot, 'package.json');
@@ -13,7 +25,7 @@ describe('diagram semantic verification helper', () => {
     const releaseWorkflowPath = path.join(repoRoot, 'docs', 'maintainer', 'release-workflow.md');
     const releaseWorkflowZhPath = path.join(repoRoot, 'docs', 'maintainer', 'release-workflow.zh-CN.md');
 
-        test('registers a semantic verification helper script and references it in maintainer docs', () => {
+    test('registers a semantic verification helper script and references it in maintainer docs', () => {
         expect(packageJson.scripts['verify:diagram-semantics']).toBe(`node ${scriptRelativePath}`);
         expect(fs.existsSync(scriptPath)).toBe(true);
 
@@ -26,6 +38,9 @@ describe('diagram semantic verification helper', () => {
         expect(runbookZh).toContain('npm run verify:diagram-semantics');
         expect(runbook).toContain('single-entry');
         expect(runbookZh).toContain('单入口');
+        expect(runbook).toContain('derived from current `entryPoints` / `outfile` values in `esbuild.config.mjs`');
+        expect(runbookZh).toContain('`esbuild.config.mjs`');
+        expect(runbookZh).toContain('`entryPoints` / `outfile`');
         expect(releaseWorkflow).toContain('verify:diagram-semantics');
         expect(releaseWorkflowZh).toContain('verify:diagram-semantics');
         expect(releaseWorkflow).toContain('does not prove true heavy-runtime isolation');
@@ -54,6 +69,12 @@ describe('diagram semantic verification helper', () => {
             commit: string;
             version: string;
             surfaces: Array<{ id: string; label: string }>;
+            packagingFacts?: {
+                sourcePath: string;
+                entryPoints: string[];
+                outfile: string;
+                resolvedFromConfig: boolean;
+            };
         }) => string;
         let writeSemanticVerificationTemplate: (template: string, outputPath?: string) => string | null;
         let parseArgs: (argv?: string[]) => {
@@ -137,6 +158,36 @@ describe('diagram semantic verification helper', () => {
             expect(fallbackFacts.entryPoints).toEqual(['<unknown-entry>']);
             expect(fallbackFacts.outfile).toBe('<unknown-outfile>');
             expect(fallbackFacts.resolvedFromConfig).toBe(false);
+        });
+
+        test('keeps packaging facts and checklist wording aligned with the current esbuild config shape', () => {
+            const esbuildConfigPath = path.join(repoRoot, 'esbuild.config.mjs');
+            const esbuildConfigSource = fs.readFileSync(esbuildConfigPath, 'utf8');
+            const expectedFacts = parseEsbuildFactsIndependently(esbuildConfigSource);
+            expect(expectedFacts.entryPoints.length).toBeGreaterThan(0);
+            expect(expectedFacts.outfile).not.toBe('');
+
+            const resolvedFacts = resolvePackagingBoundaryFacts({ esbuildConfigPath });
+            expect(resolvedFacts.entryPoints).toEqual(expectedFacts.entryPoints);
+            expect(resolvedFacts.outfile).toBe(expectedFacts.outfile);
+
+            const lines = buildPackagingBoundaryChecklistLines(resolvedFacts);
+            for (const entryPoint of expectedFacts.entryPoints) {
+                expect(lines[0]).toContain(entryPoint);
+            }
+            expect(lines[0]).toContain(expectedFacts.outfile);
+
+            const template = buildSemanticVerificationTemplate({
+                vaultName: 'Research Vault',
+                commit: 'def5678',
+                version: '1.8.5',
+                surfaces: resolveRequestedSurfaces(['mermaid']),
+                packagingFacts: resolvedFacts
+            });
+            for (const entryPoint of expectedFacts.entryPoints) {
+                expect(template).toContain(entryPoint);
+            }
+            expect(template).toContain(expectedFacts.outfile);
         });
 
         test('builds packaging-boundary checklist lines from resolved config facts', () => {

@@ -23,6 +23,13 @@ This also needs to be explicit:
 - `preview-experimental-diagram` now previews a saved `vega-lite` fenced artifact locally, so command-surface unification remains partial rather than complete
 - Drawnix should be treated as a data-boundary / conversion-boundary reference, not as the next host to embed; see `docs/brainstorms/2026-05-03-drawnix-feasibility-and-integration-direction.md`. Full Drawnix host embedding is not part of the current roadmap batch.
 
+## 2026-05-08 Follow-up Hardening
+
+- The semantic verification helper now derives packaging entry/output facts from `esbuild.config.mjs` and emits explicit placeholder wording if parsing fails.
+- Regression tests now lock that helper output to the current build-config shape so packaging-boundary truth does not drift silently.
+- `repo-saga` chronicle refresh fallback now retries candidate package-manager runners per execution failure (`pnpm`, `corepack pnpm`, `bun x pnpm`) to reduce CI brittleness.
+- The next active workstream remains unchanged: preserve this truth alignment, then choose between real heavy-runtime packaging isolation and later contract-promotion slices.
+
 ---
 
 **Goal:** Evolve Notemd from a single Mermaid-text generation path into an extensible diagram platform built around intent detection, structured specs, specialized renderers, and multi-format output inside Obsidian.
