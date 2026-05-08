@@ -130,6 +130,9 @@ function buildPackagingBoundaryChecklistLines(packagingFacts = resolvePackagingB
     const outputDescriptor = packagingFacts.outfile
         ? packagingFacts.outfile
         : (packagingFacts.outdir ? `${packagingFacts.outdir}/...` : '<unknown-output>');
+    const outputResolutionLine = outputDescriptor === '<unknown-output>'
+        ? '- [ ] Build config output target was not resolved automatically; manually confirm whether this build uses `outfile` or `outdir` before making packaging claims.'
+        : '- [ ] Confirm build output target still matches packaging expectations (`outfile`/`outdir`) for this change.';
     const configFileName = path.basename(packagingFacts.sourcePath);
     const sourceDescriptor = packagingFacts.resolvedFromConfig
         ? `resolved from \`${configFileName}\``
@@ -140,6 +143,7 @@ function buildPackagingBoundaryChecklistLines(packagingFacts = resolvePackagingB
 
     return [
         singleEntryLine,
+        outputResolutionLine,
         '- [ ] Confirm `npm run audit:render-host` only proves the current self-contained `main.js` + inline `srcdoc` host contract.',
         '- [ ] Confirm no release note, handoff, or PR summary claims that true heavy-runtime isolation is already implemented.',
         '- [ ] If the change depends on stronger packaging guarantees, record that true heavy-runtime isolation is still pending and requires later multi-entry or dedicated-asset work.'

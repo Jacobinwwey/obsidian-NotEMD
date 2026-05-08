@@ -199,6 +199,34 @@ const context = await esbuild.context({
             }
         });
 
+        test('flags unresolved output targets when entry points parse but outfile/outdir are missing', () => {
+            const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-esbuild-missing-output-'));
+            const configPath = path.join(tempRoot, 'esbuild.config.mjs');
+            fs.writeFileSync(
+                configPath,
+                `import esbuild from "esbuild";
+const context = await esbuild.context({
+    entryPoints: ["src/main.ts"]
+});
+`,
+                'utf8'
+            );
+
+            try {
+                const facts = resolvePackagingBoundaryFacts({ esbuildConfigPath: configPath });
+                expect(facts.entryPoints).toEqual(['src/main.ts']);
+                expect(facts.outfile).toBe('');
+                expect(facts.outdir).toBe('');
+                expect(facts.resolvedFromConfig).toBe(true);
+
+                const lines = buildPackagingBoundaryChecklistLines(facts);
+                expect(lines[0]).toContain('<unknown-output>');
+                expect(lines.some((line) => line.includes('output target was not resolved automatically'))).toBe(true);
+            } finally {
+                fs.rmSync(tempRoot, { recursive: true, force: true });
+            }
+        });
+
         test('keeps packaging facts and checklist wording aligned with the current esbuild config shape', () => {
             const esbuildConfigPath = path.join(repoRoot, 'esbuild.config.mjs');
             const esbuildConfigSource = fs.readFileSync(esbuildConfigPath, 'utf8');
@@ -240,8 +268,8 @@ const context = await esbuild.context({
 
             expect(lines[0]).toContain('single-entry');
             expect(lines[0]).toContain('`src/main.ts -> main.js`');
-            expect(lines[1]).toContain('`npm run audit:render-host` only proves the current self-contained `main.js` + inline `srcdoc` host contract');
-            expect(lines[3]).toContain('true heavy-runtime isolation is still pending');
+            expect(lines.some((line) => line.includes('`npm run audit:render-host` only proves the current self-contained `main.js` + inline `srcdoc` host contract'))).toBe(true);
+            expect(lines.some((line) => line.includes('true heavy-runtime isolation is still pending'))).toBe(true);
         });
 
         test('builds a markdown template with repo gates, packaging-boundary guidance, and per-surface evidence sections', () => {
