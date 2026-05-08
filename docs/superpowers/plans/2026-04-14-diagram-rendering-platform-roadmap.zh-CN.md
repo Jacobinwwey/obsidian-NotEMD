@@ -99,7 +99,7 @@ Phase-2 需求快照：
 |---|---|---|
 | 任务 0 | 已交付，但限制已明确 | `src/rendering/webview/*` 与 `src/rendering/host/iframeRenderHost.ts` 已落地，继续采用内联 `srcdoc` 方案；`scripts/audit-render-host-bundle.js`、release workflow 与单测已把“render host 必须由 `main.js` 自包含携带”的 smoke gate 固化下来，但 `esbuild.config.mjs` 仍是单入口，真正的 heavier-runtime isolation 仍未完成。 |
 | 任务 1 | 已交付 | `DiagramIntent`、`DiagramSpec`、validator、planner 和意图推断规则均已进入主线，并有单测覆盖。 |
-| 任务 2 | 部分完成（硬性约束） | spec-first prompt 与 service pipeline 已落地，`src/main.ts` 也新增了共享 `generateDiagramCommand` 执行器，并把 legacy Mermaid 保存、experimental save、experimental preview 三条命令收口到同一 orchestration path；但 public command surfaces 仍保留兼容双轨，真正的 surface-level command architecture 收口尚未完成。**硬性约束：** `promptUtils.ts` 中的旧版 Mermaid 提示词为原场景专门调优。任何扩展或退役必须完全保留原场景的可用性。跨版本稳定性优先于清理。 |
+| 任务 2 | 部分完成（硬性约束） | spec-first prompt 与 service pipeline 已落地，`src/main.ts`、`src/ui/NotemdSidebarView.ts` 与 `src/operations/diagramCommandHostAdapter.ts` 现在也已经改为通过 canonical 内部入口（`generateDiagramCommand`、`previewDiagramCommand`、`runPreviewDiagramCommandWithHost`）来收口图表生成与预览链路。workflow/sidebar action metadata 也已经切到 canonical action ID（`generate-diagram`、`preview-diagram`），而旧的 `*-experimental-diagram` action token 仅作为兼容别名在解析阶段被归一化。剩余双轨现在主要收缩为兼容期 public command ID 与文案，而不是内部执行链继续分叉。**硬性约束：** `promptUtils.ts` 中的旧版 Mermaid 提示词为原场景专门调优。任何扩展或退役必须完全保留原场景的可用性。跨版本稳定性优先于清理。 |
 | 任务 3 | 部分完成（硬性约束） | Mermaid subtype adapters 与 `mermaid.parse` 校验已落地，flowchart pipe-label escaping 已前移到 adapter emit，legacy note directive parsing / edge-attachment / note-node formatting 与一批 edge-label merge/quote/rewrite helper 也已开始下沉到 `src/diagram/adapters/mermaid/legacyFixerUtils.ts`；但 `src/mermaidProcessor.ts` 仍承担大量 legacy fixer 责任，adapter-driven fixer 拆分未完成。**硬性约束：** 每个子任务必须在真实 Obsidian 实例中独立验证后方可推进。图表输出图像必须保存、检查并确认完整正确。仅凭单元测试不足以跨越任何子任务边界。 |
 | 任务 4 | 已交付 | renderer registry/service、cache、inline host、iframe preview session 与统一 preview modal 已落地。 |
 | 任务 5 | 已交付 | `.canvas` 输出、基础 deterministic layout、保存与预览链路已落地。 |
@@ -112,12 +112,12 @@ Phase-2 需求快照：
 将这份路线图与当前代码、测试和 2026-05-03 的审计文档交叉验证后，可以把真正的中期议程收窄为四件事：
 
 1. 在不破坏 legacy 行为的前提下 canonical 化图表命令表面
-2. 正式发布并采用维护者本地语义核验 runbook
-3. 从当前已强制的单入口 `main.js` + `srcdoc` host 契约出发，继续收紧重型运行时的真实打包边界
+2. 持续让已检入的维护者本地语义核验 helper/runbook 与真实 renderer 行为和发布证据保持对齐
+3. 从当前已强制的单入口 `main.js` + `srcdoc` host 契约出发，只在构建产物真正证明更多边界之后，再继续收紧重型运行时的真实打包隔离
 4. 为未来 CLI 扩展性抽取宿主无关 operations，而不是直接绑定现有插件命令 ID
 5. 完成上述四项后，再恢复 legacy prompt 退役与 MermaidProcessor 缩编
 
-除此之外，其余事项要么已交付，要么本就属于远期选择。
+这份中期议程里的“维护者本地语义核验”现在也不再是假设项：`npm run verify:diagram-semantics`、`docs/maintainer/diagram-semantic-verification*.md` 与已对齐的 release-workflow 文案都已经检入。除此之外，其余事项要么已交付，要么本就属于远期选择。
 
 ## CLI 扩展性现实校正（2026-05-04）
 

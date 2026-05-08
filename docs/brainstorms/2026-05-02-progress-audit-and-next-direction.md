@@ -199,10 +199,10 @@ Short version:
 ### Immediate
 
 1. **Packaging / semantic-verification convergence**
-   Keep the current command IDs stable and keep `diagram.generate` framed as the host-neutral generation contract with the newly landed `followThrough` shape beneath it. The next decision is no longer "how to type that layer" but whether the landed shape is sufficient while packaging isolation, maintainer verification, and any later contract promotion decisions advance.
+   Keep the current command IDs stable and keep `diagram.generate` framed as the host-neutral generation contract with the newly landed `followThrough` shape beneath it. The first convergence slice is now already checked in as well: `npm run verify:diagram-semantics` generates packaging-boundary-aware maintainer checklists, the maintainer runbooks mirror that same truth, and tests lock the wording. The next decision is no longer "how to type that layer" or "whether to create the first runbook"; it is whether the landed helper/runbook truth is sufficient while packaging isolation and any later contract promotion decisions advance.
 
-2. **Create a sustainable live verification runbook / harness**
-   Convert "one maintainer's local proof" into a repeatable maintainer workflow that does not depend on hard-coded vault paths or private secrets in tracked files.
+2. **Operationalize the checked-in live verification runbook / helper**
+   The repo now has a repeatable maintainer workflow that does not depend on hard-coded vault paths or tracked secrets. The next leverage is to make that helper the standard release-time evidence path for renderer-affecting changes and only later decide whether a stronger machine-free harness is worth building.
 
 3. **Runtime packaging (Task 0 remainder)**
    Build a real multi-entry or isolated-asset strategy for heavy runtimes such as Vega-Lite.
@@ -262,4 +262,4 @@ When a change touches `src/diagram/`, `src/mermaidProcessor.ts`, or actual rende
 - save and inspect output files or images
 - explicitly record this as "maintainer-local semantic verification", not as current automated CI
 
-The next missing deliverable is not "add another live test file". It is turning that semantic check into a repeatable maintainer process.
+The next missing deliverable is not "add another live test file", and it is no longer "create the first repeatable maintainer process" either. That process now exists. The next missing deliverable is to keep the checked-in helper/runbook truth aligned with the real packaging boundary and then decide whether a stronger machine-free harness is justified.

@@ -132,7 +132,17 @@ function buildSemanticVerificationTemplate({ vaultName, commit, version, surface
         headerLines.push(`- [ ] \`${command}\``);
     }
 
-    headerLines.push('', '## Surface Evidence');
+    headerLines.push(
+        '',
+        '## Packaging Boundary',
+        '',
+        '- [ ] Confirm the current build truth is still single-entry: `esbuild.config.mjs` ships `src/main.ts -> main.js` only.',
+        '- [ ] Confirm `npm run audit:render-host` only proves the current self-contained `main.js` + inline `srcdoc` host contract.',
+        '- [ ] Confirm no release note, handoff, or PR summary claims that true heavy-runtime isolation is already implemented.',
+        '- [ ] If the change depends on stronger packaging guarantees, record that true heavy-runtime isolation is still pending and requires later multi-entry or dedicated-asset work.',
+        '',
+        '## Surface Evidence'
+    );
 
     for (const surface of surfaces) {
         const definition = SURFACE_DEFINITIONS.find((candidate) => candidate.id === surface.id);

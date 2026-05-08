@@ -10,7 +10,7 @@ Template helper:
 npm run verify:diagram-semantics -- --vault "<vault-name>" --commit "<sha>" --version "<plugin-version>" --output ~/tmp/notemd-diagram-check.md
 ```
 
-The helper is secret-free. It generates a Markdown checklist template plus vault-aware CLI commands and surface evidence sections; it does not launch Obsidian, read local secrets, or rely on tracked vault paths.
+The helper is secret-free. It generates a Markdown checklist template plus vault-aware CLI commands, an explicit packaging-boundary section, and surface evidence sections; it does not launch Obsidian, read local secrets, or rely on tracked vault paths.
 
 ## 1. When This Runbook Is Required
 
@@ -36,6 +36,8 @@ git diff --check
 ```
 
 These checks do **not** prove that a generated Mermaid artifact is visually valid in a real Obsidian session, or that JSON Canvas / Vega-Lite output still behaves correctly end-to-end in the desktop host.
+
+They also do **not** prove that heavy runtimes are already isolated into a separate packaged asset. `npm run audit:render-host` currently proves only the enforced shipping truth: the inline `srcdoc` host remains self-contained inside `main.js`.
 
 ## 3. Environment Rules
 
@@ -118,6 +120,8 @@ Use this sequence unless the change is more narrowly scoped:
 4. Exercise the affected diagram path(s) in real Obsidian.
 5. Save evidence for each affected surface.
 6. Record results in PR notes, release handoff, or maintainer log.
+
+The generated helper template now also includes a packaging-boundary section. Do not skip it when the change touches render-host, preview, or heavier runtime behavior: it is the explicit reminder that today's packaging model is still single-entry, not true heavy-runtime isolation.
 
 ## 6. Evidence Format
 

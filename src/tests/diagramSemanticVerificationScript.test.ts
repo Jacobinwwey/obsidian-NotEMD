@@ -13,7 +13,7 @@ describe('diagram semantic verification helper', () => {
     const releaseWorkflowPath = path.join(repoRoot, 'docs', 'maintainer', 'release-workflow.md');
     const releaseWorkflowZhPath = path.join(repoRoot, 'docs', 'maintainer', 'release-workflow.zh-CN.md');
 
-    test('registers a semantic verification helper script and references it in maintainer docs', () => {
+        test('registers a semantic verification helper script and references it in maintainer docs', () => {
         expect(packageJson.scripts['verify:diagram-semantics']).toBe(`node ${scriptRelativePath}`);
         expect(fs.existsSync(scriptPath)).toBe(true);
 
@@ -24,8 +24,12 @@ describe('diagram semantic verification helper', () => {
 
         expect(runbook).toContain('npm run verify:diagram-semantics');
         expect(runbookZh).toContain('npm run verify:diagram-semantics');
+        expect(runbook).toContain('single-entry');
+        expect(runbookZh).toContain('单入口');
         expect(releaseWorkflow).toContain('verify:diagram-semantics');
         expect(releaseWorkflowZh).toContain('verify:diagram-semantics');
+        expect(releaseWorkflow).toContain('does not prove true heavy-runtime isolation');
+        expect(releaseWorkflowZh).toContain('并不等于真正的重型运行时隔离已经完成');
     });
 
     const maybeDescribeHelper = fs.existsSync(scriptPath) ? describe : describe.skip;
@@ -105,20 +109,23 @@ describe('diagram semantic verification helper', () => {
             ]);
         });
 
-        test('builds a markdown template with repo gates and per-surface evidence sections', () => {
+        test('builds a markdown template with repo gates, packaging-boundary guidance, and per-surface evidence sections', () => {
             const template = buildSemanticVerificationTemplate({
                 vaultName: 'Research Vault',
                 commit: 'abc1234',
-                version: '1.8.4',
+                version: '1.8.5',
                 surfaces: resolveRequestedSurfaces(['mermaid', 'vega-lite'])
             });
 
             expect(template).toContain('# Notemd Diagram Semantic Verification');
             expect(template).toContain('Vault: Research Vault');
             expect(template).toContain('Commit: abc1234');
-            expect(template).toContain('Version: 1.8.4');
+            expect(template).toContain('Version: 1.8.5');
             expect(template).toContain('npm run build');
             expect(template).toContain('obsidian plugin id=notemd vault=\"Research Vault\"');
+            expect(template).toContain('## Packaging Boundary');
+            expect(template).toContain('`npm run audit:render-host` only proves the current self-contained `main.js` + inline `srcdoc` host contract');
+            expect(template).toContain('true heavy-runtime isolation is still pending');
             expect(template).toContain('## Mermaid');
             expect(template).toContain('## Vega-Lite');
             expect(template).not.toContain('## JSON Canvas');

@@ -199,10 +199,10 @@ topic: progress-audit-next-direction
 ### 立即可推进
 
 1. **Packaging / semantic-verification 收敛**
-   保持现有 command ID 稳定，并继续把 `diagram.generate` 视作宿主无关 generation contract，同时把新落地的 `followThrough` 结构视作其下的 command-completion 层。下一步不再是“如何把这层类型化”，而是判断这一已落地结构是否已经足够，并推进 packaging isolation、maintainer verification，以及未来是否还有必要继续提升更大 contract boundary。
+   保持现有 command ID 稳定，并继续把 `diagram.generate` 视作宿主无关 generation contract，同时把新落地的 `followThrough` 结构视作其下的 command-completion 层。第一批 convergence slice 现在也已经检入：`npm run verify:diagram-semantics` 会生成带 packaging-boundary 提醒的维护者检查模板，维护者 runbook 已与之对齐，对应测试也锁定了这套文案真值。下一步不再是“如何把这层类型化”，也不再是“是否先补第一份 runbook”，而是判断这套已落地 helper/runbook 真值是否已经足够，再推进 packaging isolation，以及未来是否还有必要继续提升更大 contract boundary。
 
-2. **建立可持续的 live verification runbook / harness**
-   先把“本地一次性验证”升级为不依赖硬编码 vault 路径和私钥文件的维护者流程，再决定是否需要恢复受控的集成测试。
+2. **把已检入的 live verification runbook / helper 用起来**
+   仓库现在已经有了不依赖硬编码 vault 路径或已跟踪 secrets 的可重复维护者流程。下一步更高杠杆的工作，是把这份 helper 变成 renderer 相关变更的标准发布证据路径，之后再判断是否真的需要更强的 machine-free harness。
 
 3. **运行时打包（任务 0 剩余）**
    为 Vega-Lite 等重型运行时建立真正的多入口或独立资产策略。
@@ -260,4 +260,4 @@ topic: progress-audit-next-direction
 - 保存并检查输出图像或产物文件
 - 明确记录这是“本地语义核验”，而不是仓库当前自动 CI
 
-当前最需要补的不是“再写一批 live test 文件”，而是把这层核验从一次性个人脚本，升级为可重复执行的维护者流程。
+当前最需要补的不是“再写一批 live test 文件”，也不再是“先把这层核验升级为第一份可重复维护者流程”。这一步现在已经存在。真正还需要补的是持续让已检入 helper/runbook 与真实 packaging 边界保持对齐，并在此基础上再判断是否值得继续构建更强的 machine-free harness。
