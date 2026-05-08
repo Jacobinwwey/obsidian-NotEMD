@@ -40,6 +40,7 @@ Recommended helper:
 ```bash
 npm run verify:diagram-semantics -- --vault "<vault-name>" --commit "<sha>" --version "<plugin-version>" --output ~/tmp/notemd-diagram-check.md
 ```
+Treat the helper's packaging-boundary section as required truth maintenance for renderer-affecting changes: `npm run audit:render-host` does not prove true heavy-runtime isolation; it only proves the current self-contained `main.js` + inline `srcdoc` host contract.
 
 ## 3. Version Synchronization
 

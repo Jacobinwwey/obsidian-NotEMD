@@ -199,3 +199,14 @@ npm run audit:render-host
 - 运行时打包表述已与构建真实边界对齐
 - Drawnix 被文档化为受约束的未来 adapter/export 参考，而不是近期宿主集成目标
 - 最终分支通过完整仓库验证门
+
+## 推进进度更新
+
+这份执行计划现在已经不再只是前瞻性清单。计划中的这一批工作已按当前范围实质性落到 `main`：
+
+- 任务 1 已按“保兼容收口”的目标落地：canonical `generate-diagram` / `preview-diagram` workflow/sidebar ID 已经生效，用户可见文案已收口，而旧的 `*-experimental-diagram` token 只作为兼容别名保留。
+- 任务 2 已不再停留在纯 prose：仓库现在已提供 `npm run verify:diagram-semantics`，维护者 runbook 与 release workflow 文档也已对齐到同一条无 secrets 的核验路径。
+- 任务 3 已以“真值收紧切片”形式落地，而不是真正多入口隔离：helper 模板与维护者文档现在都明确记录，`audit:render-host` 证明的是当前单入口 `main.js` + 内联 `srcdoc` 契约，而不是真正完成了 heavy-runtime isolation。
+- 任务 4 已以范围控制方式落地：路线图和进度文档现已把 Drawnix 固定为受约束的未来 adapter/export 参考，而不是活跃的整体宿主集成目标。
+
+因此，这份计划之后真正剩下的工作已经不再是“补第一版 runbook”或“补第一版 packaging 澄清”。这些基础片段现在已经检入。剩余工作是保持这套已检入真值不漂移，并进一步判断下一个真实实现批次应优先落在 heavy-runtime packaging isolation，还是后续更窄的 contract-promotion 切片。

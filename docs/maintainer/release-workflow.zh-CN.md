@@ -40,6 +40,7 @@ git diff --check
 ```bash
 npm run verify:diagram-semantics -- --vault "<vault-name>" --commit "<sha>" --version "<plugin-version>" --output ~/tmp/notemd-diagram-check.md
 ```
+对于 renderer 相关改动，还应把 helper 生成出的 packaging-boundary 区块视为必填真值维护项：`npm run audit:render-host` 并不等于真正的重型运行时隔离已经完成，它当前只证明内联 `srcdoc` host 仍按既有契约自包含于 `main.js`。
 
 ## 3. 版本同步
 

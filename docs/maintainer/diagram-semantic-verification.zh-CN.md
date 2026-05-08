@@ -10,7 +10,7 @@
 npm run verify:diagram-semantics -- --vault "<vault-name>" --commit "<sha>" --version "<plugin-version>" --output ~/tmp/notemd-diagram-check.md
 ```
 
-这个 helper 不依赖 secrets。它只会生成 Markdown 核验模板、vault 感知的 CLI 命令清单，以及各语义表面的证据区块；不会启动 Obsidian、不会读取本地凭据，也不会依赖仓库中跟踪的 vault 路径。
+这个 helper 不依赖 secrets。它只会生成 Markdown 核验模板、vault 感知的 CLI 命令清单、显式的 packaging-boundary 区块，以及各语义表面的证据区块；不会启动 Obsidian、不会读取本地凭据，也不会依赖仓库中跟踪的 vault 路径。
 
 ## 1. 何时必须使用本 Runbook
 
@@ -36,6 +36,8 @@ git diff --check
 ```
 
 这些检查**不能**证明 Mermaid 产物在真实 Obsidian 会话中视觉上仍然正确，也不能证明 JSON Canvas / Vega-Lite 在桌面宿主中的端到端行为没有退化。
+
+它们也**不等于**重型运行时已经被真正隔离为独立打包资产。`npm run audit:render-host` 当前只能证明一条已强制的发布事实：内联 `srcdoc` host 仍然自包含地随 `main.js` 一起发布。
 
 ## 3. 环境规则
 
@@ -118,6 +120,8 @@ obsidian commands vault=<vault-name> filter=notemd
 4. 在真实 Obsidian 中实际走受影响的图表路径。
 5. 保存每个受影响表面的证据。
 6. 将结果记录到 PR 说明、release handoff 或维护者日志中。
+
+helper 现在还会额外生成一个 packaging-boundary 区块。只要改动触及 render-host、preview 或更重的运行时行为，就不应跳过这一段：它明确提醒当前打包模型仍是单入口，而不是真正完成了 heavy-runtime isolation。
 
 ## 6. 证据格式
 
