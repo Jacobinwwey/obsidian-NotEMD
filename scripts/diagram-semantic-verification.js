@@ -96,6 +96,9 @@ function parseQuotedScalarValue(source, key) {
 }
 
 function resolveOutputTargetStatus({ outfile, outdir }) {
+    if (outfile && outdir) {
+        return 'ambiguous';
+    }
     if (outfile) {
         return 'outfile';
     }
@@ -143,10 +146,16 @@ function buildPackagingBoundaryChecklistLines(packagingFacts = resolvePackagingB
     const outputTargetStatus = packagingFacts.outputTargetStatus || resolveOutputTargetStatus(packagingFacts);
     const outputDescriptor = outputTargetStatus === 'outfile'
         ? packagingFacts.outfile
-        : (outputTargetStatus === 'outdir' ? `${packagingFacts.outdir}/...` : '<unknown-output>');
+        : (outputTargetStatus === 'outdir'
+            ? `${packagingFacts.outdir}/...`
+            : (outputTargetStatus === 'ambiguous'
+                ? `outfile=${packagingFacts.outfile}, outdir=${packagingFacts.outdir}/...`
+                : '<unknown-output>'));
     const outputResolutionLine = outputTargetStatus === 'unknown'
         ? '- [ ] Build config output target was not resolved automatically; manually confirm whether this build uses `outfile` or `outdir` before making packaging claims.'
-        : `- [ ] Confirm build output target still matches packaging expectations (\`${outputTargetStatus}\`) for this change.`;
+        : (outputTargetStatus === 'ambiguous'
+            ? '- [ ] Build config appears to define both `outfile` and `outdir`; manually confirm the active output target before making packaging claims.'
+            : `- [ ] Confirm build output target still matches packaging expectations (\`${outputTargetStatus}\`) for this change.`);
     const configFileName = path.basename(packagingFacts.sourcePath);
     const sourceDescriptor = packagingFacts.resolvedFromConfig
         ? `resolved from \`${configFileName}\``

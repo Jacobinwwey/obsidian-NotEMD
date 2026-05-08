@@ -14,6 +14,7 @@ npm run verify:diagram-semantics -- --vault "<vault-name>" --commit "<sha>" --ve
 其中 packaging-boundary 首行会从 `esbuild.config.mjs` 当前的 `entryPoints` / `outfile` / `outdir` 自动提取；若解析失败，helper 会输出显式占位提示，避免边界真值静默漂移。
 如果已解析到 `entryPoints`，但无法确定 `outfile` 与 `outdir`，检查清单会额外生成一条“必须人工确认输出目标”的提示，再允许下结论。
 如果输出目标已成功识别，清单会明确标记当前依据来自 `outfile` 还是 `outdir`，避免打包边界结论含糊。
+如果同时识别到 `outfile` 和 `outdir`，清单会将其视为歧义状态，并要求先人工确认有效输出目标，再给出打包结论。
 
 ## 1. 何时必须使用本 Runbook
 
