@@ -76,10 +76,10 @@
 
 | 优先级 | 候选能力 | 为什么先做 | 现有基础 |
 |---|---|---|---|
-| P0 | Packaging / semantic-verification 收敛 | 公共 provider-test 与 diagram command wrapper 已经改为通过 host adapter 代理，`provider.connection.test` 与 `diagram.preview` 已具备 typed contract，而 `diagram.generate` 现在也同时具备宿主无关 generation core 与显式 typed follow-through。所以下一批更高杠杆的工作已转向 packaging isolation、semantic verification，以及是否还有必要继续提升更大 contract boundary，而不是立刻再拆 diagram operation | `docs/maintainer/*`、`src/operations/diagramGenerateOperation.ts`、`src/operations/diagramCommandHostAdapter.ts`、`src/operations/diagramCommandExecution.ts` |
+| P0 | Packaging / semantic-verification 收敛后续 | 第一批 convergence slice 现已落地：`npm run verify:diagram-semantics` 已会生成带 packaging-boundary 提醒的维护者检查模板，runbook 已与之对齐，对应测试也已锁定这套真值。下一步更高杠杆的工作，是在保持这套真值稳定的同时，判断下一个应落地的是实际的 heavy-runtime isolation，还是后续某个 contract promotion 决策 | `scripts/diagram-semantic-verification.js`、`docs/maintainer/*`、`src/tests/diagramSemanticVerificationScript.test.ts`、`src/operations/diagramCommandExecution.ts` |
 | P1 | selection/export 与 config flow 的 contract 增强 | 这些 operation 已建模，但未来 operation invoker 需要比 command-trigger 对等更丰富的 path/context 语义 | `src/operations/registry.ts`, `src/operations/configProfileCommands.ts`, `src/operations/noteProcessingCommandHostAdapter.ts` |
 | P1 | workflow/settings 打包 | Workflow DSL 与 output-path toggles 仍是有价值 metadata，但还不是稳定公共接口 | `src/workflowButtons.ts`, 设置驱动的输出控制 |
-| P2 | maintainer 语义验证与打包硬化 | 重型运行时隔离与维护者本地 runbook 仍重要，但在命令面收口后才是下一层问题 | `docs/maintainer/*`, render-host bundle 流程, release 验证路径 |
+| P2 | 重型运行时打包隔离实现 | 仓库现在已经明确写清当前是单入口 `main.js` + 内联 `srcdoc` 契约。剩余的打包缺口已经不再是“继续补 runbook 文案”，而是真正的多入口或独立资产隔离实现本身 | `esbuild.config.mjs`、`scripts/audit-render-host-bundle.js`、render-host 打包路径 |
 
 ## 设置就绪度
 

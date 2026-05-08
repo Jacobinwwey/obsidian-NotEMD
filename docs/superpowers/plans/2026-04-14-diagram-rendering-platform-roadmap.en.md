@@ -100,7 +100,7 @@ All existing provider configs, transport protocols, and settings UI remain uncha
 |---|---|---|
 | Task 0 | Delivered with explicit limits | `src/rendering/webview/*` and `src/rendering/host/iframeRenderHost.ts` have landed with an inline `srcdoc` host. `scripts/audit-render-host-bundle.js`, the release workflow, and tests now lock the requirement that the render host must ship self-contained inside `main.js`. `esbuild.config.mjs` is still single-entry, so true heavy-runtime isolation is not complete. |
 | Task 1 | Delivered | `DiagramIntent`, `DiagramSpec`, validators, planner logic, and intent inference rules are on the mainline with tests. |
-| Task 2 | Partial (hard constraint) | The spec-first prompt and service pipeline are landed, and `src/main.ts` now uses a shared `generateDiagramCommand` executor. Legacy Mermaid save, experimental save, and experimental preview have converged onto one orchestration path internally, but public command surfaces still preserve compatibility-era dual tracks. **Hard Constraint:** The legacy Mermaid prompt in `promptUtils.ts` was specifically tuned for the original scenario. Any extension or retirement MUST fully preserve the original scenario's usability. Cross-version stability takes priority over cleanup. |
+| Task 2 | Partial (hard constraint) | The spec-first prompt and service pipeline are landed, and `src/main.ts`, `src/ui/NotemdSidebarView.ts`, and `src/operations/diagramCommandHostAdapter.ts` now route diagram generation/preview through canonical internal entrypoints (`generateDiagramCommand`, `previewDiagramCommand`, `runPreviewDiagramCommandWithHost`). Workflow/sidebar action metadata also now uses canonical action IDs (`generate-diagram`, `preview-diagram`) while older `*-experimental-diagram` action tokens are normalized as compatibility aliases. The remaining dual-track surface is therefore mostly compatibility-era public command IDs and labels rather than divergent execution chains. **Hard Constraint:** The legacy Mermaid prompt in `promptUtils.ts` was specifically tuned for the original scenario. Any extension or retirement MUST fully preserve the original scenario's usability. Cross-version stability takes priority over cleanup. |
 | Task 3 | Partial (hard constraint) | Mermaid subtype adapters and `mermaid.parse` validation are shipped. Flowchart pipe-label escaping moved into adapter emit, and a large share of note-directive parsing / edge-label helpers have started moving into `src/diagram/adapters/mermaid/legacyFixerUtils.ts`. `src/mermaidProcessor.ts` still owns too much legacy fixer work. **Hard Constraint:** Each sub-task MUST be individually verified in a real Obsidian instance before proceeding. Diagram output images MUST be saved, checked, and confirmed complete. Unit tests alone are insufficient to advance beyond any sub-task boundary. |
 | Task 4 | Delivered | Renderer registry/service, cache, inline host, iframe preview session, and unified preview modal are all landed. |
 | Task 5 | Delivered | `.canvas` output, baseline deterministic layout, save flows, and preview support are all landed. |
@@ -113,12 +113,12 @@ All existing provider configs, transport protocols, and settings UI remain uncha
 Cross-checking this roadmap against current code, tests, and the 2026-05-03 audit documents yields a narrower medium-term agenda than the original plan implied:
 
 1. canonicalize the diagram command surface without breaking legacy behavior
-2. publish and adopt a maintainer-local semantic verification runbook
-3. tighten the real packaging boundary for heavy runtimes, starting from the currently enforced single-entry `main.js` + `srcdoc` host contract
+2. keep the checked-in maintainer-local semantic verification helper/runbook aligned with real renderer behavior and release evidence
+3. tighten the real packaging boundary for heavy runtimes, starting from the currently enforced single-entry `main.js` + `srcdoc` host contract and moving only when build output proves more
 4. extract host-neutral operations for future CLI extensibility instead of binding directly to plugin command IDs
 5. only then resume legacy prompt retirement and MermaidProcessor reduction
 
-Everything else is either already delivered or intentionally future-scoped.
+The maintainer-local semantic verification layer is no longer hypothetical in this agenda: `npm run verify:diagram-semantics`, `docs/maintainer/diagram-semantic-verification*.md`, and the aligned release-workflow wording are now checked in. Everything else is either already delivered or intentionally future-scoped.
 
 ## CLI Extensibility Reality Check (2026-05-04)
 

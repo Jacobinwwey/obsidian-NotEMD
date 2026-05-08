@@ -199,3 +199,14 @@ Maintainer-local semantic verification remains a separate recorded layer, not a 
 - runtime packaging wording is aligned with what build output actually proves
 - Drawnix is documented as a constrained future adapter/export reference, not an immediate host integration target
 - full repo verification gates pass on the resulting branch
+
+## Progress Update
+
+This implementation plan is no longer purely forward-looking. The planned batch is now materially landed on `main` at the current scope:
+
+- Task 1 is landed at the intended compatibility-preserving depth: canonical `generate-diagram` / `preview-diagram` workflow/sidebar IDs are live, user-visible wording is converged, and the legacy `*-experimental-diagram` tokens remain only as compatibility aliases.
+- Task 2 is landed beyond prose-only status: the repo now ships `npm run verify:diagram-semantics`, and the maintainer runbooks plus release workflow docs are aligned to the same secret-free verification path.
+- Task 3 is landed as a truth-tightening slice rather than true multi-entry isolation: the helper template and maintainer docs now explicitly record that `audit:render-host` proves the current single-entry `main.js` + inline `srcdoc` contract, not finished heavy-runtime isolation.
+- Task 4 is landed as scope control: the roadmap/progress docs now keep Drawnix as a constrained future adapter/export reference instead of an active embedding target.
+
+The remaining work after this plan is therefore not “finish creating the runbook” or “finish the first packaging clarification.” Those pieces now exist. The remaining work is to preserve that checked-in truth while deciding whether the next real implementation step is heavy-runtime packaging isolation or a later contract-promotion slice.
