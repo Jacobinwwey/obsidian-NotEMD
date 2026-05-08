@@ -697,7 +697,7 @@ Ta kwartalna kronika zachowuje oryginalny styl wizualny [repo-saga](https://gith
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.pl.svg)
 
-_Ostatnio odświeżono z bieżącego drzewa roboczego: 2026-05-08. Data ostatniego commita: 2026-05-07._
+_Ostatnio odświeżono dla tagu wydania `1.8.5`: 2026-05-08. Data ostatniego commita: 2026-05-08._
 <!-- repo-chronicle:end -->
 
 
