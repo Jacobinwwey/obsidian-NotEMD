@@ -74,6 +74,22 @@ function parseQuotedArrayLiteralValue(source, key) {
     return values;
 }
 
+function parseQuotedObjectLiteralValues(source, key) {
+    const match = source.match(new RegExp(`${key}\\s*:\\s*\\{([\\s\\S]*?)\\}`, 'm'));
+    if (!match) {
+        return [];
+    }
+
+    const values = [];
+    const valuePattern = /:\s*["']([^"']+)["']/g;
+    let valueMatch = valuePattern.exec(match[1]);
+    while (valueMatch) {
+        values.push(valueMatch[1]);
+        valueMatch = valuePattern.exec(match[1]);
+    }
+    return values;
+}
+
 function parseQuotedScalarValue(source, key) {
     const match = source.match(new RegExp(`${key}\\s*:\\s*["']([^"']+)["']`, 'm'));
     return match ? match[1] : '';
@@ -84,20 +100,25 @@ function resolvePackagingBoundaryFacts({
 } = {}) {
     try {
         const source = fs.readFileSync(esbuildConfigPath, 'utf8');
-        const entryPoints = parseQuotedArrayLiteralValue(source, 'entryPoints');
+        const arrayEntryPoints = parseQuotedArrayLiteralValue(source, 'entryPoints');
+        const objectEntryPoints = parseQuotedObjectLiteralValues(source, 'entryPoints');
+        const entryPoints = arrayEntryPoints.length > 0 ? arrayEntryPoints : objectEntryPoints;
         const outfile = parseQuotedScalarValue(source, 'outfile');
+        const outdir = parseQuotedScalarValue(source, 'outdir');
 
         return {
             sourcePath: esbuildConfigPath,
             entryPoints: entryPoints.length > 0 ? entryPoints : ['<unknown-entry>'],
-            outfile: outfile || '<unknown-outfile>',
-            resolvedFromConfig: entryPoints.length > 0 || Boolean(outfile)
+            outfile,
+            outdir,
+            resolvedFromConfig: entryPoints.length > 0 || Boolean(outfile) || Boolean(outdir)
         };
     } catch {
         return {
             sourcePath: esbuildConfigPath,
             entryPoints: ['<unknown-entry>'],
             outfile: '<unknown-outfile>',
+            outdir: '',
             resolvedFromConfig: false
         };
     }
@@ -106,13 +127,16 @@ function resolvePackagingBoundaryFacts({
 function buildPackagingBoundaryChecklistLines(packagingFacts = resolvePackagingBoundaryFacts()) {
     const entrySummary = packagingFacts.entryPoints.join(', ');
     const entryCount = packagingFacts.entryPoints.length;
+    const outputDescriptor = packagingFacts.outfile
+        ? packagingFacts.outfile
+        : (packagingFacts.outdir ? `${packagingFacts.outdir}/...` : '<unknown-output>');
     const configFileName = path.basename(packagingFacts.sourcePath);
     const sourceDescriptor = packagingFacts.resolvedFromConfig
         ? `resolved from \`${configFileName}\``
         : `fallback placeholder because \`${configFileName}\` could not be parsed`;
     const singleEntryLine = entryCount === 1
-        ? `- [ ] Confirm the current build truth is still single-entry (${sourceDescriptor}): \`${entrySummary} -> ${packagingFacts.outfile}\` only.`
-        : `- [ ] Confirm current build entrypoint count before making packaging claims (${sourceDescriptor}): \`${entrySummary}\` -> \`${packagingFacts.outfile}\`.`;
+        ? `- [ ] Confirm the current build truth is still single-entry (${sourceDescriptor}): \`${entrySummary} -> ${outputDescriptor}\` only.`
+        : `- [ ] Confirm current build entrypoint count before making packaging claims (${sourceDescriptor}): \`${entrySummary}\` -> \`${outputDescriptor}\`.`;
 
     return [
         singleEntryLine,
