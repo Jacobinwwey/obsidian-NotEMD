@@ -488,17 +488,94 @@ function resolveReleasePackagingContractFacts({
     };
 }
 
+function getLeadingWhitespaceWidth(line) {
+    let width = 0;
+    while (width < line.length && /\s/.test(line[width])) {
+        width += 1;
+    }
+    return width;
+}
+
+function normalizeWorkflowTagPattern(rawValue) {
+    const withoutComment = rawValue.replace(/\s+#.*$/, '').trim();
+    if (!withoutComment) {
+        return '';
+    }
+
+    const quote = withoutComment[0];
+    if (
+        (quote === '"' || quote === '\'' || quote === '`') &&
+        withoutComment[withoutComment.length - 1] === quote &&
+        withoutComment.length >= 2
+    ) {
+        return withoutComment.slice(1, -1).trim();
+    }
+
+    return withoutComment;
+}
+
+function extractReleaseWorkflowTagPatterns(workflowSource) {
+    const lines = workflowSource.split(/\r?\n/);
+    const patterns = [];
+    let inTagsBlock = false;
+    let tagsIndent = -1;
+
+    for (const line of lines) {
+        const trimmed = line.trim();
+        const indent = getLeadingWhitespaceWidth(line);
+
+        if (!inTagsBlock) {
+            if (/^\s*tags\s*:\s*$/.test(line)) {
+                inTagsBlock = true;
+                tagsIndent = indent;
+            }
+            continue;
+        }
+
+        if (!trimmed || trimmed.startsWith('#')) {
+            continue;
+        }
+
+        if (indent <= tagsIndent) {
+            inTagsBlock = false;
+            if (/^\s*tags\s*:\s*$/.test(line)) {
+                inTagsBlock = true;
+                tagsIndent = indent;
+            }
+            continue;
+        }
+
+        const itemMatch = line.match(/^\s*-\s*(.+?)\s*$/);
+        if (!itemMatch) {
+            continue;
+        }
+
+        const normalizedPattern = normalizeWorkflowTagPattern(itemMatch[1]);
+        if (normalizedPattern) {
+            patterns.push(normalizedPattern);
+        }
+    }
+
+    return patterns;
+}
+
 function resolveReleaseWorkflowTriggerFacts({
     releaseWorkflowPath = path.resolve(__dirname, '..', '.github', 'workflows', 'release.yml')
 } = {}) {
     try {
         const workflowSource = fs.readFileSync(releaseWorkflowPath, 'utf8');
+        const workflowTagPatterns = extractReleaseWorkflowTagPatterns(workflowSource);
+        const hasNumericTagWildcard = workflowTagPatterns.includes('*.*.*');
+        const hasVPrefixedWildcard = workflowTagPatterns.some((pattern) => /^v\*\.\*\.\*$/i.test(pattern));
+        const hasNumericTagValidationPattern = /\^\[0-9\]\+\\\.\[0-9\]\+\\\.\[0-9\]\+\$/.test(workflowSource)
+            || /\^\[0-9\]\+\.\[0-9\]\+\.\[0-9\]\+\$/.test(workflowSource);
+
         return {
             sourcePath: releaseWorkflowPath,
-            hasWorkflowDispatch: workflowSource.includes('workflow_dispatch:'),
-            hasTagPushTrigger: workflowSource.includes("tags:") && workflowSource.includes("- '*.*.*'"),
-            rejectsVPrefixedTagTrigger: !workflowSource.includes("- 'v*.*.*'") && !workflowSource.includes("- 'V*.*.*'"),
-            validatesNumericTagPattern: workflowSource.includes('^[0-9]+\\.[0-9]+\\.[0-9]+$'),
+            hasWorkflowDispatch: /\bworkflow_dispatch\s*:/.test(workflowSource),
+            hasTagPushTrigger: hasNumericTagWildcard,
+            rejectsVPrefixedTagTrigger: workflowTagPatterns.length > 0 && !hasVPrefixedWildcard,
+            validatesNumericTagPattern: hasNumericTagValidationPattern,
             resolvedFromWorkflowFile: true
         };
     } catch {

@@ -517,6 +517,71 @@ const context = await esbuild.context({
             expect(lines[4]).toContain('tag-guard inspection incomplete');
         });
 
+        test('parses release workflow trigger facts with mixed quote styles in tags list', () => {
+            const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-release-workflow-mixed-tags-'));
+            const workflowPath = path.join(tempRoot, 'release.yml');
+            fs.writeFileSync(
+                workflowPath,
+                `name: Release
+on:
+  push:
+    tags:
+      - "*.*.*"
+      - 'release-*'
+  workflow_dispatch:
+jobs:
+  publish:
+    steps:
+      - run: |
+          if [[ ! "$TAG_NAME" =~ ^[0-9]+\\.[0-9]+\\.[0-9]+$ ]]; then
+            exit 1
+          fi
+`,
+                'utf8'
+            );
+
+            try {
+                const workflowFacts = resolveReleaseWorkflowTriggerFacts({ releaseWorkflowPath: workflowPath });
+                expect(workflowFacts.hasWorkflowDispatch).toBe(true);
+                expect(workflowFacts.hasTagPushTrigger).toBe(true);
+                expect(workflowFacts.rejectsVPrefixedTagTrigger).toBe(true);
+                expect(workflowFacts.validatesNumericTagPattern).toBe(true);
+                expect(workflowFacts.resolvedFromWorkflowFile).toBe(true);
+            } finally {
+                fs.rmSync(tempRoot, { recursive: true, force: true });
+            }
+        });
+
+        test('flags v-prefixed wildcard tag patterns in release workflow trigger facts', () => {
+            const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-release-workflow-v-prefix-'));
+            const workflowPath = path.join(tempRoot, 'release.yml');
+            fs.writeFileSync(
+                workflowPath,
+                `on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+jobs:
+  publish:
+    steps:
+      - run: echo ready
+`,
+                'utf8'
+            );
+
+            try {
+                const workflowFacts = resolveReleaseWorkflowTriggerFacts({ releaseWorkflowPath: workflowPath });
+                expect(workflowFacts.hasWorkflowDispatch).toBe(true);
+                expect(workflowFacts.hasTagPushTrigger).toBe(false);
+                expect(workflowFacts.rejectsVPrefixedTagTrigger).toBe(false);
+                expect(workflowFacts.validatesNumericTagPattern).toBe(false);
+                expect(workflowFacts.resolvedFromWorkflowFile).toBe(true);
+            } finally {
+                fs.rmSync(tempRoot, { recursive: true, force: true });
+            }
+        });
+
         test('resolves contract-promotion boundary facts for workflow/settings/export operation metadata', () => {
             const registryPath = path.join(repoRoot, 'src', 'operations', 'registry.ts');
             const facts = resolveContractPromotionBoundaryFacts({ registryPath });

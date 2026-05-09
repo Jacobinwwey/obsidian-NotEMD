@@ -60,6 +60,8 @@ Goals:
    Contract metadata extraction now tolerates mixed quote literals (`"..."`, `'...'`, `` `...` ``) in registry operation definitions, with regression coverage that locks this behavior for tracked selection/config/export operations.
 7. **Contract-promotion tracking now supports prefix wildcard expansion**
    `file.process-*` and `concept.extract-*` are now expanded from live registry operation IDs rather than maintained as static manual lists, while missing-registry fallback IDs keep checklist output stable.
+8. **Release workflow trigger parsing is now less quote-fragile**
+   Tag-trigger contract checks now parse `tags:` list items with mixed quote styles and explicitly treat `v*.*.*` wildcard patterns as guardrail violations, reducing drift from YAML formatting-only edits.
 
 ### Still open beyond convergence hardening
 
