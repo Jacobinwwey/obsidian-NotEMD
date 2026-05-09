@@ -53,7 +53,7 @@ Goals:
 3. **Verification closure is now repeatable**
    helper behavior -> regression tests -> maintainer doc sync -> release wording alignment.
 4. **Stage-B contract definition has started with executable release-truth wiring**
-   The helper template now includes a `Packaging Contract` section that derives required release assets from `scripts/release/publish-github-release.js`, keeps dual-language release-note file expectations explicit, and records numeric-tag + create/upload mode contract truth.
+   The helper template now includes a `Packaging Contract` section that derives required release assets from `scripts/release/publish-github-release.js`, keeps dual-language release-note file expectations explicit, records numeric-tag + create/upload mode contract truth, and checks tag-only release workflow trigger guardrails from `.github/workflows/release.yml`.
 
 ### Still open beyond convergence hardening
 

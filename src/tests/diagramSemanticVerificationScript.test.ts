@@ -81,7 +81,22 @@ describe('diagram semantic verification helper', () => {
             releaseTagPattern: string;
             supportsReleaseModeSwitch: boolean;
             resolvedFromReleaseHelper: boolean;
+        }, workflowFacts?: {
+            sourcePath: string;
+            hasWorkflowDispatch: boolean;
+            hasTagPushTrigger: boolean;
+            rejectsVPrefixedTagTrigger: boolean;
+            validatesNumericTagPattern: boolean;
+            resolvedFromWorkflowFile: boolean;
         }) => string[];
+        let resolveReleaseWorkflowTriggerFacts: (args?: { releaseWorkflowPath?: string }) => {
+            sourcePath: string;
+            hasWorkflowDispatch: boolean;
+            hasTagPushTrigger: boolean;
+            rejectsVPrefixedTagTrigger: boolean;
+            validatesNumericTagPattern: boolean;
+            resolvedFromWorkflowFile: boolean;
+        };
         let buildSemanticVerificationTemplate: (args: {
             vaultName?: string;
             commit: string;
@@ -122,6 +137,7 @@ describe('diagram semantic verification helper', () => {
                 buildPackagingBoundaryChecklistLines,
                 resolveReleasePackagingContractFacts,
                 buildReleasePackagingContractChecklistLines,
+                resolveReleaseWorkflowTriggerFacts,
                 buildSemanticVerificationTemplate,
                 writeSemanticVerificationTemplate
             } = require(scriptPath));
@@ -421,38 +437,57 @@ const context = await esbuild.context({
 
         test('keeps release packaging contract checklist aligned with release helper asset requirements', () => {
             const releaseHelperPath = path.join(repoRoot, 'scripts', 'release', 'publish-github-release.js');
+            const releaseWorkflowPath = path.join(repoRoot, '.github', 'workflows', 'release.yml');
             const { REQUIRED_RELEASE_ASSETS } = require(releaseHelperPath) as { REQUIRED_RELEASE_ASSETS: string[] };
 
             const facts = resolveReleasePackagingContractFacts({ releaseHelperPath });
+            const workflowFacts = resolveReleaseWorkflowTriggerFacts({ releaseWorkflowPath });
             expect(facts.requiredAssets).toEqual(REQUIRED_RELEASE_ASSETS);
             expect(facts.releaseTagPattern).toBe('^\\d+\\.\\d+\\.\\d+$');
             expect(facts.supportsReleaseModeSwitch).toBe(true);
             expect(facts.resolvedFromReleaseHelper).toBe(true);
+            expect(workflowFacts.hasWorkflowDispatch).toBe(true);
+            expect(workflowFacts.hasTagPushTrigger).toBe(true);
+            expect(workflowFacts.rejectsVPrefixedTagTrigger).toBe(true);
+            expect(workflowFacts.validatesNumericTagPattern).toBe(true);
+            expect(workflowFacts.resolvedFromWorkflowFile).toBe(true);
 
-            const lines = buildReleasePackagingContractChecklistLines(facts);
+            const lines = buildReleasePackagingContractChecklistLines(facts, workflowFacts);
             for (const assetName of REQUIRED_RELEASE_ASSETS) {
                 expect(lines[0]).toContain(`\`${assetName}\``);
             }
             expect(lines[1]).toContain('/^\\d+\\.\\d+\\.\\d+$/');
             expect(lines[2]).toContain('create path composes bilingual notes');
             expect(lines[2]).toContain('`--clobber`');
-            expect(lines[3]).toContain('docs/releases/<tag>.md');
-            expect(lines[3]).toContain('docs/releases/<tag>.zh-CN.md');
+            expect(lines[3]).toContain('tag push (`*.*.*`) + `workflow_dispatch`');
+            expect(lines[4]).toContain('numeric-tag regex guard present');
+            expect(lines[5]).toContain('docs/releases/<tag>.md');
+            expect(lines[5]).toContain('docs/releases/<tag>.zh-CN.md');
         });
 
-        test('falls back to default release packaging contract wording when release helper cannot be loaded', () => {
+        test('falls back to default release packaging/workflow contract wording when sources cannot be loaded', () => {
             const facts = resolveReleasePackagingContractFacts({
                 releaseHelperPath: path.join(repoRoot, 'scripts', 'release', 'missing-release-helper.js')
+            });
+            const workflowFacts = resolveReleaseWorkflowTriggerFacts({
+                releaseWorkflowPath: path.join(repoRoot, '.github', 'workflows', 'missing-release.yml')
             });
             expect(facts.requiredAssets).toEqual(['main.js', 'manifest.json', 'styles.css', 'README.md']);
             expect(facts.releaseTagPattern).toBe('^\\d+\\.\\d+\\.\\d+$');
             expect(facts.supportsReleaseModeSwitch).toBe(false);
             expect(facts.resolvedFromReleaseHelper).toBe(false);
+            expect(workflowFacts.hasWorkflowDispatch).toBe(false);
+            expect(workflowFacts.hasTagPushTrigger).toBe(false);
+            expect(workflowFacts.rejectsVPrefixedTagTrigger).toBe(false);
+            expect(workflowFacts.validatesNumericTagPattern).toBe(false);
+            expect(workflowFacts.resolvedFromWorkflowFile).toBe(false);
 
-            const lines = buildReleasePackagingContractChecklistLines(facts);
+            const lines = buildReleasePackagingContractChecklistLines(facts, workflowFacts);
             expect(lines[0]).toContain('fallback default');
             expect(lines[0]).toContain('missing-release-helper.js');
             expect(lines[2]).toContain('fallback reminder');
+            expect(lines[3]).toContain('fallback reminder');
+            expect(lines[4]).toContain('tag-guard inspection incomplete');
         });
 
         test('builds a markdown template with repo gates, packaging-boundary guidance, and per-surface evidence sections', () => {
@@ -481,6 +516,8 @@ const context = await esbuild.context({
             expect(template).toContain('/^\\d+\\.\\d+\\.\\d+$/');
             expect(template).toContain('create path composes bilingual notes');
             expect(template).toContain('`--clobber`');
+            expect(template).toContain('tag push (`*.*.*`) + `workflow_dispatch`');
+            expect(template).toContain('numeric-tag regex guard present');
             expect(template).toContain('docs/releases/<tag>.zh-CN.md');
             expect(template).toContain('## Mermaid');
             expect(template).toContain('## Vega-Lite');
