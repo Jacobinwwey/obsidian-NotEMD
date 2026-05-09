@@ -38,6 +38,14 @@ const SURFACE_DEFINITIONS = [
 ];
 
 const DEFAULT_REQUIRED_RELEASE_ASSETS = ['main.js', 'manifest.json', 'styles.css', 'README.md'];
+const DEFAULT_CONTRACT_PROMOTION_OPERATION_IDS = [
+    'workflow.extract-and-generate',
+    'content.extract-original-text',
+    'provider.profile.export',
+    'provider.profile.import',
+    'cli.capability-manifest.export',
+    'cli.invocation-contract.export'
+];
 
 const NORMALIZED_SURFACE_LOOKUP = new Map(
     SURFACE_DEFINITIONS.flatMap((surface) =>
@@ -95,6 +103,109 @@ function parseQuotedObjectLiteralValues(source, key) {
 function parseQuotedScalarValue(source, key) {
     const match = source.match(new RegExp(`${key}\\s*:\\s*(["'\`])([^"'\`]+)\\1`, 'm'));
     return match ? match[2] : '';
+}
+
+function extractBalancedBraceSource(source, startIndex) {
+    if (startIndex < 0 || source[startIndex] !== '{') {
+        return '';
+    }
+
+    let depth = 0;
+    let inString = '';
+    let escaping = false;
+    let inLineComment = false;
+    let inBlockComment = false;
+
+    for (let cursor = startIndex; cursor < source.length; cursor += 1) {
+        const char = source[cursor];
+        const nextChar = source[cursor + 1];
+
+        if (inLineComment) {
+            if (char === '\n') {
+                inLineComment = false;
+            }
+            continue;
+        }
+
+        if (inBlockComment) {
+            if (char === '*' && nextChar === '/') {
+                inBlockComment = false;
+                cursor += 1;
+            }
+            continue;
+        }
+
+        if (inString) {
+            if (escaping) {
+                escaping = false;
+                continue;
+            }
+            if (char === '\\') {
+                escaping = true;
+                continue;
+            }
+            if (char === inString) {
+                inString = '';
+            }
+            continue;
+        }
+
+        if (char === '/' && nextChar === '/') {
+            inLineComment = true;
+            cursor += 1;
+            continue;
+        }
+
+        if (char === '/' && nextChar === '*') {
+            inBlockComment = true;
+            cursor += 1;
+            continue;
+        }
+
+        if (char === '"' || char === '\'' || char === '`') {
+            inString = char;
+            continue;
+        }
+
+        if (char === '{') {
+            depth += 1;
+            continue;
+        }
+
+        if (char === '}') {
+            depth -= 1;
+            if (depth === 0) {
+                return source.slice(startIndex, cursor + 1);
+            }
+        }
+    }
+
+    return '';
+}
+
+function escapeRegExp(value) {
+    return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function extractOperationDefinitionSource(source, operationId) {
+    const idPattern = new RegExp(`id\\s*:\\s*'${escapeRegExp(operationId)}'`, 'm');
+    const match = idPattern.exec(source);
+    if (!match || match.index === undefined) {
+        return '';
+    }
+
+    const objectStart = source.lastIndexOf('{', match.index);
+    if (objectStart < 0) {
+        return '';
+    }
+
+    const objectSource = extractBalancedBraceSource(source, objectStart);
+    return objectSource.includes(`id: '${operationId}'`) ? objectSource : '';
+}
+
+function parseSingleQuotedField(source, fieldName) {
+    const match = source.match(new RegExp(`${fieldName}\\s*:\\s*'([^']+)'`));
+    return match ? match[1] : '';
 }
 
 function extractEsbuildContextOptionsSource(source) {
@@ -301,6 +412,48 @@ function resolveReleaseWorkflowTriggerFacts({
     }
 }
 
+function resolveContractPromotionBoundaryFacts({
+    registryPath = path.resolve(__dirname, '..', 'src', 'operations', 'registry.ts'),
+    trackedOperationIds = DEFAULT_CONTRACT_PROMOTION_OPERATION_IDS
+} = {}) {
+    try {
+        const source = fs.readFileSync(registryPath, 'utf8');
+        const operationFacts = trackedOperationIds.map((operationId) => {
+            const definitionSource = extractOperationDefinitionSource(source, operationId);
+            const automationLevel = parseSingleQuotedField(definitionSource, 'automationLevel');
+            const requiredContext = parseSingleQuotedField(definitionSource, 'requiredContext');
+            const sideEffectClass = parseSingleQuotedField(definitionSource, 'sideEffectClass');
+            const resolved = Boolean(definitionSource) && Boolean(automationLevel) && Boolean(requiredContext) && Boolean(sideEffectClass);
+
+            return {
+                operationId,
+                automationLevel: automationLevel || '<unknown>',
+                requiredContext: requiredContext || '<unknown>',
+                sideEffectClass: sideEffectClass || '<unknown>',
+                resolved
+            };
+        });
+
+        return {
+            sourcePath: registryPath,
+            operationFacts,
+            resolvedFromRegistry: true
+        };
+    } catch {
+        return {
+            sourcePath: registryPath,
+            operationFacts: trackedOperationIds.map((operationId) => ({
+                operationId,
+                automationLevel: '<unknown>',
+                requiredContext: '<unknown>',
+                sideEffectClass: '<unknown>',
+                resolved: false
+            })),
+            resolvedFromRegistry: false
+        };
+    }
+}
+
 function buildPackagingBoundaryChecklistLines(packagingFacts = resolvePackagingBoundaryFacts()) {
     const entrySummary = packagingFacts.entryPoints.join(', ');
     const entryCount = packagingFacts.entryPoints.length;
@@ -367,6 +520,29 @@ function buildReleasePackagingContractChecklistLines(
         '- [ ] Confirm release notes contract remains dual-file: `docs/releases/<tag>.md` and `docs/releases/<tag>.zh-CN.md`.',
         '- [ ] If packaging output shape changes (for example, moving from `outfile` to `outdir`), update release-helper tests and maintainer docs in the same change.'
     ];
+}
+
+function buildContractPromotionBoundaryChecklistLines(
+    contractFacts = resolveContractPromotionBoundaryFacts()
+) {
+    const registryPath = normalizeRelativePath(contractFacts.sourcePath);
+    const sourceDescriptor = contractFacts.resolvedFromRegistry
+        ? `derived from \`${registryPath}\``
+        : `fallback reminder because \`${registryPath}\` could not be loaded`;
+    const lines = [
+        `- [ ] Confirm contract-promotion boundary truth remains ${sourceDescriptor}.`
+    ];
+
+    for (const operationFact of contractFacts.operationFacts) {
+        if (operationFact.resolved) {
+            lines.push(`- [ ] Confirm \`${operationFact.operationId}\` remains \`automationLevel=${operationFact.automationLevel}\`, \`requiredContext=${operationFact.requiredContext}\`, \`sideEffectClass=${operationFact.sideEffectClass}\`.`);
+        } else {
+            lines.push(`- [ ] Resolve operation contract metadata for \`${operationFact.operationId}\` from \`${registryPath}\` before promoting related workflow/settings/export claims.`);
+        }
+    }
+
+    lines.push('- [ ] If any operation metadata above changes, update capability/contract tests and maintainer docs in the same change before promoting broader CLI or workflow/settings claims.');
+    return lines;
 }
 
 function normalizeSurfaceId(value) {
@@ -452,10 +628,13 @@ function buildSemanticVerificationTemplate({
 
     const packagingChecklistLines = buildPackagingBoundaryChecklistLines(packagingFacts);
     const releasePackagingChecklistLines = buildReleasePackagingContractChecklistLines(releasePackagingFacts);
+    const contractPromotionChecklistLines = buildContractPromotionBoundaryChecklistLines();
     headerLines.push('', '## Packaging Boundary', '');
     headerLines.push(...packagingChecklistLines);
     headerLines.push('', '## Packaging Contract', '');
     headerLines.push(...releasePackagingChecklistLines);
+    headerLines.push('', '## Contract Promotion Boundary', '');
+    headerLines.push(...contractPromotionChecklistLines);
     headerLines.push('', '## Surface Evidence');
 
     for (const surface of surfaces) {
@@ -588,11 +767,13 @@ module.exports = {
     USAGE_TEXT,
     buildEnvironmentCheckCommands,
     buildPackagingBoundaryChecklistLines,
+    buildContractPromotionBoundaryChecklistLines,
     buildReleasePackagingContractChecklistLines,
     buildSemanticVerificationTemplate,
     main,
     parseArgs,
     resolvePackagingBoundaryFacts,
+    resolveContractPromotionBoundaryFacts,
     resolveReleasePackagingContractFacts,
     resolveReleaseWorkflowTriggerFacts,
     resolveRequestedSurfaces,

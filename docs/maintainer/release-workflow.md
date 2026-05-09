@@ -40,7 +40,7 @@ Recommended helper:
 ```bash
 npm run verify:diagram-semantics -- --vault "<vault-name>" --commit "<sha>" --version "<plugin-version>" --output ~/tmp/notemd-diagram-check.md
 ```
-The helper reads packaging entry/output facts from `esbuild.config.mjs`, release packaging contract facts from `scripts/release/publish-github-release.js`, and release trigger/tag-guard facts from `.github/workflows/release.yml`; keep those files as packaging truth sources when evaluating renderer-boundary claims.
+The helper reads packaging entry/output facts from `esbuild.config.mjs`, release packaging contract facts from `scripts/release/publish-github-release.js`, release trigger/tag-guard facts from `.github/workflows/release.yml`, and operation-promotion boundary facts from `src/operations/registry.ts`; keep those files as packaging/contract truth sources when evaluating renderer-boundary claims.
 Treat the helper's packaging-boundary and packaging-contract sections as required truth maintenance for renderer-affecting changes: `npm run audit:render-host` does not prove true heavy-runtime isolation; it only proves the current self-contained `main.js` + inline `srcdoc` host contract.
 The packaging-contract section now also records numeric tag policy, create/upload mode behavior, and tag-only trigger guardrails; treat those as part of the same release-truth contract rather than informal release habits.
 
