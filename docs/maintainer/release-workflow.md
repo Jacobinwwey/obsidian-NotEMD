@@ -42,6 +42,7 @@ npm run verify:diagram-semantics -- --vault "<vault-name>" --commit "<sha>" --ve
 ```
 The helper reads packaging entry/output facts from `esbuild.config.mjs` and release packaging contract facts from `scripts/release/publish-github-release.js`; keep those files as packaging truth sources when evaluating renderer-boundary claims.
 Treat the helper's packaging-boundary and packaging-contract sections as required truth maintenance for renderer-affecting changes: `npm run audit:render-host` does not prove true heavy-runtime isolation; it only proves the current self-contained `main.js` + inline `srcdoc` host contract.
+The packaging-contract section now also records numeric tag policy and create/upload mode behavior; treat those as part of the same release-truth contract rather than informal release habits.
 
 ## 3. Version Synchronization
 
