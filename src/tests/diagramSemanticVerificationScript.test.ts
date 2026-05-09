@@ -97,6 +97,31 @@ describe('diagram semantic verification helper', () => {
             validatesNumericTagPattern: boolean;
             resolvedFromWorkflowFile: boolean;
         };
+        let resolveContractPromotionBoundaryFacts: (args?: {
+            registryPath?: string;
+            trackedOperationIds?: string[];
+        }) => {
+            sourcePath: string;
+            operationFacts: Array<{
+                operationId: string;
+                automationLevel: string;
+                requiredContext: string;
+                sideEffectClass: string;
+                resolved: boolean;
+            }>;
+            resolvedFromRegistry: boolean;
+        };
+        let buildContractPromotionBoundaryChecklistLines: (contractFacts?: {
+            sourcePath: string;
+            operationFacts: Array<{
+                operationId: string;
+                automationLevel: string;
+                requiredContext: string;
+                sideEffectClass: string;
+                resolved: boolean;
+            }>;
+            resolvedFromRegistry: boolean;
+        }) => string[];
         let buildSemanticVerificationTemplate: (args: {
             vaultName?: string;
             commit: string;
@@ -138,6 +163,8 @@ describe('diagram semantic verification helper', () => {
                 resolveReleasePackagingContractFacts,
                 buildReleasePackagingContractChecklistLines,
                 resolveReleaseWorkflowTriggerFacts,
+                resolveContractPromotionBoundaryFacts,
+                buildContractPromotionBoundaryChecklistLines,
                 buildSemanticVerificationTemplate,
                 writeSemanticVerificationTemplate
             } = require(scriptPath));
@@ -490,6 +517,78 @@ const context = await esbuild.context({
             expect(lines[4]).toContain('tag-guard inspection incomplete');
         });
 
+        test('resolves contract-promotion boundary facts for workflow/settings/export operation metadata', () => {
+            const registryPath = path.join(repoRoot, 'src', 'operations', 'registry.ts');
+            const facts = resolveContractPromotionBoundaryFacts({ registryPath });
+            expect(facts.resolvedFromRegistry).toBe(true);
+
+            const findOperation = (operationId: string) =>
+                facts.operationFacts.find((candidate) => candidate.operationId === operationId);
+
+            expect(findOperation('workflow.extract-and-generate')).toEqual(expect.objectContaining({
+                operationId: 'workflow.extract-and-generate',
+                automationLevel: 'requires-active-file',
+                requiredContext: 'active-file',
+                sideEffectClass: 'batch-write',
+                resolved: true
+            }));
+            expect(findOperation('content.extract-original-text')).toEqual(expect.objectContaining({
+                operationId: 'content.extract-original-text',
+                automationLevel: 'requires-active-file',
+                requiredContext: 'active-file',
+                sideEffectClass: 'write-file',
+                resolved: true
+            }));
+            expect(findOperation('provider.profile.export')).toEqual(expect.objectContaining({
+                operationId: 'provider.profile.export',
+                automationLevel: 'safe',
+                requiredContext: 'none',
+                sideEffectClass: 'write-file',
+                resolved: true
+            }));
+            expect(findOperation('provider.profile.import')).toEqual(expect.objectContaining({
+                operationId: 'provider.profile.import',
+                automationLevel: 'safe',
+                requiredContext: 'none',
+                sideEffectClass: 'write-file',
+                resolved: true
+            }));
+            expect(findOperation('cli.capability-manifest.export')).toEqual(expect.objectContaining({
+                operationId: 'cli.capability-manifest.export',
+                automationLevel: 'safe',
+                requiredContext: 'none',
+                sideEffectClass: 'write-file',
+                resolved: true
+            }));
+            expect(findOperation('cli.invocation-contract.export')).toEqual(expect.objectContaining({
+                operationId: 'cli.invocation-contract.export',
+                automationLevel: 'safe',
+                requiredContext: 'none',
+                sideEffectClass: 'write-file',
+                resolved: true
+            }));
+
+            const lines = buildContractPromotionBoundaryChecklistLines(facts);
+            expect(lines[0]).toContain('contract-promotion boundary truth');
+            expect(lines.join('\n')).toContain('workflow.extract-and-generate');
+            expect(lines.join('\n')).toContain('automationLevel=requires-active-file');
+            expect(lines.join('\n')).toContain('provider.profile.export');
+            expect(lines.join('\n')).toContain('cli.invocation-contract.export');
+        });
+
+        test('falls back to unresolved contract-promotion boundary facts when registry is missing', () => {
+            const facts = resolveContractPromotionBoundaryFacts({
+                registryPath: path.join(repoRoot, 'src', 'operations', 'missing-registry.ts')
+            });
+            expect(facts.resolvedFromRegistry).toBe(false);
+            expect(facts.operationFacts.every((operationFact) => !operationFact.resolved)).toBe(true);
+
+            const lines = buildContractPromotionBoundaryChecklistLines(facts);
+            expect(lines[0]).toContain('fallback reminder');
+            expect(lines.join('\n')).toContain('Resolve operation contract metadata');
+            expect(lines.join('\n')).toContain('workflow.extract-and-generate');
+        });
+
         test('builds a markdown template with repo gates, packaging-boundary guidance, and per-surface evidence sections', () => {
             const template = buildSemanticVerificationTemplate({
                 vaultName: 'Research Vault',
@@ -519,6 +618,11 @@ const context = await esbuild.context({
             expect(template).toContain('tag push (`*.*.*`) + `workflow_dispatch`');
             expect(template).toContain('numeric-tag regex guard present');
             expect(template).toContain('docs/releases/<tag>.zh-CN.md');
+            expect(template).toContain('## Contract Promotion Boundary');
+            expect(template).toContain('workflow.extract-and-generate');
+            expect(template).toContain('content.extract-original-text');
+            expect(template).toContain('provider.profile.export');
+            expect(template).toContain('cli.capability-manifest.export');
             expect(template).toContain('## Mermaid');
             expect(template).toContain('## Vega-Lite');
             expect(template).not.toContain('## JSON Canvas');
