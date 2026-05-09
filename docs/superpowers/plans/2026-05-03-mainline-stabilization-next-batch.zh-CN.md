@@ -214,5 +214,6 @@ npm run audit:render-host
 - Stage B 契约定义推进也已具备可执行形态：semantic helper 模板新增 `Packaging Contract` 区块，从 `scripts/release/publish-github-release.js` 同步 release 必需资产，并在维护者核验中显式保留双语 release notes 文件契约，同时记录数字 tag 与 create/upload 模式契约真值，并校验 `.github/workflows/release.yml` 的 tag-only 触发防护约束。
 - Stage B 契约提升边界也已具备可执行形态：helper 模板新增 `Contract Promotion Boundary` 区块，从 `src/operations/registry.ts` 提取 workflow/settings/export 邻近操作的约束真值。
 - Stage B 契约提升覆盖也在 CI 安全切片中继续扩展：helper 追踪范围新增 selection/config 邻近元数据（`editor.create-link-and-generate`、`file.process-*`、`concept.extract-*`），同时 registry 解析支持混合引号字面量并由回归测试锁定，降低操作真值提取脆弱性。
+- Stage B 防漂移收敛继续推进：契约提升追踪现在会从实时 registry ID 自动展开前缀通配（`file.process-*`、`concept.extract-*`），并保留稳定回退 ID，在 registry 读取失败时仍保持 checklist 生成确定性，减少手工列表维护抖动。
 
 因此，这份计划之后真正剩下的工作已经不再是“补第一版 runbook”或“补第一版 packaging 澄清”。这些基础片段现在已经检入。剩余工作是保持这套已检入真值不漂移，并进一步判断下一个真实实现批次应优先落在 heavy-runtime packaging isolation，还是后续更窄的 contract-promotion 切片。

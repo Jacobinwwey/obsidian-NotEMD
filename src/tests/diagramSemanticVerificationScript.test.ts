@@ -661,6 +661,72 @@ const context = await esbuild.context({
             }
         });
 
+        test('expands wildcard-tracked operation selectors against registry operation IDs', () => {
+            const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-registry-wildcard-selectors-'));
+            const registryPath = path.join(tempRoot, 'registry.ts');
+            fs.writeFileSync(
+                registryPath,
+                `export const OPERATION_DEFINITIONS = [
+    {
+        id: 'file.process-add-links',
+        automationLevel: 'requires-active-file',
+        requiredContext: 'active-file',
+        sideEffectClass: 'write-file'
+    },
+    {
+        id: 'file.process-folder-add-links',
+        automationLevel: 'interactive-ui',
+        requiredContext: 'folder-selection',
+        sideEffectClass: 'batch-write'
+    },
+    {
+        id: 'file.process-future-mode',
+        automationLevel: 'safe',
+        requiredContext: 'none',
+        sideEffectClass: 'read-only'
+    },
+    {
+        id: 'concept.extract-file',
+        automationLevel: 'requires-active-file',
+        requiredContext: 'active-file',
+        sideEffectClass: 'write-file'
+    },
+    {
+        id: 'concept.extract-folder',
+        automationLevel: 'interactive-ui',
+        requiredContext: 'folder-selection',
+        sideEffectClass: 'batch-write'
+    },
+    {
+        id: 'translate.file',
+        automationLevel: 'requires-active-file',
+        requiredContext: 'active-file',
+        sideEffectClass: 'write-file'
+    }
+];
+`,
+                'utf8'
+            );
+
+            try {
+                const facts = resolveContractPromotionBoundaryFacts({
+                    registryPath,
+                    trackedOperationIds: ['file.process-*', 'concept.extract-*']
+                });
+                expect(facts.resolvedFromRegistry).toBe(true);
+                expect(facts.operationFacts.map((operationFact) => operationFact.operationId)).toEqual([
+                    'file.process-add-links',
+                    'file.process-folder-add-links',
+                    'file.process-future-mode',
+                    'concept.extract-file',
+                    'concept.extract-folder'
+                ]);
+                expect(facts.operationFacts.every((operationFact) => operationFact.resolved)).toBe(true);
+            } finally {
+                fs.rmSync(tempRoot, { recursive: true, force: true });
+            }
+        });
+
         test('falls back to unresolved contract-promotion boundary facts when registry is missing', () => {
             const facts = resolveContractPromotionBoundaryFacts({
                 registryPath: path.join(repoRoot, 'src', 'operations', 'missing-registry.ts')
@@ -672,6 +738,21 @@ const context = await esbuild.context({
             expect(lines[0]).toContain('fallback reminder');
             expect(lines.join('\n')).toContain('Resolve operation contract metadata');
             expect(lines.join('\n')).toContain('workflow.extract-and-generate');
+        });
+
+        test('uses default fallback IDs for wildcard selectors when registry file is missing', () => {
+            const facts = resolveContractPromotionBoundaryFacts({
+                registryPath: path.join(repoRoot, 'src', 'operations', 'missing-registry.ts'),
+                trackedOperationIds: ['file.process-*', 'concept.extract-*']
+            });
+            expect(facts.resolvedFromRegistry).toBe(false);
+            expect(facts.operationFacts.map((operationFact) => operationFact.operationId)).toEqual([
+                'file.process-add-links',
+                'file.process-folder-add-links',
+                'concept.extract-file',
+                'concept.extract-folder'
+            ]);
+            expect(facts.operationFacts.every((operationFact) => !operationFact.resolved)).toBe(true);
         });
 
         test('builds a markdown template with repo gates, packaging-boundary guidance, and per-surface evidence sections', () => {

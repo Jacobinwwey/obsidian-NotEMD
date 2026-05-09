@@ -17,6 +17,7 @@ When output target detection succeeds, the checklist line now records whether th
 If both `outfile` and `outdir` are detected together, the checklist now treats that as ambiguous and requires explicit manual confirmation before packaging claims.
 Its packaging-contract section tracks release-asset, release-tag, publish-mode, and release-notes contract truth from `scripts/release/publish-github-release.js`, and release-trigger/tag-guard contract truth from `.github/workflows/release.yml`, so Stage-B contract definition stays aligned with release enforcement.
 Its contract-promotion-boundary section reads current operation metadata from `src/operations/registry.ts` for workflow/settings/selection/export/config-adjacent operations (including `editor.create-link-and-generate`, `file.process-*`, `concept.extract-*`, and export/import surfaces), so capability-promotion claims remain tied to actual `automationLevel` / `requiredContext` / `sideEffectClass` truth.
+The helper now resolves `file.process-*` and `concept.extract-*` as wildcard selectors against the current registry operation IDs, so newly added operations under those prefixes are included without manually editing the checklist script.
 
 ## 1. When This Runbook Is Required
 

@@ -58,6 +58,8 @@ Goals:
    The helper template now includes a `Contract Promotion Boundary` section that derives workflow/settings/selection/export/config-adjacent operation constraints (`automationLevel`, `requiredContext`, `sideEffectClass`) from `src/operations/registry.ts`.
 6. **Contract-promotion parser hardening now covers registry literal variants**
    Contract metadata extraction now tolerates mixed quote literals (`"..."`, `'...'`, `` `...` ``) in registry operation definitions, with regression coverage that locks this behavior for tracked selection/config/export operations.
+7. **Contract-promotion tracking now supports prefix wildcard expansion**
+   `file.process-*` and `concept.extract-*` are now expanded from live registry operation IDs rather than maintained as static manual lists, while missing-registry fallback IDs keep checklist output stable.
 
 ### Still open beyond convergence hardening
 

@@ -38,7 +38,18 @@ const SURFACE_DEFINITIONS = [
 ];
 
 const DEFAULT_REQUIRED_RELEASE_ASSETS = ['main.js', 'manifest.json', 'styles.css', 'README.md'];
-const DEFAULT_CONTRACT_PROMOTION_OPERATION_IDS = [
+const DEFAULT_CONTRACT_PROMOTION_OPERATION_SELECTORS = [
+    'workflow.extract-and-generate',
+    'content.extract-original-text',
+    'editor.create-link-and-generate',
+    'file.process-*',
+    'concept.extract-*',
+    'provider.profile.export',
+    'provider.profile.import',
+    'cli.capability-manifest.export',
+    'cli.invocation-contract.export'
+];
+const DEFAULT_CONTRACT_PROMOTION_FALLBACK_OPERATION_IDS = [
     'workflow.extract-and-generate',
     'content.extract-original-text',
     'editor.create-link-and-generate',
@@ -212,6 +223,90 @@ function extractOperationDefinitionSource(source, operationId) {
 function parseQuotedField(source, fieldName) {
     const match = source.match(new RegExp(`${fieldName}\\s*:\\s*(["'\`])([^"'\`]+)\\1`));
     return match ? match[2] : '';
+}
+
+function isWildcardSelector(selector) {
+    return selector.endsWith('*') && selector.indexOf('*') === selector.length - 1;
+}
+
+function extractOperationIdsFromRegistrySource(source) {
+    const operationIds = [];
+    const seen = new Set();
+    const idPattern = /\bid\s*:\s*(["'`])([^"'`]+)\1/g;
+
+    let match = idPattern.exec(source);
+    while (match) {
+        const operationId = match[2];
+        if (!seen.has(operationId)) {
+            seen.add(operationId);
+            operationIds.push(operationId);
+        }
+        match = idPattern.exec(source);
+    }
+
+    return operationIds;
+}
+
+function resolveTrackedOperationIdsFromSource(
+    source,
+    trackedOperationSelectors = DEFAULT_CONTRACT_PROMOTION_OPERATION_SELECTORS
+) {
+    const availableOperationIds = extractOperationIdsFromRegistrySource(source);
+    const trackedOperationIds = [];
+    const seen = new Set();
+
+    const appendId = (operationId) => {
+        if (!seen.has(operationId)) {
+            seen.add(operationId);
+            trackedOperationIds.push(operationId);
+        }
+    };
+
+    for (const selector of trackedOperationSelectors) {
+        if (isWildcardSelector(selector)) {
+            const prefix = selector.slice(0, -1);
+            for (const availableId of availableOperationIds) {
+                if (availableId.startsWith(prefix)) {
+                    appendId(availableId);
+                }
+            }
+            continue;
+        }
+        appendId(selector);
+    }
+
+    return trackedOperationIds;
+}
+
+function resolveFallbackTrackedOperationIds(
+    trackedOperationSelectors = DEFAULT_CONTRACT_PROMOTION_OPERATION_SELECTORS
+) {
+    const trackedOperationIds = [];
+    const seen = new Set();
+
+    const appendId = (operationId) => {
+        if (!seen.has(operationId)) {
+            seen.add(operationId);
+            trackedOperationIds.push(operationId);
+        }
+    };
+
+    for (const selector of trackedOperationSelectors) {
+        if (isWildcardSelector(selector)) {
+            const prefix = selector.slice(0, -1);
+            for (const fallbackId of DEFAULT_CONTRACT_PROMOTION_FALLBACK_OPERATION_IDS) {
+                if (fallbackId.startsWith(prefix)) {
+                    appendId(fallbackId);
+                }
+            }
+            continue;
+        }
+        appendId(selector);
+    }
+
+    return trackedOperationIds.length > 0
+        ? trackedOperationIds
+        : [...DEFAULT_CONTRACT_PROMOTION_FALLBACK_OPERATION_IDS];
 }
 
 function extractEsbuildContextOptionsSource(source) {
@@ -420,11 +515,15 @@ function resolveReleaseWorkflowTriggerFacts({
 
 function resolveContractPromotionBoundaryFacts({
     registryPath = path.resolve(__dirname, '..', 'src', 'operations', 'registry.ts'),
-    trackedOperationIds = DEFAULT_CONTRACT_PROMOTION_OPERATION_IDS
-} = {}) {
+    trackedOperationIds = DEFAULT_CONTRACT_PROMOTION_OPERATION_SELECTORS
+    } = {}) {
     try {
         const source = fs.readFileSync(registryPath, 'utf8');
-        const operationFacts = trackedOperationIds.map((operationId) => {
+        const resolvedTrackedOperationIds = resolveTrackedOperationIdsFromSource(source, trackedOperationIds);
+        const operationIdsForFacts = resolvedTrackedOperationIds.length > 0
+            ? resolvedTrackedOperationIds
+            : resolveFallbackTrackedOperationIds(trackedOperationIds);
+        const operationFacts = operationIdsForFacts.map((operationId) => {
             const definitionSource = extractOperationDefinitionSource(source, operationId);
             const automationLevel = parseQuotedField(definitionSource, 'automationLevel');
             const requiredContext = parseQuotedField(definitionSource, 'requiredContext');
@@ -446,9 +545,10 @@ function resolveContractPromotionBoundaryFacts({
             resolvedFromRegistry: true
         };
     } catch {
+        const fallbackOperationIds = resolveFallbackTrackedOperationIds(trackedOperationIds);
         return {
             sourcePath: registryPath,
-            operationFacts: trackedOperationIds.map((operationId) => ({
+            operationFacts: fallbackOperationIds.map((operationId) => ({
                 operationId,
                 automationLevel: '<unknown>',
                 requiredContext: '<unknown>',

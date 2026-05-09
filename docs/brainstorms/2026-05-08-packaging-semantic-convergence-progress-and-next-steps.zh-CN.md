@@ -58,6 +58,8 @@ topic: packaging-semantic-convergence-progress-and-next-steps
    helper 模板现在新增 `Contract Promotion Boundary` 区块：从 `src/operations/registry.ts` 提取 workflow/settings/selection/export/config 邻近操作的 `automationLevel` / `requiredContext` / `sideEffectClass` 约束真值。
 6. **契约提升解析器已补齐 registry 字面量抗漂移**
    操作契约元数据提取现在可容忍混合引号字面量（`"..."`、`'...'`、`` `...` ``），并新增回归覆盖锁定 selection/config/export 追踪操作的该行为。
+7. **契约提升追踪已支持前缀通配自动展开**
+   `file.process-*` 与 `concept.extract-*` 现在从实时 registry operation ID 自动展开，不再完全依赖静态手工列表；同时在 registry 缺失时仍保留稳定回退 ID，保证 checklist 输出可用。
 
 ### 尚未进入实现层的边界
 
