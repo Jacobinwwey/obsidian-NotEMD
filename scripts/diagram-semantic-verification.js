@@ -276,6 +276,31 @@ function resolveReleasePackagingContractFacts({
     };
 }
 
+function resolveReleaseWorkflowTriggerFacts({
+    releaseWorkflowPath = path.resolve(__dirname, '..', '.github', 'workflows', 'release.yml')
+} = {}) {
+    try {
+        const workflowSource = fs.readFileSync(releaseWorkflowPath, 'utf8');
+        return {
+            sourcePath: releaseWorkflowPath,
+            hasWorkflowDispatch: workflowSource.includes('workflow_dispatch:'),
+            hasTagPushTrigger: workflowSource.includes("tags:") && workflowSource.includes("- '*.*.*'"),
+            rejectsVPrefixedTagTrigger: !workflowSource.includes("- 'v*.*.*'") && !workflowSource.includes("- 'V*.*.*'"),
+            validatesNumericTagPattern: workflowSource.includes('^[0-9]+\\.[0-9]+\\.[0-9]+$'),
+            resolvedFromWorkflowFile: true
+        };
+    } catch {
+        return {
+            sourcePath: releaseWorkflowPath,
+            hasWorkflowDispatch: false,
+            hasTagPushTrigger: false,
+            rejectsVPrefixedTagTrigger: false,
+            validatesNumericTagPattern: false,
+            resolvedFromWorkflowFile: false
+        };
+    }
+}
+
 function buildPackagingBoundaryChecklistLines(packagingFacts = resolvePackagingBoundaryFacts()) {
     const entrySummary = packagingFacts.entryPoints.join(', ');
     const entryCount = packagingFacts.entryPoints.length;
@@ -310,9 +335,11 @@ function buildPackagingBoundaryChecklistLines(packagingFacts = resolvePackagingB
 }
 
 function buildReleasePackagingContractChecklistLines(
-    releaseFacts = resolveReleasePackagingContractFacts()
+    releaseFacts = resolveReleasePackagingContractFacts(),
+    workflowFacts = resolveReleaseWorkflowTriggerFacts()
 ) {
     const releaseHelperPath = normalizeRelativePath(releaseFacts.sourcePath);
+    const releaseWorkflowPath = normalizeRelativePath(workflowFacts.sourcePath);
     const sourceDescriptor = releaseFacts.resolvedFromReleaseHelper
         ? `derived from \`${releaseHelperPath}\``
         : `fallback default because \`${releaseHelperPath}\` could not be loaded`;
@@ -321,11 +348,22 @@ function buildReleasePackagingContractChecklistLines(
     const releaseModeDescriptor = releaseFacts.supportsReleaseModeSwitch
         ? 'derived from release helper create/upload mode logic'
         : 'fallback reminder because release helper mode logic could not be inspected';
+    const workflowDescriptor = workflowFacts.resolvedFromWorkflowFile
+        ? `derived from \`${releaseWorkflowPath}\``
+        : `fallback reminder because \`${releaseWorkflowPath}\` could not be loaded`;
+    const triggerDescriptor = workflowFacts.hasTagPushTrigger && workflowFacts.hasWorkflowDispatch
+        ? 'tag push (`*.*.*`) + `workflow_dispatch`'
+        : 'trigger inspection incomplete';
+    const tagGuardDescriptor = workflowFacts.validatesNumericTagPattern && workflowFacts.rejectsVPrefixedTagTrigger
+        ? 'numeric-tag regex guard present and v-prefixed wildcard triggers absent'
+        : 'tag-guard inspection incomplete';
 
     return [
         `- [ ] Confirm release asset contract remains ${sourceDescriptor}: ${requiredAssets}.`,
         `- [ ] Confirm release tag contract remains numeric-only: \`/${releaseTagPattern}/\` (no \`v\` prefix).`,
         `- [ ] Confirm release publish mode contract remains ${releaseModeDescriptor}: create path composes bilingual notes, existing-release path uploads assets with \`--clobber\`.`,
+        `- [ ] Confirm release workflow trigger contract remains ${workflowDescriptor}: ${triggerDescriptor}.`,
+        `- [ ] Confirm release workflow tag-guard contract remains ${workflowDescriptor}: ${tagGuardDescriptor}.`,
         '- [ ] Confirm release notes contract remains dual-file: `docs/releases/<tag>.md` and `docs/releases/<tag>.zh-CN.md`.',
         '- [ ] If packaging output shape changes (for example, moving from `outfile` to `outdir`), update release-helper tests and maintainer docs in the same change.'
     ];
@@ -556,6 +594,7 @@ module.exports = {
     parseArgs,
     resolvePackagingBoundaryFacts,
     resolveReleasePackagingContractFacts,
+    resolveReleaseWorkflowTriggerFacts,
     resolveRequestedSurfaces,
     writeSemanticVerificationTemplate
 };
