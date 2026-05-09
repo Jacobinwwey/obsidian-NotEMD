@@ -71,11 +71,15 @@ describe('diagram semantic verification helper', () => {
         let resolveReleasePackagingContractFacts: (args?: { releaseHelperPath?: string }) => {
             sourcePath: string;
             requiredAssets: string[];
+            releaseTagPattern: string;
+            supportsReleaseModeSwitch: boolean;
             resolvedFromReleaseHelper: boolean;
         };
         let buildReleasePackagingContractChecklistLines: (releaseFacts?: {
             sourcePath: string;
             requiredAssets: string[];
+            releaseTagPattern: string;
+            supportsReleaseModeSwitch: boolean;
             resolvedFromReleaseHelper: boolean;
         }) => string[];
         let buildSemanticVerificationTemplate: (args: {
@@ -94,6 +98,8 @@ describe('diagram semantic verification helper', () => {
             releasePackagingFacts?: {
                 sourcePath: string;
                 requiredAssets: string[];
+                releaseTagPattern: string;
+                supportsReleaseModeSwitch: boolean;
                 resolvedFromReleaseHelper: boolean;
             };
         }) => string;
@@ -419,14 +425,19 @@ const context = await esbuild.context({
 
             const facts = resolveReleasePackagingContractFacts({ releaseHelperPath });
             expect(facts.requiredAssets).toEqual(REQUIRED_RELEASE_ASSETS);
+            expect(facts.releaseTagPattern).toBe('^\\d+\\.\\d+\\.\\d+$');
+            expect(facts.supportsReleaseModeSwitch).toBe(true);
             expect(facts.resolvedFromReleaseHelper).toBe(true);
 
             const lines = buildReleasePackagingContractChecklistLines(facts);
             for (const assetName of REQUIRED_RELEASE_ASSETS) {
                 expect(lines[0]).toContain(`\`${assetName}\``);
             }
-            expect(lines[1]).toContain('docs/releases/<tag>.md');
-            expect(lines[1]).toContain('docs/releases/<tag>.zh-CN.md');
+            expect(lines[1]).toContain('/^\\d+\\.\\d+\\.\\d+$/');
+            expect(lines[2]).toContain('create path composes bilingual notes');
+            expect(lines[2]).toContain('`--clobber`');
+            expect(lines[3]).toContain('docs/releases/<tag>.md');
+            expect(lines[3]).toContain('docs/releases/<tag>.zh-CN.md');
         });
 
         test('falls back to default release packaging contract wording when release helper cannot be loaded', () => {
@@ -434,11 +445,14 @@ const context = await esbuild.context({
                 releaseHelperPath: path.join(repoRoot, 'scripts', 'release', 'missing-release-helper.js')
             });
             expect(facts.requiredAssets).toEqual(['main.js', 'manifest.json', 'styles.css', 'README.md']);
+            expect(facts.releaseTagPattern).toBe('^\\d+\\.\\d+\\.\\d+$');
+            expect(facts.supportsReleaseModeSwitch).toBe(false);
             expect(facts.resolvedFromReleaseHelper).toBe(false);
 
             const lines = buildReleasePackagingContractChecklistLines(facts);
             expect(lines[0]).toContain('fallback default');
             expect(lines[0]).toContain('missing-release-helper.js');
+            expect(lines[2]).toContain('fallback reminder');
         });
 
         test('builds a markdown template with repo gates, packaging-boundary guidance, and per-surface evidence sections', () => {
@@ -464,6 +478,9 @@ const context = await esbuild.context({
             expect(template).toContain('`manifest.json`');
             expect(template).toContain('`styles.css`');
             expect(template).toContain('`README.md`');
+            expect(template).toContain('/^\\d+\\.\\d+\\.\\d+$/');
+            expect(template).toContain('create path composes bilingual notes');
+            expect(template).toContain('`--clobber`');
             expect(template).toContain('docs/releases/<tag>.zh-CN.md');
             expect(template).toContain('## Mermaid');
             expect(template).toContain('## Vega-Lite');
