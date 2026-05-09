@@ -242,16 +242,24 @@ function normalizeRelativePath(filePath, basePath = path.resolve(__dirname, '..'
 function resolveReleasePackagingContractFacts({
     releaseHelperPath = path.resolve(__dirname, 'release', 'publish-github-release.js')
 } = {}) {
+    const fallbackTagPattern = '^\\d+\\.\\d+\\.\\d+$';
+
     try {
         const releaseHelper = require(releaseHelperPath);
         const requiredAssets = Array.isArray(releaseHelper.REQUIRED_RELEASE_ASSETS)
             ? releaseHelper.REQUIRED_RELEASE_ASSETS.filter((asset) => typeof asset === 'string' && asset.length > 0)
             : [];
+        const tagPattern = releaseHelper.OBSIDIAN_RELEASE_TAG_PATTERN instanceof RegExp
+            ? releaseHelper.OBSIDIAN_RELEASE_TAG_PATTERN.source
+            : fallbackTagPattern;
+        const supportsReleaseModeSwitch = typeof releaseHelper.buildGhReleaseCommand === 'function';
 
         if (requiredAssets.length > 0) {
             return {
                 sourcePath: releaseHelperPath,
                 requiredAssets,
+                releaseTagPattern: tagPattern,
+                supportsReleaseModeSwitch,
                 resolvedFromReleaseHelper: true
             };
         }
@@ -262,6 +270,8 @@ function resolveReleasePackagingContractFacts({
     return {
         sourcePath: releaseHelperPath,
         requiredAssets: [...DEFAULT_REQUIRED_RELEASE_ASSETS],
+        releaseTagPattern: fallbackTagPattern,
+        supportsReleaseModeSwitch: false,
         resolvedFromReleaseHelper: false
     };
 }
@@ -307,9 +317,15 @@ function buildReleasePackagingContractChecklistLines(
         ? `derived from \`${releaseHelperPath}\``
         : `fallback default because \`${releaseHelperPath}\` could not be loaded`;
     const requiredAssets = releaseFacts.requiredAssets.map((asset) => `\`${asset}\``).join(', ');
+    const releaseTagPattern = releaseFacts.releaseTagPattern || '^\\d+\\.\\d+\\.\\d+$';
+    const releaseModeDescriptor = releaseFacts.supportsReleaseModeSwitch
+        ? 'derived from release helper create/upload mode logic'
+        : 'fallback reminder because release helper mode logic could not be inspected';
 
     return [
         `- [ ] Confirm release asset contract remains ${sourceDescriptor}: ${requiredAssets}.`,
+        `- [ ] Confirm release tag contract remains numeric-only: \`/${releaseTagPattern}/\` (no \`v\` prefix).`,
+        `- [ ] Confirm release publish mode contract remains ${releaseModeDescriptor}: create path composes bilingual notes, existing-release path uploads assets with \`--clobber\`.`,
         '- [ ] Confirm release notes contract remains dual-file: `docs/releases/<tag>.md` and `docs/releases/<tag>.zh-CN.md`.',
         '- [ ] If packaging output shape changes (for example, moving from `outfile` to `outdir`), update release-helper tests and maintainer docs in the same change.'
     ];

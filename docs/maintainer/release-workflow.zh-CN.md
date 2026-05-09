@@ -42,6 +42,7 @@ npm run verify:diagram-semantics -- --vault "<vault-name>" --commit "<sha>" --ve
 ```
 该 helper 会从 `esbuild.config.mjs` 提取当前打包入口/输出事实，并从 `scripts/release/publish-github-release.js` 提取 release 打包契约事实；评估 renderer 边界声明时，应以这两处文件作为打包真值源。
 对于 renderer 相关改动，还应把 helper 生成出的 packaging-boundary 与 packaging-contract 区块都视为必填真值维护项：`npm run audit:render-host` 并不等于真正的重型运行时隔离已经完成，它当前只证明内联 `srcdoc` host 仍按既有契约自包含于 `main.js`。
+packaging-contract 区块现在还会记录数字 tag 规则与 create/upload 发布模式行为；这些也应视为同一套 release 真值契约的一部分，而不是仅靠口头流程记忆。
 
 ## 3. 版本同步
 
