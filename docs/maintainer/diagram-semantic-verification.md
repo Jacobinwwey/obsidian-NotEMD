@@ -16,7 +16,7 @@ If `entryPoints` are parsed but output target detection cannot resolve either `o
 When output target detection succeeds, the checklist line now records whether the current truth came from `outfile` or `outdir` so packaging claims remain explicit.
 If both `outfile` and `outdir` are detected together, the checklist now treats that as ambiguous and requires explicit manual confirmation before packaging claims.
 Its packaging-contract section tracks release-asset, release-tag, publish-mode, and release-notes contract truth from `scripts/release/publish-github-release.js`, and release-trigger/tag-guard contract truth from `.github/workflows/release.yml`, so Stage-B contract definition stays aligned with release enforcement.
-Its contract-promotion-boundary section reads current operation metadata from `src/operations/registry.ts` for workflow/settings/export-adjacent operations, so capability-promotion claims remain tied to actual `automationLevel` / `requiredContext` / `sideEffectClass` truth.
+Its contract-promotion-boundary section reads current operation metadata from `src/operations/registry.ts` for workflow/settings/selection/export/config-adjacent operations (including `editor.create-link-and-generate`, `file.process-*`, `concept.extract-*`, and export/import surfaces), so capability-promotion claims remain tied to actual `automationLevel` / `requiredContext` / `sideEffectClass` truth.
 
 ## 1. When This Runbook Is Required
 
@@ -127,7 +127,7 @@ Use this sequence unless the change is more narrowly scoped:
 5. Save evidence for each affected surface.
 6. Record results in PR notes, release handoff, or maintainer log.
 
-The generated helper template now also includes packaging-boundary, packaging-contract, and contract-promotion-boundary sections. Do not skip these sections when the change touches render-host, preview, workflow/settings, or heavier runtime behavior: they are explicit reminders that today's packaging model is still single-entry, not true heavy-runtime isolation, and that release + operation-promotion constraints must stay in sync.
+The generated helper template now also includes packaging-boundary, packaging-contract, and contract-promotion-boundary sections. Do not skip these sections when the change touches render-host, preview, workflow/settings/selection/export/config flows, or heavier runtime behavior: they are explicit reminders that today's packaging model is still single-entry, not true heavy-runtime isolation, and that release + operation-promotion constraints must stay in sync.
 
 ## 6. Evidence Format
 

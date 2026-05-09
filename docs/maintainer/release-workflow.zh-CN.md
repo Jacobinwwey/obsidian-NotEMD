@@ -40,7 +40,7 @@ git diff --check
 ```bash
 npm run verify:diagram-semantics -- --vault "<vault-name>" --commit "<sha>" --version "<plugin-version>" --output ~/tmp/notemd-diagram-check.md
 ```
-该 helper 会从 `esbuild.config.mjs` 提取当前打包入口/输出事实，从 `scripts/release/publish-github-release.js` 提取 release 打包契约事实，从 `.github/workflows/release.yml` 提取 release 触发与 tag 防护契约事实，并从 `src/operations/registry.ts` 提取操作契约提升边界事实；评估 renderer 边界声明时，应以这些文件作为打包/契约真值源。
+该 helper 会从 `esbuild.config.mjs` 提取当前打包入口/输出事实，从 `scripts/release/publish-github-release.js` 提取 release 打包契约事实，从 `.github/workflows/release.yml` 提取 release 触发与 tag 防护契约事实，并从 `src/operations/registry.ts` 提取操作契约提升边界事实；评估 renderer 边界声明时，应以这些文件作为打包/契约真值源。操作契约提升检查现已覆盖 workflow/settings/selection/export/config 邻近元数据（包括 `editor.create-link-and-generate`、`file.process-*`、`concept.extract-*` 与 export/import 表面）。
 对于 renderer 相关改动，还应把 helper 生成出的 packaging-boundary 与 packaging-contract 区块都视为必填真值维护项：`npm run audit:render-host` 并不等于真正的重型运行时隔离已经完成，它当前只证明内联 `srcdoc` host 仍按既有契约自包含于 `main.js`。
 packaging-contract 区块现在还会记录数字 tag 规则、create/upload 发布模式行为以及 tag-only 触发防护；这些也应视为同一套 release 真值契约的一部分，而不是仅靠口头流程记忆。
 

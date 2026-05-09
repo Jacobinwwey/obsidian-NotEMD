@@ -55,14 +55,16 @@ topic: packaging-semantic-convergence-progress-and-next-steps
 4. **Stage B 契约定义已开始进入可执行落地**
    helper 模板现在新增 `Packaging Contract` 区块：从 `scripts/release/publish-github-release.js` 同步 release 必需资产，并显式检查双语 release notes 文件契约，同时记录数字 tag 与 create/upload 模式契约真值，并校验 `.github/workflows/release.yml` 中 tag-only 触发防护约束。
 5. **Stage B 契约提升边界已进入可执行形态**
-   helper 模板现在新增 `Contract Promotion Boundary` 区块：从 `src/operations/registry.ts` 提取 workflow/settings/export 邻近操作的 `automationLevel` / `requiredContext` / `sideEffectClass` 约束真值。
+   helper 模板现在新增 `Contract Promotion Boundary` 区块：从 `src/operations/registry.ts` 提取 workflow/settings/selection/export/config 邻近操作的 `automationLevel` / `requiredContext` / `sideEffectClass` 约束真值。
+6. **契约提升解析器已补齐 registry 字面量抗漂移**
+   操作契约元数据提取现在可容忍混合引号字面量（`"..."`、`'...'`、`` `...` ``），并新增回归覆盖锁定 selection/config/export 追踪操作的该行为。
 
 ### 尚未进入实现层的边界
 
 1. **真正的 heavy-runtime packaging isolation**
    仍未进入多入口资产落地，当前仍是单入口 `main.js` + inline `srcdoc`。
 2. **更广泛的 Stage B 契约提升**
-   虽然 release 与操作提升边界真值已进入 helper，但更广泛的 selection/export 契约提升仍依赖后续真实 packaging-boundary 约束落地。
+   release 与操作提升边界真值已进入 helper，且第一批更广泛的 selection/config/export 元数据约束也已纳入；更深层的 path/context 语义仍依赖后续真实 packaging-boundary 约束与 host-adapter 契约推进。
 
 ## 4. 下一阶段具体落盘方案（执行顺序）
 
@@ -86,7 +88,7 @@ topic: packaging-semantic-convergence-progress-and-next-steps
 
 ## 5. 风险与控制
 
-1. **风险：** helper 解析继续被 `esbuild.config` 结构变化击穿  
+1. **风险：** helper 解析继续被 `esbuild.config` / `registry` 结构变化击穿
    **控制：** 新增回归必须覆盖新结构样例，再允许改动合入。
 2. **风险：** 文档叙述快于实现  
    **控制：** 所有“已完成”结论必须绑定代码路径与测试名称。

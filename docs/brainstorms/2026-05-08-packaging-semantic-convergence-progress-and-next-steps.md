@@ -55,14 +55,16 @@ Goals:
 4. **Stage-B contract definition has started with executable release-truth wiring**
    The helper template now includes a `Packaging Contract` section that derives required release assets from `scripts/release/publish-github-release.js`, keeps dual-language release-note file expectations explicit, records numeric-tag + create/upload mode contract truth, and checks tag-only release workflow trigger guardrails from `.github/workflows/release.yml`.
 5. **Stage-B contract promotion boundary is now executable**
-   The helper template now includes a `Contract Promotion Boundary` section that derives workflow/settings/export-adjacent operation constraints (`automationLevel`, `requiredContext`, `sideEffectClass`) from `src/operations/registry.ts`.
+   The helper template now includes a `Contract Promotion Boundary` section that derives workflow/settings/selection/export/config-adjacent operation constraints (`automationLevel`, `requiredContext`, `sideEffectClass`) from `src/operations/registry.ts`.
+6. **Contract-promotion parser hardening now covers registry literal variants**
+   Contract metadata extraction now tolerates mixed quote literals (`"..."`, `'...'`, `` `...` ``) in registry operation definitions, with regression coverage that locks this behavior for tracked selection/config/export operations.
 
 ### Still open beyond convergence hardening
 
 1. **True heavy-runtime packaging isolation**
    Not implemented yet; current truth is still single-entry `main.js + inline srcdoc`.
 2. **Broader Stage-B contract promotion**
-   Release and operation-promotion boundary truth are now captured in the helper, but broader selection/export contract promotion still depends on later packaging-boundary implementation constraints.
+   Release and operation-promotion boundary truth are now captured in the helper, and the first broader selection/config/export metadata slice is now covered; deeper path/context semantics still depend on later packaging-boundary implementation constraints and host-adapter contract work.
 
 ## 4. Concrete Next-Step Plan (Persisted)
 
@@ -86,7 +88,7 @@ Goals:
 
 ## 5. Risks And Controls
 
-1. **Risk:** helper parser regresses on future config shapes  
+1. **Risk:** helper parser regresses on future config/registry shapes
    **Control:** add representative regression fixtures before merging parser changes.
 2. **Risk:** docs outpace implementation again  
    **Control:** every “landed” statement must cite code paths and test surfaces.

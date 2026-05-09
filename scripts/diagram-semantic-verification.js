@@ -41,6 +41,11 @@ const DEFAULT_REQUIRED_RELEASE_ASSETS = ['main.js', 'manifest.json', 'styles.css
 const DEFAULT_CONTRACT_PROMOTION_OPERATION_IDS = [
     'workflow.extract-and-generate',
     'content.extract-original-text',
+    'editor.create-link-and-generate',
+    'file.process-add-links',
+    'file.process-folder-add-links',
+    'concept.extract-file',
+    'concept.extract-folder',
     'provider.profile.export',
     'provider.profile.import',
     'cli.capability-manifest.export',
@@ -188,7 +193,7 @@ function escapeRegExp(value) {
 }
 
 function extractOperationDefinitionSource(source, operationId) {
-    const idPattern = new RegExp(`id\\s*:\\s*'${escapeRegExp(operationId)}'`, 'm');
+    const idPattern = new RegExp(`id\\s*:\\s*(["'\`])${escapeRegExp(operationId)}\\1`, 'm');
     const match = idPattern.exec(source);
     if (!match || match.index === undefined) {
         return '';
@@ -200,12 +205,13 @@ function extractOperationDefinitionSource(source, operationId) {
     }
 
     const objectSource = extractBalancedBraceSource(source, objectStart);
-    return objectSource.includes(`id: '${operationId}'`) ? objectSource : '';
+    const operationIdPattern = new RegExp(`id\\s*:\\s*(["'\`])${escapeRegExp(operationId)}\\1`, 'm');
+    return operationIdPattern.test(objectSource) ? objectSource : '';
 }
 
-function parseSingleQuotedField(source, fieldName) {
-    const match = source.match(new RegExp(`${fieldName}\\s*:\\s*'([^']+)'`));
-    return match ? match[1] : '';
+function parseQuotedField(source, fieldName) {
+    const match = source.match(new RegExp(`${fieldName}\\s*:\\s*(["'\`])([^"'\`]+)\\1`));
+    return match ? match[2] : '';
 }
 
 function extractEsbuildContextOptionsSource(source) {
@@ -420,9 +426,9 @@ function resolveContractPromotionBoundaryFacts({
         const source = fs.readFileSync(registryPath, 'utf8');
         const operationFacts = trackedOperationIds.map((operationId) => {
             const definitionSource = extractOperationDefinitionSource(source, operationId);
-            const automationLevel = parseSingleQuotedField(definitionSource, 'automationLevel');
-            const requiredContext = parseSingleQuotedField(definitionSource, 'requiredContext');
-            const sideEffectClass = parseSingleQuotedField(definitionSource, 'sideEffectClass');
+            const automationLevel = parseQuotedField(definitionSource, 'automationLevel');
+            const requiredContext = parseQuotedField(definitionSource, 'requiredContext');
+            const sideEffectClass = parseQuotedField(definitionSource, 'sideEffectClass');
             const resolved = Boolean(definitionSource) && Boolean(automationLevel) && Boolean(requiredContext) && Boolean(sideEffectClass);
 
             return {

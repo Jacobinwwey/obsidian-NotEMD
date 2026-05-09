@@ -539,6 +539,41 @@ const context = await esbuild.context({
                 sideEffectClass: 'write-file',
                 resolved: true
             }));
+            expect(findOperation('editor.create-link-and-generate')).toEqual(expect.objectContaining({
+                operationId: 'editor.create-link-and-generate',
+                automationLevel: 'requires-selection',
+                requiredContext: 'editor-selection',
+                sideEffectClass: 'write-file',
+                resolved: true
+            }));
+            expect(findOperation('file.process-add-links')).toEqual(expect.objectContaining({
+                operationId: 'file.process-add-links',
+                automationLevel: 'requires-active-file',
+                requiredContext: 'active-file',
+                sideEffectClass: 'write-file',
+                resolved: true
+            }));
+            expect(findOperation('file.process-folder-add-links')).toEqual(expect.objectContaining({
+                operationId: 'file.process-folder-add-links',
+                automationLevel: 'interactive-ui',
+                requiredContext: 'folder-selection',
+                sideEffectClass: 'batch-write',
+                resolved: true
+            }));
+            expect(findOperation('concept.extract-file')).toEqual(expect.objectContaining({
+                operationId: 'concept.extract-file',
+                automationLevel: 'requires-active-file',
+                requiredContext: 'active-file',
+                sideEffectClass: 'write-file',
+                resolved: true
+            }));
+            expect(findOperation('concept.extract-folder')).toEqual(expect.objectContaining({
+                operationId: 'concept.extract-folder',
+                automationLevel: 'interactive-ui',
+                requiredContext: 'folder-selection',
+                sideEffectClass: 'batch-write',
+                resolved: true
+            }));
             expect(findOperation('provider.profile.export')).toEqual(expect.objectContaining({
                 operationId: 'provider.profile.export',
                 automationLevel: 'safe',
@@ -574,6 +609,56 @@ const context = await esbuild.context({
             expect(lines.join('\n')).toContain('automationLevel=requires-active-file');
             expect(lines.join('\n')).toContain('provider.profile.export');
             expect(lines.join('\n')).toContain('cli.invocation-contract.export');
+        });
+
+        test('supports mixed-quote operation metadata literals in registry contract parsing', () => {
+            const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-registry-mixed-quotes-'));
+            const registryPath = path.join(tempRoot, 'registry.ts');
+            fs.writeFileSync(
+                registryPath,
+                `export const OPERATION_DEFINITIONS = [
+    {
+        id: "workflow.extract-and-generate",
+        automationLevel: \`requires-active-file\`,
+        requiredContext: 'active-file',
+        sideEffectClass: "batch-write"
+    },
+    {
+        id: \`provider.profile.export\`,
+        automationLevel: "safe",
+        requiredContext: \`none\`,
+        sideEffectClass: 'write-file'
+    }
+];
+`,
+                'utf8'
+            );
+
+            try {
+                const facts = resolveContractPromotionBoundaryFacts({
+                    registryPath,
+                    trackedOperationIds: ['workflow.extract-and-generate', 'provider.profile.export']
+                });
+                expect(facts.resolvedFromRegistry).toBe(true);
+                expect(facts.operationFacts).toEqual([
+                    {
+                        operationId: 'workflow.extract-and-generate',
+                        automationLevel: 'requires-active-file',
+                        requiredContext: 'active-file',
+                        sideEffectClass: 'batch-write',
+                        resolved: true
+                    },
+                    {
+                        operationId: 'provider.profile.export',
+                        automationLevel: 'safe',
+                        requiredContext: 'none',
+                        sideEffectClass: 'write-file',
+                        resolved: true
+                    }
+                ]);
+            } finally {
+                fs.rmSync(tempRoot, { recursive: true, force: true });
+            }
         });
 
         test('falls back to unresolved contract-promotion boundary facts when registry is missing', () => {
@@ -621,6 +706,11 @@ const context = await esbuild.context({
             expect(template).toContain('## Contract Promotion Boundary');
             expect(template).toContain('workflow.extract-and-generate');
             expect(template).toContain('content.extract-original-text');
+            expect(template).toContain('editor.create-link-and-generate');
+            expect(template).toContain('file.process-add-links');
+            expect(template).toContain('file.process-folder-add-links');
+            expect(template).toContain('concept.extract-file');
+            expect(template).toContain('concept.extract-folder');
             expect(template).toContain('provider.profile.export');
             expect(template).toContain('cli.capability-manifest.export');
             expect(template).toContain('## Mermaid');

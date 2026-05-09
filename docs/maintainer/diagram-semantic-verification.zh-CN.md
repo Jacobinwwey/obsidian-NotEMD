@@ -16,7 +16,7 @@ npm run verify:diagram-semantics -- --vault "<vault-name>" --commit "<sha>" --ve
 如果输出目标已成功识别，清单会明确标记当前依据来自 `outfile` 还是 `outdir`，避免打包边界结论含糊。
 如果同时识别到 `outfile` 和 `outdir`，清单会将其视为歧义状态，并要求先人工确认有效输出目标，再给出打包结论。
 其中 packaging-contract 区块会从 `scripts/release/publish-github-release.js` 同步 release 资产、release tag 规则、发布模式和 release notes 契约真值，并从 `.github/workflows/release.yml` 同步 release 触发与 tag 防护契约真值，保证 Stage B 的契约定义与发布约束保持一致。
-其中 contract-promotion-boundary 区块会从 `src/operations/registry.ts` 读取 workflow/settings/export 邻近操作的当前元数据，确保能力提升结论仍绑定真实 `automationLevel` / `requiredContext` / `sideEffectClass`。
+其中 contract-promotion-boundary 区块会从 `src/operations/registry.ts` 读取 workflow/settings/selection/export/config 邻近操作的当前元数据（包括 `editor.create-link-and-generate`、`file.process-*`、`concept.extract-*` 与 export/import 表面），确保能力提升结论仍绑定真实 `automationLevel` / `requiredContext` / `sideEffectClass`。
 
 ## 1. 何时必须使用本 Runbook
 
@@ -127,7 +127,7 @@ obsidian commands vault=<vault-name> filter=notemd
 5. 保存每个受影响表面的证据。
 6. 将结果记录到 PR 说明、release handoff 或维护者日志中。
 
-helper 现在还会额外生成 packaging-boundary、packaging-contract 与 contract-promotion-boundary 三个区块。只要改动触及 render-host、preview、workflow/settings 或更重的运行时行为，就不应跳过这些段落：它们会明确提醒当前打包模型仍是单入口，而不是真正完成了 heavy-runtime isolation，同时 release 与操作契约提升约束必须保持同步。
+helper 现在还会额外生成 packaging-boundary、packaging-contract 与 contract-promotion-boundary 三个区块。只要改动触及 render-host、preview、workflow/settings/selection/export/config 流程或更重的运行时行为，就不应跳过这些段落：它们会明确提醒当前打包模型仍是单入口，而不是真正完成了 heavy-runtime isolation，同时 release 与操作契约提升约束必须保持同步。
 
 ## 6. 证据格式
 
