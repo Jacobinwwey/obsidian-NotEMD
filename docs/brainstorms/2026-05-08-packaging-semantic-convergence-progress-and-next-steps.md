@@ -62,6 +62,8 @@ Goals:
    `file.process-*` and `concept.extract-*` are now expanded from live registry operation IDs rather than maintained as static manual lists, while missing-registry fallback IDs keep checklist output stable.
 8. **Release workflow trigger parsing is now less quote-fragile**
    Tag-trigger contract checks now parse `tags:` list items with mixed quote styles and explicitly treat `v*.*.*` wildcard patterns as guardrail violations, reducing drift from YAML formatting-only edits.
+9. **Release tag-trigger scope is now explicit**
+   Trigger detection now only trusts `on.push.tags` and ignores unrelated `tags:` blocks in other workflow sections, reducing false positives from matrix/env metadata keys.
 
 ### Still open beyond convergence hardening
 

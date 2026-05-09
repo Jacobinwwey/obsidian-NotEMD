@@ -582,6 +582,40 @@ jobs:
             }
         });
 
+        test('ignores tags blocks outside on.push when resolving release tag trigger facts', () => {
+            const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-release-workflow-tag-scope-'));
+            const workflowPath = path.join(tempRoot, 'release.yml');
+            fs.writeFileSync(
+                workflowPath,
+                `on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+jobs:
+  build:
+    strategy:
+      matrix:
+        tags:
+          - "*.*.*"
+    steps:
+      - run: echo ready
+`,
+                'utf8'
+            );
+
+            try {
+                const workflowFacts = resolveReleaseWorkflowTriggerFacts({ releaseWorkflowPath: workflowPath });
+                expect(workflowFacts.hasWorkflowDispatch).toBe(true);
+                expect(workflowFacts.hasTagPushTrigger).toBe(false);
+                expect(workflowFacts.rejectsVPrefixedTagTrigger).toBe(false);
+                expect(workflowFacts.validatesNumericTagPattern).toBe(false);
+                expect(workflowFacts.resolvedFromWorkflowFile).toBe(true);
+            } finally {
+                fs.rmSync(tempRoot, { recursive: true, force: true });
+            }
+        });
+
         test('resolves contract-promotion boundary facts for workflow/settings/export operation metadata', () => {
             const registryPath = path.join(repoRoot, 'src', 'operations', 'registry.ts');
             const facts = resolveContractPromotionBoundaryFacts({ registryPath });

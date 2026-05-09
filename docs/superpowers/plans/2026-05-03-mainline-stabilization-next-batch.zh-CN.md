@@ -216,5 +216,6 @@ npm run audit:render-host
 - Stage B 契约提升覆盖也在 CI 安全切片中继续扩展：helper 追踪范围新增 selection/config 邻近元数据（`editor.create-link-and-generate`、`file.process-*`、`concept.extract-*`），同时 registry 解析支持混合引号字面量并由回归测试锁定，降低操作真值提取脆弱性。
 - Stage B 防漂移收敛继续推进：契约提升追踪现在会从实时 registry ID 自动展开前缀通配（`file.process-*`、`concept.extract-*`），并保留稳定回退 ID，在 registry 读取失败时仍保持 checklist 生成确定性，减少手工列表维护抖动。
 - Stage B release-trigger 防护检查也继续加固：workflow `tags:` 条目解析现在支持混合引号样式，并显式把 `v*.*.*` 通配模式识别为契约违规，降低 YAML 格式变更导致的检测脆弱性。
+- Stage B release-trigger 检查作用域也进一步收敛：tag 触发检测现在限定为 `on.push.tags`，避免工作流其他区块里的 `tags:` 字段产生错误契约信号。
 
 因此，这份计划之后真正剩下的工作已经不再是“补第一版 runbook”或“补第一版 packaging 澄清”。这些基础片段现在已经检入。剩余工作是保持这套已检入真值不漂移，并进一步判断下一个真实实现批次应优先落在 heavy-runtime packaging isolation，还是后续更窄的 contract-promotion 切片。

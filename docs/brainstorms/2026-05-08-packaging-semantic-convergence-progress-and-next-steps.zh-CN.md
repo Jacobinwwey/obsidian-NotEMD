@@ -62,6 +62,8 @@ topic: packaging-semantic-convergence-progress-and-next-steps
    `file.process-*` 与 `concept.extract-*` 现在从实时 registry operation ID 自动展开，不再完全依赖静态手工列表；同时在 registry 缺失时仍保留稳定回退 ID，保证 checklist 输出可用。
 8. **Release workflow 触发解析已降低引号样式脆弱性**
    tag 触发契约检查现在会解析 `tags:` 列表的混合引号风格，并显式把 `v*.*.*` 通配模式视为防护违规，降低仅因 YAML 格式改写导致的真值漂移风险。
+9. **Release tag 触发作用域已显式收敛**
+   触发检测现在只信任 `on.push.tags`，会忽略工作流其他区块中的 `tags:` 字段，降低来自 matrix/env 元数据键的误报风险。
 
 ### 尚未进入实现层的边界
 

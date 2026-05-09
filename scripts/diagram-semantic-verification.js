@@ -514,49 +514,122 @@ function normalizeWorkflowTagPattern(rawValue) {
     return withoutComment;
 }
 
-function extractReleaseWorkflowTagPatterns(workflowSource) {
-    const lines = workflowSource.split(/\r?\n/);
+function parseInlineWorkflowTagPatterns(rawValue) {
+    const normalizedValue = normalizeWorkflowTagPattern(rawValue);
+    if (!normalizedValue) {
+        return [];
+    }
+
+    if (!normalizedValue.startsWith('[') || !normalizedValue.endsWith(']')) {
+        return [normalizedValue];
+    }
+
+    const inner = normalizedValue.slice(1, -1);
     const patterns = [];
-    let inTagsBlock = false;
-    let tagsIndent = -1;
+    const tokenPattern = /(["'`])([^"'`]+)\1|([^,\[\]\s]+)/g;
+    let tokenMatch = tokenPattern.exec(inner);
+    while (tokenMatch) {
+        const token = (tokenMatch[2] || tokenMatch[3] || '').trim();
+        const normalizedToken = normalizeWorkflowTagPattern(token);
+        if (normalizedToken) {
+            patterns.push(normalizedToken);
+        }
+        tokenMatch = tokenPattern.exec(inner);
+    }
+
+    return patterns;
+}
+
+function resolveWorkflowOnTriggerConfig(workflowSource) {
+    const lines = workflowSource.split(/\r?\n/);
+    const workflowTagPatterns = [];
+    let hasWorkflowDispatch = false;
+    let inOnBlock = false;
+    let onIndent = -1;
+    let inPushBlock = false;
+    let pushIndent = -1;
+    let inPushTagsBlock = false;
+    let pushTagsIndent = -1;
 
     for (const line of lines) {
         const trimmed = line.trim();
         const indent = getLeadingWhitespaceWidth(line);
+        const isMeaningfulLine = Boolean(trimmed) && !trimmed.startsWith('#');
 
-        if (!inTagsBlock) {
-            if (/^\s*tags\s*:\s*$/.test(line)) {
-                inTagsBlock = true;
-                tagsIndent = indent;
+        if (!inOnBlock) {
+            if (/^\s*on\s*:\s*$/.test(line)) {
+                inOnBlock = true;
+                onIndent = indent;
+                inPushBlock = false;
+                inPushTagsBlock = false;
             }
             continue;
         }
 
-        if (!trimmed || trimmed.startsWith('#')) {
-            continue;
-        }
-
-        if (indent <= tagsIndent) {
-            inTagsBlock = false;
-            if (/^\s*tags\s*:\s*$/.test(line)) {
-                inTagsBlock = true;
-                tagsIndent = indent;
+        if (isMeaningfulLine && indent <= onIndent) {
+            inOnBlock = false;
+            inPushBlock = false;
+            inPushTagsBlock = false;
+            if (/^\s*on\s*:\s*$/.test(line)) {
+                inOnBlock = true;
+                onIndent = indent;
             }
             continue;
         }
 
-        const itemMatch = line.match(/^\s*-\s*(.+?)\s*$/);
-        if (!itemMatch) {
+        if (inPushTagsBlock) {
+            if (isMeaningfulLine && indent <= pushTagsIndent) {
+                inPushTagsBlock = false;
+            } else {
+                const itemMatch = line.match(/^\s*-\s*(.+?)\s*$/);
+                if (itemMatch) {
+                    const normalizedPattern = normalizeWorkflowTagPattern(itemMatch[1]);
+                    if (normalizedPattern) {
+                        workflowTagPatterns.push(normalizedPattern);
+                    }
+                }
+                continue;
+            }
+        }
+
+        if (inPushBlock) {
+            if (isMeaningfulLine && indent <= pushIndent) {
+                inPushBlock = false;
+            } else {
+                const tagsMatch = line.match(/^\s*tags\s*:\s*(.*)$/);
+                if (tagsMatch) {
+                    const tagsValue = tagsMatch[1].trim();
+                    if (!tagsValue) {
+                        inPushTagsBlock = true;
+                        pushTagsIndent = indent;
+                    } else {
+                        workflowTagPatterns.push(...parseInlineWorkflowTagPatterns(tagsValue));
+                    }
+                }
+                continue;
+            }
+        }
+
+        if (!isMeaningfulLine) {
             continue;
         }
 
-        const normalizedPattern = normalizeWorkflowTagPattern(itemMatch[1]);
-        if (normalizedPattern) {
-            patterns.push(normalizedPattern);
+        if (/^\s*workflow_dispatch\s*:/.test(line)) {
+            hasWorkflowDispatch = true;
+            continue;
+        }
+
+        const pushMatch = line.match(/^\s*push\s*:\s*(.*)$/);
+        if (pushMatch) {
+            inPushBlock = true;
+            pushIndent = indent;
         }
     }
 
-    return patterns;
+    return {
+        hasWorkflowDispatch,
+        workflowTagPatterns
+    };
 }
 
 function resolveReleaseWorkflowTriggerFacts({
@@ -564,7 +637,7 @@ function resolveReleaseWorkflowTriggerFacts({
 } = {}) {
     try {
         const workflowSource = fs.readFileSync(releaseWorkflowPath, 'utf8');
-        const workflowTagPatterns = extractReleaseWorkflowTagPatterns(workflowSource);
+        const { workflowTagPatterns, hasWorkflowDispatch } = resolveWorkflowOnTriggerConfig(workflowSource);
         const hasNumericTagWildcard = workflowTagPatterns.includes('*.*.*');
         const hasVPrefixedWildcard = workflowTagPatterns.some((pattern) => /^v\*\.\*\.\*$/i.test(pattern));
         const hasNumericTagValidationPattern = /\^\[0-9\]\+\\\.\[0-9\]\+\\\.\[0-9\]\+\$/.test(workflowSource)
@@ -572,7 +645,7 @@ function resolveReleaseWorkflowTriggerFacts({
 
         return {
             sourcePath: releaseWorkflowPath,
-            hasWorkflowDispatch: /\bworkflow_dispatch\s*:/.test(workflowSource),
+            hasWorkflowDispatch,
             hasTagPushTrigger: hasNumericTagWildcard,
             rejectsVPrefixedTagTrigger: workflowTagPatterns.length > 0 && !hasVPrefixedWildcard,
             validatesNumericTagPattern: hasNumericTagValidationPattern,
