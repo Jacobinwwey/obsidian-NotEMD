@@ -54,13 +54,15 @@ topic: packaging-semantic-convergence-progress-and-next-steps
    helper 行为 -> 测试锁定 -> maintainer 文档同步 -> release 说明对齐，形成可重复演进路径。
 4. **Stage B 契约定义已开始进入可执行落地**
    helper 模板现在新增 `Packaging Contract` 区块：从 `scripts/release/publish-github-release.js` 同步 release 必需资产，并显式检查双语 release notes 文件契约，同时记录数字 tag 与 create/upload 模式契约真值，并校验 `.github/workflows/release.yml` 中 tag-only 触发防护约束。
+5. **Stage B 契约提升边界已进入可执行形态**
+   helper 模板现在新增 `Contract Promotion Boundary` 区块：从 `src/operations/registry.ts` 提取 workflow/settings/export 邻近操作的 `automationLevel` / `requiredContext` / `sideEffectClass` 约束真值。
 
 ### 尚未进入实现层的边界
 
 1. **真正的 heavy-runtime packaging isolation**
    仍未进入多入口资产落地，当前仍是单入口 `main.js` + inline `srcdoc`。
 2. **更广泛的 Stage B 契约提升**
-   虽然 packaging contract 真值已进入 helper，但 workflow/settings 与 selection/export 的契约提升仍依赖后续真实 packaging-boundary 约束落地。
+   虽然 release 与操作提升边界真值已进入 helper，但更广泛的 selection/export 契约提升仍依赖后续真实 packaging-boundary 约束落地。
 
 ## 4. 下一阶段具体落盘方案（执行顺序）
 

@@ -212,5 +212,6 @@ npm run audit:render-host
 - 后续防漂移硬化也已落地：semantic helper 的 packaging 清单会从 `esbuild.config.mjs` 自动提取入口/输出事实，对应测试已锁定该对齐关系；同时 package-manager fallback 现在会按执行失败逐候选重试（`pnpm`、`corepack pnpm`、`bun x pnpm`），以保持 CI 编年史刷新链路稳健。
 - 语义 helper 的额外加固也已落地：打包输出目标状态已显式建模（`outfile` / `outdir` / `unknown` / `ambiguous`），解析覆盖已支持反引号字面量，且解析范围已优先收敛到 `esbuild.context({...})` 选项块，避免文件内同名 decoy 字段造成静默误判。
 - Stage B 契约定义推进也已具备可执行形态：semantic helper 模板新增 `Packaging Contract` 区块，从 `scripts/release/publish-github-release.js` 同步 release 必需资产，并在维护者核验中显式保留双语 release notes 文件契约，同时记录数字 tag 与 create/upload 模式契约真值，并校验 `.github/workflows/release.yml` 的 tag-only 触发防护约束。
+- Stage B 契约提升边界也已具备可执行形态：helper 模板新增 `Contract Promotion Boundary` 区块，从 `src/operations/registry.ts` 提取 workflow/settings/export 邻近操作的约束真值。
 
 因此，这份计划之后真正剩下的工作已经不再是“补第一版 runbook”或“补第一版 packaging 澄清”。这些基础片段现在已经检入。剩余工作是保持这套已检入真值不漂移，并进一步判断下一个真实实现批次应优先落在 heavy-runtime packaging isolation，还是后续更窄的 contract-promotion 切片。

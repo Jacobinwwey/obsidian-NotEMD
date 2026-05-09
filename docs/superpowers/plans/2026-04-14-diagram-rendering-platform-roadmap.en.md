@@ -30,6 +30,7 @@ This also needs to be explicit:
 - `repo-saga` chronicle refresh fallback now retries candidate package-manager runners per execution failure (`pnpm`, `corepack pnpm`, `bun x pnpm`) to reduce CI brittleness.
 - Semantic helper parsing is now hardened against common config drift patterns: it supports backtick literals, tracks explicit output-target status (`outfile` / `outdir` / `unknown` / `ambiguous`), and scopes parsing to `esbuild.context({...})` options to avoid decoy key collisions.
 - The helper now also captures Stage-B packaging contract truth: required release assets are derived from `scripts/release/publish-github-release.js`, dual-language release-note file expectations are encoded in the generated checklist, numeric-tag plus create/upload mode behavior are explicit contract lines, and tag-only release workflow trigger guardrails are checked from `.github/workflows/release.yml`.
+- The helper now also captures Stage-B contract-promotion boundary truth: workflow/settings/export-adjacent operation constraints are derived from `src/operations/registry.ts` and surfaced as explicit checklist lines.
 - The next active workstream remains unchanged: preserve this truth alignment, then choose between real heavy-runtime packaging isolation and later contract-promotion slices.
 
 Deep comparison and next-step implementation note:
