@@ -98,6 +98,8 @@ topic: packaging-semantic-convergence-progress-and-next-steps
    release 触发检查现在会把仅注释的 `tags:` 值（例如 `tags: # ...`）视作块列表声明，因此无论是顶层 `push` 还是序列 `push` 映射，都能继续从后续列表项稳定解析 `*.*.*` 触发。
 26. **workflow-trigger 回退文案现在保持期望契约显式**
    当 release workflow 解析走回退路径时，检查清单文案现在会显式保留触发期望（期望 `tag push (*.*.*) + workflow_dispatch` 与 numeric-tag guard），而不再只给出“inspection incomplete”。
+27. **混合 quoted-key 的 sequence/object 触发声明已被回归锁定**
+   release 触发覆盖现在包含“单个 workflow 内同时混合 quoted key、序列映射项、内联对象项与嵌套非事件噪音”的场景，确保仅顶层触发事实会被提升为契约真值。
 
 ### 尚未进入实现层的边界
 

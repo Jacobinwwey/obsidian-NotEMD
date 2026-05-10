@@ -1276,6 +1276,73 @@ jobs:
             }
         });
 
+        test('parses mixed quoted-key sequence/object hybrid trigger declarations in one workflow', () => {
+            const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-release-workflow-mixed-hybrid-quoted-sequence-object-'));
+            const workflowPath = path.join(tempRoot, 'release.yml');
+            fs.writeFileSync(
+                workflowPath,
+                `'on':
+  - "workflow_dispatch": {}
+  - { 'push': { "tags": ["*.*.*"] } }
+  - "workflow_call":
+      inputs:
+        workflow_dispatch: {}
+        push:
+          tags:
+            - "*.*.*"
+jobs:
+  publish:
+    steps:
+      - run: echo ready
+`,
+                'utf8'
+            );
+
+            try {
+                const workflowFacts = resolveReleaseWorkflowTriggerFacts({ releaseWorkflowPath: workflowPath });
+                expect(workflowFacts.hasWorkflowDispatch).toBe(true);
+                expect(workflowFacts.hasTagPushTrigger).toBe(true);
+                expect(workflowFacts.rejectsVPrefixedTagTrigger).toBe(true);
+                expect(workflowFacts.validatesNumericTagPattern).toBe(false);
+                expect(workflowFacts.resolvedFromWorkflowFile).toBe(true);
+            } finally {
+                fs.rmSync(tempRoot, { recursive: true, force: true });
+            }
+        });
+
+        test('ignores nested non-event trigger-like keys in mixed quoted-key sequence/object hybrid declarations', () => {
+            const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-release-workflow-mixed-hybrid-quoted-sequence-object-nested-'));
+            const workflowPath = path.join(tempRoot, 'release.yml');
+            fs.writeFileSync(
+                workflowPath,
+                `'on':
+  - { "workflow_call": { "inputs": { "workflow_dispatch": {}, "push": { "tags": ["*.*.*"] } } } }
+  - 'workflow_call':
+      inputs:
+        workflow_dispatch: {}
+        push:
+          tags:
+            - "*.*.*"
+jobs:
+  publish:
+    steps:
+      - run: echo ready
+`,
+                'utf8'
+            );
+
+            try {
+                const workflowFacts = resolveReleaseWorkflowTriggerFacts({ releaseWorkflowPath: workflowPath });
+                expect(workflowFacts.hasWorkflowDispatch).toBe(false);
+                expect(workflowFacts.hasTagPushTrigger).toBe(false);
+                expect(workflowFacts.rejectsVPrefixedTagTrigger).toBe(false);
+                expect(workflowFacts.validatesNumericTagPattern).toBe(false);
+                expect(workflowFacts.resolvedFromWorkflowFile).toBe(true);
+            } finally {
+                fs.rmSync(tempRoot, { recursive: true, force: true });
+            }
+        });
+
         test('ignores nested workflow_dispatch keys under non-event on mappings', () => {
             const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-release-workflow-nested-dispatch-key-'));
             const workflowPath = path.join(tempRoot, 'release.yml');
