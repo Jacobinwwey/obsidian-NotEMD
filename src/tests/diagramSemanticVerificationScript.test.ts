@@ -88,6 +88,13 @@ describe('diagram semantic verification helper', () => {
             rejectsVPrefixedTagTrigger: boolean;
             validatesNumericTagPattern: boolean;
             resolvedFromWorkflowFile: boolean;
+        }, packagingFacts?: {
+            sourcePath: string;
+            entryPoints: string[];
+            outfile: string;
+            outdir: string;
+            outputTargetStatus: 'outfile' | 'outdir' | 'unknown' | 'ambiguous';
+            resolvedFromConfig: boolean;
         }) => string[];
         let resolveReleaseWorkflowTriggerFacts: (args?: { releaseWorkflowPath?: string }) => {
             sourcePath: string;
@@ -490,6 +497,8 @@ const context = await esbuild.context({
             expect(lines[4]).toContain('numeric-tag regex guard present');
             expect(lines[5]).toContain('docs/releases/<tag>.md');
             expect(lines[5]).toContain('docs/releases/<tag>.zh-CN.md');
+            expect(lines.some((line) => line.includes('`outfile -> outdir` transition contract'))).toBe(true);
+            expect(lines.some((line) => line.includes('`main.js` release-asset ownership'))).toBe(true);
         });
 
         test('falls back to default release packaging/workflow contract wording when sources cannot be loaded', () => {
@@ -520,6 +529,32 @@ const context = await esbuild.context({
             expect(lines[4]).toContain('tag-guard inspection incomplete');
             expect(lines[4]).toContain('expected numeric-tag regex guard present');
             expect(lines[4]).toContain('v-prefixed wildcard triggers absent');
+            expect(lines.some((line) => line.includes('`outfile -> outdir` transition contract'))).toBe(true);
+            expect(lines.some((line) => line.includes('current build output'))).toBe(true);
+        });
+
+        test('keeps outfile-to-outdir release transition contract explicit when build output uses outdir', () => {
+            const releaseHelperPath = path.join(repoRoot, 'scripts', 'release', 'publish-github-release.js');
+            const releaseWorkflowPath = path.join(repoRoot, '.github', 'workflows', 'release.yml');
+            const releaseFacts = resolveReleasePackagingContractFacts({ releaseHelperPath });
+            const workflowFacts = resolveReleaseWorkflowTriggerFacts({ releaseWorkflowPath });
+
+            const lines = buildReleasePackagingContractChecklistLines(
+                releaseFacts,
+                workflowFacts,
+                {
+                    sourcePath: path.join(repoRoot, 'esbuild.config.mjs'),
+                    entryPoints: ['src/main.ts'],
+                    outfile: '',
+                    outdir: 'dist',
+                    outputTargetStatus: 'outdir',
+                    resolvedFromConfig: true
+                }
+            );
+
+            expect(lines.some((line) => line.includes('`outfile -> outdir` transition contract'))).toBe(true);
+            expect(lines.some((line) => line.includes('outdir: `dist/...`'))).toBe(true);
+            expect(lines.some((line) => line.includes('`main.js` release-asset ownership'))).toBe(true);
         });
 
         test('parses release workflow trigger facts with mixed quote styles in tags list', () => {

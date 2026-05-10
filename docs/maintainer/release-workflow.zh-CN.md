@@ -44,6 +44,7 @@ npm run verify:diagram-semantics -- --vault "<vault-name>" --commit "<sha>" --ve
 release 触发与 tag 防护解析现在可容忍 workflow YAML 中 tags 列表的混合引号风格（`'*.*.*'`、`"*.*.*"` 或不加引号），支持 `push: { tags: ["*.*.*"] }` 这类内联写法，也支持 `on: { push: { tags: ["*.*.*"] }, workflow_dispatch: {} }` 这类顶层内联 `on` 对象写法；同时可识别 `on` 事件序列（`- workflow_dispatch` 与 `- workflow_dispatch: {}`）以及内联事件数组（`on: [push, workflow_dispatch]`）中的 `workflow_dispatch`，并可解析 `on` 事件序列里的 `- push:` + 嵌套 `tags` 写法作为 tag 触发真值，也支持带引号的 YAML 键（例如 `'push':`、`"tags":`、`'workflow_dispatch':`）；同时会把事件键检测限定在 `on` 顶层映射，避免把嵌套非事件键（如 `workflow_call.inputs.workflow_dispatch`）误判为触发条件；且仍只把 `on.push.tags` 作为有效 tag 触发来源（忽略其他位置的 `tags:` 字段），同时会显式识别 `v*.*.*` 通配模式为契约违规。
 对于 renderer 相关改动，还应把 helper 生成出的 packaging-boundary 与 packaging-contract 区块都视为必填真值维护项：`npm run audit:render-host` 并不等于真正的重型运行时隔离已经完成，它当前只证明内联 `srcdoc` host 仍按既有契约自包含于 `main.js`。
 packaging-contract 区块现在还会记录数字 tag 规则、create/upload 发布模式行为以及 tag-only 触发防护；这些也应视为同一套 release 真值契约的一部分，而不是仅靠口头流程记忆。
+packaging-contract 区块现在也会记录显式的 `outfile -> outdir` 迁移契约，并锚定当前 build 输出真值；在宣称输出形态迁移已准备就绪前，必须确保 `main.js` release 资产归属与 release-helper tests/docs 更新要求保持显式且同批落地。
 
 ## 3. 版本同步
 

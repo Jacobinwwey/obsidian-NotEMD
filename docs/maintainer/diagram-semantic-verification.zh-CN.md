@@ -16,6 +16,7 @@ npm run verify:diagram-semantics -- --vault "<vault-name>" --commit "<sha>" --ve
 如果输出目标已成功识别，清单会明确标记当前依据来自 `outfile` 还是 `outdir`，避免打包边界结论含糊。
 如果同时识别到 `outfile` 和 `outdir`，清单会将其视为歧义状态，并要求先人工确认有效输出目标，再给出打包结论。
 其中 packaging-contract 区块会从 `scripts/release/publish-github-release.js` 同步 release 资产、release tag 规则、发布模式和 release notes 契约真值，并从 `.github/workflows/release.yml` 同步 release 触发与 tag 防护契约真值，保证 Stage B 的契约定义与发布约束保持一致。
+该 packaging-contract 区块现在还会输出显式的 `outfile -> outdir` 迁移契约提醒，并锚定当前 `esbuild.config.mjs` 的输出目标真值；这意味着在宣称输出形态迁移前，必须先把 `main.js` release 资产归属以及对应 tests/docs 更新写成明确契约。
 其中 contract-promotion-boundary 区块会从 `src/operations/registry.ts` 读取 workflow/settings/selection/export/config 邻近操作的当前元数据（包括 `editor.create-link-and-generate`、`file.process-*`、`concept.extract-*` 与 export/import 表面），确保能力提升结论仍绑定真实 `automationLevel` / `requiredContext` / `sideEffectClass`。
 helper 现在会把 `file.process-*` 与 `concept.extract-*` 作为通配选择器，按当前 registry operation ID 自动展开；这意味着这些前缀下新增 operation 时，无需手工改 checklist 脚本也能纳入核验清单。
 

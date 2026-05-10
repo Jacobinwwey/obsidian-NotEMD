@@ -112,6 +112,8 @@ topic: packaging-semantic-convergence-progress-and-next-steps
    release 触发检查现在会在续行收集完成后归一化 `push.tags` flow 数组值（当闭合行带有字段分隔逗号，例如 `push: { ... }` 内的 `],`），从而继续保持 numeric-tag 检测与 v 前缀守卫行为稳定。
 33. **混合 quoted-key 的 sequence/object 触发声明现在锁定了多行 `push.tags` 闭合逗号回归场景**
    release 触发覆盖现在新增“单个 workflow 中同时混合 quoted key、sequence/object 条目、且 `push` flow 对象中的多行 `tags` 数组以 `],` 闭合”的回归锁定，同时继续忽略嵌套非事件 trigger-like 键。
+34. **release packaging-contract 清单现在编码了显式 `outfile -> outdir` 迁移就绪真值**
+   semantic helper 的 release-contract 检查现在会把 `outfile -> outdir` 迁移契约锚定到 `esbuild.config.mjs` 的当前输出事实，并要求在声明迁移就绪前显式保留 `main.js` release 资产归属及同批 release-helper tests/docs 更新约束。
 
 ### 尚未进入实现层的边界
 

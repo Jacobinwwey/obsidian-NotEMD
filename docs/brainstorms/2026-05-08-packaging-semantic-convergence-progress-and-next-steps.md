@@ -112,6 +112,8 @@ Goals:
    Release trigger checks now normalize continuation-collected `push.tags` flow-array values when the closing line carries a field-delimiter comma (for example `],` inside `push: { ... }`), preserving numeric-tag detection and v-prefixed guard behavior.
 33. **Mixed quoted-key sequence/object hybrid trigger declarations now include multiline `push.tags` closure-comma regression locking**
    Release trigger coverage now includes single-workflow hybrid declarations that combine quoted keys, sequence/object entries, and multiline `push` flow-object `tags` arrays closed by `],`, while still ignoring nested non-event trigger-like keys.
+34. **Release packaging-contract checklist now encodes explicit `outfile -> outdir` transition readiness truth**
+   Semantic helper release-contract checks now anchor an explicit `outfile -> outdir` transition contract to current build output facts from `esbuild.config.mjs`, requiring explicit `main.js` release-asset ownership and same-batch release-helper test/docs updates before migration-readiness claims.
 
 ### Still open beyond convergence hardening
 

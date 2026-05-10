@@ -1388,10 +1388,12 @@ function buildPackagingBoundaryChecklistLines(packagingFacts = resolvePackagingB
 
 function buildReleasePackagingContractChecklistLines(
     releaseFacts = resolveReleasePackagingContractFacts(),
-    workflowFacts = resolveReleaseWorkflowTriggerFacts()
+    workflowFacts = resolveReleaseWorkflowTriggerFacts(),
+    packagingFacts = resolvePackagingBoundaryFacts()
 ) {
     const releaseHelperPath = normalizeRelativePath(releaseFacts.sourcePath);
     const releaseWorkflowPath = normalizeRelativePath(workflowFacts.sourcePath);
+    const packagingConfigPath = normalizeRelativePath(packagingFacts.sourcePath);
     const sourceDescriptor = releaseFacts.resolvedFromReleaseHelper
         ? `derived from \`${releaseHelperPath}\``
         : `fallback default because \`${releaseHelperPath}\` could not be loaded`;
@@ -1411,6 +1413,20 @@ function buildReleasePackagingContractChecklistLines(
     const tagGuardDescriptor = workflowFacts.validatesNumericTagPattern && workflowFacts.rejectsVPrefixedTagTrigger
         ? expectedTagGuardDescriptor
         : `tag-guard inspection incomplete (expected ${expectedTagGuardDescriptor})`;
+    const outputTargetStatus = packagingFacts.outputTargetStatus || resolveOutputTargetStatus(packagingFacts);
+    const outputDescriptor = outputTargetStatus === 'outfile'
+        ? `outfile: \`${packagingFacts.outfile || '<unknown-outfile>'}\``
+        : (outputTargetStatus === 'outdir'
+            ? `outdir: \`${packagingFacts.outdir || '<unknown-outdir>'}/...\``
+            : (outputTargetStatus === 'ambiguous'
+                ? `outfile: \`${packagingFacts.outfile || '<unknown-outfile>'}\`, outdir: \`${packagingFacts.outdir || '<unknown-outdir>'}/...\``
+                : 'output target unresolved'));
+    const packagingSourceDescriptor = packagingFacts.resolvedFromConfig
+        ? `derived from \`${packagingConfigPath}\``
+        : `fallback reminder because \`${packagingConfigPath}\` could not be parsed`;
+    const releaseOwnershipDescriptor = releaseFacts.requiredAssets.includes('main.js')
+        ? '`main.js` release-asset ownership'
+        : 'required release-asset ownership';
 
     return [
         `- [ ] Confirm release asset contract remains ${sourceDescriptor}: ${requiredAssets}.`,
@@ -1419,7 +1435,7 @@ function buildReleasePackagingContractChecklistLines(
         `- [ ] Confirm release workflow trigger contract remains ${workflowDescriptor}: ${triggerDescriptor}.`,
         `- [ ] Confirm release workflow tag-guard contract remains ${workflowDescriptor}: ${tagGuardDescriptor}.`,
         '- [ ] Confirm release notes contract remains dual-file: `docs/releases/<tag>.md` and `docs/releases/<tag>.zh-CN.md`.',
-        '- [ ] If packaging output shape changes (for example, moving from `outfile` to `outdir`), update release-helper tests and maintainer docs in the same change.'
+        `- [ ] Confirm \`outfile -> outdir\` transition contract remains explicit (${packagingSourceDescriptor}; current build output ${outputDescriptor}) and preserves ${releaseOwnershipDescriptor}, with release-helper tests and maintainer docs updated in the same change.`
     ];
 }
 
