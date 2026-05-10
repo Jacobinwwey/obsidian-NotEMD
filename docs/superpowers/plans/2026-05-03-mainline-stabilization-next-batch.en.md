@@ -265,3 +265,26 @@ To keep CI stable while moving from convergence hardening toward packaging-bound
    - update audits/helper/docs in the same batch before any release-facing claim
 
 This blueprint keeps the current anti-drift momentum without converting Stage-C runtime work into uncontrolled CI risk.
+
+## 2026-05-10 Stage-B2 Progress Alignment Update
+
+The plan now has a concrete Stage-B2 landing artifact, not only a staged intention:
+
+- `docs/brainstorms/2026-05-10-multi-entry-candidate-contract-and-stage-c-gate.md`
+- `docs/brainstorms/2026-05-10-multi-entry-candidate-contract-and-stage-c-gate.zh-CN.md`
+
+This closes the execution-level planning gap between:
+
+1. current build/audit/release truth (`main.js`-anchored single-entry delivery)
+2. future Stage-C runtime-boundary implementation intent (candidate `outfile -> outdir` transition with dedicated asset ownership)
+
+As a result, this plan should now treat Stage-B2 as:
+
+1. a contract-to-test conversion phase (fail-first fixtures + migration contract deltas)
+2. a strict prerequisite gate before any runtime packaging topology edits
+
+Mainline discipline remains unchanged:
+
+- keep slices atomic
+- run full repo gates before each landing
+- keep docs/tests/helper truth synchronized in the same batch

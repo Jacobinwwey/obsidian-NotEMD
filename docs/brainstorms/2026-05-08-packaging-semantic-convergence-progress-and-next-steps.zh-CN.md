@@ -233,3 +233,33 @@ topic: packaging-semantic-convergence-progress-and-next-steps
 - 在 Stage-B2 完成前，保持切片原子化、聚焦 parser/contract 抗漂移。
 - 禁止把运行时边界实现与大范围重构混在同一批变更。
 - 每次落盘后必须执行 clean 状态复核（`git status --short --branch`）。
+
+## 8. 2026-05-10 Stage-B2 契约工件对齐
+
+Stage-B2 契约工作现在不再只是“未来步骤描述”，而是已经落盘为独立可引用工件：
+
+- `docs/brainstorms/2026-05-10-multi-entry-candidate-contract-and-stage-c-gate.md`
+- `docs/brainstorms/2026-05-10-multi-entry-candidate-contract-and-stage-c-gate.zh-CN.md`
+
+该工件把当前收敛层与未来 Stage-C 运行时实现之间的规划缺口显式补齐，并将以下事实统一锚定：
+
+1. `esbuild.config.mjs` 中当前单入口构建真值
+2. `scripts/audit-render-host-bundle.js` 中当前内联宿主审计真值
+3. `scripts/release/publish-github-release.js` 中当前 release 资产归属真值
+4. `scripts/diagram-semantic-verification.js` 中当前 readiness / promotion 语义真值
+
+这意味着剩余缺口现在已经被进一步收窄并具体化：
+
+- 不再是“Stage-B2 是否需要独立文档”
+- 而是“在任何构建拓扑变更之前，把文档化的 `outfile -> outdir` 候选契约继续转化为 fail-first 测试，以及 audit/release 迁移差异定义”
+
+## 9. 更新后的后续推进方向
+
+结合当前代码架构与新落盘的 Stage-B2 契约工件，建议的下一阶段执行顺序现已明确为：
+
+1. 先为候选输出拓扑迁移语义补充 semantic-helper 的 fail-first 回归覆盖
+2. 起草未来独立 host 资产拓扑所需的 audit 差异
+3. 起草 release-helper 迁移测试，确保迁移过程中 `main.js` 归属语义始终显式
+4. 仅在以上约束具备后，再启动第一批真实 runtime-boundary 实现切片
+
+这样可以在继续保持 `main` 与既有路线对齐的同时，避免把“契约设计”和“运行时打包实现”混入同一批变更。

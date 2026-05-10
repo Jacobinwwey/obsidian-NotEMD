@@ -265,3 +265,26 @@ npm run audit:render-host
    - 在同一批次同步审计脚本、helper 文案与文档，再给任何 release-facing 叙述
 
 这条蓝图可保持当前 anti-drift 收敛节奏，同时避免 Stage-C 运行时改造演变为不可控 CI 风险。
+
+## 2026-05-10 Stage-B2 推进对齐更新
+
+本计划现在已有可落地引用的 Stage-B2 独立工件，不再只是阶段性意图描述：
+
+- `docs/brainstorms/2026-05-10-multi-entry-candidate-contract-and-stage-c-gate.md`
+- `docs/brainstorms/2026-05-10-multi-entry-candidate-contract-and-stage-c-gate.zh-CN.md`
+
+该工件补齐了以下执行层缺口：
+
+1. 当前 build/audit/release 真值（以 `main.js` 为锚点的单入口交付）
+2. 未来 Stage-C 运行时边界实现意图（候选 `outfile -> outdir` 迁移与独立资产归属）
+
+因此，本计划中的 Stage-B2 现在应被视为：
+
+1. 契约转测试阶段（fail-first 样例 + 迁移契约差异）
+2. 运行时打包拓扑改动前的严格前置 gate
+
+主线执行纪律保持不变：
+
+- 切片保持原子化
+- 每次落盘前执行完整仓库门禁
+- 文档、测试、helper 真值同批同步

@@ -233,3 +233,33 @@ These slices stayed inside `scripts/diagram-semantic-verification.js` + `src/tes
 - Keep slices atomic and parser-focused until Stage-B2 contracts are complete.
 - Never mix runtime-boundary implementation with broad refactor work in the same change batch.
 - Require post-push clean-status verification (`git status --short --branch`) after every landed slice.
+
+## 8. 2026-05-10 Stage-B2 Contract Artifact Alignment
+
+The Stage-B2 contract work is now no longer only described as a future step. It is landed as a dedicated artifact in:
+
+- `docs/brainstorms/2026-05-10-multi-entry-candidate-contract-and-stage-c-gate.md`
+- `docs/brainstorms/2026-05-10-multi-entry-candidate-contract-and-stage-c-gate.zh-CN.md`
+
+That artifact closes the planning gap between the current convergence layer and the future Stage-C runtime implementation by explicitly anchoring:
+
+1. current single-entry build truth from `esbuild.config.mjs`
+2. current inline-host audit truth from `scripts/audit-render-host-bundle.js`
+3. current release asset ownership truth from `scripts/release/publish-github-release.js`
+4. current semantic helper readiness/promotion truth from `scripts/diagram-semantic-verification.js`
+
+This means the remaining gap is now narrower and more concrete:
+
+- no longer “define whether Stage-B2 needs a document”
+- now “convert the documented `outfile -> outdir` candidate contract into fail-first tests and audit/release transition deltas before any build-topology change”
+
+## 9. Updated Forward Direction
+
+Based on the current code architecture and the newly landed Stage-B2 contract artifact, the recommended next implementation order is now:
+
+1. add fail-first semantic-helper regression coverage for candidate output-topology transition language
+2. draft the audit delta for any future dedicated host asset topology
+3. draft release-helper migration tests so `main.js` ownership semantics remain explicit during transition
+4. only then start the first real runtime-boundary implementation slice
+
+This keeps the repository on `main` aligned with the previously approved plan while reducing the risk of mixing contract design and runtime packaging edits in one batch.
