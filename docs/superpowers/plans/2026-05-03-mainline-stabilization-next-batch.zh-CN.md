@@ -232,3 +232,22 @@ npm run audit:render-host
 - Stage B release-trigger 解析现在也支持内联 `on` 数组对象项（例如 `on: [{ push: { tags: [...] } }, { workflow_dispatch: {} }]`），并继续忽略这类对象项中的嵌套非事件键。
 
 因此，这份计划之后真正剩下的工作已经不再是“补第一版 runbook”或“补第一版 packaging 澄清”。这些基础片段现在已经检入。剩余工作是保持这套已检入真值不漂移，并进一步判断下一个真实实现批次应优先落在 heavy-runtime packaging isolation，还是后续更窄的 contract-promotion 切片。
+
+## 2026-05-10 收敛推进具体执行蓝图
+
+为在继续推进到打包边界实现前保持 CI 稳定，后续执行应显式分段：
+
+1. **B1 parser/contract 闭合切片（短周期）**
+   - 改动范围固定为 semantic helper + 聚焦测试 + 双语文档
+   - parser 调整前必须先补可复现的失败 trigger 样例
+   - 每个落地切片都执行完整仓库门禁链
+2. **B2 实现前契约准备（中周期）**
+   - 围绕 `esbuild.config.mjs` 写清多入口候选契约
+   - 为输出目标迁移（`outfile -> outdir`）定义 release-helper 迁移契约
+   - 显式标注哪些 promotion 叙述受 runtime-isolation 前置条件阻塞
+3. **C0 运行时边界起步 gate（后续）**
+   - 仅在 B2 契约“可测试、可文档化”后开启
+   - 落地最小可行多入口/独立资产切分
+   - 在同一批次同步审计脚本、helper 文案与文档，再给任何 release-facing 叙述
+
+这条蓝图可保持当前 anti-drift 收敛节奏，同时避免 Stage-C 运行时改造演变为不可控 CI 风险。

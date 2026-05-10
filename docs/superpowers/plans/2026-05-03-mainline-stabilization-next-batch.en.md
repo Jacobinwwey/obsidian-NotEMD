@@ -232,3 +232,22 @@ This implementation plan is no longer purely forward-looking. The planned batch 
 - Stage-B release-trigger parsing now also handles inline `on` array object items (for example `on: [{ push: { tags: [...] } }, { workflow_dispatch: {} }]`) while still ignoring nested non-event keys inside those object items.
 
 The remaining work after this plan is therefore not “finish creating the runbook” or “finish the first packaging clarification.” Those pieces now exist. The remaining work is to preserve that checked-in truth while deciding whether the next real implementation step is heavy-runtime packaging isolation or a later contract-promotion slice.
+
+## 2026-05-10 Concrete Convergence Execution Blueprint
+
+To keep CI stable while moving from convergence hardening toward packaging-boundary implementation, execution should now be explicitly staged:
+
+1. **B1 parser/contract closure slices (short cycle)**
+   - keep changes scoped to semantic helper + focused tests + bilingual docs
+   - require fail-first trigger-shape fixtures before parser edits
+   - preserve the full repo gate chain per landed slice
+2. **B2 implementation-readiness contracts (mid cycle)**
+   - write an explicit multi-entry candidate contract against `esbuild.config.mjs`
+   - define release-helper migration contracts for output-target transitions
+   - mark which promotion claims are blocked on runtime-isolation preconditions
+3. **C0 runtime-boundary start gate (later)**
+   - only after B2 contracts are testable and documented
+   - land minimum viable multi-entry/dedicated-asset split
+   - update audits/helper/docs in the same batch before any release-facing claim
+
+This blueprint keeps the current anti-drift momentum without converting Stage-C runtime work into uncontrolled CI risk.

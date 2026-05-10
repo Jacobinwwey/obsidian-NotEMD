@@ -1,5 +1,5 @@
----
 date: 2026-05-08
+last_updated: 2026-05-10
 topic: packaging-semantic-convergence-progress-and-next-steps
 ---
 
@@ -136,3 +136,72 @@ Current `main` has reached a stable packaging/semantic convergence layer:
 - CI gate remains green and repeatable
 
 Next leverage should move to Stage B -> Stage C real packaging boundary work, not reopening already converged semantic-layer mechanics.
+
+## 7. 2026-05-10 Deep Delta Audit And Concrete Landing Plan
+
+### 7.1 Mainline Evidence Checkpoint
+
+Current `main` now includes an uninterrupted anti-drift commit chain for release-trigger parsing:
+
+- `087cd1a`: nested non-event key guard on top-level `on` mapping.
+- `605a282`: inline push nested-tag false-positive guard.
+- `5188ad3`: multiline push nested-tag false-positive guard.
+- `63ad325`: multiline `push.tags` nested-list false-positive guard.
+- `b545f91`: `on` sequence inline-object event mapping support.
+- `5b55fba`: inline `on` array object-item event mapping support.
+
+These slices stayed inside `scripts/diagram-semantic-verification.js` + `src/tests/diagramSemanticVerificationScript.test.ts` + progress docs, and did not reopen operation-layer contracts (`diagram.generate`, `diagram.preview`, `provider.connection.test`).
+
+### 7.2 Prior-Requirement vs Code-Truth Deep Mapping
+
+| Source requirement focus | Current code evidence | Progress state | Remaining gap |
+|---|---|---|---|
+| PRD R1: do not overclaim runtime isolation | `buildPackagingBoundaryChecklistLines()` + maintainer release wording still states single-entry `main.js + inline srcdoc` | Closed and stable | none in convergence layer |
+| PRD R2: no operation-surface reopening | commit/file scope remains helper/tests/docs only | Closed and stable | none in this track |
+| PRD R3/R5: durable helper + anti-drift tests | release-trigger parser now covers top-level inline/sequence/array/object variants with nested-key false-positive guards | Expanded and stable | keep adding fixtures before parser changes |
+| PRD R4: docs aligned with helper truth | EN/ZH maintainers + EN/ZH progress docs track identical boundary claims | Closed and stable | maintain same-batch doc sync discipline |
+| Stage-B contract-promotion extension intent | helper already derives operation contract metadata and wildcard expansions | Partially completed | deeper path/context semantics are still pending |
+| Stage-C packaging intent | no multi-entry build/runtime split exists yet | Not started by design | requires Stage-B contract gate completion first |
+
+### 7.3 Architecture Advancement Status (Layered)
+
+1. **Contract-definition layer:** mature and executable.
+   The semantic helper now encodes packaging boundary truth, release contract truth, workflow trigger contract truth, and contract-promotion boundary truth.
+2. **Parser-resilience layer:** expanded with representation guards.
+   Trigger parsing now tolerates compact YAML forms while rejecting nested non-event keys that previously produced false positives.
+3. **Promotion-governance layer:** in progress.
+   Coverage is broad for metadata truth extraction, but deeper cross-layer promotion constraints (path-level/runtime-level coupling) are not yet encoded.
+4. **Runtime-isolation layer:** intentionally untouched.
+   Multi-entry or dedicated heavy-runtime assets remain out of current code reality and must not be implied by docs.
+
+### 7.4 Concrete Landing Plan (Persisted For Next Iteration)
+
+#### Stage B1: Contract Closure (next short cycle, CI-safe)
+
+1. Add regression fixtures for additional mixed-shape trigger declarations that combine quoted keys + sequence/object hybrids in one workflow.
+2. Add helper-output assertions that ensure trigger-contract wording remains explicit when workflow parsing falls back.
+3. Keep full gate chain mandatory per slice (`build`, full test, audits, diff-check, `obsidian help`, `obsidian-cli help`).
+
+**Exit gate:** no trigger-shape drift without a failing test first; docs remain bilingual and same-batch synchronized.
+
+#### Stage B2: Implementation Readiness Contracts (mid cycle)
+
+1. Materialize a dedicated contract-research note for multi-entry candidate packaging in `esbuild.config.mjs` terms.
+2. Define migration-safe release-helper contract updates for `outfile -> outdir` transition scenarios before touching runtime packaging.
+3. Extend contract-promotion boundary checks to explicitly track which workflow/settings/export claims require runtime-isolation preconditions.
+
+**Exit gate:** Stage-C work may start only after these contracts are written, testable, and documented.
+
+#### Stage C0: Controlled Runtime-Boundary Start (later)
+
+1. Introduce the minimum viable multi-entry or dedicated render-host asset split.
+2. Update `audit:render-host` + semantic helper wording to match the new enforced truth.
+3. Re-run three-way alignment in one batch: implementation + tests + EN/ZH maintainer/progress docs.
+
+**Exit gate:** no release/maintainer wording claims isolation beyond what build outputs and audits prove.
+
+### 7.5 Workspace Hygiene And Mainline Discipline
+
+- Keep slices atomic and parser-focused until Stage-B2 contracts are complete.
+- Never mix runtime-boundary implementation with broad refactor work in the same change batch.
+- Require post-push clean-status verification (`git status --short --branch`) after every landed slice.

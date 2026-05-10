@@ -1,5 +1,5 @@
----
 date: 2026-05-08
+last_updated: 2026-05-10
 topic: packaging-semantic-convergence-progress-and-next-steps
 ---
 
@@ -136,3 +136,72 @@ topic: packaging-semantic-convergence-progress-and-next-steps
 - CI 门禁保持全绿且可重复
 
 下一步应按上面的 Stage B -> Stage C 路线推进“真实打包边界实现”，而不是回头重做已收敛的语义层。
+
+## 7. 2026-05-10 深度差异审计与具体落盘方案
+
+### 7.1 主线证据检查点
+
+当前 `main` 已形成连续的 release-trigger 解析防漂移提交链：
+
+- `087cd1a`：把事件键检测收敛到顶层 `on`，防止嵌套非事件键误报。
+- `605a282`：修复内联 push 嵌套 tags 误报。
+- `5188ad3`：修复多行 push 嵌套 tags 误报。
+- `63ad325`：修复多行 `push.tags` 嵌套列表误报。
+- `b545f91`：支持 `on` 序列内联对象事件映射。
+- `5b55fba`：支持内联 `on` 数组对象项事件映射。
+
+这些切片始终约束在 `scripts/diagram-semantic-verification.js` + `src/tests/diagramSemanticVerificationScript.test.ts` + 进度文档，没有重开 operation 层契约（`diagram.generate`、`diagram.preview`、`provider.connection.test`）。
+
+### 7.2 先前需求与代码真值深度映射
+
+| 需求来源重点 | 当前代码证据 | 推进状态 | 剩余缺口 |
+|---|---|---|---|
+| PRD R1：不夸大运行时隔离 | `buildPackagingBoundaryChecklistLines()` + maintainer/release 文案明确仍是单入口 `main.js + inline srcdoc` | 已闭环且稳定 | 收敛层无缺口 |
+| PRD R2：不重开 operation 表面 | 提交与改动文件范围仍限定在 helper/测试/文档 | 已闭环且稳定 | 当前轨道无缺口 |
+| PRD R3/R5：耐久 helper + 防漂移测试 | trigger parser 已覆盖顶层/内联/序列/数组/对象变体，并具备嵌套非事件键误报防护 | 持续扩展且稳定 | 后续 parser 变更仍需先补样例 |
+| PRD R4：文档与 helper 真值一致 | maintainer EN/ZH + progress EN/ZH 保持同一边界叙述 | 已闭环且稳定 | 继续保持同批文档同步 |
+| Stage-B 契约提升目标 | helper 已可提取操作契约元数据并支持通配展开 | 部分完成 | 更深层 path/context 语义仍待推进 |
+| Stage-C 打包目标 | 尚无多入口构建或独立重型运行时资产 | 按设计未启动 | 需先完成 Stage-B 契约 gate |
+
+### 7.3 架构推进状态（分层）
+
+1. **契约定义层：** 已成熟并可执行。
+   semantic helper 已编码打包边界真值、release 契约真值、workflow trigger 契约真值、contract-promotion 边界真值。
+2. **解析鲁棒层：** 已扩大并带表示层防护。
+   trigger 解析可容忍紧凑 YAML 写法，同时拒绝此前造成误报的嵌套非事件键。
+3. **契约提升治理层：** 进行中。
+   元数据真值提取覆盖面已扩大，但更深层跨层提升约束（path/runtime coupling）尚未编码。
+4. **运行时隔离实现层：** 按策略暂未触发。
+   多入口或重型运行时独立资产仍不是当前代码现实，文档不得提前暗示完成。
+
+### 7.4 下一轮具体落盘方案（已固化）
+
+#### Stage B1：契约闭合（下一短周期，CI-safe）
+
+1. 补充更多混合触发声明回归样例（同一 workflow 内混合 quoted key + sequence/object 组合）。
+2. 补充 helper 输出断言，确保 workflow 解析 fallback 时 trigger 契约文案仍显式可读。
+3. 持续把完整门禁作为每个切片的必需项（`build`、全量测试、audits、diff-check、`obsidian help`、`obsidian-cli help`）。
+
+**出关条件：** 任意 trigger 表达形态漂移都必须先由失败测试暴露；EN/ZH 文档保持同批同步。
+
+#### Stage B2：实现前契约准备（中周期）
+
+1. 在 `esbuild.config.mjs` 维度固化多入口候选研究文档。
+2. 在触发 runtime 打包改造前，先定义 `outfile -> outdir` 迁移的 release-helper 契约与回归策略。
+3. 扩展 contract-promotion 边界检查，显式标注哪些 workflow/settings/export 叙述依赖 runtime-isolation 前置条件。
+
+**出关条件：** Stage-C 仅可在上述契约“可写入、可测试、可文档化”后开启。
+
+#### Stage C0：受控运行时边界起步（后续）
+
+1. 引入最小可行多入口或独立 render-host 资产分离。
+2. 同步更新 `audit:render-host` 与 semantic helper 文案，反映新的“被强制约束真值”。
+3. 在同一批次完成三向对齐：实现 + 测试 + maintainer/progress EN/ZH 文档。
+
+**出关条件：** release 与 maintainer 文案不得宣称任何超出构建产物与审计可证明范围的隔离能力。
+
+### 7.5 工作区卫生与主线节奏纪律
+
+- 在 Stage-B2 完成前，保持切片原子化、聚焦 parser/contract 抗漂移。
+- 禁止把运行时边界实现与大范围重构混在同一批变更。
+- 每次落盘后必须执行 clean 状态复核（`git status --short --branch`）。
