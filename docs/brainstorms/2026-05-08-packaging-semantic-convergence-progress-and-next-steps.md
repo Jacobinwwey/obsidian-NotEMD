@@ -90,6 +90,8 @@ Goals:
    Release trigger checks now also parse `on` sequence inline-object forms (for example `- { push: { tags: [...] }, workflow_dispatch: {} }`) while still rejecting nested non-event keys inside those inline objects.
 22. **Inline on-array object event items are now parsed**
    Release trigger checks now also parse inline `on` array object items (for example `on: [{ push: { tags: [...] } }, { workflow_dispatch: {} }]`) while still rejecting nested non-event keys inside those object items.
+23. **Multiline flow-style top-level `on` object syntax is now parsed**
+   Release trigger checks now also parse multiline flow-style top-level `on` forms (for example `on: {` on one line, followed by event mappings on subsequent lines) while still rejecting nested non-event keys.
 
 ### Still open beyond convergence hardening
 

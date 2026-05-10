@@ -230,6 +230,7 @@ This implementation plan is no longer purely forward-looking. The planned batch 
 - Stage-B multiline `push.tags` parsing now only trusts direct list-item shapes, preventing nested structures (for example `push.tags.include` lists) from generating false release-tag trigger signals.
 - Stage-B release-trigger parsing now also handles `on` sequence inline-object event mappings (for example `- { push: { tags: [...] }, workflow_dispatch: {} }`) while still ignoring nested non-event keys inside those inline objects.
 - Stage-B release-trigger parsing now also handles inline `on` array object items (for example `on: [{ push: { tags: [...] } }, { workflow_dispatch: {} }]`) while still ignoring nested non-event keys inside those object items.
+- Stage-B release-trigger parsing now also handles multiline flow-style top-level `on` objects (for example first line `on: {` followed by event mappings on next lines) while still ignoring nested non-event keys.
 
 The remaining work after this plan is therefore not “finish creating the runbook” or “finish the first packaging clarification.” Those pieces now exist. The remaining work is to preserve that checked-in truth while deciding whether the next real implementation step is heavy-runtime packaging isolation or a later contract-promotion slice.
 

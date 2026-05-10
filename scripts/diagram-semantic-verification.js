@@ -936,6 +936,16 @@ function resolveWorkflowOnTriggerConfig(workflowSource) {
                     inPushTagsBlock = false;
                     pushTagsItemIndent = -1;
                     pushTagsDirectListEligible = true;
+                } else if (inlineOnValue === '{') {
+                    inOnBlock = true;
+                    onIndent = indent;
+                    onSequenceIndent = -1;
+                    onMappingIndent = -1;
+                    inPushBlock = false;
+                    pushTopLevelKeyIndent = -1;
+                    inPushTagsBlock = false;
+                    pushTagsItemIndent = -1;
+                    pushTagsDirectListEligible = true;
                 } else {
                     const inlineOnConfig = resolveInlineOnTriggerConfig(inlineOnValue);
                     if (inlineOnConfig.hasWorkflowDispatch) {
@@ -965,6 +975,16 @@ function resolveWorkflowOnTriggerConfig(workflowSource) {
                     onSequenceIndent = -1;
                     onMappingIndent = -1;
                     pushTopLevelKeyIndent = -1;
+                    pushTagsItemIndent = -1;
+                    pushTagsDirectListEligible = true;
+                } else if (inlineOnValue === '{') {
+                    inOnBlock = true;
+                    onIndent = indent;
+                    onSequenceIndent = -1;
+                    onMappingIndent = -1;
+                    inPushBlock = false;
+                    pushTopLevelKeyIndent = -1;
+                    inPushTagsBlock = false;
                     pushTagsItemIndent = -1;
                     pushTagsDirectListEligible = true;
                 } else {
