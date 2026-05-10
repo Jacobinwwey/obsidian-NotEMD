@@ -72,6 +72,8 @@ topic: packaging-semantic-convergence-progress-and-next-steps
    release 触发检查现在也会从事件序列与内联事件数组写法中识别 `workflow_dispatch`（例如 `on` 下使用 `- workflow_dispatch`，或 `on: [push, workflow_dispatch]`），在事件语法改写但意图不变时降低真值漂移风险。
 13. **`on` 事件序列 push 映射的 tag 语法已纳入解析**
    release 触发检查现在也会解析 `on` 事件序列里 `- push:` + 嵌套 `tags` 的写法，在事件声明风格变化时保持 tag 触发真值稳定。
+14. **带引号的 YAML 事件键已纳入解析**
+   release 触发检查现在也支持带引号的 workflow 事件键与嵌套触发键（例如 `'push':`、`"tags":`、`'workflow_dispatch':`），降低键名引号风格统一改写导致的真值漂移风险。
 
 ### 尚未进入实现层的边界
 

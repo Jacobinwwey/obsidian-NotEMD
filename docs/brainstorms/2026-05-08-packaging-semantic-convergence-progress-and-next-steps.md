@@ -72,6 +72,8 @@ Goals:
    Release trigger checks now also detect `workflow_dispatch` from sequence and inline-array event declarations (for example `on` with `- workflow_dispatch`, or `on: [push, workflow_dispatch]`), reducing drift when workflow event syntax changes without changing intent.
 13. **`on` sequence push-mapping tag syntax is now parsed**
    Release trigger checks now also parse `on` sequence entries that use push mappings (for example `- push:` with nested `tags`), preserving tag-trigger truth under alternate event declaration styles.
+14. **Quoted YAML event keys are now parsed**
+   Release trigger checks now also accept quoted workflow event keys and nested trigger keys (for example `'push':`, `"tags":`, and `'workflow_dispatch':`), reducing drift when workflows normalize key quoting styles.
 
 ### Still open beyond convergence hardening
 

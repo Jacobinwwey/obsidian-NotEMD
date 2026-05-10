@@ -540,13 +540,37 @@ function parseInlineWorkflowTagPatterns(rawValue) {
     return patterns;
 }
 
+const YAML_KEY_QUOTE_CLASS = `["'\\\`]`;
+
+function buildYamlKeyPattern(keyName) {
+    const escapedKeyName = escapeRegExp(keyName);
+    return `(?:${YAML_KEY_QUOTE_CLASS})?${escapedKeyName}(?:${YAML_KEY_QUOTE_CLASS})?`;
+}
+
+function matchYamlKeyValueLine(line, keyName) {
+    const keyPattern = buildYamlKeyPattern(keyName);
+    return line.match(new RegExp(`^\\s*${keyPattern}\\s*:\\s*(.*)$`));
+}
+
+function matchYamlKeyValueFragment(fragment, keyName) {
+    const keyPattern = buildYamlKeyPattern(keyName);
+    return fragment.match(new RegExp(`^${keyPattern}\\s*:\\s*(.*)$`));
+}
+
+function hasInlineYamlKey(sourceValue, keyName) {
+    const keyPattern = buildYamlKeyPattern(keyName);
+    return new RegExp(`(?:^|[,{])\\s*${keyPattern}\\s*:`).test(sourceValue);
+}
+
 function extractInlinePushTagPatterns(pushValue) {
     const normalizedValue = pushValue.replace(/\s+#.*$/, '').trim();
     if (!normalizedValue) {
         return [];
     }
 
-    const tagsMatch = normalizedValue.match(/\btags\s*:\s*(\[[^\]]*\]|[^,}]+)/);
+    const tagsMatch = normalizedValue.match(
+        new RegExp(`${buildYamlKeyPattern('tags')}\\s*:\\s*(\\[[^\\]]*\\]|[^,}]+)`)
+    );
     if (!tagsMatch) {
         return [];
     }
@@ -555,7 +579,7 @@ function extractInlinePushTagPatterns(pushValue) {
 }
 
 function extractInlineObjectFieldValue(sourceValue, fieldName) {
-    const fieldPattern = new RegExp(`\\b${fieldName}\\s*:\\s*`);
+    const fieldPattern = new RegExp(`(?:^|[,{])\\s*${buildYamlKeyPattern(fieldName)}\\s*:\\s*`);
     const fieldMatch = fieldPattern.exec(sourceValue);
     if (!fieldMatch) {
         return '';
@@ -639,7 +663,7 @@ function resolveInlineOnTriggerConfig(onValue) {
 
     if (normalizedValue.startsWith('{')) {
         const pushValue = extractInlineObjectFieldValue(normalizedValue, 'push');
-        const hasWorkflowDispatch = /\bworkflow_dispatch\s*:/.test(normalizedValue);
+        const hasWorkflowDispatch = hasInlineYamlKey(normalizedValue, 'workflow_dispatch');
         return {
             hasWorkflowDispatch,
             workflowTagPatterns: pushValue ? extractInlinePushTagPatterns(pushValue) : []
@@ -678,7 +702,7 @@ function resolveWorkflowOnTriggerConfig(workflowSource) {
         const isMeaningfulLine = Boolean(trimmed) && !trimmed.startsWith('#');
 
         if (!inOnBlock) {
-            const onMatch = line.match(/^\s*on\s*:\s*(.*)$/);
+            const onMatch = matchYamlKeyValueLine(line, 'on');
             if (onMatch) {
                 const inlineOnValue = onMatch[1].trim();
                 if (!inlineOnValue) {
@@ -703,7 +727,7 @@ function resolveWorkflowOnTriggerConfig(workflowSource) {
             inPushBlock = false;
             inPushTagsBlock = false;
             onSequenceIndent = -1;
-            const onMatch = line.match(/^\s*on\s*:\s*(.*)$/);
+            const onMatch = matchYamlKeyValueLine(line, 'on');
             if (onMatch) {
                 const inlineOnValue = onMatch[1].trim();
                 if (!inlineOnValue) {
@@ -740,7 +764,7 @@ function resolveWorkflowOnTriggerConfig(workflowSource) {
             if (isMeaningfulLine && indent <= pushIndent) {
                 inPushBlock = false;
             } else {
-                const tagsMatch = line.match(/^\s*tags\s*:\s*(.*)$/);
+                const tagsMatch = matchYamlKeyValueLine(line, 'tags');
                 if (tagsMatch) {
                     const tagsValue = tagsMatch[1].trim();
                     if (!tagsValue) {
@@ -771,7 +795,7 @@ function resolveWorkflowOnTriggerConfig(workflowSource) {
                     hasWorkflowDispatch = true;
                 }
 
-                const pushMappingMatch = sequenceItemValue.match(/^push\s*:\s*(.*)$/);
+                const pushMappingMatch = matchYamlKeyValueFragment(sequenceItemValue, 'push');
                 if (pushMappingMatch) {
                     inPushBlock = true;
                     pushIndent = indent;
@@ -784,12 +808,12 @@ function resolveWorkflowOnTriggerConfig(workflowSource) {
             continue;
         }
 
-        if (/^\s*workflow_dispatch\s*:/.test(line)) {
+        if (matchYamlKeyValueLine(line, 'workflow_dispatch')) {
             hasWorkflowDispatch = true;
             continue;
         }
 
-        const pushMatch = line.match(/^\s*push\s*:\s*(.*)$/);
+        const pushMatch = matchYamlKeyValueLine(line, 'push');
         if (pushMatch) {
             inPushBlock = true;
             pushIndent = indent;
