@@ -106,6 +106,8 @@ Goals:
    Release trigger checks now collect multiline flow-style `on` array declarations (including array object items) until collection closure, so compact multiline array formatting still resolves top-level `workflow_dispatch` and `push.tags` trigger facts.
 30. **`push.tags` multiline flow-style arrays are now parsed across continuation lines**
    Release trigger checks now collect multiline flow-style `push.tags` arrays (for both top-level and sequence `push` mappings) until collection closure, preserving numeric-tag trigger detection and v-prefixed guard semantics under compact multiline flow formatting.
+31. **Comma-separated multiline flow-style `push` object fields no longer mask tag trigger facts**
+   Release trigger checks now normalize `tags` field values that carry flow-object field delimiters (for example `tags: ["*.*.*"],`), preserving both numeric-tag detection and v-prefixed guard behavior for top-level and sequence `push` flow objects.
 
 ### Still open beyond convergence hardening
 

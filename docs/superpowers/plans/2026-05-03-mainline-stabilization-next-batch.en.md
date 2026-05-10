@@ -238,6 +238,7 @@ This implementation plan is no longer purely forward-looking. The planned batch 
 - Stage-B `on`-key parsing now also treats comment-only key-line values (for example `on: # ...`) as trigger-block declarations, preserving both mapping and sequence trigger detection under inline-comment formatting.
 - Stage-B release-trigger parsing now also supports multiline flow-style `on` arrays by collecting continuation lines until closure, keeping top-level trigger extraction stable for both scalar event items and inline object event items.
 - Stage-B `push.tags` parsing now also supports multiline flow-style arrays by collecting continuation lines until closure, keeping numeric-tag trigger detection and v-prefixed wildcard guard behavior stable for both top-level and sequence `push` mappings.
+- Stage-B `push` flow-object parsing now also normalizes comma-delimited `tags` field values (for example `tags: ["*.*.*"],`), preventing field-delimiter formatting from masking numeric-tag detection or v-prefixed wildcard guard behavior.
 
 The remaining work after this plan is therefore not “finish creating the runbook” or “finish the first packaging clarification.” Those pieces now exist. The remaining work is to preserve that checked-in truth while deciding whether the next real implementation step is heavy-runtime packaging isolation or a later contract-promotion slice.
 

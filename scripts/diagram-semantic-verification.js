@@ -1176,7 +1176,8 @@ function resolveWorkflowOnTriggerConfig(workflowSource) {
                 if (tagsMatch && indent === pushTopLevelKeyIndent) {
                     const tagsValue = tagsMatch[1].trim();
                     const normalizedTagsValue = normalizeYamlLineValue(tagsValue);
-                    if (!normalizedTagsValue) {
+                    const normalizedTagsFlowValue = normalizedTagsValue.replace(/,\s*$/, '').trim();
+                    if (!normalizedTagsFlowValue) {
                         inPushTagsBlock = true;
                         pushTagsIndent = indent;
                         pushTagsItemIndent = -1;
@@ -1184,13 +1185,13 @@ function resolveWorkflowOnTriggerConfig(workflowSource) {
                         inPushTagsInlineFlowContinuation = false;
                         pushTagsInlineFlowValue = '';
                     } else if (
-                        normalizedTagsValue.startsWith('[')
-                        && !isInlineFlowCollectionComplete(normalizedTagsValue)
+                        normalizedTagsFlowValue.startsWith('[')
+                        && !isInlineFlowCollectionComplete(normalizedTagsFlowValue)
                     ) {
                         inPushTagsInlineFlowContinuation = true;
-                        pushTagsInlineFlowValue = normalizedTagsValue;
+                        pushTagsInlineFlowValue = normalizedTagsFlowValue;
                     } else {
-                        workflowTagPatterns.push(...parseInlineWorkflowTagPatterns(normalizedTagsValue));
+                        workflowTagPatterns.push(...parseInlineWorkflowTagPatterns(normalizedTagsFlowValue));
                     }
                 }
                 continue;

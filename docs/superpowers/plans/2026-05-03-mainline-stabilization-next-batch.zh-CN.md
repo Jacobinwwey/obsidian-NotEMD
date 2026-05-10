@@ -238,6 +238,7 @@ npm run audit:render-host
 - Stage B `on` 键解析现在也会将仅注释的键行值（例如 `on: # ...`）视为触发块声明，确保行内注释格式下的映射式与序列式触发检测保持稳定。
 - Stage B release-trigger 解析现在也支持多行 flow-style `on` 数组：通过收集续行直至集合闭合，保证标量事件项与内联对象事件项都能保持顶层触发抽取稳定。
 - Stage B `push.tags` 解析现在也支持多行 flow-style 数组：通过收集续行直至集合闭合，保证顶层与序列 `push` 映射在 numeric-tag 触发识别与 v 前缀 wildcard 守卫行为上保持稳定。
+- Stage B `push` flow 对象解析现在也会归一化逗号分隔的 `tags` 字段值（例如 `tags: ["*.*.*"],`），避免字段分隔格式掩盖 numeric-tag 检测与 v 前缀 wildcard 守卫行为。
 
 因此，这份计划之后真正剩下的工作已经不再是“补第一版 runbook”或“补第一版 packaging 澄清”。这些基础片段现在已经检入。剩余工作是保持这套已检入真值不漂移，并进一步判断下一个真实实现批次应优先落在 heavy-runtime packaging isolation，还是后续更窄的 contract-promotion 切片。
 

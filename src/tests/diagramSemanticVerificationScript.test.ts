@@ -1167,6 +1167,68 @@ jobs:
             }
         });
 
+        test('parses top-level multiline flow-style push object with comma-separated fields for release trigger facts', () => {
+            const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-release-workflow-top-level-push-flow-object-comma-'));
+            const workflowPath = path.join(tempRoot, 'release.yml');
+            fs.writeFileSync(
+                workflowPath,
+                `on:
+  push: {
+    tags: ["*.*.*"],
+    branches: [main]
+  }
+  workflow_dispatch:
+jobs:
+  publish:
+    steps:
+      - run: echo ready
+`,
+                'utf8'
+            );
+
+            try {
+                const workflowFacts = resolveReleaseWorkflowTriggerFacts({ releaseWorkflowPath: workflowPath });
+                expect(workflowFacts.hasWorkflowDispatch).toBe(true);
+                expect(workflowFacts.hasTagPushTrigger).toBe(true);
+                expect(workflowFacts.rejectsVPrefixedTagTrigger).toBe(true);
+                expect(workflowFacts.validatesNumericTagPattern).toBe(false);
+                expect(workflowFacts.resolvedFromWorkflowFile).toBe(true);
+            } finally {
+                fs.rmSync(tempRoot, { recursive: true, force: true });
+            }
+        });
+
+        test('flags v-prefixed top-level multiline flow-style push object with comma-separated fields as release trigger guard violation', () => {
+            const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-release-workflow-top-level-push-flow-object-comma-v-prefix-'));
+            const workflowPath = path.join(tempRoot, 'release.yml');
+            fs.writeFileSync(
+                workflowPath,
+                `on:
+  push: {
+    tags: ["v*.*.*"],
+    branches: [main]
+  }
+  workflow_dispatch:
+jobs:
+  publish:
+    steps:
+      - run: echo ready
+`,
+                'utf8'
+            );
+
+            try {
+                const workflowFacts = resolveReleaseWorkflowTriggerFacts({ releaseWorkflowPath: workflowPath });
+                expect(workflowFacts.hasWorkflowDispatch).toBe(true);
+                expect(workflowFacts.hasTagPushTrigger).toBe(false);
+                expect(workflowFacts.rejectsVPrefixedTagTrigger).toBe(false);
+                expect(workflowFacts.validatesNumericTagPattern).toBe(false);
+                expect(workflowFacts.resolvedFromWorkflowFile).toBe(true);
+            } finally {
+                fs.rmSync(tempRoot, { recursive: true, force: true });
+            }
+        });
+
         test('parses on-sequence push mapping tags list when tags key line has trailing comment', () => {
             const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-release-workflow-sequence-push-tags-comment-'));
             const workflowPath = path.join(tempRoot, 'release.yml');
@@ -1207,6 +1269,37 @@ jobs:
       tags: [
         "*.*.*"
       ]
+  - workflow_dispatch
+jobs:
+  publish:
+    steps:
+      - run: echo ready
+`,
+                'utf8'
+            );
+
+            try {
+                const workflowFacts = resolveReleaseWorkflowTriggerFacts({ releaseWorkflowPath: workflowPath });
+                expect(workflowFacts.hasWorkflowDispatch).toBe(true);
+                expect(workflowFacts.hasTagPushTrigger).toBe(true);
+                expect(workflowFacts.rejectsVPrefixedTagTrigger).toBe(true);
+                expect(workflowFacts.validatesNumericTagPattern).toBe(false);
+                expect(workflowFacts.resolvedFromWorkflowFile).toBe(true);
+            } finally {
+                fs.rmSync(tempRoot, { recursive: true, force: true });
+            }
+        });
+
+        test('parses on-sequence multiline flow-style push object with comma-separated fields for release trigger facts', () => {
+            const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-release-workflow-sequence-push-flow-object-comma-'));
+            const workflowPath = path.join(tempRoot, 'release.yml');
+            fs.writeFileSync(
+                workflowPath,
+                `on:
+  - push: {
+      tags: ["*.*.*"],
+      branches: [main]
+    }
   - workflow_dispatch
 jobs:
   publish:
