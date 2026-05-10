@@ -795,6 +795,11 @@ function resolveWorkflowOnTriggerConfig(workflowSource) {
                     hasWorkflowDispatch = true;
                 }
 
+                const workflowDispatchMappingMatch = matchYamlKeyValueFragment(sequenceItemValue, 'workflow_dispatch');
+                if (workflowDispatchMappingMatch) {
+                    hasWorkflowDispatch = true;
+                }
+
                 const pushMappingMatch = matchYamlKeyValueFragment(sequenceItemValue, 'push');
                 if (pushMappingMatch) {
                     inPushBlock = true;

@@ -76,6 +76,8 @@ topic: packaging-semantic-convergence-progress-and-next-steps
    release 触发检查现在也支持带引号的 workflow 事件键与嵌套触发键（例如 `'push':`、`"tags":`、`'workflow_dispatch':`），降低键名引号风格统一改写导致的真值漂移风险。
 15. **带引号顶层内联 `on` 对象写法已由回归覆盖锁定**
    回归测试现已显式锁定带引号的顶层内联 `on` 对象写法（例如 `'on': { 'push': { "tags": [...] }, "workflow_dispatch": {} }`），避免紧凑带引号声明发生静默回退。
+16. **`on` 事件序列中的 workflow_dispatch 映射写法已纳入解析**
+   release 触发检查现在也可解析 `on` 事件序列中的 workflow_dispatch 映射写法（例如 `- workflow_dispatch: {}` 与 `- 'workflow_dispatch': {}`），在序列映射式事件声明下减少真值漂移。
 
 ### 尚未进入实现层的边界
 
