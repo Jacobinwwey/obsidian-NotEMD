@@ -240,6 +240,7 @@ npm run audit:render-host
 - Stage B `push.tags` 解析现在也支持多行 flow-style 数组：通过收集续行直至集合闭合，保证顶层与序列 `push` 映射在 numeric-tag 触发识别与 v 前缀 wildcard 守卫行为上保持稳定。
 - Stage B `push` flow 对象解析现在也会归一化逗号分隔的 `tags` 字段值（例如 `tags: ["*.*.*"],`），避免字段分隔格式掩盖 numeric-tag 检测与 v 前缀 wildcard 守卫行为。
 - Stage B 多行 flow-style `push.tags` 续行解析现在也会归一化闭合行字段分隔逗号（例如 `push: { ... }` 内的 `],`），避免紧凑 flow 对象格式掩盖 numeric-tag 检测与 v 前缀 wildcard 守卫行为。
+- Stage B 混合 quoted-key 的 sequence/object 回归覆盖现在也锁定了“多行 `push` flow 对象 `tags` 数组闭合行为 `],`”场景，并继续保留嵌套非事件噪音防护。
 
 因此，这份计划之后真正剩下的工作已经不再是“补第一版 runbook”或“补第一版 packaging 澄清”。这些基础片段现在已经检入。剩余工作是保持这套已检入真值不漂移，并进一步判断下一个真实实现批次应优先落在 heavy-runtime packaging isolation，还是后续更窄的 contract-promotion 切片。
 

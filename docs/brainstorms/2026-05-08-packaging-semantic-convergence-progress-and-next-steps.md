@@ -110,6 +110,8 @@ Goals:
    Release trigger checks now normalize `tags` field values that carry flow-object field delimiters (for example `tags: ["*.*.*"],`), preserving both numeric-tag detection and v-prefixed guard behavior for top-level and sequence `push` flow objects.
 32. **Multiline flow-style `push.tags` closure lines with `],` no longer mask tag trigger facts**
    Release trigger checks now normalize continuation-collected `push.tags` flow-array values when the closing line carries a field-delimiter comma (for example `],` inside `push: { ... }`), preserving numeric-tag detection and v-prefixed guard behavior.
+33. **Mixed quoted-key sequence/object hybrid trigger declarations now include multiline `push.tags` closure-comma regression locking**
+   Release trigger coverage now includes single-workflow hybrid declarations that combine quoted keys, sequence/object entries, and multiline `push` flow-object `tags` arrays closed by `],`, while still ignoring nested non-event trigger-like keys.
 
 ### Still open beyond convergence hardening
 
