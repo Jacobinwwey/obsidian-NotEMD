@@ -505,6 +505,67 @@ function normalizeYamlLineValue(rawValue) {
     return trimmedValue.replace(/\s+#.*$/, '').trim();
 }
 
+function isInlineFlowCollectionComplete(sourceValue) {
+    const normalizedSource = sourceValue.trim();
+    if (!normalizedSource) {
+        return false;
+    }
+
+    if (!normalizedSource.startsWith('[') && !normalizedSource.startsWith('{')) {
+        return false;
+    }
+
+    let bracketDepth = 0;
+    let braceDepth = 0;
+    let activeQuote = '';
+
+    for (let cursor = 0; cursor < normalizedSource.length; cursor += 1) {
+        const char = normalizedSource[cursor];
+        const previousChar = cursor > 0 ? normalizedSource[cursor - 1] : '';
+
+        if (activeQuote) {
+            if (char === activeQuote && previousChar !== '\\') {
+                activeQuote = '';
+            }
+            continue;
+        }
+
+        if (char === '"' || char === '\'' || char === '`') {
+            activeQuote = char;
+            continue;
+        }
+
+        if (char === '#' && (cursor === 0 || /\s/.test(previousChar))) {
+            while (cursor + 1 < normalizedSource.length && normalizedSource[cursor + 1] !== '\n') {
+                cursor += 1;
+            }
+            continue;
+        }
+
+        if (char === '[') {
+            bracketDepth += 1;
+            continue;
+        }
+
+        if (char === ']') {
+            bracketDepth -= 1;
+            continue;
+        }
+
+        if (char === '{') {
+            braceDepth += 1;
+            continue;
+        }
+
+        if (char === '}') {
+            braceDepth -= 1;
+            continue;
+        }
+    }
+
+    return bracketDepth === 0 && braceDepth === 0;
+}
+
 function normalizeWorkflowTagPattern(rawValue) {
     const withoutComment = normalizeYamlLineValue(rawValue);
     if (!withoutComment) {
@@ -925,11 +986,33 @@ function resolveWorkflowOnTriggerConfig(workflowSource) {
     let pushTagsIndent = -1;
     let pushTagsItemIndent = -1;
     let pushTagsDirectListEligible = true;
+    let inOnInlineFlowContinuation = false;
+    let onInlineFlowValue = '';
 
     for (const line of lines) {
         const trimmed = line.trim();
         const indent = getLeadingWhitespaceWidth(line);
         const isMeaningfulLine = Boolean(trimmed) && !trimmed.startsWith('#');
+
+        if (inOnInlineFlowContinuation) {
+            const normalizedContinuationValue = normalizeYamlLineValue(line);
+            if (normalizedContinuationValue) {
+                onInlineFlowValue = onInlineFlowValue
+                    ? `${onInlineFlowValue} ${normalizedContinuationValue}`
+                    : normalizedContinuationValue;
+            }
+
+            if (isInlineFlowCollectionComplete(onInlineFlowValue)) {
+                const inlineOnConfig = resolveInlineOnTriggerConfig(onInlineFlowValue);
+                if (inlineOnConfig.hasWorkflowDispatch) {
+                    hasWorkflowDispatch = true;
+                }
+                workflowTagPatterns.push(...inlineOnConfig.workflowTagPatterns);
+                inOnInlineFlowContinuation = false;
+                onInlineFlowValue = '';
+            }
+            continue;
+        }
 
         if (!inOnBlock) {
             const onMatch = matchYamlKeyValueLine(line, 'on');
@@ -946,6 +1029,12 @@ function resolveWorkflowOnTriggerConfig(workflowSource) {
                     inPushTagsBlock = false;
                     pushTagsItemIndent = -1;
                     pushTagsDirectListEligible = true;
+                } else if (
+                    (normalizedInlineOnValue.startsWith('[') || normalizedInlineOnValue.startsWith('{'))
+                    && !isInlineFlowCollectionComplete(normalizedInlineOnValue)
+                ) {
+                    inOnInlineFlowContinuation = true;
+                    onInlineFlowValue = normalizedInlineOnValue;
                 } else if (normalizedInlineOnValue === '{') {
                     inOnBlock = true;
                     onIndent = indent;
@@ -988,6 +1077,12 @@ function resolveWorkflowOnTriggerConfig(workflowSource) {
                     pushTopLevelKeyIndent = -1;
                     pushTagsItemIndent = -1;
                     pushTagsDirectListEligible = true;
+                } else if (
+                    (normalizedInlineOnValue.startsWith('[') || normalizedInlineOnValue.startsWith('{'))
+                    && !isInlineFlowCollectionComplete(normalizedInlineOnValue)
+                ) {
+                    inOnInlineFlowContinuation = true;
+                    onInlineFlowValue = normalizedInlineOnValue;
                 } else if (normalizedInlineOnValue === '{') {
                     inOnBlock = true;
                     onIndent = indent;

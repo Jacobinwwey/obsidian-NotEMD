@@ -102,6 +102,8 @@ Goals:
    Release trigger coverage now includes single-workflow hybrid declarations that combine quoted keys, sequence mapping entries, inline object entries, and nested non-event noise, ensuring only top-level trigger facts are promoted.
 28. **`on:` key-line trailing comments no longer suppress block trigger parsing**
    Release trigger checks now treat comment-only `on:` values (for example `on: # ...`) as block declarations, so both top-level mappings and sequence-style trigger declarations still resolve `push.tags` and `workflow_dispatch` from subsequent lines.
+29. **Multiline flow-style `on` arrays are now parsed across continuation lines**
+   Release trigger checks now collect multiline flow-style `on` array declarations (including array object items) until collection closure, so compact multiline array formatting still resolves top-level `workflow_dispatch` and `push.tags` trigger facts.
 
 ### Still open beyond convergence hardening
 

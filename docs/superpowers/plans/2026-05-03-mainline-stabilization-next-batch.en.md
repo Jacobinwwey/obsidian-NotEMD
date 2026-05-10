@@ -236,6 +236,7 @@ This implementation plan is no longer purely forward-looking. The planned batch 
 - Stage-B release-workflow fallback wording now remains contract-explicit: when workflow inspection cannot resolve trigger facts, checklist text still records expected trigger and tag-guard truths instead of only saying inspection is incomplete.
 - Stage-B regression coverage now also locks mixed quoted-key sequence/object hybrid trigger declarations in one workflow, including nested non-event noise guards, so contract extraction remains top-level scoped under representation churn.
 - Stage-B `on`-key parsing now also treats comment-only key-line values (for example `on: # ...`) as trigger-block declarations, preserving both mapping and sequence trigger detection under inline-comment formatting.
+- Stage-B release-trigger parsing now also supports multiline flow-style `on` arrays by collecting continuation lines until closure, keeping top-level trigger extraction stable for both scalar event items and inline object event items.
 
 The remaining work after this plan is therefore not “finish creating the runbook” or “finish the first packaging clarification.” Those pieces now exist. The remaining work is to preserve that checked-in truth while deciding whether the next real implementation step is heavy-runtime packaging isolation or a later contract-promotion slice.
 
