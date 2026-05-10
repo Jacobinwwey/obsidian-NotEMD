@@ -5,6 +5,24 @@ const { spawnSync } = require('child_process');
 
 const OBSIDIAN_RELEASE_TAG_PATTERN = /^\d+\.\d+\.\d+$/;
 const REQUIRED_RELEASE_ASSETS = ['main.js', 'manifest.json', 'styles.css', 'README.md'];
+const RELEASE_ASSET_OWNERSHIP_GUARD_CODE = 'ERR_RELEASE_ASSET_OWNERSHIP_MAIN_JS_REQUIRED';
+
+function createReleaseAssetOwnershipGuardError(requiredAssets = []) {
+    const error = new Error(
+        'Release helper contract guard: required release assets omitted `main.js`; block `outfile -> outdir` migration promotion until replacement release-asset ownership contract, tests, workflow checks, and maintainer docs land together.'
+    );
+    error.code = RELEASE_ASSET_OWNERSHIP_GUARD_CODE;
+    error.requiredAssets = Array.isArray(requiredAssets) ? [...requiredAssets] : [];
+    return error;
+}
+
+function isReleaseAssetOwnershipGuardError(error) {
+    return Boolean(
+        error
+        && typeof error === 'object'
+        && error.code === RELEASE_ASSET_OWNERSHIP_GUARD_CODE
+    );
+}
 
 function validateRequiredReleaseAssets(requiredAssets = REQUIRED_RELEASE_ASSETS) {
     if (!Array.isArray(requiredAssets) || requiredAssets.length === 0) {
@@ -12,9 +30,7 @@ function validateRequiredReleaseAssets(requiredAssets = REQUIRED_RELEASE_ASSETS)
     }
 
     if (!requiredAssets.includes('main.js')) {
-        throw new Error(
-            'Release helper contract guard: required release assets omitted `main.js`; block `outfile -> outdir` migration promotion until replacement release-asset ownership contract, tests, workflow checks, and maintainer docs land together.'
-        );
+        throw createReleaseAssetOwnershipGuardError(requiredAssets);
     }
 }
 
@@ -158,11 +174,14 @@ if (require.main === module) {
 
 module.exports = {
     OBSIDIAN_RELEASE_TAG_PATTERN,
+    RELEASE_ASSET_OWNERSHIP_GUARD_CODE,
     REQUIRED_RELEASE_ASSETS,
     buildGhReleaseCommand,
     cleanupReleaseNotesFile,
     composeReleaseNotesFile,
+    createReleaseAssetOwnershipGuardError,
     hasExistingRelease,
+    isReleaseAssetOwnershipGuardError,
     main,
     resolveReleaseInputs,
     validateRequiredReleaseAssets,

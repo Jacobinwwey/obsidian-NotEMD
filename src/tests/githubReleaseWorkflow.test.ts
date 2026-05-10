@@ -76,9 +76,18 @@ describe('GitHub release workflow', () => {
             assets: string[];
         };
         let validateRequiredReleaseAssets: (requiredAssets: string[]) => void;
+        let RELEASE_ASSET_OWNERSHIP_GUARD_CODE: string;
+        let isReleaseAssetOwnershipGuardError: (error: unknown) => boolean;
 
         beforeAll(() => {
-            ({ buildGhReleaseCommand, composeReleaseNotesFile, resolveReleaseInputs, validateRequiredReleaseAssets } = require(releaseScriptPath));
+            ({
+                buildGhReleaseCommand,
+                composeReleaseNotesFile,
+                resolveReleaseInputs,
+                validateRequiredReleaseAssets,
+                RELEASE_ASSET_OWNERSHIP_GUARD_CODE,
+                isReleaseAssetOwnershipGuardError
+            } = require(releaseScriptPath));
         });
 
         function createTempRepoRoot(): string {
@@ -212,6 +221,27 @@ describe('GitHub release workflow', () => {
             expect(() => validateRequiredReleaseAssets(['manifest.json', 'styles.css', 'README.md'])).toThrow(
                 'block `outfile -> outdir` migration promotion'
             );
+        });
+
+        test('exposes structured ownership guard metadata for missing main.js release assets', () => {
+            let capturedError: unknown;
+            try {
+                validateRequiredReleaseAssets(['manifest.json', 'styles.css', 'README.md']);
+            } catch (error) {
+                capturedError = error;
+            }
+
+            expect(typeof RELEASE_ASSET_OWNERSHIP_GUARD_CODE).toBe('string');
+            expect(RELEASE_ASSET_OWNERSHIP_GUARD_CODE).toContain('RELEASE_ASSET_OWNERSHIP');
+            expect(capturedError).toBeInstanceOf(Error);
+            expect((capturedError as { code?: string }).code).toBe(RELEASE_ASSET_OWNERSHIP_GUARD_CODE);
+            expect((capturedError as { requiredAssets?: string[] }).requiredAssets).toEqual([
+                'manifest.json',
+                'styles.css',
+                'README.md'
+            ]);
+            expect(isReleaseAssetOwnershipGuardError(capturedError)).toBe(true);
+            expect(isReleaseAssetOwnershipGuardError(new Error('unrelated'))).toBe(false);
         });
 
         test('accepts release-helper required assets when main.js ownership is explicit', () => {

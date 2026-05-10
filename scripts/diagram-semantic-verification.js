@@ -512,6 +512,9 @@ function resolveReleasePackagingContractFacts({
             ? releaseHelper.OBSIDIAN_RELEASE_TAG_PATTERN.source
             : fallbackTagPattern;
         const supportsReleaseModeSwitch = typeof releaseHelper.buildGhReleaseCommand === 'function';
+        const guardCode = typeof releaseHelper.RELEASE_ASSET_OWNERSHIP_GUARD_CODE === 'string'
+            ? releaseHelper.RELEASE_ASSET_OWNERSHIP_GUARD_CODE
+            : 'ERR_RELEASE_ASSET_OWNERSHIP_MAIN_JS_REQUIRED';
         let supportsMainJsOwnershipGuard = false;
 
         if (typeof releaseHelper.validateRequiredReleaseAssets === 'function') {
@@ -519,8 +522,18 @@ function resolveReleasePackagingContractFacts({
                 releaseHelper.validateRequiredReleaseAssets(['manifest.json']);
             } catch (error) {
                 const errorMessage = error instanceof Error ? error.message : String(error);
-                supportsMainJsOwnershipGuard = errorMessage.includes('main.js')
+                const hasStructuredGuardCode = Boolean(
+                    error
+                    && typeof error === 'object'
+                    && error.code === guardCode
+                );
+                const hasStructuredGuardPredicate = typeof releaseHelper.isReleaseAssetOwnershipGuardError === 'function'
+                    && releaseHelper.isReleaseAssetOwnershipGuardError(error);
+                const hasLegacyGuardMessage = errorMessage.includes('main.js')
                     && errorMessage.includes('block `outfile -> outdir` migration promotion');
+                supportsMainJsOwnershipGuard = hasStructuredGuardCode
+                    || hasStructuredGuardPredicate
+                    || hasLegacyGuardMessage;
             }
         }
 

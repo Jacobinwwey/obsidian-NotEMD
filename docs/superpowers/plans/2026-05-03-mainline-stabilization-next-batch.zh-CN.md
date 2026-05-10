@@ -306,3 +306,4 @@ npm run audit:render-host
 3. 回归测试已锁定上述双重 guardrail，避免 release-helper 资产列表漂移静默削弱迁移 gate
 4. release-helper 运行时强制约束现已新增 `validateRequiredReleaseAssets()`，在 required assets 丢失 `main.js` 时会快速失败，并由 `src/tests/githubReleaseWorkflow.test.ts` 专项覆盖
 5. semantic-helper 的 release-contract 检查现在会验证运行时归属 guard 是否生效，无法确认时会输出显式的 incomplete-inspection 阻断提示
+6. 运行时归属 guard 检测现已采用结构化键控（`RELEASE_ASSET_OWNERSHIP_GUARD_CODE` / `isReleaseAssetOwnershipGuardError`），旧报错文案匹配仅作为兼容兜底，从而降低 helper 校验对文案漂移的耦合风险

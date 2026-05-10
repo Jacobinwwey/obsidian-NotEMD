@@ -555,6 +555,51 @@ const context = await esbuild.context({
             expect(lines.some((line) => line.includes('current build output'))).toBe(true);
         });
 
+        test('detects release-helper runtime ownership guard via structured guard code even without legacy error wording', () => {
+            const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-release-helper-structured-guard-'));
+            const releaseHelperPath = path.join(tempRoot, 'publish-github-release.js');
+            fs.writeFileSync(
+                releaseHelperPath,
+                `const REQUIRED_RELEASE_ASSETS = ['main.js', 'manifest.json', 'styles.css', 'README.md'];
+const OBSIDIAN_RELEASE_TAG_PATTERN = /^\\d+\\.\\d+\\.\\d+$/;
+const RELEASE_ASSET_OWNERSHIP_GUARD_CODE = 'ERR_RELEASE_ASSET_OWNERSHIP_MAIN_JS_REQUIRED';
+function validateRequiredReleaseAssets(requiredAssets = REQUIRED_RELEASE_ASSETS) {
+    if (!requiredAssets.includes('main.js')) {
+        const error = new Error('structured guard without legacy migration sentence');
+        error.code = RELEASE_ASSET_OWNERSHIP_GUARD_CODE;
+        throw error;
+    }
+}
+function isReleaseAssetOwnershipGuardError(error) {
+    return Boolean(error && typeof error === 'object' && error.code === RELEASE_ASSET_OWNERSHIP_GUARD_CODE);
+}
+function buildGhReleaseCommand() {
+    return ['release', 'create'];
+}
+module.exports = {
+    REQUIRED_RELEASE_ASSETS,
+    OBSIDIAN_RELEASE_TAG_PATTERN,
+    RELEASE_ASSET_OWNERSHIP_GUARD_CODE,
+    validateRequiredReleaseAssets,
+    isReleaseAssetOwnershipGuardError,
+    buildGhReleaseCommand
+};
+`,
+                'utf8'
+            );
+
+            try {
+                const facts = resolveReleasePackagingContractFacts({ releaseHelperPath });
+                expect(facts.requiredAssets).toEqual(['main.js', 'manifest.json', 'styles.css', 'README.md']);
+                expect(facts.releaseTagPattern).toBe('^\\d+\\.\\d+\\.\\d+$');
+                expect(facts.supportsReleaseModeSwitch).toBe(true);
+                expect(facts.supportsMainJsOwnershipGuard).toBe(true);
+                expect(facts.resolvedFromReleaseHelper).toBe(true);
+            } finally {
+                fs.rmSync(tempRoot, { recursive: true, force: true });
+            }
+        });
+
         test('keeps outfile-to-outdir release transition contract explicit when build output uses outdir', () => {
             const releaseHelperPath = path.join(repoRoot, 'scripts', 'release', 'publish-github-release.js');
             const releaseWorkflowPath = path.join(repoRoot, '.github', 'workflows', 'release.yml');
