@@ -219,5 +219,6 @@ npm run audit:render-host
 - Stage B release-trigger 检查作用域也进一步收敛：tag 触发检测现在限定为 `on.push.tags`，避免工作流其他区块里的 `tags:` 字段产生错误契约信号。
 - Stage B release-trigger 解析现在也支持紧凑内联 push 形式（`push: { tags: [...] }`），与多行 YAML 块写法一起保持契约检测稳定。
 - Stage B release-trigger 解析现在也支持完全内联的顶层 `on` 对象写法（例如 `on: { push: { tags: [...] }, workflow_dispatch: {} }`），在紧凑 workflow 声明下仍可保持触发防护检测稳定。
+- Stage B release-trigger 解析现在也可从 `on` 事件序列/内联数组写法识别 `workflow_dispatch`（例如 `on` 下使用 `- workflow_dispatch`，或 `on: [push, workflow_dispatch]`），降低事件声明风格改写带来的真值漂移。
 
 因此，这份计划之后真正剩下的工作已经不再是“补第一版 runbook”或“补第一版 packaging 澄清”。这些基础片段现在已经检入。剩余工作是保持这套已检入真值不漂移，并进一步判断下一个真实实现批次应优先落在 heavy-runtime packaging isolation，还是后续更窄的 contract-promotion 切片。

@@ -68,6 +68,8 @@ Goals:
    Release trigger checks now also parse inline push object forms (for example `push: { tags: ["*.*.*"] }`), reducing drift risk when workflow YAML is compacted.
 11. **Inline top-level `on` object syntax is now parsed**
    Release trigger checks now also parse compact top-level `on` object forms (for example `on: { push: { tags: ["*.*.*"] }, workflow_dispatch: {} }`), preserving trigger-guard truth when event declarations are fully inlined.
+12. **`on` event-sequence workflow dispatch detection is now parsed**
+   Release trigger checks now also detect `workflow_dispatch` from sequence and inline-array event declarations (for example `on` with `- workflow_dispatch`, or `on: [push, workflow_dispatch]`), reducing drift when workflow event syntax changes without changing intent.
 
 ### Still open beyond convergence hardening
 

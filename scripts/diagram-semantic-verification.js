@@ -666,6 +666,7 @@ function resolveWorkflowOnTriggerConfig(workflowSource) {
     let hasWorkflowDispatch = false;
     let inOnBlock = false;
     let onIndent = -1;
+    let onSequenceIndent = -1;
     let inPushBlock = false;
     let pushIndent = -1;
     let inPushTagsBlock = false;
@@ -683,6 +684,7 @@ function resolveWorkflowOnTriggerConfig(workflowSource) {
                 if (!inlineOnValue) {
                     inOnBlock = true;
                     onIndent = indent;
+                    onSequenceIndent = -1;
                     inPushBlock = false;
                     inPushTagsBlock = false;
                 } else {
@@ -700,12 +702,14 @@ function resolveWorkflowOnTriggerConfig(workflowSource) {
             inOnBlock = false;
             inPushBlock = false;
             inPushTagsBlock = false;
+            onSequenceIndent = -1;
             const onMatch = line.match(/^\s*on\s*:\s*(.*)$/);
             if (onMatch) {
                 const inlineOnValue = onMatch[1].trim();
                 if (!inlineOnValue) {
                     inOnBlock = true;
                     onIndent = indent;
+                    onSequenceIndent = -1;
                 } else {
                     const inlineOnConfig = resolveInlineOnTriggerConfig(inlineOnValue);
                     if (inlineOnConfig.hasWorkflowDispatch) {
@@ -751,6 +755,21 @@ function resolveWorkflowOnTriggerConfig(workflowSource) {
         }
 
         if (!isMeaningfulLine) {
+            continue;
+        }
+
+        const onSequenceItemMatch = line.match(/^\s*-\s*(.+?)\s*$/);
+        if (onSequenceItemMatch && !inPushBlock && !inPushTagsBlock) {
+            if (onSequenceIndent < 0) {
+                onSequenceIndent = indent;
+            }
+
+            if (indent === onSequenceIndent) {
+                const workflowEvent = normalizeWorkflowTagPattern(onSequenceItemMatch[1]);
+                if (workflowEvent === 'workflow_dispatch') {
+                    hasWorkflowDispatch = true;
+                }
+            }
             continue;
         }
 
