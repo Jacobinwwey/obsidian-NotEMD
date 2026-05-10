@@ -227,5 +227,6 @@ This implementation plan is no longer purely forward-looking. The planned batch 
 - Stage-B release-trigger detection now also scopes workflow event-key matching to top-level `on` mappings, preventing nested non-event keys (for example `workflow_call.inputs.workflow_dispatch`) from generating false positives.
 - Stage-B inline push-trigger parsing now only trusts top-level `push.tags` keys, preventing nested keys (for example `push.filters.tags`) from generating false release-tag trigger signals.
 - Stage-B multiline push-trigger parsing now only trusts first-level `push` mapping keys for `tags`, preventing nested blocks (for example `push.filters.tags`) from generating false release-tag trigger signals.
+- Stage-B multiline `push.tags` parsing now only trusts direct list-item shapes, preventing nested structures (for example `push.tags.include` lists) from generating false release-tag trigger signals.
 
 The remaining work after this plan is therefore not “finish creating the runbook” or “finish the first packaging clarification.” Those pieces now exist. The remaining work is to preserve that checked-in truth while deciding whether the next real implementation step is heavy-runtime packaging isolation or a later contract-promotion slice.

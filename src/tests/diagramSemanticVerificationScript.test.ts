@@ -1135,6 +1135,37 @@ jobs:
             }
         });
 
+        test('ignores nested list items inside multiline push tags block when direct push.tags list is absent', () => {
+            const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-release-workflow-push-tags-nested-list-'));
+            const workflowPath = path.join(tempRoot, 'release.yml');
+            fs.writeFileSync(
+                workflowPath,
+                `on:
+  push:
+    tags:
+      include:
+        - "*.*.*"
+  workflow_dispatch:
+jobs:
+  publish:
+    steps:
+      - run: echo ready
+`,
+                'utf8'
+            );
+
+            try {
+                const workflowFacts = resolveReleaseWorkflowTriggerFacts({ releaseWorkflowPath: workflowPath });
+                expect(workflowFacts.hasWorkflowDispatch).toBe(true);
+                expect(workflowFacts.hasTagPushTrigger).toBe(false);
+                expect(workflowFacts.rejectsVPrefixedTagTrigger).toBe(false);
+                expect(workflowFacts.validatesNumericTagPattern).toBe(false);
+                expect(workflowFacts.resolvedFromWorkflowFile).toBe(true);
+            } finally {
+                fs.rmSync(tempRoot, { recursive: true, force: true });
+            }
+        });
+
         test('ignores nested tags keys inside inline push mapping when top-level push.tags is absent', () => {
             const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-release-workflow-inline-push-nested-tags-'));
             const workflowPath = path.join(tempRoot, 'release.yml');

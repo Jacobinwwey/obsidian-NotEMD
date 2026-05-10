@@ -797,6 +797,8 @@ function resolveWorkflowOnTriggerConfig(workflowSource) {
     let pushTopLevelKeyIndent = -1;
     let inPushTagsBlock = false;
     let pushTagsIndent = -1;
+    let pushTagsItemIndent = -1;
+    let pushTagsDirectListEligible = true;
 
     for (const line of lines) {
         const trimmed = line.trim();
@@ -815,6 +817,8 @@ function resolveWorkflowOnTriggerConfig(workflowSource) {
                     inPushBlock = false;
                     pushTopLevelKeyIndent = -1;
                     inPushTagsBlock = false;
+                    pushTagsItemIndent = -1;
+                    pushTagsDirectListEligible = true;
                 } else {
                     const inlineOnConfig = resolveInlineOnTriggerConfig(inlineOnValue);
                     if (inlineOnConfig.hasWorkflowDispatch) {
@@ -831,6 +835,8 @@ function resolveWorkflowOnTriggerConfig(workflowSource) {
             inPushBlock = false;
             pushTopLevelKeyIndent = -1;
             inPushTagsBlock = false;
+            pushTagsItemIndent = -1;
+            pushTagsDirectListEligible = true;
             onSequenceIndent = -1;
             onMappingIndent = -1;
             const onMatch = matchYamlKeyValueLine(line, 'on');
@@ -842,6 +848,8 @@ function resolveWorkflowOnTriggerConfig(workflowSource) {
                     onSequenceIndent = -1;
                     onMappingIndent = -1;
                     pushTopLevelKeyIndent = -1;
+                    pushTagsItemIndent = -1;
+                    pushTagsDirectListEligible = true;
                 } else {
                     const inlineOnConfig = resolveInlineOnTriggerConfig(inlineOnValue);
                     if (inlineOnConfig.hasWorkflowDispatch) {
@@ -856,13 +864,33 @@ function resolveWorkflowOnTriggerConfig(workflowSource) {
         if (inPushTagsBlock) {
             if (isMeaningfulLine && indent <= pushTagsIndent) {
                 inPushTagsBlock = false;
+                pushTagsItemIndent = -1;
+                pushTagsDirectListEligible = true;
             } else {
+                if (!isMeaningfulLine) {
+                    continue;
+                }
+
+                if (!pushTagsDirectListEligible) {
+                    continue;
+                }
+
                 const itemMatch = line.match(/^\s*-\s*(.+?)\s*$/);
                 if (itemMatch) {
-                    const normalizedPattern = normalizeWorkflowTagPattern(itemMatch[1]);
-                    if (normalizedPattern) {
-                        workflowTagPatterns.push(normalizedPattern);
+                    if (pushTagsItemIndent < 0) {
+                        pushTagsItemIndent = indent;
                     }
+                    if (indent === pushTagsItemIndent) {
+                        const normalizedPattern = normalizeWorkflowTagPattern(itemMatch[1]);
+                        if (normalizedPattern) {
+                            workflowTagPatterns.push(normalizedPattern);
+                        }
+                    }
+                    continue;
+                }
+
+                if (pushTagsItemIndent < 0) {
+                    pushTagsDirectListEligible = false;
                 }
                 continue;
             }
@@ -883,6 +911,8 @@ function resolveWorkflowOnTriggerConfig(workflowSource) {
                     if (!tagsValue) {
                         inPushTagsBlock = true;
                         pushTagsIndent = indent;
+                        pushTagsItemIndent = -1;
+                        pushTagsDirectListEligible = true;
                     } else {
                         workflowTagPatterns.push(...parseInlineWorkflowTagPatterns(tagsValue));
                     }

@@ -227,5 +227,6 @@ npm run audit:render-host
 - Stage B release-trigger 检测现在也将 workflow 事件键匹配限定在 `on` 顶层映射，避免把嵌套非事件键（例如 `workflow_call.inputs.workflow_dispatch`）误报为触发条件。
 - Stage B 内联 push 触发解析现在也只信任顶层 `push.tags` 键，避免把嵌套键（例如 `push.filters.tags`）误报为 release tag 触发信号。
 - Stage B 多行 push 触发解析现在也只信任 `push` 首层映射中的 `tags` 键，避免把嵌套块（例如 `push.filters.tags`）误报为 release tag 触发信号。
+- Stage B 多行 `push.tags` 解析现在也只信任直接列表项形态，避免把嵌套结构（例如 `push.tags.include` 列表）误报为 release tag 触发信号。
 
 因此，这份计划之后真正剩下的工作已经不再是“补第一版 runbook”或“补第一版 packaging 澄清”。这些基础片段现在已经检入。剩余工作是保持这套已检入真值不漂移，并进一步判断下一个真实实现批次应优先落在 heavy-runtime packaging isolation，还是后续更窄的 contract-promotion 切片。

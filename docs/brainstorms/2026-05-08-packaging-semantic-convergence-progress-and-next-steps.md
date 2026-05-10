@@ -84,6 +84,8 @@ Goals:
    Inline `push` trigger parsing now only trusts top-level `push.tags` fields, preventing nested keys such as `push.filters.tags` from being misinterpreted as release-tag triggers.
 19. **Multiline push nested tags are now guarded from false positives**
    Multiline `push` trigger parsing now only trusts first-level `push` mapping keys for `tags`, preventing nested blocks such as `push.filters.tags` from being misinterpreted as release-tag triggers.
+20. **Multiline push tags nested-list shapes are now guarded from false positives**
+   Multiline `push.tags` parsing now only trusts direct-list item shapes, preventing nested structures such as `push.tags.include` lists from being misinterpreted as release-tag triggers.
 
 ### Still open beyond convergence hardening
 
