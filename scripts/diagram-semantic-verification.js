@@ -765,9 +765,20 @@ function resolveWorkflowOnTriggerConfig(workflowSource) {
             }
 
             if (indent === onSequenceIndent) {
-                const workflowEvent = normalizeWorkflowTagPattern(onSequenceItemMatch[1]);
+                const sequenceItemValue = onSequenceItemMatch[1].trim();
+                const workflowEvent = normalizeWorkflowTagPattern(sequenceItemValue);
                 if (workflowEvent === 'workflow_dispatch') {
                     hasWorkflowDispatch = true;
+                }
+
+                const pushMappingMatch = sequenceItemValue.match(/^push\s*:\s*(.*)$/);
+                if (pushMappingMatch) {
+                    inPushBlock = true;
+                    pushIndent = indent;
+                    const inlinePushValue = pushMappingMatch[1].trim();
+                    if (inlinePushValue) {
+                        workflowTagPatterns.push(...extractInlinePushTagPatterns(inlinePushValue));
+                    }
                 }
             }
             continue;

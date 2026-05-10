@@ -70,6 +70,8 @@ topic: packaging-semantic-convergence-progress-and-next-steps
    release 触发检查现在也会解析紧凑的顶层 `on` 对象写法（例如 `on: { push: { tags: ["*.*.*"] }, workflow_dispatch: {} }`），在事件声明完全内联时仍可保持触发防护真值稳定。
 12. **`on` 事件序列中的 workflow_dispatch 检测已纳入解析**
    release 触发检查现在也会从事件序列与内联事件数组写法中识别 `workflow_dispatch`（例如 `on` 下使用 `- workflow_dispatch`，或 `on: [push, workflow_dispatch]`），在事件语法改写但意图不变时降低真值漂移风险。
+13. **`on` 事件序列 push 映射的 tag 语法已纳入解析**
+   release 触发检查现在也会解析 `on` 事件序列里 `- push:` + 嵌套 `tags` 的写法，在事件声明风格变化时保持 tag 触发真值稳定。
 
 ### 尚未进入实现层的边界
 

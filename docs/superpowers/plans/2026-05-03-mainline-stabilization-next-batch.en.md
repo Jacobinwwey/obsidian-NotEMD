@@ -220,5 +220,6 @@ This implementation plan is no longer purely forward-looking. The planned batch 
 - Stage-B release-trigger parsing now also handles compact inline push forms (`push: { tags: [...] }`) in addition to multiline YAML blocks, so format-only compaction keeps contract checks stable.
 - Stage-B release-trigger parsing now also handles fully inlined top-level `on` objects (for example `on: { push: { tags: [...] }, workflow_dispatch: {} }`), preserving trigger-guard checks under compact workflow declarations.
 - Stage-B release-trigger parsing now also detects `workflow_dispatch` from `on` sequence/inline-array event forms (for example `on` with `- workflow_dispatch`, or `on: [push, workflow_dispatch]`), reducing drift from event-declaration style rewrites.
+- Stage-B release-trigger parsing now also supports `on` sequence push-mapping forms (for example `- push:` with nested `tags`), keeping tag-trigger contract checks stable across alternate event-list YAML styles.
 
 The remaining work after this plan is therefore not “finish creating the runbook” or “finish the first packaging clarification.” Those pieces now exist. The remaining work is to preserve that checked-in truth while deciding whether the next real implementation step is heavy-runtime packaging isolation or a later contract-promotion slice.
