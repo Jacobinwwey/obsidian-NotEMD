@@ -1267,12 +1267,14 @@ function buildReleasePackagingContractChecklistLines(
     const workflowDescriptor = workflowFacts.resolvedFromWorkflowFile
         ? `derived from \`${releaseWorkflowPath}\``
         : `fallback reminder because \`${releaseWorkflowPath}\` could not be loaded`;
+    const expectedTriggerDescriptor = 'tag push (`*.*.*`) + `workflow_dispatch`';
     const triggerDescriptor = workflowFacts.hasTagPushTrigger && workflowFacts.hasWorkflowDispatch
-        ? 'tag push (`*.*.*`) + `workflow_dispatch`'
-        : 'trigger inspection incomplete';
+        ? expectedTriggerDescriptor
+        : `trigger inspection incomplete (expected ${expectedTriggerDescriptor})`;
+    const expectedTagGuardDescriptor = 'numeric-tag regex guard present and v-prefixed wildcard triggers absent';
     const tagGuardDescriptor = workflowFacts.validatesNumericTagPattern && workflowFacts.rejectsVPrefixedTagTrigger
-        ? 'numeric-tag regex guard present and v-prefixed wildcard triggers absent'
-        : 'tag-guard inspection incomplete';
+        ? expectedTagGuardDescriptor
+        : `tag-guard inspection incomplete (expected ${expectedTagGuardDescriptor})`;
 
     return [
         `- [ ] Confirm release asset contract remains ${sourceDescriptor}: ${requiredAssets}.`,

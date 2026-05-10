@@ -233,6 +233,7 @@ This implementation plan is no longer purely forward-looking. The planned batch 
 - Stage-B release-trigger parsing now also handles multiline flow-style top-level `on` objects (for example first line `on: {` followed by event mappings on next lines) while still ignoring nested non-event keys.
 - Stage-B release-trigger parsing now also handles multiline flow-style top-level `on` objects whose opening line includes a trailing comment (for example `on: { # ...`), preserving trigger checks under comment-annotated compact declarations.
 - Stage-B `push.tags` parsing now treats comment-only key-line values (for example `tags: # ...`) as multiline tag-list declarations, preventing both top-level and sequence `push` mappings from losing `*.*.*` trigger detection due inline-comment formatting.
+- Stage-B release-workflow fallback wording now remains contract-explicit: when workflow inspection cannot resolve trigger facts, checklist text still records expected trigger and tag-guard truths instead of only saying inspection is incomplete.
 
 The remaining work after this plan is therefore not “finish creating the runbook” or “finish the first packaging clarification.” Those pieces now exist. The remaining work is to preserve that checked-in truth while deciding whether the next real implementation step is heavy-runtime packaging isolation or a later contract-promotion slice.
 

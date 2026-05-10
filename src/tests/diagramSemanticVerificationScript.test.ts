@@ -514,7 +514,12 @@ const context = await esbuild.context({
             expect(lines[0]).toContain('missing-release-helper.js');
             expect(lines[2]).toContain('fallback reminder');
             expect(lines[3]).toContain('fallback reminder');
+            expect(lines[3]).toContain('trigger inspection incomplete');
+            expect(lines[3]).toContain('expected tag push');
+            expect(lines[3]).toContain('workflow_dispatch');
             expect(lines[4]).toContain('tag-guard inspection incomplete');
+            expect(lines[4]).toContain('expected numeric-tag regex guard present');
+            expect(lines[4]).toContain('v-prefixed wildcard triggers absent');
         });
 
         test('parses release workflow trigger facts with mixed quote styles in tags list', () => {

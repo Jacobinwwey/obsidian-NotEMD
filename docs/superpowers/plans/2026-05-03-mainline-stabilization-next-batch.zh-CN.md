@@ -233,6 +233,7 @@ npm run audit:render-host
 - Stage B release-trigger 解析现在也支持多行 flow-style 顶层 `on` 对象写法（例如首行 `on: {`，后续行继续事件映射），并继续忽略嵌套非事件键。
 - Stage B release-trigger 解析现在也支持多行 flow-style 顶层 `on` 对象首行带尾随注释的写法（例如 `on: { # ...`），在注释标注的紧凑声明下继续保持触发契约检查稳定。
 - Stage B `push.tags` 解析现在会将仅注释的键行值（例如 `tags: # ...`）视为多行 tag 列表声明，避免顶层与序列 `push` 映射因行内注释写法而丢失 `*.*.*` 触发检测。
+- Stage B release-workflow 回退文案现在保持契约显式：当 workflow 检查无法解析触发事实时，清单文案仍会记录期望的 trigger 与 tag-guard 真值，而不只是“inspection incomplete”。
 
 因此，这份计划之后真正剩下的工作已经不再是“补第一版 runbook”或“补第一版 packaging 澄清”。这些基础片段现在已经检入。剩余工作是保持这套已检入真值不漂移，并进一步判断下一个真实实现批次应优先落在 heavy-runtime packaging isolation，还是后续更窄的 contract-promotion 切片。
 

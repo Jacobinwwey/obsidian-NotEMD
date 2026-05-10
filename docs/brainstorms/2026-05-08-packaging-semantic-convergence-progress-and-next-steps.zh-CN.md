@@ -96,6 +96,8 @@ topic: packaging-semantic-convergence-progress-and-next-steps
    当多行 flow-style 顶层 `on` 首行带有尾随注释（例如 `on: { # ...`）时，release 触发检查也可保持稳定解析，同时继续保留嵌套非事件键防误报约束。
 25. **`push.tags` 键行尾随注释不再掩盖 tag 列表触发**
    release 触发检查现在会把仅注释的 `tags:` 值（例如 `tags: # ...`）视作块列表声明，因此无论是顶层 `push` 还是序列 `push` 映射，都能继续从后续列表项稳定解析 `*.*.*` 触发。
+26. **workflow-trigger 回退文案现在保持期望契约显式**
+   当 release workflow 解析走回退路径时，检查清单文案现在会显式保留触发期望（期望 `tag push (*.*.*) + workflow_dispatch` 与 numeric-tag guard），而不再只给出“inspection incomplete”。
 
 ### 尚未进入实现层的边界
 
