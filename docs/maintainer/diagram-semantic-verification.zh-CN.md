@@ -19,6 +19,7 @@ npm run verify:diagram-semantics -- --vault "<vault-name>" --commit "<sha>" --ve
 该 packaging-contract 区块现在还会输出显式的 `outfile -> outdir` 迁移契约提醒，并锚定当前 `esbuild.config.mjs` 的输出目标真值；这意味着在宣称输出形态迁移前，必须先把 `main.js` release 资产归属以及对应 tests/docs 更新写成明确契约。
 其中 contract-promotion-boundary 区块会从 `src/operations/registry.ts` 读取 workflow/settings/selection/export/config 邻近操作的当前元数据（包括 `editor.create-link-and-generate`、`file.process-*`、`concept.extract-*` 与 export/import 表面），确保能力提升结论仍绑定真实 `automationLevel` / `requiredContext` / `sideEffectClass`。
 helper 现在会把 `file.process-*` 与 `concept.extract-*` 作为通配选择器，按当前 registry operation ID 自动展开；这意味着这些前缀下新增 operation 时，无需手工改 checklist 脚本也能纳入核验清单。
+contract-promotion 清单现在还会输出 Stage-B2 runtime-isolation 前置条件映射，用于显式标记 workflow/settings/export 邻近 claim 中哪些 operation ID 在 Stage-C runtime-boundary 真正落地并完成核验前必须保持“不可提升”状态。
 
 ## 1. 何时必须使用本 Runbook
 

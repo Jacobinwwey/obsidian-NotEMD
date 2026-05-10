@@ -114,6 +114,8 @@ Goals:
    Release trigger coverage now includes single-workflow hybrid declarations that combine quoted keys, sequence/object entries, and multiline `push` flow-object `tags` arrays closed by `],`, while still ignoring nested non-event trigger-like keys.
 34. **Release packaging-contract checklist now encodes explicit `outfile -> outdir` transition readiness truth**
    Semantic helper release-contract checks now anchor an explicit `outfile -> outdir` transition contract to current build output facts from `esbuild.config.mjs`, requiring explicit `main.js` release-asset ownership and same-batch release-helper test/docs updates before migration-readiness claims.
+35. **Contract-promotion checklist now encodes Stage-B2 runtime-isolation precondition mapping**
+   Semantic helper contract-promotion checks now emit explicit Stage-B2 precondition mapping for workflow/settings/export-adjacent operation IDs, keeping those runtime-isolation promotion claims blocked until Stage-C runtime-boundary implementation is landed and verified.
 
 ### Still open beyond convergence hardening
 

@@ -62,6 +62,16 @@ const DEFAULT_CONTRACT_PROMOTION_FALLBACK_OPERATION_IDS = [
     'cli.capability-manifest.export',
     'cli.invocation-contract.export'
 ];
+const DEFAULT_RUNTIME_ISOLATION_PRECONDITION_SELECTORS = [
+    'workflow.extract-and-generate',
+    'editor.create-link-and-generate',
+    'file.process-*',
+    'concept.extract-*',
+    'provider.profile.export',
+    'provider.profile.import',
+    'cli.capability-manifest.export',
+    'cli.invocation-contract.export'
+];
 
 const NORMALIZED_SURFACE_LOOKUP = new Map(
     SURFACE_DEFINITIONS.flatMap((surface) =>
@@ -307,6 +317,43 @@ function resolveFallbackTrackedOperationIds(
     return trackedOperationIds.length > 0
         ? trackedOperationIds
         : [...DEFAULT_CONTRACT_PROMOTION_FALLBACK_OPERATION_IDS];
+}
+
+function resolveRuntimeIsolationPreconditionOperationIds(
+    operationFacts = [],
+    trackedOperationSelectors = DEFAULT_RUNTIME_ISOLATION_PRECONDITION_SELECTORS
+) {
+    const availableOperationIds = operationFacts
+        .map((operationFact) => operationFact.operationId)
+        .filter((operationId) => typeof operationId === 'string' && operationId.length > 0);
+    const resolvedOperationIds = [];
+    const seen = new Set();
+
+    const appendId = (operationId) => {
+        if (!seen.has(operationId)) {
+            seen.add(operationId);
+            resolvedOperationIds.push(operationId);
+        }
+    };
+
+    for (const selector of trackedOperationSelectors) {
+        if (isWildcardSelector(selector)) {
+            const prefix = selector.slice(0, -1);
+            for (const operationId of availableOperationIds) {
+                if (operationId.startsWith(prefix)) {
+                    appendId(operationId);
+                }
+            }
+            continue;
+        }
+        if (availableOperationIds.includes(selector)) {
+            appendId(selector);
+        }
+    }
+
+    return resolvedOperationIds.length > 0
+        ? resolvedOperationIds
+        : resolveFallbackTrackedOperationIds(trackedOperationSelectors);
 }
 
 function extractEsbuildContextOptionsSource(source) {
@@ -1458,6 +1505,10 @@ function buildContractPromotionBoundaryChecklistLines(
         }
     }
 
+    const runtimeIsolationOperationIds = resolveRuntimeIsolationPreconditionOperationIds(contractFacts.operationFacts);
+    const runtimeIsolationOperationList = runtimeIsolationOperationIds.map((operationId) => `\`${operationId}\``).join(', ');
+    lines.push(`- [ ] Runtime-isolation precondition map (Stage-B2): keep workflow/settings/export promotion claims tied to ${runtimeIsolationOperationList} blocked until Stage-C runtime-boundary implementation is landed and verified.`);
+    lines.push('- [ ] Do not treat `npm run audit:render-host` alone as runtime-isolation proof for those promotion claims; it only validates the current self-contained host contract.');
     lines.push('- [ ] If any operation metadata above changes, update capability/contract tests and maintainer docs in the same change before promoting broader CLI or workflow/settings claims.');
     return lines;
 }

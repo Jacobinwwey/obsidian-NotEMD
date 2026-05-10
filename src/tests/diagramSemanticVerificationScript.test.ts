@@ -2021,6 +2021,9 @@ jobs:
             expect(lines.join('\n')).toContain('automationLevel=requires-active-file');
             expect(lines.join('\n')).toContain('provider.profile.export');
             expect(lines.join('\n')).toContain('cli.invocation-contract.export');
+            expect(lines.join('\n')).toContain('Runtime-isolation precondition map (Stage-B2)');
+            expect(lines.join('\n')).toContain('file.process-folder-add-links');
+            expect(lines.join('\n')).toContain('Stage-C runtime-boundary implementation');
         });
 
         test('supports mixed-quote operation metadata literals in registry contract parsing', () => {
@@ -2150,6 +2153,8 @@ jobs:
             expect(lines[0]).toContain('fallback reminder');
             expect(lines.join('\n')).toContain('Resolve operation contract metadata');
             expect(lines.join('\n')).toContain('workflow.extract-and-generate');
+            expect(lines.join('\n')).toContain('Runtime-isolation precondition map (Stage-B2)');
+            expect(lines.join('\n')).toContain('provider.profile.import');
         });
 
         test('uses default fallback IDs for wildcard selectors when registry file is missing', () => {

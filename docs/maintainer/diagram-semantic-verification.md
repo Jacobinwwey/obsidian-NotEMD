@@ -19,6 +19,7 @@ Its packaging-contract section tracks release-asset, release-tag, publish-mode, 
 That same packaging-contract section now also emits an explicit `outfile -> outdir` transition-contract reminder, anchored to current `esbuild.config.mjs` output-target truth, so `main.js` release-asset ownership must stay explicit (with tests/docs updates) before any output-shape migration claim.
 Its contract-promotion-boundary section reads current operation metadata from `src/operations/registry.ts` for workflow/settings/selection/export/config-adjacent operations (including `editor.create-link-and-generate`, `file.process-*`, `concept.extract-*`, and export/import surfaces), so capability-promotion claims remain tied to actual `automationLevel` / `requiredContext` / `sideEffectClass` truth.
 The helper now resolves `file.process-*` and `concept.extract-*` as wildcard selectors against the current registry operation IDs, so newly added operations under those prefixes are included without manually editing the checklist script.
+The contract-promotion checklist now also emits a Stage-B2 runtime-isolation precondition map for workflow/settings/export-adjacent claims, making explicit which operation IDs must stay blocked from runtime-isolation promotion until Stage-C runtime-boundary implementation is actually landed and verified.
 
 ## 1. When This Runbook Is Required
 

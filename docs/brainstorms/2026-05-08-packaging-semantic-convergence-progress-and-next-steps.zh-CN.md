@@ -114,6 +114,8 @@ topic: packaging-semantic-convergence-progress-and-next-steps
    release 触发覆盖现在新增“单个 workflow 中同时混合 quoted key、sequence/object 条目、且 `push` flow 对象中的多行 `tags` 数组以 `],` 闭合”的回归锁定，同时继续忽略嵌套非事件 trigger-like 键。
 34. **release packaging-contract 清单现在编码了显式 `outfile -> outdir` 迁移就绪真值**
    semantic helper 的 release-contract 检查现在会把 `outfile -> outdir` 迁移契约锚定到 `esbuild.config.mjs` 的当前输出事实，并要求在声明迁移就绪前显式保留 `main.js` release 资产归属及同批 release-helper tests/docs 更新约束。
+35. **contract-promotion 清单现在编码了 Stage-B2 runtime-isolation 前置条件映射**
+   semantic helper 的 contract-promotion 检查现在会输出 workflow/settings/export 邻近 operation ID 的 Stage-B2 前置条件映射，使这些 runtime-isolation 提升声明在 Stage-C runtime-boundary 真正落地并完成核验前保持阻断。
 
 ### 尚未进入实现层的边界
 

@@ -45,6 +45,7 @@ Release trigger/tag-guard parsing now tolerates mixed tag quote styles in workfl
 Treat the helper's packaging-boundary and packaging-contract sections as required truth maintenance for renderer-affecting changes: `npm run audit:render-host` does not prove true heavy-runtime isolation; it only proves the current self-contained `main.js` + inline `srcdoc` host contract.
 The packaging-contract section now also records numeric tag policy, create/upload mode behavior, and tag-only trigger guardrails; treat those as part of the same release-truth contract rather than informal release habits.
 The packaging-contract section also now records an explicit `outfile -> outdir` transition contract anchored to current build output truth, and requires `main.js` release-asset ownership plus release-helper tests/docs updates to remain explicit before claiming output-shape migration readiness.
+The contract-promotion section now also carries a Stage-B2 runtime-isolation precondition map for workflow/settings/export-adjacent operation IDs, so release-facing summaries do not overstate runtime-isolation readiness before Stage-C runtime-boundary implementation is landed and verified.
 
 ## 3. Version Synchronization
 

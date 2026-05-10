@@ -242,6 +242,7 @@ This implementation plan is no longer purely forward-looking. The planned batch 
 - Stage-B multiline flow-style `push.tags` continuation parsing now also normalizes closure-line field-delimiter commas (for example `],` inside `push: { ... }`), preventing compact flow-object formatting from masking numeric-tag detection or v-prefixed wildcard guard behavior.
 - Stage-B mixed quoted-key sequence/object hybrid regression coverage now also locks multiline `push` flow-object `tags` arrays whose closure line carries `],`, while preserving nested non-event noise guards.
 - Stage-B release packaging-contract checks now also encode explicit `outfile -> outdir` transition readiness truth: checklist output is anchored to current `esbuild.config.mjs` output-target facts and now requires explicit `main.js` release-asset ownership plus same-batch release-helper test/docs updates before migration-readiness claims.
+- Stage-B contract-promotion checks now also encode a Stage-B2 runtime-isolation precondition map for workflow/settings/export-adjacent operation IDs, keeping runtime-isolation promotion claims blocked until Stage-C runtime-boundary implementation is actually landed and verified.
 
 The remaining work after this plan is therefore not “finish creating the runbook” or “finish the first packaging clarification.” Those pieces now exist. The remaining work is to preserve that checked-in truth while deciding whether the next real implementation step is heavy-runtime packaging isolation or a later contract-promotion slice.
 
