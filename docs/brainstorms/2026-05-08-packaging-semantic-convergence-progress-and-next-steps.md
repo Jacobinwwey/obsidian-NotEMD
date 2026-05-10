@@ -100,6 +100,8 @@ Goals:
    When release workflow parsing falls back, checklist wording now keeps trigger expectations explicit (expected `tag push (*.*.*) + workflow_dispatch` and expected numeric-tag guard) instead of only reporting an incomplete inspection.
 27. **Mixed quoted-key sequence/object hybrid trigger declarations are now regression-locked**
    Release trigger coverage now includes single-workflow hybrid declarations that combine quoted keys, sequence mapping entries, inline object entries, and nested non-event noise, ensuring only top-level trigger facts are promoted.
+28. **`on:` key-line trailing comments no longer suppress block trigger parsing**
+   Release trigger checks now treat comment-only `on:` values (for example `on: # ...`) as block declarations, so both top-level mappings and sequence-style trigger declarations still resolve `push.tags` and `workflow_dispatch` from subsequent lines.
 
 ### Still open beyond convergence hardening
 

@@ -496,8 +496,17 @@ function getLeadingWhitespaceWidth(line) {
     return width;
 }
 
+function normalizeYamlLineValue(rawValue) {
+    const trimmedValue = rawValue.trim();
+    if (!trimmedValue || trimmedValue.startsWith('#')) {
+        return '';
+    }
+
+    return trimmedValue.replace(/\s+#.*$/, '').trim();
+}
+
 function normalizeWorkflowTagPattern(rawValue) {
-    const withoutComment = rawValue.replace(/\s+#.*$/, '').trim();
+    const withoutComment = normalizeYamlLineValue(rawValue);
     if (!withoutComment) {
         return '';
     }
@@ -836,7 +845,7 @@ function extractInlineObjectFieldValue(sourceValue, fieldName) {
 }
 
 function resolveInlineOnTriggerConfig(onValue) {
-    const normalizedValue = onValue.replace(/\s+#.*$/, '').trim();
+    const normalizedValue = normalizeYamlLineValue(onValue);
     if (!normalizedValue) {
         return {
             hasWorkflowDispatch: false,
@@ -926,7 +935,7 @@ function resolveWorkflowOnTriggerConfig(workflowSource) {
             const onMatch = matchYamlKeyValueLine(line, 'on');
             if (onMatch) {
                 const inlineOnValue = onMatch[1].trim();
-                const normalizedInlineOnValue = inlineOnValue.replace(/\s+#.*$/, '').trim();
+                const normalizedInlineOnValue = normalizeYamlLineValue(inlineOnValue);
                 if (!normalizedInlineOnValue) {
                     inOnBlock = true;
                     onIndent = indent;
@@ -970,7 +979,7 @@ function resolveWorkflowOnTriggerConfig(workflowSource) {
             const onMatch = matchYamlKeyValueLine(line, 'on');
             if (onMatch) {
                 const inlineOnValue = onMatch[1].trim();
-                const normalizedInlineOnValue = inlineOnValue.replace(/\s+#.*$/, '').trim();
+                const normalizedInlineOnValue = normalizeYamlLineValue(inlineOnValue);
                 if (!normalizedInlineOnValue) {
                     inOnBlock = true;
                     onIndent = indent;
@@ -1047,9 +1056,7 @@ function resolveWorkflowOnTriggerConfig(workflowSource) {
                 const tagsMatch = matchYamlKeyValueLine(line, 'tags');
                 if (tagsMatch && indent === pushTopLevelKeyIndent) {
                     const tagsValue = tagsMatch[1].trim();
-                    const normalizedTagsValue = tagsValue.startsWith('#')
-                        ? ''
-                        : tagsValue.replace(/\s+#.*$/, '').trim();
+                    const normalizedTagsValue = normalizeYamlLineValue(tagsValue);
                     if (!normalizedTagsValue) {
                         inPushTagsBlock = true;
                         pushTagsIndent = indent;
