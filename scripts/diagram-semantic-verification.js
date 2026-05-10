@@ -512,6 +512,17 @@ function resolveReleasePackagingContractFacts({
             ? releaseHelper.OBSIDIAN_RELEASE_TAG_PATTERN.source
             : fallbackTagPattern;
         const supportsReleaseModeSwitch = typeof releaseHelper.buildGhReleaseCommand === 'function';
+        let supportsMainJsOwnershipGuard = false;
+
+        if (typeof releaseHelper.validateRequiredReleaseAssets === 'function') {
+            try {
+                releaseHelper.validateRequiredReleaseAssets(['manifest.json']);
+            } catch (error) {
+                const errorMessage = error instanceof Error ? error.message : String(error);
+                supportsMainJsOwnershipGuard = errorMessage.includes('main.js')
+                    && errorMessage.includes('block `outfile -> outdir` migration promotion');
+            }
+        }
 
         if (requiredAssets.length > 0) {
             return {
@@ -519,6 +530,7 @@ function resolveReleasePackagingContractFacts({
                 requiredAssets,
                 releaseTagPattern: tagPattern,
                 supportsReleaseModeSwitch,
+                supportsMainJsOwnershipGuard,
                 resolvedFromReleaseHelper: true
             };
         }
@@ -531,6 +543,7 @@ function resolveReleasePackagingContractFacts({
         requiredAssets: [...DEFAULT_REQUIRED_RELEASE_ASSETS],
         releaseTagPattern: fallbackTagPattern,
         supportsReleaseModeSwitch: false,
+        supportsMainJsOwnershipGuard: false,
         resolvedFromReleaseHelper: false
     };
 }
@@ -1478,10 +1491,14 @@ function buildReleasePackagingContractChecklistLines(
     const releaseOwnershipGuardLine = hasMainJsReleaseOwnership
         ? '- [ ] Confirm `main.js` remains explicitly required in release assets until any replacement ownership contract is fully ratified.'
         : '- [ ] `main.js` is not currently listed in required release assets; block `outfile -> outdir` migration promotion until explicit replacement release-asset ownership contract + tests/docs updates are landed together.';
+    const runtimeOwnershipGuardLine = releaseFacts.supportsMainJsOwnershipGuard
+        ? '- [ ] Confirm release-helper runtime ownership guard is active (`validateRequiredReleaseAssets`) and fails when required assets omit `main.js`.'
+        : '- [ ] runtime guard inspection incomplete: expected release-helper runtime ownership guard (`validateRequiredReleaseAssets`) to block missing `main.js` asset ownership.';
 
     return [
         `- [ ] Confirm release asset contract remains ${sourceDescriptor}: ${requiredAssets}.`,
         releaseOwnershipGuardLine,
+        runtimeOwnershipGuardLine,
         `- [ ] Confirm release tag contract remains numeric-only: \`/${releaseTagPattern}/\` (no \`v\` prefix).`,
         `- [ ] Confirm release publish mode contract remains ${releaseModeDescriptor}: create path composes bilingual notes, existing-release path uploads assets with \`--clobber\`.`,
         `- [ ] Confirm release workflow trigger contract remains ${workflowDescriptor}: ${triggerDescriptor}.`,

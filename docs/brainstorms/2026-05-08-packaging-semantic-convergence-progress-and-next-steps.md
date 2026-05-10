@@ -280,3 +280,4 @@ The follow-up Stage-B2 guardrail slice is also landed:
 2. implementation-readiness checklist now mirrors the same block condition until replacement ownership contracts/tests/workflow checks/docs land together.
 3. regression tests now lock both paths so release-helper asset-list drift cannot silently weaken migration gating.
 4. release-helper runtime contract now includes `validateRequiredReleaseAssets()` and fails fast when required assets omit `main.js`, with dedicated coverage in `src/tests/githubReleaseWorkflow.test.ts`.
+5. semantic-helper release contract checks now also verify whether that runtime ownership guard is actually active, and emit explicit “runtime guard inspection incomplete” wording when it cannot be confirmed.

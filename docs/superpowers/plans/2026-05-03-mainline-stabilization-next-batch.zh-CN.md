@@ -305,3 +305,4 @@ npm run audit:render-host
 2. implementation-readiness 清单同步镜像该阻断条件，直到替代资产归属契约/测试/workflow 检查/文档同批落地
 3. 回归测试已锁定上述双重 guardrail，避免 release-helper 资产列表漂移静默削弱迁移 gate
 4. release-helper 运行时强制约束现已新增 `validateRequiredReleaseAssets()`，在 required assets 丢失 `main.js` 时会快速失败，并由 `src/tests/githubReleaseWorkflow.test.ts` 专项覆盖
+5. semantic-helper 的 release-contract 检查现在会验证运行时归属 guard 是否生效，无法确认时会输出显式的 incomplete-inspection 阻断提示

@@ -73,6 +73,7 @@ describe('diagram semantic verification helper', () => {
             requiredAssets: string[];
             releaseTagPattern: string;
             supportsReleaseModeSwitch: boolean;
+            supportsMainJsOwnershipGuard?: boolean;
             resolvedFromReleaseHelper: boolean;
         };
         let buildReleasePackagingContractChecklistLines: (releaseFacts?: {
@@ -80,6 +81,7 @@ describe('diagram semantic verification helper', () => {
             requiredAssets: string[];
             releaseTagPattern: string;
             supportsReleaseModeSwitch: boolean;
+            supportsMainJsOwnershipGuard?: boolean;
             resolvedFromReleaseHelper: boolean;
         }, workflowFacts?: {
             sourcePath: string;
@@ -161,6 +163,7 @@ describe('diagram semantic verification helper', () => {
                 requiredAssets: string[];
                 releaseTagPattern: string;
                 supportsReleaseModeSwitch: boolean;
+                supportsMainJsOwnershipGuard?: boolean;
                 resolvedFromReleaseHelper: boolean;
             };
         }) => string;
@@ -494,6 +497,7 @@ const context = await esbuild.context({
             expect(facts.requiredAssets).toEqual(REQUIRED_RELEASE_ASSETS);
             expect(facts.releaseTagPattern).toBe('^\\d+\\.\\d+\\.\\d+$');
             expect(facts.supportsReleaseModeSwitch).toBe(true);
+            expect(facts.supportsMainJsOwnershipGuard).toBe(true);
             expect(facts.resolvedFromReleaseHelper).toBe(true);
             expect(workflowFacts.hasWorkflowDispatch).toBe(true);
             expect(workflowFacts.hasTagPushTrigger).toBe(true);
@@ -508,6 +512,7 @@ const context = await esbuild.context({
             expect(lines.some((line) => line.includes('/^\\d+\\.\\d+\\.\\d+$/'))).toBe(true);
             expect(lines.some((line) => line.includes('create path composes bilingual notes'))).toBe(true);
             expect(lines.some((line) => line.includes('`--clobber`'))).toBe(true);
+            expect(lines.some((line) => line.includes('release-helper runtime ownership guard'))).toBe(true);
             expect(lines.some((line) => line.includes('tag push (`*.*.*`) + `workflow_dispatch`'))).toBe(true);
             expect(lines.some((line) => line.includes('numeric-tag regex guard present'))).toBe(true);
             expect(lines.some((line) => line.includes('docs/releases/<tag>.md'))).toBe(true);
@@ -527,6 +532,7 @@ const context = await esbuild.context({
             expect(facts.requiredAssets).toEqual(['main.js', 'manifest.json', 'styles.css', 'README.md']);
             expect(facts.releaseTagPattern).toBe('^\\d+\\.\\d+\\.\\d+$');
             expect(facts.supportsReleaseModeSwitch).toBe(false);
+            expect(facts.supportsMainJsOwnershipGuard).toBe(false);
             expect(facts.resolvedFromReleaseHelper).toBe(false);
             expect(workflowFacts.hasWorkflowDispatch).toBe(false);
             expect(workflowFacts.hasTagPushTrigger).toBe(false);
@@ -538,6 +544,7 @@ const context = await esbuild.context({
             expect(lines[0]).toContain('fallback default');
             expect(lines[0]).toContain('missing-release-helper.js');
             expect(lines.some((line) => line.includes('fallback reminder'))).toBe(true);
+            expect(lines.some((line) => line.includes('runtime guard inspection incomplete'))).toBe(true);
             expect(lines.some((line) => line.includes('trigger inspection incomplete'))).toBe(true);
             expect(lines.some((line) => line.includes('expected tag push'))).toBe(true);
             expect(lines.some((line) => line.includes('workflow_dispatch'))).toBe(true);
