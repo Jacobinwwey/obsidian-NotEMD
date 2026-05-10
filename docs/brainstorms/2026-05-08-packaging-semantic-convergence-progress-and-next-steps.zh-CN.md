@@ -104,6 +104,8 @@ topic: packaging-semantic-convergence-progress-and-next-steps
    release 触发检查现在会将仅注释的 `on:` 值（例如 `on: # ...`）视为块声明，因此无论后续是顶层映射还是序列触发声明，都能继续解析 `push.tags` 与 `workflow_dispatch`。
 29. **多行 flow-style `on` 数组现在可跨续行解析**
    release 触发检查现在会收集多行 flow-style `on` 数组声明（包括数组对象项）直到集合闭合，从而在紧凑多行数组格式下继续稳定解析顶层 `workflow_dispatch` 与 `push.tags` 触发事实。
+30. **`push.tags` 多行 flow-style 数组现在可跨续行解析**
+   release 触发检查现在会收集多行 flow-style `push.tags` 数组（覆盖顶层与序列 `push` 映射）直到集合闭合，在紧凑多行 flow 格式下继续稳定保持 numeric-tag 触发识别与 v 前缀守卫语义。
 
 ### 尚未进入实现层的边界
 

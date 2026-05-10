@@ -988,6 +988,8 @@ function resolveWorkflowOnTriggerConfig(workflowSource) {
     let pushTagsDirectListEligible = true;
     let inOnInlineFlowContinuation = false;
     let onInlineFlowValue = '';
+    let inPushTagsInlineFlowContinuation = false;
+    let pushTagsInlineFlowValue = '';
 
     for (const line of lines) {
         const trimmed = line.trim();
@@ -1014,6 +1016,22 @@ function resolveWorkflowOnTriggerConfig(workflowSource) {
             continue;
         }
 
+        if (inPushTagsInlineFlowContinuation) {
+            const normalizedContinuationValue = normalizeYamlLineValue(line);
+            if (normalizedContinuationValue) {
+                pushTagsInlineFlowValue = pushTagsInlineFlowValue
+                    ? `${pushTagsInlineFlowValue} ${normalizedContinuationValue}`
+                    : normalizedContinuationValue;
+            }
+
+            if (isInlineFlowCollectionComplete(pushTagsInlineFlowValue)) {
+                workflowTagPatterns.push(...parseInlineWorkflowTagPatterns(pushTagsInlineFlowValue));
+                inPushTagsInlineFlowContinuation = false;
+                pushTagsInlineFlowValue = '';
+            }
+            continue;
+        }
+
         if (!inOnBlock) {
             const onMatch = matchYamlKeyValueLine(line, 'on');
             if (onMatch) {
@@ -1029,6 +1047,8 @@ function resolveWorkflowOnTriggerConfig(workflowSource) {
                     inPushTagsBlock = false;
                     pushTagsItemIndent = -1;
                     pushTagsDirectListEligible = true;
+                    inPushTagsInlineFlowContinuation = false;
+                    pushTagsInlineFlowValue = '';
                 } else if (
                     (normalizedInlineOnValue.startsWith('[') || normalizedInlineOnValue.startsWith('{'))
                     && !isInlineFlowCollectionComplete(normalizedInlineOnValue)
@@ -1063,6 +1083,8 @@ function resolveWorkflowOnTriggerConfig(workflowSource) {
             inPushTagsBlock = false;
             pushTagsItemIndent = -1;
             pushTagsDirectListEligible = true;
+            inPushTagsInlineFlowContinuation = false;
+            pushTagsInlineFlowValue = '';
             onSequenceIndent = -1;
             onMappingIndent = -1;
             const onMatch = matchYamlKeyValueLine(line, 'on');
@@ -1143,6 +1165,8 @@ function resolveWorkflowOnTriggerConfig(workflowSource) {
             if (isMeaningfulLine && indent <= pushIndent) {
                 inPushBlock = false;
                 pushTopLevelKeyIndent = -1;
+                inPushTagsInlineFlowContinuation = false;
+                pushTagsInlineFlowValue = '';
             } else {
                 if (isMeaningfulLine && pushTopLevelKeyIndent < 0) {
                     pushTopLevelKeyIndent = indent;
@@ -1157,6 +1181,14 @@ function resolveWorkflowOnTriggerConfig(workflowSource) {
                         pushTagsIndent = indent;
                         pushTagsItemIndent = -1;
                         pushTagsDirectListEligible = true;
+                        inPushTagsInlineFlowContinuation = false;
+                        pushTagsInlineFlowValue = '';
+                    } else if (
+                        normalizedTagsValue.startsWith('[')
+                        && !isInlineFlowCollectionComplete(normalizedTagsValue)
+                    ) {
+                        inPushTagsInlineFlowContinuation = true;
+                        pushTagsInlineFlowValue = normalizedTagsValue;
                     } else {
                         workflowTagPatterns.push(...parseInlineWorkflowTagPatterns(normalizedTagsValue));
                     }

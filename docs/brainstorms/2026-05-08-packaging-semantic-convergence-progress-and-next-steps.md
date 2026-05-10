@@ -104,6 +104,8 @@ Goals:
    Release trigger checks now treat comment-only `on:` values (for example `on: # ...`) as block declarations, so both top-level mappings and sequence-style trigger declarations still resolve `push.tags` and `workflow_dispatch` from subsequent lines.
 29. **Multiline flow-style `on` arrays are now parsed across continuation lines**
    Release trigger checks now collect multiline flow-style `on` array declarations (including array object items) until collection closure, so compact multiline array formatting still resolves top-level `workflow_dispatch` and `push.tags` trigger facts.
+30. **`push.tags` multiline flow-style arrays are now parsed across continuation lines**
+   Release trigger checks now collect multiline flow-style `push.tags` arrays (for both top-level and sequence `push` mappings) until collection closure, preserving numeric-tag trigger detection and v-prefixed guard semantics under compact multiline flow formatting.
 
 ### Still open beyond convergence hardening
 

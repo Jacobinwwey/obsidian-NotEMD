@@ -1105,6 +1105,68 @@ jobs:
             }
         });
 
+        test('parses top-level push tags multiline flow-style array syntax for release trigger facts', () => {
+            const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-release-workflow-top-level-push-tags-flow-array-'));
+            const workflowPath = path.join(tempRoot, 'release.yml');
+            fs.writeFileSync(
+                workflowPath,
+                `on:
+  push:
+    tags: [
+      "*.*.*"
+    ]
+  workflow_dispatch:
+jobs:
+  publish:
+    steps:
+      - run: echo ready
+`,
+                'utf8'
+            );
+
+            try {
+                const workflowFacts = resolveReleaseWorkflowTriggerFacts({ releaseWorkflowPath: workflowPath });
+                expect(workflowFacts.hasWorkflowDispatch).toBe(true);
+                expect(workflowFacts.hasTagPushTrigger).toBe(true);
+                expect(workflowFacts.rejectsVPrefixedTagTrigger).toBe(true);
+                expect(workflowFacts.validatesNumericTagPattern).toBe(false);
+                expect(workflowFacts.resolvedFromWorkflowFile).toBe(true);
+            } finally {
+                fs.rmSync(tempRoot, { recursive: true, force: true });
+            }
+        });
+
+        test('flags v-prefixed top-level push tags multiline flow-style array syntax as release trigger guard violation', () => {
+            const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-release-workflow-top-level-push-tags-flow-array-v-prefix-'));
+            const workflowPath = path.join(tempRoot, 'release.yml');
+            fs.writeFileSync(
+                workflowPath,
+                `on:
+  push:
+    tags: [
+      "v*.*.*"
+    ]
+  workflow_dispatch:
+jobs:
+  publish:
+    steps:
+      - run: echo ready
+`,
+                'utf8'
+            );
+
+            try {
+                const workflowFacts = resolveReleaseWorkflowTriggerFacts({ releaseWorkflowPath: workflowPath });
+                expect(workflowFacts.hasWorkflowDispatch).toBe(true);
+                expect(workflowFacts.hasTagPushTrigger).toBe(false);
+                expect(workflowFacts.rejectsVPrefixedTagTrigger).toBe(false);
+                expect(workflowFacts.validatesNumericTagPattern).toBe(false);
+                expect(workflowFacts.resolvedFromWorkflowFile).toBe(true);
+            } finally {
+                fs.rmSync(tempRoot, { recursive: true, force: true });
+            }
+        });
+
         test('parses on-sequence push mapping tags list when tags key line has trailing comment', () => {
             const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-release-workflow-sequence-push-tags-comment-'));
             const workflowPath = path.join(tempRoot, 'release.yml');
@@ -1114,6 +1176,37 @@ jobs:
   - push:
       tags: # keep release tags readable
         - "*.*.*"
+  - workflow_dispatch
+jobs:
+  publish:
+    steps:
+      - run: echo ready
+`,
+                'utf8'
+            );
+
+            try {
+                const workflowFacts = resolveReleaseWorkflowTriggerFacts({ releaseWorkflowPath: workflowPath });
+                expect(workflowFacts.hasWorkflowDispatch).toBe(true);
+                expect(workflowFacts.hasTagPushTrigger).toBe(true);
+                expect(workflowFacts.rejectsVPrefixedTagTrigger).toBe(true);
+                expect(workflowFacts.validatesNumericTagPattern).toBe(false);
+                expect(workflowFacts.resolvedFromWorkflowFile).toBe(true);
+            } finally {
+                fs.rmSync(tempRoot, { recursive: true, force: true });
+            }
+        });
+
+        test('parses on-sequence push mapping tags multiline flow-style array syntax for release trigger facts', () => {
+            const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-release-workflow-sequence-push-tags-flow-array-'));
+            const workflowPath = path.join(tempRoot, 'release.yml');
+            fs.writeFileSync(
+                workflowPath,
+                `on:
+  - push:
+      tags: [
+        "*.*.*"
+      ]
   - workflow_dispatch
 jobs:
   publish:
