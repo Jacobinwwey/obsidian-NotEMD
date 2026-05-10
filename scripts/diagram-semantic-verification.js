@@ -715,6 +715,89 @@ function parseInlineObjectTopLevelFields(sourceValue) {
     });
 }
 
+function parseInlineArrayTopLevelItems(sourceValue) {
+    const normalizedSource = sourceValue.replace(/\s+#.*$/, '').trim();
+    if (!normalizedSource.startsWith('[') || !normalizedSource.endsWith(']')) {
+        return [];
+    }
+
+    const innerSource = normalizedSource.slice(1, -1);
+    const itemTokens = [];
+    let tokenStart = 0;
+    let braceDepth = 0;
+    let bracketDepth = 0;
+    let parenDepth = 0;
+    let activeQuote = '';
+
+    for (let cursor = 0; cursor < innerSource.length; cursor += 1) {
+        const char = innerSource[cursor];
+        const previousChar = cursor > 0 ? innerSource[cursor - 1] : '';
+
+        if (activeQuote) {
+            if (char === activeQuote && previousChar !== '\\') {
+                activeQuote = '';
+            }
+            continue;
+        }
+
+        if (char === '"' || char === '\'' || char === '`') {
+            activeQuote = char;
+            continue;
+        }
+
+        if (char === '{') {
+            braceDepth += 1;
+            continue;
+        }
+
+        if (char === '}') {
+            if (braceDepth > 0) {
+                braceDepth -= 1;
+            }
+            continue;
+        }
+
+        if (char === '[') {
+            bracketDepth += 1;
+            continue;
+        }
+
+        if (char === ']') {
+            if (bracketDepth > 0) {
+                bracketDepth -= 1;
+            }
+            continue;
+        }
+
+        if (char === '(') {
+            parenDepth += 1;
+            continue;
+        }
+
+        if (char === ')') {
+            if (parenDepth > 0) {
+                parenDepth -= 1;
+            }
+            continue;
+        }
+
+        if (char === ',' && braceDepth === 0 && bracketDepth === 0 && parenDepth === 0) {
+            const itemToken = innerSource.slice(tokenStart, cursor).trim();
+            if (itemToken) {
+                itemTokens.push(itemToken);
+            }
+            tokenStart = cursor + 1;
+        }
+    }
+
+    const trailingItemToken = innerSource.slice(tokenStart).trim();
+    if (trailingItemToken) {
+        itemTokens.push(trailingItemToken);
+    }
+
+    return itemTokens;
+}
+
 function hasInlineYamlKey(sourceValue, keyName) {
     const topLevelFields = parseInlineObjectTopLevelFields(sourceValue);
     return topLevelFields.some((field) => field.key === keyName);
@@ -771,6 +854,40 @@ function resolveInlineOnTriggerConfig(onValue) {
     }
 
     if (normalizedValue.startsWith('[') && normalizedValue.endsWith(']')) {
+        const eventItems = parseInlineArrayTopLevelItems(normalizedValue);
+        if (eventItems.length > 0) {
+            let hasWorkflowDispatch = false;
+            const workflowTagPatterns = [];
+
+            for (const eventItem of eventItems) {
+                const normalizedEventItem = eventItem.trim();
+                if (!normalizedEventItem) {
+                    continue;
+                }
+
+                if (
+                    (normalizedEventItem.startsWith('{') && normalizedEventItem.endsWith('}'))
+                    || (normalizedEventItem.startsWith('[') && normalizedEventItem.endsWith(']'))
+                ) {
+                    const nestedInlineOnConfig = resolveInlineOnTriggerConfig(normalizedEventItem);
+                    if (nestedInlineOnConfig.hasWorkflowDispatch) {
+                        hasWorkflowDispatch = true;
+                    }
+                    workflowTagPatterns.push(...nestedInlineOnConfig.workflowTagPatterns);
+                    continue;
+                }
+
+                if (normalizeWorkflowTagPattern(normalizedEventItem) === 'workflow_dispatch') {
+                    hasWorkflowDispatch = true;
+                }
+            }
+
+            return {
+                hasWorkflowDispatch,
+                workflowTagPatterns
+            };
+        }
+
         const events = parseInlineWorkflowTagPatterns(normalizedValue);
         return {
             hasWorkflowDispatch: events.includes('workflow_dispatch'),

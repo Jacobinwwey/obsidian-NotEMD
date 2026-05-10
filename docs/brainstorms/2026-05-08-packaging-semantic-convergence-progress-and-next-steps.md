@@ -88,6 +88,8 @@ Goals:
    Multiline `push.tags` parsing now only trusts direct-list item shapes, preventing nested structures such as `push.tags.include` lists from being misinterpreted as release-tag triggers.
 21. **On-sequence inline-object event mappings are now parsed**
    Release trigger checks now also parse `on` sequence inline-object forms (for example `- { push: { tags: [...] }, workflow_dispatch: {} }`) while still rejecting nested non-event keys inside those inline objects.
+22. **Inline on-array object event items are now parsed**
+   Release trigger checks now also parse inline `on` array object items (for example `on: [{ push: { tags: [...] } }, { workflow_dispatch: {} }]`) while still rejecting nested non-event keys inside those object items.
 
 ### Still open beyond convergence hardening
 

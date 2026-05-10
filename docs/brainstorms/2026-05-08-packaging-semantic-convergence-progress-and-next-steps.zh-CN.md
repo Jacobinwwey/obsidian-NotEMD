@@ -88,6 +88,8 @@ topic: packaging-semantic-convergence-progress-and-next-steps
    多行 `push.tags` 解析现在只信任直接列表项形态，避免把 `push.tags.include` 这类嵌套结构中的列表误判为 release tag 触发条件。
 21. **`on` 序列内联对象事件映射写法已纳入解析**
    release 触发检查现在也可解析 `on` 序列中的内联对象写法（例如 `- { push: { tags: [...] }, workflow_dispatch: {} }`），同时继续忽略这类内联对象中嵌套的非事件键。
+22. **内联 on 数组对象事件项已纳入解析**
+   release 触发检查现在也可解析内联 `on` 数组中的对象项（例如 `on: [{ push: { tags: [...] } }, { workflow_dispatch: {} }]`），同时继续忽略这类对象项中的嵌套非事件键。
 
 ### 尚未进入实现层的边界
 
