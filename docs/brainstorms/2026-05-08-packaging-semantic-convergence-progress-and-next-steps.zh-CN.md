@@ -108,6 +108,8 @@ topic: packaging-semantic-convergence-progress-and-next-steps
    release 触发检查现在会收集多行 flow-style `push.tags` 数组（覆盖顶层与序列 `push` 映射）直到集合闭合，在紧凑多行 flow 格式下继续稳定保持 numeric-tag 触发识别与 v 前缀守卫语义。
 31. **逗号分隔的多行 flow-style `push` 对象字段不再掩盖 tag 触发事实**
    release 触发检查现在会归一化携带 flow 对象字段分隔符的 `tags` 值（例如 `tags: ["*.*.*"],`），从而在顶层与序列 `push` flow 对象中同时保持 numeric-tag 检测与 v 前缀守卫行为稳定。
+32. **`push.tags` 多行 flow-style 数组在 `],` 闭合行下不再丢失 tag 触发事实**
+   release 触发检查现在会在续行收集完成后归一化 `push.tags` flow 数组值（当闭合行带有字段分隔逗号，例如 `push: { ... }` 内的 `],`），从而继续保持 numeric-tag 检测与 v 前缀守卫行为稳定。
 
 ### 尚未进入实现层的边界
 

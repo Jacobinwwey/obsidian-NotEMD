@@ -108,6 +108,8 @@ Goals:
    Release trigger checks now collect multiline flow-style `push.tags` arrays (for both top-level and sequence `push` mappings) until collection closure, preserving numeric-tag trigger detection and v-prefixed guard semantics under compact multiline flow formatting.
 31. **Comma-separated multiline flow-style `push` object fields no longer mask tag trigger facts**
    Release trigger checks now normalize `tags` field values that carry flow-object field delimiters (for example `tags: ["*.*.*"],`), preserving both numeric-tag detection and v-prefixed guard behavior for top-level and sequence `push` flow objects.
+32. **Multiline flow-style `push.tags` closure lines with `],` no longer mask tag trigger facts**
+   Release trigger checks now normalize continuation-collected `push.tags` flow-array values when the closing line carries a field-delimiter comma (for example `],` inside `push: { ... }`), preserving numeric-tag detection and v-prefixed guard behavior.
 
 ### Still open beyond convergence hardening
 

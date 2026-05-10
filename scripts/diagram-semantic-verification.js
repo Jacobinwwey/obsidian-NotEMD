@@ -1025,7 +1025,8 @@ function resolveWorkflowOnTriggerConfig(workflowSource) {
             }
 
             if (isInlineFlowCollectionComplete(pushTagsInlineFlowValue)) {
-                workflowTagPatterns.push(...parseInlineWorkflowTagPatterns(pushTagsInlineFlowValue));
+                const normalizedPushTagsInlineFlowValue = pushTagsInlineFlowValue.replace(/,\s*$/, '').trim();
+                workflowTagPatterns.push(...parseInlineWorkflowTagPatterns(normalizedPushTagsInlineFlowValue));
                 inPushTagsInlineFlowContinuation = false;
                 pushTagsInlineFlowValue = '';
             }
