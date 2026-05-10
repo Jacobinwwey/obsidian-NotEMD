@@ -1471,12 +1471,17 @@ function buildReleasePackagingContractChecklistLines(
     const packagingSourceDescriptor = packagingFacts.resolvedFromConfig
         ? `derived from \`${packagingConfigPath}\``
         : `fallback reminder because \`${packagingConfigPath}\` could not be parsed`;
-    const releaseOwnershipDescriptor = releaseFacts.requiredAssets.includes('main.js')
+    const hasMainJsReleaseOwnership = releaseFacts.requiredAssets.includes('main.js');
+    const releaseOwnershipDescriptor = hasMainJsReleaseOwnership
         ? '`main.js` release-asset ownership'
         : 'required release-asset ownership';
+    const releaseOwnershipGuardLine = hasMainJsReleaseOwnership
+        ? '- [ ] Confirm `main.js` remains explicitly required in release assets until any replacement ownership contract is fully ratified.'
+        : '- [ ] `main.js` is not currently listed in required release assets; block `outfile -> outdir` migration promotion until explicit replacement release-asset ownership contract + tests/docs updates are landed together.';
 
     return [
         `- [ ] Confirm release asset contract remains ${sourceDescriptor}: ${requiredAssets}.`,
+        releaseOwnershipGuardLine,
         `- [ ] Confirm release tag contract remains numeric-only: \`/${releaseTagPattern}/\` (no \`v\` prefix).`,
         `- [ ] Confirm release publish mode contract remains ${releaseModeDescriptor}: create path composes bilingual notes, existing-release path uploads assets with \`--clobber\`.`,
         `- [ ] Confirm release workflow trigger contract remains ${workflowDescriptor}: ${triggerDescriptor}.`,
@@ -1512,6 +1517,9 @@ function buildImplementationReadinessContractChecklistLines(
     const releaseOwnershipDescriptor = releaseFacts.requiredAssets.includes('main.js')
         ? '`main.js` release-asset ownership remains explicit today'
         : 'current release-asset ownership requirements remain explicit today';
+    const migrationContractLine = releaseFacts.requiredAssets.includes('main.js')
+        ? `- [ ] If an \`outfile -> outdir\` migration candidate is drafted, define the corresponding \`audit:render-host\` contract delta first, keep ${releaseOwnershipDescriptor}, and require same-batch release-helper tests + maintainer-doc updates.`
+        : '- [ ] `main.js` is not currently in required release assets; block `outfile -> outdir` migration promotion until release-helper asset-ownership contract updates, tests, workflow checks, and maintainer docs are landed together.';
     const candidateReadinessLine = outputTargetStatus === 'unknown' || outputTargetStatus === 'ambiguous'
         ? '- [ ] Multi-entry candidate contract is not implementation-ready yet: resolve current output-target ambiguity before proposing Stage-C runtime-boundary rollout.'
         : `- [ ] Multi-entry candidate contract remains pre-implementation only: current output target is \`${outputTargetStatus}\` (\`${outputDescriptor}\`), so do not claim runtime-boundary rollout readiness in this slice.`;
@@ -1520,7 +1528,7 @@ function buildImplementationReadinessContractChecklistLines(
         buildTruthLine,
         candidateReadinessLine,
         `- [ ] Document any proposed Stage-C dedicated-asset or multi-entry candidate contract against \`entryPoints/outfile/outdir\` fields in \`${configPath}\` before runtime changes are attempted.`,
-        `- [ ] If an \`outfile -> outdir\` migration candidate is drafted, define the corresponding \`audit:render-host\` contract delta first, keep ${releaseOwnershipDescriptor}, and require same-batch release-helper tests + maintainer-doc updates.`,
+        migrationContractLine,
         '- [ ] Candidate promotion toward Stage-C must be blocked until `npm run build`, full tests, and `npm run audit:render-host` still pass with no over-claim about finished heavy-runtime isolation.'
     ];
 }

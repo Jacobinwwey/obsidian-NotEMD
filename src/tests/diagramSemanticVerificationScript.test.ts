@@ -505,13 +505,14 @@ const context = await esbuild.context({
             for (const assetName of REQUIRED_RELEASE_ASSETS) {
                 expect(lines[0]).toContain(`\`${assetName}\``);
             }
-            expect(lines[1]).toContain('/^\\d+\\.\\d+\\.\\d+$/');
-            expect(lines[2]).toContain('create path composes bilingual notes');
-            expect(lines[2]).toContain('`--clobber`');
-            expect(lines[3]).toContain('tag push (`*.*.*`) + `workflow_dispatch`');
-            expect(lines[4]).toContain('numeric-tag regex guard present');
-            expect(lines[5]).toContain('docs/releases/<tag>.md');
-            expect(lines[5]).toContain('docs/releases/<tag>.zh-CN.md');
+            expect(lines.some((line) => line.includes('/^\\d+\\.\\d+\\.\\d+$/'))).toBe(true);
+            expect(lines.some((line) => line.includes('create path composes bilingual notes'))).toBe(true);
+            expect(lines.some((line) => line.includes('`--clobber`'))).toBe(true);
+            expect(lines.some((line) => line.includes('tag push (`*.*.*`) + `workflow_dispatch`'))).toBe(true);
+            expect(lines.some((line) => line.includes('numeric-tag regex guard present'))).toBe(true);
+            expect(lines.some((line) => line.includes('docs/releases/<tag>.md'))).toBe(true);
+            expect(lines.some((line) => line.includes('docs/releases/<tag>.zh-CN.md'))).toBe(true);
+            expect(lines.some((line) => line.includes('`main.js` remains explicitly required in release assets'))).toBe(true);
             expect(lines.some((line) => line.includes('`outfile -> outdir` transition contract'))).toBe(true);
             expect(lines.some((line) => line.includes('`main.js` release-asset ownership'))).toBe(true);
         });
@@ -536,14 +537,13 @@ const context = await esbuild.context({
             const lines = buildReleasePackagingContractChecklistLines(facts, workflowFacts);
             expect(lines[0]).toContain('fallback default');
             expect(lines[0]).toContain('missing-release-helper.js');
-            expect(lines[2]).toContain('fallback reminder');
-            expect(lines[3]).toContain('fallback reminder');
-            expect(lines[3]).toContain('trigger inspection incomplete');
-            expect(lines[3]).toContain('expected tag push');
-            expect(lines[3]).toContain('workflow_dispatch');
-            expect(lines[4]).toContain('tag-guard inspection incomplete');
-            expect(lines[4]).toContain('expected numeric-tag regex guard present');
-            expect(lines[4]).toContain('v-prefixed wildcard triggers absent');
+            expect(lines.some((line) => line.includes('fallback reminder'))).toBe(true);
+            expect(lines.some((line) => line.includes('trigger inspection incomplete'))).toBe(true);
+            expect(lines.some((line) => line.includes('expected tag push'))).toBe(true);
+            expect(lines.some((line) => line.includes('workflow_dispatch'))).toBe(true);
+            expect(lines.some((line) => line.includes('tag-guard inspection incomplete'))).toBe(true);
+            expect(lines.some((line) => line.includes('expected numeric-tag regex guard present'))).toBe(true);
+            expect(lines.some((line) => line.includes('v-prefixed wildcard triggers absent'))).toBe(true);
             expect(lines.some((line) => line.includes('`outfile -> outdir` transition contract'))).toBe(true);
             expect(lines.some((line) => line.includes('current build output'))).toBe(true);
         });
@@ -572,6 +572,37 @@ const context = await esbuild.context({
             expect(lines.some((line) => line.includes('`main.js` release-asset ownership'))).toBe(true);
         });
 
+        test('blocks outfile-to-outdir promotion wording when required release assets do not include main.js', () => {
+            const lines = buildReleasePackagingContractChecklistLines(
+                {
+                    sourcePath: path.join(repoRoot, 'scripts', 'release', 'publish-github-release.js'),
+                    requiredAssets: ['manifest.json', 'styles.css', 'README.md'],
+                    releaseTagPattern: '^\\d+\\.\\d+\\.\\d+$',
+                    supportsReleaseModeSwitch: true,
+                    resolvedFromReleaseHelper: true
+                },
+                {
+                    sourcePath: path.join(repoRoot, '.github', 'workflows', 'release.yml'),
+                    hasWorkflowDispatch: true,
+                    hasTagPushTrigger: true,
+                    rejectsVPrefixedTagTrigger: true,
+                    validatesNumericTagPattern: true,
+                    resolvedFromWorkflowFile: true
+                },
+                {
+                    sourcePath: path.join(repoRoot, 'esbuild.config.mjs'),
+                    entryPoints: ['src/main.ts'],
+                    outfile: '',
+                    outdir: 'dist',
+                    outputTargetStatus: 'outdir',
+                    resolvedFromConfig: true
+                }
+            );
+
+            expect(lines.some((line) => line.includes('`outfile -> outdir` transition contract'))).toBe(true);
+            expect(lines.some((line) => line.includes('block `outfile -> outdir` migration promotion'))).toBe(true);
+        });
+
         test('keeps implementation-readiness wording accurate for multi-entry candidate facts', () => {
             const lines = buildImplementationReadinessContractChecklistLines(
                 {
@@ -596,6 +627,28 @@ const context = await esbuild.context({
             expect(lines.some((line) => line.includes('`outfile -> outdir` migration candidate'))).toBe(true);
             expect(lines.some((line) => line.includes('`audit:render-host` contract delta'))).toBe(true);
             expect(lines.some((line) => line.includes('same-batch release-helper tests + maintainer-doc updates'))).toBe(true);
+        });
+
+        test('blocks implementation-readiness promotion when release assets drop main.js before migration contract completion', () => {
+            const lines = buildImplementationReadinessContractChecklistLines(
+                {
+                    sourcePath: path.join(repoRoot, 'esbuild.config.mjs'),
+                    entryPoints: ['src/main.ts'],
+                    outfile: '',
+                    outdir: 'dist',
+                    outputTargetStatus: 'outdir',
+                    resolvedFromConfig: true
+                },
+                {
+                    sourcePath: path.join(repoRoot, 'scripts', 'release', 'publish-github-release.js'),
+                    requiredAssets: ['manifest.json', 'styles.css', 'README.md'],
+                    releaseTagPattern: '^\\d+\\.\\d+\\.\\d+$',
+                    supportsReleaseModeSwitch: true,
+                    resolvedFromReleaseHelper: true
+                }
+            );
+
+            expect(lines.some((line) => line.includes('block `outfile -> outdir` migration promotion'))).toBe(true);
         });
 
         test('parses release workflow trigger facts with mixed quote styles in tags list', () => {

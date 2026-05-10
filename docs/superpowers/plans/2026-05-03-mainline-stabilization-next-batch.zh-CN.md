@@ -298,3 +298,9 @@ npm run audit:render-host
 3. 以上两项已由 `src/tests/diagramSemanticVerificationScript.test.ts` 回归测试锁定
 
 这与既定 CI-safe 原则保持一致：先把契约真值写成 fail-first 测试，再进入运行时边界拓扑改造。
+
+最新 Stage-B2 加固也已落地：
+
+1. release-contract 清单现在会在 required release assets 不含 `main.js` 时阻断 `outfile -> outdir` 迁移提升
+2. implementation-readiness 清单同步镜像该阻断条件，直到替代资产归属契约/测试/workflow 检查/文档同批落地
+3. 回归测试已锁定上述双重 guardrail，避免 release-helper 资产列表漂移静默削弱迁移 gate

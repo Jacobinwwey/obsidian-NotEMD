@@ -273,3 +273,9 @@ The first Stage-B2 contract-to-test conversion slice is now landed in helper + t
 3. Regression coverage now locks both requirements in `src/tests/diagramSemanticVerificationScript.test.ts`, preserving fail-first drift detection for this contract layer.
 
 This keeps the next-step focus unchanged: continue converting Stage-B2 contract language into executable anti-drift tests before any Stage-C runtime packaging topology edits.
+
+The follow-up Stage-B2 guardrail slice is also landed:
+
+1. release-contract checklist now explicitly blocks `outfile -> outdir` migration promotion when required release assets drop `main.js`.
+2. implementation-readiness checklist now mirrors the same block condition until replacement ownership contracts/tests/workflow checks/docs land together.
+3. regression tests now lock both paths so release-helper asset-list drift cannot silently weaken migration gating.

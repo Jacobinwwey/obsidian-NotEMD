@@ -22,6 +22,7 @@ Its contract-promotion-boundary section reads current operation metadata from `s
 The helper now resolves `file.process-*` and `concept.extract-*` as wildcard selectors against the current registry operation IDs, so newly added operations under those prefixes are included without manually editing the checklist script.
 The contract-promotion checklist now also emits a Stage-B2 runtime-isolation precondition map for workflow/settings/export-adjacent claims, making explicit which operation IDs must stay blocked from runtime-isolation promotion until Stage-C runtime-boundary implementation is actually landed and verified.
 The helper template now also includes an `Implementation Readiness Contract` section: it records current build entrypoint/output-target truth from `esbuild.config.mjs` (single-entry on current mainline) and keeps multi-entry/dedicated-asset work as a pre-implementation candidate contract until Stage-C runtime-boundary work is actually landed and verified.
+If release-helper required assets ever drop `main.js`, both packaging-contract and implementation-readiness sections now explicitly treat `outfile -> outdir` migration promotion as blocked until replacement release-asset ownership contracts, tests, workflow checks, and maintainer docs are landed together.
 
 ## 1. When This Runbook Is Required
 

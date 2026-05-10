@@ -298,3 +298,9 @@ Execution has moved from Stage-B2 contract prose into executable safeguards:
 3. regression tests now lock both constraints in `src/tests/diagramSemanticVerificationScript.test.ts`
 
 This keeps the plan aligned with the same CI-safe rule: encode contract truth into fail-first tests before runtime-boundary topology changes.
+
+Latest Stage-B2 hardening also landed:
+
+1. release-contract checklist now blocks `outfile -> outdir` migration promotion when required release assets do not include `main.js`
+2. implementation-readiness checklist now mirrors the same block condition until replacement ownership contracts/tests/workflow checks/docs are landed together
+3. regression tests lock both guardrails to prevent silent release-helper asset-list drift from weakening migration gates

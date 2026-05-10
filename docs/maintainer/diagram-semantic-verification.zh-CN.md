@@ -22,6 +22,7 @@ npm run verify:diagram-semantics -- --vault "<vault-name>" --commit "<sha>" --ve
 helper 现在会把 `file.process-*` 与 `concept.extract-*` 作为通配选择器，按当前 registry operation ID 自动展开；这意味着这些前缀下新增 operation 时，无需手工改 checklist 脚本也能纳入核验清单。
 contract-promotion 清单现在还会输出 Stage-B2 runtime-isolation 前置条件映射，用于显式标记 workflow/settings/export 邻近 claim 中哪些 operation ID 在 Stage-C runtime-boundary 真正落地并完成核验前必须保持“不可提升”状态。
 helper 模板现在还包含 `Implementation Readiness Contract` 区块：它会记录来自 `esbuild.config.mjs` 的当前入口/输出目标构建真值（当前主线仍是单入口），并将 multi-entry/dedicated-asset 方向保持为“实现前候选契约”，直到 Stage-C runtime-boundary 真正落地并完成核验。
+当 release-helper 的 required assets 未来出现不含 `main.js` 的场景时，packaging-contract 与 implementation-readiness 两个区块现在都会显式将 `outfile -> outdir` 迁移提升标记为阻断状态，直到替代资产归属契约、测试、workflow 检查与维护者文档同批落地。
 
 ## 1. 何时必须使用本 Runbook
 
