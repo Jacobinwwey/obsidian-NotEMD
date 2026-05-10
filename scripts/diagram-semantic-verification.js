@@ -1502,9 +1502,13 @@ function buildImplementationReadinessContractChecklistLines(
             : (outputTargetStatus === 'ambiguous'
                 ? `outfile=${packagingFacts.outfile || '<unknown-outfile>'}, outdir=${packagingFacts.outdir || '<unknown-outdir>'}/...`
                 : '<unknown-output>'));
+    const entryCount = packagingFacts.entryPoints.length;
     const entrySummary = packagingFacts.entryPoints.length > 0
         ? packagingFacts.entryPoints.join(', ')
         : '<unknown-entry>';
+    const buildTruthLine = entryCount === 1
+        ? `- [ ] Confirm current single-entry build truth remains ${sourceDescriptor}: \`${entrySummary} -> ${outputDescriptor}\`.`
+        : `- [ ] Confirm current build entrypoint count remains explicit ${sourceDescriptor}: \`${entrySummary}\` -> \`${outputDescriptor}\` (do not treat this as Stage-C runtime-boundary completion).`;
     const releaseOwnershipDescriptor = releaseFacts.requiredAssets.includes('main.js')
         ? '`main.js` release-asset ownership remains explicit today'
         : 'current release-asset ownership requirements remain explicit today';
@@ -1513,10 +1517,10 @@ function buildImplementationReadinessContractChecklistLines(
         : `- [ ] Multi-entry candidate contract remains pre-implementation only: current output target is \`${outputTargetStatus}\` (\`${outputDescriptor}\`), so do not claim runtime-boundary rollout readiness in this slice.`;
 
     return [
-        `- [ ] Confirm current single-entry build truth remains ${sourceDescriptor}: \`${entrySummary} -> ${outputDescriptor}\`.`,
+        buildTruthLine,
         candidateReadinessLine,
         `- [ ] Document any proposed Stage-C dedicated-asset or multi-entry candidate contract against \`entryPoints/outfile/outdir\` fields in \`${configPath}\` before runtime changes are attempted.`,
-        `- [ ] If an \`outfile -> outdir\` migration candidate is drafted, keep ${releaseOwnershipDescriptor} and require same-batch release-helper tests + maintainer-doc updates.`,
+        `- [ ] If an \`outfile -> outdir\` migration candidate is drafted, define the corresponding \`audit:render-host\` contract delta first, keep ${releaseOwnershipDescriptor}, and require same-batch release-helper tests + maintainer-doc updates.`,
         '- [ ] Candidate promotion toward Stage-C must be blocked until `npm run build`, full tests, and `npm run audit:render-host` still pass with no over-claim about finished heavy-runtime isolation.'
     ];
 }

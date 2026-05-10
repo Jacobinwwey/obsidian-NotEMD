@@ -96,6 +96,20 @@ describe('diagram semantic verification helper', () => {
             outputTargetStatus: 'outfile' | 'outdir' | 'unknown' | 'ambiguous';
             resolvedFromConfig: boolean;
         }) => string[];
+        let buildImplementationReadinessContractChecklistLines: (packagingFacts?: {
+            sourcePath: string;
+            entryPoints: string[];
+            outfile: string;
+            outdir: string;
+            outputTargetStatus: 'outfile' | 'outdir' | 'unknown' | 'ambiguous';
+            resolvedFromConfig: boolean;
+        }, releaseFacts?: {
+            sourcePath: string;
+            requiredAssets: string[];
+            releaseTagPattern: string;
+            supportsReleaseModeSwitch: boolean;
+            resolvedFromReleaseHelper: boolean;
+        }) => string[];
         let resolveReleaseWorkflowTriggerFacts: (args?: { releaseWorkflowPath?: string }) => {
             sourcePath: string;
             hasWorkflowDispatch: boolean;
@@ -169,6 +183,7 @@ describe('diagram semantic verification helper', () => {
                 buildPackagingBoundaryChecklistLines,
                 resolveReleasePackagingContractFacts,
                 buildReleasePackagingContractChecklistLines,
+                buildImplementationReadinessContractChecklistLines,
                 resolveReleaseWorkflowTriggerFacts,
                 resolveContractPromotionBoundaryFacts,
                 buildContractPromotionBoundaryChecklistLines,
@@ -555,6 +570,32 @@ const context = await esbuild.context({
             expect(lines.some((line) => line.includes('`outfile -> outdir` transition contract'))).toBe(true);
             expect(lines.some((line) => line.includes('outdir: `dist/...`'))).toBe(true);
             expect(lines.some((line) => line.includes('`main.js` release-asset ownership'))).toBe(true);
+        });
+
+        test('keeps implementation-readiness wording accurate for multi-entry candidate facts', () => {
+            const lines = buildImplementationReadinessContractChecklistLines(
+                {
+                    sourcePath: path.join(repoRoot, 'esbuild.config.mjs'),
+                    entryPoints: ['src/main.ts', 'src/rendering/host/bootstrap.ts'],
+                    outfile: '',
+                    outdir: 'dist',
+                    outputTargetStatus: 'outdir',
+                    resolvedFromConfig: true
+                },
+                {
+                    sourcePath: path.join(repoRoot, 'scripts', 'release', 'publish-github-release.js'),
+                    requiredAssets: ['main.js', 'manifest.json', 'styles.css', 'README.md'],
+                    releaseTagPattern: '^\\d+\\.\\d+\\.\\d+$',
+                    supportsReleaseModeSwitch: true,
+                    resolvedFromReleaseHelper: true
+                }
+            );
+
+            expect(lines[0]).toContain('entrypoint count');
+            expect(lines[0]).not.toContain('single-entry');
+            expect(lines.some((line) => line.includes('`outfile -> outdir` migration candidate'))).toBe(true);
+            expect(lines.some((line) => line.includes('`audit:render-host` contract delta'))).toBe(true);
+            expect(lines.some((line) => line.includes('same-batch release-helper tests + maintainer-doc updates'))).toBe(true);
         });
 
         test('parses release workflow trigger facts with mixed quote styles in tags list', () => {

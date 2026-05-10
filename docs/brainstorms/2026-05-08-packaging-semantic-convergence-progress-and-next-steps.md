@@ -263,3 +263,13 @@ Based on the current code architecture and the newly landed Stage-B2 contract ar
 4. only then start the first real runtime-boundary implementation slice
 
 This keeps the repository on `main` aligned with the previously approved plan while reducing the risk of mixing contract design and runtime packaging edits in one batch.
+
+## 10. 2026-05-10 Stage-B2 Contract-To-Test Conversion Slice
+
+The first Stage-B2 contract-to-test conversion slice is now landed in helper + tests:
+
+1. `buildImplementationReadinessContractChecklistLines()` now keeps wording accurate when candidate facts are multi-entry (explicit entrypoint-count wording, no false single-entry claim).
+2. The same readiness checklist now requires an explicit `audit:render-host` contract delta before treating `outfile -> outdir` migration candidates as promotable.
+3. Regression coverage now locks both requirements in `src/tests/diagramSemanticVerificationScript.test.ts`, preserving fail-first drift detection for this contract layer.
+
+This keeps the next-step focus unchanged: continue converting Stage-B2 contract language into executable anti-drift tests before any Stage-C runtime packaging topology edits.

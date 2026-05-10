@@ -288,3 +288,13 @@ npm run audit:render-host
 - 切片保持原子化
 - 每次落盘前执行完整仓库门禁
 - 文档、测试、helper 真值同批同步
+
+## 2026-05-10 Stage-B2 契约转测试切片（已落地）
+
+执行层已从 Stage-B2 契约 prose 进一步推进到可执行防护：
+
+1. implementation-readiness 清单文案现在可根据多入口候选事实切换为 entrypoint-count 语义
+2. `outfile -> outdir` 候选提升现在显式要求先定义 `audit:render-host` 契约差异
+3. 以上两项已由 `src/tests/diagramSemanticVerificationScript.test.ts` 回归测试锁定
+
+这与既定 CI-safe 原则保持一致：先把契约真值写成 fail-first 测试，再进入运行时边界拓扑改造。
