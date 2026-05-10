@@ -78,6 +78,8 @@ Goals:
    Regression coverage now explicitly locks quoted inline top-level `on` object forms (for example `'on': { 'push': { "tags": [...] }, "workflow_dispatch": {} }`), keeping compact quoted declarations from silently regressing.
 16. **`on` sequence workflow-dispatch mapping forms are now parsed**
    Release trigger checks now also parse `on` sequence mapping forms for workflow dispatch (for example `- workflow_dispatch: {}` and `- 'workflow_dispatch': {}`), reducing drift under sequence-map event declarations.
+17. **Nested non-event workflow-dispatch keys are now guarded from false positives**
+   Event-key detection is now constrained to top-level `on` mappings, preventing nested keys such as `workflow_call.inputs.workflow_dispatch` from being misinterpreted as release-trigger events.
 
 ### Still open beyond convergence hardening
 

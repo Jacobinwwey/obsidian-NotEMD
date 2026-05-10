@@ -1019,6 +1019,37 @@ jobs:
             }
         });
 
+        test('ignores nested workflow_dispatch keys under non-event on mappings', () => {
+            const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-release-workflow-nested-dispatch-key-'));
+            const workflowPath = path.join(tempRoot, 'release.yml');
+            fs.writeFileSync(
+                workflowPath,
+                `on:
+  workflow_call:
+    inputs:
+      workflow_dispatch:
+        description: not an event trigger
+        required: false
+jobs:
+  publish:
+    steps:
+      - run: echo ready
+`,
+                'utf8'
+            );
+
+            try {
+                const workflowFacts = resolveReleaseWorkflowTriggerFacts({ releaseWorkflowPath: workflowPath });
+                expect(workflowFacts.hasWorkflowDispatch).toBe(false);
+                expect(workflowFacts.hasTagPushTrigger).toBe(false);
+                expect(workflowFacts.rejectsVPrefixedTagTrigger).toBe(false);
+                expect(workflowFacts.validatesNumericTagPattern).toBe(false);
+                expect(workflowFacts.resolvedFromWorkflowFile).toBe(true);
+            } finally {
+                fs.rmSync(tempRoot, { recursive: true, force: true });
+            }
+        });
+
         test('resolves contract-promotion boundary facts for workflow/settings/export operation metadata', () => {
             const registryPath = path.join(repoRoot, 'src', 'operations', 'registry.ts');
             const facts = resolveContractPromotionBoundaryFacts({ registryPath });

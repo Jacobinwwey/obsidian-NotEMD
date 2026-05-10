@@ -691,6 +691,7 @@ function resolveWorkflowOnTriggerConfig(workflowSource) {
     let inOnBlock = false;
     let onIndent = -1;
     let onSequenceIndent = -1;
+    let onMappingIndent = -1;
     let inPushBlock = false;
     let pushIndent = -1;
     let inPushTagsBlock = false;
@@ -709,6 +710,7 @@ function resolveWorkflowOnTriggerConfig(workflowSource) {
                     inOnBlock = true;
                     onIndent = indent;
                     onSequenceIndent = -1;
+                    onMappingIndent = -1;
                     inPushBlock = false;
                     inPushTagsBlock = false;
                 } else {
@@ -727,6 +729,7 @@ function resolveWorkflowOnTriggerConfig(workflowSource) {
             inPushBlock = false;
             inPushTagsBlock = false;
             onSequenceIndent = -1;
+            onMappingIndent = -1;
             const onMatch = matchYamlKeyValueLine(line, 'on');
             if (onMatch) {
                 const inlineOnValue = onMatch[1].trim();
@@ -734,6 +737,7 @@ function resolveWorkflowOnTriggerConfig(workflowSource) {
                     inOnBlock = true;
                     onIndent = indent;
                     onSequenceIndent = -1;
+                    onMappingIndent = -1;
                 } else {
                     const inlineOnConfig = resolveInlineOnTriggerConfig(inlineOnValue);
                     if (inlineOnConfig.hasWorkflowDispatch) {
@@ -813,13 +817,22 @@ function resolveWorkflowOnTriggerConfig(workflowSource) {
             continue;
         }
 
+        if (onSequenceIndent < 0 && onMappingIndent < 0) {
+            const onMappingKeyMatch = line.match(/^\s*(?:["'`])?[A-Za-z0-9_-]+(?:["'`])?\s*:\s*/);
+            if (onMappingKeyMatch) {
+                onMappingIndent = indent;
+            }
+        }
+
         if (matchYamlKeyValueLine(line, 'workflow_dispatch')) {
-            hasWorkflowDispatch = true;
+            if (onSequenceIndent < 0 && indent === onMappingIndent) {
+                hasWorkflowDispatch = true;
+            }
             continue;
         }
 
         const pushMatch = matchYamlKeyValueLine(line, 'push');
-        if (pushMatch) {
+        if (pushMatch && onSequenceIndent < 0 && indent === onMappingIndent) {
             inPushBlock = true;
             pushIndent = indent;
             const inlinePushValue = pushMatch[1].trim();
