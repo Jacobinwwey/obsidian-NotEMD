@@ -222,5 +222,6 @@ This implementation plan is no longer purely forward-looking. The planned batch 
 - Stage-B release-trigger parsing now also detects `workflow_dispatch` from `on` sequence/inline-array event forms (for example `on` with `- workflow_dispatch`, or `on: [push, workflow_dispatch]`), reducing drift from event-declaration style rewrites.
 - Stage-B release-trigger parsing now also supports `on` sequence push-mapping forms (for example `- push:` with nested `tags`), keeping tag-trigger contract checks stable across alternate event-list YAML styles.
 - Stage-B release-trigger parsing now also accepts quoted YAML keys for both event declarations and nested trigger keys (for example `'push':`, `"tags":`, `'workflow_dispatch':`), reducing format-only drift from key-quoting normalization.
+- Stage-B regression coverage now explicitly locks quoted inline top-level `on` object declarations (for example `'on': { 'push': { "tags": [...] }, "workflow_dispatch": {} }`) so compact quoted forms remain contract-stable.
 
 The remaining work after this plan is therefore not “finish creating the runbook” or “finish the first packaging clarification.” Those pieces now exist. The remaining work is to preserve that checked-in truth while deciding whether the next real implementation step is heavy-runtime packaging isolation or a later contract-promotion slice.

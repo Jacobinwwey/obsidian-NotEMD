@@ -74,6 +74,8 @@ Goals:
    Release trigger checks now also parse `on` sequence entries that use push mappings (for example `- push:` with nested `tags`), preserving tag-trigger truth under alternate event declaration styles.
 14. **Quoted YAML event keys are now parsed**
    Release trigger checks now also accept quoted workflow event keys and nested trigger keys (for example `'push':`, `"tags":`, and `'workflow_dispatch':`), reducing drift when workflows normalize key quoting styles.
+15. **Quoted inline top-level `on` object forms are now regression-locked**
+   Regression coverage now explicitly locks quoted inline top-level `on` object forms (for example `'on': { 'push': { "tags": [...] }, "workflow_dispatch": {} }`), keeping compact quoted declarations from silently regressing.
 
 ### Still open beyond convergence hardening
 
