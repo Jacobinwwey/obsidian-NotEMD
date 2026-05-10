@@ -94,6 +94,8 @@ Goals:
    Release trigger checks now also parse multiline flow-style top-level `on` forms (for example `on: {` on one line, followed by event mappings on subsequent lines) while still rejecting nested non-event keys.
 24. **Multiline flow-style top-level `on` opening-line comments are now tolerated**
    Release trigger checks now also parse multiline flow-style top-level `on` forms when the opening line includes a trailing comment (for example `on: { # ...`) while still preserving nested non-event key guards.
+25. **`push.tags` key-line trailing comments no longer mask tag-list triggers**
+   Release trigger checks now treat comment-only `tags:` values (for example `tags: # ...`) as block-list declarations, so both top-level and sequence `push` mappings continue to parse `*.*.*` triggers from following list items.
 
 ### Still open beyond convergence hardening
 

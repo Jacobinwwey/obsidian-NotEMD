@@ -1047,13 +1047,16 @@ function resolveWorkflowOnTriggerConfig(workflowSource) {
                 const tagsMatch = matchYamlKeyValueLine(line, 'tags');
                 if (tagsMatch && indent === pushTopLevelKeyIndent) {
                     const tagsValue = tagsMatch[1].trim();
-                    if (!tagsValue) {
+                    const normalizedTagsValue = tagsValue.startsWith('#')
+                        ? ''
+                        : tagsValue.replace(/\s+#.*$/, '').trim();
+                    if (!normalizedTagsValue) {
                         inPushTagsBlock = true;
                         pushTagsIndent = indent;
                         pushTagsItemIndent = -1;
                         pushTagsDirectListEligible = true;
                     } else {
-                        workflowTagPatterns.push(...parseInlineWorkflowTagPatterns(tagsValue));
+                        workflowTagPatterns.push(...parseInlineWorkflowTagPatterns(normalizedTagsValue));
                     }
                 }
                 continue;

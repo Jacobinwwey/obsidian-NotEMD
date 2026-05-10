@@ -94,6 +94,8 @@ topic: packaging-semantic-convergence-progress-and-next-steps
    release 触发检查现在也可解析多行 flow-style 顶层 `on` 写法（例如首行 `on: {`，后续行继续声明事件映射），同时继续忽略嵌套非事件键。
 24. **多行 flow-style 顶层 `on` 首行注释也可容忍**
    当多行 flow-style 顶层 `on` 首行带有尾随注释（例如 `on: { # ...`）时，release 触发检查也可保持稳定解析，同时继续保留嵌套非事件键防误报约束。
+25. **`push.tags` 键行尾随注释不再掩盖 tag 列表触发**
+   release 触发检查现在会把仅注释的 `tags:` 值（例如 `tags: # ...`）视作块列表声明，因此无论是顶层 `push` 还是序列 `push` 映射，都能继续从后续列表项稳定解析 `*.*.*` 触发。
 
 ### 尚未进入实现层的边界
 

@@ -952,6 +952,66 @@ jobs:
             }
         });
 
+        test('parses top-level push tags list when tags key line has trailing comment', () => {
+            const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-release-workflow-top-level-push-tags-comment-'));
+            const workflowPath = path.join(tempRoot, 'release.yml');
+            fs.writeFileSync(
+                workflowPath,
+                `on:
+  push:
+    tags: # keep release tags readable
+      - "*.*.*"
+  workflow_dispatch:
+jobs:
+  publish:
+    steps:
+      - run: echo ready
+`,
+                'utf8'
+            );
+
+            try {
+                const workflowFacts = resolveReleaseWorkflowTriggerFacts({ releaseWorkflowPath: workflowPath });
+                expect(workflowFacts.hasWorkflowDispatch).toBe(true);
+                expect(workflowFacts.hasTagPushTrigger).toBe(true);
+                expect(workflowFacts.rejectsVPrefixedTagTrigger).toBe(true);
+                expect(workflowFacts.validatesNumericTagPattern).toBe(false);
+                expect(workflowFacts.resolvedFromWorkflowFile).toBe(true);
+            } finally {
+                fs.rmSync(tempRoot, { recursive: true, force: true });
+            }
+        });
+
+        test('parses on-sequence push mapping tags list when tags key line has trailing comment', () => {
+            const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-release-workflow-sequence-push-tags-comment-'));
+            const workflowPath = path.join(tempRoot, 'release.yml');
+            fs.writeFileSync(
+                workflowPath,
+                `on:
+  - push:
+      tags: # keep release tags readable
+        - "*.*.*"
+  - workflow_dispatch
+jobs:
+  publish:
+    steps:
+      - run: echo ready
+`,
+                'utf8'
+            );
+
+            try {
+                const workflowFacts = resolveReleaseWorkflowTriggerFacts({ releaseWorkflowPath: workflowPath });
+                expect(workflowFacts.hasWorkflowDispatch).toBe(true);
+                expect(workflowFacts.hasTagPushTrigger).toBe(true);
+                expect(workflowFacts.rejectsVPrefixedTagTrigger).toBe(true);
+                expect(workflowFacts.validatesNumericTagPattern).toBe(false);
+                expect(workflowFacts.resolvedFromWorkflowFile).toBe(true);
+            } finally {
+                fs.rmSync(tempRoot, { recursive: true, force: true });
+            }
+        });
+
         test('flags v-prefixed on-sequence push mapping tags as release trigger guard violation', () => {
             const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-release-workflow-on-sequence-push-mapping-v-prefix-'));
             const workflowPath = path.join(tempRoot, 'release.yml');
