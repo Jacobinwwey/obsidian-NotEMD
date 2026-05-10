@@ -243,6 +243,7 @@ npm run audit:render-host
 - Stage B 混合 quoted-key 的 sequence/object 回归覆盖现在也锁定了“多行 `push` flow 对象 `tags` 数组闭合行为 `],`”场景，并继续保留嵌套非事件噪音防护。
 - Stage B release packaging-contract 检查现在也编码了显式 `outfile -> outdir` 迁移就绪真值：清单输出会锚定当前 `esbuild.config.mjs` 输出目标事实，并在声明迁移就绪前要求显式保留 `main.js` release 资产归属及同批 release-helper test/docs 更新约束。
 - Stage B contract-promotion 检查现在也编码了 Stage-B2 runtime-isolation 前置条件映射（覆盖 workflow/settings/export 邻近 operation ID），使这些 runtime-isolation 提升声明在 Stage-C runtime-boundary 真正落地并完成核验前保持阻断。
+- Stage B implementation-readiness 检查现在也编码了显式 multi-entry 候选契约真值：helper 输出新增 `Implementation Readiness Contract` 区块并锚定当前 `esbuild.config.mjs` 单入口事实，使 multi-entry/dedicated-asset 方向在 Stage-C runtime-boundary 交付被证明前保持“实现前契约”语义。
 
 因此，这份计划之后真正剩下的工作已经不再是“补第一版 runbook”或“补第一版 packaging 澄清”。这些基础片段现在已经检入。剩余工作是保持这套已检入真值不漂移，并进一步判断下一个真实实现批次应优先落在 heavy-runtime packaging isolation，还是后续更窄的 contract-promotion 切片。
 

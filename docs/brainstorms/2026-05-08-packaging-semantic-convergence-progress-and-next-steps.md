@@ -116,6 +116,8 @@ Goals:
    Semantic helper release-contract checks now anchor an explicit `outfile -> outdir` transition contract to current build output facts from `esbuild.config.mjs`, requiring explicit `main.js` release-asset ownership and same-batch release-helper test/docs updates before migration-readiness claims.
 35. **Contract-promotion checklist now encodes Stage-B2 runtime-isolation precondition mapping**
    Semantic helper contract-promotion checks now emit explicit Stage-B2 precondition mapping for workflow/settings/export-adjacent operation IDs, keeping those runtime-isolation promotion claims blocked until Stage-C runtime-boundary implementation is landed and verified.
+36. **Implementation-readiness checklist now encodes explicit multi-entry candidate contract truth**
+   Semantic helper templates now emit an `Implementation Readiness Contract` section that records current single-entry build truth from `esbuild.config.mjs` and keeps multi-entry/dedicated-asset direction as a pre-implementation candidate contract until Stage-C runtime-boundary work is actually landed and verified.
 
 ### Still open beyond convergence hardening
 

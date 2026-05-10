@@ -1486,6 +1486,41 @@ function buildReleasePackagingContractChecklistLines(
     ];
 }
 
+function buildImplementationReadinessContractChecklistLines(
+    packagingFacts = resolvePackagingBoundaryFacts(),
+    releaseFacts = resolveReleasePackagingContractFacts()
+) {
+    const configPath = normalizeRelativePath(packagingFacts.sourcePath);
+    const sourceDescriptor = packagingFacts.resolvedFromConfig
+        ? `derived from \`${configPath}\``
+        : `fallback reminder because \`${configPath}\` could not be parsed`;
+    const outputTargetStatus = packagingFacts.outputTargetStatus || resolveOutputTargetStatus(packagingFacts);
+    const outputDescriptor = outputTargetStatus === 'outfile'
+        ? packagingFacts.outfile || '<unknown-outfile>'
+        : (outputTargetStatus === 'outdir'
+            ? `${packagingFacts.outdir || '<unknown-outdir>'}/...`
+            : (outputTargetStatus === 'ambiguous'
+                ? `outfile=${packagingFacts.outfile || '<unknown-outfile>'}, outdir=${packagingFacts.outdir || '<unknown-outdir>'}/...`
+                : '<unknown-output>'));
+    const entrySummary = packagingFacts.entryPoints.length > 0
+        ? packagingFacts.entryPoints.join(', ')
+        : '<unknown-entry>';
+    const releaseOwnershipDescriptor = releaseFacts.requiredAssets.includes('main.js')
+        ? '`main.js` release-asset ownership remains explicit today'
+        : 'current release-asset ownership requirements remain explicit today';
+    const candidateReadinessLine = outputTargetStatus === 'unknown' || outputTargetStatus === 'ambiguous'
+        ? '- [ ] Multi-entry candidate contract is not implementation-ready yet: resolve current output-target ambiguity before proposing Stage-C runtime-boundary rollout.'
+        : `- [ ] Multi-entry candidate contract remains pre-implementation only: current output target is \`${outputTargetStatus}\` (\`${outputDescriptor}\`), so do not claim runtime-boundary rollout readiness in this slice.`;
+
+    return [
+        `- [ ] Confirm current single-entry build truth remains ${sourceDescriptor}: \`${entrySummary} -> ${outputDescriptor}\`.`,
+        candidateReadinessLine,
+        `- [ ] Document any proposed Stage-C dedicated-asset or multi-entry candidate contract against \`entryPoints/outfile/outdir\` fields in \`${configPath}\` before runtime changes are attempted.`,
+        `- [ ] If an \`outfile -> outdir\` migration candidate is drafted, keep ${releaseOwnershipDescriptor} and require same-batch release-helper tests + maintainer-doc updates.`,
+        '- [ ] Candidate promotion toward Stage-C must be blocked until `npm run build`, full tests, and `npm run audit:render-host` still pass with no over-claim about finished heavy-runtime isolation.'
+    ];
+}
+
 function buildContractPromotionBoundaryChecklistLines(
     contractFacts = resolveContractPromotionBoundaryFacts()
 ) {
@@ -1596,11 +1631,14 @@ function buildSemanticVerificationTemplate({
 
     const packagingChecklistLines = buildPackagingBoundaryChecklistLines(packagingFacts);
     const releasePackagingChecklistLines = buildReleasePackagingContractChecklistLines(releasePackagingFacts);
+    const implementationReadinessChecklistLines = buildImplementationReadinessContractChecklistLines(packagingFacts, releasePackagingFacts);
     const contractPromotionChecklistLines = buildContractPromotionBoundaryChecklistLines();
     headerLines.push('', '## Packaging Boundary', '');
     headerLines.push(...packagingChecklistLines);
     headerLines.push('', '## Packaging Contract', '');
     headerLines.push(...releasePackagingChecklistLines);
+    headerLines.push('', '## Implementation Readiness Contract', '');
+    headerLines.push(...implementationReadinessChecklistLines);
     headerLines.push('', '## Contract Promotion Boundary', '');
     headerLines.push(...contractPromotionChecklistLines);
     headerLines.push('', '## Surface Evidence');
@@ -1734,6 +1772,7 @@ module.exports = {
     SURFACE_DEFINITIONS,
     USAGE_TEXT,
     buildEnvironmentCheckCommands,
+    buildImplementationReadinessContractChecklistLines,
     buildPackagingBoundaryChecklistLines,
     buildContractPromotionBoundaryChecklistLines,
     buildReleasePackagingContractChecklistLines,

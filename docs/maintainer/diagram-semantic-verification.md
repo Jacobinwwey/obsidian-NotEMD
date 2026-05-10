@@ -20,6 +20,7 @@ That same packaging-contract section now also emits an explicit `outfile -> outd
 Its contract-promotion-boundary section reads current operation metadata from `src/operations/registry.ts` for workflow/settings/selection/export/config-adjacent operations (including `editor.create-link-and-generate`, `file.process-*`, `concept.extract-*`, and export/import surfaces), so capability-promotion claims remain tied to actual `automationLevel` / `requiredContext` / `sideEffectClass` truth.
 The helper now resolves `file.process-*` and `concept.extract-*` as wildcard selectors against the current registry operation IDs, so newly added operations under those prefixes are included without manually editing the checklist script.
 The contract-promotion checklist now also emits a Stage-B2 runtime-isolation precondition map for workflow/settings/export-adjacent claims, making explicit which operation IDs must stay blocked from runtime-isolation promotion until Stage-C runtime-boundary implementation is actually landed and verified.
+The helper template now also includes an `Implementation Readiness Contract` section: it records current single-entry build truth from `esbuild.config.mjs` and keeps multi-entry/dedicated-asset work as a pre-implementation candidate contract until Stage-C runtime-boundary work is actually landed and verified.
 
 ## 1. When This Runbook Is Required
 

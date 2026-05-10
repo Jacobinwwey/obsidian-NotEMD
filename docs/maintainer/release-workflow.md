@@ -46,6 +46,7 @@ Treat the helper's packaging-boundary and packaging-contract sections as require
 The packaging-contract section now also records numeric tag policy, create/upload mode behavior, and tag-only trigger guardrails; treat those as part of the same release-truth contract rather than informal release habits.
 The packaging-contract section also now records an explicit `outfile -> outdir` transition contract anchored to current build output truth, and requires `main.js` release-asset ownership plus release-helper tests/docs updates to remain explicit before claiming output-shape migration readiness.
 The contract-promotion section now also carries a Stage-B2 runtime-isolation precondition map for workflow/settings/export-adjacent operation IDs, so release-facing summaries do not overstate runtime-isolation readiness before Stage-C runtime-boundary implementation is landed and verified.
+The helper now also includes an `Implementation Readiness Contract` section that keeps multi-entry/dedicated-asset direction explicit as a pre-implementation contract (anchored to current `esbuild.config.mjs` truth), so release narratives cannot skip ahead of actual Stage-C runtime-boundary delivery.
 
 ## 3. Version Synchronization
 

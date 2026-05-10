@@ -2201,6 +2201,10 @@ jobs:
             expect(template).toContain('tag push (`*.*.*`) + `workflow_dispatch`');
             expect(template).toContain('numeric-tag regex guard present');
             expect(template).toContain('docs/releases/<tag>.zh-CN.md');
+            expect(template).toContain('## Implementation Readiness Contract');
+            expect(template).toContain('multi-entry candidate contract');
+            expect(template).toContain('current single-entry build truth');
+            expect(template).toContain('esbuild.config.mjs');
             expect(template).toContain('## Contract Promotion Boundary');
             expect(template).toContain('workflow.extract-and-generate');
             expect(template).toContain('content.extract-original-text');
