@@ -64,6 +64,8 @@ topic: packaging-semantic-convergence-progress-and-next-steps
    tag 触发契约检查现在会解析 `tags:` 列表的混合引号风格，并显式把 `v*.*.*` 通配模式视为防护违规，降低仅因 YAML 格式改写导致的真值漂移风险。
 9. **Release tag 触发作用域已显式收敛**
    触发检测现在只信任 `on.push.tags`，会忽略工作流其他区块中的 `tags:` 字段，降低来自 matrix/env 元数据键的误报风险。
+10. **内联 push tag 语法已纳入解析**
+   release 触发检查现在也会解析内联 push 对象写法（例如 `push: { tags: ["*.*.*"] }`），降低 workflow YAML 紧凑化改写后的漂移风险。
 
 ### 尚未进入实现层的边界
 

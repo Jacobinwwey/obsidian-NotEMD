@@ -540,6 +540,20 @@ function parseInlineWorkflowTagPatterns(rawValue) {
     return patterns;
 }
 
+function extractInlinePushTagPatterns(pushValue) {
+    const normalizedValue = pushValue.replace(/\s+#.*$/, '').trim();
+    if (!normalizedValue) {
+        return [];
+    }
+
+    const tagsMatch = normalizedValue.match(/\btags\s*:\s*(\[[^\]]*\]|[^,}]+)/);
+    if (!tagsMatch) {
+        return [];
+    }
+
+    return parseInlineWorkflowTagPatterns(tagsMatch[1].trim());
+}
+
 function resolveWorkflowOnTriggerConfig(workflowSource) {
     const lines = workflowSource.split(/\r?\n/);
     const workflowTagPatterns = [];
@@ -623,6 +637,10 @@ function resolveWorkflowOnTriggerConfig(workflowSource) {
         if (pushMatch) {
             inPushBlock = true;
             pushIndent = indent;
+            const inlinePushValue = pushMatch[1].trim();
+            if (inlinePushValue) {
+                workflowTagPatterns.push(...extractInlinePushTagPatterns(inlinePushValue));
+            }
         }
     }
 

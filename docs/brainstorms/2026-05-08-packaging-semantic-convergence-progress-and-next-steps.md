@@ -64,6 +64,8 @@ Goals:
    Tag-trigger contract checks now parse `tags:` list items with mixed quote styles and explicitly treat `v*.*.*` wildcard patterns as guardrail violations, reducing drift from YAML formatting-only edits.
 9. **Release tag-trigger scope is now explicit**
    Trigger detection now only trusts `on.push.tags` and ignores unrelated `tags:` blocks in other workflow sections, reducing false positives from matrix/env metadata keys.
+10. **Inline push tag syntax is now parsed**
+   Release trigger checks now also parse inline push object forms (for example `push: { tags: ["*.*.*"] }`), reducing drift risk when workflow YAML is compacted.
 
 ### Still open beyond convergence hardening
 
