@@ -304,3 +304,4 @@ Latest Stage-B2 hardening also landed:
 1. release-contract checklist now blocks `outfile -> outdir` migration promotion when required release assets do not include `main.js`
 2. implementation-readiness checklist now mirrors the same block condition until replacement ownership contracts/tests/workflow checks/docs are landed together
 3. regression tests lock both guardrails to prevent silent release-helper asset-list drift from weakening migration gates
+4. release-helper runtime enforcement now includes `validateRequiredReleaseAssets()` and fails fast when `main.js` is missing from required assets, with dedicated coverage in `src/tests/githubReleaseWorkflow.test.ts`

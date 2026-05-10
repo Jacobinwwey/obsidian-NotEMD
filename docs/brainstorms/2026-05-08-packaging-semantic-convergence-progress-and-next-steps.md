@@ -279,3 +279,4 @@ The follow-up Stage-B2 guardrail slice is also landed:
 1. release-contract checklist now explicitly blocks `outfile -> outdir` migration promotion when required release assets drop `main.js`.
 2. implementation-readiness checklist now mirrors the same block condition until replacement ownership contracts/tests/workflow checks/docs land together.
 3. regression tests now lock both paths so release-helper asset-list drift cannot silently weaken migration gating.
+4. release-helper runtime contract now includes `validateRequiredReleaseAssets()` and fails fast when required assets omit `main.js`, with dedicated coverage in `src/tests/githubReleaseWorkflow.test.ts`.

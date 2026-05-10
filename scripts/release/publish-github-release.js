@@ -6,6 +6,18 @@ const { spawnSync } = require('child_process');
 const OBSIDIAN_RELEASE_TAG_PATTERN = /^\d+\.\d+\.\d+$/;
 const REQUIRED_RELEASE_ASSETS = ['main.js', 'manifest.json', 'styles.css', 'README.md'];
 
+function validateRequiredReleaseAssets(requiredAssets = REQUIRED_RELEASE_ASSETS) {
+    if (!Array.isArray(requiredAssets) || requiredAssets.length === 0) {
+        throw new Error('Required release assets must be a non-empty array.');
+    }
+
+    if (!requiredAssets.includes('main.js')) {
+        throw new Error(
+            'Release helper contract guard: required release assets omitted `main.js`; block `outfile -> outdir` migration promotion until replacement release-asset ownership contract, tests, workflow checks, and maintainer docs land together.'
+        );
+    }
+}
+
 function ensureFileExists(filePath) {
     if (!fs.existsSync(filePath)) {
         throw new Error(`Missing required release file: ${filePath}`);
@@ -26,6 +38,7 @@ function resolveReleaseInputs(repoRoot, tag) {
     }
 
     validateReleaseTag(tag);
+    validateRequiredReleaseAssets(REQUIRED_RELEASE_ASSETS);
 
     const assets = REQUIRED_RELEASE_ASSETS.map((assetName) => path.join(repoRoot, assetName));
     assets.forEach(ensureFileExists);
@@ -152,5 +165,6 @@ module.exports = {
     hasExistingRelease,
     main,
     resolveReleaseInputs,
+    validateRequiredReleaseAssets,
     validateReleaseTag
 };

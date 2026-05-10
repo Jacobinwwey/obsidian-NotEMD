@@ -75,9 +75,10 @@ describe('GitHub release workflow', () => {
             chineseNotesFile: string;
             assets: string[];
         };
+        let validateRequiredReleaseAssets: (requiredAssets: string[]) => void;
 
         beforeAll(() => {
-            ({ buildGhReleaseCommand, composeReleaseNotesFile, resolveReleaseInputs } = require(releaseScriptPath));
+            ({ buildGhReleaseCommand, composeReleaseNotesFile, resolveReleaseInputs, validateRequiredReleaseAssets } = require(releaseScriptPath));
         });
 
         function createTempRepoRoot(): string {
@@ -205,6 +206,16 @@ describe('GitHub release workflow', () => {
             } finally {
                 fs.rmSync(tempRoot, { recursive: true, force: true });
             }
+        });
+
+        test('blocks release-helper migration promotion when required assets omit main.js', () => {
+            expect(() => validateRequiredReleaseAssets(['manifest.json', 'styles.css', 'README.md'])).toThrow(
+                'block `outfile -> outdir` migration promotion'
+            );
+        });
+
+        test('accepts release-helper required assets when main.js ownership is explicit', () => {
+            expect(() => validateRequiredReleaseAssets(['main.js', 'manifest.json', 'styles.css', 'README.md'])).not.toThrow();
         });
     });
 });

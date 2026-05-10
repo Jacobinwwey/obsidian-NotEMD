@@ -304,3 +304,4 @@ npm run audit:render-host
 1. release-contract 清单现在会在 required release assets 不含 `main.js` 时阻断 `outfile -> outdir` 迁移提升
 2. implementation-readiness 清单同步镜像该阻断条件，直到替代资产归属契约/测试/workflow 检查/文档同批落地
 3. 回归测试已锁定上述双重 guardrail，避免 release-helper 资产列表漂移静默削弱迁移 gate
+4. release-helper 运行时强制约束现已新增 `validateRequiredReleaseAssets()`，在 required assets 丢失 `main.js` 时会快速失败，并由 `src/tests/githubReleaseWorkflow.test.ts` 专项覆盖
