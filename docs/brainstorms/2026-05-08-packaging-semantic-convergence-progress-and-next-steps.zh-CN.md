@@ -86,6 +86,8 @@ topic: packaging-semantic-convergence-progress-and-next-steps
    多行 `push` 触发解析现在只信任 `push` 首层映射中的 `tags` 键，避免把 `push.filters.tags` 这类嵌套块误判为 release tag 触发条件。
 20. **多行 push.tags 的嵌套列表形态已加入误报防护**
    多行 `push.tags` 解析现在只信任直接列表项形态，避免把 `push.tags.include` 这类嵌套结构中的列表误判为 release tag 触发条件。
+21. **`on` 序列内联对象事件映射写法已纳入解析**
+   release 触发检查现在也可解析 `on` 序列中的内联对象写法（例如 `- { push: { tags: [...] }, workflow_dispatch: {} }`），同时继续忽略这类内联对象中嵌套的非事件键。
 
 ### 尚未进入实现层的边界
 

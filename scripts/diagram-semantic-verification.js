@@ -938,6 +938,14 @@ function resolveWorkflowOnTriggerConfig(workflowSource) {
                     hasWorkflowDispatch = true;
                 }
 
+                if (sequenceItemValue.startsWith('{')) {
+                    const inlineSequenceOnConfig = resolveInlineOnTriggerConfig(sequenceItemValue);
+                    if (inlineSequenceOnConfig.hasWorkflowDispatch) {
+                        hasWorkflowDispatch = true;
+                    }
+                    workflowTagPatterns.push(...inlineSequenceOnConfig.workflowTagPatterns);
+                }
+
                 const workflowDispatchMappingMatch = matchYamlKeyValueFragment(sequenceItemValue, 'workflow_dispatch');
                 if (workflowDispatchMappingMatch) {
                     hasWorkflowDispatch = true;
