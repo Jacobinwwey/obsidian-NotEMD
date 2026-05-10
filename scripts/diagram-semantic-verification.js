@@ -557,43 +557,23 @@ function matchYamlKeyValueFragment(fragment, keyName) {
     return fragment.match(new RegExp(`^${keyPattern}\\s*:\\s*(.*)$`));
 }
 
-function hasInlineYamlKey(sourceValue, keyName) {
-    const keyPattern = buildYamlKeyPattern(keyName);
-    return new RegExp(`(?:^|[,{])\\s*${keyPattern}\\s*:`).test(sourceValue);
-}
-
-function extractInlinePushTagPatterns(pushValue) {
-    const normalizedValue = pushValue.replace(/\s+#.*$/, '').trim();
-    if (!normalizedValue) {
+function parseInlineObjectTopLevelFields(sourceValue) {
+    const normalizedSource = sourceValue.replace(/\s+#.*$/, '').trim();
+    if (!normalizedSource.startsWith('{') || !normalizedSource.endsWith('}')) {
         return [];
     }
 
-    const tagsMatch = normalizedValue.match(
-        new RegExp(`${buildYamlKeyPattern('tags')}\\s*:\\s*(\\[[^\\]]*\\]|[^,}]+)`)
-    );
-    if (!tagsMatch) {
-        return [];
-    }
-
-    return parseInlineWorkflowTagPatterns(tagsMatch[1].trim());
-}
-
-function extractInlineObjectFieldValue(sourceValue, fieldName) {
-    const fieldPattern = new RegExp(`(?:^|[,{])\\s*${buildYamlKeyPattern(fieldName)}\\s*:\\s*`);
-    const fieldMatch = fieldPattern.exec(sourceValue);
-    if (!fieldMatch) {
-        return '';
-    }
-
-    const valueStart = fieldMatch.index + fieldMatch[0].length;
+    const innerSource = normalizedSource.slice(1, -1);
+    const fieldTokens = [];
+    let tokenStart = 0;
     let braceDepth = 0;
     let bracketDepth = 0;
     let parenDepth = 0;
     let activeQuote = '';
 
-    for (let cursor = valueStart; cursor < sourceValue.length; cursor += 1) {
-        const char = sourceValue[cursor];
-        const previousChar = cursor > valueStart ? sourceValue[cursor - 1] : '';
+    for (let cursor = 0; cursor < innerSource.length; cursor += 1) {
+        const char = innerSource[cursor];
+        const previousChar = cursor > 0 ? innerSource[cursor - 1] : '';
 
         if (activeQuote) {
             if (char === activeQuote && previousChar !== '\\') {
@@ -615,9 +595,8 @@ function extractInlineObjectFieldValue(sourceValue, fieldName) {
         if (char === '}') {
             if (braceDepth > 0) {
                 braceDepth -= 1;
-                continue;
             }
-            return sourceValue.slice(valueStart, cursor).trim();
+            continue;
         }
 
         if (char === '[') {
@@ -645,11 +624,127 @@ function extractInlineObjectFieldValue(sourceValue, fieldName) {
         }
 
         if (char === ',' && braceDepth === 0 && bracketDepth === 0 && parenDepth === 0) {
-            return sourceValue.slice(valueStart, cursor).trim();
+            const fieldToken = innerSource.slice(tokenStart, cursor).trim();
+            if (fieldToken) {
+                fieldTokens.push(fieldToken);
+            }
+            tokenStart = cursor + 1;
         }
     }
 
-    return sourceValue.slice(valueStart).trim();
+    const trailingFieldToken = innerSource.slice(tokenStart).trim();
+    if (trailingFieldToken) {
+        fieldTokens.push(trailingFieldToken);
+    }
+
+    return fieldTokens.map((fieldToken) => {
+        let tokenBraceDepth = 0;
+        let tokenBracketDepth = 0;
+        let tokenParenDepth = 0;
+        let tokenQuote = '';
+        let separatorIndex = -1;
+
+        for (let cursor = 0; cursor < fieldToken.length; cursor += 1) {
+            const char = fieldToken[cursor];
+            const previousChar = cursor > 0 ? fieldToken[cursor - 1] : '';
+
+            if (tokenQuote) {
+                if (char === tokenQuote && previousChar !== '\\') {
+                    tokenQuote = '';
+                }
+                continue;
+            }
+
+            if (char === '"' || char === '\'' || char === '`') {
+                tokenQuote = char;
+                continue;
+            }
+
+            if (char === '{') {
+                tokenBraceDepth += 1;
+                continue;
+            }
+
+            if (char === '}') {
+                if (tokenBraceDepth > 0) {
+                    tokenBraceDepth -= 1;
+                }
+                continue;
+            }
+
+            if (char === '[') {
+                tokenBracketDepth += 1;
+                continue;
+            }
+
+            if (char === ']') {
+                if (tokenBracketDepth > 0) {
+                    tokenBracketDepth -= 1;
+                }
+                continue;
+            }
+
+            if (char === '(') {
+                tokenParenDepth += 1;
+                continue;
+            }
+
+            if (char === ')') {
+                if (tokenParenDepth > 0) {
+                    tokenParenDepth -= 1;
+                }
+                continue;
+            }
+
+            if (char === ':' && tokenBraceDepth === 0 && tokenBracketDepth === 0 && tokenParenDepth === 0) {
+                separatorIndex = cursor;
+                break;
+            }
+        }
+
+        if (separatorIndex < 0) {
+            return {
+                key: '',
+                value: ''
+            };
+        }
+
+        const key = normalizeWorkflowTagPattern(fieldToken.slice(0, separatorIndex));
+        const value = fieldToken.slice(separatorIndex + 1).trim();
+        return { key, value };
+    });
+}
+
+function hasInlineYamlKey(sourceValue, keyName) {
+    const topLevelFields = parseInlineObjectTopLevelFields(sourceValue);
+    return topLevelFields.some((field) => field.key === keyName);
+}
+
+function extractInlinePushTagPatterns(pushValue) {
+    const normalizedValue = pushValue.replace(/\s+#.*$/, '').trim();
+    if (!normalizedValue) {
+        return [];
+    }
+
+    const tagsMatch = normalizedValue.match(
+        new RegExp(`${buildYamlKeyPattern('tags')}\\s*:\\s*(\\[[^\\]]*\\]|[^,}]+)`)
+    );
+    if (!tagsMatch) {
+        return [];
+    }
+
+    return parseInlineWorkflowTagPatterns(tagsMatch[1].trim());
+}
+
+function extractInlineObjectFieldValue(sourceValue, fieldName) {
+    const topLevelFields = parseInlineObjectTopLevelFields(sourceValue);
+    for (const field of topLevelFields) {
+        if (field.key === fieldName) {
+            return field.value;
+        }
+    }
+
+    return '';
 }
 
 function resolveInlineOnTriggerConfig(onValue) {
