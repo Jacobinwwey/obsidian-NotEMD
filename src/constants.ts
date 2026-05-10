@@ -75,6 +75,7 @@ export const DEFAULT_SETTINGS: NotemdSettings = {
     // Extract Concepts Task Defaults
     extractConceptsMinimalTemplate: true,
     extractConceptsAddBacklink: false,
+    replaceSynonymsDuringConceptExtraction: false,
     // Add Links Post-Processing Defaults
     removeCodeFencesOnAddLinks: false, // Default to NOT removing code fences
     // Language Settings Defaults

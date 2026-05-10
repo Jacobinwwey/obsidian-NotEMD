@@ -91,6 +91,7 @@ export interface NotemdSettings {
     // Extract Concepts Task Settings
     extractConceptsMinimalTemplate: boolean;
     extractConceptsAddBacklink: boolean;
+    replaceSynonymsDuringConceptExtraction: boolean;
     // Add Links Post-Processing
     removeCodeFencesOnAddLinks: boolean; // New: Option to remove ```markdown and ``` fences
     // Language Settings

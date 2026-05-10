@@ -224,7 +224,9 @@ export const STRINGS_ZH_TW: DeepPartial<NotemdEnglishStrings> = {
             minimalName: '建立最小化概念筆記',
             minimalDesc: '開：新建立的概念筆記只包含標題。關：它們也可能包含回鏈等其他內容。',
             backlinkName: '加入「Linked From」回鏈',
-            backlinkDesc: '開：在概念筆記中加入來源文件的回鏈。關：擷取時不加入回鏈。'
+            backlinkDesc: '開：在概念筆記中加入來源文件的回鏈。關：擷取時不加入回鏈。',
+            replaceSynonymsName: '概念擷取時替換同義詞',
+            replaceSynonymsDesc: '開：在「處理檔案/資料夾（加入連結）」與「擷取概念」任務提示詞前置「盡量避免擷取同義詞、語義相近核心概念或關鍵詞」約束。關：保留原提示詞不變。'
         },
         stableApi: {
             heading: '穩定 API 呼叫',
@@ -273,6 +275,17 @@ export const STRINGS_ZH_TW: DeepPartial<NotemdEnglishStrings> = {
             workflowAddedNotice: '已新增工作流程。',
             resetDefault: '還原預設',
             resetDefaultNotice: '已還原預設的一鍵工作流程。'
+        },
+        settingsReset: {
+            heading: '重設設定',
+            completeName: '完整重設',
+            completeDesc: '將外掛全部設定還原為預設值（包含 LLM 提供者設定）。',
+            completeButton: '重設全部設定',
+            completeNotice: '已將全部設定還原為預設值。',
+            partialName: '部分重設',
+            partialDesc: '將外掛設定還原為預設值，但保留目前 LLM 提供者設定不變。',
+            partialButton: '重設（保留提供者）',
+            partialNotice: '已將非提供者設定還原為預設值。'
         },
         generalOutput: {
             processedHeading: '處理後檔案輸出',

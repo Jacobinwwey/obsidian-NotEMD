@@ -221,7 +221,9 @@ export const STRINGS_EN = {
             minimalName: 'Create minimal concept notes',
             minimalDesc: 'On: Newly created concept notes will only contain the title. Off: They may include other content like backlinks.',
             backlinkName: 'Add "Linked From" backlink',
-            backlinkDesc: 'On: Add a backlink to the source document in the concept note. Off: Do not add backlinks during extraction.'
+            backlinkDesc: 'On: Add a backlink to the source document in the concept note. Off: Do not add backlinks during extraction.',
+            replaceSynonymsName: 'Replace synonyms during concept extraction',
+            replaceSynonymsDesc: 'On: Prepend an instruction for "Process File/Folder" and "Extract Concepts" to avoid extracting synonyms, semantically similar core concepts, or keywords whenever possible.'
         },
         stableApi: {
             heading: 'Stable API calls',
@@ -270,6 +272,17 @@ export const STRINGS_EN = {
             workflowAddedNotice: 'Workflow added.',
             resetDefault: 'Reset to default',
             resetDefaultNotice: 'Restored default one-click workflows.'
+        },
+        settingsReset: {
+            heading: 'Reset settings',
+            completeName: 'Complete reset',
+            completeDesc: 'Reset all plugin settings to their default values, including LLM provider settings.',
+            completeButton: 'Reset all settings',
+            completeNotice: 'All settings have been reset to their default values.',
+            partialName: 'Partial reset',
+            partialDesc: 'Reset all plugin settings to their defaults, but keep current LLM provider settings unchanged.',
+            partialButton: 'Reset except providers',
+            partialNotice: 'All non-provider settings have been reset to their default values.'
         },
         generalOutput: {
             processedHeading: 'Processed file output',

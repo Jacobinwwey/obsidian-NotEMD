@@ -78,6 +78,11 @@ describe('settings page i18n coverage', () => {
             'Advanced DSL editor',
             'Workflow DSL validation',
             'Available workflow action IDs',
+            'Reset settings',
+            'Complete reset',
+            'Partial reset',
+            'Reset all settings',
+            'Reset except providers',
             'Custom prompt settings',
             'Enable custom prompts for specific tasks',
             'Use custom prompt for "',
@@ -124,18 +129,25 @@ describe('settings page i18n coverage', () => {
         expect(en.settings.translationTask.heading).toBeDefined();
         expect(en.settings.mermaidTask.heading).toBeDefined();
         expect(en.settings.extractConceptsTask.heading).toBeDefined();
+        expect(en.settings.extractConceptsTask.replaceSynonymsName).toBeDefined();
+        expect(en.settings.extractConceptsTask.replaceSynonymsDesc).toBeDefined();
         expect(en.settings.stableApi.heading).toBeDefined();
         expect(en.settings.generalOutput.processedHeading).toBeDefined();
         expect(en.settings.contentGeneration.heading).toBeDefined();
         expect(en.settings.customPrompts.heading).toBeDefined();
         expect(en.settings.workflowBuilder.heading).toBeDefined();
+        expect(en.settings.settingsReset.heading).toBeDefined();
 
         expect(zhCn.settings.providerConfig.heading).not.toBe(en.settings.providerConfig.heading);
         expect(zhCn.settings.generalOutput.processedHeading).not.toBe(en.settings.generalOutput.processedHeading);
         expect(zhCn.settings.workflowBuilder.heading).not.toBe(en.settings.workflowBuilder.heading);
+        expect(zhCn.settings.extractConceptsTask.replaceSynonymsName).not.toBe(en.settings.extractConceptsTask.replaceSynonymsName);
+        expect(zhCn.settings.settingsReset.heading).not.toBe(en.settings.settingsReset.heading);
         expect(zhTw.settings.translationTask.heading).not.toBe(en.settings.translationTask.heading);
         expect(zhTw.settings.contentGeneration.heading).not.toBe(en.settings.contentGeneration.heading);
         expect(zhTw.settings.stableApi.heading).not.toBe(en.settings.stableApi.heading);
+        expect(zhTw.settings.extractConceptsTask.replaceSynonymsName).not.toBe(en.settings.extractConceptsTask.replaceSynonymsName);
+        expect(zhTw.settings.settingsReset.heading).not.toBe(en.settings.settingsReset.heading);
     });
 
     test('does not render raw english provider metadata or template literals in settings UI', () => {

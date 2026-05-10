@@ -84,6 +84,7 @@ export const mockSettings: NotemdSettings = {
     extractConceptsModel: '',
     extractConceptsMinimalTemplate: true,
     extractConceptsAddBacklink: false,
+    replaceSynonymsDuringConceptExtraction: false,
     disableAutoTranslation: false,
     enableBatchParallelism: false,
     batchConcurrency: 1,

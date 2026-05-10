@@ -5,6 +5,8 @@ import {
 } from './i18n/taskLanguagePolicy';
 import { resolveLanguageDisplayName } from './i18n/languageContext';
 
+export const CONCEPT_SYNONYM_SUPPRESSION_INSTRUCTION = 'Avoid extracting synonyms, semantically similar core concepts, or keywords whenever possible.';
+
 export const DEFAULT_PROMPTS: Record<TaskKey, string> = {
     extractConcepts: `You are an AI assistant specializing in knowledge extraction. Your task is to Completely decompose and structure the knowledge points in this markdown document, analyze the markdown document and identify all core concepts and keywords.
 
@@ -457,6 +459,10 @@ The format for each bullet point must be strictly:
     // Add language instruction for extractConcepts if a specific language is set
     if (taskKey === 'extractConcepts' && autoTranslationEnabled) {
         prompt += `\n\nThe output concepts MUST be in ${resolvedTaskLanguageName}.`;
+    }
+
+    if (settings.replaceSynonymsDuringConceptExtraction && (taskKey === 'addLinks' || taskKey === 'extractConcepts')) {
+        prompt = `${CONCEPT_SYNONYM_SUPPRESSION_INSTRUCTION}\n\n${prompt}`;
     }
 
     return prompt;

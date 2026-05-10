@@ -400,6 +400,7 @@ export class NotemdSettingTab extends PluginSettingTab {
         const extractConceptsTaskI18n = i18n.settings.extractConceptsTask;
         const stableApiI18n = i18n.settings.stableApi;
         const workflowBuilderI18n = i18n.settings.workflowBuilder;
+        const settingsResetI18n = i18n.settings.settingsReset;
         const generalOutputI18n = i18n.settings.generalOutput;
         const contentGenerationI18n = i18n.settings.contentGeneration;
         const customPromptsI18n = i18n.settings.customPrompts;
@@ -432,6 +433,34 @@ export class NotemdSettingTab extends PluginSettingTab {
 
             containerEl.createEl('hr');
         }
+
+        new Setting(containerEl).setName(settingsResetI18n.heading).setHeading();
+        new Setting(containerEl)
+            .setName(settingsResetI18n.completeName)
+            .setDesc(settingsResetI18n.completeDesc)
+            .addButton(button => button
+                .setButtonText(settingsResetI18n.completeButton)
+                .setWarning()
+                .onClick(async () => {
+                    await this.plugin.resetSettings('complete');
+                    await this.plugin.refreshLocalizedUi();
+                    this.display();
+                    new Notice(settingsResetI18n.completeNotice);
+                }));
+
+        new Setting(containerEl)
+            .setName(settingsResetI18n.partialName)
+            .setDesc(settingsResetI18n.partialDesc)
+            .addButton(button => button
+                .setButtonText(settingsResetI18n.partialButton)
+                .onClick(async () => {
+                    await this.plugin.resetSettings('partial');
+                    await this.plugin.refreshLocalizedUi();
+                    this.display();
+                    new Notice(settingsResetI18n.partialNotice);
+                }));
+
+        containerEl.createEl('hr');
 
         // --- Provider Configuration ---
         new Setting(containerEl).setName(providerI18n.heading).setHeading();
@@ -1018,6 +1047,16 @@ export class NotemdSettingTab extends PluginSettingTab {
                 .setValue(this.plugin.settings.extractConceptsAddBacklink)
                 .onChange(async (value) => {
                     this.plugin.settings.extractConceptsAddBacklink = value;
+                    await this.plugin.saveSettings();
+                }));
+
+        new Setting(containerEl)
+            .setName(extractConceptsTaskI18n.replaceSynonymsName)
+            .setDesc(extractConceptsTaskI18n.replaceSynonymsDesc)
+            .addToggle(toggle => toggle
+                .setValue(this.plugin.settings.replaceSynonymsDuringConceptExtraction)
+                .onChange(async (value) => {
+                    this.plugin.settings.replaceSynonymsDuringConceptExtraction = value;
                     await this.plugin.saveSettings();
                 }));
 

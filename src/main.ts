@@ -1,6 +1,7 @@
 import { App, Editor, MarkdownView, Modal, Notice, Plugin, TFile, TFolder, PluginSettingTab, Setting, WorkspaceLeaf } from 'obsidian';
 import { NotemdSettings, ProgressReporter, LLMProviderConfig, TaskKey } from './types';
 import { DEFAULT_SETTINGS, NOTEMD_SIDEBAR_VIEW_TYPE, NOTEMD_SIDEBAR_ICON } from './constants';
+import { createCompleteResetSettings, createPartialResetSettings } from './settingsReset';
 import { retry } from './utils';
 import { callLLM } from './llmUtils';
 import {
@@ -966,6 +967,15 @@ export default class NotemdPlugin extends Plugin {
         const syncSettings = { ...this.settings, providers: syncProviders };
         await this.saveData(syncSettings);
         await this.saveData(this.settings);
+    }
+
+    async resetSettings(mode: 'complete' | 'partial'): Promise<void> {
+        const nextSettings = mode === 'complete'
+            ? createCompleteResetSettings()
+            : createPartialResetSettings(this.settings);
+        this.settings = nextSettings;
+        this.clearConceptNotePathWarningSuppressionOnce();
+        await this.saveSettings();
     }
 
     // --- UI and Status ---

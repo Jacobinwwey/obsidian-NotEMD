@@ -224,7 +224,9 @@ export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
             minimalName: '创建最简概念笔记',
             minimalDesc: '开：新建概念笔记仅包含标题。关：它们还可以包含回链等其他内容。',
             backlinkName: '添加 “Linked From” 回链',
-            backlinkDesc: '开：在概念笔记中添加指向源文档的回链。关：提取时不添加回链。'
+            backlinkDesc: '开：在概念笔记中添加指向源文档的回链。关：提取时不添加回链。',
+            replaceSynonymsName: '概念提取时替换同义词',
+            replaceSynonymsDesc: '开：在“处理文件/文件夹（添加链接）”和“提取概念”任务提示词前置“尽量避免提取同义词、语义相近核心概念或关键词”的约束。关：保持原提示词不变。'
         },
         stableApi: {
             heading: '稳定 API 调用',
@@ -273,6 +275,17 @@ export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
             workflowAddedNotice: '已添加工作流。',
             resetDefault: '恢复默认',
             resetDefaultNotice: '已恢复默认的一键工作流。'
+        },
+        settingsReset: {
+            heading: '重置设置',
+            completeName: '完整重置',
+            completeDesc: '将插件全部设置恢复为默认值（包含 LLM 提供商设置）。',
+            completeButton: '重置全部设置',
+            completeNotice: '已将全部设置恢复为默认值。',
+            partialName: '部分重置',
+            partialDesc: '将插件设置恢复为默认值，但保留当前 LLM 提供商设置不变。',
+            partialButton: '重置（保留提供商）',
+            partialNotice: '已将非提供商设置恢复为默认值。'
         },
         generalOutput: {
             processedHeading: '处理后文件输出',

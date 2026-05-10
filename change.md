@@ -4,6 +4,37 @@ This document summarizes the major functional and architectural changes implemen
 
 ---
 
+## 1.8.6
+
+### Highlights
+
+- Settings page now includes two reset modes: complete reset and provider-preserving partial reset.
+- Concept-producing workflows now support an optional synonym-suppression prompt guard.
+- Version metadata, welcome-modal digest, and bilingual release notes are synchronized for the `1.8.6` boundary.
+
+### New Features
+
+- **Settings Reset Controls**: Added a dedicated `Reset settings` section with:
+  - **Complete reset**: restore all settings to defaults.
+  - **Partial reset**: restore all non-provider settings while preserving current LLM provider settings.
+- **Synonym Suppression Toggle**: Added `Replace synonyms during concept extraction` under `Task: Extract Concepts`.
+- **Prompt Guard Injection**: When the toggle is enabled, both `Process File/Folder (Add Links)` and `Extract Concepts` prompts now prepend:
+  - `Avoid extracting synonyms, semantically similar core concepts, or keywords whenever possible.`
+
+### Fixes
+
+- Added focused reset-helper tests to verify complete-vs-partial reset semantics and safe cloning behavior for preserved provider settings.
+- Added focused prompt tests to verify the new instruction gate only applies to the two intended tasks and only when enabled.
+- Added localized Traditional Chinese copy for the newly added settings fields to avoid fallback-only UI in that locale.
+
+### Chores
+
+- Added `docs/releases/1.8.6.md` and `docs/releases/1.8.6.zh-CN.md`.
+- Updated welcome-modal latest-two release digest from `1.8.5/1.8.4` to `1.8.6/1.8.5`.
+- Synchronized release-version markers in package metadata and README variants.
+
+---
+
 ## 1.8.4
 
 ### Highlights

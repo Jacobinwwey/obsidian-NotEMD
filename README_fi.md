@@ -24,7 +24,7 @@ Notemd parantaa Obsidian-työnkulkuasi integroimalla erilaisia suuria kielimalle
 
 Jos rakastat Notemdin käyttöä, harkitse [⭐ tähden antamista GitHubissa](https://github.com/Jacobinwwey/obsidian-NotEMD) tai [☕️ osta minulle kahvi](https://ko-fi.com/jacobinwwey).
 
-**Versio:** 1.8.5
+**Versio:** 1.8.6
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
@@ -687,7 +687,7 @@ MIT License - Katso lisätiedot tiedostosta [LICENSE](LICENSE).
 ---
 
 
-*Notemd v1.8.5 - Paranna Obsidian-tietograafiasi tekoälyn avulla.*
+*Notemd v1.8.6 - Paranna Obsidian-tietograafiasi tekoälyn avulla.*
 
 
 <!-- repo-chronicle:start -->
@@ -697,7 +697,7 @@ Tämä neljännesvuosittainen kronikka säilyttää [repo-saga](https://github.c
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.fi.svg)
 
-_Päivitetty viimeksi julkaisutägille `1.8.5` 2026-05-08. Viimeisimmän commitin päivämäärä: 2026-05-08._
+_Päivitetty viimeksi julkaisutägille `1.8.6` 2026-05-08. Viimeisimmän commitin päivämäärä: 2026-05-08._
 <!-- repo-chronicle:end -->
 
 
