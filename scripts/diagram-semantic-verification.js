@@ -794,6 +794,7 @@ function resolveWorkflowOnTriggerConfig(workflowSource) {
     let onMappingIndent = -1;
     let inPushBlock = false;
     let pushIndent = -1;
+    let pushTopLevelKeyIndent = -1;
     let inPushTagsBlock = false;
     let pushTagsIndent = -1;
 
@@ -812,6 +813,7 @@ function resolveWorkflowOnTriggerConfig(workflowSource) {
                     onSequenceIndent = -1;
                     onMappingIndent = -1;
                     inPushBlock = false;
+                    pushTopLevelKeyIndent = -1;
                     inPushTagsBlock = false;
                 } else {
                     const inlineOnConfig = resolveInlineOnTriggerConfig(inlineOnValue);
@@ -827,6 +829,7 @@ function resolveWorkflowOnTriggerConfig(workflowSource) {
         if (isMeaningfulLine && indent <= onIndent) {
             inOnBlock = false;
             inPushBlock = false;
+            pushTopLevelKeyIndent = -1;
             inPushTagsBlock = false;
             onSequenceIndent = -1;
             onMappingIndent = -1;
@@ -838,6 +841,7 @@ function resolveWorkflowOnTriggerConfig(workflowSource) {
                     onIndent = indent;
                     onSequenceIndent = -1;
                     onMappingIndent = -1;
+                    pushTopLevelKeyIndent = -1;
                 } else {
                     const inlineOnConfig = resolveInlineOnTriggerConfig(inlineOnValue);
                     if (inlineOnConfig.hasWorkflowDispatch) {
@@ -867,9 +871,14 @@ function resolveWorkflowOnTriggerConfig(workflowSource) {
         if (inPushBlock) {
             if (isMeaningfulLine && indent <= pushIndent) {
                 inPushBlock = false;
+                pushTopLevelKeyIndent = -1;
             } else {
+                if (isMeaningfulLine && pushTopLevelKeyIndent < 0) {
+                    pushTopLevelKeyIndent = indent;
+                }
+
                 const tagsMatch = matchYamlKeyValueLine(line, 'tags');
-                if (tagsMatch) {
+                if (tagsMatch && indent === pushTopLevelKeyIndent) {
                     const tagsValue = tagsMatch[1].trim();
                     if (!tagsValue) {
                         inPushTagsBlock = true;
@@ -908,6 +917,7 @@ function resolveWorkflowOnTriggerConfig(workflowSource) {
                 if (pushMappingMatch) {
                     inPushBlock = true;
                     pushIndent = indent;
+                    pushTopLevelKeyIndent = -1;
                     const inlinePushValue = pushMappingMatch[1].trim();
                     if (inlinePushValue) {
                         workflowTagPatterns.push(...extractInlinePushTagPatterns(inlinePushValue));
@@ -935,6 +945,7 @@ function resolveWorkflowOnTriggerConfig(workflowSource) {
         if (pushMatch && onSequenceIndent < 0 && indent === onMappingIndent) {
             inPushBlock = true;
             pushIndent = indent;
+            pushTopLevelKeyIndent = -1;
             const inlinePushValue = pushMatch[1].trim();
             if (inlinePushValue) {
                 workflowTagPatterns.push(...extractInlinePushTagPatterns(inlinePushValue));

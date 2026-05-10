@@ -82,6 +82,8 @@ topic: packaging-semantic-convergence-progress-and-next-steps
    事件键检测现在限定为 `on` 顶层映射，避免把 `workflow_call.inputs.workflow_dispatch` 这类嵌套键误判为 release 触发事件。
 18. **内联 push 嵌套 tags 键已加入误报防护**
    内联 `push` 触发解析现在只信任顶层 `push.tags` 字段，避免把 `push.filters.tags` 这类嵌套键误判为 release tag 触发条件。
+19. **多行 push 嵌套 tags 块已加入误报防护**
+   多行 `push` 触发解析现在只信任 `push` 首层映射中的 `tags` 键，避免把 `push.filters.tags` 这类嵌套块误判为 release tag 触发条件。
 
 ### 尚未进入实现层的边界
 

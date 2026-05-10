@@ -82,6 +82,8 @@ Goals:
    Event-key detection is now constrained to top-level `on` mappings, preventing nested keys such as `workflow_call.inputs.workflow_dispatch` from being misinterpreted as release-trigger events.
 18. **Inline push nested tags are now guarded from false positives**
    Inline `push` trigger parsing now only trusts top-level `push.tags` fields, preventing nested keys such as `push.filters.tags` from being misinterpreted as release-tag triggers.
+19. **Multiline push nested tags are now guarded from false positives**
+   Multiline `push` trigger parsing now only trusts first-level `push` mapping keys for `tags`, preventing nested blocks such as `push.filters.tags` from being misinterpreted as release-tag triggers.
 
 ### Still open beyond convergence hardening
 
