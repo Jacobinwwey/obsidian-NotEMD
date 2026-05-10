@@ -92,6 +92,8 @@ topic: packaging-semantic-convergence-progress-and-next-steps
    release 触发检查现在也可解析内联 `on` 数组中的对象项（例如 `on: [{ push: { tags: [...] } }, { workflow_dispatch: {} }]`），同时继续忽略这类对象项中的嵌套非事件键。
 23. **多行 flow-style 顶层 `on` 对象写法已纳入解析**
    release 触发检查现在也可解析多行 flow-style 顶层 `on` 写法（例如首行 `on: {`，后续行继续声明事件映射），同时继续忽略嵌套非事件键。
+24. **多行 flow-style 顶层 `on` 首行注释也可容忍**
+   当多行 flow-style 顶层 `on` 首行带有尾随注释（例如 `on: { # ...`）时，release 触发检查也可保持稳定解析，同时继续保留嵌套非事件键防误报约束。
 
 ### 尚未进入实现层的边界
 

@@ -733,6 +733,35 @@ jobs:
             }
         });
 
+        test('parses multiline flow-style top-level on object syntax when opening line has trailing comment', () => {
+            const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-release-workflow-multiline-flow-on-object-comment-'));
+            const workflowPath = path.join(tempRoot, 'release.yml');
+            fs.writeFileSync(
+                workflowPath,
+                `'on': { # keep trigger map readable
+  "push": { 'tags': ["*.*.*"] },
+  workflow_dispatch: {}
+}
+jobs:
+  publish:
+    steps:
+      - run: echo ready
+`,
+                'utf8'
+            );
+
+            try {
+                const workflowFacts = resolveReleaseWorkflowTriggerFacts({ releaseWorkflowPath: workflowPath });
+                expect(workflowFacts.hasWorkflowDispatch).toBe(true);
+                expect(workflowFacts.hasTagPushTrigger).toBe(true);
+                expect(workflowFacts.rejectsVPrefixedTagTrigger).toBe(true);
+                expect(workflowFacts.validatesNumericTagPattern).toBe(false);
+                expect(workflowFacts.resolvedFromWorkflowFile).toBe(true);
+            } finally {
+                fs.rmSync(tempRoot, { recursive: true, force: true });
+            }
+        });
+
         test('ignores nested non-event keys in multiline flow-style top-level on object syntax', () => {
             const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-release-workflow-multiline-flow-on-object-nested-'));
             const workflowPath = path.join(tempRoot, 'release.yml');

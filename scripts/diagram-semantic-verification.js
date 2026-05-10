@@ -926,7 +926,8 @@ function resolveWorkflowOnTriggerConfig(workflowSource) {
             const onMatch = matchYamlKeyValueLine(line, 'on');
             if (onMatch) {
                 const inlineOnValue = onMatch[1].trim();
-                if (!inlineOnValue) {
+                const normalizedInlineOnValue = inlineOnValue.replace(/\s+#.*$/, '').trim();
+                if (!normalizedInlineOnValue) {
                     inOnBlock = true;
                     onIndent = indent;
                     onSequenceIndent = -1;
@@ -936,7 +937,7 @@ function resolveWorkflowOnTriggerConfig(workflowSource) {
                     inPushTagsBlock = false;
                     pushTagsItemIndent = -1;
                     pushTagsDirectListEligible = true;
-                } else if (inlineOnValue === '{') {
+                } else if (normalizedInlineOnValue === '{') {
                     inOnBlock = true;
                     onIndent = indent;
                     onSequenceIndent = -1;
@@ -947,7 +948,7 @@ function resolveWorkflowOnTriggerConfig(workflowSource) {
                     pushTagsItemIndent = -1;
                     pushTagsDirectListEligible = true;
                 } else {
-                    const inlineOnConfig = resolveInlineOnTriggerConfig(inlineOnValue);
+                    const inlineOnConfig = resolveInlineOnTriggerConfig(normalizedInlineOnValue);
                     if (inlineOnConfig.hasWorkflowDispatch) {
                         hasWorkflowDispatch = true;
                     }
@@ -969,7 +970,8 @@ function resolveWorkflowOnTriggerConfig(workflowSource) {
             const onMatch = matchYamlKeyValueLine(line, 'on');
             if (onMatch) {
                 const inlineOnValue = onMatch[1].trim();
-                if (!inlineOnValue) {
+                const normalizedInlineOnValue = inlineOnValue.replace(/\s+#.*$/, '').trim();
+                if (!normalizedInlineOnValue) {
                     inOnBlock = true;
                     onIndent = indent;
                     onSequenceIndent = -1;
@@ -977,7 +979,7 @@ function resolveWorkflowOnTriggerConfig(workflowSource) {
                     pushTopLevelKeyIndent = -1;
                     pushTagsItemIndent = -1;
                     pushTagsDirectListEligible = true;
-                } else if (inlineOnValue === '{') {
+                } else if (normalizedInlineOnValue === '{') {
                     inOnBlock = true;
                     onIndent = indent;
                     onSequenceIndent = -1;
@@ -988,7 +990,7 @@ function resolveWorkflowOnTriggerConfig(workflowSource) {
                     pushTagsItemIndent = -1;
                     pushTagsDirectListEligible = true;
                 } else {
-                    const inlineOnConfig = resolveInlineOnTriggerConfig(inlineOnValue);
+                    const inlineOnConfig = resolveInlineOnTriggerConfig(normalizedInlineOnValue);
                     if (inlineOnConfig.hasWorkflowDispatch) {
                         hasWorkflowDispatch = true;
                     }
