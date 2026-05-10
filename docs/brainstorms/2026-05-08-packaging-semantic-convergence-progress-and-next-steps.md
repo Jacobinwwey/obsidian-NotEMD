@@ -66,6 +66,8 @@ Goals:
    Trigger detection now only trusts `on.push.tags` and ignores unrelated `tags:` blocks in other workflow sections, reducing false positives from matrix/env metadata keys.
 10. **Inline push tag syntax is now parsed**
    Release trigger checks now also parse inline push object forms (for example `push: { tags: ["*.*.*"] }`), reducing drift risk when workflow YAML is compacted.
+11. **Inline top-level `on` object syntax is now parsed**
+   Release trigger checks now also parse compact top-level `on` object forms (for example `on: { push: { tags: ["*.*.*"] }, workflow_dispatch: {} }`), preserving trigger-guard truth when event declarations are fully inlined.
 
 ### Still open beyond convergence hardening
 

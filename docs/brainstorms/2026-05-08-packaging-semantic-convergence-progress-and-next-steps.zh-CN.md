@@ -66,6 +66,8 @@ topic: packaging-semantic-convergence-progress-and-next-steps
    触发检测现在只信任 `on.push.tags`，会忽略工作流其他区块中的 `tags:` 字段，降低来自 matrix/env 元数据键的误报风险。
 10. **内联 push tag 语法已纳入解析**
    release 触发检查现在也会解析内联 push 对象写法（例如 `push: { tags: ["*.*.*"] }`），降低 workflow YAML 紧凑化改写后的漂移风险。
+11. **顶层内联 `on` 对象语法已纳入解析**
+   release 触发检查现在也会解析紧凑的顶层 `on` 对象写法（例如 `on: { push: { tags: ["*.*.*"] }, workflow_dispatch: {} }`），在事件声明完全内联时仍可保持触发防护真值稳定。
 
 ### 尚未进入实现层的边界
 

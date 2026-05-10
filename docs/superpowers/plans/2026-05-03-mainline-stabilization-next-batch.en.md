@@ -218,5 +218,6 @@ This implementation plan is no longer purely forward-looking. The planned batch 
 - Stage-B release-trigger guardrail checks are now less YAML-format fragile: workflow tag parsing accepts mixed quote styles in `tags:` entries and explicitly treats `v*.*.*` wildcard patterns as contract violations.
 - Stage-B release-trigger checks now also tighten scope: tag trigger detection is constrained to `on.push.tags`, preventing unrelated `tags:` keys in other workflow sections from producing false contract signals.
 - Stage-B release-trigger parsing now also handles compact inline push forms (`push: { tags: [...] }`) in addition to multiline YAML blocks, so format-only compaction keeps contract checks stable.
+- Stage-B release-trigger parsing now also handles fully inlined top-level `on` objects (for example `on: { push: { tags: [...] }, workflow_dispatch: {} }`), preserving trigger-guard checks under compact workflow declarations.
 
 The remaining work after this plan is therefore not “finish creating the runbook” or “finish the first packaging clarification.” Those pieces now exist. The remaining work is to preserve that checked-in truth while deciding whether the next real implementation step is heavy-runtime packaging isolation or a later contract-promotion slice.

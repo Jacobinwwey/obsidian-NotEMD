@@ -554,6 +554,112 @@ function extractInlinePushTagPatterns(pushValue) {
     return parseInlineWorkflowTagPatterns(tagsMatch[1].trim());
 }
 
+function extractInlineObjectFieldValue(sourceValue, fieldName) {
+    const fieldPattern = new RegExp(`\\b${fieldName}\\s*:\\s*`);
+    const fieldMatch = fieldPattern.exec(sourceValue);
+    if (!fieldMatch) {
+        return '';
+    }
+
+    const valueStart = fieldMatch.index + fieldMatch[0].length;
+    let braceDepth = 0;
+    let bracketDepth = 0;
+    let parenDepth = 0;
+    let activeQuote = '';
+
+    for (let cursor = valueStart; cursor < sourceValue.length; cursor += 1) {
+        const char = sourceValue[cursor];
+        const previousChar = cursor > valueStart ? sourceValue[cursor - 1] : '';
+
+        if (activeQuote) {
+            if (char === activeQuote && previousChar !== '\\') {
+                activeQuote = '';
+            }
+            continue;
+        }
+
+        if (char === '"' || char === '\'' || char === '`') {
+            activeQuote = char;
+            continue;
+        }
+
+        if (char === '{') {
+            braceDepth += 1;
+            continue;
+        }
+
+        if (char === '}') {
+            if (braceDepth > 0) {
+                braceDepth -= 1;
+                continue;
+            }
+            return sourceValue.slice(valueStart, cursor).trim();
+        }
+
+        if (char === '[') {
+            bracketDepth += 1;
+            continue;
+        }
+
+        if (char === ']') {
+            if (bracketDepth > 0) {
+                bracketDepth -= 1;
+            }
+            continue;
+        }
+
+        if (char === '(') {
+            parenDepth += 1;
+            continue;
+        }
+
+        if (char === ')') {
+            if (parenDepth > 0) {
+                parenDepth -= 1;
+            }
+            continue;
+        }
+
+        if (char === ',' && braceDepth === 0 && bracketDepth === 0 && parenDepth === 0) {
+            return sourceValue.slice(valueStart, cursor).trim();
+        }
+    }
+
+    return sourceValue.slice(valueStart).trim();
+}
+
+function resolveInlineOnTriggerConfig(onValue) {
+    const normalizedValue = onValue.replace(/\s+#.*$/, '').trim();
+    if (!normalizedValue) {
+        return {
+            hasWorkflowDispatch: false,
+            workflowTagPatterns: []
+        };
+    }
+
+    if (normalizedValue.startsWith('{')) {
+        const pushValue = extractInlineObjectFieldValue(normalizedValue, 'push');
+        const hasWorkflowDispatch = /\bworkflow_dispatch\s*:/.test(normalizedValue);
+        return {
+            hasWorkflowDispatch,
+            workflowTagPatterns: pushValue ? extractInlinePushTagPatterns(pushValue) : []
+        };
+    }
+
+    if (normalizedValue.startsWith('[') && normalizedValue.endsWith(']')) {
+        const events = parseInlineWorkflowTagPatterns(normalizedValue);
+        return {
+            hasWorkflowDispatch: events.includes('workflow_dispatch'),
+            workflowTagPatterns: []
+        };
+    }
+
+    return {
+        hasWorkflowDispatch: normalizeWorkflowTagPattern(normalizedValue) === 'workflow_dispatch',
+        workflowTagPatterns: []
+    };
+}
+
 function resolveWorkflowOnTriggerConfig(workflowSource) {
     const lines = workflowSource.split(/\r?\n/);
     const workflowTagPatterns = [];
@@ -571,11 +677,21 @@ function resolveWorkflowOnTriggerConfig(workflowSource) {
         const isMeaningfulLine = Boolean(trimmed) && !trimmed.startsWith('#');
 
         if (!inOnBlock) {
-            if (/^\s*on\s*:\s*$/.test(line)) {
-                inOnBlock = true;
-                onIndent = indent;
-                inPushBlock = false;
-                inPushTagsBlock = false;
+            const onMatch = line.match(/^\s*on\s*:\s*(.*)$/);
+            if (onMatch) {
+                const inlineOnValue = onMatch[1].trim();
+                if (!inlineOnValue) {
+                    inOnBlock = true;
+                    onIndent = indent;
+                    inPushBlock = false;
+                    inPushTagsBlock = false;
+                } else {
+                    const inlineOnConfig = resolveInlineOnTriggerConfig(inlineOnValue);
+                    if (inlineOnConfig.hasWorkflowDispatch) {
+                        hasWorkflowDispatch = true;
+                    }
+                    workflowTagPatterns.push(...inlineOnConfig.workflowTagPatterns);
+                }
             }
             continue;
         }
@@ -584,9 +700,19 @@ function resolveWorkflowOnTriggerConfig(workflowSource) {
             inOnBlock = false;
             inPushBlock = false;
             inPushTagsBlock = false;
-            if (/^\s*on\s*:\s*$/.test(line)) {
-                inOnBlock = true;
-                onIndent = indent;
+            const onMatch = line.match(/^\s*on\s*:\s*(.*)$/);
+            if (onMatch) {
+                const inlineOnValue = onMatch[1].trim();
+                if (!inlineOnValue) {
+                    inOnBlock = true;
+                    onIndent = indent;
+                } else {
+                    const inlineOnConfig = resolveInlineOnTriggerConfig(inlineOnValue);
+                    if (inlineOnConfig.hasWorkflowDispatch) {
+                        hasWorkflowDispatch = true;
+                    }
+                    workflowTagPatterns.push(...inlineOnConfig.workflowTagPatterns);
+                }
             }
             continue;
         }
