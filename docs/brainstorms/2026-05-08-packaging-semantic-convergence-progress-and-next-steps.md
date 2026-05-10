@@ -80,6 +80,8 @@ Goals:
    Release trigger checks now also parse `on` sequence mapping forms for workflow dispatch (for example `- workflow_dispatch: {}` and `- 'workflow_dispatch': {}`), reducing drift under sequence-map event declarations.
 17. **Nested non-event workflow-dispatch keys are now guarded from false positives**
    Event-key detection is now constrained to top-level `on` mappings, preventing nested keys such as `workflow_call.inputs.workflow_dispatch` from being misinterpreted as release-trigger events.
+18. **Inline push nested tags are now guarded from false positives**
+   Inline `push` trigger parsing now only trusts top-level `push.tags` fields, preventing nested keys such as `push.filters.tags` from being misinterpreted as release-tag triggers.
 
 ### Still open beyond convergence hardening
 

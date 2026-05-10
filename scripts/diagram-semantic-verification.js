@@ -726,6 +726,11 @@ function extractInlinePushTagPatterns(pushValue) {
         return [];
     }
 
+    if (normalizedValue.startsWith('{') && normalizedValue.endsWith('}')) {
+        const topLevelTagsValue = extractInlineObjectFieldValue(normalizedValue, 'tags');
+        return topLevelTagsValue ? parseInlineWorkflowTagPatterns(topLevelTagsValue) : [];
+    }
+
     const tagsMatch = normalizedValue.match(
         new RegExp(`${buildYamlKeyPattern('tags')}\\s*:\\s*(\\[[^\\]]*\\]|[^,}]+)`)
     );
