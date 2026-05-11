@@ -320,3 +320,11 @@ npm run audit:render-host
    - `docs/brainstorms/2026-05-11-folder-task-file-filtering-progress-and-architecture-alignment.zh-CN.md`
 
 该切片仍与本计划稳定化哲学一致：收敛边界、防止漂移，并避免在同一切片中扩散到无关的 runtime-packaging 范围。
+
+### 2026-05-11 扩展更新（契约 + UX 加固）
+
+同一文件夹任务轨道又推进了两个 CI-safe 增量切片：
+
+1. 原文提取文件夹工作流的 operation 契约已补齐：`src/operations/registry.ts` 新增 `content.batch-extract-original-text`，并由 `operationsRegistry`、`cliContracts`、`cliCapabilityManifest` 三层测试锁定。
+2. 设置页 UX 加固已落地：在文件夹任务筛选区域新增 regex/glob 语法指引，并加入非阻塞的 regex 早期校验提示（`src/ui/NotemdSettingTab.ts`）。
+3. i18n 与 settings-audit 覆盖同批扩展，在保持多语言安全的同时降低了“执行任务后才暴露 pattern 错误”的延迟发现成本。

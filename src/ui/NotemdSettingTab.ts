@@ -81,6 +81,26 @@ export class NotemdSettingTab extends PluginSettingTab {
         return normalized;
     }
 
+    private getRegexValidationError(pattern: string, caseSensitive: boolean): string | null {
+        const normalizedPattern = pattern.trim();
+        if (!normalizedPattern) {
+            return null;
+        }
+
+        try {
+            const flags = caseSensitive ? '' : 'i';
+            // Compile only for early validation; execution remains in task runtime.
+            // eslint-disable-next-line no-new
+            new RegExp(normalizedPattern, flags);
+            return null;
+        } catch (error: unknown) {
+            if (error instanceof Error && error.message) {
+                return error.message;
+            }
+            return 'Unknown regex syntax error';
+        }
+    }
+
     private addDeferredTextSetting(
         setting: Setting,
         options: {
@@ -915,6 +935,15 @@ export class NotemdSettingTab extends PluginSettingTab {
                 .onChange(async (value: 'none' | 'contains' | 'regex' | 'glob') => {
                     this.plugin.settings.folderTaskFileFilterMode = value;
                     await this.plugin.saveSettings();
+                    if (value === 'regex') {
+                        const regexError = this.getRegexValidationError(
+                            this.plugin.settings.folderTaskFileFilterPattern,
+                            this.plugin.settings.folderTaskFileFilterCaseSensitive
+                        );
+                        if (regexError) {
+                            new Notice(formatI18n(folderTaskFilterI18n.invalidRegexNotice, { message: regexError }), 9000);
+                        }
+                    }
                 }));
 
         this.addDeferredTextSetting(
@@ -927,9 +956,22 @@ export class NotemdSettingTab extends PluginSettingTab {
                 onCommit: async (value) => {
                     this.plugin.settings.folderTaskFileFilterPattern = value;
                     await this.plugin.saveSettings();
+                    if (this.plugin.settings.folderTaskFileFilterMode === 'regex') {
+                        const regexError = this.getRegexValidationError(
+                            value,
+                            this.plugin.settings.folderTaskFileFilterCaseSensitive
+                        );
+                        if (regexError) {
+                            new Notice(formatI18n(folderTaskFilterI18n.invalidRegexNotice, { message: regexError }), 9000);
+                        }
+                    }
                 }
             }
         );
+
+        new Setting(containerEl)
+            .setName(folderTaskFilterI18n.syntaxGuideName)
+            .setDesc(folderTaskFilterI18n.syntaxGuideDesc);
 
         new Setting(containerEl)
             .setName(folderTaskFilterI18n.targetName)

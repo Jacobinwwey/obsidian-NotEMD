@@ -115,6 +115,9 @@ describe('settings page i18n coverage', () => {
         expect(en.settings.processing.heading).toBeDefined();
         expect(en.settings.batchProcessing.heading).toBeDefined();
         expect(en.settings.folderTaskFilter.heading).toBeDefined();
+        expect(en.settings.folderTaskFilter.syntaxGuideName).toBeDefined();
+        expect(en.settings.folderTaskFilter.syntaxGuideDesc).toBeDefined();
+        expect(en.settings.folderTaskFilter.invalidRegexNotice).toBeDefined();
         expect(en.settings.batchMermaidFix.heading).toBeDefined();
         expect(en.settings.duplicateScope.heading).toBeDefined();
         expect(en.settings.focusedLearning.heading).toBeDefined();
@@ -122,8 +125,20 @@ describe('settings page i18n coverage', () => {
         expect(zhCn.settings.extractOriginalText.heading).not.toBe(en.settings.extractOriginalText.heading);
         expect(zhCn.settings.webResearch.heading).not.toBe(en.settings.webResearch.heading);
         expect(zhCn.settings.folderTaskFilter.heading).not.toBe(en.settings.folderTaskFilter.heading);
+        expect(zhCn.settings.folderTaskFilter.syntaxGuideName).not.toBe(en.settings.folderTaskFilter.syntaxGuideName);
+        expect(zhCn.settings.folderTaskFilter.invalidRegexNotice).not.toBe(en.settings.folderTaskFilter.invalidRegexNotice);
         expect(zhTw.settings.batchMermaidFix.heading).not.toBe(en.settings.batchMermaidFix.heading);
         expect(zhTw.settings.focusedLearning.heading).not.toBe(en.settings.focusedLearning.heading);
+        expect(zhTw.settings.folderTaskFilter.syntaxGuideName).not.toBe(en.settings.folderTaskFilter.syntaxGuideName);
+        expect(zhTw.settings.folderTaskFilter.invalidRegexNotice).not.toBe(en.settings.folderTaskFilter.invalidRegexNotice);
+    });
+
+    test('uses i18n keys for folder filter syntax guidance and regex warning', () => {
+        const source = fs.readFileSync(settingsTabPath, 'utf8');
+
+        expect(source).toContain('folderTaskFilterI18n.syntaxGuideName');
+        expect(source).toContain('folderTaskFilterI18n.syntaxGuideDesc');
+        expect(source).toContain('folderTaskFilterI18n.invalidRegexNotice');
     });
 
     test('ships catalog keys for upper settings sections in english and chinese locales', () => {

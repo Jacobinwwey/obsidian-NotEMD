@@ -137,7 +137,17 @@ This slice closes the previously identified operation-layer gap for folder-scope
 5. regression tests were expanded and now lock this operation through:
    `operationsRegistry`, `cliContracts`, and `cliCapabilityManifest` coverage.
 
-## 11. Mainline And Workspace Hygiene Outcome
+## 11. Incremental Progress Update (Filter Syntax Guidance And Early Regex Warning)
+
+The next low-risk UX hardening slice from the plan is now landed:
+
+1. settings now include an explicit pattern-syntax guidance row under folder-task filtering, with canonical regex/glob examples and target-alignment reminder.
+2. when filter mode is set to `regex`, pattern edits and mode-switch now run non-blocking compile validation in settings.
+3. invalid regex now surfaces an immediate localized notice in settings, but values are still saved to avoid blocking advanced editing workflows.
+4. this keeps runtime behavior unchanged while reducing delayed failure discovery (users no longer need to run a full folder task before seeing syntax issues).
+5. i18n and regression coverage were updated to lock the new keys and settings-tab key usage.
+
+## 12. Mainline And Workspace Hygiene Outcome
 
 This slice is ready for mainline landing under existing CI discipline:
 

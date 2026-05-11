@@ -137,7 +137,17 @@ topic: folder-task-file-filtering-progress-and-architecture-alignment
 5. 回归测试已扩展并锁定该 operation 在以下层面的可见性与契约稳定性：
    `operationsRegistry`、`cliContracts`、`cliCapabilityManifest`。
 
-## 11. 主线落盘与工作区卫生结论
+## 11. 增量进展更新（筛选语法指引与 Regex 早期提示）
+
+按既定路线的下一步低风险 UX 加固切片已落地：
+
+1. 在文件夹任务筛选区域新增“模式语法指引”设置行，提供 regex/glob 规范示例与匹配目标对齐提醒。
+2. 当筛选模式为 `regex` 时，用户在设置页修改模式串或切换到 regex 模式会触发非阻塞编译校验。
+3. 若 regex 无效，设置页立即给出本地化提示；但仍保留保存行为，不阻断高级用户的连续编辑流程。
+4. 该改动不改变任务运行时默认语义，仅把错误暴露时机前移，降低“执行批处理后才发现 pattern 错误”的延迟成本。
+5. i18n 与回归覆盖已同步更新，锁定新增 key 与设置页对 key 的使用。
+
+## 12. 主线落盘与工作区卫生结论
 
 该切片已具备主线落盘条件：
 
