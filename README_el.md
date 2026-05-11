@@ -24,7 +24,7 @@
 
 Αν αγαπάτε να χρησιμοποιείτε το Notemd, παρακαλούμε σκεφτείτε [⭐ να δώσετε ένα αστέρι στο GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) ή [☕️ να μου αγοράσετε έναν καφέ](https://ko-fi.com/jacobinwwey).
 
-**Έκδοση:** 1.8.6
+**Έκδοση:** 1.8.7
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
@@ -684,7 +684,7 @@
 ---
 
 
-*Notemd v1.8.6 - Βελτιώστε το γράφημα γνώσης σας στο Obsidian με AI.*
+*Notemd v1.8.7 - Βελτιώστε το γράφημα γνώσης σας στο Obsidian με AI.*
 
 
 <!-- repo-chronicle:start -->
@@ -694,7 +694,7 @@
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.el.svg)
 
-_Τελευταία ανανέωση για την ετικέτα έκδοσης `1.8.6` στις 2026-05-10. Ημερομηνία τελευταίου commit: 2026-05-10._
+_Τελευταία ανανέωση για την ετικέτα έκδοσης `1.8.7` στις 2026-05-11. Ημερομηνία τελευταίου commit: 2026-05-11._
 <!-- repo-chronicle:end -->
 
 

@@ -166,3 +166,44 @@ This slice is ready for mainline landing under existing CI discipline:
 - progress and architecture comparison are persisted and traceable.
 - next-step direction is explicit.
 - branch is intended to be merged/pushed on `main` with post-push clean-status verification.
+
+## 14. 1.8.7 Release Convergence Assessment (Deep Comparison + Next Direction)
+
+This release cut (`1.8.7`) closes the gap between "feature landed" and "release truth fully converged" for the folder-task track.
+
+### 14.1 Current-Code vs Prior-Plan Delta
+
+Compared against the earlier plan requirements in this document:
+
+1. **Shared selector contract requirement** is now not only implemented but also exposed as release-facing truth through welcome digest + release notes + changelog synchronization.
+2. **Optional `includeSubfolders` requirement** remains stable with `legacy` default compatibility explicitly preserved and documented at release level.
+3. **`relativePath`/`basename` target-selection requirement** remains settings-driven and regression-locked with no rollback pressure from release packaging constraints.
+4. **Robustness requirement** now includes an additional anti-drift guarantee:
+   regex syntax precheck and runtime regex compile path reuse the same helper (`getFolderTaskRegexValidationError`).
+5. **CI-safe discipline requirement** remains satisfied through full-gate verification before release publication.
+
+### 14.2 Architecture Advancement Status
+
+Progress relative to prior architecture direction is now:
+
+1. **Contract-layer convergence: complete for this wave**
+   selector semantics, host-adapter override merge, operation contract registration, and settings UX guidance are now all aligned.
+2. **Cross-layer consistency: significantly improved**
+   settings-side validation and runtime-side behavior now share validation truth for regex.
+3. **Release-surface consistency: complete for this wave**
+   package metadata, docs, changelog, welcome digest, and bilingual release notes are synchronized on the same boundary.
+
+### 14.3 Remaining Risks And Controls
+
+1. **Risk:** regex/glob usability complexity for non-technical users still exists.
+   **Control:** keep syntax guidance lightweight and non-blocking; avoid constraining advanced patterns.
+2. **Risk:** future operation additions could bypass shared override helper and reintroduce drift.
+   **Control:** enforce `applyFolderTaskSelectionOverride` usage in new folder-scope operation adapters and lock via contract tests.
+3. **Risk:** long-term migration away from `legacy` include-subfolders default may still create compatibility risk.
+   **Control:** treat any default migration as a dedicated compatibility rollout with explicit regression matrix and staged communication.
+
+### 14.4 Next Direction (Post-1.8.7)
+
+1. Continue packaging / semantic-verification convergence on the existing Stage-B2 track without mixing runtime-boundary topology work into folder-task slices.
+2. Expand operation-contract parity checks for any newly added folder actions by default in `operationsRegistry` + `cliContracts` + `cliCapabilityManifest`.
+3. Add one focused UX experiment for filter presets/examples, but keep behavior contract and runtime semantics unchanged.

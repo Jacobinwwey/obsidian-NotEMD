@@ -4,6 +4,43 @@ This document summarizes the major functional and architectural changes implemen
 
 ---
 
+## 1.8.7
+
+### Highlights
+
+- Folder-task file selection now uses one shared contract across process/extract/translate/fix flows.
+- Operation-level folder selection overrides are now consistently supported and regression-locked for folder workflows including batch extract original text.
+- Regex validation semantics are now converged between settings UI and runtime matcher compilation to reduce drift and late-failure surprises.
+- Version metadata, welcome-modal digest, and bilingual release notes are synchronized for the `1.8.7` boundary.
+
+### New Features
+
+- **Shared Folder Selector Contract**: Added and adopted a shared folder-task selector foundation in `src/folderTaskFileSelector.ts` across:
+  - `process folder (add links)`
+  - `extract concepts (folder)`
+  - `batch translate folder` (with legacy non-recursive compatibility retained by default)
+  - `batch formula fix` and related folder-level utility paths
+- **Operation-Level Folder Override Convergence**: Folder-scope operation inputs now consistently accept optional override fields:
+  - `includeSubfoldersMode`
+  - `fileFilterMode`
+  - `fileFilterPattern`
+  - `fileFilterTarget`
+  - `fileFilterCaseSensitive`
+  - `fileFilterInvert`
+- **Batch Extract Original Text Contract Completion**: `content.batch-extract-original-text` operation now ships with aligned command metadata, input schema, and result schema parity.
+
+### Fixes
+
+- **Regex Validation Drift Removal**: Introduced `getFolderTaskRegexValidationError` in selector layer and switched settings UI to reuse it instead of duplicated local regex checking.
+- **Host Adapter Override Stability**: Added regression coverage to lock override semantics and base-settings non-mutation guarantees for batch extract original text host adapter flows.
+- **Earlier Invalid-Pattern Detection**: Regex mode now surfaces immediate settings-level warning while preserving non-blocking editing behavior.
+
+### Chores
+
+- Added `docs/releases/1.8.7.md` and `docs/releases/1.8.7.zh-CN.md`.
+- Updated welcome-modal latest-two release digest from `1.8.6/1.8.5` to `1.8.7/1.8.6`.
+- Extended progress/architecture alignment docs and superpowers stabilization plan with the 1.8.7 release convergence assessment.
+
 ## 1.8.6
 
 ### Highlights

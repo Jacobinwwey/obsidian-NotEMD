@@ -329,3 +329,18 @@ npm run audit:render-host
 2. 设置页 UX 加固已落地：在文件夹任务筛选区域新增 regex/glob 语法指引，并加入非阻塞的 regex 早期校验提示（`src/ui/NotemdSettingTab.ts`）。
 3. i18n 与 settings-audit 覆盖同批扩展，在保持多语言安全的同时降低了“执行任务后才暴露 pattern 错误”的延迟发现成本。
 4. regex 预检语义已通过 selector 层共享 helper（`getFolderTaskRegexValidationError`）收敛，host-adapter 回归也已锁定 batch-extract 覆盖行为与 base settings 不变性保障。
+
+## 2026-05-11 发布对齐更新（1.8.7）
+
+主线稳定化在本轨道已进入“发布边界收敛”里程碑：
+
+1. 版本边界已同步到 `1.8.7`：包元数据、manifest 兼容映射、change log、README 标记、欢迎弹窗最近两次摘要（`1.8.7`/`1.8.6`）一致；
+2. 双语 release notes 已固化本轮最终契约语义：文件夹任务筛选、operation 级覆盖参数、共享 regex 校验语义收敛；
+3. 进度文档已补齐对先前方案要求的深度对比、架构推进状态、残余风险控制与发布后推进方向；
+4. 该里程碑仍严格处于“稳定化范围”，未扩散到 runtime packaging 拓扑改造。
+
+`1.8.7` 之后的计划状态解释：
+
+1. 文件夹任务筛选收敛在当前范围内已完成 release 级闭环；
+2. 下一关键路径仍是 Stage-B2 护栏下的 packaging / semantic-verification convergence；
+3. CI 纪律保持不变：每次主线落盘前都必须完成全量门禁。

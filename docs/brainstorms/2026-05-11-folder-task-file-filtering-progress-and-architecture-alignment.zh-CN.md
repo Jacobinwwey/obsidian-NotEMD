@@ -166,3 +166,44 @@ topic: folder-task-file-filtering-progress-and-architecture-alignment
 - 进度对比与架构推进评估已文档化并可追溯。
 - 后续方向明确且可执行。
 - 计划在 `main` 上提交推送后执行 clean 状态复核。
+
+## 14. 1.8.7 发布收敛评估（深度对比 + 后续方向）
+
+本次 `1.8.7` 发布切点补齐了“功能已落地”到“发布真值完全收敛”之间的最后差距。
+
+### 14.1 现有代码与先前方案差异对比
+
+对照本文前述方案要求，当前状态如下：
+
+1. **共享 selector 契约要求** 不仅已实现，还已同步到欢迎弹窗摘要、release notes、change log，形成发布层可见真值。
+2. **`includeSubfolders` 可选且兼容要求** 继续保持：`legacy` 默认兼容行为未变化，并在发布文档中显式固化。
+3. **`relativePath`/`basename` 目标切换要求** 继续维持设置驱动与回归锁定，未被发布流程或打包边界改动打断。
+4. **稳定性要求** 在本轮新增一层反漂移保障：
+   regex 预检与运行时编译统一复用 `getFolderTaskRegexValidationError`。
+5. **CI-safe 纪律要求** 仍通过完整门禁验证后再发布，未出现“先发后补测”的逆序风险。
+
+### 14.2 架构推进状态评估
+
+相对既有架构方向，本轮推进状态为：
+
+1. **契约层收敛：本阶段完成**
+   selector 语义、host-adapter 覆盖合成、operation 契约注册、设置页提示已对齐。
+2. **跨层一致性：显著提升**
+   设置页校验与运行时行为共享 regex 校验真值，减少双实现漂移面。
+3. **发布面一致性：本阶段完成**
+   包元数据、文档、变更记录、欢迎弹窗摘要、双语 release notes 在同一版本边界上同步。
+
+### 14.3 剩余风险与控制
+
+1. **风险：** regex/glob 对非技术用户仍有理解门槛。
+   **控制：** 继续保持轻量语法指引与非阻塞编辑，不牺牲高级语法。
+2. **风险：** 后续新 operation 可能绕过共享覆盖 helper，导致漂移回归。
+   **控制：** 新文件夹 operation adapter 强制复用 `applyFolderTaskSelectionOverride`，并通过契约测试锁定。
+3. **风险：** 未来若调整 `legacy` 默认语义，兼容风险仍高。
+   **控制：** 将默认语义迁移单独作为兼容性专项交付，配套显式回归矩阵与分阶段说明。
+
+### 14.4 后续推进方向（1.8.7 之后）
+
+1. 按既定 Stage-B2 路线继续推进 packaging / semantic-verification convergence，不把 runtime-boundary 拓扑改造混入文件夹任务切片。
+2. 对新增文件夹动作默认补齐 `operationsRegistry` + `cliContracts` + `cliCapabilityManifest` 三层契约对齐检查。
+3. 在不改变行为契约前提下，做一次聚焦的筛选预设/示例 UX 强化实验。

@@ -329,3 +329,18 @@ The same folder-task track advanced in two additional CI-safe increments:
 2. settings UX hardening now adds explicit regex/glob syntax guidance and non-blocking early regex validation notices under folder-task filtering (`src/ui/NotemdSettingTab.ts`).
 3. i18n and settings-audit coverage were extended in the same slice, preserving locale-safe behavior while reducing delayed pattern-failure discovery.
 4. regex precheck semantics are now converged through a shared selector-layer helper (`getFolderTaskRegexValidationError`), and host-adapter tests now lock batch-extract override behavior plus base-settings non-mutation guarantees.
+
+## 2026-05-11 Release-Alignment Update (1.8.7)
+
+Mainline stabilization now includes a release-boundary convergence milestone for this track:
+
+1. version boundary synchronized to `1.8.7` across package metadata, manifest compatibility map, changelog, README markers, and welcome-modal latest-two digest (`1.8.7`/`1.8.6`);
+2. bilingual release notes now capture the finalized contract-level behavior for folder-task filtering, operation-level overrides, and shared regex validation semantics;
+3. progress docs now include deep comparison against prior plan requirements, explicit architecture-advancement status, residual-risk controls, and post-release direction;
+4. this remains within the stabilization-only envelope and does not broaden into runtime packaging topology changes.
+
+Plan-status interpretation after `1.8.7`:
+
+1. folder-task filtering convergence is now release-complete for the current scope;
+2. next critical path remains packaging / semantic-verification convergence under existing Stage-B2 guardrails;
+3. CI discipline remains unchanged: full gates required before each mainline landing.

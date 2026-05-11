@@ -24,7 +24,7 @@ Notemd vylepšuje váš pracovní postup v Obsidianu integrací s různými velk
 
 Pokud rádi používáte Notemd, zvažte prosím [⭐ dát hvězdu na GitHubu](https://github.com/Jacobinwwey/obsidian-NotEMD) nebo [☕️ koupit mi kávu](https://ko-fi.com/jacobinwwey).
 
-**Verze:** 1.8.6
+**Verze:** 1.8.7
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
@@ -687,7 +687,7 @@ Licence MIT. Podrobnosti naleznete v souboru [LICENSE](LICENSE).
 ---
 
 
-*Notemd v1.8.6 - Vylepšete svůj graf znalostí v Obsidianu pomocí AI.*
+*Notemd v1.8.7 - Vylepšete svůj graf znalostí v Obsidianu pomocí AI.*
 
 
 
@@ -698,7 +698,7 @@ Tato čtvrtletní kronika zachovává původní vizuální styl [repo-saga](http
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.cs.svg)
 
-_Naposledy obnoveno pro tag vydání `1.8.6` dne 2026-05-10. Datum posledního commitu: 2026-05-10._
+_Naposledy obnoveno pro tag vydání `1.8.7` dne 2026-05-11. Datum posledního commitu: 2026-05-11._
 <!-- repo-chronicle:end -->
 
 
