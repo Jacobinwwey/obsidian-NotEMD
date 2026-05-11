@@ -134,6 +134,25 @@ function resolveFilterConfig(settings: NotemdSettings): FolderTaskFileFilterConf
     };
 }
 
+export function getFolderTaskRegexValidationError(pattern: string, caseSensitive: boolean): string | null {
+    const normalizedPattern = pattern.trim();
+    if (!normalizedPattern) {
+        return null;
+    }
+
+    try {
+        // Compile-only validation for deterministic syntax checking.
+        // eslint-disable-next-line no-new
+        new RegExp(normalizedPattern, caseSensitive ? undefined : 'i');
+        return null;
+    } catch (error: unknown) {
+        if (error instanceof Error && error.message) {
+            return error.message;
+        }
+        return 'Unknown regex syntax error';
+    }
+}
+
 export function applyFolderTaskSelectionOverride(
     settings: NotemdSettings,
     override?: FolderTaskFileSelectionOverride
@@ -177,13 +196,11 @@ function createFilterMatcher(filterConfig: FolderTaskFileFilterConfig): FolderTa
     }
 
     if (filterConfig.mode === 'regex') {
-        let regex: RegExp;
-        try {
-            regex = new RegExp(normalizedPattern, filterConfig.caseSensitive ? undefined : 'i');
-        } catch (error: unknown) {
-            const message = error instanceof Error ? error.message : String(error);
-            throw new Error(`Invalid folder task regex pattern "${normalizedPattern}": ${message}`);
+        const validationError = getFolderTaskRegexValidationError(normalizedPattern, filterConfig.caseSensitive);
+        if (validationError) {
+            throw new Error(`Invalid folder task regex pattern "${normalizedPattern}": ${validationError}`);
         }
+        const regex = new RegExp(normalizedPattern, filterConfig.caseSensitive ? undefined : 'i');
         return {
             matcher: (value: string) => regex.test(value),
             noOp: false

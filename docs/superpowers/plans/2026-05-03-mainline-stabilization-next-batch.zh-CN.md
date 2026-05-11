@@ -328,3 +328,4 @@ npm run audit:render-host
 1. 原文提取文件夹工作流的 operation 契约已补齐：`src/operations/registry.ts` 新增 `content.batch-extract-original-text`，并由 `operationsRegistry`、`cliContracts`、`cliCapabilityManifest` 三层测试锁定。
 2. 设置页 UX 加固已落地：在文件夹任务筛选区域新增 regex/glob 语法指引，并加入非阻塞的 regex 早期校验提示（`src/ui/NotemdSettingTab.ts`）。
 3. i18n 与 settings-audit 覆盖同批扩展，在保持多语言安全的同时降低了“执行任务后才暴露 pattern 错误”的延迟发现成本。
+4. regex 预检语义已通过 selector 层共享 helper（`getFolderTaskRegexValidationError`）收敛，host-adapter 回归也已锁定 batch-extract 覆盖行为与 base settings 不变性保障。

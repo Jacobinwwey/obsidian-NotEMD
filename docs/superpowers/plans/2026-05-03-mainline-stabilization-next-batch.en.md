@@ -328,3 +328,4 @@ The same folder-task track advanced in two additional CI-safe increments:
 1. operation contract parity is now complete for original-text folder workflows via `content.batch-extract-original-text` in `src/operations/registry.ts`, with contract/capability coverage in `operationsRegistry`, `cliContracts`, and `cliCapabilityManifest` tests.
 2. settings UX hardening now adds explicit regex/glob syntax guidance and non-blocking early regex validation notices under folder-task filtering (`src/ui/NotemdSettingTab.ts`).
 3. i18n and settings-audit coverage were extended in the same slice, preserving locale-safe behavior while reducing delayed pattern-failure discovery.
+4. regex precheck semantics are now converged through a shared selector-layer helper (`getFolderTaskRegexValidationError`), and host-adapter tests now lock batch-extract override behavior plus base-settings non-mutation guarantees.

@@ -147,7 +147,18 @@ The next low-risk UX hardening slice from the plan is now landed:
 4. this keeps runtime behavior unchanged while reducing delayed failure discovery (users no longer need to run a full folder task before seeing syntax issues).
 5. i18n and regression coverage were updated to lock the new keys and settings-tab key usage.
 
-## 12. Mainline And Workspace Hygiene Outcome
+## 12. Incremental Progress Update (Shared Regex Validation + Adapter Override Lock)
+
+Another stabilization increment is now landed to reduce validation drift between settings UI and runtime selection:
+
+1. regex syntax precheck is now provided by a shared helper in `src/folderTaskFileSelector.ts` (`getFolderTaskRegexValidationError`) instead of duplicated local logic in settings UI.
+2. runtime regex matcher compilation and settings precheck now use the same validation semantics, reducing future mismatch risk.
+3. host-adapter regression coverage now locks `runBatchExtractOriginalTextCommandWithHost` override behavior for both:
+   - `folderPathOverride + fileSelectionOverride` execution semantics
+   - non-mutation guarantee for base settings objects
+4. this keeps command behavior unchanged while hardening contract-to-runtime consistency.
+
+## 13. Mainline And Workspace Hygiene Outcome
 
 This slice is ready for mainline landing under existing CI discipline:
 

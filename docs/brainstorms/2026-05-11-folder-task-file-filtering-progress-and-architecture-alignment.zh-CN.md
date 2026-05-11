@@ -147,7 +147,18 @@ topic: folder-task-file-filtering-progress-and-architecture-alignment
 4. 该改动不改变任务运行时默认语义，仅把错误暴露时机前移，降低“执行批处理后才发现 pattern 错误”的延迟成本。
 5. i18n 与回归覆盖已同步更新，锁定新增 key 与设置页对 key 的使用。
 
-## 12. 主线落盘与工作区卫生结论
+## 12. 增量进展更新（共享 Regex 校验收敛 + Adapter 覆盖锁定）
+
+又一个稳定化增量切片已落地，用于降低设置页与运行时校验语义漂移风险：
+
+1. regex 语法预检已收敛到 `src/folderTaskFileSelector.ts` 的共享 helper（`getFolderTaskRegexValidationError`），不再由设置页本地重复实现。
+2. 运行时 regex matcher 编译与设置页预检现在复用同一套校验语义，降低后续维护中“提示可过但运行时报错”或反向漂移的概率。
+3. host-adapter 回归已锁定 `runBatchExtractOriginalTextCommandWithHost` 的覆盖行为，包括：
+   - `folderPathOverride + fileSelectionOverride` 的执行语义
+   - base settings 对象不被 override 流程污染的保证
+4. 该改动不改变命令默认语义，仅增强契约到执行层的一致性与可回归性。
+
+## 13. 主线落盘与工作区卫生结论
 
 该切片已具备主线落盘条件：
 

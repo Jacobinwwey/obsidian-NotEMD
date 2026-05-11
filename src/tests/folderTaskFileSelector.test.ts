@@ -1,6 +1,10 @@
 import { TFile } from 'obsidian';
 import { DEFAULT_SETTINGS } from '../constants';
-import { applyFolderTaskSelectionOverride, selectFolderTaskFiles } from '../folderTaskFileSelector';
+import {
+    applyFolderTaskSelectionOverride,
+    getFolderTaskRegexValidationError,
+    selectFolderTaskFiles
+} from '../folderTaskFileSelector';
 import { NotemdSettings } from '../types';
 
 function createFile(path: string): TFile {
@@ -167,6 +171,18 @@ describe('folderTaskFileSelector', () => {
             allowedExtensions: ['md'],
             settings
         })).toThrow('Invalid folder task regex pattern');
+    });
+
+    test('getFolderTaskRegexValidationError returns null for valid and empty patterns', () => {
+        expect(getFolderTaskRegexValidationError('^chapter-\\d+\\.md$', true)).toBeNull();
+        expect(getFolderTaskRegexValidationError('   ', false)).toBeNull();
+    });
+
+    test('getFolderTaskRegexValidationError reports deterministic syntax failures', () => {
+        const message = getFolderTaskRegexValidationError('[', true);
+
+        expect(typeof message).toBe('string');
+        expect(message).toBeTruthy();
     });
 
     test('treats empty pattern as no-op even when invert is enabled', () => {

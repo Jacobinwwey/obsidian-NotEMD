@@ -288,6 +288,105 @@ describe('note processing command host adapter', () => {
         }));
     });
 
+    test('batch extract original text command supports folder path override and selection overrides', async () => {
+        const reporter = createReporter();
+        const { host } = createHost(reporter);
+        host.getSettings.mockReturnValue({
+            ...mockSettings,
+            folderTaskFileFilterMode: 'none',
+            folderTaskFileFilterPattern: '',
+            folderTaskFileFilterTarget: 'relativePath',
+            folderTaskFileFilterCaseSensitive: false,
+            folderTaskFileFilterInvert: false
+        });
+        host.getFolderByPath.mockReturnValue({ path: 'Notes' } as any);
+        host.getFiles.mockReturnValue([
+            { name: 'A.md', basename: 'A', path: 'Notes/A.md', extension: 'md' } as any,
+            { name: 'B.md', basename: 'B', path: 'Notes/B.md', extension: 'md' } as any
+        ]);
+
+        const extractImpl = jest.fn().mockResolvedValue({
+            sourcePath: 'Notes/A.md',
+            outputPath: 'Notes/A_Extracted.md',
+            outputDirectory: 'Notes',
+            outputSuffix: '_Extracted',
+            questionCount: 1,
+            mergedMode: false
+        });
+
+        const { runBatchExtractOriginalTextCommandWithHost } = loadModule();
+        const result = await runBatchExtractOriginalTextCommandWithHost(
+            host,
+            reporter,
+            extractImpl,
+            {
+                folderPathOverride: 'Notes',
+                fileSelectionOverride: {
+                    fileFilterMode: 'contains',
+                    fileFilterPattern: 'A',
+                    fileFilterTarget: 'basename',
+                    fileFilterCaseSensitive: true
+                }
+            }
+        );
+
+        expect(host.getFolderSelection).not.toHaveBeenCalled();
+        expect(extractImpl).toHaveBeenCalledTimes(1);
+        expect(extractImpl.mock.calls[0][2].path).toBe('Notes/A.md');
+        expect(result).toEqual(expect.objectContaining({
+            folderPath: 'Notes',
+            processedFileCount: 1,
+            extractedCount: 1,
+            cancelled: false
+        }));
+    });
+
+    test('batch extract original text command does not mutate host settings when overrides are provided', async () => {
+        const reporter = createReporter();
+        const { host } = createHost(reporter);
+        const baseSettings = {
+            ...mockSettings,
+            folderTaskFileFilterMode: 'none' as const,
+            folderTaskFileFilterPattern: '',
+            folderTaskFileFilterTarget: 'relativePath' as const,
+            folderTaskFileFilterCaseSensitive: false,
+            folderTaskFileFilterInvert: false
+        };
+        host.getSettings.mockReturnValue(baseSettings);
+        host.getFolderByPath.mockReturnValue({ path: 'Notes' } as any);
+        host.getFiles.mockReturnValue([
+            { name: 'A.md', basename: 'A', path: 'Notes/A.md', extension: 'md' } as any
+        ]);
+        const extractImpl = jest.fn().mockResolvedValue({
+            sourcePath: 'Notes/A.md',
+            outputPath: 'Notes/A_Extracted.md',
+            outputDirectory: 'Notes',
+            outputSuffix: '_Extracted',
+            questionCount: 1,
+            mergedMode: false
+        });
+        const { runBatchExtractOriginalTextCommandWithHost } = loadModule();
+
+        await runBatchExtractOriginalTextCommandWithHost(
+            host,
+            reporter,
+            extractImpl,
+            {
+                folderPathOverride: 'Notes',
+                fileSelectionOverride: {
+                    fileFilterMode: 'glob',
+                    fileFilterPattern: '**/*.md'
+                }
+            }
+        );
+
+        expect(baseSettings.folderTaskFileFilterMode).toBe('none');
+        expect(baseSettings.folderTaskFileFilterPattern).toBe('');
+        expect(baseSettings.folderTaskFileFilterTarget).toBe('relativePath');
+        expect(baseSettings.folderTaskFileFilterCaseSensitive).toBe(false);
+        expect(baseSettings.folderTaskFileFilterInvert).toBe(false);
+    });
+
     test('create wiki-link and generate command reuses host orchestration and writes generated note path', async () => {
         const reporter = createReporter();
         const { host, getBusy } = createHost(reporter);

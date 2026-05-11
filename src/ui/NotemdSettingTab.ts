@@ -27,6 +27,7 @@ import { UI_LOCALE_AUTO } from '../i18n/languageContext';
 import { SUPPORTED_UI_LOCALES } from '../i18n/uiLocales';
 import { formatI18n, getI18nStrings } from '../i18n';
 import { runProviderConnectionTestWithHost } from '../operations/providerConnectionTestCommandHostAdapter';
+import { getFolderTaskRegexValidationError } from '../folderTaskFileSelector';
 
 // Define specific key types for settings accessed dynamically
 type ProviderSettingKey = 'addLinksProvider' | 'researchProvider' | 'generateTitleProvider' | 'translateProvider';
@@ -79,26 +80,6 @@ export class NotemdSettingTab extends PluginSettingTab {
             return fallback;
         }
         return normalized;
-    }
-
-    private getRegexValidationError(pattern: string, caseSensitive: boolean): string | null {
-        const normalizedPattern = pattern.trim();
-        if (!normalizedPattern) {
-            return null;
-        }
-
-        try {
-            const flags = caseSensitive ? '' : 'i';
-            // Compile only for early validation; execution remains in task runtime.
-            // eslint-disable-next-line no-new
-            new RegExp(normalizedPattern, flags);
-            return null;
-        } catch (error: unknown) {
-            if (error instanceof Error && error.message) {
-                return error.message;
-            }
-            return 'Unknown regex syntax error';
-        }
     }
 
     private addDeferredTextSetting(
@@ -936,7 +917,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                     this.plugin.settings.folderTaskFileFilterMode = value;
                     await this.plugin.saveSettings();
                     if (value === 'regex') {
-                        const regexError = this.getRegexValidationError(
+                        const regexError = getFolderTaskRegexValidationError(
                             this.plugin.settings.folderTaskFileFilterPattern,
                             this.plugin.settings.folderTaskFileFilterCaseSensitive
                         );
@@ -957,7 +938,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                     this.plugin.settings.folderTaskFileFilterPattern = value;
                     await this.plugin.saveSettings();
                     if (this.plugin.settings.folderTaskFileFilterMode === 'regex') {
-                        const regexError = this.getRegexValidationError(
+                        const regexError = getFolderTaskRegexValidationError(
                             value,
                             this.plugin.settings.folderTaskFileFilterCaseSensitive
                         );
