@@ -133,6 +133,12 @@ export interface NotemdSettings {
     batchConcurrency: number;
     batchSize: number;
     batchInterDelayMs: number;
+    folderTaskFileFilterMode: 'none' | 'contains' | 'regex' | 'glob';
+    folderTaskFileFilterPattern: string;
+    folderTaskFileFilterTarget: 'relativePath' | 'basename';
+    folderTaskFileFilterCaseSensitive: boolean;
+    folderTaskFileFilterInvert: boolean;
+    folderTaskIncludeSubfoldersMode: 'legacy' | 'include' | 'exclude';
     apiCallIntervalMs: number;
     autoMermaidFixAfterGenerate: boolean;
     customWorkflowButtonsDsl: string;

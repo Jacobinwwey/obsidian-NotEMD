@@ -1,6 +1,8 @@
 import { App, TFile, TFolder } from 'obsidian';
-import { ProgressReporter } from './types';
+import { NotemdSettings, ProgressReporter } from './types';
+import { DEFAULT_SETTINGS } from './constants';
 import { delay } from './utils';
+import { selectFolderTaskFiles } from './folderTaskFileSelector';
 
 export interface FormulaFixFileResult {
     sourcePath: string;
@@ -80,7 +82,8 @@ export async function fixFormulaFormatsInFile(
 export async function batchFixFormulaFormatsInFolder(
     app: App, 
     folderPath: string, 
-    reporter: ProgressReporter
+    reporter: ProgressReporter,
+    settings: NotemdSettings = DEFAULT_SETTINGS
 ): Promise<BatchFormulaFixResult> {
     
     const folder = app.vault.getAbstractFileByPath(folderPath);
@@ -88,10 +91,13 @@ export async function batchFixFormulaFormatsInFolder(
         throw new Error(`Invalid folder path: ${folderPath}`);
     }
 
-    const files = app.vault.getFiles().filter(f => 
-        (f.extension === 'md' || f.extension === 'txt') &&
-        (f.path === folderPath || f.path.startsWith(folderPath === '/' ? '' : folderPath + '/'))
-    );
+    const files = selectFolderTaskFiles({
+        taskKind: 'batch-fix-formula',
+        folderPath,
+        files: app.vault.getFiles(),
+        allowedExtensions: ['md', 'txt'],
+        settings
+    });
 
     if (files.length === 0) {
         reporter.log(`No eligible files found in ${folderPath}`);

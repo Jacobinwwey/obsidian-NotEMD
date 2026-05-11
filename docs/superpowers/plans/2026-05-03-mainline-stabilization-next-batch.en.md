@@ -307,3 +307,16 @@ Latest Stage-B2 hardening also landed:
 4. release-helper runtime enforcement now includes `validateRequiredReleaseAssets()` and fails fast when `main.js` is missing from required assets, with dedicated coverage in `src/tests/githubReleaseWorkflow.test.ts`
 5. semantic-helper release-contract checks now verify that runtime ownership guard is active and emit explicit incomplete-inspection wording when it cannot be confirmed
 6. runtime ownership-guard detection is now structurally keyed (`RELEASE_ASSET_OWNERSHIP_GUARD_CODE` / `isReleaseAssetOwnershipGuardError`) with legacy message matching only as fallback, reducing wording-coupled drift risk in helper verification
+
+## 2026-05-11 Cross-Track Alignment Update
+
+An additional stabilization slice is now landed on `main` for folder-task processing consistency:
+
+1. a shared folder-task file selector contract is introduced (`src/folderTaskFileSelector.ts`) and wired into process/extract/translate/fix folder paths.
+2. compatibility behavior is preserved by default via `includeSubfolders = legacy`, keeping translation non-recursive unless explicitly configured otherwise.
+3. filter semantics (`none|contains|regex|glob`, `relativePath|basename`, case-sensitivity, invert) are now settings-driven and regression-locked.
+4. progress and architecture comparison are persisted in:
+   - `docs/brainstorms/2026-05-11-folder-task-file-filtering-progress-and-architecture-alignment.md`
+   - `docs/brainstorms/2026-05-11-folder-task-file-filtering-progress-and-architecture-alignment.zh-CN.md`
+
+This remains aligned with the plan’s stabilization philosophy: consolidate boundaries, prevent drift, and avoid unrelated runtime-packaging scope expansion in the same slice.

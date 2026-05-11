@@ -372,7 +372,8 @@ export async function runBatchFixFormulaFormatsCommandWithHost(
             commandResult = await batchFixFormulaFormatsInFolderImpl(
                 host.getApp(),
                 folderPath,
-                useReporter
+                useReporter,
+                host.getSettings()
             );
 
             if (!useReporter.cancelled && commandResult) {

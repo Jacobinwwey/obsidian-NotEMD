@@ -5,6 +5,7 @@ import { callLLM, handleApiError } from './llmUtils';
 import { getSystemPrompt } from './promptUtils';
 import { resolveLanguageDisplayName } from './i18n/languageContext';
 import { formatI18n, getI18nStrings } from './i18n';
+import { selectFolderTaskFiles } from './folderTaskFileSelector';
 
 export interface TranslateFileResult {
     sourcePath: string;
@@ -99,9 +100,13 @@ export async function batchTranslateFolder(
     targetLanguage: string,
     options: BatchTranslateFolderOptions = {}
 ): Promise<BatchTranslateFolderResult> {
-	const files = folder.children.filter(
-		(file): file is TFile => file instanceof TFile && file.extension === 'md'
-	);
+	const files = selectFolderTaskFiles({
+        taskKind: 'batch-translate-folder',
+        folderPath: folder.path,
+        files: app.vault.getFiles(),
+        allowedExtensions: ['md'],
+        settings
+    });
     const result: BatchTranslateFolderResult = {
         folderPath: folder.path,
         requestedOutputFolderPath: (settings.useCustomTranslationSavePath && settings.translationSavePath)

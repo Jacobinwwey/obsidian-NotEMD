@@ -307,3 +307,16 @@ npm run audit:render-host
 4. release-helper 运行时强制约束现已新增 `validateRequiredReleaseAssets()`，在 required assets 丢失 `main.js` 时会快速失败，并由 `src/tests/githubReleaseWorkflow.test.ts` 专项覆盖
 5. semantic-helper 的 release-contract 检查现在会验证运行时归属 guard 是否生效，无法确认时会输出显式的 incomplete-inspection 阻断提示
 6. 运行时归属 guard 检测现已采用结构化键控（`RELEASE_ASSET_OWNERSHIP_GUARD_CODE` / `isReleaseAssetOwnershipGuardError`），旧报错文案匹配仅作为兼容兜底，从而降低 helper 校验对文案漂移的耦合风险
+
+## 2026-05-11 跨轨对齐更新
+
+`main` 上已落地一个额外的稳定化切片，用于提升文件夹任务处理一致性：
+
+1. 新增统一文件夹任务文件选择契约（`src/folderTaskFileSelector.ts`），并接入 process/extract/translate/fix 的文件夹路径。
+2. 默认通过 `includeSubfolders = legacy` 保持兼容行为，翻译任务仍默认非递归，只有显式配置后才改变。
+3. 筛选语义（`none|contains|regex|glob`、`relativePath|basename`、大小写、反向匹配）已设置化并由回归测试锁定。
+4. 进度与架构对比已落盘到：
+   - `docs/brainstorms/2026-05-11-folder-task-file-filtering-progress-and-architecture-alignment.md`
+   - `docs/brainstorms/2026-05-11-folder-task-file-filtering-progress-and-architecture-alignment.zh-CN.md`
+
+该切片仍与本计划稳定化哲学一致：收敛边界、防止漂移，并避免在同一切片中扩散到无关的 runtime-packaging 范围。

@@ -314,7 +314,7 @@ describe('utility command host adapter', () => {
 
         const result = await runBatchFixFormulaFormatsCommandWithHost(host, reporter, batchFixImpl);
 
-        expect(batchFixImpl).toHaveBeenCalledWith(host.getApp(), 'Notes', reporter);
+        expect(batchFixImpl).toHaveBeenCalledWith(host.getApp(), 'Notes', reporter, host.getSettings());
         expect(host.showNotice).toHaveBeenCalledWith('Fixed formulas in 3 files');
         expect(result).toEqual(expect.objectContaining({
             modifiedCount: 3,

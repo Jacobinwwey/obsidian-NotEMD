@@ -1,5 +1,5 @@
 date: 2026-05-08
-last_updated: 2026-05-10
+last_updated: 2026-05-11
 topic: packaging-semantic-convergence-progress-and-next-steps
 ---
 
@@ -282,3 +282,21 @@ The follow-up Stage-B2 guardrail slice is also landed:
 4. release-helper runtime contract now includes `validateRequiredReleaseAssets()` and fails fast when required assets omit `main.js`, with dedicated coverage in `src/tests/githubReleaseWorkflow.test.ts`.
 5. semantic-helper release contract checks now also verify whether that runtime ownership guard is actually active, and emit explicit “runtime guard inspection incomplete” wording when it cannot be confirmed.
 6. semantic-helper runtime-guard verification now prefers structured guard contracts (`RELEASE_ASSET_OWNERSHIP_GUARD_CODE` / `isReleaseAssetOwnershipGuardError`) and keeps legacy error-text checks as compatibility fallback only, so wording-only refactors cannot silently break guard detection.
+
+## 11. 2026-05-11 Cross-Track Progress Sync: Folder-Task File Filtering
+
+A dedicated progress and architecture-alignment artifact is now landed for the folder-task filtering delivery:
+
+- `docs/brainstorms/2026-05-11-folder-task-file-filtering-progress-and-architecture-alignment.md`
+- `docs/brainstorms/2026-05-11-folder-task-file-filtering-progress-and-architecture-alignment.zh-CN.md`
+
+Why this is recorded here:
+
+1. It follows the same anti-drift pattern used in this convergence track: centralized truth, regression lock-in, and same-batch docs sync.
+2. It hardens task orchestration boundaries without reopening runtime packaging scope.
+3. It preserves translation legacy behavior by default (`includeSubfolders = legacy`) while enabling explicit user-controlled recursion and filter semantics.
+
+This keeps mainline progression coherent across tracks:
+
+- packaging/semantic convergence remains focused on runtime-boundary contract truth,
+- while folder-task filtering advances processing-scope consistency using the same CI-safe boundary-hardening discipline.

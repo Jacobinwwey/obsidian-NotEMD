@@ -28,6 +28,11 @@ describe('settings page i18n coverage', () => {
             'Batch Processing',
             'Enable Batch Parallelism',
             'Batch Concurrency',
+            'Folder task file filter',
+            'Filter mode',
+            'Filter pattern',
+            'Match target',
+            'Subfolder scope',
             'Enable duplicate detection',
             'Translate output to corresponding language',
             'Merged query mode',
@@ -109,12 +114,14 @@ describe('settings page i18n coverage', () => {
         expect(en.settings.webResearch.heading).toBeDefined();
         expect(en.settings.processing.heading).toBeDefined();
         expect(en.settings.batchProcessing.heading).toBeDefined();
+        expect(en.settings.folderTaskFilter.heading).toBeDefined();
         expect(en.settings.batchMermaidFix.heading).toBeDefined();
         expect(en.settings.duplicateScope.heading).toBeDefined();
         expect(en.settings.focusedLearning.heading).toBeDefined();
 
         expect(zhCn.settings.extractOriginalText.heading).not.toBe(en.settings.extractOriginalText.heading);
         expect(zhCn.settings.webResearch.heading).not.toBe(en.settings.webResearch.heading);
+        expect(zhCn.settings.folderTaskFilter.heading).not.toBe(en.settings.folderTaskFilter.heading);
         expect(zhTw.settings.batchMermaidFix.heading).not.toBe(en.settings.batchMermaidFix.heading);
         expect(zhTw.settings.focusedLearning.heading).not.toBe(en.settings.focusedLearning.heading);
     });

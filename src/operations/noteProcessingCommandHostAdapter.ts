@@ -25,6 +25,7 @@ import { normalizeNameForFilePath } from '../utils';
 import { chunkArray, createConcurrentProcessor, delay } from '../utils';
 import { NotemdSettings, ProgressReporter, TaskKey } from '../types';
 import { SidebarActionId } from '../workflowButtons';
+import { selectFolderTaskFiles } from '../folderTaskFileSelector';
 
 export interface NoteProcessingPluginRuntime extends ConceptExtractionPluginContext, ExtractOriginalTextPluginContext {}
 
@@ -567,10 +568,13 @@ export async function runBatchExtractConceptsForFolderCommandWithHost(
                 throw new Error(`Invalid folder selected: ${folderPath}`);
             }
 
-            const files = host.getFiles().filter(file =>
-                (file.extension === 'md' || file.extension === 'txt') &&
-                file.path.startsWith(folderPath === '/' ? '' : `${folderPath}/`)
-            );
+            const files = selectFolderTaskFiles({
+                taskKind: 'extract-concepts-folder',
+                folderPath,
+                files: host.getFiles(),
+                allowedExtensions: ['md', 'txt'],
+                settings
+            });
 
             if (files.length === 0) {
                 const noFilesMessage = formatI18n(uiStrings.notices.noMarkdownOrTextFilesFoundSelectedFolder, {
@@ -885,10 +889,13 @@ export async function runBatchExtractOriginalTextCommandWithHost(
                 throw new Error(`Invalid folder selected: ${folderPath}`);
             }
 
-            const files = host.getFiles().filter(file =>
-                (file.extension === 'md' || file.extension === 'txt') &&
-                (file.path === folderPath || file.path.startsWith(folderPath === '/' ? '' : `${folderPath}/`))
-            );
+            const files = selectFolderTaskFiles({
+                taskKind: 'batch-extract-original-text',
+                folderPath,
+                files: host.getFiles(),
+                allowedExtensions: ['md', 'txt'],
+                settings: host.getSettings()
+            });
 
             commandResult = {
                 folderPath,
@@ -1333,10 +1340,13 @@ export async function runProcessFolderWithNotemdCommandWithHost(
                 throw new Error(`Invalid folder selected: ${folderPath}`);
             }
 
-            const files = host.getFiles().filter(file =>
-                (file.extension === 'md' || file.extension === 'txt') &&
-                (file.path === folderPath || file.path.startsWith(folderPath === '/' ? '' : `${folderPath}/`))
-            );
+            const files = selectFolderTaskFiles({
+                taskKind: 'process-folder-add-links',
+                folderPath,
+                files: host.getFiles(),
+                allowedExtensions: ['md', 'txt'],
+                settings
+            });
 
             const batchCommandResult: BatchProcessFolderResult = {
                 folderPath,

@@ -744,6 +744,52 @@ describe('note processing command host adapter', () => {
         expect(getBusy()).toBe(false);
     });
 
+    test('process folder command applies configured folder-task file filters', async () => {
+        const reporter = createReporter();
+        const { host } = createHost(reporter);
+        host.getSettings.mockReturnValue({
+            ...mockSettings,
+            folderTaskFileFilterMode: 'contains',
+            folderTaskFileFilterPattern: 'A',
+            folderTaskFileFilterTarget: 'basename',
+            folderTaskFileFilterCaseSensitive: true
+        });
+        host.getFolderByPath.mockReturnValue(Object.assign(new (TFolder as any)(), {
+            name: 'Concepts',
+            path: 'Concepts'
+        }));
+        host.getFiles.mockReturnValue([
+            { name: 'A.md', basename: 'A', path: 'Concepts/A.md', extension: 'md' } as any,
+            { name: 'B.md', basename: 'B', path: 'Concepts/B.md', extension: 'md' } as any
+        ]);
+        const processImpl = jest.fn().mockResolvedValue({
+            sourcePath: 'Concepts/A.md',
+            requestedOutputFolderPath: 'Concepts',
+            outputFolderPath: 'Concepts',
+            outputFolderCreated: false,
+            usedCustomOutputFolder: false,
+            outputPath: 'Concepts/A_processed.md',
+            created: true,
+            overwritten: false,
+            movedOriginalFile: false,
+            moveOriginalFile: false,
+            chunkCount: 1,
+            conceptCount: 0,
+            conceptNoteFolderPath: '',
+            removedCodeFences: false
+        });
+        const { runProcessFolderWithNotemdCommandWithHost } = loadModule();
+
+        const result = await runProcessFolderWithNotemdCommandWithHost(host, reporter, 'Concepts', processImpl);
+
+        expect(processImpl).toHaveBeenCalledTimes(1);
+        expect(processImpl.mock.calls[0][2].path).toBe('Concepts/A.md');
+        expect(result).toEqual(expect.objectContaining({
+            processedFileCount: 1,
+            savedCount: 1
+        }));
+    });
+
     test('batch generate command returns resolved folders and reuses shared reporter cleanup', async () => {
         const reporter = createReporter();
         const { host, getBusy } = createHost(reporter);

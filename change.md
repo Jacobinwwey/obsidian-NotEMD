@@ -20,12 +20,18 @@ This document summarizes the major functional and architectural changes implemen
 - **Synonym Suppression Toggle**: Added `Replace synonyms during concept extraction` under `Task: Extract Concepts`.
 - **Prompt Guard Injection**: When the toggle is enabled, both `Process File/Folder (Add Links)` and `Extract Concepts` prompts now prepend:
   - `Avoid extracting synonyms, semantically similar core concepts, or keywords whenever possible.`
+- **Folder-Task File Filtering**: Added a shared file-selection/filter contract for folder tasks with settings for:
+  - filter mode: `No filter` / `Contains` / `Regex` / `Glob`
+  - filter target: `Relative path` or `Basename`
+  - case-sensitive and invert matching
+  - subfolder scope: `Legacy behavior` / `Include` / `Current folder only`
 
 ### Fixes
 
 - Added focused reset-helper tests to verify complete-vs-partial reset semantics and safe cloning behavior for preserved provider settings.
 - Added focused prompt tests to verify the new instruction gate only applies to the two intended tasks and only when enabled.
 - Added localized Traditional Chinese copy for the newly added settings fields to avoid fallback-only UI in that locale.
+- Unified scattered folder-level file collection logic across processing/translation/extraction/fix tasks to reduce behavior drift risk while preserving translation legacy default scope (`legacy` mode keeps translation non-recursive by default).
 
 ### Chores
 

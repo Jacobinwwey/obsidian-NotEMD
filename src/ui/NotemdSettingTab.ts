@@ -404,6 +404,7 @@ export class NotemdSettingTab extends PluginSettingTab {
         const generalOutputI18n = i18n.settings.generalOutput;
         const contentGenerationI18n = i18n.settings.contentGeneration;
         const customPromptsI18n = i18n.settings.customPrompts;
+        const folderTaskFilterI18n = i18n.settings.folderTaskFilter;
         const generateFromTitleTaskLabel = getSidebarActionLabel(i18n, 'generate-from-title');
         const researchAndSummarizeTaskLabel = getSidebarActionLabel(i18n, 'research-and-summarize');
         const summarizeAsMermaidTaskLabel = getSidebarActionLabel(i18n, 'summarize-as-mermaid');
@@ -900,6 +901,80 @@ export class NotemdSettingTab extends PluginSettingTab {
                         await this.plugin.saveSettings();
                     }));
         }
+
+        new Setting(containerEl).setName(folderTaskFilterI18n.heading).setHeading();
+        new Setting(containerEl)
+            .setName(folderTaskFilterI18n.modeName)
+            .setDesc(folderTaskFilterI18n.modeDesc)
+            .addDropdown(dropdown => dropdown
+                .addOption('none', folderTaskFilterI18n.modeNone)
+                .addOption('contains', folderTaskFilterI18n.modeContains)
+                .addOption('regex', folderTaskFilterI18n.modeRegex)
+                .addOption('glob', folderTaskFilterI18n.modeGlob)
+                .setValue(this.plugin.settings.folderTaskFileFilterMode)
+                .onChange(async (value: 'none' | 'contains' | 'regex' | 'glob') => {
+                    this.plugin.settings.folderTaskFileFilterMode = value;
+                    await this.plugin.saveSettings();
+                }));
+
+        this.addDeferredTextSetting(
+            new Setting(containerEl)
+                .setName(folderTaskFilterI18n.patternName)
+                .setDesc(folderTaskFilterI18n.patternDesc),
+            {
+                placeholder: folderTaskFilterI18n.patternPlaceholder,
+                value: this.plugin.settings.folderTaskFileFilterPattern,
+                onCommit: async (value) => {
+                    this.plugin.settings.folderTaskFileFilterPattern = value;
+                    await this.plugin.saveSettings();
+                }
+            }
+        );
+
+        new Setting(containerEl)
+            .setName(folderTaskFilterI18n.targetName)
+            .setDesc(folderTaskFilterI18n.targetDesc)
+            .addDropdown(dropdown => dropdown
+                .addOption('relativePath', folderTaskFilterI18n.targetRelativePath)
+                .addOption('basename', folderTaskFilterI18n.targetBasename)
+                .setValue(this.plugin.settings.folderTaskFileFilterTarget)
+                .onChange(async (value: 'relativePath' | 'basename') => {
+                    this.plugin.settings.folderTaskFileFilterTarget = value;
+                    await this.plugin.saveSettings();
+                }));
+
+        new Setting(containerEl)
+            .setName(folderTaskFilterI18n.caseSensitiveName)
+            .setDesc(folderTaskFilterI18n.caseSensitiveDesc)
+            .addToggle(toggle => toggle
+                .setValue(this.plugin.settings.folderTaskFileFilterCaseSensitive)
+                .onChange(async (value) => {
+                    this.plugin.settings.folderTaskFileFilterCaseSensitive = value;
+                    await this.plugin.saveSettings();
+                }));
+
+        new Setting(containerEl)
+            .setName(folderTaskFilterI18n.invertName)
+            .setDesc(folderTaskFilterI18n.invertDesc)
+            .addToggle(toggle => toggle
+                .setValue(this.plugin.settings.folderTaskFileFilterInvert)
+                .onChange(async (value) => {
+                    this.plugin.settings.folderTaskFileFilterInvert = value;
+                    await this.plugin.saveSettings();
+                }));
+
+        new Setting(containerEl)
+            .setName(folderTaskFilterI18n.includeSubfoldersName)
+            .setDesc(folderTaskFilterI18n.includeSubfoldersDesc)
+            .addDropdown(dropdown => dropdown
+                .addOption('legacy', folderTaskFilterI18n.includeSubfoldersLegacy)
+                .addOption('include', folderTaskFilterI18n.includeSubfoldersInclude)
+                .addOption('exclude', folderTaskFilterI18n.includeSubfoldersExclude)
+                .setValue(this.plugin.settings.folderTaskIncludeSubfoldersMode)
+                .onChange(async (value: 'legacy' | 'include' | 'exclude') => {
+                    this.plugin.settings.folderTaskIncludeSubfoldersMode = value;
+                    await this.plugin.saveSettings();
+                }));
 
         // --- Translate Task Settings ---
         new Setting(containerEl).setName(translationTaskI18n.heading).setHeading();

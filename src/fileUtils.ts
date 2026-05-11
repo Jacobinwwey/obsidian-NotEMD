@@ -10,6 +10,7 @@ import mermaid from 'mermaid';
 import { formatI18n, getI18nStrings } from './i18n';
 import { resolveTaskLanguageName, shouldApplyAutoTranslation } from './i18n/taskLanguagePolicy';
 import { RenderArtifact } from './rendering/types';
+import { selectFolderTaskFiles } from './folderTaskFileSelector';
 
 export interface ConceptExtractionPluginContext {
     settings: NotemdSettings;
@@ -974,10 +975,16 @@ export async function batchGenerateContentForTitles(
     progressReporter.log(`Determined 'complete' folder path: ${completeFolderPath}`);
 
     const normalizedCompletePath = completeFolderPath === '' ? '' : (completeFolderPath.endsWith('/') ? completeFolderPath : completeFolderPath + '/');
-    const filesToProcess = app.vault.getMarkdownFiles().filter(f => {
-        const isInSelectedFolder = f.path.startsWith(folderPath === '/' ? '' : folderPath + '/');
-        const isInCompleteFolder = normalizedCompletePath ? f.path.startsWith(normalizedCompletePath) : false;
-        return isInSelectedFolder && !isInCompleteFolder && !f.name.endsWith('_processed.md');
+    const filesToProcess = selectFolderTaskFiles({
+        taskKind: 'batch-generate-from-titles',
+        folderPath,
+        files: app.vault.getMarkdownFiles(),
+        allowedExtensions: ['md'],
+        settings,
+        exclude: (file) => {
+            const isInCompleteFolder = normalizedCompletePath ? file.path.startsWith(normalizedCompletePath) : false;
+            return isInCompleteFolder || file.name.endsWith('_processed.md');
+        }
     });
 
     const result: BatchGenerateContentForTitlesResult = {
@@ -1203,9 +1210,13 @@ export async function batchFixMermaidSyntaxInFolder(
         throw new Error(`Selected path is not a valid folder: ${folderPath}`);
     }
 
-    const filesToProcess = app.vault.getMarkdownFiles().filter(f =>
-        f.path.startsWith(folderPath === '/' ? '' : folderPath + '/')
-    );
+    const filesToProcess = selectFolderTaskFiles({
+        taskKind: 'batch-mermaid-fix',
+        folderPath,
+        files: app.vault.getMarkdownFiles(),
+        allowedExtensions: ['md'],
+        settings
+    });
 
     const result: BatchMermaidFixResult = {
         folderPath,
