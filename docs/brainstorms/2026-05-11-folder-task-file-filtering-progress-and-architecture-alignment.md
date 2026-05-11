@@ -115,6 +115,7 @@ This follow-up slice is now landed on top of the baseline global filtering relea
 2. note-processing and utility host adapters now support scoped override inputs and resolve effective settings through a shared helper (`applyFolderTaskSelectionOverride`), avoiding duplicated merge logic.
 3. default behavior is unchanged when override input is absent; translation legacy non-recursive behavior is still preserved under `legacy`.
 4. regression coverage was expanded across selector helper, CLI contracts, operations registry metadata, and host adapter behavior.
+5. sidebar/workflow execution paths now consistently pass folder overrides for additional folder actions (`extract-concepts-folder`, `batch-extract-original-text`, `batch-fix-formula`) when workflow context already has a resolved target folder.
 
 ## 9. Next Direction (Concrete)
 

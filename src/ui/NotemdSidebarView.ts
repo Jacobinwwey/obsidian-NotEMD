@@ -564,7 +564,14 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
                 break;
             }
             case 'extract-concepts-folder': {
-                await this.plugin.batchExtractConceptsForFolderCommand(reporter);
+                const folderOverride = context?.preferredFolderPath || undefined;
+                if (folderOverride) {
+                    await this.plugin.batchExtractConceptsForFolderCommand(reporter, {
+                        folderPathOverride: folderOverride
+                    });
+                } else {
+                    await this.plugin.batchExtractConceptsForFolderCommand(reporter);
+                }
                 break;
             }
             case 'extract-original-text': {
@@ -572,7 +579,14 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
                 break;
             }
             case 'batch-extract-original-text': {
-                await this.plugin.batchExtractOriginalTextCommand(reporter);
+                const folderOverride = context?.preferredFolderPath || undefined;
+                if (folderOverride) {
+                    await this.plugin.batchExtractOriginalTextCommand(reporter, {
+                        folderPathOverride: folderOverride
+                    });
+                } else {
+                    await this.plugin.batchExtractOriginalTextCommand(reporter);
+                }
                 break;
             }
             case 'batch-mermaid-fix': {
@@ -589,7 +603,12 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
                 break;
             }
             case 'batch-fix-formula': {
-                await this.plugin.batchFixFormulaFormatsCommand(reporter);
+                const folderOverride = context?.lastGeneratedCompleteFolderPath || context?.preferredFolderPath || undefined;
+                if (folderOverride) {
+                    await this.plugin.batchFixFormulaFormatsCommand(reporter, folderOverride);
+                } else {
+                    await this.plugin.batchFixFormulaFormatsCommand(reporter);
+                }
                 break;
             }
             case 'check-duplicates-current': {

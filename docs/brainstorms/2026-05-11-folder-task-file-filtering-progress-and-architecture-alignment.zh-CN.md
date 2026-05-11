@@ -115,6 +115,7 @@ topic: folder-task-file-filtering-progress-and-architecture-alignment
 2. note-processing 与 utility 两条 host adapter 路径已打通覆盖参数，并统一通过共享 helper（`applyFolderTaskSelectionOverride`）合成有效设置，避免多处重复合成逻辑漂移。
 3. 未传覆盖参数时行为与原来完全一致；翻译任务在 `legacy` 下仍保持默认非递归。
 4. 回归覆盖已扩展到 selector helper、CLI contract、operation registry 元数据和 host adapter 行为层。
+5. sidebar/workflow 在已有上下文 folder 时，已对更多文件夹动作完成覆盖透传对齐（`extract-concepts-folder`、`batch-extract-original-text`、`batch-fix-formula`），避免同一工作流中出现“部分动作沿用上下文、部分动作重新弹选择器”的语义割裂。
 
 ## 9. 后续推进方向（具体）
 
