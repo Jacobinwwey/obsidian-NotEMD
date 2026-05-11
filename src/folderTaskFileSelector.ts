@@ -22,6 +22,15 @@ export interface FolderTaskFileFilterConfig {
     invert: boolean;
 }
 
+export interface FolderTaskFileSelectionOverride {
+    includeSubfoldersMode?: FolderTaskIncludeSubfoldersMode;
+    fileFilterMode?: FolderTaskFileFilterMode;
+    fileFilterPattern?: string;
+    fileFilterTarget?: FolderTaskFileFilterTarget;
+    fileFilterCaseSensitive?: boolean;
+    fileFilterInvert?: boolean;
+}
+
 export interface FolderTaskFileSelectionOptions {
     taskKind: FolderTaskKind;
     folderPath: string;
@@ -122,6 +131,25 @@ function resolveFilterConfig(settings: NotemdSettings): FolderTaskFileFilterConf
         target: settings.folderTaskFileFilterTarget,
         caseSensitive: settings.folderTaskFileFilterCaseSensitive,
         invert: settings.folderTaskFileFilterInvert
+    };
+}
+
+export function applyFolderTaskSelectionOverride(
+    settings: NotemdSettings,
+    override?: FolderTaskFileSelectionOverride
+): NotemdSettings {
+    if (!override) {
+        return settings;
+    }
+
+    return {
+        ...settings,
+        folderTaskIncludeSubfoldersMode: override.includeSubfoldersMode ?? settings.folderTaskIncludeSubfoldersMode,
+        folderTaskFileFilterMode: override.fileFilterMode ?? settings.folderTaskFileFilterMode,
+        folderTaskFileFilterPattern: override.fileFilterPattern ?? settings.folderTaskFileFilterPattern,
+        folderTaskFileFilterTarget: override.fileFilterTarget ?? settings.folderTaskFileFilterTarget,
+        folderTaskFileFilterCaseSensitive: override.fileFilterCaseSensitive ?? settings.folderTaskFileFilterCaseSensitive,
+        folderTaskFileFilterInvert: override.fileFilterInvert ?? settings.folderTaskFileFilterInvert
     };
 }
 

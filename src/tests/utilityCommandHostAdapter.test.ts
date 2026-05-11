@@ -260,6 +260,42 @@ describe('utility command host adapter', () => {
         expect(getBusy()).toBe(false);
     });
 
+    test('batch mermaid fix command passes per-operation selection overrides without mutating host settings', async () => {
+        const reporter = createReporter();
+        const { host } = createHost(reporter);
+        host.getFolderSelection.mockResolvedValue('Concepts');
+        host.getSettings.mockReturnValue({
+            ...mockSettings,
+            folderTaskFileFilterMode: 'none',
+            folderTaskIncludeSubfoldersMode: 'legacy'
+        });
+        const batchFixImpl = jest.fn().mockResolvedValue(createBatchMermaidFixResult({
+            folderPath: 'Concepts',
+            processedFileCount: 1,
+            modifiedCount: 1
+        }));
+        const { runBatchMermaidFixCommandWithHost } = loadModule();
+
+        await runBatchMermaidFixCommandWithHost(
+            host,
+            reporter,
+            undefined,
+            batchFixImpl,
+            {
+                includeSubfoldersMode: 'exclude',
+                fileFilterMode: 'contains',
+                fileFilterPattern: 'Topic'
+            }
+        );
+
+        const passedSettings = batchFixImpl.mock.calls[0][1];
+        expect(passedSettings.folderTaskIncludeSubfoldersMode).toBe('exclude');
+        expect(passedSettings.folderTaskFileFilterMode).toBe('contains');
+        expect(passedSettings.folderTaskFileFilterPattern).toBe('Topic');
+        expect(host.getSettings().folderTaskIncludeSubfoldersMode).toBe('legacy');
+        expect(host.getSettings().folderTaskFileFilterMode).toBe('none');
+    });
+
     test('fix formula command delegates through extracted host flow', async () => {
         const reporter = createReporter();
         const { host, getBusy } = createHost(reporter);
@@ -323,5 +359,43 @@ describe('utility command host adapter', () => {
         expect(host.completeReporter).toHaveBeenCalledWith(reporter);
         expect(host.finalizeReporter).toHaveBeenCalledWith(reporter);
         expect(getBusy()).toBe(false);
+    });
+
+    test('batch formula fix command supports folder path override and selection overrides', async () => {
+        const reporter = createReporter();
+        const { host } = createHost(reporter);
+        const batchFixImpl = jest.fn().mockResolvedValue({
+            folderPath: 'Notes',
+            processedFileCount: 1,
+            modifiedCount: 1,
+            cancelled: false,
+            fileResults: [],
+            errors: []
+        });
+        const { runBatchFixFormulaFormatsCommandWithHost } = loadModule();
+
+        await runBatchFixFormulaFormatsCommandWithHost(
+            host,
+            reporter,
+            batchFixImpl,
+            {
+                folderPathOverride: 'Notes',
+                fileSelectionOverride: {
+                    fileFilterMode: 'glob',
+                    fileFilterPattern: '**/*.md'
+                }
+            }
+        );
+
+        expect(host.getFolderSelection).not.toHaveBeenCalled();
+        expect(batchFixImpl).toHaveBeenCalledWith(
+            host.getApp(),
+            'Notes',
+            reporter,
+            expect.objectContaining({
+                folderTaskFileFilterMode: 'glob',
+                folderTaskFileFilterPattern: '**/*.md'
+            })
+        );
     });
 });

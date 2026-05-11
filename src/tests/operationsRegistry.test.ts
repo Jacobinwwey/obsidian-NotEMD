@@ -168,6 +168,7 @@ describe('operations registry', () => {
         const researchSummarize = getOperationDefinition('research.summarize-topic');
         const translateFile = getOperationDefinition('translate.file');
         const translateFolder = getOperationDefinition('translate.folder-batch');
+        const extractConceptFolder = getOperationDefinition('concept.extract-folder');
         const extractOriginalText = getOperationDefinition('content.extract-original-text');
         const extractAndGenerate = getOperationDefinition('workflow.extract-and-generate');
 
@@ -239,6 +240,18 @@ describe('operations registry', () => {
 
         expect(translateFolder).toEqual(expect.objectContaining({
             id: 'translate.folder-batch',
+            inputSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    folderPath: expect.any(Object),
+                    includeSubfoldersMode: expect.any(Object),
+                    fileFilterMode: expect.any(Object),
+                    fileFilterPattern: expect.any(Object),
+                    fileFilterTarget: expect.any(Object),
+                    fileFilterCaseSensitive: expect.any(Object),
+                    fileFilterInvert: expect.any(Object)
+                })
+            }),
             resultSchema: expect.objectContaining({
                 type: 'object',
                 properties: expect.objectContaining({
@@ -247,6 +260,23 @@ describe('operations registry', () => {
                     cancelled: expect.any(Object),
                     fileResults: expect.any(Object),
                     errors: expect.any(Object)
+                })
+            })
+        }));
+
+        expect(extractConceptFolder).toEqual(expect.objectContaining({
+            id: 'concept.extract-folder',
+            inputSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    folderPath: expect.any(Object),
+                    conceptFolderPath: expect.any(Object),
+                    includeSubfoldersMode: expect.any(Object),
+                    fileFilterMode: expect.any(Object),
+                    fileFilterPattern: expect.any(Object),
+                    fileFilterTarget: expect.any(Object),
+                    fileFilterCaseSensitive: expect.any(Object),
+                    fileFilterInvert: expect.any(Object)
                 })
             })
         }));
@@ -262,7 +292,19 @@ describe('operations registry', () => {
                     commandId: 'process-folder-with-notemd',
                     mappingKind: 'exact'
                 })
-            ])
+            ]),
+            inputSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    folderPath: expect.any(Object),
+                    includeSubfoldersMode: expect.any(Object),
+                    fileFilterMode: expect.any(Object),
+                    fileFilterPattern: expect.any(Object),
+                    fileFilterTarget: expect.any(Object),
+                    fileFilterCaseSensitive: expect.any(Object),
+                    fileFilterInvert: expect.any(Object)
+                })
+            })
         }));
 
         expect(generateFromTitle).toEqual(expect.objectContaining({
@@ -291,6 +333,18 @@ describe('operations registry', () => {
                     mappingKind: 'exact'
                 })
             ]),
+            inputSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    folderPath: expect.any(Object),
+                    includeSubfoldersMode: expect.any(Object),
+                    fileFilterMode: expect.any(Object),
+                    fileFilterPattern: expect.any(Object),
+                    fileFilterTarget: expect.any(Object),
+                    fileFilterCaseSensitive: expect.any(Object),
+                    fileFilterInvert: expect.any(Object)
+                })
+            }),
             resultSchema: expect.objectContaining({
                 type: 'object',
                 properties: expect.objectContaining({
@@ -478,6 +532,18 @@ describe('operations registry', () => {
                     mappingKind: 'exact'
                 })
             ]),
+            inputSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    folderPath: expect.any(Object),
+                    includeSubfoldersMode: expect.any(Object),
+                    fileFilterMode: expect.any(Object),
+                    fileFilterPattern: expect.any(Object),
+                    fileFilterTarget: expect.any(Object),
+                    fileFilterCaseSensitive: expect.any(Object),
+                    fileFilterInvert: expect.any(Object)
+                })
+            }),
             resultSchema: expect.objectContaining({
                 type: 'object',
                 properties: expect.objectContaining({
@@ -529,6 +595,18 @@ describe('operations registry', () => {
                     mappingKind: 'exact'
                 })
             ]),
+            inputSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    folderPath: expect.any(Object),
+                    includeSubfoldersMode: expect.any(Object),
+                    fileFilterMode: expect.any(Object),
+                    fileFilterPattern: expect.any(Object),
+                    fileFilterTarget: expect.any(Object),
+                    fileFilterCaseSensitive: expect.any(Object),
+                    fileFilterInvert: expect.any(Object)
+                })
+            }),
             resultSchema: expect.objectContaining({
                 type: 'object',
                 properties: expect.objectContaining({

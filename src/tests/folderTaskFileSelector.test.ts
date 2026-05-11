@@ -1,6 +1,6 @@
 import { TFile } from 'obsidian';
 import { DEFAULT_SETTINGS } from '../constants';
-import { selectFolderTaskFiles } from '../folderTaskFileSelector';
+import { applyFolderTaskSelectionOverride, selectFolderTaskFiles } from '../folderTaskFileSelector';
 import { NotemdSettings } from '../types';
 
 function createFile(path: string): TFile {
@@ -189,5 +189,39 @@ describe('folderTaskFileSelector', () => {
         });
 
         expect(selected.map(file => file.path)).toEqual(['Notes/A.md', 'Notes/B.md']);
+    });
+
+    test('applyFolderTaskSelectionOverride returns original object when no override is provided', () => {
+        const settings = withSettings({});
+        const applied = applyFolderTaskSelectionOverride(settings);
+
+        expect(applied).toBe(settings);
+    });
+
+    test('applyFolderTaskSelectionOverride applies only provided override fields', () => {
+        const settings = withSettings({
+            folderTaskIncludeSubfoldersMode: 'legacy',
+            folderTaskFileFilterMode: 'none',
+            folderTaskFileFilterPattern: '',
+            folderTaskFileFilterTarget: 'relativePath',
+            folderTaskFileFilterCaseSensitive: false,
+            folderTaskFileFilterInvert: false
+        });
+
+        const applied = applyFolderTaskSelectionOverride(settings, {
+            includeSubfoldersMode: 'exclude',
+            fileFilterMode: 'contains',
+            fileFilterPattern: 'Topic',
+            fileFilterTarget: 'basename',
+            fileFilterCaseSensitive: true
+        });
+
+        expect(applied).not.toBe(settings);
+        expect(applied.folderTaskIncludeSubfoldersMode).toBe('exclude');
+        expect(applied.folderTaskFileFilterMode).toBe('contains');
+        expect(applied.folderTaskFileFilterPattern).toBe('Topic');
+        expect(applied.folderTaskFileFilterTarget).toBe('basename');
+        expect(applied.folderTaskFileFilterCaseSensitive).toBe(true);
+        expect(applied.folderTaskFileFilterInvert).toBe(false);
     });
 });

@@ -790,6 +790,107 @@ describe('note processing command host adapter', () => {
         }));
     });
 
+    test('process folder command allows per-operation file selection overrides', async () => {
+        const reporter = createReporter();
+        const { host } = createHost(reporter);
+        host.getSettings.mockReturnValue({
+            ...mockSettings,
+            folderTaskFileFilterMode: 'none',
+            folderTaskFileFilterPattern: '',
+            folderTaskFileFilterTarget: 'relativePath',
+            folderTaskFileFilterCaseSensitive: false,
+            folderTaskFileFilterInvert: false
+        });
+        host.getFolderByPath.mockReturnValue(Object.assign(new (TFolder as any)(), {
+            name: 'Concepts',
+            path: 'Concepts'
+        }));
+        host.getFiles.mockReturnValue([
+            { name: 'A.md', basename: 'A', path: 'Concepts/A.md', extension: 'md' } as any,
+            { name: 'B.md', basename: 'B', path: 'Concepts/B.md', extension: 'md' } as any
+        ]);
+        const processImpl = jest.fn().mockResolvedValue({
+            sourcePath: 'Concepts/A.md',
+            requestedOutputFolderPath: 'Concepts',
+            outputFolderPath: 'Concepts',
+            outputFolderCreated: false,
+            usedCustomOutputFolder: false,
+            outputPath: 'Concepts/A_processed.md',
+            created: true,
+            overwritten: false,
+            movedOriginalFile: false,
+            moveOriginalFile: false,
+            chunkCount: 1,
+            conceptCount: 0,
+            conceptNoteFolderPath: '',
+            removedCodeFences: false
+        });
+        const { runProcessFolderWithNotemdCommandWithHost } = loadModule();
+
+        const result = await runProcessFolderWithNotemdCommandWithHost(
+            host,
+            reporter,
+            'Concepts',
+            processImpl,
+            {
+                fileFilterMode: 'contains',
+                fileFilterPattern: 'A',
+                fileFilterTarget: 'basename',
+                fileFilterCaseSensitive: true
+            }
+        );
+
+        expect(processImpl).toHaveBeenCalledTimes(1);
+        expect(processImpl.mock.calls[0][2].path).toBe('Concepts/A.md');
+        expect(result).toEqual(expect.objectContaining({
+            processedFileCount: 1,
+            savedCount: 1
+        }));
+    });
+
+    test('batch translate command passes per-operation selection overrides without mutating host settings', async () => {
+        const reporter = createReporter();
+        const { host } = createHost(reporter);
+        const folder = Object.assign(new (TFolder as any)(), {
+            name: 'Concepts',
+            path: 'Concepts'
+        });
+        host.getFolderSelection.mockResolvedValue('Concepts');
+        host.getFolderByPath.mockReturnValue(folder);
+        host.getSettings.mockReturnValue({
+            ...mockSettings,
+            folderTaskIncludeSubfoldersMode: 'legacy'
+        });
+        const batchTranslateImpl = jest.fn().mockResolvedValue({
+            folderPath: 'Concepts',
+            requestedOutputFolderPath: 'Translations',
+            outputFolderPath: 'Translations',
+            outputFolderCreated: false,
+            targetLanguage: 'en',
+            processedFileCount: 0,
+            translatedCount: 0,
+            cancelled: false,
+            fileResults: [],
+            errors: []
+        });
+        const { runBatchTranslateFolderCommandWithHost } = loadModule();
+
+        await runBatchTranslateFolderCommandWithHost(
+            host,
+            reporter,
+            undefined,
+            batchTranslateImpl,
+            {
+                includeSubfoldersMode: 'include'
+            }
+        );
+
+        expect(batchTranslateImpl).toHaveBeenCalledTimes(1);
+        const passedSettings = batchTranslateImpl.mock.calls[0][1];
+        expect(passedSettings.folderTaskIncludeSubfoldersMode).toBe('include');
+        expect(host.getSettings().folderTaskIncludeSubfoldersMode).toBe('legacy');
+    });
+
     test('batch generate command returns resolved folders and reuses shared reporter cleanup', async () => {
         const reporter = createReporter();
         const { host, getBusy } = createHost(reporter);

@@ -42,6 +42,7 @@ topic: folder-task-file-filtering-progress-and-architecture-alignment
 | 覆盖主要文件夹任务路径 | `noteProcessingCommandHostAdapter.ts`、`fileUtils.ts`、`translate.ts`、`formulaFixer.ts` | 已落地 |
 | 设置页可配置 | `NotemdSettingTab` 新增筛选区块 + EN/ZH-CN/ZH-TW i18n | 已落地 |
 | 回归测试锁定行为 | `folderTaskFileSelector.test.ts`、`translateContract.test.ts`、host/contract 测试 | 已落地 |
+| 增加 operation 级可选覆盖（不改变全局默认行为） | `applyFolderTaskSelectionOverride`、host adapter 覆盖参数打通、operation 输入 schema 扩展 | 已落地 |
 
 ## 4. 架构推进评估
 
@@ -105,14 +106,24 @@ topic: folder-task-file-filtering-progress-and-architecture-alignment
 6. `obsidian help`
 7. `obsidian-cli help`
 
-## 8. 后续推进方向（具体）
+## 8. 增量进展更新（operation 级覆盖切片）
 
-1. 在全局设置之上增加可选的“按 operation 输入覆盖”能力（不破坏全局默认契约）。
-2. 扩展 operation schema，支持自动化调用方按需传入筛选覆盖参数。
-3. 在获得更多反馈前保持 `legacy` 兼容默认，避免大范围行为迁移风险。
-4. 为 regex/glob 增加轻量示例提示与错误提示，不阻断高级语法输入。
+在全局筛选能力落地后，本轮后续切片也已完成：
 
-## 9. 主线落盘与工作区卫生结论
+1. 文件夹范围 operation 输入 schema 已支持可选覆盖字段：
+   `includeSubfoldersMode`、`fileFilterMode`、`fileFilterPattern`、`fileFilterTarget`、`fileFilterCaseSensitive`、`fileFilterInvert`。
+2. note-processing 与 utility 两条 host adapter 路径已打通覆盖参数，并统一通过共享 helper（`applyFolderTaskSelectionOverride`）合成有效设置，避免多处重复合成逻辑漂移。
+3. 未传覆盖参数时行为与原来完全一致；翻译任务在 `legacy` 下仍保持默认非递归。
+4. 回归覆盖已扩展到 selector helper、CLI contract、operation registry 元数据和 host adapter 行为层。
+
+## 9. 后续推进方向（具体）
+
+1. 在更多反馈/观测到位前保持 `legacy` 兼容默认，避免默认语义大迁移风险。
+2. 若后续扩展外部自动化调用面，优先把覆盖字段直接映射到 canonical operation 执行路径，不绕过 host adapter 的 guard/校验层。
+3. 为 regex/glob 增加更聚焦的示例提示与非法 pattern 指引，不阻断高级语法输入。
+4. 按既定路线继续推进 packaging / semantic-verification convergence，不重开无关 runtime 范围。
+
+## 10. 主线落盘与工作区卫生结论
 
 该切片已具备主线落盘条件：
 

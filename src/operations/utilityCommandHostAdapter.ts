@@ -13,6 +13,7 @@ import {
     FormulaFixFileResult,
     fixFormulaFormatsInFile
 } from '../formulaFixer';
+import { applyFolderTaskSelectionOverride, FolderTaskFileSelectionOverride } from '../folderTaskFileSelector';
 import { formatI18n } from '../i18n';
 import { NotemdSettings, ProgressReporter } from '../types';
 import { SidebarActionId } from '../workflowButtons';
@@ -73,6 +74,11 @@ export interface UtilityCommandHost {
     saveErrorLog: (error: unknown, reporter: ProgressReporter) => Promise<void>;
     completeReporter: (reporter: ProgressReporter) => void;
     finalizeReporter: (reporter: ProgressReporter) => void;
+}
+
+export interface UtilityFolderTaskCommandOptions {
+    folderPathOverride?: string;
+    fileSelectionOverride?: FolderTaskFileSelectionOverride;
 }
 
 function normalizeError(
@@ -225,7 +231,8 @@ export async function runBatchMermaidFixCommandWithHost(
     host: UtilityCommandHost,
     reporter?: ProgressReporter,
     folderPathOverride?: string,
-    batchFixMermaidSyntaxInFolderImpl: typeof batchFixMermaidSyntaxInFolder = batchFixMermaidSyntaxInFolder
+    batchFixMermaidSyntaxInFolderImpl: typeof batchFixMermaidSyntaxInFolder = batchFixMermaidSyntaxInFolder,
+    fileSelectionOverride?: FolderTaskFileSelectionOverride
 ): Promise<BatchMermaidFixResult | null> {
     const actionLabel = host.getActionLabel('batch-mermaid-fix');
     let commandResult: BatchMermaidFixResult | null = null;
@@ -236,6 +243,7 @@ export async function runBatchMermaidFixCommandWithHost(
         try {
             await host.loadSettings();
             uiStrings = host.getUiStrings();
+            const effectiveSettings = applyFolderTaskSelectionOverride(host.getSettings(), fileSelectionOverride);
             const folderPath = folderPathOverride ?? await host.getFolderSelection();
             if (!folderPath) {
                 const cancelledMessage = uiStrings.common.cancel;
@@ -249,7 +257,7 @@ export async function runBatchMermaidFixCommandWithHost(
 
             commandResult = await batchFixMermaidSyntaxInFolderImpl(
                 host.getApp(),
-                host.getSettings(),
+                effectiveSettings,
                 folderPath,
                 useReporter
             );
@@ -350,7 +358,8 @@ export async function runFixFormulaFormatsCommandWithHost(
 export async function runBatchFixFormulaFormatsCommandWithHost(
     host: UtilityCommandHost,
     reporter?: ProgressReporter,
-    batchFixFormulaFormatsInFolderImpl: typeof batchFixFormulaFormatsInFolder = batchFixFormulaFormatsInFolder
+    batchFixFormulaFormatsInFolderImpl: typeof batchFixFormulaFormatsInFolder = batchFixFormulaFormatsInFolder,
+    options: UtilityFolderTaskCommandOptions = {}
 ): Promise<BatchFormulaFixResult | null> {
     const actionLabel = host.getActionLabel('batch-fix-formula');
     let commandResult: BatchFormulaFixResult | null = null;
@@ -361,7 +370,8 @@ export async function runBatchFixFormulaFormatsCommandWithHost(
         try {
             await host.loadSettings();
             uiStrings = host.getUiStrings();
-            const folderPath = await host.getFolderSelection();
+            const effectiveSettings = applyFolderTaskSelectionOverride(host.getSettings(), options.fileSelectionOverride);
+            const folderPath = options.folderPathOverride ?? await host.getFolderSelection();
             if (!folderPath) {
                 const cancelledMessage = uiStrings.common.cancel;
                 useReporter.log(cancelledMessage);
@@ -373,7 +383,7 @@ export async function runBatchFixFormulaFormatsCommandWithHost(
                 host.getApp(),
                 folderPath,
                 useReporter,
-                host.getSettings()
+                effectiveSettings
             );
 
             if (!useReporter.cancelled && commandResult) {

@@ -42,6 +42,7 @@ Root-cause summary:
 | Integrate across folder tasks | `noteProcessingCommandHostAdapter.ts`, `fileUtils.ts`, `translate.ts`, `formulaFixer.ts` | Landed |
 | Expose user settings | `NotemdSettingTab` folder-task filter section + i18n keys (EN/ZH-CN/ZH-TW) | Landed |
 | Lock behavior with regression tests | `folderTaskFileSelector.test.ts`, `translateContract.test.ts`, host adapter and contract tests | Landed |
+| Add operation-level optional override (global default unchanged) | `applyFolderTaskSelectionOverride`, host-adapter option plumb-through, operation input schema extension | Landed |
 
 ## 4. Architecture Advancement Assessment
 
@@ -105,14 +106,24 @@ Executed and passed:
 6. `obsidian help`
 7. `obsidian-cli help`
 
-## 8. Next Direction (Concrete)
+## 8. Incremental Progress Update (Operation-Level Override Slice)
 
-1. add optional per-operation input override on top of global settings (without breaking global default contract).
-2. extend operation schema for automation clients to pass scoped filter override when needed.
-3. keep `legacy` compatibility default until telemetry/feedback confirms safe migration options.
-4. add targeted UX validation hints for regex/glob examples (without hard-blocking advanced syntax).
+This follow-up slice is now landed on top of the baseline global filtering release:
 
-## 9. Mainline And Workspace Hygiene Outcome
+1. operation input schemas for folder-scope operations now expose optional override fields:
+   `includeSubfoldersMode`, `fileFilterMode`, `fileFilterPattern`, `fileFilterTarget`, `fileFilterCaseSensitive`, `fileFilterInvert`.
+2. note-processing and utility host adapters now support scoped override inputs and resolve effective settings through a shared helper (`applyFolderTaskSelectionOverride`), avoiding duplicated merge logic.
+3. default behavior is unchanged when override input is absent; translation legacy non-recursive behavior is still preserved under `legacy`.
+4. regression coverage was expanded across selector helper, CLI contracts, operations registry metadata, and host adapter behavior.
+
+## 9. Next Direction (Concrete)
+
+1. keep `legacy` compatibility default until telemetry/feedback confirms a safe migration window.
+2. if external automation surface binding is expanded, map these override fields to canonical operation execution paths directly (without bypassing host adapter validation/guardrails).
+3. add focused UX hints for regex/glob examples and invalid-pattern guidance without blocking advanced syntax.
+4. continue the planned packaging / semantic-verification convergence track without reopening unrelated runtime scope.
+
+## 10. Mainline And Workspace Hygiene Outcome
 
 This slice is ready for mainline landing under existing CI discipline:
 

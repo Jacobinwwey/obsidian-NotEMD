@@ -2,6 +2,7 @@ import { App, Editor, MarkdownView, Modal, Notice, Plugin, TFile, TFolder, Plugi
 import { NotemdSettings, ProgressReporter, LLMProviderConfig, TaskKey } from './types';
 import { DEFAULT_SETTINGS, NOTEMD_SIDEBAR_VIEW_TYPE, NOTEMD_SIDEBAR_ICON } from './constants';
 import { createCompleteResetSettings, createPartialResetSettings } from './settingsReset';
+import { FolderTaskFileSelectionOverride } from './folderTaskFileSelector';
 import { retry } from './utils';
 import { callLLM } from './llmUtils';
 import {
@@ -1215,12 +1216,22 @@ export default class NotemdPlugin extends Plugin {
 
     async processFolderWithNotemdCommand(
         reporter?: ProgressReporter,
-        folderPathOverride?: string
+        folderPathOverride?: string,
+        fileSelectionOverride?: FolderTaskFileSelectionOverride
     ): Promise<BatchProcessFolderResult | null> {
+        if (!fileSelectionOverride) {
+            return runProcessFolderWithNotemdCommandWithHost(
+                this.createNoteProcessingCommandHost(),
+                reporter,
+                folderPathOverride
+            );
+        }
         return runProcessFolderWithNotemdCommandWithHost(
             this.createNoteProcessingCommandHost(),
             reporter,
-            folderPathOverride
+            folderPathOverride,
+            undefined,
+            fileSelectionOverride
         );
     }
 
@@ -1294,12 +1305,22 @@ export default class NotemdPlugin extends Plugin {
     /** Command: Batch Generate Content from Titles */
     async batchGenerateContentForTitlesCommand(
         reporter?: ProgressReporter,
-        folderPathOverride?: string
+        folderPathOverride?: string,
+        fileSelectionOverride?: FolderTaskFileSelectionOverride
     ): Promise<BatchGenerateContentForTitlesResult | null> {
+        if (!fileSelectionOverride) {
+            return runBatchGenerateContentForTitlesCommandWithHost(
+                this.createNoteProcessingCommandHost(),
+                reporter,
+                folderPathOverride
+            );
+        }
         return runBatchGenerateContentForTitlesCommandWithHost(
             this.createNoteProcessingCommandHost(),
             reporter,
-            folderPathOverride
+            folderPathOverride,
+            undefined,
+            fileSelectionOverride
         );
     }
 
@@ -1315,21 +1336,61 @@ export default class NotemdPlugin extends Plugin {
     /** Command: Batch Fix Mermaid Syntax */
     async batchMermaidFixCommand(
         reporter?: ProgressReporter,
-        folderPathOverride?: string
+        folderPathOverride?: string,
+        fileSelectionOverride?: FolderTaskFileSelectionOverride
     ): Promise<BatchMermaidFixResult | null> {
-        return runBatchMermaidFixCommandWithHost(this.createUtilityCommandHost(), reporter, folderPathOverride);
+        if (!fileSelectionOverride) {
+            return runBatchMermaidFixCommandWithHost(this.createUtilityCommandHost(), reporter, folderPathOverride);
+        }
+        return runBatchMermaidFixCommandWithHost(
+            this.createUtilityCommandHost(),
+            reporter,
+            folderPathOverride,
+            undefined,
+            fileSelectionOverride
+        );
     }
 
     async fixFormulaFormatsCommand(file: TFile, reporter?: ProgressReporter) {
         await runFixFormulaFormatsCommandWithHost(this.createUtilityCommandHost(), file, reporter);
     }
 
-    async batchFixFormulaFormatsCommand(reporter?: ProgressReporter) {
-        await runBatchFixFormulaFormatsCommandWithHost(this.createUtilityCommandHost(), reporter);
+    async batchFixFormulaFormatsCommand(
+        reporter?: ProgressReporter,
+        folderPathOverride?: string,
+        fileSelectionOverride?: FolderTaskFileSelectionOverride
+    ) {
+        if (!folderPathOverride && !fileSelectionOverride) {
+            await runBatchFixFormulaFormatsCommandWithHost(this.createUtilityCommandHost(), reporter);
+            return;
+        }
+        await runBatchFixFormulaFormatsCommandWithHost(
+            this.createUtilityCommandHost(),
+            reporter,
+            undefined,
+            {
+                folderPathOverride,
+                fileSelectionOverride
+            }
+        );
     }
 
-    async batchTranslateFolderCommand(folder?: TFolder, reporter?: ProgressReporter) {
-        await runBatchTranslateFolderCommandWithHost(this.createNoteProcessingCommandHost(), reporter, folder);
+    async batchTranslateFolderCommand(
+        folder?: TFolder,
+        reporter?: ProgressReporter,
+        fileSelectionOverride?: FolderTaskFileSelectionOverride
+    ) {
+        if (!fileSelectionOverride) {
+            await runBatchTranslateFolderCommandWithHost(this.createNoteProcessingCommandHost(), reporter, folder);
+            return;
+        }
+        await runBatchTranslateFolderCommandWithHost(
+            this.createNoteProcessingCommandHost(),
+            reporter,
+            folder,
+            undefined,
+            fileSelectionOverride
+        );
     }
 
     async translateFileCommand(file: TFile, signal?: AbortSignal, reporter?: ProgressReporter) {
@@ -1415,8 +1476,24 @@ export default class NotemdPlugin extends Plugin {
         await runExtractConceptsCommandWithHost(this.createNoteProcessingCommandHost(), reporter);
     }
 
-    async batchExtractConceptsForFolderCommand(reporter?: ProgressReporter) {
-        await runBatchExtractConceptsForFolderCommandWithHost(this.createNoteProcessingCommandHost(), reporter);
+    async batchExtractConceptsForFolderCommand(
+        reporter?: ProgressReporter,
+        options?: {
+            folderPathOverride?: string;
+            fileSelectionOverride?: FolderTaskFileSelectionOverride;
+        }
+    ) {
+        if (!options?.folderPathOverride && !options?.fileSelectionOverride) {
+            await runBatchExtractConceptsForFolderCommandWithHost(this.createNoteProcessingCommandHost(), reporter);
+            return;
+        }
+        await runBatchExtractConceptsForFolderCommandWithHost(
+            this.createNoteProcessingCommandHost(),
+            reporter,
+            undefined,
+            undefined,
+            options
+        );
     }
 
     async extractConceptsAndGenerateTitlesCommand(reporter?: ProgressReporter) {
@@ -1427,8 +1504,22 @@ export default class NotemdPlugin extends Plugin {
         return runExtractOriginalTextCommandWithHost(this.createNoteProcessingCommandHost(), reporter);
     }
 
-    async batchExtractOriginalTextCommand(reporter?: ProgressReporter) {
-        return runBatchExtractOriginalTextCommandWithHost(this.createNoteProcessingCommandHost(), reporter);
+    async batchExtractOriginalTextCommand(
+        reporter?: ProgressReporter,
+        options?: {
+            folderPathOverride?: string;
+            fileSelectionOverride?: FolderTaskFileSelectionOverride;
+        }
+    ) {
+        if (!options?.folderPathOverride && !options?.fileSelectionOverride) {
+            return runBatchExtractOriginalTextCommandWithHost(this.createNoteProcessingCommandHost(), reporter);
+        }
+        return runBatchExtractOriginalTextCommandWithHost(
+            this.createNoteProcessingCommandHost(),
+            reporter,
+            undefined,
+            options
+        );
     }
 
 } // End of NotemdPlugin class

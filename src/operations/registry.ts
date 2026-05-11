@@ -225,10 +225,29 @@ const PROCESS_FILE_RESULT_SCHEMA: OperationSchema = {
     }
 };
 
+const FOLDER_TASK_SELECTION_OVERRIDE_SCHEMA_PROPERTIES = {
+    includeSubfoldersMode: {
+        type: 'string',
+        enum: ['legacy', 'include', 'exclude']
+    },
+    fileFilterMode: {
+        type: 'string',
+        enum: ['none', 'contains', 'regex', 'glob']
+    },
+    fileFilterPattern: { type: 'string' },
+    fileFilterTarget: {
+        type: 'string',
+        enum: ['relativePath', 'basename']
+    },
+    fileFilterCaseSensitive: { type: 'boolean' },
+    fileFilterInvert: { type: 'boolean' }
+};
+
 const PROCESS_FOLDER_INPUT_SCHEMA: OperationSchema = {
     type: 'object',
     properties: {
-        folderPath: { type: 'string' }
+        folderPath: { type: 'string' },
+        ...FOLDER_TASK_SELECTION_OVERRIDE_SCHEMA_PROPERTIES
     }
 };
 
@@ -269,7 +288,8 @@ const GENERATE_FROM_TITLE_RESULT_SCHEMA: OperationSchema = {
 const BATCH_GENERATE_FROM_TITLES_INPUT_SCHEMA: OperationSchema = {
     type: 'object',
     properties: {
-        folderPath: { type: 'string' }
+        folderPath: { type: 'string' },
+        ...FOLDER_TASK_SELECTION_OVERRIDE_SCHEMA_PROPERTIES
     }
 };
 
@@ -351,7 +371,8 @@ const TRANSLATE_FOLDER_INPUT_SCHEMA: OperationSchema = {
     type: 'object',
     properties: {
         folderPath: { type: 'string' },
-        targetLanguage: { type: 'string' }
+        targetLanguage: { type: 'string' },
+        ...FOLDER_TASK_SELECTION_OVERRIDE_SCHEMA_PROPERTIES
     }
 };
 
@@ -395,7 +416,8 @@ const EXTRACT_CONCEPTS_FOLDER_INPUT_SCHEMA: OperationSchema = {
     type: 'object',
     properties: {
         folderPath: { type: 'string' },
-        conceptFolderPath: { type: 'string' }
+        conceptFolderPath: { type: 'string' },
+        ...FOLDER_TASK_SELECTION_OVERRIDE_SCHEMA_PROPERTIES
     }
 };
 
@@ -514,7 +536,8 @@ const CONCEPT_DEDUPE_RESULT_SCHEMA: OperationSchema = {
 const BATCH_MERMAID_FIX_INPUT_SCHEMA: OperationSchema = {
     type: 'object',
     properties: {
-        folderPath: { type: 'string' }
+        folderPath: { type: 'string' },
+        ...FOLDER_TASK_SELECTION_OVERRIDE_SCHEMA_PROPERTIES
     }
 };
 
@@ -570,7 +593,8 @@ const FIX_FORMULA_FILE_RESULT_SCHEMA: OperationSchema = {
 const BATCH_FIX_FORMULA_INPUT_SCHEMA: OperationSchema = {
     type: 'object',
     properties: {
-        folderPath: { type: 'string' }
+        folderPath: { type: 'string' },
+        ...FOLDER_TASK_SELECTION_OVERRIDE_SCHEMA_PROPERTIES
     }
 };
 

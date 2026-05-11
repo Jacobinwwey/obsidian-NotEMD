@@ -18,6 +18,7 @@ describe('CLI invocation contract', () => {
         const researchSummarize = contract.operations.find(operation => operation.operationId === 'research.summarize-topic');
         const translateFile = contract.operations.find(operation => operation.operationId === 'translate.file');
         const translateFolder = contract.operations.find(operation => operation.operationId === 'translate.folder-batch');
+        const extractConceptFolder = contract.operations.find(operation => operation.operationId === 'concept.extract-folder');
         const extractOriginalText = contract.operations.find(operation => operation.operationId === 'content.extract-original-text');
         const extractAndGenerate = contract.operations.find(operation => operation.operationId === 'workflow.extract-and-generate');
         const checkDuplicates = contract.operations.find(operation => operation.operationId === 'duplicate.check-file');
@@ -146,6 +147,18 @@ describe('CLI invocation contract', () => {
 
         expect(translateFolder).toEqual(expect.objectContaining({
             operationId: 'translate.folder-batch',
+            inputSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    folderPath: expect.any(Object),
+                    includeSubfoldersMode: expect.any(Object),
+                    fileFilterMode: expect.any(Object),
+                    fileFilterPattern: expect.any(Object),
+                    fileFilterTarget: expect.any(Object),
+                    fileFilterCaseSensitive: expect.any(Object),
+                    fileFilterInvert: expect.any(Object)
+                })
+            }),
             resultSchema: expect.objectContaining({
                 type: 'object',
                 properties: expect.objectContaining({
@@ -154,6 +167,23 @@ describe('CLI invocation contract', () => {
                     cancelled: expect.any(Object),
                     fileResults: expect.any(Object),
                     errors: expect.any(Object)
+                })
+            })
+        }));
+
+        expect(extractConceptFolder).toEqual(expect.objectContaining({
+            operationId: 'concept.extract-folder',
+            inputSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    folderPath: expect.any(Object),
+                    conceptFolderPath: expect.any(Object),
+                    includeSubfoldersMode: expect.any(Object),
+                    fileFilterMode: expect.any(Object),
+                    fileFilterPattern: expect.any(Object),
+                    fileFilterTarget: expect.any(Object),
+                    fileFilterCaseSensitive: expect.any(Object),
+                    fileFilterInvert: expect.any(Object)
                 })
             })
         }));
@@ -248,7 +278,13 @@ describe('CLI invocation contract', () => {
             inputSchema: expect.objectContaining({
                 type: 'object',
                 properties: expect.objectContaining({
-                    folderPath: expect.any(Object)
+                    folderPath: expect.any(Object),
+                    includeSubfoldersMode: expect.any(Object),
+                    fileFilterMode: expect.any(Object),
+                    fileFilterPattern: expect.any(Object),
+                    fileFilterTarget: expect.any(Object),
+                    fileFilterCaseSensitive: expect.any(Object),
+                    fileFilterInvert: expect.any(Object)
                 })
             }),
             resultSchema: expect.objectContaining({
@@ -285,6 +321,18 @@ describe('CLI invocation contract', () => {
 
         expect(batchGenerate).toEqual(expect.objectContaining({
             operationId: 'content.batch-generate-from-titles',
+            inputSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    folderPath: expect.any(Object),
+                    includeSubfoldersMode: expect.any(Object),
+                    fileFilterMode: expect.any(Object),
+                    fileFilterPattern: expect.any(Object),
+                    fileFilterTarget: expect.any(Object),
+                    fileFilterCaseSensitive: expect.any(Object),
+                    fileFilterInvert: expect.any(Object)
+                })
+            }),
             resultSchema: expect.objectContaining({
                 type: 'object',
                 properties: expect.objectContaining({
@@ -409,7 +457,13 @@ describe('CLI invocation contract', () => {
             inputSchema: expect.objectContaining({
                 type: 'object',
                 properties: expect.objectContaining({
-                    folderPath: expect.any(Object)
+                    folderPath: expect.any(Object),
+                    includeSubfoldersMode: expect.any(Object),
+                    fileFilterMode: expect.any(Object),
+                    fileFilterPattern: expect.any(Object),
+                    fileFilterTarget: expect.any(Object),
+                    fileFilterCaseSensitive: expect.any(Object),
+                    fileFilterInvert: expect.any(Object)
                 })
             }),
             resultSchema: expect.objectContaining({
@@ -451,7 +505,13 @@ describe('CLI invocation contract', () => {
             inputSchema: expect.objectContaining({
                 type: 'object',
                 properties: expect.objectContaining({
-                    folderPath: expect.any(Object)
+                    folderPath: expect.any(Object),
+                    includeSubfoldersMode: expect.any(Object),
+                    fileFilterMode: expect.any(Object),
+                    fileFilterPattern: expect.any(Object),
+                    fileFilterTarget: expect.any(Object),
+                    fileFilterCaseSensitive: expect.any(Object),
+                    fileFilterInvert: expect.any(Object)
                 })
             }),
             resultSchema: expect.objectContaining({
