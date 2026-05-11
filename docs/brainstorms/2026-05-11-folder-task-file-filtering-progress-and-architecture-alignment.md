@@ -124,7 +124,20 @@ This follow-up slice is now landed on top of the baseline global filtering relea
 3. add focused UX hints for regex/glob examples and invalid-pattern guidance without blocking advanced syntax.
 4. continue the planned packaging / semantic-verification convergence track without reopening unrelated runtime scope.
 
-## 10. Mainline And Workspace Hygiene Outcome
+## 10. Incremental Progress Update (Batch Extract Original Text Operation Contract)
+
+This slice closes the previously identified operation-layer gap for folder-scope original-text extraction:
+
+1. operation `content.batch-extract-original-text` is now registered in `src/operations/registry.ts`.
+2. command binding is now canonicalized to `batch-extract-original-text`, with metadata sourced from workflow-side action semantics (`interactive-ui`, `folder-selection`, `batch-write`).
+3. input schema now exposes folder selection overrides:
+   `includeSubfoldersMode`, `fileFilterMode`, `fileFilterPattern`, `fileFilterTarget`, `fileFilterCaseSensitive`, `fileFilterInvert`.
+4. result schema now aligns with `BatchExtractOriginalTextResult` shape:
+   `folderPath`, `processedFileCount`, `extractedCount`, `cancelled`, `fileResults`, `errors`.
+5. regression tests were expanded and now lock this operation through:
+   `operationsRegistry`, `cliContracts`, and `cliCapabilityManifest` coverage.
+
+## 11. Mainline And Workspace Hygiene Outcome
 
 This slice is ready for mainline landing under existing CI discipline:
 

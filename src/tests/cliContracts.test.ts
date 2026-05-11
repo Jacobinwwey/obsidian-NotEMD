@@ -20,6 +20,7 @@ describe('CLI invocation contract', () => {
         const translateFolder = contract.operations.find(operation => operation.operationId === 'translate.folder-batch');
         const extractConceptFolder = contract.operations.find(operation => operation.operationId === 'concept.extract-folder');
         const extractOriginalText = contract.operations.find(operation => operation.operationId === 'content.extract-original-text');
+        const batchExtractOriginalText = contract.operations.find(operation => operation.operationId === 'content.batch-extract-original-text');
         const extractAndGenerate = contract.operations.find(operation => operation.operationId === 'workflow.extract-and-generate');
         const checkDuplicates = contract.operations.find(operation => operation.operationId === 'duplicate.check-file');
         const dedupeConcepts = contract.operations.find(operation => operation.operationId === 'concept.dedupe');
@@ -44,6 +45,7 @@ describe('CLI invocation contract', () => {
             'file.process-folder-add-links',
             'content.generate-from-title',
             'content.batch-generate-from-titles',
+            'content.batch-extract-original-text',
             'research.summarize-topic',
             'translate.file',
             'translate.folder-batch',
@@ -403,6 +405,33 @@ describe('CLI invocation contract', () => {
                     outputSuffix: expect.any(Object),
                     questionCount: expect.any(Object),
                     mergedMode: expect.any(Object)
+                })
+            })
+        }));
+
+        expect(batchExtractOriginalText).toEqual(expect.objectContaining({
+            operationId: 'content.batch-extract-original-text',
+            inputSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    folderPath: expect.any(Object),
+                    includeSubfoldersMode: expect.any(Object),
+                    fileFilterMode: expect.any(Object),
+                    fileFilterPattern: expect.any(Object),
+                    fileFilterTarget: expect.any(Object),
+                    fileFilterCaseSensitive: expect.any(Object),
+                    fileFilterInvert: expect.any(Object)
+                })
+            }),
+            resultSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    folderPath: expect.any(Object),
+                    processedFileCount: expect.any(Object),
+                    extractedCount: expect.any(Object),
+                    cancelled: expect.any(Object),
+                    fileResults: expect.any(Object),
+                    errors: expect.any(Object)
                 })
             })
         }));

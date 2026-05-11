@@ -29,6 +29,7 @@ describe('CLI capability manifest', () => {
         expect(ids).toContain('notemd:extract-concepts-from-current-file');
         expect(ids).toContain('notemd:batch-extract-concepts-from-folder');
         expect(ids).toContain('notemd:extract-original-text');
+        expect(ids).toContain('notemd:batch-extract-original-text');
         expect(ids).toContain('notemd:extract-concepts-and-generate-titles');
         expect(ids).toContain('notemd:check-for-duplicates');
         expect(ids).toContain('notemd:check-and-remove-duplicate-concept-notes');
@@ -58,6 +59,7 @@ describe('CLI capability manifest', () => {
         const extractCurrent = manifest.commands.find(command => command.id === 'notemd:extract-concepts-from-current-file');
         const extractFolder = manifest.commands.find(command => command.id === 'notemd:batch-extract-concepts-from-folder');
         const extractOriginal = manifest.commands.find(command => command.id === 'notemd:extract-original-text');
+        const batchExtractOriginal = manifest.commands.find(command => command.id === 'notemd:batch-extract-original-text');
         const extractAndGenerate = manifest.commands.find(command => command.id === 'notemd:extract-concepts-and-generate-titles');
         const checkDuplicates = manifest.commands.find(command => command.id === 'notemd:check-for-duplicates');
         const dedupeConcepts = manifest.commands.find(command => command.id === 'notemd:check-and-remove-duplicate-concept-notes');
@@ -214,6 +216,14 @@ describe('CLI capability manifest', () => {
             automationLevel: getSidebarActionAutomationLevel('extract-original-text'),
             requiredContext: getSidebarActionRequiredContext('extract-original-text'),
             sideEffectClass: getSidebarActionSideEffectClass('extract-original-text'),
+            mappingKind: 'exact'
+        }));
+
+        expect(batchExtractOriginal).toEqual(expect.objectContaining({
+            operationId: 'content.batch-extract-original-text',
+            automationLevel: getSidebarActionAutomationLevel('batch-extract-original-text'),
+            requiredContext: getSidebarActionRequiredContext('batch-extract-original-text'),
+            sideEffectClass: getSidebarActionSideEffectClass('batch-extract-original-text'),
             mappingKind: 'exact'
         }));
 

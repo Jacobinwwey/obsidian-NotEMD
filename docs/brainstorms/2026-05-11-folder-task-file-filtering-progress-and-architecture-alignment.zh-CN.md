@@ -124,7 +124,20 @@ topic: folder-task-file-filtering-progress-and-architecture-alignment
 3. 为 regex/glob 增加更聚焦的示例提示与非法 pattern 指引，不阻断高级语法输入。
 4. 按既定路线继续推进 packaging / semantic-verification convergence，不重开无关 runtime 范围。
 
-## 10. 主线落盘与工作区卫生结论
+## 10. 增量进展更新（批量提取指定原文 operation 契约）
+
+本切片补齐了此前识别出的“文件夹级提取指定原文”在 operation 层的契约空缺：
+
+1. 在 `src/operations/registry.ts` 中新增 operation `content.batch-extract-original-text`。
+2. 命令绑定统一为 `batch-extract-original-text`，并复用工作流动作元数据语义（`interactive-ui`、`folder-selection`、`batch-write`）。
+3. 输入 schema 已支持文件夹筛选覆盖字段：
+   `includeSubfoldersMode`、`fileFilterMode`、`fileFilterPattern`、`fileFilterTarget`、`fileFilterCaseSensitive`、`fileFilterInvert`。
+4. 结果 schema 已对齐 `BatchExtractOriginalTextResult` 结构：
+   `folderPath`、`processedFileCount`、`extractedCount`、`cancelled`、`fileResults`、`errors`。
+5. 回归测试已扩展并锁定该 operation 在以下层面的可见性与契约稳定性：
+   `operationsRegistry`、`cliContracts`、`cliCapabilityManifest`。
+
+## 11. 主线落盘与工作区卫生结论
 
 该切片已具备主线落盘条件：
 

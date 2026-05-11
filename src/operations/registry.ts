@@ -454,6 +454,29 @@ const EXTRACT_ORIGINAL_TEXT_RESULT_SCHEMA: OperationSchema = {
     }
 };
 
+const BATCH_EXTRACT_ORIGINAL_TEXT_INPUT_SCHEMA: OperationSchema = {
+    type: 'object',
+    properties: {
+        folderPath: { type: 'string' },
+        ...FOLDER_TASK_SELECTION_OVERRIDE_SCHEMA_PROPERTIES
+    }
+};
+
+const BATCH_EXTRACT_ORIGINAL_TEXT_RESULT_SCHEMA: OperationSchema = {
+    type: 'object',
+    properties: {
+        folderPath: { type: 'string' },
+        processedFileCount: { type: 'number' },
+        extractedCount: { type: 'number' },
+        cancelled: { type: 'boolean' },
+        fileResults: {
+            type: 'array',
+            items: EXTRACT_ORIGINAL_TEXT_RESULT_SCHEMA
+        },
+        errors: ERROR_ARRAY_SCHEMA
+    }
+};
+
 const EXTRACT_AND_GENERATE_INPUT_SCHEMA: OperationSchema = {
     type: 'object',
     properties: {
@@ -900,6 +923,18 @@ const OPERATION_DEFINITIONS: OperationDefinition[] = [
         ],
         inputSchema: EXTRACT_ORIGINAL_TEXT_INPUT_SCHEMA,
         resultSchema: EXTRACT_ORIGINAL_TEXT_RESULT_SCHEMA
+    },
+    {
+        version: 1,
+        id: 'content.batch-extract-original-text',
+        automationLevel: 'interactive-ui',
+        requiredContext: 'folder-selection',
+        sideEffectClass: 'batch-write',
+        commandBindings: [
+            createWorkflowCommandBinding('batch-extract-original-text', 'batch-extract-original-text')
+        ],
+        inputSchema: BATCH_EXTRACT_ORIGINAL_TEXT_INPUT_SCHEMA,
+        resultSchema: BATCH_EXTRACT_ORIGINAL_TEXT_RESULT_SCHEMA
     },
     {
         version: 1,
