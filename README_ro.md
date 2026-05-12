@@ -694,7 +694,7 @@ Această cronică trimestrială păstrează stilul vizual original al [repo-saga
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.ro.svg)
 
-_Actualizat ultima dată pentru tagul de release `1.8.7` la 2026-05-12. Data ultimului commit: 2026-05-11._
+_Actualizat ultima dată pentru tagul de release `1.8.7` la 2026-05-12. Data ultimului commit: 2026-05-12._
 <!-- repo-chronicle:end -->
 
 
