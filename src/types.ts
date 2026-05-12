@@ -254,10 +254,11 @@ export interface ProgressReporter {
     updateApiLiveness?(event: ApiLivenessEvent): void;
 }
 
-export type ApiLivenessPhase = 'request-start' | 'response-chunk' | 'request-complete' | 'request-error';
+export type ApiLivenessPhase = 'request-start' | 'response-headers' | 'response-chunk' | 'request-complete' | 'request-error';
 
 export interface ApiLivenessEvent {
     phase: ApiLivenessPhase;
+    requestId: string;
     providerName: string;
     transport?: string;
     retrying?: boolean;

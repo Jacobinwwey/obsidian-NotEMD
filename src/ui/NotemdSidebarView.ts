@@ -66,10 +66,9 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
     private logEl: HTMLElement | null = null;
     private cancelButton: HTMLButtonElement | null = null;
     private languageSelector: HTMLSelectElement | null = null;
-    private apiLivenessPhase: 'idle' | 'waiting' | 'receiving' | 'received' | 'error' = 'idle';
+    private apiLivenessPhase: 'idle' | 'waiting' | 'accepted' | 'receiving' | 'received' | 'error' = 'idle';
     private apiLivenessTimer: ReturnType<typeof setTimeout> | null = null;
-    private apiActiveRequestCount = 0;
-    private apiReceivingRequestCount = 0;
+    private apiLivenessRequests = new Map<string, { accepted: boolean; receiving: boolean }>();
 
     private logContent: string[] = [];
     private startTime = 0;
@@ -266,32 +265,36 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
 
         switch (event.phase) {
             case 'request-start':
-                this.apiActiveRequestCount += 1;
+                this.apiLivenessRequests.set(event.requestId, { accepted: false, receiving: false });
+                this.syncApiLivenessWhileActive(i18n);
+                break;
+            case 'response-headers':
+                this.ensureApiLivenessRequest(event.requestId).accepted = true;
                 this.syncApiLivenessWhileActive(i18n);
                 break;
             case 'response-chunk':
-                if (this.apiActiveRequestCount === 0) {
-                    this.apiActiveRequestCount = 1;
-                }
-                if (this.apiReceivingRequestCount < this.apiActiveRequestCount) {
-                    this.apiReceivingRequestCount += 1;
+                {
+                    const requestState = this.ensureApiLivenessRequest(event.requestId);
+                    requestState.accepted = true;
+                    requestState.receiving = true;
                 }
                 this.syncApiLivenessWhileActive(i18n);
                 break;
             case 'request-complete':
-                this.settleApiLivenessRequest();
+                this.apiLivenessRequests.delete(event.requestId);
                 if (!this.syncApiLivenessWhileActive(i18n)) {
                     this.setApiLivenessState('received', i18n.sidebar.status.apiResponseReceived);
                 }
                 break;
             case 'request-error':
-                this.settleApiLivenessRequest();
                 if (event.retrying) {
+                    this.apiLivenessRequests.set(event.requestId, { accepted: false, receiving: false });
                     if (!this.syncApiLivenessWhileActive(i18n)) {
                         this.setApiLivenessState('waiting', i18n.sidebar.status.awaitingApiOutput);
                     }
                     break;
                 }
+                this.apiLivenessRequests.delete(event.requestId);
                 if (!this.syncApiLivenessWhileActive(i18n)) {
                     this.setApiLivenessState('error', i18n.sidebar.status.apiOutputInterrupted);
                 }
@@ -299,20 +302,33 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         }
     }
 
-    private settleApiLivenessRequest() {
-        this.apiActiveRequestCount = Math.max(0, this.apiActiveRequestCount - 1);
-        this.apiReceivingRequestCount = Math.min(this.apiReceivingRequestCount, this.apiActiveRequestCount);
+    private ensureApiLivenessRequest(requestId: string) {
+        const existingState = this.apiLivenessRequests.get(requestId);
+        if (existingState) {
+            return existingState;
+        }
+
+        const createdState = { accepted: false, receiving: false };
+        this.apiLivenessRequests.set(requestId, createdState);
+        return createdState;
     }
 
     private syncApiLivenessWhileActive(i18n = this.getStrings()): boolean {
-        if (this.apiActiveRequestCount <= 0) {
+        if (this.apiLivenessRequests.size === 0) {
             return false;
         }
 
-        if (this.apiReceivingRequestCount > 0) {
+        const requestStates = Array.from(this.apiLivenessRequests.values());
+
+        if (requestStates.some(state => state.receiving)) {
             if (this.apiLivenessPhase !== 'receiving') {
                 this.setApiLivenessState('receiving', i18n.sidebar.status.receivingApiOutput, true);
             }
+            return true;
+        }
+
+        if (requestStates.some(state => state.accepted)) {
+            this.setApiLivenessState('accepted', i18n.sidebar.status.apiRequestAcceptedAwaitingBody);
             return true;
         }
 
@@ -329,13 +345,12 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
 
     private resetApiLiveness() {
         const i18n = this.getStrings();
-        this.apiActiveRequestCount = 0;
-        this.apiReceivingRequestCount = 0;
+        this.apiLivenessRequests.clear();
         this.setApiLivenessState('idle', i18n.common.standby);
     }
 
     private setApiLivenessState(
-        phase: 'idle' | 'waiting' | 'receiving' | 'received' | 'error',
+        phase: 'idle' | 'waiting' | 'accepted' | 'receiving' | 'received' | 'error',
         text: string,
         scheduleHealthyReminder = false
     ) {
@@ -349,6 +364,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         if (this.apiLivenessRowEl) {
             this.apiLivenessRowEl.removeClass('is-idle');
             this.apiLivenessRowEl.removeClass('is-waiting');
+            this.apiLivenessRowEl.removeClass('is-accepted');
             this.apiLivenessRowEl.removeClass('is-active');
             this.apiLivenessRowEl.removeClass('is-error');
 
@@ -356,6 +372,8 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
                 ? 'is-idle'
                 : phase === 'waiting'
                     ? 'is-waiting'
+                    : phase === 'accepted'
+                        ? 'is-accepted'
                     : phase === 'error'
                         ? 'is-error'
                         : 'is-active';

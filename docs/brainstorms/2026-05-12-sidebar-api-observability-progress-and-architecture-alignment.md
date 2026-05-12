@@ -58,10 +58,12 @@ Root-cause summary:
 | Show success-path raw-response debug, not error-only debug | `logSuccessfulApiDebug()` in `src/llmUtils.ts` | Landed |
 | Reuse existing sanitized debug schema instead of inventing a second one | `getDebugInfo()` + shared runtime debug attempts | Landed |
 | Sidebar liveness event contract | `ApiLivenessEvent` / `ProgressReporter.updateApiLiveness()` in `src/types.ts` | Landed |
+| Keep a stable logical request identity across retries | request-scoped reporter binding in `src/llmUtils.ts` + `requestId` in `src/types.ts` | Landed |
+| Distinguish acceptance / response-headers from body reception | `response-headers` emits in direct transport paths + accepted-state rendering in `src/ui/NotemdSidebarView.ts` | Landed |
 | Emit liveness on real streaming chunk reception | `requestViaWebFetch*StreamTransport` and `requestViaDesktopHttp*StreamTransport` paths in `src/llmUtils.ts` | Landed |
 | Emit conservative response-arrival signal for non-streaming providers | `executeAnthropicApi`, `executeGoogleApi`, `executeAzureOpenAIApi`, `executeOllamaApi`, and OpenAI-compatible success path | Landed |
 | Distinguish retrying failure vs terminal interruption | `callApiWithRetry()` emits `request-error` with `retrying: true/false` | Landed |
-| Prevent concurrent requests from prematurely flipping sidebar into a completed/error state | `apiActiveRequestCount` + `apiReceivingRequestCount` aggregation in `src/ui/NotemdSidebarView.ts` | Landed |
+| Prevent concurrent requests from prematurely flipping sidebar into a completed/error state | `requestId`-keyed sidebar request map in `src/ui/NotemdSidebarView.ts` | Landed |
 | Forward liveness events through batch/folder mini-reporters | `src/fileUtils.ts` and `src/operations/noteProcessingCommandHostAdapter.ts` | Landed |
 | Preserve i18n coverage for new sidebar copy | `src/i18n/locales/en.ts`, `zh_cn.ts`, `zh_tw.ts` | Landed |
 | Lock behavior with focused regression tests | `src/tests/sidebarDomButtonClicks.test.ts`, `llmUtilsProviderSupport.test.ts`, `noteProcessingCommandHostAdapter.test.ts` | Landed |
@@ -76,12 +78,12 @@ This slice advances the repo in a useful but intentionally bounded way:
    provider-response timing is now surfaced through a typed progress-reporter channel instead of ad hoc log parsing
 3. **coarse failure state -> retry-aware failure semantics**
    transient attempt failure no longer has to masquerade as a final broken task
-4. **single-run assumption -> concurrent aggregation**
-   sidebar liveness rendering now tolerates overlapping requests instead of assuming exactly one request owns the footer state
+4. **single-run assumption -> request-keyed concurrent aggregation**
+   sidebar liveness rendering now tolerates overlapping requests precisely, even when multiple requests share the same provider name
 
 What this slice does **not** do:
 
-1. it does not add request-level IDs or a per-provider live timeline
+1. it does not add a per-provider live timeline or expose raw transport metadata directly in the footer
 2. it does not claim that buffered/non-streaming providers can prove ongoing body emission before the full response object exists
 3. it does not change provider protocol semantics or broaden packaging/runtime topology
 
@@ -140,13 +142,15 @@ For buffered/non-streaming paths, the runtime generally cannot prove “provider
 Current behavior is intentionally conservative:
 
 1. `request-start` moves the sidebar into waiting state
-2. the UI remains in waiting state while no verifiable response data is available
-3. once the response object is actually available, the runtime emits a conservative response-arrival signal (`response-chunk`) and then completes
+2. if a direct transport truly exposes response headers before body bytes, the runtime can emit `response-headers`, which the UI renders as “accepted / awaiting body”
+3. if no such transport evidence exists, the UI remains in waiting state while no verifiable response data is available
+4. once the response object or body bytes are actually available, the runtime emits a conservative response-arrival signal (`response-chunk`) and then completes
 
 Implication:
 
 - the current green “receiving output” semantics are strongly meaningful for streamed paths
-- for buffered paths, the implementation only claims response arrival once the response exists; it does **not** speculate about server-side health during the wait window
+- the current blue accepted-state semantics only mean “transport accepted and exposed headers,” not “body output is flowing”
+- for requestUrl-only or other buffered paths without header timing evidence, the implementation only claims response arrival once the response exists; it does **not** speculate about server-side health during the wait window
 
 This is the correct tradeoff for now. Anything stronger would require additional protocol evidence such as request IDs, response headers timing, or dedicated server-side heartbeats.
 
@@ -154,8 +158,8 @@ This is the correct tradeoff for now. Anything stronger would require additional
 
 1. **Risk:** retryable attempt failures flash as terminal errors and mislead users.
    **Control:** `retrying` is now explicit in `request-error`, and the sidebar keeps retryable failures out of the final red-state path.
-2. **Risk:** one completed request incorrectly ends the liveness indicator while another request is still active.
-   **Control:** sidebar state now aggregates active/receiving counts instead of rendering from a single scalar flag.
+2. **Risk:** one completed request incorrectly ends the liveness indicator while another request is still active, especially when the provider names match.
+   **Control:** sidebar state is now derived from a `requestId`-keyed request map instead of provider-name or count-only aggregation.
 3. **Risk:** batch/folder mini-reporters drop the new liveness channel.
    **Control:** liveness forwarding is explicitly wired through mini-reporters and locked by host-adapter regression coverage.
 4. **Risk:** docs or UI copy overclaim buffered/non-streaming health semantics.
@@ -177,8 +181,8 @@ Executed and passed:
 
 Focused regression coverage added/updated:
 
-1. sidebar liveness state transitions, long-wait messaging, and quick debug toggle persistence
-2. retry-aware liveness emission in provider runtime support tests
+1. sidebar liveness state transitions, accepted-vs-receiving distinction, long-wait messaging, and quick debug toggle persistence
+2. retry-aware liveness emission plus stable `requestId` continuity in provider runtime support tests
 3. batch concept-extraction path forwarding of per-file liveness events back to the main reporter
 
 ## 9. Current Progress And Next Direction
@@ -186,20 +190,18 @@ Focused regression coverage added/updated:
 Current status on `main` after this slice:
 
 1. quick deep debug is reachable from the live log surface
-2. sidebar liveness now reflects waiting / receiving / healthy-long-running / received / interrupted states
-3. retry semantics and concurrent-request aggregation are hardened enough for normal shipped usage
+2. sidebar liveness now reflects waiting / accepted / receiving / healthy-long-running / received / interrupted states
+3. retry semantics and concurrent-request aggregation are now hardened at `requestId` granularity instead of only count granularity
 4. batch/folder workflows no longer silently lose the liveness signal
 
 Recommended next direction:
 
-1. **Introduce request-level identity**
-   move from aggregate counters to `requestId`-keyed state so overlapping requests can be reasoned about precisely
-2. **Separate header/acceptance vs body-reception states**
-   add a distinct state for “request accepted / response headers received” rather than overloading `receiving`
-3. **Keep buffered-provider claims conservative**
+1. **Expand structured per-request evidence, not more global states**
+   if support tooling needs to go deeper, prefer per-request timelines / metadata drill-down over more footer-wide condition branches
+2. **Keep buffered-provider claims conservative**
    do not promote non-streaming long-wait states into green “healthy output” messaging unless transport evidence truly exists
-4. **If deeper support tooling is needed later**
-   prefer per-request structured observability over more global sidebar condition branches
+3. **Only widen acceptance semantics where the transport really exposes them**
+   requestUrl-only and similar paths should stay in waiting until the code can prove earlier acceptance safely
 
 ## 10. Conclusion
 
@@ -207,7 +209,8 @@ This slice is a good stabilization landing, not because it adds more UI, but bec
 
 - deep debug is faster to reach
 - retries do not masquerade as terminal failure
-- concurrent requests do not prematurely collapse the footer state
+- concurrent requests do not prematurely collapse the footer state, even when they overlap on the same provider
+- acceptance / headers reception no longer gets misreported as body streaming
 - non-streaming providers are treated conservatively rather than theatrically
 
-That keeps the feature supportable on `main` today, while leaving a clean path for future request-level observability.
+That keeps the feature supportable on `main` today, while leaving a clean path for deeper per-request observability without overstating runtime truth.

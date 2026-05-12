@@ -304,11 +304,69 @@ type RuntimeRequestResponse = {
     __notemdDebug?: RuntimeDebugInfo;
 };
 
+type ApiLivenessEventInput = Omit<ApiLivenessEvent, 'requestId'> & {
+    requestId?: string;
+};
+
+let apiLivenessRequestSequence = 0;
+
+function createApiLivenessRequestId(): string {
+    apiLivenessRequestSequence += 1;
+    return `api-${Date.now()}-${apiLivenessRequestSequence}`;
+}
+
+function bindProgressReporterToApiLivenessRequest(
+    progressReporter: ProgressReporter,
+    requestId: string
+): ProgressReporter {
+    return {
+        log(message: string) {
+            progressReporter.log(message);
+        },
+        updateStatus(text: string, percent?: number) {
+            progressReporter.updateStatus(text, percent);
+        },
+        requestCancel() {
+            progressReporter.requestCancel();
+        },
+        clearDisplay() {
+            progressReporter.clearDisplay();
+        },
+        get cancelled() {
+            return progressReporter.cancelled;
+        },
+        get abortController() {
+            return progressReporter.abortController;
+        },
+        set abortController(controller: AbortController | null | undefined) {
+            progressReporter.abortController = controller;
+        },
+        get activeTasks() {
+            return progressReporter.activeTasks;
+        },
+        set activeTasks(value: number) {
+            progressReporter.activeTasks = value;
+        },
+        updateActiveTasks(delta: number) {
+            progressReporter.updateActiveTasks(delta);
+        },
+        getLogs: progressReporter.getLogs ? () => progressReporter.getLogs!() : undefined,
+        updateApiLiveness: progressReporter.updateApiLiveness
+            ? ((event: ApiLivenessEvent) => {
+                progressReporter.updateApiLiveness?.({
+                    ...event,
+                    requestId: event.requestId || requestId
+                });
+            })
+            : undefined
+    };
+}
+
 function emitApiLiveness(
     progressReporter: ProgressReporter | null | undefined,
-    event: ApiLivenessEvent
+    event: ApiLivenessEventInput
 ): void {
-    progressReporter?.updateApiLiveness?.(event);
+    progressReporter?.updateApiLiveness?.(event as ApiLivenessEvent);
 }
 
 type TransportDebugAttempt = {
@@ -1053,7 +1111,9 @@ async function readFetchResponseText(
 
 async function requestViaWebFetchTransport(
     options: RuntimeRequestOptions,
-    signal?: AbortSignal
+    signal?: AbortSignal,
+    providerName?: string,
+    progressReporter?: ProgressReporter | null
 ): Promise<RuntimeRequestResponse> {
     const startedAt = Date.now();
 
@@ -1065,6 +1125,9 @@ async function requestViaWebFetchTransport(
             signal
         });
         const responseHeaders = extractFetchHeaders(response.headers);
+        if (providerName) {
+            emitApiLiveness(progressReporter, { phase: 'response-headers', providerName, transport: 'web-fetch' });
+        }
         const responseText = await readFetchResponseText(response, 'web-fetch', options, startedAt);
         const attempt = createTransportDebugAttempt('web-fetch', options, {
             durationMs: Date.now() - startedAt,
@@ -1130,7 +1193,9 @@ function resolveDirectRuntimeTransport(targetUrl: string): DirectRuntimeTranspor
 
 async function requestViaDesktopHttpTransport(
     options: RuntimeRequestOptions,
-    signal?: AbortSignal
+    signal?: AbortSignal,
+    providerName?: string,
+    progressReporter?: ProgressReporter | null
 ): Promise<RuntimeRequestResponse> {
     return await new Promise((resolve, reject) => {
         const startedAt = Date.now();
@@ -1185,6 +1250,9 @@ async function requestViaDesktopHttpTransport(
             let responseEnded = false;
             const responseHeaders = response.headers as Record<string, unknown> | undefined;
             const statusCode = response.statusCode ?? 0;
+            if (providerName) {
+                emitApiLiveness(progressReporter, { phase: 'response-headers', providerName, transport: 'desktop-http' });
+            }
 
             const rejectWithTransportDebug = (error: unknown) => {
                 const responseText = chunks.length > 0 ? Buffer.concat(chunks).toString('utf8') : '';
@@ -1384,6 +1452,7 @@ async function requestViaWebFetchOpenAICompatibleStreamTransport(
             signal
         });
         const responseHeaders = extractFetchHeaders(response.headers);
+        emitApiLiveness(progressReporter, { phase: 'response-headers', providerName, transport: transportName });
 
         if (!response.body || typeof response.body.getReader !== 'function') {
             const responseText = await response.text();
@@ -1536,6 +1605,7 @@ async function requestViaDesktopHttpOpenAICompatibleStreamTransport(
             const responseHeaders = response.headers as Record<string, unknown> | undefined;
             const statusCode = response.statusCode ?? 0;
             const state = createOpenAICompatibleStreamState();
+            emitApiLiveness(progressReporter, { phase: 'response-headers', providerName, transport: transportName });
 
             const rejectWithTransportDebug = (error: unknown) => {
                 rejectOnce(createOpenAICompatibleStreamTransportError(
@@ -1730,8 +1800,8 @@ async function requestOpenAICompatibleWithStreamingFallback(
 
         try {
             const bufferedResponse = primaryTransport === 'desktop-http'
-                ? await requestViaDesktopHttpTransport(options, signal)
-                : await requestViaWebFetchTransport(options, signal);
+                ? await requestViaDesktopHttpTransport(options, signal, providerName, progressReporter)
+                : await requestViaWebFetchTransport(options, signal, providerName, progressReporter);
             return attachTransportDebugToResponse(
                 bufferedResponse,
                 mergeTransportDebugAttempts(primaryAttempts, getTransportDebugAttempts(bufferedResponse))
@@ -1844,6 +1914,7 @@ async function requestViaWebFetchStructuredStreamingTransport<State>(
         });
         const responseHeaders = extractFetchHeaders(response.headers);
         const state = strategy.createState();
+        emitApiLiveness(progressReporter, { phase: 'response-headers', providerName, transport: transportName });
 
         if (!response.body || typeof response.body.getReader !== 'function') {
             const responseText = await response.text();
@@ -1992,6 +2063,7 @@ async function requestViaDesktopHttpStructuredStreamingTransport<State>(
             const responseHeaders = response.headers as Record<string, unknown> | undefined;
             const statusCode = response.statusCode ?? 0;
             const state = strategy.createState();
+            emitApiLiveness(progressReporter, { phase: 'response-headers', providerName, transport: transportName });
 
             const rejectWithTransportDebug = (error: unknown) => {
                 rejectOnce(createStructuredStreamingTransportError(
@@ -2165,8 +2237,8 @@ async function requestRuntimeUrlWithDesktopFallback(
 
         try {
             const fallbackResponse = fallbackTransport === 'desktop-http'
-                ? await requestViaDesktopHttpTransport(options, signal)
-                : await requestViaWebFetchTransport(options, signal);
+                ? await requestViaDesktopHttpTransport(options, signal, providerName, progressReporter)
+                : await requestViaWebFetchTransport(options, signal, providerName, progressReporter);
             return attachTransportDebugToResponse(
                 fallbackResponse,
                 mergeTransportDebugAttempts(requestUrlAttempts, getTransportDebugAttempts(fallbackResponse))
@@ -2513,6 +2585,7 @@ async function callApiWithRetry(
     let maxAttempts = settings.enableStableApiCall ? stableRetryMaxAttempts : 1;
     let intervalSeconds = settings.enableStableApiCall ? stableRetryIntervalSeconds : 0;
     let usingStableRetrySequence = settings.enableStableApiCall;
+    const livenessReporter = bindProgressReporterToApiLivenessRequest(progressReporter, createApiLivenessRequestId());
 
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
         if (progressReporter.cancelled) {
@@ -2521,10 +2594,10 @@ async function callApiWithRetry(
         }
 
         try {
-            emitApiLiveness(progressReporter, { phase: 'request-start', providerName: provider.name });
+            emitApiLiveness(livenessReporter, { phase: 'request-start', providerName: provider.name });
             // Pass settings and signal to the underlying API call function
-            const result = await apiCallFunction(provider, modelName, prompt, content, progressReporter, settings, signal);
-            emitApiLiveness(progressReporter, { phase: 'request-complete', providerName: provider.name });
+            const result = await apiCallFunction(provider, modelName, prompt, content, livenessReporter, settings, signal);
+            emitApiLiveness(livenessReporter, { phase: 'request-complete', providerName: provider.name });
             return result;
         } catch (error: unknown) { // Changed to unknown
             const errorMessage = error instanceof Error ? error.message : String(error);
@@ -2534,7 +2607,7 @@ async function callApiWithRetry(
 
             // Handle cancellation specifically
             if ((error instanceof Error && error.name === 'AbortError') || errorMessage.includes("cancelled by user")) {
-                emitApiLiveness(progressReporter, {
+                emitApiLiveness(livenessReporter, {
                     phase: 'request-error',
                     providerName: provider.name,
                     retrying: false
@@ -2578,7 +2651,7 @@ async function callApiWithRetry(
 
             // Check cancellation again before waiting for retry
             if (progressReporter.cancelled) {
-                emitApiLiveness(progressReporter, {
+                emitApiLiveness(livenessReporter, {
                     phase: 'request-error',
                     providerName: provider.name,
                     retrying: false
@@ -2588,7 +2661,7 @@ async function callApiWithRetry(
             }
 
             const willRetry = isRetryableFailure && attempt < maxAttempts;
-            emitApiLiveness(progressReporter, {
+            emitApiLiveness(livenessReporter, {
                 phase: 'request-error',
                 providerName: provider.name,
                 retrying: willRetry
@@ -3102,6 +3175,7 @@ export async function callOpenAICompatibleDiagnosticWithMode(
     signal?: AbortSignal
 ): Promise<string> {
     ensureProviderApiKey(provider);
+    const livenessReporter = bindProgressReporterToApiLivenessRequest(progressReporter, createApiLivenessRequestId());
 
     const url = buildOpenAICompatibleUrl(provider.baseUrl, 'chat/completions');
     const requestBody = buildOpenAICompatibleRequestBody(
@@ -3135,77 +3209,85 @@ export async function callOpenAICompatibleDiagnosticWithMode(
     };
 
     let response: RuntimeRequestResponse;
+    emitApiLiveness(livenessReporter, { phase: 'request-start', providerName: provider.name });
 
-    switch (callMode) {
-        case 'runtime-requesturl-first': {
-            response = await requestOpenAICompatibleWithStreamingFallback(
-                provider.name,
-                baseOptions,
-                streamRequestBodyJson,
-                progressReporter,
-                signal,
-                false
-            );
-            break;
-        }
-        case 'openai-requesturl-only': {
-            progressReporter.log(`[${provider.name}] Developer diagnostic: forcing requestUrl-only transport.`);
-            response = await requestViaObsidianTransport(baseOptions);
-            break;
-        }
-        case 'openai-direct-buffered': {
-            const directTransport = resolveDirectRuntimeTransport(url);
-            if (!directTransport) {
-                throw new Error(`[${provider.name}] No direct runtime transport available for direct buffered diagnostic mode.`);
+    try {
+        switch (callMode) {
+            case 'runtime-requesturl-first': {
+                response = await requestOpenAICompatibleWithStreamingFallback(
+                    provider.name,
+                    baseOptions,
+                    streamRequestBodyJson,
+                    livenessReporter,
+                    signal,
+                    false
+                );
+                break;
             }
-
-            progressReporter.log(
-                `[${provider.name}] Developer diagnostic: forcing ${directTransport === 'desktop-http' ? 'desktop HTTP' : 'web fetch'} buffered transport.`
-            );
-
-            response = directTransport === 'desktop-http'
-                ? await requestViaDesktopHttpTransport(baseOptions, signal)
-                : await requestViaWebFetchTransport(baseOptions, signal);
-            break;
-        }
-        case 'openai-direct-stream': {
-            const directTransport = resolveDirectRuntimeTransport(url);
-            if (!directTransport) {
-                throw new Error(`[${provider.name}] No direct runtime transport available for direct streaming diagnostic mode.`);
+            case 'openai-requesturl-only': {
+                progressReporter.log(`[${provider.name}] Developer diagnostic: forcing requestUrl-only transport.`);
+                response = await requestViaObsidianTransport(baseOptions);
+                break;
             }
+            case 'openai-direct-buffered': {
+                const directTransport = resolveDirectRuntimeTransport(url);
+                if (!directTransport) {
+                    throw new Error(`[${provider.name}] No direct runtime transport available for direct buffered diagnostic mode.`);
+                }
 
-            progressReporter.log(
-                `[${provider.name}] Developer diagnostic: forcing ${directTransport === 'desktop-http' ? 'desktop HTTP' : 'web fetch'} streaming transport.`
-            );
+                progressReporter.log(
+                    `[${provider.name}] Developer diagnostic: forcing ${directTransport === 'desktop-http' ? 'desktop HTTP' : 'web fetch'} buffered transport.`
+                );
 
-            response = directTransport === 'desktop-http'
-                ? await requestViaDesktopHttpOpenAICompatibleStreamTransport(provider.name, streamOptions, signal, progressReporter)
-                : await requestViaWebFetchOpenAICompatibleStreamTransport(provider.name, streamOptions, signal, progressReporter);
-            break;
+                response = directTransport === 'desktop-http'
+                    ? await requestViaDesktopHttpTransport(baseOptions, signal, provider.name, livenessReporter)
+                    : await requestViaWebFetchTransport(baseOptions, signal, provider.name, livenessReporter);
+                break;
+            }
+            case 'openai-direct-stream': {
+                const directTransport = resolveDirectRuntimeTransport(url);
+                if (!directTransport) {
+                    throw new Error(`[${provider.name}] No direct runtime transport available for direct streaming diagnostic mode.`);
+                }
+
+                progressReporter.log(
+                    `[${provider.name}] Developer diagnostic: forcing ${directTransport === 'desktop-http' ? 'desktop HTTP' : 'web fetch'} streaming transport.`
+                );
+
+                response = directTransport === 'desktop-http'
+                    ? await requestViaDesktopHttpOpenAICompatibleStreamTransport(provider.name, streamOptions, signal, livenessReporter)
+                    : await requestViaWebFetchOpenAICompatibleStreamTransport(provider.name, streamOptions, signal, livenessReporter);
+                break;
+            }
+            case 'runtime-stable':
+            default: {
+                response = await requestOpenAICompatibleWithStreamingFallback(
+                    provider.name,
+                    baseOptions,
+                    streamRequestBodyJson,
+                    livenessReporter,
+                    signal,
+                    true
+                );
+                break;
+            }
         }
-        case 'runtime-stable':
-        default: {
-            response = await requestOpenAICompatibleWithStreamingFallback(
-                provider.name,
-                baseOptions,
-                streamRequestBodyJson,
-                progressReporter,
-                signal,
-                true
-            );
-            break;
+
+        if (response.status < 200 || response.status >= 300) {
+            throw buildRuntimeResponseStatusError(provider.name, response);
         }
-    }
 
-    if (response.status < 200 || response.status >= 300) {
-        throw buildRuntimeResponseStatusError(provider.name, response);
+        emitApiLiveness(livenessReporter, { phase: 'response-chunk', providerName: provider.name });
+        logSuccessfulApiDebug(provider.name, response, progressReporter, settings.enableApiErrorDebugMode);
+        const data = response.json;
+        const fallbackText = typeof response.text === 'string' ? response.text : '';
+        const result = extractOpenAICompatibleText(provider.name, data, fallbackText);
+        emitApiLiveness(livenessReporter, { phase: 'request-complete', providerName: provider.name });
+        return result;
+    } catch (error) {
+        emitApiLiveness(livenessReporter, { phase: 'request-error', providerName: provider.name, retrying: false });
+        throw error;
     }
-
-    emitApiLiveness(progressReporter, { phase: 'response-chunk', providerName: provider.name });
-    logSuccessfulApiDebug(provider.name, response, progressReporter, settings.enableApiErrorDebugMode);
-    const data = response.json;
-    const fallbackText = typeof response.text === 'string' ? response.text : '';
-    return extractOpenAICompatibleText(provider.name, data, fallbackText);
 }
 
 

@@ -766,13 +766,20 @@ describe('note processing command host adapter', () => {
         }));
         host.getFiles.mockReturnValue([file]);
         const extractImpl = jest.fn().mockImplementation(async (_app, _runtime, _file, fileReporter: ProgressReporter) => {
-            fileReporter.updateApiLiveness?.({ phase: 'request-start', providerName: 'OpenAI' });
+            fileReporter.updateApiLiveness?.({ phase: 'request-start', providerName: 'OpenAI', requestId: 'req-openai-1' });
+            fileReporter.updateApiLiveness?.({
+                phase: 'response-headers',
+                providerName: 'OpenAI',
+                requestId: 'req-openai-1',
+                transport: 'desktop-http-stream'
+            });
             fileReporter.updateApiLiveness?.({
                 phase: 'response-chunk',
                 providerName: 'OpenAI',
+                requestId: 'req-openai-1',
                 transport: 'desktop-http-stream'
             });
-            fileReporter.updateApiLiveness?.({ phase: 'request-complete', providerName: 'OpenAI' });
+            fileReporter.updateApiLiveness?.({ phase: 'request-complete', providerName: 'OpenAI', requestId: 'req-openai-1' });
             return new Set(['Alpha']);
         });
         const createNotesImpl = jest.fn().mockResolvedValue(undefined);
@@ -782,16 +789,25 @@ describe('note processing command host adapter', () => {
 
         expect(reporter.updateApiLiveness).toHaveBeenCalledWith(expect.objectContaining({
             phase: 'request-start',
-            providerName: 'OpenAI'
+            providerName: 'OpenAI',
+            requestId: 'req-openai-1'
+        }));
+        expect(reporter.updateApiLiveness).toHaveBeenCalledWith(expect.objectContaining({
+            phase: 'response-headers',
+            providerName: 'OpenAI',
+            requestId: 'req-openai-1',
+            transport: 'desktop-http-stream'
         }));
         expect(reporter.updateApiLiveness).toHaveBeenCalledWith(expect.objectContaining({
             phase: 'response-chunk',
             providerName: 'OpenAI',
+            requestId: 'req-openai-1',
             transport: 'desktop-http-stream'
         }));
         expect(reporter.updateApiLiveness).toHaveBeenCalledWith(expect.objectContaining({
             phase: 'request-complete',
-            providerName: 'OpenAI'
+            providerName: 'OpenAI',
+            requestId: 'req-openai-1'
         }));
     });
 

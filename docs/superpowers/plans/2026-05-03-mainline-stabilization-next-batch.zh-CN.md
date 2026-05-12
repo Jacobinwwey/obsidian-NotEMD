@@ -365,9 +365,9 @@ npm run audit:render-host
 主线稳定化现在还包含一个产品侧可观测性加固切片，而且边界已经明确：
 
 1. footer `Log output` 区域现在提供快捷 `Deep debug` 开关，并直接写回 `enableApiErrorDebugMode`，降低实时支持/排障的切换成本
-2. sidebar progress 现在包含类型化 API 测活指示器，底层事件契约为 `request-start`、`response-chunk`、`request-complete`、`request-error`
+2. sidebar progress 现在包含类型化 API 测活指示器，底层事件契约为 `request-start`、`response-headers`、`response-chunk`、`request-complete`、`request-error`
 3. retry 语义现在在 UI 边界显式可见：通过 `retrying: true/false` 避免把瞬时 attempt 失败闪成最终中断
-4. 并发请求与 batch/folder 路径现在具备聚合安全性：sidebar 使用 active/receiving 计数聚合状态，batch mini-reporter 也会把测活事件透传回主 reporter
+4. 并发请求与 batch/folder 路径现在具备 request-keyed 聚合安全性：runtime 事件会在重试链路中保持稳定 `requestId`，sidebar 状态由请求状态表而不是纯计数推导，batch mini-reporter 也会把测活事件透传回主 reporter
 5. 本切片的具体深度对比进度工件现已检入：
    - `docs/brainstorms/2026-05-12-sidebar-api-observability-progress-and-architecture-alignment.md`
    - `docs/brainstorms/2026-05-12-sidebar-api-observability-progress-and-architecture-alignment.zh-CN.md`
@@ -376,4 +376,4 @@ npm run audit:render-host
 
 1. 这是稳定性/可运维性边界加固，不是 packaging-topology 切片
 2. 它仍然沿用本计划既有真值纪律：类型化契约、聚焦测试、全量门禁、双语文档同步
-3. 下一阶段更深的工作应转向 request-level observability（`requestId`、请求被接收与正文接收的状态区分），而不是继续在全局 UI 状态上堆条件分支
+3. 下一阶段更深的工作应转向 per-request 结构化可观测性细节，而不是继续在全局 UI 状态上堆条件分支，因为 `requestId` 与“请求被接收 / 正文接收”的状态区分已经落地

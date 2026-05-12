@@ -58,10 +58,12 @@ topic: sidebar-api-observability-progress-and-architecture-alignment
 | 成功路径也输出原始响应调试信息，而非仅错误路径 | `src/llmUtils.ts` 中的 `logSuccessfulApiDebug()` | 已落地 |
 | 复用现有脱敏 debug schema，而不是再造第二套 | `getDebugInfo()` + shared runtime debug attempts | 已落地 |
 | Sidebar API 测活事件契约 | `src/types.ts` 中 `ApiLivenessEvent` / `ProgressReporter.updateApiLiveness()` | 已落地 |
+| 在重试链路中保持稳定的逻辑请求身份 | `src/llmUtils.ts` 中 request-scoped reporter 绑定 + `src/types.ts` 中 `requestId` | 已落地 |
+| 区分请求已被接受 / 已拿到响应头 与 正文接收 | direct transport 路径中的 `response-headers` 发射 + `src/ui/NotemdSidebarView.ts` 中 accepted 状态渲染 | 已落地 |
 | 流式链路在真实收到 chunk 时发测活事件 | `src/llmUtils.ts` 中 `requestViaWebFetch*StreamTransport` 与 `requestViaDesktopHttp*StreamTransport` | 已落地 |
 | 非流式 provider 走保守型“响应已到达”测活语义 | `executeAnthropicApi`、`executeGoogleApi`、`executeAzureOpenAIApi`、`executeOllamaApi` 与 OpenAI-compatible 成功路径 | 已落地 |
 | 区分可重试失败与最终中断 | `callApiWithRetry()` 发出带 `retrying: true/false` 的 `request-error` | 已落地 |
-| 防止并发请求把 sidebar 过早翻成 completed/error | `src/ui/NotemdSidebarView.ts` 中 `apiActiveRequestCount` + `apiReceivingRequestCount` 聚合逻辑 | 已落地 |
+| 防止并发请求把 sidebar 过早翻成 completed/error | `src/ui/NotemdSidebarView.ts` 中基于 `requestId` 的请求状态表 | 已落地 |
 | batch/folder mini-reporter 透传测活事件 | `src/fileUtils.ts` 与 `src/operations/noteProcessingCommandHostAdapter.ts` | 已落地 |
 | 新 sidebar 文案具备 i18n 覆盖 | `src/i18n/locales/en.ts`、`zh_cn.ts`、`zh_tw.ts` | 已落地 |
 | 聚焦回归测试锁定行为 | `src/tests/sidebarDomButtonClicks.test.ts`、`llmUtilsProviderSupport.test.ts`、`noteProcessingCommandHostAdapter.test.ts` | 已落地 |
@@ -76,12 +78,12 @@ topic: sidebar-api-observability-progress-and-architecture-alignment
    provider 响应时机现在通过类型化 progress-reporter 通道进入 UI，而不是依赖日志字符串猜测
 3. **从粗粒度失败提升为 retry-aware 失败语义**
    瞬时失败不再需要伪装成最终中断
-4. **从单请求假设提升为并发聚合**
-   sidebar 测活状态现在可以容忍重叠请求，而不是默认 footer 一次只归属于一个请求
+4. **从单请求假设提升为 request-keyed 并发聚合**
+   sidebar 测活状态现在可以精确容忍重叠请求，即使多个请求来自同一个 provider 也不会互相踩状态
 
 本切片**没有**做的事情：
 
-1. 没有引入 request-level ID，也没有做 per-provider 实时时间线
+1. 没有做 per-provider 实时时间线，也没有在 footer 中直接暴露原始 transport metadata
 2. 没有声称 buffered / 非流式 provider 在完整响应对象到达之前就能证明“正在持续输出正文”
 3. 没有改变 provider 协议语义，也没有扩展到 packaging/runtime 拓扑改造
 
@@ -140,13 +142,15 @@ topic: sidebar-api-observability-progress-and-architecture-alignment
 当前行为是刻意保守的：
 
 1. `request-start` 使 sidebar 进入 waiting
-2. 在没有可验证响应数据前，UI 保持 waiting
-3. 当完整 response object 真正可用后，runtime 才发出保守型“响应已到达”事件（复用 `response-chunk`）并继续 complete
+2. 如果 direct transport 真的在正文到达前暴露了响应头，runtime 可以发出 `response-headers`，UI 将其渲染为“请求已接受 / 等待正文”
+3. 如果没有这种 transport 证据，UI 会继续停留在 waiting
+4. 当完整 response object 或正文字节真正可用后，runtime 才发出保守型“响应已到达”事件（`response-chunk`）并继续 complete
 
 这意味着：
 
 - 对流式路径，绿色“正常输出中……”是强语义成立的
-- 对非流式路径，当前实现只会在响应对象已到达时声称“收到响应”；不会在等待阶段伪造“服务端仍然健康持续输出中”的结论
+- 当前蓝色 accepted 状态只代表“transport 已接受请求且暴露了 headers”，不代表“正文已经在持续输出”
+- 对 requestUrl-only 或其他没有 header timing 证据的 buffered 路径，当前实现只会在响应对象已到达时声称“收到响应”；不会在等待阶段伪造“服务端仍然健康持续输出中”的结论
 
 这是当前阶段正确的取舍。任何更强的结论都需要额外协议证据，例如 request ID、response headers timing，或服务端主动 heartbeat。
 
@@ -154,8 +158,8 @@ topic: sidebar-api-observability-progress-and-architecture-alignment
 
 1. **风险：** 可重试失败闪成终局错误，误导用户。
    **控制：** `request-error` 现在带 `retrying`，sidebar 会把可重试失败挡在最终红态之外。
-2. **风险：** 某个请求先完成，错误地结束另一个仍在运行的请求的测活状态。
-   **控制：** sidebar 现在用 active/receiving 计数聚合，而不是单一标志位。
+2. **风险：** 某个请求先完成，错误地结束另一个仍在运行的请求的测活状态，尤其是多个请求来自同一 provider 时。
+   **控制：** sidebar 现在基于 `requestId` 状态表推导 UI，而不是依赖 provider 名称或纯计数聚合。
 3. **风险：** batch/folder mini-reporter 丢失新测活通道。
    **控制：** mini-reporter 透传已经显式打通，并有 host-adapter 回归锁定。
 4. **风险：** 文档或 UI 文案夸大 buffered / 非流式健康语义。
@@ -177,8 +181,8 @@ topic: sidebar-api-observability-progress-and-architecture-alignment
 
 新增 / 更新的聚焦回归包括：
 
-1. sidebar 测活状态流转、长等待提示与快捷 debug toggle 持久化
-2. provider runtime 支持测试中的 retry-aware liveness 事件断言
+1. sidebar 测活状态流转、accepted 与 receiving 区分、长等待提示与快捷 debug toggle 持久化
+2. provider runtime 支持测试中的 retry-aware liveness 事件断言，以及 `requestId` 在重试链路中的稳定连续性
 3. batch concept extraction 路径下 per-file liveness 事件向主 reporter 的透传
 
 ## 9. 当前进展与后续方向
@@ -186,20 +190,18 @@ topic: sidebar-api-observability-progress-and-architecture-alignment
 本切片落地后，`main` 上的状态是：
 
 1. quick deep debug 已经可以从实时日志工作面直接触达
-2. sidebar 测活现在能表达 waiting / receiving / healthy-long-running / received / interrupted
-3. retry 语义与并发请求聚合已经达到正常已发布使用所需的稳态
+2. sidebar 测活现在能表达 waiting / accepted / receiving / healthy-long-running / received / interrupted
+3. retry 语义与并发请求聚合现在已经收紧到 `requestId` 粒度，而不是只停留在计数粒度
 4. batch/folder 工作流不再静默丢失测活信号
 
 建议的下一阶段方向：
 
-1. **引入 request-level identity**
-   从聚合计数升级到 `requestId` 维度状态表，让重叠请求的语义更精确
-2. **拆分 headers/acceptance 与 body-reception 状态**
-   为“请求已被接收 / 已收到响应头”新增独立状态，而不是继续挤进 `receiving`
-3. **继续保持非流式 provider 的保守结论**
+1. **扩展 per-request 结构化证据，而不是继续加全局状态**
+   如果后续要继续做支持工具，应优先走 per-request 时间线 / 元数据下钻，而不是继续在 footer 级别堆条件分支
+2. **继续保持非流式 provider 的保守结论**
    除非 transport 真有证据，否则不要把非流式长等待升级成绿色“任务健康输出中”
-4. **如果未来需要更深的支持工具**
-   优先走 per-request 结构化可观测性，而不是继续叠加更多全局 sidebar 条件分支
+3. **只有在 transport 真能暴露 acceptance 证据时才扩大 accepted 语义**
+   requestUrl-only 等路径在代码无法安全证明更早 acceptance 之前，应继续停留在 waiting
 
 ## 10. 本次结论
 
@@ -207,7 +209,8 @@ topic: sidebar-api-observability-progress-and-architecture-alignment
 
 - deep debug 更快可达
 - retry 不再伪装成最终失败
-- 并发请求不再过早清空 footer 状态
+- 并发请求不再过早清空 footer 状态，即使同一 provider 上有重叠请求也能稳定表达
+- 请求已被接受 / 已收到响应头 不再被误报为“正在输出正文”
 - 非流式 provider 被保守处理，而不是被戏剧化“脑补健康”
 
-这使它在今天的 `main` 上可维护、可支持，同时为未来 request-level observability 留出了干净演进路径。
+这使它在今天的 `main` 上可维护、可支持，同时为未来更深的 per-request observability 留出了干净演进路径，而不会夸大当前运行时真值。

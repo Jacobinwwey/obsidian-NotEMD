@@ -403,23 +403,28 @@ describe('NotemdSidebarView DOM button wiring', () => {
         const apiLiveness = contentContainer.findByClass('notemd-api-liveness');
         const apiLivenessText = contentContainer.findByClass('notemd-api-liveness-text');
         const emit = (event: ApiLivenessEvent) => sidebar.updateApiLiveness(event);
+        const requestId = 'req-deepseek-1';
 
-        emit({ phase: 'request-start', providerName: 'DeepSeek' });
+        emit({ phase: 'request-start', providerName: 'DeepSeek', requestId });
         expect(apiLivenessText?.text).toBe('Awaiting API output...');
         expect(apiLiveness?.cls).toContain('is-waiting');
 
-        emit({ phase: 'response-chunk', providerName: 'DeepSeek', transport: 'desktop-http-stream' });
+        emit({ phase: 'response-headers', providerName: 'DeepSeek', requestId, transport: 'desktop-http-stream' });
+        expect(apiLivenessText?.text).toBe('API accepted request, awaiting body...');
+        expect(apiLiveness?.cls).toContain('is-accepted');
+
+        emit({ phase: 'response-chunk', providerName: 'DeepSeek', requestId, transport: 'desktop-http-stream' });
         expect(apiLivenessText?.text).toBe('Receiving API output...');
         expect(apiLiveness?.cls).toContain('is-active');
 
         jest.advanceTimersByTime(30000);
         expect(apiLivenessText?.text).toBe('Task is healthy, please wait.');
 
-        emit({ phase: 'request-complete', providerName: 'DeepSeek' });
+        emit({ phase: 'request-complete', providerName: 'DeepSeek', requestId });
         expect(apiLivenessText?.text).toBe('API response received.');
         expect(apiLiveness?.cls).toContain('is-active');
 
-        emit({ phase: 'request-error', providerName: 'DeepSeek' });
+        emit({ phase: 'request-error', providerName: 'DeepSeek', requestId });
         expect(apiLivenessText?.text).toBe('API output interrupted.');
         expect(apiLiveness?.cls).toContain('is-error');
 
@@ -428,24 +433,40 @@ describe('NotemdSidebarView DOM button wiring', () => {
         expect(apiLiveness?.cls).toContain('is-idle');
     });
 
-    test('api liveness stays active for concurrent requests and does not flash error while retrying', async () => {
+    test('api liveness stays request-keyed for concurrent same-provider requests and does not flash error while retrying', async () => {
         await sidebar.onOpen();
 
         const apiLiveness = contentContainer.findByClass('notemd-api-liveness');
         const apiLivenessText = contentContainer.findByClass('notemd-api-liveness-text');
         const emit = (event: ApiLivenessEvent) => sidebar.updateApiLiveness(event);
+        const acceptedRequestId = 'req-openai-accepted';
+        const receivingRequestId = 'req-openai-receiving';
 
-        emit({ phase: 'request-start', providerName: 'OpenAI' });
-        emit({ phase: 'request-start', providerName: 'DeepSeek' });
-        emit({ phase: 'response-chunk', providerName: 'OpenAI', transport: 'desktop-http-stream' });
+        emit({ phase: 'request-start', providerName: 'OpenAI', requestId: acceptedRequestId });
+        emit({ phase: 'request-start', providerName: 'OpenAI', requestId: receivingRequestId });
+        emit({
+            phase: 'response-headers',
+            providerName: 'OpenAI',
+            requestId: acceptedRequestId,
+            transport: 'desktop-http-stream'
+        });
+        expect(apiLivenessText?.text).toBe('API accepted request, awaiting body...');
+        expect(apiLiveness?.cls).toContain('is-accepted');
+
+        emit({
+            phase: 'response-chunk',
+            providerName: 'OpenAI',
+            requestId: receivingRequestId,
+            transport: 'desktop-http-stream'
+        });
         expect(apiLivenessText?.text).toBe('Receiving API output...');
         expect(apiLiveness?.cls).toContain('is-active');
 
-        emit({ phase: 'request-complete', providerName: 'OpenAI' });
-        expect(apiLivenessText?.text).toBe('Receiving API output...');
-        expect(apiLiveness?.cls).toContain('is-active');
+        emit({ phase: 'request-complete', providerName: 'OpenAI', requestId: receivingRequestId });
+        expect(apiLivenessText?.text).toBe('API accepted request, awaiting body...');
+        expect(apiLiveness?.cls).toContain('is-accepted');
 
-        emit({ phase: 'request-error', providerName: 'DeepSeek', retrying: true });
+        emit({ phase: 'request-error', providerName: 'OpenAI', requestId: acceptedRequestId, retrying: true });
         expect(apiLivenessText?.text).toBe('Awaiting API output...');
         expect(apiLiveness?.cls).toContain('is-waiting');
         expect(apiLiveness?.cls).not.toContain('is-error');

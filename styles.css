@@ -750,6 +750,11 @@
     box-shadow: 0 0 0 1px color-mix(in srgb, #f59e0b 30%, transparent);
 }
 
+.notemd-api-liveness.is-accepted .notemd-api-liveness-dot {
+    background: #3b82f6;
+    box-shadow: 0 0 0 1px color-mix(in srgb, #3b82f6 28%, transparent), 0 0 10px color-mix(in srgb, #3b82f6 18%, transparent);
+}
+
 .notemd-api-liveness.is-active .notemd-api-liveness-dot {
     background: #10b981;
     box-shadow: 0 0 0 1px color-mix(in srgb, #10b981 26%, transparent), 0 0 12px color-mix(in srgb, #10b981 24%, transparent);

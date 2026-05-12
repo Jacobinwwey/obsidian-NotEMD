@@ -946,6 +946,13 @@ describe('llmUtils expanded provider support', () => {
                 providerName: 'OpenAI',
                 retrying: true
             }));
+
+            const livenessEvents = (reporter.updateApiLiveness as jest.Mock).mock.calls.map(([event]) => event);
+            const startEvents = livenessEvents.filter(event => event.phase === 'request-start');
+            const retryEvent = livenessEvents.find(event => event.phase === 'request-error' && event.retrying === true);
+            expect(startEvents).toHaveLength(2);
+            expect(new Set(startEvents.map(event => event.requestId))).toEqual(new Set([startEvents[0].requestId]));
+            expect(retryEvent?.requestId).toBe(startEvents[0].requestId);
         } finally {
             jest.clearAllTimers();
             jest.useRealTimers();
@@ -1986,6 +1993,11 @@ describe('llmUtils expanded provider support', () => {
             providerName: 'OpenAI'
         }));
         expect(reporter.updateApiLiveness).toHaveBeenCalledWith(expect.objectContaining({
+            phase: 'response-headers',
+            providerName: 'OpenAI',
+            transport: 'desktop-http-stream'
+        }));
+        expect(reporter.updateApiLiveness).toHaveBeenCalledWith(expect.objectContaining({
             phase: 'response-chunk',
             providerName: 'OpenAI',
             transport: 'desktop-http-stream'
@@ -1994,6 +2006,13 @@ describe('llmUtils expanded provider support', () => {
             phase: 'request-complete',
             providerName: 'OpenAI'
         }));
+        const livenessEvents = (reporter.updateApiLiveness as jest.Mock).mock.calls.map(([event]) => event);
+        const relevantPhases = ['request-start', 'response-headers', 'response-chunk', 'request-complete'];
+        const relevantRequestIds = livenessEvents
+            .filter(event => relevantPhases.includes(event.phase))
+            .map(event => event.requestId);
+        expect(relevantRequestIds.length).toBeGreaterThan(0);
+        expect(new Set(relevantRequestIds).size).toBe(1);
         expect(reporter.log).toHaveBeenCalledWith(expect.stringContaining('[OpenAI] Response debug:'));
         expect(reporter.log).toHaveBeenCalledWith(expect.stringContaining('Attempt 2 [desktop-http-stream]'));
         expect(reporter.log).toHaveBeenCalledWith(expect.stringContaining('Parsed Response: Hello world'));

@@ -588,6 +588,7 @@ export const STRINGS_ZH_TW: DeepPartial<NotemdEnglishStrings> = {
             cancelling: '正在取消…',
             userRequestedCancellation: '使用者要求取消。',
             awaitingApiOutput: '正在等待 API 輸出…',
+            apiRequestAcceptedAwaitingBody: 'API 已接受請求，等待回應正文…',
             receivingApiOutput: '正常輸出中……',
             apiTaskHealthyWaiting: '任務健康請耐心等待',
             apiResponseReceived: '已接收到 API 回應。',

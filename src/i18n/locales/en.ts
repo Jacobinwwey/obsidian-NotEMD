@@ -585,6 +585,7 @@ export const STRINGS_EN = {
             cancelling: 'Cancelling...',
             userRequestedCancellation: 'User requested cancellation.',
             awaitingApiOutput: 'Awaiting API output...',
+            apiRequestAcceptedAwaitingBody: 'API accepted request, awaiting body...',
             receivingApiOutput: 'Receiving API output...',
             apiTaskHealthyWaiting: 'Task is healthy, please wait.',
             apiResponseReceived: 'API response received.',

@@ -9,17 +9,19 @@ This document summarizes the major functional and architectural changes implemen
 ### Highlights
 
 - Sidebar log footer now exposes quick deep-debug control and runtime-backed API liveness feedback.
-- Retry-aware and concurrent-request-safe liveness semantics are now part of the shipped runtime boundary.
+- Retry-aware, request-keyed, and acceptance-aware liveness semantics are now part of the shipped runtime boundary.
 
 ### New Features
 
 - **Sidebar Deep Debug Toggle**: Added a footer `Log output` checkbox that directly toggles `enableApiErrorDebugMode` without leaving the sidebar.
 - **API Liveness Indicator**: Added a sidebar liveness row that can distinguish waiting, response reception, long-running healthy streaming tasks, successful response receipt, and interrupted output.
+- **Request-Scoped Liveness Identity**: Added stable `requestId` continuity across retries so concurrent requests no longer collide when they share the same provider.
+- **Accepted-But-Not-Streaming State**: Added a distinct `response-headers` / accepted state so “request accepted” is no longer conflated with “body is already streaming”.
 
 ### Fixes
 
 - **Retry Semantics Hardening**: Retryable attempt failures no longer have to render like terminal interruptions at the UI boundary.
-- **Concurrent/Footer State Stability**: Sidebar liveness state now aggregates overlapping requests instead of assuming one request owns the footer.
+- **Concurrent/Footer State Stability**: Sidebar liveness state now derives from a request map instead of assuming one request or one provider owns the footer.
 - **Batch/Folder Observability Propagation**: Mini-reporters in batch and folder flows now forward liveness events back to the primary reporter.
 
 ### Chores
