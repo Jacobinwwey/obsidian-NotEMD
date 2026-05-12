@@ -187,6 +187,17 @@ function createMarkdownFile(path: string, name: string, extension = 'md'): TFile
     });
 }
 
+function findAllByClass(root: FakeElement, cls: string): FakeElement[] {
+    const matches: FakeElement[] = [];
+    if (root.cls.includes(cls)) {
+        matches.push(root);
+    }
+    for (const child of root.children) {
+        matches.push(...findAllByClass(child, cls));
+    }
+    return matches;
+}
+
 describe('NotemdSidebarView DOM button wiring', () => {
     let plugin: MockPlugin;
     let sidebar: NotemdSidebarView;
@@ -201,6 +212,11 @@ describe('NotemdSidebarView DOM button wiring', () => {
         (getLanguage as jest.Mock).mockReturnValue('en');
         (global as any).Option = function Option(text: string, value: string) {
             return { text, value };
+        };
+        (global as any).navigator = {
+            clipboard: {
+                writeText: jest.fn().mockResolvedValue(undefined)
+            }
         };
 
         plugin = createPluginMock();
@@ -348,7 +364,10 @@ describe('NotemdSidebarView DOM button wiring', () => {
         const logCard = contentContainer.findByClass('notemd-log-card');
         const apiLiveness = contentContainer.findByClass('notemd-api-liveness');
         const apiLivenessText = contentContainer.findByClass('notemd-api-liveness-text');
+        const apiActivity = contentContainer.findByClass('notemd-api-activity');
+        const apiActivityEmpty = contentContainer.findByClass('notemd-api-activity-empty');
         const debugToggle = contentContainer.findByClass('notemd-debug-toggle-input');
+        const copyApiActivityButton = contentContainer.findButton('Copy API activity');
 
         expect(shell).not.toBeNull();
         expect(scrollArea).not.toBeNull();
@@ -359,7 +378,10 @@ describe('NotemdSidebarView DOM button wiring', () => {
         expect(logCard).not.toBeNull();
         expect(logCard?.cls).toContain('mod-persistent');
         expect(apiLivenessText?.text).toBe('Standby');
+        expect(apiActivity).not.toBeNull();
+        expect(apiActivityEmpty?.text).toBe('No API activity yet.');
         expect(debugToggle).not.toBeNull();
+        expect(copyApiActivityButton).not.toBeNull();
         expect((debugToggle as any)?.checked).toBe(false);
     });
 
@@ -470,5 +492,79 @@ describe('NotemdSidebarView DOM button wiring', () => {
         expect(apiLivenessText?.text).toBe('Awaiting API output...');
         expect(apiLiveness?.cls).toContain('is-waiting');
         expect(apiLiveness?.cls).not.toContain('is-error');
+    });
+
+    test('api activity captures request-scoped summaries and copies a structured report without parsing logs', async () => {
+        await sidebar.onOpen();
+
+        const emit = (event: ApiLivenessEvent) => sidebar.updateApiLiveness(event);
+        const copyApiActivityButton = contentContainer.findButton('Copy API activity');
+        const apiActivityEmpty = contentContainer.findByClass('notemd-api-activity-empty');
+
+        expect(apiActivityEmpty?.text).toBe('No API activity yet.');
+
+        emit({ phase: 'request-start', providerName: 'OpenAI', requestId: 'req-openai-1', requestAttempt: 1 });
+        emit({
+            phase: 'response-headers',
+            providerName: 'OpenAI',
+            requestId: 'req-openai-1',
+            requestAttempt: 1,
+            transport: 'desktop-http-stream',
+            statusCode: 200
+        });
+        emit({
+            phase: 'request-error',
+            providerName: 'OpenAI',
+            requestId: 'req-openai-1',
+            requestAttempt: 1,
+            retrying: true
+        });
+        emit({ phase: 'request-start', providerName: 'OpenAI', requestId: 'req-openai-1', requestAttempt: 2 });
+        emit({
+            phase: 'response-chunk',
+            providerName: 'OpenAI',
+            requestId: 'req-openai-1',
+            requestAttempt: 2,
+            transport: 'desktop-http-stream',
+            statusCode: 200
+        });
+        emit({
+            phase: 'request-complete',
+            providerName: 'OpenAI',
+            requestId: 'req-openai-1',
+            requestAttempt: 2
+        });
+        emit({ phase: 'request-start', providerName: 'Anthropic', requestId: 'req-anthropic-1', requestAttempt: 1 });
+        emit({
+            phase: 'request-error',
+            providerName: 'Anthropic',
+            requestId: 'req-anthropic-1',
+            requestAttempt: 1,
+            retrying: false
+        });
+
+        const activityTitles = findAllByClass(contentContainer, 'notemd-api-activity-item-title').map(item => item.text);
+        const activityMeta = findAllByClass(contentContainer, 'notemd-api-activity-item-meta').map(item => item.text);
+
+        expect(activityTitles).toEqual(expect.arrayContaining(['OpenAI', 'Anthropic']));
+        expect(activityMeta).toEqual(expect.arrayContaining([
+            expect.stringContaining('req-openai-1'),
+            expect.stringContaining('Attempt 2'),
+            expect.stringContaining('Received'),
+            expect.stringContaining('desktop-http-stream'),
+            expect.stringContaining('HTTP 200'),
+            expect.stringContaining('req-anthropic-1'),
+            expect.stringContaining('Interrupted')
+        ]));
+
+        expect(copyApiActivityButton).not.toBeNull();
+        await copyApiActivityButton!.onclick?.();
+
+        expect((global as any).navigator.clipboard.writeText).toHaveBeenCalledWith(expect.stringContaining('API activity report'));
+        expect((global as any).navigator.clipboard.writeText).toHaveBeenCalledWith(expect.stringContaining('Request req-openai-1'));
+        expect((global as any).navigator.clipboard.writeText).toHaveBeenCalledWith(expect.stringContaining('request-start'));
+        expect((global as any).navigator.clipboard.writeText).toHaveBeenCalledWith(expect.stringContaining('request-error'));
+        expect((global as any).navigator.clipboard.writeText).toHaveBeenCalledWith(expect.stringContaining('retrying=true'));
+        expect((global as any).navigator.clipboard.writeText).toHaveBeenCalledWith(expect.stringContaining('Request req-anthropic-1'));
     });
 });

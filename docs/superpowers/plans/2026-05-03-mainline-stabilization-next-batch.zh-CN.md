@@ -369,7 +369,8 @@ npm run audit:render-host
 3. retry 语义现在在 UI 边界显式可见：通过 `retrying: true/false` 避免把瞬时 attempt 失败闪成最终中断
 4. 并发请求与 batch/folder 路径现在具备 request-keyed 聚合安全性：runtime 事件会在重试链路中保持稳定 `requestId`，sidebar 状态由请求状态表而不是纯计数推导，batch mini-reporter 也会把测活事件透传回主 reporter
 5. deep debug 模式现在会输出结构化 per-request liveness 行（`requestId`、逻辑请求 attempt、phase、transport、已知时的状态码），支持排障不再需要从泛化 progress log 中反推 retry 边界
-5. 本切片的具体深度对比进度工件现已检入：
+6. sidebar 现在已经提供首个 request-scoped API activity 工作面和可复制报告，并直接复用同一份 live liveness 记录模型，支持排障不再只能依赖原始日志手工还原链路
+7. 本切片的具体深度对比进度工件现已检入：
    - `docs/brainstorms/2026-05-12-sidebar-api-observability-progress-and-architecture-alignment.md`
    - `docs/brainstorms/2026-05-12-sidebar-api-observability-progress-and-architecture-alignment.zh-CN.md`
 
@@ -377,4 +378,4 @@ npm run audit:render-host
 
 1. 这是稳定性/可运维性边界加固，不是 packaging-topology 切片
 2. 它仍然沿用本计划既有真值纪律：类型化契约、聚焦测试、全量门禁、双语文档同步
-3. 下一阶段更深的工作应转向可导出或可下钻的 per-request 可观测性细节，而不是继续在全局 UI 状态上堆条件分支，因为 `requestId`、“请求被接收 / 正文接收”的状态区分，以及基础结构化 liveness trace 都已经落地
+3. 下一阶段更深的工作应基于这次已落地的 export/report 基线继续扩展 per-request 可观测性深度，而不是继续在全局 UI 状态上堆条件分支，因为 `requestId`、“请求被接收 / 正文接收”的状态区分、基础结构化 liveness trace，以及第一段导出工作面都已经落地

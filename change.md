@@ -18,6 +18,7 @@ This document summarizes the major functional and architectural changes implemen
 - **Request-Scoped Liveness Identity**: Added stable `requestId` continuity across retries so concurrent requests no longer collide when they share the same provider.
 - **Accepted-But-Not-Streaming State**: Added a distinct `response-headers` / accepted state so “request accepted” is no longer conflated with “body is already streaming”.
 - **Structured Liveness Deep Debug**: Deep debug mode now records structured per-request liveness lines with logical request attempt, phase, transport, and status when known.
+- **API Activity Drill-Down Export**: Sidebar now keeps request-scoped API activity summaries and supports copying an exportable activity report without re-parsing raw logs.
 
 ### Fixes
 
@@ -25,6 +26,7 @@ This document summarizes the major functional and architectural changes implemen
 - **Concurrent/Footer State Stability**: Sidebar liveness state now derives from a request map instead of assuming one request or one provider owns the footer.
 - **Batch/Folder Observability Propagation**: Mini-reporters in batch and folder flows now forward liveness events back to the primary reporter.
 - **Streaming Debug Noise Control**: Structured liveness logging now deduplicates repeated streaming chunk transitions per logical attempt instead of flooding the log with every chunk.
+- **Observability Consumer Reuse**: API activity export now reuses the same request-scoped record model that drives the live sidebar indicator, avoiding a second parsing-only observability path.
 
 ### Chores
 

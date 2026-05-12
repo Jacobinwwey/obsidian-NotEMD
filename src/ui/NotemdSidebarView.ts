@@ -1,6 +1,6 @@
 import { Editor, ItemView, MarkdownView, Notice, TFile, TFolder, WorkspaceLeaf } from 'obsidian';
 import NotemdPlugin from '../main';
-import { ApiLivenessEvent, ProgressReporter } from '../types';
+import { ApiLivenessEvent, ApiLivenessPhase, ProgressReporter } from '../types';
 import { NOTEMD_SIDEBAR_ICON, NOTEMD_SIDEBAR_VIEW_TYPE } from '../constants';
 import { findDuplicates } from '../fileUtils';
 import {
@@ -21,6 +21,38 @@ interface WorkflowExecutionContext {
     preferredFolderPath: string | null;
     lastGeneratedCompleteFolderPath: string | null;
 }
+
+type ApiLivenessVisualPhase = 'idle' | 'waiting' | 'accepted' | 'receiving' | 'received' | 'error';
+type ApiActivityTerminalState = 'received' | 'interrupted';
+
+interface ApiActivityHistoryEntry {
+    timestamp: string;
+    phase: ApiLivenessPhase;
+    requestAttempt?: number;
+    transport?: string;
+    statusCode?: number;
+    retrying?: boolean;
+}
+
+interface ApiActivityRequestRecord {
+    requestId: string;
+    providerName: string;
+    accepted: boolean;
+    receiving: boolean;
+    lastPhase: ApiLivenessPhase;
+    requestAttempt?: number;
+    transport?: string;
+    statusCode?: number;
+    retrying?: boolean;
+    startedAt: string;
+    updatedAt: string;
+    completedAt?: string;
+    terminalState?: ApiActivityTerminalState;
+    history: ApiActivityHistoryEntry[];
+}
+
+const API_ACTIVITY_RECENT_LIMIT = 6;
+const API_ACTIVITY_HISTORY_LIMIT = 20;
 
 const ACTION_CATEGORY_CONFIG: Record<ActionCategory, { openByDefault: boolean }> = {
     core: { openByDefault: true },
@@ -63,12 +95,16 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
     private timeRemainingEl: HTMLElement | null = null;
     private apiLivenessRowEl: HTMLElement | null = null;
     private apiLivenessTextEl: HTMLElement | null = null;
+    private apiActivityEl: HTMLElement | null = null;
+    private apiActivityEmptyEl: HTMLElement | null = null;
+    private apiActivityListEl: HTMLElement | null = null;
     private logEl: HTMLElement | null = null;
     private cancelButton: HTMLButtonElement | null = null;
     private languageSelector: HTMLSelectElement | null = null;
-    private apiLivenessPhase: 'idle' | 'waiting' | 'accepted' | 'receiving' | 'received' | 'error' = 'idle';
+    private apiLivenessPhase: ApiLivenessVisualPhase = 'idle';
     private apiLivenessTimer: ReturnType<typeof setTimeout> | null = null;
-    private apiLivenessRequests = new Map<string, { accepted: boolean; receiving: boolean }>();
+    private apiLivenessRequests = new Map<string, ApiActivityRequestRecord>();
+    private apiLivenessRecentRequests: ApiActivityRequestRecord[] = [];
 
     private logContent: string[] = [];
     private startTime = 0;
@@ -262,39 +298,46 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
 
     updateApiLiveness(event: ApiLivenessEvent): void {
         const i18n = this.getStrings();
+        const requestRecord = this.recordApiLivenessEvent(event);
 
         switch (event.phase) {
             case 'request-start':
-                this.apiLivenessRequests.set(event.requestId, { accepted: false, receiving: false });
+                requestRecord.accepted = false;
+                requestRecord.receiving = false;
                 this.syncApiLivenessWhileActive(i18n);
+                this.renderApiActivity(i18n);
                 break;
             case 'response-headers':
-                this.ensureApiLivenessRequest(event.requestId).accepted = true;
+                requestRecord.accepted = true;
                 this.syncApiLivenessWhileActive(i18n);
+                this.renderApiActivity(i18n);
                 break;
             case 'response-chunk':
-                {
-                    const requestState = this.ensureApiLivenessRequest(event.requestId);
-                    requestState.accepted = true;
-                    requestState.receiving = true;
-                }
+                requestRecord.accepted = true;
+                requestRecord.receiving = true;
                 this.syncApiLivenessWhileActive(i18n);
+                this.renderApiActivity(i18n);
                 break;
             case 'request-complete':
-                this.apiLivenessRequests.delete(event.requestId);
+                requestRecord.accepted = true;
+                requestRecord.receiving = false;
+                this.archiveApiLivenessRequest(event.requestId, 'received', i18n);
                 if (!this.syncApiLivenessWhileActive(i18n)) {
                     this.setApiLivenessState('received', i18n.sidebar.status.apiResponseReceived);
                 }
                 break;
             case 'request-error':
                 if (event.retrying) {
-                    this.apiLivenessRequests.set(event.requestId, { accepted: false, receiving: false });
+                    requestRecord.accepted = false;
+                    requestRecord.receiving = false;
                     if (!this.syncApiLivenessWhileActive(i18n)) {
                         this.setApiLivenessState('waiting', i18n.sidebar.status.awaitingApiOutput);
                     }
+                    this.renderApiActivity(i18n);
                     break;
                 }
-                this.apiLivenessRequests.delete(event.requestId);
+                requestRecord.receiving = false;
+                this.archiveApiLivenessRequest(event.requestId, 'interrupted', i18n);
                 if (!this.syncApiLivenessWhileActive(i18n)) {
                     this.setApiLivenessState('error', i18n.sidebar.status.apiOutputInterrupted);
                 }
@@ -302,15 +345,88 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         }
     }
 
-    private ensureApiLivenessRequest(requestId: string) {
+    private ensureApiLivenessRequest(requestId: string, providerName?: string) {
         const existingState = this.apiLivenessRequests.get(requestId);
         if (existingState) {
+            if (providerName) {
+                existingState.providerName = providerName;
+            }
             return existingState;
         }
 
-        const createdState = { accepted: false, receiving: false };
+        this.apiLivenessRecentRequests = this.apiLivenessRecentRequests.filter(record => record.requestId !== requestId);
+
+        const now = new Date().toISOString();
+        const createdState: ApiActivityRequestRecord = {
+            requestId,
+            providerName: providerName || 'Unknown',
+            accepted: false,
+            receiving: false,
+            lastPhase: 'request-start',
+            startedAt: now,
+            updatedAt: now,
+            history: []
+        };
         this.apiLivenessRequests.set(requestId, createdState);
         return createdState;
+    }
+
+    private recordApiLivenessEvent(event: ApiLivenessEvent): ApiActivityRequestRecord {
+        const requestRecord = this.ensureApiLivenessRequest(event.requestId, event.providerName);
+        const timestamp = new Date().toISOString();
+
+        requestRecord.providerName = event.providerName;
+        requestRecord.lastPhase = event.phase;
+        requestRecord.requestAttempt = event.requestAttempt ?? requestRecord.requestAttempt;
+        requestRecord.transport = event.transport ?? requestRecord.transport;
+        requestRecord.statusCode = event.statusCode ?? requestRecord.statusCode;
+        requestRecord.retrying = event.retrying;
+        requestRecord.updatedAt = timestamp;
+        requestRecord.terminalState = undefined;
+        requestRecord.completedAt = undefined;
+        requestRecord.history.push({
+            timestamp,
+            phase: event.phase,
+            requestAttempt: event.requestAttempt,
+            transport: event.transport,
+            statusCode: event.statusCode,
+            retrying: event.retrying
+        });
+        if (requestRecord.history.length > API_ACTIVITY_HISTORY_LIMIT) {
+            requestRecord.history.splice(0, requestRecord.history.length - API_ACTIVITY_HISTORY_LIMIT);
+        }
+
+        return requestRecord;
+    }
+
+    private archiveApiLivenessRequest(
+        requestId: string,
+        terminalState: ApiActivityTerminalState,
+        i18n = this.getStrings()
+    ) {
+        const existingState = this.apiLivenessRequests.get(requestId);
+        if (!existingState) {
+            this.renderApiActivity(i18n);
+            return;
+        }
+
+        const archivedAt = new Date().toISOString();
+        const archivedState: ApiActivityRequestRecord = {
+            ...existingState,
+            receiving: false,
+            retrying: false,
+            terminalState,
+            completedAt: archivedAt,
+            updatedAt: archivedAt,
+            history: existingState.history.map(entry => ({ ...entry }))
+        };
+
+        this.apiLivenessRequests.delete(requestId);
+        this.apiLivenessRecentRequests = [
+            archivedState,
+            ...this.apiLivenessRecentRequests.filter(record => record.requestId !== requestId)
+        ].slice(0, API_ACTIVITY_RECENT_LIMIT);
+        this.renderApiActivity(i18n);
     }
 
     private syncApiLivenessWhileActive(i18n = this.getStrings()): boolean {
@@ -346,11 +462,13 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
     private resetApiLiveness() {
         const i18n = this.getStrings();
         this.apiLivenessRequests.clear();
+        this.apiLivenessRecentRequests = [];
         this.setApiLivenessState('idle', i18n.common.standby);
+        this.renderApiActivity(i18n);
     }
 
     private setApiLivenessState(
-        phase: 'idle' | 'waiting' | 'accepted' | 'receiving' | 'received' | 'error',
+        phase: ApiLivenessVisualPhase,
         text: string,
         scheduleHealthyReminder = false
     ) {
@@ -387,6 +505,137 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
                 }
             }, 30000);
         }
+    }
+
+    private renderApiActivity(i18n = this.getStrings()) {
+        if (!this.apiActivityListEl || !this.apiActivityEmptyEl) {
+            return;
+        }
+
+        const records = [...Array.from(this.apiLivenessRequests.values()), ...this.apiLivenessRecentRequests];
+        this.apiActivityListEl.empty();
+
+        if (records.length === 0) {
+            this.apiActivityEmptyEl.setText(i18n.sidebar.apiActivityEmpty);
+            this.apiActivityEmptyEl.removeClass('is-hidden');
+            return;
+        }
+
+        this.apiActivityEmptyEl.setText('');
+        this.apiActivityEmptyEl.addClass('is-hidden');
+
+        records.forEach(record => {
+            const item = this.apiActivityListEl!.createDiv({ cls: 'notemd-api-activity-item' });
+            item.createEl('div', { text: record.providerName, cls: 'notemd-api-activity-item-title' });
+            item.createEl('div', {
+                text: this.buildApiActivitySummary(record, i18n),
+                cls: 'notemd-api-activity-item-meta'
+            });
+        });
+    }
+
+    private buildApiActivitySummary(record: ApiActivityRequestRecord, i18n = this.getStrings()): string {
+        const parts = [formatI18n(i18n.sidebar.apiActivityRequestLabel, { id: record.requestId })];
+
+        if (record.requestAttempt !== undefined) {
+            parts.push(formatI18n(i18n.sidebar.apiActivityAttemptLabel, { attempt: record.requestAttempt }));
+        }
+
+        parts.push(this.getApiActivityStatusLabel(record, i18n));
+
+        if (record.transport) {
+            parts.push(record.transport);
+        }
+
+        if (record.statusCode !== undefined) {
+            parts.push(`HTTP ${record.statusCode}`);
+        }
+
+        return parts.join(' | ');
+    }
+
+    private getApiActivityStatusLabel(record: ApiActivityRequestRecord, i18n = this.getStrings()): string {
+        if (record.terminalState === 'received') {
+            return i18n.sidebar.apiActivityStatusReceived;
+        }
+        if (record.terminalState === 'interrupted') {
+            return i18n.sidebar.apiActivityStatusInterrupted;
+        }
+        if (record.retrying) {
+            return i18n.sidebar.apiActivityStatusRetrying;
+        }
+        if (record.receiving) {
+            return i18n.sidebar.apiActivityStatusReceiving;
+        }
+        if (record.accepted) {
+            return i18n.sidebar.apiActivityStatusAccepted;
+        }
+        return i18n.sidebar.apiActivityStatusWaiting;
+    }
+
+    private buildApiActivityReport(i18n = this.getStrings()): string | null {
+        const activeRequests = Array.from(this.apiLivenessRequests.values());
+        const recentRequests = this.apiLivenessRecentRequests;
+
+        if (activeRequests.length === 0 && recentRequests.length === 0) {
+            return null;
+        }
+
+        const lines = [
+            i18n.sidebar.apiActivityReportTitle,
+            formatI18n(i18n.sidebar.apiActivityReportGeneratedAt, { timestamp: new Date().toISOString() }),
+            '',
+            i18n.sidebar.apiActivityReportActiveSection
+        ];
+
+        if (activeRequests.length === 0) {
+            lines.push(i18n.sidebar.apiActivityReportNone);
+        } else {
+            activeRequests.forEach(record => lines.push(...this.buildApiActivityReportLines(record, i18n)));
+        }
+
+        lines.push('', i18n.sidebar.apiActivityReportRecentSection);
+        if (recentRequests.length === 0) {
+            lines.push(i18n.sidebar.apiActivityReportNone);
+        } else {
+            recentRequests.forEach(record => lines.push(...this.buildApiActivityReportLines(record, i18n)));
+        }
+
+        return lines.join('\n');
+    }
+
+    private buildApiActivityReportLines(record: ApiActivityRequestRecord, i18n = this.getStrings()): string[] {
+        const lines = [
+            formatI18n(i18n.sidebar.apiActivityReportRequestLabel, { id: record.requestId }),
+            formatI18n(i18n.sidebar.apiActivityReportProviderLabel, { provider: record.providerName }),
+            formatI18n(i18n.sidebar.apiActivityReportSummaryLabel, { summary: this.buildApiActivitySummary(record, i18n) }),
+            formatI18n(i18n.sidebar.apiActivityReportStartedAt, { timestamp: record.startedAt })
+        ];
+
+        if (record.completedAt) {
+            lines.push(formatI18n(i18n.sidebar.apiActivityReportCompletedAt, { timestamp: record.completedAt }));
+        }
+
+        lines.push(i18n.sidebar.apiActivityReportHistoryLabel);
+        record.history.forEach(entry => {
+            const parts = [entry.timestamp, entry.phase];
+            if (entry.requestAttempt !== undefined) {
+                parts.push(`attempt=${entry.requestAttempt}`);
+            }
+            if (entry.transport) {
+                parts.push(`transport=${entry.transport}`);
+            }
+            if (entry.statusCode !== undefined) {
+                parts.push(`status=${entry.statusCode}`);
+            }
+            if (entry.retrying !== undefined) {
+                parts.push(`retrying=${entry.retrying}`);
+            }
+            lines.push(`- ${parts.join(' | ')}`);
+        });
+        lines.push('');
+
+        return lines;
     }
 
     private updateButtonStates() {
@@ -915,6 +1164,32 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             text: i18n.common.standby,
             cls: 'notemd-api-liveness-text'
         });
+        this.apiActivityEl = progressArea.createDiv({ cls: 'notemd-api-activity' });
+        const apiActivityHeader = this.apiActivityEl.createDiv({ cls: 'notemd-api-activity-header' });
+        apiActivityHeader.createEl('span', { text: i18n.sidebar.apiActivityTitle, cls: 'notemd-api-activity-title' });
+        const copyApiActivityButton = apiActivityHeader.createEl('button', {
+            text: i18n.sidebar.copyApiActivity,
+            cls: 'notemd-copy-api-activity-button'
+        });
+        copyApiActivityButton.onclick = () => {
+            const report = this.buildApiActivityReport(i18n);
+            if (!report) {
+                new Notice(i18n.sidebar.apiActivityEmpty);
+                return;
+            }
+
+            navigator.clipboard
+                .writeText(report)
+                .then(
+                    () => new Notice(i18n.sidebar.copyApiActivitySuccess),
+                    () => new Notice(i18n.sidebar.copyApiActivityFailed)
+                );
+        };
+        this.apiActivityEmptyEl = this.apiActivityEl.createEl('p', {
+            text: i18n.sidebar.apiActivityEmpty,
+            cls: 'notemd-api-activity-empty'
+        });
+        this.apiActivityListEl = this.apiActivityEl.createDiv({ cls: 'notemd-api-activity-list' });
         this.progressBarContainerEl = progressArea.createEl('div', { cls: 'notemd-progress-bar-container mod-sidebar is-idle' });
         this.progressEl = this.progressBarContainerEl.createEl('div', { cls: 'notemd-progress-bar-fill' });
         this.timeRemainingEl = progressArea.createEl('p', { text: i18n.common.standby, cls: 'notemd-time-remaining' });
@@ -961,6 +1236,9 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         this.timeRemainingEl = null;
         this.apiLivenessRowEl = null;
         this.apiLivenessTextEl = null;
+        this.apiActivityEl = null;
+        this.apiActivityEmptyEl = null;
+        this.apiActivityListEl = null;
         this.logEl = null;
         this.cancelButton = null;
         this.languageSelector = null;

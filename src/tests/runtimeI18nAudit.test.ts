@@ -85,6 +85,9 @@ describe('runtime i18n coverage', () => {
         expect(en.settings.developer.diagnosticSuccess).toBeDefined();
         expect(en.errorModal.titles.research).toBeDefined();
         expect(en.errorModal.titles.batchTranslation).toBeDefined();
+        expect(en.sidebar.apiActivityTitle).toBeDefined();
+        expect(en.sidebar.copyApiActivity).toBeDefined();
+        expect(en.sidebar.apiActivityReportTitle).toBeDefined();
         expect(en.previewModal.exportSvg).toBeDefined();
         expect(en.previewModal.saveSource).toBeDefined();
         expect(en.previewModal.exportSuccessNotice).toBeDefined();
@@ -97,6 +100,8 @@ describe('runtime i18n coverage', () => {
         expect(zhCn.notices.cliCapabilityManifestExported).not.toBe(en.notices.cliCapabilityManifestExported);
         expect(zhCn.settings.developer.diagnosticSuccess).not.toBe(en.settings.developer.diagnosticSuccess);
         expect(zhCn.errorModal.titles.batchTranslation).not.toBe(en.errorModal.titles.batchTranslation);
+        expect(zhCn.sidebar.apiActivityTitle).not.toBe(en.sidebar.apiActivityTitle);
+        expect(zhCn.sidebar.copyApiActivity).not.toBe(en.sidebar.copyApiActivity);
         expect(zhCn.previewModal.exportSvg).not.toBe(en.previewModal.exportSvg);
         expect(zhCn.previewModal.saveSource).not.toBe(en.previewModal.saveSource);
         expect(zhCn.previewModal.exportSuccessNotice).not.toBe(en.previewModal.exportSuccessNotice);
@@ -109,6 +114,8 @@ describe('runtime i18n coverage', () => {
         expect(zhTw.notices.cliInvocationContractExported).not.toBe(en.notices.cliInvocationContractExported);
         expect(zhTw.settings.developer.stabilityFinished).not.toBe(en.settings.developer.stabilityFinished);
         expect(zhTw.errorModal.titles.research).not.toBe(en.errorModal.titles.research);
+        expect(zhTw.sidebar.apiActivityTitle).not.toBe(en.sidebar.apiActivityTitle);
+        expect(zhTw.sidebar.copyApiActivity).not.toBe(en.sidebar.copyApiActivity);
         expect(zhTw.previewModal.exportSvg).not.toBe(en.previewModal.exportSvg);
         expect(zhTw.previewModal.saveSource).not.toBe(en.previewModal.saveSource);
         expect(zhTw.previewModal.exportSuccessNotice).not.toBe(en.previewModal.exportSuccessNotice);
