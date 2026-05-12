@@ -8,6 +8,8 @@ describe('GitHub release workflow', () => {
     const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
     const releaseScriptRelativePath = path.posix.join('scripts', 'release', 'publish-github-release.js');
     const releaseScriptPath = path.join(repoRoot, releaseScriptRelativePath);
+    const chronicleCommitScriptRelativePath = path.posix.join('scripts', 'release', 'commit-chronicle-refresh.js');
+    const chronicleCommitScriptPath = path.join(repoRoot, chronicleCommitScriptRelativePath);
     const releaseWorkflowPath = path.join(repoRoot, '.github', 'workflows', 'release.yml');
 
     test('exposes a checked-in GitHub release helper and notes for the current version', () => {
@@ -15,6 +17,7 @@ describe('GitHub release workflow', () => {
         expect(packageJson.scripts['chronicle:sync-repo-saga']).toBe('node scripts/repo-saga/update-quarterly-saga.mjs --sync-only');
         expect(packageJson.scripts['chronicle:update']).toBe('node scripts/repo-saga/update-quarterly-saga.mjs');
         expect(fs.existsSync(releaseScriptPath)).toBe(true);
+        expect(fs.existsSync(chronicleCommitScriptPath)).toBe(true);
 
         const currentReleaseNotesPath = path.join(repoRoot, 'docs', 'releases', `${packageJson.version}.md`);
         const currentReleaseNotesZhPath = path.join(repoRoot, 'docs', 'releases', `${packageJson.version}.zh-CN.md`);
@@ -48,9 +51,8 @@ describe('GitHub release workflow', () => {
         expect(workflow).toContain('needs: publish');
         expect(workflow).toContain('ref: main');
         expect(workflow).toContain('node scripts/repo-saga/update-quarterly-saga.mjs --tag "$TAG_NAME"');
-        expect(workflow).toContain('git diff --quiet -- README.md README_*.md docs/repo-saga/*.svg');
-        expect(workflow).toContain('git add README.md README_*.md docs/repo-saga/*.svg');
-        expect(workflow).toContain('git push origin HEAD:main');
+        expect(workflow).toContain(`node ${chronicleCommitScriptRelativePath} "$TAG_NAME"`);
+        expect(workflow).not.toContain('git push origin HEAD:main');
     });
 
     const maybeDescribeReleaseScript = fs.existsSync(releaseScriptPath) ? describe : describe.skip;
