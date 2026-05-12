@@ -1,5 +1,6 @@
+---
 date: 2026-05-08
-last_updated: 2026-05-11
+last_updated: 2026-05-12
 topic: packaging-semantic-convergence-progress-and-next-steps
 ---
 
@@ -300,3 +301,26 @@ This keeps mainline progression coherent across tracks:
 
 - packaging/semantic convergence remains focused on runtime-boundary contract truth,
 - while folder-task filtering advances processing-scope consistency using the same CI-safe boundary-hardening discipline.
+
+## 12. 2026-05-12 Release-Ops Hardening Alignment
+
+The latest release-side CI repair is now also part of this convergence story, but only as a support-layer hardening slice.
+
+What actually changed:
+
+1. the failed `Release` workflow run `25675613652` did not expose a packaging/runtime regression; it failed because `refresh_chronicle` hit a remote `500 Internal Server Error` while running `git push origin HEAD:main`
+2. that follow-up path is now centralized in `scripts/release/commit-chronicle-refresh.js` instead of remaining as YAML-only inline shell
+3. recovery behavior is regression-locked in `src/tests/commitChronicleRefreshScript.test.ts` and `src/tests/githubReleaseWorkflow.test.ts`
+4. the repaired workflow replay `25718241272` completed successfully, including the `refresh_chronicle` job
+
+Why this matters to the packaging / semantic track:
+
+1. it uses the same anti-drift pattern already established here: checked-in truth, regression coverage, bilingual maintainer-doc sync, then real workflow validation
+2. it hardens the release-verification perimeter that Stage-B2 depends on, without reopening any Stage-C runtime-boundary implementation scope
+3. it preserves PRD R1/R2 discipline: current single-entry `main.js + inline srcdoc` truth remains unchanged, and no `diagram.generate` / `diagram.preview` / `provider.connection.test` contract depth was reopened
+
+Current architecture interpretation after this slice:
+
+1. packaging/semantic convergence remains the active product-adjacent critical path
+2. release automation now has a stronger repo-owned recovery boundary for repo-mutating post-publish steps
+3. the next implementation direction still remains Stage-B2 contract-to-test convergence, not runtime packaging topology work

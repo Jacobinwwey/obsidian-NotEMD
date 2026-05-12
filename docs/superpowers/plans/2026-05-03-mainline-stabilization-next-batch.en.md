@@ -344,3 +344,18 @@ Plan-status interpretation after `1.8.7`:
 1. folder-task filtering convergence is now release-complete for the current scope;
 2. next critical path remains packaging / semantic-verification convergence under existing Stage-B2 guardrails;
 3. CI discipline remains unchanged: full gates required before each mainline landing.
+
+## 2026-05-12 Release-Chronicle CI Hardening Alignment Update
+
+Mainline stabilization now also includes a release-ops recovery hardening slice, and the evidence is specific:
+
+1. the actual failure in `Release` run `25675613652` was not build/test packaging drift; `publish` passed, while `refresh_chronicle` failed at `git push origin HEAD:main` with a remote `500 Internal Server Error`
+2. that failure path is now repository-owned in `scripts/release/commit-chronicle-refresh.js`, with tracked+untracked chronicle detection, bounded push retries, remote-contains-commit recovery, and fetch/rebase retry handling
+3. workflow anti-drift coverage now locks both the helper behavior and the YAML contract in `src/tests/commitChronicleRefreshScript.test.ts` and `src/tests/githubReleaseWorkflow.test.ts`
+4. the repaired remote replay `25718241272` completed successfully end-to-end, including `refresh_chronicle`
+
+Plan interpretation:
+
+1. this advances the stabilization plan at the release-automation boundary, not at the runtime-packaging boundary
+2. it uses the same landing rule already required elsewhere in this plan: checked-in truth, regression lock, bilingual maintainer-doc sync, then real workflow validation
+3. next critical-path work still remains Stage-B2 packaging / semantic-verification convergence; this slice should not be misread as a Stage-C topology start

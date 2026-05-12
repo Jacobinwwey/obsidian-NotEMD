@@ -344,3 +344,18 @@ npm run audit:render-host
 1. 文件夹任务筛选收敛在当前范围内已完成 release 级闭环；
 2. 下一关键路径仍是 Stage-B2 护栏下的 packaging / semantic-verification convergence；
 3. CI 纪律保持不变：每次主线落盘前都必须完成全量门禁。
+
+## 2026-05-12 release-chronicle CI 加固对齐更新
+
+主线稳定化现在还包含一个 release-ops 恢复加固切片，而且证据已经明确：
+
+1. `Release` run `25675613652` 的真实失败点不是 build/test 或 packaging 漂移；`publish` 已成功，失败的是 `refresh_chronicle` 在执行 `git push origin HEAD:main` 时命中远端 `500 Internal Server Error`
+2. 该失败路径现在已收口为仓库内 helper `scripts/release/commit-chronicle-refresh.js`，包含 tracked+untracked chronicle 变更检测、有限次 push 重试、remote-contains-commit 恢复，以及 fetch/rebase 重试处理
+3. workflow 反漂移覆盖现在同时锁定 helper 行为与 YAML 契约，相关回归位于 `src/tests/commitChronicleRefreshScript.test.ts` 与 `src/tests/githubReleaseWorkflow.test.ts`
+4. 修复后的远端回放 `25718241272` 已完整成功，包括 `refresh_chronicle`
+
+本计划下的状态解释应保持清晰：
+
+1. 这是 release-automation 边界的稳定化推进，不是 runtime-packaging 边界推进
+2. 它沿用本计划既定的同一落地规则：检入真值、回归锁定、双语维护者文档同步、再做真实 workflow 验证
+3. 下一条关键路径仍然是 Stage-B2 packaging / semantic-verification convergence，不应把本切片误读为 Stage-C 拓扑实现起点
