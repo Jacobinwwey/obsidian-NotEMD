@@ -370,7 +370,8 @@ Mainline stabilization now also includes a product-side observability hardening 
 4. concurrent and batch/folder request paths are now request-keyed and aggregation-safe because runtime events carry stable `requestId` continuity across retries, sidebar state derives from a request map instead of only counts, and batch mini-reporters forward liveness events back to the primary reporter
 5. deep debug mode now emits structured per-request liveness lines (`requestId`, logical request attempt, phase, transport, status when known) so support work no longer has to infer retry boundaries from generic progress logs
 6. sidebar now exposes a first request-scoped API activity surface plus copyable activity report derived from the same live liveness record model, so support work no longer has to reconstruct the chain only from raw logs
-7. the concrete deep-comparison progress artifact for this slice is now checked in at:
+7. sidebar now also shows a first inline active/recent request timeline backed by the same record store, so recent retries and terminal transitions are visible without leaving the panel
+8. the concrete deep-comparison progress artifact for this slice is now checked in at:
    - `docs/brainstorms/2026-05-12-sidebar-api-observability-progress-and-architecture-alignment.md`
    - `docs/brainstorms/2026-05-12-sidebar-api-observability-progress-and-architecture-alignment.zh-CN.md`
 
@@ -378,4 +379,4 @@ Plan interpretation:
 
 1. this is a stabilization/operability boundary hardening slice, not a packaging-topology slice
 2. it remains aligned with the same repo truth rule used elsewhere in this plan: typed contract, focused tests, full gates, bilingual doc sync
-3. next deeper work should extend per-request observability depth from this landed report/drill-down baseline rather than adding more global UI state branches, because `requestId`, acceptance-vs-body distinction, baseline structured liveness traces, and the first export surface are now already landed
+3. next deeper work should extend per-request observability depth from this landed report plus inline drill-down baseline rather than adding more global UI state branches, because `requestId`, acceptance-vs-body distinction, baseline structured liveness traces, the first export surface, and the first inline timeline are now already landed

@@ -366,6 +366,7 @@ describe('NotemdSidebarView DOM button wiring', () => {
         const apiLivenessText = contentContainer.findByClass('notemd-api-liveness-text');
         const apiActivity = contentContainer.findByClass('notemd-api-activity');
         const apiActivityEmpty = contentContainer.findByClass('notemd-api-activity-empty');
+        const apiActivitySectionTitles = findAllByClass(contentContainer, 'notemd-api-activity-section-title');
         const debugToggle = contentContainer.findByClass('notemd-debug-toggle-input');
         const copyApiActivityButton = contentContainer.findButton('Copy API activity');
 
@@ -380,6 +381,7 @@ describe('NotemdSidebarView DOM button wiring', () => {
         expect(apiLivenessText?.text).toBe('Standby');
         expect(apiActivity).not.toBeNull();
         expect(apiActivityEmpty?.text).toBe('No API activity yet.');
+        expect(apiActivitySectionTitles.map(item => item.text)).toEqual(expect.arrayContaining(['Active', 'Recent']));
         expect(debugToggle).not.toBeNull();
         expect(copyApiActivityButton).not.toBeNull();
         expect((debugToggle as any)?.checked).toBe(false);
@@ -545,8 +547,11 @@ describe('NotemdSidebarView DOM button wiring', () => {
 
         const activityTitles = findAllByClass(contentContainer, 'notemd-api-activity-item-title').map(item => item.text);
         const activityMeta = findAllByClass(contentContainer, 'notemd-api-activity-item-meta').map(item => item.text);
+        const activityHistoryEntries = findAllByClass(contentContainer, 'notemd-api-activity-history-entry').map(item => item.text);
+        const apiActivitySectionTitles = findAllByClass(contentContainer, 'notemd-api-activity-section-title').map(item => item.text);
 
         expect(activityTitles).toEqual(expect.arrayContaining(['OpenAI', 'Anthropic']));
+        expect(apiActivitySectionTitles).toEqual(expect.arrayContaining(['Active', 'Recent']));
         expect(activityMeta).toEqual(expect.arrayContaining([
             expect.stringContaining('req-openai-1'),
             expect.stringContaining('Attempt 2'),
@@ -555,6 +560,13 @@ describe('NotemdSidebarView DOM button wiring', () => {
             expect.stringContaining('HTTP 200'),
             expect.stringContaining('req-anthropic-1'),
             expect.stringContaining('Interrupted')
+        ]));
+        expect(activityHistoryEntries).toEqual(expect.arrayContaining([
+            expect.stringContaining('request-start'),
+            expect.stringContaining('response-headers'),
+            expect.stringContaining('request-error'),
+            expect.stringContaining('retrying=true'),
+            expect.stringContaining('request-complete')
         ]));
 
         expect(copyApiActivityButton).not.toBeNull();

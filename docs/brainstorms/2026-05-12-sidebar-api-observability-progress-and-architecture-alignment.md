@@ -62,6 +62,7 @@ Root-cause summary:
 | Distinguish acceptance / response-headers from body reception | `response-headers` emits in direct transport paths + accepted-state rendering in `src/ui/NotemdSidebarView.ts` | Landed |
 | Expose structured per-request observability evidence without adding more footer states | request-scoped deep-debug liveness logging in `src/llmUtils.ts` | Landed |
 | Provide a first-class consumer for per-request observability without re-parsing logs | sidebar request activity summary + export report in `src/ui/NotemdSidebarView.ts` | Landed |
+| Provide inline per-request drill-down, not only export | active/recent request sections + inline history rows in `src/ui/NotemdSidebarView.ts` | Landed |
 | Emit liveness on real streaming chunk reception | `requestViaWebFetch*StreamTransport` and `requestViaDesktopHttp*StreamTransport` paths in `src/llmUtils.ts` | Landed |
 | Emit conservative response-arrival signal for non-streaming providers | `executeAnthropicApi`, `executeGoogleApi`, `executeAzureOpenAIApi`, `executeOllamaApi`, and OpenAI-compatible success path | Landed |
 | Distinguish retrying failure vs terminal interruption | `callApiWithRetry()` emits `request-error` with `retrying: true/false` | Landed |
@@ -86,6 +87,8 @@ This slice advances the repo in a useful but intentionally bounded way:
    deep debug mode now records structured liveness lines (`requestId`, logical request attempt, phase, transport, statusCode when known) without widening the end-user state model
 6. **debug-only evidence -> reusable request activity surface**
    sidebar now persists request-scoped activity summaries and exportable per-request histories from the same live event stream, so support work no longer depends on parsing raw log text
+7. **report-only observability consumer -> inline drill-down**
+   request-scoped histories are now visible directly inside the sidebar as active/recent timelines, which lowers the cost of inspecting retries and terminal transitions during live runs
 
 What this slice does **not** do:
 
@@ -176,6 +179,8 @@ This is the correct tradeoff for now. Anything stronger would require additional
    **Control:** structured liveness logging deduplicates repeated `response-chunk` emissions within the same logical attempt and only records one chunk-transition line per attempt.
 7. **Risk:** UI export/drill-down forks away from the live liveness model and starts telling a different story than the footer.
    **Control:** the export/report surface now consumes the same request-scoped record store that drives sidebar aggregation instead of rebuilding state from copied logs.
+8. **Risk:** an inline timeline silently truncates away the transition support actually needs to see.
+   **Control:** the visible history window is small but intentionally wide enough to keep retries + acceptance + terminal states together, while the copied report still preserves the fuller retained history.
 
 ## 8. Verification Evidence
 
@@ -196,6 +201,7 @@ Focused regression coverage added/updated:
 3. deep debug structured liveness logging coverage for `requestAttempt`, `statusCode`, and retry continuity across attempts
 4. batch concept-extraction path forwarding of per-file liveness events back to the main reporter
 5. sidebar request-activity rendering and report export coverage without log parsing
+6. sidebar active/recent timeline section and inline history-row coverage
 
 ## 9. Current Progress And Next Direction
 
@@ -206,12 +212,13 @@ Current status on `main` after this slice:
 3. retry semantics and concurrent-request aggregation are now hardened at `requestId` granularity instead of only count granularity
 4. deep debug now includes structured per-request liveness evidence instead of forcing support work to infer state from generic progress logs
 5. sidebar now exposes a first request-scoped API activity surface and exportable report on top of the same live liveness record model
-6. batch/folder workflows no longer silently lose the liveness signal
+6. sidebar now also surfaces a first inline active/recent request timeline so users can inspect recent phase transitions without copying logs first
+7. batch/folder workflows no longer silently lose the liveness signal
 
 Recommended next direction:
 
 1. **Expand structured per-request evidence depth, not more global states**
-   the first export/report slice is landed; if support tooling needs to go deeper next, prefer richer per-request timelines, retention controls, or saved diagnostics over more footer-wide condition branches
+   the first export/report slice and inline drill-down are landed; if support tooling needs to go deeper next, prefer retention controls, saved diagnostics, or richer per-request timing metadata over more footer-wide condition branches
 2. **Keep buffered-provider claims conservative**
    do not promote non-streaming long-wait states into green “healthy output” messaging unless transport evidence truly exists
 3. **Only widen acceptance semantics where the transport really exposes them**
@@ -227,6 +234,7 @@ This slice is a good stabilization landing, not because it adds more UI, but bec
 - acceptance / headers reception no longer gets misreported as body streaming
 - deep debug now carries request-scoped liveness evidence instead of making support infer retry phases from generic logs
 - sidebar can now export request-scoped API activity directly from live records instead of making support copy raw logs and reconstruct the story by hand
+- sidebar now also exposes the first inline active/recent timeline so recent retries and terminal transitions are visible without leaving the panel
 - non-streaming providers are treated conservatively rather than theatrically
 
 That keeps the feature supportable on `main` today, while leaving a clean path for deeper per-request observability without overstating runtime truth.

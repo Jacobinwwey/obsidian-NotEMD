@@ -19,6 +19,7 @@ This document summarizes the major functional and architectural changes implemen
 - **Accepted-But-Not-Streaming State**: Added a distinct `response-headers` / accepted state so “request accepted” is no longer conflated with “body is already streaming”.
 - **Structured Liveness Deep Debug**: Deep debug mode now records structured per-request liveness lines with logical request attempt, phase, transport, and status when known.
 - **API Activity Drill-Down Export**: Sidebar now keeps request-scoped API activity summaries and supports copying an exportable activity report without re-parsing raw logs.
+- **Inline API Activity Timeline**: Sidebar API activity now shows active/recent sections with inline per-request history rows, so users can inspect recent phase transitions without leaving the panel.
 
 ### Fixes
 
@@ -27,6 +28,7 @@ This document summarizes the major functional and architectural changes implemen
 - **Batch/Folder Observability Propagation**: Mini-reporters in batch and folder flows now forward liveness events back to the primary reporter.
 - **Streaming Debug Noise Control**: Structured liveness logging now deduplicates repeated streaming chunk transitions per logical attempt instead of flooding the log with every chunk.
 - **Observability Consumer Reuse**: API activity export now reuses the same request-scoped record model that drives the live sidebar indicator, avoiding a second parsing-only observability path.
+- **Observability Surface Convergence**: Inline activity timeline and copied report now consume the same request history records, keeping the visible panel and exported diagnosis aligned.
 
 ### Chores
 
