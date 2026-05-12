@@ -260,6 +260,8 @@ export interface ApiLivenessEvent {
     phase: ApiLivenessPhase;
     requestId: string;
     providerName: string;
+    requestAttempt?: number;
     transport?: string;
+    statusCode?: number;
     retrying?: boolean;
 }

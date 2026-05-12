@@ -44,6 +44,17 @@ function createReporter(): ProgressReporter {
     };
 }
 
+function getApiLivenessDebugPayloads(reporter: ProgressReporter): Array<Record<string, unknown>> {
+    return ((reporter.log as jest.Mock).mock.calls as Array<[string]>)
+        .flatMap(([message]) => {
+            if (typeof message !== 'string' || !message.startsWith('[API LIVENESS] ')) {
+                return [];
+            }
+
+            return [JSON.parse(message.slice('[API LIVENESS] '.length)) as Record<string, unknown>];
+        });
+}
+
 function mockDesktopTransportSuccess(
     transportModule: typeof http | typeof https,
     responseBody: unknown,
@@ -2016,6 +2027,98 @@ describe('llmUtils expanded provider support', () => {
         expect(reporter.log).toHaveBeenCalledWith(expect.stringContaining('[OpenAI] Response debug:'));
         expect(reporter.log).toHaveBeenCalledWith(expect.stringContaining('Attempt 2 [desktop-http-stream]'));
         expect(reporter.log).toHaveBeenCalledWith(expect.stringContaining('Parsed Response: Hello world'));
+
+        const livenessDebugPayloads = getApiLivenessDebugPayloads(reporter);
+        expect(livenessDebugPayloads).toEqual(expect.arrayContaining([
+            expect.objectContaining({
+                phase: 'request-start',
+                providerName: 'OpenAI',
+                requestAttempt: 1
+            }),
+            expect.objectContaining({
+                phase: 'response-headers',
+                providerName: 'OpenAI',
+                requestAttempt: 1,
+                transport: 'desktop-http-stream',
+                statusCode: 200
+            }),
+            expect.objectContaining({
+                phase: 'response-chunk',
+                providerName: 'OpenAI',
+                requestAttempt: 1
+            }),
+            expect.objectContaining({
+                phase: 'request-complete',
+                providerName: 'OpenAI',
+                requestAttempt: 1
+            })
+        ]));
+        expect(new Set(livenessDebugPayloads.map(payload => payload.requestId)).size).toBe(1);
+    });
+
+    test('callLLM logs structured liveness debug with stable request identity across retries', async () => {
+        jest.useFakeTimers();
+
+        try {
+            const provider: LLMProviderConfig = {
+                name: 'OpenAI',
+                apiKey: 'openai-key',
+                baseUrl: 'https://api.openai.com/v1',
+                model: 'gpt-4o',
+                temperature: 0.2
+            };
+
+            settings = {
+                ...settings,
+                enableStableApiCall: false,
+                enableApiErrorDebugMode: true,
+                apiCallMaxRetries: 1,
+                apiCallInterval: 5
+            };
+
+            (requestUrl as jest.Mock)
+                .mockRejectedValueOnce(new Error('net::ERR_CONNECTION_CLOSED'))
+                .mockResolvedValueOnce({
+                    status: 200,
+                    json: { choices: [{ message: { content: 'retry-ok' } }] },
+                    text: '{"choices":[{"message":{"content":"retry-ok"}}]}'
+                });
+            mockDesktopTransportFailure(https);
+
+            const pendingResult = callLLM(provider, 'System prompt', 'Retry content', settings, reporter);
+
+            await Promise.resolve();
+            await jest.advanceTimersByTimeAsync(5200);
+            await expect(pendingResult).resolves.toBe('retry-ok');
+
+            const livenessDebugPayloads = getApiLivenessDebugPayloads(reporter);
+            const requestStarts = livenessDebugPayloads.filter(payload => payload.phase === 'request-start');
+            const retryingErrors = livenessDebugPayloads.filter(
+                payload => payload.phase === 'request-error' && payload.retrying === true
+            );
+            const completions = livenessDebugPayloads.filter(payload => payload.phase === 'request-complete');
+
+            expect(requestStarts).toHaveLength(2);
+            expect(requestStarts[0]).toEqual(expect.objectContaining({ requestAttempt: 1, providerName: 'OpenAI' }));
+            expect(requestStarts[1]).toEqual(expect.objectContaining({ requestAttempt: 2, providerName: 'OpenAI' }));
+            expect(retryingErrors).toEqual([
+                expect.objectContaining({
+                    providerName: 'OpenAI',
+                    requestAttempt: 1,
+                    retrying: true
+                })
+            ]);
+            expect(completions).toEqual([
+                expect.objectContaining({
+                    providerName: 'OpenAI',
+                    requestAttempt: 2
+                })
+            ]);
+            expect(new Set(livenessDebugPayloads.map(payload => payload.requestId)).size).toBe(1);
+        } finally {
+            jest.clearAllTimers();
+            jest.useRealTimers();
+        }
     });
 
     test('callLLM captures partial parsed SSE content in debug mode when desktop streaming fallback aborts', async () => {

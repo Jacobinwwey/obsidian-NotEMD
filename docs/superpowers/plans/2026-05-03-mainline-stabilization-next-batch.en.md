@@ -368,6 +368,7 @@ Mainline stabilization now also includes a product-side observability hardening 
 2. sidebar progress now includes a typed API liveness indicator backed by runtime events (`request-start`, `response-headers`, `response-chunk`, `request-complete`, `request-error`)
 3. retry semantics are now explicit at the UI boundary via `retrying: true/false`, preventing transient attempt failures from flashing as terminal interruptions
 4. concurrent and batch/folder request paths are now request-keyed and aggregation-safe because runtime events carry stable `requestId` continuity across retries, sidebar state derives from a request map instead of only counts, and batch mini-reporters forward liveness events back to the primary reporter
+5. deep debug mode now emits structured per-request liveness lines (`requestId`, logical request attempt, phase, transport, status when known) so support work no longer has to infer retry boundaries from generic progress logs
 5. the concrete deep-comparison progress artifact for this slice is now checked in at:
    - `docs/brainstorms/2026-05-12-sidebar-api-observability-progress-and-architecture-alignment.md`
    - `docs/brainstorms/2026-05-12-sidebar-api-observability-progress-and-architecture-alignment.zh-CN.md`
@@ -376,4 +377,4 @@ Plan interpretation:
 
 1. this is a stabilization/operability boundary hardening slice, not a packaging-topology slice
 2. it remains aligned with the same repo truth rule used elsewhere in this plan: typed contract, focused tests, full gates, bilingual doc sync
-3. next deeper work should move toward per-request structured observability details rather than adding more global UI state branches, because `requestId` and acceptance-vs-body distinction are now already landed
+3. next deeper work should move toward exportable or drill-down per-request observability detail rather than adding more global UI state branches, because `requestId`, acceptance-vs-body distinction, and baseline structured liveness traces are now already landed

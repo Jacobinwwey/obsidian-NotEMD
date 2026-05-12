@@ -308,6 +308,11 @@ type ApiLivenessEventInput = Omit<ApiLivenessEvent, 'requestId'> & {
     requestId?: string;
 };
 
+type ApiLivenessBindingOptions = {
+    isDebugEnabled?: () => boolean;
+    requestAttempt?: number;
+};
+
 let apiLivenessRequestSequence = 0;
 
 function createApiLivenessRequestId(): string {
@@ -317,8 +322,11 @@ function createApiLivenessRequestId(): string {
 
 function bindProgressReporterToApiLivenessRequest(
     progressReporter: ProgressReporter,
-    requestId: string
+    requestId: string,
+    options: ApiLivenessBindingOptions = {}
 ): ProgressReporter {
+    const loggedDebugPhaseKeys = new Set<string>();
+
     return {
         log(message: string) {
             progressReporter.log(message);
@@ -353,13 +361,70 @@ function bindProgressReporterToApiLivenessRequest(
         getLogs: progressReporter.getLogs ? () => progressReporter.getLogs!() : undefined,
         updateApiLiveness: progressReporter.updateApiLiveness
             ? ((event: ApiLivenessEvent) => {
-                progressReporter.updateApiLiveness?.({
+                const normalizedEvent: ApiLivenessEvent = {
                     ...event,
-                    requestId: event.requestId || requestId
-                });
+                    requestId: event.requestId || requestId,
+                    requestAttempt: event.requestAttempt ?? options.requestAttempt
+                };
+                if (options.isDebugEnabled?.() && shouldLogApiLivenessDebugEvent(normalizedEvent, loggedDebugPhaseKeys)) {
+                    progressReporter.log(buildApiLivenessDebugLine(normalizedEvent));
+                }
+                progressReporter.updateApiLiveness?.(normalizedEvent);
             })
-            : undefined
+            : (options.isDebugEnabled
+                ? ((event: ApiLivenessEvent) => {
+                    const normalizedEvent: ApiLivenessEvent = {
+                        ...event,
+                        requestId: event.requestId || requestId,
+                        requestAttempt: event.requestAttempt ?? options.requestAttempt
+                    };
+                    if (options.isDebugEnabled?.() && shouldLogApiLivenessDebugEvent(normalizedEvent, loggedDebugPhaseKeys)) {
+                        progressReporter.log(buildApiLivenessDebugLine(normalizedEvent));
+                    }
+                })
+                : undefined)
     };
+}
+
+function buildApiLivenessDebugLine(event: ApiLivenessEvent): string {
+    const payload: Record<string, unknown> = {
+        requestId: event.requestId,
+        providerName: event.providerName,
+        phase: event.phase
+    };
+
+    if (event.requestAttempt !== undefined) {
+        payload.requestAttempt = event.requestAttempt;
+    }
+    if (event.transport) {
+        payload.transport = event.transport;
+    }
+    if (event.statusCode !== undefined) {
+        payload.statusCode = event.statusCode;
+    }
+    if (event.retrying !== undefined) {
+        payload.retrying = event.retrying;
+    }
+
+    return `[API LIVENESS] ${JSON.stringify(payload)}`;
+}
+
+function shouldLogApiLivenessDebugEvent(
+    event: ApiLivenessEvent,
+    loggedDebugPhaseKeys: Set<string>
+): boolean {
+    const dedupeKey = event.phase === 'response-chunk'
+        ? 'response-chunk'
+        : event.phase === 'response-headers'
+            ? `response-headers:${event.transport ?? ''}:${event.statusCode ?? ''}`
+            : `${event.phase}:${event.retrying ?? ''}`;
+
+    if (loggedDebugPhaseKeys.has(dedupeKey)) {
+        return false;
+    }
+
+    loggedDebugPhaseKeys.add(dedupeKey);
+    return true;
 }
 
 function emitApiLiveness(
@@ -1126,7 +1191,12 @@ async function requestViaWebFetchTransport(
         });
         const responseHeaders = extractFetchHeaders(response.headers);
         if (providerName) {
-            emitApiLiveness(progressReporter, { phase: 'response-headers', providerName, transport: 'web-fetch' });
+            emitApiLiveness(progressReporter, {
+                phase: 'response-headers',
+                providerName,
+                transport: 'web-fetch',
+                statusCode: response.status
+            });
         }
         const responseText = await readFetchResponseText(response, 'web-fetch', options, startedAt);
         const attempt = createTransportDebugAttempt('web-fetch', options, {
@@ -1251,7 +1321,12 @@ async function requestViaDesktopHttpTransport(
             const responseHeaders = response.headers as Record<string, unknown> | undefined;
             const statusCode = response.statusCode ?? 0;
             if (providerName) {
-                emitApiLiveness(progressReporter, { phase: 'response-headers', providerName, transport: 'desktop-http' });
+                emitApiLiveness(progressReporter, {
+                    phase: 'response-headers',
+                    providerName,
+                    transport: 'desktop-http',
+                    statusCode
+                });
             }
 
             const rejectWithTransportDebug = (error: unknown) => {
@@ -1452,7 +1527,12 @@ async function requestViaWebFetchOpenAICompatibleStreamTransport(
             signal
         });
         const responseHeaders = extractFetchHeaders(response.headers);
-        emitApiLiveness(progressReporter, { phase: 'response-headers', providerName, transport: transportName });
+        emitApiLiveness(progressReporter, {
+            phase: 'response-headers',
+            providerName,
+            transport: transportName,
+            statusCode: response.status
+        });
 
         if (!response.body || typeof response.body.getReader !== 'function') {
             const responseText = await response.text();
@@ -1605,7 +1685,12 @@ async function requestViaDesktopHttpOpenAICompatibleStreamTransport(
             const responseHeaders = response.headers as Record<string, unknown> | undefined;
             const statusCode = response.statusCode ?? 0;
             const state = createOpenAICompatibleStreamState();
-            emitApiLiveness(progressReporter, { phase: 'response-headers', providerName, transport: transportName });
+            emitApiLiveness(progressReporter, {
+                phase: 'response-headers',
+                providerName,
+                transport: transportName,
+                statusCode
+            });
 
             const rejectWithTransportDebug = (error: unknown) => {
                 rejectOnce(createOpenAICompatibleStreamTransportError(
@@ -1914,7 +1999,12 @@ async function requestViaWebFetchStructuredStreamingTransport<State>(
         });
         const responseHeaders = extractFetchHeaders(response.headers);
         const state = strategy.createState();
-        emitApiLiveness(progressReporter, { phase: 'response-headers', providerName, transport: transportName });
+        emitApiLiveness(progressReporter, {
+            phase: 'response-headers',
+            providerName,
+            transport: transportName,
+            statusCode: response.status
+        });
 
         if (!response.body || typeof response.body.getReader !== 'function') {
             const responseText = await response.text();
@@ -2063,7 +2153,12 @@ async function requestViaDesktopHttpStructuredStreamingTransport<State>(
             const responseHeaders = response.headers as Record<string, unknown> | undefined;
             const statusCode = response.statusCode ?? 0;
             const state = strategy.createState();
-            emitApiLiveness(progressReporter, { phase: 'response-headers', providerName, transport: transportName });
+            emitApiLiveness(progressReporter, {
+                phase: 'response-headers',
+                providerName,
+                transport: transportName,
+                statusCode
+            });
 
             const rejectWithTransportDebug = (error: unknown) => {
                 rejectOnce(createStructuredStreamingTransportError(
@@ -2585,9 +2680,13 @@ async function callApiWithRetry(
     let maxAttempts = settings.enableStableApiCall ? stableRetryMaxAttempts : 1;
     let intervalSeconds = settings.enableStableApiCall ? stableRetryIntervalSeconds : 0;
     let usingStableRetrySequence = settings.enableStableApiCall;
-    const livenessReporter = bindProgressReporterToApiLivenessRequest(progressReporter, createApiLivenessRequestId());
+    const requestId = createApiLivenessRequestId();
 
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        const livenessReporter = bindProgressReporterToApiLivenessRequest(progressReporter, requestId, {
+            isDebugEnabled: () => settings.enableApiErrorDebugMode,
+            requestAttempt: attempt
+        });
         if (progressReporter.cancelled) {
             // console.log(`${provider.name} API Call: Cancellation detected before attempt ${attempt}`);
             throw new Error("Processing cancelled by user before API attempt.");
@@ -2914,7 +3013,11 @@ async function executeAnthropicApi(provider: LLMProviderConfig, modelName: strin
         }
 
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
-        emitApiLiveness(progressReporter, { phase: 'response-chunk', providerName: 'Anthropic' });
+        emitApiLiveness(progressReporter, {
+            phase: 'response-chunk',
+            providerName: 'Anthropic',
+            statusCode: response.status
+        });
         if (response.status < 200 || response.status >= 300) {
             handleApiError('Anthropic', response, progressReporter, settings.enableApiErrorDebugMode);
         }
@@ -2970,7 +3073,11 @@ async function executeGoogleApi(provider: LLMProviderConfig, modelName: string, 
         }
 
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
-        emitApiLiveness(progressReporter, { phase: 'response-chunk', providerName: 'Google' });
+        emitApiLiveness(progressReporter, {
+            phase: 'response-chunk',
+            providerName: 'Google',
+            statusCode: response.status
+        });
         if (response.status < 200 || response.status >= 300) {
             handleApiError('Google', response, progressReporter, settings.enableApiErrorDebugMode);
         }
@@ -3024,7 +3131,11 @@ async function executeAzureOpenAIApi(provider: LLMProviderConfig, modelName: str
         }
 
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
-        emitApiLiveness(progressReporter, { phase: 'response-chunk', providerName: 'Azure OpenAI' });
+        emitApiLiveness(progressReporter, {
+            phase: 'response-chunk',
+            providerName: 'Azure OpenAI',
+            statusCode: response.status
+        });
         if (response.status < 200 || response.status >= 300) {
             handleApiError('Azure OpenAI', response, progressReporter, settings.enableApiErrorDebugMode);
         }
@@ -3087,7 +3198,11 @@ async function executeOllamaApi(provider: LLMProviderConfig, modelName: string, 
         }
 
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
-        emitApiLiveness(progressReporter, { phase: 'response-chunk', providerName: 'Ollama' });
+        emitApiLiveness(progressReporter, {
+            phase: 'response-chunk',
+            providerName: 'Ollama',
+            statusCode: response.status
+        });
         if (response.status < 200 || response.status >= 300) {
             handleApiError('Ollama', response, progressReporter, settings.enableApiErrorDebugMode);
         }
@@ -3147,7 +3262,11 @@ async function executeOpenAICompatibleApi(provider: LLMProviderConfig, modelName
         }
 
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
-        emitApiLiveness(progressReporter, { phase: 'response-chunk', providerName: provider.name });
+        emitApiLiveness(progressReporter, {
+            phase: 'response-chunk',
+            providerName: provider.name,
+            statusCode: response.status
+        });
         if (response.status < 200 || response.status >= 300) {
             handleApiError(provider.name, response, progressReporter, settings.enableApiErrorDebugMode);
         }
@@ -3175,7 +3294,10 @@ export async function callOpenAICompatibleDiagnosticWithMode(
     signal?: AbortSignal
 ): Promise<string> {
     ensureProviderApiKey(provider);
-    const livenessReporter = bindProgressReporterToApiLivenessRequest(progressReporter, createApiLivenessRequestId());
+    const livenessReporter = bindProgressReporterToApiLivenessRequest(progressReporter, createApiLivenessRequestId(), {
+        isDebugEnabled: () => settings.enableApiErrorDebugMode,
+        requestAttempt: 1
+    });
 
     const url = buildOpenAICompatibleUrl(provider.baseUrl, 'chat/completions');
     const requestBody = buildOpenAICompatibleRequestBody(
@@ -3277,7 +3399,11 @@ export async function callOpenAICompatibleDiagnosticWithMode(
             throw buildRuntimeResponseStatusError(provider.name, response);
         }
 
-        emitApiLiveness(livenessReporter, { phase: 'response-chunk', providerName: provider.name });
+        emitApiLiveness(livenessReporter, {
+            phase: 'response-chunk',
+            providerName: provider.name,
+            statusCode: response.status
+        });
         logSuccessfulApiDebug(provider.name, response, progressReporter, settings.enableApiErrorDebugMode);
         const data = response.json;
         const fallbackText = typeof response.text === 'string' ? response.text : '';

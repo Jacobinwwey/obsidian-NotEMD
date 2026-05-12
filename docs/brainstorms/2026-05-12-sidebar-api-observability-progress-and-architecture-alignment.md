@@ -60,6 +60,7 @@ Root-cause summary:
 | Sidebar liveness event contract | `ApiLivenessEvent` / `ProgressReporter.updateApiLiveness()` in `src/types.ts` | Landed |
 | Keep a stable logical request identity across retries | request-scoped reporter binding in `src/llmUtils.ts` + `requestId` in `src/types.ts` | Landed |
 | Distinguish acceptance / response-headers from body reception | `response-headers` emits in direct transport paths + accepted-state rendering in `src/ui/NotemdSidebarView.ts` | Landed |
+| Expose structured per-request observability evidence without adding more footer states | request-scoped deep-debug liveness logging in `src/llmUtils.ts` | Landed |
 | Emit liveness on real streaming chunk reception | `requestViaWebFetch*StreamTransport` and `requestViaDesktopHttp*StreamTransport` paths in `src/llmUtils.ts` | Landed |
 | Emit conservative response-arrival signal for non-streaming providers | `executeAnthropicApi`, `executeGoogleApi`, `executeAzureOpenAIApi`, `executeOllamaApi`, and OpenAI-compatible success path | Landed |
 | Distinguish retrying failure vs terminal interruption | `callApiWithRetry()` emits `request-error` with `retrying: true/false` | Landed |
@@ -80,6 +81,8 @@ This slice advances the repo in a useful but intentionally bounded way:
    transient attempt failure no longer has to masquerade as a final broken task
 4. **single-run assumption -> request-keyed concurrent aggregation**
    sidebar liveness rendering now tolerates overlapping requests precisely, even when multiple requests share the same provider name
+5. **coarse footer state -> request-scoped debug evidence**
+   deep debug mode now records structured liveness lines (`requestId`, logical request attempt, phase, transport, statusCode when known) without widening the end-user state model
 
 What this slice does **not** do:
 
@@ -166,6 +169,8 @@ This is the correct tradeoff for now. Anything stronger would require additional
    **Control:** this document and the code both keep non-streaming behavior described as conservative response-arrival, not speculative “healthy output in progress.”
 5. **Risk:** future transport refactors break observability without obvious user-facing errors.
    **Control:** transport/provider support tests now assert liveness emissions directly rather than only final returned text.
+6. **Risk:** deep debug logging becomes noisy enough to drown out useful traces on streamed responses.
+   **Control:** structured liveness logging deduplicates repeated `response-chunk` emissions within the same logical attempt and only records one chunk-transition line per attempt.
 
 ## 8. Verification Evidence
 
@@ -183,7 +188,8 @@ Focused regression coverage added/updated:
 
 1. sidebar liveness state transitions, accepted-vs-receiving distinction, long-wait messaging, and quick debug toggle persistence
 2. retry-aware liveness emission plus stable `requestId` continuity in provider runtime support tests
-3. batch concept-extraction path forwarding of per-file liveness events back to the main reporter
+3. deep debug structured liveness logging coverage for `requestAttempt`, `statusCode`, and retry continuity across attempts
+4. batch concept-extraction path forwarding of per-file liveness events back to the main reporter
 
 ## 9. Current Progress And Next Direction
 
@@ -192,12 +198,13 @@ Current status on `main` after this slice:
 1. quick deep debug is reachable from the live log surface
 2. sidebar liveness now reflects waiting / accepted / receiving / healthy-long-running / received / interrupted states
 3. retry semantics and concurrent-request aggregation are now hardened at `requestId` granularity instead of only count granularity
-4. batch/folder workflows no longer silently lose the liveness signal
+4. deep debug now includes structured per-request liveness evidence instead of forcing support work to infer state from generic progress logs
+5. batch/folder workflows no longer silently lose the liveness signal
 
 Recommended next direction:
 
 1. **Expand structured per-request evidence, not more global states**
-   if support tooling needs to go deeper, prefer per-request timelines / metadata drill-down over more footer-wide condition branches
+   if support tooling needs to go deeper, prefer per-request timelines / metadata drill-down or report export over more footer-wide condition branches
 2. **Keep buffered-provider claims conservative**
    do not promote non-streaming long-wait states into green “healthy output” messaging unless transport evidence truly exists
 3. **Only widen acceptance semantics where the transport really exposes them**
@@ -211,6 +218,7 @@ This slice is a good stabilization landing, not because it adds more UI, but bec
 - retries do not masquerade as terminal failure
 - concurrent requests do not prematurely collapse the footer state, even when they overlap on the same provider
 - acceptance / headers reception no longer gets misreported as body streaming
+- deep debug now carries request-scoped liveness evidence instead of making support infer retry phases from generic logs
 - non-streaming providers are treated conservatively rather than theatrically
 
 That keeps the feature supportable on `main` today, while leaving a clean path for deeper per-request observability without overstating runtime truth.

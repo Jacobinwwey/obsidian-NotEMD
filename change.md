@@ -17,12 +17,14 @@ This document summarizes the major functional and architectural changes implemen
 - **API Liveness Indicator**: Added a sidebar liveness row that can distinguish waiting, response reception, long-running healthy streaming tasks, successful response receipt, and interrupted output.
 - **Request-Scoped Liveness Identity**: Added stable `requestId` continuity across retries so concurrent requests no longer collide when they share the same provider.
 - **Accepted-But-Not-Streaming State**: Added a distinct `response-headers` / accepted state so “request accepted” is no longer conflated with “body is already streaming”.
+- **Structured Liveness Deep Debug**: Deep debug mode now records structured per-request liveness lines with logical request attempt, phase, transport, and status when known.
 
 ### Fixes
 
 - **Retry Semantics Hardening**: Retryable attempt failures no longer have to render like terminal interruptions at the UI boundary.
 - **Concurrent/Footer State Stability**: Sidebar liveness state now derives from a request map instead of assuming one request or one provider owns the footer.
 - **Batch/Folder Observability Propagation**: Mini-reporters in batch and folder flows now forward liveness events back to the primary reporter.
+- **Streaming Debug Noise Control**: Structured liveness logging now deduplicates repeated streaming chunk transitions per logical attempt instead of flooding the log with every chunk.
 
 ### Chores
 

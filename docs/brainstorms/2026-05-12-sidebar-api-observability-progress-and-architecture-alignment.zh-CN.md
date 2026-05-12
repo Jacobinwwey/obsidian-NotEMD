@@ -60,6 +60,7 @@ topic: sidebar-api-observability-progress-and-architecture-alignment
 | Sidebar API 测活事件契约 | `src/types.ts` 中 `ApiLivenessEvent` / `ProgressReporter.updateApiLiveness()` | 已落地 |
 | 在重试链路中保持稳定的逻辑请求身份 | `src/llmUtils.ts` 中 request-scoped reporter 绑定 + `src/types.ts` 中 `requestId` | 已落地 |
 | 区分请求已被接受 / 已拿到响应头 与 正文接收 | direct transport 路径中的 `response-headers` 发射 + `src/ui/NotemdSidebarView.ts` 中 accepted 状态渲染 | 已落地 |
+| 在不继续扩张 footer 状态的前提下暴露结构化 per-request 观测证据 | `src/llmUtils.ts` 中 request-scoped deep debug liveness logging | 已落地 |
 | 流式链路在真实收到 chunk 时发测活事件 | `src/llmUtils.ts` 中 `requestViaWebFetch*StreamTransport` 与 `requestViaDesktopHttp*StreamTransport` | 已落地 |
 | 非流式 provider 走保守型“响应已到达”测活语义 | `executeAnthropicApi`、`executeGoogleApi`、`executeAzureOpenAIApi`、`executeOllamaApi` 与 OpenAI-compatible 成功路径 | 已落地 |
 | 区分可重试失败与最终中断 | `callApiWithRetry()` 发出带 `retrying: true/false` 的 `request-error` | 已落地 |
@@ -80,6 +81,8 @@ topic: sidebar-api-observability-progress-and-architecture-alignment
    瞬时失败不再需要伪装成最终中断
 4. **从单请求假设提升为 request-keyed 并发聚合**
    sidebar 测活状态现在可以精确容忍重叠请求，即使多个请求来自同一个 provider 也不会互相踩状态
+5. **从粗糙 footer 状态提升为 request-scoped 调试证据**
+   deep debug 现在会记录结构化 liveness 行（`requestId`、逻辑请求 attempt、phase、transport、已知时的 `statusCode`），而不必继续扩张终端用户状态模型
 
 本切片**没有**做的事情：
 
@@ -166,6 +169,8 @@ topic: sidebar-api-observability-progress-and-architecture-alignment
    **控制：** 本文档与代码都把非流式行为定义为“保守型响应到达”，而不是猜测式“健康输出进行中”。
 5. **风险：** 未来 transport 重构击穿观测行为，但表面功能仍“看起来能跑”。
    **控制：** provider/transport 支持测试现在直接断言 liveness 事件，而不是只看最终返回文本。
+6. **风险：** deep debug 日志在流式输出下过于嘈杂，反而淹没有效信息。
+   **控制：** 结构化 liveness logging 会对同一逻辑 attempt 内重复的 `response-chunk` 做去重，每个 attempt 只保留一条 chunk-transition 线。
 
 ## 8. 验证证据
 
@@ -183,7 +188,8 @@ topic: sidebar-api-observability-progress-and-architecture-alignment
 
 1. sidebar 测活状态流转、accepted 与 receiving 区分、长等待提示与快捷 debug toggle 持久化
 2. provider runtime 支持测试中的 retry-aware liveness 事件断言，以及 `requestId` 在重试链路中的稳定连续性
-3. batch concept extraction 路径下 per-file liveness 事件向主 reporter 的透传
+3. deep debug 结构化 liveness logging 对 `requestAttempt`、`statusCode` 与跨 attempt retry 连续性的覆盖
+4. batch concept extraction 路径下 per-file liveness 事件向主 reporter 的透传
 
 ## 9. 当前进展与后续方向
 
@@ -192,12 +198,13 @@ topic: sidebar-api-observability-progress-and-architecture-alignment
 1. quick deep debug 已经可以从实时日志工作面直接触达
 2. sidebar 测活现在能表达 waiting / accepted / receiving / healthy-long-running / received / interrupted
 3. retry 语义与并发请求聚合现在已经收紧到 `requestId` 粒度，而不是只停留在计数粒度
-4. batch/folder 工作流不再静默丢失测活信号
+4. deep debug 现在包含结构化 per-request liveness 证据，不再强迫支持排障只能从泛化 progress log 里反推阶段
+5. batch/folder 工作流不再静默丢失测活信号
 
 建议的下一阶段方向：
 
 1. **扩展 per-request 结构化证据，而不是继续加全局状态**
-   如果后续要继续做支持工具，应优先走 per-request 时间线 / 元数据下钻，而不是继续在 footer 级别堆条件分支
+   如果后续要继续做支持工具，应优先走 per-request 时间线 / 元数据下钻或报告导出，而不是继续在 footer 级别堆条件分支
 2. **继续保持非流式 provider 的保守结论**
    除非 transport 真有证据，否则不要把非流式长等待升级成绿色“任务健康输出中”
 3. **只有在 transport 真能暴露 acceptance 证据时才扩大 accepted 语义**
@@ -211,6 +218,7 @@ topic: sidebar-api-observability-progress-and-architecture-alignment
 - retry 不再伪装成最终失败
 - 并发请求不再过早清空 footer 状态，即使同一 provider 上有重叠请求也能稳定表达
 - 请求已被接受 / 已收到响应头 不再被误报为“正在输出正文”
+- deep debug 现在携带 request-scoped liveness 证据，而不必再从泛化日志里推测 retry/phase
 - 非流式 provider 被保守处理，而不是被戏剧化“脑补健康”
 
 这使它在今天的 `main` 上可维护、可支持，同时为未来更深的 per-request observability 留出了干净演进路径，而不会夸大当前运行时真值。
