@@ -1109,6 +1109,7 @@ export async function batchGenerateContentForTitles(
                 abortController: progressReporter.abortController,
                 activeTasks: progressReporter.activeTasks, // Pass through
                 updateActiveTasks: (delta: number) => progressReporter.updateActiveTasks(delta), // Pass through
+                updateApiLiveness: (event) => progressReporter.updateApiLiveness?.(event)
             };
 
             try {

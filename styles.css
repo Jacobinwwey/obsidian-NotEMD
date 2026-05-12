@@ -725,6 +725,41 @@
     margin-bottom: 0.45em;
 }
 
+.notemd-api-liveness {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45em;
+    margin-bottom: 0.5em;
+    color: color-mix(in srgb, var(--text-muted) 88%, var(--text-normal) 12%);
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.45;
+}
+
+.notemd-api-liveness-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--text-faint) 82%, var(--background-modifier-border) 18%);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--background-modifier-border) 70%, transparent 30%);
+    flex: 0 0 auto;
+}
+
+.notemd-api-liveness.is-waiting .notemd-api-liveness-dot {
+    background: #f59e0b;
+    box-shadow: 0 0 0 1px color-mix(in srgb, #f59e0b 30%, transparent);
+}
+
+.notemd-api-liveness.is-active .notemd-api-liveness-dot {
+    background: #10b981;
+    box-shadow: 0 0 0 1px color-mix(in srgb, #10b981 26%, transparent), 0 0 12px color-mix(in srgb, #10b981 24%, transparent);
+}
+
+.notemd-api-liveness.is-error .notemd-api-liveness-dot {
+    background: #ef4444;
+    box-shadow: 0 0 0 1px color-mix(in srgb, #ef4444 28%, transparent);
+}
+
 .notemd-progress-value {
     display: inline-flex;
     align-items: center;
@@ -835,6 +870,27 @@
     justify-content: space-between;
     align-items: center;
     gap: 0.7em;
+}
+
+.notemd-log-header-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55em;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.notemd-debug-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35em;
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.notemd-debug-toggle-input {
+    margin: 0;
 }
 
 .notemd-log-header h5 {

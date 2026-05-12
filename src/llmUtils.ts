@@ -1,5 +1,5 @@
 import { Notice, requestUrl } from 'obsidian';
-import { LLMProviderConfig, NotemdSettings, ProgressReporter } from './types';
+import { ApiLivenessEvent, LLMProviderConfig, NotemdSettings, ProgressReporter } from './types';
 import { getKnownModelMaxOutputTokens, getLLMProviderDefinition } from './llmProviders';
 import { DEFAULT_SETTINGS } from './constants';
 import { cancellableDelay } from './utils';
@@ -303,6 +303,13 @@ type RuntimeRequestResponse = {
     headers?: Record<string, string>;
     __notemdDebug?: RuntimeDebugInfo;
 };
+
+function emitApiLiveness(
+    progressReporter: ProgressReporter | null | undefined,
+    event: ApiLivenessEvent
+): void {
+    progressReporter?.updateApiLiveness?.(event);
+}
 
 type TransportDebugAttempt = {
     transport: string;
@@ -1363,7 +1370,8 @@ function createOpenAICompatibleStreamTransportError(
 async function requestViaWebFetchOpenAICompatibleStreamTransport(
     providerName: string,
     options: RuntimeRequestOptions,
-    signal?: AbortSignal
+    signal?: AbortSignal,
+    progressReporter?: ProgressReporter | null
 ): Promise<RuntimeRequestResponse> {
     const startedAt = Date.now();
     const transportName = 'web-fetch-stream';
@@ -1379,6 +1387,9 @@ async function requestViaWebFetchOpenAICompatibleStreamTransport(
 
         if (!response.body || typeof response.body.getReader !== 'function') {
             const responseText = await response.text();
+            if (responseText) {
+                emitApiLiveness(progressReporter, { phase: 'response-chunk', providerName, transport: transportName });
+            }
             const attempt = createTransportDebugAttempt(transportName, options, {
                 durationMs: Date.now() - startedAt,
                 status: response.status,
@@ -1407,6 +1418,7 @@ async function requestViaWebFetchOpenAICompatibleStreamTransport(
                 if (value) {
                     const chunkText = decoder.decode(value, { stream: true });
                     if (chunkText) {
+                        emitApiLiveness(progressReporter, { phase: 'response-chunk', providerName, transport: transportName });
                         state.rawResponseText += chunkText;
                         state.buffer += chunkText;
                         drainOpenAICompatibleSseBuffer(providerName, state);
@@ -1467,7 +1479,8 @@ async function requestViaWebFetchOpenAICompatibleStreamTransport(
 async function requestViaDesktopHttpOpenAICompatibleStreamTransport(
     providerName: string,
     options: RuntimeRequestOptions,
-    signal?: AbortSignal
+    signal?: AbortSignal,
+    progressReporter?: ProgressReporter | null
 ): Promise<RuntimeRequestResponse> {
     return await new Promise((resolve, reject) => {
         const startedAt = Date.now();
@@ -1539,6 +1552,9 @@ async function requestViaDesktopHttpOpenAICompatibleStreamTransport(
             response.on('data', (chunk: Buffer | string) => {
                 try {
                     const chunkText = Buffer.isBuffer(chunk) ? chunk.toString('utf8') : chunk;
+                    if (chunkText) {
+                        emitApiLiveness(progressReporter, { phase: 'response-chunk', providerName, transport: transportName });
+                    }
                     state.rawResponseText += chunkText;
                     state.buffer += chunkText;
                     drainOpenAICompatibleSseBuffer(providerName, state);
@@ -1659,8 +1675,8 @@ async function requestOpenAICompatibleWithStreamingFallback(
 
             try {
                 const fallbackResponse = fallbackTransport === 'desktop-http'
-                    ? await requestViaDesktopHttpOpenAICompatibleStreamTransport(providerName, streamOptions, signal)
-                    : await requestViaWebFetchOpenAICompatibleStreamTransport(providerName, streamOptions, signal);
+                    ? await requestViaDesktopHttpOpenAICompatibleStreamTransport(providerName, streamOptions, signal, progressReporter)
+                    : await requestViaWebFetchOpenAICompatibleStreamTransport(providerName, streamOptions, signal, progressReporter);
                 return attachTransportDebugToResponse(
                     fallbackResponse,
                     mergeTransportDebugAttempts(requestUrlAttempts, getTransportDebugAttempts(fallbackResponse))
@@ -1696,8 +1712,8 @@ async function requestOpenAICompatibleWithStreamingFallback(
 
     try {
         return primaryTransport === 'desktop-http'
-            ? await requestViaDesktopHttpOpenAICompatibleStreamTransport(providerName, streamOptions, signal)
-            : await requestViaWebFetchOpenAICompatibleStreamTransport(providerName, streamOptions, signal);
+            ? await requestViaDesktopHttpOpenAICompatibleStreamTransport(providerName, streamOptions, signal, progressReporter)
+            : await requestViaWebFetchOpenAICompatibleStreamTransport(providerName, streamOptions, signal, progressReporter);
     } catch (primaryError: unknown) {
         if (isAbortError(primaryError)) {
             throw primaryError;
@@ -1813,7 +1829,8 @@ async function requestViaWebFetchStructuredStreamingTransport<State>(
     providerName: string,
     options: RuntimeRequestOptions,
     strategy: StructuredStreamingStrategy<State>,
-    signal?: AbortSignal
+    signal?: AbortSignal,
+    progressReporter?: ProgressReporter | null
 ): Promise<RuntimeRequestResponse> {
     const startedAt = Date.now();
     const transportName = 'web-fetch-stream';
@@ -1829,7 +1846,11 @@ async function requestViaWebFetchStructuredStreamingTransport<State>(
         const state = strategy.createState();
 
         if (!response.body || typeof response.body.getReader !== 'function') {
-            strategy.onChunk(providerName, state, await response.text());
+            const responseText = await response.text();
+            if (responseText) {
+                emitApiLiveness(progressReporter, { phase: 'response-chunk', providerName, transport: transportName });
+            }
+            strategy.onChunk(providerName, state, responseText);
             return buildStructuredStreamingResponse(
                 providerName,
                 transportName,
@@ -1852,7 +1873,11 @@ async function requestViaWebFetchStructuredStreamingTransport<State>(
                     break;
                 }
                 if (value) {
-                    strategy.onChunk(providerName, state, decoder.decode(value, { stream: true }));
+                    const chunkText = decoder.decode(value, { stream: true });
+                    if (chunkText) {
+                        emitApiLiveness(progressReporter, { phase: 'response-chunk', providerName, transport: transportName });
+                    }
+                    strategy.onChunk(providerName, state, chunkText);
                 }
             }
 
@@ -1910,7 +1935,8 @@ async function requestViaDesktopHttpStructuredStreamingTransport<State>(
     providerName: string,
     options: RuntimeRequestOptions,
     strategy: StructuredStreamingStrategy<State>,
-    signal?: AbortSignal
+    signal?: AbortSignal,
+    progressReporter?: ProgressReporter | null
 ): Promise<RuntimeRequestResponse> {
     return await new Promise((resolve, reject) => {
         const startedAt = Date.now();
@@ -1982,7 +2008,11 @@ async function requestViaDesktopHttpStructuredStreamingTransport<State>(
 
             response.on('data', (chunk: Buffer | string) => {
                 try {
-                    strategy.onChunk(providerName, state, Buffer.isBuffer(chunk) ? chunk.toString('utf8') : chunk);
+                    const chunkText = Buffer.isBuffer(chunk) ? chunk.toString('utf8') : chunk;
+                    if (chunkText) {
+                        emitApiLiveness(progressReporter, { phase: 'response-chunk', providerName, transport: transportName });
+                    }
+                    strategy.onChunk(providerName, state, chunkText);
                 } catch (error: unknown) {
                     rejectWithTransportDebug(error);
                 }
@@ -2091,8 +2121,8 @@ async function requestRuntimeUrlWithStructuredStreamingFallback<State>(
 
         try {
             const fallbackResponse = fallbackTransport === 'desktop-http'
-                ? await requestViaDesktopHttpStructuredStreamingTransport(providerName, streamOptions, strategy, signal)
-                : await requestViaWebFetchStructuredStreamingTransport(providerName, streamOptions, strategy, signal);
+                ? await requestViaDesktopHttpStructuredStreamingTransport(providerName, streamOptions, strategy, signal, progressReporter)
+                : await requestViaWebFetchStructuredStreamingTransport(providerName, streamOptions, strategy, signal, progressReporter);
             return attachTransportDebugToResponse(
                 fallbackResponse,
                 mergeTransportDebugAttempts(requestUrlAttempts, getTransportDebugAttempts(fallbackResponse))
@@ -2491,8 +2521,11 @@ async function callApiWithRetry(
         }
 
         try {
+            emitApiLiveness(progressReporter, { phase: 'request-start', providerName: provider.name });
             // Pass settings and signal to the underlying API call function
-            return await apiCallFunction(provider, modelName, prompt, content, progressReporter, settings, signal);
+            const result = await apiCallFunction(provider, modelName, prompt, content, progressReporter, settings, signal);
+            emitApiLiveness(progressReporter, { phase: 'request-complete', providerName: provider.name });
+            return result;
         } catch (error: unknown) { // Changed to unknown
             const errorMessage = error instanceof Error ? error.message : String(error);
             lastError = error instanceof Error ? error : new Error(errorMessage); // Store Error object if possible
@@ -2501,6 +2534,11 @@ async function callApiWithRetry(
 
             // Handle cancellation specifically
             if ((error instanceof Error && error.name === 'AbortError') || errorMessage.includes("cancelled by user")) {
+                emitApiLiveness(progressReporter, {
+                    phase: 'request-error',
+                    providerName: provider.name,
+                    retrying: false
+                });
                 // console.log(`${provider.name} API Call: Cancellation detected during attempt ${attempt}.`);
                 throw new Error("API call cancelled by user."); // Propagate cancellation
             }
@@ -2516,19 +2554,21 @@ async function callApiWithRetry(
                 );
             }
 
+            let isRetryableFailure = true;
+
             // Don't retry on certain fatal errors
             // Check 1: HTTP Status Code (Client Errors)
             const httpStatusMatch = errorMessage.match(/API error: (\d+)/);
             const httpStatusCode = httpStatusMatch ? parseInt(httpStatusMatch[1], 10) : null;
             if (httpStatusCode && (httpStatusCode === 400 || httpStatusCode === 401 || httpStatusCode === 403 || httpStatusCode === 404)) {
-                throw lastError; // Throw fatal client HTTP errors immediately
+                isRetryableFailure = false;
             }
             // Check 2: Specific Error Codes reported *within* JSON (Server Errors)
             const jsonErrorCodeMatch = errorMessage.match(/\(Code: (\d+)\)/);
             const jsonErrorCode = jsonErrorCodeMatch ? parseInt(jsonErrorCodeMatch[1], 10) : null;
             if (jsonErrorCode && jsonErrorCode >= 500) { // Treat 5xx errors reported in JSON as fatal for retries
                  progressReporter.log(`[callApiWithRetry] Detected non-retryable error code ${jsonErrorCode} within API response.`);
-                 throw lastError;
+                 isRetryableFailure = false;
             }
             // Check 3: Specific non-retryable messages (optional, add if needed)
             // if (errorMessage.includes("some specific non-retryable text")) {
@@ -2538,18 +2578,34 @@ async function callApiWithRetry(
 
             // Check cancellation again before waiting for retry
             if (progressReporter.cancelled) {
+                emitApiLiveness(progressReporter, {
+                    phase: 'request-error',
+                    providerName: provider.name,
+                    retrying: false
+                });
                 // console.log(`${provider.name} API Call: Cancellation detected after failed attempt ${attempt} (before retry wait).`);
                 throw new Error("Processing cancelled by user during API retry sequence.");
             }
 
-            if (attempt < maxAttempts) {
+            const willRetry = isRetryableFailure && attempt < maxAttempts;
+            emitApiLiveness(progressReporter, {
+                phase: 'request-error',
+                providerName: provider.name,
+                retrying: willRetry
+            });
+
+            if (!isRetryableFailure) {
+                throw lastError;
+            }
+
+            if (willRetry) {
                 const retryDelaySeconds = intervalSeconds;
                 progressReporter.log(`Waiting ${retryDelaySeconds} seconds before retry ${attempt + 1}...`);
 
                 await cancellableDelay(retryDelaySeconds * 1000, progressReporter);
             }
 
-            if (attempt >= maxAttempts) {
+            if (!willRetry) {
                 break;
             }
         }
@@ -2636,6 +2692,22 @@ export function getDebugInfo(error: any): string {
     }
 
     return infoLines.join('\n').trim();
+}
+
+function logSuccessfulApiDebug(
+    providerName: string,
+    response: RuntimeRequestResponse,
+    progressReporter: ProgressReporter,
+    debugMode: boolean
+): void {
+    if (!debugMode) {
+        return;
+    }
+
+    const debugInfo = getDebugInfo(response);
+    if (debugInfo) {
+        progressReporter.log(`[${providerName}] Response debug:\n${debugInfo}`);
+    }
 }
 
 /**
@@ -2769,9 +2841,11 @@ async function executeAnthropicApi(provider: LLMProviderConfig, modelName: strin
         }
 
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
+        emitApiLiveness(progressReporter, { phase: 'response-chunk', providerName: 'Anthropic' });
         if (response.status < 200 || response.status >= 300) {
             handleApiError('Anthropic', response, progressReporter, settings.enableApiErrorDebugMode);
         }
+        logSuccessfulApiDebug('Anthropic', response, progressReporter, settings.enableApiErrorDebugMode);
         const data = response.json;
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API success.");
         if (!data.content?.[0]?.text) { throw new Error(`Unexpected response format from Anthropic API`); }
@@ -2823,9 +2897,11 @@ async function executeGoogleApi(provider: LLMProviderConfig, modelName: string, 
         }
 
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
+        emitApiLiveness(progressReporter, { phase: 'response-chunk', providerName: 'Google' });
         if (response.status < 200 || response.status >= 300) {
             handleApiError('Google', response, progressReporter, settings.enableApiErrorDebugMode);
         }
+        logSuccessfulApiDebug('Google', response, progressReporter, settings.enableApiErrorDebugMode);
         const data = response.json;
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API success.");
         if (!data.candidates?.[0]?.content?.parts?.[0]?.text) { throw new Error(`Unexpected response format from Google API`); }
@@ -2875,9 +2951,11 @@ async function executeAzureOpenAIApi(provider: LLMProviderConfig, modelName: str
         }
 
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
+        emitApiLiveness(progressReporter, { phase: 'response-chunk', providerName: 'Azure OpenAI' });
         if (response.status < 200 || response.status >= 300) {
             handleApiError('Azure OpenAI', response, progressReporter, settings.enableApiErrorDebugMode);
         }
+        logSuccessfulApiDebug('Azure OpenAI', response, progressReporter, settings.enableApiErrorDebugMode);
         const data = response.json;
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API success.");
         if (!data.choices?.[0]?.message?.content) { throw new Error(`Unexpected response format from Azure OpenAI API`); }
@@ -2936,9 +3014,11 @@ async function executeOllamaApi(provider: LLMProviderConfig, modelName: string, 
         }
 
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
+        emitApiLiveness(progressReporter, { phase: 'response-chunk', providerName: 'Ollama' });
         if (response.status < 200 || response.status >= 300) {
             handleApiError('Ollama', response, progressReporter, settings.enableApiErrorDebugMode);
         }
+        logSuccessfulApiDebug('Ollama', response, progressReporter, settings.enableApiErrorDebugMode);
         const data = response.json;
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API success.");
         if (!data.message?.content) { throw new Error(`Unexpected response format from Ollama`); }
@@ -2994,9 +3074,11 @@ async function executeOpenAICompatibleApi(provider: LLMProviderConfig, modelName
         }
 
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user after API response.");
+        emitApiLiveness(progressReporter, { phase: 'response-chunk', providerName: provider.name });
         if (response.status < 200 || response.status >= 300) {
             handleApiError(provider.name, response, progressReporter, settings.enableApiErrorDebugMode);
         }
+        logSuccessfulApiDebug(provider.name, response, progressReporter, settings.enableApiErrorDebugMode);
 
         const data = response.json;
         const fallbackText = typeof response.text === 'string' ? response.text : '';
@@ -3097,8 +3179,8 @@ export async function callOpenAICompatibleDiagnosticWithMode(
             );
 
             response = directTransport === 'desktop-http'
-                ? await requestViaDesktopHttpOpenAICompatibleStreamTransport(provider.name, streamOptions, signal)
-                : await requestViaWebFetchOpenAICompatibleStreamTransport(provider.name, streamOptions, signal);
+                ? await requestViaDesktopHttpOpenAICompatibleStreamTransport(provider.name, streamOptions, signal, progressReporter)
+                : await requestViaWebFetchOpenAICompatibleStreamTransport(provider.name, streamOptions, signal, progressReporter);
             break;
         }
         case 'runtime-stable':
@@ -3119,6 +3201,8 @@ export async function callOpenAICompatibleDiagnosticWithMode(
         throw buildRuntimeResponseStatusError(provider.name, response);
     }
 
+    emitApiLiveness(progressReporter, { phase: 'response-chunk', providerName: provider.name });
+    logSuccessfulApiDebug(provider.name, response, progressReporter, settings.enableApiErrorDebugMode);
     const data = response.json;
     const fallbackText = typeof response.text === 'string' ? response.text : '';
     return extractOpenAICompatibleText(provider.name, data, fallbackText);

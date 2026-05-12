@@ -4,6 +4,29 @@ This document summarizes the major functional and architectural changes implemen
 
 ---
 
+## Unreleased
+
+### Highlights
+
+- Sidebar log footer now exposes quick deep-debug control and runtime-backed API liveness feedback.
+- Retry-aware and concurrent-request-safe liveness semantics are now part of the shipped runtime boundary.
+
+### New Features
+
+- **Sidebar Deep Debug Toggle**: Added a footer `Log output` checkbox that directly toggles `enableApiErrorDebugMode` without leaving the sidebar.
+- **API Liveness Indicator**: Added a sidebar liveness row that can distinguish waiting, response reception, long-running healthy streaming tasks, successful response receipt, and interrupted output.
+
+### Fixes
+
+- **Retry Semantics Hardening**: Retryable attempt failures no longer have to render like terminal interruptions at the UI boundary.
+- **Concurrent/Footer State Stability**: Sidebar liveness state now aggregates overlapping requests instead of assuming one request owns the footer.
+- **Batch/Folder Observability Propagation**: Mini-reporters in batch and folder flows now forward liveness events back to the primary reporter.
+
+### Chores
+
+- Added `docs/brainstorms/2026-05-12-sidebar-api-observability-progress-and-architecture-alignment.md` and `docs/brainstorms/2026-05-12-sidebar-api-observability-progress-and-architecture-alignment.zh-CN.md`.
+- Extended the `mainline-stabilization-next-batch` plan with the product-observability alignment update.
+
 ## 1.8.7
 
 ### Highlights

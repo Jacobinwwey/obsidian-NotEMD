@@ -251,4 +251,14 @@ export interface ProgressReporter {
     activeTasks: number; // NEW: For concurrency display
     updateActiveTasks(delta: number): void; // NEW
     getLogs?(): string; // NEW: Retrieve all logs
+    updateApiLiveness?(event: ApiLivenessEvent): void;
+}
+
+export type ApiLivenessPhase = 'request-start' | 'response-chunk' | 'request-complete' | 'request-error';
+
+export interface ApiLivenessEvent {
+    phase: ApiLivenessPhase;
+    providerName: string;
+    transport?: string;
+    retrying?: boolean;
 }

@@ -1,6 +1,6 @@
 import { Editor, ItemView, MarkdownView, Notice, TFile, TFolder, WorkspaceLeaf } from 'obsidian';
 import NotemdPlugin from '../main';
-import { ProgressReporter } from '../types';
+import { ApiLivenessEvent, ProgressReporter } from '../types';
 import { NOTEMD_SIDEBAR_ICON, NOTEMD_SIDEBAR_VIEW_TYPE } from '../constants';
 import { findDuplicates } from '../fileUtils';
 import {
@@ -61,9 +61,15 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
     private progressBarContainerEl: HTMLElement | null = null;
     private progressValueEl: HTMLElement | null = null;
     private timeRemainingEl: HTMLElement | null = null;
+    private apiLivenessRowEl: HTMLElement | null = null;
+    private apiLivenessTextEl: HTMLElement | null = null;
     private logEl: HTMLElement | null = null;
     private cancelButton: HTMLButtonElement | null = null;
     private languageSelector: HTMLSelectElement | null = null;
+    private apiLivenessPhase: 'idle' | 'waiting' | 'receiving' | 'received' | 'error' = 'idle';
+    private apiLivenessTimer: ReturnType<typeof setTimeout> | null = null;
+    private apiActiveRequestCount = 0;
+    private apiReceivingRequestCount = 0;
 
     private logContent: string[] = [];
     private startTime = 0;
@@ -137,6 +143,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             this.progressValueEl.removeClass('is-error');
         }
         if (this.timeRemainingEl) this.timeRemainingEl.setText(i18n.common.standby);
+        this.resetApiLiveness();
         if (this.cancelButton) {
             this.cancelButton.disabled = true;
             this.cancelButton.removeClass('is-active');
@@ -254,6 +261,116 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         this.updateStatus(formatI18n(i18n.sidebar.status.processingActive, { count: this.activeTasks }));
     }
 
+    updateApiLiveness(event: ApiLivenessEvent): void {
+        const i18n = this.getStrings();
+
+        switch (event.phase) {
+            case 'request-start':
+                this.apiActiveRequestCount += 1;
+                this.syncApiLivenessWhileActive(i18n);
+                break;
+            case 'response-chunk':
+                if (this.apiActiveRequestCount === 0) {
+                    this.apiActiveRequestCount = 1;
+                }
+                if (this.apiReceivingRequestCount < this.apiActiveRequestCount) {
+                    this.apiReceivingRequestCount += 1;
+                }
+                this.syncApiLivenessWhileActive(i18n);
+                break;
+            case 'request-complete':
+                this.settleApiLivenessRequest();
+                if (!this.syncApiLivenessWhileActive(i18n)) {
+                    this.setApiLivenessState('received', i18n.sidebar.status.apiResponseReceived);
+                }
+                break;
+            case 'request-error':
+                this.settleApiLivenessRequest();
+                if (event.retrying) {
+                    if (!this.syncApiLivenessWhileActive(i18n)) {
+                        this.setApiLivenessState('waiting', i18n.sidebar.status.awaitingApiOutput);
+                    }
+                    break;
+                }
+                if (!this.syncApiLivenessWhileActive(i18n)) {
+                    this.setApiLivenessState('error', i18n.sidebar.status.apiOutputInterrupted);
+                }
+                break;
+        }
+    }
+
+    private settleApiLivenessRequest() {
+        this.apiActiveRequestCount = Math.max(0, this.apiActiveRequestCount - 1);
+        this.apiReceivingRequestCount = Math.min(this.apiReceivingRequestCount, this.apiActiveRequestCount);
+    }
+
+    private syncApiLivenessWhileActive(i18n = this.getStrings()): boolean {
+        if (this.apiActiveRequestCount <= 0) {
+            return false;
+        }
+
+        if (this.apiReceivingRequestCount > 0) {
+            if (this.apiLivenessPhase !== 'receiving') {
+                this.setApiLivenessState('receiving', i18n.sidebar.status.receivingApiOutput, true);
+            }
+            return true;
+        }
+
+        this.setApiLivenessState('waiting', i18n.sidebar.status.awaitingApiOutput);
+        return true;
+    }
+
+    private clearApiLivenessTimer() {
+        if (this.apiLivenessTimer !== null) {
+            clearTimeout(this.apiLivenessTimer);
+            this.apiLivenessTimer = null;
+        }
+    }
+
+    private resetApiLiveness() {
+        const i18n = this.getStrings();
+        this.apiActiveRequestCount = 0;
+        this.apiReceivingRequestCount = 0;
+        this.setApiLivenessState('idle', i18n.common.standby);
+    }
+
+    private setApiLivenessState(
+        phase: 'idle' | 'waiting' | 'receiving' | 'received' | 'error',
+        text: string,
+        scheduleHealthyReminder = false
+    ) {
+        this.apiLivenessPhase = phase;
+        this.clearApiLivenessTimer();
+
+        if (this.apiLivenessTextEl) {
+            this.apiLivenessTextEl.setText(text);
+        }
+
+        if (this.apiLivenessRowEl) {
+            this.apiLivenessRowEl.removeClass('is-idle');
+            this.apiLivenessRowEl.removeClass('is-waiting');
+            this.apiLivenessRowEl.removeClass('is-active');
+            this.apiLivenessRowEl.removeClass('is-error');
+
+            const className = phase === 'idle'
+                ? 'is-idle'
+                : phase === 'waiting'
+                    ? 'is-waiting'
+                    : phase === 'error'
+                        ? 'is-error'
+                        : 'is-active';
+            this.apiLivenessRowEl.addClass(className);
+        }
+
+        if (scheduleHealthyReminder) {
+            this.apiLivenessTimer = setTimeout(() => {
+                if (this.apiLivenessPhase === 'receiving') {
+                    this.setApiLivenessState('receiving', this.getStrings().sidebar.status.apiTaskHealthyWaiting);
+                }
+            }, 30000);
+        }
+    }
+
     private updateButtonStates() {
         const processing = this.isProcessing;
         this.actionButtons.forEach(button => {
@@ -307,6 +424,9 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             },
             updateActiveTasks(delta: number) {
                 view.updateActiveTasks(delta);
+            },
+            updateApiLiveness(event: ApiLivenessEvent) {
+                view.updateApiLiveness(event);
             },
             getLogs() {
                 return view.getLogs();
@@ -771,6 +891,12 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         const progressMeta = progressArea.createDiv({ cls: 'notemd-progress-meta' });
         this.statusEl = progressMeta.createEl('p', { text: i18n.common.ready, cls: 'notemd-status-text' });
         this.progressValueEl = progressMeta.createEl('span', { text: i18n.common.ready, cls: 'notemd-progress-value is-idle' });
+        this.apiLivenessRowEl = progressArea.createDiv({ cls: 'notemd-api-liveness is-idle' });
+        this.apiLivenessRowEl.createEl('span', { cls: 'notemd-api-liveness-dot' });
+        this.apiLivenessTextEl = this.apiLivenessRowEl.createEl('span', {
+            text: i18n.common.standby,
+            cls: 'notemd-api-liveness-text'
+        });
         this.progressBarContainerEl = progressArea.createEl('div', { cls: 'notemd-progress-bar-container mod-sidebar is-idle' });
         this.progressEl = this.progressBarContainerEl.createEl('div', { cls: 'notemd-progress-bar-fill' });
         this.timeRemainingEl = progressArea.createEl('p', { text: i18n.common.standby, cls: 'notemd-time-remaining' });
@@ -781,7 +907,20 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         const logCard = footer.createDiv({ cls: 'notemd-log-card mod-persistent' });
         const logHeader = logCard.createDiv({ cls: 'notemd-log-header' });
         logHeader.createEl('h5', { text: i18n.sidebar.logOutputTitle });
-        const copyLogButton = logHeader.createEl('button', { text: i18n.sidebar.copyLog, cls: 'notemd-copy-log-button' });
+        const logHeaderActions = logHeader.createDiv({ cls: 'notemd-log-header-actions' });
+        const debugToggleLabel = logHeaderActions.createEl('label', { cls: 'notemd-debug-toggle' });
+        const debugToggleInput = debugToggleLabel.createEl('input', {
+            cls: 'notemd-debug-toggle-input',
+            type: 'checkbox'
+        }) as HTMLInputElement;
+        debugToggleInput.checked = this.plugin.settings.enableApiErrorDebugMode;
+        debugToggleInput.onchange = async () => {
+            this.plugin.settings.enableApiErrorDebugMode = debugToggleInput.checked;
+            await this.plugin.saveSettings();
+        };
+        debugToggleLabel.createEl('span', { text: i18n.sidebar.quickDeepDebugToggle });
+
+        const copyLogButton = logHeaderActions.createEl('button', { text: i18n.sidebar.copyLog, cls: 'notemd-copy-log-button' });
         copyLogButton.onclick = () => {
             if (this.logContent.length > 0) {
                 navigator.clipboard
@@ -802,9 +941,12 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         this.progressBarContainerEl = null;
         this.progressValueEl = null;
         this.timeRemainingEl = null;
+        this.apiLivenessRowEl = null;
+        this.apiLivenessTextEl = null;
         this.logEl = null;
         this.cancelButton = null;
         this.languageSelector = null;
+        this.clearApiLivenessTimer();
         this.actionButtons.clear();
         this.workflowButtons = [];
     }

@@ -583,10 +583,16 @@ export const STRINGS_EN = {
             stopped: 'Stopped',
             processingStopped: 'Processing stopped.',
             cancelling: 'Cancelling...',
-            userRequestedCancellation: 'User requested cancellation.'
+            userRequestedCancellation: 'User requested cancellation.',
+            awaitingApiOutput: 'Awaiting API output...',
+            receivingApiOutput: 'Receiving API output...',
+            apiTaskHealthyWaiting: 'Task is healthy, please wait.',
+            apiResponseReceived: 'API response received.',
+            apiOutputInterrupted: 'API output interrupted.'
         },
         builtInActionsPrefix: 'Built-in {category} actions.',
         logOutputTitle: 'Log output',
+        quickDeepDebugToggle: 'Deep debug',
         copyLog: 'Copy log',
         copyLogSuccess: 'Log copied!',
         copyLogFailed: 'Failed to copy log.',

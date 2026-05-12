@@ -17,7 +17,8 @@ function createReporter(): ProgressReporter {
         },
         abortController: new AbortController(),
         activeTasks: 0,
-        updateActiveTasks: jest.fn()
+        updateActiveTasks: jest.fn(),
+        updateApiLiveness: jest.fn()
     };
 }
 
@@ -741,6 +742,57 @@ describe('note processing command host adapter', () => {
         expect(host.completeReporter).toHaveBeenCalledWith(reporter);
         expect(host.finalizeReporter).toHaveBeenCalledWith(reporter);
         expect(getBusy()).toBe(false);
+    });
+
+    test('batch extract concepts command forwards API liveness events from per-file reporters in parallel mode', async () => {
+        const reporter = createReporter();
+        const { host } = createHost(reporter);
+        const file = Object.assign(new (TFile as any)(), {
+            name: 'Topic.md',
+            basename: 'Topic',
+            path: 'Concepts/Topic.md',
+            extension: 'md'
+        });
+        host.getSettings.mockReturnValue({
+            ...mockSettings,
+            enableBatchParallelism: true,
+            batchConcurrency: 2,
+            batchSize: 10
+        });
+        host.getFolderSelection.mockResolvedValue('Concepts');
+        host.getFolderByPath.mockReturnValue(Object.assign(new (TFolder as any)(), {
+            name: 'Concepts',
+            path: 'Concepts'
+        }));
+        host.getFiles.mockReturnValue([file]);
+        const extractImpl = jest.fn().mockImplementation(async (_app, _runtime, _file, fileReporter: ProgressReporter) => {
+            fileReporter.updateApiLiveness?.({ phase: 'request-start', providerName: 'OpenAI' });
+            fileReporter.updateApiLiveness?.({
+                phase: 'response-chunk',
+                providerName: 'OpenAI',
+                transport: 'desktop-http-stream'
+            });
+            fileReporter.updateApiLiveness?.({ phase: 'request-complete', providerName: 'OpenAI' });
+            return new Set(['Alpha']);
+        });
+        const createNotesImpl = jest.fn().mockResolvedValue(undefined);
+        const { runBatchExtractConceptsForFolderCommandWithHost } = loadModule();
+
+        await runBatchExtractConceptsForFolderCommandWithHost(host, reporter, extractImpl, createNotesImpl);
+
+        expect(reporter.updateApiLiveness).toHaveBeenCalledWith(expect.objectContaining({
+            phase: 'request-start',
+            providerName: 'OpenAI'
+        }));
+        expect(reporter.updateApiLiveness).toHaveBeenCalledWith(expect.objectContaining({
+            phase: 'response-chunk',
+            providerName: 'OpenAI',
+            transport: 'desktop-http-stream'
+        }));
+        expect(reporter.updateApiLiveness).toHaveBeenCalledWith(expect.objectContaining({
+            phase: 'request-complete',
+            providerName: 'OpenAI'
+        }));
     });
 
     test('extract original text command delegates through extracted host flow', async () => {

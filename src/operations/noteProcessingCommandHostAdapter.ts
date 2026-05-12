@@ -672,7 +672,8 @@ export async function runBatchExtractConceptsForFolderCommandWithHost(
                             clearDisplay: () => undefined,
                             abortController: useReporter.abortController,
                             activeTasks: useReporter.activeTasks,
-                            updateActiveTasks: (delta: number) => useReporter.updateActiveTasks(delta)
+                            updateActiveTasks: (delta: number) => useReporter.updateActiveTasks(delta),
+                            updateApiLiveness: (event) => useReporter.updateApiLiveness?.(event)
                         };
 
                         try {
@@ -1472,7 +1473,8 @@ export async function runProcessFolderWithNotemdCommandWithHost(
                             clearDisplay: () => undefined,
                             abortController: useReporter.abortController,
                             activeTasks: useReporter.activeTasks,
-                            updateActiveTasks: (delta: number) => useReporter.updateActiveTasks(delta)
+                            updateActiveTasks: (delta: number) => useReporter.updateActiveTasks(delta),
+                            updateApiLiveness: (event) => useReporter.updateApiLiveness?.(event)
                         };
 
                         try {

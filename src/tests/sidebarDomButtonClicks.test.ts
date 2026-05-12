@@ -1,6 +1,7 @@
 import { getLanguage, MarkdownView, TFile } from 'obsidian';
 import { NotemdSidebarView } from '../ui/NotemdSidebarView';
 import { mockApp } from './__mocks__/app';
+import { ApiLivenessEvent } from '../types';
 
 type MockPlugin = {
     app: typeof mockApp;
@@ -12,6 +13,7 @@ type MockPlugin = {
         conceptNoteFolder: string;
         customWorkflowButtonsDsl: string;
         customWorkflowErrorStrategy: 'stop_on_error' | 'continue_on_error';
+        enableApiErrorDebugMode: boolean;
     };
     saveSettings: jest.Mock<Promise<void>, []>;
     getIsBusy: jest.Mock<boolean, []>;
@@ -51,14 +53,17 @@ class FakeElement {
     dataset: Record<string, string> = {};
     style: Record<string, string> = {};
     value = '';
+    type = '';
+    checked = false;
     scrollTop = 0;
     scrollHeight = 100;
     inputEl: any;
 
-    constructor(tag: string, options?: { text?: string; cls?: string }) {
+    constructor(tag: string, options?: { text?: string; cls?: string; type?: string }) {
         this.tag = tag;
         if (options?.text) this.text = options.text;
         if (options?.cls) this.cls = options.cls.split(' ').filter(Boolean);
+        if (options?.type) this.type = options.type;
         this.inputEl = {
             setAttrs: jest.fn(),
             value: ''
@@ -140,7 +145,8 @@ function createPluginMock(): MockPlugin {
             useCustomConceptNoteFolder: true,
             conceptNoteFolder: 'Concepts',
             customWorkflowButtonsDsl: 'One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix',
-            customWorkflowErrorStrategy: 'stop_on_error'
+            customWorkflowErrorStrategy: 'stop_on_error',
+            enableApiErrorDebugMode: false
         },
         saveSettings: jest.fn().mockResolvedValue(undefined),
         getIsBusy: jest.fn(() => false),
@@ -191,6 +197,7 @@ describe('NotemdSidebarView DOM button wiring', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
+        jest.useRealTimers();
         (getLanguage as jest.Mock).mockReturnValue('en');
         (global as any).Option = function Option(text: string, value: string) {
             return { text, value };
@@ -339,6 +346,9 @@ describe('NotemdSidebarView DOM button wiring', () => {
         const progressValue = contentContainer.findByClass('notemd-progress-value');
         const progressBar = contentContainer.findByClass('notemd-progress-bar-container');
         const logCard = contentContainer.findByClass('notemd-log-card');
+        const apiLiveness = contentContainer.findByClass('notemd-api-liveness');
+        const apiLivenessText = contentContainer.findByClass('notemd-api-liveness-text');
+        const debugToggle = contentContainer.findByClass('notemd-debug-toggle-input');
 
         expect(shell).not.toBeNull();
         expect(scrollArea).not.toBeNull();
@@ -348,6 +358,22 @@ describe('NotemdSidebarView DOM button wiring', () => {
         expect(progressBar?.cls).toContain('is-idle');
         expect(logCard).not.toBeNull();
         expect(logCard?.cls).toContain('mod-persistent');
+        expect(apiLivenessText?.text).toBe('Standby');
+        expect(debugToggle).not.toBeNull();
+        expect((debugToggle as any)?.checked).toBe(false);
+    });
+
+    test('quick deep debug toggle writes back to settings immediately', async () => {
+        await sidebar.onOpen();
+
+        const debugToggle = contentContainer.findByClass('notemd-debug-toggle-input');
+        expect(debugToggle).not.toBeNull();
+
+        (debugToggle as any).checked = true;
+        await debugToggle!.onchange?.();
+
+        expect(plugin.settings.enableApiErrorDebugMode).toBe(true);
+        expect(plugin.saveSettings).toHaveBeenCalledTimes(1);
     });
 
     test('updateStatus swaps between active progress and idle standby states', async () => {
@@ -368,5 +394,60 @@ describe('NotemdSidebarView DOM button wiring', () => {
         expect(progressValue?.text).toBe('Ready');
         expect(progressBar?.cls).toContain('is-idle');
         expect(progressFill?.style.width).toBe('0%');
+    });
+
+    test('api liveness indicator reflects request, receive, long-wait, complete, and error phases', async () => {
+        jest.useFakeTimers();
+        await sidebar.onOpen();
+
+        const apiLiveness = contentContainer.findByClass('notemd-api-liveness');
+        const apiLivenessText = contentContainer.findByClass('notemd-api-liveness-text');
+        const emit = (event: ApiLivenessEvent) => sidebar.updateApiLiveness(event);
+
+        emit({ phase: 'request-start', providerName: 'DeepSeek' });
+        expect(apiLivenessText?.text).toBe('Awaiting API output...');
+        expect(apiLiveness?.cls).toContain('is-waiting');
+
+        emit({ phase: 'response-chunk', providerName: 'DeepSeek', transport: 'desktop-http-stream' });
+        expect(apiLivenessText?.text).toBe('Receiving API output...');
+        expect(apiLiveness?.cls).toContain('is-active');
+
+        jest.advanceTimersByTime(30000);
+        expect(apiLivenessText?.text).toBe('Task is healthy, please wait.');
+
+        emit({ phase: 'request-complete', providerName: 'DeepSeek' });
+        expect(apiLivenessText?.text).toBe('API response received.');
+        expect(apiLiveness?.cls).toContain('is-active');
+
+        emit({ phase: 'request-error', providerName: 'DeepSeek' });
+        expect(apiLivenessText?.text).toBe('API output interrupted.');
+        expect(apiLiveness?.cls).toContain('is-error');
+
+        sidebar.clearDisplay();
+        expect(apiLivenessText?.text).toBe('Standby');
+        expect(apiLiveness?.cls).toContain('is-idle');
+    });
+
+    test('api liveness stays active for concurrent requests and does not flash error while retrying', async () => {
+        await sidebar.onOpen();
+
+        const apiLiveness = contentContainer.findByClass('notemd-api-liveness');
+        const apiLivenessText = contentContainer.findByClass('notemd-api-liveness-text');
+        const emit = (event: ApiLivenessEvent) => sidebar.updateApiLiveness(event);
+
+        emit({ phase: 'request-start', providerName: 'OpenAI' });
+        emit({ phase: 'request-start', providerName: 'DeepSeek' });
+        emit({ phase: 'response-chunk', providerName: 'OpenAI', transport: 'desktop-http-stream' });
+        expect(apiLivenessText?.text).toBe('Receiving API output...');
+        expect(apiLiveness?.cls).toContain('is-active');
+
+        emit({ phase: 'request-complete', providerName: 'OpenAI' });
+        expect(apiLivenessText?.text).toBe('Receiving API output...');
+        expect(apiLiveness?.cls).toContain('is-active');
+
+        emit({ phase: 'request-error', providerName: 'DeepSeek', retrying: true });
+        expect(apiLivenessText?.text).toBe('Awaiting API output...');
+        expect(apiLiveness?.cls).toContain('is-waiting');
+        expect(apiLiveness?.cls).not.toContain('is-error');
     });
 });

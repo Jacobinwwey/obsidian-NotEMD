@@ -586,10 +586,16 @@ export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
             stopped: '已停止',
             processingStopped: '处理已停止。',
             cancelling: '正在取消…',
-            userRequestedCancellation: '用户请求取消。'
+            userRequestedCancellation: '用户请求取消。',
+            awaitingApiOutput: '正在等待 API 输出…',
+            receivingApiOutput: '正常输出中……',
+            apiTaskHealthyWaiting: '任务健康请耐心等待',
+            apiResponseReceived: '已接收到 API 响应。',
+            apiOutputInterrupted: 'API 输出已中断。'
         },
         builtInActionsPrefix: '内置{category}动作。',
         logOutputTitle: '日志输出',
+        quickDeepDebugToggle: '深度调试',
         copyLog: '复制日志',
         copyLogSuccess: '日志已复制！',
         copyLogFailed: '复制日志失败。',

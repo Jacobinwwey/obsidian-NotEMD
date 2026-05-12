@@ -39,7 +39,8 @@ function createReporter(): ProgressReporter {
         },
         abortController: new AbortController(),
         activeTasks: 0,
-        updateActiveTasks: jest.fn()
+        updateActiveTasks: jest.fn(),
+        updateApiLiveness: jest.fn()
     };
 }
 
@@ -940,6 +941,11 @@ describe('llmUtils expanded provider support', () => {
             expect(requestUrl).toHaveBeenCalledTimes(2);
             expect(reporter.log).toHaveBeenCalledWith(expect.stringContaining('Transient network error detected'));
             expect(https.request).toHaveBeenCalledTimes(1);
+            expect(reporter.updateApiLiveness).toHaveBeenCalledWith(expect.objectContaining({
+                phase: 'request-error',
+                providerName: 'OpenAI',
+                retrying: true
+            }));
         } finally {
             jest.clearAllTimers();
             jest.useRealTimers();
@@ -1943,6 +1949,54 @@ describe('llmUtils expanded provider support', () => {
         await expect(callLLM(provider, 'System prompt', 'Streamed content', settings, reporter)).resolves.toBe('Hello world');
         expect(https.request).toHaveBeenCalledTimes(1);
         expect(reporter.log).toHaveBeenCalledWith(expect.stringContaining('streaming response parsing'));
+    });
+
+    test('callLLM emits response liveness events and success debug logs when deep debug is enabled', async () => {
+        const provider: LLMProviderConfig = {
+            name: 'OpenAI',
+            apiKey: 'openai-key',
+            baseUrl: 'https://api.openai.com/v1',
+            model: 'gpt-4o',
+            temperature: 0.2
+        };
+
+        settings = {
+            ...settings,
+            enableStableApiCall: false,
+            enableApiErrorDebugMode: true
+        };
+
+        (requestUrl as jest.Mock).mockRejectedValueOnce(new Error('net::ERR_CONNECTION_CLOSED'));
+        mockDesktopTransportStreamingSuccess(https, [
+            'data: {"choices":[{"delta":{"content":"Hello"},"finish_reason":null}]}\n\n',
+            'data: {"choices":[{"delta":{"content":" world"},"finish_reason":null}]}\n\n',
+            'data: {"choices":[{"delta":{},"finish_reason":"stop"}]}\n\n',
+            'data: [DONE]\n\n'
+        ], {
+            headers: {
+                'content-type': 'text/event-stream',
+                'x-request-id': 'desktop-success-debug-request'
+            }
+        });
+
+        await expect(callLLM(provider, 'System prompt', 'Streamed content', settings, reporter)).resolves.toBe('Hello world');
+
+        expect(reporter.updateApiLiveness).toHaveBeenCalledWith(expect.objectContaining({
+            phase: 'request-start',
+            providerName: 'OpenAI'
+        }));
+        expect(reporter.updateApiLiveness).toHaveBeenCalledWith(expect.objectContaining({
+            phase: 'response-chunk',
+            providerName: 'OpenAI',
+            transport: 'desktop-http-stream'
+        }));
+        expect(reporter.updateApiLiveness).toHaveBeenCalledWith(expect.objectContaining({
+            phase: 'request-complete',
+            providerName: 'OpenAI'
+        }));
+        expect(reporter.log).toHaveBeenCalledWith(expect.stringContaining('[OpenAI] Response debug:'));
+        expect(reporter.log).toHaveBeenCalledWith(expect.stringContaining('Attempt 2 [desktop-http-stream]'));
+        expect(reporter.log).toHaveBeenCalledWith(expect.stringContaining('Parsed Response: Hello world'));
     });
 
     test('callLLM captures partial parsed SSE content in debug mode when desktop streaming fallback aborts', async () => {

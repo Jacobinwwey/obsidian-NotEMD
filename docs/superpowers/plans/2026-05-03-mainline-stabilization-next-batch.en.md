@@ -359,3 +359,21 @@ Plan interpretation:
 1. this advances the stabilization plan at the release-automation boundary, not at the runtime-packaging boundary
 2. it uses the same landing rule already required elsewhere in this plan: checked-in truth, regression lock, bilingual maintainer-doc sync, then real workflow validation
 3. next critical-path work still remains Stage-B2 packaging / semantic-verification convergence; this slice should not be misread as a Stage-C topology start
+
+## 2026-05-12 Sidebar API Observability Alignment Update
+
+Mainline stabilization now also includes a product-side observability hardening slice, and the boundary is explicit:
+
+1. the footer `Log output` area now exposes a quick `Deep debug` toggle wired directly to `enableApiErrorDebugMode`, reducing debug friction during live support triage
+2. sidebar progress now includes a typed API liveness indicator backed by runtime events (`request-start`, `response-chunk`, `request-complete`, `request-error`)
+3. retry semantics are now explicit at the UI boundary via `retrying: true/false`, preventing transient attempt failures from flashing as terminal interruptions
+4. concurrent and batch/folder request paths are now aggregation-safe because sidebar state tracks active/receiving request counts and batch mini-reporters forward liveness events back to the primary reporter
+5. the concrete deep-comparison progress artifact for this slice is now checked in at:
+   - `docs/brainstorms/2026-05-12-sidebar-api-observability-progress-and-architecture-alignment.md`
+   - `docs/brainstorms/2026-05-12-sidebar-api-observability-progress-and-architecture-alignment.zh-CN.md`
+
+Plan interpretation:
+
+1. this is a stabilization/operability boundary hardening slice, not a packaging-topology slice
+2. it remains aligned with the same repo truth rule used elsewhere in this plan: typed contract, focused tests, full gates, bilingual doc sync
+3. next deeper work should move toward request-level observability (`requestId`, acceptance-vs-body distinction) rather than adding more global UI state branches
