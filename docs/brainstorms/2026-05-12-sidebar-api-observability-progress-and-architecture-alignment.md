@@ -218,6 +218,8 @@ Current status on `main` after this slice:
 Recommended next direction:
 
 1. **Expand structured per-request evidence depth, not more global states**
+2. **Keep preview fallback and observability aligned at the release surface**
+   the 1.8.8 release now bundles compact API activity plus direct saved-artifact preview fallback. Future product-surface work should preserve that convergence: the sidebar must remain able to show useful transport truth without crowding out logs, and diagram preview must remain able to inspect supported saved artifacts without re-entering generation.
    the first export/report slice and inline drill-down are landed; if support tooling needs to go deeper next, prefer retention controls, saved diagnostics, or richer per-request timing metadata over more footer-wide condition branches
 2. **Keep buffered-provider claims conservative**
    do not promote non-streaming long-wait states into green “healthy output” messaging unless transport evidence truly exists

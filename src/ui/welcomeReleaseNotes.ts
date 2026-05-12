@@ -9,6 +9,14 @@ type WelcomeReleaseNoteCatalog = Record<string, WelcomeReleaseNoteEntry[]>;
 
 const ENTRIES_EN: WelcomeReleaseNoteEntry[] = [
     {
+        version: '1.8.8',
+        highlights: [
+            'Sidebar API observability now ships with a quick deep-debug toggle, compact request activity region, and retry-aware liveness feedback that keeps log output visible.',
+            'Preview diagram now opens supported saved artifacts directly, including Mermaid markdown, JSON Canvas, Vega-Lite markdown or JSON, and HTML files, instead of re-entering generation for saved outputs.',
+            'Legacy Mermaid intent handling no longer coerces requested Mermaid-compatible intents such as erDiagram into mindmap, reducing saved-diagram preview/regeneration drift.'
+        ]
+    },
+    {
         version: '1.8.7',
         highlights: [
             'Folder-task file filtering now converges on a shared selector contract across process/extract/translate/fix paths with include-subfolders compatibility mode and settings-driven filter semantics.',
@@ -28,6 +36,14 @@ const ENTRIES_EN: WelcomeReleaseNoteEntry[] = [
 
 const ENTRIES_ZH_CN: WelcomeReleaseNoteEntry[] = [
     {
+        version: '1.8.8',
+        highlights: [
+            'Sidebar API 可观测性现已提供快捷 deep-debug 开关、紧凑 request activity 区域与 retry-aware 测活反馈，同时继续保证 Log output 可见。',
+            '“预览图形”现在可直接打开受支持的已保存产物，包括 Mermaid Markdown、JSON Canvas、Vega-Lite Markdown/JSON 与 HTML 文件，不再对已保存图形重新走生成链路。',
+            'legacy Mermaid intent 处理不再把 `erDiagram` 这类兼容 Mermaid 的显式 intent 强制回退为 `mindmap`，降低保存图形的预览/再生成漂移风险。'
+        ]
+    },
+    {
         version: '1.8.7',
         highlights: [
             '文件夹任务文件筛选已收敛到共享 selector 契约，覆盖处理/提取/翻译/修复路径，并保留 include-subfolders 兼容模式。',
@@ -46,6 +62,14 @@ const ENTRIES_ZH_CN: WelcomeReleaseNoteEntry[] = [
 ];
 
 const ENTRIES_ZH_TW: WelcomeReleaseNoteEntry[] = [
+    {
+        version: '1.8.8',
+        highlights: [
+            'Sidebar API 可觀測性現已提供快捷 deep-debug 開關、緊湊 request activity 區域與 retry-aware 測活回饋，同時繼續保持 Log output 可見。',
+            '「預覽圖形」現在可直接開啟受支援的已儲存產物，包括 Mermaid Markdown、JSON Canvas、Vega-Lite Markdown/JSON 與 HTML 檔案，不再對已儲存圖形重新走生成鏈路。',
+            'legacy Mermaid intent 處理不再把 `erDiagram` 這類相容 Mermaid 的顯式 intent 強制回退為 `mindmap`，降低已儲存圖形的預覽/再生成漂移風險。'
+        ]
+    },
     {
         version: '1.8.7',
         highlights: [

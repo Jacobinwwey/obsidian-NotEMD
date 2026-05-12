@@ -24,7 +24,7 @@
 
 إذا كنت تحب استخدام Notemd، يرجى النظر في [⭐ إعطاء نجمة على GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) أو [☕️ شراء قهوة لي](https://ko-fi.com/jacobinwwey).
 
-**الإصدار:** 1.8.7
+**الإصدار:** 1.8.8
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
@@ -696,7 +696,7 @@
 ---
 
 
-*Notemd v1.8.7 - عزّز الرسم المعرفي في Obsidian باستخدام الذكاء الاصطناعي.*
+*Notemd v1.8.8 - عزّز الرسم المعرفي في Obsidian باستخدام الذكاء الاصطناعي.*
 
 
 <!-- repo-chronicle:start -->
@@ -706,7 +706,7 @@
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.ar.svg)
 
-_تم آخر تحديث للإصدار ذي الوسم `1.8.7` في 2026-05-12. تاريخ أحدث التزام: 2026-05-12._
+_تم آخر تحديث للإصدار ذي الوسم `1.8.8` في 2026-05-12. تاريخ أحدث التزام: 2026-05-12._
 <!-- repo-chronicle:end -->
 
 

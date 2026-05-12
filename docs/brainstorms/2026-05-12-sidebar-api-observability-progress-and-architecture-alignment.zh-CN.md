@@ -218,6 +218,8 @@ topic: sidebar-api-observability-progress-and-architecture-alignment
 建议的下一阶段方向：
 
 1. **继续扩展 per-request 结构化证据深度，而不是继续加全局状态**
+2. **保持 preview fallback 与 observability 在 release 表面的对齐**
+   1.8.8 已把紧凑 API activity 与 direct saved-artifact preview fallback 打包在同一轮发布中。后续产品表面工作应继续保持这层收敛：sidebar 要在不挤掉日志的前提下展示有用的 transport 真值，而 diagram preview 要继续能在不重新进入生成链路的前提下检查受支持的已保存产物。
    export/report 与 inline drill-down 都已落地；如果下一段还要继续做支持工具，应优先走保留策略、可保存诊断或更丰富的 per-request timing metadata，而不是继续在 footer 级别堆条件分支
 2. **继续保持非流式 provider 的保守结论**
    除非 transport 真有证据，否则不要把非流式长等待升级成绿色“任务健康输出中”

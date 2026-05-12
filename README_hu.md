@@ -24,7 +24,7 @@ A Notemd az Obsidian munkafolyamatát fejleszti azáltal, hogy különféle nagy
 
 Ha szereted használni a Notemd-et, kérlek fontold meg [⭐ egy csillag adását GitHub-on](https://github.com/Jacobinwwey/obsidian-NotEMD) vagy [☕️ vegyél nekem egy kávét](https://ko-fi.com/jacobinwwey).
 
-**Verzió:** 1.8.7
+**Verzió:** 1.8.8
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
@@ -684,7 +684,7 @@ MIT licenc - a részletekért lásd a [LICENSE](LICENSE) fájlt.
 ---
 
 
-*Notemd v1.8.7 - Fejlessze az Obsidian tudásgráfját mesterséges intelligenciával.*
+*Notemd v1.8.8 - Fejlessze az Obsidian tudásgráfját mesterséges intelligenciával.*
 
 
 <!-- repo-chronicle:start -->
@@ -694,7 +694,7 @@ Ez a negyedéves krónika megőrzi a [repo-saga](https://github.com/teee32/repo-
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.hu.svg)
 
-_Utoljára a(z) `1.8.7` kiadási címkéhez frissítve: 2026-05-12. A legutóbbi commit dátuma: 2026-05-12._
+_Utoljára a(z) `1.8.8` kiadási címkéhez frissítve: 2026-05-12. A legutóbbi commit dátuma: 2026-05-12._
 <!-- repo-chronicle:end -->
 
 

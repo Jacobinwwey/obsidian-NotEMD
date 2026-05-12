@@ -24,7 +24,7 @@ Notemd forbedrer Obsidian-arbeidsflyten din ved å integrere med ulike store spr
 
 Hvis du elsker å bruke Notemd, vennligst vurder [⭐ å gi en stjerne på GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) eller [☕️ kjøp en kaffe til meg](https://ko-fi.com/jacobinwwey).
 
-**Versjon:** 1.8.7
+**Versjon:** 1.8.8
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
@@ -687,7 +687,7 @@ MIT License - Se filen [LICENSE](LICENSE) for detaljer.
 ---
 
 
-*Notemd v1.8.7 - Forbedre Obsidian-kunnskapsgrafen din med AI.*
+*Notemd v1.8.8 - Forbedre Obsidian-kunnskapsgrafen din med AI.*
 
 
 <!-- repo-chronicle:start -->
@@ -697,7 +697,7 @@ Denne kvartalsvise krøniken bevarer den opprinnelige visuelle stilen fra [repo-
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.no.svg)
 
-_Sist oppdatert for utgivelsestaggen `1.8.7` 2026-05-12. Dato for siste commit: 2026-05-12._
+_Sist oppdatert for utgivelsestaggen `1.8.8` 2026-05-12. Dato for siste commit: 2026-05-12._
 <!-- repo-chronicle:end -->
 
 

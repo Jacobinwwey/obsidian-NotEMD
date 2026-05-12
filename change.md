@@ -6,10 +6,15 @@ This document summarizes the major functional and architectural changes implemen
 
 ## Unreleased
 
+- No entries yet.
+
+## 1.8.8
+
 ### Highlights
 
 - Sidebar log footer now exposes quick deep-debug control and runtime-backed API liveness feedback.
 - Retry-aware, request-keyed, and acceptance-aware liveness semantics are now part of the shipped runtime boundary.
+- Saved diagram preview now directly opens supported artifact files instead of depending on a regeneration path.
 
 ### New Features
 
@@ -20,6 +25,13 @@ This document summarizes the major functional and architectural changes implemen
 - **Structured Liveness Deep Debug**: Deep debug mode now records structured per-request liveness lines with logical request attempt, phase, transport, and status when known.
 - **API Activity Drill-Down Export**: Sidebar now keeps request-scoped API activity summaries and supports copying an exportable activity report without re-parsing raw logs.
 - **Inline API Activity Timeline**: Sidebar API activity now shows active/recent sections with inline per-request history rows, so users can inspect recent phase transitions without leaving the panel.
+- **Direct Diagram Artifact Preview**: `Preview diagram` now directly previews supported saved sources:
+  - Mermaid Markdown fences
+  - Vega-Lite Markdown fences
+  - Vega-Lite JSON (`.json`)
+  - JSON Canvas (`.canvas`)
+  - HTML (`.html`)
+- **Preview Entry Surface Expansion**: Canonical preview commands and sidebar action paths now accept supported saved artifact files instead of remaining Markdown-only.
 
 ### Fixes
 
@@ -29,9 +41,15 @@ This document summarizes the major functional and architectural changes implemen
 - **Streaming Debug Noise Control**: Structured liveness logging now deduplicates repeated streaming chunk transitions per logical attempt instead of flooding the log with every chunk.
 - **Observability Consumer Reuse**: API activity export now reuses the same request-scoped record model that drives the live sidebar indicator, avoiding a second parsing-only observability path.
 - **Observability Surface Convergence**: Inline activity timeline and copied report now consume the same request history records, keeping the visible panel and exported diagnosis aligned.
+- **Saved Mermaid Preview Fallback**: Previewing a saved Mermaid artifact no longer re-enters the generation path, which removes the `erDiagram`/requested-intent mismatch failure from the direct-preview fallback flow.
+- **Legacy Mermaid Intent Preservation**: Mermaid-compatible requested intents such as `erDiagram` are no longer coerced to `mindmap` during legacy Mermaid execution.
+- **Footer Visibility Protection**: API activity is now compacted into a bounded scroll region with collapsible history so `Log output` remains visible during multi-request activity.
+- **Preview Wording Convergence**: Preview tooltip copy now matches the shipped behavior of opening supported source/artifact files instead of describing a save-less generation flow.
 
 ### Chores
 
+- Added `docs/releases/1.8.8.md` and `docs/releases/1.8.8.zh-CN.md`.
+- Updated welcome-modal latest-two release digest from `1.8.7/1.8.6` to `1.8.8/1.8.7`.
 - Added `docs/brainstorms/2026-05-12-sidebar-api-observability-progress-and-architecture-alignment.md` and `docs/brainstorms/2026-05-12-sidebar-api-observability-progress-and-architecture-alignment.zh-CN.md`.
 - Extended the `mainline-stabilization-next-batch` plan with the product-observability alignment update.
 

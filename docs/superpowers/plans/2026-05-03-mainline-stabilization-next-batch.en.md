@@ -360,6 +360,21 @@ Plan interpretation:
 2. it uses the same landing rule already required elsewhere in this plan: checked-in truth, regression lock, bilingual maintainer-doc sync, then real workflow validation
 3. next critical-path work still remains Stage-B2 packaging / semantic-verification convergence; this slice should not be misread as a Stage-C topology start
 
+## 2026-05-12 Release-Alignment Update (1.8.8)
+
+Mainline stabilization now also includes a second release-boundary convergence milestone for the current diagram/observability slice:
+
+1. version boundary is now synchronized to `1.8.8` across package metadata, manifest compatibility map, changelog, README markers, welcome-modal latest-two digest (`1.8.8`/`1.8.7`), and bilingual release notes;
+2. saved-diagram preview fallback is now product-real instead of Vega-Lite-only: canonical preview command paths now open Mermaid Markdown, Vega-Lite Markdown/JSON, JSON Canvas, and HTML artifact files directly;
+3. preview entry gating is now aligned across command and sidebar surfaces, so supported saved artifact files are no longer blocked by Markdown-only command assumptions;
+4. the same release also folds in the sidebar API observability hardening already landed on `main`, keeping the bundled product delta honest instead of splitting release truth across undocumented mainline commits.
+
+Plan-status interpretation after `1.8.8`:
+
+1. saved-artifact preview fallback is now release-complete for the current supported targets;
+2. the next critical path still remains packaging / semantic-verification convergence rather than more preview-surface expansion;
+3. future diagram-platform work should build on this direct-preview baseline instead of reintroducing generation-coupled preview behavior.
+
 ## 2026-05-12 Sidebar API Observability Alignment Update
 
 Mainline stabilization now also includes a product-side observability hardening slice, and the boundary is explicit:

@@ -360,6 +360,21 @@ npm run audit:render-host
 2. 它沿用本计划既定的同一落地规则：检入真值、回归锁定、双语维护者文档同步、再做真实 workflow 验证
 3. 下一条关键路径仍然是 Stage-B2 packaging / semantic-verification convergence，不应把本切片误读为 Stage-C 拓扑实现起点
 
+## 2026-05-12 发布对齐更新（1.8.8）
+
+主线稳定化现在还包含当前图表/可观测性切片的第二个 release-boundary convergence 里程碑：
+
+1. 版本边界现已同步到 `1.8.8`：包元数据、manifest 兼容映射、change log、README 标记、欢迎弹窗最近两次摘要（`1.8.8`/`1.8.7`）与双语 release notes 一致；
+2. 已保存图形的预览兜底现在已经从“仅 Vega-Lite 可用”推进到真正产品可用：canonical preview 命令路径现在可直接打开 Mermaid Markdown、Vega-Lite Markdown/JSON、JSON Canvas 与 HTML 产物文件；
+3. preview 入口 gating 现在已经在命令面与 sidebar 面保持一致，受支持的已保存产物文件不再被“仅 Markdown”假设拦在入口之外；
+4. 本次发布同时把已经落在 `main` 上的 sidebar API observability 加固一并纳入版本真值，避免出现“代码已发货、release 仍未记录”的主线漂移。
+
+`1.8.8` 之后的计划状态解释：
+
+1. 已保存产物预览兜底在当前受支持目标范围内已完成 release 级闭环；
+2. 下一条关键路径仍然是 packaging / semantic-verification convergence，而不是继续扩张更多 preview 表面；
+3. 后续 diagram-platform 工作应当建立在这次 direct-preview 基线上，而不是重新引入与生成链路耦合的 preview 行为。
+
 ## 2026-05-12 Sidebar API 可观测性对齐更新
 
 主线稳定化现在还包含一个产品侧可观测性加固切片，而且边界已经明确：
