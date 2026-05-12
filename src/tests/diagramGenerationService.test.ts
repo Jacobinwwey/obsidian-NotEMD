@@ -112,6 +112,38 @@ describe('diagram generation service', () => {
         expect(artifact.artifact.target).toBe('mermaid');
     });
 
+    test('preserves Mermaid-compatible requested intents in legacy-mermaid mode', async () => {
+        const llmInvoker = jest.fn(async () => JSON.stringify({
+            intent: 'erDiagram',
+            title: 'Notemd Diagram Platform',
+            nodes: [
+                { id: 'diagramSpec', label: 'DiagramSpec' },
+                { id: 'rendererService', label: 'RendererService' }
+            ],
+            edges: [
+                { from: 'diagramSpec', to: 'rendererService', label: 'rendered by' }
+            ]
+        }));
+
+        const result = await generateDiagramArtifact(`# Notemd Diagram Platform
+
+- DiagramSpec
+- RendererService
+`, {
+            compatibilityMode: 'legacy-mermaid',
+            requestedIntent: 'erDiagram',
+            targetLanguage: 'en',
+            llmInvoker
+        });
+
+        expect(llmInvoker).toHaveBeenCalledTimes(1);
+        expect(result.plan.legacyCompatibilityMode).toBe(true);
+        expect(result.plan.renderTarget).toBe('mermaid');
+        expect(result.spec.intent).toBe('erDiagram');
+        expect(result.artifact.target).toBe('mermaid');
+        expect(result.artifact.content).toContain('erDiagram');
+    });
+
     test('falls back to html when the preferred renderer fails in best-fit mode', async () => {
         const failingMermaidRenderer: DiagramRenderer = {
             id: 'failing-mermaid',

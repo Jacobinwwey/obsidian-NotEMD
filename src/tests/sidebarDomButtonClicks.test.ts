@@ -198,6 +198,20 @@ function findAllByClass(root: FakeElement, cls: string): FakeElement[] {
     return matches;
 }
 
+function findApiActivitySection(root: FakeElement, title: string): FakeElement | null {
+    return findAllByClass(root, 'notemd-api-activity-section').find(section => (
+        section.children.some(child => child.cls.includes('notemd-api-activity-section-title') && child.text === title)
+    )) ?? null;
+}
+
+function findApiActivityItem(root: FakeElement, providerName: string): FakeElement | null {
+    return findAllByClass(root, 'notemd-api-activity-item').find(item => (
+        item.children.some(child => child.children.some(grandchild => (
+            grandchild.cls.includes('notemd-api-activity-item-title') && grandchild.text === providerName
+        )))
+    )) ?? null;
+}
+
 describe('NotemdSidebarView DOM button wiring', () => {
     let plugin: MockPlugin;
     let sidebar: NotemdSidebarView;
@@ -359,14 +373,17 @@ describe('NotemdSidebarView DOM button wiring', () => {
         const shell = contentContainer.findByClass('notemd-sidebar-shell');
         const scrollArea = contentContainer.findByClass('notemd-sidebar-scroll');
         const footer = contentContainer.findByClass('notemd-sidebar-footer');
+        const footerScroll = contentContainer.findByClass('notemd-sidebar-footer-scroll');
         const progressValue = contentContainer.findByClass('notemd-progress-value');
         const progressBar = contentContainer.findByClass('notemd-progress-bar-container');
         const logCard = contentContainer.findByClass('notemd-log-card');
         const apiLiveness = contentContainer.findByClass('notemd-api-liveness');
         const apiLivenessText = contentContainer.findByClass('notemd-api-liveness-text');
         const apiActivity = contentContainer.findByClass('notemd-api-activity');
+        const apiActivityContent = contentContainer.findByClass('notemd-api-activity-content');
         const apiActivityEmpty = contentContainer.findByClass('notemd-api-activity-empty');
-        const apiActivitySectionTitles = findAllByClass(contentContainer, 'notemd-api-activity-section-title');
+        const activeSection = findApiActivitySection(contentContainer, 'Active');
+        const recentSection = findApiActivitySection(contentContainer, 'Recent');
         const debugToggle = contentContainer.findByClass('notemd-debug-toggle-input');
         const copyApiActivityButton = contentContainer.findButton('Copy API activity');
 
@@ -374,14 +391,17 @@ describe('NotemdSidebarView DOM button wiring', () => {
         expect(scrollArea).not.toBeNull();
         expect(footer).not.toBeNull();
         expect(footer?.cls).toContain('mod-docked');
+        expect(footerScroll).not.toBeNull();
         expect(progressValue?.text).toBe('Ready');
         expect(progressBar?.cls).toContain('is-idle');
         expect(logCard).not.toBeNull();
         expect(logCard?.cls).toContain('mod-persistent');
         expect(apiLivenessText?.text).toBe('Standby');
         expect(apiActivity).not.toBeNull();
+        expect(apiActivityContent).not.toBeNull();
         expect(apiActivityEmpty?.text).toBe('No API activity yet.');
-        expect(apiActivitySectionTitles.map(item => item.text)).toEqual(expect.arrayContaining(['Active', 'Recent']));
+        expect(activeSection?.cls).toContain('is-hidden');
+        expect(recentSection?.cls).toContain('is-hidden');
         expect(debugToggle).not.toBeNull();
         expect(copyApiActivityButton).not.toBeNull();
         expect((debugToggle as any)?.checked).toBe(false);
@@ -547,11 +567,14 @@ describe('NotemdSidebarView DOM button wiring', () => {
 
         const activityTitles = findAllByClass(contentContainer, 'notemd-api-activity-item-title').map(item => item.text);
         const activityMeta = findAllByClass(contentContainer, 'notemd-api-activity-item-meta').map(item => item.text);
-        const activityHistoryEntries = findAllByClass(contentContainer, 'notemd-api-activity-history-entry').map(item => item.text);
-        const apiActivitySectionTitles = findAllByClass(contentContainer, 'notemd-api-activity-section-title').map(item => item.text);
+        let activityHistoryEntries = findAllByClass(contentContainer, 'notemd-api-activity-history-entry').map(item => item.text);
+        const activeSection = findApiActivitySection(contentContainer, 'Active');
+        const recentSection = findApiActivitySection(contentContainer, 'Recent');
+        const historyButtons = findAllByClass(contentContainer, 'notemd-api-activity-toggle-button');
 
         expect(activityTitles).toEqual(expect.arrayContaining(['OpenAI', 'Anthropic']));
-        expect(apiActivitySectionTitles).toEqual(expect.arrayContaining(['Active', 'Recent']));
+        expect(activeSection?.cls).toContain('is-hidden');
+        expect(recentSection?.cls).not.toContain('is-hidden');
         expect(activityMeta).toEqual(expect.arrayContaining([
             expect.stringContaining('req-openai-1'),
             expect.stringContaining('Attempt 2'),
@@ -561,6 +584,16 @@ describe('NotemdSidebarView DOM button wiring', () => {
             expect.stringContaining('req-anthropic-1'),
             expect.stringContaining('Interrupted')
         ]));
+        expect(activityHistoryEntries).toEqual([]);
+        expect(historyButtons.map(item => item.text)).toEqual(expect.arrayContaining(['Show history']));
+
+        const openAiItem = findApiActivityItem(contentContainer, 'OpenAI');
+        const openAiHistoryButton = openAiItem?.findButton('Show history');
+        expect(openAiHistoryButton).toBeDefined();
+        await openAiHistoryButton!.onclick?.();
+
+        activityHistoryEntries = findAllByClass(contentContainer, 'notemd-api-activity-history-entry').map(item => item.text);
+        const expandedHistoryButtons = findAllByClass(contentContainer, 'notemd-api-activity-toggle-button');
         expect(activityHistoryEntries).toEqual(expect.arrayContaining([
             expect.stringContaining('request-start'),
             expect.stringContaining('response-headers'),
@@ -568,6 +601,7 @@ describe('NotemdSidebarView DOM button wiring', () => {
             expect.stringContaining('retrying=true'),
             expect.stringContaining('request-complete')
         ]));
+        expect(expandedHistoryButtons.map(item => item.text)).toEqual(expect.arrayContaining(['Hide history']));
 
         expect(copyApiActivityButton).not.toBeNull();
         await copyApiActivityButton!.onclick?.();

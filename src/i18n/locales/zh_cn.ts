@@ -610,6 +610,8 @@ export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
         apiActivityStatusRetrying: '重试中',
         apiActivityStatusReceived: '已接收',
         apiActivityStatusInterrupted: '已中断',
+        apiActivityShowHistory: '显示历史',
+        apiActivityHideHistory: '隐藏历史',
         copyApiActivity: '复制 API 活动',
         copyApiActivitySuccess: 'API 活动已复制！',
         copyApiActivityFailed: '复制 API 活动失败。',

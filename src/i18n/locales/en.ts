@@ -607,6 +607,8 @@ export const STRINGS_EN = {
         apiActivityStatusRetrying: 'Retrying',
         apiActivityStatusReceived: 'Received',
         apiActivityStatusInterrupted: 'Interrupted',
+        apiActivityShowHistory: 'Show history',
+        apiActivityHideHistory: 'Hide history',
         copyApiActivity: 'Copy API activity',
         copyApiActivitySuccess: 'API activity copied!',
         copyApiActivityFailed: 'Failed to copy API activity.',

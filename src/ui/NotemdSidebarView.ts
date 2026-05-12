@@ -97,6 +97,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
     private apiLivenessRowEl: HTMLElement | null = null;
     private apiLivenessTextEl: HTMLElement | null = null;
     private apiActivityEl: HTMLElement | null = null;
+    private apiActivityContentEl: HTMLElement | null = null;
     private apiActivityEmptyEl: HTMLElement | null = null;
     private apiActivityActiveSectionEl: HTMLElement | null = null;
     private apiActivityActiveListEl: HTMLElement | null = null;
@@ -109,6 +110,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
     private apiLivenessTimer: ReturnType<typeof setTimeout> | null = null;
     private apiLivenessRequests = new Map<string, ApiActivityRequestRecord>();
     private apiLivenessRecentRequests: ApiActivityRequestRecord[] = [];
+    private expandedApiActivityRequestIds = new Set<string>();
 
     private logContent: string[] = [];
     private startTime = 0;
@@ -359,6 +361,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         }
 
         this.apiLivenessRecentRequests = this.apiLivenessRecentRequests.filter(record => record.requestId !== requestId);
+        this.expandedApiActivityRequestIds.delete(requestId);
 
         const now = new Date().toISOString();
         const createdState: ApiActivityRequestRecord = {
@@ -467,6 +470,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         const i18n = this.getStrings();
         this.apiLivenessRequests.clear();
         this.apiLivenessRecentRequests = [];
+        this.expandedApiActivityRequestIds.clear();
         this.setApiLivenessState('idle', i18n.common.standby);
         this.renderApiActivity(i18n);
     }
@@ -514,6 +518,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
     private renderApiActivity(i18n = this.getStrings()) {
         if (
             !this.apiActivityEmptyEl
+            || !this.apiActivityContentEl
             || !this.apiActivityActiveSectionEl
             || !this.apiActivityActiveListEl
             || !this.apiActivityRecentSectionEl
@@ -542,7 +547,6 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             this.apiActivityActiveListEl,
             i18n.sidebar.apiActivityActiveSection,
             activeRecords,
-            i18n.sidebar.apiActivityActiveEmpty,
             i18n
         );
         this.renderApiActivitySection(
@@ -550,7 +554,6 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             this.apiActivityRecentListEl,
             i18n.sidebar.apiActivityRecentSection,
             recentRecords,
-            i18n.sidebar.apiActivityRecentEmpty,
             i18n
         );
     }
@@ -560,35 +563,58 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         listEl: HTMLElement,
         title: string,
         records: ApiActivityRequestRecord[],
-        emptyText: string,
         i18n = this.getStrings()
     ) {
+        if (records.length === 0) {
+            sectionEl.addClass('is-hidden');
+            return;
+        }
+
         sectionEl.removeClass('is-hidden');
         const titleEl = sectionEl.querySelector?.('.notemd-api-activity-section-title') as HTMLElement | null;
         if (titleEl) {
             titleEl.setText(title);
         }
 
-        if (records.length === 0) {
-            listEl.createEl('p', { text: emptyText, cls: 'notemd-api-activity-section-empty' });
-            return;
-        }
-
         records.forEach(record => {
             const item = listEl.createDiv({ cls: 'notemd-api-activity-item' });
-            item.createEl('div', { text: record.providerName, cls: 'notemd-api-activity-item-title' });
+            const headerEl = item.createDiv({ cls: 'notemd-api-activity-item-header' });
+            headerEl.createEl('div', { text: record.providerName, cls: 'notemd-api-activity-item-title' });
+            const toggleButtonEl = headerEl.createEl('button', {
+                text: this.expandedApiActivityRequestIds.has(record.requestId)
+                    ? i18n.sidebar.apiActivityHideHistory
+                    : i18n.sidebar.apiActivityShowHistory,
+                cls: 'notemd-api-activity-toggle-button'
+            });
+            toggleButtonEl.onclick = () => {
+                this.toggleApiActivityHistory(record.requestId, i18n);
+            };
             item.createEl('div', {
                 text: this.buildApiActivitySummary(record, i18n),
                 cls: 'notemd-api-activity-item-meta'
             });
+
+            if (!this.expandedApiActivityRequestIds.has(record.requestId)) {
+                return;
+            }
+
             const historyEl = item.createDiv({ cls: 'notemd-api-activity-history' });
-            record.history
-                .slice(-API_ACTIVITY_VISIBLE_HISTORY_LIMIT)
-                .forEach(entry => historyEl.createEl('div', {
+            record.history.slice(-API_ACTIVITY_VISIBLE_HISTORY_LIMIT).forEach(entry => {
+                historyEl.createEl('div', {
                     text: this.buildApiActivityHistorySummary(entry),
                     cls: 'notemd-api-activity-history-entry'
-                }));
+                });
+            });
         });
+    }
+
+    private toggleApiActivityHistory(requestId: string, i18n = this.getStrings()) {
+        if (this.expandedApiActivityRequestIds.has(requestId)) {
+            this.expandedApiActivityRequestIds.delete(requestId);
+        } else {
+            this.expandedApiActivityRequestIds.add(requestId);
+        }
+        this.renderApiActivity(i18n);
     }
 
     private buildApiActivityHistorySummary(entry: ApiActivityHistoryEntry): string {
@@ -1157,6 +1183,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         const shell = container.createDiv({ cls: 'notemd-sidebar-shell' });
         const scrollArea = shell.createDiv({ cls: 'notemd-sidebar-scroll' });
         const footer = shell.createDiv({ cls: 'notemd-sidebar-footer mod-docked' });
+        const footerScroll = footer.createDiv({ cls: 'notemd-sidebar-footer-scroll' });
 
         const hero = scrollArea.createDiv({ cls: 'notemd-hero-card' });
         hero.createEl('h3', { text: i18n.sidebar.heroTitle });
@@ -1227,7 +1254,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             }
         });
 
-        const progressArea = footer.createDiv({ cls: 'notemd-progress-area is-idle' });
+        const progressArea = footerScroll.createDiv({ cls: 'notemd-progress-area is-idle' });
         this.progressAreaEl = progressArea;
         const progressMeta = progressArea.createDiv({ cls: 'notemd-progress-meta' });
         this.statusEl = progressMeta.createEl('p', { text: i18n.common.ready, cls: 'notemd-status-text' });
@@ -1259,17 +1286,18 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
                     () => new Notice(i18n.sidebar.copyApiActivityFailed)
                 );
         };
-        this.apiActivityEmptyEl = this.apiActivityEl.createEl('p', {
+        this.apiActivityContentEl = this.apiActivityEl.createDiv({ cls: 'notemd-api-activity-content' });
+        this.apiActivityEmptyEl = this.apiActivityContentEl.createEl('p', {
             text: i18n.sidebar.apiActivityEmpty,
             cls: 'notemd-api-activity-empty'
         });
-        this.apiActivityActiveSectionEl = this.apiActivityEl.createDiv({ cls: 'notemd-api-activity-section is-hidden' });
+        this.apiActivityActiveSectionEl = this.apiActivityContentEl.createDiv({ cls: 'notemd-api-activity-section is-hidden' });
         this.apiActivityActiveSectionEl.createEl('div', {
             text: i18n.sidebar.apiActivityActiveSection,
             cls: 'notemd-api-activity-section-title'
         });
         this.apiActivityActiveListEl = this.apiActivityActiveSectionEl.createDiv({ cls: 'notemd-api-activity-list' });
-        this.apiActivityRecentSectionEl = this.apiActivityEl.createDiv({ cls: 'notemd-api-activity-section is-hidden' });
+        this.apiActivityRecentSectionEl = this.apiActivityContentEl.createDiv({ cls: 'notemd-api-activity-section is-hidden' });
         this.apiActivityRecentSectionEl.createEl('div', {
             text: i18n.sidebar.apiActivityRecentSection,
             cls: 'notemd-api-activity-section-title'
@@ -1282,7 +1310,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         this.cancelButton = progressArea.createEl('button', { text: i18n.sidebar.cancelProcessing, cls: 'notemd-cancel-button' });
         this.cancelButton.onclick = () => this.requestCancel();
 
-        const logCard = footer.createDiv({ cls: 'notemd-log-card mod-persistent' });
+        const logCard = footerScroll.createDiv({ cls: 'notemd-log-card mod-persistent' });
         const logHeader = logCard.createDiv({ cls: 'notemd-log-header' });
         logHeader.createEl('h5', { text: i18n.sidebar.logOutputTitle });
         const logHeaderActions = logHeader.createDiv({ cls: 'notemd-log-header-actions' });
@@ -1322,6 +1350,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         this.apiLivenessRowEl = null;
         this.apiLivenessTextEl = null;
         this.apiActivityEl = null;
+        this.apiActivityContentEl = null;
         this.apiActivityEmptyEl = null;
         this.apiActivityActiveSectionEl = null;
         this.apiActivityActiveListEl = null;
@@ -1331,6 +1360,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         this.cancelButton = null;
         this.languageSelector = null;
         this.clearApiLivenessTimer();
+        this.expandedApiActivityRequestIds.clear();
         this.actionButtons.clear();
         this.workflowButtons = [];
     }

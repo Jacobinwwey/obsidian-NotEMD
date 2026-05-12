@@ -72,6 +72,15 @@ export interface DiagramGenerationResult {
     renderError?: string;
 }
 
+const MERMAID_COMPATIBLE_INTENTS = new Set<DiagramIntent>([
+    'mindmap',
+    'flowchart',
+    'sequence',
+    'classDiagram',
+    'erDiagram',
+    'stateDiagram'
+]);
+
 function normalizeErrorMessage(error: unknown): string {
     return error instanceof Error ? error.message : String(error);
 }
@@ -121,7 +130,7 @@ function resolveLegacyCompatibleIntent(spec: DiagramSpec, plan: DiagramPlan): Di
         return requestedIntent;
     }
 
-    if (requestedIntent === 'mindmap' || requestedIntent === 'flowchart') {
+    if (MERMAID_COMPATIBLE_INTENTS.has(requestedIntent)) {
         return requestedIntent;
     }
 
