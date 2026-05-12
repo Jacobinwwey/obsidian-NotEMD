@@ -202,6 +202,15 @@ describe('NotemdSidebarView button trigger chains', () => {
         expect(plugin.previewExperimentalDiagramCommand).not.toHaveBeenCalled();
     });
 
+    test('preview-diagram accepts saved canvas artifacts as active files', async () => {
+        const canvasFile = createMarkdownFile('Notes/Current_diagram.canvas', 'Current_diagram.canvas', 'canvas');
+        (mockApp.workspace.getActiveFile as jest.Mock).mockReturnValue(canvasFile);
+
+        await executeAction('preview-diagram', reporter);
+
+        expect(plugin.previewDiagramCommand).toHaveBeenCalledWith(canvasFile, reporter);
+    });
+
     test('translate-current-file triggers translateFileCommand', async () => {
         await executeAction('translate-current-file', reporter);
         expect(plugin.translateFileCommand).toHaveBeenCalledWith(activeMdFile, reporter.abortController?.signal, reporter);

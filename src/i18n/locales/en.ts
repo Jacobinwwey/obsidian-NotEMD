@@ -514,7 +514,7 @@ export const STRINGS_EN = {
             },
             previewExperimentalDiagram: {
                 label: 'Preview diagram',
-                tooltip: 'Generate a diagram preview without saving the artifact.'
+                tooltip: 'Preview a supported diagram source or saved artifact file.'
             },
             translateCurrentFile: {
                 label: 'Translate current file',

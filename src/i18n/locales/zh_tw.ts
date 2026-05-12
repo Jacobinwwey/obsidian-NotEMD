@@ -517,7 +517,7 @@ export const STRINGS_ZH_TW: DeepPartial<NotemdEnglishStrings> = {
             },
             previewExperimentalDiagram: {
                 label: '預覽圖形',
-                tooltip: '生成圖形預覽，但不儲存產物檔案。'
+                tooltip: '預覽受支援的圖形來源內容或已儲存的產物檔案。'
             },
             translateCurrentFile: {
                 label: '翻譯目前檔案',

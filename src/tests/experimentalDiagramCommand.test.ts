@@ -200,4 +200,38 @@ describe('experimental diagram command', () => {
             plugin.settings.uiLocale
         );
     });
+
+    test('preview command extracts fenced mermaid artifacts from markdown and opens modal without calling LLM', async () => {
+        const mermaidContent = 'erDiagram\nA ||--o{ B : relates_to';
+        (mockApp.vault.read as jest.Mock).mockResolvedValue(`\`\`\`mermaid\n${mermaidContent}\n\`\`\`\n`);
+        const generateSpy = jest.spyOn(diagramGenerationService, 'generateDiagramArtifact');
+
+        const file = {
+            name: 'Topic_summ.md',
+            basename: 'Topic_summ',
+            path: 'Notes/Topic_summ.md',
+            parent: { path: 'Notes' }
+        } as any;
+
+        await (plugin as any).previewExperimentalDiagramCommand(file, reporter);
+
+        expect(generateSpy).not.toHaveBeenCalled();
+        expect(fileUtils.saveDiagramArtifactFile).not.toHaveBeenCalled();
+        expect(DiagramPreviewModal).toHaveBeenCalledTimes(1);
+        expect(DiagramPreviewModal).toHaveBeenCalledWith(
+            mockApp,
+            expect.objectContaining({
+                payload: expect.objectContaining({
+                    artifact: expect.objectContaining({
+                        target: 'mermaid',
+                        mimeType: 'text/vnd.mermaid',
+                        sourceIntent: 'erDiagram'
+                    }),
+                    sourcePath: 'Notes/Topic_summ.md',
+                    artifactSaved: false
+                })
+            }),
+            plugin.settings.uiLocale
+        );
+    });
 });

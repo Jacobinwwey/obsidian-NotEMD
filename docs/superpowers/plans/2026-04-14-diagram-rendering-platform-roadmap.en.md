@@ -496,6 +496,12 @@ The original roadmap goal was more aggressive, and that part remains unfinished:
 
 `RendererRegistry`, `RendererService`, `RenderCache`, `InlineRenderHost`, `IframeRenderHost`, and `DiagramPreviewModal` already provide the minimum preview/render/export platform skeleton. Cache keys already include `spec + target + theme`.
 
+Further hardening landed on 2026-05-12 at the product surface:
+
+- canonical `Preview diagram` now directly opens supported saved artifact/source files instead of re-entering generation for saved outputs
+- the direct-preview contract now covers Mermaid Markdown, Vega-Lite Markdown/JSON, JSON Canvas, and HTML artifacts
+- preview entry surfaces no longer stay blocked behind a Markdown-only assumption when the active file is a supported saved diagram artifact
+
 - [x] Build the platform interfaces first, then attach heavier renderers incrementally.
 - [x] Provide a unified preview entrypoint for Mermaid output instead of scattering preview logic across business commands.
 - [x] Add a simple cache keyed at least by `spec + target + theme`.

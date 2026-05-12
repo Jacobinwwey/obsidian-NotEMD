@@ -337,6 +337,33 @@ describe('diagram command architecture', () => {
         expect(ids).toContain('notemd-preview-experimental-diagram');
     });
 
+    test('canonical preview command stays available for supported saved artifact files', async () => {
+        const commandCalls: any[] = [];
+        plugin.addCommand = jest.fn((command: any) => {
+            commandCalls.push(command);
+        }) as any;
+        const previewSpy = jest.spyOn(plugin as any, 'previewDiagramCommand').mockResolvedValue(undefined);
+        const canvasFile = {
+            name: 'Topic_diagram.canvas',
+            basename: 'Topic_diagram',
+            path: 'Notes/Topic_diagram.canvas',
+            extension: 'canvas',
+            parent: { path: 'Notes' }
+        };
+        (mockApp.workspace.getActiveFile as jest.Mock).mockReturnValue(canvasFile);
+
+        await plugin.onload();
+
+        const previewCommand = commandCalls.find(command => command.id === 'notemd-preview-diagram');
+        expect(previewCommand).toBeDefined();
+        expect(previewCommand.checkCallback(true)).toBe(true);
+
+        previewCommand.checkCallback(false);
+        await Promise.resolve();
+
+        expect(previewSpy).toHaveBeenCalledWith(canvasFile, expect.anything());
+    });
+
     test('canonical generate command delegates to the canonical save flow', async () => {
         const canonicalCall = jest
             .spyOn(plugin as any, 'generateDiagramCommand')

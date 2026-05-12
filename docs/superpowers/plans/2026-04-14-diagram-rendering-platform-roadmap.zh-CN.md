@@ -517,6 +517,12 @@ Mermaid subtype adapters 已经覆盖 `mindmap`、`flowchart`、`sequenceDiagram
 
 `RendererRegistry`、`RendererService`、`RenderCache`、`InlineRenderHost`、`IframeRenderHost` 与 `DiagramPreviewModal` 已经把 preview/render/export 的最小平台骨架拉起来。缓存 key 也已经纳入 `spec + target + theme`。
 
+2026-05-12 又补上了一层产品表面加固：
+
+- canonical `预览图形` 现在会直接打开受支持的已保存产物/源文件，而不是对已保存输出重新进入生成链路
+- direct-preview 契约现在已经覆盖 Mermaid Markdown、Vega-Lite Markdown/JSON、JSON Canvas 与 HTML 产物
+- 当当前活动文件本身就是受支持的已保存图形产物时，preview 入口不再继续被“仅 Markdown”假设阻塞
+
 - [x] 先建立平台接口，再逐步接入真实重型 renderer。
 - [x] 为当前 Mermaid 输出提供统一预览入口，而不是把预览逻辑散在业务命令里。
 - [x] 增加简单缓存，至少按 `spec + target + theme` 做 cache key。

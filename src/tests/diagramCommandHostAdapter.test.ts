@@ -1,5 +1,6 @@
 import { STRINGS_EN } from '../i18n/locales/en';
 import {
+    MissingPreviewableDiagramArtifactError,
     previewVegaLiteArtifactFromMarkdown,
     runGenerateDiagramCommandWithHost,
     runPreviewDiagramCommandWithHost
@@ -126,7 +127,7 @@ describe('diagram command host adapter', () => {
         });
     });
 
-    test('preview wrapper finalizes reporter and returns artifact metadata', async () => {
+    test('preview wrapper finalizes reporter and returns artifact metadata for markdown vega-lite fences', async () => {
         const { host, reporter } = createDiagramHost();
         const file = { name: 'Topic.md', path: 'Notes/Topic.md' };
         host.readFile.mockResolvedValue('# Chart\n\n```vega-lite\n{\"mark\":\"bar\"}\n```');
@@ -143,6 +144,117 @@ describe('diagram command host adapter', () => {
         });
         expect(host.finalizeReporter).toHaveBeenCalledWith(reporter);
         expect(host.createDiagramHostAdapter().notify).toHaveBeenCalledWith('Diagram preview is ready!');
+    });
+
+    test('preview wrapper opens direct preview for fenced mermaid markdown artifacts', async () => {
+        const { host, reporter } = createDiagramHost();
+        const file = { name: 'Topic_summ.md', path: 'Notes/Topic_summ.md' };
+        host.readFile.mockResolvedValue('```mermaid\nerDiagram\nA ||--o{ B : relates_to\n```');
+
+        const result = await runPreviewDiagramCommandWithHost(host as any, file as any, reporter as any);
+
+        expect(result).toMatchObject({
+            kind: 'success',
+            sourcePath: 'Notes/Topic_summ.md',
+            previewOpened: true,
+            artifact: expect.objectContaining({
+                target: 'mermaid',
+                mimeType: 'text/vnd.mermaid',
+                sourceIntent: 'erDiagram'
+            })
+        });
+        expect(host.createDiagramHostAdapter().openPreview).toHaveBeenCalledWith(
+            expect.objectContaining({ target: 'mermaid' }),
+            'Notes/Topic_summ.md',
+            false
+        );
+    });
+
+    test('preview wrapper opens direct preview for saved json-canvas artifacts', async () => {
+        const { host, reporter } = createDiagramHost();
+        const file = { name: 'Topic_diagram.canvas', path: 'Notes/Topic_diagram.canvas' };
+        host.readFile.mockResolvedValue('{"nodes":[],"edges":[]}');
+
+        const result = await runPreviewDiagramCommandWithHost(host as any, file as any, reporter as any);
+
+        expect(result).toMatchObject({
+            kind: 'success',
+            sourcePath: 'Notes/Topic_diagram.canvas',
+            previewOpened: true,
+            artifact: expect.objectContaining({
+                target: 'json-canvas',
+                mimeType: 'application/json',
+                sourceIntent: 'canvasMap'
+            })
+        });
+        expect(host.createDiagramHostAdapter().openPreview).toHaveBeenCalledWith(
+            expect.objectContaining({ target: 'json-canvas' }),
+            'Notes/Topic_diagram.canvas',
+            true
+        );
+    });
+
+    test('preview wrapper opens direct preview for saved html artifacts', async () => {
+        const { host, reporter } = createDiagramHost();
+        const file = { name: 'Topic_diagram.html', path: 'Notes/Topic_diagram.html' };
+        host.readFile.mockResolvedValue('<!DOCTYPE html><html><body><main>Preview</main></body></html>');
+
+        const result = await runPreviewDiagramCommandWithHost(host as any, file as any, reporter as any);
+
+        expect(result).toMatchObject({
+            kind: 'success',
+            sourcePath: 'Notes/Topic_diagram.html',
+            previewOpened: true,
+            artifact: expect.objectContaining({
+                target: 'html',
+                mimeType: 'text/html'
+            })
+        });
+        expect(host.createDiagramHostAdapter().openPreview).toHaveBeenCalledWith(
+            expect.objectContaining({ target: 'html' }),
+            'Notes/Topic_diagram.html',
+            true
+        );
+    });
+
+    test('preview wrapper opens direct preview for saved vega-lite json artifacts', async () => {
+        const { host, reporter } = createDiagramHost();
+        const file = { name: 'Topic_diagram.json', path: 'Notes/Topic_diagram.json' };
+        host.readFile.mockResolvedValue('{"$schema":"https://vega.github.io/schema/vega-lite/v5.json","mark":"bar"}');
+
+        const result = await runPreviewDiagramCommandWithHost(host as any, file as any, reporter as any);
+
+        expect(result).toMatchObject({
+            kind: 'success',
+            sourcePath: 'Notes/Topic_diagram.json',
+            previewOpened: true,
+            artifact: expect.objectContaining({
+                target: 'vega-lite',
+                mimeType: 'application/json',
+                sourceIntent: 'dataChart'
+            })
+        });
+        expect(host.createDiagramHostAdapter().openPreview).toHaveBeenCalledWith(
+            expect.objectContaining({ target: 'vega-lite' }),
+            'Notes/Topic_diagram.json',
+            true
+        );
+    });
+
+    test('preview wrapper returns a direct-preview error when the file does not contain a supported artifact', async () => {
+        const { host, reporter } = createDiagramHost();
+        const file = { name: 'Topic.md', path: 'Notes/Topic.md' };
+        host.readFile.mockResolvedValue('# Topic\n\nNo previewable diagram artifact here.');
+
+        const result = await runPreviewDiagramCommandWithHost(host as any, file as any, reporter as any);
+
+        expect(result).toEqual({
+            kind: 'error',
+            sourcePath: 'Notes/Topic.md',
+            actionLabel: 'Preview diagram',
+            errorMessage: new MissingPreviewableDiagramArtifactError().message
+        });
+        expect(host.createDiagramHostAdapter().openPreview).not.toHaveBeenCalled();
     });
 
     test('preview helper keeps using markdown vega-lite fence extraction for direct preview', () => {

@@ -16,6 +16,7 @@ import {
 } from '../workflowButtons';
 import { formatI18n, getCurrentUiLocale, getI18nStrings } from '../i18n';
 import { formatTimeForLocale } from '../i18n/localeFormat';
+import { isDirectPreviewableDiagramExtension } from '../operations/diagramCommandHostAdapter';
 
 interface WorkflowExecutionContext {
     preferredFolderPath: string | null;
@@ -1020,8 +1021,8 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             }
             case 'preview-diagram': {
                 const activeFile = this.plugin.app.workspace.getActiveFile();
-                if (!activeFile || !(activeFile instanceof TFile) || activeFile.extension !== 'md') {
-                    throw new Error('No active Markdown file selected.');
+                if (!activeFile || !(activeFile instanceof TFile) || !isDirectPreviewableDiagramExtension(activeFile.extension)) {
+                    throw new Error('No supported diagram source or artifact file selected.');
                 }
                 await this.plugin.previewDiagramCommand(activeFile, reporter);
                 break;

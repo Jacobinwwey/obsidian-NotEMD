@@ -1,7 +1,7 @@
 import { TFile } from 'obsidian';
 import { formatI18n } from '../i18n';
 import { DiagramGenerationResult } from '../diagram/diagramGenerationService';
-import { DiagramIntent } from '../diagram/types';
+import { DiagramIntent, isSupportedDiagramIntent } from '../diagram/types';
 import { RenderArtifact } from '../rendering/types';
 import { DiagramOperationInput, DiagramOperationExecutionMode, buildDiagramOperationInput } from '../diagram/diagramGenerationService';
 import { LLMProviderConfig, NotemdSettings, ProgressReporter } from '../types';
@@ -171,6 +171,20 @@ export class MissingVegaLiteFenceError extends Error {
     }
 }
 
+export class MissingPreviewableDiagramArtifactError extends Error {
+    constructor() {
+        super('No previewable diagram artifact found in this file. Supported direct preview sources are Mermaid or Vega-Lite markdown fences, Vega-Lite JSON (.json), JSON Canvas (.canvas), and HTML (.html) files.');
+        this.name = 'MissingPreviewableDiagramArtifactError';
+    }
+}
+
+const DIRECT_PREVIEWABLE_DIAGRAM_EXTENSIONS = new Set(['md', 'json', 'canvas', 'html', 'htm']);
+
+export function isDirectPreviewableDiagramExtension(extension: string): boolean {
+    return typeof extension === 'string'
+        && DIRECT_PREVIEWABLE_DIAGRAM_EXTENSIONS.has(extension.trim().toLowerCase());
+}
+
 function maybeOpenSavedFile(host: DiagramCommandHostAdapter, outputFilePath: string): void {
     const savedFile = host.getFileByPath(outputFilePath);
     if (savedFile instanceof TFile || savedFile) {
@@ -282,6 +296,190 @@ export function previewVegaLiteArtifactFromMarkdown(params: {
     const artifact = buildVegaLitePreviewArtifact(vlContent);
     params.host.openPreview(artifact, params.sourcePath, false);
     return artifact;
+}
+
+function buildMermaidPreviewSource(mermaidContent: string): string {
+    return `\`\`\`mermaid\n${mermaidContent.trim()}\n\`\`\``;
+}
+
+function inferMermaidPreviewIntent(mermaidContent: string): DiagramIntent {
+    const lines = mermaidContent
+        .split(/\r?\n/)
+        .map(line => line.trim())
+        .filter(line => line.length > 0 && !line.startsWith('%%'));
+    const firstDirective = lines[0]?.toLowerCase() ?? '';
+
+    if (firstDirective === 'mindmap') {
+        return 'mindmap';
+    }
+    if (firstDirective.startsWith('flowchart') || firstDirective.startsWith('graph')) {
+        return 'flowchart';
+    }
+    if (firstDirective === 'sequencediagram') {
+        return 'sequence';
+    }
+    if (firstDirective === 'classdiagram') {
+        return 'classDiagram';
+    }
+    if (firstDirective === 'erdiagram') {
+        return 'erDiagram';
+    }
+    if (firstDirective.startsWith('statediagram')) {
+        return 'stateDiagram';
+    }
+
+    return 'mindmap';
+}
+
+function buildMermaidPreviewArtifact(mermaidContent: string): RenderArtifact {
+    return {
+        target: 'mermaid',
+        content: buildMermaidPreviewSource(mermaidContent),
+        mimeType: 'text/vnd.mermaid',
+        sourceIntent: inferMermaidPreviewIntent(mermaidContent)
+    };
+}
+
+function buildJsonCanvasPreviewArtifact(canvasContent: string): RenderArtifact {
+    return {
+        target: 'json-canvas',
+        content: canvasContent.trim(),
+        mimeType: 'application/json',
+        sourceIntent: 'canvasMap'
+    };
+}
+
+function extractHtmlPreviewIntent(htmlContent: string): DiagramIntent {
+    const match = htmlContent.match(/notemd-html-renderer-intent["'][^>]*>([^<]+)</i);
+    const value = match?.[1]?.trim();
+    return value && isSupportedDiagramIntent(value) ? value : 'flowchart';
+}
+
+function buildHtmlPreviewArtifact(htmlContent: string): RenderArtifact {
+    return {
+        target: 'html',
+        content: htmlContent.trim(),
+        mimeType: 'text/html',
+        sourceIntent: extractHtmlPreviewIntent(htmlContent)
+    };
+}
+
+type SupportedMarkdownFence = 'mermaid' | 'vega-lite';
+
+interface MarkdownFenceMatch {
+    index: number;
+    kind: SupportedMarkdownFence;
+    content: string;
+}
+
+interface DirectPreviewArtifactResult {
+    artifact: RenderArtifact;
+    artifactSaved: boolean;
+    detectionLabel: string;
+}
+
+function collectMarkdownFenceMatches(
+    sourceMarkdown: string,
+    kind: SupportedMarkdownFence,
+    regex: RegExp
+): MarkdownFenceMatch[] {
+    return Array.from(sourceMarkdown.matchAll(regex)).map(match => ({
+        index: match.index ?? Number.MAX_SAFE_INTEGER,
+        kind,
+        content: match[1]?.trim() ?? ''
+    }));
+}
+
+function extractDirectPreviewArtifactFromMarkdown(sourceMarkdown: string): DirectPreviewArtifactResult | null {
+    const fenceMatches = [
+        ...collectMarkdownFenceMatches(sourceMarkdown, 'mermaid', /```mermaid\s*\n([\s\S]*?)\n```/ig),
+        ...collectMarkdownFenceMatches(sourceMarkdown, 'vega-lite', /```vega-lite\s*\n([\s\S]*?)\n```/ig)
+    ].sort((left, right) => left.index - right.index);
+    const firstFence = fenceMatches[0];
+
+    if (!firstFence) {
+        return null;
+    }
+
+    if (firstFence.kind === 'mermaid') {
+        return {
+            artifact: buildMermaidPreviewArtifact(firstFence.content),
+            artifactSaved: false,
+            detectionLabel: 'Mermaid markdown fence'
+        };
+    }
+
+    return {
+        artifact: buildVegaLitePreviewArtifact(firstFence.content),
+        artifactSaved: false,
+        detectionLabel: 'Vega-Lite markdown fence'
+    };
+}
+
+function looksLikeVegaLiteSpec(sourceContent: string): boolean {
+    try {
+        const parsed = JSON.parse(sourceContent);
+        if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+            return false;
+        }
+
+        const schema = typeof (parsed as Record<string, unknown>).$schema === 'string'
+            ? String((parsed as Record<string, unknown>).$schema).toLowerCase()
+            : '';
+        if (schema.includes('vega-lite')) {
+            return true;
+        }
+
+        return ['mark', 'encoding', 'layer', 'facet', 'repeat', 'concat', 'hconcat', 'vconcat']
+            .some(key => key in (parsed as Record<string, unknown>));
+    } catch {
+        return false;
+    }
+}
+
+function resolveDirectPreviewArtifact(sourceContent: string, sourcePath: string): DirectPreviewArtifactResult {
+    const normalizedPath = sourcePath.trim().toLowerCase();
+
+    if (normalizedPath.endsWith('.canvas')) {
+        return {
+            artifact: buildJsonCanvasPreviewArtifact(sourceContent),
+            artifactSaved: true,
+            detectionLabel: 'JSON Canvas artifact'
+        };
+    }
+
+    if (normalizedPath.endsWith('.html') || normalizedPath.endsWith('.htm')) {
+        return {
+            artifact: buildHtmlPreviewArtifact(sourceContent),
+            artifactSaved: true,
+            detectionLabel: 'HTML artifact'
+        };
+    }
+
+    if (normalizedPath.endsWith('.json') && looksLikeVegaLiteSpec(sourceContent)) {
+        return {
+            artifact: buildVegaLitePreviewArtifact(sourceContent.trim()),
+            artifactSaved: true,
+            detectionLabel: 'Vega-Lite JSON artifact'
+        };
+    }
+
+    const markdownArtifact = extractDirectPreviewArtifactFromMarkdown(sourceContent);
+    if (markdownArtifact) {
+        return markdownArtifact;
+    }
+
+    throw new MissingPreviewableDiagramArtifactError();
+}
+
+function previewArtifactFromFile(params: {
+    host: Pick<DiagramCommandHostAdapter, 'openPreview'>;
+    sourceContent: string;
+    sourcePath: string;
+}): DirectPreviewArtifactResult {
+    const directPreview = resolveDirectPreviewArtifact(params.sourceContent, params.sourcePath);
+    params.host.openPreview(directPreview.artifact, params.sourcePath, directPreview.artifactSaved);
+    return directPreview;
 }
 
 function getEmptyFileErrorMessage(executionMode: DiagramCommandExecutionMode): string {
@@ -451,18 +649,22 @@ export async function runPreviewDiagramCommandWithHost(
     }
 
     host.startReporterAction(reporter, `${actionLabel}: ${file.name}`);
-    reporter.log(`Starting Vega-Lite preview for ${file.name}...`);
+    reporter.log(`Starting diagram preview for ${file.name}...`);
 
     try {
         const fileContent = await host.readFile(file);
-        const artifact = previewVegaLiteArtifactFromMarkdown({
+        const directPreview = previewArtifactFromFile({
             host: diagramHost,
-            sourceMarkdown: fileContent,
+            sourceContent: fileContent,
             sourcePath: file.path
         });
+        const { artifact } = directPreview;
 
+        reporter.log(
+            `Detected ${directPreview.detectionLabel} for preview target "${artifact.target}" at ${file.path}.`
+        );
         reporter.updateStatus(host.getActionCompleteText(actionLabel), 100);
-        reporter.log(`Vega-Lite preview opened for: ${file.path}`);
+        reporter.log(`Diagram preview opened for: ${file.path}`);
         diagramHost.notify(i18n.notices.experimentalDiagramPreviewReady);
 
         return {

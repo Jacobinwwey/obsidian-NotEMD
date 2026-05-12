@@ -49,6 +49,7 @@ import {
     DiagramCommandOptions,
     DiagramCommandRunHost,
     DiagramCommandUiStrings,
+    isDirectPreviewableDiagramExtension,
     runGenerateDiagramCommandWithHost,
     runPreviewDiagramCommandWithHost
 } from './operations/diagramCommandHostAdapter';
@@ -478,6 +479,47 @@ export default class NotemdPlugin extends Plugin {
         });
     }
 
+    private registerPreviewDiagramCommand(
+        id: string,
+        name: string,
+        handler: (file: TFile, reporter: ProgressReporter) => Promise<void>
+    ) {
+        const runHandler = async (file: TFile) => {
+            const reporter = this.getReporter();
+            await handler.call(this, file, reporter);
+        };
+
+        this.addCommand({
+            id,
+            name,
+            editorCallback: async (_editor: Editor, view: MarkdownView) => {
+                const file = view.file;
+                if (file && this.canPreviewDiagramFromFile(file)) {
+                    await runHandler(file);
+                }
+            },
+            checkCallback: (checking: boolean) => {
+                const activeFile = this.app.workspace.getActiveFile();
+                const condition = !!activeFile && this.canPreviewDiagramFromFile(activeFile);
+                if (condition) {
+                    if (!checking && activeFile) {
+                        void runHandler(activeFile);
+                    }
+                    return true;
+                }
+                return false;
+            }
+        });
+    }
+
+    private canPreviewDiagramFromFile(file: TFile): boolean {
+        const derivedExtension = file.extension
+            || file.name?.split('.').pop()
+            || file.path?.split('.').pop()
+            || '';
+        return isDirectPreviewableDiagramExtension(derivedExtension);
+    }
+
     async onload() {
         await this.loadSettings();
 
@@ -509,7 +551,7 @@ export default class NotemdPlugin extends Plugin {
             }
         );
 
-        this.registerEditorDiagramCommand(
+        this.registerPreviewDiagramCommand(
             'notemd-preview-diagram',
             uiStrings.commands.previewExperimentalDiagram,
             async (file, reporter) => {
@@ -525,7 +567,7 @@ export default class NotemdPlugin extends Plugin {
             this.generateExperimentalDiagramCommand
         );
 
-        this.registerEditorDiagramCommand(
+        this.registerPreviewDiagramCommand(
             'notemd-preview-experimental-diagram',
             uiStrings.commands.previewExperimentalDiagram,
             async (file, reporter) => {
