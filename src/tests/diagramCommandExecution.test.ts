@@ -25,6 +25,7 @@ function createExecutionHost() {
         saveMermaidSummary: jest.fn(),
         saveArtifact: jest.fn(),
         getFileByPath: jest.fn(),
+        readFile: jest.fn(),
         openFile: jest.fn(),
         maybeAutoFixMermaid: jest.fn(),
         supportsPreview: jest.fn(() => false),

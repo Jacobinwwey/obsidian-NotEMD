@@ -205,6 +205,7 @@ export default class NotemdPlugin extends Plugin {
                 const abstractFile = this.app.vault.getAbstractFileByPath(path);
                 return abstractFile instanceof TFile ? abstractFile : null;
             },
+            readFile: (file) => this.app.vault.read(file),
             openFile: (file) => {
                 const leaf = this.app.workspace.getLeaf('split', 'vertical');
                 leaf.openFile(file);

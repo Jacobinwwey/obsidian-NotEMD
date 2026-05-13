@@ -706,7 +706,7 @@ MIT License — подробности см. в файле [LICENSE](LICENSE).
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.ru.svg)
 
-_Последнее обновление для тега релиза `1.8.8`: 2026-05-12. Дата последнего коммита: 2026-05-12._
+_Последнее обновление для тега релиза `1.8.9`: 2026-05-13. Дата последнего коммита: 2026-05-13._
 <!-- repo-chronicle:end -->
 
 

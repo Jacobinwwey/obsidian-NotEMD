@@ -30,6 +30,12 @@ npm run build
 npm test -- --runInBand
 ```
 
+When running release-facing chronicle maintenance:
+
+- `npm run chronicle:sync-repo-saga` and `npm run chronicle:update` must run serially, never in parallel.
+- Both commands share `.cache/repo-saga-sources/`; parallel execution can corrupt clone state or leave stale git lock files.
+- The repo-saga update script now enforces a single-run execution lock, but maintainers should still treat these steps as ordered workflow gates rather than parallelizable work.
+
 Verification requirements:
 
 - Do not claim work is complete without fresh build and test output.

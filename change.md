@@ -8,6 +8,31 @@ This document summarizes the major functional and architectural changes implemen
 
 - No entries yet.
 
+## 1.8.9
+
+### Highlights
+
+- Saved Mermaid preview reopening is now consistent between the post-generation modal and later manual `Preview diagram` runs.
+- The Mermaid preview modal now keeps its controls inside the initial frame with a vertical action rail and preview history panel.
+- Release truth, local-machine verification, and preview UX now converge on the `1.8.9` boundary.
+
+### New Features
+
+- **Preview History Panel**: `Preview diagram` now remembers recent preview sessions and lets users switch between prior Mermaid preview sources directly inside the modal.
+- **Vertical Preview Action Rail**: Preview actions now stack vertically so all controls remain visible without forcing horizontal UI scrolling.
+- **Welcome Modal Digest Refresh**: First-install release digest now advances to the `1.8.9`/`1.8.8` boundary.
+
+### Fixes
+
+- **Saved-Artifact Preview Consistency**: Follow-up preview now reopens the persisted diagram source instead of trusting stale in-memory artifact state, removing first-preview vs later-preview drift.
+- **Modal Wrapper Width Alignment**: The Obsidian modal shell is now sized together with the preview content, eliminating the unnecessary bottom horizontal scrollbar for small Mermaid diagrams.
+- **History/Path Wrapping Stability**: Preview history entries, action buttons, and source-path labels now wrap safely instead of inflating layout width.
+
+### Chores
+
+- Added `docs/releases/1.8.9.md` and `docs/releases/1.8.9.zh-CN.md`.
+- Synchronized package metadata, README version markers, welcome-modal release digests, and release notes to `1.8.9`.
+
 ## 1.8.8
 
 ### Highlights

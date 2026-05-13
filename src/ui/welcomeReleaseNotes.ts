@@ -9,6 +9,14 @@ type WelcomeReleaseNoteCatalog = Record<string, WelcomeReleaseNoteEntry[]>;
 
 const ENTRIES_EN: WelcomeReleaseNoteEntry[] = [
     {
+        version: '1.8.9',
+        highlights: [
+            'Preview diagram now reopens saved Mermaid source consistently, so the first post-generation preview and later manual preview no longer drift apart.',
+            'The Mermaid preview modal now uses a vertical action rail plus preview history switching, keeping controls inside the initial frame without horizontal scrolling.',
+            'Live Obsidian verification now closes the small-diagram modal-width mismatch by sizing the outer wrapper with the preview shell instead of only expanding inner content.'
+        ]
+    },
+    {
         version: '1.8.8',
         highlights: [
             'Sidebar API observability now ships with a quick deep-debug toggle, compact request activity region, and retry-aware liveness feedback that keeps log output visible.',
@@ -36,6 +44,14 @@ const ENTRIES_EN: WelcomeReleaseNoteEntry[] = [
 
 const ENTRIES_ZH_CN: WelcomeReleaseNoteEntry[] = [
     {
+        version: '1.8.9',
+        highlights: [
+            '“预览图形”现在会一致地重新打开已保存的 Mermaid 源，因此生成后首次预览与后续手动预览不再出现内容漂移。',
+            'Mermaid 预览弹窗现已改为纵向操作栏并支持预览历史切换，所有按钮保持在初始视窗内，无需横向滚动。',
+            '通过本机 Obsidian 实测，已收口小图场景下 modal 外层宽度与内容层错配的问题，外层 shell 现负责统一控宽。'
+        ]
+    },
+    {
         version: '1.8.8',
         highlights: [
             'Sidebar API 可观测性现已提供快捷 deep-debug 开关、紧凑 request activity 区域与 retry-aware 测活反馈，同时继续保证 Log output 可见。',
@@ -62,6 +78,14 @@ const ENTRIES_ZH_CN: WelcomeReleaseNoteEntry[] = [
 ];
 
 const ENTRIES_ZH_TW: WelcomeReleaseNoteEntry[] = [
+    {
+        version: '1.8.9',
+        highlights: [
+            '「預覽圖形」現在會一致地重新開啟已儲存的 Mermaid 來源，因此生成後首次預覽與後續手動預覽不再出現內容漂移。',
+            'Mermaid 預覽彈窗現已改為縱向操作欄並支援預覽歷史切換，所有按鈕都能保持在初始視窗內，無需橫向捲動。',
+            '透過本機 Obsidian 實測，已收斂小圖場景下 modal 外層寬度與內容層錯配的問題，外層 shell 現在負責統一控寬。'
+        ]
+    },
     {
         version: '1.8.8',
         highlights: [

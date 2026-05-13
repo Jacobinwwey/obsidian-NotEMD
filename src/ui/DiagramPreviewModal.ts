@@ -15,17 +15,37 @@ import {
     supportsInlineVegaLitePreview,
 } from './diagramPreview';
 import { getRenderTargetDisplayName } from '../rendering/targetLabel';
+import {
+    getDiagramPreviewHistoryEntry,
+    listDiagramPreviewHistory,
+    rememberDiagramPreviewSession
+} from './diagramPreviewHistory';
 
 export class DiagramPreviewModal extends Modal {
+    private session: RenderPreviewSession;
+    private currentHistoryEntryId: string | null = null;
+
     constructor(
         app: App,
-        private readonly session: RenderPreviewSession,
+        session: RenderPreviewSession,
         private readonly uiLocale = 'auto'
     ) {
         super(app);
+        this.session = session;
     }
 
     onOpen() {
+        this.modalEl.addClass('notemd-diagram-preview-shell');
+        this.currentHistoryEntryId = rememberDiagramPreviewSession(this.session).id;
+        this.renderModal();
+    }
+
+    onClose() {
+        this.modalEl.removeClass('notemd-diagram-preview-shell');
+        this.contentEl.empty();
+    }
+
+    private renderModal(): void {
         const i18n = getI18nStrings({ uiLocale: this.uiLocale });
         const { contentEl } = this;
         contentEl.empty();
@@ -39,8 +59,10 @@ export class DiagramPreviewModal extends Modal {
                 })
         });
 
-        const toolbar = contentEl.createDiv({ cls: 'notemd-diagram-preview-toolbar' });
-        const copyButton = toolbar.createEl('button', {
+        const layout = contentEl.createDiv({ cls: 'notemd-diagram-preview-layout' });
+        const rail = layout.createDiv({ cls: 'notemd-diagram-preview-rail' });
+        const actions = rail.createDiv({ cls: 'notemd-diagram-preview-actions' });
+        const copyButton = actions.createEl('button', {
             text: i18n.previewModal.copySource,
             cls: 'mod-cta'
         });
@@ -60,7 +82,7 @@ export class DiagramPreviewModal extends Modal {
         };
 
         if (this.session.payload.sourcePath && !this.session.payload.artifactSaved) {
-            const saveSourceButton = toolbar.createEl('button', {
+            const saveSourceButton = actions.createEl('button', {
                 text: i18n.previewModal.saveSource
             });
             saveSourceButton.onclick = async () => {
@@ -85,7 +107,7 @@ export class DiagramPreviewModal extends Modal {
         }
 
         if (this.session.payload.sourcePath && supportsPreviewSvgExport(this.session.payload.artifact)) {
-            const exportButton = toolbar.createEl('button', {
+            const exportButton = actions.createEl('button', {
                 text: i18n.previewModal.exportSvg
             });
             exportButton.onclick = async () => {
@@ -109,7 +131,7 @@ export class DiagramPreviewModal extends Modal {
                 }
             };
 
-            const exportPngButton = toolbar.createEl('button', {
+            const exportPngButton = actions.createEl('button', {
                 text: i18n.previewModal.exportPng
             });
             exportPngButton.onclick = async () => {
@@ -134,22 +156,61 @@ export class DiagramPreviewModal extends Modal {
             };
         }
 
-        const closeButton = toolbar.createEl('button', { text: i18n.common.close });
+        const closeButton = actions.createEl('button', { text: i18n.common.close });
         closeButton.onclick = () => this.close();
 
+        this.renderHistoryPanel(rail, i18n);
+
+        const stage = layout.createDiv({ cls: 'notemd-diagram-preview-stage' });
         if (this.session.payload.sourcePath) {
-            contentEl.createEl('p', {
+            stage.createEl('p', {
                 text: formatI18n(i18n.previewModal.sourceFile, { path: this.session.payload.sourcePath }),
                 cls: 'notemd-diagram-preview-source-path'
             });
         }
 
-        const previewContainer = contentEl.createDiv({ cls: 'notemd-diagram-preview-body' });
+        const previewContainer = stage.createDiv({ cls: 'notemd-diagram-preview-body' });
         void this.renderPreview(previewContainer);
     }
 
-    onClose() {
-        this.contentEl.empty();
+    private renderHistoryPanel(container: HTMLElement, i18n: ReturnType<typeof getI18nStrings>): void {
+        const historyEl = container.createDiv({ cls: 'notemd-diagram-preview-history' });
+        historyEl.createEl('h4', {
+            text: i18n.previewModal.historyTitle,
+            cls: 'notemd-diagram-preview-history-title'
+        });
+
+        const historyList = historyEl.createDiv({ cls: 'notemd-diagram-preview-history-list' });
+        for (const entry of listDiagramPreviewHistory()) {
+            const item = historyList.createDiv({
+                cls: `notemd-diagram-preview-history-item${entry.id === this.currentHistoryEntryId ? ' is-active' : ''}`
+            });
+            const button = item.createEl('button', {
+                text: entry.label,
+                cls: 'notemd-diagram-preview-history-button'
+            });
+            if (entry.id === this.currentHistoryEntryId) {
+                button.disabled = true;
+            }
+            button.onclick = () => {
+                const selected = getDiagramPreviewHistoryEntry(entry.id);
+                if (!selected) {
+                    return;
+                }
+                this.session = selected.session;
+                this.currentHistoryEntryId = rememberDiagramPreviewSession(selected.session).id;
+                this.renderModal();
+            };
+
+            const metaParts = [getRenderTargetDisplayName(entry.target)];
+            if (entry.sourcePath) {
+                metaParts.push(entry.sourcePath);
+            }
+            item.createDiv({
+                text: metaParts.join(' · '),
+                cls: 'notemd-diagram-preview-history-meta'
+            });
+        }
     }
 
     private async renderPreview(container: HTMLElement): Promise<void> {

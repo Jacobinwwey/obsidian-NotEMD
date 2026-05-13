@@ -34,6 +34,13 @@ obsidian-cli help
 git diff --check
 ```
 
+上述两个 repo-saga 编年史命令必须**串行执行**，不要并行：
+
+- `npm run chronicle:sync-repo-saga`
+- `npm run chronicle:update`
+
+它们共享 `.cache/repo-saga-sources/` 与 `.cache/repo-saga-upstream/`。并行执行会破坏缓存 clone 状态，或留下 git lock 残留。repo-saga 更新脚本现在已经加入单实例执行锁，但发布工作流仍应把这两步视为严格有序的门禁步骤。
+
 如果本地环境缺少 `obsidian-cli`，请在发布说明或交接证据中明确记录。
 如果改动触及图表语义，还必须执行 `docs/maintainer/diagram-semantic-verification.zh-CN.md` 中定义的维护者本地语义核验层。
 推荐辅助命令：

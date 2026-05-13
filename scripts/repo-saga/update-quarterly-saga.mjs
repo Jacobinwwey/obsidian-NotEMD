@@ -2,12 +2,18 @@
 
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
+import { createRequire } from "node:module";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import packageManagerRuntime from "../lib/package-manager-runtime.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const require = createRequire(import.meta.url);
+const {
+  DEFAULT_REPO_SAGA_LOCK_FILENAME,
+  acquireRepoSagaExecutionLock,
+} = require("../lib/repo-saga-execution-lock.js");
 const repoRoot = path.resolve(__dirname, "..", "..");
 const outputDir = path.join(repoRoot, "docs", "repo-saga");
 const buildRoot = path.join(repoRoot, ".cache", "repo-saga-build");
@@ -18,6 +24,7 @@ const localeSourceRoot = path.join(repoSagaCacheRoot, "locale-i18n");
 const legacyTempToolRoot = path.join(repoRoot, ".tmp_repo_saga_tool");
 const legacyDocsBuildRoot = path.join(outputDir, ".build");
 const repoSagaForkUrl = "https://github.com/Jacobinwwey/repo-saga.git";
+const repoSagaExecutionLockPath = path.join(repoRoot, ".cache", DEFAULT_REPO_SAGA_LOCK_FILENAME);
 const repoSagaIntegrationStamp = path.join(upstreamRoot, ".notemd-repo-saga-integration.json");
 const repoSagaIntegrationVersion = 3;
 const repoSagaSourceInput = repoRoot.split(path.sep).join("/");
@@ -271,54 +278,59 @@ const argv = process.argv.slice(2);
 const cliOptions = parseArgs(argv);
 const releaseTag = cliOptions.tag ?? "";
 const writeReadmes = !cliOptions.noReadme;
+const releaseRepoSagaExecutionLock = acquireRepoSagaExecutionLock(repoSagaExecutionLockPath);
 
-cleanupLegacyArtifacts();
-await ensureRepoSagaTool();
-if (cliOptions.syncOnly) {
-  console.log("Synchronized repo-saga integration cache only.");
-  process.exit(0);
-}
-fs.mkdirSync(outputDir, { recursive: true });
+try {
+  cleanupLegacyArtifacts();
+  await ensureRepoSagaTool();
+  if (cliOptions.syncOnly) {
+    console.log("Synchronized repo-saga integration cache only.");
+  } else {
+    fs.mkdirSync(outputDir, { recursive: true });
 
-const rootReadmes = getProjectReadmes();
-const locales = [...new Set(rootReadmes.map((readme) => readme.locale))];
-fs.rmSync(buildRoot, { recursive: true, force: true });
-fs.mkdirSync(buildRoot, { recursive: true });
+    const rootReadmes = getProjectReadmes();
+    const locales = [...new Set(rootReadmes.map((readme) => readme.locale))];
+    fs.rmSync(buildRoot, { recursive: true, force: true });
+    fs.mkdirSync(buildRoot, { recursive: true });
 
-let latestCommitDate = currentIsoDate();
-for (const locale of locales) {
-  const buildDir = path.join(buildRoot, locale);
-  fs.mkdirSync(buildDir, { recursive: true });
-  runRepoSagaCli(locale, buildDir);
+    let latestCommitDate = currentIsoDate();
+    for (const locale of locales) {
+      const buildDir = path.join(buildRoot, locale);
+      fs.mkdirSync(buildDir, { recursive: true });
+      runRepoSagaCli(locale, buildDir);
 
-  const localizedSvgPath = svgPathForLocale(locale);
-  fs.copyFileSync(path.join(buildDir, "saga.svg"), localizedSvgPath);
+      const localizedSvgPath = svgPathForLocale(locale);
+      fs.copyFileSync(path.join(buildDir, "saga.svg"), localizedSvgPath);
 
-  if (locale === "en") {
-    fs.copyFileSync(localizedSvgPath, path.join(outputDir, "notemd-development-history.svg"));
-    const sagaJson = JSON.parse(fs.readFileSync(path.join(buildDir, "saga.json"), "utf8"));
-    latestCommitDate = String(sagaJson.repo?.lastCommitDate ?? "").slice(0, 10) || latestCommitDate;
+      if (locale === "en") {
+        fs.copyFileSync(localizedSvgPath, path.join(outputDir, "notemd-development-history.svg"));
+        const sagaJson = JSON.parse(fs.readFileSync(path.join(buildDir, "saga.json"), "utf8"));
+        latestCommitDate = String(sagaJson.repo?.lastCommitDate ?? "").slice(0, 10) || latestCommitDate;
+      }
+    }
+
+    if (writeReadmes) {
+      for (const readme of rootReadmes) {
+        updateReadme(
+          readme.filePath,
+          buildLocalizedReadmeBlock({
+            locale: readme.locale,
+            releaseTag,
+            latestCommitDate,
+          }),
+        );
+      }
+    }
+
+    fs.rmSync(buildRoot, { recursive: true, force: true });
+
+    console.log(`Updated repo-saga chronicle SVGs in ${path.relative(repoRoot, outputDir)}`);
+    if (writeReadmes) {
+      console.log("Updated README chronicle sections above Star History.");
+    }
   }
-}
-
-if (writeReadmes) {
-  for (const readme of rootReadmes) {
-    updateReadme(
-      readme.filePath,
-      buildLocalizedReadmeBlock({
-        locale: readme.locale,
-        releaseTag,
-        latestCommitDate,
-      }),
-    );
-  }
-}
-
-fs.rmSync(buildRoot, { recursive: true, force: true });
-
-console.log(`Updated repo-saga chronicle SVGs in ${path.relative(repoRoot, outputDir)}`);
-if (writeReadmes) {
-  console.log("Updated README chronicle sections above Star History.");
+} finally {
+  releaseRepoSagaExecutionLock();
 }
 
 function parseArgs(args) {

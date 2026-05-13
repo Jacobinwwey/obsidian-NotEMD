@@ -34,6 +34,13 @@ obsidian-cli help
 git diff --check
 ```
 
+Run the two repo-saga chronicle commands **serially**. Do not parallelize them:
+
+- `npm run chronicle:sync-repo-saga`
+- `npm run chronicle:update`
+
+They share `.cache/repo-saga-sources/` and `.cache/repo-saga-upstream/`. Parallel execution can corrupt cached clones or leave stale git lock files. The repo-saga update script now enforces a single-run execution lock, but the release workflow should still treat these as ordered gates.
+
 If `obsidian-cli` is unavailable in the local environment, record it in release notes or release-handoff evidence.
 If the change affects diagram semantics, also run the maintainer-local semantic layer in `docs/maintainer/diagram-semantic-verification.md`.
 Recommended helper:

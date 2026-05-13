@@ -1,5 +1,6 @@
 import { STRINGS_EN } from '../i18n/locales/en';
 import {
+    completeArtifactDiagramCommand,
     MissingPreviewableDiagramArtifactError,
     previewVegaLiteArtifactFromMarkdown,
     runGenerateDiagramCommandWithHost,
@@ -22,6 +23,7 @@ function createDiagramHost() {
         saveMermaidSummary: jest.fn(),
         saveArtifact: jest.fn(),
         getFileByPath: jest.fn(),
+        readFile: jest.fn(),
         openFile: jest.fn(),
         maybeAutoFixMermaid: jest.fn(),
         supportsPreview: jest.fn(() => true),
@@ -81,6 +83,52 @@ function createDiagramHost() {
 }
 
 describe('diagram command host adapter', () => {
+    test('save-artifact completion reopens preview from saved markdown so initial preview matches later direct preview', async () => {
+        const reporter = createReporter();
+        const savedFile = { path: 'Notes/Topic_summ.md', name: 'Topic_summ.md' };
+        const outputArtifact = {
+            target: 'mermaid',
+            content: '```mermaid\nerDiagram\nA ||--o B : relates_to\n```',
+            mimeType: 'text/vnd.mermaid',
+            sourceIntent: 'erDiagram'
+        } as const;
+        const { diagramHost } = createDiagramHost();
+
+        diagramHost.saveArtifact.mockResolvedValue('Notes/Topic_summ.md');
+        diagramHost.getFileByPath.mockReturnValue(savedFile);
+        diagramHost.readFile.mockResolvedValue('```mermaid\nerDiagram\nA ||--o{ B : relates_to\n```');
+
+        const outputPath = await completeArtifactDiagramCommand({
+            host: diagramHost as any,
+            file: { path: 'Notes/Topic.md' } as any,
+            reporter: reporter as any,
+            result: {
+                spec: { intent: 'erDiagram' },
+                artifact: outputArtifact
+            } as any,
+            actionLabel: 'Generate diagram',
+            executionMode: 'save-artifact',
+            completeNotice: 'done',
+            previewReadyNotice: 'preview ready',
+            manualFixHintNotice: 'fix hint',
+            autoFixAfterGenerate: true,
+            getStepStatusText: (_current, _total, label) => label,
+            getActionCompleteText: (label) => `Completed ${label}`
+        });
+
+        expect(outputPath).toBe('Notes/Topic_summ.md');
+        expect(diagramHost.readFile).toHaveBeenCalledWith(savedFile);
+        expect(diagramHost.openPreview).toHaveBeenCalledWith(
+            expect.objectContaining({
+                target: 'mermaid',
+                content: '```mermaid\nerDiagram\nA ||--o{ B : relates_to\n```',
+                sourceIntent: 'erDiagram'
+            }),
+            'Notes/Topic_summ.md',
+            true
+        );
+    });
+
     test('busy generate wrapper short-circuits before reading file or running generation', async () => {
         const { host, reporter } = createDiagramHost();
         host.isBusy.mockReturnValue(true);

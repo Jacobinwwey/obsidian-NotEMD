@@ -10,6 +10,7 @@ export interface DiagramCommandHostAdapter {
     saveMermaidSummary: (file: TFile, mermaidContent: string, reporter: ProgressReporter) => Promise<string>;
     saveArtifact: (file: TFile, artifact: RenderArtifact, reporter: ProgressReporter) => Promise<string>;
     getFileByPath: (path: string) => TFile | null;
+    readFile: (file: TFile) => Promise<string>;
     openFile: (file: TFile) => void;
     maybeAutoFixMermaid: (file: TFile, reporter: ProgressReporter, reason: string) => Promise<void>;
     supportsPreview: (artifact: RenderArtifact) => boolean;
@@ -262,7 +263,15 @@ export async function completeArtifactDiagramCommand(
     maybeOpenSavedFile(params.host, outputFilePath);
 
     if (params.host.supportsPreview(params.result.artifact)) {
-        params.host.openPreview(params.result.artifact, outputFilePath, true);
+        const reopenedPreview = await previewArtifactFromSavedPath({
+            host: params.host,
+            sourcePath: outputFilePath,
+            artifactSavedOverride: true
+        });
+
+        if (!reopenedPreview) {
+            params.host.openPreview(params.result.artifact, outputFilePath, true);
+        }
     }
 
     return outputFilePath;
@@ -476,10 +485,34 @@ function previewArtifactFromFile(params: {
     host: Pick<DiagramCommandHostAdapter, 'openPreview'>;
     sourceContent: string;
     sourcePath: string;
+    artifactSavedOverride?: boolean;
 }): DirectPreviewArtifactResult {
     const directPreview = resolveDirectPreviewArtifact(params.sourceContent, params.sourcePath);
-    params.host.openPreview(directPreview.artifact, params.sourcePath, directPreview.artifactSaved);
-    return directPreview;
+    const artifactSaved = params.artifactSavedOverride ?? directPreview.artifactSaved;
+    params.host.openPreview(directPreview.artifact, params.sourcePath, artifactSaved);
+    return {
+        ...directPreview,
+        artifactSaved
+    };
+}
+
+async function previewArtifactFromSavedPath(params: {
+    host: Pick<DiagramCommandHostAdapter, 'getFileByPath' | 'readFile' | 'openPreview'>;
+    sourcePath: string;
+    artifactSavedOverride?: boolean;
+}): Promise<DirectPreviewArtifactResult | null> {
+    const savedFile = params.host.getFileByPath(params.sourcePath);
+    if (!(savedFile instanceof TFile || savedFile)) {
+        return null;
+    }
+
+    const sourceContent = await params.host.readFile(savedFile);
+    return previewArtifactFromFile({
+        host: params.host,
+        sourceContent,
+        sourcePath: params.sourcePath,
+        artifactSavedOverride: params.artifactSavedOverride
+    });
 }
 
 function getEmptyFileErrorMessage(executionMode: DiagramCommandExecutionMode): string {

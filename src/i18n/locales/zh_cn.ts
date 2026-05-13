@@ -774,6 +774,7 @@ export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
         copySource: '复制源码',
         copySuccessNotice: '图形源码已复制到剪贴板！',
         copyFailedNotice: '复制图形源码失败，请查看控制台。',
-        sourceFile: '已保存文件：{path}'
+        sourceFile: '已保存文件：{path}',
+        historyTitle: '历史'
     }
 };

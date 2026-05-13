@@ -698,7 +698,7 @@ Kronik suku tahunan ini mengekalkan gaya visual asal [repo-saga](https://github.
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.ms.svg)
 
-_Kali terakhir disegarkan untuk tag keluaran `1.8.8` pada 2026-05-12. Tarikh commit terkini: 2026-05-12._
+_Kali terakhir disegarkan untuk tag keluaran `1.8.9` pada 2026-05-13. Tarikh commit terkini: 2026-05-13._
 <!-- repo-chronicle:end -->
 
 
