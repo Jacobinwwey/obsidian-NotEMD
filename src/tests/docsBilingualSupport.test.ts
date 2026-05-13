@@ -1,6 +1,10 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
+function isGeneratedMarkdownArtifact(fileName: string): boolean {
+    return /_summ\.md$/i.test(fileName);
+}
+
 function walkMarkdownFiles(dir: string): string[] {
     const entries = fs.readdirSync(dir, { withFileTypes: true });
     return entries.flatMap((entry) => {
@@ -12,7 +16,11 @@ function walkMarkdownFiles(dir: string): string[] {
             return walkMarkdownFiles(fullPath);
         }
 
-        return entry.name.endsWith('.md') ? [fullPath] : [];
+        if (!entry.name.endsWith('.md') || isGeneratedMarkdownArtifact(entry.name)) {
+            return [];
+        }
+
+        return [fullPath];
     });
 }
 

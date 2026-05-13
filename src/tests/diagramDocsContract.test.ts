@@ -1,6 +1,32 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
+const TRUNCATED_ER_RIGHT_MANY_PATTERN = /(?:\|\||\|o|\}\||\}o)(?:--|\.\.)o(?=\s+\S+\s*:)/;
+const TRUNCATED_ER_LEFT_MANY_PATTERN = /(?:^|\s)o(?:--|\.\.)(?=(?:\|\||\|o|o\{)\s+\S+\s*:)/;
+
+function walkMarkdownFiles(dir: string): string[] {
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    return entries.flatMap((entry) => {
+        const fullPath = path.join(dir, entry.name);
+        if (entry.isDirectory()) {
+            if (entry.name.startsWith('.')) {
+                return [];
+            }
+            return walkMarkdownFiles(fullPath);
+        }
+
+        if (!entry.name.endsWith('.md') || /_summ\.md$/i.test(entry.name)) {
+            return [];
+        }
+
+        return [fullPath];
+    });
+}
+
+function extractMermaidBlocks(content: string): string[] {
+    return Array.from(content.matchAll(/```mermaid\s*\n([\s\S]*?)\n```/g), (match) => match[1] ?? '');
+}
+
 describe('diagram documentation contract', () => {
     const repoRoot = path.join(__dirname, '..', '..');
     const readmePath = path.join(repoRoot, 'README.md');
@@ -29,5 +55,23 @@ describe('diagram documentation contract', () => {
         expect(releaseNotesZh).toContain('生成的 Mermaid 产物会先通过校验，再进入预览/导出链路');
         expect(releaseNotesZh).toContain('HTML fallback 预览现在也会跟随解析后的 Obsidian 预览主题');
         expect(releaseNotesZh).toContain('规划器现在会为 Vega-Lite 图表预填首选模板');
+    });
+
+    test('repo documentation mermaid blocks do not contain truncated erDiagram many cardinalities', () => {
+        const markdownDocs = [
+            readmePath,
+            path.join(repoRoot, 'README_zh.md'),
+            ...walkMarkdownFiles(path.join(repoRoot, 'docs'))
+        ];
+
+        for (const absolutePath of markdownDocs) {
+            const content = fs.readFileSync(absolutePath, 'utf8');
+            const blocks = extractMermaidBlocks(content);
+
+            blocks.forEach((block) => {
+                expect(block).not.toMatch(TRUNCATED_ER_RIGHT_MANY_PATTERN);
+                expect(block).not.toMatch(TRUNCATED_ER_LEFT_MANY_PATTERN);
+            });
+        }
     });
 });

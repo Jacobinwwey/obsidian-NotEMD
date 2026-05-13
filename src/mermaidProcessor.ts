@@ -1,4 +1,5 @@
 import mermaid from 'mermaid';
+import { normalizeMermaidDefinition } from './diagram/adapters/mermaid/validator';
 import {
     attachDirectionalNoteToConnection,
     buildLegacyConnectedNoteLines,
@@ -13,6 +14,97 @@ import {
     rewriteLegacyQuotedLabelAfterSemicolonLine,
     restoreProtectedBracketBlocks
 } from './diagram/adapters/mermaid/legacyFixerUtils';
+
+const MERMAID_START_REGEX = /^```\s*\(?\s*mermaid\s*\)?/;
+
+function createClosedMermaidBlockRegex(): RegExp {
+    return /(```\s*mermaid\n)([\s\S]*?)(\n```)/gi;
+}
+
+type MermaidBlockRefinementMode = 'flowchart-legacy' | 'safe-normalize';
+
+function inferMermaidBlockRefinementMode(blockContent: string): MermaidBlockRefinementMode {
+    const firstDirective = blockContent
+        .split('\n')
+        .map((line) => line.trim())
+        .find((line) => line.length > 0 && !line.startsWith('%%'))
+        ?.toLowerCase() ?? '';
+
+    return firstDirective.startsWith('graph') || firstDirective.startsWith('flowchart')
+        ? 'flowchart-legacy'
+        : 'safe-normalize';
+}
+
+function normalizeProtectedMermaidBlock(blockContent: string): string {
+    const normalized = normalizeMermaidDefinition(blockContent);
+    return normalized.length > 0 ? normalized : blockContent.trim();
+}
+
+function applyLegacyFlowchartRefinements(blockContent: string): string {
+    return blockContent
+        .split('\n')
+        .map((originalLine) => {
+            let line = originalLine;
+
+            const commentMatch = line.match(/^(\w+)\s*-->\s*(\w+);\s*#(.*)$/);
+            if (commentMatch) {
+                line = `${commentMatch[1]} -- "${commentMatch[3].trim()}" --> ${commentMatch[2]};`;
+            }
+
+            if (!line.includes('subgraph')) {
+                const placeholder = '___PROTECTED_QUOTE___';
+                line = line.replace(/\|"/g, `|${placeholder}`);
+                line = line.replace(/"\|/g, `${placeholder}|`);
+
+                line = line.replace(/^"(?!;|\s)(?!\])/g, '["');
+                line = line.replace(/([^\s\[])"(?!;|\s)(?!\])/g, '$1["');
+                line = line.replace(/";/g, '"];');
+                line = line.replace(new RegExp(placeholder, 'g'), '"');
+                line = line.replace(/\[";/g, '"];');
+                line = line.replace(/\?\[";/g, '?"];');
+
+                while (line.includes('[";')) {
+                    line = line.replace(/\[";/g, '"];');
+                    line = line.replace(/\?\[";/g, '?"];');
+                }
+
+                line = line.replace(/\[";/g, '"];');
+                line = line.replace(/\?\[";/g, '?"];');
+                line = line.replace(/\[";$/, '"];');
+                line = line.replace(/\["$/, '"]');
+                line = line.replace(/--\s*\["(.+?)\["\s*-->/g, '-- "$1" -->');
+
+                line = line.replace(/([^\s\[]+)\s*\[(?!"|')((?:[^\[\]]|\[[^\[\]]*\])*)\]/g, (match, nodeId, content) => {
+                    if (/[\[\]|]/.test(content)) {
+                        const cleanContent = content.replace(/"/g, '');
+                        return `${nodeId}["${cleanContent}"]`;
+                    }
+                    return match;
+                });
+            }
+
+            let lineWithoutBrackets = line.replace(/[(){}]/g, '');
+            if (lineWithoutBrackets.endsWith('\["')) {
+                lineWithoutBrackets = lineWithoutBrackets.slice(0, -2) + '"]';
+            }
+
+            return lineWithoutBrackets;
+        })
+        .join('\n');
+}
+
+function applyLegacyFlowchartPostProcessing(blockContent: string): string {
+    let processedBlock = blockContent;
+
+    let noteCounter = 1;
+    processedBlock = processedBlock.replace(/note\s+"([^"]*)"/g, (match: string, noteContent: string) => {
+        return `Note${noteCounter++}[/"${noteContent}"/]`;
+    });
+
+    processedBlock = processedBlock.replace(/;(.*)$/gm, (match: string, p1: string) => p1.includes('%') ? ';' : match);
+
+    return processedBlock;
+}
 
 /**
  * Checks if the content contains any Mermaid syntax errors using mermaid.parse.
@@ -56,13 +148,9 @@ export async function refineMermaidBlocks(content: string): Promise<string> {
 	for (let line of lines) { // Use 'let' so we can modify the line
 		const stripped = line.trim();
 
-		// Regex to detect ```(mermaid) or ``` mermaid with optional space/parentheses
-		const mermaidStartRegex = /^```\s*\(?\s*mermaid\s*\)?/;
-
-
-		if (mermaidStartRegex.test(stripped)) {
+		if (MERMAID_START_REGEX.test(stripped)) {
 			// Normalize the starting line
-			line = line.replace(mermaidStartRegex, '```mermaid');
+			line = line.replace(MERMAID_START_REGEX, '```mermaid');
 
 			// If already in a block, finish the previous one before starting new
 			if (inMermaid) {
@@ -87,102 +175,8 @@ export async function refineMermaidBlocks(content: string): Promise<string> {
 			currentBlockLines = [line];
 			lastArrowIndexInBlock = -1;
 		} else if (inMermaid) {
-			// Handle ; # comments - convert to labeled arrows
-			const commentMatch = line.match(/^(\w+)\s*-->\s*(\w+);\s*#(.*)$/);
-			if (commentMatch) {
-				line = `${commentMatch[1]} -- "${commentMatch[3].trim()}" --> ${commentMatch[2]};`;
-			}
-
-			// Apply new quote rules BEFORE removing brackets, ONLY if 'subgraph' is NOT on the line
-			if (!line.includes('subgraph')) {
-				// 先保护 |" 和 "| 的情况
-				const placeholder = '___PROTECTED_QUOTE___';
-				line = line.replace(/\|"/g, `|${placeholder}`);
-				line = line.replace(/"\|/g, `${placeholder}|`);
-
-				// Rule 1 (Revised - No Lookbehind):
-				// 1a: Handle quote at the start of the line
-				line = line.replace(/^"(?!;|\s)(?!\])/g, '["');
-				// 1b: Handle quote preceded by a non-space, non-[ character
-				line = line.replace(/([^\s\[])"(?!;|\s)(?!\])/g, '$1["');
-
-				// Rule 2: Replace "; with ];
-				line = line.replace(/";/g, '"];');
-
-				// 还原被保护的引号
-				line = line.replace(new RegExp(placeholder, 'g'), '"');
-				
-				// Rule 3: Replace ["; with "];
-				line = line.replace(/\[";/g, '"];');
-				// New Rule 4: Replace ?["; with ?"];
-				line = line.replace(/\?\[";/g, '?"];');
-				
-				// 添加额外的清理步骤，确保没有残留的[";模式
-				// 重复应用Rule 3直到没有更多的[";模式
-				while (line.includes('[";')) {
-					line = line.replace(/\[";/g, '"];');
-					
-					// New Rule 4: Replace ?["; with ?"];
-					line = line.replace(/\?\[";/g, '?"];');
-				}
-                // Safeguard: Final replacements to ensure ["; and ?["; are corrected
-                line = line.replace(/\[";/g, '"];');
-                line = line.replace(/\?\[";/g, '?"];');
-
-				// New User Rule 1: If line ends with [;";, change to "];
-				line = line.replace(/\[";$/, '"];');
-				// New User Rule 2: Then, if line ends with [", change to "]
-				line = line.replace(/\["$/, '"]');
-
-                // New User Rule 3: Fix broken edge labels `--["Text["-->` to `-- "Text" -->`
-                // Example: `CapRate --["Inverse Relationship["-->` becomes `CapRate -- "Inverse Relationship" -->`
-                line = line.replace(/--\s*\["(.+?)\["\s*-->/g, '-- "$1" -->');
-
-                // --- User Requested "Fix Mode" Logic for [ ... ] ---
-                // Detects Node[Label] where Label isn't fully quoted but contains brackets/quotes.
-                // Targeted cases:
-                // 1. `Investment[Corporate Investment "[企业投资]"]` -> `Investment["Corporate Investment [企业投资]"]`
-                // 2. `Consumption[Consumption [消费]]` -> `Consumption["Consumption [消费]"]`
-                // 3. `WhiteDwarf[白矮星 [White Dwarf]]` -> `WhiteDwarf["白矮星 [White Dwarf]"]`
-                
-                // Improved regex to handle one level of nested brackets:
-                // ([^\s\[]+)  : NodeID (non-whitespace AND non-[ chars)
-                // \s*\[       : Opening bracket
-                // (?!"|')     : Content does NOT start with " or ' (already quoted nodes are skipped)
-                // (           : Start capturing content
-                //   (?:       : Non-capturing group for content parts
-                //     [^\[\]] : Any character EXCEPT [ or ]
-                //     |       : OR
-                //     \[[^\[\]]*\] : A nested [...] block with no brackets inside
-                //   )*        : Repeat content parts
-                // )           : End capturing content
-                // \]          : Closing bracket
-                
-                line = line.replace(/([^\s\[]+)\s*\[(?!"|')((?:[^\[\]]|\[[^\[\]]*\])*)\]/g, (match, nodeId, content) => {
-                     // Filter out matches that don't actually contain broken characters we care about.
-                     // The regex already excludes things starting with ".
-                     // We specifically want to fix things that have [ or ] inside.
-                     if (/[\[\]|]/.test(content)) {
-                         // Logic:
-                         // 1. Remove existing double quotes from content to avoid syntax errors (as per user example where inner quotes were removed).
-                         // 2. Wrap in double quotes.
-                         const cleanContent = content.replace(/"/g, ''); 
-                         return `${nodeId}["${cleanContent}"]`;
-                     }
-                     return match;
-                });
-			}
-
-			// Remove parentheses and curly braces from the line content within the mermaid block
-			let lineWithoutBrackets = line.replace(/[(){}]/g, ''); // Updated regex
-
-			// Fix [" at the end of the line
-			if (lineWithoutBrackets.endsWith('\["')) {
-				lineWithoutBrackets = lineWithoutBrackets.slice(0, -2) + '"]';
-			}
-
-			currentBlockLines.push(lineWithoutBrackets);
-			if (lineWithoutBrackets.includes('-->')) { // Check the modified line for arrows
+			currentBlockLines.push(line);
+			if (line.includes('-->')) { // Check the raw line for arrows
 				lastArrowIndexInBlock = currentBlockLines.length - 1; // Index within currentBlockLines
 			}
 			if (stripped === '```') {
@@ -225,39 +219,37 @@ export async function refineMermaidBlocks(content: string): Promise<string> {
 	}
 
 	let result = resultLines.join('\n');
+    const mermaidBlockRegex = createClosedMermaidBlockRegex();
+    let rebuilt = '';
+    let lastIndex = 0;
 
-	// Check for remaining errors to decide if we need deep debug
-	const errorCount = await checkMermaidErrors(result);
+    for (const match of result.matchAll(mermaidBlockRegex)) {
+        const fullMatch = match[0];
+        const startTag = match[1] ?? '';
+        const blockContent = match[2] ?? '';
+        const endTag = match[3] ?? '';
+        const matchIndex = match.index ?? 0;
+        const mode = inferMermaidBlockRefinementMode(blockContent);
 
-    // Regex to find mermaid blocks and apply fixes ONLY inside them
-    // Matches ```mermaid followed by content and ending with ```
-    // We use [\s\S]*? for non-greedy multiline match
-    const mermaidBlockRegex = /(```\s*mermaid\n)([\s\S]*?)(\n```)/gi;
+        rebuilt += result.slice(lastIndex, matchIndex);
 
-    result = result.replace(mermaidBlockRegex, (match, startTag, blockContent, endTag) => {
-        let processedBlock = blockContent;
+        let processedBlock = mode === 'flowchart-legacy'
+            ? applyLegacyFlowchartPostProcessing(applyLegacyFlowchartRefinements(blockContent))
+            : normalizeProtectedMermaidBlock(blockContent);
 
-        // Apply scoped replacements inside mermaid blocks
-        
-        // Replace note "Sentences" with Note1[/"Sentences"/], Note2[/"Sentences"/]...
-        let noteCounter = 1;
-        processedBlock = processedBlock.replace(/note\s+"([^"]*)"/g, (match: string, noteContent: string) => {
-            return `Note${noteCounter++}[/"${noteContent}"/]`;
-        });
-
-        // Remove content after ; if the line contains % after ;
-        processedBlock = processedBlock.replace(/;(.*)$/gm, (match: string, p1: string) => p1.includes('%') ? ';' : match);
-
-        // Apply deep debug fixes if errors were found in the file
-        // (Optimally we would check this block specifically, but this preserves original logic trigger)
-        if (errorCount > 0) {
-            processedBlock = deepDebugMermaid(processedBlock);
+        if (mode === 'flowchart-legacy') {
+            const fencedBlock = `${startTag}${processedBlock}${endTag}`;
+            if (await checkMermaidErrors(fencedBlock) > 0) {
+                processedBlock = deepDebugMermaid(processedBlock);
+            }
         }
 
-        return `${startTag}${processedBlock}${endTag}`;
-    });
+        rebuilt += `${startTag}${processedBlock}${endTag}`;
+        lastIndex = matchIndex + fullMatch.length;
+    }
 
-	return result;
+    rebuilt += result.slice(lastIndex);
+	return rebuilt;
 }
 
 /**
@@ -267,10 +259,12 @@ export async function refineMermaidBlocks(content: string): Promise<string> {
  * @returns The processed content with Mermaid blocks debugged.
  */
 export function applyDeepDebugToMermaidBlocks(content: string): string {
-    const mermaidBlockRegex = /(```\s*mermaid\n)([\s\S]*?)(\n```)/gi;
+    const mermaidBlockRegex = createClosedMermaidBlockRegex();
 
     return content.replace(mermaidBlockRegex, (match, startTag, blockContent, endTag) => {
-        const processedBlock = deepDebugMermaid(blockContent);
+        const processedBlock = inferMermaidBlockRefinementMode(blockContent) === 'flowchart-legacy'
+            ? deepDebugMermaid(blockContent)
+            : normalizeProtectedMermaidBlock(blockContent);
         return `${startTag}${processedBlock}${endTag}`;
     });
 }

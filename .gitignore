@@ -45,4 +45,4 @@ docs/.obsidian/
 
 # local runtime diagnostics and generated diagram repro artifacts
 docs/Notemd_Error_Log_*.txt
-docs/superpowers/plans/*_summ.md
+docs/**/*_summ.md

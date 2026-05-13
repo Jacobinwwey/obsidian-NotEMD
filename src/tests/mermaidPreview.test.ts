@@ -36,6 +36,40 @@ describe('mermaid preview renderer', () => {
         }));
     });
 
+    test('repairs truncated erDiagram many-relations before rendering preview', async () => {
+        const initialize = jest.fn();
+        const render = jest.fn().mockResolvedValue({ svg: '<svg><g /></svg>' });
+
+        await renderMermaidArtifactSvg({
+            target: 'mermaid',
+            content: '```mermaid\nerDiagram\n    CATEGORY\n        string id\n    DOCUMENT\n        string id\n    CATEGORY ||--o DOCUMENT : contains\n```',
+            mimeType: 'text/vnd.mermaid',
+            sourceIntent: 'erDiagram'
+        }, { initialize, render }, 'light');
+
+        expect(render).toHaveBeenCalledWith(
+            expect.any(String),
+            expect.stringContaining('CATEGORY ||--o{ DOCUMENT : contains')
+        );
+    });
+
+    test('repairs left-side truncated erDiagram many-relations before rendering preview', async () => {
+        const initialize = jest.fn();
+        const render = jest.fn().mockResolvedValue({ svg: '<svg><g /></svg>' });
+
+        await renderMermaidArtifactSvg({
+            target: 'mermaid',
+            content: '```mermaid\nerDiagram\n    ORDER\n        string id\n    CUSTOMER\n        string id\n    ORDER o--|| CUSTOMER : belongs_to\n```',
+            mimeType: 'text/vnd.mermaid',
+            sourceIntent: 'erDiagram'
+        }, { initialize, render }, 'light');
+
+        expect(render).toHaveBeenCalledWith(
+            expect.any(String),
+            expect.stringContaining('ORDER }o--|| CUSTOMER : belongs_to')
+        );
+    });
+
     test('rejects non-mermaid artifacts', async () => {
         await expect(renderMermaidArtifactSvg({
             target: 'json-canvas',

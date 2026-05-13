@@ -50,6 +50,37 @@ describe('Mermaid Processor Tests', () => {
         expect(result).toBe(expected);
     });
 
+    test('should preserve mindmap nodes without stripping parentheses', async () => {
+        const content = "```mermaid\nmindmap\n  root((Platform))\n    API((API))\n```";
+        const result = await refineMermaidBlocks(content);
+        expect(result).toBe(content);
+    });
+
+    test('should preserve sequenceDiagram messages', async () => {
+        const content = "```mermaid\nsequenceDiagram\nAlice->>Bob: Ping\nBob-->>Alice: Pong\n```";
+        const result = await refineMermaidBlocks(content);
+        expect(result).toBe(content);
+    });
+
+    test('should preserve classDiagram braces and methods', async () => {
+        const content = "```mermaid\nclassDiagram\nclass User {\n    +String id\n    +login()\n}\nUser --> Session : owns\n```";
+        const result = await refineMermaidBlocks(content);
+        expect(result).toBe(content);
+    });
+
+    test('should repair brace-less erDiagram entity blocks and truncated many cardinalities', async () => {
+        const content = "```mermaid\nerDiagram\n    CATEGORY \n        string id\n\n    DOCUMENT \n        string id\n\n    LANGUAGE \n        string id\n\n    CATEGORY ||--o DOCUMENT : contains\n    DOCUMENT ||--o LANGUAGE : written_in\n```";
+        const expected = "```mermaid\nerDiagram\n    CATEGORY {\n        string id\n    }\n    DOCUMENT {\n        string id\n    }\n    LANGUAGE {\n        string id\n    }\n    CATEGORY ||--o{ DOCUMENT : contains\n    DOCUMENT ||--o{ LANGUAGE : written_in\n```";
+        const result = await refineMermaidBlocks(content);
+        expect(result).toBe(expected);
+    });
+
+    test('should preserve stateDiagram-v2 nested state braces', async () => {
+        const content = "```mermaid\nstateDiagram-v2\n[*] --> Idle\nstate Idle {\n    [*] --> Waiting\n    Waiting --> Active\n}\n```";
+        const result = await refineMermaidBlocks(content);
+        expect(result).toBe(content);
+    });
+
 
     // --- cleanupLatexDelimiters Tests ---
 

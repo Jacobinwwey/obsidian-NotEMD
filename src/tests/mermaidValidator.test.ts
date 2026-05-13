@@ -36,6 +36,47 @@ describe('mermaid validator', () => {
         expect(mermaid.parse).toHaveBeenCalledWith('flowchart TD\nA-->B');
     });
 
+    test('repairs truncated erDiagram many-relations during normalization', () => {
+        const definition = normalizeMermaidDefinition(`\`\`\`mermaid
+erDiagram
+    CATEGORY
+        string id
+    DOCUMENT
+        string id
+    CATEGORY ||--o DOCUMENT : contains
+\`\`\``);
+
+        expect(definition).toContain('CATEGORY ||--o{ DOCUMENT : contains');
+    });
+
+    test('repairs left-side truncated erDiagram many-relations during normalization', () => {
+        const definition = normalizeMermaidDefinition(`\`\`\`mermaid
+erDiagram
+    ORDER
+        string id
+    CUSTOMER
+        string id
+    ORDER o--|| CUSTOMER : belongs_to
+\`\`\``);
+
+        expect(definition).toContain('ORDER }o--|| CUSTOMER : belongs_to');
+    });
+
+    test('repairs brace-less erDiagram entity blocks during normalization', () => {
+        const definition = normalizeMermaidDefinition(`\`\`\`mermaid
+erDiagram
+    CATEGORY
+        string id
+    DOCUMENT
+        string id
+    CATEGORY ||--o{ DOCUMENT : contains
+\`\`\``);
+
+        expect(definition).toContain('CATEGORY {');
+        expect(definition).toContain('    string id');
+        expect(definition).toContain('}');
+    });
+
     test('throws explicit validation errors when mermaid parse fails', async () => {
         (mermaid.parse as jest.Mock).mockRejectedValueOnce(new Error('Parse error'));
 

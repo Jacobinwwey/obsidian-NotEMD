@@ -1,4 +1,5 @@
 import mermaid from 'mermaid';
+import { normalizeMermaidDefinition } from '../../diagram/adapters/mermaid/validator';
 import { RenderArtifact } from '../types';
 import { RenderWebviewTheme, resolveRenderTheme } from '../theme';
 
@@ -9,12 +10,6 @@ export interface MermaidPreviewDeps {
 
 function createPreviewId(): string {
     return `notemd-preview-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-}
-
-function unwrapMermaidFence(content: string): string {
-    const trimmed = content.trim();
-    const fenceMatch = trimmed.match(/^```mermaid\s*\n([\s\S]*?)\n```$/i);
-    return fenceMatch ? fenceMatch[1].trim() : trimmed;
 }
 
 export async function renderMermaidArtifactSvg(
@@ -32,7 +27,7 @@ export async function renderMermaidArtifactSvg(
         theme: resolveRenderTheme(theme) === 'dark' ? 'dark' : 'default'
     });
 
-    const source = unwrapMermaidFence(artifact.content);
+    const source = normalizeMermaidDefinition(artifact.content);
     const result = await deps.render(createPreviewId(), source);
     return result.svg;
 }
