@@ -116,8 +116,8 @@ jobs:
             echo "Chronicle already up to date."
             exit 0
           fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name "Jacobinwwey"
+          git config user.email "jacob.hxx.cn@outlook.com"
           git add README.md README_*.md docs/repo-saga/*.svg
           git commit -m "docs: refresh quarterly chronicle for $TAG_NAME"
           git push origin HEAD:main
