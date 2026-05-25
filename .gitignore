@@ -42,3 +42,17 @@ ref
 docs/.vitepress/cache
 docs/.vitepress/dist
 docs/.obsidian/
+
+# local vault/runtime-generated artifacts from the docs test vault
+render-host.mjs
+docs/Notemd_Error_Log_*.txt
+docs/Notemd_Provider_Diagnostic_*.txt
+docs/*_summ.md
+docs/*_diagram.canvas
+docs/*_diagram.json
+docs/*_diagram.html
+docs/*_diagram.md
+docs/*_preview.svg
+docs/*_preview.png
+docs/*_diagram_preview.svg
+docs/*_diagram_preview.png

@@ -1,19 +1,24 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import { execFileSync } from 'child_process';
 
-function walkMarkdownFiles(dir: string): string[] {
-    const entries = fs.readdirSync(dir, { withFileTypes: true });
-    return entries.flatMap((entry) => {
-        const fullPath = path.join(dir, entry.name);
-        if (entry.isDirectory()) {
-            if (entry.name.startsWith('.')) {
-                return [];
-            }
-            return walkMarkdownFiles(fullPath);
-        }
+function readTrackedMarkdownDocs(repoRoot: string): string[] {
+    const trackedFiles = execFileSync('git', ['ls-files'], {
+        cwd: repoRoot,
+        encoding: 'utf8'
+    })
+        .split('\n')
+        .map((line) => line.trim())
+        .filter(Boolean);
 
-        return entry.name.endsWith('.md') ? [fullPath] : [];
-    });
+    return trackedFiles
+        .filter((relativePath) =>
+            relativePath === 'README.md' ||
+            relativePath === 'README_zh.md' ||
+            relativePath.startsWith('docs/')
+        )
+        .filter((relativePath) => relativePath.endsWith('.md'))
+        .map((relativePath) => path.join(repoRoot, relativePath));
 }
 
 function hasPairedLanguageVariant(relativePath: string, repoRoot: string): boolean {
@@ -50,11 +55,7 @@ function hasPairedLanguageVariant(relativePath: string, repoRoot: string): boole
 
 describe('docs bilingual support contract', () => {
     const repoRoot = path.join(__dirname, '..', '..');
-    const markdownDocs = [
-        path.join(repoRoot, 'README.md'),
-        path.join(repoRoot, 'README_zh.md'),
-        ...walkMarkdownFiles(path.join(repoRoot, 'docs'))
-    ].sort();
+    const markdownDocs = readTrackedMarkdownDocs(repoRoot).sort();
 
     test.each(markdownDocs.map((absolutePath) => path.relative(repoRoot, absolutePath)))(
         '%s provides English and Chinese documentation coverage',
