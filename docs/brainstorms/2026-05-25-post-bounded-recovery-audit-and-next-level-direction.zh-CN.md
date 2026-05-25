@@ -88,6 +88,7 @@ canonical: true
 2. chapter split 已落地，具备 TOC/manifest 输出和陈旧生成文件清理。
 3. preview history 与 saved-artifact-aware reopening 已进入可复用 preview shell。
 4. settings reset、concept-note prerequisite guidance、concept synonym suppression 与 folder file-selection profiles 都已回到当前主线。
+5. 面向 retrieval 的 note-processing 结果现在也已为标题生成与研究总结暴露 machine-readable 的 `localKnowledgeRetrieval` 摘要，包含 matched/returned counts、source paths、请求的 `topK`、sliding-window size、current-file exclusion telemetry、index/query timing 与 context-char count。
 
 代码证据包括：
 
@@ -244,9 +245,9 @@ release-facing 真值也已在当前主线上重新对齐：
 
 可能的切入点：
 
-1. 为 chapter split 输出补更清晰的 result/evidence framing；
-2. 为依赖 retrieval 的 maintainer-helper 路径补更清晰的 payload 示例；
-3. 继续完善 sliding-window、snippet shaping、folder-scope 预期等调优文档。
+1. 在标题生成与研究总结已经落地 retrieval 摘要与 timing telemetry 之后，继续把 richer result/evidence framing 推进到剩余的 chapter-split / diagram 邻近路径；
+2. shared maintainer helper 现已为依赖 retrieval 的路径补上简洁 payload 示例，下一步重点是让这些示例持续跟随 result schema 演进；
+3. 继续完善 sliding-window、snippet shaping、folder-scope 预期与 offline evaluation fixture 等调优文档。
 
 ## 6. Task 与文档收口规则
 

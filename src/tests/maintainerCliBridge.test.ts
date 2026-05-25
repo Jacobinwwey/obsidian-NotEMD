@@ -8,7 +8,30 @@ describe('maintainer CLI bridge', () => {
                 tocPath: 'Docs/Topic_toc.md',
                 managedArtifactPaths: ['Docs/Topic_toc.md']
             }),
-            researchAndSummarizeForPathCommand: jest.fn().mockResolvedValue({ outputPath: 'Docs/Topic.md' }),
+            researchAndSummarizeForPathCommand: jest.fn().mockResolvedValue({
+                sourcePath: 'Docs/Topic.md',
+                outputPath: 'Docs/Topic.md',
+                topic: 'RAG',
+                sourceLabel: 'Local KB',
+                researchContextUsed: false,
+                localKnowledgeContextUsed: true,
+                localKnowledgeRetrieval: {
+                    indexedFileCount: 1,
+                    indexedSectionCount: 1,
+                    matchedSectionCount: 1,
+                    returnedHitCount: 1,
+                    expandedSectionCount: 1,
+                    sourcePaths: ['Knowledge/RAG.md'],
+                    usedSlidingWindowSize: 0,
+                    requestedTopK: 1,
+                    indexBuildMs: 10,
+                    queryMs: 3,
+                    contextCharCount: 48,
+                    excludeCurrentFileApplied: true,
+                    excludedCurrentFileHitCount: 0
+                },
+                appended: true
+            }),
             generateDiagramForPathCommand: jest.fn().mockResolvedValue({ kind: 'success', outputPath: 'Docs/Topic_diagram.md' }),
             exportRedactedProviderProfilesCommand: jest.fn(),
             exportCliCapabilityManifestCommand: jest.fn(),

@@ -204,6 +204,22 @@ describe('note processing command host adapter', () => {
             title: 'Topic',
             researchEnabled: false,
             researchContextUsed: false,
+            localKnowledgeContextUsed: false,
+            localKnowledgeRetrieval: {
+                indexedFileCount: 0,
+                indexedSectionCount: 0,
+                matchedSectionCount: 0,
+                returnedHitCount: 0,
+                expandedSectionCount: 0,
+                sourcePaths: [],
+                usedSlidingWindowSize: 0,
+                requestedTopK: 0,
+                indexBuildMs: 0,
+                queryMs: 0,
+                contextCharCount: 0,
+                excludeCurrentFileApplied: false,
+                excludedCurrentFileHitCount: 0
+            },
             modified: true
         });
         const { runGenerateContentForTitleCommandWithHost } = loadModule();
@@ -224,6 +240,22 @@ describe('note processing command host adapter', () => {
             title: 'Topic',
             researchEnabled: false,
             researchContextUsed: false,
+            localKnowledgeContextUsed: false,
+            localKnowledgeRetrieval: {
+                indexedFileCount: 0,
+                indexedSectionCount: 0,
+                matchedSectionCount: 0,
+                returnedHitCount: 0,
+                expandedSectionCount: 0,
+                sourcePaths: [],
+                usedSlidingWindowSize: 0,
+                requestedTopK: 0,
+                indexBuildMs: 0,
+                queryMs: 0,
+                contextCharCount: 0,
+                excludeCurrentFileApplied: false,
+                excludedCurrentFileHitCount: 0
+            },
             modified: true
         });
         expect(getBusy()).toBe(false);
@@ -1133,6 +1165,22 @@ describe('note processing command host adapter', () => {
                     title: 'A',
                     researchEnabled: false,
                     researchContextUsed: false,
+                    localKnowledgeContextUsed: false,
+                    localKnowledgeRetrieval: {
+                        indexedFileCount: 0,
+                        indexedSectionCount: 0,
+                        matchedSectionCount: 0,
+                        returnedHitCount: 0,
+                        expandedSectionCount: 0,
+                        sourcePaths: [],
+                        usedSlidingWindowSize: 0,
+                        requestedTopK: 0,
+                        indexBuildMs: 0,
+                        queryMs: 0,
+                        contextCharCount: 0,
+                        excludeCurrentFileApplied: false,
+                        excludedCurrentFileHitCount: 0
+                    },
                     modified: true,
                     completeDestinationPath: 'Concepts_complete/A.md',
                     movedToCompleteFolder: true,
@@ -1174,6 +1222,22 @@ describe('note processing command host adapter', () => {
                     title: 'A',
                     researchEnabled: false,
                     researchContextUsed: false,
+                    localKnowledgeContextUsed: false,
+                    localKnowledgeRetrieval: {
+                        indexedFileCount: 0,
+                        indexedSectionCount: 0,
+                        matchedSectionCount: 0,
+                        returnedHitCount: 0,
+                        expandedSectionCount: 0,
+                        sourcePaths: [],
+                        usedSlidingWindowSize: 0,
+                        requestedTopK: 0,
+                        indexBuildMs: 0,
+                        queryMs: 0,
+                        contextCharCount: 0,
+                        excludeCurrentFileApplied: false,
+                        excludedCurrentFileHitCount: 0
+                    },
                     modified: true,
                     completeDestinationPath: 'Concepts_complete/A.md',
                     movedToCompleteFolder: true,

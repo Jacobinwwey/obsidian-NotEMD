@@ -306,6 +306,8 @@ describe('CLI invocation contract', () => {
                     title: expect.any(Object),
                     researchEnabled: expect.any(Object),
                     researchContextUsed: expect.any(Object),
+                    localKnowledgeContextUsed: expect.any(Object),
+                    localKnowledgeRetrieval: expect.any(Object),
                     modified: expect.any(Object)
                 })
             })
@@ -325,6 +327,18 @@ describe('CLI invocation contract', () => {
                     cancelled: expect.any(Object),
                     fileResults: expect.any(Object),
                     errors: expect.any(Object)
+                })
+            })
+        }));
+        expect(batchGenerate?.resultSchema).toEqual(expect.objectContaining({
+            properties: expect.objectContaining({
+                fileResults: expect.objectContaining({
+                    items: expect.objectContaining({
+                        properties: expect.objectContaining({
+                            localKnowledgeContextUsed: expect.any(Object),
+                            localKnowledgeRetrieval: expect.any(Object)
+                        })
+                    })
                 })
             })
         }));
@@ -386,7 +400,9 @@ describe('CLI invocation contract', () => {
                 type: 'object',
                 properties: expect.objectContaining({
                     sourcePath: expect.any(Object),
-                    topic: expect.any(Object)
+                    topic: expect.any(Object),
+                    localKnowledgeContextUsed: expect.any(Object),
+                    localKnowledgeRetrieval: expect.any(Object)
                 })
             })
         }));

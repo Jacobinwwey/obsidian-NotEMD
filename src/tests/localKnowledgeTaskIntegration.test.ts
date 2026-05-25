@@ -56,19 +56,36 @@ describe('local knowledge integration', () => {
     test('generateContentForTitle injects supplemental local knowledge only when the caller enables it', async () => {
         const file = createFile('Notes/Topic.md');
         const reporter = createReporter();
-        const buildContext = jest.fn(() => 'Path: Knowledge/Reference.md\nExcerpt: Relevant local context.');
+        const buildContextDetails = jest.fn(() => ({
+            query: 'Topic',
+            context: 'Path: Knowledge/Reference.md\nExcerpt: Relevant local context.',
+            indexedFileCount: 2,
+            indexedSectionCount: 3,
+            matchedSectionCount: 1,
+            returnedHitCount: 1,
+            expandedSectionCount: 1,
+            sourcePaths: ['Knowledge/Reference.md'],
+            usedSlidingWindowSize: mockSettings.localKnowledgeSlidingWindowSize,
+            requestedTopK: mockSettings.localKnowledgeTopK,
+            indexBuildMs: 12,
+            queryMs: 4,
+            contextCharCount: 57,
+            excludeCurrentFileApplied: true,
+            excludedCurrentFileHitCount: 0
+        }));
         (callLLM as jest.Mock).mockResolvedValue('## Topic\nGenerated content');
 
-        await generateContentForTitle(mockApp as any, mockSettings, file, reporter, {
+        const result = await generateContentForTitle(mockApp as any, mockSettings, file, reporter, {
             enableLocalKnowledge: true,
             localKnowledgeRetriever: {
-                buildContext,
+                buildContext: jest.fn(() => 'Path: Knowledge/Reference.md\nExcerpt: Relevant local context.'),
+                buildContextDetails,
                 indexedFileCount: 1,
                 indexedSectionCount: 1
             } as any
         });
 
-        expect(buildContext).toHaveBeenCalledWith('Topic', expect.objectContaining({
+        expect(buildContextDetails).toHaveBeenCalledWith('Topic', expect.objectContaining({
             currentFilePath: 'Notes/Topic.md',
             slidingWindowSize: mockSettings.localKnowledgeSlidingWindowSize
         }));
@@ -80,6 +97,20 @@ describe('local knowledge integration', () => {
             reporter,
             expect.any(String)
         );
+        expect(result).toEqual(expect.objectContaining({
+            sourcePath: 'Notes/Topic.md',
+            outputPath: 'Notes/Topic.md',
+            title: 'Topic',
+            localKnowledgeContextUsed: true,
+            localKnowledgeRetrieval: expect.objectContaining({
+                matchedSectionCount: 1,
+                returnedHitCount: 1,
+                sourcePaths: ['Knowledge/Reference.md'],
+                indexBuildMs: 12,
+                queryMs: 4,
+                contextCharCount: 57
+            })
+        }));
     });
 
     test('researchAndSummarize can continue with local knowledge context even when web research returns no results', async () => {
@@ -171,6 +202,15 @@ describe('local knowledge integration', () => {
                 topic: 'Topic',
                 sourceLabel: 'Local KB',
                 localKnowledgeContextUsed: true,
+                localKnowledgeRetrieval: expect.objectContaining({
+                    indexedFileCount: 1,
+                    matchedSectionCount: 1,
+                    returnedHitCount: 1,
+                    sourcePaths: ['Knowledge/Reference.md'],
+                    indexBuildMs: expect.any(Number),
+                    queryMs: expect.any(Number),
+                    contextCharCount: expect.any(Number)
+                }),
                 appended: true
             }));
         } finally {

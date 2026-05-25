@@ -10,7 +10,10 @@ function printUsage() {
       const optionalLine = details.optional.length > 0
         ? `\n    optional: ${details.optional.join(', ')}`
         : '';
-      return `  ${operationId}\n    ${details.summary}\n    required: ${details.required.join(', ')}${optionalLine}`;
+      const exampleLine = details.exampleInput
+        ? `\n    example input: ${details.exampleInput}`
+        : '';
+      return `  ${operationId}\n    ${details.summary}\n    required: ${details.required.join(', ')}${optionalLine}${exampleLine}`;
     })
     .join('\n\n');
 

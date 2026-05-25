@@ -6,6 +6,7 @@ type MaintainerOperationHelp = Record<string, {
     summary: string;
     required: string[];
     optional: string[];
+    exampleInput?: string;
 }>;
 
 describe('invoke maintainer CLI operation script', () => {
@@ -27,8 +28,17 @@ describe('invoke maintainer CLI operation script', () => {
             if (details.optional.length > 0) {
                 expect(output).toContain(`optional: ${details.optional.join(', ')}`);
             }
+            if (details.exampleInput) {
+                expect(output).toContain(`example input: ${details.exampleInput}`);
+            }
         }
 
+        expect(output).toContain('content.batch-generate-from-titles');
+        expect(output).toContain('"includeSubfoldersMode":"exclude"');
+        expect(output).toContain('research.summarize-topic');
+        expect(output).toContain('"topic":"RAG quality audit"');
+        expect(output).toContain('diagram.generate');
+        expect(output).toContain('"requestedIntent":"erDiagram"');
         expect(output).toContain('Maintainer bridge only; not a public CLI surface.');
     });
 });

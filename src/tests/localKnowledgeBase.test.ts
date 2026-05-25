@@ -48,16 +48,28 @@ describe('localKnowledgeBase', () => {
         };
 
         const retriever = await buildLocalKnowledgeBaseRetriever(mockApp as any, settings);
-        const context = retriever?.buildContext('transformer attention', {
+        const details = retriever?.buildContextDetails('transformer attention', {
             currentFilePath: 'Knowledge/Transformers.md',
             topK: settings.localKnowledgeTopK,
             slidingWindowSize: settings.localKnowledgeSlidingWindowSize,
             maxSnippetChars: settings.localKnowledgeMaxSnippetChars
         });
+        const context = details?.context;
 
         expect(retriever).not.toBeNull();
         expect(retriever?.indexedFileCount).toBe(2);
         expect(retriever?.indexedSectionCount).toBeGreaterThanOrEqual(2);
+        expect(details?.matchedSectionCount).toBeGreaterThanOrEqual(1);
+        expect(details?.returnedHitCount).toBe(1);
+        expect(details?.expandedSectionCount).toBeGreaterThanOrEqual(1);
+        expect(details?.requestedTopK).toBe(2);
+        expect(details?.usedSlidingWindowSize).toBe(0);
+        expect(details?.indexBuildMs).toBeGreaterThanOrEqual(0);
+        expect(details?.queryMs).toBeGreaterThanOrEqual(0);
+        expect(details?.contextCharCount).toBeGreaterThan(0);
+        expect(details?.excludeCurrentFileApplied).toBe(true);
+        expect(details?.excludedCurrentFileHitCount).toBeGreaterThanOrEqual(1);
+        expect(details?.sourcePaths).toEqual(['Knowledge/Deep Learning.md']);
         expect(context).toContain('Knowledge/Deep Learning.md');
         expect(context).not.toContain('Knowledge/Transformers.md');
         expect(context).not.toContain('Scratch/Loose.md');
@@ -87,12 +99,20 @@ describe('localKnowledgeBase', () => {
         };
 
         const retriever = await buildLocalKnowledgeBaseRetriever(mockApp as any, settings);
-        const context = retriever?.buildContext('sliding window retrieval', {
+        const details = retriever?.buildContextDetails('sliding window retrieval', {
             topK: settings.localKnowledgeTopK,
             slidingWindowSize: settings.localKnowledgeSlidingWindowSize,
             maxSnippetChars: settings.localKnowledgeMaxSnippetChars
         });
+        const context = details?.context;
 
+        expect(details?.returnedHitCount).toBe(1);
+        expect(details?.expandedSectionCount).toBe(3);
+        expect(details?.sourcePaths).toEqual(['Knowledge/Architecture.md']);
+        expect(details?.usedSlidingWindowSize).toBe(1);
+        expect(details?.indexBuildMs).toBeGreaterThanOrEqual(0);
+        expect(details?.queryMs).toBeGreaterThanOrEqual(0);
+        expect(details?.contextCharCount).toBe(context?.length ?? 0);
         expect(context).toContain('Platform overview.');
         expect(context).toContain('Sliding window retrieval keeps adjacent sections together.');
         expect(context).toContain('RAGPerf measures end-to-end latency and throughput.');
