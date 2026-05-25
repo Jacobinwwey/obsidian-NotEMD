@@ -1,10 +1,12 @@
 ---
 date: 2026-05-13
-last_updated: 2026-05-13
+last_updated: 2026-05-25
 topic: mainline-progress-audit-1-8-9-and-next-direction
 ---
 
 # Mainline Progress Audit After 1.8.9: Deep Comparison, Current State, And Next Direction
+
+> Historical boundary note: this document records the `1.8.9` release-cut perspective before the 2026-05-24 force-rewrite recovery and the later bounded recovery on current main. For the current post-recovery state and next-level plan, see `docs/brainstorms/2026-05-25-post-bounded-recovery-audit-and-next-level-direction.md`.
 
 ## 1. Scope And Baseline
 

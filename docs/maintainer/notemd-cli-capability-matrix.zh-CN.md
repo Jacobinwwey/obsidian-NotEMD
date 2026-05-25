@@ -1,21 +1,22 @@
 # Notemd CLI 能力矩阵
 
-> 更新：2026-05-24
+> 更新：2026-05-25
 
-## 当前状态说明（2026-05-24）
+## 当前状态说明（2026-05-25）
 
-简短结论：当前恢复回 `main` 的 CLI 工作是刻意收敛的。
+简短结论：当前 `main` 上的 CLI 现状是刻意分层的两级模型，而不是单一放大的总入口。
 
 已经在 current `main` 落地的内容：
 
 - registry-backed operation 元数据
 - 类型化 capability / invocation 导出
-- 边界清晰的 export-only 公共安全切片
-- 同时覆盖 public-safe exports 与受控 path-based 维护操作的 repo-local maintainer helper
+- 收敛后的 public-safe export 切片
+- 覆盖同一 export 切片并额外支持显式 JSON / 文件 payload 的 path-based maintainer helper
 
 当前没有宣称的内容：
 
 - 面向用户的宽口径 CLI API
+- 将当前 path-based maintainer operations 直接提升为 public-safe slice
 - 针对可变笔记处理流程的宽口径 public CLI API
 
 这是一份维护者控制文档，用来区分：
@@ -86,6 +87,7 @@
 - 这是 maintainer-grade repo 工具，不是 public CLI API
 - 操作目录统一收敛在 `scripts/lib/maintainer-cli-operation-help.js`，作为共享帮助元数据
 - export operations 仍然只接受空 payload；受控内容操作必须显式提供 JSON 输入
+- 这些 path-based 维护操作在副作用、输出契约与失败语义没有作为公共契约一并锁定前，仍应保持 maintainer-only
 
 ## 当前命令矩阵
 
@@ -141,10 +143,10 @@
 
 | 优先级 | 候选能力 | 为什么先做 | 现有基础 |
 |---|---|---|---|
-| P0 | Packaging / semantic-verification 收敛后续 | 第一批 convergence slice 现已落地：`npm run verify:diagram-semantics` 已会生成带 packaging-boundary 提醒的维护者检查模板，runbook 已与之对齐，对应测试也已锁定这套真值。下一步更高杠杆的工作，是在保持这套真值稳定的同时，判断下一个应落地的是实际的 heavy-runtime isolation，还是后续某个 contract promotion 决策 | `scripts/diagram-semantic-verification.js`、`docs/maintainer/*`、`src/tests/diagramSemanticVerificationScript.test.ts`、`src/operations/diagramCommandExecution.ts` |
-| P1 | selection/export 与 config flow 的 contract 增强 | 这些 operation 已建模，但未来 operation invoker 需要比 command-trigger 对等更丰富的 path/context 语义 | `src/operations/registry.ts`, `src/operations/configProfileCommands.ts`, `src/operations/noteProcessingCommandHostAdapter.ts` |
-| P1 | workflow/settings 打包 | Workflow DSL 与 output-path toggles 仍是有价值 metadata，但还不是稳定公共接口 | `src/workflowButtons.ts`, 设置驱动的输出控制 |
-| P2 | 重型运行时打包隔离实现 | 仓库现在已经明确写清当前是单入口 `main.js` + 内联 `srcdoc` 契约。剩余的打包缺口已经不再是“继续补 runbook 文案”，而是真正的多入口或独立资产隔离实现本身 | `esbuild.config.mjs`、`scripts/audit-render-host-bundle.js`、render-host 打包路径 |
+| P0 | 围绕潜在 render-host runtime lane 的 source/build 收敛 | 当前源码已出现可复用的 runtime helper（`src/rendering/runtime/renderHostEntry.ts`、`src/rendering/preview/renderHostRuntimeClient.ts`），但 build/audit 真值仍只证明 `main.js` 单资产发货。下一步最高杠杆工作，是明确消除这层歧义：要么继续保持 source-only 候选态并写清非发货事实，要么同批落地真正的多入口构建边界 | `esbuild.config.mjs`、`scripts/audit-render-host-bundle.js`、`src/rendering/runtime/renderHostEntry.ts`、`src/rendering/preview/renderHostRuntimeClient.ts` |
+| P1 | 显式 path-based operations 的有界 public-CLI 提升 | maintainer helper 已证明 path-based operations 有真实需求，但只有当写入副作用与输出契约足够稳定、可文档化、可回归锁定时，才应该进入 public-safe slice | `src/maintainerCliBridge.ts`、`scripts/lib/maintainer-cli-operation-help.js`、`src/operations/registry.ts`、`src/tests/maintainerCliBridge.test.ts` |
+| P1 | retrieval / chapter-split 写入路径的契约与结果加固 | `content.split-note-by-chapters`、`content.batch-generate-from-titles`、`research.summarize-topic`、`diagram.generate` 已可通过 maintainer helper 调用，但下一步成熟度提升点应是 richer side-effect/result framing，而不是继续扩操作数量 | `src/chapterSplit.ts`、`src/localKnowledgeBase.ts`、`src/tests/chapterSplit.test.ts`、`src/tests/localKnowledgeTaskIntegration.test.ts` |
+| P2 | workflow/settings 打包 | Workflow DSL 与 output-path toggles 仍是有价值 metadata，但还不是稳定公共接口 | `src/workflowButtons.ts`, 设置驱动的输出控制 |
 
 ## 设置就绪度
 

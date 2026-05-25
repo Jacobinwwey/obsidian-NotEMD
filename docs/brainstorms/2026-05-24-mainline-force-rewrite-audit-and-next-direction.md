@@ -218,7 +218,7 @@ The following items should no longer be described as “missing on current main�
 The following bounded automation work is also now present again on current main:
 
 1. redacted provider export plus public-safe CLI surface export;
-2. repo-local maintainer help/invoke scripts for export-only operations;
+2. repo-local maintainer help/invoke scripts for bounded path-based operations (`content.batch-generate-from-titles`, `content.split-note-by-chapters`, `research.summarize-topic`, `diagram.generate`) plus export operations;
 3. repo-saga serial execution lock, associated tests, and maintainer-doc guidance.
 
 ### 8.3 Revised interpretation after recovery
@@ -227,4 +227,12 @@ The accurate post-recovery interpretation is now:
 
 1. the 2026-05-24 audit remains valid as a baseline snapshot of the force-rewritten branch at that time;
 2. current main has since regained a bounded but meaningful subset of the backup-branch breadth;
-3. it is still inaccurate to overclaim dedicated runtime assets or an unbounded maintainer mutation surface.
+3. release-facing version truth is again synchronized at `1.8.9` across package metadata, welcome digest, and the README family;
+4. source-level render-host runtime candidates have reappeared, but build/audit truth still proves `main.js`-only shipping;
+5. it is still inaccurate to overclaim dedicated runtime assets or an unbounded maintainer mutation surface.
+
+This changes the correct next move slightly:
+
+1. recovery work is no longer mainly about “prove the missing product slice exists”;
+2. the next-level question is whether to keep the runtime-candidate source tree explicitly dormant or promote it into a real packaged boundary;
+3. in parallel, the maintainer helper must not be confused with a widened public CLI surface.
