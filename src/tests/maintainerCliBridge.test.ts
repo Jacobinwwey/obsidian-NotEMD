@@ -4,7 +4,10 @@ describe('maintainer CLI bridge', () => {
     test('dispatches bounded content operations with parsed input fields', async () => {
         const host = {
             batchGenerateContentForTitlesCommand: jest.fn().mockResolvedValue({ generatedCount: 3 }),
-            splitNoteByChaptersForPathCommand: jest.fn().mockResolvedValue({ tocPath: 'Docs/Topic_toc.md' }),
+            splitNoteByChaptersForPathCommand: jest.fn().mockResolvedValue({
+                tocPath: 'Docs/Topic_toc.md',
+                managedArtifactPaths: ['Docs/Topic_toc.md']
+            }),
             researchAndSummarizeForPathCommand: jest.fn().mockResolvedValue({ outputPath: 'Docs/Topic.md' }),
             generateDiagramForPathCommand: jest.fn().mockResolvedValue({ kind: 'success', outputPath: 'Docs/Topic_diagram.md' }),
             exportRedactedProviderProfilesCommand: jest.fn(),
@@ -36,9 +39,16 @@ describe('maintainer CLI bridge', () => {
 
         await invokeMaintainerCliOperation(host as any, {
             operationId: 'content.split-note-by-chapters',
-            input: { sourcePath: 'docs/index.zh-CN.md' }
+            input: {
+                sourcePath: 'docs/index.zh-CN.md',
+                splitHeadingLevel: 'h3'
+            }
         });
-        expect(host.splitNoteByChaptersForPathCommand).toHaveBeenCalledWith('docs/index.zh-CN.md', undefined);
+        expect(host.splitNoteByChaptersForPathCommand).toHaveBeenCalledWith(
+            'docs/index.zh-CN.md',
+            undefined,
+            { splitHeadingLevel: 'h3' }
+        );
 
         await invokeMaintainerCliOperation(host as any, {
             operationId: 'research.summarize-topic',
@@ -145,5 +155,26 @@ describe('maintainer CLI bridge', () => {
             operationId: 'diagram.generate',
             input: {}
         })).rejects.toThrow('requires a non-empty "sourcePath" string');
+    });
+
+    test('rejects invalid chapter split heading overrides', async () => {
+        const host = {
+            batchGenerateContentForTitlesCommand: jest.fn(),
+            splitNoteByChaptersForPathCommand: jest.fn(),
+            researchAndSummarizeForPathCommand: jest.fn(),
+            generateDiagramForPathCommand: jest.fn(),
+            exportRedactedProviderProfilesCommand: jest.fn(),
+            exportCliCapabilityManifestCommand: jest.fn(),
+            exportCliInvocationContractCommand: jest.fn(),
+            exportCliPublicSurfaceCommand: jest.fn()
+        };
+
+        await expect(invokeMaintainerCliOperation(host as any, {
+            operationId: 'content.split-note-by-chapters',
+            input: {
+                sourcePath: 'docs/index.zh-CN.md',
+                splitHeadingLevel: 'h9'
+            }
+        })).rejects.toThrow('expects "splitHeadingLevel" to be one of');
     });
 });

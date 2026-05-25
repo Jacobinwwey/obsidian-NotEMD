@@ -17,6 +17,7 @@ describe('CLI invocation contract', () => {
         const processFolder = contract.operations.find(operation => operation.operationId === 'file.process-folder-add-links');
         const generateFromTitle = contract.operations.find(operation => operation.operationId === 'content.generate-from-title');
         const batchGenerate = contract.operations.find(operation => operation.operationId === 'content.batch-generate-from-titles');
+        const chapterSplit = contract.operations.find(operation => operation.operationId === 'content.split-note-by-chapters');
         const researchSummarize = contract.operations.find(operation => operation.operationId === 'research.summarize-topic');
         const translateFile = contract.operations.find(operation => operation.operationId === 'translate.file');
         const translateFolder = contract.operations.find(operation => operation.operationId === 'translate.folder-batch');
@@ -47,6 +48,7 @@ describe('CLI invocation contract', () => {
             'file.process-folder-add-links',
             'content.generate-from-title',
             'content.batch-generate-from-titles',
+            'content.split-note-by-chapters',
             'research.summarize-topic',
             'translate.file',
             'translate.folder-batch',
@@ -323,6 +325,51 @@ describe('CLI invocation contract', () => {
                     cancelled: expect.any(Object),
                     fileResults: expect.any(Object),
                     errors: expect.any(Object)
+                })
+            })
+        }));
+
+        expect(chapterSplit).toEqual(expect.objectContaining({
+            operationId: 'content.split-note-by-chapters',
+            inputSchema: expect.objectContaining({
+                type: 'object',
+                required: expect.arrayContaining(['sourcePath']),
+                properties: expect.objectContaining({
+                    sourcePath: expect.any(Object),
+                    splitHeadingLevel: expect.any(Object)
+                })
+            }),
+            resultSchema: expect.objectContaining({
+                type: 'object',
+                required: expect.arrayContaining([
+                    'sourcePath',
+                    'requestedSplitHeadingLevel',
+                    'chapterNotePaths',
+                    'managedArtifactPaths',
+                    'outputFolderPath',
+                    'tocPath',
+                    'manifestPath',
+                    'splitLevel',
+                    'chapters',
+                    'tocMarkdown',
+                    'chapterCount',
+                    'removedStaleFileCount',
+                    'removedStalePaths'
+                ]),
+                properties: expect.objectContaining({
+                    sourcePath: expect.any(Object),
+                    requestedSplitHeadingLevel: expect.any(Object),
+                    chapterNotePaths: expect.any(Object),
+                    managedArtifactPaths: expect.any(Object),
+                    outputFolderPath: expect.any(Object),
+                    tocPath: expect.any(Object),
+                    manifestPath: expect.any(Object),
+                    splitLevel: expect.any(Object),
+                    chapters: expect.any(Object),
+                    tocMarkdown: expect.any(Object),
+                    chapterCount: expect.any(Object),
+                    removedStaleFileCount: expect.any(Object),
+                    removedStalePaths: expect.any(Object)
                 })
             })
         }));

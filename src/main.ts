@@ -123,7 +123,7 @@ import {
     runSplitNoteByChaptersCommandWithHost,
     UtilityCommandHost
 } from './operations/utilityCommandHostAdapter';
-import { ChapterSplitResult, splitNoteByChapters } from './chapterSplit';
+import { ChapterSplitOptions, ChapterSplitResult, splitNoteByChapters } from './chapterSplit';
 
 export default class NotemdPlugin extends Plugin {
     settings: NotemdSettings;
@@ -1498,8 +1498,8 @@ export default class NotemdPlugin extends Plugin {
             batchGenerateContentForTitlesCommand: async (reporter, folderPathOverride, fileSelectionOverride) => (
                 this.batchGenerateContentForTitlesCommand(reporter, folderPathOverride, fileSelectionOverride)
             ),
-            splitNoteByChaptersForPathCommand: async (sourcePath, reporter) => (
-                this.splitNoteByChaptersForPathCommand(sourcePath, reporter)
+            splitNoteByChaptersForPathCommand: async (sourcePath, reporter, options) => (
+                this.splitNoteByChaptersForPathCommand(sourcePath, reporter, options)
             ),
             researchAndSummarizeForPathCommand: async (sourcePath, topicOverride, reporter) => (
                 this.researchAndSummarizeForPathCommand(sourcePath, topicOverride, reporter)
@@ -1786,7 +1786,10 @@ export default class NotemdPlugin extends Plugin {
 
     async splitNoteByChaptersForPathCommand(
         sourcePath: string,
-        reporter?: ProgressReporter
+        reporter?: ProgressReporter,
+        options: {
+            splitHeadingLevel?: ChapterSplitOptions['splitHeadingLevel'];
+        } = {}
     ): Promise<ChapterSplitResult | null> {
         await this.loadSettings();
         const file = this.app.vault.getFileByPath(sourcePath);
@@ -1800,7 +1803,7 @@ export default class NotemdPlugin extends Plugin {
         }
 
         return splitNoteByChapters(this.app, file, reporter ?? this.getReporter(), {
-            splitHeadingLevel: this.settings.chapterSplitHeadingLevel
+            splitHeadingLevel: options.splitHeadingLevel ?? this.settings.chapterSplitHeadingLevel
         });
     }
 

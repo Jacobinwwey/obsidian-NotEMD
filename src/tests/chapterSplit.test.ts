@@ -45,6 +45,17 @@ describe('chapterSplit', () => {
         expect(plan.outputFolderPath).toBe('Docs/Platform_chapters');
         expect(plan.tocPath).toBe('Docs/Platform_chapters/Platform_TOC.md');
         expect(plan.manifestPath).toBe('Docs/Platform_chapters/.notemd-chapter-split.json');
+        expect(plan.requestedSplitHeadingLevel).toBe('auto');
+        expect(plan.chapterNotePaths).toEqual([
+            'Docs/Platform_chapters/01-overview.md',
+            'Docs/Platform_chapters/02-delivery.md'
+        ]);
+        expect(plan.managedArtifactPaths).toEqual([
+            'Docs/Platform_chapters/Platform_TOC.md',
+            'Docs/Platform_chapters/.notemd-chapter-split.json',
+            'Docs/Platform_chapters/01-overview.md',
+            'Docs/Platform_chapters/02-delivery.md'
+        ]);
         expect(plan.chapters).toHaveLength(2);
         expect(plan.chapters[0]).toEqual(expect.objectContaining({
             title: 'Overview',
@@ -72,10 +83,12 @@ describe('chapterSplit', () => {
         const plan = buildChapterSplitPlan({
             sourcePath: 'Docs/Topic.md',
             sourceBasename: 'Topic',
-            markdown
+            markdown,
+            splitHeadingLevel: 'h2'
         });
 
         expect(plan.chapters[0].outputPath).toBe('Docs/Topic_chapters/01-chapter-01.md');
+        expect(plan.requestedSplitHeadingLevel).toBe('h2');
     });
 
     test('keeps unicode chapter titles in output paths instead of collapsing to fallback slugs', () => {
@@ -179,6 +192,17 @@ describe('chapterSplit', () => {
         const sourceFile = files.get('Docs/Platform.md')!.file;
         const firstRun = await splitNoteByChapters(app, sourceFile, reporter as any);
         expect(firstRun.outputFolderPath).toBe('Docs/Platform_chapters');
+        expect(firstRun.requestedSplitHeadingLevel).toBe('auto');
+        expect(firstRun.chapterNotePaths).toEqual([
+            'Docs/Platform_chapters/01-overview.md',
+            'Docs/Platform_chapters/02-delivery.md'
+        ]);
+        expect(firstRun.managedArtifactPaths).toEqual([
+            'Docs/Platform_chapters/Platform_TOC.md',
+            'Docs/Platform_chapters/.notemd-chapter-split.json',
+            'Docs/Platform_chapters/01-overview.md',
+            'Docs/Platform_chapters/02-delivery.md'
+        ]);
         expect(files.has('Docs/Platform_chapters/02-delivery.md')).toBe(true);
 
         files.set('Docs/Platform.md', {
@@ -196,6 +220,17 @@ describe('chapterSplit', () => {
 
         expect(secondRun.chapterCount).toBe(1);
         expect(secondRun.removedStaleFileCount).toBe(1);
+        expect(secondRun.removedStalePaths).toEqual([
+            'Docs/Platform_chapters/02-delivery.md'
+        ]);
+        expect(secondRun.chapterNotePaths).toEqual([
+            'Docs/Platform_chapters/01-overview.md'
+        ]);
+        expect(secondRun.managedArtifactPaths).toEqual([
+            'Docs/Platform_chapters/Platform_TOC.md',
+            'Docs/Platform_chapters/.notemd-chapter-split.json',
+            'Docs/Platform_chapters/01-overview.md'
+        ]);
         expect(files.has('Docs/Platform_chapters/02-delivery.md')).toBe(false);
         expect(files.get('Docs/Platform_chapters/01-overview.md')?.content).toContain('Overview body updated');
         expect(reporter.log).toHaveBeenCalledWith('Removed stale chapter split file: Docs/Platform_chapters/02-delivery.md');
@@ -295,6 +330,9 @@ describe('chapterSplit', () => {
 
         expect(rerun.chapterCount).toBe(1);
         expect(rerun.removedStaleFileCount).toBe(1);
+        expect(rerun.removedStalePaths).toEqual([
+            'Docs/Platform_chapters/02-delivery.md'
+        ]);
         expect(app.vault.adapter.write).toHaveBeenCalledWith(
             'Docs/Platform_chapters/01-overview.md',
             expect.stringContaining('Overview body updated')

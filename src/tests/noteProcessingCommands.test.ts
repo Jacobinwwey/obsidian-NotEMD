@@ -844,6 +844,12 @@ describe('note processing command surface', () => {
             .spyOn(utilityCommandHostAdapter, 'runSplitNoteByChaptersCommandWithHost')
             .mockResolvedValue({
                 sourcePath: 'Notes/Topic.md',
+                requestedSplitHeadingLevel: 'auto',
+                chapterNotePaths: [],
+                managedArtifactPaths: [
+                    'Notes/topic_chapters/Topic_TOC.md',
+                    'Notes/topic_chapters/.notemd-chapter-split.json'
+                ],
                 outputFolderPath: 'Notes/topic_chapters',
                 tocPath: 'Notes/topic_chapters/Topic_TOC.md',
                 manifestPath: 'Notes/topic_chapters/.notemd-chapter-split.json',
@@ -851,7 +857,8 @@ describe('note processing command surface', () => {
                 chapters: [],
                 tocMarkdown: '# Topic TOC',
                 chapterCount: 0,
-                removedStaleFileCount: 0
+                removedStaleFileCount: 0,
+                removedStalePaths: []
             });
 
         const result = await (plugin as any).splitNoteByChaptersCommand(reporter);

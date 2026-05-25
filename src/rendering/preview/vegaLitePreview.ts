@@ -1,5 +1,6 @@
 import { RenderArtifact } from '../types';
 import { RenderWebviewTheme, resolveRenderTheme } from '../theme';
+import { defaultPackagePreviewModuleLoader } from './packageModuleLoader';
 
 export interface VegaLitePreviewView {
     toSVG(): Promise<string>;
@@ -14,8 +15,8 @@ export interface VegaLitePreviewDeps {
 
 async function loadDefaultVegaLitePreviewDeps(): Promise<VegaLitePreviewDeps> {
     const [vegaLiteModule, vegaModule] = await Promise.all([
-        import('vega-lite'),
-        import('vega')
+        defaultPackagePreviewModuleLoader('vega-lite'),
+        defaultPackagePreviewModuleLoader('vega')
     ]);
 
     const compile = (vegaLiteModule as any).compile;

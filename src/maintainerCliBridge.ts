@@ -13,7 +13,7 @@ import {
 } from './operations/configProfileCommands';
 import { ChapterSplitResult } from './chapterSplit';
 import { ResearchSummarizeResult } from './searchUtils';
-import { ProgressReporter } from './types';
+import { CHAPTER_SPLIT_HEADING_LEVEL_VALUES, ChapterSplitHeadingLevelSetting, ProgressReporter } from './types';
 
 export type MaintainerCliOperationId =
     | 'content.batch-generate-from-titles'
@@ -49,7 +49,10 @@ export interface MaintainerCliBridgeHost {
     ) => Promise<BatchGenerateContentForTitlesResult | null>;
     splitNoteByChaptersForPathCommand: (
         sourcePath: string,
-        reporter?: ProgressReporter
+        reporter?: ProgressReporter,
+        options?: {
+            splitHeadingLevel?: ChapterSplitHeadingLevelSetting;
+        }
     ) => Promise<ChapterSplitResult | null>;
     researchAndSummarizeForPathCommand: (
         sourcePath: string,
@@ -177,6 +180,20 @@ function buildFileSelectionOverride(input: Record<string, unknown>): FolderTaskF
     return Object.keys(override).length > 0 ? override : undefined;
 }
 
+function buildChapterSplitOptions(input: Record<string, unknown>): {
+    splitHeadingLevel?: ChapterSplitHeadingLevelSetting;
+} | undefined {
+    const splitHeadingLevel = optionalEnum(input, 'splitHeadingLevel', CHAPTER_SPLIT_HEADING_LEVEL_VALUES);
+
+    if (!splitHeadingLevel) {
+        return undefined;
+    }
+
+    return {
+        splitHeadingLevel
+    };
+}
+
 function buildDiagramCommandOptions(input: Record<string, unknown>): DiagramCommandOptions {
     const executionMode = optionalEnum(
         input,
@@ -221,7 +238,8 @@ export async function invokeMaintainerCliOperation(
         case 'content.split-note-by-chapters':
             return host.splitNoteByChaptersForPathCommand(
                 requireString(input, 'sourcePath'),
-                reporter
+                reporter,
+                buildChapterSplitOptions(input)
             );
         case 'research.summarize-topic':
             return host.researchAndSummarizeForPathCommand(
