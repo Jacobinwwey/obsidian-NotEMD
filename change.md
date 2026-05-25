@@ -4,6 +4,38 @@ This document summarizes the major functional and architectural changes implemen
 
 ---
 
+## 2026-05-25
+
+### Bounded Product-Surface Recovery On Current Main
+
+- Recovered bounded backup-branch product slices onto the rewritten current `main` without reviving the disproven dedicated-runtime topology.
+- Current main now again includes settings reset, concept-note prerequisite guidance, concept synonym suppression, saved file-selection profiles for folder tasks, local knowledge retrieval, chapter split, and saved-artifact-aware diagram preview follow-through.
+- Kept the recovery architecture-compatible with the current single-entry `main.js` + inline `srcdoc` runtime truth rather than replaying older detached runtime assumptions.
+
+### Documentation And Archive Recovery
+
+- Restored backup-branch release/doc artifacts for `1.8.6` through `1.8.9` under `docs/releases/` as archival history instead of current packaged-version truth.
+- Re-aligned README and progress documents so they no longer describe recovered current-main features as “missing on current main.”
+
+### Verification Status
+
+- Recovery acceptance was re-validated with build, Jest, UI-string audit, render-host audit, and whitespace checks before the final commit batch.
+
+## 2026-05-24
+
+### Bounded CLI/Public-Surface Restoration On Current Main
+
+- Restored a bounded backup-branch slice that is truthful on the rewritten current `main`, instead of reviving the wider maintainer bridge that depends on unrecovered product features.
+- Added `provider.profile.export-redacted`, `cli.public-surface.export`, and a derived `src/operations/publicCliSurface.ts` so the public-safe export surface now comes from the same registry/capability/contract stack as the rest of the automation metadata.
+- Added handling tags for secret-bearing provider profile import/export paths and excluded raw provider export from the public-safe surface.
+- Added a repo-local maintainer helper surface: `npm run cli:help` and `npm run cli:invoke -- --vault <vault> --operation <operation-id> [--pretty]`, intentionally limited to export-only operations with no input payload.
+- Added localized UI strings, notices, tests, and maintainer documentation updates for the redacted export / public-surface slice.
+
+### Repo-Saga Serial Execution Guardrail
+
+- Added a repo-saga execution lock helper so `chronicle:update` and `chronicle:sync-repo-saga` fail fast instead of racing on shared clone/cache state.
+- Documented the serial-execution rule in maintainer workflow docs and covered lock-release behavior in Jest.
+
 ## 1.8.4
 
 ### Highlights
@@ -138,6 +170,7 @@ This document summarizes the major functional and architectural changes implemen
 ### English
 *   **Mainline Force-Rewrite Audit**: Added a fresh current-main audit plus a new unified follow-through matrix that explicitly separates rewritten `origin/main` shipped truth from backup-branch-only evidence, so progress docs no longer overclaim features missing from the live mainline.
 *   **Clean-State Guardrails For Local Verification**: `.gitignore` now excludes root-level `render-host.mjs` plus local vault-generated artifacts under `docs/` such as error logs, provider diagnostics, preview exports, and saved diagram artifacts, preventing local Obsidian verification from dirtying the repository.
+*   **Repo-Saga Serial Execution Guardrail**: `npm run chronicle:sync-repo-saga` and `npm run chronicle:update` now take a shared execution lock under `.cache/.repo-saga-execution.lock`, so overlapping local or CI chronicle refreshes fail fast instead of racing on the same repo-saga cache tree.
 *   **Model-Aware Output Token Caps**: Added Cline-aligned known-model max-output-token metadata and now resolve the effective output cap from the actual selected model instead of hardcoded provider defaults. When the global max-token setting is still at the stock default, supported models automatically use their true known ceiling; when users set a custom global or provider-specific cap, requests are clamped to the model’s known maximum. This now applies across OpenAI-compatible providers plus Anthropic, Google, Azure OpenAI, and Ollama runtimes.
 *   **Developer-Mode Diagnostics Panel**: Added a dedicated Settings developer panel gated by a new Developer mode switch, so normal users do not see developer-only controls.
 *   **Selectable Diagnostic Call Modes + Stability Runs**: Developer diagnostics can now run with selectable call modes (including OpenAI-compatible forced transport modes) and can execute repeated stability runs with aggregated reporting.
@@ -154,6 +187,7 @@ This document summarizes the major functional and architectural changes implemen
 ### Chinese (中文)
 *   **主线 Force Rewrite 审计**: 新增一份针对当前主线的重新审计文档与统一推进矩阵，明确区分被重写后的 `origin/main` 发货真值与仅存在于备份分支中的证据，避免进度文档继续高估 live mainline 已具备的能力。
 *   **本机验证的 Clean-State 守护**: `.gitignore` 现在会忽略根目录 `render-host.mjs` 以及 `docs/` 下本地 vault 生成的错误日志、provider 诊断文件、预览导出产物和已保存图表工件，避免每次本机 Obsidian 验证后都把仓库弄脏。
+*   **Repo-Saga 串行执行守护**: `npm run chronicle:sync-repo-saga` 与 `npm run chronicle:update` 现在会共享 `.cache/.repo-saga-execution.lock` 执行锁，避免本地或 CI 并发刷新同一套 repo-saga 缓存目录时互相踩状态。
 *   **模型感知的输出 Token 上限**: 新增与 Cline 对齐的已知模型最大输出 Token 元数据，并且运行时现在会根据用户实际选择的模型来解析有效输出上限，而不是依赖硬编码的 provider 默认值。当全局最大 Token 仍保持插件默认值时，已支持模型会自动使用其真实已知上限；当用户手动设置全局或 provider 级上限时，请求会被钳制到该模型的已知最大值。此行为现已覆盖 OpenAI-compatible 路径以及 Anthropic、Google、Azure OpenAI、Ollama 运行时。
 *   **开发者模式诊断面板**: 设置页新增由“Developer mode”开关控制的独立开发者面板，默认对普通用户隐藏开发者专用控件。
 *   **可选诊断调用方式与稳定性多轮测试**: 开发者诊断现在可选择调用方式（含 OpenAI-compatible 的强制传输模式），并支持按指定轮次执行稳定性测试并输出聚合报告。

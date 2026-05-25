@@ -655,6 +655,14 @@ const CLI_INVOCATION_CONTRACT_EXPORT_RESULT_SCHEMA: OperationSchema = {
     }
 };
 
+const CLI_PUBLIC_SURFACE_EXPORT_RESULT_SCHEMA: OperationSchema = {
+    type: 'object',
+    properties: {
+        outputPath: { type: 'string' },
+        surface: { type: 'object' }
+    }
+};
+
 const OPERATION_DEFINITIONS: OperationDefinition[] = [
     {
         version: 1,
@@ -987,12 +995,45 @@ const OPERATION_DEFINITIONS: OperationDefinition[] = [
     },
     {
         version: 1,
-        id: 'provider.profile.export',
+        id: 'cli.public-surface.export',
         automationLevel: 'safe',
         requiredContext: 'none',
         sideEffectClass: 'write-file',
         commandBindings: [
+            createStaticCommandBinding('export-cli-public-surface', {
+                automationLevel: 'safe',
+                requiredContext: 'none',
+                sideEffectClass: 'write-file'
+            })
+        ],
+        inputSchema: EMPTY_OBJECT_INPUT_SCHEMA,
+        resultSchema: CLI_PUBLIC_SURFACE_EXPORT_RESULT_SCHEMA
+    },
+    {
+        version: 1,
+        id: 'provider.profile.export',
+        automationLevel: 'safe',
+        requiredContext: 'none',
+        sideEffectClass: 'write-file',
+        outputHandlingTags: ['contains-provider-credentials'],
+        commandBindings: [
             createStaticCommandBinding('export-provider-profiles', {
+                automationLevel: 'safe',
+                requiredContext: 'none',
+                sideEffectClass: 'write-file'
+            })
+        ],
+        inputSchema: EMPTY_OBJECT_INPUT_SCHEMA,
+        resultSchema: PROVIDER_PROFILE_EXPORT_RESULT_SCHEMA
+    },
+    {
+        version: 1,
+        id: 'provider.profile.export-redacted',
+        automationLevel: 'safe',
+        requiredContext: 'none',
+        sideEffectClass: 'write-file',
+        commandBindings: [
+            createStaticCommandBinding('export-provider-profiles-redacted', {
                 automationLevel: 'safe',
                 requiredContext: 'none',
                 sideEffectClass: 'write-file'
@@ -1007,6 +1048,7 @@ const OPERATION_DEFINITIONS: OperationDefinition[] = [
         automationLevel: 'safe',
         requiredContext: 'none',
         sideEffectClass: 'write-file',
+        inputHandlingTags: ['contains-provider-credentials'],
         commandBindings: [
             createStaticCommandBinding('import-provider-profiles', {
                 automationLevel: 'safe',

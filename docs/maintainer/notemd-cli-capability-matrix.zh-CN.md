@@ -1,6 +1,22 @@
 # Notemd CLI 能力矩阵
 
-> 更新：2026-05-07
+> 更新：2026-05-24
+
+## 当前状态说明（2026-05-24）
+
+简短结论：当前恢复回 `main` 的 CLI 工作是刻意收敛的。
+
+已经在 current `main` 落地的内容：
+
+- registry-backed operation 元数据
+- 类型化 capability / invocation 导出
+- 边界清晰的 export-only 公共安全切片
+- 针对同一批 export-only operations 的 repo-local maintainer helper
+
+当前没有宣称的内容：
+
+- 面向用户的宽口径 CLI API
+- 依赖后续产品切片的 backup 分支维护桥能力
 
 这是一份维护者控制文档，用来区分：
 
@@ -26,6 +42,46 @@
 - 但这仍然只是触发表面，不是成熟的类型化集成层
 - 现在 registry 导出的 capability manifest 已把命令面板、快捷键、官方 CLI 三种触发表面统一挂到同一套 command binding 元数据上
 
+## 当前收敛后的公共安全切片
+
+当前 public-safe slice 被刻意限制，只包含满足以下条件的命令：
+
+- `safe`
+- `requiredContext=none`
+- `mappingKind=exact`
+- 暴露在官方 CLI trigger surface 上
+- input schema 为空对象
+
+当前纳入该切片的命令 ID：
+
+- `notemd:export-provider-profiles-redacted`
+- `notemd:export-cli-capability-manifest`
+- `notemd:export-cli-invocation-contract`
+- `notemd:export-cli-public-surface`
+
+约束规则：
+
+- 原始 provider export 因为带有 `outputHandlingTags=contains-provider-credentials` 被排除在外
+- redacted provider export 会主动拒绝导入，避免脱敏文件被误当成可回灌的 live settings 快照
+- redacted export 仍可能暴露私有/custom `baseUrl` 基础设施信息，所以它只是比 raw export 更安全，不等于可无审查公开分享
+
+## Repo-Local Maintainer Helper
+
+仓库现在还带有一个很小的 maintainer helper，底层仍然是 `obsidian-cli native eval`：
+
+- help：`npm run cli:help`
+- invoke：`npm run cli:invoke -- --vault <vault> --operation <operation-id> [--pretty]`
+- 当前支持的 operation id：
+  - `provider.profile.export-redacted`
+  - `cli.capability-manifest.export`
+  - `cli.invocation-contract.export`
+  - `cli.public-surface.export`
+
+边界：
+
+- 这是 maintainer-grade repo 工具，不是 public CLI API
+- 当前 helper 只支持 export-only，且不接受输入 payload
+
 ## 当前命令矩阵
 
 | Command ID | 当前用途 | Automation Level | 为什么它现在还不是稳定工程 API | Registry operation 映射 |
@@ -33,10 +89,12 @@
 | `notemd:test-llm-connection` | 检查当前 provider 连通性 | `safe` | 现在已经具备类型化 input/result schema，但交互式 busy/reporter 路径与 notice 文案仍属于宿主 UI 语义 | `provider.connection.test`（`exact`） |
 | `notemd:run-developer-provider-diagnostic` | 运行长请求 provider 诊断 | `safe` | 现在已经具备类型化 input/result schema，但长请求网络行为与诊断报告落盘仍更接近 maintainer-grade surface，而不是稳定 public API | `provider.diagnostic.run`（`exact`） |
 | `notemd:run-developer-provider-stability-diagnostic` | 运行多次 provider 稳定性诊断 | `safe` | 现在已经具备类型化 input/result schema，但重复真实 provider 调用仍更接近 maintainer-grade diagnostic surface，而不是稳定 public API | `provider.diagnostic.stability-run`（`exact`） |
-| `notemd:export-provider-profiles` | 导出 provider profile 快照 | `safe` | 确定性且 machine-readable，但仍绑定插件管理的 config 路径语义 | `provider.profile.export` |
+| `notemd:export-provider-profiles` | 导出原始 provider profile 快照 | `safe` | 确定性且 machine-readable，但导出文件本身包含 provider 凭据，因此仍是 maintainer-sensitive surface，不属于 public-safe slice | `provider.profile.export` |
+| `notemd:export-provider-profiles-redacted` | 导出脱敏后的 provider profile 快照 | `safe` | 属于当前收敛后的 public-safe slice。确定性、machine-readable、会去掉 API Key，且会被主动拒绝导入，但仍可能暴露私有/custom endpoint 元数据 | `provider.profile.export-redacted` |
 | `notemd:import-provider-profiles` | 导入 provider profile 快照 | `safe` | machine-readable，但会改动 active provider 状态与插件设置 | `provider.profile.import` |
-| `notemd:export-cli-capability-manifest` | 导出命令 capability manifest | `safe` | 导出确定，但仍绑定插件 config-path 写入语义 | `cli.capability-manifest.export` |
-| `notemd:export-cli-invocation-contract` | 导出类型化 invocation contract | `safe` | 导出确定，但仍绑定插件 config-path 写入语义 | `cli.invocation-contract.export` |
+| `notemd:export-cli-capability-manifest` | 导出命令 capability manifest | `safe` | 属于当前收敛后的 public-safe slice。导出确定，但仍绑定插件 config-path 写入语义 | `cli.capability-manifest.export` |
+| `notemd:export-cli-invocation-contract` | 导出类型化 invocation contract | `safe` | 属于当前收敛后的 public-safe slice。导出确定，但仍绑定插件 config-path 写入语义 | `cli.invocation-contract.export` |
+| `notemd:export-cli-public-surface` | 导出当前收敛后的公共 CLI 表面 | `safe` | 属于当前收敛后的 public-safe slice。该导出会自描述当前真正支持的官方 CLI 安全子集 | `cli.public-surface.export` |
 | `notemd:notemd-generate-diagram` | 从活动文件生成 spec-first artifact | `requires-active-file` | 类型化结果现在已暴露完整 wrapper envelope，并额外包含显式 follow-through 细节（`kind`、`executionMode`、`sourcePath`、`actionLabel`、`operationInput`、`generation`、`followThrough`、`outputPath`、`previewOpened`），但 active-file 依赖、插件状态与保存/打开副作用仍使它不能直接宣称为稳定 public API | `diagram.generate`（`exact`，`defaultInput.outputMode=artifact`） |
 | `notemd:notemd-summarize-as-mermaid` | 为活动文件保存 Mermaid 输出 | `requires-active-file` | 类型化结果现在已暴露完整 wrapper envelope，并额外包含显式 follow-through 细节（`kind`、`executionMode`、`sourcePath`、`actionLabel`、`operationInput`、`generation`、`followThrough`、`outputPath`、`previewOpened`），但 active-file 依赖与插件管理的保存语义仍使它不能直接宣称为稳定 public API | `diagram.generate`（`exact`，`defaultInput.outputMode=mermaid`） |
 | `notemd:notemd-preview-diagram` | 预览已保存/已生成图表 | `interactive-ui` | 现在已经具备类型化 input/result schema 来描述 preview artifact 边界，但打开 preview modal 仍属于 UI-only 流程，不具备自动化稳定性 | `diagram.preview`（`exact`） |
@@ -62,8 +120,10 @@
 
 - `src/operations/registry.ts` 已成为已抽取 operation、command binding、mapping kind 与部分 input/result schema 的中心元数据源。
 - `src/operations/capabilityManifest.ts` 现在从同一 registry 展平 capability manifest。
+- capability/public-surface 元数据现在也会携带 handling tags，使调用方无需额外硬编码规则就能区分 secret-bearing export 与 redacted/public-safe export。
 - `src/cliContracts.ts` 现在也从同一 registry 生成 invocation contract，减少了文档、命令发现与契约导出之间的漂移路径。
-- registry 现在也已纳入主要 note-processing、utility、selection 与 export operations：`editor.create-link-and-generate`、`file.process-add-links`、`file.process-folder-add-links`、`content.generate-from-title`、`content.batch-generate-from-titles`、`research.summarize-topic`、`translate.file`、`translate.folder-batch`、`concept.extract-file`、`concept.extract-folder`、`content.extract-original-text`、`workflow.extract-and-generate`、`duplicate.check-file`、`concept.dedupe`、`mermaid.batch-fix`、`formula.fix-file`、`formula.batch-fix`、`provider.profile.export`、`provider.profile.import`、`cli.capability-manifest.export` 与 `cli.invocation-contract.export`。
+- registry 现在也已纳入主要 note-processing、utility、selection 与 export operations：`editor.create-link-and-generate`、`file.process-add-links`、`file.process-folder-add-links`、`content.generate-from-title`、`content.batch-generate-from-titles`、`research.summarize-topic`、`translate.file`、`translate.folder-batch`、`concept.extract-file`、`concept.extract-folder`、`content.extract-original-text`、`workflow.extract-and-generate`、`duplicate.check-file`、`concept.dedupe`、`mermaid.batch-fix`、`formula.fix-file`、`formula.batch-fix`、`provider.profile.export`、`provider.profile.export-redacted`、`provider.profile.import`、`cli.capability-manifest.export`、`cli.invocation-contract.export` 与 `cli.public-surface.export`。
+- `src/operations/publicCliSurface.ts` 现在会从同一套 registry/capability/contract 组合直接推导 bounded public-safe slice，而不是维护另一份并行 allowlist。
 - `file.process-add-links`、`file.process-folder-add-links`、`content.generate-from-title`、`content.batch-generate-from-titles`、`mermaid.batch-fix`、`concept.dedupe`、`translate.*`、`formula.*` 与 `content.extract-original-text` 现在已经组成当前已验证的 write-heavy contract-enrichment proof set：utility core 返回结构化结果，host adapter 接管本地化成功/no-file/confirmation 语义，registry 直接导出 richer schema。
 - `diagram.generate` 现在已经在宿主无关 generation core 之下携带显式 typed follow-through：`followThrough.kind` 用来区分 Mermaid 保存、artifact 保存与 preview 完成，同时继续保留向后兼容的顶层 `outputPath` / `previewOpened`。
 - 第一份已检入的 semantic-verification helper 现在也已经存在：`npm run verify:diagram-semantics` 会把维护者 runbook 落成可复用、无 secrets 的检查模板，而不是继续停留在纯文字指引层面。

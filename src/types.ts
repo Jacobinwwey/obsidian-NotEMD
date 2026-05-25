@@ -13,6 +13,20 @@ export interface LLMProviderConfig {
     apiVersion?: string;  // Only used for Azure OpenAI
 }
 
+export type ChapterSplitHeadingLevelSetting = 'auto' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
+
+export interface FolderTaskFileSelectionProfile {
+    id: string;
+    name: string;
+    folderPathHint: string;
+    includeSubfoldersMode: 'legacy' | 'include' | 'exclude';
+    fileFilterMode: 'none' | 'contains' | 'regex' | 'glob';
+    fileFilterPattern: string;
+    fileFilterTarget: 'relativePath' | 'basename';
+    fileFilterCaseSensitive: boolean;
+    fileFilterInvert: boolean;
+}
+
 // Main settings structure for the plugin
 export interface NotemdSettings {
     providers: LLMProviderConfig[];
@@ -43,6 +57,16 @@ export interface NotemdSettings {
     enableResearchInGenerateContent: boolean;
     tavilyMaxResults: number;
     tavilySearchDepth: 'basic' | 'advanced';
+    enableLocalKnowledgeRetrieval: boolean;
+    localKnowledgeBasePaths: string;
+    localKnowledgeTopK: number;
+    localKnowledgeSlidingWindowSize: number;
+    localKnowledgeMaxSnippetChars: number;
+    localKnowledgeExcludeCurrentFile: boolean;
+    enableLocalKnowledgeForBatchGenerateFromTitles: boolean;
+    enableLocalKnowledgeForResearchSummarize: boolean;
+    enableLocalKnowledgeForDiagramGeneration: boolean;
+    chapterSplitHeadingLevel: ChapterSplitHeadingLevelSetting;
     // Multi-model settings
     useMultiModelSettings: boolean;
     addLinksProvider: string;
@@ -91,6 +115,7 @@ export interface NotemdSettings {
     // Extract Concepts Task Settings
     extractConceptsMinimalTemplate: boolean;
     extractConceptsAddBacklink: boolean;
+    replaceSynonymsDuringConceptExtraction: boolean;
     // Add Links Post-Processing
     removeCodeFencesOnAddLinks: boolean; // New: Option to remove ```markdown and ``` fences
     // Language Settings
@@ -132,6 +157,13 @@ export interface NotemdSettings {
     batchConcurrency: number;
     batchSize: number;
     batchInterDelayMs: number;
+    folderTaskFileSelectionProfiles: FolderTaskFileSelectionProfile[];
+    folderTaskFileFilterMode: 'none' | 'contains' | 'regex' | 'glob';
+    folderTaskFileFilterPattern: string;
+    folderTaskFileFilterTarget: 'relativePath' | 'basename';
+    folderTaskFileFilterCaseSensitive: boolean;
+    folderTaskFileFilterInvert: boolean;
+    folderTaskIncludeSubfoldersMode: 'legacy' | 'include' | 'exclude';
     apiCallIntervalMs: number;
     autoMermaidFixAfterGenerate: boolean;
     customWorkflowButtonsDsl: string;
@@ -244,4 +276,17 @@ export interface ProgressReporter {
     activeTasks: number; // NEW: For concurrency display
     updateActiveTasks(delta: number): void; // NEW
     getLogs?(): string; // NEW: Retrieve all logs
+    updateApiLiveness?(event: ApiLivenessEvent): void;
+}
+
+export type ApiLivenessPhase = 'request-start' | 'response-headers' | 'response-chunk' | 'request-complete' | 'request-error';
+
+export interface ApiLivenessEvent {
+    phase: ApiLivenessPhase;
+    requestId: string;
+    providerName: string;
+    requestAttempt?: number;
+    transport?: string;
+    statusCode?: number;
+    retrying?: boolean;
 }

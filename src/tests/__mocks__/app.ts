@@ -5,6 +5,7 @@ export const mockApp = {
         create: jest.fn(),
         createFolder: jest.fn(),
         getAbstractFileByPath: jest.fn(),
+        getFileByPath: jest.fn(),
         read: jest.fn().mockResolvedValue(''),
         modify: jest.fn().mockResolvedValue(undefined),
         createBinary: jest.fn().mockResolvedValue(undefined),
@@ -23,6 +24,7 @@ export const mockApp = {
             mkdir: jest.fn().mockResolvedValue(undefined),
             append: jest.fn().mockResolvedValue(undefined), // Added
             stat: jest.fn(), // Added
+            getResourcePath: jest.fn((normalizedPath: string) => `app://local/${normalizedPath}`)
         },
         on: jest.fn(), // Added
     },

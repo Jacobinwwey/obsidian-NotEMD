@@ -48,6 +48,19 @@ function buildLegacyMermaidResult(
     };
 }
 
+function buildSourceMarkdownForDiagramGeneration(input: DiagramOperationInput): string {
+    if (!input.localKnowledgeContext?.trim()) {
+        return input.sourceMarkdown;
+    }
+
+    return [
+        input.sourceMarkdown.trim(),
+        '---',
+        'Additional Local Knowledge Context (supporting reference only; keep the primary structure faithful to the source note):',
+        input.localKnowledgeContext.trim()
+    ].join('\n\n');
+}
+
 export async function runDiagramGenerateOperation(
     params: RunDiagramGenerateOperationParams
 ): Promise<DiagramGenerationResult> {
@@ -60,12 +73,13 @@ export async function runDiagramGenerateOperation(
     } = params;
     const llmCall = params.callLLMImpl ?? callLLM;
     const runStructuredGeneration = params.generateDiagramArtifactImpl ?? generateDiagramArtifact;
+    const sourceMarkdownForGeneration = buildSourceMarkdownForDiagramGeneration(input);
 
     if (input.outputMode === 'mermaid' && !settings.enableExperimentalDiagramPipeline) {
         const mermaidContent = await llmCall(
             provider,
             params.getLegacyMermaidPrompt(),
-            input.sourceMarkdown,
+            sourceMarkdownForGeneration,
             settings,
             reporter,
             modelName
@@ -80,7 +94,7 @@ export async function runDiagramGenerateOperation(
             reporter.log('Mermaid command pins experimental compatibility mode to legacy-mermaid to guarantee Mermaid output.');
         }
 
-        return await runStructuredGeneration(input.sourceMarkdown, {
+        return await runStructuredGeneration(sourceMarkdownForGeneration, {
             requestedIntent: input.requestedIntent,
             compatibilityMode: input.compatibilityMode,
             targetLanguage: input.targetLanguage,
@@ -98,7 +112,7 @@ export async function runDiagramGenerateOperation(
         const mermaidContent = await llmCall(
             provider,
             params.getLegacyMermaidPrompt(),
-            input.sourceMarkdown,
+            sourceMarkdownForGeneration,
             settings,
             reporter,
             modelName

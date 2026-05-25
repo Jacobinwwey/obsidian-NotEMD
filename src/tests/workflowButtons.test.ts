@@ -88,6 +88,7 @@ describe('workflowButtons parser', () => {
         expect(actionIds).not.toContain('run-developer-provider-diagnostic');
         expect(actionIds).not.toContain('run-developer-provider-stability-diagnostic');
         expect(actionIds).toContain('batch-extract-original-text');
+        expect(actionIds).toContain('split-note-by-chapters');
     });
 
     test('exposes automation metadata for current action ids', () => {
@@ -102,5 +103,9 @@ describe('workflowButtons parser', () => {
         expect(getSidebarActionAutomationLevel('preview-diagram')).toBe('interactive-ui');
         expect(getSidebarActionRequiredContext('preview-diagram')).toBe('preview-ui');
         expect(getSidebarActionSideEffectClass('preview-diagram')).toBe('preview-ui');
+
+        expect(getSidebarActionAutomationLevel('split-note-by-chapters')).toBe('requires-active-file');
+        expect(getSidebarActionRequiredContext('split-note-by-chapters')).toBe('active-file');
+        expect(getSidebarActionSideEffectClass('split-note-by-chapters')).toBe('write-file');
     });
 });

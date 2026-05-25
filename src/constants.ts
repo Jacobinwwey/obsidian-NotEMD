@@ -33,6 +33,16 @@ export const DEFAULT_SETTINGS: NotemdSettings = {
     enableResearchInGenerateContent: false, // Default to false: Generate from Title does NOT research by default
     tavilyMaxResults: 5, // Default Tavily max results
     tavilySearchDepth: 'basic', // Default Tavily search depth
+    enableLocalKnowledgeRetrieval: false,
+    localKnowledgeBasePaths: '',
+    localKnowledgeTopK: 3,
+    localKnowledgeSlidingWindowSize: 0,
+    localKnowledgeMaxSnippetChars: 800,
+    localKnowledgeExcludeCurrentFile: true,
+    enableLocalKnowledgeForBatchGenerateFromTitles: false,
+    enableLocalKnowledgeForResearchSummarize: false,
+    enableLocalKnowledgeForDiagramGeneration: false,
+    chapterSplitHeadingLevel: 'auto',
     // Multi-model defaults
     useMultiModelSettings: false, // Default to using the single activeProvider
     addLinksProvider: 'DeepSeek', // Default to the primary activeProvider initially
@@ -75,6 +85,7 @@ export const DEFAULT_SETTINGS: NotemdSettings = {
     // Extract Concepts Task Defaults
     extractConceptsMinimalTemplate: true,
     extractConceptsAddBacklink: false,
+    replaceSynonymsDuringConceptExtraction: false,
     // Add Links Post-Processing Defaults
     removeCodeFencesOnAddLinks: false, // Default to NOT removing code fences
     // Language Settings Defaults
@@ -148,6 +159,13 @@ export const DEFAULT_SETTINGS: NotemdSettings = {
     batchConcurrency: 1,
     batchSize: 50,
     batchInterDelayMs: 1000,
+    folderTaskFileSelectionProfiles: [],
+    folderTaskFileFilterMode: 'none',
+    folderTaskFileFilterPattern: '',
+    folderTaskFileFilterTarget: 'relativePath',
+    folderTaskFileFilterCaseSensitive: false,
+    folderTaskFileFilterInvert: false,
+    folderTaskIncludeSubfoldersMode: 'legacy',
     apiCallIntervalMs: 500,
     autoMermaidFixAfterGenerate: true,
     customWorkflowButtonsDsl: DEFAULT_CUSTOM_WORKFLOW_BUTTONS_DSL,

@@ -25,6 +25,14 @@ import { normalizeNameForFilePath } from '../utils';
 import { chunkArray, createConcurrentProcessor, delay } from '../utils';
 import { NotemdSettings, ProgressReporter, TaskKey } from '../types';
 import { SidebarActionId } from '../workflowButtons';
+import {
+    applyFolderTaskSelectionOverride,
+    FolderTaskFileSelectionOverride,
+    FolderTaskInteractiveSelection,
+    FolderTaskKind,
+    mergeFolderTaskSelectionOverrides,
+    selectFolderTaskFiles
+} from '../folderTaskFileSelector';
 
 export interface NoteProcessingPluginRuntime extends ConceptExtractionPluginContext, ExtractOriginalTextPluginContext {}
 
@@ -106,6 +114,10 @@ export interface NoteProcessingCommandHost {
     getFolderByPath: (path: string) => TFolder | null;
     getFiles: () => TFile[];
     getFolderSelection: () => Promise<string | null>;
+    getFolderTaskSelection?: (
+        taskKind: FolderTaskKind,
+        initialOverride?: FolderTaskFileSelectionOverride
+    ) => Promise<FolderTaskInteractiveSelection | null>;
     getTaskLanguageCode: (task: Extract<TaskKey, 'translate'>) => string;
     resolveCompleteFolderPath: (sourceFolderPath: string) => string | null;
     getStepStatusText: (current: number, total: number, label: string) => string;
@@ -131,6 +143,11 @@ export interface NoteProcessingCommandHost {
     appendVaultLog: (path: string, content: string) => Promise<void>;
     completeReporter: (reporter: ProgressReporter) => void;
     finalizeReporter: (reporter: ProgressReporter) => void;
+}
+
+export interface FolderTaskCommandSelectionOptions {
+    folderPathOverride?: string;
+    fileSelectionOverride?: FolderTaskFileSelectionOverride;
 }
 
 function actionRequiresConceptNotePath(actionId: SidebarActionId): boolean {
@@ -197,6 +214,44 @@ async function runBusyReporterCommandWithHost(
     }
 }
 
+async function resolveFolderTaskSelectionWithHost(
+    host: Pick<NoteProcessingCommandHost, 'getFolderSelection' | 'getFolderTaskSelection'>,
+    taskKind: FolderTaskKind,
+    folderPathOverride?: string,
+    fileSelectionOverride?: FolderTaskFileSelectionOverride
+): Promise<FolderTaskInteractiveSelection | null> {
+    if (folderPathOverride) {
+        return {
+            folderPath: folderPathOverride,
+            fileSelectionOverride
+        };
+    }
+
+    if (host.getFolderTaskSelection) {
+        const selection = await host.getFolderTaskSelection(taskKind, fileSelectionOverride);
+        if (!selection) {
+            return null;
+        }
+        return {
+            folderPath: selection.folderPath,
+            fileSelectionOverride: mergeFolderTaskSelectionOverrides(
+                selection.fileSelectionOverride,
+                fileSelectionOverride
+            )
+        };
+    }
+
+    const folderPath = await host.getFolderSelection();
+    if (!folderPath) {
+        return null;
+    }
+
+    return {
+        folderPath,
+        fileSelectionOverride
+    };
+}
+
 function getConceptNoteOptions(settings: NotemdSettings): { disableBacklink: boolean; minimalTemplate: boolean } {
     return {
         disableBacklink: !settings.extractConceptsAddBacklink,
@@ -252,7 +307,8 @@ async function runBatchGenerateContentForTitlesCommandCoreWithHost(
     host: NoteProcessingCommandHost,
     useReporter: ProgressReporter,
     folderPathOverride?: string,
-    batchGenerateContentForTitlesImpl: typeof batchGenerateContentForTitles = batchGenerateContentForTitles
+    batchGenerateContentForTitlesImpl: typeof batchGenerateContentForTitles = batchGenerateContentForTitles,
+    fileSelectionOverride?: FolderTaskFileSelectionOverride
 ): Promise<BatchGenerateContentForTitlesResult | null> {
     let uiStrings = host.getUiStrings();
     const actionLabel = host.getActionLabel('batch-generate-from-titles');
@@ -260,19 +316,26 @@ async function runBatchGenerateContentForTitlesCommandCoreWithHost(
 
     await host.loadSettings();
     uiStrings = host.getUiStrings();
-    const folderPath = folderPathOverride ?? await host.getFolderSelection();
-    if (!folderPath) {
+    const selection = await resolveFolderTaskSelectionWithHost(
+        host,
+        'batch-generate-from-titles',
+        folderPathOverride,
+        fileSelectionOverride
+    );
+    if (!selection?.folderPath) {
         useReporter.log(uiStrings.notices.batchGenerationCancelled);
         useReporter.updateStatus(uiStrings.notices.batchGenerationCancelled, -1);
         throw new Error(uiStrings.notices.batchGenerationCancelled);
     }
+    const folderPath = selection.folderPath;
+    const effectiveSettings = applyFolderTaskSelectionOverride(host.getSettings(), selection.fileSelectionOverride);
 
     host.updateStatusBar(host.getRunningActionText(actionLabel));
     useReporter.log(host.getRunningActionText(actionLabel));
 
     commandResult = await batchGenerateContentForTitlesImpl(
         host.getApp(),
-        host.getSettings(),
+        effectiveSettings,
         folderPath,
         useReporter
     );
@@ -332,7 +395,8 @@ export async function runBatchTranslateFolderCommandWithHost(
     host: NoteProcessingCommandHost,
     reporter?: ProgressReporter,
     folder?: TFolder,
-    batchTranslateFolderImpl: typeof batchTranslateFolder = batchTranslateFolder
+    batchTranslateFolderImpl: typeof batchTranslateFolder = batchTranslateFolder,
+    fileSelectionOverride?: FolderTaskFileSelectionOverride
 ): Promise<BatchTranslateFolderResult | null> {
     const actionLabel = host.getActionLabel('batch-translate-folder');
     let commandResult: BatchTranslateFolderResult | null = null;
@@ -343,23 +407,31 @@ export async function runBatchTranslateFolderCommandWithHost(
         try {
             await host.loadSettings();
             uiStrings = host.getUiStrings();
+            let resolvedFileSelectionOverride = fileSelectionOverride;
             let targetFolder = folder;
             if (!targetFolder) {
-                const folderPath = await host.getFolderSelection();
-                if (!folderPath) {
+                const selection = await resolveFolderTaskSelectionWithHost(
+                    host,
+                    'batch-translate-folder',
+                    undefined,
+                    fileSelectionOverride
+                );
+                if (!selection?.folderPath) {
                     throw new Error('Folder selection cancelled.');
                 }
-                const selectedFolder = host.getFolderByPath(folderPath);
+                const selectedFolder = host.getFolderByPath(selection.folderPath);
                 if (!selectedFolder) {
                     throw new Error('Invalid folder selected.');
                 }
                 targetFolder = selectedFolder;
+                resolvedFileSelectionOverride = selection.fileSelectionOverride;
             }
+            const effectiveSettings = applyFolderTaskSelectionOverride(host.getSettings(), resolvedFileSelectionOverride);
 
             const translateLanguage = host.getTaskLanguageCode('translate');
             commandResult = await batchTranslateFolderImpl(
                 host.getApp(),
-                host.getSettings(),
+                effectiveSettings,
                 targetFolder,
                 translateLanguage,
                 { reporter: useReporter }
@@ -543,7 +615,8 @@ export async function runBatchExtractConceptsForFolderCommandWithHost(
     host: NoteProcessingCommandHost,
     reporter?: ProgressReporter,
     extractConceptsFromFileImpl: typeof extractConceptsFromFile = extractConceptsFromFile,
-    createConceptNotesImpl: typeof createConceptNotes = createConceptNotes
+    createConceptNotesImpl: typeof createConceptNotes = createConceptNotes,
+    options: FolderTaskCommandSelectionOptions = {}
 ): Promise<void> {
     const actionLabel = host.getActionLabel('extract-concepts-folder');
 
@@ -557,20 +630,30 @@ export async function runBatchExtractConceptsForFolderCommandWithHost(
             await host.loadSettings();
             uiStrings = host.getUiStrings();
             const settings = host.getSettings();
-            const folderPath = await host.getFolderSelection();
-            if (!folderPath) {
+            const selection = await resolveFolderTaskSelectionWithHost(
+                host,
+                'extract-concepts-folder',
+                options.folderPathOverride,
+                options.fileSelectionOverride
+            );
+            if (!selection?.folderPath) {
                 throw new Error('Folder selection cancelled.');
             }
+            const folderPath = selection.folderPath;
+            const effectiveSettings = applyFolderTaskSelectionOverride(settings, selection.fileSelectionOverride);
 
             const folder = host.getFolderByPath(folderPath);
             if (!folder) {
                 throw new Error(`Invalid folder selected: ${folderPath}`);
             }
 
-            const files = host.getFiles().filter(file =>
-                (file.extension === 'md' || file.extension === 'txt') &&
-                file.path.startsWith(folderPath === '/' ? '' : `${folderPath}/`)
-            );
+            const files = selectFolderTaskFiles({
+                taskKind: 'extract-concepts-folder',
+                folderPath,
+                files: host.getFiles(),
+                allowedExtensions: ['md', 'txt'],
+                settings: effectiveSettings
+            });
 
             if (files.length === 0) {
                 const noFilesMessage = formatI18n(uiStrings.notices.noMarkdownOrTextFilesFoundSelectedFolder, {
@@ -657,7 +740,8 @@ export async function runBatchExtractConceptsForFolderCommandWithHost(
                             clearDisplay: () => undefined,
                             abortController: useReporter.abortController,
                             activeTasks: useReporter.activeTasks,
-                            updateActiveTasks: (delta: number) => useReporter.updateActiveTasks(delta)
+                            updateActiveTasks: (delta: number) => useReporter.updateActiveTasks(delta),
+                            updateApiLiveness: (event) => useReporter.updateApiLiveness?.(event)
                         };
 
                         try {
@@ -861,7 +945,8 @@ export async function runExtractOriginalTextCommandWithHost(
 export async function runBatchExtractOriginalTextCommandWithHost(
     host: NoteProcessingCommandHost,
     reporter?: ProgressReporter,
-    extractOriginalTextImpl: typeof extractOriginalText = extractOriginalText
+    extractOriginalTextImpl: typeof extractOriginalText = extractOriginalText,
+    options: FolderTaskCommandSelectionOptions = {}
 ): Promise<BatchExtractOriginalTextResult | null> {
     const actionLabel = host.getActionLabel('batch-extract-original-text');
     let commandResult: BatchExtractOriginalTextResult | null = null;
@@ -872,23 +957,33 @@ export async function runBatchExtractOriginalTextCommandWithHost(
         try {
             await host.loadSettings();
             uiStrings = host.getUiStrings();
-            const folderPath = await host.getFolderSelection();
-            if (!folderPath) {
+            const selection = await resolveFolderTaskSelectionWithHost(
+                host,
+                'batch-extract-original-text',
+                options.folderPathOverride,
+                options.fileSelectionOverride
+            );
+            if (!selection?.folderPath) {
                 const cancelledMessage = uiStrings.notices.batchExtractOriginalTextCancelled || uiStrings.notices.batchProcessingCancelled;
                 useReporter.log(cancelledMessage);
                 useReporter.updateStatus(cancelledMessage, -1);
                 throw new Error(cancelledMessage);
             }
+            const folderPath = selection.folderPath;
+            const effectiveSettings = applyFolderTaskSelectionOverride(host.getSettings(), selection.fileSelectionOverride);
 
             const folder = host.getFolderByPath(folderPath);
             if (!folder) {
                 throw new Error(`Invalid folder selected: ${folderPath}`);
             }
 
-            const files = host.getFiles().filter(file =>
-                (file.extension === 'md' || file.extension === 'txt') &&
-                (file.path === folderPath || file.path.startsWith(folderPath === '/' ? '' : `${folderPath}/`))
-            );
+            const files = selectFolderTaskFiles({
+                taskKind: 'batch-extract-original-text',
+                folderPath,
+                files: host.getFiles(),
+                allowedExtensions: ['md', 'txt'],
+                settings: effectiveSettings
+            });
 
             commandResult = {
                 folderPath,
@@ -1196,7 +1291,8 @@ export async function runBatchGenerateContentForTitlesCommandWithHost(
     host: NoteProcessingCommandHost,
     reporter?: ProgressReporter,
     folderPathOverride?: string,
-    batchGenerateContentForTitlesImpl: typeof batchGenerateContentForTitles = batchGenerateContentForTitles
+    batchGenerateContentForTitlesImpl: typeof batchGenerateContentForTitles = batchGenerateContentForTitles,
+    fileSelectionOverride?: FolderTaskFileSelectionOverride
 ): Promise<BatchGenerateContentForTitlesResult | null> {
     const actionLabel = host.getActionLabel('batch-generate-from-titles');
     let commandResult: BatchGenerateContentForTitlesResult | null = null;
@@ -1209,7 +1305,8 @@ export async function runBatchGenerateContentForTitlesCommandWithHost(
                 host,
                 useReporter,
                 folderPathOverride,
-                batchGenerateContentForTitlesImpl
+                batchGenerateContentForTitlesImpl,
+                fileSelectionOverride
             );
         } catch (error: unknown) {
             const { errorMessage, errorDetails } = normalizeError(
@@ -1306,7 +1403,8 @@ export async function runProcessFolderWithNotemdCommandWithHost(
     host: NoteProcessingCommandHost,
     reporter?: ProgressReporter,
     folderPathOverride?: string,
-    processFileImpl: typeof processFile = processFile
+    processFileImpl: typeof processFile = processFile,
+    fileSelectionOverride?: FolderTaskFileSelectionOverride
 ): Promise<BatchProcessFolderResult | null> {
     const actionLabel = host.getActionLabel('process-folder-add-links');
     let commandResult: BatchProcessFolderResult | null = null;
@@ -1321,22 +1419,32 @@ export async function runProcessFolderWithNotemdCommandWithHost(
             await host.loadSettings();
             uiStrings = host.getUiStrings();
             const settings = host.getSettings();
-            const folderPath = folderPathOverride ?? await host.getFolderSelection();
-            if (!folderPath) {
+            const selection = await resolveFolderTaskSelectionWithHost(
+                host,
+                'process-folder-add-links',
+                folderPathOverride,
+                fileSelectionOverride
+            );
+            if (!selection?.folderPath) {
                 useReporter.log(uiStrings.notices.batchProcessingCancelled);
                 useReporter.updateStatus(uiStrings.notices.batchProcessingCancelled, -1);
                 throw new Error(uiStrings.notices.batchProcessingCancelled);
             }
+            const folderPath = selection.folderPath;
+            const effectiveSettings = applyFolderTaskSelectionOverride(settings, selection.fileSelectionOverride);
 
             const folder = host.getFolderByPath(folderPath);
             if (!folder) {
                 throw new Error(`Invalid folder selected: ${folderPath}`);
             }
 
-            const files = host.getFiles().filter(file =>
-                (file.extension === 'md' || file.extension === 'txt') &&
-                (file.path === folderPath || file.path.startsWith(folderPath === '/' ? '' : `${folderPath}/`))
-            );
+            const files = selectFolderTaskFiles({
+                taskKind: 'process-folder-add-links',
+                folderPath,
+                files: host.getFiles(),
+                allowedExtensions: ['md', 'txt'],
+                settings: effectiveSettings
+            });
 
             const batchCommandResult: BatchProcessFolderResult = {
                 folderPath,
@@ -1445,7 +1553,8 @@ export async function runProcessFolderWithNotemdCommandWithHost(
                             clearDisplay: () => undefined,
                             abortController: useReporter.abortController,
                             activeTasks: useReporter.activeTasks,
-                            updateActiveTasks: (delta: number) => useReporter.updateActiveTasks(delta)
+                            updateActiveTasks: (delta: number) => useReporter.updateActiveTasks(delta),
+                            updateApiLiveness: (event) => useReporter.updateApiLiveness?.(event)
                         };
 
                         try {

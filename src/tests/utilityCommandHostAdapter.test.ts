@@ -31,6 +31,7 @@ function createUiStrings() {
             notemdBusy: 'Notemd busy',
             duplicateTermsCheckConsole: 'Found {count} potential duplicate terms. Check console.',
             duplicateCheckError: 'Error checking duplicates: {message}',
+            noActiveMarkdownFileSelected: 'No active Markdown file selected.',
             noActiveTextFileSelected: "No active '.md' or '.txt' file selected.",
             duplicateCheckRemoveError: 'Duplicate cleanup failed: {message}',
             noPotentialDuplicateConceptNotesFound: 'No potential duplicate concept notes found.',
@@ -40,6 +41,9 @@ function createUiStrings() {
             batchMermaidFixFinishedWithErrors: 'Mermaid fix finished with {count} errors after {modifiedCount} fixes',
             batchMermaidFixSuccess: 'Fixed Mermaid in {modifiedCount} files',
             batchMermaidFixError: 'Batch Mermaid fix failed: {message}',
+            chapterSplitSuccess: 'Chapter split complete. Created {count} chapter notes and TOC: {tocPath}',
+            chapterSplitError: 'Chapter split failed: {message}',
+            fileEmpty: 'File is empty.',
             formulaFixSuccess: 'Fixed formulas in {file}',
             formulaFixNotNeeded: 'No formula fixes needed for {file}',
             genericError: 'Generic error: {message}',
@@ -49,7 +53,8 @@ function createUiStrings() {
         errorModal: {
             titles: {
                 duplicateCheckRemove: 'Duplicate Cleanup Error',
-                batchMermaidFix: 'Batch Mermaid Fix Error'
+                batchMermaidFix: 'Batch Mermaid Fix Error',
+                chapterSplit: 'Chapter Split Error'
             }
         }
     };
@@ -72,6 +77,8 @@ function createHost(reporter: ProgressReporter, initiallyBusy = false) {
                         return 'Duplicate cleanup';
                     case 'batch-mermaid-fix':
                         return 'Batch Mermaid fix';
+                    case 'split-note-by-chapters':
+                        return 'Split note by chapters';
                     case 'fix-formula-current':
                         return 'Fix formulas';
                     case 'batch-fix-formula':
@@ -260,6 +267,86 @@ describe('utility command host adapter', () => {
         expect(getBusy()).toBe(false);
     });
 
+    test('batch mermaid fix command passes per-operation selection overrides without mutating host settings', async () => {
+        const reporter = createReporter();
+        const { host } = createHost(reporter);
+        host.getFolderSelection.mockResolvedValue('Concepts');
+        host.getSettings.mockReturnValue({
+            ...mockSettings,
+            folderTaskFileFilterMode: 'none',
+            folderTaskIncludeSubfoldersMode: 'legacy'
+        });
+        const batchFixImpl = jest.fn().mockResolvedValue(createBatchMermaidFixResult({
+            folderPath: 'Concepts',
+            processedFileCount: 1,
+            modifiedCount: 1
+        }));
+        const { runBatchMermaidFixCommandWithHost } = loadModule();
+
+        await runBatchMermaidFixCommandWithHost(
+            host,
+            reporter,
+            undefined,
+            batchFixImpl,
+            {
+                includeSubfoldersMode: 'exclude',
+                fileFilterMode: 'contains',
+                fileFilterPattern: 'Topic'
+            }
+        );
+
+        const passedSettings = batchFixImpl.mock.calls[0][1];
+        expect(passedSettings.folderTaskIncludeSubfoldersMode).toBe('exclude');
+        expect(passedSettings.folderTaskFileFilterMode).toBe('contains');
+        expect(passedSettings.folderTaskFileFilterPattern).toBe('Topic');
+        expect(host.getSettings().folderTaskIncludeSubfoldersMode).toBe('legacy');
+        expect(host.getSettings().folderTaskFileFilterMode).toBe('none');
+    });
+
+    test('batch mermaid fix command uses interactive folder-task selection profile when available', async () => {
+        const reporter = createReporter();
+        const { host } = createHost(reporter);
+        host.getSettings.mockReturnValue({
+            ...mockSettings,
+            folderTaskFileSelectionProfiles: [
+                {
+                    id: 'profile-formulas',
+                    name: 'Concept basename filter',
+                    folderPathHint: 'Concepts',
+                    includeSubfoldersMode: 'exclude',
+                    fileFilterMode: 'contains',
+                    fileFilterPattern: 'Concept',
+                    fileFilterTarget: 'basename',
+                    fileFilterCaseSensitive: false,
+                    fileFilterInvert: false
+                }
+            ]
+        });
+        const getFolderTaskSelection = jest.fn().mockResolvedValue({
+            folderPath: 'Concepts',
+            fileSelectionOverride: {
+                profileId: 'profile-formulas'
+            }
+        });
+        Object.assign(host, { getFolderTaskSelection });
+        const batchFixImpl = jest.fn().mockResolvedValue(createBatchMermaidFixResult({
+            folderPath: 'Concepts',
+            processedFileCount: 1,
+            modifiedCount: 1
+        }));
+        const { runBatchMermaidFixCommandWithHost } = loadModule();
+
+        await runBatchMermaidFixCommandWithHost(host, reporter, undefined, batchFixImpl);
+
+        expect(getFolderTaskSelection).toHaveBeenCalledWith('batch-mermaid-fix', undefined);
+        expect(host.getFolderSelection).not.toHaveBeenCalled();
+        const passedSettings = batchFixImpl.mock.calls[0][1];
+        expect(passedSettings.folderTaskIncludeSubfoldersMode).toBe('exclude');
+        expect(passedSettings.folderTaskFileFilterMode).toBe('contains');
+        expect(passedSettings.folderTaskFileFilterPattern).toBe('Concept');
+        expect(passedSettings.folderTaskFileFilterTarget).toBe('basename');
+    });
+
     test('fix formula command delegates through extracted host flow', async () => {
         const reporter = createReporter();
         const { host, getBusy } = createHost(reporter);
@@ -291,6 +378,56 @@ describe('utility command host adapter', () => {
         expect(getBusy()).toBe(false);
     });
 
+    test('split note by chapters command delegates through extracted host flow', async () => {
+        const reporter = createReporter();
+        const { host, getBusy } = createHost(reporter);
+        const file = Object.assign(new (TFile as any)(), {
+            name: 'Topic.md',
+            basename: 'Topic',
+            path: 'Notes/Topic.md',
+            extension: 'md'
+        });
+        host.getActiveFile = jest.fn(() => file);
+        host.readFile = jest.fn().mockResolvedValue('# Topic\n\n## One');
+        const splitImpl = jest.fn().mockResolvedValue({
+            sourcePath: 'Notes/Topic.md',
+            outputFolderPath: 'Notes/topic_chapters',
+            tocPath: 'Notes/topic_chapters/Topic_TOC.md',
+            manifestPath: 'Notes/topic_chapters/.notemd-chapter-split.json',
+            splitLevel: 2,
+            chapters: [
+                {
+                    title: 'One',
+                    outputPath: 'Notes/topic_chapters/01-one.md',
+                    markdown: '## One',
+                    breadcrumb: ['Topic', 'One'],
+                    nestedHeadings: []
+                }
+            ],
+            tocMarkdown: '# Topic TOC',
+            chapterCount: 1,
+            removedStaleFileCount: 0
+        });
+        const { runSplitNoteByChaptersCommandWithHost } = loadModule();
+
+        const result = await runSplitNoteByChaptersCommandWithHost(host, reporter, splitImpl);
+
+        expect(splitImpl).toHaveBeenCalledWith(host.getApp(), file, reporter, {
+            splitHeadingLevel: host.getSettings().chapterSplitHeadingLevel
+        });
+        expect(host.showNotice).toHaveBeenCalledWith(
+            'Chapter split complete. Created 1 chapter notes and TOC: Notes/topic_chapters/Topic_TOC.md'
+        );
+        expect(reporter.updateStatus).toHaveBeenCalledWith('Done Split note by chapters', 100);
+        expect(host.completeReporter).toHaveBeenCalledWith(reporter);
+        expect(host.finalizeReporter).toHaveBeenCalledWith(reporter);
+        expect(result).toEqual(expect.objectContaining({
+            outputFolderPath: 'Notes/topic_chapters',
+            chapterCount: 1
+        }));
+        expect(getBusy()).toBe(false);
+    });
+
     test('batch formula fix command resolves folder and reports success through extracted host flow', async () => {
         const reporter = createReporter();
         const { host, getBusy } = createHost(reporter);
@@ -314,7 +451,7 @@ describe('utility command host adapter', () => {
 
         const result = await runBatchFixFormulaFormatsCommandWithHost(host, reporter, batchFixImpl);
 
-        expect(batchFixImpl).toHaveBeenCalledWith(host.getApp(), 'Notes', reporter);
+        expect(batchFixImpl).toHaveBeenCalledWith(host.getApp(), 'Notes', reporter, host.getSettings());
         expect(host.showNotice).toHaveBeenCalledWith('Fixed formulas in 3 files');
         expect(result).toEqual(expect.objectContaining({
             modifiedCount: 3,
@@ -323,5 +460,43 @@ describe('utility command host adapter', () => {
         expect(host.completeReporter).toHaveBeenCalledWith(reporter);
         expect(host.finalizeReporter).toHaveBeenCalledWith(reporter);
         expect(getBusy()).toBe(false);
+    });
+
+    test('batch formula fix command supports folder path override and selection overrides', async () => {
+        const reporter = createReporter();
+        const { host } = createHost(reporter);
+        const batchFixImpl = jest.fn().mockResolvedValue({
+            folderPath: 'Notes',
+            processedFileCount: 1,
+            modifiedCount: 1,
+            cancelled: false,
+            fileResults: [],
+            errors: []
+        });
+        const { runBatchFixFormulaFormatsCommandWithHost } = loadModule();
+
+        await runBatchFixFormulaFormatsCommandWithHost(
+            host,
+            reporter,
+            batchFixImpl,
+            {
+                folderPathOverride: 'Notes',
+                fileSelectionOverride: {
+                    fileFilterMode: 'glob',
+                    fileFilterPattern: '**/*.md'
+                }
+            }
+        );
+
+        expect(host.getFolderSelection).not.toHaveBeenCalled();
+        expect(batchFixImpl).toHaveBeenCalledWith(
+            host.getApp(),
+            'Notes',
+            reporter,
+            expect.objectContaining({
+                folderTaskFileFilterMode: 'glob',
+                folderTaskFileFilterPattern: '**/*.md'
+            })
+        );
     });
 });

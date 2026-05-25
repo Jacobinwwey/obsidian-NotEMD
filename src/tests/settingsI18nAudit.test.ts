@@ -28,6 +28,16 @@ describe('settings page i18n coverage', () => {
             'Batch Processing',
             'Enable Batch Parallelism',
             'Batch Concurrency',
+            'Folder task file filter',
+            'Filter mode',
+            'Filter pattern',
+            'Match target',
+            'Subfolder scope',
+            'Saved file-selection profiles',
+            'Add profile',
+            'Save current defaults as profile',
+            'Profile name',
+            'Preferred folder path',
             'Enable duplicate detection',
             'Translate output to corresponding language',
             'Merged query mode',
@@ -71,6 +81,13 @@ describe('settings page i18n coverage', () => {
             'Concept note output',
             'Concept log file output',
             'Content generation & output',
+            'Local knowledge retrieval',
+            'Enable local knowledge retrieval',
+            'Knowledge base folder paths',
+            'Retrieved section count',
+            'Sliding window size',
+            'Chapter split',
+            'Split heading level',
             'Enable research in "Generate from title"',
             'One-click workflow buttons',
             'Workflow error strategy',
@@ -78,6 +95,11 @@ describe('settings page i18n coverage', () => {
             'Advanced DSL editor',
             'Workflow DSL validation',
             'Available workflow action IDs',
+            'Reset settings',
+            'Complete reset',
+            'Partial reset',
+            'Reset all settings',
+            'Reset except providers',
             'Custom prompt settings',
             'Enable custom prompts for specific tasks',
             'Use custom prompt for "',
@@ -104,14 +126,36 @@ describe('settings page i18n coverage', () => {
         expect(en.settings.webResearch.heading).toBeDefined();
         expect(en.settings.processing.heading).toBeDefined();
         expect(en.settings.batchProcessing.heading).toBeDefined();
+        expect(en.settings.folderTaskFilter.heading).toBeDefined();
+        expect(en.settings.folderTaskFilter.syntaxGuideName).toBeDefined();
+        expect(en.settings.folderTaskFilter.syntaxGuideDesc).toBeDefined();
+        expect(en.settings.folderTaskFilter.invalidRegexNotice).toBeDefined();
+        expect(en.settings.folderTaskFilter.profilesHeading).toBeDefined();
+        expect(en.settings.folderTaskFilter.addProfileButton).toBeDefined();
+        expect(en.settings.folderTaskFilter.profileFolderPathName).toBeDefined();
         expect(en.settings.batchMermaidFix.heading).toBeDefined();
         expect(en.settings.duplicateScope.heading).toBeDefined();
         expect(en.settings.focusedLearning.heading).toBeDefined();
 
         expect(zhCn.settings.extractOriginalText.heading).not.toBe(en.settings.extractOriginalText.heading);
         expect(zhCn.settings.webResearch.heading).not.toBe(en.settings.webResearch.heading);
+        expect(zhCn.settings.folderTaskFilter.heading).not.toBe(en.settings.folderTaskFilter.heading);
+        expect(zhCn.settings.folderTaskFilter.syntaxGuideName).not.toBe(en.settings.folderTaskFilter.syntaxGuideName);
+        expect(zhCn.settings.folderTaskFilter.invalidRegexNotice).not.toBe(en.settings.folderTaskFilter.invalidRegexNotice);
+        expect(zhCn.settings.folderTaskFilter.profilesHeading).not.toBe(en.settings.folderTaskFilter.profilesHeading);
         expect(zhTw.settings.batchMermaidFix.heading).not.toBe(en.settings.batchMermaidFix.heading);
         expect(zhTw.settings.focusedLearning.heading).not.toBe(en.settings.focusedLearning.heading);
+        expect(zhTw.settings.folderTaskFilter.syntaxGuideName).not.toBe(en.settings.folderTaskFilter.syntaxGuideName);
+        expect(zhTw.settings.folderTaskFilter.invalidRegexNotice).not.toBe(en.settings.folderTaskFilter.invalidRegexNotice);
+        expect(zhTw.settings.folderTaskFilter.profileFolderPathName).not.toBe(en.settings.folderTaskFilter.profileFolderPathName);
+    });
+
+    test('uses i18n keys for folder filter syntax guidance and regex warning', () => {
+        const source = fs.readFileSync(settingsTabPath, 'utf8');
+
+        expect(source).toContain('folderTaskFilterI18n.syntaxGuideName');
+        expect(source).toContain('folderTaskFilterI18n.syntaxGuideDesc');
+        expect(source).toContain('folderTaskFilterI18n.invalidRegexNotice');
     });
 
     test('ships catalog keys for upper settings sections in english and chinese locales', () => {
@@ -124,18 +168,44 @@ describe('settings page i18n coverage', () => {
         expect(en.settings.translationTask.heading).toBeDefined();
         expect(en.settings.mermaidTask.heading).toBeDefined();
         expect(en.settings.extractConceptsTask.heading).toBeDefined();
+        expect(en.settings.extractConceptsTask.replaceSynonymsName).toBeDefined();
+        expect(en.settings.extractConceptsTask.replaceSynonymsDesc).toBeDefined();
         expect(en.settings.stableApi.heading).toBeDefined();
         expect(en.settings.generalOutput.processedHeading).toBeDefined();
         expect(en.settings.contentGeneration.heading).toBeDefined();
+        expect(en.settings.localKnowledge.heading).toBeDefined();
+        expect(en.settings.localKnowledge.enableName).toBeDefined();
+        expect(en.settings.localKnowledge.pathsName).toBeDefined();
+        expect(en.settings.localKnowledge.slidingWindowSizeName).toBeDefined();
+        expect(en.settings.localKnowledge.slidingWindowSizeDesc).toBeDefined();
+        expect(en.settings.localKnowledge.generateDiagramName).toBeDefined();
+        expect(en.settings.chapterSplit.heading).toBeDefined();
+        expect(en.settings.chapterSplit.headingLevelName).toBeDefined();
+        expect(en.settings.chapterSplit.headingLevelDesc).toBeDefined();
         expect(en.settings.customPrompts.heading).toBeDefined();
         expect(en.settings.workflowBuilder.heading).toBeDefined();
+        expect(en.settings.settingsReset.heading).toBeDefined();
 
         expect(zhCn.settings.providerConfig.heading).not.toBe(en.settings.providerConfig.heading);
         expect(zhCn.settings.generalOutput.processedHeading).not.toBe(en.settings.generalOutput.processedHeading);
         expect(zhCn.settings.workflowBuilder.heading).not.toBe(en.settings.workflowBuilder.heading);
+        expect(zhCn.settings.localKnowledge.heading).not.toBe(en.settings.localKnowledge.heading);
+        expect(zhCn.settings.localKnowledge.slidingWindowSizeName).not.toBe(en.settings.localKnowledge.slidingWindowSizeName);
+        expect(zhCn.settings.localKnowledge.generateDiagramName).not.toBe(en.settings.localKnowledge.generateDiagramName);
+        expect(zhCn.settings.chapterSplit.heading).not.toBe(en.settings.chapterSplit.heading);
+        expect(zhCn.settings.chapterSplit.headingLevelName).not.toBe(en.settings.chapterSplit.headingLevelName);
+        expect(zhCn.settings.extractConceptsTask.replaceSynonymsName).not.toBe(en.settings.extractConceptsTask.replaceSynonymsName);
+        expect(zhCn.settings.settingsReset.heading).not.toBe(en.settings.settingsReset.heading);
         expect(zhTw.settings.translationTask.heading).not.toBe(en.settings.translationTask.heading);
         expect(zhTw.settings.contentGeneration.heading).not.toBe(en.settings.contentGeneration.heading);
         expect(zhTw.settings.stableApi.heading).not.toBe(en.settings.stableApi.heading);
+        expect(zhTw.settings.localKnowledge.heading).not.toBe(en.settings.localKnowledge.heading);
+        expect(zhTw.settings.localKnowledge.pathsName).not.toBe(en.settings.localKnowledge.pathsName);
+        expect(zhTw.settings.localKnowledge.slidingWindowSizeName).not.toBe(en.settings.localKnowledge.slidingWindowSizeName);
+        expect(zhTw.settings.chapterSplit.heading).not.toBe(en.settings.chapterSplit.heading);
+        expect(zhTw.settings.chapterSplit.headingLevelName).not.toBe(en.settings.chapterSplit.headingLevelName);
+        expect(zhTw.settings.extractConceptsTask.replaceSynonymsName).not.toBe(en.settings.extractConceptsTask.replaceSynonymsName);
+        expect(zhTw.settings.settingsReset.heading).not.toBe(en.settings.settingsReset.heading);
     });
 
     test('does not render raw english provider metadata or template literals in settings UI', () => {

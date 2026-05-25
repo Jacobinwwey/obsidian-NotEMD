@@ -3,7 +3,9 @@ import {
     buildPluginConfigFilePath,
     executeExportCliCapabilityManifestCommand,
     executeExportCliInvocationContractCommand,
+    executeExportCliPublicSurfaceCommand,
     executeExportProviderProfilesCommand,
+    executeExportRedactedProviderProfilesCommand,
     executeImportProviderProfilesCommand,
     MissingProviderProfileImportFileError
 } from '../operations/configProfileCommands';
@@ -54,6 +56,28 @@ describe('config/profile commands', () => {
         expect(result.profile.exportedAt).toBe('2026-05-05T12:00:00.000Z');
     });
 
+    test('exports redacted provider profiles through plugin config host', async () => {
+        const host = createHost();
+
+        const result = await executeExportRedactedProviderProfilesCommand({
+            pluginId: 'notemd-test',
+            providers,
+            host,
+            now: new Date('2026-05-05T12:00:00.000Z')
+        });
+
+        expect(host.write).toHaveBeenCalledWith(
+            '.obsidian/plugins/notemd-test/notemd-providers-redacted.json',
+            expect.stringContaining('"redacted": true')
+        );
+        expect(host.write).toHaveBeenCalledWith(
+            '.obsidian/plugins/notemd-test/notemd-providers-redacted.json',
+            expect.not.stringContaining('"apiKey": "test"')
+        );
+        expect(result.outputPath).toBe('.obsidian/plugins/notemd-test/notemd-providers-redacted.json');
+        expect(result.profile.providers[0].apiKey).toBe('[REDACTED]');
+    });
+
     test('imports provider profiles and falls back to first imported provider when active/default are unavailable', async () => {
         const host = createHost();
         host.exists.mockResolvedValue(true);
@@ -97,7 +121,7 @@ describe('config/profile commands', () => {
         })).rejects.toBeInstanceOf(MissingProviderProfileImportFileError);
     });
 
-    test('exports CLI capability manifest and invocation contract through shared host pathing', async () => {
+    test('exports CLI capability manifest, invocation contract, and public surface through shared host pathing', async () => {
         const host = createHost();
         host.exists.mockResolvedValue(true);
 
@@ -111,9 +135,15 @@ describe('config/profile commands', () => {
             host,
             buildCliInvocationContractImpl: jest.fn().mockReturnValue({ version: 1, operations: [] }) as any
         });
+        const publicSurfaceResult = await executeExportCliPublicSurfaceCommand({
+            pluginId: 'notemd-test',
+            host,
+            buildCliPublicSurfaceImpl: jest.fn().mockReturnValue({ version: 1, commands: [] }) as any
+        });
 
         expect(capabilityResult.outputPath).toBe('.obsidian/plugins/notemd-test/notemd-cli-capabilities.json');
         expect(contractResult.outputPath).toBe('.obsidian/plugins/notemd-test/notemd-cli-contract.json');
-        expect(host.write).toHaveBeenCalledTimes(2);
+        expect(publicSurfaceResult.outputPath).toBe('.obsidian/plugins/notemd-test/notemd-cli-public-surface.json');
+        expect(host.write).toHaveBeenCalledTimes(3);
     });
 });

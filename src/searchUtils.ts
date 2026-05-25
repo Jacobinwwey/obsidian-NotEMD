@@ -1,4 +1,4 @@
-import { App, requestUrl, Notice, Editor, MarkdownView } from 'obsidian';
+import { App, requestUrl, Notice, Editor, MarkdownView, TFile } from 'obsidian';
 import { NotemdSettings, ProgressReporter } from './types';
 import { estimateTokens, getProviderForTask, getModelForTask } from './utils';
 import { callLLM, getDebugInfo } from './llmUtils';
@@ -8,6 +8,25 @@ import { getSystemPrompt } from './promptUtils';
 import { SearchManager } from './search/SearchManager';
 import { formatI18n, getI18nStrings } from './i18n';
 import { resolveTaskLanguageCode } from './i18n/taskLanguagePolicy';
+import { buildLocalKnowledgeBaseRetriever } from './localKnowledgeBase';
+
+export interface ResearchSummarizeResult {
+    sourcePath: string;
+    outputPath: string;
+    topic: string;
+    sourceLabel: string;
+    researchContextUsed: boolean;
+    localKnowledgeContextUsed: boolean;
+    appended: boolean;
+}
+
+interface PreparedResearchSummary {
+    topic: string;
+    sourceLabel: string;
+    summaryToAppend: string;
+    researchContextUsed: boolean;
+    localKnowledgeContextUsed: boolean;
+}
 
 /**
  * Fetches content from a URL and extracts basic text.
@@ -193,7 +212,224 @@ export async function _performResearch(app: App, settings: NotemdSettings, topic
     }
 }
 
+function stripBoxedWrapper(value: string, progressReporter: ProgressReporter): string {
+    let normalized = value.trim();
+    const lines = normalized.split('\n');
+    if (lines.length > 0 && lines[0].trim() === '\\boxed{') {
+        progressReporter.log(`Removing '\\boxed{' wrapper from summary.`);
+        lines.shift();
+        if (lines.length > 0 && lines[lines.length - 1].trim() === '}') {
+            lines.pop();
+        }
+        normalized = lines.join('\n');
+    }
 
+    return normalized;
+}
+
+function buildResearchSummaryHeader(sourceLabel: string, topic: string): string {
+    return `\n\n## Research Summary (via ${sourceLabel}): ${topic}\n\n`;
+}
+
+function appendResearchSummaryToMarkdown(
+    currentContent: string,
+    sourceLabel: string,
+    topic: string,
+    summaryToAppend: string
+): string {
+    return `${currentContent.trim()}${buildResearchSummaryHeader(sourceLabel, topic)}${summaryToAppend}`;
+}
+
+async function prepareResearchSummary(
+    app: App,
+    settings: NotemdSettings,
+    activeFile: { path: string; basename: string },
+    topic: string,
+    progressReporter: ProgressReporter
+): Promise<PreparedResearchSummary | null> {
+    const i18n = getI18nStrings({ uiLocale: settings.uiLocale });
+
+    progressReporter.log(`Starting research for topic: "${topic}"`);
+    progressReporter.log(`Calling _performResearch for topic: "${topic}"`);
+    if (progressReporter.cancelled) throw new Error("Processing cancelled by user before research.");
+    const researchContext = await _performResearch(app, settings, topic, progressReporter);
+    const localKnowledgeRetriever = settings.enableLocalKnowledgeRetrieval
+        && settings.enableLocalKnowledgeForResearchSummarize
+        ? await buildLocalKnowledgeBaseRetriever(app, settings, progressReporter)
+        : null;
+    const localKnowledgeContext = localKnowledgeRetriever?.buildContext(topic, {
+        currentFilePath: activeFile.path,
+        topK: settings.localKnowledgeTopK,
+        slidingWindowSize: settings.localKnowledgeSlidingWindowSize,
+        maxSnippetChars: settings.localKnowledgeMaxSnippetChars
+    }) || '';
+
+    if (progressReporter.cancelled) throw new Error("Processing cancelled by user during research.");
+
+    if (!researchContext && !localKnowledgeContext) {
+        new Notice(formatI18n(i18n.notices.researchFailedOrNoResults, { topic }));
+        progressReporter.log(`_performResearch returned null or empty context for "${topic}".`);
+        progressReporter.updateStatus(formatI18n(i18n.notices.researchFailedOrNoResults, { topic }), -1);
+        return null;
+    }
+    if (researchContext) {
+        progressReporter.log(`_performResearch returned context for "${topic}" (length: ${researchContext.length}).`);
+    }
+    if (localKnowledgeContext) {
+        progressReporter.log(`Local knowledge retrieval returned context for "${topic}" (length: ${localKnowledgeContext.length}).`);
+    }
+
+    progressReporter.updateStatus(
+        formatI18n(i18n.sidebar.status.stepLabel, {
+            current: 2,
+            total: 3,
+            label: i18n.sidebar.actions.researchAndSummarize.label
+        }),
+        50
+    );
+
+    const provider = getProviderForTask('research', settings);
+    if (!provider) {
+        progressReporter.log("Error: Could not get provider for 'research' task.");
+        throw new Error('No valid LLM provider configured for the "Research & Summarize" task.');
+    }
+    const modelName = getModelForTask('research', provider, settings);
+    progressReporter.log(`Using provider "${provider.name}" and model "${modelName}" for summarization.`);
+
+    if (progressReporter.cancelled) throw new Error("Processing cancelled by user before summarization.");
+
+    progressReporter.log(`Calling ${provider.name} (Model: ${modelName}) for summarization...`);
+
+    const language = resolveTaskLanguageCode(settings, 'researchSummarize');
+    const combinedContext = [
+        researchContext ? `Web research results:\n${researchContext}` : '',
+        localKnowledgeContext ? `Local knowledge base results:\n${localKnowledgeContext}` : ''
+    ].filter(Boolean).join('\n\n');
+
+    const finalPrompt = getSystemPrompt(settings, 'researchSummarize', {
+        TOPIC: topic,
+        LANGUAGE: language,
+        SEARCH_RESULTS_CONTEXT: combinedContext
+    });
+
+    progressReporter.log(`Constructed summary prompt (context length: ${combinedContext.length}).`);
+
+    const summary = await callLLM(provider, '', finalPrompt, settings, progressReporter, modelName);
+
+    if (progressReporter.cancelled) throw new Error("Processing cancelled by user after summarization.");
+
+    progressReporter.log(`Generated summary using ${provider.name}.`);
+    progressReporter.updateStatus(
+        formatI18n(i18n.sidebar.status.stepLabel, {
+            current: 3,
+            total: 3,
+            label: i18n.sidebar.actions.researchAndSummarize.label
+        }),
+        85
+    );
+
+    let finalSummary = summary;
+    try {
+        finalSummary = cleanupLatexDelimiters(finalSummary);
+        if (progressReporter.cancelled) throw new Error("Processing cancelled by user during post-processing.");
+        finalSummary = await refineMermaidBlocks(finalSummary);
+        progressReporter.log(`Mermaid/LaTeX cleanup applied to summary.`);
+    } catch (cleanupError: unknown) {
+        const message = cleanupError instanceof Error ? cleanupError.message : String(cleanupError);
+        if (message.includes("cancelled by user")) throw cleanupError;
+        progressReporter.log(`Warning: Error during summary cleanup: ${message}`);
+    }
+
+    if (progressReporter.cancelled) throw new Error("Processing cancelled by user after post-processing.");
+
+    const searchSource = researchContext
+        ? (settings.searchProvider === 'tavily' ? 'Tavily' : 'DuckDuckGo')
+        : 'Local KB';
+    const sourceLabel = researchContext && localKnowledgeContext
+        ? `${searchSource} + Local KB`
+        : searchSource;
+
+    return {
+        topic,
+        sourceLabel,
+        summaryToAppend: stripBoxedWrapper(finalSummary, progressReporter),
+        researchContextUsed: Boolean(researchContext),
+        localKnowledgeContextUsed: Boolean(localKnowledgeContext)
+    };
+}
+
+export async function researchAndSummarizeFile(
+    app: App,
+    settings: NotemdSettings,
+    file: TFile,
+    progressReporter: ProgressReporter,
+    topicOverride?: string
+): Promise<ResearchSummarizeResult | null> {
+    const i18n = getI18nStrings({ uiLocale: settings.uiLocale });
+    const topic = topicOverride?.trim() || file.basename;
+
+    if (!topic) {
+        progressReporter.log("Exiting researchAndSummarizeFile: Topic is empty.");
+        progressReporter.updateStatus(i18n.notices.selectTopicTextOrUseNoteTitle, -1);
+        return null;
+    }
+
+    try {
+        const prepared = await prepareResearchSummary(app, settings, file, topic, progressReporter);
+        if (!prepared) {
+            return null;
+        }
+
+        progressReporter.updateStatus(
+            formatI18n(i18n.sidebar.status.stepLabel, {
+                current: 3,
+                total: 3,
+                label: i18n.sidebar.actions.researchAndSummarize.label
+            }),
+            90
+        );
+
+        const currentContent = await app.vault.read(file);
+        const nextContent = appendResearchSummaryToMarkdown(
+            currentContent,
+            prepared.sourceLabel,
+            prepared.topic,
+            prepared.summaryToAppend
+        );
+        await app.vault.modify(file, nextContent);
+
+        progressReporter.updateStatus(
+            formatI18n(i18n.sidebar.status.actionComplete, { label: i18n.sidebar.actions.researchAndSummarize.label }),
+            100
+        );
+        progressReporter.log(formatI18n(i18n.notices.researchSummaryAppended, { topic: prepared.topic }));
+
+        return {
+            sourcePath: file.path,
+            outputPath: file.path,
+            topic: prepared.topic,
+            sourceLabel: prepared.sourceLabel,
+            researchContextUsed: prepared.researchContextUsed,
+            localKnowledgeContextUsed: prepared.localKnowledgeContextUsed,
+            appended: true
+        };
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : String(error);
+        const errorDetails = error instanceof Error ? error.stack || message : String(error);
+        if (message.includes("cancelled by user")) {
+            progressReporter.log(`Research cancelled for "${topic}".`);
+            progressReporter.updateStatus(i18n.sidebar.status.cancelling, -1);
+            throw error;
+        }
+
+        console.error(`Error researching "${topic}":`, errorDetails);
+        new Notice(formatI18n(i18n.notices.researchError, { message }), 10000);
+        progressReporter.log(`Error in researchAndSummarizeFile catch block: ${message}`);
+        progressReporter.updateStatus(formatI18n(i18n.sidebar.status.actionFailed, { message }), -1);
+        new ErrorModal(app, i18n.errorModal.titles.research, errorDetails, settings.uiLocale).open();
+        return null;
+    }
+}
 
 /**
  * Performs web research on a topic (note title or selection) and appends a summary to the editor.
@@ -223,102 +459,14 @@ export async function researchAndSummarize(app: App, settings: NotemdSettings, e
         return;
     }
 
-    progressReporter.log(`Starting research for topic: "${topic}"`);
-    // Note: Status bar updates should be handled by the caller (plugin main class)
-
     try {
-        // --- Perform Research using Helper ---
-        progressReporter.log(`Calling _performResearch for topic: "${topic}"`);
-        if (progressReporter.cancelled) throw new Error("Processing cancelled by user before research.");
-        const researchContext = await _performResearch(app, settings, topic, progressReporter);
-
-        if (progressReporter.cancelled) throw new Error("Processing cancelled by user during research.");
-
-        if (!researchContext) {
-            new Notice(formatI18n(i18n.notices.researchFailedOrNoResults, { topic }));
-            progressReporter.log(`_performResearch returned null or empty context for "${topic}".`);
-            progressReporter.updateStatus(formatI18n(i18n.notices.researchFailedOrNoResults, { topic }), -1);
-            // Note: Closing modal/reporter handled by caller
-            return; // Exit here as no context means no summary
-        }
-        progressReporter.log(`_performResearch returned context for "${topic}" (length: ${researchContext.length}).`);
-
-        // --- Summarize Research Context ---
-        progressReporter.updateStatus(
-            formatI18n(i18n.sidebar.status.stepLabel, {
-                current: 2,
-                total: 3,
-                label: i18n.sidebar.actions.researchAndSummarize.label
-            }),
-            50
-        );
-
-        const provider = getProviderForTask('research', settings);
-        if (!provider) {
-            progressReporter.log("Error: Could not get provider for 'research' task.");
-            throw new Error('No valid LLM provider configured for the "Research & Summarize" task.');
-        }
-        const modelName = getModelForTask('research', provider, settings);
-        progressReporter.log(`Using provider "${provider.name}" and model "${modelName}" for summarization.`);
-
-        if (progressReporter.cancelled) throw new Error("Processing cancelled by user before summarization.");
-
-        progressReporter.log(`Calling ${provider.name} (Model: ${modelName}) for summarization...`);
-
-        const language = resolveTaskLanguageCode(settings, 'researchSummarize');
-
-        const finalPrompt = getSystemPrompt(settings, 'researchSummarize', {
-            TOPIC: topic,
-            LANGUAGE: language,
-            SEARCH_RESULTS_CONTEXT: researchContext
-        });
-
-        progressReporter.log(`Constructed summary prompt (context length: ${researchContext.length}).`);
-
-        const summary = await callLLM(provider, '', finalPrompt, settings, progressReporter, modelName);
-
-        if (progressReporter.cancelled) throw new Error("Processing cancelled by user after summarization.");
-
-        progressReporter.log(`Generated summary using ${provider.name}.`);
-        progressReporter.updateStatus(
-            formatI18n(i18n.sidebar.status.stepLabel, {
-                current: 3,
-                total: 3,
-                label: i18n.sidebar.actions.researchAndSummarize.label
-            }),
-            85
-        ); // Adjusted percentage
-
-        // Apply post-processing
-        let finalSummary = summary;
-        try {
-            finalSummary = cleanupLatexDelimiters(finalSummary);
-            if (progressReporter.cancelled) throw new Error("Processing cancelled by user during post-processing.");
-            finalSummary = await refineMermaidBlocks(finalSummary);
-            progressReporter.log(`Mermaid/LaTeX cleanup applied to summary.`);
-        } catch (cleanupError: unknown) {
-            const message = cleanupError instanceof Error ? cleanupError.message : String(cleanupError);
-            if (message.includes("cancelled by user")) throw cleanupError;
-            progressReporter.log(`Warning: Error during summary cleanup: ${message}`);
-        }
-
-        if (progressReporter.cancelled) throw new Error("Processing cancelled by user after post-processing.");
-
-        // Remove \boxed{ wrapper from summary
-        let summaryToAppend = finalSummary.trim();
-        const summaryLines = summaryToAppend.split('\n');
-        if (summaryLines.length > 0 && summaryLines[0].trim() === '\\boxed{') {
-            progressReporter.log(`Removing '\\boxed{' wrapper from summary.`);
-            summaryLines.shift();
-            if (summaryLines.length > 0 && summaryLines[summaryLines.length - 1].trim() === '}') {
-                summaryLines.pop();
-            }
-            summaryToAppend = summaryLines.join('\n');
+        const prepared = await prepareResearchSummary(app, settings, activeFile, topic, progressReporter);
+        if (!prepared) {
+            return;
         }
 
         if (progressReporter.cancelled) throw new Error("Processing cancelled by user before appending summary.");
 
-        // --- Append Summary to Note ---
         progressReporter.updateStatus(
             formatI18n(i18n.sidebar.status.stepLabel, {
                 current: 3,
@@ -327,19 +475,23 @@ export async function researchAndSummarize(app: App, settings: NotemdSettings, e
             }),
             90
         );
-        const searchSource = settings.searchProvider === 'tavily' ? 'Tavily' : 'DuckDuckGo';
-        const summaryHeader = `\n\n## Research Summary (via ${searchSource}): ${topic}\n\n`;
         editor.replaceSelection(selectedText); // Clear selection if it was used
         const currentContent = editor.getValue();
-        editor.setValue(currentContent.trim() + summaryHeader + summaryToAppend); // Use cleaned summary
+        editor.setValue(
+            appendResearchSummaryToMarkdown(
+                currentContent,
+                prepared.sourceLabel,
+                prepared.topic,
+                prepared.summaryToAppend
+            )
+        );
 
         progressReporter.updateStatus(
             formatI18n(i18n.sidebar.status.actionComplete, { label: i18n.sidebar.actions.researchAndSummarize.label }),
             100
         );
-        new Notice(formatI18n(i18n.notices.researchSummaryAppended, { topic }));
-        progressReporter.log(formatI18n(i18n.notices.researchSummaryAppended, { topic }));
-        // Note: Closing modal/reporter handled by caller
+        new Notice(formatI18n(i18n.notices.researchSummaryAppended, { topic: prepared.topic }));
+        progressReporter.log(formatI18n(i18n.notices.researchSummaryAppended, { topic: prepared.topic }));
 
     } catch (error: unknown) {
         // Error handling is now primarily done here, propagating cancellation

@@ -1,6 +1,7 @@
 import { getLanguage, MarkdownView, TFile } from 'obsidian';
 import { NotemdSidebarView } from '../ui/NotemdSidebarView';
 import { mockApp } from './__mocks__/app';
+import { ApiLivenessEvent } from '../types';
 
 type MockPlugin = {
     app: typeof mockApp;
@@ -12,6 +13,7 @@ type MockPlugin = {
         conceptNoteFolder: string;
         customWorkflowButtonsDsl: string;
         customWorkflowErrorStrategy: 'stop_on_error' | 'continue_on_error';
+        enableApiErrorDebugMode: boolean;
     };
     saveSettings: jest.Mock<Promise<void>, []>;
     getIsBusy: jest.Mock<boolean, []>;
@@ -31,6 +33,7 @@ type MockPlugin = {
     batchExtractConceptsForFolderCommand: jest.Mock<Promise<void>, [any]>;
     extractOriginalTextCommand: jest.Mock<Promise<void>, [any]>;
     batchExtractOriginalTextCommand: jest.Mock<Promise<void>, [any]>;
+    splitNoteByChaptersCommand: jest.Mock<Promise<void>, [any]>;
     batchMermaidFixCommand: jest.Mock<Promise<void>, [any, string?]>;
     fixFormulaFormatsCommand: jest.Mock<Promise<void>, [any, any]>;
     batchFixFormulaFormatsCommand: jest.Mock<Promise<void>, [any]>;
@@ -51,14 +54,17 @@ class FakeElement {
     dataset: Record<string, string> = {};
     style: Record<string, string> = {};
     value = '';
+    type = '';
+    checked = false;
     scrollTop = 0;
     scrollHeight = 100;
     inputEl: any;
 
-    constructor(tag: string, options?: { text?: string; cls?: string }) {
+    constructor(tag: string, options?: { text?: string; cls?: string; type?: string }) {
         this.tag = tag;
         if (options?.text) this.text = options.text;
         if (options?.cls) this.cls = options.cls.split(' ').filter(Boolean);
+        if (options?.type) this.type = options.type;
         this.inputEl = {
             setAttrs: jest.fn(),
             value: ''
@@ -140,7 +146,8 @@ function createPluginMock(): MockPlugin {
             useCustomConceptNoteFolder: true,
             conceptNoteFolder: 'Concepts',
             customWorkflowButtonsDsl: 'One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix',
-            customWorkflowErrorStrategy: 'stop_on_error'
+            customWorkflowErrorStrategy: 'stop_on_error',
+            enableApiErrorDebugMode: false
         },
         saveSettings: jest.fn().mockResolvedValue(undefined),
         getIsBusy: jest.fn(() => false),
@@ -163,6 +170,7 @@ function createPluginMock(): MockPlugin {
         batchExtractConceptsForFolderCommand: jest.fn().mockResolvedValue(undefined),
         extractOriginalTextCommand: jest.fn().mockResolvedValue(undefined),
         batchExtractOriginalTextCommand: jest.fn().mockResolvedValue(undefined),
+        splitNoteByChaptersCommand: jest.fn().mockResolvedValue(undefined),
         batchMermaidFixCommand: jest.fn().mockResolvedValue(undefined),
         fixFormulaFormatsCommand: jest.fn().mockResolvedValue(undefined),
         batchFixFormulaFormatsCommand: jest.fn().mockResolvedValue(undefined),
@@ -181,6 +189,31 @@ function createMarkdownFile(path: string, name: string, extension = 'md'): TFile
     });
 }
 
+function findAllByClass(root: FakeElement, cls: string): FakeElement[] {
+    const matches: FakeElement[] = [];
+    if (root.cls.includes(cls)) {
+        matches.push(root);
+    }
+    for (const child of root.children) {
+        matches.push(...findAllByClass(child, cls));
+    }
+    return matches;
+}
+
+function findApiActivitySection(root: FakeElement, title: string): FakeElement | null {
+    return findAllByClass(root, 'notemd-api-activity-section').find(section => (
+        section.children.some(child => child.cls.includes('notemd-api-activity-section-title') && child.text === title)
+    )) ?? null;
+}
+
+function findApiActivityItem(root: FakeElement, providerName: string): FakeElement | null {
+    return findAllByClass(root, 'notemd-api-activity-item').find(item => (
+        item.children.some(child => child.children.some(grandchild => (
+            grandchild.cls.includes('notemd-api-activity-item-title') && grandchild.text === providerName
+        )))
+    )) ?? null;
+}
+
 describe('NotemdSidebarView DOM button wiring', () => {
     let plugin: MockPlugin;
     let sidebar: NotemdSidebarView;
@@ -191,9 +224,15 @@ describe('NotemdSidebarView DOM button wiring', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
+        jest.useRealTimers();
         (getLanguage as jest.Mock).mockReturnValue('en');
         (global as any).Option = function Option(text: string, value: string) {
             return { text, value };
+        };
+        (global as any).navigator = {
+            clipboard: {
+                writeText: jest.fn().mockResolvedValue(undefined)
+            }
         };
 
         plugin = createPluginMock();
@@ -242,6 +281,7 @@ describe('NotemdSidebarView DOM button wiring', () => {
         await clickButton('Extract concepts (folder)');
         await clickButton('Extract specific original text');
         await clickButton('Batch extract specific original text');
+        await clickButton('Split note by chapters');
         await clickButton('Batch Mermaid fix');
 
         (mockApp.workspace.getActiveFile as jest.Mock).mockReturnValue(txtFile);
@@ -271,6 +311,7 @@ describe('NotemdSidebarView DOM button wiring', () => {
         expect(plugin.batchExtractConceptsForFolderCommand).toHaveBeenCalled();
         expect(plugin.extractOriginalTextCommand).toHaveBeenCalled();
         expect(plugin.batchExtractOriginalTextCommand).toHaveBeenCalled();
+        expect(plugin.splitNoteByChaptersCommand).toHaveBeenCalled();
         expect(plugin.batchMermaidFixCommand).toHaveBeenCalled();
         expect(plugin.fixFormulaFormatsCommand).toHaveBeenCalledWith(txtFile, expect.anything());
         expect(plugin.batchFixFormulaFormatsCommand).toHaveBeenCalled();
@@ -336,18 +377,51 @@ describe('NotemdSidebarView DOM button wiring', () => {
         const shell = contentContainer.findByClass('notemd-sidebar-shell');
         const scrollArea = contentContainer.findByClass('notemd-sidebar-scroll');
         const footer = contentContainer.findByClass('notemd-sidebar-footer');
+        const footerScroll = contentContainer.findByClass('notemd-sidebar-footer-scroll');
         const progressValue = contentContainer.findByClass('notemd-progress-value');
         const progressBar = contentContainer.findByClass('notemd-progress-bar-container');
         const logCard = contentContainer.findByClass('notemd-log-card');
+        const apiLiveness = contentContainer.findByClass('notemd-api-liveness');
+        const apiLivenessText = contentContainer.findByClass('notemd-api-liveness-text');
+        const apiActivity = contentContainer.findByClass('notemd-api-activity');
+        const apiActivityContent = contentContainer.findByClass('notemd-api-activity-content');
+        const apiActivityEmpty = contentContainer.findByClass('notemd-api-activity-empty');
+        const activeSection = findApiActivitySection(contentContainer, 'Active');
+        const recentSection = findApiActivitySection(contentContainer, 'Recent');
+        const debugToggle = contentContainer.findByClass('notemd-debug-toggle-input');
+        const copyApiActivityButton = contentContainer.findButton('Copy API activity');
 
         expect(shell).not.toBeNull();
         expect(scrollArea).not.toBeNull();
         expect(footer).not.toBeNull();
         expect(footer?.cls).toContain('mod-docked');
+        expect(footerScroll).not.toBeNull();
         expect(progressValue?.text).toBe('Ready');
         expect(progressBar?.cls).toContain('is-idle');
         expect(logCard).not.toBeNull();
         expect(logCard?.cls).toContain('mod-persistent');
+        expect(apiLivenessText?.text).toBe('Standby');
+        expect(apiActivity).not.toBeNull();
+        expect(apiActivityContent).not.toBeNull();
+        expect(apiActivityEmpty?.text).toBe('No API activity yet.');
+        expect(activeSection?.cls).toContain('is-hidden');
+        expect(recentSection?.cls).toContain('is-hidden');
+        expect(debugToggle).not.toBeNull();
+        expect(copyApiActivityButton).not.toBeNull();
+        expect((debugToggle as any)?.checked).toBe(false);
+    });
+
+    test('quick deep debug toggle writes back to settings immediately', async () => {
+        await sidebar.onOpen();
+
+        const debugToggle = contentContainer.findByClass('notemd-debug-toggle-input');
+        expect(debugToggle).not.toBeNull();
+
+        (debugToggle as any).checked = true;
+        await debugToggle!.onchange?.();
+
+        expect(plugin.settings.enableApiErrorDebugMode).toBe(true);
+        expect(plugin.saveSettings).toHaveBeenCalledTimes(1);
     });
 
     test('updateStatus swaps between active progress and idle standby states', async () => {
@@ -368,5 +442,179 @@ describe('NotemdSidebarView DOM button wiring', () => {
         expect(progressValue?.text).toBe('Ready');
         expect(progressBar?.cls).toContain('is-idle');
         expect(progressFill?.style.width).toBe('0%');
+    });
+
+    test('api liveness indicator reflects request, receive, long-wait, complete, and error phases', async () => {
+        jest.useFakeTimers();
+        await sidebar.onOpen();
+
+        const apiLiveness = contentContainer.findByClass('notemd-api-liveness');
+        const apiLivenessText = contentContainer.findByClass('notemd-api-liveness-text');
+        const emit = (event: ApiLivenessEvent) => sidebar.updateApiLiveness(event);
+        const requestId = 'req-deepseek-1';
+
+        emit({ phase: 'request-start', providerName: 'DeepSeek', requestId });
+        expect(apiLivenessText?.text).toBe('Awaiting API output...');
+        expect(apiLiveness?.cls).toContain('is-waiting');
+
+        emit({ phase: 'response-headers', providerName: 'DeepSeek', requestId, transport: 'desktop-http-stream' });
+        expect(apiLivenessText?.text).toBe('API accepted request, awaiting body...');
+        expect(apiLiveness?.cls).toContain('is-accepted');
+
+        emit({ phase: 'response-chunk', providerName: 'DeepSeek', requestId, transport: 'desktop-http-stream' });
+        expect(apiLivenessText?.text).toBe('Receiving API output...');
+        expect(apiLiveness?.cls).toContain('is-active');
+
+        jest.advanceTimersByTime(30000);
+        expect(apiLivenessText?.text).toBe('Task is healthy, please wait.');
+
+        emit({ phase: 'request-complete', providerName: 'DeepSeek', requestId });
+        expect(apiLivenessText?.text).toBe('API response received.');
+        expect(apiLiveness?.cls).toContain('is-active');
+
+        emit({ phase: 'request-error', providerName: 'DeepSeek', requestId });
+        expect(apiLivenessText?.text).toBe('API output interrupted.');
+        expect(apiLiveness?.cls).toContain('is-error');
+
+        sidebar.clearDisplay();
+        expect(apiLivenessText?.text).toBe('Standby');
+        expect(apiLiveness?.cls).toContain('is-idle');
+    });
+
+    test('api liveness stays request-keyed for concurrent same-provider requests and does not flash error while retrying', async () => {
+        await sidebar.onOpen();
+
+        const apiLiveness = contentContainer.findByClass('notemd-api-liveness');
+        const apiLivenessText = contentContainer.findByClass('notemd-api-liveness-text');
+        const emit = (event: ApiLivenessEvent) => sidebar.updateApiLiveness(event);
+        const acceptedRequestId = 'req-openai-accepted';
+        const receivingRequestId = 'req-openai-receiving';
+
+        emit({ phase: 'request-start', providerName: 'OpenAI', requestId: acceptedRequestId });
+        emit({ phase: 'request-start', providerName: 'OpenAI', requestId: receivingRequestId });
+        emit({
+            phase: 'response-headers',
+            providerName: 'OpenAI',
+            requestId: acceptedRequestId,
+            transport: 'desktop-http-stream'
+        });
+        expect(apiLivenessText?.text).toBe('API accepted request, awaiting body...');
+        expect(apiLiveness?.cls).toContain('is-accepted');
+
+        emit({
+            phase: 'response-chunk',
+            providerName: 'OpenAI',
+            requestId: receivingRequestId,
+            transport: 'desktop-http-stream'
+        });
+        expect(apiLivenessText?.text).toBe('Receiving API output...');
+        expect(apiLiveness?.cls).toContain('is-active');
+
+        emit({ phase: 'request-complete', providerName: 'OpenAI', requestId: receivingRequestId });
+        expect(apiLivenessText?.text).toBe('API accepted request, awaiting body...');
+        expect(apiLiveness?.cls).toContain('is-accepted');
+
+        emit({ phase: 'request-error', providerName: 'OpenAI', requestId: acceptedRequestId, retrying: true });
+        expect(apiLivenessText?.text).toBe('Awaiting API output...');
+        expect(apiLiveness?.cls).toContain('is-waiting');
+        expect(apiLiveness?.cls).not.toContain('is-error');
+    });
+
+    test('api activity captures request-scoped summaries and copies a structured report without parsing logs', async () => {
+        await sidebar.onOpen();
+
+        const emit = (event: ApiLivenessEvent) => sidebar.updateApiLiveness(event);
+        const copyApiActivityButton = contentContainer.findButton('Copy API activity');
+        const apiActivityEmpty = contentContainer.findByClass('notemd-api-activity-empty');
+
+        expect(apiActivityEmpty?.text).toBe('No API activity yet.');
+
+        emit({ phase: 'request-start', providerName: 'OpenAI', requestId: 'req-openai-1', requestAttempt: 1 });
+        emit({
+            phase: 'response-headers',
+            providerName: 'OpenAI',
+            requestId: 'req-openai-1',
+            requestAttempt: 1,
+            transport: 'desktop-http-stream',
+            statusCode: 200
+        });
+        emit({
+            phase: 'request-error',
+            providerName: 'OpenAI',
+            requestId: 'req-openai-1',
+            requestAttempt: 1,
+            retrying: true
+        });
+        emit({ phase: 'request-start', providerName: 'OpenAI', requestId: 'req-openai-1', requestAttempt: 2 });
+        emit({
+            phase: 'response-chunk',
+            providerName: 'OpenAI',
+            requestId: 'req-openai-1',
+            requestAttempt: 2,
+            transport: 'desktop-http-stream',
+            statusCode: 200
+        });
+        emit({
+            phase: 'request-complete',
+            providerName: 'OpenAI',
+            requestId: 'req-openai-1',
+            requestAttempt: 2
+        });
+        emit({ phase: 'request-start', providerName: 'Anthropic', requestId: 'req-anthropic-1', requestAttempt: 1 });
+        emit({
+            phase: 'request-error',
+            providerName: 'Anthropic',
+            requestId: 'req-anthropic-1',
+            requestAttempt: 1,
+            retrying: false
+        });
+
+        const activityTitles = findAllByClass(contentContainer, 'notemd-api-activity-item-title').map(item => item.text);
+        const activityMeta = findAllByClass(contentContainer, 'notemd-api-activity-item-meta').map(item => item.text);
+        let activityHistoryEntries = findAllByClass(contentContainer, 'notemd-api-activity-history-entry').map(item => item.text);
+        const activeSection = findApiActivitySection(contentContainer, 'Active');
+        const recentSection = findApiActivitySection(contentContainer, 'Recent');
+        const historyButtons = findAllByClass(contentContainer, 'notemd-api-activity-toggle-button');
+
+        expect(activityTitles).toEqual(expect.arrayContaining(['OpenAI', 'Anthropic']));
+        expect(activeSection?.cls).toContain('is-hidden');
+        expect(recentSection?.cls).not.toContain('is-hidden');
+        expect(activityMeta).toEqual(expect.arrayContaining([
+            expect.stringContaining('req-openai-1'),
+            expect.stringContaining('Attempt 2'),
+            expect.stringContaining('Received'),
+            expect.stringContaining('desktop-http-stream'),
+            expect.stringContaining('HTTP 200'),
+            expect.stringContaining('req-anthropic-1'),
+            expect.stringContaining('Interrupted')
+        ]));
+        expect(activityHistoryEntries).toEqual([]);
+        expect(historyButtons.map(item => item.text)).toEqual(expect.arrayContaining(['Show history']));
+
+        const openAiItem = findApiActivityItem(contentContainer, 'OpenAI');
+        const openAiHistoryButton = openAiItem?.findButton('Show history');
+        expect(openAiHistoryButton).toBeDefined();
+        await openAiHistoryButton!.onclick?.();
+
+        activityHistoryEntries = findAllByClass(contentContainer, 'notemd-api-activity-history-entry').map(item => item.text);
+        const expandedHistoryButtons = findAllByClass(contentContainer, 'notemd-api-activity-toggle-button');
+        expect(activityHistoryEntries).toEqual(expect.arrayContaining([
+            expect.stringContaining('request-start'),
+            expect.stringContaining('response-headers'),
+            expect.stringContaining('request-error'),
+            expect.stringContaining('retrying=true'),
+            expect.stringContaining('request-complete')
+        ]));
+        expect(expandedHistoryButtons.map(item => item.text)).toEqual(expect.arrayContaining(['Hide history']));
+
+        expect(copyApiActivityButton).not.toBeNull();
+        await copyApiActivityButton!.onclick?.();
+
+        expect((global as any).navigator.clipboard.writeText).toHaveBeenCalledWith(expect.stringContaining('API activity report'));
+        expect((global as any).navigator.clipboard.writeText).toHaveBeenCalledWith(expect.stringContaining('Request req-openai-1'));
+        expect((global as any).navigator.clipboard.writeText).toHaveBeenCalledWith(expect.stringContaining('request-start'));
+        expect((global as any).navigator.clipboard.writeText).toHaveBeenCalledWith(expect.stringContaining('request-error'));
+        expect((global as any).navigator.clipboard.writeText).toHaveBeenCalledWith(expect.stringContaining('retrying=true'));
+        expect((global as any).navigator.clipboard.writeText).toHaveBeenCalledWith(expect.stringContaining('Request req-anthropic-1'));
     });
 });

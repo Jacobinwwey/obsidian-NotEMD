@@ -1,6 +1,6 @@
 import { App, ButtonComponent, PluginSettingTab, Setting, Notice, TextAreaComponent } from 'obsidian';
 import NotemdPlugin from '../main'; // Import the plugin class itself
-import { LLMProviderConfig, NotemdSettings, TaskKey } from '../types';
+import { FolderTaskFileSelectionProfile, LLMProviderConfig, NotemdSettings, TaskKey } from '../types';
 import { DEFAULT_SETTINGS } from '../constants';
 import {
     getLLMProviderDefinition,
@@ -27,6 +27,7 @@ import { UI_LOCALE_AUTO } from '../i18n/languageContext';
 import { SUPPORTED_UI_LOCALES } from '../i18n/uiLocales';
 import { formatI18n, getI18nStrings } from '../i18n';
 import { runProviderConnectionTestWithHost } from '../operations/providerConnectionTestCommandHostAdapter';
+import { getFolderTaskFileSelectionProfiles, getFolderTaskRegexValidationError } from '../folderTaskFileSelector';
 
 // Define specific key types for settings accessed dynamically
 type ProviderSettingKey = 'addLinksProvider' | 'researchProvider' | 'generateTitleProvider' | 'translateProvider';
@@ -139,9 +140,89 @@ export class NotemdSettingTab extends PluginSettingTab {
         });
     }
 
+    private addDeferredTextAreaSetting(
+        setting: Setting,
+        options: {
+            placeholder?: string;
+            value: string;
+            onCommit: (value: string) => Promise<void>;
+        }
+    ): void {
+        setting.addTextArea((textArea: TextAreaComponent) => {
+            textArea.setPlaceholder(options.placeholder || '').setValue(options.value);
+
+            let lastCommittedValue = options.value;
+
+            const commit = async () => {
+                const nextValue = textArea.getValue();
+                if (nextValue === lastCommittedValue) {
+                    return;
+                }
+                await options.onCommit(nextValue);
+                lastCommittedValue = nextValue;
+            };
+
+            textArea.inputEl.addEventListener('blur', () => {
+                void commit();
+            });
+            textArea.inputEl.addEventListener('keydown', (event: KeyboardEvent) => {
+                if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
+                    event.preventDefault();
+                    void commit();
+                    textArea.inputEl.blur();
+                }
+            });
+        });
+    }
+
     private markSection(setting: Setting, sectionKey: string): Setting {
         setting.settingEl.setAttr('data-notemd-setting-section', sectionKey);
         return setting;
+    }
+
+    private createFolderTaskFileSelectionProfileId(): string {
+        return `folder-task-profile-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+    }
+
+    private createFolderTaskFileSelectionProfile(
+        seed: Partial<FolderTaskFileSelectionProfile> = {}
+    ): FolderTaskFileSelectionProfile {
+        return {
+            id: seed.id || this.createFolderTaskFileSelectionProfileId(),
+            name: seed.name || '',
+            folderPathHint: seed.folderPathHint || '',
+            includeSubfoldersMode: seed.includeSubfoldersMode ?? DEFAULT_SETTINGS.folderTaskIncludeSubfoldersMode,
+            fileFilterMode: seed.fileFilterMode ?? DEFAULT_SETTINGS.folderTaskFileFilterMode,
+            fileFilterPattern: seed.fileFilterPattern ?? DEFAULT_SETTINGS.folderTaskFileFilterPattern,
+            fileFilterTarget: seed.fileFilterTarget ?? DEFAULT_SETTINGS.folderTaskFileFilterTarget,
+            fileFilterCaseSensitive: seed.fileFilterCaseSensitive ?? DEFAULT_SETTINGS.folderTaskFileFilterCaseSensitive,
+            fileFilterInvert: seed.fileFilterInvert ?? DEFAULT_SETTINGS.folderTaskFileFilterInvert
+        };
+    }
+
+    private getDefaultFolderTaskProfileName(folderTaskFilterI18n: {
+        profileIndexedName?: string;
+        profileDefaultName: string;
+    }, index: number): string {
+        if (folderTaskFilterI18n.profileIndexedName) {
+            return formatI18n(folderTaskFilterI18n.profileIndexedName, { index });
+        }
+        return `${folderTaskFilterI18n.profileDefaultName} ${index}`;
+    }
+
+    private async persistFolderTaskFileSelectionProfiles(profiles: FolderTaskFileSelectionProfile[]): Promise<void> {
+        this.plugin.settings.folderTaskFileSelectionProfiles = profiles;
+        await this.plugin.saveSettings();
+    }
+
+    private async updateFolderTaskFileSelectionProfile(
+        profileId: string,
+        update: (profile: FolderTaskFileSelectionProfile) => FolderTaskFileSelectionProfile
+    ): Promise<void> {
+        const profiles = getFolderTaskFileSelectionProfiles(this.plugin.settings).map(profile =>
+            profile.id === profileId ? update(profile) : profile
+        );
+        await this.persistFolderTaskFileSelectionProfiles(profiles);
     }
 
     private createSilentReporter() {
@@ -388,6 +469,223 @@ export class NotemdSettingTab extends PluginSettingTab {
         this.display();
     }
 
+    private renderFolderTaskFileSelectionProfileManager(containerEl: HTMLElement, folderTaskFilterI18n: any): void {
+        new Setting(containerEl)
+            .setName(folderTaskFilterI18n.profilesHeading)
+            .setDesc(folderTaskFilterI18n.profilesDesc);
+
+        const toolbar = containerEl.createDiv({ cls: 'notemd-workflow-builder-toolbar' });
+        const addProfileButton = toolbar.createEl('button', {
+            text: folderTaskFilterI18n.addProfileButton,
+            cls: 'mod-cta'
+        });
+        addProfileButton.onclick = async () => {
+            const profiles = getFolderTaskFileSelectionProfiles(this.plugin.settings);
+            const nextProfileName = this.getDefaultFolderTaskProfileName(folderTaskFilterI18n, profiles.length + 1);
+            const next = [
+                ...profiles,
+                this.createFolderTaskFileSelectionProfile({
+                    name: nextProfileName
+                })
+            ];
+            await this.persistFolderTaskFileSelectionProfiles(next);
+            this.display();
+            new Notice(folderTaskFilterI18n.profileAddedNotice);
+        };
+
+        const saveCurrentAsProfileButton = toolbar.createEl('button', {
+            text: folderTaskFilterI18n.saveCurrentAsProfileButton
+        });
+        saveCurrentAsProfileButton.onclick = async () => {
+            const profiles = getFolderTaskFileSelectionProfiles(this.plugin.settings);
+            const nextProfileName = this.getDefaultFolderTaskProfileName(folderTaskFilterI18n, profiles.length + 1);
+            const next = [
+                ...profiles,
+                this.createFolderTaskFileSelectionProfile({
+                    name: nextProfileName,
+                    includeSubfoldersMode: this.plugin.settings.folderTaskIncludeSubfoldersMode,
+                    fileFilterMode: this.plugin.settings.folderTaskFileFilterMode,
+                    fileFilterPattern: this.plugin.settings.folderTaskFileFilterPattern,
+                    fileFilterTarget: this.plugin.settings.folderTaskFileFilterTarget,
+                    fileFilterCaseSensitive: this.plugin.settings.folderTaskFileFilterCaseSensitive,
+                    fileFilterInvert: this.plugin.settings.folderTaskFileFilterInvert
+                })
+            ];
+            await this.persistFolderTaskFileSelectionProfiles(next);
+            this.display();
+            new Notice(folderTaskFilterI18n.profileSavedCurrentNotice);
+        };
+
+        const profiles = getFolderTaskFileSelectionProfiles(this.plugin.settings);
+        if (profiles.length === 0) {
+            containerEl.createEl('p', {
+                text: folderTaskFilterI18n.profilesEmpty,
+                cls: 'setting-item-description'
+            });
+            return;
+        }
+
+        profiles.forEach((profile, index) => {
+            const fallbackProfileName = this.getDefaultFolderTaskProfileName(folderTaskFilterI18n, index + 1);
+            new Setting(containerEl)
+                .setName(profile.name || fallbackProfileName)
+                .setDesc(folderTaskFilterI18n.profileCardDesc)
+                .addButton(button => button
+                    .setButtonText(folderTaskFilterI18n.deleteProfileButton)
+                    .setWarning()
+                    .onClick(async () => {
+                        const next = getFolderTaskFileSelectionProfiles(this.plugin.settings)
+                            .filter(item => item.id !== profile.id);
+                        await this.persistFolderTaskFileSelectionProfiles(next);
+                        this.display();
+                        new Notice(folderTaskFilterI18n.profileDeletedNotice);
+                    }));
+
+            this.addDeferredTextSetting(
+                new Setting(containerEl)
+                    .setName(folderTaskFilterI18n.profileNameName)
+                    .setDesc(folderTaskFilterI18n.profileNameDesc),
+                {
+                    placeholder: folderTaskFilterI18n.profileNamePlaceholder,
+                    value: profile.name,
+                    onCommit: async (value) => {
+                        await this.updateFolderTaskFileSelectionProfile(profile.id, current => ({
+                            ...current,
+                            name: value.trim() || current.name
+                        }));
+                    }
+                }
+            );
+
+            this.addDeferredTextSetting(
+                new Setting(containerEl)
+                    .setName(folderTaskFilterI18n.profileFolderPathName)
+                    .setDesc(folderTaskFilterI18n.profileFolderPathDesc),
+                {
+                    placeholder: folderTaskFilterI18n.profileFolderPathPlaceholder,
+                    value: profile.folderPathHint,
+                    onCommit: async (value) => {
+                        await this.updateFolderTaskFileSelectionProfile(profile.id, current => ({
+                            ...current,
+                            folderPathHint: value.trim()
+                        }));
+                    }
+                }
+            );
+
+            new Setting(containerEl)
+                .setName(folderTaskFilterI18n.modeName)
+                .setDesc(folderTaskFilterI18n.modeDesc)
+                .addDropdown(dropdown => dropdown
+                    .addOption('none', folderTaskFilterI18n.modeNone)
+                    .addOption('contains', folderTaskFilterI18n.modeContains)
+                    .addOption('regex', folderTaskFilterI18n.modeRegex)
+                    .addOption('glob', folderTaskFilterI18n.modeGlob)
+                    .setValue(profile.fileFilterMode)
+                    .onChange(async (value: 'none' | 'contains' | 'regex' | 'glob') => {
+                        await this.updateFolderTaskFileSelectionProfile(profile.id, current => ({
+                            ...current,
+                            fileFilterMode: value
+                        }));
+                        const latestProfile = getFolderTaskFileSelectionProfiles(this.plugin.settings)
+                            .find(item => item.id === profile.id) || profile;
+                        if (value === 'regex') {
+                            const regexError = getFolderTaskRegexValidationError(
+                                latestProfile.fileFilterPattern,
+                                latestProfile.fileFilterCaseSensitive
+                            );
+                            if (regexError) {
+                                new Notice(formatI18n(folderTaskFilterI18n.invalidRegexNotice, { message: regexError }), 9000);
+                            }
+                        }
+                    }));
+
+            this.addDeferredTextSetting(
+                new Setting(containerEl)
+                    .setName(folderTaskFilterI18n.patternName)
+                    .setDesc(folderTaskFilterI18n.patternDesc),
+                {
+                    placeholder: folderTaskFilterI18n.patternPlaceholder,
+                    value: profile.fileFilterPattern,
+                    onCommit: async (value) => {
+                        await this.updateFolderTaskFileSelectionProfile(profile.id, current => ({
+                            ...current,
+                            fileFilterPattern: value
+                        }));
+                        const latestProfile = getFolderTaskFileSelectionProfiles(this.plugin.settings)
+                            .find(item => item.id === profile.id) || profile;
+                        if (latestProfile.fileFilterMode === 'regex') {
+                            const regexError = getFolderTaskRegexValidationError(
+                                value,
+                                latestProfile.fileFilterCaseSensitive
+                            );
+                            if (regexError) {
+                                new Notice(formatI18n(folderTaskFilterI18n.invalidRegexNotice, { message: regexError }), 9000);
+                            }
+                        }
+                    }
+                }
+            );
+
+            new Setting(containerEl)
+                .setName(folderTaskFilterI18n.targetName)
+                .setDesc(folderTaskFilterI18n.targetDesc)
+                .addDropdown(dropdown => dropdown
+                    .addOption('relativePath', folderTaskFilterI18n.targetRelativePath)
+                    .addOption('basename', folderTaskFilterI18n.targetBasename)
+                    .setValue(profile.fileFilterTarget)
+                    .onChange(async (value: 'relativePath' | 'basename') => {
+                        await this.updateFolderTaskFileSelectionProfile(profile.id, current => ({
+                            ...current,
+                            fileFilterTarget: value
+                        }));
+                    }));
+
+            new Setting(containerEl)
+                .setName(folderTaskFilterI18n.caseSensitiveName)
+                .setDesc(folderTaskFilterI18n.caseSensitiveDesc)
+                .addToggle(toggle => toggle
+                    .setValue(profile.fileFilterCaseSensitive)
+                    .onChange(async (value) => {
+                        await this.updateFolderTaskFileSelectionProfile(profile.id, current => ({
+                            ...current,
+                            fileFilterCaseSensitive: value
+                        }));
+                    }));
+
+            new Setting(containerEl)
+                .setName(folderTaskFilterI18n.invertName)
+                .setDesc(folderTaskFilterI18n.invertDesc)
+                .addToggle(toggle => toggle
+                    .setValue(profile.fileFilterInvert)
+                    .onChange(async (value) => {
+                        await this.updateFolderTaskFileSelectionProfile(profile.id, current => ({
+                            ...current,
+                            fileFilterInvert: value
+                        }));
+                    }));
+
+            new Setting(containerEl)
+                .setName(folderTaskFilterI18n.includeSubfoldersName)
+                .setDesc(folderTaskFilterI18n.includeSubfoldersDesc)
+                .addDropdown(dropdown => dropdown
+                    .addOption('legacy', folderTaskFilterI18n.includeSubfoldersLegacy)
+                    .addOption('include', folderTaskFilterI18n.includeSubfoldersInclude)
+                    .addOption('exclude', folderTaskFilterI18n.includeSubfoldersExclude)
+                    .setValue(profile.includeSubfoldersMode)
+                    .onChange(async (value: 'legacy' | 'include' | 'exclude') => {
+                        await this.updateFolderTaskFileSelectionProfile(profile.id, current => ({
+                            ...current,
+                            includeSubfoldersMode: value
+                        }));
+                    }));
+
+            if (index < profiles.length - 1) {
+                containerEl.createEl('hr');
+            }
+        });
+    }
+
 
     display(): void {
         const { containerEl } = this;
@@ -400,9 +698,13 @@ export class NotemdSettingTab extends PluginSettingTab {
         const extractConceptsTaskI18n = i18n.settings.extractConceptsTask;
         const stableApiI18n = i18n.settings.stableApi;
         const workflowBuilderI18n = i18n.settings.workflowBuilder;
+        const settingsResetI18n = i18n.settings.settingsReset;
         const generalOutputI18n = i18n.settings.generalOutput;
         const contentGenerationI18n = i18n.settings.contentGeneration;
+        const localKnowledgeI18n = i18n.settings.localKnowledge;
+        const chapterSplitI18n = i18n.settings.chapterSplit;
         const customPromptsI18n = i18n.settings.customPrompts;
+        const folderTaskFilterI18n = i18n.settings.folderTaskFilter;
         const generateFromTitleTaskLabel = getSidebarActionLabel(i18n, 'generate-from-title');
         const researchAndSummarizeTaskLabel = getSidebarActionLabel(i18n, 'research-and-summarize');
         const summarizeAsMermaidTaskLabel = getSidebarActionLabel(i18n, 'summarize-as-mermaid');
@@ -432,6 +734,34 @@ export class NotemdSettingTab extends PluginSettingTab {
 
             containerEl.createEl('hr');
         }
+
+        new Setting(containerEl).setName(settingsResetI18n.heading).setHeading();
+        new Setting(containerEl)
+            .setName(settingsResetI18n.completeName)
+            .setDesc(settingsResetI18n.completeDesc)
+            .addButton(button => button
+                .setButtonText(settingsResetI18n.completeButton)
+                .setWarning()
+                .onClick(async () => {
+                    await this.plugin.resetSettings('complete');
+                    await this.plugin.refreshLocalizedUi();
+                    this.display();
+                    new Notice(settingsResetI18n.completeNotice);
+                }));
+
+        new Setting(containerEl)
+            .setName(settingsResetI18n.partialName)
+            .setDesc(settingsResetI18n.partialDesc)
+            .addButton(button => button
+                .setButtonText(settingsResetI18n.partialButton)
+                .onClick(async () => {
+                    await this.plugin.resetSettings('partial');
+                    await this.plugin.refreshLocalizedUi();
+                    this.display();
+                    new Notice(settingsResetI18n.partialNotice);
+                }));
+
+        containerEl.createEl('hr');
 
         // --- Provider Configuration ---
         new Setting(containerEl).setName(providerI18n.heading).setHeading();
@@ -526,7 +856,7 @@ export class NotemdSettingTab extends PluginSettingTab {
 
             if (showManualOutputTokenOverride) {
                 new Setting(containerEl)
-                    .setName(i18n.settings.processing.maxTokensName)
+                    .setName(providerI18n.maxOutputTokensName)
                     .setDesc(providerI18n.maxOutputTokensDesc)
                     .addText(text => text
                         .setPlaceholder(String(this.plugin.settings.maxTokens))
@@ -872,6 +1202,104 @@ export class NotemdSettingTab extends PluginSettingTab {
                     }));
         }
 
+        new Setting(containerEl).setName(folderTaskFilterI18n.heading).setHeading();
+        new Setting(containerEl)
+            .setName(folderTaskFilterI18n.modeName)
+            .setDesc(folderTaskFilterI18n.modeDesc)
+            .addDropdown(dropdown => dropdown
+                .addOption('none', folderTaskFilterI18n.modeNone)
+                .addOption('contains', folderTaskFilterI18n.modeContains)
+                .addOption('regex', folderTaskFilterI18n.modeRegex)
+                .addOption('glob', folderTaskFilterI18n.modeGlob)
+                .setValue(this.plugin.settings.folderTaskFileFilterMode)
+                .onChange(async (value: 'none' | 'contains' | 'regex' | 'glob') => {
+                    this.plugin.settings.folderTaskFileFilterMode = value;
+                    await this.plugin.saveSettings();
+                    if (value === 'regex') {
+                        const regexError = getFolderTaskRegexValidationError(
+                            this.plugin.settings.folderTaskFileFilterPattern,
+                            this.plugin.settings.folderTaskFileFilterCaseSensitive
+                        );
+                        if (regexError) {
+                            new Notice(formatI18n(folderTaskFilterI18n.invalidRegexNotice, { message: regexError }), 9000);
+                        }
+                    }
+                }));
+
+        this.addDeferredTextSetting(
+            new Setting(containerEl)
+                .setName(folderTaskFilterI18n.patternName)
+                .setDesc(folderTaskFilterI18n.patternDesc),
+            {
+                placeholder: folderTaskFilterI18n.patternPlaceholder,
+                value: this.plugin.settings.folderTaskFileFilterPattern,
+                onCommit: async (value) => {
+                    this.plugin.settings.folderTaskFileFilterPattern = value;
+                    await this.plugin.saveSettings();
+                    if (this.plugin.settings.folderTaskFileFilterMode === 'regex') {
+                        const regexError = getFolderTaskRegexValidationError(
+                            value,
+                            this.plugin.settings.folderTaskFileFilterCaseSensitive
+                        );
+                        if (regexError) {
+                            new Notice(formatI18n(folderTaskFilterI18n.invalidRegexNotice, { message: regexError }), 9000);
+                        }
+                    }
+                }
+            }
+        );
+
+        new Setting(containerEl)
+            .setName(folderTaskFilterI18n.syntaxGuideName)
+            .setDesc(folderTaskFilterI18n.syntaxGuideDesc);
+
+        new Setting(containerEl)
+            .setName(folderTaskFilterI18n.targetName)
+            .setDesc(folderTaskFilterI18n.targetDesc)
+            .addDropdown(dropdown => dropdown
+                .addOption('relativePath', folderTaskFilterI18n.targetRelativePath)
+                .addOption('basename', folderTaskFilterI18n.targetBasename)
+                .setValue(this.plugin.settings.folderTaskFileFilterTarget)
+                .onChange(async (value: 'relativePath' | 'basename') => {
+                    this.plugin.settings.folderTaskFileFilterTarget = value;
+                    await this.plugin.saveSettings();
+                }));
+
+        new Setting(containerEl)
+            .setName(folderTaskFilterI18n.caseSensitiveName)
+            .setDesc(folderTaskFilterI18n.caseSensitiveDesc)
+            .addToggle(toggle => toggle
+                .setValue(this.plugin.settings.folderTaskFileFilterCaseSensitive)
+                .onChange(async (value) => {
+                    this.plugin.settings.folderTaskFileFilterCaseSensitive = value;
+                    await this.plugin.saveSettings();
+                }));
+
+        new Setting(containerEl)
+            .setName(folderTaskFilterI18n.invertName)
+            .setDesc(folderTaskFilterI18n.invertDesc)
+            .addToggle(toggle => toggle
+                .setValue(this.plugin.settings.folderTaskFileFilterInvert)
+                .onChange(async (value) => {
+                    this.plugin.settings.folderTaskFileFilterInvert = value;
+                    await this.plugin.saveSettings();
+                }));
+
+        new Setting(containerEl)
+            .setName(folderTaskFilterI18n.includeSubfoldersName)
+            .setDesc(folderTaskFilterI18n.includeSubfoldersDesc)
+            .addDropdown(dropdown => dropdown
+                .addOption('legacy', folderTaskFilterI18n.includeSubfoldersLegacy)
+                .addOption('include', folderTaskFilterI18n.includeSubfoldersInclude)
+                .addOption('exclude', folderTaskFilterI18n.includeSubfoldersExclude)
+                .setValue(this.plugin.settings.folderTaskIncludeSubfoldersMode)
+                .onChange(async (value: 'legacy' | 'include' | 'exclude') => {
+                    this.plugin.settings.folderTaskIncludeSubfoldersMode = value;
+                    await this.plugin.saveSettings();
+                }));
+
+        this.renderFolderTaskFileSelectionProfileManager(containerEl, folderTaskFilterI18n);
+
         // --- Translate Task Settings ---
         new Setting(containerEl).setName(translationTaskI18n.heading).setHeading();
 
@@ -1018,6 +1446,16 @@ export class NotemdSettingTab extends PluginSettingTab {
                 .setValue(this.plugin.settings.extractConceptsAddBacklink)
                 .onChange(async (value) => {
                     this.plugin.settings.extractConceptsAddBacklink = value;
+                    await this.plugin.saveSettings();
+                }));
+
+        new Setting(containerEl)
+            .setName(extractConceptsTaskI18n.replaceSynonymsName)
+            .setDesc(extractConceptsTaskI18n.replaceSynonymsDesc)
+            .addToggle(toggle => toggle
+                .setValue(this.plugin.settings.replaceSynonymsDuringConceptExtraction)
+                .onChange(async (value) => {
+                    this.plugin.settings.replaceSynonymsDuringConceptExtraction = value;
                     await this.plugin.saveSettings();
                 }));
 
@@ -1251,6 +1689,156 @@ export class NotemdSettingTab extends PluginSettingTab {
                 .setValue(this.plugin.settings.autoMermaidFixAfterGenerate)
                 .onChange(async (value) => {
                     this.plugin.settings.autoMermaidFixAfterGenerate = value;
+                    await this.plugin.saveSettings();
+                }));
+
+        new Setting(containerEl).setName(localKnowledgeI18n.heading).setHeading();
+        new Setting(containerEl)
+            .setName(localKnowledgeI18n.enableName)
+            .setDesc(localKnowledgeI18n.enableDesc)
+            .addToggle(toggle => toggle
+                .setValue(this.plugin.settings.enableLocalKnowledgeRetrieval)
+                .onChange(async (value) => {
+                    this.plugin.settings.enableLocalKnowledgeRetrieval = value;
+                    await this.plugin.saveSettings();
+                    this.display();
+                }));
+
+        if (this.plugin.settings.enableLocalKnowledgeRetrieval) {
+            this.addDeferredTextAreaSetting(
+                new Setting(containerEl)
+                    .setName(localKnowledgeI18n.pathsName)
+                    .setDesc(localKnowledgeI18n.pathsDesc),
+                {
+                    placeholder: localKnowledgeI18n.pathsPlaceholder,
+                    value: this.plugin.settings.localKnowledgeBasePaths,
+                    onCommit: async (value) => {
+                        this.plugin.settings.localKnowledgeBasePaths = value
+                            .split('\n')
+                            .map(line => line.trim())
+                            .filter(Boolean)
+                            .join('\n');
+                        await this.plugin.saveSettings();
+                    }
+                }
+            );
+
+            this.addDeferredNumberSetting(
+                new Setting(containerEl)
+                    .setName(localKnowledgeI18n.topKName)
+                    .setDesc(localKnowledgeI18n.topKDesc),
+                {
+                    placeholder: String(DEFAULT_SETTINGS.localKnowledgeTopK),
+                    value: this.plugin.settings.localKnowledgeTopK,
+                    onCommit: async (rawValue) => {
+                        this.plugin.settings.localKnowledgeTopK = this.sanitizePositiveInteger(
+                            rawValue,
+                            DEFAULT_SETTINGS.localKnowledgeTopK,
+                            1,
+                            20
+                        );
+                        await this.plugin.saveSettings();
+                        return String(this.plugin.settings.localKnowledgeTopK);
+                    }
+                }
+            );
+
+            this.addDeferredNumberSetting(
+                new Setting(containerEl)
+                    .setName(localKnowledgeI18n.slidingWindowSizeName)
+                    .setDesc(localKnowledgeI18n.slidingWindowSizeDesc),
+                {
+                    placeholder: String(DEFAULT_SETTINGS.localKnowledgeSlidingWindowSize),
+                    value: this.plugin.settings.localKnowledgeSlidingWindowSize,
+                    onCommit: async (rawValue) => {
+                        this.plugin.settings.localKnowledgeSlidingWindowSize = this.sanitizePositiveInteger(
+                            rawValue,
+                            DEFAULT_SETTINGS.localKnowledgeSlidingWindowSize,
+                            0,
+                            10
+                        );
+                        await this.plugin.saveSettings();
+                        return String(this.plugin.settings.localKnowledgeSlidingWindowSize);
+                    }
+                }
+            );
+
+            this.addDeferredNumberSetting(
+                new Setting(containerEl)
+                    .setName(localKnowledgeI18n.maxSnippetCharsName)
+                    .setDesc(localKnowledgeI18n.maxSnippetCharsDesc),
+                {
+                    placeholder: String(DEFAULT_SETTINGS.localKnowledgeMaxSnippetChars),
+                    value: this.plugin.settings.localKnowledgeMaxSnippetChars,
+                    onCommit: async (rawValue) => {
+                        this.plugin.settings.localKnowledgeMaxSnippetChars = this.sanitizePositiveInteger(
+                            rawValue,
+                            DEFAULT_SETTINGS.localKnowledgeMaxSnippetChars,
+                            100,
+                            10_000
+                        );
+                        await this.plugin.saveSettings();
+                        return String(this.plugin.settings.localKnowledgeMaxSnippetChars);
+                    }
+                }
+            );
+
+            new Setting(containerEl)
+                .setName(localKnowledgeI18n.excludeCurrentFileName)
+                .setDesc(localKnowledgeI18n.excludeCurrentFileDesc)
+                .addToggle(toggle => toggle
+                    .setValue(this.plugin.settings.localKnowledgeExcludeCurrentFile)
+                    .onChange(async (value) => {
+                        this.plugin.settings.localKnowledgeExcludeCurrentFile = value;
+                        await this.plugin.saveSettings();
+                    }));
+
+            new Setting(containerEl)
+                .setName(localKnowledgeI18n.batchGenerateName)
+                .setDesc(localKnowledgeI18n.batchGenerateDesc)
+                .addToggle(toggle => toggle
+                    .setValue(this.plugin.settings.enableLocalKnowledgeForBatchGenerateFromTitles)
+                    .onChange(async (value) => {
+                        this.plugin.settings.enableLocalKnowledgeForBatchGenerateFromTitles = value;
+                        await this.plugin.saveSettings();
+                    }));
+
+            new Setting(containerEl)
+                .setName(localKnowledgeI18n.researchSummarizeName)
+                .setDesc(localKnowledgeI18n.researchSummarizeDesc)
+                .addToggle(toggle => toggle
+                    .setValue(this.plugin.settings.enableLocalKnowledgeForResearchSummarize)
+                    .onChange(async (value) => {
+                        this.plugin.settings.enableLocalKnowledgeForResearchSummarize = value;
+                        await this.plugin.saveSettings();
+                    }));
+
+            new Setting(containerEl)
+                .setName(localKnowledgeI18n.generateDiagramName)
+                .setDesc(localKnowledgeI18n.generateDiagramDesc)
+                .addToggle(toggle => toggle
+                    .setValue(this.plugin.settings.enableLocalKnowledgeForDiagramGeneration)
+                    .onChange(async (value) => {
+                        this.plugin.settings.enableLocalKnowledgeForDiagramGeneration = value;
+                        await this.plugin.saveSettings();
+                    }));
+        }
+
+        new Setting(containerEl).setName(chapterSplitI18n.heading).setHeading();
+        new Setting(containerEl)
+            .setName(chapterSplitI18n.headingLevelName)
+            .setDesc(chapterSplitI18n.headingLevelDesc)
+            .addDropdown(dropdown => dropdown
+                .addOption('auto', chapterSplitI18n.headingLevelAuto)
+                .addOption('h1', chapterSplitI18n.headingLevelH1)
+                .addOption('h2', chapterSplitI18n.headingLevelH2)
+                .addOption('h3', chapterSplitI18n.headingLevelH3)
+                .addOption('h4', chapterSplitI18n.headingLevelH4)
+                .addOption('h5', chapterSplitI18n.headingLevelH5)
+                .addOption('h6', chapterSplitI18n.headingLevelH6)
+                .setValue(this.plugin.settings.chapterSplitHeadingLevel)
+                .onChange(async (value) => {
+                    this.plugin.settings.chapterSplitHeadingLevel = value as typeof this.plugin.settings.chapterSplitHeadingLevel;
                     await this.plugin.saveSettings();
                 }));
 

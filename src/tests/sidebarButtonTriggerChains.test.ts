@@ -70,6 +70,7 @@ function createPluginMock() {
         batchExtractConceptsForFolderCommand: jest.fn().mockResolvedValue(undefined),
         extractOriginalTextCommand: jest.fn().mockResolvedValue(undefined),
         batchExtractOriginalTextCommand: jest.fn().mockResolvedValue(undefined),
+        splitNoteByChaptersCommand: jest.fn().mockResolvedValue(undefined),
         batchMermaidFixCommand: jest.fn().mockResolvedValue(undefined),
         fixFormulaFormatsCommand: jest.fn().mockResolvedValue(undefined),
         batchFixFormulaFormatsCommand: jest.fn().mockResolvedValue(undefined),
@@ -125,6 +126,7 @@ describe('NotemdSidebarView button trigger chains', () => {
             'extract-concepts-folder',
             'extract-original-text',
             'batch-extract-original-text',
+            'split-note-by-chapters',
             'batch-mermaid-fix',
             'fix-formula-current',
             'batch-fix-formula',
@@ -202,6 +204,15 @@ describe('NotemdSidebarView button trigger chains', () => {
         expect(plugin.previewExperimentalDiagramCommand).not.toHaveBeenCalled();
     });
 
+    test('preview-diagram accepts saved canvas artifacts as active files', async () => {
+        const canvasFile = createMarkdownFile('Notes/Current_diagram.canvas', 'Current_diagram.canvas', 'canvas');
+        (mockApp.workspace.getActiveFile as jest.Mock).mockReturnValue(canvasFile);
+
+        await executeAction('preview-diagram', reporter);
+
+        expect(plugin.previewDiagramCommand).toHaveBeenCalledWith(canvasFile, reporter);
+    });
+
     test('translate-current-file triggers translateFileCommand', async () => {
         await executeAction('translate-current-file', reporter);
         expect(plugin.translateFileCommand).toHaveBeenCalledWith(activeMdFile, reporter.abortController?.signal, reporter);
@@ -229,6 +240,20 @@ describe('NotemdSidebarView button trigger chains', () => {
         expect(plugin.batchExtractConceptsForFolderCommand).toHaveBeenCalledWith(reporter);
     });
 
+    test('extract-concepts-folder uses workflow context folder when available', async () => {
+        await executeAction('extract-concepts-folder', reporter, {
+            preferredFolderPath: 'Concepts',
+            lastGeneratedCompleteFolderPath: null
+        });
+
+        expect(plugin.batchExtractConceptsForFolderCommand).toHaveBeenCalledWith(
+            reporter,
+            expect.objectContaining({
+                folderPathOverride: 'Concepts'
+            })
+        );
+    });
+
     test('extract-original-text triggers extractOriginalTextCommand', async () => {
         await executeAction('extract-original-text', reporter);
         expect(plugin.extractOriginalTextCommand).toHaveBeenCalledWith(reporter);
@@ -237,6 +262,25 @@ describe('NotemdSidebarView button trigger chains', () => {
     test('batch-extract-original-text triggers batchExtractOriginalTextCommand', async () => {
         await executeAction('batch-extract-original-text', reporter);
         expect(plugin.batchExtractOriginalTextCommand).toHaveBeenCalledWith(reporter);
+    });
+
+    test('split-note-by-chapters triggers splitNoteByChaptersCommand', async () => {
+        await executeAction('split-note-by-chapters', reporter);
+        expect(plugin.splitNoteByChaptersCommand).toHaveBeenCalledWith(reporter);
+    });
+
+    test('batch-extract-original-text uses workflow context folder when available', async () => {
+        await executeAction('batch-extract-original-text', reporter, {
+            preferredFolderPath: 'Concepts',
+            lastGeneratedCompleteFolderPath: null
+        });
+
+        expect(plugin.batchExtractOriginalTextCommand).toHaveBeenCalledWith(
+            reporter,
+            expect.objectContaining({
+                folderPathOverride: 'Concepts'
+            })
+        );
     });
 
     test('batch-mermaid-fix triggers batchMermaidFixCommand with latest complete folder from context', async () => {
@@ -256,6 +300,15 @@ describe('NotemdSidebarView button trigger chains', () => {
     test('batch-fix-formula triggers batchFixFormulaFormatsCommand', async () => {
         await executeAction('batch-fix-formula', reporter);
         expect(plugin.batchFixFormulaFormatsCommand).toHaveBeenCalledWith(reporter);
+    });
+
+    test('batch-fix-formula prefers latest complete folder from workflow context', async () => {
+        await executeAction('batch-fix-formula', reporter, {
+            preferredFolderPath: 'Concepts',
+            lastGeneratedCompleteFolderPath: 'Concepts_complete'
+        });
+
+        expect(plugin.batchFixFormulaFormatsCommand).toHaveBeenCalledWith(reporter, 'Concepts_complete');
     });
 
     test('check-duplicates-current triggers duplicate check read chain', async () => {

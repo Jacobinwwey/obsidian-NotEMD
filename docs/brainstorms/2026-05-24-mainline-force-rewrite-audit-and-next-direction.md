@@ -1,6 +1,6 @@
 ---
 date: 2026-05-24
-last_updated: 2026-05-24
+last_updated: 2026-05-25
 topic: mainline-force-rewrite-audit-and-next-direction
 ---
 
@@ -196,3 +196,35 @@ Current rewritten `main` is still coherent, but only if we describe it accuratel
 1. it currently ships the single-entry packaging / semantic lane;
 2. it does not currently ship the later backup-branch breadth;
 3. the next-level move is disciplined reintegration, not narrative drift.
+
+## 8. Incremental Recovery Update (2026-05-25)
+
+This section does **not** replace the 2026-05-24 baseline above. It records what has since been re-landed on current main.
+
+### 8.1 Product slices now re-proved on current main
+
+The following items should no longer be described as “missing on current main”:
+
+1. settings reset (`complete` + `partial` while preserving provider settings where intended);
+2. concept-note prerequisite guidance modal for concept-generating flows;
+3. concept synonym-suppression toggle for add-links / extract-concepts prompts;
+4. file-selection profiles plus folder-task regex/glob filtering with `relativePath` / `basename` targets and explicit subfolder-scope control;
+5. local knowledge retrieval for `Batch generate from titles`, `Research & Summarize`, and `Generate diagram`;
+6. chapter split with heading-based output, TOC generation, and stale-file cleanup;
+7. saved-artifact-aware diagram preview recovery for Mermaid, Vega-Lite, JSON Canvas, and HTML artifacts.
+
+### 8.2 Automation / maintainership slices now re-proved on current main
+
+The following bounded automation work is also now present again on current main:
+
+1. redacted provider export plus public-safe CLI surface export;
+2. repo-local maintainer help/invoke scripts for export-only operations;
+3. repo-saga serial execution lock, associated tests, and maintainer-doc guidance.
+
+### 8.3 Revised interpretation after recovery
+
+The accurate post-recovery interpretation is now:
+
+1. the 2026-05-24 audit remains valid as a baseline snapshot of the force-rewritten branch at that time;
+2. current main has since regained a bounded but meaningful subset of the backup-branch breadth;
+3. it is still inaccurate to overclaim dedicated runtime assets or an unbounded maintainer mutation surface.

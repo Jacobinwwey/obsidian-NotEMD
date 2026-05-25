@@ -15,6 +15,8 @@ export function buildCliCapabilityManifest(pluginId = 'notemd'): CliCapabilityMa
                     automationLevel: binding.automationLevel,
                     requiredContext: binding.requiredContext,
                     sideEffectClass: binding.sideEffectClass,
+                    inputHandlingTags: definition.inputHandlingTags ? [...definition.inputHandlingTags] : undefined,
+                    outputHandlingTags: definition.outputHandlingTags ? [...definition.outputHandlingTags] : undefined,
                     surfaces: [...binding.surfaces],
                     mappingKind: binding.mappingKind,
                     defaultInput: binding.defaultInput ? { ...binding.defaultInput } : undefined

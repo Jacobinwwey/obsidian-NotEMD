@@ -17,7 +17,8 @@ function createReporter(): ProgressReporter {
         },
         abortController: new AbortController(),
         activeTasks: 0,
-        updateActiveTasks: jest.fn()
+        updateActiveTasks: jest.fn(),
+        updateApiLiveness: jest.fn()
     };
 }
 
@@ -248,6 +249,63 @@ describe('note processing command host adapter', () => {
         expect(result).toBeNull();
     });
 
+    test('batch generate command uses interactive folder-task selection profile when available', async () => {
+        const reporter = createReporter();
+        const { host } = createHost(reporter);
+        host.getSettings.mockReturnValue({
+            ...mockSettings,
+            folderTaskFileFilterMode: 'none',
+            folderTaskFileFilterPattern: '',
+            folderTaskFileFilterTarget: 'relativePath',
+            folderTaskFileFilterCaseSensitive: false,
+            folderTaskFileFilterInvert: false,
+            folderTaskIncludeSubfoldersMode: 'legacy',
+            folderTaskFileSelectionProfiles: [
+                {
+                    id: 'profile-drafts',
+                    name: 'Draft notes',
+                    folderPathHint: 'Notes/Drafts',
+                    includeSubfoldersMode: 'exclude',
+                    fileFilterMode: 'glob',
+                    fileFilterPattern: 'draft-*',
+                    fileFilterTarget: 'basename',
+                    fileFilterCaseSensitive: true,
+                    fileFilterInvert: false
+                }
+            ]
+        });
+        const getFolderTaskSelection = jest.fn().mockResolvedValue({
+            folderPath: 'Notes',
+            fileSelectionOverride: {
+                profileId: 'profile-drafts'
+            }
+        });
+        Object.assign(host, { getFolderTaskSelection });
+        const batchGenerateImpl = jest.fn().mockResolvedValue({
+            sourceFolderPath: 'Notes',
+            completeFolderPath: 'Notes_complete',
+            completeFolderCreated: true,
+            processedFileCount: 0,
+            generatedCount: 0,
+            movedCount: 0,
+            cancelled: false,
+            fileResults: [],
+            errors: []
+        });
+        const { runBatchGenerateContentForTitlesCommandWithHost } = loadModule();
+
+        await runBatchGenerateContentForTitlesCommandWithHost(host, reporter, undefined, batchGenerateImpl);
+
+        expect(getFolderTaskSelection).toHaveBeenCalledWith('batch-generate-from-titles', undefined);
+        expect(host.getFolderSelection).not.toHaveBeenCalled();
+        const passedSettings = batchGenerateImpl.mock.calls[0][1];
+        expect(passedSettings.folderTaskIncludeSubfoldersMode).toBe('exclude');
+        expect(passedSettings.folderTaskFileFilterMode).toBe('glob');
+        expect(passedSettings.folderTaskFileFilterPattern).toBe('draft-*');
+        expect(passedSettings.folderTaskFileFilterTarget).toBe('basename');
+        expect(passedSettings.folderTaskFileFilterCaseSensitive).toBe(true);
+    });
+
     test('batch extract original text command processes folder files', async () => {
         const reporter = createReporter();
         const { host } = createHost(reporter);
@@ -286,6 +344,105 @@ describe('note processing command host adapter', () => {
             extractedCount: 2,
             cancelled: false
         }));
+    });
+
+    test('batch extract original text command supports folder path override and selection overrides', async () => {
+        const reporter = createReporter();
+        const { host } = createHost(reporter);
+        host.getSettings.mockReturnValue({
+            ...mockSettings,
+            folderTaskFileFilterMode: 'none',
+            folderTaskFileFilterPattern: '',
+            folderTaskFileFilterTarget: 'relativePath',
+            folderTaskFileFilterCaseSensitive: false,
+            folderTaskFileFilterInvert: false
+        });
+        host.getFolderByPath.mockReturnValue({ path: 'Notes' } as any);
+        host.getFiles.mockReturnValue([
+            { name: 'A.md', basename: 'A', path: 'Notes/A.md', extension: 'md' } as any,
+            { name: 'B.md', basename: 'B', path: 'Notes/B.md', extension: 'md' } as any
+        ]);
+
+        const extractImpl = jest.fn().mockResolvedValue({
+            sourcePath: 'Notes/A.md',
+            outputPath: 'Notes/A_Extracted.md',
+            outputDirectory: 'Notes',
+            outputSuffix: '_Extracted',
+            questionCount: 1,
+            mergedMode: false
+        });
+
+        const { runBatchExtractOriginalTextCommandWithHost } = loadModule();
+        const result = await runBatchExtractOriginalTextCommandWithHost(
+            host,
+            reporter,
+            extractImpl,
+            {
+                folderPathOverride: 'Notes',
+                fileSelectionOverride: {
+                    fileFilterMode: 'contains',
+                    fileFilterPattern: 'A',
+                    fileFilterTarget: 'basename',
+                    fileFilterCaseSensitive: true
+                }
+            }
+        );
+
+        expect(host.getFolderSelection).not.toHaveBeenCalled();
+        expect(extractImpl).toHaveBeenCalledTimes(1);
+        expect(extractImpl.mock.calls[0][2].path).toBe('Notes/A.md');
+        expect(result).toEqual(expect.objectContaining({
+            folderPath: 'Notes',
+            processedFileCount: 1,
+            extractedCount: 1,
+            cancelled: false
+        }));
+    });
+
+    test('batch extract original text command does not mutate host settings when overrides are provided', async () => {
+        const reporter = createReporter();
+        const { host } = createHost(reporter);
+        const baseSettings = {
+            ...mockSettings,
+            folderTaskFileFilterMode: 'none' as const,
+            folderTaskFileFilterPattern: '',
+            folderTaskFileFilterTarget: 'relativePath' as const,
+            folderTaskFileFilterCaseSensitive: false,
+            folderTaskFileFilterInvert: false
+        };
+        host.getSettings.mockReturnValue(baseSettings);
+        host.getFolderByPath.mockReturnValue({ path: 'Notes' } as any);
+        host.getFiles.mockReturnValue([
+            { name: 'A.md', basename: 'A', path: 'Notes/A.md', extension: 'md' } as any
+        ]);
+        const extractImpl = jest.fn().mockResolvedValue({
+            sourcePath: 'Notes/A.md',
+            outputPath: 'Notes/A_Extracted.md',
+            outputDirectory: 'Notes',
+            outputSuffix: '_Extracted',
+            questionCount: 1,
+            mergedMode: false
+        });
+        const { runBatchExtractOriginalTextCommandWithHost } = loadModule();
+
+        await runBatchExtractOriginalTextCommandWithHost(
+            host,
+            reporter,
+            extractImpl,
+            {
+                folderPathOverride: 'Notes',
+                fileSelectionOverride: {
+                    fileFilterMode: 'glob',
+                    fileFilterPattern: '**/*.md'
+                }
+            }
+        );
+
+        expect(baseSettings.folderTaskFileFilterMode).toBe('none');
+        expect(baseSettings.folderTaskFileFilterPattern).toBe('');
+        expect(baseSettings.folderTaskFileFilterTarget).toBe('relativePath');
+        expect(baseSettings.folderTaskFileFilterCaseSensitive).toBe(false);
+        expect(baseSettings.folderTaskFileFilterInvert).toBe(false);
     });
 
     test('create wiki-link and generate command reuses host orchestration and writes generated note path', async () => {
@@ -644,6 +801,73 @@ describe('note processing command host adapter', () => {
         expect(getBusy()).toBe(false);
     });
 
+    test('batch extract concepts command forwards API liveness events from per-file reporters in parallel mode', async () => {
+        const reporter = createReporter();
+        const { host } = createHost(reporter);
+        const file = Object.assign(new (TFile as any)(), {
+            name: 'Topic.md',
+            basename: 'Topic',
+            path: 'Concepts/Topic.md',
+            extension: 'md'
+        });
+        host.getSettings.mockReturnValue({
+            ...mockSettings,
+            enableBatchParallelism: true,
+            batchConcurrency: 2,
+            batchSize: 10
+        });
+        host.getFolderSelection.mockResolvedValue('Concepts');
+        host.getFolderByPath.mockReturnValue(Object.assign(new (TFolder as any)(), {
+            name: 'Concepts',
+            path: 'Concepts'
+        }));
+        host.getFiles.mockReturnValue([file]);
+        const extractImpl = jest.fn().mockImplementation(async (_app, _runtime, _file, fileReporter: ProgressReporter) => {
+            fileReporter.updateApiLiveness?.({ phase: 'request-start', providerName: 'OpenAI', requestId: 'req-openai-1' });
+            fileReporter.updateApiLiveness?.({
+                phase: 'response-headers',
+                providerName: 'OpenAI',
+                requestId: 'req-openai-1',
+                transport: 'desktop-http-stream'
+            });
+            fileReporter.updateApiLiveness?.({
+                phase: 'response-chunk',
+                providerName: 'OpenAI',
+                requestId: 'req-openai-1',
+                transport: 'desktop-http-stream'
+            });
+            fileReporter.updateApiLiveness?.({ phase: 'request-complete', providerName: 'OpenAI', requestId: 'req-openai-1' });
+            return new Set(['Alpha']);
+        });
+        const createNotesImpl = jest.fn().mockResolvedValue(undefined);
+        const { runBatchExtractConceptsForFolderCommandWithHost } = loadModule();
+
+        await runBatchExtractConceptsForFolderCommandWithHost(host, reporter, extractImpl, createNotesImpl);
+
+        expect(reporter.updateApiLiveness).toHaveBeenCalledWith(expect.objectContaining({
+            phase: 'request-start',
+            providerName: 'OpenAI',
+            requestId: 'req-openai-1'
+        }));
+        expect(reporter.updateApiLiveness).toHaveBeenCalledWith(expect.objectContaining({
+            phase: 'response-headers',
+            providerName: 'OpenAI',
+            requestId: 'req-openai-1',
+            transport: 'desktop-http-stream'
+        }));
+        expect(reporter.updateApiLiveness).toHaveBeenCalledWith(expect.objectContaining({
+            phase: 'response-chunk',
+            providerName: 'OpenAI',
+            requestId: 'req-openai-1',
+            transport: 'desktop-http-stream'
+        }));
+        expect(reporter.updateApiLiveness).toHaveBeenCalledWith(expect.objectContaining({
+            phase: 'request-complete',
+            providerName: 'OpenAI',
+            requestId: 'req-openai-1'
+        }));
+    });
+
     test('extract original text command delegates through extracted host flow', async () => {
         const reporter = createReporter();
         const { host, getBusy } = createHost(reporter);
@@ -742,6 +966,153 @@ describe('note processing command host adapter', () => {
         expect(host.completeReporter).toHaveBeenCalledWith(reporter);
         expect(host.finalizeReporter).toHaveBeenCalledWith(reporter);
         expect(getBusy()).toBe(false);
+    });
+
+    test('process folder command applies configured folder-task file filters', async () => {
+        const reporter = createReporter();
+        const { host } = createHost(reporter);
+        host.getSettings.mockReturnValue({
+            ...mockSettings,
+            folderTaskFileFilterMode: 'contains',
+            folderTaskFileFilterPattern: 'A',
+            folderTaskFileFilterTarget: 'basename',
+            folderTaskFileFilterCaseSensitive: true
+        });
+        host.getFolderByPath.mockReturnValue(Object.assign(new (TFolder as any)(), {
+            name: 'Concepts',
+            path: 'Concepts'
+        }));
+        host.getFiles.mockReturnValue([
+            { name: 'A.md', basename: 'A', path: 'Concepts/A.md', extension: 'md' } as any,
+            { name: 'B.md', basename: 'B', path: 'Concepts/B.md', extension: 'md' } as any
+        ]);
+        const processImpl = jest.fn().mockResolvedValue({
+            sourcePath: 'Concepts/A.md',
+            requestedOutputFolderPath: 'Concepts',
+            outputFolderPath: 'Concepts',
+            outputFolderCreated: false,
+            usedCustomOutputFolder: false,
+            outputPath: 'Concepts/A_processed.md',
+            created: true,
+            overwritten: false,
+            movedOriginalFile: false,
+            moveOriginalFile: false,
+            chunkCount: 1,
+            conceptCount: 0,
+            conceptNoteFolderPath: '',
+            removedCodeFences: false
+        });
+        const { runProcessFolderWithNotemdCommandWithHost } = loadModule();
+
+        const result = await runProcessFolderWithNotemdCommandWithHost(host, reporter, 'Concepts', processImpl);
+
+        expect(processImpl).toHaveBeenCalledTimes(1);
+        expect(processImpl.mock.calls[0][2].path).toBe('Concepts/A.md');
+        expect(result).toEqual(expect.objectContaining({
+            processedFileCount: 1,
+            savedCount: 1
+        }));
+    });
+
+    test('process folder command allows per-operation file selection overrides', async () => {
+        const reporter = createReporter();
+        const { host } = createHost(reporter);
+        host.getSettings.mockReturnValue({
+            ...mockSettings,
+            folderTaskFileFilterMode: 'none',
+            folderTaskFileFilterPattern: '',
+            folderTaskFileFilterTarget: 'relativePath',
+            folderTaskFileFilterCaseSensitive: false,
+            folderTaskFileFilterInvert: false
+        });
+        host.getFolderByPath.mockReturnValue(Object.assign(new (TFolder as any)(), {
+            name: 'Concepts',
+            path: 'Concepts'
+        }));
+        host.getFiles.mockReturnValue([
+            { name: 'A.md', basename: 'A', path: 'Concepts/A.md', extension: 'md' } as any,
+            { name: 'B.md', basename: 'B', path: 'Concepts/B.md', extension: 'md' } as any
+        ]);
+        const processImpl = jest.fn().mockResolvedValue({
+            sourcePath: 'Concepts/A.md',
+            requestedOutputFolderPath: 'Concepts',
+            outputFolderPath: 'Concepts',
+            outputFolderCreated: false,
+            usedCustomOutputFolder: false,
+            outputPath: 'Concepts/A_processed.md',
+            created: true,
+            overwritten: false,
+            movedOriginalFile: false,
+            moveOriginalFile: false,
+            chunkCount: 1,
+            conceptCount: 0,
+            conceptNoteFolderPath: '',
+            removedCodeFences: false
+        });
+        const { runProcessFolderWithNotemdCommandWithHost } = loadModule();
+
+        const result = await runProcessFolderWithNotemdCommandWithHost(
+            host,
+            reporter,
+            'Concepts',
+            processImpl,
+            {
+                fileFilterMode: 'contains',
+                fileFilterPattern: 'A',
+                fileFilterTarget: 'basename',
+                fileFilterCaseSensitive: true
+            }
+        );
+
+        expect(processImpl).toHaveBeenCalledTimes(1);
+        expect(processImpl.mock.calls[0][2].path).toBe('Concepts/A.md');
+        expect(result).toEqual(expect.objectContaining({
+            processedFileCount: 1,
+            savedCount: 1
+        }));
+    });
+
+    test('batch translate command passes per-operation selection overrides without mutating host settings', async () => {
+        const reporter = createReporter();
+        const { host } = createHost(reporter);
+        const folder = Object.assign(new (TFolder as any)(), {
+            name: 'Concepts',
+            path: 'Concepts'
+        });
+        host.getFolderSelection.mockResolvedValue('Concepts');
+        host.getFolderByPath.mockReturnValue(folder);
+        host.getSettings.mockReturnValue({
+            ...mockSettings,
+            folderTaskIncludeSubfoldersMode: 'legacy'
+        });
+        const batchTranslateImpl = jest.fn().mockResolvedValue({
+            folderPath: 'Concepts',
+            requestedOutputFolderPath: 'Translations',
+            outputFolderPath: 'Translations',
+            outputFolderCreated: false,
+            targetLanguage: 'en',
+            processedFileCount: 0,
+            translatedCount: 0,
+            cancelled: false,
+            fileResults: [],
+            errors: []
+        });
+        const { runBatchTranslateFolderCommandWithHost } = loadModule();
+
+        await runBatchTranslateFolderCommandWithHost(
+            host,
+            reporter,
+            undefined,
+            batchTranslateImpl,
+            {
+                includeSubfoldersMode: 'include'
+            }
+        );
+
+        expect(batchTranslateImpl).toHaveBeenCalledTimes(1);
+        const passedSettings = batchTranslateImpl.mock.calls[0][1];
+        expect(passedSettings.folderTaskIncludeSubfoldersMode).toBe('include');
+        expect(host.getSettings().folderTaskIncludeSubfoldersMode).toBe('legacy');
     });
 
     test('batch generate command returns resolved folders and reuses shared reporter cleanup', async () => {

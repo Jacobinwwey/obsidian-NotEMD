@@ -6,10 +6,11 @@ import { normalizeNameForFilePath, splitContent, getProviderForTask, getModelFor
 import { callLLM } from './llmUtils';
 import { refineMermaidBlocks, cleanupLatexDelimiters, deepDebugMermaid, applyDeepDebugToMermaidBlocks, checkMermaidErrors } from './mermaidProcessor'; // Assuming this will be moved or imported correctly later
 import { _performResearch } from './searchUtils'; // Assuming this will be moved or imported correctly later
-import mermaid from 'mermaid';
 import { formatI18n, getI18nStrings } from './i18n';
 import { resolveTaskLanguageName, shouldApplyAutoTranslation } from './i18n/taskLanguagePolicy';
 import { RenderArtifact } from './rendering/types';
+import { selectFolderTaskFiles } from './folderTaskFileSelector';
+import { buildLocalKnowledgeBaseRetriever, LocalKnowledgeBaseRetriever } from './localKnowledgeBase';
 
 export interface ConceptExtractionPluginContext {
     settings: NotemdSettings;
@@ -54,6 +55,11 @@ export interface GenerateContentForTitleResult {
     researchEnabled: boolean;
     researchContextUsed: boolean;
     modified: boolean;
+}
+
+export interface GenerateContentForTitleOptions {
+    enableLocalKnowledge?: boolean;
+    localKnowledgeRetriever?: LocalKnowledgeBaseRetriever | null;
 }
 
 export interface BatchGenerateContentFileResult extends GenerateContentForTitleResult {
@@ -762,7 +768,8 @@ export async function generateContentForTitle(
     app: App,
     settings: NotemdSettings,
     file: TFile,
-    progressReporter: ProgressReporter
+    progressReporter: ProgressReporter,
+    options: GenerateContentForTitleOptions = {}
 ): Promise<GenerateContentForTitleResult> {
     const title = file.basename;
     const i18n = getI18nStrings({ uiLocale: settings.uiLocale });
@@ -806,10 +813,33 @@ export async function generateContentForTitle(
     } else {
         progressReporter.log(`Research disabled for "Generate from Title".`);
     }
+
+    let localKnowledgeContext = '';
+    if (options.enableLocalKnowledge && options.localKnowledgeRetriever) {
+        localKnowledgeContext = options.localKnowledgeRetriever.buildContext(title, {
+            currentFilePath: file.path,
+            topK: settings.localKnowledgeTopK,
+            slidingWindowSize: settings.localKnowledgeSlidingWindowSize,
+            maxSnippetChars: settings.localKnowledgeMaxSnippetChars
+        }) || '';
+        if (localKnowledgeContext) {
+            progressReporter.log(`Local knowledge context obtained for "${title}".`);
+        } else {
+            progressReporter.log(`No local knowledge matches found for "${title}".`);
+        }
+    }
     if (progressReporter.cancelled) throw new Error("Processing cancelled by user before generation prompt construction.");
 
-    const researchContextSection = researchContext
-        ? `Use the following research context to inform the documentation:\n\n${researchContext}\n\nDocumentation based on the title "${title}" and the provided context:`
+    const supportingContexts: string[] = [];
+    if (researchContext) {
+        supportingContexts.push(`Web research context:\n${researchContext}`);
+    }
+    if (localKnowledgeContext) {
+        supportingContexts.push(`Local knowledge base context:\n${localKnowledgeContext}`);
+    }
+
+    const researchContextSection = supportingContexts.length > 0
+        ? `Use the following supporting context to inform the documentation:\n\n${supportingContexts.join('\n\n')}\n\nDocumentation based on the title "${title}" and the provided context:`
         : `Documentation based *only* on the title "${title}":`;
 
     let generationPrompt = getSystemPrompt(
@@ -974,10 +1004,16 @@ export async function batchGenerateContentForTitles(
     progressReporter.log(`Determined 'complete' folder path: ${completeFolderPath}`);
 
     const normalizedCompletePath = completeFolderPath === '' ? '' : (completeFolderPath.endsWith('/') ? completeFolderPath : completeFolderPath + '/');
-    const filesToProcess = app.vault.getMarkdownFiles().filter(f => {
-        const isInSelectedFolder = f.path.startsWith(folderPath === '/' ? '' : folderPath + '/');
-        const isInCompleteFolder = normalizedCompletePath ? f.path.startsWith(normalizedCompletePath) : false;
-        return isInSelectedFolder && !isInCompleteFolder && !f.name.endsWith('_processed.md');
+    const filesToProcess = selectFolderTaskFiles({
+        taskKind: 'batch-generate-from-titles',
+        folderPath,
+        files: app.vault.getMarkdownFiles(),
+        allowedExtensions: ['md'],
+        settings,
+        exclude: (file) => {
+            const isInCompleteFolder = normalizedCompletePath ? file.path.startsWith(normalizedCompletePath) : false;
+            return isInCompleteFolder || file.name.endsWith('_processed.md');
+        }
     });
 
     const result: BatchGenerateContentForTitlesResult = {
@@ -1008,6 +1044,11 @@ export async function batchGenerateContentForTitles(
     }
 
     progressReporter.log(`Starting batch content generation for ${filesToProcess.length} files in "${folderPath}"...`);
+
+    const localKnowledgeRetriever = settings.enableLocalKnowledgeRetrieval
+        && settings.enableLocalKnowledgeForBatchGenerateFromTitles
+        ? await buildLocalKnowledgeBaseRetriever(app, settings, progressReporter)
+        : null;
 
     // Ensure Complete Folder Exists
     try {
@@ -1043,7 +1084,10 @@ export async function batchGenerateContentForTitles(
             await delay(1); // Yield
 
             try {
-                const fileResult = await generateContentForTitle(app, settings, file, progressReporter);
+                const fileResult = await generateContentForTitle(app, settings, file, progressReporter, {
+                    enableLocalKnowledge: settings.enableLocalKnowledgeForBatchGenerateFromTitles,
+                    localKnowledgeRetriever
+                });
                 await delay(1); // Yield
                 const moveResult = await moveGeneratedFileToCompleteFolder(app, file, completeFolderPath, progressReporter);
                 result.fileResults.push({
@@ -1102,10 +1146,14 @@ export async function batchGenerateContentForTitles(
                 abortController: progressReporter.abortController,
                 activeTasks: progressReporter.activeTasks, // Pass through
                 updateActiveTasks: (delta: number) => progressReporter.updateActiveTasks(delta), // Pass through
+                updateApiLiveness: (event) => progressReporter.updateApiLiveness?.(event)
             };
 
             try {
-                const fileResult = await generateContentForTitle(app, settings, file, fileProgressReporter);
+                const fileResult = await generateContentForTitle(app, settings, file, fileProgressReporter, {
+                    enableLocalKnowledge: settings.enableLocalKnowledgeForBatchGenerateFromTitles,
+                    localKnowledgeRetriever
+                });
                 const moveResult = await moveGeneratedFileToCompleteFolder(app, file, completeFolderPath, fileProgressReporter);
                 return {
                     file,
@@ -1203,9 +1251,13 @@ export async function batchFixMermaidSyntaxInFolder(
         throw new Error(`Selected path is not a valid folder: ${folderPath}`);
     }
 
-    const filesToProcess = app.vault.getMarkdownFiles().filter(f =>
-        f.path.startsWith(folderPath === '/' ? '' : folderPath + '/')
-    );
+    const filesToProcess = selectFolderTaskFiles({
+        taskKind: 'batch-mermaid-fix',
+        folderPath,
+        files: app.vault.getMarkdownFiles(),
+        allowedExtensions: ['md'],
+        settings
+    });
 
     const result: BatchMermaidFixResult = {
         folderPath,
@@ -1299,20 +1351,7 @@ export async function batchFixMermaidSyntaxInFolder(
                     let content = await app.vault.read(file);
                     let fileErrorCount = 0;
                     
-                    // Helper to validate content using mermaid.parse
-                    const validateContent = async (text: string) => {
-                        let errors = 0;
-                        const mermaidBlockRegex = /^(?:[ \t]*)(?:```|~~~)\s*mermaid\b[^\n]*\n([\s\S]*?)\n(?:[ \t]*)(?:```|~~~)/gim;
-                        let match;
-                        while ((match = mermaidBlockRegex.exec(text)) !== null) {
-                            try {
-                                await mermaid.parse(match[1]);
-                            } catch (parseErr) {
-                                errors++;
-                            }
-                        }
-                        return errors;
-                    };
+                    const validateContent = async (text: string) => checkMermaidErrors(text);
 
                     fileErrorCount = await validateContent(content);
                     fileResult.finalErrorCount = fileErrorCount;

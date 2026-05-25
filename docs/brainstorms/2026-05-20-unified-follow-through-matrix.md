@@ -1,6 +1,6 @@
 ---
 date: 2026-05-20
-last_updated: 2026-05-24
+last_updated: 2026-05-25
 topic: unified-follow-through-matrix
 canonical: true
 ---
@@ -34,10 +34,10 @@ This matrix is grounded in:
 | Lane | Current `origin/main` truth | Backup-branch evidence | Required next action | Misread to avoid | Priority |
 |---|---|---|---|---|---|
 | A. Packaging / semantic verification | Live code is still single-entry `main.js` + inline `srcdoc`; helper/docs/tests correctly describe that boundary | Later backup branch had a wider dedicated runtime-asset lane | Keep current single-entry truth explicit; only widen topology with same-batch code + audit + docs proof | Do not keep saying `render-host.mjs` is currently shipped on main | P0 |
-| B. CLI / automation surface | Current main has registry-backed config/profile export/import plus capability/invocation contract export surfaces | Backup branch later added a bounded maintainer bridge, shared help-truth source, and narrower public-surface wording | Decide whether to reintegrate bridge/help work in bounded batches after current-main truth is stabilized | Do not describe the backup maintainer bridge as if it still exists on current main | P1 |
-| C. User-facing settings / preview / onboarding | Current main still has preview flows, release-note digest in onboarding, provider diagnostics, and canonical diagram wording | Backup branch later added settings reset, concept-note guard, richer preview history/layout, sidebar liveness/activity hardening, and more UX closure | Re-audit which user-facing guardrails must be restored first, then reintegrate in small slices | Do not assume current main still includes every later UX hardening item | P1 |
-| D. Regex / file selection / local-KB / chapter split | No current-main code/test evidence for file-selection profiles, local-KB retrieval, or chapter split on the rewritten branch | Backup branch had those features plus tests such as `folderTaskFileSelector`, `localKnowledgeBase`, `localKnowledgeTaskIntegration`, and `chapterSplit` | Treat these as a reintegration program, not as already-shipped functionality | Do not let old roadmap wording imply these features are still on the live mainline | P1/P2 |
-| E. Release / repo-saga / clean-state hygiene | Current main has release and repo-saga scripts, but local generated artifacts were not ignored and serial anti-error guardrails are not all preserved | Backup branch later added repo-saga serial lock/test/doc hardening and broader clean-state discipline | Restore guardrails that keep local verification from dirtying the repo and re-encode serial execution rules as needed | Do not confuse “script exists” with “serial safety and clean-state closure are still enforced” | P0 |
+| B. CLI / automation surface | Current main now has registry-backed config/profile export/import, redacted provider export, public-surface export, and repo-local maintainer help/invoke scripts bounded to export-only operations | Backup branch also carried broader maintainer-bridge aspirations, but the current reintegration keeps the surface intentionally narrow | Keep the export-only boundary explicit and avoid adding mutating maintainer actions without the same-batch contract/test/doc proof | Do not describe the current surface as a general-purpose public CLI or a free-form maintainer mutation API | P1 |
+| C. User-facing settings / preview / onboarding | Current main now has preview flows, release-note digest in onboarding, provider diagnostics, settings reset, concept-note prerequisite guidance, API liveness/activity UI, and saved-artifact-aware preview recovery | Backup branch carried additional UX closure work, but the recovered slice is now re-proved on current main | Keep sidebar/preview/settings wording, i18n, and saved-artifact behavior aligned as the user-facing truth source | Do not regress to “these UX guardrails are missing on current main,” but also do not overclaim unrecovered UX ideas | P1 |
+| D. Regex / file selection / local-KB / chapter split | Current main now has file-selection profiles, folder regex/glob filtering, `relativePath` / `basename` matching, optional subfolder inclusion control, local-KB retrieval, chapter split, and their regression tests | Backup branch provided the original recovery evidence; current main now carries the bounded product slice directly | Treat the next step as quality/depth follow-through, not existence re-proof | Do not keep writing these capabilities as backup-only or absent from live mainline | P1 |
+| E. Release / repo-saga / clean-state hygiene | Current main now has release/repo-saga scripts plus shared repo-saga execution lock, tests, docs, and local-artifact ignore guardrails | Backup branch motivated the guardrails; the bounded serial-safety slice is now back on current main | Preserve serial execution discipline for repo-saga refresh flows and keep clean-state proof as part of finish criteria | Do not confuse “script still exists” with permission to run repo-saga refresh paths in parallel | P0 |
 
 ## 4. Reconfirmed Current-Main Register
 
@@ -47,16 +47,18 @@ These items are safe to describe as present on current main:
 2. inline render-host audit and related tests;
 3. provider profile export/import command surfaces;
 4. welcome-modal release digest;
-5. preview artifact save/export helpers.
+5. preview artifact save/export helpers;
+6. redacted/public-safe CLI export surfaces plus repo-local maintainer help/invoke;
+7. settings reset, concept-note prerequisite guidance, and concept synonym suppression;
+8. file-selection profiles and folder-scope regex/glob control;
+9. local knowledge-base retrieval;
+10. chapter split.
 
 These items must currently be described as **not proven on rewritten main**:
 
 1. dedicated runtime assets on the shipped path;
-2. maintainer bridge help/runtime scripts from the later branch;
-3. file-selection profiles and folder-scope regex/glob control;
-4. local knowledge-base retrieval;
-5. chapter split;
-6. settings reset and the later concept-note/synonym/product guardrails from the backup branch.
+2. any broader maintainer mutation surface beyond the bounded export-only helper path;
+3. any dedicated-runtime claim that bypasses the current single-entry `main.js` + inline `srcdoc` truth.
 
 ## 5. Single Execution Order
 
@@ -64,9 +66,9 @@ Unless a regression interrupts the order:
 
 1. **P0**: keep packaging / semantic current-main truth honest
 2. **P0**: restore clean-state and repo-saga serial guardrails
-3. **P1**: restore bounded CLI / maintainer-surface truth if still desired
-4. **P1**: re-audit and selectively reintegrate user-facing guardrails
-5. **P1/P2**: reintegrate file-selection, local-KB, and chapter-split only as re-proved current-main slices
+3. **P1**: keep the bounded CLI / maintainer-surface truth narrow and well-tested
+4. **P1**: keep recovered user-facing settings / preview guardrails aligned across code, i18n, and docs
+5. **P1/P2**: deepen file-selection, local-KB, and chapter-split quality only as bounded current-main work
 
 ## 6. Documentation Sync Rule
 

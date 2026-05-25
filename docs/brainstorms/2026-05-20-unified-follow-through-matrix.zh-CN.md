@@ -1,6 +1,6 @@
 ---
 date: 2026-05-20
-last_updated: 2026-05-24
+last_updated: 2026-05-25
 topic: unified-follow-through-matrix
 canonical: true
 ---
@@ -34,10 +34,10 @@ canonical: true
 | 轨道 | 当前 `origin/main` 真值 | 备份分支证据 | 需要的下一步 | 严禁误判 | 优先级 |
 |---|---|---|---|---|---|
 | A. Packaging / semantic verification | 当前 live 代码仍是单入口 `main.js` + inline `srcdoc`；helper/docs/tests 对该边界描述一致 | 更晚的备份分支曾进入更宽的 dedicated runtime-asset 通道 | 继续把当前单入口真值写清；只有当代码 + audit + 文档同批变化时才允许拓宽 topology | 不要继续把 `render-host.mjs` 写成当前主线已发货 | P0 |
-| B. CLI / automation surface | 当前主线已有 registry-backed 的 config/profile export/import，以及 capability/invocation contract export 表面 | 备份分支后续增加了 bounded maintainer bridge、共享 help-truth source，以及更窄的 public-surface 文案 | 在当前主线真值稳定后，再决定是否按小批次 reintegrate bridge/help 工作 | 不要把备份分支上的 maintainer bridge 继续描述成当前主线已存在 | P1 |
-| C. 用户可见 settings / preview / onboarding | 当前主线仍有 preview flows、欢迎弹窗 release digest、provider diagnostics、canonical diagram wording | 备份分支后续新增了 settings reset、concept-note guard、preview history/layout 收口、sidebar liveness/activity hardening 等 | 先重新审计哪些用户 guardrail 必须优先恢复，再按小切片 reintegrate | 不要默认当前主线仍保留了所有后续 UX hardening 项 | P1 |
-| D. Regex / 文件筛选 / local-KB / chapter split | 在被重写后的主线上，没有 file-selection profile、local-KB retrieval、chapter split 的当前代码/测试证据 | 备份分支曾有这些能力及对应测试，如 `folderTaskFileSelector`、`localKnowledgeBase`、`localKnowledgeTaskIntegration`、`chapterSplit` | 把这些能力视为 reintegration program，而不是继续写成已发货功能 | 不要让旧路线图措辞继续暗示这些能力仍在 live mainline 上 | P1/P2 |
-| E. Release / repo-saga / clean-state hygiene | 当前主线有 release 与 repo-saga 脚本，但本地生成物未被忽略，串行防报错 guardrail 也没有完整保留 | 备份分支后续补过 repo-saga serial lock/test/doc hardening 与更严格 clean-state 纪律 | 先恢复能防止本机验证持续弄脏仓库的 guardrail，并视需要重新编码串行执行规则 | 不要把“脚本仍在”误当成“串行安全与 clean-state 收口仍然成立” | P0 |
+| B. CLI / automation surface | 当前主线现已具备 registry-backed 的 config/profile export/import、脱敏 provider 导出、public-surface 导出，以及仓库内 export-only 的 maintainer help/invoke 脚本 | 备份分支还承载过更宽的 maintainer-bridge 设想，但当前 reintegration 刻意保持在窄边界内 | 继续把 export-only 边界写清楚；若要新增可变更型 maintainer 动作，必须同批补齐契约/测试/文档 | 不要把当前能力面写成通用 public CLI，或无边界的 maintainer mutation API | P1 |
+| C. 用户可见 settings / preview / onboarding | 当前主线现已具备 preview flows、欢迎弹窗 release digest、provider diagnostics、settings reset、concept-note 前置配置提示、API liveness/activity UI，以及面向已保存工件的 preview 恢复链路 | 备份分支还有更多 UX 收口尝试，但目前已恢复切片已在当前主线上重新证明 | 继续保持 sidebar / preview / settings 的文案、i18n 与已保存工件行为一致 | 不要再把这些 UX guardrail 写成“当前主线缺失”，但也不要顺手高估尚未恢复的 UX 想法 | P1 |
+| D. Regex / 文件筛选 / local-KB / chapter split | 当前主线现已具备 file-selection profiles、文件夹 regex/glob 筛选、`relativePath` / `basename` 匹配、可选子目录范围控制、local-KB retrieval、chapter split 及对应回归测试 | 备份分支提供了最初恢复证据；当前主线现在已直接携带该有界产品切片 | 下一步应视为质量/深度跟进，而不是继续证明这些能力“是否存在” | 不要继续把这些能力写成只存在于 backup、或 live mainline 尚未具备 | P1 |
+| E. Release / repo-saga / clean-state hygiene | 当前主线现已具备 release/repo-saga 脚本，以及 repo-saga 执行锁、测试、文档与本地工件忽略 guardrail | 备份分支推动了这些 guardrail；当前主线已恢复有界串行安全切片 | 保持 repo-saga 刷新流程的串行纪律，并把 clean-state 证明保留为收尾要求 | 不要把“脚本还在”误读为“可以并行跑 repo-saga 刷新路径” | P0 |
 
 ## 4. 当前主线已确认 register
 
@@ -47,16 +47,18 @@ canonical: true
 2. inline render-host 审计与相关测试；
 3. provider profile export/import 命令面；
 4. 欢迎弹窗 release digest；
-5. preview artifact save/export helpers。
+5. preview artifact save/export helpers；
+6. 脱敏 / public-safe CLI 导出表面与仓库内 maintainer help/invoke；
+7. settings reset、concept-note 前置提示与 concept synonym suppression；
+8. file-selection profiles 与 folder-scope regex/glob 控制；
+9. local knowledge-base retrieval；
+10. chapter split。
 
 以下内容当前必须描述为 **未在重写后的主线上被证明存在**：
 
 1. 已发货 dedicated runtime assets；
-2. 备份分支上的 maintainer bridge help/runtime 脚本；
-3. file-selection profiles 与 folder-scope regex/glob 控制；
-4. local knowledge-base retrieval；
-5. chapter split；
-6. 备份分支后续加入的 settings reset 与 concept-note / synonym / product guardrails。
+2. 超出当前 export-only helper 边界的更宽 maintainer mutation surface；
+3. 任何绕开当前单入口 `main.js` + inline `srcdoc` 真值的 dedicated-runtime 叙述。
 
 ## 5. 单一执行顺序
 
@@ -64,9 +66,9 @@ canonical: true
 
 1. **P0**：保持 packaging / semantic 当前主线真值诚实
 2. **P0**：恢复 clean-state 与 repo-saga 串行 guardrails
-3. **P1**：如果仍需要，恢复有界 CLI / maintainer-surface 真值
-4. **P1**：重新审计并按需回灌用户可见 guardrails
-5. **P1/P2**：只有在重新证明为“当前主线能力”后，才回灌 file-selection、local-KB、chapter split
+3. **P1**：保持有界 CLI / maintainer-surface 真值收敛且测试充分
+4. **P1**：持续保持已恢复的用户可见 settings / preview guardrails 在代码、i18n 与文档之间一致
+5. **P1/P2**：以有界 current-main 工作继续深化 file-selection、local-KB、chapter split 的质量
 
 ## 6. 文档同步规则
 

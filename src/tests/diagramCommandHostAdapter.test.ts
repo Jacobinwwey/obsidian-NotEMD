@@ -159,4 +159,49 @@ describe('diagram command host adapter', () => {
         }));
         expect(diagramHost.openPreview).toHaveBeenCalled();
     });
+
+    test('preview wrapper supports saved canvas artifacts directly', async () => {
+        const { host, reporter } = createDiagramHost();
+        const file = { name: 'Topic_diagram.canvas', path: 'Notes/Topic_diagram.canvas' };
+        host.readFile.mockResolvedValue('{"nodes":[],"edges":[]}');
+
+        const result = await runPreviewDiagramCommandWithHost(host as any, file as any, reporter as any);
+
+        expect(result).toMatchObject({
+            kind: 'success',
+            sourcePath: 'Notes/Topic_diagram.canvas',
+            previewOpened: true,
+            artifact: expect.objectContaining({
+                target: 'json-canvas'
+            })
+        });
+        expect(host.createDiagramHostAdapter().openPreview).toHaveBeenCalledWith(
+            expect.objectContaining({ target: 'json-canvas' }),
+            'Notes/Topic_diagram.canvas',
+            true
+        );
+    });
+
+    test('preview wrapper supports raw saved mermaid markdown artifacts directly', async () => {
+        const { host, reporter } = createDiagramHost();
+        const file = { name: 'Topic_summ.md', path: 'Notes/Topic_summ.md' };
+        host.readFile.mockResolvedValue('flowchart TD\nA --> B');
+
+        const result = await runPreviewDiagramCommandWithHost(host as any, file as any, reporter as any);
+
+        expect(result).toMatchObject({
+            kind: 'success',
+            sourcePath: 'Notes/Topic_summ.md',
+            previewOpened: true,
+            artifact: expect.objectContaining({
+                target: 'mermaid',
+                sourceIntent: 'flowchart'
+            })
+        });
+        expect(host.createDiagramHostAdapter().openPreview).toHaveBeenCalledWith(
+            expect.objectContaining({ target: 'mermaid' }),
+            'Notes/Topic_summ.md',
+            true
+        );
+    });
 });
