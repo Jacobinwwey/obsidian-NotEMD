@@ -1,104 +1,148 @@
 ---
 date: 2026-05-08
+last_updated: 2026-05-24
 topic: packaging-semantic-convergence-progress-and-next-steps
 ---
 
 # Packaging / Semantic Convergence 进展深度对比与下一步落地方案
 
-## 1. 对比范围与基线
+## 1. 范围与基线
 
-本次对比覆盖以下“先前方案要求”与当前 `main` 代码现实：
+在 2026-05-24 远端 `main` 被强制改写之后，这份文档新增了一个必须承担的职责：
 
-1. `.trellis/tasks/05-08-packaging-semantic-verification-convergence/prd.md`（R1-R6 与 Acceptance Criteria）
+1. 描述 **当前 `origin/main` 真正发货的边界**；
+2. 防止先前晚于当前主线的分支进展被继续误写成“当前主线已落地”；
+3. 继续把 packaging / semantic-verification 轨道维持为当前最关键的架构主线。
+
+主要对比来源：
+
+1. `.trellis/tasks/05-08-packaging-semantic-verification-convergence/prd.md`
 2. `docs/superpowers/plans/2026-05-03-mainline-stabilization-next-batch.*`
 3. `docs/superpowers/plans/2026-04-14-diagram-rendering-platform-roadmap.*`
 4. `docs/brainstorms/2026-05-02-progress-audit-and-next-direction.*`
+5. 当前 `origin/main` 上的真实代码
+6. 仅用于审计参考的本地备份分支 `backup/main-before-origin-force-20260524`
 
-对比目标：
+工作规则：
 
-- 判断“已落地能力”与“文档承诺”是否一致
-- 判断 helper/test/docs 是否形成防漂移闭环
-- 明确下一阶段从“文档与验证收敛”切换到“真实打包边界实现”的条件
+- **当前发货真值** 只能来自重写后的 `origin/main`。
+- **备份分支真值** 只用于后续 reintegration 规划，不能再直接写成“当前主线已发货”。
 
-## 2. 要求逐条映射（代码证据）
+## 2. 以当前 `origin/main` 为准的需求映射
 
 ### PRD R1-R6 映射
 
-| 需求 | 当前实现证据 | 状态 | 备注 |
+| 需求 | 当前重写后 `main` 上的证据 | 状态 | 说明 |
 |---|---|---|---|
-| R1 保持真实架构边界，不夸大 heavy-runtime isolation | `scripts/diagram-semantic-verification.js` checklist + `docs/maintainer/release-workflow*.md` | 已满足 | 明确 `audit:render-host` 仅证明 `main.js + srcdoc` 自包含 |
-| R2 不重开 `diagram.generate/preview/provider.connection.test` 契约边界 | 当前提交仅触及 `scripts/diagram-semantic-verification.js`、文档、测试 | 已满足 | 未修改 operation 语义层 |
-| R3 helper 输出包含耐久 packaging-boundary 提示 | helper `buildPackagingBoundaryChecklistLines()` | 已满足 | 已覆盖 `outfile/outdir/unknown/ambiguous` 状态 |
-| R4 release/semantic 文档真值一致 | `docs/maintainer/diagram-semantic-verification*.md` + `release-workflow*.md` | 已满足 | 双语文档已同步 |
-| R5 增加防漂移回归测试 | `src/tests/diagramSemanticVerificationScript.test.ts` | 已满足 | 覆盖 array/object/backtick/unknown/ambiguous/context-scope |
-| R6 不夸大原生桌面 CLI 结论 | 门禁始终记录 `obsidian help`、`obsidian-cli help` 实际输出 | 已满足 | 维持“实测即证据”策略 |
+| R1 保持真实架构边界，不夸大隔离程度 | `esbuild.config.mjs`、`scripts/audit-render-host-bundle.js`、`docs/maintainer/release-workflow*.md`、`docs/maintainer/diagram-semantic-verification*.md` | 已满足 | 当前真值仍是单入口 `main.js` + 内联 `srcdoc`，不是已发货的独立运行时资产 |
+| R2 本轨道不重开 `diagram.generate` / `diagram.preview` / `provider.connection.test` 契约深度 | 当前语义改动仍限定在 helper/docs/tests，operation 表面保持独立 | 已满足 | packaging 轨道仍是契约与边界真值工作，不是 operation 语义重构 |
+| R3 维持可复用的 packaging-boundary 检查清单 | `scripts/diagram-semantic-verification.js` | 已满足 | helper 仍从真实构建配置与 release workflow 推导 packaging 真值 |
+| R4 保持 release / semantic 文档一致 | `docs/maintainer/diagram-semantic-verification*.md`、`docs/maintainer/release-workflow*.md` | 已满足 | 当前维护者文档对单入口 `srcdoc` 边界描述一致 |
+| R5 增加防漂移回归覆盖 | `src/tests/diagramSemanticVerificationScript.test.ts`、`src/tests/renderHostBundleAuditScript.test.ts`、`src/tests/iframeRenderHost.test.ts` | 已满足 | 当前回归测试仍锁定 helper 解析与 inline render-host 消费真值 |
+| R6 保持 host/CLI 结论诚实 | helper/docs 仍要求真实执行 `obsidian help` 与 `obsidian-cli help`，而不是推断成功 | 已满足 | 未在没有实测证据时扩大 desktop-session 结论 |
 
 ### Acceptance Criteria 映射
 
 | 验收项 | 证据 | 状态 |
 |---|---|---|
-| 模板包含 packaging-boundary 且描述当前边界真值 | `npm run verify:diagram-semantics` 输出 | 已满足 |
-| Maintainer 文档与模板一致 | `docs/maintainer/*` 对齐文案 | 已满足 |
-| 测试锁住 helper/docs 形态 | `npm test -- --runInBand src/tests/diagramSemanticVerificationScript.test.ts` | 已满足 |
-| 不改 command/operation 语义、不夸大运行时隔离 | 提交 diff 范围与门禁结果 | 已满足 |
+| 模板包含显式 packaging-boundary 区块并描述当前真值 | `npm run verify:diagram-semantics` | 已满足 |
+| maintainer 文档与模板真值一致 | `docs/maintainer/*` 文案 | 已满足 |
+| 测试锁住 helper/docs/runtime-consumption 形态 | 定向 semantic + render-host 测试 | 已满足 |
+| 不引入 command/operation 语义漂移 | 当前 diff 范围 + operation 文件未被本轨道重开 | 已满足 |
 
-## 3. 代码架构推进进度（相对先前方案）
+## 3. 2026-05-24 校正：当前主线到底在发什么
 
-### 已完成的收敛层
+### 3.1 当前代码真值
 
-1. **语义验证 helper 从“单次模板”升级为“状态化边界检查器”**
-   `outputTargetStatus` 已区分 `outfile` / `outdir` / `unknown` / `ambiguous`，降低维护者误读风险。
-2. **解析器鲁棒性增强**
-   支持 `"..."`、`'...'`、`` `...` `` 三种字面量；支持 array/object `entryPoints`；支持上下文作用域解析（优先 `esbuild.context({...})`，避免同名 decoy 字段污染）。
-3. **验证闭环完整**
-   helper 行为 -> 测试锁定 -> maintainer 文档同步 -> release 说明对齐，形成可重复演进路径。
-4. **Stage B 契约定义已开始进入可执行落地**
-   helper 模板现在新增 `Packaging Contract` 区块：从 `scripts/release/publish-github-release.js` 同步 release 必需资产，并显式检查双语 release notes 文件契约，同时记录数字 tag 与 create/upload 模式契约真值，并校验 `.github/workflows/release.yml` 中 tag-only 触发防护约束。
-5. **Stage B 契约提升边界已进入可执行形态**
-   helper 模板现在新增 `Contract Promotion Boundary` 区块：从 `src/operations/registry.ts` 提取 workflow/settings/export 邻近操作的 `automationLevel` / `requiredContext` / `sideEffectClass` 约束真值。
+当前 `origin/main` 真正发货的是：
 
-### 尚未进入实现层的边界
+1. `esbuild.config.mjs` 中的单入口 `entryPoints: ["src/main.ts"]` 与 `outfile: "main.js"`；
+2. `IframeRenderHost` 生成的自包含 `htmlSrcdoc` 预览负载；
+3. `scripts/audit-render-host-bundle.js` 对构建后 `main.js` 中 inline render-host 标记的审计；
+4. maintainer 文档中明确写出的结论：`audit:render-host` 只能证明自包含的 `main.js + inline srcdoc` 契约。
 
-1. **真正的 heavy-runtime packaging isolation**
-   仍未进入多入口资产落地，当前仍是单入口 `main.js` + inline `srcdoc`。
-2. **更广泛的 Stage B 契约提升**
-   虽然 release 与操作提升边界真值已进入 helper，但更广泛的 selection/export 契约提升仍依赖后续真实 packaging-boundary 约束落地。
+### 3.2 哪些内容不能再被写成“当前主线已落地”
 
-## 4. 下一阶段具体落盘方案（执行顺序）
+以下内容现在必须被降级为 **备份分支证据**，而不是当前 `main` 真值：
 
-### Stage A：维持收敛稳定（短周期）
+1. 已发货的 `main.js + render-host.mjs` 双资产运行时通道；
+2. 任何“当前主线已经进入 Stage-C dedicated runtime asset lane”的表述；
+3. 任何假定当前 release 资产或当前构建输出中包含 `render-host.mjs` 的进度文案。
 
-1. 持续把 helper 变化绑定到 `diagramSemanticVerificationScript.test.ts`（先测后改）。
-2. 每次边界文案变更必须同步 `docs/maintainer/*` 双语文档。
-3. 保持当前门禁链条：`build + full test + audit + diff-check + obsidian/obsidian-cli`。
+### 3.3 为什么这次校正必须做
 
-### Stage B：打包实现前置研究（中周期）
+如果继续沿用先前更晚分支上的描述，文档会直接误导后续推进：
 
-1. 在 `esbuild.config.mjs` 维度梳理“多入口/独立资产”最小可行方案（不立即改主流程）。
-2. 明确 release 资产、安装落盘、降级策略三者契约，再推进实现。
-3. 把研究结论写入下一份 PRD，避免“先改构建后补约束”。
+1. 维护者会误以为 packaging topology 已经比实际代码更成熟；
+2. 后续 reintegration 工作可能跳过本应重新验证的契约门禁；
+3. release 验证会逐步停止审视当前真正的单入口边界。
 
-### Stage C：真实边界实现（后续）
+## 4. 相对先前方案的深度对比
 
-1. 在确认契约后引入最小多入口或独立 host 资产路径。
-2. 扩展 `audit:render-host` 与语义 helper 文案，反映新边界真值。
-3. 再次执行文档-测试-实现三向同步，避免历史漂移复发。
+### 4.1 当前 `main` 上真正仍然成立的部分
 
-## 5. 风险与控制
+1. semantic helper 仍然是有效的 anti-drift 控制面；
+2. packaging-boundary 文案仍然显式且边界真实；
+3. inline render-host 路径仍然被代码与测试锁定；
+4. 下一条架构关键路径仍然是 packaging/runtime topology，而不是再做泛化 UI 摇摆。
 
-1. **风险：** helper 解析继续被 `esbuild.config` 结构变化击穿  
-   **控制：** 新增回归必须覆盖新结构样例，再允许改动合入。
-2. **风险：** 文档叙述快于实现  
-   **控制：** 所有“已完成”结论必须绑定代码路径与测试名称。
-3. **风险：** 过早进入 heavy-runtime isolation 导致 CI 波动  
-   **控制：** 先做 Stage B 契约研究，后做 Stage C 实现。
+### 4.2 没有保留在当前 `main` 上的部分
 
-## 6. 本次结论
+相较于本地备份分支：
 
-当前 `main` 已达到“packaging/semantic-verification 收敛层”的稳定状态：
+1. 更晚的 dedicated runtime-asset 通道没有保留下来；
+2. 更晚的 unified follow-through 进度文档没有保留下来；
+3. 更晚的 maintainer-bridge help-truth 收口没有保留下来；
+4. 因此，更晚的 Stage-C 进展文案现在只能作为 reintegration 输入，不能继续充当当前主线证据。
 
-- helper 能表达当前边界并对异常状态给出显式提示
-- 文档、测试、脚本三层一致
-- CI 门禁保持全绿且可重复
+### 4.3 当前正确解释
 
-下一步应按上面的 Stage B -> Stage C 路线推进“真实打包边界实现”，而不是回头重做已收敛的语义层。
+对重写后的 `main`，应统一理解为：
+
+1. 当前 live 轨道仍是 Stage-B packaging / semantic convergence；
+2. 当前 runtime 真值比后来的备份分支更窄；
+3. 未来任何拓宽都必须重新在当前主线上补齐代码、测试、审计与文档证明。
+
+## 5. 下一阶段具体落盘方案
+
+### Priority 0：先把“当前主线真值”重新对齐
+
+1. 保持本文件、maintainer 文档与新的统一推进矩阵都对齐到当前单入口 `srcdoc` 真值。
+2. 不要再把备份分支文案原样拿来当当前主线结论。
+3. 每次 packaging 文案变化，都同步检查 `change.md` 与所有当前进度文档。
+
+### Priority 0.5：补齐 clean-state 守护
+
+1. 忽略本地 vault/runtime 生成物，避免每次本机 Obsidian 验证后都把仓库弄脏。
+2. 保持发布级验证收尾必须看到真正 clean 的 `git status --short --branch`。
+
+### Priority 1：继续做有界 packaging 跟进
+
+1. 在当前 `main` 上继续维持 helper/parser/test/doc 的一致性。
+2. 只有当 build graph、release assets 与 runtime-consumption 路径同批变动时，才允许拓宽 packaging topology。
+3. 如果未来再次引入 `render-host.mjs`，必须把它当成“当前主线上的新实现切片”重新落地，而不是视为旧结论天然有效。
+
+### Priority 2：把备份分支的 Stage-C 工作视为 reintegration 候选
+
+以下切片未来仍可能值得回灌，但都必须在当前 `main` 上重新证明：
+
+1. dedicated runtime asset 跟进；
+2. maintainer-bridge help-truth 收口；
+3. 任何依赖后续 packaging 通道的更广 CLI/public-surface 加固。
+
+## 6. 风险与控制
+
+1. **风险：** 文档又回到更晚分支的措辞。
+   **控制：** 每条“已落地”的 packaging 结论都必须绑定当前 `esbuild.config.mjs`、当前 maintainer 文档与当前测试。
+2. **风险：** 后续 reintegration 误以为缺失代码仍在当前主线。
+   **控制：** 在每一份路线图/进度文档里持续区分“当前 `main` 真值”与“备份分支证据”。
+3. **风险：** 本地验证持续污染工作区，掩盖真实 diff。
+   **控制：** 持续忽略本地 vault/runtime 生成物，并在批次末尾验证 clean status。
+
+## 7. 结论
+
+当前被重写后的 `main` 仍然处于一个有效且可验证的 packaging / semantic-verification 状态，但它 **比后来的备份分支更窄**：
+
+1. live 发货边界仍是单入口 `main.js` + inline `srcdoc`；
+2. semantic/helper/doc 的 anti-drift 控制面仍然真实存在；
+3. 下一步最有意义的架构推进仍然是 packaging-boundary follow-through，只是这次必须在 force rewrite 之后更严格地区分当前主线真值。

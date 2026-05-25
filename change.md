@@ -136,6 +136,8 @@ This document summarizes the major functional and architectural changes implemen
 ## [Unreleased]
 
 ### English
+*   **Mainline Force-Rewrite Audit**: Added a fresh current-main audit plus a new unified follow-through matrix that explicitly separates rewritten `origin/main` shipped truth from backup-branch-only evidence, so progress docs no longer overclaim features missing from the live mainline.
+*   **Clean-State Guardrails For Local Verification**: `.gitignore` now excludes root-level `render-host.mjs` plus local vault-generated artifacts under `docs/` such as error logs, provider diagnostics, preview exports, and saved diagram artifacts, preventing local Obsidian verification from dirtying the repository.
 *   **Model-Aware Output Token Caps**: Added Cline-aligned known-model max-output-token metadata and now resolve the effective output cap from the actual selected model instead of hardcoded provider defaults. When the global max-token setting is still at the stock default, supported models automatically use their true known ceiling; when users set a custom global or provider-specific cap, requests are clamped to the model’s known maximum. This now applies across OpenAI-compatible providers plus Anthropic, Google, Azure OpenAI, and Ollama runtimes.
 *   **Developer-Mode Diagnostics Panel**: Added a dedicated Settings developer panel gated by a new Developer mode switch, so normal users do not see developer-only controls.
 *   **Selectable Diagnostic Call Modes + Stability Runs**: Developer diagnostics can now run with selectable call modes (including OpenAI-compatible forced transport modes) and can execute repeated stability runs with aggregated reporting.
@@ -150,6 +152,8 @@ This document summarizes the major functional and architectural changes implemen
 *   **Docs and Agent Guide Alignment**: Updated both READMEs and `AGENTS.md` so in-plugin diagnostics and CLI diagnostics are documented and required to stay semantically aligned.
 
 ### Chinese (中文)
+*   **主线 Force Rewrite 审计**: 新增一份针对当前主线的重新审计文档与统一推进矩阵，明确区分被重写后的 `origin/main` 发货真值与仅存在于备份分支中的证据，避免进度文档继续高估 live mainline 已具备的能力。
+*   **本机验证的 Clean-State 守护**: `.gitignore` 现在会忽略根目录 `render-host.mjs` 以及 `docs/` 下本地 vault 生成的错误日志、provider 诊断文件、预览导出产物和已保存图表工件，避免每次本机 Obsidian 验证后都把仓库弄脏。
 *   **模型感知的输出 Token 上限**: 新增与 Cline 对齐的已知模型最大输出 Token 元数据，并且运行时现在会根据用户实际选择的模型来解析有效输出上限，而不是依赖硬编码的 provider 默认值。当全局最大 Token 仍保持插件默认值时，已支持模型会自动使用其真实已知上限；当用户手动设置全局或 provider 级上限时，请求会被钳制到该模型的已知最大值。此行为现已覆盖 OpenAI-compatible 路径以及 Anthropic、Google、Azure OpenAI、Ollama 运行时。
 *   **开发者模式诊断面板**: 设置页新增由“Developer mode”开关控制的独立开发者面板，默认对普通用户隐藏开发者专用控件。
 *   **可选诊断调用方式与稳定性多轮测试**: 开发者诊断现在可选择调用方式（含 OpenAI-compatible 的强制传输模式），并支持按指定轮次执行稳定性测试并输出聚合报告。
