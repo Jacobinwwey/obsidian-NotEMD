@@ -88,6 +88,7 @@ The previously recovered product slices are now real current-main facts and no l
 2. chapter split is live, with TOC/manifest output and stale generated-file cleanup.
 3. preview history and saved-artifact-aware reopening are live in the reusable preview shell.
 4. settings reset, concept-note prerequisite guidance, concept synonym suppression, and folder file-selection profiles are already back on current main.
+5. retrieval-dependent note-processing results now expose machine-readable `localKnowledgeRetrieval` summaries for title generation and research, including matched/returned counts, source paths, requested `topK`, sliding-window size, current-file exclusion telemetry, index/query timing, and context-char count.
 
 Code-backed evidence includes:
 
@@ -244,9 +245,9 @@ Goal:
 
 Likely areas:
 
-1. richer result/evidence framing for chapter split outputs;
-2. clearer maintainer-helper payload examples for retrieval-dependent paths;
-3. tuning/documentation around sliding-window size, snippet shaping, and folder-scope expectations.
+1. keep extending richer result/evidence framing to the remaining chapter-split / diagram-adjacent paths now that retrieval summaries plus timing telemetry are landed for title-generation and research;
+2. the shared maintainer helper now carries compact payload examples for the retrieval-dependent paths, so the next step is to keep those examples aligned as result schemas evolve;
+3. continue tuning/documentation around sliding-window size, snippet shaping, folder-scope expectations, and offline evaluation fixtures.
 
 ## 6. Task And Documentation Follow-Through Rule
 

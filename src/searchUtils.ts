@@ -8,7 +8,12 @@ import { getSystemPrompt } from './promptUtils';
 import { SearchManager } from './search/SearchManager';
 import { formatI18n, getI18nStrings } from './i18n';
 import { resolveTaskLanguageCode } from './i18n/taskLanguagePolicy';
-import { buildLocalKnowledgeBaseRetriever } from './localKnowledgeBase';
+import {
+    buildLocalKnowledgeBaseRetriever,
+    createEmptyLocalKnowledgeContextBuildResult,
+    LocalKnowledgeRetrievalSummary,
+    toLocalKnowledgeRetrievalSummary
+} from './localKnowledgeBase';
 
 export interface ResearchSummarizeResult {
     sourcePath: string;
@@ -17,6 +22,7 @@ export interface ResearchSummarizeResult {
     sourceLabel: string;
     researchContextUsed: boolean;
     localKnowledgeContextUsed: boolean;
+    localKnowledgeRetrieval: LocalKnowledgeRetrievalSummary;
     appended: boolean;
 }
 
@@ -26,6 +32,7 @@ interface PreparedResearchSummary {
     summaryToAppend: string;
     researchContextUsed: boolean;
     localKnowledgeContextUsed: boolean;
+    localKnowledgeRetrieval: LocalKnowledgeRetrievalSummary;
 }
 
 /**
@@ -253,16 +260,31 @@ async function prepareResearchSummary(
     progressReporter.log(`Calling _performResearch for topic: "${topic}"`);
     if (progressReporter.cancelled) throw new Error("Processing cancelled by user before research.");
     const researchContext = await _performResearch(app, settings, topic, progressReporter);
-    const localKnowledgeRetriever = settings.enableLocalKnowledgeRetrieval
-        && settings.enableLocalKnowledgeForResearchSummarize
-        ? await buildLocalKnowledgeBaseRetriever(app, settings, progressReporter)
-        : null;
-    const localKnowledgeContext = localKnowledgeRetriever?.buildContext(topic, {
+    const localKnowledgeOptions = {
         currentFilePath: activeFile.path,
         topK: settings.localKnowledgeTopK,
         slidingWindowSize: settings.localKnowledgeSlidingWindowSize,
         maxSnippetChars: settings.localKnowledgeMaxSnippetChars
-    }) || '';
+    };
+    const localKnowledgeRetriever = settings.enableLocalKnowledgeRetrieval
+        && settings.enableLocalKnowledgeForResearchSummarize
+        ? await buildLocalKnowledgeBaseRetriever(app, settings, progressReporter)
+        : null;
+    const localKnowledgeDetails = localKnowledgeRetriever
+        ? localKnowledgeRetriever.buildContextDetails(topic, localKnowledgeOptions)
+        : createEmptyLocalKnowledgeContextBuildResult(topic, localKnowledgeOptions, {
+            indexedFileCount: 0,
+            indexedSectionCount: 0,
+            indexBuildMs: 0,
+            excludeCurrentFileApplied: Boolean(
+                settings.enableLocalKnowledgeRetrieval
+                && settings.enableLocalKnowledgeForResearchSummarize
+                && settings.localKnowledgeExcludeCurrentFile
+                && activeFile.path
+            )
+        });
+    const localKnowledgeContext = localKnowledgeDetails.context || '';
+    const localKnowledgeRetrieval = toLocalKnowledgeRetrievalSummary(localKnowledgeDetails);
 
     if (progressReporter.cancelled) throw new Error("Processing cancelled by user during research.");
 
@@ -276,7 +298,22 @@ async function prepareResearchSummary(
         progressReporter.log(`_performResearch returned context for "${topic}" (length: ${researchContext.length}).`);
     }
     if (localKnowledgeContext) {
-        progressReporter.log(`Local knowledge retrieval returned context for "${topic}" (length: ${localKnowledgeContext.length}).`);
+        progressReporter.log(
+            `Local knowledge retrieval returned context for "${topic}" `
+            + `(length: ${localKnowledgeContext.length}, `
+            + `${localKnowledgeRetrieval.returnedHitCount} hit block(s), `
+            + `${localKnowledgeRetrieval.sourcePaths.length} file(s), `
+            + `build ${localKnowledgeRetrieval.indexBuildMs}ms, `
+            + `query ${localKnowledgeRetrieval.queryMs}ms).`
+        );
+    } else if (settings.enableLocalKnowledgeRetrieval && settings.enableLocalKnowledgeForResearchSummarize) {
+        progressReporter.log(
+            `Local knowledge retrieval returned no prompt context for "${topic}" `
+            + `(matched sections: ${localKnowledgeRetrieval.matchedSectionCount}, `
+            + `excluded current-file hits: ${localKnowledgeRetrieval.excludedCurrentFileHitCount}, `
+            + `build ${localKnowledgeRetrieval.indexBuildMs}ms, `
+            + `query ${localKnowledgeRetrieval.queryMs}ms).`
+        );
     }
 
     progressReporter.updateStatus(
@@ -354,7 +391,8 @@ async function prepareResearchSummary(
         sourceLabel,
         summaryToAppend: stripBoxedWrapper(finalSummary, progressReporter),
         researchContextUsed: Boolean(researchContext),
-        localKnowledgeContextUsed: Boolean(localKnowledgeContext)
+        localKnowledgeContextUsed: Boolean(localKnowledgeContext),
+        localKnowledgeRetrieval
     };
 }
 
@@ -411,6 +449,7 @@ export async function researchAndSummarizeFile(
             sourceLabel: prepared.sourceLabel,
             researchContextUsed: prepared.researchContextUsed,
             localKnowledgeContextUsed: prepared.localKnowledgeContextUsed,
+            localKnowledgeRetrieval: prepared.localKnowledgeRetrieval,
             appended: true
         };
     } catch (error: unknown) {

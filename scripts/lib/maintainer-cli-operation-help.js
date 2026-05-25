@@ -2,22 +2,26 @@ const OPERATION_HELP = {
   'content.batch-generate-from-titles': {
     summary: 'Batch generate from note titles in a folder.',
     required: ['folderPath'],
-    optional: ['fileSelectionProfileId', 'fileSelectionProfileName', 'includeSubfoldersMode', 'fileFilterMode', 'fileFilterPattern', 'fileFilterTarget', 'fileFilterCaseSensitive', 'fileFilterInvert']
+    optional: ['fileSelectionProfileId', 'fileSelectionProfileName', 'includeSubfoldersMode', 'fileFilterMode', 'fileFilterPattern', 'fileFilterTarget', 'fileFilterCaseSensitive', 'fileFilterInvert'],
+    exampleInput: '{"folderPath":"docs","includeSubfoldersMode":"exclude","fileFilterMode":"regex","fileFilterPattern":"(^|/)index\\\\.(zh-CN|en)\\\\.md$","fileFilterTarget":"relativePath"}'
   },
   'content.split-note-by-chapters': {
     summary: 'Split one note into chapter files plus TOC/manifest.',
     required: ['sourcePath'],
-    optional: ['splitHeadingLevel']
+    optional: ['splitHeadingLevel'],
+    exampleInput: '{"sourcePath":"docs/index.zh-CN.md","splitHeadingLevel":"h2"}'
   },
   'research.summarize-topic': {
     summary: 'Append a research summary to a note.',
     required: ['sourcePath'],
-    optional: ['topic']
+    optional: ['topic'],
+    exampleInput: '{"sourcePath":"docs/index.zh-CN.md","topic":"RAG quality audit"}'
   },
   'diagram.generate': {
     summary: 'Generate a saved diagram artifact or Mermaid output.',
     required: ['sourcePath'],
-    optional: ['executionMode', 'requestedIntent', 'compatibilityMode', 'targetLanguage']
+    optional: ['executionMode', 'requestedIntent', 'compatibilityMode', 'targetLanguage'],
+    exampleInput: '{"sourcePath":"docs/index.zh-CN.md","executionMode":"save-artifact","requestedIntent":"erDiagram","targetLanguage":"en"}'
   },
   'provider.profile.export-redacted': {
     summary: 'Export provider profiles with API keys redacted.',

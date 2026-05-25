@@ -193,8 +193,25 @@ describe('diagram command architecture', () => {
         jest.spyOn(localKnowledgeBase, 'buildLocalKnowledgeBaseRetriever').mockResolvedValue({
             indexedFileCount: 1,
             indexedSectionCount: 1,
+            buildContextDetails: jest.fn(() => ({
+                query: 'index',
+                context: 'Path: Knowledge/Reference.md\nExcerpt: Deployment topology.',
+                indexedFileCount: 1,
+                indexedSectionCount: 1,
+                matchedSectionCount: 1,
+                returnedHitCount: 1,
+                expandedSectionCount: 1,
+                sourcePaths: ['Knowledge/Reference.md'],
+                usedSlidingWindowSize: 0,
+                requestedTopK: 1,
+                indexBuildMs: 5,
+                queryMs: 2,
+                contextCharCount: 55,
+                excludeCurrentFileApplied: true,
+                excludedCurrentFileHitCount: 0
+            })),
             buildContext: jest.fn(() => 'Path: Knowledge/Reference.md\nExcerpt: Deployment topology.')
-        });
+        } as any);
         const executionSpy = jest.spyOn(diagramCommandExecution, 'runArtifactDiagramExecutionWithHost').mockResolvedValue({
             generation: {
                 plan: {} as any,

@@ -22,9 +22,31 @@ interface RetrieveContextOptions {
     maxSnippetChars: number;
 }
 
+export interface LocalKnowledgeRetrievalSummary {
+    indexedFileCount: number;
+    indexedSectionCount: number;
+    matchedSectionCount: number;
+    returnedHitCount: number;
+    expandedSectionCount: number;
+    sourcePaths: string[];
+    usedSlidingWindowSize: number;
+    requestedTopK: number;
+    indexBuildMs: number;
+    queryMs: number;
+    contextCharCount: number;
+    excludeCurrentFileApplied: boolean;
+    excludedCurrentFileHitCount: number;
+}
+
+export interface LocalKnowledgeContextBuildResult extends LocalKnowledgeRetrievalSummary {
+    query: string;
+    context: string | null;
+}
+
 export interface LocalKnowledgeBaseRetriever {
     readonly indexedFileCount: number;
     readonly indexedSectionCount: number;
+    buildContextDetails: (query: string, options: RetrieveContextOptions) => LocalKnowledgeContextBuildResult;
     buildContext: (query: string, options: RetrieveContextOptions) => string | null;
 }
 
@@ -80,6 +102,86 @@ function formatHitContext(documents: LocalKnowledgeDocument[], maxSnippetChars: 
     }).join('\n\n');
 }
 
+function sanitizeRequestedTopK(value: number): number {
+    if (!Number.isFinite(value)) {
+        return 0;
+    }
+
+    return Math.max(0, Math.floor(value));
+}
+
+function sanitizeSlidingWindowSize(value: number): number {
+    if (!Number.isFinite(value)) {
+        return 0;
+    }
+
+    return Math.max(0, Math.floor(value));
+}
+
+function normalizeQuery(value: string): string {
+    return typeof value === 'string' ? value.trim() : '';
+}
+
+export function createEmptyLocalKnowledgeContextBuildResult(
+    query: string,
+    options: RetrieveContextOptions,
+    overrides?: Partial<Pick<LocalKnowledgeContextBuildResult, 'indexedFileCount' | 'indexedSectionCount' | 'excludeCurrentFileApplied' | 'indexBuildMs'>>
+): LocalKnowledgeContextBuildResult {
+    return {
+        query: normalizeQuery(query),
+        context: null,
+        indexedFileCount: overrides?.indexedFileCount ?? 0,
+        indexedSectionCount: overrides?.indexedSectionCount ?? 0,
+        matchedSectionCount: 0,
+        returnedHitCount: 0,
+        expandedSectionCount: 0,
+        sourcePaths: [],
+        usedSlidingWindowSize: sanitizeSlidingWindowSize(options.slidingWindowSize),
+        requestedTopK: sanitizeRequestedTopK(options.topK),
+        indexBuildMs: overrides?.indexBuildMs ?? 0,
+        queryMs: 0,
+        contextCharCount: 0,
+        excludeCurrentFileApplied: overrides?.excludeCurrentFileApplied ?? false,
+        excludedCurrentFileHitCount: 0
+    };
+}
+
+export function toLocalKnowledgeRetrievalSummary(
+    details: LocalKnowledgeContextBuildResult
+): LocalKnowledgeRetrievalSummary {
+    const {
+        indexedFileCount,
+        indexedSectionCount,
+        matchedSectionCount,
+        returnedHitCount,
+        expandedSectionCount,
+        sourcePaths,
+        usedSlidingWindowSize,
+        requestedTopK,
+        indexBuildMs,
+        queryMs,
+        contextCharCount,
+        excludeCurrentFileApplied,
+        excludedCurrentFileHitCount
+    } = details;
+
+    return {
+        indexedFileCount,
+        indexedSectionCount,
+        matchedSectionCount,
+        returnedHitCount,
+        expandedSectionCount,
+        sourcePaths,
+        usedSlidingWindowSize,
+        requestedTopK,
+        indexBuildMs,
+        queryMs,
+        contextCharCount,
+        excludeCurrentFileApplied,
+        excludedCurrentFileHitCount
+    };
+}
+
 class MiniSearchLocalKnowledgeRetriever implements LocalKnowledgeBaseRetriever {
     constructor(
         private readonly index: MiniSearchIndex<LocalKnowledgeDocument>,
@@ -87,6 +189,7 @@ class MiniSearchLocalKnowledgeRetriever implements LocalKnowledgeBaseRetriever {
         private readonly documentsByPath: Map<string, LocalKnowledgeDocument[]>,
         public readonly indexedFileCount: number,
         public readonly indexedSectionCount: number,
+        private readonly indexBuildMs: number,
         private readonly excludeCurrentFile: boolean
     ) {}
 
@@ -110,10 +213,16 @@ class MiniSearchLocalKnowledgeRetriever implements LocalKnowledgeBaseRetriever {
         return expanded;
     }
 
-    buildContext(query: string, options: RetrieveContextOptions): string | null {
-        const normalizedQuery = query.trim();
+    buildContextDetails(query: string, options: RetrieveContextOptions): LocalKnowledgeContextBuildResult {
+        const queryStartMs = Date.now();
+        const normalizedQuery = normalizeQuery(query);
         if (!normalizedQuery) {
-            return null;
+            return createEmptyLocalKnowledgeContextBuildResult(query, options, {
+                indexedFileCount: this.indexedFileCount,
+                indexedSectionCount: this.indexedSectionCount,
+                indexBuildMs: this.indexBuildMs,
+                excludeCurrentFileApplied: false
+            });
         }
 
         const results = this.index.search(normalizedQuery, {
@@ -128,11 +237,14 @@ class MiniSearchLocalKnowledgeRetriever implements LocalKnowledgeBaseRetriever {
         });
 
         const currentFilePath = options.currentFilePath ? normalizeForComparison(options.currentFilePath) : null;
-        const slidingWindowSize = Number.isFinite(options.slidingWindowSize)
-            ? Math.max(0, Math.floor(options.slidingWindowSize))
-            : 0;
+        const requestedTopK = sanitizeRequestedTopK(options.topK);
+        const slidingWindowSize = sanitizeSlidingWindowSize(options.slidingWindowSize);
+        const excludeCurrentFileApplied = this.excludeCurrentFile && Boolean(currentFilePath);
         const consumedDocumentIds = new Set<string>();
         const picked: LocalKnowledgeDocument[] = [];
+        const sourcePaths = new Set<string>();
+        let expandedSectionCount = 0;
+        let excludedCurrentFileHitCount = 0;
 
         for (const result of results) {
             const document = this.documents.get(String(result.id));
@@ -140,7 +252,8 @@ class MiniSearchLocalKnowledgeRetriever implements LocalKnowledgeBaseRetriever {
                 continue;
             }
 
-            if (this.excludeCurrentFile && currentFilePath && normalizeForComparison(document.path) === currentFilePath) {
+            if (excludeCurrentFileApplied && normalizeForComparison(document.path) === currentFilePath) {
+                excludedCurrentFileHitCount += 1;
                 continue;
             }
 
@@ -153,12 +266,36 @@ class MiniSearchLocalKnowledgeRetriever implements LocalKnowledgeBaseRetriever {
                 ...document,
                 excerpt: expandedWindow.map(candidate => candidate.excerpt).join('\n\n')
             });
-            if (picked.length >= options.topK) {
+            sourcePaths.add(document.path);
+            expandedSectionCount += expandedWindow.length;
+            if (requestedTopK > 0 && picked.length >= requestedTopK) {
                 break;
             }
         }
 
-        return formatHitContext(picked, options.maxSnippetChars);
+        const context = formatHitContext(picked, options.maxSnippetChars);
+
+        return {
+            query: normalizedQuery,
+            context,
+            indexedFileCount: this.indexedFileCount,
+            indexedSectionCount: this.indexedSectionCount,
+            matchedSectionCount: results.length,
+            returnedHitCount: picked.length,
+            expandedSectionCount,
+            sourcePaths: Array.from(sourcePaths),
+            usedSlidingWindowSize: slidingWindowSize,
+            requestedTopK,
+            indexBuildMs: this.indexBuildMs,
+            queryMs: Math.max(0, Date.now() - queryStartMs),
+            contextCharCount: context?.length ?? 0,
+            excludeCurrentFileApplied,
+            excludedCurrentFileHitCount
+        };
+    }
+
+    buildContext(query: string, options: RetrieveContextOptions): string | null {
+        return this.buildContextDetails(query, options).context;
     }
 }
 
@@ -167,6 +304,7 @@ export async function buildLocalKnowledgeBaseRetriever(
     settings: NotemdSettings,
     reporter?: ProgressReporter
 ): Promise<LocalKnowledgeBaseRetriever | null> {
+    const buildStartMs = Date.now();
     if (!settings.enableLocalKnowledgeRetrieval) {
         return null;
     }
@@ -225,7 +363,8 @@ export async function buildLocalKnowledgeBaseRetriever(
         storeFields: ['path', 'fileTitle', 'heading', 'breadcrumb', 'excerpt']
     });
     index.addAll(documents);
-    reporter?.log(`Indexed ${documents.length} local knowledge sections from ${seenFilePaths.size} files.`);
+    const indexBuildMs = Math.max(0, Date.now() - buildStartMs);
+    reporter?.log(`Indexed ${documents.length} local knowledge sections from ${seenFilePaths.size} files in ${indexBuildMs}ms.`);
 
     const documentMap = new Map<string, LocalKnowledgeDocument>();
     documents.forEach(document => {
@@ -248,6 +387,7 @@ export async function buildLocalKnowledgeBaseRetriever(
         documentsByPath,
         seenFilePaths.size,
         documents.length,
+        indexBuildMs,
         settings.localKnowledgeExcludeCurrentFile
     );
 }

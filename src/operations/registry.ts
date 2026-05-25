@@ -248,6 +248,25 @@ const PROCESS_FOLDER_RESULT_SCHEMA: OperationSchema = {
     }
 };
 
+const LOCAL_KNOWLEDGE_RETRIEVAL_RESULT_SCHEMA: OperationSchema = {
+    type: 'object',
+    properties: {
+        indexedFileCount: { type: 'number' },
+        indexedSectionCount: { type: 'number' },
+        matchedSectionCount: { type: 'number' },
+        returnedHitCount: { type: 'number' },
+        expandedSectionCount: { type: 'number' },
+        sourcePaths: STRING_ARRAY_SCHEMA,
+        usedSlidingWindowSize: { type: 'number' },
+        requestedTopK: { type: 'number' },
+        indexBuildMs: { type: 'number' },
+        queryMs: { type: 'number' },
+        contextCharCount: { type: 'number' },
+        excludeCurrentFileApplied: { type: 'boolean' },
+        excludedCurrentFileHitCount: { type: 'number' }
+    }
+};
+
 const GENERATE_FROM_TITLE_INPUT_SCHEMA: OperationSchema = {
     type: 'object',
     properties: {
@@ -263,6 +282,8 @@ const GENERATE_FROM_TITLE_RESULT_SCHEMA: OperationSchema = {
         title: { type: 'string' },
         researchEnabled: { type: 'boolean' },
         researchContextUsed: { type: 'boolean' },
+        localKnowledgeContextUsed: { type: 'boolean' },
+        localKnowledgeRetrieval: LOCAL_KNOWLEDGE_RETRIEVAL_RESULT_SCHEMA,
         modified: { type: 'boolean' }
     }
 };
@@ -294,6 +315,8 @@ const BATCH_GENERATE_FROM_TITLES_RESULT_SCHEMA: OperationSchema = {
                     title: { type: 'string' },
                     researchEnabled: { type: 'boolean' },
                     researchContextUsed: { type: 'boolean' },
+                    localKnowledgeContextUsed: { type: 'boolean' },
+                    localKnowledgeRetrieval: LOCAL_KNOWLEDGE_RETRIEVAL_RESULT_SCHEMA,
                     modified: { type: 'boolean' },
                     completeDestinationPath: { type: 'string' },
                     movedToCompleteFolder: { type: 'boolean' },
@@ -395,7 +418,13 @@ const RESEARCH_SUMMARIZE_RESULT_SCHEMA: OperationSchema = {
     type: 'object',
     properties: {
         sourcePath: { type: 'string' },
-        topic: { type: 'string' }
+        outputPath: { type: 'string' },
+        topic: { type: 'string' },
+        sourceLabel: { type: 'string' },
+        researchContextUsed: { type: 'boolean' },
+        localKnowledgeContextUsed: { type: 'boolean' },
+        localKnowledgeRetrieval: LOCAL_KNOWLEDGE_RETRIEVAL_RESULT_SCHEMA,
+        appended: { type: 'boolean' }
     }
 };
 

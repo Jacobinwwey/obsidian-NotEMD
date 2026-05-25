@@ -10,7 +10,13 @@ import { formatI18n, getI18nStrings } from './i18n';
 import { resolveTaskLanguageName, shouldApplyAutoTranslation } from './i18n/taskLanguagePolicy';
 import { RenderArtifact } from './rendering/types';
 import { selectFolderTaskFiles } from './folderTaskFileSelector';
-import { buildLocalKnowledgeBaseRetriever, LocalKnowledgeBaseRetriever } from './localKnowledgeBase';
+import {
+    buildLocalKnowledgeBaseRetriever,
+    createEmptyLocalKnowledgeContextBuildResult,
+    LocalKnowledgeBaseRetriever,
+    LocalKnowledgeRetrievalSummary,
+    toLocalKnowledgeRetrievalSummary
+} from './localKnowledgeBase';
 
 export interface ConceptExtractionPluginContext {
     settings: NotemdSettings;
@@ -54,6 +60,8 @@ export interface GenerateContentForTitleResult {
     title: string;
     researchEnabled: boolean;
     researchContextUsed: boolean;
+    localKnowledgeContextUsed: boolean;
+    localKnowledgeRetrieval: LocalKnowledgeRetrievalSummary;
     modified: boolean;
 }
 
@@ -771,7 +779,10 @@ export async function generateContentForTitle(
     progressReporter: ProgressReporter,
     options: GenerateContentForTitleOptions = {}
 ): Promise<GenerateContentForTitleResult> {
-    const title = file.basename;
+    const title = file.basename
+        || file.name?.replace(/\.[^.]+$/, '')
+        || file.path.split('/').pop()?.replace(/\.[^.]+$/, '')
+        || '';
     const i18n = getI18nStrings({ uiLocale: settings.uiLocale });
     const provider = getProviderForTask('generateTitle', settings);
     if (!provider) throw new Error('No valid LLM provider configured for "Generate from Title" task.');
@@ -814,18 +825,47 @@ export async function generateContentForTitle(
         progressReporter.log(`Research disabled for "Generate from Title".`);
     }
 
-    let localKnowledgeContext = '';
+    const localKnowledgeOptions = {
+        currentFilePath: file.path,
+        topK: settings.localKnowledgeTopK,
+        slidingWindowSize: settings.localKnowledgeSlidingWindowSize,
+        maxSnippetChars: settings.localKnowledgeMaxSnippetChars
+    };
+    const localKnowledgeDetails = options.enableLocalKnowledge && options.localKnowledgeRetriever
+        ? options.localKnowledgeRetriever.buildContextDetails(title, localKnowledgeOptions)
+        : createEmptyLocalKnowledgeContextBuildResult(title, localKnowledgeOptions, {
+            indexedFileCount: options.localKnowledgeRetriever?.indexedFileCount ?? 0,
+            indexedSectionCount: options.localKnowledgeRetriever?.indexedSectionCount ?? 0,
+            indexBuildMs: 0,
+            excludeCurrentFileApplied: Boolean(
+                options.enableLocalKnowledge
+                && options.localKnowledgeRetriever
+                && settings.localKnowledgeExcludeCurrentFile
+                && file.path
+            )
+        });
+    const localKnowledgeContext = localKnowledgeDetails.context || '';
+    const localKnowledgeRetrieval = toLocalKnowledgeRetrievalSummary(localKnowledgeDetails);
+
     if (options.enableLocalKnowledge && options.localKnowledgeRetriever) {
-        localKnowledgeContext = options.localKnowledgeRetriever.buildContext(title, {
-            currentFilePath: file.path,
-            topK: settings.localKnowledgeTopK,
-            slidingWindowSize: settings.localKnowledgeSlidingWindowSize,
-            maxSnippetChars: settings.localKnowledgeMaxSnippetChars
-        }) || '';
         if (localKnowledgeContext) {
-            progressReporter.log(`Local knowledge context obtained for "${title}".`);
+            progressReporter.log(
+                `Local knowledge context obtained for "${title}" `
+                + `(${localKnowledgeRetrieval.returnedHitCount} hit block(s), `
+                + `${localKnowledgeRetrieval.expandedSectionCount} section(s), `
+                + `${localKnowledgeRetrieval.sourcePaths.length} file(s), `
+                + `build ${localKnowledgeRetrieval.indexBuildMs}ms, `
+                + `query ${localKnowledgeRetrieval.queryMs}ms, `
+                + `${localKnowledgeRetrieval.contextCharCount} chars).`
+            );
         } else {
-            progressReporter.log(`No local knowledge matches found for "${title}".`);
+            progressReporter.log(
+                `No local knowledge matches found for "${title}" `
+                + `(matched sections: ${localKnowledgeRetrieval.matchedSectionCount}, `
+                + `excluded current-file hits: ${localKnowledgeRetrieval.excludedCurrentFileHitCount}, `
+                + `build ${localKnowledgeRetrieval.indexBuildMs}ms, `
+                + `query ${localKnowledgeRetrieval.queryMs}ms).`
+            );
         }
     }
     if (progressReporter.cancelled) throw new Error("Processing cancelled by user before generation prompt construction.");
@@ -919,6 +959,8 @@ export async function generateContentForTitle(
         title,
         researchEnabled: settings.enableResearchInGenerateContent,
         researchContextUsed: Boolean(researchContext),
+        localKnowledgeContextUsed: Boolean(localKnowledgeContext),
+        localKnowledgeRetrieval,
         modified: true
     };
 }
