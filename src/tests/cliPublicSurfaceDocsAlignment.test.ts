@@ -1,0 +1,105 @@
+import * as fs from 'fs';
+import * as path from 'path';
+
+import { buildCliPublicSurface } from '../operations/publicCliSurface';
+
+const repoRoot = path.join(__dirname, '..', '..');
+const { OPERATION_HELP } = require('../../scripts/lib/maintainer-cli-operation-help.js');
+
+function extractBacktickedBulletValues(content: string, sectionHeading: string): string[] {
+    const sectionStart = content.indexOf(sectionHeading);
+    if (sectionStart < 0) {
+        throw new Error(`Section heading not found: ${sectionHeading}`);
+    }
+
+    const sectionTail = content.slice(sectionStart + sectionHeading.length).split('\n');
+    const values: string[] = [];
+    let started = false;
+
+    for (const line of sectionTail) {
+        const trimmed = line.trim();
+        if (!started && trimmed === '') {
+            continue;
+        }
+
+        if (!trimmed.startsWith('- `')) {
+            if (started) {
+                break;
+            }
+            continue;
+        }
+
+        started = true;
+        const match = trimmed.match(/^- `([^`]+)`$/);
+        if (!match) {
+            throw new Error(`Unexpected bullet format in section ${sectionHeading}: ${trimmed}`);
+        }
+        values.push(match[1]);
+    }
+
+    if (values.length === 0) {
+        throw new Error(`No bullet values found for section: ${sectionHeading}`);
+    }
+
+    return values;
+}
+
+describe('CLI public surface docs alignment', () => {
+    const expectedPublicSurfaceCommandIds = buildCliPublicSurface().commands
+        .map(command => command.id)
+        .sort();
+    const expectedMaintainerBridgeOperationIds = Object.keys(OPERATION_HELP).sort();
+    const matrixPath = path.join(repoRoot, 'docs', 'maintainer', 'notemd-cli-capability-matrix.md');
+    const matrixZhPath = path.join(repoRoot, 'docs', 'maintainer', 'notemd-cli-capability-matrix.zh-CN.md');
+    const runbookPath = path.join(repoRoot, 'docs', 'maintainer', 'diagram-semantic-verification.md');
+    const runbookZhPath = path.join(repoRoot, 'docs', 'maintainer', 'diagram-semantic-verification.zh-CN.md');
+
+    test('maintainer CLI matrix docs enumerate the exact current public-safe command slice', () => {
+        const matrix = fs.readFileSync(matrixPath, 'utf8');
+        const matrixZh = fs.readFileSync(matrixZhPath, 'utf8');
+
+        const matrixIds = extractBacktickedBulletValues(matrix, 'Current command IDs in this slice:').sort();
+        const matrixZhIds = extractBacktickedBulletValues(matrixZh, '当前这一 slice 中的命令 ID 明确只有：').sort();
+
+        expect(matrixIds).toEqual(expectedPublicSurfaceCommandIds);
+        expect(matrixZhIds).toEqual(expectedPublicSurfaceCommandIds);
+
+        expect(matrix).toContain('`outputHandlingTags=contains-provider-credentials`');
+        expect(matrixZh).toContain('`outputHandlingTags=contains-provider-credentials`');
+        expect(matrix).toContain('`notemd:export-provider-profiles`');
+        expect(matrixZh).toContain('`notemd:export-provider-profiles`');
+    });
+
+    test('semantic verification runbooks keep the current public-safe slice and exclusion rule visible', () => {
+        const runbook = fs.readFileSync(runbookPath, 'utf8');
+        const runbookZh = fs.readFileSync(runbookZhPath, 'utf8');
+
+        for (const commandId of expectedPublicSurfaceCommandIds) {
+            expect(runbook).toContain(`\`${commandId}\``);
+            expect(runbookZh).toContain(`\`${commandId}\``);
+        }
+
+        expect(runbook).toContain('`notemd:export-provider-profiles`');
+        expect(runbookZh).toContain('`notemd:export-provider-profiles`');
+        expect(runbook).toContain('`outputHandlingTags=contains-provider-credentials`');
+        expect(runbookZh).toContain('`outputHandlingTags=contains-provider-credentials`');
+        expect(runbook).toContain('Public CLI Surface Contract');
+        expect(runbookZh).toContain('Public CLI Surface Contract');
+    });
+
+    test('maintainer CLI matrix docs enumerate the exact current bounded bridge operations and shared help source', () => {
+        const matrix = fs.readFileSync(matrixPath, 'utf8');
+        const matrixZh = fs.readFileSync(matrixZhPath, 'utf8');
+
+        const matrixOperationIds = extractBacktickedBulletValues(matrix, 'supported operation ids:').sort();
+        const matrixZhOperationIds = extractBacktickedBulletValues(matrixZh, '当前仅支持的 operation id：').sort();
+
+        expect(matrixOperationIds).toEqual(expectedMaintainerBridgeOperationIds);
+        expect(matrixZhOperationIds).toEqual(expectedMaintainerBridgeOperationIds);
+
+        expect(matrix).toContain('`scripts/lib/maintainer-cli-operation-help.js`');
+        expect(matrixZh).toContain('`scripts/lib/maintainer-cli-operation-help.js`');
+        expect(matrix).toContain('maintainer helper metadata');
+        expect(matrixZh).toContain('共享帮助元数据');
+    });
+});

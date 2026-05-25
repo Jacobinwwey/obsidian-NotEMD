@@ -1,11 +1,25 @@
+import { BatchGenerateContentForTitlesResult } from './fileUtils';
+import { FolderTaskFileSelectionOverride } from './folderTaskFileSelector';
+import {
+    DiagramCommandInputOverrides,
+    DiagramCommandOptions,
+    DiagramCommandRunResult
+} from './operations/diagramCommandHostAdapter';
 import {
     ExportCliCapabilityManifestCommandResult,
     ExportCliInvocationContractCommandResult,
     ExportCliPublicSurfaceCommandResult,
     ExportRedactedProviderProfilesCommandResult
 } from './operations/configProfileCommands';
+import { ChapterSplitResult } from './chapterSplit';
+import { ResearchSummarizeResult } from './searchUtils';
+import { ProgressReporter } from './types';
 
 export type MaintainerCliOperationId =
+    | 'content.batch-generate-from-titles'
+    | 'content.split-note-by-chapters'
+    | 'research.summarize-topic'
+    | 'diagram.generate'
     | 'provider.profile.export-redacted'
     | 'cli.capability-manifest.export'
     | 'cli.invocation-contract.export'
@@ -17,6 +31,10 @@ export interface MaintainerCliOperationRequest {
 }
 
 export type MaintainerCliOperationResult =
+    | BatchGenerateContentForTitlesResult
+    | ChapterSplitResult
+    | ResearchSummarizeResult
+    | DiagramCommandRunResult
     | ExportRedactedProviderProfilesCommandResult
     | ExportCliCapabilityManifestCommandResult
     | ExportCliInvocationContractCommandResult
@@ -24,10 +42,37 @@ export type MaintainerCliOperationResult =
     | null;
 
 export interface MaintainerCliBridgeHost {
+    batchGenerateContentForTitlesCommand: (
+        reporter?: ProgressReporter,
+        folderPathOverride?: string,
+        fileSelectionOverride?: FolderTaskFileSelectionOverride
+    ) => Promise<BatchGenerateContentForTitlesResult | null>;
+    splitNoteByChaptersForPathCommand: (
+        sourcePath: string,
+        reporter?: ProgressReporter
+    ) => Promise<ChapterSplitResult | null>;
+    researchAndSummarizeForPathCommand: (
+        sourcePath: string,
+        topicOverride?: string,
+        reporter?: ProgressReporter
+    ) => Promise<ResearchSummarizeResult | null>;
+    generateDiagramForPathCommand: (
+        sourcePath: string,
+        reporter?: ProgressReporter,
+        options?: DiagramCommandOptions
+    ) => Promise<DiagramCommandRunResult | null>;
     exportRedactedProviderProfilesCommand: () => Promise<ExportRedactedProviderProfilesCommandResult | null>;
     exportCliCapabilityManifestCommand: () => Promise<ExportCliCapabilityManifestCommandResult | null>;
     exportCliInvocationContractCommand: () => Promise<ExportCliInvocationContractCommandResult | null>;
     exportCliPublicSurfaceCommand: () => Promise<ExportCliPublicSurfaceCommandResult | null>;
+}
+
+function asObject(value: unknown): Record<string, unknown> {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) {
+        return {};
+    }
+
+    return value as Record<string, unknown>;
 }
 
 function assertNoInput(input: unknown): void {
@@ -44,20 +89,163 @@ function assertNoInput(input: unknown): void {
     }
 }
 
+function requireString(input: Record<string, unknown>, key: string): string {
+    const value = input[key];
+    if (typeof value !== 'string' || value.trim().length === 0) {
+        throw new Error(`Maintainer CLI operation requires a non-empty "${key}" string.`);
+    }
+
+    return value.trim();
+}
+
+function optionalString(input: Record<string, unknown>, key: string): string | undefined {
+    const value = input[key];
+    if (value == null || value === '') {
+        return undefined;
+    }
+    if (typeof value !== 'string') {
+        throw new Error(`Maintainer CLI operation expects "${key}" to be a string when provided.`);
+    }
+
+    const normalized = value.trim();
+    return normalized.length > 0 ? normalized : undefined;
+}
+
+function optionalBoolean(input: Record<string, unknown>, key: string): boolean | undefined {
+    const value = input[key];
+    if (value == null) {
+        return undefined;
+    }
+    if (typeof value !== 'boolean') {
+        throw new Error(`Maintainer CLI operation expects "${key}" to be a boolean when provided.`);
+    }
+    return value;
+}
+
+function optionalEnum<T extends string>(
+    input: Record<string, unknown>,
+    key: string,
+    allowed: readonly T[]
+): T | undefined {
+    const value = input[key];
+    if (value == null || value === '') {
+        return undefined;
+    }
+    if (typeof value !== 'string' || !allowed.includes(value as T)) {
+        throw new Error(`Maintainer CLI operation expects "${key}" to be one of: ${allowed.join(', ')}.`);
+    }
+
+    return value as T;
+}
+
+function buildFileSelectionOverride(input: Record<string, unknown>): FolderTaskFileSelectionOverride | undefined {
+    const profileId = optionalString(input, 'fileSelectionProfileId');
+    const profileName = optionalString(input, 'fileSelectionProfileName');
+    const includeSubfoldersMode = optionalEnum(input, 'includeSubfoldersMode', ['legacy', 'include', 'exclude'] as const);
+    const fileFilterMode = optionalEnum(input, 'fileFilterMode', ['none', 'contains', 'regex', 'glob'] as const);
+    const fileFilterPattern = optionalString(input, 'fileFilterPattern');
+    const fileFilterTarget = optionalEnum(input, 'fileFilterTarget', ['relativePath', 'basename'] as const);
+    const fileFilterCaseSensitive = optionalBoolean(input, 'fileFilterCaseSensitive');
+    const fileFilterInvert = optionalBoolean(input, 'fileFilterInvert');
+
+    const override: FolderTaskFileSelectionOverride = {};
+    if (profileId) {
+        override.profileId = profileId;
+    }
+    if (profileName) {
+        override.profileName = profileName;
+    }
+    if (includeSubfoldersMode) {
+        override.includeSubfoldersMode = includeSubfoldersMode;
+    }
+    if (fileFilterMode) {
+        override.fileFilterMode = fileFilterMode;
+    }
+    if (fileFilterPattern !== undefined) {
+        override.fileFilterPattern = fileFilterPattern;
+    }
+    if (fileFilterTarget) {
+        override.fileFilterTarget = fileFilterTarget;
+    }
+    if (fileFilterCaseSensitive !== undefined) {
+        override.fileFilterCaseSensitive = fileFilterCaseSensitive;
+    }
+    if (fileFilterInvert !== undefined) {
+        override.fileFilterInvert = fileFilterInvert;
+    }
+
+    return Object.keys(override).length > 0 ? override : undefined;
+}
+
+function buildDiagramCommandOptions(input: Record<string, unknown>): DiagramCommandOptions {
+    const executionMode = optionalEnum(
+        input,
+        'executionMode',
+        ['save-artifact', 'save-mermaid'] as const
+    ) || 'save-artifact';
+    const inputOverrides: DiagramCommandInputOverrides = {};
+    const requestedIntent = optionalString(input, 'requestedIntent');
+    const compatibilityMode = optionalEnum(input, 'compatibilityMode', ['best-fit', 'legacy-mermaid'] as const);
+    const targetLanguage = optionalString(input, 'targetLanguage');
+
+    if (requestedIntent) {
+        inputOverrides.requestedIntent = requestedIntent as DiagramCommandInputOverrides['requestedIntent'];
+    }
+    if (compatibilityMode) {
+        inputOverrides.compatibilityMode = compatibilityMode;
+    }
+    if (targetLanguage) {
+        inputOverrides.targetLanguage = targetLanguage;
+    }
+
+    return {
+        executionMode,
+        inputOverrides: Object.keys(inputOverrides).length > 0 ? inputOverrides : undefined
+    };
+}
+
 export async function invokeMaintainerCliOperation(
     host: MaintainerCliBridgeHost,
-    request: MaintainerCliOperationRequest
+    request: MaintainerCliOperationRequest,
+    reporter?: ProgressReporter
 ): Promise<MaintainerCliOperationResult> {
-    assertNoInput(request.input);
+    const input = asObject(request.input);
 
     switch (request.operationId) {
+        case 'content.batch-generate-from-titles':
+            return host.batchGenerateContentForTitlesCommand(
+                reporter,
+                requireString(input, 'folderPath'),
+                buildFileSelectionOverride(input)
+            );
+        case 'content.split-note-by-chapters':
+            return host.splitNoteByChaptersForPathCommand(
+                requireString(input, 'sourcePath'),
+                reporter
+            );
+        case 'research.summarize-topic':
+            return host.researchAndSummarizeForPathCommand(
+                requireString(input, 'sourcePath'),
+                optionalString(input, 'topic'),
+                reporter
+            );
+        case 'diagram.generate':
+            return host.generateDiagramForPathCommand(
+                requireString(input, 'sourcePath'),
+                reporter,
+                buildDiagramCommandOptions(input)
+            );
         case 'provider.profile.export-redacted':
+            assertNoInput(request.input);
             return host.exportRedactedProviderProfilesCommand();
         case 'cli.capability-manifest.export':
+            assertNoInput(request.input);
             return host.exportCliCapabilityManifestCommand();
         case 'cli.invocation-contract.export':
+            assertNoInput(request.input);
             return host.exportCliInvocationContractCommand();
         case 'cli.public-surface.export':
+            assertNoInput(request.input);
             return host.exportCliPublicSurfaceCommand();
         default: {
             const exhaustiveCheck: never = request.operationId;

@@ -48,9 +48,7 @@ describe('GitHub release workflow', () => {
         expect(workflow).toContain('needs: publish');
         expect(workflow).toContain('ref: main');
         expect(workflow).toContain('node scripts/repo-saga/update-quarterly-saga.mjs --tag "$TAG_NAME"');
-        expect(workflow).toContain('git diff --quiet -- README.md README_*.md docs/repo-saga/*.svg');
-        expect(workflow).toContain('git add README.md README_*.md docs/repo-saga/*.svg');
-        expect(workflow).toContain('git push origin HEAD:main');
+        expect(workflow).toContain('node scripts/release/commit-chronicle-refresh.js "$TAG_NAME"');
     });
 
     const maybeDescribeReleaseScript = fs.existsSync(releaseScriptPath) ? describe : describe.skip;

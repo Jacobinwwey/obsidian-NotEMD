@@ -62,6 +62,20 @@ obsidian plugin id=notemd vault=<vault-name>
 obsidian commands vault=<vault-name> filter=notemd
 ```
 
+## Public CLI Surface Contract
+
+当前 public-safe CLI slice 仍然保持刻意收敛。准确的命令 ID 只有：
+
+- `notemd:export-provider-profiles-redacted`
+- `notemd:export-cli-capability-manifest`
+- `notemd:export-cli-invocation-contract`
+- `notemd:export-cli-public-surface`
+
+排除规则：
+
+- `notemd:export-provider-profiles` 仍然不能进入 public-safe slice，因为它带有 `outputHandlingTags=contains-provider-credentials`
+- 当前 public-safe slice 的说明以 `docs/maintainer/notemd-cli-capability-matrix.zh-CN.md` 为准，并与同一套 registry-backed capability / contract 元数据保持同步
+
 ## 4. 必测语义表面
 
 对符合条件的改动，必须覆盖受影响的以下三类表面：

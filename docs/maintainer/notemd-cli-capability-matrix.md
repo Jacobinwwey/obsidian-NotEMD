@@ -11,12 +11,12 @@ What is landed on current `main`:
 - registry-backed operation metadata
 - typed capability / invocation export
 - a bounded public-safe export-only slice
-- a repo-local maintainer helper for the same export-only operations
+- a repo-local maintainer helper for the same public-safe exports plus bounded path-based maintainer operations
 
 What is intentionally not claimed:
 
 - broad user-facing CLI support for active-file, selection, or preview flows
-- backup-branch maintainer bridge features that depend on later product slices not yet restored on current `main`
+- a broad public CLI API over mutable note-processing flows
 
 This matrix is a maintainer control document. It distinguishes:
 
@@ -70,8 +70,12 @@ Guardrails:
 The repo now also carries a small maintainer helper over `obsidian-cli native eval`:
 
 - help: `npm run cli:help`
-- invoke: `npm run cli:invoke -- --vault <vault> --operation <operation-id> [--pretty]`
+- invoke: `npm run cli:invoke -- --vault <vault> --operation <operation-id> [--input-file <path> | --input-json '<json>'] [--pretty]`
 - supported operation ids:
+  - `content.batch-generate-from-titles`
+  - `content.split-note-by-chapters`
+  - `research.summarize-topic`
+  - `diagram.generate`
   - `provider.profile.export-redacted`
   - `cli.capability-manifest.export`
   - `cli.invocation-contract.export`
@@ -80,7 +84,8 @@ The repo now also carries a small maintainer helper over `obsidian-cli native ev
 Boundary:
 
 - this is maintainer-grade repo tooling, not a public CLI API
-- current helper scope is export-only and accepts no input payload
+- the operation catalog lives in `scripts/lib/maintainer-cli-operation-help.js` as shared maintainer helper metadata
+- export operations remain empty-payload only; bounded content operations accept explicit JSON input
 
 ## Current Command Matrix
 

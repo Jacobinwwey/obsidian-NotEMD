@@ -1,5 +1,6 @@
 import { Notice } from 'obsidian';
 import { DiagramPreviewModal } from '../ui/DiagramPreviewModal';
+import { clearDiagramPreviewHistory } from '../ui/diagramPreviewHistory';
 import { mockApp } from './__mocks__/app';
 import * as mermaidPreview from '../rendering/preview/mermaidPreview';
 import * as previewExport from '../rendering/preview/previewExport';
@@ -28,9 +29,11 @@ type MockElement = {
     onclick?: (() => unknown | Promise<unknown>) | null;
     disabled: boolean;
     srcdoc?: string;
+    sandbox?: string;
     attributes: Record<string, string>;
     empty: jest.Mock;
     addClass: jest.Mock;
+    removeClass: jest.Mock;
     createEl: jest.Mock;
     createDiv: jest.Mock;
     setAttribute: jest.Mock;
@@ -50,6 +53,7 @@ function createMockElement(tag = 'div', options: { text?: string; cls?: string }
         attributes: {} as Record<string, string>,
         empty: jest.fn(),
         addClass: jest.fn(),
+        removeClass: jest.fn(),
         createEl: jest.fn(),
         createDiv: jest.fn(),
         setAttribute: jest.fn(),
@@ -63,6 +67,13 @@ function createMockElement(tag = 'div', options: { text?: string; cls?: string }
 
     element.addClass.mockImplementation((cls: string) => {
         element.cls = element.cls ? `${element.cls} ${cls}` : cls;
+    });
+
+    element.removeClass.mockImplementation((cls: string) => {
+        element.cls = element.cls
+            .split(' ')
+            .filter(token => token && token !== cls)
+            .join(' ');
     });
 
     element.setAttribute.mockImplementation((name: string, value: string) => {
@@ -97,21 +108,65 @@ function collectButtons(root: MockElement): MockElement[] {
     return buttons;
 }
 
+function mountModal(modal: any): any {
+    modal.app = mockApp;
+    modal.modalEl = createMockElement();
+    modal.contentEl = createMockElement();
+    modal.close = jest.fn();
+    return modal;
+}
+
+function findByClass(root: MockElement, cls: string): MockElement | null {
+    if (root.cls.split(' ').includes(cls)) {
+        return root;
+    }
+    for (const child of root.children) {
+        const match = findByClass(child, cls);
+        if (match) {
+            return match;
+        }
+    }
+    return null;
+}
+
+function findByTag(root: MockElement, tag: string): MockElement | null {
+    if (root.tag === tag) {
+        return root;
+    }
+    for (const child of root.children) {
+        const match = findByTag(child, tag);
+        if (match) {
+            return match;
+        }
+    }
+    return null;
+}
+
 function createSession(artifactOverrides: Partial<any> = {}, sourcePath = 'Notes/Topic.md', theme = 'system') {
+    const artifact = {
+        target: 'mermaid',
+        content: '```mermaid\nflowchart TD\nA --> B\n```',
+        mimeType: 'text/vnd.mermaid',
+        sourceIntent: 'flowchart',
+        ...artifactOverrides
+    };
+    const runtimeHtml = artifact.target === 'mermaid'
+        ? '<!DOCTYPE html><html><body><div id="notemd-mermaid-mount"></div></body></html>'
+        : artifact.target === 'vega-lite'
+            ? '<!DOCTYPE html><html><body><div id="notemd-vega-lite-mount"></div></body></html>'
+            : '<!DOCTYPE html><html></html>';
+
     return {
-        htmlSrcdoc: '<!DOCTYPE html><html></html>',
+        htmlSrcdoc: runtimeHtml,
         payload: {
-            artifact: {
-                target: 'mermaid',
-                content: '```mermaid\nflowchart TD\nA --> B\n```',
-                mimeType: 'text/vnd.mermaid',
-                sourceIntent: 'flowchart',
-                ...artifactOverrides
-            },
+            artifact,
             theme,
             previewTitle: 'Mermaid preview',
             sourcePath,
-            artifactSaved: false
+            artifactSaved: false,
+            renderHostRuntimeUrl: artifact.target === 'mermaid' || artifact.target === 'vega-lite'
+                ? 'app://local/.obsidian/plugins/notemd/render-host.mjs'
+                : undefined
         }
     } as any;
 }
@@ -124,6 +179,7 @@ async function flushPromises(): Promise<void> {
 describe('diagram preview modal', () => {
     beforeEach(() => {
         jest.clearAllMocks();
+        clearDiagramPreviewHistory();
         Object.defineProperty(globalThis, 'navigator', {
             configurable: true,
             value: {
@@ -135,10 +191,7 @@ describe('diagram preview modal', () => {
     });
 
     test('shows export button for preview-capable artifacts and saves svg on click', async () => {
-        const modal = new DiagramPreviewModal(mockApp, createSession({}, 'Notes/Topic.md', 'dark'), 'en') as any;
-        modal.app = mockApp;
-        modal.contentEl = createMockElement();
-        modal.close = jest.fn();
+        const modal = mountModal(new DiagramPreviewModal(mockApp, createSession({}, 'Notes/Topic.md', 'dark'), 'en') as any);
 
         modal.onOpen();
         await flushPromises();
@@ -149,11 +202,7 @@ describe('diagram preview modal', () => {
 
         expect(exportButton).toBeDefined();
         expect(exportPngButton).toBeDefined();
-        expect(mermaidPreview.renderMermaidArtifactSvg).toHaveBeenCalledWith(
-            expect.objectContaining({ target: 'mermaid' }),
-            undefined,
-            'dark'
-        );
+        expect(mermaidPreview.renderMermaidArtifactSvg).not.toHaveBeenCalled();
 
         await exportButton?.onclick?.();
 
@@ -169,10 +218,7 @@ describe('diagram preview modal', () => {
     });
 
     test('shows png export button and saves png preview on click', async () => {
-        const modal = new DiagramPreviewModal(mockApp, createSession({}, 'Notes/Topic.md', 'dark'), 'en') as any;
-        modal.app = mockApp;
-        modal.contentEl = createMockElement();
-        modal.close = jest.fn();
+        const modal = mountModal(new DiagramPreviewModal(mockApp, createSession({}, 'Notes/Topic.md', 'dark'), 'en') as any);
 
         modal.onOpen();
         await flushPromises();
@@ -193,15 +239,12 @@ describe('diagram preview modal', () => {
     });
 
     test('shows save-source button for unsaved preview artifacts and writes target file on click', async () => {
-        const modal = new DiagramPreviewModal(mockApp, createSession({
+        const modal = mountModal(new DiagramPreviewModal(mockApp, createSession({
             target: 'vega-lite',
             content: '{"mark":"bar"}',
             mimeType: 'application/json',
             sourceIntent: 'dataChart'
-        }), 'en') as any;
-        modal.app = mockApp;
-        modal.contentEl = createMockElement();
-        modal.close = jest.fn();
+        }), 'en') as any);
 
         modal.onOpen();
         await flushPromises();
@@ -220,8 +263,26 @@ describe('diagram preview modal', () => {
         expect(Notice).toHaveBeenCalledWith('Diagram source saved to Notes/Topic_diagram.json');
     });
 
+    test('routes mermaid previews through iframe host instead of plugin-runtime svg rendering', async () => {
+        const modal = mountModal(new DiagramPreviewModal(mockApp, {
+            ...createSession({}, 'Notes/Topic.md', 'dark'),
+            htmlSrcdoc: '<!DOCTYPE html><html><body><div id="notemd-mermaid-mount"></div></body></html>'
+        }, 'en') as any);
+
+        modal.onOpen();
+        await flushPromises();
+
+        expect(mermaidPreview.renderMermaidArtifactSvg).not.toHaveBeenCalled();
+
+        const iframe = findByTag(modal.contentEl, 'iframe');
+
+        expect(iframe).toBeDefined();
+        expect(iframe?.sandbox).toBe('allow-scripts allow-same-origin');
+        expect(iframe?.srcdoc).toContain('notemd-mermaid-mount');
+    });
+
     test('routes vega-lite previews through iframe host instead of plugin-runtime svg rendering', async () => {
-        const modal = new DiagramPreviewModal(mockApp, {
+        const modal = mountModal(new DiagramPreviewModal(mockApp, {
             ...createSession({
                 target: 'vega-lite',
                 content: '{"mark":"bar"}',
@@ -229,10 +290,7 @@ describe('diagram preview modal', () => {
                 sourceIntent: 'dataChart'
             }, 'Notes/Topic.md', 'dark'),
             htmlSrcdoc: '<!DOCTYPE html><html><body><div id="notemd-vega-lite-mount"></div></body></html>'
-        }, 'en') as any;
-        modal.app = mockApp;
-        modal.contentEl = createMockElement();
-        modal.close = jest.fn();
+        }, 'en') as any);
 
         modal.onOpen();
         await flushPromises();
@@ -242,9 +300,7 @@ describe('diagram preview modal', () => {
             expect.anything()
         );
 
-        const iframe = modal.contentEl.children
-            .flatMap((child: MockElement) => child.children)
-            .find((child: MockElement) => child.tag === 'iframe');
+        const iframe = findByTag(modal.contentEl, 'iframe');
 
         expect(iframe).toBeDefined();
         expect(iframe?.sandbox).toBe('allow-scripts allow-same-origin');
@@ -252,14 +308,11 @@ describe('diagram preview modal', () => {
     });
 
     test('hides export button for non-svg preview targets', async () => {
-        const modal = new DiagramPreviewModal(mockApp, createSession({
+        const modal = mountModal(new DiagramPreviewModal(mockApp, createSession({
             target: 'html',
             content: '<div>Preview</div>',
             mimeType: 'text/html'
-        }), 'en') as any;
-        modal.app = mockApp;
-        modal.contentEl = createMockElement();
-        modal.close = jest.fn();
+        }), 'en') as any);
 
         modal.onOpen();
         await flushPromises();
@@ -268,24 +321,19 @@ describe('diagram preview modal', () => {
         expect(buttons.some(button => button.text === 'Export SVG')).toBe(false);
         expect(buttons.some(button => button.text === 'Export PNG')).toBe(false);
 
-        const iframe = modal.contentEl.children
-            .flatMap((child: MockElement) => child.children)
-            .find((child: MockElement) => child.tag === 'iframe');
+        const iframe = findByTag(modal.contentEl, 'iframe');
 
         expect(iframe?.sandbox).toBe('allow-same-origin');
     });
 
     test('hides save-source button when preview already points at saved artifact', async () => {
-        const modal = new DiagramPreviewModal(mockApp, {
+        const modal = mountModal(new DiagramPreviewModal(mockApp, {
             ...createSession(),
             payload: {
                 ...createSession().payload,
                 artifactSaved: true
             }
-        }, 'en') as any;
-        modal.app = mockApp;
-        modal.contentEl = createMockElement();
-        modal.close = jest.fn();
+        }, 'en') as any);
 
         modal.onOpen();
         await flushPromises();
@@ -295,10 +343,7 @@ describe('diagram preview modal', () => {
     });
 
     test('uses localized export label for chinese preview modal', async () => {
-        const modal = new DiagramPreviewModal(mockApp, createSession(), 'zh-CN') as any;
-        modal.app = mockApp;
-        modal.contentEl = createMockElement();
-        modal.close = jest.fn();
+        const modal = mountModal(new DiagramPreviewModal(mockApp, createSession(), 'zh-CN') as any);
 
         modal.onOpen();
         await flushPromises();
@@ -310,20 +355,39 @@ describe('diagram preview modal', () => {
     });
 
     test('renders localized preview title when session provides one', async () => {
-        const modal = new DiagramPreviewModal(mockApp, {
+        const modal = mountModal(new DiagramPreviewModal(mockApp, {
             ...createSession(),
             payload: {
                 ...createSession().payload,
                 previewTitle: 'Mermaid 预览'
             }
-        }, 'zh-CN') as any;
-        modal.app = mockApp;
-        modal.contentEl = createMockElement();
-        modal.close = jest.fn();
+        }, 'zh-CN') as any);
 
         modal.onOpen();
         await flushPromises();
 
         expect(modal.contentEl.children.some((child: MockElement) => child.tag === 'h3' && child.text === 'Mermaid 预览')).toBe(true);
+    });
+
+    test('shows preview history entries and disables the active one', async () => {
+        const firstModal = mountModal(new DiagramPreviewModal(mockApp, createSession({}, 'Notes/Topic.md', 'dark'), 'en') as any);
+        firstModal.onOpen();
+        await flushPromises();
+
+        const secondModal = mountModal(new DiagramPreviewModal(mockApp, createSession({
+            target: 'vega-lite',
+            content: '{"mark":"bar"}',
+            mimeType: 'application/json',
+            sourceIntent: 'dataChart'
+        }, 'Notes/Chart.md', 'dark'), 'en') as any);
+        secondModal.onOpen();
+        await flushPromises();
+
+        const historyPanel = findByClass(secondModal.contentEl, 'notemd-diagram-preview-history');
+        expect(historyPanel).not.toBeNull();
+
+        const historyButtons = collectButtons(historyPanel as MockElement);
+        expect(historyButtons.some(button => button.text === 'Topic.md')).toBe(true);
+        expect(historyButtons.some(button => button.text === 'Chart.md' && button.disabled)).toBe(true);
     });
 });

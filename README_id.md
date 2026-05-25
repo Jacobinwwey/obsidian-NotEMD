@@ -1,5 +1,8 @@
 ![GitHub Release](https://img.shields.io/github/v/release/Jacobinwwey/obsidian-NotEMD?label=Version&link=https%3A%2F%2Fgithub.com%2Jacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest) ![GitHub Downloads](https://img.shields.io/github/downloads/Jacobinwwey/obsidian-NotEMD/total?logo=Obsidian&label=Downloads&labelColor=%237C3AED&color=%235b5b5b&link=https%3A%2F%2Fgithub.com%2Jacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest)	![GitHub Repo stars](https://img.shields.io/github/stars/Jacobinwwey/obsidian-NotEMD?style=social)
 
+[![Discord](https://img.shields.io/badge/Discord-Join%20Chat-5865F2?logo=discord&logoColor=white)](https://discord.gg/qnGgsQ9W) ![QQ](https://img.shields.io/badge/QQ-1104515865-12B7F5)
+
+
 # Plugin Notemd untuk Obsidian
 
 [English](./README.md) | [简体中文](./README_zh.md) | [Español](./README_es.md) | [Français](./README_fr.md) | [Deutsch](./README_de.md) | [Italiano](./README_it.md) | [Português](./README_pt.md) | [繁體中文](./README_zh_Hant.md) | [日本語](./README_ja.md) | [한국어](./README_ko.md) | [Русский](./README_ru.md) | [العربية](./README_ar.md) | [हिन्दी](./README_hi.md) | [বাংলা](./README_bn.md) | [Nederlands](./README_nl.md) | [Svenska](./README_sv.md) | [Suomi](./README_fi.md) | [Dansk](./README_da.md) | [Norsk](./README_no.md) | [Polski](./README_pl.md) | [Türkçe](./README_tr.md) | [עברית](./README_he.md) | [ไทย](./README_th.md) | [Ελληνικά](./README_el.md) | [Čeština](./README_cs.md) | [Magyar](./README_hu.md) | [Română](./README_ro.md) | [Українська](./README_uk.md) | [Tiếng Việt](./README_vi.md) | [Bahasa Indonesia](./README_id.md) | [Bahasa Melayu](./README_ms.md)
@@ -24,7 +27,7 @@ Notemd meningkatkan alur kerja Obsidian Anda dengan mengintegrasikan berbagai La
 
 Jika Anda suka menggunakan Notemd, mohon pertimbangkan untuk [⭐ memberi Bintang di GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) atau [☕️ membelikan saya kopi](https://ko-fi.com/jacobinwwey).
 
-**Versi:** 1.8.5
+**Versi:** 1.8.9
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
@@ -696,7 +699,7 @@ MIT License. Lihat file [LICENSE](LICENSE) untuk detailnya.
 ---
 
 
-*Notemd v1.8.5 - Tingkatkan knowledge graph Obsidian Anda dengan AI.*
+*Notemd v1.8.9 - Tingkatkan knowledge graph Obsidian Anda dengan AI.*
 
 
 <!-- repo-chronicle:start -->
@@ -706,7 +709,7 @@ Kronik triwulanan ini mempertahankan gaya visual asli [repo-saga](https://github
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.id.svg)
 
-_Terakhir diperbarui untuk tag rilis `1.8.5` pada 2026-05-08. Tanggal commit terbaru: 2026-05-08._
+_Terakhir diperbarui untuk tag rilis `1.8.9` pada 2026-05-25. Tanggal commit terbaru: 2026-05-25._
 <!-- repo-chronicle:end -->
 
 

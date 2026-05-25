@@ -11,12 +11,12 @@
 - registry-backed operation 元数据
 - 类型化 capability / invocation 导出
 - 边界清晰的 export-only 公共安全切片
-- 针对同一批 export-only operations 的 repo-local maintainer helper
+- 同时覆盖 public-safe exports 与受控 path-based 维护操作的 repo-local maintainer helper
 
 当前没有宣称的内容：
 
 - 面向用户的宽口径 CLI API
-- 依赖后续产品切片的 backup 分支维护桥能力
+- 针对可变笔记处理流程的宽口径 public CLI API
 
 这是一份维护者控制文档，用来区分：
 
@@ -52,7 +52,7 @@
 - 暴露在官方 CLI trigger surface 上
 - input schema 为空对象
 
-当前纳入该切片的命令 ID：
+当前这一 slice 中的命令 ID 明确只有：
 
 - `notemd:export-provider-profiles-redacted`
 - `notemd:export-cli-capability-manifest`
@@ -70,8 +70,12 @@
 仓库现在还带有一个很小的 maintainer helper，底层仍然是 `obsidian-cli native eval`：
 
 - help：`npm run cli:help`
-- invoke：`npm run cli:invoke -- --vault <vault> --operation <operation-id> [--pretty]`
-- 当前支持的 operation id：
+- invoke：`npm run cli:invoke -- --vault <vault> --operation <operation-id> [--input-file <path> | --input-json '<json>'] [--pretty]`
+- 当前仅支持的 operation id：
+  - `content.batch-generate-from-titles`
+  - `content.split-note-by-chapters`
+  - `research.summarize-topic`
+  - `diagram.generate`
   - `provider.profile.export-redacted`
   - `cli.capability-manifest.export`
   - `cli.invocation-contract.export`
@@ -80,7 +84,8 @@
 边界：
 
 - 这是 maintainer-grade repo 工具，不是 public CLI API
-- 当前 helper 只支持 export-only，且不接受输入 payload
+- 操作目录统一收敛在 `scripts/lib/maintainer-cli-operation-help.js`，作为共享帮助元数据
+- export operations 仍然只接受空 payload；受控内容操作必须显式提供 JSON 输入
 
 ## 当前命令矩阵
 

@@ -854,7 +854,8 @@ export const STRINGS_EN = {
         exportFailedNotice: 'Failed to export diagram preview: {message}',
         exportPngSuccessNotice: 'Diagram PNG exported to {path}',
         exportPngFailedNotice: 'Failed to export diagram PNG: {message}',
-        sourceFile: 'Saved file: {path}'
+        sourceFile: 'Saved file: {path}',
+        historyTitle: 'History'
     }
 };
 

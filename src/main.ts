@@ -1495,6 +1495,18 @@ export default class NotemdPlugin extends Plugin {
 
     async invokeMaintainerCliOperation(request: MaintainerCliOperationRequest) {
         return invokeMaintainerCliOperation({
+            batchGenerateContentForTitlesCommand: async (reporter, folderPathOverride, fileSelectionOverride) => (
+                this.batchGenerateContentForTitlesCommand(reporter, folderPathOverride, fileSelectionOverride)
+            ),
+            splitNoteByChaptersForPathCommand: async (sourcePath, reporter) => (
+                this.splitNoteByChaptersForPathCommand(sourcePath, reporter)
+            ),
+            researchAndSummarizeForPathCommand: async (sourcePath, topicOverride, reporter) => (
+                this.researchAndSummarizeForPathCommand(sourcePath, topicOverride, reporter)
+            ),
+            generateDiagramForPathCommand: async (sourcePath, reporter, options) => (
+                this.generateDiagramForPathCommand(sourcePath, reporter, options)
+            ),
             exportRedactedProviderProfilesCommand: async () => this.exportRedactedProviderProfilesCommand(),
             exportCliCapabilityManifestCommand: async () => this.exportCliCapabilityManifestCommand(),
             exportCliInvocationContractCommand: async () => this.exportCliInvocationContractCommand(),
@@ -1526,6 +1538,26 @@ export default class NotemdPlugin extends Plugin {
     /** Command: Research and Summarize Topic */
     async researchAndSummarizeCommand(editor: Editor, view: MarkdownView, reporter?: ProgressReporter) {
         await runResearchAndSummarizeCommandWithHost(this.createNoteProcessingCommandHost(), editor, view, reporter);
+    }
+
+    async researchAndSummarizeForPathCommand(
+        sourcePath: string,
+        topicOverride?: string,
+        reporter?: ProgressReporter
+    ): Promise<ResearchSummarizeResult | null> {
+        await this.loadSettings();
+        const file = this.app.vault.getFileByPath(sourcePath);
+        if (!file || file.extension !== 'md') {
+            throw new Error(`No Markdown file found at path: ${sourcePath}`);
+        }
+
+        const useReporter = reporter ?? this.getReporter();
+        const result = await researchAndSummarizeFile(this.app, this.settings, file, useReporter, topicOverride);
+        if (result && this.settings.autoMermaidFixAfterGenerate) {
+            await this.maybeAutoFixMermaidForFile(file, useReporter, 'research & summarize (cli)');
+        }
+
+        return result;
     }
 
     /** Command: Batch Generate Content from Titles */
@@ -1638,6 +1670,19 @@ export default class NotemdPlugin extends Plugin {
             reporter,
             options
         );
+    }
+
+    async generateDiagramForPathCommand(
+        sourcePath: string,
+        reporter?: ProgressReporter,
+        options: DiagramCommandOptions = { executionMode: 'save-artifact' }
+    ) {
+        const file = this.app.vault.getFileByPath(sourcePath);
+        if (!file || file.extension !== 'md') {
+            throw new Error(`No Markdown file found at path: ${sourcePath}`);
+        }
+
+        return this.generateDiagramCommand(file, reporter, options);
     }
 
     private async executeSaveMermaidDiagramCommand(
