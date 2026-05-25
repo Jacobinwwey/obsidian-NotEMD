@@ -33,7 +33,12 @@ import {
     researchAndSummarizeFile,
     ResearchSummarizeResult
 } from './searchUtils';
-import { buildLocalKnowledgeBaseRetriever } from './localKnowledgeBase';
+import {
+    buildLocalKnowledgeBaseRetriever,
+    createEmptyLocalKnowledgeContextBuildResult,
+    LocalKnowledgeRetrievalSummary,
+    toLocalKnowledgeRetrievalSummary
+} from './localKnowledgeBase';
 import { stripMarkdownForSearch } from './markdownSectionUtils';
 import { ProgressModal } from './ui/ProgressModal';
 import { ErrorModal } from './ui/ErrorModal';
@@ -125,6 +130,12 @@ import {
 } from './operations/utilityCommandHostAdapter';
 import { ChapterSplitOptions, ChapterSplitResult, splitNoteByChapters } from './chapterSplit';
 
+interface DiagramLocalKnowledgeContextResult {
+    operationInput: DiagramOperationInput;
+    localKnowledgeContextUsed: boolean;
+    localKnowledgeRetrieval: LocalKnowledgeRetrievalSummary;
+}
+
 export default class NotemdPlugin extends Plugin {
     settings: NotemdSettings;
     statusBarItem: HTMLElement;
@@ -132,6 +143,15 @@ export default class NotemdPlugin extends Plugin {
     private isBusy: boolean = false;
     private suppressConceptNotePathWarningOnce = false;
     currentProcessingFileBasename: { value: string | null } = { value: null }; // Keep track of the file being processed
+
+    private buildDiagramLocalKnowledgeQuery(operationInput: DiagramOperationInput): string {
+        const strippedMarkdown = stripMarkdownForSearch(operationInput.sourceMarkdown);
+
+        return [
+            operationInput.sourcePath?.split('/').pop()?.replace(/\.[^.]+$/u, ''),
+            strippedMarkdown.slice(0, 1200)
+        ].filter((value): value is string => Boolean(value && value.trim())).join('\n');
+    }
 
     public getIsBusy(): boolean {
         return this.isBusy;
@@ -1694,6 +1714,14 @@ export default class NotemdPlugin extends Plugin {
         actionLabel: string,
         i18n: DiagramCommandUiStrings = this.getUiStrings()
     ): Promise<DiagramCommandExecutionDetails> {
+        const localKnowledgeRetrieval = toLocalKnowledgeRetrievalSummary(
+            createEmptyLocalKnowledgeContextBuildResult('', {
+                currentFilePath: operationInput.sourcePath,
+                topK: 0,
+                slidingWindowSize: 0,
+                maxSnippetChars: 0
+            })
+        );
         return runSaveMermaidDiagramExecutionWithHost(this.createDiagramCommandExecutionHost(), {
             file,
             operationInput,
@@ -1701,7 +1729,9 @@ export default class NotemdPlugin extends Plugin {
             modelName,
             reporter,
             actionLabel,
-            i18n
+            i18n,
+            localKnowledgeContextUsed: false,
+            localKnowledgeRetrieval
         });
     }
 
@@ -1715,19 +1745,19 @@ export default class NotemdPlugin extends Plugin {
         i18n: DiagramCommandUiStrings,
         executionMode: Extract<DiagramCommandExecutionMode, 'save-artifact' | 'preview-artifact'>
     ): Promise<DiagramCommandExecutionDetails> {
-        const effectiveOperationInput = executionMode === 'save-artifact'
-            ? await this.withDiagramLocalKnowledgeContext(operationInput, reporter)
-            : operationInput;
+        const localKnowledgeResult = await this.withDiagramLocalKnowledgeContext(operationInput, reporter);
 
         return runArtifactDiagramExecutionWithHost(this.createDiagramCommandExecutionHost(), {
             file,
-            operationInput: effectiveOperationInput,
+            operationInput: localKnowledgeResult.operationInput,
             provider,
             modelName,
             reporter,
             actionLabel,
             i18n,
-            executionMode
+            executionMode,
+            localKnowledgeContextUsed: localKnowledgeResult.localKnowledgeContextUsed,
+            localKnowledgeRetrieval: localKnowledgeResult.localKnowledgeRetrieval
         });
     }
 
@@ -1750,37 +1780,77 @@ export default class NotemdPlugin extends Plugin {
     private async withDiagramLocalKnowledgeContext(
         operationInput: DiagramOperationInput,
         reporter: ProgressReporter
-    ): Promise<DiagramOperationInput> {
-        if (!this.settings.enableLocalKnowledgeRetrieval || !this.settings.enableLocalKnowledgeForDiagramGeneration) {
-            return operationInput;
-        }
-
-        const retriever = await buildLocalKnowledgeBaseRetriever(this.app, this.settings, reporter);
-        if (!retriever) {
-            return operationInput;
-        }
-
-        const strippedMarkdown = stripMarkdownForSearch(operationInput.sourceMarkdown);
-        const query = [
-            operationInput.sourcePath?.split('/').pop()?.replace(/\.[^.]+$/u, ''),
-            strippedMarkdown.slice(0, 1200)
-        ].filter((value): value is string => Boolean(value && value.trim())).join('\n');
-
-        const localKnowledgeContext = retriever.buildContext(query, {
+    ): Promise<DiagramLocalKnowledgeContextResult> {
+        const query = this.buildDiagramLocalKnowledgeQuery(operationInput);
+        const localKnowledgeOptions = {
             currentFilePath: operationInput.sourcePath,
             topK: this.settings.localKnowledgeTopK,
             slidingWindowSize: this.settings.localKnowledgeSlidingWindowSize,
             maxSnippetChars: this.settings.localKnowledgeMaxSnippetChars
+        };
+        const emptyResult = (overrides?: Partial<Pick<
+            ReturnType<typeof createEmptyLocalKnowledgeContextBuildResult>,
+            'indexedFileCount' | 'indexedSectionCount' | 'excludeCurrentFileApplied' | 'indexBuildMs'
+        >>): DiagramLocalKnowledgeContextResult => ({
+            operationInput,
+            localKnowledgeContextUsed: false,
+            localKnowledgeRetrieval: toLocalKnowledgeRetrievalSummary(
+                createEmptyLocalKnowledgeContextBuildResult(query, localKnowledgeOptions, overrides)
+            )
         });
 
-        if (!localKnowledgeContext) {
-            return operationInput;
+        if (!this.settings.enableLocalKnowledgeRetrieval || !this.settings.enableLocalKnowledgeForDiagramGeneration) {
+            return emptyResult();
         }
 
-        reporter.log(`Local knowledge retrieval returned context for diagram source "${operationInput.sourcePath ?? 'current note'}" (length: ${localKnowledgeContext.length}).`);
+        const retriever = await buildLocalKnowledgeBaseRetriever(this.app, this.settings, reporter);
+        if (!retriever) {
+            return emptyResult({
+                indexedFileCount: 0,
+                indexedSectionCount: 0,
+                excludeCurrentFileApplied: Boolean(
+                    this.settings.localKnowledgeExcludeCurrentFile && operationInput.sourcePath
+                ),
+                indexBuildMs: 0
+            });
+        }
+
+        const localKnowledgeDetails = retriever.buildContextDetails(query, localKnowledgeOptions);
+        const localKnowledgeContext = localKnowledgeDetails.context || '';
+        const localKnowledgeRetrieval = toLocalKnowledgeRetrievalSummary(localKnowledgeDetails);
+
+        if (!localKnowledgeContext) {
+            reporter.log(
+                `Local knowledge retrieval returned no prompt context for diagram source `
+                + `"${operationInput.sourcePath ?? 'current note'}" `
+                + `(matched sections: ${localKnowledgeRetrieval.matchedSectionCount}, `
+                + `excluded current-file hits: ${localKnowledgeRetrieval.excludedCurrentFileHitCount}, `
+                + `build ${localKnowledgeRetrieval.indexBuildMs}ms, `
+                + `query ${localKnowledgeRetrieval.queryMs}ms).`
+            );
+            return {
+                operationInput,
+                localKnowledgeContextUsed: false,
+                localKnowledgeRetrieval
+            };
+        }
+
+        reporter.log(
+            `Local knowledge retrieval returned context for diagram source `
+            + `"${operationInput.sourcePath ?? 'current note'}" `
+            + `(length: ${localKnowledgeContext.length}, `
+            + `${localKnowledgeRetrieval.returnedHitCount} hit block(s), `
+            + `${localKnowledgeRetrieval.sourcePaths.length} file(s), `
+            + `build ${localKnowledgeRetrieval.indexBuildMs}ms, `
+            + `query ${localKnowledgeRetrieval.queryMs}ms).`
+        );
         return {
-            ...operationInput,
-            localKnowledgeContext
+            operationInput: {
+                ...operationInput,
+                localKnowledgeContext
+            },
+            localKnowledgeContextUsed: true,
+            localKnowledgeRetrieval
         };
     }
 
