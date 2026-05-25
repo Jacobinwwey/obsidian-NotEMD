@@ -15,9 +15,11 @@ describe('CLI capability manifest', () => {
         expect(ids).toContain('notemd:notemd-generate-diagram');
         expect(ids).toContain('notemd:notemd-summarize-as-mermaid');
         expect(ids).toContain('notemd:export-provider-profiles');
+        expect(ids).toContain('notemd:export-provider-profiles-redacted');
         expect(ids).toContain('notemd:import-provider-profiles');
         expect(ids).toContain('notemd:export-cli-capability-manifest');
         expect(ids).toContain('notemd:export-cli-invocation-contract');
+        expect(ids).toContain('notemd:export-cli-public-surface');
         expect(ids).toContain('notemd:create-wiki-link-and-generate-from-selection');
         expect(ids).toContain('notemd:process-with-notemd');
         expect(ids).toContain('notemd:process-folder-with-notemd');
@@ -44,9 +46,11 @@ describe('CLI capability manifest', () => {
         const diagnostic = manifest.commands.find(command => command.id === 'notemd:test-llm-connection');
         const mermaid = manifest.commands.find(command => command.id === 'notemd:notemd-summarize-as-mermaid');
         const providerProfileExport = manifest.commands.find(command => command.id === 'notemd:export-provider-profiles');
+        const providerProfileRedactedExport = manifest.commands.find(command => command.id === 'notemd:export-provider-profiles-redacted');
         const providerProfileImport = manifest.commands.find(command => command.id === 'notemd:import-provider-profiles');
         const cliCapabilityExport = manifest.commands.find(command => command.id === 'notemd:export-cli-capability-manifest');
         const cliContractExport = manifest.commands.find(command => command.id === 'notemd:export-cli-invocation-contract');
+        const cliPublicSurfaceExport = manifest.commands.find(command => command.id === 'notemd:export-cli-public-surface');
         const createWikiAndGenerate = manifest.commands.find(command => command.id === 'notemd:create-wiki-link-and-generate-from-selection');
         const translateFile = manifest.commands.find(command => command.id === 'notemd:translate-file');
         const processCurrent = manifest.commands.find(command => command.id === 'notemd:process-with-notemd');
@@ -102,15 +106,26 @@ describe('CLI capability manifest', () => {
             automationLevel: 'safe',
             requiredContext: 'none',
             sideEffectClass: 'write-file',
+            mappingKind: 'exact',
+            outputHandlingTags: ['contains-provider-credentials']
+        }));
+
+        expect(providerProfileRedactedExport).toEqual(expect.objectContaining({
+            operationId: 'provider.profile.export-redacted',
+            automationLevel: 'safe',
+            requiredContext: 'none',
+            sideEffectClass: 'write-file',
             mappingKind: 'exact'
         }));
+        expect(providerProfileRedactedExport?.outputHandlingTags).toBeUndefined();
 
         expect(providerProfileImport).toEqual(expect.objectContaining({
             operationId: 'provider.profile.import',
             automationLevel: 'safe',
             requiredContext: 'none',
             sideEffectClass: 'write-file',
-            mappingKind: 'exact'
+            mappingKind: 'exact',
+            inputHandlingTags: ['contains-provider-credentials']
         }));
 
         expect(cliCapabilityExport).toEqual(expect.objectContaining({
@@ -123,6 +138,14 @@ describe('CLI capability manifest', () => {
 
         expect(cliContractExport).toEqual(expect.objectContaining({
             operationId: 'cli.invocation-contract.export',
+            automationLevel: 'safe',
+            requiredContext: 'none',
+            sideEffectClass: 'write-file',
+            mappingKind: 'exact'
+        }));
+
+        expect(cliPublicSurfaceExport).toEqual(expect.objectContaining({
+            operationId: 'cli.public-surface.export',
             automationLevel: 'safe',
             requiredContext: 'none',
             sideEffectClass: 'write-file',

@@ -1,16 +1,21 @@
 import { buildCliInvocationContract } from '../cliContracts';
 import { buildCliCapabilityManifest } from './capabilityManifest';
+import { buildCliPublicSurface } from './publicCliSurface';
 import {
     buildProviderProfileExport,
+    buildRedactedProviderProfileExport,
     parseProviderProfileImport,
     ProviderProfileExport,
+    RedactedProviderProfileExport,
     ProviderProfileImportSummary
 } from '../providerProfiles';
 import { LLMProviderConfig } from '../types';
 
 export const PROVIDER_PROFILE_FILE_NAME = 'notemd-providers.json';
+export const REDACTED_PROVIDER_PROFILE_FILE_NAME = 'notemd-providers-redacted.json';
 export const CLI_CAPABILITY_MANIFEST_FILE_NAME = 'notemd-cli-capabilities.json';
 export const CLI_INVOCATION_CONTRACT_FILE_NAME = 'notemd-cli-contract.json';
+export const CLI_PUBLIC_SURFACE_FILE_NAME = 'notemd-cli-public-surface.json';
 
 export interface PluginConfigCommandHost {
     configDir: string;
@@ -23,6 +28,11 @@ export interface PluginConfigCommandHost {
 export interface ExportProviderProfilesCommandResult {
     outputPath: string;
     profile: ProviderProfileExport;
+}
+
+export interface ExportRedactedProviderProfilesCommandResult {
+    outputPath: string;
+    profile: RedactedProviderProfileExport;
 }
 
 export interface ImportProviderProfilesCommandResult extends ProviderProfileImportSummary {
@@ -39,6 +49,11 @@ export interface ExportCliCapabilityManifestCommandResult {
 export interface ExportCliInvocationContractCommandResult {
     outputPath: string;
     contract: ReturnType<typeof buildCliInvocationContract>;
+}
+
+export interface ExportCliPublicSurfaceCommandResult {
+    outputPath: string;
+    surface: ReturnType<typeof buildCliPublicSurface>;
 }
 
 export class MissingProviderProfileImportFileError extends Error {
@@ -131,6 +146,28 @@ export async function executeExportProviderProfilesCommand(params: {
     };
 }
 
+export async function executeExportRedactedProviderProfilesCommand(params: {
+    pluginId: string;
+    providers: LLMProviderConfig[];
+    host: PluginConfigCommandHost;
+    now?: Date;
+    buildRedactedProviderProfileExportImpl?: typeof buildRedactedProviderProfileExport;
+}): Promise<ExportRedactedProviderProfilesCommandResult> {
+    const buildExport = params.buildRedactedProviderProfileExportImpl ?? buildRedactedProviderProfileExport;
+    const profile = buildExport(params.providers, params.now ?? new Date());
+    const outputPath = await writePluginConfigJsonFile(
+        params.host,
+        params.pluginId,
+        REDACTED_PROVIDER_PROFILE_FILE_NAME,
+        profile
+    );
+
+    return {
+        outputPath,
+        profile
+    };
+}
+
 export async function executeImportProviderProfilesCommand(params: {
     pluginId: string;
     existingProviders: LLMProviderConfig[];
@@ -198,5 +235,25 @@ export async function executeExportCliInvocationContractCommand(params: {
     return {
         outputPath,
         contract
+    };
+}
+
+export async function executeExportCliPublicSurfaceCommand(params: {
+    pluginId: string;
+    host: PluginConfigCommandHost;
+    buildCliPublicSurfaceImpl?: typeof buildCliPublicSurface;
+}): Promise<ExportCliPublicSurfaceCommandResult> {
+    const buildSurface = params.buildCliPublicSurfaceImpl ?? buildCliPublicSurface;
+    const surface = buildSurface(params.pluginId);
+    const outputPath = await writePluginConfigJsonFile(
+        params.host,
+        params.pluginId,
+        CLI_PUBLIC_SURFACE_FILE_NAME,
+        surface
+    );
+
+    return {
+        outputPath,
+        surface
     };
 }

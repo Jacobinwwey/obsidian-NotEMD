@@ -28,4 +28,25 @@ describe('diagram operation input helpers', () => {
         const compatibilityMode = resolveDiagramOperationCompatibilityMode('save-mermaid', 'best-fit');
         expect(compatibilityMode).toBe('legacy-mermaid');
     });
+
+    test('applies explicit overrides ahead of plugin defaults for maintainer dispatch', () => {
+        const input = buildDiagramOperationInput({
+            sourcePath: 'Notes/Topic.md',
+            sourceMarkdown: '# Topic',
+            executionMode: 'save-artifact',
+            settings: {
+                ...mockSettings,
+                preferredDiagramIntent: 'flowchart',
+                experimentalDiagramCompatibilityMode: 'legacy-mermaid',
+                summarizeToMermaidLanguage: 'en'
+            },
+            requestedIntentOverride: 'erDiagram',
+            compatibilityModeOverride: 'best-fit',
+            targetLanguageOverride: 'zh-CN'
+        });
+
+        expect(input.requestedIntent).toBe('erDiagram');
+        expect(input.compatibilityMode).toBe('best-fit');
+        expect(input.targetLanguage).toBe('zh-CN');
+    });
 });

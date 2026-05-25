@@ -78,15 +78,26 @@ describe('translate contract', () => {
             extension: 'md',
             parent: { path: 'Notes' }
         });
+        const nestedFile = Object.assign(new (TFile as any)(), {
+            path: 'Notes/Sub/Nested.md',
+            basename: 'Nested',
+            name: 'Nested.md',
+            extension: 'md',
+            parent: { path: 'Notes/Sub' }
+        });
         const folder = Object.assign(new (TFolder as any)(), {
             path: 'Notes',
             name: 'Notes',
-            children: [file]
+            children: [file, nestedFile]
         });
 
         (mockApp.vault.read as jest.Mock).mockResolvedValue('Reference content');
+        (mockApp.vault.getFiles as jest.Mock).mockReturnValue([file, nestedFile]);
         (mockApp.vault.getAbstractFileByPath as jest.Mock).mockImplementation((path: string) => {
             if (path === 'Notes/Topic_en.md') {
+                return null;
+            }
+            if (path === 'Notes/Nested_en.md') {
                 return null;
             }
             return null;
@@ -123,5 +134,51 @@ describe('translate contract', () => {
             errors: []
         });
         expect(Notice).not.toHaveBeenCalled();
+    });
+
+    test('batchTranslateFolder can include subfolders when explicitly configured', async () => {
+        const file = Object.assign(new (TFile as any)(), {
+            path: 'Notes/Topic.md',
+            basename: 'Topic',
+            name: 'Topic.md',
+            extension: 'md',
+            parent: { path: 'Notes' }
+        });
+        const nestedFile = Object.assign(new (TFile as any)(), {
+            path: 'Notes/Sub/Nested.md',
+            basename: 'Nested',
+            name: 'Nested.md',
+            extension: 'md',
+            parent: { path: 'Notes/Sub' }
+        });
+        const folder = Object.assign(new (TFolder as any)(), {
+            path: 'Notes',
+            name: 'Notes',
+            children: [file, nestedFile]
+        });
+        const settings = {
+            ...mockSettings,
+            folderTaskIncludeSubfoldersMode: 'include' as const
+        };
+
+        (mockApp.vault.read as jest.Mock).mockResolvedValue('Reference content');
+        (mockApp.vault.getFiles as jest.Mock).mockReturnValue([file, nestedFile]);
+        (mockApp.vault.getAbstractFileByPath as jest.Mock).mockImplementation((path: string) => {
+            if (path === 'Notes/Topic_en.md' || path === 'Notes/Sub/Nested_en.md') {
+                return null;
+            }
+            return null;
+        });
+        (mockApp.vault.create as jest.Mock).mockResolvedValue(undefined);
+        jest.spyOn(llmUtils, 'callLLM').mockResolvedValue('Translated content');
+
+        const result = await batchTranslateFolder(mockApp, settings, folder, 'en', { reporter });
+
+        expect(result.processedFileCount).toBe(2);
+        expect(result.translatedCount).toBe(2);
+        expect(result.fileResults.map(item => item.sourcePath)).toEqual([
+            'Notes/Topic.md',
+            'Notes/Sub/Nested.md'
+        ]);
     });
 });

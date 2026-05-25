@@ -4,7 +4,8 @@ import { mockApp } from './__mocks__/app';
 import { mockSettings } from './__mocks__/settings';
 import * as diagramGenerateOperation from '../operations/diagramGenerateOperation';
 import * as diagramCommandHostAdapter from '../operations/diagramCommandHostAdapter';
-import * as fileUtils from '../fileUtils';
+import * as diagramCommandExecution from '../operations/diagramCommandExecution';
+import * as localKnowledgeBase from '../localKnowledgeBase';
 
 function createReporter(): ProgressReporter {
     return {
@@ -142,6 +143,99 @@ describe('diagram command architecture', () => {
         );
     });
 
+    test('shared diagram command applies explicit input overrides for maintainer CLI dispatch', async () => {
+        (mockApp.vault.read as jest.Mock).mockResolvedValue('# Topic');
+        jest.spyOn(plugin as any, 'executeArtifactDiagramCommand').mockResolvedValue({
+            generation: {
+                plan: {} as any,
+                spec: {} as any,
+                artifact: {} as any
+            },
+            outputPath: 'Notes/Topic_diagram.md',
+            previewOpened: true
+        });
+        jest.spyOn(plugin as any, 'getProviderAndModelForTask').mockReturnValue({
+            provider: mockSettings.providers[0],
+            modelName: mockSettings.providers[0].model
+        });
+
+        await (plugin as any).generateDiagramCommand(file, reporter, {
+            executionMode: 'save-artifact',
+            inputOverrides: {
+                requestedIntent: 'erDiagram',
+                compatibilityMode: 'best-fit',
+                targetLanguage: 'zh-CN'
+            }
+        });
+
+        expect((plugin as any).executeArtifactDiagramCommand).toHaveBeenCalledWith(
+            file,
+            expect.objectContaining({
+                sourcePath: 'Notes/Topic.md',
+                sourceMarkdown: '# Topic',
+                requestedIntent: 'erDiagram',
+                compatibilityMode: 'best-fit',
+                targetLanguage: 'zh-CN',
+                outputMode: 'artifact'
+            }),
+            mockSettings.providers[0],
+            mockSettings.providers[0].model,
+            reporter,
+            expect.any(String),
+            expect.anything(),
+            'save-artifact'
+        );
+    });
+
+    test('artifact execution injects local knowledge context when diagram retrieval is enabled', async () => {
+        plugin.settings.enableLocalKnowledgeRetrieval = true;
+        plugin.settings.enableLocalKnowledgeForDiagramGeneration = true;
+        jest.spyOn(localKnowledgeBase, 'buildLocalKnowledgeBaseRetriever').mockResolvedValue({
+            indexedFileCount: 1,
+            indexedSectionCount: 1,
+            buildContext: jest.fn(() => 'Path: Knowledge/Reference.md\nExcerpt: Deployment topology.')
+        });
+        const executionSpy = jest.spyOn(diagramCommandExecution, 'runArtifactDiagramExecutionWithHost').mockResolvedValue({
+            generation: {
+                plan: {} as any,
+                spec: {} as any,
+                artifact: {} as any
+            },
+            followThrough: {
+                kind: 'save-artifact',
+                previewOpened: false,
+                autoFixAttempted: false,
+                artifactTarget: 'mermaid'
+            },
+            previewOpened: false
+        });
+
+        await (plugin as any).executeArtifactDiagramCommand(
+            file,
+            {
+                sourcePath: file.path,
+                sourceMarkdown: '# Topic\n\nDeployment topology and failure handling.',
+                compatibilityMode: 'best-fit',
+                outputMode: 'artifact'
+            },
+            mockSettings.providers[0],
+            mockSettings.providers[0].model,
+            reporter,
+            'Generate diagram',
+            (plugin as any).getUiStrings(),
+            'save-artifact'
+        );
+
+        expect(executionSpy).toHaveBeenCalledWith(
+            expect.anything(),
+            expect.objectContaining({
+                operationInput: expect.objectContaining({
+                    localKnowledgeContext: 'Path: Knowledge/Reference.md\nExcerpt: Deployment topology.'
+                })
+            })
+        );
+    });
+
     test('generate command delegates busy and orchestration to extracted diagram host adapter wrapper', async () => {
         const commandSpy = jest
             .spyOn(diagramCommandHostAdapter, 'runGenerateDiagramCommandWithHost')
@@ -183,31 +277,39 @@ describe('diagram command architecture', () => {
     });
 
     test('artifact execution delegates to extracted diagram generate operation module', async () => {
-        const runSpy = jest.spyOn(diagramGenerateOperation, 'runDiagramGenerateOperation').mockResolvedValue({
-            plan: {
-                intent: 'flowchart',
-                confidence: 1,
-                reasons: [],
-                renderTarget: 'mermaid',
-                fallbackTargets: [],
-                mermaidDiagramType: 'flowchart',
-                legacyCompatibilityMode: false
+        const runSpy = jest.spyOn(diagramCommandExecution, 'runArtifactDiagramExecutionWithHost').mockResolvedValue({
+            generation: {
+                plan: {
+                    intent: 'flowchart',
+                    confidence: 1,
+                    reasons: [],
+                    renderTarget: 'mermaid',
+                    fallbackTargets: [],
+                    mermaidDiagramType: 'flowchart',
+                    legacyCompatibilityMode: false
+                },
+                spec: {
+                    intent: 'flowchart',
+                    title: 'Topic',
+                    nodes: []
+                },
+                artifact: {
+                    target: 'mermaid',
+                    content: 'graph TD',
+                    mimeType: 'text/vnd.mermaid',
+                    sourceIntent: 'flowchart'
+                }
+            } as any,
+            followThrough: {
+                kind: 'save-artifact',
+                outputPath: 'Notes/Topic_diagram.md',
+                previewOpened: true,
+                autoFixAttempted: false,
+                artifactTarget: 'mermaid'
             },
-            spec: {
-                intent: 'flowchart',
-                title: 'Topic',
-                nodes: []
-            },
-            artifact: {
-                target: 'mermaid',
-                content: 'graph TD',
-                mimeType: 'text/vnd.mermaid',
-                sourceIntent: 'flowchart'
-            }
-        } as any);
-        jest.spyOn(plugin as any, 'maybeAutoFixMermaidForFile').mockResolvedValue(undefined);
-        jest.spyOn(plugin as any, 'openDiagramPreviewModal').mockImplementation(() => undefined);
-        const saveSpy = jest.spyOn(fileUtils, 'saveDiagramArtifactFile').mockResolvedValue('Notes/Topic_diagram.md');
+            outputPath: 'Notes/Topic_diagram.md',
+            previewOpened: true
+        });
 
         await (plugin as any).executeArtifactDiagramCommand(
             file,
@@ -225,12 +327,15 @@ describe('diagram command architecture', () => {
             'save-artifact'
         );
 
-        expect(runSpy).toHaveBeenCalledWith(expect.objectContaining({
-            input: expect.objectContaining({ outputMode: 'artifact' }),
-            provider: mockSettings.providers[0],
-            modelName: mockSettings.providers[0].model
-        }));
-        expect(saveSpy).toHaveBeenCalled();
+        expect(runSpy).toHaveBeenCalledWith(
+            expect.anything(),
+            expect.objectContaining({
+                operationInput: expect.objectContaining({ outputMode: 'artifact' }),
+                provider: mockSettings.providers[0],
+                modelName: mockSettings.providers[0].model,
+                executionMode: 'save-artifact'
+            })
+        );
     });
 
     test('mermaid save execution delegates host side effects to extracted diagram host adapter module', async () => {
@@ -321,6 +426,21 @@ describe('diagram command architecture', () => {
         );
     });
 
+    test('diagram host adapter preview entry delegates to openDiagramPreviewModal', () => {
+        const previewSpy = jest.spyOn(plugin as any, 'openDiagramPreviewModal').mockImplementation(() => undefined);
+        const adapter = (plugin as any).createDiagramCommandHostAdapter();
+        const artifact = {
+            target: 'json-canvas',
+            content: '{"nodes":[],"edges":[]}',
+            mimeType: 'application/json',
+            sourceIntent: 'canvasMap'
+        } as any;
+
+        adapter.openPreview(artifact, 'Notes/Topic_diagram.canvas', true);
+
+        expect(previewSpy).toHaveBeenCalledWith(artifact, 'Notes/Topic_diagram.canvas', true);
+    });
+
     test('exposes canonical stable diagram command ids alongside legacy compatibility aliases', async () => {
         const commandCalls: Array<{ id: string; name: string }> = [];
         plugin.addCommand = jest.fn((command: any) => {
@@ -335,6 +455,33 @@ describe('diagram command architecture', () => {
         expect(ids).toContain('notemd-summarize-as-mermaid');
         expect(ids).toContain('notemd-generate-experimental-diagram');
         expect(ids).toContain('notemd-preview-experimental-diagram');
+    });
+
+    test('canonical preview command stays available for supported saved artifact files', async () => {
+        const commandCalls: any[] = [];
+        plugin.addCommand = jest.fn((command: any) => {
+            commandCalls.push(command);
+        }) as any;
+        const previewSpy = jest.spyOn(plugin as any, 'previewDiagramCommand').mockResolvedValue(undefined);
+        const canvasFile = {
+            name: 'Topic_diagram.canvas',
+            basename: 'Topic_diagram',
+            path: 'Notes/Topic_diagram.canvas',
+            extension: 'canvas',
+            parent: { path: 'Notes' }
+        };
+        (mockApp.workspace.getActiveFile as jest.Mock).mockReturnValue(canvasFile);
+
+        await plugin.onload();
+
+        const previewCommand = commandCalls.find(command => command.id === 'notemd-preview-diagram');
+        expect(previewCommand).toBeDefined();
+        expect(previewCommand.checkCallback(true)).toBe(true);
+
+        previewCommand.checkCallback(false);
+        await Promise.resolve();
+
+        expect(previewSpy).toHaveBeenCalledWith(canvasFile, expect.anything());
     });
 
     test('canonical generate command delegates to the canonical save flow', async () => {

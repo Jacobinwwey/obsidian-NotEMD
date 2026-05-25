@@ -4,7 +4,9 @@ import { MissingProviderProfileImportFileError } from '../operations/configProfi
 import {
     runExportCliCapabilityManifestCommandWithHost,
     runExportCliInvocationContractCommandWithHost,
+    runExportCliPublicSurfaceCommandWithHost,
     runExportProviderProfilesCommandWithHost,
+    runExportRedactedProviderProfilesCommandWithHost,
     runImportProviderProfilesCommandWithHost
 } from '../operations/configProfileCommandHostAdapter';
 
@@ -53,6 +55,9 @@ describe('config/profile command host adapter', () => {
             notices: [
                 {
                     message: 'Provider settings exported successfully to .obsidian/plugins/notemd-test/notemd-providers.json'
+                },
+                {
+                    message: 'This export contains provider credentials. Handle the file as sensitive.'
                 }
             ]
         });
@@ -70,6 +75,35 @@ describe('config/profile command host adapter', () => {
             notices: [
                 {
                     message: 'Error exporting settings: disk full'
+                }
+            ]
+        });
+    });
+
+    test('exports redacted provider profiles through extracted host adapter and formats success notice', async () => {
+        const host = createHost();
+        const executeSpy = jest.fn().mockResolvedValue({
+            outputPath: '.obsidian/plugins/notemd-test/notemd-providers-redacted.json',
+            profile: {
+                formatVersion: 1,
+                redacted: true,
+                exportedAt: '2026-05-05T00:00:00.000Z',
+                providers: [
+                    {
+                        ...mockSettings.providers[0],
+                        apiKey: '[REDACTED]'
+                    }
+                ]
+            }
+        });
+
+        const result = await runExportRedactedProviderProfilesCommandWithHost(host, executeSpy as any);
+
+        expect(result).toMatchObject({
+            kind: 'success',
+            notices: [
+                {
+                    message: 'Redacted provider settings exported successfully to .obsidian/plugins/notemd-test/notemd-providers-redacted.json'
                 }
             ]
         });
@@ -172,6 +206,25 @@ describe('config/profile command host adapter', () => {
             notices: [
                 {
                     message: 'CLI invocation contract exported to .obsidian/plugins/notemd-test/notemd-cli-contract.json'
+                }
+            ]
+        });
+    });
+
+    test('exports public CLI surface through extracted host adapter and formats notice', async () => {
+        const host = createHost();
+        const executeSpy = jest.fn().mockResolvedValue({
+            outputPath: '.obsidian/plugins/notemd-test/notemd-cli-public-surface.json',
+            surface: { version: 1, commands: [] }
+        });
+
+        const result = await runExportCliPublicSurfaceCommandWithHost(host, executeSpy as any);
+
+        expect(result).toMatchObject({
+            kind: 'success',
+            notices: [
+                {
+                    message: 'Public CLI surface exported to .obsidian/plugins/notemd-test/notemd-cli-public-surface.json'
                 }
             ]
         });

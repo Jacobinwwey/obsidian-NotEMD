@@ -3,11 +3,15 @@ import { NotemdSettings } from '../types';
 import {
     executeExportCliCapabilityManifestCommand,
     executeExportCliInvocationContractCommand,
+    executeExportCliPublicSurfaceCommand,
     executeExportProviderProfilesCommand,
+    executeExportRedactedProviderProfilesCommand,
     executeImportProviderProfilesCommand,
     ExportCliCapabilityManifestCommandResult,
     ExportCliInvocationContractCommandResult,
+    ExportCliPublicSurfaceCommandResult,
     ExportProviderProfilesCommandResult,
+    ExportRedactedProviderProfilesCommandResult,
     ImportProviderProfilesCommandResult,
     MissingProviderProfileImportFileError,
     PluginConfigCommandHost
@@ -22,10 +26,13 @@ export interface ConfigProfileCommandUiStrings {
     notices: {
         cliCapabilityManifestExported: string;
         cliInvocationContractExported: string;
+        cliPublicSurfaceExported: string;
     };
     settings: {
         providerConfig: {
             exportSuccess: string;
+            exportRedactedSuccess: string;
+            exportSensitiveWarning: string;
             exportError: string;
             importFileMissing: string;
             activeProviderReset: string;
@@ -52,6 +59,14 @@ export type ExportProviderProfilesHostResult =
         notices: ConfigProfileCommandNotice[];
         execution: ExportProviderProfilesCommandResult;
     }
+    | {
+        kind: 'error';
+        notices: ConfigProfileCommandNotice[];
+        error: unknown;
+    };
+
+export type ExportRedactedProviderProfilesHostResult =
+    | ConfigProfileHostSuccessResult<ExportRedactedProviderProfilesCommandResult>
     | {
         kind: 'error';
         notices: ConfigProfileCommandNotice[];
@@ -114,12 +129,56 @@ export async function runExportProviderProfilesCommandWithHost(
                     message: formatI18n(uiStrings.settings.providerConfig.exportSuccess, {
                         path: execution.outputPath
                     })
+                },
+                {
+                    message: uiStrings.settings.providerConfig.exportSensitiveWarning
                 }
             ],
             execution
         };
     } catch (error: unknown) {
         host.logError('Error exporting provider settings:', error);
+        return {
+            kind: 'error',
+            notices: [
+                {
+                    message: formatI18n(uiStrings.settings.providerConfig.exportError, {
+                        message: getErrorMessage(error)
+                    })
+                }
+            ],
+            error
+        };
+    }
+}
+
+export async function runExportRedactedProviderProfilesCommandWithHost(
+    host: ConfigProfileCommandHost,
+    executeCommandImpl: typeof executeExportRedactedProviderProfilesCommand = executeExportRedactedProviderProfilesCommand
+): Promise<ExportRedactedProviderProfilesHostResult> {
+    await host.loadSettings();
+    const uiStrings = host.getUiStrings();
+
+    try {
+        const execution = await executeCommandImpl({
+            pluginId: host.pluginId,
+            providers: host.getSettings().providers,
+            host: host.configHost
+        });
+
+        return {
+            kind: 'success',
+            notices: [
+                {
+                    message: formatI18n(uiStrings.settings.providerConfig.exportRedactedSuccess, {
+                        path: execution.outputPath
+                    })
+                }
+            ],
+            execution
+        };
+    } catch (error: unknown) {
+        host.logError('Error exporting redacted provider settings:', error);
         return {
             kind: 'error',
             notices: [
@@ -242,6 +301,30 @@ export async function runExportCliInvocationContractCommandWithHost(
         notices: [
             {
                 message: formatI18n(uiStrings.notices.cliInvocationContractExported, {
+                    path: execution.outputPath
+                })
+            }
+        ],
+        execution
+    };
+}
+
+export async function runExportCliPublicSurfaceCommandWithHost(
+    host: ConfigProfileCommandHost,
+    executeCommandImpl: typeof executeExportCliPublicSurfaceCommand = executeExportCliPublicSurfaceCommand
+): Promise<ConfigProfileHostSuccessResult<ExportCliPublicSurfaceCommandResult>> {
+    await host.loadSettings();
+    const uiStrings = host.getUiStrings();
+    const execution = await executeCommandImpl({
+        pluginId: host.pluginId,
+        host: host.configHost
+    });
+
+    return {
+        kind: 'success',
+        notices: [
+            {
+                message: formatI18n(uiStrings.notices.cliPublicSurfaceExported, {
                     path: execution.outputPath
                 })
             }

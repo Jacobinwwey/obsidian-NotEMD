@@ -1,7 +1,7 @@
 import { TFile } from 'obsidian';
 import { formatI18n } from '../i18n';
 import { DiagramGenerationResult } from '../diagram/diagramGenerationService';
-import { DiagramIntent } from '../diagram/types';
+import { DiagramIntent, isSupportedDiagramIntent } from '../diagram/types';
 import { RenderArtifact } from '../rendering/types';
 import { DiagramOperationInput, DiagramOperationExecutionMode, buildDiagramOperationInput } from '../diagram/diagramGenerationService';
 import { LLMProviderConfig, NotemdSettings, ProgressReporter } from '../types';
@@ -10,6 +10,7 @@ export interface DiagramCommandHostAdapter {
     saveMermaidSummary: (file: TFile, mermaidContent: string, reporter: ProgressReporter) => Promise<string>;
     saveArtifact: (file: TFile, artifact: RenderArtifact, reporter: ProgressReporter) => Promise<string>;
     getFileByPath: (path: string) => TFile | null;
+    readFile?: (file: TFile) => Promise<string>;
     openFile: (file: TFile) => void;
     maybeAutoFixMermaid: (file: TFile, reporter: ProgressReporter, reason: string) => Promise<void>;
     supportsPreview: (artifact: RenderArtifact) => boolean;
@@ -19,8 +20,15 @@ export interface DiagramCommandHostAdapter {
 
 export type DiagramCommandExecutionMode = DiagramOperationExecutionMode;
 
+export interface DiagramCommandInputOverrides {
+    requestedIntent?: DiagramIntent;
+    compatibilityMode?: 'best-fit' | 'legacy-mermaid';
+    targetLanguage?: string;
+}
+
 export interface DiagramCommandOptions {
     executionMode: DiagramCommandExecutionMode;
+    inputOverrides?: DiagramCommandInputOverrides;
 }
 
 export interface DiagramCommandUiStrings {
@@ -171,6 +179,20 @@ export class MissingVegaLiteFenceError extends Error {
     }
 }
 
+export class MissingPreviewableDiagramArtifactError extends Error {
+    constructor() {
+        super('No previewable diagram artifact found in this file. Supported direct preview sources are Mermaid or Vega-Lite markdown fences, raw Mermaid markdown artifacts, Vega-Lite JSON (.json), JSON Canvas (.canvas), and HTML (.html) files.');
+        this.name = 'MissingPreviewableDiagramArtifactError';
+    }
+}
+
+const DIRECT_PREVIEWABLE_DIAGRAM_EXTENSIONS = new Set(['md', 'json', 'canvas', 'html', 'htm']);
+
+export function isDirectPreviewableDiagramExtension(extension: string): boolean {
+    return typeof extension === 'string'
+        && DIRECT_PREVIEWABLE_DIAGRAM_EXTENSIONS.has(extension.trim().toLowerCase());
+}
+
 function maybeOpenSavedFile(host: DiagramCommandHostAdapter, outputFilePath: string): void {
     const savedFile = host.getFileByPath(outputFilePath);
     if (savedFile instanceof TFile || savedFile) {
@@ -248,7 +270,21 @@ export async function completeArtifactDiagramCommand(
     maybeOpenSavedFile(params.host, outputFilePath);
 
     if (params.host.supportsPreview(params.result.artifact)) {
-        params.host.openPreview(params.result.artifact, outputFilePath, true);
+        try {
+            const reopenedPreview = await previewArtifactFromSavedPath({
+                host: params.host,
+                sourcePath: outputFilePath,
+                artifactSavedOverride: true
+            });
+
+            if (!reopenedPreview) {
+                params.host.openPreview(params.result.artifact, outputFilePath, true);
+            }
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : String(error);
+            params.reporter.log(`Falling back to in-memory preview because saved artifact reload failed: ${message}`);
+            params.host.openPreview(params.result.artifact, outputFilePath, true);
+        }
     }
 
     return outputFilePath;
@@ -282,6 +318,234 @@ export function previewVegaLiteArtifactFromMarkdown(params: {
     const artifact = buildVegaLitePreviewArtifact(vlContent);
     params.host.openPreview(artifact, params.sourcePath, false);
     return artifact;
+}
+
+function buildMermaidPreviewSource(mermaidContent: string): string {
+    return `\`\`\`mermaid\n${mermaidContent.trim()}\n\`\`\``;
+}
+
+function resolveMermaidPreviewIntent(mermaidContent: string): DiagramIntent | null {
+    const lines = mermaidContent
+        .split(/\r?\n/)
+        .map(line => line.trim())
+        .filter(line => line.length > 0 && !line.startsWith('%%'));
+    const firstDirective = lines[0]?.toLowerCase() ?? '';
+
+    if (firstDirective === 'mindmap') {
+        return 'mindmap';
+    }
+    if (firstDirective.startsWith('flowchart') || firstDirective.startsWith('graph')) {
+        return 'flowchart';
+    }
+    if (firstDirective === 'sequencediagram') {
+        return 'sequence';
+    }
+    if (firstDirective === 'classdiagram') {
+        return 'classDiagram';
+    }
+    if (firstDirective === 'erdiagram') {
+        return 'erDiagram';
+    }
+    if (firstDirective.startsWith('statediagram')) {
+        return 'stateDiagram';
+    }
+
+    return null;
+}
+
+function inferMermaidPreviewIntent(mermaidContent: string): DiagramIntent {
+    return resolveMermaidPreviewIntent(mermaidContent) ?? 'mindmap';
+}
+
+function buildMermaidPreviewArtifact(mermaidContent: string): RenderArtifact {
+    return {
+        target: 'mermaid',
+        content: buildMermaidPreviewSource(mermaidContent),
+        mimeType: 'text/vnd.mermaid',
+        sourceIntent: inferMermaidPreviewIntent(mermaidContent)
+    };
+}
+
+function buildJsonCanvasPreviewArtifact(canvasContent: string): RenderArtifact {
+    return {
+        target: 'json-canvas',
+        content: canvasContent.trim(),
+        mimeType: 'application/json',
+        sourceIntent: 'canvasMap'
+    };
+}
+
+function extractHtmlPreviewIntent(htmlContent: string): DiagramIntent {
+    const match = htmlContent.match(/notemd-html-renderer-intent["'][^>]*>([^<]+)</i);
+    const value = match?.[1]?.trim();
+    return value && isSupportedDiagramIntent(value) ? value : 'flowchart';
+}
+
+function buildHtmlPreviewArtifact(htmlContent: string): RenderArtifact {
+    return {
+        target: 'html',
+        content: htmlContent.trim(),
+        mimeType: 'text/html',
+        sourceIntent: extractHtmlPreviewIntent(htmlContent)
+    };
+}
+
+type SupportedMarkdownFence = 'mermaid' | 'vega-lite';
+
+interface MarkdownFenceMatch {
+    index: number;
+    kind: SupportedMarkdownFence;
+    content: string;
+}
+
+interface DirectPreviewArtifactResult {
+    artifact: RenderArtifact;
+    artifactSaved: boolean;
+    detectionLabel: string;
+}
+
+function collectMarkdownFenceMatches(
+    sourceMarkdown: string,
+    kind: SupportedMarkdownFence,
+    regex: RegExp
+): MarkdownFenceMatch[] {
+    return Array.from(sourceMarkdown.matchAll(regex)).map(match => ({
+        index: match.index ?? Number.MAX_SAFE_INTEGER,
+        kind,
+        content: match[1]?.trim() ?? ''
+    }));
+}
+
+function extractDirectPreviewArtifactFromMarkdown(sourceMarkdown: string): DirectPreviewArtifactResult | null {
+    const fenceMatches = [
+        ...collectMarkdownFenceMatches(sourceMarkdown, 'mermaid', /```mermaid\s*\n([\s\S]*?)\n```/ig),
+        ...collectMarkdownFenceMatches(sourceMarkdown, 'vega-lite', /```vega-lite\s*\n([\s\S]*?)\n```/ig)
+    ].sort((left, right) => left.index - right.index);
+    const firstFence = fenceMatches[0];
+
+    if (!firstFence) {
+        return null;
+    }
+
+    if (firstFence.kind === 'mermaid') {
+        return {
+            artifact: buildMermaidPreviewArtifact(firstFence.content),
+            artifactSaved: false,
+            detectionLabel: 'Mermaid markdown fence'
+        };
+    }
+
+    return {
+        artifact: buildVegaLitePreviewArtifact(firstFence.content),
+        artifactSaved: false,
+        detectionLabel: 'Vega-Lite markdown fence'
+    };
+}
+
+function looksLikeVegaLiteSpec(sourceContent: string): boolean {
+    try {
+        const parsed = JSON.parse(sourceContent);
+        if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+            return false;
+        }
+
+        const schema = typeof (parsed as Record<string, unknown>).$schema === 'string'
+            ? String((parsed as Record<string, unknown>).$schema).toLowerCase()
+            : '';
+        if (schema.includes('vega-lite')) {
+            return true;
+        }
+
+        return ['mark', 'encoding', 'layer', 'facet', 'repeat', 'concat', 'hconcat', 'vconcat']
+            .some(key => key in (parsed as Record<string, unknown>));
+    } catch {
+        return false;
+    }
+}
+
+function looksLikeRawMermaidArtifact(sourceContent: string): boolean {
+    return resolveMermaidPreviewIntent(sourceContent) !== null;
+}
+
+function resolveDirectPreviewArtifact(sourceContent: string, sourcePath: string): DirectPreviewArtifactResult {
+    const normalizedPath = sourcePath.trim().toLowerCase();
+
+    if (normalizedPath.endsWith('.canvas')) {
+        return {
+            artifact: buildJsonCanvasPreviewArtifact(sourceContent),
+            artifactSaved: true,
+            detectionLabel: 'JSON Canvas artifact'
+        };
+    }
+
+    if (normalizedPath.endsWith('.html') || normalizedPath.endsWith('.htm')) {
+        return {
+            artifact: buildHtmlPreviewArtifact(sourceContent),
+            artifactSaved: true,
+            detectionLabel: 'HTML artifact'
+        };
+    }
+
+    if (normalizedPath.endsWith('.json') && looksLikeVegaLiteSpec(sourceContent)) {
+        return {
+            artifact: buildVegaLitePreviewArtifact(sourceContent.trim()),
+            artifactSaved: true,
+            detectionLabel: 'Vega-Lite JSON artifact'
+        };
+    }
+
+    const markdownArtifact = extractDirectPreviewArtifactFromMarkdown(sourceContent);
+    if (markdownArtifact) {
+        return markdownArtifact;
+    }
+
+    if (normalizedPath.endsWith('.md') && looksLikeRawMermaidArtifact(sourceContent)) {
+        return {
+            artifact: buildMermaidPreviewArtifact(sourceContent),
+            artifactSaved: true,
+            detectionLabel: 'Mermaid markdown artifact'
+        };
+    }
+
+    throw new MissingPreviewableDiagramArtifactError();
+}
+
+function previewArtifactFromFile(params: {
+    host: Pick<DiagramCommandHostAdapter, 'openPreview'>;
+    sourceContent: string;
+    sourcePath: string;
+    artifactSavedOverride?: boolean;
+}): DirectPreviewArtifactResult {
+    const directPreview = resolveDirectPreviewArtifact(params.sourceContent, params.sourcePath);
+    const artifactSaved = params.artifactSavedOverride ?? directPreview.artifactSaved;
+    params.host.openPreview(directPreview.artifact, params.sourcePath, artifactSaved);
+    return {
+        ...directPreview,
+        artifactSaved
+    };
+}
+
+async function previewArtifactFromSavedPath(params: {
+    host: Pick<DiagramCommandHostAdapter, 'getFileByPath' | 'readFile' | 'openPreview'>;
+    sourcePath: string;
+    artifactSavedOverride?: boolean;
+}): Promise<DirectPreviewArtifactResult | null> {
+    if (typeof params.host.readFile !== 'function') {
+        return null;
+    }
+
+    const savedFile = params.host.getFileByPath(params.sourcePath);
+    if (!(savedFile instanceof TFile || savedFile)) {
+        return null;
+    }
+
+    const sourceContent = await params.host.readFile(savedFile);
+    return previewArtifactFromFile({
+        host: params.host,
+        sourceContent,
+        sourcePath: params.sourcePath,
+        artifactSavedOverride: params.artifactSavedOverride
+    });
 }
 
 function getEmptyFileErrorMessage(executionMode: DiagramCommandExecutionMode): string {
@@ -350,7 +614,10 @@ export async function runGenerateDiagramCommandWithHost(
             sourceMarkdown: fileContent,
             executionMode: options.executionMode,
             settings: host.getSettings(),
-            targetLanguage: host.getTaskLanguageCode('summarizeToMermaid')
+            targetLanguage: host.getTaskLanguageCode('summarizeToMermaid'),
+            requestedIntentOverride: options.inputOverrides?.requestedIntent,
+            compatibilityModeOverride: options.inputOverrides?.compatibilityMode,
+            targetLanguageOverride: options.inputOverrides?.targetLanguage
         });
 
         const executionDetails = options.executionMode === 'save-mermaid'
@@ -451,18 +718,23 @@ export async function runPreviewDiagramCommandWithHost(
     }
 
     host.startReporterAction(reporter, `${actionLabel}: ${file.name}`);
-    reporter.log(`Starting Vega-Lite preview for ${file.name}...`);
+    reporter.log(`Starting diagram preview for ${file.name}...`);
 
     try {
         const fileContent = await host.readFile(file);
-        const artifact = previewVegaLiteArtifactFromMarkdown({
+        const directPreview = previewArtifactFromFile({
             host: diagramHost,
-            sourceMarkdown: fileContent,
+            sourceContent: fileContent,
             sourcePath: file.path
         });
+        const { artifact } = directPreview;
+
+        reporter.log(
+            `Detected ${directPreview.detectionLabel} for preview target "${artifact.target}" at ${file.path}.`
+        );
 
         reporter.updateStatus(host.getActionCompleteText(actionLabel), 100);
-        reporter.log(`Vega-Lite preview opened for: ${file.path}`);
+        reporter.log(`Diagram preview opened for: ${file.path}`);
         diagramHost.notify(i18n.notices.experimentalDiagramPreviewReady);
 
         return {
@@ -474,9 +746,9 @@ export async function runPreviewDiagramCommandWithHost(
         };
     } catch (error: unknown) {
         const message = error instanceof Error ? error.message : String(error);
-        reporter.log(`Error during Vega-Lite preview: ${message}`);
+        reporter.log(`Error during diagram preview: ${message}`);
         diagramHost.notify(formatI18n(i18n.notices.experimentalDiagramError, { message }));
-        host.logError('Vega-Lite preview error:', error);
+        host.logError('Diagram preview error:', error);
         reporter.updateStatus(host.getActionFailedText(message), -1);
         await host.saveErrorLog(error, reporter);
 

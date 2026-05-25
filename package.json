@@ -13,6 +13,8 @@
 		"test": "jest",
 		"lint": "eslint . --ext .ts",
 		"diagnose:llm": "node scripts/diagnose-llm-provider.js",
+		"cli:help": "node scripts/invoke-maintainer-cli-operation.js --help",
+		"cli:invoke": "node scripts/invoke-maintainer-cli-operation.js",
 		"chronicle:sync-repo-saga": "node scripts/repo-saga/update-quarterly-saga.mjs --sync-only",
 		"chronicle:update": "node scripts/repo-saga/update-quarterly-saga.mjs",
 		"audit:i18n-ui": "node scripts/audit-hardcoded-ui-strings.js",
@@ -50,6 +52,7 @@
 	},
 	"dependencies": {
 		"mermaid": "11.4.1",
+		"minisearch": "^7.2.0",
 		"vega": "^6.2.0",
 		"vega-lite": "^6.4.2"
 	},

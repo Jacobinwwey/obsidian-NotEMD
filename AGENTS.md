@@ -177,6 +177,7 @@ This is mandatory. Do not publish a release that omits `README.md`.
 ## Repository Notes
 
 - `main.js` is gitignored and is expected to be generated during builds and uploaded as a release asset.
+- `npm run chronicle:sync-repo-saga` and `npm run chronicle:update` share `.cache/repo-saga-*` state and must run serially. The script enforces `.cache/.repo-saga-execution.lock`; remove it only after verifying no repo-saga sync/update run is still active.
 - This repository already has broad Jest coverage; treat test regressions as meaningful unless proven otherwise.
 
 

@@ -1,6 +1,22 @@
 # Notemd CLI Capability Matrix
 
-> Updated: 2026-05-07
+> Updated: 2026-05-24
+
+## Status Call (2026-05-24)
+
+Short answer: the current restored CLI work is intentionally bounded.
+
+What is landed on current `main`:
+
+- registry-backed operation metadata
+- typed capability / invocation export
+- a bounded public-safe export-only slice
+- a repo-local maintainer helper for the same export-only operations
+
+What is intentionally not claimed:
+
+- broad user-facing CLI support for active-file, selection, or preview flows
+- backup-branch maintainer bridge features that depend on later product slices not yet restored on current `main`
 
 This matrix is a maintainer control document. It distinguishes:
 
@@ -26,6 +42,46 @@ Observed host facts:
 - this is a trigger surface only, not a mature typed integration layer
 - the registry-backed capability export now keeps command palette, hotkey, and official CLI trigger surfaces attached to the same command bindings
 
+## Current Bounded Public Slice
+
+The current public-safe slice is intentionally narrow. It only includes commands that are:
+
+- `safe`
+- `requiredContext=none`
+- `mappingKind=exact`
+- exposed on the official CLI trigger surface
+- backed by an empty-object input schema
+
+Current command IDs in this slice:
+
+- `notemd:export-provider-profiles-redacted`
+- `notemd:export-cli-capability-manifest`
+- `notemd:export-cli-invocation-contract`
+- `notemd:export-cli-public-surface`
+
+Guardrails:
+
+- raw provider export is excluded because it carries `outputHandlingTags=contains-provider-credentials`
+- redacted provider export is intentionally non-importable, so sanitized payloads cannot be mistaken for live settings snapshots
+- redacted export still may reveal private/custom `baseUrl` infrastructure, so it is safer than raw export, not automatically safe for public sharing
+
+## Repo-Local Maintainer Helper
+
+The repo now also carries a small maintainer helper over `obsidian-cli native eval`:
+
+- help: `npm run cli:help`
+- invoke: `npm run cli:invoke -- --vault <vault> --operation <operation-id> [--pretty]`
+- supported operation ids:
+  - `provider.profile.export-redacted`
+  - `cli.capability-manifest.export`
+  - `cli.invocation-contract.export`
+  - `cli.public-surface.export`
+
+Boundary:
+
+- this is maintainer-grade repo tooling, not a public CLI API
+- current helper scope is export-only and accepts no input payload
+
 ## Current Command Matrix
 
 | Command ID | Current Purpose | Automation Level | Why It Is Not Yet a Stable Engineering API | Registry Operation Mapping |
@@ -33,10 +89,12 @@ Observed host facts:
 | `notemd:test-llm-connection` | Test active provider connectivity | `safe` | Typed input/result schemas now exist, but the interactive busy/reporter path and notice wording still belong to the host UI | `provider.connection.test` (`exact`) |
 | `notemd:run-developer-provider-diagnostic` | Run long-request provider diagnostic | `safe` | Typed input/result schemas now exist, but long-running network behavior and report persistence still make this a maintainer-grade surface rather than a stable public API | `provider.diagnostic.run` (`exact`) |
 | `notemd:run-developer-provider-stability-diagnostic` | Run repeated provider stability diagnostic | `safe` | Typed input/result schemas now exist, but repeated live-provider execution still behaves like a maintainer-grade diagnostic surface rather than a stable public API | `provider.diagnostic.stability-run` (`exact`) |
-| `notemd:export-provider-profiles` | Export provider profile snapshot | `safe` | Deterministic and machine-readable, but still writes into plugin-managed config path semantics | `provider.profile.export` |
+| `notemd:export-provider-profiles` | Export raw provider profile snapshot | `safe` | Deterministic and machine-readable, but the exported file contains provider credentials and remains a maintainer-sensitive surface rather than part of the public-safe slice | `provider.profile.export` |
+| `notemd:export-provider-profiles-redacted` | Export redacted provider profile snapshot | `safe` | Part of the bounded public-safe slice. Deterministic, machine-readable, strips API keys, and is intentionally non-importable, but may still expose private/custom endpoint metadata | `provider.profile.export-redacted` |
 | `notemd:import-provider-profiles` | Import provider profile snapshot | `safe` | Machine-readable, but mutates active provider state and plugin settings | `provider.profile.import` |
-| `notemd:export-cli-capability-manifest` | Export command capability manifest | `safe` | Deterministic export, but still tied to plugin config-path write semantics | `cli.capability-manifest.export` |
-| `notemd:export-cli-invocation-contract` | Export typed invocation contract | `safe` | Deterministic export, but still tied to plugin config-path write semantics | `cli.invocation-contract.export` |
+| `notemd:export-cli-capability-manifest` | Export command capability manifest | `safe` | Part of the bounded public-safe slice. Deterministic export, but still tied to plugin config-path write semantics | `cli.capability-manifest.export` |
+| `notemd:export-cli-invocation-contract` | Export typed invocation contract | `safe` | Part of the bounded public-safe slice. Deterministic export, but still tied to plugin config-path write semantics | `cli.invocation-contract.export` |
+| `notemd:export-cli-public-surface` | Export bounded public CLI surface | `safe` | Part of the bounded public-safe slice. Self-describes the currently supported official-CLI-safe subset | `cli.public-surface.export` |
 | `notemd:notemd-generate-diagram` | Generate spec-first artifact from active file | `requires-active-file` | Typed result now exposes the wrapper envelope plus explicit follow-through details (`kind`, `executionMode`, `sourcePath`, `actionLabel`, `operationInput`, `generation`, `followThrough`, `outputPath`, `previewOpened`), but active-file dependency, plugin state, and save/open side effects still keep this below a stable public API | `diagram.generate` (`exact`, `defaultInput.outputMode=artifact`) |
 | `notemd:notemd-summarize-as-mermaid` | Save Mermaid output for active file | `requires-active-file` | Typed result now exposes the wrapper envelope plus explicit follow-through details (`kind`, `executionMode`, `sourcePath`, `actionLabel`, `operationInput`, `generation`, `followThrough`, `outputPath`, `previewOpened`), but active-file dependency plus plugin-managed save/output semantics still keep this below a stable public API | `diagram.generate` (`exact`, `defaultInput.outputMode=mermaid`) |
 | `notemd:notemd-preview-diagram` | Preview saved/sourced diagram | `interactive-ui` | Typed input/result schemas now describe the preview artifact boundary, but opening the preview modal is still UI-bound and not automation-stable | `diagram.preview` (`exact`) |
@@ -62,8 +120,10 @@ Observed host facts:
 
 - `src/operations/registry.ts` is now the central metadata source for extracted operations, command bindings, mapping kind, and selected input/result schemas.
 - `src/operations/capabilityManifest.ts` now flattens those command bindings into the exported capability manifest.
+- capability/public-surface metadata now also carries handling tags, so callers can distinguish secret-bearing exports from redacted/public-safe ones without a second hard-coded rule
 - `src/cliContracts.ts` now builds the invocation contract from the same registry, which removes one major drift path between docs, command discovery, and contract export.
-- The registry now includes the main note-processing, utility, selection, and export operation batches as well: `editor.create-link-and-generate`, `file.process-add-links`, `file.process-folder-add-links`, `content.generate-from-title`, `content.batch-generate-from-titles`, `research.summarize-topic`, `translate.file`, `translate.folder-batch`, `concept.extract-file`, `concept.extract-folder`, `content.extract-original-text`, `workflow.extract-and-generate`, `duplicate.check-file`, `concept.dedupe`, `mermaid.batch-fix`, `formula.fix-file`, `formula.batch-fix`, `provider.profile.export`, `provider.profile.import`, `cli.capability-manifest.export`, and `cli.invocation-contract.export`.
+- The registry now includes the main note-processing, utility, selection, and export operation batches as well: `editor.create-link-and-generate`, `file.process-add-links`, `file.process-folder-add-links`, `content.generate-from-title`, `content.batch-generate-from-titles`, `research.summarize-topic`, `translate.file`, `translate.folder-batch`, `concept.extract-file`, `concept.extract-folder`, `content.extract-original-text`, `workflow.extract-and-generate`, `duplicate.check-file`, `concept.dedupe`, `mermaid.batch-fix`, `formula.fix-file`, `formula.batch-fix`, `provider.profile.export`, `provider.profile.export-redacted`, `provider.profile.import`, `cli.capability-manifest.export`, `cli.invocation-contract.export`, and `cli.public-surface.export`.
+- `src/operations/publicCliSurface.ts` now derives the bounded public-safe slice from the same registry/capability/contract pair instead of maintaining a parallel command allowlist.
 - `file.process-add-links`, `file.process-folder-add-links`, `content.generate-from-title`, `content.batch-generate-from-titles`, `mermaid.batch-fix`, `concept.dedupe`, `translate.*`, `formula.*`, and `content.extract-original-text` now form the current proof set for write-heavy contract enrichment: utility cores return structured results, host adapters own localized success/no-file/confirmation semantics, and the registry exports the richer schemas directly.
 - `diagram.generate` now carries an explicit typed follow-through layer beneath the host-neutral generation core: `followThrough.kind` differentiates Mermaid save, artifact save, and preview completion while preserving backward-compatible top-level `outputPath` / `previewOpened`.
 - The first checked-in semantic-verification helper now exists as `npm run verify:diagram-semantics`; it turns the maintainer runbook into a reusable, secret-free checklist artifact instead of leaving semantic verification as prose-only guidance.

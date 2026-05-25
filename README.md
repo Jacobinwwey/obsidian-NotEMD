@@ -98,6 +98,8 @@ That's it! Explore the settings to unlock more features like web research, trans
 - **Single-File CTA Mapping**: Colorful CTA styling is now reserved for single-file actions only. Batch/folder-level actions and mixed workflows use non-CTA styling to reduce action-scope misclicks.
 - **Custom One-Click Workflows**: Turn built-in sidebar utilities into reusable custom buttons with user-defined names and assembled action chains. A default `One-Click Extract` workflow is included out of the box.
 - **Welcome Modal Release Digest**: On first install, the welcome modal now includes the latest two release summaries in a scrollable panel so new users can quickly see what changed before configuring providers.
+- **Settings Reset Controls**: Settings now include both a complete reset and a partial reset that preserves provider configuration while restoring the rest of the plugin defaults.
+- **Folder-Task File Selection Profiles**: Folder tasks now support reusable named file-selection profiles with regex/glob matching, `relativePath` vs `basename` targets, and explicit subfolder-scope control.
 
 
 ### Knowledge Graph Enhancement
@@ -107,6 +109,10 @@ That's it! Explore the settings to unlock more features like web research, trans
 - **Customizable Output Filenames (Add Links)**: Optionally **overwrite the original file** or use a custom suffix/replacement string instead of the default `_processed.md` when processing files for links.
 - **Link Integrity Maintenance**: Basic handling for updating links when notes are renamed or deleted within the vault.
 - **Pure Concept Extraction**: Extract concepts and create corresponding concept notes without modifying the original document. This is ideal for populating a knowledge base from existing documents without altering them. This feature has configurable options for creating minimal concept notes and adding backlinks.
+- **Concept Extraction Guardrails**: When concept-note generation prerequisites are not configured correctly, relevant flows now warn before execution and can deep-link directly into the required settings.
+- **Concept Synonym Suppression**: An optional extraction rule can tell the model to avoid extracting synonyms, semantically similar core concepts, or near-duplicate keywords when processing notes.
+- **Local Knowledge Retrieval**: `Batch generate from titles`, `Research & Summarize`, and `Generate diagram` can optionally retrieve context from a local knowledge base built from configured vault paths, with no cloud retrieval service or external daemon.
+- **Chapter Split + TOC Extraction**: Split a note into heading-based chapter files beside the source note, generate a linked TOC, and clean up stale generated files on reruns.
 
 
 ### Translation
@@ -344,6 +350,9 @@ Access plugin settings via:
 -   **Add "Linked From" backlink**:
     *   **Off (Default)**: Does not add a backlink to the source document in the concept note during extraction.
     *   **On**: Adds a "Linked From" section with a backlink to the source file.
+-   **Replace synonyms during concept extraction**:
+    *   **Off (Default)**: Keeps the existing extraction prompt unchanged.
+    *   **On**: Prepends an instruction for **Process File/Folder (Add Links)** and **Extract Concepts** to avoid extracting synonyms, semantically similar core concepts, or keywords whenever possible.
 
 #### Extract Specific Original Text
 -   **Questions for extraction**: Enter a list of questions (one per line) that you want the AI to extract verbatim answers for from your notes.
@@ -379,6 +388,24 @@ Access plugin settings via:
 -   **Chunk Word Count**: Maximum words per chunk sent to the LLM. Affects the number of API calls for large files. Recommended: about one third of **Max Tokens**. If you have not customized it yet, changing **Max Tokens** auto-fills the recommended chunk size for you. (Default: 3000)
 -   **Enable Duplicate Detection**: Toggles the basic check for duplicate words within processed content (results in console). (Default: Enabled)
 <img width="795" height="274" alt="Processing Parameters   Language settings" src="https://github.com/user-attachments/assets/74e4af76-3333-48fc-bb86-0a3ee61825d1" />
+
+#### Folder Task File Selection
+-   **Filter mode**: Folder tasks can now leave filtering off or match files with `contains`, `regex`, or `glob`.
+-   **Match target**: Patterns can be evaluated against each file's `relativePath` or `basename`.
+-   **Subfolder scope**: Each folder task can preserve legacy behavior or explicitly include/exclude subfolders. Translation keeps its legacy current-folder-only default unless you override it.
+-   **Saved profiles**: You can save named file-selection profiles that also remember an optional preferred folder path for picker prefill while still allowing run-time folder changes.
+
+#### Local Knowledge Retrieval
+-   **Enable Local Knowledge Retrieval**:
+    *   **Off (Default)**: `Batch generate from titles`, `Research & Summarize`, and `Generate diagram` run without local retrieval context.
+    *   **On**: Indexes Markdown/Text files under configured vault-relative knowledge-base paths and injects the top matching local context into those tasks.
+-   **Knowledge Base Paths**: One vault-relative path per line. Matching files are indexed locally inside the plugin runtime; no external service is required.
+-   **Sliding Window Size**: Controls how many neighboring sections from the same knowledge file are merged around each retrieval hit before prompt injection.
+-   **Exclude Current File**: Prevents retrieval from echoing the file currently being processed back into its own prompt context.
+
+#### Settings Reset
+-   **Complete Reset**: Restores all settings to plugin defaults.
+-   **Partial Reset**: Restores non-provider settings to defaults while preserving provider selections, models, and stored provider configuration.
 
 #### Translation
 -   **Default Target Language**: Select the default language you want to translate your notes into. This can be overridden in the UI when running the translation command. (Default: English)
@@ -714,6 +741,11 @@ Contributions are welcome! Please refer to the GitHub repository for guidelines:
 
 - [Release Workflow (English)](./docs/maintainer/release-workflow.md)
 - [Release Workflow (简体中文)](./docs/maintainer/release-workflow.zh-CN.md)
+- [CLI Capability Matrix](./docs/maintainer/notemd-cli-capability-matrix.md)
+- [CLI Capability Matrix (简体中文)](./docs/maintainer/notemd-cli-capability-matrix.zh-CN.md)
+- Repo-local CLI helper: `npm run cli:help`
+- Export-only maintainer invoke path: `npm run cli:invoke -- --vault <vault> --operation cli.public-surface.export --pretty`
+- Public-safe export commands are intentionally limited to redacted provider export, capability manifest export, invocation contract export, and public-surface export.
 
 ## License
 

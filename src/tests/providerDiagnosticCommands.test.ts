@@ -49,9 +49,11 @@ describe('provider diagnostic command surface', () => {
         expect(ids).toContain('run-developer-provider-diagnostic');
         expect(ids).toContain('run-developer-provider-stability-diagnostic');
         expect(ids).toContain('export-provider-profiles');
+        expect(ids).toContain('export-provider-profiles-redacted');
         expect(ids).toContain('import-provider-profiles');
         expect(ids).toContain('export-cli-capability-manifest');
         expect(ids).toContain('export-cli-invocation-contract');
+        expect(ids).toContain('export-cli-public-surface');
     });
 
     test('developer diagnostic command delegates to extracted provider diagnostic host adapter', async () => {
@@ -256,6 +258,46 @@ describe('provider diagnostic command surface', () => {
         expect(Notice).toHaveBeenCalledWith('profiles imported', undefined);
     });
 
+    test('redacted provider profile export command delegates to extracted config/profile host adapter', async () => {
+        const plugin = new NotemdPlugin(mockApp, createManifest() as any);
+        plugin.app = mockApp;
+        (plugin as any).manifest = createManifest();
+        plugin.settings = {
+            ...mockSettings,
+            _firstLaunch: false
+        };
+        plugin.loadSettings = jest.fn().mockResolvedValue(undefined);
+        const commandSpy = jest
+            .spyOn(configProfileCommandHostAdapter, 'runExportRedactedProviderProfilesCommandWithHost')
+            .mockResolvedValue({
+                kind: 'success',
+                notices: [{ message: 'redacted profiles exported' }],
+                execution: {
+                    outputPath: '.obsidian/plugins/notemd-test/notemd-providers-redacted.json',
+                    profile: {
+                        providers: [{ ...mockSettings.providers[0], apiKey: '[REDACTED]' }],
+                        formatVersion: 1,
+                        redacted: true,
+                        exportedAt: '2026-05-05T00:00:00.000Z'
+                    }
+                }
+            } as any);
+
+        await (plugin as any).exportRedactedProviderProfilesCommand();
+
+        expect(commandSpy).toHaveBeenCalledWith(expect.objectContaining({
+            pluginId: 'notemd-test',
+            loadSettings: expect.any(Function),
+            saveSettings: expect.any(Function),
+            getSettings: expect.any(Function),
+            getUiStrings: expect.any(Function),
+            defaultActiveProvider: expect.any(String),
+            configHost: expect.objectContaining({ configDir: '.obsidian' }),
+            logError: expect.any(Function)
+        }));
+        expect(Notice).toHaveBeenCalledWith('redacted profiles exported', undefined);
+    });
+
     test('CLI capability manifest export command delegates to extracted config/profile host adapter', async () => {
         const plugin = new NotemdPlugin(mockApp, createManifest() as any);
         plugin.app = mockApp;
@@ -322,5 +364,39 @@ describe('provider diagnostic command surface', () => {
             logError: expect.any(Function)
         }));
         expect(Notice).toHaveBeenCalledWith('contract exported', undefined);
+    });
+
+    test('CLI public surface export command delegates to extracted config/profile host adapter', async () => {
+        const plugin = new NotemdPlugin(mockApp, createManifest() as any);
+        plugin.app = mockApp;
+        (plugin as any).manifest = createManifest();
+        plugin.settings = {
+            ...mockSettings,
+            _firstLaunch: false
+        };
+        plugin.loadSettings = jest.fn().mockResolvedValue(undefined);
+        const commandSpy = jest
+            .spyOn(configProfileCommandHostAdapter, 'runExportCliPublicSurfaceCommandWithHost')
+            .mockResolvedValue({
+                kind: 'success',
+                notices: [{ message: 'public surface exported' }],
+                execution: {
+                    outputPath: '.obsidian/plugins/notemd-test/notemd-cli-public-surface.json',
+                    surface: { version: 1, commands: [] }
+                }
+            } as any);
+
+        await (plugin as any).exportCliPublicSurfaceCommand();
+
+        expect(commandSpy).toHaveBeenCalledWith(expect.objectContaining({
+            pluginId: 'notemd-test',
+            loadSettings: expect.any(Function),
+            saveSettings: expect.any(Function),
+            getSettings: expect.any(Function),
+            getUiStrings: expect.any(Function),
+            configHost: expect.objectContaining({ configDir: '.obsidian' }),
+            logError: expect.any(Function)
+        }));
+        expect(Notice).toHaveBeenCalledWith('public surface exported', undefined);
     });
 });

@@ -26,6 +26,7 @@ export type DiagramOperationExecutionMode = 'save-mermaid' | 'save-artifact' | '
 export interface DiagramOperationInput {
     sourcePath?: string;
     sourceMarkdown: string;
+    localKnowledgeContext?: string;
     requestedIntent?: DiagramIntent;
     compatibilityMode: 'best-fit' | 'legacy-mermaid';
     outputMode: DiagramOperationOutputMode;
@@ -38,6 +39,9 @@ export interface BuildDiagramOperationInputParams {
     executionMode: DiagramOperationExecutionMode;
     settings: Pick<NotemdSettings, 'preferredDiagramIntent' | 'experimentalDiagramCompatibilityMode' | 'summarizeToMermaidLanguage'>;
     targetLanguage?: string;
+    requestedIntentOverride?: DiagramIntent;
+    compatibilityModeOverride?: 'best-fit' | 'legacy-mermaid';
+    targetLanguageOverride?: string;
 }
 
 export function resolveDiagramOperationCompatibilityMode(
@@ -55,13 +59,16 @@ export function buildDiagramOperationInput(params: BuildDiagramOperationInputPar
     return {
         sourcePath: params.sourcePath,
         sourceMarkdown: params.sourceMarkdown,
-        requestedIntent: params.settings.preferredDiagramIntent as DiagramIntent | undefined,
+        requestedIntent: params.requestedIntentOverride
+            ?? params.settings.preferredDiagramIntent as DiagramIntent | undefined,
         compatibilityMode: resolveDiagramOperationCompatibilityMode(
             params.executionMode,
-            params.settings.experimentalDiagramCompatibilityMode
+            params.compatibilityModeOverride ?? params.settings.experimentalDiagramCompatibilityMode
         ),
         outputMode: params.executionMode === 'save-mermaid' ? 'mermaid' : 'artifact',
-        targetLanguage: params.targetLanguage ?? params.settings.summarizeToMermaidLanguage
+        targetLanguage: params.targetLanguageOverride
+            ?? params.targetLanguage
+            ?? params.settings.summarizeToMermaidLanguage
     };
 }
 
@@ -71,6 +78,15 @@ export interface DiagramGenerationResult {
     artifact: Awaited<ReturnType<RendererService['render']>>;
     renderError?: string;
 }
+
+const MERMAID_COMPATIBLE_INTENTS = new Set<DiagramIntent>([
+    'mindmap',
+    'flowchart',
+    'sequence',
+    'classDiagram',
+    'erDiagram',
+    'stateDiagram'
+]);
 
 function normalizeErrorMessage(error: unknown): string {
     return error instanceof Error ? error.message : String(error);
@@ -121,7 +137,7 @@ function resolveLegacyCompatibleIntent(spec: DiagramSpec, plan: DiagramPlan): Di
         return requestedIntent;
     }
 
-    if (requestedIntent === 'mindmap' || requestedIntent === 'flowchart') {
+    if (MERMAID_COMPATIBLE_INTENTS.has(requestedIntent)) {
         return requestedIntent;
     }
 

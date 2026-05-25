@@ -34,6 +34,8 @@ obsidian-cli help
 git diff --check
 ```
 
+Run `npm run chronicle:sync-repo-saga` and `npm run chronicle:update` serially. They share `.cache/repo-saga-*` state and now enforce `.cache/.repo-saga-execution.lock`; if a stale lock remains behind, verify that no repo-saga sync/update process is still running before removing it.
+
 If `obsidian-cli` is unavailable in the local environment, record it in release notes or release-handoff evidence.
 If the change affects diagram semantics, also run the maintainer-local semantic layer in `docs/maintainer/diagram-semantic-verification.md`.
 Recommended helper:
@@ -103,6 +105,7 @@ The repository also ships `.github/workflows/release.yml`:
 - The publish job runs `npm ci`, `npm run build`, `npm test -- --runInBand`, `npm run audit:i18n-ui`, `npm run audit:render-host`, `git diff --check`, and finally `npm run release:github -- "$TAG_NAME"`.
 - The follow-up chronicle job runs `node scripts/repo-saga/update-quarterly-saga.mjs --tag "$TAG_NAME"` on `main`, then commits the refreshed `README*.md` blocks plus localized quarterly SVG set if anything changed.
 - The chronicle refresh script itself now rebuilds its local `repo-saga` cache by copying the granularity branch as the base and overlaying the locale/i18n branch files before invoking the `repo-saga` CLI.
+- The chronicle refresh script now also enforces a single execution lock at `.cache/.repo-saga-execution.lock`, so overlapping local/CI runs fail fast instead of corrupting shared cache state.
 - That same script now hardens package-manager fallback as well: if the environment only has `corepack` or `bun x pnpm`, it creates an inheritable local `pnpm` shim so the upstream `repo-saga` workspace build can still execute nested `pnpm` script calls inside CI.
 - The workflow validates `^[0-9]+\.[0-9]+\.[0-9]+$` before checkout and publish, so `v1.8.2`-style tags are rejected.
 

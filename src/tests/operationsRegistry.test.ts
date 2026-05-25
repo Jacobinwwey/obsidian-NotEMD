@@ -30,7 +30,9 @@ describe('operations registry', () => {
             'formula.batch-fix',
             'cli.capability-manifest.export',
             'cli.invocation-contract.export',
+            'cli.public-surface.export',
             'provider.profile.export',
+            'provider.profile.export-redacted',
             'provider.profile.import'
         ]));
     });
@@ -545,9 +547,11 @@ describe('operations registry', () => {
 
     test('returns structured metadata for config export operations', () => {
         const providerProfileExport = getOperationDefinition('provider.profile.export');
+        const providerProfileRedactedExport = getOperationDefinition('provider.profile.export-redacted');
         const providerProfileImport = getOperationDefinition('provider.profile.import');
         const cliCapabilityExport = getOperationDefinition('cli.capability-manifest.export');
         const cliContractExport = getOperationDefinition('cli.invocation-contract.export');
+        const cliPublicSurfaceExport = getOperationDefinition('cli.public-surface.export');
 
         expect(providerProfileExport).toEqual(expect.objectContaining({
             id: 'provider.profile.export',
@@ -555,6 +559,7 @@ describe('operations registry', () => {
             automationLevel: 'safe',
             requiredContext: 'none',
             sideEffectClass: 'write-file',
+            outputHandlingTags: ['contains-provider-credentials'],
             commandBindings: expect.arrayContaining([
                 expect.objectContaining({
                     commandId: 'export-provider-profiles',
@@ -569,12 +574,34 @@ describe('operations registry', () => {
             })
         }));
 
+        expect(providerProfileRedactedExport).toEqual(expect.objectContaining({
+            id: 'provider.profile.export-redacted',
+            version: 1,
+            automationLevel: 'safe',
+            requiredContext: 'none',
+            sideEffectClass: 'write-file',
+            commandBindings: expect.arrayContaining([
+                expect.objectContaining({
+                    commandId: 'export-provider-profiles-redacted',
+                    mappingKind: 'exact'
+                })
+            ]),
+            resultSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    outputPath: expect.any(Object)
+                })
+            })
+        }));
+        expect(providerProfileRedactedExport?.outputHandlingTags).toBeUndefined();
+
         expect(providerProfileImport).toEqual(expect.objectContaining({
             id: 'provider.profile.import',
             version: 1,
             automationLevel: 'safe',
             requiredContext: 'none',
             sideEffectClass: 'write-file',
+            inputHandlingTags: ['contains-provider-credentials'],
             commandBindings: expect.arrayContaining([
                 expect.objectContaining({
                     commandId: 'import-provider-profiles',
@@ -634,6 +661,27 @@ describe('operations registry', () => {
                 properties: expect.objectContaining({
                     outputPath: expect.any(Object),
                     contract: expect.any(Object)
+                })
+            })
+        }));
+
+        expect(cliPublicSurfaceExport).toEqual(expect.objectContaining({
+            id: 'cli.public-surface.export',
+            version: 1,
+            automationLevel: 'safe',
+            requiredContext: 'none',
+            sideEffectClass: 'write-file',
+            commandBindings: expect.arrayContaining([
+                expect.objectContaining({
+                    commandId: 'export-cli-public-surface',
+                    mappingKind: 'exact'
+                })
+            ]),
+            resultSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    outputPath: expect.any(Object),
+                    surface: expect.any(Object)
                 })
             })
         }));

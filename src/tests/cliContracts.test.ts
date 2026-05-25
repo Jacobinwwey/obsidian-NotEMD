@@ -6,9 +6,11 @@ describe('CLI invocation contract', () => {
         const operationIds = contract.operations.map(operation => operation.operationId);
         const providerConnectionTest = contract.operations.find(operation => operation.operationId === 'provider.connection.test');
         const providerProfileExport = contract.operations.find(operation => operation.operationId === 'provider.profile.export');
+        const providerProfileRedactedExport = contract.operations.find(operation => operation.operationId === 'provider.profile.export-redacted');
         const providerProfileImport = contract.operations.find(operation => operation.operationId === 'provider.profile.import');
         const cliCapabilityExport = contract.operations.find(operation => operation.operationId === 'cli.capability-manifest.export');
         const cliContractExport = contract.operations.find(operation => operation.operationId === 'cli.invocation-contract.export');
+        const cliPublicSurfaceExport = contract.operations.find(operation => operation.operationId === 'cli.public-surface.export');
         const diagramGenerate = contract.operations.find(operation => operation.operationId === 'diagram.generate');
         const createWikiAndGenerate = contract.operations.find(operation => operation.operationId === 'editor.create-link-and-generate');
         const processCurrent = contract.operations.find(operation => operation.operationId === 'file.process-add-links');
@@ -35,9 +37,11 @@ describe('CLI invocation contract', () => {
             'diagram.generate',
             'diagram.preview',
             'provider.profile.export',
+            'provider.profile.export-redacted',
             'provider.profile.import',
             'cli.capability-manifest.export',
             'cli.invocation-contract.export',
+            'cli.public-surface.export',
             'editor.create-link-and-generate',
             'file.process-add-links',
             'file.process-folder-add-links',
@@ -144,6 +148,17 @@ describe('CLI invocation contract', () => {
             })
         }));
 
+        expect(providerProfileRedactedExport).toEqual(expect.objectContaining({
+            operationId: 'provider.profile.export-redacted',
+            resultSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    outputPath: expect.any(Object),
+                    profile: expect.any(Object)
+                })
+            })
+        }));
+
         expect(translateFolder).toEqual(expect.objectContaining({
             operationId: 'translate.folder-batch',
             resultSchema: expect.objectContaining({
@@ -193,6 +208,17 @@ describe('CLI invocation contract', () => {
                 properties: expect.objectContaining({
                     outputPath: expect.any(Object),
                     contract: expect.any(Object)
+                })
+            })
+        }));
+
+        expect(cliPublicSurfaceExport).toEqual(expect.objectContaining({
+            operationId: 'cli.public-surface.export',
+            resultSchema: expect.objectContaining({
+                type: 'object',
+                properties: expect.objectContaining({
+                    outputPath: expect.any(Object),
+                    surface: expect.any(Object)
                 })
             })
         }));

@@ -3,6 +3,7 @@ export type RequiredContext = 'none' | 'active-file' | 'editor-selection' | 'fol
 export type SideEffectClass = 'read-only' | 'write-file' | 'batch-write' | 'preview-ui' | 'destructive';
 export type CapabilityTriggerSurface = 'command-palette' | 'hotkey' | 'official-cli-command';
 export type CommandMappingKind = 'exact' | 'future-target' | 'legacy-alias';
+export type OperationHandlingTag = 'contains-provider-credentials';
 export type OperationSchema = Record<string, unknown>;
 
 export interface OperationCommandBinding {
@@ -22,6 +23,8 @@ export interface OperationDefinition {
     automationLevel: AutomationLevel;
     requiredContext: RequiredContext;
     sideEffectClass: SideEffectClass;
+    inputHandlingTags?: OperationHandlingTag[];
+    outputHandlingTags?: OperationHandlingTag[];
     commandBindings: OperationCommandBinding[];
     inputSchema?: OperationSchema;
     resultSchema?: OperationSchema;
@@ -35,6 +38,8 @@ export interface CliCapabilityCommand {
     automationLevel: AutomationLevel;
     requiredContext: RequiredContext;
     sideEffectClass: SideEffectClass;
+    inputHandlingTags?: OperationHandlingTag[];
+    outputHandlingTags?: OperationHandlingTag[];
     surfaces: CapabilityTriggerSurface[];
     mappingKind: CommandMappingKind;
     defaultInput?: OperationSchema;
@@ -55,4 +60,15 @@ export interface CliInvocationContractOperation {
 export interface CliInvocationContract {
     version: 1;
     operations: CliInvocationContractOperation[];
+}
+
+export interface CliPublicSurfaceCommand extends CliCapabilityCommand {
+    commandExample: string;
+    inputSchema: OperationSchema;
+    resultSchema: OperationSchema;
+}
+
+export interface CliPublicSurface {
+    version: 1;
+    commands: CliPublicSurfaceCommand[];
 }

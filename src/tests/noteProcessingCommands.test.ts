@@ -115,6 +115,7 @@ describe('note processing command surface', () => {
 
         const ids = addCommandSpy.mock.calls.map((call: any[]) => call[0]?.id);
         expect(ids).toContain('extract-original-text');
+        expect(ids).toContain('split-note-by-chapters');
         expect(ids).toContain('create-wiki-link-and-generate-from-selection');
     });
 
@@ -616,6 +617,34 @@ describe('note processing command surface', () => {
         expect(extractSpy).not.toHaveBeenCalled();
     });
 
+    test('batch extract concepts command forwards folder override options to host adapter', async () => {
+        const noteProcessingCommandHostAdapter = require('../operations/noteProcessingCommandHostAdapter');
+        const plugin = createPlugin();
+        const reporter = createReporter();
+
+        const hostSpy = jest
+            .spyOn(noteProcessingCommandHostAdapter, 'runBatchExtractConceptsForFolderCommandWithHost')
+            .mockResolvedValue(undefined);
+
+        await (plugin as any).batchExtractConceptsForFolderCommand(reporter, {
+            folderPathOverride: 'Concepts'
+        });
+
+        expect(hostSpy).toHaveBeenCalledWith(
+            expect.objectContaining({
+                getFolderSelection: expect.any(Function),
+                getFiles: expect.any(Function),
+                getPluginRuntime: expect.any(Function)
+            }),
+            reporter,
+            undefined,
+            undefined,
+            expect.objectContaining({
+                folderPathOverride: 'Concepts'
+            })
+        );
+    });
+
     test('extract concepts and generate titles command delegates to extracted note-processing host adapter', async () => {
         const noteProcessingCommandHostAdapter = require('../operations/noteProcessingCommandHostAdapter');
         const plugin = createPlugin();
@@ -664,6 +693,32 @@ describe('note processing command surface', () => {
             getPluginRuntime: expect.any(Function)
         }), reporter);
         expect(utilitySpy).not.toHaveBeenCalled();
+    });
+
+    test('batch extract original text command forwards folder override options to host adapter', async () => {
+        const noteProcessingCommandHostAdapter = require('../operations/noteProcessingCommandHostAdapter');
+        const plugin = createPlugin();
+        const reporter = createReporter();
+
+        const hostSpy = jest
+            .spyOn(noteProcessingCommandHostAdapter, 'runBatchExtractOriginalTextCommandWithHost')
+            .mockResolvedValue(undefined);
+
+        await (plugin as any).batchExtractOriginalTextCommand(reporter, {
+            folderPathOverride: 'Concepts'
+        });
+
+        expect(hostSpy).toHaveBeenCalledWith(
+            expect.objectContaining({
+                getFolderSelection: expect.any(Function),
+                getPluginRuntime: expect.any(Function)
+            }),
+            reporter,
+            undefined,
+            expect.objectContaining({
+                folderPathOverride: 'Concepts'
+            })
+        );
     });
 
     test('duplicate cleanup command delegates to extracted utility host adapter', async () => {
@@ -780,6 +835,41 @@ describe('note processing command surface', () => {
         expect(utilitySpy).not.toHaveBeenCalled();
     });
 
+    test('split note by chapters command delegates to extracted utility host adapter', async () => {
+        const utilityCommandHostAdapter = require('../operations/utilityCommandHostAdapter');
+        const plugin = createPlugin();
+        const reporter = createReporter();
+
+        const hostSpy = jest
+            .spyOn(utilityCommandHostAdapter, 'runSplitNoteByChaptersCommandWithHost')
+            .mockResolvedValue({
+                sourcePath: 'Notes/Topic.md',
+                outputFolderPath: 'Notes/topic_chapters',
+                tocPath: 'Notes/topic_chapters/Topic_TOC.md',
+                manifestPath: 'Notes/topic_chapters/.notemd-chapter-split.json',
+                splitLevel: 2,
+                chapters: [],
+                tocMarkdown: '# Topic TOC',
+                chapterCount: 0,
+                removedStaleFileCount: 0
+            });
+
+        const result = await (plugin as any).splitNoteByChaptersCommand(reporter);
+
+        expect(hostSpy).toHaveBeenCalledWith(expect.objectContaining({
+            getActiveFile: expect.any(Function),
+            readFile: expect.any(Function),
+            getActionLabel: expect.any(Function),
+            showNotice: expect.any(Function),
+            completeReporter: expect.any(Function),
+            finalizeReporter: expect.any(Function)
+        }), reporter);
+        expect(result).toEqual(expect.objectContaining({
+            outputFolderPath: 'Notes/topic_chapters',
+            tocPath: 'Notes/topic_chapters/Topic_TOC.md'
+        }));
+    });
+
     test('fix formula command delegates to extracted utility host adapter', async () => {
         const utilityCommandHostAdapter = require('../operations/utilityCommandHostAdapter');
         const plugin = createPlugin();
@@ -851,5 +941,32 @@ describe('note processing command surface', () => {
             finalizeReporter: expect.any(Function)
         }), reporter);
         expect(utilitySpy).not.toHaveBeenCalled();
+    });
+
+    test('batch formula fix command forwards folder override to extracted utility host adapter', async () => {
+        const utilityCommandHostAdapter = require('../operations/utilityCommandHostAdapter');
+        const plugin = createPlugin();
+        const reporter = createReporter();
+
+        const hostSpy = jest
+            .spyOn(utilityCommandHostAdapter, 'runBatchFixFormulaFormatsCommandWithHost')
+            .mockResolvedValue(undefined);
+
+        await (plugin as any).batchFixFormulaFormatsCommand(reporter, 'Concepts_complete');
+
+        expect(hostSpy).toHaveBeenCalledWith(
+            expect.objectContaining({
+                getFolderSelection: expect.any(Function),
+                getActionLabel: expect.any(Function),
+                showNotice: expect.any(Function),
+                completeReporter: expect.any(Function),
+                finalizeReporter: expect.any(Function)
+            }),
+            reporter,
+            undefined,
+            expect.objectContaining({
+                folderPathOverride: 'Concepts_complete'
+            })
+        );
     });
 });

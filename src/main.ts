@@ -1,6 +1,13 @@
 import { App, Editor, MarkdownView, Modal, Notice, Plugin, TFile, TFolder, PluginSettingTab, Setting, WorkspaceLeaf } from 'obsidian';
 import { NotemdSettings, ProgressReporter, LLMProviderConfig, TaskKey } from './types';
 import { DEFAULT_SETTINGS, NOTEMD_SIDEBAR_VIEW_TYPE, NOTEMD_SIDEBAR_ICON } from './constants';
+import {
+    FolderTaskFileSelectionOverride,
+    FolderTaskInteractiveSelection,
+    FolderTaskKind,
+    getFolderTaskFileSelectionProfiles,
+    resolveFolderTaskFileSelectionProfile
+} from './folderTaskFileSelector';
 import { retry } from './utils';
 import { callLLM } from './llmUtils';
 import {
@@ -22,7 +29,12 @@ import {
     fixMermaidSyntaxInFile,
     saveErrorLog // Import
 } from './fileUtils';
-import { _performResearch, researchAndSummarize } from './searchUtils'; // Import _performResearch if needed directly, ensure researchAndSummarize is exported
+import {
+    researchAndSummarizeFile,
+    ResearchSummarizeResult
+} from './searchUtils';
+import { buildLocalKnowledgeBaseRetriever } from './localKnowledgeBase';
+import { stripMarkdownForSearch } from './markdownSectionUtils';
 import { ProgressModal } from './ui/ProgressModal';
 import { ErrorModal } from './ui/ErrorModal';
 import { DiagramPreviewModal } from './ui/DiagramPreviewModal';
@@ -41,12 +53,17 @@ import { IframeRenderHost } from './rendering/host/iframeRenderHost';
 import { getRenderTargetDisplayName } from './rendering/targetLabel';
 import { supportsDiagramPreviewModal } from './ui/diagramPreview';
 import {
+    createCompleteResetSettings,
+    createPartialResetSettings
+} from './settingsReset';
+import {
     DiagramCommandExecutionDetails,
     DiagramCommandHostAdapter,
     DiagramCommandExecutionMode,
     DiagramCommandOptions,
     DiagramCommandRunHost,
     DiagramCommandUiStrings,
+    isDirectPreviewableDiagramExtension,
     runGenerateDiagramCommandWithHost,
     runPreviewDiagramCommandWithHost
 } from './operations/diagramCommandHostAdapter';
@@ -75,9 +92,12 @@ import {
     ConfigProfileCommandNotice,
     runExportCliCapabilityManifestCommandWithHost,
     runExportCliInvocationContractCommandWithHost,
+    runExportCliPublicSurfaceCommandWithHost,
     runExportProviderProfilesCommandWithHost,
+    runExportRedactedProviderProfilesCommandWithHost,
     runImportProviderProfilesCommandWithHost
 } from './operations/configProfileCommandHostAdapter';
+import { invokeMaintainerCliOperation, MaintainerCliOperationRequest } from './maintainerCliBridge';
 import {
     NoteProcessingCommandHost,
     runBatchExtractOriginalTextCommandWithHost,
@@ -100,8 +120,10 @@ import {
     runCheckDuplicatesCurrentCommandWithHost,
     runCheckAndRemoveDuplicateConceptNotesCommandWithHost,
     runFixFormulaFormatsCommandWithHost,
+    runSplitNoteByChaptersCommandWithHost,
     UtilityCommandHost
 } from './operations/utilityCommandHostAdapter';
+import { ChapterSplitResult, splitNoteByChapters } from './chapterSplit';
 
 export default class NotemdPlugin extends Plugin {
     settings: NotemdSettings;
@@ -202,6 +224,7 @@ export default class NotemdPlugin extends Plugin {
                 const abstractFile = this.app.vault.getAbstractFileByPath(path);
                 return abstractFile instanceof TFile ? abstractFile : null;
             },
+            readFile: (file) => this.app.vault.read(file),
             openFile: (file) => {
                 const leaf = this.app.workspace.getLeaf('split', 'vertical');
                 leaf.openFile(file);
@@ -337,6 +360,7 @@ export default class NotemdPlugin extends Plugin {
             },
             getFiles: () => this.app.vault.getFiles(),
             getFolderSelection: () => this.getFolderSelection(),
+            getFolderTaskSelection: (taskKind, initialOverride) => this.getFolderTaskSelection(taskKind, initialOverride),
             getTaskLanguageCode: (task) => resolveTaskLanguageCode(this.settings, task),
             resolveCompleteFolderPath: (sourceFolderPath) => this.resolveCompleteFolderPath(sourceFolderPath),
             getStepStatusText: (current, total, label) => this.getStepStatusText(current, total, label),
@@ -387,6 +411,7 @@ export default class NotemdPlugin extends Plugin {
             getActionLabel: (actionId) => this.getActionLabel(actionId),
             getReporter: () => this.getReporter(),
             getFolderSelection: () => this.getFolderSelection(),
+            getFolderTaskSelection: (taskKind, initialOverride) => this.getFolderTaskSelection(taskKind, initialOverride),
             isBusy: () => this.isBusy,
             setBusy: (busy) => this.setBusy(busy),
             startReporterAction: (reporter, label) => this.startReporterAction(reporter, label),
@@ -476,6 +501,47 @@ export default class NotemdPlugin extends Plugin {
         });
     }
 
+    private registerPreviewDiagramCommand(
+        id: string,
+        name: string,
+        handler: (file: TFile, reporter: ProgressReporter) => Promise<void>
+    ) {
+        const runHandler = async (file: TFile) => {
+            const reporter = this.getReporter();
+            await handler.call(this, file, reporter);
+        };
+
+        this.addCommand({
+            id,
+            name,
+            editorCallback: async (_editor: Editor, view: MarkdownView) => {
+                const file = view.file;
+                if (file && this.canPreviewDiagramFromFile(file)) {
+                    await runHandler(file);
+                }
+            },
+            checkCallback: (checking: boolean) => {
+                const activeFile = this.app.workspace.getActiveFile();
+                const condition = !!activeFile && this.canPreviewDiagramFromFile(activeFile);
+                if (condition) {
+                    if (!checking && activeFile) {
+                        void runHandler(activeFile);
+                    }
+                    return true;
+                }
+                return false;
+            }
+        });
+    }
+
+    private canPreviewDiagramFromFile(file: TFile): boolean {
+        const derivedExtension = file.extension
+            || file.name?.split('.').pop()
+            || file.path?.split('.').pop()
+            || '';
+        return isDirectPreviewableDiagramExtension(derivedExtension);
+    }
+
     async onload() {
         await this.loadSettings();
 
@@ -507,7 +573,7 @@ export default class NotemdPlugin extends Plugin {
             }
         );
 
-        this.registerEditorDiagramCommand(
+        this.registerPreviewDiagramCommand(
             'notemd-preview-diagram',
             uiStrings.commands.previewExperimentalDiagram,
             async (file, reporter) => {
@@ -523,7 +589,7 @@ export default class NotemdPlugin extends Plugin {
             this.generateExperimentalDiagramCommand
         );
 
-        this.registerEditorDiagramCommand(
+        this.registerPreviewDiagramCommand(
             'notemd-preview-experimental-diagram',
             uiStrings.commands.previewExperimentalDiagram,
             async (file, reporter) => {
@@ -628,6 +694,14 @@ export default class NotemdPlugin extends Plugin {
         });
 
         this.addCommand({
+            id: 'export-provider-profiles-redacted',
+            name: uiStrings.commands.exportProviderProfilesRedacted,
+            callback: async () => {
+                await this.exportRedactedProviderProfilesCommand();
+            }
+        });
+
+        this.addCommand({
             id: 'import-provider-profiles',
             name: uiStrings.commands.importProviderProfiles,
             callback: async () => {
@@ -648,6 +722,14 @@ export default class NotemdPlugin extends Plugin {
             name: uiStrings.commands.exportCliInvocationContract,
             callback: async () => {
                 await this.exportCliInvocationContractCommand();
+            }
+        });
+
+        this.addCommand({
+            id: 'export-cli-public-surface',
+            name: uiStrings.commands.exportCliPublicSurface,
+            callback: async () => {
+                await this.exportCliPublicSurfaceCommand();
             }
         });
 
@@ -849,6 +931,25 @@ export default class NotemdPlugin extends Plugin {
         });
 
         this.addCommand({
+            id: 'split-note-by-chapters',
+            name: getSidebarActionLabel(uiStrings, 'split-note-by-chapters'),
+            checkCallback: (checking: boolean) => {
+                const activeFile = this.app.workspace.getActiveFile();
+                const condition = activeFile && activeFile instanceof TFile && activeFile.extension === 'md';
+                if (condition) {
+                    if (!checking) {
+                        this.splitNoteByChaptersCommand();
+                    }
+                    return true;
+                }
+                if (!checking) {
+                    new Notice(uiStrings.notices.noActiveMarkdownFileSelected);
+                }
+                return false;
+            }
+        });
+
+        this.addCommand({
             id: 'create-wiki-link-and-generate-from-selection',
             name: uiStrings.commands.createWikiLinkAndGenerateNoteFromSelection,
             editorCallback: async (editor: Editor, view: MarkdownView) => {
@@ -968,6 +1069,15 @@ export default class NotemdPlugin extends Plugin {
         await this.saveData(this.settings);
     }
 
+    async resetSettings(mode: 'complete' | 'partial'): Promise<void> {
+        const nextSettings = mode === 'complete'
+            ? createCompleteResetSettings()
+            : createPartialResetSettings(this.settings);
+        this.settings = nextSettings;
+        this.clearConceptNotePathWarningSuppressionOnce();
+        await this.saveSettings();
+    }
+
     // --- UI and Status ---
     updateStatusBar(text: string) {
         if (this.statusBarItem) {
@@ -1069,11 +1179,16 @@ export default class NotemdPlugin extends Plugin {
     }
 
     /** Helper to show folder selection modal */
-    async getFolderSelection(): Promise<string | null> {
+    private getFolderPickerOptions(): string[] {
         const folders = this.app.vault.getAllLoadedFiles()
-            .filter((f): f is TFolder => f instanceof TFolder) // Type guard
+            .filter((f): f is TFolder => f instanceof TFolder)
             .map(f => f.path);
-        folders.unshift('/'); // Add root
+        folders.unshift('/');
+        return folders;
+    }
+
+    async getFolderSelection(): Promise<string | null> {
+        const folders = this.getFolderPickerOptions();
 
         return new Promise((resolve) => {
             const modal = new Modal(this.app);
@@ -1084,6 +1199,104 @@ export default class NotemdPlugin extends Plugin {
             const btnContainer = modal.contentEl.createDiv({ cls: 'modal-button-container' });
             btnContainer.createEl('button', { text: i18n.folderPicker.selectAction, cls: 'mod-cta' }).onclick = () => { modal.close(); resolve(selectEl.value); };
             btnContainer.createEl('button', { text: i18n.common.cancel }).onclick = () => { modal.close(); resolve(null); };
+            modal.open();
+        });
+    }
+
+    async getFolderTaskSelection(
+        _taskKind: FolderTaskKind,
+        initialOverride?: FolderTaskFileSelectionOverride
+    ): Promise<FolderTaskInteractiveSelection | null> {
+        const profiles = getFolderTaskFileSelectionProfiles(this.settings);
+        if (profiles.length === 0 && !initialOverride?.profileId && !initialOverride?.profileName) {
+            const folderPath = await this.getFolderSelection();
+            return folderPath ? { folderPath, fileSelectionOverride: initialOverride } : null;
+        }
+
+        const folders = this.getFolderPickerOptions();
+        const i18n = this.getUiStrings();
+        const currentDefaultsValue = '__current_defaults__';
+        const initialProfile = resolveFolderTaskFileSelectionProfile(this.settings, initialOverride);
+        const currentDefaultOverride = initialOverride
+            ? {
+                ...initialOverride,
+                profileId: undefined,
+                profileName: undefined
+            }
+            : undefined;
+        const hasFolder = (folderPath: string): boolean => folders.includes(folderPath);
+        const defaultFolderValue = initialProfile?.folderPathHint && hasFolder(initialProfile.folderPathHint)
+            ? initialProfile.folderPathHint
+            : '/';
+
+        return new Promise((resolve) => {
+            const modal = new Modal(this.app);
+            let settled = false;
+
+            const finish = (value: FolderTaskInteractiveSelection | null) => {
+                if (settled) {
+                    return;
+                }
+                settled = true;
+                resolve(value);
+            };
+
+            modal.titleEl.setText(i18n.folderPicker.selectionProfileTitle);
+            modal.contentEl.createEl('p', {
+                text: i18n.folderPicker.selectionProfileDesc,
+                cls: 'setting-item-description'
+            });
+
+            modal.contentEl.createEl('label', { text: i18n.folderPicker.selectionProfileLabel });
+            const profileSelect = modal.contentEl.createEl('select');
+            profileSelect.createEl('option', {
+                text: i18n.folderPicker.selectionProfileCurrentDefaults,
+                value: currentDefaultsValue
+            });
+            profiles.forEach(profile => {
+                profileSelect.createEl('option', { text: profile.name, value: profile.id });
+            });
+            profileSelect.value = initialProfile?.id || currentDefaultsValue;
+
+            modal.contentEl.createEl('label', { text: i18n.folderPicker.folderLabel });
+            const folderSelect = modal.contentEl.createEl('select');
+            folders.forEach(folder => folderSelect.createEl('option', {
+                text: folder === '/' ? i18n.folderPicker.vaultRoot : folder,
+                value: folder
+            }));
+            folderSelect.value = defaultFolderValue;
+
+            const applyProfileFolderHint = () => {
+                const selectedProfileId = profileSelect.value;
+                if (selectedProfileId === currentDefaultsValue) {
+                    return;
+                }
+                const profile = profiles.find(item => item.id === selectedProfileId);
+                if (profile?.folderPathHint && hasFolder(profile.folderPathHint)) {
+                    folderSelect.value = profile.folderPathHint;
+                }
+            };
+
+            profileSelect.addEventListener('change', applyProfileFolderHint);
+            applyProfileFolderHint();
+
+            const btnContainer = modal.contentEl.createDiv({ cls: 'modal-button-container' });
+            btnContainer.createEl('button', { text: i18n.folderPicker.selectAction, cls: 'mod-cta' }).onclick = () => {
+                const selectedProfileId = profileSelect.value;
+                modal.close();
+                finish({
+                    folderPath: folderSelect.value,
+                    fileSelectionOverride: selectedProfileId === currentDefaultsValue
+                        ? currentDefaultOverride
+                        : { profileId: selectedProfileId }
+                });
+            };
+            btnContainer.createEl('button', { text: i18n.common.cancel }).onclick = () => {
+                modal.close();
+                finish(null);
+            };
+
+            modal.onClose = () => finish(null);
             modal.open();
         });
     }
@@ -1205,12 +1418,22 @@ export default class NotemdPlugin extends Plugin {
 
     async processFolderWithNotemdCommand(
         reporter?: ProgressReporter,
-        folderPathOverride?: string
+        folderPathOverride?: string,
+        fileSelectionOverride?: FolderTaskFileSelectionOverride
     ): Promise<BatchProcessFolderResult | null> {
+        if (!fileSelectionOverride) {
+            return runProcessFolderWithNotemdCommandWithHost(
+                this.createNoteProcessingCommandHost(),
+                reporter,
+                folderPathOverride
+            );
+        }
         return runProcessFolderWithNotemdCommandWithHost(
             this.createNoteProcessingCommandHost(),
             reporter,
-            folderPathOverride
+            folderPathOverride,
+            undefined,
+            fileSelectionOverride
         );
     }
 
@@ -1235,9 +1458,16 @@ export default class NotemdPlugin extends Plugin {
         new Notice(result.notice.message, result.notice.duration);
     }
 
-    async exportProviderProfilesCommand(): Promise<void> {
+    async exportProviderProfilesCommand() {
         const result = await runExportProviderProfilesCommandWithHost(this.createConfigProfileCommandHost());
         this.showCommandNotices(result.notices);
+        return result.kind === 'success' ? result.execution : null;
+    }
+
+    async exportRedactedProviderProfilesCommand() {
+        const result = await runExportRedactedProviderProfilesCommandWithHost(this.createConfigProfileCommandHost());
+        this.showCommandNotices(result.notices);
+        return result.kind === 'success' ? result.execution : null;
     }
 
     async importProviderProfilesCommand(): Promise<void> {
@@ -1245,14 +1475,31 @@ export default class NotemdPlugin extends Plugin {
         this.showCommandNotices(result.notices);
     }
 
-    async exportCliCapabilityManifestCommand(): Promise<void> {
+    async exportCliCapabilityManifestCommand() {
         const result = await runExportCliCapabilityManifestCommandWithHost(this.createConfigProfileCommandHost());
         this.showCommandNotices(result.notices);
+        return result.execution;
     }
 
-    async exportCliInvocationContractCommand(): Promise<void> {
+    async exportCliInvocationContractCommand() {
         const result = await runExportCliInvocationContractCommandWithHost(this.createConfigProfileCommandHost());
         this.showCommandNotices(result.notices);
+        return result.execution;
+    }
+
+    async exportCliPublicSurfaceCommand() {
+        const result = await runExportCliPublicSurfaceCommandWithHost(this.createConfigProfileCommandHost());
+        this.showCommandNotices(result.notices);
+        return result.execution;
+    }
+
+    async invokeMaintainerCliOperation(request: MaintainerCliOperationRequest) {
+        return invokeMaintainerCliOperation({
+            exportRedactedProviderProfilesCommand: async () => this.exportRedactedProviderProfilesCommand(),
+            exportCliCapabilityManifestCommand: async () => this.exportCliCapabilityManifestCommand(),
+            exportCliInvocationContractCommand: async () => this.exportCliInvocationContractCommand(),
+            exportCliPublicSurfaceCommand: async () => this.exportCliPublicSurfaceCommand()
+        }, request);
     }
 
     /** Command: Generate Content from Title */
@@ -1284,12 +1531,22 @@ export default class NotemdPlugin extends Plugin {
     /** Command: Batch Generate Content from Titles */
     async batchGenerateContentForTitlesCommand(
         reporter?: ProgressReporter,
-        folderPathOverride?: string
+        folderPathOverride?: string,
+        fileSelectionOverride?: FolderTaskFileSelectionOverride
     ): Promise<BatchGenerateContentForTitlesResult | null> {
+        if (!fileSelectionOverride) {
+            return runBatchGenerateContentForTitlesCommandWithHost(
+                this.createNoteProcessingCommandHost(),
+                reporter,
+                folderPathOverride
+            );
+        }
         return runBatchGenerateContentForTitlesCommandWithHost(
             this.createNoteProcessingCommandHost(),
             reporter,
-            folderPathOverride
+            folderPathOverride,
+            undefined,
+            fileSelectionOverride
         );
     }
 
@@ -1305,21 +1562,61 @@ export default class NotemdPlugin extends Plugin {
     /** Command: Batch Fix Mermaid Syntax */
     async batchMermaidFixCommand(
         reporter?: ProgressReporter,
-        folderPathOverride?: string
+        folderPathOverride?: string,
+        fileSelectionOverride?: FolderTaskFileSelectionOverride
     ): Promise<BatchMermaidFixResult | null> {
-        return runBatchMermaidFixCommandWithHost(this.createUtilityCommandHost(), reporter, folderPathOverride);
+        if (!fileSelectionOverride) {
+            return runBatchMermaidFixCommandWithHost(this.createUtilityCommandHost(), reporter, folderPathOverride);
+        }
+        return runBatchMermaidFixCommandWithHost(
+            this.createUtilityCommandHost(),
+            reporter,
+            folderPathOverride,
+            undefined,
+            fileSelectionOverride
+        );
     }
 
     async fixFormulaFormatsCommand(file: TFile, reporter?: ProgressReporter) {
         await runFixFormulaFormatsCommandWithHost(this.createUtilityCommandHost(), file, reporter);
     }
 
-    async batchFixFormulaFormatsCommand(reporter?: ProgressReporter) {
-        await runBatchFixFormulaFormatsCommandWithHost(this.createUtilityCommandHost(), reporter);
+    async batchFixFormulaFormatsCommand(
+        reporter?: ProgressReporter,
+        folderPathOverride?: string,
+        fileSelectionOverride?: FolderTaskFileSelectionOverride
+    ) {
+        if (!folderPathOverride && !fileSelectionOverride) {
+            await runBatchFixFormulaFormatsCommandWithHost(this.createUtilityCommandHost(), reporter);
+            return;
+        }
+        await runBatchFixFormulaFormatsCommandWithHost(
+            this.createUtilityCommandHost(),
+            reporter,
+            undefined,
+            {
+                folderPathOverride,
+                fileSelectionOverride
+            }
+        );
     }
 
-    async batchTranslateFolderCommand(folder?: TFolder, reporter?: ProgressReporter) {
-        await runBatchTranslateFolderCommandWithHost(this.createNoteProcessingCommandHost(), reporter, folder);
+    async batchTranslateFolderCommand(
+        folder?: TFolder,
+        reporter?: ProgressReporter,
+        fileSelectionOverride?: FolderTaskFileSelectionOverride
+    ) {
+        if (!fileSelectionOverride) {
+            await runBatchTranslateFolderCommandWithHost(this.createNoteProcessingCommandHost(), reporter, folder);
+            return;
+        }
+        await runBatchTranslateFolderCommandWithHost(
+            this.createNoteProcessingCommandHost(),
+            reporter,
+            folder,
+            undefined,
+            fileSelectionOverride
+        );
     }
 
     async translateFileCommand(file: TFile, signal?: AbortSignal, reporter?: ProgressReporter) {
@@ -1373,9 +1670,13 @@ export default class NotemdPlugin extends Plugin {
         i18n: DiagramCommandUiStrings,
         executionMode: Extract<DiagramCommandExecutionMode, 'save-artifact' | 'preview-artifact'>
     ): Promise<DiagramCommandExecutionDetails> {
+        const effectiveOperationInput = executionMode === 'save-artifact'
+            ? await this.withDiagramLocalKnowledgeContext(operationInput, reporter)
+            : operationInput;
+
         return runArtifactDiagramExecutionWithHost(this.createDiagramCommandExecutionHost(), {
             file,
-            operationInput,
+            operationInput: effectiveOperationInput,
             provider,
             modelName,
             reporter,
@@ -1401,12 +1702,89 @@ export default class NotemdPlugin extends Plugin {
         return this.previewDiagramCommand(file, reporter);
     }
 
+    private async withDiagramLocalKnowledgeContext(
+        operationInput: DiagramOperationInput,
+        reporter: ProgressReporter
+    ): Promise<DiagramOperationInput> {
+        if (!this.settings.enableLocalKnowledgeRetrieval || !this.settings.enableLocalKnowledgeForDiagramGeneration) {
+            return operationInput;
+        }
+
+        const retriever = await buildLocalKnowledgeBaseRetriever(this.app, this.settings, reporter);
+        if (!retriever) {
+            return operationInput;
+        }
+
+        const strippedMarkdown = stripMarkdownForSearch(operationInput.sourceMarkdown);
+        const query = [
+            operationInput.sourcePath?.split('/').pop()?.replace(/\.[^.]+$/u, ''),
+            strippedMarkdown.slice(0, 1200)
+        ].filter((value): value is string => Boolean(value && value.trim())).join('\n');
+
+        const localKnowledgeContext = retriever.buildContext(query, {
+            currentFilePath: operationInput.sourcePath,
+            topK: this.settings.localKnowledgeTopK,
+            slidingWindowSize: this.settings.localKnowledgeSlidingWindowSize,
+            maxSnippetChars: this.settings.localKnowledgeMaxSnippetChars
+        });
+
+        if (!localKnowledgeContext) {
+            return operationInput;
+        }
+
+        reporter.log(`Local knowledge retrieval returned context for diagram source "${operationInput.sourcePath ?? 'current note'}" (length: ${localKnowledgeContext.length}).`);
+        return {
+            ...operationInput,
+            localKnowledgeContext
+        };
+    }
+
+    async splitNoteByChaptersForPathCommand(
+        sourcePath: string,
+        reporter?: ProgressReporter
+    ): Promise<ChapterSplitResult | null> {
+        await this.loadSettings();
+        const file = this.app.vault.getFileByPath(sourcePath);
+        if (!file || file.extension !== 'md') {
+            throw new Error(`No Markdown file found at path: ${sourcePath}`);
+        }
+
+        const markdown = await this.app.vault.read(file);
+        if (!markdown.trim()) {
+            throw new Error(this.getUiStrings().notices.fileEmpty);
+        }
+
+        return splitNoteByChapters(this.app, file, reporter ?? this.getReporter(), {
+            splitHeadingLevel: this.settings.chapterSplitHeadingLevel
+        });
+    }
+
+    async splitNoteByChaptersCommand(reporter?: ProgressReporter): Promise<ChapterSplitResult | null> {
+        return runSplitNoteByChaptersCommandWithHost(this.createUtilityCommandHost(), reporter);
+    }
+
     async extractConceptsCommand(reporter?: ProgressReporter) {
         await runExtractConceptsCommandWithHost(this.createNoteProcessingCommandHost(), reporter);
     }
 
-    async batchExtractConceptsForFolderCommand(reporter?: ProgressReporter) {
-        await runBatchExtractConceptsForFolderCommandWithHost(this.createNoteProcessingCommandHost(), reporter);
+    async batchExtractConceptsForFolderCommand(
+        reporter?: ProgressReporter,
+        options?: {
+            folderPathOverride?: string;
+            fileSelectionOverride?: FolderTaskFileSelectionOverride;
+        }
+    ) {
+        if (!options?.folderPathOverride && !options?.fileSelectionOverride) {
+            await runBatchExtractConceptsForFolderCommandWithHost(this.createNoteProcessingCommandHost(), reporter);
+            return;
+        }
+        await runBatchExtractConceptsForFolderCommandWithHost(
+            this.createNoteProcessingCommandHost(),
+            reporter,
+            undefined,
+            undefined,
+            options
+        );
     }
 
     async extractConceptsAndGenerateTitlesCommand(reporter?: ProgressReporter) {
@@ -1417,8 +1795,22 @@ export default class NotemdPlugin extends Plugin {
         return runExtractOriginalTextCommandWithHost(this.createNoteProcessingCommandHost(), reporter);
     }
 
-    async batchExtractOriginalTextCommand(reporter?: ProgressReporter) {
-        return runBatchExtractOriginalTextCommandWithHost(this.createNoteProcessingCommandHost(), reporter);
+    async batchExtractOriginalTextCommand(
+        reporter?: ProgressReporter,
+        options?: {
+            folderPathOverride?: string;
+            fileSelectionOverride?: FolderTaskFileSelectionOverride;
+        }
+    ) {
+        if (!options?.folderPathOverride && !options?.fileSelectionOverride) {
+            return runBatchExtractOriginalTextCommandWithHost(this.createNoteProcessingCommandHost(), reporter);
+        }
+        return runBatchExtractOriginalTextCommandWithHost(
+            this.createNoteProcessingCommandHost(),
+            reporter,
+            undefined,
+            options
+        );
     }
 
 } // End of NotemdPlugin class

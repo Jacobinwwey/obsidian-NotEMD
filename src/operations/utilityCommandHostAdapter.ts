@@ -13,6 +13,14 @@ import {
     FormulaFixFileResult,
     fixFormulaFormatsInFile
 } from '../formulaFixer';
+import { ChapterSplitResult, splitNoteByChapters } from '../chapterSplit';
+import {
+    applyFolderTaskSelectionOverride,
+    FolderTaskFileSelectionOverride,
+    FolderTaskInteractiveSelection,
+    FolderTaskKind,
+    mergeFolderTaskSelectionOverrides
+} from '../folderTaskFileSelector';
 import { formatI18n } from '../i18n';
 import { NotemdSettings, ProgressReporter } from '../types';
 import { SidebarActionId } from '../workflowButtons';
@@ -27,6 +35,7 @@ export interface UtilityCommandUiStrings {
         duplicateCheckError: string;
         noActiveTextFileSelected: string;
         duplicateCheckRemoveError: string;
+        noActiveMarkdownFileSelected: string;
         noPotentialDuplicateConceptNotesFound: string;
         duplicateDeletionCancelled: string;
         deletionCompleteSummary: string;
@@ -34,6 +43,9 @@ export interface UtilityCommandUiStrings {
         batchMermaidFixFinishedWithErrors: string;
         batchMermaidFixSuccess: string;
         batchMermaidFixError: string;
+        chapterSplitSuccess: string;
+        chapterSplitError: string;
+        fileEmpty: string;
         formulaFixSuccess: string;
         formulaFixNotNeeded: string;
         genericError: string;
@@ -44,6 +56,7 @@ export interface UtilityCommandUiStrings {
         titles: {
             duplicateCheckRemove: string;
             batchMermaidFix: string;
+            chapterSplit: string;
         };
     };
 }
@@ -58,6 +71,10 @@ export interface UtilityCommandHost {
     getActionLabel: (actionId: SidebarActionId) => string;
     getReporter: () => ProgressReporter;
     getFolderSelection: () => Promise<string | null>;
+    getFolderTaskSelection?: (
+        taskKind: FolderTaskKind,
+        initialOverride?: FolderTaskFileSelectionOverride
+    ) => Promise<FolderTaskInteractiveSelection | null>;
     isBusy: () => boolean;
     setBusy: (busy: boolean) => void;
     startReporterAction: (reporter: ProgressReporter, label: string) => void;
@@ -73,6 +90,11 @@ export interface UtilityCommandHost {
     saveErrorLog: (error: unknown, reporter: ProgressReporter) => Promise<void>;
     completeReporter: (reporter: ProgressReporter) => void;
     finalizeReporter: (reporter: ProgressReporter) => void;
+}
+
+export interface UtilityFolderTaskCommandOptions {
+    folderPathOverride?: string;
+    fileSelectionOverride?: FolderTaskFileSelectionOverride;
 }
 
 function normalizeError(
@@ -117,6 +139,44 @@ async function runBusyReporterCommandWithHost(
         host.finalizeReporter(useReporter);
         host.setBusy(false);
     }
+}
+
+async function resolveFolderTaskSelectionWithHost(
+    host: Pick<UtilityCommandHost, 'getFolderSelection' | 'getFolderTaskSelection'>,
+    taskKind: FolderTaskKind,
+    folderPathOverride?: string,
+    fileSelectionOverride?: FolderTaskFileSelectionOverride
+): Promise<FolderTaskInteractiveSelection | null> {
+    if (folderPathOverride) {
+        return {
+            folderPath: folderPathOverride,
+            fileSelectionOverride
+        };
+    }
+
+    if (host.getFolderTaskSelection) {
+        const selection = await host.getFolderTaskSelection(taskKind, fileSelectionOverride);
+        if (!selection) {
+            return null;
+        }
+        return {
+            folderPath: selection.folderPath,
+            fileSelectionOverride: mergeFolderTaskSelectionOverrides(
+                selection.fileSelectionOverride,
+                fileSelectionOverride
+            )
+        };
+    }
+
+    const folderPath = await host.getFolderSelection();
+    if (!folderPath) {
+        return null;
+    }
+
+    return {
+        folderPath,
+        fileSelectionOverride
+    };
 }
 
 export async function runCheckAndRemoveDuplicateConceptNotesCommandWithHost(
@@ -225,7 +285,8 @@ export async function runBatchMermaidFixCommandWithHost(
     host: UtilityCommandHost,
     reporter?: ProgressReporter,
     folderPathOverride?: string,
-    batchFixMermaidSyntaxInFolderImpl: typeof batchFixMermaidSyntaxInFolder = batchFixMermaidSyntaxInFolder
+    batchFixMermaidSyntaxInFolderImpl: typeof batchFixMermaidSyntaxInFolder = batchFixMermaidSyntaxInFolder,
+    fileSelectionOverride?: FolderTaskFileSelectionOverride
 ): Promise<BatchMermaidFixResult | null> {
     const actionLabel = host.getActionLabel('batch-mermaid-fix');
     let commandResult: BatchMermaidFixResult | null = null;
@@ -236,20 +297,27 @@ export async function runBatchMermaidFixCommandWithHost(
         try {
             await host.loadSettings();
             uiStrings = host.getUiStrings();
-            const folderPath = folderPathOverride ?? await host.getFolderSelection();
-            if (!folderPath) {
+            const selection = await resolveFolderTaskSelectionWithHost(
+                host,
+                'batch-mermaid-fix',
+                folderPathOverride,
+                fileSelectionOverride
+            );
+            if (!selection?.folderPath) {
                 const cancelledMessage = uiStrings.common.cancel;
                 useReporter.log(cancelledMessage);
                 useReporter.updateStatus(cancelledMessage, -1);
                 throw new Error(cancelledMessage);
             }
+            const folderPath = selection.folderPath;
+            const effectiveSettings = applyFolderTaskSelectionOverride(host.getSettings(), selection.fileSelectionOverride);
 
             host.updateStatusBar(host.getRunningActionText(actionLabel));
             useReporter.log(host.getRunningActionText(actionLabel));
 
             commandResult = await batchFixMermaidSyntaxInFolderImpl(
                 host.getApp(),
-                host.getSettings(),
+                effectiveSettings,
                 folderPath,
                 useReporter
             );
@@ -350,7 +418,8 @@ export async function runFixFormulaFormatsCommandWithHost(
 export async function runBatchFixFormulaFormatsCommandWithHost(
     host: UtilityCommandHost,
     reporter?: ProgressReporter,
-    batchFixFormulaFormatsInFolderImpl: typeof batchFixFormulaFormatsInFolder = batchFixFormulaFormatsInFolder
+    batchFixFormulaFormatsInFolderImpl: typeof batchFixFormulaFormatsInFolder = batchFixFormulaFormatsInFolder,
+    options: UtilityFolderTaskCommandOptions = {}
 ): Promise<BatchFormulaFixResult | null> {
     const actionLabel = host.getActionLabel('batch-fix-formula');
     let commandResult: BatchFormulaFixResult | null = null;
@@ -361,18 +430,26 @@ export async function runBatchFixFormulaFormatsCommandWithHost(
         try {
             await host.loadSettings();
             uiStrings = host.getUiStrings();
-            const folderPath = await host.getFolderSelection();
-            if (!folderPath) {
+            const selection = await resolveFolderTaskSelectionWithHost(
+                host,
+                'batch-fix-formula',
+                options.folderPathOverride,
+                options.fileSelectionOverride
+            );
+            if (!selection?.folderPath) {
                 const cancelledMessage = uiStrings.common.cancel;
                 useReporter.log(cancelledMessage);
                 useReporter.updateStatus(cancelledMessage, -1);
                 throw new Error(cancelledMessage);
             }
+            const folderPath = selection.folderPath;
+            const effectiveSettings = applyFolderTaskSelectionOverride(host.getSettings(), selection.fileSelectionOverride);
 
             commandResult = await batchFixFormulaFormatsInFolderImpl(
                 host.getApp(),
                 folderPath,
-                useReporter
+                useReporter,
+                effectiveSettings
             );
 
             if (!useReporter.cancelled && commandResult) {
@@ -403,6 +480,70 @@ export async function runBatchFixFormulaFormatsCommandWithHost(
                 host.showNotice(formatI18n(uiStrings.notices.genericError, { message: errorMessage }));
                 await host.saveErrorLog(error, useReporter);
             }
+        }
+    });
+
+    return commandResult;
+}
+
+export async function runSplitNoteByChaptersCommandWithHost(
+    host: UtilityCommandHost,
+    reporter?: ProgressReporter,
+    splitNoteByChaptersImpl: typeof splitNoteByChapters = splitNoteByChapters
+): Promise<ChapterSplitResult | null> {
+    const uiStrings = host.getUiStrings();
+    const activeFile = host.getActiveFile();
+
+    if (!activeFile || activeFile.extension !== 'md') {
+        host.showNotice(uiStrings.notices.noActiveMarkdownFileSelected);
+        return null;
+    }
+
+    const actionLabel = host.getActionLabel('split-note-by-chapters');
+    const reporterLabel = `${actionLabel}: ${activeFile.name}`;
+    let commandResult: ChapterSplitResult | null = null;
+
+    await runBusyReporterCommandWithHost(host, reporterLabel, reporter, async (useReporter) => {
+        let currentUiStrings = host.getUiStrings();
+
+        try {
+            await host.loadSettings();
+            currentUiStrings = host.getUiStrings();
+            const markdown = await host.readFile(activeFile);
+            if (!markdown.trim()) {
+                throw new Error(currentUiStrings.notices.fileEmpty);
+            }
+
+            host.updateStatusBar(host.getRunningActionText(actionLabel));
+            useReporter.log(host.getRunningActionText(actionLabel));
+
+            commandResult = await splitNoteByChaptersImpl(host.getApp(), activeFile, useReporter, {
+                splitHeadingLevel: host.getSettings().chapterSplitHeadingLevel
+            });
+
+            const message = formatI18n(currentUiStrings.notices.chapterSplitSuccess, {
+                count: commandResult.chapterCount,
+                tocPath: commandResult.tocPath
+            });
+            useReporter.log(message);
+            useReporter.log(`Chapter split output folder: ${commandResult.outputFolderPath}`);
+            useReporter.updateStatus(host.getActionCompleteText(actionLabel), 100);
+            host.updateStatusBar(host.getActionCompleteText(actionLabel));
+            host.showNotice(message);
+            host.completeReporter(useReporter);
+        } catch (error: unknown) {
+            const { errorMessage, errorDetails } = normalizeError(
+                error,
+                'An unknown error occurred during chapter split.'
+            );
+            host.logError('Notemd Chapter Split Error:', errorDetails);
+            host.showNotice(formatI18n(currentUiStrings.notices.chapterSplitError, {
+                message: errorMessage
+            }));
+            useReporter.log(`Error: ${errorMessage}`);
+            host.failReporterAction(useReporter, errorMessage);
+            host.openErrorModal(currentUiStrings.errorModal.titles.chapterSplit, errorDetails);
+            await host.saveErrorLog(error, useReporter);
         }
     });
 
