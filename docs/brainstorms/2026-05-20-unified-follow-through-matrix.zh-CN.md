@@ -22,7 +22,7 @@ canonical: true
 
 本文基于以下事实建立：
 
-1. 2026-05-24 force rewrite 之后的 live `origin/main`（审计时为 `0227f1b`）；
+1. 2026-05-24 force rewrite 之后的 live `origin/main`，并已更新到当前 bounded-recovery 同步后的 `d81d84d`；
 2. 先前仍与当前主线相关的文档：
    - `docs/brainstorms/2026-05-07-cli-next-phase-planning.*`
    - `docs/brainstorms/2026-05-08-packaging-semantic-convergence-progress-and-next-steps.*`
@@ -33,9 +33,9 @@ canonical: true
 
 | 轨道 | 当前 `origin/main` 真值 | 备份分支证据 | 需要的下一步 | 严禁误判 | 优先级 |
 |---|---|---|---|---|---|
-| A. Packaging / semantic verification | 当前 live 代码仍是单入口 `main.js` + inline `srcdoc`；helper/docs/tests 对该边界描述一致 | 更晚的备份分支曾进入更宽的 dedicated runtime-asset 通道 | 继续把当前单入口真值写清；只有当代码 + audit + 文档同批变化时才允许拓宽 topology | 不要继续把 `render-host.mjs` 写成当前主线已发货 | P0 |
-| B. CLI / automation surface | 当前主线现已具备 registry-backed 的 config/profile export/import、脱敏 provider 导出、public-surface 导出，以及仓库内 export-only 的 maintainer help/invoke 脚本 | 备份分支还承载过更宽的 maintainer-bridge 设想，但当前 reintegration 刻意保持在窄边界内 | 继续把 export-only 边界写清楚；若要新增可变更型 maintainer 动作，必须同批补齐契约/测试/文档 | 不要把当前能力面写成通用 public CLI，或无边界的 maintainer mutation API | P1 |
-| C. 用户可见 settings / preview / onboarding | 当前主线现已具备 preview flows、欢迎弹窗 release digest、provider diagnostics、settings reset、concept-note 前置配置提示、API liveness/activity UI，以及面向已保存工件的 preview 恢复链路 | 备份分支还有更多 UX 收口尝试，但目前已恢复切片已在当前主线上重新证明 | 继续保持 sidebar / preview / settings 的文案、i18n 与已保存工件行为一致 | 不要再把这些 UX guardrail 写成“当前主线缺失”，但也不要顺手高估尚未恢复的 UX 想法 | P1 |
+| A. Packaging / semantic verification | 当前 live build/audit 真值仍是单入口 `main.js` + inline `srcdoc`；源码中已重新出现 render-host runtime 候选模块，但它们尚未成为发货资产 | 更晚的备份分支曾进入更宽的 dedicated runtime-asset 通道 | 明确消除 source/build 歧义：要么继续保持 runtime lane 为 source-only 并写清非发货事实，要么同批补齐代码 + audit + 文档后再拓宽 topology | 不要因为 `src/` 里重新出现 runtime 候选代码，就继续把 `render-host.mjs` 写成当前主线已发货 | P0 |
+| B. CLI / automation surface | 当前主线现已具备 registry-backed 的 config/profile export/import、脱敏 provider 导出、public-surface 导出，以及覆盖有界 path-based 操作与 export 操作的 repo-local maintainer help/invoke 脚本 | 备份分支还承载过更宽的 maintainer-bridge 设想，但当前 reintegration 刻意保持在窄边界内 | 继续把 maintainer helper 的边界写清楚；若任何 path-based operation 要提升为更广或更公共的 CLI 面，必须同批补齐契约/测试/文档 | 不要把当前能力面写成通用 public CLI，或无边界的 maintainer mutation API | P1 |
+| C. 用户可见 settings / preview / onboarding | 当前主线现已具备 preview flows、preview history、欢迎弹窗 release digest、provider diagnostics、settings reset、concept-note 前置配置提示、API liveness/activity UI，以及面向已保存工件的 preview 恢复链路，并已重新同步 `1.8.9` release-facing version truth | 备份分支还有更多 UX 收口尝试，但目前已恢复切片已在当前主线上重新证明 | 继续保持 sidebar / preview / settings 的文案、i18n、已保存工件行为与 release-facing version truth 一致 | 不要再把这些 UX guardrail 写成“当前主线缺失”，但也不要顺手高估尚未恢复的 UX 想法 | P1 |
 | D. Regex / 文件筛选 / local-KB / chapter split | 当前主线现已具备 file-selection profiles、文件夹 regex/glob 筛选、`relativePath` / `basename` 匹配、可选子目录范围控制、local-KB retrieval、chapter split 及对应回归测试 | 备份分支提供了最初恢复证据；当前主线现在已直接携带该有界产品切片 | 下一步应视为质量/深度跟进，而不是继续证明这些能力“是否存在” | 不要继续把这些能力写成只存在于 backup、或 live mainline 尚未具备 | P1 |
 | E. Release / repo-saga / clean-state hygiene | 当前主线现已具备 release/repo-saga 脚本，以及 repo-saga 执行锁、测试、文档与本地工件忽略 guardrail | 备份分支推动了这些 guardrail；当前主线已恢复有界串行安全切片 | 保持 repo-saga 刷新流程的串行纪律，并把 clean-state 证明保留为收尾要求 | 不要把“脚本还在”误读为“可以并行跑 repo-saga 刷新路径” | P0 |
 
@@ -48,16 +48,17 @@ canonical: true
 3. provider profile export/import 命令面；
 4. 欢迎弹窗 release digest；
 5. preview artifact save/export helpers；
-6. 脱敏 / public-safe CLI 导出表面与仓库内 maintainer help/invoke；
+6. 脱敏 / public-safe CLI 导出表面与仓库内 maintainer help/invoke（含有界 path-based 操作）；
 7. settings reset、concept-note 前置提示与 concept synonym suppression；
 8. file-selection profiles 与 folder-scope regex/glob 控制；
 9. local knowledge-base retrieval；
-10. chapter split。
+10. chapter split；
+11. package metadata、welcome digest 与 README family 上重新同步到 `1.8.9` 的 release-facing version truth。
 
 以下内容当前必须描述为 **未在重写后的主线上被证明存在**：
 
 1. 已发货 dedicated runtime assets；
-2. 超出当前 export-only helper 边界的更宽 maintainer mutation surface；
+2. 超出当前有界 path-based helper 边界的更宽 maintainer mutation surface；
 3. 任何绕开当前单入口 `main.js` + inline `srcdoc` 真值的 dedicated-runtime 叙述。
 
 ## 5. 单一执行顺序
@@ -66,9 +67,10 @@ canonical: true
 
 1. **P0**：保持 packaging / semantic 当前主线真值诚实
 2. **P0**：恢复 clean-state 与 repo-saga 串行 guardrails
-3. **P1**：保持有界 CLI / maintainer-surface 真值收敛且测试充分
-4. **P1**：持续保持已恢复的用户可见 settings / preview guardrails 在代码、i18n 与文档之间一致
-5. **P1/P2**：以有界 current-main 工作继续深化 file-selection、local-KB、chapter split 的质量
+3. **P0/P1**：先解决当前 latent render-host runtime source 与实际 shipping build 之间的歧义，再决定是否拓宽 packaging 叙述
+4. **P1**：保持有界 CLI / maintainer-surface 真值收敛且测试充分，再决定是否有 path-based operation 适合做有界 public 提升
+5. **P1**：持续保持已恢复的用户可见 settings / preview guardrails 在代码、i18n、文档与 release-facing version truth 之间一致
+6. **P1/P2**：以有界 current-main 工作继续深化 file-selection、local-KB、chapter split 的质量
 
 ## 6. 文档同步规则
 

@@ -22,7 +22,7 @@ From this checkpoint onward:
 
 This matrix is grounded in:
 
-1. live `origin/main` after the 2026-05-24 force rewrite (`0227f1b` at audit time);
+1. live `origin/main` after the 2026-05-24 force rewrite, updated through the bounded-recovery sync now on `d81d84d`;
 2. prior current-main documents:
    - `docs/brainstorms/2026-05-07-cli-next-phase-planning.*`
    - `docs/brainstorms/2026-05-08-packaging-semantic-convergence-progress-and-next-steps.*`
@@ -33,9 +33,9 @@ This matrix is grounded in:
 
 | Lane | Current `origin/main` truth | Backup-branch evidence | Required next action | Misread to avoid | Priority |
 |---|---|---|---|---|---|
-| A. Packaging / semantic verification | Live code is still single-entry `main.js` + inline `srcdoc`; helper/docs/tests correctly describe that boundary | Later backup branch had a wider dedicated runtime-asset lane | Keep current single-entry truth explicit; only widen topology with same-batch code + audit + docs proof | Do not keep saying `render-host.mjs` is currently shipped on main | P0 |
-| B. CLI / automation surface | Current main now has registry-backed config/profile export/import, redacted provider export, public-surface export, and repo-local maintainer help/invoke scripts bounded to export-only operations | Backup branch also carried broader maintainer-bridge aspirations, but the current reintegration keeps the surface intentionally narrow | Keep the export-only boundary explicit and avoid adding mutating maintainer actions without the same-batch contract/test/doc proof | Do not describe the current surface as a general-purpose public CLI or a free-form maintainer mutation API | P1 |
-| C. User-facing settings / preview / onboarding | Current main now has preview flows, release-note digest in onboarding, provider diagnostics, settings reset, concept-note prerequisite guidance, API liveness/activity UI, and saved-artifact-aware preview recovery | Backup branch carried additional UX closure work, but the recovered slice is now re-proved on current main | Keep sidebar/preview/settings wording, i18n, and saved-artifact behavior aligned as the user-facing truth source | Do not regress to “these UX guardrails are missing on current main,” but also do not overclaim unrecovered UX ideas | P1 |
+| A. Packaging / semantic verification | Live build/audit truth is still single-entry `main.js` + inline `srcdoc`; source now also contains render-host runtime candidate modules, but they are not shipped assets yet | Later backup branch had a wider dedicated runtime-asset lane | Remove source/build ambiguity explicitly: either keep the runtime lane source-only and document it as non-shipped, or widen topology with same-batch code + audit + docs proof | Do not keep saying `render-host.mjs` is currently shipped on main just because candidate runtime code exists in `src/` | P0 |
+| B. CLI / automation surface | Current main now has registry-backed config/profile export/import, redacted provider export, public-surface export, and repo-local maintainer help/invoke scripts for bounded path-based operations plus exports | Backup branch also carried broader maintainer-bridge aspirations, but the current reintegration keeps the surface intentionally narrow | Keep maintainer helper scope explicit and only promote path-based operations to broader/public CLI status with same-batch contract/test/doc proof | Do not describe the current surface as a general-purpose public CLI or a free-form maintainer mutation API | P1 |
+| C. User-facing settings / preview / onboarding | Current main now has preview flows, preview history, release-note digest in onboarding, provider diagnostics, settings reset, concept-note prerequisite guidance, API liveness/activity UI, and saved-artifact-aware preview recovery with `1.8.9` version truth resynced | Backup branch carried additional UX closure work, but the recovered slice is now re-proved on current main | Keep sidebar/preview/settings wording, i18n, saved-artifact behavior, and release-facing version truth aligned as the user-facing truth source | Do not regress to “these UX guardrails are missing on current main,” but also do not overclaim unrecovered UX ideas | P1 |
 | D. Regex / file selection / local-KB / chapter split | Current main now has file-selection profiles, folder regex/glob filtering, `relativePath` / `basename` matching, optional subfolder inclusion control, local-KB retrieval, chapter split, and their regression tests | Backup branch provided the original recovery evidence; current main now carries the bounded product slice directly | Treat the next step as quality/depth follow-through, not existence re-proof | Do not keep writing these capabilities as backup-only or absent from live mainline | P1 |
 | E. Release / repo-saga / clean-state hygiene | Current main now has release/repo-saga scripts plus shared repo-saga execution lock, tests, docs, and local-artifact ignore guardrails | Backup branch motivated the guardrails; the bounded serial-safety slice is now back on current main | Preserve serial execution discipline for repo-saga refresh flows and keep clean-state proof as part of finish criteria | Do not confuse “script still exists” with permission to run repo-saga refresh paths in parallel | P0 |
 
@@ -48,16 +48,17 @@ These items are safe to describe as present on current main:
 3. provider profile export/import command surfaces;
 4. welcome-modal release digest;
 5. preview artifact save/export helpers;
-6. redacted/public-safe CLI export surfaces plus repo-local maintainer help/invoke;
+6. redacted/public-safe CLI export surfaces plus repo-local maintainer help/invoke for bounded path-based operations;
 7. settings reset, concept-note prerequisite guidance, and concept synonym suppression;
 8. file-selection profiles and folder-scope regex/glob control;
 9. local knowledge-base retrieval;
-10. chapter split.
+10. chapter split;
+11. `1.8.9` release-facing version truth resync across package metadata, welcome digest, and README family.
 
 These items must currently be described as **not proven on rewritten main**:
 
 1. dedicated runtime assets on the shipped path;
-2. any broader maintainer mutation surface beyond the bounded export-only helper path;
+2. any broader maintainer mutation surface beyond the current bounded path-based helper path;
 3. any dedicated-runtime claim that bypasses the current single-entry `main.js` + inline `srcdoc` truth.
 
 ## 5. Single Execution Order
@@ -66,9 +67,10 @@ Unless a regression interrupts the order:
 
 1. **P0**: keep packaging / semantic current-main truth honest
 2. **P0**: restore clean-state and repo-saga serial guardrails
-3. **P1**: keep the bounded CLI / maintainer-surface truth narrow and well-tested
-4. **P1**: keep recovered user-facing settings / preview guardrails aligned across code, i18n, and docs
-5. **P1/P2**: deepen file-selection, local-KB, and chapter-split quality only as bounded current-main work
+3. **P0/P1**: resolve the current source/build ambiguity around latent render-host runtime sources before widening packaging claims
+4. **P1**: keep the bounded CLI / maintainer-surface truth narrow and well-tested, then decide whether any path-based operation merits bounded public promotion
+5. **P1**: keep recovered user-facing settings / preview guardrails aligned across code, i18n, docs, and release-facing version truth
+6. **P1/P2**: deepen file-selection, local-KB, and chapter-split quality only as bounded current-main work
 
 ## 6. Documentation Sync Rule
 

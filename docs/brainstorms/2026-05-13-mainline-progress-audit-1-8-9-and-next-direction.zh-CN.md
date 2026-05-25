@@ -1,10 +1,12 @@
 ---
 date: 2026-05-13
-last_updated: 2026-05-13
+last_updated: 2026-05-25
 topic: mainline-progress-audit-1-8-9-and-next-direction
 ---
 
 # 1.8.9 之后的主线进展审计：深度对比、当前状态与后续方向
+
+> 历史边界说明：本文记录的是 `1.8.9` 发布切点视角下的审计结果，时间早于 2026-05-24 的 force-rewrite recovery 以及随后在当前主线上的 bounded recovery。要查看 recovery 之后的当前状态与 next-level 方案，请改看 `docs/brainstorms/2026-05-25-post-bounded-recovery-audit-and-next-level-direction.zh-CN.md`。
 
 ## 1. 范围与基线
 

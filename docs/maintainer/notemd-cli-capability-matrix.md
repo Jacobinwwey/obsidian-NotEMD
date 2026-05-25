@@ -1,21 +1,22 @@
 # Notemd CLI Capability Matrix
 
-> Updated: 2026-05-24
+> Updated: 2026-05-25
 
-## Status Call (2026-05-24)
+## Status Call (2026-05-25)
 
-Short answer: the current restored CLI work is intentionally bounded.
+Short answer: current `main` now carries a deliberate two-tier CLI story, not a single widened surface.
 
 What is landed on current `main`:
 
 - registry-backed operation metadata
 - typed capability / invocation export
-- a bounded public-safe export-only slice
-- a repo-local maintainer helper for the same public-safe exports plus bounded path-based maintainer operations
+- a bounded public-safe export slice
+- a repo-local maintainer helper that covers the same export slice plus explicit path-based maintainer operations with JSON/file payload input
 
 What is intentionally not claimed:
 
 - broad user-facing CLI support for active-file, selection, or preview flows
+- promotion of the current path-based maintainer operations into the public-safe slice
 - a broad public CLI API over mutable note-processing flows
 
 This matrix is a maintainer control document. It distinguishes:
@@ -86,6 +87,7 @@ Boundary:
 - this is maintainer-grade repo tooling, not a public CLI API
 - the operation catalog lives in `scripts/lib/maintainer-cli-operation-help.js` as shared maintainer helper metadata
 - export operations remain empty-payload only; bounded content operations accept explicit JSON input
+- path-based maintainer operations stay maintainer-only until their side effects, output schemas, and failure semantics are promoted as part of a public contract batch
 
 ## Current Command Matrix
 
@@ -141,10 +143,10 @@ These are the best remaining candidates for registry-backed or more host-neutral
 
 | Priority | Candidate | Why First | Existing Building Blocks |
 |---|---|---|---|
-| P0 | Packaging / semantic-verification convergence follow-through | The first convergence slice is already landed: `npm run verify:diagram-semantics` now emits packaging-boundary-aware maintainer checklists, the runbooks mirror that truth, and tests lock it. The next highest-leverage work is to keep that truth durable while deciding whether actual heavy-runtime isolation or any later contract promotion should land next | `scripts/diagram-semantic-verification.js`, `docs/maintainer/*`, `src/tests/diagramSemanticVerificationScript.test.ts`, `src/operations/diagramCommandExecution.ts` |
-| P1 | Contract enrichment for selection/export and config flows | Export/selection operations are now modeled, but future operation invokers need richer path/context semantics than command-trigger parity alone | `src/operations/registry.ts`, `src/operations/configProfileCommands.ts`, `src/operations/noteProcessingCommandHostAdapter.ts` |
-| P1 | Workflow/settings packaging | Workflow DSL and output-path toggles remain useful metadata but not yet stable public interfaces | `src/workflowButtons.ts`, settings-driven output controls |
-| P2 | Heavy-runtime packaging isolation implementation | The repo now explicitly documents the current single-entry `main.js` + inline `srcdoc` contract. The remaining packaging gap is the real multi-entry or dedicated-asset isolation work itself, not more wording-only runbook setup | `esbuild.config.mjs`, `scripts/audit-render-host-bundle.js`, render-host packaging path |
+| P0 | Packaging source/build convergence around the latent render-host runtime lane | Current source now contains reusable runtime helpers (`src/rendering/runtime/renderHostEntry.ts`, `src/rendering/preview/renderHostRuntimeClient.ts`), but build/audit truth still proves `main.js`-only shipping. The highest-value next step is to remove that ambiguity explicitly: either keep the runtime lane source-only and document it as non-shipped, or ship a true multi-entry boundary in one batch | `esbuild.config.mjs`, `scripts/audit-render-host-bundle.js`, `src/rendering/runtime/renderHostEntry.ts`, `src/rendering/preview/renderHostRuntimeClient.ts` |
+| P1 | Bounded public-CLI promotion for explicit path-based operations | The maintainer helper already proves there is demand for path-based operations, but public promotion should happen only for operations whose write semantics and output contracts are stable enough to document and regression-lock | `src/maintainerCliBridge.ts`, `scripts/lib/maintainer-cli-operation-help.js`, `src/operations/registry.ts`, `src/tests/maintainerCliBridge.test.ts` |
+| P1 | Contract/result hardening for retrieval and chapter-split writes | `content.split-note-by-chapters`, `content.batch-generate-from-titles`, `research.summarize-topic`, and `diagram.generate` are callable through the maintainer helper, but the next maturity gain is richer side-effect/result framing rather than broader surface count | `src/chapterSplit.ts`, `src/localKnowledgeBase.ts`, `src/tests/chapterSplit.test.ts`, `src/tests/localKnowledgeTaskIntegration.test.ts` |
+| P2 | Workflow/settings packaging | Workflow DSL and output-path toggles remain useful metadata but not yet stable public interfaces | `src/workflowButtons.ts`, settings-driven output controls |
 
 ## Settings Readiness
 
