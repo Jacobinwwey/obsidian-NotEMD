@@ -43,7 +43,7 @@ git diff --check
 
 这些检查**不能**证明 Mermaid 产物在真实 Obsidian 会话中视觉上仍然正确，也不能证明 JSON Canvas / Vega-Lite 在桌面宿主中的端到端行为没有退化。
 
-它们也**不等于**重型运行时已经被真正隔离为独立打包资产。`npm run audit:render-host` 当前只能证明一条已强制的发布事实：内联 `srcdoc` host 仍然自包含地随 `main.js` 一起发布。
+它们也**不等于**重型运行时已经被真正隔离为独立打包资产。`npm run audit:render-host` 当前只能证明一条已强制的发布事实：内联 `srcdoc` host 仍然自包含地随 `main.js` 一起发布，同时当前主线会拒绝残留的 `render-host.mjs` 资产或引用。
 
 ## 3. 环境规则
 

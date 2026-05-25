@@ -391,6 +391,13 @@ describe('utility command host adapter', () => {
         host.readFile = jest.fn().mockResolvedValue('# Topic\n\n## One');
         const splitImpl = jest.fn().mockResolvedValue({
             sourcePath: 'Notes/Topic.md',
+            requestedSplitHeadingLevel: 'auto',
+            chapterNotePaths: ['Notes/topic_chapters/01-one.md'],
+            managedArtifactPaths: [
+                'Notes/topic_chapters/Topic_TOC.md',
+                'Notes/topic_chapters/.notemd-chapter-split.json',
+                'Notes/topic_chapters/01-one.md'
+            ],
             outputFolderPath: 'Notes/topic_chapters',
             tocPath: 'Notes/topic_chapters/Topic_TOC.md',
             manifestPath: 'Notes/topic_chapters/.notemd-chapter-split.json',
@@ -406,7 +413,8 @@ describe('utility command host adapter', () => {
             ],
             tocMarkdown: '# Topic TOC',
             chapterCount: 1,
-            removedStaleFileCount: 0
+            removedStaleFileCount: 0,
+            removedStalePaths: []
         });
         const { runSplitNoteByChaptersCommandWithHost } = loadModule();
 

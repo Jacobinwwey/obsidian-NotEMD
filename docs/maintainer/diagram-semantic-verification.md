@@ -43,7 +43,7 @@ git diff --check
 
 These checks do **not** prove that a generated Mermaid artifact is visually valid in a real Obsidian session, or that JSON Canvas / Vega-Lite output still behaves correctly end-to-end in the desktop host.
 
-They also do **not** prove that heavy runtimes are already isolated into a separate packaged asset. `npm run audit:render-host` currently proves only the enforced shipping truth: the inline `srcdoc` host remains self-contained inside `main.js`.
+They also do **not** prove that heavy runtimes are already isolated into a separate packaged asset. `npm run audit:render-host` currently proves only the enforced shipping truth: the inline `srcdoc` host remains self-contained inside `main.js`, and stray `render-host.mjs` assets or references are rejected on current `main`.
 
 ## 3. Environment Rules
 

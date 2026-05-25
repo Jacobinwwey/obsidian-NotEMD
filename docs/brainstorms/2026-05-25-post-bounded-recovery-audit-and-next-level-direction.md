@@ -41,6 +41,9 @@ Current shipping truth is still narrower than the source tree might imply:
    - `src/rendering/preview/renderHostRuntimeClient.ts`
    - shared Mermaid / Vega-Lite preview runtime helpers
 4. those files are therefore a **latent implementation lane**, not yet a shipped build boundary.
+5. current execution-path convergence now explicitly keeps that lane dormant on `main`:
+   - default Mermaid / Vega-Lite preview loading stays on package runtime
+   - `audit:render-host` rejects stray `render-host.mjs` assets and built-bundle references on current `main`
 
 Interpretation:
 
@@ -63,8 +66,11 @@ Concrete current truth:
    - `diagram.generate`
    - plus the export surfaces
 2. `src/maintainerCliBridge.ts` implements those path-based maintainer operations with explicit JSON/file payloads.
-3. `scripts/lib/maintainer-cli-operation-help.js` is the shared help/operation truth for that helper surface.
-4. the public-safe export slice is still intentionally narrower than the maintainer helper.
+3. `content.split-note-by-chapters` is now also registry-backed and typed in `src/operations/registry.ts` / `src/cliContracts.ts`, while still remaining outside the current public-safe slice.
+4. `content.split-note-by-chapters` maintainer invocation now supports optional `splitHeadingLevel` override instead of depending only on the current settings snapshot.
+5. `content.split-note-by-chapters` typed results now also expose the managed artifact contract directly (`requestedSplitHeadingLevel`, `chapterNotePaths`, `managedArtifactPaths`, `removedStalePaths`) instead of forcing callers to reconstruct it from naming conventions.
+6. `scripts/lib/maintainer-cli-operation-help.js` is the shared help/operation truth for that helper surface.
+7. the public-safe export slice is still intentionally narrower than the maintainer helper.
 
 Interpretation:
 
@@ -204,6 +210,10 @@ Acceptance:
 1. `esbuild.config.mjs`, `audit:render-host`, release-asset docs, and tests all agree;
 2. README / maintainer docs stop carrying mixed signals;
 3. `git status` stays clean after local verification.
+
+Current decision on `main`:
+
+- keep the render-host lane source-only for now, and enforce that truth in runtime loading plus audit coverage rather than partially reviving a shipped multi-entry contract.
 
 ### Batch B: bounded public-CLI promotion review
 

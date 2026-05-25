@@ -7,7 +7,7 @@ const OPERATION_HELP = {
   'content.split-note-by-chapters': {
     summary: 'Split one note into chapter files plus TOC/manifest.',
     required: ['sourcePath'],
-    optional: []
+    optional: ['splitHeadingLevel']
   },
   'research.summarize-topic': {
     summary: 'Append a research summary to a note.',

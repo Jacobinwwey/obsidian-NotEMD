@@ -87,6 +87,8 @@
 - 这是 maintainer-grade repo 工具，不是 public CLI API
 - 操作目录统一收敛在 `scripts/lib/maintainer-cli-operation-help.js`，作为共享帮助元数据
 - export operations 仍然只接受空 payload；受控内容操作必须显式提供 JSON 输入
+- `content.split-note-by-chapters` 现在还支持可选 `splitHeadingLevel`（`auto`、`h1`-`h6`），脚本可避免继续隐式依赖当前 settings 快照
+- `content.split-note-by-chapters` 的结果现在还会显式带出 `requestedSplitHeadingLevel`、`chapterNotePaths`、`managedArtifactPaths` 与 `removedStalePaths`，自动化调用方不必再靠文件名规则反推 managed artifact 集合
 - 这些 path-based 维护操作在副作用、输出契约与失败语义没有作为公共契约一并锁定前，仍应保持 maintainer-only
 
 ## 当前命令矩阵
@@ -109,6 +111,7 @@
 | `notemd:process-folder-with-notemd` | 批量处理文件夹 | `interactive-ui` | 结构化批量结果已存在，且包含 `savedCount` / `errors` / `cancelled`，但文件夹选择、批量改写执行与后置 Mermaid auto-fix 仍由宿主驱动 | `file.process-folder-add-links` |
 | `notemd:generate-content-from-title` | 从标题生成内容 | `requires-active-file` | 结构化结果已存在，但 active-file 依赖、内容回写语义与可选 research 副作用仍绑定插件宿主 | `content.generate-from-title` |
 | `notemd:batch-generate-content-from-titles` | 批量标题生成 | `interactive-ui` | 结构化批量结果已存在，且包含 complete-folder move 语义与聚合错误，但文件夹选择、进度 UI 与 vault 改写仍需要宿主协调 | `content.batch-generate-from-titles` |
+| `notemd:split-note-by-chapters` | 将当前活动笔记拆分为章节文件并生成 TOC/manifest | `requires-active-file` | 现在已经有 registry/contract 覆盖，maintainer helper 也可用显式 `sourcePath` 加可选 `splitHeadingLevel` 调同一 operation；类型化结果还会直接描述 managed artifact 集合，但面向用户的命令触发仍依赖 active file，且本质仍是 write-heavy 改写流程 | `content.split-note-by-chapters` |
 | `notemd:research-and-summarize-topic` | 对选中文本 / 活动笔记标题做研究总结 | `requires-selection` | 依赖活动编辑器或活动笔记标题 | `research.summarize-topic` |
 | `notemd:translate-file` | 翻译当前活动笔记 | `requires-active-file` | 结构化结果与宿主接管的成功 notice 已存在，但 active-file 依赖、设置驱动的输出路径策略与 vault 写入副作用仍阻碍稳定自动化 | `translate.file` |
 | `notemd:batch-translate-folder` | 批量翻译文件夹 | `interactive-ui` | 文件夹选择仍然是交互式流程；结构化批量结果与宿主接管的成功 notice 已存在，但 folder picker 依赖与批量写入执行仍不适合稳定自动化 | `translate.folder-batch` |
@@ -129,9 +132,10 @@
 - `src/operations/capabilityManifest.ts` 现在从同一 registry 展平 capability manifest。
 - capability/public-surface 元数据现在也会携带 handling tags，使调用方无需额外硬编码规则就能区分 secret-bearing export 与 redacted/public-safe export。
 - `src/cliContracts.ts` 现在也从同一 registry 生成 invocation contract，减少了文档、命令发现与契约导出之间的漂移路径。
-- registry 现在也已纳入主要 note-processing、utility、selection 与 export operations：`editor.create-link-and-generate`、`file.process-add-links`、`file.process-folder-add-links`、`content.generate-from-title`、`content.batch-generate-from-titles`、`research.summarize-topic`、`translate.file`、`translate.folder-batch`、`concept.extract-file`、`concept.extract-folder`、`content.extract-original-text`、`workflow.extract-and-generate`、`duplicate.check-file`、`concept.dedupe`、`mermaid.batch-fix`、`formula.fix-file`、`formula.batch-fix`、`provider.profile.export`、`provider.profile.export-redacted`、`provider.profile.import`、`cli.capability-manifest.export`、`cli.invocation-contract.export` 与 `cli.public-surface.export`。
+- registry 现在也已纳入主要 note-processing、utility、selection 与 export operations：`editor.create-link-and-generate`、`file.process-add-links`、`file.process-folder-add-links`、`content.generate-from-title`、`content.batch-generate-from-titles`、`content.split-note-by-chapters`、`research.summarize-topic`、`translate.file`、`translate.folder-batch`、`concept.extract-file`、`concept.extract-folder`、`content.extract-original-text`、`workflow.extract-and-generate`、`duplicate.check-file`、`concept.dedupe`、`mermaid.batch-fix`、`formula.fix-file`、`formula.batch-fix`、`provider.profile.export`、`provider.profile.export-redacted`、`provider.profile.import`、`cli.capability-manifest.export`、`cli.invocation-contract.export` 与 `cli.public-surface.export`。
 - `src/operations/publicCliSurface.ts` 现在会从同一套 registry/capability/contract 组合直接推导 bounded public-safe slice，而不是维护另一份并行 allowlist。
 - `file.process-add-links`、`file.process-folder-add-links`、`content.generate-from-title`、`content.batch-generate-from-titles`、`mermaid.batch-fix`、`concept.dedupe`、`translate.*`、`formula.*` 与 `content.extract-original-text` 现在已经组成当前已验证的 write-heavy contract-enrichment proof set：utility core 返回结构化结果，host adapter 接管本地化成功/no-file/confirmation 语义，registry 直接导出 richer schema。
+- `content.split-note-by-chapters` 现在也更明确地遵循同一方向：结果结构会直接命名请求的 heading level、章节文件路径、完整 managed artifact 集合以及 stale removal 明细，而不是继续逼调用方只靠 count 或文件名间接推断。
 - `diagram.generate` 现在已经在宿主无关 generation core 之下携带显式 typed follow-through：`followThrough.kind` 用来区分 Mermaid 保存、artifact 保存与 preview 完成，同时继续保留向后兼容的顶层 `outputPath` / `previewOpened`。
 - 第一份已检入的 semantic-verification helper 现在也已经存在：`npm run verify:diagram-semantics` 会把维护者 runbook 落成可复用、无 secrets 的检查模板，而不是继续停留在纯文字指引层面。
 - 下一阶段 contract deepening 顺序现在也已更精确：先把 `diagram.generate` 保持为宿主无关 generation core，并把其下的 typed follow-through 视作已落地，再处理 packaging / semantic verification 的后续收敛，最后才重开更强的 CLI/public surface 声明。

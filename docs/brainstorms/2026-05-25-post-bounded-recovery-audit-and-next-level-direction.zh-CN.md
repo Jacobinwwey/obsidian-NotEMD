@@ -41,6 +41,9 @@ canonical: true
    - `src/rendering/preview/renderHostRuntimeClient.ts`
    - 一组共享的 Mermaid / Vega-Lite preview runtime helper
 4. 这意味着这些文件目前只是 **潜在实现通道**，而不是已发货的构建边界。
+5. 当前 `main` 上的执行链也已开始显式收口到这条真值：
+   - 默认 Mermaid / Vega-Lite preview loading 仍走 package runtime
+   - `audit:render-host` 会拒绝当前主线中残留的 `render-host.mjs` 资产与构建产物引用
 
 正确解释：
 
@@ -63,8 +66,11 @@ canonical: true
    - `diagram.generate`
    - 以及 export 相关操作
 2. `src/maintainerCliBridge.ts` 已实现这些 path-based maintainer operations，并要求显式 JSON / 文件 payload。
-3. `scripts/lib/maintainer-cli-operation-help.js` 已成为这层 helper surface 的共享帮助真值。
-4. public-safe export slice 仍然刻意比 maintainer helper 更窄。
+3. `content.split-note-by-chapters` 现在也已进入 `src/operations/registry.ts` / `src/cliContracts.ts` 的类型化主干，但仍明确不属于当前 public-safe slice。
+4. `content.split-note-by-chapters` 的 maintainer 调用现已支持可选 `splitHeadingLevel` override，不再只依赖当前 settings 快照。
+5. `content.split-note-by-chapters` 的类型化结果现在还会直接暴露 managed artifact contract（`requestedSplitHeadingLevel`、`chapterNotePaths`、`managedArtifactPaths`、`removedStalePaths`），不再逼调用方靠命名规则反推。
+6. `scripts/lib/maintainer-cli-operation-help.js` 已成为这层 helper surface 的共享帮助真值。
+7. public-safe export slice 仍然刻意比 maintainer helper 更窄。
 
 正确解释：
 
@@ -204,6 +210,10 @@ release-facing 真值也已在当前主线上重新对齐：
 1. `esbuild.config.mjs`、`audit:render-host`、release-asset 文档与测试结论一致；
 2. README / maintainer docs 不再传递混合信号；
 3. 本机验证后 `git status` 仍 clean。
+
+当前在 `main` 上做出的决策是：
+
+- 先明确保持 render-host lane 为 source-only，利用运行时加载逻辑与审计覆盖共同锁定该真值，而不是半恢复一个未闭环的 shipped multi-entry 契约。
 
 ### Batch B：有界 public-CLI promotion 评审
 

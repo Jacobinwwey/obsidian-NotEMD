@@ -1,16 +1,11 @@
 import {
-    defaultRenderHostRuntimeModuleLoader,
-    resolveBundledRenderHostRuntimeModuleSpecifier,
-    RenderHostRuntimeModuleLoader
-} from './renderHostRuntimeClient';
+    defaultPackagePreviewModuleLoader,
+    PackagePreviewModuleLoader
+} from './packageModuleLoader';
 import {
     MermaidPreviewDeps,
     validateMermaidPreviewDeps
 } from './mermaidPreviewShared';
-
-type MermaidRuntimeModule = {
-    loadBundledMermaidPreviewDeps?: () => MermaidPreviewDeps | Promise<MermaidPreviewDeps>;
-};
 
 let defaultDepsPromise: Promise<MermaidPreviewDeps> | null = null;
 
@@ -27,26 +22,19 @@ function resolveDirectMermaidDeps(moduleSpecifier: string, moduleExports: unknow
 }
 
 export function resolveBundledMermaidRuntimeModuleSpecifier(baseDir = __dirname): string {
-    return resolveBundledRenderHostRuntimeModuleSpecifier(baseDir);
+    void baseDir;
+    // Current shipping truth is still single-bundle. The default preview runtime
+    // therefore resolves directly from the bundled package runtime, not a
+    // standalone render-host asset.
+    return 'mermaid';
 }
 
 export async function loadBundledMermaidPreviewDeps(
-    loadModule: RenderHostRuntimeModuleLoader = defaultRenderHostRuntimeModuleLoader,
+    loadModule: PackagePreviewModuleLoader = defaultPackagePreviewModuleLoader,
     moduleSpecifier = resolveBundledMermaidRuntimeModuleSpecifier()
 ): Promise<MermaidPreviewDeps> {
-    try {
-        const moduleExports = await loadModule(moduleSpecifier) as MermaidRuntimeModule;
-        if (typeof moduleExports?.loadBundledMermaidPreviewDeps !== 'function') {
-            throw new Error(`Dedicated render-host runtime module did not expose loadBundledMermaidPreviewDeps: ${moduleSpecifier}`);
-        }
-
-        const deps = await moduleExports.loadBundledMermaidPreviewDeps();
-        return validateMermaidPreviewDeps(moduleSpecifier, deps);
-    } catch (error) {
-        const fallbackSpecifier = 'mermaid';
-        const fallbackModule = await loadModule(fallbackSpecifier);
-        return resolveDirectMermaidDeps(fallbackSpecifier, fallbackModule);
-    }
+    const moduleExports = await loadModule(moduleSpecifier);
+    return resolveDirectMermaidDeps(moduleSpecifier, moduleExports);
 }
 
 export async function loadDefaultBundledMermaidPreviewDeps(): Promise<MermaidPreviewDeps> {

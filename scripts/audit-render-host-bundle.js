@@ -13,10 +13,11 @@ const REQUIRED_RENDER_HOST_MARKERS = [
 const DISALLOWED_RENDER_HOST_PATTERNS = [
     /rendering-webview\/index\.html/i,
     /src\/rendering\/webview\//i,
-    /render-host\.(?:html|js)/i
+    /render-host\.(?:mjs|html|js)/i
 ];
 
 const DISALLOWED_RENDER_HOST_OUTPUT_FILES = [
+    'render-host.mjs',
     'render-host.html',
     'render-host.js',
     'rendering-webview/index.html'

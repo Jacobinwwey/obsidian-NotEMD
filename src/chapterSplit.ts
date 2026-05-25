@@ -12,6 +12,9 @@ export interface ChapterSplitPlanFile {
 
 export interface ChapterSplitPlanResult {
     sourcePath: string;
+    requestedSplitHeadingLevel: ChapterSplitHeadingLevelSetting;
+    chapterNotePaths: string[];
+    managedArtifactPaths: string[];
     outputFolderPath: string;
     tocPath: string;
     manifestPath: string;
@@ -23,6 +26,7 @@ export interface ChapterSplitPlanResult {
 export interface ChapterSplitResult extends ChapterSplitPlanResult {
     chapterCount: number;
     removedStaleFileCount: number;
+    removedStalePaths: string[];
 }
 
 export interface ChapterSplitOptions {
@@ -112,9 +116,15 @@ export function buildChapterSplitPlan(params: {
         breadcrumb: chapter.breadcrumb,
         nestedHeadings: chapter.nestedHeadings
     }));
+    const chapterNotePaths = chapters.map(chapter => chapter.outputPath);
+    const requestedSplitHeadingLevel = params.splitHeadingLevel ?? 'auto';
+    const managedArtifactPaths = [tocPath, manifestPath, ...chapterNotePaths];
 
     return {
         sourcePath: params.sourcePath,
+        requestedSplitHeadingLevel,
+        chapterNotePaths,
+        managedArtifactPaths,
         outputFolderPath,
         tocPath,
         manifestPath,
@@ -203,12 +213,12 @@ async function cleanupStaleGeneratedFiles(
     manifest: ChapterSplitManifest | null,
     nextPaths: Set<string>,
     reporter?: ProgressReporter
-): Promise<number> {
+): Promise<string[]> {
     if (!manifest) {
-        return 0;
+        return [];
     }
 
-    let removedCount = 0;
+    const removedPaths: string[] = [];
     for (const path of manifest.generatedPaths) {
         if (nextPaths.has(path)) {
             continue;
@@ -217,7 +227,7 @@ async function cleanupStaleGeneratedFiles(
         const existing = app.vault.getFileByPath(path);
         if (existing) {
             await app.vault.delete(existing);
-            removedCount += 1;
+            removedPaths.push(path);
             reporter?.log(`Removed stale chapter split file: ${path}`);
             continue;
         }
@@ -229,12 +239,12 @@ async function cleanupStaleGeneratedFiles(
             && await adapter.exists(path)
         ) {
             await adapter.remove(path);
-            removedCount += 1;
+            removedPaths.push(path);
             reporter?.log(`Removed stale chapter split file: ${path}`);
         }
     }
 
-    return removedCount;
+    return removedPaths;
 }
 
 export async function splitNoteByChapters(
@@ -254,12 +264,8 @@ export async function splitNoteByChapters(
     await ensureFolder(app, plan.outputFolderPath);
 
     const existingManifest = await loadManifest(app, plan.manifestPath);
-    const nextPaths = new Set<string>([
-        plan.tocPath,
-        plan.manifestPath,
-        ...plan.chapters.map(chapter => chapter.outputPath)
-    ]);
-    const removedStaleFileCount = await cleanupStaleGeneratedFiles(app, existingManifest, nextPaths, reporter);
+    const nextPaths = new Set<string>(plan.managedArtifactPaths);
+    const removedStalePaths = await cleanupStaleGeneratedFiles(app, existingManifest, nextPaths, reporter);
 
     for (const chapter of plan.chapters) {
         await writeMarkdownFile(app, chapter.outputPath, chapter.markdown);
@@ -269,13 +275,14 @@ export async function splitNoteByChapters(
     const manifest: ChapterSplitManifest = {
         version: 1,
         sourcePath: file.path,
-        generatedPaths: [plan.tocPath, ...plan.chapters.map(chapter => chapter.outputPath)]
+        generatedPaths: [plan.tocPath, ...plan.chapterNotePaths]
     };
     await writeMarkdownFile(app, plan.manifestPath, JSON.stringify(manifest, null, 2));
 
     return {
         ...plan,
         chapterCount: plan.chapters.length,
-        removedStaleFileCount
+        removedStaleFileCount: removedStalePaths.length,
+        removedStalePaths
     };
 }

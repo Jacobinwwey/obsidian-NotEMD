@@ -458,7 +458,7 @@ const context = await esbuild.context({
 
             expect(lines[0]).toContain('single-entry');
             expect(lines[0]).toContain('`src/main.ts -> main.js`');
-            expect(lines.some((line) => line.includes('`npm run audit:render-host` only proves the current self-contained `main.js` + inline `srcdoc` host contract'))).toBe(true);
+            expect(lines.some((line) => line.includes('`npm run audit:render-host` only proves the current self-contained `main.js` + inline `srcdoc` host contract, including rejection of stray `render-host.mjs` assets or references'))).toBe(true);
             expect(lines.some((line) => line.includes('true heavy-runtime isolation is still pending'))).toBe(true);
         });
 
@@ -605,7 +605,7 @@ const context = await esbuild.context({
             expect(template).toContain('obsidian plugin id=notemd vault=\"Research Vault\"');
             expect(template).toContain('## Packaging Boundary');
             expect(template).toContain('`src/main.ts -> main.js`');
-            expect(template).toContain('`npm run audit:render-host` only proves the current self-contained `main.js` + inline `srcdoc` host contract');
+            expect(template).toContain('`npm run audit:render-host` only proves the current self-contained `main.js` + inline `srcdoc` host contract, including rejection of stray `render-host.mjs` assets or references');
             expect(template).toContain('true heavy-runtime isolation is still pending');
             expect(template).toContain('## Packaging Contract');
             expect(template).toContain('`main.js`');

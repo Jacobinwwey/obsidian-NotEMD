@@ -25,6 +25,7 @@ describe('CLI capability manifest', () => {
         expect(ids).toContain('notemd:process-folder-with-notemd');
         expect(ids).toContain('notemd:generate-content-from-title');
         expect(ids).toContain('notemd:batch-generate-content-from-titles');
+        expect(ids).toContain('notemd:split-note-by-chapters');
         expect(ids).toContain('notemd:research-and-summarize-topic');
         expect(ids).toContain('notemd:translate-file');
         expect(ids).toContain('notemd:batch-translate-folder');
@@ -57,6 +58,7 @@ describe('CLI capability manifest', () => {
         const processFolder = manifest.commands.find(command => command.id === 'notemd:process-folder-with-notemd');
         const generateFromTitle = manifest.commands.find(command => command.id === 'notemd:generate-content-from-title');
         const batchGenerate = manifest.commands.find(command => command.id === 'notemd:batch-generate-content-from-titles');
+        const chapterSplit = manifest.commands.find(command => command.id === 'notemd:split-note-by-chapters');
         const researchSummarize = manifest.commands.find(command => command.id === 'notemd:research-and-summarize-topic');
         const batchTranslate = manifest.commands.find(command => command.id === 'notemd:batch-translate-folder');
         const extractCurrent = manifest.commands.find(command => command.id === 'notemd:extract-concepts-from-current-file');
@@ -189,6 +191,14 @@ describe('CLI capability manifest', () => {
             automationLevel: getSidebarActionAutomationLevel('batch-generate-from-titles'),
             requiredContext: getSidebarActionRequiredContext('batch-generate-from-titles'),
             sideEffectClass: getSidebarActionSideEffectClass('batch-generate-from-titles'),
+            mappingKind: 'exact'
+        }));
+
+        expect(chapterSplit).toEqual(expect.objectContaining({
+            operationId: 'content.split-note-by-chapters',
+            automationLevel: getSidebarActionAutomationLevel('split-note-by-chapters'),
+            requiredContext: getSidebarActionRequiredContext('split-note-by-chapters'),
+            sideEffectClass: getSidebarActionSideEffectClass('split-note-by-chapters'),
             mappingKind: 'exact'
         }));
 

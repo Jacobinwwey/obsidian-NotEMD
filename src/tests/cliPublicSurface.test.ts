@@ -21,6 +21,7 @@ describe('CLI public surface', () => {
         expect(ids).not.toContain('notemd:import-provider-profiles');
         expect(ids).not.toContain('notemd:test-llm-connection');
         expect(ids).not.toContain('notemd:run-developer-provider-diagnostic');
+        expect(ids).not.toContain('notemd:split-note-by-chapters');
 
         expect(providerProfileRedactedExport).toEqual(expect.objectContaining({
             operationId: 'provider.profile.export-redacted',

@@ -790,7 +790,7 @@ Notemd 在本地 Obsidian 运行，但部分功能会发起外部网络请求。
 - [CLI 能力矩阵（英文）](./docs/maintainer/notemd-cli-capability-matrix.md)
 - [CLI 能力矩阵（简体中文）](./docs/maintainer/notemd-cli-capability-matrix.zh-CN.md)
 - 仓库内维护者 CLI 帮助：`npm run cli:help`
-- export-only 调用入口：`npm run cli:invoke -- --vault <vault> --operation cli.public-surface.export --pretty`
+- 仓库内维护者调用示例：`npm run cli:invoke -- --vault <vault> --operation content.split-note-by-chapters --input-json '{"sourcePath":"docs/index.zh-CN.md","splitHeadingLevel":"h2"}' --pretty`
 - 当前 public-safe export 命令刻意收敛为：脱敏 provider 导出、capability manifest 导出、invocation contract 导出、public-surface 导出。
 
 ## 许可证

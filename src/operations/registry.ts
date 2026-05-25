@@ -4,6 +4,7 @@ import {
     getSidebarActionSideEffectClass,
     SidebarActionId
 } from '../workflowButtons';
+import { CHAPTER_SPLIT_HEADING_LEVEL_VALUES } from '../types';
 import { OperationCommandBinding, OperationDefinition, OperationSchema } from './types';
 
 const COMMAND_TRIGGER_SURFACES = ['command-palette', 'hotkey', 'official-cli-command'] as const;
@@ -302,6 +303,83 @@ const BATCH_GENERATE_FROM_TITLES_RESULT_SCHEMA: OperationSchema = {
             }
         },
         errors: ERROR_ARRAY_SCHEMA
+    }
+};
+
+const CHAPTER_SPLIT_INPUT_SCHEMA: OperationSchema = {
+    type: 'object',
+    required: ['sourcePath'],
+    properties: {
+        sourcePath: { type: 'string' },
+        splitHeadingLevel: {
+            type: 'string',
+            enum: [...CHAPTER_SPLIT_HEADING_LEVEL_VALUES]
+        }
+    }
+};
+
+const CHAPTER_SPLIT_RESULT_SCHEMA: OperationSchema = {
+    type: 'object',
+    required: [
+        'sourcePath',
+        'requestedSplitHeadingLevel',
+        'chapterNotePaths',
+        'managedArtifactPaths',
+        'outputFolderPath',
+        'tocPath',
+        'manifestPath',
+        'splitLevel',
+        'chapters',
+        'tocMarkdown',
+        'chapterCount',
+        'removedStaleFileCount',
+        'removedStalePaths'
+    ],
+    properties: {
+        sourcePath: { type: 'string' },
+        requestedSplitHeadingLevel: {
+            type: 'string',
+            enum: [...CHAPTER_SPLIT_HEADING_LEVEL_VALUES]
+        },
+        chapterNotePaths: STRING_ARRAY_SCHEMA,
+        managedArtifactPaths: STRING_ARRAY_SCHEMA,
+        outputFolderPath: { type: 'string' },
+        tocPath: { type: 'string' },
+        manifestPath: { type: 'string' },
+        splitLevel: {
+            anyOf: [
+                { type: 'number' },
+                { type: 'null' }
+            ]
+        },
+        chapters: {
+            type: 'array',
+            items: {
+                type: 'object',
+                required: ['title', 'outputPath', 'markdown', 'breadcrumb', 'nestedHeadings'],
+                properties: {
+                    title: { type: 'string' },
+                    outputPath: { type: 'string' },
+                    markdown: { type: 'string' },
+                    breadcrumb: STRING_ARRAY_SCHEMA,
+                    nestedHeadings: {
+                        type: 'array',
+                        items: {
+                            type: 'object',
+                            required: ['level', 'text'],
+                            properties: {
+                                level: { type: 'number' },
+                                text: { type: 'string' }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        tocMarkdown: { type: 'string' },
+        chapterCount: { type: 'number' },
+        removedStaleFileCount: { type: 'number' },
+        removedStalePaths: STRING_ARRAY_SCHEMA
     }
 };
 
@@ -812,6 +890,18 @@ const OPERATION_DEFINITIONS: OperationDefinition[] = [
         ],
         inputSchema: BATCH_GENERATE_FROM_TITLES_INPUT_SCHEMA,
         resultSchema: BATCH_GENERATE_FROM_TITLES_RESULT_SCHEMA
+    },
+    {
+        version: 1,
+        id: 'content.split-note-by-chapters',
+        automationLevel: 'safe',
+        requiredContext: 'none',
+        sideEffectClass: 'write-file',
+        commandBindings: [
+            createWorkflowCommandBinding('split-note-by-chapters', 'split-note-by-chapters')
+        ],
+        inputSchema: CHAPTER_SPLIT_INPUT_SCHEMA,
+        resultSchema: CHAPTER_SPLIT_RESULT_SCHEMA
     },
     {
         version: 1,

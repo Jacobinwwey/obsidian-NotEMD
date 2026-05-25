@@ -50,8 +50,8 @@ describe('render host bundle audit script', () => {
                 const title = "Notemd Render Host";
                 const shell = "notemd-render-shell";
                 const themeShim = "notemd-html-preview-theme-shim";
-                const external = "rendering-webview/index.html";
-            `, '/tmp/main.js')).toThrow('rendering-webview/index.html');
+                const external = "render-host.mjs";
+            `, '/tmp/main.js')).toThrow('render-host.mjs');
         });
 
         test('audits the built main.js bundle from disk', () => {
@@ -79,9 +79,9 @@ describe('render host bundle audit script', () => {
                     const shell = "notemd-render-shell";
                     const themeShim = "notemd-html-preview-theme-shim";
                 `, 'utf8');
-                fs.writeFileSync(path.join(tempRoot, 'render-host.html'), '<html></html>', 'utf8');
+                fs.writeFileSync(path.join(tempRoot, 'render-host.mjs'), 'export {}', 'utf8');
 
-                expect(() => auditRenderHostBundle(tempRoot)).toThrow('render-host.html');
+                expect(() => auditRenderHostBundle(tempRoot)).toThrow('render-host.mjs');
             } finally {
                 fs.rmSync(tempRoot, { recursive: true, force: true });
             }

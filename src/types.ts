@@ -13,7 +13,9 @@ export interface LLMProviderConfig {
     apiVersion?: string;  // Only used for Azure OpenAI
 }
 
-export type ChapterSplitHeadingLevelSetting = 'auto' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
+export const CHAPTER_SPLIT_HEADING_LEVEL_VALUES = ['auto', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'] as const;
+
+export type ChapterSplitHeadingLevelSetting = typeof CHAPTER_SPLIT_HEADING_LEVEL_VALUES[number];
 
 export interface FolderTaskFileSelectionProfile {
     id: string;
