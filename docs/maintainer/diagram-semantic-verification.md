@@ -62,6 +62,20 @@ obsidian plugin id=notemd vault=<vault-name>
 obsidian commands vault=<vault-name> filter=notemd
 ```
 
+## Public CLI Surface Contract
+
+The current public-safe CLI slice remains intentionally narrow. The exact current command IDs are:
+
+- `notemd:export-provider-profiles-redacted`
+- `notemd:export-cli-capability-manifest`
+- `notemd:export-cli-invocation-contract`
+- `notemd:export-cli-public-surface`
+
+Exclusion rule:
+
+- `notemd:export-provider-profiles` remains outside the public-safe slice because it carries `outputHandlingTags=contains-provider-credentials`
+- the public-safe slice is documented in `docs/maintainer/notemd-cli-capability-matrix.md` and exported from the same registry-backed metadata as the current capability/contract artifacts
+
 ## 4. Required Semantic Surfaces
 
 For qualifying changes, validate all impacted surfaces among these three:

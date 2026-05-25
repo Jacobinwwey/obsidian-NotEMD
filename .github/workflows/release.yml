@@ -110,14 +110,4 @@ jobs:
         run: node scripts/repo-saga/update-quarterly-saga.mjs --tag "$TAG_NAME"
 
       - name: Commit chronicle refresh
-        shell: bash
-        run: |
-          if git diff --quiet -- README.md README_*.md docs/repo-saga/*.svg; then
-            echo "Chronicle already up to date."
-            exit 0
-          fi
-          git config user.name "Jacobinwwey"
-          git config user.email "jacob.hxx.cn@outlook.com"
-          git add README.md README_*.md docs/repo-saga/*.svg
-          git commit -m "docs: refresh quarterly chronicle for $TAG_NAME"
-          git push origin HEAD:main
+        run: node scripts/release/commit-chronicle-refresh.js "$TAG_NAME"

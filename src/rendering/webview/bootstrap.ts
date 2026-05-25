@@ -1,10 +1,12 @@
 import { DiagramIntent } from '../../diagram/types';
+import { renderMermaidArtifactSvg } from '../preview/mermaidPreview';
 import { RenderWebviewTheme } from '../theme';
 import { renderVegaLiteArtifactSvg } from '../preview/vegaLitePreview';
 
 export const RENDER_HOST_BRIDGE_GLOBAL = '__NOTEMD_RENDER_BRIDGE__';
 
 export interface RenderHostBridge {
+    renderMermaidToSvg(content: string, theme?: RenderWebviewTheme, sourceIntent?: DiagramIntent): Promise<string>;
     renderVegaLiteToSvg(content: string, theme?: RenderWebviewTheme, sourceIntent?: DiagramIntent): Promise<string>;
 }
 
@@ -14,6 +16,14 @@ type RenderHostGlobal = typeof globalThis & {
 
 function createRenderHostBridge(): RenderHostBridge {
     return {
+        renderMermaidToSvg(content, theme = 'system', sourceIntent = 'flowchart') {
+            return renderMermaidArtifactSvg({
+                target: 'mermaid',
+                content,
+                mimeType: 'text/vnd.mermaid',
+                sourceIntent
+            }, undefined, theme);
+        },
         renderVegaLiteToSvg(content, theme = 'system', sourceIntent = 'dataChart') {
             return renderVegaLiteArtifactSvg({
                 target: 'vega-lite',
@@ -31,6 +41,52 @@ export function ensureRenderHostBridge(root: RenderHostGlobal = globalThis as Re
     }
 
     return root[RENDER_HOST_BRIDGE_GLOBAL] as RenderHostBridge;
+}
+
+export function buildMermaidRenderBootstrap(): string {
+    return String.raw`(async () => {
+    const shell = document.querySelector('[data-render-target="mermaid"]');
+    const mount = document.getElementById('notemd-mermaid-mount');
+    const sourceNode = document.getElementById('notemd-mermaid-source');
+    const fallback = document.querySelector('.notemd-render-fallback');
+    const errorNode = document.getElementById('notemd-mermaid-error');
+
+    if (!shell || !mount || !sourceNode) {
+        return;
+    }
+
+    const bridge = window.parent && window.parent.__NOTEMD_RENDER_BRIDGE__;
+    if (!bridge || typeof bridge.renderMermaidToSvg !== 'function') {
+        throw new Error('Mermaid render bridge is unavailable.');
+    }
+
+    const theme = shell.getAttribute('data-render-theme') || 'light';
+    const sourceIntent = shell.getAttribute('data-source-intent') || 'flowchart';
+    const svg = await bridge.renderMermaidToSvg(sourceNode.textContent || '', theme, sourceIntent);
+
+    mount.innerHTML = svg;
+    mount.hidden = false;
+    if (fallback instanceof HTMLDetailsElement) {
+        fallback.open = false;
+    }
+    if (errorNode) {
+        errorNode.hidden = true;
+        errorNode.textContent = '';
+    }
+})().catch((error) => {
+    const message = error instanceof Error ? error.message : String(error);
+    const errorNode = document.getElementById('notemd-mermaid-error');
+    const fallback = document.querySelector('.notemd-render-fallback');
+
+    if (errorNode) {
+        errorNode.hidden = false;
+        errorNode.textContent = message;
+    }
+    if (fallback instanceof HTMLDetailsElement) {
+        fallback.open = true;
+    }
+    console.error('Notemd render host failed to render Mermaid preview.', error);
+});`;
 }
 
 export function buildVegaLiteRenderBootstrap(): string {

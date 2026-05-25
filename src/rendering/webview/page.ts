@@ -103,7 +103,7 @@ ${payload.artifact.content}
 </html>`, payload);
     }
 
-    if (payload.artifact.target === 'vega-lite') {
+    if (payload.artifact.target === 'vega-lite' || payload.artifact.target === 'mermaid') {
         ensureRenderHostBridge();
     }
 

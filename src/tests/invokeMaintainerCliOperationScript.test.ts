@@ -9,7 +9,7 @@ type MaintainerOperationHelp = Record<string, {
 }>;
 
 describe('invoke maintainer CLI operation script', () => {
-    test('prints a simplified maintainer help surface with core commands and operation summaries', () => {
+    test('prints a simplified maintainer help surface with core commands, inputs, and operation summaries', () => {
         const scriptPath = path.join(__dirname, '..', '..', 'scripts', 'invoke-maintainer-cli-operation.js');
         const output = execFileSync(process.execPath, [scriptPath, '--help'], {
             encoding: 'utf8'
@@ -17,14 +17,18 @@ describe('invoke maintainer CLI operation script', () => {
 
         expect(output).toContain('Notemd maintainer CLI helper');
         expect(output).toContain('npm run cli:help');
-        expect(output).toContain('npm run cli:invoke -- --vault <vault> --operation <operation-id> [--pretty]');
+        expect(output).toContain('npm run cli:invoke -- --vault <vault> --operation <operation-id> [--input-file <path> | --input-json');
+        expect(output).toContain('Prefer --input-file for non-trivial payloads.');
 
         for (const [operationId, details] of Object.entries(OPERATION_HELP as MaintainerOperationHelp)) {
             expect(output).toContain(operationId);
             expect(output).toContain(details.summary);
+            expect(output).toContain(`required: ${details.required.join(', ')}`);
+            if (details.optional.length > 0) {
+                expect(output).toContain(`optional: ${details.optional.join(', ')}`);
+            }
         }
 
-        expect(output).toContain('Current helper scope is export-only and accepts no input payload.');
-        expect(output).toContain('maintainer-grade repo tooling');
+        expect(output).toContain('Maintainer bridge only; not a public CLI surface.');
     });
 });

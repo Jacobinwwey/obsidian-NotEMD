@@ -1,5 +1,8 @@
 ![GitHub Release](https://img.shields.io/github/v/release/Jacobinwwey/obsidian-NotEMD?label=Version&link=https%3A%2F%2Fgithub.com%2FJacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest) ![GitHub Downloads](https://img.shields.io/github/downloads/Jacobinwwey/obsidian-NotEMD/total?logo=Obsidian&label=Downloads&labelColor=%237C3AED&color=%235b5b5b&link=https%3A%2F%2Fgithub.com%2FJacobinwwey%2Fobsidian-NotEMD%2Freleases%2Flatest)	![GitHub Repo stars](https://img.shields.io/github/stars/Jacobinwwey/obsidian-NotEMD?style=social)
 
+[![Discord](https://img.shields.io/badge/Discord-Join%20Chat-5865F2?logo=discord&logoColor=white)](https://discord.gg/qnGgsQ9W) ![QQ](https://img.shields.io/badge/QQ-1104515865-12B7F5)
+
+
 # Plugin Notemd per Obsidian
 
 [English](./README.md) | [简体中文](./README_zh.md) | [Español](./README_es.md) | [Français](./README_fr.md) | [Deutsch](./README_de.md) | [Italiano](./README_it.md) | [Português](./README_pt.md) | [繁體中文](./README_zh_Hant.md) | [日本語](./README_ja.md) | [한국어](./README_ko.md) | [Русский](./README_ru.md) | [العربية](./README_ar.md) | [हिन्दी](./README_hi.md) | [বাংলা](./README_bn.md) | [Nederlands](./README_nl.md) | [Svenska](./README_sv.md) | [Suomi](./README_fi.md) | [Dansk](./README_da.md) | [Norsk](./README_no.md) | [Polski](./README_pl.md) | [Türkçe](./README_tr.md) | [עברית](./README_he.md) | [ไทย](./README_th.md) | [Ελληνικά](./README_el.md) | [Čeština](./README_cs.md) | [Magyar](./README_hu.md) | [Română](./README_ro.md) | [Українська](./README_uk.md) | [Tiếng Việt](./README_vi.md) | [Bahasa Indonesia](./README_id.md) | [Bahasa Melayu](./README_ms.md)
@@ -25,7 +28,7 @@ Notemd potenzia il tuo flusso di lavoro su Obsidian integrandosi con vari Modell
 
 Se ami usare Notemd, per favore considera di [⭐ dare una stella su GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) o [☕️ offrirmi un caffè](https://ko-fi.com/jacobinwwey).
 
-**Versione:** 1.8.5
+**Versione:** 1.8.9
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
@@ -694,7 +697,7 @@ Licenza MIT - Vedi il file [LICENSE](LICENSE) per i dettagli.
 ---
 
 
-*Notemd v1.8.5 - Migliora il tuo grafo di conoscenza su Obsidian con l'IA.*
+*Notemd v1.8.9 - Migliora il tuo grafo di conoscenza su Obsidian con l'IA.*
 
 
 
@@ -705,7 +708,7 @@ Questa cronaca trimestrale mantiene lo stile visivo originale di [repo-saga](htt
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.it.svg)
 
-_Aggiornato l'ultima volta per il tag di rilascio `1.8.5` il 2026-05-08. Data dell'ultimo commit: 2026-05-08._
+_Aggiornato l'ultima volta per il tag di rilascio `1.8.9` il 2026-05-25. Data dell'ultimo commit: 2026-05-25._
 <!-- repo-chronicle:end -->
 
 

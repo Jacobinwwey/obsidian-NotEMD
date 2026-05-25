@@ -1,32 +1,44 @@
 #!/usr/bin/env node
 
+const fs = require('fs');
 const { spawnSync } = require('child_process');
 const { OPERATION_HELP } = require('./lib/maintainer-cli-operation-help.js');
 
 function printUsage() {
   const operationDetails = Object.entries(OPERATION_HELP)
-    .map(([operationId, details]) => `  ${operationId}\n    ${details.summary}`)
+    .map(([operationId, details]) => {
+      const optionalLine = details.optional.length > 0
+        ? `\n    optional: ${details.optional.join(', ')}`
+        : '';
+      return `  ${operationId}\n    ${details.summary}\n    required: ${details.required.join(', ')}${optionalLine}`;
+    })
     .join('\n\n');
 
   console.log(`Notemd maintainer CLI helper
 
-Core commands:
+Help:
   npm run cli:help
-  npm run cli:invoke -- --vault <vault> --operation <operation-id> [--pretty]
+  node scripts/invoke-maintainer-cli-operation.js --help
 
-Direct form:
-  node scripts/invoke-maintainer-cli-operation.js --vault <vault> --operation <operation-id> [--plugin-id <plugin-id>] [--pretty]
+Invoke:
+  npm run cli:invoke -- --vault <vault> --operation <operation-id> [--input-file <path> | --input-json '<json>'] [--pretty]
+  node scripts/invoke-maintainer-cli-operation.js \\
+    --vault <vault-id-or-name> \\
+    --operation <operation-id> \\
+    [--input-file <path> | --input-json '<json>'] \\
+    [--plugin-id <plugin-id>] \\
+    [--pretty]
 
-Supported operations:
+Operations:
 ${operationDetails}
 
-Examples:
+Minimal examples:
+  npm run cli:invoke -- --vault docs --operation content.split-note-by-chapters --input-json '{"sourcePath":"docs/index.zh-CN.md"}' --pretty
   npm run cli:invoke -- --vault docs --operation provider.profile.export-redacted --pretty
-  npm run cli:invoke -- --vault docs --operation cli.public-surface.export --pretty
 
 Notes:
-  - Current helper scope is export-only and accepts no input payload.
-  - This is maintainer-grade repo tooling over obsidian-cli native eval, not a public CLI API.
+  - Prefer --input-file for non-trivial payloads.
+  - Maintainer bridge only; not a public CLI surface.
 `);
 }
 
@@ -48,6 +60,12 @@ function parseArgs(argv) {
       case '--plugin-id':
         args.pluginId = argv[++i];
         break;
+      case '--input-json':
+        args.inputJson = argv[++i];
+        break;
+      case '--input-file':
+        args.inputFile = argv[++i];
+        break;
       case '--pretty':
         args.pretty = true;
         break;
@@ -61,6 +79,22 @@ function parseArgs(argv) {
   }
 
   return args;
+}
+
+function loadInput(args) {
+  if (args.inputJson && args.inputFile) {
+    throw new Error('Use either --input-json or --input-file, not both.');
+  }
+
+  if (args.inputFile) {
+    return JSON.parse(fs.readFileSync(args.inputFile, 'utf8'));
+  }
+
+  if (args.inputJson) {
+    return JSON.parse(args.inputJson);
+  }
+
+  return {};
 }
 
 function buildEvalCode(pluginId, request) {
@@ -116,9 +150,10 @@ function main() {
       throw new Error(`Unsupported operation: ${args.operationId}`);
     }
 
+    const input = loadInput(args);
     const request = {
       operationId: args.operationId,
-      input: {}
+      input
     };
     const code = buildEvalCode(args.pluginId, request);
     const child = spawnSync(

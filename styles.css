@@ -104,34 +104,170 @@
     margin-top: 1em;
 }
 
-.notemd-diagram-preview-modal {
-    padding: 1em;
-    max-width: 920px;
-    width: min(92vw, 920px);
-    font-family: var(--notemd-sidebar-font);
+.modal.notemd-diagram-preview-shell {
+    width: min(96vw, 1152px);
+    max-width: min(96vw, 1152px);
+    box-sizing: border-box;
+    overflow-x: hidden;
 }
 
-.notemd-diagram-preview-toolbar {
+.modal.notemd-diagram-preview-shell .modal-content.notemd-diagram-preview-modal {
+    width: 100%;
+    max-width: 100%;
+}
+
+.notemd-diagram-preview-modal {
+    padding: 1em;
+    max-width: 100%;
+    width: 100%;
+    font-family: var(--notemd-sidebar-font);
+    box-sizing: border-box;
+    overflow-x: hidden;
+}
+
+.notemd-diagram-preview-layout {
+    display: grid;
+    grid-template-columns: minmax(220px, 260px) minmax(0, 1fr);
+    gap: 0.95em;
+    align-items: start;
+    min-width: 0;
+}
+
+.notemd-diagram-preview-rail {
     display: flex;
-    justify-content: flex-end;
-    gap: 0.6em;
-    margin-bottom: 0.8em;
+    flex-direction: column;
+    gap: 0.8em;
+    min-width: 0;
+}
+
+.notemd-diagram-preview-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55em;
+}
+
+.notemd-diagram-preview-actions button,
+.notemd-diagram-preview-history-button {
+    width: 100%;
+    background: var(--background-secondary);
+    color: var(--text-normal);
+    border: 1px solid var(--notemd-border);
+    border-radius: 9px;
+    padding: 0.48em 0.72em;
+    font-size: 12px;
+    font-family: var(--notemd-sidebar-font);
+    cursor: pointer;
+    box-shadow: var(--notemd-button-shadow);
+    transition: background-color 160ms ease, border-color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+}
+
+.notemd-diagram-preview-actions button:hover,
+.notemd-diagram-preview-history-button:hover {
+    background: color-mix(in srgb, var(--background-modifier-hover) 70%, #f0fdfa 30%);
+    border-color: var(--notemd-accent);
+    box-shadow: var(--notemd-button-shadow-hover);
+}
+
+.notemd-diagram-preview-actions button:active,
+.notemd-diagram-preview-history-button:active {
+    transform: translateY(1px) scale(0.995);
+    box-shadow: var(--notemd-button-shadow-active);
+}
+
+.notemd-diagram-preview-actions button:disabled,
+.notemd-diagram-preview-history-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.notemd-diagram-preview-history {
+    border: 1px solid var(--notemd-border);
+    border-radius: 12px;
+    padding: 0.75em;
+    background:
+        linear-gradient(
+            180deg,
+            color-mix(in srgb, var(--notemd-surface) 84%, #ffffff 16%),
+            color-mix(in srgb, var(--notemd-surface-alt) 92%, #ecfeff 8%)
+        );
+}
+
+.notemd-diagram-preview-history-title {
+    margin: 0 0 0.55em;
+    font-size: 12px;
+    line-height: 1.4;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.notemd-diagram-preview-history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+    max-height: min(40vh, 360px);
+    overflow-y: auto;
+    padding-right: 0.1em;
+}
+
+.notemd-diagram-preview-history-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.24em;
+    padding: 0.3em;
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--background-primary) 88%, #f0fdfa 12%);
+    border: 1px solid color-mix(in srgb, var(--notemd-border) 78%, #ffffff 22%);
+}
+
+.notemd-diagram-preview-history-item.is-active {
+    border-color: color-mix(in srgb, var(--interactive-accent) 44%, var(--notemd-border) 56%);
+    box-shadow: inset 0 1px 0 color-mix(in srgb, #ffffff 32%, transparent);
+}
+
+.notemd-diagram-preview-history-button {
+    text-align: left;
+}
+
+.notemd-diagram-preview-history-meta {
+    font-size: 11px;
+    line-height: 1.45;
+    color: var(--text-muted);
+    word-break: break-word;
+    overflow-wrap: anywhere;
+}
+
+.notemd-diagram-preview-stage {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
 }
 
 .notemd-diagram-preview-source-path {
     margin: 0 0 0.8em;
     color: var(--text-muted);
     font-size: 12px;
+    line-height: 1.45;
+    word-break: break-word;
+    overflow-wrap: anywhere;
 }
 
 .notemd-diagram-preview-body {
     min-height: 360px;
     max-height: 72vh;
-    overflow: auto;
+    overflow-y: auto;
+    overflow-x: hidden;
     border: 1px solid var(--notemd-border);
     border-radius: 12px;
     background: var(--notemd-surface-alt);
     padding: 1em;
+    min-width: 0;
+    box-sizing: border-box;
 }
 
 .notemd-diagram-preview-body.is-mermaid {
@@ -149,6 +285,7 @@
 .notemd-diagram-preview-body svg {
     display: block;
     max-width: 100%;
+    width: auto;
     height: auto;
 }
 
@@ -157,6 +294,16 @@
     min-height: 520px;
     border: 0;
     background: transparent;
+}
+
+@media (max-width: 860px) {
+    .notemd-diagram-preview-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .notemd-diagram-preview-history-list {
+        max-height: min(26vh, 220px);
+    }
 }
 
 .notemd-status-container {

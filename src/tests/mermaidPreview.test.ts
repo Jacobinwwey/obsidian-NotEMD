@@ -3,6 +3,7 @@ import { renderMermaidArtifactSvg } from '../rendering/preview/mermaidPreview';
 describe('mermaid preview renderer', () => {
     test('renders mermaid artifacts into svg markup using injected deps', async () => {
         const initialize = jest.fn();
+        const parse = jest.fn();
         const render = jest.fn().mockResolvedValue({ svg: '<svg><g /></svg>' });
 
         const svg = await renderMermaidArtifactSvg({
@@ -10,7 +11,7 @@ describe('mermaid preview renderer', () => {
             content: '```mermaid\nflowchart TD\nA --> B\n```',
             mimeType: 'text/vnd.mermaid',
             sourceIntent: 'flowchart'
-        }, { initialize, render }, 'dark');
+        }, { initialize, parse, render }, 'dark');
 
         expect(initialize).toHaveBeenCalledWith(expect.objectContaining({
             startOnLoad: false,
@@ -22,6 +23,7 @@ describe('mermaid preview renderer', () => {
 
     test('uses default mermaid theme for light previews', async () => {
         const initialize = jest.fn();
+        const parse = jest.fn();
         const render = jest.fn().mockResolvedValue({ svg: '<svg><g /></svg>' });
 
         await renderMermaidArtifactSvg({
@@ -29,7 +31,7 @@ describe('mermaid preview renderer', () => {
             content: 'mindmap\n  root((Core))',
             mimeType: 'text/vnd.mermaid',
             sourceIntent: 'mindmap'
-        }, { initialize, render }, 'light');
+        }, { initialize, parse, render }, 'light');
 
         expect(initialize).toHaveBeenCalledWith(expect.objectContaining({
             theme: 'default'
@@ -42,6 +44,6 @@ describe('mermaid preview renderer', () => {
             content: '{"nodes":[],"edges":[]}',
             mimeType: 'application/json',
             sourceIntent: 'canvasMap'
-        }, { initialize: jest.fn(), render: jest.fn() })).rejects.toThrow(/mermaid/i);
+        }, { initialize: jest.fn(), parse: jest.fn(), render: jest.fn() })).rejects.toThrow(/mermaid/i);
     });
 });

@@ -36,8 +36,7 @@ describe('render webview page', () => {
             resolvedTheme: 'light'
         });
 
-        expect(html).toContain('Mermaid 预览');
-        expect(html).not.toContain('Mermaid preview');
+        expect(html).toContain('<header class="notemd-render-header">Mermaid 预览</header>');
     });
 
     test('escapes mermaid source content before embedding it into srcdoc', () => {

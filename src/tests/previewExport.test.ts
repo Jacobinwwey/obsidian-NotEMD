@@ -83,6 +83,7 @@ describe('diagram preview export helpers', () => {
         }, {
             mermaid: {
                 initialize,
+                parse: jest.fn(),
                 render: jest.fn().mockResolvedValue({ svg: '<svg><path /></svg>' })
             },
             theme: 'dark'
@@ -145,6 +146,7 @@ describe('diagram preview export helpers', () => {
         }, {
             mermaid: {
                 initialize: jest.fn(),
+                parse: jest.fn(),
                 render: jest.fn().mockResolvedValue({ svg: '<svg width="40" height="20"></svg>' })
             },
             pngRaster: {

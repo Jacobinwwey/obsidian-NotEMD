@@ -14,12 +14,17 @@ const {
   DEFAULT_REPO_SAGA_LOCK_FILENAME,
   acquireRepoSagaExecutionLock,
 } = require("../lib/repo-saga-execution-lock.js");
+const {
+  countCanonicalHumanContributorsFromIdentityLines,
+  rewriteRepoSagaContributorCountsInSvg,
+} = require("../lib/repo-saga-contributor-normalization.js");
 const repoRoot = path.resolve(__dirname, "..", "..");
 const outputDir = path.join(repoRoot, "docs", "repo-saga");
 const buildRoot = path.join(repoRoot, ".cache", "repo-saga-build");
 const upstreamRoot = path.join(repoRoot, ".cache", "repo-saga-upstream");
 const repoSagaCacheRoot = path.join(repoRoot, ".cache", "repo-saga-sources");
 const repoSagaExecutionLockPath = path.join(repoRoot, ".cache", DEFAULT_REPO_SAGA_LOCK_FILENAME);
+const canonicalMailmapPath = path.join(repoRoot, ".mailmap");
 const granularitySourceRoot = path.join(repoSagaCacheRoot, "timeline-granularity");
 const localeSourceRoot = path.join(repoSagaCacheRoot, "locale-i18n");
 const legacyTempToolRoot = path.join(repoRoot, ".tmp_repo_saga_tool");
@@ -309,6 +314,8 @@ try {
       }
     }
 
+    normalizeRepoSagaContributorCounts(locales);
+
     if (writeReadmes) {
       for (const readme of rootReadmes) {
         updateReadme(
@@ -501,6 +508,117 @@ function runRepoSagaCli(locale, outDir) {
     ],
     upstreamRoot,
   );
+}
+
+function normalizeRepoSagaContributorCounts(locales) {
+  const contributorStats = collectRepoSagaContributorStats();
+  const svgPaths = new Set(
+    locales.map((locale) => svgPathForLocale(locale)),
+  );
+  svgPaths.add(path.join(outputDir, "notemd-development-history.svg"));
+
+  for (const svgPath of svgPaths) {
+    const currentSvg = fs.readFileSync(svgPath, "utf8");
+    const normalizedSvg = rewriteRepoSagaContributorCountsInSvg(currentSvg, contributorStats);
+    if (normalizedSvg !== currentSvg) {
+      fs.writeFileSync(svgPath, normalizedSvg, "utf8");
+    }
+  }
+}
+
+function collectRepoSagaContributorStats() {
+  if (!fs.existsSync(canonicalMailmapPath)) {
+    console.warn(`Canonical contributor mailmap not found at ${canonicalMailmapPath}; continuing with email-based human contributor normalization.`);
+  }
+
+  const quarterLabels = listCommitQuarterLabels();
+  if (!quarterLabels.length) {
+    throw new Error("Could not derive any commit quarters for repo-saga contributor normalization.");
+  }
+
+  return {
+    summary: {
+      rangeStartLabel: quarterLabels[0],
+      rangeEndLabel: quarterLabels[quarterLabels.length - 1],
+      contributorCount: countHumanContributorsForRange(),
+      tagCount: countAllTags(),
+    },
+    quarters: quarterLabels.map((label) => {
+      const { since, until } = quarterDateRangeFromLabel(label);
+      return {
+        label,
+        contributorCount: countHumanContributorsForRange(since, until),
+      };
+    }),
+  };
+}
+
+function listCommitQuarterLabels() {
+  const history = captureCommand("git", ["log", "--date=format:%Y-%m-%d", "--format=%ad", "--reverse", "--all"], repoRoot);
+  const labels = [];
+  const seen = new Set();
+
+  for (const dateText of history.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)) {
+    const label = quarterLabelFromDate(dateText);
+    if (label && !seen.has(label)) {
+      seen.add(label);
+      labels.push(label);
+    }
+  }
+
+  return labels;
+}
+
+function quarterLabelFromDate(dateText) {
+  const match = String(dateText).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!match) {
+    return "";
+  }
+
+  const year = Number(match[1]);
+  const monthIndex = Number(match[2]) - 1;
+  const quarter = Math.floor(monthIndex / 3) + 1;
+  return `${year} Q${quarter}`;
+}
+
+function quarterDateRangeFromLabel(label) {
+  const match = String(label).match(/^(\d{4}) Q([1-4])$/);
+  if (!match) {
+    throw new Error(`Invalid quarter label: ${label}`);
+  }
+
+  const year = Number(match[1]);
+  const quarterIndex = Number(match[2]) - 1;
+  const startMonthIndex = quarterIndex * 3;
+  const endMonthIndex = startMonthIndex + 2;
+
+  const since = new Date(Date.UTC(year, startMonthIndex, 1));
+  const until = new Date(Date.UTC(year, endMonthIndex + 1, 0));
+
+  return {
+    since: since.toISOString().slice(0, 10),
+    until: until.toISOString().slice(0, 10),
+  };
+}
+
+function countHumanContributorsForRange(since, until) {
+  const args = ["log", "--format=%aN <%aE>", "--all"];
+  if (since) {
+    args.push(`--since=${since}`);
+  }
+  if (until) {
+    args.push(`--until=${until}`);
+  }
+
+  return countCanonicalHumanContributorsFromIdentityLines(captureCommand("git", args, repoRoot));
+}
+
+function countAllTags() {
+  const tags = captureCommand("git", ["tag", "--list"], repoRoot);
+  if (!tags) {
+    return 0;
+  }
+  return tags.split(/\r?\n/).map((line) => line.trim()).filter(Boolean).length;
 }
 
 function runCommand(command, args, cwd, options = {}) {

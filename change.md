@@ -11,10 +11,11 @@ This document summarizes the major functional and architectural changes implemen
 - Recovered bounded backup-branch product slices onto the rewritten current `main` without reviving the disproven dedicated-runtime topology.
 - Current main now again includes settings reset, concept-note prerequisite guidance, concept synonym suppression, saved file-selection profiles for folder tasks, local knowledge retrieval, chapter split, and saved-artifact-aware diagram preview follow-through.
 - Kept the recovery architecture-compatible with the current single-entry `main.js` + inline `srcdoc` runtime truth rather than replaying older detached runtime assumptions.
+- Re-synchronized the shipped `1.8.9` truth across package metadata, the welcome-modal release digest, and the README family without reintroducing stale `render-host.mjs` packaging claims.
 
 ### Documentation And Archive Recovery
 
-- Restored backup-branch release/doc artifacts for `1.8.6` through `1.8.9` under `docs/releases/` as archival history instead of current packaged-version truth.
+- Restored backup-branch release/doc artifacts for `1.8.6` through `1.8.9` under `docs/releases/` and re-aligned the current package-facing version surfaces to the actual latest recovered release boundary.
 - Re-aligned README and progress documents so they no longer describe recovered current-main features as “missing on current main.”
 
 ### Verification Status

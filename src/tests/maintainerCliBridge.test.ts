@@ -1,8 +1,81 @@
 import { invokeMaintainerCliOperation } from '../maintainerCliBridge';
 
 describe('maintainer CLI bridge', () => {
+    test('dispatches bounded content operations with parsed input fields', async () => {
+        const host = {
+            batchGenerateContentForTitlesCommand: jest.fn().mockResolvedValue({ generatedCount: 3 }),
+            splitNoteByChaptersForPathCommand: jest.fn().mockResolvedValue({ tocPath: 'Docs/Topic_toc.md' }),
+            researchAndSummarizeForPathCommand: jest.fn().mockResolvedValue({ outputPath: 'Docs/Topic.md' }),
+            generateDiagramForPathCommand: jest.fn().mockResolvedValue({ kind: 'success', outputPath: 'Docs/Topic_diagram.md' }),
+            exportRedactedProviderProfilesCommand: jest.fn(),
+            exportCliCapabilityManifestCommand: jest.fn(),
+            exportCliInvocationContractCommand: jest.fn(),
+            exportCliPublicSurfaceCommand: jest.fn()
+        };
+
+        await invokeMaintainerCliOperation(host as any, {
+            operationId: 'content.batch-generate-from-titles',
+            input: {
+                folderPath: 'docs',
+                includeSubfoldersMode: 'exclude',
+                fileFilterMode: 'regex',
+                fileFilterPattern: 'index',
+                fileFilterTarget: 'basename'
+            }
+        });
+        expect(host.batchGenerateContentForTitlesCommand).toHaveBeenCalledWith(
+            undefined,
+            'docs',
+            expect.objectContaining({
+                includeSubfoldersMode: 'exclude',
+                fileFilterMode: 'regex',
+                fileFilterPattern: 'index',
+                fileFilterTarget: 'basename'
+            })
+        );
+
+        await invokeMaintainerCliOperation(host as any, {
+            operationId: 'content.split-note-by-chapters',
+            input: { sourcePath: 'docs/index.zh-CN.md' }
+        });
+        expect(host.splitNoteByChaptersForPathCommand).toHaveBeenCalledWith('docs/index.zh-CN.md', undefined);
+
+        await invokeMaintainerCliOperation(host as any, {
+            operationId: 'research.summarize-topic',
+            input: { sourcePath: 'docs/index.zh-CN.md', topic: 'RAG' }
+        });
+        expect(host.researchAndSummarizeForPathCommand).toHaveBeenCalledWith('docs/index.zh-CN.md', 'RAG', undefined);
+
+        await invokeMaintainerCliOperation(host as any, {
+            operationId: 'diagram.generate',
+            input: {
+                sourcePath: 'docs/index.zh-CN.md',
+                executionMode: 'save-mermaid',
+                requestedIntent: 'erDiagram',
+                compatibilityMode: 'legacy-mermaid',
+                targetLanguage: 'en'
+            }
+        });
+        expect(host.generateDiagramForPathCommand).toHaveBeenCalledWith(
+            'docs/index.zh-CN.md',
+            undefined,
+            {
+                executionMode: 'save-mermaid',
+                inputOverrides: {
+                    requestedIntent: 'erDiagram',
+                    compatibilityMode: 'legacy-mermaid',
+                    targetLanguage: 'en'
+                }
+            }
+        );
+    });
+
     test('dispatches redacted provider profile export', async () => {
         const host = {
+            batchGenerateContentForTitlesCommand: jest.fn(),
+            splitNoteByChaptersForPathCommand: jest.fn(),
+            researchAndSummarizeForPathCommand: jest.fn(),
+            generateDiagramForPathCommand: jest.fn(),
             exportRedactedProviderProfilesCommand: jest.fn().mockResolvedValue({ outputPath: 'redacted.json' }),
             exportCliCapabilityManifestCommand: jest.fn(),
             exportCliInvocationContractCommand: jest.fn(),
@@ -19,6 +92,10 @@ describe('maintainer CLI bridge', () => {
 
     test('dispatches CLI public surface export', async () => {
         const host = {
+            batchGenerateContentForTitlesCommand: jest.fn(),
+            splitNoteByChaptersForPathCommand: jest.fn(),
+            researchAndSummarizeForPathCommand: jest.fn(),
+            generateDiagramForPathCommand: jest.fn(),
             exportRedactedProviderProfilesCommand: jest.fn(),
             exportCliCapabilityManifestCommand: jest.fn(),
             exportCliInvocationContractCommand: jest.fn(),
@@ -34,8 +111,12 @@ describe('maintainer CLI bridge', () => {
         expect(result).toEqual({ outputPath: 'surface.json' });
     });
 
-    test('rejects unexpected input payloads', async () => {
+    test('rejects unexpected export input payloads', async () => {
         const host = {
+            batchGenerateContentForTitlesCommand: jest.fn(),
+            splitNoteByChaptersForPathCommand: jest.fn(),
+            researchAndSummarizeForPathCommand: jest.fn(),
+            generateDiagramForPathCommand: jest.fn(),
             exportRedactedProviderProfilesCommand: jest.fn(),
             exportCliCapabilityManifestCommand: jest.fn(),
             exportCliInvocationContractCommand: jest.fn(),
@@ -48,8 +129,12 @@ describe('maintainer CLI bridge', () => {
         })).rejects.toThrow('do not accept input fields');
     });
 
-    test('rejects positional input payloads', async () => {
+    test('rejects missing bounded-operation path fields', async () => {
         const host = {
+            batchGenerateContentForTitlesCommand: jest.fn(),
+            splitNoteByChaptersForPathCommand: jest.fn(),
+            researchAndSummarizeForPathCommand: jest.fn(),
+            generateDiagramForPathCommand: jest.fn(),
             exportRedactedProviderProfilesCommand: jest.fn(),
             exportCliCapabilityManifestCommand: jest.fn(),
             exportCliInvocationContractCommand: jest.fn(),
@@ -57,8 +142,8 @@ describe('maintainer CLI bridge', () => {
         };
 
         await expect(invokeMaintainerCliOperation(host as any, {
-            operationId: 'cli.invocation-contract.export',
-            input: 'bad'
-        })).rejects.toThrow('do not accept positional input payloads');
+            operationId: 'diagram.generate',
+            input: {}
+        })).rejects.toThrow('requires a non-empty "sourcePath" string');
     });
 });
