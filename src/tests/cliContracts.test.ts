@@ -91,6 +91,8 @@ describe('CLI invocation contract', () => {
                     operationInput: expect.any(Object),
                     generation: expect.any(Object),
                     followThrough: expect.any(Object),
+                    localKnowledgeContextUsed: expect.any(Object),
+                    localKnowledgeRetrieval: expect.any(Object),
                     outputPath: expect.any(Object),
                     previewOpened: expect.any(Object),
                     errorMessage: expect.any(Object)

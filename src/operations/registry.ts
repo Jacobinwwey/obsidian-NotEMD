@@ -139,6 +139,28 @@ const DIAGRAM_GENERATE_RESULT_SCHEMA: OperationSchema = {
         actionLabel: { type: 'string' },
         operationInput: { type: 'object' },
         generation: { type: 'object' },
+        localKnowledgeContextUsed: { type: 'boolean' },
+        localKnowledgeRetrieval: {
+            type: 'object',
+            properties: {
+                indexedFileCount: { type: 'number' },
+                indexedSectionCount: { type: 'number' },
+                matchedSectionCount: { type: 'number' },
+                returnedHitCount: { type: 'number' },
+                expandedSectionCount: { type: 'number' },
+                sourcePaths: {
+                    type: 'array',
+                    items: { type: 'string' }
+                },
+                usedSlidingWindowSize: { type: 'number' },
+                requestedTopK: { type: 'number' },
+                indexBuildMs: { type: 'number' },
+                queryMs: { type: 'number' },
+                contextCharCount: { type: 'number' },
+                excludeCurrentFileApplied: { type: 'boolean' },
+                excludedCurrentFileHitCount: { type: 'number' }
+            }
+        },
         followThrough: {
             type: 'object',
             properties: {

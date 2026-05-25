@@ -76,7 +76,23 @@ describe('diagram command execution', () => {
             modelName: mockSettings.providers[0].model,
             reporter: reporter as any,
             actionLabel: 'Summarize diagram',
-            i18n: STRINGS_EN as any
+            i18n: STRINGS_EN as any,
+            localKnowledgeContextUsed: false,
+            localKnowledgeRetrieval: {
+                indexedFileCount: 0,
+                indexedSectionCount: 0,
+                matchedSectionCount: 0,
+                returnedHitCount: 0,
+                expandedSectionCount: 0,
+                sourcePaths: [],
+                usedSlidingWindowSize: 0,
+                requestedTopK: 0,
+                indexBuildMs: 0,
+                queryMs: 0,
+                contextCharCount: 0,
+                excludeCurrentFileApplied: false,
+                excludedCurrentFileHitCount: 0
+            }
         });
 
         expect(runSpy).toHaveBeenCalledWith(expect.objectContaining({
@@ -102,6 +118,22 @@ describe('diagram command execution', () => {
                 previewOpened: false,
                 autoFixAttempted: mockSettings.autoMermaidFixAfterGenerate,
                 artifactTarget: 'mermaid'
+            },
+            localKnowledgeContextUsed: false,
+            localKnowledgeRetrieval: {
+                indexedFileCount: 0,
+                indexedSectionCount: 0,
+                matchedSectionCount: 0,
+                returnedHitCount: 0,
+                expandedSectionCount: 0,
+                sourcePaths: [],
+                usedSlidingWindowSize: 0,
+                requestedTopK: 0,
+                indexBuildMs: 0,
+                queryMs: 0,
+                contextCharCount: 0,
+                excludeCurrentFileApplied: false,
+                excludedCurrentFileHitCount: 0
             },
             outputPath: 'Notes/Topic_diagram.md',
             previewOpened: false
@@ -141,7 +173,23 @@ describe('diagram command execution', () => {
             reporter: reporter as any,
             actionLabel: 'Generate diagram',
             i18n: STRINGS_EN as any,
-            executionMode: 'save-artifact'
+            executionMode: 'save-artifact',
+            localKnowledgeContextUsed: true,
+            localKnowledgeRetrieval: {
+                indexedFileCount: 3,
+                indexedSectionCount: 9,
+                matchedSectionCount: 2,
+                returnedHitCount: 1,
+                expandedSectionCount: 2,
+                sourcePaths: ['Knowledge/Topology.md'],
+                usedSlidingWindowSize: 1,
+                requestedTopK: 3,
+                indexBuildMs: 8,
+                queryMs: 4,
+                contextCharCount: 88,
+                excludeCurrentFileApplied: true,
+                excludedCurrentFileHitCount: 0
+            }
         });
 
         expect(runSpy).toHaveBeenCalledWith(expect.objectContaining({
@@ -164,6 +212,22 @@ describe('diagram command execution', () => {
                 previewOpened: true,
                 autoFixAttempted: false,
                 artifactTarget: 'json-canvas'
+            },
+            localKnowledgeContextUsed: true,
+            localKnowledgeRetrieval: {
+                indexedFileCount: 3,
+                indexedSectionCount: 9,
+                matchedSectionCount: 2,
+                returnedHitCount: 1,
+                expandedSectionCount: 2,
+                sourcePaths: ['Knowledge/Topology.md'],
+                usedSlidingWindowSize: 1,
+                requestedTopK: 3,
+                indexBuildMs: 8,
+                queryMs: 4,
+                contextCharCount: 88,
+                excludeCurrentFileApplied: true,
+                excludedCurrentFileHitCount: 0
             },
             outputPath: 'Notes/Topic_diagram.canvas',
             previewOpened: true
@@ -202,7 +266,23 @@ describe('diagram command execution', () => {
             reporter: reporter as any,
             actionLabel: 'Preview diagram',
             i18n: STRINGS_EN as any,
-            executionMode: 'preview-artifact'
+            executionMode: 'preview-artifact',
+            localKnowledgeContextUsed: true,
+            localKnowledgeRetrieval: {
+                indexedFileCount: 2,
+                indexedSectionCount: 4,
+                matchedSectionCount: 1,
+                returnedHitCount: 1,
+                expandedSectionCount: 1,
+                sourcePaths: ['Knowledge/Preview.md'],
+                usedSlidingWindowSize: 0,
+                requestedTopK: 2,
+                indexBuildMs: 6,
+                queryMs: 3,
+                contextCharCount: 51,
+                excludeCurrentFileApplied: true,
+                excludedCurrentFileHitCount: 0
+            }
         });
 
         expect(result).toEqual({
@@ -213,6 +293,22 @@ describe('diagram command execution', () => {
                 previewOpened: true,
                 autoFixAttempted: false,
                 artifactTarget: 'mermaid'
+            },
+            localKnowledgeContextUsed: true,
+            localKnowledgeRetrieval: {
+                indexedFileCount: 2,
+                indexedSectionCount: 4,
+                matchedSectionCount: 1,
+                returnedHitCount: 1,
+                expandedSectionCount: 1,
+                sourcePaths: ['Knowledge/Preview.md'],
+                usedSlidingWindowSize: 0,
+                requestedTopK: 2,
+                indexBuildMs: 6,
+                queryMs: 3,
+                contextCharCount: 51,
+                excludeCurrentFileApplied: true,
+                excludedCurrentFileHitCount: 0
             },
             outputPath: undefined,
             previewOpened: true

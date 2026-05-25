@@ -69,6 +69,22 @@ function createDiagramHost() {
                     autoFixAttempted: false,
                     artifactTarget: 'json-canvas'
                 },
+                localKnowledgeContextUsed: true,
+                localKnowledgeRetrieval: {
+                    indexedFileCount: 2,
+                    indexedSectionCount: 5,
+                    matchedSectionCount: 1,
+                    returnedHitCount: 1,
+                    expandedSectionCount: 1,
+                    sourcePaths: ['Knowledge/Reference.md'],
+                    usedSlidingWindowSize: 0,
+                    requestedTopK: 3,
+                    indexBuildMs: 9,
+                    queryMs: 4,
+                    contextCharCount: 64,
+                    excludeCurrentFileApplied: true,
+                    excludedCurrentFileHitCount: 0
+                },
                 outputPath: 'Notes/Topic_diagram.canvas',
                 previewOpened: true
             }),
@@ -120,6 +136,22 @@ describe('diagram command host adapter', () => {
                 previewOpened: true,
                 autoFixAttempted: false,
                 artifactTarget: 'json-canvas'
+            },
+            localKnowledgeContextUsed: true,
+            localKnowledgeRetrieval: {
+                indexedFileCount: 2,
+                indexedSectionCount: 5,
+                matchedSectionCount: 1,
+                returnedHitCount: 1,
+                expandedSectionCount: 1,
+                sourcePaths: ['Knowledge/Reference.md'],
+                usedSlidingWindowSize: 0,
+                requestedTopK: 3,
+                indexBuildMs: 9,
+                queryMs: 4,
+                contextCharCount: 64,
+                excludeCurrentFileApplied: true,
+                excludedCurrentFileHitCount: 0
             },
             outputPath: 'Notes/Topic_diagram.canvas',
             previewOpened: true

@@ -245,7 +245,7 @@ release-facing 真值也已在当前主线上重新对齐：
 
 可能的切入点：
 
-1. 在标题生成与研究总结已经落地 retrieval 摘要与 timing telemetry 之后，继续把 richer result/evidence framing 推进到剩余的 chapter-split / diagram 邻近路径；
+1. 在标题生成、研究总结与 artifact-mode 图形生成已经落地 retrieval 摘要与 timing telemetry 之后，继续把 richer result/evidence framing 推进到剩余的 chapter-split 路径；
 2. shared maintainer helper 现已为依赖 retrieval 的路径补上简洁 payload 示例，下一步重点是让这些示例持续跟随 result schema 演进；
 3. 继续完善 sliding-window、snippet shaping、folder-scope 预期与 offline evaluation fixture 等调优文档。
 

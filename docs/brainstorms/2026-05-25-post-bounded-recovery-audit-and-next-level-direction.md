@@ -245,7 +245,7 @@ Goal:
 
 Likely areas:
 
-1. keep extending richer result/evidence framing to the remaining chapter-split / diagram-adjacent paths now that retrieval summaries plus timing telemetry are landed for title-generation and research;
+1. keep extending richer result/evidence framing to the remaining chapter-split paths now that retrieval summaries plus timing telemetry are landed for title-generation, research, and artifact-mode diagram generation;
 2. the shared maintainer helper now carries compact payload examples for the retrieval-dependent paths, so the next step is to keep those examples aligned as result schemas evolve;
 3. continue tuning/documentation around sliding-window size, snippet shaping, folder-scope expectations, and offline evaluation fixtures.
 

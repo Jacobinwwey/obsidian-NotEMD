@@ -9,6 +9,7 @@ import {
     DiagramCommandHostAdapter,
     DiagramCommandUiStrings
 } from './diagramCommandHostAdapter';
+import { LocalKnowledgeRetrievalSummary } from '../localKnowledgeBase';
 import { LLMProviderConfig, NotemdSettings, ProgressReporter } from '../types';
 
 export interface DiagramCommandExecutionHost {
@@ -27,6 +28,8 @@ export interface RunSaveMermaidDiagramExecutionParams {
     reporter: ProgressReporter;
     actionLabel: string;
     i18n: DiagramCommandUiStrings;
+    localKnowledgeContextUsed: boolean;
+    localKnowledgeRetrieval: LocalKnowledgeRetrievalSummary;
 }
 
 export interface RunArtifactDiagramExecutionParams extends RunSaveMermaidDiagramExecutionParams {
@@ -72,6 +75,8 @@ export async function runSaveMermaidDiagramExecutionWithHost(
             autoFixAttempted: settings.autoMermaidFixAfterGenerate,
             artifactTarget: result.artifact.target
         },
+        localKnowledgeContextUsed: params.localKnowledgeContextUsed,
+        localKnowledgeRetrieval: params.localKnowledgeRetrieval,
         outputPath,
         previewOpened: false
     };
@@ -127,6 +132,8 @@ export async function runArtifactDiagramExecutionWithHost(
             autoFixAttempted,
             artifactTarget: result.artifact.target
         },
+        localKnowledgeContextUsed: params.localKnowledgeContextUsed,
+        localKnowledgeRetrieval: params.localKnowledgeRetrieval,
         outputPath,
         previewOpened
     };

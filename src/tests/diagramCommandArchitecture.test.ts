@@ -190,27 +190,27 @@ describe('diagram command architecture', () => {
     test('artifact execution injects local knowledge context when diagram retrieval is enabled', async () => {
         plugin.settings.enableLocalKnowledgeRetrieval = true;
         plugin.settings.enableLocalKnowledgeForDiagramGeneration = true;
+        const buildContextDetails = jest.fn(() => ({
+            query: 'index',
+            context: 'Path: Knowledge/Reference.md\nExcerpt: Deployment topology.',
+            indexedFileCount: 1,
+            indexedSectionCount: 1,
+            matchedSectionCount: 1,
+            returnedHitCount: 1,
+            expandedSectionCount: 1,
+            sourcePaths: ['Knowledge/Reference.md'],
+            usedSlidingWindowSize: 0,
+            requestedTopK: 1,
+            indexBuildMs: 5,
+            queryMs: 2,
+            contextCharCount: 55,
+            excludeCurrentFileApplied: true,
+            excludedCurrentFileHitCount: 0
+        }));
         jest.spyOn(localKnowledgeBase, 'buildLocalKnowledgeBaseRetriever').mockResolvedValue({
             indexedFileCount: 1,
             indexedSectionCount: 1,
-            buildContextDetails: jest.fn(() => ({
-                query: 'index',
-                context: 'Path: Knowledge/Reference.md\nExcerpt: Deployment topology.',
-                indexedFileCount: 1,
-                indexedSectionCount: 1,
-                matchedSectionCount: 1,
-                returnedHitCount: 1,
-                expandedSectionCount: 1,
-                sourcePaths: ['Knowledge/Reference.md'],
-                usedSlidingWindowSize: 0,
-                requestedTopK: 1,
-                indexBuildMs: 5,
-                queryMs: 2,
-                contextCharCount: 55,
-                excludeCurrentFileApplied: true,
-                excludedCurrentFileHitCount: 0
-            })),
-            buildContext: jest.fn(() => 'Path: Knowledge/Reference.md\nExcerpt: Deployment topology.')
+            buildContextDetails
         } as any);
         const executionSpy = jest.spyOn(diagramCommandExecution, 'runArtifactDiagramExecutionWithHost').mockResolvedValue({
             generation: {
@@ -224,10 +224,26 @@ describe('diagram command architecture', () => {
                 autoFixAttempted: false,
                 artifactTarget: 'mermaid'
             },
+            localKnowledgeContextUsed: true,
+            localKnowledgeRetrieval: {
+                indexedFileCount: 1,
+                indexedSectionCount: 1,
+                matchedSectionCount: 1,
+                returnedHitCount: 1,
+                expandedSectionCount: 1,
+                sourcePaths: ['Knowledge/Reference.md'],
+                usedSlidingWindowSize: 0,
+                requestedTopK: 1,
+                indexBuildMs: 5,
+                queryMs: 2,
+                contextCharCount: 55,
+                excludeCurrentFileApplied: true,
+                excludedCurrentFileHitCount: 0
+            },
             previewOpened: false
         });
 
-        await (plugin as any).executeArtifactDiagramCommand(
+        const result = await (plugin as any).executeArtifactDiagramCommand(
             file,
             {
                 sourcePath: file.path,
@@ -251,6 +267,23 @@ describe('diagram command architecture', () => {
                 })
             })
         );
+        expect(buildContextDetails).toHaveBeenCalledWith(
+            expect.stringContaining('Topic'),
+            expect.objectContaining({
+                currentFilePath: 'Notes/Topic.md',
+                topK: mockSettings.localKnowledgeTopK,
+                slidingWindowSize: mockSettings.localKnowledgeSlidingWindowSize
+            })
+        );
+        expect(result).toEqual(expect.objectContaining({
+            localKnowledgeContextUsed: true,
+            localKnowledgeRetrieval: expect.objectContaining({
+                returnedHitCount: 1,
+                sourcePaths: ['Knowledge/Reference.md'],
+                indexBuildMs: 5,
+                queryMs: 2
+            })
+        }));
     });
 
     test('generate command delegates busy and orchestration to extracted diagram host adapter wrapper', async () => {
@@ -271,6 +304,22 @@ describe('diagram command architecture', () => {
                     plan: {} as any,
                     spec: {} as any,
                     artifact: {} as any
+                },
+                localKnowledgeContextUsed: false,
+                localKnowledgeRetrieval: {
+                    indexedFileCount: 0,
+                    indexedSectionCount: 0,
+                    matchedSectionCount: 0,
+                    returnedHitCount: 0,
+                    expandedSectionCount: 0,
+                    sourcePaths: [],
+                    usedSlidingWindowSize: 0,
+                    requestedTopK: 0,
+                    indexBuildMs: 0,
+                    queryMs: 0,
+                    contextCharCount: 0,
+                    excludeCurrentFileApplied: false,
+                    excludedCurrentFileHitCount: 0
                 },
                 outputPath: 'Notes/Topic_diagram.canvas',
                 previewOpened: true
@@ -323,6 +372,22 @@ describe('diagram command architecture', () => {
                 previewOpened: true,
                 autoFixAttempted: false,
                 artifactTarget: 'mermaid'
+            },
+            localKnowledgeContextUsed: false,
+            localKnowledgeRetrieval: {
+                indexedFileCount: 0,
+                indexedSectionCount: 0,
+                matchedSectionCount: 0,
+                returnedHitCount: 0,
+                expandedSectionCount: 0,
+                sourcePaths: [],
+                usedSlidingWindowSize: 0,
+                requestedTopK: 0,
+                indexBuildMs: 0,
+                queryMs: 0,
+                contextCharCount: 0,
+                excludeCurrentFileApplied: false,
+                excludedCurrentFileHitCount: 0
             },
             outputPath: 'Notes/Topic_diagram.md',
             previewOpened: true

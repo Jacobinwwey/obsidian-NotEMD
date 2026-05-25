@@ -2,6 +2,7 @@ import { TFile } from 'obsidian';
 import { formatI18n } from '../i18n';
 import { DiagramGenerationResult } from '../diagram/diagramGenerationService';
 import { DiagramIntent, isSupportedDiagramIntent } from '../diagram/types';
+import { LocalKnowledgeRetrievalSummary } from '../localKnowledgeBase';
 import { RenderArtifact } from '../rendering/types';
 import { DiagramOperationInput, DiagramOperationExecutionMode, buildDiagramOperationInput } from '../diagram/diagramGenerationService';
 import { LLMProviderConfig, NotemdSettings, ProgressReporter } from '../types';
@@ -50,6 +51,8 @@ export interface DiagramCommandUiStrings {
 export interface DiagramCommandExecutionDetails {
     generation: DiagramGenerationResult;
     followThrough: DiagramCommandFollowThroughDetails;
+    localKnowledgeContextUsed: boolean;
+    localKnowledgeRetrieval: LocalKnowledgeRetrievalSummary;
     outputPath?: string;
     previewOpened: boolean;
 }
@@ -71,6 +74,8 @@ export type DiagramCommandRunResult =
         operationInput: DiagramOperationInput;
         generation: DiagramGenerationResult;
         followThrough: DiagramCommandFollowThroughDetails;
+        localKnowledgeContextUsed: boolean;
+        localKnowledgeRetrieval: LocalKnowledgeRetrievalSummary;
         outputPath?: string;
         previewOpened: boolean;
     }
@@ -649,6 +654,8 @@ export async function runGenerateDiagramCommandWithHost(
             operationInput,
             generation: executionDetails.generation,
             followThrough: executionDetails.followThrough,
+            localKnowledgeContextUsed: executionDetails.localKnowledgeContextUsed,
+            localKnowledgeRetrieval: executionDetails.localKnowledgeRetrieval,
             outputPath: executionDetails.outputPath,
             previewOpened: executionDetails.previewOpened
         };
