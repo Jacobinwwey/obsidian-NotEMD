@@ -89,6 +89,7 @@ canonical: true
 3. preview history 与 saved-artifact-aware reopening 已进入可复用 preview shell。
 4. settings reset、concept-note prerequisite guidance、concept synonym suppression 与 folder file-selection profiles 都已回到当前主线。
 5. 面向 retrieval 的 note-processing 结果现在也已为标题生成与研究总结暴露 machine-readable 的 `localKnowledgeRetrieval` 摘要，包含 matched/returned counts、source paths、请求的 `topK`、sliding-window size、current-file exclusion telemetry、index/query timing 与 context-char count。
+6. 现在也已有专用的离线 retrieval-quality maintainer fixture：`npm run verify:local-kb-fixtures`。它直接对当前线上 MiniSearch retriever 跑一组小型回归语料，而不是再造一条评测专用检索路径。
 
 代码证据包括：
 
@@ -146,7 +147,7 @@ release-facing 真值也已在当前主线上重新对齐：
 | R6 新增 `章节拆分` 动作 | 已落地 | command/sidebar wiring 已存在于 current main |
 | R7 按标题拆分并生成 TOC 工件 | 已落地 | `src/chapterSplit.ts` 与对应测试已证明 |
 | R8 不回归 packaging / semantic 真值 | 已落地 | build/audit 仍只证明 `main.js` 单资产发货 |
-| R9 tests/docs/progress artifacts 对齐先前方案 | 已落地，但仍应继续维护 | 本文与矩阵更新就是这轮收口的一部分 |
+| R9 tests/docs/progress artifacts 对齐先前方案 | 已落地，且已进一步收紧 | 本文、矩阵更新以及 `verify:local-kb-fixtures` 现在同时覆盖了叙述层进度对齐与有界离线 retrieval-quality 回归检查 |
 | R10 keep CI green and stability bar intact | 当前检查点已落地 | 已由当前 repo gates 重新验证 |
 
 正确解释：
@@ -247,7 +248,7 @@ release-facing 真值也已在当前主线上重新对齐：
 
 1. 在标题生成、研究总结与 artifact-mode 图形生成已经落地 retrieval 摘要与 timing telemetry 之后，继续把 richer result/evidence framing 推进到剩余的 chapter-split 路径；
 2. shared maintainer helper 现已为依赖 retrieval 的路径补上简洁 payload 示例，下一步重点是让这些示例持续跟随 result schema 演进；
-3. 继续完善 sliding-window、snippet shaping、folder-scope 预期与 offline evaluation fixture 等调优文档。
+3. 继续完善 sliding-window、snippet shaping 与 folder-scope 预期等调优文档；对 offline fixture 则应把它视为已落地基线，后续重点转向扩充 query class 与 chapter-split evidence coverage，而不是重复证明“需要有这条夹具”。
 
 ## 6. Task 与文档收口规则
 
