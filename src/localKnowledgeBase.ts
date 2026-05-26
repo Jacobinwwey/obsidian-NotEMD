@@ -4,6 +4,8 @@ import { App, TFile } from 'obsidian';
 import { NotemdSettings, ProgressReporter } from './types';
 import { parseMarkdownSections } from './markdownSectionUtils';
 
+export type LocalKnowledgeTaskScope = 'generateTitle' | 'batchGenerateFromTitles' | 'researchSummarize' | 'diagramGeneration';
+
 interface LocalKnowledgeDocument {
     id: string;
     path: string;
@@ -66,11 +68,65 @@ function truncateSnippet(value: string, maxChars: number): string {
     return `${value.slice(0, Math.max(0, maxChars - 1)).trimEnd()}…`;
 }
 
-function buildKnowledgePathList(settings: NotemdSettings): string[] {
-    return settings.localKnowledgeBasePaths
+function buildKnowledgePathListFromValue(value: string): string[] {
+    return value
         .split('\n')
         .map(path => normalizeVaultPath(path))
         .filter(Boolean);
+}
+
+function getTaskSpecificKnowledgePathValue(
+    settings: NotemdSettings,
+    taskScope?: LocalKnowledgeTaskScope
+): string {
+    switch (taskScope) {
+        case 'generateTitle':
+            return settings.localKnowledgeGenerateTitlePaths;
+        case 'batchGenerateFromTitles':
+            return settings.localKnowledgeBatchGenerateFromTitlesPaths;
+        case 'researchSummarize':
+            return settings.localKnowledgeResearchSummarizePaths;
+        case 'diagramGeneration':
+            return settings.localKnowledgeDiagramGenerationPaths;
+        default:
+            return '';
+    }
+}
+
+export function resolveLocalKnowledgePathList(
+    settings: NotemdSettings,
+    taskScope?: LocalKnowledgeTaskScope
+): string[] {
+    const taskSpecificPaths = buildKnowledgePathListFromValue(
+        getTaskSpecificKnowledgePathValue(settings, taskScope)
+    );
+    if (taskSpecificPaths.length > 0) {
+        return taskSpecificPaths;
+    }
+
+    return buildKnowledgePathListFromValue(settings.localKnowledgeBasePaths);
+}
+
+export function isLocalKnowledgeEnabledForTask(
+    settings: NotemdSettings,
+    taskScope: LocalKnowledgeTaskScope
+): boolean {
+    if (!settings.enableLocalKnowledgeRetrieval) {
+        return false;
+    }
+
+    switch (taskScope) {
+        case 'generateTitle':
+            return settings.enableLocalKnowledgeForGenerateTitle;
+        case 'batchGenerateFromTitles':
+            return settings.enableLocalKnowledgeForBatchGenerateFromTitles;
+        case 'researchSummarize':
+            return settings.enableLocalKnowledgeForResearchSummarize;
+        case 'diagramGeneration':
+            return settings.enableLocalKnowledgeForDiagramGeneration;
+        default:
+            return false;
+    }
 }
 
 function isKnowledgeFileCandidate(file: TFile): boolean {
@@ -302,14 +358,15 @@ class MiniSearchLocalKnowledgeRetriever implements LocalKnowledgeBaseRetriever {
 export async function buildLocalKnowledgeBaseRetriever(
     app: App,
     settings: NotemdSettings,
-    reporter?: ProgressReporter
+    reporter?: ProgressReporter,
+    taskScope?: LocalKnowledgeTaskScope
 ): Promise<LocalKnowledgeBaseRetriever | null> {
     const buildStartMs = Date.now();
     if (!settings.enableLocalKnowledgeRetrieval) {
         return null;
     }
 
-    const configuredPaths = buildKnowledgePathList(settings);
+    const configuredPaths = resolveLocalKnowledgePathList(settings, taskScope);
     if (configuredPaths.length === 0) {
         reporter?.log('Local knowledge retrieval is enabled, but no local knowledge paths are configured.');
         return null;

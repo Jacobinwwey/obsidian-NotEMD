@@ -1110,7 +1110,18 @@ export async function runGenerateContentForTitleCommandWithHost(
             try {
                 await host.loadSettings();
                 uiStrings = host.getUiStrings();
-                commandResult = await generateContentForTitleImpl(host.getApp(), host.getSettings(), file, useReporter);
+                const settings = host.getSettings();
+                commandResult = await generateContentForTitleImpl(
+                    host.getApp(),
+                    settings,
+                    file,
+                    useReporter,
+                    {
+                        enableLocalKnowledge: settings.enableLocalKnowledgeRetrieval
+                            && settings.enableLocalKnowledgeForGenerateTitle,
+                        localKnowledgeTaskScope: 'generateTitle'
+                    }
+                );
                 await host.maybeAutoFixMermaidForFile(file, useReporter, 'generate from title');
 
                 const completeText = host.getActionCompleteText(actionLabel);
@@ -1206,7 +1217,12 @@ export async function runCreateWikiLinkAndGenerateFromSelectionCommandWithHost(
                 useReporter.log(`Created blank note: ${notePath}`);
             }
 
-            await generateContentForTitleImpl(host.getApp(), host.getSettings(), newFile, useReporter);
+            const settings = host.getSettings();
+            await generateContentForTitleImpl(host.getApp(), settings, newFile, useReporter, {
+                enableLocalKnowledge: settings.enableLocalKnowledgeRetrieval
+                    && settings.enableLocalKnowledgeForGenerateTitle,
+                localKnowledgeTaskScope: 'generateTitle'
+            });
             await host.maybeAutoFixMermaidForFile(newFile, useReporter, 'create wiki-link and generate');
 
             const completeText = host.getActionCompleteText(actionLabel);

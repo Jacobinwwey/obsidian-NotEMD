@@ -178,7 +178,13 @@ describe('settings page i18n coverage', () => {
         expect(en.settings.localKnowledge.pathsName).toBeDefined();
         expect(en.settings.localKnowledge.slidingWindowSizeName).toBeDefined();
         expect(en.settings.localKnowledge.slidingWindowSizeDesc).toBeDefined();
+        expect(en.settings.localKnowledge.generateTitleName).toBeDefined();
+        expect(en.settings.localKnowledge.generateTitlePathsName).toBeDefined();
+        expect(en.settings.localKnowledge.batchGeneratePathsName).toBeDefined();
+        expect(en.settings.localKnowledge.researchSummarizePathsName).toBeDefined();
         expect(en.settings.localKnowledge.generateDiagramName).toBeDefined();
+        expect(en.settings.localKnowledge.generateDiagramPathsName).toBeDefined();
+        expect(en.settings.localKnowledge.taskPathsPlaceholder).toBeDefined();
         expect(en.settings.chapterSplit.heading).toBeDefined();
         expect(en.settings.chapterSplit.headingLevelName).toBeDefined();
         expect(en.settings.chapterSplit.headingLevelDesc).toBeDefined();
@@ -191,7 +197,10 @@ describe('settings page i18n coverage', () => {
         expect(zhCn.settings.workflowBuilder.heading).not.toBe(en.settings.workflowBuilder.heading);
         expect(zhCn.settings.localKnowledge.heading).not.toBe(en.settings.localKnowledge.heading);
         expect(zhCn.settings.localKnowledge.slidingWindowSizeName).not.toBe(en.settings.localKnowledge.slidingWindowSizeName);
+        expect(zhCn.settings.localKnowledge.generateTitleName).not.toBe(en.settings.localKnowledge.generateTitleName);
+        expect(zhCn.settings.localKnowledge.generateTitlePathsName).not.toBe(en.settings.localKnowledge.generateTitlePathsName);
         expect(zhCn.settings.localKnowledge.generateDiagramName).not.toBe(en.settings.localKnowledge.generateDiagramName);
+        expect(zhCn.settings.localKnowledge.generateDiagramPathsName).not.toBe(en.settings.localKnowledge.generateDiagramPathsName);
         expect(zhCn.settings.chapterSplit.heading).not.toBe(en.settings.chapterSplit.heading);
         expect(zhCn.settings.chapterSplit.headingLevelName).not.toBe(en.settings.chapterSplit.headingLevelName);
         expect(zhCn.settings.extractConceptsTask.replaceSynonymsName).not.toBe(en.settings.extractConceptsTask.replaceSynonymsName);
@@ -202,6 +211,8 @@ describe('settings page i18n coverage', () => {
         expect(zhTw.settings.localKnowledge.heading).not.toBe(en.settings.localKnowledge.heading);
         expect(zhTw.settings.localKnowledge.pathsName).not.toBe(en.settings.localKnowledge.pathsName);
         expect(zhTw.settings.localKnowledge.slidingWindowSizeName).not.toBe(en.settings.localKnowledge.slidingWindowSizeName);
+        expect(zhTw.settings.localKnowledge.generateTitleName).not.toBe(en.settings.localKnowledge.generateTitleName);
+        expect(zhTw.settings.localKnowledge.generateTitlePathsName).not.toBe(en.settings.localKnowledge.generateTitlePathsName);
         expect(zhTw.settings.chapterSplit.heading).not.toBe(en.settings.chapterSplit.heading);
         expect(zhTw.settings.chapterSplit.headingLevelName).not.toBe(en.settings.chapterSplit.headingLevelName);
         expect(zhTw.settings.extractConceptsTask.replaceSynonymsName).not.toBe(en.settings.extractConceptsTask.replaceSynonymsName);

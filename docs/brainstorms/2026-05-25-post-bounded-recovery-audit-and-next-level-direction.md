@@ -1,6 +1,6 @@
 ---
 date: 2026-05-25
-last_updated: 2026-05-25
+last_updated: 2026-05-26
 topic: post-bounded-recovery-audit-and-next-level-direction
 canonical: true
 ---
@@ -82,14 +82,16 @@ Interpretation:
 The previously recovered product slices are now real current-main facts and no longer just backup-branch evidence:
 
 1. local knowledge retrieval is wired for:
+   - `Generate from title`
    - `Batch generate from titles`
    - `Research & Summarize`
    - `Generate diagram`
-2. chapter split is live, with TOC/manifest output, deterministic TOC front-matter metadata, repeated-heading-safe nested block refs inside generated chapter notes/TOC targets, manifest-backed guarded rerun overwrite semantics, and stale generated-file cleanup.
-3. preview history and saved-artifact-aware reopening are live in the reusable preview shell.
-4. settings reset, concept-note prerequisite guidance, concept synonym suppression, and folder file-selection profiles are already back on current main.
-5. retrieval-dependent note-processing results now expose machine-readable `localKnowledgeRetrieval` summaries for title generation and research, including matched/returned counts, source paths, requested `topK`, sliding-window size, current-file exclusion telemetry, index/query timing, and context-char count.
-6. a dedicated offline retrieval-quality maintainer fixture now exists as `npm run verify:local-kb-fixtures`; it exercises the live MiniSearch-based retriever against a small regression corpus instead of introducing a separate evaluation-only retrieval path.
+2. local knowledge retrieval settings now support mixed vault-relative file/folder path lists plus per-task override lists, with blank task overrides falling back to the default path list.
+3. chapter split is live, with TOC/manifest output, deterministic TOC front-matter metadata, repeated-heading-safe nested block refs inside generated chapter notes/TOC targets, manifest-backed guarded rerun overwrite semantics, and stale generated-file cleanup.
+4. preview history and saved-artifact-aware reopening are live in the reusable preview shell.
+5. settings reset, concept-note prerequisite guidance, concept synonym suppression, and folder file-selection profiles are already back on current main.
+6. retrieval-dependent note-processing results now expose machine-readable `localKnowledgeRetrieval` summaries for title generation and research, including matched/returned counts, source paths, requested `topK`, sliding-window size, current-file exclusion telemetry, index/query timing, and context-char count.
+7. a dedicated offline retrieval-quality maintainer fixture now exists as `npm run verify:local-kb-fixtures`; it exercises the live MiniSearch-based retriever against a small regression corpus instead of introducing a separate evaluation-only retrieval path.
 
 Code-backed evidence includes:
 
@@ -139,10 +141,10 @@ PRD requirement status on current `main`:
 
 | Requirement | Status | Notes |
 |---|---|---|
-| R1 local KB retrieval for targeted tasks | Landed | Implemented through `src/localKnowledgeBase.ts` and task-specific integration paths |
+| R1 local KB retrieval for targeted tasks | Landed | Implemented through `src/localKnowledgeBase.ts` and task-specific integration paths, now including `Generate from title` |
 | R2 local-only / no cloud / no daemon / no GPU | Landed | Current implementation uses in-plugin MiniSearch indexing |
 | R3 no regression when retrieval disabled | Landed | Guarded by optional settings and integration tests |
-| R4 settings-driven / conservative defaults | Landed | Current settings path is user-visible and opt-in |
+| R4 settings-driven / conservative defaults | Landed | Current settings path is user-visible and opt-in, with default file/folder source paths plus task-scoped overrides |
 | R5 comparison research against candidate OSS | Landed | Recorded under `.trellis/tasks/05-19-local-kb-retrieval-chapter-split-stage-b2cd/research/` |
 | R6 add `章节拆分` action | Landed | Command/sidebar wiring exists on current main |
 | R7 heading-based split + TOC artifact | Landed | `src/chapterSplit.ts` plus tests |

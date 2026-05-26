@@ -199,6 +199,11 @@ describe('note processing command host adapter', () => {
     test('generate from title command runs shared host orchestration and completes reporter cleanup', async () => {
         const reporter = createReporter();
         const { host, getBusy } = createHost(reporter);
+        host.getSettings.mockReturnValue({
+            ...mockSettings,
+            enableLocalKnowledgeRetrieval: true,
+            enableLocalKnowledgeForGenerateTitle: true
+        } as any);
         const file = {
             name: 'Topic.md',
             basename: 'Topic',
@@ -233,7 +238,16 @@ describe('note processing command host adapter', () => {
         const result = await runGenerateContentForTitleCommandWithHost(host, file, reporter, generateImpl);
 
         expect(host.setBusy).toHaveBeenNthCalledWith(1, true);
-        expect(generateImpl).toHaveBeenCalledWith(host.getApp(), mockSettings, file, reporter);
+        expect(generateImpl).toHaveBeenCalledWith(
+            host.getApp(),
+            host.getSettings(),
+            file,
+            reporter,
+            expect.objectContaining({
+                enableLocalKnowledge: true,
+                localKnowledgeTaskScope: 'generateTitle'
+            })
+        );
         expect(host.maybeAutoFixMermaidForFile).toHaveBeenCalledWith(file, reporter, 'generate from title');
         expect(reporter.updateStatus).toHaveBeenCalledWith('Done Generate from title', 100);
         expect(host.showNotice).toHaveBeenCalledWith('Generated Topic.md');
@@ -533,7 +547,16 @@ describe('note processing command host adapter', () => {
             'Topic',
             { minimalTemplate: false }
         );
-        expect(generateImpl).toHaveBeenCalledWith(host.getApp(), host.getSettings(), createdFile, reporter);
+        expect(generateImpl).toHaveBeenCalledWith(
+            host.getApp(),
+            host.getSettings(),
+            createdFile,
+            reporter,
+            expect.objectContaining({
+                enableLocalKnowledge: false,
+                localKnowledgeTaskScope: 'generateTitle'
+            })
+        );
         expect(host.maybeAutoFixMermaidForFile).toHaveBeenCalledWith(createdFile, reporter, 'create wiki-link and generate');
         expect(host.showNotice).toHaveBeenCalledWith('Generated content for [[Alpha]]!');
         expect(host.completeReporter).toHaveBeenCalledWith(reporter);

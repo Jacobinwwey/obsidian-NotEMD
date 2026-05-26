@@ -300,6 +300,12 @@ describe('diagram command architecture', () => {
                 slidingWindowSize: mockSettings.localKnowledgeSlidingWindowSize
             })
         );
+        expect(localKnowledgeBase.buildLocalKnowledgeBaseRetriever).toHaveBeenCalledWith(
+            mockApp,
+            plugin.settings,
+            reporter,
+            'diagramGeneration'
+        );
         expect(result).toEqual(expect.objectContaining({
             localKnowledgeContextUsed: true,
             localKnowledgeRetrieval: expect.objectContaining({
