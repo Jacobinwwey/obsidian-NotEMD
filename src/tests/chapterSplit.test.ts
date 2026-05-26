@@ -62,14 +62,17 @@ describe('chapterSplit', () => {
             outputPath: 'Docs/Platform_chapters/01-overview.md'
         }));
         expect(plan.chapters[0].markdown).toContain('## Overview');
-        expect(plan.chapters[0].markdown).toContain('### Scope');
+        expect(plan.chapters[0].markdown).toContain('### Scope ^notemd-scope');
         expect(plan.chapters[1]).toEqual(expect.objectContaining({
             title: 'Delivery',
             outputPath: 'Docs/Platform_chapters/02-delivery.md'
         }));
         expect(plan.tocMarkdown).toContain('[[Docs/Platform_chapters/01-overview|01. Overview]]');
-        expect(plan.tocMarkdown).toContain('[[Docs/Platform_chapters/01-overview#Scope|Scope]]');
+        expect(plan.tocMarkdown).toContain('[[Docs/Platform_chapters/01-overview#^notemd-scope|Scope]]');
         expect(plan.tocMarkdown).toContain('[[Docs/Platform_chapters/02-delivery|02. Delivery]]');
+        expect(plan.chapters[0].nestedHeadings).toEqual([
+            { level: 3, text: 'Scope', blockId: 'notemd-scope' }
+        ]);
     });
 
     test('uses a stable fallback chapter file name when the title normalizes to an empty slug', () => {
@@ -124,6 +127,36 @@ describe('chapterSplit', () => {
 
         expect(plan.outputFolderPath).toBe('Docs/chapter-split-source_chapters');
         expect(plan.tocPath).toBe('Docs/chapter-split-source_chapters/chapter-split-source_TOC.md');
+    });
+
+    test('uses stable block references in toc links when nested headings repeat within one chapter', () => {
+        const markdown = [
+            '# Platform',
+            '',
+            '## Overview',
+            'Overview body',
+            '',
+            '### Risks',
+            'Risk body',
+            '',
+            '### Risks',
+            'Second risk body'
+        ].join('\n');
+
+        const plan = buildChapterSplitPlan({
+            sourcePath: 'Docs/Platform.md',
+            sourceBasename: 'Platform',
+            markdown
+        });
+
+        expect(plan.chapters[0].markdown).toContain('### Risks ^notemd-risks');
+        expect(plan.chapters[0].markdown).toContain('### Risks ^notemd-risks-2');
+        expect(plan.tocMarkdown).toContain('[[Docs/Platform_chapters/01-overview#^notemd-risks|Risks]]');
+        expect(plan.tocMarkdown).toContain('[[Docs/Platform_chapters/01-overview#^notemd-risks-2|Risks]]');
+        expect(plan.chapters[0].nestedHeadings).toEqual([
+            { level: 3, text: 'Risks', blockId: 'notemd-risks' },
+            { level: 3, text: 'Risks', blockId: 'notemd-risks-2' }
+        ]);
     });
 
     test('reruns chapter split against existing generated files and removes stale files even when abstract lookups are non-TFile values', async () => {
