@@ -1,6 +1,6 @@
 ---
 date: 2026-05-20
-last_updated: 2026-05-25
+last_updated: 2026-05-26
 topic: unified-follow-through-matrix
 canonical: true
 ---
@@ -36,7 +36,7 @@ canonical: true
 | A. Packaging / semantic verification | 当前 live build/audit 真值仍是单入口 `main.js` + inline `srcdoc`；源码中仍保留 render-host runtime 候选模块，但当前执行链与审计真值已明确把它们保持为 non-shipped，并拒绝残留的 `render-host.mjs` 资产/引用 | 更晚的备份分支曾进入更宽的 dedicated runtime-asset 通道 | 在未来真正补齐 build + release + audit + 文档之前，继续把当前 source-only 决策写清楚 | 不要因为 `src/` 里重新出现 runtime 候选代码，就继续把 `render-host.mjs` 写成当前主线已发货 | P0 |
 | B. CLI / automation surface | 当前主线现已具备 registry-backed 的 config/profile export/import、脱敏 provider 导出、public-surface 导出、已进入 registry-backed typed contract 的 `content.split-note-by-chapters`，以及覆盖有界 path-based 操作与 export 操作的 repo-local maintainer help/invoke 脚本 | 备份分支还承载过更宽的 maintainer-bridge 设想，但当前 reintegration 刻意保持在窄边界内 | 继续把 maintainer helper 的边界写清楚；若任何 path-based operation 要提升为更广或更公共的 CLI 面，必须同批补齐契约/测试/文档 | 不要把当前能力面写成通用 public CLI，或无边界的 maintainer mutation API | P1 |
 | C. 用户可见 settings / preview / onboarding | 当前主线现已具备 preview flows、preview history、欢迎弹窗 release digest、provider diagnostics、settings reset、concept-note 前置配置提示、API liveness/activity UI，以及面向已保存工件的 preview 恢复链路，并已重新同步 `1.8.9` release-facing version truth | 备份分支还有更多 UX 收口尝试，但目前已恢复切片已在当前主线上重新证明 | 继续保持 sidebar / preview / settings 的文案、i18n、已保存工件行为与 release-facing version truth 一致 | 不要再把这些 UX guardrail 写成“当前主线缺失”，但也不要顺手高估尚未恢复的 UX 想法 | P1 |
-| D. Regex / 文件筛选 / local-KB / chapter split | 当前主线现已具备 file-selection profiles、文件夹 regex/glob 筛选、`relativePath` / `basename` 匹配、可选子目录范围控制、local-KB retrieval、chapter split、面向重复标题的稳定 TOC block ref、确定性的 TOC front-matter metadata、manifest-backed 的 guarded rerun overwrite 语义、对应回归测试、面向标题生成/研究总结/artifact-mode 图形结果路径的 machine-readable retrieval 摘要与 timing/size telemetry，以及通过 `npm run verify:local-kb-fixtures` 暴露的更宽离线夹具 | 备份分支提供了最初恢复证据；当前主线现在已直接携带该有界产品切片与最新 Stage C 收口结果 | 下一步应转向 mixed-note/query corpus 覆盖扩充与 maintainer example 对齐，而不是继续证明这些能力“是否存在” | 不要继续把这些能力写成只存在于 backup、或 live mainline 尚未具备，也不要在文档或契约里把 retrieval 再压回 boolean-only signaling | P1 |
+| D. Regex / 文件筛选 / local-KB / chapter split | 当前主线现已具备 file-selection profiles、文件夹 regex/glob 筛选、`relativePath` / `basename` 匹配、可选子目录范围控制、覆盖 `从标题生成`、`从标题批量生成`、`研究与总结`、`生成图形` 的 local-KB retrieval、混合的 Vault 相对文件/文件夹知识库路径、带默认回退语义的按任务知识库覆盖列表、chapter split、面向重复标题的稳定 TOC block ref、确定性的 TOC front-matter metadata、manifest-backed 的 guarded rerun overwrite 语义、对应回归测试、面向标题生成/研究总结/artifact-mode 图形结果路径的 machine-readable retrieval 摘要与 timing/size telemetry，以及通过 `npm run verify:local-kb-fixtures` 暴露的更宽离线夹具 | 备份分支提供了最初恢复证据；当前主线现在已直接携带该有界产品切片与最新 Stage C 收口结果 | 下一步应转向 mixed-note/query corpus 覆盖扩充与 maintainer example 对齐，而不是继续证明这些能力“是否存在” | 不要继续把这些能力写成只存在于 backup、或 live mainline 尚未具备；不要把 single-title / task-scoped retrieval 契约从文档里漏掉；也不要在文档或契约里把 retrieval 再压回 boolean-only signaling | P1 |
 | E. Release / repo-saga / clean-state hygiene | 当前主线现已具备 release/repo-saga 脚本，以及 repo-saga 执行锁、测试、文档与本地工件忽略 guardrail | 备份分支推动了这些 guardrail；当前主线已恢复有界串行安全切片 | 保持 repo-saga 刷新流程的串行纪律，并把 clean-state 证明保留为收尾要求 | 不要把“脚本还在”误读为“可以并行跑 repo-saga 刷新路径” | P0 |
 
 ## 4. 当前主线已确认 register
@@ -51,7 +51,7 @@ canonical: true
 6. 脱敏 / public-safe CLI 导出表面与仓库内 maintainer help/invoke（含有界 path-based 操作）；
 7. settings reset、concept-note 前置提示与 concept synonym suppression；
 8. file-selection profiles 与 folder-scope regex/glob 控制；
-9. local knowledge-base retrieval，以及面向标题生成、研究总结与 artifact-mode 图形结果路径的 machine-readable retrieval 摘要，外加 `npm run verify:local-kb-fixtures` 这条有界离线夹具；
+9. local knowledge-base retrieval，包括单文件标题生成与按任务启用、混合文件/文件夹知识库源路径、面向标题生成、研究总结与 artifact-mode 图形结果路径的 machine-readable retrieval 摘要，以及 `npm run verify:local-kb-fixtures` 这条有界离线夹具；
 10. chapter split（含 repeated-heading-safe TOC block ref、确定性的 TOC front-matter metadata 与 guarded rerun overwrite 语义）；
 11. package metadata、welcome digest 与 README family 上重新同步到 `1.8.9` 的 release-facing version truth。
 

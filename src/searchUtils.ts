@@ -268,7 +268,7 @@ async function prepareResearchSummary(
     };
     const localKnowledgeRetriever = settings.enableLocalKnowledgeRetrieval
         && settings.enableLocalKnowledgeForResearchSummarize
-        ? await buildLocalKnowledgeBaseRetriever(app, settings, progressReporter)
+        ? await buildLocalKnowledgeBaseRetriever(app, settings, progressReporter, 'researchSummarize')
         : null;
     const localKnowledgeDetails = localKnowledgeRetriever
         ? localKnowledgeRetriever.buildContextDetails(topic, localKnowledgeOptions)

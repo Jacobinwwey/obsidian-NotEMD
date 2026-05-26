@@ -2518,7 +2518,12 @@ export default class NotemdPlugin extends Plugin {
             return emptyResult();
         }
 
-        const retriever = await buildLocalKnowledgeBaseRetriever(this.app, this.settings, reporter);
+        const retriever = await buildLocalKnowledgeBaseRetriever(
+            this.app,
+            this.settings,
+            reporter,
+            'diagramGeneration'
+        );
         if (!retriever) {
             return emptyResult({
                 indexedFileCount: 0,

@@ -15,6 +15,7 @@ import {
     buildLocalKnowledgeBaseRetriever,
     createEmptyLocalKnowledgeContextBuildResult,
     LocalKnowledgeBaseRetriever,
+    LocalKnowledgeTaskScope,
     LocalKnowledgeRetrievalSummary,
     toLocalKnowledgeRetrievalSummary
 } from './localKnowledgeBase';
@@ -69,6 +70,7 @@ export interface GenerateContentForTitleResult {
 export interface GenerateContentForTitleOptions {
     enableLocalKnowledge?: boolean;
     localKnowledgeRetriever?: LocalKnowledgeBaseRetriever | null;
+    localKnowledgeTaskScope?: LocalKnowledgeTaskScope;
 }
 
 export interface BatchGenerateContentFileResult extends GenerateContentForTitleResult {
@@ -832,15 +834,27 @@ export async function generateContentForTitle(
         slidingWindowSize: settings.localKnowledgeSlidingWindowSize,
         maxSnippetChars: settings.localKnowledgeMaxSnippetChars
     };
-    const localKnowledgeDetails = options.enableLocalKnowledge && options.localKnowledgeRetriever
-        ? options.localKnowledgeRetriever.buildContextDetails(title, localKnowledgeOptions)
+    const localKnowledgeTaskScope = options.localKnowledgeTaskScope ?? 'generateTitle';
+    const localKnowledgeRetriever = options.enableLocalKnowledge
+        ? (
+            options.localKnowledgeRetriever
+            ?? await buildLocalKnowledgeBaseRetriever(
+                app,
+                settings,
+                progressReporter,
+                localKnowledgeTaskScope
+            )
+        )
+        : null;
+    const localKnowledgeDetails = options.enableLocalKnowledge && localKnowledgeRetriever
+        ? localKnowledgeRetriever.buildContextDetails(title, localKnowledgeOptions)
         : createEmptyLocalKnowledgeContextBuildResult(title, localKnowledgeOptions, {
-            indexedFileCount: options.localKnowledgeRetriever?.indexedFileCount ?? 0,
-            indexedSectionCount: options.localKnowledgeRetriever?.indexedSectionCount ?? 0,
+            indexedFileCount: localKnowledgeRetriever?.indexedFileCount ?? 0,
+            indexedSectionCount: localKnowledgeRetriever?.indexedSectionCount ?? 0,
             indexBuildMs: 0,
             excludeCurrentFileApplied: Boolean(
                 options.enableLocalKnowledge
-                && options.localKnowledgeRetriever
+                && localKnowledgeRetriever
                 && settings.localKnowledgeExcludeCurrentFile
                 && file.path
             )
@@ -848,7 +862,7 @@ export async function generateContentForTitle(
     const localKnowledgeContext = localKnowledgeDetails.context || '';
     const localKnowledgeRetrieval = toLocalKnowledgeRetrievalSummary(localKnowledgeDetails);
 
-    if (options.enableLocalKnowledge && options.localKnowledgeRetriever) {
+    if (options.enableLocalKnowledge && localKnowledgeRetriever) {
         if (localKnowledgeContext) {
             progressReporter.log(
                 `Local knowledge context obtained for "${title}" `
@@ -1090,7 +1104,7 @@ export async function batchGenerateContentForTitles(
 
     const localKnowledgeRetriever = settings.enableLocalKnowledgeRetrieval
         && settings.enableLocalKnowledgeForBatchGenerateFromTitles
-        ? await buildLocalKnowledgeBaseRetriever(app, settings, progressReporter)
+        ? await buildLocalKnowledgeBaseRetriever(app, settings, progressReporter, 'batchGenerateFromTitles')
         : null;
 
     // Ensure Complete Folder Exists
@@ -1129,7 +1143,8 @@ export async function batchGenerateContentForTitles(
             try {
                 const fileResult = await generateContentForTitle(app, settings, file, progressReporter, {
                     enableLocalKnowledge: settings.enableLocalKnowledgeForBatchGenerateFromTitles,
-                    localKnowledgeRetriever
+                    localKnowledgeRetriever,
+                    localKnowledgeTaskScope: 'batchGenerateFromTitles'
                 });
                 await delay(1); // Yield
                 const moveResult = await moveGeneratedFileToCompleteFolder(app, file, completeFolderPath, progressReporter);
@@ -1195,7 +1210,8 @@ export async function batchGenerateContentForTitles(
             try {
                 const fileResult = await generateContentForTitle(app, settings, file, fileProgressReporter, {
                     enableLocalKnowledge: settings.enableLocalKnowledgeForBatchGenerateFromTitles,
-                    localKnowledgeRetriever
+                    localKnowledgeRetriever,
+                    localKnowledgeTaskScope: 'batchGenerateFromTitles'
                 });
                 const moveResult = await moveGeneratedFileToCompleteFolder(app, file, completeFolderPath, fileProgressReporter);
                 return {

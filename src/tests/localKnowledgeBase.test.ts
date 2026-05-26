@@ -129,4 +129,96 @@ describe('localKnowledgeBase', () => {
 
         expect(retriever).toBeNull();
     });
+
+    test('uses task-specific knowledge paths when provided and supports exact file plus folder entries', async () => {
+        const shared = createFile('Knowledge/Shared.md');
+        const exact = createFile('Knowledge/Exact.md');
+        const folderMatch = createFile('Knowledge/Scoped/Architecture.md');
+        const excluded = createFile('Knowledge/Other.md');
+
+        (mockApp.vault.getFiles as jest.Mock).mockReturnValue([shared, exact, folderMatch, excluded]);
+        (mockApp.vault.read as jest.Mock).mockImplementation(async (file: TFile) => {
+            switch (file.path) {
+                case 'Knowledge/Shared.md':
+                    return '# Shared\nShared global knowledge.';
+                case 'Knowledge/Exact.md':
+                    return '# Exact\nExact file path knowledge.';
+                case 'Knowledge/Scoped/Architecture.md':
+                    return '# Architecture\nScoped folder knowledge.';
+                default:
+                    return '# Other\nOther knowledge.';
+            }
+        });
+
+        const settings = {
+            ...mockSettings,
+            enableLocalKnowledgeRetrieval: true,
+            localKnowledgeBasePaths: 'Knowledge/Shared.md',
+            localKnowledgeGenerateTitlePaths: 'Knowledge/Exact.md\nKnowledge/Scoped',
+            localKnowledgeTopK: 5,
+            localKnowledgeSlidingWindowSize: 0,
+            localKnowledgeMaxSnippetChars: 200
+        } as any;
+
+        const retriever = await (buildLocalKnowledgeBaseRetriever as any)(
+            mockApp as any,
+            settings,
+            undefined,
+            'generateTitle'
+        );
+        const details = retriever?.buildContextDetails('knowledge', {
+            topK: settings.localKnowledgeTopK,
+            slidingWindowSize: settings.localKnowledgeSlidingWindowSize,
+            maxSnippetChars: settings.localKnowledgeMaxSnippetChars
+        });
+
+        expect(retriever).not.toBeNull();
+        expect(retriever?.indexedFileCount).toBe(2);
+        expect(details?.sourcePaths).toEqual(
+            expect.arrayContaining(['Knowledge/Exact.md', 'Knowledge/Scoped/Architecture.md'])
+        );
+        expect(details?.sourcePaths).not.toContain('Knowledge/Shared.md');
+        expect(details?.sourcePaths).not.toContain('Knowledge/Other.md');
+    });
+
+    test('falls back to default knowledge paths when task-specific override is blank', async () => {
+        const shared = createFile('Knowledge/Shared.md');
+        const scoped = createFile('Knowledge/Scoped/Architecture.md');
+
+        (mockApp.vault.getFiles as jest.Mock).mockReturnValue([shared, scoped]);
+        (mockApp.vault.read as jest.Mock).mockImplementation(async (file: TFile) => {
+            switch (file.path) {
+                case 'Knowledge/Shared.md':
+                    return '# Shared\nShared global knowledge.';
+                default:
+                    return '# Architecture\nScoped folder knowledge.';
+            }
+        });
+
+        const settings = {
+            ...mockSettings,
+            enableLocalKnowledgeRetrieval: true,
+            localKnowledgeBasePaths: 'Knowledge/Shared.md',
+            localKnowledgeGenerateTitlePaths: '',
+            localKnowledgeTopK: 5,
+            localKnowledgeSlidingWindowSize: 0,
+            localKnowledgeMaxSnippetChars: 200
+        } as any;
+
+        const retriever = await (buildLocalKnowledgeBaseRetriever as any)(
+            mockApp as any,
+            settings,
+            undefined,
+            'generateTitle'
+        );
+        const details = retriever?.buildContextDetails('shared', {
+            topK: settings.localKnowledgeTopK,
+            slidingWindowSize: settings.localKnowledgeSlidingWindowSize,
+            maxSnippetChars: settings.localKnowledgeMaxSnippetChars
+        });
+
+        expect(retriever).not.toBeNull();
+        expect(retriever?.indexedFileCount).toBe(1);
+        expect(details?.sourcePaths).toEqual(['Knowledge/Shared.md']);
+    });
 });

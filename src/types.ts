@@ -61,10 +61,15 @@ export interface NotemdSettings {
     tavilySearchDepth: 'basic' | 'advanced';
     enableLocalKnowledgeRetrieval: boolean;
     localKnowledgeBasePaths: string;
+    localKnowledgeGenerateTitlePaths: string;
+    localKnowledgeBatchGenerateFromTitlesPaths: string;
+    localKnowledgeResearchSummarizePaths: string;
+    localKnowledgeDiagramGenerationPaths: string;
     localKnowledgeTopK: number;
     localKnowledgeSlidingWindowSize: number;
     localKnowledgeMaxSnippetChars: number;
     localKnowledgeExcludeCurrentFile: boolean;
+    enableLocalKnowledgeForGenerateTitle: boolean;
     enableLocalKnowledgeForBatchGenerateFromTitles: boolean;
     enableLocalKnowledgeForResearchSummarize: boolean;
     enableLocalKnowledgeForDiagramGeneration: boolean;

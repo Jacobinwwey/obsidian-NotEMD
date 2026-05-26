@@ -16,6 +16,7 @@ import { generateContentForTitle } from '../fileUtils';
 import { researchAndSummarize, researchAndSummarizeFile, _performResearch } from '../searchUtils';
 import { runDiagramGenerateOperation } from '../operations/diagramGenerateOperation';
 import { callLLM } from '../llmUtils';
+import * as localKnowledgeBase from '../localKnowledgeBase';
 import { mockSettings } from './__mocks__/settings';
 import { mockApp } from './__mocks__/app';
 import { ProgressReporter } from '../types';
@@ -155,6 +156,66 @@ describe('local knowledge integration', () => {
             );
             expect(editor.setValue).toHaveBeenCalledWith(expect.stringContaining('Local summary'));
         } finally {
+            consoleErrorSpy.mockRestore();
+        }
+    });
+
+    test('researchAndSummarize resolves the research-specific knowledge-base scope', async () => {
+        const reporter = createReporter();
+        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+        const buildRetrieverSpy = jest
+            .spyOn(localKnowledgeBase, 'buildLocalKnowledgeBaseRetriever')
+            .mockResolvedValue({
+                indexedFileCount: 1,
+                indexedSectionCount: 1,
+                buildContextDetails: jest.fn(() => ({
+                    query: 'Topic',
+                    context: 'Path: Knowledge/Scoped.md\nExcerpt: Scoped research evidence.',
+                    indexedFileCount: 1,
+                    indexedSectionCount: 1,
+                    matchedSectionCount: 1,
+                    returnedHitCount: 1,
+                    expandedSectionCount: 1,
+                    sourcePaths: ['Knowledge/Scoped.md'],
+                    usedSlidingWindowSize: mockSettings.localKnowledgeSlidingWindowSize,
+                    requestedTopK: mockSettings.localKnowledgeTopK,
+                    indexBuildMs: 3,
+                    queryMs: 2,
+                    contextCharCount: 56,
+                    excludeCurrentFileApplied: true,
+                    excludedCurrentFileHitCount: 0
+                }))
+            } as any);
+
+        try {
+            const file = createFile('Notes/Topic.md');
+            const editor = {
+                getSelection: jest.fn(() => ''),
+                replaceSelection: jest.fn(),
+                getValue: jest.fn(() => '# Topic'),
+                setValue: jest.fn()
+            } as any;
+            const view = { file } as any;
+            (_performResearch as jest.Mock).mockResolvedValue(null);
+            (callLLM as jest.Mock).mockResolvedValue('Scoped local summary');
+
+            await researchAndSummarize(mockApp as any, {
+                ...mockSettings,
+                enableLocalKnowledgeRetrieval: true,
+                enableLocalKnowledgeForResearchSummarize: true
+            } as any, editor, view, reporter);
+
+            expect(buildRetrieverSpy).toHaveBeenCalledWith(
+                mockApp,
+                expect.objectContaining({
+                    enableLocalKnowledgeRetrieval: true,
+                    enableLocalKnowledgeForResearchSummarize: true
+                }),
+                reporter,
+                'researchSummarize'
+            );
+        } finally {
+            buildRetrieverSpy.mockRestore();
             consoleErrorSpy.mockRestore();
         }
     });

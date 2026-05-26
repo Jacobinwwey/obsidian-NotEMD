@@ -82,6 +82,14 @@ export class NotemdSettingTab extends PluginSettingTab {
         return normalized;
     }
 
+    private normalizeMultilinePathSetting(value: string): string {
+        return value
+            .split('\n')
+            .map(line => line.trim())
+            .filter(Boolean)
+            .join('\n');
+    }
+
     private addDeferredTextSetting(
         setting: Setting,
         options: {
@@ -1730,22 +1738,39 @@ export class NotemdSettingTab extends PluginSettingTab {
                 }));
 
         if (this.plugin.settings.enableLocalKnowledgeRetrieval) {
-            this.addDeferredTextAreaSetting(
-                new Setting(containerEl)
-                    .setName(localKnowledgeI18n.pathsName)
-                    .setDesc(localKnowledgeI18n.pathsDesc),
-                {
-                    placeholder: localKnowledgeI18n.pathsPlaceholder,
-                    value: this.plugin.settings.localKnowledgeBasePaths,
-                    onCommit: async (value) => {
-                        this.plugin.settings.localKnowledgeBasePaths = value
-                            .split('\n')
-                            .map(line => line.trim())
-                            .filter(Boolean)
-                            .join('\n');
-                        await this.plugin.saveSettings();
+            type LocalKnowledgePathSettingKey =
+                | 'localKnowledgeBasePaths'
+                | 'localKnowledgeGenerateTitlePaths'
+                | 'localKnowledgeBatchGenerateFromTitlesPaths'
+                | 'localKnowledgeResearchSummarizePaths'
+                | 'localKnowledgeDiagramGenerationPaths';
+
+            const addLocalKnowledgePathSetting = (
+                name: string,
+                desc: string,
+                placeholder: string,
+                settingKey: LocalKnowledgePathSettingKey
+            ) => {
+                this.addDeferredTextAreaSetting(
+                    new Setting(containerEl)
+                        .setName(name)
+                        .setDesc(desc),
+                    {
+                        placeholder,
+                        value: this.plugin.settings[settingKey],
+                        onCommit: async (value) => {
+                            this.plugin.settings[settingKey] = this.normalizeMultilinePathSetting(value);
+                            await this.plugin.saveSettings();
+                        }
                     }
-                }
+                );
+            };
+
+            addLocalKnowledgePathSetting(
+                localKnowledgeI18n.pathsName,
+                localKnowledgeI18n.pathsDesc,
+                localKnowledgeI18n.pathsPlaceholder,
+                'localKnowledgeBasePaths'
             );
 
             this.addDeferredNumberSetting(
@@ -1819,6 +1844,23 @@ export class NotemdSettingTab extends PluginSettingTab {
                     }));
 
             new Setting(containerEl)
+                .setName(localKnowledgeI18n.generateTitleName)
+                .setDesc(localKnowledgeI18n.generateTitleDesc)
+                .addToggle(toggle => toggle
+                    .setValue(this.plugin.settings.enableLocalKnowledgeForGenerateTitle)
+                    .onChange(async (value) => {
+                        this.plugin.settings.enableLocalKnowledgeForGenerateTitle = value;
+                        await this.plugin.saveSettings();
+                    }));
+
+            addLocalKnowledgePathSetting(
+                localKnowledgeI18n.generateTitlePathsName,
+                localKnowledgeI18n.generateTitlePathsDesc,
+                localKnowledgeI18n.taskPathsPlaceholder,
+                'localKnowledgeGenerateTitlePaths'
+            );
+
+            new Setting(containerEl)
                 .setName(localKnowledgeI18n.batchGenerateName)
                 .setDesc(localKnowledgeI18n.batchGenerateDesc)
                 .addToggle(toggle => toggle
@@ -1827,6 +1869,13 @@ export class NotemdSettingTab extends PluginSettingTab {
                         this.plugin.settings.enableLocalKnowledgeForBatchGenerateFromTitles = value;
                         await this.plugin.saveSettings();
                     }));
+
+            addLocalKnowledgePathSetting(
+                localKnowledgeI18n.batchGeneratePathsName,
+                localKnowledgeI18n.batchGeneratePathsDesc,
+                localKnowledgeI18n.taskPathsPlaceholder,
+                'localKnowledgeBatchGenerateFromTitlesPaths'
+            );
 
             new Setting(containerEl)
                 .setName(localKnowledgeI18n.researchSummarizeName)
@@ -1838,6 +1887,13 @@ export class NotemdSettingTab extends PluginSettingTab {
                         await this.plugin.saveSettings();
                     }));
 
+            addLocalKnowledgePathSetting(
+                localKnowledgeI18n.researchSummarizePathsName,
+                localKnowledgeI18n.researchSummarizePathsDesc,
+                localKnowledgeI18n.taskPathsPlaceholder,
+                'localKnowledgeResearchSummarizePaths'
+            );
+
             new Setting(containerEl)
                 .setName(localKnowledgeI18n.generateDiagramName)
                 .setDesc(localKnowledgeI18n.generateDiagramDesc)
@@ -1847,6 +1903,13 @@ export class NotemdSettingTab extends PluginSettingTab {
                         this.plugin.settings.enableLocalKnowledgeForDiagramGeneration = value;
                         await this.plugin.saveSettings();
                     }));
+
+            addLocalKnowledgePathSetting(
+                localKnowledgeI18n.generateDiagramPathsName,
+                localKnowledgeI18n.generateDiagramPathsDesc,
+                localKnowledgeI18n.taskPathsPlaceholder,
+                'localKnowledgeDiagramGenerationPaths'
+            );
         }
 
         new Setting(containerEl).setName(chapterSplitI18n.heading).setHeading();

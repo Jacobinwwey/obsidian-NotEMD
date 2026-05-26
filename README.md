@@ -115,7 +115,7 @@ That's it! Explore the settings to unlock more features like web research, trans
 - **Pure Concept Extraction**: Extract concepts and create corresponding concept notes without modifying the original document. This is ideal for populating a knowledge base from existing documents without altering them. This feature has configurable options for creating minimal concept notes and adding backlinks.
 - **Concept Extraction Guardrails**: When concept-note generation prerequisites are not configured correctly, relevant flows now warn before execution and can deep-link directly into the required settings.
 - **Concept Synonym Suppression**: An optional extraction rule can tell the model to avoid extracting synonyms, semantically similar core concepts, or near-duplicate keywords when processing notes.
-- **Local Knowledge Retrieval**: `Batch generate from titles`, `Research & Summarize`, and `Generate diagram` can optionally retrieve context from a local knowledge base built from configured vault paths, with no cloud retrieval service or external daemon.
+- **Local Knowledge Retrieval**: `Generate from title`, `Batch generate from titles`, `Research & Summarize`, and `Generate diagram` can optionally retrieve context from a local knowledge base built from configured vault-relative file/folder paths, with optional task-specific overrides and no cloud retrieval service or external daemon.
 - **Chapter Split + TOC Extraction**: Split a note into heading-based chapter files beside the source note, generate a linked TOC with front-matter metadata, and clean up stale generated files on reruns.
 
 
@@ -401,9 +401,10 @@ Access plugin settings via:
 
 #### Local Knowledge Retrieval
 -   **Enable Local Knowledge Retrieval**:
-    *   **Off (Default)**: `Batch generate from titles`, `Research & Summarize`, and `Generate diagram` run without local retrieval context.
-    *   **On**: Indexes Markdown/Text files under configured vault-relative knowledge-base paths and injects the top matching local context into those tasks.
--   **Knowledge Base Paths**: One vault-relative path per line. Matching files are indexed locally inside the plugin runtime; no external service is required.
+    *   **Off (Default)**: `Generate from title`, `Batch generate from titles`, `Research & Summarize`, and `Generate diagram` run without local retrieval context.
+    *   **On**: Indexes Markdown/Text files at configured vault-relative knowledge-base file paths or under configured folders and injects the top matching local context into those tasks.
+-   **Default Knowledge Base Paths**: One vault-relative file or folder path per line. Matching files are indexed locally inside the plugin runtime; no external service is required.
+-   **Task-Specific Knowledge Base Overrides**: `Generate from title`, `Batch generate from titles`, `Research & Summarize`, and `Generate diagram` can each use their own file/folder path list. Leave an override blank to inherit the default path list.
 -   **Sliding Window Size**: Controls how many neighboring sections from the same knowledge file are merged around each retrieval hit before prompt injection.
 -   **Exclude Current File**: Prevents retrieval from echoing the file currently being processed back into its own prompt context.
 
