@@ -59,13 +59,13 @@ describe('GitHub release workflow', () => {
             englishNotesFile: string;
             chineseNotesFile: string;
         }) => string;
-        let buildGhReleaseCommand: (args: {
+        let buildGhReleaseCommands: (args: {
             tag: string;
             title: string;
             notesFile: string;
             assets: string[];
             releaseExists: boolean;
-        }) => string[];
+        }) => string[][];
         let resolveReleaseInputs: (repoRoot: string, tag: string) => {
             tag: string;
             title: string;
@@ -75,7 +75,7 @@ describe('GitHub release workflow', () => {
         };
 
         beforeAll(() => {
-            ({ buildGhReleaseCommand, composeReleaseNotesFile, resolveReleaseInputs } = require(releaseScriptPath));
+            ({ buildGhReleaseCommands, composeReleaseNotesFile, resolveReleaseInputs } = require(releaseScriptPath));
         });
 
         function createTempRepoRoot(): string {
@@ -105,7 +105,7 @@ describe('GitHub release workflow', () => {
 
                 const inputs = resolveReleaseInputs(tempRoot, '1.8.2');
                 const notesFile = composeReleaseNotesFile(inputs);
-                const command = buildGhReleaseCommand({ ...inputs, notesFile, releaseExists: false });
+                const commands = buildGhReleaseCommands({ ...inputs, notesFile, releaseExists: false });
 
                 expect(inputs).toEqual({
                     tag: '1.8.2',
@@ -129,8 +129,7 @@ describe('GitHub release workflow', () => {
                         ''
                     ].join('\n')
                 );
-                expect(command).toContain('--notes-file');
-                expect(command).toEqual([
+                expect(commands).toEqual([[
                     'release',
                     'create',
                     '1.8.2',
@@ -143,30 +142,41 @@ describe('GitHub release workflow', () => {
                     '--notes-file',
                     expect.any(String),
                     '--verify-tag'
-                ]);
+                ]]);
             } finally {
                 fs.rmSync(tempRoot, { recursive: true, force: true });
             }
         });
 
-        test('plans gh release upload with clobber when the release already exists', () => {
-            const command = buildGhReleaseCommand({
+        test('plans gh release repair by rewriting notes before uploading assets when the release already exists', () => {
+            const commands = buildGhReleaseCommands({
                 tag: '1.8.2',
                 title: 'Notemd 1.8.2',
-                notesFile: '/tmp/ignored.md',
+                notesFile: '/tmp/notes.md',
                 assets: ['/tmp/main.js', '/tmp/manifest.json', '/tmp/styles.css', '/tmp/README.md'],
                 releaseExists: true
             });
 
-            expect(command).toEqual([
-                'release',
-                'upload',
-                '1.8.2',
-                '/tmp/main.js',
-                '/tmp/manifest.json',
-                '/tmp/styles.css',
-                '/tmp/README.md',
-                '--clobber'
+            expect(commands).toEqual([
+                [
+                    'release',
+                    'edit',
+                    '1.8.2',
+                    '--title',
+                    'Notemd 1.8.2',
+                    '--notes-file',
+                    '/tmp/notes.md'
+                ],
+                [
+                    'release',
+                    'upload',
+                    '1.8.2',
+                    '/tmp/main.js',
+                    '/tmp/manifest.json',
+                    '/tmp/styles.css',
+                    '/tmp/README.md',
+                    '--clobber'
+                ]
             ]);
         });
 

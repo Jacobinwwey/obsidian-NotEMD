@@ -63,16 +63,29 @@ function cleanupReleaseNotesFile(notesFile) {
     fs.rmSync(path.dirname(notesFile), { recursive: true, force: true });
 }
 
-function buildGhReleaseCommand({ tag, title, notesFile, assets, releaseExists }) {
-    if (releaseExists) {
-        return ['release', 'upload', tag, ...assets, '--clobber'];
-    }
-
+function buildGhReleaseCommands({ tag, title, notesFile, assets, releaseExists }) {
     if (!notesFile) {
-        throw new Error('Missing composed release notes file for gh release create');
+        throw new Error('Missing composed release notes file for gh release publish/repair');
     }
 
-    return ['release', 'create', tag, ...assets, '--title', title, '--notes-file', notesFile, '--verify-tag'];
+    if (releaseExists) {
+        return [
+            ['release', 'edit', tag, '--title', title, '--notes-file', notesFile],
+            ['release', 'upload', tag, ...assets, '--clobber']
+        ];
+    }
+
+    return [[
+        'release',
+        'create',
+        tag,
+        ...assets,
+        '--title',
+        title,
+        '--notes-file',
+        notesFile,
+        '--verify-tag'
+    ]];
 }
 
 function hasExistingRelease(repoRoot, tag) {
@@ -103,6 +116,10 @@ function runGhCommand(repoRoot, commandArgs) {
     }
 }
 
+function runGhCommands(repoRoot, commandArgsList) {
+    commandArgsList.forEach((commandArgs) => runGhCommand(repoRoot, commandArgs));
+}
+
 function main(argv = process.argv.slice(2)) {
     const dryRun = argv.includes('--dry-run');
     const tag = argv.find((arg) => !arg.startsWith('--'));
@@ -112,22 +129,20 @@ function main(argv = process.argv.slice(2)) {
 
     try {
         const releaseExists = hasExistingRelease(repoRoot, tag);
-        if (!releaseExists) {
-            notesFile = composeReleaseNotesFile(inputs);
-        }
+        notesFile = composeReleaseNotesFile(inputs);
 
-        const commandArgs = buildGhReleaseCommand({
+        const commandArgsList = buildGhReleaseCommands({
             ...inputs,
             notesFile,
             releaseExists
         });
 
         if (dryRun) {
-            console.log(`gh ${commandArgs.join(' ')}`);
+            console.log(commandArgsList.map((commandArgs) => `gh ${commandArgs.join(' ')}`).join('\n'));
             return 0;
         }
 
-        runGhCommand(repoRoot, commandArgs);
+        runGhCommands(repoRoot, commandArgsList);
         return 0;
     } finally {
         cleanupReleaseNotesFile(notesFile);
@@ -146,11 +161,13 @@ if (require.main === module) {
 module.exports = {
     OBSIDIAN_RELEASE_TAG_PATTERN,
     REQUIRED_RELEASE_ASSETS,
-    buildGhReleaseCommand,
+    buildGhReleaseCommand: buildGhReleaseCommands,
+    buildGhReleaseCommands,
     cleanupReleaseNotesFile,
     composeReleaseNotesFile,
     hasExistingRelease,
     main,
     resolveReleaseInputs,
+    runGhCommands,
     validateReleaseTag
 };
