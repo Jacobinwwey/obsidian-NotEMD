@@ -173,6 +173,7 @@ This is mandatory. Do not publish a release that omits `README.md`.
 - Treat `.trellis/` as local workflow state, not as a repo-deliverable source of truth.
 - Never delete, overwrite, or bulk-replace `.trellis/` during sync, merge, cleanup, release prep, or branch recovery work.
 - If a mainline sync step could touch `.trellis/`, preserve the existing local copy first and keep the repo clean by ignoring it rather than removing it.
+- Do not make committed tests, verification scripts, or release gates depend on `.trellis/` contents; if a workflow insight needs to affect CI or shipped documentation, mirror that truth into tracked files under the repository proper.
 
 ## Repository Notes
 

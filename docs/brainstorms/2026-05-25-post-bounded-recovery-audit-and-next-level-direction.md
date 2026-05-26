@@ -89,6 +89,7 @@ The previously recovered product slices are now real current-main facts and no l
 3. preview history and saved-artifact-aware reopening are live in the reusable preview shell.
 4. settings reset, concept-note prerequisite guidance, concept synonym suppression, and folder file-selection profiles are already back on current main.
 5. retrieval-dependent note-processing results now expose machine-readable `localKnowledgeRetrieval` summaries for title generation and research, including matched/returned counts, source paths, requested `topK`, sliding-window size, current-file exclusion telemetry, index/query timing, and context-char count.
+6. a dedicated offline retrieval-quality maintainer fixture now exists as `npm run verify:local-kb-fixtures`; it exercises the live MiniSearch-based retriever against a small regression corpus instead of introducing a separate evaluation-only retrieval path.
 
 Code-backed evidence includes:
 
@@ -146,7 +147,7 @@ PRD requirement status on current `main`:
 | R6 add `章节拆分` action | Landed | Command/sidebar wiring exists on current main |
 | R7 heading-based split + TOC artifact | Landed | `src/chapterSplit.ts` plus tests |
 | R8 no regression to packaging / semantic truth | Landed | build/audit still prove `main.js`-only shipping |
-| R9 tests/docs/progress artifacts compare current code to prior plans | Landed, but should keep moving | This document and the matrix updates are part of that closure |
+| R9 tests/docs/progress artifacts compare current code to prior plans | Landed, and now deeper | This document, the matrix updates, and `verify:local-kb-fixtures` together now cover both narrative progress alignment and a bounded offline retrieval-quality regression check |
 | R10 keep CI green and stability bar intact | Landed at current checkpoint | Verified by current repo gates |
 
 Interpretation:
@@ -247,7 +248,7 @@ Likely areas:
 
 1. keep extending richer result/evidence framing to the remaining chapter-split paths now that retrieval summaries plus timing telemetry are landed for title-generation, research, and artifact-mode diagram generation;
 2. the shared maintainer helper now carries compact payload examples for the retrieval-dependent paths, so the next step is to keep those examples aligned as result schemas evolve;
-3. continue tuning/documentation around sliding-window size, snippet shaping, folder-scope expectations, and offline evaluation fixtures.
+3. keep tuning/documentation around sliding-window size, snippet shaping, and folder-scope expectations, but treat the offline fixture as landed baseline work and expand it via richer query classes / chapter-split evidence coverage rather than re-proving that the harness should exist.
 
 ## 6. Task And Documentation Follow-Through Rule
 
