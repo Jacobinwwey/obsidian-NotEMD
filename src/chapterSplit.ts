@@ -34,9 +34,10 @@ export interface ChapterSplitOptions {
 }
 
 interface ChapterSplitManifest {
-    version: 1;
+    version: 1 | 2;
     sourcePath: string;
     generatedPaths: string[];
+    generatedFileHashes?: Record<string, string>;
 }
 
 interface VaultAdapterWithFileOps {
@@ -150,6 +151,22 @@ function getVaultAdapter(app: App): VaultAdapterWithFileOps {
     return app.vault.adapter as unknown as VaultAdapterWithFileOps;
 }
 
+function normalizeContentForHash(content: string): string {
+    return content.replace(/\r\n?/g, '\n');
+}
+
+function hashContent(content: string): string {
+    let hash = 0x811c9dc5;
+    const normalized = normalizeContentForHash(content);
+
+    for (let index = 0; index < normalized.length; index += 1) {
+        hash ^= normalized.charCodeAt(index);
+        hash = Math.imul(hash, 0x01000193);
+    }
+
+    return (hash >>> 0).toString(16).padStart(8, '0');
+}
+
 function isFileAlreadyExistsError(error: unknown): boolean {
     return error instanceof Error
         && error.message.toLowerCase().includes('file already exists');
@@ -185,6 +202,20 @@ async function writeMarkdownFile(app: App, path: string, content: string): Promi
     }
 }
 
+async function readMarkdownFileByPath(app: App, path: string): Promise<string | null> {
+    const existing = app.vault.getFileByPath(path);
+    if (existing) {
+        return app.vault.read(existing);
+    }
+
+    const adapter = getVaultAdapter(app);
+    if (typeof adapter.exists === 'function' && typeof adapter.read === 'function' && await adapter.exists(path)) {
+        return adapter.read(path);
+    }
+
+    return null;
+}
+
 async function loadManifest(app: App, manifestPath: string): Promise<ChapterSplitManifest | null> {
     const existing = app.vault.getFileByPath(manifestPath);
     try {
@@ -202,10 +233,75 @@ async function loadManifest(app: App, manifestPath: string): Promise<ChapterSpli
             ? await app.vault.read(existing)
             : await adapter.read!(manifestPath);
         const parsed = JSON.parse(raw) as ChapterSplitManifest;
-        return parsed?.version === 1 ? parsed : null;
+
+        if (parsed?.version === 1 && Array.isArray(parsed.generatedPaths)) {
+            return {
+                version: 1,
+                sourcePath: parsed.sourcePath,
+                generatedPaths: parsed.generatedPaths
+            };
+        }
+
+        if (parsed?.version === 2 && Array.isArray(parsed.generatedPaths)) {
+            return {
+                version: 2,
+                sourcePath: parsed.sourcePath,
+                generatedPaths: parsed.generatedPaths,
+                generatedFileHashes: parsed.generatedFileHashes ?? {}
+            };
+        }
+
+        return null;
     } catch {
         return null;
     }
+}
+
+async function collectManuallyEditedManagedPaths(
+    app: App,
+    manifest: ChapterSplitManifest | null,
+    nextContentByPath: Map<string, string>,
+    nextPaths: Set<string>
+): Promise<string[]> {
+    if (!manifest?.generatedFileHashes) {
+        return [];
+    }
+
+    const conflictingPaths: string[] = [];
+
+    for (const path of manifest.generatedPaths) {
+        const recordedHash = manifest.generatedFileHashes[path];
+        if (!recordedHash) {
+            continue;
+        }
+
+        const currentContent = await readMarkdownFileByPath(app, path);
+        if (currentContent === null) {
+            continue;
+        }
+
+        const currentHash = hashContent(currentContent);
+        if (currentHash === recordedHash) {
+            continue;
+        }
+
+        if (nextContentByPath.has(path) || !nextPaths.has(path)) {
+            conflictingPaths.push(path);
+        }
+    }
+
+    return conflictingPaths;
+}
+
+function throwIfManagedArtifactsWereEdited(conflictingPaths: string[]): void {
+    if (conflictingPaths.length === 0) {
+        return;
+    }
+
+    const uniquePaths = [...new Set(conflictingPaths)].sort();
+    throw new Error(
+        `Refusing to overwrite manually edited chapter split artifacts: ${uniquePaths.join(', ')}`
+    );
 }
 
 async function cleanupStaleGeneratedFiles(
@@ -260,11 +356,18 @@ export async function splitNoteByChapters(
         markdown,
         splitHeadingLevel: options.splitHeadingLevel
     });
+    const nextContentByPath = new Map<string, string>([
+        [plan.tocPath, plan.tocMarkdown],
+        ...plan.chapters.map(chapter => [chapter.outputPath, chapter.markdown] as const)
+    ]);
 
     await ensureFolder(app, plan.outputFolderPath);
 
     const existingManifest = await loadManifest(app, plan.manifestPath);
     const nextPaths = new Set<string>(plan.managedArtifactPaths);
+    throwIfManagedArtifactsWereEdited(
+        await collectManuallyEditedManagedPaths(app, existingManifest, nextContentByPath, nextPaths)
+    );
     const removedStalePaths = await cleanupStaleGeneratedFiles(app, existingManifest, nextPaths, reporter);
 
     for (const chapter of plan.chapters) {
@@ -273,9 +376,15 @@ export async function splitNoteByChapters(
 
     await writeMarkdownFile(app, plan.tocPath, plan.tocMarkdown);
     const manifest: ChapterSplitManifest = {
-        version: 1,
+        version: 2,
         sourcePath: file.path,
-        generatedPaths: [plan.tocPath, ...plan.chapterNotePaths]
+        generatedPaths: [plan.tocPath, ...plan.chapterNotePaths],
+        generatedFileHashes: Object.fromEntries(
+            [plan.tocPath, ...plan.chapterNotePaths].map(path => [
+                path,
+                hashContent(nextContentByPath.get(path) || '')
+            ])
+        )
     };
     await writeMarkdownFile(app, plan.manifestPath, JSON.stringify(manifest, null, 2));
 

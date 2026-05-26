@@ -373,4 +373,180 @@ describe('chapterSplit', () => {
         expect(app.vault.adapter.remove).toHaveBeenCalledWith('Docs/Platform_chapters/02-delivery.md');
         expect(files.has('Docs/Platform_chapters/02-delivery.md')).toBe(false);
     });
+
+    test('fails fast instead of overwriting a manually edited managed chapter file on rerun', async () => {
+        const reporter = {
+            log: jest.fn()
+        };
+        const folders = new Map<string, TFolder>();
+        const files = new Map<string, { file: TFile; content: string }>();
+        const ensureFolder = (path: string) => {
+            const folder = createFolder(path);
+            folders.set(path, folder);
+            return folder;
+        };
+        const addFile = (path: string, content: string) => {
+            const file = createFile(path);
+            files.set(path, { file, content });
+            return file;
+        };
+
+        ensureFolder('Docs');
+        addFile('Docs/Platform.md', [
+            '# Platform',
+            'Intro',
+            '',
+            '## Overview',
+            'Overview body',
+            '',
+            '## Delivery',
+            'Delivery body'
+        ].join('\n'));
+
+        const app = {
+            vault: {
+                read: jest.fn(async (file: TFile) => files.get(file.path)?.content ?? ''),
+                getAbstractFileByPath: jest.fn((path: string) => {
+                    if (folders.has(path)) {
+                        return folders.get(path);
+                    }
+                    if (files.has(path)) {
+                        return { path };
+                    }
+                    return null;
+                }),
+                getFileByPath: jest.fn((path: string) => files.get(path)?.file ?? null),
+                createFolder: jest.fn(async (path: string) => {
+                    if (folders.has(path)) {
+                        throw new Error('Folder already exists.');
+                    }
+                    ensureFolder(path);
+                }),
+                create: jest.fn(async (path: string, content: string) => {
+                    if (files.has(path)) {
+                        throw new Error('File already exists.');
+                    }
+                    addFile(path, content);
+                }),
+                modify: jest.fn(async (file: TFile, content: string) => {
+                    files.set(file.path, { file, content });
+                }),
+                delete: jest.fn(async (file: TFile) => {
+                    files.delete(file.path);
+                })
+            }
+        } as any;
+
+        const sourceFile = files.get('Docs/Platform.md')!.file;
+        await splitNoteByChapters(app, sourceFile, reporter as any);
+
+        files.set('Docs/Platform_chapters/01-overview.md', {
+            file: files.get('Docs/Platform_chapters/01-overview.md')!.file,
+            content: '## Overview ^notemd-overview\nOverview body\n\nManual notes'
+        });
+        files.set('Docs/Platform.md', {
+            file: sourceFile,
+            content: [
+                '# Platform',
+                'Intro',
+                '',
+                '## Overview',
+                'Overview body updated'
+            ].join('\n')
+        });
+
+        await expect(splitNoteByChapters(app, sourceFile, reporter as any)).rejects.toThrow(
+            'Refusing to overwrite manually edited chapter split artifacts: Docs/Platform_chapters/01-overview.md'
+        );
+        expect(files.get('Docs/Platform_chapters/01-overview.md')?.content).toContain('Manual notes');
+        expect(files.has('Docs/Platform_chapters/02-delivery.md')).toBe(true);
+    });
+
+    test('fails fast instead of deleting a manually edited stale chapter file on rerun', async () => {
+        const reporter = {
+            log: jest.fn()
+        };
+        const folders = new Map<string, TFolder>();
+        const files = new Map<string, { file: TFile; content: string }>();
+        const ensureFolder = (path: string) => {
+            const folder = createFolder(path);
+            folders.set(path, folder);
+            return folder;
+        };
+        const addFile = (path: string, content: string) => {
+            const file = createFile(path);
+            files.set(path, { file, content });
+            return file;
+        };
+
+        ensureFolder('Docs');
+        addFile('Docs/Platform.md', [
+            '# Platform',
+            'Intro',
+            '',
+            '## Overview',
+            'Overview body',
+            '',
+            '## Delivery',
+            'Delivery body'
+        ].join('\n'));
+
+        const app = {
+            vault: {
+                read: jest.fn(async (file: TFile) => files.get(file.path)?.content ?? ''),
+                getAbstractFileByPath: jest.fn((path: string) => {
+                    if (folders.has(path)) {
+                        return folders.get(path);
+                    }
+                    if (files.has(path)) {
+                        return { path };
+                    }
+                    return null;
+                }),
+                getFileByPath: jest.fn((path: string) => files.get(path)?.file ?? null),
+                createFolder: jest.fn(async (path: string) => {
+                    if (folders.has(path)) {
+                        throw new Error('Folder already exists.');
+                    }
+                    ensureFolder(path);
+                }),
+                create: jest.fn(async (path: string, content: string) => {
+                    if (files.has(path)) {
+                        throw new Error('File already exists.');
+                    }
+                    addFile(path, content);
+                }),
+                modify: jest.fn(async (file: TFile, content: string) => {
+                    files.set(file.path, { file, content });
+                }),
+                delete: jest.fn(async (file: TFile) => {
+                    files.delete(file.path);
+                })
+            }
+        } as any;
+
+        const sourceFile = files.get('Docs/Platform.md')!.file;
+        await splitNoteByChapters(app, sourceFile, reporter as any);
+
+        files.set('Docs/Platform_chapters/02-delivery.md', {
+            file: files.get('Docs/Platform_chapters/02-delivery.md')!.file,
+            content: '## Delivery\nDelivery body\n\nManual notes'
+        });
+        files.set('Docs/Platform.md', {
+            file: sourceFile,
+            content: [
+                '# Platform',
+                'Intro',
+                '',
+                '## Overview',
+                'Overview body updated'
+            ].join('\n')
+        });
+
+        await expect(splitNoteByChapters(app, sourceFile, reporter as any)).rejects.toThrow(
+            'Refusing to overwrite manually edited chapter split artifacts: Docs/Platform_chapters/02-delivery.md'
+        );
+        expect(files.get('Docs/Platform_chapters/02-delivery.md')?.content).toContain('Manual notes');
+        expect(files.has('Docs/Platform_chapters/02-delivery.md')).toBe(true);
+    });
 });
