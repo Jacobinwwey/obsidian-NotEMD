@@ -158,6 +158,8 @@ describe('translate contract', () => {
         });
         const settings = {
             ...mockSettings,
+            enableDeveloperMode: true,
+            enableAdvancedFileSelectionProfiles: true,
             folderTaskIncludeSubfoldersMode: 'include' as const
         };
 

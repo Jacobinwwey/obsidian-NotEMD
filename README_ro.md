@@ -27,7 +27,7 @@ Notemd îți îmbunătățește fluxul de lucru din Obsidian prin integrarea cu 
 
 Dacă iubești să folosești Notemd, te rugăm să iei în considerare [⭐ să dai o stea pe GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) sau [☕️ să-mi cumperi o cafea](https://ko-fi.com/jacobinwwey).
 
-**Versiune:** 1.8.9
+.9.0
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
@@ -687,7 +687,7 @@ Licență MIT - vezi fișierul [LICENSE](LICENSE) pentru detalii.
 ---
 
 
-*Notemd v1.8.9 - Îmbunătățește-ți graful de cunoștințe din Obsidian cu AI.*
+*Notemd v1.9.0 - Îmbunătățește-ți graful de cunoștințe din Obsidian cu AI.*
 
 
 <!-- repo-chronicle:start -->
@@ -697,7 +697,7 @@ Această cronică trimestrială păstrează stilul vizual original al [repo-saga
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.ro.svg)
 
-_Actualizat ultima dată pentru tagul de release `1.8.9` la 2026-05-25. Data ultimului commit: 2026-05-25._
+_Actualizat ultima dată din arborele de lucru la 2026-05-26. Data ultimului commit: 2026-05-26._
 <!-- repo-chronicle:end -->
 
 

@@ -9,6 +9,14 @@ type WelcomeReleaseNoteCatalog = Record<string, WelcomeReleaseNoteEntry[]>;
 
 const ENTRIES_EN: WelcomeReleaseNoteEntry[] = [
     {
+        version: '1.9.0',
+        highlights: [
+            'Developer-gated batch folder selection now ships with saved file-selection profiles, one-run folder or rule overrides, clickable preset chips, and an inline selected-file preview before the batch starts.',
+            'Developer-gated relaxed input file restrictions now let selected source-preserving tasks read broader text-like files and PDF text via Obsidian\'s PDF runtime without weakening mutation-sensitive workflows.',
+            'Task-aware input validation is now shared across sidebar actions, command palette entrypoints, batch host adapters, and path-based diagram generation so UI and CLI-facing surfaces stop drifting.'
+        ]
+    },
+    {
         version: '1.8.9',
         highlights: [
             'Preview diagram now reopens saved Mermaid source consistently, so the first post-generation preview and later manual preview no longer drift apart.',
@@ -32,17 +40,17 @@ const ENTRIES_EN: WelcomeReleaseNoteEntry[] = [
             'Regex precheck semantics are now shared between settings UI and runtime matcher compilation, reducing drift risk and surfacing invalid patterns earlier.'
         ]
     },
-    {
-        version: '1.8.6',
-        highlights: [
-            'Added Settings reset controls with two modes: Complete reset (all settings) and Partial reset (keep LLM provider settings).',
-            'Added the new Extract Concepts option "Replace synonyms during concept extraction", which prepends a synonym-suppression instruction for Process File/Folder and Extract Concepts.',
-            'Synchronized packaged version metadata, README markers, and bilingual release notes for 1.8.6 with full regression verification gates.'
-        ]
-    }
 ];
 
 const ENTRIES_ZH_CN: WelcomeReleaseNoteEntry[] = [
+    {
+        version: '1.9.0',
+        highlights: [
+            '开发者开关控制的 batch 文件夹选择弹窗现已支持已保存筛选档案、单次文件夹/规则覆盖、可点击 preset chips，以及批处理启动前的内联匹配文件预览。',
+            '开发者开关控制的“放开输入文件限制”现可让部分保留原文件的任务读取更广泛的文本类文件，以及通过 Obsidian PDF 运行时提取文本的 PDF，同时继续保留对改写型流程的限制。',
+            '任务级输入校验现已在侧边栏、命令面板、batch host adapter 与按路径图形生成入口之间共享，减少 UI 与 CLI 可见行为漂移。'
+        ]
+    },
     {
         version: '1.8.9',
         highlights: [
@@ -67,17 +75,17 @@ const ENTRIES_ZH_CN: WelcomeReleaseNoteEntry[] = [
             'regex 预检语义已在设置页与运行时 matcher 之间共享，非法 pattern 可更早暴露，降低配置漂移风险。'
         ]
     },
-    {
-        version: '1.8.6',
-        highlights: [
-            '设置页新增“重置设置”双模式：完整重置（全部设置）与部分重置（保留 LLM 提供商设置）。',
-            '新增“概念提取时替换同义词”选项，开启后会在“处理文件/文件夹（添加链接）”与“提取概念”任务提示词前置同义词抑制约束。',
-            '1.8.6 的随包版本元数据、README 版本标记与双语 release notes 已完成同步，并通过完整回归门禁验证。'
-        ]
-    }
 ];
 
 const ENTRIES_ZH_TW: WelcomeReleaseNoteEntry[] = [
+    {
+        version: '1.9.0',
+        highlights: [
+            '開發者開關控制的 batch 資料夾選取彈窗現已支援已儲存篩選設定檔、單次資料夾/規則覆寫、可點擊 preset chips，以及批次啟動前的內聯匹配檔案預覽。',
+            '開發者開關控制的「放開輸入檔案限制」現在可讓部分保留原檔的任務讀取更廣泛的文字類檔案，以及透過 Obsidian PDF 執行期提取文字的 PDF，同時繼續保留對改寫型流程的限制。',
+            '任務級輸入校驗現已在側欄、命令面板、batch host adapter 與按路徑圖形生成入口之間共享，降低 UI 與 CLI 可見行為漂移。'
+        ]
+    },
     {
         version: '1.8.9',
         highlights: [
@@ -102,14 +110,6 @@ const ENTRIES_ZH_TW: WelcomeReleaseNoteEntry[] = [
             'regex 預檢語義已在設定頁與執行期 matcher 之間共享，非法 pattern 可更早暴露，降低設定漂移風險。'
         ]
     },
-    {
-        version: '1.8.6',
-        highlights: [
-            '設定頁新增「重設設定」雙模式：完整重設（全部設定）與部分重設（保留 LLM 提供者設定）。',
-            '新增「概念擷取時替換同義詞」選項，開啟後會在「處理檔案/資料夾（加入連結）」與「擷取概念」任務提示詞前置同義詞抑制約束。',
-            '1.8.6 的隨包版本元資料、README 版本標記與雙語 release notes 已完成同步，並通過完整回歸門禁驗證。'
-        ]
-    }
 ];
 
 const WELCOME_RELEASE_NOTES: WelcomeReleaseNoteCatalog = {

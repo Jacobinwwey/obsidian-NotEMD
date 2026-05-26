@@ -27,7 +27,7 @@ Notemd usprawnia pracę w Obsidianie, integrując się z różnymi dużymi model
 
 Jeśli kochasz korzystać z Notemd, rozważ [⭐ danie gwiazdki na GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) lub [☕️ kup mi kawę](https://ko-fi.com/jacobinwwey).
 
-**Wersja:** 1.8.9
+.9.0
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
@@ -690,7 +690,7 @@ MIT License - szczegóły znajdują się w pliku [LICENSE](LICENSE).
 ---
 
 
-*Notemd v1.8.9 - Rozwijaj swój graf wiedzy w Obsidianie dzięki AI.*
+*Notemd v1.9.0 - Rozwijaj swój graf wiedzy w Obsidianie dzięki AI.*
 
 
 <!-- repo-chronicle:start -->
@@ -700,7 +700,7 @@ Ta kwartalna kronika zachowuje oryginalny styl wizualny [repo-saga](https://gith
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.pl.svg)
 
-_Ostatnio odświeżono dla tagu wydania `1.8.9`: 2026-05-25. Data ostatniego commita: 2026-05-25._
+_Ostatnio odświeżono z bieżącego drzewa roboczego: 2026-05-26. Data ostatniego commita: 2026-05-26._
 <!-- repo-chronicle:end -->
 
 

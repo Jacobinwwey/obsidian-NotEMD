@@ -27,7 +27,7 @@ O Notemd aprimora seu fluxo de trabalho no Obsidian integrando-se a vários Mode
 
 Se adora usar o Notemd, por favor considere [⭐ dar uma estrela no GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) ou [☕️ comprar-me um café](https://ko-fi.com/jacobinwwey).
 
-**Versão:** 1.8.9
+.9.0
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
@@ -696,7 +696,7 @@ Licença MIT - Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
 ---
 
 
-*Notemd v1.8.9 - Melhore seu grafo de conhecimento no Obsidian com IA.*
+*Notemd v1.9.0 - Melhore seu grafo de conhecimento no Obsidian com IA.*
 
 
 
@@ -707,7 +707,7 @@ Esta crônica trimestral preserva o estilo visual original do [repo-saga](https:
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.pt.svg)
 
-_Atualizado pela última vez para a tag de release `1.8.9` em 2026-05-25. Data do commit mais recente: 2026-05-25._
+_Atualizado pela última vez a partir da árvore de trabalho em 2026-05-26. Data do commit mais recente: 2026-05-26._
 <!-- repo-chronicle:end -->
 
 

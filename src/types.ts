@@ -85,6 +85,8 @@ export interface NotemdSettings {
     enableApiErrorDebugMode: boolean;
     // Developer mode / diagnostics
     enableDeveloperMode: boolean;
+    enableAdvancedFileSelectionProfiles: boolean;
+    enableRelaxedInputFileTypes: boolean;
     developerDiagnosticCallMode: string;
     developerDiagnosticStabilityRuns: number;
     developerDiagnosticTimeoutMs: number;

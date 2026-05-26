@@ -58,6 +58,8 @@ export const DEFAULT_SETTINGS: NotemdSettings = {
     enableApiErrorDebugMode: false,
     // Developer diagnostics
     enableDeveloperMode: false,
+    enableAdvancedFileSelectionProfiles: false,
+    enableRelaxedInputFileTypes: false,
     developerDiagnosticCallMode: 'runtime-stable',
     developerDiagnosticStabilityRuns: 3,
     developerDiagnosticTimeoutMs: 10 * 60 * 1000,

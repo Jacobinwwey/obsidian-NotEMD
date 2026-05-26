@@ -33,6 +33,10 @@ import {
     mergeFolderTaskSelectionOverrides,
     selectFolderTaskFiles
 } from '../folderTaskFileSelector';
+import {
+    getAllowedInputExtensionsForTask,
+    isSupportedInputFileForTask
+} from '../inputFileSupport';
 
 export interface NoteProcessingPluginRuntime extends ConceptExtractionPluginContext, ExtractOriginalTextPluginContext {}
 
@@ -57,6 +61,7 @@ export interface NoteProcessingCommandUiStrings {
         processingError: string;
         batchProcessingCancelled: string;
         noMarkdownOrTextFilesFoundSelectedFolder: string;
+        noSupportedInputFilesFoundSelectedFolder?: string;
         batchProcessingFinishedWithErrors: string;
         batchProcessingSuccess: string;
         batchProcessingError: string;
@@ -272,8 +277,8 @@ async function runExtractConceptsCommandCoreWithHost(
     uiStrings = host.getUiStrings();
 
     const activeFile = host.getActiveFile();
-    if (!activeFile || (activeFile.extension !== 'md' && activeFile.extension !== 'txt')) {
-        throw new Error("No active '.md' or '.txt' file to extract concepts from.");
+    if (!activeFile || !isSupportedInputFileForTask(host.getSettings(), 'extract-concepts-current', activeFile)) {
+        throw new Error('No supported input file to extract concepts from.');
     }
 
     host.updateStatusBar(host.getRunningActionText(`${actionLabel}: ${activeFile.name}`));
@@ -442,9 +447,13 @@ export async function runBatchTranslateFolderCommandWithHost(
             }
 
             if (commandResult.processedFileCount === 0) {
-                const message = formatI18n(uiStrings.notices.noMarkdownOrTextFilesFoundSelectedFolder, {
+                const message = formatI18n(
+                    uiStrings.notices.noSupportedInputFilesFoundSelectedFolder
+                    || uiStrings.notices.noMarkdownOrTextFilesFoundSelectedFolder,
+                    {
                     folderPath: targetFolder.path
-                });
+                    }
+                );
                 useReporter.log(message);
                 useReporter.updateStatus(message, -1);
                 host.showNotice(message);
@@ -518,6 +527,9 @@ export async function runTranslateFileCommandWithHost(
             try {
                 await host.loadSettings();
                 uiStrings = host.getUiStrings();
+                if (!isSupportedInputFileForTask(host.getSettings(), 'translate-current-file', file)) {
+                    throw new Error('No supported input file to translate.');
+                }
                 const translateLanguage = host.getTaskLanguageCode('translate');
                 commandResult = await translateFileImpl(
                     host.getApp(),
@@ -651,14 +663,16 @@ export async function runBatchExtractConceptsForFolderCommandWithHost(
                 taskKind: 'extract-concepts-folder',
                 folderPath,
                 files: host.getFiles(),
-                allowedExtensions: ['md', 'txt'],
+                allowedExtensions: getAllowedInputExtensionsForTask(effectiveSettings, 'extract-concepts-folder'),
                 settings: effectiveSettings
             });
 
             if (files.length === 0) {
-                const noFilesMessage = formatI18n(uiStrings.notices.noMarkdownOrTextFilesFoundSelectedFolder, {
-                    folderPath
-                });
+                const noFilesMessage = formatI18n(
+                    uiStrings.notices.noSupportedInputFilesFoundSelectedFolder
+                    || uiStrings.notices.noMarkdownOrTextFilesFoundSelectedFolder,
+                    { folderPath }
+                );
                 host.showNotice(noFilesMessage);
                 host.completeReporter(useReporter);
                 return;
@@ -1349,7 +1363,7 @@ export async function runProcessWithNotemdCommandWithHost(
             await host.loadSettings();
             uiStrings = host.getUiStrings();
             const activeFile = host.getActiveFile();
-            if (!activeFile || (activeFile.extension !== 'md' && activeFile.extension !== 'txt')) {
+            if (!activeFile || !isSupportedInputFileForTask(host.getSettings(), 'process-current-add-links', activeFile)) {
                 throw new Error("No active '.md' or '.txt' file to process.");
             }
 

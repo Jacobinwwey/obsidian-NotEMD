@@ -1202,103 +1202,105 @@ export class NotemdSettingTab extends PluginSettingTab {
                     }));
         }
 
-        new Setting(containerEl).setName(folderTaskFilterI18n.heading).setHeading();
-        new Setting(containerEl)
-            .setName(folderTaskFilterI18n.modeName)
-            .setDesc(folderTaskFilterI18n.modeDesc)
-            .addDropdown(dropdown => dropdown
-                .addOption('none', folderTaskFilterI18n.modeNone)
-                .addOption('contains', folderTaskFilterI18n.modeContains)
-                .addOption('regex', folderTaskFilterI18n.modeRegex)
-                .addOption('glob', folderTaskFilterI18n.modeGlob)
-                .setValue(this.plugin.settings.folderTaskFileFilterMode)
-                .onChange(async (value: 'none' | 'contains' | 'regex' | 'glob') => {
-                    this.plugin.settings.folderTaskFileFilterMode = value;
-                    await this.plugin.saveSettings();
-                    if (value === 'regex') {
-                        const regexError = getFolderTaskRegexValidationError(
-                            this.plugin.settings.folderTaskFileFilterPattern,
-                            this.plugin.settings.folderTaskFileFilterCaseSensitive
-                        );
-                        if (regexError) {
-                            new Notice(formatI18n(folderTaskFilterI18n.invalidRegexNotice, { message: regexError }), 9000);
-                        }
-                    }
-                }));
-
-        this.addDeferredTextSetting(
+        if (this.plugin.settings.enableDeveloperMode && this.plugin.settings.enableAdvancedFileSelectionProfiles) {
+            new Setting(containerEl).setName(folderTaskFilterI18n.heading).setHeading();
             new Setting(containerEl)
-                .setName(folderTaskFilterI18n.patternName)
-                .setDesc(folderTaskFilterI18n.patternDesc),
-            {
-                placeholder: folderTaskFilterI18n.patternPlaceholder,
-                value: this.plugin.settings.folderTaskFileFilterPattern,
-                onCommit: async (value) => {
-                    this.plugin.settings.folderTaskFileFilterPattern = value;
-                    await this.plugin.saveSettings();
-                    if (this.plugin.settings.folderTaskFileFilterMode === 'regex') {
-                        const regexError = getFolderTaskRegexValidationError(
-                            value,
-                            this.plugin.settings.folderTaskFileFilterCaseSensitive
-                        );
-                        if (regexError) {
-                            new Notice(formatI18n(folderTaskFilterI18n.invalidRegexNotice, { message: regexError }), 9000);
+                .setName(folderTaskFilterI18n.modeName)
+                .setDesc(folderTaskFilterI18n.modeDesc)
+                .addDropdown(dropdown => dropdown
+                    .addOption('none', folderTaskFilterI18n.modeNone)
+                    .addOption('contains', folderTaskFilterI18n.modeContains)
+                    .addOption('regex', folderTaskFilterI18n.modeRegex)
+                    .addOption('glob', folderTaskFilterI18n.modeGlob)
+                    .setValue(this.plugin.settings.folderTaskFileFilterMode)
+                    .onChange(async (value: 'none' | 'contains' | 'regex' | 'glob') => {
+                        this.plugin.settings.folderTaskFileFilterMode = value;
+                        await this.plugin.saveSettings();
+                        if (value === 'regex') {
+                            const regexError = getFolderTaskRegexValidationError(
+                                this.plugin.settings.folderTaskFileFilterPattern,
+                                this.plugin.settings.folderTaskFileFilterCaseSensitive
+                            );
+                            if (regexError) {
+                                new Notice(formatI18n(folderTaskFilterI18n.invalidRegexNotice, { message: regexError }), 9000);
+                            }
+                        }
+                    }));
+
+            this.addDeferredTextSetting(
+                new Setting(containerEl)
+                    .setName(folderTaskFilterI18n.patternName)
+                    .setDesc(folderTaskFilterI18n.patternDesc),
+                {
+                    placeholder: folderTaskFilterI18n.patternPlaceholder,
+                    value: this.plugin.settings.folderTaskFileFilterPattern,
+                    onCommit: async (value) => {
+                        this.plugin.settings.folderTaskFileFilterPattern = value;
+                        await this.plugin.saveSettings();
+                        if (this.plugin.settings.folderTaskFileFilterMode === 'regex') {
+                            const regexError = getFolderTaskRegexValidationError(
+                                value,
+                                this.plugin.settings.folderTaskFileFilterCaseSensitive
+                            );
+                            if (regexError) {
+                                new Notice(formatI18n(folderTaskFilterI18n.invalidRegexNotice, { message: regexError }), 9000);
+                            }
                         }
                     }
                 }
-            }
-        );
+            );
 
-        new Setting(containerEl)
-            .setName(folderTaskFilterI18n.syntaxGuideName)
-            .setDesc(folderTaskFilterI18n.syntaxGuideDesc);
+            new Setting(containerEl)
+                .setName(folderTaskFilterI18n.syntaxGuideName)
+                .setDesc(folderTaskFilterI18n.syntaxGuideDesc);
 
-        new Setting(containerEl)
-            .setName(folderTaskFilterI18n.targetName)
-            .setDesc(folderTaskFilterI18n.targetDesc)
-            .addDropdown(dropdown => dropdown
-                .addOption('relativePath', folderTaskFilterI18n.targetRelativePath)
-                .addOption('basename', folderTaskFilterI18n.targetBasename)
-                .setValue(this.plugin.settings.folderTaskFileFilterTarget)
-                .onChange(async (value: 'relativePath' | 'basename') => {
-                    this.plugin.settings.folderTaskFileFilterTarget = value;
-                    await this.plugin.saveSettings();
-                }));
+            new Setting(containerEl)
+                .setName(folderTaskFilterI18n.targetName)
+                .setDesc(folderTaskFilterI18n.targetDesc)
+                .addDropdown(dropdown => dropdown
+                    .addOption('relativePath', folderTaskFilterI18n.targetRelativePath)
+                    .addOption('basename', folderTaskFilterI18n.targetBasename)
+                    .setValue(this.plugin.settings.folderTaskFileFilterTarget)
+                    .onChange(async (value: 'relativePath' | 'basename') => {
+                        this.plugin.settings.folderTaskFileFilterTarget = value;
+                        await this.plugin.saveSettings();
+                    }));
 
-        new Setting(containerEl)
-            .setName(folderTaskFilterI18n.caseSensitiveName)
-            .setDesc(folderTaskFilterI18n.caseSensitiveDesc)
-            .addToggle(toggle => toggle
-                .setValue(this.plugin.settings.folderTaskFileFilterCaseSensitive)
-                .onChange(async (value) => {
-                    this.plugin.settings.folderTaskFileFilterCaseSensitive = value;
-                    await this.plugin.saveSettings();
-                }));
+            new Setting(containerEl)
+                .setName(folderTaskFilterI18n.caseSensitiveName)
+                .setDesc(folderTaskFilterI18n.caseSensitiveDesc)
+                .addToggle(toggle => toggle
+                    .setValue(this.plugin.settings.folderTaskFileFilterCaseSensitive)
+                    .onChange(async (value) => {
+                        this.plugin.settings.folderTaskFileFilterCaseSensitive = value;
+                        await this.plugin.saveSettings();
+                    }));
 
-        new Setting(containerEl)
-            .setName(folderTaskFilterI18n.invertName)
-            .setDesc(folderTaskFilterI18n.invertDesc)
-            .addToggle(toggle => toggle
-                .setValue(this.plugin.settings.folderTaskFileFilterInvert)
-                .onChange(async (value) => {
-                    this.plugin.settings.folderTaskFileFilterInvert = value;
-                    await this.plugin.saveSettings();
-                }));
+            new Setting(containerEl)
+                .setName(folderTaskFilterI18n.invertName)
+                .setDesc(folderTaskFilterI18n.invertDesc)
+                .addToggle(toggle => toggle
+                    .setValue(this.plugin.settings.folderTaskFileFilterInvert)
+                    .onChange(async (value) => {
+                        this.plugin.settings.folderTaskFileFilterInvert = value;
+                        await this.plugin.saveSettings();
+                    }));
 
-        new Setting(containerEl)
-            .setName(folderTaskFilterI18n.includeSubfoldersName)
-            .setDesc(folderTaskFilterI18n.includeSubfoldersDesc)
-            .addDropdown(dropdown => dropdown
-                .addOption('legacy', folderTaskFilterI18n.includeSubfoldersLegacy)
-                .addOption('include', folderTaskFilterI18n.includeSubfoldersInclude)
-                .addOption('exclude', folderTaskFilterI18n.includeSubfoldersExclude)
-                .setValue(this.plugin.settings.folderTaskIncludeSubfoldersMode)
-                .onChange(async (value: 'legacy' | 'include' | 'exclude') => {
-                    this.plugin.settings.folderTaskIncludeSubfoldersMode = value;
-                    await this.plugin.saveSettings();
-                }));
+            new Setting(containerEl)
+                .setName(folderTaskFilterI18n.includeSubfoldersName)
+                .setDesc(folderTaskFilterI18n.includeSubfoldersDesc)
+                .addDropdown(dropdown => dropdown
+                    .addOption('legacy', folderTaskFilterI18n.includeSubfoldersLegacy)
+                    .addOption('include', folderTaskFilterI18n.includeSubfoldersInclude)
+                    .addOption('exclude', folderTaskFilterI18n.includeSubfoldersExclude)
+                    .setValue(this.plugin.settings.folderTaskIncludeSubfoldersMode)
+                    .onChange(async (value: 'legacy' | 'include' | 'exclude') => {
+                        this.plugin.settings.folderTaskIncludeSubfoldersMode = value;
+                        await this.plugin.saveSettings();
+                    }));
 
-        this.renderFolderTaskFileSelectionProfileManager(containerEl, folderTaskFilterI18n);
+            this.renderFolderTaskFileSelectionProfileManager(containerEl, folderTaskFilterI18n);
+        }
 
         // --- Translate Task Settings ---
         new Setting(containerEl).setName(translationTaskI18n.heading).setHeading();
@@ -1513,8 +1515,31 @@ export class NotemdSettingTab extends PluginSettingTab {
                     this.display();
                 }));
 
-        if (this.plugin.settings.enableDeveloperMode && activeProvider) {
+        if (this.plugin.settings.enableDeveloperMode) {
             new Setting(containerEl).setName(i18n.settings.developer.heading).setHeading();
+            new Setting(containerEl)
+                .setName(i18n.settings.developer.advancedFileSelectionName)
+                .setDesc(i18n.settings.developer.advancedFileSelectionDesc)
+                .addToggle(toggle => toggle
+                    .setValue(this.plugin.settings.enableAdvancedFileSelectionProfiles)
+                    .onChange(async (value) => {
+                        this.plugin.settings.enableAdvancedFileSelectionProfiles = value;
+                        await this.plugin.saveSettings();
+                        this.display();
+                    }));
+            new Setting(containerEl)
+                .setName(i18n.settings.developer.relaxedInputFileTypesName)
+                .setDesc(i18n.settings.developer.relaxedInputFileTypesDesc)
+                .addToggle(toggle => toggle
+                    .setValue(this.plugin.settings.enableRelaxedInputFileTypes)
+                    .onChange(async (value) => {
+                        this.plugin.settings.enableRelaxedInputFileTypes = value;
+                        await this.plugin.saveSettings();
+                        this.display();
+                    }));
+        }
+
+        if (this.plugin.settings.enableDeveloperMode && activeProvider) {
             const experimentalDiagramI18n = i18n.settings.developer.experimentalDiagramPipeline;
 
             const diagnosticModeOptions = getProviderDiagnosticCallModeOptions(activeProvider);

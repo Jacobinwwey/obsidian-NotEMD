@@ -2,11 +2,22 @@ import { App, Editor, MarkdownView, Modal, Notice, Plugin, TFile, TFolder, Plugi
 import { NotemdSettings, ProgressReporter, LLMProviderConfig, TaskKey } from './types';
 import { DEFAULT_SETTINGS, NOTEMD_SIDEBAR_VIEW_TYPE, NOTEMD_SIDEBAR_ICON } from './constants';
 import {
+    applyFolderTaskSelectionOverride,
+    createFolderTaskSelectionPresetOverride,
+    createCurrentFolderTaskFileSelectionProfile,
     FolderTaskFileSelectionOverride,
     FolderTaskInteractiveSelection,
     FolderTaskKind,
+    FolderTaskSelectionPresetId,
     getFolderTaskFileSelectionProfiles,
-    resolveFolderTaskFileSelectionProfile
+    getFolderTaskRegexValidationError,
+    isAdvancedFolderTaskFileSelectionEnabled,
+    looksLikeFolderTaskPatternPath,
+    mergeFolderTaskSelectionOverrides,
+    resolveExistingFolderTaskFolderPath,
+    resolveFolderTaskProfileFolderSelectionUiState,
+    resolveFolderTaskFileSelectionProfile,
+    selectFolderTaskFiles
 } from './folderTaskFileSelector';
 import { retry } from './utils';
 import { callLLM } from './llmUtils';
@@ -103,6 +114,12 @@ import {
     runImportProviderProfilesCommandWithHost
 } from './operations/configProfileCommandHostAdapter';
 import { invokeMaintainerCliOperation, MaintainerCliOperationRequest } from './maintainerCliBridge';
+import {
+    getAllowedInputExtensionsForTask,
+    isSupportedInputFileForTask,
+    readSupportedInputFile,
+    SupportedInputTaskId
+} from './inputFileSupport';
 import {
     NoteProcessingCommandHost,
     runBatchExtractOriginalTextCommandWithHost,
@@ -244,7 +261,7 @@ export default class NotemdPlugin extends Plugin {
                 const abstractFile = this.app.vault.getAbstractFileByPath(path);
                 return abstractFile instanceof TFile ? abstractFile : null;
             },
-            readFile: (file) => this.app.vault.read(file),
+            readFile: (file) => this.readSupportedTaskInputFile(file),
             openFile: (file) => {
                 const leaf = this.app.workspace.getLeaf('split', 'vertical');
                 leaf.openFile(file);
@@ -324,7 +341,7 @@ export default class NotemdPlugin extends Plugin {
             getActionLabel: (executionMode, i18n) => this.getDiagramCommandActionLabel(executionMode, i18n),
             getActionCompleteText: (label) => this.getActionCompleteText(label),
             getActionFailedText: (message) => this.getActionFailedText(message),
-            readFile: (file) => this.app.vault.read(file),
+            readFile: (file) => this.readSupportedTaskInputFile(file),
             getProviderAndModelForTask: (task) => this.getProviderAndModelForTask(task),
             getTaskLanguageCode: (task) => resolveTaskLanguageCode(this.settings, task),
             executeSaveMermaidCommand: (file, operationInput, provider, modelName, reporter, actionLabel, i18n) =>
@@ -424,7 +441,7 @@ export default class NotemdPlugin extends Plugin {
         return {
             getApp: () => this.app,
             getActiveFile: () => this.app.workspace.getActiveFile(),
-            readFile: (file) => this.app.vault.read(file),
+            readFile: (file) => this.readSupportedTaskInputFile(file),
             loadSettings: () => this.loadSettings(),
             getSettings: () => this.settings,
             getUiStrings: () => this.getUiStrings(),
@@ -503,20 +520,38 @@ export default class NotemdPlugin extends Plugin {
         return Math.min(normalized, 10);
     }
 
+    private isSupportedTaskInputFile(file: TFile, taskId: SupportedInputTaskId): boolean {
+        return isSupportedInputFileForTask(this.settings, taskId, file);
+    }
+
+    private getAllowedTaskInputExtensions(taskId: SupportedInputTaskId): string[] {
+        return getAllowedInputExtensionsForTask(this.settings, taskId);
+    }
+
+    private readSupportedTaskInputFile(file: TFile): Promise<string> {
+        return readSupportedInputFile(this.app, file, this.settings);
+    }
+
     private registerEditorDiagramCommand(
         id: string,
         name: string,
+        taskId: Extract<SupportedInputTaskId, 'summarize-as-mermaid' | 'generate-diagram'>,
         handler: (file: TFile, reporter: ProgressReporter) => Promise<void>
     ) {
         this.addCommand({
             id,
             name,
-            editorCallback: async (_editor: Editor, view: MarkdownView) => {
-                const file = view.file;
-                if (file) {
-                    const reporter = this.getReporter();
-                    await handler.call(this, file, reporter);
+            checkCallback: (checking: boolean) => {
+                const activeFile = this.app.workspace.getActiveFile();
+                const condition = !!activeFile && this.isSupportedTaskInputFile(activeFile, taskId);
+                if (condition) {
+                    if (!checking && activeFile) {
+                        const reporter = this.getReporter();
+                        void handler.call(this, activeFile, reporter);
+                    }
+                    return true;
                 }
+                return false;
             }
         });
     }
@@ -582,12 +617,14 @@ export default class NotemdPlugin extends Plugin {
         this.registerEditorDiagramCommand(
             'notemd-summarize-as-mermaid',
             getSidebarActionLabel(uiStrings, 'summarize-as-mermaid'),
+            'summarize-as-mermaid',
             this.summarizeToMermaidCommand
         );
 
         this.registerEditorDiagramCommand(
             'notemd-generate-diagram',
             uiStrings.commands.generateExperimentalDiagram,
+            'generate-diagram',
             async (file, reporter) => {
                 await this.generateDiagramCommand(file, reporter, { executionMode: 'save-artifact' });
             }
@@ -606,6 +643,7 @@ export default class NotemdPlugin extends Plugin {
         this.registerEditorDiagramCommand(
             'notemd-generate-experimental-diagram',
             uiStrings.commands.generateExperimentalDiagram,
+            'generate-diagram',
             this.generateExperimentalDiagramCommand
         );
 
@@ -658,7 +696,7 @@ export default class NotemdPlugin extends Plugin {
             name: uiStrings.commands.checkDuplicatesCurrent,
             checkCallback: (checking: boolean) => {
                 const activeFile = this.app.workspace.getActiveFile();
-                const condition = activeFile && (activeFile.extension === 'md' || activeFile.extension === 'txt');
+                const condition = !!activeFile && this.isSupportedTaskInputFile(activeFile, 'check-duplicates-current');
                 if (condition) {
                     if (!checking) {
                         void this.checkDuplicatesCurrentCommand();
@@ -854,7 +892,8 @@ export default class NotemdPlugin extends Plugin {
             name: getSidebarActionLabel(uiStrings, 'translate-current-file'),
             checkCallback: (checking: boolean) => {
                 const activeFile = this.app.workspace.getActiveFile();
-                if (activeFile) {
+                const condition = !!activeFile && this.isSupportedTaskInputFile(activeFile, 'translate-current-file');
+                if (condition && activeFile) {
                     if (!checking) {
                         this.translateFileCommand(activeFile);
                     }
@@ -869,7 +908,7 @@ export default class NotemdPlugin extends Plugin {
             name: getSidebarActionLabel(uiStrings, 'extract-concepts-current'),
             checkCallback: (checking: boolean) => {
                 const activeFile = this.app.workspace.getActiveFile();
-                const condition = activeFile && (activeFile.extension === 'md' || activeFile.extension === 'txt');
+                const condition = !!activeFile && this.isSupportedTaskInputFile(activeFile, 'extract-concepts-current');
                 if (condition) {
                     if (!checking) {
                         this.extractConceptsCommand();
@@ -1224,19 +1263,23 @@ export default class NotemdPlugin extends Plugin {
     }
 
     async getFolderTaskSelection(
-        _taskKind: FolderTaskKind,
+        taskKind: FolderTaskKind,
         initialOverride?: FolderTaskFileSelectionOverride
     ): Promise<FolderTaskInteractiveSelection | null> {
-        const profiles = getFolderTaskFileSelectionProfiles(this.settings);
-        if (profiles.length === 0 && !initialOverride?.profileId && !initialOverride?.profileName) {
+        if (!isAdvancedFolderTaskFileSelectionEnabled(this.settings)) {
             const folderPath = await this.getFolderSelection();
-            return folderPath ? { folderPath, fileSelectionOverride: initialOverride } : null;
+            return folderPath ? { folderPath } : null;
         }
 
+        const profiles = getFolderTaskFileSelectionProfiles(this.settings);
         const folders = this.getFolderPickerOptions();
         const i18n = this.getUiStrings();
         const currentDefaultsValue = '__current_defaults__';
         const initialProfile = resolveFolderTaskFileSelectionProfile(this.settings, initialOverride);
+        const currentDefaultsProfile = createCurrentFolderTaskFileSelectionProfile(
+            this.settings,
+            i18n.folderPicker.selectionProfileCurrentDefaults
+        );
         const currentDefaultOverride = initialOverride
             ? {
                 ...initialOverride,
@@ -1245,13 +1288,190 @@ export default class NotemdPlugin extends Plugin {
             }
             : undefined;
         const hasFolder = (folderPath: string): boolean => folders.includes(folderPath);
-        const defaultFolderValue = initialProfile?.folderPathHint && hasFolder(initialProfile.folderPathHint)
-            ? initialProfile.folderPathHint
-            : '/';
+        const defaultFolderValue = resolveExistingFolderTaskFolderPath(
+            folders,
+            initialProfile?.folderPathHint || '/'
+        ) || '/';
+        const formatFolderDisplay = (folderPath: string): string => folderPath === '/' ? i18n.folderPicker.vaultRoot : folderPath;
+        const resolveCurrentFolderInput = (rawValue: string): string | null =>
+            resolveExistingFolderTaskFolderPath(folders, rawValue);
+        const resolveSelectedProfile = (selectedProfileId: string): typeof initialProfile =>
+            selectedProfileId === currentDefaultsValue
+                ? null
+                : (profiles.find(item => item.id === selectedProfileId) || null);
+        const createDraftRuleOverride = (selectedProfileId: string): FolderTaskFileSelectionOverride => {
+            const baseOverride = selectedProfileId === currentDefaultsValue
+                ? currentDefaultOverride
+                : { profileId: selectedProfileId };
+            const effectiveSettings = applyFolderTaskSelectionOverride(this.settings, baseOverride);
+            return {
+                includeSubfoldersMode: effectiveSettings.folderTaskIncludeSubfoldersMode,
+                fileFilterMode: effectiveSettings.folderTaskFileFilterMode,
+                fileFilterPattern: effectiveSettings.folderTaskFileFilterPattern,
+                fileFilterTarget: effectiveSettings.folderTaskFileFilterTarget,
+                fileFilterCaseSensitive: effectiveSettings.folderTaskFileFilterCaseSensitive,
+                fileFilterInvert: effectiveSettings.folderTaskFileFilterInvert
+            };
+        };
+        const buildEffectiveSelectionOverride = (
+            selectedProfileId: string,
+            draftRuleOverride?: FolderTaskFileSelectionOverride,
+            useRuleOverride = false
+        ): FolderTaskFileSelectionOverride | undefined => {
+            const baseOverride = selectedProfileId === currentDefaultsValue
+                ? currentDefaultOverride
+                : { profileId: selectedProfileId };
+            if (!useRuleOverride || !draftRuleOverride) {
+                return baseOverride;
+            }
+            return mergeFolderTaskSelectionOverrides(baseOverride, draftRuleOverride);
+        };
+        const allFiles = this.app.vault.getFiles();
+        const resolvePreviewFiles = (
+            folderPath: string,
+            effectiveSettings: NotemdSettings
+        ): TFile[] => {
+            if (taskKind === 'batch-generate-from-titles') {
+                const folder = this.app.vault.getFolderByPath(folderPath);
+                const baseFolderName = folderPath === '/' ? 'Vault' : (folder?.name || folderPath.split('/').pop() || 'Vault');
+                const completeFolderName = effectiveSettings.useCustomGenerateTitleOutputFolder
+                    ? (effectiveSettings.generateTitleOutputFolderName || DEFAULT_SETTINGS.generateTitleOutputFolderName)
+                    : `${baseFolderName}_complete`;
+                const parentPath = folder?.parent?.path === '/'
+                    ? ''
+                    : (folder?.parent?.path ? `${folder.parent.path}/` : '');
+                const completeFolderPath = `${parentPath}${completeFolderName}`;
+                const normalizedCompletePath = completeFolderPath === ''
+                    ? ''
+                    : (completeFolderPath.endsWith('/') ? completeFolderPath : `${completeFolderPath}/`);
+
+                return selectFolderTaskFiles({
+                    taskKind,
+                    folderPath,
+                    files: this.app.vault.getMarkdownFiles(),
+                    allowedExtensions: ['md'],
+                    settings: effectiveSettings,
+                    exclude: (file) => {
+                        const isInCompleteFolder = normalizedCompletePath ? file.path.startsWith(normalizedCompletePath) : false;
+                        return isInCompleteFolder || file.name.endsWith('_processed.md');
+                    }
+                });
+            }
+
+            if (taskKind === 'batch-mermaid-fix' || taskKind === 'batch-translate-folder') {
+                return selectFolderTaskFiles({
+                    taskKind,
+                    folderPath,
+                    files: taskKind === 'batch-mermaid-fix' ? this.app.vault.getMarkdownFiles() : allFiles,
+                    allowedExtensions: taskKind === 'batch-translate-folder'
+                        ? this.getAllowedTaskInputExtensions('batch-translate-folder')
+                        : ['md'],
+                    settings: effectiveSettings
+                });
+            }
+
+            return selectFolderTaskFiles({
+                taskKind,
+                folderPath,
+                files: allFiles,
+                allowedExtensions: taskKind === 'extract-concepts-folder'
+                    ? this.getAllowedTaskInputExtensions('extract-concepts-folder')
+                    : ['md', 'txt'],
+                settings: effectiveSettings
+            });
+        };
+        const resolveProfilePreview = (
+            selectedProfileId: string,
+            effectiveFolderPath: string | null,
+            rawFolderInputValue: string,
+            folderOverrideEnabled: boolean,
+            ruleOverrideEnabled: boolean,
+            draftRuleOverride?: FolderTaskFileSelectionOverride
+        ) => {
+            const selectedSavedProfile = resolveSelectedProfile(selectedProfileId);
+            const previewSelectionOverride = buildEffectiveSelectionOverride(
+                selectedProfileId,
+                draftRuleOverride,
+                ruleOverrideEnabled
+            );
+            const previewSettings = applyFolderTaskSelectionOverride(this.settings, previewSelectionOverride);
+            const configuredFolderHint = selectedSavedProfile?.folderPathHint.trim() || '';
+            const resolvedConfiguredFolderHint = configuredFolderHint
+                ? resolveExistingFolderTaskFolderPath(folders, configuredFolderHint)
+                : null;
+            const configuredFolderLooksLikePattern = !resolvedConfiguredFolderHint
+                && looksLikeFolderTaskPatternPath(configuredFolderHint);
+            const normalizedRawFolderInput = (rawFolderInputValue || '').trim();
+            const rawPreviewFolderValue = normalizedRawFolderInput.length > 0 ? normalizedRawFolderInput : '/';
+            const previewRunFolder = effectiveFolderPath
+                ? formatFolderDisplay(effectiveFolderPath)
+                : formatI18n(i18n.folderPicker.selectionProfilePreviewMissingFolder, {
+                    path: rawPreviewFolderValue
+                });
+
+            return {
+                profileName: selectedSavedProfile?.name || currentDefaultsProfile.name,
+                savedFolder: configuredFolderHint
+                    ? (resolvedConfiguredFolderHint
+                        ? formatFolderDisplay(resolvedConfiguredFolderHint)
+                        : configuredFolderLooksLikePattern
+                            ? formatI18n(i18n.folderPicker.selectionProfilePreviewPatternLikeFolder, {
+                                path: configuredFolderHint
+                            })
+                        : formatI18n(i18n.folderPicker.selectionProfilePreviewMissingFolder, {
+                            path: configuredFolderHint
+                        }))
+                    : i18n.folderPicker.selectionProfilePreviewNotSet,
+                runFolder: previewRunFolder,
+                filterMode: previewSettings.folderTaskFileFilterMode === 'none'
+                    ? i18n.settings.folderTaskFilter.modeNone
+                    : previewSettings.folderTaskFileFilterMode === 'contains'
+                        ? i18n.settings.folderTaskFilter.modeContains
+                        : previewSettings.folderTaskFileFilterMode === 'regex'
+                            ? i18n.settings.folderTaskFilter.modeRegex
+                            : i18n.settings.folderTaskFilter.modeGlob,
+                pattern: previewSettings.folderTaskFileFilterPattern.trim() || i18n.folderPicker.selectionProfilePreviewNotSet,
+                matchTarget: previewSettings.folderTaskFileFilterTarget === 'basename'
+                    ? i18n.settings.folderTaskFilter.targetBasename
+                    : i18n.settings.folderTaskFilter.targetRelativePath,
+                subfolderScope: previewSettings.folderTaskIncludeSubfoldersMode === 'include'
+                    ? i18n.settings.folderTaskFilter.includeSubfoldersInclude
+                    : previewSettings.folderTaskIncludeSubfoldersMode === 'exclude'
+                        ? i18n.settings.folderTaskFilter.includeSubfoldersExclude
+                        : i18n.settings.folderTaskFilter.includeSubfoldersLegacy,
+                caseSensitive: previewSettings.folderTaskFileFilterCaseSensitive
+                    ? i18n.common.enabled
+                    : i18n.common.disabled,
+                invert: previewSettings.folderTaskFileFilterInvert
+                    ? i18n.common.enabled
+                    : i18n.common.disabled,
+                pathMode: folderOverrideEnabled
+                    ? i18n.folderPicker.selectionProfilePreviewPathModeOverride
+                    : resolvedConfiguredFolderHint
+                        ? i18n.folderPicker.selectionProfilePreviewPathModeSaved
+                        : i18n.folderPicker.selectionProfilePreviewPathModeManual,
+                filterSource: ruleOverrideEnabled
+                    ? i18n.folderPicker.selectionProfilePreviewFilterSourceOverride
+                    : i18n.folderPicker.selectionProfilePreviewFilterSourceSaved
+            };
+        };
+        const presetChipDefs: Array<{ id: FolderTaskSelectionPresetId; label: string }> = [
+            { id: 'contains-index-family', label: i18n.folderPicker.selectionProfilePresetContainsIndex },
+            { id: 'regex-index-variants', label: i18n.folderPicker.selectionProfilePresetRegexIndex },
+            { id: 'glob-index-family', label: i18n.folderPicker.selectionProfilePresetGlobIndex },
+            { id: 'glob-index-cross-folder', label: i18n.folderPicker.selectionProfilePresetCrossFolderIndex }
+        ];
 
         return new Promise((resolve) => {
             const modal = new Modal(this.app);
+            modal.modalEl.addClass('notemd-folder-task-selection-shell');
+            modal.contentEl.addClass('notemd-folder-task-selection-modal');
             let settled = false;
+            let allowTemporaryProfileFolderOverride = false;
+            let allowTemporaryRuleOverride = false;
+            let selectedFolderValue = defaultFolderValue;
+            let draftRuleOverride = createDraftRuleOverride(initialProfile?.id || currentDefaultsValue);
+            let activePresetChipId: FolderTaskSelectionPresetId | null = null;
 
             const finish = (value: FolderTaskInteractiveSelection | null) => {
                 if (settled) {
@@ -1264,51 +1484,545 @@ export default class NotemdPlugin extends Plugin {
             modal.titleEl.setText(i18n.folderPicker.selectionProfileTitle);
             modal.contentEl.createEl('p', {
                 text: i18n.folderPicker.selectionProfileDesc,
-                cls: 'setting-item-description'
+                cls: 'setting-item-description notemd-folder-task-selection-intro'
             });
 
-            modal.contentEl.createEl('label', { text: i18n.folderPicker.selectionProfileLabel });
-            const profileSelect = modal.contentEl.createEl('select');
-            profileSelect.createEl('option', {
-                text: i18n.folderPicker.selectionProfileCurrentDefaults,
-                value: currentDefaultsValue
-            });
-            profiles.forEach(profile => {
-                profileSelect.createEl('option', { text: profile.name, value: profile.id });
-            });
-            profileSelect.value = initialProfile?.id || currentDefaultsValue;
+            const layoutEl = modal.contentEl.createDiv({ cls: 'notemd-folder-task-selection-layout' });
+            const formEl = layoutEl.createDiv({ cls: 'notemd-folder-task-selection-main' });
+            const previewEl = layoutEl.createDiv({ cls: 'notemd-folder-task-selection-preview' });
 
-            modal.contentEl.createEl('label', { text: i18n.folderPicker.folderLabel });
-            const folderSelect = modal.contentEl.createEl('select');
-            folders.forEach(folder => folderSelect.createEl('option', {
-                text: folder === '/' ? i18n.folderPicker.vaultRoot : folder,
-                value: folder
-            }));
-            folderSelect.value = defaultFolderValue;
+            let profileSelect: HTMLSelectElement | null = null;
+            if (profiles.length > 0) {
+                const profileFieldEl = formEl.createDiv({ cls: 'notemd-folder-task-selection-field' });
+                profileFieldEl.createEl('label', {
+                    text: i18n.folderPicker.selectionProfileLabel,
+                    cls: 'notemd-folder-task-selection-label'
+                });
+                profileSelect = profileFieldEl.createEl('select', {
+                    cls: 'notemd-folder-task-selection-select'
+                });
+                profileSelect.createEl('option', {
+                    text: i18n.folderPicker.selectionProfileCurrentDefaults,
+                    value: currentDefaultsValue
+                });
+                profiles.forEach(profile => {
+                    profileSelect!.createEl('option', { text: profile.name, value: profile.id });
+                });
+                profileSelect.value = initialProfile?.id || currentDefaultsValue;
+            } else {
+                formEl.createEl('div', {
+                    text: i18n.folderPicker.selectionProfileNoSavedProfiles,
+                    cls: 'setting-item-description notemd-folder-task-selection-empty'
+                });
+            }
 
-            const applyProfileFolderHint = () => {
-                const selectedProfileId = profileSelect.value;
-                if (selectedProfileId === currentDefaultsValue) {
+            const folderFieldEl = formEl.createDiv({ cls: 'notemd-folder-task-selection-field' });
+            folderFieldEl.createEl('label', {
+                text: i18n.folderPicker.folderLabel,
+                cls: 'notemd-folder-task-selection-label'
+            });
+            const folderInput = folderFieldEl.createEl('input', {
+                type: 'text',
+                cls: 'notemd-folder-task-selection-input'
+            });
+            folderInput.value = defaultFolderValue;
+            folderInput.placeholder = i18n.folderPicker.selectionProfileFolderInputPlaceholder;
+            const datalistId = `notemd-folder-picker-${Date.now()}`;
+            folderInput.setAttr('list', datalistId);
+            const folderSuggestions = folderFieldEl.createEl('datalist');
+            folderSuggestions.id = datalistId;
+            folders.forEach(folder => {
+                const optionEl = folderSuggestions.createEl('option');
+                optionEl.value = folder;
+                if (folder === '/') {
+                    optionEl.label = i18n.folderPicker.vaultRoot;
+                }
+            });
+            folderFieldEl.createEl('div', {
+                text: i18n.folderPicker.selectionProfileFolderInputDesc,
+                cls: 'setting-item-description notemd-folder-task-selection-hint'
+            });
+            const folderValidationEl = folderFieldEl.createEl('div', {
+                cls: 'notemd-folder-task-selection-validation'
+            });
+
+            const exampleEl = formEl.createDiv({ cls: 'notemd-folder-task-selection-examples' });
+            exampleEl.createEl('div', {
+                text: i18n.folderPicker.selectionProfileExamplesHeading,
+                cls: 'notemd-folder-task-selection-examples-heading'
+            });
+            exampleEl.createEl('div', {
+                text: i18n.folderPicker.selectionProfilePresetHint,
+                cls: 'setting-item-description notemd-folder-task-selection-hint'
+            });
+            const presetChipsEl = exampleEl.createDiv({ cls: 'notemd-folder-task-selection-chip-row' });
+            const presetChipButtons = presetChipDefs.map(({ id, label }) => {
+                const chipEl = presetChipsEl.createEl('button', {
+                    text: label,
+                    cls: 'notemd-folder-task-selection-chip'
+                });
+                chipEl.type = 'button';
+                return {
+                    id,
+                    element: chipEl
+                };
+            });
+            const exampleListEl = exampleEl.createEl('ul', {
+                cls: 'notemd-folder-task-selection-examples-list'
+            });
+            [
+                i18n.folderPicker.selectionProfileExamplesFolderRule,
+                i18n.folderPicker.selectionProfileExamplesContains,
+                i18n.folderPicker.selectionProfileExamplesRegex,
+                i18n.folderPicker.selectionProfileExamplesGlob,
+                i18n.folderPicker.selectionProfileExamplesCrossFolder,
+                i18n.folderPicker.selectionProfileExamplesSettingsHint
+            ].forEach(exampleText => {
+                exampleListEl.createEl('li', {
+                    text: exampleText,
+                    cls: 'notemd-folder-task-selection-examples-item'
+                });
+            });
+
+            const temporaryFolderOverrideContainer = formEl.createDiv({
+                cls: 'notemd-folder-task-selection-toggle'
+            });
+            const temporaryFolderOverrideToggleLabel = temporaryFolderOverrideContainer.createEl('label', {
+                cls: 'notemd-folder-task-selection-toggle-label'
+            });
+            const temporaryFolderOverrideToggle = temporaryFolderOverrideToggleLabel.createEl('input', {
+                type: 'checkbox'
+            });
+            temporaryFolderOverrideToggleLabel.appendText(` ${i18n.folderPicker.selectionProfileTemporaryFolderOverride}`);
+            temporaryFolderOverrideContainer.createEl('div', {
+                text: i18n.folderPicker.selectionProfileTemporaryFolderOverrideDesc,
+                cls: 'setting-item-description notemd-folder-task-selection-hint'
+            });
+
+            const temporaryRuleOverrideContainer = formEl.createDiv({
+                cls: 'notemd-folder-task-selection-toggle'
+            });
+            const temporaryRuleOverrideToggleLabel = temporaryRuleOverrideContainer.createEl('label', {
+                cls: 'notemd-folder-task-selection-toggle-label'
+            });
+            const temporaryRuleOverrideToggle = temporaryRuleOverrideToggleLabel.createEl('input', {
+                type: 'checkbox'
+            });
+            temporaryRuleOverrideToggleLabel.appendText(` ${i18n.folderPicker.selectionProfileTemporaryRuleOverride}`);
+            temporaryRuleOverrideContainer.createEl('div', {
+                text: i18n.folderPicker.selectionProfileTemporaryRuleOverrideDesc,
+                cls: 'setting-item-description notemd-folder-task-selection-hint'
+            });
+            const ruleOverrideGridEl = temporaryRuleOverrideContainer.createDiv({
+                cls: 'notemd-folder-task-selection-override-grid'
+            });
+            const createRuleOverrideField = (label: string) => {
+                const fieldEl = ruleOverrideGridEl.createDiv({
+                    cls: 'notemd-folder-task-selection-field notemd-folder-task-selection-field-compact'
+                });
+                fieldEl.createEl('label', {
+                    text: label,
+                    cls: 'notemd-folder-task-selection-label'
+                });
+                return fieldEl;
+            };
+
+            const ruleModeFieldEl = createRuleOverrideField(i18n.settings.folderTaskFilter.modeName);
+            const ruleModeSelect = ruleModeFieldEl.createEl('select', {
+                cls: 'notemd-folder-task-selection-select'
+            });
+            [
+                { value: 'none', label: i18n.settings.folderTaskFilter.modeNone },
+                { value: 'contains', label: i18n.settings.folderTaskFilter.modeContains },
+                { value: 'regex', label: i18n.settings.folderTaskFilter.modeRegex },
+                { value: 'glob', label: i18n.settings.folderTaskFilter.modeGlob }
+            ].forEach(option => {
+                ruleModeSelect.createEl('option', {
+                    value: option.value,
+                    text: option.label
+                });
+            });
+
+            const rulePatternFieldEl = createRuleOverrideField(i18n.settings.folderTaskFilter.patternName);
+            const rulePatternInput = rulePatternFieldEl.createEl('input', {
+                type: 'text',
+                cls: 'notemd-folder-task-selection-input'
+            });
+            rulePatternInput.placeholder = i18n.settings.folderTaskFilter.patternPlaceholder;
+
+            const ruleTargetFieldEl = createRuleOverrideField(i18n.settings.folderTaskFilter.targetName);
+            const ruleTargetSelect = ruleTargetFieldEl.createEl('select', {
+                cls: 'notemd-folder-task-selection-select'
+            });
+            [
+                { value: 'relativePath', label: i18n.settings.folderTaskFilter.targetRelativePath },
+                { value: 'basename', label: i18n.settings.folderTaskFilter.targetBasename }
+            ].forEach(option => {
+                ruleTargetSelect.createEl('option', {
+                    value: option.value,
+                    text: option.label
+                });
+            });
+
+            const ruleSubfoldersFieldEl = createRuleOverrideField(i18n.settings.folderTaskFilter.includeSubfoldersName);
+            const ruleSubfoldersSelect = ruleSubfoldersFieldEl.createEl('select', {
+                cls: 'notemd-folder-task-selection-select'
+            });
+            [
+                { value: 'legacy', label: i18n.settings.folderTaskFilter.includeSubfoldersLegacy },
+                { value: 'include', label: i18n.settings.folderTaskFilter.includeSubfoldersInclude },
+                { value: 'exclude', label: i18n.settings.folderTaskFilter.includeSubfoldersExclude }
+            ].forEach(option => {
+                ruleSubfoldersSelect.createEl('option', {
+                    value: option.value,
+                    text: option.label
+                });
+            });
+
+            const ruleCaseSensitiveFieldEl = createRuleOverrideField(i18n.settings.folderTaskFilter.caseSensitiveName);
+            const ruleCaseSensitiveToggleLabel = ruleCaseSensitiveFieldEl.createEl('label', {
+                cls: 'notemd-folder-task-selection-toggle-label'
+            });
+            const ruleCaseSensitiveToggle = ruleCaseSensitiveToggleLabel.createEl('input', {
+                type: 'checkbox'
+            });
+            ruleCaseSensitiveToggleLabel.appendText(` ${i18n.settings.folderTaskFilter.caseSensitiveDesc}`);
+
+            const ruleInvertFieldEl = createRuleOverrideField(i18n.settings.folderTaskFilter.invertName);
+            const ruleInvertToggleLabel = ruleInvertFieldEl.createEl('label', {
+                cls: 'notemd-folder-task-selection-toggle-label'
+            });
+            const ruleInvertToggle = ruleInvertToggleLabel.createEl('input', {
+                type: 'checkbox'
+            });
+            ruleInvertToggleLabel.appendText(` ${i18n.settings.folderTaskFilter.invertDesc}`);
+
+            const ruleValidationEl = temporaryRuleOverrideContainer.createEl('div', {
+                cls: 'notemd-folder-task-selection-validation'
+            });
+
+            previewEl.createEl('h3', {
+                text: i18n.folderPicker.selectionProfilePreviewHeading,
+                cls: 'notemd-folder-task-selection-preview-heading'
+            });
+            const previewRowsEl = previewEl.createDiv({ cls: 'notemd-folder-task-selection-preview-rows' });
+            const createPreviewRow = (label: string) => {
+                const rowEl = previewRowsEl.createDiv({ cls: 'notemd-folder-task-selection-preview-row' });
+                rowEl.createEl('div', {
+                    text: label,
+                    cls: 'notemd-folder-task-selection-preview-label'
+                });
+                return rowEl.createEl('div', {
+                    cls: 'notemd-folder-task-selection-preview-value'
+                });
+            };
+            const previewConfigValueEl = createPreviewRow(i18n.folderPicker.selectionProfilePreviewConfigLabel);
+            const previewPathModeValueEl = createPreviewRow(i18n.folderPicker.selectionProfilePreviewPathModeLabel);
+            const previewSavedFolderValueEl = createPreviewRow(i18n.folderPicker.selectionProfilePreviewSavedFolderLabel);
+            const previewRunFolderValueEl = createPreviewRow(i18n.folderPicker.selectionProfilePreviewRunFolderLabel);
+            const previewFilterSourceValueEl = createPreviewRow(i18n.folderPicker.selectionProfilePreviewFilterSourceLabel);
+            const previewFilterModeValueEl = createPreviewRow(i18n.folderPicker.selectionProfilePreviewFilterModeLabel);
+            const previewPatternValueEl = createPreviewRow(i18n.folderPicker.selectionProfilePreviewPatternLabel);
+            const previewTargetValueEl = createPreviewRow(i18n.folderPicker.selectionProfilePreviewTargetLabel);
+            const previewSubfoldersValueEl = createPreviewRow(i18n.folderPicker.selectionProfilePreviewSubfoldersLabel);
+            const previewCaseSensitiveValueEl = createPreviewRow(i18n.folderPicker.selectionProfilePreviewCaseSensitiveLabel);
+            const previewInvertValueEl = createPreviewRow(i18n.folderPicker.selectionProfilePreviewInvertLabel);
+
+            const selectedFilesEl = formEl.createDiv({ cls: 'notemd-folder-task-selection-file-list' });
+            const selectedFilesHeadingEl = selectedFilesEl.createEl('div', {
+                cls: 'notemd-folder-task-selection-file-list-heading'
+            });
+            const selectedFilesListEl = selectedFilesEl.createEl('div', {
+                cls: 'notemd-folder-task-selection-file-list-scroll'
+            });
+            const selectedFilesHintEl = selectedFilesEl.createEl('div', {
+                cls: 'setting-item-description notemd-folder-task-selection-file-list-hint'
+            });
+
+            const renderSelectedFiles = (
+                resolvedRunFolder: string | null,
+                effectiveSettings: NotemdSettings,
+                validationMessage: string | null
+            ) => {
+                if (!resolvedRunFolder || validationMessage) {
+                    selectedFilesHeadingEl.setText(i18n.folderPicker.selectionProfileSelectedFilesHeading);
+                    selectedFilesHintEl.setText(validationMessage || i18n.folderPicker.selectionProfileSelectedFilesInvalidFolderHint);
+                    selectedFilesListEl.replaceChildren(selectedFilesListEl.createEl('div', {
+                        text: i18n.folderPicker.selectionProfileSelectedFilesNone,
+                        cls: 'notemd-folder-task-selection-file-list-empty'
+                    }));
                     return;
                 }
-                const profile = profiles.find(item => item.id === selectedProfileId);
-                if (profile?.folderPathHint && hasFolder(profile.folderPathHint)) {
-                    folderSelect.value = profile.folderPathHint;
+
+                let selectedFiles: TFile[];
+                try {
+                    selectedFiles = resolvePreviewFiles(resolvedRunFolder, effectiveSettings);
+                } catch (error: unknown) {
+                    const previewErrorMessage = error instanceof Error && error.message
+                        ? error.message
+                        : i18n.common.unknownError;
+                    selectedFilesHeadingEl.setText(i18n.folderPicker.selectionProfileSelectedFilesHeading);
+                    selectedFilesHintEl.setText(previewErrorMessage);
+                    selectedFilesListEl.replaceChildren(selectedFilesListEl.createEl('div', {
+                        text: i18n.folderPicker.selectionProfileSelectedFilesNone,
+                        cls: 'notemd-folder-task-selection-file-list-empty'
+                    }));
+                    return;
+                }
+
+                selectedFilesHeadingEl.setText(formatI18n(i18n.folderPicker.selectionProfileSelectedFilesHeadingWithCount, {
+                    count: selectedFiles.length
+                }));
+                selectedFilesHintEl.setText(formatI18n(i18n.folderPicker.selectionProfileSelectedFilesHint, {
+                    folder: formatFolderDisplay(resolvedRunFolder)
+                }));
+                selectedFilesListEl.replaceChildren();
+
+                if (selectedFiles.length === 0) {
+                    selectedFilesListEl.createEl('div', {
+                        text: i18n.folderPicker.selectionProfileSelectedFilesNone,
+                        cls: 'notemd-folder-task-selection-file-list-empty'
+                    });
+                    return;
+                }
+
+                const fileListFragment = document.createDocumentFragment();
+                selectedFiles.forEach(file => {
+                    const itemEl = document.createElement('div');
+                    itemEl.className = 'notemd-folder-task-selection-file-list-item';
+                    itemEl.textContent = file.path;
+                    fileListFragment.appendChild(itemEl);
+                });
+                selectedFilesListEl.appendChild(fileListFragment);
+            };
+
+            const syncRuleOverrideInputsFromDraft = () => {
+                ruleModeSelect.value = draftRuleOverride.fileFilterMode || 'none';
+                rulePatternInput.value = draftRuleOverride.fileFilterPattern || '';
+                ruleTargetSelect.value = draftRuleOverride.fileFilterTarget || 'relativePath';
+                ruleSubfoldersSelect.value = draftRuleOverride.includeSubfoldersMode || 'legacy';
+                ruleCaseSensitiveToggle.checked = Boolean(draftRuleOverride.fileFilterCaseSensitive);
+                ruleInvertToggle.checked = Boolean(draftRuleOverride.fileFilterInvert);
+            };
+
+            const updatePresetChipState = () => {
+                presetChipButtons.forEach(({ id, element }) => {
+                    const isActive = id === activePresetChipId && allowTemporaryRuleOverride;
+                    element.toggleClass('is-active', isActive);
+                    element.setAttr('aria-pressed', isActive ? 'true' : 'false');
+                });
+            };
+
+            const syncFolderPickerState = () => {
+                const selectedProfileId = profileSelect?.value || currentDefaultsValue;
+                const selectedProfile = resolveSelectedProfile(selectedProfileId);
+                const folderState = resolveFolderTaskProfileFolderSelectionUiState({
+                    availableFolders: folders,
+                    selectedProfile,
+                    currentFolderPath: selectedFolderValue,
+                    allowTemporaryFolderOverride: allowTemporaryProfileFolderOverride,
+                    fallbackFolderPath: defaultFolderValue
+                });
+
+                allowTemporaryProfileFolderOverride = folderState.allowTemporaryFolderOverride;
+                folderInput.disabled = folderState.folderSelectionDisabled;
+                folderInput.value = folderState.folderPath;
+                selectedFolderValue = folderState.folderPath;
+                temporaryFolderOverrideContainer.style.display = folderState.hasProfileFolderHint ? '' : 'none';
+                temporaryFolderOverrideToggle.checked = folderState.allowTemporaryFolderOverride;
+                temporaryFolderOverrideToggle.disabled = !folderState.hasProfileFolderHint;
+
+                const resolvedRunFolder = resolveCurrentFolderInput(folderInput.value);
+                const previewSelectionOverride = buildEffectiveSelectionOverride(
+                    selectedProfileId,
+                    draftRuleOverride,
+                    allowTemporaryRuleOverride
+                );
+                const effectiveSettings = applyFolderTaskSelectionOverride(this.settings, previewSelectionOverride);
+                const regexValidationMessage = effectiveSettings.folderTaskFileFilterMode === 'regex'
+                    ? getFolderTaskRegexValidationError(
+                        effectiveSettings.folderTaskFileFilterPattern,
+                        effectiveSettings.folderTaskFileFilterCaseSensitive
+                    )
+                    : null;
+                const preview = resolveProfilePreview(
+                    selectedProfileId,
+                    resolvedRunFolder,
+                    folderInput.value,
+                    folderState.allowTemporaryFolderOverride,
+                    allowTemporaryRuleOverride,
+                    draftRuleOverride
+                );
+                syncRuleOverrideInputsFromDraft();
+                [
+                    ruleModeSelect,
+                    rulePatternInput,
+                    ruleTargetSelect,
+                    ruleSubfoldersSelect,
+                    ruleCaseSensitiveToggle,
+                    ruleInvertToggle
+                ].forEach(control => {
+                    control.disabled = !allowTemporaryRuleOverride;
+                });
+                temporaryRuleOverrideToggle.checked = allowTemporaryRuleOverride;
+                ruleValidationEl.setText(regexValidationMessage
+                    ? formatI18n(i18n.settings.folderTaskFilter.invalidRegexNotice, {
+                        message: regexValidationMessage
+                    })
+                    : '');
+                updatePresetChipState();
+                previewConfigValueEl.setText(preview.profileName);
+                previewPathModeValueEl.setText(preview.pathMode);
+                previewSavedFolderValueEl.setText(preview.savedFolder);
+                previewRunFolderValueEl.setText(preview.runFolder);
+                previewFilterSourceValueEl.setText(preview.filterSource);
+                previewFilterModeValueEl.setText(preview.filterMode);
+                previewPatternValueEl.setText(preview.pattern);
+                previewTargetValueEl.setText(preview.matchTarget);
+                previewSubfoldersValueEl.setText(preview.subfolderScope);
+                previewCaseSensitiveValueEl.setText(preview.caseSensitive);
+                previewInvertValueEl.setText(preview.invert);
+                renderSelectedFiles(resolvedRunFolder, effectiveSettings, regexValidationMessage);
+
+                if (!folderInput.disabled && !resolvedRunFolder) {
+                    folderValidationEl.setText(formatI18n(i18n.folderPicker.selectionProfileFolderInvalid, {
+                        path: folderInput.value.trim() || '/'
+                    }));
+                } else {
+                    folderValidationEl.setText('');
                 }
             };
 
-            profileSelect.addEventListener('change', applyProfileFolderHint);
-            applyProfileFolderHint();
+            profileSelect?.addEventListener('change', () => {
+                const selectedProfileId = profileSelect?.value || currentDefaultsValue;
+                const selectedProfile = resolveSelectedProfile(selectedProfileId);
+                allowTemporaryProfileFolderOverride = false;
+                allowTemporaryRuleOverride = false;
+                activePresetChipId = null;
+                draftRuleOverride = createDraftRuleOverride(selectedProfileId);
+                selectedFolderValue = resolveExistingFolderTaskFolderPath(
+                    folders,
+                    selectedProfile?.folderPathHint || folderInput.value
+                ) || '/';
+                syncFolderPickerState();
+            });
+            folderInput.addEventListener('input', () => {
+                const resolvedFolder = resolveCurrentFolderInput(folderInput.value);
+                if (resolvedFolder) {
+                    selectedFolderValue = resolvedFolder;
+                }
+                syncFolderPickerState();
+            });
+            temporaryFolderOverrideToggle.addEventListener('change', () => {
+                allowTemporaryProfileFolderOverride = temporaryFolderOverrideToggle.checked;
+                if (!allowTemporaryProfileFolderOverride) {
+                    const selectedProfileId = profileSelect?.value || currentDefaultsValue;
+                    const selectedProfile = resolveSelectedProfile(selectedProfileId);
+                    if (selectedProfile?.folderPathHint && hasFolder(selectedProfile.folderPathHint)) {
+                        selectedFolderValue = selectedProfile.folderPathHint;
+                    }
+                }
+                syncFolderPickerState();
+            });
+            temporaryRuleOverrideToggle.addEventListener('change', () => {
+                allowTemporaryRuleOverride = temporaryRuleOverrideToggle.checked;
+                if (!allowTemporaryRuleOverride) {
+                    activePresetChipId = null;
+                }
+                syncFolderPickerState();
+            });
+            presetChipButtons.forEach(({ id, element }) => {
+                element.addEventListener('click', () => {
+                    allowTemporaryRuleOverride = true;
+                    activePresetChipId = id;
+                    draftRuleOverride = createFolderTaskSelectionPresetOverride(id);
+                    syncFolderPickerState();
+                });
+            });
+            ruleModeSelect.addEventListener('change', () => {
+                draftRuleOverride = {
+                    ...draftRuleOverride,
+                    fileFilterMode: ruleModeSelect.value as FolderTaskFileSelectionOverride['fileFilterMode']
+                };
+                activePresetChipId = null;
+                syncFolderPickerState();
+            });
+            rulePatternInput.addEventListener('input', () => {
+                draftRuleOverride = {
+                    ...draftRuleOverride,
+                    fileFilterPattern: rulePatternInput.value
+                };
+                activePresetChipId = null;
+                syncFolderPickerState();
+            });
+            ruleTargetSelect.addEventListener('change', () => {
+                draftRuleOverride = {
+                    ...draftRuleOverride,
+                    fileFilterTarget: ruleTargetSelect.value as FolderTaskFileSelectionOverride['fileFilterTarget']
+                };
+                activePresetChipId = null;
+                syncFolderPickerState();
+            });
+            ruleSubfoldersSelect.addEventListener('change', () => {
+                draftRuleOverride = {
+                    ...draftRuleOverride,
+                    includeSubfoldersMode: ruleSubfoldersSelect.value as FolderTaskFileSelectionOverride['includeSubfoldersMode']
+                };
+                activePresetChipId = null;
+                syncFolderPickerState();
+            });
+            ruleCaseSensitiveToggle.addEventListener('change', () => {
+                draftRuleOverride = {
+                    ...draftRuleOverride,
+                    fileFilterCaseSensitive: ruleCaseSensitiveToggle.checked
+                };
+                activePresetChipId = null;
+                syncFolderPickerState();
+            });
+            ruleInvertToggle.addEventListener('change', () => {
+                draftRuleOverride = {
+                    ...draftRuleOverride,
+                    fileFilterInvert: ruleInvertToggle.checked
+                };
+                activePresetChipId = null;
+                syncFolderPickerState();
+            });
+            syncFolderPickerState();
 
-            const btnContainer = modal.contentEl.createDiv({ cls: 'modal-button-container' });
+            const btnContainer = modal.contentEl.createDiv({
+                cls: 'modal-button-container notemd-folder-task-selection-actions'
+            });
             btnContainer.createEl('button', { text: i18n.folderPicker.selectAction, cls: 'mod-cta' }).onclick = () => {
-                const selectedProfileId = profileSelect.value;
+                const selectedProfileId = profileSelect?.value || currentDefaultsValue;
+                const resolvedFolderPath = resolveCurrentFolderInput(folderInput.value);
+                const previewSelectionOverride = buildEffectiveSelectionOverride(
+                    selectedProfileId,
+                    draftRuleOverride,
+                    allowTemporaryRuleOverride
+                );
+                const effectiveSettings = applyFolderTaskSelectionOverride(this.settings, previewSelectionOverride);
+                const regexValidationMessage = effectiveSettings.folderTaskFileFilterMode === 'regex'
+                    ? getFolderTaskRegexValidationError(
+                        effectiveSettings.folderTaskFileFilterPattern,
+                        effectiveSettings.folderTaskFileFilterCaseSensitive
+                    )
+                    : null;
+                if (!resolvedFolderPath) {
+                    folderValidationEl.setText(formatI18n(i18n.folderPicker.selectionProfileFolderInvalid, {
+                        path: folderInput.value.trim() || '/'
+                    }));
+                    return;
+                }
+                if (regexValidationMessage) {
+                    ruleValidationEl.setText(formatI18n(i18n.settings.folderTaskFilter.invalidRegexNotice, {
+                        message: regexValidationMessage
+                    }));
+                    return;
+                }
                 modal.close();
                 finish({
-                    folderPath: folderSelect.value,
-                    fileSelectionOverride: selectedProfileId === currentDefaultsValue
-                        ? currentDefaultOverride
-                        : { profileId: selectedProfileId }
+                    folderPath: resolvedFolderPath,
+                    fileSelectionOverride: previewSelectionOverride
                 });
             };
             btnContainer.createEl('button', { text: i18n.common.cancel }).onclick = () => {
@@ -1697,9 +2411,10 @@ export default class NotemdPlugin extends Plugin {
         reporter?: ProgressReporter,
         options: DiagramCommandOptions = { executionMode: 'save-artifact' }
     ) {
+        await this.loadSettings();
         const file = this.app.vault.getFileByPath(sourcePath);
-        if (!file || file.extension !== 'md') {
-            throw new Error(`No Markdown file found at path: ${sourcePath}`);
+        if (!file || !this.isSupportedTaskInputFile(file, 'generate-diagram')) {
+            throw new Error(`No supported diagram input file found at path: ${sourcePath}`);
         }
 
         return this.generateDiagramCommand(file, reporter, options);

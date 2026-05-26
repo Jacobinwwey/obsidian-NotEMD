@@ -27,7 +27,7 @@ Notemd आपके Obsidian वर्कफ़्लो को बेहतर 
 
 यदि आप Notemd का उपयोग करना पसंद करते हैं, तो कृपया [⭐ GitHub पर स्टार दें](https://github.com/Jacobinwwey/obsidian-NotEMD) या [☕️ मुझे कॉफी खरीदें](https://ko-fi.com/jacobinwwey).
 
-**संस्करण:** 1.8.9
+.9.0
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
@@ -687,7 +687,7 @@ MIT लाइसेंस - विवरण के लिए [LICENSE](LICENSE) 
 ---
 
 
-*Notemd v1.8.9 - AI के साथ अपने Obsidian knowledge graph को बेहतर बनाएँ।*
+*Notemd v1.9.0 - AI के साथ अपने Obsidian knowledge graph को बेहतर बनाएँ।*
 
 
 <!-- repo-chronicle:start -->
@@ -697,7 +697,7 @@ MIT लाइसेंस - विवरण के लिए [LICENSE](LICENSE) 
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.hi.svg)
 
-_इसे रिलीज़ टैग `1.8.9` के लिए 2026-05-25 को अंतिम बार रीफ़्रेश किया गया। नवीनतम कमिट तिथि: 2026-05-25।_
+_इसे 2026-05-26 को वर्तमान वर्किंग ट्री से अंतिम बार रीफ़्रेश किया गया। नवीनतम कमिट तिथि: 2026-05-26।_
 <!-- repo-chronicle:end -->
 
 

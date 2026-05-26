@@ -16,6 +16,7 @@ import {
 } from '../workflowButtons';
 import { formatI18n, getCurrentUiLocale, getI18nStrings } from '../i18n';
 import { formatTimeForLocale } from '../i18n/localeFormat';
+import { isSupportedInputFileForTask, readSupportedInputFile } from '../inputFileSupport';
 import { isDirectPreviewableDiagramExtension } from '../operations/diagramCommandHostAdapter';
 
 interface WorkflowExecutionContext {
@@ -1005,16 +1006,16 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             }
             case 'summarize-as-mermaid': {
                 const activeFile = this.plugin.app.workspace.getActiveFile();
-                if (!activeFile || !(activeFile instanceof TFile) || activeFile.extension !== 'md') {
-                    throw new Error('No active Markdown file selected.');
+                if (!activeFile || !(activeFile instanceof TFile) || !isSupportedInputFileForTask(this.plugin.settings, 'summarize-as-mermaid', activeFile)) {
+                    throw new Error('No supported diagram input file selected.');
                 }
                 await this.plugin.summarizeToMermaidCommand(activeFile, reporter);
                 break;
             }
             case 'generate-diagram': {
                 const activeFile = this.plugin.app.workspace.getActiveFile();
-                if (!activeFile || !(activeFile instanceof TFile) || activeFile.extension !== 'md') {
-                    throw new Error('No active Markdown file selected.');
+                if (!activeFile || !(activeFile instanceof TFile) || !isSupportedInputFileForTask(this.plugin.settings, 'generate-diagram', activeFile)) {
+                    throw new Error('No supported diagram input file selected.');
                 }
                 await this.plugin.generateDiagramCommand(activeFile, reporter, { executionMode: 'save-artifact' });
                 break;
@@ -1105,11 +1106,11 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             }
             case 'check-duplicates-current': {
                 const activeFile = this.plugin.app.workspace.getActiveFile();
-                if (!activeFile || !(activeFile instanceof TFile) || (activeFile.extension !== 'md' && activeFile.extension !== 'txt')) {
+                if (!activeFile || !(activeFile instanceof TFile) || !isSupportedInputFileForTask(this.plugin.settings, 'check-duplicates-current', activeFile)) {
                     throw new Error(this.getStrings().notices.noActiveTextFileSelected);
                 }
 
-                const content = await this.plugin.app.vault.read(activeFile);
+                const content = await readSupportedInputFile(this.plugin.app, activeFile, this.plugin.settings);
                 const duplicates = findDuplicates(content);
                 const message = formatI18n(this.getStrings().notices.duplicateTermsFound, { count: duplicates.size });
                 reporter.log(message);

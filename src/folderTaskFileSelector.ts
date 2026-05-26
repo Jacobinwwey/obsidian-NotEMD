@@ -5,6 +5,11 @@ import { FolderTaskFileSelectionProfile, NotemdSettings } from './types';
 export type FolderTaskFileFilterMode = 'none' | 'contains' | 'regex' | 'glob';
 export type FolderTaskFileFilterTarget = 'relativePath' | 'basename';
 export type FolderTaskIncludeSubfoldersMode = 'legacy' | 'include' | 'exclude';
+export type FolderTaskSelectionPresetId =
+    | 'contains-index-family'
+    | 'regex-index-variants'
+    | 'glob-index-family'
+    | 'glob-index-cross-folder';
 
 export type FolderTaskKind =
     | 'process-folder-add-links'
@@ -39,6 +44,14 @@ export interface FolderTaskInteractiveSelection {
     fileSelectionOverride?: FolderTaskFileSelectionOverride;
 }
 
+export interface FolderTaskProfileFolderSelectionUiState {
+    folderPath: string;
+    hasProfileFolderHint: boolean;
+    profileFolderHint: string | null;
+    allowTemporaryFolderOverride: boolean;
+    folderSelectionDisabled: boolean;
+}
+
 export interface FolderTaskFileSelectionOptions {
     taskKind: FolderTaskKind;
     folderPath: string;
@@ -62,6 +75,29 @@ const LEGACY_INCLUDE_SUBFOLDERS_BY_TASK: Record<FolderTaskKind, boolean> = {
     'batch-fix-formula': true,
     'batch-translate-folder': false
 };
+
+export function isAdvancedFolderTaskFileSelectionEnabled(
+    settings: Pick<NotemdSettings, 'enableDeveloperMode' | 'enableAdvancedFileSelectionProfiles'>
+): boolean {
+    return settings.enableDeveloperMode && settings.enableAdvancedFileSelectionProfiles;
+}
+
+function resolveFolderTaskRuntimeSettings(settings: NotemdSettings): NotemdSettings {
+    if (isAdvancedFolderTaskFileSelectionEnabled(settings)) {
+        return settings;
+    }
+
+    return {
+        ...settings,
+        folderTaskFileSelectionProfiles: [],
+        folderTaskFileFilterMode: DEFAULT_SETTINGS.folderTaskFileFilterMode,
+        folderTaskFileFilterPattern: DEFAULT_SETTINGS.folderTaskFileFilterPattern,
+        folderTaskFileFilterTarget: DEFAULT_SETTINGS.folderTaskFileFilterTarget,
+        folderTaskFileFilterCaseSensitive: DEFAULT_SETTINGS.folderTaskFileFilterCaseSensitive,
+        folderTaskFileFilterInvert: DEFAULT_SETTINGS.folderTaskFileFilterInvert,
+        folderTaskIncludeSubfoldersMode: DEFAULT_SETTINGS.folderTaskIncludeSubfoldersMode
+    };
+}
 
 function normalizeFolderPath(folderPath: string): string {
     const trimmed = folderPath.trim();
@@ -133,12 +169,13 @@ function compileGlobPattern(pattern: string, caseSensitive: boolean): RegExp {
 }
 
 function resolveFilterConfig(settings: NotemdSettings): FolderTaskFileFilterConfig {
+    const runtimeSettings = resolveFolderTaskRuntimeSettings(settings);
     return {
-        mode: settings.folderTaskFileFilterMode,
-        pattern: settings.folderTaskFileFilterPattern,
-        target: settings.folderTaskFileFilterTarget,
-        caseSensitive: settings.folderTaskFileFilterCaseSensitive,
-        invert: settings.folderTaskFileFilterInvert
+        mode: runtimeSettings.folderTaskFileFilterMode,
+        pattern: runtimeSettings.folderTaskFileFilterPattern,
+        target: runtimeSettings.folderTaskFileFilterTarget,
+        caseSensitive: runtimeSettings.folderTaskFileFilterCaseSensitive,
+        invert: runtimeSettings.folderTaskFileFilterInvert
     };
 }
 
@@ -169,10 +206,137 @@ function normalizeFolderTaskFileSelectionProfile(
 }
 
 export function getFolderTaskFileSelectionProfiles(settings: NotemdSettings): FolderTaskFileSelectionProfile[] {
+    const runtimeSettings = resolveFolderTaskRuntimeSettings(settings);
     const rawProfiles = Array.isArray(settings.folderTaskFileSelectionProfiles)
-        ? settings.folderTaskFileSelectionProfiles
+        ? runtimeSettings.folderTaskFileSelectionProfiles
         : [];
     return rawProfiles.map((profile, index) => normalizeFolderTaskFileSelectionProfile(profile, index));
+}
+
+export function createCurrentFolderTaskFileSelectionProfile(
+    settings: NotemdSettings,
+    profileName = 'Current default filter settings'
+): FolderTaskFileSelectionProfile {
+    const runtimeSettings = resolveFolderTaskRuntimeSettings(settings);
+    return normalizeFolderTaskFileSelectionProfile({
+        id: '__current_defaults__',
+        name: profileName,
+        folderPathHint: '',
+        includeSubfoldersMode: runtimeSettings.folderTaskIncludeSubfoldersMode,
+        fileFilterMode: runtimeSettings.folderTaskFileFilterMode,
+        fileFilterPattern: runtimeSettings.folderTaskFileFilterPattern,
+        fileFilterTarget: runtimeSettings.folderTaskFileFilterTarget,
+        fileFilterCaseSensitive: runtimeSettings.folderTaskFileFilterCaseSensitive,
+        fileFilterInvert: runtimeSettings.folderTaskFileFilterInvert
+    }, 0);
+}
+
+export function resolveExistingFolderTaskFolderPath(
+    availableFolders: string[],
+    folderPath: string | null | undefined
+): string | null {
+    const normalized = normalizeFolderPath(typeof folderPath === 'string' ? folderPath : '');
+    return availableFolders.includes(normalized) ? normalized : null;
+}
+
+export function looksLikeFolderTaskPatternPath(folderPath: string | null | undefined): boolean {
+    const normalized = typeof folderPath === 'string' ? folderPath.trim() : '';
+    if (!normalized) {
+        return false;
+    }
+    return /[*?[\]{}()|\\^$]/.test(normalized);
+}
+
+export function createFolderTaskSelectionPresetOverride(
+    presetId: FolderTaskSelectionPresetId
+): FolderTaskFileSelectionOverride {
+    switch (presetId) {
+        case 'contains-index-family':
+            return {
+                includeSubfoldersMode: 'exclude',
+                fileFilterMode: 'contains',
+                fileFilterPattern: 'index',
+                fileFilterTarget: 'basename',
+                fileFilterCaseSensitive: false,
+                fileFilterInvert: false
+            };
+        case 'regex-index-variants':
+            return {
+                includeSubfoldersMode: 'exclude',
+                fileFilterMode: 'regex',
+                fileFilterPattern: '^index(?:\\..+)?(?:_summ)?$',
+                fileFilterTarget: 'basename',
+                fileFilterCaseSensitive: false,
+                fileFilterInvert: false
+            };
+        case 'glob-index-family':
+            return {
+                includeSubfoldersMode: 'exclude',
+                fileFilterMode: 'glob',
+                fileFilterPattern: 'index*',
+                fileFilterTarget: 'basename',
+                fileFilterCaseSensitive: false,
+                fileFilterInvert: false
+            };
+        case 'glob-index-cross-folder':
+            return {
+                includeSubfoldersMode: 'include',
+                fileFilterMode: 'glob',
+                fileFilterPattern: '**/index*.md',
+                fileFilterTarget: 'relativePath',
+                fileFilterCaseSensitive: false,
+                fileFilterInvert: false
+            };
+    }
+}
+
+export function resolveFolderTaskProfileFolderSelectionUiState(params: {
+    availableFolders: string[];
+    selectedProfile: FolderTaskFileSelectionProfile | null;
+    currentFolderPath?: string;
+    allowTemporaryFolderOverride?: boolean;
+    fallbackFolderPath?: string;
+}): FolderTaskProfileFolderSelectionUiState {
+    const availableFolders = params.availableFolders;
+    const fallbackFolderPath = availableFolders.includes(params.fallbackFolderPath || '/')
+        ? (params.fallbackFolderPath || '/')
+        : '/';
+    const hasExplicitCurrentFolderPath = typeof params.currentFolderPath === 'string'
+        && availableFolders.includes(params.currentFolderPath);
+    const normalizedCurrentFolderPath = hasExplicitCurrentFolderPath
+        ? params.currentFolderPath!
+        : fallbackFolderPath;
+    const profileFolderHint = params.selectedProfile?.folderPathHint || '';
+    const hasProfileFolderHint = Boolean(profileFolderHint) && availableFolders.includes(profileFolderHint);
+
+    if (!hasProfileFolderHint) {
+        return {
+            folderPath: normalizedCurrentFolderPath,
+            hasProfileFolderHint: false,
+            profileFolderHint: null,
+            allowTemporaryFolderOverride: false,
+            folderSelectionDisabled: false
+        };
+    }
+
+    const allowTemporaryFolderOverride = Boolean(params.allowTemporaryFolderOverride);
+    if (!allowTemporaryFolderOverride) {
+        return {
+            folderPath: profileFolderHint,
+            hasProfileFolderHint: true,
+            profileFolderHint,
+            allowTemporaryFolderOverride: false,
+            folderSelectionDisabled: true
+        };
+    }
+
+    return {
+        folderPath: hasExplicitCurrentFolderPath ? normalizedCurrentFolderPath : profileFolderHint,
+        hasProfileFolderHint: true,
+        profileFolderHint,
+        allowTemporaryFolderOverride: true,
+        folderSelectionDisabled: false
+    };
 }
 
 export function resolveFolderTaskFileSelectionProfile(
@@ -251,14 +415,19 @@ export function applyFolderTaskSelectionOverride(
     settings: NotemdSettings,
     override?: FolderTaskFileSelectionOverride
 ): NotemdSettings {
-    if (!override) {
-        return settings;
+    const runtimeSettings = resolveFolderTaskRuntimeSettings(settings);
+    if (!isAdvancedFolderTaskFileSelectionEnabled(settings)) {
+        return runtimeSettings;
     }
 
-    const profile = resolveFolderTaskFileSelectionProfile(settings, override);
+    if (!override) {
+        return runtimeSettings;
+    }
+
+    const profile = resolveFolderTaskFileSelectionProfile(runtimeSettings, override);
     const baseSettings = profile
         ? {
-            ...settings,
+            ...runtimeSettings,
             folderTaskIncludeSubfoldersMode: profile.includeSubfoldersMode,
             folderTaskFileFilterMode: profile.fileFilterMode,
             folderTaskFileFilterPattern: profile.fileFilterPattern,
@@ -266,7 +435,7 @@ export function applyFolderTaskSelectionOverride(
             folderTaskFileFilterCaseSensitive: profile.fileFilterCaseSensitive,
             folderTaskFileFilterInvert: profile.fileFilterInvert
         }
-        : settings;
+        : runtimeSettings;
 
     return {
         ...baseSettings,
@@ -353,12 +522,13 @@ function resolveFileExtension(file: TFile): string {
 
 export function selectFolderTaskFiles(options: FolderTaskFileSelectionOptions): TFile[] {
     const folderPath = normalizeFolderPath(options.folderPath);
+    const runtimeSettings = resolveFolderTaskRuntimeSettings(options.settings);
     const includeSubfolders = resolveIncludeSubfolders(
         options.taskKind,
-        options.settings.folderTaskIncludeSubfoldersMode
+        runtimeSettings.folderTaskIncludeSubfoldersMode
     );
     const allowedExtensions = new Set(options.allowedExtensions.map(ext => ext.toLowerCase()));
-    const filterConfig = resolveFilterConfig(options.settings);
+    const filterConfig = resolveFilterConfig(runtimeSettings);
     const filterMatcher = createFilterMatcher(filterConfig);
 
     const selectedFiles: TFile[] = [];

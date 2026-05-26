@@ -22,6 +22,7 @@ import {
     mergeFolderTaskSelectionOverrides
 } from '../folderTaskFileSelector';
 import { formatI18n } from '../i18n';
+import { isSupportedInputFileForTask } from '../inputFileSupport';
 import { NotemdSettings, ProgressReporter } from '../types';
 import { SidebarActionId } from '../workflowButtons';
 
@@ -243,7 +244,7 @@ export async function runCheckDuplicatesCurrentCommandWithHost(
     const uiStrings = host.getUiStrings();
     const activeFile = host.getActiveFile();
 
-    if (!activeFile || (activeFile.extension !== 'md' && activeFile.extension !== 'txt')) {
+    if (!activeFile || !isSupportedInputFileForTask(host.getSettings(), 'check-duplicates-current', activeFile)) {
         host.showNotice(uiStrings.notices.noActiveTextFileSelected);
         return null;
     }

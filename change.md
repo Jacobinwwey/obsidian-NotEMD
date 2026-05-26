@@ -4,6 +4,29 @@ This document summarizes the major functional and architectural changes implemen
 
 ---
 
+## 1.9.0
+
+### Highlights
+
+- Developer-gated advanced batch folder selection now supports saved profiles, one-run overrides, preset chips, and inline file preview before execution.
+- Developer-gated relaxed input file restrictions now land as a shared runtime contract for selected source-preserving tasks, including PDF text extraction through Obsidian's PDF runtime.
+- Release-facing version truth, welcome digest, release notes, and chronicle refresh are synchronized at the `1.9.0` boundary.
+
+### New Features
+
+- Added the `Relax input file restrictions` developer setting plus the shared supported-input reader layer.
+- Extended advanced folder-task selection with profile-aware folder locking, temporary overrides, preview panels, and example/preset chips.
+
+### Fixes
+
+- Unified task-aware input validation across sidebar actions, command entrypoints, batch adapters, and path-based diagram generation.
+- Corrected relaxed-mode batch empty-folder notices so they describe supported inputs rather than hard-coded `.md` / `.txt` assumptions.
+- Kept source-mutating and verbatim-sensitive flows intentionally restricted while widening only the safe allowlist.
+
+### Verification
+
+- Revalidated locally with serial repo-saga refresh, build, full Jest, i18n audit, render-host audit, repo-local Obsidian build/test shims, CLI help checks, and whitespace verification before release.
+
 ## 2026-05-25
 
 ### Bounded Product-Surface Recovery On Current Main

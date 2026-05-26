@@ -104,6 +104,254 @@
     margin-top: 1em;
 }
 
+.modal.notemd-folder-task-selection-shell {
+    width: min(92vw, 860px);
+    max-width: min(92vw, 860px);
+    box-sizing: border-box;
+}
+
+.notemd-folder-task-selection-modal {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    font-family: var(--notemd-sidebar-font);
+    padding: 1em;
+}
+
+.notemd-folder-task-selection-intro {
+    margin: 0 0 1em;
+    line-height: 1.55;
+}
+
+.notemd-folder-task-selection-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.45fr) minmax(260px, 0.95fr);
+    gap: 1em;
+    align-items: start;
+}
+
+.notemd-folder-task-selection-main,
+.notemd-folder-task-selection-preview {
+    min-width: 0;
+}
+
+.notemd-folder-task-selection-main {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85em;
+}
+
+.notemd-folder-task-selection-field,
+.notemd-folder-task-selection-toggle {
+    border: 1px solid var(--notemd-border);
+    border-radius: 14px;
+    background:
+        linear-gradient(
+            180deg,
+            color-mix(in srgb, var(--notemd-surface) 82%, #ffffff 18%),
+            color-mix(in srgb, var(--notemd-surface-alt) 92%, #ecfeff 8%)
+        );
+    padding: 0.85em 0.9em;
+}
+
+.notemd-folder-task-selection-empty {
+    margin: 0;
+    border: 1px dashed var(--notemd-border);
+    border-radius: 12px;
+    padding: 0.85em 0.9em;
+    background: color-mix(in srgb, var(--background-primary) 90%, #f0fdfa 10%);
+}
+
+.notemd-folder-task-selection-label {
+    display: block;
+    margin-bottom: 0.45em;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.notemd-folder-task-selection-select,
+.notemd-folder-task-selection-input {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.notemd-folder-task-selection-hint {
+    margin-top: 0.55em;
+    line-height: 1.5;
+}
+
+.notemd-folder-task-selection-examples,
+.notemd-folder-task-selection-file-list {
+    border: 1px solid var(--notemd-border);
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--background-primary) 90%, #f0fdfa 10%);
+    padding: 0.85em 0.9em;
+}
+
+.notemd-folder-task-selection-examples-heading,
+.notemd-folder-task-selection-file-list-heading {
+    margin: 0 0 0.55em;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.notemd-folder-task-selection-examples-list {
+    margin: 0;
+    padding-left: 1.1em;
+}
+
+.notemd-folder-task-selection-chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5em;
+    margin: 0.75em 0 0.2em;
+}
+
+.notemd-folder-task-selection-chip {
+    border: 1px solid color-mix(in srgb, var(--interactive-accent) 34%, var(--notemd-border) 66%);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--background-primary) 92%, #ecfeff 8%);
+    color: var(--text-normal);
+    padding: 0.42em 0.8em;
+    line-height: 1.35;
+    cursor: pointer;
+}
+
+.notemd-folder-task-selection-chip:hover,
+.notemd-folder-task-selection-chip:focus-visible {
+    border-color: var(--interactive-accent);
+    background: color-mix(in srgb, var(--interactive-accent) 14%, var(--background-primary) 86%);
+}
+
+.notemd-folder-task-selection-chip.is-active {
+    border-color: var(--interactive-accent);
+    background: color-mix(in srgb, var(--interactive-accent) 22%, var(--background-primary) 78%);
+    color: var(--text-on-accent, var(--text-normal));
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--interactive-accent) 24%, transparent);
+}
+
+.notemd-folder-task-selection-examples-item {
+    margin: 0.35em 0;
+    line-height: 1.5;
+}
+
+.notemd-folder-task-selection-validation {
+    min-height: 1.2em;
+    margin-top: 0.45em;
+    color: var(--text-error);
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+.notemd-folder-task-selection-toggle-label {
+    display: flex;
+    align-items: center;
+    gap: 0.45em;
+    font-weight: 600;
+}
+
+.notemd-folder-task-selection-override-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75em;
+    margin-top: 0.8em;
+}
+
+.notemd-folder-task-selection-field-compact {
+    margin: 0;
+    padding: 0.7em 0.75em;
+}
+
+.notemd-folder-task-selection-preview {
+    border: 1px solid var(--notemd-border);
+    border-radius: 16px;
+    padding: 0.9em;
+    background:
+        linear-gradient(
+            180deg,
+            color-mix(in srgb, var(--notemd-surface) 84%, #ffffff 16%),
+            color-mix(in srgb, var(--notemd-surface-alt) 92%, #ecfeff 8%)
+        );
+}
+
+.notemd-folder-task-selection-preview-heading {
+    margin: 0 0 0.8em;
+    font-size: 14px;
+}
+
+.notemd-folder-task-selection-preview-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 0.7em;
+}
+
+.notemd-folder-task-selection-preview-row {
+    padding: 0.65em 0.75em;
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--background-primary) 88%, #f0fdfa 12%);
+    border: 1px solid color-mix(in srgb, var(--notemd-border) 78%, #ffffff 22%);
+}
+
+.notemd-folder-task-selection-preview-label {
+    margin-bottom: 0.28em;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.notemd-folder-task-selection-preview-value {
+    line-height: 1.5;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+}
+
+.notemd-folder-task-selection-file-list-scroll {
+    max-height: min(34vh, 320px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35em;
+    padding-right: 0.15em;
+}
+
+.notemd-folder-task-selection-file-list-item,
+.notemd-folder-task-selection-file-list-empty {
+    border-radius: 10px;
+    padding: 0.48em 0.6em;
+    background: color-mix(in srgb, var(--background-secondary) 84%, #f0fdfa 16%);
+    border: 1px solid color-mix(in srgb, var(--notemd-border) 76%, #ffffff 24%);
+    line-height: 1.45;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+}
+
+.notemd-folder-task-selection-file-list-hint {
+    margin-top: 0.6em;
+    line-height: 1.5;
+}
+
+.notemd-folder-task-selection-actions {
+    margin-top: 1em;
+}
+
+@media (max-width: 900px) {
+    .notemd-folder-task-selection-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .notemd-folder-task-selection-override-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
 .modal.notemd-diagram-preview-shell {
     width: min(96vw, 1152px);
     max-width: min(96vw, 1152px);

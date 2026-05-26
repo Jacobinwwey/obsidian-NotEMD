@@ -7,6 +7,7 @@ export const Plugin = jest.fn();
 export const PluginSettingTab = jest.fn();
 export const requestUrl = jest.fn();
 export const getLanguage = jest.fn(() => 'en');
+export const loadPdfJs = jest.fn();
 export const Setting = jest.fn().mockImplementation(() => ({
 	setName: jest.fn().mockReturnThis(),
 	setDesc: jest.fn().mockReturnThis(),

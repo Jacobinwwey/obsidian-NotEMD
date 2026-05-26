@@ -27,7 +27,7 @@ Notemd, çok dilli notlarınızı işlemek, anahtar kavramlar için otomatik wik
 
 Notemd kullanmayı seviyorsanız, lütfen [⭐ GitHub'da yıldız vermeyi](https://github.com/Jacobinwwey/obsidian-NotEMD) veya [☕️ bana kahve almayı](https://ko-fi.com/jacobinwwey) düşünün.
 
-**Sürüm:** 1.8.9
+.9.0
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
@@ -690,7 +690,7 @@ MIT Lisansı - Ayrıntılar için [LICENSE](LICENSE) dosyasına bakın.
 ---
 
 
-*Notemd v1.8.9 - Obsidian bilgi grafiğinizi yapay zeka ile geliştirin.*
+*Notemd v1.9.0 - Obsidian bilgi grafiğinizi yapay zeka ile geliştirin.*
 
 
 <!-- repo-chronicle:start -->
@@ -700,7 +700,7 @@ Bu üç aylık kronik, [repo-saga](https://github.com/teee32/repo-saga) özgün 
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.tr.svg)
 
-_`1.8.9` sürüm etiketi için son yenileme tarihi: 2026-05-25. En son commit tarihi: 2026-05-25._
+_Çalışma ağacından son yenileme tarihi: 2026-05-26. En son commit tarihi: 2026-05-26._
 <!-- repo-chronicle:end -->
 
 
