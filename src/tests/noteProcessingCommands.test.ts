@@ -871,7 +871,20 @@ describe('note processing command surface', () => {
                 manifestPath: 'Notes/topic_chapters/.notemd-chapter-split.json',
                 splitLevel: 2,
                 chapters: [],
-                tocMarkdown: '# Topic TOC',
+                tocMetadata: {
+                    sourcePath: 'Notes/Topic.md',
+                    sourceBasename: 'Topic',
+                    requestedSplitHeadingLevel: 'auto',
+                    resolvedSplitHeadingLevel: 2,
+                    chapterCount: 0,
+                    managedArtifactCount: 2,
+                    outputFolderPath: 'Notes/topic_chapters',
+                    tocPath: 'Notes/topic_chapters/Topic_TOC.md',
+                    manifestPath: 'Notes/topic_chapters/.notemd-chapter-split.json',
+                    chapterTitles: [],
+                    chapterNotePaths: []
+                },
+                tocMarkdown: '---\nnotemdGenerated: true\n---\n# Topic TOC',
                 chapterCount: 0,
                 removedStaleFileCount: 0,
                 removedStalePaths: []

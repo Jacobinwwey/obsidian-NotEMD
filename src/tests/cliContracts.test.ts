@@ -367,6 +367,7 @@ describe('CLI invocation contract', () => {
                     'manifestPath',
                     'splitLevel',
                     'chapters',
+                    'tocMetadata',
                     'tocMarkdown',
                     'chapterCount',
                     'removedStaleFileCount',
@@ -382,6 +383,7 @@ describe('CLI invocation contract', () => {
                     manifestPath: expect.any(Object),
                     splitLevel: expect.any(Object),
                     chapters: expect.any(Object),
+                    tocMetadata: expect.any(Object),
                     tocMarkdown: expect.any(Object),
                     chapterCount: expect.any(Object),
                     removedStaleFileCount: expect.any(Object),
@@ -403,6 +405,23 @@ describe('CLI invocation contract', () => {
                                 })
                             })
                         })
+                    })
+                }),
+                tocMetadata: expect.objectContaining({
+                    required: expect.arrayContaining([
+                        'sourcePath',
+                        'sourceBasename',
+                        'requestedSplitHeadingLevel',
+                        'resolvedSplitHeadingLevel',
+                        'chapterCount',
+                        'managedArtifactCount',
+                        'chapterTitles',
+                        'chapterNotePaths'
+                    ]),
+                    properties: expect.objectContaining({
+                        managedArtifactCount: expect.any(Object),
+                        chapterTitles: expect.any(Object),
+                        chapterNotePaths: expect.any(Object)
                     })
                 })
             })

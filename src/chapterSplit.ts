@@ -10,6 +10,20 @@ export interface ChapterSplitPlanFile {
     nestedHeadings: Array<{ level: number; text: string; blockId: string }>;
 }
 
+export interface ChapterSplitTocMetadata {
+    sourcePath: string;
+    sourceBasename: string;
+    requestedSplitHeadingLevel: ChapterSplitHeadingLevelSetting;
+    resolvedSplitHeadingLevel: number | null;
+    chapterCount: number;
+    managedArtifactCount: number;
+    outputFolderPath: string;
+    tocPath: string;
+    manifestPath: string;
+    chapterTitles: string[];
+    chapterNotePaths: string[];
+}
+
 export interface ChapterSplitPlanResult {
     sourcePath: string;
     requestedSplitHeadingLevel: ChapterSplitHeadingLevelSetting;
@@ -20,6 +34,7 @@ export interface ChapterSplitPlanResult {
     manifestPath: string;
     splitLevel: number | null;
     chapters: ChapterSplitPlanFile[];
+    tocMetadata: ChapterSplitTocMetadata;
     tocMarkdown: string;
 }
 
@@ -66,6 +81,30 @@ function buildWikiLinkTarget(path: string): string {
     return path.replace(/\.md$/i, '');
 }
 
+function toYamlString(value: string): string {
+    return JSON.stringify(value);
+}
+
+function appendYamlStringArray(lines: string[], key: string, values: string[]): void {
+    if (values.length === 0) {
+        lines.push(`${key}: []`);
+        return;
+    }
+
+    lines.push(`${key}:`);
+    values.forEach(value => {
+        lines.push(`  - ${toYamlString(value)}`);
+    });
+}
+
+function formatRequestedSplitHeadingLevelLabel(value: ChapterSplitHeadingLevelSetting): string {
+    return value === 'auto' ? 'Auto' : value.toUpperCase();
+}
+
+function formatResolvedSplitHeadingLevelLabel(value: number | null): string {
+    return value === null ? 'None' : `H${value}`;
+}
+
 function formatChapterLink(order: number, chapter: ChapterSplitPlanFile): string {
     return `- [[${buildWikiLinkTarget(chapter.outputPath)}|${String(order).padStart(2, '0')}. ${chapter.title}]]`;
 }
@@ -75,18 +114,46 @@ function formatNestedHeadingLink(chapter: ChapterSplitPlanFile, heading: { level
     return `${'  '.repeat(indentLevel)}- [[${buildWikiLinkTarget(chapter.outputPath)}#^${heading.blockId}|${heading.text}]]`;
 }
 
-function buildTocMarkdown(sourcePath: string, sourceBasename: string, splitLevel: number | null, chapters: ChapterSplitPlanFile[]): string {
+function buildTocFrontMatter(metadata: ChapterSplitTocMetadata): string {
     const lines = [
-        `# ${sourceBasename} TOC`,
+        '---',
+        'notemdGenerated: true',
+        'notemdArtifactKind: "chapter-split-toc"',
+        `sourcePath: ${toYamlString(metadata.sourcePath)}`,
+        `sourceBasename: ${toYamlString(metadata.sourceBasename)}`,
+        `requestedSplitHeadingLevel: ${toYamlString(metadata.requestedSplitHeadingLevel)}`,
+        `resolvedSplitHeadingLevel: ${metadata.resolvedSplitHeadingLevel === null ? 'null' : metadata.resolvedSplitHeadingLevel}`,
+        `chapterCount: ${metadata.chapterCount}`,
+        `managedArtifactCount: ${metadata.managedArtifactCount}`,
+        `outputFolderPath: ${toYamlString(metadata.outputFolderPath)}`,
+        `tocPath: ${toYamlString(metadata.tocPath)}`,
+        `manifestPath: ${toYamlString(metadata.manifestPath)}`
+    ];
+
+    appendYamlStringArray(lines, 'chapterNotePaths', metadata.chapterNotePaths);
+    appendYamlStringArray(lines, 'chapterTitles', metadata.chapterTitles);
+    lines.push('---');
+
+    return lines.join('\n');
+}
+
+function buildTocMarkdown(metadata: ChapterSplitTocMetadata, chapters: ChapterSplitPlanFile[]): string {
+    const lines = [
+        buildTocFrontMatter(metadata),
+        `# ${metadata.sourceBasename} TOC`,
         '',
-        `Source: [[${buildWikiLinkTarget(sourcePath)}|${sourceBasename}]]`,
+        `Source: [[${buildWikiLinkTarget(metadata.sourcePath)}|${metadata.sourceBasename}]]`,
+        `Requested split: ${formatRequestedSplitHeadingLevelLabel(metadata.requestedSplitHeadingLevel)}`,
+        `Resolved split level: ${formatResolvedSplitHeadingLevelLabel(metadata.resolvedSplitHeadingLevel)}`,
+        `Chapters: ${metadata.chapterCount}`,
+        `Managed artifacts: ${metadata.managedArtifactCount}`,
         ''
     ];
 
     chapters.forEach((chapter, index) => {
         lines.push(formatChapterLink(index + 1, chapter));
         chapter.nestedHeadings.forEach(heading => {
-            lines.push(formatNestedHeadingLink(chapter, heading, splitLevel));
+            lines.push(formatNestedHeadingLink(chapter, heading, metadata.resolvedSplitHeadingLevel));
         });
     });
 
@@ -120,6 +187,19 @@ export function buildChapterSplitPlan(params: {
     const chapterNotePaths = chapters.map(chapter => chapter.outputPath);
     const requestedSplitHeadingLevel = params.splitHeadingLevel ?? 'auto';
     const managedArtifactPaths = [tocPath, manifestPath, ...chapterNotePaths];
+    const tocMetadata: ChapterSplitTocMetadata = {
+        sourcePath: params.sourcePath,
+        sourceBasename: params.sourceBasename,
+        requestedSplitHeadingLevel,
+        resolvedSplitHeadingLevel: chapterPlan.splitLevel,
+        chapterCount: chapters.length,
+        managedArtifactCount: managedArtifactPaths.length,
+        outputFolderPath,
+        tocPath,
+        manifestPath,
+        chapterTitles: chapters.map(chapter => chapter.title),
+        chapterNotePaths: [...chapterNotePaths]
+    };
 
     return {
         sourcePath: params.sourcePath,
@@ -131,7 +211,8 @@ export function buildChapterSplitPlan(params: {
         manifestPath,
         splitLevel: chapterPlan.splitLevel,
         chapters,
-        tocMarkdown: buildTocMarkdown(params.sourcePath, params.sourceBasename, chapterPlan.splitLevel, chapters)
+        tocMetadata,
+        tocMarkdown: buildTocMarkdown(tocMetadata, chapters)
     };
 }
 

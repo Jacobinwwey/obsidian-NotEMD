@@ -375,6 +375,7 @@ const CHAPTER_SPLIT_RESULT_SCHEMA: OperationSchema = {
         'manifestPath',
         'splitLevel',
         'chapters',
+        'tocMetadata',
         'tocMarkdown',
         'chapterCount',
         'removedStaleFileCount',
@@ -420,6 +421,43 @@ const CHAPTER_SPLIT_RESULT_SCHEMA: OperationSchema = {
                         }
                     }
                 }
+            }
+        },
+        tocMetadata: {
+            type: 'object',
+            required: [
+                'sourcePath',
+                'sourceBasename',
+                'requestedSplitHeadingLevel',
+                'resolvedSplitHeadingLevel',
+                'chapterCount',
+                'managedArtifactCount',
+                'outputFolderPath',
+                'tocPath',
+                'manifestPath',
+                'chapterTitles',
+                'chapterNotePaths'
+            ],
+            properties: {
+                sourcePath: { type: 'string' },
+                sourceBasename: { type: 'string' },
+                requestedSplitHeadingLevel: {
+                    type: 'string',
+                    enum: [...CHAPTER_SPLIT_HEADING_LEVEL_VALUES]
+                },
+                resolvedSplitHeadingLevel: {
+                    anyOf: [
+                        { type: 'number' },
+                        { type: 'null' }
+                    ]
+                },
+                chapterCount: { type: 'number' },
+                managedArtifactCount: { type: 'number' },
+                outputFolderPath: { type: 'string' },
+                tocPath: { type: 'string' },
+                manifestPath: { type: 'string' },
+                chapterTitles: STRING_ARRAY_SCHEMA,
+                chapterNotePaths: STRING_ARRAY_SCHEMA
             }
         },
         tocMarkdown: { type: 'string' },
