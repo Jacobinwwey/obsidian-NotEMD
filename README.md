@@ -28,7 +28,7 @@ Notemd enhances your Obsidian workflow by integrating with various Large Languag
 
 If you love using Notemd, please consider [⭐ Give a Star on GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) or [☕️ Buy Me a Coffee](https://ko-fi.com/jacobinwwey).
 
-**Version:** 1.8.9
+**Version:** 1.9.0
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
@@ -96,6 +96,7 @@ That's it! Explore the settings to unlock more features like web research, trans
 - **Progress Bar Accuracy**: Fixed a bug where the progress bar for the "Create Wiki-Link & Generate Note" command would get stuck at 95%, ensuring it now correctly shows 100% upon completion.
 - **Enhanced API Debugging**: The "API Error Debugging Mode" now captures full response bodies from LLM providers and search services (Tavily/DuckDuckGo), and also records a per-attempt transport timeline with sanitized request URLs, elapsed duration, response headers, partial response bodies, parsed partial stream content, and stack traces for better troubleshooting across OpenAI-compatible, Anthropic, Google, Azure OpenAI, and Ollama fallbacks.
 - **Developer Mode Panel**: Settings now include a dedicated developer-only diagnostics panel that stays hidden unless "Developer mode" is enabled. It supports selecting diagnostic call paths and running repeated stability probes for the selected mode.
+- **Developer-Gated Relaxed Input Types**: A separate `Relax input file restrictions` toggle can expand selected source-preserving tasks beyond flat `.md` / `.txt` input. When enabled, Translate current file, Batch translate folder, Extract concepts (current/folder), Summarise as Mermaid diagram, Generate diagram, and Check duplicates in current file can also read broader text-like files and PDF text extracted through Obsidian's PDF runtime. Source-mutating, Markdown-structure-dependent, and verbatim-comparison workflows remain intentionally restricted.
 - **Redesigned Sidebar**: Built-in actions are grouped into focused sections with clearer labels, live status, cancellable progress, and copyable logs to reduce sidebar clutter. The progress/log footer now stays visible even when every section is expanded, and the ready state uses a clearer standby progress track.
 - **Sidebar Interaction & Readability Polish**: Sidebar buttons now provide clearer hover/press/focus feedback, and colorful CTA buttons (including `One-Click Extract` and `Batch generate from titles`) use stronger text contrast for better readability across themes.
 - **Single-File CTA Mapping**: Colorful CTA styling is now reserved for single-file actions only. Batch/folder-level actions and mixed workflows use non-CTA styling to reduce action-scope misclicks.
@@ -396,7 +397,7 @@ Access plugin settings via:
 -   **Filter mode**: Folder tasks can now leave filtering off or match files with `contains`, `regex`, or `glob`.
 -   **Match target**: Patterns can be evaluated against each file's `relativePath` or `basename`.
 -   **Subfolder scope**: Each folder task can preserve legacy behavior or explicitly include/exclude subfolders. Translation keeps its legacy current-folder-only default unless you override it.
--   **Saved profiles**: You can save named file-selection profiles that also remember an optional preferred folder path for picker prefill while still allowing run-time folder changes.
+-   **Developer-gated advanced mode**: Regex/glob filters, saved file-selection profiles, subfolder-scope overrides, preset chips, and the richer batch folder popup are hidden by default. Turn on `Developer mode` and then enable `Advanced batch file selection` to expose those controls. Otherwise batch folder tasks stay on the simpler legacy picker flow for regular users.
 
 #### Local Knowledge Retrieval
 -   **Enable Local Knowledge Retrieval**:
@@ -510,7 +511,7 @@ This feature allows you to override the default instructions (prompts) sent to t
 ### Original Processing (Adding Wiki-Links)
 This is the core functionality focused on identifying concepts and adding `[[wiki-links]]`.
 
-**Important:** This process only works on `.md` or `.txt` files. You can convert PDF files to MD files for free using [Mineru](https://github.com/opendatalab/MinerU) before further processing.
+**Important:** This source-mutating workflow intentionally stays limited to `.md` or `.txt` files. Even if `Relax input file restrictions` is enabled in Developer settings, PDF and other expanded formats are still blocked here to keep add-links and source-diff semantics stable. If you need PDF input, convert it to Markdown first with a tool such as [Mineru](https://github.com/opendatalab/MinerU).
 
 1.  **Using the Sidebar**:
     *   Open the Notemd Sidebar (wand icon or command palette).
@@ -756,7 +757,7 @@ MIT License - See [LICENSE](LICENSE) file for details.
 
 ---
 
-*Notemd v1.8.9 - Enhance your Obsidian knowledge graph with AI.*
+*Notemd v1.9.0 - Enhance your Obsidian knowledge graph with AI.*
 
 
 <!-- repo-chronicle:start -->
@@ -766,7 +767,7 @@ Quarterly chronicle rendered in the original [repo-saga](https://github.com/teee
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.en.svg)
 
-_Last refreshed for release tag `1.8.9` on 2026-05-25. Latest commit date: 2026-05-25._
+_Last refreshed from the working tree on 2026-05-26. Latest commit date: 2026-05-26._
 <!-- repo-chronicle:end -->
 
 

@@ -10,6 +10,7 @@ import { formatI18n, getI18nStrings } from './i18n';
 import { resolveTaskLanguageName, shouldApplyAutoTranslation } from './i18n/taskLanguagePolicy';
 import { RenderArtifact } from './rendering/types';
 import { selectFolderTaskFiles } from './folderTaskFileSelector';
+import { readSupportedInputFile } from './inputFileSupport';
 import {
     buildLocalKnowledgeBaseRetriever,
     createEmptyLocalKnowledgeContextBuildResult,
@@ -453,7 +454,7 @@ export async function extractConceptsFromFile(
     progressReporter: ProgressReporter
 ): Promise<Set<string>> {
     progressReporter.log(`Starting concept extraction for: ${file.name}`);
-    const content = await app.vault.read(file);
+    const content = await readSupportedInputFile(app, file, plugin.settings);
     const allConcepts = new Set<string>();
     const settings = plugin.settings;
     const i18n = getI18nStrings({ uiLocale: settings.uiLocale });

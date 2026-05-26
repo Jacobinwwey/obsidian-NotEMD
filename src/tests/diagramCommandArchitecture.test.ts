@@ -187,6 +187,31 @@ describe('diagram command architecture', () => {
         );
     });
 
+    test('generateDiagramForPathCommand accepts pdf input when developer relaxed input mode is enabled', async () => {
+        plugin.settings.enableDeveloperMode = true;
+        plugin.settings.enableRelaxedInputFileTypes = true;
+        const pdfFile = {
+            name: 'Topic.pdf',
+            basename: 'Topic',
+            path: 'Docs/Topic.pdf',
+            extension: 'pdf',
+            parent: { path: 'Docs' }
+        };
+        (mockApp.vault.getFileByPath as jest.Mock).mockReturnValue(pdfFile);
+        const generateSpy = jest
+            .spyOn(plugin as any, 'generateDiagramCommand')
+            .mockResolvedValue({ outputPath: 'Docs/Topic_diagram.canvas' });
+
+        await (plugin as any).generateDiagramForPathCommand('Docs/Topic.pdf', reporter, {
+            executionMode: 'save-artifact'
+        });
+
+        expect(plugin.loadSettings).toHaveBeenCalled();
+        expect(generateSpy).toHaveBeenCalledWith(pdfFile, reporter, expect.objectContaining({
+            executionMode: 'save-artifact'
+        }));
+    });
+
     test('artifact execution injects local knowledge context when diagram retrieval is enabled', async () => {
         plugin.settings.enableLocalKnowledgeRetrieval = true;
         plugin.settings.enableLocalKnowledgeForDiagramGeneration = true;
@@ -570,9 +595,13 @@ describe('diagram command architecture', () => {
         const canonicalCall = jest
             .spyOn(plugin as any, 'generateDiagramCommand')
             .mockResolvedValue(undefined);
+        (mockApp.workspace.getActiveFile as jest.Mock).mockReturnValue({
+            ...file,
+            extension: 'md'
+        });
         plugin.addCommand = jest.fn((command: any) => {
             if (command.id === 'notemd-generate-diagram') {
-                command.editorCallback({}, { file } as any);
+                command.checkCallback(false);
             }
         }) as any;
 
@@ -580,7 +609,10 @@ describe('diagram command architecture', () => {
         await Promise.resolve();
 
         expect(canonicalCall).toHaveBeenCalledWith(
-            file,
+            expect.objectContaining({
+                path: file.path,
+                extension: 'md'
+            }),
             expect.anything(),
             expect.objectContaining({ executionMode: 'save-artifact' })
         );
@@ -590,15 +622,25 @@ describe('diagram command architecture', () => {
         const canonicalCall = jest
             .spyOn(plugin as any, 'previewDiagramCommand')
             .mockResolvedValue(undefined);
+        (mockApp.workspace.getActiveFile as jest.Mock).mockReturnValue({
+            ...file,
+            extension: 'md'
+        });
         plugin.addCommand = jest.fn((command: any) => {
             if (command.id === 'notemd-preview-diagram') {
-                command.editorCallback({}, { file } as any);
+                command.checkCallback(false);
             }
         }) as any;
 
         plugin.onload();
         await Promise.resolve();
 
-        expect(canonicalCall).toHaveBeenCalledWith(file, expect.anything());
+        expect(canonicalCall).toHaveBeenCalledWith(
+            expect.objectContaining({
+                path: file.path,
+                extension: 'md'
+            }),
+            expect.anything()
+        );
     });
 });

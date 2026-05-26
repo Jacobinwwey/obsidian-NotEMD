@@ -44,6 +44,8 @@ export const mockSettings: NotemdSettings = {
     apiCallMaxRetries: 3,
     enableApiErrorDebugMode: false,
     enableDeveloperMode: false,
+    enableAdvancedFileSelectionProfiles: false,
+    enableRelaxedInputFileTypes: false,
     developerDiagnosticCallMode: 'runtime-stable',
     developerDiagnosticStabilityRuns: 3,
     developerDiagnosticTimeoutMs: 10 * 60 * 1000,

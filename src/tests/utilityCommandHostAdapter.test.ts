@@ -3,6 +3,11 @@ import * as fileUtils from '../fileUtils';
 import { mockSettings } from './__mocks__/settings';
 import { ProgressReporter } from '../types';
 
+const ADVANCED_FILE_SELECTION_SETTINGS = {
+    enableDeveloperMode: true,
+    enableAdvancedFileSelectionProfiles: true
+} as const;
+
 function loadModule() {
     return require('../operations/utilityCommandHostAdapter');
 }
@@ -221,6 +226,38 @@ describe('utility command host adapter', () => {
         });
     });
 
+    test('check duplicates current command accepts pdf input when relaxed input mode is enabled', async () => {
+        const reporter = createReporter();
+        const { host } = createHost(reporter);
+        const file = Object.assign(new (TFile as any)(), {
+            name: 'Topic.pdf',
+            basename: 'Topic',
+            path: 'Notes/Topic.pdf',
+            extension: 'pdf'
+        });
+        host.getActiveFile = jest.fn(() => file);
+        host.getSettings = jest.fn(() => ({
+            ...mockSettings,
+            enableDeveloperMode: true,
+            enableRelaxedInputFileTypes: true
+        }));
+        host.readFile = jest.fn().mockResolvedValue('alpha alpha beta');
+        host.logInfo = jest.fn();
+
+        const duplicateSpy = jest.spyOn(fileUtils, 'findDuplicates').mockReturnValue(new Set(['alpha']));
+        const { runCheckDuplicatesCurrentCommandWithHost } = loadModule();
+
+        const result = await runCheckDuplicatesCurrentCommandWithHost(host as any, reporter);
+
+        expect(host.readFile).toHaveBeenCalledWith(file);
+        expect(duplicateSpy).toHaveBeenCalledWith('alpha alpha beta');
+        expect(result).toEqual({
+            sourcePath: 'Notes/Topic.pdf',
+            duplicateCount: 1,
+            duplicates: ['alpha']
+        });
+    });
+
     test('batch mermaid fix command resolves folder and reports success through extracted host flow', async () => {
         const reporter = createReporter();
         const { host, getBusy } = createHost(reporter);
@@ -273,6 +310,7 @@ describe('utility command host adapter', () => {
         host.getFolderSelection.mockResolvedValue('Concepts');
         host.getSettings.mockReturnValue({
             ...mockSettings,
+            ...ADVANCED_FILE_SELECTION_SETTINGS,
             folderTaskFileFilterMode: 'none',
             folderTaskIncludeSubfoldersMode: 'legacy'
         });
@@ -308,6 +346,7 @@ describe('utility command host adapter', () => {
         const { host } = createHost(reporter);
         host.getSettings.mockReturnValue({
             ...mockSettings,
+            ...ADVANCED_FILE_SELECTION_SETTINGS,
             folderTaskFileSelectionProfiles: [
                 {
                     id: 'profile-formulas',
@@ -522,6 +561,10 @@ describe('utility command host adapter', () => {
     test('batch formula fix command supports folder path override and selection overrides', async () => {
         const reporter = createReporter();
         const { host } = createHost(reporter);
+        host.getSettings.mockReturnValue({
+            ...mockSettings,
+            ...ADVANCED_FILE_SELECTION_SETTINGS
+        });
         const batchFixImpl = jest.fn().mockResolvedValue({
             folderPath: 'Notes',
             processedFileCount: 1,

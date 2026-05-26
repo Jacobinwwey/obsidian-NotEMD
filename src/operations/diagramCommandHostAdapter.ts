@@ -5,6 +5,7 @@ import { DiagramIntent, isSupportedDiagramIntent } from '../diagram/types';
 import { LocalKnowledgeRetrievalSummary } from '../localKnowledgeBase';
 import { RenderArtifact } from '../rendering/types';
 import { DiagramOperationInput, DiagramOperationExecutionMode, buildDiagramOperationInput } from '../diagram/diagramGenerationService';
+import { isSupportedInputFileForTask } from '../inputFileSupport';
 import { LLMProviderConfig, NotemdSettings, ProgressReporter } from '../types';
 
 export interface DiagramCommandHostAdapter {
@@ -606,6 +607,10 @@ export async function runGenerateDiagramCommandWithHost(
         await host.loadSettings();
         i18n = host.getUiStrings();
         actionLabel = host.getActionLabel(options.executionMode, i18n);
+        const inputTaskId = options.executionMode === 'save-mermaid' ? 'summarize-as-mermaid' : 'generate-diagram';
+        if (!isSupportedInputFileForTask(host.getSettings(), inputTaskId, file)) {
+            throw new Error('No supported diagram input file selected.');
+        }
 
         const fileContent = await host.readFile(file);
         if (!fileContent.trim()) {

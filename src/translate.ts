@@ -6,6 +6,7 @@ import { getSystemPrompt } from './promptUtils';
 import { resolveLanguageDisplayName } from './i18n/languageContext';
 import { formatI18n, getI18nStrings } from './i18n';
 import { selectFolderTaskFiles } from './folderTaskFileSelector';
+import { getAllowedInputExtensionsForTask, readSupportedInputFile } from './inputFileSupport';
 
 export interface TranslateFileResult {
     sourcePath: string;
@@ -104,7 +105,7 @@ export async function batchTranslateFolder(
         taskKind: 'batch-translate-folder',
         folderPath: folder.path,
         files: app.vault.getFiles(),
-        allowedExtensions: ['md'],
+        allowedExtensions: getAllowedInputExtensionsForTask(settings, 'batch-translate-folder'),
         settings
     });
     const result: BatchTranslateFolderResult = {
@@ -172,7 +173,7 @@ export async function translateFile(
     signal?: AbortSignal
 ): Promise<TranslateFileResult | null> {
     const i18n = getI18nStrings({ uiLocale: settings.uiLocale });
-    const fileContent = await app.vault.read(file);
+    const fileContent = await readSupportedInputFile(app, file, settings);
     if (!fileContent) {
         throw new Error(i18n.notices.fileEmpty);
     }

@@ -2,6 +2,11 @@ import { TFile, TFolder } from 'obsidian';
 import { mockSettings } from './__mocks__/settings';
 import { ProgressReporter } from '../types';
 
+const ADVANCED_FILE_SELECTION_SETTINGS = {
+    enableDeveloperMode: true,
+    enableAdvancedFileSelectionProfiles: true
+} as const;
+
 function loadModule() {
     return require('../operations/noteProcessingCommandHostAdapter');
 }
@@ -44,6 +49,7 @@ function createUiStrings() {
             processingError: 'Processing failed: {message}',
             batchProcessingCancelled: 'Batch cancelled',
             noMarkdownOrTextFilesFoundSelectedFolder: 'No markdown files in {folderPath}',
+            noSupportedInputFilesFoundSelectedFolder: 'No supported input files in {folderPath}',
             batchProcessingFinishedWithErrors: 'Batch finished with {count} errors',
             batchProcessingSuccess: 'Processed {count} files',
             batchProcessingError: 'Batch processing failed: {message}',
@@ -286,6 +292,7 @@ describe('note processing command host adapter', () => {
         const { host } = createHost(reporter);
         host.getSettings.mockReturnValue({
             ...mockSettings,
+            ...ADVANCED_FILE_SELECTION_SETTINGS,
             folderTaskFileFilterMode: 'none',
             folderTaskFileFilterPattern: '',
             folderTaskFileFilterTarget: 'relativePath',
@@ -383,6 +390,7 @@ describe('note processing command host adapter', () => {
         const { host } = createHost(reporter);
         host.getSettings.mockReturnValue({
             ...mockSettings,
+            ...ADVANCED_FILE_SELECTION_SETTINGS,
             folderTaskFileFilterMode: 'none',
             folderTaskFileFilterPattern: '',
             folderTaskFileFilterTarget: 'relativePath',
@@ -436,6 +444,7 @@ describe('note processing command host adapter', () => {
         const { host } = createHost(reporter);
         const baseSettings = {
             ...mockSettings,
+            ...ADVANCED_FILE_SELECTION_SETTINGS,
             folderTaskFileFilterMode: 'none' as const,
             folderTaskFileFilterPattern: '',
             folderTaskFileFilterTarget: 'relativePath' as const,
@@ -700,6 +709,48 @@ describe('note processing command host adapter', () => {
         expect(getBusy()).toBe(false);
     });
 
+    test('translate file command accepts pdf input when relaxed input mode is enabled', async () => {
+        const reporter = createReporter();
+        const { host } = createHost(reporter);
+        const file = Object.assign(new (TFile as any)(), {
+            name: 'Topic.pdf',
+            basename: 'Topic',
+            path: 'Notes/Topic.pdf',
+            extension: 'pdf'
+        });
+        host.getSettings.mockReturnValue({
+            ...mockSettings,
+            enableDeveloperMode: true,
+            enableRelaxedInputFileTypes: true
+        });
+        const translateImpl = jest.fn().mockResolvedValue({
+            sourcePath: 'Notes/Topic.pdf',
+            targetLanguage: 'en',
+            requestedOutputFolderPath: 'Translations',
+            outputFolderPath: 'Translations',
+            outputFolderCreated: false,
+            usedFallbackOutputFolder: false,
+            outputPath: 'Translations/Topic_en.md',
+            created: true,
+            overwritten: false,
+            openedInWorkspace: true,
+            chunkCount: 1
+        });
+        const { runTranslateFileCommandWithHost } = loadModule();
+
+        await runTranslateFileCommandWithHost(host, file, undefined, reporter, translateImpl);
+
+        expect(translateImpl).toHaveBeenCalledWith(
+            host.getApp(),
+            host.getSettings(),
+            file,
+            'en',
+            reporter,
+            true,
+            undefined
+        );
+    });
+
     test('batch translate command resolves selected folder and reuses host cleanup path', async () => {
         const reporter = createReporter();
         const { host, getBusy } = createHost(reporter);
@@ -796,6 +847,37 @@ describe('note processing command host adapter', () => {
         expect(host.completeReporter).toHaveBeenCalledWith(reporter);
         expect(host.finalizeReporter).toHaveBeenCalledWith(reporter);
         expect(getBusy()).toBe(false);
+    });
+
+    test('extract concepts command accepts pdf input when relaxed input mode is enabled', async () => {
+        const reporter = createReporter();
+        const { host } = createHost(reporter);
+        const activeFile = Object.assign(new (TFile as any)(), {
+            name: 'Topic.pdf',
+            basename: 'Topic',
+            path: 'Notes/Topic.pdf',
+            extension: 'pdf'
+        });
+        host.getActiveFile.mockReturnValue(activeFile);
+        host.getSettings.mockReturnValue({
+            ...mockSettings,
+            enableDeveloperMode: true,
+            enableRelaxedInputFileTypes: true
+        });
+        const extractImpl = jest.fn().mockResolvedValue(new Set(['Alpha']));
+        const createNotesImpl = jest.fn().mockResolvedValue(undefined);
+        const { runExtractConceptsCommandWithHost } = loadModule();
+
+        await runExtractConceptsCommandWithHost(host, reporter, extractImpl, createNotesImpl);
+
+        expect(extractImpl).toHaveBeenCalledWith(host.getApp(), host.getPluginRuntime(), activeFile, reporter);
+        expect(createNotesImpl).toHaveBeenCalledWith(
+            host.getApp(),
+            host.getSettings(),
+            new Set(['Alpha']),
+            'Topic',
+            { disableBacklink: true, minimalTemplate: true }
+        );
     });
 
     test('batch extract concepts command aggregates per-file concepts and completes reporter', async () => {
@@ -1005,6 +1087,7 @@ describe('note processing command host adapter', () => {
         const { host } = createHost(reporter);
         host.getSettings.mockReturnValue({
             ...mockSettings,
+            ...ADVANCED_FILE_SELECTION_SETTINGS,
             folderTaskFileFilterMode: 'contains',
             folderTaskFileFilterPattern: 'A',
             folderTaskFileFilterTarget: 'basename',
@@ -1051,6 +1134,7 @@ describe('note processing command host adapter', () => {
         const { host } = createHost(reporter);
         host.getSettings.mockReturnValue({
             ...mockSettings,
+            ...ADVANCED_FILE_SELECTION_SETTINGS,
             folderTaskFileFilterMode: 'none',
             folderTaskFileFilterPattern: '',
             folderTaskFileFilterTarget: 'relativePath',
@@ -1115,6 +1199,7 @@ describe('note processing command host adapter', () => {
         host.getFolderByPath.mockReturnValue(folder);
         host.getSettings.mockReturnValue({
             ...mockSettings,
+            ...ADVANCED_FILE_SELECTION_SETTINGS,
             folderTaskIncludeSubfoldersMode: 'legacy'
         });
         const batchTranslateImpl = jest.fn().mockResolvedValue({
