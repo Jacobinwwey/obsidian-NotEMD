@@ -152,6 +152,58 @@ describe('markdownSectionUtils', () => {
         })).toThrow('Configured chapter split heading level H3 was not found in the note.');
     });
 
+    test('strips trailing obsidian block ids from heading titles and search text', () => {
+        const markdown = [
+            '# Platform',
+            '',
+            '## Overview ^overview-anchor',
+            'Overview body',
+            '',
+            '### Risks ^risks-anchor',
+            'Risk body'
+        ].join('\n');
+
+        const sections = parseMarkdownSections(markdown, 'Platform');
+
+        expect(sections.map(section => section.title)).toEqual([
+            'Platform',
+            'Overview',
+            'Risks'
+        ]);
+        expect(sections[1].searchText).not.toContain('^overview-anchor');
+        expect(sections[2].searchText).not.toContain('^risks-anchor');
+    });
+
+    test('adds deterministic block ids to nested headings for repeated titles and special-character headings', () => {
+        const markdown = [
+            '# Platform',
+            '',
+            '## Overview',
+            'Overview body',
+            '',
+            '### Risks',
+            'Risk body',
+            '',
+            '### Risks',
+            'Second risk body',
+            '',
+            '### ???',
+            'Unnamed heading body'
+        ].join('\n');
+
+        const plan = planMarkdownChapterSections(markdown, 'Notes/Platform.md', 'Platform');
+        const [chapter] = plan.chapters;
+
+        expect(chapter.nestedHeadings).toEqual([
+            { level: 3, text: 'Risks', blockId: 'notemd-risks' },
+            { level: 3, text: 'Risks', blockId: 'notemd-risks-2' },
+            { level: 3, text: '???', blockId: 'notemd-section-03' }
+        ]);
+        expect(chapter.markdown).toContain('### Risks ^notemd-risks');
+        expect(chapter.markdown).toContain('### Risks ^notemd-risks-2');
+        expect(chapter.markdown).toContain('### ??? ^notemd-section-03');
+    });
+
     test('falls back to a single section when no markdown headings exist', () => {
         const markdown = [
             'Paragraph one.',

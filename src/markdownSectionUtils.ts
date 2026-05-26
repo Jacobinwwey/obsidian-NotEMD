@@ -12,6 +12,7 @@ export interface MarkdownSection {
 export interface MarkdownHeadingSummary {
     level: number;
     text: string;
+    blockId: string;
 }
 
 export interface MarkdownChapterSection {
@@ -39,12 +40,23 @@ interface SectionAccumulator {
     lines: string[];
 }
 
+const OBSIDIAN_BLOCK_ID_PATTERN = /\s+\^([A-Za-z0-9-]+)\s*$/;
+
 function isFenceDelimiter(line: string): boolean {
     return /^(```|~~~)/.test(line.trim());
 }
 
 function trimSectionMarkdown(markdown: string): string {
     return markdown.replace(/^\s+|\s+$/g, '');
+}
+
+function stripObsidianBlockIdSuffix(value: string): string {
+    return value.replace(OBSIDIAN_BLOCK_ID_PATTERN, '').trim();
+}
+
+function extractObsidianBlockId(value: string): string | null {
+    const match = OBSIDIAN_BLOCK_ID_PATTERN.exec(value);
+    return match ? match[1] : null;
 }
 
 export function stripMarkdownForSearch(markdown: string): string {
@@ -74,6 +86,7 @@ export function stripMarkdownForSearch(markdown: string): string {
         .replace(/!\[([^\]]*)\]\([^)]+\)/g, '$1')
         .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
         .replace(/`([^`]+)`/g, '$1')
+        .replace(/\s+\^[A-Za-z0-9-]+(?=\n|$)/g, '')
         .replace(/^#{1,6}\s+/gm, '')
         .replace(/^\s*[-*+]\s+/gm, '')
         .replace(/\s+/g, ' ')
@@ -127,7 +140,7 @@ export function parseMarkdownSections(markdown: string, sourceTitle: string): Ma
                 }
 
                 const level = headingMatch[1].length;
-                const title = headingMatch[2].trim();
+                const title = stripObsidianBlockIdSuffix(headingMatch[2].trim());
                 while (headingStack.length > 0 && headingStack[headingStack.length - 1].level >= level) {
                     headingStack.pop();
                 }
@@ -218,12 +231,44 @@ function buildChapterFileName(title: string, order: number): string {
 }
 
 function collectNestedHeadings(chapterSections: MarkdownSection[], splitLevel: number): MarkdownHeadingSummary[] {
+    const duplicateCounts = new Map<string, number>();
+
     return chapterSections
         .filter(section => section.level > splitLevel)
-        .map(section => ({
-            level: section.level,
-            text: section.title
-        }));
+        .map((section, index) => {
+            const normalizedBase = normalizeNameForFilePath(section.title)
+                .normalize('NFKD')
+                .toLowerCase()
+                .replace(/\s+/g, '-')
+                .replace(/[^a-z0-9-]/g, '')
+                .replace(/-+/g, '-')
+                .replace(/^-+|-+$/g, '');
+            const fallbackBase = normalizedBase || `section-${String(index + 1).padStart(2, '0')}`;
+            const baseBlockId = `notemd-${fallbackBase}`;
+            const nextCount = (duplicateCounts.get(baseBlockId) || 0) + 1;
+            duplicateCounts.set(baseBlockId, nextCount);
+
+            return {
+                level: section.level,
+                text: section.title,
+                blockId: nextCount === 1 ? baseBlockId : `${baseBlockId}-${nextCount}`
+            };
+        });
+}
+
+function addBlockIdToHeadingMarkdown(markdown: string, blockId: string): string {
+    const lines = markdown.split(/\r?\n/);
+    if (lines.length === 0) {
+        return markdown;
+    }
+
+    const existingBlockId = extractObsidianBlockId(lines[0]);
+    if (existingBlockId) {
+        return markdown;
+    }
+
+    lines[0] = `${lines[0]} ^${blockId}`;
+    return lines.join('\n');
 }
 
 export function planMarkdownChapterSections(
@@ -262,7 +307,39 @@ export function planMarkdownChapterSections(
     const chapters: MarkdownChapterSection[] = splitIndexes.map(({ section, index }, chapterIndex) => {
         const nextStartIndex = splitIndexes[chapterIndex + 1]?.index ?? sections.length;
         const groupedSections = sections.slice(index, nextStartIndex);
-        const groupedMarkdown = groupedSections.map(item => item.markdown).join('\n\n');
+        const nestedHeadings = collectNestedHeadings(groupedSections, splitLevel);
+        const blockIdByHeading = new Map<string, MarkdownHeadingSummary[]>();
+        nestedHeadings.forEach(heading => {
+            const key = `${heading.level}::${heading.text}`;
+            const bucket = blockIdByHeading.get(key) || [];
+            bucket.push(heading);
+            blockIdByHeading.set(key, bucket);
+        });
+        const nestedHeadingCursor = new Map<string, number>();
+        const renderedSections = groupedSections.map(item => {
+            if (item.level <= splitLevel) {
+                return item.markdown;
+            }
+
+            const key = `${item.level}::${item.title}`;
+            const matchingHeadings = blockIdByHeading.get(key) || [];
+            const currentIndex = nestedHeadingCursor.get(key) || 0;
+            nestedHeadingCursor.set(key, currentIndex + 1);
+            const matchingHeading = matchingHeadings[currentIndex];
+
+            if (!matchingHeading) {
+                return item.markdown;
+            }
+
+            const existingBlockId = extractObsidianBlockId(item.markdown.split(/\r?\n/, 1)[0]);
+            if (existingBlockId) {
+                matchingHeading.blockId = existingBlockId;
+                return item.markdown;
+            }
+
+            return addBlockIdToHeadingMarkdown(item.markdown, matchingHeading.blockId);
+        });
+        const groupedMarkdown = renderedSections.join('\n\n');
         const order = chapterIndex + 1;
         const markdownWithPreamble = chapterIndex === 0 && preambleSections.length > 0
             ? `${preambleSections.map(item => item.markdown).join('\n\n')}\n\n${groupedMarkdown}`
@@ -274,7 +351,7 @@ export function planMarkdownChapterSections(
             outputFileName: buildChapterFileName(section.title, order),
             markdown: trimSectionMarkdown(markdownWithPreamble),
             breadcrumb: [...section.breadcrumb],
-            nestedHeadings: collectNestedHeadings(groupedSections, splitLevel)
+            nestedHeadings
         };
     });
 

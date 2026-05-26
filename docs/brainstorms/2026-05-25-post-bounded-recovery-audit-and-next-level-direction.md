@@ -85,7 +85,7 @@ The previously recovered product slices are now real current-main facts and no l
    - `Batch generate from titles`
    - `Research & Summarize`
    - `Generate diagram`
-2. chapter split is live, with TOC/manifest output and stale generated-file cleanup.
+2. chapter split is live, with TOC/manifest output, repeated-heading-safe nested block refs inside generated chapter notes/TOC targets, and stale generated-file cleanup.
 3. preview history and saved-artifact-aware reopening are live in the reusable preview shell.
 4. settings reset, concept-note prerequisite guidance, concept synonym suppression, and folder file-selection profiles are already back on current main.
 5. retrieval-dependent note-processing results now expose machine-readable `localKnowledgeRetrieval` summaries for title generation and research, including matched/returned counts, source paths, requested `topK`, sliding-window size, current-file exclusion telemetry, index/query timing, and context-char count.
@@ -246,9 +246,9 @@ Goal:
 
 Likely areas:
 
-1. keep extending richer result/evidence framing to the remaining chapter-split paths now that retrieval summaries plus timing telemetry are landed for title-generation, research, and artifact-mode diagram generation;
+1. keep extending richer result/evidence framing to the remaining chapter-split paths now that repeated-heading-safe TOC block refs are landed alongside retrieval summaries plus timing telemetry for title-generation, research, and artifact-mode diagram generation;
 2. the shared maintainer helper now carries compact payload examples for the retrieval-dependent paths, so the next step is to keep those examples aligned as result schemas evolve;
-3. keep tuning/documentation around sliding-window size, snippet shaping, and folder-scope expectations, but treat the offline fixture as landed baseline work and expand it via richer query classes / chapter-split evidence coverage rather than re-proving that the harness should exist.
+3. keep tuning/documentation around sliding-window size, snippet shaping, and folder-scope expectations, but treat the offline fixture as landed baseline work and shift the remaining chapter-split gap toward overwrite-policy / optional metadata hardening plus richer query-class coverage rather than re-proving that the harness should exist.
 
 ## 6. Task And Documentation Follow-Through Rule
 

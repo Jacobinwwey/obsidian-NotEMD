@@ -411,10 +411,11 @@ const CHAPTER_SPLIT_RESULT_SCHEMA: OperationSchema = {
                         type: 'array',
                         items: {
                             type: 'object',
-                            required: ['level', 'text'],
+                            required: ['level', 'text', 'blockId'],
                             properties: {
                                 level: { type: 'number' },
-                                text: { type: 'string' }
+                                text: { type: 'string' },
+                                blockId: { type: 'string' }
                             }
                         }
                     }

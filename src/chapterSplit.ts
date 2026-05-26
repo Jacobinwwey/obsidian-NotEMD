@@ -7,7 +7,7 @@ export interface ChapterSplitPlanFile {
     outputPath: string;
     markdown: string;
     breadcrumb: string[];
-    nestedHeadings: Array<{ level: number; text: string }>;
+    nestedHeadings: Array<{ level: number; text: string; blockId: string }>;
 }
 
 export interface ChapterSplitPlanResult {
@@ -69,9 +69,9 @@ function formatChapterLink(order: number, chapter: ChapterSplitPlanFile): string
     return `- [[${buildWikiLinkTarget(chapter.outputPath)}|${String(order).padStart(2, '0')}. ${chapter.title}]]`;
 }
 
-function formatNestedHeadingLink(chapter: ChapterSplitPlanFile, heading: { level: number; text: string }, splitLevel: number | null): string {
+function formatNestedHeadingLink(chapter: ChapterSplitPlanFile, heading: { level: number; text: string; blockId: string }, splitLevel: number | null): string {
     const indentLevel = splitLevel === null ? 1 : Math.max(1, heading.level - splitLevel);
-    return `${'  '.repeat(indentLevel)}- [[${buildWikiLinkTarget(chapter.outputPath)}#${heading.text}|${heading.text}]]`;
+    return `${'  '.repeat(indentLevel)}- [[${buildWikiLinkTarget(chapter.outputPath)}#^${heading.blockId}|${heading.text}]]`;
 }
 
 function buildTocMarkdown(sourcePath: string, sourceBasename: string, splitLevel: number | null, chapters: ChapterSplitPlanFile[]): string {

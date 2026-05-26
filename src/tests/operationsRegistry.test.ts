@@ -365,6 +365,24 @@ describe('operations registry', () => {
                 })
             })
         }));
+        expect(chapterSplit?.resultSchema).toEqual(expect.objectContaining({
+            properties: expect.objectContaining({
+                chapters: expect.objectContaining({
+                    items: expect.objectContaining({
+                        properties: expect.objectContaining({
+                            nestedHeadings: expect.objectContaining({
+                                items: expect.objectContaining({
+                                    required: expect.arrayContaining(['level', 'text', 'blockId']),
+                                    properties: expect.objectContaining({
+                                        blockId: expect.any(Object)
+                                    })
+                                })
+                            })
+                        })
+                    })
+                })
+            })
+        }));
 
         expect(researchSummarize).toEqual(expect.objectContaining({
             id: 'research.summarize-topic',
