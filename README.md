@@ -115,7 +115,7 @@ That's it! Explore the settings to unlock more features like web research, trans
 - **Concept Extraction Guardrails**: When concept-note generation prerequisites are not configured correctly, relevant flows now warn before execution and can deep-link directly into the required settings.
 - **Concept Synonym Suppression**: An optional extraction rule can tell the model to avoid extracting synonyms, semantically similar core concepts, or near-duplicate keywords when processing notes.
 - **Local Knowledge Retrieval**: `Batch generate from titles`, `Research & Summarize`, and `Generate diagram` can optionally retrieve context from a local knowledge base built from configured vault paths, with no cloud retrieval service or external daemon.
-- **Chapter Split + TOC Extraction**: Split a note into heading-based chapter files beside the source note, generate a linked TOC, and clean up stale generated files on reruns.
+- **Chapter Split + TOC Extraction**: Split a note into heading-based chapter files beside the source note, generate a linked TOC with front-matter metadata, and clean up stale generated files on reruns.
 
 
 ### Translation

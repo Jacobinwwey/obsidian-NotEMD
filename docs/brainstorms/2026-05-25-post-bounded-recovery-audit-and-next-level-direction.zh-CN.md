@@ -85,7 +85,7 @@ canonical: true
    - `从标题批量生成`
    - `研究与总结`
    - `生成图形`
-2. chapter split 已落地，具备 TOC/manifest 输出、面向重复 nested heading 的稳定 block ref、manifest-backed 的 guarded rerun overwrite 语义，以及陈旧生成文件清理。
+2. chapter split 已落地，具备 TOC/manifest 输出、确定性的 TOC front-matter metadata、面向重复 nested heading 的稳定 block ref、manifest-backed 的 guarded rerun overwrite 语义，以及陈旧生成文件清理。
 3. preview history 与 saved-artifact-aware reopening 已进入可复用 preview shell。
 4. settings reset、concept-note prerequisite guidance、concept synonym suppression 与 folder file-selection profiles 都已回到当前主线。
 5. 面向 retrieval 的 note-processing 结果现在也已为标题生成与研究总结暴露 machine-readable 的 `localKnowledgeRetrieval` 摘要，包含 matched/returned counts、source paths、请求的 `topK`、sliding-window size、current-file exclusion telemetry、index/query timing 与 context-char count。
@@ -246,9 +246,9 @@ release-facing 真值也已在当前主线上重新对齐：
 
 可能的切入点：
 
-1. 在标题生成、研究总结与 artifact-mode 图形生成已经落地 retrieval 摘要与 timing telemetry，且 chapter split 已补上 repeated-heading-safe TOC block ref 之后，继续把 richer result/evidence framing 推进到剩余的 chapter-split 路径；
+1. 在标题生成、研究总结与 artifact-mode 图形生成已经落地 retrieval 摘要与 timing telemetry，且 chapter split 已补上确定性的 TOC front-matter metadata 与 repeated-heading-safe TOC block ref 之后，继续把 richer result/evidence framing 推进到剩余的 chapter-split helper/example 路径；
 2. shared maintainer helper 现已为依赖 retrieval 的路径补上简洁 payload 示例，下一步重点是让这些示例持续跟随 result schema 演进；
-3. 继续完善 sliding-window、snippet shaping 与 folder-scope 预期等调优文档；对 offline fixture 则应把它视为已落地基线，而 chapter-split 的剩余缺口应转向 optional metadata / richer TOC surface 与更丰富的 query-class coverage，而不是重复证明“需要有这条夹具”。
+3. 继续完善 sliding-window、snippet shaping 与 folder-scope 预期等调优文档；对 offline fixture 则应把它视为已覆盖 exact/prefix/current-file-exclusion 类别的更宽基线，而 chapter-split 的剩余缺口应转向 mixed-note/query corpus 扩充，而不是重复证明“需要有这条夹具”。
 
 ## 6. Task 与文档收口规则
 

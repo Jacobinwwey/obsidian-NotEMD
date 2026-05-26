@@ -20,6 +20,10 @@ interface EvaluationCase {
     maxSnippetChars: number;
     minExpectedPathRecall: number;
     minReturnedHitCount: number;
+    minMatchedSectionCount?: number;
+    minExpandedSectionCount?: number;
+    minExcludedCurrentFileHitCount?: number;
+    expectContextAbsent?: boolean;
     expectedContextFragments?: string[];
 }
 
@@ -90,6 +94,7 @@ const EVALUATION_CASES: EvaluationCase[] = [
         maxSnippetChars: 500,
         minExpectedPathRecall: 1,
         minReturnedHitCount: 1,
+        minExpandedSectionCount: 3,
         expectedContextFragments: [
             'The rendering platform has multiple layers.',
             'Sliding window retrieval keeps adjacent sections together for diagram generation.',
@@ -106,6 +111,32 @@ const EVALUATION_CASES: EvaluationCase[] = [
         minExpectedPathRecall: 1,
         minReturnedHitCount: 1,
         expectedContextFragments: ['Single-entry packaging keeps runtime truth narrow and auditable.']
+    },
+    {
+        id: 'prefix-query-retrieval',
+        query: 'retriev',
+        expectedSourcePaths: ['Knowledge/Diagram Platform.md'],
+        topK: 1,
+        slidingWindowSize: 0,
+        maxSnippetChars: 240,
+        minExpectedPathRecall: 1,
+        minReturnedHitCount: 1,
+        minMatchedSectionCount: 1,
+        expectedContextFragments: ['Sliding window retrieval keeps adjacent sections together for diagram generation.']
+    },
+    {
+        id: 'exclude-current-file-only-hit',
+        query: 'feed-forward residual batching caching',
+        currentFilePath: 'Knowledge/Transformers.md',
+        expectedSourcePaths: [],
+        topK: 2,
+        slidingWindowSize: 0,
+        maxSnippetChars: 220,
+        minExpectedPathRecall: 1,
+        minReturnedHitCount: 0,
+        minMatchedSectionCount: 1,
+        minExcludedCurrentFileHitCount: 1,
+        expectContextAbsent: true
     }
 ];
 
@@ -224,11 +255,22 @@ describe('local knowledge offline evaluation fixture', () => {
 
             expect(recall).toBeGreaterThanOrEqual(evaluationCase.minExpectedPathRecall);
             expect(details.returnedHitCount).toBeGreaterThanOrEqual(evaluationCase.minReturnedHitCount);
+            expect(details.matchedSectionCount).toBeGreaterThanOrEqual(evaluationCase.minMatchedSectionCount ?? 0);
+            expect(details.expandedSectionCount).toBeGreaterThanOrEqual(evaluationCase.minExpandedSectionCount ?? 0);
+            expect(details.excludedCurrentFileHitCount).toBeGreaterThanOrEqual(
+                evaluationCase.minExcludedCurrentFileHitCount ?? 0
+            );
             expect(details.indexedFileCount).toBe(FIXTURE_FILES.length);
             expect(details.indexedSectionCount).toBeGreaterThanOrEqual(FIXTURE_FILES.length);
             expect(details.indexBuildMs).toBeGreaterThanOrEqual(0);
             expect(details.queryMs).toBeGreaterThanOrEqual(0);
-            expect(details.contextCharCount).toBeGreaterThan(0);
+
+            if (evaluationCase.expectContextAbsent) {
+                expect(details.context).toBeNull();
+                expect(details.contextCharCount).toBe(0);
+            } else {
+                expect(details.contextCharCount).toBeGreaterThan(0);
+            }
 
             for (const expectedPath of evaluationCase.expectedSourcePaths) {
                 expect(details.sourcePaths).toContain(expectedPath);

@@ -411,7 +411,20 @@ describe('utility command host adapter', () => {
                     nestedHeadings: []
                 }
             ],
-            tocMarkdown: '# Topic TOC',
+            tocMetadata: {
+                sourcePath: 'Notes/Topic.md',
+                sourceBasename: 'Topic',
+                requestedSplitHeadingLevel: 'auto',
+                resolvedSplitHeadingLevel: 2,
+                chapterCount: 1,
+                managedArtifactCount: 3,
+                outputFolderPath: 'Notes/topic_chapters',
+                tocPath: 'Notes/topic_chapters/Topic_TOC.md',
+                manifestPath: 'Notes/topic_chapters/.notemd-chapter-split.json',
+                chapterTitles: ['One'],
+                chapterNotePaths: ['Notes/topic_chapters/01-one.md']
+            },
+            tocMarkdown: '---\nnotemdGenerated: true\n---\n# Topic TOC',
             chapterCount: 1,
             removedStaleFileCount: 0,
             removedStalePaths: []

@@ -56,6 +56,22 @@ describe('chapterSplit', () => {
             'Docs/Platform_chapters/01-overview.md',
             'Docs/Platform_chapters/02-delivery.md'
         ]);
+        expect(plan.tocMetadata).toEqual({
+            sourcePath: 'Docs/Platform.md',
+            sourceBasename: 'Platform',
+            requestedSplitHeadingLevel: 'auto',
+            resolvedSplitHeadingLevel: 2,
+            chapterCount: 2,
+            managedArtifactCount: 4,
+            outputFolderPath: 'Docs/Platform_chapters',
+            tocPath: 'Docs/Platform_chapters/Platform_TOC.md',
+            manifestPath: 'Docs/Platform_chapters/.notemd-chapter-split.json',
+            chapterTitles: ['Overview', 'Delivery'],
+            chapterNotePaths: [
+                'Docs/Platform_chapters/01-overview.md',
+                'Docs/Platform_chapters/02-delivery.md'
+            ]
+        });
         expect(plan.chapters).toHaveLength(2);
         expect(plan.chapters[0]).toEqual(expect.objectContaining({
             title: 'Overview',
@@ -67,9 +83,18 @@ describe('chapterSplit', () => {
             title: 'Delivery',
             outputPath: 'Docs/Platform_chapters/02-delivery.md'
         }));
+        expect(plan.tocMarkdown).toContain('notemdArtifactKind: "chapter-split-toc"');
+        expect(plan.tocMarkdown).toContain('requestedSplitHeadingLevel: "auto"');
+        expect(plan.tocMarkdown).toContain('resolvedSplitHeadingLevel: 2');
+        expect(plan.tocMarkdown).toContain('chapterTitles:');
+        expect(plan.tocMarkdown).toContain('  - "Overview"');
         expect(plan.tocMarkdown).toContain('[[Docs/Platform_chapters/01-overview|01. Overview]]');
         expect(plan.tocMarkdown).toContain('[[Docs/Platform_chapters/01-overview#^notemd-scope|Scope]]');
         expect(plan.tocMarkdown).toContain('[[Docs/Platform_chapters/02-delivery|02. Delivery]]');
+        expect(plan.tocMarkdown).toContain('Requested split: Auto');
+        expect(plan.tocMarkdown).toContain('Resolved split level: H2');
+        expect(plan.tocMarkdown).toContain('Chapters: 2');
+        expect(plan.tocMarkdown).toContain('Managed artifacts: 4');
         expect(plan.chapters[0].nestedHeadings).toEqual([
             { level: 3, text: 'Scope', blockId: 'notemd-scope' }
         ]);
@@ -236,6 +261,11 @@ describe('chapterSplit', () => {
             'Docs/Platform_chapters/01-overview.md',
             'Docs/Platform_chapters/02-delivery.md'
         ]);
+        expect(firstRun.tocMetadata).toEqual(expect.objectContaining({
+            chapterCount: 2,
+            managedArtifactCount: 4,
+            chapterTitles: ['Overview', 'Delivery']
+        }));
         expect(files.has('Docs/Platform_chapters/02-delivery.md')).toBe(true);
 
         files.set('Docs/Platform.md', {
@@ -264,6 +294,11 @@ describe('chapterSplit', () => {
             'Docs/Platform_chapters/.notemd-chapter-split.json',
             'Docs/Platform_chapters/01-overview.md'
         ]);
+        expect(secondRun.tocMetadata).toEqual(expect.objectContaining({
+            chapterCount: 1,
+            managedArtifactCount: 3,
+            chapterTitles: ['Overview']
+        }));
         expect(files.has('Docs/Platform_chapters/02-delivery.md')).toBe(false);
         expect(files.get('Docs/Platform_chapters/01-overview.md')?.content).toContain('Overview body updated');
         expect(reporter.log).toHaveBeenCalledWith('Removed stale chapter split file: Docs/Platform_chapters/02-delivery.md');
