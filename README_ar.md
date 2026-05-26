@@ -709,7 +709,7 @@
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.ar.svg)
 
-_تم آخر تحديث من شجرة العمل في 2026-05-26. تاريخ أحدث التزام: 2026-05-26._
+_تم آخر تحديث للإصدار ذي الوسم `1.9.0` في 2026-05-26. تاريخ أحدث التزام: 2026-05-26._
 <!-- repo-chronicle:end -->
 
 

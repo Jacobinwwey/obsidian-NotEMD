@@ -708,7 +708,7 @@ Cette chronique trimestrielle conserve le style visuel original de [repo-saga](h
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.fr.svg)
 
-_Dernière actualisation depuis l’arbre de travail le 2026-05-26. Date du dernier commit : 2026-05-26._
+_Dernière actualisation pour le tag de publication `1.9.0` le 2026-05-26. Date du dernier commit : 2026-05-26._
 <!-- repo-chronicle:end -->
 
 

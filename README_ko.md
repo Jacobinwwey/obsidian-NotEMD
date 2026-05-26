@@ -707,7 +707,7 @@ MIT 라이선스 - 자세한 내용은 [LICENSE](LICENSE) 파일을 참조하세
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.ko.svg)
 
-_2026-05-26에 현재 작업 트리 기준으로 마지막 새로고침을 완료했습니다. 최신 커밋 날짜: 2026-05-26._
+_릴리스 태그 `1.9.0` 기준으로 2026-05-26에 마지막 새로고침을 완료했습니다. 최신 커밋 날짜: 2026-05-26._
 <!-- repo-chronicle:end -->
 
 
