@@ -700,7 +700,7 @@ Bu üç aylık kronik, [repo-saga](https://github.com/teee32/repo-saga) özgün 
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.tr.svg)
 
-_Çalışma ağacından son yenileme tarihi: 2026-05-26. En son commit tarihi: 2026-05-26._
+_`1.9.0` sürüm etiketi için son yenileme tarihi: 2026-05-26. En son commit tarihi: 2026-05-26._
 <!-- repo-chronicle:end -->
 
 
