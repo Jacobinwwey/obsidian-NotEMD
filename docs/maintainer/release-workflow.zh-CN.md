@@ -86,10 +86,10 @@ npm run release:github -- <tag>
 该辅助命令会在调用 GitHub 前强制校验必须打包的资产，以及两份已提交的 release notes：
 
 - 如果 release 尚不存在，则会先组合 `docs/releases/<tag>.md` 与 `docs/releases/<tag>.zh-CN.md`，再执行 `gh release create ... --verify-tag`。
-- 如果 release 已存在，则执行 `gh release upload ... --clobber`。
+- 如果 release 已存在，则会先用这两份双语 notes 回写现有 release 的 body/title，然后再执行 `gh release upload ... --clobber`。
 - 如果 tag 不是纯数字 `x.x.x`，则立即失败。
 
-第二条路径就是这类问题的修复路径：release 文案已发布，但插件安装资产未上传时，可直接补传。
+第二条路径就是这类问题的修复路径：当 release 文案与仓库 notes 漂移，或 release 文案已发布但插件安装资产未上传时，可直接修正并补传。
 
 ## 7. CI 自动化
 

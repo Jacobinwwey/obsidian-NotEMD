@@ -363,7 +363,8 @@ function resolveReleasePackagingContractFacts({
         const tagPattern = releaseHelper.OBSIDIAN_RELEASE_TAG_PATTERN instanceof RegExp
             ? releaseHelper.OBSIDIAN_RELEASE_TAG_PATTERN.source
             : fallbackTagPattern;
-        const supportsReleaseModeSwitch = typeof releaseHelper.buildGhReleaseCommand === 'function';
+        const supportsReleaseModeSwitch = typeof releaseHelper.buildGhReleaseCommands === 'function'
+            || typeof releaseHelper.buildGhReleaseCommand === 'function';
 
         if (requiredAssets.length > 0) {
             return {

@@ -86,10 +86,10 @@ npm run release:github -- <tag>
 The helper now enforces the required packaged assets plus both checked-in release-note files before invoking GitHub:
 
 - If the release does not exist yet, it combines `docs/releases/<tag>.md` and `docs/releases/<tag>.zh-CN.md`, then runs `gh release create ... --verify-tag`.
-- If the release already exists, it runs `gh release upload ... --clobber`.
+- If the release already exists, it first rewrites the existing release body/title from those checked-in bilingual notes and then runs `gh release upload ... --clobber`.
 - If the tag is not numeric `x.x.x`, it fails immediately.
 
-That second path is the repair path for cases where a release body was published but plugin assets were not uploaded.
+That second path is the repair path for cases where a release body drifted from checked-in notes or plugin assets were not uploaded.
 
 ## 7. CI Automation
 
