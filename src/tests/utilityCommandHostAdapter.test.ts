@@ -436,6 +436,42 @@ describe('utility command host adapter', () => {
         expect(getBusy()).toBe(false);
     });
 
+    test('split note by chapters command surfaces guarded-overwrite conflicts through the host error path', async () => {
+        const reporter = createReporter();
+        const { host, getBusy } = createHost(reporter);
+        const file = Object.assign(new (TFile as any)(), {
+            name: 'Topic.md',
+            basename: 'Topic',
+            path: 'Notes/Topic.md',
+            extension: 'md'
+        });
+        host.getActiveFile = jest.fn(() => file);
+        host.readFile = jest.fn().mockResolvedValue('# Topic\n\n## One');
+        const splitImpl = jest.fn().mockRejectedValue(
+            new Error('Refusing to overwrite manually edited chapter split artifacts: Notes/topic_chapters/01-one.md')
+        );
+        const { runSplitNoteByChaptersCommandWithHost } = loadModule();
+
+        const result = await runSplitNoteByChaptersCommandWithHost(host, reporter, splitImpl);
+
+        expect(result).toBeNull();
+        expect(host.showNotice).toHaveBeenCalledWith(
+            'Chapter split failed: Refusing to overwrite manually edited chapter split artifacts: Notes/topic_chapters/01-one.md'
+        );
+        expect(host.failReporterAction).toHaveBeenCalledWith(
+            reporter,
+            'Refusing to overwrite manually edited chapter split artifacts: Notes/topic_chapters/01-one.md'
+        );
+        expect(host.openErrorModal).toHaveBeenCalledWith(
+            'Chapter Split Error',
+            expect.stringContaining(
+                'Error: Refusing to overwrite manually edited chapter split artifacts: Notes/topic_chapters/01-one.md'
+            )
+        );
+        expect(host.finalizeReporter).toHaveBeenCalledWith(reporter);
+        expect(getBusy()).toBe(false);
+    });
+
     test('batch formula fix command resolves folder and reports success through extracted host flow', async () => {
         const reporter = createReporter();
         const { host, getBusy } = createHost(reporter);
