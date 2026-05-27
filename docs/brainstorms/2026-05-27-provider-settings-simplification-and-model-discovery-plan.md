@@ -104,18 +104,18 @@ What is still missing:
 
 | Requirement | Current status | Practical conclusion |
 |---|---|---|
-| Show only required/default-visible fields by default | Not landed | Current UI is still a flat provider panel |
+| Show only required/default-visible fields by default | Landed | Current main now renders provider settings through shared field grouping metadata, with core controls shown by default |
 | Keep `model` in the default surface | Already true | Must be preserved during refactor |
-| Hide secondary knobs behind advanced settings | Not landed | Needs metadata + UI refactor |
-| Auto-expand advanced when persisted advanced values exist | Not landed | Needs derived expansion helper from live provider config |
-| Reuse Cherry Studio selectively | Planned with concrete research | Safe to implement without copying the whole architecture |
-| Support optional model discovery without blocking manual setup | Not landed | Discovery must be additive and ephemeral |
+| Hide secondary knobs behind advanced settings | Landed | Secondary tuning controls now sit behind explicit advanced disclosure |
+| Auto-expand advanced when persisted advanced values exist | Landed | Expansion is now derived from persisted provider override state |
+| Reuse Cherry Studio selectively | Landed in bounded form | The landed implementation reuses discovery strategy ideas without copying a persisted provider-model catalog |
+| Support optional model discovery without blocking manual setup | Landed | Discovery is additive/transient and manual `model` entry remains the persisted truth |
 
-## 3.5 Current isolated implementation-lane checkpoint
+## 3.5 Landed implementation checkpoint
 
-As of the 2026-05-27 audit, the isolated worktree/branch `feat/provider-settings-model-discovery` has moved this lane beyond pure planning, but not into current-main truth yet.
+As of the 2026-05-27 closeout, the work from the isolated `feat/provider-settings-model-discovery` lane has been verified and merged back into current main.
 
-What is already present there:
+What is now present on current main:
 
 1. `src/llmProviders.ts` now carries draft provider-field taxonomy metadata (`core`, `contextual`, `advanced`, `developer`) and per-provider model-discovery metadata.
 2. a new `src/providerModelDiscovery.ts` implements transient discovery for:
@@ -128,13 +128,13 @@ What is already present there:
    - advanced disclosure
    - derived auto-expand when persisted advanced values exist
    - optional fetch-models UI wiring
-4. matching locale keys and focused tests were added for the new control-plane behavior.
+4. matching locale keys, README/update-surface sync, and focused tests cover the new control-plane behavior.
 
-What is still not done there:
+What remains intentionally out of scope:
 
-1. the isolated worktree has not finished verification yet and was not bootstrapped with local dependencies when checked;
-2. CSS/layout polish for the new provider-panel surfaces is still incomplete;
-3. current-main truth remains unchanged until that lane passes verification and merges.
+1. persisted remote provider model catalogs;
+2. model CRUD / health-check management UI;
+3. broad all-provider model discovery claims beyond the verified first batch.
 
 ## 4. Cherry Studio Comparison
 
@@ -223,8 +223,8 @@ Mitigation:
 
 Current checkpoint:
 
-1. implemented in the isolated lane, not merged;
-2. the metadata shape stays declarative and field-scoped so far.
+1. landed on current main;
+2. the metadata shape remains declarative and field-scoped.
 
 ### Phase 2: settings renderer refactor
 
@@ -250,9 +250,9 @@ Mitigation:
 
 Current checkpoint:
 
-1. a metadata-driven renderer attempt now exists in the isolated lane;
-2. default/core, contextual, and advanced sections are partially wired there;
-3. verification, CSS polish, and merge gating remain open.
+1. landed on current main;
+2. default/core, contextual, and advanced sections are wired through shared metadata;
+3. CSS/layout support and focused style tests are now part of the shipped surface.
 
 ### Phase 3: lightweight discovery service
 
@@ -281,9 +281,9 @@ Mitigation:
 
 Current checkpoint:
 
-1. a transient discovery helper exists in the isolated lane for the planned first batch;
+1. landed on current main for the planned first batch;
 2. it keeps manual `model` entry as the persisted source of truth;
-3. it is still unmerged and unverified.
+3. unsupported providers still degrade to manual entry rather than a heavy catalog subsystem.
 
 ### Phase 4: UI integration
 
@@ -295,9 +295,9 @@ Deliverables:
 
 Current checkpoint:
 
-1. fetch-models UI wiring and transient suggestion state exist in the isolated lane;
-2. styling and user-surface validation are still open;
-3. this is not yet current-main behavior.
+1. fetch-models UI wiring and transient suggestion state are now on current main;
+2. styling support for the new provider-panel surfaces is landed;
+3. README/update surfaces now describe the same bounded behavior.
 
 ### Phase 5: tests and documentation
 
@@ -317,9 +317,9 @@ Required docs:
 
 Current checkpoint:
 
-1. focused i18n/test updates already exist in the isolated lane;
-2. current-main canonical docs are now being updated to reflect the real split between mainline truth and isolated implementation progress;
-3. the merge gate still requires isolated-lane bootstrap plus targeted and full verification.
+1. focused i18n/test updates are landed on current main;
+2. canonical docs now describe the lane as landed current-main truth rather than isolated implementation progress;
+3. verification evidence now includes targeted provider-settings/model-discovery tests plus full repository gates.
 
 ## 7. Explicit Non-Goals
 
@@ -336,14 +336,16 @@ Do not do these in the first batch:
 Execution should follow this split:
 
 1. `main` keeps the docs/progress truth and stays clean;
-2. implementation proceeds in the isolated worktree/branch lane created for this task;
-3. only a verified, bounded implementation is merged back.
+2. bounded implementation can proceed in isolated lanes first when the control-plane blast radius is large;
+3. only verified, bounded implementations get merged back.
 
-Concrete merge gate for the isolated lane:
+Verification evidence for this lane:
 
-1. bootstrap the isolated worktree so build/test tooling actually resolves project dependencies;
-2. run targeted provider-settings/model-discovery tests there first, then full `npm run build`, `npm test -- --runInBand`, `npm run audit:i18n-ui`, and `git diff --check`;
-3. close the remaining CSS/layout gaps in the provider settings surface;
-4. merge back only after the lane is green and current-main docs can truthfully switch from “isolated implementation in progress” to “landed”.
+1. targeted provider-settings/model-discovery tests;
+2. full `npm run build`;
+3. full `npm test -- --runInBand`;
+4. `npm run audit:i18n-ui`;
+5. `npm run audit:render-host`;
+6. `git diff --check`.
 
-That keeps the planning truth honest while avoiding half-landed control-plane changes on current main.
+That preserved planning truth during development and avoided landing half-verified control-plane changes on current main.
