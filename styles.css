@@ -993,6 +993,14 @@
     margin-top: 0;
 }
 
+.notemd-provider-discovery-panel {
+    margin: 0 0 0.95em;
+}
+
+.notemd-provider-discovery-summary {
+    margin-bottom: 0;
+}
+
 .notemd-provider-model-list {
     display: flex;
     flex-direction: column;
@@ -1009,6 +1017,11 @@
     border-radius: 10px;
     border: 1px solid color-mix(in srgb, var(--notemd-border) 78%, #14b8a6 22%);
     background: color-mix(in srgb, var(--background-primary) 90%, #f0fdfa 10%);
+}
+
+.notemd-provider-model-item.is-current {
+    border-color: color-mix(in srgb, var(--notemd-accent) 44%, var(--notemd-border) 56%);
+    background: color-mix(in srgb, var(--background-primary) 86%, var(--notemd-accent) 14%);
 }
 
 .notemd-provider-model-item code {

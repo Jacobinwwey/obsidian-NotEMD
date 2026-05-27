@@ -21,4 +21,14 @@ describe('settings provider connection reuse', () => {
         expect(source).toContain('advancedSettingsName');
         expect(source).toContain('fetchModelsName');
     });
+
+    test('collapses discovered-models panel and emits apply feedback when a discovered model is selected', () => {
+        const source = fs.readFileSync(settingsTabPath, 'utf8');
+
+        expect(source).toContain('discoveredModelsExpanded');
+        expect(source).toContain('detailsEl.addEventListener(\'toggle\'');
+        expect(source).toContain('providerI18n.discoveredModelsApplied');
+        expect(source).toContain('panelState.discoveredModelsExpanded = false;');
+        expect(source).toContain('providerI18n.discoveredModelsSummaryWithCurrent');
+    });
 });
