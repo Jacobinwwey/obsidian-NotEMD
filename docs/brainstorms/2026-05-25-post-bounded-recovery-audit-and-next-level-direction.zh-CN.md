@@ -14,10 +14,11 @@ canonical: true
 1. 2026-05-13 的 `1.8.9` 发布边界审计；
 2. 2026-05-24 的 force-rewrite 基线审计。
 
-在那之后，当前 `main` 已重新拿回一部分有界但实质性的 backup-branch 能力宽度，且 release-facing 的版本真值也再次同步完成。因此，当前真正需要回答的问题已经变了：
+在那之后，当前 `main` 已重新拿回一部分有界但实质性的 backup-branch 能力宽度，发布了 `1.9.0`，并继续把 local-KB / chapter-split 的 Stage C 收口往前推进。因此，当前真正需要回答的问题又变了：
 
-- 不再是“缺失的 recovery 切片到底是不是真存在”；
-- 而是“recovery 之后的当前代码真值是什么、相对先前方案推进了多远，以及下一阶段真正的关键路径是什么”。
+- 不再是“recovery 到底有没有发生”；
+- 也不再只是“bounded product slice 有没有重新落回主线”；
+- 而是“哪些架构通道现在已经实质收敛、哪些仍然结构性落后，以及 bounded recovery 之后真正的 next-level control-plane 工作是什么”。
 
 主要对比来源：
 
@@ -26,7 +27,8 @@ canonical: true
 3. `docs/brainstorms/2026-05-13-mainline-progress-audit-1-8-9-and-next-direction.zh-CN.md`
 4. `docs/superpowers/plans/2026-05-03-mainline-stabilization-next-batch.zh-CN.md`
 5. `.trellis/tasks/05-19-local-kb-retrieval-chapter-split-stage-b2cd/prd.md`
-6. `d81d84d` 之后的 live `main`
+6. `.trellis/tasks/05-27-provider-settings-model-discovery/prd.md`
+7. `5c3173b` 之后的 live `main`
 
 ## 2. Recovery 之后的当前代码真值
 
@@ -36,12 +38,12 @@ canonical: true
 
 1. `esbuild.config.mjs` 仍只构建单个 `main.js` 输出。
 2. `scripts/audit-render-host-bundle.js` 仍在强制执行 `main.js + inline srcdoc` 的 host 契约，并拒绝独立 render-host 输出文件。
-3. 但源码中已经重新出现 runtime 候选文件，例如：
+3. 源码里仍保留 runtime 候选文件，例如：
    - `src/rendering/runtime/renderHostEntry.ts`
    - `src/rendering/preview/renderHostRuntimeClient.ts`
    - 一组共享的 Mermaid / Vega-Lite preview runtime helper
 4. 这意味着这些文件目前只是 **潜在实现通道**，而不是已发货的构建边界。
-5. 当前 `main` 上的执行链也已开始显式收口到这条真值：
+5. 当前执行链已显式把这条通道保持为 dormant：
    - 默认 Mermaid / Vega-Lite preview loading 仍走 package runtime
    - `audit:render-host` 会拒绝当前主线中残留的 `render-host.mjs` 资产与构建产物引用
 
@@ -106,13 +108,47 @@ canonical: true
 
 ### 2.4 Release / version / chronicle 真值
 
-release-facing 真值也已在当前主线上重新对齐：
+release-facing 真值已重新对齐到当前主线：
 
-1. `package.json`、`manifest.json`、`versions.json` 已回到 `1.8.9`；
-2. `src/ui/welcomeReleaseNotes.ts` 已把欢迎弹窗摘要推进到 `1.8.9` / `1.8.8`；
-3. root `README*.md` 家族再次同步了版本 / badge / chronicle footer；
-4. `scripts/release/commit-chronicle-refresh.js` 与 `scripts/lib/repo-saga-contributor-normalization.js` 已重新回到当前主线；
-5. repo-saga 串行执行纪律仍由执行锁与文档共同强制。
+1. `package.json`、`manifest.json`、`versions.json` 现在处于 `1.9.0`；
+2. `src/ui/welcomeReleaseNotes.ts` 已把欢迎弹窗摘要推进到 `1.9.0` / `1.8.9`；
+3. root `README*.md` 家族现在也同步了 `1.9.0` 的版本 / badge / footer 状态；
+4. `docs/releases/1.9.0.md` 与 `docs/releases/1.9.0.zh-CN.md` 已进入当前发货真值面；
+5. `scripts/release/commit-chronicle-refresh.js` 与 `scripts/lib/repo-saga-contributor-normalization.js` 已重新回到当前主线；
+6. repo-saga 串行安全仍由执行锁与文档共同强制。
+
+### 2.5 Provider settings / model-discovery 真值
+
+这条通道现在最典型地体现了“runtime 宽度推进快于 settings 架构推进”：
+
+1. `src/ui/NotemdSettingTab.ts` 仍通过 `activeProvider.name` 的硬编码分支来渲染 provider 字段，而不是通过共享字段元数据。
+2. 当前默认可见的 provider 面板虽然能用，但并不是 taxonomy-driven：
+   - `apiKey`（取决于 provider 是 required 还是 optional）
+   - `baseUrl`
+   - `model`
+   - `temperature`
+   - `maxOutputTokens`（仅在 developer mode 开启或已有持久化 override 时显示）
+   - `topP` / `reasoningEffort`（仅 OpenAI-compatible）
+   - `thinkingEnabled`（仅 `DeepSeek`）
+   - `apiVersion`（仅 `Azure OpenAI`）
+3. `src/llmProviders.ts` 已经承担 transport/runtime registry 角色，但 `LLMProviderDefinition` 目前仍只有 transport/category/api-key/test/default 等元数据。它 **还没有** 表达：
+   - core / advanced / developer-only 字段分组
+   - provider-specific 的字段可见性组
+   - model discovery capability 或 endpoint-family 元数据
+4. `src/types.ts` 中的 `LLMProviderConfig` 依旧是刻意保持扁平的。这保证了向后兼容，并保持 `model` 作为唯一持久化 source-of-truth 字符串，但也意味着当前 UI 无法仅从数据层推导出 advanced 展开逻辑或 contextual 字段语义。
+5. `src/llmUtils.ts` 已有一部分可复用基础：
+   - OpenAI-compatible base URL normalization
+   - `apiTestMode=models-then-chat`
+   - connection test 中的 `GET /models` 探测
+6. 但设置页中仍然 **没有** 一条一等公民的模型发现服务或 provider model picker。
+7. 对 Cherry Studio 的分析已经给出明确对照方向：
+   - strategy-registry 与 parser/fallback 分层值得复用
+   - 持久化 `provider.models[]` 生命周期和更重的 provider-domain 状态，对 Notemd 当前架构来说过重
+
+正确解释：
+
+- provider/runtime 支持面已经实质领先于 provider settings UX 架构；
+- 下一阶段真正该做的，不是先继续堆 provider 数量，而是把已存在 provider 的 control plane 收敛到可扩展的 schema 与 discoverability 设计上。
 
 ## 3. 相对先前方案要求的深度对比
 
@@ -130,12 +166,13 @@ release-facing 真值也已在当前主线上重新对齐：
 1. command/help/preview follow-through 的收敛程度已经超过当时最小目标；
 2. semantic helper / runbook 真值已真实落地并检入；
 3. Drawnix 仍未被误写成下一批 active scope；
-4. packaging 文案整体上又恢复了诚实，但 latent runtime candidate code 让 source/build 歧义重新出现。
+4. packaging 文案整体上又恢复了诚实，但 latent runtime candidate code 仍留下 source/build 歧义；
+5. provider/runtime 的宽度现在已经超过 provider settings control plane 的架构承载力，这个瓶颈在更早的计划中还没有被显式暴露出来。
 
 仍然未解决的点：
 
-1. 下一阶段的瓶颈已不再是“把 runbook 写出来”；
-2. 下一阶段真正的瓶颈，是“决定 latent runtime lane 是继续 dormant，还是提升成真实 packaged boundary”。
+1. 下一阶段的第一个瓶颈，依然是“latent runtime lane 是继续 dormant，还是提升成真实 packaged boundary”；
+2. 第二个瓶颈，则是“在 provider 宽度继续增长前，先停止硬编码 provider settings 行为，并把它们收敛到共享元数据上”。
 
 ### 3.2 相对 local-KB / chapter-split Stage-B2CD PRD
 
@@ -156,37 +193,61 @@ release-facing 真值也已在当前主线上重新对齐：
 
 正确解释：
 
-- 这份 PRD 在 current main 上已经功能性落地；
+- 这份 Stage-B2CD PRD 在 current main 上已经功能性落地；
 - 后续工作应转入质量/深度跟进，而不是继续证明“这些能力存不存在”。
 
-### 3.3 相对 2026-05-20 统一矩阵
+### 3.3 相对 provider-settings simplification / model-discovery PRD
+
+当前 requirement 状态如下：
+
+| Requirement | 状态 | 说明 |
+|---|---|---|
+| R1 provider settings 需要区分 required/core 与 advanced 字段 | 未落地 | 当前 UI 仍是单层 provider panel，没有共享分组元数据 |
+| R2 这一区分必须来自共享 provider metadata | 未落地 | `LLMProviderDefinition` 还不具备字段 taxonomy 能力 |
+| R3 保持 runtime 行为与 import/export 兼容 | 当前数据模型已天然有利于此 | 扁平 provider config 让未来重构的兼容性压力较低 |
+| R4 支持 Azure 专属 required 字段而不污染其他 provider | 部分对齐 | `apiVersion` 已存在，但仍通过硬编码 UI 分支注入 |
+| R5 常见配置流程需要更快更聚焦 | 部分对齐 | 当前 UI 简单但噪声偏高，尚未收敛出 core/advanced split |
+| R6 深度分析 Cherry Studio 模型获取链路 | 研究已落地 | `.trellis/tasks/05-27-provider-settings-model-discovery/research/cherry-studio-model-discovery.md` |
+| R7 发现失败时必须平滑回退到手动 model 输入 | 目前行为上成立 | 现在唯一方式就是手动输入，但还没有 discovery helper |
+| R8 `model` 必须保持 core/default-visible | 当前行为已满足 | `model` 现在就是一等可见字段 |
+| R9 若已有持久化 advanced 值则默认展开 advanced | 未落地 | 目前根本没有 advanced disclosure state |
+| R10 Cherry 方案只做 selective reuse，不整体照搬 | 已规划但未实现 | 研究结论已足以指导实现 |
+
+正确解释：
+
+1. requirement exploration 已经足够具体，可以进入实现；
+2. 当前 main **并没有** 已满足用户要求的 provider-settings UX；
+3. 剩余工作是实质性的架构收敛，而不是文案微调或字段顺序修补。
+
+### 3.4 相对 2026-05-20 统一矩阵
 
 相对那份矩阵，当前有三处关键变化：
 
-1. lane B 不能再继续写成 export-only maintainer tooling；
-2. lane A 需要明确写出：runtime 候选源码已存在，但 build 真值仍未发货它；
-3. lane C 现在不仅有 UX guardrail 收口，还有恢复后的 release-facing version truth 对齐；
-4. lane D 已经明确进入“继续做质量/深度”阶段，而不是“恢复功能存在性”阶段。
+1. lane C 应明确带上 `1.9.0` release-facing version truth，而不再停留在 `1.8.9`；
+2. 矩阵中需要显式增加 provider-settings / model-discovery 轨道，否则后续优先级会被“泛化 settings 叙述”掩盖；
+3. lane D 应继续保持“质量/深度 next”定位，而不是回退到“先证明功能存在”的表述。
 
 ## 4. 架构推进评估
 
 ### 4.1 真正推进了什么
 
-1. **Registry-centered orchestration 更深了**
-   maintainer helper metadata、public-safe export surfaces 与 operation identifiers 比最初 recovery 基线更一致。
-2. **产品切片恢复时没有破坏 packaging honesty**
+1. **Transport-driven provider runtime 更成熟了**
+   provider 宽度、test mode、known-model token metadata 与 connection-test 语义都比早期 provider-expansion 方案更完整。
+2. **Bounded product slice 在不扩大 packaging claim 的前提下重新落地**
    local-KB、chapter split、preview history 与 saved-artifact reopening 的回归，没有逼着文档去假装 packaged runtime isolation 已经完成。
-3. **runtime-candidate 代码更可复用了**
-   共享 preview runtime helper 会降低未来 Stage-C 若真的选择 multi-entry delivery 的实现成本。
+3. **Cherry Studio 对照研究消除了大的规划盲区**
+   仓库现在已经明确知道该复用什么、不该复用什么，以及原因是什么。
 
 ### 4.2 当前最大的结构性张力
 
 1. **Source/build 真值不再完全一致**
    源码里已有 render-host runtime candidates；但 build 和 audit 仍证明没有发货独立 runtime asset。
-2. **Maintainer helper 的能力宽度大于 public CLI**
-   这本身可以成立，但必须保持显式边界。
-3. **Local-KB 质量仍然受制于轻量本地索引设计**
-   当前实现是刻意 lightweight 的；未来工作应是 tuning / explainability，而不是“上更多基础设施”。
+2. **Provider runtime 的成熟度已经高于 provider settings 架构**
+   transport registry 可以继续扩，当前硬编码 provider panel 不行。
+3. **朴素的 model-discovery 功能很容易过度扩 scope**
+   如果整体照搬 Cherry Studio，就会平白引入第二套 provider-state subsystem。
+4. **扁平配置结构既是优势也是约束**
+   它保住了 import/export 与 `data.json` 兼容性，但也意味着 UI 自身拿不到字段 taxonomy。
 
 ### 4.3 正确解释
 
@@ -194,7 +255,8 @@ release-facing 真值也已在当前主线上重新对齐：
 
 1. 已经跨过“bounded product slice 是否恢复存在”的阶段；
 2. 但还没有进入真正的 Stage-C packaged runtime convergence；
-3. 也还没有进入宽口径 public CLI promotion。
+3. 也还没有完成 provider-settings control-plane convergence；
+4. 更没有进入宽口径 public CLI promotion。
 
 ## 5. 具体 next-level 方案
 
@@ -254,14 +316,49 @@ release-facing 真值也已在当前主线上重新对齐：
 2. shared maintainer helper 现已为依赖 retrieval 的路径补上简洁 payload 示例，而当前 `main` 也新增了有界的 `local-knowledge.inspect` seam 用于检查 effective path/query/context，并支持临时 override-path 调参；下一步重点是让这些 maintainer 示例与 inspect 输出持续跟随 result schema 演进；
 3. 继续完善 sliding-window、snippet shaping 与 folder-scope 预期等调优文档；对 offline fixture 则应把它视为已覆盖 exact/prefix/current-file-exclusion 类别以及 mixed file/folder task-scoped inspect case 的更宽基线，而 chapter-split 的剩余缺口应转向更深的 corpus 扩充，而不是重复证明“需要有这条夹具”。
 
+### Batch D：provider-settings simplification + lightweight model discovery
+
+优先级：`P1`
+
+目标：
+
+1. 重设计 provider settings，使默认面板只显示核心必填控制项；
+2. 保持 `model` 在 core/default-visible surface；
+3. 将非核心调优项收入显式 advanced disclosure；
+4. 当持久化 provider config 中已存在 explicit advanced 值时默认展开 advanced；
+5. 把模型发现做成轻量辅助能力，而不是第二套持久化 provider-state system。
+
+实现形态：
+
+1. 扩展 `LLMProviderDefinition`，加入共享字段元数据与 discovery capability 元数据；
+2. 重构 `src/ui/NotemdSettingTab.ts`，让 provider 字段从 metadata 渲染，而不是再靠 provider-name 分支决定 taxonomy；
+3. 保持 `LLMProviderConfig.model` 作为持久化 source-of-truth 字符串；
+4. 新增一条小型 discovery service，直接复用 `src/llmUtils.ts` 中已有的 runtime/base-URL 语义；
+5. 首批 discovery 支持保持收窄：
+   - OpenAI-compatible `GET /models`
+   - Ollama `GET /api/tags`
+   - Google Gemini `GET v1beta/models`
+6. **不要** 把远程 model catalog 持久化进 `data.json`；
+7. 即使有 discovery，手动 model 输入也必须始终可用；
+8. 实现应在隔离 worktree/branch 中推进，而不是直接在 canonical `main` worktree 上展开。
+
+验收：
+
+1. provider definition 可以表达 core/contextual/advanced/developer 字段分组；
+2. 当前已有 advanced 持久化值的用户不会丢失对实际行为的可见性；
+3. model-discovery 失败不会阻断手动配置；
+4. 测试覆盖 metadata-driven rendering、backward compatibility 与 discovery fallback；
+5. 文档明确写出能力边界，不要高估 Cherry Studio parity。
+
 ## 6. Task 与文档收口规则
 
-下一批工作应继续保持四层同步：
+下一批工作应保持以下产物持续对齐：
 
 1. task-local Trellis artifact（`.trellis/tasks/...`）
 2. 当前 canonical progress matrix
-3. 专题 brainstorm / next-level audit 文档
-4. 一旦涉及 automation 或 packaging 文案变化，就同步维护 maintainer control docs
+3. 本审计文档
+4. 独立的 provider-settings/model-discovery 专题方案文档
+5. 若涉及 automation 或 packaging 文案变化，则同步维护 maintainer control docs
 
 ## 7. 验证门禁
 
@@ -278,9 +375,9 @@ release-facing 真值也已在当前主线上重新对齐：
 
 当前主线已经不再主要缺失 bounded recovery slice。
 
-当前主线现在真正承载的是一个新的架构问题：
+当前主线现在主要承载着两个 next-level 架构问题：
 
-1. 是继续让 latent runtime lane 明确保持 dormant / non-shipped，
-2. 还是把它推进成 build、audit、docs、release truth 全部一致的真实 packaged boundary。
+1. 是继续让 latent runtime lane 明确保持 dormant / non-shipped，还是把它推进成 build、audit、docs、release truth 全部一致的真实 packaged boundary；
+2. 是继续容忍 provider settings 越来越依赖硬编码、越来越嘈杂，还是在 provider 宽度进一步增长前，把 control plane 收敛到共享元数据 + 轻量 model discovery。
 
-这才是现在真正的 next-level move。
+这两件事，才是现在真正的 next-level move。
