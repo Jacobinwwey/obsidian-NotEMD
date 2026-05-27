@@ -101,5 +101,13 @@ describe('CLI public surface docs alignment', () => {
         expect(matrixZh).toContain('`scripts/lib/maintainer-cli-operation-help.js`');
         expect(matrix).toContain('maintainer helper metadata');
         expect(matrixZh).toContain('共享帮助元数据');
+        expect(matrix).toContain('`local-knowledge.inspect`');
+        expect(matrixZh).toContain('`local-knowledge.inspect`');
+        expect(matrix).toContain('effective knowledge-base path resolution');
+        expect(matrixZh).toContain('实际生效的知识库路径解析结果');
+        expect(matrix).toContain('temporary `knowledgePaths` override array');
+        expect(matrixZh).toContain('临时 `knowledgePaths` override 数组');
+        expect(matrix).toContain("npm run cli:invoke -- --vault docs --operation local-knowledge.inspect");
+        expect(matrixZh).toContain("npm run cli:invoke -- --vault docs --operation local-knowledge.inspect");
     });
 });

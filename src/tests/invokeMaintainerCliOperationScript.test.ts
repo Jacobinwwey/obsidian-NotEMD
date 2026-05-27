@@ -35,6 +35,10 @@ describe('invoke maintainer CLI operation script', () => {
 
         expect(output).toContain('content.batch-generate-from-titles');
         expect(output).toContain('"includeSubfoldersMode":"exclude"');
+        expect(output).toContain('local-knowledge.inspect');
+        expect(output).toContain('"taskScope":"diagramGeneration"');
+        expect(output).toContain('knowledgePaths');
+        expect(output).toContain('npm run cli:invoke -- --vault docs --operation local-knowledge.inspect');
         expect(output).toContain('research.summarize-topic');
         expect(output).toContain('"topic":"RAG quality audit"');
         expect(output).toContain('diagram.generate');

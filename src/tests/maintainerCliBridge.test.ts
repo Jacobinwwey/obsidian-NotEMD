@@ -33,6 +33,10 @@ describe('maintainer CLI bridge', () => {
                 appended: true
             }),
             generateDiagramForPathCommand: jest.fn().mockResolvedValue({ kind: 'success', outputPath: 'Docs/Topic_diagram.md' }),
+            inspectLocalKnowledgeCommand: jest.fn().mockResolvedValue({
+                taskScope: 'diagramGeneration',
+                query: 'Architecture'
+            }),
             exportRedactedProviderProfilesCommand: jest.fn(),
             exportCliCapabilityManifestCommand: jest.fn(),
             exportCliInvocationContractCommand: jest.fn(),
@@ -101,6 +105,31 @@ describe('maintainer CLI bridge', () => {
                 }
             }
         );
+
+        await invokeMaintainerCliOperation(host as any, {
+            operationId: 'local-knowledge.inspect',
+            input: {
+                taskScope: 'diagramGeneration',
+                sourcePath: 'docs/index.zh-CN.md',
+                query: 'Architecture',
+                knowledgePaths: ['Knowledge/Scoped', 'Knowledge/Exact.md'],
+                topK: 4,
+                slidingWindowSize: 2,
+                maxSnippetChars: 640
+            }
+        });
+        expect(host.inspectLocalKnowledgeCommand).toHaveBeenCalledWith(
+            {
+                taskScope: 'diagramGeneration',
+                sourcePath: 'docs/index.zh-CN.md',
+                query: 'Architecture',
+                knowledgePaths: ['Knowledge/Scoped', 'Knowledge/Exact.md'],
+                topK: 4,
+                slidingWindowSize: 2,
+                maxSnippetChars: 640
+            },
+            undefined
+        );
     });
 
     test('dispatches redacted provider profile export', async () => {
@@ -109,6 +138,7 @@ describe('maintainer CLI bridge', () => {
             splitNoteByChaptersForPathCommand: jest.fn(),
             researchAndSummarizeForPathCommand: jest.fn(),
             generateDiagramForPathCommand: jest.fn(),
+            inspectLocalKnowledgeCommand: jest.fn(),
             exportRedactedProviderProfilesCommand: jest.fn().mockResolvedValue({ outputPath: 'redacted.json' }),
             exportCliCapabilityManifestCommand: jest.fn(),
             exportCliInvocationContractCommand: jest.fn(),
@@ -129,6 +159,7 @@ describe('maintainer CLI bridge', () => {
             splitNoteByChaptersForPathCommand: jest.fn(),
             researchAndSummarizeForPathCommand: jest.fn(),
             generateDiagramForPathCommand: jest.fn(),
+            inspectLocalKnowledgeCommand: jest.fn(),
             exportRedactedProviderProfilesCommand: jest.fn(),
             exportCliCapabilityManifestCommand: jest.fn(),
             exportCliInvocationContractCommand: jest.fn(),
@@ -150,6 +181,7 @@ describe('maintainer CLI bridge', () => {
             splitNoteByChaptersForPathCommand: jest.fn(),
             researchAndSummarizeForPathCommand: jest.fn(),
             generateDiagramForPathCommand: jest.fn(),
+            inspectLocalKnowledgeCommand: jest.fn(),
             exportRedactedProviderProfilesCommand: jest.fn(),
             exportCliCapabilityManifestCommand: jest.fn(),
             exportCliInvocationContractCommand: jest.fn(),
@@ -168,6 +200,7 @@ describe('maintainer CLI bridge', () => {
             splitNoteByChaptersForPathCommand: jest.fn(),
             researchAndSummarizeForPathCommand: jest.fn(),
             generateDiagramForPathCommand: jest.fn(),
+            inspectLocalKnowledgeCommand: jest.fn(),
             exportRedactedProviderProfilesCommand: jest.fn(),
             exportCliCapabilityManifestCommand: jest.fn(),
             exportCliInvocationContractCommand: jest.fn(),
@@ -186,6 +219,7 @@ describe('maintainer CLI bridge', () => {
             splitNoteByChaptersForPathCommand: jest.fn(),
             researchAndSummarizeForPathCommand: jest.fn(),
             generateDiagramForPathCommand: jest.fn(),
+            inspectLocalKnowledgeCommand: jest.fn(),
             exportRedactedProviderProfilesCommand: jest.fn(),
             exportCliCapabilityManifestCommand: jest.fn(),
             exportCliInvocationContractCommand: jest.fn(),
@@ -199,5 +233,48 @@ describe('maintainer CLI bridge', () => {
                 splitHeadingLevel: 'h9'
             }
         })).rejects.toThrow('expects "splitHeadingLevel" to be one of');
+    });
+
+    test('rejects invalid local knowledge inspect task scope', async () => {
+        const host = {
+            batchGenerateContentForTitlesCommand: jest.fn(),
+            splitNoteByChaptersForPathCommand: jest.fn(),
+            researchAndSummarizeForPathCommand: jest.fn(),
+            generateDiagramForPathCommand: jest.fn(),
+            inspectLocalKnowledgeCommand: jest.fn(),
+            exportRedactedProviderProfilesCommand: jest.fn(),
+            exportCliCapabilityManifestCommand: jest.fn(),
+            exportCliInvocationContractCommand: jest.fn(),
+            exportCliPublicSurfaceCommand: jest.fn()
+        };
+
+        await expect(invokeMaintainerCliOperation(host as any, {
+            operationId: 'local-knowledge.inspect',
+            input: {
+                taskScope: 'bad-scope'
+            }
+        })).rejects.toThrow('expects "taskScope" to be one of');
+    });
+
+    test('rejects non-array local knowledge inspect knowledgePaths payloads', async () => {
+        const host = {
+            batchGenerateContentForTitlesCommand: jest.fn(),
+            splitNoteByChaptersForPathCommand: jest.fn(),
+            researchAndSummarizeForPathCommand: jest.fn(),
+            generateDiagramForPathCommand: jest.fn(),
+            inspectLocalKnowledgeCommand: jest.fn(),
+            exportRedactedProviderProfilesCommand: jest.fn(),
+            exportCliCapabilityManifestCommand: jest.fn(),
+            exportCliInvocationContractCommand: jest.fn(),
+            exportCliPublicSurfaceCommand: jest.fn()
+        };
+
+        await expect(invokeMaintainerCliOperation(host as any, {
+            operationId: 'local-knowledge.inspect',
+            input: {
+                taskScope: 'generateTitle',
+                knowledgePaths: 'Knowledge/Scoped'
+            }
+        })).rejects.toThrow('expects "knowledgePaths" to be an array');
     });
 });

@@ -46,11 +46,14 @@ import {
 } from './searchUtils';
 import {
     buildLocalKnowledgeBaseRetriever,
+    buildDiagramLocalKnowledgeQuery,
+    inspectLocalKnowledgeRetrieval,
     createEmptyLocalKnowledgeContextBuildResult,
+    LocalKnowledgeInspectRequest,
+    LocalKnowledgeInspectResult,
     LocalKnowledgeRetrievalSummary,
     toLocalKnowledgeRetrievalSummary
 } from './localKnowledgeBase';
-import { stripMarkdownForSearch } from './markdownSectionUtils';
 import { ProgressModal } from './ui/ProgressModal';
 import { ErrorModal } from './ui/ErrorModal';
 import { DiagramPreviewModal } from './ui/DiagramPreviewModal';
@@ -160,15 +163,6 @@ export default class NotemdPlugin extends Plugin {
     private isBusy: boolean = false;
     private suppressConceptNotePathWarningOnce = false;
     currentProcessingFileBasename: { value: string | null } = { value: null }; // Keep track of the file being processed
-
-    private buildDiagramLocalKnowledgeQuery(operationInput: DiagramOperationInput): string {
-        const strippedMarkdown = stripMarkdownForSearch(operationInput.sourceMarkdown);
-
-        return [
-            operationInput.sourcePath?.split('/').pop()?.replace(/\.[^.]+$/u, ''),
-            strippedMarkdown.slice(0, 1200)
-        ].filter((value): value is string => Boolean(value && value.trim())).join('\n');
-    }
 
     public getIsBusy(): boolean {
         return this.isBusy;
@@ -2241,6 +2235,9 @@ export default class NotemdPlugin extends Plugin {
             generateDiagramForPathCommand: async (sourcePath, reporter, options) => (
                 this.generateDiagramForPathCommand(sourcePath, reporter, options)
             ),
+            inspectLocalKnowledgeCommand: async (inspectRequest, reporter) => (
+                this.inspectLocalKnowledgeCommand(inspectRequest, reporter)
+            ),
             exportRedactedProviderProfilesCommand: async () => this.exportRedactedProviderProfilesCommand(),
             exportCliCapabilityManifestCommand: async () => this.exportCliCapabilityManifestCommand(),
             exportCliInvocationContractCommand: async () => this.exportCliInvocationContractCommand(),
@@ -2420,6 +2417,14 @@ export default class NotemdPlugin extends Plugin {
         return this.generateDiagramCommand(file, reporter, options);
     }
 
+    async inspectLocalKnowledgeCommand(
+        request: LocalKnowledgeInspectRequest,
+        reporter?: ProgressReporter
+    ): Promise<LocalKnowledgeInspectResult> {
+        await this.loadSettings();
+        return inspectLocalKnowledgeRetrieval(this.app, this.settings, request, reporter);
+    }
+
     private async executeSaveMermaidDiagramCommand(
         file: TFile,
         operationInput: DiagramOperationInput,
@@ -2496,7 +2501,7 @@ export default class NotemdPlugin extends Plugin {
         operationInput: DiagramOperationInput,
         reporter: ProgressReporter
     ): Promise<DiagramLocalKnowledgeContextResult> {
-        const query = this.buildDiagramLocalKnowledgeQuery(operationInput);
+        const query = buildDiagramLocalKnowledgeQuery(operationInput.sourcePath, operationInput.sourceMarkdown);
         const localKnowledgeOptions = {
             currentFilePath: operationInput.sourcePath,
             topK: this.settings.localKnowledgeTopK,

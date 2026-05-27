@@ -1,6 +1,6 @@
 # Notemd CLI Capability Matrix
 
-> Updated: 2026-05-25
+> Updated: 2026-05-27
 
 ## Status Call (2026-05-25)
 
@@ -77,6 +77,7 @@ The repo now also carries a small maintainer helper over `obsidian-cli native ev
   - `content.split-note-by-chapters`
   - `research.summarize-topic`
   - `diagram.generate`
+  - `local-knowledge.inspect`
   - `provider.profile.export-redacted`
   - `cli.capability-manifest.export`
   - `cli.invocation-contract.export`
@@ -87,6 +88,9 @@ Boundary:
 - this is maintainer-grade repo tooling, not a public CLI API
 - the operation catalog lives in `scripts/lib/maintainer-cli-operation-help.js` as shared maintainer helper metadata, including compact example payloads for the path-based operations
 - export operations remain empty-payload only; bounded content operations accept explicit JSON input
+- minimal inspect example: `npm run cli:invoke -- --vault docs --operation local-knowledge.inspect --input-json '{"taskScope":"diagramGeneration","sourcePath":"docs/index.zh-CN.md","knowledgePaths":["docs/maintainer","docs/superpowers"]}' --pretty`
+- `local-knowledge.inspect` is intentionally maintainer-only explainability surface: it exposes task scope, effective knowledge-base path resolution, derived or explicit query, current-file exclusion inputs, retrieval options, candidate file paths, raw formatted context, structured `contextBlocks` evidence, and the structured retrieval summary without widening the public CLI contract
+- `local-knowledge.inspect` now also accepts a temporary `knowledgePaths` override array, so maintainers can inspect task-scoped retrieval against ad hoc file/folder path lists without mutating the saved settings snapshot
 - `content.split-note-by-chapters` also accepts optional `splitHeadingLevel` (`auto`, `h1`-`h6`) so scripts can avoid depending on the current settings snapshot
 - `content.split-note-by-chapters` results now also expose `requestedSplitHeadingLevel`, `chapterNotePaths`, `managedArtifactPaths`, `removedStalePaths`, deterministic `tocMetadata`, and stable `nestedHeadings[].blockId` values so automation can reason about the managed artifact set, TOC front-matter metadata, and repeated-heading-safe TOC targets without re-deriving them from filenames or ambiguous heading text; reruns now also refuse to overwrite or delete manifest-managed artifacts whose contents drifted from the last generated snapshot
 - path-based maintainer operations stay maintainer-only until their side effects, output schemas, and failure semantics are promoted as part of a public contract batch
@@ -151,7 +155,7 @@ These are the best remaining candidates for registry-backed or more host-neutral
 |---|---|---|---|
 | P0 | Packaging source/build convergence around the latent render-host runtime lane | Current source now contains reusable runtime helpers (`src/rendering/runtime/renderHostEntry.ts`, `src/rendering/preview/renderHostRuntimeClient.ts`), but build/audit truth still proves `main.js`-only shipping. The highest-value next step is to remove that ambiguity explicitly: either keep the runtime lane source-only and document it as non-shipped, or ship a true multi-entry boundary in one batch | `esbuild.config.mjs`, `scripts/audit-render-host-bundle.js`, `src/rendering/runtime/renderHostEntry.ts`, `src/rendering/preview/renderHostRuntimeClient.ts` |
 | P1 | Bounded public-CLI promotion for explicit path-based operations | The maintainer helper already proves there is demand for path-based operations, but public promotion should happen only for operations whose write semantics and output contracts are stable enough to document and regression-lock | `src/maintainerCliBridge.ts`, `scripts/lib/maintainer-cli-operation-help.js`, `src/operations/registry.ts`, `src/tests/maintainerCliBridge.test.ts` |
-| P1 | Contract/result hardening for retrieval and chapter-split writes | Retrieval-dependent note-processing results, including artifact-mode `diagram.generate`, now expose machine-readable `localKnowledgeRetrieval` summaries with timing/size telemetry, the shared maintainer helper now carries compact payload examples, `npm run verify:local-kb-fixtures` now locks a broader offline retrieval-quality fixture set across exact/prefix/current-file-exclusion classes, and chapter split now emits repeated-heading-safe nested block refs, deterministic TOC front-matter metadata, plus guarded rerun overwrite semantics; the next maturity gain is to expand mixed-note/query corpus coverage rather than broadening the surface count | `src/chapterSplit.ts`, `src/localKnowledgeBase.ts`, `src/fileUtils.ts`, `src/searchUtils.ts`, `src/main.ts`, `src/tests/localKnowledgeEvaluationFixture.test.ts`, `scripts/lib/maintainer-cli-operation-help.js`, `src/tests/chapterSplit.test.ts`, `src/tests/localKnowledgeTaskIntegration.test.ts`, `src/tests/diagramCommandArchitecture.test.ts` |
+| P1 | Contract/result hardening for retrieval and chapter-split writes | Retrieval-dependent note-processing results, including artifact-mode `diagram.generate`, now expose machine-readable `localKnowledgeRetrieval` summaries with timing/size telemetry, the shared maintainer helper now carries compact payload examples plus a dedicated `local-knowledge.inspect` seam for effective path/query/context inspection, temporary `knowledgePaths` override arrays for task-scoped retrieval tuning, `npm run verify:local-kb-fixtures` now locks a broader offline retrieval-quality fixture set across exact/prefix/current-file-exclusion classes, and chapter split now emits repeated-heading-safe nested block refs, deterministic TOC front-matter metadata, plus guarded rerun overwrite semantics; the next maturity gain is to expand mixed-note/query corpus coverage rather than broadening the surface count | `src/chapterSplit.ts`, `src/localKnowledgeBase.ts`, `src/fileUtils.ts`, `src/searchUtils.ts`, `src/main.ts`, `src/tests/localKnowledgeEvaluationFixture.test.ts`, `scripts/lib/maintainer-cli-operation-help.js`, `src/tests/chapterSplit.test.ts`, `src/tests/localKnowledgeTaskIntegration.test.ts`, `src/tests/diagramCommandArchitecture.test.ts`, `src/tests/localKnowledgeBase.test.ts`, `src/tests/maintainerCliBridge.test.ts` |
 | P2 | Workflow/settings packaging | Workflow DSL and output-path toggles remain useful metadata but not yet stable public interfaces | `src/workflowButtons.ts`, settings-driven output controls |
 
 ## Settings Readiness

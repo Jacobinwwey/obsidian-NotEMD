@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { TFile } from 'obsidian';
-import { buildLocalKnowledgeBaseRetriever } from '../localKnowledgeBase';
+import { buildLocalKnowledgeBaseRetriever, inspectLocalKnowledgeRetrieval } from '../localKnowledgeBase';
 import { mockApp } from './__mocks__/app';
 import { mockSettings } from './__mocks__/settings';
 
@@ -24,6 +24,7 @@ interface EvaluationCase {
     minExpandedSectionCount?: number;
     minExcludedCurrentFileHitCount?: number;
     expectContextAbsent?: boolean;
+    expectEllipsis?: boolean;
     expectedContextFragments?: string[];
 }
 
@@ -69,8 +70,33 @@ const FIXTURE_FILES: FixtureFile[] = [
             '## Packaging',
             'Single-entry packaging keeps runtime truth narrow and auditable.'
         ].join('\n')
+    },
+    {
+        path: 'Knowledge/Scoped/CLI Surface.md',
+        markdown: [
+            '# CLI Surface',
+            'Repo-local maintainer automation stays intentionally bounded.',
+            '',
+            '## Inspect',
+            'The local-knowledge.inspect helper exposes effective path resolution, candidate file paths, raw formatted context, and query derivation for maintainers debugging task-scoped retrieval behavior.',
+            '',
+            '## Safety',
+            'This introspection surface must not be overclaimed as a public CLI contract.'
+        ].join('\n')
+    },
+    {
+        path: 'Docs/Diagram Platform.md',
+        markdown: [
+            '# Diagram Platform',
+            'This source note asks for a diagram about retrieval architecture.',
+            '',
+            '## Retrieval',
+            'Sliding window retrieval and runtime truth should both appear in the derived query.'
+        ].join('\n')
     }
 ];
+
+const KNOWLEDGE_FIXTURE_FILE_COUNT = FIXTURE_FILES.filter(file => file.path.startsWith('Knowledge/')).length;
 
 const EVALUATION_CASES: EvaluationCase[] = [
     {
@@ -137,6 +163,19 @@ const EVALUATION_CASES: EvaluationCase[] = [
         minMatchedSectionCount: 1,
         minExcludedCurrentFileHitCount: 1,
         expectContextAbsent: true
+    },
+    {
+        id: 'inspect-helper-bounded-surface',
+        query: 'effective path resolution query derivation candidate file paths',
+        expectedSourcePaths: ['Knowledge/Scoped/CLI Surface.md'],
+        topK: 1,
+        slidingWindowSize: 0,
+        maxSnippetChars: 80,
+        minExpectedPathRecall: 1,
+        minReturnedHitCount: 1,
+        minMatchedSectionCount: 1,
+        expectEllipsis: true,
+        expectedContextFragments: ['CLI Surface']
     }
 ];
 
@@ -260,16 +299,23 @@ describe('local knowledge offline evaluation fixture', () => {
             expect(details.excludedCurrentFileHitCount).toBeGreaterThanOrEqual(
                 evaluationCase.minExcludedCurrentFileHitCount ?? 0
             );
-            expect(details.indexedFileCount).toBe(FIXTURE_FILES.length);
-            expect(details.indexedSectionCount).toBeGreaterThanOrEqual(FIXTURE_FILES.length);
+            expect(details.indexedFileCount).toBe(KNOWLEDGE_FIXTURE_FILE_COUNT);
+            expect(details.indexedSectionCount).toBeGreaterThanOrEqual(KNOWLEDGE_FIXTURE_FILE_COUNT);
             expect(details.indexBuildMs).toBeGreaterThanOrEqual(0);
             expect(details.queryMs).toBeGreaterThanOrEqual(0);
 
             if (evaluationCase.expectContextAbsent) {
                 expect(details.context).toBeNull();
                 expect(details.contextCharCount).toBe(0);
+                expect(details.contextBlocks).toEqual([]);
             } else {
                 expect(details.contextCharCount).toBeGreaterThan(0);
+                expect(details.contextBlocks.length).toBeGreaterThan(0);
+            }
+
+            if (evaluationCase.expectEllipsis) {
+                expect(details.context).toContain('…');
+                expect(details.contextBlocks.some(block => block.excerptWasTruncated)).toBe(true);
             }
 
             for (const expectedPath of evaluationCase.expectedSourcePaths) {
@@ -283,5 +329,88 @@ describe('local knowledge offline evaluation fixture', () => {
 
         const averageRecall = recalls.reduce((sum, value) => sum + value, 0) / recalls.length;
         expect(averageRecall).toBeGreaterThanOrEqual(0.95);
+    });
+
+    test('keeps the maintainer inspect seam aligned with mixed file-folder path scopes and derived diagram queries', async () => {
+        const settings = {
+            ...mockSettings,
+            enableLocalKnowledgeRetrieval: true,
+            localKnowledgeBasePaths: 'Knowledge',
+            localKnowledgeGenerateTitlePaths: 'Knowledge/Transformers.md\nKnowledge/Scoped',
+            localKnowledgeDiagramGenerationPaths: 'Knowledge/Diagram Platform.md\nKnowledge/Scoped',
+            localKnowledgeTopK: 2,
+            localKnowledgeSlidingWindowSize: 1,
+            localKnowledgeMaxSnippetChars: 180,
+            localKnowledgeExcludeCurrentFile: true,
+            enableLocalKnowledgeForGenerateTitle: true,
+            enableLocalKnowledgeForDiagramGeneration: true
+        };
+
+        const titleInspect = await inspectLocalKnowledgeRetrieval(
+            mockApp as any,
+            settings,
+            {
+                taskScope: 'generateTitle',
+                sourcePath: 'Docs/CLI Surface.md'
+            }
+        );
+        const diagramInspect = await inspectLocalKnowledgeRetrieval(
+            mockApp as any,
+            settings,
+            {
+                taskScope: 'diagramGeneration',
+                sourcePath: 'Docs/Diagram Platform.md'
+            }
+        );
+
+        expect(titleInspect.effectivePathSource).toBe('task-specific');
+        expect(titleInspect.queryDerivation).toBe('basename');
+        expect(titleInspect.query).toBe('CLI Surface');
+        expect(titleInspect.candidateFilePaths).toEqual([
+            'Knowledge/Transformers.md',
+            'Knowledge/Scoped/CLI Surface.md'
+        ]);
+        expect(titleInspect.retrieverBuildStatus).toBe('ready');
+        expect(titleInspect.retrieval.sourcePaths).toContain('Knowledge/Scoped/CLI Surface.md');
+
+        expect(diagramInspect.effectivePathSource).toBe('task-specific');
+        expect(diagramInspect.queryDerivation).toBe('diagram-source');
+        expect(diagramInspect.query).toContain('Diagram Platform');
+        expect(diagramInspect.query).toContain('Sliding window retrieval and runtime truth should both appear in the derived query.');
+        expect(diagramInspect.candidateFilePaths).toEqual([
+            'Knowledge/Diagram Platform.md',
+            'Knowledge/Scoped/CLI Surface.md'
+        ]);
+        expect(diagramInspect.retrieverBuildStatus).toBe('ready');
+        expect(diagramInspect.retrieval.sourcePaths).toContain('Knowledge/Diagram Platform.md');
+    });
+
+    test('inspect supports temporary knowledge-path override arrays for maintainer-side task tuning', async () => {
+        const settings = {
+            ...mockSettings,
+            enableLocalKnowledgeRetrieval: true,
+            localKnowledgeBasePaths: 'Knowledge/Transformers.md',
+            localKnowledgeGenerateTitlePaths: 'Knowledge/Transformers.md',
+            localKnowledgeTopK: 2,
+            localKnowledgeSlidingWindowSize: 0,
+            localKnowledgeMaxSnippetChars: 160,
+            localKnowledgeExcludeCurrentFile: true,
+            enableLocalKnowledgeForGenerateTitle: true
+        };
+
+        const inspect = await inspectLocalKnowledgeRetrieval(
+            mockApp as any,
+            settings,
+            {
+                taskScope: 'generateTitle',
+                sourcePath: 'Docs/CLI Surface.md',
+                knowledgePaths: ['Knowledge/Scoped', 'Knowledge/Scoped']
+            }
+        );
+
+        expect(inspect.effectivePathSource).toBe('override');
+        expect(inspect.effectiveConfiguredPaths).toEqual(['Knowledge/Scoped']);
+        expect(inspect.candidateFilePaths).toEqual(['Knowledge/Scoped/CLI Surface.md']);
+        expect(inspect.retrieval.sourcePaths).toEqual(['Knowledge/Scoped/CLI Surface.md']);
     });
 });

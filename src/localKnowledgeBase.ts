@@ -2,9 +2,16 @@ type MiniSearchIndex<T = any> = import('minisearch').default<T>;
 const MiniSearch = require('minisearch') as typeof import('minisearch').default;
 import { App, TFile } from 'obsidian';
 import { NotemdSettings, ProgressReporter } from './types';
-import { parseMarkdownSections } from './markdownSectionUtils';
+import { parseMarkdownSections, stripMarkdownForSearch } from './markdownSectionUtils';
 
 export type LocalKnowledgeTaskScope = 'generateTitle' | 'batchGenerateFromTitles' | 'researchSummarize' | 'diagramGeneration';
+export type LocalKnowledgePathSource = 'override' | 'task-specific' | 'default';
+export type LocalKnowledgeRetrieverBuildStatus =
+    | 'disabled'
+    | 'no-paths'
+    | 'no-candidate-files'
+    | 'no-retrievable-sections'
+    | 'ready';
 
 interface LocalKnowledgeDocument {
     id: string;
@@ -22,6 +29,48 @@ interface RetrieveContextOptions {
     topK: number;
     slidingWindowSize: number;
     maxSnippetChars: number;
+}
+
+export interface ResolvedLocalKnowledgePathConfig {
+    pathSource: LocalKnowledgePathSource;
+    paths: string[];
+}
+
+export interface LocalKnowledgeInspectRequest {
+    taskScope: LocalKnowledgeTaskScope;
+    sourcePath?: string;
+    currentFilePath?: string;
+    query?: string;
+    knowledgePaths?: string[];
+    topK?: number;
+    slidingWindowSize?: number;
+    maxSnippetChars?: number;
+}
+
+export type LocalKnowledgeInspectQueryDerivation = 'explicit' | 'basename' | 'diagram-source';
+
+export interface LocalKnowledgeInspectResult {
+    taskScope: LocalKnowledgeTaskScope;
+    globalEnabled: boolean;
+    taskEnabled: boolean;
+    effectivePathSource: LocalKnowledgePathSource;
+    effectiveConfiguredPaths: string[];
+    sourcePath: string | null;
+    query: string;
+    queryDerivation: LocalKnowledgeInspectQueryDerivation;
+    currentFilePath: string | null;
+    retrievalOptions: {
+        topK: number;
+        slidingWindowSize: number;
+        maxSnippetChars: number;
+        excludeCurrentFile: boolean;
+    };
+    retrieverBuildStatus: LocalKnowledgeRetrieverBuildStatus;
+    retrieverCreated: boolean;
+    candidateFilePaths: string[];
+    context: string | null;
+    contextBlocks: LocalKnowledgeContextBlock[];
+    retrieval: LocalKnowledgeContextBuildResult;
 }
 
 export interface LocalKnowledgeRetrievalSummary {
@@ -43,6 +92,17 @@ export interface LocalKnowledgeRetrievalSummary {
 export interface LocalKnowledgeContextBuildResult extends LocalKnowledgeRetrievalSummary {
     query: string;
     context: string | null;
+    contextBlocks: LocalKnowledgeContextBlock[];
+}
+
+export interface LocalKnowledgeContextBlock {
+    index: number;
+    path: string;
+    heading: string;
+    breadcrumb: string;
+    excerpt: string;
+    excerptCharCount: number;
+    excerptWasTruncated: boolean;
 }
 
 export interface LocalKnowledgeBaseRetriever {
@@ -50,6 +110,22 @@ export interface LocalKnowledgeBaseRetriever {
     readonly indexedSectionCount: number;
     buildContextDetails: (query: string, options: RetrieveContextOptions) => LocalKnowledgeContextBuildResult;
     buildContext: (query: string, options: RetrieveContextOptions) => string | null;
+}
+
+interface LocalKnowledgeRetrieverBuildState {
+    status: LocalKnowledgeRetrieverBuildStatus;
+    pathSource: LocalKnowledgePathSource;
+    configuredPaths: string[];
+    candidateFilePaths: string[];
+    indexedFileCount: number;
+    indexedSectionCount: number;
+    indexBuildMs: number;
+    retriever: LocalKnowledgeBaseRetriever | null;
+}
+
+interface LocalKnowledgeRetrieverBuildOptions {
+    respectEnablement?: boolean;
+    pathOverrideList?: string[];
 }
 
 function normalizeVaultPath(value: string): string {
@@ -68,11 +144,30 @@ function truncateSnippet(value: string, maxChars: number): string {
     return `${value.slice(0, Math.max(0, maxChars - 1)).trimEnd()}…`;
 }
 
+function normalizeKnowledgePathList(values: readonly string[]): string[] {
+    const seen = new Set<string>();
+    const normalized: string[] = [];
+
+    values.forEach(value => {
+        const candidate = normalizeVaultPath(value);
+        if (!candidate) {
+            return;
+        }
+
+        const dedupeKey = normalizeForComparison(candidate);
+        if (seen.has(dedupeKey)) {
+            return;
+        }
+
+        seen.add(dedupeKey);
+        normalized.push(candidate);
+    });
+
+    return normalized;
+}
+
 function buildKnowledgePathListFromValue(value: string): string[] {
-    return value
-        .split('\n')
-        .map(path => normalizeVaultPath(path))
-        .filter(Boolean);
+    return normalizeKnowledgePathList(value.split('\n'));
 }
 
 function getTaskSpecificKnowledgePathValue(
@@ -93,18 +188,41 @@ function getTaskSpecificKnowledgePathValue(
     }
 }
 
-export function resolveLocalKnowledgePathList(
+export function resolveLocalKnowledgePathConfig(
     settings: NotemdSettings,
-    taskScope?: LocalKnowledgeTaskScope
-): string[] {
+    taskScope?: LocalKnowledgeTaskScope,
+    options: {
+        overridePaths?: string[];
+    } = {}
+): ResolvedLocalKnowledgePathConfig {
+    if (options.overridePaths !== undefined) {
+        return {
+            pathSource: 'override',
+            paths: normalizeKnowledgePathList(options.overridePaths ?? [])
+        };
+    }
+
     const taskSpecificPaths = buildKnowledgePathListFromValue(
         getTaskSpecificKnowledgePathValue(settings, taskScope)
     );
     if (taskSpecificPaths.length > 0) {
-        return taskSpecificPaths;
+        return {
+            pathSource: 'task-specific',
+            paths: taskSpecificPaths
+        };
     }
 
-    return buildKnowledgePathListFromValue(settings.localKnowledgeBasePaths);
+    return {
+        pathSource: 'default',
+        paths: buildKnowledgePathListFromValue(settings.localKnowledgeBasePaths)
+    };
+}
+
+export function resolveLocalKnowledgePathList(
+    settings: NotemdSettings,
+    taskScope?: LocalKnowledgeTaskScope
+): string[] {
+    return resolveLocalKnowledgePathConfig(settings, taskScope).paths;
 }
 
 export function isLocalKnowledgeEnabledForTask(
@@ -142,18 +260,36 @@ function matchesConfiguredKnowledgePath(file: TFile, configuredPaths: string[]):
     });
 }
 
-function formatHitContext(documents: LocalKnowledgeDocument[], maxSnippetChars: number): string | null {
-    if (documents.length === 0) {
+function buildContextBlocks(
+    documents: LocalKnowledgeDocument[],
+    maxSnippetChars: number
+): LocalKnowledgeContextBlock[] {
+    return documents.map((document, index) => {
+        const excerpt = truncateSnippet(document.excerpt, maxSnippetChars);
+        return {
+            index: index + 1,
+            path: document.path,
+            heading: document.heading,
+            breadcrumb: document.breadcrumb,
+            excerpt,
+            excerptCharCount: excerpt.length,
+            excerptWasTruncated: excerpt.length < document.excerpt.length
+        };
+    });
+}
+
+function formatContextBlocks(blocks: LocalKnowledgeContextBlock[]): string | null {
+    if (blocks.length === 0) {
         return null;
     }
 
-    return documents.map((document, index) => {
-        const headingLine = document.heading ? `Heading: ${document.heading}\n` : '';
+    return blocks.map(block => {
+        const headingLine = block.heading ? `Heading: ${block.heading}\n` : '';
         return [
-            `[${index + 1}] Path: ${document.path}`,
+            `[${block.index}] Path: ${block.path}`,
             headingLine ? headingLine.trimEnd() : null,
-            document.breadcrumb ? `Breadcrumb: ${document.breadcrumb}` : null,
-            `Excerpt: ${truncateSnippet(document.excerpt, maxSnippetChars)}`
+            block.breadcrumb ? `Breadcrumb: ${block.breadcrumb}` : null,
+            `Excerpt: ${block.excerpt}`
         ].filter(Boolean).join('\n');
     }).join('\n\n');
 }
@@ -178,6 +314,42 @@ function normalizeQuery(value: string): string {
     return typeof value === 'string' ? value.trim() : '';
 }
 
+function sanitizeMaxSnippetChars(value: number): number {
+    if (!Number.isFinite(value)) {
+        return 0;
+    }
+
+    return Math.max(0, Math.floor(value));
+}
+
+function normalizeOptionalPath(value?: string): string | undefined {
+    if (typeof value !== 'string') {
+        return undefined;
+    }
+
+    const normalized = normalizeVaultPath(value);
+    return normalized.length > 0 ? normalized : undefined;
+}
+
+function buildTitleLikeQueryFromPath(sourcePath: string): string {
+    return sourcePath.split('/').pop()?.replace(/\.[^.]+$/u, '')?.trim() || '';
+}
+
+export function buildDiagramLocalKnowledgeQuery(sourcePath: string | undefined, sourceMarkdown: string): string {
+    const strippedMarkdown = stripMarkdownForSearch(sourceMarkdown);
+
+    return [
+        sourcePath?.split('/').pop()?.replace(/\.[^.]+$/u, ''),
+        strippedMarkdown.slice(0, 1200)
+    ].filter((value): value is string => Boolean(value && value.trim())).join('\n');
+}
+
+function findVaultFileByPath(app: App, sourcePath: string): TFile | null {
+    return app.vault.getFileByPath(sourcePath)
+        || app.vault.getFiles().find(candidate => normalizeForComparison(candidate.path) === normalizeForComparison(sourcePath))
+        || null;
+}
+
 export function createEmptyLocalKnowledgeContextBuildResult(
     query: string,
     options: RetrieveContextOptions,
@@ -186,6 +358,7 @@ export function createEmptyLocalKnowledgeContextBuildResult(
     return {
         query: normalizeQuery(query),
         context: null,
+        contextBlocks: [],
         indexedFileCount: overrides?.indexedFileCount ?? 0,
         indexedSectionCount: overrides?.indexedSectionCount ?? 0,
         matchedSectionCount: 0,
@@ -329,11 +502,13 @@ class MiniSearchLocalKnowledgeRetriever implements LocalKnowledgeBaseRetriever {
             }
         }
 
-        const context = formatHitContext(picked, options.maxSnippetChars);
+        const contextBlocks = buildContextBlocks(picked, options.maxSnippetChars);
+        const context = formatContextBlocks(contextBlocks);
 
         return {
             query: normalizedQuery,
             context,
+            contextBlocks,
             indexedFileCount: this.indexedFileCount,
             indexedSectionCount: this.indexedSectionCount,
             matchedSectionCount: results.length,
@@ -355,31 +530,64 @@ class MiniSearchLocalKnowledgeRetriever implements LocalKnowledgeBaseRetriever {
     }
 }
 
-export async function buildLocalKnowledgeBaseRetriever(
+async function buildLocalKnowledgeRetrieverState(
     app: App,
     settings: NotemdSettings,
     reporter?: ProgressReporter,
-    taskScope?: LocalKnowledgeTaskScope
-): Promise<LocalKnowledgeBaseRetriever | null> {
+    taskScope?: LocalKnowledgeTaskScope,
+    options: LocalKnowledgeRetrieverBuildOptions = {}
+): Promise<LocalKnowledgeRetrieverBuildState> {
     const buildStartMs = Date.now();
-    if (!settings.enableLocalKnowledgeRetrieval) {
-        return null;
+    const respectEnablement = options.respectEnablement !== false;
+    const pathConfig = resolveLocalKnowledgePathConfig(settings, taskScope, {
+        overridePaths: options.pathOverrideList
+    });
+
+    if (respectEnablement && !settings.enableLocalKnowledgeRetrieval) {
+        return {
+            status: 'disabled',
+            pathSource: pathConfig.pathSource,
+            configuredPaths: pathConfig.paths,
+            candidateFilePaths: [],
+            indexedFileCount: 0,
+            indexedSectionCount: 0,
+            indexBuildMs: 0,
+            retriever: null
+        };
     }
 
-    const configuredPaths = resolveLocalKnowledgePathList(settings, taskScope);
-    if (configuredPaths.length === 0) {
+    if (pathConfig.paths.length === 0) {
         reporter?.log('Local knowledge retrieval is enabled, but no local knowledge paths are configured.');
-        return null;
+        return {
+            status: 'no-paths',
+            pathSource: pathConfig.pathSource,
+            configuredPaths: pathConfig.paths,
+            candidateFilePaths: [],
+            indexedFileCount: 0,
+            indexedSectionCount: 0,
+            indexBuildMs: 0,
+            retriever: null
+        };
     }
 
     const candidateFiles = app.vault
         .getFiles()
         .filter(isKnowledgeFileCandidate)
-        .filter(file => matchesConfiguredKnowledgePath(file, configuredPaths));
+        .filter(file => matchesConfiguredKnowledgePath(file, pathConfig.paths));
+    const candidateFilePaths = candidateFiles.map(file => file.path);
 
     if (candidateFiles.length === 0) {
         reporter?.log('No eligible local knowledge files were found for the configured knowledge base paths.');
-        return null;
+        return {
+            status: 'no-candidate-files',
+            pathSource: pathConfig.pathSource,
+            configuredPaths: pathConfig.paths,
+            candidateFilePaths,
+            indexedFileCount: 0,
+            indexedSectionCount: 0,
+            indexBuildMs: Math.max(0, Date.now() - buildStartMs),
+            retriever: null
+        };
     }
 
     const documents: LocalKnowledgeDocument[] = [];
@@ -412,7 +620,16 @@ export async function buildLocalKnowledgeBaseRetriever(
 
     if (documents.length === 0) {
         reporter?.log('Local knowledge files were found, but no retrievable sections were produced.');
-        return null;
+        return {
+            status: 'no-retrievable-sections',
+            pathSource: pathConfig.pathSource,
+            configuredPaths: pathConfig.paths,
+            candidateFilePaths,
+            indexedFileCount: seenFilePaths.size,
+            indexedSectionCount: 0,
+            indexBuildMs: Math.max(0, Date.now() - buildStartMs),
+            retriever: null
+        };
     }
 
     const index: MiniSearchIndex<LocalKnowledgeDocument> = new MiniSearch({
@@ -438,13 +655,150 @@ export async function buildLocalKnowledgeBaseRetriever(
         fileDocuments.sort((left, right) => left.sectionIndex - right.sectionIndex);
     });
 
-    return new MiniSearchLocalKnowledgeRetriever(
-        index,
-        documentMap,
-        documentsByPath,
-        seenFilePaths.size,
-        documents.length,
+    return {
+        status: 'ready',
+        pathSource: pathConfig.pathSource,
+        configuredPaths: pathConfig.paths,
+        candidateFilePaths,
+        indexedFileCount: seenFilePaths.size,
+        indexedSectionCount: documents.length,
         indexBuildMs,
-        settings.localKnowledgeExcludeCurrentFile
+        retriever: new MiniSearchLocalKnowledgeRetriever(
+            index,
+            documentMap,
+            documentsByPath,
+            seenFilePaths.size,
+            documents.length,
+            indexBuildMs,
+            settings.localKnowledgeExcludeCurrentFile
+        )
+    };
+}
+
+async function resolveLocalKnowledgeInspectQuery(
+    app: App,
+    request: LocalKnowledgeInspectRequest
+): Promise<{
+    query: string;
+    queryDerivation: LocalKnowledgeInspectQueryDerivation;
+}> {
+    const explicitQuery = normalizeQuery(request.query ?? '');
+    if (explicitQuery) {
+        return {
+            query: explicitQuery,
+            queryDerivation: 'explicit'
+        };
+    }
+
+    const sourcePath = normalizeOptionalPath(request.sourcePath);
+    if (!sourcePath) {
+        throw new Error('Local knowledge inspect requires a non-empty "query" or "sourcePath".');
+    }
+
+    if (request.taskScope === 'diagramGeneration') {
+        const file = findVaultFileByPath(app, sourcePath);
+        if (!file || !['md', 'txt'].includes(file.extension)) {
+            throw new Error(
+                `Local knowledge inspect needs an existing Markdown/text "sourcePath" to derive a diagram query: ${sourcePath}.`
+            );
+        }
+
+        return {
+            query: buildDiagramLocalKnowledgeQuery(sourcePath, await app.vault.read(file)),
+            queryDerivation: 'diagram-source'
+        };
+    }
+
+    const basenameQuery = buildTitleLikeQueryFromPath(sourcePath);
+    if (!basenameQuery) {
+        throw new Error(`Could not derive a local knowledge query from source path: ${sourcePath}`);
+    }
+
+    return {
+        query: basenameQuery,
+        queryDerivation: 'basename'
+    };
+}
+
+export async function buildLocalKnowledgeBaseRetriever(
+    app: App,
+    settings: NotemdSettings,
+    reporter?: ProgressReporter,
+    taskScope?: LocalKnowledgeTaskScope
+): Promise<LocalKnowledgeBaseRetriever | null> {
+    const buildState = await buildLocalKnowledgeRetrieverState(app, settings, reporter, taskScope, {
+        respectEnablement: true
+    });
+    return buildState.retriever;
+}
+
+export async function inspectLocalKnowledgeRetrieval(
+    app: App,
+    settings: NotemdSettings,
+    request: LocalKnowledgeInspectRequest,
+    reporter?: ProgressReporter
+): Promise<LocalKnowledgeInspectResult> {
+    const sourcePath = normalizeOptionalPath(request.sourcePath) ?? null;
+    const currentFilePath = normalizeOptionalPath(request.currentFilePath) ?? sourcePath ?? undefined;
+    const { query, queryDerivation } = await resolveLocalKnowledgeInspectQuery(app, request);
+    const topK = request.topK ?? settings.localKnowledgeTopK;
+    const slidingWindowSize = request.slidingWindowSize ?? settings.localKnowledgeSlidingWindowSize;
+    const maxSnippetChars = request.maxSnippetChars ?? settings.localKnowledgeMaxSnippetChars;
+    const retrievalOptions = {
+        topK: sanitizeRequestedTopK(topK),
+        slidingWindowSize: sanitizeSlidingWindowSize(slidingWindowSize),
+        maxSnippetChars: sanitizeMaxSnippetChars(maxSnippetChars),
+        excludeCurrentFile: settings.localKnowledgeExcludeCurrentFile
+    };
+    const buildState = await buildLocalKnowledgeRetrieverState(
+        app,
+        settings,
+        reporter,
+        request.taskScope,
+        {
+            respectEnablement: false,
+            ...(Object.prototype.hasOwnProperty.call(request, 'knowledgePaths')
+                ? { pathOverrideList: request.knowledgePaths ?? [] }
+                : {})
+        }
     );
+    const retrieval = buildState.retriever
+        ? buildState.retriever.buildContextDetails(query, {
+            currentFilePath,
+            topK: retrievalOptions.topK,
+            slidingWindowSize: retrievalOptions.slidingWindowSize,
+            maxSnippetChars: retrievalOptions.maxSnippetChars
+        })
+        : createEmptyLocalKnowledgeContextBuildResult(query, {
+            currentFilePath,
+            topK: retrievalOptions.topK,
+            slidingWindowSize: retrievalOptions.slidingWindowSize,
+            maxSnippetChars: retrievalOptions.maxSnippetChars
+        }, {
+            indexedFileCount: buildState.indexedFileCount,
+            indexedSectionCount: buildState.indexedSectionCount,
+            excludeCurrentFileApplied: Boolean(
+                settings.localKnowledgeExcludeCurrentFile && currentFilePath
+            ),
+            indexBuildMs: buildState.indexBuildMs
+        });
+
+    return {
+        taskScope: request.taskScope,
+        globalEnabled: settings.enableLocalKnowledgeRetrieval,
+        taskEnabled: isLocalKnowledgeEnabledForTask(settings, request.taskScope),
+        effectivePathSource: buildState.pathSource,
+        effectiveConfiguredPaths: buildState.configuredPaths,
+        sourcePath,
+        query,
+        queryDerivation,
+        currentFilePath: currentFilePath ?? null,
+        retrievalOptions,
+        retrieverBuildStatus: buildState.status,
+        retrieverCreated: Boolean(buildState.retriever),
+        candidateFilePaths: buildState.candidateFilePaths,
+        context: retrieval.context,
+        contextBlocks: retrieval.contextBlocks,
+        retrieval
+    };
 }
