@@ -30,6 +30,7 @@ type MockElement = {
     setAttr: jest.Mock;
     setText: jest.Mock;
     addEventListener: jest.Mock;
+    querySelector?: jest.Mock;
     dispatch: (eventName: string) => void;
 };
 
@@ -137,6 +138,14 @@ class MockSetting {
         this.nameEl = createMockElement('div', { cls: 'setting-item-name', parent: this.settingEl });
         this.descEl = createMockElement('div', { cls: 'setting-item-description', parent: this.settingEl });
         this.controlEl = createMockElement('div', { cls: 'setting-item-control', parent: this.settingEl });
+        this.controlEl.querySelector = jest.fn((selector: string) => {
+            if (selector !== 'input') {
+                return null;
+            }
+
+            const textControl = this.controls.find((control): control is MockTextControl => control.kind === 'text');
+            return textControl?.inputEl ?? null;
+        });
         this.settingEl.children.push(this.nameEl, this.descEl, this.controlEl);
         containerEl.children.push(this.settingEl);
     }
@@ -227,6 +236,7 @@ function createMockElement(
         setAttr: jest.fn(),
         setText: jest.fn(),
         addEventListener: jest.fn(),
+        querySelector: jest.fn(),
         dispatch: (eventName: string) => {
             for (const listener of element.listeners[eventName] ?? []) {
                 listener();
@@ -505,6 +515,13 @@ function findSettingByName(root: MockElement, name: string): MockSetting | undef
     return collectSettings(root).find(setting => setting.name === name);
 }
 
+async function triggerDeferredTextBlur(control: MockTextControl): Promise<void> {
+    const blurHandler = control.inputEl.addEventListener.mock.calls
+        .find(([eventName]: [string]) => eventName === 'blur')?.[1] as (() => Promise<void> | void) | undefined;
+    expect(blurHandler).toBeDefined();
+    await blurHandler?.();
+}
+
 const mockSettingsCreated: MockSetting[] = [];
 const mockButtonComponents: MockButtonControl[] = [];
 
@@ -637,5 +654,113 @@ describe('provider settings behavior', () => {
 
         const summaryNode = findElementByClass(tab.containerEl, 'notemd-provider-discovery-summary');
         expect(summaryNode?.text).toContain('current: deepseek-v4-pro');
+    });
+
+    test('shows known model max output token guidance on model and provider override settings', () => {
+        const plugin = createPlugin();
+        plugin.settings.activeProvider = 'OpenAI';
+        const provider = plugin.settings.providers.find((entry: any) => entry.name === 'OpenAI');
+        provider.model = 'gpt-4.1';
+
+        const tab = new NotemdSettingTab(mockApp as any, plugin as any) as any;
+        tab.display();
+
+        const modelSetting = findSettingByName(tab.containerEl, 'Model');
+        expect(modelSetting).toBeDefined();
+        expect(modelSetting?.desc).toContain('Known model max output tokens: 32768.');
+
+        const maxOutputTokensSetting = findSettingByName(tab.containerEl, 'Provider output token override');
+        expect(maxOutputTokensSetting).toBeDefined();
+        expect(maxOutputTokensSetting?.desc).toContain('Known max output tokens for gpt-4.1: 32768.');
+    });
+
+    test('refreshes model-aware guidance after model and max token edits', async () => {
+        const plugin = createPlugin();
+        plugin.settings.activeProvider = 'OpenAI';
+        const provider = plugin.settings.providers.find((entry: any) => entry.name === 'OpenAI');
+        provider.model = 'gpt-4.1';
+        plugin.settings.maxTokens = 8192;
+
+        const tab = new NotemdSettingTab(mockApp as any, plugin as any) as any;
+        tab.display();
+
+        const modelSetting = findSettingByName(tab.containerEl, 'Model');
+        const modelControl = modelSetting?.controls.find(control => control.kind === 'text') as MockTextControl | undefined;
+        expect(modelControl).toBeDefined();
+
+        modelControl!.inputEl.value = 'gpt-4o';
+        modelControl!.getValue.mockReturnValue('gpt-4o');
+        await triggerDeferredTextBlur(modelControl!);
+
+        const refreshedModelSetting = findSettingByName(tab.containerEl, 'Model');
+        expect(refreshedModelSetting?.desc).toContain('Known model max output tokens: 4096.');
+
+        const refreshedMaxTokensSetting = findSettingByName(tab.containerEl, 'Max tokens');
+        expect(refreshedMaxTokensSetting?.desc).toContain('Known max output tokens for gpt-4o: 4096.');
+
+        const maxTokensControl = refreshedMaxTokensSetting?.controls.find(control => control.kind === 'text') as MockTextControl | undefined;
+        expect(maxTokensControl).toBeDefined();
+
+        maxTokensControl!.inputEl.value = '9000';
+        maxTokensControl!.getValue.mockReturnValue('9000');
+        await triggerDeferredTextBlur(maxTokensControl!);
+
+        const refreshedChunkSetting = findSettingByName(tab.containerEl, 'Chunk word count');
+        const refreshedChunkControl = refreshedChunkSetting?.controls.find(control => control.kind === 'text') as MockTextControl | undefined;
+        expect(refreshedChunkControl?.placeholder).toBe('3000');
+    });
+
+    test('shows recommended chunk guidance in global max token description', () => {
+        const plugin = createPlugin();
+        plugin.settings.maxTokens = 8192;
+
+        const tab = new NotemdSettingTab(mockApp as any, plugin as any) as any;
+        tab.display();
+
+        const maxTokensSetting = findSettingByName(tab.containerEl, 'Max tokens');
+        expect(maxTokensSetting).toBeDefined();
+        expect(maxTokensSetting?.desc).toContain('Recommended chunk word count: 2731.');
+
+        const chunkWordCountSetting = findSettingByName(tab.containerEl, 'Chunk word count');
+        const chunkWordTextControl = chunkWordCountSetting?.controls.find(control => control.kind === 'text') as MockTextControl | undefined;
+        expect(chunkWordTextControl).toBeDefined();
+        expect(chunkWordTextControl?.placeholder).toBe('2731');
+    });
+
+    test('auto-fills chunk word count from max tokens using ceiling division until user overrides it manually', async () => {
+        const plugin = createPlugin();
+        plugin.settings.maxTokens = 8192;
+        plugin.settings.chunkWordCount = 3000;
+
+        const tab = new NotemdSettingTab(mockApp as any, plugin as any) as any;
+        tab.display();
+
+        const maxTokensSetting = findSettingByName(tab.containerEl, 'Max tokens');
+        const maxTokensControl = maxTokensSetting?.controls.find(control => control.kind === 'text') as MockTextControl | undefined;
+        expect(maxTokensControl).toBeDefined();
+
+        maxTokensControl!.inputEl.value = '9001';
+        maxTokensControl!.getValue.mockReturnValue('9001');
+        await triggerDeferredTextBlur(maxTokensControl!);
+
+        expect(plugin.settings.maxTokens).toBe(9001);
+        expect(plugin.settings.chunkWordCount).toBe(3001);
+
+        const chunkSetting = findSettingByName(tab.containerEl, 'Chunk word count');
+        const chunkControl = chunkSetting?.controls.find(control => control.kind === 'text') as MockTextControl | undefined;
+        expect(chunkControl).toBeDefined();
+
+        chunkControl!.inputEl.value = '1234';
+        chunkControl!.getValue.mockReturnValue('1234');
+        await triggerDeferredTextBlur(chunkControl!);
+
+        expect(plugin.settings.chunkWordCount).toBe(1234);
+
+        maxTokensControl!.inputEl.value = '12000';
+        maxTokensControl!.getValue.mockReturnValue('12000');
+        await triggerDeferredTextBlur(maxTokensControl!);
+
+        expect(plugin.settings.maxTokens).toBe(12000);
+        expect(plugin.settings.chunkWordCount).toBe(1234);
     });
 });

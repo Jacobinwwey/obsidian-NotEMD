@@ -207,6 +207,7 @@ export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
             baseUrlPlaceholder: '输入 API Base URL',
             modelName: '模型',
             modelDesc: '{provider} 使用的模型名称。',
+            modelKnownMaxOutputTokensHint: '该模型已知的最大输出 Token 上限：{maxTokens}。',
             modelPlaceholder: '输入模型名称',
             advancedSettingsName: '显示高级设置',
             advancedSettingsDesc: '展开 {provider} 的调优项与提供商特定覆盖项。',
@@ -230,6 +231,7 @@ export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
             temperatureDesc: '控制随机性（0=确定性，1=更有创造性）。',
             maxOutputTokensName: '提供商输出 Token 覆盖上限',
             maxOutputTokensDesc: '可选的、仅对当前提供商生效的输出 Token 上限。填写后会覆盖该提供商使用的全局“最大 Token 数”；留空则继承全局设置。它不会影响“研究内容最大 Token 数”。',
+            maxOutputTokensKnownModelHint: '{model} 的已知最大输出 Token 上限：{maxTokens}。',
             topPName: 'Top-p 值',
             topPDesc: 'OpenAI-compatible 请求的可选 nucleus sampling 覆盖值。留空时沿用提供商默认行为。',
             reasoningEffortName: '推理强度',
@@ -522,9 +524,9 @@ export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
         processing: {
             heading: '处理参数',
             chunkWordCountName: '分块词数',
-            chunkWordCountDesc: '发送给 LLM 的每个分块最大词数。推荐约为“最大 Token 数”的 1/3。',
+            chunkWordCountDesc: '发送给 LLM 的每个分块最大词数。默认推荐值为“最大 Token 数”的 1/3 向上取整；你仍然可以手动覆盖。',
             maxTokensName: '最大 Token 数',
-            maxTokensDesc: 'LLM 每次响应可生成的最大 Token 数。',
+            maxTokensDesc: 'LLM 每次响应可生成的全局最大 Token 数。若当前提供商设置了“输出 Token 覆盖上限”，则该提供商会优先使用覆盖值。',
             duplicateDetectionName: '启用重复检测',
             duplicateDetectionDesc: '启用对重复术语的检查（结果输出到控制台）。'
         },

@@ -4,6 +4,7 @@ import { FolderTaskFileSelectionProfile, LLMProviderConfig, NotemdSettings, Task
 import { DEFAULT_SETTINGS } from '../constants';
 import {
     getLLMProviderDefinition,
+    getKnownModelMaxOutputTokens,
     getProviderModelDiscoveryDefinition,
     getProviderSettingFields,
     getOrderedProviderNames,
@@ -198,6 +199,59 @@ export class NotemdSettingTab extends PluginSettingTab {
         });
     }
 
+    private getRecommendedChunkWordCount(maxTokens: number): number {
+        return Math.max(1, Math.ceil(maxTokens / 3));
+    }
+
+    private shouldAutoFillRecommendedChunk(
+        currentChunkWordCount: number,
+        previousMaxTokens: number
+    ): boolean {
+        const previousRecommendedChunk = this.getRecommendedChunkWordCount(previousMaxTokens);
+        return currentChunkWordCount === DEFAULT_SETTINGS.chunkWordCount
+            || currentChunkWordCount === previousRecommendedChunk;
+    }
+
+    private getGlobalMaxTokensDescription(baseDescription: string): string {
+        const providerI18n = getI18nStrings({ uiLocale: this.plugin.settings.uiLocale }).settings.providerConfig;
+        const activeProvider = this.plugin.settings.providers.find(provider => provider.name === this.plugin.settings.activeProvider);
+        const knownModelMaxTokens = activeProvider
+            ? getKnownModelMaxOutputTokens(activeProvider.name, activeProvider.model)
+            : undefined;
+        const knownModelHint = typeof knownModelMaxTokens === 'number'
+            ? ` ${formatI18n(providerI18n.maxOutputTokensKnownModelHint, {
+                model: activeProvider?.model ?? '',
+                maxTokens: knownModelMaxTokens
+            })}`
+            : '';
+        return `${baseDescription}${knownModelHint} Recommended chunk word count: ${this.getRecommendedChunkWordCount(this.plugin.settings.maxTokens)}.`;
+    }
+
+    private getProviderMaxOutputTokensDescription(provider: LLMProviderConfig, baseDescription: string): string {
+        const providerI18n = getI18nStrings({ uiLocale: this.plugin.settings.uiLocale }).settings.providerConfig;
+        const knownModelMaxTokens = getKnownModelMaxOutputTokens(provider.name, provider.model);
+        if (typeof knownModelMaxTokens !== 'number') {
+            return baseDescription;
+        }
+
+        return `${baseDescription} ${formatI18n(providerI18n.maxOutputTokensKnownModelHint, {
+            model: provider.model,
+            maxTokens: knownModelMaxTokens
+        })}`;
+    }
+
+    private getProviderModelDescription(provider: LLMProviderConfig, baseDescription: string): string {
+        const providerI18n = getI18nStrings({ uiLocale: this.plugin.settings.uiLocale }).settings.providerConfig;
+        const knownModelMaxTokens = getKnownModelMaxOutputTokens(provider.name, provider.model);
+        if (typeof knownModelMaxTokens !== 'number') {
+            return baseDescription;
+        }
+
+        return `${baseDescription} ${formatI18n(providerI18n.modelKnownMaxOutputTokensHint, {
+            maxTokens: knownModelMaxTokens
+        })}`;
+    }
+
     private markSection(setting: Setting, sectionKey: string): Setting {
         setting.settingEl.setAttr('data-notemd-setting-section', sectionKey);
         return setting;
@@ -292,6 +346,7 @@ export class NotemdSettingTab extends PluginSettingTab {
     ): Promise<void> {
         update(provider);
         await this.plugin.saveSettings();
+        this.display();
     }
 
     private addProviderTextField(
@@ -483,7 +538,7 @@ export class NotemdSettingTab extends PluginSettingTab {
             case 'model': {
                 const setting = new Setting(containerEl)
                     .setName(providerI18n.modelName)
-                    .setDesc(formatI18n(providerI18n.modelDesc, { provider: provider.name }));
+                    .setDesc(this.getProviderModelDescription(provider, formatI18n(providerI18n.modelDesc, { provider: provider.name })));
                 this.addProviderTextField(
                     setting,
                     provider,
@@ -580,7 +635,7 @@ export class NotemdSettingTab extends PluginSettingTab {
             case 'maxOutputTokens': {
                 const setting = new Setting(containerEl)
                     .setName(providerI18n.maxOutputTokensName)
-                    .setDesc(providerI18n.maxOutputTokensDesc);
+                    .setDesc(this.getProviderMaxOutputTokensDescription(provider, providerI18n.maxOutputTokensDesc));
                 this.addProviderNumberField(
                     setting,
                     provider,
@@ -1411,22 +1466,23 @@ export class NotemdSettingTab extends PluginSettingTab {
         this.addDeferredNumberSetting(
             new Setting(containerEl)
                 .setName(i18n.settings.processing.maxTokensName)
-                .setDesc(i18n.settings.processing.maxTokensDesc),
+                .setDesc(this.getGlobalMaxTokensDescription(i18n.settings.processing.maxTokensDesc)),
             {
                 placeholder: String(DEFAULT_SETTINGS.maxTokens),
                 value: this.plugin.settings.maxTokens,
                 onCommit: async (rawValue) => {
                     const previousMaxTokens = this.plugin.settings.maxTokens;
-                    const previousRecommendedChunk = Math.max(1, Math.floor(previousMaxTokens / 3));
+                    const previousRecommendedChunk = this.getRecommendedChunkWordCount(previousMaxTokens);
                     const nextMaxTokens = this.sanitizePositiveInteger(rawValue, DEFAULT_SETTINGS.maxTokens, 1);
                     this.plugin.settings.maxTokens = nextMaxTokens;
 
                     const currentChunk = this.plugin.settings.chunkWordCount;
-                    if (currentChunk === DEFAULT_SETTINGS.chunkWordCount || currentChunk === previousRecommendedChunk) {
-                        this.plugin.settings.chunkWordCount = Math.max(1, Math.floor(nextMaxTokens / 3));
+                    if (this.shouldAutoFillRecommendedChunk(currentChunk, previousMaxTokens)) {
+                        this.plugin.settings.chunkWordCount = this.getRecommendedChunkWordCount(nextMaxTokens);
                     }
 
                     await this.plugin.saveSettings();
+                    this.display();
                     return String(this.plugin.settings.maxTokens);
                 }
             }
@@ -1436,11 +1492,12 @@ export class NotemdSettingTab extends PluginSettingTab {
                 .setName(i18n.settings.processing.chunkWordCountName)
                 .setDesc(i18n.settings.processing.chunkWordCountDesc),
             {
-                placeholder: String(Math.max(1, Math.floor(this.plugin.settings.maxTokens / 3))),
+                placeholder: String(this.getRecommendedChunkWordCount(this.plugin.settings.maxTokens)),
                 value: this.plugin.settings.chunkWordCount,
                 onCommit: async (rawValue) => {
                     this.plugin.settings.chunkWordCount = this.sanitizePositiveInteger(rawValue, DEFAULT_SETTINGS.chunkWordCount, 50);
                     await this.plugin.saveSettings();
+                    this.display();
                     return String(this.plugin.settings.chunkWordCount);
                 }
             }

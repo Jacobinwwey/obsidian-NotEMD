@@ -204,6 +204,7 @@ export const STRINGS_EN = {
             baseUrlPlaceholder: 'Enter API Base URL',
             modelName: 'Model',
             modelDesc: 'Model name to use with {provider}.',
+            modelKnownMaxOutputTokensHint: 'Known model max output tokens: {maxTokens}.',
             modelPlaceholder: 'Enter model name',
             advancedSettingsName: 'Show advanced settings',
             advancedSettingsDesc: 'Reveal tuning and provider-specific overrides for {provider}.',
@@ -227,6 +228,7 @@ export const STRINGS_EN = {
             temperatureDesc: 'Controls randomness (0=deterministic, 1=creative).',
             maxOutputTokensName: 'Provider output token override',
             maxOutputTokensDesc: 'Optional output-token cap for this provider only. When set, it overrides the global Max tokens value for this provider. Leave blank to inherit the global Max tokens setting. This does not affect Max research content tokens.',
+            maxOutputTokensKnownModelHint: 'Known max output tokens for {model}: {maxTokens}.',
             topPName: 'Top-p',
             topPDesc: 'Optional nucleus sampling override for OpenAI-compatible requests. Leave blank to keep the provider default.',
             reasoningEffortName: 'Reasoning effort',
@@ -519,9 +521,9 @@ export const STRINGS_EN = {
         processing: {
             heading: 'Processing parameters',
             chunkWordCountName: 'Chunk word count',
-            chunkWordCountDesc: 'Max words per chunk sent to LLM. Recommended: about one third of Max tokens.',
+            chunkWordCountDesc: 'Max words per chunk sent to LLM. Recommended default: one third of Max tokens, rounded up. You can still override it manually.',
             maxTokensName: 'Max tokens',
-            maxTokensDesc: 'Max tokens LLM should generate per response.',
+            maxTokensDesc: 'Global max tokens LLM should generate per response. A provider-specific output token override, when set, takes precedence for that provider.',
             duplicateDetectionName: 'Enable duplicate detection',
             duplicateDetectionDesc: 'Enable checks for duplicate terms (results in console).'
         },
