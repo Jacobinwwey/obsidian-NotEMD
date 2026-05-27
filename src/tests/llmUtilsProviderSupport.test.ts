@@ -523,6 +523,91 @@ describe('llmUtils expanded provider support', () => {
         expect(requestBody.model).toBe('mimo-v2.5-pro');
     });
 
+    test.each([
+        {
+            name: 'LiteLLM',
+            provider: {
+                name: 'LiteLLM',
+                apiKey: '',
+                baseUrl: 'http://localhost:4000/v1',
+                model: 'your-proxy-model',
+                temperature: 0.5
+            } as LLMProviderConfig,
+            expectedUrl: 'http://localhost:4000/v1/chat/completions',
+            expectedHeaders: {}
+        },
+        {
+            name: 'Nebius',
+            provider: {
+                name: 'Nebius',
+                apiKey: 'nebius-key',
+                baseUrl: 'https://api.studio.nebius.com/v1',
+                model: 'openai/gpt-oss-120b',
+                temperature: 0.3
+            } as LLMProviderConfig,
+            expectedUrl: 'https://api.studio.nebius.com/v1/chat/completions',
+            expectedHeaders: { Authorization: 'Bearer nebius-key' }
+        },
+        {
+            name: 'Cerebras',
+            provider: {
+                name: 'Cerebras',
+                apiKey: 'cerebras-key',
+                baseUrl: 'https://api.cerebras.ai/v1',
+                model: 'gpt-oss-120b',
+                temperature: 0.5
+            } as LLMProviderConfig,
+            expectedUrl: 'https://api.cerebras.ai/v1/chat/completions',
+            expectedHeaders: {
+                Authorization: 'Bearer cerebras-key',
+                'X-Cerebras-3rd-Party-Integration': 'notemd'
+            }
+        },
+        {
+            name: 'Hugging Face',
+            provider: {
+                name: 'Hugging Face',
+                apiKey: 'hf-key',
+                baseUrl: 'https://router.huggingface.co/v1',
+                model: 'openai/gpt-oss-120b',
+                temperature: 0.5
+            } as LLMProviderConfig,
+            expectedUrl: 'https://router.huggingface.co/v1/chat/completions',
+            expectedHeaders: { Authorization: 'Bearer hf-key' }
+        },
+        {
+            name: 'Vercel AI Gateway',
+            provider: {
+                name: 'Vercel AI Gateway',
+                apiKey: 'vercel-key',
+                baseUrl: 'https://ai-gateway.vercel.sh/v1/ai',
+                model: 'anthropic/claude-sonnet-4.5',
+                temperature: 0.5
+            } as LLMProviderConfig,
+            expectedUrl: 'https://ai-gateway.vercel.sh/v1/chat/completions',
+            expectedHeaders: { Authorization: 'Bearer vercel-key' }
+        }
+    ])('callLLM routes $name through the OpenAI-compatible runtime', async ({ provider, expectedUrl, expectedHeaders }) => {
+        (requestUrl as jest.Mock).mockResolvedValue({
+            status: 200,
+            json: { choices: [{ message: { content: `${provider.name}-ok` } }] },
+            text: `{"choices":[{"message":{"content":"${provider.name}-ok"}}]}`
+        });
+
+        const result = await callLLM(provider, 'System prompt', 'Provider content', settings, reporter);
+
+        expect(result).toBe(`${provider.name}-ok`);
+        expect(requestUrl).toHaveBeenCalledWith(expect.objectContaining({
+            url: expectedUrl,
+            method: 'POST',
+            headers: expect.objectContaining(expectedHeaders)
+        }));
+
+        const requestBody = JSON.parse((requestUrl as jest.Mock).mock.calls[0][0].body);
+        expect(requestBody.model).toBe(provider.model);
+        (requestUrl as jest.Mock).mockClear();
+    });
+
     test('callLLM routes SiliconFlow through the OpenAI-compatible runtime', async () => {
         const provider: LLMProviderConfig = {
             name: 'SiliconFlow',
@@ -1246,6 +1331,33 @@ describe('llmUtils expanded provider support', () => {
                 Authorization: 'Bearer rq-key',
                 'HTTP-Referer': 'https://github.com/Jacobinwwey/obsidian-NotEMD',
                 'X-Title': 'Notemd Obsidian Plugin'
+            })
+        }));
+    });
+
+    test('testAPI uses model probing for Vercel AI Gateway through the normalized base URL', async () => {
+        const provider: LLMProviderConfig = {
+            name: 'Vercel AI Gateway',
+            apiKey: 'vercel-key',
+            baseUrl: 'https://ai-gateway.vercel.sh/v1/ai',
+            model: 'anthropic/claude-sonnet-4.5',
+            temperature: 0.5
+        };
+
+        (requestUrl as jest.Mock).mockResolvedValue({
+            status: 200,
+            json: { data: [] },
+            text: '{"data":[]}'
+        });
+
+        const result = await testAPI(provider);
+
+        expect(result.success).toBe(true);
+        expect(requestUrl).toHaveBeenCalledWith(expect.objectContaining({
+            url: 'https://ai-gateway.vercel.sh/v1/models',
+            method: 'GET',
+            headers: expect.objectContaining({
+                Authorization: 'Bearer vercel-key'
             })
         }));
     });

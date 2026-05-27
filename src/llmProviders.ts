@@ -16,7 +16,12 @@ export type LLMProviderSettingFieldId =
     | 'apiVersion'
     | 'maxOutputTokens';
 export type LLMProviderSettingFieldGroup = 'core' | 'contextual' | 'advanced' | 'developer';
-export type LLMProviderModelDiscoveryMode = 'none' | 'openai-compatible-models' | 'ollama-tags' | 'google-models';
+export type LLMProviderModelDiscoveryMode =
+    | 'none'
+    | 'openai-compatible-models'
+    | 'vercel-ai-gateway-models'
+    | 'ollama-tags'
+    | 'google-models';
 
 export interface LLMProviderSettingFieldDefinition {
     id: LLMProviderSettingFieldId;
@@ -46,6 +51,9 @@ export interface LLMProviderValidationIssue {
 }
 
 const DEEPSEEK_RECOMMENDED_THINKING_OUTPUT_TOKENS = 8000;
+const PROVIDER_NAME_ALIASES = new Map<string, string>([
+    ['Xiaomi', 'Xiaomi MiMo']
+]);
 const OPENAI_COMPATIBLE_REASONING_PROVIDER_NAMES = new Set([
     'DeepSeek',
     'OpenAI',
@@ -56,6 +64,8 @@ const OPENAI_COMPATIBLE_MODEL_DISCOVERY_PROVIDER_NAMES = new Set([
     'DeepSeek',
     'OpenAI',
     'Mistral',
+    'Nebius',
+    'Cerebras',
     'OpenRouter',
     'xAI',
     'Requesty',
@@ -66,6 +76,8 @@ type ProviderDefinitionInput = Omit<LLMProviderDefinition, 'settingFields' | 'mo
 
 const KNOWN_MODEL_MAX_OUTPUT_TOKENS: Partial<Record<string, Record<string, number>>> = {
     'DeepSeek': {
+        'deepseek-chat': 8_000,
+        'deepseek-reasoner': 8_000,
         'deepseek-v3': 8_000,
         'deepseek-r1': 8_000
     },
@@ -197,6 +209,7 @@ const KNOWN_MODEL_MAX_OUTPUT_TOKENS: Partial<Record<string, Record<string, numbe
         'kimi-k2.5': 32_000
     },
     'Xiaomi MiMo': {
+        'mimo-latest': 32_768,
         'mimo-v2.5-pro': 65_536,
         'mimo-v2.5': 65_536,
         'mimo-v2-omni': 65_536
@@ -226,7 +239,37 @@ const KNOWN_MODEL_MAX_OUTPUT_TOKENS: Partial<Record<string, Record<string, numbe
         'minimax-m2.7': 128_000,
         'minimax-m2.7-highspeed': 128_000
     },
+    'LiteLLM': {
+        'anthropic/claude-3-7-sonnet-20250219': 128_000
+    },
+    'Nebius': {
+        'deepseek-ai/deepseek-r1-0528': 128_000,
+        'openai/gpt-oss-120b': 32_766,
+        'qwen/qwen2.5-32b-instruct-fast': 8_192,
+        'qwen/qwen2.5-coder-32b-instruct-fast': 128_000,
+        'qwen/qwen3-coder-480b-a35b-instruct': 163_800
+    },
+    'Cerebras': {
+        'gpt-oss-120b': 32_766,
+        'openai/gpt-oss-120b': 32_766,
+        'openai/gpt-oss-20b': 32_766,
+        'qwen-3-235b-a22b-instruct-2507': 64_000,
+        'zai-glm-4.7': 40_000
+    },
+    'Hugging Face': {
+        'deepseek-ai/deepseek-r1-0528': 64_000,
+        'moonshotai/kimi-k2-instruct': 131_072,
+        'openai/gpt-oss-120b': 32_766,
+        'openai/gpt-oss-20b': 32_766
+    },
+    'Vercel AI Gateway': {
+        'anthropic/claude-sonnet-4.5': 64_000
+    },
     'OpenRouter': {
+        'anthropic/claude-opus-4.6': 128_000,
+        'anthropic/claude-opus-4.6:1m': 128_000,
+        'anthropic/claude-sonnet-4.5': 64_000,
+        'anthropic/claude-sonnet-4.5:1m': 64_000,
         'anthropic/claude-3.7-sonnet': 64_000,
         'anthropic/claude-3-7-sonnet': 64_000,
         'anthropic/claude-3.7-sonnet:beta': 64_000,
@@ -236,10 +279,13 @@ const KNOWN_MODEL_MAX_OUTPUT_TOKENS: Partial<Record<string, Record<string, numbe
         'anthropic/claude-3.5-sonnet:beta': 8_192,
         'anthropic/claude-3.5-sonnet-20240620': 8_192,
         'anthropic/claude-3.5-sonnet-20240620:beta': 8_192,
-        'google/gemini-2.0-flash-exp': 8_192
+        'google/gemini-2.0-flash-exp': 8_192,
+        'openai/gpt-oss-120b:exacto': 32_766,
+        'qwen/qwen3-coder': 65_536
     },
     'Requesty': {
-        'anthropic/claude-3-7-sonnet-latest': 8_192
+        'anthropic/claude-3-7-sonnet-latest': 8_192,
+        'anthropic/claude-sonnet-4.5': 64_000
     },
     'Mistral': {
         'codestral-2501': 256_000,
@@ -324,6 +370,10 @@ function resolveModelDiscoveryMode(definition: ProviderDefinitionInput): LLMProv
 
     if (definition.transport === 'google') {
         return { mode: 'google-models' };
+    }
+
+    if (definition.name === 'Vercel AI Gateway') {
+        return { mode: 'vercel-ai-gateway-models' };
     }
 
     if (definition.transport === 'openai-compatible' && OPENAI_COMPATIBLE_MODEL_DISCOVERY_PROVIDER_NAMES.has(definition.name)) {
@@ -731,6 +781,86 @@ const RAW_LLM_PROVIDER_DEFINITIONS: ProviderDefinitionInput[] = [
         }
     },
     {
+        name: 'LiteLLM',
+        category: 'gateway',
+        transport: 'openai-compatible',
+        apiKeyMode: 'optional',
+        apiTestMode: 'chat-only',
+        description: 'LiteLLM proxy preset for self-hosted multi-provider OpenAI-compatible routing.',
+        setupHint: 'Use the model alias exposed by your LiteLLM proxy and point Base URL at the proxy root or /v1 endpoint, for example http://localhost:4000/v1.',
+        defaultConfig: {
+            name: 'LiteLLM',
+            apiKey: '',
+            baseUrl: 'http://localhost:4000/v1',
+            model: 'your-proxy-model',
+            temperature: 0.5
+        }
+    },
+    {
+        name: 'Nebius',
+        category: 'cloud',
+        transport: 'openai-compatible',
+        apiKeyMode: 'required',
+        apiTestMode: 'models-then-chat',
+        description: 'Nebius Token Factory OpenAI-compatible endpoint for hosted OSS and frontier models.',
+        setupHint: 'Use the official Nebius AI Studio base URL https://api.studio.nebius.com/v1 with a model ID available to your account, such as openai/gpt-oss-120b or nvidia/nemotron-3-super-120b-a12b.',
+        defaultConfig: {
+            name: 'Nebius',
+            apiKey: '',
+            baseUrl: 'https://api.studio.nebius.com/v1',
+            model: 'openai/gpt-oss-120b',
+            temperature: 0.3
+        }
+    },
+    {
+        name: 'Cerebras',
+        category: 'cloud',
+        transport: 'openai-compatible',
+        apiKeyMode: 'required',
+        apiTestMode: 'models-then-chat',
+        description: 'Cerebras Inference OpenAI-compatible endpoint for fast hosted models.',
+        setupHint: 'Use the Cerebras base URL https://api.cerebras.ai/v1 with current model IDs such as gpt-oss-120b or zai-glm-4.7.',
+        defaultConfig: {
+            name: 'Cerebras',
+            apiKey: '',
+            baseUrl: 'https://api.cerebras.ai/v1',
+            model: 'gpt-oss-120b',
+            temperature: 0.5
+        }
+    },
+    {
+        name: 'Hugging Face',
+        category: 'gateway',
+        transport: 'openai-compatible',
+        apiKeyMode: 'required',
+        apiTestMode: 'chat-only',
+        description: 'Hugging Face Inference Providers router through the OpenAI-compatible chat-completions API.',
+        setupHint: 'Use the router base URL https://router.huggingface.co/v1 with a model ID available to your token, such as openai/gpt-oss-120b.',
+        defaultConfig: {
+            name: 'Hugging Face',
+            apiKey: '',
+            baseUrl: 'https://router.huggingface.co/v1',
+            model: 'openai/gpt-oss-120b',
+            temperature: 0.5
+        }
+    },
+    {
+        name: 'Vercel AI Gateway',
+        category: 'gateway',
+        transport: 'openai-compatible',
+        apiKeyMode: 'required',
+        apiTestMode: 'models-then-chat',
+        description: 'Vercel AI Gateway OpenAI-compatible endpoint for multi-provider routing behind one API key.',
+        setupHint: 'Use the official base URL https://ai-gateway.vercel.sh/v1 with a provider-prefixed model ID such as anthropic/claude-sonnet-4.5 or alibaba/qwen3.6-plus.',
+        defaultConfig: {
+            name: 'Vercel AI Gateway',
+            apiKey: '',
+            baseUrl: 'https://ai-gateway.vercel.sh/v1',
+            model: 'anthropic/claude-sonnet-4.5',
+            temperature: 0.5
+        }
+    },
+    {
         name: 'Requesty',
         category: 'gateway',
         transport: 'openai-compatible',
@@ -801,8 +931,46 @@ export const LLM_PROVIDER_DEFINITIONS: LLMProviderDefinition[] = RAW_LLM_PROVIDE
 const PROVIDER_INDEX = new Map(LLM_PROVIDER_DEFINITIONS.map((definition, index) => [definition.name, index]));
 const PROVIDER_MAP = new Map(LLM_PROVIDER_DEFINITIONS.map(definition => [definition.name, definition]));
 
+export function resolveCanonicalProviderName(name: string): string {
+    return PROVIDER_NAME_ALIASES.get(name) ?? name;
+}
+
+export function canonicalizeProviderConfig(provider: LLMProviderConfig): LLMProviderConfig {
+    const canonicalName = resolveCanonicalProviderName(provider.name);
+    if (canonicalName === provider.name) {
+        return provider;
+    }
+
+    const definition = PROVIDER_MAP.get(canonicalName);
+    return definition
+        ? { ...definition.defaultConfig, ...provider, name: canonicalName }
+        : { ...provider, name: canonicalName };
+}
+
+export function canonicalizeProviderConfigs(providers: LLMProviderConfig[]): LLMProviderConfig[] {
+    const providersByName = new Map<string, LLMProviderConfig>();
+
+    providers.forEach(provider => {
+        if (!provider || typeof provider.name !== 'string') {
+            return;
+        }
+
+        const canonicalProvider = canonicalizeProviderConfig(provider);
+        const existingProvider = providersByName.get(canonicalProvider.name);
+
+        providersByName.set(
+            canonicalProvider.name,
+            existingProvider
+                ? { ...existingProvider, ...canonicalProvider }
+                : canonicalProvider
+        );
+    });
+
+    return Array.from(providersByName.values());
+}
+
 export function getLLMProviderDefinition(name: string): LLMProviderDefinition | undefined {
-    return PROVIDER_MAP.get(name);
+    return PROVIDER_MAP.get(resolveCanonicalProviderName(name));
 }
 
 function normalizeModelId(modelName: string): string {
@@ -814,7 +982,7 @@ export function getKnownModelMaxOutputTokens(providerName: string, modelName: st
         return undefined;
     }
 
-    const providerModels = KNOWN_MODEL_MAX_OUTPUT_TOKENS[providerName];
+    const providerModels = KNOWN_MODEL_MAX_OUTPUT_TOKENS[resolveCanonicalProviderName(providerName)];
     if (!providerModels) {
         return undefined;
     }
@@ -981,7 +1149,7 @@ export function hasBlockingProviderValidationIssues(
 }
 
 export function getOrderedProviderNames(providers: LLMProviderConfig[]): string[] {
-    return providers
+    return canonicalizeProviderConfigs(providers)
         .map(provider => provider.name)
         .sort((left, right) => {
             const leftIndex = PROVIDER_INDEX.get(left);

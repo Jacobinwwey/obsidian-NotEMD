@@ -39,7 +39,19 @@ function requireBaseUrl(provider: LLMProviderConfig): string {
 }
 
 function normalizeOpenAICompatibleBaseUrl(baseUrl: string): string {
-    return normalizeEndpointBaseUrl(baseUrl, ['/chat/completions', '/models']);
+    let normalized = normalizeEndpointBaseUrl(baseUrl, ['/chat/completions', '/models']);
+    if (normalized.endsWith('/v1/ai')) {
+        normalized = normalized.slice(0, -'/ai'.length);
+    }
+    return normalized;
+}
+
+function normalizeVercelAIGatewayBaseUrl(baseUrl: string): string {
+    let normalized = normalizeOpenAICompatibleBaseUrl(baseUrl);
+    if (normalized.endsWith('/v1')) {
+        normalized = normalized.slice(0, -'/v1'.length);
+    }
+    return trimTrailingSlashes(normalized);
 }
 
 function normalizeOllamaBaseUrl(baseUrl: string): string {
@@ -64,6 +76,12 @@ function buildOpenAICompatibleHeaders(provider: LLMProviderConfig): Record<strin
         headers['X-Title'] = 'Notemd Obsidian Plugin';
     }
 
+    return headers;
+}
+
+function buildVercelAIGatewayDiscoveryHeaders(provider: LLMProviderConfig): Record<string, string> {
+    const headers = buildOpenAICompatibleHeaders(provider);
+    headers['ai-gateway-protocol-version'] = '0.0.1';
     return headers;
 }
 
@@ -113,6 +131,19 @@ async function discoverOpenAICompatibleModels(provider: LLMProviderConfig): Prom
     return normalizeModelList(modelIds);
 }
 
+async function discoverVercelAIGatewayModels(provider: LLMProviderConfig): Promise<string[]> {
+    const baseUrl = normalizeVercelAIGatewayBaseUrl(requireBaseUrl(provider));
+    const data = await fetchJson(`${baseUrl}/v3/ai/config`, {
+        headers: buildVercelAIGatewayDiscoveryHeaders(provider)
+    });
+
+    const modelIds = Array.isArray(data?.models)
+        ? data.models.map((entry: any) => typeof entry?.id === 'string' ? entry.id : '')
+        : [];
+
+    return normalizeModelList(modelIds);
+}
+
 async function discoverOllamaModels(provider: LLMProviderConfig): Promise<string[]> {
     const baseUrl = normalizeOllamaBaseUrl(requireBaseUrl(provider));
 
@@ -150,6 +181,8 @@ export async function discoverProviderModels(provider: LLMProviderConfig): Promi
     switch (definition.mode) {
         case 'openai-compatible-models':
             return { models: await discoverOpenAICompatibleModels(provider), source: 'remote' };
+        case 'vercel-ai-gateway-models':
+            return { models: await discoverVercelAIGatewayModels(provider), source: 'remote' };
         case 'ollama-tags':
             return { models: await discoverOllamaModels(provider), source: 'remote' };
         case 'google-models':

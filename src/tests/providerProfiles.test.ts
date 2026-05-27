@@ -75,6 +75,43 @@ describe('provider profile helpers', () => {
         expect(result.importedProviders.find(provider => provider.name === 'OpenAI')?.localOnly).toBe(false);
     });
 
+    test('canonicalizes legacy provider names during import', () => {
+        const json = JSON.stringify({
+            formatVersion: 1,
+            exportedAt: '2026-05-04T12:00:00.000Z',
+            providers: [
+                {
+                    name: 'Xiaomi',
+                    apiKey: 'legacy-key',
+                    baseUrl: 'https://legacy.example/v1',
+                    model: 'mimo-latest',
+                    temperature: 0.4,
+                    localOnly: false
+                }
+            ]
+        });
+
+        const result = parseProviderProfileImport(json, [
+            {
+                name: 'Xiaomi MiMo',
+                apiKey: '',
+                baseUrl: 'https://api.xiaomimimo.com/v1',
+                model: 'mimo-v2.5-pro',
+                temperature: 1.0
+            }
+        ]);
+
+        expect(result.newCount).toBe(0);
+        expect(result.updatedCount).toBe(1);
+        expect(result.importedProviders).toHaveLength(1);
+        expect(result.importedProviders[0]).toEqual(expect.objectContaining({
+            name: 'Xiaomi MiMo',
+            apiKey: 'legacy-key',
+            baseUrl: 'https://legacy.example/v1',
+            model: 'mimo-latest'
+        }));
+    });
+
     test('rejects redacted provider profile payloads during import', () => {
         const json = JSON.stringify({
             formatVersion: 1,

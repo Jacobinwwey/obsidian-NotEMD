@@ -61,6 +61,41 @@ describe('provider model discovery', () => {
         }));
     });
 
+    test('discovers Vercel AI Gateway models from the config registry endpoint', async () => {
+        mockedRequestUrl.mockResolvedValue({
+            status: 200,
+            text: '',
+            json: {
+                models: [
+                    { id: 'anthropic/claude-sonnet-4.5' },
+                    { id: 'alibaba/qwen3.6-plus' },
+                    { id: 'anthropic/claude-sonnet-4.5' }
+                ]
+            }
+        } as any);
+
+        const result = await discoverProviderModels({
+            name: 'Vercel AI Gateway',
+            apiKey: 'vercel-key',
+            baseUrl: 'https://ai-gateway.vercel.sh/v1',
+            model: 'anthropic/claude-sonnet-4.5',
+            temperature: 0.5
+        });
+
+        expect(mockedRequestUrl).toHaveBeenCalledWith(expect.objectContaining({
+            url: 'https://ai-gateway.vercel.sh/v3/ai/config',
+            method: 'GET',
+            headers: expect.objectContaining({
+                Authorization: 'Bearer vercel-key',
+                'ai-gateway-protocol-version': '0.0.1'
+            })
+        }));
+        expect(result).toEqual({
+            models: ['alibaba/qwen3.6-plus', 'anthropic/claude-sonnet-4.5'],
+            source: 'remote'
+        });
+    });
+
     test('sends gateway headers for Requesty/OpenRouter-compatible discovery calls', async () => {
         mockedRequestUrl.mockResolvedValue({
             status: 200,
@@ -82,6 +117,26 @@ describe('provider model discovery', () => {
                 'HTTP-Referer': 'https://github.com/Jacobinwwey/obsidian-NotEMD',
                 'X-Title': 'Notemd Obsidian Plugin'
             })
+        }));
+    });
+
+    test('normalizes Vercel AI Gateway chat endpoints before fetching model config', async () => {
+        mockedRequestUrl.mockResolvedValue({
+            status: 200,
+            text: '',
+            json: { models: [{ id: 'anthropic/claude-sonnet-4.5' }] }
+        } as any);
+
+        await discoverProviderModels({
+            name: 'Vercel AI Gateway',
+            apiKey: 'vercel-key',
+            baseUrl: 'https://ai-gateway.vercel.sh/v1/chat/completions',
+            model: 'anthropic/claude-sonnet-4.5',
+            temperature: 0.5
+        });
+
+        expect(mockedRequestUrl).toHaveBeenCalledWith(expect.objectContaining({
+            url: 'https://ai-gateway.vercel.sh/v3/ai/config'
         }));
     });
 
@@ -219,6 +274,22 @@ describe('provider model discovery', () => {
             model: 'deployment-name',
             temperature: 0.5,
             apiVersion: '2025-01-01-preview'
+        });
+
+        expect(mockedRequestUrl).not.toHaveBeenCalled();
+        expect(result).toEqual({
+            models: [],
+            source: 'none'
+        });
+    });
+
+    test('does not pretend to support model discovery for chat-only manual providers', async () => {
+        const result = await discoverProviderModels({
+            name: 'LiteLLM',
+            apiKey: 'optional-key',
+            baseUrl: 'http://localhost:4000/v1',
+            model: 'your-proxy-model',
+            temperature: 0.5
         });
 
         expect(mockedRequestUrl).not.toHaveBeenCalled();
