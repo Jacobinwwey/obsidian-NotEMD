@@ -41,6 +41,7 @@ type ModelSettingKey = 'addLinksModel' | 'researchModel' | 'generateTitleModel' 
 
 type ProviderPanelState = {
     discoveredModels: string[];
+    discoveredModelsExpanded: boolean;
     fetchStatus: 'idle' | 'loading' | 'success' | 'error';
     fetchMessage?: string;
 };
@@ -265,6 +266,7 @@ export class NotemdSettingTab extends PluginSettingTab {
         if (!state) {
             state = {
                 discoveredModels: [],
+                discoveredModelsExpanded: false,
                 fetchStatus: 'idle'
             };
             this.providerPanelState.set(providerName, state);
@@ -332,6 +334,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                         try {
                             const result = await discoverProviderModels(provider);
                             panelState.discoveredModels = result.models;
+                            panelState.discoveredModelsExpanded = result.models.length > 0;
                             panelState.fetchStatus = 'success';
                             panelState.fetchMessage = result.models.length > 0
                                 ? formatI18n(providerI18n.fetchModelsSuccess, {
@@ -365,20 +368,54 @@ export class NotemdSettingTab extends PluginSettingTab {
         }
 
         if (panelState.discoveredModels.length > 0) {
-            const listWrapper = containerEl.createDiv({ cls: 'notemd-provider-callout' });
-            listWrapper.createEl('strong', { text: providerI18n.discoveredModelsName });
-            listWrapper.createEl('p', { text: providerI18n.discoveredModelsDesc });
+            const currentModel = provider.model.trim();
+            const currentDiscoveredModel = panelState.discoveredModels.includes(currentModel) ? currentModel : '';
+            const detailsEl = containerEl.createEl('details', {
+                cls: 'notemd-section-card notemd-provider-discovery-panel'
+            });
+            detailsEl.open = panelState.discoveredModelsExpanded;
+            detailsEl.addEventListener('toggle', () => {
+                panelState.discoveredModelsExpanded = detailsEl.open;
+            });
 
-            const list = listWrapper.createDiv({ cls: 'notemd-provider-model-list' });
+            const summary = detailsEl.createEl('summary', {
+                cls: 'notemd-section-summary notemd-provider-discovery-summary'
+            });
+            summary.setText(
+                currentDiscoveredModel
+                    ? formatI18n(providerI18n.discoveredModelsSummaryWithCurrent, {
+                        count: panelState.discoveredModels.length,
+                        model: currentDiscoveredModel
+                    })
+                    : formatI18n(providerI18n.discoveredModelsSummary, {
+                        count: panelState.discoveredModels.length
+                    })
+            );
+
+            detailsEl.createEl('p', {
+                cls: 'notemd-section-description',
+                text: providerI18n.discoveredModelsDesc
+            });
+
+            const list = detailsEl.createDiv({ cls: 'notemd-provider-model-list' });
             panelState.discoveredModels.forEach(modelId => {
-                const row = list.createDiv({ cls: 'notemd-provider-model-item' });
+                const isCurrentModel = currentModel === modelId;
+                const row = list.createDiv({
+                    cls: `notemd-provider-model-item${isCurrentModel ? ' is-current' : ''}`
+                });
                 row.createEl('code', { text: modelId });
                 const useButton = new ButtonComponent(row);
                 useButton
-                    .setButtonText(providerI18n.discoveredModelsUseButton)
+                    .setButtonText(isCurrentModel ? providerI18n.discoveredModelsUsingButton : providerI18n.discoveredModelsUseButton)
+                    .setDisabled(isCurrentModel)
                     .onClick(async () => {
                         provider.model = modelId;
                         await this.plugin.saveSettings();
+                        panelState.discoveredModelsExpanded = false;
+                        new Notice(formatI18n(providerI18n.discoveredModelsApplied, {
+                            provider: provider.name,
+                            model: modelId
+                        }), 5000);
                         this.display();
                     });
             });
