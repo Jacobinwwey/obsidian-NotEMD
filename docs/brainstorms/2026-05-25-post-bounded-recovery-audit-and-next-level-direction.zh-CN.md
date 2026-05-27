@@ -144,11 +144,14 @@ release-facing 真值已重新对齐到当前主线：
 7. 对 Cherry Studio 的分析已经给出明确对照方向：
    - strategy-registry 与 parser/fallback 分层值得复用
    - 持久化 `provider.models[]` 生命周期和更重的 provider-domain 状态，对 Notemd 当前架构来说过重
+8. 当前已有一条隔离实现通道：单独 worktree 中的 `feat/provider-settings-model-discovery`。从其当前 diff 来看，这条通道已经增加了 `src/llmProviders.ts` 里的 provider-field taxonomy metadata 与 discovery metadata、一个新的瞬时 `src/providerModelDiscovery.ts`（首批覆盖 OpenAI-compatible / Ollama / Google）、`src/ui/NotemdSettingTab.ts` 中一版 metadata-driven provider panel 重构尝试、对应 locale keys，以及聚焦的回归测试。
+9. 但这条隔离通道仍然不属于 current-main 真值。2026-05-27 检查时，该 worktree 还没有 bootstrapped 的 `node_modules`，因此那里的验证尚未完成；CSS/polish 与最终质量门禁也都还没收口。
 
 正确解释：
 
 - provider/runtime 支持面已经实质领先于 provider settings UX 架构；
-- 下一阶段真正该做的，不是先继续堆 provider 数量，而是把已存在 provider 的 control plane 收敛到可扩展的 schema 与 discoverability 设计上。
+- 下一阶段真正该做的，不是先继续堆 provider 数量，而是把已存在 provider 的 control plane 收敛到可扩展的 schema 与 discoverability 设计上；
+- 这条线已经从纯规划进入了有界隔离实现，但在完成 bootstrap、验证并合回之前，current-main 真值不发生变化。
 
 ## 3. 相对先前方案要求的深度对比
 
@@ -202,16 +205,16 @@ release-facing 真值已重新对齐到当前主线：
 
 | Requirement | 状态 | 说明 |
 |---|---|---|
-| R1 provider settings 需要区分 required/core 与 advanced 字段 | 未落地 | 当前 UI 仍是单层 provider panel，没有共享分组元数据 |
-| R2 这一区分必须来自共享 provider metadata | 未落地 | `LLMProviderDefinition` 还不具备字段 taxonomy 能力 |
+| R1 provider settings 需要区分 required/core 与 advanced 字段 | 当前主线未落地；隔离实现进行中 | 当前 main 上的 UI 仍是单层 provider panel，而隔离通道里已经有一版未合并的 metadata-driven 分组尝试 |
+| R2 这一区分必须来自共享 provider metadata | 当前主线未落地；隔离实现进行中 | main 上的 `LLMProviderDefinition` 还没有字段 taxonomy 能力，但隔离通道已新增 `settingFields` 元数据 |
 | R3 保持 runtime 行为与 import/export 兼容 | 当前数据模型已天然有利于此 | 扁平 provider config 让未来重构的兼容性压力较低 |
-| R4 支持 Azure 专属 required 字段而不污染其他 provider | 部分对齐 | `apiVersion` 已存在，但仍通过硬编码 UI 分支注入 |
-| R5 常见配置流程需要更快更聚焦 | 部分对齐 | 当前 UI 简单但噪声偏高，尚未收敛出 core/advanced split |
+| R4 支持 Azure 专属 required 字段而不污染其他 provider | main 上部分对齐；隔离元数据路径已出现 | `apiVersion` 现在仍靠硬编码 UI 分支注入；隔离通道已开始把这类可见性往 provider metadata 上迁移，同时不改持久化结构 |
+| R5 常见配置流程需要更快更聚焦 | main 上部分对齐；隔离 renderer 重构进行中 | 当前 UI 简单但噪声偏高；隔离通道已开始做 core/contextual/advanced split，但还没有验证并合并 |
 | R6 深度分析 Cherry Studio 模型获取链路 | 研究已落地 | `.trellis/tasks/05-27-provider-settings-model-discovery/research/cherry-studio-model-discovery.md` |
-| R7 发现失败时必须平滑回退到手动 model 输入 | 目前行为上成立 | 现在唯一方式就是手动输入，但还没有 discovery helper |
+| R7 发现失败时必须平滑回退到手动 model 输入 | 当前 main 行为上成立；隔离 discovery helper 进行中 | main 目前仍完全依赖手动输入；隔离通道则补了一条 transient discovery，同时刻意保留手动 `model` 输入作为持久化真值路径 |
 | R8 `model` 必须保持 core/default-visible | 当前行为已满足 | `model` 现在就是一等可见字段 |
-| R9 若已有持久化 advanced 值则默认展开 advanced | 未落地 | 目前根本没有 advanced disclosure state |
-| R10 Cherry 方案只做 selective reuse，不整体照搬 | 已规划但未实现 | 研究结论已足以指导实现 |
+| R9 若已有持久化 advanced 值则默认展开 advanced | 当前主线未落地；隔离 helper 已出现 | main 目前还没有 advanced disclosure state；隔离通道已增加一条未合并的基于持久化 advanced 值的展开 helper |
+| R10 Cherry 方案只做 selective reuse，不整体照搬 | 研究已落地；隔离实现遵循该方向 | 隔离通道使用的是 transient discovery metadata/service，而不是持久化 `provider.models[]` 子系统 |
 
 正确解释：
 
@@ -237,6 +240,8 @@ release-facing 真值已重新对齐到当前主线：
    local-KB、chapter split、preview history 与 saved-artifact reopening 的回归，没有逼着文档去假装 packaged runtime isolation 已经完成。
 3. **Cherry Studio 对照研究消除了大的规划盲区**
    仓库现在已经明确知道该复用什么、不该复用什么，以及原因是什么。
+4. **Provider-settings 轨道已经出现隔离执行探针**
+   当前已不再被架构方向不明所阻塞，真正的阻塞点变成了如何在不过度声明主线真值的前提下，把隔离通道 bootstrap、补完并验证通过。
 
 ### 4.2 当前最大的结构性张力
 
@@ -248,6 +253,8 @@ release-facing 真值已重新对齐到当前主线：
    如果整体照搬 Cherry Studio，就会平白引入第二套 provider-state subsystem。
 4. **扁平配置结构既是优势也是约束**
    它保住了 import/export 与 `data.json` 兼容性，但也意味着 UI 自身拿不到字段 taxonomy。
+5. **当前下一个 blocker 已经变成执行纪律，而不是规划模糊**
+   隔离通道已经有一版有界实现，但在它 bootstrap、验证、polish 完成前，不能改变 current-main 真值。
 
 ### 4.3 正确解释
 
@@ -255,7 +262,7 @@ release-facing 真值已重新对齐到当前主线：
 
 1. 已经跨过“bounded product slice 是否恢复存在”的阶段；
 2. 但还没有进入真正的 Stage-C packaged runtime convergence；
-3. 也还没有完成 provider-settings control-plane convergence；
+3. 也还没有完成 current main 上的 provider-settings control-plane convergence，尽管隔离实现通道已经启动；
 4. 更没有进入宽口径 public CLI promotion。
 
 ## 5. 具体 next-level 方案
