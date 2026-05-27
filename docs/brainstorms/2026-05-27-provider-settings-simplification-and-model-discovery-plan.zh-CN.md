@@ -129,12 +129,18 @@ canonical: true
    - 基于持久化 advanced 值的派生 auto-expand
    - 可选的 fetch-models UI wiring
 4. 对应 locale keys、README/update surface 与聚焦测试也已经补入。
+5. 当前 main 还继续补齐了这条 lane 的有界 provider 宽度收口：
+   - 对旧持久化 provider 名称做 canonical alias 归一化，例如 `Xiaomi` -> `Xiaomi MiMo`
+   - 补入并对齐共享 runtime 的额外 OpenAI-compatible 预设（`LiteLLM`、`Nebius`、`Cerebras`、`Hugging Face`、`Vercel AI Gateway`）
+   - 对 Vercel AI Gateway 单独走 `v3/ai/config` registry endpoint，而不是假装它和 generic `/models` 完全等价
+   - 在设置页中加入 model-aware token guidance，使当前模型的已知最大输出 Token 上限能在 `Model`、provider override 与全局 `Max tokens` 旁被明确展示
 
 仍然刻意不做的内容：
 
 1. 持久化远程 provider model catalog；
 2. model CRUD / health-check management UI；
 3. 对首批之外 provider 的泛化 discovery 覆盖宣称。
+4. 假装所有 OpenAI-compatible gateway 都共享完全相同的 `/models` 语义。
 
 ## 4. Cherry Studio 对照结论
 
@@ -225,6 +231,7 @@ Cherry Studio 值得复用的点：
 
 1. 已落地到 current main；
 2. 当前 metadata 形态仍保持 declarative、field-scoped。
+3. backward compatibility 现在还覆盖了 legacy provider name 的 canonicalization，包括 settings load 与 provider-profile import/export。
 
 ### Phase 2：settings renderer 重构
 
@@ -253,6 +260,7 @@ Cherry Studio 值得复用的点：
 1. 已落地到 current main；
 2. default/core、contextual 与 advanced 分区现已通过共享 metadata 接线；
 3. 对应 CSS/layout 支撑与样式测试也已进入发货面。
+4. provider settings 现在还会展示 model-aware token guidance，并在 `model`、全局 `Max tokens`、chunk-size 提交后立即刷新。
 
 ### Phase 3：lightweight discovery service
 
@@ -284,6 +292,7 @@ Cherry Studio 值得复用的点：
 1. 已按计划首批 family 落地到 current main；
 2. 它仍保持手动 `model` 输入为持久化 source of truth；
 3. 不支持的 provider 仍然降级回手动输入，而不是引入重型 catalog 子系统。
+4. gateway 的有界分流现在已经显式化：Vercel AI Gateway 走专用 registry endpoint；LiteLLM、Hugging Face 等预设则继续保持 manual-first，而不是过度宣称 discovery 支持。
 
 ### Phase 4：UI 接入
 
@@ -298,6 +307,7 @@ Cherry Studio 值得复用的点：
 1. fetch-models UI wiring 与瞬时 suggestion state 已进入 current main；
 2. 新 provider-panel surface 的 styling 支撑已经落地；
 3. README / update surface 现在也已描述同样的有界行为。
+4. “应用成功提示”与 discovered-models collapse-state/persistence 行为现在也有聚焦行为测试覆盖。
 
 ### Phase 5：测试与文档
 
@@ -320,6 +330,7 @@ Cherry Studio 值得复用的点：
 1. 聚焦的 i18n/test 更新已经落地到 current main；
 2. canonical 文档现在把这条线描述为 current-main 已落地真值，而不是隔离实现进展；
 3. 验证证据现已包含 targeted provider-settings/model-discovery tests 与完整仓库门禁。
+4. 当前 settings surface 还额外写清了全局 `Max tokens` 与 provider-specific output-token override 的关系，以降低“两处 max tokens”造成的理解成本。
 
 ## 7. 显式非目标
 

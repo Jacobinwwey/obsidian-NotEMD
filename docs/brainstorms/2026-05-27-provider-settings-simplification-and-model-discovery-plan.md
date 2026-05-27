@@ -129,12 +129,18 @@ What is now present on current main:
    - derived auto-expand when persisted advanced values exist
    - optional fetch-models UI wiring
 4. matching locale keys, README/update-surface sync, and focused tests cover the new control-plane behavior.
+5. current main also now carries bounded provider-breadth follow-through for this lane:
+   - canonical provider alias normalization for legacy persisted names such as `Xiaomi` -> `Xiaomi MiMo`
+   - additional OpenAI-compatible presets aligned to the shared runtime (`LiteLLM`, `Nebius`, `Cerebras`, `Hugging Face`, `Vercel AI Gateway`)
+   - provider-family-specific discovery handling for Vercel AI Gateway's `v3/ai/config` registry endpoint
+   - model-aware token guidance in settings, so the active model's known max output-token cap is surfaced beside `Model`, provider override, and global `Max tokens`
 
 What remains intentionally out of scope:
 
 1. persisted remote provider model catalogs;
 2. model CRUD / health-check management UI;
 3. broad all-provider model discovery claims beyond the verified first batch.
+4. pretending that every OpenAI-compatible gateway should expose the same `/models` semantics.
 
 ## 4. Cherry Studio Comparison
 
@@ -225,6 +231,7 @@ Current checkpoint:
 
 1. landed on current main;
 2. the metadata shape remains declarative and field-scoped.
+3. backward compatibility now also includes canonicalization of legacy provider names during settings load and provider-profile import/export flows.
 
 ### Phase 2: settings renderer refactor
 
@@ -253,6 +260,7 @@ Current checkpoint:
 1. landed on current main;
 2. default/core, contextual, and advanced sections are wired through shared metadata;
 3. CSS/layout support and focused style tests are now part of the shipped surface.
+4. provider settings now surface model-aware token guidance and refresh immediately after `model`, global `Max tokens`, or chunk-size edits commit.
 
 ### Phase 3: lightweight discovery service
 
@@ -284,6 +292,7 @@ Current checkpoint:
 1. landed on current main for the planned first batch;
 2. it keeps manual `model` entry as the persisted source of truth;
 3. unsupported providers still degrade to manual entry rather than a heavy catalog subsystem.
+4. the bounded gateway split is now explicit: Vercel AI Gateway uses its dedicated registry endpoint, while presets such as LiteLLM and Hugging Face remain manual-first rather than over-claiming discovery support.
 
 ### Phase 4: UI integration
 
@@ -298,6 +307,7 @@ Current checkpoint:
 1. fetch-models UI wiring and transient suggestion state are now on current main;
 2. styling support for the new provider-panel surfaces is landed;
 3. README/update surfaces now describe the same bounded behavior.
+4. apply-success feedback and collapse-state persistence are now covered by focused behavior tests.
 
 ### Phase 5: tests and documentation
 
@@ -320,6 +330,7 @@ Current checkpoint:
 1. focused i18n/test updates are landed on current main;
 2. canonical docs now describe the lane as landed current-main truth rather than isolated implementation progress;
 3. verification evidence now includes targeted provider-settings/model-discovery tests plus full repository gates.
+4. the current settings surface also documents the relationship between global `Max tokens` and provider-specific output-token overrides, to reduce confusion around the two token caps.
 
 ## 7. Explicit Non-Goals
 

@@ -17,6 +17,7 @@ This document summarizes the major functional and architectural changes implemen
 
 - Added provider-field taxonomy metadata (`core`, `contextual`, `advanced`, `developer`) so the provider settings panel can render required/default-visible controls separately from secondary tuning controls.
 - Added lightweight in-settings model discovery for OpenAI-compatible `/models`, Ollama tags, and Google Gemini model listing. Discovery results are transient suggestions only; persisted provider state still uses the existing manual `model` string.
+- Expanded the bounded OpenAI-compatible preset set with `LiteLLM`, `Nebius`, `Cerebras`, `Hugging Face`, and `Vercel AI Gateway`, while keeping discovery support honest per endpoint family rather than over-claiming generic `/models` parity.
 - Added the `Relax input file restrictions` developer setting plus the shared supported-input reader layer.
 - Extended advanced folder-task selection with profile-aware folder locking, temporary overrides, preview panels, and example/preset chips.
 
@@ -24,6 +25,8 @@ This document summarizes the major functional and architectural changes implemen
 
 - Provider advanced settings now auto-expand when a provider already has saved advanced overrides, preserving visibility for existing `data.json` behavior instead of silently collapsing non-default live config.
 - Added discovery prerequisite validation and endpoint normalization so `/chat/completions`, `/models`, and `/tags` style base URLs do not cause malformed model-list requests.
+- Added canonical provider-name normalization for legacy persisted/imported aliases such as `Xiaomi` -> `Xiaomi MiMo`, preventing duplicate provider rows across settings load and profile import.
+- Added model-aware token guidance in provider settings so the current model's known output-token cap is surfaced beside `Model`, provider override, and global `Max tokens`, with immediate re-render after edits.
 - Unified task-aware input validation across sidebar actions, command entrypoints, batch adapters, and path-based diagram generation.
 - Corrected relaxed-mode batch empty-folder notices so they describe supported inputs rather than hard-coded `.md` / `.txt` assumptions.
 - Kept source-mutating and verbatim-sensitive flows intentionally restricted while widening only the safe allowlist.

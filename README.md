@@ -247,15 +247,15 @@ Access plugin settings via:
 ### LLM Provider Configuration
 1.  **Active Provider**: Select the LLM provider you want to use from the dropdown menu.
 2.  **Provider Settings**: Configure the specific settings for the selected provider:
-    *   **API Key**: Required for most cloud providers (e.g., OpenAI, Anthropic, DeepSeek, Qwen, Qwen Code, Doubao, Moonshot, Xiaomi MiMo, GLM, Z AI, MiniMax, Huawei Cloud MaaS, Baidu Qianfan, SiliconFlow, Google, Mistral, Azure OpenAI, OpenRouter, xAI, Groq, Together, Fireworks, Requesty). Not needed for Ollama. Optional for LM Studio and the generic `OpenAI Compatible` preset when your endpoint accepts anonymous or placeholder access.
+    *   **API Key**: Required for most cloud providers (e.g., OpenAI, Anthropic, DeepSeek, Qwen, Qwen Code, Doubao, Moonshot, Xiaomi MiMo, GLM, Z AI, MiniMax, Huawei Cloud MaaS, Baidu Qianfan, SiliconFlow, Google, Mistral, Azure OpenAI, OpenRouter, xAI, Groq, Together, Fireworks, Nebius, Cerebras, Hugging Face, Vercel AI Gateway, Requesty). Not needed for Ollama. Optional for LM Studio, LiteLLM, and the generic `OpenAI Compatible` preset when your endpoint accepts anonymous or placeholder access.
     *   **Base URL / Endpoint**: The API endpoint for the service. Defaults are provided, but you may need to change this for local models (LMStudio, Ollama), gateways (OpenRouter, Requesty, OpenAI Compatible), or specific Azure deployments. **Required for Azure OpenAI.**
     *   **Model**: The specific model name/ID to use (e.g., `gpt-4o`, `claude-3-5-sonnet-20240620`, `google/gemini-flash-1.5`, `grok-4`, `moonshotai/kimi-k2-instruct-0905`, `accounts/fireworks/models/kimi-k2p5`, `anthropic/claude-3-7-sonnet-latest`). Ensure the model is available at your endpoint/provider.
     *   **API Version (Azure Only)**: Required for Azure OpenAI deployments (e.g., `2024-02-15-preview`).
     *   **Advanced Settings**: Secondary tuning controls such as `Temperature`, `Top-p`, reasoning hints, DeepSeek thinking mode, and the provider-specific output-token override now live behind **Show advanced settings**. If a provider already has saved advanced overrides, this section auto-expands so existing behavior stays visible instead of being silently hidden.
-    *   **Fetch Model List**: Supported providers can query the endpoint for available model IDs without replacing manual model entry. In the first batch this covers OpenAI-compatible `/models`, Ollama tags, and Google Gemini model listing. The fetched list is transient suggestions only; your saved `Model` string remains the source of truth.
+    *   **Fetch Model List**: Supported providers can query the endpoint for available model IDs without replacing manual model entry. The current bounded support covers OpenAI-compatible `/models`, the dedicated Vercel AI Gateway registry endpoint, Ollama tags, and Google Gemini model listing. Presets such as LiteLLM and Hugging Face still stay manual-first for model entry until their discovery semantics are implemented explicitly. The fetched list is transient suggestions only; your saved `Model` string remains the source of truth.
 3.  **Test Connection**: Use the "Test Connection" button for the active provider to verify your settings. OpenAI-compatible providers now use provider-aware checks: endpoints such as `Qwen`, `Qwen Code`, `Doubao`, `Moonshot`, `Xiaomi MiMo`, `GLM`, `Z AI`, `MiniMax`, `Huawei Cloud MaaS`, `Baidu Qianfan`, `SiliconFlow`, `Groq`, `Together`, `Fireworks`, `LMStudio`, and `OpenAI Compatible` probe `chat/completions` directly, while providers with a reliable `/models` endpoint can still use model listing first. If the first probe fails with a transient network disconnect such as `ERR_CONNECTION_CLOSED`, Notemd automatically falls back to the stable retry sequence instead of failing immediately.
 4.  **Manage Provider Configurations**: Use the "Export Providers" and "Import Providers" buttons to save/load your LLM provider settings to/from a `notemd-providers.json` file within the plugin's configuration directory. This allows for easy backup and sharing.
-5.  **Preset Coverage**: In addition to the original providers, Notemd now includes preset entries for `Qwen`, `Qwen Code`, `Doubao`, `Moonshot`, `Xiaomi MiMo`, `GLM`, `Z AI`, `MiniMax`, `Huawei Cloud MaaS`, `Baidu Qianfan`, `SiliconFlow`, `xAI`, `Groq`, `Together`, `Fireworks`, `Requesty`, and a generic `OpenAI Compatible` target for LiteLLM, vLLM, Perplexity, Vercel AI Gateway, or custom proxies.
+5.  **Preset Coverage**: In addition to the original providers, Notemd now includes preset entries for `Qwen`, `Qwen Code`, `Doubao`, `Moonshot`, `Xiaomi MiMo`, `GLM`, `Z AI`, `MiniMax`, `Huawei Cloud MaaS`, `Baidu Qianfan`, `SiliconFlow`, `xAI`, `Groq`, `Together`, `Fireworks`, `LiteLLM`, `Nebius`, `Cerebras`, `Hugging Face`, `Vercel AI Gateway`, `Requesty`, and a generic `OpenAI Compatible` target for custom proxies.
 <img width="804" height="506" alt="LLM" src="https://github.com/user-attachments/assets/8caf42e3-43ad-456d-8b96-b63e7914e45f" />
 
 ### Multi-Model Configuration
@@ -389,8 +389,8 @@ Access plugin settings via:
 -   **Batch Size**: (Visible only when parallelism is enabled) The number of files to group into a single batch. (Default: 50, Range: 10-200)
 -   **Delay Between Batches (ms)**: (Visible only when parallelism is enabled) An optional delay in milliseconds between processing each batch, which can help manage API rate limits. (Default: 1000ms)
 -   **API Call Interval (ms)**: Minimum delay in milliseconds *before and after* each individual LLM API call. Crucial for low-rate APIs or to prevent 429 errors. Set to 0 for no artificial delay. (Default: 500ms)
--   **Max Tokens**: Maximum tokens the LLM should generate per response chunk. Affects cost and detail. (Default: 8192)
--   **Chunk Word Count**: Maximum words per chunk sent to the LLM. Affects the number of API calls for large files. Recommended: about one third of **Max Tokens**. If you have not customized it yet, changing **Max Tokens** auto-fills the recommended chunk size for you. (Default: 3000)
+-   **Max Tokens**: Global maximum tokens the LLM should generate per response chunk. Affects cost and detail. If the active provider has a **Provider output token override** set in advanced settings, that provider-specific cap takes precedence. (Default: 8192)
+-   **Chunk Word Count**: Maximum words per chunk sent to the LLM. Affects the number of API calls for large files. Recommended default: one third of **Max Tokens**, rounded up. If you have not customized it yet, changing **Max Tokens** auto-fills the recommended chunk size for you. (Default: 3000)
 -   **Enable Duplicate Detection**: Toggles the basic check for duplicate words within processed content (results in console). (Default: Enabled)
 <img width="795" height="274" alt="Processing Parameters   Language settings" src="https://github.com/user-attachments/assets/74e4af76-3333-48fc-bb86-0a3ee61825d1" />
 
@@ -652,6 +652,11 @@ This is the core functionality focused on identifying concepts and adding `[[wik
 | Groq               | Cloud   | Yes                    | Fast OpenAI-compatible inference for hosted OSS models                |
 | Together           | Cloud   | Yes                    | OpenAI-compatible endpoint for hosted OSS models                      |
 | Fireworks          | Cloud   | Yes                    | OpenAI-compatible inference endpoint                                  |
+| LiteLLM            | Gateway | Optional               | Self-hosted OpenAI-compatible proxy preset; default local endpoint is `http://localhost:4000/v1` |
+| Nebius             | Cloud   | Yes                    | Nebius AI Studio OpenAI-compatible endpoint                           |
+| Cerebras           | Cloud   | Yes                    | Cerebras Cloud OpenAI-compatible endpoint for fast hosted inference   |
+| Hugging Face       | Gateway | Yes                    | Hugging Face hosted inference router preset                           |
+| Vercel AI Gateway  | Gateway | Yes                    | Vercel multi-provider gateway preset with dedicated model discovery   |
 | Requesty           | Gateway | Yes                    | Multi-provider router behind one API key                              |
 | OpenAI Compatible  | Gateway | Optional               | Generic preset for LiteLLM, vLLM, Perplexity, Vercel AI Gateway, etc. |
 | LMStudio           | Local   | Optional (`EMPTY`)     | Runs models locally via LM Studio server                              |
@@ -662,6 +667,8 @@ This is the core functionality focused on identifying concepts and adding `[[wik
 *Note: `Doubao` usually expects an Ark endpoint/deployment ID in the model field rather than a raw model family name. The settings screen now warns when the placeholder value is still present and blocks connection tests until you replace it with a real endpoint ID.*
 *Note: `Z AI` targets the international `api.z.ai` line, while `GLM` keeps the mainland China BigModel endpoint. Choose the preset that matches your account region.*
 *Note: China-focused presets use chat-first connection checks so the test validates the actual configured model/deployment, not only API-key reachability.*
+*Note: `Vercel AI Gateway` uses a dedicated model-registry discovery path instead of the generic OpenAI-compatible `/models` endpoint.*
+*Note: `LiteLLM` and `Hugging Face` presets are supported for runtime calls, but the settings UI currently keeps model entry manual-first rather than claiming remote discovery support.*
 *Note: `OpenAI Compatible` is intended for custom gateways and proxies. Set the Base URL, API key policy, and model ID according to your provider's documentation.*
 
 ## Network Usage & Data Handling
