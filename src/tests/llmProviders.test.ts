@@ -1,4 +1,6 @@
 import {
+    canonicalizeProviderConfig,
+    canonicalizeProviderConfigs,
     createDefaultProviders,
     getProviderModelDiscoveryDefinition,
     getProviderSettingFields,
@@ -37,6 +39,11 @@ describe('llmProviders registry', () => {
             'Groq',
             'Together',
             'Fireworks',
+            'LiteLLM',
+            'Nebius',
+            'Cerebras',
+            'Hugging Face',
+            'Vercel AI Gateway',
             'Requesty',
             'Huawei Cloud MaaS',
             'OpenAI Compatible',
@@ -129,6 +136,9 @@ describe('llmProviders registry', () => {
         expect(getLLMProviderDefinition('Xiaomi MiMo')?.defaultConfig.baseUrl).toBe('https://api.xiaomimimo.com/v1');
         expect(getLLMProviderDefinition('Xiaomi MiMo')?.defaultConfig.model).toBe('mimo-v2.5-pro');
         expect(getLLMProviderDefinition('MiniMax')?.defaultConfig.model).toBe('MiniMax-M2.7');
+        expect(getLLMProviderDefinition('LiteLLM')?.defaultConfig.baseUrl).toBe('http://localhost:4000/v1');
+        expect(getLLMProviderDefinition('Nebius')?.defaultConfig.baseUrl).toBe('https://api.studio.nebius.com/v1');
+        expect(getLLMProviderDefinition('Vercel AI Gateway')?.defaultConfig.baseUrl).toBe('https://ai-gateway.vercel.sh/v1');
     });
 
     test('known model metadata exposes cline-aligned max output token caps per provider/model pair', () => {
@@ -150,6 +160,12 @@ describe('llmProviders registry', () => {
         expect(getKnownModelMaxOutputTokens('GLM', 'glm-5')).toBe(128_000);
         expect(getKnownModelMaxOutputTokens('Z AI', 'glm-5')).toBe(128_000);
         expect(getKnownModelMaxOutputTokens('MiniMax', 'MiniMax-M2.7')).toBe(128_000);
+        expect(getKnownModelMaxOutputTokens('LiteLLM', 'anthropic/claude-3-7-sonnet-20250219')).toBe(128_000);
+        expect(getKnownModelMaxOutputTokens('Nebius', 'openai/gpt-oss-120b')).toBe(32_766);
+        expect(getKnownModelMaxOutputTokens('Cerebras', 'gpt-oss-120b')).toBe(32_766);
+        expect(getKnownModelMaxOutputTokens('Cerebras', 'openai/gpt-oss-120b')).toBe(32_766);
+        expect(getKnownModelMaxOutputTokens('Hugging Face', 'openai/gpt-oss-120b')).toBe(32_766);
+        expect(getKnownModelMaxOutputTokens('Vercel AI Gateway', 'anthropic/claude-sonnet-4.5')).toBe(64_000);
         expect(getKnownModelMaxOutputTokens('Mistral', 'devstral-2512')).toBe(256_000);
         expect(getKnownModelMaxOutputTokens('xAI', 'grok-4')).toBe(8_192);
         expect(getKnownModelMaxOutputTokens('OpenRouter', 'anthropic/claude-3.7-sonnet')).toBe(64_000);
@@ -183,7 +199,50 @@ describe('llmProviders registry', () => {
         expect(getProviderModelDiscoveryDefinition('OpenAI')).toEqual({ mode: 'openai-compatible-models' });
         expect(getProviderModelDiscoveryDefinition('Ollama')).toEqual({ mode: 'ollama-tags' });
         expect(getProviderModelDiscoveryDefinition('Google')).toEqual({ mode: 'google-models' });
+        expect(getProviderModelDiscoveryDefinition('Vercel AI Gateway')).toEqual({ mode: 'vercel-ai-gateway-models' });
+        expect(getProviderModelDiscoveryDefinition('LiteLLM')).toEqual({ mode: 'none' });
+        expect(getProviderModelDiscoveryDefinition('Hugging Face')).toEqual({ mode: 'none' });
         expect(getProviderModelDiscoveryDefinition('Azure OpenAI')).toEqual({ mode: 'none' });
+    });
+
+    test('canonicalizes legacy provider aliases without duplicating providers', () => {
+        expect(canonicalizeProviderConfig({
+            name: 'Xiaomi',
+            apiKey: 'legacy-key',
+            baseUrl: 'https://legacy.example/v1',
+            model: 'mimo-latest',
+            temperature: 0.4
+        })).toEqual(expect.objectContaining({
+            name: 'Xiaomi MiMo',
+            apiKey: 'legacy-key',
+            baseUrl: 'https://legacy.example/v1',
+            model: 'mimo-latest',
+            temperature: 0.4
+        }));
+
+        const canonicalized = canonicalizeProviderConfigs([
+            {
+                name: 'Xiaomi',
+                apiKey: 'legacy-key',
+                baseUrl: 'https://legacy.example/v1',
+                model: 'mimo-latest',
+                temperature: 0.4
+            },
+            {
+                name: 'Xiaomi MiMo',
+                apiKey: 'new-key',
+                baseUrl: 'https://api.xiaomimimo.com/v1',
+                model: 'mimo-v2.5-pro',
+                temperature: 1
+            }
+        ]);
+
+        expect(canonicalized).toHaveLength(1);
+        expect(canonicalized[0]).toEqual(expect.objectContaining({
+            name: 'Xiaomi MiMo',
+            apiKey: 'new-key',
+            model: 'mimo-v2.5-pro'
+        }));
     });
 
     test('advanced visibility detection only expands when persisted advanced values are present', () => {

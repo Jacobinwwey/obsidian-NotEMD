@@ -2,6 +2,10 @@ import { App, Editor, MarkdownView, Modal, Notice, Plugin, TFile, TFolder, Plugi
 import { NotemdSettings, ProgressReporter, LLMProviderConfig, TaskKey } from './types';
 import { DEFAULT_SETTINGS, NOTEMD_SIDEBAR_VIEW_TYPE, NOTEMD_SIDEBAR_ICON } from './constants';
 import {
+    canonicalizeProviderConfigs,
+    resolveCanonicalProviderName
+} from './llmProviders';
+import {
     applyFolderTaskSelectionOverride,
     createFolderTaskSelectionPresetOverride,
     createCurrentFolderTaskFileSelectionProfile,
@@ -1037,7 +1041,7 @@ export default class NotemdPlugin extends Plugin {
     // --- Settings Management ---
     async loadSettings() {
         const savedData = await this.loadData() || {};
-        const savedProviders = savedData.providers || [];
+        const savedProviders = canonicalizeProviderConfigs(savedData.providers || []);
         const defaultProviders = DEFAULT_SETTINGS.providers;
         const mergedProviders: LLMProviderConfig[] = [];
         const savedProviderMap = new Map(savedProviders.map((p: LLMProviderConfig) => [p.name, p]));
@@ -1059,7 +1063,7 @@ export default class NotemdPlugin extends Plugin {
             try {
                 const localRaw = localStorage.getItem('notemd-local-providers');
                 if (localRaw) {
-                    const localProviders: LLMProviderConfig[] = JSON.parse(localRaw);
+                    const localProviders = canonicalizeProviderConfigs(JSON.parse(localRaw) as LLMProviderConfig[]);
                     const mergedNames = new Set(mergedProviders.map(p => p.name));
                     for (const lp of localProviders) {
                         if (!mergedNames.has(lp.name)) {
@@ -1074,6 +1078,14 @@ export default class NotemdPlugin extends Plugin {
         }
 
         this.settings = Object.assign({}, DEFAULT_SETTINGS, savedData, { providers: mergedProviders });
+        this.settings.activeProvider = resolveCanonicalProviderName(this.settings.activeProvider);
+        this.settings.addLinksProvider = resolveCanonicalProviderName(this.settings.addLinksProvider);
+        this.settings.researchProvider = resolveCanonicalProviderName(this.settings.researchProvider);
+        this.settings.generateTitleProvider = resolveCanonicalProviderName(this.settings.generateTitleProvider);
+        this.settings.translateProvider = resolveCanonicalProviderName(this.settings.translateProvider);
+        this.settings.summarizeToMermaidProvider = resolveCanonicalProviderName(this.settings.summarizeToMermaidProvider);
+        this.settings.extractConceptsProvider = resolveCanonicalProviderName(this.settings.extractConceptsProvider);
+        this.settings.extractOriginalTextProvider = resolveCanonicalProviderName(this.settings.extractOriginalTextProvider);
 
         if (!this.settings.providers.some(p => p.name === this.settings.activeProvider)) {
             this.settings.activeProvider = DEFAULT_SETTINGS.activeProvider;

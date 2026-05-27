@@ -10,6 +10,7 @@ import {
     ProviderProfileImportSummary
 } from '../providerProfiles';
 import { LLMProviderConfig } from '../types';
+import { resolveCanonicalProviderName } from '../llmProviders';
 
 export const PROVIDER_PROFILE_FILE_NAME = 'notemd-providers.json';
 export const REDACTED_PROVIDER_PROFILE_FILE_NAME = 'notemd-providers-redacted.json';
@@ -97,16 +98,18 @@ function resolveImportedActiveProvider(
     defaultActiveProvider: string
 ): { activeProvider: string; activeProviderReset: boolean } {
     const providerNames = new Set(importedProviders.map(provider => provider.name));
-    if (providerNames.has(activeProvider)) {
+    const canonicalActiveProvider = resolveCanonicalProviderName(activeProvider);
+    const canonicalDefaultActiveProvider = resolveCanonicalProviderName(defaultActiveProvider);
+    if (providerNames.has(canonicalActiveProvider)) {
         return {
-            activeProvider,
+            activeProvider: canonicalActiveProvider,
             activeProviderReset: false
         };
     }
 
-    if (providerNames.has(defaultActiveProvider)) {
+    if (providerNames.has(canonicalDefaultActiveProvider)) {
         return {
-            activeProvider: defaultActiveProvider,
+            activeProvider: canonicalDefaultActiveProvider,
             activeProviderReset: true
         };
     }
@@ -119,7 +122,7 @@ function resolveImportedActiveProvider(
     }
 
     return {
-        activeProvider: defaultActiveProvider,
+        activeProvider: canonicalDefaultActiveProvider,
         activeProviderReset: true
     };
 }

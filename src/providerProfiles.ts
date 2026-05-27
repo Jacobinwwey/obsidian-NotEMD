@@ -1,5 +1,6 @@
 import { LLMProviderConfig } from './types';
 import { redactApiKey } from './providerSecrets';
+import { canonicalizeProviderConfigs } from './llmProviders';
 
 export interface ProviderProfileExport {
     providers: LLMProviderConfig[];
@@ -59,11 +60,13 @@ export function parseProviderProfileImport(jsonData: string, existingProviders: 
         throw new Error('Imported file does not contain a valid provider array.');
     }
 
-    const existingProvidersMap = new Map(existingProviders.map(provider => [provider.name, provider]));
+    const existingProvidersMap = new Map(
+        canonicalizeProviderConfigs(existingProviders).map(provider => [provider.name, provider])
+    );
     let updatedCount = 0;
     let newCount = 0;
 
-    importedProviders.forEach(importedProvider => {
+    canonicalizeProviderConfigs(importedProviders).forEach(importedProvider => {
         if (importedProvider && typeof importedProvider.name === 'string') {
             if (existingProvidersMap.has(importedProvider.name)) {
                 existingProvidersMap.set(importedProvider.name, importedProvider);

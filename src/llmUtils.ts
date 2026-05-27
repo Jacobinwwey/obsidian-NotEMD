@@ -148,6 +148,10 @@ function buildOpenAICompatibleHeaders(provider: LLMProviderConfig): Record<strin
         headers['X-Title'] = 'Notemd Obsidian Plugin';
     }
 
+    if (provider.name === 'Cerebras') {
+        headers['X-Cerebras-3rd-Party-Integration'] = 'notemd';
+    }
+
     return headers;
 }
 
@@ -156,20 +160,24 @@ function trimTrailingSlashes(value: string): string {
 }
 
 function normalizeOpenAICompatibleBaseUrl(baseUrl: string): string {
-    const trimmed = trimTrailingSlashes(baseUrl.trim());
-    if (!trimmed) {
-        return trimmed;
+    let normalized = trimTrailingSlashes(baseUrl.trim());
+    if (!normalized) {
+        return normalized;
     }
 
-    if (trimmed.endsWith('/chat/completions')) {
-        return trimmed.slice(0, -'/chat/completions'.length);
+    if (normalized.endsWith('/chat/completions')) {
+        normalized = normalized.slice(0, -'/chat/completions'.length);
     }
 
-    if (trimmed.endsWith('/models')) {
-        return trimmed.slice(0, -'/models'.length);
+    if (normalized.endsWith('/models')) {
+        normalized = normalized.slice(0, -'/models'.length);
     }
 
-    return trimmed;
+    if (normalized.endsWith('/v1/ai')) {
+        normalized = normalized.slice(0, -'/ai'.length);
+    }
+
+    return normalized;
 }
 
 function buildOpenAICompatibleUrl(baseUrl: string, path: 'chat/completions' | 'models'): string {

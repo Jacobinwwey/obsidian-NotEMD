@@ -109,6 +109,38 @@ describe('config/profile commands', () => {
         expect(result.importedProviders).toHaveLength(1);
     });
 
+    test('imports provider profiles with canonicalized active provider names', async () => {
+        const host = createHost();
+        host.exists.mockResolvedValue(true);
+        host.read.mockResolvedValue(JSON.stringify({
+            formatVersion: 1,
+            exportedAt: '2026-05-05T12:00:00.000Z',
+            providers: [
+                {
+                    name: 'Xiaomi',
+                    apiKey: 'legacy-key',
+                    baseUrl: 'https://legacy.example/v1',
+                    model: 'mimo-latest',
+                    temperature: 0.4,
+                    localOnly: false
+                }
+            ]
+        }));
+
+        const result = await executeImportProviderProfilesCommand({
+            pluginId: 'notemd-test',
+            existingProviders: [],
+            activeProvider: 'Xiaomi',
+            defaultActiveProvider: 'Xiaomi MiMo',
+            host
+        });
+
+        expect(result.activeProvider).toBe('Xiaomi MiMo');
+        expect(result.activeProviderReset).toBe(false);
+        expect(result.importedProviders).toHaveLength(1);
+        expect(result.importedProviders[0].name).toBe('Xiaomi MiMo');
+    });
+
     test('throws typed error when provider profile import file is missing', async () => {
         const host = createHost();
 
