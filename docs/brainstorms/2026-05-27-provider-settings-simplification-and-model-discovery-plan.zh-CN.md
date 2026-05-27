@@ -104,18 +104,18 @@ canonical: true
 
 | Requirement | 当前状态 | 结论 |
 |---|---|---|
-| 默认仅显示 required/default-visible 字段 | 未落地 | 当前 UI 仍然是单层 provider panel |
+| 默认仅显示 required/default-visible 字段 | 已落地 | 当前 main 已通过共享字段分组元数据渲染 provider settings，并默认展示 core controls |
 | 保持 `model` 在默认可见面 | 当前已满足 | 重构时必须保留 |
-| 次级调优项收入 advanced settings | 未落地 | 需要 metadata + UI 重构 |
-| 持久化 advanced 值存在时自动展开 | 未落地 | 需要从 live provider config 推导展开逻辑 |
-| selective reuse Cherry Studio | 已形成具体研究结论 | 可以安全进入实现，不需要整体照搬 |
-| 模型发现不能阻断手动配置 | 未落地 | discovery 必须是 additive 且 transient 的 |
+| 次级调优项收入 advanced settings | 已落地 | 次级调优项现已收入显式 advanced disclosure |
+| 持久化 advanced 值存在时自动展开 | 已落地 | 当前实现会根据持久化 provider override 派生展开状态 |
+| selective reuse Cherry Studio | 已以有界形态落地 | 已落地实现复用了 discovery 策略思路，但没有照搬持久化 provider-model catalog |
+| 模型发现不能阻断手动配置 | 已落地 | discovery 是 additive/transient 的，手动 `model` 输入仍是持久化真值 |
 
-## 3.5 当前隔离实现通道检查点
+## 3.5 已落地实现检查点
 
-截至 2026-05-27 审计，隔离 worktree/branch `feat/provider-settings-model-discovery` 已经把这条线从纯规划推进到了有界实现，但还没有推进成 current-main 真值。
+截至 2026-05-27 收口，隔离 `feat/provider-settings-model-discovery` 通道中的实现已经完成验证并合回 current main。
 
-那里已经存在的内容：
+当前 main 上现已存在的内容：
 
 1. `src/llmProviders.ts` 已加入一版 provider-field taxonomy metadata（`core`、`contextual`、`advanced`、`developer`）与按 provider 的 model-discovery metadata。
 2. 新增了一个瞬时 `src/providerModelDiscovery.ts`，首批覆盖：
@@ -128,13 +128,13 @@ canonical: true
    - advanced disclosure
    - 基于持久化 advanced 值的派生 auto-expand
    - 可选的 fetch-models UI wiring
-4. 对应 locale keys 与聚焦测试也已经补入。
+4. 对应 locale keys、README/update surface 与聚焦测试也已经补入。
 
-那里还没有完成的内容：
+仍然刻意不做的内容：
 
-1. 该隔离 worktree 在检查时还没有完成验证，且本地依赖没有 bootstrap 好；
-2. 新 provider-panel surface 的 CSS/layout polish 还没收口；
-3. 在这条通道验证通过并合回之前，current-main 真值不变。
+1. 持久化远程 provider model catalog；
+2. model CRUD / health-check management UI；
+3. 对首批之外 provider 的泛化 discovery 覆盖宣称。
 
 ## 4. Cherry Studio 对照结论
 
@@ -223,7 +223,7 @@ Cherry Studio 值得复用的点：
 
 当前检查点：
 
-1. 已在隔离通道里实现，但尚未合回；
+1. 已落地到 current main；
 2. 当前 metadata 形态仍保持 declarative、field-scoped。
 
 ### Phase 2：settings renderer 重构
@@ -250,9 +250,9 @@ Cherry Studio 值得复用的点：
 
 当前检查点：
 
-1. 隔离通道里已经有一版 metadata-driven renderer 尝试；
-2. default/core、contextual 与 advanced 分区已部分接线；
-3. 验证、CSS polish 与 merge gate 仍未完成。
+1. 已落地到 current main；
+2. default/core、contextual 与 advanced 分区现已通过共享 metadata 接线；
+3. 对应 CSS/layout 支撑与样式测试也已进入发货面。
 
 ### Phase 3：lightweight discovery service
 
@@ -281,9 +281,9 @@ Cherry Studio 值得复用的点：
 
 当前检查点：
 
-1. 隔离通道中已存在面向首批 family 的 transient discovery helper；
+1. 已按计划首批 family 落地到 current main；
 2. 它仍保持手动 `model` 输入为持久化 source of truth；
-3. 但目前还没有合并，也还没完成验证。
+3. 不支持的 provider 仍然降级回手动输入，而不是引入重型 catalog 子系统。
 
 ### Phase 4：UI 接入
 
@@ -295,9 +295,9 @@ Cherry Studio 值得复用的点：
 
 当前检查点：
 
-1. 隔离通道里已经有 fetch-models UI wiring 与瞬时 suggestion state；
-2. styling 与用户面验证仍未完成；
-3. 这还不是 current-main 行为。
+1. fetch-models UI wiring 与瞬时 suggestion state 已进入 current main；
+2. 新 provider-panel surface 的 styling 支撑已经落地；
+3. README / update surface 现在也已描述同样的有界行为。
 
 ### Phase 5：测试与文档
 
@@ -317,9 +317,9 @@ Cherry Studio 值得复用的点：
 
 当前检查点：
 
-1. 聚焦的 i18n/test 更新已经出现在隔离通道里；
-2. 当前 main 的 canonical 文档现在正在同步更新，以反映“主线真值”和“隔离实现进展”的真实分离；
-3. 最终 merge gate 仍要求隔离通道先 bootstrap，再跑 targeted + full verification。
+1. 聚焦的 i18n/test 更新已经落地到 current main；
+2. canonical 文档现在把这条线描述为 current-main 已落地真值，而不是隔离实现进展；
+3. 验证证据现已包含 targeted provider-settings/model-discovery tests 与完整仓库门禁。
 
 ## 7. 显式非目标
 
@@ -336,14 +336,16 @@ Cherry Studio 值得复用的点：
 执行应保持如下分工：
 
 1. `main` 只承载 docs/progress truth，并保持 clean；
-2. 实现工作在为该任务创建的 isolated worktree/branch 中推进；
+2. 当 control-plane 爆炸半径较大时，可以先在 isolated lane 中推进有界实现；
 3. 只有经过验证的、有界实现才合回主线。
 
-隔离通道的具体 merge gate：
+这条线的验证证据：
 
-1. 先把 isolated worktree bootstrap 好，让 build/test tooling 真正能解析到项目依赖；
-2. 先跑 provider-settings/model-discovery 的 targeted tests，再跑完整的 `npm run build`、`npm test -- --runInBand`、`npm run audit:i18n-ui` 与 `git diff --check`；
-3. 收掉 provider settings surface 剩余的 CSS/layout 缺口；
-4. 只有在整条通道变绿后，才能把当前 main 文档从“隔离实现进行中”切换为“已落地”。
+1. targeted provider-settings/model-discovery tests；
+2. 完整的 `npm run build`；
+3. 完整的 `npm test -- --runInBand`；
+4. `npm run audit:i18n-ui`；
+5. `npm run audit:render-host`；
+6. `git diff --check`。
 
-这样才能在保持规划真值诚实的同时，避免把半落地的 control-plane 改动直接摊在当前 main 上。
+这套流程既在开发期间保持了规划真值诚实，也避免把半验证的 control-plane 改动直接摊到当前 main 上。
