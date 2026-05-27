@@ -4,9 +4,14 @@ import { FolderTaskFileSelectionProfile, LLMProviderConfig, NotemdSettings, Task
 import { DEFAULT_SETTINGS } from '../constants';
 import {
     getLLMProviderDefinition,
+    getProviderModelDiscoveryDefinition,
+    getProviderSettingFields,
     getOrderedProviderNames,
     getProviderValidationIssues,
-    hasBlockingProviderValidationIssues
+    hasBlockingProviderValidationIssues,
+    hasPersistedAdvancedProviderSettings,
+    LLMProviderSettingFieldDefinition,
+    shouldShowProviderSettingField
 } from '../llmProviders';
 import { getDefaultPrompt } from '../promptUtils'; // Import for default prompts
 import {
@@ -28,14 +33,22 @@ import { SUPPORTED_UI_LOCALES } from '../i18n/uiLocales';
 import { formatI18n, getI18nStrings } from '../i18n';
 import { runProviderConnectionTestWithHost } from '../operations/providerConnectionTestCommandHostAdapter';
 import { getFolderTaskFileSelectionProfiles, getFolderTaskRegexValidationError } from '../folderTaskFileSelector';
+import { discoverProviderModels } from '../providerModelDiscovery';
 
 // Define specific key types for settings accessed dynamically
 type ProviderSettingKey = 'addLinksProvider' | 'researchProvider' | 'generateTitleProvider' | 'translateProvider';
 type ModelSettingKey = 'addLinksModel' | 'researchModel' | 'generateTitleModel' | 'translateModel';
 
+type ProviderPanelState = {
+    discoveredModels: string[];
+    fetchStatus: 'idle' | 'loading' | 'success' | 'error';
+    fetchMessage?: string;
+};
+
 
 export class NotemdSettingTab extends PluginSettingTab {
     plugin: NotemdPlugin;
+    private providerPanelState = new Map<string, ProviderPanelState>();
 
     constructor(app: App, plugin: NotemdPlugin) {
         super(app, plugin);
@@ -129,13 +142,13 @@ export class NotemdSettingTab extends PluginSettingTab {
         setting: Setting,
         options: {
             placeholder?: string;
-            value: number;
+            value: number | string;
             onCommit: (rawValue: string) => Promise<string | void>;
         }
     ): void {
         this.addDeferredTextSetting(setting, {
             placeholder: options.placeholder,
-            value: String(options.value),
+            value: typeof options.value === 'string' ? options.value : String(options.value),
             onCommit: async (rawValue) => {
                 const normalized = await options.onCommit(rawValue);
                 if (typeof normalized === 'string') {
@@ -245,6 +258,300 @@ export class NotemdSettingTab extends PluginSettingTab {
             activeTasks: 0,
             updateActiveTasks: () => {}
         };
+    }
+
+    private getProviderPanelState(providerName: string): ProviderPanelState {
+        let state = this.providerPanelState.get(providerName);
+        if (!state) {
+            state = {
+                discoveredModels: [],
+                fetchStatus: 'idle'
+            };
+            this.providerPanelState.set(providerName, state);
+        }
+        return state;
+    }
+
+    private async updateProviderField(
+        provider: LLMProviderConfig,
+        update: (draft: LLMProviderConfig) => void
+    ): Promise<void> {
+        update(provider);
+        await this.plugin.saveSettings();
+    }
+
+    private addProviderTextField(
+        setting: Setting,
+        provider: LLMProviderConfig,
+        read: () => string,
+        placeholder: string,
+        onCommit: (value: string) => Promise<void>
+    ): void {
+        this.addDeferredTextSetting(setting, {
+            placeholder,
+            value: read(),
+            onCommit
+        });
+    }
+
+    private addProviderNumberField(
+        setting: Setting,
+        provider: LLMProviderConfig,
+        read: () => string,
+        placeholder: string,
+        onCommit: (value: string) => Promise<string | void>
+    ): void {
+        this.addDeferredNumberSetting(setting, {
+            placeholder,
+            value: read(),
+            onCommit
+        });
+    }
+
+    private renderProviderModelDiscovery(containerEl: HTMLElement, provider: LLMProviderConfig): void {
+        const providerI18n = getI18nStrings({ uiLocale: this.plugin.settings.uiLocale }).settings.providerConfig;
+        const discovery = getProviderModelDiscoveryDefinition(provider.name);
+        const panelState = this.getProviderPanelState(provider.name);
+
+        new Setting(containerEl)
+            .setName(providerI18n.fetchModelsName)
+            .setDesc(
+                discovery.mode === 'none'
+                    ? formatI18n(providerI18n.fetchModelsUnavailable, { provider: provider.name })
+                    : providerI18n.fetchModelsDesc
+            )
+            .addButton(button => {
+                button
+                    .setButtonText(panelState.fetchStatus === 'loading' ? providerI18n.fetchModelsLoading : providerI18n.fetchModelsButton)
+                    .setDisabled(discovery.mode === 'none' || panelState.fetchStatus === 'loading')
+                    .onClick(async () => {
+                        panelState.fetchStatus = 'loading';
+                        panelState.fetchMessage = undefined;
+                        this.display();
+
+                        try {
+                            const result = await discoverProviderModels(provider);
+                            panelState.discoveredModels = result.models;
+                            panelState.fetchStatus = 'success';
+                            panelState.fetchMessage = result.models.length > 0
+                                ? formatI18n(providerI18n.fetchModelsSuccess, {
+                                    provider: provider.name,
+                                    count: result.models.length
+                                })
+                                : formatI18n(providerI18n.fetchModelsEmpty, { provider: provider.name });
+                        } catch (error: unknown) {
+                            const message = error instanceof Error ? error.message : String(error);
+                            panelState.fetchStatus = 'error';
+                            panelState.fetchMessage = formatI18n(providerI18n.fetchModelsError, {
+                                provider: provider.name,
+                                message
+                            });
+                        }
+
+                        this.display();
+                    });
+            });
+
+        if (panelState.fetchMessage) {
+            const callout = containerEl.createDiv({
+                cls: `notemd-provider-validation ${panelState.fetchStatus === 'error' ? 'notemd-provider-validation-error' : 'notemd-provider-validation-warning'}`
+            });
+            callout.createEl('strong', {
+                text: panelState.fetchStatus === 'error'
+                    ? providerI18n.validationWarning
+                    : providerI18n.discoveredModelsName
+            });
+            callout.createEl('p', { text: panelState.fetchMessage });
+        }
+
+        if (panelState.discoveredModels.length > 0) {
+            const listWrapper = containerEl.createDiv({ cls: 'notemd-provider-callout' });
+            listWrapper.createEl('strong', { text: providerI18n.discoveredModelsName });
+            listWrapper.createEl('p', { text: providerI18n.discoveredModelsDesc });
+
+            const list = listWrapper.createDiv({ cls: 'notemd-provider-model-list' });
+            panelState.discoveredModels.forEach(modelId => {
+                const row = list.createDiv({ cls: 'notemd-provider-model-item' });
+                row.createEl('code', { text: modelId });
+                const useButton = new ButtonComponent(row);
+                useButton
+                    .setButtonText(providerI18n.discoveredModelsUseButton)
+                    .onClick(async () => {
+                        provider.model = modelId;
+                        await this.plugin.saveSettings();
+                        this.display();
+                    });
+            });
+        }
+    }
+
+    private renderProviderField(
+        containerEl: HTMLElement,
+        provider: LLMProviderConfig,
+        field: LLMProviderSettingFieldDefinition
+    ): void {
+        const providerI18n = getI18nStrings({ uiLocale: this.plugin.settings.uiLocale }).settings.providerConfig;
+        const defaultProvider = DEFAULT_SETTINGS.providers.find(p => p.name === provider.name);
+
+        switch (field.id) {
+            case 'apiKey': {
+                const definition = getLLMProviderDefinition(provider.name);
+                const apiKeyMode = definition?.apiKeyMode ?? 'required';
+                const apiKeyDescription = apiKeyMode === 'optional'
+                    ? formatI18n(providerI18n.apiKeyDescOptional, { provider: provider.name })
+                    : formatI18n(providerI18n.apiKeyDescRequired, {
+                        provider: provider.name,
+                        extra: provider.name === 'LMStudio' ? providerI18n.apiKeyExtraLmStudio : ''
+                    });
+                const setting = new Setting(containerEl)
+                    .setName(providerI18n.apiKeyName)
+                    .setDesc(apiKeyDescription);
+                this.addProviderTextField(
+                    setting,
+                    provider,
+                    () => provider.apiKey,
+                    provider.name === 'LMStudio' ? providerI18n.apiKeyPlaceholderLmStudio : providerI18n.apiKeyPlaceholderDefault,
+                    async value => this.updateProviderField(provider, draft => { draft.apiKey = value; })
+                );
+                break;
+            }
+            case 'baseUrl': {
+                const setting = new Setting(containerEl)
+                    .setName(providerI18n.baseUrlName)
+                    .setDesc(formatI18n(providerI18n.baseUrlDesc, {
+                        provider: provider.name,
+                        required: provider.name === 'Azure OpenAI' ? providerI18n.baseUrlRequired : ''
+                    }));
+                this.addProviderTextField(
+                    setting,
+                    provider,
+                    () => provider.baseUrl,
+                    defaultProvider?.baseUrl || providerI18n.baseUrlPlaceholder,
+                    async value => this.updateProviderField(provider, draft => { draft.baseUrl = value.trim(); })
+                );
+                break;
+            }
+            case 'model': {
+                const setting = new Setting(containerEl)
+                    .setName(providerI18n.modelName)
+                    .setDesc(formatI18n(providerI18n.modelDesc, { provider: provider.name }));
+                this.addProviderTextField(
+                    setting,
+                    provider,
+                    () => provider.model,
+                    defaultProvider?.model || providerI18n.modelPlaceholder,
+                    async value => this.updateProviderField(provider, draft => { draft.model = value.trim(); })
+                );
+                break;
+            }
+            case 'temperature': {
+                const setting = new Setting(containerEl)
+                    .setName(providerI18n.temperatureName)
+                    .setDesc(providerI18n.temperatureDesc);
+                setting.addSlider(slider => slider
+                    .setLimits(0, 1, 0.1)
+                    .setValue(provider.temperature)
+                    .onChange(async value => {
+                        provider.temperature = value;
+                        await this.plugin.saveSettings();
+                    })
+                    .setDynamicTooltip());
+                break;
+            }
+            case 'topP': {
+                const setting = new Setting(containerEl)
+                    .setName(providerI18n.topPName)
+                    .setDesc(providerI18n.topPDesc);
+                this.addProviderNumberField(
+                    setting,
+                    provider,
+                    () => provider.topP !== undefined ? String(provider.topP) : '',
+                    providerI18n.topPPlaceholder,
+                    async value => {
+                        const parsed = Number.parseFloat(value.trim());
+                        await this.updateProviderField(provider, draft => {
+                            if (Number.isFinite(parsed) && parsed >= 0 && parsed <= 1) {
+                                draft.topP = parsed;
+                            } else {
+                                delete draft.topP;
+                            }
+                        });
+                        return provider.topP !== undefined ? String(provider.topP) : '';
+                    }
+                );
+                break;
+            }
+            case 'reasoningEffort': {
+                const setting = new Setting(containerEl)
+                    .setName(providerI18n.reasoningEffortName)
+                    .setDesc(providerI18n.reasoningEffortDesc);
+                this.addProviderTextField(
+                    setting,
+                    provider,
+                    () => provider.reasoningEffort || '',
+                    providerI18n.reasoningEffortPlaceholder,
+                    async value => {
+                        const normalized = value.trim().toLowerCase();
+                        await this.updateProviderField(provider, draft => {
+                            if (['none', 'low', 'medium', 'high'].includes(normalized)) {
+                                draft.reasoningEffort = normalized;
+                            } else {
+                                delete draft.reasoningEffort;
+                            }
+                        });
+                    }
+                );
+                break;
+            }
+            case 'thinkingEnabled': {
+                new Setting(containerEl)
+                    .setName(providerI18n.thinkingEnabledName)
+                    .setDesc(providerI18n.thinkingEnabledDesc)
+                    .addToggle(toggle => toggle
+                        .setValue(provider.thinkingEnabled === true)
+                        .onChange(async value => {
+                            provider.thinkingEnabled = value;
+                            await this.plugin.saveSettings();
+                        }));
+                break;
+            }
+            case 'apiVersion': {
+                const setting = new Setting(containerEl)
+                    .setName(providerI18n.apiVersionName)
+                    .setDesc(providerI18n.apiVersionDesc);
+                this.addProviderTextField(
+                    setting,
+                    provider,
+                    () => provider.apiVersion || '',
+                    providerI18n.apiVersionPlaceholder,
+                    async value => this.updateProviderField(provider, draft => { draft.apiVersion = value.trim(); })
+                );
+                break;
+            }
+            case 'maxOutputTokens': {
+                const setting = new Setting(containerEl)
+                    .setName(providerI18n.maxOutputTokensName)
+                    .setDesc(providerI18n.maxOutputTokensDesc);
+                this.addProviderNumberField(
+                    setting,
+                    provider,
+                    () => provider.maxOutputTokens !== undefined ? String(provider.maxOutputTokens) : '',
+                    String(this.plugin.settings.maxTokens),
+                    async value => {
+                        const parsed = Number.parseInt(value.trim(), 10);
+                        await this.updateProviderField(provider, draft => {
+                            if (Number.isFinite(parsed) && parsed > 0) {
+                                draft.maxOutputTokens = parsed;
+                            } else {
+                                delete draft.maxOutputTokens;
+                            }
+                        });
+                        return provider.maxOutputTokens !== undefined ? String(provider.maxOutputTokens) : '';
+                    }
+                );
+                break;
+            }
+        }
     }
 
     private renderProviderSummary(containerEl: HTMLElement, provider: LLMProviderConfig): void {
@@ -811,129 +1118,40 @@ export class NotemdSettingTab extends PluginSettingTab {
             this.renderProviderSummary(containerEl, activeProvider);
             this.renderProviderValidation(containerEl, activeProvider);
 
-            const providerDefinition = getLLMProviderDefinition(activeProvider.name);
-            const apiKeyMode = providerDefinition?.apiKeyMode ?? 'required';
-            const isOpenAICompatible = providerDefinition?.transport === 'openai-compatible';
+            const providerFields = getProviderSettingFields(activeProvider.name)
+                .filter(field => shouldShowProviderSettingField(activeProvider, field, {
+                    developerMode: this.plugin.settings.enableDeveloperMode
+                }));
 
-            if (apiKeyMode !== 'none') {
-                const apiKeyDescription = apiKeyMode === 'optional'
-                    ? formatI18n(providerI18n.apiKeyDescOptional, { provider: activeProvider.name })
-                    : formatI18n(providerI18n.apiKeyDescRequired, {
-                        provider: activeProvider.name,
-                        extra: activeProvider.name === 'LMStudio' ? providerI18n.apiKeyExtraLmStudio : ''
-                    });
+            providerFields
+                .filter(field => field.group === 'core')
+                .forEach(field => this.renderProviderField(containerEl, activeProvider, field));
+
+            const hasContextualFields = providerFields.some(field => field.group === 'contextual');
+            if (hasContextualFields) {
                 new Setting(containerEl)
-                    .setName(providerI18n.apiKeyName)
-                    .setDesc(apiKeyDescription)
-                    .addText(text => text
-                        .setPlaceholder(activeProvider.name === 'LMStudio' ? providerI18n.apiKeyPlaceholderLmStudio : providerI18n.apiKeyPlaceholderDefault)
-                        .setValue(activeProvider.apiKey)
-                        .onChange(async (value) => { activeProvider.apiKey = value; await this.plugin.saveSettings(); }));
+                    .setName(providerI18n.contextualSettingsName)
+                    .setHeading();
+                providerFields
+                    .filter(field => field.group === 'contextual')
+                    .forEach(field => this.renderProviderField(containerEl, activeProvider, field));
             }
 
-            new Setting(containerEl)
-                .setName(providerI18n.baseUrlName)
-                .setDesc(formatI18n(providerI18n.baseUrlDesc, {
-                    provider: activeProvider.name,
-                    required: activeProvider.name === 'Azure OpenAI' ? providerI18n.baseUrlRequired : ''
-                }))
-                .addText(text => text
-                    .setPlaceholder(DEFAULT_SETTINGS.providers.find(p => p.name === activeProvider.name)?.baseUrl || providerI18n.baseUrlPlaceholder)
-                    .setValue(activeProvider.baseUrl)
-                    .onChange(async (value) => { activeProvider.baseUrl = value; await this.plugin.saveSettings(); }));
+            this.renderProviderModelDiscovery(containerEl, activeProvider);
 
-            new Setting(containerEl)
-                .setName(providerI18n.modelName)
-                .setDesc(formatI18n(providerI18n.modelDesc, { provider: activeProvider.name }))
-                .addText(text => text
-                    .setPlaceholder(DEFAULT_SETTINGS.providers.find(p => p.name === activeProvider.name)?.model || providerI18n.modelPlaceholder)
-                    .setValue(activeProvider.model)
-                    .onChange(async (value) => { activeProvider.model = value; await this.plugin.saveSettings(); }));
-
-            new Setting(containerEl)
-                .setName(providerI18n.temperatureName)
-                .setDesc(providerI18n.temperatureDesc)
-                .addSlider(slider => slider
-                    .setLimits(0, 1, 0.1)
-                    .setValue(activeProvider.temperature)
-                    .onChange(async (value) => { activeProvider.temperature = value; await this.plugin.saveSettings(); })
-                    .setDynamicTooltip());
-
-            const showManualOutputTokenOverride =
-                this.plugin.settings.enableDeveloperMode || activeProvider.maxOutputTokens !== undefined;
-
-            if (showManualOutputTokenOverride) {
-                new Setting(containerEl)
-                    .setName(providerI18n.maxOutputTokensName)
-                    .setDesc(providerI18n.maxOutputTokensDesc)
-                    .addText(text => text
-                        .setPlaceholder(String(this.plugin.settings.maxTokens))
-                        .setValue(activeProvider.maxOutputTokens !== undefined ? String(activeProvider.maxOutputTokens) : '')
-                        .onChange(async (value) => {
-                            const parsed = Number.parseInt(value.trim(), 10);
-                            if (Number.isFinite(parsed) && parsed > 0) {
-                                activeProvider.maxOutputTokens = parsed;
-                            } else {
-                                delete activeProvider.maxOutputTokens;
-                            }
-                            await this.plugin.saveSettings();
-                        }));
-            }
-
-            if (isOpenAICompatible) {
-                new Setting(containerEl)
-                    .setName(providerI18n.topPName)
-                    .setDesc(providerI18n.topPDesc)
-                    .addText(text => text
-                        .setPlaceholder(providerI18n.topPPlaceholder)
-                        .setValue(activeProvider.topP !== undefined ? String(activeProvider.topP) : '')
-                        .onChange(async (value) => {
-                            const parsed = Number.parseFloat(value.trim());
-                            if (Number.isFinite(parsed) && parsed >= 0 && parsed <= 1) {
-                                activeProvider.topP = parsed;
-                            } else {
-                                delete activeProvider.topP;
-                            }
-                            await this.plugin.saveSettings();
-                        }));
-
-                new Setting(containerEl)
-                    .setName(providerI18n.reasoningEffortName)
-                    .setDesc(providerI18n.reasoningEffortDesc)
-                    .addText(text => text
-                        .setPlaceholder(providerI18n.reasoningEffortPlaceholder)
-                        .setValue(activeProvider.reasoningEffort || '')
-                        .onChange(async (value) => {
-                            const normalized = value.trim().toLowerCase();
-                            if (['none', 'low', 'medium', 'high'].includes(normalized)) {
-                                activeProvider.reasoningEffort = normalized;
-                            } else {
-                                delete activeProvider.reasoningEffort;
-                            }
-                            await this.plugin.saveSettings();
-                        }));
-            }
-
-            if (activeProvider.name === 'DeepSeek') {
-                new Setting(containerEl)
-                    .setName(providerI18n.thinkingEnabledName)
-                    .setDesc(providerI18n.thinkingEnabledDesc)
-                    .addToggle(toggle => toggle
-                        .setValue(activeProvider.thinkingEnabled === true)
-                        .onChange(async (value) => {
-                            activeProvider.thinkingEnabled = value;
-                            await this.plugin.saveSettings();
-                        }));
-            }
-
-            if (activeProvider.name === 'Azure OpenAI') {
-                new Setting(containerEl)
-                    .setName(providerI18n.apiVersionName)
-                    .setDesc(providerI18n.apiVersionDesc)
-                    .addText(text => text
-                        .setPlaceholder(providerI18n.apiVersionPlaceholder)
-                        .setValue(activeProvider.apiVersion || '')
-                        .onChange(async (value) => { activeProvider.apiVersion = value; await this.plugin.saveSettings(); }));
+            const advancedFields = providerFields.filter(field => field.group === 'advanced' || field.group === 'developer');
+            if (advancedFields.length > 0) {
+                const advancedDetails = containerEl.createEl('details', { cls: 'notemd-section-card notemd-provider-advanced-settings' });
+                advancedDetails.open = hasPersistedAdvancedProviderSettings(activeProvider);
+                const summary = advancedDetails.createEl('summary', { cls: 'notemd-section-summary' });
+                summary.setText(providerI18n.advancedSettingsName);
+                advancedDetails.createEl('p', {
+                    text: advancedDetails.open
+                        ? providerI18n.advancedSettingsHint
+                        : formatI18n(providerI18n.advancedSettingsDesc, { provider: activeProvider.name }),
+                    cls: 'notemd-section-description'
+                });
+                advancedFields.forEach(field => this.renderProviderField(advancedDetails, activeProvider, field));
             }
 
             new Setting(containerEl)

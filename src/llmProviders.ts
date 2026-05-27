@@ -5,6 +5,27 @@ export type LLMProviderTransport = 'openai-compatible' | 'anthropic' | 'google' 
 export type LLMProviderApiKeyMode = 'required' | 'optional' | 'none';
 export type LLMProviderApiTestMode = 'models-then-chat' | 'chat-only';
 export type LLMProviderValidationLevel = 'warning' | 'error';
+export type LLMProviderSettingFieldId =
+    | 'apiKey'
+    | 'baseUrl'
+    | 'model'
+    | 'temperature'
+    | 'topP'
+    | 'reasoningEffort'
+    | 'thinkingEnabled'
+    | 'apiVersion'
+    | 'maxOutputTokens';
+export type LLMProviderSettingFieldGroup = 'core' | 'contextual' | 'advanced' | 'developer';
+export type LLMProviderModelDiscoveryMode = 'none' | 'openai-compatible-models' | 'ollama-tags' | 'google-models';
+
+export interface LLMProviderSettingFieldDefinition {
+    id: LLMProviderSettingFieldId;
+    group: LLMProviderSettingFieldGroup;
+}
+
+export interface LLMProviderModelDiscoveryDefinition {
+    mode: LLMProviderModelDiscoveryMode;
+}
 
 export interface LLMProviderDefinition {
     name: string;
@@ -15,6 +36,8 @@ export interface LLMProviderDefinition {
     description: string;
     setupHint: string;
     defaultConfig: LLMProviderConfig;
+    settingFields: LLMProviderSettingFieldDefinition[];
+    modelDiscovery: LLMProviderModelDiscoveryDefinition;
 }
 
 export interface LLMProviderValidationIssue {
@@ -23,6 +46,23 @@ export interface LLMProviderValidationIssue {
 }
 
 const DEEPSEEK_RECOMMENDED_THINKING_OUTPUT_TOKENS = 8000;
+const OPENAI_COMPATIBLE_REASONING_PROVIDER_NAMES = new Set([
+    'DeepSeek',
+    'OpenAI',
+    'OpenAI Compatible',
+    'Azure OpenAI'
+]);
+const OPENAI_COMPATIBLE_MODEL_DISCOVERY_PROVIDER_NAMES = new Set([
+    'DeepSeek',
+    'OpenAI',
+    'Mistral',
+    'OpenRouter',
+    'xAI',
+    'Requesty',
+    'OpenAI Compatible'
+]);
+
+type ProviderDefinitionInput = Omit<LLMProviderDefinition, 'settingFields' | 'modelDiscovery'>;
 
 const KNOWN_MODEL_MAX_OUTPUT_TOKENS: Partial<Record<string, Record<string, number>>> = {
     'DeepSeek': {
@@ -273,7 +313,70 @@ const KNOWN_MODEL_MAX_OUTPUT_TOKENS: Partial<Record<string, Record<string, numbe
     }
 };
 
-export const LLM_PROVIDER_DEFINITIONS: LLMProviderDefinition[] = [
+function supportsReasoningEffortSetting(definition: ProviderDefinitionInput): boolean {
+    return OPENAI_COMPATIBLE_REASONING_PROVIDER_NAMES.has(definition.name);
+}
+
+function resolveModelDiscoveryMode(definition: ProviderDefinitionInput): LLMProviderModelDiscoveryDefinition {
+    if (definition.transport === 'ollama') {
+        return { mode: 'ollama-tags' };
+    }
+
+    if (definition.transport === 'google') {
+        return { mode: 'google-models' };
+    }
+
+    if (definition.transport === 'openai-compatible' && OPENAI_COMPATIBLE_MODEL_DISCOVERY_PROVIDER_NAMES.has(definition.name)) {
+        return { mode: 'openai-compatible-models' };
+    }
+
+    return { mode: 'none' };
+}
+
+function buildProviderSettingFields(definition: ProviderDefinitionInput): LLMProviderSettingFieldDefinition[] {
+    const fields: LLMProviderSettingFieldDefinition[] = [];
+
+    if (definition.apiKeyMode !== 'none') {
+        fields.push({ id: 'apiKey', group: 'core' });
+    }
+
+    fields.push(
+        { id: 'baseUrl', group: 'core' },
+        { id: 'model', group: 'core' }
+    );
+
+    if (definition.transport === 'azure-openai') {
+        fields.push({ id: 'apiVersion', group: 'contextual' });
+    }
+
+    fields.push({ id: 'temperature', group: 'advanced' });
+
+    if (definition.transport === 'openai-compatible') {
+        fields.push({ id: 'topP', group: 'advanced' });
+    }
+
+    if (supportsReasoningEffortSetting(definition)) {
+        fields.push({ id: 'reasoningEffort', group: 'advanced' });
+    }
+
+    if (definition.name === 'DeepSeek') {
+        fields.push({ id: 'thinkingEnabled', group: 'advanced' });
+    }
+
+    fields.push({ id: 'maxOutputTokens', group: 'developer' });
+
+    return fields;
+}
+
+function createProviderDefinition(definition: ProviderDefinitionInput): LLMProviderDefinition {
+    return {
+        ...definition,
+        settingFields: buildProviderSettingFields(definition),
+        modelDiscovery: resolveModelDiscoveryMode(definition)
+    };
+}
+
+const RAW_LLM_PROVIDER_DEFINITIONS: ProviderDefinitionInput[] = [
     {
         name: 'DeepSeek',
         category: 'cloud',
@@ -693,6 +796,8 @@ export const LLM_PROVIDER_DEFINITIONS: LLMProviderDefinition[] = [
     }
 ];
 
+export const LLM_PROVIDER_DEFINITIONS: LLMProviderDefinition[] = RAW_LLM_PROVIDER_DEFINITIONS.map(createProviderDefinition);
+
 const PROVIDER_INDEX = new Map(LLM_PROVIDER_DEFINITIONS.map((definition, index) => [definition.name, index]));
 const PROVIDER_MAP = new Map(LLM_PROVIDER_DEFINITIONS.map(definition => [definition.name, definition]));
 
@@ -723,6 +828,92 @@ export function createDefaultProviders(): LLMProviderConfig[] {
 
 export function isOpenAICompatibleProvider(name: string): boolean {
     return getLLMProviderDefinition(name)?.transport === 'openai-compatible';
+}
+
+export function getProviderSettingFields(name: string): LLMProviderSettingFieldDefinition[] {
+    return getLLMProviderDefinition(name)?.settingFields ?? [];
+}
+
+export function getProviderModelDiscoveryDefinition(name: string): LLMProviderModelDiscoveryDefinition {
+    return getLLMProviderDefinition(name)?.modelDiscovery ?? { mode: 'none' };
+}
+
+function getProviderFieldValue(provider: LLMProviderConfig, fieldId: LLMProviderSettingFieldId): unknown {
+    switch (fieldId) {
+        case 'apiKey':
+            return provider.apiKey;
+        case 'baseUrl':
+            return provider.baseUrl;
+        case 'model':
+            return provider.model;
+        case 'temperature':
+            return provider.temperature;
+        case 'topP':
+            return provider.topP;
+        case 'reasoningEffort':
+            return provider.reasoningEffort;
+        case 'thinkingEnabled':
+            return provider.thinkingEnabled;
+        case 'apiVersion':
+            return provider.apiVersion;
+        case 'maxOutputTokens':
+            return provider.maxOutputTokens;
+        default:
+            return undefined;
+    }
+}
+
+function hasExplicitProviderFieldValue(
+    provider: LLMProviderConfig,
+    definition: LLMProviderDefinition,
+    field: LLMProviderSettingFieldDefinition
+): boolean {
+    const currentValue = getProviderFieldValue(provider, field.id);
+    const defaultValue = getProviderFieldValue(definition.defaultConfig, field.id);
+
+    switch (field.id) {
+        case 'temperature':
+            return Number.isFinite(Number(currentValue)) && Number(currentValue) !== Number(defaultValue);
+        case 'topP':
+            return Number.isFinite(Number(currentValue));
+        case 'reasoningEffort':
+            return typeof currentValue === 'string' && currentValue.trim() !== '' && currentValue.trim().toLowerCase() !== 'none';
+        case 'thinkingEnabled':
+            return currentValue === true;
+        case 'maxOutputTokens':
+            return Number.isFinite(Number(currentValue)) && Number(currentValue) > 0;
+        default:
+            return currentValue !== undefined && currentValue !== null && currentValue !== defaultValue;
+    }
+}
+
+export function hasPersistedAdvancedProviderSettings(provider: LLMProviderConfig): boolean {
+    const definition = getLLMProviderDefinition(provider.name);
+    if (!definition) {
+        return false;
+    }
+
+    return definition.settingFields.some(field =>
+        (field.group === 'advanced' || field.group === 'developer')
+        && hasExplicitProviderFieldValue(provider, definition, field)
+    );
+}
+
+export function shouldShowProviderSettingField(
+    provider: LLMProviderConfig,
+    field: LLMProviderSettingFieldDefinition,
+    options?: { developerMode?: boolean }
+): boolean {
+    if (field.group !== 'developer') {
+        return true;
+    }
+
+    const definition = getLLMProviderDefinition(provider.name);
+    if (!definition) {
+        return options?.developerMode === true;
+    }
+
+    return options?.developerMode === true || hasExplicitProviderFieldValue(provider, definition, field);
 }
 
 function looksLikeDoubaoEndpointId(model: string): boolean {

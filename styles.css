@@ -985,6 +985,44 @@
     border-color: color-mix(in srgb, var(--notemd-border) 70%, #f97316 30%);
 }
 
+.notemd-provider-advanced-settings {
+    margin: 0 0 0.95em;
+}
+
+.notemd-provider-advanced-settings > .setting-item {
+    margin-top: 0;
+}
+
+.notemd-provider-model-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55em;
+    margin-top: 0.75em;
+}
+
+.notemd-provider-model-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75em;
+    padding: 0.6em 0.7em;
+    border-radius: 10px;
+    border: 1px solid color-mix(in srgb, var(--notemd-border) 78%, #14b8a6 22%);
+    background: color-mix(in srgb, var(--background-primary) 90%, #f0fdfa 10%);
+}
+
+.notemd-provider-model-item code {
+    flex: 1 1 auto;
+    min-width: 0;
+    word-break: break-word;
+    white-space: break-spaces;
+}
+
+.notemd-provider-model-item button {
+    flex: 0 0 auto;
+    white-space: nowrap;
+}
+
 .notemd-language-select {
     width: 100%;
     min-height: 34px;
