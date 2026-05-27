@@ -40,6 +40,7 @@ type ProviderSettingKey = 'addLinksProvider' | 'researchProvider' | 'generateTit
 type ModelSettingKey = 'addLinksModel' | 'researchModel' | 'generateTitleModel' | 'translateModel';
 
 type ProviderPanelState = {
+    advancedSettingsExpanded?: boolean;
     discoveredModels: string[];
     discoveredModelsExpanded: boolean;
     fetchStatus: 'idle' | 'loading' | 'success' | 'error';
@@ -272,6 +273,17 @@ export class NotemdSettingTab extends PluginSettingTab {
             this.providerPanelState.set(providerName, state);
         }
         return state;
+    }
+
+    private isProviderAdvancedSettingsExpanded(provider: LLMProviderConfig): boolean {
+        const panelState = this.getProviderPanelState(provider.name);
+        if (typeof panelState.advancedSettingsExpanded === 'boolean') {
+            return panelState.advancedSettingsExpanded;
+        }
+
+        const defaultOpen = hasPersistedAdvancedProviderSettings(provider);
+        panelState.advancedSettingsExpanded = defaultOpen;
+        return defaultOpen;
     }
 
     private async updateProviderField(
@@ -1178,8 +1190,12 @@ export class NotemdSettingTab extends PluginSettingTab {
 
             const advancedFields = providerFields.filter(field => field.group === 'advanced' || field.group === 'developer');
             if (advancedFields.length > 0) {
+                const panelState = this.getProviderPanelState(activeProvider.name);
                 const advancedDetails = containerEl.createEl('details', { cls: 'notemd-section-card notemd-provider-advanced-settings' });
-                advancedDetails.open = hasPersistedAdvancedProviderSettings(activeProvider);
+                advancedDetails.open = this.isProviderAdvancedSettingsExpanded(activeProvider);
+                advancedDetails.addEventListener('toggle', () => {
+                    panelState.advancedSettingsExpanded = advancedDetails.open;
+                });
                 const summary = advancedDetails.createEl('summary', { cls: 'notemd-section-summary' });
                 summary.setText(providerI18n.advancedSettingsName);
                 advancedDetails.createEl('p', {

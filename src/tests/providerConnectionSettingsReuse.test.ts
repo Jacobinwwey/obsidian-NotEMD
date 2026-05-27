@@ -31,4 +31,13 @@ describe('settings provider connection reuse', () => {
         expect(source).toContain('panelState.discoveredModelsExpanded = false;');
         expect(source).toContain('providerI18n.discoveredModelsSummaryWithCurrent');
     });
+
+    test('keeps advanced provider settings collapsed after the user closes the section manually', () => {
+        const source = fs.readFileSync(settingsTabPath, 'utf8');
+
+        expect(source).toContain('advancedSettingsExpanded');
+        expect(source).toContain('advancedDetails.addEventListener(\'toggle\'');
+        expect(source).toContain('panelState.advancedSettingsExpanded');
+        expect(source).not.toContain('advancedDetails.open = hasPersistedAdvancedProviderSettings(activeProvider);');
+    });
 });
