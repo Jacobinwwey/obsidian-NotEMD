@@ -111,6 +111,31 @@ canonical: true
 | selective reuse Cherry Studio | 已形成具体研究结论 | 可以安全进入实现，不需要整体照搬 |
 | 模型发现不能阻断手动配置 | 未落地 | discovery 必须是 additive 且 transient 的 |
 
+## 3.5 当前隔离实现通道检查点
+
+截至 2026-05-27 审计，隔离 worktree/branch `feat/provider-settings-model-discovery` 已经把这条线从纯规划推进到了有界实现，但还没有推进成 current-main 真值。
+
+那里已经存在的内容：
+
+1. `src/llmProviders.ts` 已加入一版 provider-field taxonomy metadata（`core`、`contextual`、`advanced`、`developer`）与按 provider 的 model-discovery metadata。
+2. 新增了一个瞬时 `src/providerModelDiscovery.ts`，首批覆盖：
+   - OpenAI-compatible `GET /models`
+   - Ollama tag listing
+   - Google model listing
+3. `src/ui/NotemdSettingTab.ts` 中已有一版 metadata-driven provider panel 重构尝试，包含：
+   - 默认/core 字段渲染
+   - contextual 字段渲染
+   - advanced disclosure
+   - 基于持久化 advanced 值的派生 auto-expand
+   - 可选的 fetch-models UI wiring
+4. 对应 locale keys 与聚焦测试也已经补入。
+
+那里还没有完成的内容：
+
+1. 该隔离 worktree 在检查时还没有完成验证，且本地依赖没有 bootstrap 好；
+2. 新 provider-panel surface 的 CSS/layout polish 还没收口；
+3. 在这条通道验证通过并合回之前，current-main 真值不变。
+
 ## 4. Cherry Studio 对照结论
 
 参考仓库：`/home/jacob/ref/cherry-studio`
@@ -196,6 +221,11 @@ Cherry Studio 值得复用的点：
 1. metadata 保持 declarative 与 field-scoped；
 2. 不把渲染逻辑搬进 provider registry。
 
+当前检查点：
+
+1. 已在隔离通道里实现，但尚未合回；
+2. 当前 metadata 形态仍保持 declarative、field-scoped。
+
 ### Phase 2：settings renderer 重构
 
 涉及文件：
@@ -217,6 +247,12 @@ Cherry Studio 值得复用的点：
 
 1. advanced 展开逻辑从当前配置实时推导；
 2. 保留现有字段值与保存语义。
+
+当前检查点：
+
+1. 隔离通道里已经有一版 metadata-driven renderer 尝试；
+2. default/core、contextual 与 advanced 分区已部分接线；
+3. 验证、CSS polish 与 merge gate 仍未完成。
 
 ### Phase 3：lightweight discovery service
 
@@ -243,6 +279,12 @@ Cherry Studio 值得复用的点：
 2. 始终保留手动 model 输入；
 3. 永不持久化远程 catalog。
 
+当前检查点：
+
+1. 隔离通道中已存在面向首批 family 的 transient discovery helper；
+2. 它仍保持手动 `model` 输入为持久化 source of truth；
+3. 但目前还没有合并，也还没完成验证。
+
 ### Phase 4：UI 接入
 
 产物：
@@ -250,6 +292,12 @@ Cherry Studio 值得复用的点：
 1. 在 `model` 字段附近提供轻量 “fetch models” 或 suggestion surface；
 2. discovery 与保存流程之间不能形成阻塞依赖；
 3. 一旦 discovery 失败，当前手动工作流必须完整可用。
+
+当前检查点：
+
+1. 隔离通道里已经有 fetch-models UI wiring 与瞬时 suggestion state；
+2. styling 与用户面验证仍未完成；
+3. 这还不是 current-main 行为。
 
 ### Phase 5：测试与文档
 
@@ -266,6 +314,12 @@ Cherry Studio 值得复用的点：
 2. `README_zh.md`
 3. 本文
 4. 如果实现状态变化，则同步更新 canonical matrix/audit 文档
+
+当前检查点：
+
+1. 聚焦的 i18n/test 更新已经出现在隔离通道里；
+2. 当前 main 的 canonical 文档现在正在同步更新，以反映“主线真值”和“隔离实现进展”的真实分离；
+3. 最终 merge gate 仍要求隔离通道先 bootstrap，再跑 targeted + full verification。
 
 ## 7. 显式非目标
 
@@ -284,5 +338,12 @@ Cherry Studio 值得复用的点：
 1. `main` 只承载 docs/progress truth，并保持 clean；
 2. 实现工作在为该任务创建的 isolated worktree/branch 中推进；
 3. 只有经过验证的、有界实现才合回主线。
+
+隔离通道的具体 merge gate：
+
+1. 先把 isolated worktree bootstrap 好，让 build/test tooling 真正能解析到项目依赖；
+2. 先跑 provider-settings/model-discovery 的 targeted tests，再跑完整的 `npm run build`、`npm test -- --runInBand`、`npm run audit:i18n-ui` 与 `git diff --check`；
+3. 收掉 provider settings surface 剩余的 CSS/layout 缺口；
+4. 只有在整条通道变绿后，才能把当前 main 文档从“隔离实现进行中”切换为“已落地”。
 
 这样才能在保持规划真值诚实的同时，避免把半落地的 control-plane 改动直接摊在当前 main 上。

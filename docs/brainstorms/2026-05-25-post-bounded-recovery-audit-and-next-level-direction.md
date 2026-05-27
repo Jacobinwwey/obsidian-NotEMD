@@ -144,11 +144,14 @@ This lane is now the clearest example of “runtime breadth advanced faster than
 7. Cherry Studio analysis now gives a concrete comparison target:
    - the strategy-registry and parser/fallback separation are worth reusing
    - the persisted `provider.models[]` lifecycle and heavier provider-domain state are too heavy for Notemd's current architecture
+8. an isolated implementation lane now exists at `feat/provider-settings-model-discovery` in a separate worktree. Based on its current diff, that lane adds provider-field taxonomy metadata plus discovery metadata in `src/llmProviders.ts`, a new transient `src/providerModelDiscovery.ts` helper for OpenAI-compatible / Ollama / Google discovery, a metadata-driven provider-panel refactor attempt in `src/ui/NotemdSettingTab.ts`, matching locale keys, and focused regression tests.
+9. that isolated lane is still outside current-main truth. When checked on 2026-05-27, the worktree did not have a bootstrapped `node_modules`, so verification there has not completed yet; CSS/polish and final quality gates remain open.
 
 Interpretation:
 
 - provider/runtime support is materially ahead of provider settings UX architecture;
-- the next product-facing control-plane work is not more providers first, but schema and discoverability convergence for the providers that already exist.
+- the next product-facing control-plane work is not more providers first, but schema and discoverability convergence for the providers that already exist;
+- this lane has moved beyond pure planning into bounded isolated implementation, but current-main truth does not move until that lane is bootstrapped, verified, and merged.
 
 ## 3. Deep Comparison Against Prior Requirement Tracks
 
@@ -203,16 +206,16 @@ Current requirement status:
 
 | Requirement | Status | Notes |
 |---|---|---|
-| R1 provider settings must distinguish required/core from advanced fields | Not landed | Current UI shows a flat provider panel without shared grouping metadata |
-| R2 distinction must come from shared provider metadata | Not landed | `LLMProviderDefinition` is not yet field-taxonomy aware |
+| R1 provider settings must distinguish required/core from advanced fields | Not landed on current main; isolated implementation in progress | Current UI on main still shows a flat provider panel, while the isolated lane has an unmerged metadata-driven grouping attempt |
+| R2 distinction must come from shared provider metadata | Not landed on current main; isolated implementation in progress | `LLMProviderDefinition` on main is not field-taxonomy aware yet, but the isolated lane adds `settingFields` metadata |
 | R3 preserve runtime behavior and import/export compatibility | Already aligned in the current data model | The flat persisted provider config keeps compatibility pressure low for the future refactor |
-| R4 support Azure-specific required fields without forcing them onto others | Partially aligned | `apiVersion` exists today, but only through hardcoded UI branching |
-| R5 keep common setup fast and visible | Partially aligned | Current UI is simple but noisy; it has not yet converged to a core/advanced split |
+| R4 support Azure-specific required fields without forcing them onto others | Partially aligned on main; isolated metadata path exists | `apiVersion` exists today through hardcoded UI branching; the isolated lane starts moving that visibility into provider metadata without changing persisted shape |
+| R5 keep common setup fast and visible | Partially aligned on main; isolated renderer refactor in progress | Current UI is simple but noisy; the isolated lane starts a core/contextual/advanced split, but it is not verified or merged yet |
 | R6 deeply analyze Cherry Studio model fetch design | Landed as research | `.trellis/tasks/05-27-provider-settings-model-discovery/research/cherry-studio-model-discovery.md` |
-| R7 degrade gracefully to manual model entry | Operationally true today | Manual entry is the only path today, but there is no optional discovery helper yet |
+| R7 degrade gracefully to manual model entry | Operationally true on main; isolated discovery helper in progress | Main still relies entirely on manual entry; the isolated lane adds transient discovery while intentionally keeping manual `model` entry as the persisted truth path |
 | R8 `model` must remain core/default-visible | Landed in current behavior | `model` is already a first-class visible field |
-| R9 auto-expand advanced if persisted advanced values already exist | Not landed | No advanced disclosure state exists yet |
-| R10 reuse Cherry Studio selectively rather than cloning its whole architecture | Planned, not implemented | The research now makes this direction concrete enough to implement |
+| R9 auto-expand advanced if persisted advanced values already exist | Not landed on current main; isolated helper exists | Main has no advanced disclosure state yet; the isolated lane adds an unmerged derived helper for persisted advanced-value expansion |
+| R10 reuse Cherry Studio selectively rather than cloning its whole architecture | Research landed; isolated implementation follows that direction | The isolated lane uses transient discovery metadata/service rather than a persisted `provider.models[]` subsystem |
 
 Interpretation:
 
@@ -238,6 +241,8 @@ What has changed since the earlier matrix wording:
    local-KB, chapter split, preview history, and saved-artifact reopening came back without forcing docs to pretend packaged runtime isolation already exists.
 3. **Cherry Studio comparison removed a large planning blind spot**
    the repo now has a concrete answer for what to reuse, what to reject, and why.
+4. **The provider-settings lane now has an isolated execution probe**
+   the work is no longer blocked on architecture ambiguity; it is now blocked on finishing, bootstrapping, and verifying the implementation lane without overclaiming mainline truth.
 
 ### 4.2 What is structurally tense right now
 
@@ -249,6 +254,8 @@ What has changed since the earlier matrix wording:
    copying Cherry Studio wholesale would create a second provider-state subsystem that Notemd does not need.
 4. **The flat config shape is both a strength and a constraint**
    it preserves import/export and `data.json` compatibility, but it gives the UI no field taxonomy by itself.
+5. **The next blocker is now execution discipline, not planning ambiguity**
+   the isolated lane already carries a bounded implementation attempt, but it must be bootstrapped, verified, and polished before it can change current-main truth.
 
 ### 4.3 Correct interpretation
 
@@ -256,7 +263,7 @@ Current main is best described as:
 
 1. past the “recovery existence proof” stage for the bounded product slice;
 2. still before true Stage-C packaged runtime convergence;
-3. still before provider-settings control-plane convergence;
+3. still before provider-settings control-plane convergence on current main, even though a bounded isolated implementation lane is now underway;
 4. still before any broad public CLI promotion.
 
 ## 5. Concrete Next-Level Plan
