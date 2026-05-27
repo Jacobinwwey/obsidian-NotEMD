@@ -23,6 +23,12 @@ const OPERATION_HELP = {
     optional: ['executionMode', 'requestedIntent', 'compatibilityMode', 'targetLanguage'],
     exampleInput: '{"sourcePath":"docs/index.zh-CN.md","executionMode":"save-artifact","requestedIntent":"erDiagram","targetLanguage":"en"}'
   },
+  'local-knowledge.inspect': {
+    summary: 'Inspect task-scoped local knowledge retrieval inputs, paths, and context.',
+    required: ['taskScope'],
+    optional: ['sourcePath', 'currentFilePath', 'query', 'knowledgePaths', 'topK', 'slidingWindowSize', 'maxSnippetChars'],
+    exampleInput: '{"taskScope":"diagramGeneration","sourcePath":"docs/index.zh-CN.md","knowledgePaths":["docs/maintainer","docs/superpowers"],"topK":2,"slidingWindowSize":1}'
+  },
   'provider.profile.export-redacted': {
     summary: 'Export provider profiles with API keys redacted.',
     required: [],

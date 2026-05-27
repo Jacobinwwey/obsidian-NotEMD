@@ -1,6 +1,6 @@
 ---
 date: 2026-05-25
-last_updated: 2026-05-26
+last_updated: 2026-05-27
 topic: post-bounded-recovery-audit-and-next-level-direction
 canonical: true
 ---
@@ -64,13 +64,15 @@ Concrete current truth:
    - `content.split-note-by-chapters`
    - `research.summarize-topic`
    - `diagram.generate`
+   - `local-knowledge.inspect`
    - plus the export surfaces
 2. `src/maintainerCliBridge.ts` implements those path-based maintainer operations with explicit JSON/file payloads.
-3. `content.split-note-by-chapters` is now also registry-backed and typed in `src/operations/registry.ts` / `src/cliContracts.ts`, while still remaining outside the current public-safe slice.
-4. `content.split-note-by-chapters` maintainer invocation now supports optional `splitHeadingLevel` override instead of depending only on the current settings snapshot.
-5. `content.split-note-by-chapters` typed results now also expose the managed artifact contract directly (`requestedSplitHeadingLevel`, `chapterNotePaths`, `managedArtifactPaths`, `removedStalePaths`) instead of forcing callers to reconstruct it from naming conventions.
-6. `scripts/lib/maintainer-cli-operation-help.js` is the shared help/operation truth for that helper surface.
-7. the public-safe export slice is still intentionally narrower than the maintainer helper.
+3. the maintainer-only `local-knowledge.inspect` seam now exposes effective path resolution, derived/explicit query, candidate file paths, raw formatted context, structured `contextBlocks` evidence, structured retrieval summaries, and temporary `knowledgePaths` override arrays for task-scoped local-KB debugging without widening the public-safe slice.
+4. `content.split-note-by-chapters` is now also registry-backed and typed in `src/operations/registry.ts` / `src/cliContracts.ts`, while still remaining outside the current public-safe slice.
+5. `content.split-note-by-chapters` maintainer invocation now supports optional `splitHeadingLevel` override instead of depending only on the current settings snapshot.
+6. `content.split-note-by-chapters` typed results now also expose the managed artifact contract directly (`requestedSplitHeadingLevel`, `chapterNotePaths`, `managedArtifactPaths`, `removedStalePaths`) instead of forcing callers to reconstruct it from naming conventions.
+7. `scripts/lib/maintainer-cli-operation-help.js` is the shared help/operation truth for that helper surface.
+8. the public-safe export slice is still intentionally narrower than the maintainer helper.
 
 Interpretation:
 
@@ -91,7 +93,7 @@ The previously recovered product slices are now real current-main facts and no l
 4. preview history and saved-artifact-aware reopening are live in the reusable preview shell.
 5. settings reset, concept-note prerequisite guidance, concept synonym suppression, and folder file-selection profiles are already back on current main.
 6. retrieval-dependent note-processing results now expose machine-readable `localKnowledgeRetrieval` summaries for title generation and research, including matched/returned counts, source paths, requested `topK`, sliding-window size, current-file exclusion telemetry, index/query timing, and context-char count.
-7. a dedicated offline retrieval-quality maintainer fixture now exists as `npm run verify:local-kb-fixtures`; it exercises the live MiniSearch-based retriever against a small regression corpus instead of introducing a separate evaluation-only retrieval path.
+7. a dedicated offline retrieval-quality maintainer fixture now exists as `npm run verify:local-kb-fixtures`; it exercises the live MiniSearch-based retriever against a broader mixed-note/query regression corpus and task-scoped inspect cases instead of introducing a separate evaluation-only retrieval path.
 
 Code-backed evidence includes:
 
@@ -249,8 +251,8 @@ Goal:
 Likely areas:
 
 1. keep extending richer result/evidence framing to the remaining chapter-split helper/example paths now that deterministic TOC front-matter metadata and repeated-heading-safe TOC block refs are landed alongside retrieval summaries plus timing telemetry for title-generation, research, and artifact-mode diagram generation;
-2. the shared maintainer helper now carries compact payload examples for the retrieval-dependent paths, so the next step is to keep those examples aligned as result schemas evolve;
-3. keep tuning/documentation around sliding-window size, snippet shaping, and folder-scope expectations, but treat the offline fixture as a broader landed baseline across exact/prefix/current-file-exclusion classes and shift the remaining chapter-split gap toward mixed-note/query corpus expansion rather than re-proving that the harness should exist.
+2. the shared maintainer helper now carries compact payload examples for the retrieval-dependent paths, and current `main` now also includes a bounded `local-knowledge.inspect` seam for effective path/query/context inspection plus temporary override-path tuning; the next step is to keep those maintainer examples and inspect outputs aligned as result schemas evolve;
+3. keep tuning/documentation around sliding-window size, snippet shaping, and folder-scope expectations, but treat the offline fixture as a broader landed baseline across exact/prefix/current-file-exclusion classes plus mixed file/folder task-scoped inspect cases, and shift the remaining chapter-split gap toward deeper corpus expansion rather than re-proving that the harness should exist.
 
 ## 6. Task And Documentation Follow-Through Rule
 

@@ -37,6 +37,7 @@ ${operationDetails}
 
 Minimal examples:
   npm run cli:invoke -- --vault docs --operation content.split-note-by-chapters --input-json '{"sourcePath":"docs/index.zh-CN.md"}' --pretty
+  npm run cli:invoke -- --vault docs --operation local-knowledge.inspect --input-json '{"taskScope":"diagramGeneration","sourcePath":"docs/index.zh-CN.md","knowledgePaths":["docs/maintainer","docs/superpowers"]}' --pretty
   npm run cli:invoke -- --vault docs --operation provider.profile.export-redacted --pretty
 
 Notes:

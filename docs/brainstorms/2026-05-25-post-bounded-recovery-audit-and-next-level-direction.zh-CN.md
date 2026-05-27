@@ -1,6 +1,6 @@
 ---
 date: 2026-05-25
-last_updated: 2026-05-26
+last_updated: 2026-05-27
 topic: post-bounded-recovery-audit-and-next-level-direction
 canonical: true
 ---
@@ -64,13 +64,15 @@ canonical: true
    - `content.split-note-by-chapters`
    - `research.summarize-topic`
    - `diagram.generate`
+   - `local-knowledge.inspect`
    - 以及 export 相关操作
 2. `src/maintainerCliBridge.ts` 已实现这些 path-based maintainer operations，并要求显式 JSON / 文件 payload。
-3. `content.split-note-by-chapters` 现在也已进入 `src/operations/registry.ts` / `src/cliContracts.ts` 的类型化主干，但仍明确不属于当前 public-safe slice。
-4. `content.split-note-by-chapters` 的 maintainer 调用现已支持可选 `splitHeadingLevel` override，不再只依赖当前 settings 快照。
-5. `content.split-note-by-chapters` 的类型化结果现在还会直接暴露 managed artifact contract（`requestedSplitHeadingLevel`、`chapterNotePaths`、`managedArtifactPaths`、`removedStalePaths`），不再逼调用方靠命名规则反推。
-6. `scripts/lib/maintainer-cli-operation-help.js` 已成为这层 helper surface 的共享帮助真值。
-7. public-safe export slice 仍然刻意比 maintainer helper 更窄。
+3. maintainer-only 的 `local-knowledge.inspect` seam 现已可以暴露 effective path resolution、显式或自动派生的 query、candidate file paths、原始格式化 context、结构化 `contextBlocks` 证据、结构化 retrieval 摘要，以及临时 `knowledgePaths` override 数组，用于 task-scoped local-KB 调试，而不会扩大 public-safe slice。
+4. `content.split-note-by-chapters` 现在也已进入 `src/operations/registry.ts` / `src/cliContracts.ts` 的类型化主干，但仍明确不属于当前 public-safe slice。
+5. `content.split-note-by-chapters` 的 maintainer 调用现已支持可选 `splitHeadingLevel` override，不再只依赖当前 settings 快照。
+6. `content.split-note-by-chapters` 的类型化结果现在还会直接暴露 managed artifact contract（`requestedSplitHeadingLevel`、`chapterNotePaths`、`managedArtifactPaths`、`removedStalePaths`），不再逼调用方靠命名规则反推。
+7. `scripts/lib/maintainer-cli-operation-help.js` 已成为这层 helper surface 的共享帮助真值。
+8. public-safe export slice 仍然刻意比 maintainer helper 更窄。
 
 正确解释：
 
@@ -91,7 +93,7 @@ canonical: true
 4. preview history 与 saved-artifact-aware reopening 已进入可复用 preview shell。
 5. settings reset、concept-note prerequisite guidance、concept synonym suppression 与 folder file-selection profiles 都已回到当前主线。
 6. 面向 retrieval 的 note-processing 结果现在也已为标题生成与研究总结暴露 machine-readable 的 `localKnowledgeRetrieval` 摘要，包含 matched/returned counts、source paths、请求的 `topK`、sliding-window size、current-file exclusion telemetry、index/query timing 与 context-char count。
-7. 现在也已有专用的离线 retrieval-quality maintainer fixture：`npm run verify:local-kb-fixtures`。它直接对当前线上 MiniSearch retriever 跑一组小型回归语料，而不是再造一条评测专用检索路径。
+7. 现在也已有专用的离线 retrieval-quality maintainer fixture：`npm run verify:local-kb-fixtures`。它直接对当前线上 MiniSearch retriever 跑一组更宽的 mixed-note/query 回归语料与 task-scoped inspect case，而不是再造一条评测专用检索路径。
 
 代码证据包括：
 
@@ -249,8 +251,8 @@ release-facing 真值也已在当前主线上重新对齐：
 可能的切入点：
 
 1. 在标题生成、研究总结与 artifact-mode 图形生成已经落地 retrieval 摘要与 timing telemetry，且 chapter split 已补上确定性的 TOC front-matter metadata 与 repeated-heading-safe TOC block ref 之后，继续把 richer result/evidence framing 推进到剩余的 chapter-split helper/example 路径；
-2. shared maintainer helper 现已为依赖 retrieval 的路径补上简洁 payload 示例，下一步重点是让这些示例持续跟随 result schema 演进；
-3. 继续完善 sliding-window、snippet shaping 与 folder-scope 预期等调优文档；对 offline fixture 则应把它视为已覆盖 exact/prefix/current-file-exclusion 类别的更宽基线，而 chapter-split 的剩余缺口应转向 mixed-note/query corpus 扩充，而不是重复证明“需要有这条夹具”。
+2. shared maintainer helper 现已为依赖 retrieval 的路径补上简洁 payload 示例，而当前 `main` 也新增了有界的 `local-knowledge.inspect` seam 用于检查 effective path/query/context，并支持临时 override-path 调参；下一步重点是让这些 maintainer 示例与 inspect 输出持续跟随 result schema 演进；
+3. 继续完善 sliding-window、snippet shaping 与 folder-scope 预期等调优文档；对 offline fixture 则应把它视为已覆盖 exact/prefix/current-file-exclusion 类别以及 mixed file/folder task-scoped inspect case 的更宽基线，而 chapter-split 的剩余缺口应转向更深的 corpus 扩充，而不是重复证明“需要有这条夹具”。
 
 ## 6. Task 与文档收口规则
 

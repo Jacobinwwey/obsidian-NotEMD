@@ -1,6 +1,11 @@
 import { BatchGenerateContentForTitlesResult } from './fileUtils';
 import { FolderTaskFileSelectionOverride } from './folderTaskFileSelector';
 import {
+    LocalKnowledgeInspectRequest,
+    LocalKnowledgeInspectResult,
+    LocalKnowledgeTaskScope
+} from './localKnowledgeBase';
+import {
     DiagramCommandInputOverrides,
     DiagramCommandOptions,
     DiagramCommandRunResult
@@ -20,6 +25,7 @@ export type MaintainerCliOperationId =
     | 'content.split-note-by-chapters'
     | 'research.summarize-topic'
     | 'diagram.generate'
+    | 'local-knowledge.inspect'
     | 'provider.profile.export-redacted'
     | 'cli.capability-manifest.export'
     | 'cli.invocation-contract.export'
@@ -35,6 +41,7 @@ export type MaintainerCliOperationResult =
     | ChapterSplitResult
     | ResearchSummarizeResult
     | DiagramCommandRunResult
+    | LocalKnowledgeInspectResult
     | ExportRedactedProviderProfilesCommandResult
     | ExportCliCapabilityManifestCommandResult
     | ExportCliInvocationContractCommandResult
@@ -64,6 +71,10 @@ export interface MaintainerCliBridgeHost {
         reporter?: ProgressReporter,
         options?: DiagramCommandOptions
     ) => Promise<DiagramCommandRunResult | null>;
+    inspectLocalKnowledgeCommand: (
+        request: LocalKnowledgeInspectRequest,
+        reporter?: ProgressReporter
+    ) => Promise<LocalKnowledgeInspectResult>;
     exportRedactedProviderProfilesCommand: () => Promise<ExportRedactedProviderProfilesCommandResult | null>;
     exportCliCapabilityManifestCommand: () => Promise<ExportCliCapabilityManifestCommandResult | null>;
     exportCliInvocationContractCommand: () => Promise<ExportCliInvocationContractCommandResult | null>;
@@ -123,6 +134,40 @@ function optionalBoolean(input: Record<string, unknown>, key: string): boolean |
         throw new Error(`Maintainer CLI operation expects "${key}" to be a boolean when provided.`);
     }
     return value;
+}
+
+function optionalNumber(input: Record<string, unknown>, key: string): number | undefined {
+    const value = input[key];
+    if (value == null || value === '') {
+        return undefined;
+    }
+    if (typeof value !== 'number' || !Number.isFinite(value)) {
+        throw new Error(`Maintainer CLI operation expects "${key}" to be a finite number when provided.`);
+    }
+
+    return value;
+}
+
+function optionalStringArray(input: Record<string, unknown>, key: string): string[] | undefined {
+    if (!Object.prototype.hasOwnProperty.call(input, key)) {
+        return undefined;
+    }
+
+    const value = input[key];
+    if (value == null) {
+        return [];
+    }
+    if (!Array.isArray(value)) {
+        throw new Error(`Maintainer CLI operation expects "${key}" to be an array of strings when provided.`);
+    }
+
+    return value.map((entry, index) => {
+        if (typeof entry !== 'string') {
+            throw new Error(`Maintainer CLI operation expects "${key}[${index}]" to be a string.`);
+        }
+
+        return entry.trim();
+    }).filter(Boolean);
 }
 
 function optionalEnum<T extends string>(
@@ -221,6 +266,37 @@ function buildDiagramCommandOptions(input: Record<string, unknown>): DiagramComm
     };
 }
 
+function buildLocalKnowledgeInspectRequest(input: Record<string, unknown>): LocalKnowledgeInspectRequest {
+    const taskScope = optionalEnum(
+        input,
+        'taskScope',
+        ['generateTitle', 'batchGenerateFromTitles', 'researchSummarize', 'diagramGeneration'] as const satisfies readonly LocalKnowledgeTaskScope[]
+    );
+
+    if (!taskScope) {
+        throw new Error('Maintainer CLI operation expects "taskScope" to be one of: generateTitle, batchGenerateFromTitles, researchSummarize, diagramGeneration.');
+    }
+
+    const sourcePath = optionalString(input, 'sourcePath');
+    const currentFilePath = optionalString(input, 'currentFilePath');
+    const query = optionalString(input, 'query');
+    const knowledgePaths = optionalStringArray(input, 'knowledgePaths');
+    const topK = optionalNumber(input, 'topK');
+    const slidingWindowSize = optionalNumber(input, 'slidingWindowSize');
+    const maxSnippetChars = optionalNumber(input, 'maxSnippetChars');
+
+    return {
+        taskScope,
+        ...(sourcePath !== undefined ? { sourcePath } : {}),
+        ...(currentFilePath !== undefined ? { currentFilePath } : {}),
+        ...(query !== undefined ? { query } : {}),
+        ...(knowledgePaths !== undefined ? { knowledgePaths } : {}),
+        ...(topK !== undefined ? { topK } : {}),
+        ...(slidingWindowSize !== undefined ? { slidingWindowSize } : {}),
+        ...(maxSnippetChars !== undefined ? { maxSnippetChars } : {})
+    };
+}
+
 export async function invokeMaintainerCliOperation(
     host: MaintainerCliBridgeHost,
     request: MaintainerCliOperationRequest,
@@ -252,6 +328,11 @@ export async function invokeMaintainerCliOperation(
                 requireString(input, 'sourcePath'),
                 reporter,
                 buildDiagramCommandOptions(input)
+            );
+        case 'local-knowledge.inspect':
+            return host.inspectLocalKnowledgeCommand(
+                buildLocalKnowledgeInspectRequest(input),
+                reporter
             );
         case 'provider.profile.export-redacted':
             assertNoInput(request.input);

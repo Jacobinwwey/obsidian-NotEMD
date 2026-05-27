@@ -1,5 +1,5 @@
 import { TFile } from 'obsidian';
-import { buildLocalKnowledgeBaseRetriever } from '../localKnowledgeBase';
+import { buildLocalKnowledgeBaseRetriever, inspectLocalKnowledgeRetrieval } from '../localKnowledgeBase';
 import { mockSettings } from './__mocks__/settings';
 import { mockApp } from './__mocks__/app';
 
@@ -220,5 +220,218 @@ describe('localKnowledgeBase', () => {
         expect(retriever).not.toBeNull();
         expect(retriever?.indexedFileCount).toBe(1);
         expect(details?.sourcePaths).toEqual(['Knowledge/Shared.md']);
+    });
+
+    test('inspects task-scoped retrieval with derived basename query and effective path metadata even when settings are disabled', async () => {
+        const source = createFile('Docs/Architecture.md');
+        const exact = createFile('Knowledge/Exact.md');
+        const scoped = createFile('Knowledge/Scoped/Architecture.md');
+        const excluded = createFile('Knowledge/Other.md');
+
+        (mockApp.vault.getFiles as jest.Mock).mockReturnValue([source, exact, scoped, excluded]);
+        (mockApp.vault.read as jest.Mock).mockImplementation(async (file: TFile) => {
+            switch (file.path) {
+                case 'Docs/Architecture.md':
+                    return '# Architecture\nSource note title only.';
+                case 'Knowledge/Exact.md':
+                    return '# Exact\nExact file path knowledge.';
+                case 'Knowledge/Scoped/Architecture.md':
+                    return '# Architecture\nScoped folder architecture knowledge.';
+                default:
+                    return '# Other\nOther knowledge.';
+            }
+        });
+
+        const settings = {
+            ...mockSettings,
+            enableLocalKnowledgeRetrieval: false,
+            enableLocalKnowledgeForGenerateTitle: false,
+            localKnowledgeBasePaths: 'Knowledge/Shared.md',
+            localKnowledgeGenerateTitlePaths: 'Knowledge/Exact.md\nKnowledge/Scoped',
+            localKnowledgeTopK: 4,
+            localKnowledgeSlidingWindowSize: 1,
+            localKnowledgeMaxSnippetChars: 220,
+            localKnowledgeExcludeCurrentFile: true
+        } as any;
+
+        const result = await inspectLocalKnowledgeRetrieval(
+            mockApp as any,
+            settings,
+            {
+                taskScope: 'generateTitle',
+                sourcePath: 'Docs/Architecture.md'
+            }
+        );
+
+        expect(result.globalEnabled).toBe(false);
+        expect(result.taskEnabled).toBe(false);
+        expect(result.effectivePathSource).toBe('task-specific');
+        expect(result.effectiveConfiguredPaths).toEqual(['Knowledge/Exact.md', 'Knowledge/Scoped']);
+        expect(result.query).toBe('Architecture');
+        expect(result.queryDerivation).toBe('basename');
+        expect(result.sourcePath).toBe('Docs/Architecture.md');
+        expect(result.currentFilePath).toBe('Docs/Architecture.md');
+        expect(result.retrievalOptions).toEqual({
+            topK: 4,
+            slidingWindowSize: 1,
+            maxSnippetChars: 220,
+            excludeCurrentFile: true
+        });
+        expect(result.retrieverBuildStatus).toBe('ready');
+        expect(result.retrieverCreated).toBe(true);
+        expect(result.candidateFilePaths).toEqual(['Knowledge/Exact.md', 'Knowledge/Scoped/Architecture.md']);
+        expect(result.retrieval.sourcePaths).toContain('Knowledge/Scoped/Architecture.md');
+        expect(result.contextBlocks).toHaveLength(1);
+        expect(result.contextBlocks[0]).toEqual(expect.objectContaining({
+            index: 1,
+            path: 'Knowledge/Scoped/Architecture.md',
+            heading: 'Architecture',
+            breadcrumb: 'Architecture',
+            excerptWasTruncated: false
+        }));
+        expect(result.context).toContain('Knowledge/Scoped/Architecture.md');
+        expect(result.context).not.toContain('Knowledge/Other.md');
+    });
+
+    test('inspect supports temporary knowledge-path overrides without mutating task settings', async () => {
+        const source = createFile('Docs/Architecture.md');
+        const defaultKnowledge = createFile('Knowledge/Default.md');
+        const scoped = createFile('Knowledge/Scoped/Architecture.md');
+
+        (mockApp.vault.getFiles as jest.Mock).mockReturnValue([source, defaultKnowledge, scoped]);
+        (mockApp.vault.read as jest.Mock).mockImplementation(async (file: TFile) => {
+            switch (file.path) {
+                case 'Docs/Architecture.md':
+                    return '# Architecture\nSource note title only.';
+                case 'Knowledge/Default.md':
+                    return '# Default\nDefault knowledge only.';
+                default:
+                    return '# Architecture\nScoped folder architecture knowledge.';
+            }
+        });
+
+        const settings = {
+            ...mockSettings,
+            enableLocalKnowledgeRetrieval: true,
+            enableLocalKnowledgeForGenerateTitle: true,
+            localKnowledgeBasePaths: 'Knowledge/Default.md',
+            localKnowledgeGenerateTitlePaths: 'Knowledge/Default.md',
+            localKnowledgeTopK: 4,
+            localKnowledgeSlidingWindowSize: 0,
+            localKnowledgeMaxSnippetChars: 220,
+            localKnowledgeExcludeCurrentFile: true
+        } as any;
+
+        const result = await inspectLocalKnowledgeRetrieval(
+            mockApp as any,
+            settings,
+            {
+                taskScope: 'generateTitle',
+                sourcePath: 'Docs/Architecture.md',
+                knowledgePaths: ['Knowledge/Scoped', ' Knowledge/Scoped ']
+            }
+        );
+
+        expect(result.effectivePathSource).toBe('override');
+        expect(result.effectiveConfiguredPaths).toEqual(['Knowledge/Scoped']);
+        expect(result.candidateFilePaths).toEqual(['Knowledge/Scoped/Architecture.md']);
+        expect(result.retrieval.sourcePaths).toEqual(['Knowledge/Scoped/Architecture.md']);
+        expect(result.context).toContain('Knowledge/Scoped/Architecture.md');
+        expect(result.context).not.toContain('Knowledge/Default.md');
+    });
+
+    test('inspects diagram retrieval with derived source-markdown query when query is omitted', async () => {
+        const source = createFile('Docs/Diagram Platform.md');
+        const knowledge = createFile('Knowledge/Diagram Platform.md');
+
+        (mockApp.vault.getFiles as jest.Mock).mockReturnValue([source, knowledge]);
+        (mockApp.vault.read as jest.Mock).mockImplementation(async (file: TFile) => {
+            switch (file.path) {
+                case 'Docs/Diagram Platform.md':
+                    return '# Diagram Platform\n## Retrieval\nSliding window retrieval keeps adjacent sections together.';
+                default:
+                    return '# Diagram Platform\n## Packaging\nSingle-entry packaging keeps runtime truth narrow.';
+            }
+        });
+
+        const settings = {
+            ...mockSettings,
+            enableLocalKnowledgeRetrieval: true,
+            enableLocalKnowledgeForDiagramGeneration: true,
+            localKnowledgeBasePaths: 'Knowledge',
+            localKnowledgeTopK: 1,
+            localKnowledgeSlidingWindowSize: 0,
+            localKnowledgeMaxSnippetChars: 260,
+            localKnowledgeExcludeCurrentFile: true
+        } as any;
+
+        const result = await inspectLocalKnowledgeRetrieval(
+            mockApp as any,
+            settings,
+            {
+                taskScope: 'diagramGeneration',
+                sourcePath: 'Docs/Diagram Platform.md'
+            }
+        );
+
+        expect(result.taskScope).toBe('diagramGeneration');
+        expect(result.queryDerivation).toBe('diagram-source');
+        expect(result.query).toContain('Diagram Platform');
+        expect(result.query).toContain('Sliding window retrieval keeps adjacent sections together.');
+        expect(result.sourcePath).toBe('Docs/Diagram Platform.md');
+        expect(result.currentFilePath).toBe('Docs/Diagram Platform.md');
+        expect(result.candidateFilePaths).toEqual(['Knowledge/Diagram Platform.md']);
+        expect(result.retrieverBuildStatus).toBe('ready');
+        expect(result.contextBlocks).toHaveLength(1);
+        expect(result.contextBlocks[0]).toEqual(expect.objectContaining({
+            index: 1,
+            path: 'Knowledge/Diagram Platform.md',
+            heading: 'Diagram Platform',
+            breadcrumb: 'Diagram Platform'
+        }));
+    });
+
+    test('inspect exposes structured blocks that reflect truncation and headings', async () => {
+        const knowledge = createFile('Knowledge/Architecture.md');
+
+        (mockApp.vault.getFiles as jest.Mock).mockReturnValue([knowledge]);
+        (mockApp.vault.read as jest.Mock).mockResolvedValue(
+            '# Diagram Platform\n'
+            + 'Platform overview.\n\n'
+            + '## Retrieval\n'
+            + 'Sliding window retrieval keeps adjacent sections together with enough detail to force snippet truncation.'
+        );
+
+        const settings = {
+            ...mockSettings,
+            enableLocalKnowledgeRetrieval: true,
+            enableLocalKnowledgeForResearchSummarize: true,
+            localKnowledgeBasePaths: 'Knowledge',
+            localKnowledgeTopK: 1,
+            localKnowledgeSlidingWindowSize: 0,
+            localKnowledgeMaxSnippetChars: 40,
+            localKnowledgeExcludeCurrentFile: false
+        } as any;
+
+        const result = await inspectLocalKnowledgeRetrieval(
+            mockApp as any,
+            settings,
+            {
+                taskScope: 'researchSummarize',
+                query: 'sliding window retrieval'
+            }
+        );
+
+        expect(result.contextBlocks).toHaveLength(1);
+        expect(result.contextBlocks[0]).toEqual(expect.objectContaining({
+            index: 1,
+            path: 'Knowledge/Architecture.md',
+            heading: 'Retrieval',
+            breadcrumb: 'Diagram Platform > Retrieval',
+            excerptWasTruncated: true
+        }));
+        expect(result.contextBlocks[0].excerptCharCount).toBeLessThanOrEqual(40);
+        expect(result.contextBlocks[0].excerpt).toContain('…');
+        expect(result.context).toContain('Heading: Retrieval');
     });
 });

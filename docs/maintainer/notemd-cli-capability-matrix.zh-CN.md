@@ -1,6 +1,6 @@
 # Notemd CLI 能力矩阵
 
-> 更新：2026-05-25
+> 更新：2026-05-27
 
 ## 当前状态说明（2026-05-25）
 
@@ -77,6 +77,7 @@
   - `content.split-note-by-chapters`
   - `research.summarize-topic`
   - `diagram.generate`
+  - `local-knowledge.inspect`
   - `provider.profile.export-redacted`
   - `cli.capability-manifest.export`
   - `cli.invocation-contract.export`
@@ -87,6 +88,9 @@
 - 这是 maintainer-grade repo 工具，不是 public CLI API
 - 操作目录统一收敛在 `scripts/lib/maintainer-cli-operation-help.js`，作为共享帮助元数据，并为 path-based operations 提供简洁 example payload
 - export operations 仍然只接受空 payload；受控内容操作必须显式提供 JSON 输入
+- 最小 inspect 示例：`npm run cli:invoke -- --vault docs --operation local-knowledge.inspect --input-json '{"taskScope":"diagramGeneration","sourcePath":"docs/index.zh-CN.md","knowledgePaths":["docs/maintainer","docs/superpowers"]}' --pretty`
+- `local-knowledge.inspect` 是刻意保持 maintainer-only 的 explainability surface：它会暴露 task scope、实际生效的知识库路径解析结果、显式或自动派生的 query、current-file exclusion 输入、retrieval options、候选文件路径、原始格式化 context、结构化 `contextBlocks` 证据，以及结构化 retrieval 摘要，但不会因此扩大 public CLI 契约
+- `local-knowledge.inspect` 现在还支持临时 `knowledgePaths` override 数组，维护者可以在不改动已保存 settings 快照的前提下，用临时文件/文件夹路径列表检查 task-scoped retrieval 行为
 - `content.split-note-by-chapters` 现在还支持可选 `splitHeadingLevel`（`auto`、`h1`-`h6`），脚本可避免继续隐式依赖当前 settings 快照
 - `content.split-note-by-chapters` 的结果现在还会显式带出 `requestedSplitHeadingLevel`、`chapterNotePaths`、`managedArtifactPaths`、`removedStalePaths`、确定性的 `tocMetadata` 以及稳定的 `nestedHeadings[].blockId`，自动化调用方不必再靠文件名规则或重复标题的歧义去反推 managed artifact 集合、TOC front-matter metadata 与 TOC 目标；rerun 时若 manifest 管理的生成文件已被手改，当前实现也会拒绝静默覆盖或删除
 - 这些 path-based 维护操作在副作用、输出契约与失败语义没有作为公共契约一并锁定前，仍应保持 maintainer-only
@@ -151,7 +155,7 @@
 |---|---|---|---|
 | P0 | 围绕潜在 render-host runtime lane 的 source/build 收敛 | 当前源码已出现可复用的 runtime helper（`src/rendering/runtime/renderHostEntry.ts`、`src/rendering/preview/renderHostRuntimeClient.ts`），但 build/audit 真值仍只证明 `main.js` 单资产发货。下一步最高杠杆工作，是明确消除这层歧义：要么继续保持 source-only 候选态并写清非发货事实，要么同批落地真正的多入口构建边界 | `esbuild.config.mjs`、`scripts/audit-render-host-bundle.js`、`src/rendering/runtime/renderHostEntry.ts`、`src/rendering/preview/renderHostRuntimeClient.ts` |
 | P1 | 显式 path-based operations 的有界 public-CLI 提升 | maintainer helper 已证明 path-based operations 有真实需求，但只有当写入副作用与输出契约足够稳定、可文档化、可回归锁定时，才应该进入 public-safe slice | `src/maintainerCliBridge.ts`、`scripts/lib/maintainer-cli-operation-help.js`、`src/operations/registry.ts`、`src/tests/maintainerCliBridge.test.ts` |
-| P1 | retrieval / chapter-split 写入路径的契约与结果加固 | 面向 retrieval 的 note-processing 结果现在已为标题生成、研究总结以及 artifact-mode 的 `diagram.generate` 显式暴露带 timing/size telemetry 的 machine-readable `localKnowledgeRetrieval` 摘要，shared maintainer helper 也已补上简洁 payload 示例，`npm run verify:local-kb-fixtures` 还锁定了一组覆盖 exact/prefix/current-file-exclusion 类别的更宽离线 retrieval-quality fixture，chapter split 也已补上 repeated-heading-safe 的 nested block ref、确定性的 TOC front-matter metadata 与 guarded rerun overwrite 语义；下一步成熟度提升点应转向 mixed-note/query corpus 覆盖扩充，而不是继续扩操作数量 | `src/chapterSplit.ts`、`src/localKnowledgeBase.ts`、`src/fileUtils.ts`、`src/searchUtils.ts`、`src/main.ts`、`src/tests/localKnowledgeEvaluationFixture.test.ts`、`scripts/lib/maintainer-cli-operation-help.js`、`src/tests/chapterSplit.test.ts`、`src/tests/localKnowledgeTaskIntegration.test.ts`、`src/tests/diagramCommandArchitecture.test.ts` |
+| P1 | retrieval / chapter-split 写入路径的契约与结果加固 | 面向 retrieval 的 note-processing 结果现在已为标题生成、研究总结以及 artifact-mode 的 `diagram.generate` 显式暴露带 timing/size telemetry 的 machine-readable `localKnowledgeRetrieval` 摘要，shared maintainer helper 也已补上简洁 payload 示例，并新增专门的 `local-knowledge.inspect` explainability seam 用于检查 effective path/query/context，还支持临时 `knowledgePaths` override 数组做 task-scoped retrieval 调参检查，`npm run verify:local-kb-fixtures` 还锁定了一组覆盖 exact/prefix/current-file-exclusion 类别的更宽离线 retrieval-quality fixture，chapter split 也已补上 repeated-heading-safe 的 nested block ref、确定性的 TOC front-matter metadata 与 guarded rerun overwrite 语义；下一步成熟度提升点应转向 mixed-note/query corpus 覆盖扩充，而不是继续扩操作数量 | `src/chapterSplit.ts`、`src/localKnowledgeBase.ts`、`src/fileUtils.ts`、`src/searchUtils.ts`、`src/main.ts`、`src/tests/localKnowledgeEvaluationFixture.test.ts`、`scripts/lib/maintainer-cli-operation-help.js`、`src/tests/chapterSplit.test.ts`、`src/tests/localKnowledgeTaskIntegration.test.ts`、`src/tests/diagramCommandArchitecture.test.ts`、`src/tests/localKnowledgeBase.test.ts`、`src/tests/maintainerCliBridge.test.ts` |
 | P2 | workflow/settings 打包 | Workflow DSL 与 output-path toggles 仍是有价值 metadata，但还不是稳定公共接口 | `src/workflowButtons.ts`, 设置驱动的输出控制 |
 
 ## 设置就绪度
