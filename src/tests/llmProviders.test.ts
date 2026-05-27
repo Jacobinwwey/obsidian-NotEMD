@@ -1,8 +1,12 @@
 import {
     createDefaultProviders,
+    getProviderModelDiscoveryDefinition,
+    getProviderSettingFields,
     getKnownModelMaxOutputTokens,
     getLLMProviderDefinition,
     getOrderedProviderNames,
+    hasPersistedAdvancedProviderSettings,
+    shouldShowProviderSettingField,
     isOpenAICompatibleProvider
 } from '../llmProviders';
 
@@ -157,5 +161,95 @@ describe('llmProviders registry', () => {
         expect(getKnownModelMaxOutputTokens('Huawei Cloud MaaS', 'DeepSeek-V3')).toBe(16_384);
         expect(getKnownModelMaxOutputTokens('OpenAI', 'unknown-model')).toBeUndefined();
         expect(getKnownModelMaxOutputTokens('Unknown Provider', 'gpt-4o')).toBeUndefined();
+    });
+
+    test('provider metadata exposes field taxonomy and first-batch discovery capabilities', () => {
+        expect(getProviderSettingFields('OpenAI')).toEqual(expect.arrayContaining([
+            { id: 'apiKey', group: 'core' },
+            { id: 'baseUrl', group: 'core' },
+            { id: 'model', group: 'core' },
+            { id: 'temperature', group: 'advanced' },
+            { id: 'topP', group: 'advanced' },
+            { id: 'reasoningEffort', group: 'advanced' },
+            { id: 'maxOutputTokens', group: 'developer' }
+        ]));
+        expect(getProviderSettingFields('Azure OpenAI')).toEqual(expect.arrayContaining([
+            { id: 'apiVersion', group: 'contextual' }
+        ]));
+        expect(getProviderSettingFields('DeepSeek')).toEqual(expect.arrayContaining([
+            { id: 'thinkingEnabled', group: 'advanced' }
+        ]));
+
+        expect(getProviderModelDiscoveryDefinition('OpenAI')).toEqual({ mode: 'openai-compatible-models' });
+        expect(getProviderModelDiscoveryDefinition('Ollama')).toEqual({ mode: 'ollama-tags' });
+        expect(getProviderModelDiscoveryDefinition('Google')).toEqual({ mode: 'google-models' });
+        expect(getProviderModelDiscoveryDefinition('Azure OpenAI')).toEqual({ mode: 'none' });
+    });
+
+    test('advanced visibility detection only expands when persisted advanced values are present', () => {
+        expect(hasPersistedAdvancedProviderSettings({
+            name: 'OpenAI',
+            apiKey: '',
+            baseUrl: 'https://api.openai.com/v1',
+            model: 'gpt-4o',
+            temperature: 0.5
+        })).toBe(false);
+
+        expect(hasPersistedAdvancedProviderSettings({
+            name: 'OpenAI',
+            apiKey: '',
+            baseUrl: 'https://api.openai.com/v1',
+            model: 'gpt-4o',
+            temperature: 0.5,
+            topP: 0.7
+        })).toBe(true);
+
+        expect(hasPersistedAdvancedProviderSettings({
+            name: 'Azure OpenAI',
+            apiKey: '',
+            baseUrl: 'https://example.azure.com',
+            model: 'gpt-4o',
+            temperature: 0.5,
+            apiVersion: '2025-01-01-preview'
+        })).toBe(false);
+
+        expect(hasPersistedAdvancedProviderSettings({
+            name: 'DeepSeek',
+            apiKey: '',
+            baseUrl: 'https://api.deepseek.com',
+            model: 'deepseek-v4-pro',
+            temperature: 0.5,
+            thinkingEnabled: true
+        })).toBe(true);
+    });
+
+    test('developer-only provider fields stay hidden unless developer mode is on or a persisted override exists', () => {
+        const developerField = getProviderSettingFields('OpenAI').find(field => field.id === 'maxOutputTokens');
+        expect(developerField).toBeDefined();
+
+        expect(shouldShowProviderSettingField({
+            name: 'OpenAI',
+            apiKey: '',
+            baseUrl: 'https://api.openai.com/v1',
+            model: 'gpt-4o',
+            temperature: 0.5
+        }, developerField!, { developerMode: false })).toBe(false);
+
+        expect(shouldShowProviderSettingField({
+            name: 'OpenAI',
+            apiKey: '',
+            baseUrl: 'https://api.openai.com/v1',
+            model: 'gpt-4o',
+            temperature: 0.5
+        }, developerField!, { developerMode: true })).toBe(true);
+
+        expect(shouldShowProviderSettingField({
+            name: 'OpenAI',
+            apiKey: '',
+            baseUrl: 'https://api.openai.com/v1',
+            model: 'gpt-4o',
+            temperature: 0.5,
+            maxOutputTokens: 4096
+        }, developerField!, { developerMode: false })).toBe(true);
     });
 });

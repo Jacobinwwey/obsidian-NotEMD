@@ -11,4 +11,14 @@ describe('settings provider connection reuse', () => {
         expect(source).not.toContain("import { testAPI } from '../llmUtils'");
         expect(source).toContain('hasBlockingProviderValidationIssues');
     });
+
+    test('renders provider settings through shared metadata/discovery helpers instead of provider-name-only field branching', () => {
+        const source = fs.readFileSync(settingsTabPath, 'utf8');
+
+        expect(source).toContain('getProviderSettingFields');
+        expect(source).toContain('hasPersistedAdvancedProviderSettings');
+        expect(source).toContain('discoverProviderModels');
+        expect(source).toContain('advancedSettingsName');
+        expect(source).toContain('fetchModelsName');
+    });
 });

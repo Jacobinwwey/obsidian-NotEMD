@@ -8,17 +8,22 @@ This document summarizes the major functional and architectural changes implemen
 
 ### Highlights
 
+- Provider settings now converge on a metadata-driven core/advanced split, and supported providers can fetch transient model suggestions without creating a second persisted provider catalog.
 - Developer-gated advanced batch folder selection now supports saved profiles, one-run overrides, preset chips, and inline file preview before execution.
 - Developer-gated relaxed input file restrictions now land as a shared runtime contract for selected source-preserving tasks, including PDF text extraction through Obsidian's PDF runtime.
 - Release-facing version truth, welcome digest, release notes, and chronicle refresh are synchronized at the `1.9.0` boundary.
 
 ### New Features
 
+- Added provider-field taxonomy metadata (`core`, `contextual`, `advanced`, `developer`) so the provider settings panel can render required/default-visible controls separately from secondary tuning controls.
+- Added lightweight in-settings model discovery for OpenAI-compatible `/models`, Ollama tags, and Google Gemini model listing. Discovery results are transient suggestions only; persisted provider state still uses the existing manual `model` string.
 - Added the `Relax input file restrictions` developer setting plus the shared supported-input reader layer.
 - Extended advanced folder-task selection with profile-aware folder locking, temporary overrides, preview panels, and example/preset chips.
 
 ### Fixes
 
+- Provider advanced settings now auto-expand when a provider already has saved advanced overrides, preserving visibility for existing `data.json` behavior instead of silently collapsing non-default live config.
+- Added discovery prerequisite validation and endpoint normalization so `/chat/completions`, `/models`, and `/tags` style base URLs do not cause malformed model-list requests.
 - Unified task-aware input validation across sidebar actions, command entrypoints, batch adapters, and path-based diagram generation.
 - Corrected relaxed-mode batch empty-folder notices so they describe supported inputs rather than hard-coded `.md` / `.txt` assumptions.
 - Kept source-mutating and verbatim-sensitive flows intentionally restricted while widening only the safe allowlist.
