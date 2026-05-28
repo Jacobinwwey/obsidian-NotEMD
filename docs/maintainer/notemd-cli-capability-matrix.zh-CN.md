@@ -1,6 +1,6 @@
 # Notemd CLI 能力矩阵
 
-> 更新：2026-05-27
+> 更新：2026-05-28
 
 ## 当前状态说明（2026-05-25）
 
@@ -90,7 +90,11 @@
 - export operations 仍然只接受空 payload；受控内容操作必须显式提供 JSON 输入
 - 最小 inspect 示例：`npm run cli:invoke -- --vault docs --operation local-knowledge.inspect --input-json '{"taskScope":"diagramGeneration","sourcePath":"docs/index.zh-CN.md","knowledgePaths":["docs/maintainer","docs/superpowers"]}' --pretty`
 - `local-knowledge.inspect` 是刻意保持 maintainer-only 的 explainability surface：它会暴露 task scope、实际生效的知识库路径解析结果、显式或自动派生的 query、current-file exclusion 输入、retrieval options、候选文件路径、原始格式化 context、结构化 `contextBlocks` 证据，以及结构化 retrieval 摘要，但不会因此扩大 public CLI 契约
+- `local-knowledge.inspect` 当前会把三条 query 派生路径明确暴露出来并由测试锁定：`explicit`（直接研究查询）、`basename`（标题/批量标题任务作用域）以及 `diagram-source`（由图形生成任务的源文件 basename + stripped note content 共同派生）
 - `local-knowledge.inspect` 现在还支持临时 `knowledgePaths` override 数组，维护者可以在不改动已保存 settings 快照的前提下，用临时文件/文件夹路径列表检查 task-scoped retrieval 行为
+- 现在还补上了更贴近真实 task-scoped retrieval 链路的 inspect 示例，而不再只有 diagram lane：
+  - `npm run cli:invoke -- --vault docs --operation local-knowledge.inspect --input-json '{"taskScope":"batchGenerateFromTitles","sourcePath":"docs/index.zh-CN.md"}' --pretty`
+  - `npm run cli:invoke -- --vault docs --operation local-knowledge.inspect --input-json '{"taskScope":"researchSummarize","query":"task-scoped retrieval behavior","knowledgePaths":["docs/maintainer"]}' --pretty`
 - `content.split-note-by-chapters` 现在还支持可选 `splitHeadingLevel`（`auto`、`h1`-`h6`），脚本可避免继续隐式依赖当前 settings 快照
 - `content.split-note-by-chapters` 的结果现在还会显式带出 `requestedSplitHeadingLevel`、`chapterNotePaths`、`managedArtifactPaths`、`removedStalePaths`、确定性的 `tocMetadata` 以及稳定的 `nestedHeadings[].blockId`，自动化调用方不必再靠文件名规则或重复标题的歧义去反推 managed artifact 集合、TOC front-matter metadata 与 TOC 目标；rerun 时若 manifest 管理的生成文件已被手改，当前实现也会拒绝静默覆盖或删除
 - 这些 path-based 维护操作在副作用、输出契约与失败语义没有作为公共契约一并锁定前，仍应保持 maintainer-only
@@ -140,7 +144,7 @@
 - `src/operations/publicCliSurface.ts` 现在会从同一套 registry/capability/contract 组合直接推导 bounded public-safe slice，而不是维护另一份并行 allowlist。
 - `file.process-add-links`、`file.process-folder-add-links`、`content.generate-from-title`、`content.batch-generate-from-titles`、`mermaid.batch-fix`、`concept.dedupe`、`translate.*`、`formula.*` 与 `content.extract-original-text` 现在已经组成当前已验证的 write-heavy contract-enrichment proof set：utility core 返回结构化结果，host adapter 接管本地化成功/no-file/confirmation 语义，registry 直接导出 richer schema。
 - `content.generate-from-title`、`content.batch-generate-from-titles`、`research.summarize-topic` 以及 artifact-mode 的 `diagram.generate` 现在也已直接暴露 machine-readable 的 local-KB retrieval 摘要，而不再只剩一个 boolean 侧记。当前摘要会带出 indexed counts、matched/returned section counts、expanded section counts、source paths、请求的 `topK`、sliding-window size、current-file exclusion telemetry、index-build ms、query ms 与最终 context-char count。
-- 现在也已有专用的离线 retrieval-quality fixture：`npm run verify:local-kb-fixtures`。它直接复用线上 MiniSearch runtime path 跑一组小型维护者夹具，而不是再造一条只给评测用的分叉 retriever。
+- 现在也已有专用的离线 retrieval-quality fixture：`npm run verify:local-kb-fixtures`。它直接复用线上 MiniSearch runtime path 跑一组小型维护者夹具，而不是再造一条只给评测用的分叉 retriever；当前 Stage-C 收口还把 task-scoped 的 batch-title / research inspect case 与 exact-file-vs-folder retrieval 边界一并纳入，而不再只覆盖单个 diagram 示例。
 - `content.split-note-by-chapters` 现在也更明确地遵循同一方向：结果结构会直接命名请求的 heading level、章节文件路径、完整 managed artifact 集合、确定性的 TOC front-matter metadata、stale removal 明细以及稳定的 nested-heading block-ref id，而不是继续逼调用方只靠 count、文件名或重复标题文本间接推断；若既有生成文件已被手改，rerun 还会 fail fast。
 - `diagram.generate` 现在已经在宿主无关 generation core 之下携带显式 typed follow-through：`followThrough.kind` 用来区分 Mermaid 保存、artifact 保存与 preview 完成，同时继续保留向后兼容的顶层 `outputPath` / `previewOpened`；artifact-generation modes 还会沿同一结构化结果暴露 local-KB retrieval telemetry。
 - 第一份已检入的 semantic-verification helper 现在也已经存在：`npm run verify:diagram-semantics` 会把维护者 runbook 落成可复用、无 secrets 的检查模板，而不是继续停留在纯文字指引层面。
@@ -155,7 +159,7 @@
 |---|---|---|---|
 | P0 | 围绕潜在 render-host runtime lane 的 source/build 收敛 | 当前源码仍保留可复用的 runtime helper（`src/rendering/runtime/renderHostEntry.ts`、`src/rendering/preview/renderHostRuntimeClient.ts`），但 build/audit 真值仍只证明 `main.js` 单资产发货。当前主线现已让这条 latent lane 以 fail-closed 方式保持 source-only：除非显式配置，否则不会再返回默认的 standalone runtime-module specifier；下一步最高杠杆工作仍然是二选一：要么继续保持 source-only 候选态并写清非发货事实，要么同批落地真正的多入口构建边界 | `esbuild.config.mjs`、`scripts/audit-render-host-bundle.js`、`src/rendering/runtime/renderHostEntry.ts`、`src/rendering/preview/renderHostRuntimeClient.ts` |
 | P1 | 显式 path-based operations 的有界 public-CLI 提升 | maintainer helper 已证明 path-based operations 有真实需求，但只有当写入副作用与输出契约足够稳定、可文档化、可回归锁定时，才应该进入 public-safe slice | `src/maintainerCliBridge.ts`、`scripts/lib/maintainer-cli-operation-help.js`、`src/operations/registry.ts`、`src/tests/maintainerCliBridge.test.ts` |
-| P1 | retrieval / chapter-split 写入路径的契约与结果加固 | 面向 retrieval 的 note-processing 结果现在已为标题生成、研究总结以及 artifact-mode 的 `diagram.generate` 显式暴露带 timing/size telemetry 的 machine-readable `localKnowledgeRetrieval` 摘要，shared maintainer helper 也已补上简洁 payload 示例，并新增专门的 `local-knowledge.inspect` explainability seam 用于检查 effective path/query/context，还支持临时 `knowledgePaths` override 数组做 task-scoped retrieval 调参检查，`npm run verify:local-kb-fixtures` 还锁定了一组覆盖 exact/prefix/current-file-exclusion 类别的更宽离线 retrieval-quality fixture，chapter split 也已补上 repeated-heading-safe 的 nested block ref、确定性的 TOC front-matter metadata 与 guarded rerun overwrite 语义；下一步成熟度提升点应转向 mixed-note/query corpus 覆盖扩充，而不是继续扩操作数量 | `src/chapterSplit.ts`、`src/localKnowledgeBase.ts`、`src/fileUtils.ts`、`src/searchUtils.ts`、`src/main.ts`、`src/tests/localKnowledgeEvaluationFixture.test.ts`、`scripts/lib/maintainer-cli-operation-help.js`、`src/tests/chapterSplit.test.ts`、`src/tests/localKnowledgeTaskIntegration.test.ts`、`src/tests/diagramCommandArchitecture.test.ts`、`src/tests/localKnowledgeBase.test.ts`、`src/tests/maintainerCliBridge.test.ts` |
+| P1 | retrieval / chapter-split 写入路径的契约与结果加固 | 面向 retrieval 的 note-processing 结果现在已为标题生成、研究总结以及 artifact-mode 的 `diagram.generate` 显式暴露带 timing/size telemetry 的 machine-readable `localKnowledgeRetrieval` 摘要，shared maintainer helper 也已补上简洁 payload 示例，并新增专门的 `local-knowledge.inspect` explainability seam 用于检查 effective path/query/context、三种 query 派生路径（`explicit`、`basename`、`diagram-source`），还支持临时 `knowledgePaths` override 数组做 task-scoped retrieval 调参检查；`npm run verify:local-kb-fixtures` 还锁定了一组覆盖 exact/prefix/current-file-exclusion 类别，以及 task-scoped batch-title / research inspect case 的更宽离线 retrieval-quality fixture。chapter split 也已补上 repeated-heading-safe 的 nested block ref、确定性的 TOC front-matter metadata 与 guarded rerun overwrite 语义；下一步成熟度提升点应转向 mixed-note/query corpus 覆盖扩充，而不是继续扩操作数量 | `src/chapterSplit.ts`、`src/localKnowledgeBase.ts`、`src/fileUtils.ts`、`src/searchUtils.ts`、`src/main.ts`、`src/tests/localKnowledgeEvaluationFixture.test.ts`、`scripts/lib/maintainer-cli-operation-help.js`、`src/tests/chapterSplit.test.ts`、`src/tests/localKnowledgeTaskIntegration.test.ts`、`src/tests/diagramCommandArchitecture.test.ts`、`src/tests/localKnowledgeBase.test.ts`、`src/tests/maintainerCliBridge.test.ts` |
 | P2 | workflow/settings 打包 | Workflow DSL 与 output-path toggles 仍是有价值 metadata，但还不是稳定公共接口 | `src/workflowButtons.ts`, 设置驱动的输出控制 |
 
 ## 设置就绪度

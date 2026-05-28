@@ -7,6 +7,7 @@ type MaintainerOperationHelp = Record<string, {
     required: string[];
     optional: string[];
     exampleInput?: string;
+    additionalExamples?: string[];
 }>;
 
 describe('invoke maintainer CLI operation script', () => {
@@ -31,12 +32,17 @@ describe('invoke maintainer CLI operation script', () => {
             if (details.exampleInput) {
                 expect(output).toContain(`example input: ${details.exampleInput}`);
             }
+            for (const additionalExample of details.additionalExamples || []) {
+                expect(output).toContain(additionalExample);
+            }
         }
 
         expect(output).toContain('content.batch-generate-from-titles');
         expect(output).toContain('"includeSubfoldersMode":"exclude"');
         expect(output).toContain('local-knowledge.inspect');
         expect(output).toContain('"taskScope":"diagramGeneration"');
+        expect(output).toContain('"taskScope":"batchGenerateFromTitles"');
+        expect(output).toContain('"taskScope":"researchSummarize"');
         expect(output).toContain('knowledgePaths');
         expect(output).toContain('npm run cli:invoke -- --vault docs --operation local-knowledge.inspect');
         expect(output).toContain('research.summarize-topic');

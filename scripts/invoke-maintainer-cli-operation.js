@@ -13,7 +13,10 @@ function printUsage() {
       const exampleLine = details.exampleInput
         ? `\n    example input: ${details.exampleInput}`
         : '';
-      return `  ${operationId}\n    ${details.summary}\n    required: ${details.required.join(', ')}${optionalLine}${exampleLine}`;
+      const additionalExamplesLine = Array.isArray(details.additionalExamples) && details.additionalExamples.length > 0
+        ? `\n    additional examples:\n${details.additionalExamples.map((example) => `      - ${example}`).join('\n')}`
+        : '';
+      return `  ${operationId}\n    ${details.summary}\n    required: ${details.required.join(', ')}${optionalLine}${exampleLine}${additionalExamplesLine}`;
     })
     .join('\n\n');
 

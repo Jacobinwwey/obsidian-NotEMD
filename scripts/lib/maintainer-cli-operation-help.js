@@ -27,7 +27,11 @@ const OPERATION_HELP = {
     summary: 'Inspect task-scoped local knowledge retrieval inputs, paths, and context.',
     required: ['taskScope'],
     optional: ['sourcePath', 'currentFilePath', 'query', 'knowledgePaths', 'topK', 'slidingWindowSize', 'maxSnippetChars'],
-    exampleInput: '{"taskScope":"diagramGeneration","sourcePath":"docs/index.zh-CN.md","knowledgePaths":["docs/maintainer","docs/superpowers"],"topK":2,"slidingWindowSize":1}'
+    exampleInput: '{"taskScope":"diagramGeneration","sourcePath":"docs/index.zh-CN.md","knowledgePaths":["docs/maintainer","docs/superpowers"],"topK":2,"slidingWindowSize":1}',
+    additionalExamples: [
+      '{"taskScope":"batchGenerateFromTitles","sourcePath":"docs/index.zh-CN.md"}',
+      '{"taskScope":"researchSummarize","query":"task-scoped retrieval behavior","knowledgePaths":["docs/maintainer"]}'
+    ]
   },
   'provider.profile.export-redacted': {
     summary: 'Export provider profiles with API keys redacted.',
