@@ -10,13 +10,17 @@
 npm run verify:diagram-semantics -- --vault "<vault-name>" --commit "<sha>" --version "<plugin-version>" --output ~/tmp/notemd-diagram-check.md
 ```
 
-这个 helper 不依赖 secrets。它只会生成 Markdown 核验模板、vault 感知的 CLI 命令清单、显式的 packaging-boundary 区块、packaging-contract 区块，以及各语义表面的证据区块；不会启动 Obsidian、不会读取本地凭据，也不会依赖仓库中跟踪的 vault 路径。
+这个 helper 不依赖 secrets。它只会生成 Markdown 核验模板、vault 感知的 CLI 命令清单、显式的 packaging-boundary、render-host audit、render-host runtime-consumption、implementation-readiness、packaging-contract、contract-promotion-boundary 与 Stage-C gate 区块，以及各语义表面的证据区块；不会启动 Obsidian、不会读取本地凭据，也不会依赖仓库中跟踪的 vault 路径。
 其中 packaging-boundary 首行会从 `esbuild.config.mjs` 当前的 `entryPoints` / `outfile` / `outdir` 自动提取；若解析失败，helper 会输出显式占位提示，避免边界真值静默漂移。
 如果已解析到 `entryPoints`，但无法确定 `outfile` 与 `outdir`，检查清单会额外生成一条“必须人工确认输出目标”的提示，再允许下结论。
 如果输出目标已成功识别，清单会明确标记当前依据来自 `outfile` 还是 `outdir`，避免打包边界结论含糊。
 如果同时识别到 `outfile` 和 `outdir`，清单会将其视为歧义状态，并要求先人工确认有效输出目标，再给出打包结论。
+其中 render-host audit 区块会从 `scripts/audit-render-host-bundle.js` 读取当前 bundle markers 与 standalone-output 禁止规则，把发布边界从“口头描述”变成可执行真值。
+其中 runtime-consumption 区块会通过 `src/main.ts`、`src/ui/DiagramPreviewModal.ts`、`src/rendering/webview/page.ts` 与 `src/rendering/webview/renderFrame.ts` 保持 command entry → preview modal → iframe `srcdoc` → webview bridge 链路的当前真值显式化。
+其中 implementation-readiness 区块会把当前主线真实 shipped packaging lane 与 release 证据边界固定下来，避免后续误把未落地拓扑当成当前能力。
 其中 packaging-contract 区块会从 `scripts/release/publish-github-release.js` 同步 release 资产、release tag 规则、发布模式和 release notes 契约真值，并从 `.github/workflows/release.yml` 同步 release 触发与 tag 防护契约真值，保证 Stage B 的契约定义与发布约束保持一致。
 其中 contract-promotion-boundary 区块会从 `src/operations/registry.ts` 读取 workflow/settings/export 邻近操作的当前元数据，确保能力提升结论仍绑定真实 `automationLevel` / `requiredContext` / `sideEffectClass`。
+其中 Stage-C gate 区块用于明确阻断后续拓扑扩张，除非 packaging boundary、render-host audit、runtime-consumption、release contract 与 contract-promotion boundary 五层真值一起前进。
 
 ## 1. 何时必须使用本 Runbook
 
@@ -141,7 +145,7 @@ obsidian commands vault=<vault-name> filter=notemd
 5. 保存每个受影响表面的证据。
 6. 将结果记录到 PR 说明、release handoff 或维护者日志中。
 
-helper 现在还会额外生成 packaging-boundary、packaging-contract 与 contract-promotion-boundary 三个区块。只要改动触及 render-host、preview、workflow/settings 或更重的运行时行为，就不应跳过这些段落：它们会明确提醒当前打包模型仍是单入口，而不是真正完成了 heavy-runtime isolation，同时 release 与操作契约提升约束必须保持同步。
+helper 现在还会额外生成 packaging-boundary、render-host audit、render-host runtime-consumption、implementation-readiness、packaging-contract、contract-promotion-boundary 与 Stage-C gate 七个区块。只要改动触及 render-host、preview、workflow/settings 或更重的运行时行为，就不应跳过这些段落：它们会明确提醒当前打包模型、命令入口链路与 release / 操作契约约束必须一起保持同步。
 
 ## 6. 证据格式
 

@@ -38,6 +38,18 @@ const SURFACE_DEFINITIONS = [
 ];
 
 const DEFAULT_REQUIRED_RELEASE_ASSETS = ['main.js', 'manifest.json', 'styles.css', 'README.md'];
+const DEFAULT_RENDER_HOST_AUDIT_MARKERS = [
+    'htmlSrcdoc',
+    'Notemd Render Host',
+    'notemd-render-shell',
+    'notemd-html-preview-theme-shim'
+];
+const DEFAULT_DISALLOWED_RENDER_HOST_OUTPUTS = [
+    'render-host.mjs',
+    'render-host.html',
+    'render-host.js',
+    'rendering-webview/index.html'
+];
 const DEFAULT_CONTRACT_PROMOTION_OPERATION_IDS = [
     'workflow.extract-and-generate',
     'content.extract-original-text',
@@ -388,6 +400,47 @@ function resolveReleasePackagingContractFacts({
     };
 }
 
+function resolveRenderHostAuditFacts({
+    auditScriptPath = path.resolve(__dirname, 'audit-render-host-bundle.js')
+} = {}) {
+    const projectRoot = path.resolve(__dirname, '..');
+
+    try {
+        const auditScript = require(auditScriptPath);
+        const requiredMarkers = Array.isArray(auditScript.REQUIRED_RENDER_HOST_MARKERS)
+            ? auditScript.REQUIRED_RENDER_HOST_MARKERS.filter((marker) => typeof marker === 'string' && marker.length > 0)
+            : [];
+        const disallowedStandaloneOutputs = Array.isArray(auditScript.DISALLOWED_RENDER_HOST_OUTPUT_FILES)
+            ? auditScript.DISALLOWED_RENDER_HOST_OUTPUT_FILES.filter((outputPath) => typeof outputPath === 'string' && outputPath.length > 0)
+            : [];
+        const bundlePath = typeof auditScript.resolveBundlePath === 'function'
+            ? normalizeRelativePath(auditScript.resolveBundlePath(projectRoot), projectRoot)
+            : 'main.js';
+
+        if (requiredMarkers.length > 0) {
+            return {
+                sourcePath: auditScriptPath,
+                bundlePath: bundlePath || 'main.js',
+                requiredMarkers,
+                disallowedStandaloneOutputs: disallowedStandaloneOutputs.length > 0
+                    ? disallowedStandaloneOutputs
+                    : [...DEFAULT_DISALLOWED_RENDER_HOST_OUTPUTS],
+                resolvedFromAuditScript: true
+            };
+        }
+    } catch {
+        // fall through to default facts
+    }
+
+    return {
+        sourcePath: auditScriptPath,
+        bundlePath: 'main.js',
+        requiredMarkers: [...DEFAULT_RENDER_HOST_AUDIT_MARKERS],
+        disallowedStandaloneOutputs: [...DEFAULT_DISALLOWED_RENDER_HOST_OUTPUTS],
+        resolvedFromAuditScript: false
+    };
+}
+
 function resolveReleaseWorkflowTriggerFacts({
     releaseWorkflowPath = path.resolve(__dirname, '..', '.github', 'workflows', 'release.yml')
 } = {}) {
@@ -455,6 +508,57 @@ function resolveContractPromotionBoundaryFacts({
     }
 }
 
+function resolveRenderHostRuntimeConsumptionFacts({
+    mainPath = path.resolve(__dirname, '..', 'src', 'main.ts'),
+    previewModalPath = path.resolve(__dirname, '..', 'src', 'ui', 'DiagramPreviewModal.ts'),
+    pagePath = path.resolve(__dirname, '..', 'src', 'rendering', 'webview', 'page.ts'),
+    renderFramePath = path.resolve(__dirname, '..', 'src', 'rendering', 'webview', 'renderFrame.ts')
+} = {}) {
+    try {
+        const mainSource = fs.readFileSync(mainPath, 'utf8');
+        const previewModalSource = fs.readFileSync(previewModalPath, 'utf8');
+        const pageSource = fs.readFileSync(pagePath, 'utf8');
+        const renderFrameSource = fs.readFileSync(renderFramePath, 'utf8');
+
+        const mainCreatesIframeRenderHostSession = mainSource.includes('new IframeRenderHost().createSession(');
+        const openPreviewDelegatesThroughModal = mainSource.includes('this.openDiagramPreviewModal(artifact, sourcePath, artifactSaved)');
+        const previewModalUsesIframeSrcdoc = previewModalSource.includes('iframe.srcdoc = this.session.htmlSrcdoc');
+        const pageUsesRenderArtifactMarkup = pageSource.includes('renderArtifactMarkup(payload)');
+        const pageTreatsBridgeTargetsAsInlinePreviewable = pageSource.includes("payload.artifact.target === 'vega-lite' || payload.artifact.target === 'mermaid'")
+            && pageSource.includes('ensureRenderHostBridge();');
+        const renderFrameSupportsMermaid = renderFrameSource.includes("payload.artifact.target === 'mermaid'")
+            && renderFrameSource.includes('notemd-mermaid-mount')
+            && renderFrameSource.includes('buildMermaidRenderBootstrap');
+        const renderFrameSupportsVegaLite = renderFrameSource.includes("payload.artifact.target === 'vega-lite'")
+            && renderFrameSource.includes('notemd-vega-lite-mount')
+            && renderFrameSource.includes('buildVegaLiteRenderBootstrap');
+
+        return {
+            sourcePaths: [mainPath, previewModalPath, pagePath, renderFramePath],
+            mainCreatesIframeRenderHostSession,
+            openPreviewDelegatesThroughModal,
+            previewModalUsesIframeSrcdoc,
+            pageUsesRenderArtifactMarkup,
+            pageTreatsBridgeTargetsAsInlinePreviewable,
+            renderFrameSupportsMermaid,
+            renderFrameSupportsVegaLite,
+            resolvedFromSources: true
+        };
+    } catch {
+        return {
+            sourcePaths: [mainPath, previewModalPath, pagePath, renderFramePath],
+            mainCreatesIframeRenderHostSession: false,
+            openPreviewDelegatesThroughModal: false,
+            previewModalUsesIframeSrcdoc: false,
+            pageUsesRenderArtifactMarkup: false,
+            pageTreatsBridgeTargetsAsInlinePreviewable: false,
+            renderFrameSupportsMermaid: false,
+            renderFrameSupportsVegaLite: false,
+            resolvedFromSources: false
+        };
+    }
+}
+
 function buildPackagingBoundaryChecklistLines(packagingFacts = resolvePackagingBoundaryFacts()) {
     const entrySummary = packagingFacts.entryPoints.join(', ');
     const entryCount = packagingFacts.entryPoints.length;
@@ -485,6 +589,24 @@ function buildPackagingBoundaryChecklistLines(packagingFacts = resolvePackagingB
         '- [ ] Confirm `npm run audit:render-host` only proves the current self-contained `main.js` + inline `srcdoc` host contract, including rejection of stray `render-host.mjs` assets or references.',
         '- [ ] Confirm no release note, handoff, or PR summary claims that true heavy-runtime isolation is already implemented.',
         '- [ ] If the change depends on stronger packaging guarantees, record that true heavy-runtime isolation is still pending and requires later multi-entry or dedicated-asset work.'
+    ];
+}
+
+function buildRenderHostAuditChecklistLines(
+    auditFacts = resolveRenderHostAuditFacts()
+) {
+    const auditScriptPath = normalizeRelativePath(auditFacts.sourcePath);
+    const sourceDescriptor = auditFacts.resolvedFromAuditScript
+        ? `derived from \`${auditScriptPath}\``
+        : `fallback default because \`${auditScriptPath}\` could not be loaded`;
+    const requiredMarkers = auditFacts.requiredMarkers.map((marker) => `\`${marker}\``).join(', ');
+    const disallowedOutputs = auditFacts.disallowedStandaloneOutputs.map((outputPath) => `\`${outputPath}\``).join(', ');
+
+    return [
+        `- [ ] Confirm render-host audit truth remains ${sourceDescriptor} and still targets built bundle \`${auditFacts.bundlePath}\`.`,
+        `- [ ] Confirm inline render-host marker enforcement still covers: ${requiredMarkers}.`,
+        `- [ ] Confirm standalone render-host outputs remain disallowed on current main: ${disallowedOutputs}.`,
+        '- [ ] If render-host audit scope changes, update helper/tests/runbooks in the same batch so packaging truth does not drift.'
     ];
 }
 
@@ -544,6 +666,66 @@ function buildContractPromotionBoundaryChecklistLines(
 
     lines.push('- [ ] If any operation metadata above changes, update capability/contract tests and maintainer docs in the same change before promoting broader CLI or workflow/settings claims.');
     return lines;
+}
+
+function buildRenderHostRuntimeConsumptionChecklistLines(
+    runtimeFacts = resolveRenderHostRuntimeConsumptionFacts()
+) {
+    const sourceDescriptor = runtimeFacts.resolvedFromSources
+        ? `derived from ${runtimeFacts.sourcePaths.map((sourcePath) => `\`${normalizeRelativePath(sourcePath)}\``).join(', ')}`
+        : `fallback reminder because runtime-consumption sources could not be loaded`;
+    const lines = [
+        `- [ ] Confirm render-host runtime-consumption truth remains ${sourceDescriptor}.`
+    ];
+
+    if (runtimeFacts.mainCreatesIframeRenderHostSession && runtimeFacts.openPreviewDelegatesThroughModal) {
+        lines.push('- [ ] Confirm command-entry preview flow still routes through `openDiagramPreviewModal(...)` and `new IframeRenderHost().createSession(...)`.');
+    } else {
+        lines.push('- [ ] Resolve command-entry preview/session wiring before making runtime-consumption claims.');
+    }
+
+    if (runtimeFacts.previewModalUsesIframeSrcdoc) {
+        lines.push('- [ ] Confirm preview modal still consumes `session.htmlSrcdoc` through iframe `srcdoc` instead of relying on a separate packaged render-host asset.');
+    } else {
+        lines.push('- [ ] Resolve preview-modal iframe `srcdoc` consumption before making runtime-consumption claims.');
+    }
+
+    if (runtimeFacts.pageUsesRenderArtifactMarkup && runtimeFacts.pageTreatsBridgeTargetsAsInlinePreviewable) {
+        lines.push('- [ ] Confirm webview page still builds inline Mermaid / Vega-Lite preview shells through `renderArtifactMarkup(payload)` and `ensureRenderHostBridge()`.');
+    } else {
+        lines.push('- [ ] Resolve webview page render-host bridge usage before making runtime-consumption claims.');
+    }
+
+    if (runtimeFacts.renderFrameSupportsMermaid && runtimeFacts.renderFrameSupportsVegaLite) {
+        lines.push('- [ ] Confirm `renderFrame` still provides dedicated Mermaid and Vega-Lite mount/bootstrap shells inside the inline host markup.');
+    } else {
+        lines.push('- [ ] Resolve Mermaid / Vega-Lite inline host markup coverage before making runtime-consumption claims.');
+    }
+
+    return lines;
+}
+
+function buildImplementationReadinessChecklistLines(
+    packagingFacts = resolvePackagingBoundaryFacts()
+) {
+    const packagingDescriptor = packagingFacts.entryPoints.length === 1 && packagingFacts.outputTargetStatus === 'outfile'
+        ? `current single-entry lane \`${packagingFacts.entryPoints[0]} -> ${packagingFacts.outfile}\``
+        : `current packaging lane \`${packagingFacts.entryPoints.join(', ')} -> ${packagingFacts.outputTargetStatus === 'outdir' ? `${packagingFacts.outdir}/...` : packagingFacts.outfile || '<unknown-output>'}\``;
+
+    return [
+        `- [ ] Treat ${packagingDescriptor} as the current implementation baseline unless this batch explicitly changes packaging topology.`,
+        '- [ ] If packaging topology widens, update `esbuild.config.mjs`, `scripts/audit-render-host-bundle.js`, helper output/tests, maintainer docs, and release-helper expectations in the same batch.',
+        '- [ ] Do not claim true heavy-runtime isolation until build outputs, render-host audit, runtime-consumption chain, and release contract all prove the new boundary together.',
+        '- [ ] Keep real Obsidian semantic verification mandatory for renderer-affecting changes even when helper/docs contracts are green.'
+    ];
+}
+
+function buildStageCGateChecklistLines() {
+    return [
+        '- [ ] Treat any future Stage-C widening as blocked unless packaging boundary, render-host audit, runtime-consumption, release contract, and contract-promotion boundary sections stay explicit together.',
+        '- [ ] Confirm current main still ships the inline `htmlSrcdoc` preview host contract rather than a standalone packaged render-host asset.',
+        '- [ ] If a future change introduces dedicated runtime assets, add matching release-asset rules, helper output, tests, maintainer docs, and real Obsidian evidence in the same batch before calling Stage-C widened.'
+    ];
 }
 
 function normalizeSurfaceId(value) {
@@ -628,14 +810,26 @@ function buildSemanticVerificationTemplate({
     }
 
     const packagingChecklistLines = buildPackagingBoundaryChecklistLines(packagingFacts);
+    const renderHostAuditChecklistLines = buildRenderHostAuditChecklistLines();
+    const renderHostRuntimeConsumptionChecklistLines = buildRenderHostRuntimeConsumptionChecklistLines();
+    const implementationReadinessChecklistLines = buildImplementationReadinessChecklistLines(packagingFacts);
     const releasePackagingChecklistLines = buildReleasePackagingContractChecklistLines(releasePackagingFacts);
     const contractPromotionChecklistLines = buildContractPromotionBoundaryChecklistLines();
+    const stageCGateChecklistLines = buildStageCGateChecklistLines();
     headerLines.push('', '## Packaging Boundary', '');
     headerLines.push(...packagingChecklistLines);
+    headerLines.push('', '## Render Host Audit', '');
+    headerLines.push(...renderHostAuditChecklistLines);
+    headerLines.push('', '## Render Host Runtime Consumption', '');
+    headerLines.push(...renderHostRuntimeConsumptionChecklistLines);
+    headerLines.push('', '## Implementation Readiness', '');
+    headerLines.push(...implementationReadinessChecklistLines);
     headerLines.push('', '## Packaging Contract', '');
     headerLines.push(...releasePackagingChecklistLines);
     headerLines.push('', '## Contract Promotion Boundary', '');
     headerLines.push(...contractPromotionChecklistLines);
+    headerLines.push('', '## Stage-C Gate', '');
+    headerLines.push(...stageCGateChecklistLines);
     headerLines.push('', '## Surface Evidence');
 
     for (const surface of surfaces) {
@@ -767,14 +961,20 @@ module.exports = {
     SURFACE_DEFINITIONS,
     USAGE_TEXT,
     buildEnvironmentCheckCommands,
+    buildImplementationReadinessChecklistLines,
     buildPackagingBoundaryChecklistLines,
     buildContractPromotionBoundaryChecklistLines,
+    buildRenderHostAuditChecklistLines,
+    buildRenderHostRuntimeConsumptionChecklistLines,
     buildReleasePackagingContractChecklistLines,
     buildSemanticVerificationTemplate,
+    buildStageCGateChecklistLines,
     main,
     parseArgs,
     resolvePackagingBoundaryFacts,
     resolveContractPromotionBoundaryFacts,
+    resolveRenderHostAuditFacts,
+    resolveRenderHostRuntimeConsumptionFacts,
     resolveReleasePackagingContractFacts,
     resolveReleaseWorkflowTriggerFacts,
     resolveRequestedSurfaces,
