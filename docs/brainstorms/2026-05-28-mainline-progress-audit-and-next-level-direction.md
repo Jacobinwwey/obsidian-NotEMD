@@ -121,6 +121,21 @@ Interpretation:
 1. the lane is now past “bootstrap the architecture”;
 2. the lane is now in bounded breadth management and truth-maintenance mode.
 
+### 2.5 Clean-state closure is now re-proved, not still pending
+
+The older audit language that treated clean-state as still pending is now stale.
+
+Current truth is:
+
+1. the provider-settings/model-discovery closure work has already been committed onto `main`;
+2. the repository is currently back to a clean `main...origin/main` state after that lane landed;
+3. clean-state is therefore no longer the next unresolved bottleneck for this lane.
+
+Correct interpretation:
+
+1. clean-state must still remain a finish gate for every later batch;
+2. it should no longer be described here as an unclosed prerequisite blocking the next-direction discussion.
+
 ## 3. Deep Comparison Against Earlier Plan Language
 
 ### 3.1 What the 2026-05-25 audit now understates
@@ -181,6 +196,26 @@ The unified matrix now needs to protect against three recurrent misreads:
 2. treating host-aware bare-model token lookup as permission to infer ownership for arbitrary custom gateways;
 3. treating the presence of shared parser seams as permission to persist remote catalogs later without a new explicit architecture decision.
 
+### 3.5 What the packaging and CLI planning documents still get right
+
+The earlier packaging and CLI planning documents remain directionally correct on two key points:
+
+1. current shipped renderer truth is still `main.js` plus inline `srcdoc`, not a shipped dedicated runtime asset;
+2. the correct CLI boundary is still “host-neutral core first, host/file/UI follow-through second,” not broad public command-count growth.
+
+Current code continues to support those earlier decisions:
+
+1. `esbuild.config.mjs`, `scripts/audit-render-host-bundle.js`, and the maintainer docs still lock the single-entry shipping boundary;
+2. `src/operations/diagramGenerateOperation.ts`, `src/operations/diagramCommandExecution.ts`, `src/operations/diagramCommandHostAdapter.ts`, `src/operations/publicCliSurface.ts`, and `src/maintainerCliBridge.ts` still preserve the bounded split between:
+   - typed core operations;
+   - bounded public-safe export commands;
+   - wider but explicitly maintainer-only path-based helper flows.
+
+Correct interpretation:
+
+1. provider-lane closure reduced one control-plane risk, but it did not replace packaging or bounded CLI promotion discipline as the next architecture questions;
+2. next-level planning should now rotate back to packaging/semantic convergence first, then bounded CLI/public-surface decisions, with provider widening treated as ongoing maintenance instead of the central narrative.
+
 ## 4. Architecture Advancement Assessment
 
 ### 4.1 What has genuinely advanced
@@ -208,11 +243,62 @@ Likely failure modes:
 3. settings/discovery token guidance logic and runtime token-ceiling logic drift apart again;
 4. a future “just persist the fetched list” shortcut silently creates a second provider-state subsystem.
 
+### 4.4 Where the actual mainline bottleneck moved
+
+After the latest provider closure, the highest-leverage unresolved bottlenecks are now adjacent lanes:
+
+1. packaging / semantic-verification still carries the main source-vs-shipped-boundary ambiguity because source contains reusable runtime candidates while the shipped contract remains single-entry;
+2. CLI / automation still carries a deliberate public-vs-maintainer split that has to stay explicit if any path-based operation is later promoted;
+3. file-selection / local-KB / chapter-split Stage C now needs deeper evaluation coverage and example alignment, not another “does this feature exist?” recovery cycle.
+
 ## 5. Concrete Next Direction
 
-### Batch A: keep the provider lane in shared-core mode
+### Batch A: finish packaging / semantic-verification convergence before widening any claims
+
+Priority: `P0`
+
+Goal:
+
+1. keep the current `main.js` + inline `srcdoc` shipping truth explicit and executable;
+2. resolve the current source/build ambiguity around latent render-host runtime candidates before anyone widens packaging claims.
+
+Required rule:
+
+1. if a later batch wants a dedicated runtime asset again, build graph, release assets, audit logic, maintainer docs, and release docs must move together in the same batch.
+
+### Batch B: keep bounded CLI / public-surface promotion separate and explicit
 
 Priority: `P1`
+
+Goal:
+
+1. preserve the current split between bounded public-safe exports and explicitly maintainer-only path-based helper flows;
+2. only promote any path-based operation when its contract, automation level, context requirements, tests, and docs all justify broader exposure.
+
+Likely work:
+
+1. keep `cli.public-surface.export` aligned with current registry metadata;
+2. keep `npm run cli:help` and maintainer docs aligned with the bounded helper surface;
+3. resist turning maintainer-only mutation/introspection seams into implied public CLI support.
+
+### Batch C: deepen Stage-C quality on file selection / local-KB / chapter split without reopening existence questions
+
+Priority: `P1`
+
+Goal:
+
+1. treat current-main retrieval and batch-input capabilities as landed product slices;
+2. spend the next effort on broader corpus-quality evidence, maintainer examples, and regression depth instead of recovery rhetoric.
+
+Likely work:
+
+1. expand mixed file/folder, mixed query-shape, and exclusion-behavior fixture coverage where current contracts already justify it;
+2. keep maintainer examples and retrieval-inspection guidance synchronized with the real task-scoped retrieval path;
+3. preserve deterministic managed-artifact and rerun-guard semantics while broadening evaluation depth.
+
+### Batch D: keep the provider lane in bounded breadth-maintenance mode
+
+Priority: `P1/P2`
 
 Goal:
 
@@ -223,65 +309,25 @@ Required rule:
 
 1. every new provider/discovery addition must specify family mode, header ownership, endpoint normalization, token-guidance behavior, and tests/docs in the same batch.
 
-### Batch B: finish the current bounded discovery truth maintenance
-
-Priority: `P1`
-
-Goal:
-
-1. keep auditing real-world response envelopes for additional wrapped catalog shapes that already fit the shared parser contract;
-2. extend support only where the data shape is compatible with the existing control-plane architecture.
-
-Likely work:
-
-1. more wrapped registry/container keys if real endpoints justify them;
-2. more resource-style naming patterns only when they are semantically safe;
-3. additional trusted-host inference only when ownership is operationally explicit and stable.
-
-### Batch C: keep documentation and tests as the actual boundary guardrail
+### Batch E: keep documentation/tests and clean-state as ongoing guardrails
 
 Priority: `P0`
 
 Goal:
 
 1. prevent future sessions from downgrading current-main truth back to outdated plan wording;
-2. keep the matrix, topic plan, README/change surfaces, and focused regression tests synchronized.
-
-Acceptance:
-
-1. topic docs describe the same bounded discovery surface as code/tests;
-2. matrix language no longer implies the older first-batch-only state;
-3. the next person touching this lane can tell what is shipped, what is out of scope, and why.
-
-### Batch D: keep packaging and public CLI separate
-
-Priority: `P0/P1`
-
-Goal:
-
-1. do not let the provider-lane progress justify unrelated packaging or public-CLI claims;
-2. preserve the existing mainline narrative separation.
-
-### Batch E: restore honest clean-state closure
-
-Priority: `P0`
-
-Goal:
-
-1. separate the current provider/settings/model-discovery lane from unrelated dirty worktree changes instead of treating the whole repository as one unnamed WIP bucket;
-2. recover the repo's documented finish rule that current-main truth updates should end with a genuinely clean `git status`, not only green tests.
+2. keep clean-state proof as a maintained invariant instead of letting it slip back into deferred cleanup debt.
 
 Current audit reality:
 
-1. the current worktree is still not clean, even though the provider lane's build/tests/audits are green;
-2. the dirty state spans provider/runtime code, docs, maintainer docs, and test additions, so clean-state proof cannot be claimed yet;
-3. the next honest step is commit-boundary isolation, not more truth-language expansion.
+1. the repository is clean today, so clean-state recovery is no longer an open action item in this audit;
+2. the real requirement is to preserve that finish discipline while the next packaging / CLI / Stage-C batches land;
+3. the matrix, topic docs, README/change surfaces, and focused regression checks still act as the practical anti-drift guardrail.
 
 Required follow-through:
 
-1. classify dirty files into coherent commit batches by lane;
-2. keep unrecognized or unrelated dirty paths out of the batch;
-3. only after those commits land may this audit's clean-state gate be considered satisfied.
+1. re-check the current truth documents whenever packaging, CLI surface, or provider/discovery boundaries change;
+2. keep `npm run build`, `npm test -- --runInBand`, `npm run audit:i18n-ui`, `npm run audit:render-host`, `git diff --check`, and clean `git status --short --branch` as the minimum closure bundle.
 
 ## 6. Documentation Sync Rule
 
@@ -311,7 +357,7 @@ Current `main` no longer needs another “did the provider settings lane really 
 
 The real current questions are now:
 
-1. can the widened bounded discovery surface remain shared-core, lightweight, and honest;
-2. can token guidance, discovery metadata, runtime behavior, tests, and docs keep converging together instead of drifting again;
-3. can the repository keep packaging truth, public CLI truth, and provider control-plane truth separated cleanly;
-4. can the current dirty worktree finally be split into auditable commit batches so the documented clean-state requirement becomes true again instead of remaining only a policy statement.
+1. can packaging/source organization and shipped render-host truth stay aligned without overclaiming a runtime topology that current main does not ship;
+2. can the current bounded CLI split stay explicit while any future path-based promotion remains contract-first rather than convenience-first;
+3. can Stage-C local-KB / file-selection / chapter-split work deepen quality evidence instead of relitigating feature existence;
+4. can the widened bounded provider discovery surface remain shared-core, lightweight, and honest as a maintenance lane rather than becoming the excuse for broader architectural claims.
