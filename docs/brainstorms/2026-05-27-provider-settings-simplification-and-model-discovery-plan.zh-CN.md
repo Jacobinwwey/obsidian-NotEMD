@@ -1,6 +1,6 @@
 ---
 date: 2026-05-27
-last_updated: 2026-05-27
+last_updated: 2026-05-28
 topic: provider-settings-simplification-and-model-discovery-plan
 canonical: true
 ---
@@ -55,7 +55,8 @@ canonical: true
 1. 字段可见性分组；
 2. core / contextual / advanced / developer-only 分类；
 3. model discovery capability 元数据；
-4. provider-specific 的 discovery endpoint family 或 fallback 顺序。
+4. provider-specific 的 discovery endpoint family 或 fallback 顺序；
+5. 对刻意保持 manual-first 的预设，允许附带可选 disable reason。
 
 ### 2.3 Config 形态兼容性好，但过于扁平，无法驱动更强的 UI
 
@@ -118,8 +119,11 @@ canonical: true
 当前 main 上现已存在的内容：
 
 1. `src/llmProviders.ts` 已加入一版 provider-field taxonomy metadata（`core`、`contextual`、`advanced`、`developer`）与按 provider 的 model-discovery metadata。
-2. 新增了一个瞬时 `src/providerModelDiscovery.ts`，首批覆盖：
-   - OpenAI-compatible `GET /models`
+2. 新增了一个瞬时 `src/providerModelDiscovery.ts`，有界覆盖：
+   - 一批已验证的 OpenAI-compatible `GET /models` 预设
+   - OpenRouter 有界的 chat + embedding catalog 聚合
+   - Together 专用的 `/models` 数组响应
+   - Anthropic `GET /models`
    - Ollama tag listing
    - Google model listing
 3. `src/ui/NotemdSettingTab.ts` 中已有一版 metadata-driven provider panel 重构尝试，包含：
@@ -131,9 +135,20 @@ canonical: true
 4. 对应 locale keys、README/update surface 与聚焦测试也已经补入。
 5. 当前 main 还继续补齐了这条 lane 的有界 provider 宽度收口：
    - 对旧持久化 provider 名称做 canonical alias 归一化，例如 `Xiaomi` -> `Xiaomi MiMo`
-   - 补入并对齐共享 runtime 的额外 OpenAI-compatible 预设（`LiteLLM`、`Nebius`、`Cerebras`、`Hugging Face`、`Vercel AI Gateway`）
-   - 对 Vercel AI Gateway 单独走 `v3/ai/config` registry endpoint，而不是假装它和 generic `/models` 完全等价
+   - 补入并对齐共享 runtime 的额外 OpenAI-compatible 预设（`LiteLLM`、`Nebius`、`Cerebras`、`Hugging Face`、`Vercel AI Gateway`、`AIHubMix`、`GitHub Models`、`PPIO`、`New API`、`OVMS`）
+   - 对 Vercel AI Gateway 走有界的 `/v1/models` + `v3/ai/config` 双源合并，对 xAI 单独走 `/v1/language-models` 并有界回退到 `/v1/models`，对 Huawei Cloud MaaS 单独走 `v2/models` registry endpoint，对 Together 单独走数组式 `/models` 响应，将 LiteLLM 显式归入 proxy-family 的 `/models` + `/model/info` 有界合并，对 PPIO 单独走 chat + embedding + reranker 三路有界合并，并让 OVMS 优先走本地 `/v3/models`、必要时再回退到 `/v1/config`，而不是假装它们和 generic `/models` 完全等价
+   - 对 OpenRouter 单独走有界的 chat + embedding catalog 聚合，而不是假装它只是另一个 generic `/models` 网关
+   - 对 Azure OpenAI 等 manual-first 预设补入 provider-specific discovery disable reason，使设置页在 Fetch model list 不可用时能解释原因，而不是只显示统一的“不支持”
    - 在设置页中加入 model-aware token guidance，使当前模型的已知最大输出 Token 上限能在 `Model`、provider override 与全局 `Max tokens` 旁被明确展示
+   - 对 gateway/provider-prefixed model ID 增加有界 token-cap 推断，使 `openai/gpt-4o`、`anthropic/claude-sonnet-4.5` 这类已抓取模型在 owner 足够明确时也能驱动 `Max tokens` / chunk-size 指引，而不会反过来假装所有 custom gateway 上的 bare model 名称都能被无上下文归因
+   - 扩宽 OpenAI-compatible payload 解析，兼容 `list` / `items`、object-shaped proxy catalog、嵌套的 gateway `specification.modelId` 与 endpoint-type-aware listing metadata
+   - 继续增强共享 fetch-model-list 的真实返回体容忍度，补齐 provider-mapped 的 `provider_models` 对象目录、更宽的 `nextPageUrl` / `next_page_url` 分页信号、保持 provider 语义正确的 `after_id` 续页处理，以及 `supportedOutputModalities`、嵌套 `supportedGenerationMethods`、limit objects 等更丰富的 generation/modality 元数据解析
+   - discovered-model 的 token guidance 现在还会继续吸收真实 hosted registry 中的 token-cap 字段，例如 `top_provider.max_completion_tokens`、`per_request_limits` 与 `limits.max_output_tokens`，从而让 `Fetch model list -> Use` 在静态 provider token registry 还不认识该模型时，依然能把 model-aware 的 `Max tokens` 与 chunk-size 默认值同步到更接近上游真值
+   - 对瞬时 discovered-model metadata 保留显示标签、owner/provider hint 与 max-output-token 提示，并引入 capability / modality / status 感知过滤，尽量避免更宽模型目录把不可用、仅音频或仅图像模型混入文本生成建议；当上游返回体缺少主标识时，只把 alias 用作后备 identifier，而不会把所有 alias 都展开成独立选项
+   - AIHubMix 的 discovery 现在优先走官方 `?type=llm` 目录，而不是先拉完整混合多模态模型表再完全依赖本地过滤
+   - 让 runtime 与 discovery 共享同一套 OpenAI-compatible endpoint 归一化（包括 `/responses` 这类端点形态），容忍用户粘贴带 query/hash 的 endpoint root，并让 generic host 自动升级也能识别 OVMS 风格的本地 `/v3` 端点，而不是把所有本地 host 都折叠进 LiteLLM proxy bucket
+   - family-specific 的 discovery 归一化现在也能容忍用户直接粘贴官方 discovery endpoint 而不是 provider root，例如 OpenRouter 的 `/models` 或 `/embeddings/models`，以及 Vercel AI Gateway 的 `/v3/ai/config` 或 `/v1/ai/models`，从而让 fetch-model-list 仍能回到正确的 bounded registry 流程
+   - generic/custom gateway 现在还可以在已抓取 registry row 明确给出 `owned_by`、`publisher`、`provider` 这类 owner/provider hint 时，对 bare model ID 有界复用上游 token-cap metadata；但任意 bare-model 猜测仍刻意保持为非目标
 
 仍然刻意不做的内容：
 
@@ -271,11 +286,23 @@ Cherry Studio 值得复用的点：
 产物：
 
 1. 瞬时模型发现服务；
-2. 首批仅支持：
-   - OpenAI-compatible `GET /models`
+2. 当前有界验证批次支持：
+   - 一批已验证的 OpenAI-compatible `GET /models` 预设
+   - OpenRouter 有界 chat + embedding registry 聚合
+   - LiteLLM proxy-family `/models` + `/model/info`
+   - Together `/models`
+   - Anthropic `GET /models`
    - Ollama `GET /api/tags`
    - Google Gemini `GET v1beta/models`
+   - Huawei Cloud MaaS `v2/models`
+   - Vercel AI Gateway 有界 `/v1/models` + `v3/ai/config`
+   - AIHubMix hosted registry
+   - GitHub Models `catalog/models` + `/v1/models`
+   - PPIO 有界 chat + embedding + reranker 聚合
+   - OVMS `/v3/models`，并有界回退 `/v1/config`
+   - xAI `/v1/language-models`
 3. 共享的错误归一化与 graceful empty-result fallback。
+4. 对 Google `nextPageToken`、Anthropic `has_more` / `last_id` 这类分页 registry 做有界多页遍历。
 
 风险：
 
@@ -289,10 +316,12 @@ Cherry Studio 值得复用的点：
 
 当前检查点：
 
-1. 已按计划首批 family 落地到 current main；
+1. 已按当前有界 family 批次落地到 current main，除最初的 OpenAI-compatible/Ollama/Google 基线外，现在还包括 Anthropic、LM Studio、OpenRouter、LiteLLM proxy-family、Together、Huawei Cloud MaaS、Vercel AI Gateway、AIHubMix、GitHub Models、PPIO、OVMS 与 xAI；
 2. 它仍保持手动 `model` 输入为持久化 source of truth；
 3. 不支持的 provider 仍然降级回手动输入，而不是引入重型 catalog 子系统。
-4. gateway 的有界分流现在已经显式化：Vercel AI Gateway 走专用 registry endpoint；LiteLLM、Hugging Face 等预设则继续保持 manual-first，而不是过度宣称 discovery 支持。
+4. gateway 的有界分流现在已经显式化：Vercel AI Gateway 现在会有界合并 `/v1/models` 与 `v3/ai/config`；OpenRouter 现在会有界合并 chat 与 embedding catalog；LiteLLM 显式走 proxy-family 的 `/models` + `/model/info` 有界合并；Huawei Cloud MaaS 走专用 `v2/models` registry endpoint；PPIO 走有界的 chat + embedding + reranker 三路合并；`OVMS` 优先走当前本地 `/v3/models`，必要时才回退到 `/v1/config`；`New API` 复用共享的 bounded OpenAI-compatible `/models` 路径；Hugging Face 则并入这条共享路径，不再保持 manual-first。
+5. Google 与 Anthropic 在 provider 返回分页模型目录时，也会执行有界多页遍历，避免 fetch-model-list 静默停在第一页。
+6. 共享 parser 的加固现在还覆盖了更宽的 wrapped catalog shape，例如 `provider_models`、`providerModels`、`publisherModels`、`registry`、`registries` 与 `services`，以及对 `models/<id>`、`publishers/<owner>/models/<id>` 的保守 resource-name normalization。
 
 ### Phase 4：UI 接入
 
@@ -308,6 +337,13 @@ Cherry Studio 值得复用的点：
 2. 新 provider-panel surface 的 styling 支撑已经落地；
 3. README / update surface 现在也已描述同样的有界行为。
 4. “应用成功提示”与 discovered-models collapse-state/persistence 行为现在也有聚焦行为测试覆盖。
+5. gateway/provider-prefixed 的已发现模型现在也会进入有界 token-cap guidance，只在 owner 能被安全推断时才复用 ceiling；generic `OpenAI Compatible` 对 bare model 名称仍然保持保守，不做无上下文猜测。
+5. discovery 结果现在还会有界地优先保留适合生成任务的模型，避免 embedding / reranker / speech / classifier 这类明显不适合当前设置页选择器的条目挤占列表，也能覆盖 object-shaped proxy catalog 与 endpoint-type-aware listing 这类更宽的返回形态。
+6. 共享的 OpenAI-compatible provider family 现在还会显式保持 discovery/runtime 兼容头一致，避免某些依赖 `X-Api-Key` 或 provider-specific compatibility header 的端点在 fetch-model-list 上出现假失败。
+7. 通用 `OpenAI Compatible` 预设在 base URL 指向 OpenAI、DashScope/Qwen、Xiaomi MiMo、Fireworks、Hugging Face 这类已知可信官方 host 时，现在也会让 bare model ID 复用官方 provider 的 token-cap 元数据，而不再要求这些场景必须写成 provider-prefixed gateway model ID。
+8. 全局 model-aware token guidance 不再只是“数值刚好相等”的启发式：当前主线现已持久化显式 `globalModelAwareMaxTokensTracking` 标记，使 `Fetch model list -> Use`、手动改模型、runtime request token ceiling、以及 reset/reload 行为都共享同一条 auto-managed baseline 真值链路。
+9. 共享的 discovery/runtime header owner 现在也通过同一条 endpoint-family seam 显式收敛，因此 fetch-model-list 不会再轻易与 runtime 在依赖 compatibility header 的 provider 上发生语义漂移。
+10. registry 返回的瞬时 owner/provider hint 现在也会进入 generic/custom gateway 的有界 bare-model token guidance，因此像 `gpt-4.1` + `owned_by: "openai"` 这样的 discovered row，也能在不强迫用户把持久化 model 改成 provider-prefixed ID 的前提下，安全驱动 `Max tokens` / chunk-size 默认值。
 
 ### Phase 5：测试与文档
 
@@ -317,6 +353,7 @@ Cherry Studio 值得复用的点：
 2. core/advanced 分组的 UI rendering 覆盖；
 3. 基于持久化 advanced 值的 auto-expand 覆盖；
 4. 已支持 endpoint family 的 discovery success/fallback 覆盖。
+5. 对 wrapped provider/publisher catalog 与 resource-name normalization 的 registry-shape 覆盖。
 
 必须同步的文档：
 
@@ -331,6 +368,7 @@ Cherry Studio 值得复用的点：
 2. canonical 文档现在把这条线描述为 current-main 已落地真值，而不是隔离实现进展；
 3. 验证证据现已包含 targeted provider-settings/model-discovery tests 与完整仓库门禁。
 4. 当前 settings surface 还额外写清了全局 `Max tokens` 与 provider-specific output-token override 的关系，以降低“两处 max tokens”造成的理解成本。
+5. 当前文档现在应被视为 current-main 真值维护文档，而不是 pre-landing 的实现草案。
 
 ## 7. 显式非目标
 
@@ -341,6 +379,7 @@ Cherry Studio 值得复用的点：
 3. 整体照搬 Cherry Studio 的 provider domain；
 4. 对所有 provider 宣称完整模型发现覆盖；
 5. 在隔离实现通道验证前，直接把半成品落到 main worktree。
+6. 把 generic `OpenAI Compatible` 的 token owner 推断扩写到 trusted host、显式 provider prefix 或其他有界可证场景之外。
 
 ## 8. 执行规则
 
