@@ -121,6 +121,21 @@ canonical: true
 1. 这条轨道已经跨过“先把架构 bootstrap 起步”的阶段；
 2. 现在进入的是 bounded breadth management 与 truth-maintenance 阶段。
 
+### 2.5 Clean-state 收口现在已经重新证明，不再处于待完成状态
+
+旧审计里把 clean-state 写成仍待完成，现已不再准确。
+
+当前真值是：
+
+1. provider-settings/model-discovery 这一轮收口工作已经真实提交到 `main`；
+2. 当前仓库已经回到 clean 的 `main...origin/main` 状态；
+3. 对这条轨道来说，clean-state 已不再是阻塞 next-direction 讨论的未解前置条件。
+
+正确解释：
+
+1. clean-state 仍然必须继续作为后续每个批次的 finish gate；
+2. 但本文不应再把它写成尚未完成的收尾欠账。
+
 ## 3. 相对先前方案语言的深度对比
 
 ### 3.1 2026-05-25 审计现在低估了什么
@@ -181,6 +196,26 @@ provider 专题文在以下几点上仍然正确，而且不应被放松：
 2. 把 host-aware bare-model token lookup 误写成 arbitrary custom gateway 上也能自动推断 owner；
 3. 把已有共享 parser seam 误写成以后可以顺手持久化 remote catalog，而不需要新的显式架构决策。
 
+### 3.5 Packaging 与 CLI 规划文档目前仍然成立的部分
+
+更早的 packaging 与 CLI 规划文档，在两个关键点上仍然是正确的：
+
+1. 当前真正发货的渲染器边界仍然是 `main.js` + inline `srcdoc`，而不是已发货 dedicated runtime asset；
+2. 当前 CLI 的正确边界仍然是“先保持宿主无关 core，再单独处理 host/file/UI follow-through”，而不是继续做更广 public command 数量扩张。
+
+当前代码仍然支持这些早期决策：
+
+1. `esbuild.config.mjs`、`scripts/audit-render-host-bundle.js` 与 maintainer 文档仍然共同锁定单入口发货边界；
+2. `src/operations/diagramGenerateOperation.ts`、`src/operations/diagramCommandExecution.ts`、`src/operations/diagramCommandHostAdapter.ts`、`src/operations/publicCliSurface.ts` 与 `src/maintainerCliBridge.ts` 仍然保持以下有界拆分：
+   - typed core operation；
+   - 有界 public-safe export command；
+   - 更宽但明确仅供 maintainer 使用的 path-based helper flow。
+
+正确解释：
+
+1. provider 轨道的收口降低了一部分 control-plane 风险，但并没有取代 packaging 与 bounded CLI promotion discipline，成为新的架构主问题；
+2. next-level 规划现在应回到 packaging/semantic convergence 优先，其次才是 bounded CLI/public-surface 决策；provider 宽度扩充应降为持续维护轨道，而不是继续占据中心叙事。
+
 ## 4. 架构推进评估
 
 ### 4.1 真正推进了什么
@@ -208,11 +243,62 @@ provider 专题文在以下几点上仍然正确，而且不应被放松：
 3. settings/discovery token guidance 与 runtime token-ceiling 逻辑再次漂移；
 4. 未来有人顺手“把抓到的模型列表存起来”，静默造出第二套 provider-state subsystem。
 
+### 4.4 当前主线真正的瓶颈已经移动到哪里
+
+在最新 provider 收口之后，当前最高杠杆、但尚未解决的瓶颈，已经移动到了相邻轨道：
+
+1. packaging / semantic-verification 仍然承载着最核心的 source-vs-shipped 边界歧义，因为源码里已有可复用 runtime candidate，但真正发货契约仍是单入口；
+2. CLI / automation 仍然承载着刻意保持的 public-vs-maintainer 分层，任何 path-based operation 的提升都必须继续显式化；
+3. file-selection / local-KB / chapter-split 的 Stage C 现在需要的是更深的评估覆盖与示例对齐，而不是再做一次“功能是否存在”的恢复性论证。
+
 ## 5. 具体下一阶段方向
 
-### Batch A：继续保持 provider 轨道处于 shared-core 模式
+### Batch A：优先完成 packaging / semantic-verification 收敛，再决定是否拓宽任何叙述
+
+优先级：`P0`
+
+目标：
+
+1. 继续把当前 `main.js` + inline `srcdoc` 的发货真值保持为显式、可执行的边界；
+2. 在任何人拓宽 packaging 叙述之前，先解决当前 latent render-host runtime candidate 与 source/build 真值之间的歧义。
+
+硬规则：
+
+1. 如果未来又要引入 dedicated runtime asset，那么 build graph、release assets、audit logic、maintainer docs 与 release docs 必须在同一批次里一起变更。
+
+### Batch B：继续把 bounded CLI / public-surface promotion 与 maintainer helper 显式分开
 
 优先级：`P1`
+
+目标：
+
+1. 保持当前有界 public-safe export 与仅供 maintainer 使用的 path-based helper flow 的分层；
+2. 只有当某个 path-based operation 的 contract、automation level、context requirement、测试与文档都足以支撑更广暴露时，才考虑提升。
+
+可能的工作：
+
+1. 持续保持 `cli.public-surface.export` 与当前 registry metadata 对齐；
+2. 持续保持 `npm run cli:help` 与 maintainer 文档对当前有界 helper surface 的描述一致；
+3. 避免把 maintainer-only mutation/introspection seam 误写成已有公共 CLI 支持。
+
+### Batch C：在不重开存在性问题的前提下，深化 file selection / local-KB / chapter split 的 Stage-C 质量
+
+优先级：`P1`
+
+目标：
+
+1. 把当前主线上的 retrieval 与 batch-input 能力当作已经落地的产品切片；
+2. 后续投入聚焦在更宽 corpus-quality 证据、maintainer 示例与回归深度，而不是继续做恢复性叙事。
+
+可能的工作：
+
+1. 在当前契约已经支持的前提下，继续扩 mixed file/folder、mixed query-shape 与 exclusion-behavior 的夹具覆盖；
+2. 持续保持 maintainer 示例与 retrieval inspect 指引和真实 task-scoped retrieval 链路一致；
+3. 在扩测试深度时，继续保住 deterministic managed-artifact 与 rerun-guard 语义。
+
+### Batch D：把 provider 轨道放回 bounded breadth-maintenance 模式
+
+优先级：`P1/P2`
 
 目标：
 
@@ -223,65 +309,25 @@ provider 专题文在以下几点上仍然正确，而且不应被放松：
 
 1. 每个新的 provider/discovery 扩展，都必须在同一批次里明确 family mode、header owner、endpoint normalization、token-guidance 行为，以及测试/文档。
 
-### Batch B：完成当前有界 discovery 真值维护
-
-优先级：`P1`
-
-目标：
-
-1. 继续审计真实返回体，找出还能被当前共享 parser 契约吸收的 wrapped catalog shape；
-2. 只有在数据形态与现有 control-plane 架构兼容时才扩支持。
-
-可能的工作：
-
-1. 如果真实端点证明有价值，再补更多 wrapped registry/container key；
-2. 只在语义安全时，再补更多 resource-style naming pattern；
-3. 只在 ownership 在运维上足够显式且稳定时，再补更多 trusted-host 推断。
-
-### Batch C：把文档与测试继续作为实际边界护栏
+### Batch E：把文档/测试与 clean-state 继续当作长期护栏
 
 优先级：`P0`
 
 目标：
 
-1. 防止后续会话又把 current-main 真值降回过时的计划措辞；
-2. 持续保持矩阵、专题文、README/change surface 与聚焦回归测试同步。
-
-验收：
-
-1. 专题文描述的 bounded discovery surface 与代码/测试一致；
-2. 统一矩阵不再暗示旧的 first-batch-only 状态；
-3. 下一位维护者能直接看懂什么已发货、什么仍然超出范围、以及原因。
-
-### Batch D：继续把 packaging 与 public CLI 分开处理
-
-优先级：`P0/P1`
-
-目标：
-
-1. 不要让 provider 轨道的推进被误读成 packaging 或 public CLI 已扩宽；
-2. 保持主线叙述上的边界分离。
-
-### Batch E：恢复诚实的 clean-state 收口
-
-优先级：`P0`
-
-目标：
-
-1. 把当前 provider/settings/model-discovery 轨道与其它脏工作树改动明确拆开，而不是继续把整仓库当成一个没有命名边界的 WIP 桶；
-2. 恢复仓库文档里定义的 finish 要求：current-main 真值更新最终应以真实 clean 的 `git status` 收尾，而不是只停留在测试全绿。
+1. 防止后续会话再次把 current-main 真值降回过时措辞；
+2. 把 clean-state 证明维持为持续满足的收尾不变量，而不是重新积累成待清理债务。
 
 当前审计现实：
 
-1. 当前 worktree 仍然不 clean，尽管 provider 这条线本身的 build/tests/audits 已经是绿的；
-2. 当前 dirty state 横跨 provider/runtime 代码、进度文档、maintainer docs 与测试补充，现阶段还不能声称已经拿到 clean-state 证明；
-3. 下一步真正需要的是提交边界隔离，而不是继续扩写真值文案。
+1. 仓库当前已经 clean，因此 clean-state 恢复已不再是本文中的开放动作项；
+2. 现在真正需要的是，在后续 packaging / CLI / Stage-C 批次落地时继续守住这套 finish discipline；
+3. 统一矩阵、专题文、README/change surface 与聚焦回归检查，仍然是最实际的 anti-drift 护栏。
 
 必须跟进的动作：
 
-1. 按轨道把 dirty files 拆成可审计的 commit batch；
-2. 不把无法解释或无关的 dirty path 混进同一批；
-3. 只有这些批次真正落下后，本文中的 clean-state gate 才能被视为满足。
+1. 只要 packaging、CLI surface 或 provider/discovery 边界发生变化，就重新检查当前真值文档；
+2. 持续把 `npm run build`、`npm test -- --runInBand`、`npm run audit:i18n-ui`、`npm run audit:render-host`、`git diff --check` 与 clean 的 `git status --short --branch` 作为最小收尾包。
 
 ## 6. 文档同步规则
 
@@ -311,7 +357,7 @@ provider 专题文在以下几点上仍然正确，而且不应被放松：
 
 现在真正的问题是：
 
-1. 已扩宽的 bounded discovery surface 能否继续保持 shared-core、lightweight 且边界诚实；
-2. token guidance、discovery metadata、runtime 行为、测试与文档能否继续同步收敛，而不是再次漂移；
-3. 仓库能否继续把 packaging 真值、public CLI 真值与 provider control-plane 真值明确分开；
-4. 当前脏工作树能否最终被拆成可审计的 commit batch，让文档里写着的 clean-state 要求从“政策”真正变成“已证明事实”。
+1. packaging/source organization 与真正 shipped render-host truth 能否继续保持一致，而不夸大当前主线并未发货的 runtime topology；
+2. 当前 bounded CLI 分层能否继续显式保持，而未来任何 path-based promotion 都坚持 contract-first，而不是 convenience-first；
+3. Stage-C local-KB / file-selection / chapter-split 工作能否继续补强质量证据，而不是反复重谈“功能是否存在”；
+4. 当前更宽的 bounded provider discovery surface 能否继续保持 shared-core、lightweight 且边界诚实，并作为维护轨道而不是更大架构声明的借口。
