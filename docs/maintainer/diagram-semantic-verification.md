@@ -10,13 +10,17 @@ Template helper:
 npm run verify:diagram-semantics -- --vault "<vault-name>" --commit "<sha>" --version "<plugin-version>" --output ~/tmp/notemd-diagram-check.md
 ```
 
-The helper is secret-free. It generates a Markdown checklist template plus vault-aware CLI commands, an explicit packaging-boundary section, a packaging-contract section, and surface evidence sections; it does not launch Obsidian, read local secrets, or rely on tracked vault paths.
+The helper is secret-free. It generates a Markdown checklist template plus vault-aware CLI commands, explicit packaging-boundary, render-host audit, render-host runtime-consumption, implementation-readiness, packaging-contract, contract-promotion-boundary, and Stage-C gate sections, plus surface evidence sections; it does not launch Obsidian, read local secrets, or rely on tracked vault paths.
 Its packaging boundary line is derived from current `entryPoints` / `outfile` / `outdir` values in `esbuild.config.mjs`; if parsing fails, the helper emits explicit placeholder wording so boundary drift is visible.
 If `entryPoints` are parsed but output target detection cannot resolve either `outfile` or `outdir`, the checklist now adds an explicit manual-confirmation line before packaging claims can be made.
 When output target detection succeeds, the checklist line now records whether the current truth came from `outfile` or `outdir` so packaging claims remain explicit.
 If both `outfile` and `outdir` are detected together, the checklist now treats that as ambiguous and requires explicit manual confirmation before packaging claims.
+The render-host audit section is derived from `scripts/audit-render-host-bundle.js` and keeps the shipped `main.js` bundle markers plus standalone-output bans executable instead of rhetorical.
+The runtime-consumption section keeps the command-entry → preview-modal → iframe `srcdoc` → webview bridge chain explicit through `src/main.ts`, `src/ui/DiagramPreviewModal.ts`, `src/rendering/webview/page.ts`, and `src/rendering/webview/renderFrame.ts`.
+The implementation-readiness section keeps the current packaging lane and release evidence bounded to what main actually ships today.
 Its packaging-contract section tracks release-asset, release-tag, publish-mode, and release-notes contract truth from `scripts/release/publish-github-release.js`, and release-trigger/tag-guard contract truth from `.github/workflows/release.yml`, so Stage-B contract definition stays aligned with release enforcement.
 Its contract-promotion-boundary section reads current operation metadata from `src/operations/registry.ts` for workflow/settings/export-adjacent operations, so capability-promotion claims remain tied to actual `automationLevel` / `requiredContext` / `sideEffectClass` truth.
+Its Stage-C gate section keeps future topology widening blocked until packaging boundary, render-host audit, runtime-consumption, release contract, and contract-promotion boundary truth all move together.
 
 ## 1. When This Runbook Is Required
 
@@ -141,7 +145,7 @@ Use this sequence unless the change is more narrowly scoped:
 5. Save evidence for each affected surface.
 6. Record results in PR notes, release handoff, or maintainer log.
 
-The generated helper template now also includes packaging-boundary, packaging-contract, and contract-promotion-boundary sections. Do not skip these sections when the change touches render-host, preview, workflow/settings, or heavier runtime behavior: they are explicit reminders that today's packaging model is still single-entry, not true heavy-runtime isolation, and that release + operation-promotion constraints must stay in sync.
+The generated helper template now also includes packaging-boundary, render-host audit, render-host runtime-consumption, implementation-readiness, packaging-contract, contract-promotion-boundary, and Stage-C gate sections. Do not skip these sections when the change touches render-host, preview, workflow/settings, or heavier runtime behavior: they are explicit reminders that today's packaging model and command-entry runtime chain must stay in sync with release and operation-promotion constraints.
 
 ## 6. Evidence Format
 

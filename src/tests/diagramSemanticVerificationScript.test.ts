@@ -36,8 +36,9 @@ describe('diagram semantic verification helper', () => {
 
         expect(runbook).toContain('npm run verify:diagram-semantics');
         expect(runbookZh).toContain('npm run verify:diagram-semantics');
-        expect(runbook).toContain('single-entry');
-        expect(runbookZh).toContain('单入口');
+        expect(runbook).toContain('render-host runtime-consumption');
+        expect(runbook).toContain('Stage-C gate section');
+        expect(runbookZh).toContain('当前打包模型');
         expect(runbook).toContain('derived from current `entryPoints` / `outfile` / `outdir` values in `esbuild.config.mjs`');
         expect(runbookZh).toContain('`esbuild.config.mjs`');
         expect(runbookZh).toContain('`entryPoints` / `outfile` / `outdir`');
@@ -75,6 +76,55 @@ describe('diagram semantic verification helper', () => {
             supportsReleaseModeSwitch: boolean;
             resolvedFromReleaseHelper: boolean;
         };
+        let resolveRenderHostAuditFacts: (args?: { auditScriptPath?: string }) => {
+            sourcePath: string;
+            bundlePath: string;
+            requiredMarkers: string[];
+            disallowedStandaloneOutputs: string[];
+            resolvedFromAuditScript: boolean;
+        };
+        let buildRenderHostAuditChecklistLines: (auditFacts?: {
+            sourcePath: string;
+            bundlePath: string;
+            requiredMarkers: string[];
+            disallowedStandaloneOutputs: string[];
+            resolvedFromAuditScript: boolean;
+        }) => string[];
+        let resolveRenderHostRuntimeConsumptionFacts: (args?: {
+            mainPath?: string;
+            previewModalPath?: string;
+            pagePath?: string;
+            renderFramePath?: string;
+        }) => {
+            sourcePaths: string[];
+            mainCreatesIframeRenderHostSession: boolean;
+            openPreviewDelegatesThroughModal: boolean;
+            previewModalUsesIframeSrcdoc: boolean;
+            pageUsesRenderArtifactMarkup: boolean;
+            pageTreatsBridgeTargetsAsInlinePreviewable: boolean;
+            renderFrameSupportsMermaid: boolean;
+            renderFrameSupportsVegaLite: boolean;
+            resolvedFromSources: boolean;
+        };
+        let buildRenderHostRuntimeConsumptionChecklistLines: (runtimeFacts?: {
+            sourcePaths: string[];
+            mainCreatesIframeRenderHostSession: boolean;
+            openPreviewDelegatesThroughModal: boolean;
+            previewModalUsesIframeSrcdoc: boolean;
+            pageUsesRenderArtifactMarkup: boolean;
+            pageTreatsBridgeTargetsAsInlinePreviewable: boolean;
+            renderFrameSupportsMermaid: boolean;
+            renderFrameSupportsVegaLite: boolean;
+            resolvedFromSources: boolean;
+        }) => string[];
+        let buildImplementationReadinessChecklistLines: (packagingFacts?: {
+            sourcePath: string;
+            entryPoints: string[];
+            outfile: string;
+            outdir: string;
+            outputTargetStatus: 'outfile' | 'outdir' | 'unknown' | 'ambiguous';
+            resolvedFromConfig: boolean;
+        }) => string[];
         let buildReleasePackagingContractChecklistLines: (releaseFacts?: {
             sourcePath: string;
             requiredAssets: string[];
@@ -158,8 +208,13 @@ describe('diagram semantic verification helper', () => {
                 parseArgs,
                 resolveRequestedSurfaces,
                 buildEnvironmentCheckCommands,
+                buildImplementationReadinessChecklistLines,
                 resolvePackagingBoundaryFacts,
                 buildPackagingBoundaryChecklistLines,
+                resolveRenderHostAuditFacts,
+                buildRenderHostAuditChecklistLines,
+                resolveRenderHostRuntimeConsumptionFacts,
+                buildRenderHostRuntimeConsumptionChecklistLines,
                 resolveReleasePackagingContractFacts,
                 buildReleasePackagingContractChecklistLines,
                 resolveReleaseWorkflowTriggerFacts,
@@ -462,6 +517,58 @@ const context = await esbuild.context({
             expect(lines.some((line) => line.includes('true heavy-runtime isolation is still pending'))).toBe(true);
         });
 
+        test('keeps render-host audit facts aligned with the current audit script contract', () => {
+            const auditScriptPath = path.join(repoRoot, 'scripts', 'audit-render-host-bundle.js');
+            const facts = resolveRenderHostAuditFacts({ auditScriptPath });
+            expect(facts.bundlePath).toBe('main.js');
+            expect(facts.requiredMarkers).toContain('htmlSrcdoc');
+            expect(facts.disallowedStandaloneOutputs).toContain('render-host.mjs');
+            expect(facts.resolvedFromAuditScript).toBe(true);
+
+            const lines = buildRenderHostAuditChecklistLines(facts);
+            expect(lines[0]).toContain('audit-render-host-bundle.js');
+            expect(lines[0]).toContain('main.js');
+            expect(lines[1]).toContain('htmlSrcdoc');
+            expect(lines[2]).toContain('render-host.mjs');
+        });
+
+        test('keeps render-host runtime-consumption facts aligned with the current preview chain', () => {
+            const facts = resolveRenderHostRuntimeConsumptionFacts();
+            expect(facts.resolvedFromSources).toBe(true);
+            expect(facts.mainCreatesIframeRenderHostSession).toBe(true);
+            expect(facts.openPreviewDelegatesThroughModal).toBe(true);
+            expect(facts.previewModalUsesIframeSrcdoc).toBe(true);
+            expect(facts.pageUsesRenderArtifactMarkup).toBe(true);
+            expect(facts.pageTreatsBridgeTargetsAsInlinePreviewable).toBe(true);
+            expect(facts.renderFrameSupportsMermaid).toBe(true);
+            expect(facts.renderFrameSupportsVegaLite).toBe(true);
+
+            const lines = buildRenderHostRuntimeConsumptionChecklistLines(facts);
+            expect(lines[0]).toContain('src/main.ts');
+            expect(lines[0]).toContain('src/ui/DiagramPreviewModal.ts');
+            expect(lines.join('\n')).toContain('openDiagramPreviewModal');
+            expect(lines.join('\n')).toContain('session.htmlSrcdoc');
+            expect(lines.join('\n')).toContain('renderArtifactMarkup(payload)');
+            expect(lines.join('\n')).toContain('Mermaid and Vega-Lite mount/bootstrap shells');
+        });
+
+        test('builds implementation-readiness lines that keep packaging widening gated', () => {
+            const lines = buildImplementationReadinessChecklistLines({
+                sourcePath: path.join(repoRoot, 'esbuild.config.mjs'),
+                entryPoints: ['src/main.ts'],
+                outfile: 'main.js',
+                outdir: '',
+                outputTargetStatus: 'outfile',
+                resolvedFromConfig: true
+            });
+
+            expect(lines[0]).toContain('current single-entry lane');
+            expect(lines[1]).toContain('esbuild.config.mjs');
+            expect(lines[1]).toContain('release-helper expectations');
+            expect(lines[2]).toContain('true heavy-runtime isolation');
+            expect(lines[3]).toContain('real Obsidian semantic verification');
+        });
+
         test('keeps release packaging contract checklist aligned with release helper asset requirements', () => {
             const releaseHelperPath = path.join(repoRoot, 'scripts', 'release', 'publish-github-release.js');
             const releaseWorkflowPath = path.join(repoRoot, '.github', 'workflows', 'release.yml');
@@ -607,6 +714,12 @@ const context = await esbuild.context({
             expect(template).toContain('`src/main.ts -> main.js`');
             expect(template).toContain('`npm run audit:render-host` only proves the current self-contained `main.js` + inline `srcdoc` host contract, including rejection of stray `render-host.mjs` assets or references');
             expect(template).toContain('true heavy-runtime isolation is still pending');
+            expect(template).toContain('## Render Host Audit');
+            expect(template).toContain('htmlSrcdoc');
+            expect(template).toContain('## Render Host Runtime Consumption');
+            expect(template).toContain('session.htmlSrcdoc');
+            expect(template).toContain('## Implementation Readiness');
+            expect(template).toContain('real Obsidian semantic verification');
             expect(template).toContain('## Packaging Contract');
             expect(template).toContain('`main.js`');
             expect(template).toContain('`manifest.json`');
@@ -623,6 +736,8 @@ const context = await esbuild.context({
             expect(template).toContain('content.extract-original-text');
             expect(template).toContain('provider.profile.export');
             expect(template).toContain('cli.capability-manifest.export');
+            expect(template).toContain('## Stage-C Gate');
+            expect(template).toContain('packaging boundary, render-host audit, runtime-consumption, release contract, and contract-promotion boundary');
             expect(template).toContain('## Mermaid');
             expect(template).toContain('## Vega-Lite');
             expect(template).not.toContain('## JSON Canvas');
