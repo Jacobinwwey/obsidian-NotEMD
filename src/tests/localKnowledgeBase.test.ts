@@ -434,4 +434,150 @@ describe('localKnowledgeBase', () => {
         expect(result.contextBlocks[0].excerpt).toContain('…');
         expect(result.context).toContain('Heading: Retrieval');
     });
+
+    test('inspect reports no-paths status with empty retrieval details when no effective knowledge paths are configured', async () => {
+        const settings = {
+            ...mockSettings,
+            enableLocalKnowledgeRetrieval: true,
+            enableLocalKnowledgeForResearchSummarize: true,
+            localKnowledgeBasePaths: '',
+            localKnowledgeResearchSummarizePaths: '',
+            localKnowledgeTopK: 3,
+            localKnowledgeSlidingWindowSize: 1,
+            localKnowledgeMaxSnippetChars: 120,
+            localKnowledgeExcludeCurrentFile: true
+        } as any;
+
+        const result = await inspectLocalKnowledgeRetrieval(
+            mockApp as any,
+            settings,
+            {
+                taskScope: 'researchSummarize',
+                query: 'missing path coverage'
+            }
+        );
+
+        expect(result.retrieverBuildStatus).toBe('no-paths');
+        expect(result.retrieverCreated).toBe(false);
+        expect(result.effectivePathSource).toBe('default');
+        expect(result.effectiveConfiguredPaths).toEqual([]);
+        expect(result.candidateFilePaths).toEqual([]);
+        expect(result.context).toBeNull();
+        expect(result.contextBlocks).toEqual([]);
+        expect(result.retrieval).toEqual(expect.objectContaining({
+            query: 'missing path coverage',
+            indexedFileCount: 0,
+            indexedSectionCount: 0,
+            matchedSectionCount: 0,
+            returnedHitCount: 0,
+            expandedSectionCount: 0,
+            sourcePaths: [],
+            context: null,
+            contextBlocks: [],
+            contextCharCount: 0,
+            excludeCurrentFileApplied: false,
+            excludedCurrentFileHitCount: 0
+        }));
+    });
+
+    test('inspect reports no-candidate-files status when effective paths resolve but no eligible files match', async () => {
+        const source = createFile('Docs/Architecture.md');
+        const unrelated = createFile('Elsewhere/Other.md');
+
+        (mockApp.vault.getFiles as jest.Mock).mockReturnValue([source, unrelated]);
+        (mockApp.vault.read as jest.Mock).mockImplementation(async (file: TFile) => {
+            switch (file.path) {
+                case 'Docs/Architecture.md':
+                    return '# Architecture\nSource note title only.';
+                default:
+                    return '# Other\nOther knowledge.';
+            }
+        });
+
+        const settings = {
+            ...mockSettings,
+            enableLocalKnowledgeRetrieval: true,
+            enableLocalKnowledgeForGenerateTitle: true,
+            localKnowledgeBasePaths: 'Knowledge/Missing',
+            localKnowledgeGenerateTitlePaths: 'Knowledge/Missing',
+            localKnowledgeTopK: 2,
+            localKnowledgeSlidingWindowSize: 0,
+            localKnowledgeMaxSnippetChars: 140,
+            localKnowledgeExcludeCurrentFile: true
+        } as any;
+
+        const result = await inspectLocalKnowledgeRetrieval(
+            mockApp as any,
+            settings,
+            {
+                taskScope: 'generateTitle',
+                sourcePath: 'Docs/Architecture.md'
+            }
+        );
+
+        expect(result.query).toBe('Architecture');
+        expect(result.queryDerivation).toBe('basename');
+        expect(result.retrieverBuildStatus).toBe('no-candidate-files');
+        expect(result.retrieverCreated).toBe(false);
+        expect(result.effectiveConfiguredPaths).toEqual(['Knowledge/Missing']);
+        expect(result.candidateFilePaths).toEqual([]);
+        expect(result.retrieval).toEqual(expect.objectContaining({
+            query: 'Architecture',
+            indexedFileCount: 0,
+            indexedSectionCount: 0,
+            matchedSectionCount: 0,
+            returnedHitCount: 0,
+            sourcePaths: [],
+            context: null
+        }));
+    });
+
+    test('inspect reports no-retrievable-sections status when candidate files exist but all searchable content is empty', async () => {
+        const source = createFile('Docs/Architecture.md');
+        const blankKnowledge = createFile('Knowledge/Blank.md');
+
+        (mockApp.vault.getFiles as jest.Mock).mockReturnValue([source, blankKnowledge]);
+        (mockApp.vault.read as jest.Mock).mockImplementation(async (file: TFile) => {
+            switch (file.path) {
+                case 'Docs/Architecture.md':
+                    return '# Architecture\nSource note title only.';
+                default:
+                    return '```ts\nconst hidden = true;\n```\n';
+            }
+        });
+
+        const settings = {
+            ...mockSettings,
+            enableLocalKnowledgeRetrieval: true,
+            enableLocalKnowledgeForGenerateTitle: true,
+            localKnowledgeBasePaths: 'Knowledge',
+            localKnowledgeGenerateTitlePaths: 'Knowledge',
+            localKnowledgeTopK: 2,
+            localKnowledgeSlidingWindowSize: 0,
+            localKnowledgeMaxSnippetChars: 140,
+            localKnowledgeExcludeCurrentFile: true
+        } as any;
+
+        const result = await inspectLocalKnowledgeRetrieval(
+            mockApp as any,
+            settings,
+            {
+                taskScope: 'generateTitle',
+                sourcePath: 'Docs/Architecture.md'
+            }
+        );
+
+        expect(result.retrieverBuildStatus).toBe('no-retrievable-sections');
+        expect(result.retrieverCreated).toBe(false);
+        expect(result.candidateFilePaths).toEqual(['Knowledge/Blank.md']);
+        expect(result.retrieval).toEqual(expect.objectContaining({
+            query: 'Architecture',
+            indexedFileCount: 1,
+            indexedSectionCount: 0,
+            matchedSectionCount: 0,
+            returnedHitCount: 0,
+            sourcePaths: [],
+            context: null
+        }));
+    });
 });

@@ -300,7 +300,8 @@ provider 专题文在以下几点上仍然正确，而且不应被放松：
 
 1. 离线夹具现在还会回归锁定 task-scoped 的 `batchGenerateFromTitles` 与 `researchSummarize` retrieval case，而不再把 diagram generation 当成唯一的 maintainer inspect 证明路径；
 2. maintainer helper 的 help/示例现在已经把当前真实支持的三条 inspect query 派生路径一起暴露出来：`basename`、`explicit` 与 `diagram-source`；
-3. exact-file-vs-folder 的 configured knowledge-path 边界现在也在同一条离线夹具链路中被检查，进一步降低了文档/示例与真实 retrieval 行为漂移的风险。
+3. exact-file-vs-folder 的 configured knowledge-path 边界现在也在同一条离线夹具链路中被检查，进一步降低了文档/示例与真实 retrieval 行为漂移的风险；
+4. maintainer 侧 inspect 的失败态现在也被明确锁成 explainability 真值：`no-paths`、`no-candidate-files` 与 `no-retrievable-sections` 将继续保持可区分，而不会再被压成一个笼统的“没有 context”结果。
 
 ### Batch D：把 provider 轨道放回 bounded breadth-maintenance 模式
 
