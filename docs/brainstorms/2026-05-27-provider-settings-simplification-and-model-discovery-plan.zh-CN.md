@@ -84,7 +84,7 @@ canonical: true
 1. 推导 advanced auto-expand 逻辑；
 2. 在不新增元数据层的前提下表达 provider-specific 字段分组。
 
-### 2.4 Model discovery 的基础只是局部存在，还没产品化
+### 2.4 Model discovery 的基础已不再只是局部 helper
 
 `src/llmUtils.ts` 已有一些可复用基础：
 
@@ -94,12 +94,12 @@ canonical: true
 
 这意味着 runtime 已经知道一些必要语义，模型发现并不是从零开始。
 
-但还缺：
+但仍需要持续显式维护的真值是：
 
-1. 一条一等公民的 `discoverProviderModels()` 服务；
-2. 面向不同 endpoint family 的 parser；
-3. 设置页中的 UI 接入；
-4. 面向最终用户的“失败时安全回退到手动输入”行为。
+1. discovery 行为必须继续与 runtime/provider-family 语义对齐；
+2. 瞬时 discovery hint 必须继续与持久化 provider state 分离；
+3. discovered-model token autofill 的真实语义必须在 UI 与文档层保持诚实；
+4. 不能回退到 provider-name-only 的 ad hoc 分支。
 
 ## 3. 相对当前仓库的需求状态
 
@@ -143,7 +143,7 @@ canonical: true
    - 对 gateway/provider-prefixed model ID 增加有界 token-cap 推断，使 `openai/gpt-4o`、`anthropic/claude-sonnet-4.5` 这类已抓取模型在 owner 足够明确时也能驱动 `Max tokens` / chunk-size 指引，而不会反过来假装所有 custom gateway 上的 bare model 名称都能被无上下文归因
    - 扩宽 OpenAI-compatible payload 解析，兼容 `list` / `items`、object-shaped proxy catalog、嵌套的 gateway `specification.modelId` 与 endpoint-type-aware listing metadata
    - 继续增强共享 fetch-model-list 的真实返回体容忍度，补齐 provider-mapped 的 `provider_models` 对象目录、更宽的 `nextPageUrl` / `next_page_url` 分页信号、保持 provider 语义正确的 `after_id` 续页处理，以及 `supportedOutputModalities`、嵌套 `supportedGenerationMethods`、limit objects 等更丰富的 generation/modality 元数据解析
-   - discovered-model 的 token guidance 现在还会继续吸收真实 hosted registry 中的 token-cap 字段，例如 `top_provider.max_completion_tokens`、`per_request_limits` 与 `limits.max_output_tokens`，从而让 `Fetch model list -> Use` 在静态 provider token registry 还不认识该模型时，依然能把 model-aware 的 `Max tokens` 与 chunk-size 默认值同步到更接近上游真值
+   - discovered-model 的 token guidance 现在还会继续吸收真实 hosted registry 中的 token-cap 字段，例如 `top_provider.max_completion_tokens`、`per_request_limits` 与 `limits.max_output_tokens`，从而让 `Fetch model list -> Use` 在静态 provider token registry 还不认识该模型时，依然能自动填入 provider-scoped 的输出 Token 覆盖上限
    - 对瞬时 discovered-model metadata 保留显示标签、owner/provider hint 与 max-output-token 提示，并引入 capability / modality / status 感知过滤，尽量避免更宽模型目录把不可用、仅音频或仅图像模型混入文本生成建议；当上游返回体缺少主标识时，只把 alias 用作后备 identifier，而不会把所有 alias 都展开成独立选项
    - AIHubMix 的 discovery 现在优先走官方 `?type=llm` 目录，而不是先拉完整混合多模态模型表再完全依赖本地过滤
    - 让 runtime 与 discovery 共享同一套 OpenAI-compatible endpoint 归一化（包括 `/responses` 这类端点形态），容忍用户粘贴带 query/hash 的 endpoint root，并让 generic host 自动升级也能识别 OVMS 风格的本地 `/v3` 端点，而不是把所有本地 host 都折叠进 LiteLLM proxy bucket
@@ -156,6 +156,29 @@ canonical: true
 2. model CRUD / health-check management UI；
 3. 对首批之外 provider 的泛化 discovery 覆盖宣称。
 4. 假装所有 OpenAI-compatible gateway 都共享完全相同的 `/models` 语义。
+
+### 3.6 当前 discovered-model token 语义
+
+这部分最容易在后续会话中被写错，必须显式落盘。
+
+current main 的真实行为是：
+
+1. `Fetch model list -> Use` **不会**直接同步全局 `Max tokens` 或 `Chunk word count`。
+2. 当 `autoApplyDiscoveredModelMaxOutputTokens` 开启时，应用 discovered model 会尝试解析 provider/model 级别的 max-output-token ceiling，并把结果写入该 provider 的 `maxOutputTokens` override。
+3. 当前解析优先级是有界的：
+   - curated/static known-model metadata
+   - bounded host/owner-aware lookup
+   - transient discovered-row max-output-token metadata
+   - conservative fallback
+4. 如果没有足够可信的 ceiling，插件当前会优先保留已有的有效 provider override；只有在当前没有可用值时，才会把保守 fallback（`DEFAULT_SETTINGS.maxTokens`，目前是 `8192`）写入 provider override，并明确提示用户手动复核。
+5. 这个 fallback 不能被描述成“真实发现到的模型上限”，它只是 safety rail，不是模型真值。
+6. 手动 typed model edit 仍然走独立的全局 model-aware token guidance 通道（`globalModelAwareMaxTokensTracking`），前提是全局 `Max tokens` 仍处在 auto-managed baseline 上。
+
+为什么这个区分重要：
+
+1. 它保住了用户自己维护的全局输出上限；
+2. 它让 discovered-model apply 保持 additive，而不是静默重写跨 provider 的全局策略；
+3. 它避免了“因为远端 registry 元数据弱/缺失，就把已有 provider override 清空”的坏行为。
 
 ## 4. Cherry Studio 对照结论
 
@@ -341,9 +364,10 @@ Cherry Studio 值得复用的点：
 5. discovery 结果现在还会有界地优先保留适合生成任务的模型，避免 embedding / reranker / speech / classifier 这类明显不适合当前设置页选择器的条目挤占列表，也能覆盖 object-shaped proxy catalog 与 endpoint-type-aware listing 这类更宽的返回形态。
 6. 共享的 OpenAI-compatible provider family 现在还会显式保持 discovery/runtime 兼容头一致，避免某些依赖 `X-Api-Key` 或 provider-specific compatibility header 的端点在 fetch-model-list 上出现假失败。
 7. 通用 `OpenAI Compatible` 预设在 base URL 指向 OpenAI、DashScope/Qwen、Xiaomi MiMo、Fireworks、Hugging Face 这类已知可信官方 host 时，现在也会让 bare model ID 复用官方 provider 的 token-cap 元数据，而不再要求这些场景必须写成 provider-prefixed gateway model ID。
-8. 全局 model-aware token guidance 不再只是“数值刚好相等”的启发式：当前主线现已持久化显式 `globalModelAwareMaxTokensTracking` 标记，使 `Fetch model list -> Use`、手动改模型、runtime request token ceiling、以及 reset/reload 行为都共享同一条 auto-managed baseline 真值链路。
-9. 共享的 discovery/runtime header owner 现在也通过同一条 endpoint-family seam 显式收敛，因此 fetch-model-list 不会再轻易与 runtime 在依赖 compatibility header 的 provider 上发生语义漂移。
-10. registry 返回的瞬时 owner/provider hint 现在也会进入 generic/custom gateway 的有界 bare-model token guidance，因此像 `gpt-4.1` + `owned_by: "openai"` 这样的 discovered row，也能在不强迫用户把持久化 model 改成 provider-prefixed ID 的前提下，安全驱动 `Max tokens` / chunk-size 默认值。
+8. 全局 model-aware token guidance 不再只是“数值刚好相等”的启发式：当前主线现已持久化显式 `globalModelAwareMaxTokensTracking` 标记，使手动改模型、runtime request token ceiling、以及 reset/reload 行为在用户未接管全局值时共享同一条 auto-managed baseline 真值链路。
+9. `Fetch model list -> Use` 现在拥有独立的 provider-scoped persistence lane：`discoveredModelMaxOutputTokensTracking`，因此 discovered-model autofill 不再伪装成全局 max-token 管理。
+10. 共享的 discovery/runtime header owner 现在也通过同一条 endpoint-family seam 显式收敛，因此 fetch-model-list 不会再轻易与 runtime 在依赖 compatibility header 的 provider 上发生语义漂移。
+11. registry 返回的瞬时 owner/provider hint 现在也会进入 generic/custom gateway 的有界 bare-model token guidance，因此像 `gpt-4.1` + `owned_by: "openai"` 这样的 discovered row，也能在不强迫用户把持久化 model 改成 provider-prefixed ID 的前提下，安全驱动 provider output-token autofill 与 settings hint。
 
 ### Phase 5：测试与文档
 
@@ -369,6 +393,30 @@ Cherry Studio 值得复用的点：
 3. 验证证据现已包含 targeted provider-settings/model-discovery tests 与完整仓库门禁。
 4. 当前 settings surface 还额外写清了全局 `Max tokens` 与 provider-specific output-token override 的关系，以降低“两处 max tokens”造成的理解成本。
 5. 当前文档现在应被视为 current-main 真值维护文档，而不是 pre-landing 的实现草案。
+6. 当前 host-side 验证证据仍然是不对称的：
+   - 已验证通过本机 Obsidian 的 plugin reload/state inspection；
+   - 已用 focused Jest coverage 锁住 discovered-model apply feedback、provider override 写入、以及 fallback/manual-review 分支；
+   - 但当前 host 的 Obsidian CLI/runtime surface 仍未暴露一个干净的可脚本化桌面点击入口，无法把 `Fetch model list -> Use` 的设置页真实点击链路完全自动化。
+
+## 6.5 这条 lane 的下一步 bounded direction
+
+下一步不该先继续扩 provider 宽度，而该先把 resolution stack 稳定下来。
+
+优先切片：
+
+1. 引入显式 layered “output ceiling resolver” contract：
+   - authoritative provider-native metadata（若存在）
+   - curated static registry
+   - bounded host/owner-aware inference
+   - transient discovery metadata
+   - conservative fallback
+2. 在 docs/tests/UI 中更清楚地区分三件事：
+   - discovered model output ceiling
+   - 当前实际写入的 provider override
+   - 用户自己掌控的 global response cap
+3. 保持 fallback 行为 fail-closed：
+   - unresolved discovery 不能清空或降级已有的有效 provider override
+   - fallback 值必须继续显式标注为 fallback/manual-review 值
 
 ## 7. 显式非目标
 

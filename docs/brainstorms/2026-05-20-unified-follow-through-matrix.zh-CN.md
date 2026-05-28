@@ -58,7 +58,7 @@ canonical: true
 11. package metadata、welcome digest、README family 与 release-note artifacts 上重新同步到 `1.9.0` 的 release-facing version truth；
 12. transport-driven provider registry 增长，以及 OpenAI-compatible base-URL normalization、`models-then-chat` probing 等连接测试语义，同时仍保持手动 model 输入作为 live configuration truth；
 13. 当前主线已落地的 schema-driven provider-settings field grouping、基于持久化 advanced 值的自动展开，以及当前有界 family 批次的 in-plugin provider model discovery suggestions，包括 OpenAI-compatible（含 LM Studio、多项中国区 provider、Groq、Fireworks、`New API`、`OVMS`）、OpenRouter、LiteLLM proxy-family、Together、Anthropic、Ollama、Google、Huawei Cloud MaaS、`AIHubMix`、`GitHub Models`、`PPIO`、Vercel AI Gateway 与 xAI；
-14. 当前主线已落地的 host-aware token-cap guidance：generic `OpenAI Compatible` 在 base URL 指向已知 trusted official host 时，可让 bare model ID 复用上游 provider 的已知输出 token ceiling，并联动 `Max tokens` / `Chunk word count` 的自动同步与 runtime clamp。
+14. 当前主线已落地的 host-aware token-cap guidance：generic `OpenAI Compatible` 在 base URL 指向已知 trusted official host 时，可让 bare model ID 复用上游 provider 的已知输出 token ceiling；手动 typed model change 仍可推进全局 auto-managed baseline，而 transient discovered-model max-output-token hint 则只驱动 provider-scoped 的输出 Token 覆盖上限 autofill，不会静默改写全局 `Max tokens`。
 
 以下内容当前必须描述为 **未在重写后的主线上被证明存在**：
 
