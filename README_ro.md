@@ -687,7 +687,7 @@ Licență MIT - vezi fișierul [LICENSE](LICENSE) pentru detalii.
 ---
 
 
-*Notemd v1.9.0 - Îmbunătățește-ți graful de cunoștințe din Obsidian cu AI.*
+*Notemd v1.9.1 - Îmbunătățește-ți graful de cunoștințe din Obsidian cu AI.*
 
 
 <!-- repo-chronicle:start -->
@@ -697,7 +697,7 @@ Această cronică trimestrială păstrează stilul vizual original al [repo-saga
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.ro.svg)
 
-_Actualizat ultima dată pentru tagul de release `1.9.0` la 2026-05-26. Data ultimului commit: 2026-05-26._
+_Actualizat ultima dată pentru tagul de release `1.9.1` la 2026-05-28. Data ultimului commit: 2026-05-28._
 <!-- repo-chronicle:end -->
 
 

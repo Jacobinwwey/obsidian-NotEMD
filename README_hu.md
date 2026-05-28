@@ -687,7 +687,7 @@ MIT licenc - a részletekért lásd a [LICENSE](LICENSE) fájlt.
 ---
 
 
-*Notemd v1.9.0 - Fejlessze az Obsidian tudásgráfját mesterséges intelligenciával.*
+*Notemd v1.9.1 - Fejlessze az Obsidian tudásgráfját mesterséges intelligenciával.*
 
 
 <!-- repo-chronicle:start -->
@@ -697,7 +697,7 @@ Ez a negyedéves krónika megőrzi a [repo-saga](https://github.com/teee32/repo-
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.hu.svg)
 
-_Utoljára a(z) `1.9.0` kiadási címkéhez frissítve: 2026-05-26. A legutóbbi commit dátuma: 2026-05-26._
+_Utoljára a(z) `1.9.1` kiadási címkéhez frissítve: 2026-05-28. A legutóbbi commit dátuma: 2026-05-28._
 <!-- repo-chronicle:end -->
 
 

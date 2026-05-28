@@ -699,7 +699,7 @@ MIT License. Lihat file [LICENSE](LICENSE) untuk detailnya.
 ---
 
 
-*Notemd v1.9.0 - Tingkatkan knowledge graph Obsidian Anda dengan AI.*
+*Notemd v1.9.1 - Tingkatkan knowledge graph Obsidian Anda dengan AI.*
 
 
 <!-- repo-chronicle:start -->
@@ -709,7 +709,7 @@ Kronik triwulanan ini mempertahankan gaya visual asli [repo-saga](https://github
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.id.svg)
 
-_Terakhir diperbarui untuk tag rilis `1.9.0` pada 2026-05-26. Tanggal commit terbaru: 2026-05-26._
+_Terakhir diperbarui untuk tag rilis `1.9.1` pada 2026-05-28. Tanggal commit terbaru: 2026-05-28._
 <!-- repo-chronicle:end -->
 
 

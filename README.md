@@ -28,7 +28,7 @@ Notemd enhances your Obsidian workflow by integrating with various Large Languag
 
 If you love using Notemd, please consider [⭐ Give a Star on GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) or [☕️ Buy Me a Coffee](https://ko-fi.com/jacobinwwey).
 
-**Version:** 1.9.0
+**Version:** 1.9.1
 
 <img width="1853" height="1080" alt="show" src="https://github.com/user-attachments/assets/b9f9292b-a9d8-48a3-9acf-1b6f00413966" />
 <img width="1853" height="1080" alt="multi-langu" src="https://github.com/user-attachments/assets/d9a0a4fb-1c00-425a-ac1d-0134a013a381" />
@@ -771,7 +771,7 @@ MIT License - See [LICENSE](LICENSE) file for details.
 
 ---
 
-*Notemd v1.9.0 - Enhance your Obsidian knowledge graph with AI.*
+*Notemd v1.9.1 - Enhance your Obsidian knowledge graph with AI.*
 
 
 <!-- repo-chronicle:start -->
@@ -781,7 +781,7 @@ Quarterly chronicle rendered in the original [repo-saga](https://github.com/teee
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.en.svg)
 
-_Last refreshed for release tag `1.9.0` on 2026-05-26. Latest commit date: 2026-05-26._
+_Last refreshed for release tag `1.9.1` on 2026-05-28. Latest commit date: 2026-05-28._
 <!-- repo-chronicle:end -->
 
 

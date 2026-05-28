@@ -170,7 +170,7 @@ describe('welcome modal', () => {
 
         expect(modal.titleEl.text).toBe('欢迎使用 Notemd');
         expect(releaseNotes).toHaveLength(2);
-        expect(releaseNotes[0].highlights[0]).toContain('开发者开关控制的 batch 文件夹选择弹窗');
+        expect(releaseNotes[0].highlights[0]).toContain('Provider 设置现已采用更清晰的核心/高级分组');
         expect(nodes.some(node => node.text === releaseNotes[0].highlights[0])).toBe(true);
         expect(nodes.some(node => node.text === '最近更新')).toBe(true);
     });
