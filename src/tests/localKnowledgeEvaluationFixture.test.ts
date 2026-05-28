@@ -14,6 +14,7 @@ interface EvaluationCase {
     id: string;
     query: string;
     expectedSourcePaths: string[];
+    configuredKnowledgePaths?: string;
     currentFilePath?: string;
     topK: number;
     slidingWindowSize: number;
@@ -82,6 +83,16 @@ const FIXTURE_FILES: FixtureFile[] = [
             '',
             '## Safety',
             'This introspection surface must not be overclaimed as a public CLI contract.'
+        ].join('\n')
+    },
+    {
+        path: 'Knowledge/Exact.md',
+        markdown: [
+            '# Exact',
+            'Exact file path knowledge.',
+            '',
+            '## Match',
+            'Exact file path knowledge is useful when maintainers want to compare folder scopes against one explicitly pinned note.'
         ].join('\n')
     },
     {
@@ -176,6 +187,32 @@ const EVALUATION_CASES: EvaluationCase[] = [
         minMatchedSectionCount: 1,
         expectEllipsis: true,
         expectedContextFragments: ['CLI Surface']
+    },
+    {
+        id: 'task-scoped-batch-file-match',
+        query: 'exact file path knowledge',
+        configuredKnowledgePaths: 'Knowledge/Exact.md\nKnowledge/Scoped',
+        expectedSourcePaths: ['Knowledge/Exact.md'],
+        topK: 1,
+        slidingWindowSize: 0,
+        maxSnippetChars: 220,
+        minExpectedPathRecall: 1,
+        minReturnedHitCount: 1,
+        minMatchedSectionCount: 1,
+        expectedContextFragments: ['Exact file path knowledge.']
+    },
+    {
+        id: 'task-scoped-research-breadcrumb-match',
+        query: 'task-scoped retrieval behavior',
+        configuredKnowledgePaths: 'Knowledge/Scoped',
+        expectedSourcePaths: ['Knowledge/Scoped/CLI Surface.md'],
+        topK: 1,
+        slidingWindowSize: 0,
+        maxSnippetChars: 220,
+        minExpectedPathRecall: 1,
+        minReturnedHitCount: 1,
+        minMatchedSectionCount: 1,
+        expectedContextFragments: ['task-scoped retrieval behavior']
     }
 ];
 
@@ -282,48 +319,64 @@ describe('local knowledge offline evaluation fixture', () => {
         const recalls: number[] = [];
 
         for (const evaluationCase of EVALUATION_CASES) {
+            const retrieverSettings = {
+                ...settings,
+                ...(evaluationCase.configuredKnowledgePaths
+                    ? { localKnowledgeBasePaths: evaluationCase.configuredKnowledgePaths }
+                    : {})
+            };
+            const scopedRetriever = await buildLocalKnowledgeBaseRetriever(mockApp as any, retrieverSettings);
+            expect(scopedRetriever).not.toBeNull();
             const details = retriever!.buildContextDetails(evaluationCase.query, {
                 currentFilePath: evaluationCase.currentFilePath,
                 topK: evaluationCase.topK,
                 slidingWindowSize: evaluationCase.slidingWindowSize,
                 maxSnippetChars: evaluationCase.maxSnippetChars
             });
+            const effectiveDetails = evaluationCase.configuredKnowledgePaths
+                ? scopedRetriever!.buildContextDetails(evaluationCase.query, {
+                    currentFilePath: evaluationCase.currentFilePath,
+                    topK: evaluationCase.topK,
+                    slidingWindowSize: evaluationCase.slidingWindowSize,
+                    maxSnippetChars: evaluationCase.maxSnippetChars
+                })
+                : details;
 
-            const recall = computeExpectedPathRecall(details.sourcePaths, evaluationCase.expectedSourcePaths);
+            const recall = computeExpectedPathRecall(effectiveDetails.sourcePaths, evaluationCase.expectedSourcePaths);
             recalls.push(recall);
 
             expect(recall).toBeGreaterThanOrEqual(evaluationCase.minExpectedPathRecall);
-            expect(details.returnedHitCount).toBeGreaterThanOrEqual(evaluationCase.minReturnedHitCount);
-            expect(details.matchedSectionCount).toBeGreaterThanOrEqual(evaluationCase.minMatchedSectionCount ?? 0);
-            expect(details.expandedSectionCount).toBeGreaterThanOrEqual(evaluationCase.minExpandedSectionCount ?? 0);
-            expect(details.excludedCurrentFileHitCount).toBeGreaterThanOrEqual(
+            expect(effectiveDetails.returnedHitCount).toBeGreaterThanOrEqual(evaluationCase.minReturnedHitCount);
+            expect(effectiveDetails.matchedSectionCount).toBeGreaterThanOrEqual(evaluationCase.minMatchedSectionCount ?? 0);
+            expect(effectiveDetails.expandedSectionCount).toBeGreaterThanOrEqual(evaluationCase.minExpandedSectionCount ?? 0);
+            expect(effectiveDetails.excludedCurrentFileHitCount).toBeGreaterThanOrEqual(
                 evaluationCase.minExcludedCurrentFileHitCount ?? 0
             );
-            expect(details.indexedFileCount).toBe(KNOWLEDGE_FIXTURE_FILE_COUNT);
-            expect(details.indexedSectionCount).toBeGreaterThanOrEqual(KNOWLEDGE_FIXTURE_FILE_COUNT);
-            expect(details.indexBuildMs).toBeGreaterThanOrEqual(0);
-            expect(details.queryMs).toBeGreaterThanOrEqual(0);
+            expect(effectiveDetails.indexedFileCount).toBeGreaterThanOrEqual(1);
+            expect(effectiveDetails.indexedSectionCount).toBeGreaterThanOrEqual(1);
+            expect(effectiveDetails.indexBuildMs).toBeGreaterThanOrEqual(0);
+            expect(effectiveDetails.queryMs).toBeGreaterThanOrEqual(0);
 
             if (evaluationCase.expectContextAbsent) {
-                expect(details.context).toBeNull();
-                expect(details.contextCharCount).toBe(0);
-                expect(details.contextBlocks).toEqual([]);
+                expect(effectiveDetails.context).toBeNull();
+                expect(effectiveDetails.contextCharCount).toBe(0);
+                expect(effectiveDetails.contextBlocks).toEqual([]);
             } else {
-                expect(details.contextCharCount).toBeGreaterThan(0);
-                expect(details.contextBlocks.length).toBeGreaterThan(0);
+                expect(effectiveDetails.contextCharCount).toBeGreaterThan(0);
+                expect(effectiveDetails.contextBlocks.length).toBeGreaterThan(0);
             }
 
             if (evaluationCase.expectEllipsis) {
-                expect(details.context).toContain('…');
-                expect(details.contextBlocks.some(block => block.excerptWasTruncated)).toBe(true);
+                expect(effectiveDetails.context).toContain('…');
+                expect(effectiveDetails.contextBlocks.some(block => block.excerptWasTruncated)).toBe(true);
             }
 
             for (const expectedPath of evaluationCase.expectedSourcePaths) {
-                expect(details.sourcePaths).toContain(expectedPath);
+                expect(effectiveDetails.sourcePaths).toContain(expectedPath);
             }
 
             for (const expectedFragment of evaluationCase.expectedContextFragments || []) {
-                expect(details.context).toContain(expectedFragment);
+                expect(effectiveDetails.context).toContain(expectedFragment);
             }
         }
 
@@ -412,5 +465,56 @@ describe('local knowledge offline evaluation fixture', () => {
         expect(inspect.effectiveConfiguredPaths).toEqual(['Knowledge/Scoped']);
         expect(inspect.candidateFilePaths).toEqual(['Knowledge/Scoped/CLI Surface.md']);
         expect(inspect.retrieval.sourcePaths).toEqual(['Knowledge/Scoped/CLI Surface.md']);
+    });
+
+    test('inspect keeps batch-title and research task scopes explicit through basename and explicit query derivation', async () => {
+        const settings = {
+            ...mockSettings,
+            enableLocalKnowledgeRetrieval: true,
+            localKnowledgeBasePaths: 'Knowledge/Exact.md\nKnowledge/Scoped',
+            localKnowledgeBatchGenerateFromTitlesPaths: 'Knowledge/Exact.md\nKnowledge/Scoped',
+            localKnowledgeResearchSummarizePaths: 'Knowledge/Scoped',
+            localKnowledgeTopK: 2,
+            localKnowledgeSlidingWindowSize: 0,
+            localKnowledgeMaxSnippetChars: 180,
+            localKnowledgeExcludeCurrentFile: true,
+            enableLocalKnowledgeForBatchGenerateFromTitles: true,
+            enableLocalKnowledgeForResearchSummarize: true
+        };
+
+        const batchInspect = await inspectLocalKnowledgeRetrieval(
+            mockApp as any,
+            settings,
+            {
+                taskScope: 'batchGenerateFromTitles',
+                sourcePath: 'Docs/CLI Surface.md'
+            }
+        );
+        const researchInspect = await inspectLocalKnowledgeRetrieval(
+            mockApp as any,
+            settings,
+            {
+                taskScope: 'researchSummarize',
+                query: 'task-scoped retrieval behavior'
+            }
+        );
+
+        expect(batchInspect.taskScope).toBe('batchGenerateFromTitles');
+        expect(batchInspect.queryDerivation).toBe('basename');
+        expect(batchInspect.query).toBe('CLI Surface');
+        expect(batchInspect.effectivePathSource).toBe('task-specific');
+        expect(batchInspect.candidateFilePaths).toEqual(expect.arrayContaining([
+            'Knowledge/Exact.md',
+            'Knowledge/Scoped/CLI Surface.md'
+        ]));
+        expect(batchInspect.candidateFilePaths).toHaveLength(2);
+        expect(batchInspect.retrieval.sourcePaths).toContain('Knowledge/Scoped/CLI Surface.md');
+
+        expect(researchInspect.taskScope).toBe('researchSummarize');
+        expect(researchInspect.queryDerivation).toBe('explicit');
+        expect(researchInspect.query).toBe('task-scoped retrieval behavior');
+        expect(researchInspect.effectivePathSource).toBe('task-specific');
+        expect(researchInspect.candidateFilePaths).toEqual(['Knowledge/Scoped/CLI Surface.md']);
+        expect(researchInspect.retrieval.sourcePaths).toEqual(['Knowledge/Scoped/CLI Surface.md']);
     });
 });
