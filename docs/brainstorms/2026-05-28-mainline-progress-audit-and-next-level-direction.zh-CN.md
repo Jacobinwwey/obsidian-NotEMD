@@ -112,8 +112,8 @@ canonical: true
    - family detection 现在能把本地 OVMS 风格 `/v3` 端点与 LiteLLM 风格本地 proxy 分开；
    - runtime 与 discovery 现在复用同一套 compatibility-header owner，包括 `Authorization`、`X-Api-Key`、OpenRouter/Requesty referer-title header、AIHubMix `APP-Code`、GitHub Models API version header 与 Cerebras integration header。
 5. model-aware token guidance 现在已变成显式状态，而不再只是启发式碰巧一致：
-   - `globalModelAwareMaxTokensTracking` 现在持久化当前 auto-managed baseline；
-   - `Fetch model list -> Use`、手动改模型、settings reload、reset 行为与 runtime request ceiling 选择，现已共享同一条 token-guidance 真值链路；
+   - `globalModelAwareMaxTokensTracking` 现在持久化手动改模型、reset/reload 与 runtime request ceiling 选择所共享的全局 auto-managed baseline；
+   - discovered-model apply 现在走独立的 provider-scoped lane（`discoveredModelMaxOutputTokensTracking`），而不是静默改写全局 token cap；
    - generic/custom gateway 现在也可以在 registry 明确返回 owner/provider hint 时，对 bare model ID 有界复用上游 token-cap metadata；但任意 bare-model 猜测仍然不在边界内。
 
 正确解释：
@@ -231,6 +231,7 @@ provider 专题文在以下几点上仍然正确，而且不应被放松：
 2. discovery 仍按设计保持瞬时，不存在持久化 remote model catalog。
 3. 当前 bounded discovery family 批次已经足够宽，需要纪律，但还远没到可以宣称“通用 provider discovery”。
 4. generic `OpenAI Compatible` 对 owner 的推断仍必须保持保守；超出 trusted host、显式 registry owner hint 与显式 prefix 的部分，token ceiling 仍应保持 unresolved。
+5. 当前本机 host-side desktop verification 对 plugin reload/state inspection 更强，但对 settings-panel 的完整脚本化点击自动化仍较弱；这条 lane 目前仍依赖 Jest 去锁住 `Fetch model list -> Use` 的 notice/override 分支。
 
 ### 4.3 如果这条线现在漂移，最大的风险是什么
 
@@ -315,6 +316,16 @@ provider 专题文在以下几点上仍然正确，而且不应被放松：
 硬规则：
 
 1. 每个新的 provider/discovery 扩展，都必须在同一批次里明确 family mode、header owner、endpoint normalization、token-guidance 行为，以及测试/文档。
+2. 每次改 discovered-model token autofill 时，都必须显式写清它影响的是：
+   - 全局 `Max tokens`
+   - provider output-token override
+   - 两者都影响
+   - 两者都不影响
+
+当前真值：
+
+1. 当前实现只影响 provider output-token override；
+2. 手动 typed model change 仍是会推进全局 model-aware baseline 的那条路径，前提是用户没有偏离它。
 
 ### Batch E：把文档/测试与 clean-state 继续当作长期护栏
 

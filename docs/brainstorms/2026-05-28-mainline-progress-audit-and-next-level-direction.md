@@ -112,8 +112,8 @@ What is materially true now:
    - family detection distinguishes local OVMS-style `/v3` endpoints from LiteLLM-style local proxies;
    - runtime and discovery reuse the same compatibility-header ownership for headers such as `Authorization`, `X-Api-Key`, OpenRouter/Requesty referer-title headers, AIHubMix `APP-Code`, GitHub Models API versioning, and Cerebras integration headers.
 5. model-aware token guidance is now explicit state, not only heuristic coincidence:
-   - `globalModelAwareMaxTokensTracking` persists the current auto-managed baseline;
-   - `Fetch model list -> Use`, manual model edits, settings reloads, reset behavior, and runtime request ceiling selection now all share the same token-guidance truth path;
+   - `globalModelAwareMaxTokensTracking` persists the current auto-managed global baseline for manual model edits, resets/reloads, and runtime request ceiling selection;
+   - discovered-model application now uses its own provider-scoped lane (`discoveredModelMaxOutputTokensTracking`) instead of silently rewriting the global token cap;
    - generic/custom gateways can now also reuse upstream token-cap metadata for bare model ids when the registry itself returns an explicit owner/provider hint, while arbitrary bare-model guessing still remains out of bounds.
 
 Interpretation:
@@ -231,6 +231,7 @@ Correct interpretation:
 2. Discovery remains transient by design; there is still no persisted remote model catalog.
 3. The bounded discovery family set is broad enough to need discipline, but not broad enough to justify “generic provider discovery” claims.
 4. Generic `OpenAI Compatible` still requires conservative ownership inference; beyond trusted hosts, explicit registry-provided owner hints, and explicit prefixes, token ceilings must remain unresolved.
+5. Local host-side desktop verification is still stronger for plugin reload/state inspection than for fully scripted settings-panel click automation; this lane still relies on Jest to lock the exact `Fetch model list -> Use` notice/override branches.
 
 ### 4.3 Main risk if the lane drifts now
 
@@ -315,6 +316,16 @@ Goal:
 Required rule:
 
 1. every new provider/discovery addition must specify family mode, header ownership, endpoint normalization, token-guidance behavior, and tests/docs in the same batch.
+2. every change to discovered-model token autofill must explicitly state whether it affects:
+   - global `Max tokens`
+   - provider output-token override
+   - both
+   - neither
+
+Current truth for this rule:
+
+1. the current implementation affects provider output-token override only;
+2. manual typed model changes remain the path that can still advance the global model-aware baseline when the user has not diverged from it.
 
 ### Batch E: keep documentation/tests and clean-state as ongoing guardrails
 

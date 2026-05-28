@@ -58,7 +58,7 @@ These items are safe to describe as present on current main:
 11. `1.9.0` release-facing version truth resync across package metadata, welcome digest, README family, and release-note artifacts;
 12. transport-driven provider registry growth plus connection-test semantics such as OpenAI-compatible base-URL normalization and `models-then-chat` probing, while still keeping manual model entry as the live configuration truth;
 13. schema-driven provider-settings field grouping, derived advanced auto-expand, and in-plugin provider model discovery suggestions for the current bounded family batch, including OpenAI-compatible presets, OpenRouter, LiteLLM proxy-family, Together, Anthropic, Ollama, Google, Huawei Cloud MaaS, Vercel AI Gateway, AIHubMix, GitHub Models, PPIO, OVMS, and xAI;
-14. host-aware and discovery-aware token-cap guidance, including trusted-host reuse for bare `OpenAI Compatible` model IDs and transient discovered-model max-output-token hints that drive `Max tokens` and recommended chunk-size syncing.
+14. host-aware and discovery-aware token-cap guidance, including trusted-host reuse for bare `OpenAI Compatible` model IDs, a global auto-managed baseline for typed model changes, and transient discovered-model max-output-token hints that drive provider-scoped output-token autofill without silently rewriting global `Max tokens`.
 
 These items must currently be described as **not proven on rewritten main**:
 

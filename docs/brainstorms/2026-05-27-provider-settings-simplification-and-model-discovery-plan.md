@@ -84,7 +84,7 @@ This is weak for:
 1. deriving advanced auto-expand logic;
 2. expressing provider-specific field grouping without another metadata layer.
 
-### 2.4 Model-discovery foundations are partial, not productized
+### 2.4 Model-discovery foundations are no longer only partial helpers
 
 `src/llmUtils.ts` already contains reusable pieces:
 
@@ -94,12 +94,12 @@ This is weak for:
 
 That means the runtime already knows enough to avoid starting model discovery from zero.
 
-What is still missing:
+What still requires explicit truth maintenance:
 
-1. a first-class `discoverProviderModels()` service;
-2. provider-family-specific parsers;
-3. UI integration in settings;
-4. manual-entry-safe fallback behavior at the product surface.
+1. keeping discovery behavior aligned with runtime/provider-family semantics;
+2. keeping transient discovery hints separate from persisted provider state;
+3. keeping discovered-model token autofill semantics honest at the UI and docs layer;
+4. avoiding regressions back to provider-name-only branches.
 
 ## 3. Requirements Status Against The Current Repo
 
@@ -143,7 +143,7 @@ What is now present on current main:
    - bounded gateway-model token inference for provider-prefixed model IDs and explicit gateway presets, so fetched models such as `openai/gpt-4o` or `anthropic/claude-sonnet-4.5` can still drive the `Max tokens` / chunk-size guidance without pretending that bare model IDs are universally attributable across all custom gateways
    - broader OpenAI-compatible payload parsing for `list` / `items`, object-shaped proxy catalogs, nested gateway `specification.modelId`, and endpoint-type-aware listing metadata
    - additional shared fetch-model-list robustness for wider real-world registry drift, including provider-mapped `provider_models` object catalogs, broader `nextPageUrl` / `next_page_url` pagination hints, provider-correct `after_id` continuation handling, and richer generation/modality metadata such as `supportedOutputModalities`, nested `supportedGenerationMethods`, and limit objects
-   - discovered-model token guidance now also consumes real hosted registry token-cap fields such as `top_provider.max_completion_tokens`, `per_request_limits`, and `limits.max_output_tokens`, so `Fetch model list -> Use` can keep model-aware `Max tokens` and chunk-size defaults aligned even when the static provider token registry does not know the fetched model yet
+   - discovered-model token guidance now also consumes real hosted registry token-cap fields such as `top_provider.max_completion_tokens`, `per_request_limits`, and `limits.max_output_tokens`, so `Fetch model list -> Use` can still auto-fill a provider-scoped output-token override even when the static provider token registry does not know the fetched model yet
    - transient discovered-model metadata preservation for display labels, owner/provider hints, and max-output-token hints, plus richer capability/modality/status-aware filtering so broader registries do not leak unavailable, audio-only, or image-only entries into text-generation suggestions, while alias-only fallback identifiers recover malformed upstream rows without expanding every alias into a separate picker entry
    - AIHubMix discovery now prefers the hosted `?type=llm` registry shape instead of pulling the full mixed multimodal catalog and relying only on local filtering
    - shared OpenAI-compatible endpoint normalization across runtime and discovery, including `/responses` endpoint forms, plus query/hash-tolerant pasted endpoint roots and generic-host auto-upgrade for OVMS-style local `/v3` endpoints instead of collapsing every local host into the LiteLLM proxy bucket
@@ -156,6 +156,29 @@ What remains intentionally out of scope:
 2. model CRUD / health-check management UI;
 3. broad all-provider model discovery claims beyond the verified first batch.
 4. pretending that every OpenAI-compatible gateway should expose the same `/models` semantics.
+
+### 3.6 Current discovered-model token semantics
+
+This is the part most likely to drift if it is not written down precisely.
+
+Current current-main truth is:
+
+1. `Fetch model list -> Use` does **not** directly sync global `Max tokens` or `Chunk word count`.
+2. When `autoApplyDiscoveredModelMaxOutputTokens` is enabled, the apply path tries to resolve a provider/model-specific max-output-token ceiling and writes it into that provider's `maxOutputTokens` override.
+3. Resolution priority is intentionally bounded:
+   - curated/static known-model metadata
+   - bounded host/owner-aware lookup
+   - transient discovered-row max-output-token metadata
+   - conservative fallback
+4. If no trustworthy ceiling can be resolved, the plugin currently preserves an existing valid provider override when one is already present; otherwise it writes a conservative fallback (`DEFAULT_SETTINGS.maxTokens`, currently `8192`) into the provider override and explicitly tells the user to review it manually.
+5. That fallback path must not be described as a true discovered model ceiling. It is a safety rail, not model truth.
+6. Manual typed model edits still drive the separate global model-aware token guidance path (`globalModelAwareMaxTokensTracking`) when the global `Max tokens` value is still on the auto-managed baseline.
+
+Why this distinction matters:
+
+1. it preserves user-owned global output-cap settings;
+2. it keeps discovered-model application additive instead of silently rewriting cross-provider global policy;
+3. it avoids clearing an existing provider override just because remote registry metadata is weak or missing.
 
 ## 4. Cherry Studio Comparison
 
@@ -341,9 +364,10 @@ Current checkpoint:
 6. discovery/runtime compatibility headers are now explicitly kept aligned for shared OpenAI-compatible provider families, avoiding false-negative fetch-model-list failures on providers that also rely on `X-Api-Key` or provider-specific compatibility headers.
 7. gateway/provider-prefixed fetched models now also feed bounded token-cap guidance when the ownership is explicit enough to be inferred safely, while generic bare-model guesses remain intentionally conservative for custom `OpenAI Compatible` endpoints.
 8. the generic `OpenAI Compatible` preset now also reuses official-provider token-cap metadata for bare model IDs when the configured base URL points at a known trusted host such as OpenAI, DashScope/Qwen, Xiaomi MiMo, Fireworks, or Hugging Face, instead of requiring provider-prefixed gateway model IDs in those cases.
-9. global model-aware token guidance is no longer only a same-number heuristic: current main now persists an explicit `globalModelAwareMaxTokensTracking` marker so `Fetch model list -> Use`, manual model edits, runtime request token ceilings, and reset/reload behavior all share the same auto-managed baseline truth.
-10. shared discovery/runtime header ownership is now explicit through the same endpoint-family seam, so fetch-model-list no longer drifts away from runtime behavior on providers that rely on compatibility headers beyond plain `Authorization`.
-11. transient owner/provider hints returned by model registries now also participate in bounded bare-model token guidance for generic/custom gateways, so a discovered row like `gpt-4.1` plus `owned_by: "openai"` can safely drive `Max tokens` / chunk-size defaults without forcing the saved model id to become provider-prefixed.
+9. global model-aware token guidance is no longer only a same-number heuristic: current main now persists an explicit `globalModelAwareMaxTokensTracking` marker so manual model edits, runtime request token ceilings, and reset/reload behavior can share the same auto-managed baseline truth when the user has not taken over the global value.
+10. `Fetch model list -> Use` now has its own provider-scoped persistence lane through `discoveredModelMaxOutputTokensTracking`, so discovered-model autofill no longer masquerades as global max-token management.
+11. shared discovery/runtime header ownership is now explicit through the same endpoint-family seam, so fetch-model-list no longer drifts away from runtime behavior on providers that rely on compatibility headers beyond plain `Authorization`.
+12. transient owner/provider hints returned by model registries now also participate in bounded bare-model token guidance for generic/custom gateways, so a discovered row like `gpt-4.1` plus `owned_by: "openai"` can safely drive provider output-token autofill and settings hints without forcing the saved model id to become provider-prefixed.
 
 ### Phase 5: tests and documentation
 
@@ -369,6 +393,30 @@ Current checkpoint:
 3. verification evidence now includes targeted provider-settings/model-discovery tests plus full repository gates.
 4. the current settings surface also documents the relationship between global `Max tokens` and provider-specific output-token overrides, to reduce confusion around the two token caps.
 5. current docs now need to be read as current-main truth maintenance artifacts, not as a pre-landing implementation sketch.
+6. current host-side validation evidence is still asymmetric:
+   - host-side plugin reload/state inspection through local Obsidian is verified;
+   - focused Jest coverage verifies discovered-model apply feedback, provider override writes, and fallback/manual-review branches;
+   - a fully scripted desktop click path for `Fetch model list -> Use` inside the live settings UI is still not exposed cleanly by the current Obsidian CLI/runtime surface on this host.
+
+## 6.5 Next bounded direction for this lane
+
+The next provider/model-discovery work should not widen breadth first. It should stabilize the resolution stack.
+
+Preferred next slice:
+
+1. introduce an explicit layered “output ceiling resolver” contract:
+   - authoritative provider-native metadata when available
+   - curated static registry
+   - bounded host/owner-aware inference
+   - transient discovery metadata
+   - conservative fallback
+2. separate three concepts more explicitly in docs/tests/UI:
+   - discovered model output ceiling
+   - provider override currently written
+   - user-owned global response cap
+3. keep fallback behavior fail-closed:
+   - unresolved discovery must never clear or downgrade an existing valid provider override
+   - fallback values must remain visibly labeled as fallback/manual-review values
 
 ## 7. Explicit Non-Goals
 
