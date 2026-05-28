@@ -121,6 +121,18 @@ The correct reading of rewritten `main` is:
 1. Keep helper/parser/test/doc alignment stable on current `main`.
 2. Only widen packaging topology when the build graph, release assets, and runtime-consumption path all move together in the same batch.
 3. If a later reintegration wants `render-host.mjs` again, treat it as a new current-main implementation slice, not as already-landed background truth.
+4. Keep latent runtime helpers fail-closed on the current single-entry lane: do not let helper code synthesize a default `render-host.mjs` runtime path unless the dedicated asset is explicitly configured and actually shipped in the same batch.
+
+### 2026-05-28 Delta: helper truth now covers fail-closed latent runtime helpers explicitly
+
+This current-main anti-drift gap is now closed in code, tests, and maintainer docs:
+
+1. `src/rendering/preview/renderHostRuntimeClient.ts` no longer synthesizes any default standalone runtime URL/path; it returns only an explicitly configured module specifier or `null`.
+2. `scripts/diagram-semantic-verification.js` now reads `src/rendering/preview/renderHostRuntimeClient.ts` directly and emits packaging-boundary checklist lines that make this fail-closed truth executable.
+3. `src/tests/diagramSemanticVerificationScript.test.ts` now regression-locks both:
+   - the current repo truth (`resolveBundledRenderHostRuntimeModuleSpecifier()` returns `null` without explicit config), and
+   - the fallback wording when the helper source cannot be inspected.
+4. Maintainer runbooks now cite this additional truth source so release/semantic verification no longer stop at build-output + audit truth alone.
 
 ### Priority 2: treat backup-branch Stage-C work as reintegration candidates
 

@@ -559,7 +559,39 @@ function resolveRenderHostRuntimeConsumptionFacts({
     }
 }
 
-function buildPackagingBoundaryChecklistLines(packagingFacts = resolvePackagingBoundaryFacts()) {
+function resolveRenderHostRuntimeModuleSpecifierFacts({
+    runtimeClientPath = path.resolve(__dirname, '..', 'src', 'rendering', 'preview', 'renderHostRuntimeClient.ts')
+} = {}) {
+    try {
+        const runtimeClientSource = fs.readFileSync(runtimeClientPath, 'utf8');
+        const resolveFunctionReturnsNullableSpecifier = runtimeClientSource.includes('resolveBundledRenderHostRuntimeModuleSpecifier(): string | null');
+        const resolveFunctionReturnsConfiguredSpecifierOnly = runtimeClientSource.includes('return configuredBundledRenderHostRuntimeModuleSpecifier;');
+        const defaultStandaloneRuntimeFallbackAbsent = !runtimeClientSource.includes('render-host.mjs')
+            && !runtimeClientSource.includes('pathToFileURL(')
+            && !runtimeClientSource.includes('path.resolve(');
+
+        return {
+            sourcePath: runtimeClientPath,
+            resolveFunctionReturnsNullableSpecifier,
+            resolveFunctionReturnsConfiguredSpecifierOnly,
+            defaultStandaloneRuntimeFallbackAbsent,
+            resolvedFromSource: true
+        };
+    } catch {
+        return {
+            sourcePath: runtimeClientPath,
+            resolveFunctionReturnsNullableSpecifier: false,
+            resolveFunctionReturnsConfiguredSpecifierOnly: false,
+            defaultStandaloneRuntimeFallbackAbsent: false,
+            resolvedFromSource: false
+        };
+    }
+}
+
+function buildPackagingBoundaryChecklistLines(
+    packagingFacts = resolvePackagingBoundaryFacts(),
+    runtimeModuleSpecifierFacts = resolveRenderHostRuntimeModuleSpecifierFacts()
+) {
     const entrySummary = packagingFacts.entryPoints.join(', ');
     const entryCount = packagingFacts.entryPoints.length;
     const outputTargetStatus = packagingFacts.outputTargetStatus || resolveOutputTargetStatus(packagingFacts);
@@ -579,13 +611,26 @@ function buildPackagingBoundaryChecklistLines(packagingFacts = resolvePackagingB
     const sourceDescriptor = packagingFacts.resolvedFromConfig
         ? `resolved from \`${configFileName}\``
         : `fallback placeholder because \`${configFileName}\` could not be parsed`;
+    const runtimeModuleSpecifierPath = normalizeRelativePath(runtimeModuleSpecifierFacts.sourcePath);
+    const runtimeModuleSpecifierDescriptor = runtimeModuleSpecifierFacts.resolvedFromSource
+        ? `derived from \`${runtimeModuleSpecifierPath}\``
+        : `fallback reminder because \`${runtimeModuleSpecifierPath}\` could not be loaded`;
     const singleEntryLine = entryCount === 1
         ? `- [ ] Confirm the current build truth is still single-entry (${sourceDescriptor}): \`${entrySummary} -> ${outputDescriptor}\` only.`
         : `- [ ] Confirm current build entrypoint count before making packaging claims (${sourceDescriptor}): \`${entrySummary}\` -> \`${outputDescriptor}\`.`;
+    const runtimeModuleSpecifierLine = runtimeModuleSpecifierFacts.resolveFunctionReturnsNullableSpecifier
+        && runtimeModuleSpecifierFacts.resolveFunctionReturnsConfiguredSpecifierOnly
+        ? `- [ ] Confirm latent render-host runtime-module specifier truth remains ${runtimeModuleSpecifierDescriptor}: \`resolveBundledRenderHostRuntimeModuleSpecifier()\` exposes only an explicitly configured module specifier and otherwise returns \`null\`.`
+        : `- [ ] Resolve latent render-host runtime-module specifier behavior from \`${runtimeModuleSpecifierPath}\` before claiming any standalone render-host asset is implied by current source.`;
+    const runtimeModuleSpecifierFallbackLine = runtimeModuleSpecifierFacts.defaultStandaloneRuntimeFallbackAbsent
+        ? '- [ ] Confirm no default standalone runtime-path synthesis (`render-host.mjs`, `pathToFileURL(...)`, or relative file URL fallback) has been reintroduced on the current single-entry lane.'
+        : '- [ ] Remove any default standalone runtime-path synthesis before claiming the current single-entry lane remains fail-closed.';
 
     return [
         singleEntryLine,
         outputResolutionLine,
+        runtimeModuleSpecifierLine,
+        runtimeModuleSpecifierFallbackLine,
         '- [ ] Confirm `npm run audit:render-host` only proves the current self-contained `main.js` + inline `srcdoc` host contract, including rejection of stray `render-host.mjs` assets or references.',
         '- [ ] Confirm no release note, handoff, or PR summary claims that true heavy-runtime isolation is already implemented.',
         '- [ ] If the change depends on stronger packaging guarantees, record that true heavy-runtime isolation is still pending and requires later multi-entry or dedicated-asset work.'
@@ -974,6 +1019,7 @@ module.exports = {
     resolvePackagingBoundaryFacts,
     resolveContractPromotionBoundaryFacts,
     resolveRenderHostAuditFacts,
+    resolveRenderHostRuntimeModuleSpecifierFacts,
     resolveRenderHostRuntimeConsumptionFacts,
     resolveReleasePackagingContractFacts,
     resolveReleaseWorkflowTriggerFacts,

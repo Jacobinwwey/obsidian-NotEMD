@@ -68,6 +68,12 @@ describe('diagram semantic verification helper', () => {
             outdir: string;
             outputTargetStatus: 'outfile' | 'outdir' | 'unknown' | 'ambiguous';
             resolvedFromConfig: boolean;
+        }, runtimeModuleSpecifierFacts?: {
+            sourcePath: string;
+            resolveFunctionReturnsNullableSpecifier: boolean;
+            resolveFunctionReturnsConfiguredSpecifierOnly: boolean;
+            defaultStandaloneRuntimeFallbackAbsent: boolean;
+            resolvedFromSource: boolean;
         }) => string[];
         let resolveReleasePackagingContractFacts: (args?: { releaseHelperPath?: string }) => {
             sourcePath: string;
@@ -90,6 +96,15 @@ describe('diagram semantic verification helper', () => {
             disallowedStandaloneOutputs: string[];
             resolvedFromAuditScript: boolean;
         }) => string[];
+        let resolveRenderHostRuntimeModuleSpecifierFacts: (args?: {
+            runtimeClientPath?: string;
+        }) => {
+            sourcePath: string;
+            resolveFunctionReturnsNullableSpecifier: boolean;
+            resolveFunctionReturnsConfiguredSpecifierOnly: boolean;
+            defaultStandaloneRuntimeFallbackAbsent: boolean;
+            resolvedFromSource: boolean;
+        };
         let resolveRenderHostRuntimeConsumptionFacts: (args?: {
             mainPath?: string;
             previewModalPath?: string;
@@ -213,6 +228,7 @@ describe('diagram semantic verification helper', () => {
                 buildPackagingBoundaryChecklistLines,
                 resolveRenderHostAuditFacts,
                 buildRenderHostAuditChecklistLines,
+                resolveRenderHostRuntimeModuleSpecifierFacts,
                 resolveRenderHostRuntimeConsumptionFacts,
                 buildRenderHostRuntimeConsumptionChecklistLines,
                 resolveReleasePackagingContractFacts,
@@ -513,8 +529,46 @@ const context = await esbuild.context({
 
             expect(lines[0]).toContain('single-entry');
             expect(lines[0]).toContain('`src/main.ts -> main.js`');
+            expect(lines[2]).toContain('resolveBundledRenderHostRuntimeModuleSpecifier()');
+            expect(lines[2]).toContain('returns `null`');
+            expect(lines[3]).toContain('no default standalone runtime-path synthesis');
             expect(lines.some((line) => line.includes('`npm run audit:render-host` only proves the current self-contained `main.js` + inline `srcdoc` host contract, including rejection of stray `render-host.mjs` assets or references'))).toBe(true);
             expect(lines.some((line) => line.includes('true heavy-runtime isolation is still pending'))).toBe(true);
+        });
+
+        test('keeps latent render-host runtime-module specifier facts aligned with the current fail-closed helper truth', () => {
+            const facts = resolveRenderHostRuntimeModuleSpecifierFacts();
+            expect(facts.resolvedFromSource).toBe(true);
+            expect(facts.resolveFunctionReturnsNullableSpecifier).toBe(true);
+            expect(facts.resolveFunctionReturnsConfiguredSpecifierOnly).toBe(true);
+            expect(facts.defaultStandaloneRuntimeFallbackAbsent).toBe(true);
+        });
+
+        test('falls back to unresolved runtime-module specifier wording when the helper source is missing', () => {
+            const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-runtime-module-specifier-'));
+            const missingRuntimeClientPath = path.join(tempRoot, 'missing-runtime-client.ts');
+
+            try {
+                const facts = resolveRenderHostRuntimeModuleSpecifierFacts({ runtimeClientPath: missingRuntimeClientPath });
+                expect(facts.resolvedFromSource).toBe(false);
+                expect(facts.resolveFunctionReturnsNullableSpecifier).toBe(false);
+                expect(facts.resolveFunctionReturnsConfiguredSpecifierOnly).toBe(false);
+                expect(facts.defaultStandaloneRuntimeFallbackAbsent).toBe(false);
+
+                const lines = buildPackagingBoundaryChecklistLines({
+                    sourcePath: path.join(repoRoot, 'esbuild.config.mjs'),
+                    entryPoints: ['src/main.ts'],
+                    outfile: 'main.js',
+                    outdir: '',
+                    outputTargetStatus: 'outfile',
+                    resolvedFromConfig: true
+                }, facts);
+                expect(lines[2]).toContain('Resolve latent render-host runtime-module specifier behavior');
+                expect(lines[2]).toContain('missing-runtime-client.ts');
+                expect(lines[3]).toContain('Remove any default standalone runtime-path synthesis');
+            } finally {
+                fs.rmSync(tempRoot, { recursive: true, force: true });
+            }
         });
 
         test('keeps render-host audit facts aligned with the current audit script contract', () => {
@@ -712,6 +766,9 @@ const context = await esbuild.context({
             expect(template).toContain('obsidian plugin id=notemd vault=\"Research Vault\"');
             expect(template).toContain('## Packaging Boundary');
             expect(template).toContain('`src/main.ts -> main.js`');
+            expect(template).toContain('resolveBundledRenderHostRuntimeModuleSpecifier()');
+            expect(template).toContain('returns `null`');
+            expect(template).toContain('no default standalone runtime-path synthesis');
             expect(template).toContain('`npm run audit:render-host` only proves the current self-contained `main.js` + inline `srcdoc` host contract, including rejection of stray `render-host.mjs` assets or references');
             expect(template).toContain('true heavy-runtime isolation is still pending');
             expect(template).toContain('## Render Host Audit');

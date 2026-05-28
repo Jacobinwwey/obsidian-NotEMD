@@ -11,14 +11,12 @@ describe('render host runtime client', () => {
     test('prefers an explicitly configured runtime module specifier over the fallback relative path', () => {
         configureBundledRenderHostRuntimeModuleSpecifier('app://local/.obsidian/plugins/notemd/render-host.mjs');
 
-        expect(resolveBundledRenderHostRuntimeModuleSpecifier('/tmp/plugin/dist')).toBe(
+        expect(resolveBundledRenderHostRuntimeModuleSpecifier()).toBe(
             'app://local/.obsidian/plugins/notemd/render-host.mjs'
         );
     });
 
-    test('falls back to a relative file URL when no runtime module specifier is configured', () => {
-        const specifier = resolveBundledRenderHostRuntimeModuleSpecifier('/tmp/plugin/dist');
-
-        expect(specifier).toBe('file:///render-host.mjs');
+    test('returns null when no dedicated runtime module specifier is configured on the current single-bundle lane', () => {
+        expect(resolveBundledRenderHostRuntimeModuleSpecifier()).toBeNull();
     });
 });

@@ -1,6 +1,3 @@
-import * as path from 'path';
-import { pathToFileURL } from 'url';
-
 export type RenderHostRuntimeModuleLoader = (moduleSpecifier: string) => Promise<unknown>;
 
 let configuredBundledRenderHostRuntimeModuleSpecifier: string | null = null;
@@ -42,10 +39,6 @@ export function configureBundledRenderHostRuntimeModuleSpecifier(moduleSpecifier
     configuredBundledRenderHostRuntimeModuleSpecifier = normalized.length > 0 ? normalized : null;
 }
 
-export function resolveBundledRenderHostRuntimeModuleSpecifier(baseDir = __dirname): string {
-    if (configuredBundledRenderHostRuntimeModuleSpecifier) {
-        return configuredBundledRenderHostRuntimeModuleSpecifier;
-    }
-
-    return pathToFileURL(path.resolve(baseDir, '../../../render-host.mjs')).href;
+export function resolveBundledRenderHostRuntimeModuleSpecifier(): string | null {
+    return configuredBundledRenderHostRuntimeModuleSpecifier;
 }
