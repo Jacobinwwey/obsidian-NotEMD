@@ -43,5 +43,7 @@ export function createPartialResetSettings(current: NotemdSettings): NotemdSetti
         (reset as any)[key] = cloneValue(current[key] as any);
     }
 
+    reset.globalModelAwareMaxTokensTracking = DEFAULT_SETTINGS.globalModelAwareMaxTokensTracking;
+
     return reset;
 }
