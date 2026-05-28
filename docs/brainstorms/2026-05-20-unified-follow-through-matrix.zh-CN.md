@@ -1,6 +1,6 @@
 ---
 date: 2026-05-20
-last_updated: 2026-05-27
+last_updated: 2026-05-28
 topic: unified-follow-through-matrix
 canonical: true
 ---
@@ -22,7 +22,7 @@ canonical: true
 
 本文基于以下事实建立：
 
-1. 2026-05-24 force rewrite 之后的 live `origin/main`，并已更新到当前 `main` 的 `5c3173b`；
+1. 2026-05-24 force rewrite 之后的 live `origin/main`，并按 2026-05-28 的当前 `main` 工作树进行审计；
 2. 先前仍与当前主线相关的文档：
    - `docs/brainstorms/2026-05-07-cli-next-phase-planning.*`
    - `docs/brainstorms/2026-05-08-packaging-semantic-convergence-progress-and-next-steps.*`
@@ -38,7 +38,7 @@ canonical: true
 | B. CLI / automation surface | 当前主线现已具备 registry-backed 的 config/profile export/import、脱敏 provider 导出、public-surface 导出、已进入 registry-backed typed contract 的 `content.split-note-by-chapters`，以及覆盖有界 path-based 操作与 export 操作的 repo-local maintainer help/invoke 脚本，其中也包含 maintainer-only 的 `local-knowledge.inspect` retrieval introspection | 备份分支还承载过更宽的 maintainer-bridge 设想，但当前 reintegration 刻意保持在窄边界内 | 继续把 maintainer helper 的边界写清楚；若任何 path-based operation 要提升为更广或更公共的 CLI 面，必须同批补齐契约/测试/文档 | 不要把当前能力面写成通用 public CLI，或无边界的 maintainer mutation API | P1 |
 | C. 用户可见 settings / preview / onboarding | 当前主线现已具备 preview flows、preview history、欢迎弹窗 release digest、provider diagnostics、settings reset、concept-note 前置配置提示、API liveness/activity UI、面向已保存工件的 preview 恢复链路，并已重新同步 `1.9.0` 的 release-facing version truth | 备份分支还有更多 UX 收口尝试，但目前已恢复切片已在当前主线上重新证明 | 继续保持 sidebar / preview / settings 的文案、i18n、已保存工件行为与 release-facing version truth 一致 | 不要再把这些 UX guardrail 写成“当前主线缺失”，但也不要顺手高估尚未恢复的 UX 想法 | P1 |
 | D. Regex / 文件筛选 / local-KB / chapter split | 当前主线现已具备 file-selection profiles、文件夹 regex/glob 筛选、`relativePath` / `basename` 匹配、可选子目录范围控制、覆盖 `从标题生成`、`从标题批量生成`、`研究与总结`、`生成图形` 的 local-KB retrieval、混合的 Vault 相对文件/文件夹知识库路径、带默认回退语义的按任务知识库覆盖列表、chapter split、面向重复标题的稳定 TOC block ref、确定性的 TOC front-matter metadata、manifest-backed 的 guarded rerun overwrite 语义、对应回归测试、面向标题生成/研究总结/artifact-mode 图形结果路径的 machine-readable retrieval 摘要与 timing/size telemetry、用于检查 effective path/query/context 的 maintainer-only retrieval inspect seam、支持临时 `knowledgePaths` override 数组做 ad hoc task-scoped retrieval 检查，以及通过 `npm run verify:local-kb-fixtures` 暴露、且已覆盖 mixed file/folder task-scoped inspect case 的更宽离线夹具 | 备份分支提供了最初恢复证据；当前主线现在已直接携带该有界产品切片与后续 Stage C 收口结果 | 下一步应转向 mixed-note/query corpus 覆盖扩充与 maintainer example 对齐，而不是继续证明这些能力“是否存在” | 不要继续把这些能力写成只存在于 backup、或 live mainline 尚未具备；不要把 single-title / task-scoped retrieval 契约从文档里漏掉；也不要在文档或契约里把 retrieval 再压回 boolean-only signaling | P1 |
-| E. Provider settings / model discovery | 当前主线现已具备 metadata-driven 的 provider settings panel：其背后由 `src/llmProviders.ts` 提供共享字段 taxonomy，支持显式的 core/contextual/advanced/developer 分组、基于持久化 override 的 advanced auto-expand，以及首批面向 OpenAI-compatible `/models`、Ollama tags、Google Gemini model listing 的轻量 settings 内模型发现辅助；同时仍保持手动 `model` 字符串作为持久化 source-of-truth | 这里没有值得“恢复”的 backup-branch 已发货实现；这条能力来自 current-main 代码、`.trellis/tasks/05-27-provider-settings-model-discovery/` 下的 Cherry Studio 对照研究，以及已经验证完成并合回的隔离实现通道 | 保持当前 lightweight discovery 边界诚实，继续补 UI 行为级覆盖；只有在 endpoint 语义足够稳定、且不破坏 manual-entry-first UX 与扁平 provider state 的前提下，才扩到更多 provider family | 不要把首批 helper 误写成已经具备完整 Cherry Studio parity、持久化远程 model catalog、或所有 provider 都支持模型发现 | P1 |
+| E. Provider settings / model discovery | 当前主线现已具备 metadata-driven 的 provider settings panel：其背后由 `src/llmProviders.ts` 提供共享字段 taxonomy，支持显式的 core/contextual/advanced/developer 分组、基于持久化 override 的 advanced auto-expand，以及面向一批已验证 OpenAI-compatible `/models` 预设（含 LM Studio、Groq、Fireworks、多项中国区 provider、`New API`、`OVMS`）、OpenRouter 有界 chat + embedding catalog 聚合、LiteLLM 显式 proxy-family `/models` + `/model/info` 聚合、Together 专用 `/models` 响应、Anthropic `GET /models`、Ollama tags、Google Gemini model listing、Huawei Cloud MaaS 专用 `v2/models`、Vercel AI Gateway 有界 `/v1/models` + `v3/ai/config` 双源合并、`AIHubMix` 托管 `/api/v1/models` registry、`GitHub Models` 的 `catalog/models` + `/v1/models` 双源发现、PPIO 的 chat + embedding + reranker 三路有界发现、OVMS 优先 `/v3/models` 并有界回退 `/v1/config` 的本地发现，以及 xAI 的 `/v1/language-models`；Google `nextPageToken` 与 Anthropic `has_more` / `last_id` 这类分页 registry 现在也会做有界多页遍历；runtime 与 discovery 还已收敛到共享的 OpenAI-compatible header owner 与 endpoint normalization，以避免 `Authorization` / `X-Api-Key` / provider-specific compatibility header` 语义继续漂移，并容忍 `/responses`、`/chat/completions`、`/models` 这类 endpoint 形态；generic `OpenAI Compatible` 还会把 OVMS 风格本地 `/v3` 端点与 LiteLLM 风格本地 proxy 分开路由；同时仍保持手动 `model` 字符串作为持久化 source-of-truth，共享 parser 现已兼容 object-shaped proxy catalog、nested `specification.modelId`、wrapped `provider_models` / `publisherModels` / `registry` / `services` 目录，以及 `models/<id>`、`publishers/<owner>/models/<id>` 这类 resource-style 名称归一化，并已补齐对 gateway/provider-prefixed 模型的有界 token-cap guidance；此外，当 generic `OpenAI Compatible` 的 base URL 指向 OpenAI、DashScope/Qwen、Xiaomi MiMo、Fireworks、Hugging Face 这类已知 trusted official host 时，bare model ID 现在也会复用官方 provider 的 token-cap 元数据 | 这里没有值得“恢复”的 backup-branch 已发货实现；这条能力来自 current-main 代码、`.trellis/tasks/05-27-provider-settings-model-discovery/` 下的 Cherry Studio 对照研究，以及已经验证完成并合回的隔离实现通道 | 保持当前 lightweight discovery 边界诚实，继续通过共享 family/response-shape 语义扩宽支持，而不是退回 provider-name 分支；只有在 endpoint 语义、header owner、fallback 行为、token metadata 与测试/文档都足够稳定时，才扩到更多 provider family | 不要把当前有界 helper 误写成已经具备完整 Cherry Studio parity、持久化远程 model catalog、或所有 provider 都支持模型发现；generic `OpenAI Compatible` 的 bare model token ceiling 也只能在已知 trusted host 上写成当前主线真值，不能扩写成对任意 custom gateway 都成立 | P1 |
 | F. Release / repo-saga / clean-state hygiene | 当前主线现已具备 release/repo-saga 脚本，以及 repo-saga 执行锁、测试、文档与本地工件忽略 guardrail | 备份分支推动了这些 guardrail；当前主线已恢复有界串行安全切片 | 保持 repo-saga 刷新流程的串行纪律，并把 clean-state 证明保留为收尾要求 | 不要把“脚本还在”误读为“可以并行跑 repo-saga 刷新路径” | P0 |
 
 ## 4. 当前主线已确认 register
@@ -57,7 +57,8 @@ canonical: true
 10. chapter split（含 repeated-heading-safe TOC block ref、确定性的 TOC front-matter metadata 与 guarded rerun overwrite 语义）；
 11. package metadata、welcome digest、README family 与 release-note artifacts 上重新同步到 `1.9.0` 的 release-facing version truth；
 12. transport-driven provider registry 增长，以及 OpenAI-compatible base-URL normalization、`models-then-chat` probing 等连接测试语义，同时仍保持手动 model 输入作为 live configuration truth；
-13. 当前主线已落地的 schema-driven provider-settings field grouping、基于持久化 advanced 值的自动展开，以及首批 OpenAI-compatible / Ollama / Google 的 in-plugin provider model discovery suggestions。
+13. 当前主线已落地的 schema-driven provider-settings field grouping、基于持久化 advanced 值的自动展开，以及当前有界 family 批次的 in-plugin provider model discovery suggestions，包括 OpenAI-compatible（含 LM Studio、多项中国区 provider、Groq、Fireworks、`New API`、`OVMS`）、OpenRouter、LiteLLM proxy-family、Together、Anthropic、Ollama、Google、Huawei Cloud MaaS、`AIHubMix`、`GitHub Models`、`PPIO`、Vercel AI Gateway 与 xAI；
+14. 当前主线已落地的 host-aware token-cap guidance：generic `OpenAI Compatible` 在 base URL 指向已知 trusted official host 时，可让 bare model ID 复用上游 provider 的已知输出 token ceiling，并联动 `Max tokens` / `Chunk word count` 的自动同步与 runtime clamp。
 
 以下内容当前必须描述为 **未在重写后的主线上被证明存在**：
 
@@ -65,7 +66,7 @@ canonical: true
 2. 超出当前有界 path-based helper 边界的更宽 maintainer mutation surface；
 3. 任何绕开当前单入口 `main.js` + inline `srcdoc` 真值的 dedicated-runtime 叙述；
 4. 当前主线已存在持久化 provider model catalog 或 Cherry Studio 风格 model CRUD 子系统的说法；
-5. 当前主线已覆盖所有 provider 的 remote model discovery，或 Azure/Anthropic/Doubao/LMStudio 已进入同一批 discovery surface 的说法。
+5. 当前主线已覆盖所有 provider 的 remote model discovery，或任意 custom gateway 都自动具备权威模型发现、token metadata 与 provider ownership 推断能力的说法。
 
 ## 5. 单一执行顺序
 
