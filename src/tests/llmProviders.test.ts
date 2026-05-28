@@ -8,6 +8,7 @@ import {
     getLLMProviderDefinition,
     getOrderedProviderNames,
     hasPersistedAdvancedProviderSettings,
+    resolveProviderModelDiscoveryDefinition,
     shouldShowProviderSettingField,
     isOpenAICompatibleProvider
 } from '../llmProviders';
@@ -38,6 +39,11 @@ describe('llmProviders registry', () => {
             'xAI',
             'Groq',
             'Together',
+            'AIHubMix',
+            'GitHub Models',
+            'PPIO',
+            'New API',
+            'OVMS',
             'Fireworks',
             'LiteLLM',
             'Nebius',
@@ -66,6 +72,11 @@ describe('llmProviders registry', () => {
     test('registry exposes provider transport metadata', () => {
         expect(isOpenAICompatibleProvider('Groq')).toBe(true);
         expect(isOpenAICompatibleProvider('Requesty')).toBe(true);
+        expect(isOpenAICompatibleProvider('AIHubMix')).toBe(true);
+        expect(isOpenAICompatibleProvider('GitHub Models')).toBe(true);
+        expect(isOpenAICompatibleProvider('PPIO')).toBe(true);
+        expect(isOpenAICompatibleProvider('New API')).toBe(true);
+        expect(isOpenAICompatibleProvider('OVMS')).toBe(true);
         expect(isOpenAICompatibleProvider('Qwen')).toBe(true);
         expect(isOpenAICompatibleProvider('Qwen Code')).toBe(true);
         expect(isOpenAICompatibleProvider('Doubao')).toBe(true);
@@ -126,6 +137,26 @@ describe('llmProviders registry', () => {
             transport: 'openai-compatible',
             apiTestMode: 'chat-only'
         }));
+        expect(getLLMProviderDefinition('AIHubMix')).toEqual(expect.objectContaining({
+            transport: 'openai-compatible',
+            apiTestMode: 'chat-only'
+        }));
+        expect(getLLMProviderDefinition('GitHub Models')).toEqual(expect.objectContaining({
+            transport: 'openai-compatible',
+            apiTestMode: 'chat-only'
+        }));
+        expect(getLLMProviderDefinition('PPIO')).toEqual(expect.objectContaining({
+            transport: 'openai-compatible',
+            apiTestMode: 'chat-only'
+        }));
+        expect(getLLMProviderDefinition('New API')).toEqual(expect.objectContaining({
+            transport: 'openai-compatible',
+            apiTestMode: 'chat-only'
+        }));
+        expect(getLLMProviderDefinition('OVMS')).toEqual(expect.objectContaining({
+            transport: 'openai-compatible',
+            apiTestMode: 'chat-only'
+        }));
     });
 
     test('selected china-focused preset defaults stay aligned with current cline model defaults', () => {
@@ -139,6 +170,14 @@ describe('llmProviders registry', () => {
         expect(getLLMProviderDefinition('LiteLLM')?.defaultConfig.baseUrl).toBe('http://localhost:4000/v1');
         expect(getLLMProviderDefinition('Nebius')?.defaultConfig.baseUrl).toBe('https://api.studio.nebius.com/v1');
         expect(getLLMProviderDefinition('Vercel AI Gateway')?.defaultConfig.baseUrl).toBe('https://ai-gateway.vercel.sh/v1');
+        expect(getLLMProviderDefinition('AIHubMix')?.defaultConfig.baseUrl).toBe('https://aihubmix.com/v1');
+        expect(getLLMProviderDefinition('GitHub Models')?.defaultConfig.baseUrl).toBe('https://models.github.ai/inference');
+        expect(getLLMProviderDefinition('GitHub Models')?.defaultConfig.model).toBe('gpt-4o-mini');
+        expect(getLLMProviderDefinition('PPIO')?.defaultConfig.baseUrl).toBe('https://api.ppinfra.com/v3/openai');
+        expect(getLLMProviderDefinition('PPIO')?.defaultConfig.model).toBe('qwen/qwen3-32b');
+        expect(getLLMProviderDefinition('New API')?.defaultConfig.baseUrl).toBe('http://localhost:3000/v1');
+        expect(getLLMProviderDefinition('OVMS')?.defaultConfig.baseUrl).toBe('http://localhost:8000/v3');
+        expect(getLLMProviderDefinition('OVMS')?.defaultConfig.model).toBe('openvino-model');
     });
 
     test('known model metadata exposes cline-aligned max output token caps per provider/model pair', () => {
@@ -166,6 +205,28 @@ describe('llmProviders registry', () => {
         expect(getKnownModelMaxOutputTokens('Cerebras', 'openai/gpt-oss-120b')).toBe(32_766);
         expect(getKnownModelMaxOutputTokens('Hugging Face', 'openai/gpt-oss-120b')).toBe(32_766);
         expect(getKnownModelMaxOutputTokens('Vercel AI Gateway', 'anthropic/claude-sonnet-4.5')).toBe(64_000);
+        expect(getKnownModelMaxOutputTokens('GitHub Models', 'gpt-4o-mini')).toBe(16_384);
+        expect(getKnownModelMaxOutputTokens('GitHub Models', 'openai/gpt-4o')).toBe(4_096);
+        expect(getKnownModelMaxOutputTokens('AIHubMix', 'openai/gpt-4.1')).toBe(32_768);
+        expect(getKnownModelMaxOutputTokens('AIHubMix', 'deepseek/deepseek-r1')).toBe(8_000);
+        expect(getKnownModelMaxOutputTokens('OpenAI Compatible', 'anthropic/claude-sonnet-4.5')).toBe(64_000);
+        expect(getKnownModelMaxOutputTokens('OpenAI Compatible', 'openai/gpt-oss-120b')).toBe(32_766);
+        expect(getKnownModelMaxOutputTokens('OpenAI Compatible', 'qwen3-coder-plus')).toBeUndefined();
+        expect(getKnownModelMaxOutputTokens('OpenAI Compatible', 'gpt-4o', {
+            baseUrl: 'https://api.openai.com/v1'
+        })).toBe(4_096);
+        expect(getKnownModelMaxOutputTokens('OpenAI Compatible', 'gpt-4.1', {
+            ownerHint: 'openai'
+        })).toBe(32_768);
+        expect(getKnownModelMaxOutputTokens('OpenAI Compatible', 'qwen3-coder-plus', {
+            ownerHint: 'alibaba'
+        })).toBe(65_536);
+        expect(getKnownModelMaxOutputTokens('OpenAI Compatible', 'qwen3-coder-plus', {
+            baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1'
+        })).toBe(65_536);
+        expect(getKnownModelMaxOutputTokens('OpenAI Compatible', 'mimo-v2.5-pro', {
+            baseUrl: 'https://api.xiaomimimo.com/v1'
+        })).toBe(65_536);
         expect(getKnownModelMaxOutputTokens('Mistral', 'devstral-2512')).toBe(256_000);
         expect(getKnownModelMaxOutputTokens('xAI', 'grok-4')).toBe(8_192);
         expect(getKnownModelMaxOutputTokens('OpenRouter', 'anthropic/claude-3.7-sonnet')).toBe(64_000);
@@ -175,6 +236,8 @@ describe('llmProviders registry', () => {
         expect(getKnownModelMaxOutputTokens('Fireworks', 'accounts/fireworks/models/kimi-k2p5')).toBe(16_384);
         expect(getKnownModelMaxOutputTokens('Fireworks', 'accounts/fireworks/models/qwen3-vl-30b-a3b-thinking')).toBe(32_768);
         expect(getKnownModelMaxOutputTokens('Huawei Cloud MaaS', 'DeepSeek-V3')).toBe(16_384);
+        expect(getKnownModelMaxOutputTokens('OpenAI Compatible', 'gpt-4o')).toBeUndefined();
+        expect(getKnownModelMaxOutputTokens('OpenAI Compatible', 'gpt-4o', { allowGlobalConsistentFallback: true })).toBe(4_096);
         expect(getKnownModelMaxOutputTokens('OpenAI', 'unknown-model')).toBeUndefined();
         expect(getKnownModelMaxOutputTokens('Unknown Provider', 'gpt-4o')).toBeUndefined();
     });
@@ -190,19 +253,118 @@ describe('llmProviders registry', () => {
             { id: 'maxOutputTokens', group: 'developer' }
         ]));
         expect(getProviderSettingFields('Azure OpenAI')).toEqual(expect.arrayContaining([
-            { id: 'apiVersion', group: 'contextual' }
+            { id: 'apiVersion', group: 'core' }
         ]));
         expect(getProviderSettingFields('DeepSeek')).toEqual(expect.arrayContaining([
             { id: 'thinkingEnabled', group: 'advanced' }
         ]));
 
         expect(getProviderModelDiscoveryDefinition('OpenAI')).toEqual({ mode: 'openai-compatible-models' });
+        expect(getProviderModelDiscoveryDefinition('Qwen')).toEqual({ mode: 'openai-compatible-models' });
+        expect(getProviderModelDiscoveryDefinition('Groq')).toEqual({ mode: 'openai-compatible-models' });
+        expect(getProviderModelDiscoveryDefinition('Fireworks')).toEqual({ mode: 'openai-compatible-models' });
+        expect(getProviderModelDiscoveryDefinition('Anthropic')).toEqual({ mode: 'anthropic-models' });
+        expect(getProviderModelDiscoveryDefinition('Together')).toEqual({ mode: 'together-models' });
+        expect(getProviderModelDiscoveryDefinition('xAI')).toEqual({ mode: 'xai-language-models' });
+        expect(getProviderModelDiscoveryDefinition('AIHubMix')).toEqual({ mode: 'aihubmix-models' });
+        expect(getProviderModelDiscoveryDefinition('GitHub Models')).toEqual({ mode: 'github-models' });
+        expect(getProviderModelDiscoveryDefinition('PPIO')).toEqual({ mode: 'ppio-models' });
+        expect(getProviderModelDiscoveryDefinition('New API')).toEqual({ mode: 'openai-compatible-models' });
+        expect(getProviderModelDiscoveryDefinition('OVMS')).toEqual({ mode: 'ovms-models' });
+        expect(getProviderModelDiscoveryDefinition('OpenRouter')).toEqual({ mode: 'openrouter-models' });
+        expect(getProviderModelDiscoveryDefinition('LMStudio')).toEqual({ mode: 'openai-compatible-models' });
+        expect(getProviderModelDiscoveryDefinition('LiteLLM')).toEqual({ mode: 'litellm-proxy-models' });
         expect(getProviderModelDiscoveryDefinition('Ollama')).toEqual({ mode: 'ollama-tags' });
         expect(getProviderModelDiscoveryDefinition('Google')).toEqual({ mode: 'google-models' });
+        expect(getProviderModelDiscoveryDefinition('Huawei Cloud MaaS')).toEqual({ mode: 'huaweicloud-modelarts-models' });
         expect(getProviderModelDiscoveryDefinition('Vercel AI Gateway')).toEqual({ mode: 'vercel-ai-gateway-models' });
-        expect(getProviderModelDiscoveryDefinition('LiteLLM')).toEqual({ mode: 'none' });
-        expect(getProviderModelDiscoveryDefinition('Hugging Face')).toEqual({ mode: 'none' });
-        expect(getProviderModelDiscoveryDefinition('Azure OpenAI')).toEqual({ mode: 'none' });
+        expect(getProviderModelDiscoveryDefinition('Hugging Face')).toEqual({ mode: 'openai-compatible-models' });
+        expect(getProviderModelDiscoveryDefinition('Azure OpenAI')).toEqual(expect.objectContaining({
+            mode: 'none',
+            disableReasonKey: 'azureDeployment'
+        }));
+    });
+
+    test('generic OpenAI-compatible discovery resolves richer endpoint families from configured base URLs', () => {
+        expect(resolveProviderModelDiscoveryDefinition({
+            name: 'OpenAI Compatible',
+            apiKey: 'aihubmix-key',
+            baseUrl: 'https://aihubmix.com/v1',
+            model: 'openai/gpt-4.1',
+            temperature: 0.5
+        })).toEqual({ mode: 'aihubmix-models' });
+
+        expect(resolveProviderModelDiscoveryDefinition({
+            name: 'OpenAI Compatible',
+            apiKey: 'github-token',
+            baseUrl: 'https://models.github.ai/inference',
+            model: 'gpt-4o-mini',
+            temperature: 0.5
+        })).toEqual({ mode: 'github-models' });
+
+        expect(resolveProviderModelDiscoveryDefinition({
+            name: 'OpenAI Compatible',
+            apiKey: 'router-key',
+            baseUrl: 'https://openrouter.ai/api/v1',
+            model: 'anthropic/claude-sonnet-4.5',
+            temperature: 0.5
+        })).toEqual({ mode: 'openrouter-models' });
+
+        expect(resolveProviderModelDiscoveryDefinition({
+            name: 'OpenAI Compatible',
+            apiKey: 'vercel-key',
+            baseUrl: 'https://ai-gateway.vercel.sh/v1',
+            model: 'openai/gpt-5.4',
+            temperature: 0.5
+        })).toEqual({ mode: 'vercel-ai-gateway-models' });
+
+        expect(resolveProviderModelDiscoveryDefinition({
+            name: 'OpenAI Compatible',
+            apiKey: 'xai-key',
+            baseUrl: 'https://api.x.ai/v1/language-models',
+            model: 'grok-4',
+            temperature: 0.5
+        })).toEqual({ mode: 'xai-language-models' });
+
+        expect(resolveProviderModelDiscoveryDefinition({
+            name: 'OpenAI Compatible',
+            apiKey: 'huaweicloud-key',
+            baseUrl: 'https://api.modelarts-maas.com/openai/v1',
+            model: 'DeepSeek-V3',
+            temperature: 0.5
+        })).toEqual({ mode: 'huaweicloud-modelarts-models' });
+
+        expect(resolveProviderModelDiscoveryDefinition({
+            name: 'OpenAI Compatible',
+            apiKey: 'together-key',
+            baseUrl: 'https://api.together.xyz/v1',
+            model: 'meta-llama/Llama-3.3-70B-Instruct-Turbo',
+            temperature: 0.5
+        })).toEqual({ mode: 'together-models' });
+
+        expect(resolveProviderModelDiscoveryDefinition({
+            name: 'OpenAI Compatible',
+            apiKey: '',
+            baseUrl: 'http://localhost:4000/v1',
+            model: 'openai/gpt-4.1-mini',
+            temperature: 0.5
+        })).toEqual({ mode: 'litellm-proxy-models' });
+
+        expect(resolveProviderModelDiscoveryDefinition({
+            name: 'OpenAI Compatible',
+            apiKey: 'ppio-key',
+            baseUrl: 'https://api.ppinfra.com/v3/openai',
+            model: 'qwen/qwen3-32b',
+            temperature: 0.5
+        })).toEqual({ mode: 'ppio-models' });
+
+        expect(resolveProviderModelDiscoveryDefinition({
+            name: 'OpenAI Compatible',
+            apiKey: 'custom-key',
+            baseUrl: 'https://custom-openai-compatible.example/v1',
+            model: 'gpt-4.1',
+            temperature: 0.5
+        })).toEqual({ mode: 'openai-compatible-models' });
     });
 
     test('canonicalizes legacy provider aliases without duplicating providers', () => {

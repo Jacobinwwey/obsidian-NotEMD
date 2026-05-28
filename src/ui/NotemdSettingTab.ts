@@ -1,17 +1,24 @@
 import { App, ButtonComponent, PluginSettingTab, Setting, Notice, TextAreaComponent } from 'obsidian';
 import NotemdPlugin from '../main'; // Import the plugin class itself
-import { FolderTaskFileSelectionProfile, LLMProviderConfig, NotemdSettings, TaskKey } from '../types';
+import {
+    FolderTaskFileSelectionProfile,
+    GlobalModelAwareMaxTokensTracking,
+    LLMProviderConfig,
+    NotemdSettings,
+    TaskKey
+} from '../types';
 import { DEFAULT_SETTINGS } from '../constants';
 import {
     getLLMProviderDefinition,
     getKnownModelMaxOutputTokens,
-    getProviderModelDiscoveryDefinition,
+    getProviderDiscoveryIdentity,
     getProviderSettingFields,
     getOrderedProviderNames,
     getProviderValidationIssues,
     hasBlockingProviderValidationIssues,
     hasPersistedAdvancedProviderSettings,
     LLMProviderSettingFieldDefinition,
+    resolveProviderModelDiscoveryDefinition,
     shouldShowProviderSettingField
 } from '../llmProviders';
 import { getDefaultPrompt } from '../promptUtils'; // Import for default prompts
@@ -34,7 +41,7 @@ import { SUPPORTED_UI_LOCALES } from '../i18n/uiLocales';
 import { formatI18n, getI18nStrings } from '../i18n';
 import { runProviderConnectionTestWithHost } from '../operations/providerConnectionTestCommandHostAdapter';
 import { getFolderTaskFileSelectionProfiles, getFolderTaskRegexValidationError } from '../folderTaskFileSelector';
-import { discoverProviderModels } from '../providerModelDiscovery';
+import { DiscoveredProviderModel, discoverProviderModelsDetailed } from '../providerModelDiscovery';
 
 // Define specific key types for settings accessed dynamically
 type ProviderSettingKey = 'addLinksProvider' | 'researchProvider' | 'generateTitleProvider' | 'translateProvider';
@@ -43,9 +50,12 @@ type ModelSettingKey = 'addLinksModel' | 'researchModel' | 'generateTitleModel' 
 type ProviderPanelState = {
     advancedSettingsExpanded?: boolean;
     discoveredModels: string[];
+    discoveredModelEntries: DiscoveredProviderModel[];
     discoveredModelsExpanded: boolean;
     fetchStatus: 'idle' | 'loading' | 'success' | 'error';
     fetchMessage?: string;
+    discoveryIdentity?: string;
+    discoveryRequestNonce: number;
 };
 
 
@@ -203,6 +213,121 @@ export class NotemdSettingTab extends PluginSettingTab {
         return Math.max(1, Math.ceil(maxTokens / 3));
     }
 
+    private buildModelAwareMaxTokensTracking(
+        provider: LLMProviderConfig,
+        modelName: string,
+        resolvedMaxTokens: number
+    ): GlobalModelAwareMaxTokensTracking | undefined {
+        const normalizedModelName = modelName.trim();
+        if (!normalizedModelName || !Number.isFinite(resolvedMaxTokens) || resolvedMaxTokens <= 0) {
+            return undefined;
+        }
+
+        return {
+            providerName: provider.name,
+            modelName: normalizedModelName,
+            discoveryIdentity: getProviderDiscoveryIdentity(provider),
+            resolvedMaxTokens: Math.floor(resolvedMaxTokens)
+        };
+    }
+
+    private getCurrentModelAwareMaxTokensTracking(): GlobalModelAwareMaxTokensTracking | undefined {
+        const tracking = this.plugin.settings.globalModelAwareMaxTokensTracking;
+        if (!tracking) {
+            return undefined;
+        }
+
+        const provider = this.plugin.settings.providers.find(entry => entry.name === tracking.providerName);
+        if (!provider) {
+            return undefined;
+        }
+
+        if (
+            provider.model.trim() !== tracking.modelName
+            || getProviderDiscoveryIdentity(provider) !== tracking.discoveryIdentity
+            || !Number.isFinite(tracking.resolvedMaxTokens)
+            || tracking.resolvedMaxTokens <= 0
+        ) {
+            return undefined;
+        }
+
+        return tracking;
+    }
+
+    private setModelAwareMaxTokensTracking(
+        tracking: GlobalModelAwareMaxTokensTracking | undefined
+    ): void {
+        this.plugin.settings.globalModelAwareMaxTokensTracking = tracking;
+    }
+
+    private resolveModelAwareMaxTokensForProvider(
+        provider: LLMProviderConfig,
+        modelName: string,
+        options?: { discoveredModelEntries?: DiscoveredProviderModel[] }
+    ): number {
+        return this.getKnownModelMaxTokensForProvider(provider, modelName, options) ?? DEFAULT_SETTINGS.maxTokens;
+    }
+
+    private getKnownModelMaxTokensForProvider(
+        provider: LLMProviderConfig,
+        modelName: string,
+        options?: { discoveredModelEntries?: DiscoveredProviderModel[] }
+    ): number | undefined {
+        const normalizedModelName = modelName.trim();
+        if (!normalizedModelName) {
+            return undefined;
+        }
+
+        const discoveredModel = options?.discoveredModelEntries?.find(entry => entry.id === normalizedModelName);
+        if (typeof discoveredModel?.maxOutputTokens === 'number' && discoveredModel.maxOutputTokens > 0) {
+            return discoveredModel.maxOutputTokens;
+        }
+
+        const knownModelMaxTokens = getKnownModelMaxOutputTokens(provider.name, normalizedModelName, {
+            baseUrl: provider.baseUrl,
+            ownerHint: discoveredModel?.ownerHint
+        });
+        if (typeof knownModelMaxTokens === 'number' && knownModelMaxTokens > 0) {
+            return knownModelMaxTokens;
+        }
+
+        return undefined;
+    }
+
+    private resetProviderDiscoveryState(
+        state: ProviderPanelState,
+        discoveryIdentity: string
+    ): void {
+        state.discoveryIdentity = discoveryIdentity;
+        state.discoveryRequestNonce += 1;
+        state.discoveredModels = [];
+        state.discoveredModelEntries = [];
+        state.discoveredModelsExpanded = false;
+        state.fetchStatus = 'idle';
+        state.fetchMessage = undefined;
+    }
+
+    private syncProviderDiscoveryState(provider: LLMProviderConfig): ProviderPanelState {
+        const state = this.getProviderPanelState(provider.name);
+        const discoveryIdentity = getProviderDiscoveryIdentity(provider);
+        if (state.discoveryIdentity !== discoveryIdentity) {
+            this.resetProviderDiscoveryState(state, discoveryIdentity);
+        }
+        return state;
+    }
+
+    private resolveModelAwareMaxTokens(providerName: string, modelName: string): number {
+        const activeProvider = this.plugin.settings.providers.find(provider => provider.name === providerName);
+        if (!activeProvider) {
+            return DEFAULT_SETTINGS.maxTokens;
+        }
+
+        const discoveredModelEntries = this.syncProviderDiscoveryState(activeProvider).discoveredModelEntries;
+        return this.resolveModelAwareMaxTokensForProvider(activeProvider, modelName, {
+            discoveredModelEntries
+        });
+    }
+
     private shouldAutoFillRecommendedChunk(
         currentChunkWordCount: number,
         previousMaxTokens: number
@@ -212,11 +337,88 @@ export class NotemdSettingTab extends PluginSettingTab {
             || currentChunkWordCount === previousRecommendedChunk;
     }
 
+    private shouldAutoSyncModelAwareMaxTokens(
+        currentMaxTokens: number,
+        previousProviderName: string,
+        previousModelName: string
+    ): boolean {
+        const tracking = this.getCurrentModelAwareMaxTokensTracking();
+        if (tracking) {
+            return currentMaxTokens === tracking.resolvedMaxTokens;
+        }
+
+        return currentMaxTokens === DEFAULT_SETTINGS.maxTokens
+            || currentMaxTokens === this.resolveModelAwareMaxTokens(previousProviderName, previousModelName);
+    }
+
+    private syncModelAwareTokenDefaults(
+        provider: LLMProviderConfig,
+        previousProviderName: string,
+        previousModelName: string
+    ): void {
+        const previousMaxTokens = this.plugin.settings.maxTokens;
+        const shouldSyncMaxTokens = this.shouldAutoSyncModelAwareMaxTokens(
+            previousMaxTokens,
+            previousProviderName,
+            previousModelName
+        );
+        const shouldSyncChunk = this.shouldAutoFillRecommendedChunk(
+            this.plugin.settings.chunkWordCount,
+            previousMaxTokens
+        );
+
+        if (!shouldSyncMaxTokens) {
+            return;
+        }
+
+        const nextMaxTokens = this.resolveModelAwareMaxTokens(provider.name, provider.model);
+        this.plugin.settings.maxTokens = nextMaxTokens;
+        this.setModelAwareMaxTokensTracking(
+            this.buildModelAwareMaxTokensTracking(provider, provider.model, nextMaxTokens)
+        );
+
+        if (shouldSyncChunk) {
+            this.plugin.settings.chunkWordCount = this.getRecommendedChunkWordCount(nextMaxTokens);
+        }
+    }
+
+    private syncModelAwareTokenDefaultsAfterDiscoveryIdentityChange(
+        provider: LLMProviderConfig,
+        previousResolvedMaxTokens: number,
+        previousConfiguredMaxTokens: number,
+        previousChunkWordCount: number
+    ): void {
+        const tracking = this.getCurrentModelAwareMaxTokensTracking();
+        const shouldSyncMaxTokens = previousConfiguredMaxTokens === DEFAULT_SETTINGS.maxTokens
+            || previousConfiguredMaxTokens === previousResolvedMaxTokens
+            || (tracking?.resolvedMaxTokens === previousConfiguredMaxTokens);
+        const shouldSyncChunk = previousChunkWordCount === DEFAULT_SETTINGS.chunkWordCount
+            || previousChunkWordCount === this.getRecommendedChunkWordCount(previousConfiguredMaxTokens);
+
+        if (!shouldSyncMaxTokens) {
+            return;
+        }
+
+        const nextMaxTokens = this.resolveModelAwareMaxTokensForProvider(provider, provider.model, {
+            discoveredModelEntries: []
+        });
+        this.plugin.settings.maxTokens = nextMaxTokens;
+        this.setModelAwareMaxTokensTracking(
+            this.buildModelAwareMaxTokensTracking(provider, provider.model, nextMaxTokens)
+        );
+
+        if (shouldSyncChunk) {
+            this.plugin.settings.chunkWordCount = this.getRecommendedChunkWordCount(nextMaxTokens);
+        }
+    }
+
     private getGlobalMaxTokensDescription(baseDescription: string): string {
         const providerI18n = getI18nStrings({ uiLocale: this.plugin.settings.uiLocale }).settings.providerConfig;
         const activeProvider = this.plugin.settings.providers.find(provider => provider.name === this.plugin.settings.activeProvider);
         const knownModelMaxTokens = activeProvider
-            ? getKnownModelMaxOutputTokens(activeProvider.name, activeProvider.model)
+            ? this.getKnownModelMaxTokensForProvider(activeProvider, activeProvider.model, {
+                discoveredModelEntries: this.syncProviderDiscoveryState(activeProvider).discoveredModelEntries
+            })
             : undefined;
         const knownModelHint = typeof knownModelMaxTokens === 'number'
             ? ` ${formatI18n(providerI18n.maxOutputTokensKnownModelHint, {
@@ -229,7 +431,9 @@ export class NotemdSettingTab extends PluginSettingTab {
 
     private getProviderMaxOutputTokensDescription(provider: LLMProviderConfig, baseDescription: string): string {
         const providerI18n = getI18nStrings({ uiLocale: this.plugin.settings.uiLocale }).settings.providerConfig;
-        const knownModelMaxTokens = getKnownModelMaxOutputTokens(provider.name, provider.model);
+        const knownModelMaxTokens = this.getKnownModelMaxTokensForProvider(provider, provider.model, {
+            discoveredModelEntries: this.syncProviderDiscoveryState(provider).discoveredModelEntries
+        });
         if (typeof knownModelMaxTokens !== 'number') {
             return baseDescription;
         }
@@ -242,7 +446,9 @@ export class NotemdSettingTab extends PluginSettingTab {
 
     private getProviderModelDescription(provider: LLMProviderConfig, baseDescription: string): string {
         const providerI18n = getI18nStrings({ uiLocale: this.plugin.settings.uiLocale }).settings.providerConfig;
-        const knownModelMaxTokens = getKnownModelMaxOutputTokens(provider.name, provider.model);
+        const knownModelMaxTokens = this.getKnownModelMaxTokensForProvider(provider, provider.model, {
+            discoveredModelEntries: this.syncProviderDiscoveryState(provider).discoveredModelEntries
+        });
         if (typeof knownModelMaxTokens !== 'number') {
             return baseDescription;
         }
@@ -321,12 +527,24 @@ export class NotemdSettingTab extends PluginSettingTab {
         if (!state) {
             state = {
                 discoveredModels: [],
+                discoveredModelEntries: [],
                 discoveredModelsExpanded: false,
-                fetchStatus: 'idle'
+                fetchStatus: 'idle',
+                discoveryRequestNonce: 0
             };
             this.providerPanelState.set(providerName, state);
         }
         return state;
+    }
+
+    private getDiscoveredProviderModel(provider: LLMProviderConfig, modelId: string): DiscoveredProviderModel | undefined {
+        const normalizedModelId = modelId.trim();
+        if (!normalizedModelId) {
+            return undefined;
+        }
+
+        const state = this.syncProviderDiscoveryState(provider);
+        return state.discoveredModelEntries.find(entry => entry.id === normalizedModelId);
     }
 
     private isProviderAdvancedSettingsExpanded(provider: LLMProviderConfig): boolean {
@@ -344,9 +562,38 @@ export class NotemdSettingTab extends PluginSettingTab {
         provider: LLMProviderConfig,
         update: (draft: LLMProviderConfig) => void
     ): Promise<void> {
+        const panelState = this.syncProviderDiscoveryState(provider);
+        const previousDiscoveryIdentity = getProviderDiscoveryIdentity(provider);
+        const previousResolvedMaxTokens = this.resolveModelAwareMaxTokensForProvider(provider, provider.model, {
+            discoveredModelEntries: panelState.discoveredModelEntries
+        });
+        const previousConfiguredMaxTokens = this.plugin.settings.maxTokens;
+        const previousChunkWordCount = this.plugin.settings.chunkWordCount;
         update(provider);
+        const nextDiscoveryIdentity = getProviderDiscoveryIdentity(provider);
+        if (nextDiscoveryIdentity !== previousDiscoveryIdentity) {
+            this.resetProviderDiscoveryState(panelState, nextDiscoveryIdentity);
+            this.syncModelAwareTokenDefaultsAfterDiscoveryIdentityChange(
+                provider,
+                previousResolvedMaxTokens,
+                previousConfiguredMaxTokens,
+                previousChunkWordCount
+            );
+        }
         await this.plugin.saveSettings();
         this.display();
+    }
+
+    private async applyProviderModelSelection(
+        provider: LLMProviderConfig,
+        nextModel: string
+    ): Promise<void> {
+        await this.updateProviderField(provider, draft => {
+            const previousProviderName = draft.name;
+            const previousModelName = draft.model;
+            draft.model = nextModel.trim();
+            this.syncModelAwareTokenDefaults(draft, previousProviderName, previousModelName);
+        });
     }
 
     private addProviderTextField(
@@ -379,14 +626,20 @@ export class NotemdSettingTab extends PluginSettingTab {
 
     private renderProviderModelDiscovery(containerEl: HTMLElement, provider: LLMProviderConfig): void {
         const providerI18n = getI18nStrings({ uiLocale: this.plugin.settings.uiLocale }).settings.providerConfig;
-        const discovery = getProviderModelDiscoveryDefinition(provider.name);
-        const panelState = this.getProviderPanelState(provider.name);
+        const discovery = resolveProviderModelDiscoveryDefinition(provider);
+        const panelState = this.syncProviderDiscoveryState(provider);
+        const unavailableReason = discovery.disableReasonKey
+            ? providerI18n.fetchModelsUnavailableReasons[discovery.disableReasonKey]
+            : providerI18n.fetchModelsUnavailableReasonDefault;
 
         new Setting(containerEl)
             .setName(providerI18n.fetchModelsName)
             .setDesc(
                 discovery.mode === 'none'
-                    ? formatI18n(providerI18n.fetchModelsUnavailable, { provider: provider.name })
+                    ? formatI18n(providerI18n.fetchModelsUnavailable, {
+                        provider: provider.name,
+                        reason: unavailableReason
+                    })
                     : providerI18n.fetchModelsDesc
             )
             .addButton(button => {
@@ -394,13 +647,28 @@ export class NotemdSettingTab extends PluginSettingTab {
                     .setButtonText(panelState.fetchStatus === 'loading' ? providerI18n.fetchModelsLoading : providerI18n.fetchModelsButton)
                     .setDisabled(discovery.mode === 'none' || panelState.fetchStatus === 'loading')
                     .onClick(async () => {
+                        const providerSnapshot: LLMProviderConfig = { ...provider };
+                        const requestIdentity = getProviderDiscoveryIdentity(providerSnapshot);
+                        const requestNonce = panelState.discoveryRequestNonce + 1;
+                        panelState.discoveryIdentity = requestIdentity;
+                        panelState.discoveryRequestNonce = requestNonce;
                         panelState.fetchStatus = 'loading';
                         panelState.fetchMessage = undefined;
+                        panelState.discoveredModels = [];
+                        panelState.discoveredModelEntries = [];
+                        panelState.discoveredModelsExpanded = false;
                         this.display();
 
                         try {
-                            const result = await discoverProviderModels(provider);
+                            const result = await discoverProviderModelsDetailed(providerSnapshot);
+                            if (
+                                panelState.discoveryRequestNonce !== requestNonce
+                                || panelState.discoveryIdentity !== requestIdentity
+                            ) {
+                                return;
+                            }
                             panelState.discoveredModels = result.models;
+                            panelState.discoveredModelEntries = result.entries;
                             panelState.discoveredModelsExpanded = result.models.length > 0;
                             panelState.fetchStatus = 'success';
                             panelState.fetchMessage = result.models.length > 0
@@ -410,6 +678,12 @@ export class NotemdSettingTab extends PluginSettingTab {
                                 })
                                 : formatI18n(providerI18n.fetchModelsEmpty, { provider: provider.name });
                         } catch (error: unknown) {
+                            if (
+                                panelState.discoveryRequestNonce !== requestNonce
+                                || panelState.discoveryIdentity !== requestIdentity
+                            ) {
+                                return;
+                            }
                             const message = error instanceof Error ? error.message : String(error);
                             panelState.fetchStatus = 'error';
                             panelState.fetchMessage = formatI18n(providerI18n.fetchModelsError, {
@@ -437,6 +711,9 @@ export class NotemdSettingTab extends PluginSettingTab {
         if (panelState.discoveredModels.length > 0) {
             const currentModel = provider.model.trim();
             const currentDiscoveredModel = panelState.discoveredModels.includes(currentModel) ? currentModel : '';
+            const discoveredModels: DiscoveredProviderModel[] = panelState.discoveredModelEntries.length > 0
+                ? panelState.discoveredModelEntries
+                : panelState.discoveredModels.map(modelId => ({ id: modelId }));
             const detailsEl = containerEl.createEl('details', {
                 cls: 'notemd-section-card notemd-provider-discovery-panel'
             });
@@ -465,19 +742,42 @@ export class NotemdSettingTab extends PluginSettingTab {
             });
 
             const list = detailsEl.createDiv({ cls: 'notemd-provider-model-list' });
-            panelState.discoveredModels.forEach(modelId => {
+            discoveredModels.forEach(model => {
+                const modelId = model.id;
                 const isCurrentModel = currentModel === modelId;
                 const row = list.createDiv({
                     cls: `notemd-provider-model-item${isCurrentModel ? ' is-current' : ''}`
                 });
-                row.createEl('code', { text: modelId });
+                const copy = row.createDiv({ cls: 'notemd-provider-model-copy' });
+                copy.createEl('code', { text: modelId });
+                const metaParts = [
+                    model.label?.trim() || '',
+                    model.ownerHint?.trim()
+                        ? formatI18n(providerI18n.discoveredModelsOwnerHint, { owner: model.ownerHint.trim() })
+                        : '',
+                    (() => {
+                        const knownModelMaxTokens = this.getKnownModelMaxTokensForProvider(provider, modelId, {
+                            discoveredModelEntries: discoveredModels
+                        });
+                        return typeof knownModelMaxTokens === 'number'
+                            ? formatI18n(providerI18n.modelKnownMaxOutputTokensHint, {
+                                maxTokens: knownModelMaxTokens
+                            })
+                            : '';
+                    })()
+                ].filter(Boolean);
+                if (metaParts.length > 0) {
+                    copy.createEl('div', {
+                        cls: 'notemd-provider-model-meta',
+                        text: metaParts.join(' · ')
+                    });
+                }
                 const useButton = new ButtonComponent(row);
                 useButton
                     .setButtonText(isCurrentModel ? providerI18n.discoveredModelsUsingButton : providerI18n.discoveredModelsUseButton)
                     .setDisabled(isCurrentModel)
                     .onClick(async () => {
-                        provider.model = modelId;
-                        await this.plugin.saveSettings();
+                        await this.applyProviderModelSelection(provider, modelId);
                         panelState.discoveredModelsExpanded = false;
                         new Notice(formatI18n(providerI18n.discoveredModelsApplied, {
                             provider: provider.name,
@@ -544,7 +844,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                     provider,
                     () => provider.model,
                     defaultProvider?.model || providerI18n.modelPlaceholder,
-                    async value => this.updateProviderField(provider, draft => { draft.model = value.trim(); })
+                    async value => this.applyProviderModelSelection(provider, value)
                 );
                 break;
             }
@@ -1475,6 +1775,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                     const previousRecommendedChunk = this.getRecommendedChunkWordCount(previousMaxTokens);
                     const nextMaxTokens = this.sanitizePositiveInteger(rawValue, DEFAULT_SETTINGS.maxTokens, 1);
                     this.plugin.settings.maxTokens = nextMaxTokens;
+                    this.setModelAwareMaxTokensTracking(undefined);
 
                     const currentChunk = this.plugin.settings.chunkWordCount;
                     if (this.shouldAutoFillRecommendedChunk(currentChunk, previousMaxTokens)) {

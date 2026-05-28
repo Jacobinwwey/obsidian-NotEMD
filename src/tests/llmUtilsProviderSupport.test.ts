@@ -523,7 +523,51 @@ describe('llmUtils expanded provider support', () => {
         expect(requestBody.model).toBe('mimo-v2.5-pro');
     });
 
+    test('callLLM normalizes OpenAI-compatible responses endpoints before sending chat completions', async () => {
+        const provider: LLMProviderConfig = {
+            name: 'OpenAI Compatible',
+            apiKey: 'sk-test',
+            baseUrl: 'https://api.openai.com/v1/responses',
+            model: 'gpt-4.1',
+            temperature: 0.5
+        };
+
+        (requestUrl as jest.Mock).mockResolvedValue({
+            status: 200,
+            json: { choices: [{ message: { content: 'responses-ok' } }] },
+            text: '{"choices":[{"message":{"content":"responses-ok"}}]}'
+        });
+
+        const result = await callLLM(provider, 'System prompt', 'Provider content', settings, reporter);
+
+        expect(result).toBe('responses-ok');
+        expect(requestUrl).toHaveBeenCalledWith(expect.objectContaining({
+            url: 'https://api.openai.com/v1/chat/completions',
+            method: 'POST',
+            headers: expect.objectContaining({
+                Authorization: 'Bearer sk-test',
+                'X-Api-Key': 'sk-test'
+            })
+        }));
+    });
+
     test.each([
+        {
+            name: 'AIHubMix',
+            provider: {
+                name: 'AIHubMix',
+                apiKey: 'aihubmix-key',
+                baseUrl: 'https://aihubmix.com/v1',
+                model: 'openai/gpt-4.1',
+                temperature: 0.5
+            } as LLMProviderConfig,
+            expectedUrl: 'https://aihubmix.com/v1/chat/completions',
+            expectedHeaders: {
+                Authorization: 'Bearer aihubmix-key',
+                'X-Api-Key': 'aihubmix-key',
+                'APP-Code': 'MLTG2087'
+            }
+        },
         {
             name: 'LiteLLM',
             provider: {
@@ -546,7 +590,10 @@ describe('llmUtils expanded provider support', () => {
                 temperature: 0.3
             } as LLMProviderConfig,
             expectedUrl: 'https://api.studio.nebius.com/v1/chat/completions',
-            expectedHeaders: { Authorization: 'Bearer nebius-key' }
+            expectedHeaders: {
+                Authorization: 'Bearer nebius-key',
+                'X-Api-Key': 'nebius-key'
+            }
         },
         {
             name: 'Cerebras',
@@ -560,6 +607,7 @@ describe('llmUtils expanded provider support', () => {
             expectedUrl: 'https://api.cerebras.ai/v1/chat/completions',
             expectedHeaders: {
                 Authorization: 'Bearer cerebras-key',
+                'X-Api-Key': 'cerebras-key',
                 'X-Cerebras-3rd-Party-Integration': 'notemd'
             }
         },
@@ -573,7 +621,10 @@ describe('llmUtils expanded provider support', () => {
                 temperature: 0.5
             } as LLMProviderConfig,
             expectedUrl: 'https://router.huggingface.co/v1/chat/completions',
-            expectedHeaders: { Authorization: 'Bearer hf-key' }
+            expectedHeaders: {
+                Authorization: 'Bearer hf-key',
+                'X-Api-Key': 'hf-key'
+            }
         },
         {
             name: 'Vercel AI Gateway',
@@ -585,7 +636,10 @@ describe('llmUtils expanded provider support', () => {
                 temperature: 0.5
             } as LLMProviderConfig,
             expectedUrl: 'https://ai-gateway.vercel.sh/v1/chat/completions',
-            expectedHeaders: { Authorization: 'Bearer vercel-key' }
+            expectedHeaders: {
+                Authorization: 'Bearer vercel-key',
+                'X-Api-Key': 'vercel-key'
+            }
         }
     ])('callLLM routes $name through the OpenAI-compatible runtime', async ({ provider, expectedUrl, expectedHeaders }) => {
         (requestUrl as jest.Mock).mockResolvedValue({
@@ -801,6 +855,40 @@ describe('llmUtils expanded provider support', () => {
         }));
     });
 
+    test('callLLM uses mapped upstream model max tokens for GitHub Models gateway models when maxTokens is still on the auto baseline', async () => {
+        const provider = createDefaultProviders().find(candidate => candidate.name === 'GitHub Models');
+
+        expect(provider).toBeDefined();
+
+        const configuredProvider: LLMProviderConfig = {
+            ...provider!,
+            apiKey: 'github-token',
+            model: 'openai/gpt-4o'
+        };
+
+        (requestUrl as jest.Mock).mockResolvedValue({
+            status: 200,
+            json: { choices: [{ message: { content: 'github-gateway-ok' } }] },
+            text: '{"choices":[{"message":{"content":"github-gateway-ok"}}]}'
+        });
+
+        const result = await callLLM(
+            configuredProvider,
+            'System prompt',
+            'Return a concise answer',
+            { ...settings, maxTokens: DEFAULT_SETTINGS.maxTokens },
+            reporter
+        );
+
+        expect(result).toBe('github-gateway-ok');
+
+        const requestBody = JSON.parse((requestUrl as jest.Mock).mock.calls[0][0].body);
+        expect(requestBody).toEqual(expect.objectContaining({
+            model: 'openai/gpt-4o',
+            max_tokens: 4_096
+        }));
+    });
+
     test('callLLM preserves a user-selected max token setting when it is already below the known model max', async () => {
         const provider = createDefaultProviders().find(candidate => candidate.name === 'Qwen Code');
 
@@ -823,6 +911,81 @@ describe('llmUtils expanded provider support', () => {
 
         const requestBody = JSON.parse((requestUrl as jest.Mock).mock.calls[0][0].body);
         expect(requestBody.max_tokens).toBe(4_096);
+    });
+
+    test('callLLM keeps using the tracked model-aware auto baseline across sessions for known models', async () => {
+        const provider = createDefaultProviders().find(candidate => candidate.name === 'OpenAI');
+
+        expect(provider).toBeDefined();
+
+        const configuredProvider: LLMProviderConfig = {
+            ...provider!,
+            apiKey: 'openai-key',
+            model: 'gpt-4.1'
+        };
+
+        (requestUrl as jest.Mock).mockResolvedValue({
+            status: 200,
+            json: { choices: [{ message: { content: 'tracked-auto-ok' } }] },
+            text: '{"choices":[{"message":{"content":"tracked-auto-ok"}}]}'
+        });
+
+        const result = await callLLM(
+            configuredProvider,
+            'System prompt',
+            'Return a large code sample',
+            {
+                ...settings,
+                maxTokens: 16_384,
+                globalModelAwareMaxTokensTracking: {
+                    providerName: 'OpenAI',
+                    modelName: 'gpt-4.1',
+                    discoveryIdentity: 'tracked-session',
+                    resolvedMaxTokens: 16_384
+                }
+            },
+            reporter
+        );
+
+        expect(result).toBe('tracked-auto-ok');
+
+        const requestBody = JSON.parse((requestUrl as jest.Mock).mock.calls[0][0].body);
+        expect(requestBody.max_tokens).toBe(32_768);
+    });
+
+    test('callLLM does not infer auto-managed max tokens from the same numeric value when tracking is absent', async () => {
+        const provider = createDefaultProviders().find(candidate => candidate.name === 'OpenAI');
+
+        expect(provider).toBeDefined();
+
+        const configuredProvider: LLMProviderConfig = {
+            ...provider!,
+            apiKey: 'openai-key',
+            model: 'gpt-4.1'
+        };
+
+        (requestUrl as jest.Mock).mockResolvedValue({
+            status: 200,
+            json: { choices: [{ message: { content: 'manual-same-number-ok' } }] },
+            text: '{"choices":[{"message":{"content":"manual-same-number-ok"}}]}'
+        });
+
+        const result = await callLLM(
+            configuredProvider,
+            'System prompt',
+            'Return a large code sample',
+            {
+                ...settings,
+                maxTokens: 16_384,
+                globalModelAwareMaxTokensTracking: undefined
+            },
+            reporter
+        );
+
+        expect(result).toBe('manual-same-number-ok');
+
+        const requestBody = JSON.parse((requestUrl as jest.Mock).mock.calls[0][0].body);
+        expect(requestBody.max_tokens).toBe(16_384);
     });
 
     test('callLLM defers to API provider for unknown models when maxTokens is default (Cline-aligned)', async () => {
@@ -958,6 +1121,30 @@ describe('llmUtils expanded provider support', () => {
 
         const requestBody = JSON.parse((requestUrl as jest.Mock).mock.calls[0][0].body);
         assertBody(requestBody);
+    });
+
+    test('callLLM clamps generic OpenAI Compatible overrides using host-aware known model caps on official hosts', async () => {
+        const provider: LLMProviderConfig = {
+            name: 'OpenAI Compatible',
+            apiKey: 'sk-test',
+            baseUrl: 'https://api.openai.com/v1',
+            model: 'gpt-4o',
+            temperature: 0.5,
+            maxOutputTokens: 9_999
+        };
+
+        (requestUrl as jest.Mock).mockResolvedValue({
+            status: 200,
+            json: { choices: [{ message: { content: 'host-aware-cap-ok' } }] },
+            text: '{"choices":[{"message":{"content":"host-aware-cap-ok"}}]}'
+        });
+
+        await expect(
+            callLLM(provider, 'System prompt', 'Host-aware cap content', { ...settings, maxTokens: 4_096 }, reporter)
+        ).resolves.toBe('host-aware-cap-ok');
+
+        const requestBody = JSON.parse((requestUrl as jest.Mock).mock.calls[0][0].body);
+        expect(requestBody.max_tokens).toBe(4_096);
     });
 
     test('callLLM fails clearly when DeepSeek thinking mode exhausts tokens before final content', async () => {
@@ -1503,6 +1690,39 @@ describe('llmUtils expanded provider support', () => {
 
         const requestBody = JSON.parse((requestUrl as jest.Mock).mock.calls[0][0].body);
         expect(requestBody.model).toBe('DeepSeek-V3');
+    });
+
+    test('testAPI uses direct chat probing for GitHub Models instead of probing the hosted catalog path', async () => {
+        const provider: LLMProviderConfig = {
+            name: 'GitHub Models',
+            apiKey: 'github-token',
+            baseUrl: 'https://models.github.ai/inference',
+            model: 'gpt-4o-mini',
+            temperature: 0.2
+        };
+
+        (requestUrl as jest.Mock).mockResolvedValue({
+            status: 200,
+            json: { choices: [{ message: { content: 'ok' } }] },
+            text: '{"choices":[{"message":{"content":"ok"}}]}'
+        });
+
+        const result = await testAPI(provider);
+
+        expect(result.success).toBe(true);
+        expect(requestUrl).toHaveBeenCalledTimes(1);
+        expect(requestUrl).toHaveBeenCalledWith(expect.objectContaining({
+            url: 'https://models.github.ai/inference/chat/completions',
+            method: 'POST',
+            headers: expect.objectContaining({
+                Authorization: 'Bearer github-token',
+                'X-Api-Key': 'github-token',
+                'X-GitHub-Api-Version': '2022-11-28'
+            })
+        }));
+
+        const requestBody = JSON.parse((requestUrl as jest.Mock).mock.calls[0][0].body);
+        expect(requestBody.model).toBe('gpt-4o-mini');
     });
 
     test('testAPI keeps DeepSeek connection probes minimal even when advanced provider settings are enabled', async () => {

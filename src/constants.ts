@@ -22,6 +22,7 @@ export const DEFAULT_SETTINGS: NotemdSettings = {
     // Other Defaults
     chunkWordCount: 3000,
     maxTokens: 8192, // Default max tokens for LLM response
+    globalModelAwareMaxTokensTracking: undefined,
     enableDuplicateDetection: true, // Enable by default
     processMode: 'single',
     moveOriginalFileOnProcess: false, // Default to creating copies

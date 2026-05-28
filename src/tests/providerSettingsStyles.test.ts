@@ -13,6 +13,8 @@ describe('provider settings styles', () => {
         expect(styles).toContain('.notemd-provider-model-list');
         expect(styles).toContain('.notemd-provider-model-item');
         expect(styles).toContain('.notemd-provider-model-item.is-current');
+        expect(styles).toContain('.notemd-provider-model-copy');
+        expect(styles).toContain('.notemd-provider-model-meta');
         expect(styles).toContain('.notemd-provider-model-item code');
     });
 });
