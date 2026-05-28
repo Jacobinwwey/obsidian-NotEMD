@@ -584,7 +584,25 @@ export class NotemdSettingTab extends PluginSettingTab {
         this.display();
     }
 
-    private async applyProviderModelSelection(
+    private syncDiscoveredModelSelectionTokenDefaults(
+        provider: LLMProviderConfig,
+        discoveredModelEntries: DiscoveredProviderModel[]
+    ): void {
+        if (!this.plugin.settings.autoSyncGlobalTokensOnDiscoveredModelApply) {
+            return;
+        }
+
+        const nextMaxTokens = this.resolveModelAwareMaxTokensForProvider(provider, provider.model, {
+            discoveredModelEntries
+        });
+        this.plugin.settings.maxTokens = nextMaxTokens;
+        this.plugin.settings.chunkWordCount = this.getRecommendedChunkWordCount(nextMaxTokens);
+        this.setModelAwareMaxTokensTracking(
+            this.buildModelAwareMaxTokensTracking(provider, provider.model, nextMaxTokens)
+        );
+    }
+
+    private async applyTypedProviderModelSelection(
         provider: LLMProviderConfig,
         nextModel: string
     ): Promise<void> {
@@ -593,6 +611,17 @@ export class NotemdSettingTab extends PluginSettingTab {
             const previousModelName = draft.model;
             draft.model = nextModel.trim();
             this.syncModelAwareTokenDefaults(draft, previousProviderName, previousModelName);
+        });
+    }
+
+    private async applyDiscoveredProviderModelSelection(
+        provider: LLMProviderConfig,
+        nextModel: string,
+        discoveredModelEntries: DiscoveredProviderModel[]
+    ): Promise<void> {
+        await this.updateProviderField(provider, draft => {
+            draft.model = nextModel.trim();
+            this.syncDiscoveredModelSelectionTokenDefaults(draft, discoveredModelEntries);
         });
     }
 
@@ -696,6 +725,16 @@ export class NotemdSettingTab extends PluginSettingTab {
                     });
             });
 
+        new Setting(containerEl)
+            .setName(providerI18n.discoveredModelTokenSyncName)
+            .setDesc(providerI18n.discoveredModelTokenSyncDesc)
+            .addToggle(toggle => toggle
+                .setValue(this.plugin.settings.autoSyncGlobalTokensOnDiscoveredModelApply)
+                .onChange(async value => {
+                    this.plugin.settings.autoSyncGlobalTokensOnDiscoveredModelApply = value;
+                    await this.plugin.saveSettings();
+                }));
+
         if (panelState.fetchMessage) {
             const callout = containerEl.createDiv({
                 cls: `notemd-provider-validation ${panelState.fetchStatus === 'error' ? 'notemd-provider-validation-error' : 'notemd-provider-validation-warning'}`
@@ -777,7 +816,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                     .setButtonText(isCurrentModel ? providerI18n.discoveredModelsUsingButton : providerI18n.discoveredModelsUseButton)
                     .setDisabled(isCurrentModel)
                     .onClick(async () => {
-                        await this.applyProviderModelSelection(provider, modelId);
+                        await this.applyDiscoveredProviderModelSelection(provider, modelId, discoveredModels);
                         panelState.discoveredModelsExpanded = false;
                         new Notice(formatI18n(providerI18n.discoveredModelsApplied, {
                             provider: provider.name,
@@ -844,7 +883,7 @@ export class NotemdSettingTab extends PluginSettingTab {
                     provider,
                     () => provider.model,
                     defaultProvider?.model || providerI18n.modelPlaceholder,
-                    async value => this.applyProviderModelSelection(provider, value)
+                    async value => this.applyTypedProviderModelSelection(provider, value)
                 );
                 break;
             }

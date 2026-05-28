@@ -217,6 +217,8 @@ export const STRINGS_ZH_TW: DeepPartial<NotemdEnglishStrings> = {
             fetchModelsLoading: '取得中...',
             fetchModelsSuccess: '已為 {provider} 取得 {count} 個模型。',
             fetchModelsEmpty: '{provider} 沒有回傳模型清單。你仍然可以手動輸入模型。',
+            discoveredModelTokenSyncName: '套用已發現模型時自動同步最大 Token 數',
+            discoveredModelTokenSyncDesc: '開：在已發現模型清單中點擊「使用」時，會把全域「最大 Token 數」與「分塊詞數」同步到該模型的上限建議。關：保留你目前的全域 token 數值，後續由你手動調整。',
             fetchModelsUnavailable: '{provider} 目前不支援在這裡取得模型清單：{reason}。請手動輸入模型。',
             fetchModelsUnavailableReasonDefault: '目前這條有界實作仍將該預設保持為 manual-first',
             fetchModelsUnavailableReasons: {

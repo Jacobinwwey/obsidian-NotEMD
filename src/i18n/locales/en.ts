@@ -215,6 +215,8 @@ export const STRINGS_EN = {
             fetchModelsLoading: 'Fetching...',
             fetchModelsSuccess: 'Fetched {count} models for {provider}.',
             fetchModelsEmpty: 'No models were returned by {provider}. You can still enter a model manually.',
+            discoveredModelTokenSyncName: 'Auto-sync Max tokens when applying a discovered model',
+            discoveredModelTokenSyncDesc: 'On: choosing Use from the discovered model list updates the global Max tokens and Chunk word count to the model-aware ceiling. Off: keep your current global token values and adjust them manually if needed.',
             fetchModelsUnavailable: '{provider} does not support Fetch model list here: {reason}. Enter the model manually.',
             fetchModelsUnavailableReasonDefault: 'this preset stays manual-first in the current bounded implementation',
             fetchModelsUnavailableReasons: {

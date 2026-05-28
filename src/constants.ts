@@ -69,6 +69,7 @@ export const DEFAULT_SETTINGS: NotemdSettings = {
     developerDiagnosticCallMode: 'runtime-stable',
     developerDiagnosticStabilityRuns: 3,
     developerDiagnosticTimeoutMs: 10 * 60 * 1000,
+    autoSyncGlobalTokensOnDiscoveredModelApply: true,
     // Task-specific model defaults (empty means use provider's default)
     addLinksModel: '',
     researchModel: '',
