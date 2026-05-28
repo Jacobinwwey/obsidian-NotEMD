@@ -1,3 +1,4 @@
+import { getCurrentUiLocale } from '../i18n';
 import { resolveSupportedLocaleCode } from '../i18n/languageContext';
 
 export interface WelcomeReleaseNoteEntry {
@@ -6,6 +7,7 @@ export interface WelcomeReleaseNoteEntry {
 }
 
 type WelcomeReleaseNoteCatalog = Record<string, WelcomeReleaseNoteEntry[]>;
+const WELCOME_RELEASE_NOTE_LIMIT = 2;
 
 const ENTRIES_EN: WelcomeReleaseNoteEntry[] = [
     {
@@ -119,6 +121,9 @@ const WELCOME_RELEASE_NOTES: WelcomeReleaseNoteCatalog = {
 };
 
 export function getWelcomeReleaseNotes(uiLocale: string): WelcomeReleaseNoteEntry[] {
-    const locale = resolveSupportedLocaleCode(uiLocale, Object.keys(WELCOME_RELEASE_NOTES));
-    return WELCOME_RELEASE_NOTES[locale] ?? ENTRIES_EN;
+    const locale = resolveSupportedLocaleCode(
+        getCurrentUiLocale({ uiLocale }),
+        Object.keys(WELCOME_RELEASE_NOTES)
+    );
+    return (WELCOME_RELEASE_NOTES[locale] ?? ENTRIES_EN).slice(0, WELCOME_RELEASE_NOTE_LIMIT);
 }

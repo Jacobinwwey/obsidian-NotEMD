@@ -1,6 +1,9 @@
 import { WelcomeModal } from '../ui/WelcomeModal';
 import { getWelcomeReleaseNotes } from '../ui/welcomeReleaseNotes';
+import { getLanguage } from 'obsidian';
 import { mockApp } from './__mocks__/app';
+
+jest.mock('obsidian');
 
 type MockElement = {
     tag: string;
@@ -84,6 +87,8 @@ describe('welcome modal', () => {
     const originalRequestAnimationFrame = globalThis.requestAnimationFrame;
 
     beforeEach(() => {
+        (getLanguage as jest.Mock).mockReset();
+        (getLanguage as jest.Mock).mockReturnValue('en');
         (mockApp as any).setting = {
             openTabById: jest.fn()
         };
@@ -113,6 +118,7 @@ describe('welcome modal', () => {
 
         expect(modal.titleEl.text).toBe('Welcome to Notemd');
         expect(nodes.some(node => node.cls.includes('notemd-welcome-release-notes'))).toBe(true);
+        expect(releaseNotes).toHaveLength(2);
 
         for (const release of releaseNotes) {
             expect(nodes.some(node => node.text === `v${release.version}`)).toBe(true);
@@ -120,6 +126,8 @@ describe('welcome modal', () => {
                 expect(nodes.some(node => node.text === highlight)).toBe(true);
             }
         }
+
+        expect(nodes.some(node => node.text === 'v1.8.8')).toBe(false);
     });
 
     test('uses localized release notes and labels for simplified chinese', () => {
@@ -143,6 +151,28 @@ describe('welcome modal', () => {
             expect(nodes.some(node => node.text === `v${release.version}`)).toBe(true);
             expect(nodes.some(node => node.text === release.highlights[0])).toBe(true);
         }
+    });
+
+    test('uses Obsidian locale for release notes when ui locale is auto', () => {
+        (getLanguage as jest.Mock).mockReturnValue('zh-cn');
+
+        const modal = new WelcomeModal(mockApp, 'auto') as any;
+        modal.app = mockApp;
+        modal.titleEl = createMockElement('h2');
+        modal.contentEl = createMockElement();
+        modal.modalEl = createMockElement();
+        modal.close = jest.fn();
+
+        modal.onOpen();
+
+        const nodes = flattenElements(modal.contentEl);
+        const releaseNotes = getWelcomeReleaseNotes('auto');
+
+        expect(modal.titleEl.text).toBe('欢迎使用 Notemd');
+        expect(releaseNotes).toHaveLength(2);
+        expect(releaseNotes[0].highlights[0]).toContain('开发者开关控制的 batch 文件夹选择弹窗');
+        expect(nodes.some(node => node.text === releaseNotes[0].highlights[0])).toBe(true);
+        expect(nodes.some(node => node.text === '最近更新')).toBe(true);
     });
 
     test('keeps release notes in a dedicated scroll container and focuses the configure button', () => {

@@ -3,6 +3,7 @@ import { NotemdSettings } from '../../types';
 export const mockSettings: NotemdSettings = {
     chunkWordCount: 3000,
     maxTokens: 4096,
+    globalModelAwareMaxTokensTracking: undefined,
     enableDuplicateDetection: true,
     processMode: 'single',
     providers: [{ name: 'DeepSeek', apiKey: 'test', baseUrl: 'test', model: 'test', temperature: 0.5 }],

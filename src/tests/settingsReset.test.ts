@@ -51,6 +51,12 @@ describe('settings reset helpers', () => {
 
     test('partial reset preserves llm provider settings while resetting other fields', () => {
         const customized = createCustomizedSettings();
+        customized.globalModelAwareMaxTokensTracking = {
+            providerName: customized.activeProvider,
+            modelName: customized.providers[0].model,
+            discoveryIdentity: 'tracked-discovery-identity',
+            resolvedMaxTokens: 4321
+        };
         const reset = createPartialResetSettings(customized);
 
         expect(reset.chunkWordCount).toBe(DEFAULT_SETTINGS.chunkWordCount);
@@ -75,6 +81,7 @@ describe('settings reset helpers', () => {
         expect(reset.summarizeToMermaidModel).toBe(customized.summarizeToMermaidModel);
         expect(reset.extractConceptsModel).toBe(customized.extractConceptsModel);
         expect(reset.extractOriginalTextModel).toBe(customized.extractOriginalTextModel);
+        expect(reset.globalModelAwareMaxTokensTracking).toBeUndefined();
     });
 
     test('partial reset clones preserved provider objects to avoid mutating source settings', () => {
@@ -86,5 +93,10 @@ describe('settings reset helpers', () => {
 
         reset.providers[0].apiKey = 'mutated-key';
         expect(customized.providers[0].apiKey).toBe('custom-key-1');
+    });
+
+    test('complete reset clears model-aware max token tracking', () => {
+        const reset = createCompleteResetSettings();
+        expect(reset.globalModelAwareMaxTokensTracking).toBeUndefined();
     });
 });

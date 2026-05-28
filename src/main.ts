@@ -1,5 +1,5 @@
 import { App, Editor, MarkdownView, Modal, Notice, Plugin, TFile, TFolder, PluginSettingTab, Setting, WorkspaceLeaf } from 'obsidian';
-import { NotemdSettings, ProgressReporter, LLMProviderConfig, TaskKey } from './types';
+import { NotemdSettings, ProgressReporter, LLMProviderConfig, TaskKey, GlobalModelAwareMaxTokensTracking } from './types';
 import { DEFAULT_SETTINGS, NOTEMD_SIDEBAR_VIEW_TYPE, NOTEMD_SIDEBAR_ICON } from './constants';
 import {
     canonicalizeProviderConfigs,
@@ -1039,6 +1039,35 @@ export default class NotemdPlugin extends Plugin {
     }
 
     // --- Settings Management ---
+    private normalizeGlobalModelAwareMaxTokensTracking(
+        value: unknown
+    ): GlobalModelAwareMaxTokensTracking | undefined {
+        if (!value || typeof value !== 'object' || Array.isArray(value)) {
+            return undefined;
+        }
+
+        const candidate = value as Partial<GlobalModelAwareMaxTokensTracking>;
+        const providerName = typeof candidate.providerName === 'string' ? candidate.providerName.trim() : '';
+        const modelName = typeof candidate.modelName === 'string' ? candidate.modelName.trim() : '';
+        const discoveryIdentity = typeof candidate.discoveryIdentity === 'string' ? candidate.discoveryIdentity.trim() : '';
+        const resolvedMaxTokens = Number(candidate.resolvedMaxTokens);
+
+        if (!providerName || !modelName || !discoveryIdentity) {
+            return undefined;
+        }
+
+        if (!Number.isFinite(resolvedMaxTokens) || resolvedMaxTokens <= 0) {
+            return undefined;
+        }
+
+        return {
+            providerName,
+            modelName,
+            discoveryIdentity,
+            resolvedMaxTokens: Math.floor(resolvedMaxTokens)
+        };
+    }
+
     async loadSettings() {
         const savedData = await this.loadData() || {};
         const savedProviders = canonicalizeProviderConfigs(savedData.providers || []);
@@ -1078,6 +1107,15 @@ export default class NotemdPlugin extends Plugin {
         }
 
         this.settings = Object.assign({}, DEFAULT_SETTINGS, savedData, { providers: mergedProviders });
+        this.settings.globalModelAwareMaxTokensTracking = this.normalizeGlobalModelAwareMaxTokensTracking(
+            this.settings.globalModelAwareMaxTokensTracking
+        );
+        if (
+            this.settings.globalModelAwareMaxTokensTracking
+            && !mergedProviders.some(provider => provider.name === this.settings.globalModelAwareMaxTokensTracking?.providerName)
+        ) {
+            this.settings.globalModelAwareMaxTokensTracking = undefined;
+        }
         this.settings.activeProvider = resolveCanonicalProviderName(this.settings.activeProvider);
         this.settings.addLinksProvider = resolveCanonicalProviderName(this.settings.addLinksProvider);
         this.settings.researchProvider = resolveCanonicalProviderName(this.settings.researchProvider);
