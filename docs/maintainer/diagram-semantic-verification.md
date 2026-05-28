@@ -15,6 +15,7 @@ Its packaging boundary line is derived from current `entryPoints` / `outfile` / 
 If `entryPoints` are parsed but output target detection cannot resolve either `outfile` or `outdir`, the checklist now adds an explicit manual-confirmation line before packaging claims can be made.
 When output target detection succeeds, the checklist line now records whether the current truth came from `outfile` or `outdir` so packaging claims remain explicit.
 If both `outfile` and `outdir` are detected together, the checklist now treats that as ambiguous and requires explicit manual confirmation before packaging claims.
+The packaging-boundary section now also inspects `src/rendering/preview/renderHostRuntimeClient.ts` so current-main truth stays executable: on the current single-entry lane, `resolveBundledRenderHostRuntimeModuleSpecifier()` must remain fail-closed by exposing only an explicitly configured module specifier and otherwise returning `null`, without synthesizing a default `render-host.mjs` path.
 The render-host audit section is derived from `scripts/audit-render-host-bundle.js` and keeps the shipped `main.js` bundle markers plus standalone-output bans executable instead of rhetorical.
 The runtime-consumption section keeps the command-entry → preview-modal → iframe `srcdoc` → webview bridge chain explicit through `src/main.ts`, `src/ui/DiagramPreviewModal.ts`, `src/rendering/webview/page.ts`, and `src/rendering/webview/renderFrame.ts`.
 The implementation-readiness section keeps the current packaging lane and release evidence bounded to what main actually ships today.
@@ -47,7 +48,7 @@ git diff --check
 
 These checks do **not** prove that a generated Mermaid artifact is visually valid in a real Obsidian session, or that JSON Canvas / Vega-Lite output still behaves correctly end-to-end in the desktop host.
 
-They also do **not** prove that heavy runtimes are already isolated into a separate packaged asset. `npm run audit:render-host` currently proves only the enforced shipping truth: the inline `srcdoc` host remains self-contained inside `main.js`, and stray `render-host.mjs` assets or references are rejected on current `main`.
+They also do **not** prove that heavy runtimes are already isolated into a separate packaged asset. `npm run audit:render-host` currently proves only the enforced shipping truth: the inline `srcdoc` host remains self-contained inside `main.js`, and stray `render-host.mjs` assets or references are rejected on current `main`. The helper's packaging-boundary section adds one more explicit anti-drift check on top of that: latent runtime helpers must not silently reintroduce a default standalone runtime-module path on the current single-entry lane.
 
 ## 3. Environment Rules
 

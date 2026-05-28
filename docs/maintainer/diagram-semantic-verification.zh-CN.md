@@ -15,6 +15,7 @@ npm run verify:diagram-semantics -- --vault "<vault-name>" --commit "<sha>" --ve
 如果已解析到 `entryPoints`，但无法确定 `outfile` 与 `outdir`，检查清单会额外生成一条“必须人工确认输出目标”的提示，再允许下结论。
 如果输出目标已成功识别，清单会明确标记当前依据来自 `outfile` 还是 `outdir`，避免打包边界结论含糊。
 如果同时识别到 `outfile` 和 `outdir`，清单会将其视为歧义状态，并要求先人工确认有效输出目标，再给出打包结论。
+其中 packaging-boundary 区块现在还会检查 `src/rendering/preview/renderHostRuntimeClient.ts`，把当前主线的 fail-closed 真值也显式化：在当前单入口主线上，`resolveBundledRenderHostRuntimeModuleSpecifier()` 只能暴露显式配置过的 module specifier，否则必须返回 `null`，不能默认合成 `render-host.mjs` 路径。
 其中 render-host audit 区块会从 `scripts/audit-render-host-bundle.js` 读取当前 bundle markers 与 standalone-output 禁止规则，把发布边界从“口头描述”变成可执行真值。
 其中 runtime-consumption 区块会通过 `src/main.ts`、`src/ui/DiagramPreviewModal.ts`、`src/rendering/webview/page.ts` 与 `src/rendering/webview/renderFrame.ts` 保持 command entry → preview modal → iframe `srcdoc` → webview bridge 链路的当前真值显式化。
 其中 implementation-readiness 区块会把当前主线真实 shipped packaging lane 与 release 证据边界固定下来，避免后续误把未落地拓扑当成当前能力。
@@ -47,7 +48,7 @@ git diff --check
 
 这些检查**不能**证明 Mermaid 产物在真实 Obsidian 会话中视觉上仍然正确，也不能证明 JSON Canvas / Vega-Lite 在桌面宿主中的端到端行为没有退化。
 
-它们也**不等于**重型运行时已经被真正隔离为独立打包资产。`npm run audit:render-host` 当前只能证明一条已强制的发布事实：内联 `srcdoc` host 仍然自包含地随 `main.js` 一起发布，同时当前主线会拒绝残留的 `render-host.mjs` 资产或引用。
+它们也**不等于**重型运行时已经被真正隔离为独立打包资产。`npm run audit:render-host` 当前只能证明一条已强制的发布事实：内联 `srcdoc` host 仍然自包含地随 `main.js` 一起发布，同时当前主线会拒绝残留的 `render-host.mjs` 资产或引用。helper 的 packaging-boundary 区块会在此基础上再补一层显式 anti-drift 检查：当前单入口主线上的 latent runtime helper 不能悄悄重新引入默认 standalone runtime-module 路径。
 
 ## 3. 环境规则
 

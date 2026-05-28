@@ -121,6 +121,18 @@ topic: packaging-semantic-convergence-progress-and-next-steps
 1. 在当前 `main` 上继续维持 helper/parser/test/doc 的一致性。
 2. 只有当 build graph、release assets 与 runtime-consumption 路径同批变动时，才允许拓宽 packaging topology。
 3. 如果未来再次引入 `render-host.mjs`，必须把它当成“当前主线上的新实现切片”重新落地，而不是视为旧结论天然有效。
+4. 在当前单入口主线上，latent runtime helper 必须保持 fail-closed：除非 dedicated asset 被显式配置且同批真实发货，否则不要在 helper 代码里默认合成 `render-host.mjs` 运行时路径。
+
+### 2026-05-28 增量：helper 现已显式覆盖 fail-closed 的 latent runtime helper 真值
+
+这条当前主线上的 anti-drift 缺口现已在代码、测试与维护文档中补齐：
+
+1. `src/rendering/preview/renderHostRuntimeClient.ts` 不再默认合成任何 standalone runtime URL/path；它只会返回显式配置的 module specifier，否则返回 `null`。
+2. `scripts/diagram-semantic-verification.js` 现在会直接读取 `src/rendering/preview/renderHostRuntimeClient.ts`，并在 packaging-boundary 检查清单中把这条 fail-closed 真值变成可执行检查项。
+3. `src/tests/diagramSemanticVerificationScript.test.ts` 现在同时回归锁定：
+   - 当前仓库真值（未显式配置时 `resolveBundledRenderHostRuntimeModuleSpecifier()` 返回 `null`）；
+   - helper 源文件无法读取时的 fallback 文案。
+4. 维护者 runbook 现已把这条新增真值源写清，确保 release/semantic verification 不再只停留在 build-output + audit 真值层面。
 
 ### Priority 2：把备份分支的 Stage-C 工作视为 reintegration 候选
 
