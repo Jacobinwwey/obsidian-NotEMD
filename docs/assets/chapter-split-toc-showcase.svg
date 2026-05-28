@@ -21,60 +21,60 @@
   <text x="150" y="216" fill="#FFFFFF" font-size="58" font-family="Segoe UI, Arial, sans-serif" font-weight="800">Chapter Split + TOC Extraction</text>
   <text x="150" y="250" fill="#DCEAFE" font-size="24" font-family="Segoe UI, Arial, sans-serif">Turn one long note into a linked chapter workspace beside the source file.</text>
 
-  <rect x="118" y="304" width="150" height="42" rx="21" fill="#CCFBF1"/>
-  <text x="142" y="332" fill="#115E59" font-size="20" font-family="Segoe UI, Arial, sans-serif" font-weight="700">Heading-aware</text>
-  <rect x="280" y="304" width="122" height="42" rx="21" fill="#DBEAFE"/>
-  <text x="309" y="332" fill="#1D4ED8" font-size="20" font-family="Segoe UI, Arial, sans-serif" font-weight="700">Linked TOC</text>
-  <rect x="414" y="304" width="142" height="42" rx="21" fill="#FEF3C7"/>
-  <text x="445" y="332" fill="#B45309" font-size="20" font-family="Segoe UI, Arial, sans-serif" font-weight="700">Safe reruns</text>
-  <rect x="568" y="304" width="168" height="42" rx="21" fill="#EDE9FE"/>
-  <text x="595" y="332" fill="#6D28D9" font-size="20" font-family="Segoe UI, Arial, sans-serif" font-weight="700">Artifact cleanup</text>
+  <rect x="118" y="304" width="164" height="42" rx="21" fill="#CCFBF1"/>
+  <text x="140" y="332" fill="#115E59" font-size="20" font-family="Segoe UI, Arial, sans-serif" font-weight="700">Heading-aware</text>
+  <rect x="294" y="304" width="128" height="42" rx="21" fill="#DBEAFE"/>
+  <text x="322" y="332" fill="#1D4ED8" font-size="20" font-family="Segoe UI, Arial, sans-serif" font-weight="700">Linked TOC</text>
+  <rect x="434" y="304" width="148" height="42" rx="21" fill="#FEF3C7"/>
+  <text x="462" y="332" fill="#B45309" font-size="20" font-family="Segoe UI, Arial, sans-serif" font-weight="700">Safe reruns</text>
+  <rect x="594" y="304" width="180" height="42" rx="21" fill="#EDE9FE"/>
+  <text x="621" y="332" fill="#6D28D9" font-size="20" font-family="Segoe UI, Arial, sans-serif" font-weight="700">Artifact cleanup</text>
 
-  <rect x="96" y="388" width="404" height="448" rx="30" fill="#FFFFFF" filter="url(#shadow)"/>
-  <text x="132" y="444" fill="#0F172A" font-size="32" font-family="Segoe UI, Arial, sans-serif" font-weight="800">Source Note</text>
-  <text x="132" y="478" fill="#475569" font-size="20" font-family="Segoe UI, Arial, sans-serif">One long Markdown note with nested headings</text>
-  <rect x="132" y="516" width="332" height="280" rx="20" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="2"/>
-  <text x="158" y="566" fill="#111827" font-size="28" font-family="Consolas, Menlo, monospace" font-weight="700"># Platform</text>
-  <text x="158" y="610" fill="#0F766E" font-size="26" font-family="Consolas, Menlo, monospace" font-weight="700">## Overview</text>
-  <text x="190" y="648" fill="#334155" font-size="22" font-family="Consolas, Menlo, monospace">Overview body</text>
-  <text x="158" y="694" fill="#1D4ED8" font-size="24" font-family="Consolas, Menlo, monospace" font-weight="700">### Scope</text>
-  <text x="190" y="732" fill="#334155" font-size="22" font-family="Consolas, Menlo, monospace">Scope body</text>
-  <text x="158" y="778" fill="#0F766E" font-size="26" font-family="Consolas, Menlo, monospace" font-weight="700">## Delivery</text>
-  <text x="190" y="816" fill="#334155" font-size="22" font-family="Consolas, Menlo, monospace">Delivery body</text>
+  <rect x="96" y="388" width="382" height="448" rx="30" fill="#FFFFFF" filter="url(#shadow)"/>
+  <text x="128" y="444" fill="#0F172A" font-size="32" font-family="Segoe UI, Arial, sans-serif" font-weight="800">Source Note</text>
+  <text x="128" y="478" fill="#475569" font-size="20" font-family="Segoe UI, Arial, sans-serif">Nested headings in one note</text>
+  <rect x="128" y="516" width="318" height="280" rx="20" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="2"/>
+  <text x="154" y="566" fill="#111827" font-size="28" font-family="Consolas, Menlo, monospace" font-weight="700"># Platform</text>
+  <text x="154" y="610" fill="#0F766E" font-size="26" font-family="Consolas, Menlo, monospace" font-weight="700">## Overview</text>
+  <text x="186" y="648" fill="#334155" font-size="22" font-family="Consolas, Menlo, monospace">Overview body</text>
+  <text x="154" y="694" fill="#1D4ED8" font-size="24" font-family="Consolas, Menlo, monospace" font-weight="700">### Scope</text>
+  <text x="186" y="732" fill="#334155" font-size="22" font-family="Consolas, Menlo, monospace">Scope body</text>
+  <text x="154" y="778" fill="#0F766E" font-size="26" font-family="Consolas, Menlo, monospace" font-weight="700">## Delivery</text>
 
-  <path d="M534 612H626" stroke="#0F766E" stroke-width="10" stroke-linecap="round"/>
-  <path d="M606 582L656 612L606 642" fill="none" stroke="#0F766E" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
-  <text x="536" y="566" fill="#0F766E" font-size="22" font-family="Segoe UI, Arial, sans-serif" font-weight="700">Run once</text>
+  <path d="M504 612H548" stroke="#0F766E" stroke-width="10" stroke-linecap="round"/>
+  <path d="M538 582L584 612L538 642" fill="none" stroke="#0F766E" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="508" y="566" fill="#0F766E" font-size="22" font-family="Segoe UI, Arial, sans-serif" font-weight="700">Run</text>
 
-  <rect x="648" y="388" width="420" height="448" rx="30" fill="#FFFFFF" filter="url(#shadow)"/>
-  <text x="684" y="444" fill="#0F172A" font-size="32" font-family="Segoe UI, Arial, sans-serif" font-weight="800">Generated TOC</text>
-  <text x="684" y="478" fill="#475569" font-size="20" font-family="Segoe UI, Arial, sans-serif">Linked overview artifact with front-matter truth</text>
-  <rect x="684" y="516" width="348" height="280" rx="20" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="2"/>
-  <text x="708" y="552" fill="#7C3AED" font-size="19" font-family="Consolas, Menlo, monospace">notemdArtifactKind: "chapter-split-toc"</text>
-  <text x="708" y="582" fill="#334155" font-size="19" font-family="Consolas, Menlo, monospace">sourcePath: "Docs/Platform.md"</text>
-  <text x="708" y="612" fill="#334155" font-size="19" font-family="Consolas, Menlo, monospace">resolvedSplitHeadingLevel: 2</text>
-  <text x="708" y="642" fill="#334155" font-size="19" font-family="Consolas, Menlo, monospace">chapterCount: 2</text>
-  <line x1="706" y1="666" x2="1010" y2="666" stroke="#CBD5E1" stroke-width="2"/>
-  <text x="708" y="708" fill="#111827" font-size="24" font-family="Consolas, Menlo, monospace" font-weight="700">- [[01. Overview]]</text>
-  <text x="736" y="744" fill="#1D4ED8" font-size="21" font-family="Consolas, Menlo, monospace">- [[#^notemd-scope|Scope]]</text>
-  <text x="708" y="784" fill="#111827" font-size="24" font-family="Consolas, Menlo, monospace" font-weight="700">- [[02. Delivery]]</text>
+  <rect x="584" y="388" width="472" height="448" rx="30" fill="#FFFFFF" filter="url(#shadow)"/>
+  <text x="620" y="444" fill="#0F172A" font-size="32" font-family="Segoe UI, Arial, sans-serif" font-weight="800">Generated TOC</text>
+  <text x="620" y="478" fill="#475569" font-size="20" font-family="Segoe UI, Arial, sans-serif">TOC metadata and deep links</text>
+  <rect x="620" y="516" width="400" height="280" rx="20" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="2"/>
+  <text x="646" y="552" fill="#7C3AED" font-size="19" font-family="Consolas, Menlo, monospace">notemdArtifactKind:</text>
+  <text x="672" y="582" fill="#7C3AED" font-size="19" font-family="Consolas, Menlo, monospace">"chapter-split-toc"</text>
+  <text x="646" y="612" fill="#334155" font-size="19" font-family="Consolas, Menlo, monospace">sourcePath: "Docs/Platform.md"</text>
+  <text x="646" y="642" fill="#334155" font-size="19" font-family="Consolas, Menlo, monospace">resolvedLevel: 2</text>
+  <text x="646" y="672" fill="#334155" font-size="19" font-family="Consolas, Menlo, monospace">chapterCount: 2</text>
+  <line x1="646" y1="696" x2="994" y2="696" stroke="#CBD5E1" stroke-width="2"/>
+  <text x="646" y="736" fill="#111827" font-size="22" font-family="Consolas, Menlo, monospace" font-weight="700">- [[01. Overview]]</text>
+  <text x="676" y="768" fill="#1D4ED8" font-size="20" font-family="Consolas, Menlo, monospace">- [[#^scope|Scope]]</text>
 
-  <path d="M1104 612H1196" stroke="#1D4ED8" stroke-width="10" stroke-linecap="round"/>
-  <path d="M1176 582L1226 612L1176 642" fill="none" stroke="#1D4ED8" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
-  <text x="1092" y="566" fill="#1D4ED8" font-size="22" font-family="Segoe UI, Arial, sans-serif" font-weight="700">Managed artifacts</text>
+  <path d="M1080 612H1128" stroke="#1D4ED8" stroke-width="10" stroke-linecap="round"/>
+  <path d="M1118 582L1164 612L1118 642" fill="none" stroke="#1D4ED8" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="1078" y="566" fill="#1D4ED8" font-size="22" font-family="Segoe UI, Arial, sans-serif" font-weight="700">Track</text>
 
-  <rect x="1216" y="388" width="288" height="448" rx="30" fill="#FFFFFF" filter="url(#shadow)"/>
-  <text x="1252" y="444" fill="#0F172A" font-size="32" font-family="Segoe UI, Arial, sans-serif" font-weight="800">Output Folder</text>
-  <text x="1252" y="478" fill="#475569" font-size="20" font-family="Segoe UI, Arial, sans-serif">Everything lands beside the source note</text>
-  <rect x="1252" y="516" width="216" height="280" rx="20" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="2"/>
-  <text x="1274" y="560" fill="#0F172A" font-size="24" font-family="Consolas, Menlo, monospace" font-weight="700">Platform_chapters/</text>
-  <text x="1288" y="604" fill="#7C3AED" font-size="20" font-family="Consolas, Menlo, monospace">├─ Platform_TOC.md</text>
-  <text x="1288" y="644" fill="#0F766E" font-size="20" font-family="Consolas, Menlo, monospace">├─ 01-overview.md</text>
-  <text x="1288" y="684" fill="#0F766E" font-size="20" font-family="Consolas, Menlo, monospace">├─ 02-delivery.md</text>
-  <text x="1288" y="724" fill="#64748B" font-size="20" font-family="Consolas, Menlo, monospace">└─ .notemd-chapter-split.json</text>
-  <rect x="1270" y="748" width="180" height="30" rx="15" fill="#E0F2FE"/>
-  <text x="1294" y="769" fill="#0369A1" font-size="17" font-family="Segoe UI, Arial, sans-serif" font-weight="700">stale files cleaned on rerun</text>
+  <rect x="1168" y="388" width="336" height="448" rx="30" fill="#FFFFFF" filter="url(#shadow)"/>
+  <text x="1200" y="444" fill="#0F172A" font-size="32" font-family="Segoe UI, Arial, sans-serif" font-weight="800">Output Folder</text>
+  <text x="1200" y="478" fill="#475569" font-size="20" font-family="Segoe UI, Arial, sans-serif">Files beside the source</text>
+  <rect x="1200" y="516" width="272" height="280" rx="20" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="2"/>
+  <text x="1224" y="560" fill="#0F172A" font-size="22" font-family="Consolas, Menlo, monospace" font-weight="700">Platform_chapters/</text>
+  <text x="1236" y="604" fill="#7C3AED" font-size="18" font-family="Consolas, Menlo, monospace">├ Platform_TOC.md</text>
+  <text x="1236" y="642" fill="#0F766E" font-size="18" font-family="Consolas, Menlo, monospace">├ 01-overview.md</text>
+  <text x="1236" y="680" fill="#0F766E" font-size="18" font-family="Consolas, Menlo, monospace">├ 02-delivery.md</text>
+  <text x="1236" y="718" fill="#64748B" font-size="18" font-family="Consolas, Menlo, monospace">└ .notemd-chapter-</text>
+  <text x="1258" y="748" fill="#64748B" font-size="18" font-family="Consolas, Menlo, monospace">split.json</text>
+  <rect x="1222" y="764" width="228" height="30" rx="15" fill="#E0F2FE"/>
+  <text x="1242" y="785" fill="#0369A1" font-size="16" font-family="Segoe UI, Arial, sans-serif" font-weight="700">stale files cleaned on rerun</text>
 
   <rect x="96" y="866" width="1408" height="48" rx="24" fill="#0F172A"/>
-  <text x="126" y="897" fill="#E2E8F0" font-size="22" font-family="Segoe UI, Arial, sans-serif">Deterministic TOC metadata • Stable nested-heading block refs • Manual-edit protection • Explicit split-level control</text>
+  <text x="126" y="897" fill="#E2E8F0" font-size="20" font-family="Segoe UI, Arial, sans-serif">Deterministic TOC metadata • Stable nested-heading block refs • Manual-edit protection • Explicit split-level control</text>
 </svg>
