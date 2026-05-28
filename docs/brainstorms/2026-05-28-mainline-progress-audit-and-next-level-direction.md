@@ -300,7 +300,8 @@ Current-main delta already landed during this Stage-C follow-through:
 
 1. the offline fixture now also regression-locks task-scoped `batchGenerateFromTitles` and `researchSummarize` retrieval cases instead of treating diagram generation as the only maintainer inspect proof path;
 2. maintainer helper help/examples now surface all three currently supported inspect query-derivation modes in practice: `basename`, `explicit`, and `diagram-source`;
-3. exact-file-vs-folder configured knowledge-path boundaries are now checked in the same offline fixture lane, which reduces the risk of docs/examples drifting away from real retrieval behavior.
+3. exact-file-vs-folder configured knowledge-path boundaries are now checked in the same offline fixture lane, which reduces the risk of docs/examples drifting away from real retrieval behavior;
+4. maintainer-side inspect failure states are now explicitly regression-locked as explainability truth as well: `no-paths`, `no-candidate-files`, and `no-retrievable-sections` stay distinguishable instead of collapsing into one generic “no context” outcome.
 
 ### Batch D: keep the provider lane in bounded breadth-maintenance mode
 

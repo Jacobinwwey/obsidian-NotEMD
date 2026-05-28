@@ -517,4 +517,27 @@ describe('local knowledge offline evaluation fixture', () => {
         expect(researchInspect.candidateFilePaths).toEqual(['Knowledge/Scoped/CLI Surface.md']);
         expect(researchInspect.retrieval.sourcePaths).toEqual(['Knowledge/Scoped/CLI Surface.md']);
     });
+
+    test('inspect failure states remain explainable through retrieverBuildStatus without widening behavior', async () => {
+        const noPathsResult = await inspectLocalKnowledgeRetrieval(
+            mockApp as any,
+            {
+                ...mockSettings,
+                enableLocalKnowledgeRetrieval: true,
+                enableLocalKnowledgeForResearchSummarize: true,
+                localKnowledgeBasePaths: '',
+                localKnowledgeResearchSummarizePaths: ''
+            } as any,
+            {
+                taskScope: 'researchSummarize',
+                query: 'missing path coverage'
+            }
+        );
+
+        expect(noPathsResult.retrieverBuildStatus).toBe('no-paths');
+        expect(noPathsResult.retrieverCreated).toBe(false);
+        expect(noPathsResult.candidateFilePaths).toEqual([]);
+        expect(noPathsResult.context).toBeNull();
+        expect(noPathsResult.retrieval.returnedHitCount).toBe(0);
+    });
 });
