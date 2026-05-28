@@ -11,6 +11,14 @@ const WELCOME_RELEASE_NOTE_LIMIT = 2;
 
 const ENTRIES_EN: WelcomeReleaseNoteEntry[] = [
     {
+        version: '1.9.1',
+        highlights: [
+            'Provider settings now use a clearer core/advanced split, preserving existing advanced overrides while keeping first-run provider setup focused on required fields.',
+            'Fetch model list now covers more provider catalog shapes and applies discovered token ceilings to the active provider override lane instead of silently rewriting the global Max tokens value.',
+            'When a discovered model does not expose a reliable output-token ceiling, Notemd preserves any existing provider override and falls back only with an explicit manual-review notice.'
+        ]
+    },
+    {
         version: '1.9.0',
         highlights: [
             'Developer-gated batch folder selection now ships with saved file-selection profiles, one-run folder or rule overrides, clickable preset chips, and an inline selected-file preview before the batch starts.',
@@ -46,6 +54,14 @@ const ENTRIES_EN: WelcomeReleaseNoteEntry[] = [
 
 const ENTRIES_ZH_CN: WelcomeReleaseNoteEntry[] = [
     {
+        version: '1.9.1',
+        highlights: [
+            'Provider 设置现已采用更清晰的核心/高级分组：首次配置只暴露必要字段，同时会保留并自动展开已有高级覆盖项。',
+            '“获取模型列表”现在覆盖更多 provider catalog 形态，并将发现到的输出 token 上限应用到当前 provider 的 override 通道，而不是静默改写全局“最大Token数”。',
+            '当模型发现无法解析可靠输出 token 上限时，Notemd 会保留已有 provider 覆盖值；只有不存在有效覆盖值时才使用 fallback，并明确提示用户人工复核。'
+        ]
+    },
+    {
         version: '1.9.0',
         highlights: [
             '开发者开关控制的 batch 文件夹选择弹窗现已支持已保存筛选档案、单次文件夹/规则覆盖、可点击 preset chips，以及批处理启动前的内联匹配文件预览。',
@@ -80,6 +96,14 @@ const ENTRIES_ZH_CN: WelcomeReleaseNoteEntry[] = [
 ];
 
 const ENTRIES_ZH_TW: WelcomeReleaseNoteEntry[] = [
+    {
+        version: '1.9.1',
+        highlights: [
+            'Provider 設定現已採用更清晰的核心/進階分組：首次配置只暴露必要欄位，同時會保留並自動展開既有進階覆寫項。',
+            '「取得模型列表」現在覆蓋更多 provider catalog 形態，並將發現到的輸出 token 上限套用到目前 provider 的 override 通道，而不是靜默改寫全域「最大Token數」。',
+            '當模型發現無法解析可靠輸出 token 上限時，Notemd 會保留既有 provider 覆寫值；只有不存在有效覆寫值時才使用 fallback，並明確提示使用者人工複核。'
+        ]
+    },
     {
         version: '1.9.0',
         highlights: [

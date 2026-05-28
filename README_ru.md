@@ -699,7 +699,7 @@ MIT License — подробности см. в файле [LICENSE](LICENSE).
 ---
 
 
-*Notemd v1.9.0 — усиливайте граф знаний Obsidian с помощью ИИ.*
+*Notemd v1.9.1 — усиливайте граф знаний Obsidian с помощью ИИ.*
 
 
 <!-- repo-chronicle:start -->
@@ -709,7 +709,7 @@ MIT License — подробности см. в файле [LICENSE](LICENSE).
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.ru.svg)
 
-_Последнее обновление для тега релиза `1.9.0`: 2026-05-26. Дата последнего коммита: 2026-05-26._
+_Последнее обновление для тега релиза `1.9.1`: 2026-05-28. Дата последнего коммита: 2026-05-28._
 <!-- repo-chronicle:end -->
 
 

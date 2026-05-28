@@ -4,6 +4,34 @@ This document summarizes the major functional and architectural changes implemen
 
 ---
 
+## 1.9.1
+
+### Highlights
+
+- Provider settings now converge on a cleaner required-fields-first surface while preserving saved advanced overrides and discovery metadata behavior.
+- Fetch-model-list now covers a broader bounded set of provider catalog shapes and keeps discovered output-token ceilings scoped to provider overrides instead of global `Max tokens`.
+- Release-facing truth is synchronized for the full `1.9.0..1.9.1` delta, including bilingual release notes, welcome digest, version markers, and chronicle references.
+
+### New Features
+
+- Expanded bounded provider model discovery across more OpenAI-compatible endpoint families, additional registry envelopes, continuation tokens, and hosted-provider-specific catalog shapes.
+- Added clearer provider settings guidance so model-aware token notices distinguish provider output-token overrides from the global runtime `Max tokens` budget.
+- Preserved provider-scoped `maxOutputTokens` autofill as the discovery lane while keeping manual typed-model edits responsible for global model-aware token guidance.
+- Extended Stage-C local knowledge-base routing and inspect/evaluation semantics so task-scoped retrieval sources and failure-state visibility stay explicit.
+- Deepened the diagram semantic-verification lane and kept packaging/runtime boundary checks fail-closed on current `main`.
+
+### Fixes
+
+- Fixed discovered-model apply so it no longer silently rewrites the global `Max tokens` field when the real change belongs to the active provider override.
+- Fixed unresolved discovered-model ceilings so an existing valid provider override is preserved instead of being cleared or degraded.
+- Fixed release-modal recent update content so the latest two entries now match the shipped version boundary and localized text bundle.
+- Fixed advanced provider-panel persistence so saved advanced overrides still surface after reopening settings.
+- Realigned progress/planning docs with the actual shipped provider-settings architecture rather than the older global token-sync wording.
+
+### Verification
+
+- Revalidated with `npm run build`, `npm test -- --runInBand`, `npm run audit:i18n-ui`, `npm run audit:render-host`, `obsidian help`, `obsidian-cli help`, local Obsidian hot reload/runtime inspection, and `git diff --check` before cutting the release.
+
 ## 1.9.0
 
 ### Highlights
