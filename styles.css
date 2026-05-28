@@ -1031,6 +1031,20 @@
     white-space: break-spaces;
 }
 
+.notemd-provider-model-copy {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.notemd-provider-model-meta {
+    margin-top: 0.35em;
+    font-size: 12px;
+    line-height: 1.45;
+    color: var(--text-muted);
+    word-break: break-word;
+    overflow-wrap: anywhere;
+}
+
 .notemd-provider-model-item button {
     flex: 0 0 auto;
     white-space: nowrap;

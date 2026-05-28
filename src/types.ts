@@ -29,6 +29,13 @@ export interface FolderTaskFileSelectionProfile {
     fileFilterInvert: boolean;
 }
 
+export interface GlobalModelAwareMaxTokensTracking {
+    providerName: string;
+    modelName: string;
+    discoveryIdentity: string;
+    resolvedMaxTokens: number;
+}
+
 // Main settings structure for the plugin
 export interface NotemdSettings {
     providers: LLMProviderConfig[];
@@ -195,6 +202,7 @@ export interface NotemdSettings {
     enableExperimentalDiagramPipeline: boolean;
     experimentalDiagramCompatibilityMode: 'legacy-mermaid' | 'best-fit';
     preferredDiagramIntent?: string;
+    globalModelAwareMaxTokensTracking?: GlobalModelAwareMaxTokensTracking;
     _firstLaunch?: boolean;
 }
 

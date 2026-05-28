@@ -1,6 +1,13 @@
 import { Notice, requestUrl } from 'obsidian';
-import { LLMProviderConfig, NotemdSettings, ProgressReporter } from './types';
+import {
+    GlobalModelAwareMaxTokensTracking,
+    LLMProviderConfig,
+    NotemdSettings,
+    ProgressReporter
+} from './types';
 import { getKnownModelMaxOutputTokens, getLLMProviderDefinition } from './llmProviders';
+import { normalizeOpenAICompatibleEndpointBaseUrl } from './openaiCompatibleEndpointFamily';
+import { buildOpenAICompatibleProviderHeaders } from './providerRequestHeaders';
 import { DEFAULT_SETTINGS } from './constants';
 import { cancellableDelay } from './utils';
 import { ErrorModal } from './ui/ErrorModal'; // Import ErrorModal
@@ -50,13 +57,18 @@ function resolveProviderTokenLimit(
     provider: LLMProviderConfig,
     modelName: string,
     fallbackMaxTokens: number,
-    options?: { connectionTest?: boolean }
+    options?: {
+        connectionTest?: boolean;
+        modelAwareTracking?: GlobalModelAwareMaxTokensTracking;
+    }
 ): number | undefined {
     if (options?.connectionTest) {
         return 1;
     }
 
-    const knownModelMaxTokens = getKnownModelMaxOutputTokens(provider.name, modelName);
+    const knownModelMaxTokens = getKnownModelMaxOutputTokens(provider.name, modelName, {
+        baseUrl: provider.baseUrl
+    });
     const providerOverride = Number(provider.maxOutputTokens);
     if (Number.isFinite(providerOverride) && providerOverride > 0) {
         if (typeof knownModelMaxTokens === 'number' && knownModelMaxTokens > 0) {
@@ -69,7 +81,14 @@ function resolveProviderTokenLimit(
         if (typeof knownModelMaxTokens === 'number' && knownModelMaxTokens > 0) {
             // Preserve manual user choices below the known model ceiling, but treat the untouched
             // global default as "auto" so supported models can use their real max output cap.
-            if (fallbackMaxTokens === DEFAULT_SETTINGS.maxTokens) {
+            const tracking = options?.modelAwareTracking;
+            const matchesTrackedAutoBaseline = Boolean(
+                tracking
+                && tracking.providerName === provider.name
+                && tracking.modelName === modelName.trim()
+                && tracking.resolvedMaxTokens === fallbackMaxTokens
+            );
+            if (fallbackMaxTokens === DEFAULT_SETTINGS.maxTokens || matchesTrackedAutoBaseline) {
                 return knownModelMaxTokens;
             }
             return Math.min(fallbackMaxTokens, knownModelMaxTokens);
@@ -134,50 +153,8 @@ function shouldEnableDeepSeekThinking(provider: LLMProviderConfig): boolean {
     return provider.name === 'DeepSeek' && provider.thinkingEnabled === true;
 }
 
-function buildOpenAICompatibleHeaders(provider: LLMProviderConfig): Record<string, string> {
-    const headers: Record<string, string> = {
-        'Content-Type': 'application/json'
-    };
-
-    if (provider.apiKey || provider.name === 'LMStudio') {
-        headers['Authorization'] = `Bearer ${provider.apiKey || 'EMPTY'}`;
-    }
-
-    if (provider.name === 'OpenRouter' || provider.name === 'Requesty') {
-        headers['HTTP-Referer'] = 'https://github.com/Jacobinwwey/obsidian-NotEMD';
-        headers['X-Title'] = 'Notemd Obsidian Plugin';
-    }
-
-    if (provider.name === 'Cerebras') {
-        headers['X-Cerebras-3rd-Party-Integration'] = 'notemd';
-    }
-
-    return headers;
-}
-
-function trimTrailingSlashes(value: string): string {
-    return value.replace(/\/+$/, '');
-}
-
 function normalizeOpenAICompatibleBaseUrl(baseUrl: string): string {
-    let normalized = trimTrailingSlashes(baseUrl.trim());
-    if (!normalized) {
-        return normalized;
-    }
-
-    if (normalized.endsWith('/chat/completions')) {
-        normalized = normalized.slice(0, -'/chat/completions'.length);
-    }
-
-    if (normalized.endsWith('/models')) {
-        normalized = normalized.slice(0, -'/models'.length);
-    }
-
-    if (normalized.endsWith('/v1/ai')) {
-        normalized = normalized.slice(0, -'/ai'.length);
-    }
-
-    return normalized;
+    return normalizeOpenAICompatibleEndpointBaseUrl(baseUrl);
 }
 
 function buildOpenAICompatibleUrl(baseUrl: string, path: 'chat/completions' | 'models'): string {
@@ -2165,7 +2142,10 @@ function buildOpenAICompatibleRequestBody(
     content: string,
     maxTokens: number,
     temperature: number,
-    options?: { connectionTest?: boolean }
+    options?: {
+        connectionTest?: boolean;
+        modelAwareTracking?: GlobalModelAwareMaxTokensTracking;
+    }
 ) {
     const isConnectionTest = options?.connectionTest === true;
     const requestBody: any = {
@@ -2277,7 +2257,7 @@ async function testOpenAICompatibleAPI(provider: LLMProviderConfig): Promise<{ s
     ensureProviderApiKey(provider);
 
     let response;
-    const headers = buildOpenAICompatibleHeaders(provider);
+    const headers = buildOpenAICompatibleProviderHeaders(provider);
     const apiTestMode = getLLMProviderDefinition(provider.name)?.apiTestMode ?? 'chat-only';
     const normalizedBaseUrl = normalizeOpenAICompatibleBaseUrl(provider.baseUrl);
 
@@ -2730,7 +2710,9 @@ async function executeOpenAIApi(provider: LLMProviderConfig, modelName: string, 
 async function executeAnthropicApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings, signal?: AbortSignal): Promise<string> {
     if (!provider.apiKey) throw new Error(`API key is missing for Anthropic provider.`);
     const url = `${provider.baseUrl}/v1/messages`;
-    const tokenLimit = resolveProviderTokenLimit(provider, modelName, settings.maxTokens);
+    const tokenLimit = resolveProviderTokenLimit(provider, modelName, settings.maxTokens, {
+        modelAwareTracking: settings.globalModelAwareMaxTokensTracking
+    });
     const requestBody = {
         model: modelName,
         system: prompt, // Pass the prompt as the system message
@@ -2797,7 +2779,9 @@ async function executeGoogleApi(provider: LLMProviderConfig, modelName: string, 
     const streamUrl = new URL(urlWithKey);
     streamUrl.pathname = streamUrl.pathname.replace(':generateContent', ':streamGenerateContent');
     streamUrl.searchParams.set('alt', 'sse');
-    const tokenLimit = resolveProviderTokenLimit(provider, modelName, settings.maxTokens);
+    const tokenLimit = resolveProviderTokenLimit(provider, modelName, settings.maxTokens, {
+        modelAwareTracking: settings.globalModelAwareMaxTokensTracking
+    });
     const requestBody = {
         contents: [{ role: 'user', parts: [{ text: `${prompt}\n\n${content}` }] }],
         generationConfig: { temperature: provider.temperature, maxOutputTokens: tokenLimit }
@@ -2853,7 +2837,9 @@ async function executeAzureOpenAIApi(provider: LLMProviderConfig, modelName: str
     if (!provider.apiKey) throw new Error(`API key is missing for Azure OpenAI provider.`);
     if (!provider.apiVersion || !provider.baseUrl) { throw new Error('API version and Base URL are required for Azure OpenAI'); }
     const url = `${provider.baseUrl}/openai/deployments/${modelName}/chat/completions?api-version=${provider.apiVersion}`;
-    const tokenLimit = resolveProviderTokenLimit(provider, modelName, settings.maxTokens);
+    const tokenLimit = resolveProviderTokenLimit(provider, modelName, settings.maxTokens, {
+        modelAwareTracking: settings.globalModelAwareMaxTokensTracking
+    });
     const requestBody = {
         messages: [{ role: 'system', content: prompt }, { role: 'user', content: content }],
         temperature: provider.temperature,
@@ -2904,7 +2890,9 @@ async function executeLMStudioApi(provider: LLMProviderConfig, modelName: string
 async function executeOllamaApi(provider: LLMProviderConfig, modelName: string, prompt: string, content: string, progressReporter: ProgressReporter, settings: NotemdSettings, signal?: AbortSignal): Promise<string> {
     // Note: Ollama does not use API keys.
     const url = `${provider.baseUrl}/chat`;
-    const tokenLimit = resolveProviderTokenLimit(provider, modelName, settings.maxTokens);
+    const tokenLimit = resolveProviderTokenLimit(provider, modelName, settings.maxTokens, {
+        modelAwareTracking: settings.globalModelAwareMaxTokensTracking
+    });
     const requestBody = {
         model: modelName,
         messages: [{ role: 'system', content: prompt }, { role: 'user', content: content }],
@@ -2976,7 +2964,10 @@ async function executeOpenAICompatibleApi(provider: LLMProviderConfig, modelName
         prompt,
         content,
         settings.maxTokens,
-        provider.temperature
+        provider.temperature,
+        {
+            modelAwareTracking: settings.globalModelAwareMaxTokensTracking
+        }
     );
     const requestBodyJson = JSON.stringify(requestBody);
     const streamRequestBodyJson = JSON.stringify({
@@ -2993,7 +2984,7 @@ async function executeOpenAICompatibleApi(provider: LLMProviderConfig, modelName
             response = await requestOpenAICompatibleWithStreamingFallback(provider.name, {
                 url,
                 method: 'POST',
-                headers: buildOpenAICompatibleHeaders(provider),
+                headers: buildOpenAICompatibleProviderHeaders(provider),
                 body: requestBodyJson,
                 throw: false
             }, streamRequestBodyJson, progressReporter, signal, settings.enableStableApiCall);
@@ -3036,7 +3027,10 @@ export async function callOpenAICompatibleDiagnosticWithMode(
         prompt,
         content,
         settings.maxTokens,
-        provider.temperature
+        provider.temperature,
+        {
+            modelAwareTracking: settings.globalModelAwareMaxTokensTracking
+        }
     );
     const requestBodyJson = JSON.stringify(requestBody);
     const streamRequestBodyJson = JSON.stringify({
@@ -3047,7 +3041,7 @@ export async function callOpenAICompatibleDiagnosticWithMode(
     const baseOptions: RuntimeRequestOptions = {
         url,
         method: 'POST',
-        headers: buildOpenAICompatibleHeaders(provider),
+        headers: buildOpenAICompatibleProviderHeaders(provider),
         body: requestBodyJson,
         throw: false
     };

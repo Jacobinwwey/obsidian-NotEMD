@@ -1,4 +1,8 @@
 import { LLMProviderConfig } from './types';
+import {
+    detectOpenAICompatibleEndpointFamily,
+    inferKnownOpenAICompatibleProviderNames
+} from './openaiCompatibleEndpointFamily';
 
 export type LLMProviderCategory = 'cloud' | 'gateway' | 'local';
 export type LLMProviderTransport = 'openai-compatible' | 'anthropic' | 'google' | 'azure-openai' | 'ollama';
@@ -18,10 +22,20 @@ export type LLMProviderSettingFieldId =
 export type LLMProviderSettingFieldGroup = 'core' | 'contextual' | 'advanced' | 'developer';
 export type LLMProviderModelDiscoveryMode =
     | 'none'
+    | 'aihubmix-models'
+    | 'github-models'
+    | 'ppio-models'
+    | 'ovms-models'
     | 'openai-compatible-models'
+    | 'openrouter-models'
+    | 'litellm-proxy-models'
+    | 'huaweicloud-modelarts-models'
+    | 'anthropic-models'
+    | 'together-models'
     | 'vercel-ai-gateway-models'
     | 'ollama-tags'
-    | 'google-models';
+    | 'google-models'
+    | 'xai-language-models';
 
 export interface LLMProviderSettingFieldDefinition {
     id: LLMProviderSettingFieldId;
@@ -30,6 +44,7 @@ export interface LLMProviderSettingFieldDefinition {
 
 export interface LLMProviderModelDiscoveryDefinition {
     mode: LLMProviderModelDiscoveryMode;
+    disableReasonKey?: 'azureDeployment' | 'liteLlmProxy' | 'huaweicloudDeployment';
 }
 
 export interface LLMProviderDefinition {
@@ -54,6 +69,31 @@ const DEEPSEEK_RECOMMENDED_THINKING_OUTPUT_TOKENS = 8000;
 const PROVIDER_NAME_ALIASES = new Map<string, string>([
     ['Xiaomi', 'Xiaomi MiMo']
 ]);
+const PROVIDER_NAMES_ALLOWING_GLOBAL_CONSISTENT_MODEL_TOKEN_FALLBACK = new Set([
+    'AIHubMix',
+    'GitHub Models',
+    'PPIO'
+]);
+const MODEL_PROVIDER_PREFIX_ALIASES = new Map<string, string[]>([
+    ['alibaba', ['Qwen']],
+    ['anthropic', ['Anthropic']],
+    ['deepseek', ['DeepSeek']],
+    ['deepseek-ai', ['DeepSeek']],
+    ['gemini', ['Google']],
+    ['google', ['Google']],
+    ['minimax', ['MiniMax']],
+    ['mistral', ['Mistral']],
+    ['mistralai', ['Mistral']],
+    ['moonshot', ['Moonshot']],
+    ['moonshotai', ['Moonshot']],
+    ['openai', ['OpenAI']],
+    ['qwen', ['Qwen', 'Qwen Code']],
+    ['x-ai', ['xAI']],
+    ['xai', ['xAI']],
+    ['xiaomi', ['Xiaomi MiMo']],
+    ['z-ai', ['Z AI']],
+    ['zai', ['Z AI']]
+]);
 const OPENAI_COMPATIBLE_REASONING_PROVIDER_NAMES = new Set([
     'DeepSeek',
     'OpenAI',
@@ -62,13 +102,30 @@ const OPENAI_COMPATIBLE_REASONING_PROVIDER_NAMES = new Set([
 ]);
 const OPENAI_COMPATIBLE_MODEL_DISCOVERY_PROVIDER_NAMES = new Set([
     'DeepSeek',
+    'Qwen',
+    'Qwen Code',
+    'Doubao',
+    'Moonshot',
+    'Xiaomi MiMo',
+    'GLM',
+    'Z AI',
+    'MiniMax',
+    'Baidu Qianfan',
+    'SiliconFlow',
+    'LMStudio',
     'OpenAI',
     'Mistral',
+    'Groq',
+    'Fireworks',
+    'LiteLLM',
     'Nebius',
     'Cerebras',
+    'Hugging Face',
     'OpenRouter',
     'xAI',
     'Requesty',
+    'GitHub Models',
+    'New API',
     'OpenAI Compatible'
 ]);
 
@@ -372,15 +429,63 @@ function resolveModelDiscoveryMode(definition: ProviderDefinitionInput): LLMProv
         return { mode: 'google-models' };
     }
 
+    if (definition.transport === 'anthropic') {
+        return { mode: 'anthropic-models' };
+    }
+
+    if (definition.name === 'Huawei Cloud MaaS') {
+        return { mode: 'huaweicloud-modelarts-models' };
+    }
+
+    if (definition.name === 'Together') {
+        return { mode: 'together-models' };
+    }
+
+    if (definition.name === 'AIHubMix') {
+        return { mode: 'aihubmix-models' };
+    }
+
+    if (definition.name === 'GitHub Models') {
+        return { mode: 'github-models' };
+    }
+
+    if (definition.name === 'PPIO') {
+        return { mode: 'ppio-models' };
+    }
+
+    if (definition.name === 'OVMS') {
+        return { mode: 'ovms-models' };
+    }
+
+    if (definition.name === 'OpenRouter') {
+        return { mode: 'openrouter-models' };
+    }
+
+    if (definition.name === 'LiteLLM') {
+        return { mode: 'litellm-proxy-models' };
+    }
+
     if (definition.name === 'Vercel AI Gateway') {
         return { mode: 'vercel-ai-gateway-models' };
+    }
+
+    if (definition.name === 'xAI') {
+        return { mode: 'xai-language-models' };
     }
 
     if (definition.transport === 'openai-compatible' && OPENAI_COMPATIBLE_MODEL_DISCOVERY_PROVIDER_NAMES.has(definition.name)) {
         return { mode: 'openai-compatible-models' };
     }
 
-    return { mode: 'none' };
+    switch (definition.name) {
+        case 'Azure OpenAI':
+            return {
+                mode: 'none',
+                disableReasonKey: 'azureDeployment'
+            };
+        default:
+            return { mode: 'none' };
+    }
 }
 
 function buildProviderSettingFields(definition: ProviderDefinitionInput): LLMProviderSettingFieldDefinition[] {
@@ -396,7 +501,7 @@ function buildProviderSettingFields(definition: ProviderDefinitionInput): LLMPro
     );
 
     if (definition.transport === 'azure-openai') {
-        fields.push({ id: 'apiVersion', group: 'contextual' });
+        fields.push({ id: 'apiVersion', group: 'core' });
     }
 
     fields.push({ id: 'temperature', group: 'advanced' });
@@ -765,6 +870,86 @@ const RAW_LLM_PROVIDER_DEFINITIONS: ProviderDefinitionInput[] = [
         }
     },
     {
+        name: 'AIHubMix',
+        category: 'gateway',
+        transport: 'openai-compatible',
+        apiKeyMode: 'required',
+        apiTestMode: 'chat-only',
+        description: 'AIHubMix unified OpenAI-compatible gateway for GPT, Claude, Gemini, DeepSeek, Qwen, and other hosted models.',
+        setupHint: 'Use the official AIHubMix OpenAI-compatible base URL https://aihubmix.com/v1 with a model ID available to your account, such as gpt-4o-mini or gpt-5.',
+        defaultConfig: {
+            name: 'AIHubMix',
+            apiKey: '',
+            baseUrl: 'https://aihubmix.com/v1',
+            model: 'gpt-4o-mini',
+            temperature: 0.5
+        }
+    },
+    {
+        name: 'GitHub Models',
+        category: 'gateway',
+        transport: 'openai-compatible',
+        apiKeyMode: 'required',
+        apiTestMode: 'chat-only',
+        description: 'GitHub Models OpenAI-compatible inference endpoint with a hosted catalog for GitHub-token-backed model access.',
+        setupHint: 'Use a GitHub token that has access to GitHub Models, point Base URL at https://models.github.ai/inference, and choose a catalog model such as gpt-4o-mini or Phi-4.',
+        defaultConfig: {
+            name: 'GitHub Models',
+            apiKey: '',
+            baseUrl: 'https://models.github.ai/inference',
+            model: 'gpt-4o-mini',
+            temperature: 0.5
+        }
+    },
+    {
+        name: 'PPIO',
+        category: 'gateway',
+        transport: 'openai-compatible',
+        apiKeyMode: 'required',
+        apiTestMode: 'chat-only',
+        description: 'PPIO multi-provider OpenAI-compatible gateway with bounded model discovery across chat, embedding, and reranker registries.',
+        setupHint: 'Use the official PPIO OpenAI-compatible base URL https://api.ppinfra.com/v3/openai with a model ID available to your account, such as qwen/qwen3-32b or openai/gpt-4o-mini.',
+        defaultConfig: {
+            name: 'PPIO',
+            apiKey: '',
+            baseUrl: 'https://api.ppinfra.com/v3/openai',
+            model: 'qwen/qwen3-32b',
+            temperature: 0.5
+        }
+    },
+    {
+        name: 'New API',
+        category: 'gateway',
+        transport: 'openai-compatible',
+        apiKeyMode: 'optional',
+        apiTestMode: 'chat-only',
+        description: 'Self-hosted New API gateway using the native OpenAI-compatible `/v1/models` and chat-completions surfaces.',
+        setupHint: 'Use your New API server root such as http://localhost:3000/v1 with the model ID exposed by your deployment. Keep the API key empty only if your instance explicitly allows anonymous access.',
+        defaultConfig: {
+            name: 'New API',
+            apiKey: '',
+            baseUrl: 'http://localhost:3000/v1',
+            model: 'gpt-4.1',
+            temperature: 0.5
+        }
+    },
+    {
+        name: 'OVMS',
+        category: 'local',
+        transport: 'openai-compatible',
+        apiKeyMode: 'optional',
+        apiTestMode: 'chat-only',
+        description: 'OpenVINO Model Server local OpenAI-compatible endpoint with bounded local model discovery.',
+        setupHint: 'Use the current OVMS OpenAI-compatible base URL such as http://localhost:8000/v3. Model discovery prefers the modern `/v3/models` endpoint and only falls back to legacy local config surfaces when needed.',
+        defaultConfig: {
+            name: 'OVMS',
+            apiKey: '',
+            baseUrl: 'http://localhost:8000/v3',
+            model: 'openvino-model',
+            temperature: 0.5
+        }
+    },
+    {
         name: 'Fireworks',
         category: 'cloud',
         transport: 'openai-compatible',
@@ -977,17 +1162,134 @@ function normalizeModelId(modelName: string): string {
     return modelName.trim().toLowerCase();
 }
 
-export function getKnownModelMaxOutputTokens(providerName: string, modelName: string): number | undefined {
-    if (!modelName.trim()) {
-        return undefined;
-    }
-
+function getKnownModelMaxOutputTokensForProvider(providerName: string, normalizedModelName: string): number | undefined {
     const providerModels = KNOWN_MODEL_MAX_OUTPUT_TOKENS[resolveCanonicalProviderName(providerName)];
     if (!providerModels) {
         return undefined;
     }
 
-    return providerModels[normalizeModelId(modelName)];
+    return providerModels[normalizedModelName];
+}
+
+function pickConsistentKnownModelMaxOutputTokens(candidates: number[]): number | undefined {
+    const uniqueCandidates = Array.from(new Set(
+        candidates.filter(candidate => Number.isFinite(candidate) && candidate > 0)
+    ));
+
+    if (uniqueCandidates.length !== 1) {
+        return undefined;
+    }
+
+    return uniqueCandidates[0];
+}
+
+function getGloballyConsistentKnownModelMaxOutputTokens(normalizedModelName: string): number | undefined {
+    const candidates = Object.keys(KNOWN_MODEL_MAX_OUTPUT_TOKENS)
+        .map(providerName => getKnownModelMaxOutputTokensForProvider(providerName, normalizedModelName))
+        .filter((candidate): candidate is number => typeof candidate === 'number');
+
+    return pickConsistentKnownModelMaxOutputTokens(candidates);
+}
+
+function getPrefixMappedKnownModelMaxOutputTokens(normalizedModelName: string): number | undefined {
+    const slashIndex = normalizedModelName.indexOf('/');
+    if (slashIndex <= 0 || slashIndex >= normalizedModelName.length - 1) {
+        return undefined;
+    }
+
+    const providerPrefix = normalizedModelName.slice(0, slashIndex);
+    const upstreamModelName = normalizedModelName.slice(slashIndex + 1);
+    const upstreamProviders = MODEL_PROVIDER_PREFIX_ALIASES.get(providerPrefix);
+    if (!upstreamProviders || upstreamProviders.length === 0) {
+        return undefined;
+    }
+
+    const candidates = upstreamProviders
+        .map(providerName => getKnownModelMaxOutputTokensForProvider(providerName, upstreamModelName))
+        .filter((candidate): candidate is number => typeof candidate === 'number');
+
+    return pickConsistentKnownModelMaxOutputTokens(candidates);
+}
+
+function getHostMappedKnownModelMaxOutputTokens(
+    providerName: string,
+    normalizedModelName: string,
+    baseUrl?: string
+): number | undefined {
+    if (resolveCanonicalProviderName(providerName) !== 'OpenAI Compatible' || !baseUrl?.trim()) {
+        return undefined;
+    }
+
+    const inferredProviders = inferKnownOpenAICompatibleProviderNames(baseUrl)
+        .map(resolveCanonicalProviderName)
+        .filter((candidate, index, array) => candidate && array.indexOf(candidate) === index);
+
+    if (inferredProviders.length === 0) {
+        return undefined;
+    }
+
+    const candidates = inferredProviders
+        .map(candidateProviderName => getKnownModelMaxOutputTokensForProvider(candidateProviderName, normalizedModelName))
+        .filter((candidate): candidate is number => typeof candidate === 'number');
+
+    return pickConsistentKnownModelMaxOutputTokens(candidates);
+}
+
+export function getKnownModelMaxOutputTokens(
+    providerName: string,
+    modelName: string,
+    options?: { allowGlobalConsistentFallback?: boolean; baseUrl?: string; ownerHint?: string }
+): number | undefined {
+    if (!modelName.trim()) {
+        return undefined;
+    }
+
+    const normalizedModelName = normalizeModelId(modelName);
+    const providerKnownLimit = getKnownModelMaxOutputTokensForProvider(providerName, normalizedModelName);
+    if (typeof providerKnownLimit === 'number') {
+        return providerKnownLimit;
+    }
+
+    const hostMappedLimit = getHostMappedKnownModelMaxOutputTokens(providerName, normalizedModelName, options?.baseUrl);
+    if (typeof hostMappedLimit === 'number') {
+        return hostMappedLimit;
+    }
+
+    if (typeof options?.ownerHint === 'string' && options.ownerHint.trim() && !normalizedModelName.includes('/')) {
+        const ownerHintKey = options.ownerHint.trim().toLowerCase();
+        const upstreamProviders = MODEL_PROVIDER_PREFIX_ALIASES.get(ownerHintKey);
+        if (upstreamProviders && upstreamProviders.length > 0) {
+            const ownerHintCandidates = upstreamProviders
+                .map(candidateProviderName => getKnownModelMaxOutputTokensForProvider(candidateProviderName, normalizedModelName))
+                .filter((candidate): candidate is number => typeof candidate === 'number');
+            const ownerHintLimit = pickConsistentKnownModelMaxOutputTokens(ownerHintCandidates);
+            if (typeof ownerHintLimit === 'number') {
+                return ownerHintLimit;
+            }
+        }
+    }
+
+    const prefixMappedLimit = getPrefixMappedKnownModelMaxOutputTokens(normalizedModelName);
+    if (typeof prefixMappedLimit === 'number') {
+        return prefixMappedLimit;
+    }
+
+    if (normalizedModelName.includes('/')) {
+        const globallyConsistentPrefixedLimit = getGloballyConsistentKnownModelMaxOutputTokens(normalizedModelName);
+        if (typeof globallyConsistentPrefixedLimit === 'number') {
+            return globallyConsistentPrefixedLimit;
+        }
+    }
+
+    const canonicalProviderName = resolveCanonicalProviderName(providerName);
+    if (
+        options?.allowGlobalConsistentFallback === true
+        || PROVIDER_NAMES_ALLOWING_GLOBAL_CONSISTENT_MODEL_TOKEN_FALLBACK.has(canonicalProviderName)
+    ) {
+        return getGloballyConsistentKnownModelMaxOutputTokens(normalizedModelName);
+    }
+
+    return undefined;
 }
 
 export function createDefaultProviders(): LLMProviderConfig[] {
@@ -1004,6 +1306,63 @@ export function getProviderSettingFields(name: string): LLMProviderSettingFieldD
 
 export function getProviderModelDiscoveryDefinition(name: string): LLMProviderModelDiscoveryDefinition {
     return getLLMProviderDefinition(name)?.modelDiscovery ?? { mode: 'none' };
+}
+
+function inferOpenAICompatibleDiscoveryMode(provider: LLMProviderConfig): LLMProviderModelDiscoveryDefinition | undefined {
+    const family = detectOpenAICompatibleEndpointFamily(provider.baseUrl);
+    if (!family) {
+        return undefined;
+    }
+
+    switch (family) {
+        case 'aihubmix':
+            return { mode: 'aihubmix-models' };
+        case 'github-models':
+            return { mode: 'github-models' };
+        case 'ovms':
+            return { mode: 'ovms-models' };
+        case 'ppio':
+            return { mode: 'ppio-models' };
+        case 'openrouter':
+            return { mode: 'openrouter-models' };
+        case 'requesty':
+            return { mode: 'openai-compatible-models' };
+        case 'vercel-ai-gateway':
+            return { mode: 'vercel-ai-gateway-models' };
+        case 'together':
+            return { mode: 'together-models' };
+        case 'huaweicloud-modelarts':
+            return { mode: 'huaweicloud-modelarts-models' };
+        case 'xai':
+            return { mode: 'xai-language-models' };
+        case 'litellm-proxy':
+            return { mode: 'litellm-proxy-models' };
+        case 'cerebras':
+            return { mode: 'openai-compatible-models' };
+        default:
+            return undefined;
+    }
+}
+
+export function resolveProviderModelDiscoveryDefinition(provider: LLMProviderConfig): LLMProviderModelDiscoveryDefinition {
+    const configuredDefinition = getProviderModelDiscoveryDefinition(provider.name);
+    if (configuredDefinition.mode !== 'openai-compatible-models') {
+        return configuredDefinition;
+    }
+
+    return inferOpenAICompatibleDiscoveryMode(provider) ?? configuredDefinition;
+}
+
+export function getProviderDiscoveryIdentity(provider: LLMProviderConfig): string {
+    const discovery = resolveProviderModelDiscoveryDefinition(provider);
+    return JSON.stringify({
+        name: provider.name,
+        mode: discovery.mode,
+        disableReasonKey: discovery.disableReasonKey ?? '',
+        baseUrl: provider.baseUrl.trim(),
+        apiKey: provider.apiKey.trim(),
+        apiVersion: provider.apiVersion?.trim() ?? ''
+    });
 }
 
 function getProviderFieldValue(provider: LLMProviderConfig, fieldId: LLMProviderSettingFieldId): unknown {

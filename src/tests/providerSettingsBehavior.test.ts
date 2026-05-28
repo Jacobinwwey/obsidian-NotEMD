@@ -4,10 +4,10 @@ import { DEFAULT_SETTINGS } from '../constants';
 import { mockApp } from './__mocks__/app';
 
 jest.mock('../providerModelDiscovery', () => ({
-    discoverProviderModels: jest.fn()
+    discoverProviderModelsDetailed: jest.fn()
 }));
 
-import { discoverProviderModels } from '../providerModelDiscovery';
+import { discoverProviderModelsDetailed } from '../providerModelDiscovery';
 
 type MockElement = {
     tag: string;
@@ -515,6 +515,16 @@ function findSettingByName(root: MockElement, name: string): MockSetting | undef
     return collectSettings(root).find(setting => setting.name === name);
 }
 
+function createDeferred<T>() {
+    let resolve!: (value: T) => void;
+    let reject!: (reason?: unknown) => void;
+    const promise = new Promise<T>((res, rej) => {
+        resolve = res;
+        reject = rej;
+    });
+    return { promise, resolve, reject };
+}
+
 async function triggerDeferredTextBlur(control: MockTextControl): Promise<void> {
     const blurHandler = control.inputEl.addEventListener.mock.calls
         .find(([eventName]: [string]) => eventName === 'blur')?.[1] as (() => Promise<void> | void) | undefined;
@@ -615,11 +625,17 @@ describe('provider settings behavior', () => {
     test('applies a discovered model, shows feedback, and collapses the discovered models panel', async () => {
         const plugin = createPlugin();
         plugin.settings.activeProvider = 'DeepSeek';
+        plugin.settings.maxTokens = DEFAULT_SETTINGS.maxTokens;
+        plugin.settings.chunkWordCount = DEFAULT_SETTINGS.chunkWordCount;
         const provider = plugin.settings.providers.find((entry: any) => entry.name === 'DeepSeek');
         provider.model = 'deepseek-chat';
 
-        (discoverProviderModels as jest.Mock).mockResolvedValue({
+        (discoverProviderModelsDetailed as jest.Mock).mockResolvedValue({
             models: ['deepseek-chat', 'deepseek-v4-pro'],
+            entries: [
+                { id: 'deepseek-chat' },
+                { id: 'deepseek-v4-pro', maxOutputTokens: 8192 }
+            ],
             source: 'remote'
         });
 
@@ -645,6 +661,14 @@ describe('provider settings behavior', () => {
         await useButtons[0].click();
 
         expect(provider.model).toBe('deepseek-v4-pro');
+        expect(plugin.settings.maxTokens).toBe(8192);
+        expect(plugin.settings.chunkWordCount).toBe(2731);
+        expect(plugin.settings.globalModelAwareMaxTokensTracking).toEqual({
+            providerName: 'DeepSeek',
+            modelName: 'deepseek-v4-pro',
+            discoveryIdentity: expect.any(String),
+            resolvedMaxTokens: 8192
+        });
         expect(plugin.saveSettings).toHaveBeenCalled();
         expect(Notice).toHaveBeenCalledWith('Applied deepseek-v4-pro to DeepSeek.', 5000);
 
@@ -654,6 +678,575 @@ describe('provider settings behavior', () => {
 
         const summaryNode = findElementByClass(tab.containerEl, 'notemd-provider-discovery-summary');
         expect(summaryNode?.text).toContain('current: deepseek-v4-pro');
+    });
+
+    test('preserves manual token overrides when applying a discovered model', async () => {
+        const plugin = createPlugin();
+        plugin.settings.activeProvider = 'DeepSeek';
+        plugin.settings.maxTokens = 12000;
+        plugin.settings.chunkWordCount = 1234;
+        const provider = plugin.settings.providers.find((entry: any) => entry.name === 'DeepSeek');
+        provider.model = 'deepseek-chat';
+
+        (discoverProviderModelsDetailed as jest.Mock).mockResolvedValue({
+            models: ['deepseek-chat', 'deepseek-v4-pro'],
+            entries: [
+                { id: 'deepseek-chat' },
+                { id: 'deepseek-v4-pro', maxOutputTokens: 8192 }
+            ],
+            source: 'remote'
+        });
+
+        const tab = new NotemdSettingTab(mockApp as any, plugin as any) as any;
+        tab.display();
+
+        const fetchSetting = findSettingByName(tab.containerEl, 'Fetch model list');
+        const fetchButton = fetchSetting?.controls.find(control => control.kind === 'button') as MockButtonControl | undefined;
+        expect(fetchButton).toBeDefined();
+
+        await fetchButton?.click();
+
+        const useButtons = mockButtonComponents.filter(control => control.text === 'Use');
+        expect(useButtons).toHaveLength(1);
+
+        await useButtons[0].click();
+
+        expect(provider.model).toBe('deepseek-v4-pro');
+        expect(plugin.settings.maxTokens).toBe(12000);
+        expect(plugin.settings.chunkWordCount).toBe(1234);
+        expect(plugin.settings.globalModelAwareMaxTokensTracking).toBeUndefined();
+    });
+
+    test('uses transient discovered max-output-token hints when applying a model that is absent from the static token registry', async () => {
+        const plugin = createPlugin();
+        plugin.settings.activeProvider = 'OpenAI Compatible';
+        plugin.settings.maxTokens = DEFAULT_SETTINGS.maxTokens;
+        plugin.settings.chunkWordCount = DEFAULT_SETTINGS.chunkWordCount;
+        const provider = plugin.settings.providers.find((entry: any) => entry.name === 'OpenAI Compatible');
+        provider.baseUrl = 'https://custom-openai-compatible.example/v1';
+        provider.model = 'legacy-model';
+
+        (discoverProviderModelsDetailed as jest.Mock).mockResolvedValue({
+            models: ['custom-model-ultra'],
+            entries: [
+                {
+                    id: 'custom-model-ultra',
+                    label: 'Custom Model Ultra',
+                    ownerHint: 'custom-gateway',
+                    maxOutputTokens: 24576
+                }
+            ],
+            source: 'remote'
+        });
+
+        const tab = new NotemdSettingTab(mockApp as any, plugin as any) as any;
+        tab.display();
+
+        const fetchSetting = findSettingByName(tab.containerEl, 'Fetch model list');
+        const fetchButton = fetchSetting?.controls.find(control => control.kind === 'button') as MockButtonControl | undefined;
+        expect(fetchButton).toBeDefined();
+
+        await fetchButton?.click();
+
+        const modelMeta = findElementByClass(tab.containerEl, 'notemd-provider-model-meta');
+        expect(modelMeta?.text).toContain('Custom Model Ultra');
+        expect(modelMeta?.text).toContain('Provider hint: custom-gateway.');
+        expect(modelMeta?.text).toContain('Known model max output tokens: 24576.');
+
+        const useButtons = mockButtonComponents.filter(control => control.text === 'Use');
+        expect(useButtons).toHaveLength(1);
+
+        await useButtons[0].click();
+
+        expect(provider.model).toBe('custom-model-ultra');
+        expect(plugin.settings.maxTokens).toBe(24576);
+        expect(plugin.settings.chunkWordCount).toBe(8192);
+        expect(plugin.settings.globalModelAwareMaxTokensTracking).toEqual({
+            providerName: 'OpenAI Compatible',
+            modelName: 'custom-model-ultra',
+            discoveryIdentity: expect.any(String),
+            resolvedMaxTokens: 24576
+        });
+
+        const refreshedModelSetting = findSettingByName(tab.containerEl, 'Model');
+        expect(refreshedModelSetting?.desc).toContain('Known model max output tokens: 24576.');
+
+        const refreshedMaxTokensSetting = findSettingByName(tab.containerEl, 'Max tokens');
+        expect(refreshedMaxTokensSetting?.desc).toContain('Known max output tokens for custom-model-ultra: 24576.');
+    });
+
+    test('uses discovered owner/provider hints to resolve known max-output-token guidance for bare model ids on generic gateways', async () => {
+        const plugin = createPlugin();
+        plugin.settings.activeProvider = 'OpenAI Compatible';
+        plugin.settings.maxTokens = DEFAULT_SETTINGS.maxTokens;
+        plugin.settings.chunkWordCount = DEFAULT_SETTINGS.chunkWordCount;
+        const provider = plugin.settings.providers.find((entry: any) => entry.name === 'OpenAI Compatible');
+        provider.baseUrl = 'https://custom-openai-compatible.example/v1';
+        provider.model = 'legacy-model';
+
+        (discoverProviderModelsDetailed as jest.Mock).mockResolvedValue({
+            models: ['gpt-4.1'],
+            entries: [
+                {
+                    id: 'gpt-4.1',
+                    label: 'GPT-4.1',
+                    ownerHint: 'openai'
+                }
+            ],
+            source: 'remote'
+        });
+
+        const tab = new NotemdSettingTab(mockApp as any, plugin as any) as any;
+        tab.display();
+
+        const fetchSetting = findSettingByName(tab.containerEl, 'Fetch model list');
+        const fetchButton = fetchSetting?.controls.find(control => control.kind === 'button') as MockButtonControl | undefined;
+        expect(fetchButton).toBeDefined();
+
+        await fetchButton?.click();
+
+        const modelMeta = findElementByClass(tab.containerEl, 'notemd-provider-model-meta');
+        expect(modelMeta?.text).toContain('GPT-4.1');
+        expect(modelMeta?.text).toContain('Provider hint: openai.');
+        expect(modelMeta?.text).toContain('Known model max output tokens: 32768.');
+
+        const useButtons = mockButtonComponents.filter(control => control.text === 'Use');
+        expect(useButtons).toHaveLength(1);
+
+        await useButtons[0].click();
+
+        expect(provider.model).toBe('gpt-4.1');
+        expect(plugin.settings.maxTokens).toBe(32768);
+        expect(plugin.settings.chunkWordCount).toBe(10923);
+        expect(plugin.settings.globalModelAwareMaxTokensTracking).toEqual({
+            providerName: 'OpenAI Compatible',
+            modelName: 'gpt-4.1',
+            discoveryIdentity: expect.any(String),
+            resolvedMaxTokens: 32768
+        });
+
+        const refreshedModelSetting = findSettingByName(tab.containerEl, 'Model');
+        expect(refreshedModelSetting?.desc).toContain('Known model max output tokens: 32768.');
+    });
+
+    test('uses discovered max-output-token hints sourced from real registry metadata when applying gateway models absent from the static token registry', async () => {
+        const plugin = createPlugin();
+        plugin.settings.activeProvider = 'OpenAI Compatible';
+        plugin.settings.maxTokens = DEFAULT_SETTINGS.maxTokens;
+        plugin.settings.chunkWordCount = DEFAULT_SETTINGS.chunkWordCount;
+        const provider = plugin.settings.providers.find((entry: any) => entry.name === 'OpenAI Compatible');
+        provider.baseUrl = 'https://custom-openai-compatible.example/v1';
+        provider.model = 'legacy-model';
+
+        (discoverProviderModelsDetailed as jest.Mock).mockResolvedValue({
+            models: ['qwen/qwen3.7-max'],
+            entries: [
+                {
+                    id: 'qwen/qwen3.7-max',
+                    label: 'Qwen: Qwen3.7 Max',
+                    maxOutputTokens: 65536
+                }
+            ],
+            source: 'remote'
+        });
+
+        const tab = new NotemdSettingTab(mockApp as any, plugin as any) as any;
+        tab.display();
+
+        const fetchSetting = findSettingByName(tab.containerEl, 'Fetch model list');
+        const fetchButton = fetchSetting?.controls.find(control => control.kind === 'button') as MockButtonControl | undefined;
+        expect(fetchButton).toBeDefined();
+
+        await fetchButton?.click();
+
+        const modelMeta = findElementByClass(tab.containerEl, 'notemd-provider-model-meta');
+        expect(modelMeta?.text).toContain('Qwen: Qwen3.7 Max');
+        expect(modelMeta?.text).toContain('Known model max output tokens: 65536.');
+
+        const useButtons = mockButtonComponents.filter(control => control.text === 'Use');
+        expect(useButtons).toHaveLength(1);
+
+        await useButtons[0].click();
+
+        expect(provider.model).toBe('qwen/qwen3.7-max');
+        expect(plugin.settings.maxTokens).toBe(65536);
+        expect(plugin.settings.chunkWordCount).toBe(21846);
+        expect(plugin.settings.globalModelAwareMaxTokensTracking).toEqual({
+            providerName: 'OpenAI Compatible',
+            modelName: 'qwen/qwen3.7-max',
+            discoveryIdentity: expect.any(String),
+            resolvedMaxTokens: 65536
+        });
+    });
+
+    test('clears transient discovery results and token hints when the provider discovery identity changes', async () => {
+        const plugin = createPlugin();
+        plugin.settings.activeProvider = 'OpenAI Compatible';
+        const provider = plugin.settings.providers.find((entry: any) => entry.name === 'OpenAI Compatible');
+        provider.baseUrl = 'https://custom-openai-compatible.example/v1';
+        provider.model = 'custom-model-ultra';
+
+        (discoverProviderModelsDetailed as jest.Mock).mockResolvedValue({
+            models: ['custom-model-ultra'],
+            entries: [
+                {
+                    id: 'custom-model-ultra',
+                    label: 'Custom Model Ultra',
+                    maxOutputTokens: 24576
+                }
+            ],
+            source: 'remote'
+        });
+
+        const tab = new NotemdSettingTab(mockApp as any, plugin as any) as any;
+        tab.display();
+
+        const fetchSetting = findSettingByName(tab.containerEl, 'Fetch model list');
+        const fetchButton = fetchSetting?.controls.find(control => control.kind === 'button') as MockButtonControl | undefined;
+        expect(fetchButton).toBeDefined();
+
+        await fetchButton?.click();
+
+        expect(findElementByClass(tab.containerEl, 'notemd-provider-discovery-panel')).toBeDefined();
+        const modelSettingBeforeIdentityChange = findSettingByName(tab.containerEl, 'Model');
+        expect(modelSettingBeforeIdentityChange?.desc).toContain('Known model max output tokens: 24576.');
+
+        const baseUrlSetting = findSettingByName(tab.containerEl, 'Base URL / endpoint');
+        const baseUrlControl = baseUrlSetting?.controls.find(control => control.kind === 'text') as MockTextControl | undefined;
+        expect(baseUrlControl).toBeDefined();
+
+        baseUrlControl!.inputEl.value = 'https://another-openai-compatible.example/v1';
+        baseUrlControl!.getValue.mockReturnValue('https://another-openai-compatible.example/v1');
+        await triggerDeferredTextBlur(baseUrlControl!);
+
+        expect(provider.baseUrl).toBe('https://another-openai-compatible.example/v1');
+        expect(findElementByClass(tab.containerEl, 'notemd-provider-discovery-panel')).toBeUndefined();
+
+        const modelSettingAfterIdentityChange = findSettingByName(tab.containerEl, 'Model');
+        expect(modelSettingAfterIdentityChange?.desc).not.toContain('Known model max output tokens: 24576.');
+
+        const refreshedFetchSetting = findSettingByName(tab.containerEl, 'Fetch model list');
+        expect(refreshedFetchSetting?.desc).toContain('Query the provider endpoint for available model IDs.');
+    });
+
+    test('restores auto-managed global max tokens and chunk guidance when a discovery identity change invalidates the old transient ceiling', async () => {
+        const plugin = createPlugin();
+        plugin.settings.activeProvider = 'OpenAI Compatible';
+        plugin.settings.maxTokens = 24576;
+        plugin.settings.chunkWordCount = 8192;
+        const provider = plugin.settings.providers.find((entry: any) => entry.name === 'OpenAI Compatible');
+        provider.baseUrl = 'https://custom-openai-compatible.example/v1';
+        provider.model = 'custom-model-ultra';
+
+        (discoverProviderModelsDetailed as jest.Mock).mockResolvedValue({
+            models: ['custom-model-ultra'],
+            entries: [
+                {
+                    id: 'custom-model-ultra',
+                    label: 'Custom Model Ultra',
+                    maxOutputTokens: 24576
+                }
+            ],
+            source: 'remote'
+        });
+
+        const tab = new NotemdSettingTab(mockApp as any, plugin as any) as any;
+        tab.display();
+
+        const fetchSetting = findSettingByName(tab.containerEl, 'Fetch model list');
+        const fetchButton = fetchSetting?.controls.find(control => control.kind === 'button') as MockButtonControl | undefined;
+        expect(fetchButton).toBeDefined();
+
+        await fetchButton?.click();
+
+        const baseUrlSetting = findSettingByName(tab.containerEl, 'Base URL / endpoint');
+        const baseUrlControl = baseUrlSetting?.controls.find(control => control.kind === 'text') as MockTextControl | undefined;
+        expect(baseUrlControl).toBeDefined();
+
+        baseUrlControl!.inputEl.value = 'https://another-openai-compatible.example/v1';
+        baseUrlControl!.getValue.mockReturnValue('https://another-openai-compatible.example/v1');
+        await triggerDeferredTextBlur(baseUrlControl!);
+
+        expect(plugin.settings.maxTokens).toBe(DEFAULT_SETTINGS.maxTokens);
+        expect(plugin.settings.chunkWordCount).toBe(2731);
+
+        const refreshedChunkSetting = findSettingByName(tab.containerEl, 'Chunk word count');
+        const refreshedChunkControl = refreshedChunkSetting?.controls.find(control => control.kind === 'text') as MockTextControl | undefined;
+        expect(refreshedChunkControl?.value).toBe('2731');
+        expect(refreshedChunkControl?.placeholder).toBe('2731');
+    });
+
+    test('preserves manual max tokens and chunk settings when the provider discovery identity changes', async () => {
+        const plugin = createPlugin();
+        plugin.settings.activeProvider = 'OpenAI Compatible';
+        plugin.settings.maxTokens = 12000;
+        plugin.settings.chunkWordCount = 1234;
+        const provider = plugin.settings.providers.find((entry: any) => entry.name === 'OpenAI Compatible');
+        provider.baseUrl = 'https://custom-openai-compatible.example/v1';
+        provider.model = 'custom-model-ultra';
+
+        (discoverProviderModelsDetailed as jest.Mock).mockResolvedValue({
+            models: ['custom-model-ultra'],
+            entries: [
+                {
+                    id: 'custom-model-ultra',
+                    label: 'Custom Model Ultra',
+                    maxOutputTokens: 24576
+                }
+            ],
+            source: 'remote'
+        });
+
+        const tab = new NotemdSettingTab(mockApp as any, plugin as any) as any;
+        tab.display();
+
+        const fetchSetting = findSettingByName(tab.containerEl, 'Fetch model list');
+        const fetchButton = fetchSetting?.controls.find(control => control.kind === 'button') as MockButtonControl | undefined;
+        expect(fetchButton).toBeDefined();
+
+        await fetchButton?.click();
+
+        const baseUrlSetting = findSettingByName(tab.containerEl, 'Base URL / endpoint');
+        const baseUrlControl = baseUrlSetting?.controls.find(control => control.kind === 'text') as MockTextControl | undefined;
+        expect(baseUrlControl).toBeDefined();
+
+        baseUrlControl!.inputEl.value = 'https://another-openai-compatible.example/v1';
+        baseUrlControl!.getValue.mockReturnValue('https://another-openai-compatible.example/v1');
+        await triggerDeferredTextBlur(baseUrlControl!);
+
+        expect(plugin.settings.maxTokens).toBe(12000);
+        expect(plugin.settings.chunkWordCount).toBe(1234);
+    });
+
+    test('ignores stale in-flight discovery responses after the provider discovery identity changes', async () => {
+        const plugin = createPlugin();
+        plugin.settings.activeProvider = 'OpenAI Compatible';
+        const provider = plugin.settings.providers.find((entry: any) => entry.name === 'OpenAI Compatible');
+        provider.baseUrl = 'https://old-openai-compatible.example/v1';
+        provider.model = 'custom-model-ultra';
+
+        const deferred = createDeferred<{
+            models: string[];
+            entries: Array<{ id: string; label?: string; maxOutputTokens?: number }>;
+            source: 'remote';
+        }>();
+        (discoverProviderModelsDetailed as jest.Mock).mockReturnValueOnce(deferred.promise);
+
+        const tab = new NotemdSettingTab(mockApp as any, plugin as any) as any;
+        tab.display();
+
+        const fetchSetting = findSettingByName(tab.containerEl, 'Fetch model list');
+        const fetchButton = fetchSetting?.controls.find(control => control.kind === 'button') as MockButtonControl | undefined;
+        expect(fetchButton).toBeDefined();
+
+        const pendingFetch = fetchButton!.click();
+
+        const loadingFetchSetting = findSettingByName(tab.containerEl, 'Fetch model list');
+        const loadingFetchButton = loadingFetchSetting?.controls.find(control => control.kind === 'button') as MockButtonControl | undefined;
+        expect(loadingFetchButton?.text).toBe('Fetching...');
+
+        const baseUrlSetting = findSettingByName(tab.containerEl, 'Base URL / endpoint');
+        const baseUrlControl = baseUrlSetting?.controls.find(control => control.kind === 'text') as MockTextControl | undefined;
+        expect(baseUrlControl).toBeDefined();
+
+        baseUrlControl!.inputEl.value = 'https://new-openai-compatible.example/v1';
+        baseUrlControl!.getValue.mockReturnValue('https://new-openai-compatible.example/v1');
+        await triggerDeferredTextBlur(baseUrlControl!);
+
+        expect(provider.baseUrl).toBe('https://new-openai-compatible.example/v1');
+        expect(findElementByClass(tab.containerEl, 'notemd-provider-discovery-panel')).toBeUndefined();
+
+        deferred.resolve({
+            models: ['custom-model-ultra'],
+            entries: [
+                {
+                    id: 'custom-model-ultra',
+                    label: 'Custom Model Ultra',
+                    maxOutputTokens: 24576
+                }
+            ],
+            source: 'remote'
+        });
+        await pendingFetch;
+
+        expect(findElementByClass(tab.containerEl, 'notemd-provider-discovery-panel')).toBeUndefined();
+        const modelSetting = findSettingByName(tab.containerEl, 'Model');
+        expect(modelSetting?.desc).not.toContain('Known model max output tokens: 24576.');
+
+        const currentFetchSetting = findSettingByName(tab.containerEl, 'Fetch model list');
+        const currentFetchButton = currentFetchSetting?.controls.find(control => control.kind === 'button') as MockButtonControl | undefined;
+        expect(currentFetchButton?.text).toBe('Fetch models');
+    });
+
+    test('shows an actionable discovery disable reason for manual-first providers that stay unsupported', () => {
+        const plugin = createPlugin();
+        plugin.settings.activeProvider = 'Azure OpenAI';
+
+        const tab = new NotemdSettingTab(mockApp as any, plugin as any) as any;
+        tab.display();
+
+        const fetchSetting = findSettingByName(tab.containerEl, 'Fetch model list');
+        expect(fetchSetting).toBeDefined();
+        expect(fetchSetting?.desc).toContain('deployment-specific');
+        expect(fetchSetting?.desc).toContain('deployment name');
+
+        const fetchButton = fetchSetting?.controls.find(control => control.kind === 'button') as MockButtonControl | undefined;
+        expect(fetchButton).toBeDefined();
+        expect(fetchButton?.disabled).toBe(true);
+    });
+
+    test('keeps fetch-models available for Hugging Face now that it shares the bounded OpenAI-compatible discovery path', () => {
+        const plugin = createPlugin();
+        plugin.settings.activeProvider = 'Hugging Face';
+
+        const tab = new NotemdSettingTab(mockApp as any, plugin as any) as any;
+        tab.display();
+
+        const fetchSetting = findSettingByName(tab.containerEl, 'Fetch model list');
+        expect(fetchSetting).toBeDefined();
+        expect(fetchSetting?.desc).toContain('Query the provider endpoint for available model IDs.');
+        expect(fetchSetting?.desc).not.toContain('manual-first');
+
+        const fetchButton = fetchSetting?.controls.find(control => control.kind === 'button') as MockButtonControl | undefined;
+        expect(fetchButton).toBeDefined();
+        expect(fetchButton?.disabled).toBe(false);
+    });
+
+    test('keeps fetch-models available for GitHub Models via its hosted catalog family', () => {
+        const plugin = createPlugin();
+        plugin.settings.activeProvider = 'GitHub Models';
+
+        const tab = new NotemdSettingTab(mockApp as any, plugin as any) as any;
+        tab.display();
+
+        const fetchSetting = findSettingByName(tab.containerEl, 'Fetch model list');
+        expect(fetchSetting).toBeDefined();
+        expect(fetchSetting?.desc).toContain('Query the provider endpoint for available model IDs.');
+        expect(fetchSetting?.desc).not.toContain('manual-first');
+
+        const fetchButton = fetchSetting?.controls.find(control => control.kind === 'button') as MockButtonControl | undefined;
+        expect(fetchButton).toBeDefined();
+        expect(fetchButton?.disabled).toBe(false);
+    });
+
+    test('keeps fetch-models available for PPIO via its dedicated bounded registry merge', () => {
+        const plugin = createPlugin();
+        plugin.settings.activeProvider = 'PPIO';
+
+        const tab = new NotemdSettingTab(mockApp as any, plugin as any) as any;
+        tab.display();
+
+        const fetchSetting = findSettingByName(tab.containerEl, 'Fetch model list');
+        expect(fetchSetting).toBeDefined();
+        expect(fetchSetting?.desc).toContain('Query the provider endpoint for available model IDs.');
+
+        const fetchButton = fetchSetting?.controls.find(control => control.kind === 'button') as MockButtonControl | undefined;
+        expect(fetchButton).toBeDefined();
+        expect(fetchButton?.disabled).toBe(false);
+    });
+
+    test('keeps fetch-models available for New API through the shared OpenAI-compatible discovery flow', () => {
+        const plugin = createPlugin();
+        plugin.settings.activeProvider = 'New API';
+
+        const tab = new NotemdSettingTab(mockApp as any, plugin as any) as any;
+        tab.display();
+
+        const fetchSetting = findSettingByName(tab.containerEl, 'Fetch model list');
+        expect(fetchSetting).toBeDefined();
+        expect(fetchSetting?.desc).toContain('Query the provider endpoint for available model IDs.');
+
+        const fetchButton = fetchSetting?.controls.find(control => control.kind === 'button') as MockButtonControl | undefined;
+        expect(fetchButton).toBeDefined();
+        expect(fetchButton?.disabled).toBe(false);
+    });
+
+    test('keeps fetch-models available for OVMS through its bounded local registry flow', () => {
+        const plugin = createPlugin();
+        plugin.settings.activeProvider = 'OVMS';
+
+        const tab = new NotemdSettingTab(mockApp as any, plugin as any) as any;
+        tab.display();
+
+        const fetchSetting = findSettingByName(tab.containerEl, 'Fetch model list');
+        expect(fetchSetting).toBeDefined();
+        expect(fetchSetting?.desc).toContain('Query the provider endpoint for available model IDs.');
+
+        const fetchButton = fetchSetting?.controls.find(control => control.kind === 'button') as MockButtonControl | undefined;
+        expect(fetchButton).toBeDefined();
+        expect(fetchButton?.disabled).toBe(false);
+    });
+
+    test('keeps fetch-models available for generic OpenAI Compatible endpoints that resolve to a supported gateway family', () => {
+        const plugin = createPlugin();
+        const provider = plugin.settings.providers.find((entry: any) => entry.name === 'OpenAI Compatible');
+        provider.baseUrl = 'https://openrouter.ai/api/v1';
+
+        const tab = new NotemdSettingTab(mockApp as any, plugin as any) as any;
+        tab.display();
+
+        const fetchSetting = findSettingByName(tab.containerEl, 'Fetch model list');
+        expect(fetchSetting).toBeDefined();
+        expect(fetchSetting?.desc).toContain('Query the provider endpoint for available model IDs.');
+        expect(fetchSetting?.desc).not.toContain('manual-first');
+
+        const fetchButton = fetchSetting?.controls.find(control => control.kind === 'button') as MockButtonControl | undefined;
+        expect(fetchButton).toBeDefined();
+        expect(fetchButton?.disabled).toBe(false);
+    });
+
+    test('keeps fetch-models available for generic OpenAI Compatible endpoints that resolve to GitHub Models', () => {
+        const plugin = createPlugin();
+        const provider = plugin.settings.providers.find((entry: any) => entry.name === 'OpenAI Compatible');
+        provider.baseUrl = 'https://models.github.ai/inference';
+
+        const tab = new NotemdSettingTab(mockApp as any, plugin as any) as any;
+        tab.display();
+
+        const fetchSetting = findSettingByName(tab.containerEl, 'Fetch model list');
+        expect(fetchSetting).toBeDefined();
+        expect(fetchSetting?.desc).toContain('Query the provider endpoint for available model IDs.');
+        expect(fetchSetting?.desc).not.toContain('manual-first');
+
+        const fetchButton = fetchSetting?.controls.find(control => control.kind === 'button') as MockButtonControl | undefined;
+        expect(fetchButton).toBeDefined();
+        expect(fetchButton?.disabled).toBe(false);
+    });
+
+    test('keeps fetch-models available for generic OpenAI Compatible endpoints that resolve to OVMS-style local v3 registries', () => {
+        const plugin = createPlugin();
+        const provider = plugin.settings.providers.find((entry: any) => entry.name === 'OpenAI Compatible');
+        provider.baseUrl = 'http://localhost:8000/v3';
+
+        const tab = new NotemdSettingTab(mockApp as any, plugin as any) as any;
+        tab.display();
+
+        const fetchSetting = findSettingByName(tab.containerEl, 'Fetch model list');
+        expect(fetchSetting).toBeDefined();
+        expect(fetchSetting?.desc).toContain('Query the provider endpoint for available model IDs.');
+        expect(fetchSetting?.desc).not.toContain('manual-first');
+
+        const fetchButton = fetchSetting?.controls.find(control => control.kind === 'button') as MockButtonControl | undefined;
+        expect(fetchButton).toBeDefined();
+        expect(fetchButton?.disabled).toBe(false);
+    });
+
+    test('keeps fetch-models available for generic OpenAI Compatible endpoints entered as /responses roots', () => {
+        const plugin = createPlugin();
+        const provider = plugin.settings.providers.find((entry: any) => entry.name === 'OpenAI Compatible');
+        provider.baseUrl = 'https://api.openai.com/v1/responses';
+
+        const tab = new NotemdSettingTab(mockApp as any, plugin as any) as any;
+        tab.display();
+
+        const fetchSetting = findSettingByName(tab.containerEl, 'Fetch model list');
+        expect(fetchSetting).toBeDefined();
+        expect(fetchSetting?.desc).toContain('Query the provider endpoint for available model IDs.');
+        expect(fetchSetting?.desc).not.toContain('manual-first');
+
+        const fetchButton = fetchSetting?.controls.find(control => control.kind === 'button') as MockButtonControl | undefined;
+        expect(fetchButton).toBeDefined();
+        expect(fetchButton?.disabled).toBe(false);
     });
 
     test('shows known model max output token guidance on model and provider override settings', () => {
@@ -672,6 +1265,188 @@ describe('provider settings behavior', () => {
         const maxOutputTokensSetting = findSettingByName(tab.containerEl, 'Provider output token override');
         expect(maxOutputTokensSetting).toBeDefined();
         expect(maxOutputTokensSetting?.desc).toContain('Known max output tokens for gpt-4.1: 32768.');
+    });
+
+    test('shows mapped known model max output token guidance for GitHub Models gateway presets', () => {
+        const plugin = createPlugin();
+        plugin.settings.activeProvider = 'GitHub Models';
+        const provider = plugin.settings.providers.find((entry: any) => entry.name === 'GitHub Models');
+        provider.model = 'openai/gpt-4o';
+
+        const tab = new NotemdSettingTab(mockApp as any, plugin as any) as any;
+        tab.display();
+
+        const modelSetting = findSettingByName(tab.containerEl, 'Model');
+        expect(modelSetting).toBeDefined();
+        expect(modelSetting?.desc).toContain('Known model max output tokens: 4096.');
+
+        const maxOutputTokensSetting = findSettingByName(tab.containerEl, 'Provider output token override');
+        expect(maxOutputTokensSetting).toBeDefined();
+        expect(maxOutputTokensSetting?.desc).toContain('Known max output tokens for openai/gpt-4o: 4096.');
+    });
+
+    test('shows mapped known model max output token guidance for generic OpenAI Compatible gateway models', () => {
+        const plugin = createPlugin();
+        plugin.settings.activeProvider = 'OpenAI Compatible';
+        const provider = plugin.settings.providers.find((entry: any) => entry.name === 'OpenAI Compatible');
+        provider.baseUrl = 'https://models.github.ai/inference';
+        provider.model = 'anthropic/claude-sonnet-4.5';
+
+        const tab = new NotemdSettingTab(mockApp as any, plugin as any) as any;
+        tab.display();
+
+        const modelSetting = findSettingByName(tab.containerEl, 'Model');
+        expect(modelSetting).toBeDefined();
+        expect(modelSetting?.desc).toContain('Known model max output tokens: 64000.');
+
+        const maxOutputTokensSetting = findSettingByName(tab.containerEl, 'Provider output token override');
+        expect(maxOutputTokensSetting).toBeDefined();
+        expect(maxOutputTokensSetting?.desc).toContain('Known max output tokens for anthropic/claude-sonnet-4.5: 64000.');
+    });
+
+    test('shows host-aware known model max output token guidance for generic OpenAI Compatible bare model IDs on known official hosts', () => {
+        const plugin = createPlugin();
+        plugin.settings.activeProvider = 'OpenAI Compatible';
+        const provider = plugin.settings.providers.find((entry: any) => entry.name === 'OpenAI Compatible');
+        provider.baseUrl = 'https://api.openai.com/v1';
+        provider.model = 'gpt-4o';
+
+        const tab = new NotemdSettingTab(mockApp as any, plugin as any) as any;
+        tab.display();
+
+        const modelSetting = findSettingByName(tab.containerEl, 'Model');
+        expect(modelSetting).toBeDefined();
+        expect(modelSetting?.desc).toContain('Known model max output tokens: 4096.');
+
+        const maxOutputTokensSetting = findSettingByName(tab.containerEl, 'Provider output token override');
+        expect(maxOutputTokensSetting).toBeDefined();
+        expect(maxOutputTokensSetting?.desc).toContain('Known max output tokens for gpt-4o: 4096.');
+    });
+
+    test('auto-syncs max tokens and chunk word count when the selected model changes while defaults are still auto-managed', async () => {
+        const plugin = createPlugin();
+        plugin.settings.activeProvider = 'OpenAI';
+        plugin.settings.maxTokens = DEFAULT_SETTINGS.maxTokens;
+        plugin.settings.chunkWordCount = DEFAULT_SETTINGS.chunkWordCount;
+        const provider = plugin.settings.providers.find((entry: any) => entry.name === 'OpenAI');
+        provider.model = 'gpt-4o';
+
+        const tab = new NotemdSettingTab(mockApp as any, plugin as any) as any;
+        tab.display();
+
+        const modelSetting = findSettingByName(tab.containerEl, 'Model');
+        const modelControl = modelSetting?.controls.find(control => control.kind === 'text') as MockTextControl | undefined;
+        expect(modelControl).toBeDefined();
+
+        modelControl!.inputEl.value = 'gpt-4.1';
+        modelControl!.getValue.mockReturnValue('gpt-4.1');
+        await triggerDeferredTextBlur(modelControl!);
+
+        expect(provider.model).toBe('gpt-4.1');
+        expect(plugin.settings.maxTokens).toBe(32768);
+        expect(plugin.settings.chunkWordCount).toBe(10923);
+
+        const refreshedChunkSetting = findSettingByName(tab.containerEl, 'Chunk word count');
+        const refreshedChunkControl = refreshedChunkSetting?.controls.find(control => control.kind === 'text') as MockTextControl | undefined;
+        expect(refreshedChunkControl?.value).toBe('10923');
+        expect(refreshedChunkControl?.placeholder).toBe('10923');
+    });
+
+    test('auto-syncs max tokens and chunk word count for GitHub Models when the selected gateway model has mapped token metadata', async () => {
+        const plugin = createPlugin();
+        plugin.settings.activeProvider = 'GitHub Models';
+        plugin.settings.maxTokens = DEFAULT_SETTINGS.maxTokens;
+        plugin.settings.chunkWordCount = DEFAULT_SETTINGS.chunkWordCount;
+        const provider = plugin.settings.providers.find((entry: any) => entry.name === 'GitHub Models');
+        provider.model = 'gpt-4o-mini';
+
+        const tab = new NotemdSettingTab(mockApp as any, plugin as any) as any;
+        tab.display();
+
+        const modelSetting = findSettingByName(tab.containerEl, 'Model');
+        const modelControl = modelSetting?.controls.find(control => control.kind === 'text') as MockTextControl | undefined;
+        expect(modelControl).toBeDefined();
+
+        modelControl!.inputEl.value = 'openai/gpt-4o';
+        modelControl!.getValue.mockReturnValue('openai/gpt-4o');
+        await triggerDeferredTextBlur(modelControl!);
+
+        expect(provider.model).toBe('openai/gpt-4o');
+        expect(plugin.settings.maxTokens).toBe(4096);
+        expect(plugin.settings.chunkWordCount).toBe(1366);
+    });
+
+    test('auto-syncs max tokens and chunk word count for generic OpenAI Compatible on known official hosts when the selected bare model has known metadata', async () => {
+        const plugin = createPlugin();
+        plugin.settings.activeProvider = 'OpenAI Compatible';
+        plugin.settings.maxTokens = DEFAULT_SETTINGS.maxTokens;
+        plugin.settings.chunkWordCount = DEFAULT_SETTINGS.chunkWordCount;
+        const provider = plugin.settings.providers.find((entry: any) => entry.name === 'OpenAI Compatible');
+        provider.baseUrl = 'https://api.openai.com/v1';
+        provider.model = 'unknown-model';
+
+        const tab = new NotemdSettingTab(mockApp as any, plugin as any) as any;
+        tab.display();
+
+        const modelSetting = findSettingByName(tab.containerEl, 'Model');
+        const modelControl = modelSetting?.controls.find(control => control.kind === 'text') as MockTextControl | undefined;
+        expect(modelControl).toBeDefined();
+
+        modelControl!.inputEl.value = 'gpt-4o';
+        modelControl!.getValue.mockReturnValue('gpt-4o');
+        await triggerDeferredTextBlur(modelControl!);
+
+        expect(provider.model).toBe('gpt-4o');
+        expect(plugin.settings.maxTokens).toBe(4096);
+        expect(plugin.settings.chunkWordCount).toBe(1366);
+    });
+
+    test('preserves manual max tokens and chunk word count when the selected model changes', async () => {
+        const plugin = createPlugin();
+        plugin.settings.activeProvider = 'OpenAI';
+        plugin.settings.maxTokens = 12000;
+        plugin.settings.chunkWordCount = 1234;
+        const provider = plugin.settings.providers.find((entry: any) => entry.name === 'OpenAI');
+        provider.model = 'gpt-4o';
+
+        const tab = new NotemdSettingTab(mockApp as any, plugin as any) as any;
+        tab.display();
+
+        const modelSetting = findSettingByName(tab.containerEl, 'Model');
+        const modelControl = modelSetting?.controls.find(control => control.kind === 'text') as MockTextControl | undefined;
+        expect(modelControl).toBeDefined();
+
+        modelControl!.inputEl.value = 'gpt-4.1';
+        modelControl!.getValue.mockReturnValue('gpt-4.1');
+        await triggerDeferredTextBlur(modelControl!);
+
+        expect(provider.model).toBe('gpt-4.1');
+        expect(plugin.settings.maxTokens).toBe(12000);
+        expect(plugin.settings.chunkWordCount).toBe(1234);
+    });
+
+    test('restores the default auto baseline when switching from a known model to an unknown model while token settings still track the model default', async () => {
+        const plugin = createPlugin();
+        plugin.settings.activeProvider = 'OpenAI';
+        plugin.settings.maxTokens = 4096;
+        plugin.settings.chunkWordCount = 1366;
+        const provider = plugin.settings.providers.find((entry: any) => entry.name === 'OpenAI');
+        provider.model = 'gpt-4o';
+
+        const tab = new NotemdSettingTab(mockApp as any, plugin as any) as any;
+        tab.display();
+
+        const modelSetting = findSettingByName(tab.containerEl, 'Model');
+        const modelControl = modelSetting?.controls.find(control => control.kind === 'text') as MockTextControl | undefined;
+        expect(modelControl).toBeDefined();
+
+        modelControl!.inputEl.value = 'custom-unknown-model';
+        modelControl!.getValue.mockReturnValue('custom-unknown-model');
+        await triggerDeferredTextBlur(modelControl!);
+
+        expect(provider.model).toBe('custom-unknown-model');
+        expect(plugin.settings.maxTokens).toBe(DEFAULT_SETTINGS.maxTokens);
+        expect(plugin.settings.chunkWordCount).toBe(2731);
     });
 
     test('refreshes model-aware guidance after model and max token edits', async () => {
@@ -725,6 +1500,33 @@ describe('provider settings behavior', () => {
         const chunkWordTextControl = chunkWordCountSetting?.controls.find(control => control.kind === 'text') as MockTextControl | undefined;
         expect(chunkWordTextControl).toBeDefined();
         expect(chunkWordTextControl?.placeholder).toBe('2731');
+    });
+
+    test('clears model-aware tracking when the user manually edits global max tokens', async () => {
+        const plugin = createPlugin();
+        plugin.settings.activeProvider = 'OpenAI Compatible';
+        plugin.settings.maxTokens = 24576;
+        plugin.settings.chunkWordCount = 8192;
+        plugin.settings.globalModelAwareMaxTokensTracking = {
+            providerName: 'OpenAI Compatible',
+            modelName: 'custom-model-ultra',
+            discoveryIdentity: 'tracked-identity',
+            resolvedMaxTokens: 24576
+        };
+
+        const tab = new NotemdSettingTab(mockApp as any, plugin as any) as any;
+        tab.display();
+
+        const maxTokensSetting = findSettingByName(tab.containerEl, 'Max tokens');
+        const maxTokensControl = maxTokensSetting?.controls.find(control => control.kind === 'text') as MockTextControl | undefined;
+        expect(maxTokensControl).toBeDefined();
+
+        maxTokensControl!.inputEl.value = '12000';
+        maxTokensControl!.getValue.mockReturnValue('12000');
+        await triggerDeferredTextBlur(maxTokensControl!);
+
+        expect(plugin.settings.maxTokens).toBe(12000);
+        expect(plugin.settings.globalModelAwareMaxTokensTracking).toBeUndefined();
     });
 
     test('auto-fills chunk word count from max tokens using ceiling division until user overrides it manually', async () => {
