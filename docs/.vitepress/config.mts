@@ -33,6 +33,14 @@ export default {
                 ]
             },
             {
+                text: 'Feature Spotlights',
+                collapsed: false,
+                items: [
+                    { text: 'Chapter Split + TOC (EN)', link: '/chapter-split-toc' },
+                    { text: 'Chapter Split + TOC (zh-CN)', link: '/chapter-split-toc.zh-CN' }
+                ]
+            },
+            {
                 text: 'Releases',
                 collapsed: false,
                 items: [

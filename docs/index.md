@@ -6,6 +6,8 @@ Repository docs preview for `obsidian-NotEMD`.
 
 - [Docs Hub (EN)](./README.md)
 - [Docs Hub (zh-CN)](./README.zh-CN.md)
+- [Chapter Split + TOC (EN)](./chapter-split-toc.md)
+- [Chapter Split + TOC (zh-CN)](./chapter-split-toc.zh-CN.md)
 - [Release Notes 1.8.2 (EN)](./releases/1.8.2.md)
 - [Release Notes 1.8.2 (zh-CN)](./releases/1.8.2.zh-CN.md)
 

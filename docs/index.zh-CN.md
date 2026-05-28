@@ -6,6 +6,8 @@
 
 - [文档中心（英文）](./README.md)
 - [文档中心（中文）](./README.zh-CN.md)
+- [章节拆分 + TOC（英文）](./chapter-split-toc.md)
+- [章节拆分 + TOC（中文）](./chapter-split-toc.zh-CN.md)
 - [1.8.2 发布说明（英文）](./releases/1.8.2.md)
 - [1.8.2 发布说明（中文）](./releases/1.8.2.zh-CN.md)
 
