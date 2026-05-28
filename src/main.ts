@@ -1,5 +1,12 @@
 import { App, Editor, MarkdownView, Modal, Notice, Plugin, TFile, TFolder, PluginSettingTab, Setting, WorkspaceLeaf } from 'obsidian';
-import { NotemdSettings, ProgressReporter, LLMProviderConfig, TaskKey, GlobalModelAwareMaxTokensTracking } from './types';
+import {
+    NotemdSettings,
+    ProgressReporter,
+    LLMProviderConfig,
+    TaskKey,
+    GlobalModelAwareMaxTokensTracking,
+    ProviderDiscoveredModelMaxOutputTokensTracking
+} from './types';
 import { DEFAULT_SETTINGS, NOTEMD_SIDEBAR_VIEW_TYPE, NOTEMD_SIDEBAR_ICON } from './constants';
 import {
     canonicalizeProviderConfigs,
@@ -1068,6 +1075,35 @@ export default class NotemdPlugin extends Plugin {
         };
     }
 
+    private normalizeDiscoveredModelMaxOutputTokensTracking(
+        value: unknown
+    ): ProviderDiscoveredModelMaxOutputTokensTracking | undefined {
+        if (!value || typeof value !== 'object' || Array.isArray(value)) {
+            return undefined;
+        }
+
+        const candidate = value as Partial<ProviderDiscoveredModelMaxOutputTokensTracking>;
+        const providerName = typeof candidate.providerName === 'string' ? candidate.providerName.trim() : '';
+        const modelName = typeof candidate.modelName === 'string' ? candidate.modelName.trim() : '';
+        const discoveryIdentity = typeof candidate.discoveryIdentity === 'string' ? candidate.discoveryIdentity.trim() : '';
+        const resolvedMaxOutputTokens = Number(candidate.resolvedMaxOutputTokens);
+
+        if (!providerName || !modelName || !discoveryIdentity) {
+            return undefined;
+        }
+
+        if (!Number.isFinite(resolvedMaxOutputTokens) || resolvedMaxOutputTokens <= 0) {
+            return undefined;
+        }
+
+        return {
+            providerName,
+            modelName,
+            discoveryIdentity,
+            resolvedMaxOutputTokens: Math.floor(resolvedMaxOutputTokens)
+        };
+    }
+
     async loadSettings() {
         const savedData = await this.loadData() || {};
         const savedProviders = canonicalizeProviderConfigs(savedData.providers || []);
@@ -1110,11 +1146,23 @@ export default class NotemdPlugin extends Plugin {
         this.settings.globalModelAwareMaxTokensTracking = this.normalizeGlobalModelAwareMaxTokensTracking(
             this.settings.globalModelAwareMaxTokensTracking
         );
+        this.settings.discoveredModelMaxOutputTokensTracking = this.normalizeDiscoveredModelMaxOutputTokensTracking(
+            this.settings.discoveredModelMaxOutputTokensTracking
+        );
         if (
             this.settings.globalModelAwareMaxTokensTracking
             && !mergedProviders.some(provider => provider.name === this.settings.globalModelAwareMaxTokensTracking?.providerName)
         ) {
             this.settings.globalModelAwareMaxTokensTracking = undefined;
+        }
+        if (
+            this.settings.discoveredModelMaxOutputTokensTracking
+            && !mergedProviders.some(provider => provider.name === this.settings.discoveredModelMaxOutputTokensTracking?.providerName)
+        ) {
+            this.settings.discoveredModelMaxOutputTokensTracking = undefined;
+        }
+        if (savedData.autoApplyDiscoveredModelMaxOutputTokens === undefined) {
+            this.settings.autoApplyDiscoveredModelMaxOutputTokens = this.settings.autoSyncGlobalTokensOnDiscoveredModelApply;
         }
         this.settings.activeProvider = resolveCanonicalProviderName(this.settings.activeProvider);
         this.settings.addLinksProvider = resolveCanonicalProviderName(this.settings.addLinksProvider);

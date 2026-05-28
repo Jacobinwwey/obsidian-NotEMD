@@ -133,8 +133,10 @@ type ProviderDefinitionInput = Omit<LLMProviderDefinition, 'settingFields' | 'mo
 
 const KNOWN_MODEL_MAX_OUTPUT_TOKENS: Partial<Record<string, Record<string, number>>> = {
     'DeepSeek': {
-        'deepseek-chat': 8_000,
-        'deepseek-reasoner': 8_000,
+        'deepseek-chat': 384_000,
+        'deepseek-reasoner': 384_000,
+        'deepseek-v4-flash': 384_000,
+        'deepseek-v4-pro': 384_000,
         'deepseek-v3': 8_000,
         'deepseek-r1': 8_000
     },

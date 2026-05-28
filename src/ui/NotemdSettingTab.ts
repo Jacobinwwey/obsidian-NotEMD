@@ -5,6 +5,7 @@ import {
     GlobalModelAwareMaxTokensTracking,
     LLMProviderConfig,
     NotemdSettings,
+    ProviderDiscoveredModelMaxOutputTokensTracking,
     TaskKey
 } from '../types';
 import { DEFAULT_SETTINGS } from '../constants';
@@ -260,6 +261,53 @@ export class NotemdSettingTab extends PluginSettingTab {
         this.plugin.settings.globalModelAwareMaxTokensTracking = tracking;
     }
 
+    private buildDiscoveredModelMaxOutputTokensTracking(
+        provider: LLMProviderConfig,
+        modelName: string,
+        resolvedMaxOutputTokens: number
+    ): ProviderDiscoveredModelMaxOutputTokensTracking | undefined {
+        const normalizedModelName = modelName.trim();
+        if (!normalizedModelName || !Number.isFinite(resolvedMaxOutputTokens) || resolvedMaxOutputTokens <= 0) {
+            return undefined;
+        }
+
+        return {
+            providerName: provider.name,
+            modelName: normalizedModelName,
+            discoveryIdentity: getProviderDiscoveryIdentity(provider),
+            resolvedMaxOutputTokens: Math.floor(resolvedMaxOutputTokens)
+        };
+    }
+
+    private getCurrentDiscoveredModelMaxOutputTokensTracking(): ProviderDiscoveredModelMaxOutputTokensTracking | undefined {
+        const tracking = this.plugin.settings.discoveredModelMaxOutputTokensTracking;
+        if (!tracking) {
+            return undefined;
+        }
+
+        const provider = this.plugin.settings.providers.find(entry => entry.name === tracking.providerName);
+        if (!provider) {
+            return undefined;
+        }
+
+        if (
+            provider.model.trim() !== tracking.modelName
+            || getProviderDiscoveryIdentity(provider) !== tracking.discoveryIdentity
+            || !Number.isFinite(tracking.resolvedMaxOutputTokens)
+            || tracking.resolvedMaxOutputTokens <= 0
+        ) {
+            return undefined;
+        }
+
+        return tracking;
+    }
+
+    private setDiscoveredModelMaxOutputTokensTracking(
+        tracking: ProviderDiscoveredModelMaxOutputTokensTracking | undefined
+    ): void {
+        this.plugin.settings.discoveredModelMaxOutputTokensTracking = tracking;
+    }
+
     private resolveModelAwareMaxTokensForProvider(
         provider: LLMProviderConfig,
         modelName: string,
@@ -279,16 +327,16 @@ export class NotemdSettingTab extends PluginSettingTab {
         }
 
         const discoveredModel = options?.discoveredModelEntries?.find(entry => entry.id === normalizedModelName);
-        if (typeof discoveredModel?.maxOutputTokens === 'number' && discoveredModel.maxOutputTokens > 0) {
-            return discoveredModel.maxOutputTokens;
-        }
-
         const knownModelMaxTokens = getKnownModelMaxOutputTokens(provider.name, normalizedModelName, {
             baseUrl: provider.baseUrl,
             ownerHint: discoveredModel?.ownerHint
         });
         if (typeof knownModelMaxTokens === 'number' && knownModelMaxTokens > 0) {
             return knownModelMaxTokens;
+        }
+
+        if (typeof discoveredModel?.maxOutputTokens === 'number' && discoveredModel.maxOutputTokens > 0) {
+            return discoveredModel.maxOutputTokens;
         }
 
         return undefined;
@@ -380,6 +428,7 @@ export class NotemdSettingTab extends PluginSettingTab {
         if (shouldSyncChunk) {
             this.plugin.settings.chunkWordCount = this.getRecommendedChunkWordCount(nextMaxTokens);
         }
+        this.setDiscoveredModelMaxOutputTokensTracking(undefined);
     }
 
     private syncModelAwareTokenDefaultsAfterDiscoveryIdentityChange(
@@ -410,6 +459,7 @@ export class NotemdSettingTab extends PluginSettingTab {
         if (shouldSyncChunk) {
             this.plugin.settings.chunkWordCount = this.getRecommendedChunkWordCount(nextMaxTokens);
         }
+        this.setDiscoveredModelMaxOutputTokensTracking(undefined);
     }
 
     private getGlobalMaxTokensDescription(baseDescription: string): string {
@@ -579,27 +629,41 @@ export class NotemdSettingTab extends PluginSettingTab {
                 previousConfiguredMaxTokens,
                 previousChunkWordCount
             );
+            this.setDiscoveredModelMaxOutputTokensTracking(undefined);
         }
         await this.plugin.saveSettings();
         this.display();
     }
 
-    private syncDiscoveredModelSelectionTokenDefaults(
+    private syncDiscoveredModelSelectionProviderMaxOutputTokens(
         provider: LLMProviderConfig,
         discoveredModelEntries: DiscoveredProviderModel[]
-    ): void {
-        if (!this.plugin.settings.autoSyncGlobalTokensOnDiscoveredModelApply) {
-            return;
-        }
-
-        const nextMaxTokens = this.resolveModelAwareMaxTokensForProvider(provider, provider.model, {
+    ): { resolvedMaxOutputTokens?: number; usedFallbackMaxOutputTokens?: boolean } {
+        const nextMaxOutputTokens = this.getKnownModelMaxTokensForProvider(provider, provider.model, {
             discoveredModelEntries
         });
-        this.plugin.settings.maxTokens = nextMaxTokens;
-        this.plugin.settings.chunkWordCount = this.getRecommendedChunkWordCount(nextMaxTokens);
-        this.setModelAwareMaxTokensTracking(
-            this.buildModelAwareMaxTokensTracking(provider, provider.model, nextMaxTokens)
-        );
+        if (!this.plugin.settings.autoApplyDiscoveredModelMaxOutputTokens) {
+            return {};
+        }
+
+        if (typeof nextMaxOutputTokens === 'number' && nextMaxOutputTokens > 0) {
+            provider.maxOutputTokens = nextMaxOutputTokens;
+            this.setDiscoveredModelMaxOutputTokensTracking(
+                this.buildDiscoveredModelMaxOutputTokensTracking(provider, provider.model, nextMaxOutputTokens)
+            );
+            return { resolvedMaxOutputTokens: nextMaxOutputTokens };
+        }
+
+        const existingProviderOverride = typeof provider.maxOutputTokens === 'number' && provider.maxOutputTokens > 0
+            ? Math.floor(provider.maxOutputTokens)
+            : undefined;
+        const fallbackMaxOutputTokens = existingProviderOverride ?? DEFAULT_SETTINGS.maxTokens;
+        provider.maxOutputTokens = fallbackMaxOutputTokens;
+        this.setDiscoveredModelMaxOutputTokensTracking(undefined);
+        return {
+            resolvedMaxOutputTokens: fallbackMaxOutputTokens,
+            usedFallbackMaxOutputTokens: true
+        };
     }
 
     private async applyTypedProviderModelSelection(
@@ -618,11 +682,13 @@ export class NotemdSettingTab extends PluginSettingTab {
         provider: LLMProviderConfig,
         nextModel: string,
         discoveredModelEntries: DiscoveredProviderModel[]
-    ): Promise<void> {
+    ): Promise<{ resolvedMaxOutputTokens?: number; usedFallbackMaxOutputTokens?: boolean }> {
+        let applyResult: { resolvedMaxOutputTokens?: number; usedFallbackMaxOutputTokens?: boolean } = {};
         await this.updateProviderField(provider, draft => {
             draft.model = nextModel.trim();
-            this.syncDiscoveredModelSelectionTokenDefaults(draft, discoveredModelEntries);
+            applyResult = this.syncDiscoveredModelSelectionProviderMaxOutputTokens(draft, discoveredModelEntries);
         });
+        return applyResult;
     }
 
     private addProviderTextField(
@@ -729,9 +795,9 @@ export class NotemdSettingTab extends PluginSettingTab {
             .setName(providerI18n.discoveredModelTokenSyncName)
             .setDesc(providerI18n.discoveredModelTokenSyncDesc)
             .addToggle(toggle => toggle
-                .setValue(this.plugin.settings.autoSyncGlobalTokensOnDiscoveredModelApply)
+                .setValue(this.plugin.settings.autoApplyDiscoveredModelMaxOutputTokens)
                 .onChange(async value => {
-                    this.plugin.settings.autoSyncGlobalTokensOnDiscoveredModelApply = value;
+                    this.plugin.settings.autoApplyDiscoveredModelMaxOutputTokens = value;
                     await this.plugin.saveSettings();
                 }));
 
@@ -816,12 +882,31 @@ export class NotemdSettingTab extends PluginSettingTab {
                     .setButtonText(isCurrentModel ? providerI18n.discoveredModelsUsingButton : providerI18n.discoveredModelsUseButton)
                     .setDisabled(isCurrentModel)
                     .onClick(async () => {
-                        await this.applyDiscoveredProviderModelSelection(provider, modelId, discoveredModels);
+                        const applyResult = await this.applyDiscoveredProviderModelSelection(provider, modelId, discoveredModels);
                         panelState.discoveredModelsExpanded = false;
-                        new Notice(formatI18n(providerI18n.discoveredModelsApplied, {
-                            provider: provider.name,
-                            model: modelId
-                        }), 5000);
+                        const appliedMessage = applyResult.usedFallbackMaxOutputTokens === true
+                            ? formatI18n(providerI18n.discoveredModelsAppliedManualMaxOutputTokensNeeded, {
+                                provider: provider.name,
+                                model: modelId,
+                                maxTokens: applyResult.resolvedMaxOutputTokens ?? DEFAULT_SETTINGS.maxTokens
+                            })
+                            : typeof applyResult.resolvedMaxOutputTokens === 'number'
+                            ? formatI18n(providerI18n.discoveredModelsAppliedAutoMaxOutputTokens, {
+                                provider: provider.name,
+                                model: modelId,
+                                maxTokens: applyResult.resolvedMaxOutputTokens
+                            })
+                            : this.plugin.settings.autoApplyDiscoveredModelMaxOutputTokens
+                                ? formatI18n(providerI18n.discoveredModelsAppliedManualMaxOutputTokensNeeded, {
+                                    provider: provider.name,
+                                    model: modelId,
+                                    maxTokens: DEFAULT_SETTINGS.maxTokens
+                                })
+                                : formatI18n(providerI18n.discoveredModelsApplied, {
+                                    provider: provider.name,
+                                    model: modelId
+                                });
+                        new Notice(appliedMessage, 7000);
                         this.display();
                     });
             });

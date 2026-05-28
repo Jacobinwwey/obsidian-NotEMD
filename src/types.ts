@@ -36,6 +36,13 @@ export interface GlobalModelAwareMaxTokensTracking {
     resolvedMaxTokens: number;
 }
 
+export interface ProviderDiscoveredModelMaxOutputTokensTracking {
+    providerName: string;
+    modelName: string;
+    discoveryIdentity: string;
+    resolvedMaxOutputTokens: number;
+}
+
 // Main settings structure for the plugin
 export interface NotemdSettings {
     providers: LLMProviderConfig[];
@@ -103,6 +110,7 @@ export interface NotemdSettings {
     developerDiagnosticStabilityRuns: number;
     developerDiagnosticTimeoutMs: number;
     autoSyncGlobalTokensOnDiscoveredModelApply: boolean;
+    autoApplyDiscoveredModelMaxOutputTokens: boolean;
     // Task-specific models (used if useMultiModelSettings is true)
     addLinksModel?: string;
     researchModel?: string;
@@ -204,6 +212,7 @@ export interface NotemdSettings {
     experimentalDiagramCompatibilityMode: 'legacy-mermaid' | 'best-fit';
     preferredDiagramIntent?: string;
     globalModelAwareMaxTokensTracking?: GlobalModelAwareMaxTokensTracking;
+    discoveredModelMaxOutputTokensTracking?: ProviderDiscoveredModelMaxOutputTokensTracking;
     _firstLaunch?: boolean;
 }
 

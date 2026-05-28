@@ -70,6 +70,7 @@ export const DEFAULT_SETTINGS: NotemdSettings = {
     developerDiagnosticStabilityRuns: 3,
     developerDiagnosticTimeoutMs: 10 * 60 * 1000,
     autoSyncGlobalTokensOnDiscoveredModelApply: true,
+    autoApplyDiscoveredModelMaxOutputTokens: true,
     // Task-specific model defaults (empty means use provider's default)
     addLinksModel: '',
     researchModel: '',
@@ -196,6 +197,7 @@ export const DEFAULT_SETTINGS: NotemdSettings = {
     mermaidErrorFolderPath: 'MermaidErrors',
     enableExperimentalDiagramPipeline: false,
     experimentalDiagramCompatibilityMode: 'legacy-mermaid',
+    discoveredModelMaxOutputTokensTracking: undefined,
 };
 
 // Constants for the Sidebar View
