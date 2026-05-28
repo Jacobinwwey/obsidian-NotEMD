@@ -102,6 +102,7 @@ export interface NotemdSettings {
     developerDiagnosticCallMode: string;
     developerDiagnosticStabilityRuns: number;
     developerDiagnosticTimeoutMs: number;
+    autoSyncGlobalTokensOnDiscoveredModelApply: boolean;
     // Task-specific models (used if useMultiModelSettings is true)
     addLinksModel?: string;
     researchModel?: string;

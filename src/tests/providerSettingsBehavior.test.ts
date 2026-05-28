@@ -625,6 +625,7 @@ describe('provider settings behavior', () => {
     test('applies a discovered model, shows feedback, and collapses the discovered models panel', async () => {
         const plugin = createPlugin();
         plugin.settings.activeProvider = 'DeepSeek';
+        plugin.settings.autoSyncGlobalTokensOnDiscoveredModelApply = true;
         plugin.settings.maxTokens = DEFAULT_SETTINGS.maxTokens;
         plugin.settings.chunkWordCount = DEFAULT_SETTINGS.chunkWordCount;
         const provider = plugin.settings.providers.find((entry: any) => entry.name === 'DeepSeek');
@@ -678,11 +679,29 @@ describe('provider settings behavior', () => {
 
         const summaryNode = findElementByClass(tab.containerEl, 'notemd-provider-discovery-summary');
         expect(summaryNode?.text).toContain('current: deepseek-v4-pro');
+
+        const refreshedModelSetting = findSettingByName(tab.containerEl, 'Model');
+        const refreshedModelControl = refreshedModelSetting?.controls.find(control => control.kind === 'text') as MockTextControl | undefined;
+        expect(refreshedModelControl).toBeDefined();
+        expect(refreshedModelControl?.inputEl.value).toBe('deepseek-v4-pro');
+
+        const refreshedMaxTokensSetting = findSettingByName(tab.containerEl, 'Max tokens');
+        const refreshedMaxTokensControl = refreshedMaxTokensSetting?.controls.find(control => control.kind === 'text') as MockTextControl | undefined;
+        expect(refreshedMaxTokensControl).toBeDefined();
+        expect(refreshedMaxTokensControl?.inputEl.value).toBe('8192');
+        expect(refreshedMaxTokensSetting?.desc).toContain('Known max output tokens for deepseek-v4-pro: 8192.');
+
+        const refreshedChunkSetting = findSettingByName(tab.containerEl, 'Chunk word count');
+        const refreshedChunkControl = refreshedChunkSetting?.controls.find(control => control.kind === 'text') as MockTextControl | undefined;
+        expect(refreshedChunkControl).toBeDefined();
+        expect(refreshedChunkControl?.inputEl.value).toBe('2731');
+        expect(refreshedChunkControl?.placeholder).toBe('2731');
     });
 
     test('preserves manual token overrides when applying a discovered model', async () => {
         const plugin = createPlugin();
         plugin.settings.activeProvider = 'DeepSeek';
+        plugin.settings.autoSyncGlobalTokensOnDiscoveredModelApply = false;
         plugin.settings.maxTokens = 12000;
         plugin.settings.chunkWordCount = 1234;
         const provider = plugin.settings.providers.find((entry: any) => entry.name === 'DeepSeek');
@@ -715,6 +734,105 @@ describe('provider settings behavior', () => {
         expect(plugin.settings.maxTokens).toBe(12000);
         expect(plugin.settings.chunkWordCount).toBe(1234);
         expect(plugin.settings.globalModelAwareMaxTokensTracking).toBeUndefined();
+    });
+
+    test('keeps the current global token settings when discovered-model auto-sync is disabled', async () => {
+        const plugin = createPlugin();
+        plugin.settings.activeProvider = 'DeepSeek';
+        plugin.settings.autoSyncGlobalTokensOnDiscoveredModelApply = false;
+        plugin.settings.maxTokens = 12000;
+        plugin.settings.chunkWordCount = 1234;
+        const provider = plugin.settings.providers.find((entry: any) => entry.name === 'DeepSeek');
+        provider.model = 'deepseek-chat';
+
+        (discoverProviderModelsDetailed as jest.Mock).mockResolvedValue({
+            models: ['deepseek-chat', 'deepseek-v4-pro'],
+            entries: [
+                { id: 'deepseek-chat' },
+                { id: 'deepseek-v4-pro', maxOutputTokens: 8192 }
+            ],
+            source: 'remote'
+        });
+
+        const tab = new NotemdSettingTab(mockApp as any, plugin as any) as any;
+        tab.display();
+
+        const tokenSyncSetting = findSettingByName(tab.containerEl, 'Auto-sync Max tokens when applying a discovered model');
+        const tokenSyncToggle = tokenSyncSetting?.controls.find(control => control.kind === 'toggle') as MockToggleControl | undefined;
+        expect(tokenSyncToggle).toBeDefined();
+        expect(tokenSyncToggle?.value).toBe(false);
+
+        const fetchSetting = findSettingByName(tab.containerEl, 'Fetch model list');
+        const fetchButton = fetchSetting?.controls.find(control => control.kind === 'button') as MockButtonControl | undefined;
+        expect(fetchButton).toBeDefined();
+
+        await fetchButton?.click();
+
+        const useButtons = mockButtonComponents.filter(control => control.text === 'Use');
+        expect(useButtons).toHaveLength(1);
+
+        await useButtons[0].click();
+
+        expect(provider.model).toBe('deepseek-v4-pro');
+        expect(plugin.settings.maxTokens).toBe(12000);
+        expect(plugin.settings.chunkWordCount).toBe(1234);
+        expect(plugin.settings.globalModelAwareMaxTokensTracking).toBeUndefined();
+
+        const refreshedMaxTokensSetting = findSettingByName(tab.containerEl, 'Max tokens');
+        const refreshedMaxTokensControl = refreshedMaxTokensSetting?.controls.find(control => control.kind === 'text') as MockTextControl | undefined;
+        expect(refreshedMaxTokensControl?.inputEl.value).toBe('12000');
+
+        const refreshedChunkSetting = findSettingByName(tab.containerEl, 'Chunk word count');
+        const refreshedChunkControl = refreshedChunkSetting?.controls.find(control => control.kind === 'text') as MockTextControl | undefined;
+        expect(refreshedChunkControl?.inputEl.value).toBe('1234');
+    });
+
+    test('auto-syncs global token settings when discovered-model auto-sync is enabled', async () => {
+        const plugin = createPlugin();
+        plugin.settings.activeProvider = 'DeepSeek';
+        plugin.settings.autoSyncGlobalTokensOnDiscoveredModelApply = true;
+        plugin.settings.maxTokens = 12000;
+        plugin.settings.chunkWordCount = 1234;
+        const provider = plugin.settings.providers.find((entry: any) => entry.name === 'DeepSeek');
+        provider.model = 'deepseek-chat';
+
+        (discoverProviderModelsDetailed as jest.Mock).mockResolvedValue({
+            models: ['deepseek-chat', 'deepseek-v4-pro'],
+            entries: [
+                { id: 'deepseek-chat' },
+                { id: 'deepseek-v4-pro', maxOutputTokens: 8192 }
+            ],
+            source: 'remote'
+        });
+
+        const tab = new NotemdSettingTab(mockApp as any, plugin as any) as any;
+        tab.display();
+
+        const tokenSyncSetting = findSettingByName(tab.containerEl, 'Auto-sync Max tokens when applying a discovered model');
+        const tokenSyncToggle = tokenSyncSetting?.controls.find(control => control.kind === 'toggle') as MockToggleControl | undefined;
+        expect(tokenSyncToggle).toBeDefined();
+        expect(tokenSyncToggle?.value).toBe(true);
+
+        const fetchSetting = findSettingByName(tab.containerEl, 'Fetch model list');
+        const fetchButton = fetchSetting?.controls.find(control => control.kind === 'button') as MockButtonControl | undefined;
+        expect(fetchButton).toBeDefined();
+
+        await fetchButton?.click();
+
+        const useButtons = mockButtonComponents.filter(control => control.text === 'Use');
+        expect(useButtons).toHaveLength(1);
+
+        await useButtons[0].click();
+
+        expect(provider.model).toBe('deepseek-v4-pro');
+        expect(plugin.settings.maxTokens).toBe(8192);
+        expect(plugin.settings.chunkWordCount).toBe(2731);
+        expect(plugin.settings.globalModelAwareMaxTokensTracking).toEqual({
+            providerName: 'DeepSeek',
+            modelName: 'deepseek-v4-pro',
+            discoveryIdentity: expect.any(String),
+            resolvedMaxTokens: 8192
+        });
     });
 
     test('uses transient discovered max-output-token hints when applying a model that is absent from the static token registry', async () => {
