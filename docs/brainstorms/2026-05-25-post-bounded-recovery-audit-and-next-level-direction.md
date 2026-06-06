@@ -1,6 +1,6 @@
 ---
 date: 2026-05-25
-last_updated: 2026-05-27
+last_updated: 2026-06-06
 topic: post-bounded-recovery-audit-and-next-level-direction
 canonical: true
 ---
@@ -14,7 +14,7 @@ The repository is no longer at the same interpretive checkpoint as either:
 1. the `1.8.9` release-boundary audit on 2026-05-13;
 2. the force-rewrite baseline audit on 2026-05-24.
 
-Since then, current `main` has regained a bounded but meaningful subset of the backup-branch breadth, shipped `1.9.0`, and pushed Stage C follow-through further on the local-KB / chapter-split side. That changes the next-question set again:
+Since then, current `main` has regained a bounded but meaningful subset of the backup-branch breadth, shipped through the `1.9.2` boundary, and pushed Stage C follow-through further on the local-KB / chapter-split side. That changes the next-question set again:
 
 - not “did recovery actually happen?”
 - not even only “is the bounded product slice re-landed?”
@@ -28,7 +28,13 @@ Primary comparison sources:
 4. `docs/superpowers/plans/2026-05-03-mainline-stabilization-next-batch.en.md`
 5. `.trellis/tasks/05-19-local-kb-retrieval-chapter-split-stage-b2cd/prd.md`
 6. `.trellis/tasks/05-27-provider-settings-model-discovery/prd.md`
-7. live code on `main` after `5c3173b`
+7. live code on `main` after the `1.9.2` release boundary and post-release contract/evidence follow-through
+
+Current-reading note:
+
+1. this document remains the post-bounded-recovery checkpoint;
+2. the newer current-main truth source is `docs/brainstorms/2026-05-28-mainline-progress-audit-and-next-level-direction.md`;
+3. the unified execution matrix remains `docs/brainstorms/2026-05-20-unified-follow-through-matrix.md`.
 
 ## 2. Current Code Truth After Recovery
 
@@ -37,7 +43,7 @@ Primary comparison sources:
 Current shipping truth is still narrower than the source tree might imply:
 
 1. `esbuild.config.mjs` still builds a single `main.js` output.
-2. `scripts/audit-render-host-bundle.js` still enforces the `main.js + inline srcdoc` host contract and rejects standalone render-host output files.
+2. `scripts/audit-render-host-bundle.js` still enforces the `main.js` + inline `srcdoc` host contract and rejects standalone render-host output files.
 3. source still contains runtime-candidate files such as:
    - `src/rendering/runtime/renderHostEntry.ts`
    - `src/rendering/preview/renderHostRuntimeClient.ts`
@@ -46,11 +52,14 @@ Current shipping truth is still narrower than the source tree might imply:
 5. current execution-path convergence explicitly keeps that lane dormant on `main`:
    - default Mermaid / Vega-Lite preview loading stays on package runtime
    - `audit:render-host` rejects stray `render-host.mjs` assets and built-bundle references on current `main`
+   - `resolveBundledRenderHostRuntimeModuleSpecifier()` remains fail-closed unless an explicit runtime module specifier is configured
+   - `createRenderHostBundleBuildOptions()` remains candidate-only and outside the production `esbuild.config.mjs` path unless build, release assets, audit, and docs move together
 
 Interpretation:
 
 - architecture has advanced at the source-organization layer;
 - architecture has **not** advanced at the release-asset boundary yet.
+- source/build split is now guarded by executable checks rather than only planning prose.
 
 ### 2.2 CLI / automation truth
 
@@ -110,54 +119,37 @@ Code-backed evidence includes:
 
 Release-facing truth is aligned again on current main:
 
-1. `package.json`, `manifest.json`, and `versions.json` are at `1.9.0`;
-2. `src/ui/welcomeReleaseNotes.ts` now advances the onboarding digest to `1.9.0` / `1.8.9`;
-3. the root `README*.md` family carries synced `1.9.0` version/badge/footer state;
-4. `docs/releases/1.9.0.md` and `docs/releases/1.9.0.zh-CN.md` are part of the current shipped truth surface;
+1. `package.json`, `manifest.json`, and `versions.json` are at `1.9.2`;
+2. `src/ui/welcomeReleaseNotes.ts` now carries the `1.9.2` onboarding digest;
+3. the root `README*.md` family carries synced `1.9.2` version/badge/footer state;
+4. `docs/releases/1.9.2.md` and `docs/releases/1.9.2.zh-CN.md` are part of the current shipped truth surface;
 5. `scripts/release/commit-chronicle-refresh.js` and `scripts/lib/repo-saga-contributor-normalization.js` are present again on current main;
-6. repo-saga serial safety remains enforced by the lock helper plus docs.
+6. repo-saga serial safety remains enforced by the lock helper plus docs;
+7. release workflow assets, tag trigger, workflow-source branch, and chronicle-target branch truth now share `scripts/lib/packaging-contract.js` ownership instead of living only as YAML-local assumptions.
 
 ### 2.5 Provider settings / model-discovery truth
 
-This lane is now the clearest example of “runtime breadth advanced faster than settings architecture”:
+This lane has moved from planning/bootstrap into bounded breadth maintenance:
 
-1. `src/ui/NotemdSettingTab.ts` still renders provider fields through hardcoded branching on `activeProvider.name`, not through shared field metadata.
-2. the current default visible surface is operational but not taxonomy-driven:
-   - `apiKey` when the provider requires or optionally supports it
-   - `baseUrl`
-   - `model`
-   - `temperature`
-   - `maxOutputTokens` only when developer mode is enabled or a persisted override already exists
-   - `topP` / `reasoningEffort` only for OpenAI-compatible transports
-   - `thinkingEnabled` only for `DeepSeek`
-   - `apiVersion` only for `Azure OpenAI`
-3. `src/llmProviders.ts` already acts as the transport/runtime registry, but `LLMProviderDefinition` still contains only transport/category/api-key/test/default metadata. It does **not** yet describe:
-   - core vs advanced vs developer-only fields
-   - provider-specific field visibility groups
-   - model discovery capability or endpoint-family metadata
-4. `src/types.ts` keeps `LLMProviderConfig` deliberately flat. That preserves backward compatibility and keeps `model` as the only persisted source-of-truth string, but it also means the UI currently has no semantic layer to derive advanced expansion or contextual field treatment from.
-5. `src/llmUtils.ts` already contains a useful partial foundation:
-   - normalized OpenAI-compatible base-URL handling
-   - `apiTestMode=models-then-chat`
-   - `GET /models` probing in connection testing
-6. current main now includes a first-batch in-plugin model discovery helper in the settings surface for OpenAI-compatible, Ollama, and Google providers, while still intentionally avoiding a persisted remote model catalog.
-7. Cherry Studio analysis now gives a concrete comparison target:
+1. `src/llmProviders.ts` now carries shared provider-field taxonomy metadata for `core`, `contextual`, `advanced`, and `developer` fields.
+2. `src/ui/NotemdSettingTab.ts` now renders provider settings from that metadata instead of treating provider-name branching as the main field-taxonomy owner.
+3. the panel still keeps the flat `LLMProviderConfig` shape, preserving import/export and existing `data.json` compatibility while making `model` the persisted source-of-truth string.
+4. advanced disclosure now derives from metadata plus persisted overrides, so existing explicit advanced values remain visible instead of being hidden by simplification.
+5. current main includes bounded in-settings model discovery with a transient helper rather than a persisted remote model catalog.
+6. discovery/runtime now share endpoint-family and header ownership seams for the current verified provider families.
+7. discovered-model token metadata can guide provider-scoped output-token autofill, while arbitrary generic gateway ownership inference remains intentionally out of bounds.
+8. Cherry Studio analysis now gives a concrete comparison target:
    - the strategy-registry and parser/fallback separation are worth reusing
    - the persisted `provider.models[]` lifecycle and heavier provider-domain state are too heavy for Notemd's current architecture
-8. the former isolated implementation lane at `feat/provider-settings-model-discovery` has now been bootstrapped, verified, and merged. Current main therefore now carries:
-   - provider-field taxonomy metadata plus discovery metadata in `src/llmProviders.ts`
-   - a transient `src/providerModelDiscovery.ts` helper for OpenAI-compatible / Ollama / Google discovery
-   - a metadata-driven provider-panel refactor in `src/ui/NotemdSettingTab.ts`
-   - matching locale keys, README/update surfaces, and focused regression tests
 9. the remaining boundary is now intentionally product-scoped, not implementation-scoped:
    - no persisted `provider.models[]` catalog
    - no model CRUD subsystem
-   - no broad all-provider discovery claim beyond the verified first batch
+   - no broad all-provider discovery claim beyond the verified bounded family batch
 
 Interpretation:
 
-- provider/runtime support is materially ahead of provider settings UX architecture;
-- the next product-facing control-plane work is not more providers first, but schema and discoverability convergence for the providers that already exist;
+- provider settings/model discovery is no longer an unlanded UX architecture gap;
+- the next product-facing control-plane work is not first delivery, but bounded breadth maintenance and truth discipline;
 - this lane is no longer just a planning or isolated-implementation topic; the bounded provider-settings control-plane convergence is now landed on current main.
 
 ## 3. Deep Comparison Against Prior Requirement Tracks
@@ -176,14 +168,14 @@ What current code now proves:
 1. command/help/preview follow-through is materially more converged than the original plan minimum;
 2. semantic helper/runbook truth is landed and checked in;
 3. Drawnix is still not being overclaimed as the next batch;
-4. packaging wording is mostly honest again, but source/build ambiguity persists through latent runtime candidate code;
-5. provider/runtime breadth is now ahead of the settings control plane, creating a new scaling bottleneck that the older plan did not need to confront yet.
+4. packaging wording is now backed by executable guardrails, but true multi-entry runtime shipping remains unresolved;
+5. provider/runtime breadth and provider-settings metadata now share a bounded control plane, so the remaining risk is boundary drift rather than first implementation.
 
 What remains open:
 
 1. the next bottleneck is no longer “write the runbook”;
 2. the first next-level bottleneck is still “decide whether the latent runtime lane stays dormant or becomes a real packaged boundary”;
-3. the second next-level bottleneck is “stop hardcoding provider settings behavior and converge it on shared metadata before provider breadth grows further.”
+3. the second next-level bottleneck is “keep provider discovery widening on shared family/shape seams without turning it into a persisted catalog or all-provider claim.”
 
 ### 3.2 Against the local-KB / chapter-split Stage-B2CD PRD
 
@@ -226,16 +218,16 @@ Current requirement status:
 
 Interpretation:
 
-1. requirement exploration is complete enough to implement;
-2. current main does **not** already satisfy the requested provider-settings UX;
-3. the work remaining is real architecture work, not copy editing or field reordering.
+1. the first provider-settings/model-discovery implementation is now landed on current main;
+2. the plan should now be read as a control-plane contract and maintenance boundary;
+3. the work remaining is bounded provider-family extension, parser/header/token-guidance discipline, and documentation truth maintenance.
 
 ### 3.4 Against the 2026-05-20 unified matrix
 
 What has changed since the earlier matrix wording:
 
-1. lane C should now carry `1.9.0` release-facing version truth, not `1.8.9`;
-2. the matrix needs an explicit provider-settings / model-discovery lane because that gap is now large enough to distort future prioritization if it stays hidden under general settings wording;
+1. lane C should now carry `1.9.2` release-facing version truth, not `1.8.9`, `1.9.0`, or `1.9.1`;
+2. the matrix needs an explicit provider-settings / model-discovery lane because that landed bounded surface is now large enough to distort future prioritization if it stays hidden under general settings wording;
 3. lane D should remain “quality/depth next” rather than drifting back into “prove the feature exists” language.
 
 ## 4. Architecture Advancement Assessment
@@ -250,17 +242,19 @@ What has changed since the earlier matrix wording:
    the repo now has a concrete answer for what to reuse, what to reject, and why.
 4. **The provider-settings lane is now a landed current-main capability**
    the architectural ambiguity has been resolved into a bounded shipped implementation instead of remaining a planning-only or isolated-lane topic.
+5. **Release truth moved again after this checkpoint**
+   `1.9.2` plus post-release contract follow-through made sidebar observability, inspect explainability, and release workflow contract ownership part of current-main truth.
 
 ### 4.2 What is structurally tense right now
 
 1. **Source/build truth is no longer perfectly aligned**
    source contains render-host runtime candidates; build and audit still prove no shipped detached runtime asset.
-2. **Provider runtime maturity now exceeds provider settings architecture**
-   the transport registry can scale; the current hardcoded provider panel cannot.
+2. **Provider discovery breadth now needs maintenance discipline**
+   the control plane can scale through shared metadata, but only if new providers continue to use family/shape/header seams instead of ad hoc provider-name branches.
 3. **A naive model-discovery feature would overshoot scope**
    copying Cherry Studio wholesale would create a second provider-state subsystem that Notemd does not need.
 4. **The flat config shape is both a strength and a constraint**
-   it preserves import/export and `data.json` compatibility, but it gives the UI no field taxonomy by itself.
+   it preserves import/export and `data.json` compatibility, but it must not be stretched into a hidden persisted remote catalog.
 5. **The next blocker is now scope discipline, not implementation bootstrap**
    the first-batch helper is landed, so the risk shifts from “can we converge this lane?” to “do we keep the discovery boundary lightweight and honest as provider breadth grows?”.
 
@@ -337,32 +331,29 @@ Priority: `P1`
 
 Goal:
 
-1. redesign provider settings so the default panel shows only core required controls;
+1. keep the default provider panel core-first and metadata-driven;
 2. keep `model` in the core/default-visible surface;
-3. move non-core tuning knobs behind an explicit advanced disclosure;
-4. auto-expand advanced when persisted provider config already contains explicit advanced values;
-5. add optional model discovery as a lightweight helper, not as a second persisted provider-state system.
+3. keep non-core tuning knobs behind explicit advanced disclosure while preserving visibility for persisted overrides;
+4. keep optional model discovery as a lightweight transient helper, not as a second persisted provider-state system;
+5. widen support only when endpoint semantics, header ownership, token-guidance behavior, tests, and docs move together.
 
 Implementation shape:
 
-1. extend `LLMProviderDefinition` with shared field metadata and discovery capability metadata;
-2. refactor `src/ui/NotemdSettingTab.ts` to render provider fields from metadata rather than provider-name branching for taxonomy decisions;
+1. preserve `LLMProviderDefinition` as the shared field/discovery metadata owner;
+2. preserve `src/ui/NotemdSettingTab.ts` metadata-driven provider-field rendering rather than returning taxonomy decisions to provider-name branching;
 3. keep `LLMProviderConfig.model` as the source-of-truth persisted string;
-4. add a small discovery service that reuses current runtime/base-URL semantics from `src/llmUtils.ts`;
-5. first-batch discovery support should stay narrow:
-   - OpenAI-compatible `GET /models`
-   - Ollama `GET /api/tags`
-   - Google Gemini `GET v1beta/models`
+4. keep discovery services aligned with runtime/base-URL/header semantics;
+5. future discovery additions should stay bounded through shared family/shape support rather than broad all-provider claims;
 6. do **not** persist remote model catalogs in `data.json`;
 7. keep manual model entry available even when discovery exists;
-8. implement in the isolated worktree/branch lane, not directly inside the canonical `main` worktree.
+8. use an isolated worktree/branch for substantial widening batches, then merge only after docs/tests/verification agree.
 
 Acceptance:
 
-1. provider definitions express core/contextual/advanced/developer field grouping;
+1. provider definitions keep expressing core/contextual/advanced/developer field grouping;
 2. current users with persisted advanced values do not lose visibility of active behavior;
 3. model-discovery failure never blocks manual configuration;
-4. tests cover metadata-driven rendering, backward compatibility, and discovery fallback;
+4. tests cover metadata-driven rendering, backward compatibility, discovery fallback, parser shapes, header ownership, and token-guidance behavior touched by the batch;
 5. docs describe the exact capability boundary and do not overclaim Cherry Studio parity.
 
 ## 6. Task And Documentation Follow-Through Rule
@@ -393,6 +384,6 @@ Current main is no longer mainly missing the bounded recovery slice.
 Current main is now mainly carrying two next-level architecture questions:
 
 1. keep the latent runtime lane explicitly dormant and documented as non-shipped, or promote it into a real packaged boundary with matching build, audit, docs, and release truth;
-2. keep provider settings hardcoded and increasingly noisy, or converge the control plane on shared metadata plus lightweight model discovery before provider breadth grows further.
+2. keep the landed provider settings/model-discovery control plane shared-core and lightweight as support widens, or let provider-specific exceptions and catalog-like state creep back in.
 
 Those are now the actual next-level moves.

@@ -1,6 +1,6 @@
 ---
 date: 2026-05-25
-last_updated: 2026-05-27
+last_updated: 2026-06-06
 topic: post-bounded-recovery-audit-and-next-level-direction
 canonical: true
 ---
@@ -14,7 +14,7 @@ canonical: true
 1. 2026-05-13 的 `1.8.9` 发布边界审计；
 2. 2026-05-24 的 force-rewrite 基线审计。
 
-在那之后，当前 `main` 已重新拿回一部分有界但实质性的 backup-branch 能力宽度，发布了 `1.9.0`，并继续把 local-KB / chapter-split 的 Stage C 收口往前推进。因此，当前真正需要回答的问题又变了：
+在那之后，当前 `main` 已重新拿回一部分有界但实质性的 backup-branch 能力宽度，并已发货到 `1.9.2` 边界，同时继续把 local-KB / chapter-split 的 Stage C 收口往前推进。因此，当前真正需要回答的问题又变了：
 
 - 不再是“recovery 到底有没有发生”；
 - 也不再只是“bounded product slice 有没有重新落回主线”；
@@ -28,7 +28,13 @@ canonical: true
 4. `docs/superpowers/plans/2026-05-03-mainline-stabilization-next-batch.zh-CN.md`
 5. `.trellis/tasks/05-19-local-kb-retrieval-chapter-split-stage-b2cd/prd.md`
 6. `.trellis/tasks/05-27-provider-settings-model-discovery/prd.md`
-7. `5c3173b` 之后的 live `main`
+7. `1.9.2` release 边界与后续 post-release contract/evidence follow-through 之后的 live `main`
+
+当前阅读说明：
+
+1. 本文仍是 post-bounded-recovery checkpoint；
+2. 更新的 current-main 真值来源是 `docs/brainstorms/2026-05-28-mainline-progress-audit-and-next-level-direction.zh-CN.md`；
+3. 统一执行矩阵仍是 `docs/brainstorms/2026-05-20-unified-follow-through-matrix.zh-CN.md`。
 
 ## 2. Recovery 之后的当前代码真值
 
@@ -37,7 +43,7 @@ canonical: true
 当前发货真值仍然比源码树表面看起来更窄：
 
 1. `esbuild.config.mjs` 仍只构建单个 `main.js` 输出。
-2. `scripts/audit-render-host-bundle.js` 仍在强制执行 `main.js + inline srcdoc` 的 host 契约，并拒绝独立 render-host 输出文件。
+2. `scripts/audit-render-host-bundle.js` 仍在强制执行 `main.js` + inline `srcdoc` 的 host 契约，并拒绝独立 render-host 输出文件。
 3. 源码里仍保留 runtime 候选文件，例如：
    - `src/rendering/runtime/renderHostEntry.ts`
    - `src/rendering/preview/renderHostRuntimeClient.ts`
@@ -46,11 +52,14 @@ canonical: true
 5. 当前执行链已显式把这条通道保持为 dormant：
    - 默认 Mermaid / Vega-Lite preview loading 仍走 package runtime
    - `audit:render-host` 会拒绝当前主线中残留的 `render-host.mjs` 资产与构建产物引用
+   - `resolveBundledRenderHostRuntimeModuleSpecifier()` 除非显式配置 runtime module specifier，否则继续 fail-closed
+   - `createRenderHostBundleBuildOptions()` 会保持 candidate-only，并留在 production `esbuild.config.mjs` 路径之外，除非 build、release assets、audit 与 docs 同批前进
 
 正确解释：
 
 - 架构在源码组织层面继续推进了；
 - 但在 release-asset 边界上 **还没有** 推进成已发货事实。
+- source/build split 现在已经由可执行检查守住，而不只是计划文案。
 
 ### 2.2 CLI / automation 真值
 
@@ -110,54 +119,37 @@ canonical: true
 
 release-facing 真值已重新对齐到当前主线：
 
-1. `package.json`、`manifest.json`、`versions.json` 现在处于 `1.9.0`；
-2. `src/ui/welcomeReleaseNotes.ts` 已把欢迎弹窗摘要推进到 `1.9.0` / `1.8.9`；
-3. root `README*.md` 家族现在也同步了 `1.9.0` 的版本 / badge / footer 状态；
-4. `docs/releases/1.9.0.md` 与 `docs/releases/1.9.0.zh-CN.md` 已进入当前发货真值面；
+1. `package.json`、`manifest.json`、`versions.json` 现在处于 `1.9.2`；
+2. `src/ui/welcomeReleaseNotes.ts` 现在承载 `1.9.2` 欢迎弹窗摘要；
+3. root `README*.md` 家族现在也同步了 `1.9.2` 的版本 / badge / footer 状态；
+4. `docs/releases/1.9.2.md` 与 `docs/releases/1.9.2.zh-CN.md` 已进入当前发货真值面；
 5. `scripts/release/commit-chronicle-refresh.js` 与 `scripts/lib/repo-saga-contributor-normalization.js` 已重新回到当前主线；
-6. repo-saga 串行安全仍由执行锁与文档共同强制。
+6. repo-saga 串行安全仍由执行锁与文档共同强制；
+7. release workflow assets、tag trigger、workflow-source branch 与 chronicle-target branch 真值现在都由 `scripts/lib/packaging-contract.js` 共享持有，而不再只是 YAML-local 假设。
 
 ### 2.5 Provider settings / model-discovery 真值
 
-这条通道现在最典型地体现了“runtime 宽度推进快于 settings 架构推进”：
+这条通道已经从 planning/bootstrap 进入 bounded breadth maintenance：
 
-1. `src/ui/NotemdSettingTab.ts` 仍通过 `activeProvider.name` 的硬编码分支来渲染 provider 字段，而不是通过共享字段元数据。
-2. 当前默认可见的 provider 面板虽然能用，但并不是 taxonomy-driven：
-   - `apiKey`（取决于 provider 是 required 还是 optional）
-   - `baseUrl`
-   - `model`
-   - `temperature`
-   - `maxOutputTokens`（仅在 developer mode 开启或已有持久化 override 时显示）
-   - `topP` / `reasoningEffort`（仅 OpenAI-compatible）
-   - `thinkingEnabled`（仅 `DeepSeek`）
-   - `apiVersion`（仅 `Azure OpenAI`）
-3. `src/llmProviders.ts` 已经承担 transport/runtime registry 角色，但 `LLMProviderDefinition` 目前仍只有 transport/category/api-key/test/default 等元数据。它 **还没有** 表达：
-   - core / advanced / developer-only 字段分组
-   - provider-specific 的字段可见性组
-   - model discovery capability 或 endpoint-family 元数据
-4. `src/types.ts` 中的 `LLMProviderConfig` 依旧是刻意保持扁平的。这保证了向后兼容，并保持 `model` 作为唯一持久化 source-of-truth 字符串，但也意味着当前 UI 无法仅从数据层推导出 advanced 展开逻辑或 contextual 字段语义。
-5. `src/llmUtils.ts` 已有一部分可复用基础：
-   - OpenAI-compatible base URL normalization
-   - `apiTestMode=models-then-chat`
-   - connection test 中的 `GET /models` 探测
-6. 当前主线现已具备首批 settings 内模型发现 helper，覆盖 OpenAI-compatible、Ollama 与 Google provider，但仍刻意不引入持久化远程 model catalog。
-7. 对 Cherry Studio 的分析已经给出明确对照方向：
+1. `src/llmProviders.ts` 现在承载共享的 provider-field taxonomy metadata，覆盖 `core`、`contextual`、`advanced` 与 `developer` 字段。
+2. `src/ui/NotemdSettingTab.ts` 现在从这些 metadata 渲染 provider settings，而不是把 provider-name 分支当成字段 taxonomy 的主要 owner。
+3. 面板仍保持扁平的 `LLMProviderConfig` 形态，从而保留 import/export 与既有 `data.json` 兼容性，并让 `model` 继续作为持久化 source-of-truth 字符串。
+4. advanced disclosure 现在由 metadata 与持久化 override 共同派生，因此既有显式 advanced 值仍会保持可见，不会被简化 UI 隐藏。
+5. 当前主线已包含有界的 settings 内模型发现能力，并使用瞬时 helper，而不是持久化 remote model catalog。
+6. discovery/runtime 现在会为当前已验证的 provider family 共享 endpoint-family 与 header ownership seam。
+7. discovered-model token metadata 可以引导 provider-scoped output-token autofill，但 arbitrary generic gateway owner inference 仍然刻意保持 out of bounds。
+8. 对 Cherry Studio 的分析已经给出明确对照方向：
    - strategy-registry 与 parser/fallback 分层值得复用
    - 持久化 `provider.models[]` 生命周期和更重的 provider-domain 状态，对 Notemd 当前架构来说过重
-8. 先前的隔离实现通道 `feat/provider-settings-model-discovery` 现已完成 bootstrap、验证并合回。因此当前 main 现在已经直接携带：
-   - `src/llmProviders.ts` 中的 provider-field taxonomy metadata 与 discovery metadata
-   - 一个新的瞬时 `src/providerModelDiscovery.ts`，覆盖 OpenAI-compatible / Ollama / Google discovery
-   - `src/ui/NotemdSettingTab.ts` 中的 metadata-driven provider panel 重构
-   - 对应 locale keys、README/update surface 与聚焦的回归测试
 9. 当前剩余边界已经转成产品边界，而不是实现边界：
    - 没有持久化 `provider.models[]` catalog
    - 没有 model CRUD 子系统
-   - 不对首批之外的 provider 做泛化 discovery 覆盖宣称
+   - 不宣称已覆盖 verified bounded family batch 之外的 broad all-provider discovery
 
 正确解释：
 
-- provider/runtime 支持面已经实质领先于 provider settings UX 架构；
-- 下一阶段真正该做的，不是先继续堆 provider 数量，而是把已存在 provider 的 control plane 收敛到可扩展的 schema 与 discoverability 设计上；
+- provider settings/model discovery 已不再是未落地的 UX architecture gap；
+- 下一阶段真正该做的不是 first delivery，而是 bounded breadth maintenance 与 truth discipline；
 - 这条线已经不再只是规划或隔离实现话题；有界的 provider-settings control-plane convergence 已经落到 current main。
 
 ## 3. 相对先前方案要求的深度对比
@@ -176,13 +168,13 @@ release-facing 真值已重新对齐到当前主线：
 1. command/help/preview follow-through 的收敛程度已经超过当时最小目标；
 2. semantic helper / runbook 真值已真实落地并检入；
 3. Drawnix 仍未被误写成下一批 active scope；
-4. packaging 文案整体上又恢复了诚实，但 latent runtime candidate code 仍留下 source/build 歧义；
-5. provider/runtime 的宽度现在已经超过 provider settings control plane 的架构承载力，这个瓶颈在更早的计划中还没有被显式暴露出来。
+4. packaging 文案现在已由可执行 guardrails 支撑，但真正的 multi-entry runtime 发货仍未解决；
+5. provider/runtime 宽度与 provider-settings metadata 现在已共享一条有界 control plane，因此剩余风险是边界漂移，而不是首轮实现。
 
 仍然未解决的点：
 
 1. 下一阶段的第一个瓶颈，依然是“latent runtime lane 是继续 dormant，还是提升成真实 packaged boundary”；
-2. 第二个瓶颈，则是“在 provider 宽度继续增长前，先停止硬编码 provider settings 行为，并把它们收敛到共享元数据上”。
+2. 第二个瓶颈，则是“让 provider discovery 的扩宽继续走共享 family/shape seam，而不是演变成持久化 catalog 或 all-provider 宣称”。
 
 ### 3.2 相对 local-KB / chapter-split Stage-B2CD PRD
 
@@ -225,16 +217,16 @@ release-facing 真值已重新对齐到当前主线：
 
 正确解释：
 
-1. requirement exploration 已经足够具体，可以进入实现；
-2. 当前 main **并没有** 已满足用户要求的 provider-settings UX；
-3. 剩余工作是实质性的架构收敛，而不是文案微调或字段顺序修补。
+1. 首轮 provider-settings/model-discovery 实现已经落到 current main；
+2. 这份方案现在应被读作 control-plane contract 与 maintenance boundary；
+3. 剩余工作是有界 provider-family 扩展、parser/header/token-guidance 纪律，以及文档真值维护。
 
 ### 3.4 相对 2026-05-20 统一矩阵
 
 相对那份矩阵，当前有三处关键变化：
 
-1. lane C 应明确带上 `1.9.0` release-facing version truth，而不再停留在 `1.8.9`；
-2. 矩阵中需要显式增加 provider-settings / model-discovery 轨道，否则后续优先级会被“泛化 settings 叙述”掩盖；
+1. lane C 应明确带上 `1.9.2` release-facing version truth，而不再停留在 `1.8.9`、`1.9.0` 或 `1.9.1`；
+2. 矩阵中需要显式保留 provider-settings / model-discovery 轨道，因为这条已落地的有界 surface 已足够影响后续优先级，不能被“泛化 settings 叙述”掩盖；
 3. lane D 应继续保持“质量/深度 next”定位，而不是回退到“先证明功能存在”的表述。
 
 ## 4. 架构推进评估
@@ -249,17 +241,19 @@ release-facing 真值已重新对齐到当前主线：
    仓库现在已经明确知道该复用什么、不该复用什么，以及原因是什么。
 4. **Provider-settings 轨道已经成为 current-main 已落地能力**
    先前的架构模糊已经转化为一个有界且已发货的实现，而不再只是规划话题或隔离执行探针。
+5. **Release truth 在这个 checkpoint 之后再次前进**
+   `1.9.2` 与后续 post-release contract follow-through 已把 sidebar observability、inspect explainability 与 release workflow contract ownership 变成 current-main 真值。
 
 ### 4.2 当前最大的结构性张力
 
 1. **Source/build 真值不再完全一致**
    源码里已有 render-host runtime candidates；但 build 和 audit 仍证明没有发货独立 runtime asset。
-2. **Provider runtime 的成熟度已经高于 provider settings 架构**
-   transport registry 可以继续扩，当前硬编码 provider panel 不行。
+2. **Provider discovery 宽度现在需要 maintenance discipline**
+   control plane 可以通过共享 metadata 扩展，但前提是新增 provider 继续走 family/shape/header seam，而不是回到临时 provider-name 分支。
 3. **朴素的 model-discovery 功能很容易过度扩 scope**
    如果整体照搬 Cherry Studio，就会平白引入第二套 provider-state subsystem。
 4. **扁平配置结构既是优势也是约束**
-   它保住了 import/export 与 `data.json` 兼容性，但也意味着 UI 自身拿不到字段 taxonomy。
+   它保住了 import/export 与 `data.json` 兼容性，但不能被拉伸成隐藏的持久化 remote catalog。
 5. **当前下一个 blocker 已经变成 scope discipline，而不是实现 bootstrap**
    首批 helper 已经落地，风险从“这条线能不能收敛”转向“随着 provider 宽度继续扩张，能否继续保持 discovery 边界轻量且诚实”。
 
@@ -336,32 +330,29 @@ release-facing 真值已重新对齐到当前主线：
 
 目标：
 
-1. 重设计 provider settings，使默认面板只显示核心必填控制项；
+1. 继续保持默认 provider panel 为 core-first 且 metadata-driven；
 2. 保持 `model` 在 core/default-visible surface；
-3. 将非核心调优项收入显式 advanced disclosure；
-4. 当持久化 provider config 中已存在 explicit advanced 值时默认展开 advanced；
-5. 把模型发现做成轻量辅助能力，而不是第二套持久化 provider-state system。
+3. 继续将非核心调优项放在显式 advanced disclosure 后，同时保留已有 persisted override 的可见性；
+4. 继续让模型发现保持 lightweight transient helper，而不是第二套持久化 provider-state system；
+5. 只有当 endpoint semantics、header ownership、token-guidance behavior、tests 与 docs 同批对齐时，才继续扩宽支持面。
 
 实现形态：
 
-1. 扩展 `LLMProviderDefinition`，加入共享字段元数据与 discovery capability 元数据；
-2. 重构 `src/ui/NotemdSettingTab.ts`，让 provider 字段从 metadata 渲染，而不是再靠 provider-name 分支决定 taxonomy；
+1. 继续让 `LLMProviderDefinition` 成为 shared field/discovery metadata owner；
+2. 继续保持 `src/ui/NotemdSettingTab.ts` 的 metadata-driven provider-field rendering，不要把 taxonomy 决策退回 provider-name 分支；
 3. 保持 `LLMProviderConfig.model` 作为持久化 source-of-truth 字符串；
-4. 新增一条小型 discovery service，直接复用 `src/llmUtils.ts` 中已有的 runtime/base-URL 语义；
-5. 首批 discovery 支持保持收窄：
-   - OpenAI-compatible `GET /models`
-   - Ollama `GET /api/tags`
-   - Google Gemini `GET v1beta/models`
+4. 继续让 discovery services 与 runtime/base-URL/header 语义保持一致；
+5. 未来 discovery 扩展应继续通过共享 family/shape support 保持有界，而不是宣称 broad all-provider support；
 6. **不要** 把远程 model catalog 持久化进 `data.json`；
 7. 即使有 discovery，手动 model 输入也必须始终可用；
-8. 实现应在隔离 worktree/branch 中推进，而不是直接在 canonical `main` worktree 上展开。
+8. 重大扩宽批次仍应使用隔离 worktree/branch，只有在 docs/tests/verification 对齐后再合回。
 
 验收：
 
-1. provider definition 可以表达 core/contextual/advanced/developer 字段分组；
+1. provider definition 持续表达 core/contextual/advanced/developer 字段分组；
 2. 当前已有 advanced 持久化值的用户不会丢失对实际行为的可见性；
 3. model-discovery 失败不会阻断手动配置；
-4. 测试覆盖 metadata-driven rendering、backward compatibility 与 discovery fallback；
+4. 测试覆盖 metadata-driven rendering、backward compatibility、discovery fallback、parser shapes、header ownership，以及本批触及的 token-guidance behavior；
 5. 文档明确写出能力边界，不要高估 Cherry Studio parity。
 
 ## 6. Task 与文档收口规则
@@ -392,6 +383,6 @@ release-facing 真值已重新对齐到当前主线：
 当前主线现在主要承载着两个 next-level 架构问题：
 
 1. 是继续让 latent runtime lane 明确保持 dormant / non-shipped，还是把它推进成 build、audit、docs、release truth 全部一致的真实 packaged boundary；
-2. 是继续容忍 provider settings 越来越依赖硬编码、越来越嘈杂，还是在 provider 宽度进一步增长前，把 control plane 收敛到共享元数据 + 轻量 model discovery。
+2. 是让已落地的 provider settings/model-discovery control plane 在扩宽时继续保持 shared-core、lightweight，还是让 provider-specific exception 与 catalog-like state 再次渗回系统。
 
 这两件事，才是现在真正的 next-level move。

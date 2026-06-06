@@ -109,6 +109,11 @@ describe('CLI public surface docs alignment', () => {
         expect(matrixZh).toContain('query diagnostics');
         expect(matrix).toContain('temporary `knowledgePaths` override array');
         expect(matrixZh).toContain('临时 `knowledgePaths` override 数组');
+        expect(matrix).toContain('`createRenderHostBundleBuildOptions()` candidate-only');
+        expect(matrix).toContain('outside `esbuild.config.mjs`');
+        expect(matrix).toContain('build, release assets, audit, and docs moving together');
+        expect(matrixZh).toContain('`createRenderHostBundleBuildOptions()` 保持在 `esbuild.config.mjs` 之外的 candidate-only 状态');
+        expect(matrixZh).toContain('build、release assets、audit 与 docs');
         expect(matrix).toContain("npm run cli:invoke -- --vault docs --operation local-knowledge.inspect");
         expect(matrixZh).toContain("npm run cli:invoke -- --vault docs --operation local-knowledge.inspect");
         expect(matrix).toContain('"sourcePath":"index.zh-CN.md"');

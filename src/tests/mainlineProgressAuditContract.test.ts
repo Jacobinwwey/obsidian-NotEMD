@@ -12,6 +12,12 @@ describe('mainline progress audit contract', () => {
     const progressDocZh = readDoc(
         'docs/brainstorms/2026-05-28-mainline-progress-audit-and-next-level-direction.zh-CN.md'
     );
+    const postRecoveryDoc = readDoc(
+        'docs/brainstorms/2026-05-25-post-bounded-recovery-audit-and-next-level-direction.md'
+    );
+    const postRecoveryDocZh = readDoc(
+        'docs/brainstorms/2026-05-25-post-bounded-recovery-audit-and-next-level-direction.zh-CN.md'
+    );
     const matrixDoc = readDoc('docs/brainstorms/2026-05-20-unified-follow-through-matrix.md');
     const matrixDocZh = readDoc('docs/brainstorms/2026-05-20-unified-follow-through-matrix.zh-CN.md');
 
@@ -45,13 +51,18 @@ describe('mainline progress audit contract', () => {
     });
 
     test('keeps diagnostics and packaging boundaries explicit instead of widening public claims', () => {
-        for (const content of [progressDoc, progressDocZh, matrixDoc, matrixDocZh]) {
+        for (const content of [progressDoc, progressDocZh, postRecoveryDoc, postRecoveryDocZh, matrixDoc, matrixDocZh]) {
             expect(content).toContain('`local-knowledge.inspect`');
-            expect(content).toContain('maintainer-only');
             expect(content).toContain('`main.js`');
             expect(content).toContain('inline `srcdoc`');
         }
 
+        expect(progressDoc).toContain('maintainer-only');
+        expect(progressDocZh).toContain('maintainer-only');
+        expect(postRecoveryDoc).toContain('maintainer-only');
+        expect(postRecoveryDocZh).toContain('maintainer-only');
+        expect(matrixDoc).toContain('maintainer-only');
+        expect(matrixDocZh).toContain('maintainer-only');
         expect(progressDoc).toContain('not a public CLI expansion');
         expect(progressDocZh).toContain('不是 public CLI 扩张');
         expect(progressDoc).toContain('no dedicated runtime asset is claimed');
@@ -67,6 +78,41 @@ describe('mainline progress audit contract', () => {
         expect(matrixDocZh).toContain('production `esbuild.config.mjs`');
         expect(matrixDoc).toContain('not existence re-proof');
         expect(matrixDocZh).toContain('不是继续做存在性重证');
+    });
+
+    test('keeps the post-recovery audit aligned to current release and provider-control truth', () => {
+        expect(postRecoveryDoc).toContain('shipped through the `1.9.2` boundary');
+        expect(postRecoveryDocZh).toContain('已发货到 `1.9.2` 边界');
+        expect(postRecoveryDoc).toContain('`createRenderHostBundleBuildOptions()` remains candidate-only');
+        expect(postRecoveryDocZh).toContain('`createRenderHostBundleBuildOptions()` 会保持 candidate-only');
+        expect(postRecoveryDoc).toContain('provider settings/model discovery is no longer an unlanded UX architecture gap');
+        expect(postRecoveryDocZh).toContain('provider settings/model discovery 已不再是未落地的 UX architecture gap');
+        expect(postRecoveryDoc).toContain('keep the landed provider settings/model-discovery control plane shared-core and lightweight');
+        expect(postRecoveryDocZh).toContain('让已落地的 provider settings/model-discovery control plane');
+
+        for (const staleMarker of [
+            'shipped `1.9.0`,',
+            'through hardcoded branching on `activeProvider.name`',
+            'does **not** yet describe',
+            'current main does **not** already satisfy the requested provider-settings UX',
+            'stop hardcoding provider settings behavior',
+            'first-batch discovery support should stay narrow',
+            'current hardcoded provider panel cannot'
+        ]) {
+            expect(postRecoveryDoc).not.toContain(staleMarker);
+        }
+
+        for (const staleMarker of [
+            '发布了 `1.9.0`',
+            '仍通过 `activeProvider.name` 的硬编码分支',
+            '它 **还没有** 表达',
+            '当前 main **并没有** 已满足用户要求的 provider-settings UX',
+            '先停止硬编码 provider settings 行为',
+            '首批 discovery 支持保持收窄',
+            '当前硬编码 provider panel 不行'
+        ]) {
+            expect(postRecoveryDocZh).not.toContain(staleMarker);
+        }
     });
 
     test('keeps the unified matrix aligned with the same current-head evidence and next direction', () => {
