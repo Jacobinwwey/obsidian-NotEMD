@@ -131,6 +131,8 @@ describe('chronicle refresh release helper', () => {
             attempts: 1,
             commitSha: head
         });
+        expect(calls).toContain('config user.name Jacobinwwey');
+        expect(calls).toContain('config user.email jacob.hxx.cn@outlook.com');
         expect(calls).toContain(`add -- ${CHRONICLE_PATHS.join(' ')}`);
         expect(calls).toContain('commit -m docs: refresh quarterly chronicle for 1.8.7');
         expect(calls).toContain('push origin HEAD:main');

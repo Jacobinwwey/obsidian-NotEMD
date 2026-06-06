@@ -5,6 +5,8 @@ const CHRONICLE_PATHS = ['README.md', 'README_*.md', 'docs/repo-saga/*.svg'];
 const DEFAULT_TARGET_BRANCH = 'main';
 const DEFAULT_PUSH_MAX_ATTEMPTS = 5;
 const DEFAULT_PUSH_RETRY_BASE_DELAY_MS = 3000;
+const DEFAULT_COMMIT_AUTHOR_NAME = 'Jacobinwwey';
+const DEFAULT_COMMIT_AUTHOR_EMAIL = 'jacob.hxx.cn@outlook.com';
 
 function normalizeCommandOutput(result = {}) {
     return [result.stdout, result.stderr]
@@ -81,8 +83,8 @@ function hasStagedChronicleChanges(repoRoot, gitRunner = runGit) {
 }
 
 function configureCommitIdentity(repoRoot, gitRunner = runGit) {
-    gitRunner(repoRoot, ['config', 'user.name', 'github-actions[bot]']);
-    gitRunner(repoRoot, ['config', 'user.email', '41898282+github-actions[bot]@users.noreply.github.com']);
+    gitRunner(repoRoot, ['config', 'user.name', DEFAULT_COMMIT_AUTHOR_NAME]);
+    gitRunner(repoRoot, ['config', 'user.email', DEFAULT_COMMIT_AUTHOR_EMAIL]);
 }
 
 function revParseHead(repoRoot, gitRunner = runGit) {
@@ -266,6 +268,8 @@ if (require.main === module) {
 
 module.exports = {
     CHRONICLE_PATHS,
+    DEFAULT_COMMIT_AUTHOR_EMAIL,
+    DEFAULT_COMMIT_AUTHOR_NAME,
     DEFAULT_PUSH_MAX_ATTEMPTS,
     DEFAULT_PUSH_RETRY_BASE_DELAY_MS,
     buildBackoffDelayMs,
