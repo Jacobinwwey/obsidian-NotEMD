@@ -11,19 +11,19 @@ const WELCOME_RELEASE_NOTE_LIMIT = 2;
 
 const ENTRIES_EN: WelcomeReleaseNoteEntry[] = [
     {
+        version: '1.9.2',
+        highlights: [
+            'Sidebar footer scrolling and API observability styling are restored, so API activity no longer squeezes the log output area out of view.',
+            'Local knowledge inspect now reports bounded query diagnostics, including navigation-note cautions for low-signal basenames such as index-style notes.',
+            'Maintainer CLI examples now use the correct vault-relative path contract, and Chapter Split + TOC now ships with dedicated docs and showcase coverage.'
+        ]
+    },
+    {
         version: '1.9.1',
         highlights: [
             'Provider settings now use a clearer core/advanced split, preserving existing advanced overrides while keeping first-run provider setup focused on required fields.',
             'Fetch model list now covers more provider catalog shapes and applies discovered token ceilings to the active provider override lane instead of silently rewriting the global Max tokens value.',
             'When a discovered model does not expose a reliable output-token ceiling, Notemd preserves any existing provider override and falls back only with an explicit manual-review notice.'
-        ]
-    },
-    {
-        version: '1.9.0',
-        highlights: [
-            'Developer-gated batch folder selection now ships with saved file-selection profiles, one-run folder or rule overrides, clickable preset chips, and an inline selected-file preview before the batch starts.',
-            'Developer-gated relaxed input file restrictions now let selected source-preserving tasks read broader text-like files and PDF text via Obsidian\'s PDF runtime without weakening mutation-sensitive workflows.',
-            'Task-aware input validation is now shared across sidebar actions, command palette entrypoints, batch host adapters, and path-based diagram generation so UI and CLI-facing surfaces stop drifting.'
         ]
     },
     {
@@ -54,19 +54,19 @@ const ENTRIES_EN: WelcomeReleaseNoteEntry[] = [
 
 const ENTRIES_ZH_CN: WelcomeReleaseNoteEntry[] = [
     {
+        version: '1.9.2',
+        highlights: [
+            'Sidebar 底部滚动区与 API 可观测性样式已恢复，API activity 不会再把 Log output 区域挤出可视范围。',
+            '本地知识库 inspect 现在会返回有界 query diagnostics，包括对 `index.*` 这类低信号导航文件名的 caution 提示。',
+            '维护者 CLI 示例现已统一为正确的 vault-relative 路径契约，同时“章节拆分 + TOC”也补齐了独立文档与效果展示。'
+        ]
+    },
+    {
         version: '1.9.1',
         highlights: [
             'Provider 设置现已采用更清晰的核心/高级分组：首次配置只暴露必要字段，同时会保留并自动展开已有高级覆盖项。',
             '“获取模型列表”现在覆盖更多 provider catalog 形态，并将发现到的输出 token 上限应用到当前 provider 的 override 通道，而不是静默改写全局“最大Token数”。',
             '当模型发现无法解析可靠输出 token 上限时，Notemd 会保留已有 provider 覆盖值；只有不存在有效覆盖值时才使用 fallback，并明确提示用户人工复核。'
-        ]
-    },
-    {
-        version: '1.9.0',
-        highlights: [
-            '开发者开关控制的 batch 文件夹选择弹窗现已支持已保存筛选档案、单次文件夹/规则覆盖、可点击 preset chips，以及批处理启动前的内联匹配文件预览。',
-            '开发者开关控制的“放开输入文件限制”现可让部分保留原文件的任务读取更广泛的文本类文件，以及通过 Obsidian PDF 运行时提取文本的 PDF，同时继续保留对改写型流程的限制。',
-            '任务级输入校验现已在侧边栏、命令面板、batch host adapter 与按路径图形生成入口之间共享，减少 UI 与 CLI 可见行为漂移。'
         ]
     },
     {
@@ -97,19 +97,19 @@ const ENTRIES_ZH_CN: WelcomeReleaseNoteEntry[] = [
 
 const ENTRIES_ZH_TW: WelcomeReleaseNoteEntry[] = [
     {
+        version: '1.9.2',
+        highlights: [
+            'Sidebar 底部捲動區與 API 可觀測性樣式已恢復，API activity 不會再把 Log output 區域擠出可視範圍。',
+            '本地知識庫 inspect 現在會回傳有界 query diagnostics，包括對 `index.*` 這類低訊號導覽檔名的 caution 提示。',
+            '維護者 CLI 範例現已統一為正確的 vault-relative 路徑契約，同時「章節拆分 + TOC」也補齊了獨立文件與效果展示。'
+        ]
+    },
+    {
         version: '1.9.1',
         highlights: [
             'Provider 設定現已採用更清晰的核心/進階分組：首次配置只暴露必要欄位，同時會保留並自動展開既有進階覆寫項。',
             '「取得模型列表」現在覆蓋更多 provider catalog 形態，並將發現到的輸出 token 上限套用到目前 provider 的 override 通道，而不是靜默改寫全域「最大Token數」。',
             '當模型發現無法解析可靠輸出 token 上限時，Notemd 會保留既有 provider 覆寫值；只有不存在有效覆寫值時才使用 fallback，並明確提示使用者人工複核。'
-        ]
-    },
-    {
-        version: '1.9.0',
-        highlights: [
-            '開發者開關控制的 batch 資料夾選取彈窗現已支援已儲存篩選設定檔、單次資料夾/規則覆寫、可點擊 preset chips，以及批次啟動前的內聯匹配檔案預覽。',
-            '開發者開關控制的「放開輸入檔案限制」現在可讓部分保留原檔的任務讀取更廣泛的文字類檔案，以及透過 Obsidian PDF 執行期提取文字的 PDF，同時繼續保留對改寫型流程的限制。',
-            '任務級輸入校驗現已在側欄、命令面板、batch host adapter 與按路徑圖形生成入口之間共享，降低 UI 與 CLI 可見行為漂移。'
         ]
     },
     {

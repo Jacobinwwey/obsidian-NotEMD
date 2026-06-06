@@ -690,7 +690,7 @@ MIT Lisansı - Ayrıntılar için [LICENSE](LICENSE) dosyasına bakın.
 ---
 
 
-*Notemd v1.9.1 - Obsidian bilgi grafiğinizi yapay zeka ile geliştirin.*
+*Notemd v1.9.2 - Obsidian bilgi grafiğinizi yapay zeka ile geliştirin.*
 
 
 <!-- repo-chronicle:start -->
@@ -700,7 +700,7 @@ Bu üç aylık kronik, [repo-saga](https://github.com/teee32/repo-saga) özgün 
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.tr.svg)
 
-_`1.9.1` sürüm etiketi için son yenileme tarihi: 2026-05-28. En son commit tarihi: 2026-05-28._
+_`1.9.2` sürüm etiketi için son yenileme tarihi: 2026-06-06. En son commit tarihi: 2026-06-06._
 <!-- repo-chronicle:end -->
 
 

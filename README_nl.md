@@ -690,7 +690,7 @@ MIT-licentie - Zie het bestand [LICENSE](LICENSE) voor details.
 ---
 
 
-*Notemd v1.9.1 - Verrijk je Obsidian-kennisgrafiek met AI.*
+*Notemd v1.9.2 - Verrijk je Obsidian-kennisgrafiek met AI.*
 
 
 
@@ -701,7 +701,7 @@ Deze kwartaalchroniek behoudt de oorspronkelijke visuele stijl van [repo-saga](h
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.nl.svg)
 
-_Laatst vernieuwd voor releasetag `1.9.1` op 2026-05-28. Datum van de laatste commit: 2026-05-28._
+_Laatst vernieuwd voor releasetag `1.9.2` op 2026-06-06. Datum van de laatste commit: 2026-06-06._
 <!-- repo-chronicle:end -->
 
 

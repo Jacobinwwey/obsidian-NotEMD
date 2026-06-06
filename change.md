@@ -4,6 +4,30 @@ This document summarizes the major functional and architectural changes implemen
 
 ---
 
+## 1.9.2
+
+### Highlights
+
+- Sidebar footer scrolling and API observability styling are restored, so request activity no longer crowds out log output in the shipped sidebar layout.
+- Local knowledge inspect now exposes bounded query diagnostics, including low-signal navigation-note cautions for `index.*` and related basename-derived queries.
+- Maintainer CLI docs and examples now use the correct vault-relative path contract, and Chapter Split + TOC now has dedicated showcase documentation.
+
+### New Features
+
+- Added dedicated Chapter Split + TOC spotlight docs, docs-home entry points, and showcase artwork so the feature is now part of the repository’s visible shipped surface instead of only maintainer-facing references.
+- Extended `local-knowledge.inspect` explainability with `queryDiagnostics`, including the derived basename, bounded stripped-source length used for diagram-source derivation, and cautions for generic navigation-like source names.
+- Expanded maintainer CLI help and capability-matrix guidance so `--vault docs` examples consistently demonstrate vault-relative `sourcePath` and `knowledgePaths` inputs.
+
+### Fixes
+
+- Fixed the sidebar footer container so the log/API region can scroll vertically again instead of getting pinned behind oversized activity content.
+- Fixed the maintainer docs-vault examples that previously used repo-relative `docs/...` paths, which could mislead local knowledge inspection and chapter-split invocations in a real `--vault docs` run.
+- Fixed chronicle refresh helper authorship so release-driven chronicle updates preserve maintainer identity instead of falling back to a bot identity.
+
+### Verification
+
+- Revalidated with serial `npm run chronicle:sync-repo-saga` / `npm run chronicle:update -- --tag 1.9.2`, `npm run build`, `npm test -- --runInBand`, `npm run audit:i18n-ui`, `npm run audit:render-host`, `obsidian help`, `obsidian-cli help`, and `git diff --check` before cutting the release.
+
 ## 1.9.1
 
 ### Highlights

@@ -127,7 +127,7 @@ describe('welcome modal', () => {
             }
         }
 
-        expect(nodes.some(node => node.text === 'v1.8.8')).toBe(false);
+        expect(nodes.some(node => node.text === 'v1.9.0')).toBe(false);
     });
 
     test('uses localized release notes and labels for simplified chinese', () => {
@@ -170,7 +170,7 @@ describe('welcome modal', () => {
 
         expect(modal.titleEl.text).toBe('欢迎使用 Notemd');
         expect(releaseNotes).toHaveLength(2);
-        expect(releaseNotes[0].highlights[0]).toContain('Provider 设置现已采用更清晰的核心/高级分组');
+        expect(releaseNotes[0].highlights[0]).toContain('Sidebar 底部滚动区与 API 可观测性样式已恢复');
         expect(nodes.some(node => node.text === releaseNotes[0].highlights[0])).toBe(true);
         expect(nodes.some(node => node.text === '最近更新')).toBe(true);
     });

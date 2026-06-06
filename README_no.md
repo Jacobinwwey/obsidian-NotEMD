@@ -690,7 +690,7 @@ MIT License - Se filen [LICENSE](LICENSE) for detaljer.
 ---
 
 
-*Notemd v1.9.1 - Forbedre Obsidian-kunnskapsgrafen din med AI.*
+*Notemd v1.9.2 - Forbedre Obsidian-kunnskapsgrafen din med AI.*
 
 
 <!-- repo-chronicle:start -->
@@ -700,7 +700,7 @@ Denne kvartalsvise krøniken bevarer den opprinnelige visuelle stilen fra [repo-
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.no.svg)
 
-_Sist oppdatert for utgivelsestaggen `1.9.1` 2026-05-28. Dato for siste commit: 2026-05-28._
+_Sist oppdatert for utgivelsestaggen `1.9.2` 2026-06-06. Dato for siste commit: 2026-06-06._
 <!-- repo-chronicle:end -->
 
 

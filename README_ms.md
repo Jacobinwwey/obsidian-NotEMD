@@ -690,7 +690,7 @@ Lesen MIT - lihat fail [LICENSE](LICENSE) untuk butiran.
 ---
 
 
-*Notemd v1.9.1 - Perkayakan graf pengetahuan Obsidian anda dengan AI.*
+*Notemd v1.9.2 - Perkayakan graf pengetahuan Obsidian anda dengan AI.*
 
 
 
@@ -701,7 +701,7 @@ Kronik suku tahunan ini mengekalkan gaya visual asal [repo-saga](https://github.
 
 ![Notemd Development Chronicle](./docs/repo-saga/notemd-development-history.ms.svg)
 
-_Kali terakhir disegarkan untuk tag keluaran `1.9.1` pada 2026-05-28. Tarikh commit terkini: 2026-05-28._
+_Kali terakhir disegarkan untuk tag keluaran `1.9.2` pada 2026-06-06. Tarikh commit terkini: 2026-06-06._
 <!-- repo-chronicle:end -->
 
 
