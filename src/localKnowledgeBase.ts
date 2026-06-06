@@ -48,6 +48,15 @@ export interface LocalKnowledgeInspectRequest {
 }
 
 export type LocalKnowledgeInspectQueryDerivation = 'explicit' | 'basename' | 'diagram-source';
+export type LocalKnowledgeInspectQueryCaution =
+    | 'generic-navigation-basename'
+    | 'diagram-source-built-from-navigation-like-note';
+
+export interface LocalKnowledgeInspectQueryDiagnostics {
+    derivedBasename: string | null;
+    strippedSourceCharsUsed: number;
+    cautions: LocalKnowledgeInspectQueryCaution[];
+}
 
 export interface LocalKnowledgeInspectResult {
     taskScope: LocalKnowledgeTaskScope;
@@ -58,6 +67,7 @@ export interface LocalKnowledgeInspectResult {
     sourcePath: string | null;
     query: string;
     queryDerivation: LocalKnowledgeInspectQueryDerivation;
+    queryDiagnostics: LocalKnowledgeInspectQueryDiagnostics;
     currentFilePath: string | null;
     retrievalOptions: {
         topK: number;
@@ -333,6 +343,15 @@ function normalizeOptionalPath(value?: string): string | undefined {
 
 function buildTitleLikeQueryFromPath(sourcePath: string): string {
     return sourcePath.split('/').pop()?.replace(/\.[^.]+$/u, '')?.trim() || '';
+}
+
+function normalizeDerivedBasenameForSignalChecks(value: string): string {
+    return value.trim().toLowerCase();
+}
+
+function isGenericNavigationBasename(value: string): boolean {
+    const normalized = normalizeDerivedBasenameForSignalChecks(value);
+    return /^(?:index|readme|home|overview|summary)(?:[._-][a-z0-9_]+)*$/iu.test(normalized);
 }
 
 export function buildDiagramLocalKnowledgeQuery(sourcePath: string | undefined, sourceMarkdown: string): string {
@@ -681,12 +700,18 @@ async function resolveLocalKnowledgeInspectQuery(
 ): Promise<{
     query: string;
     queryDerivation: LocalKnowledgeInspectQueryDerivation;
+    queryDiagnostics: LocalKnowledgeInspectQueryDiagnostics;
 }> {
     const explicitQuery = normalizeQuery(request.query ?? '');
     if (explicitQuery) {
         return {
             query: explicitQuery,
-            queryDerivation: 'explicit'
+            queryDerivation: 'explicit',
+            queryDiagnostics: {
+                derivedBasename: null,
+                strippedSourceCharsUsed: 0,
+                cautions: []
+            }
         };
     }
 
@@ -703,9 +728,25 @@ async function resolveLocalKnowledgeInspectQuery(
             );
         }
 
+        const derivedBasename = buildTitleLikeQueryFromPath(sourcePath);
+        const strippedSourceMarkdown = stripMarkdownForSearch(await app.vault.read(file));
+        const strippedSourceCharsUsed = strippedSourceMarkdown.slice(0, 1200).length;
+        const cautions: LocalKnowledgeInspectQueryCaution[] = [];
+        if (derivedBasename && isGenericNavigationBasename(derivedBasename)) {
+            cautions.push('diagram-source-built-from-navigation-like-note');
+        }
+
         return {
-            query: buildDiagramLocalKnowledgeQuery(sourcePath, await app.vault.read(file)),
-            queryDerivation: 'diagram-source'
+            query: [
+                derivedBasename,
+                strippedSourceMarkdown.slice(0, 1200)
+            ].filter((value): value is string => Boolean(value && value.trim())).join('\n'),
+            queryDerivation: 'diagram-source',
+            queryDiagnostics: {
+                derivedBasename: derivedBasename || null,
+                strippedSourceCharsUsed,
+                cautions
+            }
         };
     }
 
@@ -714,9 +755,19 @@ async function resolveLocalKnowledgeInspectQuery(
         throw new Error(`Could not derive a local knowledge query from source path: ${sourcePath}`);
     }
 
+    const cautions: LocalKnowledgeInspectQueryCaution[] = [];
+    if (isGenericNavigationBasename(basenameQuery)) {
+        cautions.push('generic-navigation-basename');
+    }
+
     return {
         query: basenameQuery,
-        queryDerivation: 'basename'
+        queryDerivation: 'basename',
+        queryDiagnostics: {
+            derivedBasename: basenameQuery,
+            strippedSourceCharsUsed: 0,
+            cautions
+        }
     };
 }
 
@@ -740,7 +791,7 @@ export async function inspectLocalKnowledgeRetrieval(
 ): Promise<LocalKnowledgeInspectResult> {
     const sourcePath = normalizeOptionalPath(request.sourcePath) ?? null;
     const currentFilePath = normalizeOptionalPath(request.currentFilePath) ?? sourcePath ?? undefined;
-    const { query, queryDerivation } = await resolveLocalKnowledgeInspectQuery(app, request);
+    const { query, queryDerivation, queryDiagnostics } = await resolveLocalKnowledgeInspectQuery(app, request);
     const topK = request.topK ?? settings.localKnowledgeTopK;
     const slidingWindowSize = request.slidingWindowSize ?? settings.localKnowledgeSlidingWindowSize;
     const maxSnippetChars = request.maxSnippetChars ?? settings.localKnowledgeMaxSnippetChars;
@@ -792,6 +843,7 @@ export async function inspectLocalKnowledgeRetrieval(
         sourcePath,
         query,
         queryDerivation,
+        queryDiagnostics,
         currentFilePath: currentFilePath ?? null,
         retrievalOptions,
         retrieverBuildStatus: buildState.status,

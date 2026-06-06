@@ -9,28 +9,28 @@ const OPERATION_HELP = {
     summary: 'Split one note into chapter files plus TOC/manifest.',
     required: ['sourcePath'],
     optional: ['splitHeadingLevel'],
-    exampleInput: '{"sourcePath":"docs/index.zh-CN.md","splitHeadingLevel":"h2"}'
+    exampleInput: '{"sourcePath":"index.zh-CN.md","splitHeadingLevel":"h2"}'
   },
   'research.summarize-topic': {
     summary: 'Append a research summary to a note.',
     required: ['sourcePath'],
     optional: ['topic'],
-    exampleInput: '{"sourcePath":"docs/index.zh-CN.md","topic":"RAG quality audit"}'
+    exampleInput: '{"sourcePath":"index.zh-CN.md","topic":"RAG quality audit"}'
   },
   'diagram.generate': {
     summary: 'Generate a saved diagram artifact or Mermaid output.',
     required: ['sourcePath'],
     optional: ['executionMode', 'requestedIntent', 'compatibilityMode', 'targetLanguage'],
-    exampleInput: '{"sourcePath":"docs/index.zh-CN.md","executionMode":"save-artifact","requestedIntent":"erDiagram","targetLanguage":"en"}'
+    exampleInput: '{"sourcePath":"index.zh-CN.md","executionMode":"save-artifact","requestedIntent":"erDiagram","targetLanguage":"en"}'
   },
   'local-knowledge.inspect': {
     summary: 'Inspect task-scoped local knowledge retrieval inputs, paths, and context.',
     required: ['taskScope'],
     optional: ['sourcePath', 'currentFilePath', 'query', 'knowledgePaths', 'topK', 'slidingWindowSize', 'maxSnippetChars'],
-    exampleInput: '{"taskScope":"diagramGeneration","sourcePath":"docs/index.zh-CN.md","knowledgePaths":["docs/maintainer","docs/superpowers"],"topK":2,"slidingWindowSize":1}',
+    exampleInput: '{"taskScope":"diagramGeneration","sourcePath":"index.zh-CN.md","knowledgePaths":["maintainer","superpowers"],"topK":2,"slidingWindowSize":1}',
     additionalExamples: [
-      '{"taskScope":"batchGenerateFromTitles","sourcePath":"docs/index.zh-CN.md"}',
-      '{"taskScope":"researchSummarize","query":"task-scoped retrieval behavior","knowledgePaths":["docs/maintainer"]}'
+      '{"taskScope":"batchGenerateFromTitles","sourcePath":"index.zh-CN.md"}',
+      '{"taskScope":"researchSummarize","query":"task-scoped retrieval behavior","knowledgePaths":["maintainer"]}'
     ]
   },
   'provider.profile.export-redacted': {

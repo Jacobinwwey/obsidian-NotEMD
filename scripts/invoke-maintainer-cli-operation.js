@@ -39,12 +39,13 @@ Operations:
 ${operationDetails}
 
 Minimal examples:
-  npm run cli:invoke -- --vault docs --operation content.split-note-by-chapters --input-json '{"sourcePath":"docs/index.zh-CN.md"}' --pretty
-  npm run cli:invoke -- --vault docs --operation local-knowledge.inspect --input-json '{"taskScope":"diagramGeneration","sourcePath":"docs/index.zh-CN.md","knowledgePaths":["docs/maintainer","docs/superpowers"]}' --pretty
+  npm run cli:invoke -- --vault docs --operation content.split-note-by-chapters --input-json '{"sourcePath":"index.zh-CN.md"}' --pretty
+  npm run cli:invoke -- --vault docs --operation local-knowledge.inspect --input-json '{"taskScope":"diagramGeneration","sourcePath":"index.zh-CN.md","knowledgePaths":["maintainer","superpowers"]}' --pretty
   npm run cli:invoke -- --vault docs --operation provider.profile.export-redacted --pretty
 
 Notes:
   - Prefer --input-file for non-trivial payloads.
+  - Paths inside --input-json are vault-relative. For --vault docs, use "index.zh-CN.md" and "maintainer", not "docs/index.zh-CN.md" or "docs/maintainer".
   - Maintainer bridge only; not a public CLI surface.
 `);
 }

@@ -105,9 +105,17 @@ describe('CLI public surface docs alignment', () => {
         expect(matrixZh).toContain('`local-knowledge.inspect`');
         expect(matrix).toContain('effective knowledge-base path resolution');
         expect(matrixZh).toContain('实际生效的知识库路径解析结果');
+        expect(matrix).toContain('query diagnostics');
+        expect(matrixZh).toContain('query diagnostics');
         expect(matrix).toContain('temporary `knowledgePaths` override array');
         expect(matrixZh).toContain('临时 `knowledgePaths` override 数组');
         expect(matrix).toContain("npm run cli:invoke -- --vault docs --operation local-knowledge.inspect");
         expect(matrixZh).toContain("npm run cli:invoke -- --vault docs --operation local-knowledge.inspect");
+        expect(matrix).toContain('"sourcePath":"index.zh-CN.md"');
+        expect(matrixZh).toContain('"sourcePath":"index.zh-CN.md"');
+        expect(matrix).toContain('"knowledgePaths":["maintainer","superpowers"]');
+        expect(matrixZh).toContain('"knowledgePaths":["maintainer","superpowers"]');
+        expect(matrix).toContain('vault-relative');
+        expect(matrixZh).toContain('vault-relative');
     });
 });

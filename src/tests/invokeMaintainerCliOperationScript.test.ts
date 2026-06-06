@@ -45,6 +45,9 @@ describe('invoke maintainer CLI operation script', () => {
         expect(output).toContain('"taskScope":"researchSummarize"');
         expect(output).toContain('knowledgePaths');
         expect(output).toContain('npm run cli:invoke -- --vault docs --operation local-knowledge.inspect');
+        expect(output).toContain('"sourcePath":"index.zh-CN.md"');
+        expect(output).toContain('"knowledgePaths":["maintainer","superpowers"]');
+        expect(output).toContain('Paths inside --input-json are vault-relative.');
         expect(output).toContain('research.summarize-topic');
         expect(output).toContain('"topic":"RAG quality audit"');
         expect(output).toContain('diagram.generate');

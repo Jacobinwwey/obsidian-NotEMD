@@ -418,6 +418,11 @@ describe('local knowledge offline evaluation fixture', () => {
 
         expect(titleInspect.effectivePathSource).toBe('task-specific');
         expect(titleInspect.queryDerivation).toBe('basename');
+        expect(titleInspect.queryDiagnostics).toEqual({
+            derivedBasename: 'CLI Surface',
+            strippedSourceCharsUsed: 0,
+            cautions: []
+        });
         expect(titleInspect.query).toBe('CLI Surface');
         expect(titleInspect.candidateFilePaths).toEqual([
             'Knowledge/Transformers.md',
@@ -428,6 +433,12 @@ describe('local knowledge offline evaluation fixture', () => {
 
         expect(diagramInspect.effectivePathSource).toBe('task-specific');
         expect(diagramInspect.queryDerivation).toBe('diagram-source');
+        expect(diagramInspect.queryDiagnostics).toEqual(expect.objectContaining({
+            derivedBasename: 'Diagram Platform',
+            cautions: []
+        }));
+        expect(diagramInspect.queryDiagnostics.strippedSourceCharsUsed).toBeGreaterThan(0);
+        expect(diagramInspect.queryDiagnostics.strippedSourceCharsUsed).toBeLessThanOrEqual(1200);
         expect(diagramInspect.query).toContain('Diagram Platform');
         expect(diagramInspect.query).toContain('Sliding window retrieval and runtime truth should both appear in the derived query.');
         expect(diagramInspect.candidateFilePaths).toEqual([
@@ -501,6 +512,11 @@ describe('local knowledge offline evaluation fixture', () => {
 
         expect(batchInspect.taskScope).toBe('batchGenerateFromTitles');
         expect(batchInspect.queryDerivation).toBe('basename');
+        expect(batchInspect.queryDiagnostics).toEqual({
+            derivedBasename: 'CLI Surface',
+            strippedSourceCharsUsed: 0,
+            cautions: []
+        });
         expect(batchInspect.query).toBe('CLI Surface');
         expect(batchInspect.effectivePathSource).toBe('task-specific');
         expect(batchInspect.candidateFilePaths).toEqual(expect.arrayContaining([
@@ -512,6 +528,11 @@ describe('local knowledge offline evaluation fixture', () => {
 
         expect(researchInspect.taskScope).toBe('researchSummarize');
         expect(researchInspect.queryDerivation).toBe('explicit');
+        expect(researchInspect.queryDiagnostics).toEqual({
+            derivedBasename: null,
+            strippedSourceCharsUsed: 0,
+            cautions: []
+        });
         expect(researchInspect.query).toBe('task-scoped retrieval behavior');
         expect(researchInspect.effectivePathSource).toBe('task-specific');
         expect(researchInspect.candidateFilePaths).toEqual(['Knowledge/Scoped/CLI Surface.md']);

@@ -269,6 +269,11 @@ describe('localKnowledgeBase', () => {
         expect(result.effectiveConfiguredPaths).toEqual(['Knowledge/Exact.md', 'Knowledge/Scoped']);
         expect(result.query).toBe('Architecture');
         expect(result.queryDerivation).toBe('basename');
+        expect(result.queryDiagnostics).toEqual({
+            derivedBasename: 'Architecture',
+            strippedSourceCharsUsed: 0,
+            cautions: []
+        });
         expect(result.sourcePath).toBe('Docs/Architecture.md');
         expect(result.currentFilePath).toBe('Docs/Architecture.md');
         expect(result.retrievalOptions).toEqual({
@@ -376,6 +381,12 @@ describe('localKnowledgeBase', () => {
 
         expect(result.taskScope).toBe('diagramGeneration');
         expect(result.queryDerivation).toBe('diagram-source');
+        expect(result.queryDiagnostics).toEqual(expect.objectContaining({
+            derivedBasename: 'Diagram Platform',
+            cautions: []
+        }));
+        expect(result.queryDiagnostics.strippedSourceCharsUsed).toBeGreaterThan(0);
+        expect(result.queryDiagnostics.strippedSourceCharsUsed).toBeLessThanOrEqual(1200);
         expect(result.query).toContain('Diagram Platform');
         expect(result.query).toContain('Sliding window retrieval keeps adjacent sections together.');
         expect(result.sourcePath).toBe('Docs/Diagram Platform.md');
@@ -478,6 +489,94 @@ describe('localKnowledgeBase', () => {
             excludeCurrentFileApplied: false,
             excludedCurrentFileHitCount: 0
         }));
+    });
+
+    test('inspect marks low-signal navigation basenames in query diagnostics without changing the derived basename query', async () => {
+        const source = createFile('Docs/index.zh-CN.md');
+        const knowledge = createFile('Knowledge/Indexing.md');
+
+        (mockApp.vault.getFiles as jest.Mock).mockReturnValue([source, knowledge]);
+        (mockApp.vault.read as jest.Mock).mockImplementation(async (file: TFile) => {
+            switch (file.path) {
+                case 'Docs/index.zh-CN.md':
+                    return '# Index\nNavigation note.';
+                default:
+                    return '# Indexing\nIndexing notes.';
+            }
+        });
+
+        const settings = {
+            ...mockSettings,
+            enableLocalKnowledgeRetrieval: true,
+            enableLocalKnowledgeForBatchGenerateFromTitles: true,
+            localKnowledgeBasePaths: 'Knowledge',
+            localKnowledgeBatchGenerateFromTitlesPaths: 'Knowledge',
+            localKnowledgeTopK: 2,
+            localKnowledgeSlidingWindowSize: 0,
+            localKnowledgeMaxSnippetChars: 160,
+            localKnowledgeExcludeCurrentFile: true
+        } as any;
+
+        const result = await inspectLocalKnowledgeRetrieval(
+            mockApp as any,
+            settings,
+            {
+                taskScope: 'batchGenerateFromTitles',
+                sourcePath: 'Docs/index.zh-CN.md'
+            }
+        );
+
+        expect(result.query).toBe('index.zh-CN');
+        expect(result.queryDerivation).toBe('basename');
+        expect(result.queryDiagnostics).toEqual({
+            derivedBasename: 'index.zh-CN',
+            strippedSourceCharsUsed: 0,
+            cautions: ['generic-navigation-basename']
+        });
+    });
+
+    test('inspect marks navigation-like diagram sources in query diagnostics', async () => {
+        const source = createFile('Docs/index.zh-CN.md');
+        const knowledge = createFile('Knowledge/Roadmap.md');
+
+        (mockApp.vault.getFiles as jest.Mock).mockReturnValue([source, knowledge]);
+        (mockApp.vault.read as jest.Mock).mockImplementation(async (file: TFile) => {
+            switch (file.path) {
+                case 'Docs/index.zh-CN.md':
+                    return '# Index\n## Roadmap\nThis note links to roadmap and release workflow pages.';
+                default:
+                    return '# Roadmap\nRelease workflow and roadmap notes.';
+            }
+        });
+
+        const settings = {
+            ...mockSettings,
+            enableLocalKnowledgeRetrieval: true,
+            enableLocalKnowledgeForDiagramGeneration: true,
+            localKnowledgeBasePaths: 'Knowledge',
+            localKnowledgeTopK: 1,
+            localKnowledgeSlidingWindowSize: 0,
+            localKnowledgeMaxSnippetChars: 180,
+            localKnowledgeExcludeCurrentFile: true
+        } as any;
+
+        const result = await inspectLocalKnowledgeRetrieval(
+            mockApp as any,
+            settings,
+            {
+                taskScope: 'diagramGeneration',
+                sourcePath: 'Docs/index.zh-CN.md'
+            }
+        );
+
+        expect(result.queryDerivation).toBe('diagram-source');
+        expect(result.query).toContain('index.zh-CN');
+        expect(result.queryDiagnostics).toEqual(expect.objectContaining({
+            derivedBasename: 'index.zh-CN',
+            cautions: ['diagram-source-built-from-navigation-like-note']
+        }));
+        expect(result.queryDiagnostics.strippedSourceCharsUsed).toBeGreaterThan(0);
+        expect(result.queryDiagnostics.strippedSourceCharsUsed).toBeLessThanOrEqual(1200);
     });
 
     test('inspect reports no-candidate-files status when effective paths resolve but no eligible files match', async () => {

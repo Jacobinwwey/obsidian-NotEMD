@@ -88,14 +88,15 @@
 - 这是 maintainer-grade repo 工具，不是 public CLI API
 - 操作目录统一收敛在 `scripts/lib/maintainer-cli-operation-help.js`，作为共享帮助元数据，并为 path-based operations 提供简洁 example payload
 - export operations 仍然只接受空 payload；受控内容操作必须显式提供 JSON 输入
-- 最小 inspect 示例：`npm run cli:invoke -- --vault docs --operation local-knowledge.inspect --input-json '{"taskScope":"diagramGeneration","sourcePath":"docs/index.zh-CN.md","knowledgePaths":["docs/maintainer","docs/superpowers"]}' --pretty`
-- `local-knowledge.inspect` 是刻意保持 maintainer-only 的 explainability surface：它会暴露 task scope、实际生效的知识库路径解析结果、显式或自动派生的 query、current-file exclusion 输入、retrieval options、候选文件路径、原始格式化 context、结构化 `contextBlocks` 证据，以及结构化 retrieval 摘要，但不会因此扩大 public CLI 契约
-- `local-knowledge.inspect` 当前会把三条 query 派生路径明确暴露出来并由测试锁定：`explicit`（直接研究查询）、`basename`（标题/批量标题任务作用域）以及 `diagram-source`（由图形生成任务的源文件 basename + stripped note content 共同派生）
+- 最小 inspect 示例：`npm run cli:invoke -- --vault docs --operation local-knowledge.inspect --input-json '{"taskScope":"diagramGeneration","sourcePath":"index.zh-CN.md","knowledgePaths":["maintainer","superpowers"]}' --pretty`
+- 对 `--vault docs` 来说，`sourcePath` 与 `knowledgePaths` 都必须写成 vault-relative 路径；应使用 `index.zh-CN.md`、`maintainer`，而不是 `docs/index.zh-CN.md`、`docs/maintainer`
+- `local-knowledge.inspect` 是刻意保持 maintainer-only 的 explainability surface：它会暴露 task scope、实际生效的知识库路径解析结果、显式或自动派生的 query、query diagnostics、current-file exclusion 输入、retrieval options、候选文件路径、原始格式化 context、结构化 `contextBlocks` 证据，以及结构化 retrieval 摘要，但不会因此扩大 public CLI 契约
+- `local-knowledge.inspect` 当前会把三条 query 派生路径明确暴露出来并由测试锁定：`explicit`（直接研究查询）、`basename`（标题/批量标题任务作用域）以及 `diagram-source`（由图形生成任务的源文件 basename + stripped note content 共同派生）。inspect 结果现在还会补充有界 query diagnostics，例如对 `index.*` 这类低信号导航文件名给出 generic navigation-basename caution
 - `local-knowledge.inspect` 现在还支持临时 `knowledgePaths` override 数组，维护者可以在不改动已保存 settings 快照的前提下，用临时文件/文件夹路径列表检查 task-scoped retrieval 行为
 - `local-knowledge.inspect` 现在还会把失败态 explainability 明确保留下来，而不是把所有未命中都压成同一种空结果：`retrieverBuildStatus` 会区分 `no-paths`、`no-candidate-files`、`no-retrievable-sections` 与 `ready`，同时继续保留 `candidateFilePaths` 与结构化 retrieval 摘要供维护者定位问题
 - 现在还补上了更贴近真实 task-scoped retrieval 链路的 inspect 示例，而不再只有 diagram lane：
-  - `npm run cli:invoke -- --vault docs --operation local-knowledge.inspect --input-json '{"taskScope":"batchGenerateFromTitles","sourcePath":"docs/index.zh-CN.md"}' --pretty`
-  - `npm run cli:invoke -- --vault docs --operation local-knowledge.inspect --input-json '{"taskScope":"researchSummarize","query":"task-scoped retrieval behavior","knowledgePaths":["docs/maintainer"]}' --pretty`
+  - `npm run cli:invoke -- --vault docs --operation local-knowledge.inspect --input-json '{"taskScope":"batchGenerateFromTitles","sourcePath":"index.zh-CN.md"}' --pretty`
+  - `npm run cli:invoke -- --vault docs --operation local-knowledge.inspect --input-json '{"taskScope":"researchSummarize","query":"task-scoped retrieval behavior","knowledgePaths":["maintainer"]}' --pretty`
 - `content.split-note-by-chapters` 现在还支持可选 `splitHeadingLevel`（`auto`、`h1`-`h6`），脚本可避免继续隐式依赖当前 settings 快照
 - `content.split-note-by-chapters` 的结果现在还会显式带出 `requestedSplitHeadingLevel`、`chapterNotePaths`、`managedArtifactPaths`、`removedStalePaths`、确定性的 `tocMetadata` 以及稳定的 `nestedHeadings[].blockId`，自动化调用方不必再靠文件名规则或重复标题的歧义去反推 managed artifact 集合、TOC front-matter metadata 与 TOC 目标；rerun 时若 manifest 管理的生成文件已被手改，当前实现也会拒绝静默覆盖或删除
 - 这些 path-based 维护操作在副作用、输出契约与失败语义没有作为公共契约一并锁定前，仍应保持 maintainer-only

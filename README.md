@@ -762,7 +762,8 @@ Contributions are welcome! Please refer to the GitHub repository for guidelines:
 - [CLI Capability Matrix](./docs/maintainer/notemd-cli-capability-matrix.md)
 - [CLI Capability Matrix (简体中文)](./docs/maintainer/notemd-cli-capability-matrix.zh-CN.md)
 - Repo-local CLI helper: `npm run cli:help`
-- Repo-local maintainer invoke example: `npm run cli:invoke -- --vault <vault> --operation content.split-note-by-chapters --input-json '{"sourcePath":"docs/index.zh-CN.md","splitHeadingLevel":"h2"}' --pretty`
+- Repo-local maintainer invoke example: `npm run cli:invoke -- --vault docs --operation content.split-note-by-chapters --input-json '{"sourcePath":"index.zh-CN.md","splitHeadingLevel":"h2"}' --pretty`
+- For `--vault docs`, JSON path inputs stay vault-relative: use `index.zh-CN.md` and `maintainer`, not `docs/index.zh-CN.md` or `docs/maintainer`.
 - Public-safe export commands are intentionally limited to redacted provider export, capability manifest export, invocation contract export, and public-surface export.
 
 ## License
