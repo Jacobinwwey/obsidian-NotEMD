@@ -17,11 +17,13 @@ This document summarizes the major functional and architectural changes implemen
 - Added dedicated Chapter Split + TOC spotlight docs, docs-home entry points, and showcase artwork so the feature is now part of the repository’s visible shipped surface instead of only maintainer-facing references.
 - Extended `local-knowledge.inspect` explainability with `queryDiagnostics`, including the derived basename, bounded stripped-source length used for diagram-source derivation, and cautions for generic navigation-like source names.
 - Expanded maintainer CLI help and capability-matrix guidance so `--vault docs` examples consistently demonstrate vault-relative `sourcePath` and `knowledgePaths` inputs.
+- Added maintainer inspect examples for broader docs-vault local knowledge checks, covering explicit research queries, cross-folder batch-title source paths, and diagram-source retrieval with bounded `topK` / `slidingWindowSize` overrides.
 
 ### Fixes
 
 - Fixed the sidebar footer container so the log/API region can scroll vertically again instead of getting pinned behind oversized activity content.
 - Fixed the maintainer docs-vault examples that previously used repo-relative `docs/...` paths, which could mislead local knowledge inspection and chapter-split invocations in a real `--vault docs` run.
+- Fixed Stage-C documentation drift by keeping local knowledge fixture coverage, maintainer helper output, and bilingual CLI capability docs aligned around the same vault-relative example payloads.
 - Fixed chronicle refresh helper authorship so release-driven chronicle updates preserve maintainer identity instead of falling back to a bot identity.
 
 ### Verification

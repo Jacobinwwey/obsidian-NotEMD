@@ -98,6 +98,9 @@
   - `npm run cli:invoke -- --vault docs --operation local-knowledge.inspect --input-json '{"taskScope":"batchGenerateFromTitles","sourcePath":"index.zh-CN.md"}' --pretty`
   - `npm run cli:invoke -- --vault docs --operation local-knowledge.inspect --input-json '{"taskScope":"researchSummarize","query":"task-scoped retrieval behavior","knowledgePaths":["maintainer"]}' --pretty`
   - `npm run cli:invoke -- --vault docs --operation local-knowledge.inspect --input-json '{"taskScope":"researchSummarize","query":"chapter split TOC managed artifacts guarded reruns","knowledgePaths":["chapter-split-toc.md","chapter-split-toc.zh-CN.md"]}' --pretty`
+  - `npm run cli:invoke -- --vault docs --operation local-knowledge.inspect --input-json '{"taskScope":"researchSummarize","query":"real-note query diversity beyond chapter split showcase","knowledgePaths":["brainstorms","maintainer"],"topK":2,"slidingWindowSize":1}' --pretty`
+  - `npm run cli:invoke -- --vault docs --operation local-knowledge.inspect --input-json '{"taskScope":"batchGenerateFromTitles","sourcePath":"brainstorms/2026-05-28-mainline-progress-audit-and-next-level-direction.md","knowledgePaths":["brainstorms","maintainer"],"topK":2,"slidingWindowSize":1}' --pretty`
+  - `npm run cli:invoke -- --vault docs --operation local-knowledge.inspect --input-json '{"taskScope":"diagramGeneration","sourcePath":"index.zh-CN.md","knowledgePaths":["brainstorms","maintainer"],"topK":2,"slidingWindowSize":1}' --pretty`
 - `content.split-note-by-chapters` 现在还支持可选 `splitHeadingLevel`（`auto`、`h1`-`h6`），脚本可避免继续隐式依赖当前 settings 快照
 - `content.split-note-by-chapters` 的结果现在还会显式带出 `requestedSplitHeadingLevel`、`chapterNotePaths`、`managedArtifactPaths`、`removedStalePaths`、确定性的 `tocMetadata` 以及稳定的 `nestedHeadings[].blockId`，自动化调用方不必再靠文件名规则或重复标题的歧义去反推 managed artifact 集合、TOC front-matter metadata 与 TOC 目标；rerun 时若 manifest 管理的生成文件已被手改，当前实现也会拒绝静默覆盖或删除
 - 这些 path-based 维护操作在副作用、输出契约与失败语义没有作为公共契约一并锁定前，仍应保持 maintainer-only

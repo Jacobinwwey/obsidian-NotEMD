@@ -124,6 +124,12 @@ describe('CLI public surface docs alignment', () => {
         expect(matrixZh).toContain('"query":"chapter split TOC managed artifacts guarded reruns"');
         expect(matrix).toContain('"knowledgePaths":["chapter-split-toc.md","chapter-split-toc.zh-CN.md"]');
         expect(matrixZh).toContain('"knowledgePaths":["chapter-split-toc.md","chapter-split-toc.zh-CN.md"]');
+        expect(matrix).toContain('"query":"real-note query diversity beyond chapter split showcase"');
+        expect(matrixZh).toContain('"query":"real-note query diversity beyond chapter split showcase"');
+        expect(matrix).toContain('"knowledgePaths":["brainstorms","maintainer"]');
+        expect(matrixZh).toContain('"knowledgePaths":["brainstorms","maintainer"]');
+        expect(matrix).toContain('"sourcePath":"brainstorms/2026-05-28-mainline-progress-audit-and-next-level-direction.md"');
+        expect(matrixZh).toContain('"sourcePath":"brainstorms/2026-05-28-mainline-progress-audit-and-next-level-direction.md"');
         expect(matrix).toContain('vault-relative');
         expect(matrixZh).toContain('vault-relative');
     });

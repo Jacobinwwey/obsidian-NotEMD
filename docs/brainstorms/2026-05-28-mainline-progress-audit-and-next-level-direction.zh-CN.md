@@ -194,6 +194,8 @@ canonical: true
 
 这条 fixture lane 的价值在于，它把 Stage-C 证据从叙事层推进到可运行检查：`npm run verify:local-kb-fixtures` 现在会用当前线上 MiniSearch-backed retrieval 路径，跑 real-note-style 的 chapter-split docs-vault 示例，并覆盖 managed artifacts、guarded reruns、稳定 TOC block refs、跨文件夹 task-contract retrieval，以及 chapter-split showcase 之外的真实 note/query 多样性。
 
+当前 `7999a5f` 之后的跟进切片没有改 runtime retrieval algorithm，而是把已经通过 fixture 的真实 docs-vault 检索路径继续落到 maintainer operator surface：`local-knowledge.inspect` 的 helper help、双语 capability matrix 与文档对齐测试现在共同覆盖 explicit research query、跨文件夹 batch-title source path、diagram-source retrieval，以及有界 `topK` / `slidingWindowSize` override。这个切片的意义是减少“测试证明了，但维护者不知道怎么复现”的断层；它不改变 public CLI 边界，也不把 maintainer-only inspect seam 提升为用户 API。
+
 对照 `.trellis/tasks/05-19-local-kb-retrieval-chapter-split-stage-b2cd/prd.md`，当前逐项状态如下：
 
 | PRD 要求 | 当前代码/文档真值 | 状态 | 下一步解释 |
@@ -204,7 +206,7 @@ canonical: true
 | R5 对比研究 | active task 的 `research/` 目录下已有 local-RAG 与 TOC 对比材料 | 已作为决策支撑落地 | 后续比较必须落到 Notemd 当前任务契约，不能泛化成 RAG 口号 |
 | R6/R7 chapter split | command/sidebar/maintainer surface、确定性 TOC metadata、稳定 block refs、manifest-backed guarded reruns 与 managed artifact 结果已存在 | 已落地 | 随 result schema 演进，持续保持 showcase docs 与写入契约一致 |
 | R8 packaging / semantic truth | 当前发货边界仍是 `main.js` + inline `srcdoc`，没有宣称 dedicated runtime asset | 已作为约束落地 | packaging convergence 是下一条 P0 架构轨道，不是已完成项 |
-| R9/R10 tests、docs 与 CI 稳定性 | 现有集成测试与 `verify:local-kb-fixtures` 已覆盖 retrieval injection、fallback、inspect、chapter-split showcase 行为、跨文件夹 task-contract retrieval 与低信号导航源 diagnostics | 持续 finish gate | 扩大表述前继续用测试锁住进度文案 |
+| R9/R10 tests、docs 与 CI 稳定性 | 现有集成测试与 `verify:local-kb-fixtures` 已覆盖 retrieval injection、fallback、inspect、chapter-split showcase 行为、跨文件夹 task-contract retrieval 与低信号导航源 diagnostics；当前 maintainer help/docs alignment 测试还锁住真实 docs-vault example payload | 持续 finish gate | 扩大表述前继续用测试锁住进度文案；helper 示例必须继续保持 vault-relative 且不越界进入 public CLI 叙述 |
 
 架构解释：
 
@@ -426,12 +428,13 @@ provider 专题文在以下几点上仍然正确，而且不应被放松：
 5. 离线夹具现在还覆盖了 noisy mixed-corpus scope：重复/空白 override path、混合 file/folder entry、非 Markdown 干扰文件、无关文件夹与空 searchable section 候选都会进入同一条评估路径，用来证明当前 MiniSearch 路径仍能保持 scope 收敛，同时不扩任务数量或 public CLI 行为。
 6. 离线夹具与 maintainer helper 示例现在还覆盖 real-note-style chapter-split showcase query：它会围绕 managed artifacts、guarded reruns 与稳定 TOC block refs 检查检索效果，并且 runnable inspect 示例使用真实 docs vault 路径，而不是只存在于测试夹具中的路径。
 7. 离线夹具现在还覆盖了 chapter-split showcase 之外的真实 note/query 多样性：跨文件夹 project/reference 知识库路径、任务契约检索、RAG 质量评估笔记与 navigation-like source diagnostics 都被锁定，同时没有把 `local-knowledge.inspect` 提升成 public CLI contract。
+8. maintainer help、双语 capability matrix 与对应 Jest alignment 测试现在补上了同一批真实 docs-vault inspect 示例：explicit research query 使用 `brainstorms` + `maintainer` 跨文件夹知识路径，batch-title 示例直接指向 `brainstorms/2026-05-28-mainline-progress-audit-and-next-level-direction.md`，diagram-source 示例继续用 `index.zh-CN.md` 验证低信号来源诊断；这使 Batch C 的“示例对齐”从开放方向推进为已落地 guardrail。
 
 这一批次接下来的有界方向：
 
-1. 继续增加 chapter-split showcase 之外的真实 note/query 多样性，再考虑增加新的 retrieval-dependent task 数量；
-2. 随 result schema 演进，持续保持 chapter split 的 showcase/docs 与真实写入契约、managed-artifact 语义一致；
-3. 让 maintainer inspect 足够适合诊断，但不要让它意外变成事实上的 public contract。
+1. 继续增加 chapter-split showcase 之外的真实 note/query 多样性时，优先补真实任务契约上的失败态、低信号 query 与 noisy-corpus 证据，而不是增加更多演示性路径；
+2. 随 result schema 演进，持续保持 chapter split 的 showcase/docs、maintainer examples 与真实写入契约、managed-artifact 语义一致；
+3. 让 maintainer inspect 足够适合诊断，但不要让它意外变成事实上的 public contract；若未来要提升任何 path-based operation，必须另起 public-promotion 批次并同批锁 schema、help、测试与文档。
 
 ### Batch D：把 provider 轨道放回 bounded breadth-maintenance 模式
 

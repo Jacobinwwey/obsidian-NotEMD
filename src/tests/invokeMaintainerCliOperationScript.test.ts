@@ -45,6 +45,9 @@ describe('invoke maintainer CLI operation script', () => {
         expect(output).toContain('"taskScope":"researchSummarize"');
         expect(output).toContain('"query":"chapter split TOC managed artifacts guarded reruns"');
         expect(output).toContain('"knowledgePaths":["chapter-split-toc.md","chapter-split-toc.zh-CN.md"]');
+        expect(output).toContain('"query":"real-note query diversity beyond chapter split showcase"');
+        expect(output).toContain('"knowledgePaths":["brainstorms","maintainer"]');
+        expect(output).toContain('"sourcePath":"brainstorms/2026-05-28-mainline-progress-audit-and-next-level-direction.md"');
         expect(output).toContain('knowledgePaths');
         expect(output).toContain('npm run cli:invoke -- --vault docs --operation local-knowledge.inspect');
         expect(output).toContain('"sourcePath":"index.zh-CN.md"');
