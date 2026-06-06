@@ -45,6 +45,10 @@ describe('diagram semantic verification helper', () => {
         expect(runbookZh).toContain('`scripts/lib/esbuild-bundle-config.js`');
         expect(runbook).toContain('release-trigger/tag-guard/workflow-branch/chronicle-target contract truth');
         expect(runbookZh).toContain('release 触发、tag 防护、workflow-source 分支与 chronicle-target 分支契约真值');
+        expect(runbook).toContain('RELEASE_WORKFLOW_TAG_TRIGGER_GLOB');
+        expect(runbook).toContain('RELEASE_WORKFLOW_DISALLOWED_TAG_TRIGGER_GLOBS');
+        expect(runbookZh).toContain('RELEASE_WORKFLOW_TAG_TRIGGER_GLOB');
+        expect(runbookZh).toContain('RELEASE_WORKFLOW_DISALLOWED_TAG_TRIGGER_GLOBS');
         expect(releaseWorkflow).toContain('verify:diagram-semantics');
         expect(releaseWorkflowZh).toContain('verify:diagram-semantics');
         expect(releaseWorkflow).toContain('does not prove true heavy-runtime isolation');
@@ -55,6 +59,10 @@ describe('diagram semantic verification helper', () => {
         expect(releaseWorkflow).toContain('NOTEMD_RELEASE_CHRONICLE_TARGET_BRANCH');
         expect(releaseWorkflowZh).toContain('NOTEMD_RELEASE_WORKFLOW_SOURCE_BRANCH');
         expect(releaseWorkflowZh).toContain('NOTEMD_RELEASE_CHRONICLE_TARGET_BRANCH');
+        expect(releaseWorkflow).toContain('RELEASE_WORKFLOW_TAG_TRIGGER_GLOB');
+        expect(releaseWorkflow).toContain('RELEASE_WORKFLOW_DISALLOWED_TAG_TRIGGER_GLOBS');
+        expect(releaseWorkflowZh).toContain('RELEASE_WORKFLOW_TAG_TRIGGER_GLOB');
+        expect(releaseWorkflowZh).toContain('RELEASE_WORKFLOW_DISALLOWED_TAG_TRIGGER_GLOBS');
     });
 
     const maybeDescribeHelper = fs.existsSync(scriptPath) ? describe : describe.skip;
@@ -159,6 +167,8 @@ describe('diagram semantic verification helper', () => {
             sourcePath: string;
             hasWorkflowDispatch: boolean;
             hasTagPushTrigger: boolean;
+            tagTriggerGlob: string;
+            disallowedTagTriggerGlobs: string[];
             checksOutWorkflowSourcesFromConfiguredBranch: boolean;
             refreshesChronicleOnConfiguredBranch: boolean;
             workflowSourceBranch: string;
@@ -171,6 +181,8 @@ describe('diagram semantic verification helper', () => {
             sourcePath: string;
             hasWorkflowDispatch: boolean;
             hasTagPushTrigger: boolean;
+            tagTriggerGlob: string;
+            disallowedTagTriggerGlobs: string[];
             checksOutWorkflowSourcesFromConfiguredBranch: boolean;
             refreshesChronicleOnConfiguredBranch: boolean;
             workflowSourceBranch: string;
@@ -705,6 +717,8 @@ const context = await esbuild.context({
             expect(facts.resolvedFromReleaseHelper).toBe(true);
             expect(workflowFacts.hasWorkflowDispatch).toBe(true);
             expect(workflowFacts.hasTagPushTrigger).toBe(true);
+            expect(workflowFacts.tagTriggerGlob).toBe(packagingContract.RELEASE_WORKFLOW_TAG_TRIGGER_GLOB);
+            expect(workflowFacts.disallowedTagTriggerGlobs).toEqual(packagingContract.RELEASE_WORKFLOW_DISALLOWED_TAG_TRIGGER_GLOBS);
             expect(workflowFacts.checksOutWorkflowSourcesFromConfiguredBranch).toBe(true);
             expect(workflowFacts.refreshesChronicleOnConfiguredBranch).toBe(true);
             expect(workflowFacts.workflowSourceBranch).toBe(packagingContract.RELEASE_WORKFLOW_SOURCE_BRANCH);
@@ -720,7 +734,7 @@ const context = await esbuild.context({
             expect(lines[1]).toContain('/^\\d+\\.\\d+\\.\\d+$/');
             expect(lines[2]).toContain('create path composes bilingual notes');
             expect(lines[2]).toContain('`--clobber`');
-            expect(lines[3]).toContain('tag push (`*.*.*`) + `workflow_dispatch`');
+            expect(lines[3]).toContain(`tag push (\`${packagingContract.RELEASE_WORKFLOW_TAG_TRIGGER_GLOB}\`) + \`workflow_dispatch\``);
             expect(lines[4]).toContain(`checked-in workflow sources are validated from configured workflow-source branch \`${packagingContract.RELEASE_WORKFLOW_SOURCE_BRANCH}\``);
             expect(lines[5]).toContain('numeric-tag regex guard present');
             const releaseNotesRelativePaths = packagingContract.resolveReleaseNotesRelativePaths('<tag>');
@@ -742,6 +756,8 @@ const context = await esbuild.context({
             expect(facts.resolvedFromReleaseHelper).toBe(false);
             expect(workflowFacts.hasWorkflowDispatch).toBe(false);
             expect(workflowFacts.hasTagPushTrigger).toBe(false);
+            expect(workflowFacts.tagTriggerGlob).toBe(packagingContract.RELEASE_WORKFLOW_TAG_TRIGGER_GLOB);
+            expect(workflowFacts.disallowedTagTriggerGlobs).toEqual(packagingContract.RELEASE_WORKFLOW_DISALLOWED_TAG_TRIGGER_GLOBS);
             expect(workflowFacts.checksOutWorkflowSourcesFromConfiguredBranch).toBe(false);
             expect(workflowFacts.refreshesChronicleOnConfiguredBranch).toBe(false);
             expect(workflowFacts.workflowSourceBranch).toBe(packagingContract.RELEASE_WORKFLOW_SOURCE_BRANCH);
@@ -758,6 +774,39 @@ const context = await esbuild.context({
             expect(lines[4]).toContain('workflow-source checkout inspection incomplete');
             expect(lines[5]).toContain('tag-guard inspection incomplete');
             expect(lines[7]).toContain('chronicle-refresh workflow inspection incomplete');
+        });
+
+        test('detects release workflow tag-trigger drift from the shared contract', () => {
+            const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-release-workflow-trigger-'));
+            const releaseWorkflowPath = path.join(tempRoot, 'release.yml');
+
+            try {
+                fs.writeFileSync(
+                    releaseWorkflowPath,
+                    [
+                        'name: Release',
+                        'on:',
+                        '  push:',
+                        '    tags:',
+                        `      - '${packagingContract.RELEASE_WORKFLOW_TAG_TRIGGER_GLOB}'`,
+                        `      - '${packagingContract.RELEASE_WORKFLOW_DISALLOWED_TAG_TRIGGER_GLOBS[0]}'`,
+                        '  workflow_dispatch:',
+                        'jobs: {}',
+                        ''
+                    ].join('\n'),
+                    'utf8'
+                );
+
+                const workflowFacts = resolveReleaseWorkflowTriggerFacts({ releaseWorkflowPath });
+                expect(workflowFacts.hasTagPushTrigger).toBe(true);
+                expect(workflowFacts.tagTriggerGlob).toBe(packagingContract.RELEASE_WORKFLOW_TAG_TRIGGER_GLOB);
+                expect(workflowFacts.rejectsVPrefixedTagTrigger).toBe(false);
+
+                const lines = buildReleasePackagingContractChecklistLines(undefined, workflowFacts);
+                expect(lines[5]).toContain('tag-guard inspection incomplete');
+            } finally {
+                fs.rmSync(tempRoot, { recursive: true, force: true });
+            }
         });
 
         test('resolves contract-promotion boundary facts for workflow/settings/export operation metadata', () => {
@@ -867,7 +916,7 @@ const context = await esbuild.context({
             expect(template).toContain('/^\\d+\\.\\d+\\.\\d+$/');
             expect(template).toContain('create path composes bilingual notes');
             expect(template).toContain('`--clobber`');
-            expect(template).toContain('tag push (`*.*.*`) + `workflow_dispatch`');
+            expect(template).toContain(`tag push (\`${packagingContract.RELEASE_WORKFLOW_TAG_TRIGGER_GLOB}\`) + \`workflow_dispatch\``);
             expect(template).toContain(`checked-in workflow sources are validated from configured workflow-source branch \`${packagingContract.RELEASE_WORKFLOW_SOURCE_BRANCH}\``);
             expect(template).toContain('numeric-tag regex guard present');
             expect(template).toContain(packagingContract.resolveReleaseNotesRelativePaths('<tag>').simplifiedChinese);

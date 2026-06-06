@@ -179,11 +179,13 @@ canonical: true
 5. release 维护链路真值再次收紧：
    - chronicle refresh helper 现在会保留 maintainer 身份，而不是悄悄退回 bot-like identity。
    - workflow-source checkout 与 chronicle-target branch 真值现在归 `scripts/lib/packaging-contract.js` 所有，并通过 workflow env 名与 helper/tests 保持 GitHub Actions bootstrap 值一致。
+   - release workflow 的 tag-trigger glob 真值现在也归 `scripts/lib/packaging-contract.js` 所有，`.github/workflows/release.yml` 只保留 GitHub Actions 在 checkout 前必须解析的 bootstrap 字面量。
+   - semantic verification 现在会区分 workflow-start trigger 真值与数字版 release 准入：`*.*.*` 只负责启动 workflow，`scripts/release/validate-release-tag.js` 仍负责执行纯数字 `x.x.x` 契约。
 
 正确解释：
 
 1. `1.9.2` 不是“新增架构主线”的 release；
-2. 它是一个真值收紧型 release，价值在于减少 operator confusion、doc/runtime 漂移与 release-process 歧义。
+2. `1.9.2` 之后的 release-contract 跟进仍在同一轨道内：减少 operator confusion、doc/runtime 漂移与 release-process 歧义，但不改变插件发货行为。
 
 ## 3. 相对先前方案语言的深度对比
 
@@ -239,12 +241,13 @@ provider 专题文在以下几点上仍然正确，而且不应被放松：
 
 ### 3.4 当前统一矩阵必须继续防止的误判
 
-统一矩阵现在需要明确防住三类反复出现的误读：
+统一矩阵现在需要明确防住这些反复出现的误读：
 
 1. 把当前更宽的 bounded discovery 误写成 all-provider discovery；
 2. 把 host-aware bare-model token lookup 误写成 arbitrary custom gateway 上也能自动推断 owner；
 3. 把已有共享 parser seam 误写成以后可以顺手持久化 remote catalog，而不需要新的显式架构决策。
 4. 把 `1.9.2` 中 sidebar / inspect / docs 的收口误写成 public CLI 已扩宽，或 packaging 契约已变化。
+5. 把 YAML 中的 `*.*.*` trigger 字面量误写成独立 release 规则，而不是受 shared release contract 锁定、且后续仍由数字 tag validator 准入的 bootstrap 值。
 
 ### 3.5 Packaging 与 CLI 规划文档目前仍然成立的部分
 
@@ -292,6 +295,7 @@ provider 专题文在以下几点上仍然正确，而且不应被放松：
 4. discovery parser 相比最初落地 helper，已经对真实 registry 漂移、wrapped catalogs 与 resource-style names 更鲁棒。
 5. retrieval explainability 在 maintainer 轨道上更强了，因为弱 query 推导现在会被结构化诊断显式暴露，而不再只表现为不透明的空 context。
 6. shipped UI 的 operator feedback 再次可用了，因为日志输出与 API activity 现在共享有界滚动布局，而不是继续争抢固定空间。
+7. release workflow trigger 真值现在和 release assets、notes、tag validation、workflow-source branch、chronicle-target branch 一起进入 contract-backed 状态；这关闭了一处 YAML-local 漂移缝隙，同时没有假装 GitHub Actions 能在 checkout 前 import 仓库代码。
 
 ### 4.2 仍然存在的结构约束
 
@@ -330,7 +334,8 @@ provider 专题文在以下几点上仍然正确，而且不应被放松：
 目标：
 
 1. 继续把当前 `main.js` + inline `srcdoc` 的发货真值保持为显式、可执行的边界；
-2. 在任何人拓宽 packaging 叙述之前，先解决当前 latent render-host runtime candidate 与 source/build 真值之间的歧义。
+2. 让 release workflow trigger、tag validation、assets、notes、workflow-source 与 chronicle-target 真值继续处在同一份 shared contract 下；
+3. 在任何人拓宽 packaging 叙述之前，先解决当前 latent render-host runtime candidate 与 source/build 真值之间的歧义。
 
 硬规则：
 

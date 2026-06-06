@@ -33,9 +33,16 @@ describe('GitHub release workflow', () => {
 
         expect(workflow).toContain('workflow_dispatch:');
         expect(workflow).toContain('push:');
-        expect(workflow).toContain("- '*.*.*'");
-        expect(workflow).not.toContain("- 'v*.*.*'");
-        expect(workflow).not.toContain("- 'V*.*.*'");
+        expect(packagingContract.RELEASE_WORKFLOW_TAG_TRIGGER_GLOB).toBe('*.*.*');
+        expect(packagingContract.RELEASE_WORKFLOW_DISALLOWED_TAG_TRIGGER_GLOBS).toEqual([
+            'v*.*.*',
+            'V*.*.*'
+        ]);
+        expect(workflow).toContain(`- '${packagingContract.RELEASE_WORKFLOW_TAG_TRIGGER_GLOB}'`);
+        for (const disallowedTagTriggerGlob of packagingContract.RELEASE_WORKFLOW_DISALLOWED_TAG_TRIGGER_GLOBS) {
+            expect(workflow).not.toContain(`- '${disallowedTagTriggerGlob}'`);
+            expect(workflow).not.toContain(`- "${disallowedTagTriggerGlob}"`);
+        }
         expect(workflow).toContain('contents: write');
         expect(workflow).toContain('actions/checkout@v6');
         expect(workflow).toContain('actions/setup-node@v6');

@@ -179,11 +179,13 @@ What is materially true now:
 5. release maintenance truth tightened again:
    - chronicle refresh helper authorship now preserves maintainer identity instead of silently collapsing to a bot-like identity.
    - workflow-source checkout and chronicle-target branch truth now share `scripts/lib/packaging-contract.js` ownership, with workflow env names and helper/tests keeping the GitHub Actions bootstrap values aligned.
+   - release workflow tag-trigger glob truth now also lives in `scripts/lib/packaging-contract.js`, while `.github/workflows/release.yml` keeps only the GitHub Actions bootstrap literal required before checkout.
+   - semantic verification now distinguishes workflow-start trigger truth from numeric release admission: `*.*.*` starts the workflow, and `scripts/release/validate-release-tag.js` still enforces the numeric `x.x.x` contract.
 
 Interpretation:
 
 1. `1.9.2` is not a “new architecture lane” release;
-2. it is a truth-tightening release that matters because it reduces operator confusion, doc/runtime drift, and release-process ambiguity.
+2. the post-`1.9.2` release-contract follow-through is still in the same lane: it reduces operator confusion, doc/runtime drift, and release-process ambiguity without changing shipped plugin behavior.
 
 ## 3. Deep Comparison Against Earlier Plan Language
 
@@ -239,12 +241,13 @@ Correct interpretation:
 
 ### 3.4 What the unified matrix must now protect
 
-The unified matrix now needs to protect against three recurrent misreads:
+The unified matrix now needs to protect against recurring misreads:
 
 1. treating wider bounded discovery as permission to claim all-provider discovery;
 2. treating host-aware bare-model token lookup as permission to infer ownership for arbitrary custom gateways;
 3. treating the presence of shared parser seams as permission to persist remote catalogs later without a new explicit architecture decision.
 4. treating `1.9.2` sidebar / inspect / docs improvements as if they widened the public CLI or changed the packaging contract.
+5. treating the YAML `*.*.*` trigger literal as an independent release rule instead of a bootstrap value locked against the shared release contract and followed by numeric tag validation.
 
 ### 3.5 What the packaging and CLI planning documents still get right
 
@@ -292,6 +295,7 @@ Correct interpretation:
 4. The discovery parser is meaningfully more robust against real registry drift, wrapped catalogs, and resource-style names than the initial landed helper.
 5. Retrieval explainability is stronger on the maintainer lane because weak query derivation is now surfaced as structured diagnostics rather than an opaque empty-context outcome.
 6. Sidebar operator feedback is again usable in the shipped UI because log output and API activity now share a bounded scrollable layout instead of fighting for fixed space.
+7. Release workflow trigger truth is now contract-backed alongside release assets, notes, tag validation, workflow-source branch, and chronicle-target branch; this closes a YAML-local drift seam without pretending GitHub Actions can import repo code before checkout.
 
 ### 4.2 What remains structurally constrained
 
@@ -330,7 +334,8 @@ Priority: `P0`
 Goal:
 
 1. keep the current `main.js` + inline `srcdoc` shipping truth explicit and executable;
-2. resolve the current source/build ambiguity around latent render-host runtime candidates before anyone widens packaging claims.
+2. keep release workflow trigger, tag validation, asset, note, workflow-source, and chronicle-target truth under one shared contract;
+3. resolve the current source/build ambiguity around latent render-host runtime candidates before anyone widens packaging claims.
 
 Required rule:
 

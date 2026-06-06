@@ -6,7 +6,9 @@ const {
     MAIN_BUNDLE_OUTPUT_FILE,
     REQUIRED_RELEASE_ASSET_FILES,
     RELEASE_CHRONICLE_REFRESH_TARGET_BRANCH,
+    RELEASE_WORKFLOW_DISALLOWED_TAG_TRIGGER_GLOBS,
     RELEASE_TAG_PATTERN_SOURCE,
+    RELEASE_WORKFLOW_TAG_TRIGGER_GLOB,
     RELEASE_WORKFLOW_SOURCE_BRANCH,
     resolveReleaseNotesRelativePaths,
     RENDER_HOST_AUDIT_MARKERS,
@@ -413,6 +415,11 @@ function normalizeRelativePath(filePath, basePath = path.resolve(__dirname, '..'
     return path.relative(basePath, filePath).split(path.sep).join('/');
 }
 
+function workflowIncludesTagTriggerGlob(workflowSource, glob) {
+    const quotedGlob = escapeRegExp(glob);
+    return new RegExp(`^\\s*-\\s*['"]${quotedGlob}['"]\\s*$`, 'm').test(workflowSource);
+}
+
 function resolveReleasePackagingContractFacts({
     releaseHelperPath = path.resolve(__dirname, 'release', 'publish-github-release.js')
 } = {}) {
@@ -508,15 +515,20 @@ function resolveReleaseWorkflowTriggerFacts({
             && workflowSource.includes('node scripts/release/commit-chronicle-refresh.js "$TAG_NAME" --target-branch "$NOTEMD_RELEASE_CHRONICLE_TARGET_BRANCH"')
             && workflowSource.includes(chronicleTargetEnvLine)
             && workflowSource.includes('ref: ${{ env.NOTEMD_RELEASE_CHRONICLE_TARGET_BRANCH }}');
+        const hasConfiguredTagPushTrigger = workflowIncludesTagTriggerGlob(workflowSource, RELEASE_WORKFLOW_TAG_TRIGGER_GLOB);
+        const hasDisallowedTagPushTrigger = RELEASE_WORKFLOW_DISALLOWED_TAG_TRIGGER_GLOBS
+            .some((glob) => workflowIncludesTagTriggerGlob(workflowSource, glob));
         return {
             sourcePath: releaseWorkflowPath,
             hasWorkflowDispatch: workflowSource.includes('workflow_dispatch:'),
-            hasTagPushTrigger: workflowSource.includes("tags:") && workflowSource.includes("- '*.*.*'"),
+            hasTagPushTrigger: workflowSource.includes('tags:') && hasConfiguredTagPushTrigger,
+            tagTriggerGlob: RELEASE_WORKFLOW_TAG_TRIGGER_GLOB,
+            disallowedTagTriggerGlobs: [...RELEASE_WORKFLOW_DISALLOWED_TAG_TRIGGER_GLOBS],
             checksOutWorkflowSourcesFromConfiguredBranch: checkoutsWorkflowSourcesFromConfiguredBranch,
             refreshesChronicleOnConfiguredBranch,
             workflowSourceBranch: RELEASE_WORKFLOW_SOURCE_BRANCH,
             chronicleTargetBranch: RELEASE_CHRONICLE_REFRESH_TARGET_BRANCH,
-            rejectsVPrefixedTagTrigger: !workflowSource.includes("- 'v*.*.*'") && !workflowSource.includes("- 'V*.*.*'"),
+            rejectsVPrefixedTagTrigger: !hasDisallowedTagPushTrigger,
             validatesNumericTagPattern: validatesWithSharedHelper
                 || workflowSource.includes('^[0-9]+\\.[0-9]+\\.[0-9]+$'),
             resolvedFromWorkflowFile: true
@@ -526,6 +538,8 @@ function resolveReleaseWorkflowTriggerFacts({
             sourcePath: releaseWorkflowPath,
             hasWorkflowDispatch: false,
             hasTagPushTrigger: false,
+            tagTriggerGlob: RELEASE_WORKFLOW_TAG_TRIGGER_GLOB,
+            disallowedTagTriggerGlobs: [...RELEASE_WORKFLOW_DISALLOWED_TAG_TRIGGER_GLOBS],
             checksOutWorkflowSourcesFromConfiguredBranch: false,
             refreshesChronicleOnConfiguredBranch: false,
             workflowSourceBranch: RELEASE_WORKFLOW_SOURCE_BRANCH,
@@ -743,8 +757,9 @@ function buildReleasePackagingContractChecklistLines(
     const workflowDescriptor = workflowFacts.resolvedFromWorkflowFile
         ? `derived from \`${releaseWorkflowPath}\``
         : `fallback reminder because \`${releaseWorkflowPath}\` could not be loaded`;
+    const tagTriggerGlob = workflowFacts.tagTriggerGlob || RELEASE_WORKFLOW_TAG_TRIGGER_GLOB;
     const triggerDescriptor = workflowFacts.hasTagPushTrigger && workflowFacts.hasWorkflowDispatch
-        ? 'tag push (`*.*.*`) + `workflow_dispatch`'
+        ? `tag push (\`${tagTriggerGlob}\`) + \`workflow_dispatch\``
         : 'trigger inspection incomplete';
     const workflowSourceCheckoutDescriptor = workflowFacts.checksOutWorkflowSourcesFromConfiguredBranch
         ? `checked-in workflow sources are validated from configured workflow-source branch \`${workflowFacts.workflowSourceBranch}\` before release-ref checkout`

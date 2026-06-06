@@ -231,6 +231,30 @@ source/build/audit 边界上另一处 anti-drift 缺口现在也已经补齐：
 2. 真正变化的是 ownership：workflow-source 与 chronicle-target 分支真值现在会跟 release assets、tag 与 notes 真值一起演进；
 3. GitHub Actions 在首次 checkout 前仍需要 bootstrap env 值，因此 workflow 不可能在那一步直接 import 仓库 JS；防止 YAML-local 漂移的是仓库内 contract 与测试。
 
+### 2026-06-06 Trigger-Glob 增量：release workflow 的 tag trigger 现在也由 contract 支撑
+
+上一轮 branch-target 收口之后，release workflow 里仍留着一个小但真实的重复定义：YAML trigger list 还在独自拥有 tag wildcard 字面量。
+
+这次以有界方式补齐了这处缺口：
+
+1. `scripts/lib/packaging-contract.js` 现在拥有：
+   - `RELEASE_WORKFLOW_TAG_TRIGGER_GLOB`；
+   - `RELEASE_WORKFLOW_DISALLOWED_TAG_TRIGGER_GLOBS`。
+2. `.github/workflows/release.yml` 仍保留 `*.*.*` 字面量，因为 GitHub Actions 必须在 checkout 仓库 JavaScript 之前解析 event triggers。
+3. `scripts/diagram-semantic-verification.js` 现在从 shared contract 推导 workflow trigger facts，并能识别 `v*.*.*` / `V*.*.*` 这类被禁止的 trigger 漂移。
+4. 回归覆盖现在同时锁住两条路径：
+   - `src/tests/githubReleaseWorkflow.test.ts` 验证 workflow bootstrap 字面量与 shared contract 一致，且不包含被禁止的 trigger glob；
+   - `src/tests/diagramSemanticVerificationScript.test.ts` 验证 helper 输出、fallback facts 与 drift fixture 都继续对齐同一份 contract。
+5. 维护者文档现在明确区分 trigger-start 行为与 release 准入：
+   - wildcard 只决定 release workflow 是否启动；
+   - 已检入的 tag validator 仍是真正的纯数字 `x.x.x` 准入点。
+
+正确解释：
+
+1. 当前 release 行为没有变化；
+2. 这次补齐的是 ownership 缺口，并没有假装 GitHub Actions YAML 能在 checkout 前动态 import 仓库 JavaScript；
+3. release workflow trigger、tag validation、release notes、release assets、workflow-source branch 与 chronicle-target branch 现在都处在同一条 repo-side anti-drift contract 下。
+
 ### Priority 2：把备份分支的 Stage-C 工作视为 reintegration 候选
 
 以下切片未来仍可能值得回灌，但都必须在当前 `main` 上重新证明：

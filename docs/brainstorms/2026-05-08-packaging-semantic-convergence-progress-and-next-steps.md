@@ -231,6 +231,30 @@ Interpretation:
 2. the useful change is ownership: workflow-source and chronicle-target branch truth now move with the same release contract as assets, tags, and release notes.
 3. GitHub Actions still needs bootstrap env values before the first checkout, so the workflow cannot literally import repo JavaScript at that point; the repo-owned contract and tests are what prevent YAML-local drift.
 
+### 2026-06-06 Trigger-Glob Delta: release workflow tag triggers are now contract-backed too
+
+The previous branch-target slice left one small but real release workflow duplication behind: the YAML trigger list still owned the tag wildcard literal.
+
+That gap is now closed in a bounded way:
+
+1. `scripts/lib/packaging-contract.js` now owns:
+   - `RELEASE_WORKFLOW_TAG_TRIGGER_GLOB`;
+   - `RELEASE_WORKFLOW_DISALLOWED_TAG_TRIGGER_GLOBS`.
+2. `.github/workflows/release.yml` still carries the literal `*.*.*`, because GitHub Actions has to parse event triggers before repository JavaScript can be checked out.
+3. `scripts/diagram-semantic-verification.js` now derives workflow trigger facts from the shared contract and detects disallowed `v*.*.*` / `V*.*.*` trigger drift.
+4. Regression coverage now checks both directions:
+   - `src/tests/githubReleaseWorkflow.test.ts` verifies the workflow bootstrap literal matches the shared contract and does not include the disallowed trigger globs;
+   - `src/tests/diagramSemanticVerificationScript.test.ts` verifies helper output, fallback facts, and a drift fixture stay aligned with the same contract.
+5. Maintainer docs now explicitly distinguish trigger-start behavior from release admission:
+   - the wildcard only decides whether the release workflow starts;
+   - the checked-in tag validator remains the numeric `x.x.x` enforcement point.
+
+Interpretation:
+
+1. current release behavior remains unchanged;
+2. this closes another ownership gap without pretending GitHub Actions YAML can dynamically import repository JavaScript before checkout;
+3. release workflow trigger, tag validation, release notes, release assets, workflow-source branch, and chronicle-target branch now all sit under the same repo-side anti-drift contract.
+
 ### Priority 2: treat backup-branch Stage-C work as reintegration candidates
 
 Candidate later slices may still be valuable, but they must be re-proved on current `main`:
