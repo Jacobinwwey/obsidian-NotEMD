@@ -159,6 +159,8 @@ describe('diagram semantic verification helper', () => {
             sourcePath: string;
             hasWorkflowDispatch: boolean;
             hasTagPushTrigger: boolean;
+            checksOutWorkflowSourcesFromMain: boolean;
+            refreshesChronicleOnMain: boolean;
             rejectsVPrefixedTagTrigger: boolean;
             validatesNumericTagPattern: boolean;
             resolvedFromWorkflowFile: boolean;
@@ -689,6 +691,8 @@ const context = await esbuild.context({
             expect(facts.resolvedFromReleaseHelper).toBe(true);
             expect(workflowFacts.hasWorkflowDispatch).toBe(true);
             expect(workflowFacts.hasTagPushTrigger).toBe(true);
+            expect(workflowFacts.checksOutWorkflowSourcesFromMain).toBe(true);
+            expect(workflowFacts.refreshesChronicleOnMain).toBe(true);
             expect(workflowFacts.rejectsVPrefixedTagTrigger).toBe(true);
             expect(workflowFacts.validatesNumericTagPattern).toBe(true);
             expect(workflowFacts.resolvedFromWorkflowFile).toBe(true);
@@ -701,10 +705,12 @@ const context = await esbuild.context({
             expect(lines[2]).toContain('create path composes bilingual notes');
             expect(lines[2]).toContain('`--clobber`');
             expect(lines[3]).toContain('tag push (`*.*.*`) + `workflow_dispatch`');
-            expect(lines[4]).toContain('numeric-tag regex guard present');
+            expect(lines[4]).toContain('checked-in workflow sources are validated from `main`');
+            expect(lines[5]).toContain('numeric-tag regex guard present');
             const releaseNotesRelativePaths = packagingContract.resolveReleaseNotesRelativePaths('<tag>');
-            expect(lines[5]).toContain(releaseNotesRelativePaths.english);
-            expect(lines[5]).toContain(releaseNotesRelativePaths.simplifiedChinese);
+            expect(lines[6]).toContain(releaseNotesRelativePaths.english);
+            expect(lines[6]).toContain(releaseNotesRelativePaths.simplifiedChinese);
+            expect(lines[7]).toContain('chronicle refresh still runs on `main`');
         });
 
         test('falls back to default release packaging/workflow contract wording when sources cannot be loaded', () => {
@@ -720,6 +726,8 @@ const context = await esbuild.context({
             expect(facts.resolvedFromReleaseHelper).toBe(false);
             expect(workflowFacts.hasWorkflowDispatch).toBe(false);
             expect(workflowFacts.hasTagPushTrigger).toBe(false);
+            expect(workflowFacts.checksOutWorkflowSourcesFromMain).toBe(false);
+            expect(workflowFacts.refreshesChronicleOnMain).toBe(false);
             expect(workflowFacts.rejectsVPrefixedTagTrigger).toBe(false);
             expect(workflowFacts.validatesNumericTagPattern).toBe(false);
             expect(workflowFacts.resolvedFromWorkflowFile).toBe(false);
@@ -729,7 +737,9 @@ const context = await esbuild.context({
             expect(lines[0]).toContain('missing-release-helper.js');
             expect(lines[2]).toContain('fallback reminder');
             expect(lines[3]).toContain('fallback reminder');
-            expect(lines[4]).toContain('tag-guard inspection incomplete');
+            expect(lines[4]).toContain('workflow-source checkout inspection incomplete');
+            expect(lines[5]).toContain('tag-guard inspection incomplete');
+            expect(lines[7]).toContain('chronicle-refresh workflow inspection incomplete');
         });
 
         test('resolves contract-promotion boundary facts for workflow/settings/export operation metadata', () => {
@@ -840,8 +850,10 @@ const context = await esbuild.context({
             expect(template).toContain('create path composes bilingual notes');
             expect(template).toContain('`--clobber`');
             expect(template).toContain('tag push (`*.*.*`) + `workflow_dispatch`');
+            expect(template).toContain('checked-in workflow sources are validated from `main`');
             expect(template).toContain('numeric-tag regex guard present');
             expect(template).toContain(packagingContract.resolveReleaseNotesRelativePaths('<tag>').simplifiedChinese);
+            expect(template).toContain('chronicle refresh still runs on `main`');
             expect(template).toContain('## Contract Promotion Boundary');
             expect(template).toContain('workflow.extract-and-generate');
             expect(template).toContain('content.extract-original-text');

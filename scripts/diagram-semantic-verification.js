@@ -496,10 +496,18 @@ function resolveReleaseWorkflowTriggerFacts({
     try {
         const workflowSource = fs.readFileSync(releaseWorkflowPath, 'utf8');
         const validatesWithSharedHelper = workflowSource.includes('node scripts/release/validate-release-tag.js "$TAG_NAME"');
+        const checkoutsWorkflowSourcesFromMain = workflowSource.includes('Check out workflow sources')
+            && workflowSource.includes('ref: main');
+        const refreshesChronicleOnMain = workflowSource.includes('refresh_chronicle:')
+            && workflowSource.includes('node scripts/repo-saga/update-quarterly-saga.mjs --tag "$TAG_NAME"')
+            && workflowSource.includes('node scripts/release/commit-chronicle-refresh.js "$TAG_NAME"')
+            && workflowSource.includes('Check out main');
         return {
             sourcePath: releaseWorkflowPath,
             hasWorkflowDispatch: workflowSource.includes('workflow_dispatch:'),
             hasTagPushTrigger: workflowSource.includes("tags:") && workflowSource.includes("- '*.*.*'"),
+            checksOutWorkflowSourcesFromMain: checkoutsWorkflowSourcesFromMain,
+            refreshesChronicleOnMain,
             rejectsVPrefixedTagTrigger: !workflowSource.includes("- 'v*.*.*'") && !workflowSource.includes("- 'V*.*.*'"),
             validatesNumericTagPattern: validatesWithSharedHelper
                 || workflowSource.includes('^[0-9]+\\.[0-9]+\\.[0-9]+$'),
@@ -510,6 +518,8 @@ function resolveReleaseWorkflowTriggerFacts({
             sourcePath: releaseWorkflowPath,
             hasWorkflowDispatch: false,
             hasTagPushTrigger: false,
+            checksOutWorkflowSourcesFromMain: false,
+            refreshesChronicleOnMain: false,
             rejectsVPrefixedTagTrigger: false,
             validatesNumericTagPattern: false,
             resolvedFromWorkflowFile: false
@@ -726,17 +736,25 @@ function buildReleasePackagingContractChecklistLines(
     const triggerDescriptor = workflowFacts.hasTagPushTrigger && workflowFacts.hasWorkflowDispatch
         ? 'tag push (`*.*.*`) + `workflow_dispatch`'
         : 'trigger inspection incomplete';
+    const workflowSourceCheckoutDescriptor = workflowFacts.checksOutWorkflowSourcesFromMain
+        ? 'checked-in workflow sources are validated from `main` before release-ref checkout'
+        : 'workflow-source checkout inspection incomplete';
     const tagGuardDescriptor = workflowFacts.validatesNumericTagPattern && workflowFacts.rejectsVPrefixedTagTrigger
         ? 'numeric-tag regex guard present and v-prefixed wildcard triggers absent'
         : 'tag-guard inspection incomplete';
+    const chronicleDescriptor = workflowFacts.refreshesChronicleOnMain
+        ? 'chronicle refresh still runs on `main` and commits back through the checked-in helper'
+        : 'chronicle-refresh workflow inspection incomplete';
 
     return [
         `- [ ] Confirm release asset contract remains ${sourceDescriptor}: ${requiredAssets}.`,
         `- [ ] Confirm release tag contract remains numeric-only: \`/${releaseTagPattern}/\` (no \`v\` prefix).`,
         `- [ ] Confirm release publish mode contract remains ${releaseModeDescriptor}: create path composes bilingual notes, existing-release path uploads assets with \`--clobber\`.`,
         `- [ ] Confirm release workflow trigger contract remains ${workflowDescriptor}: ${triggerDescriptor}.`,
+        `- [ ] Confirm release workflow source-checkout contract remains ${workflowDescriptor}: ${workflowSourceCheckoutDescriptor}.`,
         `- [ ] Confirm release workflow tag-guard contract remains ${workflowDescriptor}: ${tagGuardDescriptor}.`,
         `- [ ] Confirm release notes contract remains dual-file: \`${resolveReleaseNotesRelativePaths('<tag>').english}\` and \`${resolveReleaseNotesRelativePaths('<tag>').simplifiedChinese}\`.`,
+        `- [ ] Confirm release workflow chronicle contract remains ${workflowDescriptor}: ${chronicleDescriptor}.`,
         '- [ ] If packaging output shape changes (for example, moving from `outfile` to `outdir`), update release-helper tests and maintainer docs in the same change.'
     ];
 }
