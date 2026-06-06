@@ -43,6 +43,8 @@ describe('invoke maintainer CLI operation script', () => {
         expect(output).toContain('"taskScope":"diagramGeneration"');
         expect(output).toContain('"taskScope":"batchGenerateFromTitles"');
         expect(output).toContain('"taskScope":"researchSummarize"');
+        expect(output).toContain('"query":"chapter split TOC managed artifacts guarded reruns"');
+        expect(output).toContain('"knowledgePaths":["chapter-split-toc.md","chapter-split-toc.zh-CN.md"]');
         expect(output).toContain('knowledgePaths');
         expect(output).toContain('npm run cli:invoke -- --vault docs --operation local-knowledge.inspect');
         expect(output).toContain('"sourcePath":"index.zh-CN.md"');

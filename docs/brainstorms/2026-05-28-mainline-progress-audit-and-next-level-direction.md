@@ -379,11 +379,12 @@ Current-main delta already landed during this Stage-C follow-through:
 3. exact-file-vs-folder configured knowledge-path boundaries are now checked in the same offline fixture lane, which reduces the risk of docs/examples drifting away from real retrieval behavior;
 4. maintainer-side inspect failure states are now explicitly regression-locked as explainability truth as well: `no-paths`, `no-candidate-files`, and `no-retrievable-sections` stay distinguishable instead of collapsing into one generic “no context” outcome.
 5. the offline fixture now also covers a noisy mixed-corpus scope case with duplicate/whitespace override paths, mixed file/folder entries, non-Markdown distractions, unrelated folders, and empty-section candidates, proving that the current MiniSearch path stays scoped without widening task count or public CLI behavior.
+6. the offline fixture and maintainer helper examples now also cover a real-note-style chapter-split showcase query against managed artifacts, guarded reruns, and stable TOC block refs, using real docs-vault paths in the runnable inspect example instead of fixture-only paths.
 
 Next bounded direction for this batch:
 
-1. keep increasing real-note/query diversity and maintainer example alignment before expanding any new retrieval-dependent task count;
-2. keep chapter split showcase/docs aligned with the actual write contract and managed-artifact semantics;
+1. keep increasing real-note/query diversity across more than the chapter-split showcase before expanding any new retrieval-dependent task count;
+2. keep chapter split showcase/docs aligned with the actual write contract and managed-artifact semantics as those result schemas evolve;
 3. keep maintainer inspect rich enough for diagnosis, but do not accidentally let that seam become the de facto public contract.
 
 ### Batch D: keep the provider lane in bounded breadth-maintenance mode

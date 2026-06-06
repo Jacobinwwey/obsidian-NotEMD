@@ -30,7 +30,8 @@ const OPERATION_HELP = {
     exampleInput: '{"taskScope":"diagramGeneration","sourcePath":"index.zh-CN.md","knowledgePaths":["maintainer","superpowers"],"topK":2,"slidingWindowSize":1}',
     additionalExamples: [
       '{"taskScope":"batchGenerateFromTitles","sourcePath":"index.zh-CN.md"}',
-      '{"taskScope":"researchSummarize","query":"task-scoped retrieval behavior","knowledgePaths":["maintainer"]}'
+      '{"taskScope":"researchSummarize","query":"task-scoped retrieval behavior","knowledgePaths":["maintainer"]}',
+      '{"taskScope":"researchSummarize","query":"chapter split TOC managed artifacts guarded reruns","knowledgePaths":["chapter-split-toc.md","chapter-split-toc.zh-CN.md"]}'
     ]
   },
   'provider.profile.export-redacted': {

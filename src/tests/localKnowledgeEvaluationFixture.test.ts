@@ -121,6 +121,32 @@ const FIXTURE_FILES: FixtureFile[] = [
         markdown: 'This attachment-like file must not be indexed by local knowledge retrieval.'
     },
     {
+        path: 'Knowledge/Showcase/Chapter Split TOC.md',
+        markdown: [
+            '---',
+            'title: Chapter Split TOC Showcase',
+            '---',
+            '# Chapter Split + TOC',
+            'Release-facing documentation should stay searchable as a realistic local knowledge source, not only as synthetic maintainer prose.',
+            '',
+            '## Managed Artifacts',
+            'Chapter split writes chapter files, a TOC file, and a manifest near the source note so automation can inspect the complete managed artifact set.',
+            '',
+            '## Guarded Reruns',
+            'Guarded reruns refuse to overwrite manually edited managed artifacts and keep stale generated files scoped to the recorded manifest.',
+            '',
+            '## Stable TOC Targets',
+            'Repeated nested headings receive stable block refs, so TOC targets remain deterministic across reruns and showcase docs.'
+        ].join('\n')
+    },
+    {
+        path: 'Knowledge/Showcase/Provider Model Discovery.md',
+        markdown: [
+            '# Provider Model Discovery',
+            'Provider model discovery belongs to a separate maintenance lane and should not satisfy chapter split retrieval queries.'
+        ].join('\n')
+    },
+    {
         path: 'Archive/Noisy/Runtime Boundaries.md',
         markdown: [
             '# Runtime Boundaries',
@@ -262,6 +288,24 @@ const EVALUATION_CASES: EvaluationCase[] = [
             'Mixed corpus retrieval should stay focused when override paths contain duplicates',
             'non-Markdown distractions',
             'empty-section candidates'
+        ]
+    },
+    {
+        id: 'real-note-chapter-split-showcase',
+        query: 'chapter split TOC front matter managed artifact block refs guarded reruns showcase docs',
+        configuredKnowledgePaths: 'Knowledge/Showcase\nKnowledge/Scoped',
+        expectedSourcePaths: ['Knowledge/Showcase/Chapter Split TOC.md'],
+        topK: 1,
+        slidingWindowSize: 1,
+        maxSnippetChars: 620,
+        minExpectedPathRecall: 1,
+        minReturnedHitCount: 1,
+        minMatchedSectionCount: 1,
+        minExpandedSectionCount: 2,
+        expectedContextFragments: [
+            'complete managed artifact set',
+            'Guarded reruns refuse to overwrite manually edited managed artifacts',
+            'stable block refs'
         ]
     }
 ];

@@ -379,11 +379,12 @@ provider 专题文在以下几点上仍然正确，而且不应被放松：
 3. exact-file-vs-folder 的 configured knowledge-path 边界现在也在同一条离线夹具链路中被检查，进一步降低了文档/示例与真实 retrieval 行为漂移的风险；
 4. maintainer 侧 inspect 的失败态现在也被明确锁成 explainability 真值：`no-paths`、`no-candidate-files` 与 `no-retrievable-sections` 将继续保持可区分，而不会再被压成一个笼统的“没有 context”结果。
 5. 离线夹具现在还覆盖了 noisy mixed-corpus scope：重复/空白 override path、混合 file/folder entry、非 Markdown 干扰文件、无关文件夹与空 searchable section 候选都会进入同一条评估路径，用来证明当前 MiniSearch 路径仍能保持 scope 收敛，同时不扩任务数量或 public CLI 行为。
+6. 离线夹具与 maintainer helper 示例现在还覆盖 real-note-style chapter-split showcase query：它会围绕 managed artifacts、guarded reruns 与稳定 TOC block refs 检查检索效果，并且 runnable inspect 示例使用真实 docs vault 路径，而不是只存在于测试夹具中的路径。
 
 这一批次接下来的有界方向：
 
-1. 继续增加真实 note/query 多样性与 maintainer 示例对齐，再考虑增加新的 retrieval-dependent task 数量；
-2. 持续保持 chapter split 的 showcase/docs 与真实写入契约、managed-artifact 语义一致；
+1. 继续增加超出 chapter-split showcase 之外的真实 note/query 多样性，再考虑增加新的 retrieval-dependent task 数量；
+2. 随 result schema 演进，持续保持 chapter split 的 showcase/docs 与真实写入契约、managed-artifact 语义一致；
 3. 让 maintainer inspect 足够适合诊断，但不要让它意外变成事实上的 public contract。
 
 ### Batch D：把 provider 轨道放回 bounded breadth-maintenance 模式

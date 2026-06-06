@@ -115,6 +115,10 @@ describe('CLI public surface docs alignment', () => {
         expect(matrixZh).toContain('"sourcePath":"index.zh-CN.md"');
         expect(matrix).toContain('"knowledgePaths":["maintainer","superpowers"]');
         expect(matrixZh).toContain('"knowledgePaths":["maintainer","superpowers"]');
+        expect(matrix).toContain('"query":"chapter split TOC managed artifacts guarded reruns"');
+        expect(matrixZh).toContain('"query":"chapter split TOC managed artifacts guarded reruns"');
+        expect(matrix).toContain('"knowledgePaths":["chapter-split-toc.md","chapter-split-toc.zh-CN.md"]');
+        expect(matrixZh).toContain('"knowledgePaths":["chapter-split-toc.md","chapter-split-toc.zh-CN.md"]');
         expect(matrix).toContain('vault-relative');
         expect(matrixZh).toContain('vault-relative');
     });
