@@ -187,6 +187,31 @@ canonical: true
 1. `1.9.2` 不是“新增架构主线”的 release；
 2. `1.9.2` 之后的 release-contract 跟进仍在同一轨道内：减少 operator confusion、doc/runtime 漂移与 release-process 歧义，但不改变插件发货行为。
 
+### 2.7 当前 `824d07e` Stage-B2/C/D 检查点
+
+本文更新前的执行检查点是 `824d07e`（`test(local-kb): cover chapter split showcase retrieval`），本地 `main`、`origin/main` 与工作区在本批次开始前保持一致且 clean。
+
+这个检查点的价值在于，它把 Stage-C 证据从叙事层推进到可运行 fixture：`npm run verify:local-kb-fixtures` 现在会用当前线上 MiniSearch-backed retrieval 路径，跑 real-note-style 的 chapter-split docs-vault 示例，并覆盖 managed artifacts、guarded reruns 与稳定 TOC block refs。
+
+对照 `.trellis/tasks/05-19-local-kb-retrieval-chapter-split-stage-b2cd/prd.md`，当前逐项状态如下：
+
+| PRD 要求 | 当前代码/文档真值 | 状态 | 下一步解释 |
+|---|---|---|---|
+| R1 local-KB 任务支持 | `从标题生成`、`从标题批量生成`、`研究与总结` 与 `生成图形` 在启用后已经进入 settings-driven retrieval 链路 | 已落地 | 不再把任务接线写成开放问题，后续投入质量深度 |
+| R2/R3 local-only 与 fallback 行为 | 当前运行时使用插件内 MiniSearch lexical retrieval；关闭 retrieval 或没有可用 context 时保留原任务路径 | 已落地 | 应写成轻量本地检索，不应写成完整 semantic RAG 平台 |
+| R4/R4a/R4b 设置与 source paths | 已支持混合 vault-relative 文件/文件夹知识库路径、默认列表、按任务覆盖，以及空覆盖回退默认列表 | 已落地 | 先提升示例与 inspect 易诊断性，再考虑更多任务类型 |
+| R5 对比研究 | active task 的 `research/` 目录下已有 local-RAG 与 TOC 对比材料 | 已作为决策支撑落地 | 后续比较必须落到 Notemd 当前任务契约，不能泛化成 RAG 口号 |
+| R6/R7 chapter split | command/sidebar/maintainer surface、确定性 TOC metadata、稳定 block refs、manifest-backed guarded reruns 与 managed artifact 结果已存在 | 已落地 | 随 result schema 演进，持续保持 showcase docs 与写入契约一致 |
+| R8 packaging / semantic truth | 当前发货边界仍是 `main.js` + inline `srcdoc`，没有宣称 dedicated runtime asset | 已作为约束落地 | packaging convergence 是下一条 P0 架构轨道，不是已完成项 |
+| R9/R10 tests、docs 与 CI 稳定性 | 现有集成测试与 `verify:local-kb-fixtures` 已覆盖 retrieval injection、fallback、inspect 与 chapter-split showcase 行为 | 持续 finish gate | 扩大表述前继续用测试锁住进度文案 |
+
+架构解释：
+
+1. local-KB 是插件内 MiniSearch lexical retriever，加上 task-scoped prompt injection；不是已发货的外部 semantic RAG stack；
+2. `local-knowledge.inspect` 是 maintainer-only 诊断 seam，不是 public CLI 扩张；
+3. chapter split 是具备确定性 rerun 行为的 managed artifact 写入契约，不只是文本转换 helper；
+4. packaging 真值仍是单入口 `main.js` + inline `srcdoc`，所以 latent render-host source candidate 仍只是源码候选，除非未来同批修改 build、release、audit 与 docs。
+
 ## 3. 相对先前方案语言的深度对比
 
 ### 3.1 2026-05-25 审计现在低估了什么
@@ -285,6 +310,17 @@ provider 专题文在以下几点上仍然正确，而且不应被放松：
 2. Stage-C 质量/评测现在是更高价值的产品轨道；
 3. 在后续 release 出现前，`1.9.2` 就是当前公开真值边界。
 
+### 3.7 Stage-B2/C/D PRD 在当前主线上的真实含义
+
+当前 active Stage-B2/C/D PRD 不应再被读成“功能是否存在”的 checklist。在当前主线上，R1 到 R7 已经是实现真值；R8 是防止夸大 packaging 的边界锁；R9 与 R10 是持续 finish gate。
+
+这会改变工程推进方向：
+
+1. local-KB 的有效工作是更多真实 note/query 多样性与失败态 explainability，而不是重新接一遍任务入口；
+2. chapter split 的有效工作是 showcase/doc/result-schema 对齐，而不是重新恢复命令面；
+3. CLI 的有效工作是判断是否有有界 path-based operation 值得 public promotion，而不是把 maintainer diagnostics 变成隐含 public support；
+4. packaging 的有效工作是解决 latent runtime candidate 的 source/build 边界，而不是把候选源码写成已发货资产。
+
 ## 4. 架构推进评估
 
 ### 4.1 真正推进了什么
@@ -326,6 +362,14 @@ provider 专题文在以下几点上仍然正确，而且不应被放松：
 3. file-selection / local-KB / chapter-split 的 Stage C 现在需要的是更深的 mixed-corpus 评估覆盖、示例对齐与 explainability 收口，而不是再做一次“功能是否存在”的恢复性论证。
 
 ## 5. 具体下一阶段方向
+
+下一批有界执行方案：
+
+1. **P0 packaging 真值：** 在没有同批修改 build graph、release assets、audit 与 docs 之前，继续把 `main.js` + inline `srcdoc` 作为唯一发货边界。
+2. **P1 Stage-C 质量：** 在保留 exact-file/folder、exclusion、failure-state 与 task-scoped inspect 覆盖的前提下，把 `verify:local-kb-fixtures` 扩展到更多 chapter-split showcase 之外的真实 note/query 形态。
+3. **P1 chapter split 文档：** 让 showcase docs 与 generated-artifact 示例持续跟随确定性 TOC front matter、稳定 block refs 与 guarded rerun 语义。
+4. **P1 CLI 边界：** 除非另起 public-promotion 批次并同批补齐契约、help、测试与文档，否则 `local-knowledge.inspect` 继续保持 maintainer-only。
+5. **P1/P2 provider 维护：** provider/model-discovery 的新增支持继续走共享 family 与 response-shape seam，并且每次都明确 token-guidance 的影响范围。
 
 ### Batch A：优先完成 packaging / semantic-verification 收敛，再决定是否拓宽任何叙述
 

@@ -187,6 +187,31 @@ Interpretation:
 1. `1.9.2` is not a “new architecture lane” release;
 2. the post-`1.9.2` release-contract follow-through is still in the same lane: it reduces operator confusion, doc/runtime drift, and release-process ambiguity without changing shipped plugin behavior.
 
+### 2.7 Current `824d07e` Stage-B2/C/D checkpoint
+
+The current execution checkpoint before this document update is `824d07e` (`test(local-kb): cover chapter split showcase retrieval`), with local `main`, `origin/main`, and the working tree aligned cleanly before this batch started.
+
+That checkpoint matters because it moved Stage-C evidence from narrative-only progress wording into a runnable fixture lane: `npm run verify:local-kb-fixtures` now exercises the live MiniSearch-backed retrieval path against real-note-style chapter-split docs-vault examples, including managed artifacts, guarded reruns, and stable TOC block refs.
+
+Requirement-by-requirement status against `.trellis/tasks/05-19-local-kb-retrieval-chapter-split-stage-b2cd/prd.md` is now:
+
+| PRD requirement | Current code/docs truth | Status | Next interpretation |
+|---|---|---|---|
+| R1 local-KB task support | `Generate from title`, `Batch generate from titles`, `Research & summarize`, and `Generate diagram` now route through the settings-driven retrieval path when enabled | Landed | Do not keep treating task wiring as open; spend effort on quality depth |
+| R2/R3 local-only and fallback behavior | The runtime uses plugin-native MiniSearch lexical retrieval; disabled retrieval and empty-context cases preserve the original task path | Landed | Keep describing this as lightweight local retrieval, not as a full semantic RAG platform |
+| R4/R4a/R4b settings and source paths | Mixed vault-relative file/folder knowledge-base paths, default lists, and task overrides with blank fallback are present | Landed | Improve examples and inspect ergonomics before adding more task types |
+| R5 comparison research | Local-RAG and TOC comparison artifacts exist under the active task's `research/` directory | Landed as decision support | Ground future comparison claims in current Notemd task contracts, not generic RAG slogans |
+| R6/R7 chapter split | Command/sidebar/maintainer surfaces, deterministic TOC metadata, stable block refs, manifest-backed guarded reruns, and managed artifact results are present | Landed | Keep showcase docs aligned with the write contract as result schemas evolve |
+| R8 packaging / semantic truth | The shipped boundary remains `main.js` plus inline `srcdoc`; no dedicated runtime asset is claimed | Landed as a constraint | Treat packaging convergence as the next P0 architecture lane, not as already complete |
+| R9/R10 tests, docs, and CI stability | Existing integration tests plus `verify:local-kb-fixtures` cover retrieval injection, fallback, inspect, and chapter-split showcase behavior | Ongoing finish gate | Continue locking progress wording with tests before broadening claims |
+
+Architecture interpretation:
+
+1. local-KB is a plugin-native MiniSearch lexical retriever with task-scoped prompt injection, not a shipped external semantic RAG stack;
+2. `local-knowledge.inspect` is a maintainer-only diagnostics seam, not a public CLI expansion;
+3. chapter split is a managed artifact write contract with deterministic rerun behavior, not only a text transformation helper;
+4. packaging truth remains single-entry `main.js` plus inline `srcdoc`, so latent render-host source candidates are still source-only candidates until a later batch changes build, release, audit, and docs together.
+
 ## 3. Deep Comparison Against Earlier Plan Language
 
 ### 3.1 What the 2026-05-25 audit now understates
@@ -285,6 +310,17 @@ Correct interpretation:
 2. Stage-C quality/evaluation is now the higher-value product lane next to packaging;
 3. `1.9.2` is the current public truth boundary until a later release supersedes it.
 
+### 3.7 What the Stage-B2/C/D PRD now means on current main
+
+The active Stage-B2/C/D PRD should no longer be read as a feature-existence checklist. On current main, R1 through R7 are implementation truth; R8 is a boundary lock that prevents overclaiming packaging; R9 and R10 are continuing finish gates.
+
+This changes the engineering direction:
+
+1. the useful local-KB work is broader real-note/query diversity and failure explainability, not another task-wiring pass;
+2. the useful chapter-split work is showcase/doc/result-schema alignment, not another command-surface recovery pass;
+3. the useful CLI work is deciding whether any bounded path-based operation deserves public promotion, not turning maintainer diagnostics into implied public support;
+4. the useful packaging work is resolving the source/build boundary around latent runtime candidates, not describing candidate files as shipped assets.
+
 ## 4. Architecture Advancement Assessment
 
 ### 4.1 What has genuinely advanced
@@ -326,6 +362,14 @@ After the latest provider closure, the highest-leverage unresolved bottlenecks a
 3. file-selection / local-KB / chapter-split Stage C now needs deeper evaluation coverage, mixed-corpus evidence, and example alignment, not another “does this feature exist?” recovery cycle.
 
 ## 5. Concrete Next Direction
+
+Concrete execution plan for the next bounded batch:
+
+1. **P0 packaging truth:** keep `main.js` plus inline `srcdoc` as the enforced shipped boundary until a same-batch build graph, release-asset, audit, and docs change intentionally promotes a real multi-entry runtime lane.
+2. **P1 Stage-C quality:** extend `verify:local-kb-fixtures` with additional real-note/query shapes beyond the chapter-split showcase, while preserving current exact-file/folder, exclusion, failure-state, and task-scoped inspect coverage.
+3. **P1 chapter split docs:** keep showcase docs and generated-artifact examples synchronized with deterministic TOC front matter, stable block refs, and guarded rerun semantics.
+4. **P1 CLI boundary:** keep `local-knowledge.inspect` maintainer-only unless a separate public-promotion batch adds contract, help text, tests, and docs at the same time.
+5. **P1/P2 provider maintenance:** keep provider/model-discovery additions on shared family and response-shape seams, with token-guidance scope stated explicitly for each change.
 
 ### Batch A: finish packaging / semantic-verification convergence before widening any claims
 

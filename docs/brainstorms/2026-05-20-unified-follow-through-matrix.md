@@ -30,6 +30,12 @@ This matrix is grounded in:
    - `docs/brainstorms/2026-05-27-provider-settings-simplification-and-model-discovery-plan.*`
 3. backup-branch evidence from `backup/main-before-origin-force-20260524`.
 
+Current execution checkpoint for this matrix update:
+
+1. `824d07e` (`test(local-kb): cover chapter split showcase retrieval`) is the clean local/remote baseline before the current progress-doc batch;
+2. the checkpoint proves the Stage-B2/C/D local-KB and chapter-split lane is no longer an existence question, because `npm run verify:local-kb-fixtures` now covers real-note-style chapter-split showcase retrieval through the live MiniSearch path;
+3. the matrix therefore treats local-KB, file selection, and chapter split as landed product contracts whose next work is evaluation depth, maintainer-example alignment, and packaging-boundary discipline.
+
 ## 3. Current Unified Matrix
 
 | Lane | Current `origin/main` truth | Backup-branch evidence | Required next action | Misread to avoid | Priority |

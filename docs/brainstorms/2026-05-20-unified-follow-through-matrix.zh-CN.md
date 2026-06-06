@@ -30,6 +30,12 @@ canonical: true
    - `docs/brainstorms/2026-05-27-provider-settings-simplification-and-model-discovery-plan.*`
 3. 来自 `backup/main-before-origin-force-20260524` 的备份分支证据。
 
+本次矩阵更新的当前执行检查点：
+
+1. `824d07e`（`test(local-kb): cover chapter split showcase retrieval`）是本次进度文档批次开始前 clean 的本地/远端基线；
+2. 该检查点证明 Stage-B2/C/D 的 local-KB 与 chapter split 轨道已经不再是“功能是否存在”的问题，因为 `npm run verify:local-kb-fixtures` 已经通过线上 MiniSearch path 覆盖 real-note-style chapter-split showcase retrieval；
+3. 因此，本文把 local-KB、file selection 与 chapter split 视为已落地产品契约；下一步是评估深度、maintainer 示例对齐与 packaging 边界纪律，而不是继续做存在性重证。
+
 ## 3. 当前统一矩阵
 
 | 轨道 | 当前 `origin/main` 真值 | 备份分支证据 | 需要的下一步 | 严禁误判 | 优先级 |
