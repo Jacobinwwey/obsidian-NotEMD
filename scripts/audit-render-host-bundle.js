@@ -2,13 +2,13 @@
 
 const fs = require('fs');
 const path = require('path');
+const {
+    MAIN_BUNDLE_OUTPUT_FILE,
+    RENDER_HOST_AUDIT_MARKERS,
+    RENDER_HOST_STANDALONE_OUTPUT_FILES
+} = require('./lib/render-host-contract.js');
 
-const REQUIRED_RENDER_HOST_MARKERS = [
-    'htmlSrcdoc',
-    'Notemd Render Host',
-    'notemd-render-shell',
-    'notemd-html-preview-theme-shim'
-];
+const REQUIRED_RENDER_HOST_MARKERS = [...RENDER_HOST_AUDIT_MARKERS];
 
 const DISALLOWED_RENDER_HOST_PATTERNS = [
     /rendering-webview\/index\.html/i,
@@ -16,15 +16,10 @@ const DISALLOWED_RENDER_HOST_PATTERNS = [
     /render-host\.(?:mjs|html|js)/i
 ];
 
-const DISALLOWED_RENDER_HOST_OUTPUT_FILES = [
-    'render-host.mjs',
-    'render-host.html',
-    'render-host.js',
-    'rendering-webview/index.html'
-];
+const DISALLOWED_RENDER_HOST_OUTPUT_FILES = [...RENDER_HOST_STANDALONE_OUTPUT_FILES];
 
 function resolveBundlePath(projectRoot = process.cwd()) {
-    return path.join(projectRoot, 'main.js');
+    return path.join(projectRoot, MAIN_BUNDLE_OUTPUT_FILE);
 }
 
 function auditRenderHostBundleSource(bundleSource, bundlePath = 'main.js') {

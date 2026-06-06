@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
+const renderHostContract = require('../../scripts/lib/render-host-contract.js');
 
 function parseEsbuildFactsIndependently(source: string): { entryPoints: string[]; outfile: string } {
     const entryPointsMatch = source.match(/entryPoints\s*:\s*\[([\s\S]*?)\]/m);
@@ -575,8 +576,8 @@ const context = await esbuild.context({
             const auditScriptPath = path.join(repoRoot, 'scripts', 'audit-render-host-bundle.js');
             const facts = resolveRenderHostAuditFacts({ auditScriptPath });
             expect(facts.bundlePath).toBe('main.js');
-            expect(facts.requiredMarkers).toContain('htmlSrcdoc');
-            expect(facts.disallowedStandaloneOutputs).toContain('render-host.mjs');
+            expect(facts.requiredMarkers).toEqual(renderHostContract.RENDER_HOST_AUDIT_MARKERS);
+            expect(facts.disallowedStandaloneOutputs).toEqual(renderHostContract.RENDER_HOST_STANDALONE_OUTPUT_FILES);
             expect(facts.resolvedFromAuditScript).toBe(true);
 
             const lines = buildRenderHostAuditChecklistLines(facts);

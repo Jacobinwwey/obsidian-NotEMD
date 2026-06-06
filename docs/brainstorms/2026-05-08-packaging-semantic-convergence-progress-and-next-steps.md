@@ -1,6 +1,6 @@
 ---
 date: 2026-05-08
-last_updated: 2026-05-24
+last_updated: 2026-06-06
 topic: packaging-semantic-convergence-progress-and-next-steps
 ---
 
@@ -133,6 +133,26 @@ This current-main anti-drift gap is now closed in code, tests, and maintainer do
    - the current repo truth (`resolveBundledRenderHostRuntimeModuleSpecifier()` returns `null` without explicit config), and
    - the fallback wording when the helper source cannot be inspected.
 4. Maintainer runbooks now cite this additional truth source so release/semantic verification no longer stop at build-output + audit truth alone.
+
+### 2026-06-06 Delta: render-host packaging contract now has a single code truth source
+
+Another anti-drift gap is now closed at the source/build/audit boundary itself:
+
+1. `scripts/lib/render-host-contract.js` now defines the shared render-host packaging contract constants for:
+   - the current main bundle output file;
+   - the required inline render-host audit markers;
+   - the disallowed standalone render-host output files on the current single-entry lane.
+2. `esbuild.config.mjs` now reuses that shared contract when removing stale standalone render-host outputs before build.
+3. `scripts/audit-render-host-bundle.js` now reuses the same shared contract instead of carrying a second hand-maintained copy of render-host markers/output filenames.
+4. `scripts/diagram-semantic-verification.js` now falls back to the same shared contract constants when direct audit-script inspection is unavailable, instead of keeping a third disconnected default copy.
+5. Focused regression coverage now locks this ownership boundary explicitly:
+   - `src/tests/renderHostBundleAuditScript.test.ts` verifies the audit helper reuses the shared contract constants;
+   - `src/tests/diagramSemanticVerificationScript.test.ts` verifies helper-derived audit facts stay aligned with the same shared contract.
+
+Interpretation:
+
+1. current shipped topology is unchanged;
+2. the important change is ownership discipline: future render-host packaging-boundary edits now have one canonical constant source instead of three partially duplicated ones.
 
 ### Priority 2: treat backup-branch Stage-C work as reintegration candidates
 

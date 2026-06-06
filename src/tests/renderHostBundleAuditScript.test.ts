@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
+const renderHostContract = require('../../scripts/lib/render-host-contract.js');
 
 describe('render host bundle audit script', () => {
     const repoRoot = path.join(__dirname, '..', '..');
@@ -23,9 +24,26 @@ describe('render host bundle audit script', () => {
     maybeDescribeAuditScript('audit helper', () => {
         let auditRenderHostBundle: (projectRoot?: string) => string;
         let auditRenderHostBundleSource: (bundleSource: string, bundlePath?: string) => void;
+        let REQUIRED_RENDER_HOST_MARKERS: string[];
+        let DISALLOWED_RENDER_HOST_OUTPUT_FILES: string[];
+        let resolveBundlePath: (projectRoot?: string) => string;
 
         beforeAll(() => {
-            ({ auditRenderHostBundle, auditRenderHostBundleSource } = require(scriptPath));
+            ({
+                REQUIRED_RENDER_HOST_MARKERS,
+                DISALLOWED_RENDER_HOST_OUTPUT_FILES,
+                auditRenderHostBundle,
+                auditRenderHostBundleSource,
+                resolveBundlePath
+            } = require(scriptPath));
+        });
+
+        test('reuses the shared render-host packaging contract constants', () => {
+            expect(REQUIRED_RENDER_HOST_MARKERS).toEqual(renderHostContract.RENDER_HOST_AUDIT_MARKERS);
+            expect(DISALLOWED_RENDER_HOST_OUTPUT_FILES).toEqual(renderHostContract.RENDER_HOST_STANDALONE_OUTPUT_FILES);
+            expect(resolveBundlePath('/tmp/notemd-root')).toBe(
+                path.join('/tmp/notemd-root', renderHostContract.MAIN_BUNDLE_OUTPUT_FILE)
+            );
         });
 
         test('accepts self-contained srcdoc bundle markers', () => {

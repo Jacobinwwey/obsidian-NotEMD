@@ -2,6 +2,10 @@
 
 const fs = require('fs');
 const path = require('path');
+const {
+    RENDER_HOST_AUDIT_MARKERS,
+    RENDER_HOST_STANDALONE_OUTPUT_FILES
+} = require('./lib/render-host-contract.js');
 
 const SURFACE_DEFINITIONS = [
     {
@@ -38,18 +42,8 @@ const SURFACE_DEFINITIONS = [
 ];
 
 const DEFAULT_REQUIRED_RELEASE_ASSETS = ['main.js', 'manifest.json', 'styles.css', 'README.md'];
-const DEFAULT_RENDER_HOST_AUDIT_MARKERS = [
-    'htmlSrcdoc',
-    'Notemd Render Host',
-    'notemd-render-shell',
-    'notemd-html-preview-theme-shim'
-];
-const DEFAULT_DISALLOWED_RENDER_HOST_OUTPUTS = [
-    'render-host.mjs',
-    'render-host.html',
-    'render-host.js',
-    'rendering-webview/index.html'
-];
+const DEFAULT_RENDER_HOST_AUDIT_MARKERS = [...RENDER_HOST_AUDIT_MARKERS];
+const DEFAULT_DISALLOWED_RENDER_HOST_OUTPUTS = [...RENDER_HOST_STANDALONE_OUTPUT_FILES];
 const DEFAULT_CONTRACT_PROMOTION_OPERATION_IDS = [
     'workflow.extract-and-generate',
     'content.extract-original-text',
