@@ -725,6 +725,7 @@ function buildPackagingBoundaryChecklistLines(
     return [
         singleEntryLine,
         outputResolutionLine,
+        '- [ ] Confirm `createRenderHostBundleBuildOptions()` remains candidate-only and is not consumed by the production `esbuild.config.mjs` path unless standalone render-host release assets, audit logic, and docs move in the same batch.',
         runtimeModuleSpecifierLine,
         runtimeModuleSpecifierFallbackLine,
         '- [ ] Confirm `npm run audit:render-host` only proves the current self-contained `main.js` + inline `srcdoc` host contract, including rejection of stray `render-host.mjs` assets or references.',

@@ -69,7 +69,8 @@ No meaningful change in shipping boundary happened in this lane:
 
 1. current build truth is still single-entry `main.js`;
 2. `audit:render-host` still enforces inline/runtime-host truth rather than a shipped detached render-host asset;
-3. source continues to contain latent render-host/runtime candidates, but they are still source-organization truth, not release truth.
+3. source continues to contain latent render-host/runtime candidates, but they are still source-organization truth, not release truth;
+4. the production build path now has an explicit guard around that split: `createRenderHostBundleBuildOptions()` remains candidate-only and is not consumed by `esbuild.config.mjs` unless release assets, audit rules, and docs move in the same batch.
 
 Interpretation:
 
@@ -379,7 +380,7 @@ Goal:
 
 1. keep the current `main.js` + inline `srcdoc` shipping truth explicit and executable;
 2. keep release workflow trigger, tag validation, asset, note, workflow-source, and chronicle-target truth under one shared contract;
-3. resolve the current source/build ambiguity around latent render-host runtime candidates before anyone widens packaging claims.
+3. keep the candidate-only production-build guard around latent render-host runtime candidates explicit before anyone widens packaging claims.
 
 Required rule:
 

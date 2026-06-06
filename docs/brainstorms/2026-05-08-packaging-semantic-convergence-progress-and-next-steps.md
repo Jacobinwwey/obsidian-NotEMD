@@ -256,6 +256,21 @@ Interpretation:
 2. this closes another ownership gap without pretending GitHub Actions YAML can dynamically import repository JavaScript before checkout;
 3. release workflow trigger, tag validation, release notes, release assets, workflow-source branch, and chronicle-target branch now all sit under the same repo-side anti-drift contract.
 
+### 2026-06-06 Production-Build Delta: render-host build helper remains candidate-only
+
+The next source/build ambiguity is now locked by code, helper output, and docs:
+
+1. `src/tests/esbuildBundleConfig.test.ts` now proves the production `esbuild.config.mjs` path consumes `createMainBundleBuildOptions()` but not `createRenderHostBundleBuildOptions()`.
+2. The same test verifies that the candidate render-host output file remains listed under `RENDER_HOST_STANDALONE_OUTPUT_FILES` and absent from `REQUIRED_RELEASE_ASSET_FILES`.
+3. `scripts/diagram-semantic-verification.js` now emits a packaging-boundary checklist item requiring `createRenderHostBundleBuildOptions()` to stay candidate-only unless standalone render-host release assets, audit logic, and docs move in the same batch.
+4. Maintainer semantic-verification and release-workflow docs now describe that helper split explicitly, so future reviewers do not infer a shipped standalone runtime merely from candidate source code.
+
+Interpretation:
+
+1. current shipped topology is still unchanged: `main.js` plus inline `srcdoc`;
+2. the useful change is that source-only render-host build helper status is now executable contract, not just planning prose;
+3. if a future batch promotes `render-host.mjs`, it must do so by changing production build, release assets, audit rules, and docs together.
+
 ### Priority 2: treat backup-branch Stage-C work as reintegration candidates
 
 Candidate later slices may still be valuable, but they must be re-proved on current `main`:

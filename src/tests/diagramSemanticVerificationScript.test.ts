@@ -60,10 +60,19 @@ describe('diagram semantic verification helper', () => {
         expect(runbook).toContain('RELEASE_WORKFLOW_DISALLOWED_TAG_TRIGGER_GLOBS');
         expect(runbookZh).toContain('RELEASE_WORKFLOW_TAG_TRIGGER_GLOB');
         expect(runbookZh).toContain('RELEASE_WORKFLOW_DISALLOWED_TAG_TRIGGER_GLOBS');
+        expect(runbook).toContain('`createRenderHostBundleBuildOptions()` as candidate-only');
+        expect(runbook).toContain('production `esbuild.config.mjs` path');
+        expect(runbookZh).toContain('`createRenderHostBundleBuildOptions()`');
+        expect(runbookZh).toContain('candidate-only');
+        expect(runbookZh).toContain('production `esbuild.config.mjs`');
         expect(releaseWorkflow).toContain('verify:diagram-semantics');
         expect(releaseWorkflowZh).toContain('verify:diagram-semantics');
         expect(releaseWorkflow).toContain('does not prove true heavy-runtime isolation');
         expect(releaseWorkflowZh).toContain('并不等于真正的重型运行时隔离已经完成');
+        expect(releaseWorkflow).toContain('`createRenderHostBundleBuildOptions()` to remain candidate-only');
+        expect(releaseWorkflow).toContain('production `esbuild.config.mjs` path');
+        expect(releaseWorkflowZh).toContain('`createRenderHostBundleBuildOptions()` 保持 candidate-only');
+        expect(releaseWorkflowZh).toContain('production `esbuild.config.mjs`');
         expect(releaseWorkflow).toContain('workflow-source branch, and chronicle-target branch');
         expect(releaseWorkflowZh).toContain('workflow-source 分支与 chronicle-target 分支');
         expect(releaseWorkflow).toContain('NOTEMD_RELEASE_WORKFLOW_SOURCE_BRANCH');
@@ -615,9 +624,11 @@ const context = await esbuild.context({
 
             expect(lines[0]).toContain('single-entry');
             expect(lines[0]).toContain('`src/main.ts -> main.js`');
-            expect(lines[2]).toContain('resolveBundledRenderHostRuntimeModuleSpecifier()');
-            expect(lines[2]).toContain('returns `null`');
-            expect(lines[3]).toContain('no default standalone runtime-path synthesis');
+            expect(lines.some((line) => line.includes('createRenderHostBundleBuildOptions()') && line.includes('candidate-only'))).toBe(true);
+            expect(lines.some((line) => line.includes('production `esbuild.config.mjs` path'))).toBe(true);
+            expect(lines.some((line) => line.includes('standalone render-host release assets, audit logic, and docs move in the same batch'))).toBe(true);
+            expect(lines.some((line) => line.includes('resolveBundledRenderHostRuntimeModuleSpecifier()') && line.includes('returns `null`'))).toBe(true);
+            expect(lines.some((line) => line.includes('no default standalone runtime-path synthesis'))).toBe(true);
             expect(lines.some((line) => line.includes('`npm run audit:render-host` only proves the current self-contained `main.js` + inline `srcdoc` host contract, including rejection of stray `render-host.mjs` assets or references'))).toBe(true);
             expect(lines.some((line) => line.includes('true heavy-runtime isolation is still pending'))).toBe(true);
         });
@@ -649,9 +660,8 @@ const context = await esbuild.context({
                     outputTargetStatus: 'outfile',
                     resolvedFromConfig: true
                 }, facts);
-                expect(lines[2]).toContain('Resolve latent render-host runtime-module specifier behavior');
-                expect(lines[2]).toContain('missing-runtime-client.ts');
-                expect(lines[3]).toContain('Remove any default standalone runtime-path synthesis');
+                expect(lines.some((line) => line.includes('Resolve latent render-host runtime-module specifier behavior') && line.includes('missing-runtime-client.ts'))).toBe(true);
+                expect(lines.some((line) => line.includes('Remove any default standalone runtime-path synthesis'))).toBe(true);
             } finally {
                 fs.rmSync(tempRoot, { recursive: true, force: true });
             }
@@ -916,6 +926,8 @@ const context = await esbuild.context({
             expect(template).toContain('obsidian plugin id=notemd vault=\"Research Vault\"');
             expect(template).toContain('## Packaging Boundary');
             expect(template).toContain('`src/main.ts -> main.js`');
+            expect(template).toContain('createRenderHostBundleBuildOptions()');
+            expect(template).toContain('candidate-only');
             expect(template).toContain('resolveBundledRenderHostRuntimeModuleSpecifier()');
             expect(template).toContain('returns `null`');
             expect(template).toContain('no default standalone runtime-path synthesis');

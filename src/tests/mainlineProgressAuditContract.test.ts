@@ -56,6 +56,15 @@ describe('mainline progress audit contract', () => {
         expect(progressDocZh).toContain('不是 public CLI 扩张');
         expect(progressDoc).toContain('no dedicated runtime asset is claimed');
         expect(progressDocZh).toContain('没有宣称 dedicated runtime asset');
+        expect(progressDoc).toContain('`createRenderHostBundleBuildOptions()` remains candidate-only');
+        expect(progressDoc).toContain('not consumed by `esbuild.config.mjs`');
+        expect(progressDocZh).toContain('`createRenderHostBundleBuildOptions()` 继续保持 candidate-only');
+        expect(progressDocZh).toContain('不能被 `esbuild.config.mjs` 消费');
+        expect(matrixDoc).toContain('`createRenderHostBundleBuildOptions()` candidate-only');
+        expect(matrixDoc).toContain('production `esbuild.config.mjs` path');
+        expect(matrixDocZh).toContain('`createRenderHostBundleBuildOptions()`');
+        expect(matrixDocZh).toContain('candidate-only');
+        expect(matrixDocZh).toContain('production `esbuild.config.mjs`');
         expect(matrixDoc).toContain('not existence re-proof');
         expect(matrixDocZh).toContain('不是继续做存在性重证');
     });
@@ -70,5 +79,7 @@ describe('mainline progress audit contract', () => {
         expect(matrixDocZh).toContain('MiniSearch path');
         expect(matrixDoc).toContain('evaluation depth, maintainer-example alignment, and packaging-boundary discipline');
         expect(matrixDocZh).toContain('评估深度、maintainer 示例对齐与 packaging 边界纪律');
+        expect(matrixDoc).toContain('candidate-only production-build guard');
+        expect(matrixDocZh).toContain('candidate-only production-build guard');
     });
 });

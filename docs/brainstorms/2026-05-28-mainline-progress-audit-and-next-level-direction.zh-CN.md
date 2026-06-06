@@ -69,7 +69,8 @@ canonical: true
 
 1. 当前构建真值仍然是单入口 `main.js`；
 2. `audit:render-host` 仍然只承认 inline/runtime-host 真值，不承认已发货 detached render-host asset；
-3. 源码里继续保留 latent render-host/runtime candidates，但它们仍是源码组织层真值，不是 release 真值。
+3. 源码里继续保留 latent render-host/runtime candidates，但它们仍是源码组织层真值，不是 release 真值；
+4. production build 路径现在已经围绕这条分层补上显式 guard：除非 release assets、audit rules 与 docs 同批前进，否则 `createRenderHostBundleBuildOptions()` 继续保持 candidate-only，不能被 `esbuild.config.mjs` 消费。
 
 正确解释：
 
@@ -379,7 +380,7 @@ provider 专题文在以下几点上仍然正确，而且不应被放松：
 
 1. 继续把当前 `main.js` + inline `srcdoc` 的发货真值保持为显式、可执行的边界；
 2. 让 release workflow trigger、tag validation、assets、notes、workflow-source 与 chronicle-target 真值继续处在同一份 shared contract 下；
-3. 在任何人拓宽 packaging 叙述之前，先解决当前 latent render-host runtime candidate 与 source/build 真值之间的歧义。
+3. 在任何人拓宽 packaging 叙述之前，继续显式守住 latent render-host runtime candidate 的 candidate-only production-build guard。
 
 硬规则：
 

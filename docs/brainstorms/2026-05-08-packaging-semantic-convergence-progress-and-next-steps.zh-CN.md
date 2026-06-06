@@ -256,6 +256,21 @@ source/build/audit 边界上另一处 anti-drift 缺口现在也已经补齐：
 2. 这次补齐的是 ownership 缺口，并没有假装 GitHub Actions YAML 能在 checkout 前动态 import 仓库 JavaScript；
 3. release workflow trigger、tag validation、release notes、release assets、workflow-source branch 与 chronicle-target branch 现在都处在同一条 repo-side anti-drift contract 下。
 
+### 2026-06-06 Production-Build 增量：render-host build helper 继续保持 candidate-only
+
+下一处 source/build 歧义现在也已经通过代码、helper 输出与文档锁住：
+
+1. `src/tests/esbuildBundleConfig.test.ts` 现在证明 production `esbuild.config.mjs` 路径只消费 `createMainBundleBuildOptions()`，不消费 `createRenderHostBundleBuildOptions()`。
+2. 同一个测试还会验证 candidate render-host 输出文件继续列在 `RENDER_HOST_STANDALONE_OUTPUT_FILES` 中，并且不在 `REQUIRED_RELEASE_ASSET_FILES` 中。
+3. `scripts/diagram-semantic-verification.js` 现在会生成一条 packaging-boundary 检查项，要求 `createRenderHostBundleBuildOptions()` 保持 candidate-only；除非 standalone render-host release assets、audit logic 与 docs 同批前进，否则不能把它写成当前发货路径。
+4. maintainer semantic-verification 与 release-workflow 文档现在也明确写出这条 helper 分层，避免后续仅因为源码里存在候选 helper，就误判当前已经发货 standalone runtime。
+
+正确解释：
+
+1. 当前发货 topology 仍未改变：`main.js` + inline `srcdoc`；
+2. 这次真正收紧的是：source-only render-host build helper 的候选状态现在已经是可执行 contract，而不再只是路线图文案；
+3. 如果未来要提升 `render-host.mjs`，必须同批修改 production build、release assets、audit rules 与 docs。
+
 ### Priority 2：把备份分支的 Stage-C 工作视为 reintegration 候选
 
 以下切片未来仍可能值得回灌，但都必须在当前 `main` 上重新证明：
