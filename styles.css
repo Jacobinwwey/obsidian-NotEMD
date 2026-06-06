@@ -716,6 +716,17 @@
     overflow: hidden;
 }
 
+.notemd-sidebar-footer-scroll {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75em;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 0.12em;
+}
+
 .notemd-hero-card {
     border: 1px solid var(--notemd-border);
     border-radius: 14px;
@@ -1185,6 +1196,197 @@
     margin-bottom: 0.45em;
 }
 
+.notemd-api-liveness {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45em;
+    margin-bottom: 0.5em;
+    color: color-mix(in srgb, var(--text-muted) 88%, var(--text-normal) 12%);
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.45;
+}
+
+.notemd-api-liveness-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--text-faint) 82%, var(--background-modifier-border) 18%);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--background-modifier-border) 70%, transparent 30%);
+    flex: 0 0 auto;
+}
+
+.notemd-api-liveness.is-waiting .notemd-api-liveness-dot {
+    background: #f59e0b;
+    box-shadow: 0 0 0 1px color-mix(in srgb, #f59e0b 30%, transparent);
+}
+
+.notemd-api-liveness.is-accepted .notemd-api-liveness-dot {
+    background: #3b82f6;
+    box-shadow:
+        0 0 0 1px color-mix(in srgb, #3b82f6 28%, transparent),
+        0 0 10px color-mix(in srgb, #3b82f6 18%, transparent);
+}
+
+.notemd-api-liveness.is-active .notemd-api-liveness-dot {
+    background: #10b981;
+    box-shadow:
+        0 0 0 1px color-mix(in srgb, #10b981 26%, transparent),
+        0 0 12px color-mix(in srgb, #10b981 24%, transparent);
+}
+
+.notemd-api-liveness.is-error .notemd-api-liveness-dot {
+    background: #ef4444;
+    box-shadow: 0 0 0 1px color-mix(in srgb, #ef4444 28%, transparent);
+}
+
+.notemd-api-activity {
+    border: 1px solid color-mix(in srgb, var(--notemd-border) 72%, transparent);
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--background-primary) 90%, #ffffff 10%);
+    padding: 0.5em 0.58em;
+    margin-bottom: 0.55em;
+    display: flex;
+    flex-direction: column;
+    gap: 0.38em;
+}
+
+.notemd-api-activity-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.55em;
+}
+
+.notemd-api-activity-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: var(--text-muted);
+}
+
+.notemd-api-activity-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.34em;
+}
+
+.notemd-api-activity-empty {
+    margin: 0;
+    color: color-mix(in srgb, var(--text-muted) 90%, var(--text-normal) 10%);
+    font-size: 11px;
+    line-height: 1.45;
+}
+
+.notemd-api-activity-empty.is-hidden {
+    display: none;
+}
+
+.notemd-api-activity-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.34em;
+}
+
+.notemd-api-activity-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.28em;
+}
+
+.notemd-api-activity-section.is-hidden {
+    display: none;
+}
+
+.notemd-api-activity-section-title {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--text-muted) 86%, var(--interactive-accent) 14%);
+}
+
+.notemd-api-activity-section-empty {
+    margin: 0;
+    color: color-mix(in srgb, var(--text-muted) 90%, var(--text-normal) 10%);
+    font-size: 10px;
+    line-height: 1.45;
+}
+
+.notemd-api-activity-item {
+    border-radius: 8px;
+    padding: 0.38em 0.42em;
+    background: color-mix(in srgb, var(--background-secondary) 86%, #ecfeff 14%);
+}
+
+.notemd-api-activity-item-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.45em;
+}
+
+.notemd-api-activity-item-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-normal);
+    line-height: 1.35;
+}
+
+.notemd-api-activity-item-meta {
+    margin-top: 0.12em;
+    color: color-mix(in srgb, var(--text-muted) 88%, var(--text-normal) 12%);
+    font-size: 10px;
+    line-height: 1.45;
+    word-break: break-word;
+}
+
+.notemd-api-activity-toggle-button,
+.notemd-copy-api-activity-button {
+    background: var(--background-secondary);
+    color: var(--text-normal);
+    border: 1px solid var(--notemd-border);
+    border-radius: 8px;
+    padding: 0.24em 0.58em;
+    font-size: 11px;
+    font-family: var(--notemd-sidebar-font);
+    cursor: pointer;
+    box-shadow: var(--notemd-button-shadow);
+    transition:
+        background-color 160ms ease,
+        border-color 160ms ease,
+        transform 160ms ease,
+        box-shadow 160ms ease;
+}
+
+.notemd-api-activity-toggle-button:hover,
+.notemd-copy-api-activity-button:hover {
+    background: color-mix(in srgb, var(--background-modifier-hover) 70%, #f0fdfa 30%);
+    border-color: var(--notemd-accent);
+    box-shadow: var(--notemd-button-shadow-hover);
+}
+
+.notemd-api-activity-toggle-button:active,
+.notemd-copy-api-activity-button:active {
+    transform: translateY(1px) scale(0.995);
+    box-shadow: var(--notemd-button-shadow-active);
+}
+
+.notemd-api-activity-history {
+    margin-top: 0.28em;
+    display: flex;
+    flex-direction: column;
+    gap: 0.14em;
+}
+
+.notemd-api-activity-history-entry {
+    font-size: 10px;
+    line-height: 1.4;
+    color: color-mix(in srgb, var(--text-faint) 78%, var(--text-normal) 22%);
+    font-family: var(--font-monospace);
+    word-break: break-word;
+}
+
 .notemd-progress-value {
     display: inline-flex;
     align-items: center;
@@ -1295,6 +1497,27 @@
     justify-content: space-between;
     align-items: center;
     gap: 0.7em;
+}
+
+.notemd-log-header-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55em;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.notemd-debug-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35em;
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.notemd-debug-toggle-input {
+    margin: 0;
 }
 
 .notemd-log-header h5 {

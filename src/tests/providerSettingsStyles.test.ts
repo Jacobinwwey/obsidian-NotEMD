@@ -17,4 +17,21 @@ describe('provider settings styles', () => {
         expect(styles).toContain('.notemd-provider-model-meta');
         expect(styles).toContain('.notemd-provider-model-item code');
     });
+
+    test('styles preserve sidebar footer scroll and API observability selectors', () => {
+        const styles = fs.readFileSync(stylesPath, 'utf8');
+
+        expect(styles).toContain('.notemd-sidebar-footer-scroll');
+        expect(styles).toContain('overflow-y: auto;');
+        expect(styles).toContain('.notemd-api-liveness');
+        expect(styles).toContain('.notemd-api-liveness-dot');
+        expect(styles).toContain('.notemd-api-activity');
+        expect(styles).toContain('.notemd-api-activity-content');
+        expect(styles).toContain('.notemd-api-activity-item-header');
+        expect(styles).toContain('.notemd-api-activity-toggle-button');
+        expect(styles).toContain('.notemd-copy-api-activity-button');
+        expect(styles).toContain('.notemd-log-header-actions');
+        expect(styles).toContain('.notemd-debug-toggle');
+        expect(styles).toContain('.notemd-debug-toggle-input');
+    });
 });
