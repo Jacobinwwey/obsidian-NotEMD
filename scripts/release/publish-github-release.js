@@ -2,9 +2,12 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const { spawnSync } = require('child_process');
+const {
+    REQUIRED_RELEASE_ASSET_FILES
+} = require('../lib/packaging-contract.js');
 
 const OBSIDIAN_RELEASE_TAG_PATTERN = /^\d+\.\d+\.\d+$/;
-const REQUIRED_RELEASE_ASSETS = ['main.js', 'manifest.json', 'styles.css', 'README.md'];
+const REQUIRED_RELEASE_ASSETS = [...REQUIRED_RELEASE_ASSET_FILES];
 
 function ensureFileExists(filePath) {
     if (!fs.existsSync(filePath)) {

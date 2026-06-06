@@ -138,7 +138,7 @@ This current-main anti-drift gap is now closed in code, tests, and maintainer do
 
 Another anti-drift gap is now closed at the source/build/audit boundary itself:
 
-1. `scripts/lib/render-host-contract.js` now defines the shared render-host packaging contract constants for:
+1. `scripts/lib/packaging-contract.js` now defines the shared packaging contract constants for:
    - the current main bundle output file;
    - the required inline render-host audit markers;
    - the disallowed standalone render-host output files on the current single-entry lane.
@@ -153,6 +153,22 @@ Interpretation:
 
 1. current shipped topology is unchanged;
 2. the important change is ownership discipline: future render-host packaging-boundary edits now have one canonical constant source instead of three partially duplicated ones.
+
+### 2026-06-06 Later Delta: semantic packaging facts now track the real bundle-config owner
+
+The ownership cleanup exposed one more real anti-drift problem and this batch closes it:
+
+1. current `esbuild.config.mjs` no longer keeps top-level literal `entryPoints` / `outfile` values; it delegates to `scripts/lib/esbuild-bundle-config.js`.
+2. `scripts/diagram-semantic-verification.js` now reflects that architecture truth instead of assuming the literals still live only in `esbuild.config.mjs`.
+3. Packaging-fact resolution now works in two bounded steps:
+   - parse `esbuild.config.mjs` directly when literal entry/output fields still exist there;
+   - fall back to `scripts/lib/esbuild-bundle-config.js` when the top-level config delegates to the shared helper.
+4. `src/tests/diagramSemanticVerificationScript.test.ts` now regression-locks both the current repo shape and the helper-fallback shape, preventing the semantic verifier from drifting behind the real build owner again.
+
+Interpretation:
+
+1. this batch still does not widen packaging topology;
+2. it does tighten the source/build/helper contract so the semantic verifier now follows the actual build owner instead of a stale file-shape assumption.
 
 ### Priority 2: treat backup-branch Stage-C work as reintegration candidates
 

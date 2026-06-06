@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
-const renderHostContract = require('../../scripts/lib/render-host-contract.js');
+const packagingContract = require('../../scripts/lib/packaging-contract.js');
 
 function parseEsbuildFactsIndependently(source: string): { entryPoints: string[]; outfile: string } {
     const entryPointsMatch = source.match(/entryPoints\s*:\s*\[([\s\S]*?)\]/m);
@@ -40,9 +40,9 @@ describe('diagram semantic verification helper', () => {
         expect(runbook).toContain('render-host runtime-consumption');
         expect(runbook).toContain('Stage-C gate section');
         expect(runbookZh).toContain('当前打包模型');
-        expect(runbook).toContain('derived from current `entryPoints` / `outfile` / `outdir` values in `esbuild.config.mjs`');
+        expect(runbook).toContain('resolves current mainline build truth from `esbuild.config.mjs` first and falls back to `scripts/lib/esbuild-bundle-config.js`');
         expect(runbookZh).toContain('`esbuild.config.mjs`');
-        expect(runbookZh).toContain('`entryPoints` / `outfile` / `outdir`');
+        expect(runbookZh).toContain('`scripts/lib/esbuild-bundle-config.js`');
         expect(releaseWorkflow).toContain('verify:diagram-semantics');
         expect(releaseWorkflowZh).toContain('verify:diagram-semantics');
         expect(releaseWorkflow).toContain('does not prove true heavy-runtime isolation');
@@ -54,7 +54,7 @@ describe('diagram semantic verification helper', () => {
     maybeDescribeHelper('helper module', () => {
         let resolveRequestedSurfaces: (surfaces?: string[]) => Array<{ id: string; label: string }>;
         let buildEnvironmentCheckCommands: (vaultName?: string) => string[];
-        let resolvePackagingBoundaryFacts: (args?: { esbuildConfigPath?: string }) => {
+        let resolvePackagingBoundaryFacts: (args?: { esbuildConfigPath?: string; bundleConfigPath?: string }) => {
             sourcePath: string;
             entryPoints: string[];
             outfile: string;
@@ -299,13 +299,56 @@ describe('diagram semantic verification helper', () => {
             expect(factsFromRepo.resolvedFromConfig).toBe(true);
 
             const fallbackFacts = resolvePackagingBoundaryFacts({
-                esbuildConfigPath: path.join(repoRoot, 'scripts', 'missing-esbuild.config.mjs')
+                esbuildConfigPath: path.join(repoRoot, 'scripts', 'missing-esbuild.config.mjs'),
+                bundleConfigPath: path.join(repoRoot, 'scripts', 'lib', 'missing-esbuild-bundle-config.js')
             });
             expect(fallbackFacts.entryPoints).toEqual(['<unknown-entry>']);
             expect(fallbackFacts.outfile).toBe('<unknown-outfile>');
             expect(fallbackFacts.outdir).toBe('');
             expect(fallbackFacts.outputTargetStatus).toBe('unknown');
             expect(fallbackFacts.resolvedFromConfig).toBe(false);
+        });
+
+        test('falls back to the shared bundle-config helper when esbuild.config.mjs no longer carries literal entry/output fields', () => {
+            const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-esbuild-helper-fallback-'));
+            const configPath = path.join(tempRoot, 'esbuild.config.mjs');
+            const bundleConfigPath = path.join(tempRoot, 'esbuild-bundle-config.js');
+
+            fs.writeFileSync(
+                configPath,
+                `import bundleConfig from "./esbuild-bundle-config.js";
+const context = await esbuild.context(bundleConfig.createMainBundleBuildOptions());
+`,
+                'utf8'
+            );
+            fs.writeFileSync(
+                bundleConfigPath,
+                `module.exports = {
+    createMainBundleBuildOptions() {
+        return {
+            entryPoints: ["src/main.ts"],
+            outfile: "main.js"
+        };
+    }
+};
+`,
+                'utf8'
+            );
+
+            try {
+                const facts = resolvePackagingBoundaryFacts({
+                    esbuildConfigPath: configPath,
+                    bundleConfigPath
+                });
+                expect(facts.sourcePath).toBe(bundleConfigPath);
+                expect(facts.entryPoints).toEqual(['src/main.ts']);
+                expect(facts.outfile).toBe('main.js');
+                expect(facts.outdir).toBe('');
+                expect(facts.outputTargetStatus).toBe('outfile');
+                expect(facts.resolvedFromConfig).toBe(true);
+            } finally {
+                fs.rmSync(tempRoot, { recursive: true, force: true });
+            }
         });
 
         test('supports object entryPoints plus outdir packaging configs', () => {
@@ -489,13 +532,14 @@ const context = await esbuild.context({
         });
 
         test('keeps packaging facts and checklist wording aligned with the current esbuild config shape', () => {
-            const esbuildConfigPath = path.join(repoRoot, 'esbuild.config.mjs');
-            const esbuildConfigSource = fs.readFileSync(esbuildConfigPath, 'utf8');
-            const expectedFacts = parseEsbuildFactsIndependently(esbuildConfigSource);
+            const bundleConfig = require(path.join(repoRoot, 'scripts', 'lib', 'esbuild-bundle-config.js'));
+            const expectedFacts = bundleConfig.createMainBundleBuildOptions();
             expect(expectedFacts.entryPoints.length).toBeGreaterThan(0);
             expect(expectedFacts.outfile).not.toBe('');
 
-            const resolvedFacts = resolvePackagingBoundaryFacts({ esbuildConfigPath });
+            const resolvedFacts = resolvePackagingBoundaryFacts({
+                esbuildConfigPath: path.join(repoRoot, 'esbuild.config.mjs')
+            });
             expect(resolvedFacts.entryPoints).toEqual(expectedFacts.entryPoints);
             expect(resolvedFacts.outfile).toBe(expectedFacts.outfile);
 
@@ -576,8 +620,8 @@ const context = await esbuild.context({
             const auditScriptPath = path.join(repoRoot, 'scripts', 'audit-render-host-bundle.js');
             const facts = resolveRenderHostAuditFacts({ auditScriptPath });
             expect(facts.bundlePath).toBe('main.js');
-            expect(facts.requiredMarkers).toEqual(renderHostContract.RENDER_HOST_AUDIT_MARKERS);
-            expect(facts.disallowedStandaloneOutputs).toEqual(renderHostContract.RENDER_HOST_STANDALONE_OUTPUT_FILES);
+            expect(facts.requiredMarkers).toEqual(packagingContract.RENDER_HOST_AUDIT_MARKERS);
+            expect(facts.disallowedStandaloneOutputs).toEqual(packagingContract.RENDER_HOST_STANDALONE_OUTPUT_FILES);
             expect(facts.resolvedFromAuditScript).toBe(true);
 
             const lines = buildRenderHostAuditChecklistLines(facts);
@@ -631,6 +675,7 @@ const context = await esbuild.context({
 
             const facts = resolveReleasePackagingContractFacts({ releaseHelperPath });
             const workflowFacts = resolveReleaseWorkflowTriggerFacts({ releaseWorkflowPath });
+            expect(REQUIRED_RELEASE_ASSETS).toEqual(packagingContract.REQUIRED_RELEASE_ASSET_FILES);
             expect(facts.requiredAssets).toEqual(REQUIRED_RELEASE_ASSETS);
             expect(facts.releaseTagPattern).toBe('^\\d+\\.\\d+\\.\\d+$');
             expect(facts.supportsReleaseModeSwitch).toBe(true);
@@ -661,7 +706,7 @@ const context = await esbuild.context({
             const workflowFacts = resolveReleaseWorkflowTriggerFacts({
                 releaseWorkflowPath: path.join(repoRoot, '.github', 'workflows', 'missing-release.yml')
             });
-            expect(facts.requiredAssets).toEqual(['main.js', 'manifest.json', 'styles.css', 'README.md']);
+            expect(facts.requiredAssets).toEqual(packagingContract.REQUIRED_RELEASE_ASSET_FILES);
             expect(facts.releaseTagPattern).toBe('^\\d+\\.\\d+\\.\\d+$');
             expect(facts.supportsReleaseModeSwitch).toBe(false);
             expect(facts.resolvedFromReleaseHelper).toBe(false);

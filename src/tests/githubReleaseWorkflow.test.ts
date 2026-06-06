@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
+const packagingContract = require('../../scripts/lib/packaging-contract.js');
 
 describe('GitHub release workflow', () => {
     const repoRoot = path.join(__dirname, '..', '..');
@@ -73,9 +74,19 @@ describe('GitHub release workflow', () => {
             chineseNotesFile: string;
             assets: string[];
         };
+        let REQUIRED_RELEASE_ASSETS: string[];
 
         beforeAll(() => {
-            ({ buildGhReleaseCommands, composeReleaseNotesFile, resolveReleaseInputs } = require(releaseScriptPath));
+            ({
+                buildGhReleaseCommands,
+                composeReleaseNotesFile,
+                resolveReleaseInputs,
+                REQUIRED_RELEASE_ASSETS
+            } = require(releaseScriptPath));
+        });
+
+        test('reuses the shared release asset contract', () => {
+            expect(REQUIRED_RELEASE_ASSETS).toEqual(packagingContract.REQUIRED_RELEASE_ASSET_FILES);
         });
 
         function createTempRepoRoot(): string {

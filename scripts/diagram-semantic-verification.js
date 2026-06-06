@@ -3,9 +3,11 @@
 const fs = require('fs');
 const path = require('path');
 const {
+    MAIN_BUNDLE_OUTPUT_FILE,
+    REQUIRED_RELEASE_ASSET_FILES,
     RENDER_HOST_AUDIT_MARKERS,
     RENDER_HOST_STANDALONE_OUTPUT_FILES
-} = require('./lib/render-host-contract.js');
+} = require('./lib/packaging-contract.js');
 
 const SURFACE_DEFINITIONS = [
     {
@@ -41,7 +43,7 @@ const SURFACE_DEFINITIONS = [
     }
 ];
 
-const DEFAULT_REQUIRED_RELEASE_ASSETS = ['main.js', 'manifest.json', 'styles.css', 'README.md'];
+const DEFAULT_REQUIRED_RELEASE_ASSETS = [...REQUIRED_RELEASE_ASSET_FILES];
 const DEFAULT_RENDER_HOST_AUDIT_MARKERS = [...RENDER_HOST_AUDIT_MARKERS];
 const DEFAULT_DISALLOWED_RENDER_HOST_OUTPUTS = [...RENDER_HOST_STANDALONE_OUTPUT_FILES];
 const DEFAULT_CONTRACT_PROMOTION_OPERATION_IDS = [
@@ -318,8 +320,46 @@ function resolveOutputTargetStatus({ outfile, outdir }) {
     return 'unknown';
 }
 
+function resolvePackagingBoundaryFactsFromBundleConfig({
+    bundleConfigPath = path.resolve(__dirname, 'lib', 'esbuild-bundle-config.js')
+} = {}) {
+    try {
+        const bundleConfig = require(bundleConfigPath);
+        const mainBuildOptions = typeof bundleConfig.createMainBundleBuildOptions === 'function'
+            ? bundleConfig.createMainBundleBuildOptions()
+            : null;
+
+        if (!mainBuildOptions || typeof mainBuildOptions !== 'object') {
+            return null;
+        }
+
+        const entryPointsValue = mainBuildOptions.entryPoints;
+        const entryPoints = Array.isArray(entryPointsValue)
+            ? entryPointsValue.filter((entryPoint) => typeof entryPoint === 'string' && entryPoint.length > 0)
+            : [];
+        const outfile = typeof mainBuildOptions.outfile === 'string' ? mainBuildOptions.outfile : '';
+        const outdir = typeof mainBuildOptions.outdir === 'string' ? mainBuildOptions.outdir : '';
+
+        if (entryPoints.length === 0 && !outfile && !outdir) {
+            return null;
+        }
+
+        return {
+            sourcePath: bundleConfigPath,
+            entryPoints: entryPoints.length > 0 ? entryPoints : ['<unknown-entry>'],
+            outfile,
+            outdir,
+            outputTargetStatus: resolveOutputTargetStatus({ outfile, outdir }),
+            resolvedFromConfig: true
+        };
+    } catch {
+        return null;
+    }
+}
+
 function resolvePackagingBoundaryFacts({
-    esbuildConfigPath = path.resolve(__dirname, '..', 'esbuild.config.mjs')
+    esbuildConfigPath = path.resolve(__dirname, '..', 'esbuild.config.mjs'),
+    bundleConfigPath = path.resolve(__dirname, 'lib', 'esbuild-bundle-config.js')
 } = {}) {
     try {
         const source = fs.readFileSync(esbuildConfigPath, 'utf8');
@@ -332,15 +372,28 @@ function resolvePackagingBoundaryFacts({
         const outdir = parseQuotedScalarValue(parsingSource, 'outdir');
         const outputTargetStatus = resolveOutputTargetStatus({ outfile, outdir });
 
+        const resolvedFromConfig = entryPoints.length > 0 || Boolean(outfile) || Boolean(outdir);
+        if (!resolvedFromConfig) {
+            const factsFromBundleConfig = resolvePackagingBoundaryFactsFromBundleConfig({ bundleConfigPath });
+            if (factsFromBundleConfig) {
+                return factsFromBundleConfig;
+            }
+        }
+
         return {
             sourcePath: esbuildConfigPath,
             entryPoints: entryPoints.length > 0 ? entryPoints : ['<unknown-entry>'],
             outfile,
             outdir,
             outputTargetStatus,
-            resolvedFromConfig: entryPoints.length > 0 || Boolean(outfile) || Boolean(outdir)
+            resolvedFromConfig
         };
     } catch {
+        const factsFromBundleConfig = resolvePackagingBoundaryFactsFromBundleConfig({ bundleConfigPath });
+        if (factsFromBundleConfig) {
+            return factsFromBundleConfig;
+        }
+
         return {
             sourcePath: esbuildConfigPath,
             entryPoints: ['<unknown-entry>'],
@@ -409,12 +462,12 @@ function resolveRenderHostAuditFacts({
             : [];
         const bundlePath = typeof auditScript.resolveBundlePath === 'function'
             ? normalizeRelativePath(auditScript.resolveBundlePath(projectRoot), projectRoot)
-            : 'main.js';
+            : MAIN_BUNDLE_OUTPUT_FILE;
 
         if (requiredMarkers.length > 0) {
             return {
                 sourcePath: auditScriptPath,
-                bundlePath: bundlePath || 'main.js',
+                bundlePath: bundlePath || MAIN_BUNDLE_OUTPUT_FILE,
                 requiredMarkers,
                 disallowedStandaloneOutputs: disallowedStandaloneOutputs.length > 0
                     ? disallowedStandaloneOutputs
@@ -428,7 +481,7 @@ function resolveRenderHostAuditFacts({
 
     return {
         sourcePath: auditScriptPath,
-        bundlePath: 'main.js',
+        bundlePath: MAIN_BUNDLE_OUTPUT_FILE,
         requiredMarkers: [...DEFAULT_RENDER_HOST_AUDIT_MARKERS],
         disallowedStandaloneOutputs: [...DEFAULT_DISALLOWED_RENDER_HOST_OUTPUTS],
         resolvedFromAuditScript: false

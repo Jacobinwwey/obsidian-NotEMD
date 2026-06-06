@@ -11,7 +11,7 @@ npm run verify:diagram-semantics -- --vault "<vault-name>" --commit "<sha>" --ve
 ```
 
 这个 helper 不依赖 secrets。它只会生成 Markdown 核验模板、vault 感知的 CLI 命令清单、显式的 packaging-boundary、render-host audit、render-host runtime-consumption、implementation-readiness、packaging-contract、contract-promotion-boundary 与 Stage-C gate 区块，以及各语义表面的证据区块；不会启动 Obsidian、不会读取本地凭据，也不会依赖仓库中跟踪的 vault 路径。
-其中 packaging-boundary 首行会从 `esbuild.config.mjs` 当前的 `entryPoints` / `outfile` / `outdir` 自动提取；若解析失败，helper 会输出显式占位提示，避免边界真值静默漂移。
+其中 packaging-boundary 首行现在会优先从 `esbuild.config.mjs` 解析当前主线的 build 真值；如果顶层配置只是把入口/输出委托给共享 bundle-config helper，则会自动回退到 `scripts/lib/esbuild-bundle-config.js`；若两者都无法解析，helper 才会输出显式占位提示，避免边界真值静默漂移。
 如果已解析到 `entryPoints`，但无法确定 `outfile` 与 `outdir`，检查清单会额外生成一条“必须人工确认输出目标”的提示，再允许下结论。
 如果输出目标已成功识别，清单会明确标记当前依据来自 `outfile` 还是 `outdir`，避免打包边界结论含糊。
 如果同时识别到 `outfile` 和 `outdir`，清单会将其视为歧义状态，并要求先人工确认有效输出目标，再给出打包结论。

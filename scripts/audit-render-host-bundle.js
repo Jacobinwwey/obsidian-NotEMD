@@ -6,7 +6,7 @@ const {
     MAIN_BUNDLE_OUTPUT_FILE,
     RENDER_HOST_AUDIT_MARKERS,
     RENDER_HOST_STANDALONE_OUTPUT_FILES
-} = require('./lib/render-host-contract.js');
+} = require('./lib/packaging-contract.js');
 
 const REQUIRED_RENDER_HOST_MARKERS = [...RENDER_HOST_AUDIT_MARKERS];
 
@@ -22,7 +22,7 @@ function resolveBundlePath(projectRoot = process.cwd()) {
     return path.join(projectRoot, MAIN_BUNDLE_OUTPUT_FILE);
 }
 
-function auditRenderHostBundleSource(bundleSource, bundlePath = 'main.js') {
+function auditRenderHostBundleSource(bundleSource, bundlePath = MAIN_BUNDLE_OUTPUT_FILE) {
     for (const marker of REQUIRED_RENDER_HOST_MARKERS) {
         if (!bundleSource.includes(marker)) {
             throw new Error(`Render host bundle audit failed for ${bundlePath}: missing required marker "${marker}".`);

@@ -1,4 +1,8 @@
 const builtins = require('builtin-modules');
+const {
+    MAIN_BUNDLE_OUTPUT_FILE,
+    RENDER_HOST_RUNTIME_OUTPUT_FILE
+} = require('./packaging-contract.js');
 
 const BUNDLE_BANNER =
 `/*
@@ -46,7 +50,7 @@ function createMainBundleBuildOptions({
         logLevel,
         sourcemap: resolveSourceMap(prod),
         treeShaking: true,
-        outfile: 'main.js',
+        outfile: MAIN_BUNDLE_OUTPUT_FILE,
         minify: prod,
         metafile,
         write
@@ -70,7 +74,7 @@ function createRenderHostBundleBuildOptions({
         logLevel,
         sourcemap: resolveSourceMap(prod),
         treeShaking: true,
-        outfile: 'render-host.mjs',
+        outfile: RENDER_HOST_RUNTIME_OUTPUT_FILE,
         minify: prod,
         platform: 'browser',
         metafile,

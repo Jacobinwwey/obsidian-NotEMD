@@ -138,7 +138,7 @@ topic: packaging-semantic-convergence-progress-and-next-steps
 
 source/build/audit 边界上另一处 anti-drift 缺口现在也已经补齐：
 
-1. `scripts/lib/render-host-contract.js` 现在定义了共享的 render-host packaging contract 常量，覆盖：
+1. `scripts/lib/packaging-contract.js` 现在定义了共享的 packaging contract 常量，覆盖：
    - 当前主 bundle 输出文件；
    - inline render-host 审计所要求的标记；
    - 当前单入口 lane 上禁止出现的 standalone render-host 输出文件。
@@ -153,6 +153,22 @@ source/build/audit 边界上另一处 anti-drift 缺口现在也已经补齐：
 
 1. 当前发货 topology 没有变化；
 2. 真正重要的变化是 ownership discipline：未来如果再改 render-host packaging boundary，常量真值不再散落在三处手工副本里，而是只有一个 canonical source。
+
+### 2026-06-06 后续增量：semantic packaging facts 现在会跟着真实 bundle-config owner 走
+
+这次 ownership 收口还顺带暴露并补齐了另一处真实 anti-drift 问题：
+
+1. 当前 `esbuild.config.mjs` 已不再保留顶层字面量 `entryPoints` / `outfile`，而是把 build 真值委托给 `scripts/lib/esbuild-bundle-config.js`。
+2. `scripts/diagram-semantic-verification.js` 现在已经反映这条架构真值，而不再假定所有字面量只会存在于 `esbuild.config.mjs`。
+3. packaging facts 的推导现在采用两段式有界策略：
+   - 如果 `esbuild.config.mjs` 里仍有字面量 entry/output 字段，就直接解析；
+   - 如果顶层配置只是委托给共享 helper，就回退到 `scripts/lib/esbuild-bundle-config.js` 继续解析。
+4. `src/tests/diagramSemanticVerificationScript.test.ts` 现在同时回归锁定当前仓库形态与 helper-fallback 形态，避免 semantic verifier 再次落后于真实 build owner。
+
+正确解释：
+
+1. 这批工作依旧没有拓宽 packaging topology；
+2. 但它进一步收紧了 source/build/helper contract：semantic verifier 现在跟随真实 build owner，而不再依赖已经过时的文件形态假设。
 
 ### Priority 2：把备份分支的 Stage-C 工作视为 reintegration 候选
 
