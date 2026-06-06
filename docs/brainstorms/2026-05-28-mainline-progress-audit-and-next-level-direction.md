@@ -178,6 +178,7 @@ What is materially true now:
    - dedicated chapter split + TOC spotlight docs and showcase assets are now part of the checked-in release-facing documentation surface.
 5. release maintenance truth tightened again:
    - chronicle refresh helper authorship now preserves maintainer identity instead of silently collapsing to a bot-like identity.
+   - workflow-source checkout and chronicle-target branch truth now share `scripts/lib/packaging-contract.js` ownership, with workflow env names and helper/tests keeping the GitHub Actions bootstrap values aligned.
 
 Interpretation:
 

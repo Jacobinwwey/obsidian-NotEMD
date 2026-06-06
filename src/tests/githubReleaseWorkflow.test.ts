@@ -50,9 +50,14 @@ describe('GitHub release workflow', () => {
         expect(workflow).toContain('inputs.tag');
         expect(workflow).toContain('refresh_chronicle:');
         expect(workflow).toContain('needs: publish');
-        expect(workflow).toContain('ref: main');
+        expect(packagingContract.RELEASE_WORKFLOW_SOURCE_BRANCH).toBe('main');
+        expect(packagingContract.RELEASE_CHRONICLE_REFRESH_TARGET_BRANCH).toBe('main');
+        expect(workflow).toContain(`NOTEMD_RELEASE_WORKFLOW_SOURCE_BRANCH: ${packagingContract.RELEASE_WORKFLOW_SOURCE_BRANCH}`);
+        expect(workflow).toContain(`NOTEMD_RELEASE_CHRONICLE_TARGET_BRANCH: ${packagingContract.RELEASE_CHRONICLE_REFRESH_TARGET_BRANCH}`);
+        expect(workflow).toContain('ref: ${{ env.NOTEMD_RELEASE_WORKFLOW_SOURCE_BRANCH }}');
+        expect(workflow).toContain('ref: ${{ env.NOTEMD_RELEASE_CHRONICLE_TARGET_BRANCH }}');
         expect(workflow).toContain('node scripts/repo-saga/update-quarterly-saga.mjs --tag "$TAG_NAME"');
-        expect(workflow).toContain('node scripts/release/commit-chronicle-refresh.js "$TAG_NAME"');
+        expect(workflow).toContain('node scripts/release/commit-chronicle-refresh.js "$TAG_NAME" --target-branch "$NOTEMD_RELEASE_CHRONICLE_TARGET_BRANCH"');
     });
 
     const maybeDescribeReleaseScript = fs.existsSync(releaseScriptPath) ? describe : describe.skip;

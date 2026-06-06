@@ -42,10 +42,10 @@ Recommended helper:
 ```bash
 npm run verify:diagram-semantics -- --vault "<vault-name>" --commit "<sha>" --version "<plugin-version>" --output ~/tmp/notemd-diagram-check.md
 ```
-The helper reads packaging entry/output facts from `esbuild.config.mjs` and, when needed, the shared `scripts/lib/esbuild-bundle-config.js` helper, latent runtime-module specifier facts from `src/rendering/preview/renderHostRuntimeClient.ts`, render-host audit facts from `scripts/audit-render-host-bundle.js`, runtime-consumption facts from `src/main.ts`, `src/ui/DiagramPreviewModal.ts`, `src/rendering/webview/page.ts`, and `src/rendering/webview/renderFrame.ts`, release packaging contract facts from `scripts/release/publish-github-release.js`, release trigger/tag-guard facts from `.github/workflows/release.yml`, and operation-promotion boundary facts from `src/operations/registry.ts`; keep those files as packaging/contract truth sources when evaluating renderer-boundary claims.
+The helper reads packaging entry/output facts from `esbuild.config.mjs` and, when needed, the shared `scripts/lib/esbuild-bundle-config.js` helper, latent runtime-module specifier facts from `src/rendering/preview/renderHostRuntimeClient.ts`, render-host audit facts from `scripts/audit-render-host-bundle.js`, runtime-consumption facts from `src/main.ts`, `src/ui/DiagramPreviewModal.ts`, `src/rendering/webview/page.ts`, and `src/rendering/webview/renderFrame.ts`, release packaging contract facts from `scripts/release/publish-github-release.js`, release trigger/tag-guard/workflow-branch/chronicle-target facts from `.github/workflows/release.yml`, and operation-promotion boundary facts from `src/operations/registry.ts`; keep those files as packaging/contract truth sources when evaluating renderer-boundary claims.
 Treat the helper's packaging-boundary, render-host audit, render-host runtime-consumption, implementation-readiness, packaging-contract, contract-promotion-boundary, and Stage-C gate sections as required truth maintenance for renderer-affecting changes: `npm run audit:render-host` does not prove true heavy-runtime isolation; it only proves the current self-contained `main.js` + inline `srcdoc` host contract and rejects stray `render-host.mjs` assets/references on current `main`.
 On the current single-entry lane, that packaging-boundary truth also requires the latent runtime helper to stay fail-closed: no default standalone `render-host.mjs` module specifier may be synthesized unless a dedicated runtime asset is explicitly configured and shipped in the same batch.
-The packaging-contract section now also records numeric tag policy, create/upload mode behavior, and tag-only trigger guardrails; treat those as part of the same release-truth contract rather than informal release habits.
+The packaging-contract section now also records numeric tag policy, create/upload mode behavior, tag-only trigger guardrails, workflow-source branch, and chronicle-target branch; treat those as part of the same release-truth contract rather than informal release habits.
 
 ## 3. Version Synchronization
 
@@ -105,12 +105,13 @@ The repository also ships `.github/workflows/release.yml`:
 - The workflow now pins `actions/checkout@v6` and `actions/setup-node@v6` so the release path does not keep the older Node 20 JavaScript-action runtime warning alive.
 - The publish job runs `npm ci`, `npm run build`, `npm test -- --runInBand`, `npm run audit:i18n-ui`, `npm run audit:render-host`, `git diff --check`, and finally `npm run release:github -- "$TAG_NAME"`.
 - The follow-up chronicle job runs `node scripts/repo-saga/update-quarterly-saga.mjs --tag "$TAG_NAME"` on `main`, then commits the refreshed `README*.md` blocks plus localized quarterly SVG set if anything changed.
+- The workflow-source checkout branch and chronicle push target are now named explicitly as `NOTEMD_RELEASE_WORKFLOW_SOURCE_BRANCH` and `NOTEMD_RELEASE_CHRONICLE_TARGET_BRANCH` in the workflow, while the repo-side default contract lives in `scripts/lib/packaging-contract.js`. GitHub Actions still needs bootstrap env values before the first checkout, but scripts, helper output, and tests now treat those branch names as release-contract truth instead of independent release-script defaults.
 - The chronicle refresh script itself now rebuilds its local `repo-saga` cache by copying the granularity branch as the base and overlaying the locale/i18n branch files before invoking the `repo-saga` CLI.
 - The chronicle refresh script now also enforces a single execution lock at `.cache/.repo-saga-execution.lock`, so overlapping local/CI runs fail fast instead of corrupting shared cache state.
 - That same script now hardens package-manager fallback as well: if the environment only has `corepack` or `bun x pnpm`, it creates an inheritable local `pnpm` shim so the upstream `repo-saga` workspace build can still execute nested `pnpm` script calls inside CI.
 - The workflow now validates tags through the checked-in `scripts/release/validate-release-tag.js` helper before checking out the release ref, so CI and repo-owned release helpers reuse the same numeric tag contract and still reject `v1.8.2`-style tags.
 
-The workflow intentionally reuses the checked-in release helper instead of duplicating asset lists or release-note logic inside YAML.
+The workflow intentionally reuses checked-in release helpers instead of duplicating asset lists, release-note logic, tag validation, or chronicle target defaults inside YAML-local script fragments.
 
 ## 8. Diagram Semantic Layer
 

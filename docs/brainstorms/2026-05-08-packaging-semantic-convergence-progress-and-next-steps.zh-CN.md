@@ -208,6 +208,29 @@ source/build/audit 边界上另一处 anti-drift 缺口现在也已经补齐：
 1. 从维护者视角看，release 行为没有变化；
 2. 但关键变化在于：CI 现在消费的是同一个 repo-owned tag-validation entrypoint，而不再在 YAML 里 shadow 一段本地 regex。
 
+### 2026-06-06 Branch-Target 增量：workflow source 与 chronicle target 现在共享 release contract 真值
+
+下一个 release/chronicle anti-drift 缺口现在也已补齐，而且没有改变发货拓扑：
+
+1. `scripts/lib/packaging-contract.js` 现在同时拥有：
+   - `RELEASE_WORKFLOW_SOURCE_BRANCH`；
+   - `RELEASE_CHRONICLE_REFRESH_TARGET_BRANCH`。
+2. `.github/workflows/release.yml` 现在通过显式 workflow env 名表达这两个分支角色：
+   - `NOTEMD_RELEASE_WORKFLOW_SOURCE_BRANCH`；
+   - `NOTEMD_RELEASE_CHRONICLE_TARGET_BRANCH`。
+3. `scripts/release/commit-chronicle-refresh.js` 现在从 shared contract 派生默认 push 目标，并支持 `--target-branch` 供显式修复流程使用。
+4. `scripts/diagram-semantic-verification.js` 现在会按配置化分支契约验证 workflow-source checkout 与 chronicle refresh 链路，而不是在 helper 内部继续硬编码 `main` 检查。
+5. 回归覆盖现在锁定了这条边界：
+   - `src/tests/githubReleaseWorkflow.test.ts` 检查 workflow env contract 与 target-branch handoff；
+   - `src/tests/commitChronicleRefreshScript.test.ts` 检查 chronicle helper 的 shared 默认值与显式 override 解析；
+   - `src/tests/diagramSemanticVerificationScript.test.ts` 检查 semantic helper 的 configured-branch facts 与文档引用。
+
+正确解释：
+
+1. 当前 release 行为仍然以 `main` 为目标；
+2. 真正变化的是 ownership：workflow-source 与 chronicle-target 分支真值现在会跟 release assets、tag 与 notes 真值一起演进；
+3. GitHub Actions 在首次 checkout 前仍需要 bootstrap env 值，因此 workflow 不可能在那一步直接 import 仓库 JS；防止 YAML-local 漂移的是仓库内 contract 与测试。
+
 ### Priority 2：把备份分支的 Stage-C 工作视为 reintegration 候选
 
 以下切片未来仍可能值得回灌，但都必须在当前 `main` 上重新证明：

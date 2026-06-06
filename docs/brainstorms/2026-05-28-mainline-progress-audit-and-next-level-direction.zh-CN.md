@@ -178,6 +178,7 @@ canonical: true
    - chapter split + TOC 的独立聚焦文档与 showcase 资产已经进入 checked-in 的 release-facing documentation surface。
 5. release 维护链路真值再次收紧：
    - chronicle refresh helper 现在会保留 maintainer 身份，而不是悄悄退回 bot-like identity。
+   - workflow-source checkout 与 chronicle-target branch 真值现在归 `scripts/lib/packaging-contract.js` 所有，并通过 workflow env 名与 helper/tests 保持 GitHub Actions bootstrap 值一致。
 
 正确解释：
 

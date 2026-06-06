@@ -1,4 +1,5 @@
 import * as path from 'path';
+const packagingContract = require('../../scripts/lib/packaging-contract.js');
 
 const repoRoot = path.join(__dirname, '..', '..');
 const scriptPath = path.join(repoRoot, 'scripts', 'release', 'commit-chronicle-refresh.js');
@@ -22,12 +23,15 @@ function fail(status: number, stderr: string, stdout = ''): GitResult {
 describe('chronicle refresh release helper', () => {
     const {
         CHRONICLE_PATHS,
+        DEFAULT_CHRONICLE_TARGET_BRANCH,
         DEFAULT_PUSH_RETRY_BASE_DELAY_MS,
         commitChronicleRefresh,
         hasChronicleChanges,
+        parseChronicleRefreshArgs,
         pushChronicleCommitWithRetries
     } = require(scriptPath) as {
         CHRONICLE_PATHS: string[];
+        DEFAULT_CHRONICLE_TARGET_BRANCH: string;
         DEFAULT_PUSH_RETRY_BASE_DELAY_MS: number;
         commitChronicleRefresh: (
             repoRoot: string,
@@ -47,6 +51,10 @@ describe('chronicle refresh release helper', () => {
             commitSha?: string;
         };
         hasChronicleChanges: (repoRoot: string, gitRunner?: GitRunner) => boolean;
+        parseChronicleRefreshArgs: (argv?: string[]) => {
+            tag: string | undefined;
+            targetBranch: string;
+        };
         pushChronicleCommitWithRetries: (
             repoRoot: string,
             targetBranch?: string,
@@ -73,6 +81,10 @@ describe('chronicle refresh release helper', () => {
             '/tmp/notemd',
             ['status', '--porcelain=v1', '--untracked-files=all', '--', ...CHRONICLE_PATHS]
         );
+    });
+
+    test('derives the default chronicle push target from the shared packaging contract', () => {
+        expect(DEFAULT_CHRONICLE_TARGET_BRANCH).toBe(packagingContract.RELEASE_CHRONICLE_REFRESH_TARGET_BRANCH);
     });
 
     test('returns cleanly when no chronicle changes exist', () => {
@@ -135,7 +147,19 @@ describe('chronicle refresh release helper', () => {
         expect(calls).toContain('config user.email jacob.hxx.cn@outlook.com');
         expect(calls).toContain(`add -- ${CHRONICLE_PATHS.join(' ')}`);
         expect(calls).toContain('commit -m docs: refresh quarterly chronicle for 1.8.7');
-        expect(calls).toContain('push origin HEAD:main');
+        expect(calls).toContain(`push origin HEAD:${packagingContract.RELEASE_CHRONICLE_REFRESH_TARGET_BRANCH}`);
+    });
+
+    test('parses explicit target-branch override for manual repair runs', () => {
+        expect(parseChronicleRefreshArgs(['1.8.7', '--target-branch', 'release-maint'])).toEqual({
+            tag: '1.8.7',
+            targetBranch: 'release-maint'
+        });
+        expect(parseChronicleRefreshArgs(['1.8.7'])).toEqual({
+            tag: '1.8.7',
+            targetBranch: packagingContract.RELEASE_CHRONICLE_REFRESH_TARGET_BRANCH
+        });
+        expect(() => parseChronicleRefreshArgs(['1.8.7', '--target-branch'])).toThrow('Missing value for --target-branch');
     });
 
     test('retries chronicle push after transient failure by fetching and rebasing onto main', () => {
@@ -168,7 +192,7 @@ describe('chronicle refresh release helper', () => {
             }
         };
 
-        const result = pushChronicleCommitWithRetries('/tmp/notemd', 'main', {
+        const result = pushChronicleCommitWithRetries('/tmp/notemd', packagingContract.RELEASE_CHRONICLE_REFRESH_TARGET_BRANCH, {
             gitRunner,
             log: (message) => logs.push(message),
             sleepFn: (milliseconds) => sleeps.push(milliseconds),
@@ -181,8 +205,8 @@ describe('chronicle refresh release helper', () => {
             alreadyPresent: false,
             commitSha: 'def456'
         });
-        expect(calls).toContain('fetch origin main');
-        expect(calls).toContain('rebase origin/main');
+        expect(calls).toContain(`fetch origin ${packagingContract.RELEASE_CHRONICLE_REFRESH_TARGET_BRANCH}`);
+        expect(calls).toContain(`rebase origin/${packagingContract.RELEASE_CHRONICLE_REFRESH_TARGET_BRANCH}`);
         expect(sleeps).toEqual([DEFAULT_PUSH_RETRY_BASE_DELAY_MS]);
         expect(logs.some((message) => message.includes('retrying in'))).toBe(true);
     });
@@ -207,7 +231,7 @@ describe('chronicle refresh release helper', () => {
             }
         };
 
-        const result = pushChronicleCommitWithRetries('/tmp/notemd', 'main', {
+        const result = pushChronicleCommitWithRetries('/tmp/notemd', packagingContract.RELEASE_CHRONICLE_REFRESH_TARGET_BRANCH, {
             gitRunner,
             log: () => undefined,
             sleepFn: () => undefined,
@@ -220,6 +244,6 @@ describe('chronicle refresh release helper', () => {
             alreadyPresent: true,
             commitSha: head
         });
-        expect(calls).not.toContain('rebase origin/main');
+        expect(calls).not.toContain(`rebase origin/${packagingContract.RELEASE_CHRONICLE_REFRESH_TARGET_BRANCH}`);
     });
 });

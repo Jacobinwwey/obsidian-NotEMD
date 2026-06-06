@@ -42,10 +42,10 @@ git diff --check
 ```bash
 npm run verify:diagram-semantics -- --vault "<vault-name>" --commit "<sha>" --version "<plugin-version>" --output ~/tmp/notemd-diagram-check.md
 ```
-该 helper 会从 `esbuild.config.mjs` 提取当前打包入口/输出事实；如果顶层配置只是把构建入口/输出委托给共享 helper，则还会回退到 `scripts/lib/esbuild-bundle-config.js` 继续解析；同时它还会从 `src/rendering/preview/renderHostRuntimeClient.ts` 提取 latent runtime-module specifier 真值，从 `scripts/audit-render-host-bundle.js` 提取 render-host audit 真值，从 `src/main.ts`、`src/ui/DiagramPreviewModal.ts`、`src/rendering/webview/page.ts` 与 `src/rendering/webview/renderFrame.ts` 提取 runtime-consumption 真值，从 `scripts/release/publish-github-release.js` 提取 release 打包契约事实，从 `.github/workflows/release.yml` 提取 release 触发与 tag 防护契约事实，并从 `src/operations/registry.ts` 提取操作契约提升边界事实；评估 renderer 边界声明时，应以这些文件作为打包/契约真值源。
+该 helper 会从 `esbuild.config.mjs` 提取当前打包入口/输出事实；如果顶层配置只是把构建入口/输出委托给共享 helper，则还会回退到 `scripts/lib/esbuild-bundle-config.js` 继续解析；同时它还会从 `src/rendering/preview/renderHostRuntimeClient.ts` 提取 latent runtime-module specifier 真值，从 `scripts/audit-render-host-bundle.js` 提取 render-host audit 真值，从 `src/main.ts`、`src/ui/DiagramPreviewModal.ts`、`src/rendering/webview/page.ts` 与 `src/rendering/webview/renderFrame.ts` 提取 runtime-consumption 真值，从 `scripts/release/publish-github-release.js` 提取 release 打包契约事实，从 `.github/workflows/release.yml` 提取 release 触发、tag 防护、workflow-source 分支与 chronicle-target 分支契约事实，并从 `src/operations/registry.ts` 提取操作契约提升边界事实；评估 renderer 边界声明时，应以这些文件作为打包/契约真值源。
 对于 renderer 相关改动，还应把 helper 生成出的 packaging-boundary、render-host audit、render-host runtime-consumption、implementation-readiness、packaging-contract、contract-promotion-boundary 与 Stage-C gate 区块都视为必填真值维护项：`npm run audit:render-host` 并不等于真正的重型运行时隔离已经完成，它当前只证明内联 `srcdoc` host 仍按既有契约自包含于 `main.js`，并会拒绝当前主线上残留的 `render-host.mjs` 资产或引用。
 在当前单入口主线上，这份 packaging-boundary 真值还要求 latent runtime helper 保持 fail-closed：除非 dedicated runtime asset 被显式配置并在同批真实发货，否则不得默认合成 standalone `render-host.mjs` module specifier。
-packaging-contract 区块现在还会记录数字 tag 规则、create/upload 发布模式行为以及 tag-only 触发防护；这些也应视为同一套 release 真值契约的一部分，而不是仅靠口头流程记忆。
+packaging-contract 区块现在还会记录数字 tag 规则、create/upload 发布模式行为、tag-only 触发防护、workflow-source 分支与 chronicle-target 分支；这些也应视为同一套 release 真值契约的一部分，而不是仅靠口头流程记忆。
 
 ## 3. 版本同步
 
@@ -105,12 +105,13 @@ npm run release:github -- <tag>
 - 工作流现已固定使用 `actions/checkout@v6` 与 `actions/setup-node@v6`，避免继续保留旧版 Node 20 JavaScript-action 运行时弃用告警。
 - 发布 job 会执行 `npm ci`、`npm run build`、`npm test -- --runInBand`、`npm run audit:i18n-ui`、`npm run audit:render-host`、`git diff --check`，最后执行 `npm run release:github -- "$TAG_NAME"`。
 - 随后的编年史 job 会在 `main` 上执行 `node scripts/repo-saga/update-quarterly-saga.mjs --tag "$TAG_NAME"`，如果 `README*.md` 编年史区块或多语言季度 SVG 有变化，就自动提交并推送。
+- workflow-source checkout 分支与 chronicle push 目标现在会在 workflow 中分别显式命名为 `NOTEMD_RELEASE_WORKFLOW_SOURCE_BRANCH` 与 `NOTEMD_RELEASE_CHRONICLE_TARGET_BRANCH`，而仓库侧默认契约归 `scripts/lib/packaging-contract.js` 管。GitHub Actions 在首次 checkout 前仍需要 bootstrap env 值，但脚本、helper 输出与测试现在都把这些分支名作为 release-contract 真值处理，而不是各自维护 release 脚本默认值。
 - 编年史刷新脚本本身现在也会先重建本地 `repo-saga` 集成缓存：以时间粒度分支为基底，再覆盖 locale/i18n 分支对应文件，然后才调用 `repo-saga` CLI。
 - 编年史刷新脚本现在还会强制使用 `.cache/.repo-saga-execution.lock` 单实例执行锁，避免本地或 CI 并发刷新把共享缓存状态踩坏。
 - 这套脚本现在还补上了包管理器 fallback 的稳健性：如果环境里只有 `corepack` 或 `bun x pnpm`，脚本会额外创建一个可被子进程继承的本地 `pnpm` shim，确保上游 `repo-saga` workspace build 中嵌套调用的 `pnpm` 脚本在 CI 里仍然能执行。
 - 工作流现在会在 checkout release ref 之前通过已检入的 `scripts/release/validate-release-tag.js` helper 做 tag 校验，因此 CI 与仓库内 release helper 复用同一套纯数字 tag 契约，并继续拒绝 `v1.8.2` 这类 tag。
 
-工作流刻意复用仓库内的 release 辅助脚本，而不是在 YAML 中重复维护资产清单或 release notes 逻辑，避免两套规则漂移。
+工作流刻意复用仓库内的 release 辅助脚本，而不是在 YAML-local 脚本片段中重复维护资产清单、release notes 逻辑、tag 校验或 chronicle 目标分支默认值，避免多套规则漂移。
 
 ## 8. 图表语义层
 

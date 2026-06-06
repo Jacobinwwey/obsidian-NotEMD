@@ -5,7 +5,9 @@ const path = require('path');
 const {
     MAIN_BUNDLE_OUTPUT_FILE,
     REQUIRED_RELEASE_ASSET_FILES,
+    RELEASE_CHRONICLE_REFRESH_TARGET_BRANCH,
     RELEASE_TAG_PATTERN_SOURCE,
+    RELEASE_WORKFLOW_SOURCE_BRANCH,
     resolveReleaseNotesRelativePaths,
     RENDER_HOST_AUDIT_MARKERS,
     RENDER_HOST_STANDALONE_OUTPUT_FILES
@@ -496,18 +498,24 @@ function resolveReleaseWorkflowTriggerFacts({
     try {
         const workflowSource = fs.readFileSync(releaseWorkflowPath, 'utf8');
         const validatesWithSharedHelper = workflowSource.includes('node scripts/release/validate-release-tag.js "$TAG_NAME"');
-        const checkoutsWorkflowSourcesFromMain = workflowSource.includes('Check out workflow sources')
-            && workflowSource.includes('ref: main');
-        const refreshesChronicleOnMain = workflowSource.includes('refresh_chronicle:')
+        const workflowSourceEnvLine = `NOTEMD_RELEASE_WORKFLOW_SOURCE_BRANCH: ${RELEASE_WORKFLOW_SOURCE_BRANCH}`;
+        const chronicleTargetEnvLine = `NOTEMD_RELEASE_CHRONICLE_TARGET_BRANCH: ${RELEASE_CHRONICLE_REFRESH_TARGET_BRANCH}`;
+        const checkoutsWorkflowSourcesFromConfiguredBranch = workflowSource.includes('Check out workflow sources')
+            && workflowSource.includes(workflowSourceEnvLine)
+            && workflowSource.includes('ref: ${{ env.NOTEMD_RELEASE_WORKFLOW_SOURCE_BRANCH }}');
+        const refreshesChronicleOnConfiguredBranch = workflowSource.includes('refresh_chronicle:')
             && workflowSource.includes('node scripts/repo-saga/update-quarterly-saga.mjs --tag "$TAG_NAME"')
-            && workflowSource.includes('node scripts/release/commit-chronicle-refresh.js "$TAG_NAME"')
-            && workflowSource.includes('Check out main');
+            && workflowSource.includes('node scripts/release/commit-chronicle-refresh.js "$TAG_NAME" --target-branch "$NOTEMD_RELEASE_CHRONICLE_TARGET_BRANCH"')
+            && workflowSource.includes(chronicleTargetEnvLine)
+            && workflowSource.includes('ref: ${{ env.NOTEMD_RELEASE_CHRONICLE_TARGET_BRANCH }}');
         return {
             sourcePath: releaseWorkflowPath,
             hasWorkflowDispatch: workflowSource.includes('workflow_dispatch:'),
             hasTagPushTrigger: workflowSource.includes("tags:") && workflowSource.includes("- '*.*.*'"),
-            checksOutWorkflowSourcesFromMain: checkoutsWorkflowSourcesFromMain,
-            refreshesChronicleOnMain,
+            checksOutWorkflowSourcesFromConfiguredBranch: checkoutsWorkflowSourcesFromConfiguredBranch,
+            refreshesChronicleOnConfiguredBranch,
+            workflowSourceBranch: RELEASE_WORKFLOW_SOURCE_BRANCH,
+            chronicleTargetBranch: RELEASE_CHRONICLE_REFRESH_TARGET_BRANCH,
             rejectsVPrefixedTagTrigger: !workflowSource.includes("- 'v*.*.*'") && !workflowSource.includes("- 'V*.*.*'"),
             validatesNumericTagPattern: validatesWithSharedHelper
                 || workflowSource.includes('^[0-9]+\\.[0-9]+\\.[0-9]+$'),
@@ -518,8 +526,10 @@ function resolveReleaseWorkflowTriggerFacts({
             sourcePath: releaseWorkflowPath,
             hasWorkflowDispatch: false,
             hasTagPushTrigger: false,
-            checksOutWorkflowSourcesFromMain: false,
-            refreshesChronicleOnMain: false,
+            checksOutWorkflowSourcesFromConfiguredBranch: false,
+            refreshesChronicleOnConfiguredBranch: false,
+            workflowSourceBranch: RELEASE_WORKFLOW_SOURCE_BRANCH,
+            chronicleTargetBranch: RELEASE_CHRONICLE_REFRESH_TARGET_BRANCH,
             rejectsVPrefixedTagTrigger: false,
             validatesNumericTagPattern: false,
             resolvedFromWorkflowFile: false
@@ -736,14 +746,14 @@ function buildReleasePackagingContractChecklistLines(
     const triggerDescriptor = workflowFacts.hasTagPushTrigger && workflowFacts.hasWorkflowDispatch
         ? 'tag push (`*.*.*`) + `workflow_dispatch`'
         : 'trigger inspection incomplete';
-    const workflowSourceCheckoutDescriptor = workflowFacts.checksOutWorkflowSourcesFromMain
-        ? 'checked-in workflow sources are validated from `main` before release-ref checkout'
+    const workflowSourceCheckoutDescriptor = workflowFacts.checksOutWorkflowSourcesFromConfiguredBranch
+        ? `checked-in workflow sources are validated from configured workflow-source branch \`${workflowFacts.workflowSourceBranch}\` before release-ref checkout`
         : 'workflow-source checkout inspection incomplete';
     const tagGuardDescriptor = workflowFacts.validatesNumericTagPattern && workflowFacts.rejectsVPrefixedTagTrigger
         ? 'numeric-tag regex guard present and v-prefixed wildcard triggers absent'
         : 'tag-guard inspection incomplete';
-    const chronicleDescriptor = workflowFacts.refreshesChronicleOnMain
-        ? 'chronicle refresh still runs on `main` and commits back through the checked-in helper'
+    const chronicleDescriptor = workflowFacts.refreshesChronicleOnConfiguredBranch
+        ? `chronicle refresh still runs on configured chronicle-target branch \`${workflowFacts.chronicleTargetBranch}\` and commits back through the checked-in helper`
         : 'chronicle-refresh workflow inspection incomplete';
 
     return [

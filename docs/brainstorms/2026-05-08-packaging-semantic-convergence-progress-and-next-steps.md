@@ -208,6 +208,29 @@ Interpretation:
 1. release behavior is still the same from a maintainer perspective;
 2. the important change is that CI now consumes the same repo-owned tag-validation entrypoint as the release helper, instead of shadowing it with a YAML-local regex.
 
+### 2026-06-06 Branch-Target Delta: workflow source and chronicle targets now share release contract truth
+
+The next release/chronicle anti-drift gap is now closed without changing the shipping topology:
+
+1. `scripts/lib/packaging-contract.js` now owns both:
+   - `RELEASE_WORKFLOW_SOURCE_BRANCH`;
+   - `RELEASE_CHRONICLE_REFRESH_TARGET_BRANCH`.
+2. `.github/workflows/release.yml` now exposes those two branch roles through explicit workflow env names:
+   - `NOTEMD_RELEASE_WORKFLOW_SOURCE_BRANCH`;
+   - `NOTEMD_RELEASE_CHRONICLE_TARGET_BRANCH`.
+3. `scripts/release/commit-chronicle-refresh.js` now derives its default push target from the shared contract and accepts `--target-branch` for explicit repair flows.
+4. `scripts/diagram-semantic-verification.js` now validates the workflow-source checkout and chronicle refresh path against the configured branch contract instead of hard-coding `main` checks internally.
+5. Regression coverage now locks this in:
+   - `src/tests/githubReleaseWorkflow.test.ts` checks the workflow env contract and target-branch handoff;
+   - `src/tests/commitChronicleRefreshScript.test.ts` checks the chronicle helper's shared default plus explicit override parsing;
+   - `src/tests/diagramSemanticVerificationScript.test.ts` checks the semantic helper's configured-branch facts and docs references.
+
+Interpretation:
+
+1. current release behavior remains `main`-targeted;
+2. the useful change is ownership: workflow-source and chronicle-target branch truth now move with the same release contract as assets, tags, and release notes.
+3. GitHub Actions still needs bootstrap env values before the first checkout, so the workflow cannot literally import repo JavaScript at that point; the repo-owned contract and tests are what prevent YAML-local drift.
+
 ### Priority 2: treat backup-branch Stage-C work as reintegration candidates
 
 Candidate later slices may still be valuable, but they must be re-proved on current `main`:

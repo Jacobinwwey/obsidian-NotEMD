@@ -1,8 +1,11 @@
 const path = require('path');
 const { spawnSync } = require('child_process');
+const {
+    RELEASE_CHRONICLE_REFRESH_TARGET_BRANCH
+} = require('../lib/packaging-contract.js');
 
 const CHRONICLE_PATHS = ['README.md', 'README_*.md', 'docs/repo-saga/*.svg'];
-const DEFAULT_TARGET_BRANCH = 'main';
+const DEFAULT_CHRONICLE_TARGET_BRANCH = RELEASE_CHRONICLE_REFRESH_TARGET_BRANCH;
 const DEFAULT_PUSH_MAX_ATTEMPTS = 5;
 const DEFAULT_PUSH_RETRY_BASE_DELAY_MS = 3000;
 const DEFAULT_COMMIT_AUTHOR_NAME = 'Jacobinwwey';
@@ -123,7 +126,7 @@ function rebaseOntoRemote(repoRoot, remoteRef, gitRunner = runGit) {
 
 function pushChronicleCommitWithRetries(
     repoRoot,
-    targetBranch = DEFAULT_TARGET_BRANCH,
+    targetBranch = DEFAULT_CHRONICLE_TARGET_BRANCH,
     {
         gitRunner = runGit,
         log = console.log,
@@ -200,7 +203,7 @@ function commitChronicleRefresh(
     {
         gitRunner = runGit,
         log = console.log,
-        targetBranch = DEFAULT_TARGET_BRANCH,
+        targetBranch = DEFAULT_CHRONICLE_TARGET_BRANCH,
         maxAttempts = DEFAULT_PUSH_MAX_ATTEMPTS,
         sleepFn = sleep
     } = {}
@@ -250,10 +253,54 @@ function commitChronicleRefresh(
     };
 }
 
+function parseChronicleRefreshArgs(argv = process.argv.slice(2)) {
+    let tag;
+    let targetBranch = DEFAULT_CHRONICLE_TARGET_BRANCH;
+
+    for (let index = 0; index < argv.length; index += 1) {
+        const arg = argv[index];
+
+        if (arg === '--target-branch') {
+            const nextValue = argv[index + 1];
+            if (!nextValue || nextValue.startsWith('--')) {
+                throw new Error('Missing value for --target-branch');
+            }
+            targetBranch = nextValue;
+            index += 1;
+            continue;
+        }
+
+        if (arg.startsWith('--target-branch=')) {
+            const [, nextValue] = arg.split('=', 2);
+            if (!nextValue) {
+                throw new Error('Missing value for --target-branch');
+            }
+            targetBranch = nextValue;
+            continue;
+        }
+
+        if (arg.startsWith('--')) {
+            throw new Error(`Unknown option "${arg}"`);
+        }
+
+        if (!tag) {
+            tag = arg;
+            continue;
+        }
+
+        throw new Error(`Unexpected argument "${arg}"`);
+    }
+
+    return {
+        tag,
+        targetBranch
+    };
+}
+
 function main(argv = process.argv.slice(2)) {
-    const tag = argv.find((arg) => !arg.startsWith('--'));
+    const { tag, targetBranch } = parseChronicleRefreshArgs(argv);
     const repoRoot = path.join(__dirname, '..', '..');
-    commitChronicleRefresh(repoRoot, tag);
+    commitChronicleRefresh(repoRoot, tag, { targetBranch });
     return 0;
 }
 
@@ -268,6 +315,7 @@ if (require.main === module) {
 
 module.exports = {
     CHRONICLE_PATHS,
+    DEFAULT_CHRONICLE_TARGET_BRANCH,
     DEFAULT_COMMIT_AUTHOR_EMAIL,
     DEFAULT_COMMIT_AUTHOR_NAME,
     DEFAULT_PUSH_MAX_ATTEMPTS,
@@ -281,6 +329,7 @@ module.exports = {
     hasStagedChronicleChanges,
     main,
     normalizeCommandOutput,
+    parseChronicleRefreshArgs,
     pushChronicleCommitWithRetries,
     rebaseOntoRemote,
     remoteContainsCommit,

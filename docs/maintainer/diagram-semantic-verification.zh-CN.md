@@ -19,7 +19,7 @@ npm run verify:diagram-semantics -- --vault "<vault-name>" --commit "<sha>" --ve
 其中 render-host audit 区块会从 `scripts/audit-render-host-bundle.js` 读取当前 bundle markers 与 standalone-output 禁止规则，把发布边界从“口头描述”变成可执行真值。
 其中 runtime-consumption 区块会通过 `src/main.ts`、`src/ui/DiagramPreviewModal.ts`、`src/rendering/webview/page.ts` 与 `src/rendering/webview/renderFrame.ts` 保持 command entry → preview modal → iframe `srcdoc` → webview bridge 链路的当前真值显式化。
 其中 implementation-readiness 区块会把当前主线真实 shipped packaging lane 与 release 证据边界固定下来，避免后续误把未落地拓扑当成当前能力。
-其中 packaging-contract 区块会从 `scripts/release/publish-github-release.js` 同步 release 资产、release tag 规则、发布模式和 release notes 契约真值，并从 `.github/workflows/release.yml` 同步 release 触发与 tag 防护契约真值，保证 Stage B 的契约定义与发布约束保持一致。
+其中 packaging-contract 区块会从 `scripts/release/publish-github-release.js` 同步 release 资产、release tag 规则、发布模式和 release notes 契约真值，并从 `.github/workflows/release.yml` 同步 release 触发、tag 防护、workflow-source 分支与 chronicle-target 分支契约真值，保证 Stage B 的契约定义与发布约束保持一致。
 其中 contract-promotion-boundary 区块会从 `src/operations/registry.ts` 读取 workflow/settings/export 邻近操作的当前元数据，确保能力提升结论仍绑定真实 `automationLevel` / `requiredContext` / `sideEffectClass`。
 其中 Stage-C gate 区块用于明确阻断后续拓扑扩张，除非 packaging boundary、render-host audit、runtime-consumption、release contract 与 contract-promotion boundary 五层真值一起前进。
 
