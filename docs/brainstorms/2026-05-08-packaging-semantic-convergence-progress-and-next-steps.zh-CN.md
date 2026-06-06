@@ -170,6 +170,28 @@ source/build/audit 边界上另一处 anti-drift 缺口现在也已经补齐：
 1. 这批工作依旧没有拓宽 packaging topology；
 2. 但它进一步收紧了 source/build/helper contract：semantic verifier 现在跟随真实 build owner，而不再依赖已经过时的文件形态假设。
 
+### 2026-06-06 最终增量：release tag 与 release-notes 真值也已进入同一份 shared packaging contract
+
+当前 packaging/release 边界上的另一处 anti-drift 缺口现在也已补齐：
+
+1. `scripts/lib/packaging-contract.js` 现在还负责承载：
+   - 数字版 release tag 的 regex source；
+   - 规范的 release-notes 目录与中英文文件后缀；
+   - 一个可按 tag 推导英文 / 简体中文 release-notes 路径的 helper。
+2. `scripts/release/publish-github-release.js` 现在会从同一份 shared packaging contract 派生：
+   - `OBSIDIAN_RELEASE_TAG_PATTERN`；
+   - `<tag>.md` / `<tag>.zh-CN.md` 这两条 release notes 路径；
+   而不再各自手写一份本地副本。
+3. `scripts/diagram-semantic-verification.js` 现在也会使用同一份 shared release-tag pattern 与 release-notes path resolver，在 packaging-contract checklist 中输出 release 真值。
+4. 定向回归测试现在已锁定这条 contract：
+   - `src/tests/githubReleaseWorkflow.test.ts` 会验证 release helper 复用的是共享的 release-asset 与 release-tag contract；
+   - `src/tests/diagramSemanticVerificationScript.test.ts` 会验证 semantic helper 推导出的 release-contract facts 与 release-notes checklist 文案继续和这份 shared contract 对齐。
+
+正确解释：
+
+1. 当前 release 行为没有变化；
+2. 但 ownership model 更紧了：release assets、release tag 规则与 release-notes 路径真值现在会一起演进，不再在 helper、测试和文档之间各自漂移。
+
 ### Priority 2：把备份分支的 Stage-C 工作视为 reintegration 候选
 
 以下切片未来仍可能值得回灌，但都必须在当前 `main` 上重新证明：

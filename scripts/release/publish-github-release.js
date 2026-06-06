@@ -3,10 +3,13 @@ const os = require('os');
 const path = require('path');
 const { spawnSync } = require('child_process');
 const {
+    RELEASE_TAG_PATTERN_SOURCE,
     REQUIRED_RELEASE_ASSET_FILES
+    ,
+    resolveReleaseNotesRelativePaths
 } = require('../lib/packaging-contract.js');
 
-const OBSIDIAN_RELEASE_TAG_PATTERN = /^\d+\.\d+\.\d+$/;
+const OBSIDIAN_RELEASE_TAG_PATTERN = new RegExp(RELEASE_TAG_PATTERN_SOURCE);
 const REQUIRED_RELEASE_ASSETS = [...REQUIRED_RELEASE_ASSET_FILES];
 
 function ensureFileExists(filePath) {
@@ -33,8 +36,9 @@ function resolveReleaseInputs(repoRoot, tag) {
     const assets = REQUIRED_RELEASE_ASSETS.map((assetName) => path.join(repoRoot, assetName));
     assets.forEach(ensureFileExists);
 
-    const englishNotesFile = path.join(repoRoot, 'docs', 'releases', `${tag}.md`);
-    const chineseNotesFile = path.join(repoRoot, 'docs', 'releases', `${tag}.zh-CN.md`);
+    const releaseNotesRelativePaths = resolveReleaseNotesRelativePaths(tag);
+    const englishNotesFile = path.join(repoRoot, releaseNotesRelativePaths.english);
+    const chineseNotesFile = path.join(repoRoot, releaseNotesRelativePaths.simplifiedChinese);
     ensureFileExists(englishNotesFile);
     ensureFileExists(chineseNotesFile);
 

@@ -170,6 +170,28 @@ Interpretation:
 1. this batch still does not widen packaging topology;
 2. it does tighten the source/build/helper contract so the semantic verifier now follows the actual build owner instead of a stale file-shape assumption.
 
+### 2026-06-06 Final Delta: release tag and release-notes truth now live in the same shared packaging contract
+
+One more packaging/release anti-drift gap is now closed:
+
+1. `scripts/lib/packaging-contract.js` now also owns:
+   - the numeric release-tag regex source;
+   - the canonical release-notes directory and bilingual filename suffixes;
+   - a helper that resolves the expected English / Simplified Chinese release-note paths for any tag.
+2. `scripts/release/publish-github-release.js` now derives both:
+   - `OBSIDIAN_RELEASE_TAG_PATTERN`, and
+   - the `<tag>.md` / `<tag>.zh-CN.md` note paths
+   from that same shared packaging contract instead of hand-maintaining a local second copy.
+3. `scripts/diagram-semantic-verification.js` now uses the same shared release-tag pattern and release-notes path resolver when it emits packaging-contract checklist truth.
+4. Focused regression coverage now locks that contract in both places:
+   - `src/tests/githubReleaseWorkflow.test.ts` verifies the release helper reuses the shared release-asset and release-tag contracts;
+   - `src/tests/diagramSemanticVerificationScript.test.ts` verifies the semantic helper's release-contract facts and release-notes checklist lines stay aligned with the same shared contract.
+
+Interpretation:
+
+1. current release behavior is unchanged;
+2. the ownership model is tighter: release assets, release tag policy, and release-notes path truth now move together instead of drifting across helper, tests, and docs.
+
 ### Priority 2: treat backup-branch Stage-C work as reintegration candidates
 
 Candidate later slices may still be valuable, but they must be re-proved on current `main`:

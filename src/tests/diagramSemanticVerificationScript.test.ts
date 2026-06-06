@@ -671,13 +671,20 @@ const context = await esbuild.context({
         test('keeps release packaging contract checklist aligned with release helper asset requirements', () => {
             const releaseHelperPath = path.join(repoRoot, 'scripts', 'release', 'publish-github-release.js');
             const releaseWorkflowPath = path.join(repoRoot, '.github', 'workflows', 'release.yml');
-            const { REQUIRED_RELEASE_ASSETS } = require(releaseHelperPath) as { REQUIRED_RELEASE_ASSETS: string[] };
+            const {
+                OBSIDIAN_RELEASE_TAG_PATTERN,
+                REQUIRED_RELEASE_ASSETS
+            } = require(releaseHelperPath) as {
+                OBSIDIAN_RELEASE_TAG_PATTERN: RegExp;
+                REQUIRED_RELEASE_ASSETS: string[];
+            };
 
             const facts = resolveReleasePackagingContractFacts({ releaseHelperPath });
             const workflowFacts = resolveReleaseWorkflowTriggerFacts({ releaseWorkflowPath });
             expect(REQUIRED_RELEASE_ASSETS).toEqual(packagingContract.REQUIRED_RELEASE_ASSET_FILES);
+            expect(OBSIDIAN_RELEASE_TAG_PATTERN.source).toBe(packagingContract.RELEASE_TAG_PATTERN_SOURCE);
             expect(facts.requiredAssets).toEqual(REQUIRED_RELEASE_ASSETS);
-            expect(facts.releaseTagPattern).toBe('^\\d+\\.\\d+\\.\\d+$');
+            expect(facts.releaseTagPattern).toBe(packagingContract.RELEASE_TAG_PATTERN_SOURCE);
             expect(facts.supportsReleaseModeSwitch).toBe(true);
             expect(facts.resolvedFromReleaseHelper).toBe(true);
             expect(workflowFacts.hasWorkflowDispatch).toBe(true);
@@ -695,8 +702,9 @@ const context = await esbuild.context({
             expect(lines[2]).toContain('`--clobber`');
             expect(lines[3]).toContain('tag push (`*.*.*`) + `workflow_dispatch`');
             expect(lines[4]).toContain('numeric-tag regex guard present');
-            expect(lines[5]).toContain('docs/releases/<tag>.md');
-            expect(lines[5]).toContain('docs/releases/<tag>.zh-CN.md');
+            const releaseNotesRelativePaths = packagingContract.resolveReleaseNotesRelativePaths('<tag>');
+            expect(lines[5]).toContain(releaseNotesRelativePaths.english);
+            expect(lines[5]).toContain(releaseNotesRelativePaths.simplifiedChinese);
         });
 
         test('falls back to default release packaging/workflow contract wording when sources cannot be loaded', () => {
@@ -707,7 +715,7 @@ const context = await esbuild.context({
                 releaseWorkflowPath: path.join(repoRoot, '.github', 'workflows', 'missing-release.yml')
             });
             expect(facts.requiredAssets).toEqual(packagingContract.REQUIRED_RELEASE_ASSET_FILES);
-            expect(facts.releaseTagPattern).toBe('^\\d+\\.\\d+\\.\\d+$');
+            expect(facts.releaseTagPattern).toBe(packagingContract.RELEASE_TAG_PATTERN_SOURCE);
             expect(facts.supportsReleaseModeSwitch).toBe(false);
             expect(facts.resolvedFromReleaseHelper).toBe(false);
             expect(workflowFacts.hasWorkflowDispatch).toBe(false);
@@ -833,7 +841,7 @@ const context = await esbuild.context({
             expect(template).toContain('`--clobber`');
             expect(template).toContain('tag push (`*.*.*`) + `workflow_dispatch`');
             expect(template).toContain('numeric-tag regex guard present');
-            expect(template).toContain('docs/releases/<tag>.zh-CN.md');
+            expect(template).toContain(packagingContract.resolveReleaseNotesRelativePaths('<tag>').simplifiedChinese);
             expect(template).toContain('## Contract Promotion Boundary');
             expect(template).toContain('workflow.extract-and-generate');
             expect(template).toContain('content.extract-original-text');

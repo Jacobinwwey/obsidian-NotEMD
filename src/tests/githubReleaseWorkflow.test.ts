@@ -75,9 +75,11 @@ describe('GitHub release workflow', () => {
             assets: string[];
         };
         let REQUIRED_RELEASE_ASSETS: string[];
+        let OBSIDIAN_RELEASE_TAG_PATTERN: RegExp;
 
         beforeAll(() => {
             ({
+                OBSIDIAN_RELEASE_TAG_PATTERN,
                 buildGhReleaseCommands,
                 composeReleaseNotesFile,
                 resolveReleaseInputs,
@@ -85,8 +87,9 @@ describe('GitHub release workflow', () => {
             } = require(releaseScriptPath));
         });
 
-        test('reuses the shared release asset contract', () => {
+        test('reuses the shared release asset and tag contracts', () => {
             expect(REQUIRED_RELEASE_ASSETS).toEqual(packagingContract.REQUIRED_RELEASE_ASSET_FILES);
+            expect(OBSIDIAN_RELEASE_TAG_PATTERN.source).toBe(packagingContract.RELEASE_TAG_PATTERN_SOURCE);
         });
 
         function createTempRepoRoot(): string {
@@ -109,8 +112,9 @@ describe('GitHub release workflow', () => {
                 writeFile(tempRoot, 'manifest.json');
                 writeFile(tempRoot, 'styles.css');
                 writeFile(tempRoot, 'README.md');
-                const englishNotesRelativePath = path.posix.join('docs', 'releases', '1.8.2.md');
-                const chineseNotesRelativePath = path.posix.join('docs', 'releases', '1.8.2.zh-CN.md');
+                const releaseNotesRelativePaths = packagingContract.resolveReleaseNotesRelativePaths('1.8.2');
+                const englishNotesRelativePath = releaseNotesRelativePaths.english;
+                const chineseNotesRelativePath = releaseNotesRelativePaths.simplifiedChinese;
                 const englishNotesFile = writeFile(tempRoot, englishNotesRelativePath);
                 const chineseNotesFile = writeFile(tempRoot, chineseNotesRelativePath);
 

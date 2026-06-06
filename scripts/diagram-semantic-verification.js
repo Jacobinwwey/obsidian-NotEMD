@@ -5,6 +5,8 @@ const path = require('path');
 const {
     MAIN_BUNDLE_OUTPUT_FILE,
     REQUIRED_RELEASE_ASSET_FILES,
+    RELEASE_TAG_PATTERN_SOURCE,
+    resolveReleaseNotesRelativePaths,
     RENDER_HOST_AUDIT_MARKERS,
     RENDER_HOST_STANDALONE_OUTPUT_FILES
 } = require('./lib/packaging-contract.js');
@@ -412,7 +414,7 @@ function normalizeRelativePath(filePath, basePath = path.resolve(__dirname, '..'
 function resolveReleasePackagingContractFacts({
     releaseHelperPath = path.resolve(__dirname, 'release', 'publish-github-release.js')
 } = {}) {
-    const fallbackTagPattern = '^\\d+\\.\\d+\\.\\d+$';
+    const fallbackTagPattern = RELEASE_TAG_PATTERN_SOURCE;
 
     try {
         const releaseHelper = require(releaseHelperPath);
@@ -732,7 +734,7 @@ function buildReleasePackagingContractChecklistLines(
         `- [ ] Confirm release publish mode contract remains ${releaseModeDescriptor}: create path composes bilingual notes, existing-release path uploads assets with \`--clobber\`.`,
         `- [ ] Confirm release workflow trigger contract remains ${workflowDescriptor}: ${triggerDescriptor}.`,
         `- [ ] Confirm release workflow tag-guard contract remains ${workflowDescriptor}: ${tagGuardDescriptor}.`,
-        '- [ ] Confirm release notes contract remains dual-file: `docs/releases/<tag>.md` and `docs/releases/<tag>.zh-CN.md`.',
+        `- [ ] Confirm release notes contract remains dual-file: \`${resolveReleaseNotesRelativePaths('<tag>').english}\` and \`${resolveReleaseNotesRelativePaths('<tag>').simplifiedChinese}\`.`,
         '- [ ] If packaging output shape changes (for example, moving from `outfile` to `outdir`), update release-helper tests and maintainer docs in the same change.'
     ];
 }
