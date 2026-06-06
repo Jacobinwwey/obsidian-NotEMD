@@ -1,6 +1,6 @@
 ---
 date: 2026-05-28
-last_updated: 2026-05-28
+last_updated: 2026-06-06
 topic: mainline-progress-audit-and-next-level-direction
 canonical: true
 ---
@@ -9,7 +9,7 @@ canonical: true
 
 ## 1. 为什么需要这份文档
 
-仓库在 2026-05-25 的 bounded-recovery 审计之后又发生了一次解释层面的变化。
+仓库在 2026-05-28 的 provider-settings/model-discovery 收口审计之后，又发生了一次需要重新落盘的真值变化。
 
 当前主线已经不应再被描述为：
 
@@ -19,7 +19,7 @@ canonical: true
 
 现在真正需要的是更窄、更操作化的收口：
 
-1. 按最新代码真值重述 current main；
+1. 以最新 `1.9.2` 发货边界与远端同步后的 `87a5a4c` 为基准，重述 current main；
 2. 对照先前计划语言，指出哪些表述已经滞后；
 3. 在不重开已收口存在性问题的前提下，明确下一阶段的有界推进方向。
 
@@ -37,8 +37,31 @@ canonical: true
    - `src/ui/NotemdSettingTab.ts`
    - `src/main.ts`
    - `src/llmUtils.ts`
+   - `src/localKnowledgeBase.ts`
+   - `src/ui/NotemdSidebarView.ts`
+   - `styles.css`
+6. 当前已发货 release/docs 真值：
+   - `docs/releases/1.9.2.md`
+   - `docs/releases/1.9.2.zh-CN.md`
+   - `change.md`
+   - `src/ui/welcomeReleaseNotes.ts`
 
 ## 2. 当前主线真值
+
+### 2.0 当前 live 分支与 release 边界已经重新明确
+
+当前审计基线不再是“某个计划之后的本地工作树”。
+
+它现在明确是：
+
+1. `origin/main` 位于 `87a5a4c`（`chore(release): cut 1.9.2`）；
+2. 本地 `main` 已重新同步到该远端头部；
+3. 本文更新前仓库处于 clean 的 `main...origin/main` 状态。
+
+正确解释：
+
+1. 这次审计基于真实已发货且已重新同步的主线边界，而不是本地推演中的 WIP；
+2. 任何仍把 remote sync 或 clean-state 写成未完成事项的旧措辞，都已经过时。
 
 ### 2.1 Packaging / runtime 真值仍刻意保持收窄
 
@@ -136,6 +159,31 @@ canonical: true
 1. clean-state 仍然必须继续作为后续每个批次的 finish gate；
 2. 但本文不应再把它写成尚未完成的收尾欠账。
 
+### 2.6 `1.9.2` 对主线真值的影响更窄，但仍然重要
+
+最新一轮发货增量并没有重开新的架构轨道，而是收紧了已经落地轨道上的真值。
+
+现在真实成立的是：
+
+1. sidebar 可观测性布局回退已在发货主线上修复：
+   - `styles.css` 再次明确包含 footer scroll container 与有界 API-activity 区域样式；
+   - `src/ui/NotemdSidebarView.ts` 再次让日志输出与 API activity 处在同一个可滚动发货面中，不再让 activity 条目把日志顶出视野。
+2. 本地知识库 inspect 在不扩大 public runtime contract 的前提下变得更可诊断：
+   - `src/localKnowledgeBase.ts` 现在会暴露结构化 `queryDiagnostics`；
+   - inspect 结果现在可以更清楚地区分低信号 basename 推导与健康 retrieval 路径，并对 `index.*` 这类导航型笔记给出 caution。
+3. maintainer CLI 示例与文档更贴近真实运行时：
+   - 文档与 helper 示例现在一致采用 `--vault docs` 下的 vault-relative 路径；
+   - 这减少了 maintainer 示例与真实 retrieval / chapter-split 执行契约之间的漂移。
+4. chapter split 现在已更明确地进入发货文档面，而不只是 maintainer 文档面：
+   - chapter split + TOC 的独立聚焦文档与 showcase 资产已经进入 checked-in 的 release-facing documentation surface。
+5. release 维护链路真值再次收紧：
+   - chronicle refresh helper 现在会保留 maintainer 身份，而不是悄悄退回 bot-like identity。
+
+正确解释：
+
+1. `1.9.2` 不是“新增架构主线”的 release；
+2. 它是一个真值收紧型 release，价值在于减少 operator confusion、doc/runtime 漂移与 release-process 歧义。
+
 ## 3. 相对先前方案语言的深度对比
 
 ### 3.1 2026-05-25 审计现在低估了什么
@@ -195,6 +243,7 @@ provider 专题文在以下几点上仍然正确，而且不应被放松：
 1. 把当前更宽的 bounded discovery 误写成 all-provider discovery；
 2. 把 host-aware bare-model token lookup 误写成 arbitrary custom gateway 上也能自动推断 owner；
 3. 把已有共享 parser seam 误写成以后可以顺手持久化 remote catalog，而不需要新的显式架构决策。
+4. 把 `1.9.2` 中 sidebar / inspect / docs 的收口误写成 public CLI 已扩宽，或 packaging 契约已变化。
 
 ### 3.5 Packaging 与 CLI 规划文档目前仍然成立的部分
 
@@ -216,6 +265,22 @@ provider 专题文在以下几点上仍然正确，而且不应被放松：
 1. provider 轨道的收口降低了一部分 control-plane 风险，但并没有取代 packaging 与 bounded CLI promotion discipline，成为新的架构主问题；
 2. next-level 规划现在应回到 packaging/semantic convergence 优先，其次才是 bounded CLI/public-surface 决策；provider 宽度扩充应降为持续维护轨道，而不是继续占据中心叙事。
 
+### 3.6 哪些旧进度表述现在会高估或错位
+
+现在有一类旧进度表述已经朝相反方向失真了：它们给 provider 轨道过多叙事权重，却低估了当前 Stage-C 真值维护的价值。
+
+具体来说：
+
+1. 当前主线不应再被写成 provider settings/model discovery 仍是唯一主要推进轨道；
+2. 当前主线不应再被写成 Stage-C local-KB / chapter-split 仍主要是在证明“功能是否存在”；
+3. 当前主线不应再被写成最新 release-facing truth 仍停留在 `1.9.0` 或 `1.9.1`。
+
+正确解释：
+
+1. provider 宽度现在属于维护轨道；
+2. Stage-C 质量/评测现在是更高价值的产品轨道；
+3. 在后续 release 出现前，`1.9.2` 就是当前公开真值边界。
+
 ## 4. 架构推进评估
 
 ### 4.1 真正推进了什么
@@ -224,6 +289,8 @@ provider 专题文在以下几点上仍然正确，而且不应被放松：
 2. discovery 与 runtime 在 endpoint-family 和 header-owner 层已经更收敛。
 3. token guidance 不再只是 UI hint，而是已经进入持久化 settings 状态与 runtime ceiling 行为。
 4. discovery parser 相比最初落地 helper，已经对真实 registry 漂移、wrapped catalogs 与 resource-style names 更鲁棒。
+5. retrieval explainability 在 maintainer 轨道上更强了，因为弱 query 推导现在会被结构化诊断显式暴露，而不再只表现为不透明的空 context。
+6. shipped UI 的 operator feedback 再次可用了，因为日志输出与 API activity 现在共享有界滚动布局，而不是继续争抢固定空间。
 
 ### 4.2 仍然存在的结构约束
 
@@ -232,6 +299,7 @@ provider 专题文在以下几点上仍然正确，而且不应被放松：
 3. 当前 bounded discovery family 批次已经足够宽，需要纪律，但还远没到可以宣称“通用 provider discovery”。
 4. generic `OpenAI Compatible` 对 owner 的推断仍必须保持保守；超出 trusted host、显式 registry owner hint 与显式 prefix 的部分，token ceiling 仍应保持 unresolved。
 5. 当前本机 host-side desktop verification 对 plugin reload/state inspection 更强，但对 settings-panel 的完整脚本化点击自动化仍较弱；这条 lane 目前仍依赖 Jest 去锁住 `Fetch model list -> Use` 的 notice/override 分支。
+6. maintainer inspect explainability 刻意比 public CLI 真值更丰富；除非未来有显式提升批次，否则它必须继续保持有界。
 
 ### 4.3 如果这条线现在漂移，最大的风险是什么
 
@@ -250,7 +318,7 @@ provider 专题文在以下几点上仍然正确，而且不应被放松：
 
 1. packaging / semantic-verification 仍然承载着最核心的 source-vs-shipped 边界歧义，因为源码里已有可复用 runtime candidate，但真正发货契约仍是单入口；
 2. CLI / automation 仍然承载着刻意保持的 public-vs-maintainer 分层，任何 path-based operation 的提升都必须继续显式化；
-3. file-selection / local-KB / chapter-split 的 Stage C 现在需要的是更深的评估覆盖与示例对齐，而不是再做一次“功能是否存在”的恢复性论证。
+3. file-selection / local-KB / chapter-split 的 Stage C 现在需要的是更深的 mixed-corpus 评估覆盖、示例对齐与 explainability 收口，而不是再做一次“功能是否存在”的恢复性论证。
 
 ## 5. 具体下一阶段方向
 
@@ -296,6 +364,7 @@ provider 专题文在以下几点上仍然正确，而且不应被放松：
 1. 在当前契约已经支持的前提下，继续扩 mixed file/folder、mixed query-shape 与 exclusion-behavior 的夹具覆盖；
 2. 持续保持 maintainer 示例与 retrieval inspect 指引和真实 task-scoped retrieval 链路一致；
 3. 在扩测试深度时，继续保住 deterministic managed-artifact 与 rerun-guard 语义。
+4. 只有在能严格落到 Notemd 当前任务契约时，才增加与外部参考项目的比较性评测；避免泛化成脱离当前产品面的 RAG 口号。
 
 当前主线在这一轮 Stage-C follow-through 中已经新增落地的差量：
 
@@ -303,6 +372,12 @@ provider 专题文在以下几点上仍然正确，而且不应被放松：
 2. maintainer helper 的 help/示例现在已经把当前真实支持的三条 inspect query 派生路径一起暴露出来：`basename`、`explicit` 与 `diagram-source`；
 3. exact-file-vs-folder 的 configured knowledge-path 边界现在也在同一条离线夹具链路中被检查，进一步降低了文档/示例与真实 retrieval 行为漂移的风险；
 4. maintainer 侧 inspect 的失败态现在也被明确锁成 explainability 真值：`no-paths`、`no-candidate-files` 与 `no-retrievable-sections` 将继续保持可区分，而不会再被压成一个笼统的“没有 context”结果。
+
+这一批次接下来的有界方向：
+
+1. 先增加 mixed-corpus retrieval fixture 多样性，再考虑增加新的 retrieval-dependent task 数量；
+2. 持续保持 chapter split 的 showcase/docs 与真实写入契约、managed-artifact 语义一致；
+3. 让 maintainer inspect 足够适合诊断，但不要让它意外变成事实上的 public contract。
 
 ### Batch D：把 provider 轨道放回 bounded breadth-maintenance 模式
 
@@ -377,5 +452,6 @@ provider 专题文在以下几点上仍然正确，而且不应被放松：
 
 1. packaging/source organization 与真正 shipped render-host truth 能否继续保持一致，而不夸大当前主线并未发货的 runtime topology；
 2. 当前 bounded CLI 分层能否继续显式保持，而未来任何 path-based promotion 都坚持 contract-first，而不是 convenience-first；
-3. Stage-C local-KB / file-selection / chapter-split 工作能否继续补强质量证据，而不是反复重谈“功能是否存在”；
-4. 当前更宽的 bounded provider discovery surface 能否继续保持 shared-core、lightweight 且边界诚实，并作为维护轨道而不是更大架构声明的借口。
+3. Stage-C local-KB / file-selection / chapter-split 工作能否继续补强 mixed-corpus 质量证据，而不是反复重谈“功能是否存在”；
+4. 当前更宽的 bounded provider discovery surface 能否继续保持 shared-core、lightweight 且边界诚实，并作为维护轨道而不是更大架构声明的借口；
+5. 当前真值文档能否足够快地跟上真实发货分支边界，避免未来会话又退回到 `1.9.0/1.9.1` 时代的旧措辞。

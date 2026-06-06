@@ -1,6 +1,6 @@
 ---
 date: 2026-05-28
-last_updated: 2026-05-28
+last_updated: 2026-06-06
 topic: mainline-progress-audit-and-next-level-direction
 canonical: true
 ---
@@ -9,7 +9,7 @@ canonical: true
 
 ## 1. Why This Document Exists
 
-The repository has moved again since the 2026-05-25 bounded-recovery audit.
+The repository has moved again since the 2026-05-28 provider-settings/model-discovery closure audit.
 
 The mainline is no longer best described as:
 
@@ -19,7 +19,7 @@ The mainline is no longer best described as:
 
 The current need is narrower and more operational:
 
-1. restate current-main truth after the latest provider-settings and discovery convergence work;
+1. restate current-main truth after the latest `1.9.2` release boundary and the remote-main resync to `87a5a4c`;
 2. compare that truth against the earlier plan language and identify where those documents are now stale;
 3. define the next bounded direction without re-opening already-closed existence questions.
 
@@ -37,8 +37,31 @@ Primary comparison sources:
    - `src/ui/NotemdSettingTab.ts`
    - `src/main.ts`
    - `src/llmUtils.ts`
+   - `src/localKnowledgeBase.ts`
+   - `src/ui/NotemdSidebarView.ts`
+   - `styles.css`
+6. shipped release/docs truth in:
+   - `docs/releases/1.9.2.md`
+   - `docs/releases/1.9.2.zh-CN.md`
+   - `change.md`
+   - `src/ui/welcomeReleaseNotes.ts`
 
 ## 2. Current Mainline Truth
+
+### 2.0 Live branch and release boundary are now explicit again
+
+Current audit baseline is no longer “some post-plan local worktree”.
+
+It is:
+
+1. `origin/main` at `87a5a4c` (`chore(release): cut 1.9.2`);
+2. local `main` resynchronized to that exact remote head;
+3. clean `main...origin/main` state before this document update.
+
+Interpretation:
+
+1. this audit is grounded in a shipped and re-synced branch boundary, not in speculative local-only WIP;
+2. any older wording that still frames clean-state or remote-sync as unresolved is stale.
 
 ### 2.1 Packaging / runtime truth is still intentionally narrow
 
@@ -136,6 +159,31 @@ Correct interpretation:
 1. clean-state must still remain a finish gate for every later batch;
 2. it should no longer be described here as an unclosed prerequisite blocking the next-direction discussion.
 
+### 2.6 `1.9.2` changed mainline truth in a narrower but still important way
+
+The latest shipped delta did not reopen architecture scope. It tightened truth around already-landed lanes.
+
+What is materially true now:
+
+1. sidebar observability layout regression is fixed on shipped `main`:
+   - `styles.css` again contains the footer scroll container plus bounded API-activity region styles;
+   - `src/ui/NotemdSidebarView.ts` again renders log output and API activity inside the same scrollable shipped surface without letting activity rows crowd logs out of view.
+2. local knowledge-base inspection is now more diagnosable without widening the public runtime contract:
+   - `src/localKnowledgeBase.ts` now exposes structured `queryDiagnostics`;
+   - inspect results can now distinguish low-signal basename derivation from a healthy retrieval path, including cautions for navigation-like notes such as `index.*`.
+3. maintainer CLI examples and docs now better match runtime reality:
+   - docs and helper examples consistently use vault-relative paths for `--vault docs` flows;
+   - this reduces drift between maintainer examples and the real retrieval/chapter-split execution contract.
+4. chapter split is now more visible as shipped product truth, not only maintainer truth:
+   - dedicated chapter split + TOC spotlight docs and showcase assets are now part of the checked-in release-facing documentation surface.
+5. release maintenance truth tightened again:
+   - chronicle refresh helper authorship now preserves maintainer identity instead of silently collapsing to a bot-like identity.
+
+Interpretation:
+
+1. `1.9.2` is not a “new architecture lane” release;
+2. it is a truth-tightening release that matters because it reduces operator confusion, doc/runtime drift, and release-process ambiguity.
+
 ## 3. Deep Comparison Against Earlier Plan Language
 
 ### 3.1 What the 2026-05-25 audit now understates
@@ -195,6 +243,7 @@ The unified matrix now needs to protect against three recurrent misreads:
 1. treating wider bounded discovery as permission to claim all-provider discovery;
 2. treating host-aware bare-model token lookup as permission to infer ownership for arbitrary custom gateways;
 3. treating the presence of shared parser seams as permission to persist remote catalogs later without a new explicit architecture decision.
+4. treating `1.9.2` sidebar / inspect / docs improvements as if they widened the public CLI or changed the packaging contract.
 
 ### 3.5 What the packaging and CLI planning documents still get right
 
@@ -216,6 +265,22 @@ Correct interpretation:
 1. provider-lane closure reduced one control-plane risk, but it did not replace packaging or bounded CLI promotion discipline as the next architecture questions;
 2. next-level planning should now rotate back to packaging/semantic convergence first, then bounded CLI/public-surface decisions, with provider widening treated as ongoing maintenance instead of the central narrative.
 
+### 3.6 What earlier progress wording now overstates or misplaces
+
+Some older progress wording is now stale in the opposite direction: it gives too much narrative weight to the provider lane and too little to current Stage-C truth maintenance.
+
+Specifically:
+
+1. current main should no longer be described as if provider settings/model discovery are still the only meaningful moving lane;
+2. current main should no longer be described as if Stage-C local-KB / chapter-split follow-through is still mainly about feature existence proof;
+3. current main should no longer be described as if the latest release-facing truth is still `1.9.0` or `1.9.1`.
+
+Correct interpretation:
+
+1. provider breadth is now a maintenance lane;
+2. Stage-C quality/evaluation is now the higher-value product lane next to packaging;
+3. `1.9.2` is the current public truth boundary until a later release supersedes it.
+
 ## 4. Architecture Advancement Assessment
 
 ### 4.1 What has genuinely advanced
@@ -224,6 +289,8 @@ Correct interpretation:
 2. Discovery and runtime semantics are more converged at the endpoint-family and header-owner layers.
 3. Token guidance is no longer just a UI hint; it is now tied into persisted settings state and runtime ceiling behavior.
 4. The discovery parser is meaningfully more robust against real registry drift, wrapped catalogs, and resource-style names than the initial landed helper.
+5. Retrieval explainability is stronger on the maintainer lane because weak query derivation is now surfaced as structured diagnostics rather than an opaque empty-context outcome.
+6. Sidebar operator feedback is again usable in the shipped UI because log output and API activity now share a bounded scrollable layout instead of fighting for fixed space.
 
 ### 4.2 What remains structurally constrained
 
@@ -232,6 +299,7 @@ Correct interpretation:
 3. The bounded discovery family set is broad enough to need discipline, but not broad enough to justify “generic provider discovery” claims.
 4. Generic `OpenAI Compatible` still requires conservative ownership inference; beyond trusted hosts, explicit registry-provided owner hints, and explicit prefixes, token ceilings must remain unresolved.
 5. Local host-side desktop verification is still stronger for plugin reload/state inspection than for fully scripted settings-panel click automation; this lane still relies on Jest to lock the exact `Fetch model list -> Use` notice/override branches.
+6. Maintainer inspect explainability is intentionally richer than public CLI truth; that seam must remain bounded unless a future batch explicitly promotes it.
 
 ### 4.3 Main risk if the lane drifts now
 
@@ -250,7 +318,7 @@ After the latest provider closure, the highest-leverage unresolved bottlenecks a
 
 1. packaging / semantic-verification still carries the main source-vs-shipped-boundary ambiguity because source contains reusable runtime candidates while the shipped contract remains single-entry;
 2. CLI / automation still carries a deliberate public-vs-maintainer split that has to stay explicit if any path-based operation is later promoted;
-3. file-selection / local-KB / chapter-split Stage C now needs deeper evaluation coverage and example alignment, not another “does this feature exist?” recovery cycle.
+3. file-selection / local-KB / chapter-split Stage C now needs deeper evaluation coverage, mixed-corpus evidence, and example alignment, not another “does this feature exist?” recovery cycle.
 
 ## 5. Concrete Next Direction
 
@@ -296,6 +364,7 @@ Likely work:
 1. expand mixed file/folder, mixed query-shape, and exclusion-behavior fixture coverage where current contracts already justify it;
 2. keep maintainer examples and retrieval-inspection guidance synchronized with the real task-scoped retrieval path;
 3. preserve deterministic managed-artifact and rerun-guard semantics while broadening evaluation depth.
+4. add tighter comparison guidance between the shipped retriever path and external reference projects only when that comparison can be grounded in the exact current Notemd task contracts, not generic RAG claims.
 
 Current-main delta already landed during this Stage-C follow-through:
 
@@ -303,6 +372,12 @@ Current-main delta already landed during this Stage-C follow-through:
 2. maintainer helper help/examples now surface all three currently supported inspect query-derivation modes in practice: `basename`, `explicit`, and `diagram-source`;
 3. exact-file-vs-folder configured knowledge-path boundaries are now checked in the same offline fixture lane, which reduces the risk of docs/examples drifting away from real retrieval behavior;
 4. maintainer-side inspect failure states are now explicitly regression-locked as explainability truth as well: `no-paths`, `no-candidate-files`, and `no-retrievable-sections` stay distinguishable instead of collapsing into one generic “no context” outcome.
+
+Next bounded direction for this batch:
+
+1. increase mixed-corpus retrieval fixture diversity before expanding any new retrieval-dependent task count;
+2. keep chapter split showcase/docs aligned with the actual write contract and managed-artifact semantics;
+3. keep maintainer inspect rich enough for diagnosis, but do not accidentally let that seam become the de facto public contract.
 
 ### Batch D: keep the provider lane in bounded breadth-maintenance mode
 
@@ -377,5 +452,6 @@ The real current questions are now:
 
 1. can packaging/source organization and shipped render-host truth stay aligned without overclaiming a runtime topology that current main does not ship;
 2. can the current bounded CLI split stay explicit while any future path-based promotion remains contract-first rather than convenience-first;
-3. can Stage-C local-KB / file-selection / chapter-split work deepen quality evidence instead of relitigating feature existence;
-4. can the widened bounded provider discovery surface remain shared-core, lightweight, and honest as a maintenance lane rather than becoming the excuse for broader architectural claims.
+3. can Stage-C local-KB / file-selection / chapter-split work deepen mixed-corpus quality evidence instead of relitigating feature existence;
+4. can the widened bounded provider discovery surface remain shared-core, lightweight, and honest as a maintenance lane rather than becoming the excuse for broader architectural claims;
+5. can current truth documents keep tracking the real shipped branch boundary quickly enough that future sessions do not regress back to `1.9.0/1.9.1`-era wording.
