@@ -757,6 +757,7 @@ function buildReleasePackagingContractChecklistLines(
     const workflowDescriptor = workflowFacts.resolvedFromWorkflowFile
         ? `derived from \`${releaseWorkflowPath}\``
         : `fallback reminder because \`${releaseWorkflowPath}\` could not be loaded`;
+    const triggerContractOwner = 'shared trigger-glob owner `scripts/lib/packaging-contract.js` (`RELEASE_WORKFLOW_TAG_TRIGGER_GLOB`, `RELEASE_WORKFLOW_DISALLOWED_TAG_TRIGGER_GLOBS`)';
     const tagTriggerGlob = workflowFacts.tagTriggerGlob || RELEASE_WORKFLOW_TAG_TRIGGER_GLOB;
     const triggerDescriptor = workflowFacts.hasTagPushTrigger && workflowFacts.hasWorkflowDispatch
         ? `tag push (\`${tagTriggerGlob}\`) + \`workflow_dispatch\``
@@ -775,7 +776,7 @@ function buildReleasePackagingContractChecklistLines(
         `- [ ] Confirm release asset contract remains ${sourceDescriptor}: ${requiredAssets}.`,
         `- [ ] Confirm release tag contract remains numeric-only: \`/${releaseTagPattern}/\` (no \`v\` prefix).`,
         `- [ ] Confirm release publish mode contract remains ${releaseModeDescriptor}: create path composes bilingual notes, existing-release path uploads assets with \`--clobber\`.`,
-        `- [ ] Confirm release workflow trigger contract remains ${workflowDescriptor}: ${triggerDescriptor}.`,
+        `- [ ] Confirm release workflow trigger contract remains ${workflowDescriptor} with ${triggerContractOwner}: ${triggerDescriptor}.`,
         `- [ ] Confirm release workflow source-checkout contract remains ${workflowDescriptor}: ${workflowSourceCheckoutDescriptor}.`,
         `- [ ] Confirm release workflow tag-guard contract remains ${workflowDescriptor}: ${tagGuardDescriptor}.`,
         `- [ ] Confirm release notes contract remains dual-file: \`${resolveReleaseNotesRelativePaths('<tag>').english}\` and \`${resolveReleaseNotesRelativePaths('<tag>').simplifiedChinese}\`.`,
