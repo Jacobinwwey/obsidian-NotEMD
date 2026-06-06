@@ -96,6 +96,38 @@ const FIXTURE_FILES: FixtureFile[] = [
         ].join('\n')
     },
     {
+        path: 'Knowledge/Noisy/Runtime Boundaries.md',
+        markdown: [
+            '# Runtime Boundaries',
+            'Mixed corpus retrieval should stay focused when override paths contain duplicates, extra whitespace, and file/folder entries together.',
+            '',
+            '## Noise Control',
+            'Noisy vaults can include attachments, blank searchable notes, and unrelated folders without changing task-scoped local knowledge retrieval.',
+            '',
+            '## Evidence',
+            'The bounded offline fixture proves local knowledge quality with duplicate override paths, non-Markdown distractions, and empty-section candidates.'
+        ].join('\n')
+    },
+    {
+        path: 'Knowledge/Noisy/Blank.md',
+        markdown: [
+            '```ts',
+            'const hidden = true;',
+            '```'
+        ].join('\n')
+    },
+    {
+        path: 'Knowledge/Noisy/Attachment.pdf',
+        markdown: 'This attachment-like file must not be indexed by local knowledge retrieval.'
+    },
+    {
+        path: 'Archive/Noisy/Runtime Boundaries.md',
+        markdown: [
+            '# Runtime Boundaries',
+            'This unrelated folder should not appear when the knowledge path is scoped to Knowledge/Noisy.'
+        ].join('\n')
+    },
+    {
         path: 'Docs/Diagram Platform.md',
         markdown: [
             '# Diagram Platform',
@@ -213,6 +245,24 @@ const EVALUATION_CASES: EvaluationCase[] = [
         minReturnedHitCount: 1,
         minMatchedSectionCount: 1,
         expectedContextFragments: ['task-scoped retrieval behavior']
+    },
+    {
+        id: 'noisy-mixed-corpus-override-scope',
+        query: 'duplicate override non-Markdown distractions empty-section candidates',
+        configuredKnowledgePaths: ' Knowledge/Noisy \nKnowledge/Noisy/Runtime Boundaries.md\nknowledge/noisy\n',
+        expectedSourcePaths: ['Knowledge/Noisy/Runtime Boundaries.md'],
+        topK: 2,
+        slidingWindowSize: 1,
+        maxSnippetChars: 460,
+        minExpectedPathRecall: 1,
+        minReturnedHitCount: 1,
+        minMatchedSectionCount: 1,
+        minExpandedSectionCount: 2,
+        expectedContextFragments: [
+            'Mixed corpus retrieval should stay focused when override paths contain duplicates',
+            'non-Markdown distractions',
+            'empty-section candidates'
+        ]
     }
 ];
 

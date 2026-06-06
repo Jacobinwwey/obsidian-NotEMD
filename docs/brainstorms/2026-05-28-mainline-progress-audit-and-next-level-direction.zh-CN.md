@@ -19,7 +19,7 @@ canonical: true
 
 现在真正需要的是更窄、更操作化的收口：
 
-1. 以最新 `1.9.2` 发货边界与远端同步后的 `87a5a4c` 为基准，重述 current main；
+1. 以最新 `1.9.2` 发货边界、远端同步以及后续 post-release contract/evidence follow-through commits 为基准，重述 current main；
 2. 对照先前计划语言，指出哪些表述已经滞后；
 3. 在不重开已收口存在性问题的前提下，明确下一阶段的有界推进方向。
 
@@ -54,8 +54,8 @@ canonical: true
 
 它现在明确是：
 
-1. `origin/main` 位于 `87a5a4c`（`chore(release): cut 1.9.2`）；
-2. 本地 `main` 已重新同步到该远端头部；
+1. `origin/main` 已越过 `1.9.2` release cut，并包含后续 post-release contract/evidence follow-through commits；
+2. 本地 `main` 在本批次开始前已重新同步到该远端头部；
 3. 本文更新前仓库处于 clean 的 `main...origin/main` 状态。
 
 正确解释：
@@ -378,10 +378,11 @@ provider 专题文在以下几点上仍然正确，而且不应被放松：
 2. maintainer helper 的 help/示例现在已经把当前真实支持的三条 inspect query 派生路径一起暴露出来：`basename`、`explicit` 与 `diagram-source`；
 3. exact-file-vs-folder 的 configured knowledge-path 边界现在也在同一条离线夹具链路中被检查，进一步降低了文档/示例与真实 retrieval 行为漂移的风险；
 4. maintainer 侧 inspect 的失败态现在也被明确锁成 explainability 真值：`no-paths`、`no-candidate-files` 与 `no-retrievable-sections` 将继续保持可区分，而不会再被压成一个笼统的“没有 context”结果。
+5. 离线夹具现在还覆盖了 noisy mixed-corpus scope：重复/空白 override path、混合 file/folder entry、非 Markdown 干扰文件、无关文件夹与空 searchable section 候选都会进入同一条评估路径，用来证明当前 MiniSearch 路径仍能保持 scope 收敛，同时不扩任务数量或 public CLI 行为。
 
 这一批次接下来的有界方向：
 
-1. 先增加 mixed-corpus retrieval fixture 多样性，再考虑增加新的 retrieval-dependent task 数量；
+1. 继续增加真实 note/query 多样性与 maintainer 示例对齐，再考虑增加新的 retrieval-dependent task 数量；
 2. 持续保持 chapter split 的 showcase/docs 与真实写入契约、managed-artifact 语义一致；
 3. 让 maintainer inspect 足够适合诊断，但不要让它意外变成事实上的 public contract。
 

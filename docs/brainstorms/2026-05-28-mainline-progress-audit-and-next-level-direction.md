@@ -19,7 +19,7 @@ The mainline is no longer best described as:
 
 The current need is narrower and more operational:
 
-1. restate current-main truth after the latest `1.9.2` release boundary and the remote-main resync to `87a5a4c`;
+1. restate current-main truth after the latest `1.9.2` release boundary, remote-main resync, and later post-release contract/evidence follow-through commits;
 2. compare that truth against the earlier plan language and identify where those documents are now stale;
 3. define the next bounded direction without re-opening already-closed existence questions.
 
@@ -54,8 +54,8 @@ Current audit baseline is no longer “some post-plan local worktree”.
 
 It is:
 
-1. `origin/main` at `87a5a4c` (`chore(release): cut 1.9.2`);
-2. local `main` resynchronized to that exact remote head;
+1. `origin/main` after the `1.9.2` release cut plus later post-release contract/evidence follow-through commits;
+2. local `main` resynchronized to that exact remote head before this batch started;
 3. clean `main...origin/main` state before this document update.
 
 Interpretation:
@@ -378,10 +378,11 @@ Current-main delta already landed during this Stage-C follow-through:
 2. maintainer helper help/examples now surface all three currently supported inspect query-derivation modes in practice: `basename`, `explicit`, and `diagram-source`;
 3. exact-file-vs-folder configured knowledge-path boundaries are now checked in the same offline fixture lane, which reduces the risk of docs/examples drifting away from real retrieval behavior;
 4. maintainer-side inspect failure states are now explicitly regression-locked as explainability truth as well: `no-paths`, `no-candidate-files`, and `no-retrievable-sections` stay distinguishable instead of collapsing into one generic “no context” outcome.
+5. the offline fixture now also covers a noisy mixed-corpus scope case with duplicate/whitespace override paths, mixed file/folder entries, non-Markdown distractions, unrelated folders, and empty-section candidates, proving that the current MiniSearch path stays scoped without widening task count or public CLI behavior.
 
 Next bounded direction for this batch:
 
-1. increase mixed-corpus retrieval fixture diversity before expanding any new retrieval-dependent task count;
+1. keep increasing real-note/query diversity and maintainer example alignment before expanding any new retrieval-dependent task count;
 2. keep chapter split showcase/docs aligned with the actual write contract and managed-artifact semantics;
 3. keep maintainer inspect rich enough for diagnosis, but do not accidentally let that seam become the de facto public contract.
 
