@@ -104,7 +104,7 @@ The previously recovered product slices are now real current-main facts and no l
 4. preview history and saved-artifact-aware reopening are live in the reusable preview shell.
 5. settings reset, concept-note prerequisite guidance, concept synonym suppression, and folder file-selection profiles are already back on current main.
 6. retrieval-dependent note-processing results now expose machine-readable `localKnowledgeRetrieval` summaries for title generation and research, including matched/returned counts, source paths, requested `topK`, sliding-window size, current-file exclusion telemetry, index/query timing, and context-char count.
-7. a dedicated offline retrieval-quality maintainer fixture now exists as `npm run verify:local-kb-fixtures`; it exercises the live MiniSearch-based retriever against a broader mixed-note/query regression corpus and task-scoped inspect cases instead of introducing a separate evaluation-only retrieval path.
+7. a dedicated offline retrieval-quality maintainer fixture now exists as `npm run verify:local-kb-fixtures`; it exercises the live MiniSearch-based retriever against a broader mixed-note/query regression corpus, task-scoped inspect cases, and real-note/query diversity beyond the chapter-split showcase instead of introducing a separate evaluation-only retrieval path.
 
 Code-backed evidence includes:
 

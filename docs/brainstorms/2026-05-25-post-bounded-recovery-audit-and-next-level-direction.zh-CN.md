@@ -104,7 +104,7 @@ canonical: true
 4. preview history 与 saved-artifact-aware reopening 已进入可复用 preview shell。
 5. settings reset、concept-note prerequisite guidance、concept synonym suppression 与 folder file-selection profiles 都已回到当前主线。
 6. 面向 retrieval 的 note-processing 结果现在也已为标题生成与研究总结暴露 machine-readable 的 `localKnowledgeRetrieval` 摘要，包含 matched/returned counts、source paths、请求的 `topK`、sliding-window size、current-file exclusion telemetry、index/query timing 与 context-char count。
-7. 现在也已有专用的离线 retrieval-quality maintainer fixture：`npm run verify:local-kb-fixtures`。它直接对当前线上 MiniSearch retriever 跑一组更宽的 mixed-note/query 回归语料与 task-scoped inspect case，而不是再造一条评测专用检索路径。
+7. 现在也已有专用的离线 retrieval-quality maintainer fixture：`npm run verify:local-kb-fixtures`。它直接对当前线上 MiniSearch retriever 跑一组更宽的 mixed-note/query 回归语料、task-scoped inspect case，以及 chapter-split showcase 之外的真实 note/query 多样性，而不是再造一条评测专用检索路径。
 
 代码证据包括：
 

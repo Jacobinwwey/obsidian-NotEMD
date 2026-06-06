@@ -147,6 +147,52 @@ const FIXTURE_FILES: FixtureFile[] = [
         ].join('\n')
     },
     {
+        path: 'Knowledge/Projects/Batch Title Drafting.md',
+        markdown: [
+            '# Batch Title Drafting',
+            'Batch title generation should retrieve local project notes when drafts depend on saved vault knowledge.',
+            '',
+            '## Source Selection',
+            'Cross-folder local knowledge scopes let maintainers combine project folders with pinned architecture references for title-based generation.',
+            '',
+            '## Stability',
+            'The task should keep existing output behavior when no relevant local knowledge context is returned.'
+        ].join('\n')
+    },
+    {
+        path: 'Knowledge/Research/RAG Evaluation Notes.md',
+        markdown: [
+            '# RAG Evaluation Notes',
+            'Stage-C retrieval quality should be judged through real note and query diversity, not only feature-existence checks.',
+            '',
+            '## Quality Signals',
+            'Evaluation should track recall proxy, precision pressure, noisy corpus behavior, latency telemetry, and explainability for task-scoped local knowledge retrieval.',
+            '',
+            '## Constraints',
+            'The shipped retriever remains local-only, server-free, cloud-free, and GPU-free while using the plugin runtime.'
+        ].join('\n')
+    },
+    {
+        path: 'References/Architecture/Local KB Task Contracts.md',
+        markdown: [
+            '# Local KB Task Contracts',
+            'Task-scoped retrieval contracts should stay explicit for generate-title, batch-title, research, and diagram lanes.',
+            '',
+            '## Cross Folder Inputs',
+            'A single task can inspect mixed knowledge paths across project folders and reference folders without mutating saved settings.',
+            '',
+            '## Diagnostics',
+            'Maintainer inspect output should expose effective paths, query diagnostics, source paths, context blocks, and retrieval timing.'
+        ].join('\n')
+    },
+    {
+        path: 'References/Architecture/Navigation Index.md',
+        markdown: [
+            '# Navigation Index',
+            'This file is intentionally generic. It should not be enough by itself to prove healthy retrieval for a navigation-like source basename.'
+        ].join('\n')
+    },
+    {
         path: 'Archive/Noisy/Runtime Boundaries.md',
         markdown: [
             '# Runtime Boundaries',
@@ -161,6 +207,16 @@ const FIXTURE_FILES: FixtureFile[] = [
             '',
             '## Retrieval',
             'Sliding window retrieval and runtime truth should both appear in the derived query.'
+        ].join('\n')
+    },
+    {
+        path: 'Docs/index.zh-CN.md',
+        markdown: [
+            '# Index',
+            'Navigation hub for the docs vault.',
+            '',
+            '## Local Knowledge',
+            'The index points to local knowledge task contracts but is still a low-signal source name.'
         ].join('\n')
     }
 ];
@@ -307,6 +363,42 @@ const EVALUATION_CASES: EvaluationCase[] = [
             'Guarded reruns refuse to overwrite manually edited managed artifacts',
             'stable block refs'
         ]
+    },
+    {
+        id: 'cross-folder-task-contracts',
+        query: 'task scoped retrieval contracts mixed knowledge paths query diagnostics timing',
+        configuredKnowledgePaths: 'Knowledge/Projects\nReferences/Architecture',
+        expectedSourcePaths: ['References/Architecture/Local KB Task Contracts.md'],
+        topK: 2,
+        slidingWindowSize: 1,
+        maxSnippetChars: 700,
+        minExpectedPathRecall: 1,
+        minReturnedHitCount: 1,
+        minMatchedSectionCount: 1,
+        minExpandedSectionCount: 2,
+        expectedContextFragments: [
+            'Task-scoped retrieval contracts should stay explicit',
+            'mixed knowledge paths across project folders and reference folders',
+            'Maintainer inspect output should expose effective paths'
+        ]
+    },
+    {
+        id: 'real-note-rag-quality-evaluation',
+        query: 'real note query diversity recall proxy precision latency telemetry explainability',
+        configuredKnowledgePaths: 'Knowledge/Research\nKnowledge/Showcase',
+        expectedSourcePaths: ['Knowledge/Research/RAG Evaluation Notes.md'],
+        topK: 1,
+        slidingWindowSize: 1,
+        maxSnippetChars: 640,
+        minExpectedPathRecall: 1,
+        minReturnedHitCount: 1,
+        minMatchedSectionCount: 1,
+        minExpandedSectionCount: 2,
+        expectedContextFragments: [
+            'real note and query diversity',
+            'recall proxy, precision pressure, noisy corpus behavior, latency telemetry',
+            'local-only, server-free, cloud-free, and GPU-free'
+        ]
     }
 ];
 
@@ -394,6 +486,11 @@ describe('local knowledge offline evaluation fixture', () => {
         for (const documentation of documentationSurfaces) {
             expect(documentation).toContain('verify:local-kb-fixtures');
         }
+
+        expect(documentationSurfaces.some(documentation => documentation.includes('real-note/query diversity beyond the chapter-split showcase')))
+            .toBe(true);
+        expect(documentationSurfaces.some(documentation => documentation.includes('chapter-split showcase 之外的真实 note/query 多样性')))
+            .toBe(true);
     });
 
     test('keeps the offline fixture cases above minimum retrieval thresholds', async () => {
@@ -654,5 +751,110 @@ describe('local knowledge offline evaluation fixture', () => {
         expect(noPathsResult.candidateFilePaths).toEqual([]);
         expect(noPathsResult.context).toBeNull();
         expect(noPathsResult.retrieval.returnedHitCount).toBe(0);
+    });
+
+    test('inspect keeps cross-folder real-note task scopes explicit without mutating saved settings', async () => {
+        const settings = {
+            ...mockSettings,
+            enableLocalKnowledgeRetrieval: true,
+            localKnowledgeBasePaths: 'Knowledge/Showcase',
+            localKnowledgeBatchGenerateFromTitlesPaths: 'Knowledge/Projects',
+            localKnowledgeTopK: 3,
+            localKnowledgeSlidingWindowSize: 1,
+            localKnowledgeMaxSnippetChars: 260,
+            localKnowledgeExcludeCurrentFile: true,
+            enableLocalKnowledgeForBatchGenerateFromTitles: true
+        };
+
+        const inspect = await inspectLocalKnowledgeRetrieval(
+            mockApp as any,
+            settings,
+            {
+                taskScope: 'batchGenerateFromTitles',
+                sourcePath: 'Roadmaps/Local KB Task Contracts.md',
+                knowledgePaths: [
+                    'Knowledge/Projects',
+                    'References/Architecture',
+                    'Knowledge/Showcase/Provider Model Discovery.md'
+                ]
+            }
+        );
+
+        expect(inspect.effectivePathSource).toBe('override');
+        expect(inspect.queryDerivation).toBe('basename');
+        expect(inspect.queryDiagnostics).toEqual({
+            derivedBasename: 'Local KB Task Contracts',
+            strippedSourceCharsUsed: 0,
+            cautions: []
+        });
+        expect(inspect.effectiveConfiguredPaths).toEqual([
+            'Knowledge/Projects',
+            'References/Architecture',
+            'Knowledge/Showcase/Provider Model Discovery.md'
+        ]);
+        expect(inspect.candidateFilePaths).toEqual([
+            'Knowledge/Showcase/Provider Model Discovery.md',
+            'Knowledge/Projects/Batch Title Drafting.md',
+            'References/Architecture/Local KB Task Contracts.md',
+            'References/Architecture/Navigation Index.md'
+        ]);
+        expect(inspect.retrieverBuildStatus).toBe('ready');
+        expect(inspect.retrieval.sourcePaths).toContain('References/Architecture/Local KB Task Contracts.md');
+        expect(inspect.context).toContain('Task-scoped retrieval contracts should stay explicit');
+    });
+
+    test('inspect surfaces navigation-source cautions while preserving retrieval diagnostics', async () => {
+        const settings = {
+            ...mockSettings,
+            enableLocalKnowledgeRetrieval: true,
+            localKnowledgeBasePaths: 'References/Architecture\nKnowledge/Research',
+            localKnowledgeTopK: 2,
+            localKnowledgeSlidingWindowSize: 0,
+            localKnowledgeMaxSnippetChars: 220,
+            localKnowledgeExcludeCurrentFile: true,
+            enableLocalKnowledgeForBatchGenerateFromTitles: true,
+            enableLocalKnowledgeForDiagramGeneration: true
+        };
+
+        const basenameInspect = await inspectLocalKnowledgeRetrieval(
+            mockApp as any,
+            settings,
+            {
+                taskScope: 'batchGenerateFromTitles',
+                sourcePath: 'Docs/index.zh-CN.md'
+            }
+        );
+        const diagramInspect = await inspectLocalKnowledgeRetrieval(
+            mockApp as any,
+            settings,
+            {
+                taskScope: 'diagramGeneration',
+                sourcePath: 'Docs/index.zh-CN.md'
+            }
+        );
+
+        expect(basenameInspect.query).toBe('index.zh-CN');
+        expect(basenameInspect.queryDiagnostics).toEqual({
+            derivedBasename: 'index.zh-CN',
+            strippedSourceCharsUsed: 0,
+            cautions: ['generic-navigation-basename']
+        });
+        expect(basenameInspect.retrieverBuildStatus).toBe('ready');
+        expect(basenameInspect.candidateFilePaths).toEqual([
+            'Knowledge/Research/RAG Evaluation Notes.md',
+            'References/Architecture/Local KB Task Contracts.md',
+            'References/Architecture/Navigation Index.md'
+        ]);
+
+        expect(diagramInspect.query).toContain('index.zh-CN');
+        expect(diagramInspect.query).toContain('The index points to local knowledge task contracts');
+        expect(diagramInspect.queryDiagnostics).toEqual({
+            derivedBasename: 'index.zh-CN',
+            strippedSourceCharsUsed: expect.any(Number),
+            cautions: ['diagram-source-built-from-navigation-like-note']
+        });
+        expect(diagramInspect.queryDiagnostics.strippedSourceCharsUsed).toBeGreaterThan(0);
+        expect(diagramInspect.retrieverBuildStatus).toBe('ready');
+        expect(diagramInspect.retrieval.sourcePaths).toContain('References/Architecture/Local KB Task Contracts.md');
     });
 });

@@ -21,9 +21,13 @@ describe('mainline progress audit contract', () => {
     const matrixDoc = readDoc('docs/brainstorms/2026-05-20-unified-follow-through-matrix.md');
     const matrixDocZh = readDoc('docs/brainstorms/2026-05-20-unified-follow-through-matrix.zh-CN.md');
 
-    test('records the current Stage-B2/C/D checkpoint in both canonical progress docs', () => {
-        expect(progressDoc).toContain('### 2.7 Current `824d07e` Stage-B2/C/D checkpoint');
-        expect(progressDocZh).toContain('### 2.7 当前 `824d07e` Stage-B2/C/D 检查点');
+    test('records the current Stage-B2/C/D baseline and fixture anchor in both canonical progress docs', () => {
+        expect(progressDoc).toContain('### 2.7 Current `890b21b` Stage-B2/C/D follow-through baseline');
+        expect(progressDocZh).toContain('### 2.7 当前 `890b21b` Stage-B2/C/D 跟进基线');
+        expect(progressDoc).toContain('docs(progress): align post-recovery packaging truth');
+        expect(progressDocZh).toContain('docs(progress): align post-recovery packaging truth');
+        expect(progressDoc).toContain('earlier local-KB fixture anchor remains `824d07e`');
+        expect(progressDocZh).toContain('更早的 local-KB fixture 锚点仍是 `824d07e`');
         expect(progressDoc).toContain('test(local-kb): cover chapter split showcase retrieval');
         expect(progressDocZh).toContain('test(local-kb): cover chapter split showcase retrieval');
         expect(progressDoc).toContain('`npm run verify:local-kb-fixtures`');
@@ -116,13 +120,22 @@ describe('mainline progress audit contract', () => {
     });
 
     test('keeps the unified matrix aligned with the same current-head evidence and next direction', () => {
-        expect(matrixDoc).toContain('Current execution checkpoint for this matrix update:');
-        expect(matrixDocZh).toContain('本次矩阵更新的当前执行检查点：');
+        expect(matrixDoc).toContain('Current execution baseline for this matrix update:');
+        expect(matrixDocZh).toContain('本次矩阵更新的当前执行基线：');
+        expect(matrixDoc).toContain('`890b21b`');
+        expect(matrixDocZh).toContain('`890b21b`');
+        expect(matrixDoc).toContain('docs(progress): align post-recovery packaging truth');
+        expect(matrixDocZh).toContain('docs(progress): align post-recovery packaging truth');
         expect(matrixDoc).toContain('`824d07e`');
         expect(matrixDocZh).toContain('`824d07e`');
-        expect(matrixDoc).toContain('real-note-style chapter-split showcase retrieval through the live MiniSearch path');
+        expect(matrixDoc).toContain(
+            'real-note-style chapter-split showcase retrieval plus real-note/query diversity beyond the chapter-split showcase through the live MiniSearch path'
+        );
         expect(matrixDocZh).toContain('real-note-style chapter-split showcase retrieval');
+        expect(matrixDocZh).toContain('chapter-split showcase 之外的真实 note/query 多样性');
         expect(matrixDocZh).toContain('MiniSearch path');
+        expect(matrixDoc).toContain('cross-folder task-contract retrieval, RAG-quality evaluation notes, and low-signal navigation-source diagnostics');
+        expect(matrixDocZh).toContain('跨文件夹任务契约检索、RAG 质量评估笔记与低信号导航源 diagnostics');
         expect(matrixDoc).toContain('evaluation depth, maintainer-example alignment, and packaging-boundary discipline');
         expect(matrixDocZh).toContain('评估深度、maintainer 示例对齐与 packaging 边界纪律');
         expect(matrixDoc).toContain('candidate-only production-build guard');
