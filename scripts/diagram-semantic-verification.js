@@ -12,6 +12,7 @@ const {
     RELEASE_WORKFLOW_SOURCE_BRANCH,
     resolveReleaseNotesRelativePaths,
     RENDER_HOST_AUDIT_MARKERS,
+    RENDER_HOST_STANDALONE_REFERENCE_PATTERNS,
     RENDER_HOST_STANDALONE_OUTPUT_FILES
 } = require('./lib/packaging-contract.js');
 
@@ -51,6 +52,7 @@ const SURFACE_DEFINITIONS = [
 
 const DEFAULT_REQUIRED_RELEASE_ASSETS = [...REQUIRED_RELEASE_ASSET_FILES];
 const DEFAULT_RENDER_HOST_AUDIT_MARKERS = [...RENDER_HOST_AUDIT_MARKERS];
+const DEFAULT_DISALLOWED_RENDER_HOST_REFERENCE_PATTERNS = RENDER_HOST_STANDALONE_REFERENCE_PATTERNS.map(String);
 const DEFAULT_DISALLOWED_RENDER_HOST_OUTPUTS = [...RENDER_HOST_STANDALONE_OUTPUT_FILES];
 const DEFAULT_CONTRACT_PROMOTION_OPERATION_IDS = [
     'workflow.extract-and-generate',
@@ -471,6 +473,11 @@ function resolveRenderHostAuditFacts({
         const disallowedStandaloneOutputs = Array.isArray(auditScript.DISALLOWED_RENDER_HOST_OUTPUT_FILES)
             ? auditScript.DISALLOWED_RENDER_HOST_OUTPUT_FILES.filter((outputPath) => typeof outputPath === 'string' && outputPath.length > 0)
             : [];
+        const disallowedStandaloneReferencePatterns = Array.isArray(auditScript.DISALLOWED_RENDER_HOST_PATTERNS)
+            ? auditScript.DISALLOWED_RENDER_HOST_PATTERNS
+                .filter((pattern) => pattern instanceof RegExp)
+                .map(String)
+            : [];
         const bundlePath = typeof auditScript.resolveBundlePath === 'function'
             ? normalizeRelativePath(auditScript.resolveBundlePath(projectRoot), projectRoot)
             : MAIN_BUNDLE_OUTPUT_FILE;
@@ -480,6 +487,9 @@ function resolveRenderHostAuditFacts({
                 sourcePath: auditScriptPath,
                 bundlePath: bundlePath || MAIN_BUNDLE_OUTPUT_FILE,
                 requiredMarkers,
+                disallowedStandaloneReferencePatterns: disallowedStandaloneReferencePatterns.length > 0
+                    ? disallowedStandaloneReferencePatterns
+                    : [...DEFAULT_DISALLOWED_RENDER_HOST_REFERENCE_PATTERNS],
                 disallowedStandaloneOutputs: disallowedStandaloneOutputs.length > 0
                     ? disallowedStandaloneOutputs
                     : [...DEFAULT_DISALLOWED_RENDER_HOST_OUTPUTS],
@@ -494,6 +504,7 @@ function resolveRenderHostAuditFacts({
         sourcePath: auditScriptPath,
         bundlePath: MAIN_BUNDLE_OUTPUT_FILE,
         requiredMarkers: [...DEFAULT_RENDER_HOST_AUDIT_MARKERS],
+        disallowedStandaloneReferencePatterns: [...DEFAULT_DISALLOWED_RENDER_HOST_REFERENCE_PATTERNS],
         disallowedStandaloneOutputs: [...DEFAULT_DISALLOWED_RENDER_HOST_OUTPUTS],
         resolvedFromAuditScript: false
     };
@@ -730,11 +741,18 @@ function buildRenderHostAuditChecklistLines(
         ? `derived from \`${auditScriptPath}\``
         : `fallback default because \`${auditScriptPath}\` could not be loaded`;
     const requiredMarkers = auditFacts.requiredMarkers.map((marker) => `\`${marker}\``).join(', ');
+    const disallowedStandaloneReferencePatterns = Array.isArray(auditFacts.disallowedStandaloneReferencePatterns)
+        ? auditFacts.disallowedStandaloneReferencePatterns
+        : [...DEFAULT_DISALLOWED_RENDER_HOST_REFERENCE_PATTERNS];
+    const disallowedReferencePatterns = disallowedStandaloneReferencePatterns
+        .map((pattern) => `\`${pattern}\``)
+        .join(', ');
     const disallowedOutputs = auditFacts.disallowedStandaloneOutputs.map((outputPath) => `\`${outputPath}\``).join(', ');
 
     return [
         `- [ ] Confirm render-host audit truth remains ${sourceDescriptor} and still targets built bundle \`${auditFacts.bundlePath}\`.`,
         `- [ ] Confirm inline render-host marker enforcement still covers: ${requiredMarkers}.`,
+        `- [ ] Confirm standalone render-host references remain disallowed inside the built bundle: ${disallowedReferencePatterns}.`,
         `- [ ] Confirm standalone render-host outputs remain disallowed on current main: ${disallowedOutputs}.`,
         '- [ ] If render-host audit scope changes, update helper/tests/runbooks in the same batch so packaging truth does not drift.'
     ];

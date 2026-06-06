@@ -25,12 +25,14 @@ describe('render host bundle audit script', () => {
         let auditRenderHostBundle: (projectRoot?: string) => string;
         let auditRenderHostBundleSource: (bundleSource: string, bundlePath?: string) => void;
         let REQUIRED_RENDER_HOST_MARKERS: string[];
+        let DISALLOWED_RENDER_HOST_PATTERNS: RegExp[];
         let DISALLOWED_RENDER_HOST_OUTPUT_FILES: string[];
         let resolveBundlePath: (projectRoot?: string) => string;
 
         beforeAll(() => {
             ({
                 REQUIRED_RENDER_HOST_MARKERS,
+                DISALLOWED_RENDER_HOST_PATTERNS,
                 DISALLOWED_RENDER_HOST_OUTPUT_FILES,
                 auditRenderHostBundle,
                 auditRenderHostBundleSource,
@@ -40,6 +42,7 @@ describe('render host bundle audit script', () => {
 
         test('reuses the shared render-host packaging contract constants', () => {
             expect(REQUIRED_RENDER_HOST_MARKERS).toEqual(packagingContract.RENDER_HOST_AUDIT_MARKERS);
+            expect(DISALLOWED_RENDER_HOST_PATTERNS).toEqual(packagingContract.RENDER_HOST_STANDALONE_REFERENCE_PATTERNS);
             expect(DISALLOWED_RENDER_HOST_OUTPUT_FILES).toEqual(packagingContract.RENDER_HOST_STANDALONE_OUTPUT_FILES);
             expect(resolveBundlePath('/tmp/notemd-root')).toBe(
                 path.join('/tmp/notemd-root', packagingContract.MAIN_BUNDLE_OUTPUT_FILE)

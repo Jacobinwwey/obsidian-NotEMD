@@ -16,7 +16,7 @@ npm run verify:diagram-semantics -- --vault "<vault-name>" --commit "<sha>" --ve
 如果输出目标已成功识别，清单会明确标记当前依据来自 `outfile` 还是 `outdir`，避免打包边界结论含糊。
 如果同时识别到 `outfile` 和 `outdir`，清单会将其视为歧义状态，并要求先人工确认有效输出目标，再给出打包结论。
 其中 packaging-boundary 区块现在还会检查 `src/rendering/preview/renderHostRuntimeClient.ts`，把当前主线的 fail-closed 真值也显式化：在当前单入口主线上，`resolveBundledRenderHostRuntimeModuleSpecifier()` 只能暴露显式配置过的 module specifier，否则必须返回 `null`，不能默认合成 `render-host.mjs` 路径。
-其中 render-host audit 区块会从 `scripts/audit-render-host-bundle.js` 读取当前 bundle markers 与 standalone-output 禁止规则，把发布边界从“口头描述”变成可执行真值。
+其中 render-host audit 区块会从 `scripts/audit-render-host-bundle.js` 读取当前 bundle markers、standalone-reference pattern 禁止规则与 standalone-output 禁止规则，把发布边界从“口头描述”变成可执行真值。这些 marker / output / reference 规则统一归 `scripts/lib/packaging-contract.js` 所有，而不是散落在脚本内部的临时正则副本里。
 其中 runtime-consumption 区块会通过 `src/main.ts`、`src/ui/DiagramPreviewModal.ts`、`src/rendering/webview/page.ts` 与 `src/rendering/webview/renderFrame.ts` 保持 command entry → preview modal → iframe `srcdoc` → webview bridge 链路的当前真值显式化。
 其中 implementation-readiness 区块会把当前主线真实 shipped packaging lane 与 release 证据边界固定下来，避免后续误把未落地拓扑当成当前能力。
 其中 packaging-contract 区块会从 `scripts/release/publish-github-release.js` 同步 release 资产、release tag 规则、发布模式和 release notes 契约真值，并从 `.github/workflows/release.yml` 同步 release 触发、tag 防护、workflow-source 分支与 chronicle-target 分支契约真值，保证 Stage B 的契约定义与发布约束保持一致。release workflow 的 tag-trigger glob 与禁止的 `v` 前缀 glob 现在分别由 `scripts/lib/packaging-contract.js` 中的 `RELEASE_WORKFLOW_TAG_TRIGGER_GLOB` 与 `RELEASE_WORKFLOW_DISALLOWED_TAG_TRIGGER_GLOBS` 统一拥有；YAML 仍保留 bootstrap 字面量，因为 GitHub Actions 会在 checkout 仓库 JavaScript 之前解析 tag trigger，仓库内测试负责把这条字面量锁定到 shared contract。
@@ -48,7 +48,7 @@ git diff --check
 
 这些检查**不能**证明 Mermaid 产物在真实 Obsidian 会话中视觉上仍然正确，也不能证明 JSON Canvas / Vega-Lite 在桌面宿主中的端到端行为没有退化。
 
-它们也**不等于**重型运行时已经被真正隔离为独立打包资产。`npm run audit:render-host` 当前只能证明一条已强制的发布事实：内联 `srcdoc` host 仍然自包含地随 `main.js` 一起发布，同时当前主线会拒绝残留的 `render-host.mjs` 资产或引用。helper 的 packaging-boundary 区块会在此基础上再补一层显式 anti-drift 检查：当前单入口主线上的 latent runtime helper 不能悄悄重新引入默认 standalone runtime-module 路径。
+它们也**不等于**重型运行时已经被真正隔离为独立打包资产。`npm run audit:render-host` 当前只能证明一条已强制的发布事实：内联 `srcdoc` host 仍然自包含地随 `main.js` 一起发布，同时当前主线会通过共享 packaging contract 拒绝残留的 `render-host.mjs` 资产或引用。helper 的 packaging-boundary 区块会在此基础上再补一层显式 anti-drift 检查：当前单入口主线上的 latent runtime helper 不能悄悄重新引入默认 standalone runtime-module 路径。
 
 ## 3. 环境规则
 

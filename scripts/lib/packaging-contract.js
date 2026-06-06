@@ -45,6 +45,12 @@ const RENDER_HOST_STANDALONE_OUTPUT_FILES = [
     'rendering-webview/index.html'
 ];
 
+const RENDER_HOST_STANDALONE_REFERENCE_PATTERNS = [
+    /rendering-webview\/index\.html/i,
+    /src\/rendering\/webview\//i,
+    /render-host\.(?:mjs|html|js)/i
+];
+
 function resolveReleaseNotesRelativePaths(tag) {
     return {
         english: path.posix.join(RELEASE_NOTES_DIRECTORY, `${tag}${RELEASE_NOTES_FILE_SUFFIXES.english}`),
@@ -64,6 +70,7 @@ module.exports = {
     RELEASE_WORKFLOW_SOURCE_BRANCH,
     RENDER_HOST_RUNTIME_OUTPUT_FILE,
     RENDER_HOST_AUDIT_MARKERS,
+    RENDER_HOST_STANDALONE_REFERENCE_PATTERNS,
     RENDER_HOST_STANDALONE_OUTPUT_FILES,
     resolveReleaseNotesRelativePaths
 };

@@ -114,6 +114,7 @@ describe('diagram semantic verification helper', () => {
             sourcePath: string;
             bundlePath: string;
             requiredMarkers: string[];
+            disallowedStandaloneReferencePatterns: string[];
             disallowedStandaloneOutputs: string[];
             resolvedFromAuditScript: boolean;
         };
@@ -121,6 +122,7 @@ describe('diagram semantic verification helper', () => {
             sourcePath: string;
             bundlePath: string;
             requiredMarkers: string[];
+            disallowedStandaloneReferencePatterns: string[];
             disallowedStandaloneOutputs: string[];
             resolvedFromAuditScript: boolean;
         }) => string[];
@@ -660,6 +662,9 @@ const context = await esbuild.context({
             const facts = resolveRenderHostAuditFacts({ auditScriptPath });
             expect(facts.bundlePath).toBe('main.js');
             expect(facts.requiredMarkers).toEqual(packagingContract.RENDER_HOST_AUDIT_MARKERS);
+            expect(facts.disallowedStandaloneReferencePatterns).toEqual(
+                packagingContract.RENDER_HOST_STANDALONE_REFERENCE_PATTERNS.map(String)
+            );
             expect(facts.disallowedStandaloneOutputs).toEqual(packagingContract.RENDER_HOST_STANDALONE_OUTPUT_FILES);
             expect(facts.resolvedFromAuditScript).toBe(true);
 
@@ -667,7 +672,8 @@ const context = await esbuild.context({
             expect(lines[0]).toContain('audit-render-host-bundle.js');
             expect(lines[0]).toContain('main.js');
             expect(lines[1]).toContain('htmlSrcdoc');
-            expect(lines[2]).toContain('render-host.mjs');
+            expect(lines[2]).toContain('/render-host\\.(?:mjs|html|js)/i');
+            expect(lines[3]).toContain('render-host.mjs');
         });
 
         test('keeps render-host runtime-consumption facts aligned with the current preview chain', () => {
@@ -917,6 +923,7 @@ const context = await esbuild.context({
             expect(template).toContain('true heavy-runtime isolation is still pending');
             expect(template).toContain('## Render Host Audit');
             expect(template).toContain('htmlSrcdoc');
+            expect(template).toContain('standalone render-host references remain disallowed');
             expect(template).toContain('## Render Host Runtime Consumption');
             expect(template).toContain('session.htmlSrcdoc');
             expect(template).toContain('## Implementation Readiness');

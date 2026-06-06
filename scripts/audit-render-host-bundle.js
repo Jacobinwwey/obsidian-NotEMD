@@ -5,16 +5,13 @@ const path = require('path');
 const {
     MAIN_BUNDLE_OUTPUT_FILE,
     RENDER_HOST_AUDIT_MARKERS,
+    RENDER_HOST_STANDALONE_REFERENCE_PATTERNS,
     RENDER_HOST_STANDALONE_OUTPUT_FILES
 } = require('./lib/packaging-contract.js');
 
 const REQUIRED_RENDER_HOST_MARKERS = [...RENDER_HOST_AUDIT_MARKERS];
 
-const DISALLOWED_RENDER_HOST_PATTERNS = [
-    /rendering-webview\/index\.html/i,
-    /src\/rendering\/webview\//i,
-    /render-host\.(?:mjs|html|js)/i
-];
+const DISALLOWED_RENDER_HOST_PATTERNS = [...RENDER_HOST_STANDALONE_REFERENCE_PATTERNS];
 
 const DISALLOWED_RENDER_HOST_OUTPUT_FILES = [...RENDER_HOST_STANDALONE_OUTPUT_FILES];
 

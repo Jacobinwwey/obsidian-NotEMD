@@ -141,12 +141,13 @@ source/build/audit 边界上另一处 anti-drift 缺口现在也已经补齐：
 1. `scripts/lib/packaging-contract.js` 现在定义了共享的 packaging contract 常量，覆盖：
    - 当前主 bundle 输出文件；
    - inline render-host 审计所要求的标记；
-   - 当前单入口 lane 上禁止出现的 standalone render-host 输出文件。
+   - 当前单入口 lane 上禁止出现的 standalone render-host 输出文件；
+   - 构建后 bundle 内禁止出现的 standalone render-host 引用正则。
 2. `esbuild.config.mjs` 现在会复用这份共享 contract，在构建前清理 stale 的 standalone render-host 输出。
-3. `scripts/audit-render-host-bundle.js` 现在也复用同一份共享 contract，不再自己维护第二套 render-host marker / output filename 副本。
+3. `scripts/audit-render-host-bundle.js` 现在也复用同一份共享 contract，不再自己维护第二套 render-host marker、standalone output filename 或 standalone reference regex 副本。
 4. `scripts/diagram-semantic-verification.js` 在无法直接读取 audit script 时，也会回退到同一份共享 contract 常量，而不再保留第三套彼此分离的默认副本。
 5. 定向回归测试现在已显式锁定这条 ownership 边界：
-   - `src/tests/renderHostBundleAuditScript.test.ts` 会验证 audit helper 确实复用了共享 contract 常量；
+   - `src/tests/renderHostBundleAuditScript.test.ts` 会验证 audit helper 确实复用了共享 contract 常量，包括 reference regex；
    - `src/tests/diagramSemanticVerificationScript.test.ts` 会验证 helper 推导出的 audit facts 继续与这份共享 contract 对齐。
 
 正确解释：

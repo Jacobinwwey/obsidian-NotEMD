@@ -141,12 +141,13 @@ Another anti-drift gap is now closed at the source/build/audit boundary itself:
 1. `scripts/lib/packaging-contract.js` now defines the shared packaging contract constants for:
    - the current main bundle output file;
    - the required inline render-host audit markers;
-   - the disallowed standalone render-host output files on the current single-entry lane.
+   - the disallowed standalone render-host output files on the current single-entry lane;
+   - the disallowed standalone render-host reference patterns inside the built bundle.
 2. `esbuild.config.mjs` now reuses that shared contract when removing stale standalone render-host outputs before build.
-3. `scripts/audit-render-host-bundle.js` now reuses the same shared contract instead of carrying a second hand-maintained copy of render-host markers/output filenames.
+3. `scripts/audit-render-host-bundle.js` now reuses the same shared contract instead of carrying a second hand-maintained copy of render-host markers, standalone output filenames, or standalone reference regexes.
 4. `scripts/diagram-semantic-verification.js` now falls back to the same shared contract constants when direct audit-script inspection is unavailable, instead of keeping a third disconnected default copy.
 5. Focused regression coverage now locks this ownership boundary explicitly:
-   - `src/tests/renderHostBundleAuditScript.test.ts` verifies the audit helper reuses the shared contract constants;
+   - `src/tests/renderHostBundleAuditScript.test.ts` verifies the audit helper reuses the shared contract constants, including reference regexes;
    - `src/tests/diagramSemanticVerificationScript.test.ts` verifies helper-derived audit facts stay aligned with the same shared contract.
 
 Interpretation:
