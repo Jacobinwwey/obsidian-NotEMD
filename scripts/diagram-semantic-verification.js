@@ -495,12 +495,14 @@ function resolveReleaseWorkflowTriggerFacts({
 } = {}) {
     try {
         const workflowSource = fs.readFileSync(releaseWorkflowPath, 'utf8');
+        const validatesWithSharedHelper = workflowSource.includes('node scripts/release/validate-release-tag.js "$TAG_NAME"');
         return {
             sourcePath: releaseWorkflowPath,
             hasWorkflowDispatch: workflowSource.includes('workflow_dispatch:'),
             hasTagPushTrigger: workflowSource.includes("tags:") && workflowSource.includes("- '*.*.*'"),
             rejectsVPrefixedTagTrigger: !workflowSource.includes("- 'v*.*.*'") && !workflowSource.includes("- 'V*.*.*'"),
-            validatesNumericTagPattern: workflowSource.includes('^[0-9]+\\.[0-9]+\\.[0-9]+$'),
+            validatesNumericTagPattern: validatesWithSharedHelper
+                || workflowSource.includes('^[0-9]+\\.[0-9]+\\.[0-9]+$'),
             resolvedFromWorkflowFile: true
         };
     } catch {

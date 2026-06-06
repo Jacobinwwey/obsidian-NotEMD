@@ -9,6 +9,8 @@ describe('GitHub release workflow', () => {
     const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
     const releaseScriptRelativePath = path.posix.join('scripts', 'release', 'publish-github-release.js');
     const releaseScriptPath = path.join(repoRoot, releaseScriptRelativePath);
+    const validateTagScriptRelativePath = path.posix.join('scripts', 'release', 'validate-release-tag.js');
+    const validateTagScriptPath = path.join(repoRoot, validateTagScriptRelativePath);
     const releaseWorkflowPath = path.join(repoRoot, '.github', 'workflows', 'release.yml');
 
     test('exposes a checked-in GitHub release helper and notes for the current version', () => {
@@ -25,6 +27,7 @@ describe('GitHub release workflow', () => {
 
     test('checks in a GitHub Actions workflow that reuses the release helper for tag and manual publishing', () => {
         expect(fs.existsSync(releaseWorkflowPath)).toBe(true);
+        expect(fs.existsSync(validateTagScriptPath)).toBe(true);
 
         const workflow = fs.readFileSync(releaseWorkflowPath, 'utf8');
 
@@ -42,9 +45,9 @@ describe('GitHub release workflow', () => {
         expect(workflow).toContain('npm run audit:i18n-ui');
         expect(workflow).toContain('npm run audit:render-host');
         expect(workflow).toContain('npm run release:github -- "$TAG_NAME"');
+        expect(workflow).toContain('node scripts/release/validate-release-tag.js "$TAG_NAME"');
         expect(workflow).toContain('if [ "${{ github.event_name }}" = "workflow_dispatch" ]');
         expect(workflow).toContain('inputs.tag');
-        expect(workflow).toContain("^[0-9]+\\.[0-9]+\\.[0-9]+$");
         expect(workflow).toContain('refresh_chronicle:');
         expect(workflow).toContain('needs: publish');
         expect(workflow).toContain('ref: main');
@@ -67,6 +70,7 @@ describe('GitHub release workflow', () => {
             assets: string[];
             releaseExists: boolean;
         }) => string[][];
+        let validateReleaseTagMain: (argv?: string[]) => number;
         let resolveReleaseInputs: (repoRoot: string, tag: string) => {
             tag: string;
             title: string;
@@ -85,11 +89,17 @@ describe('GitHub release workflow', () => {
                 resolveReleaseInputs,
                 REQUIRED_RELEASE_ASSETS
             } = require(releaseScriptPath));
+            ({ main: validateReleaseTagMain } = require(validateTagScriptPath));
         });
 
         test('reuses the shared release asset and tag contracts', () => {
             expect(REQUIRED_RELEASE_ASSETS).toEqual(packagingContract.REQUIRED_RELEASE_ASSET_FILES);
             expect(OBSIDIAN_RELEASE_TAG_PATTERN.source).toBe(packagingContract.RELEASE_TAG_PATTERN_SOURCE);
+        });
+
+        test('reuses the checked-in tag-validation helper wrapper', () => {
+            expect(validateReleaseTagMain(['1.9.2'])).toBe(0);
+            expect(() => validateReleaseTagMain(['v1.9.2'])).toThrow('numeric x.x.x tags');
         });
 
         function createTempRepoRoot(): string {

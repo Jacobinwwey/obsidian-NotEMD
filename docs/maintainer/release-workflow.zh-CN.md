@@ -108,7 +108,7 @@ npm run release:github -- <tag>
 - 编年史刷新脚本本身现在也会先重建本地 `repo-saga` 集成缓存：以时间粒度分支为基底，再覆盖 locale/i18n 分支对应文件，然后才调用 `repo-saga` CLI。
 - 编年史刷新脚本现在还会强制使用 `.cache/.repo-saga-execution.lock` 单实例执行锁，避免本地或 CI 并发刷新把共享缓存状态踩坏。
 - 这套脚本现在还补上了包管理器 fallback 的稳健性：如果环境里只有 `corepack` 或 `bun x pnpm`，脚本会额外创建一个可被子进程继承的本地 `pnpm` shim，确保上游 `repo-saga` workspace build 中嵌套调用的 `pnpm` 脚本在 CI 里仍然能执行。
-- 工作流会在 checkout 与 publish 前校验 `^[0-9]+\.[0-9]+\.[0-9]+$`，因此会拒绝 `v1.8.2` 这类 tag。
+- 工作流现在会在 checkout release ref 之前通过已检入的 `scripts/release/validate-release-tag.js` helper 做 tag 校验，因此 CI 与仓库内 release helper 复用同一套纯数字 tag 契约，并继续拒绝 `v1.8.2` 这类 tag。
 
 工作流刻意复用仓库内的 release 辅助脚本，而不是在 YAML 中重复维护资产清单或 release notes 逻辑，避免两套规则漂移。
 

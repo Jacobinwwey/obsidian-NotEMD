@@ -192,6 +192,22 @@ source/build/audit 边界上另一处 anti-drift 缺口现在也已经补齐：
 1. 当前 release 行为没有变化；
 2. 但 ownership model 更紧了：release assets、release tag 规则与 release-notes 路径真值现在会一起演进，不再在 helper、测试和文档之间各自漂移。
 
+### 2026-06-06 Workflow 增量：CI tag 校验现在也复用已检入 helper 路径
+
+当前 release-truth 上最后一处明显的重复定义现在也被移除了：
+
+1. `.github/workflows/release.yml` 不再把一段 YAML 内联 shell regex 当成唯一的 release-tag 权威校验入口。
+2. publish workflow 现在会先 checkout 仓库中的 workflow sources，再在 checkout release ref 之前执行 `node scripts/release/validate-release-tag.js "$TAG_NAME"`。
+3. 这个 wrapper 会继续委托 `scripts/release/publish-github-release.js` 里的 `validateReleaseTag(...)`，而后者本身已经从 `scripts/lib/packaging-contract.js` 派生 regex 真值。
+4. `src/tests/githubReleaseWorkflow.test.ts` 现在会同时锁定：
+   - workflow 已改为调用 checked-in 的 tag-validation helper；
+   - wrapper 自身对纯数字 tag 与 `v` 前缀 tag 的 pass/fail 行为。
+
+正确解释：
+
+1. 从维护者视角看，release 行为没有变化；
+2. 但关键变化在于：CI 现在消费的是同一个 repo-owned tag-validation entrypoint，而不再在 YAML 里 shadow 一段本地 regex。
+
 ### Priority 2：把备份分支的 Stage-C 工作视为 reintegration 候选
 
 以下切片未来仍可能值得回灌，但都必须在当前 `main` 上重新证明：

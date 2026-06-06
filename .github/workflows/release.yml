@@ -30,14 +30,14 @@ jobs:
           echo "tag_name=$TAG_NAME" >> "$GITHUB_OUTPUT"
           echo "TAG_NAME=$TAG_NAME" >> "$GITHUB_ENV"
 
+      - name: Check out workflow sources
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: main
+
       - name: Validate Obsidian release tag format
-        shell: bash
-        run: |
-          TAG_NAME="${{ steps.resolve_tag.outputs.tag_name }}"
-          if [[ ! "$TAG_NAME" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "Obsidian releases must use numeric x.x.x tags without a v prefix: $TAG_NAME" >&2
-            exit 1
-          fi
+        run: node scripts/release/validate-release-tag.js "$TAG_NAME"
 
       - name: Check out release ref
         uses: actions/checkout@v6

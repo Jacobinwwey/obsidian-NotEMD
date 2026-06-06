@@ -192,6 +192,22 @@ Interpretation:
 1. current release behavior is unchanged;
 2. the ownership model is tighter: release assets, release tag policy, and release-notes path truth now move together instead of drifting across helper, tests, and docs.
 
+### 2026-06-06 Workflow Delta: CI tag validation now reuses the checked-in helper path
+
+One more release-truth duplication is now removed:
+
+1. `.github/workflows/release.yml` no longer carries an inline shell regex as the only authoritative release-tag validator.
+2. The publish workflow now checks out the repository's workflow sources first, then runs `node scripts/release/validate-release-tag.js "$TAG_NAME"` before checking out the release ref.
+3. That wrapper delegates to `validateReleaseTag(...)` in `scripts/release/publish-github-release.js`, which already derives its regex truth from `scripts/lib/packaging-contract.js`.
+4. `src/tests/githubReleaseWorkflow.test.ts` now locks both:
+   - the workflow's use of the checked-in tag-validation helper, and
+   - the wrapper's own pass/fail behavior for numeric vs. `v`-prefixed tags.
+
+Interpretation:
+
+1. release behavior is still the same from a maintainer perspective;
+2. the important change is that CI now consumes the same repo-owned tag-validation entrypoint as the release helper, instead of shadowing it with a YAML-local regex.
+
 ### Priority 2: treat backup-branch Stage-C work as reintegration candidates
 
 Candidate later slices may still be valuable, but they must be re-proved on current `main`:

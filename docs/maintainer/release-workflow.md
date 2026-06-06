@@ -108,7 +108,7 @@ The repository also ships `.github/workflows/release.yml`:
 - The chronicle refresh script itself now rebuilds its local `repo-saga` cache by copying the granularity branch as the base and overlaying the locale/i18n branch files before invoking the `repo-saga` CLI.
 - The chronicle refresh script now also enforces a single execution lock at `.cache/.repo-saga-execution.lock`, so overlapping local/CI runs fail fast instead of corrupting shared cache state.
 - That same script now hardens package-manager fallback as well: if the environment only has `corepack` or `bun x pnpm`, it creates an inheritable local `pnpm` shim so the upstream `repo-saga` workspace build can still execute nested `pnpm` script calls inside CI.
-- The workflow validates `^[0-9]+\.[0-9]+\.[0-9]+$` before checkout and publish, so `v1.8.2`-style tags are rejected.
+- The workflow now validates tags through the checked-in `scripts/release/validate-release-tag.js` helper before checking out the release ref, so CI and repo-owned release helpers reuse the same numeric tag contract and still reject `v1.8.2`-style tags.
 
 The workflow intentionally reuses the checked-in release helper instead of duplicating asset lists or release-note logic inside YAML.
 
