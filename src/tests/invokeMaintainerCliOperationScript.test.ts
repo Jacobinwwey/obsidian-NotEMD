@@ -1,4 +1,6 @@
-import { execFileSync } from 'child_process';
+import { execFileSync, spawnSync } from 'child_process';
+import * as fs from 'fs';
+import * as os from 'os';
 import * as path from 'path';
 
 const { OPERATION_HELP } = require('../../scripts/lib/maintainer-cli-operation-help.js');
@@ -11,6 +13,25 @@ type MaintainerOperationHelp = Record<string, {
 }>;
 
 describe('invoke maintainer CLI operation script', () => {
+    function writeFakeObsidianCli(
+        tempRoot: string,
+        options: {
+            stdout?: string;
+            stderr?: string;
+            exitCode?: number;
+        } = {}
+    ) {
+        const scriptPath = path.join(tempRoot, 'obsidian-cli');
+        const argsPath = path.join(tempRoot, 'obsidian-cli-args.json');
+        const scriptSource = `#!/usr/bin/env node
+const fs = require('fs');
+fs.writeFileSync(${JSON.stringify(argsPath)}, JSON.stringify(process.argv.slice(2), null, 2));
+${options.stderr ? `process.stderr.write(${JSON.stringify(options.stderr)});\n` : ''}${options.stdout ? `process.stdout.write(${JSON.stringify(options.stdout)});\n` : ''}process.exit(${options.exitCode ?? 0});
+`;
+        fs.writeFileSync(scriptPath, scriptSource, { encoding: 'utf8', mode: 0o755 });
+        return { scriptPath, argsPath };
+    }
+
     test('prints a simplified maintainer help surface with core commands, inputs, and operation summaries', () => {
         const scriptPath = path.join(__dirname, '..', '..', 'scripts', 'invoke-maintainer-cli-operation.js');
         const output = execFileSync(process.execPath, [scriptPath, '--help'], {
@@ -66,5 +87,196 @@ describe('invoke maintainer CLI operation script', () => {
         expect(output).toContain('diagram.generate');
         expect(output).toContain('"requestedIntent":"erDiagram"');
         expect(output).toContain('Maintainer bridge only; not a public CLI surface.');
+    });
+
+    test('invokes obsidian-cli native eval and pretty-prints the parsed result', () => {
+        const scriptPath = path.join(__dirname, '..', '..', 'scripts', 'invoke-maintainer-cli-operation.js');
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-cli-invoke-success-'));
+        const fakeCli = writeFakeObsidianCli(tempRoot, {
+            stdout: 'Booting fake cli\n=> {"ok":true,"nested":{"count":2}}\n',
+            exitCode: 0
+        });
+
+        try {
+            const output = execFileSync(
+                process.execPath,
+                [
+                    scriptPath,
+                    '--vault', 'docs',
+                    '--operation', 'provider.profile.export-redacted',
+                    '--pretty'
+                ],
+                {
+                    encoding: 'utf8',
+                    env: {
+                        ...process.env,
+                        PATH: `${tempRoot}:${process.env.PATH || ''}`
+                    }
+                }
+            );
+
+            const argv = JSON.parse(fs.readFileSync(fakeCli.argsPath, 'utf8'));
+            expect(argv[0]).toBe('native');
+            expect(argv).toContain('vault=docs');
+            expect(argv).toContain('eval');
+            const codeArg = argv.find((value: string) => value.startsWith('code='));
+            expect(codeArg).toContain('provider.profile.export-redacted');
+            expect(output).toBe('{\n  "ok": true,\n  "nested": {\n    "count": 2\n  }\n}\n');
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    });
+
+    test('supports --input-file and custom plugin id through the real script entrypoint', () => {
+        const scriptPath = path.join(__dirname, '..', '..', 'scripts', 'invoke-maintainer-cli-operation.js');
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-cli-invoke-input-file-'));
+        const fakeCli = writeFakeObsidianCli(tempRoot, {
+            stdout: '=> {"status":"ok"}\n',
+            exitCode: 0
+        });
+        const inputPath = path.join(tempRoot, 'request.json');
+        fs.writeFileSync(
+            inputPath,
+            JSON.stringify({
+                taskScope: 'researchSummarize',
+                query: 'task-scoped retrieval behavior',
+                knowledgePaths: ['maintainer']
+            }),
+            'utf8'
+        );
+
+        try {
+            const output = execFileSync(
+                process.execPath,
+                [
+                    scriptPath,
+                    '--vault', 'docs',
+                    '--plugin-id', 'custom-notemd',
+                    '--operation', 'local-knowledge.inspect',
+                    '--input-file', inputPath
+                ],
+                {
+                    encoding: 'utf8',
+                    env: {
+                        ...process.env,
+                        PATH: `${tempRoot}:${process.env.PATH || ''}`
+                    }
+                }
+            );
+
+            const argv = JSON.parse(fs.readFileSync(fakeCli.argsPath, 'utf8'));
+            const codeArg = argv.find((value: string) => value.startsWith('code='));
+            expect(codeArg).toContain('custom-notemd');
+            expect(codeArg).toContain('local-knowledge.inspect');
+            expect(codeArg).toContain('task-scoped retrieval behavior');
+            expect(codeArg).toContain('maintainer');
+            expect(output).toBe('{"status":"ok"}\n');
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    });
+
+    test('surfaces child-process stderr and exit code when obsidian-cli native eval fails', () => {
+        const scriptPath = path.join(__dirname, '..', '..', 'scripts', 'invoke-maintainer-cli-operation.js');
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-cli-invoke-fail-'));
+        writeFakeObsidianCli(tempRoot, {
+            stderr: 'fake obsidian-cli failure\n',
+            exitCode: 7
+        });
+
+        try {
+            const result = spawnSync(
+                process.execPath,
+                [
+                    scriptPath,
+                    '--vault', 'docs',
+                    '--operation', 'provider.profile.export-redacted'
+                ],
+                {
+                    encoding: 'utf8',
+                    env: {
+                        ...process.env,
+                        PATH: `${tempRoot}:${process.env.PATH || ''}`
+                    }
+                }
+            );
+
+            expect(result.status).toBe(7);
+            expect(result.stdout).toBe('');
+            expect(result.stderr).toContain('fake obsidian-cli failure');
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    });
+
+    test('fails fast when obsidian-cli output does not contain a parseable eval result line', () => {
+        const scriptPath = path.join(__dirname, '..', '..', 'scripts', 'invoke-maintainer-cli-operation.js');
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-cli-invoke-unparseable-'));
+        writeFakeObsidianCli(tempRoot, {
+            stdout: 'missing eval marker\n',
+            exitCode: 0
+        });
+
+        try {
+            const result = spawnSync(
+                process.execPath,
+                [
+                    scriptPath,
+                    '--vault', 'docs',
+                    '--operation', 'provider.profile.export-redacted'
+                ],
+                {
+                    encoding: 'utf8',
+                    env: {
+                        ...process.env,
+                        PATH: `${tempRoot}:${process.env.PATH || ''}`
+                    }
+                }
+            );
+
+            expect(result.status).toBe(1);
+            expect(result.stdout).toBe('');
+            expect(result.stderr).toContain('Could not parse eval output');
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    });
+
+    test('rejects conflicting --input-json and --input-file arguments before invoking obsidian-cli', () => {
+        const scriptPath = path.join(__dirname, '..', '..', 'scripts', 'invoke-maintainer-cli-operation.js');
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-cli-invoke-conflict-'));
+        const fakeCli = writeFakeObsidianCli(tempRoot, {
+            stdout: '=> {"unexpected":true}\n',
+            exitCode: 0
+        });
+        const inputPath = path.join(tempRoot, 'request.json');
+        fs.writeFileSync(inputPath, JSON.stringify({ sourcePath: 'index.zh-CN.md' }), 'utf8');
+
+        try {
+            const result = spawnSync(
+                process.execPath,
+                [
+                    scriptPath,
+                    '--vault', 'docs',
+                    '--operation', 'content.split-note-by-chapters',
+                    '--input-json', '{"sourcePath":"index.zh-CN.md"}',
+                    '--input-file', inputPath
+                ],
+                {
+                    encoding: 'utf8',
+                    env: {
+                        ...process.env,
+                        PATH: `${tempRoot}:${process.env.PATH || ''}`
+                    }
+                }
+            );
+
+            expect(result.status).toBe(1);
+            expect(result.stdout).toBe('');
+            expect(result.stderr).toContain('Use either --input-json or --input-file, not both.');
+            expect(fs.existsSync(fakeCli.argsPath)).toBe(false);
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
     });
 });

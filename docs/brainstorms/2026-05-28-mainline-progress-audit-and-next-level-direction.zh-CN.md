@@ -379,6 +379,7 @@ provider 专题文在以下几点上仍然正确，而且不应被放松：
 4. generic `OpenAI Compatible` 对 owner 的推断仍必须保持保守；超出 trusted host、显式 registry owner hint 与显式 prefix 的部分，token ceiling 仍应保持 unresolved。
 5. 当前本机 host-side desktop verification 对 plugin reload/state inspection 更强，但对 settings-panel 的完整脚本化点击自动化仍较弱；这条 lane 目前仍依赖 Jest 去锁住 `Fetch model list -> Use` 的 notice/override 分支。
 6. maintainer inspect explainability 刻意比 public CLI 真值更丰富；除非未来有显式提升批次，否则它必须继续保持有界。
+7. repo-local 的 maintainer CLI wrapper 现在已经具备入口级 process-level 回归覆盖（`--input-json`、`--input-file`、`--pretty`、stderr 透传，以及 eval 解析失败路径），因此这条有界 maintainer surface 不再只依赖 bridge 层单元测试。
 
 ### 4.3 如果这条线现在漂移，最大的风险是什么
 

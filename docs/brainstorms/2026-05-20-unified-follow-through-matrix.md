@@ -56,6 +56,7 @@ Current Batch-C alignment note:
 3. This batch does not change the MiniSearch retrieval algorithm, chapter-split write contract, packaging boundary, or provider control plane. It reduces drift between test evidence, maintainer-reproducible examples, and progress documentation.
 4. The local-KB decision, execution-quality lens, and chapter-split comparison conclusions are now also mirrored into tracked `docs/brainstorms/2026-06-09-*` records instead of remaining only under `.trellis/tasks/.../research/`.
 5. Those repo-owned `2026-06-09` records are now also part of executable retrieval evidence through the offline fixture and maintainer inspect examples, not only documentation truth.
+6. The repo-local maintainer CLI wrapper itself is now also process-level regression-locked, so bounded path-based helper claims no longer rely only on bridge-unit tests and prose help text.
 
 ## 4. Reconfirmed Current-Main Register
 

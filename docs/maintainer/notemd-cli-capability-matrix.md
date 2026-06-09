@@ -87,6 +87,7 @@ Boundary:
 
 - this is maintainer-grade repo tooling, not a public CLI API
 - the operation catalog lives in `scripts/lib/maintainer-cli-operation-help.js` as shared maintainer helper metadata, including compact example payloads for the path-based operations
+- the checked-in `scripts/invoke-maintainer-cli-operation.js` entrypoint is now also process-level regression-locked: `--help`, `--input-json`, `--input-file`, `--pretty`, child stderr passthrough, and unparseable `obsidian-cli native eval` failures are covered without depending on a live desktop session
 - export operations remain empty-payload only; bounded content operations accept explicit JSON input
 - minimal inspect example: `npm run cli:invoke -- --vault docs --operation local-knowledge.inspect --input-json '{"taskScope":"diagramGeneration","sourcePath":"index.zh-CN.md","knowledgePaths":["maintainer","superpowers"]}' --pretty`
 - for `--vault docs`, all `sourcePath` and `knowledgePaths` values are vault-relative; use `index.zh-CN.md` and `maintainer`, not `docs/index.zh-CN.md` or `docs/maintainer`

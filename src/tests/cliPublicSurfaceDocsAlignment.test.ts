@@ -99,8 +99,12 @@ describe('CLI public surface docs alignment', () => {
 
         expect(matrix).toContain('`scripts/lib/maintainer-cli-operation-help.js`');
         expect(matrixZh).toContain('`scripts/lib/maintainer-cli-operation-help.js`');
+        expect(matrix).toContain('`scripts/invoke-maintainer-cli-operation.js` entrypoint is now also process-level regression-locked');
+        expect(matrixZh).toContain('`scripts/invoke-maintainer-cli-operation.js` 入口现在也具备 process-level 回归锁定');
         expect(matrix).toContain('maintainer helper metadata');
         expect(matrixZh).toContain('共享帮助元数据');
+        expect(matrix).toContain('`--help`, `--input-json`, `--input-file`, `--pretty`, child stderr passthrough');
+        expect(matrixZh).toContain('`--help`、`--input-json`、`--input-file`、`--pretty`、子进程 stderr 透传');
         expect(matrix).toContain('`local-knowledge.inspect`');
         expect(matrixZh).toContain('`local-knowledge.inspect`');
         expect(matrix).toContain('effective knowledge-base path resolution');

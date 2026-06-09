@@ -160,6 +160,8 @@ describe('mainline progress audit contract', () => {
         expect(progressDocZh).toContain('可直接复现的 docs-vault failure-state 示例');
         expect(progressDoc).toContain('`repo-saga` SVG-only folder now proves `no-candidate-files`');
         expect(progressDocZh).toContain('`repo-saga` 这个仅含 SVG 的目录会稳定证明 `no-candidate-files`');
+        expect(progressDoc).toContain('maintainer CLI wrapper now has process-level regression coverage');
+        expect(progressDocZh).toContain('maintainer CLI wrapper 现在已经具备入口级 process-level 回归覆盖');
         expect(progressDoc).toContain('MiniSearch remains the chosen implementation base');
         expect(progressDocZh).toContain('MiniSearch 仍是当前主线的实现基座');
         expect(progressDoc).toContain('LightRAG, txtai, and Mem0/Embedchain remain rejected as direct runtime bases');

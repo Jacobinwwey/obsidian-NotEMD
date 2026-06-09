@@ -87,6 +87,7 @@
 
 - 这是 maintainer-grade repo 工具，不是 public CLI API
 - 操作目录统一收敛在 `scripts/lib/maintainer-cli-operation-help.js`，作为共享帮助元数据，并为 path-based operations 提供简洁 example payload
+- 已检入的 `scripts/invoke-maintainer-cli-operation.js` 入口现在也具备 process-level 回归锁定：`--help`、`--input-json`、`--input-file`、`--pretty`、子进程 stderr 透传，以及无法解析的 `obsidian-cli native eval` 失败路径都已覆盖，而不依赖真实桌面会话
 - export operations 仍然只接受空 payload；受控内容操作必须显式提供 JSON 输入
 - 最小 inspect 示例：`npm run cli:invoke -- --vault docs --operation local-knowledge.inspect --input-json '{"taskScope":"diagramGeneration","sourcePath":"index.zh-CN.md","knowledgePaths":["maintainer","superpowers"]}' --pretty`
 - 对 `--vault docs` 来说，`sourcePath` 与 `knowledgePaths` 都必须写成 vault-relative 路径；应使用 `index.zh-CN.md`、`maintainer`，而不是 `docs/index.zh-CN.md`、`docs/maintainer`

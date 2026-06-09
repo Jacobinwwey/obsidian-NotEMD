@@ -56,6 +56,7 @@ canonical: true
 3. 这批更新没有改变 MiniSearch retrieval algorithm、chapter split 写入契约、packaging 边界或 provider control-plane；它只降低测试证据、维护者可执行示例与进度文档之间的漂移风险。
 4. local-KB 的方案决策、执行质量视角以及 chapter-split 对比结论，现在也已镜像到受跟踪的 `docs/brainstorms/2026-06-09-*` 文档，而不再只留在 `.trellis/tasks/.../research/` 下。
 5. 这些 repo-owned 的 `2026-06-09` 文档现在也已经进入可执行的检索证据面：离线 fixture 与 maintainer inspect 示例会直接沿真实 retrieval 路径探测它们，而不只是把它们当作文档真值。
+6. repo-local 的 maintainer CLI wrapper 现在也已有 process-level 回归锁定，因此这些有界 path-based helper 结论不再只依赖 bridge 单元测试和文字帮助说明。
 
 ## 4. 当前主线已确认 register
 

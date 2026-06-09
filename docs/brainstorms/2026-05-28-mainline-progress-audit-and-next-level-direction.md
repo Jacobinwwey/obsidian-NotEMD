@@ -379,6 +379,7 @@ This changes the engineering direction:
 4. Generic `OpenAI Compatible` still requires conservative ownership inference; beyond trusted hosts, explicit registry-provided owner hints, and explicit prefixes, token ceilings must remain unresolved.
 5. Local host-side desktop verification is still stronger for plugin reload/state inspection than for fully scripted settings-panel click automation; this lane still relies on Jest to lock the exact `Fetch model list -> Use` notice/override branches.
 6. Maintainer inspect explainability is intentionally richer than public CLI truth; that seam must remain bounded unless a future batch explicitly promotes it.
+7. The repo-local maintainer CLI wrapper now has process-level regression coverage for its checked-in entrypoint semantics (`--input-json`, `--input-file`, `--pretty`, stderr passthrough, and eval-parse failure), so the bounded maintainer surface no longer relies only on bridge-level unit coverage.
 
 ### 4.3 Main risk if the lane drifts now
 
