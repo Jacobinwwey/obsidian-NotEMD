@@ -54,6 +54,7 @@ Current Batch-C alignment note:
 1. The CLI / automation change here is limited to maintainer-helper truth maintenance: `local-knowledge.inspect` help output and the bilingual capability matrix now carry the same real docs-vault example payloads, but they remain outside the public-safe slice.
 2. The regex / file selection / local-KB / chapter split lane has therefore moved from “maintainer examples still need alignment” to “helper/docs/tests are aligned to the current fixture lane’s real note/query diversity, including reproducible docs-vault failure-state probes for `no-paths` and `no-candidate-files`.” When that lane grows again, prioritize failure-state, low-signal query, and noisy-corpus evidence before adding task count.
 3. This batch does not change the MiniSearch retrieval algorithm, chapter-split write contract, packaging boundary, or provider control plane. It reduces drift between test evidence, maintainer-reproducible examples, and progress documentation.
+4. The local-KB decision, execution-quality lens, and chapter-split comparison conclusions are now also mirrored into tracked `docs/brainstorms/2026-06-09-*` records instead of remaining only under `.trellis/tasks/.../research/`.
 
 ## 4. Reconfirmed Current-Main Register
 

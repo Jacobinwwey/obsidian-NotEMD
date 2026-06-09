@@ -166,5 +166,11 @@ describe('mainline progress audit contract', () => {
         expect(progressDocZh).toContain('LightRAG、txtai 与 Mem0/Embedchain 仍应排除为本批直连 runtime 基座');
         expect(progressDoc).toContain('RAGPerf / ragas remain evaluation references');
         expect(progressDocZh).toContain('RAGPerf / ragas 仍应视为评测参考');
+        expect(progressDoc).toContain('2026-06-09-local-kb-rag-quality-and-execution-truth.md');
+        expect(progressDocZh).toContain('2026-06-09-local-kb-rag-quality-and-execution-truth.zh-CN.md');
+        expect(progressDoc).toContain('2026-06-09-chapter-split-knowledge-management-and-toc-comparison-truth.md');
+        expect(progressDocZh).toContain('2026-06-09-chapter-split-knowledge-management-and-toc-comparison-truth.zh-CN.md');
+        expect(matrixDoc).toContain('docs/brainstorms/2026-06-09-*');
+        expect(matrixDocZh).toContain('docs/brainstorms/2026-06-09-*');
     });
 });

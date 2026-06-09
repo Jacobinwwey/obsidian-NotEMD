@@ -18,6 +18,11 @@ Those files are useful development context, but `.trellis/` is local workflow st
 
 This document mirrors the decision that current `main` actually ships and the evaluation lens that should guide future work.
 
+The deeper execution-chain and chapter-split comparison details are now mirrored into tracked repo docs as well:
+
+1. `docs/brainstorms/2026-06-09-local-kb-rag-quality-and-execution-truth.md`
+2. `docs/brainstorms/2026-06-09-chapter-split-knowledge-management-and-toc-comparison-truth.md`
+
 ## 2. Current Runtime Truth
 
 The shipped local-KB path is:

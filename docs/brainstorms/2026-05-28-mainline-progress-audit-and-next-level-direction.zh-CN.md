@@ -242,6 +242,12 @@ canonical: true
 2. 任何未来 semantic/vector 扩张都必须被视为新的架构决策，而不是当前发货线路已经暗含的能力；
 3. `.trellis` 研究可以继续指导后续工作，但 repo 也必须在 tracked progress truth 中保留这条决策，以防未来会话又退回到含糊的“local RAG”措辞。
 
+这已经不再只是原则陈述。仓库现在也已把相关研究结论镜像到 repo 跟踪文档：
+
+1. `docs/brainstorms/2026-06-09-local-kb-retrieval-decision-and-quality-truth.zh-CN.md`
+2. `docs/brainstorms/2026-06-09-local-kb-rag-quality-and-execution-truth.zh-CN.md`
+3. `docs/brainstorms/2026-06-09-chapter-split-knowledge-management-and-toc-comparison-truth.zh-CN.md`
+
 ## 3. 相对先前方案语言的深度对比
 
 ### 3.1 2026-05-25 审计现在低估了什么

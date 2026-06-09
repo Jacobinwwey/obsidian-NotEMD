@@ -26,6 +26,12 @@
 
 - [图表平台 Phase 2 需求（英文）](./brainstorms/2026-04-14-diagram-platform-phase-2-requirements.md)
 - [图表平台 Phase 2 需求（中文）](./brainstorms/2026-04-14-diagram-platform-phase-2-requirements.zh-CN.md)
+- [Local KB Retrieval 方案决策与质量真值（英文）](./brainstorms/2026-06-09-local-kb-retrieval-decision-and-quality-truth.md)
+- [Local KB Retrieval 方案决策与质量真值（中文）](./brainstorms/2026-06-09-local-kb-retrieval-decision-and-quality-truth.zh-CN.md)
+- [Local KB RAG 质量与执行链路真值（英文）](./brainstorms/2026-06-09-local-kb-rag-quality-and-execution-truth.md)
+- [Local KB RAG 质量与执行链路真值（中文）](./brainstorms/2026-06-09-local-kb-rag-quality-and-execution-truth.zh-CN.md)
+- [Chapter Split 的知识管理与 TOC 对比真值（英文）](./brainstorms/2026-06-09-chapter-split-knowledge-management-and-toc-comparison-truth.md)
+- [Chapter Split 的知识管理与 TOC 对比真值（中文）](./brainstorms/2026-06-09-chapter-split-knowledge-management-and-toc-comparison-truth.zh-CN.md)
 - [发布流程（英文）](./maintainer/release-workflow.md)
 - [发布流程（中文）](./maintainer/release-workflow.zh-CN.md)
 - [语言中心（英文）](./i18n/README.md)

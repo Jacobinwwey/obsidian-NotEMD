@@ -18,6 +18,11 @@ canonical: true
 
 本文的目的，是把当前 `main` 真正采用的实现决策，以及后续应如何评估其质量，正式镜像进仓库跟踪文档。
 
+更深一层的执行链路与 chapter split 对比细节，现在也已经单独镜像到 repo 跟踪文档：
+
+1. `docs/brainstorms/2026-06-09-local-kb-rag-quality-and-execution-truth.zh-CN.md`
+2. `docs/brainstorms/2026-06-09-chapter-split-knowledge-management-and-toc-comparison-truth.zh-CN.md`
+
 ## 2. 当前运行时真值
 
 当前 shipped 的 local-KB 路径具有以下边界：

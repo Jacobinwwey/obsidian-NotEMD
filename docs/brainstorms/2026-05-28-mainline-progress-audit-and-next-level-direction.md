@@ -242,6 +242,12 @@ Correct interpretation:
 2. any future semantic/vector expansion must be treated as a new architecture decision, not as something already implied by the current shipped lane;
 3. `.trellis` research may guide future work, but the repo must keep the actual decision visible in tracked progress truth so later sessions do not regress to vague “local RAG” wording.
 
+This is no longer only a principle statement. The repo now carries tracked mirrors for that research truth in:
+
+1. `docs/brainstorms/2026-06-09-local-kb-retrieval-decision-and-quality-truth.md`
+2. `docs/brainstorms/2026-06-09-local-kb-rag-quality-and-execution-truth.md`
+3. `docs/brainstorms/2026-06-09-chapter-split-knowledge-management-and-toc-comparison-truth.md`
+
 ## 3. Deep Comparison Against Earlier Plan Language
 
 ### 3.1 What the 2026-05-25 audit now understates

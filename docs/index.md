@@ -26,6 +26,12 @@ Repository docs preview for `obsidian-NotEMD`.
 
 - [Diagram Platform Phase 2 Requirements (EN)](./brainstorms/2026-04-14-diagram-platform-phase-2-requirements.md)
 - [Diagram Platform Phase 2 Requirements (zh-CN)](./brainstorms/2026-04-14-diagram-platform-phase-2-requirements.zh-CN.md)
+- [Local KB Retrieval Decision And Quality Truth (EN)](./brainstorms/2026-06-09-local-kb-retrieval-decision-and-quality-truth.md)
+- [Local KB Retrieval Decision And Quality Truth (zh-CN)](./brainstorms/2026-06-09-local-kb-retrieval-decision-and-quality-truth.zh-CN.md)
+- [Local KB RAG Quality And Execution Truth (EN)](./brainstorms/2026-06-09-local-kb-rag-quality-and-execution-truth.md)
+- [Local KB RAG Quality And Execution Truth (zh-CN)](./brainstorms/2026-06-09-local-kb-rag-quality-and-execution-truth.zh-CN.md)
+- [Chapter Split Knowledge Management And TOC Comparison Truth (EN)](./brainstorms/2026-06-09-chapter-split-knowledge-management-and-toc-comparison-truth.md)
+- [Chapter Split Knowledge Management And TOC Comparison Truth (zh-CN)](./brainstorms/2026-06-09-chapter-split-knowledge-management-and-toc-comparison-truth.zh-CN.md)
 - [Release Workflow (EN)](./maintainer/release-workflow.md)
 - [Release Workflow (zh-CN)](./maintainer/release-workflow.zh-CN.md)
 - [Language Hub (EN)](./i18n/README.md)

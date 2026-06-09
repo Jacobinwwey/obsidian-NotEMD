@@ -28,6 +28,10 @@ describe('local knowledge decision docs contract', () => {
         expect(decisionDocZh).toContain('**MiniSearch** 仍是当前主线上最合适的实现基座');
         expect(decisionDoc).toContain('### 3.2 Rejected as direct runtime bases');
         expect(decisionDocZh).toContain('仍被排除为直连 runtime 基座');
+        expect(decisionDoc).toContain('2026-06-09-local-kb-rag-quality-and-execution-truth.md');
+        expect(decisionDocZh).toContain('2026-06-09-local-kb-rag-quality-and-execution-truth.zh-CN.md');
+        expect(decisionDoc).toContain('2026-06-09-chapter-split-knowledge-management-and-toc-comparison-truth.md');
+        expect(decisionDocZh).toContain('2026-06-09-chapter-split-knowledge-management-and-toc-comparison-truth.zh-CN.md');
         expect(decisionDoc).toContain('plugin-native MiniSearch lexical retriever with task-scoped prompt injection');
         expect(decisionDocZh).toContain('plugin-native 的 MiniSearch lexical retriever，加上 task-scoped prompt injection');
         expect(decisionDoc).toContain('do not overclaim semantic/vector retrieval');
