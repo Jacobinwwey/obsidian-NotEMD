@@ -622,6 +622,103 @@ describe('provider settings behavior', () => {
         expect(secondAdvanced?.open).toBe(false);
     });
 
+    test('reveals and persists local knowledge settings when the master toggle is enabled', async () => {
+        const plugin = createPlugin();
+        plugin.settings.enableLocalKnowledgeRetrieval = false;
+
+        const tab = new NotemdSettingTab(mockApp as any, plugin as any) as any;
+        tab.display();
+
+        expect(findSettingByName(tab.containerEl, 'Local knowledge retrieval')).toBeDefined();
+        expect(findSettingByName(tab.containerEl, 'Default knowledge-base file/folder paths')).toBeUndefined();
+
+        const enableSetting = findSettingByName(tab.containerEl, 'Enable local knowledge retrieval');
+        const enableToggle = enableSetting?.controls.find(control => control.kind === 'toggle') as MockToggleControl | undefined;
+        expect(enableToggle).toBeDefined();
+
+        await enableToggle?.onChangeHandler?.(true);
+
+        expect(plugin.settings.enableLocalKnowledgeRetrieval).toBe(true);
+        expect(plugin.saveSettings).toHaveBeenCalled();
+        expect(findSettingByName(tab.containerEl, 'Default knowledge-base file/folder paths')).toBeDefined();
+        expect(findSettingByName(tab.containerEl, 'Retrieved section count')).toBeDefined();
+        expect(findSettingByName(tab.containerEl, 'Sliding window size')).toBeDefined();
+        expect(findSettingByName(tab.containerEl, 'Snippet character limit')).toBeDefined();
+        expect(findSettingByName(tab.containerEl, 'Use for "Generate from title"')).toBeDefined();
+        expect(findSettingByName(tab.containerEl, 'Use for "Batch generate from titles"')).toBeDefined();
+        expect(findSettingByName(tab.containerEl, 'Use for "Research & summarize"')).toBeDefined();
+        expect(findSettingByName(tab.containerEl, 'Use for "Generate diagram"')).toBeDefined();
+
+        const basePathsSetting = findSettingByName(tab.containerEl, 'Default knowledge-base file/folder paths');
+        const basePathsControl = basePathsSetting?.controls.find(control => control.kind === 'textarea') as MockTextAreaControl | undefined;
+        expect(basePathsControl).toBeDefined();
+        basePathsControl!.inputEl.value = 'Knowledge\nReferences/Architecture';
+        basePathsControl!.getValue.mockReturnValue('Knowledge\nReferences/Architecture');
+        await triggerDeferredTextBlur(basePathsControl! as unknown as MockTextControl);
+        expect(plugin.settings.localKnowledgeBasePaths).toBe('Knowledge\nReferences/Architecture');
+
+        const topKSetting = findSettingByName(tab.containerEl, 'Retrieved section count');
+        const topKControl = topKSetting?.controls.find(control => control.kind === 'text') as MockTextControl | undefined;
+        expect(topKControl).toBeDefined();
+        topKControl!.inputEl.value = '5';
+        topKControl!.getValue.mockReturnValue('5');
+        await triggerDeferredTextBlur(topKControl!);
+        expect(plugin.settings.localKnowledgeTopK).toBe(5);
+
+        const windowSetting = findSettingByName(tab.containerEl, 'Sliding window size');
+        const windowControl = windowSetting?.controls.find(control => control.kind === 'text') as MockTextControl | undefined;
+        expect(windowControl).toBeDefined();
+        windowControl!.inputEl.value = '2';
+        windowControl!.getValue.mockReturnValue('2');
+        await triggerDeferredTextBlur(windowControl!);
+        expect(plugin.settings.localKnowledgeSlidingWindowSize).toBe(2);
+
+        const snippetSetting = findSettingByName(tab.containerEl, 'Snippet character limit');
+        const snippetControl = snippetSetting?.controls.find(control => control.kind === 'text') as MockTextControl | undefined;
+        expect(snippetControl).toBeDefined();
+        snippetControl!.inputEl.value = '640';
+        snippetControl!.getValue.mockReturnValue('640');
+        await triggerDeferredTextBlur(snippetControl!);
+        expect(plugin.settings.localKnowledgeMaxSnippetChars).toBe(640);
+
+        const generateTitleToggle = findSettingByName(tab.containerEl, 'Use for "Generate from title"')
+            ?.controls.find(control => control.kind === 'toggle') as MockToggleControl | undefined;
+        const batchToggle = findSettingByName(tab.containerEl, 'Use for "Batch generate from titles"')
+            ?.controls.find(control => control.kind === 'toggle') as MockToggleControl | undefined;
+        const researchToggle = findSettingByName(tab.containerEl, 'Use for "Research & summarize"')
+            ?.controls.find(control => control.kind === 'toggle') as MockToggleControl | undefined;
+        const diagramToggle = findSettingByName(tab.containerEl, 'Use for "Generate diagram"')
+            ?.controls.find(control => control.kind === 'toggle') as MockToggleControl | undefined;
+
+        await generateTitleToggle?.onChangeHandler?.(true);
+        await batchToggle?.onChangeHandler?.(true);
+        await researchToggle?.onChangeHandler?.(true);
+        await diagramToggle?.onChangeHandler?.(true);
+
+        expect(plugin.settings.enableLocalKnowledgeForGenerateTitle).toBe(true);
+        expect(plugin.settings.enableLocalKnowledgeForBatchGenerateFromTitles).toBe(true);
+        expect(plugin.settings.enableLocalKnowledgeForResearchSummarize).toBe(true);
+        expect(plugin.settings.enableLocalKnowledgeForDiagramGeneration).toBe(true);
+    });
+
+    test('persists chapter split heading level changes from the settings dropdown', async () => {
+        const plugin = createPlugin();
+        plugin.settings.chapterSplitHeadingLevel = 'auto';
+
+        const tab = new NotemdSettingTab(mockApp as any, plugin as any) as any;
+        tab.display();
+
+        const chapterSplitSetting = findSettingByName(tab.containerEl, 'Split heading level');
+        const chapterSplitDropdown = chapterSplitSetting?.controls.find(control => control.kind === 'dropdown') as MockDropdownControl | undefined;
+        expect(chapterSplitDropdown).toBeDefined();
+        expect(chapterSplitDropdown?.value).toBe('auto');
+
+        await chapterSplitDropdown?.onChangeHandler?.('h3');
+
+        expect(plugin.settings.chapterSplitHeadingLevel).toBe('h3');
+        expect(plugin.saveSettings).toHaveBeenCalled();
+    });
+
     test('applies a discovered model, shows feedback, and collapses the discovered models panel', async () => {
         const plugin = createPlugin();
         plugin.settings.activeProvider = 'DeepSeek';
