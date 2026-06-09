@@ -353,9 +353,24 @@ function parseArgs(args) {
       continue;
     }
     if (token === "--tag") {
-      options.tag = args[index + 1] ?? "";
+      const nextValue = args[index + 1];
+      if (!nextValue || nextValue.startsWith("--")) {
+        throw new Error("Missing value for --tag");
+      }
+      options.tag = nextValue;
       index += 1;
       continue;
+    }
+    if (token.startsWith("--tag=")) {
+      const [, nextValue] = token.split("=", 2);
+      if (!nextValue) {
+        throw new Error("Missing value for --tag");
+      }
+      options.tag = nextValue;
+      continue;
+    }
+    if (token.startsWith("--")) {
+      throw new Error(`Unknown option "${token}"`);
     }
   }
   return options;

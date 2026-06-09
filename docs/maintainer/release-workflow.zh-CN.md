@@ -115,7 +115,7 @@ npm run release:github -- <tag>
 - 编年史刷新脚本现在还会强制使用 `.cache/.repo-saga-execution.lock` 单实例执行锁，避免本地或 CI 并发刷新把共享缓存状态踩坏。
 - 这套脚本现在还补上了包管理器 fallback 的稳健性：如果环境里只有 `corepack` 或 `bun x pnpm`，脚本会额外创建一个可被子进程继承的本地 `pnpm` shim，确保上游 `repo-saga` workspace build 中嵌套调用的 `pnpm` 脚本在 CI 里仍然能执行。
 - 已检入的 `scripts/release/commit-chronicle-refresh.js` 入口现在也具备 process-level 回归锁定：覆盖 clean no-op、显式 `--target-branch` override、缺失参数失败路径，以及 git status 失败透传。
-- 已检入的 `scripts/repo-saga/update-quarterly-saga.mjs` 入口现在也具备 process-level 回归锁定：覆盖 `--sync-only` 在 stamp 命中时的成功路径、已有执行锁时的快速失败，以及隔离的 `--no-readme --tag <tag>` 真实生成路径，并可证明它会产出多语言编年史 SVG 而不会改动 README 文件。
+- 已检入的 `scripts/repo-saga/update-quarterly-saga.mjs` 入口现在也具备 process-level 回归锁定：覆盖 `--sync-only` 在 stamp 命中时的成功路径、已有执行锁时的快速失败、隔离的 `--no-readme --tag <tag>` 真实生成路径，以及缺失 `--tag` 值或未知参数时的快速失败，并可证明它会产出多语言编年史 SVG 而不会改动 README 文件。
 - 工作流现在会在 checkout release ref 之前通过已检入的 `scripts/release/validate-release-tag.js` helper 做 tag 校验，因此 CI 与仓库内 release helper 复用同一套纯数字 tag 契约，并继续拒绝 `v1.8.2` 这类 tag。
 
 工作流刻意复用仓库内的 release 辅助脚本，而不是在 YAML-local 脚本片段中重复维护资产清单、release notes 逻辑、tag 校验或 chronicle 目标分支默认值，避免多套规则漂移。

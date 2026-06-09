@@ -49,5 +49,7 @@ describe('release workflow docs contract', () => {
         expect(releaseWorkflowZh).toContain('`scripts/repo-saga/update-quarterly-saga.mjs` 入口现在也具备 process-level 回归锁定');
         expect(releaseWorkflow).toContain('`--no-readme --tag <tag>` generation path');
         expect(releaseWorkflowZh).toContain('`--no-readme --tag <tag>` 真实生成路径');
+        expect(releaseWorkflow).toContain('missing `--tag` values or unknown options');
+        expect(releaseWorkflowZh).toContain('缺失 `--tag` 值或未知参数');
     });
 });

@@ -254,6 +254,68 @@ default:
         }
     });
 
+    test('real repo-saga entrypoint fails fast on missing --tag values before touching repo-saga state', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-repo-saga-missing-tag-'));
+
+        try {
+            for (const relativePath of [
+                'scripts/repo-saga/update-quarterly-saga.mjs',
+                'scripts/lib/package-manager-runtime.js',
+                'scripts/lib/repo-saga-execution-lock.js',
+                'scripts/lib/repo-saga-contributor-normalization.js'
+            ]) {
+                copyFileIntoTempRepo(repoRoot, tempRoot, relativePath);
+            }
+
+            const result = spawnSync(
+                process.execPath,
+                [path.join(tempRoot, 'scripts', 'repo-saga', 'update-quarterly-saga.mjs'), '--tag'],
+                {
+                    cwd: tempRoot,
+                    encoding: 'utf8'
+                }
+            );
+
+            expect(result.status).toBe(1);
+            expect(result.stdout).toBe('');
+            expect(result.stderr).toContain('Missing value for --tag');
+            expect(fs.existsSync(path.join(tempRoot, '.cache', '.repo-saga-execution.lock'))).toBe(false);
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    });
+
+    test('real repo-saga entrypoint fails fast on unknown options before touching repo-saga state', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-repo-saga-unknown-option-'));
+
+        try {
+            for (const relativePath of [
+                'scripts/repo-saga/update-quarterly-saga.mjs',
+                'scripts/lib/package-manager-runtime.js',
+                'scripts/lib/repo-saga-execution-lock.js',
+                'scripts/lib/repo-saga-contributor-normalization.js'
+            ]) {
+                copyFileIntoTempRepo(repoRoot, tempRoot, relativePath);
+            }
+
+            const result = spawnSync(
+                process.execPath,
+                [path.join(tempRoot, 'scripts', 'repo-saga', 'update-quarterly-saga.mjs'), '--bad-option'],
+                {
+                    cwd: tempRoot,
+                    encoding: 'utf8'
+                }
+            );
+
+            expect(result.status).toBe(1);
+            expect(result.stdout).toBe('');
+            expect(result.stderr).toContain('Unknown option "--bad-option"');
+            expect(fs.existsSync(path.join(tempRoot, '.cache', '.repo-saga-execution.lock'))).toBe(false);
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    });
+
     test('real repo-saga entrypoint produces localized chronicle SVGs without mutating README files when --no-readme is used', () => {
         const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-repo-saga-generate-'));
         const fakeGit = writeFakeGit(
