@@ -11,8 +11,8 @@ jest.mock('../searchUtils', () => {
     };
 });
 
-import { TFile } from 'obsidian';
-import { generateContentForTitle } from '../fileUtils';
+import { TFile, TFolder } from 'obsidian';
+import { batchGenerateContentForTitles, generateContentForTitle } from '../fileUtils';
 import { researchAndSummarize, researchAndSummarizeFile, _performResearch } from '../searchUtils';
 import { runDiagramGenerateOperation } from '../operations/diagramGenerateOperation';
 import { callLLM } from '../llmUtils';
@@ -44,6 +44,15 @@ function createFile(path: string): TFile {
         extension: 'md',
         basename: name.replace(/\.[^.]+$/, ''),
         parent: { path: path.split('/').slice(0, -1).join('/') || '/' }
+    });
+}
+
+function createFolder(path: string): TFolder {
+    return Object.assign(new (TFolder as any)(), {
+        path,
+        name: path.split('/').pop() || path,
+        children: [],
+        parent: { path: '/' }
     });
 }
 
@@ -112,6 +121,89 @@ describe('local knowledge integration', () => {
                 contextCharCount: 57
             })
         }));
+    });
+
+    test('generateContentForTitle builds the generate-title retriever itself when local knowledge is enabled', async () => {
+        const file = createFile('Notes/Topic.md');
+        const reporter = createReporter();
+        const buildContextDetails = jest.fn(() => ({
+            query: 'Topic',
+            context: 'Path: Knowledge/Reference.md\nExcerpt: Generated-title local context.',
+            indexedFileCount: 1,
+            indexedSectionCount: 2,
+            matchedSectionCount: 1,
+            returnedHitCount: 1,
+            expandedSectionCount: 1,
+            sourcePaths: ['Knowledge/Reference.md'],
+            usedSlidingWindowSize: mockSettings.localKnowledgeSlidingWindowSize,
+            requestedTopK: mockSettings.localKnowledgeTopK,
+            indexBuildMs: 6,
+            queryMs: 2,
+            contextCharCount: 60,
+            excludeCurrentFileApplied: true,
+            excludedCurrentFileHitCount: 0
+        }));
+        const buildRetrieverSpy = jest
+            .spyOn(localKnowledgeBase, 'buildLocalKnowledgeBaseRetriever')
+            .mockResolvedValue({
+                indexedFileCount: 1,
+                indexedSectionCount: 2,
+                buildContextDetails
+            } as any);
+        (callLLM as jest.Mock).mockResolvedValue('## Topic\nGenerated content');
+
+        const result = await generateContentForTitle(
+            mockApp as any,
+            {
+                ...mockSettings,
+                enableLocalKnowledgeRetrieval: true,
+                enableLocalKnowledgeForGenerateTitle: true
+            } as any,
+            file,
+            reporter,
+            {
+                enableLocalKnowledge: true
+            }
+        );
+
+        expect(buildRetrieverSpy).toHaveBeenCalledWith(
+            mockApp,
+            expect.objectContaining({
+                enableLocalKnowledgeRetrieval: true,
+                enableLocalKnowledgeForGenerateTitle: true
+            }),
+            reporter,
+            'generateTitle'
+        );
+        expect(buildContextDetails).toHaveBeenCalledWith(
+            'Topic',
+            expect.objectContaining({
+                currentFilePath: 'Notes/Topic.md',
+                topK: mockSettings.localKnowledgeTopK,
+                slidingWindowSize: mockSettings.localKnowledgeSlidingWindowSize
+            })
+        );
+        expect(callLLM).toHaveBeenCalledWith(
+            expect.anything(),
+            '',
+            expect.stringContaining('Generated-title local context.'),
+            expect.anything(),
+            reporter,
+            expect.any(String)
+        );
+        expect(result).toEqual(expect.objectContaining({
+            localKnowledgeContextUsed: true,
+            localKnowledgeRetrieval: expect.objectContaining({
+                indexedFileCount: 1,
+                indexedSectionCount: 2,
+                returnedHitCount: 1,
+                sourcePaths: ['Knowledge/Reference.md'],
+                indexBuildMs: 6,
+                queryMs: 2
+            })
+        }));
+
+        buildRetrieverSpy.mockRestore();
     });
 
     test('researchAndSummarize can continue with local knowledge context even when web research returns no results', async () => {
@@ -337,5 +429,131 @@ describe('local knowledge integration', () => {
                 compatibilityMode: 'best-fit'
             })
         );
+    });
+
+    test('batchGenerateContentForTitles propagates batch-title local knowledge through generated file results', async () => {
+        const reporter = createReporter();
+        const folder = createFolder('Notes');
+        const files = [
+            createFile('Notes/Topic.md'),
+            createFile('Notes/Ideas.md')
+        ];
+
+        const buildContextDetails = jest.fn((query: string) => ({
+            query,
+            context: `Path: Knowledge/${query}.md\nExcerpt: Batch-title local context for ${query}.`,
+            indexedFileCount: 2,
+            indexedSectionCount: 4,
+            matchedSectionCount: 1,
+            returnedHitCount: 1,
+            expandedSectionCount: 1,
+            sourcePaths: [`Knowledge/${query}.md`],
+            usedSlidingWindowSize: 0,
+            requestedTopK: 1,
+            indexBuildMs: 7,
+            queryMs: 3,
+            contextCharCount: 58,
+            excludeCurrentFileApplied: true,
+            excludedCurrentFileHitCount: 0
+        }));
+        const buildRetrieverSpy = jest
+            .spyOn(localKnowledgeBase, 'buildLocalKnowledgeBaseRetriever')
+            .mockResolvedValue({
+                indexedFileCount: 2,
+                indexedSectionCount: 4,
+                buildContextDetails
+            } as any);
+
+        (mockApp.vault.getAbstractFileByPath as jest.Mock).mockImplementation((path: string) => {
+            if (path === 'Notes') {
+                return folder;
+            }
+            return null;
+        });
+        (mockApp.vault as any).getMarkdownFiles = jest.fn().mockReturnValue(files);
+        (mockApp.vault.getMarkdownFiles as jest.Mock).mockReturnValue(files);
+        (mockApp.vault.read as jest.Mock).mockResolvedValue('# Topic');
+        (mockApp.vault.adapter.exists as jest.Mock).mockImplementation(async (path: string) => {
+            if (path === 'Notes_complete') return false;
+            if (path === 'Notes_complete/Topic.md' || path === 'Notes_complete/Ideas.md') return false;
+            return path === 'Notes/Topic.md' || path === 'Notes/Ideas.md';
+        });
+        (mockApp.vault.createFolder as jest.Mock).mockResolvedValue(undefined);
+        (mockApp.vault.rename as jest.Mock).mockResolvedValue(undefined);
+        (mockApp.vault.modify as jest.Mock).mockResolvedValue(undefined);
+        (callLLM as jest.Mock).mockResolvedValue('Generated batch content');
+
+        const result = await batchGenerateContentForTitles(
+            mockApp as any,
+            {
+                ...mockSettings,
+                enableBatchParallelism: false,
+                enableLocalKnowledgeRetrieval: true,
+                enableLocalKnowledgeForBatchGenerateFromTitles: true,
+                localKnowledgeBasePaths: 'Knowledge',
+                localKnowledgeTopK: 1,
+                localKnowledgeSlidingWindowSize: 0,
+                localKnowledgeMaxSnippetChars: 120
+            } as any,
+            'Notes',
+            reporter
+        );
+
+        expect(buildRetrieverSpy).toHaveBeenCalledWith(
+            mockApp,
+            expect.objectContaining({
+                enableLocalKnowledgeRetrieval: true,
+                enableLocalKnowledgeForBatchGenerateFromTitles: true
+            }),
+            reporter,
+            'batchGenerateFromTitles'
+        );
+        expect(buildContextDetails).toHaveBeenCalledWith(
+            'Topic',
+            expect.objectContaining({
+                currentFilePath: 'Notes/Topic.md'
+            })
+        );
+        expect(buildContextDetails).toHaveBeenCalledWith(
+            'Ideas',
+            expect.objectContaining({
+                currentFilePath: 'Notes/Ideas.md'
+            })
+        );
+        expect(callLLM).toHaveBeenCalledWith(
+            expect.anything(),
+            '',
+            expect.stringContaining('Batch-title local context for Topic.'),
+            expect.anything(),
+            reporter,
+            expect.any(String)
+        );
+        expect(result).toEqual(expect.objectContaining({
+            generatedCount: 2,
+            movedCount: 2,
+            fileResults: expect.arrayContaining([
+                expect.objectContaining({
+                    sourcePath: 'Notes/Topic.md',
+                    localKnowledgeContextUsed: true,
+                    localKnowledgeRetrieval: expect.objectContaining({
+                        indexedFileCount: 2,
+                        indexedSectionCount: 4,
+                        returnedHitCount: 1,
+                        sourcePaths: ['Knowledge/Topic.md'],
+                        indexBuildMs: 7,
+                        queryMs: 3
+                    })
+                }),
+                expect.objectContaining({
+                    sourcePath: 'Notes/Ideas.md',
+                    localKnowledgeContextUsed: true,
+                    localKnowledgeRetrieval: expect.objectContaining({
+                        sourcePaths: ['Knowledge/Ideas.md']
+                    })
+                })
+            ])
+        }));
+
+        buildRetrieverSpy.mockRestore();
     });
 });
