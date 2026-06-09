@@ -5,6 +5,8 @@ import { buildLocalKnowledgeBaseRetriever, inspectLocalKnowledgeRetrieval } from
 import { mockApp } from './__mocks__/app';
 import { mockSettings } from './__mocks__/settings';
 
+const { OPERATION_HELP } = require('../../scripts/lib/maintainer-cli-operation-help.js');
+
 interface FixtureFile {
     path: string;
     markdown: string;
@@ -28,6 +30,14 @@ interface EvaluationCase {
     expectEllipsis?: boolean;
     expectedContextFragments?: string[];
 }
+
+type MaintainerOperationHelp = Record<string, {
+    summary: string;
+    required: string[];
+    optional: string[];
+    exampleInput?: string;
+    additionalExamples?: string[];
+}>;
 
 const FIXTURE_FILES: FixtureFile[] = [
     {
@@ -217,6 +227,94 @@ const FIXTURE_FILES: FixtureFile[] = [
             '',
             '## Local Knowledge',
             'The index points to local knowledge task contracts but is still a low-signal source name.'
+        ].join('\n')
+    },
+    {
+        path: 'brainstorms/2026-05-28-mainline-progress-audit-and-next-level-direction.md',
+        markdown: [
+            '# Mainline Progress Audit',
+            'This roadmap note tracks the next-level direction for current main.',
+            '',
+            '## Local KB',
+            'Real-note query diversity beyond the chapter-split showcase matters because Stage-C should prove broader docs-vault retrieval quality.',
+            '',
+            '## Direction',
+            'Maintainers can combine brainstorm and maintainer folders as cross-folder knowledge paths for batch-title and research inspection.'
+        ].join('\n')
+    },
+    {
+        path: 'brainstorms/2026-05-29-stage-c-quality-follow-through.md',
+        markdown: [
+            '# Stage-C Quality Follow-Through',
+            'This note extends the mainline progress audit with more retrieval-specific detail.',
+            '',
+            '## Diversity',
+            'Real-note query diversity beyond the chapter-split showcase should remain part of the Stage-C proof surface.',
+            '',
+            '## Batch Titles',
+            'Batch title inspection against brainstorm notes should still find cross-folder operator guidance after current-file exclusion removes the source note itself.'
+        ].join('\n')
+    },
+    {
+        path: 'maintainer/CLI Surface.md',
+        markdown: [
+            '# CLI Surface',
+            'Maintainer guidance for bounded automation surfaces.',
+            '',
+            '## Retrieval',
+            'Task-scoped retrieval behavior, query diagnostics, and effective path resolution remain maintainer-only inspect concerns.',
+            '',
+            '## Chapter Split',
+            'Chapter split TOC managed artifacts and guarded reruns should stay diagnosable from the maintainer docs surface.'
+        ].join('\n')
+    },
+    {
+        path: 'chapter-split-toc.md',
+        markdown: [
+            '# Chapter Split + TOC Extraction',
+            'Release-facing chapter split showcase documentation.',
+            '',
+            '## Managed Artifacts',
+            'Chapter split TOC managed artifacts expose deterministic front matter and stable block refs.',
+            '',
+            '## Guarded Reruns',
+            'Guarded reruns keep manually edited chapter artifacts from being silently overwritten.'
+        ].join('\n')
+    },
+    {
+        path: 'chapter-split-toc.zh-CN.md',
+        markdown: [
+            '# 章节拆分 + TOC 提取',
+            '中文的 chapter split showcase 文档。',
+            '',
+            '## Managed Artifacts',
+            '章节拆分会生成 TOC、manifest 与章节文件，并保持 deterministic metadata。',
+            '',
+            '## Guarded Reruns',
+            'guarded reruns 不会静默覆盖手动改过的生成产物。'
+        ].join('\n')
+    },
+    {
+        path: 'superpowers/plans/2026-04-14-diagram-rendering-platform-roadmap.zh-CN.md',
+        markdown: [
+            '# Diagram Rendering Platform Roadmap',
+            'Superpowers planning notes for diagram rendering.',
+            '',
+            '## Diagram Platform',
+            'The roadmap reinforces diagram platform retrieval, packaging truth, and rendering architecture decisions.',
+            '',
+            '## Runtime Truth',
+            'Sliding window retrieval and runtime truth belong together when maintainers inspect diagram-generation context.'
+        ].join('\n')
+    },
+    {
+        path: 'index.zh-CN.md',
+        markdown: [
+            '# Index',
+            'Docs vault navigation hub at the root path.',
+            '',
+            '## Local Knowledge',
+            'The root index note is still a low-signal navigation source, so inspect should expose a caution while retrieval stays healthy.'
         ].join('\n')
     }
 ];
@@ -856,5 +954,125 @@ describe('local knowledge offline evaluation fixture', () => {
         expect(diagramInspect.queryDiagnostics.strippedSourceCharsUsed).toBeGreaterThan(0);
         expect(diagramInspect.retrieverBuildStatus).toBe('ready');
         expect(diagramInspect.retrieval.sourcePaths).toContain('References/Architecture/Local KB Task Contracts.md');
+    });
+
+    test('shared maintainer local-knowledge examples stay healthy against the runtime inspect fixture', async () => {
+        const help = OPERATION_HELP as MaintainerOperationHelp;
+        const examples = [
+            help['local-knowledge.inspect'].exampleInput,
+            ...(help['local-knowledge.inspect'].additionalExamples || [])
+        ].filter((value): value is string => Boolean(value));
+
+        const settings = {
+            ...mockSettings,
+            enableLocalKnowledgeRetrieval: true,
+            enableLocalKnowledgeForGenerateTitle: true,
+            enableLocalKnowledgeForBatchGenerateFromTitles: true,
+            enableLocalKnowledgeForResearchSummarize: true,
+            enableLocalKnowledgeForDiagramGeneration: true,
+            localKnowledgeBasePaths: 'Knowledge',
+            localKnowledgeGenerateTitlePaths: 'Knowledge/Scoped',
+            localKnowledgeBatchGenerateFromTitlesPaths: 'Knowledge/Projects',
+            localKnowledgeResearchSummarizePaths: 'Knowledge/Scoped',
+            localKnowledgeDiagramGenerationPaths: 'Knowledge/Diagram Platform.md\nKnowledge/Scoped',
+            localKnowledgeTopK: 2,
+            localKnowledgeSlidingWindowSize: 1,
+            localKnowledgeMaxSnippetChars: 220,
+            localKnowledgeExcludeCurrentFile: true
+        };
+
+        const results = await Promise.all(
+            examples.map((exampleInput) =>
+                inspectLocalKnowledgeRetrieval(
+                    mockApp as any,
+                    settings,
+                    JSON.parse(exampleInput)
+                )
+            )
+        );
+
+        expect(results).toHaveLength(examples.length);
+
+        const [
+            minimalDiagram,
+            batchIndex,
+            researchScoped,
+            chapterSplitShowcase,
+            researchCrossFolder,
+            batchCrossFolder,
+            diagramCrossFolder
+        ] = results;
+
+        expect(minimalDiagram.queryDerivation).toBe('diagram-source');
+        expect(minimalDiagram.retrieverBuildStatus).toBe('ready');
+        expect(minimalDiagram.retrieval.returnedHitCount).toBeGreaterThanOrEqual(1);
+        expect(minimalDiagram.retrieval.sourcePaths).toEqual(
+            expect.arrayContaining([
+                'maintainer/CLI Surface.md',
+                'superpowers/plans/2026-04-14-diagram-rendering-platform-roadmap.zh-CN.md'
+            ])
+        );
+
+        expect(batchIndex.queryDerivation).toBe('basename');
+        expect(batchIndex.queryDiagnostics.cautions).toContain('generic-navigation-basename');
+        expect(batchIndex.retrieverBuildStatus).toBe('ready');
+
+        expect(researchScoped.queryDerivation).toBe('explicit');
+        expect(researchScoped.retrieval.sourcePaths).toEqual(['maintainer/CLI Surface.md']);
+
+        expect(chapterSplitShowcase.queryDerivation).toBe('explicit');
+        expect(chapterSplitShowcase.retrieval.sourcePaths).toEqual(
+            expect.arrayContaining(['chapter-split-toc.md', 'chapter-split-toc.zh-CN.md'])
+        );
+        expect(chapterSplitShowcase.retrieval.returnedHitCount).toBeGreaterThanOrEqual(1);
+
+        expect(researchCrossFolder.queryDerivation).toBe('explicit');
+        expect(researchCrossFolder.effectivePathSource).toBe('override');
+        expect(researchCrossFolder.effectiveConfiguredPaths).toEqual(['brainstorms', 'maintainer']);
+        expect(researchCrossFolder.retrieverBuildStatus).toBe('ready');
+        expect(researchCrossFolder.retrieval.returnedHitCount).toBeGreaterThanOrEqual(1);
+        expect(researchCrossFolder.retrieval.sourcePaths).toEqual(
+            expect.arrayContaining(['brainstorms/2026-05-28-mainline-progress-audit-and-next-level-direction.md'])
+        );
+        expect(researchCrossFolder.candidateFilePaths).toEqual(
+            expect.arrayContaining([
+                'brainstorms/2026-05-28-mainline-progress-audit-and-next-level-direction.md',
+                'brainstorms/2026-05-29-stage-c-quality-follow-through.md',
+                'maintainer/CLI Surface.md'
+            ])
+        );
+
+        expect(batchCrossFolder.queryDerivation).toBe('basename');
+        expect(batchCrossFolder.effectivePathSource).toBe('override');
+        expect(batchCrossFolder.effectiveConfiguredPaths).toEqual(['brainstorms', 'maintainer']);
+        expect(batchCrossFolder.retrieverBuildStatus).toBe('ready');
+        expect(batchCrossFolder.retrieval.returnedHitCount).toBeGreaterThanOrEqual(1);
+        expect(batchCrossFolder.retrieval.sourcePaths).toEqual(
+            expect.arrayContaining(['brainstorms/2026-05-29-stage-c-quality-follow-through.md'])
+        );
+        expect(batchCrossFolder.candidateFilePaths).toEqual(
+            expect.arrayContaining([
+                'brainstorms/2026-05-28-mainline-progress-audit-and-next-level-direction.md',
+                'brainstorms/2026-05-29-stage-c-quality-follow-through.md',
+                'maintainer/CLI Surface.md'
+            ])
+        );
+
+        expect(diagramCrossFolder.queryDerivation).toBe('diagram-source');
+        expect(diagramCrossFolder.effectivePathSource).toBe('override');
+        expect(diagramCrossFolder.effectiveConfiguredPaths).toEqual(['brainstorms', 'maintainer']);
+        expect(diagramCrossFolder.queryDiagnostics.cautions).toContain('diagram-source-built-from-navigation-like-note');
+        expect(diagramCrossFolder.retrieverBuildStatus).toBe('ready');
+        expect(diagramCrossFolder.retrieval.returnedHitCount).toBeGreaterThanOrEqual(1);
+        expect(diagramCrossFolder.retrieval.sourcePaths).toEqual(
+            expect.arrayContaining(['maintainer/CLI Surface.md'])
+        );
+        expect(diagramCrossFolder.candidateFilePaths).toEqual(
+            expect.arrayContaining([
+                'brainstorms/2026-05-28-mainline-progress-audit-and-next-level-direction.md',
+                'brainstorms/2026-05-29-stage-c-quality-follow-through.md',
+                'maintainer/CLI Surface.md'
+            ])
+        );
     });
 });
