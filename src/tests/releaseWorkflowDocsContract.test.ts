@@ -47,5 +47,7 @@ describe('release workflow docs contract', () => {
         expect(releaseWorkflowZh).toContain('`scripts/release/commit-chronicle-refresh.js` 入口现在也具备 process-level 回归锁定');
         expect(releaseWorkflow).toContain('`scripts/repo-saga/update-quarterly-saga.mjs` entrypoint is now also process-level regression-locked');
         expect(releaseWorkflowZh).toContain('`scripts/repo-saga/update-quarterly-saga.mjs` 入口现在也具备 process-level 回归锁定');
+        expect(releaseWorkflow).toContain('`--no-readme --tag <tag>` generation path');
+        expect(releaseWorkflowZh).toContain('`--no-readme --tag <tag>` 真实生成路径');
     });
 });

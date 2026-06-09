@@ -331,7 +331,8 @@ The repo-saga side of the release-follow-through lane now closes one more entryp
 2. That process-level coverage now proves:
    - `--sync-only` still respects a matching integration stamp and exits with the checked-in success message instead of rebuilding the cache unnecessarily;
    - the checked-in serial lock still fails fast when another repo-saga execution lock is active;
-   - both behaviors remain testable without depending on a live upstream clone/fetch/build cycle.
+   - an isolated `--no-readme --tag <tag>` run still produces localized chronicle SVGs plus the English alias while leaving README files untouched;
+   - these entrypoint behaviors remain testable without depending on a live upstream clone/fetch/build cycle.
 3. Maintainer release docs now record that this checked-in repo-saga sync entrypoint also has process-level regression coverage.
 
 Interpretation:

@@ -70,5 +70,7 @@ describe('packaging semantic progress docs contract', () => {
         expect(progressDocZh).toContain('`node scripts/repo-saga/update-quarterly-saga.mjs --sync-only`');
         expect(progressDoc).toContain('respects a matching integration stamp');
         expect(progressDocZh).toContain('在 integration stamp 命中时仍会按已检入语义成功退出');
+        expect(progressDoc).toContain('`--no-readme --tag <tag>` run still produces localized chronicle SVGs');
+        expect(progressDocZh).toContain('`--no-readme --tag <tag>` 真实运行仍会产出多语言编年史 SVG');
     });
 });
