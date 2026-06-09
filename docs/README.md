@@ -14,6 +14,7 @@ This directory contains repository-level documentation for maintainers and contr
 ## Engineering Planning Docs
 
 - [Diagram Platform Phase 2 Requirements](./brainstorms/2026-04-14-diagram-platform-phase-2-requirements.md)
+- [Local KB Retrieval Decision And Quality Truth](./brainstorms/2026-06-09-local-kb-retrieval-decision-and-quality-truth.md)
 - [Diagram Rendering Platform Roadmap](./superpowers/plans/2026-04-14-diagram-rendering-platform-roadmap.en.md)
 - [Language Support Multiphase Plan](./superpowers/plans/2026-04-09-language-support-first-principles-multiphase.en.md)
 - [AGENTS And Provider Expansion Plan](./superpowers/plans/2026-03-26-agents-and-provider-expansion.en.md)
