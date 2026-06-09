@@ -194,6 +194,8 @@ The current execution baseline before this document update is `890b21b` (`docs(p
 
 That fixture lane matters because it moved Stage-C evidence from narrative-only progress wording into runnable checks: `npm run verify:local-kb-fixtures` now exercises the live MiniSearch-backed retrieval path against real-note-style chapter-split docs-vault examples, including managed artifacts, guarded reruns, stable TOC block refs, cross-folder task-contract retrieval, and real-note/query diversity beyond the chapter-split showcase.
 
+The follow-through slice after `7999a5f` did not change the runtime retrieval algorithm. Instead, it carried the already-proven docs-vault retrieval paths into the maintainer operator surface: `local-knowledge.inspect` helper help, the bilingual capability matrix, and docs-alignment tests now jointly cover explicit research queries, cross-folder batch-title source paths, diagram-source retrieval, and bounded `topK` / `slidingWindowSize` overrides. That matters because it removes the gap where tests prove the path but maintainers still lack runnable, drift-resistant examples. It does not widen the public CLI boundary, and it does not promote the maintainer-only inspect seam into a user-facing API.
+
 Requirement-by-requirement status against `.trellis/tasks/05-19-local-kb-retrieval-chapter-split-stage-b2cd/prd.md` is now:
 
 | PRD requirement | Current code/docs truth | Status | Next interpretation |
@@ -204,7 +206,7 @@ Requirement-by-requirement status against `.trellis/tasks/05-19-local-kb-retriev
 | R5 comparison research | Local-RAG and TOC comparison artifacts exist under the active task's `research/` directory | Landed as decision support | Ground future comparison claims in current Notemd task contracts, not generic RAG slogans |
 | R6/R7 chapter split | Command/sidebar/maintainer surfaces, deterministic TOC metadata, stable block refs, manifest-backed guarded reruns, and managed artifact results are present | Landed | Keep showcase docs aligned with the write contract as result schemas evolve |
 | R8 packaging / semantic truth | The shipped boundary remains `main.js` plus inline `srcdoc`; no dedicated runtime asset is claimed | Landed as a constraint | Treat packaging convergence as the next P0 architecture lane, not as already complete |
-| R9/R10 tests, docs, and CI stability | Existing integration tests plus `verify:local-kb-fixtures` cover retrieval injection, fallback, inspect, chapter-split showcase behavior, cross-folder task-contract retrieval, and low-signal navigation-source diagnostics | Ongoing finish gate | Continue locking progress wording with tests before broadening claims |
+| R9/R10 tests, docs, and CI stability | Existing integration tests plus `verify:local-kb-fixtures` cover retrieval injection, fallback, inspect, chapter-split showcase behavior, cross-folder task-contract retrieval, and low-signal navigation-source diagnostics; maintainer help/docs alignment tests now also lock the real docs-vault example payloads | Ongoing finish gate | Continue locking progress wording with tests before broadening claims, and keep helper examples vault-relative without letting them drift into public CLI wording |
 
 Architecture interpretation:
 
@@ -426,12 +428,13 @@ Current-main delta already landed during this Stage-C follow-through:
 5. the offline fixture now also covers a noisy mixed-corpus scope case with duplicate/whitespace override paths, mixed file/folder entries, non-Markdown distractions, unrelated folders, and empty-section candidates, proving that the current MiniSearch path stays scoped without widening task count or public CLI behavior.
 6. the offline fixture and maintainer helper examples now also cover a real-note-style chapter-split showcase query against managed artifacts, guarded reruns, and stable TOC block refs, using real docs-vault paths in the runnable inspect example instead of fixture-only paths.
 7. the offline fixture now also covers real-note/query diversity beyond the chapter-split showcase: cross-folder project/reference knowledge paths, task-contract retrieval, RAG-quality evaluation notes, and navigation-like source diagnostics are locked without promoting `local-knowledge.inspect` into a public CLI contract.
+8. maintainer help, the bilingual capability matrix, and the corresponding Jest alignment tests now also cover the same real docs-vault inspect examples: the explicit research query uses cross-folder `brainstorms` + `maintainer` knowledge paths, the batch-title example points at `brainstorms/2026-05-28-mainline-progress-audit-and-next-level-direction.md`, and the diagram-source example keeps `index.zh-CN.md` in the loop to prove low-signal navigation-source diagnostics. That moves Batch C example alignment from an open direction into a landed guardrail.
 
 Next bounded direction for this batch:
 
-1. keep increasing real-note/query diversity beyond the chapter-split showcase before expanding any new retrieval-dependent task count;
-2. keep chapter split showcase/docs aligned with the actual write contract and managed-artifact semantics as those result schemas evolve;
-3. keep maintainer inspect rich enough for diagnosis, but do not accidentally let that seam become the de facto public contract.
+1. when increasing real-note/query diversity beyond the chapter-split showcase, prioritize real task-contract failure states, low-signal queries, and noisy-corpus evidence before adding more demonstrative paths;
+2. keep chapter split showcase/docs, maintainer examples, and the actual write contract aligned as managed-artifact/result schemas evolve;
+3. keep maintainer inspect rich enough for diagnosis, but do not accidentally let that seam become the de facto public contract; if any path-based operation is ever promoted, do it in a separate public-promotion batch with same-batch schema/help/test/doc proof.
 
 ### Batch D: keep the provider lane in bounded breadth-maintenance mode
 

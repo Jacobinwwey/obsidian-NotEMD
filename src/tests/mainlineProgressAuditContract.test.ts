@@ -128,17 +128,31 @@ describe('mainline progress audit contract', () => {
         expect(matrixDocZh).toContain('docs(progress): align post-recovery packaging truth');
         expect(matrixDoc).toContain('`824d07e`');
         expect(matrixDocZh).toContain('`824d07e`');
+        expect(matrixDoc).toContain('`7999a5f`');
+        expect(matrixDocZh).toContain('`7999a5f`');
+        expect(matrixDoc).toContain('test(local-kb): broaden stage-c fixture coverage');
+        expect(matrixDocZh).toContain('test(local-kb): broaden stage-c fixture coverage');
         expect(matrixDoc).toContain(
             'real-note-style chapter-split showcase retrieval plus real-note/query diversity beyond the chapter-split showcase through the live MiniSearch path'
         );
         expect(matrixDocZh).toContain('real-note-style chapter-split showcase retrieval');
         expect(matrixDocZh).toContain('chapter-split showcase 之外的真实 note/query 多样性');
         expect(matrixDocZh).toContain('MiniSearch path');
+        expect(matrixDoc).toContain('Current Batch-C alignment note:');
+        expect(matrixDocZh).toContain('本轮 Batch-C 对齐说明：');
+        expect(matrixDoc).toContain('helper help, the bilingual capability matrix, and tests now jointly cover explicit research queries');
+        expect(matrixDocZh).toContain('helper help、双语 capability matrix 与测试现在共同覆盖 explicit research query');
         expect(matrixDoc).toContain('cross-folder task-contract retrieval, RAG-quality evaluation notes, and low-signal navigation-source diagnostics');
         expect(matrixDocZh).toContain('跨文件夹任务契约检索、RAG 质量评估笔记与低信号导航源 diagnostics');
         expect(matrixDoc).toContain('evaluation depth, maintainer-example alignment, and packaging-boundary discipline');
         expect(matrixDocZh).toContain('评估深度、maintainer 示例对齐与 packaging 边界纪律');
         expect(matrixDoc).toContain('candidate-only production-build guard');
         expect(matrixDocZh).toContain('candidate-only production-build guard');
+        expect(progressDoc).toContain('maintainer operator surface');
+        expect(progressDocZh).toContain('maintainer operator surface');
+        expect(progressDoc).toContain('maintainer help/docs alignment tests now also lock the real docs-vault example payloads');
+        expect(progressDocZh).toContain('maintainer help/docs alignment 测试还锁住真实 docs-vault example payload');
+        expect(progressDoc).toContain('the bilingual capability matrix');
+        expect(progressDocZh).toContain('双语 capability matrix');
     });
 });
