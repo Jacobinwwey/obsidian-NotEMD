@@ -1,5 +1,57 @@
 import { invokeMaintainerCliOperation } from '../maintainerCliBridge';
 
+const { OPERATION_HELP } = require('../../scripts/lib/maintainer-cli-operation-help.js');
+type MaintainerOperationHelp = Record<string, {
+    summary: string;
+    required: string[];
+    optional: string[];
+    exampleInput?: string;
+    additionalExamples?: string[];
+}>;
+
+function createMaintainerCliHost() {
+    return {
+        batchGenerateContentForTitlesCommand: jest.fn().mockResolvedValue({ generatedCount: 3 }),
+        splitNoteByChaptersForPathCommand: jest.fn().mockResolvedValue({
+            tocPath: 'Docs/Topic_toc.md',
+            managedArtifactPaths: ['Docs/Topic_toc.md']
+        }),
+        researchAndSummarizeForPathCommand: jest.fn().mockResolvedValue({
+            sourcePath: 'Docs/Topic.md',
+            outputPath: 'Docs/Topic.md',
+            topic: 'RAG',
+            sourceLabel: 'Local KB',
+            researchContextUsed: false,
+            localKnowledgeContextUsed: true,
+            localKnowledgeRetrieval: {
+                indexedFileCount: 1,
+                indexedSectionCount: 1,
+                matchedSectionCount: 1,
+                returnedHitCount: 1,
+                expandedSectionCount: 1,
+                sourcePaths: ['Knowledge/RAG.md'],
+                usedSlidingWindowSize: 0,
+                requestedTopK: 1,
+                indexBuildMs: 10,
+                queryMs: 3,
+                contextCharCount: 48,
+                excludeCurrentFileApplied: true,
+                excludedCurrentFileHitCount: 0
+            },
+            appended: true
+        }),
+        generateDiagramForPathCommand: jest.fn().mockResolvedValue({ kind: 'success', outputPath: 'Docs/Topic_diagram.md' }),
+        inspectLocalKnowledgeCommand: jest.fn().mockResolvedValue({
+            taskScope: 'diagramGeneration',
+            query: 'Architecture'
+        }),
+        exportRedactedProviderProfilesCommand: jest.fn().mockResolvedValue({ outputPath: 'redacted.json' }),
+        exportCliCapabilityManifestCommand: jest.fn().mockResolvedValue({ outputPath: 'capability.json' }),
+        exportCliInvocationContractCommand: jest.fn().mockResolvedValue({ outputPath: 'contract.json' }),
+        exportCliPublicSurfaceCommand: jest.fn().mockResolvedValue({ outputPath: 'surface.json' })
+    };
+}
+
 describe('maintainer CLI bridge', () => {
     test('dispatches bounded content operations with parsed input fields', async () => {
         const host = {
@@ -129,6 +181,50 @@ describe('maintainer CLI bridge', () => {
                 maxSnippetChars: 640
             },
             undefined
+        );
+    });
+
+    test('shared maintainer example inputs stay executable against bridge validation', async () => {
+        const host = createMaintainerCliHost();
+        const help = OPERATION_HELP as MaintainerOperationHelp;
+        const operationBindings: Record<string, keyof ReturnType<typeof createMaintainerCliHost>> = {
+            'content.batch-generate-from-titles': 'batchGenerateContentForTitlesCommand',
+            'content.split-note-by-chapters': 'splitNoteByChaptersForPathCommand',
+            'research.summarize-topic': 'researchAndSummarizeForPathCommand',
+            'diagram.generate': 'generateDiagramForPathCommand',
+            'local-knowledge.inspect': 'inspectLocalKnowledgeCommand'
+        };
+
+        for (const [operationId, methodName] of Object.entries(operationBindings)) {
+            const exampleInput = help[operationId]?.exampleInput;
+            expect(exampleInput).toBeDefined();
+
+            await invokeMaintainerCliOperation(host as any, {
+                operationId: operationId as any,
+                input: JSON.parse(exampleInput as string)
+            });
+
+            expect(host[methodName]).toHaveBeenCalledTimes(1);
+        }
+    });
+
+    test('local knowledge inspect additional examples stay executable and preserve task-scoped payloads', async () => {
+        const host = createMaintainerCliHost();
+        const help = OPERATION_HELP as MaintainerOperationHelp;
+        const additionalExamples = help['local-knowledge.inspect']?.additionalExamples || [];
+
+        expect(additionalExamples.length).toBeGreaterThan(0);
+
+        for (const exampleInput of additionalExamples) {
+            await invokeMaintainerCliOperation(host as any, {
+                operationId: 'local-knowledge.inspect',
+                input: JSON.parse(exampleInput)
+            });
+        }
+
+        expect(host.inspectLocalKnowledgeCommand).toHaveBeenCalledTimes(additionalExamples.length);
+        expect(host.inspectLocalKnowledgeCommand.mock.calls.map(([request]) => request)).toEqual(
+            additionalExamples.map((exampleInput) => JSON.parse(exampleInput))
         );
     });
 
