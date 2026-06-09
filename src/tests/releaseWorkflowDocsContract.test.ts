@@ -37,5 +37,9 @@ describe('release workflow docs contract', () => {
         expect(releaseWorkflow).toContain('RELEASE_WORKFLOW_DISALLOWED_TAG_TRIGGER_GLOBS');
         expect(releaseWorkflowZh).toContain('RELEASE_WORKFLOW_TAG_TRIGGER_GLOB');
         expect(releaseWorkflowZh).toContain('RELEASE_WORKFLOW_DISALLOWED_TAG_TRIGGER_GLOBS');
+        expect(releaseWorkflow).toContain('If you omit `--output`, the helper prints the checklist to stdout');
+        expect(releaseWorkflowZh).toContain('如果不传 `--output`，helper 会直接把检查清单打印到 stdout');
+        expect(releaseWorkflow).toContain('unsupported `--surface` values fail fast');
+        expect(releaseWorkflowZh).toContain('若 `--surface` 不受支持，则会快速失败');
     });
 });

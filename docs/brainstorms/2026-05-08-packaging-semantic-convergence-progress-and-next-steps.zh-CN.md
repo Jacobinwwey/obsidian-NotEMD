@@ -271,6 +271,22 @@ source/build/audit 边界上另一处 anti-drift 缺口现在也已经补齐：
 2. 这次真正收紧的是：source-only render-host build helper 的候选状态现在已经是可执行 contract，而不再只是路线图文案；
 3. 如果未来要提升 `render-host.mjs`，必须同批修改 production build、release assets、audit rules 与 docs。
 
+### 2026-06-09 Helper-Entrypoint 增量：真实 semantic-verification CLI 行为现在也有 process-level 证明
+
+helper 契约现在又往上补了一层，不再只依赖模块内部函数测试：
+
+1. `src/tests/diagramSemanticVerificationScript.test.ts` 现在会直接执行真实的 `node scripts/diagram-semantic-verification.js ...` 入口，而不只是 import helper 函数。
+2. 这层 process-level 覆盖现在会证明三条面向维护者的真实行为：
+   - 省略 `--output` 时，stdout 模式仍会输出完整检查清单；
+   - `--output <path>` 仍会把渲染后的检查清单写到目标文件，并保持请求的 surface 过滤；
+   - 不受支持的 `--surface` 值仍会以非零退出码快速失败，而不是静默输出误导性的残缺模板。
+3. maintainer runbook 现在也明确写出：stdout 模式适合快速审阅，而显式文件输出仍是耐久交接路径。
+
+正确解释：
+
+1. 这次仍然没有扩大 packaging topology；
+2. 但它又关闭了一处漂移缝隙：现在被证明的是已检入 helper 的真实 CLI 行为，而不只是其内部格式化函数。
+
 ### Priority 2：把备份分支的 Stage-C 工作视为 reintegration 候选
 
 以下切片未来仍可能值得回灌，但都必须在当前 `main` 上重新证明：

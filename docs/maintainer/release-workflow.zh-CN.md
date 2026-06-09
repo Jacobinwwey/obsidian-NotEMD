@@ -42,6 +42,7 @@ git diff --check
 ```bash
 npm run verify:diagram-semantics -- --vault "<vault-name>" --commit "<sha>" --version "<plugin-version>" --output ~/tmp/notemd-diagram-check.md
 ```
+如果不传 `--output`，helper 会直接把检查清单打印到 stdout，便于快速审阅；若 `--surface` 不受支持，则会快速失败，而不是静默生成残缺模板。
 该 helper 会从 `esbuild.config.mjs` 提取当前打包入口/输出事实；如果顶层配置只是把构建入口/输出委托给共享 helper，则还会回退到 `scripts/lib/esbuild-bundle-config.js` 继续解析；同时它还会从 `src/rendering/preview/renderHostRuntimeClient.ts` 提取 latent runtime-module specifier 真值，从 `scripts/audit-render-host-bundle.js` 提取 render-host audit 真值，而 audit 的 marker / output / reference 规则由 `scripts/lib/packaging-contract.js` 统一提供；它还会从 `src/main.ts`、`src/ui/DiagramPreviewModal.ts`、`src/rendering/webview/page.ts` 与 `src/rendering/webview/renderFrame.ts` 提取 runtime-consumption 真值，从 `scripts/release/publish-github-release.js` 提取 release 打包契约事实，从 `.github/workflows/release.yml` 提取 release 触发、tag 防护、workflow-source 分支与 chronicle-target 分支契约事实，并从 `src/operations/registry.ts` 提取操作契约提升边界事实；评估 renderer 边界声明时，应以这些文件作为打包/契约真值源。
 对于 renderer 相关改动，还应把 helper 生成出的 packaging-boundary、render-host audit、render-host runtime-consumption、implementation-readiness、packaging-contract、contract-promotion-boundary 与 Stage-C gate 区块都视为必填真值维护项：`npm run audit:render-host` 并不等于真正的重型运行时隔离已经完成，它当前只证明内联 `srcdoc` host 仍按既有契约自包含于 `main.js`，并会通过共享 packaging contract 拒绝当前主线上残留的 `render-host.mjs` 资产或引用。
 在当前单入口主线上，这份 packaging-boundary 真值还要求 latent runtime helper 保持 fail-closed：除非 dedicated runtime asset 被显式配置并在同批真实发货，否则不得默认合成 standalone `render-host.mjs` module specifier。

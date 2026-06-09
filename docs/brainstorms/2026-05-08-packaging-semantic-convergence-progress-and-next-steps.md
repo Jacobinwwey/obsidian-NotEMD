@@ -271,6 +271,22 @@ Interpretation:
 2. the useful change is that source-only render-host build helper status is now executable contract, not just planning prose;
 3. if a future batch promotes `render-host.mjs`, it must do so by changing production build, release assets, audit rules, and docs together.
 
+### 2026-06-09 Helper-Entrypoint Delta: real semantic-verification CLI behavior is now process-level proof
+
+The helper contract is now locked one layer higher than module-internal functions:
+
+1. `src/tests/diagramSemanticVerificationScript.test.ts` now executes the real `node scripts/diagram-semantic-verification.js ...` entrypoint instead of only importing helper functions.
+2. That process-level coverage now proves three concrete maintainer-facing behaviors:
+   - stdout mode still emits the full checklist when `--output` is omitted;
+   - `--output <path>` still writes the rendered checklist file and preserves requested surface filtering;
+   - unsupported `--surface` values still fail fast with a non-zero exit instead of silently emitting a misleading partial template.
+3. Maintainer runbooks now state that stdout mode is valid for quick review while explicit file output remains the durable handoff path.
+
+Interpretation:
+
+1. this still does not widen packaging topology;
+2. it does remove another drift seam by proving the checked-in helper's actual CLI behavior, not only its internal formatting helpers.
+
 ### Priority 2: treat backup-branch Stage-C work as reintegration candidates
 
 Candidate later slices may still be valuable, but they must be re-proved on current `main`:

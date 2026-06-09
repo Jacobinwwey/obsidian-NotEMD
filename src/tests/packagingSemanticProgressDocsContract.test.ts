@@ -46,5 +46,11 @@ describe('packaging semantic progress docs contract', () => {
         expect(progressDoc).toContain('`src/tests/diagramSemanticVerificationScript.test.ts`');
         expect(progressDoc).toContain('`src/tests/esbuildBundleConfig.test.ts`');
         expect(progressDocZh).toContain('`src/tests/esbuildBundleConfig.test.ts`');
+        expect(progressDoc).toContain('### 2026-06-09 Helper-Entrypoint Delta');
+        expect(progressDocZh).toContain('### 2026-06-09 Helper-Entrypoint 增量');
+        expect(progressDoc).toContain('stdout mode still emits the full checklist when `--output` is omitted');
+        expect(progressDocZh).toContain('stdout 模式仍会输出完整检查清单');
+        expect(progressDoc).toContain('unsupported `--surface` values still fail fast');
+        expect(progressDocZh).toContain('不受支持的 `--surface` 值仍会以非零退出码快速失败');
     });
 });

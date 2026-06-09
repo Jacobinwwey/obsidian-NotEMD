@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
+import { execFileSync, spawnSync } from 'child_process';
 const packagingContract = require('../../scripts/lib/packaging-contract.js');
 
 function parseEsbuildFactsIndependently(source: string): { entryPoints: string[]; outfile: string } {
@@ -83,6 +84,90 @@ describe('diagram semantic verification helper', () => {
         expect(releaseWorkflow).toContain('RELEASE_WORKFLOW_DISALLOWED_TAG_TRIGGER_GLOBS');
         expect(releaseWorkflowZh).toContain('RELEASE_WORKFLOW_TAG_TRIGGER_GLOB');
         expect(releaseWorkflowZh).toContain('RELEASE_WORKFLOW_DISALLOWED_TAG_TRIGGER_GLOBS');
+    });
+
+    test('real helper entrypoint prints a filtered checklist to stdout without requiring an output file', () => {
+        const output = execFileSync(
+            process.execPath,
+            [
+                scriptPath,
+                '--vault', 'docs',
+                '--commit', '2ed3d01',
+                '--version', '1.9.2',
+                '--surface', 'mermaid'
+            ],
+            {
+                cwd: repoRoot,
+                encoding: 'utf8'
+            }
+        );
+
+        expect(output).toContain('# Notemd Diagram Semantic Verification');
+        expect(output).toContain('Vault: docs');
+        expect(output).toContain('Commit: 2ed3d01');
+        expect(output).toContain('Version: 1.9.2');
+        expect(output).toContain('## Packaging Boundary');
+        expect(output).toContain('## Render Host Runtime Consumption');
+        expect(output).toContain('## Packaging Contract');
+        expect(output).toContain('## Stage-C Gate');
+        expect(output).toContain('## Mermaid');
+        expect(output).not.toContain('## JSON Canvas');
+        expect(output).not.toContain('## Vega-Lite');
+        expect(output).not.toContain('Diagram semantic verification template written to');
+    });
+
+    test('real helper entrypoint writes a filtered checklist to an explicit output path', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-diagram-semantics-cli-'));
+        const outputPath = path.join(tempRoot, 'diagram-check.md');
+
+        try {
+            const stdout = execFileSync(
+                process.execPath,
+                [
+                    scriptPath,
+                    '--vault', 'docs',
+                    '--commit', '2ed3d01',
+                    '--version', '1.9.2',
+                    '--surface', 'vega-lite',
+                    '--output', outputPath
+                ],
+                {
+                    cwd: repoRoot,
+                    encoding: 'utf8'
+                }
+            );
+
+            expect(stdout).toContain(`Diagram semantic verification template written to ${outputPath}`);
+
+            const writtenTemplate = fs.readFileSync(outputPath, 'utf8');
+            expect(writtenTemplate).toContain('# Notemd Diagram Semantic Verification');
+            expect(writtenTemplate).toContain('Vault: docs');
+            expect(writtenTemplate).toContain('## Packaging Boundary');
+            expect(writtenTemplate).toContain('## Vega-Lite');
+            expect(writtenTemplate).not.toContain('## Mermaid');
+            expect(writtenTemplate).not.toContain('## JSON Canvas');
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    });
+
+    test('real helper entrypoint fails fast on unsupported surface arguments', () => {
+        const result = spawnSync(
+            process.execPath,
+            [
+                scriptPath,
+                '--surface', 'bad-surface'
+            ],
+            {
+                cwd: repoRoot,
+                encoding: 'utf8'
+            }
+        );
+
+        expect(result.status).toBe(1);
+        expect(result.stdout).toBe('');
+        expect(result.stderr).toContain('Unsupported diagram semantic surface "bad-surface"');
+        expect(result.stderr).toContain('Supported values: mermaid, json-canvas, vega-lite');
     });
 
     const maybeDescribeHelper = fs.existsSync(scriptPath) ? describe : describe.skip;
