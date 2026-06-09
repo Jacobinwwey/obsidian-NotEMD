@@ -33,6 +33,8 @@ const OPERATION_HELP = {
       '{"taskScope":"researchSummarize","query":"task-scoped retrieval behavior","knowledgePaths":["maintainer"]}',
       '{"taskScope":"researchSummarize","query":"chapter split TOC managed artifacts guarded reruns","knowledgePaths":["chapter-split-toc.md","chapter-split-toc.zh-CN.md"]}',
       '{"taskScope":"researchSummarize","query":"real-note query diversity beyond chapter split showcase","knowledgePaths":["brainstorms","maintainer"],"topK":2,"slidingWindowSize":1}',
+      '{"taskScope":"researchSummarize","query":"MiniSearch ragas RAGPerf execution chain maintainer-only offline evidence","knowledgePaths":["brainstorms/2026-06-09-local-kb-rag-quality-and-execution-truth.md"],"topK":2,"slidingWindowSize":1,"maxSnippetChars":640}',
+      '{"taskScope":"researchSummarize","query":"managed-artifact kpm markdown-toc active-file scoped stable block refs","knowledgePaths":["brainstorms/2026-06-09-chapter-split-knowledge-management-and-toc-comparison-truth.md"],"topK":2,"slidingWindowSize":1,"maxSnippetChars":640}',
       '{"taskScope":"batchGenerateFromTitles","sourcePath":"brainstorms/2026-05-28-mainline-progress-audit-and-next-level-direction.md","knowledgePaths":["brainstorms","maintainer"],"topK":2,"slidingWindowSize":1}',
       '{"taskScope":"diagramGeneration","sourcePath":"index.zh-CN.md","knowledgePaths":["brainstorms","maintainer"],"topK":2,"slidingWindowSize":1}',
       '{"taskScope":"researchSummarize","query":"missing path coverage","knowledgePaths":[]}',

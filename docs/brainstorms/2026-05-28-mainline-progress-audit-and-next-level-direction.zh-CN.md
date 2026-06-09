@@ -248,6 +248,8 @@ canonical: true
 2. `docs/brainstorms/2026-06-09-local-kb-rag-quality-and-execution-truth.zh-CN.md`
 3. `docs/brainstorms/2026-06-09-chapter-split-knowledge-management-and-toc-comparison-truth.zh-CN.md`
 
+这些镜像现在也已经进入可执行的 Stage-C 证据面，而不再只是 docs-only 真值：local-KB 的离线 fixture 与 maintainer inspect 示例会沿真实检索路径探测它们。
+
 ## 3. 相对先前方案语言的深度对比
 
 ### 3.1 2026-05-25 审计现在低估了什么

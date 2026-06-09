@@ -170,7 +170,11 @@ describe('mainline progress audit contract', () => {
         expect(progressDocZh).toContain('2026-06-09-local-kb-rag-quality-and-execution-truth.zh-CN.md');
         expect(progressDoc).toContain('2026-06-09-chapter-split-knowledge-management-and-toc-comparison-truth.md');
         expect(progressDocZh).toContain('2026-06-09-chapter-split-knowledge-management-and-toc-comparison-truth.zh-CN.md');
+        expect(progressDoc).toContain('offline fixture and maintainer inspect examples now probe them through real retrieval paths');
+        expect(progressDocZh).toContain('离线 fixture 与 maintainer inspect 示例会沿真实检索路径探测它们');
         expect(matrixDoc).toContain('docs/brainstorms/2026-06-09-*');
         expect(matrixDocZh).toContain('docs/brainstorms/2026-06-09-*');
+        expect(matrixDoc).toContain('part of executable retrieval evidence through the offline fixture and maintainer inspect examples');
+        expect(matrixDocZh).toContain('进入可执行的检索证据面');
     });
 });

@@ -47,6 +47,10 @@ describe('invoke maintainer CLI operation script', () => {
         expect(output).toContain('"knowledgePaths":["chapter-split-toc.md","chapter-split-toc.zh-CN.md"]');
         expect(output).toContain('"query":"real-note query diversity beyond chapter split showcase"');
         expect(output).toContain('"knowledgePaths":["brainstorms","maintainer"]');
+        expect(output).toContain('"query":"MiniSearch ragas RAGPerf execution chain maintainer-only offline evidence"');
+        expect(output).toContain('"knowledgePaths":["brainstorms/2026-06-09-local-kb-rag-quality-and-execution-truth.md"],"topK":2,"slidingWindowSize":1,"maxSnippetChars":640');
+        expect(output).toContain('"query":"managed-artifact kpm markdown-toc active-file scoped stable block refs"');
+        expect(output).toContain('"knowledgePaths":["brainstorms/2026-06-09-chapter-split-knowledge-management-and-toc-comparison-truth.md"],"topK":2,"slidingWindowSize":1,"maxSnippetChars":640');
         expect(output).toContain('"sourcePath":"brainstorms/2026-05-28-mainline-progress-audit-and-next-level-direction.md"');
         expect(output).toContain('"query":"missing path coverage"');
         expect(output).toContain('"knowledgePaths":[]');

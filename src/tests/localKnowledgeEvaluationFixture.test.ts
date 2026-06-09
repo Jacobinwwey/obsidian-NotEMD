@@ -256,6 +256,38 @@ const FIXTURE_FILES: FixtureFile[] = [
         ].join('\n')
     },
     {
+        path: 'brainstorms/2026-06-09-local-kb-rag-quality-and-execution-truth.md',
+        markdown: [
+            '# Local KB RAG Quality And Execution Truth',
+            'Repo-owned mirror for the shipped local retrieval execution chain and evaluation boundary.',
+            '',
+            '## Execution Chain',
+            'The shipped retrieval path is intentionally narrow: plugin-native, local-only, in-process, server-free, GPU-free, embedding-free.',
+            '',
+            '## Evaluation References',
+            'MiniSearch remains the bounded runtime fit while ragas and RAGPerf stay evaluation references.',
+            '',
+            '## Guidance',
+            'The right near-term move is to borrow the evaluation mindset off the hot path, keep local-knowledge.inspect maintainer-only, and keep npm run verify:local-kb-fixtures as offline evidence.'
+        ].join('\n')
+    },
+    {
+        path: 'brainstorms/2026-06-09-chapter-split-knowledge-management-and-toc-comparison-truth.md',
+        markdown: [
+            '# Chapter Split Knowledge Management And TOC Comparison Truth',
+            'Repo-owned mirror for the chapter-split comparison conclusions.',
+            '',
+            '## Managed Artifacts',
+            'This is a managed-artifact write contract, not just TOC insertion, and kpm plus markdown-toc remain comparison references.',
+            '',
+            '## Scope',
+            'Keep chapter split active-file scoped on current main.',
+            '',
+            '## Guidance',
+            'Deterministic TOC front matter, stable block refs, and manifest-backed reruns should stay explicit in docs and tests.'
+        ].join('\n')
+    },
+    {
         path: 'maintainer/CLI Surface.md',
         markdown: [
             '# CLI Surface',
@@ -500,6 +532,42 @@ const EVALUATION_CASES: EvaluationCase[] = [
             'real note and query diversity',
             'recall proxy, precision pressure, noisy corpus behavior, latency telemetry',
             'local-only, server-free, cloud-free, and GPU-free'
+        ]
+    },
+    {
+        id: 'repo-owned-rag-truth-doc',
+        query: 'MiniSearch ragas RAGPerf execution chain maintainer-only offline evidence',
+        configuredKnowledgePaths: 'brainstorms/2026-06-09-local-kb-rag-quality-and-execution-truth.md',
+        expectedSourcePaths: ['brainstorms/2026-06-09-local-kb-rag-quality-and-execution-truth.md'],
+        topK: 2,
+        slidingWindowSize: 1,
+        maxSnippetChars: 640,
+        minExpectedPathRecall: 1,
+        minReturnedHitCount: 1,
+        minMatchedSectionCount: 1,
+        minExpandedSectionCount: 2,
+        expectedContextFragments: [
+            'plugin-native, local-only, in-process, server-free, GPU-free, embedding-free',
+            'MiniSearch remains the bounded runtime fit while ragas and RAGPerf stay evaluation references.',
+            'borrow the evaluation mindset off the hot path'
+        ]
+    },
+    {
+        id: 'repo-owned-chapter-split-comparison-doc',
+        query: 'managed-artifact kpm markdown-toc active-file scoped stable block refs',
+        configuredKnowledgePaths: 'brainstorms/2026-06-09-chapter-split-knowledge-management-and-toc-comparison-truth.md',
+        expectedSourcePaths: ['brainstorms/2026-06-09-chapter-split-knowledge-management-and-toc-comparison-truth.md'],
+        topK: 2,
+        slidingWindowSize: 1,
+        maxSnippetChars: 640,
+        minExpectedPathRecall: 1,
+        minReturnedHitCount: 1,
+        minMatchedSectionCount: 1,
+        minExpandedSectionCount: 2,
+        expectedContextFragments: [
+            'managed-artifact write contract',
+            'kpm plus markdown-toc remain comparison references',
+            'Keep chapter split active-file scoped on current main.'
         ]
     }
 ];
@@ -1003,6 +1071,8 @@ describe('local knowledge offline evaluation fixture', () => {
             researchScoped,
             chapterSplitShowcase,
             researchCrossFolder,
+            repoOwnedRagTruth,
+            repoOwnedChapterSplitTruth,
             batchCrossFolder,
             diagramCrossFolder,
             noPathsExample,
@@ -1048,6 +1118,34 @@ describe('local knowledge offline evaluation fixture', () => {
             ])
         );
 
+        expect(repoOwnedRagTruth.queryDerivation).toBe('explicit');
+        expect(repoOwnedRagTruth.effectivePathSource).toBe('override');
+        expect(repoOwnedRagTruth.effectiveConfiguredPaths).toEqual([
+            'brainstorms/2026-06-09-local-kb-rag-quality-and-execution-truth.md'
+        ]);
+        expect(repoOwnedRagTruth.retrieverBuildStatus).toBe('ready');
+        expect(repoOwnedRagTruth.candidateFilePaths).toEqual([
+            'brainstorms/2026-06-09-local-kb-rag-quality-and-execution-truth.md'
+        ]);
+        expect(repoOwnedRagTruth.retrieval.sourcePaths).toEqual([
+            'brainstorms/2026-06-09-local-kb-rag-quality-and-execution-truth.md'
+        ]);
+        expect(repoOwnedRagTruth.context).toContain('ragas and RAGPerf stay evaluation references');
+
+        expect(repoOwnedChapterSplitTruth.queryDerivation).toBe('explicit');
+        expect(repoOwnedChapterSplitTruth.effectivePathSource).toBe('override');
+        expect(repoOwnedChapterSplitTruth.effectiveConfiguredPaths).toEqual([
+            'brainstorms/2026-06-09-chapter-split-knowledge-management-and-toc-comparison-truth.md'
+        ]);
+        expect(repoOwnedChapterSplitTruth.retrieverBuildStatus).toBe('ready');
+        expect(repoOwnedChapterSplitTruth.candidateFilePaths).toEqual([
+            'brainstorms/2026-06-09-chapter-split-knowledge-management-and-toc-comparison-truth.md'
+        ]);
+        expect(repoOwnedChapterSplitTruth.retrieval.sourcePaths).toEqual([
+            'brainstorms/2026-06-09-chapter-split-knowledge-management-and-toc-comparison-truth.md'
+        ]);
+        expect(repoOwnedChapterSplitTruth.context).toContain('Keep chapter split active-file scoped on current main.');
+
         expect(batchCrossFolder.queryDerivation).toBe('basename');
         expect(batchCrossFolder.effectivePathSource).toBe('override');
         expect(batchCrossFolder.effectiveConfiguredPaths).toEqual(['brainstorms', 'maintainer']);
@@ -1071,12 +1169,18 @@ describe('local knowledge offline evaluation fixture', () => {
         expect(diagramCrossFolder.retrieverBuildStatus).toBe('ready');
         expect(diagramCrossFolder.retrieval.returnedHitCount).toBeGreaterThanOrEqual(1);
         expect(diagramCrossFolder.retrieval.sourcePaths).toEqual(
-            expect.arrayContaining(['maintainer/CLI Surface.md'])
+            expect.arrayContaining([
+                'brainstorms/2026-05-28-mainline-progress-audit-and-next-level-direction.md',
+                'brainstorms/2026-06-09-local-kb-rag-quality-and-execution-truth.md'
+            ])
         );
+        expect(diagramCrossFolder.context).toContain('ragas and RAGPerf stay evaluation references');
         expect(diagramCrossFolder.candidateFilePaths).toEqual(
             expect.arrayContaining([
                 'brainstorms/2026-05-28-mainline-progress-audit-and-next-level-direction.md',
                 'brainstorms/2026-05-29-stage-c-quality-follow-through.md',
+                'brainstorms/2026-06-09-local-kb-rag-quality-and-execution-truth.md',
+                'brainstorms/2026-06-09-chapter-split-knowledge-management-and-toc-comparison-truth.md',
                 'maintainer/CLI Surface.md'
             ])
         );

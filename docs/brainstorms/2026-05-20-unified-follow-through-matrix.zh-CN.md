@@ -55,6 +55,7 @@ canonical: true
 2. Regex / 文件筛选 / local-KB / chapter split 轨道的当前进展从“需要 maintainer 示例对齐”推进为“helper/docs/tests 已对齐当前 fixture lane 的真实 note/query 多样性，并补上了可直接复现 `no-paths` / `no-candidate-files` 的 docs-vault failure-state 示例”；后续再扩大时，应先补失败态、低信号 query 与 noisy-corpus 证据，而不是扩任务数量。
 3. 这批更新没有改变 MiniSearch retrieval algorithm、chapter split 写入契约、packaging 边界或 provider control-plane；它只降低测试证据、维护者可执行示例与进度文档之间的漂移风险。
 4. local-KB 的方案决策、执行质量视角以及 chapter-split 对比结论，现在也已镜像到受跟踪的 `docs/brainstorms/2026-06-09-*` 文档，而不再只留在 `.trellis/tasks/.../research/` 下。
+5. 这些 repo-owned 的 `2026-06-09` 文档现在也已经进入可执行的检索证据面：离线 fixture 与 maintainer inspect 示例会直接沿真实 retrieval 路径探测它们，而不只是把它们当作文档真值。
 
 ## 4. 当前主线已确认 register
 

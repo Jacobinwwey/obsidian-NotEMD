@@ -128,6 +128,14 @@ describe('CLI public surface docs alignment', () => {
         expect(matrixZh).toContain('"query":"real-note query diversity beyond chapter split showcase"');
         expect(matrix).toContain('"knowledgePaths":["brainstorms","maintainer"]');
         expect(matrixZh).toContain('"knowledgePaths":["brainstorms","maintainer"]');
+        expect(matrix).toContain('"query":"MiniSearch ragas RAGPerf execution chain maintainer-only offline evidence"');
+        expect(matrixZh).toContain('"query":"MiniSearch ragas RAGPerf execution chain maintainer-only offline evidence"');
+        expect(matrix).toContain('"knowledgePaths":["brainstorms/2026-06-09-local-kb-rag-quality-and-execution-truth.md"],"topK":2,"slidingWindowSize":1,"maxSnippetChars":640');
+        expect(matrixZh).toContain('"knowledgePaths":["brainstorms/2026-06-09-local-kb-rag-quality-and-execution-truth.md"],"topK":2,"slidingWindowSize":1,"maxSnippetChars":640');
+        expect(matrix).toContain('"query":"managed-artifact kpm markdown-toc active-file scoped stable block refs"');
+        expect(matrixZh).toContain('"query":"managed-artifact kpm markdown-toc active-file scoped stable block refs"');
+        expect(matrix).toContain('"knowledgePaths":["brainstorms/2026-06-09-chapter-split-knowledge-management-and-toc-comparison-truth.md"],"topK":2,"slidingWindowSize":1,"maxSnippetChars":640');
+        expect(matrixZh).toContain('"knowledgePaths":["brainstorms/2026-06-09-chapter-split-knowledge-management-and-toc-comparison-truth.md"],"topK":2,"slidingWindowSize":1,"maxSnippetChars":640');
         expect(matrix).toContain('"sourcePath":"brainstorms/2026-05-28-mainline-progress-audit-and-next-level-direction.md"');
         expect(matrixZh).toContain('"sourcePath":"brainstorms/2026-05-28-mainline-progress-audit-and-next-level-direction.md"');
         expect(matrix).toContain('"query":"missing path coverage"');

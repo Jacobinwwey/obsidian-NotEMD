@@ -248,6 +248,8 @@ This is no longer only a principle statement. The repo now carries tracked mirro
 2. `docs/brainstorms/2026-06-09-local-kb-rag-quality-and-execution-truth.md`
 3. `docs/brainstorms/2026-06-09-chapter-split-knowledge-management-and-toc-comparison-truth.md`
 
+Those mirrors are now also part of executable Stage-C evidence instead of remaining docs-only truth: the local-KB offline fixture and maintainer inspect examples now probe them through real retrieval paths.
+
 ## 3. Deep Comparison Against Earlier Plan Language
 
 ### 3.1 What the 2026-05-25 audit now understates
