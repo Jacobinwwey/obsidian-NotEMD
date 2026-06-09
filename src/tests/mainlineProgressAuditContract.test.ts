@@ -142,6 +142,8 @@ describe('mainline progress audit contract', () => {
         expect(matrixDocZh).toContain('本轮 Batch-C 对齐说明：');
         expect(matrixDoc).toContain('helper help, the bilingual capability matrix, and tests now jointly cover explicit research queries');
         expect(matrixDocZh).toContain('helper help、双语 capability matrix 与测试现在共同覆盖 explicit research query');
+        expect(matrixDoc).toContain('reproducible docs-vault failure-state probes for `no-paths` and `no-candidate-files`');
+        expect(matrixDocZh).toContain('可直接复现 `no-paths` / `no-candidate-files` 的 docs-vault failure-state 示例');
         expect(matrixDoc).toContain('cross-folder task-contract retrieval, RAG-quality evaluation notes, and low-signal navigation-source diagnostics');
         expect(matrixDocZh).toContain('跨文件夹任务契约检索、RAG 质量评估笔记与低信号导航源 diagnostics');
         expect(matrixDoc).toContain('evaluation depth, maintainer-example alignment, and packaging-boundary discipline');
@@ -154,5 +156,9 @@ describe('mainline progress audit contract', () => {
         expect(progressDocZh).toContain('maintainer help/docs alignment 测试还锁住真实 docs-vault example payload');
         expect(progressDoc).toContain('the bilingual capability matrix');
         expect(progressDocZh).toContain('双语 capability matrix');
+        expect(progressDoc).toContain('reproducible docs-vault failure-state examples');
+        expect(progressDocZh).toContain('可直接复现的 docs-vault failure-state 示例');
+        expect(progressDoc).toContain('`repo-saga` SVG-only folder now proves `no-candidate-files`');
+        expect(progressDocZh).toContain('`repo-saga` 这个仅含 SVG 的目录会稳定证明 `no-candidate-files`');
     });
 });
