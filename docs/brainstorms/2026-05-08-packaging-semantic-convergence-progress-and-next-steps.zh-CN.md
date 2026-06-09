@@ -323,6 +323,22 @@ release 这条线现在也在模块内部测试之外补上了同类型的入口
 1. 当前 release / chronicle 行为仍然没有变化；
 2. 真正收紧的是：现在被更强地证明的是已检入 chronicle helper 的真实 CLI 行为，而不只是其内部 retry 逻辑。
 
+### 2026-06-09 Repo-Saga Entrypoint 增量：sync helper 现在也有 process-level 证明
+
+release-follow-through 这条链路里的 repo-saga 侧入口现在也补上了一处真实入口证明：
+
+1. `src/tests/repoSagaChronicleCoverage.test.ts` 现在会在隔离的 temp repo 副本里直接执行真实的 `node scripts/repo-saga/update-quarterly-saga.mjs --sync-only` 入口。
+2. 这层 process-level 覆盖现在会证明：
+   - `--sync-only` 在 integration stamp 命中时仍会按已检入语义成功退出，而不会无谓重建缓存；
+   - 已检入的串行执行锁在已有 repo-saga execution lock 时仍会快速失败；
+   - 这两条行为都能在不依赖真实上游 clone/fetch/build 周期的前提下被稳定验证。
+3. maintainer release 文档现在也明确记录：这条已检入的 repo-saga sync 入口同样具备 process-level 回归覆盖。
+
+正确解释：
+
+1. 当前 repo-saga 行为仍然没有变化；
+2. 真正收紧的是：现在被更强地证明的是已检入 sync helper 的真实 CLI 行为，而不只是其源码形态与 lock-helper 内部逻辑。
+
 ### Priority 2：把备份分支的 Stage-C 工作视为 reintegration 候选
 
 以下切片未来仍可能值得回灌，但都必须在当前 `main` 上重新证明：

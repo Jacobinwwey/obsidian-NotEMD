@@ -45,5 +45,7 @@ describe('release workflow docs contract', () => {
         expect(releaseWorkflowZh).toContain('`npm run release:github -- <tag> --dry-run` 是已检入的无网络证明路径');
         expect(releaseWorkflow).toContain('`scripts/release/commit-chronicle-refresh.js` entrypoint is now also process-level regression-locked');
         expect(releaseWorkflowZh).toContain('`scripts/release/commit-chronicle-refresh.js` 入口现在也具备 process-level 回归锁定');
+        expect(releaseWorkflow).toContain('`scripts/repo-saga/update-quarterly-saga.mjs` entrypoint is now also process-level regression-locked');
+        expect(releaseWorkflowZh).toContain('`scripts/repo-saga/update-quarterly-saga.mjs` 入口现在也具备 process-level 回归锁定');
     });
 });

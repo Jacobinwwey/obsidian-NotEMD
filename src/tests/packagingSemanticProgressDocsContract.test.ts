@@ -64,5 +64,11 @@ describe('packaging semantic progress docs contract', () => {
         expect(progressDocZh).toContain('`node scripts/release/commit-chronicle-refresh.js ...`');
         expect(progressDoc).toContain('clean no-op runs print `Chronicle already up to date.`');
         expect(progressDocZh).toContain('clean no-op 时会输出 `Chronicle already up to date.`');
+        expect(progressDoc).toContain('### 2026-06-09 Repo-Saga Entrypoint Delta');
+        expect(progressDocZh).toContain('### 2026-06-09 Repo-Saga Entrypoint 增量');
+        expect(progressDoc).toContain('`node scripts/repo-saga/update-quarterly-saga.mjs --sync-only`');
+        expect(progressDocZh).toContain('`node scripts/repo-saga/update-quarterly-saga.mjs --sync-only`');
+        expect(progressDoc).toContain('respects a matching integration stamp');
+        expect(progressDocZh).toContain('在 integration stamp 命中时仍会按已检入语义成功退出');
     });
 });

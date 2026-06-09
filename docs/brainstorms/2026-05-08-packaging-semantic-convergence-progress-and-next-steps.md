@@ -323,6 +323,22 @@ Interpretation:
 1. current release / chronicle behavior is still unchanged;
 2. the useful change is stronger proof of the checked-in chronicle helper's real CLI behavior, not only its internal retry logic.
 
+### 2026-06-09 Repo-Saga Entrypoint Delta: sync helper now also has process-level proof
+
+The repo-saga side of the release-follow-through lane now closes one more entrypoint gap:
+
+1. `src/tests/repoSagaChronicleCoverage.test.ts` now executes the real `node scripts/repo-saga/update-quarterly-saga.mjs --sync-only` entrypoint inside an isolated temp repo copy.
+2. That process-level coverage now proves:
+   - `--sync-only` still respects a matching integration stamp and exits with the checked-in success message instead of rebuilding the cache unnecessarily;
+   - the checked-in serial lock still fails fast when another repo-saga execution lock is active;
+   - both behaviors remain testable without depending on a live upstream clone/fetch/build cycle.
+3. Maintainer release docs now record that this checked-in repo-saga sync entrypoint also has process-level regression coverage.
+
+Interpretation:
+
+1. current repo-saga behavior is still unchanged;
+2. the useful change is stronger proof of the checked-in sync helper's real CLI behavior, not only its source-shape and lock-helper internals.
+
 ### Priority 2: treat backup-branch Stage-C work as reintegration candidates
 
 Candidate later slices may still be valuable, but they must be re-proved on current `main`:
