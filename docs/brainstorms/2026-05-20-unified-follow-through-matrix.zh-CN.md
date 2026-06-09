@@ -57,7 +57,10 @@ canonical: true
 4. local-KB 的方案决策、执行质量视角以及 chapter-split 对比结论，现在也已镜像到受跟踪的 `docs/brainstorms/2026-06-09-*` 文档，而不再只留在 `.trellis/tasks/.../research/` 下。
 5. 这些 repo-owned 的 `2026-06-09` 文档现在也已经进入可执行的检索证据面：离线 fixture 与 maintainer inspect 示例会直接沿真实 retrieval 路径探测它们，而不只是把它们当作文档真值。
 6. repo-local 的 maintainer CLI wrapper 现在也已有 process-level 回归锁定，因此这些有界 path-based helper 结论不再只依赖 bridge 单元测试和文字帮助说明。
-7. release / repo-saga helper 这条线现在也已经具备 current main 上的 process-level 入口证明，覆盖已检入的 release dry-run 路径、chronicle refresh wrapper 与 repo-saga sync/generation wrapper，而不再只依赖模块级 helper 测试。
+7. release / repo-saga helper 这条线现在也已经具备 current main 上的 process-level 入口证明，覆盖：
+   - 已检入 release dry-run 的 create/repair 路径与非法 tag 的 wrapper 失败路径；
+   - chronicle refresh wrapper 的 no-op / override / git-failure 路径；
+   - repo-saga sync/generation wrapper 的 sync-only stamp 命中、active-lock refusal、隔离生成路径，以及非法参数 fast-fail 行为。
 
 ## 4. 当前主线已确认 register
 

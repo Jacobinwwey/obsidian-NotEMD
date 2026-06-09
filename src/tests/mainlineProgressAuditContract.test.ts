@@ -164,6 +164,10 @@ describe('mainline progress audit contract', () => {
         expect(progressDocZh).toContain('maintainer CLI wrapper 现在已经具备入口级 process-level 回归覆盖');
         expect(progressDoc).toContain('release / repo-saga helper lane now also has process-level regression coverage');
         expect(progressDocZh).toContain('release / repo-saga helper 这条线现在也已经具备已检入入口的 process-level 回归覆盖');
+        expect(progressDoc).toContain('release dry-run create/repair command shape');
+        expect(progressDocZh).toContain('release dry-run 的 create/repair 命令形态');
+        expect(progressDoc).toContain('repo-saga sync-only stamp hits, active-lock refusal, isolated generation, and invalid-argument fast-fail paths');
+        expect(progressDocZh).toContain('repo-saga 的 sync-only stamp 命中、active-lock refusal、隔离生成路径与非法参数 fast-fail');
         expect(progressDoc).toContain('MiniSearch remains the chosen implementation base');
         expect(progressDocZh).toContain('MiniSearch 仍是当前主线的实现基座');
         expect(progressDoc).toContain('LightRAG, txtai, and Mem0/Embedchain remain rejected as direct runtime bases');
@@ -182,5 +186,9 @@ describe('mainline progress audit contract', () => {
         expect(matrixDocZh).toContain('进入可执行的检索证据面');
         expect(matrixDoc).toContain('release / repo-saga helper lane now also has process-level entrypoint proof');
         expect(matrixDocZh).toContain('release / repo-saga helper 这条线现在也已经具备 current main 上的 process-level 入口证明');
+        expect(matrixDoc).toContain('invalid-tag wrapper failures');
+        expect(matrixDocZh).toContain('非法 tag 的 wrapper 失败路径');
+        expect(matrixDoc).toContain('invalid-argument fast-fail behavior');
+        expect(matrixDocZh).toContain('非法参数 fast-fail 行为');
     });
 });
