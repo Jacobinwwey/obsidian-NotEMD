@@ -86,6 +86,8 @@ Required release assets:
 npm run release:github -- <tag>
 ```
 
+For maintainer-side verification, `npm run release:github -- <tag> --dry-run` is the checked-in no-network proof path: it still validates the numeric tag, required assets, checked-in bilingual release notes, release-exists branch selection, and composed `gh release ...` command shape without performing the publish.
+
 The helper now enforces the required packaged assets plus both checked-in release-note files before invoking GitHub:
 
 - If the release does not exist yet, it combines `docs/releases/<tag>.md` and `docs/releases/<tag>.zh-CN.md`, then runs `gh release create ... --verify-tag`.

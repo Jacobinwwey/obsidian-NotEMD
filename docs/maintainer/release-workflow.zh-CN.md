@@ -86,6 +86,8 @@ Release 必需资产：
 npm run release:github -- <tag>
 ```
 
+对维护者本地验证来说，`npm run release:github -- <tag> --dry-run` 是已检入的无网络证明路径：它仍会校验纯数字 tag、必需资产、已提交的双语 release notes、release 是否已存在所对应的分支选择，以及最终组合出的 `gh release ...` 命令形态，但不会真正执行发布。
+
 该辅助命令会在调用 GitHub 前强制校验必须打包的资产，以及两份已提交的 release notes：
 
 - 如果 release 尚不存在，则会先组合 `docs/releases/<tag>.md` 与 `docs/releases/<tag>.zh-CN.md`，再执行 `gh release create ... --verify-tag`。

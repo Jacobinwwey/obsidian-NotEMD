@@ -287,6 +287,25 @@ Interpretation:
 1. this still does not widen packaging topology;
 2. it does remove another drift seam by proving the checked-in helper's actual CLI behavior, not only its internal formatting helpers.
 
+### 2026-06-09 Release-Helper Entrypoint Delta: release helper and tag validator now also have process-level proof
+
+The release lane now closes the same class of drift one step higher than module-internal tests:
+
+1. `src/tests/githubReleaseWorkflow.test.ts` now executes the real checked-in script entrypoints for:
+   - `node scripts/release/validate-release-tag.js`
+   - `node scripts/release/publish-github-release.js <tag> --dry-run`
+2. That process-level coverage now proves:
+   - numeric tags pass while `v`-prefixed tags and missing tags fail fast through the real wrapper entrypoints;
+   - release dry-run still validates required assets and checked-in bilingual release notes before composing commands;
+   - the helper still selects the correct create vs repair command shape based on `gh release view`;
+   - temporary composed release-notes files are still cleaned up after dry-run output.
+3. Maintainer release docs now record `--dry-run` as the checked-in no-network proof path rather than leaving it as an implicit helper feature.
+
+Interpretation:
+
+1. current release behavior is still unchanged;
+2. the useful change is stronger proof of the checked-in release helper's real CLI behavior, not only its internal planning helpers.
+
 ### Priority 2: treat backup-branch Stage-C work as reintegration candidates
 
 Candidate later slices may still be valuable, but they must be re-proved on current `main`:

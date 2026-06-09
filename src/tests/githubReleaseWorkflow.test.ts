@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
+import { execFileSync, spawnSync } from 'child_process';
 const packagingContract = require('../../scripts/lib/packaging-contract.js');
 
 describe('GitHub release workflow', () => {
@@ -67,6 +68,49 @@ describe('GitHub release workflow', () => {
         expect(workflow).toContain('node scripts/release/commit-chronicle-refresh.js "$TAG_NAME" --target-branch "$NOTEMD_RELEASE_CHRONICLE_TARGET_BRANCH"');
     });
 
+    function writeFakeGh(tempRoot: string, releaseViewExitCode: number) {
+        const scriptPath = path.join(tempRoot, 'gh');
+        const argsPath = path.join(tempRoot, 'gh-args.jsonl');
+        const scriptSource = `#!/usr/bin/env node
+const fs = require('fs');
+const path = ${JSON.stringify(argsPath)};
+const args = process.argv.slice(2);
+fs.appendFileSync(path, JSON.stringify(args) + '\\n');
+if (args[0] === 'release' && args[1] === 'view') {
+  process.exit(${releaseViewExitCode});
+}
+process.exit(0);
+`;
+        fs.writeFileSync(scriptPath, scriptSource, { encoding: 'utf8', mode: 0o755 });
+        return { scriptPath, argsPath };
+    }
+
+    test('real validate-release-tag entrypoint passes numeric tags and fails fast on invalid input', () => {
+        const ok = spawnSync(process.execPath, [validateTagScriptPath, packageJson.version], {
+            cwd: repoRoot,
+            encoding: 'utf8'
+        });
+        expect(ok.status).toBe(0);
+        expect(ok.stdout).toBe('');
+        expect(ok.stderr).toBe('');
+
+        const bad = spawnSync(process.execPath, [validateTagScriptPath, `v${packageJson.version}`], {
+            cwd: repoRoot,
+            encoding: 'utf8'
+        });
+        expect(bad.status).toBe(1);
+        expect(bad.stdout).toBe('');
+        expect(bad.stderr).toContain('numeric x.x.x tags');
+
+        const missing = spawnSync(process.execPath, [validateTagScriptPath], {
+            cwd: repoRoot,
+            encoding: 'utf8'
+        });
+        expect(missing.status).toBe(1);
+        expect(missing.stdout).toBe('');
+        expect(missing.stderr).toContain('Usage: node scripts/release/validate-release-tag.js <tag>');
+    });
+
     const maybeDescribeReleaseScript = fs.existsSync(releaseScriptPath) ? describe : describe.skip;
 
     maybeDescribeReleaseScript('publish-github-release helper', () => {
@@ -112,6 +156,97 @@ describe('GitHub release workflow', () => {
         test('reuses the checked-in tag-validation helper wrapper', () => {
             expect(validateReleaseTagMain(['1.9.2'])).toBe(0);
             expect(() => validateReleaseTagMain(['v1.9.2'])).toThrow('numeric x.x.x tags');
+        });
+
+        test('real release helper dry-run prints create commands and cleans up the temporary notes file', () => {
+            const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-release-dry-run-create-'));
+            const fakeGh = writeFakeGh(tempRoot, 1);
+
+            try {
+                const output = execFileSync(
+                    process.execPath,
+                    [releaseScriptPath, packageJson.version, '--dry-run'],
+                    {
+                        cwd: repoRoot,
+                        encoding: 'utf8',
+                        env: {
+                            ...process.env,
+                            PATH: `${tempRoot}:${process.env.PATH || ''}`
+                        }
+                    }
+                );
+
+                expect(output).toContain(`gh release create ${packageJson.version}`);
+                expect(output).toContain('--verify-tag');
+                expect(output).toContain(path.join(repoRoot, 'main.js'));
+                expect(output).toContain(path.join(repoRoot, 'manifest.json'));
+                expect(output).toContain(path.join(repoRoot, 'styles.css'));
+                expect(output).toContain(path.join(repoRoot, 'README.md'));
+
+                const ghCalls = fs.readFileSync(fakeGh.argsPath, 'utf8').trim().split('\n').map((line) => JSON.parse(line));
+                expect(ghCalls).toEqual([['release', 'view', packageJson.version]]);
+
+                const notesFileMatch = output.match(/--notes-file\s+(\S+)/);
+                expect(notesFileMatch).not.toBeNull();
+                expect(fs.existsSync(notesFileMatch![1])).toBe(false);
+            } finally {
+                fs.rmSync(tempRoot, { recursive: true, force: true });
+            }
+        });
+
+        test('real release helper dry-run prints repair commands when the release already exists', () => {
+            const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-release-dry-run-repair-'));
+            const fakeGh = writeFakeGh(tempRoot, 0);
+
+            try {
+                const output = execFileSync(
+                    process.execPath,
+                    [releaseScriptPath, packageJson.version, '--dry-run'],
+                    {
+                        cwd: repoRoot,
+                        encoding: 'utf8',
+                        env: {
+                            ...process.env,
+                            PATH: `${tempRoot}:${process.env.PATH || ''}`
+                        }
+                    }
+                );
+
+                expect(output).toContain(`gh release edit ${packageJson.version}`);
+                expect(output).toContain(`gh release upload ${packageJson.version}`);
+                expect(output).toContain('--clobber');
+
+                const ghCalls = fs.readFileSync(fakeGh.argsPath, 'utf8').trim().split('\n').map((line) => JSON.parse(line));
+                expect(ghCalls).toEqual([['release', 'view', packageJson.version]]);
+            } finally {
+                fs.rmSync(tempRoot, { recursive: true, force: true });
+            }
+        });
+
+        test('real release helper fails fast on invalid or missing tag arguments before invoking GitHub', () => {
+            const invalid = spawnSync(
+                process.execPath,
+                [releaseScriptPath, `v${packageJson.version}`, '--dry-run'],
+                {
+                    cwd: repoRoot,
+                    encoding: 'utf8'
+                }
+            );
+            expect(invalid.status).toBe(1);
+            expect(invalid.stdout).toBe('');
+            expect(invalid.stderr).toContain('numeric x.x.x tags');
+
+            const missing = spawnSync(
+                process.execPath,
+                [releaseScriptPath, '--dry-run'],
+                {
+                    cwd: repoRoot,
+                    encoding: 'utf8'
+                }
+            );
+            expect(missing.status).toBe(1);
+            expect(missing.stdout).toBe('');
+            expect(missing.stderr).toContain('Usage: node scripts/release/publish-github-release.js <tag> [--dry-run]');
         });
 
         function createTempRepoRoot(): string {

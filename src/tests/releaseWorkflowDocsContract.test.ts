@@ -41,5 +41,7 @@ describe('release workflow docs contract', () => {
         expect(releaseWorkflowZh).toContain('如果不传 `--output`，helper 会直接把检查清单打印到 stdout');
         expect(releaseWorkflow).toContain('unsupported `--surface` values fail fast');
         expect(releaseWorkflowZh).toContain('若 `--surface` 不受支持，则会快速失败');
+        expect(releaseWorkflow).toContain('`npm run release:github -- <tag> --dry-run` is the checked-in no-network proof path');
+        expect(releaseWorkflowZh).toContain('`npm run release:github -- <tag> --dry-run` 是已检入的无网络证明路径');
     });
 });

@@ -52,5 +52,11 @@ describe('packaging semantic progress docs contract', () => {
         expect(progressDocZh).toContain('stdout 模式仍会输出完整检查清单');
         expect(progressDoc).toContain('unsupported `--surface` values still fail fast');
         expect(progressDocZh).toContain('不受支持的 `--surface` 值仍会以非零退出码快速失败');
+        expect(progressDoc).toContain('### 2026-06-09 Release-Helper Entrypoint Delta');
+        expect(progressDocZh).toContain('### 2026-06-09 Release-Helper Entrypoint 增量');
+        expect(progressDoc).toContain('`node scripts/release/publish-github-release.js <tag> --dry-run`');
+        expect(progressDocZh).toContain('`node scripts/release/publish-github-release.js <tag> --dry-run`');
+        expect(progressDoc).toContain('temporary composed release-notes files are still cleaned up after dry-run output');
+        expect(progressDocZh).toContain('dry-run 结束后仍会清理临时组合出的 release-notes 文件');
     });
 });
