@@ -215,6 +215,33 @@ canonical: true
 3. chapter split 是具备确定性 rerun 行为的 managed artifact 写入契约，不只是文本转换 helper；
 4. packaging 真值仍是单入口 `main.js` + inline `srcdoc`，所以 latent render-host source candidate 仍只是源码候选，除非未来同批修改 build、release、audit 与 docs。
 
+### 2.8 local retrieval 方案决策不应继续只留在 `.trellis`
+
+当前 local-KB 实现已经发货，但最明确的方案比较研究最初主要落在 `.trellis/tasks/05-19-local-kb-retrieval-chapter-split-stage-b2cd/research/`。这对开发有用，但单靠它还不足以构成 repo-owned 真值。
+
+现在必须保持显式的 repo-side 决策是：
+
+1. **MiniSearch 仍是当前主线的实现基座**，因为它同时满足：
+   - TypeScript 原生
+   - local-only
+   - in-process
+   - server-free
+   - GPU-free
+   - 对 Obsidian 插件运行时足够收敛
+2. **LightRAG、txtai 与 Mem0/Embedchain 仍应排除为本批直连 runtime 基座**，因为它们是 Python-first，且会把架构推向更重的服务、vector-store 或 companion-runtime 形态，不适合 current main 的有界切片。
+3. **Smart Connections 与 Smart Composer 仍是产品/UX 参考，而不是实现基座**：
+   - 对后续产品设计有参考价值；
+   - 但 embedding / local-db / adjacent-runtime 足迹仍明显重于当前切片可接受范围。
+4. **RAGPerf / ragas 仍应视为评测参考，而不是 runtime 依赖**：
+   - 它们有助于判断检索质量；
+   - 当前正确动作是在线路外借用它们的评测思维，而不是把它们的栈嵌入插件。
+
+正确解释：
+
+1. 当前主线仍应继续把 local-KB 描述为 plugin-native 的 MiniSearch lexical retriever，加上 task-scoped prompt injection；
+2. 任何未来 semantic/vector 扩张都必须被视为新的架构决策，而不是当前发货线路已经暗含的能力；
+3. `.trellis` 研究可以继续指导后续工作，但 repo 也必须在 tracked progress truth 中保留这条决策，以防未来会话又退回到含糊的“local RAG”措辞。
+
 ## 3. 相对先前方案语言的深度对比
 
 ### 3.1 2026-05-25 审计现在低估了什么

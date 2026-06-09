@@ -215,6 +215,33 @@ Architecture interpretation:
 3. chapter split is a managed artifact write contract with deterministic rerun behavior, not only a text transformation helper;
 4. packaging truth remains single-entry `main.js` plus inline `srcdoc`, so latent render-host source candidates are still source-only candidates until a later batch changes build, release, audit, and docs together.
 
+### 2.8 Local retrieval decision truth should no longer live only in `.trellis`
+
+The current local-KB implementation is already shipped, but the most explicit comparison research originally lived under `.trellis/tasks/05-19-local-kb-retrieval-chapter-split-stage-b2cd/research/`. That is useful for development, but it is not durable repo truth on its own.
+
+The repo-owned decision that now needs to remain explicit is:
+
+1. **MiniSearch remains the chosen implementation base** for current main because it is:
+   - TypeScript-native
+   - local-only
+   - in-process
+   - server-free
+   - GPU-free
+   - operationally narrow enough for an Obsidian plugin runtime
+2. **LightRAG, txtai, and Mem0/Embedchain remain rejected as direct runtime bases** for this batch because they are Python-first and/or push the architecture toward a heavier service, vector-store, or companion-runtime shape than current main should carry.
+3. **Smart Connections and Smart Composer remain reference products, not implementation bases**:
+   - useful for future product/UX ideas;
+   - still too heavy in embedding / local-db / adjacent-runtime footprint for the current bounded slice.
+4. **RAGPerf / ragas remain evaluation references, not runtime dependencies**:
+   - they are useful for judging retrieval quality;
+   - the correct near-term move is to borrow their evaluation mindset off the hot path, not to embed their stack into the plugin.
+
+Correct interpretation:
+
+1. current main should continue to describe local-KB as a plugin-native MiniSearch lexical retriever with task-scoped prompt injection;
+2. any future semantic/vector expansion must be treated as a new architecture decision, not as something already implied by the current shipped lane;
+3. `.trellis` research may guide future work, but the repo must keep the actual decision visible in tracked progress truth so later sessions do not regress to vague “local RAG” wording.
+
 ## 3. Deep Comparison Against Earlier Plan Language
 
 ### 3.1 What the 2026-05-25 audit now understates
