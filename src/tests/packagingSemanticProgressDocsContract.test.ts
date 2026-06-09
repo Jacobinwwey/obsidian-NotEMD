@@ -58,5 +58,11 @@ describe('packaging semantic progress docs contract', () => {
         expect(progressDocZh).toContain('`node scripts/release/publish-github-release.js <tag> --dry-run`');
         expect(progressDoc).toContain('temporary composed release-notes files are still cleaned up after dry-run output');
         expect(progressDocZh).toContain('dry-run 结束后仍会清理临时组合出的 release-notes 文件');
+        expect(progressDoc).toContain('### 2026-06-09 Chronicle-Helper Entrypoint Delta');
+        expect(progressDocZh).toContain('### 2026-06-09 Chronicle-Helper Entrypoint 增量');
+        expect(progressDoc).toContain('`node scripts/release/commit-chronicle-refresh.js ...`');
+        expect(progressDocZh).toContain('`node scripts/release/commit-chronicle-refresh.js ...`');
+        expect(progressDoc).toContain('clean no-op runs print `Chronicle already up to date.`');
+        expect(progressDocZh).toContain('clean no-op 时会输出 `Chronicle already up to date.`');
     });
 });

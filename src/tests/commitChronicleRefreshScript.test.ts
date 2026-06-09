@@ -1,4 +1,7 @@
+import * as fs from 'fs';
+import * as os from 'os';
 import * as path from 'path';
+import { execFileSync, spawnSync } from 'child_process';
 const packagingContract = require('../../scripts/lib/packaging-contract.js');
 
 const repoRoot = path.join(__dirname, '..', '..');
@@ -18,6 +21,23 @@ function ok(stdout = '', stderr = ''): GitResult {
 
 function fail(status: number, stderr: string, stdout = ''): GitResult {
     return { status, stdout, stderr };
+}
+
+function writeFakeGit(
+    tempRoot: string,
+    body: string
+): { scriptPath: string; argsPath: string } {
+    const scriptPath = path.join(tempRoot, 'git');
+    const argsPath = path.join(tempRoot, 'git-args.jsonl');
+    const scriptSource = `#!/usr/bin/env node
+const fs = require('fs');
+const argsPath = ${JSON.stringify(argsPath)};
+const args = process.argv.slice(2);
+fs.appendFileSync(argsPath, JSON.stringify(args) + '\\n');
+${body}
+`;
+    fs.writeFileSync(scriptPath, scriptSource, { encoding: 'utf8', mode: 0o755 });
+    return { scriptPath, argsPath };
 }
 
 describe('chronicle refresh release helper', () => {
@@ -85,6 +105,158 @@ describe('chronicle refresh release helper', () => {
 
     test('derives the default chronicle push target from the shared packaging contract', () => {
         expect(DEFAULT_CHRONICLE_TARGET_BRANCH).toBe(packagingContract.RELEASE_CHRONICLE_REFRESH_TARGET_BRANCH);
+    });
+
+    test('real helper entrypoint prints a clean no-op message when no chronicle files changed', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-chronicle-noop-'));
+        const fakeGit = writeFakeGit(
+            tempRoot,
+            `if (args[0] === 'status') { process.stdout.write(''); process.exit(0); }
+process.stderr.write('Unexpected git command: ' + args.join(' '));
+process.exit(9);
+`
+        );
+
+        try {
+            const output = execFileSync(process.execPath, [scriptPath, '1.8.7'], {
+                cwd: repoRoot,
+                encoding: 'utf8',
+                env: {
+                    ...process.env,
+                    PATH: `${tempRoot}:${process.env.PATH || ''}`
+                }
+            });
+
+            expect(output).toContain('Chronicle already up to date.');
+            const calls = fs.readFileSync(fakeGit.argsPath, 'utf8')
+                .trim()
+                .split('\n')
+                .map((line) => JSON.parse(line));
+            expect(calls).toEqual([
+                ['status', '--porcelain=v1', '--untracked-files=all', '--', ...CHRONICLE_PATHS]
+            ]);
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    });
+
+    test('real helper entrypoint honors explicit target-branch overrides through the checked-in script', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-chronicle-branch-'));
+        const fakeGit = writeFakeGit(
+            tempRoot,
+            `switch (args[0]) {
+case 'status':
+  process.stdout.write('?? docs/repo-saga/notemd-development-history.xx.svg\\n');
+  process.exit(0);
+case 'config':
+case 'add':
+  process.exit(0);
+case 'diff':
+  process.exit(1);
+case 'commit':
+  process.stdout.write('[main abc123] docs: refresh quarterly chronicle for 1.8.7\\n');
+  process.exit(0);
+case 'rev-parse':
+  process.stdout.write('abc123\\n');
+  process.exit(0);
+case 'push':
+  process.exit(0);
+default:
+  process.stderr.write('Unexpected git command: ' + args.join(' '));
+  process.exit(9);
+}
+`
+        );
+
+        try {
+            const result = spawnSync(process.execPath, [scriptPath, '1.8.7', '--target-branch', 'release-maint'], {
+                cwd: repoRoot,
+                encoding: 'utf8',
+                env: {
+                    ...process.env,
+                    PATH: `${tempRoot}:${process.env.PATH || ''}`
+                }
+            });
+
+            expect(result.status).toBe(0);
+            expect(result.stderr).toBe('');
+            const calls = fs.readFileSync(fakeGit.argsPath, 'utf8')
+                .trim()
+                .split('\n')
+                .map((line) => JSON.parse(line));
+            expect(calls).toContainEqual(['push', 'origin', 'HEAD:release-maint']);
+            expect(calls).toContainEqual(['config', 'user.name', 'Jacobinwwey']);
+            expect(calls).toContainEqual(['config', 'user.email', 'jacob.hxx.cn@outlook.com']);
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    });
+
+    test('real helper entrypoint fails fast on missing target-branch value before invoking git', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-chronicle-missing-branch-'));
+        const fakeGit = writeFakeGit(
+            tempRoot,
+            `process.stderr.write('git should not be invoked'); process.exit(9);`
+        );
+
+        try {
+            const result = spawnSync(process.execPath, [scriptPath, '1.8.7', '--target-branch'], {
+                cwd: repoRoot,
+                encoding: 'utf8',
+                env: {
+                    ...process.env,
+                    PATH: `${tempRoot}:${process.env.PATH || ''}`
+                }
+            });
+
+            expect(result.status).toBe(1);
+            expect(result.stdout).toBe('');
+            expect(result.stderr).toContain('Missing value for --target-branch');
+            expect(fs.existsSync(fakeGit.argsPath)).toBe(false);
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
+    });
+
+    test('real helper entrypoint surfaces git status failures with the checked-in error formatting', () => {
+        const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-chronicle-git-fail-'));
+        const fakeGit = writeFakeGit(
+            tempRoot,
+            `if (args[0] === 'status') {
+  process.stderr.write('fatal: fake git status failure\\n');
+  process.exit(128);
+}
+process.stderr.write('Unexpected git command: ' + args.join(' '));
+process.exit(9);
+`
+        );
+
+        try {
+            const result = spawnSync(process.execPath, [scriptPath, '1.8.7'], {
+                cwd: repoRoot,
+                encoding: 'utf8',
+                env: {
+                    ...process.env,
+                    PATH: `${tempRoot}:${process.env.PATH || ''}`
+                }
+            });
+
+            expect(result.status).toBe(1);
+            expect(result.stdout).toBe('');
+            expect(result.stderr).toContain(
+                'git status --porcelain=v1 --untracked-files=all -- README.md README_*.md docs/repo-saga/*.svg failed with exit code 128'
+            );
+            expect(result.stderr).toContain('fatal: fake git status failure');
+            const calls = fs.readFileSync(fakeGit.argsPath, 'utf8')
+                .trim()
+                .split('\n')
+                .map((line) => JSON.parse(line));
+            expect(calls).toEqual([
+                ['status', '--porcelain=v1', '--untracked-files=all', '--', ...CHRONICLE_PATHS]
+            ]);
+        } finally {
+            fs.rmSync(tempRoot, { recursive: true, force: true });
+        }
     });
 
     test('returns cleanly when no chronicle changes exist', () => {

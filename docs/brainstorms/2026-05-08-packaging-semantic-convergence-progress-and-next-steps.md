@@ -306,6 +306,23 @@ Interpretation:
 1. current release behavior is still unchanged;
 2. the useful change is stronger proof of the checked-in release helper's real CLI behavior, not only its internal planning helpers.
 
+### 2026-06-09 Chronicle-Helper Entrypoint Delta: chronicle refresh helper now also has process-level proof
+
+The adjacent release-follow-through helper now closes the same class of gap:
+
+1. `src/tests/commitChronicleRefreshScript.test.ts` now executes the real `node scripts/release/commit-chronicle-refresh.js ...` entrypoint with a fake `git` binary on `PATH`.
+2. That process-level coverage now proves:
+   - clean no-op runs print `Chronicle already up to date.`;
+   - explicit `--target-branch` overrides reach the checked-in push path;
+   - missing `--target-branch` values fail fast before invoking `git`;
+   - git-status failures surface through the checked-in `createGitCommandError(...)` formatting instead of collapsing into opaque script errors.
+3. Maintainer release docs now record that this checked-in chronicle helper entrypoint is regression-locked, not only its module-level retry helpers.
+
+Interpretation:
+
+1. current release / chronicle behavior is still unchanged;
+2. the useful change is stronger proof of the checked-in chronicle helper's real CLI behavior, not only its internal retry logic.
+
 ### Priority 2: treat backup-branch Stage-C work as reintegration candidates
 
 Candidate later slices may still be valuable, but they must be re-proved on current `main`:

@@ -306,6 +306,23 @@ release 这条线现在也在模块内部测试之外补上了同类型的入口
 1. 当前 release 行为仍然没有变化；
 2. 真正收紧的是：现在被更强地证明的是已检入 release helper 的真实 CLI 行为，而不只是其内部 command planner。
 
+### 2026-06-09 Chronicle-Helper Entrypoint 增量：chronicle refresh helper 现在也有 process-level 证明
+
+相邻的 release-follow-through helper 现在也补上了同类缺口：
+
+1. `src/tests/commitChronicleRefreshScript.test.ts` 现在会通过 `PATH` 上的 fake `git` 直接执行真实的 `node scripts/release/commit-chronicle-refresh.js ...` 入口。
+2. 这层 process-level 覆盖现在会证明：
+   - clean no-op 时会输出 `Chronicle already up to date.`；
+   - 显式 `--target-branch` override 会真正进入已检入的 push 路径；
+   - 缺失 `--target-branch` 的值时，会在调用 `git` 前快速失败；
+   - git status 失败会继续沿已检入的 `createGitCommandError(...)` 格式透传，而不是退化成模糊脚本错误。
+3. maintainer release 文档现在也明确记录：被回归锁定的是这条已检入 chronicle helper 的真实入口，而不只是它的模块级重试逻辑。
+
+正确解释：
+
+1. 当前 release / chronicle 行为仍然没有变化；
+2. 真正收紧的是：现在被更强地证明的是已检入 chronicle helper 的真实 CLI 行为，而不只是其内部 retry 逻辑。
+
 ### Priority 2：把备份分支的 Stage-C 工作视为 reintegration 候选
 
 以下切片未来仍可能值得回灌，但都必须在当前 `main` 上重新证明：
