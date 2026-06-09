@@ -162,6 +162,8 @@ describe('mainline progress audit contract', () => {
         expect(progressDocZh).toContain('`repo-saga` 这个仅含 SVG 的目录会稳定证明 `no-candidate-files`');
         expect(progressDoc).toContain('maintainer CLI wrapper now has process-level regression coverage');
         expect(progressDocZh).toContain('maintainer CLI wrapper 现在已经具备入口级 process-level 回归覆盖');
+        expect(progressDoc).toContain('release / repo-saga helper lane now also has process-level regression coverage');
+        expect(progressDocZh).toContain('release / repo-saga helper 这条线现在也已经具备已检入入口的 process-level 回归覆盖');
         expect(progressDoc).toContain('MiniSearch remains the chosen implementation base');
         expect(progressDocZh).toContain('MiniSearch 仍是当前主线的实现基座');
         expect(progressDoc).toContain('LightRAG, txtai, and Mem0/Embedchain remain rejected as direct runtime bases');
@@ -178,5 +180,7 @@ describe('mainline progress audit contract', () => {
         expect(matrixDocZh).toContain('docs/brainstorms/2026-06-09-*');
         expect(matrixDoc).toContain('part of executable retrieval evidence through the offline fixture and maintainer inspect examples');
         expect(matrixDocZh).toContain('进入可执行的检索证据面');
+        expect(matrixDoc).toContain('release / repo-saga helper lane now also has process-level entrypoint proof');
+        expect(matrixDocZh).toContain('release / repo-saga helper 这条线现在也已经具备 current main 上的 process-level 入口证明');
     });
 });

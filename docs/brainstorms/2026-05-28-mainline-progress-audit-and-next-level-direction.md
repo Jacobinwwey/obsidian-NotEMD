@@ -182,6 +182,10 @@ What is materially true now:
    - workflow-source checkout and chronicle-target branch truth now share `scripts/lib/packaging-contract.js` ownership, with workflow env names and helper/tests keeping the GitHub Actions bootstrap values aligned.
    - release workflow tag-trigger glob truth now also lives in `scripts/lib/packaging-contract.js`, while `.github/workflows/release.yml` keeps only the GitHub Actions bootstrap literal required before checkout.
    - semantic verification now distinguishes workflow-start trigger truth from numeric release admission: `*.*.*` starts the workflow, and `scripts/release/validate-release-tag.js` still enforces the numeric `x.x.x` contract.
+   - the checked-in release helper entrypoints now also have process-level regression proof instead of only module-level helper proof:
+     - `scripts/release/publish-github-release.js` is now exercised through real `--dry-run` create/repair paths plus real tag-wrapper failures;
+     - `scripts/release/commit-chronicle-refresh.js` is now exercised through real clean no-op, explicit target-branch override, and git-failure paths;
+     - `scripts/repo-saga/update-quarterly-saga.mjs` is now exercised through real `--sync-only`, active-lock refusal, isolated `--no-readme --tag` generation, and fail-fast invalid-argument paths.
 
 Interpretation:
 
@@ -380,6 +384,7 @@ This changes the engineering direction:
 5. Local host-side desktop verification is still stronger for plugin reload/state inspection than for fully scripted settings-panel click automation; this lane still relies on Jest to lock the exact `Fetch model list -> Use` notice/override branches.
 6. Maintainer inspect explainability is intentionally richer than public CLI truth; that seam must remain bounded unless a future batch explicitly promotes it.
 7. The repo-local maintainer CLI wrapper now has process-level regression coverage for its checked-in entrypoint semantics (`--input-json`, `--input-file`, `--pretty`, stderr passthrough, and eval-parse failure), so the bounded maintainer surface no longer relies only on bridge-level unit coverage.
+8. The release / repo-saga helper lane now also has process-level regression coverage for its checked-in entrypoints, so current release-contract and chronicle-contract claims no longer rely only on helper-function tests and maintainer prose.
 
 ### 4.3 Main risk if the lane drifts now
 

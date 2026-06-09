@@ -182,6 +182,10 @@ canonical: true
    - workflow-source checkout 与 chronicle-target branch 真值现在归 `scripts/lib/packaging-contract.js` 所有，并通过 workflow env 名与 helper/tests 保持 GitHub Actions bootstrap 值一致。
    - release workflow 的 tag-trigger glob 真值现在也归 `scripts/lib/packaging-contract.js` 所有，`.github/workflows/release.yml` 只保留 GitHub Actions 在 checkout 前必须解析的 bootstrap 字面量。
    - semantic verification 现在会区分 workflow-start trigger 真值与数字版 release 准入：`*.*.*` 只负责启动 workflow，`scripts/release/validate-release-tag.js` 仍负责执行纯数字 `x.x.x` 契约。
+   - 已检入的 release helper 入口现在也具备 process-level 回归证明，而不再只依赖模块级 helper 测试：
+     - `scripts/release/publish-github-release.js` 现在会通过真实 `--dry-run` create/repair 路径与真实 tag-wrapper 失败路径被执行；
+     - `scripts/release/commit-chronicle-refresh.js` 现在会通过真实 clean no-op、显式 target-branch override 与 git-failure 路径被执行；
+     - `scripts/repo-saga/update-quarterly-saga.mjs` 现在会通过真实 `--sync-only`、active-lock refusal、隔离的 `--no-readme --tag` 生成路径，以及 fail-fast 的非法参数路径被执行。
 
 正确解释：
 
@@ -380,6 +384,7 @@ provider 专题文在以下几点上仍然正确，而且不应被放松：
 5. 当前本机 host-side desktop verification 对 plugin reload/state inspection 更强，但对 settings-panel 的完整脚本化点击自动化仍较弱；这条 lane 目前仍依赖 Jest 去锁住 `Fetch model list -> Use` 的 notice/override 分支。
 6. maintainer inspect explainability 刻意比 public CLI 真值更丰富；除非未来有显式提升批次，否则它必须继续保持有界。
 7. repo-local 的 maintainer CLI wrapper 现在已经具备入口级 process-level 回归覆盖（`--input-json`、`--input-file`、`--pretty`、stderr 透传，以及 eval 解析失败路径），因此这条有界 maintainer surface 不再只依赖 bridge 层单元测试。
+8. release / repo-saga helper 这条线现在也已经具备已检入入口的 process-level 回归覆盖，因此当前 release-contract 与 chronicle-contract 结论不再只依赖 helper 函数测试和维护文档本身。
 
 ### 4.3 如果这条线现在漂移，最大的风险是什么
 
