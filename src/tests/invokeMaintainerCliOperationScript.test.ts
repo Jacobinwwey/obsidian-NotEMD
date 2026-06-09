@@ -48,6 +48,10 @@ describe('invoke maintainer CLI operation script', () => {
         expect(output).toContain('"query":"real-note query diversity beyond chapter split showcase"');
         expect(output).toContain('"knowledgePaths":["brainstorms","maintainer"]');
         expect(output).toContain('"sourcePath":"brainstorms/2026-05-28-mainline-progress-audit-and-next-level-direction.md"');
+        expect(output).toContain('"query":"missing path coverage"');
+        expect(output).toContain('"knowledgePaths":[]');
+        expect(output).toContain('"query":"svg-only repo saga scope"');
+        expect(output).toContain('"knowledgePaths":["repo-saga"]');
         expect(output).toContain('knowledgePaths');
         expect(output).toContain('npm run cli:invoke -- --vault docs --operation local-knowledge.inspect');
         expect(output).toContain('"sourcePath":"index.zh-CN.md"');

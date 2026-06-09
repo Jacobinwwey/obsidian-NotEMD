@@ -52,7 +52,7 @@ canonical: true
 本轮 Batch-C 对齐说明：
 
 1. CLI / automation surface 的变化只限 maintainer helper truth-maintenance：`local-knowledge.inspect` 的 help 输出与双语 capability matrix 已补上真实 docs-vault example payload，仍不进入 public-safe slice。
-2. Regex / 文件筛选 / local-KB / chapter split 轨道的当前进展从“需要 maintainer 示例对齐”推进为“helper/docs/tests 已对齐当前 fixture lane 的真实 note/query 多样性”；后续再扩大时，应先补失败态、低信号 query 与 noisy-corpus 证据，而不是扩任务数量。
+2. Regex / 文件筛选 / local-KB / chapter split 轨道的当前进展从“需要 maintainer 示例对齐”推进为“helper/docs/tests 已对齐当前 fixture lane 的真实 note/query 多样性，并补上了可直接复现 `no-paths` / `no-candidate-files` 的 docs-vault failure-state 示例”；后续再扩大时，应先补失败态、低信号 query 与 noisy-corpus 证据，而不是扩任务数量。
 3. 这批更新没有改变 MiniSearch retrieval algorithm、chapter split 写入契约、packaging 边界或 provider control-plane；它只降低测试证据、维护者可执行示例与进度文档之间的漂移风险。
 
 ## 4. 当前主线已确认 register
@@ -67,7 +67,7 @@ canonical: true
 6. 脱敏 / public-safe CLI 导出表面与仓库内 maintainer help/invoke（含有界 path-based 操作）；
 7. settings reset、concept-note 前置提示、concept synonym suppression 与 API liveness/activity UI；
 8. file-selection profiles 与 folder-scope regex/glob 控制；
-9. local knowledge-base retrieval，包括单文件标题生成与按任务启用、混合文件/文件夹知识库源路径、面向标题生成、研究总结与 artifact-mode 图形结果路径的 machine-readable retrieval 摘要、用于检查 effective path/query/context 的 maintainer-only `local-knowledge.inspect` seam、用于 ad hoc task-scoped 检查的临时 `knowledgePaths` override 数组，以及 `npm run verify:local-kb-fixtures` 这条现已覆盖 mixed file/folder task-scoped inspect case、noisy mixed-corpus scope、real-note-style chapter-split showcase retrieval、chapter-split showcase 之外真实 note/query 多样性，以及 helper/docs/tests 对同一批真实 docs-vault example payload 的对齐；
+9. local knowledge-base retrieval，包括单文件标题生成与按任务启用、混合文件/文件夹知识库源路径、面向标题生成、研究总结与 artifact-mode 图形结果路径的 machine-readable retrieval 摘要、用于检查 effective path/query/context 的 maintainer-only `local-knowledge.inspect` seam、用于 ad hoc task-scoped 检查的临时 `knowledgePaths` override 数组，以及 `npm run verify:local-kb-fixtures` 这条现已覆盖 mixed file/folder task-scoped inspect case、noisy mixed-corpus scope、real-note-style chapter-split showcase retrieval、chapter-split showcase 之外真实 note/query 多样性、helper/docs/tests 对同一批真实 docs-vault example payload 的对齐，以及可直接复现 `no-paths` / `no-candidate-files` 的 docs-vault failure-state 示例；
 10. chapter split（含 repeated-heading-safe TOC block ref、确定性的 TOC front-matter metadata 与 guarded rerun overwrite 语义）；
 11. package metadata、welcome digest、README family、change log 与 release-note artifacts 上当前 `1.9.2` 的 release-facing version truth；
 12. transport-driven provider registry 增长，以及 OpenAI-compatible base-URL normalization、`models-then-chat` probing 等连接测试语义，同时仍保持手动 model 输入作为 live configuration truth；

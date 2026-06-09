@@ -94,13 +94,15 @@
 - `local-knowledge.inspect` 当前会把三条 query 派生路径明确暴露出来并由测试锁定：`explicit`（直接研究查询）、`basename`（标题/批量标题任务作用域）以及 `diagram-source`（由图形生成任务的源文件 basename + stripped note content 共同派生）。inspect 结果现在还会补充有界 query diagnostics，例如对 `index.*` 这类低信号导航文件名给出 generic navigation-basename caution
 - `local-knowledge.inspect` 现在还支持临时 `knowledgePaths` override 数组，维护者可以在不改动已保存 settings 快照的前提下，用临时文件/文件夹路径列表检查 task-scoped retrieval 行为
 - `local-knowledge.inspect` 现在还会把失败态 explainability 明确保留下来，而不是把所有未命中都压成同一种空结果：`retrieverBuildStatus` 会区分 `no-paths`、`no-candidate-files`、`no-retrievable-sections` 与 `ready`，同时继续保留 `candidateFilePaths` 与结构化 retrieval 摘要供维护者定位问题
-- 现在还补上了更贴近真实 task-scoped retrieval 链路的 inspect 示例，而不再只有 diagram lane：
+- 现在还补上了更贴近真实 task-scoped retrieval 链路、并可直接复现 failure-state 的 inspect 示例，而不再只有 diagram lane：
   - `npm run cli:invoke -- --vault docs --operation local-knowledge.inspect --input-json '{"taskScope":"batchGenerateFromTitles","sourcePath":"index.zh-CN.md"}' --pretty`
   - `npm run cli:invoke -- --vault docs --operation local-knowledge.inspect --input-json '{"taskScope":"researchSummarize","query":"task-scoped retrieval behavior","knowledgePaths":["maintainer"]}' --pretty`
   - `npm run cli:invoke -- --vault docs --operation local-knowledge.inspect --input-json '{"taskScope":"researchSummarize","query":"chapter split TOC managed artifacts guarded reruns","knowledgePaths":["chapter-split-toc.md","chapter-split-toc.zh-CN.md"]}' --pretty`
   - `npm run cli:invoke -- --vault docs --operation local-knowledge.inspect --input-json '{"taskScope":"researchSummarize","query":"real-note query diversity beyond chapter split showcase","knowledgePaths":["brainstorms","maintainer"],"topK":2,"slidingWindowSize":1}' --pretty`
   - `npm run cli:invoke -- --vault docs --operation local-knowledge.inspect --input-json '{"taskScope":"batchGenerateFromTitles","sourcePath":"brainstorms/2026-05-28-mainline-progress-audit-and-next-level-direction.md","knowledgePaths":["brainstorms","maintainer"],"topK":2,"slidingWindowSize":1}' --pretty`
   - `npm run cli:invoke -- --vault docs --operation local-knowledge.inspect --input-json '{"taskScope":"diagramGeneration","sourcePath":"index.zh-CN.md","knowledgePaths":["brainstorms","maintainer"],"topK":2,"slidingWindowSize":1}' --pretty`
+  - `npm run cli:invoke -- --vault docs --operation local-knowledge.inspect --input-json '{"taskScope":"researchSummarize","query":"missing path coverage","knowledgePaths":[]}' --pretty`
+  - `npm run cli:invoke -- --vault docs --operation local-knowledge.inspect --input-json '{"taskScope":"researchSummarize","query":"svg-only repo saga scope","knowledgePaths":["repo-saga"]}' --pretty`
 - `content.split-note-by-chapters` 现在还支持可选 `splitHeadingLevel`（`auto`、`h1`-`h6`），脚本可避免继续隐式依赖当前 settings 快照
 - `content.split-note-by-chapters` 的结果现在还会显式带出 `requestedSplitHeadingLevel`、`chapterNotePaths`、`managedArtifactPaths`、`removedStalePaths`、确定性的 `tocMetadata` 以及稳定的 `nestedHeadings[].blockId`，自动化调用方不必再靠文件名规则或重复标题的歧义去反推 managed artifact 集合、TOC front-matter metadata 与 TOC 目标；rerun 时若 manifest 管理的生成文件已被手改，当前实现也会拒绝静默覆盖或删除
 - 这些 path-based 维护操作在副作用、输出契约与失败语义没有作为公共契约一并锁定前，仍应保持 maintainer-only

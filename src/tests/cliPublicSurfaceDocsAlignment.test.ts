@@ -130,6 +130,14 @@ describe('CLI public surface docs alignment', () => {
         expect(matrixZh).toContain('"knowledgePaths":["brainstorms","maintainer"]');
         expect(matrix).toContain('"sourcePath":"brainstorms/2026-05-28-mainline-progress-audit-and-next-level-direction.md"');
         expect(matrixZh).toContain('"sourcePath":"brainstorms/2026-05-28-mainline-progress-audit-and-next-level-direction.md"');
+        expect(matrix).toContain('"query":"missing path coverage"');
+        expect(matrixZh).toContain('"query":"missing path coverage"');
+        expect(matrix).toContain('"knowledgePaths":[]');
+        expect(matrixZh).toContain('"knowledgePaths":[]');
+        expect(matrix).toContain('"query":"svg-only repo saga scope"');
+        expect(matrixZh).toContain('"query":"svg-only repo saga scope"');
+        expect(matrix).toContain('"knowledgePaths":["repo-saga"]');
+        expect(matrixZh).toContain('"knowledgePaths":["repo-saga"]');
         expect(matrix).toContain('vault-relative');
         expect(matrixZh).toContain('vault-relative');
     });

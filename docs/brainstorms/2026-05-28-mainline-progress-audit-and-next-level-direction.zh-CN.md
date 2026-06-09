@@ -429,6 +429,7 @@ provider 专题文在以下几点上仍然正确，而且不应被放松：
 6. 离线夹具与 maintainer helper 示例现在还覆盖 real-note-style chapter-split showcase query：它会围绕 managed artifacts、guarded reruns 与稳定 TOC block refs 检查检索效果，并且 runnable inspect 示例使用真实 docs vault 路径，而不是只存在于测试夹具中的路径。
 7. 离线夹具现在还覆盖了 chapter-split showcase 之外的真实 note/query 多样性：跨文件夹 project/reference 知识库路径、任务契约检索、RAG 质量评估笔记与 navigation-like source diagnostics 都被锁定，同时没有把 `local-knowledge.inspect` 提升成 public CLI contract。
 8. maintainer help、双语 capability matrix 与对应 Jest alignment 测试现在补上了同一批真实 docs-vault inspect 示例：explicit research query 使用 `brainstorms` + `maintainer` 跨文件夹知识路径，batch-title 示例直接指向 `brainstorms/2026-05-28-mainline-progress-audit-and-next-level-direction.md`，diagram-source 示例继续用 `index.zh-CN.md` 验证低信号来源诊断；这使 Batch C 的“示例对齐”从开放方向推进为已落地 guardrail。
+9. maintainer help、双语 capability matrix 与离线 runtime fixture 现在还补上了可直接复现的 docs-vault failure-state 示例：显式空 override 数组会稳定证明 `no-paths`，而 `repo-saga` 这个仅含 SVG 的目录会稳定证明 `no-candidate-files`，不再只依赖合成夹具去表达这两类失败态。
 
 这一批次接下来的有界方向：
 

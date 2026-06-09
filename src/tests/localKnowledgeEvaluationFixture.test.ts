@@ -316,6 +316,10 @@ const FIXTURE_FILES: FixtureFile[] = [
             '## Local Knowledge',
             'The root index note is still a low-signal navigation source, so inspect should expose a caution while retrieval stays healthy.'
         ].join('\n')
+    },
+    {
+        path: 'repo-saga/notemd-development-history.svg',
+        markdown: '<svg><text>repo saga history</text></svg>'
     }
 ];
 
@@ -1000,7 +1004,9 @@ describe('local knowledge offline evaluation fixture', () => {
             chapterSplitShowcase,
             researchCrossFolder,
             batchCrossFolder,
-            diagramCrossFolder
+            diagramCrossFolder,
+            noPathsExample,
+            noCandidateFilesExample
         ] = results;
 
         expect(minimalDiagram.queryDerivation).toBe('diagram-source');
@@ -1074,5 +1080,21 @@ describe('local knowledge offline evaluation fixture', () => {
                 'maintainer/CLI Surface.md'
             ])
         );
+
+        expect(noPathsExample.queryDerivation).toBe('explicit');
+        expect(noPathsExample.effectivePathSource).toBe('override');
+        expect(noPathsExample.effectiveConfiguredPaths).toEqual([]);
+        expect(noPathsExample.retrieverBuildStatus).toBe('no-paths');
+        expect(noPathsExample.retrieverCreated).toBe(false);
+        expect(noPathsExample.candidateFilePaths).toEqual([]);
+        expect(noPathsExample.retrieval.returnedHitCount).toBe(0);
+
+        expect(noCandidateFilesExample.queryDerivation).toBe('explicit');
+        expect(noCandidateFilesExample.effectivePathSource).toBe('override');
+        expect(noCandidateFilesExample.effectiveConfiguredPaths).toEqual(['repo-saga']);
+        expect(noCandidateFilesExample.retrieverBuildStatus).toBe('no-candidate-files');
+        expect(noCandidateFilesExample.retrieverCreated).toBe(false);
+        expect(noCandidateFilesExample.candidateFilePaths).toEqual([]);
+        expect(noCandidateFilesExample.retrieval.returnedHitCount).toBe(0);
     });
 });
