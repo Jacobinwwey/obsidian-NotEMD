@@ -309,4 +309,128 @@ describe('batchGenerateContentForTitles', () => {
 
         buildRetrieverSpy.mockRestore();
     });
+
+    it('reuses one batch-title retriever across parallel workers and keeps retrieval summaries in parallel results', async () => {
+        settings.enableBatchParallelism = true;
+        settings.batchConcurrency = 2;
+        settings.batchSize = 2;
+        settings.enableLocalKnowledgeRetrieval = true;
+        settings.enableLocalKnowledgeForBatchGenerateFromTitles = true;
+        settings.localKnowledgeTopK = 2;
+        settings.localKnowledgeSlidingWindowSize = 1;
+        settings.localKnowledgeMaxSnippetChars = 180;
+
+        const files = [
+            { path: 'folder/file1.md', name: 'file1.md', basename: 'file1' },
+            { path: 'folder/file2.md', name: 'file2.md', basename: 'file2' },
+        ] as TFile[];
+
+        const buildContextDetails = jest.fn((query: string) => ({
+            query,
+            context: `Path: Knowledge/${query}.md\nExcerpt: Parallel local context for ${query}.`,
+            indexedFileCount: 2,
+            indexedSectionCount: 4,
+            matchedSectionCount: 1,
+            returnedHitCount: 1,
+            expandedSectionCount: 1,
+            sourcePaths: [`Knowledge/${query}.md`],
+            usedSlidingWindowSize: settings.localKnowledgeSlidingWindowSize,
+            requestedTopK: settings.localKnowledgeTopK,
+            indexBuildMs: 11,
+            queryMs: 4,
+            contextCharCount: 47,
+            excludeCurrentFileApplied: true,
+            excludedCurrentFileHitCount: 0,
+            contextBlocks: []
+        }));
+        const buildRetrieverSpy = jest
+            .spyOn(localKnowledgeBase, 'buildLocalKnowledgeBaseRetriever')
+            .mockResolvedValue({
+                indexedFileCount: 2,
+                indexedSectionCount: 4,
+                buildContextDetails
+            } as any);
+
+        (mockApp.vault.getAbstractFileByPath as jest.Mock).mockImplementation((path: string) => {
+            if (path === 'folder') {
+                const folder = new TFolder();
+                Object.assign(folder, { path: 'folder', name: 'folder', children: [] });
+                return folder;
+            }
+            return null;
+        });
+        (mockApp.vault.getMarkdownFiles as jest.Mock).mockReturnValue(files);
+        (mockApp.vault.adapter.exists as jest.Mock).mockImplementation(async (path: string) => {
+            if (path === 'folder_complete') return false;
+            if (path === 'folder_complete/file1.md' || path === 'folder_complete/file2.md') return false;
+            if (path === 'folder/file1.md' || path === 'folder/file2.md') return true;
+            return false;
+        });
+
+        const result = await batchGenerateContentForTitles(mockApp, settings, 'folder', mockProgressReporter);
+
+        expect(buildRetrieverSpy).toHaveBeenCalledWith(
+            mockApp,
+            settings,
+            mockProgressReporter,
+            'batchGenerateFromTitles'
+        );
+        expect(buildRetrieverSpy).toHaveBeenCalledTimes(1);
+        expect(buildContextDetails).toHaveBeenCalledWith(
+            'file1',
+            expect.objectContaining({
+                currentFilePath: 'folder/file1.md',
+                topK: settings.localKnowledgeTopK,
+                slidingWindowSize: settings.localKnowledgeSlidingWindowSize,
+                maxSnippetChars: settings.localKnowledgeMaxSnippetChars
+            })
+        );
+        expect(buildContextDetails).toHaveBeenCalledWith(
+            'file2',
+            expect.objectContaining({
+                currentFilePath: 'folder/file2.md'
+            })
+        );
+        expect(callLLM).toHaveBeenCalledTimes(2);
+        expect(
+            (callLLM as jest.Mock).mock.calls.some(([, systemPrompt, prompt, usedSettings, reporterArg, modelName]) =>
+                systemPrompt === ''
+                && typeof prompt === 'string'
+                && prompt.includes('Parallel local context for file1.')
+                && usedSettings === settings
+                && typeof reporterArg?.updateStatus === 'function'
+                && typeof reporterArg?.updateActiveTasks === 'function'
+                && typeof reporterArg?.updateApiLiveness === 'function'
+                && typeof modelName === 'string'
+            )
+        ).toBe(true);
+        expect(result).toEqual(expect.objectContaining({
+            generatedCount: 2,
+            movedCount: 2,
+            fileResults: expect.arrayContaining([
+                expect.objectContaining({
+                    sourcePath: 'folder/file1.md',
+                    localKnowledgeContextUsed: true,
+                    localKnowledgeRetrieval: expect.objectContaining({
+                        indexedFileCount: 2,
+                        indexedSectionCount: 4,
+                        returnedHitCount: 1,
+                        sourcePaths: ['Knowledge/file1.md'],
+                        indexBuildMs: 11,
+                        queryMs: 4,
+                        contextCharCount: 47
+                    })
+                }),
+                expect.objectContaining({
+                    sourcePath: 'folder/file2.md',
+                    localKnowledgeContextUsed: true,
+                    localKnowledgeRetrieval: expect.objectContaining({
+                        sourcePaths: ['Knowledge/file2.md']
+                    })
+                })
+            ])
+        }));
+
+        buildRetrieverSpy.mockRestore();
+    });
 });
