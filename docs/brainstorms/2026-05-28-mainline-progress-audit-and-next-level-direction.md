@@ -1,6 +1,6 @@
 ---
 date: 2026-05-28
-last_updated: 2026-06-06
+last_updated: 2026-06-09
 topic: mainline-progress-audit-and-next-level-direction
 canonical: true
 ---
@@ -257,6 +257,24 @@ This is no longer only a principle statement. The repo now carries tracked mirro
 3. `docs/brainstorms/2026-06-09-chapter-split-knowledge-management-and-toc-comparison-truth.md`
 
 Those mirrors are now also part of executable Stage-C evidence instead of remaining docs-only truth: the local-KB offline fixture and maintainer inspect examples now probe them through real retrieval paths.
+
+### 2.9 Current `7af2f9b` docs-sync baseline
+
+The current remote-synced baseline is now also explicit at the documentation layer: `7af2f9b` (`docs(progress): sync current-main helper proof truth`).
+
+What that baseline means:
+
+1. no shipped runtime or product behavior changed in that docs-sync commit;
+2. the canonical current-main progress docs now explicitly treat the release / chronicle / repo-saga helper-entrypoint proofs as landed evidence instead of future intent;
+3. the diagram-platform roadmap is now expected to describe:
+   - Task 0 as packaging/source-build boundary truth;
+   - Task 2 as compatibility-surface convergence rather than pipeline existence work;
+   - Task 3 as MermaidProcessor responsibility reduction under a real-Obsidian verification bar.
+
+Correct interpretation:
+
+1. current-main truth maintenance now includes keeping roadmap/progress language synchronized with the checked-in helper-entrypoint evidence;
+2. document sync is now a regression boundary, not optional prose cleanup.
 
 ## 3. Deep Comparison Against Earlier Plan Language
 

@@ -36,6 +36,17 @@ This also needs to be explicit:
 Deep comparison and next-step implementation note:
 - `docs/brainstorms/2026-05-08-packaging-semantic-convergence-progress-and-next-steps.md`
 
+## 2026-06-09 Current-Main Truth Sync
+
+This roadmap now also needs to track the current-main docs-sync baseline explicitly: `7af2f9b` (`docs(progress): sync current-main helper proof truth`) on clean `main...origin/main`.
+
+What that correction means:
+
+- Task 0 is still the primary architecture bottleneck. Current build/release/audit/docs truth still enforces single-entry `main.js` plus inline `srcdoc`, and `createRenderHostBundleBuildOptions()` remains candidate-only outside the production `esbuild.config.mjs` path.
+- Task 2 is no longer about proving that the spec-first generation pipeline exists. It is now a compatibility-surface convergence problem across legacy command IDs, workflow/sidebar labels, and experimental-era naming.
+- Task 3 is no longer about proving Mermaid subtype support. It is now about reducing `src/mermaidProcessor.ts` responsibility under the already-declared rule that every sub-slice must be verified in a real Obsidian session with saved-artifact inspection.
+- The checked-in release / chronicle / repo-saga helper entrypoints now have process-level regression proof, so Task 0 packaging evidence is repo-owned truth rather than maintainer memory.
+
 ---
 
 **Goal:** Evolve Notemd from a single Mermaid-text generation path into an extensible diagram platform built around intent detection, structured specs, specialized renderers, and multi-format output inside Obsidian.
@@ -111,14 +122,14 @@ All existing provider configs, transport protocols, and settings UI remain uncha
 
 | Task | Status | Current reality |
 |---|---|---|
-| Task 0 | Delivered with explicit limits | `src/rendering/webview/*` and `src/rendering/host/iframeRenderHost.ts` have landed with an inline `srcdoc` host. `scripts/audit-render-host-bundle.js`, the release workflow, and tests now lock the requirement that the render host must ship self-contained inside `main.js`. `esbuild.config.mjs` is still single-entry, so true heavy-runtime isolation is not complete. |
+| Task 0 | Delivered with explicit limits | `src/rendering/webview/*` and `src/rendering/host/iframeRenderHost.ts` have landed with an inline `srcdoc` host. `scripts/audit-render-host-bundle.js`, the release workflow, `scripts/lib/packaging-contract.js`, and tests now lock the requirement that the render host must ship self-contained inside `main.js`. `createRenderHostBundleBuildOptions()` remains candidate-only outside the production `esbuild.config.mjs` path, so true heavy-runtime isolation is still not complete. |
 | Task 1 | Delivered | `DiagramIntent`, `DiagramSpec`, validators, planner logic, and intent inference rules are on the mainline with tests. |
 | Task 2 | Partial (hard constraint) | The spec-first prompt and service pipeline are landed, and `src/main.ts`, `src/ui/NotemdSidebarView.ts`, and `src/operations/diagramCommandHostAdapter.ts` now route diagram generation/preview through canonical internal entrypoints (`generateDiagramCommand`, `previewDiagramCommand`, `runPreviewDiagramCommandWithHost`). Workflow/sidebar action metadata also now uses canonical action IDs (`generate-diagram`, `preview-diagram`) while older `*-experimental-diagram` action tokens are normalized as compatibility aliases. The remaining dual-track surface is therefore mostly compatibility-era public command IDs and labels rather than divergent execution chains. **Hard Constraint:** The legacy Mermaid prompt in `promptUtils.ts` was specifically tuned for the original scenario. Any extension or retirement MUST fully preserve the original scenario's usability. Cross-version stability takes priority over cleanup. |
 | Task 3 | Partial (hard constraint) | Mermaid subtype adapters and `mermaid.parse` validation are shipped. Flowchart pipe-label escaping moved into adapter emit, and a large share of note-directive parsing / edge-label helpers have started moving into `src/diagram/adapters/mermaid/legacyFixerUtils.ts`. `src/mermaidProcessor.ts` still owns too much legacy fixer work. **Hard Constraint:** Each sub-task MUST be individually verified in a real Obsidian instance before proceeding. Diagram output images MUST be saved, checked, and confirmed complete. Unit tests alone are insufficient to advance beyond any sub-task boundary. |
 | Task 4 | Delivered | Renderer registry/service, cache, inline host, iframe preview session, and unified preview modal are all landed. |
 | Task 5 | Delivered | `.canvas` output, baseline deterministic layout, save flows, and preview support are all landed. |
 | Task 6 | Delivered with explicit limits | Vega-Lite preview now boots through the iframe host with a target-specific sandbox and `srcdoc` bootstrap path. The remaining limit is packaging, not preview routing: the runtime still ships through the main bundle bridge until Task 0 grows a real multi-entry host asset strategy. |
-| Task 7 | Delivered with explicit limits | Theme, locale, SVG/PNG/source export, and the support matrix are aligned with current code. HTML still promises only iframe fallback preview and raw source save. The release workflow now also pins supported `actions/checkout@v6` and `actions/setup-node@v6` majors so the release path does not inherit the older Node 20 JavaScript-action deprecation warning. |
+| Task 7 | Delivered with explicit limits | Theme, locale, SVG/PNG/source export, and the support matrix are aligned with current code. HTML still promises only iframe fallback preview and raw source save. The release workflow now also pins supported `actions/checkout@v6` and `actions/setup-node@v6` majors so the release path does not inherit the older Node 20 JavaScript-action deprecation warning, and the checked-in release / chronicle / repo-saga helper entrypoints now have process-level regression proof for the current release-contract lane. |
 | Task 8 | Deferred by design | Advanced DSL / renderer evaluation remains intentionally postponed. |
 
 ### Cross-Validated Medium-Term Agenda
@@ -724,11 +735,11 @@ The following should not enter the mainline now:
 
 If work continues now, it should be a convergence batch, not a new-target batch:
 
-1. Finish Task 2's remaining command-architecture convergence
-2. Finish Task 3's remaining `mermaidProcessor.ts` responsibility reduction and legacy-fixer sunset boundary
-3. Revisit Task 0's remaining heavier-runtime packaging boundary so bridge-backed iframe preview can graduate to a real dedicated host bundle
-4. Keep strengthening Task 7 so the support matrix is bound more tightly to docs and release contracts
-5. Treat Task 0's smoke gate as a hard regression boundary; any move to standalone host assets must upgrade release/install design first
+1. Revisit Task 0's remaining heavier-runtime packaging boundary first, so current source/build/release/audit truth stays aligned before any broader claim widening
+2. Finish Task 2's remaining command-architecture convergence
+3. Finish Task 3's remaining `mermaidProcessor.ts` responsibility reduction and legacy-fixer sunset boundary
+4. Keep strengthening Task 7 so the support matrix, release contracts, and checked-in helper-entrypoint proof stay aligned
+5. Treat Task 0's smoke gate plus candidate-only build guard as hard regression boundaries; any move to standalone host assets must upgrade release/install design first
 
 Reason:
 

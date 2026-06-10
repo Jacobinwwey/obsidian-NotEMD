@@ -1,6 +1,6 @@
 ---
 date: 2026-05-08
-last_updated: 2026-06-06
+last_updated: 2026-06-09
 topic: packaging-semantic-convergence-progress-and-next-steps
 ---
 
@@ -340,6 +340,22 @@ Interpretation:
 
 1. current repo-saga behavior is still unchanged;
 2. the useful change is stronger proof of the checked-in sync helper's real CLI behavior, not only its source-shape and lock-helper internals.
+
+### 2026-06-09 Current-Main Progress-Sync Delta
+
+The next drift risk in this lane was no longer code. It was documentation ownership across the current-main truth surfaces.
+
+1. the canonical progress docs in `docs/brainstorms/2026-05-20-*` and `docs/brainstorms/2026-05-28-*` now explicitly treat the helper-entrypoint proofs above as landed current-main evidence instead of pending follow-through;
+2. the diagram-platform roadmap in `docs/superpowers/plans/2026-04-14-diagram-rendering-platform-roadmap.*` now also reads:
+   - Task 0 as the still-live packaging/source-build bottleneck;
+   - Task 2 as compatibility-surface convergence rather than pipeline existence work;
+   - Task 3 as MermaidProcessor responsibility reduction guarded by real Obsidian verification;
+3. the packaging lane therefore remains the primary architecture bottleneck on current main, while the release / chronicle / repo-saga helper-entrypoint proofs act as contract-depth evidence supporting that lane rather than as a separate architecture track.
+
+Interpretation:
+
+1. this batch still does not widen the shipped topology;
+2. it does reduce one more class of drift by making roadmap/progress truth follow the same checked-in helper-entrypoint evidence that code/tests already prove.
 
 ### Priority 2: treat backup-branch Stage-C work as reintegration candidates
 

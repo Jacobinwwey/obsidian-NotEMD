@@ -1,6 +1,6 @@
 ---
 date: 2026-05-20
-last_updated: 2026-06-06
+last_updated: 2026-06-09
 topic: unified-follow-through-matrix
 canonical: true
 ---
@@ -22,7 +22,7 @@ canonical: true
 
 本文基于以下事实建立：
 
-1. 2026-05-24 force rewrite 之后的 live `origin/main`，并在 2026-06-06 基于 `1.9.2` 发货边界以及后续 post-release contract/evidence follow-through commits 重新审计当前 `main` 工作树；
+1. 2026-05-24 force rewrite 之后的 live `origin/main`，并在 2026-06-09 基于 `1.9.2` 发货边界以及后续 post-release contract/evidence follow-through commits 重新审计当前 `main` 工作树；
 2. 先前仍与当前主线相关的文档：
    - `docs/brainstorms/2026-05-07-cli-next-phase-planning.*`
    - `docs/brainstorms/2026-05-08-packaging-semantic-convergence-progress-and-next-steps.*`
@@ -37,6 +37,7 @@ canonical: true
 3. `7999a5f`（`test(local-kb): broaden stage-c fixture coverage`）之后，fixture lane 已把 chapter-split showcase 之外的真实 note/query 多样性纳入当前证明范围；
 4. 因此，本文把 local-KB、file selection 与 chapter split 视为已落地产品契约；下一步是评估深度、maintainer 示例对齐与 packaging 边界纪律，而不是继续做存在性重证。
 5. 当前批次继续把 maintainer example alignment 收口到真实 docs-vault 路径：helper help、双语 capability matrix 与测试现在共同覆盖 explicit research query、跨文件夹 batch-title source path、diagram-source retrieval，以及有界 `topK` / `slidingWindowSize` override；这仍是 maintainer-only 诊断面，不是 public CLI 扩面。
+6. `7af2f9b`（`docs(progress): sync current-main helper proof truth`）是当前 docs-sync 基线：它没有扩大 runtime 行为，但重新把 canonical progress 文档与 diagram roadmap 锁回同一套 current-main helper-entrypoint 真值。
 
 ## 3. 当前统一矩阵
 
@@ -61,6 +62,7 @@ canonical: true
    - 已检入 release dry-run 的 create/repair 路径与非法 tag 的 wrapper 失败路径；
    - chronicle refresh wrapper 的 no-op / override / git-failure 路径；
    - repo-saga sync/generation wrapper 的 sync-only stamp 命中、active-lock refusal、隔离生成路径，以及非法参数 fast-fail 行为。
+8. diagram-platform roadmap 的中英文版本现在也属于这套 current-main truth：它们应继续把任务 0 写成 packaging 边界瓶颈，把任务 2 写成 compatibility-surface 收口，把任务 3 写成 MermaidProcessor 降责，而不是继续暗示平台尚未建成。
 
 ## 4. 当前主线已确认 register
 

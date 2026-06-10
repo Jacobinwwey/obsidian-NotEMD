@@ -1,6 +1,6 @@
 ---
 date: 2026-05-20
-last_updated: 2026-06-06
+last_updated: 2026-06-09
 topic: unified-follow-through-matrix
 canonical: true
 ---
@@ -22,7 +22,7 @@ From this checkpoint onward:
 
 This matrix is grounded in:
 
-1. live `origin/main` after the 2026-05-24 force rewrite, re-audited against the current `main` working tree on 2026-06-06 after the `1.9.2` release boundary plus the later post-release contract/evidence follow-through commits;
+1. live `origin/main` after the 2026-05-24 force rewrite, re-audited against the current `main` working tree on 2026-06-09 after the `1.9.2` release boundary plus the later post-release contract/evidence follow-through commits;
 2. prior current-main documents:
    - `docs/brainstorms/2026-05-07-cli-next-phase-planning.*`
    - `docs/brainstorms/2026-05-08-packaging-semantic-convergence-progress-and-next-steps.*`
@@ -37,6 +37,7 @@ Current execution baseline for this matrix update:
 3. after `7999a5f` (`test(local-kb): broaden stage-c fixture coverage`), that fixture lane also explicitly carries broader real-note/query diversity beyond the chapter-split showcase as current evidence instead of future intent;
 4. the matrix therefore treats local-KB, file selection, and chapter split as landed product contracts whose next work is evaluation depth, maintainer-example alignment, and packaging-boundary discipline.
 5. the current batch further closes maintainer example alignment onto real docs-vault paths: helper help, the bilingual capability matrix, and tests now jointly cover explicit research queries, cross-folder batch-title source paths, diagram-source retrieval, and bounded `topK` / `slidingWindowSize` overrides without widening the public CLI boundary.
+6. `7af2f9b` (`docs(progress): sync current-main helper proof truth`) is the current docs-sync baseline: it does not widen runtime behavior, but it does re-lock the canonical progress docs and the diagram roadmap to the same current-main helper-entrypoint truth.
 
 ## 3. Current Unified Matrix
 
@@ -61,6 +62,7 @@ Current Batch-C alignment note:
    - the checked-in release dry-run create/repair path plus invalid-tag wrapper failures;
    - the chronicle refresh wrapper's no-op / override / git-failure paths;
    - the repo-saga sync/generation wrapper's sync-only stamp hit, active-lock refusal, isolated generation, and invalid-argument fast-fail behavior.
+8. The diagram-platform roadmap EN/ZH is now also part of this current-main truth set: it is expected to keep Task 0 as the packaging-boundary bottleneck, Task 2 as compatibility-surface convergence, and Task 3 as MermaidProcessor responsibility reduction instead of implying the platform is still unbuilt.
 
 ## 4. Reconfirmed Current-Main Register
 

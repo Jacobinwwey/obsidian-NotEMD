@@ -1,6 +1,6 @@
 ---
 date: 2026-05-28
-last_updated: 2026-06-06
+last_updated: 2026-06-09
 topic: mainline-progress-audit-and-next-level-direction
 canonical: true
 ---
@@ -257,6 +257,24 @@ canonical: true
 3. `docs/brainstorms/2026-06-09-chapter-split-knowledge-management-and-toc-comparison-truth.zh-CN.md`
 
 这些镜像现在也已经进入可执行的 Stage-C 证据面，而不再只是 docs-only 真值：local-KB 的离线 fixture 与 maintainer inspect 示例会沿真实检索路径探测它们。
+
+### 2.9 当前 `7af2f9b` 的文档同步基线
+
+当前远端同步后的基线，也已经在文档层被明确下来：`7af2f9b`（`docs(progress): sync current-main helper proof truth`）。
+
+这个基线真正意味着：
+
+1. 这次 docs-sync commit 没有改变任何已发货 runtime 或产品行为；
+2. canonical 的 current-main progress 文档现在会把 release / chronicle / repo-saga helper 的入口级证明明确视为已落地证据，而不是未来意图；
+3. diagram-platform roadmap 现在也应明确把：
+   - 任务 0 读成 packaging/source-build 边界真值；
+   - 任务 2 读成 compatibility-surface 收口，而不是 pipeline 是否存在；
+   - 任务 3 读成带真实 Obsidian 验证门槛的 MermaidProcessor 降责工作。
+
+正确解释：
+
+1. 当前主线真值维护现在也包括让 roadmap/progress 语言持续跟上已检入 helper-entrypoint 证据；
+2. 文档同步现在已经是回归边界，而不是可选的 prose 清理。
 
 ## 3. 相对先前方案语言的深度对比
 
