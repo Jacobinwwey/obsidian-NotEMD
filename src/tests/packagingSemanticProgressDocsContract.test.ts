@@ -74,5 +74,13 @@ describe('packaging semantic progress docs contract', () => {
         expect(progressDocZh).toContain('`--no-readme --tag <tag>` 真实运行仍会产出多语言编年史 SVG');
         expect(progressDoc).toContain('missing `--tag` values and unknown options now fail fast before touching repo-saga state');
         expect(progressDocZh).toContain('缺失 `--tag` 值与未知参数现在会在触碰 repo-saga 状态前快速失败');
+        expect(progressDoc).toContain('### 2026-06-09 Current-Main Progress-Sync Delta');
+        expect(progressDocZh).toContain('### 2026-06-09 Current-Main Progress-Sync 增量');
+        expect(progressDoc).toContain('Task 0 as the still-live packaging/source-build bottleneck');
+        expect(progressDocZh).toContain('任务 0 读成仍然活跃的 packaging/source-build 瓶颈');
+        expect(progressDoc).toContain('Task 2 as compatibility-surface convergence rather than pipeline existence work');
+        expect(progressDocZh).toContain('任务 2 读成 compatibility-surface 收口，而不是 pipeline 是否存在');
+        expect(progressDoc).toContain('Task 3 as MermaidProcessor responsibility reduction guarded by real Obsidian verification');
+        expect(progressDocZh).toContain('任务 3 读成带真实 Obsidian 验证门槛的 MermaidProcessor 降责');
     });
 });

@@ -34,6 +34,10 @@ describe('mainline progress audit contract', () => {
         expect(progressDocZh).toContain('`npm run verify:local-kb-fixtures`');
         expect(progressDoc).toContain('MiniSearch-backed retrieval path');
         expect(progressDocZh).toContain('MiniSearch-backed retrieval 路径');
+        expect(progressDoc).toContain('### 2.9 Current `7af2f9b` docs-sync baseline');
+        expect(progressDocZh).toContain('### 2.9 当前 `7af2f9b` 的文档同步基线');
+        expect(progressDoc).toContain('docs(progress): sync current-main helper proof truth');
+        expect(progressDocZh).toContain('docs(progress): sync current-main helper proof truth');
     });
 
     test('locks the active PRD interpretation to landed implementation truth plus ongoing gates', () => {
@@ -122,6 +126,8 @@ describe('mainline progress audit contract', () => {
     test('keeps the unified matrix aligned with the same current-head evidence and next direction', () => {
         expect(matrixDoc).toContain('Current execution baseline for this matrix update:');
         expect(matrixDocZh).toContain('本次矩阵更新的当前执行基线：');
+        expect(matrixDoc).toContain('re-audited against the current `main` working tree on 2026-06-09');
+        expect(matrixDocZh).toContain('并在 2026-06-09 基于 `1.9.2` 发货边界');
         expect(matrixDoc).toContain('`890b21b`');
         expect(matrixDocZh).toContain('`890b21b`');
         expect(matrixDoc).toContain('docs(progress): align post-recovery packaging truth');
@@ -184,6 +190,10 @@ describe('mainline progress audit contract', () => {
         expect(matrixDocZh).toContain('docs/brainstorms/2026-06-09-*');
         expect(matrixDoc).toContain('part of executable retrieval evidence through the offline fixture and maintainer inspect examples');
         expect(matrixDocZh).toContain('进入可执行的检索证据面');
+        expect(matrixDoc).toContain('`7af2f9b` (`docs(progress): sync current-main helper proof truth`) is the current docs-sync baseline');
+        expect(matrixDocZh).toContain('`7af2f9b`（`docs(progress): sync current-main helper proof truth`）是当前 docs-sync 基线');
+        expect(matrixDoc).toContain('The diagram-platform roadmap EN/ZH is now also part of this current-main truth set');
+        expect(matrixDocZh).toContain('diagram-platform roadmap 的中英文版本现在也属于这套 current-main truth');
         expect(matrixDoc).toContain('release / repo-saga helper lane now also has process-level entrypoint proof');
         expect(matrixDocZh).toContain('release / repo-saga helper 这条线现在也已经具备 current main 上的 process-level 入口证明');
         expect(matrixDoc).toContain('invalid-tag wrapper failures');
