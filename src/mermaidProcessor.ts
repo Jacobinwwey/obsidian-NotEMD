@@ -6,6 +6,18 @@ import {
     mergeLegacyDoubleArrowLabelLine,
     parseDirectionalNoteDirective,
     parseLegacyForOfNoteDirective,
+    rewriteLegacyInlineSubgraphLabelLine,
+    rewriteLegacyBlankArrowSyntax,
+    rewriteLegacyDoubleDashArrow,
+    rewriteLegacyDoubleSlashCommentLine,
+    rewriteLegacyDuplicateQuotedLabelChain,
+    rewriteLegacyInvalidArrowSyntax,
+    rewriteLegacyMermaidCommentLine,
+    rewriteLegacyMisplacedPipeLine,
+    rewriteLegacyPlaceholderArtifacts,
+    rewriteLegacyReverseArrowLine,
+    rewriteLegacyShapeMismatch,
+    rewriteLegacySubgraphDirectionLine,
     parseLegacyStandaloneNoteDirective,
     parseLegacyTargetedNoteDirective,
     protectTopLevelBracketBlocks,
@@ -486,8 +498,7 @@ export function deepDebugMermaid(content: string): string {
  * @returns Content with `--|>` replaced by `-->`.
  */
 export function fixInvalidArrows(content: string): string {
-    // Global replacement of --|> with -->
-    return content.replace(/--\|>/g, '-->');
+    return rewriteLegacyInvalidArrowSyntax(content);
 }
 
 
@@ -498,8 +509,7 @@ export function fixInvalidArrows(content: string): string {
  * @returns Content with `--|>` replaced by `-->`.
  */
 export function fixBlankArrows(content: string): string {
-    // Global replacement of -- > with -->
-    return content.replace(/-- >/g, '-->');
+    return rewriteLegacyBlankArrowSyntax(content);
 }
 
 /**
@@ -508,12 +518,7 @@ export function fixBlankArrows(content: string): string {
  * Example: `note1[/["Path Difference = CB + BD["/] -> note1["Path Difference = CB + BD"]`
  */
 export function fixShapeMismatch(content: string): string {
-    let processed = content;
-    // Fix start: [/[" -> ["
-    processed = processed.replace(/\[\/\["/g, '["');
-    // Fix end: ["/] -> "]
-    processed = processed.replace(/\["\/\]/g, '"]');
-    return processed;
+    return rewriteLegacyShapeMismatch(content);
 }
 
 /**
@@ -521,7 +526,7 @@ export function fixShapeMismatch(content: string): string {
  * Deletes '___BRACKET_BLOCK_0___' and similar artifacts.
  */
 export function fixPlaceholderArtifacts(content: string): string {
-    return content.replace(/___BRACKET_BLOCK_\d+___/g, '');
+    return rewriteLegacyPlaceholderArtifacts(content);
 }
 
 /**
@@ -862,74 +867,7 @@ export function fixUnquotedNodeLabels(content: string): string {
 export function fixMermaidComments(content: string): string {
     const lines = content.split('\n');
     const processedLines = lines.map(line => {
-        // Simple check for potential Mermaid comment
-        if (!line.includes('%') || !line.includes('-->')) {
-            return line;
-        }
-
-        // We only care about lines that look like: ... -- ... --> ... % ...
-        // Split by '%' first to safely isolate the comment, ensuring % isn't inside a quoted label.
-        
-        const parts = line.split('%');
-        
-        let codePart = parts[0];
-        let commentPart = '';
-        let foundComment = false;
-        
-        // Re-assemble parts if the % was inside a quote.
-        for (let i = 1; i < parts.length; i++) {
-             const potentialCode = parts.slice(0, i).join('%');
-             const quoteCount = (potentialCode.match(/"/g) || []).length;
-             if (quoteCount % 2 === 0) {
-                 // Even quotes means we are outside a string, so this % starts a comment
-                 codePart = potentialCode;
-                 commentPart = parts.slice(i).join('%');
-                 foundComment = true;
-                 break;
-             }
-        }
-        
-        if (!foundComment) return line; // No valid comment found or % was inside quotes
-        
-        // Clean up parts
-        let cleanCode = codePart.trim();
-        const cleanComment = commentPart.trim();
-        
-        if (!cleanComment) return line; // Empty comment, keep as is
-        
-        // Check for trailing semicolon in code
-        let hasSemi = false;
-        if (cleanCode.endsWith(';')) {
-            cleanCode = cleanCode.slice(0, -1).trim();
-            hasSemi = true;
-        }
-        
-        // Parse the arrow relation in cleanCode
-        // We support: A -- Label --> B
-        // Regex: (Start) (-- ) (Label) ( --> ) (End)
-        const arrowLabelRegex = /^(.*?)(--\s*)(.*?)(\s*-->\s*)(.*?)$/;
-        const match = cleanCode.match(arrowLabelRegex);
-        
-        if (match) {
-            const pre = match[1];
-            const arrowStart = match[2];
-            let label = match[3];
-            const arrowEnd = match[4];
-            const post = match[5];
-            
-            // If label is quoted, strip quotes
-            if (label.startsWith('"') && label.endsWith('"')) {
-                label = label.slice(1, -1);
-            }
-            
-            // Append comment
-            const newLabel = `${label}(${cleanComment})`;
-            
-            // Reconstruct
-            return `${pre}${arrowStart}"${newLabel}"${arrowEnd}${post}${hasSemi ? ';' : ''}`;
-        }
-        
-        return line;
+        return rewriteLegacyMermaidCommentLine(line) ?? line;
     });
     
     return processedLines.join('\n');
@@ -943,40 +881,7 @@ export function fixMermaidComments(content: string): string {
 export function fixInlineSubgraphs(content: string): string {
     const lines = content.split('\n');
     const processedLines = lines.map(line => {
-        // Regex to detect: Node ... Arrow ... Node; subgraph "Label" end;
-        // Captures:
-        // 1. Source (lazy)
-        // 2. Arrow (--> or ---)
-        // 3. Target (lazy)
-        // 4. Label (inside quotes)
-        
-        const regex = /^(.*?)\s*(---|-->)\s*(.*?);\s*subgraph\s+"(.*?)"\s*end;?\s*$/;
-        const match = line.match(regex);
-        
-        if (match) {
-            const source = match[1].trim();
-            const arrow = match[2].trim(); // '-->' or '---'
-            const target = match[3].trim();
-            const label = match[4].trim();
-            
-            // Construct new line: source -- "label" --> target;
-            // We use the arrow type to determine the connector.
-            // --> becomes -- "label" -->
-            // --- becomes -- "label" ---
-            
-            let newArrow = arrow;
-            if (arrow === '-->') {
-                newArrow = ` -- "${label}" --> `;
-            } else if (arrow === '---') {
-                newArrow = ` -- "${label}" --- `;
-            } else {
-                 // Fallback if regex matched something else (unlikely given regex)
-                 newArrow = ` -- "${label}" ${arrow} `;
-            }
-            
-            return `${source}${newArrow}${target};`;
-        }
-        return line;
+        return rewriteLegacyInlineSubgraphLabelLine(line) ?? line;
     });
     return processedLines.join('\n');
 }
@@ -1315,24 +1220,7 @@ export function fixSmartQuotes(content: string): string {
 export function fixReverseArrows(content: string): string {
     const lines = content.split('\n');
     const processedLines = lines.map(line => {
-        if (!line.includes('<--')) return line;
-
-        // Regex to capture:
-        // Group 1: Left Node (lazy)
-        // Group 2: <-- (literal)
-        // Group 3: Right Node (lazy)
-        // Group 4: Optional Semicolon
-        const regex = /^(.*?)\s*<--\s*(.*?)(;?)\s*$/;
-        const match = line.match(regex);
-
-        if (match) {
-            const leftNode = match[1].trim();
-            const rightNode = match[2].trim();
-            const semicolon = match[3] || '';
-            
-            return `${rightNode} --> ${leftNode}${semicolon}`;
-        }
-        return line;
+        return rewriteLegacyReverseArrowLine(line) ?? line;
     });
     return processedLines.join('\n');
 }
@@ -1351,13 +1239,7 @@ export function fixSubgraphDirection(content: string): string {
             insideSubgraph = false;
         }
 
-        if (insideSubgraph) {
-            // Replace `Direction` with `direction` if followed by TB, BT, LR, RL, TD
-            return line.replace(/^\s*Direction\s+(TB|BT|LR|RL|TD)\b/g, (match) => {
-                return match.replace('Direction', 'direction');
-            });
-        }
-        return line;
+        return rewriteLegacySubgraphDirectionLine(line, insideSubgraph);
     });
     return processedLines.join('\n');
 }
@@ -1370,37 +1252,7 @@ export function fixSubgraphDirection(content: string): string {
 export function fixDoubleSlashComments(content: string): string {
     const lines = content.split('\n');
     const processedLines = lines.map(line => {
-        if (!line.includes('//') || !line.includes('-->')) return line;
-
-        // Regex to find arrow relation followed by // comment
-        // Handle optional semicolon before //
-        // Group 1: Pre-arrow part
-        // Group 2: Arrow (-->)
-        // Group 3: Post-arrow part (target node)
-        // Group 4: Semicolon (optional)
-        // Group 5: Comment text
-        
-        // This regex assumes standard `-->` arrow. 
-        // We match `//` specifically.
-        
-        const regex = /^(.*?)(\s*-->\s*)(.*?)(;?)\s*\/\/\s*(.*)$/;
-        const match = line.match(regex);
-        
-        if (match) {
-            const preArrow = match[1]; // "Thermal"
-            const arrow = match[2]; // " --> "
-            const target = match[3].trim(); // "Optical"
-            const semicolon = match[4]; // ";"
-            const comment = match[5].trim(); // "Thermo-optic effect"
-            
-            if (comment) {
-                // Construct: Pre -- "Comment" --> Target;
-                // Note: arrow variable contains " --> ". We change it to " -- "Comment" --> "
-                const newArrow = ` -- "${comment}" --> `;
-                return `${preArrow}${newArrow}${target}${semicolon}`;
-            }
-        }
-        return line;
+        return rewriteLegacyDoubleSlashCommentLine(line) ?? line;
     });
     return processedLines.join('\n');
 }
@@ -1414,24 +1266,7 @@ export function fixDoubleSlashComments(content: string): string {
 export function fixDuplicateLabels(content: string): string {
     const lines = content.split('\n');
     const processedLines = lines.map(line => {
-        // Regex to match consecutive quoted brackets: ["..."]["..."]...
-        // We want to replace the whole sequence with just the last ["..."]
-        
-        // Improved Regex to handle escaped quotes: \[\"(?:[^"\\]|\\.)*\"\]
-        const blockRegexStr = '\\["(?:[^"\\\\]|\\\\.)*"\\]';
-        const blockRegex = new RegExp(blockRegexStr, 'g');
-        
-        // We look for 2 or more occurrences
-        const chainRegex = new RegExp(`((?:${blockRegexStr}\\s*){2,})`, 'g');
-        
-        return line.replace(chainRegex, (match) => {
-             // Split match into blocks
-             const blocks = match.match(blockRegex);
-             if (blocks && blocks.length > 0) {
-                 return blocks[blocks.length - 1];
-             }
-             return match;
-        });
+        return rewriteLegacyDuplicateQuotedLabelChain(line);
     });
     return processedLines.join('\n');
 }
@@ -1443,35 +1278,7 @@ export function fixDuplicateLabels(content: string): string {
 export function fixDoubleDashToArrow(content: string): string {
     const lines = content.split('\n');
     const processedLines = lines.map(line => {
-        // Target: ... -- Words...; where Words contains no -- or -->
-        if (!line.trim().endsWith(';')) return line;
-        
-        // Regex to capture:
-        // Group 1: Everything before
-        // Group 2: Pre-dash whitespace
-        // Group 3: Post-dash whitespace
-        // Group 4: Content
-        
-        // We match `--` explicitly using lookbehind/lookahead to avoid ---
-        // (?<!-)--(?!>|-)
-        
-        const regex = /^(.*?)(\s*)(?<!-)--(?!>|-)(\s*)((?:(?!--|-->).)*?);\s*$/;
-        
-        const match = line.match(regex);
-        if (match) {
-            const p1 = match[1];
-            const s1 = match[2];
-            const s2 = match[3];
-            const p4 = match[4]; // Content
-            
-            // The regex lookbehind handles the --- cases now, but we can double check logic
-            // strict logic is better
-            
-            // We reconstruct with -->
-            // We preserve s1 and s2 whitespace.
-            return `${p1}${s1}-->${s2}${p4};`;
-        }
-        return line;
+        return rewriteLegacyDoubleDashArrow(line) ?? line;
     }).join('\n');
     return processedLines;
 }
@@ -1637,23 +1444,7 @@ export function fixConcatenatedLabels(content: string): string {
 export function fixMisplacedPipes(content: string): string {
     const lines = content.split('\n');
     const processedLines = lines.map(line => {
-        // Regex to capture:
-        // > | "Label" | Source Arrow Target
-        // We handle --> and ---
-        // Label matches: "((?:[^"\\]|\\.)*)" -> non-greedy quoted string with escapes
-        const regex = /^\s*>\s*\|\s*"((?:[^"\\]|\\.)*)"\s*\|\s*(.*?)\s*(-->|---)\s*(.*)$/;
-        const match = line.match(regex);
-        
-        if (match) {
-            const label = match[1];
-            const source = match[2].trim();
-            const arrow = match[3]; // "-->" or "---"
-            const target = match[4].trim();
-            
-            // Construct: Source Arrow|"Label"| Target
-            return `${source} ${arrow}|"${label}"| ${target}`;
-        }
-        return line;
+        return rewriteLegacyMisplacedPipeLine(line) ?? line;
     });
     return processedLines.join('\n');
 }
