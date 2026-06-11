@@ -16,8 +16,14 @@ import {
     rewriteLegacyMisplacedPipeLine,
     rewriteLegacyPlaceholderArtifacts,
     rewriteLegacyReverseArrowLine,
+    rewriteLegacyDoubledIdLine,
+    rewriteLegacyEnhancedNoteAndSemicolonCleanup,
+    rewriteLegacyExcessiveBracketLine,
     rewriteLegacyShapeMismatch,
+    rewriteLegacySemicolonPositioningLine,
+    rewriteLegacySmartQuotes,
     rewriteLegacySubgraphDirectionLine,
+    rewriteLegacyUnquotedLabelWithSemicolonLine,
     parseLegacyStandaloneNoteDirective,
     parseLegacyTargetedNoteDirective,
     protectTopLevelBracketBlocks,
@@ -708,44 +714,10 @@ export function fixQuotedLabelsAfterSemicolon(content: string): string {
  * - Should become: `Target -- Result --> PT___BRACKET_BLOCK_0______BRACKET_BLOCK_0______BRACKET_BLOCK_0___["Final..."]`
  */
 export function fixExcessiveBrackets(content: string): string {
-    let lines = content.split('\n');
-    lines = lines.map(line => {
-        let processedLine = line;
-        
-        // Multiple passes to handle nested/repeated patterns
-        let previousLine = '';
-        let maxIterations = 10; // Prevent infinite loops
-        let iteration = 0;
-        
-        while (processedLine !== previousLine && iteration < maxIterations) {
-            previousLine = processedLine;
-            
-            // Replace [[" with ["
-            processedLine = processedLine.replace(/\[\["/g, '["');
-            
-            // Replace ["] with "] (but be careful not to break valid patterns)
-            // Only replace if it's truly excessive (e.g., ends improperly)
-            processedLine = processedLine.replace(/\["\]/g, '"]');
-            
-            // Fix pattern like `text["` at end of line -> `text"]`
-            processedLine = processedLine.replace(/\["$/g, '"]');
-            
-            // Fix pattern like `text[";` -> `text"];`
-            processedLine = processedLine.replace(/\[";/g, '"];');
-            
-            // Fix pattern like [[[ or ]]] (excessive brackets without quotes)
-            processedLine = processedLine.replace(/\[\[\[/g, '[');
-            processedLine = processedLine.replace(/\]\]\]/g, ']');
-
-            // NEW: Fix end of line ]] or ]];
-            processedLine = processedLine.replace(/\]\](;?)\s*$/g, ']$1');
-            
-            iteration++;
-        }
-
-        return processedLine;
-    });
-    return lines.join('\n');
+    return content
+        .split('\n')
+        .map((line) => rewriteLegacyExcessiveBracketLine(line))
+        .join('\n');
 }
 
 /**
@@ -802,27 +774,10 @@ export function fixIntermediateNodes(content: string): string {
  * Pattern: `Arrow SplitSplit Sample` -> `Arrow Split[Split Sample]`
  */
 export function fixDoubledID(content: string): string {
-    const lines = content.split('\n');
-    const processedLines = lines.map(line => {
-        // Look for pattern: (Arrow) (Word)(SameWord) (Space) (Rest)
-        // \1 backreference to match repeated word
-        // We only target lines with arrows to avoid false positives in text
-        if (!line.includes('-->') && !line.includes('---') && !line.includes('--')) {
-            return line;
-        }
-
-        return line.replace(/(\s*(?:---|-->|--)\s*)([A-Z][a-z]+)\2(\s+)(.*)$/, (match, arrow, word, space, rest) => {
-            // arrow: " --> "
-            // word: "Split"
-            // space: " "
-            // rest: "Sample for..."
-            
-            // Result: " --> Split[Split Sample for...]"
-            // We append the word back to the start of the label
-            return `${arrow}${word}[${word}${space}${rest}]`;
-        });
-    });
-    return processedLines.join('\n');
+    return content
+        .split('\n')
+        .map((line) => rewriteLegacyDoubledIdLine(line))
+        .join('\n');
 }
 
 /**
@@ -1087,29 +1042,10 @@ export function fixMermaidNotes(content: string): string {
  * Also handles: `text];` -> `text"];` when text should be quoted
  */
 export function fixSemicolonPositioning(content: string): string {
-    const lines = content.split('\n');
-    const processedLines = lines.map(line => {
-        // Skip lines without semicolons or arrows
-        if (!line.includes(';') || (!line.includes('-->') && !line.includes('--'))) {
-            return line;
-        }
-
-        // Pattern 1: Fix `"];` that might be incorrectly positioned
-        // Look for patterns where ] comes after ; when it should be before
-        // Pattern: `"...];` should be `"..."];`
-        let processedLine = line.replace(/("\s*)\];/g, '"];');
-
-        // Pattern 2: Ensure quoted labels ending with semicolon have proper bracket placement
-        // `["text;` -> `["text"];`
-        processedLine = processedLine.replace(/\["([^"\]]*);/g, '["$1"];');
-
-        // Pattern 3: Handle unquoted text after arrow ending with semicolon
-        // This catches patterns like: `--> NodeIDText Text;` and converts to `--> NodeID["Text Text"];`
-        // We need to be careful to identify where the NodeID ends and label begins
-        
-        return processedLine;
-    });
-    return processedLines.join('\n');
+    return content
+        .split('\n')
+        .map((line) => rewriteLegacySemicolonPositioningLine(line))
+        .join('\n');
 }
 
 /**
@@ -1118,40 +1054,10 @@ export function fixSemicolonPositioning(content: string): string {
  * Example: `Evaluate1E: Evaluate $f$;` -> `Evaluate1["E: Evaluate $f$"];`
  */
 export function fixUnquotedLabelsWithSemicolons(content: string): string {
-    const lines = content.split('\n');
-    const processedLines = lines.map(line => {
-        // Skip lines without semicolons or arrows
-        if (!line.includes(';') || (!line.includes('-->') && !line.includes('--'))) {
-            return line;
-        }
-
-        // Pattern: Arrow followed by NodeID followed by unquoted text ending with semicolon
-        // Regex: (Arrow) (Space) (NodeID) (Unquoted Text Content) (Semicolon)
-        // We look for: `--> NodeIDText Text...;` where there's no opening bracket after NodeID
-        
-        // Match pattern: `(-->) (NodeID)(Content without brackets)(;)`
-        const regex = /((?:--|---)->)\s*([a-zA-Z0-9_]+)([^[\n;]+);/g;
-        
-        return line.replace(regex, (match, arrow, nodeId, content) => {
-            // Check if content starts with a bracket (already has label)
-            if (content.trim().startsWith('[')) {
-                return match;
-            }
-            
-            // Extract the label from content
-            // Often NodeID is partially in the content (e.g., "E: Text" where NodeID was "Evaluate1E")
-            const trimmedContent = content.trim();
-            
-            // If content is empty or very short, skip
-            if (!trimmedContent || trimmedContent.length < 2) {
-                return match;
-            }
-            
-            // Build new syntax: arrow NodeID["Content"];
-            return `${arrow} ${nodeId}["${trimmedContent}"];`;
-        });
-    });
-    return processedLines.join('\n');
+    return content
+        .split('\n')
+        .map((line) => rewriteLegacyUnquotedLabelWithSemicolonLine(line))
+        .join('\n');
 }
 
 /**
@@ -1161,26 +1067,7 @@ export function fixUnquotedLabelsWithSemicolons(content: string): string {
  * 3. Specifically handles `-.- Words["Sentences"]; % notes` pattern
  */
 export function enhancedNoteAndSemicolonCleanup(content: string): string {
-    let processed = content;
-    
-    // 1. Replace note "Sentences" with Note1[/"Sentences"/]
-    // This pattern catches standalone note statements (not "note right of")
-    // Use a counter to avoid aliasing multiple notes to Note1
-    let noteCounter = 1;
-    processed = processed.replace(/\bnote\s+"([^"]*)"/gi, (match: string, noteContent: string) => {
-        return `Note${noteCounter++}[/"${noteContent}"/]`;
-    });
-    
-    // 2. Remove content after ; if the line contains % after ;
-    // Pattern: `;...%...` on any line
-    // We want to keep everything before `;`, the `;` itself, but remove everything after if `%` appears
-    processed = processed.replace(/;([^;\n]*%[^\n]*)/g, ';');
-    
-    // 3. Specific pattern: Lines with `-.-` (dotted lines) containing `["..."];` followed by `% comment`
-    // Example: `A -.- B["Text"]; % comment` -> `A -.- B["Text"];`
-    // This is already handled by rule 2 above
-    
-    return processed;
+    return rewriteLegacyEnhancedNoteAndSemicolonCleanup(content);
 }
 
 /**
@@ -1190,26 +1077,7 @@ export function enhancedNoteAndSemicolonCleanup(content: string): string {
  * Also handles general cases of excessive closing brackets if needed.
  */
 export function fixSmartQuotes(content: string): string {
-    let processed = content
-        .replace(/[\u201C\u201D]/g, '"') // Curly double quotes to straight
-        .replace(/[\u2018\u2019]/g, "'"); // Curly single quotes to straight
-
-    // Fix slashed note pattern: Note["/“Sentences”/"] -> Note["/Sentences/"]
-    // Handle with spaces or without
-    processed = processed.replace(/Note\s*\["\s*\/\s*(["\u201C][^"\u201D]*["\u201D])\s*\/\s*"\]/g, (match, innerQuotes) => {
-        const innerText = innerQuotes.replace(/[\u201C\u201D]/g, '"').replace(/^["']|["']$/g, '');
-        return `Note["/${innerText}/"]`;
-    });
-    processed = processed.replace(/Note\s*\["\/([^"]+)\"\/"\]/g, (match, text) => `Note["/${text.trim()}/"]`);
-
-    // General for any node: [" / “text” / "] -> [" / text / "]
-    processed = processed.replace(/\["\s*\/\s*(["\u201C][^"\u201D]*["\u201D])\s*\/\s*"\]/g, (match, innerQuotes) => {
-        const innerText = innerQuotes.replace(/[\u201C\u201D]/g, '"').replace(/^["']|["']$/g, '');
-        return `["/${innerText}/"]`;
-    });
-    processed = processed.replace(/\["\/([^"]+)\"\/"\]/g, (match, text) => `["/${text.trim()}/"]`);
-
-    return processed;
+    return rewriteLegacySmartQuotes(content);
 }
 
 /**

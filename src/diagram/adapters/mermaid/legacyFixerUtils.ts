@@ -449,3 +449,99 @@ export function rewriteLegacySubgraphDirectionLine(line: string, insideSubgraph:
         return match.replace('Direction', 'direction');
     });
 }
+
+export function rewriteLegacyExcessiveBracketLine(line: string): string {
+    let processedLine = line;
+    let previousLine = '';
+    let iteration = 0;
+    const maxIterations = 10;
+
+    while (processedLine !== previousLine && iteration < maxIterations) {
+        previousLine = processedLine;
+
+        processedLine = processedLine.replace(/\[\["/g, '["');
+        processedLine = processedLine.replace(/\["\]/g, '"]');
+        processedLine = processedLine.replace(/\["$/g, '"]');
+        processedLine = processedLine.replace(/\[";/g, '"];');
+        processedLine = processedLine.replace(/\[\[\[/g, '[');
+        processedLine = processedLine.replace(/\]\]\]/g, ']');
+        processedLine = processedLine.replace(/\]\](;?)\s*$/g, ']$1');
+
+        iteration++;
+    }
+
+    return processedLine;
+}
+
+export function rewriteLegacyDoubledIdLine(line: string): string {
+    if (!line.includes('-->') && !line.includes('---') && !line.includes('--')) {
+        return line;
+    }
+
+    return line.replace(/(\s*(?:---|-->|--)\s*)([A-Z][a-z]+)\2(\s+)(.*)$/, (match, arrow, word, space, rest) => {
+        return `${arrow}${word}[${word}${space}${rest}]`;
+    });
+}
+
+export function rewriteLegacySemicolonPositioningLine(line: string): string {
+    if (!line.includes(';') || (!line.includes('-->') && !line.includes('--'))) {
+        return line;
+    }
+
+    let processedLine = line.replace(/("\s*)\];/g, '"];');
+    processedLine = processedLine.replace(/\["([^"\]]*);/g, '["$1"];');
+    return processedLine;
+}
+
+export function rewriteLegacyUnquotedLabelWithSemicolonLine(line: string): string {
+    if (!line.includes(';') || (!line.includes('-->') && !line.includes('--'))) {
+        return line;
+    }
+
+    const regex = /((?:-->|---))\s*([a-zA-Z0-9_]+)([^[\n;]+);/g;
+    return line.replace(regex, (match, arrow, nodeId, content) => {
+        if (content.trim().startsWith('[')) {
+            return match;
+        }
+
+        const trimmedContent = content.trim();
+        if (!trimmedContent || trimmedContent.length < 2) {
+            return match;
+        }
+
+        return `${arrow} ${nodeId}["${trimmedContent}"];`;
+    });
+}
+
+export function rewriteLegacyEnhancedNoteAndSemicolonCleanup(text: string): string {
+    let processed = text;
+    let noteCounter = 1;
+
+    processed = processed.replace(/\bnote\s+"([^"]*)"/gi, (_match: string, noteContent: string) => {
+        return `Note${noteCounter++}[/"${noteContent}"/]`;
+    });
+
+    processed = processed.replace(/;([^;\n]*%[^\n]*)/g, ';');
+
+    return processed;
+}
+
+export function rewriteLegacySmartQuotes(text: string): string {
+    let processed = text
+        .replace(/[\u201C\u201D]/g, '"')
+        .replace(/[\u2018\u2019]/g, "'");
+
+    processed = processed.replace(/Note\s*\["\s*\/\s*(["\u201C][^"\u201D]*["\u201D])\s*\/\s*"\]/g, (_match, innerQuotes) => {
+        const innerText = innerQuotes.replace(/[\u201C\u201D]/g, '"').replace(/^["']|["']$/g, '');
+        return `Note["/${innerText}/"]`;
+    });
+    processed = processed.replace(/Note\s*\["\/([^"]+)\"\/"\]/g, (_match, text) => `Note["/${text.trim()}/"]`);
+
+    processed = processed.replace(/\["\s*\/\s*(["\u201C][^"\u201D]*["\u201D])\s*\/\s*"\]/g, (_match, innerQuotes) => {
+        const innerText = innerQuotes.replace(/[\u201C\u201D]/g, '"').replace(/^["']|["']$/g, '');
+        return `["/${innerText}/"]`;
+    });
+    processed = processed.replace(/\["\/([^"]+)\"\/"\]/g, (_match, text) => `["/${text.trim()}/"]`);
+
+    return processed;
+}

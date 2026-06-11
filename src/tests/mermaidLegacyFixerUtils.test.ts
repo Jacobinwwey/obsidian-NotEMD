@@ -16,6 +16,9 @@ import {
     rewriteLegacyDoubleDashArrow,
     rewriteLegacyDoubleSlashCommentLine,
     rewriteLegacyDuplicateQuotedLabelChain,
+    rewriteLegacyDoubledIdLine,
+    rewriteLegacyEnhancedNoteAndSemicolonCleanup,
+    rewriteLegacyExcessiveBracketLine,
     rewriteLegacyInlineSubgraphLabelLine,
     rewriteLegacyInvalidArrowSyntax,
     rewriteLegacyMermaidCommentLine,
@@ -23,8 +26,11 @@ import {
     rewriteLegacyPlaceholderArtifacts,
     rewriteLegacyQuotedLabelAfterSemicolonLine,
     rewriteLegacyReverseArrowLine,
+    rewriteLegacySemicolonPositioningLine,
     rewriteLegacyShapeMismatch,
+    rewriteLegacySmartQuotes,
     rewriteLegacySubgraphDirectionLine,
+    rewriteLegacyUnquotedLabelWithSemicolonLine,
     restoreProtectedBracketBlocks
 } from '../diagram/adapters/mermaid/legacyFixerUtils';
 
@@ -197,5 +203,27 @@ describe('mermaid legacy fixer utils', () => {
         expect(rewriteLegacyReverseArrowLine('A --> B')).toBeNull();
         expect(rewriteLegacySubgraphDirectionLine('  Direction TB', true)).toBe('  direction TB');
         expect(rewriteLegacySubgraphDirectionLine('  Direction TB', false)).toBe('  Direction TB');
+    });
+
+    test('rewrites excessive brackets, doubled ids, and semicolon positioning with pure line transforms', () => {
+        expect(rewriteLegacyExcessiveBracketLine('A[["Text"]]')).toBe('A["Text"]');
+        expect(rewriteLegacyExcessiveBracketLine('Target["Broken[";')).toBe('Target["Broken"];');
+        expect(rewriteLegacyDoubledIdLine('Start --> SplitSplit Sample for Multiple Tests')).toBe(
+            'Start --> Split[Split Sample for Multiple Tests]'
+        );
+        expect(rewriteLegacySemicolonPositioningLine('B --> Node["Label;')).toBe('B --> Node["Label"];');
+    });
+
+    test('rewrites unquoted labels with semicolons, note cleanup, and smart quotes safely', () => {
+        expect(rewriteLegacyUnquotedLabelWithSemicolonLine('A --> Evaluate1E: Evaluate f;')).toBe(
+            'A --> Evaluate1E[": Evaluate f"];'
+        );
+        expect(rewriteLegacyUnquotedLabelWithSemicolonLine('A --> B[Already Quoted];')).toBe(
+            'A --> B[Already Quoted];'
+        );
+        expect(rewriteLegacyEnhancedNoteAndSemicolonCleanup('note "Sentences"\nA -.- B["Text"]; % comment')).toBe(
+            'Note1[/"Sentences"/]\nA -.- B["Text"];'
+        );
+        expect(rewriteLegacySmartQuotes('Note["/“Sentences”/"]')).toBe('Note["/Sentences/"]');
     });
 });
