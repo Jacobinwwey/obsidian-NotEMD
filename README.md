@@ -3,12 +3,15 @@
 [![Discord](https://img.shields.io/badge/Discord-Join%20Chat-5865F2?logo=discord&logoColor=white)](https://discord.gg/qnGgsQ9W) ![QQ](https://img.shields.io/badge/QQ-1104515865-12B7F5)
 
 
-# Notemd Plugin for Obsidian
+# Notemd — AI-Powered Knowledge Base Builder for Obsidian
+
+> **Notemd** (Note + EMD — Enhanced Markdown Documents) turns LLM-powered reading into persistent knowledge: wiki-links, concept notes, research summaries, translations, and diagrams all write back to your Obsidian vault.
 
 [English](./README.md) | [简体中文](./README_zh.md) | [Español](./README_es.md) | [Français](./README_fr.md) | [Deutsch](./README_de.md) | [Italiano](./README_it.md) | [Português](./README_pt.md) | [繁體中文](./README_zh_Hant.md) | [日本語](./README_ja.md) | [한국어](./README_ko.md) | [Русский](./README_ru.md) | [العربية](./README_ar.md) | [हिन्दी](./README_hi.md) | [বাংলা](./README_bn.md) | [Nederlands](./README_nl.md) | [Svenska](./README_sv.md) | [Suomi](./README_fi.md) | [Dansk](./README_da.md) | [Norsk](./README_no.md) | [Polski](./README_pl.md) | [Türkçe](./README_tr.md) | [עברית](./README_he.md) | [ไทย](./README_th.md) | [Ελληνικά](./README_el.md) | [Čeština](./README_cs.md) | [Magyar](./README_hu.md) | [Română](./README_ro.md) | [Українська](./README_uk.md) | [Tiếng Việt](./README_vi.md) | [Bahasa Indonesia](./README_id.md) | [Bahasa Melayu](./README_ms.md)
 
-Read docs in more languages: [Language Hub](./docs/i18n/README.md)
-Browse repository docs: [Docs Hub](./docs/README.md)
+📚 Read docs in more languages: [Language Hub](./docs/i18n/README.md)  
+📖 Browse repository docs: [Docs Hub](./docs/README.md)  
+❓ **New:** [Frequently Asked Questions (FAQ)](./docs/faq.md)
 
 ```
 ==================================================
@@ -22,9 +25,18 @@ Browse repository docs: [Docs Hub](./docs/README.md)
 ==================================================
 ```
 
-A Easy way to create your own Knowledge-base!
+## What is Notemd?
 
-Notemd enhances your Obsidian workflow by integrating with various Large Language Models (LLMs) to process your multi-languages notes, automatically generate wiki-links for key concepts, create corresponding concept notes, perform web research, helping you build powerful knowledge graphs and more.
+Notemd is an **open-source Obsidian plugin** that integrates with 30+ Large Language Models (LLMs) to transform your notes into a structured, searchable knowledge base.
+
+Unlike chat-based AI tools where insights disappear after the session, Notemd writes results **directly into your vault** as:
+- **[[Wiki-links]]** connecting key concepts
+- **Concept notes** for terms and ideas
+- **Research summaries** with source citations
+- **Translations** for multilingual workflows
+- **Mermaid diagrams** and visual charts
+
+**Result:** Your reading and research accumulate into a persistent, evolving knowledge graph that stays with you.
 
 If you love using Notemd, please consider [⭐ Give a Star on GitHub](https://github.com/Jacobinwwey/obsidian-NotEMD) or [☕️ Buy Me a Coffee](https://ko-fi.com/jacobinwwey).
 

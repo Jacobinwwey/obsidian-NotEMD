@@ -3,12 +3,15 @@
 [![Discord](https://img.shields.io/badge/Discord-Join%20Chat-5865F2?logo=discord&logoColor=white)](https://discord.gg/qnGgsQ9W) ![QQ](https://img.shields.io/badge/QQ-1104515865-12B7F5)
 
 
-# Notemd Obsidian 插件
+# Notemd — Obsidian AI 知识库构建插件
+
+> **Notemd**（Note + EMD — 增强型 Markdown 文档）将 LLM 驱动的阅读转化为持久知识：wiki 链接、概念笔记、研究摘要、翻译和图表，全部写回你的 Obsidian 库。
 
 [English](./README.md) | [简体中文](./README_zh.md) | [Español](./README_es.md) | [Français](./README_fr.md) | [Deutsch](./README_de.md) | [Italiano](./README_it.md) | [Português](./README_pt.md) | [繁體中文](./README_zh_Hant.md) | [日本語](./README_ja.md) | [한국어](./README_ko.md) | [Русский](./README_ru.md) | [العربية](./README_ar.md) | [हिन्दी](./README_hi.md) | [বাংলা](./README_bn.md) | [Nederlands](./README_nl.md) | [Svenska](./README_sv.md) | [Suomi](./README_fi.md) | [Dansk](./README_da.md) | [Norsk](./README_no.md) | [Polski](./README_pl.md) | [Türkçe](./README_tr.md) | [עברית](./README_he.md) | [ไทย](./README_th.md) | [Ελληνικά](./README_el.md) | [Čeština](./README_cs.md) | [Magyar](./README_hu.md) | [Română](./README_ro.md) | [Українська](./README_uk.md) | [Tiếng Việt](./README_vi.md) | [Bahasa Indonesia](./README_id.md) | [Bahasa Melayu](./README_ms.md)
 
-更多语言文档：请查看 [语言中心](./docs/i18n/README_zh.md)
-浏览仓库文档：请查看 [文档中心](./docs/README.zh-CN.md)
+📚 更多语言文档：请查看 [语言中心](./docs/i18n/README_zh.md)  
+📖 浏览仓库文档：请查看 [文档中心](./docs/README.zh-CN.md)  
+❓ **新增：** [常见问题 (FAQ)](./docs/faq.zh-CN.md)
 
 ```
 =============================================
@@ -22,9 +25,18 @@
 =============================================
 ```
 
-一个创建您自己知识库的简单方法！
+## 什么是 Notemd？
 
-Notemd 通过与各种大型语言模型 (LLM) 集成来增强您的 Obsidian 工作流程，支持多语言笔记处理，自动为关键概念生成维基链接、创建相应的概念笔记、执行网页搜索与摘要、翻译内容、总结为Mermaid脑图等，助力构建强大的知识图谱。
+Notemd 是一个**开源 Obsidian 插件**，集成 30+ 种大型语言模型 (LLM)，将你的笔记转化为结构化、可搜索的知识库。
+
+与基于聊天的 AI 工具不同（见解在会话后消失），Notemd 将结果**直接写入你的库**，形式包括：
+- **[[Wiki 链接]]** 连接关键概念
+- **概念笔记** 记录术语和想法
+- **研究摘要** 附带来源引用
+- **翻译** 支持多语言工作流
+- **Mermaid 图表** 和可视化图表
+
+**结果：** 你的阅读和研究积累成持久的、不断演化的知识图谱，永远伴随你。
 
 如果您喜欢使用 Notemd，请考虑 [⭐ 给 GitHub 加星](https://github.com/Jacobinwwey/obsidian-NotEMD) 或 [☕️ 请喝杯咖啡](https://ko-fi.com/jacobinwwey)。
 
