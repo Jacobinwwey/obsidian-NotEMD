@@ -10,7 +10,7 @@ import {themes as prismThemes} from 'prism-react-renderer';
 const config = {
   title: 'Notemd',
   tagline: 'AI-Powered Knowledge Base Builder for Obsidian',
-  favicon: 'img/favicon.ico',
+  favicon: 'img/favicon.svg',
 
   // Set the production url of your site here
   url: 'https://jacobinwwey.github.io',
@@ -32,23 +32,30 @@ const config = {
       attributes: { type: 'application/ld+json' },
       innerHTML: JSON.stringify({
         "@context": "https://schema.org",
-        "@type": "WebSite",
-        "name": "Notemd Documentation",
-        "url": "https://jacobinwwey.github.io/obsidian-NotEMD/",
-        "description": "AI-powered Obsidian plugin documentation - wiki-links, concept notes, research, translation, and diagrams",
-        "publisher": {
-          "@type": "Organization",
-          "name": "Notemd",
-          "logo": {
-            "@type": "ImageObject",
-            "url": "https://jacobinwwey.github.io/obsidian-NotEMD/img/logo.png"
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "name": "Notemd Documentation",
+            "url": "https://jacobinwwey.github.io/obsidian-NotEMD/",
+            "description": "AI-powered Obsidian plugin documentation - wiki-links, concept notes, research, translation, and diagrams",
+            "publisher": {
+              "@type": "Organization",
+              "name": "Notemd",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://jacobinwwey.github.io/obsidian-NotEMD/img/logo.png"
+              }
+            }
+          },
+          {
+            "@id": "https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey",
+            "@type": "Person",
+            "name": "Jacobinwwey",
+            "url": "https://github.com/Jacobinwwey",
+            "knowsAbout": ["Obsidian", "LLM Integration", "Knowledge Management", "TypeScript", "Markdown"],
+            "sameAs": ["https://github.com/Jacobinwwey"]
           }
-        },
-        "potentialAction": {
-          "@type": "SearchAction",
-          "target": "https://jacobinwwey.github.io/obsidian-NotEMD/search?q={search_term_string}",
-          "query-input": "required name=search_term_string"
-        }
+        ]
       }),
     },
     {
@@ -210,12 +217,14 @@ const config = {
         theme: prismThemes.github,
         darkTheme: prismThemes.dracula,
       },
+      /* algolia: configure when DocSearch approved (https://docusaurus.io/docs/search#using-algolia-docsearch)
       algolia: {
         appId: 'YOUR_APP_ID',
         apiKey: 'YOUR_SEARCH_API_KEY',
         indexName: 'notemd',
         contextualSearch: true,
       },
+      */
     }),
 };
 

@@ -1,25 +1,43 @@
 import React from 'react';
 import Layout from '@theme-original/DocItem/Layout';
 import Head from '@docusaurus/Head';
+import {useDoc} from '@docusaurus/plugin-content-docs/client';
 
 /**
  * Swizzled DocItem Layout component
  * Automatically injects JSON-LD TechArticle Schema for every documentation page
- *
- * Note: In Docusaurus 3.x, we use a simpler approach by reading from window.location
- * and relying on frontmatter in the MDX files themselves.
+ * Reads frontmatter (author, keywords, concepts, citations) for rich Schema.
  */
 export default function LayoutWrapper(props) {
-  // Simple schema that works for all doc pages
+  const {frontMatter, metadata} = useDoc();
+
+  const siteUrl = 'https://jacobinwwey.github.io';
   const currentUrl = typeof window !== 'undefined'
     ? window.location.href
-    : 'https://jacobinwwey.github.io/obsidian-NotEMD/';
+    : `${siteUrl}${metadata.permalink}`;
 
-  // Basic TechArticle Schema (page-specific details come from frontmatter in MDX)
+  const author = frontMatter.author || {'@type': 'Organization', name: 'Notemd Team'};
+
+  const aboutEntries = (frontMatter.concepts || []).map((c) => ({
+    '@type': 'Thing',
+    name: c,
+  }));
+
+  const citationEntries = (frontMatter.citations || []).map((c) => ({
+    '@type': 'CreativeWork',
+    name: c.title || c,
+    ...(c.url ? {url: c.url} : {}),
+  }));
+
   const articleSchema = {
     '@context': 'https://schema.org',
     '@type': 'TechArticle',
+    headline: metadata.title,
+    description: metadata.description,
     url: currentUrl,
+    author,
+    datePublished: metadata.date,
+    dateModified: metadata.lastUpdatedAt || metadata.date,
     publisher: {
       '@type': 'Organization',
       name: 'Notemd',
@@ -32,6 +50,9 @@ export default function LayoutWrapper(props) {
       '@type': 'WebPage',
       '@id': currentUrl,
     },
+    ...(aboutEntries.length > 0 ? {about: aboutEntries} : {}),
+    ...(citationEntries.length > 0 ? {citation: citationEntries} : {}),
+    ...(frontMatter.keywords ? {keywords: frontMatter.keywords} : {}),
   };
 
   return (
