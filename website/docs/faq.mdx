@@ -293,14 +293,45 @@ All three can be used together — they complement rather than compete.
 3. **Parallel processing:** Settings → Batch Processing → increase concurrency
 4. **Local models:** Ollama for tasks that don't need web search
 
-### Can I use Notemd without an API key?
+### Can Notemd work 100% offline?
 
-**Partial functionality:**
-- **With local Ollama:** Full offline workflow (linking, concepts, translation, diagrams)
-- **DuckDuckGo research:** No API key needed (experimental quality)
-- **Formula fixing, chapter split:** No LLM required
+**Yes, with Ollama.** No API key, no internet, no data leaves your machine:
 
-**Requires API key:** Provider-based tasks (OpenAI, Anthropic, Google, etc.)
+1. Install [Ollama](https://ollama.com) and run `ollama serve`
+2. In Notemd settings, select **Ollama** as your provider
+3. Pull a model: `ollama pull llama3` (or qwen2.5, gemma2, etc.)
+4. All features work: wiki-links, concept notes, translation, diagrams
+
+**DuckDuckGo research** also works without an API key (experimental quality).
+
+With cloud providers (OpenAI, Anthropic, Google, DeepSeek, etc.), your note content is sent as API input. Check each provider's privacy policy for data handling details.
+
+### Is my data sent to the cloud?
+
+**It depends on your provider:**
+
+| Provider type | Data sent to cloud? | Notes |
+|--------------|---------------------|-------|
+| **Ollama (local)** | No | Everything stays on your machine |
+| **LMStudio (local)** | No | Same as Ollama |
+| **DeepSeek, OpenAI, etc.** | Yes | Note content sent as API input for processing |
+| **OpenRouter, AIHubMix** | Yes | Gateway that routes to cloud providers |
+
+Notemd itself collects **no telemetry, no analytics, no user data**. The plugin is fully open source (MIT). The only data that leaves your machine is what you explicitly send to your configured LLM provider.
+
+### Which Obsidian AI plugin is best for research?
+
+Depends on your research workflow:
+
+| Need | Plugin | Why |
+|------|--------|-----|
+| Find related papers/notes | Smart Connections | Semantic similarity discovery |
+| Chat about your sources | Copilot | Conversation with vault context |
+| Auto-link concepts + generate notes | **Notemd** | AI identifies concepts, inserts links, creates notes |
+| Web research + summarize into notes | **Notemd** | Tavily/DuckDuckGo search → LLM summary → appended to note |
+| Generate diagrams from research | **Notemd** | Mermaid/Canvas/Vega-Lite from note content |
+
+**Recommended combo:** Smart Connections (discovery) + Notemd (structuring) + Copilot (discussion).
 
 ---
 

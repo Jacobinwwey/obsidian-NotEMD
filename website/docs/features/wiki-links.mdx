@@ -4,8 +4,8 @@ title: Wiki-Links
 description: Automatic wiki-link generation for key concepts
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
-keywords: [wiki-links, linking, concepts, knowledge graph]
-concepts: [Wiki-Links, Knowledge Graph, Concept Extraction, Synonym Suppression, Obsidian]
+keywords: [wiki-links, linking, concepts, knowledge graph, Auto Link alternative, obsidian auto link, AI wiki-link]
+concepts: [Wiki-Links, Knowledge Graph, Concept Extraction, Synonym Suppression, Obsidian, Auto Link Alternative, AI Linking]
 ---
 
 import TLDR from '@site/src/components/TLDR';
@@ -13,7 +13,7 @@ import TLDR from '@site/src/components/TLDR';
 # Wiki-Links
 
 <TLDR>
-**Notemd automatically adds `[[wiki-links]]` to key concepts in your notes.** The LLM reads your content, identifies important terms in context, and inserts Obsidian-style wiki-links at each occurrence. Optionally creates concept note files with backlinks. Supports synonym suppression, link integrity on rename/delete, and pure extraction mode (no file modification). This is part of the [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge).
+**Notemd automatically adds `[[wiki-links]]` to key concepts in your notes.** The LLM reads your content, identifies important terms in context, and inserts Obsidian-style wiki-links at each occurrence. Optionally creates concept note files with backlinks. Supports synonym suppression, link integrity on rename/delete, and pure extraction mode (no file modification). Unlike Auto Link which only matches existing note titles, Notemd uses AI to identify new concepts and creates corresponding notes. This is part of the [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge).
 </TLDR>
 
 ## Overview
@@ -77,6 +77,23 @@ The [[transformer architecture]] revolutionized [[natural language processing]].
 1. Highlight text to process
 2. Right-click → **"Process selection (add links)"**
 3. Only highlighted portion is analyzed
+
+## Notemd vs Auto Link
+
+Obsidian has two approaches to automatic wiki-linking:
+
+| | **Auto Link** | **Notemd** |
+|--|---------------|-------------|
+| Link source | Existing note titles in vault | LLM-identified concepts in content |
+| Can link new concepts | No — title must already exist | Yes — AI identifies concepts and creates notes |
+| Synonym handling | No | Yes — synonym suppression |
+| Concept note creation | No | Yes — with backlinks and dedup |
+| Batch processing | No (single file) | Yes (folder-level) |
+| Per-task model routing | No | Yes |
+
+**Auto Link** is title-matching: if a note named "Machine Learning" exists, it wraps occurrences in `[[Machine Learning]]`. If the note doesn't exist, nothing happens.
+
+**Notemd** is AI-driven: the LLM reads your content, understands context, identifies concepts that *should* be linked — even if no note exists yet — and creates both the link and the concept note.
 
 ## Features
 
