@@ -56,3 +56,6 @@ docs/*_preview.svg
 docs/*_preview.png
 docs/*_diagram_preview.svg
 docs/*_diagram_preview.png
+
+# GEO internal reports (not for public repo)
+GEO_OPTIMIZATION_REPORT.md
