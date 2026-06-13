@@ -1,8 +1,8 @@
 # NotEMD GEO Phase 2 Roadmap
 
 **Created:** 2026-06-12
-**Updated:** 2026-06-12
-**Status:** Steps 1-7 complete
+**Updated:** 2026-06-13
+**Status:** All steps complete. Baseline captured.
 **Scope:** Post-deployment GEO optimization, based on audit of Phase 1 deliverables vs actual code
 
 ---
@@ -15,9 +15,9 @@
 | 2 | Content Depth (3 high-value + 9 placeholders) | Done (commit 7989940) |
 | 3 | Pillar Page Architecture | Done (commit 7989940) |
 | 4 | E-E-A-T Signals | Done (commit 7989940) |
-| 5 | Visibility Monitoring | Deferred (needs deployment first) |
-| 6 | geo-content-optimizer Gap Analysis | Deferred (needs deployment first) |
-| 7 | Multilingual Pruned to EN + zh-CN + ja | Done (this commit) |
+| 5 | Visibility Monitoring | Done (baseline: 0/9 EN, 0/4 ZH) |
+| 6 | geo-content-optimizer Gap Analysis | Done (3 recommendations implemented) |
+| 7 | Multilingual Pruned to EN + zh-CN + ja | Done (commit decce74) |
 | — | VitePress noindex | Done (this commit) |
 | — | robots.txt + sitemap | Done (this commit) |
 
