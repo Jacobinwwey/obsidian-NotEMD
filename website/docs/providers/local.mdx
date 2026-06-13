@@ -4,10 +4,32 @@ title: Local Models
 description: Configure Ollama and local LLMs
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [local, ollama, lmstudio, provider, configuration, offline]
+concepts: [Local Models, Ollama, LMStudio, Offline]
 ---
+
+import TLDR from '@site/src/components/TLDR';
 
 # Local Models
 
-Setup guide for Ollama and local LLMs.
+<TLDR>
+**Ollama and LMStudio run LLMs locally with no API key required.** Configuration details are covered in [LLM Providers](/docs/providers/overview). Key details: Ollama base URL `localhost:11434/api`, LMStudio base URL `localhost:1234/v1`. No API key needed for either. Works fully offline.
 
-(Full documentation coming soon)
+This is part of the [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge).
+</TLDR>
+
+Full setup instructions, per-task configuration, and troubleshooting are covered in [LLM Providers](/docs/providers/overview).
+
+**Quick reference:**
+
+| Provider | Base URL | Default Model | API Key | Notes |
+|----------|----------|---------------|---------|-------|
+| Ollama | `localhost:11434/api` | `llama3` | Not required | NDJSON streaming; model discovery via `/api/tags` |
+| LMStudio | `localhost:1234/v1` | `local-model` | Not required | Sends `"EMPTY"` as bearer token; OpenAI-compatible |
+
+---
+
+## Next Steps
+
+- [LLM Providers](/docs/providers/overview) -- Full configuration and per-task model setup
+- [Troubleshooting](/docs/advanced/troubleshooting) -- Fix connection-refused errors when the local server is not running

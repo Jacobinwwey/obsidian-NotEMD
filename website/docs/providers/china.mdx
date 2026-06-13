@@ -4,10 +4,43 @@ title: China Providers
 description: Configure Qwen, DeepSeek, GLM, etc.
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [china providers, deepseek, qwen, glm, doubao, moonshot, mimo, minimax, baidu, siliconflow, huawei]
+concepts: [China Providers, DeepSeek, Qwen, Doubao, Moonshot, MiMo, GLM, MiniMax, Baidu, SiliconFlow, Huawei]
 ---
+
+import TLDR from '@site/src/components/TLDR';
 
 # China Providers
 
-Setup guide for Chinese LLM providers.
+<TLDR>
+**Notemd supports 11 Chinese LLM providers: DeepSeek, Qwen, Doubao, Moonshot, MiMo, GLM, MiniMax, Baidu, SiliconFlow, Huawei, and Z AI.** Full configuration details are in [LLM Providers](/docs/providers/overview). These providers offer OpenAI-compatible endpoints accessible from within China. No separate VPN needed when using China-based base URLs.
 
-(Full documentation coming soon)
+This is part of the [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge).
+</TLDR>
+
+Full setup instructions, per-task configuration, and troubleshooting are covered in [LLM Providers](/docs/providers/overview).
+
+**Quick reference:**
+
+| Provider | Default Model | Base URL |
+|----------|---------------|----------|
+| DeepSeek | `deepseek-v4-pro` | `api.deepseek.com` |
+| Qwen | `qwen3-235b-a22b` | `dashscope.aliyuncs.com/compatible-mode/v1` |
+| Qwen Code | `qwen3-coder-plus` | `dashscope.aliyuncs.com/compatible-mode/v1` |
+| Doubao | (endpoint ID required) | `ark.cn-beijing.volces.com/api/v3` |
+| Moonshot | `kimi-k2-0905-preview` | `api.moonshot.cn/v1` |
+| Xiaomi MiMo | `mimo-v2.5-pro` | `api.xiaomimimo.com/v1` |
+| GLM | `glm-5` | `open.bigmodel.cn/api/paas/v4` |
+| MiniMax | `MiniMax-M2.7` | `api.minimaxi.com/v1` |
+| Baidu Qianfan | `ernie-4.5-turbo-32k` | `qianfan.baidubce.com/v2` |
+| SiliconFlow | `Qwen/QwQ-32B` | `api.siliconflow.cn/v1` |
+| Huawei Cloud MaaS | `DeepSeek-V3` | `api.modelarts-maas.com/v1` |
+
+**Note:** Doubao requires an Ark endpoint ID (format: `ep-xxxxxxxx-xxxx-xxxx`) instead of a standard model name.
+
+---
+
+## Next Steps
+
+- [LLM Providers](/docs/providers/overview) -- Full configuration, per-task models, and retry logic
+- [Troubleshooting](/docs/advanced/troubleshooting) -- Fix regional connectivity and authentication errors

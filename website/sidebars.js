@@ -15,6 +15,7 @@
 const sidebars = {
   tutorialSidebar: [
     'intro',
+    'pillar-ai-knowledge',
     {
       type: 'category',
       label: 'Getting Started',

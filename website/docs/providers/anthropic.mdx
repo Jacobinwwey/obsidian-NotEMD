@@ -4,10 +4,35 @@ title: Anthropic
 description: Configure Anthropic Claude
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [anthropic, claude, provider, configuration]
+concepts: [Anthropic, Claude, API Configuration]
 ---
+
+import TLDR from '@site/src/components/TLDR';
 
 # Anthropic Provider
 
-Setup guide for Claude models.
+<TLDR>
+**Anthropic is configured as part of the [LLM Providers](/docs/providers/overview) overview.** Key details: default model `claude-3-5-sonnet`, Anthropic transport (separate from OpenAI-compatible), base URL `api.anthropic.com`, temperature `0.5`.
 
-(Full documentation coming soon)
+This is part of the [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge).
+</TLDR>
+
+Full setup instructions, per-task configuration, and troubleshooting are covered in [LLM Providers](/docs/providers/overview).
+
+**Quick reference:**
+
+| Field | Value |
+|-------|-------|
+| Default model | `claude-3-5-sonnet` |
+| Transport | Anthropic (native) |
+| Base URL | `api.anthropic.com` |
+| Temperature | `0.5` |
+| Model discovery | Anthropic models list API |
+
+---
+
+## Next Steps
+
+- [LLM Providers](/docs/providers/overview) -- Full configuration, per-task models, and retry logic
+- [Troubleshooting](/docs/advanced/troubleshooting) -- Fix 401/403 and connection errors

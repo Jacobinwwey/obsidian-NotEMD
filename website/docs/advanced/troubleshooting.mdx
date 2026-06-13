@@ -4,10 +4,153 @@ title: Troubleshooting
 description: Common issues and solutions
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [troubleshooting, errors, diagnostics, connection test]
+concepts: [Troubleshooting, Error Handling, Diagnostics]
 ---
+
+import TLDR from '@site/src/components/TLDR';
 
 # Troubleshooting
 
-Common issues and how to fix them.
+<TLDR>
+**Most Notemd issues fall into four categories: API key problems, network connectivity, authentication errors (401/403), and rate limits (429).** The built-in connection test and diagnostics panel identify the root cause quickly. This page covers every common error message, its cause, and the fix. For issues not listed here, report them on GitHub Issues with the diagnostics output.
 
-(Full documentation coming soon)
+This is part of the [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge).
+</TLDR>
+
+## Overview
+
+Notemd depends on external services -- LLM providers and search APIs -- so most problems originate outside the plugin itself. The diagnostics panel in settings provides a structured view of the last API call, including the request URL, response status, and error body. Always check it first before investigating further.
+
+## How It Works: Diagnostics
+
+### Connection Test
+
+Every provider configuration section has a **"Test Connection"** button. Clicking it sends a minimal API request (typically a model list or a short completion) and reports success or the specific HTTP error. This is the fastest way to verify that your API key and base URL are correct.
+
+### Diagnostics Panel
+
+**Settings --> Notemd --> Diagnostics** shows:
+
+| Field | Content |
+|-------|---------|
+| Last provider | Which provider was last called |
+| Last model | Which model was last called |
+| Last status | HTTP status code or transport error |
+| Last error | Raw error message from the API |
+| Last request URL | Full URL of the last request (redacted API key) |
+| Last response body | Truncated response body (first 500 chars) |
+
+Copy the full diagnostics output when reporting issues on GitHub.
+
+## Common Errors
+
+### API Key Invalid or Missing
+
+**Symptom:** HTTP 401 or "Incorrect API key provided"
+
+**Cause:** The API key is missing, contains whitespace, or belongs to a different provider.
+
+**Fix:**
+1. Verify the key has no leading/trailing spaces
+2. Confirm the key matches the selected provider (an OpenAI key will not work with Anthropic)
+3. Check that your account has credits or an active subscription
+4. Click **"Test Connection"** to verify
+
+### Network / Connection Errors
+
+**Symptom:** `ERR_CONNECTION_REFUSED`, `ERR_TIMED_OUT`, `Socket hang up`, `Network request failed`
+
+**Cause:** The API endpoint is unreachable from your machine.
+
+**Fix:**
+1. Check your internet connection
+2. If behind a proxy or firewall, verify the API domain is not blocked
+3. For Ollama: confirm `ollama serve` is running (`ollama list` should return models)
+4. For LMStudio: confirm the server is running on `localhost:1234`
+5. Try a different transport -- mobile users should ensure the `requestUrl` transport is active
+6. Enable `enableStableApiCall` for automatic retry on transient errors
+
+### 403 Forbidden
+
+**Symptom:** HTTP 403
+
+**Cause:** Your API key is valid but does not have permission for the requested resource.
+
+**Fix:**
+1. Some models require special access (e.g., GPT-4 via Azure requires a deployment name)
+2. Some providers restrict models by plan tier -- check your account
+3. Regional restrictions may apply (some China providers block international IPs and vice versa)
+4. Verify the model name is spelled correctly (e.g., `gpt-4o` not `gpt-4o-mini` when the mini model is all your plan allows)
+
+### Rate Limit (429)
+
+**Symptom:** HTTP 429 or "Rate limit exceeded"
+
+**Cause:** Too many requests in a short time window.
+
+**Fix:**
+1. Reduce `batchConcurrency` to `1` or `2`
+2. Wait a few minutes before retrying
+3. Check your provider's rate limit documentation for your plan tier
+4. Enable `enableStableApiCall` for automatic retry with backoff
+5. Consider switching to a provider with higher limits (DeepSeek, Ollama)
+
+### Model Not Found
+
+**Symptom:** "Model not found" or HTTP 404
+
+**Cause:** The model name does not exist on the selected provider.
+
+**Fix:**
+1. Click **"Get Model List"** to see all available models for your provider
+2. Some model names change over time -- verify the current name in the provider's documentation
+3. For Ollama: run `ollama list` to see pulled models; only downloaded models are available
+
+### No Links / No Concepts Generated
+
+**Symptom:** The command runs but produces no output
+
+**Cause:** The LLM returned an empty or unparseable response.
+
+**Fix:**
+1. Check the diagnostics panel for the actual LLM response
+2. Try a more capable model (some small models struggle with structured output)
+3. Ensure the note has sufficient content (>50 words)
+4. Review your custom prompt for conflicting instructions
+5. Disable synonym suppression temporarily to see if it is filtering too aggressively
+
+### Doubao Endpoint ID Missing
+
+**Symptom:** Error when using ByteDance Doubao provider
+
+**Cause:** Doubao requires an Ark endpoint ID (format: `ep-xxxxxxxx-xxxx-xxxx`) instead of a model name.
+
+**Fix:** Replace the default placeholder model with your actual endpoint ID from the Volcengine console.
+
+## Configuration
+
+| Diagnostic Setting | Location | Purpose |
+|--------------------|----------|---------|
+| **Test Connection** | Settings --> Provider section | Verify API key and connectivity |
+| **Get Model List** | Settings --> Provider section | Confirm which models are accessible |
+| `enableStableApiCall` | Settings --> Advanced | Enable retry with backoff |
+| `batchConcurrency` | Settings --> Batch | Control parallelism to avoid rate limits |
+
+## How to Report Issues
+
+If your issue is not covered above:
+
+1. Open **Settings --> Notemd --> Diagnostics**
+2. Copy the full diagnostics output
+3. Open a GitHub Issue at [github.com/Jacobinwwey/obsidian-NotEMD/issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)
+4. Include: Obsidian version, Notemd version, provider, model, diagnostics output, and steps to reproduce
+5. Redact your API key from any shared logs
+
+---
+
+## Next Steps
+
+- [LLM Providers](/docs/providers/overview) -- Full provider configuration reference
+- [Batch Processing](/docs/advanced/batch-processing) -- Concurrency and retry settings for large operations
+- [Custom Prompts](/docs/advanced/custom-prompts) -- Fix unexpected LLM behavior by adjusting prompts

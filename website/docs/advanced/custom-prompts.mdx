@@ -4,10 +4,126 @@ title: Custom Prompts
 description: Customize LLM prompts for your needs
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [custom prompts, prompts, focused learning, domain]
+concepts: [Custom Prompts, Focused Learning, Prompt Engineering]
 ---
+
+import TLDR from '@site/src/components/TLDR';
 
 # Custom Prompts
 
-Customize prompts for specific domains.
+<TLDR>
+**Notemd lets you override the default LLM prompt for every task type.** Custom prompts give you control over what the model prioritizes: you can constrain concept extraction to a specific discipline, change the linking style, or redirect translation tone. Prompt variables like `{{content}}` and `{{concept}}` are substituted at runtime. The focused learning domain feature prepends your field of study to automatically scope extraction results.
 
-(Full documentation coming soon)
+This is part of the [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge).
+</TLDR>
+
+## Overview
+
+Notemd's built-in prompts are written for general-purpose knowledge work. They work well across domains, but they also leave room for domain-specific improvement. Custom prompts let you tell the LLM exactly how to behave for your use case -- whether that means extracting only medical terminology, linking only named entities, or translating in a formal register.
+
+Custom prompts do not replace the entire system prompt. They override or augment the **task-specific instruction portion** while preserving the structural output format (e.g., `CONCEPT:` lines, wiki-link syntax) that Notemd depends on for parsing.
+
+## How It Works
+
+### Prompt Architecture
+
+Every Notemd task follows the same prompt structure:
+
+```
+[System role: You are a helpful assistant...]
+[Domain constraint: Relevant Fields: [{domain}]]   <-- focused learning (optional)
+[Custom task prompt]                                <-- your override (optional)
+[Output format instructions]                        <-- always preserved
+[Content: {{content}}]                              <-- runtime substitution
+```
+
+1. **Base system prompt** -- Sets the assistant persona. Not overridable.
+2. **Focused learning domain** -- Prepends `Relevant Fields: [medicine / law / computer science / ...]` to constrain scope. This is a settings toggle, not a raw prompt.
+3. **Custom task prompt** -- Replaces the default task instructions (e.g., what kinds of concepts to extract, how aggressively to link).
+4. **Output format** -- Structural rules (`CONCEPT:` lines, wiki-link format). Always appended by Notemd to ensure parseability.
+5. **Content** -- The actual note text, substituted at runtime via `{{content}}`.
+
+### Prompt Variables
+
+Variables are replaced at execution time. Available variables differ by task:
+
+| Variable | Tasks | Replaced With |
+|----------|-------|---------------|
+| `{{content}}` | All | The note or selection text |
+| `{{concept}}` | Concept note template | The extracted concept name |
+| `{{description}}` | Concept note template | LLM-generated concept description |
+| `{{backlinks}}` | Concept note template | List of source notes with links |
+| `{{date}}` | Concept note template | Current date (YYYY-MM-DD) |
+| `{{language}}` | Translation | Target output language |
+| `{{source}}` | Concept note template | Source note basename |
+
+### Focused Learning Domain
+
+The focused learning feature is a shortcut for domain scoping. Instead of writing a custom prompt that mentions your field, you set `focusedLearningDomain` in settings:
+
+```
+Settings → Advanced → Focused Learning Domain
+Example: "medicine" or "computer science" or "Chinese philosophy"
+```
+
+This prepends `Relevant Fields: [medicine]` to the extraction prompt, causing the LLM to prioritize domain-relevant concepts and suppress generic ones. It is lighter than a full custom prompt and works across all extraction tasks.
+
+## Configuration
+
+| Setting | Default | Effect |
+|---------|---------|--------|
+| `customAddLinksPrompt` | `''` | Override the default add-links task prompt |
+| `customExtractConceptsPrompt` | `''` | Override the default concept extraction prompt |
+| `customResearchPrompt` | `''` | Override the default research + summarize prompt |
+| `customTranslatePrompt` | `''` | Override the default translation prompt |
+| `customDiagramPrompt` | `''` | Override the default diagram generation prompt |
+| `focusedLearningDomain` | `''` | Prepend discipline context to extraction and linking prompts |
+| `extractConceptsMinimalTemplate` | `true` | Use title-only concept note template (affects `{{concept}}` template scope) |
+| `customConceptNoteTemplate` | `''` | Override the concept note file template with full variable support |
+
+**When a custom prompt field is empty, the built-in default prompt is used.**
+
+## Example
+
+You are a medical researcher extracting concepts from clinical trial notes. The default prompt extracts generic nouns alongside medical terms, which clutters your concept folder.
+
+**Solution:** Set a focused learning domain and a custom extraction prompt.
+
+1. Set `focusedLearningDomain` to `medicine`
+2. Set `customExtractConceptsPrompt` to:
+
+```
+Extract only clinically relevant concepts: diseases, drug names,
+anatomical terms, measurement endpoints, and statistical methods.
+Ignore generic English nouns, brand names, and institutional names.
+Prioritize MeSH terminology where applicable.
+```
+
+Now when you run "Extract concepts" on a clinical note, the LLM produces:
+
+```
+CONCEPT: Randomized Controlled Trial
+CONCEPT: Double-Blind Method
+CONCEPT: Myocardial Infarction
+CONCEPT: Creatine Kinase-MB
+CONCEPT: Kaplan-Meier Estimate
+```
+
+Instead of the default behavior that might also extract unwanted generic terms like "hospital" or "month".
+
+## Tips
+
+- **Start with the focused learning domain** before writing a full custom prompt. It covers 80% of use cases with a single setting.
+- **Preserve output format** -- Never remove format instructions like "one per line" or "CONCEPT: prefix" from custom prompts. Notemd's parser depends on them.
+- **Test with a single note first** -- Custom prompts can have unexpected effects on extraction breadth. Verify on one note before batch processing.
+- **Keep prompts concise** -- Overly long custom prompts consume tokens and can dilute the model's focus.
+
+---
+
+## Next Steps
+
+- [Wiki-Links](/docs/features/wiki-links) -- What gets linked when you customize the add-links prompt
+- [Concept Notes](/docs/features/concept-notes) -- Concept note templates and the `{{concept}}` variable
+- [Batch Processing](/docs/advanced/batch-processing) -- Apply custom prompts across entire folders
+- [Troubleshooting](/docs/advanced/troubleshooting) -- Fix issues where custom prompts produce unexpected output

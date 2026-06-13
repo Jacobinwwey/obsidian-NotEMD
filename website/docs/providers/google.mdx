@@ -4,10 +4,35 @@ title: Google
 description: Configure Google Gemini
 author:
   '@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'
+keywords: [google, gemini, provider, configuration]
+concepts: [Google, Gemini, API Configuration]
 ---
+
+import TLDR from '@site/src/components/TLDR';
 
 # Google Provider
 
-Setup guide for Gemini models.
+<TLDR>
+**Google Gemini is configured as part of the [LLM Providers](/docs/providers/overview) overview.** Key details: default model `gemini-2.0-flash-exp`, Google transport (native Gemini API), base URL `generativelanguage.googleapis.com`, temperature `0.5`.
 
-(Full documentation coming soon)
+This is part of the [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge).
+</TLDR>
+
+Full setup instructions, per-task configuration, and troubleshooting are covered in [LLM Providers](/docs/providers/overview).
+
+**Quick reference:**
+
+| Field | Value |
+|-------|-------|
+| Default model | `gemini-2.0-flash-exp` |
+| Transport | Google (native) |
+| Base URL | `generativelanguage.googleapis.com` |
+| Temperature | `0.5` |
+| Model discovery | Google models list API |
+
+---
+
+## Next Steps
+
+- [LLM Providers](/docs/providers/overview) -- Full configuration, per-task models, and retry logic
+- [Translation](/docs/features/translation) -- Gemini Flash is recommended for high-volume translation tasks
