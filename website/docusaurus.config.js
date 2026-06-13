@@ -43,8 +43,12 @@ const config = {
               "name": "Notemd",
               "logo": {
                 "@type": "ImageObject",
-                "url": "https://jacobinwwey.github.io/obsidian-NotEMD/img/logo.png"
-              }
+                "url": "https://jacobinwwey.github.io/obsidian-NotEMD/img/logo.svg"
+              },
+              "sameAs": [
+                "https://github.com/Jacobinwwey/obsidian-NotEMD",
+                "https://discord.gg/qnGgsQ9W"
+              ]
             }
           },
           {
@@ -95,11 +99,10 @@ const config = {
   // may want to replace "en" with "zh-Hans".
   i18n: {
     defaultLocale: 'en',
-    locales: ['en', 'zh-CN', 'ja'],
+    locales: ['en', 'zh-CN'],
     localeConfigs: {
       en: { label: 'English', direction: 'ltr', htmlLang: 'en-US' },
       'zh-CN': { label: '简体中文', direction: 'ltr', htmlLang: 'zh-CN' },
-      ja: { label: '日本語', direction: 'ltr', htmlLang: 'ja' },
     },
   },
 

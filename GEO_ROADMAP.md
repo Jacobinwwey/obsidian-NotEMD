@@ -2,7 +2,7 @@
 
 **Created:** 2026-06-12
 **Updated:** 2026-06-13
-**Status:** Phase 1 complete. Phase 2 in progress.
+**Status:** Phase 1 + Phase 2 + Phase 3 complete. Awaiting 2026-07-01 retest.
 **Scope:** Post-deployment GEO optimization for AI search engine visibility
 
 ---
@@ -73,19 +73,18 @@ Next measurement date: **2026-07-01**
 
 ---
 
-## Phase 3: Architecture Evolution (Next)
+## Phase 3: Architecture Evolution (Complete)
 
-These items require analysis of Phase 2 impact (measured 2026-07-01) before execution.
-
-| Step | Description | Risk | Trigger |
-|------|-------------|------|---------|
-| P3-1 | Remove `ja` locale (0 translated pages) | Low: no indexed ja/ URLs yet | Before Google indexes ja/ |
-| P3-2 | Consolidate or expand 5 provider stub pages | Medium: need content writing effort | After baseline retest |
-| P3-3 | Sidebar reorder: Getting Started before pillar | Low: nav structure change | Anytime |
-| P3-4 | Apply for Algolia DocSearch | Low: free for OSS | After site is indexed |
-| P3-5 | Add `position_in_response` to visibility_tester | Low: 5 lines of code | Before 2026-07-01 retest |
-| P3-6 | Organization Schema: add `sameAs` (GitHub, Discord) | Low | Anytime |
-| P3-7 | Extend visibility test to Perplexity engine | Medium: needs API key | After credit card setup |
+| Step | Description | Status |
+|------|-------------|--------|
+| P3-1 | Remove `ja` locale (0 translated pages → hreflang pollution) | Done |
+| P3-2 | Consolidate or expand 5 provider stub pages | Deferred (needs content writing) |
+| P3-3 | Sidebar reorder: Getting Started before pillar, FAQ last | Done |
+| P3-4 | Apply for Algolia DocSearch | Deferred (after site indexed) |
+| P3-5 | Add `position_in_response` to visibility_tester | Done |
+| P3-6 | Organization Schema: add `sameAs` (GitHub, Discord) | Done |
+| P3-7 | Extend visibility test to Perplexity engine | Deferred (needs API key) |
+| P3-8 | Upgrade Docusaurus packages to ^3.10.1 (version consistency) | Done |
 
 ### Deferred (Explicitly NOT Doing)
 
@@ -108,7 +107,7 @@ These items require analysis of Phase 2 impact (measured 2026-07-01) before exec
 | Risk | Status | Mitigation |
 |------|--------|-----------|
 | Site not indexed by Google | Open | Submit sitemap via Google Search Console post-deploy |
-| Empty i18n locales emit wrong hreflang | **Fixed (partial)** | Phase 3 will remove ja; zh-CN needs more translation |
+| Empty i18n locales emit wrong hreflang | **Fixed** | Removed ja locale; zh-CN has 1 translated page |
 | Thin provider pages dilute crawl budget | Open | Phase 3: consolidate or expand |
 | Mermaid 660KB bundle on non-diagram pages | Accepted | Docusaurus architecture limitation; gzip ~200KB |
 | Correctness vs volume tradeoff in citations | **Fixed** | All citations point to real external authority sources |
@@ -134,17 +133,17 @@ These items require analysis of Phase 2 impact (measured 2026-07-01) before exec
 
 | Module | Capability | Used | Not Used | Priority |
 |---|---|---|---|---|
-| A1 | Organization Schema | WebSite + Person @graph | `sameAs` social links | P3 |
+| A1 | Organization Schema | WebSite + Person @graph + sameAs | — | Done |
 | A2 | FAQPage Schema | Now emitting for faq.mdx | — | Done |
-| A3 | Article Schema | TechArticle per page | `image` field (OG thumbnail) | P3 |
-| A4 | Person/E-E-A-T | Person @id cross-reference | `hasCredential` | P3 |
+| A3 | Article Schema | TechArticle per page | `image` field (OG thumbnail) | P4 |
+| A4 | Person/E-E-A-T | Person @id cross-reference (21/21) | `hasCredential` | P4 |
 | A5 | Citation Schema | 21/21 pages now have citations | — | Done |
 | A6 | BreadcrumbList | Not used | Full BreadcrumbList | Deferred |
 | B | Readability Check | — | Chinese-only, not applicable to EN content | Deferred |
-| C | Pillar Page Cluster | pillar-ai-knowledge exists | Cluster navigation HTML block | P3 |
-| D1 | Visibility Test | GLM baseline captured | Perplexity engine, position metric | P3 |
+| C | Pillar Page Cluster | pillar-ai-knowledge exists | Cluster navigation HTML block | P4 |
+| D1 | Visibility Test | GLM baseline + position metric | Perplexity engine | P4 |
 | D2 | Quarterly Report | — | First report after 3 data points | Q3 2026 |
-| E | Gap Analysis | 3 pages analyzed | Remaining 18 pages | P3 (after retest) |
+| E | Gap Analysis | 3 pages analyzed | Remaining 18 pages | P4 (after retest) |
 
 ---
 
