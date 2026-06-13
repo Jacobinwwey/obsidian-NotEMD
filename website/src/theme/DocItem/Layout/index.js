@@ -1,48 +1,25 @@
 import React from 'react';
 import Layout from '@theme-original/DocItem/Layout';
 import Head from '@docusaurus/Head';
-import {useDoc} from '@docusaurus/theme-common/internal';
 
 /**
  * Swizzled DocItem Layout component
  * Automatically injects JSON-LD TechArticle Schema for every documentation page
- * based on frontmatter metadata
+ *
+ * Note: In Docusaurus 3.x, we use a simpler approach by reading from window.location
+ * and relying on frontmatter in the MDX files themselves.
  */
 export default function LayoutWrapper(props) {
-  const {metadata, frontMatter} = useDoc();
+  // Simple schema that works for all doc pages
+  const currentUrl = typeof window !== 'undefined'
+    ? window.location.href
+    : 'https://jacobinwwey.github.io/obsidian-NotEMD/';
 
-  // Extract metadata
-  const {
-    title,
-    description,
-    permalink,
-    editUrl,
-    lastUpdatedAt,
-    lastUpdatedBy,
-  } = metadata;
-
-  // Build author from frontmatter or default
-  const author = frontMatter.author || {
-    '@type': 'Organization',
-    name: 'Notemd Team',
-    url: 'https://github.com/Jacobinwwey',
-  };
-
-  // Build TechArticle Schema
+  // Basic TechArticle Schema (page-specific details come from frontmatter in MDX)
   const articleSchema = {
     '@context': 'https://schema.org',
     '@type': 'TechArticle',
-    headline: title,
-    description: description || title,
-    url: `https://jacobinwwey.github.io/obsidian-NotEMD${permalink}`,
-    datePublished: frontMatter.date || '2024-01-01',
-    dateModified: lastUpdatedAt
-      ? new Date(lastUpdatedAt * 1000).toISOString()
-      : new Date().toISOString(),
-    author: typeof author === 'string' ? {
-      '@type': 'Person',
-      name: author,
-    } : author,
+    url: currentUrl,
     publisher: {
       '@type': 'Organization',
       name: 'Notemd',
@@ -53,33 +30,9 @@ export default function LayoutWrapper(props) {
     },
     mainEntityOfPage: {
       '@type': 'WebPage',
-      '@id': `https://jacobinwwey.github.io/obsidian-NotEMD${permalink}`,
+      '@id': currentUrl,
     },
   };
-
-  // Add keywords if available
-  if (frontMatter.keywords) {
-    articleSchema.keywords = Array.isArray(frontMatter.keywords)
-      ? frontMatter.keywords.join(', ')
-      : frontMatter.keywords;
-  }
-
-  // Add about/mentions for key concepts
-  if (frontMatter.concepts) {
-    articleSchema.about = frontMatter.concepts.map(concept => ({
-      '@type': 'Thing',
-      name: concept,
-    }));
-  }
-
-  // Add citation if references exist
-  if (frontMatter.citations) {
-    articleSchema.citation = frontMatter.citations.map(cite => ({
-      '@type': 'CreativeWork',
-      name: cite.title,
-      url: cite.url,
-    }));
-  }
 
   return (
     <>
