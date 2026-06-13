@@ -14,6 +14,7 @@ export default {
     description: 'Repository documentation for obsidian-NotEMD',
     cleanUrls: true,
     rewrites: planRewrites,
+    head: [['meta', { name: 'robots', content: 'noindex, nofollow' }]],
     themeConfig: {
         nav: [
             { text: 'Home', link: '/' },

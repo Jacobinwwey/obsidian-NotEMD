@@ -95,18 +95,11 @@ const config = {
   // may want to replace "en" with "zh-Hans".
   i18n: {
     defaultLocale: 'en',
-    locales: ['en', 'zh-CN', 'ja', 'ko', 'es', 'fr', 'de', 'ru', 'ar', 'pt'],
+    locales: ['en', 'zh-CN', 'ja'],
     localeConfigs: {
       en: { label: 'English', direction: 'ltr', htmlLang: 'en-US' },
       'zh-CN': { label: '简体中文', direction: 'ltr', htmlLang: 'zh-CN' },
       ja: { label: '日本語', direction: 'ltr', htmlLang: 'ja' },
-      ko: { label: '한국어', direction: 'ltr', htmlLang: 'ko' },
-      es: { label: 'Español', direction: 'ltr', htmlLang: 'es' },
-      fr: { label: 'Français', direction: 'ltr', htmlLang: 'fr' },
-      de: { label: 'Deutsch', direction: 'ltr', htmlLang: 'de' },
-      ru: { label: 'Русский', direction: 'ltr', htmlLang: 'ru' },
-      ar: { label: 'العربية', direction: 'rtl', htmlLang: 'ar' },
-      pt: { label: 'Português', direction: 'ltr', htmlLang: 'pt-BR' },
     },
   },
 

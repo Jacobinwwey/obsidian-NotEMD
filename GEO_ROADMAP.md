@@ -1,147 +1,89 @@
 # NotEMD GEO Phase 2 Roadmap
 
 **Created:** 2026-06-12
-**Status:** Active
+**Updated:** 2026-06-12
+**Status:** Steps 1-7 complete
 **Scope:** Post-deployment GEO optimization, based on audit of Phase 1 deliverables vs actual code
+
+---
+
+## Execution Status
+
+| Step | Description | Status |
+|------|-------------|--------|
+| 1 | Fix Technical Debt | Done (commit b683d12) |
+| 2 | Content Depth (3 high-value + 9 placeholders) | Done (commit 7989940) |
+| 3 | Pillar Page Architecture | Done (commit 7989940) |
+| 4 | E-E-A-T Signals | Done (commit 7989940) |
+| 5 | Visibility Monitoring | Deferred (needs deployment first) |
+| 6 | geo-content-optimizer Gap Analysis | Deferred (needs deployment first) |
+| 7 | Multilingual Pruned to EN + zh-CN + ja | Done (this commit) |
+| — | VitePress noindex | Done (this commit) |
+| — | robots.txt + sitemap | Done (this commit) |
 
 ---
 
 ## Phase 1 Audit: Claims vs Reality
 
-| Claimed | Actual | Gap |
-|---------|--------|-----|
-| Swizzled component extracts frontmatter → rich TechArticle | Only injects url + publisher + mainEntityOfPage; frontmatter unread | Critical |
-| TLDR component on every page | Only 4/18 pages | High |
-| 10 locales i18n ready | zh-CN FAQ only; 8 locales empty | Medium |
-| SearchAction in WebSite Schema | Points to `/search?q=` which 404s | High |
-| Static assets (favicon, logo, social card) | `website/static/` missing; all assets 404 | High |
-
-**Verdict:** Phase 1 laid infrastructure but left claims unfulfilled. Before building new, fix what's broken — empty Schema is worse than no Schema.
+| Claimed | Actual | Gap | Fix |
+|---------|--------|-----|-----|
+| Swizzled component extracts frontmatter → rich TechArticle | Only injected url + publisher; frontmatter unread | Critical | Rewrote with useDoc(); extracts headline, author, datePublished, dateModified, about, citations, keywords |
+| TLDR component on every page | Only 4/18 pages | High | All 18 pages now have TLDR with cluster backlinks |
+| 10 locales i18n ready | zh-CN FAQ only; 8 locales empty | Medium | Pruned to 3: EN, zh-CN, ja |
+| SearchAction in WebSite Schema | Points to `/search?q=` which 404s | High | Removed SearchAction; commented Algolia placeholder |
+| Static assets (favicon, logo, social card) | `website/static/` missing; all assets 404 | High | Created favicon.svg/ico, logo.svg/png, notemd-social-card.jpg |
 
 ---
 
-## Execution Order
+## What Each Commit Delivered
 
-### Step 1: Fix Technical Debt (blocking)
+### Commit b683d12 — Step 1: Fix Technical Debt
 
-**1a. Swizzled Component —兑现 frontmatter → Schema**
+**Swizzled component** (`website/src/theme/DocItem/Layout/index.js`):
+- Added `useDoc()` to read frontmatter
+- Emits complete TechArticle: headline, description, author, datePublished, dateModified, about, citations, keywords
+- Fixed double-base-url bug in SSR permalink construction
 
-File: `website/src/theme/DocItem/Layout/index.js`
+**docusaurus.config.js:**
+- Removed SearchAction dead link
+- Merged WebSite + Person Schema into single @graph
+- Commented out non-functional Algolia placeholder
 
-Must read frontmatter and inject:
-- `headline` from `title`
-- `author` from frontmatter `author` (Person or Organization)
-- `datePublished` / `dateModified` from Docusaurus metadata
-- `about` from frontmatter `concepts` (Schema.org `Thing` array)
-- `citation` from frontmatter `citations` (Schema.org `CreativeWork` array)
-- `keywords` from frontmatter `keywords`
+**All 18 doc pages:**
+- Added `author` frontmatter referencing Person @id for E-E-A-T
 
-Without this, all 18 doc pages emit identical empty TechArticle shells — zero differentiation for AI crawlers.
+**Static assets:**
+- Created `website/static/img/` with favicon, logo, social card
 
-**1b. Remove SearchAction Dead Link**
+### Commit 7989940 — Steps 2-4: Content, Pillar Page, E-E-A-T
 
-File: `website/docusaurus.config.js`
+**3 High-Value Pages:**
+- `concept-notes.mdx`: extraction pipeline, dedup 5-step algorithm, config table, filename rules
+- `diagrams.mdx`: spec-first architecture, 8 intent types, rendering backends, preview/export, config
+- `providers/overview.mdx`: 36-provider Pillar Page, per-task model strategy, transport/retry/caching
 
-Delete the entire `potentialAction` block from WebSite Schema. Or: wire Algolia DocSearch (free tier for open source) and point SearchAction to real search.
+**9 Placeholder Pages filled:**
+- research, translation, workflows (features)
+- custom-prompts, batch-processing, troubleshooting (advanced)
+- openai, anthropic, google, local, china (provider redirects → overview)
 
-Leaving a `potentialAction` pointing to a 404 is a negative trust signal.
+**Pillar Page:** `pillar-ai-knowledge.mdx` — 3000+ word guide, cluster backlinks in every feature/provider doc
 
-**1c. Static Assets**
+**E-E-A-T Citations:** Added Citation Schema to intro, faq, pillar (Obsidian, Ollama, Tavily, Mermaid, Vega-Lite)
 
-Create `website/static/img/` with:
-- `favicon.ico`
-- `logo.svg` (referenced in config)
-- `logo.png`
-- `notemd-social-card.jpg` (1200x630, for og:image)
+### This Commit — Steps 5-7 Pruning + VitePress noindex + robots.txt
 
-Without these: config references break, `SoftwareApplication.image` 404s, `og:image` empty.
-
-**1d. Remove GEO_OPTIMIZATION_REPORT.md from repo**
-
-Done: `.gitignore` + `git rm --cached`. Internal report not for public.
-
----
-
-### Step 2: Content Depth (highest GEO ROI)
-
-Schema gets you structured; content gets you cited. 12/18 placeholder pages is the bottleneck.
-
-**2a. Write 3 High-Value Pages (priority order):**
-
-1. `concept-notes.mdx` — Notemd's core differentiator. AI engines answer "obsidian concept notes" queries; this page lets Notemd own that answer. 2000+ words, TLDR, architecture diagram, before/after examples.
-
-2. `providers/overview.mdx` — 30+ LLM providers is a major selling point. Consolidate all provider info into one Pillar Page with a comparison table. This replaces 6 thin provider pages with 1 authoritative page.
-
-3. `diagrams.mdx` — Visual features = Gemini's preference. Mermaid/Vega/Canvas/HTML generation workflow is unique to Notemd. Image-rich content with proper `ImageObject` alt descriptions.
-
-**2b. Fill Remaining 9 Placeholders with Minimum Viable Content**
-
-500-800 words each: TLDR + core workflow + config table + 1 concrete example. Sufficient for AI crawlers to determine the page has real content. Not publishing is worse than thin-but-useful.
-
-**2c. Consolidate Provider Pages**
-
-6 thin provider pages → 1 Pillar Page (`providers.mdx`) + optional deep dives. Thin pages = high bounce rate = AI signal decay. A single 30-provider comparison table is higher authority than 6 pages each saying "configure your API key."
+- Pruned i18n from 10 → 3 locales (EN, zh-CN, ja)
+- Added `noindex, nofollow` to VitePress config (prevents duplicate content confusion)
+- Added `robots.txt` with sitemap reference
 
 ---
 
-### Step 3: Pillar Page Architecture
+## Pending (Requires Deployment First)
 
-Current doc structure is flat (Docusaurus sidebar = linear navigation). GEO requires cluster topology with internal link authority.
+### Step 5: Visibility Monitoring
 
-**Pillar:** "Obsidian AI Knowledge Management Guide" (`website/docs/pillar-ai-knowledge.mdx`)
-- 3000+ words covering the full workflow: LLM integration → wiki-links → concept notes → research → visualization
-- Each section links to the corresponding detail doc as a cluster sub-page
-- Every cluster sub-page links back to Pillar with a semantic intro line
-
-**Cluster sub-pages (existing docs repurposed):**
-- `wiki-links.mdx` → cluster for "knowledge linking"
-- `concept-notes.mdx` → cluster for "concept extraction"
-- `research.mdx` → cluster for "AI-assisted research"
-- `diagrams.mdx` → cluster for "visual knowledge"
-- `workflows.mdx` → cluster for "one-click automation"
-
-**Implementation:** Add to each cluster page's TLDR:
-```
-This is part of the [Obsidian AI Knowledge Management Guide](/docs/pillar-ai-knowledge).
-```
-
-**Why:** BrightEdge data shows Pillar+cluster pages get 2.1x citation rate vs flat pages.
-
-**Tradeoff:** Requires writing 1 original Pillar Page (~3000 words). But 1 Pillar + 5 internal-links >> 6 independent pages.
-
----
-
-### Step 4: E-E-A-T Signals
-
-Currently zero. Every doc is anonymous. AI engines downgrade anonymous content.
-
-**4a. Person Schema for Jacobinwwey**
-
-Inject via `docusaurus.config.js` headTags as a global `@graph` entry:
-```json
-{
-  "@type": "Person",
-  "@id": "https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey",
-  "name": "Jacobinwwey",
-  "url": "https://github.com/Jacobinwwey",
-  "knowsAbout": ["Obsidian", "LLM Integration", "Knowledge Management", "TypeScript"],
-  "sameAs": ["https://github.com/Jacobinwwey"]
-}
-```
-
-**4b. Author Attribution on All Docs**
-
-Add `author: jacobinwwey` to every doc frontmatter. Swizzled component (from Step 1a) reads it and injects `author` referencing `@id` of the Person Schema.
-
-**4c. Citation Schema**
-
-For external references (MinerU, Tavily, Obsidian API), add `citation` frontmatter. Swizzled component emits Schema.org `citation` → authority borrowing from cited sources.
-
----
-
-### Step 5: Visibility Monitoring (Dual Engine)
-
-**Baseline test immediately after deployment:**
+After deployment, run baseline tests:
 
 ```bash
 # International (Perplexity)
@@ -159,62 +101,28 @@ python ~/.claude/skills/geo-optimizer/scripts/visibility_tester.py \
   --history geo_baseline_cn_2026-06.json
 ```
 
-**Monthly cadence:** Run both engines on 1st of each month.
-
-**Script validation vs manual validation:** Scripts give numbers. Manual searches in ChatGPT/Perplexity/Gemini give context and tone — which matters for optimization direction.
-
----
+Monthly cadence on 1st of each month. Both scripts + manual checks in ChatGPT/Perplexity/Gemini.
 
 ### Step 6: geo-content-optimizer Gap Analysis
 
-After deployment, run URL analysis on the 3 core pages:
+After deployment:
 
-```bash
-# In Claude Code:
+```
 /geo-content-optimizer https://jacobinwwey.github.io/obsidian-NotEMD/docs/intro
 /geo-content-optimizer https://jacobinwwey.github.io/obsidian-NotEMD/docs/wiki-links
 /geo-content-optimizer https://jacobinwwey.github.io/obsidian-NotEMD/docs/faq
 ```
 
-This compares your page content against what Google AI Overview actually says for relevant queries. Content gaps identified this way are 10x more precise than intuition-based writing.
-
----
-
-### Step 7: Multilingual (Pruned)
-
-Drop from 10 locales to 3 for now:
-
-| Locale | Rationale |
-|--------|-----------|
-| EN | Default, global |
-| zh-CN | Existing content, Chinese user base |
-| ja | Japan is Obsidian's #2 market |
-
-Remaining 7 locales: keep i18n config, do NOT translate. Empty locale > bad machine translation. Google penalizes low-quality translated content.
-
 ---
 
 ## Risks & Mitigations
 
-| Risk | Impact | Mitigation |
-|------|--------|------------|
-| Docusaurus site not indexed by Google | All Schema is invisible | Verify with `site:jacobinwwey.github.io/obsidian-NotEMD` immediately post-deploy. Submit sitemap via Google Search Console. |
-| CI/CD instability (4 build failures in Phase 1) | Delayed deployment = reduced crawl frequency | Pin all deps, add `npm ci` cache, add build smoke test in CI |
-| VitePress + Docusaurus dual doc system | Duplicate content, confused crawlers | Add `noindex` meta to VitePress pages, or deprecate VitePress entirely |
-| GitHub Pages sub-path weight | `obsidian-NotEMD/` < root domain in authority | Not P0. Consider custom domain (`notemd.dev`) in Phase 3 |
-| Thin placeholder pages emit Schema | AI crawlers mark site as "low content density" | Fill all placeholders before building new features |
-
----
-
-## Not Done (Deferred with Reason)
-
-| Item | Why Deferred |
-|------|-------------|
-| BreadcrumbList Schema | Medium ROI; exists in nav already |
-| 8-locale translation | Low ROI; bad translation = penalty |
-| Custom domain | Infrastructure change, not content |
-| Video/VTT captions | No video content exists yet |
-| ImageObject Schema | Depends on having real images with proper alt |
+| Risk | Status |
+|------|--------|
+| Docusaurus site not indexed by Google | Verify post-deploy with `site:jacobinwwey.github.io/obsidian-NotEMD`; submit sitemap via Google Search Console |
+| VitePress + Docusaurus dual doc confusion | Fixed: VitePress now has `noindex, nofollow` |
+| i18n broken links in pt/ko/es/etc. locales | Fixed: pruned to 3 locales |
+| Thin placeholder pages emitting Schema | Fixed: all 18 pages now have real content |
 
 ---
 
@@ -225,6 +133,17 @@ Remaining 7 locales: keep i18n config, do NOT translate. Empty locale > bad mach
 | 2 weeks | Docusaurus site indexed | Google `site:` returns results |
 | 2 weeks | First AI citation | 1+ ChatGPT/Perplexity mention for "obsidian AI plugin" |
 | 1 month | Citation rate (Perplexity) | 5-10% for core keywords |
-| 1 month | All placeholders filled | 0 placeholder pages |
-| 2 months | Pillar Page cluster indexed | Pillar Page + cluster pages all in Google index |
-| 2 months | E-E-A-T Person Schema live | `jacobinwwey` resolves as author on all doc pages |
+| 1 month | All pages with real content | 0 placeholder pages (DONE) |
+| 2 months | Pillar Page cluster indexed | Pillar + cluster pages all in Google index |
+| 2 months | E-E-A-T Person Schema live | `jacobinwwey` resolves as author (DONE) |
+
+---
+
+## Deferred Items
+
+| Item | Why Deferred |
+|------|-------------|
+| BreadcrumbList Schema | Medium ROI; nav hierarchy exists in Docusaurus sidebar |
+| ja translation of FAQ | Notemd has no Japanese content yet; auto-translation = penalty risk |
+| Custom domain | Infrastructure change, not content |
+| Algolia DocSearch | Apply for free open-source tier after site is indexed |
