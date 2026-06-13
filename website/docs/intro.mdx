@@ -2,11 +2,11 @@
 id: intro
 title: Introduction to Notemd
 description: AI-powered knowledge base builder for Obsidian
-keywords: [notemd, obsidian, AI, LLM, knowledge base, wiki-links]
+keywords: [notemd, obsidian, AI, LLM, knowledge base, wiki-links, Copilot alternative, Smart Connections alternative, obsidian AI plugin, auto wiki-link, concept notes]
 author:
   '@type': Organization
   name: Notemd Team
-concepts: [Notemd, Obsidian, LLM, Knowledge Management, Wiki-Links]
+concepts: [Notemd, Obsidian, LLM, Knowledge Management, Wiki-Links, Copilot Alternative, Smart Connections Alternative, AI Plugin]
 citations:
   - title: Obsidian
     url: https://obsidian.md
@@ -113,6 +113,32 @@ graph LR
     G --> J[Diagrams]
     G --> K[Research Summaries]
 ```
+
+## Notemd vs Other Obsidian AI Plugins
+
+Most Obsidian AI plugins are conversation-first (you ask, AI answers, insights stay in chat). Notemd is **write-first**: AI processes your notes and writes structured results directly into your vault.
+
+| Capability | Notemd | Copilot | Smart Connections | Text Generator |
+|-----------|--------|---------|-------------------|-----------------|
+| Auto wiki-link insertion | Yes | No | No | No |
+| Concept note generation | Yes (with backlinks + dedup) | No | No | No |
+| Diagram generation | Yes (Mermaid, Canvas, Vega-Lite, HTML) | No | No | No |
+| Web research integration | Yes (Tavily + DuckDuckGo) | No | No | No |
+| Batch folder processing | Yes | Limited | No | Limited |
+| Per-task model routing | Yes (7 tasks, independent models) | No | No | No |
+| One-click workflow chains | Yes (DSL) | No | No | No |
+| Translation (batch) | Yes | No | No | No |
+| Chat with vault | No | Yes | No | No |
+| Semantic similarity search | No | No | Yes | No |
+| Template-based generation | No | No | No | Yes |
+| LLM providers | 36 (cloud + gateway + local) | 3-5 | 2-3 | 3-5 |
+| Fully offline | Yes (Ollama) | Partial | Partial | Partial |
+
+**When to choose Notemd**: You want AI to build a persistent knowledge graph — not just chat about your notes.
+
+**When to choose Copilot**: You want a conversational AI assistant inside Obsidian.
+
+**When to choose Smart Connections**: You want to discover existing relationships between notes via semantic search.
 
 ## Philosophy
 
