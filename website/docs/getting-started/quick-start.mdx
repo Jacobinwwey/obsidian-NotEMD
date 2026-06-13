@@ -1,0 +1,175 @@
+---
+id: quick-start
+title: Quick Start Guide
+description: Get started with Notemd in 5 minutes
+keywords: [quick start, tutorial, getting started, first steps]
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Quick Start Guide
+
+<TLDR>
+**Start using Notemd in 5 minutes.** Three steps: (1) Add an LLM API key (or use local Ollama), (2) Open a note and run "Process file (add links)", (3) Explore one-click workflows in the sidebar. Supports 30+ providers. No coding required. Works offline with Ollama.
+</TLDR>
+
+## Step 1: Configure Your First LLM Provider (2 min)
+
+### Option A: Cloud Provider (OpenAI, Anthropic, etc.)
+
+1. Open **Settings** → **Notemd**
+2. Under **LLM Provider Configuration**, select a provider from the dropdown
+3. Enter your **API Key**
+4. (Optional) Click **"Get Model List"** to see available models
+5. Select a model for each task type
+
+**Popular choices:**
+- **OpenAI**: `gpt-4o-mini` (fast, affordable)
+- **Anthropic**: `claude-sonnet-4-6` (high quality)
+- **DeepSeek**: `deepseek-chat` (very affordable)
+
+### Option B: Local Ollama (No API Key Needed)
+
+1. Install [Ollama](https://ollama.com/)
+2. Download a model: `ollama pull llama3.1`
+3. In Notemd settings, select **"Ollama"** as provider
+4. Model name: `llama3.1` (or any model you downloaded)
+
+## Step 2: Try Your First Task (1 min)
+
+### Add Wiki-Links to a Note
+
+1. Open any note with meaningful content
+2. Right-click in the editor
+3. Select **"Process file (add links)"**
+4. Wait a few seconds
+5. Key concepts are now `[[wiki-linked]]`!
+
+**Example:**
+
+**Before:**
+```
+Machine learning models use neural networks to process data.
+```
+
+**After:**
+```
+[[Machine learning]] models use [[neural networks]] to process data.
+```
+
+## Step 3: Explore Features (2 min)
+
+### Extract Concept Notes
+
+1. Right-click → **"Extract concepts from current file"**
+2. Notemd creates separate files for each concept
+3. Check your configured concept folder (default: `concepts/`)
+4. Each concept note has a backlink to your original note
+
+### Research & Summarize
+
+1. Highlight a topic in your note
+2. Right-click → **"Research and summarize"**
+3. Notemd queries web search (Tavily or DuckDuckGo)
+4. Summary appends to your note with sources
+
+### One-Click Workflows
+
+1. Check the **left sidebar** for workflow buttons
+2. Click **"One-Click Extract"** on any note
+3. It runs: add links → extract concepts → research → generate diagram
+4. All in one click!
+
+## Common First Tasks
+
+### Task 1: Process a Paper/Article
+
+```
+1. Paste article content into a note
+2. Run "Process file (add links)"
+3. Run "Extract concepts"
+4. Run "Research and summarize" on unfamiliar terms
+5. Run "Summarize as Mermaid diagram" for visual structure
+```
+
+### Task 2: Translate Notes
+
+```
+1. Highlight text to translate
+2. Right-click → "Translate to target language"
+3. Set target language in settings first
+```
+
+### Task 3: Create a Knowledge Map
+
+```
+1. Process 5-10 related notes with "add links"
+2. Run "Extract concepts" on each
+3. Open Graph view to see connections
+4. Your knowledge graph is forming!
+```
+
+## Customization Tips
+
+### Per-Task Model Selection
+
+You can use different models for different tasks:
+
+| Task | Recommended Model | Why |
+|------|------------------|-----|
+| Add Links | `gpt-4o-mini`, `deepseek-chat` | Fast, many calls |
+| Extract Concepts | `claude-sonnet-4-6`, `gpt-4o` | Quality extraction |
+| Research | `perplexity`, `gpt-4o` | Web-grounded |
+| Translation | `gemini-flash`, `gpt-4o` | Multilingual |
+| Diagrams | `claude-opus`, local model | Complex reasoning |
+
+Configure in: **Settings → Notemd → Task-Specific Models**
+
+### Custom Workflows
+
+Create your own button:
+
+1. Settings → Notemd → Workflows
+2. Click "Add Workflow"
+3. Enter DSL: `process-current-add-links>extract-concepts-current>research-and-summarize`
+4. Name it: "My Research Flow"
+5. New button appears in sidebar
+
+## Troubleshooting
+
+### "API Key Invalid"
+- Check if key is correct (no extra spaces)
+- Verify account has credits
+- Test with "Connection Test" button in settings
+
+### "Model Not Found"
+- Click "Get Model List" to see available models
+- Some providers require specific model names (e.g., `gpt-4o` not `gpt-4`)
+
+### Links Not Appearing
+- Ensure note has enough content (>50 words)
+- Try a more powerful model
+- Check if LLM call succeeded (see diagnostics panel)
+
+### Slow Performance
+- Use faster models (`gpt-4o-mini` instead of `gpt-4o`)
+- Reduce chunk size in settings
+- Enable parallel processing for batch tasks
+
+## Next Steps
+
+- 📖 [Explore All Features](../features/wiki-links)
+- ⚙️ [Advanced Configuration](./configuration)
+- 🔧 [LLM Provider Setup](../providers/overview)
+- ❓ [FAQ](../faq)
+
+## Video Tutorial
+
+Watch the 3-minute quickstart video (Chinese):
+[【全开源免费！NotEMD 三分钟速通】](https://b23.tv/lqR0RlA)
+
+## Getting Help
+
+- 💬 **Discord**: [discord.gg/qnGgsQ9W](https://discord.gg/qnGgsQ9W)
+- 🐛 **Issues**: [GitHub Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)
+- 📚 **Docs**: [Full Documentation](https://jacobinwwey.github.io/obsidian-NotEMD/)

@@ -1,0 +1,127 @@
+---
+id: installation
+title: Installation
+description: How to install Notemd in Obsidian
+keywords: [installation, setup, obsidian plugin]
+---
+
+import TLDR from '@site/src/components/TLDR';
+
+# Installation
+
+<TLDR>
+**Install Notemd in under 2 minutes.** Two methods: (1) Obsidian Community Plugins (recommended, one-click install), or (2) Manual installation via GitHub Releases. Requires Obsidian 0.15.0+. Works on Windows, macOS, Linux, iOS, and Android. No external dependencies. 4k+ downloads, MIT licensed.
+</TLDR>
+
+## Method 1: Community Plugins (Recommended)
+
+1. Open **Obsidian Settings** (⚙️ icon or `Ctrl/Cmd + ,`)
+2. Navigate to **Community plugins**
+3. Click **Browse**
+4. Search for **"Notemd"**
+5. Click **Install**
+6. Click **Enable**
+
+**Done!** You'll see the Notemd icon in your left sidebar.
+
+## Method 2: Manual Installation
+
+### Prerequisites
+- Obsidian 0.15.0 or higher
+- Git (optional, for cloning)
+
+### Steps
+
+1. **Download files** from [GitHub Releases](https://github.com/Jacobinwwey/obsidian-NotEMD/releases/latest):
+   - `main.js`
+   - `styles.css`
+   - `manifest.json`
+
+2. **Locate your vault's plugin folder:**
+   ```
+   <your-vault>/.obsidian/plugins/
+   ```
+   
+   If the `plugins` folder doesn't exist, create it.
+
+3. **Create Notemd folder:**
+   ```
+   <your-vault>/.obsidian/plugins/notemd/
+   ```
+
+4. **Copy the three files** into the `notemd` folder.
+
+5. **Reload Obsidian:**
+   - Press `Ctrl/Cmd + R`, or
+   - Restart Obsidian
+
+6. **Enable the plugin:**
+   - Settings → Community plugins
+   - Find "Notemd" in the list
+   - Toggle it on
+
+## Alternative: Install via BRAT
+
+If you use the [BRAT plugin](https://github.com/TfTHacker/obsidian42-brat):
+
+1. Open BRAT settings
+2. Click "Add Beta plugin"
+3. Enter: `Jacobinwwey/obsidian-NotEMD`
+4. Click "Add Plugin"
+5. Enable Notemd in Community plugins
+
+## Verification
+
+After installation, verify Notemd is working:
+
+1. Open any note
+2. Right-click in the editor
+3. You should see Notemd commands like:
+   - "Process file (add links)"
+   - "Extract concepts"
+   - "Research and summarize"
+
+## Next Steps
+
+- **Configure LLM provider:** [Quick Start →](./quick-start)
+- **Troubleshooting:** [Common Issues →](../advanced/troubleshooting)
+
+## System Requirements
+
+| Platform | Version | Status |
+|----------|---------|--------|
+| **Obsidian** | 0.15.0+ | Required |
+| **Windows** | 7+ | ✅ Supported |
+| **macOS** | 10.15+ | ✅ Supported |
+| **Linux** | Any | ✅ Supported |
+| **iOS** | 15+ | ✅ Supported |
+| **Android** | 5+ | ✅ Supported |
+
+## Uninstallation
+
+To remove Notemd:
+
+1. Settings → Community plugins
+2. Find "Notemd"
+3. Click the ❌ icon
+4. Optionally, delete the plugin folder: `<vault>/.obsidian/plugins/notemd/`
+
+Your data (notes, concept notes, etc.) remains untouched.
+
+## Updating
+
+### Auto-update (Recommended)
+Obsidian automatically checks for plugin updates. When a new version is available:
+1. Settings → Community plugins
+2. Click "Check for updates"
+3. Click "Update" next to Notemd
+
+### Manual update
+Download the latest release and replace the three files in your plugin folder.
+
+## Getting Help
+
+- 📖 [Quick Start Guide](./quick-start)
+- ❓ [FAQ](../faq)
+- 💬 [Discord Community](https://discord.gg/qnGgsQ9W)
+- 🐛 [Report Issues](https://github.com/Jacobinwwey/obsidian-NotEMD/issues)
