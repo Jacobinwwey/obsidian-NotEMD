@@ -2,25 +2,20 @@ import React from 'react';
 import Layout from '@theme-original/DocItem/Layout';
 import Head from '@docusaurus/Head';
 import {useDoc} from '@docusaurus/plugin-content-docs/client';
+import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 
-/**
- * Swizzled DocItem Layout component
- * Automatically injects JSON-LD TechArticle Schema for every documentation page
- * Reads frontmatter (author, keywords, concepts, citations) for rich Schema.
- */
 export default function LayoutWrapper(props) {
   const {frontMatter, metadata} = useDoc();
+  const {siteConfig} = useDocusaurusContext();
 
-  const siteUrl = 'https://jacobinwwey.github.io';
-  const currentUrl = typeof window !== 'undefined'
-    ? window.location.href
-    : `${siteUrl}${metadata.permalink}`;
+  const currentUrl = `${siteConfig.url}${metadata.permalink}`;
 
-  const author = frontMatter.author || {'@type': 'Organization', name: 'Notemd Team'};
+  const author = frontMatter.author || {'@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'};
 
   const aboutEntries = (frontMatter.concepts || []).map((c) => ({
-    '@type': 'Thing',
+    '@type': 'DefinedTerm',
     name: c,
+    inDefinedTermSet: 'https://jacobinwwey.github.io/obsidian-NotEMD/#concepts',
   }));
 
   const citationEntries = (frontMatter.citations || []).map((c) => ({
@@ -29,6 +24,12 @@ export default function LayoutWrapper(props) {
     ...(c.url ? {url: c.url} : {}),
   }));
 
+  const dateModified = metadata.lastUpdatedAt
+    ? new Date(metadata.lastUpdatedAt).toISOString()
+    : undefined;
+
+  const datePublished = frontMatter.datePublished || dateModified;
+
   const articleSchema = {
     '@context': 'https://schema.org',
     '@type': 'TechArticle',
@@ -36,14 +37,14 @@ export default function LayoutWrapper(props) {
     description: metadata.description,
     url: currentUrl,
     author,
-    datePublished: metadata.date,
-    dateModified: metadata.lastUpdatedAt || metadata.date,
+    ...(datePublished ? {datePublished} : {}),
+    ...(dateModified ? {dateModified} : {}),
     publisher: {
       '@type': 'Organization',
       name: 'Notemd',
       logo: {
         '@type': 'ImageObject',
-        url: 'https://jacobinwwey.github.io/obsidian-NotEMD/img/logo.png',
+        url: `${siteConfig.url}/obsidian-NotEMD/img/logo.svg`,
       },
     },
     mainEntityOfPage: {
@@ -55,13 +56,27 @@ export default function LayoutWrapper(props) {
     ...(frontMatter.keywords ? {keywords: frontMatter.keywords} : {}),
   };
 
+  const schemas = [<script key="techArticle" type="application/ld+json">{JSON.stringify(articleSchema)}</script>];
+
+  if (metadata.id === 'faq' && frontMatter.faqItems) {
+    const faqSchema = {
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: frontMatter.faqItems.map((item) => ({
+        '@type': 'Question',
+        name: item.question,
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: item.answer,
+        },
+      })),
+    };
+    schemas.push(<script key="faqPage" type="application/ld+json">{JSON.stringify(faqSchema)}</script>);
+  }
+
   return (
     <>
-      <Head>
-        <script type="application/ld+json">
-          {JSON.stringify(articleSchema)}
-        </script>
-      </Head>
+      <Head>{schemas}</Head>
       <Layout {...props} />
     </>
   );

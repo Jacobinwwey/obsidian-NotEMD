@@ -1,6 +1,6 @@
 /**
- * Custom CSS for GEO-optimized Docusaurus site
- * Optimized for AI/LLM crawler readability
+ * Custom CSS for NotEMD documentation site
+ * Styling for readability and visual hierarchy
  */
 
 :root {
@@ -26,13 +26,13 @@
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
 }
 
-/* GEO Optimization: High-contrast headers for better AI extraction */
+/* Readability: High-contrast headers for clear visual hierarchy */
 h1, h2, h3, h4, h5, h6 {
   font-weight: 700;
   letter-spacing: -0.02em;
 }
 
-/* GEO Optimization: Clear visual hierarchy */
+/* Readability: Heading sizes with primary-color accent on H1 */
 h1 {
   font-size: 2.5rem;
   margin-bottom: 1.5rem;
@@ -52,13 +52,13 @@ h3 {
   margin-bottom: 0.75rem;
 }
 
-/* GEO Optimization: Enhanced readability for body text */
+/* Readability: Comfortable line height for body text */
 article p {
   line-height: 1.8;
   margin-bottom: 1.25rem;
 }
 
-/* GEO Optimization: Emphasized lists for AI extraction */
+/* Readability: List spacing for scanability */
 article ul, article ol {
   margin-bottom: 1.5rem;
 }
@@ -67,14 +67,14 @@ article li {
   margin-bottom: 0.5rem;
 }
 
-/* GEO Optimization: Code blocks with clear boundaries */
+/* Readability: Code blocks with left accent border */
 pre {
   border-left: 4px solid var(--ifm-color-primary);
   border-radius: 8px;
   margin: 1.5rem 0;
 }
 
-/* GEO Optimization: Tables with strong structure */
+/* Readability: Tables with colored header and zebra striping */
 table {
   width: 100%;
   margin: 1.5rem 0;
@@ -101,7 +101,7 @@ tbody tr:nth-child(even) {
   background: rgba(255, 255, 255, 0.05);
 }
 
-/* GEO Optimization: Blockquotes for key insights */
+/* Readability: Blockquotes with left accent */
 blockquote {
   border-left: 4px solid var(--ifm-color-primary);
   background: rgba(0, 102, 204, 0.05);
@@ -114,7 +114,7 @@ blockquote {
   background: rgba(77, 171, 247, 0.1);
 }
 
-/* GEO Optimization: Strong emphasis for key terms */
+/* Readability: Strong text with primary color */
 strong {
   font-weight: 700;
   color: var(--ifm-color-primary-dark);
@@ -124,14 +124,14 @@ strong {
   color: var(--ifm-color-primary-light);
 }
 
-/* GEO Optimization: Clear visual separation between sections */
+/* Readability: Section dividers */
 hr {
   margin: 3rem 0;
   border: none;
   border-top: 2px solid var(--ifm-hr-background-color);
 }
 
-/* Responsive improvements */
+/* Responsive: Tablet breakpoint */
 @media (max-width: 996px) {
   h1 {
     font-size: 2rem;

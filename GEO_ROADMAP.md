@@ -1,149 +1,158 @@
-# NotEMD GEO Phase 2 Roadmap
+# NotEMD GEO Roadmap
 
 **Created:** 2026-06-12
 **Updated:** 2026-06-13
-**Status:** All steps complete. Baseline captured.
-**Scope:** Post-deployment GEO optimization, based on audit of Phase 1 deliverables vs actual code
+**Status:** Phase 1 complete. Phase 2 in progress.
+**Scope:** Post-deployment GEO optimization for AI search engine visibility
 
 ---
 
-## Execution Status
+## Phase 1: Foundation (Complete)
+
+| Step | Description | Status | Commit |
+|------|-------------|--------|--------|
+| 1 | Fix Technical Debt | Done | b683d12 |
+| 2 | Content Depth (3 high-value + 9 placeholders) | Done | 7989940 |
+| 3 | Pillar Page Architecture | Done | 7989940 |
+| 4 | E-E-A-T Signals | Done | 7989940 |
+| 5 | Visibility Monitoring Baseline | Done (0/9 EN, 0/4 ZH) | 1f10e4f |
+| 6 | geo-content-optimizer Gap Analysis | Done (3 pages, 8 recs implemented) | da08abe |
+| 7 | i18n Prune + VitePress noindex + robots.txt | Done | decce74 |
+| 8 | Competitive Positioning + Competitor Keywords | Done | 04cb921 |
+| 9 | Mermaid Diagram Rendering Fix | Done | 115cb87 |
+
+### Phase 1 Audit: Claims vs Reality
+
+| Claimed | Actual | Fix |
+|---------|--------|-----|
+| Swizzled component extracts frontmatter → rich TechArticle | Only injected url + publisher | Rewrote with useDoc() |
+| TLDR component on every page | Only 4/18 pages | All 21 pages now have TLDR |
+| 10 locales i18n ready | 8 locales empty | Pruned to 3: EN, zh-CN, ja |
+| SearchAction in WebSite Schema | Points to 404 | Removed |
+| Static assets | All 404 | Created favicon, logo, social card |
+| Mermaid diagrams render | Plain text code blocks | Added @docusaurus/theme-mermaid + markdown.mermaid: true |
+
+### Baseline Visibility (2026-06-13)
+
+| Engine | Keywords | Cited | Data File |
+|--------|----------|-------|-----------|
+| GLM (EN) | 5 | 0 | `geo-data/geo_baseline_glm_2026-06.json` |
+| GLM (ZH) | 4 | 0 | `geo-data/geo_baseline_glm_cn_2026-06.json` |
+
+Next measurement date: **2026-07-01**
+
+---
+
+## Phase 2: Schema & Architecture Fixes (In Progress)
+
+### Code Audit: Plans vs Implementation
+
+| Recommendation | Source Plan | Current Code State | Delta |
+|---|---|---|---|
+| **Fix `datePublished` missing** | Analysis: `metadata.date` is undefined → field omitted | **Fixed**: Reads from `frontMatter.datePublished`, falls back to `dateModified` | Resolved |
+| **Fix `dateModified` raw timestamp** | Analysis: `metadata.lastUpdatedAt` emits Unix epoch | **Fixed**: `new Date(metadata.lastUpdatedAt).toISOString()` | Resolved |
+| **Fix hardcoded `siteUrl`** | Analysis: `'https://jacobinwwey.github.io'` hardcoded | **Fixed**: Uses `useDocusaurusContext().siteConfig.url` | Resolved |
+| **`about` type: `Thing` → `DefinedTerm`** | Analysis: `Thing` is semantic vacuum | **Fixed**: Now emits `DefinedTerm` with `inDefinedTermSet` | Resolved |
+| **Missing `.nojekyll`** | GitHub Pages requires it to prevent Jekyll processing | **Fixed**: Created `static/.nojekyll` | Resolved |
+| **Redundant `favicon.ico`** | SVG favicon covers all modern browsers | **Fixed**: Deleted `favicon.ico` | Resolved |
+| **CSS "GEO Optimization" overclaims** | Analysis: CSS has zero direct impact on AI crawlers | **Fixed**: Renamed 9 comments to accurate purpose (Readability, etc.) | Resolved |
+| **3 pages missing `concepts`** | frontmatter audit: installation, quick-start, configuration | **Fixed**: Added concepts to all 3 | Resolved |
+| **18 pages missing `citations`** | E-E-A-T signal: only 3/21 had citations | **Fixed**: Added 2 citations each to 15 pages (3 had existing + 3 just-fixed = 21/21) | Resolved |
+| **2 pages use Organization author** | intro, faq used `@type: Organization` instead of Person @id | **Fixed**: Both now use Person @id | Resolved |
+| **Add FAQPage Schema** | BrightEdge: 43% AI citations from FAQ Schema | **Fixed**: Swizzled component emits FAQPage for faq.mdx; 12 Q&A pairs | Resolved |
+
+### Phase 2 Step Status
 
 | Step | Description | Status |
 |------|-------------|--------|
-| 1 | Fix Technical Debt | Done (commit b683d12) |
-| 2 | Content Depth (3 high-value + 9 placeholders) | Done (commit 7989940) |
-| 3 | Pillar Page Architecture | Done (commit 7989940) |
-| 4 | E-E-A-T Signals | Done (commit 7989940) |
-| 5 | Visibility Monitoring | Done (baseline: 0/9 EN, 0/4 ZH) |
-| 6 | geo-content-optimizer Gap Analysis | Done (3 recommendations implemented) |
-| 7 | Multilingual Pruned to EN + zh-CN + ja | Done (commit decce74) |
-| — | VitePress noindex | Done (this commit) |
-| — | robots.txt + sitemap | Done (this commit) |
+| P2-1 | Fix TechArticle Schema 3 bugs | Done |
+| P2-2 | Add .nojekyll + remove favicon.ico | Done |
+| P2-3 | Fix CSS comment overclaims | Done |
+| P2-4 | Supplement missing frontmatter (concepts, citations, author) | Done |
+| P2-5 | Add FAQPage Schema to FAQ page | Done |
 
 ---
 
-## Phase 1 Audit: Claims vs Reality
+## Phase 3: Architecture Evolution (Next)
 
-| Claimed | Actual | Gap | Fix |
-|---------|--------|-----|-----|
-| Swizzled component extracts frontmatter → rich TechArticle | Only injected url + publisher; frontmatter unread | Critical | Rewrote with useDoc(); extracts headline, author, datePublished, dateModified, about, citations, keywords |
-| TLDR component on every page | Only 4/18 pages | High | All 18 pages now have TLDR with cluster backlinks |
-| 10 locales i18n ready | zh-CN FAQ only; 8 locales empty | Medium | Pruned to 3: EN, zh-CN, ja |
-| SearchAction in WebSite Schema | Points to `/search?q=` which 404s | High | Removed SearchAction; commented Algolia placeholder |
-| Static assets (favicon, logo, social card) | `website/static/` missing; all assets 404 | High | Created favicon.svg/ico, logo.svg/png, notemd-social-card.jpg |
+These items require analysis of Phase 2 impact (measured 2026-07-01) before execution.
 
----
+| Step | Description | Risk | Trigger |
+|------|-------------|------|---------|
+| P3-1 | Remove `ja` locale (0 translated pages) | Low: no indexed ja/ URLs yet | Before Google indexes ja/ |
+| P3-2 | Consolidate or expand 5 provider stub pages | Medium: need content writing effort | After baseline retest |
+| P3-3 | Sidebar reorder: Getting Started before pillar | Low: nav structure change | Anytime |
+| P3-4 | Apply for Algolia DocSearch | Low: free for OSS | After site is indexed |
+| P3-5 | Add `position_in_response` to visibility_tester | Low: 5 lines of code | Before 2026-07-01 retest |
+| P3-6 | Organization Schema: add `sameAs` (GitHub, Discord) | Low | Anytime |
+| P3-7 | Extend visibility test to Perplexity engine | Medium: needs API key | After credit card setup |
 
-## What Each Commit Delivered
+### Deferred (Explicitly NOT Doing)
 
-### Commit b683d12 — Step 1: Fix Technical Debt
-
-**Swizzled component** (`website/src/theme/DocItem/Layout/index.js`):
-- Added `useDoc()` to read frontmatter
-- Emits complete TechArticle: headline, description, author, datePublished, dateModified, about, citations, keywords
-- Fixed double-base-url bug in SSR permalink construction
-
-**docusaurus.config.js:**
-- Removed SearchAction dead link
-- Merged WebSite + Person Schema into single @graph
-- Commented out non-functional Algolia placeholder
-
-**All 18 doc pages:**
-- Added `author` frontmatter referencing Person @id for E-E-A-T
-
-**Static assets:**
-- Created `website/static/img/` with favicon, logo, social card
-
-### Commit 7989940 — Steps 2-4: Content, Pillar Page, E-E-A-T
-
-**3 High-Value Pages:**
-- `concept-notes.mdx`: extraction pipeline, dedup 5-step algorithm, config table, filename rules
-- `diagrams.mdx`: spec-first architecture, 8 intent types, rendering backends, preview/export, config
-- `providers/overview.mdx`: 36-provider Pillar Page, per-task model strategy, transport/retry/caching
-
-**9 Placeholder Pages filled:**
-- research, translation, workflows (features)
-- custom-prompts, batch-processing, troubleshooting (advanced)
-- openai, anthropic, google, local, china (provider redirects → overview)
-
-**Pillar Page:** `pillar-ai-knowledge.mdx` — 3000+ word guide, cluster backlinks in every feature/provider doc
-
-**E-E-A-T Citations:** Added Citation Schema to intro, faq, pillar (Obsidian, Ollama, Tavily, Mermaid, Vega-Lite)
-
-### This Commit — Steps 5-7 Pruning + VitePress noindex + robots.txt
-
-- Pruned i18n from 10 → 3 locales (EN, zh-CN, ja)
-- Added `noindex, nofollow` to VitePress config (prevents duplicate content confusion)
-- Added `robots.txt` with sitemap reference
-
----
-
-## Pending (Requires Deployment First)
-
-### Step 5: Visibility Monitoring
-
-After deployment, run baseline tests:
-
-```bash
-# International (Perplexity)
-python ~/.claude/skills/geo-optimizer/scripts/visibility_tester.py \
-  --brand "notemd" \
-  --engine perplexity \
-  --keywords "obsidian AI plugin" "obsidian knowledge base" "obsidian wiki links" \
-  --history geo_baseline_intl_2026-06.json
-
-# China (Kimi)
-python ~/.claude/skills/geo-optimizer/scripts/visibility_tester.py \
-  --brand "notemd" \
-  --engine kimi \
-  --keywords "obsidian AI插件" "obsidian知识库" "obsidian笔记插件" \
-  --history geo_baseline_cn_2026-06.json
-```
-
-Monthly cadence on 1st of each month. Both scripts + manual checks in ChatGPT/Perplexity/Gemini.
-
-### Step 6: geo-content-optimizer Gap Analysis
-
-After deployment:
-
-```
-/geo-content-optimizer https://jacobinwwey.github.io/obsidian-NotEMD/docs/intro
-/geo-content-optimizer https://jacobinwwey.github.io/obsidian-NotEMD/docs/wiki-links
-/geo-content-optimizer https://jacobinwwey.github.io/obsidian-NotEMD/docs/faq
-```
+| Item | Why |
+|------|-----|
+| `@docusaurus/plugin-ideal-image` | 6 static files, ROI too low |
+| BreadcrumbList Schema | Docusaurus sidebar already provides nav hierarchy |
+| English readability checker | Not a bottleneck; Chinese-only checker is sufficient |
+| PWA / offline docs plugin | Documentation site doesn't need offline support |
+| WebP/AVIF image formats | No pipeline support in Docusaurus; static assets too small to matter |
+| kaTeX / math equation support | No math-heavy content |
+| Custom 404 page | Default is acceptable |
+| Blog / changelog section | Not a priority |
+| Versioned documentation | Single version plugin, no need |
 
 ---
 
 ## Risks & Mitigations
 
-| Risk | Status |
-|------|--------|
-| Docusaurus site not indexed by Google | Verify post-deploy with `site:jacobinwwey.github.io/obsidian-NotEMD`; submit sitemap via Google Search Console |
-| VitePress + Docusaurus dual doc confusion | Fixed: VitePress now has `noindex, nofollow` |
-| i18n broken links in pt/ko/es/etc. locales | Fixed: pruned to 3 locales |
-| Thin placeholder pages emitting Schema | Fixed: all 18 pages now have real content |
+| Risk | Status | Mitigation |
+|------|--------|-----------|
+| Site not indexed by Google | Open | Submit sitemap via Google Search Console post-deploy |
+| Empty i18n locales emit wrong hreflang | **Fixed (partial)** | Phase 3 will remove ja; zh-CN needs more translation |
+| Thin provider pages dilute crawl budget | Open | Phase 3: consolidate or expand |
+| Mermaid 660KB bundle on non-diagram pages | Accepted | Docusaurus architecture limitation; gzip ~200KB |
+| Correctness vs volume tradeoff in citations | **Fixed** | All citations point to real external authority sources |
+| CSS comment overclaims create false causation narrative | **Fixed** | Renamed to accurate purpose descriptors |
 
 ---
 
 ## Success Metrics
 
-| Timeframe | Metric | Target |
-|-----------|--------|--------|
-| 2 weeks | Docusaurus site indexed | Google `site:` returns results |
-| 2 weeks | First AI citation | 1+ ChatGPT/Perplexity mention for "obsidian AI plugin" |
-| 1 month | Citation rate (Perplexity) | 5-10% for core keywords |
-| 1 month | All pages with real content | 0 placeholder pages (DONE) |
-| 2 months | Pillar Page cluster indexed | Pillar + cluster pages all in Google index |
-| 2 months | E-E-A-T Person Schema live | `jacobinwwey` resolves as author (DONE) |
+| Timeframe | Metric | Target | Current |
+|-----------|--------|--------|---------|
+| 2 weeks | Docusaurus site indexed | Google `site:` returns results | Unknown |
+| 2 weeks | First AI citation | 1+ ChatGPT/Perplexity mention | 0/9 |
+| 1 month | Citation rate (GLM) | 5-10% for core keywords | 0% |
+| 1 month | All pages with citations | 21/21 | **21/21 (fixed)** |
+| 1 month | All pages with concepts | 21/21 | **21/21 (fixed)** |
+| 2 months | Pillar Page cluster indexed | All in Google index | Unknown |
+| 2 months | E-E-A-T Person Schema live | Person @id resolves as author | **19/21 → 21/21 (fixed)** |
 
 ---
 
-## Deferred Items
+## GEO Skill Capability Utilization
 
-| Item | Why Deferred |
-|------|-------------|
-| BreadcrumbList Schema | Medium ROI; nav hierarchy exists in Docusaurus sidebar |
-| ja translation of FAQ | Notemd has no Japanese content yet; auto-translation = penalty risk |
-| Custom domain | Infrastructure change, not content |
-| Algolia DocSearch | Apply for free open-source tier after site is indexed |
+| Module | Capability | Used | Not Used | Priority |
+|---|---|---|---|---|
+| A1 | Organization Schema | WebSite + Person @graph | `sameAs` social links | P3 |
+| A2 | FAQPage Schema | Now emitting for faq.mdx | — | Done |
+| A3 | Article Schema | TechArticle per page | `image` field (OG thumbnail) | P3 |
+| A4 | Person/E-E-A-T | Person @id cross-reference | `hasCredential` | P3 |
+| A5 | Citation Schema | 21/21 pages now have citations | — | Done |
+| A6 | BreadcrumbList | Not used | Full BreadcrumbList | Deferred |
+| B | Readability Check | — | Chinese-only, not applicable to EN content | Deferred |
+| C | Pillar Page Cluster | pillar-ai-knowledge exists | Cluster navigation HTML block | P3 |
+| D1 | Visibility Test | GLM baseline captured | Perplexity engine, position metric | P3 |
+| D2 | Quarterly Report | — | First report after 3 data points | Q3 2026 |
+| E | Gap Analysis | 3 pages analyzed | Remaining 18 pages | P3 (after retest) |
+
+---
+
+## Measurement Cadence
+
+| Date | Action |
+|------|--------|
+| 2026-07-01 | Retest GLM baseline (EN + ZH). Add `position_in_response` if P3-5 done. |
+| 2026-07-01 | Check Google Search Console for indexing status |
+| 2026-08-01 | Second retest. If cited > 0: expand to Perplexity. If still 0: audit indexed pages. |
+| 2026-10-01 | First quarterly report via geo_report_generator.py (needs 3+ data points) |
