@@ -1,0 +1,55 @@
+.tldr {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-left: 4px solid #0066cc;
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin: 24px 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme='dark'] .tldr {
+  background: linear-gradient(135deg, #1c1e21 0%, #2d3238 100%);
+  border-left-color: #4dabf7;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.tldrHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  font-size: 1.1em;
+  font-weight: 600;
+  color: #0066cc;
+}
+
+[data-theme='dark'] .tldrHeader {
+  color: #4dabf7;
+}
+
+.tldrIcon {
+  font-size: 1.2em;
+}
+
+.tldrContent {
+  font-size: 0.95em;
+  line-height: 1.6;
+  color: #343a40;
+}
+
+[data-theme='dark'] .tldrContent {
+  color: #ced4da;
+}
+
+.tldrContent p:last-child {
+  margin-bottom: 0;
+}
+
+.tldrContent strong {
+  font-weight: 600;
+  color: #212529;
+}
+
+[data-theme='dark'] .tldrContent strong {
+  color: #f8f9fa;
+}

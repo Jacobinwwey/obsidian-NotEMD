@@ -1,0 +1,18 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Production
+build/
+.docusaurus/
+.cache-loader/
+
+# Generated files
+.docusaurus
+.DS_Store
+
+# Misc
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

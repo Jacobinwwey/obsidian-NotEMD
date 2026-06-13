@@ -1,0 +1,143 @@
+/**
+ * Custom CSS for GEO-optimized Docusaurus site
+ * Optimized for AI/LLM crawler readability
+ */
+
+:root {
+  --ifm-color-primary: #0066cc;
+  --ifm-color-primary-dark: #005bb8;
+  --ifm-color-primary-darker: #0055ad;
+  --ifm-color-primary-darkest: #00468f;
+  --ifm-color-primary-light: #0071e0;
+  --ifm-color-primary-lighter: #0077eb;
+  --ifm-color-primary-lightest: #1a85ff;
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme='dark'] {
+  --ifm-color-primary: #4dabf7;
+  --ifm-color-primary-dark: #339af0;
+  --ifm-color-primary-darker: #228be6;
+  --ifm-color-primary-darkest: #1c7ed6;
+  --ifm-color-primary-light: #74c0fc;
+  --ifm-color-primary-lighter: #a5d8ff;
+  --ifm-color-primary-lightest: #d0ebff;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+}
+
+/* GEO Optimization: High-contrast headers for better AI extraction */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* GEO Optimization: Clear visual hierarchy */
+h1 {
+  font-size: 2.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid var(--ifm-color-primary);
+  padding-bottom: 0.5rem;
+}
+
+h2 {
+  font-size: 2rem;
+  margin-top: 3rem;
+  margin-bottom: 1rem;
+}
+
+h3 {
+  font-size: 1.5rem;
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+}
+
+/* GEO Optimization: Enhanced readability for body text */
+article p {
+  line-height: 1.8;
+  margin-bottom: 1.25rem;
+}
+
+/* GEO Optimization: Emphasized lists for AI extraction */
+article ul, article ol {
+  margin-bottom: 1.5rem;
+}
+
+article li {
+  margin-bottom: 0.5rem;
+}
+
+/* GEO Optimization: Code blocks with clear boundaries */
+pre {
+  border-left: 4px solid var(--ifm-color-primary);
+  border-radius: 8px;
+  margin: 1.5rem 0;
+}
+
+/* GEO Optimization: Tables with strong structure */
+table {
+  width: 100%;
+  margin: 1.5rem 0;
+  border-collapse: collapse;
+}
+
+thead {
+  background: var(--ifm-color-primary);
+  color: white;
+  font-weight: 700;
+}
+
+th, td {
+  padding: 12px;
+  text-align: left;
+  border: 1px solid var(--ifm-table-border-color);
+}
+
+tbody tr:nth-child(even) {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+[data-theme='dark'] tbody tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* GEO Optimization: Blockquotes for key insights */
+blockquote {
+  border-left: 4px solid var(--ifm-color-primary);
+  background: rgba(0, 102, 204, 0.05);
+  padding: 1rem 1.5rem;
+  margin: 1.5rem 0;
+  border-radius: 4px;
+}
+
+[data-theme='dark'] blockquote {
+  background: rgba(77, 171, 247, 0.1);
+}
+
+/* GEO Optimization: Strong emphasis for key terms */
+strong {
+  font-weight: 700;
+  color: var(--ifm-color-primary-dark);
+}
+
+[data-theme='dark'] strong {
+  color: var(--ifm-color-primary-light);
+}
+
+/* GEO Optimization: Clear visual separation between sections */
+hr {
+  margin: 3rem 0;
+  border: none;
+  border-top: 2px solid var(--ifm-hr-background-color);
+}
+
+/* Responsive improvements */
+@media (max-width: 996px) {
+  h1 {
+    font-size: 2rem;
+  }
+
+  h2 {
+    font-size: 1.75rem;
+  }
+}

@@ -1,109 +1,23 @@
+---
+id: faq
+title: Frequently Asked Questions
+description: Common questions about Notemd installation, features, and usage
+keywords: [faq, installation, LLM providers, obsidian plugin, wiki-links, concept notes]
+author:
+  '@type': Organization
+  name: Notemd Team
+concepts: [Notemd, Obsidian, LLM, wiki-links, concept notes, knowledge base]
+---
+
+import TLDR from '@site/src/components/TLDR';
+
 # Frequently Asked Questions
 
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": [
-    {
-      "@type": "Question",
-      "name": "How do I install Notemd in Obsidian?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Open Obsidian Settings → Community Plugins → Browse → search 'Notemd' → Install → Enable. Requires Obsidian 0.15.0+. The plugin has 4k+ downloads, 44 releases, and is MIT licensed. You can also install manually by downloading main.js, styles.css, and manifest.json from GitHub Releases into your vault's .obsidian/plugins/notemd/ folder."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "What LLM providers does Notemd support?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Notemd supports 30+ providers including OpenAI, Anthropic (Claude), Google (Gemini), DeepSeek, Qwen, Qwen Code, Ollama, Azure OpenAI, SiliconFlow, Moonshot, GLM, Z AI, xAI, Groq, Together AI, LM Studio, Mistral, OpenRouter, and any OpenAI-compatible endpoint. You can configure different providers per task (linking, research, translation, generation) with per-task model selection."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "How does Notemd differ from ChatGPT for paper reading?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "ChatGPT gives you an answer in the current chat session; Notemd writes results back into your Obsidian vault as wiki-links, concept notes, translations, diagrams, and workflow artifacts. Your reading accumulation persists in your knowledge base as structured files, not in ephemeral chat history. You can reference, link, and build upon these artifacts weeks or months later."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Can Notemd work with local LLMs?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes. Notemd fully supports Ollama and any OpenAI-Compatible local gateway (LM Studio, vLLM, LocalAI, etc.). Local models work for all tasks: wiki-linking, concept note generation, translation, research summarization, and diagram generation. You can mix local and cloud providers — for example, use Ollama for linking and OpenAI for research."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "What is the Notemd one-click workflow?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Notemd lets you chain multiple actions (add links → extract concepts → research → generate mermaid) into a single sidebar button. The default 'One-Click Extract' runs 4 steps in sequence. You can create custom chains with a DSL format like: process-current-add-links>extract-concepts-current>research-and-summarize>summarize-as-mermaid. Each workflow button appears in the sidebar for instant reuse."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Does Notemd support Chinese or other languages?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes. Notemd's UI supports 21+ languages including Chinese (Simplified and Traditional), Japanese, Korean, Arabic, German, French, Spanish, Russian, and more. Task output language is independently configurable — you can use a Chinese UI with English output, or vice versa. This is particularly useful for bilingual research workflows."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "How does Notemd add wiki-links to notes?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Notemd sends your note text to an LLM which identifies key concepts in context, then inserts Obsidian [[wiki-links]] at each occurrence. It can optionally auto-create concept notes in a configurable folder with backlinks to the source document. The concept extraction supports synonym suppression to avoid near-duplicate concepts, and maintains link integrity on rename/delete operations."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Which search services work with Notemd research?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Notemd supports Tavily (recommended, requires API key) and DuckDuckGo (experimental, no API key needed). When you run 'Research & summarize', Notemd queries the search service, sends results to your configured LLM for summarization, and appends the summary to your current note with source context. This creates a persistent research trail in your vault."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Can I use Notemd for paper/PDF reading?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes. First convert PDF to Markdown using tools like MinerU (recommended for academic papers), then open in Obsidian. Notemd can: add wiki-links to key terms, generate concept notes for unfamiliar concepts, extract specific original text via custom questions, research background topics, translate sections, and compress understanding into Mermaid diagrams. All results stay in your vault as persistent, linkable artifacts. Version 1.9.1+ includes chapter structure extraction with TOC support."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "What graph/diagram types can Notemd generate?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Notemd generates Mermaid flowcharts, sequence diagrams, class diagrams, state diagrams, entity-relationship diagrams, Gantt charts, JSON Canvas layouts, and Vega-Lite data charts. It includes a Mermaid syntax auto-fix feature with deep debug mode that repairs arrows, labels, comments, subgraphs, shapes, pipes, and notes. An experimental spec-first diagram pipeline can produce multiple chart types from a single natural-language prompt, with preview and export (SVG, PNG) support."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Is Notemd free and open source?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes. Notemd is fully open source under the MIT license. All source code is available on GitHub at https://github.com/Jacobinwwey/obsidian-NotEMD. There are no paid tiers, cloud dependencies, or proprietary components. You own your data and workflows. The project welcomes contributions and has 234+ stars and an active community."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "How do I configure different models for different tasks?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "In Notemd settings, each task type (linking, concept generation, research, translation, diagram generation) has an independent provider and model selector. For example, you might use: DeepSeek for linking (fast, cheap), Claude Opus for research (high quality), Gemini Flash for translation (multimodal), and local Ollama for diagram generation (private, no cost). This per-task configuration optimizes for speed, cost, and quality across your workflow."
-      }
-    }
-  ]
-}
-</script>
+<TLDR>
+**Quick answers to the most common Notemd questions.** Covers installation (5 min setup), 30+ LLM providers support, local/cloud model options, one-click workflows, multilingual UI (21 languages), wiki-linking automation, research integration, PDF reading workflows, diagram generation, and open-source licensing. All features work offline with Ollama.
+</TLDR>
+
+---
 
 ## Installation & Setup
 

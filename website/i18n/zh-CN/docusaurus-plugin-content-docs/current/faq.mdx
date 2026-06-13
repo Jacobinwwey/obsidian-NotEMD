@@ -1,109 +1,23 @@
+---
+id: faq
+title: 常见问题
+description: Notemd 安装、功能和使用的常见问题
+keywords: [常见问题, 安装, LLM提供商, obsidian插件, wiki链接, 概念笔记]
+author:
+  '@type': Organization
+  name: Notemd团队
+concepts: [Notemd, Obsidian, LLM, wiki链接, 概念笔记, 知识库]
+---
+
+import TLDR from '@site/src/components/TLDR';
+
 # 常见问题
 
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": [
-    {
-      "@type": "Question",
-      "name": "如何在 Obsidian 中安装 Notemd？",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "打开 Obsidian 设置 → 社区插件 → 浏览 → 搜索"Notemd"→ 安装 → 启用。需要 Obsidian 0.15.0+。插件已有 4k+ 下载量，44 个版本，MIT 许可证。也可以手动安装：从 GitHub Releases 下载 main.js、styles.css、manifest.json，放入你的库的 .obsidian/plugins/notemd/ 文件夹。"
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Notemd 支持哪些 LLM 提供商？",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Notemd 支持 30+ 个提供商，包括 OpenAI、Anthropic (Claude)、Google (Gemini)、DeepSeek、Qwen、Qwen Code、Ollama、Azure OpenAI、SiliconFlow、Moonshot、GLM、Z AI、xAI、Groq、Together AI、LM Studio、Mistral、OpenRouter，以及任何 OpenAI 兼容端点。你可以为不同任务配置不同提供商（链接、研究、翻译、生成），并为每个任务选择模型。"
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Notemd 与 ChatGPT 在论文阅读上有什么区别？",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "ChatGPT 在当前聊天会话中给你答案；Notemd 将结果写回你的 Obsidian 库，形成 wiki 链接、概念笔记、翻译、图表和工作流产物。你的阅读积累以结构化文件的形式持久化在知识库中，而不是短暂的聊天记录。几周或几个月后，你仍然可以引用、链接和基于这些产物构建新内容。"
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Notemd 可以使用本地 LLM 吗？",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "可以。Notemd 完全支持 Ollama 和任何 OpenAI 兼容的本地网关（LM Studio、vLLM、LocalAI 等）。本地模型支持所有任务：wiki 链接、概念笔记生成、翻译、研究总结和图表生成。你可以混合使用本地和云端提供商——例如，用 Ollama 做链接，用 OpenAI 做研究。"
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "什么是 Notemd 的一键工作流？",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Notemd 允许你将多个操作（添加链接 → 提取概念 → 研究 → 生成 mermaid）链接成单个侧边栏按钮。默认的"一键提取"按钮会依次运行 4 个步骤。你可以用 DSL 格式创建自定义链：process-current-add-links>extract-concepts-current>research-and-summarize>summarize-as-mermaid。每个工作流按钮出现在侧边栏，可即时重用。"
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Notemd 支持中文或其他语言吗？",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "支持。Notemd 的 UI 支持 21+ 种语言，包括中文（简体和繁体）、日语、韩语、阿拉伯语、德语、法语、西班牙语、俄语等。任务输出语言可独立配置——你可以使用中文 UI + 英文输出，或反过来。这对双语研究工作流特别有用。"
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Notemd 如何为笔记添加 wiki 链接？",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Notemd 将你的笔记文本发送给 LLM，LLM 识别上下文中的关键概念，然后在每次出现时插入 Obsidian [[wiki-links]]。它可以选择性地在你指定的文件夹中自动创建概念笔记，并带有回链到源文档。概念提取支持同义词抑制以避免近似重复概念，并在重命名/删除操作时保持链接完整性。"
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Notemd 研究功能支持哪些搜索服务？",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Notemd 支持 Tavily（推荐，需要 API key）和 DuckDuckGo（实验性，无需 API key）。当你运行"研究与总结"时，Notemd 查询搜索服务，将结果发送给你配置的 LLM 进行总结，并将总结附加到当前笔记，包含来源上下文。这在你的库中创建了持久的研究轨迹。"
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "我可以用 Notemd 阅读论文/PDF 吗？",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "可以。先用 MinerU（推荐用于学术论文）等工具将 PDF 转换为 Markdown，然后在 Obsidian 中打开。Notemd 可以：为关键术语添加 wiki 链接、为陌生概念生成概念笔记、通过自定义问题提取特定原文、研究背景主题、翻译章节、将理解压缩为 Mermaid 图表。所有结果作为持久的、可链接的产物保留在你的库中。1.9.1+ 版本支持带 TOC 的章节结构提取。"
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Notemd 可以生成哪些图表类型？",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Notemd 可生成 Mermaid 流程图、时序图、类图、状态图、实体关系图、甘特图、JSON Canvas 布局和 Vega-Lite 数据图表。它包含 Mermaid 语法自动修复功能，带深度调试模式，可修复箭头、标签、注释、子图、形状、管道和附注。实验性的 spec-first 图表管道可以从单个自然语言提示生成多种图表类型，支持预览和导出（SVG、PNG）。"
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Notemd 是免费开源的吗？",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "是的。Notemd 在 MIT 许可证下完全开源。所有源代码在 GitHub 上公开：https://github.com/Jacobinwwey/obsidian-NotEMD。没有付费层级、云依赖或专有组件。你拥有自己的数据和工作流。项目欢迎贡献，已有 234+ 星和活跃社区。"
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "如何为不同任务配置不同模型？",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "在 Notemd 设置中，每种任务类型（链接、概念生成、研究、翻译、图表生成）都有独立的提供商和模型选择器。例如，你可以使用：DeepSeek 做链接（快速、便宜），Claude Opus 做研究（高质量），Gemini Flash 做翻译（多模态），本地 Ollama 做图表生成（隐私、无成本）。这种按任务配置在速度、成本和质量之间优化了你的工作流。"
-      }
-    }
-  ]
-}
-</script>
+<TLDR>
+**Notemd 最常见问题的快速解答。** 涵盖安装（5分钟设置）、30+个LLM提供商支持、本地/云端模型选项、一键工作流、多语言UI（21种语言）、wiki链接自动化、研究集成、PDF阅读工作流、图表生成和开源许可。所有功能支持Ollama离线使用。
+</TLDR>
+
+---
 
 ## 安装与设置
 
