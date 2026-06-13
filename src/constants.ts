@@ -198,6 +198,16 @@ export const DEFAULT_SETTINGS: NotemdSettings = {
     enableExperimentalDiagramPipeline: false,
     experimentalDiagramCompatibilityMode: 'legacy-mermaid',
     discoveredModelMaxOutputTokensTracking: undefined,
+
+    // Slide Export Defaults
+    enableSlideExport: false,
+    slideExportDefaultFormat: 'html',
+    slideExportOutputSubfolder: 'slidev-export',
+    slideExportWithClicks: false,
+    slideExportFfmpegFps: 1,
+    slideExportFfmpegCrf: 23,
+    slideExportTimeoutMs: 120_000,
+    slideExportTheme: '',
 };
 
 // Constants for the Sidebar View

@@ -1577,3 +1577,96 @@
 .notemd-time-remaining {
     unicode-bidi: plaintext;
 }
+
+/* Slide Export Environment Probe Modal */
+.notemd-probe-modal {
+    padding: 1.5em;
+    max-width: 650px;
+    font-family: var(--notemd-sidebar-font);
+}
+
+.notemd-probe-grid {
+    display: grid;
+    grid-template-columns: auto 1fr auto auto;
+    gap: 0.75em 1em;
+    align-items: center;
+    margin: 1em 0;
+}
+
+.notemd-probe-tool-name {
+    font-weight: 600;
+    color: var(--text-normal);
+}
+
+.notemd-probe-status {
+    font-size: 0.9em;
+    padding: 0.2em 0.6em;
+    border-radius: 4px;
+    text-align: center;
+}
+
+.notemd-probe-status.pass {
+    background: color-mix(in srgb, var(--color-green) 20%, transparent);
+    color: var(--color-green);
+}
+
+.notemd-probe-status.fail {
+    background: color-mix(in srgb, var(--color-red) 20%, transparent);
+    color: var(--color-red);
+}
+
+.notemd-probe-version {
+    font-family: var(--font-monospace);
+    font-size: 0.85em;
+    color: var(--text-muted);
+}
+
+.notemd-probe-install-btn {
+    padding: 0.3em 0.8em;
+    font-size: 0.85em;
+}
+
+.notemd-ffmpeg-instructions {
+    margin-top: 1em;
+    padding: 1em;
+    background: var(--notemd-surface);
+    border: 1px solid var(--notemd-border);
+    border-radius: 6px;
+    font-size: 0.9em;
+    line-height: 1.5;
+}
+
+.notemd-ffmpeg-instructions code {
+    background: var(--code-background);
+    padding: 0.2em 0.4em;
+    border-radius: 3px;
+    font-family: var(--font-monospace);
+}
+
+.notemd-capability-matrix {
+    margin-top: 1.5em;
+    padding-top: 1em;
+    border-top: 1px solid var(--notemd-border);
+}
+
+.notemd-capability-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.4em 0;
+}
+
+.notemd-capability-format {
+    font-weight: 500;
+}
+
+.notemd-capability-indicator {
+    color: var(--text-muted);
+}
+
+.notemd-capability-indicator.available {
+    color: var(--color-green);
+}
+
+.notemd-recheck-btn {
+    margin-top: 1em;
+}

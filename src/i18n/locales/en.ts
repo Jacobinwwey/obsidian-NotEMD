@@ -640,7 +640,8 @@ export const STRINGS_EN = {
             generation: 'Generation & Mermaid',
             knowledge: 'Knowledge',
             translation: 'Translation',
-            utilities: 'Utilities'
+            utilities: 'Utilities',
+            export: 'Slide Export'
         },
         actions: {
             processCurrentAddLinks: {
@@ -726,6 +727,14 @@ export const STRINGS_EN = {
             testLlmConnection: {
                 label: 'Test LLM connection',
                 tooltip: 'Test active provider connection and credentials.'
+            },
+            probeSlideExportEnv: {
+                label: 'Probe slide export env',
+                tooltip: 'Check whether Slidev, Playwright, and ffmpeg are installed.'
+            },
+            exportSlides: {
+                label: 'Export as slides',
+                tooltip: 'Export current Markdown file as a slide presentation (HTML, PDF, PNG, or MP4).'
             }
         },
         status: {
@@ -953,6 +962,63 @@ export const STRINGS_EN = {
         exportPngFailedNotice: 'Failed to export diagram PNG: {message}',
         sourceFile: 'Saved file: {path}',
         historyTitle: 'History'
+    },
+    slideExport: {
+        settingsHeading: 'Slide Export',
+        enableName: 'Enable slide export',
+        enableDesc: 'Allow exporting Markdown files as slide presentations using Slidev. Desktop only — requires Node.js 20+.',
+        defaultFormatName: 'Default export format',
+        defaultFormatDesc: 'MP4 requires ffmpeg in addition to Slidev and Playwright.',
+        outputSubfolderName: 'Output subfolder',
+        outputSubfolderDesc: 'Vault-relative folder for exported slides.',
+        withClicksName: 'Include click-throughs',
+        withClicksDesc: 'Export each animation step as a separate slide (PNG/MP4).',
+        ffmpegFpsName: 'Video frame rate (fps)',
+        ffmpegFpsDesc: 'Frames per second for MP4. Default 1 (1 second per slide).',
+        ffmpegCrfName: 'Video quality (CRF)',
+        ffmpegCrfDesc: 'Lower = higher quality. Range 0-51, default 23.',
+        timeoutName: 'Command timeout (seconds)',
+        timeoutDesc: 'Max time for each external command. Default 120 (2 min).',
+        themeName: 'Slidev theme',
+        themeDesc: 'Optional theme package name. Leave empty for default.',
+        themePlaceholder: 'e.g., slidev-theme-seriph',
+        probeCommandName: 'Probe slide export environment',
+        exportCommandName: 'Export current file as slides',
+        mobileUnsupportedError: 'Slide export is not available on mobile devices.',
+        exportStartedNotice: 'Exporting slides...',
+        exportSuccessNotice: 'Slide export complete: {path}',
+        exportFailedNotice: 'Slide export failed: {message}',
+        formatRequiresNotice: '{format} export requires: {missing}',
+        probeBtnName: 'Probe Environment',
+        openOutputBtnName: 'Open Output',
+        // Runtime progress messages
+        probingEnvironment: 'Probing environment...',
+        exportingSlides: 'Exporting slides...',
+        exportingPngSequence: 'Exporting PNG sequence...',
+        convertingToVideo: 'Converting to video...',
+        exportSuccess: 'Export complete: {path}',
+        exportComplete: 'Slide export finished',
+        exportFailed: 'Export failed',
+        formatNotSupported: '{format} export not available',
+        // Probe modal strings
+        probeModalTitle: 'Slide Export Environment',
+        probeToolColumn: 'Tool',
+        probeStatusColumn: 'Status',
+        probeVersionColumn: 'Version',
+        probeActionColumn: 'Action',
+        probeStatusPass: 'Installed',
+        probeStatusFail: 'Missing',
+        probeInstallBtn: 'Install',
+        probeInstallingBtn: 'Installing...',
+        probeFfmpegInstructions: 'ffmpeg must be installed manually:',
+        probeFfmpegMac: 'macOS: brew install ffmpeg',
+        probeFfmpegLinux: 'Linux: sudo apt install ffmpeg',
+        probeFfmpegWindows: 'Windows: Download from ffmpeg.org and add to PATH',
+        probeCapabilitiesHeading: 'Export Capabilities',
+        probeCapabilityAvailable: '✓ Available',
+        probeCapabilityUnavailable: '✗ Unavailable',
+        probeRecheckBtn: 'Re-check Environment',
+        probeCloseBtn: 'Close'
     }
 };
 

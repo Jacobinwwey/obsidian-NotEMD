@@ -643,7 +643,8 @@ export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
             generation: '生成与 Mermaid',
             knowledge: '知识',
             translation: '翻译',
-            utilities: '工具'
+            utilities: '工具',
+            export: '演示导出'
         },
         actions: {
             processCurrentAddLinks: {
@@ -729,6 +730,14 @@ export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
             testLlmConnection: {
                 label: '测试 LLM 连接',
                 tooltip: '测试当前提供商的连接和凭据。'
+            },
+            probeSlideExportEnv: {
+                label: '检测演示导出环境',
+                tooltip: '检查 Slidev、Playwright 和 ffmpeg 是否已安装。'
+            },
+            exportSlides: {
+                label: '导出为演示',
+                tooltip: '将当前 Markdown 文件导出为演示文稿（HTML、PDF、PNG 或 MP4）。'
             }
         },
         status: {
@@ -944,5 +953,62 @@ export const STRINGS_ZH_CN: DeepPartial<NotemdEnglishStrings> = {
         copyFailedNotice: '复制图形源码失败，请查看控制台。',
         sourceFile: '已保存文件：{path}',
         historyTitle: '历史'
+    },
+    slideExport: {
+        settingsHeading: '演示导出',
+        enableName: '启用演示导出',
+        enableDesc: '允许使用 Slidev 将 Markdown 文件导出为演示文稿。仅桌面端 — 需要 Node.js 20+。',
+        defaultFormatName: '默认导出格式',
+        defaultFormatDesc: 'MP4 除了 Slidev 和 Playwright 外还需要 ffmpeg。',
+        outputSubfolderName: '输出子文件夹',
+        outputSubfolderDesc: '相对于库根目录的导出文件夹路径。',
+        withClicksName: '包含点击动画',
+        withClicksDesc: '将每个动画步骤导出为单独的幻灯片（PNG/MP4）。',
+        ffmpegFpsName: '视频帧率（fps）',
+        ffmpegFpsDesc: 'MP4 的每秒帧数。默认 1（每张幻灯片 1 秒）。',
+        ffmpegCrfName: '视频质量（CRF）',
+        ffmpegCrfDesc: '数值越低质量越高。范围 0-51，默认 23。',
+        timeoutName: '命令超时（秒）',
+        timeoutDesc: '每个外部命令的最大执行时间。默认 120（2 分钟）。',
+        themeName: 'Slidev 主题',
+        themeDesc: '可选的主题包名称。留空使用默认主题。',
+        themePlaceholder: '例如：slidev-theme-seriph',
+        probeCommandName: '检测演示导出环境',
+        exportCommandName: '将当前文件导出为演示',
+        mobileUnsupportedError: '移动设备不支持演示导出。',
+        exportStartedNotice: '正在导出演示…',
+        exportSuccessNotice: '演示导出完成：{path}',
+        exportFailedNotice: '演示导出失败：{message}',
+        formatRequiresNotice: '{format} 导出需要：{missing}',
+        probeBtnName: '检测环境',
+        openOutputBtnName: '打开输出',
+        // 运行时进度消息
+        probingEnvironment: '正在检测环境…',
+        exportingSlides: '正在导出演示…',
+        exportingPngSequence: '正在导出 PNG 序列…',
+        convertingToVideo: '正在转换为视频…',
+        exportSuccess: '导出完成：{path}',
+        exportComplete: '演示导出完成',
+        exportFailed: '导出失败',
+        formatNotSupported: '不支持 {format} 导出',
+        // 探测模态框字符串
+        probeModalTitle: '演示导出环境',
+        probeToolColumn: '工具',
+        probeStatusColumn: '状态',
+        probeVersionColumn: '版本',
+        probeActionColumn: '操作',
+        probeStatusPass: '已安装',
+        probeStatusFail: '未安装',
+        probeInstallBtn: '安装',
+        probeInstallingBtn: '正在安装…',
+        probeFfmpegInstructions: 'ffmpeg 需要手动安装：',
+        probeFfmpegMac: 'macOS：brew install ffmpeg',
+        probeFfmpegLinux: 'Linux：sudo apt install ffmpeg',
+        probeFfmpegWindows: 'Windows：从 ffmpeg.org 下载并添加到 PATH',
+        probeCapabilitiesHeading: '导出能力',
+        probeCapabilityAvailable: '✓ 可用',
+        probeCapabilityUnavailable: '✗ 不可用',
+        probeRecheckBtn: '重新检测环境',
+        probeCloseBtn: '关闭'
     }
 };

@@ -62,7 +62,8 @@ const ACTION_CATEGORY_CONFIG: Record<ActionCategory, { openByDefault: boolean }>
     generation: { openByDefault: true },
     knowledge: { openByDefault: false },
     translation: { openByDefault: false },
-    utilities: { openByDefault: false }
+    utilities: { openByDefault: false },
+    export: { openByDefault: false }
 };
 
 const SINGLE_FILE_ACTION_IDS = new Set<SidebarActionId>([
@@ -76,7 +77,8 @@ const SINGLE_FILE_ACTION_IDS = new Set<SidebarActionId>([
     'extract-concepts-current',
     'extract-original-text',
     'fix-formula-current',
-    'check-duplicates-current'
+    'check-duplicates-current',
+    'export-slides'
 ]);
 
 function isSingleFileAction(actionId: SidebarActionId): boolean {
@@ -1127,6 +1129,18 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             }
             case 'test-llm-connection': {
                 await this.plugin.testLlmConnectionCommand(reporter);
+                break;
+            }
+            case 'probe-slide-export-env': {
+                await this.plugin.probeSlideExportEnvironmentCommand();
+                break;
+            }
+            case 'export-slides': {
+                const activeFile = this.app.workspace.getActiveFile();
+                if (!activeFile || !(activeFile instanceof TFile) || activeFile.extension !== 'md') {
+                    throw new Error('No active Markdown file selected.');
+                }
+                await this.plugin.exportSlidesCommand(activeFile, reporter);
                 break;
             }
             default: {

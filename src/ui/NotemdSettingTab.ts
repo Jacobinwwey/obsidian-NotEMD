@@ -3231,5 +3231,115 @@ export class NotemdSettingTab extends PluginSettingTab {
                 }
             );
         }
+
+        // --- Slide Export (Desktop only) ---
+        if ((globalThis as any).Platform?.isDesktopApp !== false) {
+            containerEl.createEl('hr');
+            new Setting(containerEl).setName(i18n.slideExport.settingsHeading).setHeading();
+
+            new Setting(containerEl)
+                .setName(i18n.slideExport.enableName)
+                .setDesc(i18n.slideExport.enableDesc)
+                .addToggle(toggle => toggle
+                    .setValue(this.plugin.settings.enableSlideExport)
+                    .onChange(async (value) => {
+                        this.plugin.settings.enableSlideExport = value;
+                        await this.plugin.saveSettings();
+                        this.display();
+                    }));
+
+            if (this.plugin.settings.enableSlideExport) {
+                new Setting(containerEl)
+                    .setName(i18n.slideExport.defaultFormatName)
+                    .setDesc(i18n.slideExport.defaultFormatDesc)
+                    .addDropdown(dropdown => dropdown
+                        .addOption('html', 'HTML')
+                        .addOption('pdf', 'PDF')
+                        .addOption('png', 'PNG')
+                        .addOption('mp4', 'MP4')
+                        .setValue(this.plugin.settings.slideExportDefaultFormat)
+                        .onChange(async (value) => {
+                            this.plugin.settings.slideExportDefaultFormat = value as any;
+                            await this.plugin.saveSettings();
+                        }));
+
+                this.addDeferredTextSetting(
+                    new Setting(containerEl)
+                        .setName(i18n.slideExport.outputSubfolderName)
+                        .setDesc(i18n.slideExport.outputSubfolderDesc),
+                    {
+                        placeholder: 'slidev-export',
+                        value: this.plugin.settings.slideExportOutputSubfolder,
+                        onCommit: async (value) => {
+                            this.plugin.settings.slideExportOutputSubfolder = value;
+                            await this.plugin.saveSettings();
+                        }
+                    }
+                );
+
+                this.addDeferredTextSetting(
+                    new Setting(containerEl)
+                        .setName(i18n.slideExport.themeName)
+                        .setDesc(i18n.slideExport.themeDesc),
+                    {
+                        placeholder: i18n.slideExport.themePlaceholder,
+                        value: this.plugin.settings.slideExportTheme,
+                        onCommit: async (value) => {
+                            this.plugin.settings.slideExportTheme = value;
+                            await this.plugin.saveSettings();
+                        }
+                    }
+                );
+
+                new Setting(containerEl)
+                    .setName(i18n.slideExport.withClicksName)
+                    .setDesc(i18n.slideExport.withClicksDesc)
+                    .addToggle(toggle => toggle
+                        .setValue(this.plugin.settings.slideExportWithClicks)
+                        .onChange(async (value) => {
+                            this.plugin.settings.slideExportWithClicks = value;
+                            await this.plugin.saveSettings();
+                        }));
+
+                new Setting(containerEl)
+                    .setName(i18n.slideExport.ffmpegFpsName)
+                    .setDesc(i18n.slideExport.ffmpegFpsDesc)
+                    .addText(text => text
+                        .setValue(String(this.plugin.settings.slideExportFfmpegFps))
+                        .onChange(async (value) => {
+                            const num = parseInt(value, 10);
+                            if (!isNaN(num) && num > 0) {
+                                this.plugin.settings.slideExportFfmpegFps = num;
+                                await this.plugin.saveSettings();
+                            }
+                        }));
+
+                new Setting(containerEl)
+                    .setName(i18n.slideExport.ffmpegCrfName)
+                    .setDesc(i18n.slideExport.ffmpegCrfDesc)
+                    .addText(text => text
+                        .setValue(String(this.plugin.settings.slideExportFfmpegCrf))
+                        .onChange(async (value) => {
+                            const num = parseInt(value, 10);
+                            if (!isNaN(num) && num >= 0 && num <= 51) {
+                                this.plugin.settings.slideExportFfmpegCrf = num;
+                                await this.plugin.saveSettings();
+                            }
+                        }));
+
+                new Setting(containerEl)
+                    .setName(i18n.slideExport.timeoutName)
+                    .setDesc(i18n.slideExport.timeoutDesc)
+                    .addText(text => text
+                        .setValue(String(this.plugin.settings.slideExportTimeoutMs / 1000))
+                        .onChange(async (value) => {
+                            const num = parseInt(value, 10);
+                            if (!isNaN(num) && num > 0) {
+                                this.plugin.settings.slideExportTimeoutMs = num * 1000;
+                                await this.plugin.saveSettings();
+                            }
+                        }));
+            }
+        }
     }
 }

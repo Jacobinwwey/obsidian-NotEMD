@@ -1021,6 +1021,41 @@ export default class NotemdPlugin extends Plugin {
             }
         });
 
+        // Slide export commands (desktop-only)
+        if ((globalThis as any).Platform?.isDesktopApp !== false) {
+            this.addCommand({
+                id: 'probe-slide-export-environment',
+                name: getSidebarActionLabel(uiStrings, 'probe-slide-export-env'),
+                callback: async () => {
+                    await this.probeSlideExportEnvironmentCommand();
+                }
+            });
+
+            this.addCommand({
+                id: 'export-slides',
+                name: getSidebarActionLabel(uiStrings, 'export-slides'),
+                checkCallback: (checking: boolean) => {
+                    const activeFile = this.app.workspace.getActiveFile();
+                    const condition = activeFile && activeFile instanceof TFile && activeFile.extension === 'md';
+                    if (condition) {
+                        if (!checking) {
+                            const currentActiveFile = this.app.workspace.getActiveFile();
+                            if (currentActiveFile && currentActiveFile instanceof TFile && currentActiveFile.extension === 'md') {
+                                this.exportSlidesCommand(currentActiveFile);
+                            } else {
+                                new Notice(uiStrings.notices.noActiveMarkdownFileSelectedOrChanged);
+                            }
+                        }
+                        return true;
+                    }
+                    if (!checking) {
+                        new Notice(uiStrings.notices.noActiveMarkdownFileSelected);
+                    }
+                    return false;
+                }
+            });
+        }
+
         // --- Settings Tab ---
         this.addSettingTab(new NotemdSettingTab(this.app, this));
 
@@ -2752,6 +2787,89 @@ export default class NotemdPlugin extends Plugin {
             undefined,
             options
         );
+    }
+
+    /** Command: Probe Slide Export Environment */
+    async probeSlideExportEnvironmentCommand(): Promise<void> {
+        const { EnvironmentProbeModal } = await import('./slideExport');
+        new EnvironmentProbeModal(this.app).open();
+    }
+
+    /** Command: Export Slides */
+    async exportSlidesCommand(file: TFile, reporter?: ProgressReporter): Promise<void> {
+        const { probeEnvironment, exportSlidevHtml, exportSlidevImages, exportVideoMp4 } = await import('./slideExport');
+        const uiStrings = this.getUiStrings();
+        const config = {
+            format: this.settings.slideExportDefaultFormat,
+            withClicks: this.settings.slideExportWithClicks,
+            outputSubfolder: this.settings.slideExportOutputSubfolder,
+            ffmpegFps: this.settings.slideExportFfmpegFps,
+            ffmpegCrf: this.settings.slideExportFfmpegCrf,
+            slidevTheme: this.settings.slideExportTheme,
+            timeoutMs: this.settings.slideExportTimeoutMs,
+        };
+
+        const modal = new ProgressModal(this.app, uiStrings.slideExport.exportingSlides);
+        const modalReporter = reporter || modal;
+        modal.open();
+
+        try {
+            modalReporter.log(uiStrings.slideExport.probingEnvironment);
+            const envReport = await probeEnvironment();
+
+            if (!envReport.capabilities[config.format]) {
+                throw new Error(uiStrings.slideExport.formatNotSupported.replace('{format}', config.format.toUpperCase()));
+            }
+
+            if (config.format === 'html') {
+                const outputPath = await exportSlidevHtml(
+                    this.app,
+                    file,
+                    config,
+                    (message) => modalReporter.log(message)
+                );
+                modalReporter.log(uiStrings.slideExport.exportSuccess.replace('{path}', outputPath));
+                new Notice(uiStrings.slideExport.exportComplete);
+            } else if (config.format === 'pdf' || config.format === 'png') {
+                const outputPath = await exportSlidevImages(
+                    this.app,
+                    file,
+                    config,
+                    config.format,
+                    (message) => modalReporter.log(message)
+                );
+                modalReporter.log(uiStrings.slideExport.exportSuccess.replace('{path}', outputPath));
+                new Notice(uiStrings.slideExport.exportComplete);
+            } else if (config.format === 'mp4') {
+                modalReporter.log(uiStrings.slideExport.exportingPngSequence);
+                const pngDir = await exportSlidevImages(
+                    this.app,
+                    file,
+                    config,
+                    'png',
+                    (message: string) => modalReporter.log(message)
+                );
+                modalReporter.log(uiStrings.slideExport.convertingToVideo);
+                const outputPath = await exportVideoMp4(
+                    this.app,
+                    pngDir,
+                    file.basename,
+                    config,
+                    (message: string) => modalReporter.log(message)
+                );
+                modalReporter.log(uiStrings.slideExport.exportSuccess.replace('{path}', outputPath));
+                new Notice(uiStrings.slideExport.exportComplete);
+            }
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            modalReporter.log(`${uiStrings.slideExport.exportFailed}: ${errorMessage}`);
+            new Notice(`${uiStrings.slideExport.exportFailed}: ${errorMessage}`);
+            console.error('Slide export error:', error);
+        } finally {
+            if (modal && !reporter) {
+                modal.close();
+            }
+        }
     }
 
 } // End of NotemdPlugin class

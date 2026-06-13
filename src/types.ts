@@ -214,6 +214,16 @@ export interface NotemdSettings {
     globalModelAwareMaxTokensTracking?: GlobalModelAwareMaxTokensTracking;
     discoveredModelMaxOutputTokensTracking?: ProviderDiscoveredModelMaxOutputTokensTracking;
     _firstLaunch?: boolean;
+
+    // Slide Export Settings
+    enableSlideExport: boolean;
+    slideExportDefaultFormat: 'html' | 'pdf' | 'png' | 'mp4';
+    slideExportOutputSubfolder: string;
+    slideExportWithClicks: boolean;
+    slideExportFfmpegFps: number;
+    slideExportFfmpegCrf: number;
+    slideExportTimeoutMs: number;
+    slideExportTheme: string;
 }
 
 // Defines the keys for tasks that can have custom prompts

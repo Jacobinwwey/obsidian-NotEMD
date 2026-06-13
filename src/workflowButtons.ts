@@ -29,7 +29,9 @@ export const SIDEBAR_ACTION_DEFINITIONS = [
     { id: 'batch-fix-formula', label: 'Batch fix formula formats', translationKey: 'batchFixFormula', category: 'utilities', automationLevel: 'interactive-ui', requiredContext: 'folder-selection', sideEffectClass: 'batch-write' },
     { id: 'check-duplicates-current', label: 'Check duplicates (current file)', translationKey: 'checkDuplicatesCurrent', category: 'utilities', automationLevel: 'requires-active-file', requiredContext: 'active-file', sideEffectClass: 'read-only' },
     { id: 'check-remove-duplicate-concepts', label: 'Check & remove duplicates', translationKey: 'checkRemoveDuplicateConcepts', category: 'utilities', automationLevel: 'interactive-ui', requiredContext: 'folder-selection', sideEffectClass: 'destructive' },
-    { id: 'test-llm-connection', label: 'Test LLM connection', translationKey: 'testLlmConnection', category: 'utilities', automationLevel: 'safe', requiredContext: 'none', sideEffectClass: 'read-only' }
+    { id: 'test-llm-connection', label: 'Test LLM connection', translationKey: 'testLlmConnection', category: 'utilities', automationLevel: 'safe', requiredContext: 'none', sideEffectClass: 'read-only' },
+    { id: 'probe-slide-export-env', label: 'Probe slide export environment', translationKey: 'probeSlideExportEnv', category: 'export', automationLevel: 'safe', requiredContext: 'none', sideEffectClass: 'read-only' },
+    { id: 'export-slides', label: 'Export current file as slides', translationKey: 'exportSlides', category: 'export', automationLevel: 'requires-active-file', requiredContext: 'active-file', sideEffectClass: 'write-file' }
 ] as const;
 
 export type SidebarActionId = typeof SIDEBAR_ACTION_DEFINITIONS[number]['id'];
