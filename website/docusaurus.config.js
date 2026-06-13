@@ -103,6 +103,12 @@ const config = {
     },
   },
 
+  themes: ['@docusaurus/theme-mermaid'],
+
+  markdown: {
+    mermaid: true,
+  },
+
   presets: [
     [
       'classic',
@@ -205,6 +211,9 @@ const config = {
           },
         ],
         copyright: `Copyright © ${new Date().getFullYear()} Notemd. Built with Docusaurus. | <a href="https://github.com/Jacobinwwey/obsidian-NotEMD/blob/main/LICENSE">MIT License</a>`,
+      },
+      mermaid: {
+        theme: { light: 'default', dark: 'dark' },
       },
       prism: {
         theme: prismThemes.github,
