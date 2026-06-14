@@ -30,6 +30,7 @@ export async function exportSlidevHtml(
 	const args = [
 		'-y', '@slidev/cli', 'build',
 		'--output', outputDir,
+		'--base', './',
 		'--router-mode', 'hash',
 		inputPath,
 	];

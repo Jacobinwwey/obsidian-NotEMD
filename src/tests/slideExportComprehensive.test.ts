@@ -212,7 +212,7 @@ describe('slidevExporter — All Format Combinations', () => {
         await exportSlidevHtml(app, file, config, callback);
         expect(mockExecFileAsync).toHaveBeenCalledWith(
             'npx',
-            expect.arrayContaining(['--theme', 'seriph']),
+            expect.arrayContaining(['--theme', 'seriph', '--base', './']),
             expect.objectContaining({ timeout: 120000 })
         );
     });
