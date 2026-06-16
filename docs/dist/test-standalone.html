@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Standalone Test</title>
+<script>
+// Capture console output
+window.consoleLog = [];
+const origLog = console.log;
+const origError = console.error;
+console.log = function(...args) { 
+  window.consoleLog.push({type: 'log', msg: args.join(' ')}); 
+  origLog.apply(console, args); 
+};
+console.error = function(...args) { 
+  window.consoleLog.push({type: 'error', msg: args.join(' ')}); 
+  origError.apply(console, args); 
+};
+
+// Load standalone HTML
+fetch('index-standalone.html')
+  .then(r => r.text())
+  .then(html => {
+    // Extract script
+    const match = html.match(/<script type="text\/javascript">([\s\S]*?)<\/script>/);
+    if (!match) {
+      document.body.innerHTML = '<h1 style="color:red">Failed to extract script</h1>';
+      return;
+    }
+    
+    // Execute it
+    try {
+      eval(match[1]);
+      
+      setTimeout(() => {
+        let report = '<h1>Test Results</h1>';
+        report += '<h2>Console Output:</h2><ul>';
+        window.consoleLog.forEach(l => {
+          report += '<li style="color:' + (l.type === 'error' ? 'red' : 'green') + '">' + 
+                    l.type + ': ' + l.msg + '</li>';
+        });
+        report += '</ul>';
+        
+        report += '<h2>Checks:</h2><ul>';
+        report += '<li>__require exists: ' + (typeof window.__require === 'function' ? '✓' : '✗') + '</li>';
+        report += '<li>Error in body: ' + (document.body.innerHTML.includes('Failed to load') ? '✗ YES' : '✓ NO') + '</li>';
+        report += '</ul>';
+        
+        document.body.innerHTML = report;
+      }, 2000);
+      
+    } catch(e) {
+      document.body.innerHTML = '<h1 style="color:red">Script Error: ' + e.message + '</h1>';
+    }
+  });
+</script>
+</head>
+<body>
+<h1>Loading...</h1>
+</body>
+</html>

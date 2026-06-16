@@ -1,0 +1,1 @@
+import{B as e,U as t,v as n,x as r}from"../modules/shiki-yoNnvMyB.js";import{mt as i}from"../index-hODKC6Hw.js";var a={},o={class:`slidev-layout center h-full grid place-content-center`},s={class:`my-auto`};function c(i,a){return e(),r(`div`,o,[n(`div`,s,[t(i.$slots,`default`)])])}var l=i(a,[[`render`,c]]);export{l as t};

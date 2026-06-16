@@ -11,6 +11,13 @@ This directory contains repository-level documentation for maintainers and contr
 - [Release Workflow](./maintainer/release-workflow.md)
 - [Release Notes 1.8.2](./releases/1.8.2.md)
 
+## Slide Export Documentation
+
+- [Standalone Bundle Fix](./STANDALONE_BUNDLE_FIX.md) - **Latest**: Export transformation bug fix (2026-06-16)
+- [Single-File Bundler](./SINGLE_FILE_BUNDLER.md) - Architecture and implementation overview
+- [Slidev Solution Summary](./SLIDEV_SOLUTION.md) - Server-script mode (alternative approach)
+- [Slidev HTML Fix](./SLIDEV_HTML_FIX.md) - Original problem analysis and testing
+
 ## Engineering Planning Docs
 
 - [Diagram Platform Phase 2 Requirements](./brainstorms/2026-04-14-diagram-platform-phase-2-requirements.md)

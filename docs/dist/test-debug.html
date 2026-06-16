@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Debug Standalone HTML</title>
+<style>
+body { font-family: monospace; padding: 20px; }
+pre { background: #f0f0f0; padding: 10px; overflow-x: auto; }
+.error { color: red; }
+.success { color: green; }
+</style>
+</head>
+<body>
+<h1>Debugging Standalone HTML</h1>
+<div id="log"></div>
+
+<script>
+const log = document.getElementById('log');
+
+function addLog(message, isError) {
+  const div = document.createElement('div');
+  div.className = isError ? 'error' : 'success';
+  div.textContent = message;
+  log.appendChild(div);
+  console.log(message);
+}
+
+// Capture all console output
+const originalConsoleLog = console.log;
+const originalConsoleError = console.error;
+const originalConsoleWarn = console.warn;
+
+console.log = function(...args) {
+  addLog('[LOG] ' + args.join(' '), false);
+  originalConsoleLog.apply(console, args);
+};
+
+console.error = function(...args) {
+  addLog('[ERROR] ' + args.join(' '), true);
+  originalConsoleError.apply(console, args);
+};
+
+console.warn = function(...args) {
+  addLog('[WARN] ' + args.join(' '), false);
+  originalConsoleWarn.apply(console, args);
+};
+
+// Capture uncaught errors
+window.onerror = function(msg, url, line, col, error) {
+  addLog('[UNCAUGHT ERROR] ' + msg + ' at line ' + line, true);
+  return false;
+};
+
+window.addEventListener('unhandledrejection', function(event) {
+  addLog('[UNHANDLED REJECTION] ' + event.reason, true);
+});
+
+addLog('Debug system initialized', false);
+addLog('Loading standalone HTML...', false);
+
+// Load the standalone HTML content directly
+fetch('index-standalone.html')
+  .then(response => response.text())
+  .then(html => {
+    addLog('Loaded HTML: ' + html.length + ' bytes', false);
+
+    // Extract and execute the script
+    const scriptMatch = html.match(/<script type="text\/javascript">([\s\S]*?)<\/script>/);
+    if (!scriptMatch) {
+      addLog('ERROR: Could not find script tag!', true);
+      return;
+    }
+
+    const scriptContent = scriptMatch[1];
+    addLog('Found script: ' + scriptContent.length + ' bytes', false);
+
+    // Execute the script
+    try {
+      addLog('Executing script...', false);
+      eval(scriptContent);
+      addLog('Script executed successfully', false);
+
+      // Check if __require exists
+      if (typeof window.__require === 'function') {
+        addLog('✓ __require function exists', false);
+      } else {
+        addLog('✗ __require function NOT found', true);
+      }
+
+    } catch (error) {
+      addLog('ERROR executing script: ' + error.message, true);
+      addLog('Stack: ' + error.stack, true);
+    }
+  })
+  .catch(error => {
+    addLog('ERROR loading HTML: ' + error.message, true);
+  });
+</script>
+</body>
+</html>

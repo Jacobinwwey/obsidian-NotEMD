@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Diagnostic Test</title>
+<script>
+// Capture all errors
+window.errors = [];
+window.onerror = function(msg, url, line, col, error) {
+  window.errors.push({type: 'error', msg, url, line, col, error: error?.toString()});
+  console.error('ERROR:', msg, url, line, col, error);
+};
+
+window.addEventListener('unhandledrejection', function(event) {
+  window.errors.push({type: 'promise', reason: event.reason?.toString()});
+  console.error('PROMISE REJECTION:', event.reason);
+});
+
+// Load the standalone HTML in iframe
+window.addEventListener('load', function() {
+  const iframe = document.createElement('iframe');
+  iframe.src = 'index-standalone.html';
+  iframe.style.width = '100%';
+  iframe.style.height = '600px';
+  document.getElementById('container').appendChild(iframe);
+
+  setTimeout(function() {
+    const results = document.getElementById('results');
+    results.innerHTML = '<h2>Console Errors:</h2><pre>' +
+      JSON.stringify(window.errors, null, 2) + '</pre>';
+
+    // Try to get iframe errors
+    try {
+      const iframeErrors = iframe.contentWindow.errors || [];
+      results.innerHTML += '<h2>IFrame Errors:</h2><pre>' +
+        JSON.stringify(iframeErrors, null, 2) + '</pre>';
+    } catch(e) {
+      results.innerHTML += '<p>Cannot access iframe: ' + e.message + '</p>';
+    }
+  }, 3000);
+});
+</script>
+</head>
+<body>
+<h1>Standalone HTML Diagnostic</h1>
+<div id="container"></div>
+<div id="results"></div>
+</body>
+</html>
