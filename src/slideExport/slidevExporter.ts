@@ -43,8 +43,31 @@ export async function exportSlidevHtml(
 		throw new Error(`Slidev build failed (exit ${result.exitCode}): ${result.stderr || result.error?.message || 'unknown error'}`);
 	}
 
-	onProgress?.('slidev-build', 'HTML build complete');
-	return `${config.outputSubfolder}/${sourceFile.basename}-slides/index.html`;
+	const exportPath = `${config.outputSubfolder}/${sourceFile.basename}-slides/index.html`;
+
+	// Check HTML mode setting
+	if (config.htmlMode === 'standalone') {
+		// Create single-file bundle
+		onProgress?.('slidev-build', 'Creating standalone bundle...');
+		const { createSingleFileHtml } = await import('./singleFileBundler');
+
+		const bundleResult = await createSingleFileHtml(
+			app,
+			exportPath,
+			(msg) => onProgress?.('slidev-build', msg)
+		);
+
+		onProgress?.('slidev-build', `Standalone HTML created (${(bundleResult.size / 1024 / 1024).toFixed(2)} MB)`);
+		return bundleResult.htmlPath;
+	} else {
+		// Create server scripts for manual serving
+		onProgress?.('slidev-build', 'Creating server scripts...');
+		const { createServerScripts } = await import('./serverScripts');
+		await createServerScripts(app, exportPath);
+
+		onProgress?.('slidev-build', 'HTML build complete (requires local server)');
+		return exportPath;
+	}
 }
 
 /**
@@ -115,5 +138,18 @@ export async function autoInstallPlaywright(
 	const npx = resolveNpxCommand();
 	const result = await execFileAsync(npx, ['playwright', 'install', 'chromium'], { timeout: 300_000 });
 	onProgress?.('install-playwright', result.exitCode === 0 ? 'Playwright Chromium installed' : 'Playwright install failed');
+	return result;
+}
+
+/**
+ * Auto-install http-server for serving HTML exports.
+ */
+export async function autoInstallHttpServer(
+	onProgress?: ExportProgressCallback,
+): Promise<ExecResult> {
+	onProgress?.('install-http-server', 'Installing http-server...');
+	const npx = resolveNpxCommand();
+	const result = await execFileAsync(npx, ['-y', 'http-server', '--version'], { timeout: 60_000 });
+	onProgress?.('install-http-server', result.exitCode === 0 ? 'http-server installed' : 'http-server install failed');
 	return result;
 }

@@ -224,6 +224,7 @@ export interface NotemdSettings {
     slideExportFfmpegCrf: number;
     slideExportTimeoutMs: number;
     slideExportTheme: string;
+    slideExportHtmlMode: 'standalone' | 'server-script';
 }
 
 // Defines the keys for tasks that can have custom prompts

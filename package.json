@@ -47,11 +47,13 @@
 		"jest": "^29.7.0",
 		"lodash": "^4.17.21",
 		"obsidian": "latest",
+		"playwright": "^1.61.0",
 		"ts-jest": "^29.3.2",
 		"tslib": "2.4.0",
 		"typescript": "^5.9.3"
 	},
 	"dependencies": {
+		"acorn": "^8.17.0",
 		"mermaid": "11.4.1",
 		"minisearch": "^7.2.0",
 		"vega": "^6.2.0",

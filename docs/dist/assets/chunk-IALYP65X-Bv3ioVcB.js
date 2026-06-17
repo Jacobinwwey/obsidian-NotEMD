@@ -1,0 +1,1 @@
+import{r as e}from"./chunk-PTVI3W5X-DVfdoxm6.js";var t=class{constructor(e){this.init=e,this.records=this.init()}static{e(this,`ImperativeState`)}reset(){this.records=this.init()}};export{t};

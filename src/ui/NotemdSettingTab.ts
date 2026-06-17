@@ -3261,7 +3261,23 @@ export class NotemdSettingTab extends PluginSettingTab {
                         .onChange(async (value) => {
                             this.plugin.settings.slideExportDefaultFormat = value as any;
                             await this.plugin.saveSettings();
+                            this.display();
                         }));
+
+                // HTML Mode setting (only shown when format is HTML)
+                if (this.plugin.settings.slideExportDefaultFormat === 'html') {
+                    new Setting(containerEl)
+                        .setName(i18n.slideExport.htmlModeName)
+                        .setDesc(i18n.slideExport.htmlModeDesc)
+                        .addDropdown(dropdown => dropdown
+                            .addOption('standalone', i18n.slideExport.htmlModeStandalone)
+                            .addOption('server-script', i18n.slideExport.htmlModeServer)
+                            .setValue(this.plugin.settings.slideExportHtmlMode)
+                            .onChange(async (value) => {
+                                this.plugin.settings.slideExportHtmlMode = value as 'standalone' | 'server-script';
+                                await this.plugin.saveSettings();
+                            }));
+                }
 
                 this.addDeferredTextSetting(
                     new Setting(containerEl)

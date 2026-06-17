@@ -97,6 +97,7 @@ import {
     runGenerateDiagramCommandWithHost,
     runPreviewDiagramCommandWithHost
 } from './operations/diagramCommandHostAdapter';
+import { stopAllServers } from './slideExport/localServer';
 import {
     DiagramCommandExecutionHost,
     runArtifactDiagramExecutionWithHost,
@@ -1078,6 +1079,7 @@ export default class NotemdPlugin extends Plugin {
 
     onunload() {
         // Clean up resources if necessary
+        stopAllServers();
     }
 
     // --- Settings Management ---
@@ -2807,6 +2809,7 @@ export default class NotemdPlugin extends Plugin {
             ffmpegCrf: this.settings.slideExportFfmpegCrf,
             slidevTheme: this.settings.slideExportTheme,
             timeoutMs: this.settings.slideExportTimeoutMs,
+            htmlMode: this.settings.slideExportHtmlMode,
         };
 
         const modal = new ProgressModal(this.app, uiStrings.slideExport.exportingSlides);
@@ -2830,6 +2833,12 @@ export default class NotemdPlugin extends Plugin {
                 );
                 modalReporter.log(uiStrings.slideExport.exportSuccess.replace('{path}', outputPath));
                 new Notice(uiStrings.slideExport.exportComplete);
+
+                // Automatically open in browser via local server
+                modalReporter.log('Opening in browser...');
+                const { openHtmlInBrowser } = await import('./slideExport/localServer');
+                const vaultRoot = (this.app.vault.adapter as any).basePath;
+                await openHtmlInBrowser(outputPath, vaultRoot);
             } else if (config.format === 'pdf' || config.format === 'png') {
                 const outputPath = await exportSlidevImages(
                     this.app,

@@ -38,6 +38,7 @@ export interface SlideExportConfig {
 	ffmpegCrf: number;
 	slidevTheme: string;
 	timeoutMs: number;
+	htmlMode?: 'standalone' | 'server-script';
 }
 
 export interface ExecResult {

@@ -208,6 +208,7 @@ export const DEFAULT_SETTINGS: NotemdSettings = {
     slideExportFfmpegCrf: 23,
     slideExportTimeoutMs: 120_000,
     slideExportTheme: '',
+    slideExportHtmlMode: 'standalone',
 };
 
 // Constants for the Sidebar View

@@ -147,4 +147,5 @@ export const mockSettings: NotemdSettings = {
     slideExportFfmpegCrf: 23,
     slideExportTimeoutMs: 120000,
     slideExportTheme: '',
+    slideExportHtmlMode: 'standalone',
 };
