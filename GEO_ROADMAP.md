@@ -1,157 +1,196 @@
 # NotEMD GEO Roadmap
 
 **Created:** 2026-06-12
-**Updated:** 2026-06-13
-**Status:** Phase 1 + Phase 2 + Phase 3 complete. Awaiting 2026-07-01 retest.
-**Scope:** Post-deployment GEO optimization for AI search engine visibility
+**Updated:** 2026-06-17
+**Status:** Phase 1-3 shipped; Phase 4 GitHub Pages reliability, language truth, and AI retrieval entry point complete in this batch.
+**Scope:** Post-deployment GEO optimization for AI search engine visibility, documentation truth, and GitHub Pages reliability.
 
 ---
 
-## Phase 1: Foundation (Complete)
+## Current Truth Snapshot
 
-| Step | Description | Status | Commit |
-|------|-------------|--------|--------|
-| 1 | Fix Technical Debt | Done | b683d12 |
-| 2 | Content Depth (3 high-value + 9 placeholders) | Done | 7989940 |
-| 3 | Pillar Page Architecture | Done | 7989940 |
-| 4 | E-E-A-T Signals | Done | 7989940 |
-| 5 | Visibility Monitoring Baseline | Done (0/9 EN, 0/4 ZH) | 1f10e4f |
-| 6 | geo-content-optimizer Gap Analysis | Done (3 pages, 8 recs implemented) | da08abe |
-| 7 | i18n Prune + VitePress noindex + robots.txt | Done | decce74 |
-| 8 | Competitive Positioning + Competitor Keywords | Done | 04cb921 |
-| 9 | Mermaid Diagram Rendering Fix | Done | 115cb87 |
+The website is a Docusaurus site under `website/`, deployed by `.github/workflows/deploy-docs.yml` on pushes to `main` that touch `website/**` or the workflow file. The workflow already uses `npm ci` and `npm run build` from the `website` working directory.
 
-### Phase 1 Audit: Claims vs Reality
+The current public language surface is deliberately narrow:
 
-| Claimed | Actual | Fix |
-|---------|--------|-----|
-| Swizzled component extracts frontmatter → rich TechArticle | Only injected url + publisher | Rewrote with useDoc() |
-| TLDR component on every page | Only 4/18 pages | All 21 pages now have TLDR |
-| 10 locales i18n ready | 8 locales empty | Pruned to 3: EN, zh-CN, ja |
-| SearchAction in WebSite Schema | Points to 404 | Removed |
-| Static assets | All 404 | Created favicon, logo, social card |
-| Mermaid diagrams render | Plain text code blocks | Added @docusaurus/theme-mermaid + markdown.mermaid: true |
+| Surface | Current state | Interpretation |
+|---|---|---|
+| English docs | Complete canonical docs under `website/docs/` | Primary crawl and answer source |
+| Simplified Chinese | Localized homepage plus localized FAQ | Partial locale; untranslated doc fallbacks are noindex and excluded from sitemap |
+| Other locales | Not published | Do not add empty locale folders to `i18n.locales` |
+| Plugin UI i18n | Separate runtime feature | Do not confuse runtime UI language support with website documentation coverage |
 
-### Baseline Visibility (2026-06-13)
+## 2026-06-17 Pages / GEO Audit
 
-| Engine | Keywords | Cited | Data File |
-|--------|----------|-------|-----------|
-| GLM (EN) | 5 | 0 | `geo-data/geo_baseline_glm_2026-06.json` |
-| GLM (ZH) | 4 | 0 | `geo-data/geo_baseline_glm_cn_2026-06.json` |
+### Findings
 
-Next measurement date: **2026-07-01**
+| Finding | Evidence | Impact |
+|---|---|---|
+| Missing GitHub Pages root routes | `npm run build` warned about links to `/obsidian-NotEMD/` and `/obsidian-NotEMD/zh-CN/` | Navbar/logo/footer root links pointed to missing generated pages |
+| Deprecated markdown-link config | Docusaurus warned that top-level `siteConfig.onBrokenMarkdownLinks` is deprecated for v4 | Future Docusaurus upgrade risk |
+| Stale website docs | `website/README.md` claimed Docusaurus 3.6.3 and 10 languages, while package/config use 3.10.1 and `['en', 'zh-CN']` | Operator and crawler strategy drift |
+| Roadmap language drift | This file claimed both Phase 2 in progress and Phase 1-3 complete; it also referenced pruned language counts that no longer match config | Progress accounting drift |
+| Hardcoded schema URLs | Some JSON-LD code encoded the GitHub Pages base path directly | Higher risk if `url` or `baseUrl` changes |
+| zh-CN FAQ weaker metadata | Localized FAQ used Organization author and lacked citations | Lower schema consistency than English docs |
+| zh-CN fallback docs in sitemap | Docusaurus generated zh-CN paths for untranslated docs | Weak language and hreflang signal |
+| No AI retrieval index | No static `llms.txt` existed | Answer engines had no concise canonical map |
 
----
+### Fixes Landed In This Batch
 
-## Phase 2: Schema & Architecture Fixes (In Progress)
+| Fix | Files | Result |
+|---|---|---|
+| Add locale-aware root homepage | `website/src/pages/index.js`, `website/src/pages/index.module.css` | `/obsidian-NotEMD/` and `/obsidian-NotEMD/zh-CN/` become real pages |
+| Move Docusaurus markdown hook | `website/docusaurus.config.js` | Uses `markdown.hooks.onBrokenMarkdownLinks` instead of deprecated top-level config |
+| Derive JSON-LD URLs from config | `website/docusaurus.config.js`, `website/src/theme/DocItem/Layout/index.js`, `website/src/pages/index.js` | Schema follows `url` + `baseUrl` instead of scattering path literals |
+| Align zh-CN FAQ metadata | `website/i18n/zh-CN/docusaurus-plugin-content-docs/current/faq.mdx` | Localized FAQ uses the canonical Person author and citations |
+| Fence untranslated zh-CN docs | `website/docusaurus.config.js`, `website/src/theme/DocItem/Layout/index.js` | Only translated zh-CN FAQ stays in sitemap; fallback docs emit `noindex,follow` |
+| Add AI retrieval entry point | `website/static/llms.txt` | Provides a compact canonical source map for AI crawlers and answer engines |
+| Correct website operator docs | `website/README.md` | Documents real Docusaurus version, real locale policy, root homepage, and `llms.txt` |
+| Rebaseline roadmap and progress docs | `GEO_ROADMAP.md`, current progress audit doc | Removes stale language and phase claims |
 
-### Code Audit: Plans vs Implementation
+## Phase 1: Foundation (Shipped)
 
-| Recommendation | Source Plan | Current Code State | Delta |
-|---|---|---|---|
-| **Fix `datePublished` missing** | Analysis: `metadata.date` is undefined → field omitted | **Fixed**: Reads from `frontMatter.datePublished`, falls back to `dateModified` | Resolved |
-| **Fix `dateModified` raw timestamp** | Analysis: `metadata.lastUpdatedAt` emits Unix epoch | **Fixed**: `new Date(metadata.lastUpdatedAt).toISOString()` | Resolved |
-| **Fix hardcoded `siteUrl`** | Analysis: `'https://jacobinwwey.github.io'` hardcoded | **Fixed**: Uses `useDocusaurusContext().siteConfig.url` | Resolved |
-| **`about` type: `Thing` → `DefinedTerm`** | Analysis: `Thing` is semantic vacuum | **Fixed**: Now emits `DefinedTerm` with `inDefinedTermSet` | Resolved |
-| **Missing `.nojekyll`** | GitHub Pages requires it to prevent Jekyll processing | **Fixed**: Created `static/.nojekyll` | Resolved |
-| **Redundant `favicon.ico`** | SVG favicon covers all modern browsers | **Fixed**: Deleted `favicon.ico` | Resolved |
-| **CSS "GEO Optimization" overclaims** | Analysis: CSS has zero direct impact on AI crawlers | **Fixed**: Renamed 9 comments to accurate purpose (Readability, etc.) | Resolved |
-| **3 pages missing `concepts`** | frontmatter audit: installation, quick-start, configuration | **Fixed**: Added concepts to all 3 | Resolved |
-| **18 pages missing `citations`** | E-E-A-T signal: only 3/21 had citations | **Fixed**: Added 2 citations each to 15 pages (3 had existing + 3 just-fixed = 21/21) | Resolved |
-| **2 pages use Organization author** | intro, faq used `@type: Organization` instead of Person @id | **Fixed**: Both now use Person @id | Resolved |
-| **Add FAQPage Schema** | BrightEdge: 43% AI citations from FAQ Schema | **Fixed**: Swizzled component emits FAQPage for faq.mdx; 12 Q&A pairs | Resolved |
+| Step | Description | Status | Notes |
+|------|-------------|--------|-------|
+| 1 | Fix technical debt | Done | Historical baseline |
+| 2 | Content depth | Done | High-value docs plus placeholders were created earlier |
+| 3 | Pillar page architecture | Done | `docs/pillar-ai-knowledge.mdx` remains the cluster anchor |
+| 4 | E-E-A-T signals | Done | Person, citations, and publisher schema exist |
+| 5 | Visibility monitoring baseline | Done | Baseline data exists under `geo-data/` |
+| 6 | Gap analysis | Done | Earlier recommendations were implemented where still valid |
+| 7 | i18n pruning + noindex / robots | Done | Empty language expansion was stopped |
+| 8 | Competitive positioning | Done | Competitive keywords and positioning were added |
+| 9 | Mermaid rendering | Done | Mermaid theme is enabled |
 
-### Phase 2 Step Status
+### Claims vs Reality Rebaseline
+
+| Earlier claim | Current reality | Current action |
+|---|---|---|
+| 10 locales i18n ready | Only `en` and `zh-CN` are published; zh-CN is partial | Keep published locale list small until critical path pages are translated |
+| Pruned to 3 locales: EN, zh-CN, ja | Current config publishes 2 locales: `en`, `zh-CN` | Do not mention `ja` as active or ready |
+| Phase 1-3 complete with only July retest remaining | Pages root and language docs still had build-visible defects | Treat Pages reliability as Phase 4, now fixed and verified by build |
+| SearchAction removed because it pointed to 404 | Correct historically | Continue avoiding schema features that point to missing routes |
+| TLDR/schema work complete | Mostly true for docs pages | Homepage and `llms.txt` now cover the root/answer-engine entry point |
+
+## Phase 2: Schema & Architecture Fixes (Shipped)
+
+| Recommendation | Current code state | Status |
+|---|---|---|
+| Fix `datePublished` missing | Reads `frontMatter.datePublished`, falls back to `dateModified` | Done |
+| Fix raw `dateModified` timestamp | Converts `metadata.lastUpdatedAt` to ISO | Done |
+| Fix hardcoded doc page URL composition | Uses `siteConfig.url` and `siteConfig.baseUrl` through URL construction | Done |
+| `about` type: `Thing` -> `DefinedTerm` | Emits `DefinedTerm` with `inDefinedTermSet` | Done |
+| Missing `.nojekyll` | `website/static/.nojekyll` exists | Done |
+| CSS "GEO Optimization" overclaims | Comments were narrowed; negative letter spacing also removed from custom CSS | Done |
+| Missing concepts/citations/author metadata | English docs and zh-CN FAQ now align on author/citation pattern | Done |
+| FAQPage Schema | Swizzled doc layout emits FAQPage for `faq.mdx` | Done |
+| Root WebPage Schema | Homepage now emits localized WebPage JSON-LD | Done |
+
+## Phase 3: Architecture Evolution (Shipped / Deferred)
 
 | Step | Description | Status |
 |------|-------------|--------|
-| P2-1 | Fix TechArticle Schema 3 bugs | Done |
-| P2-2 | Add .nojekyll + remove favicon.ico | Done |
-| P2-3 | Fix CSS comment overclaims | Done |
-| P2-4 | Supplement missing frontmatter (concepts, citations, author) | Done |
-| P2-5 | Add FAQPage Schema to FAQ page | Done |
+| P3-1 | Remove empty/unsupported locales | Done |
+| P3-2 | Consolidate or expand provider stub pages | Deferred, still needs content writing |
+| P3-3 | Sidebar reorder | Done |
+| P3-4 | Apply for Algolia DocSearch | Deferred until indexing is stable |
+| P3-5 | Add `position_in_response` to visibility tester | Done |
+| P3-6 | Organization Schema `sameAs` | Done |
+| P3-7 | Extend visibility test to Perplexity | Deferred, needs API key |
+| P3-8 | Upgrade Docusaurus packages to `^3.10.1` | Done |
 
----
+## Phase 4: Pages Reliability + Language Truth (2026-06-17)
 
-## Phase 3: Architecture Evolution (Complete)
+Phase 4 exists because the previous roadmap optimized schema/content while leaving deployment routes and language truth under-specified. GEO will not work if crawlers and answer engines hit missing root pages, stale language claims, or inconsistent canonical source maps.
 
-| Step | Description | Status |
-|------|-------------|--------|
-| P3-1 | Remove `ja` locale (0 translated pages → hreflang pollution) | Done |
-| P3-2 | Consolidate or expand 5 provider stub pages | Deferred (needs content writing) |
-| P3-3 | Sidebar reorder: Getting Started before pillar, FAQ last | Done |
-| P3-4 | Apply for Algolia DocSearch | Deferred (after site indexed) |
-| P3-5 | Add `position_in_response` to visibility_tester | Done |
-| P3-6 | Organization Schema: add `sameAs` (GitHub, Discord) | Done |
-| P3-7 | Extend visibility test to Perplexity engine | Deferred (needs API key) |
-| P3-8 | Upgrade Docusaurus packages to ^3.10.1 (version consistency) | Done |
+### Phase 4 Acceptance
 
-### Deferred (Explicitly NOT Doing)
+| Requirement | Status | Evidence target |
+|---|---|---|
+| GitHub Pages root route exists | Fixed | `website/build/index.html` |
+| zh-CN root route exists | Fixed | `website/build/zh-CN/index.html` |
+| Deprecated Docusaurus markdown config removed | Fixed | No v4 deprecation warning in `npm run build` |
+| Root broken markdown links removed | Fixed | No `/obsidian-NotEMD/` root broken-link warning in `npm run build` |
+| Published language policy matches code | Fixed | README + roadmap state `en` plus partial `zh-CN` |
+| Untranslated zh-CN fallback docs fenced | Fixed | zh-CN sitemap keeps only root + FAQ; fallback docs emit `noindex,follow` |
+| AI retrieval entry point exists | Fixed | `website/build/llms.txt` |
+| Test files excluded from this commit | Required | Commit file list must not include `src/tests/**` |
 
-| Item | Why |
-|------|-----|
-| `@docusaurus/plugin-ideal-image` | 6 static files, ROI too low |
-| BreadcrumbList Schema | Docusaurus sidebar already provides nav hierarchy |
-| English readability checker | Not a bottleneck; Chinese-only checker is sufficient |
-| PWA / offline docs plugin | Documentation site doesn't need offline support |
-| WebP/AVIF image formats | No pipeline support in Docusaurus; static assets too small to matter |
-| kaTeX / math equation support | No math-heavy content |
-| Custom 404 page | Default is acceptable |
-| Blog / changelog section | Not a priority |
-| Versioned documentation | Single version plugin, no need |
+## Better GEO Strategy
 
----
+The next effective GEO strategy is truth-first and route-first, not locale-volume-first.
+
+1. **Make canonical routes boring and stable.** Root, locale root, sitemap, robots, FAQ, intro, quick-start, provider overview, and pillar pages must all build without missing-link warnings.
+2. **Publish only reviewed language surfaces.** Keep `en` complete and grow `zh-CN` by translating the critical path before adding any new locale.
+3. **Use `llms.txt` as the compact answer-engine map.** It should point to canonical docs, explain language scope, and discourage answers based on generated exports or stale issue text.
+4. **Keep schema accurate before making it richer.** Person, Organization, WebPage, TechArticle, FAQPage, citations, and concepts are useful only if URLs resolve and claims match source pages.
+5. **Consolidate thin provider pages before adding more.** Stub-like provider pages dilute crawl quality; expand them with real setup, request semantics, and troubleshooting or merge them into stronger overview pages.
+6. **Measure after deploy, then tune.** Re-run Google indexing checks and AI visibility tests only after the fixed Pages build is deployed.
+
+### Critical Path Translation Plan
+
+Before adding any locale beyond `zh-CN`, finish and review these zh-CN pages:
+
+1. Homepage
+2. FAQ
+3. Introduction
+4. Installation
+5. Quick Start
+6. Configuration
+7. Provider overview
+8. AI knowledge pillar
+
+Until this set is translated, zh-CN should stay explicitly partial.
 
 ## Risks & Mitigations
 
 | Risk | Status | Mitigation |
 |------|--------|-----------|
-| Site not indexed by Google | Open | Submit sitemap via Google Search Console post-deploy |
-| Empty i18n locales emit wrong hreflang | **Fixed** | Removed ja locale; zh-CN has 1 translated page |
-| Thin provider pages dilute crawl budget | Open | Phase 3: consolidate or expand |
-| Mermaid 660KB bundle on non-diagram pages | Accepted | Docusaurus architecture limitation; gzip ~200KB |
-| Correctness vs volume tradeoff in citations | **Fixed** | All citations point to real external authority sources |
-| CSS comment overclaims create false causation narrative | **Fixed** | Renamed to accurate purpose descriptors |
-
----
+| Site not indexed by Google | Open | Submit sitemap via Google Search Console after the fixed Pages deploy |
+| Empty or fallback i18n pages emit weak hreflang signals | Controlled | Publish only `en` + partial `zh-CN`; noindex untranslated zh-CN fallbacks and exclude them from sitemap |
+| GitHub Pages root route missing | Fixed | Root homepage now exists for default and zh-CN locale |
+| Docusaurus v4 markdown config breakage | Fixed | Broken markdown hook moved under `markdown.hooks` |
+| Untranslated zh-CN fallback docs dilute language quality | Controlled | Exclude fallback docs from sitemap and emit `noindex,follow` until translated |
+| Thin provider pages dilute crawl budget | Open | Expand or consolidate provider pages before adding more |
+| Mermaid bundle size on non-diagram pages | Accepted | Docusaurus/theme tradeoff; not the current GEO blocker |
+| Hand-maintained `llms.txt` can drift | Open | Update it when canonical docs, language status, or provider docs change |
+| Test or generated export files accidentally entering main | Controlled in this batch | Stage production/docs files only; leave tests and generated exports out of the commit |
 
 ## Success Metrics
 
 | Timeframe | Metric | Target | Current |
 |-----------|--------|--------|---------|
-| 2 weeks | Docusaurus site indexed | Google `site:` returns results | Unknown |
-| 2 weeks | First AI citation | 1+ ChatGPT/Perplexity mention | 0/9 |
-| 1 month | Citation rate (GLM) | 5-10% for core keywords | 0% |
-| 1 month | All pages with citations | 21/21 | **21/21 (fixed)** |
-| 1 month | All pages with concepts | 21/21 | **21/21 (fixed)** |
-| 2 months | Pillar Page cluster indexed | All in Google index | Unknown |
-| 2 months | E-E-A-T Person Schema live | Person @id resolves as author | **19/21 → 21/21 (fixed)** |
-
----
+| Immediate | Docusaurus build | No root broken-link or deprecated markdown-hook warnings | Verified 2026-06-17 |
+| Immediate | Root pages | `index.html` and `zh-CN/index.html` exist | Verified 2026-06-17 |
+| Immediate | zh-CN fallback fence | Sitemap excludes untranslated docs; fallback docs noindex | Verified 2026-06-17 |
+| Immediate | AI retrieval map | `llms.txt` exists in build output | Verified 2026-06-17 |
+| 2 weeks post-deploy | Docusaurus site indexed | Google `site:` returns results | Unknown |
+| 2 weeks post-deploy | First AI citation | 1+ ChatGPT/Perplexity/GLM mention | 0 baseline |
+| 1 month post-deploy | Citation rate | 5-10% for core keywords | 0 baseline |
+| 1 month post-deploy | zh-CN critical path | 8 pages translated/reviewed | Homepage + FAQ only |
 
 ## GEO Skill Capability Utilization
 
 | Module | Capability | Used | Not Used | Priority |
 |---|---|---|---|---|
-| A1 | Organization Schema | WebSite + Person @graph + sameAs | — | Done |
-| A2 | FAQPage Schema | Now emitting for faq.mdx | — | Done |
-| A3 | Article Schema | TechArticle per page | `image` field (OG thumbnail) | P4 |
-| A4 | Person/E-E-A-T | Person @id cross-reference (21/21) | `hasCredential` | P4 |
-| A5 | Citation Schema | 21/21 pages now have citations | — | Done |
-| A6 | BreadcrumbList | Not used | Full BreadcrumbList | Deferred |
-| B | Readability Check | — | Chinese-only, not applicable to EN content | Deferred |
-| C | Pillar Page Cluster | pillar-ai-knowledge exists | Cluster navigation HTML block | P4 |
-| D1 | Visibility Test | GLM baseline + position metric | Perplexity engine | P4 |
-| D2 | Quarterly Report | — | First report after 3 data points | Q3 2026 |
-| E | Gap Analysis | 3 pages analyzed | Remaining 18 pages | P4 (after retest) |
-
----
+| A1 | Organization Schema | WebSite + Person graph + sameAs | Richer credentials | P4/P5 |
+| A2 | FAQPage Schema | FAQ docs | More localized FAQ variants | After translation |
+| A3 | Article Schema | TechArticle per doc page | `image` field per article | P5 |
+| A4 | Person/E-E-A-T | Person @id cross-reference | `hasCredential` | P5 |
+| A5 | Citation Schema | Docs citations | Automated citation freshness audit | P5 |
+| A6 | BreadcrumbList | Docusaurus navigation only | Full BreadcrumbList schema | Deferred |
+| B | Readability Check | TLDR and docs structure | Full English readability gate | Deferred |
+| C | Pillar Page Cluster | Pillar page exists | Stronger cluster navigation blocks | P5 |
+| D1 | Visibility Test | GLM baseline + position metric | Perplexity engine | Needs API key |
+| D2 | Quarterly Report | Planned | First report after 3 data points | Q3 2026 |
+| E | AI retrieval pack | `llms.txt` | Generated `llms-full.txt` | Defer until content pipeline exists |
 
 ## Measurement Cadence
 
 | Date | Action |
 |------|--------|
-| 2026-07-01 | Retest GLM baseline (EN + ZH). Add `position_in_response` if P3-5 done. |
-| 2026-07-01 | Check Google Search Console for indexing status |
-| 2026-08-01 | Second retest. If cited > 0: expand to Perplexity. If still 0: audit indexed pages. |
-| 2026-10-01 | First quarterly report via geo_report_generator.py (needs 3+ data points) |
+| 2026-06-17 | Verify fixed website build, root pages, zh-CN root, and `llms.txt` output |
+| After deploy | Submit sitemap and inspect canonical root/locale root in Search Console |
+| 2026-07-01 | Retest GLM baseline in EN + ZH after the fixed Pages deployment |
+| 2026-08-01 | Second retest. If citations remain 0, audit indexed pages and provider-page thinness |
+| 2026-10-01 | First quarterly report via `geo_report_generator.py` after enough data points |

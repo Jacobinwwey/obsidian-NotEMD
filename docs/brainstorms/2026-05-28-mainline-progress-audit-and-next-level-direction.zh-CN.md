@@ -1,6 +1,6 @@
 ---
 date: 2026-05-28
-last_updated: 2026-06-09
+last_updated: 2026-06-17
 topic: mainline-progress-audit-and-next-level-direction
 canonical: true
 ---
@@ -40,11 +40,19 @@ canonical: true
    - `src/localKnowledgeBase.ts`
    - `src/ui/NotemdSidebarView.ts`
    - `styles.css`
+   - `website/docusaurus.config.js`
+   - `website/src/pages/index.js`
+   - `website/src/theme/DocItem/Layout/index.js`
+   - `website/static/llms.txt`
 6. 当前已发货 release/docs 真值：
    - `docs/releases/1.9.2.md`
    - `docs/releases/1.9.2.zh-CN.md`
    - `change.md`
    - `src/ui/welcomeReleaseNotes.ts`
+7. 当前 GitHub Pages / GEO 真值：
+   - `GEO_ROADMAP.md`
+   - `website/README.md`
+   - `.github/workflows/deploy-docs.yml`
 
 ## 2. 当前主线真值
 
@@ -276,6 +284,39 @@ canonical: true
 1. 当前主线真值维护现在也包括让 roadmap/progress 语言持续跟上已检入 helper-entrypoint 证据；
 2. 文档同步现在已经是回归边界，而不是可选的 prose 清理。
 
+### 2.10 2026-06-17 GitHub Pages / language / GEO 真值
+
+这一批次新增的主线真值不在插件 runtime，而在公开文档站的发布面。用户反馈的核心问题不是“还要再加一个语言开关”，而是 GitHub Pages 的真实路由、语言覆盖声明、GEO 入口和文档说明已经彼此漂移。
+
+实机审计发现：
+
+1. `website` 本地第一次构建在未安装依赖时失败于 `docusaurus: not found`，但 Pages workflow 本身已经包含 `npm ci`，所以这不是 CI 架构缺口；
+2. 安装依赖后 `npm run build` 可以运行，但暴露出真实缺陷：默认根路径 `/obsidian-NotEMD/` 与 zh-CN 根路径 `/obsidian-NotEMD/zh-CN/` 被 navbar/logo/footer 链接引用，却没有对应 root page；
+3. Docusaurus 配置仍使用即将迁出的位置：`siteConfig.onBrokenMarkdownLinks`，应转到 `markdown.hooks.onBrokenMarkdownLinks`；
+4. `website/README.md` 仍把站点描述为 Docusaurus 3.6.3 与 10 语言支持，而实际 `package.json` 是 `^3.10.1`，`i18n.locales` 只有 `en` 与 `zh-CN`；
+5. `website/i18n/zh-CN` 实际只有 FAQ 本地化文件，因此 zh-CN 是局部语言面，不是完整中文文档站；
+6. 旧 `GEO_ROADMAP.md` 同时宣称 Phase 1/2/3 complete、Phase 2 in progress、以及已经被代码否定的语言数量，已经不能再作为可执行真值；
+7. Docusaurus 会为未翻译 docs 生成 zh-CN fallback 路径，若直接进 sitemap，会把英文 fallback 当作中文页面暴露给 crawler；
+8. 站点缺少一个精简的 AI answer-engine source map，导致 answer engine 更容易从生成导出物、旧 issue 或 fallback locale 中取错信号。
+
+本批次已经把这条文档站轨道推进到更真实的结构：
+
+1. `website/src/pages/index.js` 现在提供默认语言与 zh-CN 的 root homepage，并把 root page JSON-LD 写成带 URL 与语言的 WebPage schema；
+2. `website/docusaurus.config.js` 将 broken markdown link hook 放到 Docusaurus 当前推荐的 `markdown.hooks` 位置；
+3. doc page 的 TechArticle schema、全站 WebSite schema 与首页 WebPage schema 都从 `siteConfig.url` / `siteConfig.baseUrl` 推导 URL，不再在多个位置散落同一段 GitHub Pages base path；
+4. zh-CN FAQ 现在使用同一个 Person author `@id` 并补上 citations；
+5. 未翻译的 zh-CN docs fallback 现在被排除在 sitemap 之外，并在 swizzled doc layout 里标记为 `noindex,follow`；
+6. `website/static/llms.txt` 成为静态高信号入口，列出 canonical docs、provider/runtime 页面、语言覆盖边界和回答约束；
+7. `website/README.md` 与 `GEO_ROADMAP.md` 已把语言策略改成“English complete + partial zh-CN”，不再夸大为 10 语言或 3 语言 ready。
+
+架构解释：
+
+1. 插件 runtime 的 UI 语言支持、Obsidian 内部工作流语言、以及 Docusaurus 文档站 locale 是三条不同轨道，不能互相证明；
+2. GEO 的第一优先级不是增加 locale 数量，而是让 canonical route、locale root、FAQ、intro、quick-start、provider overview、pillar page、sitemap、robots 和 `llms.txt` 都指向真实可访问内容；
+3. `llms.txt` 是 answer-engine 索引入口，不是内容副本；当前只维护 concise canonical map，暂不生成容易漂移的 `llms-full.txt`；
+4. zh-CN 接下来的正确推进不是继续索引 fallback 页面，而是补齐 homepage、FAQ、intro、installation、quick-start、configuration、provider overview 与 pillar page 这条 critical path；
+5. 本批次必须把测试文件、生成导出物和 Slidev 上一阶段 WIP 排除在提交之外；clean-state 的实现方式应是只提交生产/文档文件，其余未提交内容保留到受控 stash。
+
 ## 3. 相对先前方案语言的深度对比
 
 ### 3.1 2026-05-25 审计现在低估了什么
@@ -385,6 +426,25 @@ provider 专题文在以下几点上仍然正确，而且不应被放松：
 3. CLI 的有效工作是判断是否有有界 path-based operation 值得 public promotion，而不是把 maintainer diagnostics 变成隐含 public support；
 4. packaging 的有效工作是解决 latent runtime candidate 的 source/build 边界，而不是把候选源码写成已发货资产。
 
+### 3.8 GitHub Pages / GEO 方案语言现在需要纠偏的部分
+
+旧 GEO 方案的主要问题不是方向完全错误，而是把“内容与 schema 已推进”过早等同于“Pages 发布面已经可靠”。当前代码审计显示，这个等号不成立。
+
+需要纠偏的地方：
+
+1. 旧方案强调 schema、TLDR、citations、pillar page，但没有把 root route 和 locale root route 当成第一等 acceptance；实际构建已经证明缺 root route 会直接形成站内坏链；
+2. 旧方案把 locale 数量当成进度表达，当前正确表达应改成“已发布语言面是否真实、完整、可被 crawler 正确解释”；
+3. 旧方案把 zh-CN FAQ 的存在写得过于接近“中文站已具备”，但现状只是局部中文面；
+4. 旧方案没有给 answer engine 一个紧凑入口，导致 GEO 依赖 sitemap 与页面 schema 的间接发现；
+5. 旧方案没有把 Pages build warning 当成 blocking-quality signal，导致 deprecated config 与 root broken links 能继续存在。
+
+当前实现后的正确判断：
+
+1. GitHub Pages 轨道已经从“schema/content first”推进到“route/schema/language truth first”；
+2. 下一步高杠杆工作是翻译并审校 zh-CN critical path，以及扩充薄 provider 页面，而不是立刻添加更多 locales；
+3. `llms.txt` 应随 canonical docs 与语言状态同步维护，但不应在没有生成管线时手写大体量全文副本；
+4. Pages build 现在必须进入与 plugin build/test 并列的文档站 finish gate。
+
 ## 4. 架构推进评估
 
 ### 4.1 真正推进了什么
@@ -429,6 +489,25 @@ provider 专题文在以下几点上仍然正确，而且不应被放松：
 1. packaging / semantic-verification 仍然承载着最核心的 source-vs-shipped 边界歧义，因为源码里已有可复用 runtime candidate，但真正发货契约仍是单入口；
 2. CLI / automation 仍然承载着刻意保持的 public-vs-maintainer 分层，任何 path-based operation 的提升都必须继续显式化；
 3. file-selection / local-KB / chapter-split 的 Stage C 现在需要的是更深的 mixed-corpus 评估覆盖、示例对齐与 explainability 收口，而不是再做一次“功能是否存在”的恢复性论证。
+
+### 4.5 文档站架构瓶颈已经从“有页面”移动到“可信发布面”
+
+GitHub Pages 这条线当前最大的结构风险不是缺少更多页面，而是公开站点的入口、语言、schema 与 source map 是否一致。
+
+当前已推进的架构点：
+
+1. root homepage 现在成为 Docusaurus `src/pages` 管理的真实 route，不再依赖 docs plugin 的 sidebar 首页间接承担站点根路径；
+2. default locale 与 zh-CN locale 都能通过同一个 homepage component 生成对应语言的入口文案；
+3. doc page schema 与 root page schema 都开始从站点配置推导 URL；
+4. `llms.txt` 把 answer-engine 引导从“猜 sitemap / 猜页面关系”改成“读取明确 canonical map”；
+5. website README 与 GEO roadmap 现在记录真实语言覆盖，减少未来会话继续把 runtime i18n 与 website i18n 混在一起。
+
+仍然存在的约束：
+
+1. zh-CN 还不是完整文档站，不能在对外材料里写成完整中文支持；
+2. provider docs 仍有薄页风险，后续需要按真实配置、请求语义、错误诊断扩写或合并；
+3. `llms.txt` 当前是手工维护文件，后续如果 canonical docs 扩大，应考虑生成式维护而不是继续人工复制长内容；
+4. Pages 质量门禁目前仍主要靠 `npm run build`，还没有独立的 sitemap/llms/locale-root smoke script。
 
 ## 5. 具体下一阶段方向
 
@@ -546,6 +625,31 @@ provider 专题文在以下几点上仍然正确，而且不应被放松：
 1. 只要 packaging、CLI surface 或 provider/discovery 边界发生变化，就重新检查当前真值文档；
 2. 持续把 `npm run build`、`npm test -- --runInBand`、`npm run audit:i18n-ui`、`npm run audit:render-host`、`git diff --check` 与 clean 的 `git status --short --branch` 作为最小收尾包。
 
+### Batch F：把 GitHub Pages / GEO 作为独立发布面维护
+
+优先级：`P0/P1`
+
+目标：
+
+1. 把 `website` 视为独立的公开产品面，而不是主插件 README 的附属输出；
+2. Pages build warning 必须进入 blocking-quality 视角，尤其是 root route、locale route、deprecated config 与 broken links；
+3. GEO 策略先服务于准确、可访问、可验证的 canonical pages，再服务于更多语言或更多 schema 类型。
+
+当前已经落地：
+
+1. 默认 root 与 zh-CN root 已由 `website/src/pages/index.js` 接管；
+2. `website/static/llms.txt` 已提供 canonical answer-engine map；
+3. Docusaurus markdown link hook 已迁到当前配置位置；
+4. 未翻译的 zh-CN fallback docs 已从 sitemap 排除，并标记 `noindex,follow`；
+5. website README 和 GEO roadmap 已同步真实语言边界。
+
+下一步：
+
+1. 把 zh-CN critical path 补齐到 homepage、FAQ、intro、installation、quick-start、configuration、provider overview 与 pillar page；
+2. 给 `website` 增加轻量 smoke gate，检查 `build/index.html`、`build/zh-CN/index.html`、`build/llms.txt` 和 sitemap 是否存在；
+3. 扩写或合并 provider thin pages，优先补真实 provider setup、endpoint/header 语义、model discovery 与 troubleshooting；
+4. fixed Pages 部署后再进行 Search Console 与 AI visibility 复测，不要用本地未部署结果过早判断 GEO 成败。
+
 ## 6. 文档同步规则
 
 未来任何会更新 provider-settings/model-discovery 轨道真值的改动，至少都应同步检查：
@@ -557,6 +661,15 @@ provider 专题文在以下几点上仍然正确，而且不应被放松：
 5. `docs/brainstorms/2026-05-27-provider-settings-simplification-and-model-discovery-plan.*`
 6. 本文
 
+未来任何会更新 GitHub Pages / GEO / website language 轨道真值的改动，至少都应同步检查：
+
+1. `GEO_ROADMAP.md`
+2. `website/README.md`
+3. `website/docusaurus.config.js`
+4. `website/src/pages/index.js`
+5. `website/static/llms.txt`
+6. `.github/workflows/deploy-docs.yml`
+
 ## 7. 验证门禁
 
 任何会改变本文真值判断的更新，仍应以以下结果收尾：
@@ -565,8 +678,12 @@ provider 专题文在以下几点上仍然正确，而且不应被放松：
 2. `npm test -- --runInBand`
 3. `npm run audit:i18n-ui`
 4. `npm run audit:render-host`
-5. `git diff --check`
-6. clean 的 `git status --short --branch`
+5. `cd website && npm run build`
+6. `test -f website/build/index.html`
+7. `test -f website/build/zh-CN/index.html`
+8. `test -f website/build/llms.txt`
+9. `git diff --check`
+10. clean 的 `git status --short --branch`
 
 ## 8. Bottom Line
 
@@ -578,4 +695,5 @@ provider 专题文在以下几点上仍然正确，而且不应被放松：
 2. 当前 bounded CLI 分层能否继续显式保持，而未来任何 path-based promotion 都坚持 contract-first，而不是 convenience-first；
 3. Stage-C local-KB / file-selection / chapter-split 工作能否继续补强 mixed-corpus 质量证据，而不是反复重谈“功能是否存在”；
 4. 当前更宽的 bounded provider discovery surface 能否继续保持 shared-core、lightweight 且边界诚实，并作为维护轨道而不是更大架构声明的借口；
-5. 当前真值文档能否足够快地跟上真实发货分支边界，避免未来会话又退回到 `1.9.0/1.9.1` 时代的旧措辞。
+5. GitHub Pages / GEO / website language 轨道能否坚持 route-first、truth-first，而不是继续用空 locale 或过时 README 制造弱信号；
+6. 当前真值文档能否足够快地跟上真实发货分支边界，避免未来会话又退回到 `1.9.0/1.9.1` 时代的旧措辞。

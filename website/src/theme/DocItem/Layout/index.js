@@ -6,16 +6,20 @@ import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 
 export default function LayoutWrapper(props) {
   const {frontMatter, metadata} = useDoc();
-  const {siteConfig} = useDocusaurusContext();
+  const {siteConfig, i18n} = useDocusaurusContext();
 
-  const currentUrl = `${siteConfig.url}${metadata.permalink}`;
+  const siteBaseUrl = new URL(siteConfig.baseUrl, siteConfig.url).toString();
+  const currentUrl = new URL(metadata.permalink, siteConfig.url).toString();
+  const personId = new URL('#person-jacobinwwey', siteBaseUrl).toString();
+  const conceptSetId = new URL('#concepts', siteBaseUrl).toString();
+  const logoUrl = new URL('img/logo.svg', siteBaseUrl).toString();
 
-  const author = frontMatter.author || {'@id': 'https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey'};
+  const author = frontMatter.author || {'@id': personId};
 
   const aboutEntries = (frontMatter.concepts || []).map((c) => ({
     '@type': 'DefinedTerm',
     name: c,
-    inDefinedTermSet: 'https://jacobinwwey.github.io/obsidian-NotEMD/#concepts',
+    inDefinedTermSet: conceptSetId,
   }));
 
   const citationEntries = (frontMatter.citations || []).map((c) => ({
@@ -29,6 +33,7 @@ export default function LayoutWrapper(props) {
     : undefined;
 
   const datePublished = frontMatter.datePublished || dateModified;
+  const untranslatedZhCnFallbackDoc = i18n.currentLocale === 'zh-CN' && metadata.id !== 'faq';
 
   const articleSchema = {
     '@context': 'https://schema.org',
@@ -44,7 +49,7 @@ export default function LayoutWrapper(props) {
       name: 'Notemd',
       logo: {
         '@type': 'ImageObject',
-        url: `${siteConfig.url}/obsidian-NotEMD/img/logo.svg`,
+        url: logoUrl,
       },
     },
     mainEntityOfPage: {
@@ -76,7 +81,12 @@ export default function LayoutWrapper(props) {
 
   return (
     <>
-      <Head>{schemas}</Head>
+      <Head>
+        {untranslatedZhCnFallbackDoc ? (
+          <meta name="robots" content="noindex,follow" />
+        ) : null}
+        {schemas}
+      </Head>
       <Layout {...props} />
     </>
   );

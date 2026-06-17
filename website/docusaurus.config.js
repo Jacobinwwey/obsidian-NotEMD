@@ -6,6 +6,21 @@
 
 import {themes as prismThemes} from 'prism-react-renderer';
 
+const siteUrl = 'https://jacobinwwey.github.io';
+const baseUrl = '/obsidian-NotEMD/';
+const siteBaseUrl = `${siteUrl}${baseUrl}`;
+const personId = `${siteBaseUrl}#person-jacobinwwey`;
+const logoUrl = `${siteBaseUrl}img/logo.svg`;
+const translatedZhCnDocUrls = new Set([
+  `${siteBaseUrl}zh-CN/docs/faq`,
+]);
+
+function sitemapItemMatchesPublishedLanguageScope(item) {
+  const itemUrl = item.url.replace(/\/$/, '');
+  const zhCnDocsPrefix = `${siteBaseUrl}zh-CN/docs/`;
+  return !itemUrl.startsWith(zhCnDocsPrefix) || translatedZhCnDocUrls.has(itemUrl);
+}
+
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: 'Notemd',
@@ -13,18 +28,16 @@ const config = {
   favicon: 'img/favicon.svg',
 
   // Set the production url of your site here
-  url: 'https://jacobinwwey.github.io',
+  url: siteUrl,
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: '/obsidian-NotEMD/',
+  baseUrl,
 
   // GitHub pages deployment config.
   organizationName: 'Jacobinwwey',
   projectName: 'obsidian-NotEMD',
 
   onBrokenLinks: 'warn',
-  onBrokenMarkdownLinks: 'warn',
-
   // Global JSON-LD Schema for entire site
   headTags: [
     {
@@ -36,14 +49,14 @@ const config = {
           {
             "@type": "WebSite",
             "name": "Notemd Documentation",
-            "url": "https://jacobinwwey.github.io/obsidian-NotEMD/",
+            "url": siteBaseUrl,
             "description": "AI-powered Obsidian plugin documentation - wiki-links, concept notes, research, translation, and diagrams",
             "publisher": {
               "@type": "Organization",
               "name": "Notemd",
               "logo": {
                 "@type": "ImageObject",
-                "url": "https://jacobinwwey.github.io/obsidian-NotEMD/img/logo.svg"
+                "url": logoUrl
               },
               "sameAs": [
                 "https://github.com/Jacobinwwey/obsidian-NotEMD",
@@ -52,7 +65,7 @@ const config = {
             }
           },
           {
-            "@id": "https://jacobinwwey.github.io/obsidian-NotEMD/#person-jacobinwwey",
+            "@id": personId,
             "@type": "Person",
             "name": "Jacobinwwey",
             "url": "https://github.com/Jacobinwwey",
@@ -110,6 +123,9 @@ const config = {
 
   markdown: {
     mermaid: true,
+    hooks: {
+      onBrokenMarkdownLinks: 'warn',
+    },
   },
 
   presets: [
@@ -132,6 +148,11 @@ const config = {
           priority: 0.5,
           ignorePatterns: ['/tags/**'],
           filename: 'sitemap.xml',
+          createSitemapItems: async (params) => {
+            const {defaultCreateSitemapItems, ...rest} = params;
+            const items = await defaultCreateSitemapItems(rest);
+            return items.filter(sitemapItemMatchesPublishedLanguageScope);
+          },
         },
       }),
     ],
