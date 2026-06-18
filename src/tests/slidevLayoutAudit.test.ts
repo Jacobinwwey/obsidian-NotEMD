@@ -437,6 +437,59 @@ describe('slidevLayoutAudit', () => {
 		expect(patched.deckMarkdown).toContain('| Provider | Token Ceiling | Notes |');
 	});
 
+	test('converts pathological width-heavy tables into record slides instead of only repeating column splits', () => {
+		const audit: SlidevLayoutAudit = {
+			slide: 2,
+			safeRect: { left: 51.2, top: 43.2, right: 1228.8, bottom: 676.8, width: 1177.6, height: 633.6 },
+			contentBounds: { left: 48, top: 52, right: 1234, bottom: 780, width: 1186, height: 728 },
+			pageScale: 1,
+			elementKinds: ['table'],
+			findings: [
+				{
+					kind: 'overflow',
+					target: 'content',
+					message: 'Slide content exceeds the safe visible rectangle',
+					recommendedPatch: 'split-table',
+					recommendedScale: 0.55,
+					overflowAxis: 'width',
+				},
+				{
+					kind: 'overflow',
+					target: 'table',
+					message: 'Table exceeds the safe visible rectangle',
+					recommendedPatch: 'split-table',
+					recommendedScale: 0.55,
+					overflowAxis: 'width',
+				},
+			],
+		};
+		const deck = [
+			'---',
+			'theme: default',
+			'---',
+			'',
+			'# Intro',
+			'',
+			'---',
+			'## Pathological Table',
+			'',
+			'| Provider | Model | Runtime | Token Ceiling | Fallback Route | Deployment Notes | Verification Marker |',
+			'| --- | --- | --- | --- | --- | --- | --- |',
+			'| OpenAI | gpt-4o-production | hosted | 16k | primary::north-america::zero-downtime | default_hosted_profile_with_explicit_operator_guardrails | verify::openai::hosted::success |',
+			'| Anthropic | claude-sonnet-extended | hosted | 64k | secondary::global-router::latency-balanced | long_context_reasoning_profile_with_release_evidence_follow_through | verify::anthropic::hosted::success |',
+		].join('\n');
+
+		const patched = patchDeckWithLayoutAudit(deck, [audit]);
+
+		expect(patched.changed).toBe(true);
+		expect(patched.blockedSlides).toEqual([]);
+		expect(countSlideDeckSlides(patched.deckMarkdown)).toBe(3);
+		expect(patched.deckMarkdown).toContain('- Provider: OpenAI');
+		expect(patched.deckMarkdown).toContain('  - Fallback Route: primary::north-america::zero-downtime');
+		expect(patched.deckMarkdown).toContain('- Provider: Anthropic');
+		expect(patched.deckMarkdown).not.toContain('| Provider | Model | Runtime | Token Ceiling | Fallback Route | Deployment Notes | Verification Marker |');
+	});
+
 	test('splits oversized code fences when further zoom would become unreadable', () => {
 		const audit: SlidevLayoutAudit = {
 			slide: 2,
@@ -619,6 +672,71 @@ describe('slidevLayoutAudit', () => {
 		expect((patched.deckMarkdown.match(/Left column context stays duplicated/g) || []).length).toBe(2);
 	});
 
+	test('splits code inside explicit default slot markers', () => {
+		const audit: SlidevLayoutAudit = {
+			slide: 2,
+			safeRect: { left: 51.2, top: 43.2, right: 1228.8, bottom: 676.8, width: 1177.6, height: 633.6 },
+			contentBounds: { left: 48, top: 52, right: 1234, bottom: 820, width: 1186, height: 768 },
+			pageScale: 1,
+			elementKinds: ['code'],
+			findings: [
+				{
+					kind: 'overflow',
+					target: 'content',
+					message: 'Slide content exceeds the safe visible rectangle',
+					recommendedPatch: 'reduce-code',
+					recommendedScale: 0.82,
+				},
+				{
+					kind: 'overflow',
+					target: 'code',
+					message: 'Code block overflows its scroll box',
+					recommendedPatch: 'reduce-code',
+					recommendedScale: 0.82,
+					scrollOverflow: true,
+					overflowAxis: 'height',
+				},
+			],
+		};
+		const deck = [
+			'---',
+			'theme: default',
+			'---',
+			'',
+			'# Intro',
+			'',
+			'---',
+			'layout: two-cols',
+			'---',
+			'',
+			'::right::',
+			'',
+			'- Right slot stays duplicated.',
+			'',
+			'::default::',
+			'',
+			'## Export Workflow',
+			'',
+			'```ts',
+			'const environment = await probeEnvironment();',
+			'const slideSource = await prepareSlidevExportSource(app, sourceFile, config, {}, onProgress);',
+			'const htmlPath = await exportSlidevHtml(app, slideSource, config, onProgress);',
+			'const auditResult = await runPlaywrightChecks(htmlPath, slidesToAudit, true, slideExport);',
+			'const patchResult = patchDeckWithLayoutAudit(currentDeckMarkdown, auditResult.layoutAudits, config);',
+			'```',
+		].join('\n');
+
+		const patched = patchDeckWithLayoutAudit(deck, [audit]);
+
+		expect(patched.changed).toBe(true);
+		expect(patched.blockedSlides).toEqual([]);
+		expect(countSlideDeckSlides(patched.deckMarkdown)).toBe(3);
+		expect((patched.deckMarkdown.match(/::default::/g) || []).length).toBe(2);
+		expect((patched.deckMarkdown.match(/::right::/g) || []).length).toBe(2);
+		expect((patched.deckMarkdown.match(/```ts/g) || []).length).toBe(2);
+		expect((patched.deckMarkdown.match(/Right slot stays duplicated/g) || []).length).toBe(2);
+	});
+
 	test('splits supported two-cols-header slot layouts by patching the overflowing slot only', () => {
 		const audit: SlidevLayoutAudit = {
 			slide: 2,
@@ -683,6 +801,68 @@ describe('slidevLayoutAudit', () => {
 		expect(patched.deckMarkdown).toContain('Preserve host command smoke');
 	});
 
+	test('splits generic slot-marked custom layouts when a named slot contains patchable content', () => {
+		const audit: SlidevLayoutAudit = {
+			slide: 2,
+			safeRect: { left: 51.2, top: 43.2, right: 1228.8, bottom: 676.8, width: 1177.6, height: 633.6 },
+			contentBounds: { left: 48, top: 52, right: 1234, bottom: 820, width: 1186, height: 768 },
+			pageScale: 1,
+			elementKinds: ['text'],
+			findings: [
+				{
+					kind: 'overflow',
+					target: 'content',
+					message: 'Slide content exceeds the safe visible rectangle',
+					recommendedPatch: 'split-slide',
+					recommendedScale: 0.9,
+				},
+				{
+					kind: 'overflow',
+					target: 'text',
+					message: 'text element exceeds the safe visible rectangle',
+					recommendedPatch: 'reduce-zoom',
+					recommendedScale: 0.9,
+				},
+			],
+		};
+		const deck = [
+			'---',
+			'theme: default',
+			'---',
+			'',
+			'# Intro',
+			'',
+			'---',
+			'layout: custom-grid',
+			'---',
+			'',
+			'::summary::',
+			'',
+			'- Summary remains duplicated.',
+			'',
+			'::details::',
+			'',
+			'- First detail',
+			'- Second detail',
+			'- Third detail',
+			'- Fourth detail',
+			'- Fifth detail',
+			'- Sixth detail',
+		].join('\n');
+
+		const patched = patchDeckWithLayoutAudit(deck, [audit]);
+
+		expect(patched.changed).toBe(true);
+		expect(patched.blockedSlides).toEqual([]);
+		expect(countSlideDeckSlides(patched.deckMarkdown)).toBe(3);
+		expect((patched.deckMarkdown.match(/layout: custom-grid/g) || []).length).toBe(2);
+		expect((patched.deckMarkdown.match(/::summary::/g) || []).length).toBe(2);
+		expect((patched.deckMarkdown.match(/::details::/g) || []).length).toBe(2);
+		expect((patched.deckMarkdown.match(/Summary remains duplicated/g) || []).length).toBe(2);
+		expect(patched.deckMarkdown).toContain('- First detail');
+		expect(patched.deckMarkdown).toContain('- Sixth detail');
+	});
+
 	test('splits first-slide deck headmatter content structurally when per-slide zoom cannot be used', () => {
 		const audit: SlidevLayoutAudit = {
 			slide: 1,
@@ -735,6 +915,60 @@ describe('slidevLayoutAudit', () => {
 		expect(patched.deckMarkdown).toContain('- first bullet');
 		expect(patched.deckMarkdown).toContain('- sixth bullet');
 		expect(patched.deckMarkdown).not.toContain('zoom:');
+	});
+
+	test('allows supported single-slot built-in layouts to split content without slot markers', () => {
+		const audit: SlidevLayoutAudit = {
+			slide: 2,
+			safeRect: { left: 51.2, top: 43.2, right: 1228.8, bottom: 676.8, width: 1177.6, height: 633.6 },
+			contentBounds: { left: 48, top: 52, right: 1234, bottom: 820, width: 1186, height: 768 },
+			pageScale: 1,
+			elementKinds: ['text'],
+			findings: [
+				{
+					kind: 'overflow',
+					target: 'content',
+					message: 'Slide content exceeds the safe visible rectangle',
+					recommendedPatch: 'split-slide',
+					recommendedScale: 0.9,
+				},
+				{
+					kind: 'overflow',
+					target: 'text',
+					message: 'text element exceeds the safe visible rectangle',
+					recommendedPatch: 'reduce-zoom',
+					recommendedScale: 0.9,
+				},
+			],
+		};
+		const deck = [
+			'---',
+			'theme: default',
+			'---',
+			'',
+			'# Intro',
+			'',
+			'---',
+			'layout: quote',
+			'---',
+			'',
+			'## Quote Layout Coverage',
+			'',
+			'- first bullet',
+			'- second bullet',
+			'- third bullet',
+			'- fourth bullet',
+			'- fifth bullet',
+			'- sixth bullet',
+		].join('\n');
+
+		const patched = patchDeckWithLayoutAudit(deck, [audit]);
+
+		expect(patched.changed).toBe(true);
+		expect(patched.blockedSlides).toEqual([]);
+		expect(countSlideDeckSlides(patched.deckMarkdown)).toBe(3);
+		expect((patched.deckMarkdown.match(/layout: quote/g) || []).length).toBe(2);
+		expect((patched.deckMarkdown.match(/## Quote Layout Coverage/g) || []).length).toBe(2);
 	});
 
 	test('summarizes audit counts across slides', () => {

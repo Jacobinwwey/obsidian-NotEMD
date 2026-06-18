@@ -9,12 +9,13 @@ NoteMD no longer treats direct `slidev build` as a sufficient proof for the UI e
 The maintained workflow is:
 
 1. The active note is prepared as a Slidev deck when it is not already a Slidev deck.
-2. The full Slidev skill directory is loaded when available, including `references/*.md`.
-3. Generated decks receive presentation guardrails before export.
-4. The local Slidev fork is preferred when present.
-5. HTML output directories are recreated before build to avoid stale assets.
-6. HTML export attempts native standalone first, then falls back to server-script-compatible HTML when the generated standalone bundle misses slide loader bindings.
-7. Browser rendering is verified with Playwright across the full deck by default.
+2. Existing Slidev decks are copied into a prepared working file before export verification so the verifier can audit and patch without mutating the source note.
+3. The full Slidev skill directory is loaded when available, including `references/*.md`.
+4. Generated decks receive presentation guardrails before export.
+5. The local Slidev fork is preferred when present.
+6. HTML output directories are recreated before build to avoid stale assets.
+7. HTML export attempts native standalone first, then falls back to server-script-compatible HTML when the generated standalone bundle misses slide loader bindings.
+8. Browser rendering is verified with Playwright across the full deck by default.
 
 The canonical maintainer workflow is documented in:
 
@@ -103,6 +104,7 @@ Real maintained baseline as of 2026-06-18:
 5. the real `architecture.zh-CN` deck converges to `28` slides after bounded patching with `overflowCount = 0`
 6. `PDF` and `PNG` verification on the same real source also return `ok: true`
 7. the current local Slidev `52.16.0` fork falls back to `index.html` for the real `architecture.zh-CN` HTML export after standalone loader-gap detection, and that fallback path still closes at `ok: true`
+8. existing Slidev deck fixtures now go through prepared working copies, so maintainer verification no longer under-audits them as single-slide files
 
 ## Current Rendered Layout Model
 
@@ -119,8 +121,9 @@ The current render-feedback loop is now:
    - Mermaid `sequenceDiagram` with repeated participant declarations
    - simple heading + paragraph/list slides
    - Markdown tables, including row-split and width-driven column decomposition
+   - pathological width-heavy tables through deterministic record-list fallback
    - non-Mermaid fenced code blocks with vertical chunking
-   - supported slot layouts (`two-cols`, `two-cols-header`)
+   - generic slot-marked layouts, including explicit `::default::`, supported built-in slot layouts, and custom named slots when the slot content is structurally patchable
    - first-slide deck headmatter content when structural splitting is possible
 6. The HTML exporter now rejects known-bad native standalone bundles and falls back to server-script-compatible HTML.
 7. The verifier now audits the full deck by default and keeps retrying within a bounded loop until the rendered deck fits or the retry budget is exhausted.
@@ -136,11 +139,16 @@ Current landed state:
 5. the real `docs/architecture.zh-CN.md` HTML workflow now passes with a full-deck Playwright audit, `28` audited slides, `overflowCount = 0`, and bounded retry closure.
 6. an additional real maintainer-local structural overflow note now proves that Markdown table decomposition and code-fence chunking can converge through the same verifier path instead of only through unit tests.
 7. a real slot/headmatter Slidev deck now proves that native standalone loader gaps are detected and converted into a working `index.html + start-server.* + README.md` fallback instead of being treated as successful standalone output.
+8. real maintainer-local decks now also prove:
+   - explicit `::default::` slot handling
+   - existing Slidev deck working-copy verification
+   - pathological table fallback into record-list slides
+   - slot-marked custom layouts backed by a real custom `layouts/*.vue` file
 
 Current gap:
 
 1. richer custom/component-heavy Slidev layouts beyond the current supported structural set still fall back to conservative zoom/manual-review behavior;
-2. width-heavy tables with pathological unbreakable cell content can still require repeated decomposition, so future work should add cell-level wrapping or alternative non-table fallbacks rather than relying only on repeated column splitting;
+2. standalone export correctness currently depends on native bundle sanity detection plus server-script fallback rather than on a fully reliable standalone bundling strategy of its own;
 3. full-deck Playwright verification is now more correct, but noticeably slower, so future work should improve patch convergence instead of weakening the audit back to representative sampling.
 
 ## Output Policy

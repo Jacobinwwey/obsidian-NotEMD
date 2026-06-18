@@ -123,6 +123,40 @@ describe('slidevSourcePreparer', () => {
         expect(deck).toContain('layout: section');
     });
 
+    test('existing Slidev decks are copied into the prepared export workspace instead of exporting the source file directly', async () => {
+        const markdown = [
+            '---',
+            'theme: default',
+            'title: Existing Deck',
+            '---',
+            '',
+            '# First',
+            '',
+            '---',
+            '',
+            '# Second',
+        ].join('\n');
+        const app = createApp(markdown);
+        app.vault.adapter.exists = jest.fn(async () => false);
+        app.vault.adapter.mkdir = jest.fn(async () => undefined);
+        app.vault.adapter.write = jest.fn(async () => undefined);
+
+        const result = await prepareSlidevExportSource(
+            app,
+            createFile('docs/existing-slidev.md'),
+            config,
+            {},
+            jest.fn()
+        );
+
+        expect(result.inputFilePath).toBe('export/_slidev-sources/existing-slidev.slidev.md');
+        expect(result.preparedDeckPath).toBe('export/_slidev-sources/existing-slidev.slidev.md');
+        expect(app.vault.adapter.write).toHaveBeenCalledWith(
+            'export/_slidev-sources/existing-slidev.slidev.md',
+            markdown
+        );
+    });
+
     test('deterministic conversion does not split inside fenced code blocks', () => {
         const longCode = Array.from({ length: 120 }, (_, index) => `console.log(${index})`).join('\n');
         const deck = buildDeterministicSlidevDeck([
@@ -259,7 +293,7 @@ describe('slidevSourcePreparer', () => {
         expect(guardedDeck).not.toContain('theme: seriph');
     });
 
-    test('passes through an existing Slidev deck without writing a prepared source', async () => {
+    test('copies an existing Slidev deck into the prepared export workspace', async () => {
         const markdown = [
             '---',
             'theme: default',
@@ -277,11 +311,15 @@ describe('slidevSourcePreparer', () => {
         const source = await prepareSlidevExportSource(app, file, config);
 
         expect(source).toEqual({
-            inputFilePath: 'slides.md',
+            inputFilePath: 'export/_slidev-sources/slides.slidev.md',
             outputBasename: 'slides',
-            sourceLabel: 'slides.md',
+            sourceLabel: 'export/_slidev-sources/slides.slidev.md',
+            preparedDeckPath: 'export/_slidev-sources/slides.slidev.md',
         });
-        expect(app.vault.adapter.write).not.toHaveBeenCalled();
+        expect(app.vault.adapter.write).toHaveBeenCalledWith(
+            'export/_slidev-sources/slides.slidev.md',
+            markdown
+        );
     });
 
     test('writes an intermediate Slidev deck for ordinary Markdown', async () => {

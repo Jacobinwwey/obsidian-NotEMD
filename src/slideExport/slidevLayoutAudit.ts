@@ -113,7 +113,7 @@ interface SlotSection {
 
 interface SupportedSlotLayoutSurface {
 	frontmatterLines: string[];
-	layout: 'two-cols' | 'two-cols-header';
+	layout: string | null;
 	leadRole: 'default' | 'header';
 	leadLines: string[];
 	sections: SlotSection[];
@@ -712,6 +712,9 @@ function splitOverflowingMarkdownTableSlide(
 	}
 
 	const targetChunkCount = resolveStructuralChunkCount(audit, currentZoom, nextZoom, config.minReadableScale);
+	const recordSlideBodies = shouldConvertTableToRecordSlides(audit.findings, tableBlock)
+		? splitMarkdownTableToRecordSlides(tableBlock, targetChunkCount)
+		: null;
 	const splitOrientation = chooseTableSplitOrientation(audit.findings, tableBlock);
 
 	const prefixLines = trimOuterBlankLines(surface.bodyLines.slice(0, tableBlock.startLine));
@@ -720,10 +723,14 @@ function splitOverflowingMarkdownTableSlide(
 	const cleanFrontmatter = stripFrontmatterKey(surface.frontmatterLines, 'zoom');
 	const splitSlides: string[] = [];
 
-	const chunkedTableBodies = splitOrientation === 'columns'
-		? splitMarkdownTableByColumns(tableBlock, targetChunkCount)
-		: splitMarkdownTableByRows(tableBlock, targetChunkCount);
+	const chunkedTableBodies = recordSlideBodies
+		?? (splitOrientation === 'columns'
+			? splitMarkdownTableByColumns(tableBlock, targetChunkCount)
+			: splitMarkdownTableByRows(tableBlock, targetChunkCount));
 	if (!chunkedTableBodies || chunkedTableBodies.length < 2) {
+		if (recordSlideBodies) {
+			return { slides: null, reason: 'table record fallback could not be distributed into multiple slides' };
+		}
 		return { slides: null, reason: splitOrientation === 'columns'
 			? 'table columns could not be distributed into multiple slides'
 			: 'table rows could not be distributed into multiple slides' };
@@ -982,7 +989,7 @@ function extractPatchableSlideSurface(slideMarkdown: string): PatchableSlideSurf
 	const frontmatterLines = frontmatterEnd > 0 ? lines.slice(0, frontmatterEnd + 1) : [];
 	const bodyLines = frontmatterEnd > 0 ? lines.slice(frontmatterEnd + 1) : lines;
 	const layout = readFrontmatterScalar(frontmatterLines, 'layout');
-	if (layout && !['default', 'center'].includes(layout)) {
+	if (!isSupportedSingleSlotLayout(layout)) {
 		return null;
 	}
 	if (bodyLines.some(line => /^::[\w-]+::$/.test(line.trim()) || /^:::\s*/.test(line.trim()) || /<(Transform|v-click|v-switch)\b/i.test(line.trim()))) {
@@ -1006,7 +1013,7 @@ function parseSupportedSlotLayoutSurface(slideMarkdown: string): SupportedSlotLa
 	const frontmatterLines = frontmatterEnd > 0 ? lines.slice(0, frontmatterEnd + 1) : [];
 	const bodyLines = frontmatterEnd > 0 ? lines.slice(frontmatterEnd + 1) : lines;
 	const layout = readFrontmatterScalar(frontmatterLines, 'layout');
-	if (layout !== 'two-cols' && layout !== 'two-cols-header') {
+	if (!bodyLines.some(line => /^::[\w-]+::$/.test(line.trim()))) {
 		return null;
 	}
 
@@ -1015,27 +1022,19 @@ function parseSupportedSlotLayoutSurface(slideMarkdown: string): SupportedSlotLa
 		return null;
 	}
 
-	if (layout === 'two-cols') {
-		if (slotLines.sections.length !== 1 || slotLines.sections[0].name !== 'right') {
-			return null;
-		}
-		return {
-			frontmatterLines,
-			layout,
-			leadRole: 'default',
-			leadLines: slotLines.leadLines,
-			sections: slotLines.sections,
-		};
-	}
-
-	const sectionNames = slotLines.sections.map(section => section.name).join(',');
-	if (sectionNames !== 'left,right') {
+	const hasExplicitDefaultSection = slotLines.sections.some(section => section.name === 'default');
+	if (slotLines.leadLines.length > 0 && hasExplicitDefaultSection) {
 		return null;
 	}
+
+	const leadRole = layout === 'two-cols-header' && slotLines.leadLines.length > 0
+		? 'header'
+		: 'default';
+
 	return {
 		frontmatterLines,
 		layout,
-		leadRole: 'header',
+		leadRole,
 		leadLines: slotLines.leadLines,
 		sections: slotLines.sections,
 	};
@@ -1170,6 +1169,23 @@ function assembleSupportedSlotLayoutSlide(
 
 function isDeckHeadmatterSlide(slideMarkdown: string, slideIndex: number): boolean {
 	return slideIndex === 0 && slideMarkdown.trimStart().startsWith('---');
+}
+
+function isSupportedSingleSlotLayout(layout: string | null): boolean {
+	return layout === null || [
+		'default',
+		'center',
+		'full',
+		'none',
+		'intro',
+		'quote',
+		'statement',
+		'fact',
+		'image-left',
+		'image-right',
+		'iframe-left',
+		'iframe-right',
+	].includes(layout);
 }
 
 function readFrontmatterScalar(frontmatterLines: string[], key: string): string | null {
@@ -1332,6 +1348,25 @@ function chooseTableSplitOrientation(
 	return 'rows';
 }
 
+function shouldConvertTableToRecordSlides(
+	findings: SlidevLayoutFinding[],
+	tableBlock: MarkdownTableBlock,
+): boolean {
+	const tableFinding = findings.find(finding => finding.target === 'table')
+		?? findings.find(finding => finding.recommendedPatch === 'split-table' && typeof finding.overflowAxis === 'string');
+	if (!tableFinding || (tableFinding.overflowAxis !== 'width' && tableFinding.overflowAxis !== 'both')) {
+		return false;
+	}
+
+	const headerCells = parseMarkdownTableCells(tableBlock.headerLine);
+	const rowCells = tableBlock.dataLines.map(parseMarkdownTableCells);
+	const longestTokenLength = Math.max(
+		0,
+		...rowCells.flatMap(cells => cells.map(cell => longestUnbrokenTokenLength(cell))),
+	);
+	return headerCells.length >= 5 && longestTokenLength >= 28;
+}
+
 function resolveStructuralChunkCount(
 	audit: SlidevLayoutAudit,
 	currentZoom: number,
@@ -1409,6 +1444,28 @@ function splitMarkdownTableByColumns(tableBlock: MarkdownTableBlock, targetChunk
 			...rowCells.map(cells => formatMarkdownTableLine(selectTableCells(cells, selectedIndexes))),
 		];
 	});
+}
+
+function splitMarkdownTableToRecordSlides(tableBlock: MarkdownTableBlock, targetChunkCount: number): string[][] | null {
+	const headerCells = parseMarkdownTableCells(tableBlock.headerLine);
+	const rowCells = tableBlock.dataLines.map(parseMarkdownTableCells);
+	if (headerCells.length < 2 || rowCells.some(cells => cells.length !== headerCells.length)) {
+		return null;
+	}
+
+	const recordBlocks = rowCells.map(cells => formatMarkdownTableRecordBlock(headerCells, cells));
+	const chunkedRecordBlocks = chunkLineBlocks(recordBlocks, Math.max(2, Math.min(targetChunkCount, recordBlocks.length)));
+	if (chunkedRecordBlocks.length < 2) {
+		return null;
+	}
+
+	return chunkedRecordBlocks.map(blocks => blocks.flatMap((line, index, lines) => {
+		const emitted = [line];
+		if (index < lines.length - 1 && line.trim().length > 0 && lines[index + 1]?.trim().startsWith('- ')) {
+			emitted.push('');
+		}
+		return emitted;
+	}));
 }
 
 function buildMermaidSplitPlan(bodyLines: string[]): MermaidSplitPlan | null {
@@ -1633,6 +1690,22 @@ function formatMarkdownTableSeparator(columnCount: number): string {
 	return `| ${Array.from({ length: columnCount }, () => '---').join(' | ')} |`;
 }
 
+function formatMarkdownTableRecordBlock(headers: string[], cells: string[]): string[] {
+	const primaryLabel = headers[0] || 'Item';
+	const primaryValue = cells[0] || '';
+	const lines = [`- ${primaryLabel}: ${primaryValue}`];
+	for (let index = 1; index < headers.length; index++) {
+		lines.push(`  - ${headers[index]}: ${cells[index] || ''}`);
+	}
+	return lines;
+}
+
+function longestUnbrokenTokenLength(value: string): number {
+	return value
+		.split(/\s+/)
+		.reduce((longest, token) => Math.max(longest, token.length), 0);
+}
+
 function isMarkdownTableRow(line: string): boolean {
 	const trimmed = line.trim();
 	return trimmed.length > 0
@@ -1843,7 +1916,7 @@ function findSlideFrontmatterEnd(lines: string[]): number {
 		if (line === '---') {
 			return index;
 		}
-		if (line.startsWith('#') || line.startsWith('```') || line.startsWith(':::')) {
+		if (line.startsWith('#') || line.startsWith('```') || line.startsWith(':::') || isSlotMarkerLine(line)) {
 			return -1;
 		}
 	}
@@ -1862,7 +1935,7 @@ function findBareFrontmatterBodyStart(lines: string[]): number {
 		if (!trimmed) {
 			return index;
 		}
-		if (index > 0 && (trimmed.startsWith('#') || trimmed.startsWith('```') || trimmed.startsWith(':::'))) {
+		if (index > 0 && (trimmed.startsWith('#') || trimmed.startsWith('```') || trimmed.startsWith(':::') || isSlotMarkerLine(trimmed))) {
 			return index;
 		}
 	}
@@ -1886,10 +1959,14 @@ function isFrontmatterClosingBoundary(lines: string[]): boolean {
 		if (!line) {
 			continue;
 		}
-		if (line.startsWith('#') || line.startsWith('```') || line.startsWith(':::')) {
+		if (line.startsWith('#') || line.startsWith('```') || line.startsWith(':::') || isSlotMarkerLine(line)) {
 			return false;
 		}
 	}
 
 	return true;
+}
+
+function isSlotMarkerLine(line: string): boolean {
+	return /^::[\w-]+::$/.test(line.trim());
 }

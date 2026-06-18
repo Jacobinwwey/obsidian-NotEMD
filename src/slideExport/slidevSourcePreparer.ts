@@ -46,11 +46,13 @@ export async function prepareSlidevExportSource(
 ): Promise<SlidevExportSource> {
 	const sourceMarkdown = await app.vault.read(sourceFile);
 	if (isSlidevDeckMarkdown(sourceMarkdown)) {
-		onProgress?.('slidev-source', 'Current file is already a Slidev deck.');
+		onProgress?.('slidev-source', 'Current file is already a Slidev deck; writing working copy for export verification.');
+		const preparedDeckPath = await writePreparedDeck(app, sourceFile, config, sourceMarkdown);
 		return {
-			inputFilePath: sourceFile.path,
+			inputFilePath: preparedDeckPath,
 			outputBasename: sourceFile.basename,
-			sourceLabel: sourceFile.path,
+			sourceLabel: preparedDeckPath,
+			preparedDeckPath,
 		};
 	}
 
