@@ -103,13 +103,14 @@ async function bundleSlideExportModules() {
 	const result = await esbuild.build({
 		stdin: {
 			contents: [
-				"export { probeEnvironment } from './src/slideExport/environmentProber';",
-				"export { prepareSlidevExportSource } from './src/slideExport/slidevSourcePreparer';",
-				"export { exportSlidevHtml, exportSlidevPdf, exportSlidevPng } from './src/slideExport/slidevExporter';",
-				"export { exportVideoMp4 } from './src/slideExport/videoExporter';",
-				"export { analyzeRenderedSlideMeasurement, summarizeLayoutAudits, patchDeckWithLayoutAudit, countSlideDeckSlides } from './src/slideExport/slidevLayoutAudit';",
-				"export { resolveWorkspaceHomeCandidates } from './src/slideExport/platformUtils';",
-				"export { startLocalServer, stopLocalServer } from './src/slideExport/localServer';",
+					"export { probeEnvironment } from './src/slideExport/environmentProber';",
+					"export { prepareSlidevExportSource } from './src/slideExport/slidevSourcePreparer';",
+					"export { exportSlidevHtml, exportSlidevPdf, exportSlidevPng } from './src/slideExport/slidevExporter';",
+					"export { convergeSlidevDeckLayout } from './src/slideExport/slidevLayoutWorkflow';",
+					"export { exportVideoMp4 } from './src/slideExport/videoExporter';",
+					"export { analyzeRenderedSlideMeasurement, summarizeLayoutAudits, patchDeckWithLayoutAudit, countSlideDeckSlides } from './src/slideExport/slidevLayoutAudit';",
+					"export { resolveWorkspaceHomeCandidates } from './src/slideExport/platformUtils';",
+					"export { startLocalServer, stopLocalServer } from './src/slideExport/localServer';",
 			].join('\n'),
 			resolveDir: process.cwd(),
 			sourcefile: 'notemd-slidev-workflow-entry.ts',
@@ -496,68 +497,35 @@ async function main() {
 
 	const environment = await slideExport.probeEnvironment();
 	const slideSource = await slideExport.prepareSlidevExportSource(app, sourceFile, config, {}, onProgress);
-	let exportPath;
+	let layoutConvergence = null;
+	if (args.playwright) {
+		layoutConvergence = await slideExport.convergeSlidevDeckLayout(app, slideSource, config, onProgress, {
+			sampleSlides: args.sampleSlides,
+			writeScreenshots: args.screenshots,
+			auditConfig: LAYOUT_AUDIT_CONFIG,
+		});
+	}
 
-	if (args.format === 'html') {
-		exportPath = await slideExport.exportSlidevHtml(app, slideSource, config, onProgress);
-	} else if (args.format === 'pdf') {
+	let exportPath = layoutConvergence?.exportPath;
+	if (args.format === 'pdf') {
 		exportPath = await slideExport.exportSlidevPdf(app, slideSource, config, onProgress);
 	} else if (args.format === 'png') {
 		exportPath = await slideExport.exportSlidevPng(app, slideSource, config, onProgress);
 	} else if (args.format === 'mp4') {
 		const pngDirectory = await slideExport.exportSlidevPng(app, slideSource, config, onProgress);
 		exportPath = await slideExport.exportVideoMp4(app, pngDirectory, slideSource.outputBasename, config, onProgress);
+	} else if (!exportPath) {
+		exportPath = await slideExport.exportSlidevHtml(app, slideSource, config, onProgress);
 	}
 
 	let absoluteExportPath = path.join(vaultRoot, exportPath);
 	const absoluteDeckPath = slideSource.preparedDeckPath ? path.join(vaultRoot, slideSource.preparedDeckPath) : null;
 	let deckSummary = collectDeckSummary(absoluteDeckPath);
-	let playwrightChecks = [];
-	let layoutAudits = [];
-	let layoutAuditSummary = slideExport.summarizeLayoutAudits([], 0);
-	let layoutPatchAttempts = [];
-	let auditedSlides = [];
-	let retryCount = 0;
-
-	if (args.playwright && args.format === 'html') {
-		let currentExportPath = absoluteExportPath;
-		let currentDeckMarkdown = absoluteDeckPath && fs.existsSync(absoluteDeckPath)
-			? fs.readFileSync(absoluteDeckPath, 'utf8')
-			: null;
-
-		while (true) {
-			auditedSlides = resolveSlidesToAudit(args.sampleSlides, currentDeckMarkdown, slideExport);
-			const auditResult = await runPlaywrightChecks(currentExportPath, auditedSlides, args.screenshots, slideExport);
-			playwrightChecks = auditResult.checks;
-			layoutAudits = auditResult.layoutAudits;
-			layoutAuditSummary = slideExport.summarizeLayoutAudits(layoutAudits, retryCount);
-
-			if (!currentDeckMarkdown || !absoluteDeckPath || retryCount >= LAYOUT_AUDIT_CONFIG.maxAutoPatchPasses) {
-				break;
-			}
-
-			const patchResult = slideExport.patchDeckWithLayoutAudit(currentDeckMarkdown, layoutAudits, LAYOUT_AUDIT_CONFIG);
-			layoutPatchAttempts.push({
-				pass: retryCount + 1,
-				changed: patchResult.changed,
-				changedSlides: patchResult.changedSlides,
-				blockedSlides: patchResult.blockedSlides,
-			});
-
-			if (!patchResult.changed) {
-				break;
-			}
-
-			currentDeckMarkdown = patchResult.deckMarkdown;
-			fs.writeFileSync(absoluteDeckPath, currentDeckMarkdown, 'utf8');
-			retryCount += 1;
-			onProgress('layout-audit', `Patched deck on slides ${patchResult.changedSlides.join(', ')} and rebuilding...`);
-			exportPath = await slideExport.exportSlidevHtml(app, slideSource, config, onProgress);
-			currentExportPath = path.join(vaultRoot, exportPath);
-			absoluteExportPath = currentExportPath;
-			deckSummary = collectDeckSummary(absoluteDeckPath);
-		}
-	}
+	let playwrightChecks = layoutConvergence?.checks ?? [];
+	let layoutAudits = layoutConvergence?.layoutAudits ?? [];
+	let layoutAuditSummary = layoutConvergence?.layoutAuditSummary ?? slideExport.summarizeLayoutAudits([], 0);
+	let layoutPatchAttempts = layoutConvergence?.layoutPatchAttempts ?? [];
+	let auditedSlides = layoutConvergence?.auditedSlides ?? [];
 
 	const ignoredOutputs = checkIgnored([
 		absoluteDeckPath,

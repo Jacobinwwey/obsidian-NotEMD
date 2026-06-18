@@ -196,6 +196,9 @@ function applySlideGuardrails(slideMarkdown: string): string {
 	if (mermaidLineCount < LARGE_MERMAID_LINE_THRESHOLD) {
 		return normalizedSlide;
 	}
+	if (hasSlideFrontmatterValue(normalizedSlide, 'zoom')) {
+		return normalizedSlide;
+	}
 
 	const zoom = resolveDiagramSlideZoom(mermaidLineCount);
 	return ensureSlideFrontmatterValue(normalizedSlide, 'zoom', zoom);
@@ -310,6 +313,12 @@ function findSlideFrontmatterEnd(lines: string[]): number {
 function startsWithFrontmatterValue(lines: string[]): boolean {
 	const firstContentLine = lines.findIndex(line => line.trim().length > 0);
 	return firstContentLine >= 0 && /^[A-Za-z][\w-]*\s*:/.test(lines[firstContentLine].trim());
+}
+
+function hasSlideFrontmatterValue(slideMarkdown: string, key: string): boolean {
+	const lines = slideMarkdown.split(/\r?\n/);
+	const frontmatterEnd = findSlideFrontmatterEnd(lines);
+	return frontmatterEnd > 0 && hasFrontmatterValue(lines, frontmatterEnd, key);
 }
 
 function findBareFrontmatterBodyStart(lines: string[]): number {

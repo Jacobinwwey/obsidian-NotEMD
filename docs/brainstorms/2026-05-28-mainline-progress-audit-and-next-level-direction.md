@@ -285,7 +285,7 @@ Current code already satisfies several earlier requirements:
 1. command palette export and sidebar export both enter `exportSlidesCommand()`;
 2. settings expose default format selection across `HTML`, `PDF`, `PNG`, and `MP4`, and expose HTML mode when `HTML` is selected;
 3. the sidebar has an inline Slidev export format selector instead of hiding format choice entirely;
-4. `exportSlidesCommand()` probes environment, prepares a Slidev export source, then exports the prepared source in the selected format;
+4. `exportSlidesCommand()` now probes environment, prepares a Slidev export source, runs the shared `convergeSlidevDeckLayout()` loop, and only then emits the selected final format from the converged prepared deck;
 5. `prepareSlidevExportSource()` loads the top-level Slidev skill and `references/*.md` when available, and the LLM prompt explicitly asks for dense slides to be split and large diagrams/tables/code to avoid clipping;
 6. `scripts/verify-slidev-export-workflow.cjs` exercises production modules against the real `docs/architecture.zh-CN.md` source and records skill reference count, local fork, deck summary, Playwright results, and `.gitignore` visibility.
 
@@ -298,7 +298,7 @@ The important gap is equally clear:
 | UI format selection | Settings and sidebar controls expose format selection; HTML mode is conditional on HTML | Landed in code, still needs real UI smoke when UI changes |
 | Output visibility to Git | `verify:slidev-export` checks `.gitignore` hits for generated deck/output/screenshots | Landed for workflow evidence |
 | Rendered layout containment | Visible-root DOM bbox, scroll overflow, Mermaid host, table, code, and text overflow audit exists in the real maintainer workflow | Landed |
-| Automatic correction | `SlidevDeckPatch` now applies measured `zoom`, Mermaid / table / code structural splitting, pathological table record fallback, generic slot-marked layout splitting, and first-slide headmatter structural splitting in a bounded retry loop | Landed, keep extending |
+| Automatic correction | `SlidevDeckPatch` now applies measured `zoom`, Mermaid / table / code structural splitting, pathological table record fallback, generic slot-marked layout splitting, and first-slide headmatter structural splitting in a bounded retry loop shared by the verifier and `exportSlidesCommand()` | Landed, keep extending |
 
 The `ref/infinite-canvas` analysis supports a clean-room direction, not code reuse. Its useful architecture ideas are world-space nodes with `{ position, width, height }`, viewport transform `{ x, y, k }`, screen/world conversion, union bounds, natural image sizing, and minimap/bounds calculation. Those ideas map well to a static export-layout camera for Slidev. They do not justify turning Slidev into an interactive infinite canvas, and AGPL-3.0 code must not be copied into this MIT project.
 
@@ -306,9 +306,10 @@ Correct interpretation:
 
 1. the workflow proof is now meaningfully stronger than direct `slidev build`;
 2. the workflow now includes a real render-feedback quality gate instead of only a CLI smoke path;
-3. the real `docs/architecture.zh-CN.md` HTML fixture now closes at `ok: true` with `28` audited slides and zero overflow/unreadable findings, while `PDF` and `PNG` on the same source also return `ok: true`;
-4. current landed truth is already past the original plan wording: workspace-aware resolution for the local Slidev fork, Slidev skill roots, and Playwright browser cache is in place, full-deck visible-slide-root audit is in place, existing Slidev decks now go through prepared working copies, the patch loop now covers Mermaid, Markdown tables, pathological table fallback, code fences, dense text, generic slot-marked layouts, and first-slide headmatter instead of only zoom, and known-bad standalone bundles now fall back to server-script HTML rather than being treated as good output.
-5. the next architectural step is narrower now: extend structural patching to richer component-heavy custom layouts without regressing back to representative-slide-only audit, and decide whether the current standalone fallback should remain product truth or be replaced by a stronger standalone bundling strategy.
+3. the real `docs/architecture.zh-CN.md` HTML fixture now closes at `ok: true` with `28` audited slides, zero overflow/unreadable findings, and `retryCount = 4`, while `PDF` and `PNG` on the same source also return `ok: true`;
+4. current landed truth is already past the original plan wording: workspace-aware resolution for the local Slidev fork, Slidev skill roots, and Playwright browser cache is in place, the local checkout is confirmed against `https://github.com/Jacobinwwey/slidev.git`, full-deck visible-slide-root audit is in place, existing Slidev decks now go through prepared working copies, the patch loop now covers Mermaid, Markdown tables, pathological table fallback, code fences, dense text, generic slot-marked layouts, and first-slide headmatter instead of only zoom, and known-bad standalone bundles now fall back to server-script HTML rather than being treated as good output;
+5. the real product export path now matches the verifier on the critical point that mattered most: the patch/rebuild loop is no longer verifier-only, so `HTML`/`PDF`/`PNG`/`MP4` export all reuse the same converged prepared deck.
+6. the next architectural step is narrower now: extend structural patching to richer component-heavy custom layouts without regressing back to representative-slide-only audit, and decide whether the current standalone fallback should remain product truth or be replaced by a stronger standalone bundling strategy.
 
 ## 3. Deep Comparison Against Earlier Plan Language
 
@@ -595,18 +596,18 @@ Background:
 Current WIP status:
 
 1. `npm run verify:slidev-export` is now the stable maintainer entrypoint, defaulting to the real `docs/architecture.zh-CN.md` source;
-2. the entrypoint calls the production TypeScript `prepareSlidevExportSource()` and `exportSlidevHtml()` modules instead of only shelling out to Slidev;
+2. the verifier and the real product export command now both call the production TypeScript `prepareSlidevExportSource()` plus shared `convergeSlidevDeckLayout()` workflow instead of keeping patch/rebuild logic verifier-only;
 3. the JSON report records environment capability, local fork path, skill root, skill reference count, deck summary, Playwright samples, and `.gitignore` hits;
 4. `docs/maintainer/slidev-export-workflow.*` now defines pass criteria, output policy, UI contract, and when to run the workflow;
 5. `docs/SLIDEV_SOLUTION.md` and `docs/SLIDEV_HTML_FIX.md` now describe the current standalone-first, server-script-compatible truth.
-6. the current source-preparation prompt uses the full skill references and asks the model to split dense content, but the post-generation guardrails still rely on static Markdown heuristics.
+6. the current source-preparation prompt uses the full skill references and asks the model to split dense content; the only remaining static Mermaid zoom heuristic is now a missing-value seed, not an overwrite of explicit per-slide `zoom`, and re-export zoom comes from measured safe-rect overflow.
 7. `node scripts/verify-slidev-export-workflow.cjs --json` can now prove, on the real `docs/architecture.zh-CN.md` input, that:
    - the workflow resolves `/home/jacob/slidev/packages/slidev/bin/slidev.mjs`
    - the workflow resolves `/home/jacob/slidev/skills/slidev`
    - the workflow reuses Jacob's Playwright browser cache
    - full-deck HTML slides go through visible-root layout audit plus bounded measured patch/rebuild
-   - the `HTML`, `PDF`, and `PNG` export paths are live
-   - the real HTML fixture now closes with `ok: true`, `28` audited slides, and `overflowCount = 0`
+   - the `HTML`, `PDF`, and `PNG` export paths are live and now all export from the same converged prepared deck
+   - the real HTML fixture now closes with `ok: true`, `28` audited slides, `overflowCount = 0`, and `retryCount = 4`
    - maintainer-local structural overflow notes can now converge through real Markdown table decomposition and code-fence chunking rather than only unit-test rewrites
 
 Next direction:
@@ -615,7 +616,8 @@ Next direction:
 2. generated `docs/export/` files may remain available for local inspection, but should not be committed unless the task explicitly asks for generated output;
 3. keep `SlidevRenderedMeasure`, `SlidevOverflowAudit`, and `SlidevDeckPatch` as explicit owned modules and extend them rather than letting logic leak back into prompt heuristics;
 4. the next step is no longer “add table/code decomposition at all”; it is to extend the current patcher toward custom layout-safe splitting, richer component slides, and pathological cell/content fallback handling while preserving deterministic failure modes;
-5. any upstream Slidev skill PR should stay generic: full references, built-in/configured theme preference, closed frontmatter, readable transforms for large diagrams/tables/code, and browser-sampled build verification. NoteMD vault paths, local fork paths, layout audit internals, and the `architecture.zh-CN.md` fixture should remain project-local.
+5. product-smoke evidence still has one host limitation: `obsidian command id=notemd:export-slides` proves command dispatch, but the Obsidian CLI still does not expose an export-complete handshake, so verifier JSON remains the stronger closure signal;
+6. any upstream Slidev skill PR should stay generic: full references, built-in/configured theme preference, closed frontmatter, readable transforms for large diagrams/tables/code, and browser-sampled build verification. NoteMD vault paths, local fork paths, layout audit internals, and the `architecture.zh-CN.md` fixture should remain project-local.
 
 ## 6. Documentation Sync Rule
 

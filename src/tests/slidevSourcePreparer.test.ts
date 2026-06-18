@@ -228,6 +228,34 @@ describe('slidevSourcePreparer', () => {
         expect(guardedDeck).toContain('```mermaid {scale:0.7}\nflowchart TB');
     });
 
+    test('presentation guardrails keep explicit zoom on large Mermaid slides', () => {
+        const mermaidLines = Array.from({ length: 58 }, (_, index) => `    A${index} --> A${index + 1}`).join('\n');
+        const deck = [
+            '---',
+            'theme: default',
+            '---',
+            '',
+            '# Architecture',
+            '',
+            '---',
+            'layout: default',
+            'zoom: 0.46',
+            '---',
+            '',
+            '# Large Diagram',
+            '',
+            '```mermaid',
+            'flowchart TB',
+            mermaidLines,
+            '```',
+        ].join('\n');
+
+        const guardedDeck = applySlidevPresentationGuardrails(deck);
+
+        expect(guardedDeck).toContain('layout: default\nzoom: 0.46\n---');
+        expect(guardedDeck).not.toContain('zoom: 0.34');
+    });
+
     test('presentation guardrails normalize bare slide frontmatter values', () => {
         const deck = [
             '---',

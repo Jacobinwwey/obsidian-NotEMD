@@ -201,4 +201,15 @@ describe('mainline progress audit contract', () => {
         expect(matrixDoc).toContain('invalid-argument fast-fail behavior');
         expect(matrixDocZh).toContain('非法参数 fast-fail 行为');
     });
+
+    test('records the current Slidev export convergence truth in both canonical progress docs', () => {
+        expect(progressDoc).toContain('`convergeSlidevDeckLayout()`');
+        expect(progressDocZh).toContain('`convergeSlidevDeckLayout()`');
+        expect(progressDoc).toContain('same converged prepared deck');
+        expect(progressDocZh).toContain('同一个 converged prepared deck');
+        expect(progressDoc).toContain('retryCount = 4');
+        expect(progressDocZh).toContain('retryCount = 4');
+        expect(progressDoc).toContain('https://github.com/Jacobinwwey/slidev.git');
+        expect(progressDocZh).toContain('https://github.com/Jacobinwwey/slidev.git');
+    });
 });

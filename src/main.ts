@@ -2799,7 +2799,7 @@ export default class NotemdPlugin extends Plugin {
 
     /** Command: Export Slides */
     async exportSlidesCommand(file: TFile, reporter?: ProgressReporter): Promise<void> {
-        const { probeEnvironment, prepareSlidevExportSource, exportSlidevHtml, exportSlidevPdf, exportSlidevPng, exportVideoMp4 } = await import('./slideExport');
+        const { probeEnvironment, prepareSlidevExportSource, convergeSlidevDeckLayout, exportSlidevPdf, exportSlidevPng, exportVideoMp4 } = await import('./slideExport');
         const uiStrings = this.getUiStrings();
         const config = {
             format: this.settings.slideExportDefaultFormat,
@@ -2848,14 +2848,15 @@ export default class NotemdPlugin extends Plugin {
                 { deckGeneration },
                 logSlideExportProgress
             );
+            const layoutConvergence = await convergeSlidevDeckLayout(
+                this.app,
+                slideSource,
+                config,
+                logSlideExportProgress
+            );
 
             if (config.format === 'html') {
-                const outputPath = await exportSlidevHtml(
-                    this.app,
-                    slideSource,
-                    config,
-                    logSlideExportProgress
-                );
+                const outputPath = layoutConvergence.exportPath;
                 modalReporter.log(uiStrings.slideExport.exportSuccess.replace('{path}', outputPath));
                 new Notice(uiStrings.slideExport.exportComplete);
 

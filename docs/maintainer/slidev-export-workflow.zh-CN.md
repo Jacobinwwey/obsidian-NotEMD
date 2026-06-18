@@ -15,7 +15,7 @@ NoteMD 的验证必须把以下步骤串起来看：
 3. 本地 Slidev fork 存在时会被优先使用。
 4. 现有 Slidev deck 也会先复制到 prepared working file，再进入验证链，避免 patch/retry 直接改写源笔记。
 5. 每次 HTML build 前会重建输出目录，避免旧 chunk 残留。
-6. 生成 deck 的 guardrails 会规范 theme、逐页 frontmatter 和大 Mermaid 图的 zoom。
+6. 生成 deck 的 guardrails 会规范 theme、逐页 frontmatter，并且只在页面本身没有声明 `zoom` 时才为大 Mermaid 图补缺省 zoom。
 7. HTML 导出会先尝试 native standalone；如果生成的 standalone bundle 缺少 slide loader binding，则自动回退到 server-script 兼容 HTML。
 8. 最终 HTML 输出会经过真实浏览器打开，并默认审计整个 deck。
 9. 生成的检查产物对 Git 可见，不会被 `.gitignore` 意外隐藏。
@@ -87,12 +87,12 @@ obsidian command id=notemd:export-slides vault=/home/jacob/obsidian-NotEMD/docs
 
 当前工作流已经能证明 UI 等价导出路径可以生成 deck，并且默认会把整个准备后的 deck 放进真实浏览器审计。这是必要条件，因为密集架构笔记即使 build 成功，Mermaid 图、表格、代码块或长文本仍可能被固定 16:9 画布裁掉。
 
-当前实现已经把 render-feedback gate 落到了维护者验证链上，但还没有到长期设计的终点：
+当前实现已经把 render-feedback gate 落到了共享工作流上；只要 Playwright 可用，维护者 verifier 与真实产品导出命令都会走这条链路：
 
 1. 测量前等待 `document.fonts.ready`、图片 decode 和 Mermaid 渲染完成；
 2. 对每个被审计页检查 DOM bbox 是否超出实际可见 slide root、是否存在 scroll overflow、Mermaid 容器是否溢出、表格自然宽度是否溢出、代码块是否溢出；
 3. 将问题归类为 `overflow`、`unreadable-scale`、`stale-output` 或 `render-error`；
-4. 在维护者验证链中做基于渲染证据的有界 patch/retry，当前最多 6 轮；
+4. 基于渲染证据对 prepared working deck 做有界 patch/retry，当前最多 6 轮；
 5. 如果多轮重试后内容仍被真实可见 slide root 裁掉，应 fail closed 并输出审计报告。
 
 `ref/infinite-canvas` 只能作为 clean-room 设计参考。真正值得借鉴的不是把无限画布嵌进 Slidev export，而是先把 slide 元素建模成可测量的 world rect，计算 union bounds，再为固定 Slidev safe rect 推导 fit camera；一旦 fit 会破坏可读性，就拆分内容。不要把 AGPL-3.0 实现代码复制进 MIT 项目。
@@ -115,16 +115,19 @@ layoutAuditSummary.retryCount
 1. 默认 HTML 验证在未传 `--sample-slides` 时会审计整个准备后的 deck；
 2. patcher 的 `zoom` 来自真实 overflow 测量，而不是固定导出常数；
 3. patcher 已会在不宜继续缩小时，升级为结构化拆分，当前支持的内容类型包括 Mermaid `flowchart` / `graph` / `mindmap` / `sequenceDiagram`、Markdown table、病态宽表的 record-list fallback、非 Mermaid fenced code block、简单的标题 + 段落/列表页、generic slot-marked layout（含显式 `::default::`），以及可结构拆分的第一张 deck headmatter 页面；
-4. 现有 Slidev deck 也会走 prepared working copy 验证链，而不是直接改动源文件；
-5. HTML exporter 现在会拒绝已知坏掉的 native standalone bundle，并回退到 `index.html + start-server.* + README.md`；
-6. 真实 `docs/architecture.zh-CN.md` workflow 现在已经收敛到 `ok: true`、`28` 个审计页、`overflow` 与 `unreadable-scale` 都为零；
-7. 同一真实源文件的 `PDF` 与 `PNG` 验证也返回 `ok: true`。
+4. 大 Mermaid guardrail 不会再覆盖页面里已经显式声明的 `zoom`；
+5. 现有 Slidev deck 也会走 prepared working copy 验证链，而不是直接改动源文件；
+6. 共享的 `convergeSlidevDeckLayout()` 现在已经进入 `exportSlidesCommand()` 与维护者 verifier，因此 HTML/PDF/PNG/MP4 都会复用同一个收敛后的 prepared deck；
+7. HTML exporter 现在会拒绝已知坏掉的 native standalone bundle，并回退到 `index.html + start-server.* + README.md`；
+8. 真实 `docs/architecture.zh-CN.md` workflow 现在已经收敛到 `ok: true`、`28` 个审计页、`overflow` 与 `unreadable-scale` 都为零，`retryCount = 4`；
+9. 同一真实源文件的 `PDF` 与 `PNG` 验证也返回 `ok: true`，而且现在导出自同一个收敛后的 deck，而不是 raw prepared source。
 
 当前限制：
 
 1. 超出当前支持集的 richer custom/component-heavy Slidev layout 仍保持保守/manual-review 路径；
 2. standalone 导出的正确性目前仍依赖 native bundle 的 sanity detection + server-script fallback，而不是自身已经具备完全可靠的 standalone bundling 策略；
-3. full-deck Playwright 验证故意比代表性抽样更慢，后续优化方向应是提高 patch 收敛能力，而不是退回弱审计。
+3. full-deck Playwright 验证故意比代表性抽样更慢，后续优化方向应是提高 patch 收敛能力，而不是退回弱审计；
+4. `obsidian command id=notemd:export-slides` 目前仍只能算 dispatch-level smoke，因为 Obsidian CLI 没有暴露导出完成握手信号。
 
 ## 输出策略
 

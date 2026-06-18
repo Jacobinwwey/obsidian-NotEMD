@@ -11,5 +11,6 @@ export { isDesktopApp, getVaultBasePath, safeRequire, execFileAsync, resolveNpxC
 export { probeEnvironment, probeNode, probeSlidev, probePlaywright, probeFfmpeg } from './environmentProber';
 export { prepareSlidevExportSource } from './slidevSourcePreparer';
 export { exportSlidevHtml, exportSlidevPdf, exportSlidevPng, autoInstallSlidev, autoInstallPlaywright } from './slidevExporter';
+export { convergeSlidevDeckLayout } from './slidevLayoutWorkflow';
 export { exportVideoMp4, getFfmpegInstallInstructions } from './videoExporter';
 export { EnvironmentProbeModal } from './EnvironmentProbeModal';

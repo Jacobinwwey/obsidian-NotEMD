@@ -40,6 +40,13 @@ describe('slidevLayoutAudit', () => {
 		expect(audit.findings.some(finding => finding.recommendedScale !== null && finding.recommendedScale < 1)).toBe(true);
 	});
 
+	test('derives fit scale from the verifier safe rectangle instead of the raw slide root', () => {
+		const audit = analyzeRenderedSlideMeasurement(createMeasurement());
+		const contentFinding = audit.findings.find(finding => finding.target === 'content');
+
+		expect(contentFinding?.recommendedScale).toBeCloseTo(0.816, 2);
+	});
+
 	test('reports unreadable scale when zoom falls below the readable floor', () => {
 		const audit = analyzeRenderedSlideMeasurement(createMeasurement({
 			pageScale: 0.22,
@@ -123,7 +130,7 @@ describe('slidevLayoutAudit', () => {
 
 		expect(patched.changed).toBe(true);
 		expect(patched.changedSlides).toEqual([2]);
-		expect(patched.deckMarkdown).toContain('zoom: 0.362');
+		expect(patched.deckMarkdown).toContain('zoom: 0.369');
 	});
 
 	test('blocks zoom patches that would drop below the readable floor', () => {

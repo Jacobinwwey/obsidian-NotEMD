@@ -164,7 +164,7 @@ export function analyzeRenderedSlideMeasurement(
 				target: 'content',
 				message: 'Slide content exceeds the safe visible rectangle',
 				recommendedPatch: dominantPatchTarget(elementKinds),
-				recommendedScale: computeFitScale(measurement.contentBounds, measurement.slideRoot),
+				recommendedScale: computeFitScale(measurement.contentBounds, measurement.safeRect),
 				overflowAxis: resolveOverflowAxis(contentOverflow, false, false),
 				overflow: contentOverflow,
 			});
@@ -185,7 +185,7 @@ export function analyzeRenderedSlideMeasurement(
 			target: element.kind,
 			message: describeElementOverflow(element.kind, scrollOverflow),
 			recommendedPatch: patchTargetForElement(element.kind),
-			recommendedScale: computeElementFitScale(element, measurement.slideRoot, scrollOverflow),
+			recommendedScale: computeElementFitScale(element, measurement.safeRect, scrollOverflow),
 			scrollOverflow,
 			overflowAxis: resolveOverflowAxis(
 				elementOverflow,
@@ -253,7 +253,7 @@ export function patchDeckWithLayoutAudit(
 		const currentSlide = slides[targetIndex];
 		const bestScale = chooseBestRecommendedScale(audit.findings);
 		const currentZoom = readSlideZoom(currentSlide) ?? 1;
-		const nextZoom = bestScale === null ? null : clampZoom(currentZoom * bestScale * 0.98);
+		const nextZoom = deriveMeasuredPatchZoom(currentZoom, bestScale);
 
 		if (shouldSplitDiagramBeforeZoom(audit.findings, nextZoom, resolvedConfig.minReadableScale)) {
 			const splitResult = splitOverflowingMermaidSlide(currentSlide, audit, currentZoom, nextZoom, resolvedConfig);
@@ -498,6 +498,14 @@ function chooseBestRecommendedScale(findings: SlidevLayoutFinding[]): number | n
 	}
 
 	return Math.min(...scales);
+}
+
+function deriveMeasuredPatchZoom(currentZoom: number, recommendedScale: number | null): number | null {
+	if (recommendedScale === null || !Number.isFinite(recommendedScale) || recommendedScale <= 0 || recommendedScale >= 1) {
+		return null;
+	}
+
+	return clampZoom(currentZoom * recommendedScale);
 }
 
 function clampZoom(value: number): number {
