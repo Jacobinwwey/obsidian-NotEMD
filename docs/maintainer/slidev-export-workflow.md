@@ -118,16 +118,16 @@ Current landed truth as of 2026-06-18:
 4. large Mermaid guardrails no longer overwrite a slide that already declares its own `zoom`;
 5. existing Slidev decks now use isolated prepared working-copy directories under `_slidev-sources/<deck-basename>/`, and common sibling Slidev support entries such as `layouts/`, `public/`, `setup/`, `components/`, `snippets/`, `styles/`, `global-top.vue`, and `global-bottom.vue` are mirrored into that workspace when present;
 6. rendered layout audit now also measures direct-text `div`/`section`/`article`/`aside`/`span` blocks, so component-heavy slides do not silently under-audit as empty layouts;
-7. component-heavy slot zones now carry lightweight owner wrappers inside prepared working copies, so rendered measurements can bring slot ownership back into the patch loop instead of relying on slide-global guesses alone;
-8. component-heavy custom slot layouts can now fall back to local `<Transform :scale=\"...\">` wrapping for the overflowing slot zone when structural splitting is unavailable; when several component-heavy zones exist, the patcher now combines slot ownership with rendered text hints to attribute overflow to the right slot and avoids retargeting already-nonoverflowing sibling zones;
-8. the shared `convergeSlidevDeckLayout()` workflow now runs inside `exportSlidesCommand()` and the maintainer verifier, so HTML/PDF/PNG/MP4 export all reuse the same converged prepared deck;
-9. the HTML exporter now rejects known-bad native standalone bundles and falls back to `index.html + start-server.* + README.md`;
-10. the real `docs/architecture.zh-CN.md` workflow now closes with `ok: true`, `28` audited slides, and zero `overflow` / `unreadable-scale` findings with `retryCount = 4`;
-11. `PDF` and `PNG` verification on the same source also return `ok: true`, and now export from the same converged deck instead of the raw prepared source.
+7. component-heavy slot zones now carry lightweight owner wrappers inside prepared working copies, and rendered measurement now records zone-level owner rects, content bounds, scroll overflow, and recommended local transform scales for those zones;
+8. component-heavy custom slot layouts can now fall back to local `<Transform :scale=\"...\">` wrapping for the overflowing slot zone when structural splitting is unavailable; that scale is derived from the detected out-of-bounds geometry and scroll overflow of the current slot-owner surface instead of fixed constants or manual LLM choice; when several component-heavy zones exist, the patcher prefers zone-level geometry first and falls back to slot signals / rendered text hints only when geometry ties, which avoids retargeting already-nonoverflowing sibling zones;
+9. the shared `convergeSlidevDeckLayout()` workflow now runs inside `exportSlidesCommand()` and the maintainer verifier, so HTML/PDF/PNG/MP4 export all reuse the same converged prepared deck;
+10. the HTML exporter now rejects known-bad native standalone bundles and falls back to `index.html + start-server.* + README.md`;
+11. the real `docs/architecture.zh-CN.md` workflow now closes with `ok: true`, `28` audited slides, and zero `overflow` / `unreadable-scale` findings with `retryCount = 4`;
+12. `PDF` and `PNG` verification on the same source also return `ok: true`, and now export from the same converged deck instead of the raw prepared source.
 
 Current limitation:
 
-1. richer custom/component-heavy Slidev layouts beyond the current supported structural set still remain conservative/manual-review paths, especially when multiple competing component-heavy slot zones exist or when no unique local transform target can be derived safely;
+1. richer custom/component-heavy Slidev layouts beyond the current supported structural set still remain conservative/manual-review paths, especially when several component-heavy slot zones still land in near-tied geometry or when the owner surface does not expose a stable local transform / structural split target;
 2. standalone export correctness currently depends on native bundle sanity detection plus server-script fallback rather than on a fully reliable standalone bundling strategy of its own;
 3. full-deck Playwright verification is deliberately slower than representative sampling, so future work should improve convergence rather than weaken the audit;
 4. `obsidian command id=notemd:export-slides` is still only a dispatch-level smoke because the Obsidian CLI does not expose an export-complete handshake.

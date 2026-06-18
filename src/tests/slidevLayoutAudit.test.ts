@@ -26,6 +26,7 @@ function createMeasurement(overrides: Partial<RenderedSlideMeasurement> = {}): R
 				rect: { left: 48, top: 52, right: 1234, bottom: 820, width: 1186, height: 768 },
 			},
 		],
+		slotZones: [],
 		errors: [],
 		...overrides,
 	};
@@ -88,6 +89,42 @@ describe('slidevLayoutAudit', () => {
 		const tableFinding = audit.findings.find(finding => finding.target === 'table');
 		expect(tableFinding?.recommendedPatch).toBe('split-table');
 		expect(tableFinding?.recommendedScale).toBeCloseTo(0.5, 2);
+	});
+
+	test('derives slot-zone transform scale from measured zone geometry instead of slide-wide overflow only', () => {
+		const audit = analyzeRenderedSlideMeasurement(createMeasurement({
+			pageScale: 1,
+			contentBounds: { left: 80, top: 72, right: 1180, bottom: 620, width: 1100, height: 548 },
+			elements: [
+				{
+					kind: 'other',
+					selector: 'div',
+					slotZone: 'details',
+					textLength: 160,
+					textPreview: 'Runtime orchestration detail block',
+					scrollWidth: 450,
+					scrollHeight: 300,
+					clientWidth: 400,
+					clientHeight: 260,
+					rect: { left: 680, top: 120, right: 1130, bottom: 420, width: 450, height: 300 },
+				},
+			],
+			slotZones: [
+				{
+					name: 'details',
+					textLength: 160,
+					textPreview: 'Runtime orchestration detail block',
+					ownerRect: { left: 680, top: 120, right: 1080, bottom: 380, width: 400, height: 260 },
+					contentBounds: { left: 680, top: 120, right: 1130, bottom: 420, width: 450, height: 300 },
+					scrollWidth: 450,
+					scrollHeight: 300,
+					clientWidth: 400,
+					clientHeight: 260,
+				},
+			],
+		}));
+
+		expect(audit.slotZones?.[0]?.recommendedTransformScale).toBeCloseTo(0.866, 2);
 	});
 
 	test('patches slide zoom downward when audit recommends a smaller readable scale', () => {
@@ -989,6 +1026,95 @@ describe('slidevLayoutAudit', () => {
 		expect((patched.deckMarkdown.match(/<Transform :scale="0.86" origin="top left">/g) || []).length).toBe(1);
 		expect(patched.deckMarkdown).toContain('::summary::\n\n<div class="summary-card">');
 		expect(patched.deckMarkdown).toContain('::details::\n\n<Transform :scale="0.86" origin="top left">');
+	});
+
+	test('prefers slot-zone geometry over noisier descendant counts when attributing a multizone component slide', () => {
+		const audit: SlidevLayoutAudit = {
+			slide: 2,
+			safeRect: { left: 51.2, top: 43.2, right: 1228.8, bottom: 676.8, width: 1177.6, height: 633.6 },
+			contentBounds: { left: 48, top: 52, right: 1234, bottom: 820, width: 1186, height: 768 },
+			pageScale: 1,
+			elementKinds: ['other'],
+			findings: [
+				{
+					kind: 'overflow',
+					target: 'other',
+					message: 'summary descendant text overflows',
+					recommendedPatch: 'reduce-zoom',
+					recommendedScale: 0.92,
+					slotZone: 'summary',
+					textPreview: 'Short status card',
+				},
+				{
+					kind: 'overflow',
+					target: 'other',
+					message: 'summary descendant text overflows again',
+					recommendedPatch: 'reduce-zoom',
+					recommendedScale: 0.92,
+					slotZone: 'summary',
+					textPreview: 'Should remain unscaled',
+				},
+				{
+					kind: 'overflow',
+					target: 'other',
+					message: 'details owner overflows',
+					recommendedPatch: 'reduce-zoom',
+					recommendedScale: 0.73,
+					slotZone: 'details',
+					textPreview: 'Runtime orchestration detail block 12 with explicit structured text.',
+					overflow: { left: 0, top: 0, right: 18, bottom: 64 },
+				},
+			],
+			slotZones: [
+				{
+					name: 'summary',
+					textPreview: 'Short status card',
+					ownerRect: { left: 110, top: 146, right: 520, bottom: 420, width: 410, height: 274 },
+					contentBounds: { left: 118, top: 156, right: 506, bottom: 392, width: 388, height: 236 },
+					scrollOverflow: false,
+					recommendedTransformScale: null,
+				},
+				{
+					name: 'details',
+					textPreview: 'Runtime orchestration detail block 12 with explicit structured text.',
+					ownerRect: { left: 612, top: 146, right: 1112, bottom: 418, width: 500, height: 272 },
+					contentBounds: { left: 612, top: 146, right: 1166, bottom: 448, width: 554, height: 302 },
+					scrollOverflow: true,
+					overflow: { left: 0, top: 0, right: 18, bottom: 64 },
+					recommendedTransformScale: 0.901,
+				},
+			],
+		};
+		const deck = [
+			'---',
+			'theme: default',
+			'---',
+			'',
+			'# Intro',
+			'',
+			'---',
+			'layout: custom-grid',
+			'---',
+			'',
+			'::summary::',
+			'',
+			'<div class="summary-card">',
+			'  <p>Short status card</p>',
+			'  <p>Should remain unscaled</p>',
+			'</div>',
+			'',
+			'::details::',
+			'',
+			'<div class="space-y-3">',
+			'  <div class="border rounded px-3 py-2 text-sm">Runtime orchestration detail block 12 with explicit structured text.</div>',
+			'</div>',
+		].join('\n');
+
+		const patched = patchDeckWithLayoutAudit(deck, [audit]);
+
+		expect(patched.changed).toBe(true);
+		expect(patched.deckMarkdown).toContain('::details::\n\n<Transform :scale="0.901" origin="top left">');
+		expect(patched.deckMarkdown).not.toContain('::summary::\n\n<Transform :scale="0.901" origin="top left">');
 	});
 
 	test('does not retarget a different component-heavy slot after another slot is already wrapped in Transform', () => {

@@ -247,7 +247,7 @@ function collectDeckSummary(deckPath) {
 }
 
 async function collectRenderedSlideMeasurement(page, slide) {
-	return page.evaluate(() => {
+	return page.evaluate(slotZoneAttr => {
 		const toRect = rect => ({
 			left: rect.left,
 			top: rect.top,
@@ -256,6 +256,10 @@ async function collectRenderedSlideMeasurement(page, slide) {
 			width: rect.width,
 			height: rect.height,
 		});
+		const toTextPreview = value => value
+			.replace(/\s+/g, ' ')
+			.trim()
+			.slice(0, 160);
 		const overlaps = (a, b) => !(a.right <= b.left || a.left >= b.right || a.bottom <= b.top || a.top >= b.bottom);
 		const unionRects = rects => rects.reduce((acc, rect) => {
 			if (!acc) {
@@ -288,6 +292,7 @@ async function collectRenderedSlideMeasurement(page, slide) {
 				contentBounds: null,
 				pageScale: null,
 				elements: [],
+				slotZones: [],
 				errors: ['Slide root not found'],
 			};
 		}
@@ -310,9 +315,10 @@ async function collectRenderedSlideMeasurement(page, slide) {
 			['code', 'pre, .shiki'],
 			['image', 'img, svg'],
 			['text', 'h1, h2, h3, h4, p, li, blockquote'],
+			['other', 'div, section, article, aside, span'],
 		];
 		const seen = new Set();
-		const elements = [];
+		const measuredElements = [];
 
 		for (const [kind, selector] of selectors) {
 			for (const element of slideRoot.querySelectorAll(selector)) {
@@ -331,18 +337,81 @@ async function collectRenderedSlideMeasurement(page, slide) {
 					continue;
 				}
 
-				elements.push({
-					kind,
-					selector,
-					textLength: (element.textContent || '').trim().length,
-					scrollWidth: element.scrollWidth || rect.width,
-					scrollHeight: element.scrollHeight || rect.height,
-					clientWidth: element.clientWidth || rect.width,
-					clientHeight: element.clientHeight || rect.height,
-					rect,
+				const textLength = (element.textContent || '').trim().length;
+				if (kind === 'other') {
+					const directTextLength = Array.from(element.childNodes)
+						.filter(node => node.nodeType === Node.TEXT_NODE)
+						.map(node => node.textContent || '')
+						.join(' ')
+						.trim()
+						.length;
+					if (directTextLength === 0 || textLength === 0) {
+						continue;
+					}
+				}
+
+				const ownerElement = element.closest(`[${slotZoneAttr}]`);
+				measuredElements.push({
+					ownerElement,
+					measured: {
+						kind,
+						selector,
+						slotZone: ownerElement?.getAttribute(slotZoneAttr) || undefined,
+						slotOwner: element.hasAttribute(slotZoneAttr),
+						textLength,
+						textPreview: textLength > 0 ? toTextPreview(element.textContent || '') : undefined,
+						scrollWidth: element.scrollWidth || rect.width,
+						scrollHeight: element.scrollHeight || rect.height,
+						clientWidth: element.clientWidth || rect.width,
+						clientHeight: element.clientHeight || rect.height,
+						rect,
+					},
 				});
 			}
 		}
+
+		const elements = measuredElements.map(entry => entry.measured);
+		const slotZones = Array.from(slideRoot.querySelectorAll(`[${slotZoneAttr}]`))
+			.filter(element => element instanceof Element)
+			.map(ownerElement => {
+				const ownerRect = toRect(ownerElement.getBoundingClientRect());
+				if (ownerRect.width < 2 || ownerRect.height < 2 || !overlaps(ownerRect, slideRootRect)) {
+					return null;
+				}
+
+				const style = window.getComputedStyle(ownerElement);
+				if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity || '1') === 0) {
+					return null;
+				}
+
+				const zoneName = ownerElement.getAttribute(slotZoneAttr);
+				if (!zoneName) {
+					return null;
+				}
+
+				const zoneElementRects = measuredElements
+					.filter(entry => entry.ownerElement === ownerElement && !entry.measured.slotOwner)
+					.map(entry => entry.measured.rect);
+				const contentBounds = unionRects(zoneElementRects.length > 0 ? zoneElementRects : [ownerRect]);
+				if (contentBounds) {
+					contentBounds.width = contentBounds.right - contentBounds.left;
+					contentBounds.height = contentBounds.bottom - contentBounds.top;
+				}
+
+				const textValue = (ownerElement.textContent || '').trim();
+				return {
+					name: zoneName,
+					textLength: textValue.length,
+					textPreview: textValue.length > 0 ? toTextPreview(textValue) : undefined,
+					ownerRect,
+					contentBounds,
+					scrollWidth: ownerElement.scrollWidth || ownerRect.width,
+					scrollHeight: ownerElement.scrollHeight || ownerRect.height,
+					clientWidth: ownerElement.clientWidth || ownerRect.width,
+					clientHeight: ownerElement.clientHeight || ownerRect.height,
+				};
+			})
+			.filter(Boolean);
 
 		const contentBounds = unionRects(elements.map(element => element.rect));
 		if (contentBounds) {
@@ -361,9 +430,10 @@ async function collectRenderedSlideMeasurement(page, slide) {
 			contentBounds,
 			pageScale: Number.isFinite(pageScale) ? pageScale : null,
 			elements,
+			slotZones,
 			errors: [],
 		};
-	});
+	}, 'data-notemd-slot-zone');
 }
 
 function configurePlaywrightBrowserPath(slideExport) {

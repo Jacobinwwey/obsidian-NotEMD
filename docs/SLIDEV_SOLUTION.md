@@ -115,8 +115,8 @@ The current render-feedback loop is now:
 
 1. `prepareSlidevExportSource()` still loads the full Slidev skill directory and asks the LLM to split dense sections before export.
 2. `scripts/verify-slidev-export-workflow.cjs` and the product `exportSlidesCommand()` now share the same convergence workflow, which renders the built HTML in Playwright, waits for visible slide content, and measures the actual `slidev-page` root plus overflow-prone elements.
-3. `SlidevOverflowAudit` classifies `overflow`, `unreadable-scale`, and `render-error` from rendered geometry instead of relying only on Markdown heuristics.
-4. `SlidevDeckPatch` now applies overflow-derived `zoom` values and escalates to content-level patching when shrinking further would make the slide unreadable or when the rendered finding already recommends structural splitting.
+3. `SlidevOverflowAudit` classifies `overflow`, `unreadable-scale`, and `render-error` from rendered geometry, and now also records slot-zone owner rects, content bounds, scroll overflow, and recommended local transform scales instead of relying only on Markdown heuristics.
+4. `SlidevDeckPatch` now applies overflow-derived slide `zoom` values, zone-local `<Transform>` scales derived from detected out-of-bounds geometry, and escalates to content-level patching when shrinking further would make the slide unreadable or when the rendered finding already recommends structural splitting.
 5. The current structural patcher supports:
    - Mermaid `flowchart` / `graph` / `mindmap`
    - Mermaid `sequenceDiagram` with repeated participant declarations
@@ -140,7 +140,7 @@ Current landed state:
 4. the real product export path now converges the prepared working deck before final `HTML`/`PDF`/`PNG`/`MP4` export, instead of keeping the patch/rebuild loop verifier-only.
 5. existing Slidev deck working copies now live under `_slidev-sources/<deck-basename>/`, and common sibling support entries such as `layouts/`, `public/`, `setup/`, `components/`, `snippets/`, `styles/`, `global-top.vue`, and `global-bottom.vue` are mirrored there when present.
 6. rendered layout audit now also measures direct-text `div`/`section`/`article`/`aside`/`span` blocks, which closes the previous under-audit gap for component-heavy slides.
-7. component-heavy slot zones now carry lightweight owner wrappers inside prepared working copies, so rendered measurements can feed slot ownership back into the patch loop instead of relying only on slide-global inference.
+7. component-heavy slot zones now carry lightweight owner wrappers inside prepared working copies, so rendered measurements can feed slot ownership, zone-level owner geometry, and local overflow scale back into the patch loop instead of relying only on slide-global inference.
 8. `PDF` and `PNG` export now pass `PLAYWRIGHT_BROWSERS_PATH` through the Slidev CLI env so root-run verification can reuse Jacob's browser cache.
 9. the real `docs/architecture.zh-CN.md` HTML workflow now passes with a full-deck Playwright audit, `28` audited slides, `overflowCount = 0`, and bounded retry closure at `retryCount = 4`.
 10. an additional real maintainer-local structural overflow note now proves that Markdown table decomposition and code-fence chunking can converge through the same verifier path instead of only through unit tests.
@@ -150,11 +150,11 @@ Current landed state:
    - existing Slidev deck working-copy verification
    - pathological table fallback into record-list slides
    - slot-marked custom layouts backed by a real custom `layouts/*.vue` file
-   - component-heavy custom slot layouts converging through rendered-text-hint-based local `<Transform>` wrapping, including multi-zone cases where the overflowing slot must be attributed without retargeting nonoverflowing sibling zones
+   - component-heavy custom slot layouts converging through zone-level owner-geometry-based local `<Transform>` wrapping, with slot signals and rendered text hints held as bounded fallback when several zones compete for attribution
 
 Current gap:
 
-1. richer custom/component-heavy Slidev layouts beyond the current supported structural set still fall back to conservative zoom/manual-review behavior, especially when multiple competing component-heavy slot zones exist and rendered text hints still cannot safely distinguish the true overflow owner;
+1. richer custom/component-heavy Slidev layouts beyond the current supported structural set still fall back to conservative zoom/manual-review behavior, especially when multiple competing component-heavy slot zones remain near-tied even after zone-level geometry scoring or when the owner surface does not expose a stable transform/split target;
 2. standalone export correctness currently depends on native bundle sanity detection plus server-script fallback rather than on a fully reliable standalone bundling strategy of its own;
 3. full-deck Playwright verification is now more correct, but noticeably slower, so future work should improve patch convergence instead of weakening the audit back to representative sampling;
 4. the Obsidian CLI can dispatch `notemd:export-slides`, but it does not expose an export-complete handshake, so host-command smoke is still weaker than the maintainer verifier.

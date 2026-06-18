@@ -250,19 +250,19 @@ async function collectRenderedSlideMeasurement(page: any, slide: number): Promis
 			width: number;
 			height: number;
 		};
-			const toRect = (rect: DOMRect) => ({
-				left: rect.left,
-				top: rect.top,
-				right: rect.right,
-				bottom: rect.bottom,
-				width: rect.width,
-				height: rect.height,
-			});
-			const toTextPreview = (value: string) => value
-				.replace(/\s+/g, ' ')
-				.trim()
-				.slice(0, 160);
-			const overlaps = (a: BrowserRect, b: BrowserRect) => !(a.right <= b.left || a.left >= b.right || a.bottom <= b.top || a.top >= b.bottom);
+		const toRect = (rect: DOMRect) => ({
+			left: rect.left,
+			top: rect.top,
+			right: rect.right,
+			bottom: rect.bottom,
+			width: rect.width,
+			height: rect.height,
+		});
+		const toTextPreview = (value: string) => value
+			.replace(/\s+/g, ' ')
+			.trim()
+			.slice(0, 160);
+		const overlaps = (a: BrowserRect, b: BrowserRect) => !(a.right <= b.left || a.left >= b.right || a.bottom <= b.top || a.top >= b.bottom);
 		const unionRects = (rects: BrowserRect[]) => rects.reduce<BrowserRect | null>((acc, rect) => {
 			if (!acc) {
 				return { ...rect };
@@ -294,6 +294,7 @@ async function collectRenderedSlideMeasurement(page: any, slide: number): Promis
 				contentBounds: null,
 				pageScale: null,
 				elements: [],
+				slotZones: [],
 				errors: ['Slide root not found'],
 			};
 		}
@@ -319,7 +320,22 @@ async function collectRenderedSlideMeasurement(page: any, slide: number): Promis
 			['other', 'div, section, article, aside, span'],
 		];
 		const seen = new Set<Element>();
-		const elements = [];
+		const measuredElements: Array<{
+			ownerElement: Element | null;
+			measured: {
+				kind: string;
+				selector: string;
+				slotZone?: string;
+				slotOwner?: boolean;
+				textLength: number;
+				textPreview?: string;
+				scrollWidth: number;
+				scrollHeight: number;
+				clientWidth: number;
+				clientHeight: number;
+				rect: BrowserRect;
+			};
+		}> = [];
 
 		for (const [kind, selector] of selectors) {
 			for (const element of Array.from(slideRoot.querySelectorAll(selector))) {
@@ -351,20 +367,69 @@ async function collectRenderedSlideMeasurement(page: any, slide: number): Promis
 					}
 				}
 
-					elements.push({
+				const ownerElement = element.closest(`[${slotZoneAttr}]`) as Element | null;
+				measuredElements.push({
+					ownerElement,
+					measured: {
 						kind,
 						selector,
-						slotZone: (element.closest(`[${slotZoneAttr}]`) as Element | null)?.getAttribute(slotZoneAttr) || undefined,
+						slotZone: ownerElement?.getAttribute(slotZoneAttr) || undefined,
+						slotOwner: element.hasAttribute(slotZoneAttr),
 						textLength,
 						textPreview: textLength > 0 ? toTextPreview(element.textContent || '') : undefined,
 						scrollWidth: element.scrollWidth || rect.width,
 						scrollHeight: element.scrollHeight || rect.height,
 						clientWidth: element.clientWidth || rect.width,
-					clientHeight: element.clientHeight || rect.height,
-					rect,
+						clientHeight: element.clientHeight || rect.height,
+						rect,
+					},
 				});
 			}
 		}
+
+		const elements = measuredElements.map(entry => entry.measured);
+		const slotZones = Array.from(slideRoot.querySelectorAll(`[${slotZoneAttr}]`))
+			.filter(element => element instanceof Element)
+			.map(element => element as Element)
+			.map(ownerElement => {
+				const ownerRect = toRect(ownerElement.getBoundingClientRect());
+				if (ownerRect.width < 2 || ownerRect.height < 2 || !overlaps(ownerRect, slideRootRect)) {
+					return null;
+				}
+
+				const style = window.getComputedStyle(ownerElement);
+				if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity || '1') === 0) {
+					return null;
+				}
+
+				const zoneName = ownerElement.getAttribute(slotZoneAttr);
+				if (!zoneName) {
+					return null;
+				}
+
+				const zoneElementRects = measuredElements
+					.filter(entry => entry.ownerElement === ownerElement && !entry.measured.slotOwner)
+					.map(entry => entry.measured.rect);
+				const contentBounds = unionRects(zoneElementRects.length > 0 ? zoneElementRects : [ownerRect]);
+				if (contentBounds) {
+					contentBounds.width = contentBounds.right - contentBounds.left;
+					contentBounds.height = contentBounds.bottom - contentBounds.top;
+				}
+
+				const textValue = (ownerElement.textContent || '').trim();
+				return {
+					name: zoneName,
+					textLength: textValue.length,
+					textPreview: textValue.length > 0 ? toTextPreview(textValue) : undefined,
+					ownerRect,
+					contentBounds,
+					scrollWidth: ownerElement.scrollWidth || ownerRect.width,
+					scrollHeight: ownerElement.scrollHeight || ownerRect.height,
+					clientWidth: ownerElement.clientWidth || ownerRect.width,
+					clientHeight: ownerElement.clientHeight || ownerRect.height,
+				};
+			})
+			.filter((zone): zone is NonNullable<typeof zone> => zone !== null);
 
 		const contentBounds = unionRects(elements.map(element => element.rect));
 		if (contentBounds) {
@@ -383,6 +448,7 @@ async function collectRenderedSlideMeasurement(page: any, slide: number): Promis
 			contentBounds,
 			pageScale: Number.isFinite(pageScale) ? pageScale : null,
 			elements,
+			slotZones,
 			errors: [],
 		};
 	}, NOTEMD_SLOT_ZONE_ATTR);

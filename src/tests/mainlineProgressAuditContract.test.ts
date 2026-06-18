@@ -215,10 +215,14 @@ describe('mainline progress audit contract', () => {
         expect(progressDocZh).toContain('isolated working-copy + sibling support sync');
         expect(progressDoc).toContain('component-heavy custom-slot local `<Transform>` fallback');
         expect(progressDocZh).toContain('component-heavy custom slot 的 local `<Transform>` fallback');
+        expect(progressDoc).toContain('zone-level owner rects');
+        expect(progressDocZh).toContain('zone 级 owner rect');
+        expect(progressDoc).toContain('fixed constants or manual LLM choice');
+        expect(progressDocZh).toContain('固定常数，也不依赖 LLM 手工挑值');
         expect(progressDoc).toContain('rendered text hints');
         expect(progressDocZh).toContain('rendered text hint');
         expect(progressDoc).toContain('nonoverflowing sibling zone');
-        expect(progressDocZh).toContain('未溢出的 sibling zone');
+        expect(progressDocZh).toContain('几何结果打平');
         expect(progressDoc).toContain('slot-owner wrappers');
         expect(progressDocZh).toContain('slot-owner wrapper');
     });
