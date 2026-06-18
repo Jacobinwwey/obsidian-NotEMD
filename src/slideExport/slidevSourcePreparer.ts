@@ -9,7 +9,7 @@ import type { App, TFile } from 'obsidian';
 import type { LLMProviderConfig, NotemdSettings, ProgressReporter } from '../types';
 import { callLLM } from '../llmUtils';
 import type { ExportProgressCallback, SlideExportConfig, SlidevExportSource } from './types';
-import { resolveWorkspaceHomeCandidates, safeRequire } from './platformUtils';
+import { getVaultBasePath, resolveWorkspaceHomeCandidates, safeRequire } from './platformUtils';
 
 interface SlidevSkillContext {
 	rootPath: string | null;
@@ -36,6 +36,8 @@ interface SlidevSourcePreparationOptions {
 const MAX_DETERMINISTIC_SLIDE_CHARS = 1350;
 const MAX_LLM_REFERENCE_CHARS = 120000;
 const LARGE_MERMAID_LINE_THRESHOLD = 32;
+const SLIDEV_SUPPORT_DIRECTORIES = ['layouts', 'public', 'setup', 'snippets', 'components', 'styles'];
+const SLIDEV_SUPPORT_FILES = ['global-top.vue', 'global-bottom.vue', 'style.css', 'styles.css'];
 
 export async function prepareSlidevExportSource(
 	app: App,
@@ -47,7 +49,7 @@ export async function prepareSlidevExportSource(
 	const sourceMarkdown = await app.vault.read(sourceFile);
 	if (isSlidevDeckMarkdown(sourceMarkdown)) {
 		onProgress?.('slidev-source', 'Current file is already a Slidev deck; writing working copy for export verification.');
-		const preparedDeckPath = await writePreparedDeck(app, sourceFile, config, sourceMarkdown);
+		const preparedDeckPath = await writePreparedDeckWorkspace(app, sourceFile, config, sourceMarkdown, onProgress);
 		return {
 			inputFilePath: preparedDeckPath,
 			outputBasename: sourceFile.basename,
@@ -789,6 +791,76 @@ async function writePreparedDeck(app: App, sourceFile: TFile, config: SlideExpor
 	await ensureVaultDirectory(app, directoryPath);
 	await app.vault.adapter.write(filePath, deckMarkdown);
 	return filePath;
+}
+
+async function writePreparedDeckWorkspace(
+	app: App,
+	sourceFile: TFile,
+	config: SlideExportConfig,
+	deckMarkdown: string,
+	onProgress?: ExportProgressCallback,
+): Promise<string> {
+	const workspacePath = normalizeVaultPath(`${config.outputSubfolder}/_slidev-sources/${sourceFile.basename}`);
+	const filePath = normalizeVaultPath(`${workspacePath}/${sourceFile.basename}.slidev.md`);
+	await recreatePreparedWorkspace(app, workspacePath);
+	await app.vault.adapter.write(filePath, deckMarkdown);
+	await copyExistingSlidevSupportWorkspace(app, sourceFile, workspacePath, onProgress);
+	return filePath;
+}
+
+async function recreatePreparedWorkspace(app: App, workspacePath: string): Promise<void> {
+	const vaultRoot = getVaultBasePath(app);
+	const fs: any = safeRequire('fs');
+	const path: any = safeRequire('path');
+	if (vaultRoot && fs?.rmSync && fs?.mkdirSync && path?.join) {
+		const absoluteWorkspacePath = path.join(vaultRoot, workspacePath);
+		fs.rmSync(absoluteWorkspacePath, { recursive: true, force: true });
+		fs.mkdirSync(absoluteWorkspacePath, { recursive: true });
+		return;
+	}
+
+	await ensureVaultDirectory(app, workspacePath);
+}
+
+async function copyExistingSlidevSupportWorkspace(
+	app: App,
+	sourceFile: TFile,
+	workspacePath: string,
+	onProgress?: ExportProgressCallback,
+): Promise<void> {
+	const vaultRoot = getVaultBasePath(app);
+	const fs: any = safeRequire('fs');
+	const path: any = safeRequire('path');
+	if (!vaultRoot || !fs?.existsSync || !fs?.cpSync || !path?.join || typeof sourceFile.path !== 'string') {
+		return;
+	}
+
+	const absoluteSourcePath = path.join(vaultRoot, normalizeVaultPath(sourceFile.path));
+	const absoluteSourceDir = path.dirname(absoluteSourcePath);
+	const absoluteWorkspacePath = path.join(vaultRoot, workspacePath);
+	const copiedEntries: string[] = [];
+
+	for (const directoryName of SLIDEV_SUPPORT_DIRECTORIES) {
+		const absoluteSourceDirectory = path.join(absoluteSourceDir, directoryName);
+		if (!fs.existsSync(absoluteSourceDirectory)) {
+			continue;
+		}
+		fs.cpSync(absoluteSourceDirectory, path.join(absoluteWorkspacePath, directoryName), { recursive: true });
+		copiedEntries.push(directoryName);
+	}
+
+	for (const filename of SLIDEV_SUPPORT_FILES) {
+		const absoluteSourceFile = path.join(absoluteSourceDir, filename);
+		if (!fs.existsSync(absoluteSourceFile)) {
+			continue;
+		}
+		fs.cpSync(absoluteSourceFile, path.join(absoluteWorkspacePath, filename));
+		copiedEntries.push(filename);
+	}
+
+	if (copiedEntries.length > 0) {
+		onProgress?.('slidev-source', `Copied Slidev support entries into working copy: ${copiedEntries.join(', ')}`);
+	}
 }
 
 async function ensureVaultDirectory(app: App, directoryPath: string): Promise<void> {

@@ -287,7 +287,8 @@ Current code already satisfies several earlier requirements:
 3. the sidebar has an inline Slidev export format selector instead of hiding format choice entirely;
 4. `exportSlidesCommand()` now probes environment, prepares a Slidev export source, runs the shared `convergeSlidevDeckLayout()` loop, and only then emits the selected final format from the converged prepared deck;
 5. `prepareSlidevExportSource()` loads the top-level Slidev skill and `references/*.md` when available, and the LLM prompt explicitly asks for dense slides to be split and large diagrams/tables/code to avoid clipping;
-6. `scripts/verify-slidev-export-workflow.cjs` exercises production modules against the real `docs/architecture.zh-CN.md` source and records skill reference count, local fork, deck summary, Playwright results, and `.gitignore` visibility.
+6. existing Slidev decks now write into isolated `_slidev-sources/<deck-basename>/` workspaces, and common sibling Slidev support entries such as `layouts/`, `public/`, `setup/`, `components/`, `snippets/`, `styles/`, `global-top.vue`, and `global-bottom.vue` are mirrored there when present;
+7. `scripts/verify-slidev-export-workflow.cjs` exercises production modules against the real `docs/architecture.zh-CN.md` source and records skill reference count, local fork, deck summary, Playwright results, and `.gitignore` visibility.
 
 The important gap is equally clear:
 
@@ -298,7 +299,7 @@ The important gap is equally clear:
 | UI format selection | Settings and sidebar controls expose format selection; HTML mode is conditional on HTML | Landed in code, still needs real UI smoke when UI changes |
 | Output visibility to Git | `verify:slidev-export` checks `.gitignore` hits for generated deck/output/screenshots | Landed for workflow evidence |
 | Rendered layout containment | Visible-root DOM bbox, scroll overflow, Mermaid host, table, code, and text overflow audit exists in the real maintainer workflow | Landed |
-| Automatic correction | `SlidevDeckPatch` now applies measured `zoom`, Mermaid / table / code structural splitting, pathological table record fallback, generic slot-marked layout splitting, and first-slide headmatter structural splitting in a bounded retry loop shared by the verifier and `exportSlidesCommand()` | Landed, keep extending |
+| Automatic correction | `SlidevDeckPatch` now applies measured `zoom`, Mermaid / table / code structural splitting, pathological table record fallback, generic slot-marked layout splitting, component-heavy custom-slot local `<Transform>` fallback, and first-slide headmatter structural splitting in a bounded retry loop shared by the verifier and `exportSlidesCommand()` | Landed, keep extending |
 
 The `ref/infinite-canvas` analysis supports a clean-room direction, not code reuse. Its useful architecture ideas are world-space nodes with `{ position, width, height }`, viewport transform `{ x, y, k }`, screen/world conversion, union bounds, natural image sizing, and minimap/bounds calculation. Those ideas map well to a static export-layout camera for Slidev. They do not justify turning Slidev into an interactive infinite canvas, and AGPL-3.0 code must not be copied into this MIT project.
 
@@ -307,9 +308,9 @@ Correct interpretation:
 1. the workflow proof is now meaningfully stronger than direct `slidev build`;
 2. the workflow now includes a real render-feedback quality gate instead of only a CLI smoke path;
 3. the real `docs/architecture.zh-CN.md` HTML fixture now closes at `ok: true` with `28` audited slides, zero overflow/unreadable findings, and `retryCount = 4`, while `PDF` and `PNG` on the same source also return `ok: true`;
-4. current landed truth is already past the original plan wording: workspace-aware resolution for the local Slidev fork, Slidev skill roots, and Playwright browser cache is in place, the local checkout is confirmed against `https://github.com/Jacobinwwey/slidev.git`, full-deck visible-slide-root audit is in place, existing Slidev decks now go through prepared working copies, the patch loop now covers Mermaid, Markdown tables, pathological table fallback, code fences, dense text, generic slot-marked layouts, and first-slide headmatter instead of only zoom, and known-bad standalone bundles now fall back to server-script HTML rather than being treated as good output;
+4. current landed truth is already past the original plan wording: workspace-aware resolution for the local Slidev fork, Slidev skill roots, and Playwright browser cache is in place, the local checkout is confirmed against `https://github.com/Jacobinwwey/slidev.git`, full-deck visible-slide-root audit is in place, existing Slidev decks now go through isolated working copies with sibling support-entry mirroring, the patch loop now covers Mermaid, Markdown tables, pathological table fallback, code fences, dense text, generic slot-marked layouts, component-heavy custom-slot local `<Transform>` fallback, and first-slide headmatter instead of only zoom, and known-bad standalone bundles now fall back to server-script HTML rather than being treated as good output;
 5. the real product export path now matches the verifier on the critical point that mattered most: the patch/rebuild loop is no longer verifier-only, so `HTML`/`PDF`/`PNG`/`MP4` export all reuse the same converged prepared deck.
-6. the next architectural step is narrower now: extend structural patching to richer component-heavy custom layouts without regressing back to representative-slide-only audit, and decide whether the current standalone fallback should remain product truth or be replaced by a stronger standalone bundling strategy.
+6. the next architectural step is narrower now: extend structural patching to richer component-heavy custom layouts without regressing back to representative-slide-only audit; the main unresolved shape is when multiple competing component-heavy slot zones exist or when no safe unique local transform target can be derived; separately, decide whether the current standalone fallback should remain product truth or be replaced by a stronger standalone bundling strategy.
 
 ## 3. Deep Comparison Against Earlier Plan Language
 

@@ -870,6 +870,68 @@ describe('slidevLayoutAudit', () => {
 		expect(patched.deckMarkdown).toContain('- Sixth detail');
 	});
 
+	test('wraps a component-heavy custom slot zone in Transform when structural splitting is unavailable', () => {
+		const audit: SlidevLayoutAudit = {
+			slide: 2,
+			safeRect: { left: 51.2, top: 43.2, right: 1228.8, bottom: 676.8, width: 1177.6, height: 633.6 },
+			contentBounds: { left: 48, top: 52, right: 1234, bottom: 820, width: 1186, height: 768 },
+			pageScale: 1,
+			elementKinds: ['text'],
+			findings: [
+				{
+					kind: 'overflow',
+					target: 'content',
+					message: 'Slide content exceeds the safe visible rectangle',
+					recommendedPatch: 'split-slide',
+					recommendedScale: 0.83,
+				},
+				{
+					kind: 'overflow',
+					target: 'text',
+					message: 'text element exceeds the safe visible rectangle',
+					recommendedPatch: 'reduce-zoom',
+					recommendedScale: 0.83,
+				},
+			],
+		};
+		const deck = [
+			'---',
+			'theme: default',
+			'---',
+			'',
+			'# Intro',
+			'',
+			'---',
+			'layout: custom-grid',
+			'---',
+			'',
+			'::summary::',
+			'',
+			'- Summary stays unscaled.',
+			'',
+			'::details::',
+			'',
+			'<div class="space-y-2">',
+			'  <MetricCard title="One" value="Alpha" />',
+			'  <MetricCard title="Two" value="Beta" />',
+			'  <MetricCard title="Three" value="Gamma" />',
+			'  <MetricCard title="Four" value="Delta" />',
+			'  <MetricCard title="Five" value="Epsilon" />',
+			'</div>',
+		].join('\n');
+
+		const patched = patchDeckWithLayoutAudit(deck, [audit]);
+
+		expect(patched.changed).toBe(true);
+		expect(patched.blockedSlides).toEqual([]);
+		expect(countSlideDeckSlides(patched.deckMarkdown)).toBe(2);
+		expect(patched.deckMarkdown).toContain('<Transform :scale="0.83" origin="top left">');
+		expect(patched.deckMarkdown).toContain('::details::');
+		expect(patched.deckMarkdown).toContain('<MetricCard title="Five" value="Epsilon" />');
+		expect((patched.deckMarkdown.match(/Summary stays unscaled/g) || []).length).toBe(1);
+		expect(patched.deckMarkdown).not.toContain('zoom: 0.83');
+	});
+
 	test('splits first-slide deck headmatter content structurally when per-slide zoom cannot be used', () => {
 		const audit: SlidevLayoutAudit = {
 			slide: 1,
@@ -922,6 +984,58 @@ describe('slidevLayoutAudit', () => {
 		expect(patched.deckMarkdown).toContain('- first bullet');
 		expect(patched.deckMarkdown).toContain('- sixth bullet');
 		expect(patched.deckMarkdown).not.toContain('zoom:');
+	});
+
+	test('wraps a component-heavy single-surface slide in Transform before falling back to whole-slide zoom', () => {
+		const audit: SlidevLayoutAudit = {
+			slide: 2,
+			safeRect: { left: 51.2, top: 43.2, right: 1228.8, bottom: 676.8, width: 1177.6, height: 633.6 },
+			contentBounds: { left: 48, top: 52, right: 1234, bottom: 820, width: 1186, height: 768 },
+			pageScale: 1,
+			elementKinds: ['text'],
+			findings: [
+				{
+					kind: 'overflow',
+					target: 'content',
+					message: 'Slide content exceeds the safe visible rectangle',
+					recommendedPatch: 'split-slide',
+					recommendedScale: 0.88,
+				},
+				{
+					kind: 'overflow',
+					target: 'text',
+					message: 'text element exceeds the safe visible rectangle',
+					recommendedPatch: 'reduce-zoom',
+					recommendedScale: 0.88,
+				},
+			],
+		};
+		const deck = [
+			'---',
+			'theme: default',
+			'---',
+			'',
+			'# Intro',
+			'',
+			'---',
+			'layout: default',
+			'---',
+			'',
+			'<div class="space-y-2">',
+			'  <StatBlock label="Queue A" value="128" />',
+			'  <StatBlock label="Queue B" value="256" />',
+			'  <StatBlock label="Queue C" value="512" />',
+			'</div>',
+		].join('\n');
+
+		const patched = patchDeckWithLayoutAudit(deck, [audit]);
+
+		expect(patched.changed).toBe(true);
+		expect(patched.blockedSlides).toEqual([]);
+		expect(countSlideDeckSlides(patched.deckMarkdown)).toBe(2);
+		expect(patched.deckMarkdown).toContain('<Transform :scale="0.88" origin="top left">');
+		expect(patched.deckMarkdown).toContain('<StatBlock label="Queue C" value="512" />');
+		expect(patched.deckMarkdown).not.toContain('zoom: 0.88');
 	});
 
 	test('allows supported single-slot built-in layouts to split content without slot markers', () => {

@@ -13,7 +13,7 @@ The NoteMD workflow must verify all of these steps together:
 1. The active Markdown note is converted into a real Slidev deck before export.
 2. The full Slidev skill directory is discovered, including `references/*.md`, not only `SKILL.md`.
 3. The local Slidev fork is preferred when present.
-4. Existing Slidev decks are copied into a prepared working file before verification so patch/retry never mutates the source note directly.
+4. Existing Slidev decks are copied into an isolated prepared working workspace before verification so patch/retry never mutates the source note directly and sibling Slidev support entries can be mirrored into the working copy.
 5. The output directory is recreated before each HTML build so stale chunks cannot survive.
 6. Generated deck guardrails normalize theme, slide frontmatter, and seed large Mermaid diagram zoom only when the slide does not already declare its own zoom.
 7. HTML export attempts native standalone first and falls back to server-script-compatible HTML when the generated standalone bundle misses slide loader bindings.
@@ -116,15 +116,17 @@ Current landed truth as of 2026-06-18:
 2. the patcher derives `zoom` from measured overflow instead of fixed export constants;
 3. the patcher escalates to structural splitting for supported Mermaid diagrams (`flowchart`, `graph`, `mindmap`, `sequenceDiagram`), Markdown tables, pathological width-heavy tables through record-list fallback, non-Mermaid fenced code blocks, simple heading + paragraph/list slides, generic slot-marked layouts (including explicit `::default::`), and first-slide deck headmatter content when structural splitting is possible;
 4. large Mermaid guardrails no longer overwrite a slide that already declares its own `zoom`;
-5. existing Slidev decks are verified through prepared working copies instead of direct source-file mutation;
-6. the shared `convergeSlidevDeckLayout()` workflow now runs inside `exportSlidesCommand()` and the maintainer verifier, so HTML/PDF/PNG/MP4 export all reuse the same converged prepared deck;
-7. the HTML exporter now rejects known-bad native standalone bundles and falls back to `index.html + start-server.* + README.md`;
-8. the real `docs/architecture.zh-CN.md` workflow now closes with `ok: true`, `28` audited slides, and zero `overflow` / `unreadable-scale` findings with `retryCount = 4`;
-9. `PDF` and `PNG` verification on the same source also return `ok: true`, and now export from the same converged deck instead of the raw prepared source.
+5. existing Slidev decks now use isolated prepared working-copy directories under `_slidev-sources/<deck-basename>/`, and common sibling Slidev support entries such as `layouts/`, `public/`, `setup/`, `components/`, `snippets/`, `styles/`, `global-top.vue`, and `global-bottom.vue` are mirrored into that workspace when present;
+6. rendered layout audit now also measures direct-text `div`/`section`/`article`/`aside`/`span` blocks, so component-heavy slides do not silently under-audit as empty layouts;
+7. component-heavy custom slot layouts can now fall back to local `<Transform :scale=\"...\">` wrapping for the unique overflowing slot zone when structural splitting is unavailable;
+8. the shared `convergeSlidevDeckLayout()` workflow now runs inside `exportSlidesCommand()` and the maintainer verifier, so HTML/PDF/PNG/MP4 export all reuse the same converged prepared deck;
+9. the HTML exporter now rejects known-bad native standalone bundles and falls back to `index.html + start-server.* + README.md`;
+10. the real `docs/architecture.zh-CN.md` workflow now closes with `ok: true`, `28` audited slides, and zero `overflow` / `unreadable-scale` findings with `retryCount = 4`;
+11. `PDF` and `PNG` verification on the same source also return `ok: true`, and now export from the same converged deck instead of the raw prepared source.
 
 Current limitation:
 
-1. richer custom/component-heavy Slidev layouts beyond the current supported structural set remain conservative/manual-review paths;
+1. richer custom/component-heavy Slidev layouts beyond the current supported structural set still remain conservative/manual-review paths, especially when multiple competing component-heavy slot zones exist or when no unique local transform target can be derived safely;
 2. standalone export correctness currently depends on native bundle sanity detection plus server-script fallback rather than on a fully reliable standalone bundling strategy of its own;
 3. full-deck Playwright verification is deliberately slower than representative sampling, so future work should improve convergence rather than weaken the audit;
 4. `obsidian command id=notemd:export-slides` is still only a dispatch-level smoke because the Obsidian CLI does not expose an export-complete handshake.

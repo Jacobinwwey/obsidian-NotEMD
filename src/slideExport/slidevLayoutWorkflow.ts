@@ -311,6 +311,7 @@ async function collectRenderedSlideMeasurement(page: any, slide: number): Promis
 			['code', 'pre, .shiki'],
 			['image', 'img, svg'],
 			['text', 'h1, h2, h3, h4, p, li, blockquote'],
+			['other', 'div, section, article, aside, span'],
 		];
 		const seen = new Set<Element>();
 		const elements = [];
@@ -332,10 +333,23 @@ async function collectRenderedSlideMeasurement(page: any, slide: number): Promis
 					continue;
 				}
 
+				const textLength = (element.textContent || '').trim().length;
+				if (kind === 'other') {
+					const directTextLength = Array.from(element.childNodes)
+						.filter(node => node.nodeType === Node.TEXT_NODE)
+						.map(node => node.textContent || '')
+						.join(' ')
+						.trim()
+						.length;
+					if (directTextLength === 0 || textLength === 0) {
+						continue;
+					}
+				}
+
 				elements.push({
 					kind,
 					selector,
-					textLength: (element.textContent || '').trim().length,
+					textLength,
 					scrollWidth: element.scrollWidth || rect.width,
 					scrollHeight: element.scrollHeight || rect.height,
 					clientWidth: element.clientWidth || rect.width,

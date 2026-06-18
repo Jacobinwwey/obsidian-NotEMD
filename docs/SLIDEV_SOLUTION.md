@@ -9,7 +9,7 @@ NoteMD no longer treats direct `slidev build` as a sufficient proof for the UI e
 The maintained workflow is:
 
 1. The active note is prepared as a Slidev deck when it is not already a Slidev deck.
-2. Existing Slidev decks are copied into a prepared working file before export verification so the verifier can audit and patch without mutating the source note.
+2. Existing Slidev decks are copied into an isolated prepared working workspace before export verification so the verifier can audit and patch without mutating the source note, and so sibling Slidev support entries can be mirrored into the working copy.
 3. The full Slidev skill directory is loaded when available, including `references/*.md`.
 4. Generated decks receive presentation guardrails before export, and large Mermaid guardrails no longer overwrite a slide that already declares `zoom`.
 5. The local Slidev fork is preferred when present.
@@ -105,7 +105,7 @@ Real maintained baseline as of 2026-06-18:
 5. the real `architecture.zh-CN` deck converges to `28` slides after bounded patching with `overflowCount = 0`
 6. `PDF` and `PNG` verification on the same real source also return `ok: true` after exporting from the same converged deck
 7. the current local Slidev `52.16.0` fork falls back to `index.html` for the real `architecture.zh-CN` HTML export after standalone loader-gap detection, and that fallback path still closes at `ok: true`
-8. existing Slidev deck fixtures now go through prepared working copies, so maintainer verification no longer under-audits them as single-slide files
+8. existing Slidev deck fixtures now go through isolated prepared working copies, so maintainer verification no longer under-audits them as single-slide files or loses sibling `layouts/*.vue`
 
 ## Current Rendered Layout Model
 
@@ -125,6 +125,7 @@ The current render-feedback loop is now:
    - pathological width-heavy tables through deterministic record-list fallback
    - non-Mermaid fenced code blocks with vertical chunking
    - generic slot-marked layouts, including explicit `::default::`, supported built-in slot layouts, and custom named slots when the slot content is structurally patchable
+   - unique component-heavy slot zones through local `<Transform :scale="...">` wrapping when structural splitting is unavailable
    - first-slide deck headmatter content when structural splitting is possible
 6. The HTML exporter now rejects known-bad native standalone bundles and falls back to server-script-compatible HTML.
 7. The verifier now audits the full deck by default and keeps retrying within a bounded loop until the rendered deck fits or the retry budget is exhausted.
@@ -137,19 +138,22 @@ Current landed state:
 2. the maintainer verification chain now measures the visible `slidev-page` root with Playwright, captures Mermaid shadow-host bounding boxes, and fails when the actual visible slide root clips content.
 3. the patcher is no longer zoom-only: it first applies overflow-derived `zoom`, then structurally splits supported Mermaid, Markdown table, code-fence, and simple text/list slides when rendered evidence says further shrinking would be the wrong move.
 4. the real product export path now converges the prepared working deck before final `HTML`/`PDF`/`PNG`/`MP4` export, instead of keeping the patch/rebuild loop verifier-only.
-5. `PDF` and `PNG` export now pass `PLAYWRIGHT_BROWSERS_PATH` through the Slidev CLI env so root-run verification can reuse Jacob's browser cache.
-6. the real `docs/architecture.zh-CN.md` HTML workflow now passes with a full-deck Playwright audit, `28` audited slides, `overflowCount = 0`, and bounded retry closure at `retryCount = 4`.
-7. an additional real maintainer-local structural overflow note now proves that Markdown table decomposition and code-fence chunking can converge through the same verifier path instead of only through unit tests.
-8. a real slot/headmatter Slidev deck now proves that native standalone loader gaps are detected and converted into a working `index.html + start-server.* + README.md` fallback instead of being treated as successful standalone output.
-9. real maintainer-local decks now also prove:
+5. existing Slidev deck working copies now live under `_slidev-sources/<deck-basename>/`, and common sibling support entries such as `layouts/`, `public/`, `setup/`, `components/`, `snippets/`, `styles/`, `global-top.vue`, and `global-bottom.vue` are mirrored there when present.
+6. rendered layout audit now also measures direct-text `div`/`section`/`article`/`aside`/`span` blocks, which closes the previous under-audit gap for component-heavy slides.
+7. `PDF` and `PNG` export now pass `PLAYWRIGHT_BROWSERS_PATH` through the Slidev CLI env so root-run verification can reuse Jacob's browser cache.
+8. the real `docs/architecture.zh-CN.md` HTML workflow now passes with a full-deck Playwright audit, `28` audited slides, `overflowCount = 0`, and bounded retry closure at `retryCount = 4`.
+9. an additional real maintainer-local structural overflow note now proves that Markdown table decomposition and code-fence chunking can converge through the same verifier path instead of only through unit tests.
+10. a real slot/headmatter Slidev deck now proves that native standalone loader gaps are detected and converted into a working `index.html + start-server.* + README.md` fallback instead of being treated as successful standalone output.
+11. real maintainer-local decks now also prove:
    - explicit `::default::` slot handling
    - existing Slidev deck working-copy verification
    - pathological table fallback into record-list slides
    - slot-marked custom layouts backed by a real custom `layouts/*.vue` file
+   - component-heavy custom slot layouts converging through unique-zone local `<Transform>` wrapping after rendered overflow detection
 
 Current gap:
 
-1. richer custom/component-heavy Slidev layouts beyond the current supported structural set still fall back to conservative zoom/manual-review behavior;
+1. richer custom/component-heavy Slidev layouts beyond the current supported structural set still fall back to conservative zoom/manual-review behavior, especially when multiple competing component-heavy slot zones exist or no unique local transform target can be derived safely;
 2. standalone export correctness currently depends on native bundle sanity detection plus server-script fallback rather than on a fully reliable standalone bundling strategy of its own;
 3. full-deck Playwright verification is now more correct, but noticeably slower, so future work should improve patch convergence instead of weakening the audit back to representative sampling;
 4. the Obsidian CLI can dispatch `notemd:export-slides`, but it does not expose an export-complete handshake, so host-command smoke is still weaker than the maintainer verifier.

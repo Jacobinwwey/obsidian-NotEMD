@@ -13,7 +13,7 @@ NoteMD 的验证必须把以下步骤串起来看：
 1. 当前 Markdown 笔记会在导出前转换成真正的 Slidev deck。
 2. 能发现完整 Slidev skill 目录，包括 `references/*.md`，而不是只读 `SKILL.md`。
 3. 本地 Slidev fork 存在时会被优先使用。
-4. 现有 Slidev deck 也会先复制到 prepared working file，再进入验证链，避免 patch/retry 直接改写源笔记。
+4. 现有 Slidev deck 也会先复制到隔离的 prepared working workspace，再进入验证链，避免 patch/retry 直接改写源笔记，同时允许把 sibling Slidev support entries 一并镜像进 working copy。
 5. 每次 HTML build 前会重建输出目录，避免旧 chunk 残留。
 6. 生成 deck 的 guardrails 会规范 theme、逐页 frontmatter，并且只在页面本身没有声明 `zoom` 时才为大 Mermaid 图补缺省 zoom。
 7. HTML 导出会先尝试 native standalone；如果生成的 standalone bundle 缺少 slide loader binding，则自动回退到 server-script 兼容 HTML。
@@ -116,15 +116,17 @@ layoutAuditSummary.retryCount
 2. patcher 的 `zoom` 来自真实 overflow 测量，而不是固定导出常数；
 3. patcher 已会在不宜继续缩小时，升级为结构化拆分，当前支持的内容类型包括 Mermaid `flowchart` / `graph` / `mindmap` / `sequenceDiagram`、Markdown table、病态宽表的 record-list fallback、非 Mermaid fenced code block、简单的标题 + 段落/列表页、generic slot-marked layout（含显式 `::default::`），以及可结构拆分的第一张 deck headmatter 页面；
 4. 大 Mermaid guardrail 不会再覆盖页面里已经显式声明的 `zoom`；
-5. 现有 Slidev deck 也会走 prepared working copy 验证链，而不是直接改动源文件；
-6. 共享的 `convergeSlidevDeckLayout()` 现在已经进入 `exportSlidesCommand()` 与维护者 verifier，因此 HTML/PDF/PNG/MP4 都会复用同一个收敛后的 prepared deck；
-7. HTML exporter 现在会拒绝已知坏掉的 native standalone bundle，并回退到 `index.html + start-server.* + README.md`；
-8. 真实 `docs/architecture.zh-CN.md` workflow 现在已经收敛到 `ok: true`、`28` 个审计页、`overflow` 与 `unreadable-scale` 都为零，`retryCount = 4`；
-9. 同一真实源文件的 `PDF` 与 `PNG` 验证也返回 `ok: true`，而且现在导出自同一个收敛后的 deck，而不是 raw prepared source。
+5. 现有 Slidev deck 现在会进入 `_slidev-sources/<deck-basename>/` 隔离 working copy 目录；若 sibling 下存在 `layouts/`、`public/`、`setup/`、`components/`、`snippets/`、`styles/`、`global-top.vue`、`global-bottom.vue` 等常见 Slidev support entries，也会一并镜像进去；
+6. 渲染后布局审计现在也会测量带直接文本的 `div` / `section` / `article` / `aside` / `span`，因此 component-heavy 页面不会再被静默低估成“空布局”；
+7. component-heavy custom slot layout 在结构拆分不可用、且能唯一定位 overflow slot 时，现在可以回退到局部 `<Transform :scale=\"...\">` 包裹；
+8. 共享的 `convergeSlidevDeckLayout()` 现在已经进入 `exportSlidesCommand()` 与维护者 verifier，因此 HTML/PDF/PNG/MP4 都会复用同一个收敛后的 prepared deck；
+9. HTML exporter 现在会拒绝已知坏掉的 native standalone bundle，并回退到 `index.html + start-server.* + README.md`；
+10. 真实 `docs/architecture.zh-CN.md` workflow 现在已经收敛到 `ok: true`、`28` 个审计页、`overflow` 与 `unreadable-scale` 都为零，`retryCount = 4`；
+11. 同一真实源文件的 `PDF` 与 `PNG` 验证也返回 `ok: true`，而且现在导出自同一个收敛后的 deck，而不是 raw prepared source。
 
 当前限制：
 
-1. 超出当前支持集的 richer custom/component-heavy Slidev layout 仍保持保守/manual-review 路径；
+1. 超出当前支持集的 richer custom/component-heavy Slidev layout 仍保持保守/manual-review 路径，尤其是同时存在多个 component-heavy slot zone、无法安全唯一定位 local transform target 的情况；
 2. standalone 导出的正确性目前仍依赖 native bundle 的 sanity detection + server-script fallback，而不是自身已经具备完全可靠的 standalone bundling 策略；
 3. full-deck Playwright 验证故意比代表性抽样更慢，后续优化方向应是提高 patch 收敛能力，而不是退回弱审计；
 4. `obsidian command id=notemd:export-slides` 目前仍只能算 dispatch-level smoke，因为 Obsidian CLI 没有暴露导出完成握手信号。

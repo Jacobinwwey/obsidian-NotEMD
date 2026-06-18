@@ -292,6 +292,13 @@ export function patchDeckWithLayoutAudit(
 			}
 		}
 
+		const transformedSlotSlide = wrapOverflowingSupportedSlotLayoutZoneInTransform(currentSlide, bestScale, currentZoom, resolvedConfig.minReadableScale);
+		if (transformedSlotSlide) {
+			slides[targetIndex] = transformedSlotSlide;
+			changedSlides.push(audit.slide);
+			continue;
+		}
+
 		if (hasSupportedSlotMarkers(currentSlide)) {
 			const splitResult = splitOverflowingSupportedSlotLayoutSlide(currentSlide, audit, currentZoom, nextZoom, resolvedConfig);
 			if (splitResult.slides) {
@@ -320,6 +327,13 @@ export function patchDeckWithLayoutAudit(
 				slideOffset += splitResult.slides.length - 1;
 				continue;
 			}
+		}
+
+		const transformedSurfaceSlide = wrapOverflowingSlideSurfaceInTransform(currentSlide, bestScale, currentZoom, resolvedConfig.minReadableScale);
+		if (transformedSurfaceSlide) {
+			slides[targetIndex] = transformedSurfaceSlide;
+			changedSlides.push(audit.slide);
+			continue;
 		}
 
 		if (bestScale === null || bestScale >= 0.995 || nextZoom === null || nextZoom >= currentZoom - 0.01) {
@@ -861,6 +875,31 @@ function splitOverflowingSupportedSlotLayoutSlide(
 	return { slides: splitSlides };
 }
 
+function wrapOverflowingSupportedSlotLayoutZoneInTransform(
+	slideMarkdown: string,
+	recommendedScale: number | null,
+	currentZoom: number,
+	minReadableScale: number,
+): string | null {
+	const transformScale = deriveMeasuredTransformScale(recommendedScale, currentZoom, minReadableScale);
+	if (transformScale === null) {
+		return null;
+	}
+
+	const surface = parseSupportedSlotLayoutSurface(slideMarkdown);
+	if (!surface) {
+		return null;
+	}
+
+	const targetZone = pickSlotLayoutTransformZone(surface);
+	if (!targetZone) {
+		return null;
+	}
+
+	const wrappedLines = wrapLinesInTransform(targetZone.lines, transformScale);
+	return assembleSupportedSlotLayoutSlide(surface, targetZone, wrappedLines);
+}
+
 function splitOverflowingDeckHeadmatterSlide(
 	slideMarkdown: string,
 	audit: SlidevLayoutAudit,
@@ -984,6 +1023,25 @@ function splitOverflowingSimpleSlide(
 	});
 
 	return { slides: splitSlides };
+}
+
+function wrapOverflowingSlideSurfaceInTransform(
+	slideMarkdown: string,
+	recommendedScale: number | null,
+	currentZoom: number,
+	minReadableScale: number,
+): string | null {
+	const transformScale = deriveMeasuredTransformScale(recommendedScale, currentZoom, minReadableScale);
+	if (transformScale === null) {
+		return null;
+	}
+
+	const surface = extractPatchableSlideSurface(slideMarkdown);
+	if (!surface || !containsTransformableComponentSyntax(surface.bodyLines)) {
+		return null;
+	}
+
+	return assemblePatchedSlide(surface.frontmatterLines, wrapLinesInTransform(surface.bodyLines, transformScale));
 }
 
 function extractPatchableSlideSurface(slideMarkdown: string): PatchableSlideSurface | null {
@@ -1132,7 +1190,8 @@ function pickSlotLayoutTargetZone(
 	if (findings.some(finding => finding.recommendedPatch === 'reduce-code')) {
 		matchers.push(lines => findSingleCodeFenceBlock(lines) !== null);
 	}
-	if (findings.some(finding => finding.recommendedPatch === 'split-slide')) {
+	const hasComponentZone = zones.some(zone => containsTransformableComponentSyntax(zone.lines) || containsTransformWrapper(zone.lines));
+	if (!hasComponentZone && findings.some(finding => finding.recommendedPatch === 'split-slide')) {
 		matchers.push(lines => collectSimpleSlideBlocks(trimOuterBlankLines(lines)).length >= 2);
 	}
 
@@ -1144,6 +1203,33 @@ function pickSlotLayoutTargetZone(
 	}
 
 	return null;
+}
+
+function pickSlotLayoutTransformZone(
+	surface: SupportedSlotLayoutSurface,
+): { kind: 'lead' | 'section'; name: string; lines: string[] } | null {
+	const zones = [
+		{
+			kind: 'lead' as const,
+			name: surface.leadRole,
+			lines: surface.leadLines,
+		},
+		...surface.sections.map(section => ({
+			kind: 'section' as const,
+			name: section.name,
+			lines: section.lines,
+		})),
+	].filter(zone => zone.lines.some(line => line.trim().length > 0));
+
+	const transformableZones = zones.filter(zone =>
+		containsTransformableComponentSyntax(zone.lines)
+		&& !containsTransformWrapper(zone.lines)
+	);
+	if (transformableZones.length !== 1) {
+		return null;
+	}
+
+	return transformableZones[0];
 }
 
 function assembleSupportedSlotLayoutSlide(
@@ -1194,6 +1280,22 @@ function isSupportedSingleSlotLayout(layout: string | null): boolean {
 		'iframe-left',
 		'iframe-right',
 	].includes(layout);
+}
+
+function deriveMeasuredTransformScale(
+	recommendedScale: number | null,
+	currentZoom: number,
+	minReadableScale: number,
+): number | null {
+	if (recommendedScale === null || !Number.isFinite(recommendedScale) || recommendedScale <= 0 || recommendedScale >= 0.995) {
+		return null;
+	}
+
+	if (currentZoom * recommendedScale < minReadableScale) {
+		return null;
+	}
+
+	return clampZoom(recommendedScale);
 }
 
 function readFrontmatterScalar(frontmatterLines: string[], key: string): string | null {
@@ -1774,6 +1876,23 @@ function collectSimpleSlideBlocks(lines: string[]): string[][] {
 	}
 
 	return blocks.filter(block => block.some(line => line.trim().length > 0));
+}
+
+function containsTransformableComponentSyntax(lines: string[]): boolean {
+	return lines.some(line => /^\s*<[A-Za-z][\w-]*(?:\s|>|\/)/.test(line.trim()) || /^\s*<\/[A-Za-z][\w-]*\s*>/.test(line.trim()));
+}
+
+function containsTransformWrapper(lines: string[]): boolean {
+	return lines.some(line => /<(Transform)\b/i.test(line.trim()));
+}
+
+function wrapLinesInTransform(lines: string[], scale: number): string[] {
+	const trimmedLines = trimOuterBlankLines(lines);
+	return [
+		`<Transform :scale="${formatZoom(scale)}" origin="top left">`,
+		...trimmedLines,
+		'</Transform>',
+	];
 }
 
 function isTopLevelListItem(line: string): boolean {

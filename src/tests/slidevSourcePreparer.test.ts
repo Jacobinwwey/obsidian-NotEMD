@@ -1,3 +1,5 @@
+import * as fs from 'fs';
+import * as path from 'path';
 import {
     applySlidevPresentationGuardrails,
     buildDeterministicSlidevDeck,
@@ -7,18 +9,20 @@ import {
 import type { SlideExportConfig } from '../slideExport/types';
 import type { TFile } from 'obsidian';
 import { callLLM } from '../llmUtils';
-import { resolveWorkspaceHomeCandidates, safeRequire } from '../slideExport/platformUtils';
+import { getVaultBasePath, resolveWorkspaceHomeCandidates, safeRequire } from '../slideExport/platformUtils';
 
 jest.mock('../llmUtils', () => ({
     callLLM: jest.fn(),
 }));
 
 jest.mock('../slideExport/platformUtils', () => ({
+    getVaultBasePath: jest.fn(() => null),
     safeRequire: jest.fn(() => null),
     resolveWorkspaceHomeCandidates: jest.fn(() => []),
 }));
 
 const mockCallLLM = callLLM as jest.MockedFunction<typeof callLLM>;
+const mockGetVaultBasePath = getVaultBasePath as jest.MockedFunction<typeof getVaultBasePath>;
 const mockSafeRequire = safeRequire as jest.MockedFunction<typeof safeRequire>;
 const mockResolveWorkspaceHomeCandidates = resolveWorkspaceHomeCandidates as jest.MockedFunction<typeof resolveWorkspaceHomeCandidates>;
 
@@ -65,6 +69,7 @@ describe('slidevSourcePreparer', () => {
         jest.clearAllMocks();
         delete process.env.NOTEMD_SLIDEV_SKILL_DIR;
         mockResolveWorkspaceHomeCandidates.mockReturnValue([]);
+        mockGetVaultBasePath.mockReturnValue(null);
     });
 
     test('detects an existing Slidev deck with headmatter and separators', () => {
@@ -123,7 +128,7 @@ describe('slidevSourcePreparer', () => {
         expect(deck).toContain('layout: section');
     });
 
-    test('existing Slidev decks are copied into the prepared export workspace instead of exporting the source file directly', async () => {
+    test('existing Slidev decks are copied into an isolated prepared export workspace instead of exporting the source file directly', async () => {
         const markdown = [
             '---',
             'theme: default',
@@ -149,12 +154,48 @@ describe('slidevSourcePreparer', () => {
             jest.fn()
         );
 
-        expect(result.inputFilePath).toBe('export/_slidev-sources/existing-slidev.slidev.md');
-        expect(result.preparedDeckPath).toBe('export/_slidev-sources/existing-slidev.slidev.md');
+        expect(result.inputFilePath).toBe('export/_slidev-sources/existing-slidev/existing-slidev.slidev.md');
+        expect(result.preparedDeckPath).toBe('export/_slidev-sources/existing-slidev/existing-slidev.slidev.md');
         expect(app.vault.adapter.write).toHaveBeenCalledWith(
-            'export/_slidev-sources/existing-slidev.slidev.md',
+            'export/_slidev-sources/existing-slidev/existing-slidev.slidev.md',
             markdown
         );
+    });
+
+    test('existing Slidev decks copy sibling layouts into the isolated working copy when desktop filesystem access is available', async () => {
+        const markdown = [
+            '---',
+            'theme: default',
+            'title: Existing Deck',
+            '---',
+            '',
+            '# First',
+        ].join('\n');
+        const app = createApp(markdown);
+        const tempVaultRoot = fs.mkdtempSync(path.join(require('os').tmpdir(), 'notemd-slidev-support-workspace-'));
+        const sourceDirectory = path.join(tempVaultRoot, 'docs');
+        const layoutsDirectory = path.join(sourceDirectory, 'layouts');
+        fs.mkdirSync(layoutsDirectory, { recursive: true });
+        fs.writeFileSync(path.join(layoutsDirectory, 'custom-grid.vue'), '<template><slot /></template>', 'utf8');
+
+        app.vault.adapter.write = jest.fn(async (vaultPath: string, content: string) => {
+            const absolutePath = path.join(tempVaultRoot, vaultPath);
+            fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+            fs.writeFileSync(absolutePath, content, 'utf8');
+        });
+        mockGetVaultBasePath.mockReturnValue(tempVaultRoot);
+        mockSafeRequire.mockImplementation((moduleName: string) => require(moduleName));
+
+        const result = await prepareSlidevExportSource(
+            app,
+            createFile('docs/existing-slidev.md'),
+            config,
+            {},
+            jest.fn()
+        );
+
+        expect(result.inputFilePath).toBe('export/_slidev-sources/existing-slidev/existing-slidev.slidev.md');
+        expect(fs.existsSync(path.join(tempVaultRoot, 'export/_slidev-sources/existing-slidev/layouts/custom-grid.vue'))).toBe(true);
     });
 
     test('deterministic conversion does not split inside fenced code blocks', () => {
@@ -339,13 +380,13 @@ describe('slidevSourcePreparer', () => {
         const source = await prepareSlidevExportSource(app, file, config);
 
         expect(source).toEqual({
-            inputFilePath: 'export/_slidev-sources/slides.slidev.md',
+            inputFilePath: 'export/_slidev-sources/slides/slides.slidev.md',
             outputBasename: 'slides',
-            sourceLabel: 'export/_slidev-sources/slides.slidev.md',
-            preparedDeckPath: 'export/_slidev-sources/slides.slidev.md',
+            sourceLabel: 'export/_slidev-sources/slides/slides.slidev.md',
+            preparedDeckPath: 'export/_slidev-sources/slides/slides.slidev.md',
         });
         expect(app.vault.adapter.write).toHaveBeenCalledWith(
-            'export/_slidev-sources/slides.slidev.md',
+            'export/_slidev-sources/slides/slides.slidev.md',
             markdown
         );
     });

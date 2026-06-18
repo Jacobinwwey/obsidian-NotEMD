@@ -328,7 +328,8 @@ canonical: true
 3. 侧栏已有内联 Slidev export format selector，不再把格式选择完全隐藏；
 4. `exportSlidesCommand()` 现在会先探测环境、准备 Slidev export source、执行共享的 `convergeSlidevDeckLayout()` 收敛链，然后再从收敛后的 prepared deck 导出所选最终格式；
 5. `prepareSlidevExportSource()` 可加载顶层 Slidev skill 和 `references/*.md`，LLM prompt 也明确要求拆分密集页，并避免大图、表格和代码块裁剪；
-6. `scripts/verify-slidev-export-workflow.cjs` 会用真实 `docs/architecture.zh-CN.md` 源文件跑生产模块，并记录 skill reference 数、本地 fork、deck 摘要、Playwright 结果与 `.gitignore` 可见性。
+6. 现有 Slidev deck 现在会被写入 `_slidev-sources/<deck-basename>/` 隔离 working copy；若 sibling 下存在 `layouts/`、`public/`、`setup/`、`components/`、`snippets/`、`styles/`、`global-top.vue`、`global-bottom.vue` 等常见 Slidev support entries，也会一并镜像进去；
+7. `scripts/verify-slidev-export-workflow.cjs` 会用真实 `docs/architecture.zh-CN.md` 源文件跑生产模块，并记录 skill reference 数、本地 fork、deck 摘要、Playwright 结果与 `.gitignore` 可见性。
 
 真正的缺口也很明确：
 
@@ -339,7 +340,7 @@ canonical: true
 | UI 格式选择 | 设置页和侧栏都暴露格式选择；HTML mode 随 HTML 条件显示 | 代码已落地，UI 改动时仍需实机 smoke |
 | 导出产物对 Git 可见 | `verify:slidev-export` 检查生成 deck/output/screenshots 的 `.gitignore` 命中情况 | 已作为工作流证据落地 |
 | 渲染后布局 containment | 真实维护者链路里已经有 visible-root DOM bbox、scroll overflow、Mermaid host、table、code 与 text overflow 审计 | 已落地 |
-| 自动修正 | `SlidevDeckPatch` 已能在有界重试里执行 measured `zoom`、Mermaid / table / code 结构拆分、病态 table 的 record fallback、generic slot-marked layout 拆分，以及第一张 deck headmatter 页的结构拆分；这条 bounded retry loop 现在已被 verifier 与 `exportSlidesCommand()` 共同复用 | 已落地，继续扩展 |
+| 自动修正 | `SlidevDeckPatch` 已能在有界重试里执行 measured `zoom`、Mermaid / table / code 结构拆分、病态 table 的 record fallback、generic slot-marked layout 拆分、component-heavy custom slot 的 local `<Transform>` fallback，以及第一张 deck headmatter 页的结构拆分；这条 bounded retry loop 现在已被 verifier 与 `exportSlidesCommand()` 共同复用 | 已落地，继续扩展 |
 
 `ref/infinite-canvas` 的分析支持 clean-room 方向，而不是代码复用。它真正有价值的架构思想是：world-space nodes 使用 `{ position, width, height }`，viewport 使用 `{ x, y, k }`，通过 screen/world conversion、union bounds、natural image sizing 与 minimap/bounds 计算来管理可视范围。这些思想适合映射成 Slidev 固定 safe rect 上的 export-layout camera；它们不意味着要把 Slidev 变成交互式无限画布。该参考项目是 AGPL-3.0，本项目是 MIT，不能复制实现代码。
 
@@ -348,9 +349,9 @@ canonical: true
 1. 当前 workflow proof 已经明显强于直接 `slidev build`；
 2. 它现在已经带着真实渲染反馈质量门，而不再只是 CLI smoke；
 3. 真实 `docs/architecture.zh-CN.md` HTML fixture 现在已经收敛到 `ok: true`、`28` 个审计页、零 `overflow` / `unreadable-scale`，且 `retryCount = 4`；同一源文件的 `PDF` 与 `PNG` 也返回 `ok: true`；
-4. 当前已经落地的实现真值比最初方案更进一步：workspace-aware 的 local Slidev fork / Slidev skill / Playwright browser cache 解析、对 `https://github.com/Jacobinwwey/slidev.git` 本地 checkout 的实机确认、full-deck visible slide root 审计、现有 Slidev deck 的 prepared working copy 验证，以及覆盖 Mermaid、Markdown table、病态 table record fallback、code fence、密集文本、generic slot-marked layout 与第一张 deck headmatter 页的非 zoom-only patch/rebuild 都已进入真实维护者链路；已知坏掉的 standalone bundle 也会回退到 server-script HTML，而不再被当成成功产物；
+4. 当前已经落地的实现真值比最初方案更进一步：workspace-aware 的 local Slidev fork / Slidev skill / Playwright browser cache 解析、对 `https://github.com/Jacobinwwey/slidev.git` 本地 checkout 的实机确认、full-deck visible slide root 审计、现有 Slidev deck 的 isolated working-copy + sibling support sync 验证，以及覆盖 Mermaid、Markdown table、病态 table record fallback、code fence、密集文本、generic slot-marked layout、component-heavy custom slot 的 local `<Transform>` fallback 与第一张 deck headmatter 页的非 zoom-only patch/rebuild 都已进入真实维护者链路；已知坏掉的 standalone bundle 也会回退到 server-script HTML，而不再被当成成功产物；
 5. 这次最关键的收口是：patch/rebuild loop 不再只是 verifier 能力，真实产品导出路径也已经复用同一条收敛链，因此 `HTML`/`PDF`/`PNG`/`MP4` 都会从同一个 converged prepared deck 导出；
-6. 下一步架构推进已经更收窄：继续扩展 richer component-heavy custom Slidev layout 的结构化 patch，而不是退回代表性抽样页验证；同时还要判断当前 standalone fallback 是否应继续作为产品真值，还是后续再引入更强的 standalone bundling 策略。
+6. 下一步架构推进已经更收窄：继续扩展 richer component-heavy custom Slidev layout 的结构化 patch，而不是退回代表性抽样页验证；当前仍未收口的主要情况是多个 competing component-heavy slot zone 并存、或无法安全唯一定位 local transform target 的 deck；同时还要判断当前 standalone fallback 是否应继续作为产品真值，还是后续再引入更强的 standalone bundling 策略。
 
 ## 3. 相对先前方案语言的深度对比
 

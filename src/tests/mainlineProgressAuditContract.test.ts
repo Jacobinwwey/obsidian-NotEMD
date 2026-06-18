@@ -211,5 +211,9 @@ describe('mainline progress audit contract', () => {
         expect(progressDocZh).toContain('retryCount = 4');
         expect(progressDoc).toContain('https://github.com/Jacobinwwey/slidev.git');
         expect(progressDocZh).toContain('https://github.com/Jacobinwwey/slidev.git');
+        expect(progressDoc).toContain('isolated working copies with sibling support-entry mirroring');
+        expect(progressDocZh).toContain('isolated working-copy + sibling support sync');
+        expect(progressDoc).toContain('component-heavy custom-slot local `<Transform>` fallback');
+        expect(progressDocZh).toContain('component-heavy custom slot 的 local `<Transform>` fallback');
     });
 });
