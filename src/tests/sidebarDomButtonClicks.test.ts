@@ -14,6 +14,7 @@ type MockPlugin = {
         customWorkflowButtonsDsl: string;
         customWorkflowErrorStrategy: 'stop_on_error' | 'continue_on_error';
         enableApiErrorDebugMode: boolean;
+        slideExportDefaultFormat: 'html' | 'pdf' | 'png' | 'mp4';
     };
     saveSettings: jest.Mock<Promise<void>, []>;
     getIsBusy: jest.Mock<boolean, []>;
@@ -147,7 +148,8 @@ function createPluginMock(): MockPlugin {
             conceptNoteFolder: 'Concepts',
             customWorkflowButtonsDsl: 'One-Click Extract::process-current-add-links>batch-generate-from-titles>batch-mermaid-fix',
             customWorkflowErrorStrategy: 'stop_on_error',
-            enableApiErrorDebugMode: false
+            enableApiErrorDebugMode: false,
+            slideExportDefaultFormat: 'html'
         },
         saveSettings: jest.fn().mockResolvedValue(undefined),
         getIsBusy: jest.fn(() => false),
@@ -421,6 +423,21 @@ describe('NotemdSidebarView DOM button wiring', () => {
         await debugToggle!.onchange?.();
 
         expect(plugin.settings.enableApiErrorDebugMode).toBe(true);
+        expect(plugin.saveSettings).toHaveBeenCalledTimes(1);
+    });
+
+    test('renders slide export format selector and saves selected format', async () => {
+        await sidebar.onOpen();
+
+        const selector = contentContainer.findByClass('notemd-slide-export-format-select');
+        expect(selector).not.toBeNull();
+        expect(selector?.tag).toBe('select');
+        expect(selector?.value).toBe('html');
+
+        selector!.value = 'pdf';
+        await selector!.onchange?.();
+
+        expect(plugin.settings.slideExportDefaultFormat).toBe('pdf');
         expect(plugin.saveSettings).toHaveBeenCalledTimes(1);
     });
 

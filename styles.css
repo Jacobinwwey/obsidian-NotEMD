@@ -922,6 +922,24 @@
     min-width: 64px;
 }
 
+.notemd-slide-export-format-control {
+    align-items: center;
+    justify-content: space-between;
+    margin: 0 0 0.12em;
+}
+
+.notemd-slide-export-format-control .notemd-inline-label {
+    min-width: 0;
+    flex: 0 0 auto;
+}
+
+.notemd-slide-export-format-select {
+    flex: 1 1 112px;
+    min-width: 0;
+    max-width: 148px;
+    font-size: 12px;
+}
+
 .notemd-provider-callout {
     border: 1px solid var(--notemd-border);
     border-radius: 12px;

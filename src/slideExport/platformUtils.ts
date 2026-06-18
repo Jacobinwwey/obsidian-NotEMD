@@ -5,7 +5,15 @@
  * Every function returns null/false on mobile — no crashes.
  */
 
+import { Platform } from 'obsidian';
 import type { ExecResult } from './types';
+
+export interface ResolvedSlidevCommand {
+	command: string;
+	argsPrefix: string[];
+	description: string;
+	source: 'local-fork' | 'npx';
+}
 
 /**
  * Check whether we are on a desktop (Electron) Obsidian client.
@@ -13,11 +21,25 @@ import type { ExecResult } from './types';
  */
 export function isDesktopApp(): boolean {
 	try {
-		const Platform = (globalThis as any).Platform;
-		return Platform ? Platform.isDesktopApp === true : false;
+		if (typeof Platform?.isDesktopApp === 'boolean') {
+			return Platform.isDesktopApp;
+		}
 	} catch {
-		return false;
+		// Fall through to runtime checks below.
 	}
+
+	try {
+		const runtimePlatform = (globalThis as any).Platform;
+		if (typeof runtimePlatform?.isDesktopApp === 'boolean') {
+			return runtimePlatform.isDesktopApp;
+		}
+	} catch {
+		// Fall through to Electron feature detection below.
+	}
+
+	return typeof process !== 'undefined'
+		&& !!process.versions?.electron
+		&& typeof require === 'function';
 }
 
 /**
@@ -104,6 +126,99 @@ export function resolveNpxCommand(): string {
 		return os.platform() === 'win32' ? 'npx.cmd' : 'npx';
 	}
 	return 'npx';
+}
+
+export function resolveWorkspaceHomeCandidates(): string[] {
+	const path: any = safeRequire('path');
+	const candidates: string[] = [];
+
+	const pushCandidate = (candidate: string | undefined | null) => {
+		if (typeof candidate !== 'string' || candidate.trim().length === 0) {
+			return;
+		}
+
+		const normalized = path?.resolve?.(candidate) ?? candidate;
+		if (!candidates.includes(normalized)) {
+			candidates.push(normalized);
+		}
+	};
+
+	pushCandidate(process.env.NOTEMD_WORKSPACE_HOME);
+	pushCandidate(process.env.HOME);
+	pushCandidate(process.env.USERPROFILE);
+
+	const cwd = typeof process !== 'undefined' ? process.cwd() : '';
+	if (typeof cwd === 'string' && cwd.length > 0) {
+		pushCandidate(cwd.match(/^\/home\/[^/]+/)?.[0]);
+		if (cwd === '/root' || cwd.startsWith('/root/')) {
+			pushCandidate('/root');
+		}
+		if (path?.dirname) {
+			pushCandidate(path.dirname(cwd));
+			pushCandidate(path.dirname(path.dirname(cwd)));
+		}
+	}
+
+	return candidates;
+}
+
+export function resolvePlaywrightBrowsersPath(): string | null {
+	const fs: any = safeRequire('fs');
+	const path: any = safeRequire('path');
+	if (!fs || !path) {
+		return null;
+	}
+
+	for (const home of resolveWorkspaceHomeCandidates()) {
+		for (const candidate of [
+			path.join(home, '.cache', 'ms-playwright'),
+			path.join(home, 'Library', 'Caches', 'ms-playwright'),
+			path.join(home, 'AppData', 'Local', 'ms-playwright'),
+		]) {
+			try {
+				if (fs.existsSync(candidate)) {
+					return candidate;
+				}
+			} catch {
+				// Try the next candidate.
+			}
+		}
+	}
+
+	return null;
+}
+
+export function resolveSlidevCommand(): ResolvedSlidevCommand {
+	const fs: any = safeRequire('fs');
+	const path: any = safeRequire('path');
+	const workspaceHomes = resolveWorkspaceHomeCandidates();
+	const candidatePaths = [
+		process.env.NOTEMD_SLIDEV_BIN,
+		process.env.SLIDEV_CLI_PATH,
+		...workspaceHomes.map(home => path?.join?.(home, 'slidev', 'packages', 'slidev', 'bin', 'slidev.mjs')),
+	].filter((candidate): candidate is string => typeof candidate === 'string' && candidate.length > 0);
+
+	for (const candidate of candidatePaths) {
+		try {
+			if (fs?.existsSync?.(candidate)) {
+				return {
+					command: candidate,
+					argsPrefix: [],
+					description: candidate,
+					source: 'local-fork',
+				};
+			}
+		} catch {
+			// Try the next candidate.
+		}
+	}
+
+	return {
+		command: resolveNpxCommand(),
+		argsPrefix: ['-y', '@slidev/cli'],
+		description: 'npx -y @slidev/cli',
+		source: 'npx',
+	};
 }
 
 /**

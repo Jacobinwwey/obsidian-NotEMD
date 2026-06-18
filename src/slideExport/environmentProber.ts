@@ -6,7 +6,7 @@
  */
 
 import type { EnvironmentReport, ExportCapabilities, ProbeResult } from './types';
-import { execFileAsync, getOsPlatform, isDesktopApp, resolveNpxCommand } from './platformUtils';
+import { execFileAsync, getOsPlatform, isDesktopApp, resolveNpxCommand, resolvePlaywrightBrowsersPath, resolveSlidevCommand, safeRequire } from './platformUtils';
 
 const MIN_NODE_MAJOR = 20;
 
@@ -32,13 +32,13 @@ export async function probeNode(): Promise<ProbeResult> {
 export async function probeSlidev(): Promise<ProbeResult> {
 	if (!isDesktopApp()) return makeMissingProbe('slidev', 'Not a desktop app');
 
-	const npx = resolveNpxCommand();
-	const result = await execFileAsync(npx, ['@slidev/cli', '--version'], { timeout: 45_000 });
+	const slidev = resolveSlidevCommand();
+	const result = await execFileAsync(slidev.command, [...slidev.argsPrefix, '--version'], { timeout: 45_000 });
 	if (result.exitCode === 0) {
 		const version = result.stdout.trim() || 'available';
-		return { tool: 'slidev', installed: true, version };
+		return { tool: 'slidev', installed: true, version: `${version} (${slidev.description})` };
 	}
-	return { tool: 'slidev', installed: false, version: null, error: 'Not installed (auto-install via npx)' };
+	return { tool: 'slidev', installed: false, version: null, error: `Not available via ${slidev.description}` };
 }
 
 export async function probePlaywright(): Promise<ProbeResult> {
@@ -52,21 +52,21 @@ export async function probePlaywright(): Promise<ProbeResult> {
 		return { tool: 'playwright', installed: true, version: result.stdout.trim() || 'available' };
 	}
 
-	// Fallback: check if chromium binary directory exists
-	const fs: any = require('fs');
-	const path: any = require('path');
-	const home = process.env.HOME || process.env.USERPROFILE || '';
-	const cacheDirs = [
-		path.join(home, '.cache', 'ms-playwright'),
-		path.join(home, 'AppData', 'Local', 'ms-playwright'),
-	];
-	for (const dir of cacheDirs) {
+	const fs: any = safeRequire('fs');
+	if (!fs) {
+		return { tool: 'playwright', installed: false, version: null, error: 'Playwright chromium not installed (auto-install available)' };
+	}
+
+	const browserPath = resolvePlaywrightBrowsersPath();
+	if (browserPath) {
 		try {
-			const entries = fs.readdirSync(dir);
+			const entries = fs.readdirSync(browserPath);
 			if (entries.length > 0) {
 				return { tool: 'playwright', installed: true, version: 'chromium (cached)' };
 			}
-		} catch { /* dir doesn't exist */ }
+		} catch {
+			// Fall through to the missing-tool result below.
+		}
 	}
 
 	return { tool: 'playwright', installed: false, version: null, error: 'Playwright chromium not installed (auto-install available)' };

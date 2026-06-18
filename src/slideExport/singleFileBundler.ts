@@ -82,23 +82,20 @@ function transformToCommonJS(code: string, modulePath: string): string {
 	);
 
 	// 1. Transform static imports: import {...} from "..."
-	//    Match: import{...}from"..." or import ... from "..."
 	code = code.replace(
 		/import\s*\{([^}]+)\}\s*from\s*["']([^"']+)["']\s*;?/g,
 		(match, imports, path) => {
-			// Parse imported names and their aliases
 			const importList = imports.split(',').map((imp: string) => {
 				const parts = imp.trim().split(/\s+as\s+/);
 				if (parts.length === 2) {
-					return `${parts[1].trim()}:${parts[0].trim()}`; // alias:original
+					return `${parts[1].trim()}:${parts[0].trim()}`;
 				}
-				return parts[0].trim(); // same name
+				return parts[0].trim();
 			});
 
 			const varName = `__imp_${Math.random().toString(36).substr(2, 9)}`;
 			let result = `const ${varName}=__require('${path}');`;
 
-			// Destructure imports
 			importList.forEach((imp: string) => {
 				if (imp.includes(':')) {
 					const [alias, original] = imp.split(':');
@@ -142,32 +139,52 @@ function transformToCommonJS(code: string, modulePath: string): string {
 		}
 	);
 
-	// 4. Replace dynamic import() with __require() calls
+	// 4. Transform side-effect imports: import './mod' or import "./mod"
+	code = code.replace(
+		/import\s*["']([^"']+)["']\s*;?/g,
+		(match, modPath) => `__require('${modPath}');`
+	);
+
+	// 5. Replace dynamic import() with __require() calls
 	code = code.replace(
 		/import\s*\(\s*(['"`])([^'"`]+)\1\s*\)/g,
 		(match, quote, path) => {
-			return `Promise.resolve(__require('${path}'))`;
+			return `Promise.resolve(window.__require('${path}'))`;
 		}
 	);
 
-	// 5. Replace import.meta.url with static path
+	// 6. Strip "assets/" prefix from __vite__mapDeps dependency arrays
+	// Modules with dynamic imports have local __vite__mapDeps with hardcoded paths like:
+	// m.f=["assets/c4Diagram-xxx.js", ...] - these need the prefix removed
+	code = code.replace(
+		/"assets\//g,
+		'"'
+	);
+
+	// 7. Replace import.meta.url with static path
 	const moduleUrl = `file:///${modulePath}`;
 	code = code.replace(/import\.meta\.url/g, JSON.stringify(moduleUrl));
 
-	// 6. Replace import.meta.glob patterns (if any)
+	// 8. Replace import.meta.glob patterns (if any)
 	code = code.replace(
 		/import\.meta\.glob\s*\(\s*(['"`])([^'"`]+)\1\s*\)/g,
-		'{}' // Empty object - slides are loaded differently
+		'{}'
 	);
 
-	// 7. Handle exports - convert to module.exports
+	// 9. Handle exports - convert to module.exports
 	//    export { x, y } → module.exports.x = x; module.exports.y = y;
+	//    CRITICAL: export { X as default } must generate BOTH:
+	//    module.exports.default = X AND module.exports = X
+	//    for Vue's defineAsyncComponent compatibility
 	code = code.replace(
 		/export\s*\{([^}]+)\}\s*;?/g,
 		(match, exports) => {
 			return exports.split(',').map((exp: string) => {
 				const parts = exp.trim().split(/\s+as\s+/);
 				if (parts.length === 2) {
+					if (parts[1].trim() === 'default') {
+						return `module.exports.default=module.exports=${parts[0].trim()};`;
+					}
 					return `module.exports.${parts[1].trim()}=${parts[0].trim()};`;
 				}
 				const name = parts[0].trim();
@@ -176,13 +193,13 @@ function transformToCommonJS(code: string, modulePath: string): string {
 		}
 	);
 
-	// 8. export default X → module.exports.default = X; module.exports = X;
+	// 10. export default X → module.exports.default = X; module.exports = X;
 	code = code.replace(
 		/export\s+default\s+/g,
 		'module.exports.default=module.exports='
 	);
 
-	// 9. export const/let/var → define then export
+	// 11. export const/let/var → define then export
 	code = code.replace(
 		/export\s+(const|let|var)\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\s*=/g,
 		(match, keyword, name) => {
@@ -190,7 +207,7 @@ function transformToCommonJS(code: string, modulePath: string): string {
 		}
 	);
 
-	// 10. export function/class
+	// 12. export function/class
 	code = code.replace(
 		/export\s+(function|class)\s+([a-zA-Z_$][a-zA-Z0-9_$]*)/g,
 		(match, keyword, name) => {
@@ -209,11 +226,7 @@ function generateModuleSystem(modules: Map<string, ModuleInfo>): string {
 
 	for (const [modulePath, info] of modules.entries()) {
 		const transformed = transformToCommonJS(info.code, modulePath);
-
-		// Use JSON.stringify to properly escape all special characters
-		// Then escape backticks which JSON.stringify doesn't handle
 		const escaped = JSON.stringify(transformed).replace(/`/g, '\\`');
-
 		moduleEntries.push(`    '${modulePath}': ${escaped}`);
 	}
 
@@ -227,7 +240,6 @@ ${moduleEntries.join(',\n')}
   };
 
   const __moduleCache = {};
-  const __pendingModules = {};
 
   // === Custom Module Loader ===
   window.__require = function(modulePath) {
@@ -245,7 +257,6 @@ ${moduleEntries.join(',\n')}
     // Check if module exists
     if (!__moduleCode[resolved]) {
       console.error('[Module Loader] Module not found:', resolved);
-      console.error('[Module Loader] Available modules:', Object.keys(__moduleCode));
       throw new Error('Cannot find module: ' + resolved);
     }
 
@@ -255,11 +266,9 @@ ${moduleEntries.join(',\n')}
 
     // Execute module code
     try {
-      // Create a bound version of __require that resolves paths relative to current module
       const moduleDir = resolved.substring(0, resolved.lastIndexOf('/'));
       const boundRequire = function(requestPath) {
         if (requestPath.startsWith('./') || requestPath.startsWith('../')) {
-          // Resolve relative to the requesting module's directory
           const parts = (moduleDir + '/' + requestPath).split('/');
           const resolvedParts = [];
           for (const part of parts) {
@@ -295,14 +304,22 @@ ${moduleEntries.join(',\n')}
     }
   };
 
-  // === Dynamic Import Support ===
-  // Override Vite's mapDeps function to prevent fetching
-  window.__vite__mapDeps = function() { return []; };
+  // === Dynamic Import & Vite Support ===
+  // __vite__mapDeps: Resolves dependency indices to file paths.
+  // Strips "assets/" prefix since all modules are flattened in the bundle.
+  window.__vite__mapDeps = function(indexes, depMap, depCache) {
+    if (!depMap || !indexes) return [];
+    return indexes.map(function(i) {
+      var path = depMap[i];
+      if (path && path.startsWith("assets/")) {
+        path = path.substring(7);
+      }
+      return path;
+    });
+  };
 
-  // Vite's preload helper: P(loader, deps, baseUrl)
+  // Vite's preload helper
   window.__vitePreload = function(loader, deps, baseUrl) {
-    // In inline mode, just execute the loader
-    // Dependencies are already embedded
     return Promise.resolve().then(() => {
       if (typeof loader === 'function') {
         return loader();
@@ -311,7 +328,6 @@ ${moduleEntries.join(',\n')}
     });
   };
 
-  // Replace global P function (if exists)
   if (typeof window.P === 'undefined') {
     window.P = window.__vitePreload;
   }
@@ -370,7 +386,6 @@ export async function createSingleFileHtml(
 	// Step 1: Collect all modules
 	onProgress?.('Collecting JavaScript modules...');
 	const modules = await collectModules(app, baseDir);
-	console.log(`Collected ${modules.size} modules`);
 
 	if (modules.size === 0) {
 		throw new Error('No JavaScript modules found in build output');
@@ -397,8 +412,8 @@ export async function createSingleFileHtml(
 	);
 
 	// Step 5: Find entry point
-	const entryModule = Array.from(modules.keys()).find(path =>
-		path.includes('/index-') && !path.includes('modules/')
+	const entryModule = Array.from(modules.keys()).find(p =>
+		p.includes('/index-') && !p.includes('modules/')
 	);
 
 	if (!entryModule) {
@@ -413,7 +428,6 @@ ${moduleSystem}
 // Bootstrap application
 (function() {
   try {
-    // Load entry module
     window.__require('${entryModule}');
   } catch (error) {
     console.error('[Bootstrap] Failed to load application:', error);
@@ -446,8 +460,6 @@ ${moduleSystem}
 
 	const stat = await app.vault.adapter.stat(outputPath);
 
-	onProgress?.('Single-file bundle created successfully');
-
 	return {
 		htmlPath: outputPath,
 		size: stat?.size || html.length,
@@ -467,19 +479,14 @@ export async function estimateBundleSize(
 
 	let totalSize = 0;
 
-	// JS modules
 	for (const module of modules.values()) {
 		totalSize += module.size;
 	}
 
-	// HTML base
 	const htmlStat = await app.vault.adapter.stat(htmlPath);
 	if (htmlStat) totalSize += htmlStat.size;
 
-	// CSS (estimate)
 	totalSize += 100 * 1024; // ~100KB for CSS
-
-	// Overhead for module system
 	totalSize += 50 * 1024; // ~50KB overhead
 
 	return totalSize;

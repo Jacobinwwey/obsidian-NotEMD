@@ -2799,7 +2799,7 @@ export default class NotemdPlugin extends Plugin {
 
     /** Command: Export Slides */
     async exportSlidesCommand(file: TFile, reporter?: ProgressReporter): Promise<void> {
-        const { probeEnvironment, exportSlidevHtml, exportSlidevImages, exportVideoMp4 } = await import('./slideExport');
+        const { probeEnvironment, prepareSlidevExportSource, exportSlidevHtml, exportSlidevPdf, exportSlidevPng, exportVideoMp4 } = await import('./slideExport');
         const uiStrings = this.getUiStrings();
         const config = {
             format: this.settings.slideExportDefaultFormat,
@@ -2814,6 +2814,9 @@ export default class NotemdPlugin extends Plugin {
 
         const modal = new ProgressModal(this.app, uiStrings.slideExport.exportingSlides);
         const modalReporter = reporter || modal;
+        const logSlideExportProgress = (phase: string, detail?: string) => {
+            modalReporter.log(detail ? `${phase}: ${detail}` : phase);
+        };
         modal.open();
 
         try {
@@ -2824,47 +2827,77 @@ export default class NotemdPlugin extends Plugin {
                 throw new Error(uiStrings.slideExport.formatNotSupported.replace('{format}', config.format.toUpperCase()));
             }
 
+            let deckGeneration;
+            try {
+                const { provider, modelName } = this.getProviderAndModelForTask('generateTitle');
+                deckGeneration = {
+                    provider,
+                    modelName,
+                    settings: this.settings,
+                    reporter: modalReporter,
+                };
+            } catch (providerError) {
+                const message = providerError instanceof Error ? providerError.message : String(providerError);
+                modalReporter.log(`Slide deck LLM preparation unavailable: ${message}`);
+            }
+
+            const slideSource = await prepareSlidevExportSource(
+                this.app,
+                file,
+                config,
+                { deckGeneration },
+                logSlideExportProgress
+            );
+
             if (config.format === 'html') {
                 const outputPath = await exportSlidevHtml(
                     this.app,
-                    file,
+                    slideSource,
                     config,
-                    (message) => modalReporter.log(message)
+                    logSlideExportProgress
                 );
                 modalReporter.log(uiStrings.slideExport.exportSuccess.replace('{path}', outputPath));
                 new Notice(uiStrings.slideExport.exportComplete);
 
-                // Automatically open in browser via local server
-                modalReporter.log('Opening in browser...');
-                const { openHtmlInBrowser } = await import('./slideExport/localServer');
-                const vaultRoot = (this.app.vault.adapter as any).basePath;
-                await openHtmlInBrowser(outputPath, vaultRoot);
-            } else if (config.format === 'pdf' || config.format === 'png') {
-                const outputPath = await exportSlidevImages(
+                if (config.htmlMode === 'server-script') {
+                    modalReporter.log('Opening in browser...');
+                    const { openHtmlInBrowser } = await import('./slideExport/localServer');
+                    const vaultRoot = (this.app.vault.adapter as any).basePath;
+                    await openHtmlInBrowser(outputPath, vaultRoot);
+                }
+            } else if (config.format === 'pdf') {
+                const outputPath = await exportSlidevPdf(
                     this.app,
-                    file,
+                    slideSource,
                     config,
-                    config.format,
-                    (message) => modalReporter.log(message)
+                    logSlideExportProgress
+                );
+                modalReporter.log(uiStrings.slideExport.exportSuccess.replace('{path}', outputPath));
+                new Notice(uiStrings.slideExport.exportComplete);
+            } else if (config.format === 'png') {
+                const outputPath = await exportSlidevPng(
+                    this.app,
+                    slideSource,
+                    config,
+                    logSlideExportProgress
                 );
                 modalReporter.log(uiStrings.slideExport.exportSuccess.replace('{path}', outputPath));
                 new Notice(uiStrings.slideExport.exportComplete);
             } else if (config.format === 'mp4') {
                 modalReporter.log(uiStrings.slideExport.exportingPngSequence);
-                const pngDir = await exportSlidevImages(
+                const pngDir = await exportSlidevPng(
                     this.app,
-                    file,
+                    slideSource,
                     config,
-                    'png',
-                    (message: string) => modalReporter.log(message)
+                    logSlideExportProgress
                 );
                 modalReporter.log(uiStrings.slideExport.convertingToVideo);
                 const outputPath = await exportVideoMp4(
                     this.app,
                     pngDir,
-                    file.basename,
+                    slideSource.outputBasename,
                     config,
-                    (message: string) => modalReporter.log(message)
+                    logSlideExportProgress
                 );
                 modalReporter.log(uiStrings.slideExport.exportSuccess.replace('{path}', outputPath));
                 new Notice(uiStrings.slideExport.exportComplete);

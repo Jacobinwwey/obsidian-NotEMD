@@ -1,6 +1,6 @@
 import { Editor, ItemView, MarkdownView, Notice, TFile, TFolder, WorkspaceLeaf } from 'obsidian';
 import NotemdPlugin from '../main';
-import { ApiLivenessEvent, ApiLivenessPhase, ProgressReporter } from '../types';
+import { ApiLivenessEvent, ApiLivenessPhase, NotemdSettings, ProgressReporter } from '../types';
 import { NOTEMD_SIDEBAR_ICON, NOTEMD_SIDEBAR_VIEW_TYPE } from '../constants';
 import { findDuplicates } from '../fileUtils';
 import {
@@ -56,6 +56,7 @@ interface ApiActivityRequestRecord {
 const API_ACTIVITY_RECENT_LIMIT = 6;
 const API_ACTIVITY_HISTORY_LIMIT = 20;
 const API_ACTIVITY_VISIBLE_HISTORY_LIMIT = 6;
+const SLIDE_EXPORT_FORMATS: Array<NotemdSettings['slideExportDefaultFormat']> = ['html', 'pdf', 'png', 'mp4'];
 
 const ACTION_CATEGORY_CONFIG: Record<ActionCategory, { openByDefault: boolean }> = {
     core: { openByDefault: true },
@@ -110,6 +111,7 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
     private logEl: HTMLElement | null = null;
     private cancelButton: HTMLButtonElement | null = null;
     private languageSelector: HTMLSelectElement | null = null;
+    private slideExportFormatSelector: HTMLSelectElement | null = null;
     private apiLivenessPhase: ApiLivenessVisualPhase = 'idle';
     private apiLivenessTimer: ReturnType<typeof setTimeout> | null = null;
     private apiLivenessRequests = new Map<string, ApiActivityRequestRecord>();
@@ -753,6 +755,9 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         if (this.languageSelector) {
             this.languageSelector.disabled = processing;
         }
+        if (this.slideExportFormatSelector) {
+            this.slideExportFormatSelector.disabled = processing;
+        }
 
         if (this.cancelButton) {
             this.cancelButton.disabled = !processing || this.isCancelled;
@@ -1166,6 +1171,35 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
         };
     }
 
+    private buildSlideExportFormatSelector(parent: HTMLElement) {
+        const i18n = this.getStrings();
+        const row = parent.createDiv({ cls: 'notemd-inline-control notemd-slide-export-format-control' });
+        row.createEl('label', {
+            text: i18n.slideExport.defaultFormatName,
+            cls: 'notemd-inline-label'
+        });
+
+        const selector = row.createEl('select', { cls: 'notemd-slide-export-format-select' }) as HTMLSelectElement;
+        selector.title = i18n.slideExport.defaultFormatDesc;
+        SLIDE_EXPORT_FORMATS.forEach(format => {
+            const option = selector.createEl('option', { text: format.toUpperCase() }) as HTMLOptionElement;
+            option.value = format;
+        });
+
+        const currentFormat = this.plugin.settings.slideExportDefaultFormat;
+        selector.value = SLIDE_EXPORT_FORMATS.includes(currentFormat) ? currentFormat : 'html';
+        selector.onchange = async () => {
+            const selectedFormat = selector.value as NotemdSettings['slideExportDefaultFormat'];
+            if (!SLIDE_EXPORT_FORMATS.includes(selectedFormat)) {
+                return;
+            }
+            this.plugin.settings.slideExportDefaultFormat = selectedFormat;
+            await this.plugin.saveSettings();
+        };
+
+        this.slideExportFormatSelector = selector;
+    }
+
     private buildDiagramIntentSelector(parent: HTMLElement) {
         const i18n = this.getStrings();
         const row = parent.createDiv({ cls: 'notemd-inline-control' });
@@ -1264,6 +1298,10 @@ export class NotemdSidebarView extends ItemView implements ProgressReporter {
             defs.forEach(def => {
                 this.createActionButton(body, def.id, def.category);
             });
+
+            if (category === 'export') {
+                this.buildSlideExportFormatSelector(body);
+            }
 
             if (category === 'generation') {
                 this.buildDiagramIntentSelector(body);

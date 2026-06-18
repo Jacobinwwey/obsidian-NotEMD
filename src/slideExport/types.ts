@@ -41,6 +41,15 @@ export interface SlideExportConfig {
 	htmlMode?: 'standalone' | 'server-script';
 }
 
+export interface SlidevExportSource {
+	inputFilePath: string;
+	outputBasename: string;
+	sourceLabel: string;
+	preparedDeckPath?: string;
+	skillRootPath?: string;
+	skillReferencePaths?: string[];
+}
+
 export interface ExecResult {
 	exitCode: number | null;
 	stdout: string;

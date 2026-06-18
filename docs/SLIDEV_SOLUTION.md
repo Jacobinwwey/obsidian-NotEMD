@@ -1,173 +1,147 @@
-# Slidev HTML Export - Solution Summary
+# Slidev Export Solution Summary
 
-## Problem Identified
+This document records the current Slidev export truth for NoteMD.
 
-Slidev HTML exports failed to display when opened directly (via `file://` protocol) in Chrome, Firefox, and Edge browsers. The root cause was:
+## Current Export Model
 
-- Slidev uses ES modules with dynamic imports (`import()`)
-- Modern browsers block dynamic imports under `file://` protocol due to CORS security policy
-- The bundled JavaScript contains `__vite__mapDeps` function that attempts to load modules dynamically
-- Even with relative paths (`--base ./`), the CORS restriction applies
+NoteMD no longer treats direct `slidev build` as a sufficient proof for the UI export buttons.
 
-## Solution Implemented
+The maintained workflow is:
 
-**Standalone Server Scripts** - Generate platform-specific scripts alongside HTML exports that users can run independently:
+1. The active note is prepared as a Slidev deck when it is not already a Slidev deck.
+2. The full Slidev skill directory is loaded when available, including `references/*.md`.
+3. Generated decks receive presentation guardrails before export.
+4. The local Slidev fork is preferred when present.
+5. HTML output directories are recreated before build to avoid stale assets.
+6. Browser rendering is verified with Playwright for representative slides.
 
-### Generated Files
+The canonical maintainer workflow is documented in:
 
-For each HTML export, the plugin now creates:
+```text
+docs/maintainer/slidev-export-workflow.md
+docs/maintainer/slidev-export-workflow.zh-CN.md
+```
 
-1. **`index.html`** - The Slidev presentation
-2. **`assets/`** - JavaScript and CSS bundles
-3. **`start-server.sh`** - Unix/macOS/Linux server launcher
-4. **`start-server.bat`** - Windows server launcher
-5. **`README.md`** - User instructions with shortcuts
+## HTML Modes
 
-### How It Works
+### Standalone HTML
 
-**User workflow:**
+Standalone HTML is the preferred local-inspection path when the installed Slidev CLI supports `--standalone-bundle`.
+
+Expected output:
+
+```text
+docs/export/<source-basename>-slides/index-standalone.html
+```
+
+This path should be openable directly from the filesystem and is the default mode used by:
+
 ```bash
-# Navigate to export directory
-cd vault/export/presentation-name-slides/
-
-# Run the server script
-./start-server.sh          # macOS/Linux
-start-server.bat           # Windows
-
-# Open browser to http://localhost:8765
+npm run verify:slidev-export
 ```
 
-**Script features:**
-- Auto-detects Python 3, Python 2, or Node.js
-- Starts HTTP server on port 8765
-- Provides clear error messages if no server available
-- Simple Ctrl+C to stop
+### Server-Script HTML
 
-## Key Design Decisions
+Server-script mode remains available for compatibility with normal Slidev SPA builds that need HTTP serving.
 
-### ✅ What We Did
-- **No embedded server in plugin** - Zero attack surface for the plugin
-- **Standalone scripts** - Work without Obsidian or plugin running
-- **Cross-platform** - Windows, macOS, Linux support
-- **User-friendly** - Single command execution
-- **Secure** - Localhost-only, manual start/stop
+Expected output:
 
-### ❌ What We Rejected
-- ~~Embedded HTTP server in plugin~~ - Security risk
-- ~~Force single-file bundle~~ - Not supported by Slidev/Vite architecture
-- ~~Service Worker workaround~~ - Requires `file://` to already work
-- ~~Modify Vite bundler~~ - Too invasive, breaks Slidev updates
-
-## Implementation
-
-### Modified Files
-```
-src/slideExport/serverScripts.ts (NEW)
-  - Generate start-server.sh
-  - Generate start-server.bat  
-  - Generate README.md
-
-src/slideExport/slidevExporter.ts
-  - Call createServerScripts() after HTML build
-  - Pass export path for script generation
-
-src/slideExport/localServer.ts (NEW, optional)
-  - Auto-launch helper when plugin is active
-  - Manages temporary servers during active session
-
-src/main.ts
-  - Import stopAllServers for cleanup
-  - Optional: Auto-open in browser on export
+```text
+docs/export/<source-basename>-slides/index.html
+docs/export/<source-basename>-slides/start-server.sh
+docs/export/<source-basename>-slides/start-server.bat
+docs/export/<source-basename>-slides/README.md
 ```
 
-### Build Configuration
-- Added `--base ./` to Slidev build for relative paths
-- Kept `--router-mode hash` for proper navigation
-- No special Vite/Rolldown configuration needed
+Use this mode when a build must be served via localhost instead of opened as a standalone file.
 
-## Testing Verification
+## Local Fork Resolution
 
-### ✅ Completed Tests
-- [x] HTML export generates all required files
-- [x] Server script runs on macOS/Linux
-- [x] Python 3 HTTP server detected and used
-- [x] Presentation loads at http://localhost:8765
-- [x] All slides navigable with proper routing
-- [x] Dynamic features work (v-clicks, transitions)
-- [x] Works in Firefox, Chrome, Edge
-- [x] Works when Obsidian is completely closed
-- [x] README provides clear instructions
-- [x] No HTTP server embedded in plugin code
+Slidev command resolution prefers:
 
-### Test Results
+1. `NOTEMD_SLIDEV_BIN`
+2. `SLIDEV_CLI_PATH`
+3. `$HOME/slidev/packages/slidev/bin/slidev.mjs`
+4. `npx -y @slidev/cli`
+
+On Jacob's workstation, the maintained verification path should report the local fork path in `environment.slidev.version`.
+
+## Real Verification Command
+
+Run:
+
 ```bash
-# Build successful
-npm run build ✓
-
-# Export directory structure
-docs/export/test-slidev-real/
-├── index.html
-├── assets/
-│   ├── index-WCI2Sn3v.js
-│   ├── modules/
-│   └── slidev/
-├── start-server.sh (755)
-├── start-server.bat
-└── README.md
-
-# Server test
-./start-server.sh
-  → Server started on port 8765 ✓
-  → http://localhost:8765 accessible ✓
-  → Slides load correctly ✓
+npm run verify:slidev-export
 ```
 
-## User Experience
+Default real source:
 
-### Before (Broken)
-1. User exports HTML
-2. User double-clicks `index.html`
-3. Browser shows blank page with console errors
-4. User confused, cannot view presentation
+```text
+docs/architecture.zh-CN.md
+```
 
-### After (Working)
-1. User exports HTML
-2. Plugin generates server scripts + README
-3. User runs `./start-server.sh` in export directory
-4. Browser shows presentation at http://localhost:8765
-5. User views slides, presses Ctrl+C when done
+Important pass conditions:
 
-## Security Benefits
+1. `ok: true`
+2. `slideSource.skillReferenceCount > 0`
+3. `ignoredOutputs: []`
+4. no stale deck text
+5. no missing-theme marker such as `seriph`
+6. every Playwright sample has `failed: false`
 
-- **No persistent server** - User controls when server runs
-- **Localhost only** - No external network exposure
-- **Manual operation** - Explicit user action required
-- **Plugin-independent** - Works without plugin running
-- **Clean shutdown** - Simple Ctrl+C termination
-- **No attack surface** - Plugin runs zero network services
+## Next-Level Rendered Layout Plan
 
-## Documentation
+The current workflow is now strong enough to reject broken wiring, missing skill references, stale output directories, missing local fork usage, and browser-open failures. It is not yet strong enough to reject all visually bad decks.
 
-Created comprehensive documentation:
-- `docs/SLIDEV_HTML_FIX.md` - Technical implementation details
-- `README.md` (in each export) - End-user instructions
-- Server script comments - Clear usage instructions
+The remaining architecture gap is a render-feedback loop:
 
-## Future Enhancements (Optional)
+1. `prepareSlidevExportSource()` loads the full Slidev skill directory and asks the LLM to split dense sections, but `applySlidevPresentationGuardrails()` still uses text-level heuristics, mainly Mermaid fence line counts and static `zoom` values.
+2. `exportSlidevHtml()`, `exportSlidevPdf()`, and `exportSlidevPng()` invoke Slidev and return paths; they do not measure rendered geometry.
+3. `scripts/verify-slidev-export-workflow.cjs` samples browser pages and screenshots, but the current `ok` value is based on browser errors, output existence, stale-text checks, and `.gitignore` visibility. It does not fail on clipped tables, cropped Mermaid SVGs, or unreadably small text.
 
-1. **Auto-detect busy ports** - Try 8766, 8767 if 8765 is occupied
-2. **Browser auto-open** - Launch default browser automatically
-3. **QR code generation** - For mobile device viewing
-4. **Server status indicator** - Show running servers in plugin UI
-5. **Custom port selection** - Let users choose port in settings
+The next design should add three owned pieces:
 
-## Conclusion
+1. `SlidevRenderedMeasure`: Playwright-based measurement of fonts, images, Mermaid SVGs, tables, code blocks, and slide scroll state after render.
+2. `SlidevOverflowAudit`: deterministic classification of overflow, clipped SVG/viewBox content, table/code natural-width overflow, edge-pixel risk, stale deck text, and unreadable scale.
+3. `SlidevDeckPatch`: bounded retry logic that patches deck Markdown by splitting dense slides, decomposing tables/diagrams, or applying readable `zoom`/`Transform` values. It should fail closed after two retries.
 
-The solution successfully resolves the HTML export issue while maintaining:
-- **Security** - No embedded servers, no attack vectors
-- **Usability** - Simple one-command operation
-- **Independence** - Works without plugin or Obsidian
-- **Cross-platform** - Windows, macOS, Linux support
-- **Maintainability** - Clean architecture, minimal code
+The clean-room reference from `ref/infinite-canvas` is the world-rect and viewport-transform idea: nodes have `{ position, width, height }`, the viewport has `{ x, y, k }`, and visible bounds are derived from transform math. For NoteMD export, that becomes an export-layout camera for a fixed Slidev safe rectangle, not an interactive infinite canvas. Because the reference project is AGPL-3.0 and NoteMD is MIT, implementation must be independent.
 
-All requirements met with an elegant, robust, and secure implementation.
+Current landed state:
+
+1. `verify:slidev-export` now resolves Jacob's local Slidev fork, Slidev skill references, and Playwright browser cache from workspace-aware paths instead of trusting the current process home blindly.
+2. the maintainer verification chain now measures the visible `slidev-page` root with Playwright, captures Mermaid shadow-host bounding boxes, and fails when the actual visible slide root clips content.
+3. the first patcher is zoom-only and bounded; it rewrites per-slide `zoom` in the prepared deck and rebuilds until sampled HTML slides fit, which is now proven on the real `docs/architecture.zh-CN.md` standalone export.
+4. `PDF` and `PNG` export now pass `PLAYWRIGHT_BROWSERS_PATH` through the Slidev CLI env so root-run verification can reuse Jacob's browser cache.
+
+Current gap:
+
+1. the patcher does not yet split dense slides or decompose oversized diagrams/tables;
+2. default verification still audits representative slides rather than the full deck.
+
+## Output Policy
+
+The verification command writes inspectable files under `docs/export/`. They are useful local evidence, but they are not meant to be committed unless a release or documentation task explicitly asks for those generated artifacts.
+
+Before committing, check:
+
+```bash
+git status --short docs/export
+git check-ignore -v docs/export/_slidev-sources/architecture.zh-CN.slidev.md docs/export/architecture.zh-CN-slides/index-standalone.html
+```
+
+For local verification artifacts, `git check-ignore` should print nothing.
+
+## Why The Workflow Was Hardened
+
+The previous workflow missed several failure modes:
+
+1. direct CLI smoke tests did not prove that UI actions called source preparation;
+2. non-outline export did not have a durable proof that full Slidev references were available to deck generation;
+3. stale output directories allowed old chunks or old deck content to survive rebuilds;
+4. LLM-created decks could emit malformed per-slide frontmatter;
+5. LLM-created decks could select uninstalled themes;
+6. large Mermaid diagrams could overflow the 16:9 canvas;
+7. generated output could be hard to inspect if ignored or cleaned too early.
+
+The current verification workflow makes those failure modes explicit.

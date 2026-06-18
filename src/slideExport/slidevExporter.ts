@@ -1,21 +1,91 @@
 /**
  * Slide Export — Slidev CLI wrapper
  *
- * Orchestrates `npx @slidev/cli build/export` via child_process.
+ * Orchestrates Slidev CLI build/export via child_process.
  * All arguments passed as arrays to execFile — no shell interpolation.
  */
 
-import type { App, TFile } from 'obsidian';
-import type { SlideExportConfig, ExecResult, ExportProgressCallback } from './types';
-import { execFileAsync, getVaultBasePath, resolveNpxCommand } from './platformUtils';
+import type { App } from 'obsidian';
+import type { SlideExportConfig, ExecResult, ExportProgressCallback, SlidevExportSource } from './types';
+import { execFileAsync, getVaultBasePath, resolveNpxCommand, resolvePlaywrightBrowsersPath, resolveSlidevCommand, safeRequire } from './platformUtils';
+
+function createBuildArgs(
+	inputPath: string,
+	outputDir: string,
+	config: SlideExportConfig,
+	extraArgs: string[],
+): string[] {
+	const args = [
+		'build',
+		'--out', outputDir,
+		'--base', './',
+		'--router-mode', 'hash',
+		...extraArgs,
+	];
+	if (config.slidevTheme) {
+		args.push('--theme', config.slidevTheme);
+	}
+	args.push(inputPath);
+	return args;
+}
+
+function ensureDirectoryExists(directoryPath: string): void {
+	const fs: any = safeRequire('fs');
+	fs?.mkdirSync?.(directoryPath, { recursive: true });
+}
+
+function recreateDirectory(directoryPath: string): void {
+	const fs: any = safeRequire('fs');
+	fs?.rmSync?.(directoryPath, { recursive: true, force: true });
+	fs?.mkdirSync?.(directoryPath, { recursive: true });
+}
 
 /**
  * Export Markdown as a Slidev SPA (HTML build).
- * npx -y @slidev/cli build --output <dir> --router-mode hash <input.md>
  */
 export async function exportSlidevHtml(
 	app: App,
-	sourceFile: TFile,
+	source: SlidevExportSource,
+	config: SlideExportConfig,
+	onProgress?: ExportProgressCallback,
+): Promise<string> {
+	if ((config.htmlMode ?? 'standalone') === 'server-script') {
+		return exportSlidevServerHtml(app, source, config, onProgress);
+	}
+	return exportSlidevStandaloneHtml(app, source, config, onProgress);
+}
+
+async function exportSlidevStandaloneHtml(
+	app: App,
+	source: SlidevExportSource,
+	config: SlideExportConfig,
+	onProgress?: ExportProgressCallback,
+): Promise<string> {
+	onProgress?.('slidev-build', 'Building standalone Slidev HTML...');
+	const vaultRoot = getVaultBasePath(app);
+	if (!vaultRoot) throw new Error('Vault root path unavailable');
+
+	const inputPath = `${vaultRoot}/${source.inputFilePath}`;
+	const outputDir = `${vaultRoot}/${config.outputSubfolder}/${source.outputBasename}-slides`;
+	const slidev = resolveSlidevCommand();
+	recreateDirectory(outputDir);
+	const args = [
+		...slidev.argsPrefix,
+		...createBuildArgs(inputPath, outputDir, config, ['--standalone-bundle']),
+	];
+
+	const result = await execFileAsync(slidev.command, args, { cwd: vaultRoot, timeout: config.timeoutMs });
+	if (result.exitCode !== 0) {
+		throw new Error(`Slidev standalone build failed via ${slidev.description} (exit ${result.exitCode}): ${result.stderr || result.error?.message || 'unknown error'}`);
+	}
+
+	onProgress?.('slidev-build', `Standalone HTML created via ${slidev.description}`);
+	return `${config.outputSubfolder}/${source.outputBasename}-slides/index-standalone.html`;
+}
+
+async function exportSlidevServerHtml(
+	app: App,
+	source: SlidevExportSource,
 	config: SlideExportConfig,
 	onProgress?: ExportProgressCallback,
 ): Promise<string> {
@@ -23,96 +93,118 @@ export async function exportSlidevHtml(
 	const vaultRoot = getVaultBasePath(app);
 	if (!vaultRoot) throw new Error('Vault root path unavailable');
 
-	const inputPath = `${vaultRoot}/${sourceFile.path}`;
-	const outputDir = `${vaultRoot}/${config.outputSubfolder}/${sourceFile.basename}-slides`;
-	const npx = resolveNpxCommand();
+	const inputPath = `${vaultRoot}/${source.inputFilePath}`;
+	const outputDir = `${vaultRoot}/${config.outputSubfolder}/${source.outputBasename}-slides`;
+	const slidev = resolveSlidevCommand();
+	recreateDirectory(outputDir);
+	const args = [
+		...slidev.argsPrefix,
+		...createBuildArgs(inputPath, outputDir, config, []),
+	];
+
+	const result = await execFileAsync(slidev.command, args, { cwd: vaultRoot, timeout: config.timeoutMs });
+	if (result.exitCode !== 0) {
+		throw new Error(`Slidev build failed via ${slidev.description} (exit ${result.exitCode}): ${result.stderr || result.error?.message || 'unknown error'}`);
+	}
+
+	const exportPath = `${config.outputSubfolder}/${source.outputBasename}-slides/index.html`;
+
+	onProgress?.('slidev-build', 'Creating server scripts...');
+	const { createServerScripts } = await import('./serverScripts');
+	await createServerScripts(app, exportPath);
+
+	onProgress?.('slidev-build', `HTML build complete via ${slidev.description} (requires local server)`);
+	return exportPath;
+}
+
+/**
+ * Export slides as a PDF.
+ */
+export async function exportSlidevPdf(
+	app: App,
+	source: SlidevExportSource,
+	config: SlideExportConfig,
+	onProgress?: ExportProgressCallback,
+): Promise<string> {
+	onProgress?.('slidev-export', 'Exporting PDF...');
+	const vaultRoot = getVaultBasePath(app);
+	if (!vaultRoot) throw new Error('Vault root path unavailable');
+
+	const inputPath = `${vaultRoot}/${source.inputFilePath}`;
+	const outputDir = `${vaultRoot}/${config.outputSubfolder}`;
+	const slidev = resolveSlidevCommand();
+	ensureDirectoryExists(outputDir);
+	const outputPath = `${outputDir}/${source.outputBasename}.pdf`;
+	const playwrightBrowsersPath = resolvePlaywrightBrowsersPath();
 
 	const args = [
-		'-y', '@slidev/cli', 'build',
-		'--output', outputDir,
-		'--base', './',
-		'--router-mode', 'hash',
+		...slidev.argsPrefix,
+		'export',
+		'--format', 'pdf',
+		'--output', outputPath,
 		inputPath,
 	];
 	if (config.slidevTheme) {
 		args.push('--theme', config.slidevTheme);
 	}
 
-	const result = await execFileAsync(npx, args, { cwd: vaultRoot, timeout: config.timeoutMs });
+	const result = await execFileAsync(slidev.command, args, {
+		cwd: vaultRoot,
+		timeout: config.timeoutMs,
+		env: playwrightBrowsersPath ? { PLAYWRIGHT_BROWSERS_PATH: playwrightBrowsersPath } : undefined,
+	});
 	if (result.exitCode !== 0) {
-		throw new Error(`Slidev build failed (exit ${result.exitCode}): ${result.stderr || result.error?.message || 'unknown error'}`);
+		throw new Error(`Slidev export failed via ${slidev.description} (exit ${result.exitCode}): ${result.stderr || result.error?.message || 'unknown error'}`);
 	}
 
-	const exportPath = `${config.outputSubfolder}/${sourceFile.basename}-slides/index.html`;
-
-	// Check HTML mode setting
-	if (config.htmlMode === 'standalone') {
-		// Create single-file bundle
-		onProgress?.('slidev-build', 'Creating standalone bundle...');
-		const { createSingleFileHtml } = await import('./singleFileBundler');
-
-		const bundleResult = await createSingleFileHtml(
-			app,
-			exportPath,
-			(msg) => onProgress?.('slidev-build', msg)
-		);
-
-		onProgress?.('slidev-build', `Standalone HTML created (${(bundleResult.size / 1024 / 1024).toFixed(2)} MB)`);
-		return bundleResult.htmlPath;
-	} else {
-		// Create server scripts for manual serving
-		onProgress?.('slidev-build', 'Creating server scripts...');
-		const { createServerScripts } = await import('./serverScripts');
-		await createServerScripts(app, exportPath);
-
-		onProgress?.('slidev-build', 'HTML build complete (requires local server)');
-		return exportPath;
-	}
+	onProgress?.('slidev-export', 'PDF export complete');
+	return `${config.outputSubfolder}/${source.outputBasename}.pdf`;
 }
 
 /**
- * Export slides as PDF or PNG.
- * npx -y @slidev/cli export --format <pdf|png> [--with-clicks] <input.md>
+ * Export slides as a PNG sequence.
  */
-export async function exportSlidevImages(
+export async function exportSlidevPng(
 	app: App,
-	sourceFile: TFile,
+	source: SlidevExportSource,
 	config: SlideExportConfig,
-	format: 'pdf' | 'png',
 	onProgress?: ExportProgressCallback,
 ): Promise<string> {
-	onProgress?.('slidev-export', `Exporting ${format.toUpperCase()}...`);
+	onProgress?.('slidev-export', 'Exporting PNG...');
 	const vaultRoot = getVaultBasePath(app);
 	if (!vaultRoot) throw new Error('Vault root path unavailable');
 
-	const inputPath = `${vaultRoot}/${sourceFile.path}`;
-	const outputDir = `${vaultRoot}/${config.outputSubfolder}`;
-	const npx = resolveNpxCommand();
+	const inputPath = `${vaultRoot}/${source.inputFilePath}`;
+	const outputDir = `${vaultRoot}/${config.outputSubfolder}/${source.outputBasename}-slides-png`;
+	const slidev = resolveSlidevCommand();
+	recreateDirectory(outputDir);
+	const playwrightBrowsersPath = resolvePlaywrightBrowsersPath();
 
 	const args = [
-		'-y', '@slidev/cli', 'export',
-		'--format', format,
+		...slidev.argsPrefix,
+		'export',
+		'--format', 'png',
 		'--output', outputDir,
 		inputPath,
 	];
-	if (config.withClicks && format === 'png') {
+	if (config.withClicks) {
 		args.push('--with-clicks');
 	}
 	if (config.slidevTheme) {
 		args.push('--theme', config.slidevTheme);
 	}
 
-	const result = await execFileAsync(npx, args, { cwd: vaultRoot, timeout: config.timeoutMs });
+	const result = await execFileAsync(slidev.command, args, {
+		cwd: vaultRoot,
+		timeout: config.timeoutMs,
+		env: playwrightBrowsersPath ? { PLAYWRIGHT_BROWSERS_PATH: playwrightBrowsersPath } : undefined,
+	});
 	if (result.exitCode !== 0) {
-		throw new Error(`Slidev export failed (exit ${result.exitCode}): ${result.stderr || result.error?.message || 'unknown error'}`);
+		throw new Error(`Slidev export failed via ${slidev.description} (exit ${result.exitCode}): ${result.stderr || result.error?.message || 'unknown error'}`);
 	}
 
-	if (format === 'pdf') {
-		onProgress?.('slidev-export', 'PDF export complete');
-		return `${config.outputSubfolder}/${sourceFile.basename}.pdf`;
-	}
 	onProgress?.('slidev-export', 'PNG sequence exported');
-	return `${config.outputSubfolder}/`;
+	return `${config.outputSubfolder}/${source.outputBasename}-slides-png`;
 }
 
 /**
@@ -121,9 +213,16 @@ export async function exportSlidevImages(
 export async function autoInstallSlidev(
 	onProgress?: ExportProgressCallback,
 ): Promise<ExecResult> {
+	const slidev = resolveSlidevCommand();
+	if (slidev.source === 'local-fork') {
+		onProgress?.('install-slidev', 'Using local Slidev fork...');
+		const result = await execFileAsync(slidev.command, ['--version'], { timeout: 120_000 });
+		onProgress?.('install-slidev', result.exitCode === 0 ? 'Local Slidev fork is available' : 'Local Slidev fork failed');
+		return result;
+	}
+
 	onProgress?.('install-slidev', 'Installing Slidev CLI (may take a moment)...');
-	const npx = resolveNpxCommand();
-	const result = await execFileAsync(npx, ['-y', '@slidev/cli', '--version'], { timeout: 120_000 });
+	const result = await execFileAsync(slidev.command, [...slidev.argsPrefix, '--version'], { timeout: 120_000 });
 	onProgress?.('install-slidev', result.exitCode === 0 ? 'Slidev CLI installed' : 'Slidev CLI install failed');
 	return result;
 }

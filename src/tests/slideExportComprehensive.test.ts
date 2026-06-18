@@ -1,7 +1,7 @@
 import { probeNode, probePlaywright, probeFfmpeg, probeEnvironment } from '../slideExport/environmentProber';
-import { exportSlidevHtml, exportSlidevImages } from '../slideExport/slidevExporter';
+import { exportSlidevHtml, exportSlidevPdf, exportSlidevPng } from '../slideExport/slidevExporter';
 import { exportVideoMp4 } from '../slideExport/videoExporter';
-import type { SlideExportConfig } from '../slideExport/types';
+import type { SlideExportConfig, SlidevExportSource } from '../slideExport/types';
 import type { TFile, App } from 'obsidian';
 
 jest.mock('../slideExport/platformUtils');
@@ -13,7 +13,19 @@ const mockGetVaultBasePath = platformUtils.getVaultBasePath as jest.MockedFuncti
 const mockSafeRequire = platformUtils.safeRequire as jest.MockedFunction<typeof platformUtils.safeRequire>;
 const mockExecFileAsync = platformUtils.execFileAsync as jest.MockedFunction<typeof platformUtils.execFileAsync>;
 const mockResolveNpxCommand = platformUtils.resolveNpxCommand as jest.MockedFunction<typeof platformUtils.resolveNpxCommand>;
+const mockResolvePlaywrightBrowsersPath = platformUtils.resolvePlaywrightBrowsersPath as jest.MockedFunction<typeof platformUtils.resolvePlaywrightBrowsersPath>;
+const mockResolveSlidevCommand = platformUtils.resolveSlidevCommand as jest.MockedFunction<typeof platformUtils.resolveSlidevCommand>;
+const mockResolveWorkspaceHomeCandidates = platformUtils.resolveWorkspaceHomeCandidates as jest.MockedFunction<typeof platformUtils.resolveWorkspaceHomeCandidates>;
 const mockGetOsPlatform = platformUtils.getOsPlatform as jest.MockedFunction<typeof platformUtils.getOsPlatform>;
+
+function mockNpxSlidevCommand(): void {
+    mockResolveSlidevCommand.mockReturnValue({
+        command: 'npx',
+        argsPrefix: ['-y', '@slidev/cli'],
+        description: 'npx -y @slidev/cli',
+        source: 'npx',
+    });
+}
 
 function createMockApp(basePath: string | null = '/vault'): any {
     return {
@@ -42,6 +54,15 @@ function createMockFile(name: string, path: string, hasParent = true): TFile {
     } as TFile;
 }
 
+function createMockSlidevSource(name: string, path: string, hasParent = true): SlidevExportSource {
+    const file = createMockFile(name, path, hasParent);
+    return {
+        inputFilePath: file.path,
+        outputBasename: file.basename,
+        sourceLabel: file.path,
+    };
+}
+
 function ok(tool: string, version: string) {
     return { tool, installed: true, version, error: undefined };
 }
@@ -53,6 +74,9 @@ function fail(tool: string, version: string | null, error: string) {
 describe('platformUtils — Edge Cases', () => {
     beforeEach(() => {
         jest.clearAllMocks();
+        mockNpxSlidevCommand();
+        mockResolvePlaywrightBrowsersPath.mockReturnValue('/home/user/.cache/ms-playwright');
+        mockResolveWorkspaceHomeCandidates.mockReturnValue(['/home/user']);
     });
 
     test('isDesktopApp returns false when Platform is undefined', () => {
@@ -112,6 +136,9 @@ describe('environmentProber — Node Version Edge Cases', () => {
     beforeEach(() => {
         jest.clearAllMocks();
         mockIsDesktopApp.mockReturnValue(true);
+        mockNpxSlidevCommand();
+        mockResolvePlaywrightBrowsersPath.mockReturnValue('/home/user/.cache/ms-playwright');
+        mockResolveWorkspaceHomeCandidates.mockReturnValue(['/home/user']);
     });
 
     test('probeNode accepts v20.0.0 exact boundary', async () => {
@@ -193,12 +220,18 @@ describe('slidevExporter — All Format Combinations', () => {
         mockIsDesktopApp.mockReturnValue(true);
         mockGetVaultBasePath.mockReturnValue('/vault');
         mockResolveNpxCommand.mockReturnValue('npx');
+        mockNpxSlidevCommand();
+        mockResolvePlaywrightBrowsersPath.mockReturnValue('/home/user/.cache/ms-playwright');
+        mockResolveWorkspaceHomeCandidates.mockReturnValue(['/home/user']);
     });
 
     test('exports HTML with theme', async () => {
         mockExecFileAsync.mockResolvedValue({ exitCode: 0, stdout: '', stderr: '' });
+        const rmSync = jest.fn();
+        const mkdirSync = jest.fn();
+        mockSafeRequire.mockImplementation((name: string) => name === 'fs' ? { rmSync, mkdirSync } : null);
         const app = createMockApp();
-        const file = createMockFile('test', 'test.md');
+        const source = createMockSlidevSource('test', 'test.md');
         const config: SlideExportConfig = {
             format: 'html',
             withClicks: false,
@@ -209,18 +242,22 @@ describe('slidevExporter — All Format Combinations', () => {
             timeoutMs: 120000,
         };
         const callback = jest.fn();
-        await exportSlidevHtml(app, file, config, callback);
+        await exportSlidevHtml(app, source, config, callback);
+        expect(rmSync).toHaveBeenCalledWith('/vault/export/test-slides', { recursive: true, force: true });
+        expect(mkdirSync).toHaveBeenCalledWith('/vault/export/test-slides', { recursive: true });
         expect(mockExecFileAsync).toHaveBeenCalledWith(
             'npx',
-            expect.arrayContaining(['--theme', 'seriph', '--base', './']),
+            expect.arrayContaining(['--theme', 'seriph', '--base', './', '--standalone-bundle']),
             expect.objectContaining({ timeout: 120000 })
         );
     });
 
     test('exports PDF without theme', async () => {
         mockExecFileAsync.mockResolvedValue({ exitCode: 0, stdout: '', stderr: '' });
+        const mkdirSync = jest.fn();
+        mockSafeRequire.mockImplementation((name: string) => name === 'fs' ? { mkdirSync } : null);
         const app = createMockApp();
-        const file = createMockFile('test', 'test.md');
+        const source = createMockSlidevSource('test', 'test.md');
         const config: SlideExportConfig = {
             format: 'pdf',
             withClicks: true,
@@ -231,19 +268,26 @@ describe('slidevExporter — All Format Combinations', () => {
             timeoutMs: 60000,
         };
         const callback = jest.fn();
-        await exportSlidevImages(app, file, config, 'pdf', callback);
+        await exportSlidevPdf(app, source, config, callback);
+        expect(mkdirSync).toHaveBeenCalledWith('/vault/export', { recursive: true });
         expect(mockExecFileAsync).toHaveBeenCalledWith(
             'npx',
-            expect.arrayContaining(['--format', 'pdf']),
-            expect.objectContaining({ timeout: 60000 })
+            expect.arrayContaining(['--format', 'pdf', '--output', '/vault/export/test.pdf']),
+            expect.objectContaining({
+                timeout: 60000,
+                env: { PLAYWRIGHT_BROWSERS_PATH: '/home/user/.cache/ms-playwright' },
+            })
         );
         expect(mockExecFileAsync.mock.calls[0][1]).not.toContain('--theme');
     });
 
     test('exports PNG with clicks and calls progress callback', async () => {
         mockExecFileAsync.mockResolvedValue({ exitCode: 0, stdout: '', stderr: '' });
+        const rmSync = jest.fn();
+        const mkdirSync = jest.fn();
+        mockSafeRequire.mockImplementation((name: string) => name === 'fs' ? { rmSync, mkdirSync } : null);
         const app = createMockApp();
-        const file = createMockFile('test', 'test.md');
+        const source = createMockSlidevSource('test', 'test.md');
         const config: SlideExportConfig = {
             format: 'png',
             withClicks: true,
@@ -254,19 +298,24 @@ describe('slidevExporter — All Format Combinations', () => {
             timeoutMs: 90000,
         };
         const callback = jest.fn();
-        await exportSlidevImages(app, file, config, 'png', callback);
+        await exportSlidevPng(app, source, config, callback);
         expect(callback).toHaveBeenCalledWith('slidev-export', expect.any(String));
         expect(mockExecFileAsync).toHaveBeenCalledWith(
             'npx',
-            expect.arrayContaining(['--format', 'png', '--with-clicks', '--theme', 'default']),
-            expect.objectContaining({ timeout: 90000 })
+            expect.arrayContaining(['--format', 'png', '--output', '/vault/export/test-slides-png', '--with-clicks', '--theme', 'default']),
+            expect.objectContaining({
+                timeout: 90000,
+                env: { PLAYWRIGHT_BROWSERS_PATH: '/home/user/.cache/ms-playwright' },
+            })
         );
+        expect(rmSync).toHaveBeenCalledWith('/vault/export/test-slides-png', { recursive: true, force: true });
+        expect(mkdirSync).toHaveBeenCalledWith('/vault/export/test-slides-png', { recursive: true });
     });
 
     test('timeout passthrough to execFileAsync', async () => {
         mockExecFileAsync.mockResolvedValue({ exitCode: 0, stdout: '', stderr: '' });
         const app = createMockApp();
-        const file = createMockFile('test', 'test.md');
+        const source = createMockSlidevSource('test', 'test.md');
         const config: SlideExportConfig = {
             format: 'html',
             withClicks: false,
@@ -276,7 +325,7 @@ describe('slidevExporter — All Format Combinations', () => {
             slidevTheme: '',
             timeoutMs: 180000,
         };
-        await exportSlidevHtml(app, file, config, jest.fn());
+        await exportSlidevHtml(app, source, config, jest.fn());
         expect(mockExecFileAsync).toHaveBeenCalledWith(
             'npx',
             expect.any(Array),
@@ -291,6 +340,7 @@ describe('videoExporter — Timeout and Pattern Construction', () => {
         mockIsDesktopApp.mockReturnValue(true);
         mockGetVaultBasePath.mockReturnValue('/vault');
         mockResolveNpxCommand.mockReturnValue('npx');
+        mockNpxSlidevCommand();
     });
 
     test('clamps timeout to minimum 300s', async () => {
@@ -360,6 +410,7 @@ describe('Integration — Probe to HTML Export', () => {
         mockIsDesktopApp.mockReturnValue(true);
         mockGetVaultBasePath.mockReturnValue('/vault');
         mockResolveNpxCommand.mockReturnValue('npx');
+        mockNpxSlidevCommand();
     });
 
     test('full probe to HTML export flow', async () => {
@@ -374,7 +425,7 @@ describe('Integration — Probe to HTML Export', () => {
         expect(report.capabilities.html).toBe(true);
 
         const app = createMockApp();
-        const file = createMockFile('test', 'test.md');
+        const source = createMockSlidevSource('test', 'test.md');
         const config: SlideExportConfig = {
             format: 'html',
             withClicks: false,
@@ -384,7 +435,7 @@ describe('Integration — Probe to HTML Export', () => {
             slidevTheme: '',
             timeoutMs: 120000,
         };
-        await exportSlidevHtml(app, file, config, jest.fn());
+        await exportSlidevHtml(app, source, config, jest.fn());
         expect(mockExecFileAsync).toHaveBeenLastCalledWith(
             'npx',
             expect.arrayContaining(['@slidev/cli', 'build']),
@@ -399,6 +450,7 @@ describe('Integration — Probe to PDF Export', () => {
         mockIsDesktopApp.mockReturnValue(true);
         mockGetVaultBasePath.mockReturnValue('/vault');
         mockResolveNpxCommand.mockReturnValue('npx');
+        mockNpxSlidevCommand();
     });
 
     test('full probe to PDF export flow', async () => {
@@ -421,7 +473,7 @@ describe('Integration — Probe to PDF Export', () => {
         expect(report.capabilities.pdf).toBe(true);
 
         const app = createMockApp();
-        const file = createMockFile('slides', 'slides.md');
+        const source = createMockSlidevSource('slides', 'slides.md');
         const config: SlideExportConfig = {
             format: 'pdf',
             withClicks: true,
@@ -431,11 +483,14 @@ describe('Integration — Probe to PDF Export', () => {
             slidevTheme: 'default',
             timeoutMs: 180000,
         };
-        await exportSlidevImages(app, file, config, 'pdf', jest.fn());
+        await exportSlidevPdf(app, source, config, jest.fn());
         expect(mockExecFileAsync).toHaveBeenLastCalledWith(
             'npx',
             expect.arrayContaining(['--format', 'pdf', '--theme', 'default']),
-            expect.objectContaining({ timeout: 180000 })
+            expect.objectContaining({
+                timeout: 180000,
+                env: { PLAYWRIGHT_BROWSERS_PATH: '/home/user/.cache/ms-playwright' },
+            })
         );
     });
 });
@@ -446,6 +501,7 @@ describe('Integration — Probe to PNG to MP4 Chain', () => {
         mockIsDesktopApp.mockReturnValue(true);
         mockGetVaultBasePath.mockReturnValue('/vault');
         mockResolveNpxCommand.mockReturnValue('npx');
+        mockNpxSlidevCommand();
     });
 
     test('full PNG export to MP4 conversion chain', async () => {
@@ -470,7 +526,7 @@ describe('Integration — Probe to PNG to MP4 Chain', () => {
         expect(report.capabilities.mp4).toBe(true);
 
         const app = createMockApp();
-        const file = createMockFile('deck', 'deck.md');
+        const source = createMockSlidevSource('deck', 'deck.md');
         const config: SlideExportConfig = {
             format: 'png',
             withClicks: false,
@@ -480,9 +536,9 @@ describe('Integration — Probe to PNG to MP4 Chain', () => {
             slidevTheme: '',
             timeoutMs: 120000,
         };
-        await exportSlidevImages(app, file, config, 'png', jest.fn());
+        await exportSlidevPng(app, source, config, jest.fn());
 
-        await exportVideoMp4(app, 'export/deck-export', 'deck', config, jest.fn());
+        await exportVideoMp4(app, 'export/deck-slides-png', 'deck', config, jest.fn());
         expect(mockExecFileAsync).toHaveBeenLastCalledWith(
             'ffmpeg',
             expect.arrayContaining(['-framerate', '2', '-crf', '20']),

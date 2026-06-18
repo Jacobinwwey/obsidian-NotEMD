@@ -1,6 +1,6 @@
 ---
 date: 2026-05-28
-last_updated: 2026-06-09
+last_updated: 2026-06-17
 topic: mainline-progress-audit-and-next-level-direction
 canonical: true
 ---
@@ -276,6 +276,39 @@ Correct interpretation:
 1. current-main truth maintenance now includes keeping roadmap/progress language synchronized with the checked-in helper-entrypoint evidence;
 2. document sync is now a regression boundary, not optional prose cleanup.
 
+### 2.10 2026-06-17 Slidev export rendered-layout truth
+
+This batch changes the Slidev export lane from "can the workflow run?" to "can the exported deck be trusted as a visible, readable artifact?"
+
+Current code already satisfies several earlier requirements:
+
+1. command palette export and sidebar export both enter `exportSlidesCommand()`;
+2. settings expose default format selection across `HTML`, `PDF`, `PNG`, and `MP4`, and expose HTML mode when `HTML` is selected;
+3. the sidebar has an inline Slidev export format selector instead of hiding format choice entirely;
+4. `exportSlidesCommand()` probes environment, prepares a Slidev export source, then exports the prepared source in the selected format;
+5. `prepareSlidevExportSource()` loads the top-level Slidev skill and `references/*.md` when available, and the LLM prompt explicitly asks for dense slides to be split and large diagrams/tables/code to avoid clipping;
+6. `scripts/verify-slidev-export-workflow.cjs` exercises production modules against the real `docs/architecture.zh-CN.md` source and records skill reference count, local fork, deck summary, Playwright samples, and `.gitignore` visibility.
+
+The important gap is equally clear:
+
+| Requirement | Current implementation | Status |
+|---|---|---|
+| Full Slidev skill support in non-outline generation | `loadSlidevSkillContext()` reads `SKILL.md` plus sorted `references/*.md` and includes the contents in the prompt | Landed |
+| Local Slidev fork usage | Slidev command resolution prefers env overrides and then `$HOME/slidev/packages/slidev/bin/slidev.mjs` | Landed, keep verifying |
+| UI format selection | Settings and sidebar controls expose format selection; HTML mode is conditional on HTML | Landed in code, still needs real UI smoke when UI changes |
+| Output visibility to Git | `verify:slidev-export` checks `.gitignore` hits for generated deck/output/screenshots | Landed for workflow evidence |
+| Rendered layout containment | No DOM bbox, SVG/viewBox, table natural width, scroll overflow, edge-pixel, or minimum-readable-scale audit exists | Open P0 |
+| Automatic correction | Current guardrails only use text heuristics and static Mermaid `zoom`; there is no measure/patch/retry loop | Open P0 |
+
+The `ref/infinite-canvas` analysis supports a clean-room direction, not code reuse. Its useful architecture ideas are world-space nodes with `{ position, width, height }`, viewport transform `{ x, y, k }`, screen/world conversion, union bounds, natural image sizing, and minimap/bounds calculation. Those ideas map well to a static export-layout camera for Slidev. They do not justify turning Slidev into an interactive infinite canvas, and AGPL-3.0 code must not be copied into this MIT project.
+
+Correct interpretation:
+
+1. the workflow proof is now meaningfully stronger than direct `slidev build`;
+2. it still cannot certify visual quality for Mermaid-heavy, table-heavy, or dense architecture decks;
+3. the next architectural step is a render-feedback quality gate with measurement, bounded patching, and fail-closed reporting.
+4. current landed truth is already more concrete than the original plan: workspace-aware resolution for the local Slidev fork, Slidev skill roots, and Playwright browser cache is now in place, and a visible-slide-root layout audit plus bounded zoom-patch rebuild loop now runs in the real maintainer workflow.
+
 ## 3. Deep Comparison Against Earlier Plan Language
 
 ### 3.1 What the 2026-05-25 audit now understates
@@ -537,14 +570,49 @@ Goal:
 
 Current audit reality:
 
-1. the repository is clean today, so clean-state recovery is no longer an open action item in this audit;
-2. the real requirement is to preserve that finish discipline while the next packaging / CLI / Stage-C batches land;
-3. the matrix, topic docs, README/change surfaces, and focused regression checks still act as the practical anti-drift guardrail.
+1. the historical current-main closure was clean, but the present local branch is not clean at the start of this Slidev/GEO follow-through batch;
+2. the dirty state includes generated `docs/export` artifacts, `docs/dist` churn, and Slidev export WIP that must not be reset or folded into unrelated commits blindly;
+3. this batch's clean-state rule is therefore narrower: do not create or commit new generated test/export files, and keep the production/documentation delta separable from the pre-existing WIP;
+4. the real next cleanup action is a controlled split: commit or stash intentional source/docs work, then explicitly discard or archive generated artifacts only after the owner confirms they are no longer needed for inspection;
+5. the matrix, topic docs, README/change surfaces, and focused regression checks still act as the practical anti-drift guardrail.
 
 Required follow-through:
 
 1. re-check the current truth documents whenever packaging, CLI surface, or provider/discovery boundaries change;
-2. keep `npm run build`, `npm test -- --runInBand`, `npm run audit:i18n-ui`, `npm run audit:render-host`, `git diff --check`, and clean `git status --short --branch` as the minimum closure bundle.
+2. keep `npm run build`, `npm test -- --runInBand`, `npm run audit:i18n-ui`, `npm run audit:render-host`, `git diff --check`, and either clean `git status --short --branch` or an explicit pre-existing-dirty ledger as the minimum closure bundle.
+
+### Batch F: promote Slidev export from one-off smoke test to real workflow gate
+
+Priority: `P0`
+
+Background:
+
+1. the real `docs/architecture.zh-CN.md` test exposed a gap in the old verification path: directly calling the Slidev CLI does not prove that the two UI export entries exercised NoteMD source preparation, full skill references, local fork selection, and output cleanup;
+2. the old HTML docs still described server scripts as the only reliable path, which is no longer the current truth when the local fork supports standalone bundles;
+3. generated artifacts need to remain inspectable instead of being hidden by `.gitignore` or cleaned too early.
+
+Current WIP status:
+
+1. `npm run verify:slidev-export` is now the stable maintainer entrypoint, defaulting to the real `docs/architecture.zh-CN.md` source;
+2. the entrypoint calls the production TypeScript `prepareSlidevExportSource()` and `exportSlidevHtml()` modules instead of only shelling out to Slidev;
+3. the JSON report records environment capability, local fork path, skill root, skill reference count, deck summary, Playwright samples, and `.gitignore` hits;
+4. `docs/maintainer/slidev-export-workflow.*` now defines pass criteria, output policy, UI contract, and when to run the workflow;
+5. `docs/SLIDEV_SOLUTION.md` and `docs/SLIDEV_HTML_FIX.md` now describe the current standalone-first, server-script-compatible truth.
+6. the current source-preparation prompt uses the full skill references and asks the model to split dense content, but the post-generation guardrails still rely on static Markdown heuristics.
+7. `npm run verify:slidev-export -- --json` can now prove, on the real `docs/architecture.zh-CN.md` input, that:
+   - the workflow resolves `/home/jacob/slidev/packages/slidev/bin/slidev.mjs`
+   - the workflow resolves `/home/jacob/slidev/skills/slidev`
+   - the workflow reuses Jacob's Playwright browser cache
+   - sampled HTML slides go through visible-root layout audit plus bounded zoom-only patch/rebuild
+   - the `HTML`, `PDF`, and `PNG` export paths are live
+
+Next direction:
+
+1. Slidev export changes must include `npm run verify:slidev-export` in closure evidence;
+2. generated `docs/export/` files may remain available for local inspection, but should not be committed unless the task explicitly asks for generated output;
+3. add `SlidevRenderedMeasure`, `SlidevOverflowAudit`, and `SlidevDeckPatch` as owned modules before claiming the output is robust against clipped diagrams, tables, code, or dense text;
+4. the current landed patcher is still zoom-only; the next step is to extend patch/retry toward slide splitting and diagram/table decomposition, otherwise tall sequence diagrams still depend on repeated zoom convergence;
+5. any upstream Slidev skill PR should stay generic: full references, built-in/configured theme preference, closed frontmatter, readable transforms for large diagrams/tables/code, and browser-sampled build verification. NoteMD vault paths, local fork paths, layout audit internals, and the `architecture.zh-CN.md` fixture should remain project-local.
 
 ## 6. Documentation Sync Rule
 
@@ -557,6 +625,17 @@ Any future change that updates the provider-settings/model-discovery lane must r
 5. `docs/brainstorms/2026-05-27-provider-settings-simplification-and-model-discovery-plan.*`
 6. this audit document
 
+Any future change that updates the Slidev export lane must re-check, at minimum:
+
+1. `docs/maintainer/slidev-export-workflow.*`
+2. `docs/SLIDEV_SOLUTION.md`
+3. `docs/SLIDEV_HTML_FIX.md`
+4. `src/slideExport/*`
+5. `src/main.ts`
+6. `src/ui/NotemdSettingTab.ts`
+7. `src/ui/NotemdSidebarView.ts`
+8. `package.json`
+
 ## 7. Verification Gate
 
 Any update that changes the truth claims in this document should still finish with:
@@ -568,6 +647,13 @@ Any update that changes the truth claims in this document should still finish wi
 5. `git diff --check`
 6. clean `git status --short --branch`
 
+If the update touches Slidev export, also run:
+
+1. `npm run verify:slidev-export`
+2. `npm test -- --runInBand src/tests/slidevSourcePreparer.test.ts src/tests/slideExportComprehensive.test.ts`
+
+After the rendered-layout gate lands, Slidev export closure must also include a non-empty layout-audit report for `docs/architecture.zh-CN.md` with zero `overflow` and zero `unreadable-scale` findings.
+
 ## 8. Bottom Line
 
 Current `main` no longer needs another “did the provider settings lane really land?” argument.
@@ -578,4 +664,5 @@ The real current questions are now:
 2. can the current bounded CLI split stay explicit while any future path-based promotion remains contract-first rather than convenience-first;
 3. can Stage-C local-KB / file-selection / chapter-split work deepen mixed-corpus quality evidence instead of relitigating feature existence;
 4. can the widened bounded provider discovery surface remain shared-core, lightweight, and honest as a maintenance lane rather than becoming the excuse for broader architectural claims;
-5. can current truth documents keep tracking the real shipped branch boundary quickly enough that future sessions do not regress back to `1.9.0/1.9.1`-era wording.
+5. can Slidev export keep using a real UI-equivalent workflow proof and add rendered-layout quality gates instead of regressing to “the CLI can build, so the buttons must work” as weak evidence;
+6. can current truth documents keep tracking the real shipped branch boundary quickly enough that future sessions do not regress back to `1.9.0/1.9.1`-era wording.
