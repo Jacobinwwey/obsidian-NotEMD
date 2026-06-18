@@ -351,9 +351,10 @@ canonical: true
 3. 真实 `docs/architecture.zh-CN.md` HTML fixture 现在已经收敛到 `ok: true`、`28` 个审计页、零 `overflow` / `unreadable-scale`，且 `retryCount = 4`；同一源文件的 `PDF` 与 `PNG` 也返回 `ok: true`；
 4. 当前已经落地的实现真值比最初方案更进一步：workspace-aware 的 local Slidev fork / Slidev skill / Playwright browser cache 解析、对 `https://github.com/Jacobinwwey/slidev.git` 本地 checkout 的实机确认、full-deck visible slide root 审计、现有 Slidev deck 的 isolated working-copy + sibling support sync 验证，以及覆盖 Mermaid、Markdown table、病态 table record fallback、code fence、密集文本、generic slot-marked layout、component-heavy custom slot 的 local `<Transform>` fallback 与第一张 deck headmatter 页的非 zoom-only patch/rebuild 都已进入真实维护者链路；已知坏掉的 standalone bundle 也会回退到 server-script HTML，而不再被当成成功产物；
 5. 新增的真实 custom-layout multi-zone fixture 进一步证明：当 `summary` 与 `details` 都是 component-heavy zone 时，prepared working copy 中的轻量 slot-owner wrapper 已经不只是辅助 text hint；渲染测量会直接产出 zone 级 owner rect、content bounds、scroll overflow 与推荐局部 scale，patcher 会先用这些几何信号定位真正溢出的 `details` slot，并仅在几何结果打平时才回退到 slot signal / rendered text hint；
-6. 这次也把“zoom 参数怎么来”彻底收窄为检测驱动：整页重导出的 `zoom` 来自 measured safe-rect overflow，局部 `<Transform>` 的 scale 来自具体 slot-owner surface 的超界范围与 scroll overflow；它们都不依赖固定常数，也不依赖 LLM 手工挑值；
-7. 这次最关键的收口是：patch/rebuild loop 不再只是 verifier 能力，真实产品导出路径也已经复用同一条收敛链，因此 `HTML`/`PDF`/`PNG`/`MP4` 都会从同一个 converged prepared deck 导出；
-8. 下一步架构推进已经更收窄：继续扩展 richer component-heavy custom Slidev layout 的结构化 patch，而不是退回代表性抽样页验证；当前仍未收口的主要情况不是“还没有检测驱动缩放”，而是多个 competing component-heavy slot zone 的 zone 级几何仍然接近打平、或 owner surface 本身不形成稳定 structural split / local transform target 的 deck；同时还要判断当前 standalone fallback 是否应继续作为产品真值，还是后续再引入更强的 standalone bundling 策略。
+6. 后续新增的真实 custom-layout fixture 又证明了更严格的一种情况：当同一页上不止一个 transformable component-heavy zone 独立溢出时，patcher 现在可以在一次 patch pass 里分别注入多个局部 `<Transform>`，而不是被迫只选一个 owner；
+7. 这次也把“zoom 参数怎么来”彻底收窄为检测驱动：整页重导出的 `zoom` 来自 measured safe-rect overflow，局部 `<Transform>` 的 scale 来自具体 slot-owner surface 的超界范围与 scroll overflow；它们都不依赖固定常数，也不依赖 LLM 手工挑值；
+8. 这次最关键的收口是：patch/rebuild loop 不再只是 verifier 能力，真实产品导出路径也已经复用同一条收敛链，因此 `HTML`/`PDF`/`PNG`/`MP4` 都会从同一个 converged prepared deck 导出；
+9. 下一步架构推进已经更收窄：继续扩展 richer component-heavy custom Slidev layout 的结构化 patch，而不是退回代表性抽样页验证；当前仍未收口的主要情况不是“还没有检测驱动缩放”，而是多个 competing component-heavy slot zone 的 zone 级几何仍然接近打平且并非每个溢出 zone 都能安全 transform、或 owner surface 本身不形成稳定 structural split / local transform target 的 deck；同时还要判断当前 standalone fallback 是否应继续作为产品真值，还是后续再引入更强的 standalone bundling 策略。
 
 ## 3. 相对先前方案语言的深度对比
 

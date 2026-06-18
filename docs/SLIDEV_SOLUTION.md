@@ -150,11 +150,11 @@ Current landed state:
    - existing Slidev deck working-copy verification
    - pathological table fallback into record-list slides
    - slot-marked custom layouts backed by a real custom `layouts/*.vue` file
-   - component-heavy custom slot layouts converging through zone-level owner-geometry-based local `<Transform>` wrapping, with slot signals and rendered text hints held as bounded fallback when several zones compete for attribution
+   - component-heavy custom slot layouts converging through zone-level owner-geometry-based local `<Transform>` wrapping, including same-slide multi-zone cases where more than one overflowing transformable slot can be wrapped in the same pass while slot signals and rendered text hints stay as bounded fallback for attribution ties
 
 Current gap:
 
-1. richer custom/component-heavy Slidev layouts beyond the current supported structural set still fall back to conservative zoom/manual-review behavior, especially when multiple competing component-heavy slot zones remain near-tied even after zone-level geometry scoring or when the owner surface does not expose a stable transform/split target;
+1. richer custom/component-heavy Slidev layouts beyond the current supported structural set still fall back to conservative zoom/manual-review behavior, especially when multiple competing component-heavy slot zones remain near-tied even after zone-level geometry scoring but not every overflowing zone is safely transformable, or when the owner surface does not expose a stable transform/split target;
 2. standalone export correctness currently depends on native bundle sanity detection plus server-script fallback rather than on a fully reliable standalone bundling strategy of its own;
 3. full-deck Playwright verification is now more correct, but noticeably slower, so future work should improve patch convergence instead of weakening the audit back to representative sampling;
 4. the Obsidian CLI can dispatch `notemd:export-slides`, but it does not expose an export-complete handshake, so host-command smoke is still weaker than the maintainer verifier.

@@ -1117,6 +1117,88 @@ describe('slidevLayoutAudit', () => {
 		expect(patched.deckMarkdown).not.toContain('::summary::\n\n<Transform :scale="0.901" origin="top left">');
 	});
 
+	test('wraps each overflowing component-heavy slot zone when multiple zones independently overflow', () => {
+		const audit: SlidevLayoutAudit = {
+			slide: 2,
+			safeRect: { left: 51.2, top: 43.2, right: 1228.8, bottom: 676.8, width: 1177.6, height: 633.6 },
+			contentBounds: { left: 48, top: 52, right: 1234, bottom: 820, width: 1186, height: 768 },
+			pageScale: 1,
+			elementKinds: ['other'],
+			findings: [
+				{
+					kind: 'overflow',
+					target: 'other',
+					message: 'summary zone overflows',
+					recommendedPatch: 'reduce-zoom',
+					recommendedScale: 0.78,
+					slotZone: 'summary',
+					textPreview: 'Summary cards',
+					overflow: { left: 0, top: 0, right: 20, bottom: 44 },
+				},
+				{
+					kind: 'overflow',
+					target: 'other',
+					message: 'details zone overflows',
+					recommendedPatch: 'reduce-zoom',
+					recommendedScale: 0.74,
+					slotZone: 'details',
+					textPreview: 'Detailed orchestration cards',
+					overflow: { left: 0, top: 0, right: 26, bottom: 62 },
+				},
+			],
+			slotZones: [
+				{
+					name: 'summary',
+					textPreview: 'Summary cards',
+					ownerRect: { left: 110, top: 146, right: 520, bottom: 420, width: 410, height: 274 },
+					contentBounds: { left: 110, top: 146, right: 552, bottom: 454, width: 442, height: 308 },
+					scrollOverflow: true,
+					overflow: { left: 0, top: 0, right: 20, bottom: 44 },
+					recommendedTransformScale: 0.928,
+				},
+				{
+					name: 'details',
+					textPreview: 'Detailed orchestration cards',
+					ownerRect: { left: 612, top: 146, right: 1112, bottom: 418, width: 500, height: 272 },
+					contentBounds: { left: 612, top: 146, right: 1166, bottom: 448, width: 554, height: 302 },
+					scrollOverflow: true,
+					overflow: { left: 0, top: 0, right: 26, bottom: 62 },
+					recommendedTransformScale: 0.901,
+				},
+			],
+		};
+		const deck = [
+			'---',
+			'theme: default',
+			'---',
+			'',
+			'# Intro',
+			'',
+			'---',
+			'layout: custom-grid',
+			'---',
+			'',
+			'::summary::',
+			'',
+			'<div class="summary-grid">',
+			'  <div class="border rounded px-3 py-2 text-sm">Summary cards</div>',
+			'</div>',
+			'',
+			'::details::',
+			'',
+			'<div class="space-y-3">',
+			'  <div class="border rounded px-3 py-2 text-sm">Detailed orchestration cards</div>',
+			'</div>',
+		].join('\n');
+
+		const patched = patchDeckWithLayoutAudit(deck, [audit]);
+
+		expect(patched.changed).toBe(true);
+		expect((patched.deckMarkdown.match(/<Transform :scale=/g) || []).length).toBe(2);
+		expect(patched.deckMarkdown).toContain('::summary::\n\n<Transform :scale="0.928" origin="top left">');
+		expect(patched.deckMarkdown).toContain('::details::\n\n<Transform :scale="0.901" origin="top left">');
+	});
+
 	test('does not retarget a different component-heavy slot after another slot is already wrapped in Transform', () => {
 		const audit: SlidevLayoutAudit = {
 			slide: 2,

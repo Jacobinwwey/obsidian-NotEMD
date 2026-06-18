@@ -119,7 +119,7 @@ layoutAuditSummary.retryCount
 5. 现有 Slidev deck 现在会进入 `_slidev-sources/<deck-basename>/` 隔离 working copy 目录；若 sibling 下存在 `layouts/`、`public/`、`setup/`、`components/`、`snippets/`、`styles/`、`global-top.vue`、`global-bottom.vue` 等常见 Slidev support entries，也会一并镜像进去；
 6. 渲染后布局审计现在也会测量带直接文本的 `div` / `section` / `article` / `aside` / `span`，因此 component-heavy 页面不会再被静默低估成“空布局”；
 7. component-heavy slot zone 现在会在 prepared working copy 中带上轻量 owner wrapper；渲染测量不仅会带回 slot ownership，还会记录 zone 级 owner rect、content bounds、scroll overflow 与推荐的局部 transform scale；
-8. component-heavy custom slot layout 在结构拆分不可用时，现在可以回退到局部 `<Transform :scale=\"...\">` 包裹；该 scale 由当前超界 zone 相对于 slot-owner 几何与 scroll 边界的检测结果推导，而不是固定常数或 LLM 手动决定；当存在多个 component-heavy zone 时，patcher 会优先使用 zone 级几何归因，只在几何结果打平时才回退到 slot signal / rendered text hint，并避免继续误伤已经不溢出的 sibling zone；
+8. component-heavy custom slot layout 在结构拆分不可用时，现在可以回退到局部 `<Transform :scale=\"...\">` 包裹；该 scale 由当前超界 zone 相对于 slot-owner 几何与 scroll 边界的检测结果推导，而不是固定常数或 LLM 手动决定；当多个 component-heavy zone 独立溢出时，patcher 现在可以在同一页里对每个可变换 zone 分别包裹局部 `<Transform>`；只有在仍然必须选择唯一 owner 时，才会优先使用 zone 级几何归因，并在几何结果打平时回退到 slot signal / rendered text hint；
 9. 共享的 `convergeSlidevDeckLayout()` 现在已经进入 `exportSlidesCommand()` 与维护者 verifier，因此 HTML/PDF/PNG/MP4 都会复用同一个收敛后的 prepared deck；
 10. HTML exporter 现在会拒绝已知坏掉的 native standalone bundle，并回退到 `index.html + start-server.* + README.md`；
 11. 真实 `docs/architecture.zh-CN.md` workflow 现在已经收敛到 `ok: true`、`28` 个审计页、`overflow` 与 `unreadable-scale` 都为零，`retryCount = 4`；
@@ -127,7 +127,7 @@ layoutAuditSummary.retryCount
 
 当前限制：
 
-1. 超出当前支持集的 richer custom/component-heavy Slidev layout 仍保持保守/manual-review 路径，尤其是多个 component-heavy slot zone 的 zone 级几何仍然接近打平、或 owner surface 本身不形成稳定 local transform / structural split target 的情况；
+1. 超出当前支持集的 richer custom/component-heavy Slidev layout 仍保持保守/manual-review 路径，尤其是多个 component-heavy slot zone 的 zone 级几何仍然接近打平但并非每个溢出 zone 都可安全 transform、或 owner surface 本身不形成稳定 local transform / structural split target 的情况；
 2. standalone 导出的正确性目前仍依赖 native bundle 的 sanity detection + server-script fallback，而不是自身已经具备完全可靠的 standalone bundling 策略；
 3. full-deck Playwright 验证故意比代表性抽样更慢，后续优化方向应是提高 patch 收敛能力，而不是退回弱审计；
 4. `obsidian command id=notemd:export-slides` 目前仍只能算 dispatch-level smoke，因为 Obsidian CLI 没有暴露导出完成握手信号。

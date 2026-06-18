@@ -217,6 +217,8 @@ describe('mainline progress audit contract', () => {
         expect(progressDocZh).toContain('component-heavy custom slot 的 local `<Transform>` fallback');
         expect(progressDoc).toContain('zone-level owner rects');
         expect(progressDocZh).toContain('zone 级 owner rect');
+        expect(progressDoc).toContain('inject local `<Transform>` wrappers for each overflowing zone');
+        expect(progressDocZh).toContain('分别注入多个局部 `<Transform>`');
         expect(progressDoc).toContain('fixed constants or manual LLM choice');
         expect(progressDocZh).toContain('固定常数，也不依赖 LLM 手工挑值');
         expect(progressDoc).toContain('rendered text hints');

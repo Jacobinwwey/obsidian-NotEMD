@@ -345,7 +345,7 @@ export function patchDeckWithLayoutAudit(
 			}
 		}
 
-		const transformedSlotSlide = wrapOverflowingSupportedSlotLayoutZoneInTransform(
+		const transformedSlotSlide = wrapOverflowingSupportedSlotLayoutZonesInTransform(
 			currentSlide,
 			audit,
 			bestScale,
@@ -973,36 +973,46 @@ function splitOverflowingSupportedSlotLayoutSlide(
 	return { slides: splitSlides };
 }
 
-function wrapOverflowingSupportedSlotLayoutZoneInTransform(
+function wrapOverflowingSupportedSlotLayoutZonesInTransform(
 	slideMarkdown: string,
 	audit: SlidevLayoutAudit,
 	fallbackScale: number | null,
 	currentZoom: number,
 	minReadableScale: number,
 ): string | null {
-	const surface = parseSupportedSlotLayoutSurface(slideMarkdown);
-	if (!surface) {
-		return null;
+	let nextSlideMarkdown = slideMarkdown;
+	let changed = false;
+	const candidateZoneNames = collectSlotLayoutTransformCandidateNames(slideMarkdown, audit);
+
+	for (const zoneName of candidateZoneNames) {
+		const surface = parseSupportedSlotLayoutSurface(nextSlideMarkdown);
+		if (!surface) {
+			break;
+		}
+
+		const targetZone = collectSupportedSlotZones(surface).find(zone => zone.name === zoneName)
+			?? pickSlotLayoutTransformZone(surface, audit);
+		if (!targetZone || containsTransformWrapper(targetZone.contentLines) || !containsTransformableComponentSyntax(targetZone.contentLines)) {
+			continue;
+		}
+
+		const transformScale = resolveSupportedSlotZoneTransformScale(
+			targetZone,
+			audit,
+			fallbackScale,
+			currentZoom,
+			minReadableScale,
+		);
+		if (transformScale === null) {
+			continue;
+		}
+
+		const wrappedLines = wrapLinesInTransform(targetZone.contentLines, transformScale);
+		nextSlideMarkdown = assembleSupportedSlotLayoutSlide(surface, targetZone, wrappedLines);
+		changed = true;
 	}
 
-	const targetZone = pickSlotLayoutTransformZone(surface, audit);
-	if (!targetZone) {
-		return null;
-	}
-
-	const transformScale = resolveSupportedSlotZoneTransformScale(
-		targetZone,
-		audit,
-		fallbackScale,
-		currentZoom,
-		minReadableScale,
-	);
-	if (transformScale === null) {
-		return null;
-	}
-
-	const wrappedLines = wrapLinesInTransform(targetZone.contentLines, transformScale);
-	return assembleSupportedSlotLayoutSlide(surface, targetZone, wrappedLines);
+	return changed ? nextSlideMarkdown : null;
 }
 
 function splitOverflowingDeckHeadmatterSlide(
@@ -1345,6 +1355,39 @@ function pickSlotLayoutTransformZone(
 	}
 
 	return transformableZones[0];
+}
+
+function collectSlotLayoutTransformCandidateNames(
+	slideMarkdown: string,
+	audit: SlidevLayoutAudit,
+): string[] {
+	const surface = parseSupportedSlotLayoutSurface(slideMarkdown);
+	if (!surface) {
+		return [];
+	}
+
+	const zones = collectSupportedSlotZones(surface);
+	const zoneOrder = new Map(zones.map((zone, index) => [zone.name, index]));
+	const measuredCandidates = (audit.slotZones ?? [])
+		.filter(zone =>
+			zoneOrder.has(zone.name)
+			&& (zone.scrollOverflow
+				|| (zone.overflow ? hasOverflow(zone.overflow) : false)
+				|| (typeof zone.recommendedTransformScale === 'number' && zone.recommendedTransformScale < 0.995))
+		)
+		.sort((left, right) => {
+			const leftOrder = zoneOrder.get(left.name) ?? Number.MAX_SAFE_INTEGER;
+			const rightOrder = zoneOrder.get(right.name) ?? Number.MAX_SAFE_INTEGER;
+			return leftOrder - rightOrder;
+		})
+		.map(zone => zone.name);
+
+	if (measuredCandidates.length > 0) {
+		return Array.from(new Set(measuredCandidates));
+	}
+
+	const singleZone = pickSlotLayoutTransformZone(surface, audit);
+	return singleZone ? [singleZone.name] : [];
 }
 
 function collectSupportedSlotZones(
