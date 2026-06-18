@@ -219,8 +219,12 @@ describe('mainline progress audit contract', () => {
         expect(progressDocZh).toContain('zone 级 owner rect');
         expect(progressDoc).toContain('inject local `<Transform>` wrappers for each overflowing zone');
         expect(progressDocZh).toContain('分别注入多个局部 `<Transform>`');
-        expect(progressDoc).toContain('fixed constants or manual LLM choice');
-        expect(progressDocZh).toContain('固定常数，也不依赖 LLM 手工挑值');
+        expect(progressDoc).toContain('clipped by `overflow-hidden`');
+        expect(progressDocZh).toContain('`overflow-hidden` 把后代裁出了当前视口');
+        expect(progressDoc).toContain('pass/fail overflow remains rooted in the rendered slide root');
+        expect(progressDocZh).toContain('pass/fail 的 hard overflow 继续锚定在真实渲染后的 slide root');
+        expect(progressDoc).toContain('safe-rect-aware measured fit');
+        expect(progressDocZh).toContain('safe-rect-aware 的 measured fit');
         expect(progressDoc).toContain('rendered text hints');
         expect(progressDocZh).toContain('rendered text hint');
         expect(progressDoc).toContain('nonoverflowing sibling zone');

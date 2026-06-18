@@ -333,7 +333,8 @@ async function collectRenderedSlideMeasurement(page, slide) {
 				}
 
 				const rect = toRect(element.getBoundingClientRect());
-				if (rect.width < 2 || rect.height < 2 || !overlaps(rect, slideRootRect)) {
+				const ownerElement = element.closest(`[${slotZoneAttr}]`);
+				if (rect.width < 2 || rect.height < 2 || (!ownerElement && !overlaps(rect, slideRootRect))) {
 					continue;
 				}
 
@@ -350,7 +351,6 @@ async function collectRenderedSlideMeasurement(page, slide) {
 					}
 				}
 
-				const ownerElement = element.closest(`[${slotZoneAttr}]`);
 				measuredElements.push({
 					ownerElement,
 					measured: {

@@ -140,17 +140,19 @@ Current landed state:
 4. the real product export path now converges the prepared working deck before final `HTML`/`PDF`/`PNG`/`MP4` export, instead of keeping the patch/rebuild loop verifier-only.
 5. existing Slidev deck working copies now live under `_slidev-sources/<deck-basename>/`, and common sibling support entries such as `layouts/`, `public/`, `setup/`, `components/`, `snippets/`, `styles/`, `global-top.vue`, and `global-bottom.vue` are mirrored there when present.
 6. rendered layout audit now also measures direct-text `div`/`section`/`article`/`aside`/`span` blocks, which closes the previous under-audit gap for component-heavy slides.
-7. component-heavy slot zones now carry lightweight owner wrappers inside prepared working copies, so rendered measurements can feed slot ownership, zone-level owner geometry, and local overflow scale back into the patch loop instead of relying only on slide-global inference.
-8. `PDF` and `PNG` export now pass `PLAYWRIGHT_BROWSERS_PATH` through the Slidev CLI env so root-run verification can reuse Jacob's browser cache.
-9. the real `docs/architecture.zh-CN.md` HTML workflow now passes with a full-deck Playwright audit, `28` audited slides, `overflowCount = 0`, and bounded retry closure at `retryCount = 4`.
-10. an additional real maintainer-local structural overflow note now proves that Markdown table decomposition and code-fence chunking can converge through the same verifier path instead of only through unit tests.
-11. a real slot/headmatter Slidev deck now proves that native standalone loader gaps are detected and converted into a working `index.html + start-server.* + README.md` fallback instead of being treated as successful standalone output.
-12. real maintainer-local decks now also prove:
+7. component-heavy slot zones now carry lightweight owner wrappers inside prepared working copies, so rendered measurements can feed slot ownership, zone-level owner geometry, local overflow scale, and slot-owned descendants that are clipped by `overflow-hidden` back into the patch loop instead of relying only on slide-global inference.
+8. hard overflow remains rooted in the rendered slide root, while `safeRect` stays the conservative fit target for measured scale recommendations; this keeps the gate tied to actual clipping while still steering shrink decisions away from edge-hugging layouts.
+9. `PDF` and `PNG` export now pass `PLAYWRIGHT_BROWSERS_PATH` through the Slidev CLI env so root-run verification can reuse Jacob's browser cache.
+10. the real `docs/architecture.zh-CN.md` HTML workflow now passes with a full-deck Playwright audit, `28` audited slides, `overflowCount = 0`, and bounded retry closure at `retryCount = 4`.
+11. an additional real maintainer-local structural overflow note now proves that Markdown table decomposition and code-fence chunking can converge through the same verifier path instead of only through unit tests.
+12. a real slot/headmatter Slidev deck now proves that native standalone loader gaps are detected and converted into a working `index.html + start-server.* + README.md` fallback instead of being treated as successful standalone output.
+13. real maintainer-local decks now also prove:
    - explicit `::default::` slot handling
    - existing Slidev deck working-copy verification
    - pathological table fallback into record-list slides
    - slot-marked custom layouts backed by a real custom `layouts/*.vue` file
    - component-heavy custom slot layouts converging through zone-level owner-geometry-based local `<Transform>` wrapping, including same-slide multi-zone cases where more than one overflowing transformable slot can be wrapped in the same pass while slot signals and rendered text hints stay as bounded fallback for attribution ties
+   - a dense two-zone custom layout where slot-owned descendants originally clipped under `overflow-hidden` are now measured correctly and converge to `ok: true` without forcing whole-slide zoom
 
 Current gap:
 

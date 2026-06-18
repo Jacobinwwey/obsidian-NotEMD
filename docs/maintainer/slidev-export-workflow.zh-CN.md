@@ -119,11 +119,13 @@ layoutAuditSummary.retryCount
 5. 现有 Slidev deck 现在会进入 `_slidev-sources/<deck-basename>/` 隔离 working copy 目录；若 sibling 下存在 `layouts/`、`public/`、`setup/`、`components/`、`snippets/`、`styles/`、`global-top.vue`、`global-bottom.vue` 等常见 Slidev support entries，也会一并镜像进去；
 6. 渲染后布局审计现在也会测量带直接文本的 `div` / `section` / `article` / `aside` / `span`，因此 component-heavy 页面不会再被静默低估成“空布局”；
 7. component-heavy slot zone 现在会在 prepared working copy 中带上轻量 owner wrapper；渲染测量不仅会带回 slot ownership，还会记录 zone 级 owner rect、content bounds、scroll overflow 与推荐的局部 transform scale；
-8. component-heavy custom slot layout 在结构拆分不可用时，现在可以回退到局部 `<Transform :scale=\"...\">` 包裹；该 scale 由当前超界 zone 相对于 slot-owner 几何与 scroll 边界的检测结果推导，而不是固定常数或 LLM 手动决定；当多个 component-heavy zone 独立溢出时，patcher 现在可以在同一页里对每个可变换 zone 分别包裹局部 `<Transform>`；只有在仍然必须选择唯一 owner 时，才会优先使用 zone 级几何归因，并在几何结果打平时回退到 slot signal / rendered text hint；
-9. 共享的 `convergeSlidevDeckLayout()` 现在已经进入 `exportSlidesCommand()` 与维护者 verifier，因此 HTML/PDF/PNG/MP4 都会复用同一个收敛后的 prepared deck；
-10. HTML exporter 现在会拒绝已知坏掉的 native standalone bundle，并回退到 `index.html + start-server.* + README.md`；
-11. 真实 `docs/architecture.zh-CN.md` workflow 现在已经收敛到 `ok: true`、`28` 个审计页、`overflow` 与 `unreadable-scale` 都为零，`retryCount = 4`；
-12. 同一真实源文件的 `PDF` 与 `PNG` 验证也返回 `ok: true`，而且现在导出自同一个收敛后的 deck，而不是 raw prepared source。
+8. 即使 slot container 用 `overflow-hidden` 把后代裁出了当前视口，slot-owned descendant 现在也会进入测量，因此 component-heavy slot 内容不会再因为被容器裁掉就被静默低估；
+9. component-heavy custom slot layout 在结构拆分不可用时，现在可以回退到局部 `<Transform :scale=\"...\">` 包裹；该 scale 由当前超界 zone 相对于 slot-owner 几何与 scroll 边界的检测结果推导，而不是固定常数或 LLM 手动决定；当多个 component-heavy zone 独立溢出时，patcher 现在可以在同一页里对每个可变换 zone 分别包裹局部 `<Transform>`；只有在仍然必须选择唯一 owner 时，才会优先使用 zone 级几何归因，并在几何结果打平时回退到 slot signal / rendered text hint；
+10. pass/fail 的 hard overflow 仍以渲染后的 slide root 为边界，而 `safeRect` 继续只承担 measured scale 的保守拟合目标；这样既不会放过真正裁剪，也不会把合理的 edge-aligned layout 过度误杀；
+11. 共享的 `convergeSlidevDeckLayout()` 现在已经进入 `exportSlidesCommand()` 与维护者 verifier，因此 HTML/PDF/PNG/MP4 都会复用同一个收敛后的 prepared deck；
+12. HTML exporter 现在会拒绝已知坏掉的 native standalone bundle，并回退到 `index.html + start-server.* + README.md`；
+13. 真实 `docs/architecture.zh-CN.md` workflow 现在已经收敛到 `ok: true`、`28` 个审计页、`overflow` 与 `unreadable-scale` 都为零，`retryCount = 4`；
+14. 同一真实源文件的 `PDF` 与 `PNG` 验证也返回 `ok: true`，而且现在导出自同一个收敛后的 deck，而不是 raw prepared source。
 
 当前限制：
 

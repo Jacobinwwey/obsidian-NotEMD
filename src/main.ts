@@ -2909,8 +2909,9 @@ export default class NotemdPlugin extends Plugin {
             }
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : String(error);
-            modalReporter.log(`${uiStrings.slideExport.exportFailed}: ${errorMessage}`);
-            new Notice(`${uiStrings.slideExport.exportFailed}: ${errorMessage}`);
+            const failureNotice = formatI18n(uiStrings.slideExport.exportFailedNotice, { message: errorMessage });
+            modalReporter.log(failureNotice);
+            new Notice(failureNotice);
             console.error('Slide export error:', error);
         } finally {
             if (modal && !reporter) {
