@@ -118,7 +118,8 @@ layoutAuditSummary.retryCount
 4. 大 Mermaid guardrail 不会再覆盖页面里已经显式声明的 `zoom`；
 5. 现有 Slidev deck 现在会进入 `_slidev-sources/<deck-basename>/` 隔离 working copy 目录；若 sibling 下存在 `layouts/`、`public/`、`setup/`、`components/`、`snippets/`、`styles/`、`global-top.vue`、`global-bottom.vue` 等常见 Slidev support entries，也会一并镜像进去；
 6. 渲染后布局审计现在也会测量带直接文本的 `div` / `section` / `article` / `aside` / `span`，因此 component-heavy 页面不会再被静默低估成“空布局”；
-7. component-heavy custom slot layout 在结构拆分不可用时，现在可以回退到局部 `<Transform :scale=\"...\">` 包裹；当存在多个 component-heavy zone 时，patcher 会用渲染后的 text hint 做 slot 归因，并避免继续误伤已经不溢出的 sibling zone；
+7. component-heavy slot zone 现在会在 prepared working copy 中带上轻量 owner wrapper，因此渲染测量可以把 slot ownership 带回 patch loop，而不是只能做 slide-global 猜测；
+8. component-heavy custom slot layout 在结构拆分不可用时，现在可以回退到局部 `<Transform :scale=\"...\">` 包裹；当存在多个 component-heavy zone 时，patcher 会组合 slot ownership 与渲染后的 text hint 做 slot 归因，并避免继续误伤已经不溢出的 sibling zone；
 8. 共享的 `convergeSlidevDeckLayout()` 现在已经进入 `exportSlidesCommand()` 与维护者 verifier，因此 HTML/PDF/PNG/MP4 都会复用同一个收敛后的 prepared deck；
 9. HTML exporter 现在会拒绝已知坏掉的 native standalone bundle，并回退到 `index.html + start-server.* + README.md`；
 10. 真实 `docs/architecture.zh-CN.md` workflow 现在已经收敛到 `ok: true`、`28` 个审计页、`overflow` 与 `unreadable-scale` 都为零，`retryCount = 4`；

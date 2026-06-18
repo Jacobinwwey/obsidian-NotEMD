@@ -9,6 +9,7 @@ import {
 import type { SlideExportConfig } from '../slideExport/types';
 import type { TFile } from 'obsidian';
 import { callLLM } from '../llmUtils';
+import { NOTEMD_SLOT_ZONE_ATTR } from '../slideExport/slidevLayoutAudit';
 import { getVaultBasePath, resolveWorkspaceHomeCandidates, safeRequire } from '../slideExport/platformUtils';
 
 jest.mock('../llmUtils', () => ({
@@ -160,6 +161,43 @@ describe('slidevSourcePreparer', () => {
             'export/_slidev-sources/existing-slidev/existing-slidev.slidev.md',
             markdown
         );
+    });
+
+    test('existing Slidev decks decorate component-heavy slot zones with ownership wrappers before writing the working copy', async () => {
+        const markdown = [
+            '---',
+            'theme: default',
+            '---',
+            '',
+            '# First',
+            '',
+            '---',
+            'layout: custom-grid',
+            '---',
+            '',
+            '::summary::',
+            '',
+            '<div class="summary-card">Summary</div>',
+            '',
+            '::details::',
+            '',
+            '<div class="space-y-3">',
+            '  <div class="border rounded px-3 py-2 text-sm">Runtime orchestration detail block 12 with explicit structured text.</div>',
+            '</div>',
+        ].join('\n');
+        const app = createApp(markdown);
+
+        await prepareSlidevExportSource(
+            app,
+            createFile('docs/existing-slidev.md'),
+            config,
+            {},
+            jest.fn()
+        );
+
+        const writtenDeck = (app.vault.adapter.write as jest.Mock).mock.calls[0][1] as string;
+        expect(writtenDeck).toContain(`<div ${NOTEMD_SLOT_ZONE_ATTR}="summary">`);
+        expect(writtenDeck).toContain(`<div ${NOTEMD_SLOT_ZONE_ATTR}="details">`);
     });
 
     test('existing Slidev decks copy sibling layouts into the isolated working copy when desktop filesystem access is available', async () => {

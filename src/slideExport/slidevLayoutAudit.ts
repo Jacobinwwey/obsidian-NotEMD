@@ -12,6 +12,7 @@ export interface SlidevRect {
 export interface SlidevMeasuredElement {
 	kind: SlidevMeasuredElementKind;
 	selector: string;
+	slotZone?: string;
 	textLength: number;
 	textPreview?: string;
 	scrollWidth: number;
@@ -40,6 +41,7 @@ export interface SlidevLayoutFinding {
 	message: string;
 	recommendedPatch: SlidevLayoutPatchKind;
 	recommendedScale: number | null;
+	slotZone?: string;
 	scrollOverflow?: boolean;
 	textPreview?: string;
 	overflowAxis?: 'width' | 'height' | 'both';
@@ -113,6 +115,14 @@ interface SlotSection {
 	lines: string[];
 }
 
+interface SupportedSlotZone {
+	kind: 'lead' | 'section';
+	name: string;
+	lines: string[];
+	contentLines: string[];
+	ownershipWrapped: boolean;
+}
+
 interface SupportedSlotLayoutSurface {
 	frontmatterLines: string[];
 	layout: string | null;
@@ -131,6 +141,8 @@ const DEFAULT_CONFIG: SlidevLayoutAuditConfig = {
 	minReadableScale: 0.28,
 	maxAutoPatchPasses: 2,
 };
+
+export const NOTEMD_SLOT_ZONE_ATTR = 'data-notemd-slot-zone';
 
 export function analyzeRenderedSlideMeasurement(
 	measurement: RenderedSlideMeasurement,
@@ -188,6 +200,7 @@ export function analyzeRenderedSlideMeasurement(
 				message: describeElementOverflow(element.kind, scrollOverflow),
 				recommendedPatch: patchTargetForElement(element.kind),
 				recommendedScale: computeElementFitScale(element, measurement.safeRect, scrollOverflow),
+				slotZone: element.slotZone,
 				scrollOverflow,
 				textPreview: element.textPreview,
 				overflowAxis: resolveOverflowAxis(
@@ -859,7 +872,7 @@ function splitOverflowingSupportedSlotLayoutSlide(
 		return { slides: null, reason: 'no supported slot zone matches the current structural patch target' };
 	}
 
-	const zoneMarkdown = targetZone.lines.join('\n').trim();
+	const zoneMarkdown = targetZone.contentLines.join('\n').trim();
 	if (!zoneMarkdown) {
 		return { slides: null, reason: 'target slot does not contain patchable content' };
 	}
@@ -900,7 +913,7 @@ function wrapOverflowingSupportedSlotLayoutZoneInTransform(
 		return null;
 	}
 
-	const wrappedLines = wrapLinesInTransform(targetZone.lines, transformScale);
+	const wrappedLines = wrapLinesInTransform(targetZone.contentLines, transformScale);
 	return assembleSupportedSlotLayoutSlide(surface, targetZone, wrappedLines);
 }
 
@@ -1170,8 +1183,12 @@ function parseSlotSections(bodyLines: string[]): { leadLines: string[]; sections
 function pickSlotLayoutTargetZone(
 	surface: SupportedSlotLayoutSurface,
 	findings: SlidevLayoutFinding[],
-): { kind: 'lead' | 'section'; name: string; lines: string[] } | null {
+): SupportedSlotZone | null {
 	const zones = collectSupportedSlotZones(surface);
+	const zoneBySlotName = pickZoneByFindingSlotNames(zones, findings);
+	if (zoneBySlotName) {
+		return zoneBySlotName;
+	}
 
 	const matchers: Array<(lines: string[]) => boolean> = [];
 	if (findings.some(finding => finding.recommendedPatch === 'split-diagram')) {
@@ -1189,7 +1206,7 @@ function pickSlotLayoutTargetZone(
 	}
 
 	for (const matcher of matchers) {
-		const matchedZones = zones.filter(zone => matcher(zone.lines));
+		const matchedZones = zones.filter(zone => matcher(zone.contentLines));
 		if (matchedZones.length === 1) {
 			return matchedZones[0];
 		}
@@ -1208,15 +1225,19 @@ function pickSlotLayoutTargetZone(
 function pickSlotLayoutTransformZone(
 	surface: SupportedSlotLayoutSurface,
 	findings: SlidevLayoutFinding[],
-): { kind: 'lead' | 'section'; name: string; lines: string[] } | null {
+): SupportedSlotZone | null {
 	const zones = collectSupportedSlotZones(surface);
+	const zoneBySlotName = pickZoneByFindingSlotNames(zones, findings);
+	if (zoneBySlotName && containsTransformableComponentSyntax(zoneBySlotName.contentLines) && !zoneBySlotName.ownershipWrapped) {
+		return zoneBySlotName;
+	}
 	const componentZones = zones.filter(zone =>
-		containsTransformableComponentSyntax(zone.lines) || containsTransformWrapper(zone.lines)
+		containsTransformableComponentSyntax(zone.contentLines) || containsTransformWrapper(zone.contentLines)
 	);
 
 	const transformableZones = zones.filter(zone =>
-		containsTransformableComponentSyntax(zone.lines)
-		&& !containsTransformWrapper(zone.lines)
+		containsTransformableComponentSyntax(zone.contentLines)
+		&& !containsTransformWrapper(zone.contentLines)
 	);
 	if (componentZones.length > 1) {
 		return transformableZones.length > 0 ? pickZoneByFindingTextHints(transformableZones, findings) : null;
@@ -1230,22 +1251,49 @@ function pickSlotLayoutTransformZone(
 
 function collectSupportedSlotZones(
 	surface: SupportedSlotLayoutSurface,
-): Array<{ kind: 'lead' | 'section'; name: string; lines: string[] }> {
+): SupportedSlotZone[] {
 	return [
 		{
 			kind: 'lead' as const,
 			name: surface.leadRole,
 			lines: surface.leadLines,
+			contentLines: unwrapSlotZoneOwnerWrapper(surface.leadLines)?.contentLines ?? surface.leadLines,
+			ownershipWrapped: unwrapSlotZoneOwnerWrapper(surface.leadLines) !== null,
 		},
 		...surface.sections.map(section => ({
 			kind: 'section' as const,
 			name: section.name,
 			lines: section.lines,
+			contentLines: unwrapSlotZoneOwnerWrapper(section.lines)?.contentLines ?? section.lines,
+			ownershipWrapped: unwrapSlotZoneOwnerWrapper(section.lines) !== null,
 		})),
 	].filter(zone => zone.lines.some(line => line.trim().length > 0));
 }
 
-function pickZoneByFindingTextHints<T extends { lines: string[] }>(
+function pickZoneByFindingSlotNames(
+	zones: SupportedSlotZone[],
+	findings: SlidevLayoutFinding[],
+): SupportedSlotZone | null {
+	const slotCounts = new Map<string, number>();
+	for (const finding of findings) {
+		if (!finding.slotZone) {
+			continue;
+		}
+		slotCounts.set(finding.slotZone, (slotCounts.get(finding.slotZone) ?? 0) + 1);
+	}
+	if (slotCounts.size === 0) {
+		return null;
+	}
+
+	const rankedSlots = Array.from(slotCounts.entries()).sort((left, right) => right[1] - left[1]);
+	if (rankedSlots.length > 1 && rankedSlots[0][1] === rankedSlots[1][1]) {
+		return null;
+	}
+
+	return zones.find(zone => zone.name === rankedSlots[0][0]) ?? null;
+}
+
+function pickZoneByFindingTextHints<T extends { contentLines: string[] }>(
 	zones: T[],
 	findings: SlidevLayoutFinding[],
 ): T | null {
@@ -1259,7 +1307,7 @@ function pickZoneByFindingTextHints<T extends { lines: string[] }>(
 	const scoredZones = zones
 		.map(zone => ({
 			zone,
-			score: scoreZoneTextHints(zone.lines, hints),
+			score: scoreZoneTextHints(zone.contentLines, hints),
 		}))
 		.filter(candidate => candidate.score > 0)
 		.sort((left, right) => right.score - left.score);
@@ -1302,8 +1350,13 @@ function assembleSupportedSlotLayoutSlide(
 	replacementLines: string[],
 ): string {
 	const bodyLines: string[] = [];
+	const zones = collectSupportedSlotZones(surface);
+	const matchedTargetZone = zones.find(zone => zone.kind === targetZone.kind && zone.name === targetZone.name) ?? null;
+	const nextReplacementLines = matchedTargetZone?.ownershipWrapped
+		? wrapLinesInSlotZoneOwner(replacementLines, targetZone.name)
+		: replacementLines;
 	const nextLeadLines = targetZone.kind === 'lead'
-		? replacementLines
+		? nextReplacementLines
 		: surface.leadLines;
 
 	if (nextLeadLines.length > 0) {
@@ -1314,13 +1367,13 @@ function assembleSupportedSlotLayoutSlide(
 		if (bodyLines.length > 0) {
 			bodyLines.push('');
 		}
-		bodyLines.push(section.marker);
-		bodyLines.push('');
-		const sectionLines = targetZone.kind === 'section' && targetZone.name === section.name
-			? replacementLines
-			: section.lines;
-		bodyLines.push(...trimOuterBlankLines(sectionLines));
-	}
+			bodyLines.push(section.marker);
+			bodyLines.push('');
+			const sectionLines = targetZone.kind === 'section' && targetZone.name === section.name
+				? nextReplacementLines
+				: section.lines;
+			bodyLines.push(...trimOuterBlankLines(sectionLines));
+		}
 
 	return assemblePatchedSlide(surface.frontmatterLines, bodyLines);
 }
@@ -1957,6 +2010,89 @@ function wrapLinesInTransform(lines: string[], scale: number): string[] {
 		...trimmedLines,
 		'</Transform>',
 	];
+}
+
+function wrapLinesInSlotZoneOwner(lines: string[], zoneName: string): string[] {
+	const trimmedLines = trimOuterBlankLines(lines);
+	return [
+		`<div ${NOTEMD_SLOT_ZONE_ATTR}="${zoneName}">`,
+		...trimmedLines,
+		'</div>',
+	];
+}
+
+function unwrapSlotZoneOwnerWrapper(lines: string[]): { zoneName: string; contentLines: string[] } | null {
+	const trimmedLines = trimOuterBlankLines(lines);
+	if (trimmedLines.length < 2) {
+		return null;
+	}
+
+	const openingMatch = trimmedLines[0].trim().match(new RegExp(`^<div\\s+${NOTEMD_SLOT_ZONE_ATTR}="([^"]+)"\\s*>$`, 'i'));
+	if (!openingMatch || trimmedLines[trimmedLines.length - 1].trim() !== '</div>') {
+		return null;
+	}
+
+	return {
+		zoneName: openingMatch[1],
+		contentLines: trimOuterBlankLines(trimmedLines.slice(1, -1)),
+	};
+}
+
+export function decorateComponentHeavySlotZones(deckMarkdown: string): string {
+	const slides = splitSlideDeck(deckMarkdown);
+	let changed = false;
+	const decoratedSlides = slides.map(slideMarkdown => {
+		const decoratedSlide = decorateComponentHeavySlotZonesInSlide(slideMarkdown);
+		if (decoratedSlide !== slideMarkdown) {
+			changed = true;
+		}
+		return decoratedSlide;
+	});
+	return changed ? joinSlideDeck(decoratedSlides) : deckMarkdown;
+}
+
+function decorateComponentHeavySlotZonesInSlide(slideMarkdown: string): string {
+	const surface = parseSupportedSlotLayoutSurface(slideMarkdown);
+	if (!surface) {
+		return slideMarkdown;
+	}
+
+	const nextLeadLines = decorateSlotZoneOwnershipLines(surface.leadLines, surface.leadRole);
+	const nextSections = surface.sections.map(section => ({
+		...section,
+		lines: decorateSlotZoneOwnershipLines(section.lines, section.name),
+	}));
+	return assemblePatchedSlide(surface.frontmatterLines, buildSupportedSlotLayoutBodyLines({
+		...surface,
+		leadLines: nextLeadLines,
+		sections: nextSections,
+	}));
+}
+
+function decorateSlotZoneOwnershipLines(lines: string[], zoneName: string): string[] {
+	if (!containsTransformableComponentSyntax(lines) || unwrapSlotZoneOwnerWrapper(lines)) {
+		return lines;
+	}
+
+	return wrapLinesInSlotZoneOwner(lines, zoneName);
+}
+
+function buildSupportedSlotLayoutBodyLines(surface: SupportedSlotLayoutSurface): string[] {
+	const bodyLines: string[] = [];
+	if (surface.leadLines.length > 0) {
+		bodyLines.push(...trimOuterBlankLines(surface.leadLines));
+	}
+
+	for (const section of surface.sections) {
+		if (bodyLines.length > 0) {
+			bodyLines.push('');
+		}
+		bodyLines.push(section.marker);
+		bodyLines.push('');
+		bodyLines.push(...trimOuterBlankLines(section.lines));
+	}
+
+	return bodyLines;
 }
 
 function isTopLevelListItem(line: string): boolean {

@@ -140,11 +140,12 @@ Current landed state:
 4. the real product export path now converges the prepared working deck before final `HTML`/`PDF`/`PNG`/`MP4` export, instead of keeping the patch/rebuild loop verifier-only.
 5. existing Slidev deck working copies now live under `_slidev-sources/<deck-basename>/`, and common sibling support entries such as `layouts/`, `public/`, `setup/`, `components/`, `snippets/`, `styles/`, `global-top.vue`, and `global-bottom.vue` are mirrored there when present.
 6. rendered layout audit now also measures direct-text `div`/`section`/`article`/`aside`/`span` blocks, which closes the previous under-audit gap for component-heavy slides.
-7. `PDF` and `PNG` export now pass `PLAYWRIGHT_BROWSERS_PATH` through the Slidev CLI env so root-run verification can reuse Jacob's browser cache.
-8. the real `docs/architecture.zh-CN.md` HTML workflow now passes with a full-deck Playwright audit, `28` audited slides, `overflowCount = 0`, and bounded retry closure at `retryCount = 4`.
-9. an additional real maintainer-local structural overflow note now proves that Markdown table decomposition and code-fence chunking can converge through the same verifier path instead of only through unit tests.
-10. a real slot/headmatter Slidev deck now proves that native standalone loader gaps are detected and converted into a working `index.html + start-server.* + README.md` fallback instead of being treated as successful standalone output.
-11. real maintainer-local decks now also prove:
+7. component-heavy slot zones now carry lightweight owner wrappers inside prepared working copies, so rendered measurements can feed slot ownership back into the patch loop instead of relying only on slide-global inference.
+8. `PDF` and `PNG` export now pass `PLAYWRIGHT_BROWSERS_PATH` through the Slidev CLI env so root-run verification can reuse Jacob's browser cache.
+9. the real `docs/architecture.zh-CN.md` HTML workflow now passes with a full-deck Playwright audit, `28` audited slides, `overflowCount = 0`, and bounded retry closure at `retryCount = 4`.
+10. an additional real maintainer-local structural overflow note now proves that Markdown table decomposition and code-fence chunking can converge through the same verifier path instead of only through unit tests.
+11. a real slot/headmatter Slidev deck now proves that native standalone loader gaps are detected and converted into a working `index.html + start-server.* + README.md` fallback instead of being treated as successful standalone output.
+12. real maintainer-local decks now also prove:
    - explicit `::default::` slot handling
    - existing Slidev deck working-copy verification
    - pathological table fallback into record-list slides

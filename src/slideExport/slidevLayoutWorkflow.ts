@@ -6,6 +6,7 @@ import { startLocalServer, stopLocalServer } from './localServer';
 import {
 	analyzeRenderedSlideMeasurement,
 	countSlideDeckSlides,
+	NOTEMD_SLOT_ZONE_ATTR,
 	patchDeckWithLayoutAudit,
 	summarizeLayoutAudits,
 	type RenderedSlideMeasurement,
@@ -240,7 +241,7 @@ function resolveSlidesToAudit(sampleSlides: number[] | null | undefined, deckMar
 }
 
 async function collectRenderedSlideMeasurement(page: any, slide: number): Promise<RenderedSlideMeasurement> {
-	const measurement = await page.evaluate(() => {
+	const measurement = await page.evaluate((slotZoneAttr: string) => {
 		type BrowserRect = {
 			left: number;
 			top: number;
@@ -353,6 +354,7 @@ async function collectRenderedSlideMeasurement(page: any, slide: number): Promis
 					elements.push({
 						kind,
 						selector,
+						slotZone: (element.closest(`[${slotZoneAttr}]`) as Element | null)?.getAttribute(slotZoneAttr) || undefined,
 						textLength,
 						textPreview: textLength > 0 ? toTextPreview(element.textContent || '') : undefined,
 						scrollWidth: element.scrollWidth || rect.width,
@@ -383,7 +385,7 @@ async function collectRenderedSlideMeasurement(page: any, slide: number): Promis
 			elements,
 			errors: [],
 		};
-	});
+	}, NOTEMD_SLOT_ZONE_ATTR);
 
 	return {
 		...measurement,

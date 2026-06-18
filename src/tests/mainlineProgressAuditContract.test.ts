@@ -219,5 +219,7 @@ describe('mainline progress audit contract', () => {
         expect(progressDocZh).toContain('rendered text hint');
         expect(progressDoc).toContain('nonoverflowing sibling zone');
         expect(progressDocZh).toContain('未溢出的 sibling zone');
+        expect(progressDoc).toContain('slot-owner wrappers');
+        expect(progressDocZh).toContain('slot-owner wrapper');
     });
 });

@@ -8,6 +8,7 @@
 import type { App, TFile } from 'obsidian';
 import type { LLMProviderConfig, NotemdSettings, ProgressReporter } from '../types';
 import { callLLM } from '../llmUtils';
+import { decorateComponentHeavySlotZones } from './slidevLayoutAudit';
 import type { ExportProgressCallback, SlideExportConfig, SlidevExportSource } from './types';
 import { getVaultBasePath, resolveWorkspaceHomeCandidates, safeRequire } from './platformUtils';
 
@@ -49,7 +50,7 @@ export async function prepareSlidevExportSource(
 	const sourceMarkdown = await app.vault.read(sourceFile);
 	if (isSlidevDeckMarkdown(sourceMarkdown)) {
 		onProgress?.('slidev-source', 'Current file is already a Slidev deck; writing working copy for export verification.');
-		const preparedDeckPath = await writePreparedDeckWorkspace(app, sourceFile, config, sourceMarkdown, onProgress);
+		const preparedDeckPath = await writePreparedDeckWorkspace(app, sourceFile, config, decorateComponentHeavySlotZones(sourceMarkdown), onProgress);
 		return {
 			inputFilePath: preparedDeckPath,
 			outputBasename: sourceFile.basename,
@@ -73,7 +74,7 @@ export async function prepareSlidevExportSource(
 		generatedDeck ?? buildDeterministicSlidevDeck(sourceMarkdown, sourceFile.basename),
 		config.slidevTheme || 'default',
 	);
-	const preparedDeckPath = await writePreparedDeck(app, sourceFile, config, deckMarkdown);
+	const preparedDeckPath = await writePreparedDeck(app, sourceFile, config, decorateComponentHeavySlotZones(deckMarkdown));
 
 	onProgress?.('slidev-source', `Prepared Slidev deck: ${preparedDeckPath}`);
 	return {

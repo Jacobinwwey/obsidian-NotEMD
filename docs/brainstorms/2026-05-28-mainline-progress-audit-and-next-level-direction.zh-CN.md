@@ -350,7 +350,7 @@ canonical: true
 2. 它现在已经带着真实渲染反馈质量门，而不再只是 CLI smoke；
 3. 真实 `docs/architecture.zh-CN.md` HTML fixture 现在已经收敛到 `ok: true`、`28` 个审计页、零 `overflow` / `unreadable-scale`，且 `retryCount = 4`；同一源文件的 `PDF` 与 `PNG` 也返回 `ok: true`；
 4. 当前已经落地的实现真值比最初方案更进一步：workspace-aware 的 local Slidev fork / Slidev skill / Playwright browser cache 解析、对 `https://github.com/Jacobinwwey/slidev.git` 本地 checkout 的实机确认、full-deck visible slide root 审计、现有 Slidev deck 的 isolated working-copy + sibling support sync 验证，以及覆盖 Mermaid、Markdown table、病态 table record fallback、code fence、密集文本、generic slot-marked layout、component-heavy custom slot 的 local `<Transform>` fallback 与第一张 deck headmatter 页的非 zoom-only patch/rebuild 都已进入真实维护者链路；已知坏掉的 standalone bundle 也会回退到 server-script HTML，而不再被当成成功产物；
-5. 新增的真实 custom-layout multi-zone fixture 进一步证明：当 `summary` 与 `details` 都是 component-heavy zone 时，patcher 会基于 rendered text hint 只对真正溢出的 `details` slot 注入 local `<Transform>`，而不会继续误伤未溢出的 sibling zone；
+5. 新增的真实 custom-layout multi-zone fixture 进一步证明：当 `summary` 与 `details` 都是 component-heavy zone 时，prepared working copy 中的轻量 slot-owner wrapper 加上 rendered text hint 会让 patcher 只对真正溢出的 `details` slot 注入 local `<Transform>`，而不会继续误伤未溢出的 sibling zone；
 6. 这次最关键的收口是：patch/rebuild loop 不再只是 verifier 能力，真实产品导出路径也已经复用同一条收敛链，因此 `HTML`/`PDF`/`PNG`/`MP4` 都会从同一个 converged prepared deck 导出；
 7. 下一步架构推进已经更收窄：继续扩展 richer component-heavy custom Slidev layout 的结构化 patch，而不是退回代表性抽样页验证；当前仍未收口的主要情况是多个 competing component-heavy slot zone 并存、且 rendered text hint 仍不足以安全区分真正 overflow owner 的 deck；同时还要判断当前 standalone fallback 是否应继续作为产品真值，还是后续再引入更强的 standalone bundling 策略。
 
