@@ -111,14 +111,14 @@ Current landed truth as of 2026-06-18:
 
 1. default HTML verification audits the full prepared deck when `--sample-slides` is not provided;
 2. the patcher derives `zoom` from measured overflow instead of fixed export constants;
-3. the patcher escalates to structural splitting for supported Mermaid diagrams (`flowchart`, `graph`, `mindmap`, `sequenceDiagram`) and simple heading + paragraph/list slides;
-4. the real `docs/architecture.zh-CN.md` workflow now closes with `ok: true`, `27` audited slides, and zero `overflow` / `unreadable-scale` findings;
+3. the patcher escalates to structural splitting for supported Mermaid diagrams (`flowchart`, `graph`, `mindmap`, `sequenceDiagram`), Markdown tables, non-Mermaid fenced code blocks, and simple heading + paragraph/list slides;
+4. the real `docs/architecture.zh-CN.md` workflow now closes with `ok: true`, `28` audited slides, and zero `overflow` / `unreadable-scale` findings;
 5. `PDF` and `PNG` verification on the same source also return `ok: true`.
 
 Current limitation:
 
-1. the patcher still does not decompose oversized tables or code-heavy slides;
-2. custom Slidev slot layouts and first-slide deck headmatter remain conservative/manual-review paths;
+1. custom Slidev slot layouts and first-slide deck headmatter remain conservative/manual-review paths;
+2. width-heavy tables with pathological unbreakable cell content can still need repeated decomposition; a later phase should add cell-level wrapping or non-table fallbacks instead of only more passes;
 3. full-deck Playwright verification is deliberately slower than representative sampling, so future work should improve convergence rather than weaken the audit.
 
 ## Output Policy

@@ -114,6 +114,8 @@ The current render-feedback loop is now:
    - Mermaid `flowchart` / `graph` / `mindmap`
    - Mermaid `sequenceDiagram` with repeated participant declarations
    - simple heading + paragraph/list slides
+   - Markdown tables, including row-split and width-driven column decomposition
+   - non-Mermaid fenced code blocks with vertical chunking
 6. The verifier now audits the full deck by default and keeps retrying within a bounded loop until the rendered deck fits or the retry budget is exhausted.
 
 The clean-room reference from `ref/infinite-canvas` is still the world-rect and viewport-transform idea: nodes have `{ position, width, height }`, the viewport has `{ x, y, k }`, and visible bounds are derived from transform math. For NoteMD export, that becomes an export-layout camera for a fixed Slidev safe rectangle, not an interactive infinite canvas. Because the reference project is AGPL-3.0 and NoteMD is MIT, implementation must be independent.
@@ -122,14 +124,15 @@ Current landed state:
 
 1. `verify:slidev-export` now resolves Jacob's local Slidev fork, Slidev skill references, and Playwright browser cache from workspace-aware paths instead of trusting the current process home blindly.
 2. the maintainer verification chain now measures the visible `slidev-page` root with Playwright, captures Mermaid shadow-host bounding boxes, and fails when the actual visible slide root clips content.
-3. the patcher is no longer zoom-only: it first applies overflow-derived `zoom`, then structurally splits supported Mermaid and simple text/list slides when rendered evidence says further shrinking would be the wrong move.
+3. the patcher is no longer zoom-only: it first applies overflow-derived `zoom`, then structurally splits supported Mermaid, Markdown table, code-fence, and simple text/list slides when rendered evidence says further shrinking would be the wrong move.
 4. `PDF` and `PNG` export now pass `PLAYWRIGHT_BROWSERS_PATH` through the Slidev CLI env so root-run verification can reuse Jacob's browser cache.
 5. the real `docs/architecture.zh-CN.md` HTML workflow now passes with a full-deck Playwright audit, `27` audited slides, `overflowCount = 0`, and bounded retry closure.
+6. an additional real maintainer-local structural overflow note now proves that Markdown table decomposition and code-fence chunking can converge through the same verifier path instead of only through unit tests.
 
 Current gap:
 
-1. the patcher still does not decompose oversized tables or code-heavy slides;
-2. custom Slidev slot layouts, first-slide deck headmatter, and richer component slides still fall back to conservative zoom/manual-review behavior;
+1. custom Slidev slot layouts, first-slide deck headmatter, and richer component slides still fall back to conservative zoom/manual-review behavior;
+2. width-heavy tables with pathological unbreakable cell content can still require repeated decomposition, so future work should add cell-level wrapping or alternative non-table fallbacks rather than relying only on repeated column splitting;
 3. full-deck Playwright verification is now more correct, but noticeably slower, so future work should improve patch convergence instead of weakening the audit back to representative sampling.
 
 ## Output Policy

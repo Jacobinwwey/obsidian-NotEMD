@@ -39,6 +39,8 @@ export interface SlidevLayoutFinding {
 	message: string;
 	recommendedPatch: SlidevLayoutPatchKind;
 	recommendedScale: number | null;
+	scrollOverflow?: boolean;
+	overflowAxis?: 'width' | 'height' | 'both';
 	overflow?: {
 		left: number;
 		top: number;
@@ -77,7 +79,7 @@ export interface SlidevDeckPatchResult {
 	blockedSlides: Array<{ slide: number; reason: string }>;
 }
 
-interface MermaidFenceBlock {
+interface FencedBlock {
 	startLine: number;
 	endLine: number;
 	opener: string;
@@ -93,6 +95,14 @@ interface PatchableSlideSurface {
 interface MermaidSplitPlan {
 	repeatedLines: string[];
 	segments: string[][];
+}
+
+interface MarkdownTableBlock {
+	startLine: number;
+	endLine: number;
+	headerLine: string;
+	separatorLine: string;
+	dataLines: string[];
 }
 
 const DEFAULT_CONFIG: SlidevLayoutAuditConfig = {
@@ -136,6 +146,7 @@ export function analyzeRenderedSlideMeasurement(
 				message: 'Slide content exceeds the safe visible rectangle',
 				recommendedPatch: dominantPatchTarget(elementKinds),
 				recommendedScale: computeFitScale(measurement.contentBounds, measurement.slideRoot),
+				overflowAxis: resolveOverflowAxis(contentOverflow, false, false),
 				overflow: contentOverflow,
 			});
 		}
@@ -155,7 +166,13 @@ export function analyzeRenderedSlideMeasurement(
 			target: element.kind,
 			message: describeElementOverflow(element.kind, scrollOverflow),
 			recommendedPatch: patchTargetForElement(element.kind),
-			recommendedScale: computeFitScale(element.rect, measurement.slideRoot),
+			recommendedScale: computeElementFitScale(element, measurement.slideRoot, scrollOverflow),
+			scrollOverflow,
+			overflowAxis: resolveOverflowAxis(
+				elementOverflow,
+				element.scrollWidth - element.clientWidth > resolvedConfig.overflowTolerancePx,
+				element.scrollHeight - element.clientHeight > resolvedConfig.overflowTolerancePx,
+			),
 			overflow: elementOverflow,
 		});
 	}
@@ -238,6 +255,26 @@ export function patchDeckWithLayoutAudit(
 
 		if (shouldSplitSimpleSlideBeforeZoom(audit.findings)) {
 			const splitResult = splitOverflowingSimpleSlide(currentSlide, audit, currentZoom, nextZoom, resolvedConfig);
+			if (splitResult.slides) {
+				slides.splice(targetIndex, 1, ...splitResult.slides);
+				changedSlides.push(audit.slide);
+				slideOffset += splitResult.slides.length - 1;
+				continue;
+			}
+		}
+
+		if (shouldSplitTableBeforeZoom(audit.findings, nextZoom, resolvedConfig.minReadableScale)) {
+			const splitResult = splitOverflowingMarkdownTableSlide(currentSlide, audit, currentZoom, nextZoom, resolvedConfig);
+			if (splitResult.slides) {
+				slides.splice(targetIndex, 1, ...splitResult.slides);
+				changedSlides.push(audit.slide);
+				slideOffset += splitResult.slides.length - 1;
+				continue;
+			}
+		}
+
+		if (shouldSplitCodeBeforeZoom(audit.findings, nextZoom, resolvedConfig.minReadableScale)) {
+			const splitResult = splitOverflowingCodeSlide(currentSlide, audit, currentZoom, nextZoom, resolvedConfig);
 			if (splitResult.slides) {
 				slides.splice(targetIndex, 1, ...splitResult.slides);
 				changedSlides.push(audit.slide);
@@ -358,6 +395,60 @@ function computeFitScale(rect: SlidevRect, safeRect: SlidevRect): number | null 
 	return Math.min(1, widthScale, heightScale);
 }
 
+function computeElementFitScale(
+	element: SlidevMeasuredElement,
+	safeRect: SlidevRect,
+	scrollOverflow: boolean,
+): number | null {
+	const layoutScale = computeFitScale(element.rect, safeRect);
+	if (!scrollOverflow) {
+		return layoutScale;
+	}
+
+	const scrollScale = computeScrollableContentScale(element);
+	if (layoutScale === null) {
+		return scrollScale;
+	}
+	if (scrollScale === null) {
+		return layoutScale;
+	}
+	return Math.min(layoutScale, scrollScale);
+}
+
+function computeScrollableContentScale(element: SlidevMeasuredElement): number | null {
+	if (element.clientWidth <= 0 || element.clientHeight <= 0) {
+		return null;
+	}
+
+	const widthScale = element.scrollWidth > element.clientWidth
+		? element.clientWidth / element.scrollWidth
+		: 1;
+	const heightScale = element.scrollHeight > element.clientHeight
+		? element.clientHeight / element.scrollHeight
+		: 1;
+	const scale = Math.min(widthScale, heightScale);
+	return scale > 0 && Number.isFinite(scale) ? Math.min(1, scale) : null;
+}
+
+function resolveOverflowAxis(
+	overflow: { left: number; top: number; right: number; bottom: number },
+	scrollWidthOverflow: boolean,
+	scrollHeightOverflow: boolean,
+): 'width' | 'height' | 'both' | undefined {
+	const widthOverflow = overflow.left > 0 || overflow.right > 0 || scrollWidthOverflow;
+	const heightOverflow = overflow.top > 0 || overflow.bottom > 0 || scrollHeightOverflow;
+	if (widthOverflow && heightOverflow) {
+		return 'both';
+	}
+	if (widthOverflow) {
+		return 'width';
+	}
+	if (heightOverflow) {
+		return 'height';
+	}
+	return undefined;
+}
+
 function chooseBestRecommendedScale(findings: SlidevLayoutFinding[]): number | null {
 	const scales = findings
 		.map(finding => finding.recommendedScale)
@@ -457,6 +548,42 @@ function shouldSplitSimpleSlideBeforeZoom(findings: SlidevLayoutFinding[]): bool
 	return findings.some(finding => finding.recommendedPatch === 'split-slide');
 }
 
+function shouldSplitTableBeforeZoom(
+	findings: SlidevLayoutFinding[],
+	nextZoom: number | null,
+	minReadableScale: number,
+): boolean {
+	return findings.some(finding => finding.recommendedPatch === 'split-table')
+		&& (
+			findings.some(finding => finding.kind === 'unreadable-scale')
+			|| (nextZoom !== null && nextZoom < minReadableScale)
+			|| hasTableStructuralOverflow(findings)
+		);
+}
+
+function shouldSplitCodeBeforeZoom(
+	findings: SlidevLayoutFinding[],
+	nextZoom: number | null,
+	minReadableScale: number,
+): boolean {
+	return findings.some(finding => finding.recommendedPatch === 'reduce-code')
+		&& (
+			findings.some(finding => finding.kind === 'unreadable-scale')
+			|| (nextZoom !== null && nextZoom < minReadableScale)
+			|| hasCodeStructuralOverflow(findings)
+		);
+}
+
+function hasTableStructuralOverflow(findings: SlidevLayoutFinding[]): boolean {
+	return findings.some(finding => finding.recommendedPatch === 'split-table' && typeof finding.overflowAxis === 'string');
+}
+
+function hasCodeStructuralOverflow(findings: SlidevLayoutFinding[]): boolean {
+	return findings.some(finding => finding.target === 'code'
+		&& finding.scrollOverflow === true
+		&& (finding.overflowAxis === 'height' || finding.overflowAxis === 'both'));
+}
+
 function splitOverflowingMermaidSlide(
 	slideMarkdown: string,
 	audit: SlidevLayoutAudit,
@@ -474,7 +601,7 @@ function splitOverflowingMermaidSlide(
 		return { slides: null, reason: 'diagram split requires exactly one Mermaid fence' };
 	}
 
-	const targetChunkCount = resolveDiagramChunkCount(audit, currentZoom, nextZoom, config.minReadableScale);
+	const targetChunkCount = resolveStructuralChunkCount(audit, currentZoom, nextZoom, config.minReadableScale);
 	const mermaidChunks = splitMermaidFenceIntoChunks(mermaidBlock.bodyLines, targetChunkCount);
 	if (!mermaidChunks || mermaidChunks.length < 2) {
 		return { slides: null, reason: 'Mermaid structure does not expose safe top-level split boundaries' };
@@ -497,6 +624,128 @@ function splitOverflowingMermaidSlide(
 		bodyLines.push(mermaidBlock.opener, ...mermaidChunks[index], mermaidBlock.closer);
 
 		if (index === mermaidChunks.length - 1 && suffixLines.length > 0) {
+			const trailingLines = dropLeadingHeadingLine(suffixLines, continuationHeading);
+			if (trailingLines.length > 0) {
+				bodyLines.push('', ...trailingLines);
+			}
+		}
+
+		splitSlides.push(assemblePatchedSlide(cleanFrontmatter, bodyLines));
+	}
+
+	return { slides: splitSlides };
+}
+
+function splitOverflowingMarkdownTableSlide(
+	slideMarkdown: string,
+	audit: SlidevLayoutAudit,
+	currentZoom: number,
+	nextZoom: number | null,
+	config: SlidevLayoutAuditConfig,
+): { slides: string[] | null; reason?: string } {
+	const surface = extractPatchableSlideSurface(slideMarkdown);
+	if (!surface) {
+		return { slides: null, reason: 'table slide uses deck headmatter or unsupported layout syntax' };
+	}
+	if (surface.bodyLines.some(line => /^(```+|~~~+)/.test(line.trim()) || /^!\[.*\]\(.+\)/.test(line.trim()))) {
+		return { slides: null, reason: 'table split does not support mixed code or image slides' };
+	}
+
+	const tableBlock = findSingleMarkdownTableBlock(surface.bodyLines);
+	if (!tableBlock) {
+		return { slides: null, reason: 'table split requires exactly one Markdown table block' };
+	}
+	if (tableBlock.dataLines.length < 2) {
+		return { slides: null, reason: 'table does not have enough data rows to split safely' };
+	}
+
+	const targetChunkCount = resolveStructuralChunkCount(audit, currentZoom, nextZoom, config.minReadableScale);
+	const splitOrientation = chooseTableSplitOrientation(audit.findings, tableBlock);
+
+	const prefixLines = trimOuterBlankLines(surface.bodyLines.slice(0, tableBlock.startLine));
+	const suffixLines = trimOuterBlankLines(surface.bodyLines.slice(tableBlock.endLine + 1));
+	const continuationHeading = findFirstHeadingLine(prefixLines.length > 0 ? prefixLines : surface.bodyLines);
+	const cleanFrontmatter = stripFrontmatterKey(surface.frontmatterLines, 'zoom');
+	const splitSlides: string[] = [];
+
+	const chunkedTableBodies = splitOrientation === 'columns'
+		? splitMarkdownTableByColumns(tableBlock, targetChunkCount)
+		: splitMarkdownTableByRows(tableBlock, targetChunkCount);
+	if (!chunkedTableBodies || chunkedTableBodies.length < 2) {
+		return { slides: null, reason: splitOrientation === 'columns'
+			? 'table columns could not be distributed into multiple slides'
+			: 'table rows could not be distributed into multiple slides' };
+	}
+
+	for (let index = 0; index < chunkedTableBodies.length; index++) {
+		const bodyLines: string[] = [];
+		if (index === 0) {
+			bodyLines.push(...prefixLines);
+		} else if (continuationHeading) {
+			bodyLines.push(continuationHeading, '');
+		}
+
+		bodyLines.push(...chunkedTableBodies[index]);
+
+		if (index === chunkedTableBodies.length - 1 && suffixLines.length > 0) {
+			const trailingLines = dropLeadingHeadingLine(suffixLines, continuationHeading);
+			if (trailingLines.length > 0) {
+				bodyLines.push('', ...trailingLines);
+			}
+		}
+
+		splitSlides.push(assemblePatchedSlide(cleanFrontmatter, bodyLines));
+	}
+
+	return { slides: splitSlides };
+}
+
+function splitOverflowingCodeSlide(
+	slideMarkdown: string,
+	audit: SlidevLayoutAudit,
+	currentZoom: number,
+	nextZoom: number | null,
+	config: SlidevLayoutAuditConfig,
+): { slides: string[] | null; reason?: string } {
+	const surface = extractPatchableSlideSurface(slideMarkdown);
+	if (!surface) {
+		return { slides: null, reason: 'code slide uses deck headmatter or unsupported layout syntax' };
+	}
+	if (surface.bodyLines.some(line => /^\|.*\|$/.test(line.trim()) || /^!\[.*\]\(.+\)/.test(line.trim()))) {
+		return { slides: null, reason: 'code split does not support mixed table or image slides' };
+	}
+
+	const codeBlock = findSingleCodeFenceBlock(surface.bodyLines);
+	if (!codeBlock) {
+		return { slides: null, reason: 'code split requires exactly one non-Mermaid code fence' };
+	}
+	if (codeBlock.bodyLines.length < 2) {
+		return { slides: null, reason: 'code block does not have enough lines to split safely' };
+	}
+
+	const targetChunkCount = resolveStructuralChunkCount(audit, currentZoom, nextZoom, config.minReadableScale);
+	const codeChunks = splitCodeFenceIntoChunks(codeBlock.bodyLines, targetChunkCount);
+	if (!codeChunks || codeChunks.length < 2) {
+		return { slides: null, reason: 'code block could not be distributed into multiple slides' };
+	}
+
+	const prefixLines = trimOuterBlankLines(surface.bodyLines.slice(0, codeBlock.startLine));
+	const suffixLines = trimOuterBlankLines(surface.bodyLines.slice(codeBlock.endLine + 1));
+	const continuationHeading = findFirstHeadingLine(prefixLines.length > 0 ? prefixLines : surface.bodyLines);
+	const cleanFrontmatter = stripFrontmatterKey(surface.frontmatterLines, 'zoom');
+	const splitSlides: string[] = [];
+
+	for (let index = 0; index < codeChunks.length; index++) {
+		const bodyLines: string[] = [];
+		if (index === 0) {
+			bodyLines.push(...prefixLines);
+		} else if (continuationHeading) {
+			bodyLines.push(continuationHeading, '');
+		}
+
+		bodyLines.push(codeBlock.opener, ...codeChunks[index], codeBlock.closer);
+
+		if (index === codeChunks.length - 1 && suffixLines.length > 0) {
 			const trailingLines = dropLeadingHeadingLine(suffixLines, continuationHeading);
 			if (trailingLines.length > 0) {
 				bodyLines.push('', ...trailingLines);
@@ -538,7 +787,7 @@ function splitOverflowingSimpleSlide(
 		return { slides: null, reason: 'content slide does not expose enough paragraph or list blocks to split safely' };
 	}
 
-	const targetChunkCount = resolveDiagramChunkCount(audit, currentZoom, nextZoom, config.minReadableScale);
+	const targetChunkCount = resolveStructuralChunkCount(audit, currentZoom, nextZoom, config.minReadableScale);
 	const chunkedBlocks = chunkLineBlocks(blocks, Math.max(2, Math.min(targetChunkCount, blocks.length)));
 	if (chunkedBlocks.length < 2) {
 		return { slides: null, reason: 'content blocks could not be distributed into multiple slides' };
@@ -611,8 +860,8 @@ function stripFrontmatterKey(frontmatterLines: string[], key: string): string[] 
 	return [...contentLines, '---'];
 }
 
-function findSingleMermaidFenceBlock(lines: string[]): MermaidFenceBlock | null {
-	let block: MermaidFenceBlock | null = null;
+function findSingleMermaidFenceBlock(lines: string[]): FencedBlock | null {
+	let block: FencedBlock | null = null;
 	let activeFenceMarker: string | null = null;
 	let opener = '';
 	let startLine = -1;
@@ -653,7 +902,100 @@ function findSingleMermaidFenceBlock(lines: string[]): MermaidFenceBlock | null 
 	return activeFenceMarker ? null : block;
 }
 
-function resolveDiagramChunkCount(
+function findSingleCodeFenceBlock(lines: string[]): FencedBlock | null {
+	let block: FencedBlock | null = null;
+	let activeFenceMarker: string | null = null;
+	let opener = '';
+	let startLine = -1;
+	let bodyLines: string[] = [];
+
+	for (let index = 0; index < lines.length; index++) {
+		const line = lines[index];
+		const trimmed = line.trim();
+		const openingMatch = trimmed.match(/^(```+|~~~+)(.*)$/);
+		if (!activeFenceMarker && openingMatch) {
+			if (/^(```+|~~~+)\s*mermaid(?:\s+\{[^}]+\})?\s*$/i.test(trimmed)) {
+				return null;
+			}
+			if (block) {
+				return null;
+			}
+			activeFenceMarker = openingMatch[1][0] === '~' ? '~~~' : '```';
+			opener = line;
+			startLine = index;
+			bodyLines = [];
+			continue;
+		}
+
+		if (activeFenceMarker && new RegExp(`^${escapeRegExp(activeFenceMarker)}+\\s*$`).test(trimmed)) {
+			block = {
+				startLine,
+				endLine: index,
+				opener,
+				closer: line,
+				bodyLines: trimOuterBlankLines(bodyLines),
+			};
+			activeFenceMarker = null;
+			continue;
+		}
+
+		if (activeFenceMarker) {
+			bodyLines.push(line);
+		}
+	}
+
+	return activeFenceMarker ? null : block;
+}
+
+function findSingleMarkdownTableBlock(lines: string[]): MarkdownTableBlock | null {
+	let tableBlock: MarkdownTableBlock | null = null;
+
+	for (let index = 0; index < lines.length - 1; index++) {
+		if (!isMarkdownTableRow(lines[index]) || !isMarkdownTableSeparator(lines[index + 1])) {
+			continue;
+		}
+
+		if (tableBlock) {
+			return null;
+		}
+
+		let endLine = index + 1;
+		const dataLines: string[] = [];
+		for (let rowIndex = index + 2; rowIndex < lines.length; rowIndex++) {
+			if (!isMarkdownTableRow(lines[rowIndex])) {
+				break;
+			}
+			dataLines.push(lines[rowIndex]);
+			endLine = rowIndex;
+		}
+
+		tableBlock = {
+			startLine: index,
+			endLine,
+			headerLine: lines[index],
+			separatorLine: lines[index + 1],
+			dataLines: trimOuterBlankLines(dataLines),
+		};
+		index = endLine;
+	}
+
+	return tableBlock;
+}
+
+function chooseTableSplitOrientation(
+	findings: SlidevLayoutFinding[],
+	tableBlock: MarkdownTableBlock,
+): 'rows' | 'columns' {
+	const columnCount = parseMarkdownTableCells(tableBlock.headerLine).length;
+	const tableFinding = findings.find(finding => finding.target === 'table')
+		?? findings.find(finding => finding.recommendedPatch === 'split-table' && typeof finding.overflowAxis === 'string');
+	if (tableFinding?.overflowAxis === 'width' || tableFinding?.overflowAxis === 'both') {
+		return columnCount > 2 ? 'columns' : 'rows';
+	}
+	return 'rows';
+}
+
+function resolveStructuralChunkCount(
 	audit: SlidevLayoutAudit,
 	currentZoom: number,
 	nextZoom: number | null,
@@ -683,6 +1025,55 @@ function splitMermaidFenceIntoChunks(bodyLines: string[], targetChunkCount: numb
 	]));
 }
 
+function splitCodeFenceIntoChunks(bodyLines: string[], targetChunkCount: number): string[][] | null {
+	const codeSegments = collectCodeFenceSegments(bodyLines);
+	if (codeSegments.length >= 2) {
+		const chunkedSegments = chunkLineBlocks(codeSegments, Math.max(2, Math.min(targetChunkCount, codeSegments.length)));
+		if (chunkedSegments.length >= 2) {
+			return chunkedSegments;
+		}
+	}
+
+	return splitCodeLinesByBudget(bodyLines, targetChunkCount);
+}
+
+function splitMarkdownTableByRows(tableBlock: MarkdownTableBlock, targetChunkCount: number): string[][] | null {
+	const rowBlocks = tableBlock.dataLines.map(line => [line]);
+	const chunkedRowBlocks = chunkLineBlocks(rowBlocks, Math.max(2, Math.min(targetChunkCount, rowBlocks.length)));
+	if (chunkedRowBlocks.length < 2) {
+		return null;
+	}
+
+	return chunkedRowBlocks.map(rows => [
+		tableBlock.headerLine,
+		tableBlock.separatorLine,
+		...rows.map(line => line.trimEnd()),
+	]);
+}
+
+function splitMarkdownTableByColumns(tableBlock: MarkdownTableBlock, targetChunkCount: number): string[][] | null {
+	const headerCells = parseMarkdownTableCells(tableBlock.headerLine);
+	const rowCells = tableBlock.dataLines.map(parseMarkdownTableCells);
+	if (headerCells.length < 3 || rowCells.some(cells => cells.length !== headerCells.length)) {
+		return null;
+	}
+
+	const trailingColumnIndexes = Array.from({ length: headerCells.length - 1 }, (_, index) => index + 1);
+	const columnGroups = chunkIndexList(trailingColumnIndexes, Math.max(2, Math.min(targetChunkCount, trailingColumnIndexes.length)));
+	if (columnGroups.length < 2) {
+		return null;
+	}
+
+	return columnGroups.map(group => {
+		const selectedIndexes = [0, ...group];
+		return [
+			formatMarkdownTableLine(selectTableCells(headerCells, selectedIndexes)),
+			formatMarkdownTableSeparator(selectedIndexes.length),
+			...rowCells.map(cells => formatMarkdownTableLine(selectTableCells(cells, selectedIndexes))),
+		];
+	});
+}
+
 function buildMermaidSplitPlan(bodyLines: string[]): MermaidSplitPlan | null {
 	const trimmedBody = trimOuterBlankLines(bodyLines);
 	const typeIndex = trimmedBody.findIndex(line => {
@@ -703,10 +1094,10 @@ function buildMermaidSplitPlan(bodyLines: string[]): MermaidSplitPlan | null {
 	}
 
 	if (normalizedType.startsWith('flowchart') || normalizedType.startsWith('graph') || normalizedType.startsWith('mindmap')) {
-		const segments = collectMermaidTopLevelSegments(diagramBody, {
-			openPatterns: [/^subgraph\b/i],
-			closePattern: /^end\b/i,
-		});
+	const segments = collectMermaidTopLevelSegments(diagramBody, {
+		openPatterns: [/^subgraph\b/i],
+		closePattern: /^end\b/i,
+	});
 		return segments.length > 1
 			? {
 				repeatedLines: [...repeatedPrefix, typeLine],
@@ -767,7 +1158,7 @@ function collectMermaidTopLevelSegments(
 
 	for (const line of lines) {
 		const trimmed = line.trim();
-		const currentHasContent = current.some(hasSubstantiveMermaidLine);
+		const currentHasContent = current.some(hasSubstantiveLine);
 		if (depth === 0 && currentHasContent && trimmed.length > 0) {
 			segments.push(trimOuterBlankLines(current));
 			current = [];
@@ -782,14 +1173,14 @@ function collectMermaidTopLevelSegments(
 		}
 	}
 
-	if (current.some(hasSubstantiveMermaidLine)) {
+	if (current.some(hasSubstantiveLine)) {
 		segments.push(trimOuterBlankLines(current));
 	}
 
-	return segments.filter(segment => segment.some(hasSubstantiveMermaidLine));
+	return segments.filter(segment => segment.some(hasSubstantiveLine));
 }
 
-function hasSubstantiveMermaidLine(line: string): boolean {
+function hasSubstantiveLine(line: string): boolean {
 	const trimmed = line.trim();
 	return trimmed.length > 0 && !trimmed.startsWith('%%');
 }
@@ -822,11 +1213,101 @@ function chunkLineBlocks(blocks: string[][], chunkCount: number): string[][] {
 		currentLineCount += blockLineCount;
 	}
 
-	if (currentChunk.some(hasSubstantiveMermaidLine)) {
+	if (currentChunk.some(hasSubstantiveLine)) {
 		chunks.push(trimOuterBlankLines(currentChunk));
 	}
 
-	return chunks.filter(chunk => chunk.some(hasSubstantiveMermaidLine));
+	return chunks.filter(chunk => chunk.some(hasSubstantiveLine));
+}
+
+function collectCodeFenceSegments(lines: string[]): string[][] {
+	const segments: string[][] = [];
+	let current: string[] = [];
+
+	for (const line of lines) {
+		current.push(line);
+		if (line.trim().length === 0) {
+			if (current.some(hasSubstantiveLine)) {
+				segments.push(trimOuterBlankLines(current));
+			}
+			current = [];
+		}
+	}
+
+	if (current.some(hasSubstantiveLine)) {
+		segments.push(trimOuterBlankLines(current));
+	}
+
+	return segments.filter(segment => segment.some(hasSubstantiveLine));
+}
+
+function chunkIndexList(indexes: number[], chunkCount: number): number[][] {
+	if (indexes.length < 2) {
+		return [indexes];
+	}
+
+	const chunkSize = Math.max(1, Math.ceil(indexes.length / Math.max(2, chunkCount)));
+	const groups: number[][] = [];
+	for (let index = 0; index < indexes.length; index += chunkSize) {
+		groups.push(indexes.slice(index, index + chunkSize));
+	}
+	return groups.filter(group => group.length > 0);
+}
+
+function splitCodeLinesByBudget(lines: string[], chunkCount: number): string[][] | null {
+	const trimmedLines = trimOuterBlankLines(lines);
+	if (trimmedLines.length < 2) {
+		return null;
+	}
+
+	const targetLineBudget = Math.max(1, Math.ceil(trimmedLines.length / Math.max(2, chunkCount)));
+	const chunks: string[][] = [];
+	let currentChunk: string[] = [];
+
+	for (const line of trimmedLines) {
+		currentChunk.push(line);
+		if (currentChunk.length >= targetLineBudget && chunks.length < chunkCount - 1) {
+			chunks.push(trimOuterBlankLines(currentChunk));
+			currentChunk = [];
+		}
+	}
+
+	if (currentChunk.length > 0) {
+		chunks.push(trimOuterBlankLines(currentChunk));
+	}
+
+	return chunks.length >= 2 ? chunks : null;
+}
+
+function parseMarkdownTableCells(line: string): string[] {
+	const trimmed = line.trim().replace(/^\|/, '').replace(/\|$/, '');
+	return trimmed.split('|').map(cell => cell.trim());
+}
+
+function selectTableCells(cells: string[], indexes: number[]): string[] {
+	return indexes.map(index => cells[index] ?? '');
+}
+
+function formatMarkdownTableLine(cells: string[]): string {
+	return `| ${cells.join(' | ')} |`;
+}
+
+function formatMarkdownTableSeparator(columnCount: number): string {
+	return `| ${Array.from({ length: columnCount }, () => '---').join(' | ')} |`;
+}
+
+function isMarkdownTableRow(line: string): boolean {
+	const trimmed = line.trim();
+	return trimmed.length > 0
+		&& trimmed.includes('|')
+		&& !trimmed.startsWith('```')
+		&& !trimmed.startsWith('~~~')
+		&& !trimmed.startsWith('#');
+}
+
+function isMarkdownTableSeparator(line: string): boolean {
+	const compact = line.trim().replace(/\s+/g, '');
+	return compact.length > 0 && /^[:|\-]+$/.test(compact) && compact.includes('-');
 }
 
 function collectSimpleSlideBlocks(lines: string[]): string[][] {

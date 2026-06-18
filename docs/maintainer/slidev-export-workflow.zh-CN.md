@@ -111,14 +111,14 @@ layoutAuditSummary.retryCount
 
 1. 默认 HTML 验证在未传 `--sample-slides` 时会审计整个准备后的 deck；
 2. patcher 的 `zoom` 来自真实 overflow 测量，而不是固定导出常数；
-3. patcher 已会在不宜继续缩小时，升级为结构化拆分，当前支持的内容类型包括 Mermaid `flowchart` / `graph` / `mindmap` / `sequenceDiagram`，以及简单的标题 + 段落/列表页；
-4. 真实 `docs/architecture.zh-CN.md` workflow 现在已经收敛到 `ok: true`、`27` 个审计页、`overflow` 与 `unreadable-scale` 都为零；
+3. patcher 已会在不宜继续缩小时，升级为结构化拆分，当前支持的内容类型包括 Mermaid `flowchart` / `graph` / `mindmap` / `sequenceDiagram`、Markdown table、非 Mermaid fenced code block，以及简单的标题 + 段落/列表页；
+4. 真实 `docs/architecture.zh-CN.md` workflow 现在已经收敛到 `ok: true`、`28` 个审计页、`overflow` 与 `unreadable-scale` 都为零；
 5. 同一真实源文件的 `PDF` 与 `PNG` 验证也返回 `ok: true`。
 
 当前限制：
 
-1. patcher 还不能拆解超大表格或代码重页；
-2. 自定义 Slidev slot layout 与第一张带 deck headmatter 的页面仍保持保守/manual-review 路径；
+1. 自定义 Slidev slot layout 与第一张带 deck headmatter 的页面仍保持保守/manual-review 路径；
+2. 对于单元格内容病态不可换行的宽表，patcher 仍可能需要多轮列拆；下一阶段应补 cell-level wrapping 或非 table fallback，而不是只继续加 pass；
 3. full-deck Playwright 验证故意比代表性抽样更慢，后续优化方向应是提高 patch 收敛能力，而不是退回弱审计。
 
 ## 输出策略

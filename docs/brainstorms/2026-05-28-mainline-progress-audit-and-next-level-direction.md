@@ -306,9 +306,9 @@ Correct interpretation:
 
 1. the workflow proof is now meaningfully stronger than direct `slidev build`;
 2. the workflow now includes a real render-feedback quality gate instead of only a CLI smoke path;
-3. the real `docs/architecture.zh-CN.md` HTML fixture now closes at `ok: true` with `27` audited slides and zero overflow/unreadable findings, while `PDF` and `PNG` on the same source also return `ok: true`;
-4. current landed truth is already past the original plan wording: workspace-aware resolution for the local Slidev fork, Slidev skill roots, and Playwright browser cache is in place, full-deck visible-slide-root audit is in place, and the patch loop is no longer zoom-only.
-5. the next architectural step is narrower now: extend structural patching to oversized tables, code-heavy slides, and richer custom Slidev layouts without regressing back to representative-slide-only audit.
+3. the real `docs/architecture.zh-CN.md` HTML fixture now closes at `ok: true` with `28` audited slides and zero overflow/unreadable findings, while `PDF` and `PNG` on the same source also return `ok: true`;
+4. current landed truth is already past the original plan wording: workspace-aware resolution for the local Slidev fork, Slidev skill roots, and Playwright browser cache is in place, full-deck visible-slide-root audit is in place, and the patch loop now covers Mermaid, Markdown tables, code fences, and dense text instead of only zoom.
+5. the next architectural step is narrower now: extend structural patching to richer custom Slidev layouts and pathological component content without regressing back to representative-slide-only audit.
 
 ## 3. Deep Comparison Against Earlier Plan Language
 
@@ -606,14 +606,15 @@ Current WIP status:
    - the workflow reuses Jacob's Playwright browser cache
    - full-deck HTML slides go through visible-root layout audit plus bounded measured patch/rebuild
    - the `HTML`, `PDF`, and `PNG` export paths are live
-   - the real HTML fixture now closes with `ok: true`, `27` audited slides, and `overflowCount = 0`
+   - the real HTML fixture now closes with `ok: true`, `28` audited slides, and `overflowCount = 0`
+   - maintainer-local structural overflow notes can now converge through real Markdown table decomposition and code-fence chunking rather than only unit-test rewrites
 
 Next direction:
 
 1. Slidev export changes must include `npm run verify:slidev-export` in closure evidence;
 2. generated `docs/export/` files may remain available for local inspection, but should not be committed unless the task explicitly asks for generated output;
 3. keep `SlidevRenderedMeasure`, `SlidevOverflowAudit`, and `SlidevDeckPatch` as explicit owned modules and extend them rather than letting logic leak back into prompt heuristics;
-4. the next step is no longer “add slide splitting at all”; it is to extend the current patcher toward table decomposition, code-heavy slide handling, and custom layout-safe splitting while preserving deterministic failure modes;
+4. the next step is no longer “add table/code decomposition at all”; it is to extend the current patcher toward custom layout-safe splitting, richer component slides, and pathological cell/content fallback handling while preserving deterministic failure modes;
 5. any upstream Slidev skill PR should stay generic: full references, built-in/configured theme preference, closed frontmatter, readable transforms for large diagrams/tables/code, and browser-sampled build verification. NoteMD vault paths, local fork paths, layout audit internals, and the `architecture.zh-CN.md` fixture should remain project-local.
 
 ## 6. Documentation Sync Rule

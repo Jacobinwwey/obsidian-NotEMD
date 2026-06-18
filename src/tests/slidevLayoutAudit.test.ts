@@ -61,6 +61,28 @@ describe('slidevLayoutAudit', () => {
 		expect(audit.findings.some(finding => finding.kind === 'unreadable-scale')).toBe(true);
 	});
 
+	test('derives a smaller recommended scale from table scroll overflow even when the outer rect fits', () => {
+		const audit = analyzeRenderedSlideMeasurement(createMeasurement({
+			contentBounds: { left: 70, top: 60, right: 1160, bottom: 620, width: 1090, height: 560 },
+			elements: [
+				{
+					kind: 'table',
+					selector: 'table',
+					textLength: 400,
+					scrollWidth: 2200,
+					scrollHeight: 560,
+					clientWidth: 1100,
+					clientHeight: 560,
+					rect: { left: 70, top: 60, right: 1160, bottom: 620, width: 1090, height: 560 },
+				},
+			],
+		}));
+
+		const tableFinding = audit.findings.find(finding => finding.target === 'table');
+		expect(tableFinding?.recommendedPatch).toBe('split-table');
+		expect(tableFinding?.recommendedScale).toBeCloseTo(0.5, 2);
+	});
+
 	test('patches slide zoom downward when audit recommends a smaller readable scale', () => {
 		const audit: SlidevLayoutAudit = {
 			slide: 2,
@@ -305,6 +327,233 @@ describe('slidevLayoutAudit', () => {
 		expect((patched.deckMarkdown.match(/## CLI 边界现实/g) || []).length).toBe(2);
 		expect(patched.deckMarkdown).toContain('providerDiagnosticReportPersistence');
 		expect(patched.deckMarkdown).toContain('providerDiagnosticCommandHostAdapter');
+	});
+
+	test('splits oversized Markdown tables when further zoom would become unreadable', () => {
+		const audit: SlidevLayoutAudit = {
+			slide: 2,
+			safeRect: { left: 51.2, top: 43.2, right: 1228.8, bottom: 676.8, width: 1177.6, height: 633.6 },
+			contentBounds: { left: 48, top: 52, right: 1234, bottom: 920, width: 1186, height: 868 },
+			pageScale: 0.26,
+			elementKinds: ['table'],
+			findings: [
+				{
+					kind: 'overflow',
+					target: 'content',
+					message: 'Slide content exceeds the safe visible rectangle',
+					recommendedPatch: 'split-table',
+					recommendedScale: 0.7,
+				},
+				{
+					kind: 'overflow',
+					target: 'table',
+					message: 'Table content overflows its scroll box',
+					recommendedPatch: 'split-table',
+					recommendedScale: 0.7,
+				},
+			],
+		};
+		const deck = [
+			'---',
+			'theme: default',
+			'---',
+			'',
+			'# Intro',
+			'',
+			'---',
+			'zoom: 0.26',
+			'---',
+			'',
+			'## Provider Matrix',
+			'',
+			'| Provider | Model | Mode |',
+			'| --- | --- | --- |',
+			'| OpenAI | gpt-4o | hosted |',
+			'| Anthropic | claude-sonnet | hosted |',
+			'| Ollama | llama3 | local |',
+			'| LMStudio | local-model | local |',
+		].join('\n');
+
+		const patched = patchDeckWithLayoutAudit(deck, [audit]);
+
+		expect(patched.changed).toBe(true);
+		expect(patched.blockedSlides).toEqual([]);
+		expect(countSlideDeckSlides(patched.deckMarkdown)).toBe(3);
+		expect((patched.deckMarkdown.match(/\| Provider \| Model \| Mode \|/g) || []).length).toBe(2);
+		expect(patched.deckMarkdown).toContain('| OpenAI | gpt-4o | hosted |');
+		expect(patched.deckMarkdown).toContain('| LMStudio | local-model | local |');
+		expect(patched.deckMarkdown).not.toContain('zoom: 0.26');
+	});
+
+	test('splits wide Markdown tables into column groups when scroll overflow is horizontal', () => {
+		const audit: SlidevLayoutAudit = {
+			slide: 2,
+			safeRect: { left: 51.2, top: 43.2, right: 1228.8, bottom: 676.8, width: 1177.6, height: 633.6 },
+			contentBounds: { left: 48, top: 52, right: 1234, bottom: 780, width: 1186, height: 728 },
+			pageScale: 1,
+			elementKinds: ['table'],
+			findings: [
+				{
+					kind: 'overflow',
+					target: 'content',
+					message: 'Slide content exceeds the safe visible rectangle',
+					recommendedPatch: 'split-table',
+					recommendedScale: 0.55,
+				},
+				{
+					kind: 'overflow',
+					target: 'table',
+					message: 'Table content overflows its scroll box',
+					recommendedPatch: 'split-table',
+					recommendedScale: 0.55,
+					scrollOverflow: true,
+					overflowAxis: 'width',
+				},
+			],
+		};
+		const deck = [
+			'---',
+			'theme: default',
+			'---',
+			'',
+			'# Intro',
+			'',
+			'---',
+			'## Wide Provider Matrix',
+			'',
+			'| Provider | Model | Runtime | Token Ceiling | Notes |',
+			'| --- | --- | --- | --- | --- |',
+			'| OpenAI | gpt-4o | hosted | 16k | default hosted profile |',
+			'| Anthropic | claude-sonnet | hosted | 64k | long-context reasoning profile |',
+		].join('\n');
+
+		const patched = patchDeckWithLayoutAudit(deck, [audit]);
+
+		expect(patched.changed).toBe(true);
+		expect(patched.blockedSlides).toEqual([]);
+		expect(countSlideDeckSlides(patched.deckMarkdown)).toBe(3);
+		expect((patched.deckMarkdown.match(/\| Provider \|/g) || []).length).toBe(2);
+		expect(patched.deckMarkdown).toContain('| Provider | Model | Runtime |');
+		expect(patched.deckMarkdown).toContain('| Provider | Token Ceiling | Notes |');
+	});
+
+	test('splits oversized code fences when further zoom would become unreadable', () => {
+		const audit: SlidevLayoutAudit = {
+			slide: 2,
+			safeRect: { left: 51.2, top: 43.2, right: 1228.8, bottom: 676.8, width: 1177.6, height: 633.6 },
+			contentBounds: { left: 48, top: 52, right: 1234, bottom: 920, width: 1186, height: 868 },
+			pageScale: 0.26,
+			elementKinds: ['code'],
+			findings: [
+				{
+					kind: 'overflow',
+					target: 'content',
+					message: 'Slide content exceeds the safe visible rectangle',
+					recommendedPatch: 'reduce-code',
+					recommendedScale: 0.7,
+				},
+				{
+					kind: 'overflow',
+					target: 'code',
+					message: 'Code block content overflows its scroll box',
+					recommendedPatch: 'reduce-code',
+					recommendedScale: 0.7,
+				},
+			],
+		};
+		const deck = [
+			'---',
+			'theme: default',
+			'---',
+			'',
+			'# Intro',
+			'',
+			'---',
+			'zoom: 0.26',
+			'---',
+			'',
+			'## Export Pipeline',
+			'',
+			'```ts',
+			'const environment = await probeEnvironment();',
+			'const slideSource = await prepareSlidevExportSource(app, sourceFile, config, {}, onProgress);',
+			'const htmlPath = await exportSlidevHtml(app, slideSource, config, onProgress);',
+			'',
+			'const auditResult = await runPlaywrightChecks(htmlPath, slidesToAudit, true, slideExport);',
+			'const patchResult = patchDeckWithLayoutAudit(deckMarkdown, auditResult.layoutAudits, config);',
+			'if (patchResult.changed) {',
+			'  await exportSlidevHtml(app, slideSource, config, onProgress);',
+			'}',
+			'```',
+		].join('\n');
+
+		const patched = patchDeckWithLayoutAudit(deck, [audit]);
+
+		expect(patched.changed).toBe(true);
+		expect(patched.blockedSlides).toEqual([]);
+		expect(countSlideDeckSlides(patched.deckMarkdown)).toBe(3);
+		expect((patched.deckMarkdown.match(/```ts/g) || []).length).toBe(2);
+		expect((patched.deckMarkdown.match(/## Export Pipeline/g) || []).length).toBe(2);
+		expect(patched.deckMarkdown).toContain('probeEnvironment');
+		expect(patched.deckMarkdown).toContain('patchDeckWithLayoutAudit');
+		expect(patched.deckMarkdown).not.toContain('zoom: 0.26');
+	});
+
+	test('splits tall code fences on vertical scroll overflow before the readable floor is crossed', () => {
+		const audit: SlidevLayoutAudit = {
+			slide: 2,
+			safeRect: { left: 51.2, top: 43.2, right: 1228.8, bottom: 676.8, width: 1177.6, height: 633.6 },
+			contentBounds: { left: 48, top: 52, right: 1234, bottom: 800, width: 1186, height: 748 },
+			pageScale: 1,
+			elementKinds: ['code'],
+			findings: [
+				{
+					kind: 'overflow',
+					target: 'content',
+					message: 'Slide content exceeds the safe visible rectangle',
+					recommendedPatch: 'reduce-code',
+					recommendedScale: 0.8,
+				},
+				{
+					kind: 'overflow',
+					target: 'code',
+					message: 'Code block overflows its scroll box',
+					recommendedPatch: 'reduce-code',
+					recommendedScale: 0.8,
+					scrollOverflow: true,
+					overflowAxis: 'height',
+				},
+			],
+		};
+		const deck = [
+			'---',
+			'theme: default',
+			'---',
+			'',
+			'# Intro',
+			'',
+			'---',
+			'## Tall Export Pipeline',
+			'',
+			'```ts',
+			'const environment = await probeEnvironment();',
+			'const slideSource = await prepareSlidevExportSource(app, sourceFile, config, {}, onProgress);',
+			'',
+			'const htmlPath = await exportSlidevHtml(app, slideSource, config, onProgress);',
+			'const slidesToAudit = resolveSlidesToAudit(args.sampleSlides, currentDeckMarkdown, slideExport);',
+			'',
+			'const auditResult = await runPlaywrightChecks(htmlPath, slidesToAudit, true, slideExport);',
+			'const layoutSummary = summarizeLayoutAudits(auditResult.layoutAudits, retryCount);',
+			'```',
+		].join('\n');
+
+		const patched = patchDeckWithLayoutAudit(deck, [audit]);
+
+		expect(patched.changed).toBe(true);
+		expect(patched.blockedSlides).toEqual([]);
+		expect(countSlideDeckSlides(patched.deckMarkdown)).toBe(3);
+		expect((patched.deckMarkdown.match(/```ts/g) || []).length).toBe(2);
+		expect((patched.deckMarkdown.match(/## Tall Export Pipeline/g) || []).length).toBe(2);
 	});
 
 	test('summarizes audit counts across slides', () => {
