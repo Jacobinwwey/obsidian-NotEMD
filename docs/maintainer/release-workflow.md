@@ -38,6 +38,11 @@ Run `npm run chronicle:sync-repo-saga` and `npm run chronicle:update` serially. 
 
 If `obsidian-cli` is unavailable in the local environment, record it in release notes or release-handoff evidence.
 If the change affects diagram semantics, also run the maintainer-local semantic layer in `docs/maintainer/diagram-semantic-verification.md`.
+If the change affects Slidev export wiring, Slidev settings, source preparation, local fork detection, or HTML/PDF/PNG/MP4 export behavior, also run the maintainer-local workflow in `docs/maintainer/slidev-export-workflow.md`:
+```bash
+npm run verify:slidev-export
+```
+That command intentionally writes inspectable artifacts under `docs/export/`; do not include those generated files in a commit unless the release task explicitly asks for them.
 Recommended helper:
 ```bash
 npm run verify:diagram-semantics -- --vault "<vault-name>" --commit "<sha>" --version "<plugin-version>" --output ~/tmp/notemd-diagram-check.md

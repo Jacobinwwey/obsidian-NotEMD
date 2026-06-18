@@ -38,6 +38,11 @@ git diff --check
 
 如果本地环境缺少 `obsidian-cli`，请在发布说明或交接证据中明确记录。
 如果改动触及图表语义，还必须执行 `docs/maintainer/diagram-semantic-verification.zh-CN.md` 中定义的维护者本地语义核验层。
+如果改动触及 Slidev 导出接线、Slidev 设置、source preparation、本地 fork 探测，或 HTML/PDF/PNG/MP4 导出行为，还必须执行 `docs/maintainer/slidev-export-workflow.zh-CN.md` 中定义的维护者本地工作流：
+```bash
+npm run verify:slidev-export
+```
+该命令会有意在 `docs/export/` 下写出可检查产物；除非发布任务明确要求，不应把这些生成文件提交进 commit。
 推荐辅助命令：
 ```bash
 npm run verify:diagram-semantics -- --vault "<vault-name>" --commit "<sha>" --version "<plugin-version>" --output ~/tmp/notemd-diagram-check.md
