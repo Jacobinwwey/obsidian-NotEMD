@@ -932,6 +932,123 @@ describe('slidevLayoutAudit', () => {
 		expect(patched.deckMarkdown).not.toContain('zoom: 0.83');
 	});
 
+	test('targets the matching component-heavy slot zone when multiple transformable zones exist', () => {
+		const audit: SlidevLayoutAudit = {
+			slide: 2,
+			safeRect: { left: 51.2, top: 43.2, right: 1228.8, bottom: 676.8, width: 1177.6, height: 633.6 },
+			contentBounds: { left: 48, top: 52, right: 1234, bottom: 820, width: 1186, height: 768 },
+			pageScale: 1,
+			elementKinds: ['text', 'other'],
+			findings: [
+				{
+					kind: 'overflow',
+					target: 'content',
+					message: 'Slide content exceeds the safe visible rectangle',
+					recommendedPatch: 'split-slide',
+					recommendedScale: 0.86,
+				},
+				{
+					kind: 'overflow',
+					target: 'other',
+					message: 'other element exceeds the safe visible rectangle',
+					recommendedPatch: 'reduce-zoom',
+					recommendedScale: 0.86,
+					textPreview: 'Runtime orchestration detail block 12 with explicit structured text that stays inside a single custom component tree.',
+				},
+			],
+		};
+		const deck = [
+			'---',
+			'theme: default',
+			'---',
+			'',
+			'# Intro',
+			'',
+			'---',
+			'layout: custom-grid',
+			'---',
+			'',
+			'::summary::',
+			'',
+			'<div class="summary-card">',
+			'  <p>Short status card</p>',
+			'</div>',
+			'',
+			'::details::',
+			'',
+			'<div class="space-y-3">',
+			'  <div class="border rounded px-3 py-2 text-sm">Runtime orchestration detail block 01 with explicit structured text that stays inside a single custom component tree.</div>',
+			'  <div class="border rounded px-3 py-2 text-sm">Runtime orchestration detail block 12 with explicit structured text that stays inside a single custom component tree.</div>',
+			'</div>',
+		].join('\n');
+
+		const patched = patchDeckWithLayoutAudit(deck, [audit]);
+
+		expect(patched.changed).toBe(true);
+		expect(countSlideDeckSlides(patched.deckMarkdown)).toBe(2);
+		expect((patched.deckMarkdown.match(/<Transform :scale="0.86" origin="top left">/g) || []).length).toBe(1);
+		expect(patched.deckMarkdown).toContain('::summary::\n\n<div class="summary-card">');
+		expect(patched.deckMarkdown).toContain('::details::\n\n<Transform :scale="0.86" origin="top left">');
+	});
+
+	test('does not retarget a different component-heavy slot after another slot is already wrapped in Transform', () => {
+		const audit: SlidevLayoutAudit = {
+			slide: 2,
+			safeRect: { left: 51.2, top: 43.2, right: 1228.8, bottom: 676.8, width: 1177.6, height: 633.6 },
+			contentBounds: { left: 48, top: 52, right: 1234, bottom: 820, width: 1186, height: 768 },
+			pageScale: 0.86,
+			elementKinds: ['text', 'other'],
+			findings: [
+				{
+					kind: 'overflow',
+					target: 'content',
+					message: 'Slide content exceeds the safe visible rectangle',
+					recommendedPatch: 'split-slide',
+					recommendedScale: 0.9,
+				},
+				{
+					kind: 'overflow',
+					target: 'other',
+					message: 'other element exceeds the safe visible rectangle',
+					recommendedPatch: 'reduce-zoom',
+					recommendedScale: 0.9,
+					textPreview: 'Runtime orchestration detail block 12 with explicit structured text that stays inside a single custom component tree.',
+				},
+			],
+		};
+		const deck = [
+			'---',
+			'theme: default',
+			'---',
+			'',
+			'# Intro',
+			'',
+			'---',
+			'layout: custom-grid',
+			'---',
+			'',
+			'::summary::',
+			'',
+			'<div class="summary-card">',
+			'  <p>Short status card</p>',
+			'</div>',
+			'',
+			'::details::',
+			'',
+			'<Transform :scale="0.86" origin="top left">',
+			'<div class="space-y-3">',
+			'  <div class="border rounded px-3 py-2 text-sm">Runtime orchestration detail block 01 with explicit structured text that stays inside a single custom component tree.</div>',
+			'  <div class="border rounded px-3 py-2 text-sm">Runtime orchestration detail block 12 with explicit structured text that stays inside a single custom component tree.</div>',
+			'</div>',
+			'</Transform>',
+		].join('\n');
+
+		const patched = patchDeckWithLayoutAudit(deck, [audit]);
+
+		expect((patched.deckMarkdown.match(/<Transform :scale="0.86" origin="top left">/g) || []).length).toBe(1);
+		expect(patched.deckMarkdown).not.toContain('::summary::\n\n<Transform :scale=');
+	});
+
 	test('splits first-slide deck headmatter content structurally when per-slide zoom cannot be used', () => {
 		const audit: SlidevLayoutAudit = {
 			slide: 1,

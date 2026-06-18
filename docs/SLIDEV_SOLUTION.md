@@ -149,11 +149,11 @@ Current landed state:
    - existing Slidev deck working-copy verification
    - pathological table fallback into record-list slides
    - slot-marked custom layouts backed by a real custom `layouts/*.vue` file
-   - component-heavy custom slot layouts converging through unique-zone local `<Transform>` wrapping after rendered overflow detection
+   - component-heavy custom slot layouts converging through rendered-text-hint-based local `<Transform>` wrapping, including multi-zone cases where the overflowing slot must be attributed without retargeting nonoverflowing sibling zones
 
 Current gap:
 
-1. richer custom/component-heavy Slidev layouts beyond the current supported structural set still fall back to conservative zoom/manual-review behavior, especially when multiple competing component-heavy slot zones exist or no unique local transform target can be derived safely;
+1. richer custom/component-heavy Slidev layouts beyond the current supported structural set still fall back to conservative zoom/manual-review behavior, especially when multiple competing component-heavy slot zones exist and rendered text hints still cannot safely distinguish the true overflow owner;
 2. standalone export correctness currently depends on native bundle sanity detection plus server-script fallback rather than on a fully reliable standalone bundling strategy of its own;
 3. full-deck Playwright verification is now more correct, but noticeably slower, so future work should improve patch convergence instead of weakening the audit back to representative sampling;
 4. the Obsidian CLI can dispatch `notemd:export-slides`, but it does not expose an export-complete handshake, so host-command smoke is still weaker than the maintainer verifier.

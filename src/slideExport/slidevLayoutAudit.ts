@@ -13,6 +13,7 @@ export interface SlidevMeasuredElement {
 	kind: SlidevMeasuredElementKind;
 	selector: string;
 	textLength: number;
+	textPreview?: string;
 	scrollWidth: number;
 	scrollHeight: number;
 	clientWidth: number;
@@ -40,6 +41,7 @@ export interface SlidevLayoutFinding {
 	recommendedPatch: SlidevLayoutPatchKind;
 	recommendedScale: number | null;
 	scrollOverflow?: boolean;
+	textPreview?: string;
 	overflowAxis?: 'width' | 'height' | 'both';
 	overflow?: {
 		left: number;
@@ -180,16 +182,17 @@ export function analyzeRenderedSlideMeasurement(
 			continue;
 		}
 
-		findings.push({
-			kind: 'overflow',
-			target: element.kind,
-			message: describeElementOverflow(element.kind, scrollOverflow),
-			recommendedPatch: patchTargetForElement(element.kind),
-			recommendedScale: computeElementFitScale(element, measurement.safeRect, scrollOverflow),
-			scrollOverflow,
-			overflowAxis: resolveOverflowAxis(
-				elementOverflow,
-				element.scrollWidth - element.clientWidth > resolvedConfig.overflowTolerancePx,
+			findings.push({
+				kind: 'overflow',
+				target: element.kind,
+				message: describeElementOverflow(element.kind, scrollOverflow),
+				recommendedPatch: patchTargetForElement(element.kind),
+				recommendedScale: computeElementFitScale(element, measurement.safeRect, scrollOverflow),
+				scrollOverflow,
+				textPreview: element.textPreview,
+				overflowAxis: resolveOverflowAxis(
+					elementOverflow,
+					element.scrollWidth - element.clientWidth > resolvedConfig.overflowTolerancePx,
 				element.scrollHeight - element.clientHeight > resolvedConfig.overflowTolerancePx,
 			),
 			overflow: elementOverflow,
@@ -292,7 +295,7 @@ export function patchDeckWithLayoutAudit(
 			}
 		}
 
-		const transformedSlotSlide = wrapOverflowingSupportedSlotLayoutZoneInTransform(currentSlide, bestScale, currentZoom, resolvedConfig.minReadableScale);
+		const transformedSlotSlide = wrapOverflowingSupportedSlotLayoutZoneInTransform(currentSlide, audit.findings, bestScale, currentZoom, resolvedConfig.minReadableScale);
 		if (transformedSlotSlide) {
 			slides[targetIndex] = transformedSlotSlide;
 			changedSlides.push(audit.slide);
@@ -877,6 +880,7 @@ function splitOverflowingSupportedSlotLayoutSlide(
 
 function wrapOverflowingSupportedSlotLayoutZoneInTransform(
 	slideMarkdown: string,
+	findings: SlidevLayoutFinding[],
 	recommendedScale: number | null,
 	currentZoom: number,
 	minReadableScale: number,
@@ -891,7 +895,7 @@ function wrapOverflowingSupportedSlotLayoutZoneInTransform(
 		return null;
 	}
 
-	const targetZone = pickSlotLayoutTransformZone(surface);
+	const targetZone = pickSlotLayoutTransformZone(surface, findings);
 	if (!targetZone) {
 		return null;
 	}
@@ -1167,18 +1171,7 @@ function pickSlotLayoutTargetZone(
 	surface: SupportedSlotLayoutSurface,
 	findings: SlidevLayoutFinding[],
 ): { kind: 'lead' | 'section'; name: string; lines: string[] } | null {
-	const zones = [
-		{
-			kind: 'lead' as const,
-			name: surface.leadRole,
-			lines: surface.leadLines,
-		},
-		...surface.sections.map(section => ({
-			kind: 'section' as const,
-			name: section.name,
-			lines: section.lines,
-		})),
-	].filter(zone => zone.lines.some(line => line.trim().length > 0));
+	const zones = collectSupportedSlotZones(surface);
 
 	const matchers: Array<(lines: string[]) => boolean> = [];
 	if (findings.some(finding => finding.recommendedPatch === 'split-diagram')) {
@@ -1196,9 +1189,16 @@ function pickSlotLayoutTargetZone(
 	}
 
 	for (const matcher of matchers) {
-		const matchedZone = zones.find(zone => matcher(zone.lines));
-		if (matchedZone) {
-			return matchedZone;
+		const matchedZones = zones.filter(zone => matcher(zone.lines));
+		if (matchedZones.length === 1) {
+			return matchedZones[0];
+		}
+		if (matchedZones.length > 1) {
+			const hintedZone = pickZoneByFindingTextHints(matchedZones, findings);
+			if (hintedZone) {
+				return hintedZone;
+			}
+			return matchedZones[0];
 		}
 	}
 
@@ -1207,8 +1207,31 @@ function pickSlotLayoutTargetZone(
 
 function pickSlotLayoutTransformZone(
 	surface: SupportedSlotLayoutSurface,
+	findings: SlidevLayoutFinding[],
 ): { kind: 'lead' | 'section'; name: string; lines: string[] } | null {
-	const zones = [
+	const zones = collectSupportedSlotZones(surface);
+	const componentZones = zones.filter(zone =>
+		containsTransformableComponentSyntax(zone.lines) || containsTransformWrapper(zone.lines)
+	);
+
+	const transformableZones = zones.filter(zone =>
+		containsTransformableComponentSyntax(zone.lines)
+		&& !containsTransformWrapper(zone.lines)
+	);
+	if (componentZones.length > 1) {
+		return transformableZones.length > 0 ? pickZoneByFindingTextHints(transformableZones, findings) : null;
+	}
+	if (transformableZones.length !== 1) {
+		return transformableZones.length > 1 ? pickZoneByFindingTextHints(transformableZones, findings) : null;
+	}
+
+	return transformableZones[0];
+}
+
+function collectSupportedSlotZones(
+	surface: SupportedSlotLayoutSurface,
+): Array<{ kind: 'lead' | 'section'; name: string; lines: string[] }> {
+	return [
 		{
 			kind: 'lead' as const,
 			name: surface.leadRole,
@@ -1220,16 +1243,57 @@ function pickSlotLayoutTransformZone(
 			lines: section.lines,
 		})),
 	].filter(zone => zone.lines.some(line => line.trim().length > 0));
+}
 
-	const transformableZones = zones.filter(zone =>
-		containsTransformableComponentSyntax(zone.lines)
-		&& !containsTransformWrapper(zone.lines)
-	);
-	if (transformableZones.length !== 1) {
+function pickZoneByFindingTextHints<T extends { lines: string[] }>(
+	zones: T[],
+	findings: SlidevLayoutFinding[],
+): T | null {
+	const hints = Array.from(new Set(findings
+		.map(finding => normalizeTextForMatching(finding.textPreview ?? ''))
+		.filter(hint => hint.length >= 12)));
+	if (hints.length === 0) {
 		return null;
 	}
 
-	return transformableZones[0];
+	const scoredZones = zones
+		.map(zone => ({
+			zone,
+			score: scoreZoneTextHints(zone.lines, hints),
+		}))
+		.filter(candidate => candidate.score > 0)
+		.sort((left, right) => right.score - left.score);
+	if (scoredZones.length === 0) {
+		return null;
+	}
+	if (scoredZones.length > 1 && scoredZones[0].score === scoredZones[1].score) {
+		return null;
+	}
+
+	return scoredZones[0].zone;
+}
+
+function scoreZoneTextHints(lines: string[], hints: string[]): number {
+	const zoneText = normalizeTextForMatching(lines
+		.join('\n')
+		.replace(/<[^>]+>/g, ' ')
+		.replace(/^\s{0,3}(?:[-*+]|\d+\.)\s+/gm, ' ')
+		.replace(/^#{1,6}\s+/gm, ' ')
+		.replace(/^::[\w-]+::$/gm, ' ')
+	);
+	if (!zoneText) {
+		return 0;
+	}
+
+	return hints.reduce((score, hint) => score + (zoneText.includes(hint) ? hint.length : 0), 0);
+}
+
+function normalizeTextForMatching(value: string): string {
+	return value
+		.toLowerCase()
+		.replace(/\s+/g, ' ')
+		.replace(/[^\p{L}\p{N}\s.-]/gu, ' ')
+		.trim();
 }
 
 function assembleSupportedSlotLayoutSlide(

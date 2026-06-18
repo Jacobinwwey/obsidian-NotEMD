@@ -249,15 +249,19 @@ async function collectRenderedSlideMeasurement(page: any, slide: number): Promis
 			width: number;
 			height: number;
 		};
-		const toRect = (rect: DOMRect) => ({
-			left: rect.left,
-			top: rect.top,
-			right: rect.right,
-			bottom: rect.bottom,
-			width: rect.width,
-			height: rect.height,
-		});
-		const overlaps = (a: BrowserRect, b: BrowserRect) => !(a.right <= b.left || a.left >= b.right || a.bottom <= b.top || a.top >= b.bottom);
+			const toRect = (rect: DOMRect) => ({
+				left: rect.left,
+				top: rect.top,
+				right: rect.right,
+				bottom: rect.bottom,
+				width: rect.width,
+				height: rect.height,
+			});
+			const toTextPreview = (value: string) => value
+				.replace(/\s+/g, ' ')
+				.trim()
+				.slice(0, 160);
+			const overlaps = (a: BrowserRect, b: BrowserRect) => !(a.right <= b.left || a.left >= b.right || a.bottom <= b.top || a.top >= b.bottom);
 		const unionRects = (rects: BrowserRect[]) => rects.reduce<BrowserRect | null>((acc, rect) => {
 			if (!acc) {
 				return { ...rect };
@@ -346,13 +350,14 @@ async function collectRenderedSlideMeasurement(page: any, slide: number): Promis
 					}
 				}
 
-				elements.push({
-					kind,
-					selector,
-					textLength,
-					scrollWidth: element.scrollWidth || rect.width,
-					scrollHeight: element.scrollHeight || rect.height,
-					clientWidth: element.clientWidth || rect.width,
+					elements.push({
+						kind,
+						selector,
+						textLength,
+						textPreview: textLength > 0 ? toTextPreview(element.textContent || '') : undefined,
+						scrollWidth: element.scrollWidth || rect.width,
+						scrollHeight: element.scrollHeight || rect.height,
+						clientWidth: element.clientWidth || rect.width,
 					clientHeight: element.clientHeight || rect.height,
 					rect,
 				});

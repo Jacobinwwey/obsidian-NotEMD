@@ -215,5 +215,9 @@ describe('mainline progress audit contract', () => {
         expect(progressDocZh).toContain('isolated working-copy + sibling support sync');
         expect(progressDoc).toContain('component-heavy custom-slot local `<Transform>` fallback');
         expect(progressDocZh).toContain('component-heavy custom slot 的 local `<Transform>` fallback');
+        expect(progressDoc).toContain('rendered text hints');
+        expect(progressDocZh).toContain('rendered text hint');
+        expect(progressDoc).toContain('nonoverflowing sibling zone');
+        expect(progressDocZh).toContain('未溢出的 sibling zone');
     });
 });
