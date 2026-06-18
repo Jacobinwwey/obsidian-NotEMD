@@ -109,6 +109,7 @@ async function bundleSlideExportModules() {
 				"export { exportVideoMp4 } from './src/slideExport/videoExporter';",
 				"export { analyzeRenderedSlideMeasurement, summarizeLayoutAudits, patchDeckWithLayoutAudit, countSlideDeckSlides } from './src/slideExport/slidevLayoutAudit';",
 				"export { resolveWorkspaceHomeCandidates } from './src/slideExport/platformUtils';",
+				"export { startLocalServer, stopLocalServer } from './src/slideExport/localServer';",
 			].join('\n'),
 			resolveDir: process.cwd(),
 			sourcefile: 'notemd-slidev-workflow-entry.ts',
@@ -168,6 +169,22 @@ function createApp(vaultRoot) {
 		getBasePath: () => vaultRoot,
 		exists: async vaultPath => fs.existsSync(path.join(vaultRoot, vaultPath)),
 		mkdir: async vaultPath => fs.mkdirSync(path.join(vaultRoot, vaultPath), { recursive: true }),
+		read: async vaultPath => fs.readFileSync(path.join(vaultRoot, vaultPath), 'utf8'),
+		list: async vaultPath => {
+			const absolutePath = path.join(vaultRoot, vaultPath);
+			const entries = fs.existsSync(absolutePath) ? fs.readdirSync(absolutePath, { withFileTypes: true }) : [];
+			return {
+				files: entries.filter(entry => entry.isFile()).map(entry => path.join(vaultPath, entry.name).replace(/\\/g, '/')),
+				folders: entries.filter(entry => entry.isDirectory()).map(entry => path.join(vaultPath, entry.name).replace(/\\/g, '/')),
+			};
+		},
+		stat: async vaultPath => {
+			const absolutePath = path.join(vaultRoot, vaultPath);
+			if (!fs.existsSync(absolutePath)) {
+				return null;
+			}
+			return fs.statSync(absolutePath);
+		},
 		write: async (vaultPath, content) => {
 			const absolutePath = path.join(vaultRoot, vaultPath);
 			fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
@@ -373,8 +390,16 @@ async function runPlaywrightChecks(htmlPath, sampleSlides, writeScreenshots, sli
 	const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
 	const checks = [];
 	const layoutAudits = [];
+	let serverDirectory = null;
+	let baseUrl = null;
 
 	try {
+		if (htmlPath.endsWith('/index.html')) {
+			serverDirectory = path.dirname(htmlPath);
+			const port = await slideExport.startLocalServer(serverDirectory);
+			baseUrl = `http://localhost:${port}/index.html`;
+		}
+
 		for (const slide of sampleSlides) {
 			const errors = [];
 			page.removeAllListeners('pageerror');
@@ -387,7 +412,8 @@ async function runPlaywrightChecks(htmlPath, sampleSlides, writeScreenshots, sli
 				if (message.type() === 'error' && keepError(message.text())) errors.push(message.text());
 			});
 
-			await page.goto(`file://${htmlPath}#/${slide}`, { waitUntil: 'networkidle', timeout: 30000 });
+			const targetUrl = baseUrl ? `${baseUrl}#/${slide}` : `file://${htmlPath}#/${slide}`;
+			await page.goto(targetUrl, { waitUntil: 'networkidle', timeout: 30000 });
 			await page.waitForTimeout(1000);
 			const text = await page.locator('body').innerText({ timeout: 5000 }).catch(() => '');
 			const measurement = await collectRenderedSlideMeasurement(page, slide);
@@ -410,6 +436,9 @@ async function runPlaywrightChecks(htmlPath, sampleSlides, writeScreenshots, sli
 		}
 	} finally {
 		await browser.close();
+		if (serverDirectory) {
+			slideExport.stopLocalServer(serverDirectory);
+		}
 	}
 
 	return { checks, layoutAudits };

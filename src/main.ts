@@ -2859,7 +2859,11 @@ export default class NotemdPlugin extends Plugin {
                 modalReporter.log(uiStrings.slideExport.exportSuccess.replace('{path}', outputPath));
                 new Notice(uiStrings.slideExport.exportComplete);
 
-                if (config.htmlMode === 'server-script') {
+                const requiresLocalServer = outputPath.endsWith('/index.html');
+                if (config.htmlMode === 'server-script' || requiresLocalServer) {
+                    if (requiresLocalServer && config.htmlMode !== 'server-script') {
+                        modalReporter.log('Standalone HTML fallback requires a local server; opening compatible HTML export...');
+                    }
                     modalReporter.log('Opening in browser...');
                     const { openHtmlInBrowser } = await import('./slideExport/localServer');
                     const vaultRoot = (this.app.vault.adapter as any).basePath;

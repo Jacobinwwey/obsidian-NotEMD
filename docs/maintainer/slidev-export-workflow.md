@@ -15,8 +15,9 @@ The NoteMD workflow must verify all of these steps together:
 3. The local Slidev fork is preferred when present.
 4. The output directory is recreated before each HTML build so stale chunks cannot survive.
 5. Generated deck guardrails normalize theme, slide frontmatter, and large Mermaid diagram zoom.
-6. The final standalone HTML is opened by a real browser check, auditing the full deck by default.
-7. Generated inspection artifacts remain visible to Git and are not accidentally hidden by `.gitignore`.
+6. HTML export attempts native standalone first and falls back to server-script-compatible HTML when the generated standalone bundle misses slide loader bindings.
+7. The final HTML output is opened by a real browser check, auditing the full deck by default.
+8. Generated inspection artifacts remain visible to Git and are not accidentally hidden by `.gitignore`.
 
 ## Maintainer Command
 
@@ -37,6 +38,7 @@ The command writes the same kind of artifacts the UI writes:
 ```text
 docs/export/_slidev-sources/architecture.zh-CN.slidev.md
 docs/export/architecture.zh-CN-slides/index-standalone.html
+or docs/export/architecture.zh-CN-slides/index.html when standalone falls back
 docs/export/architecture.zh-CN-slides/slide-*-workflow.png
 ```
 
@@ -111,13 +113,14 @@ Current landed truth as of 2026-06-18:
 
 1. default HTML verification audits the full prepared deck when `--sample-slides` is not provided;
 2. the patcher derives `zoom` from measured overflow instead of fixed export constants;
-3. the patcher escalates to structural splitting for supported Mermaid diagrams (`flowchart`, `graph`, `mindmap`, `sequenceDiagram`), Markdown tables, non-Mermaid fenced code blocks, and simple heading + paragraph/list slides;
-4. the real `docs/architecture.zh-CN.md` workflow now closes with `ok: true`, `28` audited slides, and zero `overflow` / `unreadable-scale` findings;
-5. `PDF` and `PNG` verification on the same source also return `ok: true`.
+3. the patcher escalates to structural splitting for supported Mermaid diagrams (`flowchart`, `graph`, `mindmap`, `sequenceDiagram`), Markdown tables, non-Mermaid fenced code blocks, simple heading + paragraph/list slides, supported slot layouts (`two-cols`, `two-cols-header`), and first-slide deck headmatter content when structural splitting is possible;
+4. the HTML exporter now rejects known-bad native standalone bundles and falls back to `index.html + start-server.* + README.md`;
+5. the real `docs/architecture.zh-CN.md` workflow now closes with `ok: true`, `28` audited slides, and zero `overflow` / `unreadable-scale` findings;
+6. `PDF` and `PNG` verification on the same source also return `ok: true`.
 
 Current limitation:
 
-1. custom Slidev slot layouts and first-slide deck headmatter remain conservative/manual-review paths;
+1. richer custom/component-heavy Slidev layouts beyond the current supported structural set remain conservative/manual-review paths;
 2. width-heavy tables with pathological unbreakable cell content can still need repeated decomposition; a later phase should add cell-level wrapping or non-table fallbacks instead of only more passes;
 3. full-deck Playwright verification is deliberately slower than representative sampling, so future work should improve convergence rather than weaken the audit.
 

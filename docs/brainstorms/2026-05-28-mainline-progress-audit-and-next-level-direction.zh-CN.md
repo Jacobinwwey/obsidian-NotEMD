@@ -339,7 +339,7 @@ canonical: true
 | UI 格式选择 | 设置页和侧栏都暴露格式选择；HTML mode 随 HTML 条件显示 | 代码已落地，UI 改动时仍需实机 smoke |
 | 导出产物对 Git 可见 | `verify:slidev-export` 检查生成 deck/output/screenshots 的 `.gitignore` 命中情况 | 已作为工作流证据落地 |
 | 渲染后布局 containment | 真实维护者链路里已经有 visible-root DOM bbox、scroll overflow、Mermaid host、table、code 与 text overflow 审计 | 已落地 |
-| 自动修正 | `SlidevDeckPatch` 已能在有界重试里执行 measured `zoom`、Mermaid 结构拆分与简单文本/列表页拆分 | 已落地，继续扩展 |
+| 自动修正 | `SlidevDeckPatch` 已能在有界重试里执行 measured `zoom`、Mermaid / table / code 结构拆分、支持集内的 slot layout 拆分，以及第一张 deck headmatter 页的结构拆分 | 已落地，继续扩展 |
 
 `ref/infinite-canvas` 的分析支持 clean-room 方向，而不是代码复用。它真正有价值的架构思想是：world-space nodes 使用 `{ position, width, height }`，viewport 使用 `{ x, y, k }`，通过 screen/world conversion、union bounds、natural image sizing 与 minimap/bounds 计算来管理可视范围。这些思想适合映射成 Slidev 固定 safe rect 上的 export-layout camera；它们不意味着要把 Slidev 变成交互式无限画布。该参考项目是 AGPL-3.0，本项目是 MIT，不能复制实现代码。
 
@@ -348,8 +348,8 @@ canonical: true
 1. 当前 workflow proof 已经明显强于直接 `slidev build`；
 2. 它现在已经带着真实渲染反馈质量门，而不再只是 CLI smoke；
 3. 真实 `docs/architecture.zh-CN.md` HTML fixture 现在已经收敛到 `ok: true`、`28` 个审计页、零 `overflow` / `unreadable-scale`，同一源文件的 `PDF` 与 `PNG` 也返回 `ok: true`；
-4. 当前已经落地的实现真值比最初方案更进一步：workspace-aware 的 local Slidev fork / Slidev skill / Playwright browser cache 解析、full-deck visible slide root 审计，以及覆盖 Mermaid、Markdown table、code fence 和密集文本的非 zoom-only patch/rebuild 都已进入真实维护者链路；
-5. 下一步架构推进已经更收窄：继续扩展 custom Slidev layout / richer component slide 的结构化 patch，以及病态内容 fallback，而不是退回代表性抽样页验证。
+4. 当前已经落地的实现真值比最初方案更进一步：workspace-aware 的 local Slidev fork / Slidev skill / Playwright browser cache 解析、full-deck visible slide root 审计，以及覆盖 Mermaid、Markdown table、code fence、密集文本、支持集内 slot layout 与第一张 deck headmatter 页的非 zoom-only patch/rebuild 都已进入真实维护者链路；已知坏掉的 standalone bundle 也会回退到 server-script HTML，而不再被当成成功产物；
+5. 下一步架构推进已经更收窄：继续扩展 richer custom Slidev layout / richer component slide 的结构化 patch，以及病态内容 fallback，而不是退回代表性抽样页验证；同时还要判断当前 standalone fallback 是否应继续作为产品真值，还是后续再引入更强的 standalone bundling 策略。
 
 ## 3. 相对先前方案语言的深度对比
 

@@ -556,6 +556,187 @@ describe('slidevLayoutAudit', () => {
 		expect((patched.deckMarkdown.match(/## Tall Export Pipeline/g) || []).length).toBe(2);
 	});
 
+	test('splits code inside supported two-cols slot layouts', () => {
+		const audit: SlidevLayoutAudit = {
+			slide: 2,
+			safeRect: { left: 51.2, top: 43.2, right: 1228.8, bottom: 676.8, width: 1177.6, height: 633.6 },
+			contentBounds: { left: 48, top: 52, right: 1234, bottom: 820, width: 1186, height: 768 },
+			pageScale: 1,
+			elementKinds: ['code'],
+			findings: [
+				{
+					kind: 'overflow',
+					target: 'content',
+					message: 'Slide content exceeds the safe visible rectangle',
+					recommendedPatch: 'reduce-code',
+					recommendedScale: 0.82,
+				},
+				{
+					kind: 'overflow',
+					target: 'code',
+					message: 'Code block overflows its scroll box',
+					recommendedPatch: 'reduce-code',
+					recommendedScale: 0.82,
+					scrollOverflow: true,
+					overflowAxis: 'height',
+				},
+			],
+		};
+		const deck = [
+			'---',
+			'theme: default',
+			'---',
+			'',
+			'# Intro',
+			'',
+			'---',
+			'layout: two-cols',
+			'---',
+			'',
+			'## Export Workflow',
+			'',
+			'- Left column context stays duplicated.',
+			'',
+			'::right::',
+			'',
+			'```ts',
+			'const environment = await probeEnvironment();',
+			'const slideSource = await prepareSlidevExportSource(app, sourceFile, config, {}, onProgress);',
+			'const htmlPath = await exportSlidevHtml(app, slideSource, config, onProgress);',
+			'const auditResult = await runPlaywrightChecks(htmlPath, slidesToAudit, true, slideExport);',
+			'const patchResult = patchDeckWithLayoutAudit(currentDeckMarkdown, auditResult.layoutAudits, config);',
+			'```',
+		].join('\n');
+
+		const patched = patchDeckWithLayoutAudit(deck, [audit]);
+
+		expect(patched.changed).toBe(true);
+		expect(patched.blockedSlides).toEqual([]);
+		expect(countSlideDeckSlides(patched.deckMarkdown)).toBe(3);
+		expect((patched.deckMarkdown.match(/layout: two-cols/g) || []).length).toBe(2);
+		expect((patched.deckMarkdown.match(/::right::/g) || []).length).toBe(2);
+		expect((patched.deckMarkdown.match(/```ts/g) || []).length).toBe(2);
+		expect((patched.deckMarkdown.match(/Left column context stays duplicated/g) || []).length).toBe(2);
+	});
+
+	test('splits supported two-cols-header slot layouts by patching the overflowing slot only', () => {
+		const audit: SlidevLayoutAudit = {
+			slide: 2,
+			safeRect: { left: 51.2, top: 43.2, right: 1228.8, bottom: 676.8, width: 1177.6, height: 633.6 },
+			contentBounds: { left: 48, top: 52, right: 1234, bottom: 820, width: 1186, height: 768 },
+			pageScale: 1,
+			elementKinds: ['text'],
+			findings: [
+				{
+					kind: 'overflow',
+					target: 'content',
+					message: 'Slide content exceeds the safe visible rectangle',
+					recommendedPatch: 'split-slide',
+					recommendedScale: 0.9,
+				},
+				{
+					kind: 'overflow',
+					target: 'text',
+					message: 'text element exceeds the safe visible rectangle',
+					recommendedPatch: 'reduce-zoom',
+					recommendedScale: 0.9,
+				},
+			],
+		};
+		const deck = [
+			'---',
+			'theme: default',
+			'---',
+			'',
+			'# Intro',
+			'',
+			'---',
+			'layout: two-cols-header',
+			'---',
+			'',
+			'## Layout Audit Coverage',
+			'',
+			'::left::',
+			'',
+			'- Static left column',
+			'',
+			'::right::',
+			'',
+			'- Audit visible root',
+			'- Split Mermaid when unreadable',
+			'- Split table columns when width bound',
+			'- Split code fences when height bound',
+			'- Keep deterministic retry closure',
+			'- Preserve host command smoke',
+		].join('\n');
+
+		const patched = patchDeckWithLayoutAudit(deck, [audit]);
+
+		expect(patched.changed).toBe(true);
+		expect(patched.blockedSlides).toEqual([]);
+		expect(countSlideDeckSlides(patched.deckMarkdown)).toBe(3);
+		expect((patched.deckMarkdown.match(/layout: two-cols-header/g) || []).length).toBe(2);
+		expect((patched.deckMarkdown.match(/::left::/g) || []).length).toBe(2);
+		expect((patched.deckMarkdown.match(/::right::/g) || []).length).toBe(2);
+		expect((patched.deckMarkdown.match(/Static left column/g) || []).length).toBe(2);
+		expect(patched.deckMarkdown).toContain('Split table columns when width bound');
+		expect(patched.deckMarkdown).toContain('Preserve host command smoke');
+	});
+
+	test('splits first-slide deck headmatter content structurally when per-slide zoom cannot be used', () => {
+		const audit: SlidevLayoutAudit = {
+			slide: 1,
+			safeRect: { left: 51.2, top: 43.2, right: 1228.8, bottom: 676.8, width: 1177.6, height: 633.6 },
+			contentBounds: { left: 48, top: 52, right: 1234, bottom: 820, width: 1186, height: 768 },
+			pageScale: 1,
+			elementKinds: ['text'],
+			findings: [
+				{
+					kind: 'overflow',
+					target: 'content',
+					message: 'Slide content exceeds the safe visible rectangle',
+					recommendedPatch: 'split-slide',
+					recommendedScale: 0.92,
+				},
+				{
+					kind: 'overflow',
+					target: 'text',
+					message: 'text element exceeds the safe visible rectangle',
+					recommendedPatch: 'reduce-zoom',
+					recommendedScale: 0.92,
+				},
+			],
+		};
+		const deck = [
+			'---',
+			'theme: default',
+			'title: Headmatter Slide',
+			'---',
+			'',
+			'# Headmatter Slide',
+			'',
+			'- first bullet',
+			'- second bullet',
+			'- third bullet',
+			'- fourth bullet',
+			'- fifth bullet',
+			'- sixth bullet',
+		].join('\n');
+
+		const patched = patchDeckWithLayoutAudit(deck, [audit]);
+
+		expect(patched.changed).toBe(true);
+		expect(patched.blockedSlides).toEqual([]);
+		expect(patched.changedSlides).toEqual([1]);
+		expect(countSlideDeckSlides(patched.deckMarkdown)).toBe(2);
+		expect((patched.deckMarkdown.match(/^title: Headmatter Slide$/gm) || []).length).toBe(1);
+		expect((patched.deckMarkdown.match(/^theme: default$/gm) || []).length).toBe(1);
+		expect((patched.deckMarkdown.match(/^# Headmatter Slide$/gm) || []).length).toBe(2);
+		expect(patched.deckMarkdown).toContain('- first bullet');
+		expect(patched.deckMarkdown).toContain('- sixth bullet');
+		expect(patched.deckMarkdown).not.toContain('zoom:');
+	});
+
 	test('summarizes audit counts across slides', () => {
 		const auditWithOverflow = analyzeRenderedSlideMeasurement(createMeasurement());
 		const auditWithRenderError = analyzeRenderedSlideMeasurement(createMeasurement({

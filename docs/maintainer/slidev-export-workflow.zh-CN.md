@@ -15,8 +15,9 @@ NoteMD 的验证必须把以下步骤串起来看：
 3. 本地 Slidev fork 存在时会被优先使用。
 4. 每次 HTML build 前会重建输出目录，避免旧 chunk 残留。
 5. 生成 deck 的 guardrails 会规范 theme、逐页 frontmatter 和大 Mermaid 图的 zoom。
-6. 最终 standalone HTML 会经过真实浏览器打开，并默认审计整个 deck。
-7. 生成的检查产物对 Git 可见，不会被 `.gitignore` 意外隐藏。
+6. HTML 导出会先尝试 native standalone；如果生成的 standalone bundle 缺少 slide loader binding，则自动回退到 server-script 兼容 HTML。
+7. 最终 HTML 输出会经过真实浏览器打开，并默认审计整个 deck。
+8. 生成的检查产物对 Git 可见，不会被 `.gitignore` 意外隐藏。
 
 ## 维护者命令
 
@@ -37,6 +38,7 @@ docs/architecture.zh-CN.md
 ```text
 docs/export/_slidev-sources/architecture.zh-CN.slidev.md
 docs/export/architecture.zh-CN-slides/index-standalone.html
+或在 standalone 回退时写出 docs/export/architecture.zh-CN-slides/index.html
 docs/export/architecture.zh-CN-slides/slide-*-workflow.png
 ```
 
@@ -111,13 +113,14 @@ layoutAuditSummary.retryCount
 
 1. 默认 HTML 验证在未传 `--sample-slides` 时会审计整个准备后的 deck；
 2. patcher 的 `zoom` 来自真实 overflow 测量，而不是固定导出常数；
-3. patcher 已会在不宜继续缩小时，升级为结构化拆分，当前支持的内容类型包括 Mermaid `flowchart` / `graph` / `mindmap` / `sequenceDiagram`、Markdown table、非 Mermaid fenced code block，以及简单的标题 + 段落/列表页；
-4. 真实 `docs/architecture.zh-CN.md` workflow 现在已经收敛到 `ok: true`、`28` 个审计页、`overflow` 与 `unreadable-scale` 都为零；
-5. 同一真实源文件的 `PDF` 与 `PNG` 验证也返回 `ok: true`。
+3. patcher 已会在不宜继续缩小时，升级为结构化拆分，当前支持的内容类型包括 Mermaid `flowchart` / `graph` / `mindmap` / `sequenceDiagram`、Markdown table、非 Mermaid fenced code block、简单的标题 + 段落/列表页、支持集内的 slot layout（`two-cols`、`two-cols-header`），以及可结构拆分的第一张 deck headmatter 页面；
+4. HTML exporter 现在会拒绝已知坏掉的 native standalone bundle，并回退到 `index.html + start-server.* + README.md`；
+5. 真实 `docs/architecture.zh-CN.md` workflow 现在已经收敛到 `ok: true`、`28` 个审计页、`overflow` 与 `unreadable-scale` 都为零；
+6. 同一真实源文件的 `PDF` 与 `PNG` 验证也返回 `ok: true`。
 
 当前限制：
 
-1. 自定义 Slidev slot layout 与第一张带 deck headmatter 的页面仍保持保守/manual-review 路径；
+1. 超出当前支持集的 richer custom/component-heavy Slidev layout 仍保持保守/manual-review 路径；
 2. 对于单元格内容病态不可换行的宽表，patcher 仍可能需要多轮列拆；下一阶段应补 cell-level wrapping 或非 table fallback，而不是只继续加 pass；
 3. full-deck Playwright 验证故意比代表性抽样更慢，后续优化方向应是提高 patch 收敛能力，而不是退回弱审计。
 

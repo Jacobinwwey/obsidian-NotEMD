@@ -1,5 +1,5 @@
 import { probeNode, probePlaywright, probeFfmpeg, probeEnvironment } from '../slideExport/environmentProber';
-import { exportSlidevHtml, exportSlidevPdf, exportSlidevPng } from '../slideExport/slidevExporter';
+import { detectStandaloneBundleLoaderGaps, exportSlidevHtml, exportSlidevPdf, exportSlidevPng } from '../slideExport/slidevExporter';
 import { exportVideoMp4 } from '../slideExport/videoExporter';
 import type { SlideExportConfig, SlidevExportSource } from '../slideExport/types';
 import type { TFile, App } from 'obsidian';
@@ -33,6 +33,13 @@ function createMockApp(basePath: string | null = '/vault'): any {
             adapter: {
                 getBasePath: basePath ? () => basePath : undefined,
                 basePath: basePath ?? undefined,
+                read: jest.fn().mockResolvedValue(`
+window.__require("./index-abc.js");
+{"./index-abc.js":"var LoaderA=async()=>{},LoaderB=async()=>{};const slides=[{load:LoaderA},{load:LoaderB}]"}
+`),
+                write: jest.fn().mockResolvedValue(undefined),
+                stat: jest.fn().mockResolvedValue({ size: 1024 }),
+                list: jest.fn().mockResolvedValue({ files: [], folders: [] }),
             },
             create: jest.fn().mockResolvedValue(undefined),
             modify: jest.fn().mockResolvedValue(undefined),
@@ -331,6 +338,62 @@ describe('slidevExporter — All Format Combinations', () => {
             expect.any(Array),
             expect.objectContaining({ timeout: 180000 })
         );
+    });
+
+    test('falls back to server-script html when native standalone bundle misses slide loader bindings', async () => {
+        mockExecFileAsync
+            .mockResolvedValueOnce({ exitCode: 0, stdout: '', stderr: '' })
+            .mockResolvedValueOnce({ exitCode: 0, stdout: '', stderr: '' });
+        const rmSync = jest.fn();
+        const mkdirSync = jest.fn();
+        mockSafeRequire.mockImplementation((name: string) => name === 'fs' ? { rmSync, mkdirSync } : null);
+        const app = createMockApp();
+        app.vault.adapter.read = jest.fn().mockResolvedValue(`
+window.__require("./index-abc.js");
+{"./index-abc.js":"var Bt=(e,t)=>t;const slides=[{load:Vt,component:Bt(0,Vt)},{load:Ht,component:Bt(1,Ht)}];Ht=async()=>{};"}
+`);
+        const source = createMockSlidevSource('test', 'test.md');
+        const config: SlideExportConfig = {
+            format: 'html',
+            withClicks: false,
+            outputSubfolder: 'export',
+            ffmpegFps: 1,
+            ffmpegCrf: 23,
+            slidevTheme: 'default',
+            timeoutMs: 120000,
+        };
+
+        const output = await exportSlidevHtml(app, source, config, jest.fn());
+
+        expect(output).toBe('export/test-slides/index.html');
+        expect(mockExecFileAsync.mock.calls[0][1]).toEqual(expect.arrayContaining(['--standalone-bundle']));
+        expect(mockExecFileAsync.mock.calls[1][1]).not.toEqual(expect.arrayContaining(['--standalone-bundle']));
+        expect(app.vault.adapter.write).toHaveBeenCalledWith(
+            'export/test-slides/start-server.sh',
+            expect.stringContaining('python3 -m http.server')
+        );
+        expect(app.vault.adapter.write).toHaveBeenCalledWith(
+            'export/test-slides/README.md',
+            expect.stringContaining('Quick Start')
+        );
+    });
+});
+
+describe('slidevExporter — standalone loader sanity detection', () => {
+    test('detects missing slide loader bindings in standalone bundle html', () => {
+        const html = `
+window.__require("./index-abc.js");
+{"./index-abc.js":"var Bt=(e,t)=>t;const slides=[{load:Vt,component:Bt(0,Vt)},{load:Ht,component:Bt(1,Ht)}];Ht=async()=>{};"}
+`;
+        expect(detectStandaloneBundleLoaderGaps(html)).toEqual(['Vt']);
+    });
+
+    test('accepts standalone bundle html when all referenced slide loaders are defined', () => {
+        const html = `
+window.__require("./index-abc.js");
+{"./index-abc.js":"var Bt=(e,t)=>t,Vt=async()=>{},Ht=async()=>{};const slides=[{load:Vt,component:Bt(0,Vt)},{load:Ht,component:Bt(1,Ht)}];"}
+`;
+        expect(detectStandaloneBundleLoaderGaps(html)).toEqual([]);
     });
 });
 

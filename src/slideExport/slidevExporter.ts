@@ -40,6 +40,35 @@ function recreateDirectory(directoryPath: string): void {
 	fs?.mkdirSync?.(directoryPath, { recursive: true });
 }
 
+export function detectStandaloneBundleLoaderGaps(html: string): string[] {
+	const entryRefMatch = html.match(/window\.__require\(['"](\.\/index-[^'"]+\.js)['"]\)/);
+	if (!entryRefMatch) {
+		return [];
+	}
+
+	const entryModulePath = entryRefMatch[1];
+	const escapedEntryModulePath = entryModulePath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+	const entryModuleMatch = html.match(new RegExp(`"${escapedEntryModulePath}":"((?:\\\\.|[^"])*)"`));
+	if (!entryModuleMatch) {
+		return [];
+	}
+
+	let entryModuleCode = '';
+	try {
+		entryModuleCode = JSON.parse(`"${entryModuleMatch[1]}"`);
+	} catch {
+		return [];
+	}
+
+	const loaderRefs = Array.from(entryModuleCode.matchAll(/load:([A-Za-z_$][A-Za-z0-9_$]*)/g)).map(match => match[1]);
+	if (loaderRefs.length === 0) {
+		return [];
+	}
+
+	const uniqueRefs = Array.from(new Set(loaderRefs));
+	return uniqueRefs.filter(ref => !new RegExp(`\\b${ref}\\s*=`).test(entryModuleCode));
+}
+
 /**
  * Export Markdown as a Slidev SPA (HTML build).
  */
@@ -79,8 +108,16 @@ async function exportSlidevStandaloneHtml(
 		throw new Error(`Slidev standalone build failed via ${slidev.description} (exit ${result.exitCode}): ${result.stderr || result.error?.message || 'unknown error'}`);
 	}
 
-	onProgress?.('slidev-build', `Standalone HTML created via ${slidev.description}`);
-	return `${config.outputSubfolder}/${source.outputBasename}-slides/index-standalone.html`;
+	const standaloneHtmlPath = `${config.outputSubfolder}/${source.outputBasename}-slides/index-standalone.html`;
+	const standaloneHtml = await app.vault.adapter.read(standaloneHtmlPath);
+	const loaderGaps = detectStandaloneBundleLoaderGaps(standaloneHtml);
+	if (loaderGaps.length === 0) {
+		onProgress?.('slidev-build', `Standalone HTML created via ${slidev.description}`);
+		return standaloneHtmlPath;
+	}
+
+	onProgress?.('slidev-build', `Standalone bundle missed loader bindings (${loaderGaps.join(', ')}); falling back to server-script HTML...`);
+	return exportSlidevServerHtml(app, source, config, onProgress);
 }
 
 async function exportSlidevServerHtml(

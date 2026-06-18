@@ -105,6 +105,25 @@ interface MarkdownTableBlock {
 	dataLines: string[];
 }
 
+interface SlotSection {
+	name: string;
+	marker: string;
+	lines: string[];
+}
+
+interface SupportedSlotLayoutSurface {
+	frontmatterLines: string[];
+	layout: 'two-cols' | 'two-cols-header';
+	leadRole: 'default' | 'header';
+	leadLines: string[];
+	sections: SlotSection[];
+}
+
+interface DeckHeadmatterSlideSurface {
+	headmatterLines: string[];
+	bodyLines: string[];
+}
+
 const DEFAULT_CONFIG: SlidevLayoutAuditConfig = {
 	overflowTolerancePx: 6,
 	minReadableScale: 0.28,
@@ -255,6 +274,26 @@ export function patchDeckWithLayoutAudit(
 
 		if (shouldSplitSimpleSlideBeforeZoom(audit.findings)) {
 			const splitResult = splitOverflowingSimpleSlide(currentSlide, audit, currentZoom, nextZoom, resolvedConfig);
+			if (splitResult.slides) {
+				slides.splice(targetIndex, 1, ...splitResult.slides);
+				changedSlides.push(audit.slide);
+				slideOffset += splitResult.slides.length - 1;
+				continue;
+			}
+		}
+
+		if (isDeckHeadmatterSlide(currentSlide, targetIndex) && hasStructuralSplitCandidate(audit.findings)) {
+			const splitResult = splitOverflowingDeckHeadmatterSlide(currentSlide, audit, currentZoom, nextZoom, resolvedConfig);
+			if (splitResult.slides) {
+				slides.splice(targetIndex, 1, ...splitResult.slides);
+				changedSlides.push(audit.slide);
+				slideOffset += splitResult.slides.length - 1;
+				continue;
+			}
+		}
+
+		if (hasSupportedSlotMarkers(currentSlide)) {
+			const splitResult = splitOverflowingSupportedSlotLayoutSlide(currentSlide, audit, currentZoom, nextZoom, resolvedConfig);
 			if (splitResult.slides) {
 				slides.splice(targetIndex, 1, ...splitResult.slides);
 				changedSlides.push(audit.slide);
@@ -574,6 +613,19 @@ function shouldSplitCodeBeforeZoom(
 		);
 }
 
+function hasSupportedSlotMarkers(slideMarkdown: string): boolean {
+	return /^::[\w-]+::$/m.test(slideMarkdown);
+}
+
+function hasStructuralSplitCandidate(findings: SlidevLayoutFinding[]): boolean {
+	return findings.some(finding => [
+		'split-diagram',
+		'split-table',
+		'reduce-code',
+		'split-slide',
+	].includes(finding.recommendedPatch));
+}
+
 function hasTableStructuralOverflow(findings: SlidevLayoutFinding[]): boolean {
 	return findings.some(finding => finding.recommendedPatch === 'split-table' && typeof finding.overflowAxis === 'string');
 }
@@ -758,6 +810,118 @@ function splitOverflowingCodeSlide(
 	return { slides: splitSlides };
 }
 
+function splitOverflowingSupportedSlotLayoutSlide(
+	slideMarkdown: string,
+	audit: SlidevLayoutAudit,
+	currentZoom: number,
+	nextZoom: number | null,
+	config: SlidevLayoutAuditConfig,
+): { slides: string[] | null; reason?: string } {
+	const surface = parseSupportedSlotLayoutSurface(slideMarkdown);
+	if (!surface) {
+		return { slides: null, reason: 'slot layout is not in the supported structural patch set' };
+	}
+
+	const targetZone = pickSlotLayoutTargetZone(surface, audit.findings);
+	if (!targetZone) {
+		return { slides: null, reason: 'no supported slot zone matches the current structural patch target' };
+	}
+
+	const zoneMarkdown = targetZone.lines.join('\n').trim();
+	if (!zoneMarkdown) {
+		return { slides: null, reason: 'target slot does not contain patchable content' };
+	}
+
+	const splitResult = applyZoneStructuralSplit(zoneMarkdown, audit, currentZoom, nextZoom, config);
+	if (!splitResult.slides || splitResult.slides.length < 2) {
+		return { slides: null, reason: splitResult.reason ?? 'slot zone did not yield multiple structural chunks' };
+	}
+
+	const splitSlides = splitResult.slides.map(splitSlide => {
+		const chunkSurface = extractPatchableSlideSurface(splitSlide);
+		const chunkLines = chunkSurface ? chunkSurface.bodyLines : splitSlide.split(/\r?\n/);
+		return assembleSupportedSlotLayoutSlide(surface, targetZone, trimOuterBlankLines(chunkLines));
+	});
+
+	return { slides: splitSlides };
+}
+
+function splitOverflowingDeckHeadmatterSlide(
+	slideMarkdown: string,
+	audit: SlidevLayoutAudit,
+	currentZoom: number,
+	nextZoom: number | null,
+	config: SlidevLayoutAuditConfig,
+): { slides: string[] | null; reason?: string } {
+	const surface = parseDeckHeadmatterSlideSurface(slideMarkdown);
+	if (!surface) {
+		return { slides: null, reason: 'deck headmatter slide surface unavailable' };
+	}
+
+	const zoneMarkdown = surface.bodyLines.join('\n').trim();
+	if (!zoneMarkdown) {
+		return { slides: null, reason: 'deck headmatter slide does not contain patchable body content' };
+	}
+
+	const splitResult = applyZoneStructuralSplit(zoneMarkdown, audit, currentZoom, nextZoom, config);
+	if (!splitResult.slides || splitResult.slides.length < 2) {
+		return { slides: null, reason: splitResult.reason ?? 'deck headmatter slide did not yield multiple structural chunks' };
+	}
+
+	const reconstructedSlides = splitResult.slides.map((splitSlide, index) => {
+		const chunkSurface = extractPatchableSlideSurface(splitSlide);
+		const chunkLines = chunkSurface ? chunkSurface.bodyLines : splitSlide.split(/\r?\n/);
+		if (index === 0) {
+			return [
+				...surface.headmatterLines,
+				'',
+				...trimOuterBlankLines(chunkLines),
+			].join('\n').trim();
+		}
+		return trimOuterBlankLines(chunkLines).join('\n').trim();
+	});
+
+	return { slides: reconstructedSlides };
+}
+
+function applyZoneStructuralSplit(
+	zoneMarkdown: string,
+	audit: SlidevLayoutAudit,
+	currentZoom: number,
+	nextZoom: number | null,
+	config: SlidevLayoutAuditConfig,
+): { slides: string[] | null; reason?: string } {
+	if (shouldSplitDiagramBeforeZoom(audit.findings, nextZoom, config.minReadableScale)) {
+		const result = splitOverflowingMermaidSlide(zoneMarkdown, audit, currentZoom, nextZoom, config);
+		if (result.slides) {
+			return result;
+		}
+	}
+
+	if (shouldSplitSimpleSlideBeforeZoom(audit.findings)) {
+		const result = splitOverflowingSimpleSlide(zoneMarkdown, audit, currentZoom, nextZoom, config);
+		if (result.slides) {
+			return result;
+		}
+	}
+
+	if (shouldSplitTableBeforeZoom(audit.findings, nextZoom, config.minReadableScale)) {
+		const result = splitOverflowingMarkdownTableSlide(zoneMarkdown, audit, currentZoom, nextZoom, config);
+		if (result.slides) {
+			return result;
+		}
+	}
+
+	if (shouldSplitCodeBeforeZoom(audit.findings, nextZoom, config.minReadableScale)) {
+		const result = splitOverflowingCodeSlide(zoneMarkdown, audit, currentZoom, nextZoom, config);
+		if (result.slides) {
+			return result;
+		}
+	}
+
+	return { slides: null, reason: 'slot zone does not match a supported structural splitter' };
+}
+
 function splitOverflowingSimpleSlide(
 	slideMarkdown: string,
 	audit: SlidevLayoutAudit,
@@ -829,6 +993,179 @@ function extractPatchableSlideSurface(slideMarkdown: string): PatchableSlideSurf
 		frontmatterLines,
 		bodyLines,
 	};
+}
+
+function parseSupportedSlotLayoutSurface(slideMarkdown: string): SupportedSlotLayoutSurface | null {
+	const normalizedSlide = normalizeSlideFrontmatter(slideMarkdown);
+	if (normalizedSlide.trimStart().startsWith('---')) {
+		return null;
+	}
+
+	const lines = normalizedSlide.split(/\r?\n/);
+	const frontmatterEnd = findSlideFrontmatterEnd(lines);
+	const frontmatterLines = frontmatterEnd > 0 ? lines.slice(0, frontmatterEnd + 1) : [];
+	const bodyLines = frontmatterEnd > 0 ? lines.slice(frontmatterEnd + 1) : lines;
+	const layout = readFrontmatterScalar(frontmatterLines, 'layout');
+	if (layout !== 'two-cols' && layout !== 'two-cols-header') {
+		return null;
+	}
+
+	const slotLines = parseSlotSections(bodyLines);
+	if (!slotLines) {
+		return null;
+	}
+
+	if (layout === 'two-cols') {
+		if (slotLines.sections.length !== 1 || slotLines.sections[0].name !== 'right') {
+			return null;
+		}
+		return {
+			frontmatterLines,
+			layout,
+			leadRole: 'default',
+			leadLines: slotLines.leadLines,
+			sections: slotLines.sections,
+		};
+	}
+
+	const sectionNames = slotLines.sections.map(section => section.name).join(',');
+	if (sectionNames !== 'left,right') {
+		return null;
+	}
+	return {
+		frontmatterLines,
+		layout,
+		leadRole: 'header',
+		leadLines: slotLines.leadLines,
+		sections: slotLines.sections,
+	};
+}
+
+function parseDeckHeadmatterSlideSurface(slideMarkdown: string): DeckHeadmatterSlideSurface | null {
+	const lines = slideMarkdown.split(/\r?\n/);
+	if (lines[0]?.trim() !== '---') {
+		return null;
+	}
+
+	for (let index = 1; index < lines.length; index++) {
+		if (lines[index].trim() === '---') {
+			return {
+				headmatterLines: lines.slice(0, index + 1),
+				bodyLines: trimOuterBlankLines(lines.slice(index + 1)),
+			};
+		}
+	}
+
+	return null;
+}
+
+function parseSlotSections(bodyLines: string[]): { leadLines: string[]; sections: SlotSection[] } | null {
+	const sections: SlotSection[] = [];
+	const leadLines: string[] = [];
+	let currentSection: SlotSection | null = null;
+
+	for (const line of bodyLines) {
+		const markerMatch = line.trim().match(/^::([\w-]+)::$/);
+		if (markerMatch) {
+			if (currentSection) {
+				currentSection.lines = trimOuterBlankLines(currentSection.lines);
+				sections.push(currentSection);
+			}
+			currentSection = {
+				name: markerMatch[1],
+				marker: line.trim(),
+				lines: [],
+			};
+			continue;
+		}
+
+		if (currentSection) {
+			currentSection.lines.push(line);
+		} else {
+			leadLines.push(line);
+		}
+	}
+
+	if (!currentSection) {
+		return null;
+	}
+
+	currentSection.lines = trimOuterBlankLines(currentSection.lines);
+	sections.push(currentSection);
+	return {
+		leadLines: trimOuterBlankLines(leadLines),
+		sections,
+	};
+}
+
+function pickSlotLayoutTargetZone(
+	surface: SupportedSlotLayoutSurface,
+	findings: SlidevLayoutFinding[],
+): { kind: 'lead' | 'section'; name: string; lines: string[] } | null {
+	const zones = [
+		{
+			kind: 'lead' as const,
+			name: surface.leadRole,
+			lines: surface.leadLines,
+		},
+		...surface.sections.map(section => ({
+			kind: 'section' as const,
+			name: section.name,
+			lines: section.lines,
+		})),
+	].filter(zone => zone.lines.some(line => line.trim().length > 0));
+
+	const matchers: Array<(lines: string[]) => boolean> = [];
+	if (findings.some(finding => finding.recommendedPatch === 'split-diagram')) {
+		matchers.push(lines => findSingleMermaidFenceBlock(lines) !== null);
+	}
+	if (findings.some(finding => finding.recommendedPatch === 'split-table')) {
+		matchers.push(lines => findSingleMarkdownTableBlock(lines) !== null);
+	}
+	if (findings.some(finding => finding.recommendedPatch === 'reduce-code')) {
+		matchers.push(lines => findSingleCodeFenceBlock(lines) !== null);
+	}
+	if (findings.some(finding => finding.recommendedPatch === 'split-slide')) {
+		matchers.push(lines => collectSimpleSlideBlocks(trimOuterBlankLines(lines)).length >= 2);
+	}
+
+	for (const matcher of matchers) {
+		const matchedZone = zones.find(zone => matcher(zone.lines));
+		if (matchedZone) {
+			return matchedZone;
+		}
+	}
+
+	return null;
+}
+
+function assembleSupportedSlotLayoutSlide(
+	surface: SupportedSlotLayoutSurface,
+	targetZone: { kind: 'lead' | 'section'; name: string },
+	replacementLines: string[],
+): string {
+	const bodyLines: string[] = [];
+	const nextLeadLines = targetZone.kind === 'lead'
+		? replacementLines
+		: surface.leadLines;
+
+	if (nextLeadLines.length > 0) {
+		bodyLines.push(...trimOuterBlankLines(nextLeadLines));
+	}
+
+	for (const section of surface.sections) {
+		if (bodyLines.length > 0) {
+			bodyLines.push('');
+		}
+		bodyLines.push(section.marker);
+		bodyLines.push('');
+		const sectionLines = targetZone.kind === 'section' && targetZone.name === section.name
+			? replacementLines
+			: section.lines;
+		bodyLines.push(...trimOuterBlankLines(sectionLines));
+	}
+
+	return assemblePatchedSlide(surface.frontmatterLines, bodyLines);
 }
 
 function isDeckHeadmatterSlide(slideMarkdown: string, slideIndex: number): boolean {

@@ -13,7 +13,8 @@ The maintained workflow is:
 3. Generated decks receive presentation guardrails before export.
 4. The local Slidev fork is preferred when present.
 5. HTML output directories are recreated before build to avoid stale assets.
-6. Browser rendering is verified with Playwright across the full deck by default.
+6. HTML export attempts native standalone first, then falls back to server-script-compatible HTML when the generated standalone bundle misses slide loader bindings.
+7. Browser rendering is verified with Playwright across the full deck by default.
 
 The canonical maintainer workflow is documented in:
 
@@ -40,9 +41,11 @@ This path should be openable directly from the filesystem and is the default mod
 npm run verify:slidev-export
 ```
 
+When the native standalone bundle is invalid, NoteMD falls back to the server-script-compatible HTML path instead of shipping a broken `index-standalone.html`.
+
 ### Server-Script HTML
 
-Server-script mode remains available for compatibility with normal Slidev SPA builds that need HTTP serving.
+Server-script mode remains available for compatibility with normal Slidev SPA builds that need HTTP serving, and it is now the automatic fallback when native standalone bundle sanity checks fail.
 
 Expected output:
 
@@ -97,8 +100,9 @@ Real maintained baseline as of 2026-06-18:
 2. the report confirms `/home/jacob/slidev/packages/slidev/bin/slidev.mjs`
 3. the report confirms `/home/jacob/slidev/skills/slidev`
 4. default HTML verification now audits the full prepared deck, not only representative slides
-5. the real `architecture.zh-CN` deck converges to `27` slides after bounded patching with `overflowCount = 0`
+5. the real `architecture.zh-CN` deck converges to `28` slides after bounded patching with `overflowCount = 0`
 6. `PDF` and `PNG` verification on the same real source also return `ok: true`
+7. the current local Slidev `52.16.0` fork falls back to `index.html` for the real `architecture.zh-CN` HTML export after standalone loader-gap detection, and that fallback path still closes at `ok: true`
 
 ## Current Rendered Layout Model
 
@@ -116,7 +120,10 @@ The current render-feedback loop is now:
    - simple heading + paragraph/list slides
    - Markdown tables, including row-split and width-driven column decomposition
    - non-Mermaid fenced code blocks with vertical chunking
-6. The verifier now audits the full deck by default and keeps retrying within a bounded loop until the rendered deck fits or the retry budget is exhausted.
+   - supported slot layouts (`two-cols`, `two-cols-header`)
+   - first-slide deck headmatter content when structural splitting is possible
+6. The HTML exporter now rejects known-bad native standalone bundles and falls back to server-script-compatible HTML.
+7. The verifier now audits the full deck by default and keeps retrying within a bounded loop until the rendered deck fits or the retry budget is exhausted.
 
 The clean-room reference from `ref/infinite-canvas` is still the world-rect and viewport-transform idea: nodes have `{ position, width, height }`, the viewport has `{ x, y, k }`, and visible bounds are derived from transform math. For NoteMD export, that becomes an export-layout camera for a fixed Slidev safe rectangle, not an interactive infinite canvas. Because the reference project is AGPL-3.0 and NoteMD is MIT, implementation must be independent.
 
@@ -126,12 +133,13 @@ Current landed state:
 2. the maintainer verification chain now measures the visible `slidev-page` root with Playwright, captures Mermaid shadow-host bounding boxes, and fails when the actual visible slide root clips content.
 3. the patcher is no longer zoom-only: it first applies overflow-derived `zoom`, then structurally splits supported Mermaid, Markdown table, code-fence, and simple text/list slides when rendered evidence says further shrinking would be the wrong move.
 4. `PDF` and `PNG` export now pass `PLAYWRIGHT_BROWSERS_PATH` through the Slidev CLI env so root-run verification can reuse Jacob's browser cache.
-5. the real `docs/architecture.zh-CN.md` HTML workflow now passes with a full-deck Playwright audit, `27` audited slides, `overflowCount = 0`, and bounded retry closure.
+5. the real `docs/architecture.zh-CN.md` HTML workflow now passes with a full-deck Playwright audit, `28` audited slides, `overflowCount = 0`, and bounded retry closure.
 6. an additional real maintainer-local structural overflow note now proves that Markdown table decomposition and code-fence chunking can converge through the same verifier path instead of only through unit tests.
+7. a real slot/headmatter Slidev deck now proves that native standalone loader gaps are detected and converted into a working `index.html + start-server.* + README.md` fallback instead of being treated as successful standalone output.
 
 Current gap:
 
-1. custom Slidev slot layouts, first-slide deck headmatter, and richer component slides still fall back to conservative zoom/manual-review behavior;
+1. richer custom/component-heavy Slidev layouts beyond the current supported structural set still fall back to conservative zoom/manual-review behavior;
 2. width-heavy tables with pathological unbreakable cell content can still require repeated decomposition, so future work should add cell-level wrapping or alternative non-table fallbacks rather than relying only on repeated column splitting;
 3. full-deck Playwright verification is now more correct, but noticeably slower, so future work should improve patch convergence instead of weakening the audit back to representative sampling.
 

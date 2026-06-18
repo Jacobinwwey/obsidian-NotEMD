@@ -7,11 +7,12 @@
  */
 
 import type { Server } from 'http';
-import { spawn, ChildProcess } from 'child_process';
 import { Notice } from 'obsidian';
+import { createReadStream, existsSync, statSync } from 'fs';
+import { extname, join, normalize } from 'path';
 
 interface ServerInstance {
-	process: ChildProcess;
+	server: Server;
 	port: number;
 	directory: string;
 }
@@ -32,60 +33,16 @@ export async function startLocalServer(directory: string, preferredPort = 8765):
 	const port = await findAvailablePort(preferredPort);
 
 	return new Promise((resolve, reject) => {
-		// Use Node's built-in http-server via npx
-		const serverProcess = spawn('npx', [
-			'-y',
-			'http-server',
-			directory,
-			'-p', port.toString(),
-			'--cors',
-			'-c-1', // Disable caching
-			'--silent'
-		], {
-			stdio: ['ignore', 'pipe', 'pipe']
+		const server = createStaticServer(directory);
+		server.on('error', error => reject(new Error(`Failed to start server: ${error.message}`)));
+		server.listen(port, () => {
+			activeServers.set(directory, {
+				server,
+				port,
+				directory
+			});
+			resolve(port);
 		});
-
-		let started = false;
-
-		serverProcess.stdout?.on('data', (data: Buffer) => {
-			const output = data.toString();
-			if (output.includes('Available on:') || output.includes('Hit CTRL-C')) {
-				if (!started) {
-					started = true;
-					activeServers.set(directory, {
-						process: serverProcess,
-						port,
-						directory
-					});
-					resolve(port);
-				}
-			}
-		});
-
-		serverProcess.stderr?.on('data', (data: Buffer) => {
-			console.error('Server error:', data.toString());
-		});
-
-		serverProcess.on('error', (error) => {
-			if (!started) {
-				reject(new Error(`Failed to start server: ${error.message}`));
-			}
-		});
-
-		serverProcess.on('exit', (code) => {
-			activeServers.delete(directory);
-			if (!started && code !== 0) {
-				reject(new Error(`Server exited with code ${code}`));
-			}
-		});
-
-		// Timeout after 10 seconds
-		setTimeout(() => {
-			if (!started) {
-				serverProcess.kill();
-				reject(new Error('Server startup timeout'));
-			}
-		}, 10000);
 	});
 }
 
@@ -95,7 +52,7 @@ export async function startLocalServer(directory: string, preferredPort = 8765):
 export function stopLocalServer(directory: string): void {
 	const server = activeServers.get(directory);
 	if (server) {
-		server.process.kill();
+		server.server.close();
 		activeServers.delete(directory);
 	}
 }
@@ -105,7 +62,7 @@ export function stopLocalServer(directory: string): void {
  */
 export function stopAllServers(): void {
 	for (const [directory, server] of activeServers.entries()) {
-		server.process.kill();
+		server.server.close();
 	}
 	activeServers.clear();
 }
@@ -146,6 +103,60 @@ async function findAvailablePort(startPort: number): Promise<number> {
 			}
 		});
 	});
+}
+
+function createStaticServer(directory: string): Server {
+	const { createServer } = require('http') as typeof import('http');
+
+	return createServer((request, response) => {
+		const requestPath = new URL(request.url || '/', 'http://localhost').pathname;
+		const relativePath = requestPath === '/' ? '/index.html' : requestPath;
+		const normalizedPath = normalize(relativePath).replace(/^(\.\.(\/|\\|$))+/, '');
+		const filePath = join(directory, normalizedPath);
+
+		response.setHeader('Access-Control-Allow-Origin', '*');
+		response.setHeader('Cache-Control', 'no-store');
+
+		if (!existsSync(filePath) || !statSync(filePath).isFile()) {
+			response.statusCode = 404;
+			response.end('Not found');
+			return;
+		}
+
+		response.setHeader('Content-Type', contentTypeForPath(filePath));
+		createReadStream(filePath)
+			.on('error', () => {
+				response.statusCode = 500;
+				response.end('Failed to read file');
+			})
+			.pipe(response);
+	});
+}
+
+function contentTypeForPath(filePath: string): string {
+	switch (extname(filePath).toLowerCase()) {
+		case '.html':
+			return 'text/html; charset=utf-8';
+		case '.js':
+			return 'application/javascript; charset=utf-8';
+		case '.css':
+			return 'text/css; charset=utf-8';
+		case '.json':
+			return 'application/json; charset=utf-8';
+		case '.svg':
+			return 'image/svg+xml';
+		case '.png':
+			return 'image/png';
+		case '.jpg':
+		case '.jpeg':
+			return 'image/jpeg';
+		case '.woff':
+			return 'font/woff';
+		case '.woff2':
+			return 'font/woff2';
+		default:
+			return 'application/octet-stream';
+	}
 }
 
 /**
