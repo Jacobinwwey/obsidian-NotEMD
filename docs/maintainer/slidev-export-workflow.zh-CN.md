@@ -15,7 +15,7 @@ NoteMD 的验证必须把以下步骤串起来看：
 3. 本地 Slidev fork 存在时会被优先使用。
 4. 每次 HTML build 前会重建输出目录，避免旧 chunk 残留。
 5. 生成 deck 的 guardrails 会规范 theme、逐页 frontmatter 和大 Mermaid 图的 zoom。
-6. 最终 standalone HTML 会经过真实浏览器抽样打开。
+6. 最终 standalone HTML 会经过真实浏览器打开，并默认审计整个 deck。
 7. 生成的检查产物对 Git 可见，不会被 `.gitignore` 意外隐藏。
 
 ## 维护者命令
@@ -52,6 +52,15 @@ npm run verify:slidev-export -- --no-screenshots --json
 npm run verify:slidev-export -- --source path/to/source.md
 ```
 
+如果本机已有真实 Obsidian 桌面会话，也应补一层真实命令路径 smoke：
+
+```bash
+obsidian open path=architecture.zh-CN.md vault=/home/jacob/obsidian-NotEMD/docs
+obsidian command id=notemd:export-slides vault=/home/jacob/obsidian-NotEMD/docs
+```
+
+在 2026-06-18 的 Jacob docs vault 上，这条命令已经执行成功。它是宿主命令级 smoke，不是 DOM 点击自动化。
+
 ## 通过标准
 
 只有最终 JSON 同时满足以下条件时，才把这次导出视为通过：
@@ -66,19 +75,21 @@ npm run verify:slidev-export -- --source path/to/source.md
 8. `deck.containsMissingTheme: false`
 9. 所有 `playwright[].failed` 都是 `false`
 10. `ignoredOutputs: []`
+11. `layoutAuditSummary.overflowCount: 0`
+12. `layoutAuditSummary.unreadableCount: 0`
 
 任一条件失败，都应先修 NoteMD 工作流，再相信导出文件。
 
 ## 渲染后可见范围质量门
 
-当前工作流已经能证明 UI 等价导出路径可以生成 deck，并且代表性页面能在真实浏览器里打开。这是必要条件，但还不够覆盖密集架构笔记：Slidev build 成功时，Mermaid 图、表格、代码块或长文本仍可能被固定 16:9 画布裁掉。
+当前工作流已经能证明 UI 等价导出路径可以生成 deck，并且默认会把整个准备后的 deck 放进真实浏览器审计。这是必要条件，因为密集架构笔记即使 build 成功，Mermaid 图、表格、代码块或长文本仍可能被固定 16:9 画布裁掉。
 
 当前实现已经把 render-feedback gate 落到了维护者验证链上，但还没有到长期设计的终点：
 
 1. 测量前等待 `document.fonts.ready`、图片 decode 和 Mermaid 渲染完成；
-2. 对每个抽样页检查 DOM bbox 是否超出实际可见 slide root、是否存在 scroll overflow、Mermaid 容器是否溢出、表格自然宽度是否溢出、代码块是否溢出；
+2. 对每个被审计页检查 DOM bbox 是否超出实际可见 slide root、是否存在 scroll overflow、Mermaid 容器是否溢出、表格自然宽度是否溢出、代码块是否溢出；
 3. 将问题归类为 `overflow`、`unreadable-scale`、`stale-output` 或 `render-error`；
-4. 在维护者验证链中做有界 `zoom` 回写和重导出，当前最多 6 轮；
+4. 在维护者验证链中做基于渲染证据的有界 patch/retry，当前最多 6 轮；
 5. 如果多轮重试后内容仍被真实可见 slide root 裁掉，应 fail closed 并输出审计报告。
 
 `ref/infinite-canvas` 只能作为 clean-room 设计参考。真正值得借鉴的不是把无限画布嵌进 Slidev export，而是先把 slide 元素建模成可测量的 world rect，计算 union bounds，再为固定 Slidev safe rect 推导 fit camera；一旦 fit 会破坏可读性，就拆分内容。不要把 AGPL-3.0 实现代码复制进 MIT 项目。
@@ -96,7 +107,19 @@ layoutAuditSummary.unreadableCount
 layoutAuditSummary.retryCount
 ```
 
-当前限制：已落地的 patcher 仍是 `zoom`-only。它已经实证改善了 Mermaid-heavy 页面，并在真实 `docs/architecture.zh-CN.md` HTML workflow 上通过，但 slide splitting 与 diagram/table decomposition 仍是下一阶段的鲁棒性工作。
+截至 2026-06-18 的当前真值：
+
+1. 默认 HTML 验证在未传 `--sample-slides` 时会审计整个准备后的 deck；
+2. patcher 的 `zoom` 来自真实 overflow 测量，而不是固定导出常数；
+3. patcher 已会在不宜继续缩小时，升级为结构化拆分，当前支持的内容类型包括 Mermaid `flowchart` / `graph` / `mindmap` / `sequenceDiagram`，以及简单的标题 + 段落/列表页；
+4. 真实 `docs/architecture.zh-CN.md` workflow 现在已经收敛到 `ok: true`、`27` 个审计页、`overflow` 与 `unreadable-scale` 都为零；
+5. 同一真实源文件的 `PDF` 与 `PNG` 验证也返回 `ok: true`。
+
+当前限制：
+
+1. patcher 还不能拆解超大表格或代码重页；
+2. 自定义 Slidev slot layout 与第一张带 deck headmatter 的页面仍保持保守/manual-review 路径；
+3. full-deck Playwright 验证故意比代表性抽样更慢，后续优化方向应是提高 patch 收敛能力，而不是退回弱审计。
 
 ## 输出策略
 
@@ -143,7 +166,7 @@ git check-ignore -v docs/export/_slidev-sources/architecture.zh-CN.slidev.md doc
 代码改动还应同时运行：
 
 ```bash
-npm test -- --runInBand src/tests/slidevSourcePreparer.test.ts src/tests/slideExportComprehensive.test.ts
+npm test -- --runInBand src/tests/slidevLayoutAudit.test.ts src/tests/slidevSourcePreparer.test.ts src/tests/slideExportComprehensive.test.ts src/tests/sidebarDomButtonClicks.test.ts
 npm run build
 git diff --check
 ```
@@ -158,7 +181,7 @@ git diff --check
 2. 除非项目明确声明已安装自定义主题，否则优先使用内置或调用方配置的主题；
 3. 逐页 frontmatter 必须在正文前闭合；
 4. 大 Mermaid 图、表格和密集代码块应使用 `zoom` 或 `Transform`；
-5. 验证导出结果时应 build 并打开代表性页面，而不只是检查 Markdown 已生成；
+5. 验证导出结果时应 build 并在浏览器里检查渲染页，而不只是检查 Markdown 已生成；
 6. 当旧资产可能影响浏览器输出时，重建前应清理或重建输出目录。
 
 这些应留在 NoteMD 本地，不应上游：

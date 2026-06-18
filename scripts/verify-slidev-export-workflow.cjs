@@ -13,7 +13,6 @@ const fs = require('fs');
 const path = require('path');
 const esbuild = require('esbuild');
 
-const DEFAULT_SAMPLE_SLIDES = [1, 2, 3, 5, 10];
 const LAYOUT_AUDIT_CONFIG = {
 	minReadableScale: 0.24,
 	maxAutoPatchPasses: 6,
@@ -30,7 +29,7 @@ function parseArgs(argv) {
 		timeoutMs: 180000,
 		playwright: true,
 		screenshots: true,
-		sampleSlides: DEFAULT_SAMPLE_SLIDES,
+		sampleSlides: null,
 		json: false,
 	};
 
@@ -51,7 +50,10 @@ function parseArgs(argv) {
 		} else if (arg === '--timeout-ms' && argv[index + 1]) {
 			args.timeoutMs = Number(argv[++index]);
 		} else if (arg === '--sample-slides' && argv[index + 1]) {
-			args.sampleSlides = argv[++index].split(',').map(value => Number(value.trim())).filter(Number.isFinite);
+			const rawValue = argv[++index].trim().toLowerCase();
+			args.sampleSlides = rawValue === 'all'
+				? []
+				: rawValue.split(',').map(value => Number(value.trim())).filter(Number.isFinite);
 		} else if (arg === '--no-playwright') {
 			args.playwright = false;
 		} else if (arg === '--no-screenshots') {
@@ -90,7 +92,7 @@ function printHelp() {
 		'  --html-mode <standalone|server-script> HTML mode, default: standalone',
 		'  --output-subfolder <path>  Vault-relative output folder, default: export',
 		'  --theme <name>             Slidev theme, default: default',
-		'  --sample-slides <list>     Comma-separated slide numbers for Playwright, default: 1,2,3,5,10',
+		'  --sample-slides <list|all> Comma-separated slide numbers for Playwright, default: all slides',
 		'  --no-playwright            Skip browser rendering checks',
 		'  --no-screenshots           Do not write Playwright screenshots',
 		'  --json                     Print only the final JSON report',
@@ -105,7 +107,7 @@ async function bundleSlideExportModules() {
 				"export { prepareSlidevExportSource } from './src/slideExport/slidevSourcePreparer';",
 				"export { exportSlidevHtml, exportSlidevPdf, exportSlidevPng } from './src/slideExport/slidevExporter';",
 				"export { exportVideoMp4 } from './src/slideExport/videoExporter';",
-				"export { analyzeRenderedSlideMeasurement, summarizeLayoutAudits, patchDeckWithLayoutAudit } from './src/slideExport/slidevLayoutAudit';",
+				"export { analyzeRenderedSlideMeasurement, summarizeLayoutAudits, patchDeckWithLayoutAudit, countSlideDeckSlides } from './src/slideExport/slidevLayoutAudit';",
 				"export { resolveWorkspaceHomeCandidates } from './src/slideExport/platformUtils';",
 			].join('\n'),
 			resolveDir: process.cwd(),
@@ -413,6 +415,17 @@ async function runPlaywrightChecks(htmlPath, sampleSlides, writeScreenshots, sli
 	return { checks, layoutAudits };
 }
 
+function resolveSlidesToAudit(sampleSlides, deckMarkdown, slideExport) {
+	const deckSlideCount = deckMarkdown ? slideExport.countSlideDeckSlides(deckMarkdown) : 0;
+	const allSlides = Array.from({ length: Math.max(deckSlideCount, 1) }, (_, index) => index + 1);
+	if (!Array.isArray(sampleSlides) || sampleSlides.length === 0) {
+		return allSlides;
+	}
+
+	const filteredSlides = sampleSlides.filter(slide => Number.isFinite(slide) && slide >= 1 && slide <= deckSlideCount);
+	return filteredSlides.length > 0 ? filteredSlides : allSlides;
+}
+
 function checkIgnored(pathsToCheck) {
 	const existingPaths = pathsToCheck.filter(Boolean).filter(filePath => fs.existsSync(filePath));
 	if (existingPaths.length === 0) {
@@ -474,6 +487,7 @@ async function main() {
 	let layoutAudits = [];
 	let layoutAuditSummary = slideExport.summarizeLayoutAudits([], 0);
 	let layoutPatchAttempts = [];
+	let auditedSlides = [];
 	let retryCount = 0;
 
 	if (args.playwright && args.format === 'html') {
@@ -483,7 +497,8 @@ async function main() {
 			: null;
 
 		while (true) {
-			const auditResult = await runPlaywrightChecks(currentExportPath, args.sampleSlides, args.screenshots, slideExport);
+			auditedSlides = resolveSlidesToAudit(args.sampleSlides, currentDeckMarkdown, slideExport);
+			const auditResult = await runPlaywrightChecks(currentExportPath, auditedSlides, args.screenshots, slideExport);
 			playwrightChecks = auditResult.checks;
 			layoutAudits = auditResult.layoutAudits;
 			layoutAuditSummary = slideExport.summarizeLayoutAudits(layoutAudits, retryCount);
@@ -507,7 +522,7 @@ async function main() {
 			currentDeckMarkdown = patchResult.deckMarkdown;
 			fs.writeFileSync(absoluteDeckPath, currentDeckMarkdown, 'utf8');
 			retryCount += 1;
-			onProgress('layout-audit', `Patched deck zoom on slides ${patchResult.changedSlides.join(', ')} and rebuilding...`);
+			onProgress('layout-audit', `Patched deck on slides ${patchResult.changedSlides.join(', ')} and rebuilding...`);
 			exportPath = await slideExport.exportSlidevHtml(app, slideSource, config, onProgress);
 			currentExportPath = path.join(vaultRoot, exportPath);
 			absoluteExportPath = currentExportPath;
@@ -556,6 +571,7 @@ async function main() {
 		},
 		deck: deckSummary,
 		playwright: playwrightChecks,
+		playwrightSlides: auditedSlides,
 		layoutAudit: layoutAudits,
 		layoutAuditSummary,
 		layoutPatchAttempts,

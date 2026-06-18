@@ -1,5 +1,6 @@
 import {
 	analyzeRenderedSlideMeasurement,
+	countSlideDeckSlides,
 	patchDeckWithLayoutAudit,
 	summarizeLayoutAudits,
 	type RenderedSlideMeasurement,
@@ -140,6 +141,170 @@ describe('slidevLayoutAudit', () => {
 		expect(patched.blockedSlides).toEqual([
 			expect.objectContaining({ slide: 2 }),
 		]);
+	});
+
+	test('splits oversized Mermaid flowcharts into multiple slides before dropping below the readable floor', () => {
+		const audit: SlidevLayoutAudit = {
+			slide: 2,
+			safeRect: { left: 51.2, top: 43.2, right: 1228.8, bottom: 676.8, width: 1177.6, height: 633.6 },
+			contentBounds: { left: 48, top: 52, right: 1234, bottom: 920, width: 1186, height: 868 },
+			pageScale: 0.30,
+			elementKinds: ['mermaid'],
+			findings: [
+				{
+					kind: 'overflow',
+					target: 'content',
+					message: 'Slide content exceeds the safe visible rectangle',
+					recommendedPatch: 'split-diagram',
+					recommendedScale: 0.5,
+				},
+			],
+		};
+		const deck = [
+			'---',
+			'theme: default',
+			'---',
+			'',
+			'# Intro',
+			'',
+			'---',
+			'zoom: 0.30',
+			'---',
+			'',
+			'## Diagram',
+			'',
+			'```mermaid',
+			'flowchart TB',
+			'  Start --> Decision',
+			'  Decision -->|yes| PathA',
+			'  Decision -->|no| PathB',
+			'  subgraph Detail',
+			'    PathA --> Review',
+			'    Review --> Done',
+			'  end',
+			'  PathB --> Retry',
+			'  Retry --> Done',
+			'```',
+		].join('\n');
+
+		const patched = patchDeckWithLayoutAudit(deck, [audit]);
+
+		expect(patched.changed).toBe(true);
+		expect(patched.changedSlides).toEqual([2]);
+		expect(patched.blockedSlides).toEqual([]);
+		expect(countSlideDeckSlides(patched.deckMarkdown)).toBe(3);
+		expect((patched.deckMarkdown.match(/```mermaid/g) || []).length).toBe(2);
+		expect((patched.deckMarkdown.match(/## Diagram/g) || []).length).toBe(2);
+		expect(patched.deckMarkdown).not.toContain('zoom: 0.30');
+		expect(patched.deckMarkdown).toContain('Decision -->|yes| PathA');
+		expect(patched.deckMarkdown).toContain('Retry --> Done');
+	});
+
+	test('repeats sequence participants when splitting oversized sequence diagrams', () => {
+		const audit: SlidevLayoutAudit = {
+			slide: 2,
+			safeRect: { left: 51.2, top: 43.2, right: 1228.8, bottom: 676.8, width: 1177.6, height: 633.6 },
+			contentBounds: { left: 48, top: 52, right: 1234, bottom: 920, width: 1186, height: 868 },
+			pageScale: 0.30,
+			elementKinds: ['mermaid'],
+			findings: [
+				{
+					kind: 'overflow',
+					target: 'content',
+					message: 'Slide content exceeds the safe visible rectangle',
+					recommendedPatch: 'split-diagram',
+					recommendedScale: 0.6,
+				},
+			],
+		};
+		const deck = [
+			'---',
+			'theme: default',
+			'---',
+			'',
+			'# Intro',
+			'',
+			'---',
+			'zoom: 0.30',
+			'---',
+			'',
+			'## Sequence',
+			'',
+			'```mermaid',
+			'sequenceDiagram',
+			'  participant User',
+			'  participant Plugin',
+			'  User->>Plugin: Export',
+			'  alt success',
+			'    Plugin-->>User: HTML',
+			'  end',
+			'  Plugin->>Plugin: Verify layout',
+			'  Plugin-->>User: Done',
+			'```',
+		].join('\n');
+
+		const patched = patchDeckWithLayoutAudit(deck, [audit]);
+
+		expect(patched.changed).toBe(true);
+		expect(patched.blockedSlides).toEqual([]);
+		expect(countSlideDeckSlides(patched.deckMarkdown)).toBe(3);
+		expect((patched.deckMarkdown.match(/participant User/g) || []).length).toBe(2);
+		expect((patched.deckMarkdown.match(/participant Plugin/g) || []).length).toBe(2);
+		expect((patched.deckMarkdown.match(/```mermaid/g) || []).length).toBe(2);
+		expect(patched.deckMarkdown).toContain('alt success');
+		expect(patched.deckMarkdown).toContain('Plugin->>Plugin: Verify layout');
+	});
+
+	test('splits oversized bullet slides when content audit recommends split-slide', () => {
+		const audit: SlidevLayoutAudit = {
+			slide: 2,
+			safeRect: { left: 51.2, top: 43.2, right: 1228.8, bottom: 676.8, width: 1177.6, height: 633.6 },
+			contentBounds: { left: 48, top: 52, right: 1234, bottom: 820, width: 1186, height: 768 },
+			pageScale: 1,
+			elementKinds: ['text'],
+			findings: [
+				{
+					kind: 'overflow',
+					target: 'content',
+					message: 'Slide content exceeds the safe visible rectangle',
+					recommendedPatch: 'split-slide',
+					recommendedScale: 0.92,
+				},
+				{
+					kind: 'overflow',
+					target: 'text',
+					message: 'text element exceeds the safe visible rectangle',
+					recommendedPatch: 'reduce-zoom',
+					recommendedScale: 0.92,
+				},
+			],
+		};
+		const deck = [
+			'---',
+			'theme: default',
+			'---',
+			'',
+			'# Intro',
+			'',
+			'---',
+			'## CLI 边界现实',
+			'',
+			'- `src/operations/diagramGenerateOperation.ts`',
+			'- `src/operations/providerDiagnosticCommand.ts`',
+			'- `src/operations/diagramCommandHostAdapter.ts`',
+			'- `src/operations/configProfileCommands.ts`',
+			'- `src/operations/providerDiagnosticReportPersistence.ts`',
+			'- `src/operations/providerDiagnosticCommandHostAdapter.ts`',
+		].join('\n');
+
+		const patched = patchDeckWithLayoutAudit(deck, [audit]);
+
+		expect(patched.changed).toBe(true);
+		expect(patched.blockedSlides).toEqual([]);
+		expect(countSlideDeckSlides(patched.deckMarkdown)).toBe(3);
+		expect((patched.deckMarkdown.match(/## CLI 边界现实/g) || []).length).toBe(2);
+		expect(patched.deckMarkdown).toContain('providerDiagnosticReportPersistence');
+		expect(patched.deckMarkdown).toContain('providerDiagnosticCommandHostAdapter');
 	});
 
 	test('summarizes audit counts across slides', () => {

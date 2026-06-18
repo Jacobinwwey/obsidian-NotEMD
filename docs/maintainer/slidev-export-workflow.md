@@ -15,7 +15,7 @@ The NoteMD workflow must verify all of these steps together:
 3. The local Slidev fork is preferred when present.
 4. The output directory is recreated before each HTML build so stale chunks cannot survive.
 5. Generated deck guardrails normalize theme, slide frontmatter, and large Mermaid diagram zoom.
-6. The final standalone HTML is opened by a real browser check.
+6. The final standalone HTML is opened by a real browser check, auditing the full deck by default.
 7. Generated inspection artifacts remain visible to Git and are not accidentally hidden by `.gitignore`.
 
 ## Maintainer Command
@@ -52,6 +52,15 @@ To test another vault-relative source:
 npm run verify:slidev-export -- --source path/to/source.md
 ```
 
+For a live desktop-session smoke against the real Obsidian command path:
+
+```bash
+obsidian open path=architecture.zh-CN.md vault=/home/jacob/obsidian-NotEMD/docs
+obsidian command id=notemd:export-slides vault=/home/jacob/obsidian-NotEMD/docs
+```
+
+On 2026-06-18 this command executed successfully in Jacob's docs vault. It is a real host-command smoke, not a DOM click automation pass.
+
 ## Passing Criteria
 
 Treat the command as passing only when the final JSON report has:
@@ -66,19 +75,21 @@ Treat the command as passing only when the final JSON report has:
 8. `deck.containsMissingTheme: false`
 9. every `playwright[].failed` value equal to `false`
 10. `ignoredOutputs: []`
+11. `layoutAuditSummary.overflowCount: 0`
+12. `layoutAuditSummary.unreadableCount: 0`
 
 If any check fails, fix the NoteMD workflow before relying on the exported files.
 
 ## Rendered Layout Quality Gate
 
-The current workflow proves that the UI-equivalent export path creates a deck and that representative slides open in a browser. That is necessary but not sufficient for dense architecture notes: a deck can build successfully while Mermaid diagrams, tables, code blocks, or long text are clipped by Slidev's fixed 16:9 canvas.
+The current workflow proves that the UI-equivalent export path creates a deck and that the full prepared deck can open in a browser. That is necessary because dense architecture notes can still build successfully while Mermaid diagrams, tables, code blocks, or long text are clipped by Slidev's fixed 16:9 canvas.
 
 The current implementation now includes a render-feedback gate after deck generation for maintainer verification, but it is still narrower than the long-term design:
 
 1. wait for `document.fonts.ready`, image decode, and Mermaid rendering before measuring;
-2. inspect every sampled slide for DOM bounding boxes outside the actual visible slide root, scroll overflow, Mermaid container overflow, table natural width overflow, and code block overflow;
+2. inspect every audited slide for DOM bounding boxes outside the actual visible slide root, scroll overflow, Mermaid container overflow, table natural width overflow, and code block overflow;
 3. classify each finding as `overflow`, `unreadable-scale`, `stale-output`, or `render-error`;
-4. patch and retry the deck with bounded `zoom` rewrites during maintainer verification, currently up to 6 passes;
+4. patch and retry the deck with bounded rendered-evidence rewrites during maintainer verification, currently up to 6 passes;
 5. fail closed with an audit report when the visible slide root still clips content after those retries.
 
 Use `ref/infinite-canvas` only as a clean-room design reference. The useful idea is not to embed an infinite canvas in Slidev export; it is to model generated slide elements as measurable world rectangles, compute union bounds, derive a fit camera for the fixed Slidev safe rectangle, and split content when fitting would make it unreadable. Do not copy AGPL-3.0 implementation code into this MIT project.
@@ -96,7 +107,19 @@ layoutAuditSummary.unreadableCount
 layoutAuditSummary.retryCount
 ```
 
-Current limitation: the landed patcher is still `zoom`-only. It materially improves Mermaid-heavy slides and is now proven on the real `docs/architecture.zh-CN.md` HTML workflow, but slide splitting and diagram/table decomposition remain the next robustness step.
+Current landed truth as of 2026-06-18:
+
+1. default HTML verification audits the full prepared deck when `--sample-slides` is not provided;
+2. the patcher derives `zoom` from measured overflow instead of fixed export constants;
+3. the patcher escalates to structural splitting for supported Mermaid diagrams (`flowchart`, `graph`, `mindmap`, `sequenceDiagram`) and simple heading + paragraph/list slides;
+4. the real `docs/architecture.zh-CN.md` workflow now closes with `ok: true`, `27` audited slides, and zero `overflow` / `unreadable-scale` findings;
+5. `PDF` and `PNG` verification on the same source also return `ok: true`.
+
+Current limitation:
+
+1. the patcher still does not decompose oversized tables or code-heavy slides;
+2. custom Slidev slot layouts and first-slide deck headmatter remain conservative/manual-review paths;
+3. full-deck Playwright verification is deliberately slower than representative sampling, so future work should improve convergence rather than weaken the audit.
 
 ## Output Policy
 
@@ -143,7 +166,7 @@ Run `npm run verify:slidev-export` whenever a change touches:
 For code changes, also run:
 
 ```bash
-npm test -- --runInBand src/tests/slidevSourcePreparer.test.ts src/tests/slideExportComprehensive.test.ts
+npm test -- --runInBand src/tests/slidevLayoutAudit.test.ts src/tests/slidevSourcePreparer.test.ts src/tests/slideExportComprehensive.test.ts src/tests/sidebarDomButtonClicks.test.ts
 npm run build
 git diff --check
 ```
@@ -158,7 +181,7 @@ Good upstream skill candidates:
 2. prefer built-in or configured themes unless the project explicitly declares an installed custom theme;
 3. close per-slide frontmatter before slide body content;
 4. use `zoom` or `Transform` for large Mermaid diagrams, tables, and dense code blocks;
-5. verify exported decks by building and opening representative slides, not only by checking that Markdown was generated;
+5. verify exported decks by building and opening rendered slides in a browser, not only by checking that Markdown was generated;
 6. clear or recreate output directories before rebuilds when stale assets can affect browser output.
 
 Keep these project-local instead of upstreaming:
