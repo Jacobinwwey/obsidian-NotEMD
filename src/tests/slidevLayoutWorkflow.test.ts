@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 import { convergeSlidevDeckLayout } from '../slideExport/slidevLayoutWorkflow';
-import { exportSlidevHtml } from '../slideExport/slidevExporter';
+import { exportSlidevHtmlWithOutcome } from '../slideExport/slidevExporter';
 import { startLocalServer, stopLocalServer } from '../slideExport/localServer';
 import { getVaultBasePath, resolvePlaywrightBrowsersPath, safeRequire } from '../slideExport/platformUtils';
 import {
@@ -13,7 +13,7 @@ import {
 } from '../slideExport/slidevLayoutAudit';
 
 jest.mock('../slideExport/slidevExporter', () => ({
-	exportSlidevHtml: jest.fn(),
+	exportSlidevHtmlWithOutcome: jest.fn(),
 }));
 
 jest.mock('../slideExport/localServer', () => ({
@@ -34,7 +34,7 @@ jest.mock('../slideExport/slidevLayoutAudit', () => ({
 	summarizeLayoutAudits: jest.fn(),
 }));
 
-const mockExportSlidevHtml = exportSlidevHtml as jest.MockedFunction<typeof exportSlidevHtml>;
+const mockExportSlidevHtmlWithOutcome = exportSlidevHtmlWithOutcome as jest.MockedFunction<typeof exportSlidevHtmlWithOutcome>;
 const mockStartLocalServer = startLocalServer as jest.MockedFunction<typeof startLocalServer>;
 const mockStopLocalServer = stopLocalServer as jest.MockedFunction<typeof stopLocalServer>;
 const mockGetVaultBasePath = getVaultBasePath as jest.MockedFunction<typeof getVaultBasePath>;
@@ -55,6 +55,24 @@ function createSummary(retryCount: number) {
 	};
 }
 
+function createHtmlOutcome(path: string, actualMode: 'standalone' | 'server-script' | 'server-script-fallback' = 'standalone') {
+	return {
+		path,
+		requestedMode: 'standalone' as const,
+		actualMode,
+		requiresLocalServer: actualMode !== 'standalone',
+		fallbackPath: actualMode === 'server-script-fallback' ? path : null,
+		standaloneAttempt: {
+			attempted: actualMode !== 'server-script',
+			accepted: actualMode === 'standalone',
+			outputPath: actualMode !== 'server-script' ? path.replace('/index.html', '/index-standalone.html') : null,
+			preservedFailurePath: actualMode === 'server-script-fallback' ? path.replace('/index.html', '/index-standalone.failed.html') : null,
+			loaderGaps: actualMode === 'server-script-fallback' ? ['$n'] : [],
+			failureReason: actualMode === 'server-script-fallback' ? 'loader-gaps' as const : null,
+		},
+	};
+}
+
 describe('slidevLayoutWorkflow', () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
@@ -64,7 +82,7 @@ describe('slidevLayoutWorkflow', () => {
 
 	test('returns the initial HTML export when the Playwright runtime is unavailable', async () => {
 		mockGetVaultBasePath.mockReturnValue('/vault');
-		mockExportSlidevHtml.mockResolvedValue('export/demo/index-standalone.html');
+		mockExportSlidevHtmlWithOutcome.mockResolvedValue(createHtmlOutcome('export/demo/index-standalone.html'));
 		mockSafeRequire.mockReturnValue(null);
 
 		const result = await convergeSlidevDeckLayout(
@@ -88,10 +106,12 @@ describe('slidevLayoutWorkflow', () => {
 		);
 
 		expect(result.exportPath).toBe('export/demo/index-standalone.html');
+		expect(result.htmlExport.actualMode).toBe('standalone');
+		expect(result.htmlExportHistory).toHaveLength(1);
 		expect(result.auditSkippedReason).toContain('Playwright runtime is unavailable');
 		expect(result.layoutAudits).toEqual([]);
 		expect(result.layoutPatchAttempts).toEqual([]);
-		expect(mockExportSlidevHtml).toHaveBeenCalledTimes(1);
+		expect(mockExportSlidevHtmlWithOutcome).toHaveBeenCalledTimes(1);
 		expect(mockPatchDeckWithLayoutAudit).not.toHaveBeenCalled();
 	});
 
@@ -102,7 +122,7 @@ describe('slidevLayoutWorkflow', () => {
 		fs.writeFileSync(deckPath, 'original deck', 'utf8');
 
 		mockGetVaultBasePath.mockReturnValue(vaultRoot);
-		mockExportSlidevHtml.mockResolvedValue('export/demo/index.html');
+		mockExportSlidevHtmlWithOutcome.mockResolvedValue(createHtmlOutcome('export/demo/index.html', 'server-script-fallback'));
 		mockResolvePlaywrightBrowsersPath.mockReturnValue('/home/user/.cache/ms-playwright');
 		mockCountSlideDeckSlides.mockReturnValue(1);
 		mockStartLocalServer.mockResolvedValue(8765);
@@ -200,7 +220,7 @@ describe('slidevLayoutWorkflow', () => {
 			{ writeScreenshots: false }
 		);
 
-		expect(mockExportSlidevHtml).toHaveBeenCalledTimes(2);
+		expect(mockExportSlidevHtmlWithOutcome).toHaveBeenCalledTimes(2);
 		expect(mockPatchDeckWithLayoutAudit).toHaveBeenCalledTimes(2);
 		expect(fs.readFileSync(deckPath, 'utf8')).toBe('patched deck');
 		expect(result.layoutPatchAttempts).toEqual([
@@ -216,6 +236,8 @@ describe('slidevLayoutWorkflow', () => {
 			}),
 		]);
 		expect(result.layoutAuditSummary.retryCount).toBe(1);
+		expect(result.htmlExport.actualMode).toBe('server-script-fallback');
+		expect(result.htmlExportHistory).toHaveLength(2);
 		expect(result.checks).toHaveLength(1);
 		expect(mockStartLocalServer).toHaveBeenCalled();
 		expect(mockStopLocalServer).toHaveBeenCalled();

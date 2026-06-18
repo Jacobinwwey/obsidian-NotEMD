@@ -16,7 +16,7 @@ NoteMD 的验证必须把以下步骤串起来看：
 4. 现有 Slidev deck 也会先复制到隔离的 prepared working workspace，再进入验证链，避免 patch/retry 直接改写源笔记，同时允许把 sibling Slidev support entries 一并镜像进 working copy。
 5. 每次 HTML build 前会重建输出目录，避免旧 chunk 残留。
 6. 生成 deck 的 guardrails 会规范 theme、逐页 frontmatter，并且只在页面本身没有声明 `zoom` 时才为大 Mermaid 图补缺省 zoom。
-7. HTML 导出会先尝试 native standalone；如果生成的 standalone bundle 缺少 slide loader binding，则自动回退到 server-script 兼容 HTML。
+7. HTML 导出会先尝试 native standalone，记录实际 HTML mode；只有在生成的 standalone bundle 确实缺少 slide loader binding 时，才自动回退到 server-script 兼容 HTML。
 8. 最终 HTML 输出会经过真实浏览器打开，并默认审计整个 deck。
 9. 生成的检查产物对 Git 可见，不会被 `.gitignore` 意外隐藏。
 
@@ -49,6 +49,14 @@ docs/export/architecture.zh-CN-slides/slide-*-workflow.png
 npm run verify:slidev-export -- --no-screenshots --json
 ```
 
+如果要声称 native standalone 已通过，不能只看兼容默认路径。必须运行严格 gate：
+
+```bash
+npm run verify:slidev-export -- --format html --html-mode standalone --require-native-standalone --source architecture.zh-CN.md --json
+```
+
+该报告必须包含 `htmlExport.actualMode: "standalone"` 与 `standaloneGate.passed: true`。
+
 测试其他 vault-relative 源文件：
 
 ```bash
@@ -80,6 +88,10 @@ obsidian command id=notemd:export-slides vault=/home/jacob/obsidian-NotEMD/docs
 10. `ignoredOutputs: []`
 11. `layoutAuditSummary.overflowCount: 0`
 12. `layoutAuditSummary.unreadableCount: 0`
+13. 严格 native standalone 收口时，`htmlExport.actualMode: "standalone"`
+14. 严格 native standalone 收口时，`htmlExport.requiresLocalServer: false`
+15. 严格 native standalone 收口时，`htmlExport.standaloneAttempt.loaderGaps: []`
+16. 严格 native standalone 收口时，`standaloneGate.passed: true`
 
 任一条件失败，都应先修 NoteMD 工作流，再相信导出文件。
 
@@ -123,14 +135,14 @@ layoutAuditSummary.retryCount
 9. component-heavy custom slot layout 在结构拆分不可用时，现在可以回退到局部 `<Transform :scale=\"...\">` 包裹；该 scale 由当前超界 zone 相对于 slot-owner 几何与 scroll 边界的检测结果推导，而不是固定常数或 LLM 手动决定；当多个 component-heavy zone 独立溢出时，patcher 现在可以在同一页里对每个可变换 zone 分别包裹局部 `<Transform>`；只有在仍然必须选择唯一 owner 时，才会优先使用 zone 级几何归因，并在几何结果打平时回退到 slot signal / rendered text hint；
 10. pass/fail 的 hard overflow 仍以渲染后的 slide root 为边界，而 `safeRect` 继续只承担 measured scale 的保守拟合目标；这样既不会放过真正裁剪，也不会把合理的 edge-aligned layout 过度误杀；
 11. 共享的 `convergeSlidevDeckLayout()` 现在已经进入 `exportSlidesCommand()` 与维护者 verifier，因此 HTML/PDF/PNG/MP4 都会复用同一个收敛后的 prepared deck；
-12. HTML exporter 现在会拒绝已知坏掉的 native standalone bundle，并回退到 `index.html + start-server.* + README.md`；
-13. 真实 `docs/architecture.zh-CN.md` workflow 现在已经收敛到 `ok: true`、`28` 个审计页、`overflow` 与 `unreadable-scale` 都为零，`retryCount = 4`；
+12. HTML exporter 现在会返回结构化 outcome，包含 `requestedMode`、`actualMode`、fallback 状态与 standalone sanity 细节；已知坏掉的 native attempt 会先保留为 `index-standalone.failed.html`，再进入兼容 fallback；
+13. 真实 `docs/architecture.zh-CN.md` 严格 native standalone workflow 现在已经收敛到 `ok: true`、`actualMode: "standalone"`、`requiresLocalServer: false`、`standaloneGate.passed: true`、`28` 个审计页、`overflow` 与 `unreadable-scale` 都为零，`retryCount = 4`；
 14. 同一真实源文件的 `PDF` 与 `PNG` 验证也返回 `ok: true`，而且现在导出自同一个收敛后的 deck，而不是 raw prepared source。
 
 当前限制：
 
 1. 超出当前支持集的 richer custom/component-heavy Slidev layout 仍保持保守/manual-review 路径，尤其是多个 component-heavy slot zone 的 zone 级几何仍然接近打平但并非每个溢出 zone 都可安全 transform、或 owner surface 本身不形成稳定 local transform / structural split target 的情况；
-2. standalone 导出的正确性目前仍依赖 native bundle 的 sanity detection + server-script fallback，而不是自身已经具备完全可靠的 standalone bundling 策略；
+2. native standalone 现在已有严格 gate，且真实 architecture fixture 已通过；但正确性仍依赖 post-build sanity detection，server-script fallback 只是兼容通道，不能再被算作 native standalone 成功；
 3. full-deck Playwright 验证故意比代表性抽样更慢，后续优化方向应是提高 patch 收敛能力，而不是退回弱审计；
 4. `obsidian command id=notemd:export-slides` 目前仍只能算 dispatch-level smoke，因为 Obsidian CLI 没有暴露导出完成握手信号。
 

@@ -27,6 +27,7 @@ function parseArgs(argv) {
 		outputSubfolder: 'export',
 		theme: 'default',
 		timeoutMs: 180000,
+		requireNativeStandalone: false,
 		playwright: true,
 		screenshots: true,
 		sampleSlides: null,
@@ -49,6 +50,8 @@ function parseArgs(argv) {
 			args.theme = argv[++index];
 		} else if (arg === '--timeout-ms' && argv[index + 1]) {
 			args.timeoutMs = Number(argv[++index]);
+		} else if (arg === '--require-native-standalone') {
+			args.requireNativeStandalone = true;
 		} else if (arg === '--sample-slides' && argv[index + 1]) {
 			const rawValue = argv[++index].trim().toLowerCase();
 			args.sampleSlides = rawValue === 'all'
@@ -77,6 +80,9 @@ function parseArgs(argv) {
 	if (!Number.isFinite(args.timeoutMs) || args.timeoutMs <= 0) {
 		throw new Error('--timeout-ms must be a positive number');
 	}
+	if (args.requireNativeStandalone && (args.format !== 'html' || args.htmlMode !== 'standalone')) {
+		throw new Error('--require-native-standalone requires --format html --html-mode standalone');
+	}
 
 	return args;
 }
@@ -92,6 +98,7 @@ function printHelp() {
 		'  --html-mode <standalone|server-script> HTML mode, default: standalone',
 		'  --output-subfolder <path>  Vault-relative output folder, default: export',
 		'  --theme <name>             Slidev theme, default: default',
+		'  --require-native-standalone Fail if HTML export falls back from native standalone',
 		'  --sample-slides <list|all> Comma-separated slide numbers for Playwright, default: all slides',
 		'  --no-playwright            Skip browser rendering checks',
 		'  --no-screenshots           Do not write Playwright screenshots',
@@ -105,7 +112,7 @@ async function bundleSlideExportModules() {
 			contents: [
 					"export { probeEnvironment } from './src/slideExport/environmentProber';",
 					"export { prepareSlidevExportSource } from './src/slideExport/slidevSourcePreparer';",
-					"export { exportSlidevHtml, exportSlidevPdf, exportSlidevPng } from './src/slideExport/slidevExporter';",
+					"export { exportSlidevHtml, exportSlidevHtmlWithOutcome, exportSlidevPdf, exportSlidevPng } from './src/slideExport/slidevExporter';",
 					"export { convergeSlidevDeckLayout } from './src/slideExport/slidevLayoutWorkflow';",
 					"export { exportVideoMp4 } from './src/slideExport/videoExporter';",
 					"export { analyzeRenderedSlideMeasurement, summarizeLayoutAudits, patchDeckWithLayoutAudit, countSlideDeckSlides } from './src/slideExport/slidevLayoutAudit';",
@@ -577,6 +584,8 @@ async function main() {
 	}
 
 	let exportPath = layoutConvergence?.exportPath;
+	let htmlExport = layoutConvergence?.htmlExport ?? null;
+	let htmlExportHistory = layoutConvergence?.htmlExportHistory ?? [];
 	if (args.format === 'pdf') {
 		exportPath = await slideExport.exportSlidevPdf(app, slideSource, config, onProgress);
 	} else if (args.format === 'png') {
@@ -585,7 +594,9 @@ async function main() {
 		const pngDirectory = await slideExport.exportSlidevPng(app, slideSource, config, onProgress);
 		exportPath = await slideExport.exportVideoMp4(app, pngDirectory, slideSource.outputBasename, config, onProgress);
 	} else if (!exportPath) {
-		exportPath = await slideExport.exportSlidevHtml(app, slideSource, config, onProgress);
+		htmlExport = await slideExport.exportSlidevHtmlWithOutcome(app, slideSource, config, onProgress);
+		htmlExportHistory = [htmlExport];
+		exportPath = htmlExport.path;
 	}
 
 	let absoluteExportPath = path.join(vaultRoot, exportPath);
@@ -600,9 +611,28 @@ async function main() {
 	const ignoredOutputs = checkIgnored([
 		absoluteDeckPath,
 		absoluteExportPath,
+		htmlExport?.standaloneAttempt?.preservedFailurePath
+			? path.join(vaultRoot, htmlExport.standaloneAttempt.preservedFailurePath)
+			: null,
+		htmlExport?.standaloneAttempt?.outputPath
+			? path.join(vaultRoot, htmlExport.standaloneAttempt.outputPath)
+			: null,
+		htmlExport?.fallbackPath
+			? path.join(vaultRoot, htmlExport.fallbackPath)
+			: null,
 		...playwrightChecks.map(check => check.screenshotPath),
 	]);
 	const hasLayoutFailures = layoutAudits.some(audit => audit.findings.length > 0);
+	const nativeStandalonePassed = htmlExport?.actualMode === 'standalone'
+		&& htmlExport?.standaloneAttempt?.accepted === true
+		&& fs.existsSync(path.join(vaultRoot, htmlExport.path));
+	const standaloneGate = {
+		required: args.requireNativeStandalone,
+		passed: !args.requireNativeStandalone || nativeStandalonePassed,
+		reason: args.requireNativeStandalone && !nativeStandalonePassed
+			? `Expected native standalone HTML but actual mode was ${htmlExport?.actualMode || 'unavailable'}`
+			: null,
+	};
 
 	const report = {
 		ok: playwrightChecks.every(check => !check.failed)
@@ -610,7 +640,8 @@ async function main() {
 			&& fs.existsSync(absoluteExportPath)
 			&& ignoredOutputs.length === 0
 			&& !hasLayoutFailures
-			&& (!deckSummary || (!deckSummary.containsKnownStaleText && !deckSummary.containsMissingTheme)),
+			&& (!deckSummary || (!deckSummary.containsKnownStaleText && !deckSummary.containsMissingTheme))
+			&& standaloneGate.passed,
 		source: {
 			vaultRoot,
 			sourcePath: sourceFile.path,
@@ -636,6 +667,9 @@ async function main() {
 				? fs.statSync(absoluteExportPath).size
 				: null,
 		},
+		htmlExport,
+		htmlExportHistory,
+		standaloneGate,
 		deck: deckSummary,
 		playwright: playwrightChecks,
 		playwrightSlides: auditedSlides,

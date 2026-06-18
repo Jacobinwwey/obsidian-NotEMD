@@ -211,6 +211,14 @@ describe('mainline progress audit contract', () => {
         expect(progressDocZh).toContain('retryCount = 4');
         expect(progressDoc).toContain('https://github.com/Jacobinwwey/slidev.git');
         expect(progressDocZh).toContain('https://github.com/Jacobinwwey/slidev.git');
+        expect(progressDoc).toContain('actualMode = "standalone"');
+        expect(progressDocZh).toContain('actualMode = "standalone"');
+        expect(progressDoc).toContain('standaloneGate.passed = true');
+        expect(progressDocZh).toContain('standaloneGate.passed = true');
+        expect(progressDoc).toContain('$n');
+        expect(progressDocZh).toContain('$n');
+        expect(progressDoc).toContain('server-script-fallback');
+        expect(progressDocZh).toContain('server-script-fallback');
         expect(progressDoc).toContain('isolated working copies with sibling support-entry mirroring');
         expect(progressDocZh).toContain('isolated working-copy + sibling support sync');
         expect(progressDoc).toContain('component-heavy custom-slot local `<Transform>` fallback');

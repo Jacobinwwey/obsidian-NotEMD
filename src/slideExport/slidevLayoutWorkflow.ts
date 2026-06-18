@@ -1,7 +1,7 @@
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { dirname, join } from 'path';
 import type { App } from 'obsidian';
-import { exportSlidevHtml } from './slidevExporter';
+import { exportSlidevHtmlWithOutcome } from './slidevExporter';
 import { startLocalServer, stopLocalServer } from './localServer';
 import {
 	analyzeRenderedSlideMeasurement,
@@ -15,7 +15,7 @@ import {
 	type SlidevLayoutAuditSummary,
 } from './slidevLayoutAudit';
 import { getVaultBasePath, resolvePlaywrightBrowsersPath, safeRequire } from './platformUtils';
-import type { ExportProgressCallback, SlideExportConfig, SlidevExportSource } from './types';
+import type { ExportProgressCallback, SlideExportConfig, SlidevExportSource, SlidevHtmlExportOutcome } from './types';
 
 export interface SlidevLayoutCheck {
 	slide: number;
@@ -41,6 +41,8 @@ export interface SlidevLayoutConvergenceOptions {
 
 export interface SlidevLayoutConvergenceResult {
 	exportPath: string;
+	htmlExport: SlidevHtmlExportOutcome;
+	htmlExportHistory: SlidevHtmlExportOutcome[];
 	checks: SlidevLayoutCheck[];
 	auditedSlides: number[];
 	layoutAudits: SlidevLayoutAudit[];
@@ -77,7 +79,9 @@ export async function convergeSlidevDeckLayout(
 		...DEFAULT_LAYOUT_AUDIT_CONFIG,
 		...options.auditConfig,
 	};
-	let exportPath = await exportSlidevHtml(app, source, config, onProgress);
+	let htmlExport = await exportSlidevHtmlWithOutcome(app, source, config, onProgress);
+	const htmlExportHistory = [htmlExport];
+	let exportPath = htmlExport.path;
 	const initialSummary = summarizeLayoutAudits([], 0);
 	const playwright = resolvePlaywrightRuntime();
 	if (!playwright?.chromium) {
@@ -85,6 +89,8 @@ export async function convergeSlidevDeckLayout(
 		onProgress?.('layout-audit', auditSkippedReason);
 		return {
 			exportPath,
+			htmlExport,
+			htmlExportHistory,
 			checks: [],
 			auditedSlides: [],
 			layoutAudits: [],
@@ -136,12 +142,16 @@ export async function convergeSlidevDeckLayout(
 		writeFileSync(absoluteDeckPath, currentDeckMarkdown, 'utf8');
 		retryCount += 1;
 		onProgress?.('layout-audit', `Patched deck on slides ${patchResult.changedSlides.join(', ')} and rebuilding...`);
-		exportPath = await exportSlidevHtml(app, source, config, onProgress);
+		htmlExport = await exportSlidevHtmlWithOutcome(app, source, config, onProgress);
+		htmlExportHistory.push(htmlExport);
+		exportPath = htmlExport.path;
 		currentExportPath = join(vaultRoot, exportPath);
 	}
 
 	return {
 		exportPath,
+		htmlExport,
+		htmlExportHistory,
 		checks,
 		auditedSlides,
 		layoutAudits,

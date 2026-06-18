@@ -14,7 +14,7 @@ The maintained workflow is:
 4. Generated decks receive presentation guardrails before export, and large Mermaid guardrails no longer overwrite a slide that already declares `zoom`.
 5. The local Slidev fork is preferred when present.
 6. HTML output directories are recreated before build to avoid stale assets.
-7. HTML export attempts native standalone first, then falls back to server-script-compatible HTML when the generated standalone bundle misses slide loader bindings.
+7. HTML export attempts native standalone first, records the actual HTML mode, and falls back to server-script-compatible HTML only when native standalone sanity checks find real missing slide loader bindings.
 8. Browser rendering is verified with Playwright across the full deck by default.
 9. When the Playwright runtime is available, `exportSlidesCommand()` and the maintainer verifier both run the same `convergeSlidevDeckLayout()` loop before final `HTML`/`PDF`/`PNG`/`MP4` export.
 
@@ -43,7 +43,7 @@ This path should be openable directly from the filesystem and is the default mod
 npm run verify:slidev-export
 ```
 
-When the native standalone bundle is invalid, NoteMD falls back to the server-script-compatible HTML path instead of shipping a broken `index-standalone.html`.
+When the native standalone bundle is invalid, NoteMD falls back to the server-script-compatible HTML path instead of shipping a broken `index-standalone.html`. Maintainer closure that specifically claims native standalone must use the strict gate, not the compatibility pass.
 
 ### Server-Script HTML
 
@@ -59,6 +59,25 @@ docs/export/<source-basename>-slides/README.md
 ```
 
 Use this mode when a build must be served via localhost instead of opened as a standalone file.
+
+### Strict Native Standalone Gate
+
+Compatibility HTML verification may pass through server-script fallback. Native standalone verification is a stricter claim and must be run with:
+
+```bash
+node scripts/verify-slidev-export-workflow.cjs --json --format html --html-mode standalone --require-native-standalone --source architecture.zh-CN.md
+```
+
+Strict pass conditions add:
+
+1. `htmlExport.actualMode = "standalone"`
+2. `htmlExport.requiresLocalServer = false`
+3. `htmlExport.standaloneAttempt.accepted = true`
+4. `htmlExport.standaloneAttempt.loaderGaps = []`
+5. `standaloneGate.required = true`
+6. `standaloneGate.passed = true`
+
+The gate exists because a compatibility run with `ok: true` can still mean `actualMode = "server-script-fallback"`.
 
 ## Local Fork Resolution
 
@@ -104,7 +123,7 @@ Real maintained baseline as of 2026-06-18:
 4. default HTML verification now audits the full prepared deck, not only representative slides
 5. the real `architecture.zh-CN` deck converges to `28` slides after bounded patching with `overflowCount = 0`
 6. `PDF` and `PNG` verification on the same real source also return `ok: true` after exporting from the same converged deck
-7. the current local Slidev `52.16.0` fork falls back to `index.html` for the real `architecture.zh-CN` HTML export after standalone loader-gap detection, and that fallback path still closes at `ok: true`
+7. the current local Slidev `52.16.0` fork now passes the strict native standalone gate for the real `architecture.zh-CN` HTML export after fixing NoteMD's loader-binding detector to accept minified identifiers such as `$n`; the final real output is `index-standalone.html`, not a fallback-only `index.html`
 8. existing Slidev deck fixtures now go through isolated prepared working copies, so maintainer verification no longer under-audits them as single-slide files or loses sibling `layouts/*.vue`
 
 ## Current Rendered Layout Model
@@ -127,7 +146,7 @@ The current render-feedback loop is now:
    - generic slot-marked layouts, including explicit `::default::`, supported built-in slot layouts, and custom named slots when the slot content is structurally patchable
    - unique component-heavy slot zones through local `<Transform :scale="...">` wrapping when structural splitting is unavailable
    - first-slide deck headmatter content when structural splitting is possible
-6. The HTML exporter now rejects known-bad native standalone bundles and falls back to server-script-compatible HTML.
+6. The HTML exporter now records structured HTML outcomes, rejects known-bad native standalone bundles, preserves rejected native attempts as `index-standalone.failed.html`, and falls back to server-script-compatible HTML only for the compatibility path.
 7. The verifier now audits the full deck by default and keeps retrying within a bounded loop until the rendered deck fits or the retry budget is exhausted.
 
 The clean-room reference from `ref/infinite-canvas` is still the world-rect and viewport-transform idea: nodes have `{ position, width, height }`, the viewport has `{ x, y, k }`, and visible bounds are derived from transform math. For NoteMD export, that becomes an export-layout camera for a fixed Slidev safe rectangle, not an interactive infinite canvas. Because the reference project is AGPL-3.0 and NoteMD is MIT, implementation must be independent.
@@ -153,11 +172,12 @@ Current landed state:
    - slot-marked custom layouts backed by a real custom `layouts/*.vue` file
    - component-heavy custom slot layouts converging through zone-level owner-geometry-based local `<Transform>` wrapping, including same-slide multi-zone cases where more than one overflowing transformable slot can be wrapped in the same pass while slot signals and rendered text hints stay as bounded fallback for attribution ties
    - a dense two-zone custom layout where slot-owned descendants originally clipped under `overflow-hidden` are now measured correctly and converge to `ok: true` without forcing whole-slide zoom
+14. the real `docs/architecture.zh-CN.md` strict native standalone run now closes with `actualMode = "standalone"`, `requiresLocalServer = false`, `loaderGaps = []`, `standaloneGate.passed = true`, `28` audited slides, `overflowCount = 0`, `unreadableCount = 0`, `renderErrorCount = 0`, and `retryCount = 4`.
 
 Current gap:
 
 1. richer custom/component-heavy Slidev layouts beyond the current supported structural set still fall back to conservative zoom/manual-review behavior, especially when multiple competing component-heavy slot zones remain near-tied even after zone-level geometry scoring but not every overflowing zone is safely transformable, or when the owner surface does not expose a stable transform/split target;
-2. standalone export correctness currently depends on native bundle sanity detection plus server-script fallback rather than on a fully reliable standalone bundling strategy of its own;
+2. standalone export now has a strict native gate and the real architecture fixture passes it, but correctness still depends on post-build sanity detection; server-script fallback remains a compatibility lane for future bad bundles, not evidence that native standalone passed;
 3. full-deck Playwright verification is now more correct, but noticeably slower, so future work should improve patch convergence instead of weakening the audit back to representative sampling;
 4. the Obsidian CLI can dispatch `notemd:export-slides`, but it does not expose an export-complete handshake, so host-command smoke is still weaker than the maintainer verifier.
 

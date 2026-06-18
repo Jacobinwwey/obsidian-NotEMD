@@ -30,6 +30,28 @@ export interface EnvironmentReport {
 	capabilities: ExportCapabilities;
 }
 
+export type SlidevHtmlMode = 'standalone' | 'server-script';
+
+export type SlidevHtmlActualMode = 'standalone' | 'server-script' | 'server-script-fallback';
+
+export interface SlidevStandaloneAttempt {
+	attempted: boolean;
+	accepted: boolean;
+	outputPath: string | null;
+	preservedFailurePath: string | null;
+	loaderGaps: string[];
+	failureReason: 'loader-gaps' | null;
+}
+
+export interface SlidevHtmlExportOutcome {
+	path: string;
+	requestedMode: SlidevHtmlMode;
+	actualMode: SlidevHtmlActualMode;
+	requiresLocalServer: boolean;
+	fallbackPath: string | null;
+	standaloneAttempt: SlidevStandaloneAttempt;
+}
+
 export interface SlideExportConfig {
 	format: SlideExportFormat;
 	withClicks: boolean;
@@ -38,7 +60,7 @@ export interface SlideExportConfig {
 	ffmpegCrf: number;
 	slidevTheme: string;
 	timeoutMs: number;
-	htmlMode?: 'standalone' | 'server-script';
+	htmlMode?: SlidevHtmlMode;
 }
 
 export interface SlidevExportSource {

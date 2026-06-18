@@ -1,5 +1,5 @@
 import { probeNode, probePlaywright, probeFfmpeg, probeEnvironment } from '../slideExport/environmentProber';
-import { detectStandaloneBundleLoaderGaps, exportSlidevHtml, exportSlidevPdf, exportSlidevPng } from '../slideExport/slidevExporter';
+import { detectStandaloneBundleLoaderGaps, exportSlidevHtml, exportSlidevHtmlWithOutcome, exportSlidevPdf, exportSlidevPng } from '../slideExport/slidevExporter';
 import { exportVideoMp4 } from '../slideExport/videoExporter';
 import type { SlideExportConfig, SlidevExportSource } from '../slideExport/types';
 import type { TFile, App } from 'obsidian';
@@ -259,6 +259,83 @@ describe('slidevExporter — All Format Combinations', () => {
         );
     });
 
+    test('reports accepted native standalone html outcome', async () => {
+        mockExecFileAsync.mockResolvedValue({ exitCode: 0, stdout: '', stderr: '' });
+        const rmSync = jest.fn();
+        const mkdirSync = jest.fn();
+        mockSafeRequire.mockImplementation((name: string) => name === 'fs' ? { rmSync, mkdirSync } : null);
+        const app = createMockApp();
+        const source = createMockSlidevSource('test', 'test.md');
+        const config: SlideExportConfig = {
+            format: 'html',
+            withClicks: false,
+            outputSubfolder: 'export',
+            ffmpegFps: 1,
+            ffmpegCrf: 23,
+            slidevTheme: 'seriph',
+            timeoutMs: 120000,
+        };
+
+        const outcome = await exportSlidevHtmlWithOutcome(app, source, config, jest.fn());
+
+        expect(outcome).toEqual({
+            path: 'export/test-slides/index-standalone.html',
+            requestedMode: 'standalone',
+            actualMode: 'standalone',
+            requiresLocalServer: false,
+            fallbackPath: null,
+            standaloneAttempt: {
+                attempted: true,
+                accepted: true,
+                outputPath: 'export/test-slides/index-standalone.html',
+                preservedFailurePath: null,
+                loaderGaps: [],
+                failureReason: null,
+            },
+        });
+        expect(mockExecFileAsync).toHaveBeenCalledTimes(1);
+        expect(mockExecFileAsync.mock.calls[0][1]).toEqual(expect.arrayContaining(['--standalone-bundle']));
+    });
+
+    test('reports explicit server-script html outcome without standalone attempt', async () => {
+        mockExecFileAsync.mockResolvedValue({ exitCode: 0, stdout: '', stderr: '' });
+        const rmSync = jest.fn();
+        const mkdirSync = jest.fn();
+        mockSafeRequire.mockImplementation((name: string) => name === 'fs' ? { rmSync, mkdirSync } : null);
+        const app = createMockApp();
+        const source = createMockSlidevSource('test', 'test.md');
+        const config: SlideExportConfig = {
+            format: 'html',
+            withClicks: false,
+            outputSubfolder: 'export',
+            ffmpegFps: 1,
+            ffmpegCrf: 23,
+            slidevTheme: 'default',
+            timeoutMs: 120000,
+            htmlMode: 'server-script',
+        };
+
+        const outcome = await exportSlidevHtmlWithOutcome(app, source, config, jest.fn());
+
+        expect(outcome).toEqual({
+            path: 'export/test-slides/index.html',
+            requestedMode: 'server-script',
+            actualMode: 'server-script',
+            requiresLocalServer: true,
+            fallbackPath: null,
+            standaloneAttempt: {
+                attempted: false,
+                accepted: false,
+                outputPath: null,
+                preservedFailurePath: null,
+                loaderGaps: [],
+                failureReason: null,
+            },
+        });
+        expect(mockExecFileAsync).toHaveBeenCalledTimes(1);
+        expect(mockExecFileAsync.mock.calls[0][1]).not.toEqual(expect.arrayContaining(['--standalone-bundle']));
+    });
+
     test('exports PDF without theme', async () => {
         mockExecFileAsync.mockResolvedValue({ exitCode: 0, stdout: '', stderr: '' });
         const mkdirSync = jest.fn();
@@ -377,6 +454,56 @@ window.__require("./index-abc.js");
             expect.stringContaining('Quick Start')
         );
     });
+
+    test('reports fallback html outcome and preserves rejected standalone bundle', async () => {
+        mockExecFileAsync
+            .mockResolvedValueOnce({ exitCode: 0, stdout: '', stderr: '' })
+            .mockResolvedValueOnce({ exitCode: 0, stdout: '', stderr: '' });
+        const rmSync = jest.fn();
+        const mkdirSync = jest.fn();
+        mockSafeRequire.mockImplementation((name: string) => name === 'fs' ? { rmSync, mkdirSync } : null);
+        const app = createMockApp();
+        const rejectedHtml = `
+window.__require("./index-abc.js");
+{"./index-abc.js":"var Bt=(e,t)=>t;const slides=[{load:Vt,component:Bt(0,Vt)},{load:Ht,component:Bt(1,Ht)}];Ht=async()=>{};"}
+`;
+        app.vault.adapter.read = jest.fn().mockResolvedValue(rejectedHtml);
+        const source = createMockSlidevSource('test', 'test.md');
+        const config: SlideExportConfig = {
+            format: 'html',
+            withClicks: false,
+            outputSubfolder: 'export',
+            ffmpegFps: 1,
+            ffmpegCrf: 23,
+            slidevTheme: 'default',
+            timeoutMs: 120000,
+        };
+
+        const outcome = await exportSlidevHtmlWithOutcome(app, source, config, jest.fn());
+
+        expect(outcome).toEqual({
+            path: 'export/test-slides/index.html',
+            requestedMode: 'standalone',
+            actualMode: 'server-script-fallback',
+            requiresLocalServer: true,
+            fallbackPath: 'export/test-slides/index.html',
+            standaloneAttempt: {
+                attempted: true,
+                accepted: false,
+                outputPath: 'export/test-slides/index-standalone.html',
+                preservedFailurePath: 'export/test-slides/index-standalone.failed.html',
+                loaderGaps: ['Vt'],
+                failureReason: 'loader-gaps',
+            },
+        });
+        expect(mockExecFileAsync).toHaveBeenCalledTimes(2);
+        expect(mockExecFileAsync.mock.calls[0][1]).toEqual(expect.arrayContaining(['--standalone-bundle']));
+        expect(mockExecFileAsync.mock.calls[1][1]).not.toEqual(expect.arrayContaining(['--standalone-bundle']));
+        expect(app.vault.adapter.write).toHaveBeenCalledWith(
+            'export/test-slides/index-standalone.failed.html',
+            rejectedHtml
+        );
+    });
 });
 
 describe('slidevExporter — standalone loader sanity detection', () => {
@@ -392,6 +519,14 @@ window.__require("./index-abc.js");
         const html = `
 window.__require("./index-abc.js");
 {"./index-abc.js":"var Bt=(e,t)=>t,Vt=async()=>{},Ht=async()=>{};const slides=[{load:Vt,component:Bt(0,Vt)},{load:Ht,component:Bt(1,Ht)}];"}
+`;
+        expect(detectStandaloneBundleLoaderGaps(html)).toEqual([]);
+    });
+
+    test('accepts minified loader bindings that start with dollar signs', () => {
+        const html = `
+window.__require("./index-abc.js");
+{"./index-abc.js":"var Bt=(e,t)=>t,$n=async()=>{},er=async()=>{};const slides=[{load:$n,component:Bt(0,$n)},{load:er,component:Bt(1,er)}];"}
 `;
         expect(detectStandaloneBundleLoaderGaps(html)).toEqual([]);
     });

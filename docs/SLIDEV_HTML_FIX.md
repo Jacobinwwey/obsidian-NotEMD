@@ -15,6 +15,14 @@ The current maintainer smoke test uses `standalone` mode by default:
 npm run verify:slidev-export
 ```
 
+Use the strict native standalone gate when the acceptance claim is specifically about `index-standalone.html`:
+
+```bash
+npm run verify:slidev-export -- --format html --html-mode standalone --require-native-standalone --source architecture.zh-CN.md --json
+```
+
+Compatibility HTML verification can still pass through server-script fallback. Strict native standalone requires `htmlExport.actualMode = "standalone"` and `standaloneGate.passed = true`.
+
 ## What The Verification Covers
 
 The maintainer command verifies more than a raw Slidev build:
@@ -25,8 +33,9 @@ The maintainer command verifies more than a raw Slidev build:
 4. The HTML output directory is recreated before build.
 5. The generated deck does not contain stale text from previous outputs.
 6. The generated deck does not select an uninstalled theme.
-7. Playwright opens representative slides from the final standalone HTML.
-8. Generated inspection artifacts are not hidden by `.gitignore`.
+7. Playwright opens the final HTML and audits the full deck by default.
+8. Strict native standalone checks fail if the export falls back to server-script mode.
+9. Generated inspection artifacts are not hidden by `.gitignore`.
 
 ## Manual Verification
 
@@ -41,6 +50,13 @@ Expected key report fields:
 ```json
 {
   "ok": true,
+  "htmlExport": {
+    "actualMode": "standalone",
+    "requiresLocalServer": false
+  },
+  "standaloneGate": {
+    "passed": true
+  },
   "slideSource": {
     "skillReferenceCount": 52
   },

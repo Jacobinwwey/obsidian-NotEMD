@@ -6,7 +6,7 @@
  */
 
 import type { App } from 'obsidian';
-import type { SlideExportConfig, ExecResult, ExportProgressCallback, SlidevExportSource } from './types';
+import type { SlideExportConfig, ExecResult, ExportProgressCallback, SlidevExportSource, SlidevHtmlActualMode, SlidevHtmlExportOutcome } from './types';
 import { execFileAsync, getVaultBasePath, resolveNpxCommand, resolvePlaywrightBrowsersPath, resolveSlidevCommand, safeRequire } from './platformUtils';
 
 function createBuildArgs(
@@ -40,6 +40,15 @@ function recreateDirectory(directoryPath: string): void {
 	fs?.mkdirSync?.(directoryPath, { recursive: true });
 }
 
+function escapeRegExp(value: string): string {
+	return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function hasStandaloneLoaderBinding(entryModuleCode: string, loaderRef: string): boolean {
+	const escapedLoaderRef = escapeRegExp(loaderRef);
+	return new RegExp(`(^|[^A-Za-z0-9_$])${escapedLoaderRef}\\s*=`).test(entryModuleCode);
+}
+
 export function detectStandaloneBundleLoaderGaps(html: string): string[] {
 	const entryRefMatch = html.match(/window\.__require\(['"](\.\/index-[^'"]+\.js)['"]\)/);
 	if (!entryRefMatch) {
@@ -47,7 +56,7 @@ export function detectStandaloneBundleLoaderGaps(html: string): string[] {
 	}
 
 	const entryModulePath = entryRefMatch[1];
-	const escapedEntryModulePath = entryModulePath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+	const escapedEntryModulePath = escapeRegExp(entryModulePath);
 	const entryModuleMatch = html.match(new RegExp(`"${escapedEntryModulePath}":"((?:\\\\.|[^"])*)"`));
 	if (!entryModuleMatch) {
 		return [];
@@ -66,7 +75,7 @@ export function detectStandaloneBundleLoaderGaps(html: string): string[] {
 	}
 
 	const uniqueRefs = Array.from(new Set(loaderRefs));
-	return uniqueRefs.filter(ref => !new RegExp(`\\b${ref}\\s*=`).test(entryModuleCode));
+	return uniqueRefs.filter(ref => !hasStandaloneLoaderBinding(entryModuleCode, ref));
 }
 
 /**
@@ -78,8 +87,17 @@ export async function exportSlidevHtml(
 	config: SlideExportConfig,
 	onProgress?: ExportProgressCallback,
 ): Promise<string> {
+	return (await exportSlidevHtmlWithOutcome(app, source, config, onProgress)).path;
+}
+
+export async function exportSlidevHtmlWithOutcome(
+	app: App,
+	source: SlidevExportSource,
+	config: SlideExportConfig,
+	onProgress?: ExportProgressCallback,
+): Promise<SlidevHtmlExportOutcome> {
 	if ((config.htmlMode ?? 'standalone') === 'server-script') {
-		return exportSlidevServerHtml(app, source, config, onProgress);
+		return exportSlidevServerHtml(app, source, config, 'server-script', onProgress);
 	}
 	return exportSlidevStandaloneHtml(app, source, config, onProgress);
 }
@@ -89,7 +107,7 @@ async function exportSlidevStandaloneHtml(
 	source: SlidevExportSource,
 	config: SlideExportConfig,
 	onProgress?: ExportProgressCallback,
-): Promise<string> {
+): Promise<SlidevHtmlExportOutcome> {
 	onProgress?.('slidev-build', 'Building standalone Slidev HTML...');
 	const vaultRoot = getVaultBasePath(app);
 	if (!vaultRoot) throw new Error('Vault root path unavailable');
@@ -113,19 +131,50 @@ async function exportSlidevStandaloneHtml(
 	const loaderGaps = detectStandaloneBundleLoaderGaps(standaloneHtml);
 	if (loaderGaps.length === 0) {
 		onProgress?.('slidev-build', `Standalone HTML created via ${slidev.description}`);
-		return standaloneHtmlPath;
+		return {
+			path: standaloneHtmlPath,
+			requestedMode: 'standalone',
+			actualMode: 'standalone',
+			requiresLocalServer: false,
+			fallbackPath: null,
+			standaloneAttempt: {
+				attempted: true,
+				accepted: true,
+				outputPath: standaloneHtmlPath,
+				preservedFailurePath: null,
+				loaderGaps: [],
+				failureReason: null,
+			},
+		};
 	}
 
 	onProgress?.('slidev-build', `Standalone bundle missed loader bindings (${loaderGaps.join(', ')}); falling back to server-script HTML...`);
-	return exportSlidevServerHtml(app, source, config, onProgress);
+	const fallbackOutcome = await exportSlidevServerHtml(app, source, config, 'server-script-fallback', onProgress);
+	const preservedFailurePath = `${config.outputSubfolder}/${source.outputBasename}-slides/index-standalone.failed.html`;
+	await app.vault.adapter.write(preservedFailurePath, standaloneHtml);
+	onProgress?.('slidev-build', `Preserved rejected standalone bundle at ${preservedFailurePath}`);
+	return {
+		...fallbackOutcome,
+		requestedMode: 'standalone',
+		fallbackPath: fallbackOutcome.path,
+		standaloneAttempt: {
+			attempted: true,
+			accepted: false,
+			outputPath: standaloneHtmlPath,
+			preservedFailurePath,
+			loaderGaps,
+			failureReason: 'loader-gaps',
+		},
+	};
 }
 
 async function exportSlidevServerHtml(
 	app: App,
 	source: SlidevExportSource,
 	config: SlideExportConfig,
+	actualMode: SlidevHtmlActualMode,
 	onProgress?: ExportProgressCallback,
-): Promise<string> {
+): Promise<SlidevHtmlExportOutcome> {
 	onProgress?.('slidev-build', 'Building Slidev SPA...');
 	const vaultRoot = getVaultBasePath(app);
 	if (!vaultRoot) throw new Error('Vault root path unavailable');
@@ -151,7 +200,21 @@ async function exportSlidevServerHtml(
 	await createServerScripts(app, exportPath);
 
 	onProgress?.('slidev-build', `HTML build complete via ${slidev.description} (requires local server)`);
-	return exportPath;
+	return {
+		path: exportPath,
+		requestedMode: config.htmlMode ?? 'standalone',
+		actualMode,
+		requiresLocalServer: true,
+		fallbackPath: actualMode === 'server-script-fallback' ? exportPath : null,
+		standaloneAttempt: {
+			attempted: false,
+			accepted: false,
+			outputPath: null,
+			preservedFailurePath: null,
+			loaderGaps: [],
+			failureReason: null,
+		},
+	};
 }
 
 /**
