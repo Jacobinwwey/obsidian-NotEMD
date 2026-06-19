@@ -627,6 +627,33 @@ Next direction:
 6. any upstream Slidev skill PR should stay generic: full references, built-in/configured theme preference, closed frontmatter, readable transforms for large diagrams/tables/code, and browser-sampled build verification. NoteMD vault paths, local fork paths, layout audit internals, and the `architecture.zh-CN.md` fixture should remain project-local.
 7. standalone acceptance should now be treated as a tracked maintainer evidence package, not as an implicit chat summary: if the strict report or archived output path changes, update `docs/maintainer/slidev-standalone-acceptance-2026-06-18.*` or create a new dated acceptance file in the same shape.
 
+### Batch G: gate GitHub Pages language and GEO output
+
+Priority: `P0/P1`
+
+Background:
+
+1. the 2026-06-17 Pages pass fixed missing root pages, stale language claims, sitemap filtering, and `llms.txt`, but it still relied mostly on source review plus `npm run build`;
+2. the real generated zh-CN homepage still exposed `/obsidian-NotEMD/zh-CN/docs/intro`, `/zh-CN/docs/getting-started/quick-start`, `/zh-CN/docs/providers/overview`, and `/zh-CN/docs/pillar-ai-knowledge` as user-facing links even though those pages are untranslated fallback docs;
+3. that means crawler protection was better than user-facing language truth: `noindex,follow` and sitemap filtering cannot compensate for a Chinese homepage that routes users into English fallback pages.
+
+Current landed status:
+
+1. `website/src/lib/publishedLanguageScope.js` now owns the published zh-CN doc scope: currently only `faq`;
+2. `website/docusaurus.config.js` consumes that scope for sitemap filtering and uses canonical English URLs for the navbar/footer docs entry where untranslated zh-CN docs must not be implied;
+3. `website/src/theme/DocItem/Layout/index.js` consumes the same scope for fallback-doc `noindex,follow`;
+4. `website/src/pages/index.js` consumes the same scope so zh-CN homepage links FAQ to `/zh-CN/docs/faq` and routes untranslated critical docs to canonical English URLs;
+5. `website/scripts/audit-build.cjs` now audits the built output for root pages, canonical/WebPage JSON-LD URLs, zh-CN homepage route truth, noindex fallback behavior, sitemap language scope, and `llms.txt` language markers;
+6. `website/package.json` exposes `npm run audit:build`, and `.github/workflows/deploy-docs.yml` runs it after `npm run build` before uploading the Pages artifact;
+7. `docs/maintainer/github-pages-language-geo-workflow.*`, `website/README.md`, and `GEO_ROADMAP.md` now describe the deploy gate and the promotion rule for future zh-CN translations.
+
+Next direction:
+
+1. do not add locales as GEO surface area until the critical path is translated and reviewed;
+2. promote future zh-CN docs by updating the translation and `publishedLanguageScope.js` in the same batch, then running `npm --prefix website run build && npm --prefix website run audit:build`;
+3. after the route/language gate stays stable, add a provider-page quality audit for thin pages; this is a content-depth problem, not a locale-routing problem;
+4. keep `website/build` and generated Slidev export artifacts out of source commits.
+
 ## 6. Documentation Sync Rule
 
 Any future change that updates the provider-settings/model-discovery lane must re-check, at minimum:
@@ -650,6 +677,18 @@ Any future change that updates the Slidev export lane must re-check, at minimum:
 8. `src/ui/NotemdSidebarView.ts`
 9. `package.json`
 
+Any future change that updates the GitHub Pages / GEO / website language lane must re-check, at minimum:
+
+1. `GEO_ROADMAP.md`
+2. `website/README.md`
+3. `website/docusaurus.config.js`
+4. `website/src/lib/publishedLanguageScope.js`
+5. `website/src/pages/index.js`
+6. `website/src/theme/DocItem/Layout/index.js`
+7. `website/static/llms.txt`
+8. `website/scripts/audit-build.cjs`
+9. `.github/workflows/deploy-docs.yml`
+
 ## 7. Verification Gate
 
 Any update that changes the truth claims in this document should still finish with:
@@ -668,6 +707,11 @@ If the update touches Slidev export, also run:
 
 After the rendered-layout gate lands, Slidev export closure must also include a non-empty layout-audit report for `docs/architecture.zh-CN.md` with zero `overflow` and zero `unreadable-scale` findings.
 
+If the update touches GitHub Pages / GEO / website language scope, also run:
+
+1. `npm --prefix website run build`
+2. `npm --prefix website run audit:build`
+
 ## 8. Bottom Line
 
 Current `main` no longer needs another “did the provider settings lane really land?” argument.
@@ -679,4 +723,5 @@ The real current questions are now:
 3. can Stage-C local-KB / file-selection / chapter-split work deepen mixed-corpus quality evidence instead of relitigating feature existence;
 4. can the widened bounded provider discovery surface remain shared-core, lightweight, and honest as a maintenance lane rather than becoming the excuse for broader architectural claims;
 5. can Slidev export keep using a real UI-equivalent workflow proof and add rendered-layout quality gates instead of regressing to “the CLI can build, so the buttons must work” as weak evidence;
-6. can current truth documents keep tracking the real shipped branch boundary quickly enough that future sessions do not regress back to `1.9.0/1.9.1`-era wording.
+6. can GitHub Pages keep route, sitemap, canonical, `llms.txt`, and visible language entry points aligned through a build-output gate instead of source-only review;
+7. can current truth documents keep tracking the real shipped branch boundary quickly enough that future sessions do not regress back to `1.9.0/1.9.1`-era wording.

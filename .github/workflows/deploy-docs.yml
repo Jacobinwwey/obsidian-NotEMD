@@ -41,6 +41,9 @@ jobs:
         env:
           NODE_ENV: production
 
+      - name: Audit website build
+        run: npm run audit:build
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

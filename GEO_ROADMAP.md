@@ -1,15 +1,15 @@
 # NotEMD GEO Roadmap
 
 **Created:** 2026-06-12
-**Updated:** 2026-06-17
-**Status:** Phase 1-3 shipped; Phase 4 GitHub Pages reliability, language truth, and AI retrieval entry point complete in this batch.
+**Updated:** 2026-06-19
+**Status:** Phase 1-3 shipped; Phase 4 GitHub Pages reliability, language truth, AI retrieval entry point, and build-output gate complete in this batch.
 **Scope:** Post-deployment GEO optimization for AI search engine visibility, documentation truth, and GitHub Pages reliability.
 
 ---
 
 ## Current Truth Snapshot
 
-The website is a Docusaurus site under `website/`, deployed by `.github/workflows/deploy-docs.yml` on pushes to `main` that touch `website/**` or the workflow file. The workflow already uses `npm ci` and `npm run build` from the `website` working directory.
+The website is a Docusaurus site under `website/`, deployed by `.github/workflows/deploy-docs.yml` on pushes to `main` that touch `website/**` or the workflow file. The workflow uses `npm ci`, `npm run build`, and `npm run audit:build` from the `website` working directory before uploading the Pages artifact.
 
 The current public language surface is deliberately narrow:
 
@@ -19,6 +19,28 @@ The current public language surface is deliberately narrow:
 | Simplified Chinese | Localized homepage plus localized FAQ | Partial locale; untranslated doc fallbacks are noindex and excluded from sitemap |
 | Other locales | Not published | Do not add empty locale folders to `i18n.locales` |
 | Plugin UI i18n | Separate runtime feature | Do not confuse runtime UI language support with website documentation coverage |
+
+## 2026-06-19 Pages / Language Gate Follow-Up
+
+### Findings
+
+| Finding | Evidence | Impact |
+|---|---|---|
+| zh-CN homepage still linked untranslated fallback docs | Built `website/build/zh-CN/index.html` contained `/obsidian-NotEMD/zh-CN/docs/intro`, `/zh-CN/docs/getting-started/quick-start`, `/zh-CN/docs/providers/overview`, and `/zh-CN/docs/pillar-ai-knowledge` | Users could still enter English fallback pages through the Chinese homepage even though crawlers were protected by noindex/sitemap filtering |
+| Navbar/footer docs link localized into fallback docs | Docusaurus `docSidebar` / `to` links produced zh-CN docs routes for untranslated pages | UI language truth diverged from crawler truth |
+| Published zh-CN scope was duplicated | FAQ exception lived separately in sitemap filtering, DocItem noindex logic, and homepage links | Future translation promotion could easily update one surface and miss another |
+| Deploy workflow lacked a build-output audit | `.github/workflows/deploy-docs.yml` ran `npm run build` only | GitHub Pages could publish route drift that source review did not catch |
+
+### Fixes Landed In This Follow-Up
+
+| Fix | Files | Result |
+|---|---|---|
+| Add shared published-language scope | `website/src/lib/publishedLanguageScope.js` | zh-CN published ids/paths have one owner |
+| Route zh-CN homepage untranslated docs to canonical English URLs | `website/src/pages/index.js` | zh-CN homepage keeps FAQ localized and sends other critical doc links to English canonical pages |
+| Keep sitemap and noindex on the same rule | `website/docusaurus.config.js`, `website/src/theme/DocItem/Layout/index.js` | Sitemap filtering and fallback robots metadata consume the same published scope |
+| Add built-output audit | `website/scripts/audit-build.cjs`, `website/package.json` | `npm run audit:build` checks real generated pages, sitemaps, and `llms.txt` |
+| Gate GitHub Pages deploy | `.github/workflows/deploy-docs.yml` | Pages upload is blocked unless build output satisfies the language/GEO contract |
+| Record maintainer workflow | `docs/maintainer/github-pages-language-geo-workflow.*` | Future locale promotion has a concrete owner and command path |
 
 ## 2026-06-17 Pages / GEO Audit
 
@@ -113,8 +135,10 @@ Phase 4 exists because the previous roadmap optimized schema/content while leavi
 | Root broken markdown links removed | Fixed | No `/obsidian-NotEMD/` root broken-link warning in `npm run build` |
 | Published language policy matches code | Fixed | README + roadmap state `en` plus partial `zh-CN` |
 | Untranslated zh-CN fallback docs fenced | Fixed | zh-CN sitemap keeps only root + FAQ; fallback docs emit `noindex,follow` |
+| zh-CN homepage does not route users into fallback docs | Fixed | `npm run audit:build` rejects `/zh-CN/docs/intro`, quick-start, provider overview, and pillar fallback links |
+| GitHub Pages deploy has built-output language/GEO gate | Fixed | `.github/workflows/deploy-docs.yml` runs `npm run audit:build` after build |
 | AI retrieval entry point exists | Fixed | `website/build/llms.txt` |
-| Test files excluded from this commit | Required | Commit file list must not include `src/tests/**` |
+| Generated outputs excluded from source commit | Required | `website/build` and Slidev export artifacts remain ignored/uncommitted |
 
 ## Better GEO Strategy
 
@@ -125,7 +149,8 @@ The next effective GEO strategy is truth-first and route-first, not locale-volum
 3. **Use `llms.txt` as the compact answer-engine map.** It should point to canonical docs, explain language scope, and discourage answers based on generated exports or stale issue text.
 4. **Keep schema accurate before making it richer.** Person, Organization, WebPage, TechArticle, FAQPage, citations, and concepts are useful only if URLs resolve and claims match source pages.
 5. **Consolidate thin provider pages before adding more.** Stub-like provider pages dilute crawl quality; expand them with real setup, request semantics, and troubleshooting or merge them into stronger overview pages.
-6. **Measure after deploy, then tune.** Re-run Google indexing checks and AI visibility tests only after the fixed Pages build is deployed.
+6. **Gate the built output, not only the source.** `npm run audit:build` must pass before Pages upload because Docusaurus locale behavior can change the final route graph.
+7. **Measure after deploy, then tune.** Re-run Google indexing checks and AI visibility tests only after the fixed Pages build is deployed.
 
 ### Critical Path Translation Plan
 
@@ -151,19 +176,21 @@ Until this set is translated, zh-CN should stay explicitly partial.
 | GitHub Pages root route missing | Fixed | Root homepage now exists for default and zh-CN locale |
 | Docusaurus v4 markdown config breakage | Fixed | Broken markdown hook moved under `markdown.hooks` |
 | Untranslated zh-CN fallback docs dilute language quality | Controlled | Exclude fallback docs from sitemap and emit `noindex,follow` until translated |
+| zh-CN UI links users into fallback docs | Controlled | Homepage, navbar, and footer docs entry points now route untranslated critical docs to canonical English URLs; audit blocks regressions |
 | Thin provider pages dilute crawl budget | Open | Expand or consolidate provider pages before adding more |
 | Mermaid bundle size on non-diagram pages | Accepted | Docusaurus/theme tradeoff; not the current GEO blocker |
-| Hand-maintained `llms.txt` can drift | Open | Update it when canonical docs, language status, or provider docs change |
-| Test or generated export files accidentally entering main | Controlled in this batch | Stage production/docs files only; leave tests and generated exports out of the commit |
+| Hand-maintained `llms.txt` can drift | Controlled | `npm run audit:build` checks the language-scope markers; update content when canonical docs, language status, or provider docs change |
+| Test or generated export files accidentally entering main | Controlled in this batch | Stage production/docs/test contract files only; leave generated exports out of the commit |
 
 ## Success Metrics
 
 | Timeframe | Metric | Target | Current |
 |-----------|--------|--------|---------|
-| Immediate | Docusaurus build | No root broken-link or deprecated markdown-hook warnings | Verified 2026-06-17 |
-| Immediate | Root pages | `index.html` and `zh-CN/index.html` exist | Verified 2026-06-17 |
-| Immediate | zh-CN fallback fence | Sitemap excludes untranslated docs; fallback docs noindex | Verified 2026-06-17 |
-| Immediate | AI retrieval map | `llms.txt` exists in build output | Verified 2026-06-17 |
+| Immediate | Docusaurus build | No root broken-link or deprecated markdown-hook warnings | Verified 2026-06-19 |
+| Immediate | Root pages | `index.html` and `zh-CN/index.html` exist | Verified 2026-06-19 |
+| Immediate | zh-CN fallback fence | Sitemap excludes untranslated docs; fallback docs noindex | Verified 2026-06-19 by `npm run audit:build` |
+| Immediate | zh-CN homepage language routes | Untranslated critical docs route to canonical English URLs; FAQ stays localized | Verified 2026-06-19 by `npm run audit:build` |
+| Immediate | AI retrieval map | `llms.txt` exists in build output and records language scope | Verified 2026-06-19 by `npm run audit:build` |
 | 2 weeks post-deploy | Docusaurus site indexed | Google `site:` returns results | Unknown |
 | 2 weeks post-deploy | First AI citation | 1+ ChatGPT/Perplexity/GLM mention | 0 baseline |
 | 1 month post-deploy | Citation rate | 5-10% for core keywords | 0 baseline |
@@ -189,7 +216,7 @@ Until this set is translated, zh-CN should stay explicitly partial.
 
 | Date | Action |
 |------|--------|
-| 2026-06-17 | Verify fixed website build, root pages, zh-CN root, and `llms.txt` output |
+| 2026-06-19 | Verify fixed website build, root pages, zh-CN root, canonical English fallback routing, zh-CN sitemap/noindex fence, and `llms.txt` output through `npm run audit:build` |
 | After deploy | Submit sitemap and inspect canonical root/locale root in Search Console |
 | 2026-07-01 | Retest GLM baseline in EN + ZH after the fixed Pages deployment |
 | 2026-08-01 | Second retest. If citations remain 0, audit indexed pages and provider-page thinness |

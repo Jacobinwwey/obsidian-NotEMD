@@ -22,6 +22,12 @@ describe('mainline progress audit contract', () => {
     const matrixDocZh = readDoc('docs/brainstorms/2026-05-20-unified-follow-through-matrix.zh-CN.md');
     const standaloneAcceptanceDoc = readDoc('docs/maintainer/slidev-standalone-acceptance-2026-06-18.md');
     const standaloneAcceptanceDocZh = readDoc('docs/maintainer/slidev-standalone-acceptance-2026-06-18.zh-CN.md');
+    const pagesLanguageGeoWorkflowDoc = readDoc('docs/maintainer/github-pages-language-geo-workflow.md');
+    const pagesLanguageGeoWorkflowDocZh = readDoc('docs/maintainer/github-pages-language-geo-workflow.zh-CN.md');
+    const docsReadme = readDoc('docs/README.md');
+    const docsReadmeZh = readDoc('docs/README.zh-CN.md');
+    const websiteReadme = readDoc('website/README.md');
+    const geoRoadmap = readDoc('GEO_ROADMAP.md');
 
     test('records the current Stage-B2/C/D baseline and fixture anchor in both canonical progress docs', () => {
         expect(progressDoc).toContain('### 2.7 Current `890b21b` Stage-B2/C/D follow-through baseline');
@@ -266,5 +272,36 @@ describe('mainline progress audit contract', () => {
 
         expect(standaloneAcceptanceDoc).toContain('Do not commit test/generated output to main');
         expect(standaloneAcceptanceDocZh).toContain('测试/生成输出不要提交到 main');
+    });
+
+    test('locks the GitHub Pages language and GEO build-output gate', () => {
+        for (const content of [pagesLanguageGeoWorkflowDoc, pagesLanguageGeoWorkflowDocZh]) {
+            expect(content).toContain('website/scripts/audit-build.cjs');
+            expect(content).toContain('website/src/lib/publishedLanguageScope.js');
+            expect(content).toContain('npm run audit:build');
+            expect(content).toContain('noindex,follow');
+            expect(content).toContain('llms.txt');
+            expect(content).toContain('/zh-CN/docs/faq');
+            expect(content).toContain('canonical');
+            expect(content).toContain('autoAddBaseUrl: false');
+            expect(content).toContain('data-noBrokenLinkCheck');
+        }
+
+        expect(docsReadme).toContain('GitHub Pages Language And GEO Workflow');
+        expect(docsReadmeZh).toContain('GitHub Pages 语言与 GEO 工作流');
+
+        for (const content of [progressDoc, progressDocZh, websiteReadme, geoRoadmap]) {
+            expect(content).toContain('website/scripts/audit-build.cjs');
+            expect(content).toContain('website/src/lib/publishedLanguageScope.js');
+            expect(content).toContain('npm run audit:build');
+            expect(content).toContain('noindex,follow');
+            expect(content).toContain('llms.txt');
+        }
+
+        expect(progressDoc).toContain('build-output gate');
+        expect(progressDocZh).toContain('build-output gate');
+        expect(websiteReadme).toContain('zh-CN homepage sends untranslated docs to canonical English URLs');
+        expect(geoRoadmap).toContain('zh-CN homepage does not route users into fallback docs');
+        expect(geoRoadmap).toContain('.github/workflows/deploy-docs.yml');
     });
 });

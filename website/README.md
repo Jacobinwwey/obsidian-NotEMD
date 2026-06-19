@@ -23,13 +23,23 @@ This starts a local development server at `http://localhost:3000`.
 
 ```bash
 npm run build
+npm run audit:build
 ```
 
-Generates static content into the `build` directory.
+Generates static content into the `build` directory, then audits the built Pages output.
+
+The audit checks the public contract that source review cannot prove by itself:
+
+- root and zh-CN root pages exist;
+- canonical and JSON-LD URLs match GitHub Pages routes;
+- zh-CN homepage sends untranslated docs to canonical English URLs;
+- zh-CN FAQ remains published under the zh-CN route;
+- untranslated zh-CN fallback docs are `noindex,follow` and excluded from the zh-CN sitemap;
+- `llms.txt` still states the real language boundary.
 
 ## Deployment
 
-The site auto-deploys to GitHub Pages on push to `main` branch (via `.github/workflows/deploy-docs.yml`).
+The site auto-deploys to GitHub Pages on push to `main` branch (via `.github/workflows/deploy-docs.yml`). The deployment workflow runs both `npm run build` and `npm run audit:build` before uploading the Pages artifact.
 
 **Live URL**: https://jacobinwwey.github.io/obsidian-NotEMD/
 
@@ -59,7 +69,12 @@ The site auto-deploys to GitHub Pages on push to `main` branch (via `.github/wor
 - Lists canonical docs, provider/runtime topics, and the current language coverage boundary
 - Keeps GEO strategy focused on verified source pages instead of empty locale expansion
 
-### 6. FAQ with FAQPage Schema
+### 6. Build Output Language Gate
+- `website/scripts/audit-build.cjs`: blocks Pages deployment when build output violates the published language scope
+- `website/src/lib/publishedLanguageScope.js`: single source for published zh-CN doc ids and paths
+- Keeps sitemap filtering, fallback `noindex,follow`, and homepage routing aligned
+
+### 7. FAQ with FAQPage Schema
 - `docs/faq.mdx`: 12 Q&A pairs
 - Simplified Chinese translation: `i18n/zh-CN/docusaurus-plugin-content-docs/current/faq.mdx`
 - 43% of AI citations come from FAQ content (BrightEdge data)
@@ -73,6 +88,8 @@ website/
 ├── static/
 │   ├── llms.txt                # AI crawler / answer-engine entry point
 │   └── img/
+├── scripts/
+│   └── audit-build.cjs         # Built-output Pages language/GEO gate
 ├── docs/                       # English docs
 │   ├── intro.mdx
 │   ├── faq.mdx
@@ -85,6 +102,8 @@ website/
 ├── src/
 │   ├── pages/
 │   │   └── index.js           # Locale-aware root homepage
+│   ├── lib/
+│   │   └── publishedLanguageScope.js
 │   ├── components/
 │   │   └── TLDR/              # TLDR component
 │   ├── theme/
@@ -124,7 +143,14 @@ citations:                       # Adds Schema.org "citation"
 
 Do not add a locale to `i18n.locales` just because a translation folder exists. Docusaurus publishes fallback English docs under a locale path when docs are untranslated, which creates weak hreflang signals for search and AI crawlers.
 
-Current zh-CN policy: the localized homepage and FAQ are published, while untranslated zh-CN doc fallbacks are excluded from sitemap output and marked `noindex,follow` by the swizzled doc layout. A locale should only become fully indexable after the critical path pages are translated and reviewed.
+Current zh-CN policy: the localized homepage and FAQ are published, while untranslated zh-CN doc fallbacks are excluded from sitemap output and marked `noindex,follow` by the swizzled doc layout. The zh-CN homepage must link untranslated docs to canonical English URLs, not to zh-CN fallback routes. A locale should only become fully indexable after the critical path pages are translated and reviewed.
+
+When promoting a zh-CN doc from fallback to published content, update `website/src/lib/publishedLanguageScope.js` in the same change as the translation and rerun:
+
+```bash
+npm run build
+npm run audit:build
+```
 
 ## License
 

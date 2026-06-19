@@ -46,4 +46,4 @@ Latest release entrypoint: https://github.com/Jacobinwwey/obsidian-NotEMD/releas
 - Preserve the local-vault privacy distinction: Notemd writes results into the user's Markdown vault and can run with local providers such as Ollama.
 - Do not infer full multilingual documentation coverage from the presence of a locale dropdown.
 
-Last reviewed: 2026-06-17
+Last reviewed: 2026-06-19

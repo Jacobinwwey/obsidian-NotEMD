@@ -4,6 +4,7 @@ import Head from '@docusaurus/Head';
 import Layout from '@theme/Layout';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import useBaseUrl from '@docusaurus/useBaseUrl';
+import {isPublishedZhCnDocPath} from '../lib/publishedLanguageScope';
 import styles from './index.module.css';
 
 const copyByLocale = {
@@ -40,8 +41,8 @@ const copyByLocale = {
     eyebrow: 'Obsidian 插件文档',
     heading: 'Notemd',
     lead: '把笔记处理成可积累的知识资产：wiki 链接、概念笔记、研究总结、翻译、图表，以及可复用的一键工作流。',
-    primary: '阅读文档',
-    secondary: '快速开始',
+    primary: '阅读英文文档',
+    secondary: '英文快速开始',
     faq: '常见问题',
     sections: [
       {
@@ -68,6 +69,19 @@ export default function Home() {
   const logoSrc = useBaseUrl('img/logo.svg');
   const copy = copyByLocale[i18n.currentLocale] || copyByLocale.en;
   const pageUrl = new URL(siteConfig.baseUrl, siteConfig.url).toString();
+  const canonicalBasePath = siteConfig.customFields?.canonicalBasePath || siteConfig.baseUrl;
+  const englishDocHref = (docPath) => `${canonicalBasePath}${docPath.replace(/^\//, '')}`;
+  const docLinkProps = (docPath) => {
+    if (i18n.currentLocale === 'zh-CN' && !isPublishedZhCnDocPath(docPath)) {
+      return {
+        href: englishDocHref(docPath),
+        autoAddBaseUrl: false,
+        'data-noBrokenLinkCheck': true,
+      };
+    }
+
+    return {to: docPath};
+  };
 
   return (
     <Layout title={copy.title} description={copy.description}>
@@ -90,13 +104,16 @@ export default function Home() {
             <h1>{copy.heading}</h1>
             <p className={styles.lead}>{copy.lead}</p>
             <div className={styles.actions}>
-              <Link className="button button--primary button--lg" to="/docs/intro">
+              <Link className="button button--primary button--lg" {...docLinkProps('/docs/intro')}>
                 {copy.primary}
               </Link>
-              <Link className="button button--secondary button--lg" to="/docs/getting-started/quick-start">
+              <Link
+                className="button button--secondary button--lg"
+                {...docLinkProps('/docs/getting-started/quick-start')}
+              >
                 {copy.secondary}
               </Link>
-              <Link className="button button--outline button--lg" to="/docs/faq">
+              <Link className="button button--outline button--lg" {...docLinkProps('/docs/faq')}>
                 {copy.faq}
               </Link>
             </div>
@@ -105,7 +122,7 @@ export default function Home() {
         </section>
         <section className={styles.sectionGrid} aria-label={copy.primary}>
           {copy.sections.map((section) => (
-            <Link className={styles.sectionCard} key={section.href} to={section.href}>
+            <Link className={styles.sectionCard} key={section.href} {...docLinkProps(section.href)}>
               <h2>{section.title}</h2>
               <p>{section.body}</p>
             </Link>

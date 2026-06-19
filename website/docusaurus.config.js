@@ -5,20 +5,21 @@
 // See: https://docusaurus.io/docs/api/docusaurus-config
 
 import {themes as prismThemes} from 'prism-react-renderer';
+import {publishedZhCnDocPaths} from './src/lib/publishedLanguageScope.js';
 
 const siteUrl = 'https://jacobinwwey.github.io';
 const baseUrl = '/obsidian-NotEMD/';
 const siteBaseUrl = `${siteUrl}${baseUrl}`;
 const personId = `${siteBaseUrl}#person-jacobinwwey`;
 const logoUrl = `${siteBaseUrl}img/logo.svg`;
-const translatedZhCnDocUrls = new Set([
-  `${siteBaseUrl}zh-CN/docs/faq`,
-]);
+const publishedZhCnDocUrls = new Set(
+  Array.from(publishedZhCnDocPaths, (docPath) => `${siteBaseUrl}zh-CN${docPath}`),
+);
 
 function sitemapItemMatchesPublishedLanguageScope(item) {
   const itemUrl = item.url.replace(/\/$/, '');
   const zhCnDocsPrefix = `${siteBaseUrl}zh-CN/docs/`;
-  return !itemUrl.startsWith(zhCnDocsPrefix) || translatedZhCnDocUrls.has(itemUrl);
+  return !itemUrl.startsWith(zhCnDocsPrefix) || publishedZhCnDocUrls.has(itemUrl);
 }
 
 /** @type {import('@docusaurus/types').Config} */
@@ -36,6 +37,9 @@ const config = {
   // GitHub pages deployment config.
   organizationName: 'Jacobinwwey',
   projectName: 'obsidian-NotEMD',
+  customFields: {
+    canonicalBasePath: baseUrl,
+  },
 
   onBrokenLinks: 'warn',
   // Global JSON-LD Schema for entire site
@@ -170,10 +174,11 @@ const config = {
         },
         items: [
           {
-            type: 'docSidebar',
-            sidebarId: 'tutorialSidebar',
+            href: `${baseUrl}docs/intro`,
             position: 'left',
             label: 'Docs',
+            autoAddBaseUrl: false,
+            'data-noBrokenLinkCheck': true,
           },
           {
             to: '/docs/faq',
@@ -199,7 +204,9 @@ const config = {
             items: [
               {
                 label: 'Getting Started',
-                to: '/docs/intro',
+                href: `${baseUrl}docs/intro`,
+                autoAddBaseUrl: false,
+                'data-noBrokenLinkCheck': true,
               },
               {
                 label: 'FAQ',

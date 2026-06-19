@@ -7,6 +7,7 @@ This directory contains repository-level documentation for maintainers and contr
 ## User And Maintainer Entry Points
 
 - [Language Hub](./i18n/README.md)
+- [GitHub Pages Language And GEO Workflow](./maintainer/github-pages-language-geo-workflow.md)
 - [Chapter Split + TOC Extraction](./chapter-split-toc.md)
 - [Release Workflow](./maintainer/release-workflow.md)
 - [Release Notes 1.8.2](./releases/1.8.2.md)

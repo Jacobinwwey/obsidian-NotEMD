@@ -3,6 +3,7 @@ import Layout from '@theme-original/DocItem/Layout';
 import Head from '@docusaurus/Head';
 import {useDoc} from '@docusaurus/plugin-content-docs/client';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
+import {isPublishedZhCnDocId} from '../../../lib/publishedLanguageScope';
 
 export default function LayoutWrapper(props) {
   const {frontMatter, metadata} = useDoc();
@@ -33,7 +34,7 @@ export default function LayoutWrapper(props) {
     : undefined;
 
   const datePublished = frontMatter.datePublished || dateModified;
-  const untranslatedZhCnFallbackDoc = i18n.currentLocale === 'zh-CN' && metadata.id !== 'faq';
+  const untranslatedZhCnFallbackDoc = i18n.currentLocale === 'zh-CN' && !isPublishedZhCnDocId(metadata.id);
 
   const articleSchema = {
     '@context': 'https://schema.org',
