@@ -615,6 +615,7 @@ Current WIP status:
    - the real HTML fixture now closes with strict native standalone `ok: true`, `actualMode = "standalone"`, `standaloneGate.passed = true`, `28` audited slides, `overflowCount = 0`, and `retryCount = 4`
    - maintainer-local structural overflow notes can now converge through real Markdown table decomposition and code-fence chunking rather than only unit-test rewrites
    - compatibility fallback remains observable through `htmlExport.actualMode = "server-script-fallback"` and preserved `index-standalone.failed.html` evidence when a future native bundle has real loader gaps
+8. `docs/maintainer/slidev-standalone-acceptance-2026-06-18.*` now records the dedicated strict standalone acceptance package for the real `architecture.zh-CN.md` run: report path, archived output path, local fork evidence, full skill-reference evidence, layout-audit summary, the earlier `$n` false-positive diagnosis, and the explicit policy that the large generated HTML/screenshots stay under `/home/jacob/slidev-export-review/2026-06-18/standalone-strict/` instead of being committed to `main`.
 
 Next direction:
 
@@ -624,6 +625,7 @@ Next direction:
 4. the next step is no longer “add table/code decomposition at all”; it is to extend the current patcher toward custom layout-safe splitting, richer component slides, and pathological cell/content fallback handling while preserving deterministic failure modes;
 5. product-smoke evidence still has one host limitation: `obsidian command id=notemd:export-slides` proves command dispatch, but the Obsidian CLI still does not expose an export-complete handshake, so verifier JSON remains the stronger closure signal;
 6. any upstream Slidev skill PR should stay generic: full references, built-in/configured theme preference, closed frontmatter, readable transforms for large diagrams/tables/code, and browser-sampled build verification. NoteMD vault paths, local fork paths, layout audit internals, and the `architecture.zh-CN.md` fixture should remain project-local.
+7. standalone acceptance should now be treated as a tracked maintainer evidence package, not as an implicit chat summary: if the strict report or archived output path changes, update `docs/maintainer/slidev-standalone-acceptance-2026-06-18.*` or create a new dated acceptance file in the same shape.
 
 ## 6. Documentation Sync Rule
 
@@ -639,13 +641,14 @@ Any future change that updates the provider-settings/model-discovery lane must r
 Any future change that updates the Slidev export lane must re-check, at minimum:
 
 1. `docs/maintainer/slidev-export-workflow.*`
-2. `docs/SLIDEV_SOLUTION.md`
-3. `docs/SLIDEV_HTML_FIX.md`
-4. `src/slideExport/*`
-5. `src/main.ts`
-6. `src/ui/NotemdSettingTab.ts`
-7. `src/ui/NotemdSidebarView.ts`
-8. `package.json`
+2. `docs/maintainer/slidev-standalone-acceptance-2026-06-18.*` or the newest dated standalone acceptance file
+3. `docs/SLIDEV_SOLUTION.md`
+4. `docs/SLIDEV_HTML_FIX.md`
+5. `src/slideExport/*`
+6. `src/main.ts`
+7. `src/ui/NotemdSettingTab.ts`
+8. `src/ui/NotemdSidebarView.ts`
+9. `package.json`
 
 ## 7. Verification Gate
 

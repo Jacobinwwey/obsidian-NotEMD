@@ -13,9 +13,11 @@ This directory contains repository-level documentation for maintainers and contr
 
 ## Slide Export Documentation
 
-- [Standalone Bundle Fix](./STANDALONE_BUNDLE_FIX.md) - **Latest**: Export transformation bug fix (2026-06-16)
+- [Slidev Standalone Acceptance, 2026-06-18](./maintainer/slidev-standalone-acceptance-2026-06-18.md) - Real `architecture.zh-CN.md` strict native standalone acceptance
+- [Slidev Export Workflow Verification](./maintainer/slidev-export-workflow.md) - Maintainer gate for UI-equivalent export workflow
+- [Standalone Bundle Fix](./STANDALONE_BUNDLE_FIX.md) - Earlier export transformation bug fix (2026-06-16)
 - [Single-File Bundler](./SINGLE_FILE_BUNDLER.md) - Architecture and implementation overview
-- [Slidev Solution Summary](./SLIDEV_SOLUTION.md) - Server-script mode (alternative approach)
+- [Slidev Solution Summary](./SLIDEV_SOLUTION.md) - Current standalone-first export truth
 - [Slidev HTML Fix](./SLIDEV_HTML_FIX.md) - Original problem analysis and testing
 
 ## Engineering Planning Docs

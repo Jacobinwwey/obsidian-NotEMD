@@ -72,6 +72,12 @@ obsidian command id=notemd:export-slides vault=/home/jacob/obsidian-NotEMD/docs
 
 On 2026-06-18 this command executed successfully in Jacob's docs vault. It is a real host-command smoke, not a DOM click automation pass.
 
+The strict standalone acceptance index for the real `architecture.zh-CN.md` run is tracked in:
+
+```text
+docs/maintainer/slidev-standalone-acceptance-2026-06-18.md
+```
+
 ## Passing Criteria
 
 Treat the command as passing only when the final JSON report has:

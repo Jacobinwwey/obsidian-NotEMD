@@ -11,6 +11,13 @@
 - [发布流程](./maintainer/release-workflow.zh-CN.md)
 - [1.8.2 发布说明](./releases/1.8.2.zh-CN.md)
 
+## Slide Export 文档
+
+- [Slidev Standalone 验收记录，2026-06-18](./maintainer/slidev-standalone-acceptance-2026-06-18.zh-CN.md) - 真实 `architecture.zh-CN.md` strict native standalone 验收
+- [Slidev 导出工作流验证](./maintainer/slidev-export-workflow.zh-CN.md) - UI 等价导出工作流的维护者 gate
+- [Slidev Solution Summary](./SLIDEV_SOLUTION.md) - 当前 standalone 优先、server-script 兼容的方案真值
+- [Slidev HTML Fix](./SLIDEV_HTML_FIX.md) - 原始问题分析与测试记录
+
 ## 工程规划文档
 
 - [Diagram Platform Phase 2 Requirements](./brainstorms/2026-04-14-diagram-platform-phase-2-requirements.zh-CN.md)

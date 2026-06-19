@@ -72,6 +72,12 @@ obsidian command id=notemd:export-slides vault=/home/jacob/obsidian-NotEMD/docs
 
 在 2026-06-18 的 Jacob docs vault 上，这条命令已经执行成功。它是宿主命令级 smoke，不是 DOM 点击自动化。
 
+真实 `architecture.zh-CN.md` strict standalone run 的验收索引已落盘到：
+
+```text
+docs/maintainer/slidev-standalone-acceptance-2026-06-18.zh-CN.md
+```
+
 ## 通过标准
 
 只有最终 JSON 同时满足以下条件时，才把这次导出视为通过：

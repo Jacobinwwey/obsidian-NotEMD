@@ -25,6 +25,13 @@ docs/maintainer/slidev-export-workflow.md
 docs/maintainer/slidev-export-workflow.zh-CN.md
 ```
 
+The current strict standalone acceptance index for the real `architecture.zh-CN.md` run is:
+
+```text
+docs/maintainer/slidev-standalone-acceptance-2026-06-18.md
+docs/maintainer/slidev-standalone-acceptance-2026-06-18.zh-CN.md
+```
+
 ## HTML Modes
 
 ### Standalone HTML
@@ -125,6 +132,8 @@ Real maintained baseline as of 2026-06-18:
 6. `PDF` and `PNG` verification on the same real source also return `ok: true` after exporting from the same converged deck
 7. the current local Slidev `52.16.0` fork now passes the strict native standalone gate for the real `architecture.zh-CN` HTML export after fixing NoteMD's loader-binding detector to accept minified identifiers such as `$n`; the final real output is `index-standalone.html`, not a fallback-only `index.html`
 8. existing Slidev deck fixtures now go through isolated prepared working copies, so maintainer verification no longer under-audits them as single-slide files or loses sibling `layouts/*.vue`
+
+Dedicated standalone acceptance evidence is tracked in `docs/maintainer/slidev-standalone-acceptance-2026-06-18.*`. The large generated HTML and screenshot output remains archived outside the repo under `/home/jacob/slidev-export-review/2026-06-18/standalone-strict/` so the main branch does not gain new one-off export artifacts.
 
 ## Current Rendered Layout Model
 

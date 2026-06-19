@@ -20,6 +20,8 @@ describe('mainline progress audit contract', () => {
     );
     const matrixDoc = readDoc('docs/brainstorms/2026-05-20-unified-follow-through-matrix.md');
     const matrixDocZh = readDoc('docs/brainstorms/2026-05-20-unified-follow-through-matrix.zh-CN.md');
+    const standaloneAcceptanceDoc = readDoc('docs/maintainer/slidev-standalone-acceptance-2026-06-18.md');
+    const standaloneAcceptanceDocZh = readDoc('docs/maintainer/slidev-standalone-acceptance-2026-06-18.zh-CN.md');
 
     test('records the current Stage-B2/C/D baseline and fixture anchor in both canonical progress docs', () => {
         expect(progressDoc).toContain('### 2.7 Current `890b21b` Stage-B2/C/D follow-through baseline');
@@ -205,6 +207,8 @@ describe('mainline progress audit contract', () => {
     test('records the current Slidev export convergence truth in both canonical progress docs', () => {
         expect(progressDoc).toContain('`convergeSlidevDeckLayout()`');
         expect(progressDocZh).toContain('`convergeSlidevDeckLayout()`');
+        expect(progressDoc).toContain('slidev-standalone-acceptance-2026-06-18');
+        expect(progressDocZh).toContain('slidev-standalone-acceptance-2026-06-18');
         expect(progressDoc).toContain('same converged prepared deck');
         expect(progressDocZh).toContain('同一个 converged prepared deck');
         expect(progressDoc).toContain('retryCount = 4');
@@ -239,5 +243,28 @@ describe('mainline progress audit contract', () => {
         expect(progressDocZh).toContain('几何结果打平');
         expect(progressDoc).toContain('slot-owner wrappers');
         expect(progressDocZh).toContain('slot-owner wrapper');
+    });
+
+    test('tracks the strict Slidev standalone acceptance package as a repository-visible artifact index', () => {
+        for (const content of [standaloneAcceptanceDoc, standaloneAcceptanceDocZh]) {
+            expect(content).toContain('completion-rerun-strict-report.json');
+            expect(content).toContain('/home/jacob/slidev-export-review/2026-06-18/standalone-strict/');
+            expect(content).toContain('/home/jacob/slidev/packages/slidev/bin/slidev.mjs');
+            expect(content).toContain('/home/jacob/slidev/skills/slidev');
+            expect(content).toContain('"skillReferenceCount": 52');
+            expect(content).toContain('"actualMode": "standalone"');
+            expect(content).toContain('"requiresLocalServer": false');
+            expect(content).toContain('"passed": true');
+            expect(content).toContain('"slideCount": 28');
+            expect(content).toContain('"overflowCount": 0');
+            expect(content).toContain('"unreadableCount": 0');
+            expect(content).toContain('"retryCount": 4');
+            expect(content).toContain('"ignoredOutputs": []');
+            expect(content).toContain('$n');
+            expect(content).toContain('server-script-fallback');
+        }
+
+        expect(standaloneAcceptanceDoc).toContain('Do not commit test/generated output to main');
+        expect(standaloneAcceptanceDocZh).toContain('测试/生成输出不要提交到 main');
     });
 });
