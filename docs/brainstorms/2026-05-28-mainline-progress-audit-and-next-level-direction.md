@@ -1,6 +1,6 @@
 ---
 date: 2026-05-28
-last_updated: 2026-06-18
+last_updated: 2026-06-20
 topic: mainline-progress-audit-and-next-level-direction
 canonical: true
 ---
@@ -654,6 +654,31 @@ Next direction:
 3. after the route/language gate stays stable, add a provider-page quality audit for thin pages; this is a content-depth problem, not a locale-routing problem;
 4. keep `website/build` and generated Slidev export artifacts out of source commits.
 
+### Batch H: move Slidev export from hard visibility to presentation quality
+
+Priority: `P0`
+
+Background:
+
+1. Batch G already proved the real UI-equivalent export path, full Slidev skill references, local fork usage, strict standalone, and full-deck rendered audit;
+2. the real `architecture.zh-CN.md` output still exposes the next bottleneck: low-zoom slides can avoid clipping while still being poor presentation material;
+3. the useful reference from `ref/infinite-canvas` is world rectangles, union bounds, viewport fit, and node geometry, not its UI or AGPL-3.0 implementation code.
+
+Current status:
+
+1. `convergeSlidevDeckLayout()` is the shared final fact gate for product export and maintainer verification;
+2. `slidevLayoutAudit.ts` already supports rendered bounding boxes, scroll overflow, slot-zone owner geometry, and several structural patch paths;
+3. `docs/brainstorms/2026-06-20-slidev-layout-quality-and-canvas-roadmap.zh-CN.md` now tracks the detailed route, comparing previous requirements, current code, useful `ref/infinite-canvas` concepts, real-output gaps, and the implementation order;
+4. `docs/SLIDEV_SOLUTION.*` and `docs/maintainer/slidev-export-workflow.*` now state that the hard gate and quality gate must be reported separately.
+
+Next direction:
+
+1. Stage 1 should enhance rendered measurement with effective font, SVG text font, table/code minimum font, quality margins, content-area ratio, and low utilization;
+2. Stage 2 should add a clean-room `SlideGeometry` / `SlideLayoutPlan` layer before LLM deck generation;
+3. Stage 3/4 should wire Mermaid/table/code semantic splitting into source preparation and patching so low `zoom` is not the main final fix;
+4. Stage 5 should expand fixtures to cover large flowcharts, long sequence diagrams, wide/tall tables, mixed code/table slides, component-heavy slot layouts, and the real `architecture.zh-CN.md`;
+5. every implementation slice must retain strict standalone and full-deck browser audit instead of regressing to CLI-only or representative sampling.
+
 ## 6. Documentation Sync Rule
 
 Any future change that updates the provider-settings/model-discovery lane must re-check, at minimum:
@@ -669,13 +694,14 @@ Any future change that updates the Slidev export lane must re-check, at minimum:
 
 1. `docs/maintainer/slidev-export-workflow.*`
 2. `docs/maintainer/slidev-standalone-acceptance-2026-06-18.*` or the newest dated standalone acceptance file
-3. `docs/SLIDEV_SOLUTION.md`
-4. `docs/SLIDEV_HTML_FIX.md`
-5. `src/slideExport/*`
-6. `src/main.ts`
-7. `src/ui/NotemdSettingTab.ts`
-8. `src/ui/NotemdSidebarView.ts`
-9. `package.json`
+3. `docs/brainstorms/2026-06-20-slidev-layout-quality-and-canvas-roadmap.zh-CN.md`
+4. `docs/SLIDEV_SOLUTION.md`
+5. `docs/SLIDEV_HTML_FIX.md`
+6. `src/slideExport/*`
+7. `src/main.ts`
+8. `src/ui/NotemdSettingTab.ts`
+9. `src/ui/NotemdSidebarView.ts`
+10. `package.json`
 
 Any future change that updates the GitHub Pages / GEO / website language lane must re-check, at minimum:
 
@@ -705,7 +731,7 @@ If the update touches Slidev export, also run:
 1. `npm run verify:slidev-export`
 2. `npm test -- --runInBand src/tests/slidevSourcePreparer.test.ts src/tests/slideExportComprehensive.test.ts`
 
-After the rendered-layout gate lands, Slidev export closure must also include a non-empty layout-audit report for `docs/architecture.zh-CN.md` with zero `overflow` and zero `unreadable-scale` findings.
+Slidev export closure must also include a non-empty layout-audit report for `docs/architecture.zh-CN.md` with zero `overflow` and zero `unreadable-scale` findings. After Batch H lands, closure should additionally check effective-font, quality-margin, content-area-ratio, and pre/post split metrics instead of accepting low `zoom` as the final quality fix.
 
 If the update touches GitHub Pages / GEO / website language scope, also run:
 
@@ -722,6 +748,6 @@ The real current questions are now:
 2. can the current bounded CLI split stay explicit while any future path-based promotion remains contract-first rather than convenience-first;
 3. can Stage-C local-KB / file-selection / chapter-split work deepen mixed-corpus quality evidence instead of relitigating feature existence;
 4. can the widened bounded provider discovery surface remain shared-core, lightweight, and honest as a maintenance lane rather than becoming the excuse for broader architectural claims;
-5. can Slidev export keep using a real UI-equivalent workflow proof and add rendered-layout quality gates instead of regressing to “the CLI can build, so the buttons must work” as weak evidence;
+5. can Slidev export keep using a real UI-equivalent workflow proof and move from hard overflow gates into effective-font / quality-margin / layout-planning gates instead of regressing to “the CLI can build, so the buttons must work” or “it fits after zoom, so it is readable” as weak evidence;
 6. can GitHub Pages keep route, sitemap, canonical, `llms.txt`, and visible language entry points aligned through a build-output gate instead of source-only review;
 7. can current truth documents keep tracking the real shipped branch boundary quickly enough that future sessions do not regress back to `1.9.0/1.9.1`-era wording.

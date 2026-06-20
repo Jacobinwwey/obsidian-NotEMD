@@ -115,18 +115,31 @@ The current implementation now includes a shared render-feedback gate after deck
 
 Use `ref/infinite-canvas` only as a clean-room design reference. The useful idea is not to embed an infinite canvas in Slidev export; it is to model generated slide elements as measurable world rectangles, compute union bounds, derive a fit camera for the fixed Slidev safe rectangle, and split content when fitting would make it unreadable. Do not copy AGPL-3.0 implementation code into this MIT project.
 
-The planned report shape should add fields equivalent to:
+The next report shape should not only record hard overflow. It should separate the hard gate from the quality gate and add fields equivalent to:
 
 ```text
 layoutAudit[].slide
 layoutAudit[].findings[]
 layoutAudit[].safeRect
 layoutAudit[].contentBounds
+layoutAudit[].effectiveMinFontPx
+layoutAudit[].svgTextMinFontPx
+layoutAudit[].tableBodyMinFontPx
+layoutAudit[].codeMinFontPx
+layoutAudit[].qualityMargins
+layoutAudit[].contentAreaRatio
 layoutAudit[].recommendedPatch
-layoutAuditSummary.overflowCount
-layoutAuditSummary.unreadableCount
+layoutAuditSummary.hardOverflowCount
+layoutAuditSummary.unreadableScaleCount
+layoutAuditSummary.lowEffectiveFontCount
+layoutAuditSummary.qualityMarginWarningCount
+layoutAuditSummary.lowContentUtilizationCount
+layoutAuditSummary.preSplitCount
+layoutAuditSummary.postPatchCount
 layoutAuditSummary.retryCount
 ```
+
+The detailed implementation direction is tracked in `docs/brainstorms/2026-06-20-slidev-layout-quality-and-canvas-roadmap.zh-CN.md`. That route keeps the current render-feedback loop as the final fact gate, adds a clean-room layout planning IR before generation, and translates the world-rect / viewport-fit ideas from `ref/infinite-canvas` into NoteMD-owned geometry logic instead of copying AGPL-3.0 implementation code or embedding an infinite-canvas UI in Slidev export.
 
 Current landed truth as of 2026-06-18:
 

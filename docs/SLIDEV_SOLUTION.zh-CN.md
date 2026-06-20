@@ -170,6 +170,24 @@ npm run verify:slidev-export
 3. 全 deck Playwright 审计更正确但更慢，后续应优化收敛效率，而不是削弱审计范围。
 4. Obsidian CLI 可以派发 `notemd:export-slides`，但缺少导出完成握手，所以宿主命令烟测弱于 verifier。
 
+## Next-level 布局质量路线
+
+当前验收已经能证明“不裁切、能 standalone、真实 UI 等价路径可运行”，但还不能充分证明“演示质量合格”。真实 `architecture.zh-CN.md` 导出中仍有 `zoom: 0.285`、`0.384`、`0.40` 这类低缩放页；它们通过了 hard overflow gate，但视觉上仍可能过小、过空或贴边。
+
+下一阶段不应替换现有 render-feedback pipeline。正确方向是：
+
+1. 保留 `convergeSlidevDeckLayout()` 作为最终事实门；
+2. 在 source preparation 前增加 clean-room `SlideGeometry` / `SlideLayoutPlan`，借鉴 `ref/infinite-canvas` 的 world rect、union bounds 与 viewport fit 思想，但不复制 AGPL-3.0 实现代码；
+3. 在 rendered audit 中新增 effective font、quality margin、content area ratio 与 low-utilization 指标；
+4. 对 Mermaid/table/code 做预拆分和语义拆分，避免继续把大内容压到低 `zoom`；
+5. 将 hard gate 与 quality gate 分开报告：hard overflow 失败仍 fail closed，quality warning 用于推动拆分、重布局或人工复查。
+
+具体路线和进度对比见：
+
+```text
+docs/brainstorms/2026-06-20-slidev-layout-quality-and-canvas-roadmap.zh-CN.md
+```
+
 ## 输出策略
 
 `docs/export/` 下的验证产物用于本地检查。提交前应确认没有把一次性导出内容误加入 main：

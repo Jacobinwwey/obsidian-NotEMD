@@ -115,18 +115,31 @@ docs/maintainer/slidev-standalone-acceptance-2026-06-18.zh-CN.md
 
 `ref/infinite-canvas` 只能作为 clean-room 设计参考。真正值得借鉴的不是把无限画布嵌进 Slidev export，而是先把 slide 元素建模成可测量的 world rect，计算 union bounds，再为固定 Slidev safe rect 推导 fit camera；一旦 fit 会破坏可读性，就拆分内容。不要把 AGPL-3.0 实现代码复制进 MIT 项目。
 
-计划中的报告结构应补充类似字段：
+下一阶段的报告结构不应只记录 hard overflow。它需要把 hard gate 与 quality gate 拆开，补充类似字段：
 
 ```text
 layoutAudit[].slide
 layoutAudit[].findings[]
 layoutAudit[].safeRect
 layoutAudit[].contentBounds
+layoutAudit[].effectiveMinFontPx
+layoutAudit[].svgTextMinFontPx
+layoutAudit[].tableBodyMinFontPx
+layoutAudit[].codeMinFontPx
+layoutAudit[].qualityMargins
+layoutAudit[].contentAreaRatio
 layoutAudit[].recommendedPatch
-layoutAuditSummary.overflowCount
-layoutAuditSummary.unreadableCount
+layoutAuditSummary.hardOverflowCount
+layoutAuditSummary.unreadableScaleCount
+layoutAuditSummary.lowEffectiveFontCount
+layoutAuditSummary.qualityMarginWarningCount
+layoutAuditSummary.lowContentUtilizationCount
+layoutAuditSummary.preSplitCount
+layoutAuditSummary.postPatchCount
 layoutAuditSummary.retryCount
 ```
+
+具体推进路线见 `docs/brainstorms/2026-06-20-slidev-layout-quality-and-canvas-roadmap.zh-CN.md`。该路线保留当前 render-feedback loop 作为最终事实门，但在生成前增加 clean-room layout planning IR，并把 `ref/infinite-canvas` 的 world rect / viewport fit 思想转译为 NoteMD 自有几何算法，而不是复制 AGPL-3.0 实现或把无限画布 UI 嵌入 Slidev export。
 
 截至 2026-06-18 的当前真值：
 

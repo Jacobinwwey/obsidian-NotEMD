@@ -190,6 +190,24 @@ Current gap:
 3. full-deck Playwright verification is now more correct, but noticeably slower, so future work should improve patch convergence instead of weakening the audit back to representative sampling;
 4. the Obsidian CLI can dispatch `notemd:export-slides`, but it does not expose an export-complete handshake, so host-command smoke is still weaker than the maintainer verifier.
 
+## Next-Level Layout Quality Direction
+
+The current acceptance proves that export does not clip, can pass strict standalone, and follows the real UI-equivalent workflow. It does not yet prove presentation quality. The real `architecture.zh-CN.md` output still contains low-zoom slides such as `zoom: 0.285`, `0.384`, and `0.40`; those can pass the hard overflow gate while still being too small, under-used, or tight at the edges.
+
+The next direction should not replace the current render-feedback pipeline. It should:
+
+1. keep `convergeSlidevDeckLayout()` as the final fact gate;
+2. add a clean-room `SlideGeometry` / `SlideLayoutPlan` layer before source preparation, borrowing only the world-rect, union-bounds, and viewport-fit ideas from `ref/infinite-canvas` without copying AGPL-3.0 implementation code;
+3. add rendered effective-font, quality-margin, content-area-ratio, and low-utilization metrics;
+4. pre-split Mermaid/table/code content so large content is not solved mainly by low `zoom`;
+5. report hard gate and quality gate separately: hard overflow still fails closed, while quality warnings drive splitting, relayout, or manual review.
+
+Detailed progress comparison and implementation direction are tracked in:
+
+```text
+docs/brainstorms/2026-06-20-slidev-layout-quality-and-canvas-roadmap.zh-CN.md
+```
+
 ## Output Policy
 
 The verification command writes inspectable files under `docs/export/`. They are useful local evidence, but they are not meant to be committed unless a release or documentation task explicitly asks for those generated artifacts.
