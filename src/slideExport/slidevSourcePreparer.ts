@@ -913,6 +913,7 @@ function buildSlidevDeckPrompt(
 		'The deck must start with Slidev headmatter and use --- slide separators.',
 		'Preserve fenced code blocks, tables, and important technical details.',
 		'Preserve each source Mermaid fence as one Mermaid diagram; do not split or rewrite one Mermaid diagram into several diagrams.',
+		'If a Mermaid diagram shares a slide with prose, move the non-Mermaid prose outside the diagram slide when needed; keep the Mermaid fence byte-stable.',
 		'Split dense prose, tables, or code into multiple readable slides instead of making one overflowing slide.',
 		'For large Mermaid diagrams, preserve the source diagram and use layout, zoom, Transform, speaker notes, or adjacent explanation outside the fence.',
 		'For large tables or code blocks, prefer row/column splits or focused excerpts before zoom or Transform.',
@@ -966,6 +967,7 @@ function buildSlidevDeckFromOutlinePrompt(
 		'The deck must start with Slidev headmatter and use --- slide separators.',
 		'Preserve fenced code blocks, tables, and important technical details.',
 		'Preserve each source Mermaid fence as one Mermaid diagram; do not split or rewrite one Mermaid diagram into several diagrams.',
+		'If a Mermaid diagram shares a slide with prose, move the non-Mermaid prose outside the diagram slide when needed; keep the Mermaid fence byte-stable.',
 		'Split dense prose, tables, or code into multiple readable slides instead of making one overflowing slide.',
 		'For large Mermaid diagrams, preserve the source diagram and use layout, zoom, Transform, speaker notes, or adjacent explanation outside the fence.',
 		'For large tables or code blocks, prefer row/column splits or focused excerpts before zoom or Transform.',
@@ -1018,7 +1020,7 @@ function buildSlidevOutlinePrompt(
 		'Use the deterministic layout budget to decide where the deck must pre-split dense prose/table/code and where Mermaid needs source-preserving fit review.',
 		'Return only Markdown. Do not wrap the outline in a code fence.',
 		'Define the intended slide sequence, each slide purpose, likely layout, source sections, and risks.',
-		'Call out Mermaid diagrams that must preserve their source fence, and tables, code blocks, and dense sections that require splitting, zoom, Transform, or alternate layouts.',
+		'Call out Mermaid diagrams that must preserve their source fence, mixed Mermaid/prose slides where only non-Mermaid prose may move, and tables, code blocks, and dense sections that require splitting, zoom, Transform, or alternate layouts.',
 		'The outline is a planning artifact for a later Slidev deck generation step, not the final deck.',
 	].join('\n');
 
@@ -1266,13 +1268,7 @@ function copyReferencedLocalAssetFilesWithNodeFs(
 	const absoluteSourcePath = path.join(vaultRoot, normalizeVaultPath(sourceFile.path));
 	const absoluteSourceDir = path.dirname(absoluteSourcePath);
 	const absoluteTargetDirectory = path.join(vaultRoot, targetDirectoryPath);
-	const seen = new Set<string>();
-
-	for (const referencePath of extractLocalAssetReferences(deckMarkdown)) {
-		if (seen.has(referencePath)) {
-			continue;
-		}
-		seen.add(referencePath);
+	for (const referencePath of collectLocalAssetReferencesWithDependencies(fs, path, absoluteSourceDir, deckMarkdown)) {
 		const absoluteSourceAsset = path.join(absoluteSourceDir, referencePath);
 		if (!isInsideDirectory(path, absoluteSourceDir, absoluteSourceAsset) || !fs.existsSync(absoluteSourceAsset)) {
 			continue;
@@ -1288,6 +1284,93 @@ function copyReferencedLocalAssetFilesWithNodeFs(
 	}
 
 	return copiedAssets;
+}
+
+export function collectLocalAssetReferencesWithDependencies(
+	fs: any,
+	path: any,
+	baseDirectory: string,
+	markdown: string,
+): string[] {
+	const references: string[] = [];
+	const pending = [...extractLocalAssetReferences(markdown)];
+	const seen = new Set<string>();
+
+	while (pending.length > 0) {
+		const referencePath = pending.shift()!;
+		if (seen.has(referencePath)) {
+			continue;
+		}
+		seen.add(referencePath);
+		references.push(referencePath);
+
+		if (!isCssFileReference(referencePath) || !fs?.existsSync || !fs?.readFileSync || !path?.join || !path?.dirname || !path?.relative || !path?.isAbsolute) {
+			continue;
+		}
+
+		const absoluteCssPath = path.join(baseDirectory, referencePath);
+		if (!isInsideDirectory(path, baseDirectory, absoluteCssPath) || !fs.existsSync(absoluteCssPath)) {
+			continue;
+		}
+
+		const cssStat = fs.statSync?.(absoluteCssPath);
+		if (!cssStat?.isFile?.()) {
+			continue;
+		}
+
+		const cssText = fs.readFileSync(absoluteCssPath, 'utf8');
+		const cssDirectory = path.dirname(absoluteCssPath);
+		for (const rawCssReference of extractCssUrlReferences(cssText)) {
+			const dependencyPath = normalizeCssDependencyReference(path, baseDirectory, cssDirectory, rawCssReference);
+			if (dependencyPath && !seen.has(dependencyPath)) {
+				pending.push(dependencyPath);
+			}
+		}
+	}
+
+	return references;
+}
+
+function isCssFileReference(referencePath: string): boolean {
+	return referencePath.toLowerCase().endsWith('.css');
+}
+
+function normalizeCssDependencyReference(
+	path: any,
+	baseDirectory: string,
+	cssDirectory: string,
+	rawReference: string,
+): string | null {
+	const normalizedReference = normalizeLocalCssUrlReference(rawReference);
+	if (!normalizedReference || !path?.join || !path?.relative || !path?.isAbsolute) {
+		return null;
+	}
+
+	const absoluteDependencyPath = path.join(cssDirectory, normalizedReference);
+	if (!isInsideDirectory(path, baseDirectory, absoluteDependencyPath)) {
+		return null;
+	}
+
+	return normalizeVaultPath(path.relative(baseDirectory, absoluteDependencyPath));
+}
+
+function normalizeLocalCssUrlReference(rawReference: string): string | null {
+	const withoutQuery = rawReference.trim().split(/[?#]/, 1)[0];
+	if (
+		!withoutQuery
+		|| withoutQuery.startsWith('/')
+		|| withoutQuery.startsWith('#')
+		|| /^[a-z][a-z0-9+.-]*:/i.test(withoutQuery)
+		|| withoutQuery.includes('\0')
+	) {
+		return null;
+	}
+
+	try {
+		return decodeURI(withoutQuery);
+	} catch {
+		return withoutQuery;
+	}
 }
 
 export function extractLocalAssetReferences(markdown: string): string[] {

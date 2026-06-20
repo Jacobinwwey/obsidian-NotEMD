@@ -354,6 +354,7 @@ function createBackgroundCrossAssetStressDeck() {
         '# Background Asset Stress',
         '',
         'This deck keeps local frontmatter assets beside a source file that lives in a nested directory.',
+        '<link rel="stylesheet" href="./assets/local-theme.css">',
         '',
         '---',
         'background: url("./assets/section-background.svg")',
@@ -467,6 +468,17 @@ const FIXTURES = [
             { path: 'decks/assets/section-background.svg', content: createFixtureSvg('Section background', '#0f172a', '#22d3ee') },
             { path: 'decks/assets/hero.svg', content: createFixtureSvg('Hero image', '#ecfdf5', '#047857') },
             { path: 'decks/assets/favicon.svg', content: createFixtureSvg('Favicon', '#f8fafc', '#7c3aed') },
+            {
+                path: 'decks/assets/local-theme.css',
+                content: [
+                    '@font-face { font-family: FixtureTheme; src: url("./theme-font.woff2") format("woff2"); }',
+                    '.themed-backdrop { background-image: url("../media/theme-pattern.svg"); }',
+                    '.bad-backdrop { background-image: url("../../outside.svg"); }',
+                ].join('\n'),
+            },
+            { path: 'decks/assets/theme-font.woff2', content: 'fake font payload' },
+            { path: 'decks/media/theme-pattern.svg', content: createFixtureSvg('Theme pattern', '#fefce8', '#ca8a04') },
+            { path: 'outside.svg', content: createFixtureSvg('Outside rejected', '#fee2e2', '#dc2626') },
         ],
         expectFrontmatterAssets: true,
         expectedCopiedAssets: [
@@ -474,6 +486,18 @@ const FIXTURES = [
             'assets/section-background.svg',
             'assets/hero.svg',
             'assets/favicon.svg',
+            'assets/local-theme.css',
+            'assets/theme-font.woff2',
+            'media/theme-pattern.svg',
+        ],
+        expectedExportAssets: [
+            'assets/deck-background.svg',
+            'assets/section-background.svg',
+            'assets/hero.svg',
+            'assets/favicon.svg',
+            'assets/local-theme.css',
+            'assets/theme-font.woff2',
+            'media/theme-pattern.svg',
         ],
         expectedMermaidBlocks: 0,
     },
@@ -617,6 +641,16 @@ function assertFixtureReport(fixture, report, sourceMarkdown) {
         for (const relativeAssetPath of fixture.expectedCopiedAssets) {
             assert(fs.existsSync(path.join(preparedDeckDirectory, relativeAssetPath)), `${fixture.id}: prepared workspace is missing ${relativeAssetPath}`);
         }
+        assert(!fs.existsSync(path.join(preparedDeckDirectory, 'outside.svg')), `${fixture.id}: prepared workspace copied an out-of-scope asset`);
+    }
+    if (fixture.expectedExportAssets) {
+        const outputDirectory = fs.statSync(report.output.path).isDirectory()
+            ? report.output.path
+            : path.dirname(report.output.path);
+        for (const relativeAssetPath of fixture.expectedExportAssets) {
+            assert(fs.existsSync(path.join(outputDirectory, relativeAssetPath)), `${fixture.id}: final export is missing ${relativeAssetPath}`);
+        }
+        assert(!fs.existsSync(path.join(outputDirectory, 'outside.svg')), `${fixture.id}: final export copied an out-of-scope asset`);
     }
     if (fixture.expectUltraWideTableSplit) {
         assert(!deckMarkdown.includes('| Capability | Trigger | Boundary | Evidence | Fallback | User surface | Owner | Replay command | Regression risk | Gate |'), `${fixture.id}: ultra-wide table survived unsplit`);

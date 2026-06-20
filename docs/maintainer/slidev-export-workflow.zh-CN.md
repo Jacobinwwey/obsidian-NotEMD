@@ -212,11 +212,13 @@ mermaidSourcePreservation.changedFenceIndexes
 25. synthetic full-deck layout fixtures 现在会跑完整生产 verifier：`source-layout-stress` 覆盖完整 skill references、native standalone、Mermaid fence 保真、record-list fallback 与 code splitting；`slot-component-stress` 覆盖 component-heavy slot 的局部 Transform 收敛，并防止整页 zoom 叠加。2026-06-20 归档为 `/home/jacob/slidev-export-review/2026-06-20-full-deck-layout-fixtures/`。
 26. text overflow measurement 现在对 text 元素使用 text-node Range glyph rectangles，而不是 block-level element box，因此不会因为 `h1` 的块级布局盒比实际可见文字宽就误判失败。
 27. Mermaid-only 页面可以用测量得到的低 zoom 保证一张保留源图完整可见；可读性风险通过 `mermaidFit.manual-review` 暴露，而不是拆分或改写原 Mermaid 图。
-28. Mermaid/prose 混排页现在会在允许 source-preserved Mermaid fit 之前先分离非 Mermaid 主内容；每个源 Mermaid fence 仍保持一个 fence 且内容不变，unsupported mixed layout 会阻止低整页 zoom，而不是把正文一起缩小。
-29. prepared deck workspace 现在会复制 Markdown image、HTML media/link/srcset 属性和 Slidev frontmatter `background`、`image`、`src`、`favicon`、`poster`、`download` 显式引用的本地相对资产；URL、绝对路径和 `..` traversal 会被拒绝，也不会粗暴复制整个源目录。
+28. Mermaid/prose 混排页现在会在允许 source-preserved Mermaid fit 之前先移动非 Mermaid 主内容；每个源 Mermaid fence 仍保持一个 byte-stable fence 且内容不变，unsupported mixed layout 会阻止低整页 zoom，而不是把正文一起缩小。
+29. prepared deck workspace 现在会复制 Markdown image、HTML media/link/srcset 属性和 Slidev frontmatter `background`、`image`、`src`、`favicon`、`poster`、`download` 显式引用的本地相对资产；deck 显式引用的本地 CSS 文件还会继续解析其本地 `url(...)` 图片/字体依赖，并按 CSS 文件所在目录解析相对路径。URL、绝对路径和越界 traversal 会被拒绝，也不会粗暴复制整个源目录。
 30. local Slidev fork 的 standalone bundler 现在用括号平衡的函数边界替换来 stub Vite preload helper，避免误删第一张 slide loader binding。NoteMD strict standalone gate 仍保持 fail-closed，继续报告 loader gaps，而不会把 fallback 输出当成 native standalone 成功。
-31. native standalone 或 server-script HTML build 完成后，exporter 会把 prepared deck 仍显式引用的本地文件同步到最终 `<source>-slides/` 输出目录，避免 frontmatter background、image layout、favicon、poster 或 linked local asset 反向依赖临时 prepared workspace。
+31. native standalone 或 server-script HTML build 完成后，exporter 会把 prepared deck 仍显式引用的本地文件和 CSS `url(...)` 依赖同步到最终 `<source>-slides/` 输出目录，避免 frontmatter background、image layout、favicon、poster、linked CSS、本地字体或 CSS background image 反向依赖临时 prepared workspace。
 32. 未显式配置顶层 `fonts:` 的 prepared deck 会注入 `fonts.provider: none`，避免 strict standalone 验证因 Google Fonts 等外网字体请求超时；用户显式字体配置保持不覆盖。
+33. 2026-06-20 CSS asset dependency 收口验收包位于 `/home/jacob/slidev-export-review/2026-06-20-css-asset-dependencies-final/`；真实 `architecture.zh-CN.md` strict standalone report 为 `ok = true`，`actualMode = "standalone"`，`requiresLocalServer = false`，`standaloneGate.passed = true`，`skillReferenceCount = 52`，且 `mermaidSourcePreservation.passed = true`。
+34. 生成式测试导出产物已不再跟踪在 `docs/export/test-slidev-*`、`docs/export/test-slidev.pdf`、`docs/export/test-slidev-video.mp4` 或旧 `docs/export/slides/` 下；后续 Slidev 生成产物默认作为仓库外 evidence package 保存，除非任务明确要求提交经过审查的 artifact。
 
 当前限制：
 
@@ -228,7 +230,7 @@ mermaidSourcePreservation.changedFenceIndexes
 6. Mermaid `manual-review` 证据不是 hard gate failure。它是在“不修改原 Mermaid 内容”和“自动保证投影级可读”不能同时被证明时，正确暴露给维护者的透明结果。
 7. code splitting 仍是 parser-light；TypeScript/JavaScript/Python/Rust 已有 top-level tokenizer，但完整 AST 拆分与更多语言专用 splitter 仍是后续工作。
 8. Mermaid 不拆图约束不等于 Mermaid 演示质量自动合格。超大源图如果只能靠低 zoom 保持完整，流程应暴露 `source-preserved-fit-review` 或 `manual-review`，而不是静默改图。
-9. Stage 5/6 full-deck fixtures 已覆盖长表、宽表、混合代码、Mermaid 源图保持 fit、component-heavy slot Transform 边界、Mermaid/prose 分离、本地图片资产、嵌套 slot component、超宽表、frontmatter background/image/favicon、跨目录资产与离线字体边界，但仍不是 exhaustive；后续真实文档若出现媒体密集 deck、复杂 Vue component 或 unsupported layout 失败，应继续沉淀为 fixture。
+9. Stage 5/6 full-deck fixtures 已覆盖长表、宽表、混合代码、Mermaid 源图保持 fit、component-heavy slot Transform 边界、Mermaid/prose 非图内容移动、本地图片资产、嵌套 slot component、超宽表、frontmatter background/image/favicon、跨目录资产、CSS `url(...)` 图片/字体依赖与离线字体边界，但仍不是 exhaustive；后续真实文档若出现媒体密集 deck、复杂 Vue component 或 unsupported layout 失败，应继续沉淀为 fixture。
 
 ## 输出策略
 

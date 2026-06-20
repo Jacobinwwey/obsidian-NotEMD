@@ -306,6 +306,7 @@ describe('slidevExporter — All Format Combinations', () => {
         const preparedDeckPath = 'export/_slidev-sources/deck/deck.slidev.md';
         const preparedDeckDirectory = path.join(tempVaultRoot, 'export/_slidev-sources/deck');
         fs.mkdirSync(path.join(preparedDeckDirectory, 'assets'), { recursive: true });
+        fs.mkdirSync(path.join(preparedDeckDirectory, 'media'), { recursive: true });
         fs.writeFileSync(path.join(preparedDeckDirectory, 'deck.slidev.md'), [
             '---',
             'theme: default',
@@ -323,6 +324,7 @@ describe('slidevExporter — All Format Combinations', () => {
             '# Image',
             '',
             '![Texture](./assets/texture.svg)',
+            '<link rel="stylesheet" href="./assets/local-theme.css">',
             '',
             '---',
             'background: ../outside.svg',
@@ -334,6 +336,13 @@ describe('slidevExporter — All Format Combinations', () => {
         fs.writeFileSync(path.join(preparedDeckDirectory, 'assets/favicon.svg'), '<svg/>', 'utf8');
         fs.writeFileSync(path.join(preparedDeckDirectory, 'assets/hero.svg'), '<svg/>', 'utf8');
         fs.writeFileSync(path.join(preparedDeckDirectory, 'assets/texture.svg'), '<svg/>', 'utf8');
+        fs.writeFileSync(path.join(preparedDeckDirectory, 'assets/local-theme.css'), [
+            '@font-face { font-family: FixtureTheme; src: url("./theme-font.woff2") format("woff2"); }',
+            '.themed-backdrop { background-image: url("../media/theme-pattern.svg"); }',
+            '.bad-backdrop { background-image: url("../../outside.svg"); }',
+        ].join('\n'), 'utf8');
+        fs.writeFileSync(path.join(preparedDeckDirectory, 'assets/theme-font.woff2'), 'fake font payload', 'utf8');
+        fs.writeFileSync(path.join(preparedDeckDirectory, 'media/theme-pattern.svg'), '<svg/>', 'utf8');
         fs.writeFileSync(path.join(tempVaultRoot, 'export/_slidev-sources/outside.svg'), '<svg/>', 'utf8');
         mockGetVaultBasePath.mockReturnValue(tempVaultRoot);
         mockSafeRequire.mockImplementation((moduleName: string) => {
@@ -366,6 +375,9 @@ describe('slidevExporter — All Format Combinations', () => {
             expect(fs.existsSync(path.join(exportDirectory, 'assets/favicon.svg'))).toBe(true);
             expect(fs.existsSync(path.join(exportDirectory, 'assets/hero.svg'))).toBe(true);
             expect(fs.existsSync(path.join(exportDirectory, 'assets/texture.svg'))).toBe(true);
+            expect(fs.existsSync(path.join(exportDirectory, 'assets/local-theme.css'))).toBe(true);
+            expect(fs.existsSync(path.join(exportDirectory, 'assets/theme-font.woff2'))).toBe(true);
+            expect(fs.existsSync(path.join(exportDirectory, 'media/theme-pattern.svg'))).toBe(true);
             expect(fs.existsSync(path.join(exportDirectory, 'outside.svg'))).toBe(false);
         } finally {
             fs.rmSync(tempVaultRoot, { recursive: true, force: true });

@@ -367,8 +367,14 @@ describe('slidevSourcePreparer', () => {
         fs.writeFileSync(path.join(sourceDirectory, 'assets/poster.svg'), '<svg/>', 'utf8');
         fs.writeFileSync(path.join(sourceDirectory, 'assets/small.svg'), '<svg/>', 'utf8');
         fs.writeFileSync(path.join(sourceDirectory, 'assets/large.svg'), '<svg/>', 'utf8');
-        fs.writeFileSync(path.join(sourceDirectory, 'assets/local-theme.css'), 'body{}', 'utf8');
+        fs.writeFileSync(path.join(sourceDirectory, 'assets/local-theme.css'), [
+            '@font-face { font-family: FixtureTheme; src: url("./theme-font.woff2") format("woff2"); }',
+            '.themed-backdrop { background-image: url("../media/theme-pattern.svg"); }',
+            '.bad-backdrop { background-image: url("../../outside.svg"); }',
+        ].join('\n'), 'utf8');
+        fs.writeFileSync(path.join(sourceDirectory, 'assets/theme-font.woff2'), 'fake font payload', 'utf8');
         fs.writeFileSync(path.join(sourceDirectory, 'media/clip.mp4'), 'fake video payload', 'utf8');
+        fs.writeFileSync(path.join(sourceDirectory, 'media/theme-pattern.svg'), '<svg/>', 'utf8');
         fs.writeFileSync(path.join(tempVaultRoot, 'docs/outside.svg'), '<svg/>', 'utf8');
 
         app.vault.adapter.write = jest.fn(async (vaultPath: string, content: string) => {
@@ -396,7 +402,9 @@ describe('slidevSourcePreparer', () => {
         expect(fs.existsSync(path.join(workspaceRoot, 'assets/small.svg'))).toBe(true);
         expect(fs.existsSync(path.join(workspaceRoot, 'assets/large.svg'))).toBe(true);
         expect(fs.existsSync(path.join(workspaceRoot, 'assets/local-theme.css'))).toBe(true);
+        expect(fs.existsSync(path.join(workspaceRoot, 'assets/theme-font.woff2'))).toBe(true);
         expect(fs.existsSync(path.join(workspaceRoot, 'media/clip.mp4'))).toBe(true);
+        expect(fs.existsSync(path.join(workspaceRoot, 'media/theme-pattern.svg'))).toBe(true);
         expect(fs.existsSync(path.join(workspaceRoot, 'outside.svg'))).toBe(false);
         expect(fs.existsSync(path.join(workspaceRoot, 'absolute/poster.svg'))).toBe(false);
     });

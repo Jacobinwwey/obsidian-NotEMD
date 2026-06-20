@@ -57,5 +57,10 @@ docs/*_preview.png
 docs/*_diagram_preview.svg
 docs/*_diagram_preview.png
 
+# local Slidev test export artifacts
+docs/export/test-slidev-*/
+docs/export/test-slidev.pdf
+docs/export/test-slidev-video.mp4
+
 # GEO internal reports (not for public repo)
 GEO_OPTIMIZATION_REPORT.md

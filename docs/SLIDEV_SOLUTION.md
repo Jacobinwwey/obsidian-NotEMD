@@ -139,8 +139,8 @@ Real maintained baseline as of 2026-06-20:
 10. low effective font, tight margin, and low utilization now create structural patch recommendations for table/code/prose before whole-slide zoom is reduced further; Mermaid keeps the source fence intact by default
 11. source preparation now injects a clean-room `SlideLayoutPlan` budget into deterministic outlines and LLM deck prompts
 12. rendered audit now reports source-preserved Mermaid fit evidence through `layoutAudit[].mermaidFit` and summary counters for Mermaid review, low zoom, and manual-review cases; the latest real strict run reports `mermaidSlideCount = 3`, `mermaidFitReviewCount = 3`, `mermaidLowZoomCount = 3`, and `mermaidManualReviewCount = 1`
-13. mixed Mermaid/prose slides no longer solve fit by keeping low whole-slide zoom on prose; the patcher separates the non-Mermaid primary content onto a readable slide while preserving every source Mermaid fence as one unchanged fence
-14. explicit local relative assets referenced by Markdown images, HTML media/link/srcset attributes, and Slidev frontmatter keys are copied next to the prepared deck, so isolated `_slidev-sources` workspaces do not break source-relative SVG/PNG/JPEG/background/favicon/poster references
+13. mixed Mermaid/prose slides no longer solve fit by keeping low whole-slide zoom on prose; the patcher may move only the non-Mermaid primary content onto a readable slide while preserving every source Mermaid fence as one byte-stable unchanged fence
+14. explicit local relative assets referenced by Markdown images, HTML media/link/srcset attributes, and Slidev frontmatter keys are copied next to the prepared deck; local CSS files referenced by the deck are parsed for local `url(...)` image/font dependencies relative to the CSS file location, so isolated `_slidev-sources` workspaces do not break source-relative SVG/PNG/JPEG/background/favicon/poster/font references
 15. the local Slidev fork's standalone bundler now preserves first-slide loader bindings when stubbing Vite preload helpers; NoteMD's strict standalone gate remains fail-closed and continues to report real `loaderGaps`
 16. HTML export syncs the prepared deck's explicit local file references into the final `<source>-slides/` output directory, and prepared decks default to `fonts.provider: none` unless the source already declares top-level `fonts:`
 
@@ -165,7 +165,7 @@ The current render-feedback loop is now:
    - generic slot-marked layouts, including explicit `::default::`, supported built-in slot layouts, and custom named slots when the slot content is structurally patchable
    - unique component-heavy slot zones through local `<Transform :scale="...">` wrapping when structural splitting is unavailable
    - first-slide deck headmatter content when structural splitting is possible
-   - mixed Mermaid/prose slides by separating prose/list content while preserving each Mermaid fence unchanged
+   - mixed Mermaid/prose slides by moving prose/list content away from the diagram slide while preserving each Mermaid fence unchanged
 7. The HTML exporter now records structured HTML outcomes, rejects known-bad native standalone bundles, preserves rejected native attempts as `index-standalone.failed.html`, and falls back to server-script-compatible HTML only for the compatibility path.
 8. The verifier now audits the full deck by default and keeps retrying within a bounded loop until the rendered deck fits or the retry budget is exhausted.
 
@@ -173,7 +173,7 @@ Mermaid handling has a stricter content-preservation rule than tables, code, or 
 
 The verifier now enforces that rule with `mermaidSourcePreservation`: each exported Mermaid fence is compared to the corresponding source fence. A block-count-only match is not enough.
 
-Mixed Mermaid/prose slides are different from Mermaid-only slides: low whole-slide zoom is not acceptable because it makes the prose unreadable. The supported repair is to keep the Mermaid source fence intact on a diagram-focused slide and move the prose/list content to its own readable slide. If the slide layout is unsupported and that separation cannot be done safely, the patcher blocks the low zoom instead of shrinking mixed content.
+Mixed Mermaid/prose slides are different from Mermaid-only slides: low whole-slide zoom is not acceptable because it makes the prose unreadable. The supported repair is to keep the Mermaid source fence byte-stable on a diagram-focused slide and move only the prose/list content to its own readable slide. It is not a license to split one Mermaid diagram into several diagrams. If the slide layout is unsupported and that prose move cannot be done safely, the patcher blocks the low zoom instead of shrinking mixed content.
 
 That rule is also covered by a unit regression now: even if a Mermaid slide is mistakenly routed toward a code structural patch, the patcher must refuse to treat a `mermaid` fence as a splittable code block.
 
@@ -203,8 +203,10 @@ Current landed state:
    - local CSS `transform` / independent `scale` / CSS `zoom` awareness in effective font measurement, so locally transformed content is judged by rendered size
 14. the real `docs/architecture.zh-CN.md` strict native standalone run now closes with `actualMode = "standalone"`, `requiresLocalServer = false`, `loaderGaps = []`, `standaloneGate.passed = true`, `29` audited slides, zero hard overflow / unreadable scale / low effective font / quality margin warning / low utilization findings, and bounded retry closure.
 15. Mermaid fit review is now explicit report data. It is intentionally separate from hard overflow: a `manual-review` Mermaid status is evidence that source preservation and automatic readability proof are in tension, not permission to auto-split the diagram.
-16. the expanded full-deck fixture suite archives native standalone fixtures under `/home/jacob/slidev-export-review/2026-06-20-expanded-layout-fixtures/`: source-layout stress with 52 Slidev skill references, slot/component Transform stress, mixed Mermaid/prose separation, media/nested-slot/ultra-wide-table stress, and frontmatter/cross-directory asset stress.
-17. prepared deck export now keeps explicit frontmatter/media assets available in final HTML output and disables remote font providers by default for prepared decks, while preserving explicit user font configuration.
+16. the expanded full-deck fixture suite archives native standalone fixtures under `/home/jacob/slidev-export-review/2026-06-20-expanded-layout-fixtures/`: source-layout stress with 52 Slidev skill references, slot/component Transform stress, mixed Mermaid/prose non-diagram content separation, media/nested-slot/ultra-wide-table stress, and frontmatter/cross-directory asset stress.
+17. prepared deck export now keeps explicit frontmatter/media/CSS dependency assets available in final HTML output and disables remote font providers by default for prepared decks, while preserving explicit user font configuration.
+18. the final CSS dependency verification archive is `/home/jacob/slidev-export-review/2026-06-20-css-asset-dependencies-final/`: the real `architecture.zh-CN.md` strict standalone report is `ok = true`, uses `/home/jacob/slidev/packages/slidev/bin/slidev.mjs`, loads 52 Slidev skill references, preserves all 3 source Mermaid fences byte-for-byte, and outputs native standalone HTML without local-server fallback.
+19. historical generated `docs/export/test-slidev-*`, `docs/export/test-slidev.pdf`, `docs/export/test-slidev-video.mp4`, and old `docs/export/slides/` artifacts are no longer tracked in `main`; reusable export guidance remains in `docs/export/README.md` and `docs/export/README.zh-CN.md`.
 
 Current gap:
 

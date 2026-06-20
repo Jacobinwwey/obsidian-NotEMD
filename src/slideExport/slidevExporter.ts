@@ -8,7 +8,7 @@
 import type { App } from 'obsidian';
 import type { SlideExportConfig, ExecResult, ExportProgressCallback, SlidevExportSource, SlidevHtmlActualMode, SlidevHtmlExportOutcome } from './types';
 import { execFileAsync, getVaultBasePath, resolveNpxCommand, resolvePlaywrightBrowsersPath, resolveSlidevCommand, safeRequire } from './platformUtils';
-import { extractLocalAssetReferences } from './slidevSourcePreparer';
+import { collectLocalAssetReferencesWithDependencies } from './slidevSourcePreparer';
 
 function createBuildArgs(
 	inputPath: string,
@@ -62,7 +62,7 @@ function copyPreparedLocalFileReferencesToExport(
 	const preparedDeckDirectory = path.dirname(absolutePreparedDeckPath);
 	const copiedAssets: string[] = [];
 	const deckMarkdown = fs.readFileSync(absolutePreparedDeckPath, 'utf8');
-	for (const referencePath of extractLocalAssetReferences(deckMarkdown)) {
+	for (const referencePath of collectLocalAssetReferencesWithDependencies(fs, path, preparedDeckDirectory, deckMarkdown)) {
 		const absoluteSourceAsset = path.join(preparedDeckDirectory, referencePath);
 		if (!isInsideDirectory(path, preparedDeckDirectory, absoluteSourceAsset) || !fs.existsSync(absoluteSourceAsset)) {
 			continue;
