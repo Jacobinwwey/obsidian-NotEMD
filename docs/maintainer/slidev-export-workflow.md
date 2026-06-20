@@ -186,6 +186,7 @@ Current landed truth as of 2026-06-20:
 21. TypeScript and JavaScript code fences now use a lightweight top-level tokenizer before generic semantic splitting, so contiguous import groups and top-level type/function/class/const declarations stay intact when a dense code slide is distributed across several slides.
 22. Mermaid source preservation now has an explicit regression test: even if a Mermaid slide is mistakenly routed toward a code structural patch, the patcher must not treat one `mermaid` fence as a splittable code block.
 23. Python and Rust code fences now also use lightweight top-level tokenizers before generic semantic splitting, preserving Python import groups, decorators, top-level class/function blocks, Rust use groups, attributes, and top-level struct/enum/trait/impl/fn/mod items.
+24. Stage 5 fixture coverage now separates `source-preserved-fit-review` from `manual-review` for preserved Mermaid diagrams and uses a Playwright measurement fixture to prove record-list table fallback renders as readable text instead of an overflowing table.
 
 Current limitation:
 
@@ -197,6 +198,7 @@ Current limitation:
 6. Mermaid `manual-review` evidence is not a hard gate failure. It is the correct fail-transparent outcome when preserving the original Mermaid source and guaranteeing projector-level readability cannot both be proven automatically.
 7. code splitting is still parser-light. TypeScript/JavaScript/Python/Rust now have top-level tokenizers, but full AST splitting and more language-specific splitters remain future work.
 8. The Mermaid no-split constraint does not mean Mermaid presentation quality automatically passes. If a very large source diagram can only remain complete at low zoom, the workflow should surface `source-preserved-fit-review` or `manual-review` instead of silently rewriting the diagram.
+9. Stage 5 fixtures now cover the key boundaries, but they are not exhaustive: real long-table, wide-table, and mixed-code cases still need dedicated full-deck export fixtures instead of relying only on local Markdown patches or single-page measurement.
 
 ## Output Policy
 

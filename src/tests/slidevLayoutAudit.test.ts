@@ -105,6 +105,64 @@ describe('slidevLayoutAudit', () => {
 		expect(audit.findings).toEqual([]);
 	});
 
+	test('separates source-preserved Mermaid fit review from manual-review conflicts', () => {
+		const fitReviewAudit = analyzeRenderedSlideMeasurement(createMeasurement({
+			pageScale: 0.62,
+			contentBounds: { left: 110, top: 96, right: 980, bottom: 600, width: 870, height: 504 },
+			elements: [
+				{
+					kind: 'mermaid',
+					selector: '.mermaid',
+					textLength: 160,
+					textPreview: 'Dense but readable Mermaid graph',
+					minFontPx: 16,
+					effectiveMinFontPx: 10.4,
+					svgTextMinFontPx: 10.4,
+					textSampleCount: 12,
+					scrollWidth: 870,
+					scrollHeight: 504,
+					clientWidth: 870,
+					clientHeight: 504,
+					rect: { left: 110, top: 96, right: 980, bottom: 600, width: 870, height: 504 },
+				},
+			],
+		}));
+		const manualReviewAudit = analyzeRenderedSlideMeasurement(createMeasurement({
+			pageScale: 0.3,
+			contentBounds: { left: -180, top: 50, right: 1800, bottom: 650, width: 1980, height: 600 },
+			elements: [
+				{
+					kind: 'mermaid',
+					selector: '.mermaid',
+					textLength: 220,
+					textPreview: 'Oversized preserved Mermaid graph',
+					minFontPx: 36,
+					effectiveMinFontPx: 10.8,
+					svgTextMinFontPx: 10.8,
+					textSampleCount: 16,
+					scrollWidth: 1980,
+					scrollHeight: 600,
+					clientWidth: 1980,
+					clientHeight: 600,
+					rect: { left: -180, top: 50, right: 1800, bottom: 650, width: 1980, height: 600 },
+				},
+			],
+		}));
+
+		expect(fitReviewAudit.mermaidFit).toEqual(expect.objectContaining({
+			status: 'source-preserved-fit-review',
+			lowZoom: true,
+			lowFont: false,
+			tightMargin: false,
+		}));
+		expect(fitReviewAudit.mermaidFit?.reason).toContain('preserved Mermaid zoom');
+		expect(manualReviewAudit.mermaidFit).toEqual(expect.objectContaining({
+			status: 'manual-review',
+			lowFont: false,
+		}));
+		expect(manualReviewAudit.mermaidFit?.reason).toContain('safe-rect fit would require zoom');
+	});
+
 	test('refuses to split Mermaid fences even if a structural code patch is requested', () => {
 		const audit: SlidevLayoutAudit = {
 			slide: 2,

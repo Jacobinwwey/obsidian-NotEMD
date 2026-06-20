@@ -3,7 +3,7 @@ date: 2026-06-20
 last_updated: 2026-06-20
 topic: slidev-layout-quality-and-canvas-roadmap
 canonical: true
-status: python-rust-code-tokenizer-implemented
+status: stage5-fixture-boundaries-implemented
 ---
 
 # Slidev 布局质量与画布规划路线
@@ -26,7 +26,7 @@ status: python-rust-code-tokenizer-implemented
 
 1. 分支：`main`
 2. 远端：`origin/main`
-3. 本批次实现内容：rendered quality gate + clean-room `SlideLayoutPlan` 第一切片 + Mermaid 源图保持 fit 审计 + JS/TS/Python/Rust tokenizer + Mermaid 不拆图回归契约
+3. 本批次实现内容：rendered quality gate + clean-room `SlideLayoutPlan` 第一切片 + Mermaid 源图保持 fit 审计 + JS/TS/Python/Rust tokenizer + Mermaid 不拆图回归契约 + Stage 5 fixture 边界补强
 4. 真实源文件：`docs/architecture.zh-CN.md`
 5. 本批次真实导出证据包：`/home/jacob/slidev-export-review/2026-06-20-quality/`
 6. 本批次成功输出归档：`/home/jacob/slidev-export-review/2026-06-20-quality/preserve-mermaid-success-export-final/`
@@ -48,7 +48,8 @@ status: python-rust-code-tokenizer-implemented
 10. `architecture.zh-CN.md` strict native standalone rerun 已通过：`slideCount = 29`，源文档与导出 deck 均为 3 个 Mermaid block，hard overflow / unreadable scale / low effective font / quality margin warning / low utilization 均为零；
 11. `slidevLayoutAudit` 单测新增 Mermaid source-preservation 回归：即使误收到 code structural patch，也不会把一个 Mermaid fence 拆成多个 fence；
 12. Python/Rust code fence 现在也会先走轻量 top-level tokenizer，保持 import/use 组、decorator/attribute 与顶层 class/function/impl/module item 完整；
-13. 当前生成产物可被 Git 看到，用于本地视觉检查，但不应提交进 `main`。
+13. Stage 5 fixture 已把 Mermaid 的 `source-preserved-fit-review` 与 `manual-review` 分开测试，并用真实 Playwright measurement 验证长表 record-list fallback 是可读文本，不再是挤压后的 table；
+14. 当前生成产物可被 Git 看到，用于本地视觉检查，但不应提交进 `main`。
 
 当前未完成事实：
 
@@ -448,11 +449,11 @@ interface SlideLayoutPlan {
 
 实现状态：已新增/扩展 unit fixtures：
 
-1. `src/tests/slidevLayoutAudit.test.ts` 覆盖 low effective font measurement、Mermaid 源图保持、Mermaid fit/manual-review 统计、table/code 质量 finding 驱动结构拆分、长 cell record-list fallback、代码语义块拆分、TypeScript import 组和顶层声明 tokenizer、Python import/decorator/top-level block tokenizer、Rust use/attribute/top-level item tokenizer、summary 新字段；
+1. `src/tests/slidevLayoutAudit.test.ts` 覆盖 low effective font measurement、Mermaid 源图保持、Mermaid fit/manual-review 统计、`source-preserved-fit-review` 与 `manual-review` 分流、table/code 质量 finding 驱动结构拆分、长 cell record-list fallback、代码语义块拆分、TypeScript import 组和顶层声明 tokenizer、Python import/decorator/top-level block tokenizer、Rust use/attribute/top-level item tokenizer、summary 新字段；
 2. `src/tests/slidevLayoutPlan.test.ts` 覆盖 clean-room layout budget 对 Mermaid 的 `preserve-source-fit` 与 table/code 的 pre-split 判断；
 3. `src/tests/slidevSourcePreparer.test.ts` 覆盖 deterministic outline 与 LLM prompt 都带 layout budget；
 4. `src/tests/slidevLayoutWorkflow.test.ts` 更新 summary schema，避免 verifier mock 停留在旧字段；
-5. `src/tests/slidevRenderedMeasurement.test.ts` 用真实 Playwright 页面验证局部 `transform: scale(0.5)` 与整页 `--slidev-slide-zoom-scale: 0.8` 会把 20px code font 测为 8px effective font。
+5. `src/tests/slidevRenderedMeasurement.test.ts` 用真实 Playwright 页面验证局部 `transform: scale(0.5)` 与整页 `--slidev-slide-zoom-scale: 0.8` 会把 20px code font 测为 8px effective font，并验证长表 record-list fallback 在浏览器里以可读文本呈现、不残留 table overflow。
 
 ## 8. 与上游 Slidev skill PR 的关系
 
@@ -489,11 +490,12 @@ interface SlideLayoutPlan {
 7. Stage 1 第二切片：effective font measurement 已感知局部 CSS transform / scale / zoom，避免 `<Transform>` 包裹内容被误判为仍有原始字号。
 8. Stage 4 第三切片：TypeScript/JavaScript code fence 先走 top-level tokenizer，连续 import 组和顶层 type/function/class/const 声明保持完整，再进入 chunk 分配。
 9. Stage 4 第四切片：Python/Rust code fence 先走 top-level tokenizer，import/use 组、decorator/attribute 与顶层 class/function/impl/module item 保持完整，再进入 chunk 分配。
+10. Stage 5 第一切片：Mermaid fit status 分流 fixture 与 record-list Playwright measurement fixture 已落地，明确 Mermaid 源图保持问题进入审计状态，表格可读性问题走结构化文本 fallback。
 
 建议下一批实现顺序：
 
-1. 扩展真实 fixture 包，把“保留 Mermaid 源图导致低 zoom 可接受”和“应人工复核”的场景分开，避免 gate 过松或误杀；
-2. 针对真实长表 fixture 增加 record-list 视觉验收，而不是只看 Markdown 结构；
+1. 增加 dedicated full-deck/export fixture，覆盖真实长表、宽表、混合代码页的完整导出链路，而不是只看 Markdown 结构或局部浏览器 fixture；
+2. 对 Mermaid 继续只做源图保持的 fit/zoom/Transform 与人工复核边界，不引入自动拆原图策略；
 3. 继续增强更多语言专用 splitter；Python/Rust 当前是 parser-light，不是完整 AST；
 4. 评估是否把 source-preserved Mermaid fit review 抽成通用 Slidev skill PR 建议。
 

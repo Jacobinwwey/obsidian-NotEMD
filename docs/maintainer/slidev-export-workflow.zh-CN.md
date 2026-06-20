@@ -186,6 +186,7 @@ layoutAuditSummary.retryCount
 21. TypeScript 与 JavaScript code fence 现在会先走轻量 top-level tokenizer，再进入通用语义拆分；连续 import 组和顶层 type/function/class/const 声明在密集代码页拆分时保持完整。
 22. Mermaid source-preservation 现在有独立回归测试：即使 Mermaid slide 被错误送入 code structural patch 候选，patcher 也不会把一个 `mermaid` fence 当作可拆分代码块。
 23. Python 与 Rust code fence 现在也会先走轻量 top-level tokenizer，再进入通用语义拆分；Python import 组、decorator、顶层 class/function block，以及 Rust use 组、attribute、顶层 struct/enum/trait/impl/fn/mod item 会保持完整。
+24. Stage 5 fixture 覆盖现在已经把保留 Mermaid 源图时的 `source-preserved-fit-review` 与 `manual-review` 分开测试，并用 Playwright measurement fixture 证明 record-list table fallback 在浏览器里是可读文本，不再是溢出的 table。
 
 当前限制：
 
@@ -197,6 +198,7 @@ layoutAuditSummary.retryCount
 6. Mermaid `manual-review` 证据不是 hard gate failure。它是在“不修改原 Mermaid 内容”和“自动保证投影级可读”不能同时被证明时，正确暴露给维护者的透明结果。
 7. code splitting 仍是 parser-light；TypeScript/JavaScript/Python/Rust 已有 top-level tokenizer，但完整 AST 拆分与更多语言专用 splitter 仍是后续工作。
 8. Mermaid 不拆图约束不等于 Mermaid 演示质量自动合格。超大源图如果只能靠低 zoom 保持完整，流程应暴露 `source-preserved-fit-review` 或 `manual-review`，而不是静默改图。
+9. Stage 5 fixture 已加强关键边界，但还不是 exhaustive：真实长表/宽表/混合代码页仍需要 dedicated full-deck export fixture，不能只依赖局部 Markdown patch 或单页 measurement。
 
 ## 输出策略
 
