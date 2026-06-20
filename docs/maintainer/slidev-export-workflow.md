@@ -15,7 +15,7 @@ The NoteMD workflow must verify all of these steps together:
 3. The local Slidev fork is preferred when present.
 4. Existing Slidev decks are copied into an isolated prepared working workspace before verification so patch/retry never mutates the source note directly and sibling Slidev support entries plus explicitly referenced local assets can be mirrored into the working copy.
 5. The output directory is recreated before each HTML build so stale chunks cannot survive.
-6. Generated deck guardrails normalize theme, slide frontmatter, and seed large Mermaid diagram zoom only when the slide does not already declare its own zoom; LLM-generated decks that change source Mermaid fences are rejected before the prepared deck is written.
+6. Generated deck guardrails normalize theme and slide frontmatter, strip generated Mermaid slide `zoom` so rendered audit owns measured fit, and reject LLM-generated decks that change source Mermaid fences before the prepared deck is written.
 7. HTML export attempts native standalone first, records the actual HTML mode, and falls back to server-script-compatible HTML only when the generated standalone bundle really misses slide loader bindings.
 8. The final HTML output is opened by a real browser check, auditing the full deck by default.
 9. Generated inspection artifacts remain visible to Git and are not accidentally hidden by `.gitignore`.
@@ -190,7 +190,7 @@ Current landed truth as of 2026-06-20:
 1. default HTML verification audits the full prepared deck when `--sample-slides` is not provided;
 2. the patcher derives `zoom` from measured overflow instead of fixed export constants;
 3. the patcher preserves source Mermaid fences by default and escalates to structural splitting for Markdown tables, pathological width-heavy or long-cell tables through record-list fallback, non-Mermaid fenced code blocks, simple heading + paragraph/list slides, generic slot-marked layouts (including explicit `::default::`), and first-slide deck headmatter content when structural splitting is possible;
-4. large Mermaid guardrails no longer overwrite a slide that already declares its own `zoom`;
+4. generated Mermaid slide guardrails no longer seed or trust LLM-chosen `zoom`; generated Mermaid zoom is stripped before `_slidev-sources` is written, while existing user-authored Slidev decks keep their explicit source settings in the isolated working copy;
 5. existing Slidev decks now use isolated prepared working-copy directories under `_slidev-sources/<deck-basename>/`, and common sibling Slidev support entries such as `layouts/`, `public/`, `setup/`, `components/`, `snippets/`, `styles/`, `global-top.vue`, and `global-bottom.vue` are mirrored into that workspace when present;
 6. rendered layout audit now also measures direct-text `div`/`section`/`article`/`aside`/`span` blocks, so component-heavy slides do not silently under-audit as empty layouts;
 7. component-heavy slot zones now carry lightweight owner wrappers inside prepared working copies, and rendered measurement now records zone-level owner rects, content bounds, scroll overflow, and recommended local transform scales for those zones;
@@ -306,7 +306,7 @@ Good upstream skill candidates:
 1. when converting long-form technical documents into Slidev decks, use the full skill reference set instead of relying only on the top-level `SKILL.md`;
 2. prefer built-in or configured themes unless the project explicitly declares an installed custom theme;
 3. close per-slide frontmatter before slide body content;
-4. use `zoom` or `Transform` for large Mermaid diagrams, tables, and dense code blocks;
+4. keep user Mermaid diagrams intact and let rendered browser audit derive any required Mermaid zoom or review state, while tables and dense code blocks use structural splits, `zoom`, or `Transform` according to measured overflow;
 5. verify exported decks by building and opening rendered slides in a browser, not only by checking that Markdown was generated;
 6. clear or recreate output directories before rebuilds when stale assets can affect browser output.
 

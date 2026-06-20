@@ -15,7 +15,7 @@ NoteMD 的验证必须把以下步骤串起来看：
 3. 本地 Slidev fork 存在时会被优先使用。
 4. 现有 Slidev deck 也会先复制到隔离的 prepared working workspace，再进入验证链，避免 patch/retry 直接改写源笔记，同时允许把 sibling Slidev support entries 和显式引用的本地资产一并镜像进 working copy。
 5. 每次 HTML build 前会重建输出目录，避免旧 chunk 残留。
-6. 生成 deck 的 guardrails 会规范 theme、逐页 frontmatter，并且只在页面本身没有声明 `zoom` 时才为大 Mermaid 图补缺省 zoom；LLM 生成的 deck 如果改变源 Mermaid fence，会在写入 prepared deck 前被拒绝。
+6. 生成 deck 的 guardrails 会规范 theme 与逐页 frontmatter，并剥离生成页中的 Mermaid `zoom`，让 rendered audit 拥有实测 fit 决策权；LLM 生成的 deck 如果改变源 Mermaid fence，会在写入 prepared deck 前被拒绝。
 7. HTML 导出会先尝试 native standalone，记录实际 HTML mode；只有在生成的 standalone bundle 确实缺少 slide loader binding 时，才自动回退到 server-script 兼容 HTML。
 8. 最终 HTML 输出会经过真实浏览器打开，并默认审计整个 deck。
 9. 生成的检查产物对 Git 可见，不会被 `.gitignore` 意外隐藏。
@@ -190,7 +190,7 @@ mermaidSourcePreservation.changedFenceIndexes
 1. 默认 HTML 验证在未传 `--sample-slides` 时会审计整个准备后的 deck；
 2. patcher 的 `zoom` 来自真实 overflow 测量，而不是固定导出常数；
 3. patcher 默认保留 Mermaid 源 fence，并会在不宜继续缩小时对 Markdown table、病态宽表或长 cell 表的 record-list fallback、非 Mermaid fenced code block、简单的标题 + 段落/列表页、generic slot-marked layout（含显式 `::default::`），以及可结构拆分的第一张 deck headmatter 页面做结构化拆分；
-4. 大 Mermaid guardrail 不会再覆盖页面里已经显式声明的 `zoom`；
+4. 生成 Mermaid 页的 guardrail 不再补缺省 `zoom`，也不信任 LLM 选择的 Mermaid `zoom`；写入 `_slidev-sources` 前会剥离生成页中的 Mermaid zoom，但用户已有 Slidev 源 deck 会在隔离 working copy 中保留显式源设置；
 5. 现有 Slidev deck 现在会进入 `_slidev-sources/<deck-basename>/` 隔离 working copy 目录；若 sibling 下存在 `layouts/`、`public/`、`setup/`、`components/`、`snippets/`、`styles/`、`global-top.vue`、`global-bottom.vue` 等常见 Slidev support entries，也会一并镜像进去；
 6. 渲染后布局审计现在也会测量带直接文本的 `div` / `section` / `article` / `aside` / `span`，因此 component-heavy 页面不会再被静默低估成“空布局”；
 7. component-heavy slot zone 现在会在 prepared working copy 中带上轻量 owner wrapper；渲染测量不仅会带回 slot ownership，还会记录 zone 级 owner rect、content bounds、scroll overflow 与推荐的局部 transform scale；
@@ -306,7 +306,7 @@ git diff --check
 1. 将长篇技术文档转换成 Slidev deck 时，应使用完整 skill references，而不是只依赖顶层 `SKILL.md`；
 2. 除非项目明确声明已安装自定义主题，否则优先使用内置或调用方配置的主题；
 3. 逐页 frontmatter 必须在正文前闭合；
-4. 大 Mermaid 图、表格和密集代码块应使用 `zoom` 或 `Transform`；
+4. 用户 Mermaid 图必须保持完整，并让浏览器 rendered audit 推导必要的 Mermaid zoom 或复核状态；表格与密集代码块再按实测 overflow 使用结构化拆分、`zoom` 或 `Transform`；
 5. 验证导出结果时应 build 并在浏览器里检查渲染页，而不只是检查 Markdown 已生成；
 6. 当旧资产可能影响浏览器输出时，重建前应清理或重建输出目录。
 

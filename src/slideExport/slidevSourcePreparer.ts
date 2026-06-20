@@ -37,7 +37,6 @@ interface SlidevSourcePreparationOptions {
 
 const MAX_DETERMINISTIC_SLIDE_CHARS = 1350;
 const MAX_LLM_REFERENCE_CHARS = 120000;
-const LARGE_MERMAID_LINE_THRESHOLD = 32;
 const SLIDEV_SUPPORT_DIRECTORIES = ['layouts', 'public', 'setup', 'snippets', 'components', 'styles'];
 const SLIDEV_SUPPORT_FILES = ['global-top.vue', 'global-bottom.vue', 'style.css', 'styles.css'];
 const SLIDEV_LOCAL_FILE_FRONTMATTER_KEYS = new Set(['background', 'image', 'src', 'favicon', 'poster', 'download']);
@@ -367,58 +366,33 @@ function hasTopLevelDeckHeadmatterKey(lines: string[], headmatterEnd: number, ke
 }
 
 function applySlideGuardrails(slideMarkdown: string): string {
-	const normalizedSlide = normalizeSlideFrontmatter(slideMarkdown);
-	const mermaidLineCount = countLargestMermaidBlockLines(normalizedSlide);
-	if (mermaidLineCount < LARGE_MERMAID_LINE_THRESHOLD) {
-		return normalizedSlide;
-	}
-	if (hasSlideFrontmatterValue(normalizedSlide, 'zoom')) {
-		return normalizedSlide;
-	}
-
-	const zoom = resolveDiagramSlideZoom(mermaidLineCount);
-	return ensureSlideFrontmatterValue(normalizedSlide, 'zoom', zoom);
+	return stripGeneratedMermaidSlideZoom(normalizeSlideFrontmatter(slideMarkdown));
 }
 
-function countLargestMermaidBlockLines(markdown: string): number {
-	const lines = markdown.split(/\r?\n/);
-	let inMermaidFence = false;
-	let currentLines = 0;
-	let largestBlock = 0;
-
-	for (const line of lines) {
-		if (!inMermaidFence && /^(```+|~~~+)\s*mermaid(?:\s+\{[^}]+\})?\s*$/i.test(line.trim())) {
-			inMermaidFence = true;
-			currentLines = 0;
-			continue;
-		}
-
-		if (inMermaidFence && /^(```+|~~~+)\s*$/.test(line.trim())) {
-			largestBlock = Math.max(largestBlock, currentLines);
-			inMermaidFence = false;
-			currentLines = 0;
-			continue;
-		}
-
-		if (inMermaidFence) {
-			currentLines += 1;
-		}
+function stripGeneratedMermaidSlideZoom(slideMarkdown: string): string {
+	const lines = slideMarkdown.split(/\r?\n/);
+	const frontmatterEnd = findSlideFrontmatterEnd(lines);
+	if (frontmatterEnd <= 0 || !slideBodyContainsMermaidFence(lines.slice(frontmatterEnd + 1))) {
+		return slideMarkdown;
 	}
 
-	return Math.max(largestBlock, currentLines);
+	const frontmatterLines = lines
+		.slice(0, frontmatterEnd)
+		.filter(line => !/^zoom\s*:/i.test(line.trim()));
+	const bodyLines = lines.slice(frontmatterEnd + 1);
+	if (!frontmatterLines.some(line => line.trim().length > 0)) {
+		return bodyLines.join('\n').replace(/^\s+/, '');
+	}
+
+	return [
+		...frontmatterLines,
+		'---',
+		...bodyLines,
+	].join('\n');
 }
 
-function resolveDiagramSlideZoom(mermaidLineCount: number): string {
-	if (mermaidLineCount >= 68) {
-		return '0.28';
-	}
-	if (mermaidLineCount >= 56) {
-		return '0.34';
-	}
-	if (mermaidLineCount >= 44) {
-		return '0.40';
-	}
-	return '0.52';
+function slideBodyContainsMermaidFence(lines: string[]): boolean {
+	return lines.some(line => /^(```+|~~~+)\s*mermaid(?:\s+\{[^}]+\})?\s*$/i.test(line.trim()));
 }
 
 function ensureSlideFrontmatterValue(slideMarkdown: string, key: string, value: string): string {
@@ -489,12 +463,6 @@ function findSlideFrontmatterEnd(lines: string[]): number {
 function startsWithFrontmatterValue(lines: string[]): boolean {
 	const firstContentLine = lines.findIndex(line => line.trim().length > 0);
 	return firstContentLine >= 0 && /^[A-Za-z][\w-]*\s*:/.test(lines[firstContentLine].trim());
-}
-
-function hasSlideFrontmatterValue(slideMarkdown: string, key: string): boolean {
-	const lines = slideMarkdown.split(/\r?\n/);
-	const frontmatterEnd = findSlideFrontmatterEnd(lines);
-	return frontmatterEnd > 0 && hasFrontmatterValue(lines, frontmatterEnd, key);
 }
 
 function findBareFrontmatterBodyStart(lines: string[]): number {
@@ -925,7 +893,7 @@ function buildSlidevDeckPrompt(
 		'Preserve each source Mermaid fence as one Mermaid diagram; do not split or rewrite one Mermaid diagram into several diagrams.',
 		'If a Mermaid diagram shares a slide with prose, move the non-Mermaid prose outside the diagram slide when needed; keep the Mermaid fence byte-stable.',
 		'Split dense prose, tables, or code into multiple readable slides instead of making one overflowing slide.',
-		'For large Mermaid diagrams, preserve the source diagram and use layout, zoom, Transform, speaker notes, or adjacent explanation outside the fence.',
+		'For large Mermaid diagrams, preserve the source diagram and use layout, diagram-focused slides, Transform containers, speaker notes, or adjacent explanation outside the fence; do not choose Mermaid zoom manually because rendered audit owns measured fit.',
 		'For large tables or code blocks, prefer row/column splits or focused excerpts before zoom or Transform.',
 		'Do not use zoom below 0.72 for primary prose, table, or code content unless the slide is a deliberate overview and detail slides follow.',
 	].join('\n');
@@ -979,7 +947,7 @@ function buildSlidevDeckFromOutlinePrompt(
 		'Preserve each source Mermaid fence as one Mermaid diagram; do not split or rewrite one Mermaid diagram into several diagrams.',
 		'If a Mermaid diagram shares a slide with prose, move the non-Mermaid prose outside the diagram slide when needed; keep the Mermaid fence byte-stable.',
 		'Split dense prose, tables, or code into multiple readable slides instead of making one overflowing slide.',
-		'For large Mermaid diagrams, preserve the source diagram and use layout, zoom, Transform, speaker notes, or adjacent explanation outside the fence.',
+		'For large Mermaid diagrams, preserve the source diagram and use layout, diagram-focused slides, Transform containers, speaker notes, or adjacent explanation outside the fence; do not choose Mermaid zoom manually because rendered audit owns measured fit.',
 		'For large tables or code blocks, prefer row/column splits or focused excerpts before zoom or Transform.',
 		'Do not use zoom below 0.72 for primary prose, table, or code content unless the slide is a deliberate overview and detail slides follow.',
 	].join('\n');
@@ -1030,7 +998,7 @@ function buildSlidevOutlinePrompt(
 		'Use the deterministic layout budget to decide where the deck must pre-split dense prose/table/code and where Mermaid needs source-preserving fit review.',
 		'Return only Markdown. Do not wrap the outline in a code fence.',
 		'Define the intended slide sequence, each slide purpose, likely layout, source sections, and risks.',
-		'Call out Mermaid diagrams that must preserve their source fence, mixed Mermaid/prose slides where only non-Mermaid prose may move, and tables, code blocks, and dense sections that require splitting, zoom, Transform, or alternate layouts.',
+		'Call out Mermaid diagrams that must preserve their source fence and leave zoom to rendered fit audit, mixed Mermaid/prose slides where only non-Mermaid prose may move, and tables, code blocks, and dense sections that require splitting, zoom, Transform, or alternate layouts.',
 		'The outline is a planning artifact for a later Slidev deck generation step, not the final deck.',
 	].join('\n');
 

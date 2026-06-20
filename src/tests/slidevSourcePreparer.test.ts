@@ -240,6 +240,39 @@ describe('slidevSourcePreparer', () => {
         expect(writtenDeck).not.toContain('provider: none');
     });
 
+    test('existing Slidev decks preserve explicit Mermaid slide zoom in the working copy', async () => {
+        const markdown = [
+            '---',
+            'theme: default',
+            '---',
+            '',
+            '# First',
+            '',
+            '---',
+            'layout: default',
+            'zoom: 0.46',
+            '---',
+            '',
+            '```mermaid',
+            'flowchart TB',
+            '  A --> B',
+            '```',
+        ].join('\n');
+        const app = createApp(markdown);
+
+        await prepareSlidevExportSource(
+            app,
+            createFile('docs/explicit-zoom-slidev.md'),
+            config,
+            {},
+            jest.fn()
+        );
+
+        const writtenDeck = (app.vault.adapter.write as jest.Mock).mock.calls[0][1] as string;
+        expect(writtenDeck).toContain('zoom: 0.46');
+        expect(writtenDeck).toContain('```mermaid\nflowchart TB\n  A --> B\n```');
+    });
+
     test('existing Slidev decks reached from saved outline use the same offline working copy guardrails', async () => {
         const markdown = [
             '---',
@@ -472,7 +505,7 @@ describe('slidevSourcePreparer', () => {
         expect(deck).toContain('console.log(119)');
     });
 
-    test('presentation guardrails zoom large Mermaid slides', () => {
+    test('presentation guardrails leave large Mermaid zoom to rendered audit', () => {
         const mermaidLines = Array.from({ length: 58 }, (_, index) => `    A${index} --> A${index + 1}`).join('\n');
         const deck = [
             '---',
@@ -495,11 +528,12 @@ describe('slidevSourcePreparer', () => {
 
         const guardedDeck = applySlidevPresentationGuardrails(deck);
 
-        expect(guardedDeck).toContain('layout: default\nzoom: 0.34\n---');
+        expect(guardedDeck).toContain('layout: default\n---');
+        expect(guardedDeck).not.toContain('zoom:');
         expect(guardedDeck).toContain('```mermaid\nflowchart TB');
     });
 
-    test('presentation guardrails detect Mermaid fences with inline options', () => {
+    test('presentation guardrails preserve Mermaid fences with inline options without fixed zoom', () => {
         const mermaidLines = Array.from({ length: 46 }, (_, index) => `    A${index} --> A${index + 1}`).join('\n');
         const deck = [
             '---',
@@ -522,11 +556,12 @@ describe('slidevSourcePreparer', () => {
 
         const guardedDeck = applySlidevPresentationGuardrails(deck);
 
-        expect(guardedDeck).toContain('layout: default\nzoom: 0.40\n---');
+        expect(guardedDeck).toContain('layout: default\n---');
+        expect(guardedDeck).not.toContain('zoom:');
         expect(guardedDeck).toContain('```mermaid {scale:0.7}\nflowchart TB');
     });
 
-    test('presentation guardrails keep explicit zoom on large Mermaid slides', () => {
+    test('presentation guardrails strip generated Mermaid zoom so rendered audit owns fit', () => {
         const mermaidLines = Array.from({ length: 58 }, (_, index) => `    A${index} --> A${index + 1}`).join('\n');
         const deck = [
             '---',
@@ -550,8 +585,8 @@ describe('slidevSourcePreparer', () => {
 
         const guardedDeck = applySlidevPresentationGuardrails(deck);
 
-        expect(guardedDeck).toContain('layout: default\nzoom: 0.46\n---');
-        expect(guardedDeck).not.toContain('zoom: 0.34');
+        expect(guardedDeck).toContain('layout: default\n---');
+        expect(guardedDeck).not.toContain('zoom: 0.46');
     });
 
     test('presentation guardrails normalize bare slide frontmatter values', () => {
@@ -575,7 +610,8 @@ describe('slidevSourcePreparer', () => {
 
         const guardedDeck = applySlidevPresentationGuardrails(deck);
 
-        expect(guardedDeck).toContain('zoom: 0.7\n---\n\n## Large Diagram');
+        expect(guardedDeck).toContain('---\n\n## Large Diagram');
+        expect(guardedDeck).not.toContain('zoom: 0.7');
     });
 
     test('presentation guardrails keep normal Markdown slides out of frontmatter', () => {
