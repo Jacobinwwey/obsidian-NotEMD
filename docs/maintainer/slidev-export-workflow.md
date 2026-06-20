@@ -63,6 +63,14 @@ To test another vault-relative source:
 npm run verify:slidev-export -- --source path/to/source.md
 ```
 
+To run the heavier synthetic full-deck layout fixtures without committing generated files:
+
+```bash
+npm run verify:slidev-layout-fixtures -- --archive /home/jacob/slidev-export-review/2026-06-20-full-deck-layout-fixtures
+```
+
+This command creates temporary vaults outside the repository, runs the production verifier, and archives the source fixture, final deck, report, and standalone export. Use it when layout audit, Mermaid fit, table/code splitting, text measurement, or slot Transform behavior changes.
+
 For a live desktop-session smoke against the real Obsidian command path:
 
 ```bash
@@ -187,6 +195,9 @@ Current landed truth as of 2026-06-20:
 22. Mermaid source preservation now has an explicit regression test: even if a Mermaid slide is mistakenly routed toward a code structural patch, the patcher must not treat one `mermaid` fence as a splittable code block.
 23. Python and Rust code fences now also use lightweight top-level tokenizers before generic semantic splitting, preserving Python import groups, decorators, top-level class/function blocks, Rust use groups, attributes, and top-level struct/enum/trait/impl/fn/mod items.
 24. Stage 5 fixture coverage now separates `source-preserved-fit-review` from `manual-review` for preserved Mermaid diagrams and uses a Playwright measurement fixture to prove record-list table fallback renders as readable text instead of an overflowing table.
+25. synthetic full-deck layout fixtures now run through the production verifier: `source-layout-stress` covers full skill references, native standalone, preserved Mermaid block count, record-list fallback, and code splitting; `slot-component-stress` covers component-heavy slot Transform convergence without whole-slide zoom stacking. The 2026-06-20 archive is `/home/jacob/slidev-export-review/2026-06-20-full-deck-layout-fixtures/`.
+26. text overflow measurement now uses text-node Range glyph rectangles for text elements instead of block-level element boxes, so layouts are not failed because an `h1` block is wider than its actual visible text.
+27. Mermaid-only slides may apply a measured low zoom to keep one preserved source diagram fully visible; the readability risk is surfaced through `mermaidFit.manual-review` instead of splitting or rewriting the source diagram.
 
 Current limitation:
 
@@ -198,7 +209,7 @@ Current limitation:
 6. Mermaid `manual-review` evidence is not a hard gate failure. It is the correct fail-transparent outcome when preserving the original Mermaid source and guaranteeing projector-level readability cannot both be proven automatically.
 7. code splitting is still parser-light. TypeScript/JavaScript/Python/Rust now have top-level tokenizers, but full AST splitting and more language-specific splitters remain future work.
 8. The Mermaid no-split constraint does not mean Mermaid presentation quality automatically passes. If a very large source diagram can only remain complete at low zoom, the workflow should surface `source-preserved-fit-review` or `manual-review` instead of silently rewriting the diagram.
-9. Stage 5 fixtures now cover the key boundaries, but they are not exhaustive: real long-table, wide-table, and mixed-code cases still need dedicated full-deck export fixtures instead of relying only on local Markdown patches or single-page measurement.
+9. Stage 5 full-deck fixtures now cover long-table, wide-table, mixed-code, Mermaid source-preserved fit, and component-heavy slot Transform boundaries, but they are not exhaustive; add more fixture sources for image-heavy decks, complex Vue components, nested slots, very wide tables, and mixed Mermaid/prose layouts as they fail in real documents.
 
 ## Output Policy
 
@@ -242,10 +253,19 @@ Run `npm run verify:slidev-export` whenever a change touches:
 6. Slidev skill loading or prompt preparation;
 7. output cleanup, bundling, or browser-launch behavior.
 
+Run `npm run verify:slidev-layout-fixtures` as well when a change touches:
+
+1. rendered layout measurement;
+2. Mermaid fit/manual-review handling;
+3. table/code structural splitting;
+4. slot-zone measurement or local Transform patching;
+5. any rule intended to avoid whole-slide low zoom for non-Mermaid content.
+
 For code changes, also run:
 
 ```bash
 npm test -- --runInBand src/tests/slidevLayoutAudit.test.ts src/tests/slidevSourcePreparer.test.ts src/tests/slideExportComprehensive.test.ts src/tests/sidebarDomButtonClicks.test.ts
+npm run verify:slidev-layout-fixtures -- --timeout-ms 300000
 npm run build
 git diff --check
 ```

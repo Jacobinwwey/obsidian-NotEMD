@@ -286,10 +286,29 @@ async function collectRenderedSlideMeasurement(page, slide) {
 				top: Math.min(acc.top, rect.top),
 				right: Math.max(acc.right, rect.right),
 				bottom: Math.max(acc.bottom, rect.bottom),
-				width: 0,
-				height: 0,
+				width: Math.max(acc.right, rect.right) - Math.min(acc.left, rect.left),
+				height: Math.max(acc.bottom, rect.bottom) - Math.min(acc.top, rect.top),
 			};
 		}, null);
+		const collectTextContentRect = element => {
+			const textRects = [];
+			const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
+			let node = walker.nextNode();
+			while (node) {
+				if ((node.textContent || '').trim().length > 0) {
+					const range = document.createRange();
+					range.selectNodeContents(node);
+					for (const rect of Array.from(range.getClientRects())) {
+						if (rect.width > 1 && rect.height > 1) {
+							textRects.push(toRect(rect));
+						}
+					}
+					range.detach();
+				}
+				node = walker.nextNode();
+			}
+			return unionRects(textRects);
+		};
 		const pickVisibleLargest = selector => Array.from(document.querySelectorAll(selector))
 			.filter(element => element instanceof Element)
 			.map(element => ({ element, rect: element.getBoundingClientRect(), style: window.getComputedStyle(element) }))
@@ -348,7 +367,10 @@ async function collectRenderedSlideMeasurement(page, slide) {
 					continue;
 				}
 
-				const rect = toRect(element.getBoundingClientRect());
+				const elementRect = toRect(element.getBoundingClientRect());
+				const rect = kind === 'text'
+					? collectTextContentRect(element) || elementRect
+					: elementRect;
 				const ownerElement = element.closest(`[${slotZoneAttr}]`);
 				if (rect.width < 2 || rect.height < 2 || (!ownerElement && !overlaps(rect, slideRootRect))) {
 					continue;

@@ -48,7 +48,28 @@ describe('slidevLayoutAudit', () => {
 		expect(contentFinding?.recommendedScale).toBeCloseTo(0.816, 2);
 	});
 
-	test('reports unreadable scale when zoom falls below the readable floor', () => {
+	test('reports unreadable scale for non-Mermaid primary content below the readable floor', () => {
+		const audit = analyzeRenderedSlideMeasurement(createMeasurement({
+			pageScale: 0.22,
+			contentBounds: { left: 70, top: 60, right: 1160, bottom: 620, width: 1090, height: 560 },
+			elements: [
+				{
+					kind: 'text',
+					selector: 'p',
+					textLength: 120,
+					scrollWidth: 1090,
+					scrollHeight: 560,
+					clientWidth: 1090,
+					clientHeight: 560,
+					rect: { left: 70, top: 60, right: 1160, bottom: 620, width: 1090, height: 560 },
+				},
+			],
+		}));
+
+		expect(audit.findings.some(finding => finding.kind === 'unreadable-scale')).toBe(true);
+	});
+
+	test('keeps low source-preserved Mermaid zoom as review evidence instead of a hard unreadable finding', () => {
 		const audit = analyzeRenderedSlideMeasurement(createMeasurement({
 			pageScale: 0.22,
 			contentBounds: { left: 70, top: 60, right: 1160, bottom: 620, width: 1090, height: 560 },
@@ -66,7 +87,11 @@ describe('slidevLayoutAudit', () => {
 			],
 		}));
 
-		expect(audit.findings.some(finding => finding.kind === 'unreadable-scale')).toBe(true);
+		expect(audit.findings.some(finding => finding.kind === 'unreadable-scale')).toBe(false);
+		expect(audit.mermaidFit).toEqual(expect.objectContaining({
+			status: 'manual-review',
+			lowZoom: true,
+		}));
 	});
 
 	test('records Mermaid quality metrics without auto-splitting preserved source diagrams', () => {
@@ -357,7 +382,7 @@ describe('slidevLayoutAudit', () => {
 		]);
 	});
 
-	test('blocks oversized Mermaid flowcharts instead of rewriting source diagrams below the readable floor', () => {
+	test('fits oversized Mermaid flowcharts below the readable floor without rewriting source diagrams', () => {
 		const audit: SlidevLayoutAudit = {
 			slide: 2,
 			safeRect: { left: 51.2, top: 43.2, right: 1228.8, bottom: 676.8, width: 1177.6, height: 633.6 },
@@ -370,7 +395,7 @@ describe('slidevLayoutAudit', () => {
 					target: 'content',
 					message: 'Slide content exceeds the safe visible rectangle',
 					recommendedPatch: 'reduce-zoom',
-					recommendedScale: 0.5,
+					recommendedScale: 0.8,
 				},
 			],
 		};
@@ -403,15 +428,13 @@ describe('slidevLayoutAudit', () => {
 
 		const patched = patchDeckWithLayoutAudit(deck, [audit]);
 
-		expect(patched.changed).toBe(false);
-		expect(patched.changedSlides).toEqual([]);
-		expect(patched.blockedSlides).toEqual([
-			expect.objectContaining({ slide: 2 }),
-		]);
+		expect(patched.changed).toBe(true);
+		expect(patched.changedSlides).toEqual([2]);
+		expect(patched.blockedSlides).toEqual([]);
 		expect(countSlideDeckSlides(patched.deckMarkdown)).toBe(2);
 		expect((patched.deckMarkdown.match(/```mermaid/g) || []).length).toBe(1);
 		expect((patched.deckMarkdown.match(/## Diagram/g) || []).length).toBe(1);
-		expect(patched.deckMarkdown).toContain('zoom: 0.30');
+		expect(patched.deckMarkdown).toContain('zoom: 0.24');
 		expect(patched.deckMarkdown).toContain('Decision -->|yes| PathA');
 		expect(patched.deckMarkdown).toContain('Retry --> Done');
 	});
@@ -473,7 +496,7 @@ describe('slidevLayoutAudit', () => {
 		expect((patched.deckMarkdown.match(/```mermaid/g) || []).length).toBe(1);
 	});
 
-	test('blocks oversized sequence diagrams instead of splitting Mermaid participants', () => {
+	test('fits oversized sequence diagrams instead of splitting Mermaid participants', () => {
 		const audit: SlidevLayoutAudit = {
 			slide: 2,
 			safeRect: { left: 51.2, top: 43.2, right: 1228.8, bottom: 676.8, width: 1177.6, height: 633.6 },
@@ -518,14 +541,14 @@ describe('slidevLayoutAudit', () => {
 
 		const patched = patchDeckWithLayoutAudit(deck, [audit]);
 
-		expect(patched.changed).toBe(false);
-		expect(patched.blockedSlides).toEqual([
-			expect.objectContaining({ slide: 2 }),
-		]);
+		expect(patched.changed).toBe(true);
+		expect(patched.changedSlides).toEqual([2]);
+		expect(patched.blockedSlides).toEqual([]);
 		expect(countSlideDeckSlides(patched.deckMarkdown)).toBe(2);
 		expect((patched.deckMarkdown.match(/participant User/g) || []).length).toBe(1);
 		expect((patched.deckMarkdown.match(/participant Plugin/g) || []).length).toBe(1);
 		expect((patched.deckMarkdown.match(/```mermaid/g) || []).length).toBe(1);
+		expect(patched.deckMarkdown).toContain('zoom: 0.18');
 		expect(patched.deckMarkdown).toContain('alt success');
 		expect(patched.deckMarkdown).toContain('Plugin->>Plugin: Verify layout');
 	});
@@ -1916,6 +1939,59 @@ describe('slidevLayoutAudit', () => {
 
 		expect((patched.deckMarkdown.match(/<Transform :scale="0.86" origin="top left">/g) || []).length).toBe(1);
 		expect(patched.deckMarkdown).not.toContain('::summary::\n\n<Transform :scale=');
+	});
+
+	test('removes whole-slide zoom from an already transformed slot when compounded scale lowers text quality', () => {
+		const audit: SlidevLayoutAudit = {
+			slide: 2,
+			safeRect: { left: 51.2, top: 43.2, right: 1228.8, bottom: 676.8, width: 1177.6, height: 633.6 },
+			contentBounds: { left: 78, top: 90, right: 710, bottom: 430, width: 632, height: 340 },
+			pageScale: 0.674,
+			elementKinds: ['text'],
+			findings: [
+				{
+					kind: 'low-effective-font',
+					target: 'text',
+					message: 'text effective font is below the quality floor',
+					recommendedPatch: 'split-slide',
+					recommendedScale: null,
+					slotZone: 'details',
+					effectiveFontPx: 9.75,
+					fontThresholdPx: 10,
+				},
+			],
+		};
+		const deck = [
+			'---',
+			'theme: default',
+			'---',
+			'',
+			'# Intro',
+			'',
+			'---',
+			'layout: custom-grid',
+			'zoom: 0.674',
+			'---',
+			'',
+			'::summary::',
+			'',
+			'- Summary stays unscaled.',
+			'',
+			'::details::',
+			'',
+			'<Transform :scale="0.804" origin="top left">',
+			'<div class="space-y-3">',
+			'  <div class="border rounded px-3 py-2 text-sm">Runtime orchestration detail block.</div>',
+			'</div>',
+			'</Transform>',
+		].join('\n');
+
+		const patched = patchDeckWithLayoutAudit(deck, [audit]);
+
+		expect(patched.changed).toBe(true);
+		expect(patched.deckMarkdown).not.toContain('zoom: 0.674');
+		expect(patched.deckMarkdown).toContain('::details::\n\n<Transform :scale="0.804" origin="top left">');
+		expect(patched.deckMarkdown).toContain('::summary::\n\n- Summary stays unscaled.');
 	});
 
 	test('splits first-slide deck headmatter content structurally when per-slide zoom cannot be used', () => {

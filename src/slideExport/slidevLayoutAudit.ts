@@ -374,7 +374,11 @@ export function analyzeRenderedSlideMeasurement(
 		});
 	}
 
-	if (measurement.pageScale !== null && measurement.pageScale < resolvedConfig.minReadableScale) {
+	if (
+		measurement.pageScale !== null
+		&& measurement.pageScale < resolvedConfig.minReadableScale
+		&& !isSourcePreservedMermaidRenderedSurface(elementKinds)
+	) {
 		findings.push({
 			kind: 'unreadable-scale',
 			target: 'content',
@@ -490,6 +494,17 @@ export function patchDeckWithLayoutAudit(
 			continue;
 		}
 
+		const retunedSlotTransformSlide = retuneSupportedSlotLayoutTransformScale(
+			currentSlide,
+			audit,
+			currentZoom,
+		);
+		if (retunedSlotTransformSlide) {
+			slides[targetIndex] = retunedSlotTransformSlide;
+			changedSlides.push(audit.slide);
+			continue;
+		}
+
 		if (hasSupportedSlotMarkers(currentSlide)) {
 			const splitResult = splitOverflowingSupportedSlotLayoutSlide(currentSlide, audit, currentZoom, nextZoom, resolvedConfig);
 			if (splitResult.slides) {
@@ -539,7 +554,15 @@ export function patchDeckWithLayoutAudit(
 			continue;
 		}
 
-		if (nextZoom < resolvedConfig.minReadableScale) {
+		if (hasSupportedSlotMarkers(currentSlide) && containsTransformWrapper(currentSlide.split(/\r?\n/))) {
+			blockedSlides.push({
+				slide: audit.slide,
+				reason: 'existing slot Transform will not be compounded with whole-slide zoom',
+			});
+			continue;
+		}
+
+		if (nextZoom < resolvedConfig.minReadableScale && !isSourcePreservedMermaidFitSlide(currentSlide, audit)) {
 			blockedSlides.push({
 				slide: audit.slide,
 				reason: `required zoom ${nextZoom.toFixed(3)} is below readable floor ${resolvedConfig.minReadableScale.toFixed(2)}`,
@@ -830,6 +853,11 @@ function shouldPreserveMermaidFontFinding(
 		return kind === 'mermaid';
 	}
 	return kind === 'mermaid' || kind === 'text' || kind === 'other';
+}
+
+function isSourcePreservedMermaidRenderedSurface(elementKinds: SlidevMeasuredElementKind[]): boolean {
+	return elementKinds.includes('mermaid')
+		&& !elementKinds.some(kind => kind === 'table' || kind === 'code' || kind === 'image');
 }
 
 function describeElementOverflow(kind: SlidevMeasuredElementKind, scrollOverflow: boolean): string {
@@ -1152,6 +1180,25 @@ function hasCodeStructuralOverflow(findings: SlidevLayoutFinding[]): boolean {
 		&& (finding.overflowAxis === 'height' || finding.overflowAxis === 'both'));
 }
 
+function isSourcePreservedMermaidFitSlide(slideMarkdown: string, audit: SlidevLayoutAudit): boolean {
+	if (!isSourcePreservedMermaidRenderedSurface(audit.elementKinds)) {
+		return false;
+	}
+	if (audit.findings.some(finding => finding.target !== 'content' && finding.target !== 'mermaid')) {
+		return false;
+	}
+
+	const surface = extractPatchableSlideSurface(slideMarkdown);
+	if (!surface) {
+		return false;
+	}
+
+	return containsMermaidFence(surface.bodyLines)
+		&& !containsNonMermaidFence(surface.bodyLines)
+		&& !containsMarkdownTableOutsideFence(surface.bodyLines)
+		&& !containsMarkdownImageOutsideFence(surface.bodyLines);
+}
+
 function splitOverflowingMarkdownTableSlide(
 	slideMarkdown: string,
 	audit: SlidevLayoutAudit,
@@ -1357,6 +1404,55 @@ function wrapOverflowingSupportedSlotLayoutZonesInTransform(
 	}
 
 	return changed ? nextSlideMarkdown : null;
+}
+
+function retuneSupportedSlotLayoutTransformScale(
+	slideMarkdown: string,
+	audit: SlidevLayoutAudit,
+	currentZoom: number,
+): string | null {
+	const surface = parseSupportedSlotLayoutSurface(slideMarkdown);
+	const hasSlotFontFailure = audit.findings.some(finding => finding.kind === 'low-effective-font' && finding.slotZone);
+	if (!surface || currentZoom >= 0.995 || !hasSlotFontFailure) {
+		return null;
+	}
+
+	const zones = collectSupportedSlotZones(surface);
+	const transformedZones = zones.filter(zone => containsTransformWrapper(zone.contentLines));
+	if (transformedZones.length === 0) {
+		return null;
+	}
+
+	const candidateNames = collectRetunableSlotZoneNames(slideMarkdown, audit, transformedZones);
+	let nextSlideMarkdown: string | null = null;
+	for (const zoneName of candidateNames) {
+		const currentSurface = parseSupportedSlotLayoutSurface(nextSlideMarkdown ?? slideMarkdown);
+		if (!currentSurface) {
+			break;
+		}
+
+		const targetZone = collectSupportedSlotZones(currentSurface).find(zone => zone.name === zoneName);
+		if (!targetZone || !containsTransformWrapper(targetZone.contentLines)) {
+			continue;
+		}
+
+		const currentTransformScale = readFirstTransformScale(targetZone.contentLines);
+		if (currentTransformScale === null) {
+			continue;
+		}
+
+		const cleanSurface = {
+			...currentSurface,
+			frontmatterLines: stripFrontmatterKey(currentSurface.frontmatterLines, 'zoom'),
+		};
+		nextSlideMarkdown = assembleSupportedSlotLayoutSlide(
+			cleanSurface,
+			targetZone,
+			replaceFirstTransformScale(targetZone.contentLines, currentTransformScale),
+		);
+	}
+
+	return nextSlideMarkdown;
 }
 
 function splitOverflowingDeckHeadmatterSlide(
@@ -1724,6 +1820,28 @@ function collectSlotLayoutTransformCandidateNames(
 	return singleZone ? [singleZone.name] : [];
 }
 
+function collectRetunableSlotZoneNames(
+	slideMarkdown: string,
+	audit: SlidevLayoutAudit,
+	transformedZones: SupportedSlotZone[],
+): string[] {
+	const transformedNames = new Set(transformedZones.map(zone => zone.name));
+	const measuredNames = collectSlotLayoutTransformCandidateNames(slideMarkdown, audit)
+		.filter(name => transformedNames.has(name));
+	if (measuredNames.length > 0) {
+		return measuredNames;
+	}
+
+	const findingNames = audit.findings
+		.map(finding => finding.slotZone)
+		.filter((name): name is string => typeof name === 'string' && transformedNames.has(name));
+	if (findingNames.length > 0) {
+		return Array.from(new Set(findingNames));
+	}
+
+	return transformedZones.length === 1 ? [transformedZones[0].name] : [];
+}
+
 function collectSupportedSlotZones(
 	surface: SupportedSlotLayoutSurface,
 ): SupportedSlotZone[] {
@@ -2088,6 +2206,67 @@ function findSingleCodeFenceBlock(lines: string[]): FencedBlock | null {
 	}
 
 	return activeFenceMarker ? null : block;
+}
+
+function containsMermaidFence(lines: string[]): boolean {
+	return containsFenceMatching(lines, info => /^mermaid(?:\s+\{[^}]+\})?\s*$/i.test(info));
+}
+
+function containsNonMermaidFence(lines: string[]): boolean {
+	return containsFenceMatching(lines, info => !/^mermaid(?:\s+\{[^}]+\})?\s*$/i.test(info));
+}
+
+function containsFenceMatching(lines: string[], predicate: (info: string) => boolean): boolean {
+	let activeFenceMarker: string | null = null;
+
+	for (const line of lines) {
+		const trimmed = line.trim();
+		const openingMatch = trimmed.match(/^(```+|~~~+)(.*)$/);
+		if (!activeFenceMarker && openingMatch) {
+			if (predicate(openingMatch[2].trim())) {
+				return true;
+			}
+			activeFenceMarker = openingMatch[1][0] === '~' ? '~~~' : '```';
+			continue;
+		}
+		if (activeFenceMarker && new RegExp(`^${escapeRegExp(activeFenceMarker)}+\\s*$`).test(trimmed)) {
+			activeFenceMarker = null;
+		}
+	}
+
+	return false;
+}
+
+function containsMarkdownTableOutsideFence(lines: string[]): boolean {
+	return hasOutsideFenceLine(lines, isMarkdownTableRow);
+}
+
+function containsMarkdownImageOutsideFence(lines: string[]): boolean {
+	return hasOutsideFenceLine(lines, line => /^!\[.*\]\(.+\)/.test(line.trim()));
+}
+
+function hasOutsideFenceLine(lines: string[], predicate: (line: string) => boolean): boolean {
+	let activeFenceMarker: string | null = null;
+
+	for (const line of lines) {
+		const trimmed = line.trim();
+		const openingMatch = trimmed.match(/^(```+|~~~+)(.*)$/);
+		if (!activeFenceMarker && openingMatch) {
+			activeFenceMarker = openingMatch[1][0] === '~' ? '~~~' : '```';
+			continue;
+		}
+		if (activeFenceMarker) {
+			if (new RegExp(`^${escapeRegExp(activeFenceMarker)}+\\s*$`).test(trimmed)) {
+				activeFenceMarker = null;
+			}
+			continue;
+		}
+		if (predicate(line)) {
+			return true;
+		}
+	}
+
+	return false;
 }
 
 function findSingleMarkdownTableBlock(lines: string[]): MarkdownTableBlock | null {
@@ -3071,6 +3250,29 @@ function containsTransformableComponentSyntax(lines: string[]): boolean {
 
 function containsTransformWrapper(lines: string[]): boolean {
 	return lines.some(line => /<(Transform)\b/i.test(line.trim()));
+}
+
+function readFirstTransformScale(lines: string[]): number | null {
+	for (const line of lines) {
+		const match = line.match(/<Transform\b[^>]*:scale=["']([0-9]+(?:\.[0-9]+)?)["']/i);
+		if (!match) {
+			continue;
+		}
+		const value = Number(match[1]);
+		return Number.isFinite(value) ? value : null;
+	}
+	return null;
+}
+
+function replaceFirstTransformScale(lines: string[], scale: number): string[] {
+	let replaced = false;
+	return lines.map(line => {
+		if (replaced || !/<Transform\b/i.test(line)) {
+			return line;
+		}
+		replaced = true;
+		return line.replace(/:scale=["'][0-9]+(?:\.[0-9]+)?["']/i, `:scale="${formatZoom(scale)}"`);
+	});
 }
 
 function wrapLinesInTransform(lines: string[], scale: number): string[] {

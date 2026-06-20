@@ -21,6 +21,7 @@
 		"audit:render-host": "node scripts/audit-render-host-bundle.js",
 		"verify:diagram-semantics": "node scripts/diagram-semantic-verification.js",
 		"verify:slidev-export": "node scripts/verify-slidev-export-workflow.cjs",
+		"verify:slidev-layout-fixtures": "node scripts/verify-slidev-layout-fixtures.cjs",
 		"verify:local-kb-fixtures": "jest --runInBand src/tests/localKnowledgeEvaluationFixture.test.ts",
 		"release:github": "node scripts/release/publish-github-release.js",
 		"regression:language-baseline": "bash scripts/regression/language-support-baseline.sh",

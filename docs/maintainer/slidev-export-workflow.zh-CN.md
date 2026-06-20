@@ -63,6 +63,14 @@ npm run verify:slidev-export -- --format html --html-mode standalone --require-n
 npm run verify:slidev-export -- --source path/to/source.md
 ```
 
+运行更重的 synthetic full-deck layout fixtures，同时避免把生成文件写进仓库：
+
+```bash
+npm run verify:slidev-layout-fixtures -- --archive /home/jacob/slidev-export-review/2026-06-20-full-deck-layout-fixtures
+```
+
+该命令会在仓库外创建临时 vault，调用生产 verifier，并归档 source fixture、最终 deck、report 与 standalone export。修改 layout audit、Mermaid fit、table/code 拆分、文本测量或 slot Transform 行为时应运行它。
+
 如果本机已有真实 Obsidian 桌面会话，也应补一层真实命令路径 smoke：
 
 ```bash
@@ -187,6 +195,9 @@ layoutAuditSummary.retryCount
 22. Mermaid source-preservation 现在有独立回归测试：即使 Mermaid slide 被错误送入 code structural patch 候选，patcher 也不会把一个 `mermaid` fence 当作可拆分代码块。
 23. Python 与 Rust code fence 现在也会先走轻量 top-level tokenizer，再进入通用语义拆分；Python import 组、decorator、顶层 class/function block，以及 Rust use 组、attribute、顶层 struct/enum/trait/impl/fn/mod item 会保持完整。
 24. Stage 5 fixture 覆盖现在已经把保留 Mermaid 源图时的 `source-preserved-fit-review` 与 `manual-review` 分开测试，并用 Playwright measurement fixture 证明 record-list table fallback 在浏览器里是可读文本，不再是溢出的 table。
+25. synthetic full-deck layout fixtures 现在会跑完整生产 verifier：`source-layout-stress` 覆盖完整 skill references、native standalone、Mermaid block count 保真、record-list fallback 与 code splitting；`slot-component-stress` 覆盖 component-heavy slot 的局部 Transform 收敛，并防止整页 zoom 叠加。2026-06-20 归档为 `/home/jacob/slidev-export-review/2026-06-20-full-deck-layout-fixtures/`。
+26. text overflow measurement 现在对 text 元素使用 text-node Range glyph rectangles，而不是 block-level element box，因此不会因为 `h1` 的块级布局盒比实际可见文字宽就误判失败。
+27. Mermaid-only 页面可以用测量得到的低 zoom 保证一张保留源图完整可见；可读性风险通过 `mermaidFit.manual-review` 暴露，而不是拆分或改写原 Mermaid 图。
 
 当前限制：
 
@@ -198,7 +209,7 @@ layoutAuditSummary.retryCount
 6. Mermaid `manual-review` 证据不是 hard gate failure。它是在“不修改原 Mermaid 内容”和“自动保证投影级可读”不能同时被证明时，正确暴露给维护者的透明结果。
 7. code splitting 仍是 parser-light；TypeScript/JavaScript/Python/Rust 已有 top-level tokenizer，但完整 AST 拆分与更多语言专用 splitter 仍是后续工作。
 8. Mermaid 不拆图约束不等于 Mermaid 演示质量自动合格。超大源图如果只能靠低 zoom 保持完整，流程应暴露 `source-preserved-fit-review` 或 `manual-review`，而不是静默改图。
-9. Stage 5 fixture 已加强关键边界，但还不是 exhaustive：真实长表/宽表/混合代码页仍需要 dedicated full-deck export fixture，不能只依赖局部 Markdown patch 或单页 measurement。
+9. Stage 5 full-deck fixtures 已覆盖长表、宽表、混合代码、Mermaid 源图保持 fit 与 component-heavy slot Transform 边界，但仍不是 exhaustive；后续真实文档若出现图片密集 deck、复杂 Vue component、嵌套 slot、超宽表或 Mermaid/prose 混排失败，应继续沉淀为 fixture。
 
 ## 输出策略
 
@@ -242,10 +253,19 @@ git check-ignore -v docs/export/_slidev-sources/architecture.zh-CN.slidev.md doc
 6. Slidev skill 加载或 prompt 准备；
 7. 输出目录清理、打包或浏览器打开行为。
 
+以下改动还应运行 `npm run verify:slidev-layout-fixtures`：
+
+1. rendered layout measurement；
+2. Mermaid fit/manual-review 处理；
+3. table/code 结构化拆分；
+4. slot-zone 测量或局部 Transform patch；
+5. 任何用于避免非 Mermaid 内容依赖整页低 zoom 的规则。
+
 代码改动还应同时运行：
 
 ```bash
 npm test -- --runInBand src/tests/slidevLayoutAudit.test.ts src/tests/slidevSourcePreparer.test.ts src/tests/slideExportComprehensive.test.ts src/tests/sidebarDomButtonClicks.test.ts
+npm run verify:slidev-layout-fixtures -- --timeout-ms 300000
 npm run build
 git diff --check
 ```
