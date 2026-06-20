@@ -681,6 +681,51 @@ describe('slidevLayoutAudit', () => {
 		expect(patched.deckMarkdown).not.toContain('| Provider | Model | Runtime | Token Ceiling | Fallback Route | Deployment Notes | Verification Marker |');
 	});
 
+	test('converts long table cells into record slides instead of preserving cramped rows', () => {
+		const audit: SlidevLayoutAudit = {
+			slide: 2,
+			safeRect: { left: 51.2, top: 43.2, right: 1228.8, bottom: 676.8, width: 1177.6, height: 633.6 },
+			contentBounds: { left: 48, top: 52, right: 1234, bottom: 780, width: 1186, height: 728 },
+			pageScale: 1,
+			elementKinds: ['table'],
+			findings: [
+				{
+					kind: 'overflow',
+					target: 'table',
+					message: 'Table exceeds the safe visible rectangle',
+					recommendedPatch: 'split-table',
+					recommendedScale: 0.55,
+					overflowAxis: 'width',
+				},
+			],
+		};
+		const deck = [
+			'---',
+			'theme: default',
+			'---',
+			'',
+			'# Intro',
+			'',
+			'---',
+			'## Risk Register',
+			'',
+			'| Risk | Impact | Mitigation |',
+			'| --- | --- | --- |',
+			'| Provider retry cascade | A single dense row with long operator-facing explanation pushes the table past the visible content width before the rest of the deck is audited. | Move the details into record-list bullets so each risk can wrap naturally without shrinking the whole slide. |',
+			'| Standalone loader drift | Loader sanity checks can pass locally while a minified binding name changes in the native standalone bundle. | Keep the native gate explicit and preserve failed attempts for inspection instead of accepting fallback output silently. |',
+		].join('\n');
+
+		const patched = patchDeckWithLayoutAudit(deck, [audit]);
+
+		expect(patched.changed).toBe(true);
+		expect(patched.blockedSlides).toEqual([]);
+		expect(countSlideDeckSlides(patched.deckMarkdown)).toBe(3);
+		expect(patched.deckMarkdown).toContain('- Risk: Provider retry cascade');
+		expect(patched.deckMarkdown).toContain('  - Mitigation: Move the details into record-list bullets');
+		expect(patched.deckMarkdown).toContain('- Risk: Standalone loader drift');
+		expect(patched.deckMarkdown).not.toContain('| Risk | Impact | Mitigation |');
+	});
+
 	test('splits oversized code fences when further zoom would become unreadable', () => {
 		const audit: SlidevLayoutAudit = {
 			slide: 2,
@@ -798,6 +843,68 @@ describe('slidevLayoutAudit', () => {
 		expect(countSlideDeckSlides(patched.deckMarkdown)).toBe(3);
 		expect((patched.deckMarkdown.match(/```ts/g) || []).length).toBe(2);
 		expect((patched.deckMarkdown.match(/## Tall Export Pipeline/g) || []).length).toBe(2);
+	});
+
+	test('keeps complete code semantic blocks together when splitting dense fences', () => {
+		const audit: SlidevLayoutAudit = {
+			slide: 2,
+			safeRect: { left: 51.2, top: 43.2, right: 1228.8, bottom: 676.8, width: 1177.6, height: 633.6 },
+			contentBounds: { left: 48, top: 52, right: 1234, bottom: 920, width: 1186, height: 868 },
+			pageScale: 0.26,
+			elementKinds: ['code'],
+			findings: [
+				{
+					kind: 'overflow',
+					target: 'code',
+					message: 'Code block overflows its scroll box',
+					recommendedPatch: 'reduce-code',
+					recommendedScale: 0.7,
+					scrollOverflow: true,
+					overflowAxis: 'height',
+				},
+			],
+		};
+		const deck = [
+			'---',
+			'theme: default',
+			'---',
+			'',
+			'# Intro',
+			'',
+			'---',
+			'zoom: 0.26',
+			'---',
+			'',
+			'## Semantic Code Split',
+			'',
+			'```ts',
+			'// Prepare the source once.',
+			'async function prepareDeck() {',
+			'  const environment = await probeEnvironment();',
+			'  if (!environment.capabilities.html) {',
+			'    throw new Error("HTML export is unavailable");',
+			'  }',
+			'  const slideSource = await prepareSlidevExportSource(app, sourceFile, config, {}, onProgress);',
+			'  await writePreparedDeck(slideSource);',
+			'  return slideSource;',
+			'}',
+			'async function buildDeck(slideSource) {',
+			'  const htmlPath = await exportSlidevHtml(app, slideSource, config, onProgress);',
+			'  await runPlaywrightChecks(htmlPath, slidesToAudit, true, slideExport);',
+			'  return htmlPath;',
+			'}',
+			'```',
+		].join('\n');
+
+		const patched = patchDeckWithLayoutAudit(deck, [audit]);
+
+		expect(patched.changed).toBe(true);
+		expect(patched.blockedSlides).toEqual([]);
+		expect(countSlideDeckSlides(patched.deckMarkdown)).toBe(3);
+		expect((patched.deckMarkdown.match(/```ts/g) || []).length).toBe(2);
+		expect(patched.deckMarkdown).toMatch(/\/\/ Prepare the source once\.\nasync function prepareDeck\(\) \{[\s\S]*?return slideSource;\n\}/);
+		expect(patched.deckMarkdown).toMatch(/async function buildDeck\(slideSource\) \{[\s\S]*?return htmlPath;\n\}/);
+		expect(patched.deckMarkdown).not.toContain('zoom: 0.26');
 	});
 
 	test('splits code fences on low effective code font without waiting for scroll overflow', () => {

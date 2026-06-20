@@ -605,6 +605,7 @@ async function main() {
 		layoutConvergence = await slideExport.convergeSlidevDeckLayout(app, slideSource, config, onProgress, {
 			sampleSlides: args.sampleSlides,
 			writeScreenshots: args.screenshots,
+			navigationTimeoutMs: args.timeoutMs,
 			auditConfig: LAYOUT_AUDIT_CONFIG,
 		});
 	}

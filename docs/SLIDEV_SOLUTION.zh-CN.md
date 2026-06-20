@@ -165,8 +165,8 @@ Mermaid 的规则比 table/code/prose 更严格：用户提供的一个 Mermaid 
 支持的结构化 patch 范围包括：
 
 - 简单标题、段落、列表 slide
-- Markdown 表格拆行、拆列与 record-list fallback
-- 非 Mermaid 代码块分块
+- Markdown 表格拆行、拆列，病态宽表与长 cell 表转 record-list fallback
+- 非 Mermaid 代码块优先按语义块分块，再退回空行或行数预算
 - slot-marked layout 与部分 component-heavy slot zone
 
 当前仍存在的边界：

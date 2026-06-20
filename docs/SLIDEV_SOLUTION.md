@@ -156,8 +156,8 @@ The current render-feedback loop is now:
 6. The current structural patcher supports:
    - simple heading + paragraph/list slides
    - Markdown tables, including row-split and width-driven column decomposition
-   - pathological width-heavy tables through deterministic record-list fallback
-   - non-Mermaid fenced code blocks with vertical chunking
+   - pathological width-heavy and long-cell tables through deterministic record-list fallback
+   - non-Mermaid fenced code blocks with semantic-block chunking before blank-line or line-budget fallback
    - generic slot-marked layouts, including explicit `::default::`, supported built-in slot layouts, and custom named slots when the slot content is structurally patchable
    - unique component-heavy slot zones through local `<Transform :scale="...">` wrapping when structural splitting is unavailable
    - first-slide deck headmatter content when structural splitting is possible
@@ -185,7 +185,7 @@ Current landed state:
 13. real maintainer-local decks now also prove:
    - explicit `::default::` slot handling
    - existing Slidev deck working-copy verification
-   - pathological table fallback into record-list slides
+   - pathological table fallback into record-list slides, including long-cell tables where row/column splitting would preserve cramped prose
    - slot-marked custom layouts backed by a real custom `layouts/*.vue` file
    - component-heavy custom slot layouts converging through zone-level owner-geometry-based local `<Transform>` wrapping, including same-slide multi-zone cases where more than one overflowing transformable slot can be wrapped in the same pass while slot signals and rendered text hints stay as bounded fallback for attribution ties
    - a dense two-zone custom layout where slot-owned descendants originally clipped under `overflow-hidden` are now measured correctly and converge to `ok: true` without forcing whole-slide zoom

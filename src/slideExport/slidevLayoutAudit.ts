@@ -2144,7 +2144,18 @@ function shouldConvertTableToRecordSlides(
 ): boolean {
 	const tableFinding = findings.find(finding => finding.target === 'table')
 		?? findings.find(finding => finding.recommendedPatch === 'split-table' && typeof finding.overflowAxis === 'string');
-	if (!tableFinding || (tableFinding.overflowAxis !== 'width' && tableFinding.overflowAxis !== 'both')) {
+	const hasTableQualityFinding = findings.some(finding => finding.recommendedPatch === 'split-table'
+		&& (finding.kind === 'low-effective-font'
+			|| finding.kind === 'tight-margin'
+			|| finding.kind === 'low-content-utilization'));
+	if (
+		!tableFinding
+		|| (
+			tableFinding.overflowAxis !== 'width'
+			&& tableFinding.overflowAxis !== 'both'
+			&& !hasTableQualityFinding
+		)
+	) {
 		return false;
 	}
 
@@ -2154,7 +2165,8 @@ function shouldConvertTableToRecordSlides(
 		0,
 		...rowCells.flatMap(cells => cells.map(cell => longestUnbrokenTokenLength(cell))),
 	);
-	return headerCells.length >= 5 && longestTokenLength >= 28;
+	return (headerCells.length >= 5 && longestTokenLength >= 28)
+		|| hasLongMarkdownTableCell(rowCells);
 }
 
 function resolveStructuralChunkCount(
@@ -2170,6 +2182,14 @@ function resolveStructuralChunkCount(
 }
 
 function splitCodeFenceIntoChunks(bodyLines: string[], targetChunkCount: number): string[][] | null {
+	const semanticBlocks = collectCodeSemanticBlocks(bodyLines);
+	if (semanticBlocks.length >= 2) {
+		const chunkedSemanticBlocks = chunkLineBlocks(semanticBlocks, Math.max(2, Math.min(targetChunkCount, semanticBlocks.length)));
+		if (chunkedSemanticBlocks.length >= 2) {
+			return chunkedSemanticBlocks;
+		}
+	}
+
 	const codeSegments = collectCodeFenceSegments(bodyLines);
 	if (codeSegments.length >= 2) {
 		const chunkedSegments = chunkLineBlocks(codeSegments, Math.max(2, Math.min(targetChunkCount, codeSegments.length)));
@@ -2280,6 +2300,55 @@ function chunkLineBlocks(blocks: string[][], chunkCount: number): string[][] {
 	return chunks.filter(chunk => chunk.some(hasSubstantiveLine));
 }
 
+function collectCodeSemanticBlocks(lines: string[]): string[][] {
+	const trimmedLines = trimOuterBlankLines(lines);
+	const blocks: string[][] = [];
+	let pendingLeadLines: string[] = [];
+	let index = 0;
+
+	while (index < trimmedLines.length) {
+		const line = trimmedLines[index];
+		const trimmed = line.trim();
+		if (trimmed.length === 0) {
+			index += 1;
+			continue;
+		}
+		if (isCodeLeadComment(trimmed)) {
+			pendingLeadLines.push(line);
+			index += 1;
+			continue;
+		}
+
+		const blockStartIndent = countLeadingWhitespace(line);
+		const block: string[] = [...pendingLeadLines, line];
+		pendingLeadLines = [];
+		let delimiterDepth = measureCodeDelimiterDelta(line);
+		const hasIndentScope = startsIndentScopedCodeBlock(trimmed);
+		index += 1;
+
+		while (index < trimmedLines.length) {
+			const nextLine = trimmedLines[index];
+			if (shouldStartNextCodeSemanticBlock(block, delimiterDepth, hasIndentScope, blockStartIndent, nextLine)) {
+				break;
+			}
+			block.push(nextLine);
+			delimiterDepth += measureCodeDelimiterDelta(nextLine);
+			index += 1;
+		}
+
+		const normalizedBlock = trimOuterBlankLines(block);
+		if (normalizedBlock.some(hasSubstantiveLine)) {
+			blocks.push(normalizedBlock);
+		}
+	}
+
+	if (pendingLeadLines.some(hasSubstantiveLine)) {
+		blocks.push(trimOuterBlankLines(pendingLeadLines));
+	}
+
+	return blocks.filter(block => block.some(hasSubstantiveLine));
+}
+
 function collectCodeFenceSegments(lines: string[]): string[][] {
 	const segments: string[][] = [];
 	let current: string[] = [];
@@ -2339,6 +2408,65 @@ function splitCodeLinesByBudget(lines: string[], chunkCount: number): string[][]
 	return chunks.length >= 2 ? chunks : null;
 }
 
+function shouldStartNextCodeSemanticBlock(
+	currentBlock: string[],
+	delimiterDepth: number,
+	hasIndentScope: boolean,
+	blockStartIndent: number,
+	nextLine: string,
+): boolean {
+	const trimmedNext = nextLine.trim();
+	if (trimmedNext.length === 0) {
+		return delimiterDepth <= 0 && !hasIndentScope;
+	}
+	if (delimiterDepth > 0 || codeLineContinues(currentBlock[currentBlock.length - 1] ?? '')) {
+		return false;
+	}
+	if (hasIndentScope && countLeadingWhitespace(nextLine) > blockStartIndent) {
+		return false;
+	}
+	return true;
+}
+
+function startsIndentScopedCodeBlock(trimmedLine: string): boolean {
+	return /:\s*(?:#.*)?$/.test(trimmedLine)
+		&& /^(?:async\s+def|def|class|if|elif|else|for|while|try|except|finally|with|match|case)\b/.test(trimmedLine);
+}
+
+function isCodeLeadComment(trimmedLine: string): boolean {
+	return /^(?:\/\/|#|--|\/\*|\*|\*\/)/.test(trimmedLine);
+}
+
+function codeLineContinues(line: string): boolean {
+	const trimmed = line.trim();
+	return trimmed.length > 0
+		&& /(?:[({[\\,]|=>|\?|\|\||&&|[+\-*/%=<>])$/.test(trimmed);
+}
+
+function measureCodeDelimiterDelta(line: string): number {
+	const code = stripCodeLineNoise(line);
+	let delta = 0;
+	for (const char of code) {
+		if (char === '{' || char === '(' || char === '[') {
+			delta += 1;
+		} else if (char === '}' || char === ')' || char === ']') {
+			delta -= 1;
+		}
+	}
+	return delta;
+}
+
+function stripCodeLineNoise(line: string): string {
+	return line
+		.replace(/(["'`])(?:\\.|(?!\1).)*\1/g, '')
+		.replace(/\/\/.*$/, '')
+		.replace(/#.*$/, '');
+}
+
+function countLeadingWhitespace(line: string): number {
+	return line.length - line.trimStart().length;
+}
+
 function parseMarkdownTableCells(line: string): string[] {
 	const trimmed = line.trim().replace(/^\|/, '').replace(/\|$/, '');
 	return trimmed.split('|').map(cell => cell.trim());
@@ -2370,6 +2498,13 @@ function longestUnbrokenTokenLength(value: string): number {
 	return value
 		.split(/\s+/)
 		.reduce((longest, token) => Math.max(longest, token.length), 0);
+}
+
+function hasLongMarkdownTableCell(rows: string[][]): boolean {
+	return rows.some(cells => cells.some(cell => {
+		const trimmed = cell.trim();
+		return trimmed.length >= 80 || trimmed.split(/\s+/).filter(Boolean).length >= 12;
+	}));
 }
 
 function isMarkdownTableRow(line: string): boolean {

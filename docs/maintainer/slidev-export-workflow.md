@@ -165,7 +165,7 @@ Current landed truth as of 2026-06-20:
 
 1. default HTML verification audits the full prepared deck when `--sample-slides` is not provided;
 2. the patcher derives `zoom` from measured overflow instead of fixed export constants;
-3. the patcher preserves source Mermaid fences by default and escalates to structural splitting for Markdown tables, pathological width-heavy tables through record-list fallback, non-Mermaid fenced code blocks, simple heading + paragraph/list slides, generic slot-marked layouts (including explicit `::default::`), and first-slide deck headmatter content when structural splitting is possible;
+3. the patcher preserves source Mermaid fences by default and escalates to structural splitting for Markdown tables, pathological width-heavy or long-cell tables through record-list fallback, non-Mermaid fenced code blocks, simple heading + paragraph/list slides, generic slot-marked layouts (including explicit `::default::`), and first-slide deck headmatter content when structural splitting is possible;
 4. large Mermaid guardrails no longer overwrite a slide that already declares its own `zoom`;
 5. existing Slidev decks now use isolated prepared working-copy directories under `_slidev-sources/<deck-basename>/`, and common sibling Slidev support entries such as `layouts/`, `public/`, `setup/`, `components/`, `snippets/`, `styles/`, `global-top.vue`, and `global-bottom.vue` are mirrored into that workspace when present;
 6. rendered layout audit now also measures direct-text `div`/`section`/`article`/`aside`/`span` blocks, so component-heavy slides do not silently under-audit as empty layouts;
@@ -181,6 +181,7 @@ Current landed truth as of 2026-06-20:
 16. low effective font, tight margin, and low content utilization findings now carry structural `recommendedPatch` values for table/code/prose; Mermaid low-font metrics are recorded while preserving the source fence instead of automatically splitting one diagram into several diagrams;
 17. source preparation now builds a clean-room `SlideLayoutPlan` and injects its deterministic layout budget into generated outlines, one-shot Slidev deck prompts, and outline-continuation prompts.
 18. rendered layout audit now also reports `mermaidFit` and the matching summary counters so low Mermaid zoom, low Mermaid font, and manual-review cases remain visible without mutating the original Mermaid fence; the real `architecture.zh-CN.md` rerun reports `mermaidSlideCount = 3`, `mermaidFitReviewCount = 3`, `mermaidLowZoomCount = 3`, and `mermaidManualReviewCount = 1`.
+19. table/code quality splitting now has a second structural slice: long table cells convert to key-value record-list slides, and code fences split by semantic blocks before falling back to blank-line or line-budget chunking.
 
 Current limitation:
 
@@ -190,6 +191,7 @@ Current limitation:
 4. full-deck Playwright verification is deliberately slower than representative sampling, so future work should improve convergence rather than weaken the audit;
 5. `obsidian command id=notemd:export-slides` is still only a dispatch-level smoke because the Obsidian CLI does not expose an export-complete handshake.
 6. Mermaid `manual-review` evidence is not a hard gate failure. It is the correct fail-transparent outcome when preserving the original Mermaid source and guaranteeing projector-level readability cannot both be proven automatically.
+7. code splitting is still parser-light. It preserves common delimiter/indentation semantic blocks, but language-specific AST splitting remains future work.
 
 ## Output Policy
 

@@ -231,7 +231,7 @@ describe('slidevLayoutWorkflow', () => {
 				htmlMode: 'standalone',
 			},
 			jest.fn(),
-			{ writeScreenshots: false }
+			{ writeScreenshots: false, navigationTimeoutMs: 180_000 }
 		);
 
 		expect(mockExportSlidevHtmlWithOutcome).toHaveBeenCalledTimes(2);
@@ -253,7 +253,7 @@ describe('slidevLayoutWorkflow', () => {
 		expect(result.htmlExport.actualMode).toBe('server-script-fallback');
 		expect(result.htmlExportHistory).toHaveLength(2);
 		expect(result.checks).toHaveLength(1);
-		expect(page.goto).toHaveBeenCalledWith(expect.any(String), { waitUntil: 'domcontentloaded', timeout: 60_000 });
+		expect(page.goto).toHaveBeenCalledWith(expect.any(String), { waitUntil: 'domcontentloaded', timeout: 180_000 });
 		expect(page.waitForLoadState).toHaveBeenCalledWith('networkidle', { timeout: 10_000 });
 		expect(page.waitForFunction).toHaveBeenCalled();
 		expect(mockStartLocalServer).toHaveBeenCalled();

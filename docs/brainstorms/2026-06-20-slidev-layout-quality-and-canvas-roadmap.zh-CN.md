@@ -322,18 +322,18 @@ interface SlideLayoutPlan {
 
 目标：避免“没溢出但不可读”的大表和代码块。
 
-实现状态：低 table/code effective font 现在分别触发 `split-table` 与 `reduce-code`，在没有 hard overflow 时也会进入结构化拆分；layout budget 会提前把宽表、长表和长代码标为 pre-split candidates。尚未落地的是更强的 cell-level rewrite 与代码语义 AST 级拆分。
+实现状态：低 table/code effective font 现在分别触发 `split-table` 与 `reduce-code`，在没有 hard overflow 时也会进入结构化拆分；layout budget 会提前把宽表、长表和长代码标为 pre-split candidates。本切片继续补上两个更具体的质量策略：长 table cell 会转成 record-list，不继续挤压表格；code fence 会先按语义块拆分，尽量保留注释+函数/作用域块，失败时才退回空行/行预算。尚未落地的是语言特定 AST 级拆分。
 
 表格策略：
 
 1. wide table：优先列拆分；
 2. tall table：优先行拆分；
 3. dense table：转 record-list 或 summary + appendix；
-4. cell 文本过长：先改写为 key-value cards，而不是继续缩小 table。
+4. cell 文本过长：先改写为 key-value record-list，而不是继续缩小 table。
 
 代码策略：
 
-1. 超长 code fence 按语义段落拆；
+1. 超长 code fence 优先按语义块拆，包括注释前缀、括号/缩进作用域与续行边界；
 2. 宽代码优先解释/摘录关键片段；
 3. 代码字号低于阈值时不要继续 shrink。
 
@@ -360,7 +360,7 @@ interface SlideLayoutPlan {
 
 实现状态：已新增/扩展 unit fixtures：
 
-1. `src/tests/slidevLayoutAudit.test.ts` 覆盖 low effective font measurement、Mermaid 源图保持、Mermaid fit/manual-review 统计、table/code 质量 finding 驱动结构拆分、summary 新字段；
+1. `src/tests/slidevLayoutAudit.test.ts` 覆盖 low effective font measurement、Mermaid 源图保持、Mermaid fit/manual-review 统计、table/code 质量 finding 驱动结构拆分、长 cell record-list fallback、代码语义块拆分、summary 新字段；
 2. `src/tests/slidevLayoutPlan.test.ts` 覆盖 clean-room layout budget 对 Mermaid 的 `preserve-source-fit` 与 table/code 的 pre-split 判断；
 3. `src/tests/slidevSourcePreparer.test.ts` 覆盖 deterministic outline 与 LLM prompt 都带 layout budget；
 4. `src/tests/slidevLayoutWorkflow.test.ts` 更新 summary schema，避免 verifier mock 停留在旧字段。
@@ -395,15 +395,16 @@ interface SlideLayoutPlan {
 2. Stage 2 layout planning IR 第一切片：支持 Markdown block、Mermaid、table、code 的预算估算；
 3. Stage 3/4 第一切片：low effective font 可触发 table/code 结构化 patch；Mermaid 改为源图保持，不再自动拆图；
 4. verifier JSON 与 unit fixtures 已覆盖新 summary schema；
-5. 真实 `architecture.zh-CN.md` strict standalone 已重新验收并归档。
+5. 真实 `architecture.zh-CN.md` strict standalone 已重新验收并归档；
+6. Stage 4 第二切片：长 table cell 转 record-list，code fence 优先按语义块拆分，避免行预算切断函数体。
 
 建议下一批实现顺序：
 
-1. 增强 Mermaid source-preserving fit：针对原 fence 计算最小可见 zoom、safe rect、可选局部 Transform 与 manual-review 原因；
-2. 增强 Mermaid 可读性报告：把 SVG 最小字号、图 bbox、content-area ratio 作为非改图证据输出，而不是触发拆图；
-3. 增强 table/code 语义改写：宽表转列簇或 record-list，代码按 AST/空行/注释段切分；
-4. 精确测量局部 CSS transform 对有效字号的影响；
-5. 扩展真实 fixture 包，把“保留 Mermaid 源图导致低 zoom 可接受”和“应人工复核”的场景分开，避免 gate 过松或误杀。
+1. 精确测量局部 CSS transform 对有效字号的影响；
+2. 增强 table/code 语言特定拆分：TypeScript/JavaScript 可走轻量 AST 或 tokenizer，Python/Rust 等至少保留缩进/作用域块；
+3. 扩展真实 fixture 包，把“保留 Mermaid 源图导致低 zoom 可接受”和“应人工复核”的场景分开，避免 gate 过松或误杀；
+4. 针对真实长表 fixture 增加 record-list 视觉验收，而不是只看 Markdown 结构；
+5. 评估是否把 source-preserved Mermaid fit review 抽成通用 Slidev skill PR 建议。
 
 不要先做：
 

@@ -165,7 +165,7 @@ layoutAuditSummary.retryCount
 
 1. 默认 HTML 验证在未传 `--sample-slides` 时会审计整个准备后的 deck；
 2. patcher 的 `zoom` 来自真实 overflow 测量，而不是固定导出常数；
-3. patcher 默认保留 Mermaid 源 fence，并会在不宜继续缩小时对 Markdown table、病态宽表的 record-list fallback、非 Mermaid fenced code block、简单的标题 + 段落/列表页、generic slot-marked layout（含显式 `::default::`），以及可结构拆分的第一张 deck headmatter 页面做结构化拆分；
+3. patcher 默认保留 Mermaid 源 fence，并会在不宜继续缩小时对 Markdown table、病态宽表或长 cell 表的 record-list fallback、非 Mermaid fenced code block、简单的标题 + 段落/列表页、generic slot-marked layout（含显式 `::default::`），以及可结构拆分的第一张 deck headmatter 页面做结构化拆分；
 4. 大 Mermaid guardrail 不会再覆盖页面里已经显式声明的 `zoom`；
 5. 现有 Slidev deck 现在会进入 `_slidev-sources/<deck-basename>/` 隔离 working copy 目录；若 sibling 下存在 `layouts/`、`public/`、`setup/`、`components/`、`snippets/`、`styles/`、`global-top.vue`、`global-bottom.vue` 等常见 Slidev support entries，也会一并镜像进去；
 6. 渲染后布局审计现在也会测量带直接文本的 `div` / `section` / `article` / `aside` / `span`，因此 component-heavy 页面不会再被静默低估成“空布局”；
@@ -181,6 +181,7 @@ layoutAuditSummary.retryCount
 16. low effective font、tight margin 与 low content utilization finding 现在会对 table/code/prose 携带结构化 `recommendedPatch`；Mermaid 低字号指标会被记录，但默认保持源 fence，不把一张原图自动拆成多张图；
 17. source preparation 现在会生成 clean-room `SlideLayoutPlan`，并把 deterministic layout budget 注入 deterministic outline、一次性 Slidev deck prompt 与基于大纲继续导出的 prompt。
 18. rendered layout audit 现在还会报告 `mermaidFit` 与对应 summary 计数，让 Mermaid 低 zoom、低字号和 manual-review 情况可见，但不修改原始 Mermaid fence；真实 `architecture.zh-CN.md` rerun 报告 `mermaidSlideCount = 3`、`mermaidFitReviewCount = 3`、`mermaidLowZoomCount = 3`、`mermaidManualReviewCount = 1`。
+19. table/code quality splitting 已进入第二个结构化切片：长 table cell 会转成 key-value record-list slide，code fence 会优先按语义块拆分，再退回空行或行数预算。
 
 当前限制：
 
@@ -190,6 +191,7 @@ layoutAuditSummary.retryCount
 4. full-deck Playwright 验证故意比代表性抽样更慢，后续优化方向应是提高 patch 收敛能力，而不是退回弱审计；
 5. `obsidian command id=notemd:export-slides` 目前仍只能算 dispatch-level smoke，因为 Obsidian CLI 没有暴露导出完成握手信号。
 6. Mermaid `manual-review` 证据不是 hard gate failure。它是在“不修改原 Mermaid 内容”和“自动保证投影级可读”不能同时被证明时，正确暴露给维护者的透明结果。
+7. code splitting 仍是 parser-light，不是语言特定 AST 拆分；当前能保留常见括号/缩进语义块，AST 级拆分仍是后续工作。
 
 ## 输出策略
 

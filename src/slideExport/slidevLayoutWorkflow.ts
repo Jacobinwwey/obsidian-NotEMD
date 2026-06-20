@@ -36,6 +36,7 @@ export interface SlidevLayoutPatchAttempt {
 export interface SlidevLayoutConvergenceOptions {
 	sampleSlides?: number[] | null;
 	writeScreenshots?: boolean;
+	navigationTimeoutMs?: number;
 	auditConfig?: Partial<SlidevLayoutAuditConfig>;
 }
 
@@ -64,7 +65,7 @@ const DEFAULT_LAYOUT_AUDIT_CONFIG: SlidevLayoutAuditConfig = {
 	lowContentUtilizationScaleThreshold: 0.55,
 	mermaidLowZoomReviewScale: 0.72,
 };
-const SLIDEV_LAYOUT_NAVIGATION_TIMEOUT_MS = 60_000;
+const DEFAULT_SLIDEV_LAYOUT_NAVIGATION_TIMEOUT_MS = 120_000;
 
 type PlaywrightRuntime = {
 	chromium?: {
@@ -88,6 +89,7 @@ export async function convergeSlidevDeckLayout(
 		...DEFAULT_LAYOUT_AUDIT_CONFIG,
 		...options.auditConfig,
 	};
+	const navigationTimeoutMs = resolveLayoutNavigationTimeout(options.navigationTimeoutMs);
 	let htmlExport = await exportSlidevHtmlWithOutcome(app, source, config, onProgress);
 	const htmlExportHistory = [htmlExport];
 	let exportPath = htmlExport.path;
@@ -128,6 +130,7 @@ export async function convergeSlidevDeckLayout(
 			options.writeScreenshots === true,
 			playwright,
 			resolvedAuditConfig,
+			navigationTimeoutMs,
 		);
 		checks = auditResult.checks;
 		layoutAudits = auditResult.layoutAudits;
@@ -186,6 +189,7 @@ async function runPlaywrightLayoutChecks(
 	writeScreenshots: boolean,
 	playwright: PlaywrightRuntime,
 	auditConfig: SlidevLayoutAuditConfig,
+	navigationTimeoutMs: number,
 ): Promise<{ checks: SlidevLayoutCheck[]; layoutAudits: SlidevLayoutAudit[] }> {
 	const browser = await playwright.chromium!.launch({ headless: true });
 	const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
@@ -218,7 +222,7 @@ async function runPlaywrightLayoutChecks(
 			});
 
 			const targetUrl = baseUrl ? `${baseUrl}#/${slide}` : `file://${htmlPath}#/${slide}`;
-			await openSlideForLayoutAudit(page, targetUrl);
+			await openSlideForLayoutAudit(page, targetUrl, navigationTimeoutMs);
 			await page.waitForTimeout(1_000);
 			const text = await page.locator('body').innerText({ timeout: 5_000 }).catch(() => '');
 			const measurement = await collectRenderedSlideMeasurement(page, slide);
@@ -248,8 +252,14 @@ async function runPlaywrightLayoutChecks(
 	return { checks, layoutAudits };
 }
 
-async function openSlideForLayoutAudit(page: any, targetUrl: string): Promise<void> {
-	await page.goto(targetUrl, { waitUntil: 'domcontentloaded', timeout: SLIDEV_LAYOUT_NAVIGATION_TIMEOUT_MS });
+function resolveLayoutNavigationTimeout(timeoutMs: number | null | undefined): number {
+	return typeof timeoutMs === 'number' && Number.isFinite(timeoutMs) && timeoutMs > 0
+		? Math.max(DEFAULT_SLIDEV_LAYOUT_NAVIGATION_TIMEOUT_MS, timeoutMs)
+		: DEFAULT_SLIDEV_LAYOUT_NAVIGATION_TIMEOUT_MS;
+}
+
+async function openSlideForLayoutAudit(page: any, targetUrl: string, navigationTimeoutMs: number): Promise<void> {
+	await page.goto(targetUrl, { waitUntil: 'domcontentloaded', timeout: navigationTimeoutMs });
 	if (typeof page.waitForLoadState === 'function') {
 		await page.waitForLoadState('networkidle', { timeout: 10_000 }).catch(() => undefined);
 	}
