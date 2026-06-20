@@ -496,6 +496,133 @@ describe('slidevLayoutAudit', () => {
 		expect((patched.deckMarkdown.match(/```mermaid/g) || []).length).toBe(1);
 	});
 
+	test('separates mixed Mermaid and prose while preserving each source Mermaid fence', () => {
+		const audit: SlidevLayoutAudit = {
+			slide: 2,
+			safeRect: { left: 51.2, top: 43.2, right: 1228.8, bottom: 676.8, width: 1177.6, height: 633.6 },
+			contentBounds: { left: 120, top: 96, right: 1080, bottom: 610, width: 960, height: 514 },
+			pageScale: 0.42,
+			elementKinds: ['mermaid', 'text'],
+			mermaidFit: {
+				status: 'source-preserved-fit-review',
+				reason: 'preserved Mermaid zoom 0.420 is below review scale 0.72',
+				pageScale: 0.42,
+				fitScale: null,
+				nextZoom: null,
+				diagramBounds: null,
+				effectiveMinFontPx: 8.4,
+				svgTextMinFontPx: 8.4,
+				qualityMargins: { left: 70, top: 52, right: 80, bottom: 66, min: 52 },
+				contentAreaRatio: 0.62,
+				lowZoom: true,
+				lowFont: false,
+				tightMargin: false,
+			},
+			findings: [],
+		};
+		const mermaidLines = [
+			'```mermaid',
+			'flowchart LR',
+			'  Source --> Transform',
+			'  Transform --> Standalone',
+			'```',
+		];
+		const secondMermaidLines = [
+			'```mermaid',
+			'sequenceDiagram',
+			'  participant User',
+			'  participant Exporter',
+			'  User->>Exporter: preserve original fence',
+			'```',
+		];
+		const deck = [
+			'---',
+			'theme: default',
+			'---',
+			'',
+			'# Intro',
+			'',
+			'---',
+			'zoom: 0.42',
+			'---',
+			'',
+			'## Runtime Shape',
+			'',
+			...mermaidLines,
+			'',
+			...secondMermaidLines,
+			'',
+			'The export path must keep this prose readable without shrinking it together with the diagram.',
+			'',
+			'- Preserve the source Mermaid fence.',
+			'- Move prose onto its own readable slide when needed.',
+		].join('\n');
+
+		const patched = patchDeckWithLayoutAudit(deck, [audit]);
+
+		expect(patched.changed).toBe(true);
+		expect(patched.changedSlides).toEqual([2]);
+		expect(patched.blockedSlides).toEqual([]);
+		expect(countSlideDeckSlides(patched.deckMarkdown)).toBe(3);
+		expect(patched.deckMarkdown).not.toContain('zoom: 0.42');
+		expect((patched.deckMarkdown.match(/```mermaid/g) || []).length).toBe(2);
+		expect(patched.deckMarkdown).toContain(mermaidLines.join('\n'));
+		expect(patched.deckMarkdown).toContain(secondMermaidLines.join('\n'));
+		expect(patched.deckMarkdown).toContain('The export path must keep this prose readable');
+		expect((patched.deckMarkdown.match(/## Runtime Shape/g) || []).length).toBe(2);
+	});
+
+	test('blocks low whole-slide zoom for mixed Mermaid and prose when separation is unsupported', () => {
+		const audit: SlidevLayoutAudit = {
+			slide: 2,
+			safeRect: { left: 51.2, top: 43.2, right: 1228.8, bottom: 676.8, width: 1177.6, height: 633.6 },
+			contentBounds: { left: 48, top: 52, right: 1234, bottom: 920, width: 1186, height: 868 },
+			pageScale: 1,
+			elementKinds: ['mermaid', 'text'],
+			findings: [
+				{
+					kind: 'overflow',
+					target: 'content',
+					message: 'Slide content exceeds the safe visible rectangle',
+					recommendedPatch: 'reduce-zoom',
+					recommendedScale: 0.5,
+				},
+			],
+		};
+		const deck = [
+			'---',
+			'theme: default',
+			'---',
+			'',
+			'# Intro',
+			'',
+			'---',
+			'layout: custom-unpatchable',
+			'---',
+			'',
+			'## Runtime Shape',
+			'',
+			'```mermaid',
+			'flowchart LR',
+			'  Source --> Transform',
+			'```',
+			'',
+			'This prose should not be hidden behind low whole-slide zoom.',
+		].join('\n');
+
+		const patched = patchDeckWithLayoutAudit(deck, [audit], { mermaidLowZoomReviewScale: 0.72 });
+
+		expect(patched.changed).toBe(false);
+		expect(patched.blockedSlides).toEqual([
+			expect.objectContaining({
+				slide: 2,
+				reason: expect.stringContaining('mixed Mermaid and primary non-Mermaid content'),
+			}),
+		]);
+		expect(patched.deckMarkdown).not.toContain('zoom: 0.5');
+		expect((patched.deckMarkdown.match(/```mermaid/g) || []).length).toBe(1);
+	});
+
 	test('fits oversized sequence diagrams instead of splitting Mermaid participants', () => {
 		const audit: SlidevLayoutAudit = {
 			slide: 2,

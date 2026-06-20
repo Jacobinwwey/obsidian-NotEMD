@@ -13,7 +13,7 @@ The NoteMD workflow must verify all of these steps together:
 1. The active Markdown note is converted into a real Slidev deck before export.
 2. The full Slidev skill directory is discovered, including `references/*.md`, not only `SKILL.md`.
 3. The local Slidev fork is preferred when present.
-4. Existing Slidev decks are copied into an isolated prepared working workspace before verification so patch/retry never mutates the source note directly and sibling Slidev support entries can be mirrored into the working copy.
+4. Existing Slidev decks are copied into an isolated prepared working workspace before verification so patch/retry never mutates the source note directly and sibling Slidev support entries plus referenced local image assets can be mirrored into the working copy.
 5. The output directory is recreated before each HTML build so stale chunks cannot survive.
 6. Generated deck guardrails normalize theme, slide frontmatter, and seed large Mermaid diagram zoom only when the slide does not already declare its own zoom.
 7. HTML export attempts native standalone first, records the actual HTML mode, and falls back to server-script-compatible HTML only when the generated standalone bundle really misses slide loader bindings.
@@ -71,6 +71,12 @@ npm run verify:slidev-layout-fixtures -- --archive /home/jacob/slidev-export-rev
 
 This command creates temporary vaults outside the repository, runs the production verifier, and archives the source fixture, final deck, report, and standalone export. Use it when layout audit, Mermaid fit, table/code splitting, text measurement, or slot Transform behavior changes.
 
+The current expanded fixture archive is:
+
+```text
+/home/jacob/slidev-export-review/2026-06-20-expanded-layout-fixtures/
+```
+
 For a live desktop-session smoke against the real Obsidian command path:
 
 ```bash
@@ -107,6 +113,7 @@ Treat the command as passing only when the final JSON report has:
 15. for strict native standalone closure, `htmlExport.standaloneAttempt.loaderGaps: []`
 16. for strict native standalone closure, `standaloneGate.passed: true`
 17. when the source contains Mermaid fences, the exported deck preserves the same Mermaid block count unless a human explicitly edits the source.
+18. mixed Mermaid/prose slides must not retain low whole-slide zoom; if separation is possible, the Mermaid fence stays intact on a Mermaid-focused slide and prose moves to a readable slide.
 
 If any check fails, fix the NoteMD workflow before relying on the exported files.
 
@@ -198,6 +205,9 @@ Current landed truth as of 2026-06-20:
 25. synthetic full-deck layout fixtures now run through the production verifier: `source-layout-stress` covers full skill references, native standalone, preserved Mermaid block count, record-list fallback, and code splitting; `slot-component-stress` covers component-heavy slot Transform convergence without whole-slide zoom stacking. The 2026-06-20 archive is `/home/jacob/slidev-export-review/2026-06-20-full-deck-layout-fixtures/`.
 26. text overflow measurement now uses text-node Range glyph rectangles for text elements instead of block-level element boxes, so layouts are not failed because an `h1` block is wider than its actual visible text.
 27. Mermaid-only slides may apply a measured low zoom to keep one preserved source diagram fully visible; the readability risk is surfaced through `mermaidFit.manual-review` instead of splitting or rewriting the source diagram.
+28. mixed Mermaid/prose slides now separate non-Mermaid primary content before permitting source-preserved Mermaid fit; every source Mermaid fence remains one fence with unchanged content, and unsupported mixed layouts block low whole-slide zoom instead of shrinking prose.
+29. prepared deck workspaces now copy local relative Markdown image and HTML `<img>` assets next to the generated deck while rejecting URLs, absolute paths, and `..` traversal; this keeps isolated `_slidev-sources` builds from breaking source-relative SVG/PNG/JPEG references.
+30. the local Slidev fork's standalone bundler now uses brace-balanced function replacement when stubbing Vite preload helpers, preventing the first slide loader binding from being deleted. The NoteMD strict standalone gate remains fail-closed and still reports loader gaps instead of accepting fallback output as native standalone.
 
 Current limitation:
 
@@ -209,7 +219,7 @@ Current limitation:
 6. Mermaid `manual-review` evidence is not a hard gate failure. It is the correct fail-transparent outcome when preserving the original Mermaid source and guaranteeing projector-level readability cannot both be proven automatically.
 7. code splitting is still parser-light. TypeScript/JavaScript/Python/Rust now have top-level tokenizers, but full AST splitting and more language-specific splitters remain future work.
 8. The Mermaid no-split constraint does not mean Mermaid presentation quality automatically passes. If a very large source diagram can only remain complete at low zoom, the workflow should surface `source-preserved-fit-review` or `manual-review` instead of silently rewriting the diagram.
-9. Stage 5 full-deck fixtures now cover long-table, wide-table, mixed-code, Mermaid source-preserved fit, and component-heavy slot Transform boundaries, but they are not exhaustive; add more fixture sources for image-heavy decks, complex Vue components, nested slots, very wide tables, and mixed Mermaid/prose layouts as they fail in real documents.
+9. Stage 5 full-deck fixtures now cover long-table, wide-table, mixed-code, Mermaid source-preserved fit, component-heavy slot Transform boundaries, mixed Mermaid/prose separation, local image assets, nested slot components, and ultra-wide tables, but they are not exhaustive; add more fixture sources for frontmatter backgrounds, cross-directory assets, media-heavy decks, complex Vue components, and unsupported layouts as they fail in real documents.
 
 ## Output Policy
 

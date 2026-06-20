@@ -238,6 +238,8 @@ describe('slidevSourcePreparer', () => {
             '---',
             '',
             '# First',
+            '',
+            '![Diagram](./wide-schematic.svg)',
         ].join('\n');
         const app = createApp(markdown);
         const tempVaultRoot = fs.mkdtempSync(path.join(require('os').tmpdir(), 'notemd-slidev-support-workspace-'));
@@ -245,6 +247,7 @@ describe('slidevSourcePreparer', () => {
         const layoutsDirectory = path.join(sourceDirectory, 'layouts');
         fs.mkdirSync(layoutsDirectory, { recursive: true });
         fs.writeFileSync(path.join(layoutsDirectory, 'custom-grid.vue'), '<template><slot /></template>', 'utf8');
+        fs.writeFileSync(path.join(sourceDirectory, 'wide-schematic.svg'), '<svg xmlns="http://www.w3.org/2000/svg"/>', 'utf8');
 
         app.vault.adapter.write = jest.fn(async (vaultPath: string, content: string) => {
             const absolutePath = path.join(tempVaultRoot, vaultPath);
@@ -264,6 +267,7 @@ describe('slidevSourcePreparer', () => {
 
         expect(result.inputFilePath).toBe('export/_slidev-sources/existing-slidev/existing-slidev.slidev.md');
         expect(fs.existsSync(path.join(tempVaultRoot, 'export/_slidev-sources/existing-slidev/layouts/custom-grid.vue'))).toBe(true);
+        expect(fs.existsSync(path.join(tempVaultRoot, 'export/_slidev-sources/existing-slidev/wide-schematic.svg'))).toBe(true);
     });
 
     test('deterministic conversion does not split inside fenced code blocks', () => {

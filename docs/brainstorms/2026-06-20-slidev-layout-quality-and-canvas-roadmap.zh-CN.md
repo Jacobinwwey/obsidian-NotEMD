@@ -3,7 +3,7 @@ date: 2026-06-20
 last_updated: 2026-06-20
 topic: slidev-layout-quality-and-canvas-roadmap
 canonical: true
-status: stage5-full-deck-fixtures-and-source-preserved-fit-implemented
+status: stage5-expanded-fixtures-assets-and-standalone-loader-implemented
 ---
 
 # Slidev 布局质量与画布规划路线
@@ -26,7 +26,7 @@ status: stage5-full-deck-fixtures-and-source-preserved-fit-implemented
 
 1. 分支：`main`
 2. 远端：`origin/main`
-3. 本批次实现内容：rendered quality gate + clean-room `SlideLayoutPlan` 第一切片 + Mermaid 源图保持 fit 审计 + JS/TS/Python/Rust tokenizer + Mermaid 不拆图回归契约 + Stage 5 full-deck/export fixture、文本 glyph rect 测量、slot Transform 去整页 zoom 叠加
+3. 本批次实现内容：rendered quality gate + clean-room `SlideLayoutPlan` 第一切片 + Mermaid 源图保持 fit 审计 + JS/TS/Python/Rust tokenizer + Mermaid 不拆图回归契约 + Stage 5 full-deck/export fixture、文本 glyph rect 测量、slot Transform 去整页 zoom 叠加、mixed Mermaid/prose 分离、相对图片资产镜像、local Slidev fork standalone loader 边界修复
 4. 真实源文件：`docs/architecture.zh-CN.md`
 5. 本批次真实导出证据包：`/home/jacob/slidev-export-review/2026-06-20-quality/`
 6. 本批次最终 source-preserved-fit 输出归档：`/home/jacob/slidev-export-review/2026-06-20-source-preserved-fit-final/`
@@ -34,6 +34,7 @@ status: stage5-full-deck-fixtures-and-source-preserved-fit-implemented
 8. JS/TS code tokenizer 验收包：`/home/jacob/slidev-export-review/2026-06-20-js-ts-code-tokenizer/`
 9. Python/Rust code tokenizer 验收包：`/home/jacob/slidev-export-review/2026-06-20-python-rust-code-tokenizer/`
 10. full-deck layout fixture 验收包：`/home/jacob/slidev-export-review/2026-06-20-full-deck-layout-fixtures/`
+11. expanded layout fixture 验收包：`/home/jacob/slidev-export-review/2026-06-20-expanded-layout-fixtures/`
 
 当前已落地事实：
 
@@ -49,19 +50,21 @@ status: stage5-full-deck-fixtures-and-source-preserved-fit-implemented
 10. `architecture.zh-CN.md` strict native standalone rerun 已通过：`slideCount = 27`，源文档与导出 deck 均为 3 个 Mermaid block，hard overflow / unreadable scale / low effective font / quality margin warning / low utilization 均为零，HTML export 为 native standalone 且不需要本地 server；
 11. `slidevLayoutAudit` 单测新增 Mermaid source-preservation 回归：即使误收到 code structural patch，也不会把一个 Mermaid fence 拆成多个 fence；
 12. Python/Rust code fence 现在也会先走轻量 top-level tokenizer，保持 import/use 组、decorator/attribute 与顶层 class/function/impl/module item 完整；
-13. Stage 5 fixture 已从局部 unit/measurement 扩展到 full-deck export fixture：`source-layout-stress` 覆盖非 Slidev 源笔记、完整 skill references、长表 record-list、代码拆分、Mermaid 源图保持与 native standalone；`slot-component-stress` 覆盖 component-heavy slot 的局部 Transform 收敛；
+13. Stage 5 fixture 已从局部 unit/measurement 扩展到 full-deck export fixture：`source-layout-stress` 覆盖非 Slidev 源笔记、完整 skill references、长表 record-list、代码拆分、Mermaid 源图保持与 native standalone；`slot-component-stress` 覆盖 component-heavy slot 的局部 Transform 收敛；`mixed-mermaid-prose-stress` 覆盖 Mermaid fence 原样保留、同页 prose 分离和禁止 mixed low zoom；`media-nested-slot-stress` 覆盖相对 SVG 资产、image slide、嵌套 slot component 与超宽表；
 14. Mermaid-only 页在保留源 fence 且进一步拆图被禁止时，可以使用测量得到的低 `zoom` 先保证整张图不裁切，再通过 `mermaidFit.manual-review` 暴露投影可读性风险；这不是自动拆图许可；
 15. 文本 overflow 测量已从 block element box 改为 text node Range glyph rect，避免 `h1` 等块级元素的布局盒被误判为文字超界；
 16. 已有 slot `<Transform>` 的页面不会再叠加整页 `zoom`；若叠加导致低 effective font，patcher 会移除整页 zoom，保持局部 Transform 作为唯一缩放面；
-17. 当前生成产物可被 Git 看到，用于本地视觉检查，但不应提交进 `main`。
+17. source preparation 现在会把 deck 中引用的本地相对 Markdown/HTML 图片资产复制到 prepared deck 所在目录，避免 `_slidev-sources` 隔离工作副本破坏相对路径；
+18. local Slidev fork 的 standalone bundler 已修复 Vite preload helper 替换边界，避免误删第一张 slide loader binding；NoteMD strict gate 继续保持 fail-closed，不把 server-script fallback 伪装为 native standalone；
+19. 当前生成产物可被 Git 看到，用于本地视觉检查，但不应提交进 `main`。
 
 当前未完成事实：
 
 1. semantic split 仍只覆盖当前已有 table/code/text 支持集；Mermaid 源图保持后，过密原图只能通过布局/zoom/Transform 或人工复核处理，不能把一个源 Mermaid fence 自动拆成多个图；
-2. effective font 现在会把文本节点到 slide root 之间的局部 CSS `transform` / `scale` / `zoom` 乘入逐样本字号；full-deck slot fixture 已覆盖一条复杂 Vue/slot layout 的真实收敛链路，但更多 custom layout 仍需继续加 fixture；
+2. effective font 现在会把文本节点到 slide root 之间的局部 CSS `transform` / `scale` / `zoom` 乘入逐样本字号；full-deck slot fixture 已覆盖复杂 Vue/slot、嵌套 slot 与 component-heavy Transform 的真实收敛链路，但更多 custom layout 仍需继续加 fixture；
 3. `SlideLayoutPlan` 是生成前预算，不替代 Playwright rendered audit；
 4. 真实 `architecture.zh-CN.md` 仍需要每批次跑 strict standalone 验收，不能用单测替代；
-5. 当前真实 deck 仍可能出现 `zoom` 小于 `0.72` 的 Mermaid 页面；在“不改原 Mermaid 图内容”的约束下，低 zoom 有时是保留源图的代价，但不能扩散到 prose/table/code。
+5. 当前真实 deck 仍可能出现 `zoom` 小于 `0.72` 的 Mermaid-only 页面；在“不改原 Mermaid 图内容”的约束下，低 zoom 有时是保留源图的代价，但不能扩散到 prose/table/code。混合 Mermaid/prose 页应先分离非图内容，不能把正文一起缩小。
 
 ## 3. 先前要求与当前代码逐项对比
 
@@ -69,11 +72,13 @@ status: stage5-full-deck-fixtures-and-source-preserved-fit-implemented
 |---|---|---|---|
 | UI 中两个 Slidev export 按钮必须跑真实工作流 | `exportSlidesCommand()` 是命令面板和侧栏入口共同拥有的完整操作；侧栏支持一次性导出和大纲模式 | 已落地 | 后续 UI 改动继续以 `sidebarDomButtonClicks` 与真实 verifier 锁住 |
 | 非大纲模式也要嵌入 Slidev skill 流程 | source preparation 会加载完整 skill references，不再只读 `SKILL.md` | 已落地 | skill reference 数继续作为 verifier 报告字段 |
-| 必须使用本地 Slidev fork | CLI 解析优先使用 `$HOME/slidev/packages/slidev/bin/slidev.mjs` | 已落地 | verifier 中继续检查 fork 路径 |
+| 必须使用本地 Slidev fork | CLI 解析优先使用 `$HOME/slidev/packages/slidev/bin/slidev.mjs`；本批次还在 fork 中修复 standalone loader binding 被 preload helper 替换误删的问题 | 已落地 | verifier 中继续检查 fork 路径与 `loaderGaps = []` |
 | standalone 文件必须真实可打开 | strict native gate 检查 `actualMode = standalone`、`requiresLocalServer = false`、`loaderGaps = []` | 已落地 | 新 standalone 验收应继续走带日期 evidence package |
 | 不能提交测试生成文件 | `docs/export/` 产物可见但默认不提交，本批次真实输出已归档到仓库外 | 已收口 | 最终 commit 前继续检查 `git status --short docs/export` |
 | zoom 参数应由检测结果决定 | overflow patch 已用 measured fit scale；quality finding 现在会优先触发结构化拆分 | 已推进 | 继续避免把低 `zoom` 当最终修复手段 |
 | 不修改 Mermaid 原图内容 | prompt、layout budget、patcher 与 audit 都按 source-preserved 模型推进；Mermaid fit 问题进入证据字段或人工复核，不进入自动拆图；单测已覆盖 Mermaid fence 不被误走 code split | 已落地当前切片 | 真实导出继续检查 source/exported Mermaid block count 一致 |
+| Mermaid 与正文混排不能靠低整页 zoom 解决 | `slidevLayoutAudit` 会把 mixed Mermaid/prose 页拆成 Mermaid 专属页与正文页，但每个 Mermaid fence 原样保留，数量不变；无法分离的 unsupported layout 会阻止低整页 zoom | 已落地 | 后续只允许增强布局分离，不允许拆一个 Mermaid fence |
+| 相对图片资产不能在 prepared workspace 中丢失 | source-preparer 会复制 Markdown image / HTML img 的本地相对资产到 prepared deck 所在目录；忽略 URL、绝对路径和 `..` traversal | 已落地 | 后续可扩展到 background/frontmatter asset，但不能粗暴复制整个源目录 |
 | 完整支持 Slidev skill references | skill root 与 reference count 已进入 verifier | 已落地 | 可考虑上游 skill PR，但只放通用 guardrails |
 | 参考无限画布优化图/表/画布可见范围 | 已新增 clean-room `SlideLayoutPlan`，按 world-rect / viewport-fit 思想做生成前预算 | 已落地第一切片 | 后续加强语义拆分算法，不复制 AGPL 代码 |
 
@@ -529,13 +534,15 @@ interface SlideLayoutPlan {
 9. Stage 4 第四切片：Python/Rust code fence 先走 top-level tokenizer，import/use 组、decorator/attribute 与顶层 class/function/impl/module item 保持完整，再进入 chunk 分配。
 10. Stage 5 第一切片：Mermaid fit status 分流 fixture 与 record-list Playwright measurement fixture 已落地，明确 Mermaid 源图保持问题进入审计状态，表格可读性问题走结构化文本 fallback。
 11. Stage 5 第二切片：full-deck/export fixtures 已落地，覆盖真实生产 verifier 链路；Mermaid-only 页允许测量低 zoom fit 来保证整图可见，同时以 `manual-review` 记录投影可读性风险；slot/component-heavy 页禁止局部 Transform 与整页 zoom 叠加。
+12. Stage 5 第三切片：expanded full-deck fixtures 已落地，覆盖 Mermaid/prose 混排、相对图片资产、image slide、嵌套 slot component 和超宽表；完整 suite 归档到 `/home/jacob/slidev-export-review/2026-06-20-expanded-layout-fixtures/`，4 个 fixture 均为 native standalone，`source-layout-stress` 继续验证 `/home/jacob/slidev/skills/slidev` 与 52 个 references。
+13. local Slidev fork 修复了 standalone bundler 用正则猜测 Vite preload helper 结束位置导致误删第一张 slide loader binding 的问题；fork focused bundler test 与 NoteMD full fixture suite 已验证 `loaderGaps = []`。
 
 建议下一批实现顺序：
 
-1. 继续把更多真实失败样本沉淀为 full-deck/export fixtures，尤其是图片、复杂 Vue component、嵌套 slot、超宽表与多 Mermaid 页面混排；
+1. 继续把更多真实失败样本沉淀为 full-deck/export fixtures，尤其是 frontmatter background、本地视频/音频、复杂 Vue component、多 Mermaid 页面混排、跨目录资产和 unsupported layout；
 2. 对 Mermaid 继续只做源图保持的 fit/zoom/Transform 与人工复核边界，不引入自动拆原图策略；
 3. 继续增强更多语言专用 splitter；Python/Rust 当前是 parser-light，不是完整 AST；
-4. 评估是否把 source-preserved Mermaid fit review、browser-check 与“不要拆用户原图”抽成通用 Slidev skill PR 建议。
+4. 评估是否把 source-preserved Mermaid fit review、mixed Mermaid/prose guardrail、browser-check 与“不要拆用户原图”抽成通用 Slidev skill PR 建议。
 
 不要先做：
 

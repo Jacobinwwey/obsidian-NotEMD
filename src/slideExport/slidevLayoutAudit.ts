@@ -481,6 +481,16 @@ export function patchDeckWithLayoutAudit(
 			}
 		}
 
+		if (shouldSeparateMixedMermaidPrimaryContent(audit)) {
+			const separatedSurface = separateMixedMermaidPrimaryContentSlide(currentSlide);
+			if (separatedSurface.slides) {
+				slides.splice(targetIndex, 1, ...separatedSurface.slides);
+				changedSlides.push(audit.slide);
+				slideOffset += separatedSurface.slides.length - 1;
+				continue;
+			}
+		}
+
 		const transformedSlotSlide = wrapOverflowingSupportedSlotLayoutZonesInTransform(
 			currentSlide,
 			audit,
@@ -558,6 +568,17 @@ export function patchDeckWithLayoutAudit(
 			blockedSlides.push({
 				slide: audit.slide,
 				reason: 'existing slot Transform will not be compounded with whole-slide zoom',
+			});
+			continue;
+		}
+
+		if (
+			nextZoom < resolvedConfig.mermaidLowZoomReviewScale
+			&& containsMermaidWithPrimaryNonMermaidContent(currentSlide)
+		) {
+			blockedSlides.push({
+				slide: audit.slide,
+				reason: 'mixed Mermaid and primary non-Mermaid content cannot be fixed with low whole-slide zoom',
 			});
 			continue;
 		}
@@ -1180,6 +1201,23 @@ function hasCodeStructuralOverflow(findings: SlidevLayoutFinding[]): boolean {
 		&& (finding.overflowAxis === 'height' || finding.overflowAxis === 'both'));
 }
 
+function shouldSeparateMixedMermaidPrimaryContent(audit: SlidevLayoutAudit): boolean {
+	if (!audit.elementKinds.includes('mermaid')) {
+		return false;
+	}
+	if (audit.mermaidFit?.lowZoom || audit.mermaidFit?.status === 'manual-review') {
+		return true;
+	}
+	return audit.findings.some(finding =>
+		finding.kind === 'overflow'
+		|| finding.kind === 'unreadable-scale'
+		|| finding.kind === 'low-effective-font'
+		|| finding.kind === 'tight-margin'
+		|| finding.kind === 'low-content-utilization'
+		|| finding.recommendedPatch === 'reduce-zoom'
+	);
+}
+
 function isSourcePreservedMermaidFitSlide(slideMarkdown: string, audit: SlidevLayoutAudit): boolean {
 	if (!isSourcePreservedMermaidRenderedSurface(audit.elementKinds)) {
 		return false;
@@ -1196,7 +1234,8 @@ function isSourcePreservedMermaidFitSlide(slideMarkdown: string, audit: SlidevLa
 	return containsMermaidFence(surface.bodyLines)
 		&& !containsNonMermaidFence(surface.bodyLines)
 		&& !containsMarkdownTableOutsideFence(surface.bodyLines)
-		&& !containsMarkdownImageOutsideFence(surface.bodyLines);
+		&& !containsMarkdownImageOutsideFence(surface.bodyLines)
+		&& !containsPrimaryNonMermaidContentOutsideFence(surface.bodyLines);
 }
 
 function splitOverflowingMarkdownTableSlide(
@@ -1571,6 +1610,44 @@ function splitOverflowingSimpleSlide(
 	});
 
 	return { slides: splitSlides };
+}
+
+function separateMixedMermaidPrimaryContentSlide(
+	slideMarkdown: string,
+): { slides: string[] | null; reason?: string } {
+	const surface = extractPatchableSlideSurface(slideMarkdown);
+	if (!surface) {
+		return { slides: null, reason: 'mixed Mermaid slide uses deck headmatter or unsupported layout syntax' };
+	}
+
+	const partition = partitionMermaidAndPrimaryContent(surface.bodyLines);
+	if (partition.mermaidLines.length === 0) {
+		return { slides: null, reason: 'mixed Mermaid separation requires at least one Mermaid fence' };
+	}
+	if (partition.primaryContentLines.length === 0) {
+		return { slides: null, reason: 'mixed Mermaid slide has no primary non-Mermaid content' };
+	}
+
+	const cleanFrontmatter = stripFrontmatterKey(surface.frontmatterLines, 'zoom');
+	const headingLines = partition.headingLine ? [partition.headingLine, ''] : [];
+	const mermaidSlideLines = trimOuterBlankLines([
+		...headingLines,
+		...partition.mermaidLines,
+	]);
+	const primarySlideLines = trimOuterBlankLines([
+		...headingLines,
+		...partition.primaryContentLines,
+	]);
+	if (countMeaningfulLines(mermaidSlideLines) === 0 || countMeaningfulLines(primarySlideLines) === 0) {
+		return { slides: null, reason: 'mixed Mermaid separation produced an empty slide' };
+	}
+
+	return {
+		slides: [
+			assemblePatchedSlide(cleanFrontmatter, mermaidSlideLines),
+			assemblePatchedSlide(cleanFrontmatter, primarySlideLines),
+		],
+	};
 }
 
 function wrapOverflowingSlideSurfaceInTransform(
@@ -2243,6 +2320,94 @@ function containsMarkdownTableOutsideFence(lines: string[]): boolean {
 
 function containsMarkdownImageOutsideFence(lines: string[]): boolean {
 	return hasOutsideFenceLine(lines, line => /^!\[.*\]\(.+\)/.test(line.trim()));
+}
+
+function containsPrimaryNonMermaidContentOutsideFence(lines: string[]): boolean {
+	return partitionMermaidAndPrimaryContent(lines).primaryContentLines.length > 0;
+}
+
+function containsMermaidWithPrimaryNonMermaidContent(slideMarkdown: string): boolean {
+	const bodyLines = extractSlideBodyLinesWithoutLayoutCheck(slideMarkdown);
+	if (!bodyLines) {
+		return false;
+	}
+	const partition = partitionMermaidAndPrimaryContent(bodyLines);
+	return partition.mermaidLines.length > 0 && partition.primaryContentLines.length > 0;
+}
+
+function extractSlideBodyLinesWithoutLayoutCheck(slideMarkdown: string): string[] | null {
+	const normalizedSlide = normalizeSlideFrontmatter(slideMarkdown);
+	if (!normalizedSlide.trim()) {
+		return null;
+	}
+	const lines = normalizedSlide.split(/\r?\n/);
+	const frontmatterEnd = findSlideFrontmatterEnd(lines);
+	return frontmatterEnd > 0 ? lines.slice(frontmatterEnd + 1) : lines;
+}
+
+function partitionMermaidAndPrimaryContent(lines: string[]): {
+	headingLine: string | null;
+	mermaidLines: string[];
+	primaryContentLines: string[];
+} {
+	const trimmedLines = trimOuterBlankLines(lines);
+	const headingIndex = trimmedLines.findIndex(line => /^#{1,6}\s+\S/.test(line.trim()));
+	const headingLine = headingIndex >= 0 ? trimmedLines[headingIndex].trim() : null;
+	const mermaidLines: string[] = [];
+	const primaryContentLines: string[] = [];
+	let activeFence: {
+		marker: string;
+		isMermaid: boolean;
+		lines: string[];
+	} | null = null;
+
+	for (let index = 0; index < trimmedLines.length; index++) {
+		const line = trimmedLines[index];
+		const trimmed = line.trim();
+		const openingMatch = trimmed.match(/^(```+|~~~+)(.*)$/);
+		if (!activeFence && openingMatch) {
+			activeFence = {
+				marker: openingMatch[1][0] === '~' ? '~~~' : '```',
+				isMermaid: /^mermaid(?:\s+\{[^}]+\})?\s*$/i.test(openingMatch[2].trim()),
+				lines: [line],
+			};
+			continue;
+		}
+
+		if (activeFence) {
+			activeFence.lines.push(line);
+			if (new RegExp(`^${escapeRegExp(activeFence.marker)}+\\s*$`).test(trimmed)) {
+				if (activeFence.isMermaid) {
+					appendSlideBlock(mermaidLines, activeFence.lines);
+				} else {
+					appendSlideBlock(primaryContentLines, activeFence.lines);
+				}
+				activeFence = null;
+			}
+			continue;
+		}
+
+		if (index === headingIndex || isIgnorableMermaidCompanionLine(line)) {
+			continue;
+		}
+
+		primaryContentLines.push(line);
+	}
+
+	if (activeFence) {
+		appendSlideBlock(primaryContentLines, activeFence.lines);
+	}
+
+	return {
+		headingLine,
+		mermaidLines: trimOuterBlankLines(mermaidLines),
+		primaryContentLines: trimOuterBlankLines(primaryContentLines),
+	};
+}
+
+function isIgnorableMermaidCompanionLine(line: string): boolean {
+	const trimmed = line.trim();
+	return trimmed.length === 0 || /^<!--.*-->$/.test(trimmed);
 }
 
 function hasOutsideFenceLine(lines: string[], predicate: (line: string) => boolean): boolean {

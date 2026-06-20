@@ -7,7 +7,7 @@
 NoteMD 不再把直接运行 `slidev build` 视为 UI 导出按钮已经可用的充分证据。维护中的导出流程是：
 
 1. 如果当前笔记不是 Slidev deck，先准备为可导出的 Slidev source deck。
-2. 如果当前文件已经是 Slidev deck，先复制到隔离的 prepared workspace，再进行审计和导出，避免修改源文件。
+2. 如果当前文件已经是 Slidev deck，先复制到隔离的 prepared workspace，再进行审计和导出，避免修改源文件，同时镜像 sibling Slidev support entries 和被引用的本地图片资产。
 3. 加载完整 Slidev skill 目录，包括 `SKILL.md` 与 `references/*.md`。
 4. Deck 生成后应用展示 guardrails，避免大 Mermaid、表格、代码块或密集文本直接挤进单页。
 5. 本地 Slidev fork 存在时优先使用本地 fork。
@@ -160,6 +160,8 @@ npm run verify:slidev-export
 
 Mermaid 的规则比 table/code/prose 更严格：用户提供的一个 Mermaid fence 仍然是一张图。若保留源图后出现低 zoom、低字号或边距过紧，流程记录 `fits`、`source-preserved-fit-review` 或 `manual-review` 证据，而不是把原图静默拆成多张图。
 
+Mermaid/prose 混排页不能套用 Mermaid-only 页的低整页 zoom 策略，因为正文会一起变小。当前支持的修复是把 Mermaid 源 fence 原样保留在图专属页，把 prose/list 内容移动到独立可读页；如果 layout 不支持安全分离，patcher 会阻止低整页 zoom，而不是牺牲正文可读性。
+
 这一点现在也有单元测试约束：即使 Mermaid slide 被错误送入 code structural patch 候选，patcher 也必须拒绝把 `mermaid` fence 当作可拆分代码块。
 
 最新真实 strict run 的 Mermaid fit 计数为 `mermaidSlideCount = 3`、`mermaidFitReviewCount = 3`、`mermaidLowZoomCount = 3`、`mermaidManualReviewCount = 1`。这说明当前流程已经把低 zoom 风险显性化，但没有改写原 Mermaid 内容。
@@ -171,6 +173,13 @@ Mermaid 的规则比 table/code/prose 更严格：用户提供的一个 Mermaid 
 - 非 Mermaid 代码块中，TypeScript/JavaScript/Python/Rust 优先按 top-level tokenizer 分块，再退回通用语义块、空行或行数预算
 - slot-marked layout 与部分 component-heavy slot zone
 - effective font measurement 已感知局部 CSS `transform` / independent `scale` / CSS `zoom`，被局部 `<Transform>` 缩放的内容按真实渲染字号进入质量门
+- Mermaid/prose 混排页分离，其中每个 Mermaid fence 仍是一个未改写的 fence
+
+当前已补齐的工程事实：
+
+1. local relative Markdown image 和 HTML `<img>` 资产会被复制到 prepared deck 所在目录，避免 `_slidev-sources` 隔离工作副本破坏源文档相对 SVG/PNG/JPEG 引用。
+2. local Slidev fork 的 standalone bundler 已改为用括号平衡边界替换 Vite preload helper，避免误删第一张 slide loader binding；NoteMD strict standalone gate 继续 fail-closed 并报告真实 `loaderGaps`。
+3. expanded full-deck fixture suite 已归档到 `/home/jacob/slidev-export-review/2026-06-20-expanded-layout-fixtures/`，四个 fixture 均为 native standalone：source-layout stress（含 52 个 Slidev skill references）、slot/component Transform stress、Mermaid/prose 分离、media/nested-slot/超宽表 stress。
 
 当前仍存在的边界：
 

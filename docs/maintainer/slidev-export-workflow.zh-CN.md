@@ -13,7 +13,7 @@ NoteMD 的验证必须把以下步骤串起来看：
 1. 当前 Markdown 笔记会在导出前转换成真正的 Slidev deck。
 2. 能发现完整 Slidev skill 目录，包括 `references/*.md`，而不是只读 `SKILL.md`。
 3. 本地 Slidev fork 存在时会被优先使用。
-4. 现有 Slidev deck 也会先复制到隔离的 prepared working workspace，再进入验证链，避免 patch/retry 直接改写源笔记，同时允许把 sibling Slidev support entries 一并镜像进 working copy。
+4. 现有 Slidev deck 也会先复制到隔离的 prepared working workspace，再进入验证链，避免 patch/retry 直接改写源笔记，同时允许把 sibling Slidev support entries 和被引用的本地图片资产一并镜像进 working copy。
 5. 每次 HTML build 前会重建输出目录，避免旧 chunk 残留。
 6. 生成 deck 的 guardrails 会规范 theme、逐页 frontmatter，并且只在页面本身没有声明 `zoom` 时才为大 Mermaid 图补缺省 zoom。
 7. HTML 导出会先尝试 native standalone，记录实际 HTML mode；只有在生成的 standalone bundle 确实缺少 slide loader binding 时，才自动回退到 server-script 兼容 HTML。
@@ -71,6 +71,12 @@ npm run verify:slidev-layout-fixtures -- --archive /home/jacob/slidev-export-rev
 
 该命令会在仓库外创建临时 vault，调用生产 verifier，并归档 source fixture、最终 deck、report 与 standalone export。修改 layout audit、Mermaid fit、table/code 拆分、文本测量或 slot Transform 行为时应运行它。
 
+当前 expanded fixture 归档为：
+
+```text
+/home/jacob/slidev-export-review/2026-06-20-expanded-layout-fixtures/
+```
+
 如果本机已有真实 Obsidian 桌面会话，也应补一层真实命令路径 smoke：
 
 ```bash
@@ -107,6 +113,7 @@ docs/maintainer/slidev-standalone-acceptance-2026-06-18.zh-CN.md
 15. 严格 native standalone 收口时，`htmlExport.standaloneAttempt.loaderGaps: []`
 16. 严格 native standalone 收口时，`standaloneGate.passed: true`
 17. 源文件包含 Mermaid fence 时，除非人工显式改源文档，否则导出 deck 的 Mermaid block 数应与源文档一致。
+18. Mermaid/prose 混排页不能保留低整页 zoom；如果可以分离，Mermaid fence 原样保留在 Mermaid 专属页，正文移动到可读页。
 
 任一条件失败，都应先修 NoteMD 工作流，再相信导出文件。
 
@@ -198,6 +205,9 @@ layoutAuditSummary.retryCount
 25. synthetic full-deck layout fixtures 现在会跑完整生产 verifier：`source-layout-stress` 覆盖完整 skill references、native standalone、Mermaid block count 保真、record-list fallback 与 code splitting；`slot-component-stress` 覆盖 component-heavy slot 的局部 Transform 收敛，并防止整页 zoom 叠加。2026-06-20 归档为 `/home/jacob/slidev-export-review/2026-06-20-full-deck-layout-fixtures/`。
 26. text overflow measurement 现在对 text 元素使用 text-node Range glyph rectangles，而不是 block-level element box，因此不会因为 `h1` 的块级布局盒比实际可见文字宽就误判失败。
 27. Mermaid-only 页面可以用测量得到的低 zoom 保证一张保留源图完整可见；可读性风险通过 `mermaidFit.manual-review` 暴露，而不是拆分或改写原 Mermaid 图。
+28. Mermaid/prose 混排页现在会在允许 source-preserved Mermaid fit 之前先分离非 Mermaid 主内容；每个源 Mermaid fence 仍保持一个 fence 且内容不变，unsupported mixed layout 会阻止低整页 zoom，而不是把正文一起缩小。
+29. prepared deck workspace 现在会把本地相对 Markdown image 和 HTML `<img>` 资产复制到生成 deck 所在目录，同时拒绝 URL、绝对路径和 `..` traversal；这避免 `_slidev-sources` 隔离工作副本破坏源文档的相对 SVG/PNG/JPEG 引用。
+30. local Slidev fork 的 standalone bundler 现在用括号平衡的函数边界替换来 stub Vite preload helper，避免误删第一张 slide loader binding。NoteMD strict standalone gate 仍保持 fail-closed，继续报告 loader gaps，而不会把 fallback 输出当成 native standalone 成功。
 
 当前限制：
 
@@ -209,7 +219,7 @@ layoutAuditSummary.retryCount
 6. Mermaid `manual-review` 证据不是 hard gate failure。它是在“不修改原 Mermaid 内容”和“自动保证投影级可读”不能同时被证明时，正确暴露给维护者的透明结果。
 7. code splitting 仍是 parser-light；TypeScript/JavaScript/Python/Rust 已有 top-level tokenizer，但完整 AST 拆分与更多语言专用 splitter 仍是后续工作。
 8. Mermaid 不拆图约束不等于 Mermaid 演示质量自动合格。超大源图如果只能靠低 zoom 保持完整，流程应暴露 `source-preserved-fit-review` 或 `manual-review`，而不是静默改图。
-9. Stage 5 full-deck fixtures 已覆盖长表、宽表、混合代码、Mermaid 源图保持 fit 与 component-heavy slot Transform 边界，但仍不是 exhaustive；后续真实文档若出现图片密集 deck、复杂 Vue component、嵌套 slot、超宽表或 Mermaid/prose 混排失败，应继续沉淀为 fixture。
+9. Stage 5 full-deck fixtures 已覆盖长表、宽表、混合代码、Mermaid 源图保持 fit、component-heavy slot Transform 边界、Mermaid/prose 分离、本地图片资产、嵌套 slot component 与超宽表，但仍不是 exhaustive；后续真实文档若出现 frontmatter background、跨目录资产、媒体密集 deck、复杂 Vue component 或 unsupported layout 失败，应继续沉淀为 fixture。
 
 ## 输出策略
 

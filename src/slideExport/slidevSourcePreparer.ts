@@ -1118,6 +1118,7 @@ async function writePreparedDeck(app: App, sourceFile: TFile, config: SlideExpor
 	const filePath = normalizeVaultPath(`${directoryPath}/${sourceFile.basename}.slidev.md`);
 	await ensureVaultDirectory(app, directoryPath);
 	await app.vault.adapter.write(filePath, deckMarkdown);
+	await copyReferencedLocalAssetFiles(app, sourceFile, deckMarkdown, directoryPath);
 	return filePath;
 }
 
@@ -1132,7 +1133,7 @@ async function writePreparedDeckWorkspace(
 	const filePath = normalizeVaultPath(`${workspacePath}/${sourceFile.basename}.slidev.md`);
 	await recreatePreparedWorkspace(app, workspacePath);
 	await app.vault.adapter.write(filePath, deckMarkdown);
-	await copyExistingSlidevSupportWorkspace(app, sourceFile, workspacePath, onProgress);
+	await copyExistingSlidevSupportWorkspace(app, sourceFile, deckMarkdown, workspacePath, onProgress);
 	return filePath;
 }
 
@@ -1153,6 +1154,7 @@ async function recreatePreparedWorkspace(app: App, workspacePath: string): Promi
 async function copyExistingSlidevSupportWorkspace(
 	app: App,
 	sourceFile: TFile,
+	deckMarkdown: string,
 	workspacePath: string,
 	onProgress?: ExportProgressCallback,
 ): Promise<void> {
@@ -1186,9 +1188,112 @@ async function copyExistingSlidevSupportWorkspace(
 		copiedEntries.push(filename);
 	}
 
+	copiedEntries.push(...copyReferencedLocalAssetFilesWithNodeFs(fs, path, vaultRoot, sourceFile, deckMarkdown, workspacePath));
+
 	if (copiedEntries.length > 0) {
-		onProgress?.('slidev-source', `Copied Slidev support entries into working copy: ${copiedEntries.join(', ')}`);
+		onProgress?.('slidev-source', `Copied Slidev support entries/assets into working copy: ${copiedEntries.join(', ')}`);
 	}
+}
+
+async function copyReferencedLocalAssetFiles(
+	app: App,
+	sourceFile: TFile,
+	deckMarkdown: string,
+	targetDirectoryPath: string,
+): Promise<void> {
+	const vaultRoot = getVaultBasePath(app);
+	const fs: any = safeRequire('fs');
+	const path: any = safeRequire('path');
+	if (!vaultRoot || !fs?.existsSync || !fs?.cpSync || !path?.join || typeof sourceFile.path !== 'string') {
+		return;
+	}
+	copyReferencedLocalAssetFilesWithNodeFs(fs, path, vaultRoot, sourceFile, deckMarkdown, targetDirectoryPath);
+}
+
+function copyReferencedLocalAssetFilesWithNodeFs(
+	fs: any,
+	path: any,
+	vaultRoot: string,
+	sourceFile: TFile,
+	deckMarkdown: string,
+	targetDirectoryPath: string,
+): string[] {
+	const copiedAssets: string[] = [];
+	const absoluteSourcePath = path.join(vaultRoot, normalizeVaultPath(sourceFile.path));
+	const absoluteSourceDir = path.dirname(absoluteSourcePath);
+	const absoluteTargetDirectory = path.join(vaultRoot, targetDirectoryPath);
+	const seen = new Set<string>();
+
+	for (const referencePath of extractLocalAssetReferences(deckMarkdown)) {
+		if (seen.has(referencePath)) {
+			continue;
+		}
+		seen.add(referencePath);
+		const absoluteSourceAsset = path.join(absoluteSourceDir, referencePath);
+		if (!isInsideDirectory(path, absoluteSourceDir, absoluteSourceAsset) || !fs.existsSync(absoluteSourceAsset)) {
+			continue;
+		}
+		const stat = fs.statSync?.(absoluteSourceAsset);
+		if (!stat?.isFile?.()) {
+			continue;
+		}
+		const absoluteTargetAsset = path.join(absoluteTargetDirectory, referencePath);
+		fs.mkdirSync?.(path.dirname(absoluteTargetAsset), { recursive: true });
+		fs.cpSync(absoluteSourceAsset, absoluteTargetAsset);
+		copiedAssets.push(referencePath);
+	}
+
+	return copiedAssets;
+}
+
+function extractLocalAssetReferences(markdown: string): string[] {
+	const references = new Set<string>();
+	for (const match of markdown.matchAll(/!\[[^\]]*]\(([^)]+)\)/g)) {
+		const reference = normalizeLocalAssetReference(match[1]);
+		if (reference) {
+			references.add(reference);
+		}
+	}
+	for (const match of markdown.matchAll(/<img\b[^>]*\bsrc\s*=\s*["']([^"']+)["'][^>]*>/gi)) {
+		const reference = normalizeLocalAssetReference(match[1]);
+		if (reference) {
+			references.add(reference);
+		}
+	}
+	return Array.from(references);
+}
+
+function normalizeLocalAssetReference(rawReference: string): string | null {
+	const withoutTitle = rawReference.trim().replace(/\s+["'][^"']*["']\s*$/, '');
+	const withoutQuery = withoutTitle.split(/[?#]/, 1)[0];
+	if (
+		!withoutQuery
+		|| withoutQuery.startsWith('/')
+		|| withoutQuery.startsWith('#')
+		|| /^[a-z][a-z0-9+.-]*:/i.test(withoutQuery)
+		|| withoutQuery.includes('\0')
+	) {
+		return null;
+	}
+
+	let decoded = withoutQuery;
+	try {
+		decoded = decodeURI(withoutQuery);
+	} catch {
+		decoded = withoutQuery;
+	}
+
+	const normalized = normalizeVaultPath(decoded);
+	if (!normalized || normalized === '.' || normalized.startsWith('../') || normalized.includes('/../')) {
+		return null;
+	}
+
+	return normalized.replace(/^\.\//, '');
+}
+
+function isInsideDirectory(path: any, directoryPath: string, candidatePath: string): boolean {
+	const relativePath = path.relative(directoryPath, candidatePath);
+	return Boolean(relativePath) && !relativePath.startsWith('..') && !path.isAbsolute(relativePath);
 }
 
 async function ensureVaultDirectory(app: App, directoryPath: string): Promise<void> {

@@ -70,7 +70,7 @@ function printHelp() {
         '  --work-root <path>    Temporary work root, default: ~/.cache/notemd-slidev-layout-fixtures',
         '  --help                Print this usage text',
         '',
-        'Fixtures: source-layout-stress, slot-component-stress',
+        `Fixtures: ${FIXTURE_IDS.join(', ')}`,
     ].join('\n'));
 }
 
@@ -223,6 +223,153 @@ function createSlotComponentStressDeck() {
     ].join('\n');
 }
 
+function createMixedMermaidProseStressDeck() {
+    return [
+        '---',
+        'theme: default',
+        'mdc: true',
+        '---',
+        '',
+        '# Mixed Mermaid Prose Stress',
+        '',
+        '---',
+        'zoom: 0.42',
+        '---',
+        '',
+        '## Runtime Shape',
+        '',
+        '```mermaid',
+        'flowchart LR',
+        '  Source[Source note] --> Skill[Full skill references]',
+        '  Skill --> Deck[Prepared deck]',
+        '  Deck --> Browser[Rendered audit]',
+        '  Browser --> Standalone[Native standalone]',
+        '```',
+        '',
+        'The export path must keep this prose readable without shrinking it together with the diagram.',
+        '',
+        '- Preserve the source Mermaid fence as one fence.',
+        '- Move prose onto a readable slide if the diagram needs source-preserved fit.',
+        '- Do not solve this mixed slide by keeping low whole-slide zoom on prose.',
+        '',
+    ].join('\n');
+}
+
+function createMediaNestedSlotStressDeck() {
+    const ultraWideHeader = [
+        'Capability',
+        'Trigger',
+        'Boundary',
+        'Evidence',
+        'Fallback',
+        'User surface',
+        'Owner',
+        'Replay command',
+        'Regression risk',
+        'Gate',
+    ];
+    const ultraWideRows = [
+        ['Image asset audit', 'Markdown image is present', 'Image layout must stay visible', 'wide-schematic.svg', 'Do not hide export assets', 'standalone HTML', 'source preparer', 'verify media fixture', 'broken relative asset path', 'native standalone'],
+        ['Nested slot audit', 'Component content overflows a named slot', 'Only the overflowing slot is transformed', 'data-notemd-slot-zone', 'Do not shrink the whole slide', 'layout audit', 'patcher', 'verify slot fixture', 'wrong slot attribution', 'no low font'],
+        ['Wide table audit', 'Ten-column table is too wide', 'Split columns or records structurally', 'final deck markdown', 'Do not rely on low zoom', 'maintainer report', 'table splitter', 'verify table fixture', 'cramped table text', 'no hard overflow'],
+        ['Mixed source audit', 'Mermaid appears beside prose', 'Mermaid fence remains intact', 'mermaid block count', 'Separate prose before low zoom', 'deck markdown', 'source-preserved fit', 'verify mixed fixture', 'prose made unreadable', 'no mixed low zoom'],
+    ];
+    const ultraWideTable = [
+        `| ${ultraWideHeader.join(' | ')} |`,
+        `| ${ultraWideHeader.map(() => '---').join(' | ')} |`,
+        ...ultraWideRows.map(row => `| ${row.join(' | ')} |`),
+    ];
+
+    return [
+        '---',
+        'theme: default',
+        'mdc: true',
+        '---',
+        '',
+        '# Media Nested Slot Stress',
+        '',
+        '---',
+        'layout: image-right',
+        '---',
+        '',
+        '# Visual Asset',
+        '',
+        'A real Markdown image should remain a visible source asset in the standalone export path.',
+        '',
+        '![Wide schematic](./wide-schematic.svg)',
+        '',
+        '---',
+        'layout: two-cols-header',
+        '---',
+        '',
+        '# Nested Slot Component',
+        '',
+        '::left::',
+        '',
+        ':::info',
+        '<div style="width: 1180px; height: 430px; border: 1px solid #64748b; padding: 22px; display: grid; grid-template-columns: repeat(4, 265px); gap: 18px; background: #f8fafc; color: #0f172a;">',
+        '  <section style="border-left: 4px solid #0f766e; padding-left: 14px;">',
+        '    <h3 style="font-size: 24px; margin: 0 0 12px;">Source</h3>',
+        '    <p style="font-size: 18px; line-height: 1.35;">Nested slot content keeps ownership markers while the measured Transform targets only this overflowing zone.</p>',
+        '  </section>',
+        '  <section style="border-left: 4px solid #2563eb; padding-left: 14px;">',
+        '    <h3 style="font-size: 24px; margin: 0 0 12px;">Audit</h3>',
+        '    <p style="font-size: 18px; line-height: 1.35;">The right column should not inherit a whole-slide zoom just because the left component is too wide.</p>',
+        '  </section>',
+        '  <section style="border-left: 4px solid #b45309; padding-left: 14px;">',
+        '    <h3 style="font-size: 24px; margin: 0 0 12px;">Patch</h3>',
+        '    <p style="font-size: 18px; line-height: 1.35;">Local Transform is acceptable here because the component is one visual surface, not table or prose.</p>',
+        '  </section>',
+        '  <section style="border-left: 4px solid #7c3aed; padding-left: 14px;">',
+        '    <h3 style="font-size: 24px; margin: 0 0 12px;">Evidence</h3>',
+        '    <p style="font-size: 18px; line-height: 1.35;">The exported deck must retain the slot owner wrapper and avoid low effective font after convergence.</p>',
+        '  </section>',
+        '</div>',
+        ':::',
+        '',
+        '::right::',
+        '',
+        '- Right-side prose remains ordinary readable text.',
+        '- Nested directive syntax stays inside the left slot.',
+        '- No whole-slide low zoom should be introduced for this component.',
+        '',
+        '---',
+        '',
+        '## Ultra Wide Contract Matrix',
+        '',
+        ...ultraWideTable,
+        '',
+    ].join('\n');
+}
+
+function createWideSchematicSvg() {
+    return [
+        '<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="560" viewBox="0 0 1440 560" role="img" aria-label="Wide schematic">',
+        '  <rect width="1440" height="560" fill="#f8fafc"/>',
+        '  <g font-family="Inter, Arial, sans-serif" font-size="34" fill="#0f172a">',
+        '    <text x="60" y="86">Source</text>',
+        '    <text x="410" y="86">Prepare</text>',
+        '    <text x="775" y="86">Audit</text>',
+        '    <text x="1110" y="86">Standalone</text>',
+        '  </g>',
+        '  <g fill="none" stroke="#2563eb" stroke-width="8">',
+        '    <rect x="50" y="130" width="260" height="190" rx="18"/>',
+        '    <rect x="400" y="130" width="260" height="190" rx="18"/>',
+        '    <rect x="750" y="130" width="260" height="190" rx="18"/>',
+        '    <rect x="1100" y="130" width="260" height="190" rx="18"/>',
+        '    <path d="M310 225 H400 M660 225 H750 M1010 225 H1100" stroke="#0f766e"/>',
+        '  </g>',
+        '  <g font-family="Inter, Arial, sans-serif" font-size="24" fill="#334155">',
+        '    <text x="90" y="235">Markdown</text>',
+        '    <text x="430" y="235">Slidev deck</text>',
+        '    <text x="790" y="235">Browser check</text>',
+        '    <text x="1135" y="235">HTML file</text>',
+        '  </g>',
+        '</svg>',
+        '',
+    ].join('\n');
+}
+
 const FIXTURES = [
     {
         id: 'source-layout-stress',
@@ -242,7 +389,30 @@ const FIXTURES = [
         expectTransform: true,
         expectedMermaidBlocks: 0,
     },
+    {
+        id: 'mixed-mermaid-prose-stress',
+        sourcePath: 'mixed-mermaid-prose-stress.md',
+        sourceMarkdown: createMixedMermaidProseStressDeck(),
+        expectPatch: true,
+        expectMixedMermaidSeparation: true,
+        expectedMermaidBlocks: 1,
+    },
+    {
+        id: 'media-nested-slot-stress',
+        sourcePath: 'media-nested-slot-stress.md',
+        sourceMarkdown: createMediaNestedSlotStressDeck(),
+        files: [
+            { path: 'wide-schematic.svg', content: createWideSchematicSvg() },
+        ],
+        expectPatch: true,
+        expectTransform: true,
+        expectImageReference: true,
+        expectUltraWideTableSplit: true,
+        expectedMermaidBlocks: 0,
+    },
 ];
+
+const FIXTURE_IDS = FIXTURES.map(fixture => fixture.id);
 
 function resolveFixtures(filterId) {
     if (!filterId) {
@@ -358,6 +528,20 @@ function assertFixtureReport(fixture, report, sourceMarkdown) {
         assert(deckMarkdown.includes('data-notemd-slot-zone="left"'), `${fixture.id}: slot owner wrapper was not preserved`);
         assert(deckMarkdown.includes('<Transform :scale='), `${fixture.id}: component-heavy slot was not wrapped in a measured Transform`);
     }
+    if (fixture.expectMixedMermaidSeparation) {
+        assert(splitDeckSlides(deckMarkdown).length > splitDeckSlides(sourceMarkdown).length, `${fixture.id}: mixed Mermaid/prose slide was not separated`);
+        assert(deckMarkdown.includes('The export path must keep this prose readable'), `${fixture.id}: prose content disappeared during mixed Mermaid separation`);
+        assert(deckMarkdown.includes('Source[Source note] --> Skill[Full skill references]'), `${fixture.id}: source Mermaid content changed during mixed separation`);
+        assert(countMermaidBlocks(deckMarkdown) === countMermaidBlocks(sourceMarkdown), `${fixture.id}: source Mermaid fence count changed during mixed Mermaid separation`);
+        assert(!deckMarkdown.includes('zoom: 0.42'), `${fixture.id}: mixed Mermaid/prose low zoom survived after convergence`);
+    }
+    if (fixture.expectImageReference) {
+        assert(deckMarkdown.includes('wide-schematic.svg'), `${fixture.id}: Markdown image reference did not survive deck convergence`);
+    }
+    if (fixture.expectUltraWideTableSplit) {
+        assert(!deckMarkdown.includes('| Capability | Trigger | Boundary | Evidence | Fallback | User surface | Owner | Replay command | Regression risk | Gate |'), `${fixture.id}: ultra-wide table survived unsplit`);
+        assert((deckMarkdown.match(/Ultra Wide Contract Matrix/g) || []).length > 1, `${fixture.id}: ultra-wide table did not produce continuation slides`);
+    }
 }
 
 function assertLowZoomOnlyTargetsMermaid(fixtureId, deckMarkdown) {
@@ -368,9 +552,12 @@ function assertLowZoomOnlyTargetsMermaid(fixtureId, deckMarkdown) {
             return;
         }
         const hasMermaid = /```mermaid/i.test(slide);
-        const slideLines = slide.split(/\r?\n/);
+        const slideLines = extractSlideBodyLines(slide);
         const hasPrimaryNonMermaid = containsMarkdownTableOutsideFence(slideLines) || containsNonMermaidFence(slideLines);
-        assert(hasMermaid && !hasPrimaryNonMermaid, `${fixtureId}: slide ${index + 1} uses low zoom ${zoom} outside Mermaid-only content`);
+        assert(
+            hasMermaid && !hasPrimaryNonMermaid && !containsPrimaryNonMermaidContentOutsideFence(slideLines),
+            `${fixtureId}: slide ${index + 1} uses low zoom ${zoom} outside Mermaid-only content`
+        );
     });
 }
 
@@ -475,6 +662,41 @@ function containsMarkdownTableOutsideFence(lines) {
             && !trimmed.startsWith('~~~')
             && !trimmed.startsWith('#');
     });
+}
+
+function containsPrimaryNonMermaidContentOutsideFence(lines) {
+    let skippedHeading = false;
+    return hasOutsideFenceLine(lines, line => {
+        const trimmed = line.trim();
+        if (!trimmed || /^<!--.*-->$/.test(trimmed)) {
+            return false;
+        }
+        if (!skippedHeading && /^#{1,6}\s+\S/.test(trimmed)) {
+            skippedHeading = true;
+            return false;
+        }
+        return true;
+    });
+}
+
+function extractSlideBodyLines(slideMarkdown) {
+    const lines = slideMarkdown.split(/\r?\n/);
+    const firstContentLine = lines.findIndex(line => line.trim().length > 0);
+    if (firstContentLine < 0) {
+        return [];
+    }
+
+    if (lines[firstContentLine].trim() === '---') {
+        const closingIndex = lines.findIndex((line, index) => index > firstContentLine && line.trim() === '---');
+        return closingIndex > firstContentLine ? lines.slice(closingIndex + 1) : lines;
+    }
+
+    if (/^[A-Za-z][\w-]*\s*:/.test(lines[firstContentLine].trim())) {
+        const closingIndex = lines.findIndex((line, index) => index > firstContentLine && line.trim() === '---');
+        return closingIndex > firstContentLine ? lines.slice(closingIndex + 1) : lines;
+    }
+
+    return lines;
 }
 
 function hasOutsideFenceLine(lines, predicate) {
@@ -584,6 +806,11 @@ async function main() {
             const vaultRoot = path.join(runRoot, fixture.id, 'vault');
             fs.mkdirSync(vaultRoot, { recursive: true });
             linkSlidevRuntimeDependencies(repoRoot, vaultRoot);
+            for (const file of fixture.files ?? []) {
+                const targetFile = path.join(vaultRoot, file.path);
+                fs.mkdirSync(path.dirname(targetFile), { recursive: true });
+                fs.writeFileSync(targetFile, file.content, 'utf8');
+            }
             const sourcePath = path.join(vaultRoot, fixture.sourcePath);
             fs.writeFileSync(sourcePath, fixture.sourceMarkdown, 'utf8');
 
