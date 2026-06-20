@@ -1816,17 +1816,7 @@ function extractTransformableComponentSurface(slideMarkdown: string): PatchableS
 	if (!containsTransformableComponentSyntax(trimmedBodyLines)) {
 		return null;
 	}
-	if (trimmedBodyLines.some(line => !isRawHtmlSurfaceLine(line))) {
-		return null;
-	}
-	if (trimmedBodyLines.some(line =>
-		/^::[\w-]+::$/.test(line.trim())
-		|| /^:::\s*/.test(line.trim())
-		|| /<(Transform|v-click|v-switch)\b/i.test(line.trim())
-		|| /^(```+|~~~+)/.test(line.trim())
-		|| isMarkdownTableRow(line)
-		|| /^!\[.*\]\(.+\)/.test(line.trim())
-	)) {
+	if (!containsOnlyTransformableComponentSurfaceSyntax(trimmedBodyLines)) {
 		return null;
 	}
 
@@ -3581,14 +3571,72 @@ function collectSimpleSlideBlocks(lines: string[]): string[][] {
 }
 
 function containsTransformableComponentSyntax(lines: string[]): boolean {
-	return lines.some(line => /^\s*<[A-Za-z][\w-]*(?:\s|>|\/)/.test(line.trim()) || /^\s*<\/[A-Za-z][\w-]*\s*>/.test(line.trim()));
+	return lines.some(line => /^\s*<[A-Za-z][\w-]*(?:\s|>|\/|$)/.test(line.trim()) || /^\s*<\/[A-Za-z][\w-]*\s*>/.test(line.trim()));
 }
 
-function isRawHtmlSurfaceLine(line: string): boolean {
+function containsOnlyTransformableComponentSurfaceSyntax(lines: string[]): boolean {
+	const state: ComponentSurfaceScanState = { inOpenTag: false, quote: null };
+	for (const line of lines) {
+		if (!isTransformableComponentSurfaceLine(line, state)) {
+			return false;
+		}
+	}
+	return !state.inOpenTag && state.quote === null;
+}
+
+interface ComponentSurfaceScanState {
+	inOpenTag: boolean;
+	quote: '"' | "'" | null;
+}
+
+function isTransformableComponentSurfaceLine(line: string, state: ComponentSurfaceScanState): boolean {
 	const trimmed = line.trim();
-	return trimmed.length === 0
-		|| /^<!--.*-->$/.test(trimmed)
-		|| /^<\/?[A-Za-z][\w-]*(?:\s|>|\/)/.test(trimmed);
+	if (trimmed.length === 0 || /^<!--.*-->$/.test(trimmed)) {
+		return true;
+	}
+	if (isForbiddenComponentSurfaceLine(trimmed)) {
+		return false;
+	}
+	if (!state.inOpenTag && !/^<\/?[A-Za-z][\w-]*(?:\s|>|\/|$)/.test(trimmed)) {
+		return false;
+	}
+
+	updateComponentSurfaceScanState(trimmed, state);
+	return true;
+}
+
+function isForbiddenComponentSurfaceLine(trimmedLine: string): boolean {
+	return /^::[\w-]+::$/.test(trimmedLine)
+		|| /^:::\s*/.test(trimmedLine)
+		|| /<(Transform|v-click|v-switch)\b/i.test(trimmedLine)
+		|| /^(```+|~~~+)/.test(trimmedLine)
+		|| isMarkdownTableRow(trimmedLine)
+		|| /^!\[.*\]\(.+\)/.test(trimmedLine);
+}
+
+function updateComponentSurfaceScanState(line: string, state: ComponentSurfaceScanState): void {
+	for (const char of line) {
+		if (state.quote) {
+			if (char === state.quote) {
+				state.quote = null;
+			}
+			continue;
+		}
+		if (!state.inOpenTag && char === '<') {
+			state.inOpenTag = true;
+			continue;
+		}
+		if (!state.inOpenTag) {
+			continue;
+		}
+		if (char === '"' || char === "'") {
+			state.quote = char;
+			continue;
+		}
+		if (char === '>') {
+			state.inOpenTag = false;
+		}
+	}
 }
 
 function containsTransformWrapper(lines: string[]): boolean {

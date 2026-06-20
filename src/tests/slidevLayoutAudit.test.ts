@@ -2375,6 +2375,114 @@ describe('slidevLayoutAudit', () => {
 		expect(patched.deckMarkdown).not.toContain('zoom: 0.86');
 	});
 
+	test('wraps a multiline Vue component tree surface in Transform without requiring slot owner markers', () => {
+		const audit: SlidevLayoutAudit = {
+			slide: 2,
+			safeRect: { left: 51.2, top: 43.2, right: 1228.8, bottom: 676.8, width: 1177.6, height: 633.6 },
+			contentBounds: { left: 48, top: 52, right: 1248, bottom: 812, width: 1200, height: 760 },
+			pageScale: 1,
+			elementKinds: ['other'],
+			findings: [
+				{
+					kind: 'overflow',
+					target: 'content',
+					message: 'Slide content exceeds the safe visible rectangle',
+					recommendedPatch: 'split-slide',
+					recommendedScale: 0.84,
+				},
+				{
+					kind: 'overflow',
+					target: 'other',
+					message: 'component surface exceeds the safe visible rectangle',
+					recommendedPatch: 'reduce-zoom',
+					recommendedScale: 0.84,
+				},
+			],
+		};
+		const deck = [
+			'---',
+			'theme: default',
+			'---',
+			'',
+			'# Intro',
+			'',
+			'---',
+			'layout: dashboard-shell',
+			'---',
+			'',
+			'<DashboardGrid',
+			'  class="stage10-dashboard"',
+			'  :cards="[',
+			"    { label: 'Queue A', value: '128', tone: 'teal' },",
+			"    { label: 'Queue B', value: '256', tone: 'blue' },",
+			'  ]"',
+			'>',
+			'  <MetricPanel',
+			'    label="Queue A"',
+			'    value="128"',
+			'    tone="teal"',
+			'  />',
+			'  <template #footer>',
+			'    <div class="dashboard-footnote">Vue component tree regression fingerprint remains a single measured surface.</div>',
+			'  </template>',
+			'</DashboardGrid>',
+		].join('\n');
+
+		const patched = patchDeckWithLayoutAudit(deck, [audit]);
+
+		expect(patched.changed).toBe(true);
+		expect(patched.blockedSlides).toEqual([]);
+		expect(countSlideDeckSlides(patched.deckMarkdown)).toBe(2);
+		expect(patched.deckMarkdown).toContain('layout: dashboard-shell');
+		expect(patched.deckMarkdown).toContain('<Transform :scale="0.84" origin="top left">');
+		expect(patched.deckMarkdown).toContain(':cards="[');
+		expect(patched.deckMarkdown).toContain('Vue component tree regression fingerprint');
+		expect(patched.deckMarkdown).not.toContain('data-notemd-slot-zone=');
+		expect(patched.deckMarkdown).not.toContain('zoom: 0.84');
+	});
+
+	test('does not treat mixed component and Markdown prose as a single transformable surface', () => {
+		const audit: SlidevLayoutAudit = {
+			slide: 2,
+			safeRect: { left: 51.2, top: 43.2, right: 1228.8, bottom: 676.8, width: 1177.6, height: 633.6 },
+			contentBounds: { left: 48, top: 52, right: 1248, bottom: 812, width: 1200, height: 760 },
+			pageScale: 1,
+			elementKinds: ['other', 'text'],
+			findings: [
+				{
+					kind: 'overflow',
+					target: 'content',
+					message: 'Slide content exceeds the safe visible rectangle',
+					recommendedPatch: 'reduce-zoom',
+					recommendedScale: 0.84,
+				},
+			],
+		};
+		const deck = [
+			'---',
+			'theme: default',
+			'---',
+			'',
+			'# Intro',
+			'',
+			'---',
+			'layout: dashboard-shell',
+			'---',
+			'',
+			'<DashboardGrid class="stage10-dashboard">',
+			'  <MetricPanel label="Queue A" value="128" />',
+			'</DashboardGrid>',
+			'This markdown prose is not part of a bounded component surface.',
+		].join('\n');
+
+		const patched = patchDeckWithLayoutAudit(deck, [audit]);
+
+		expect(patched.changed).toBe(true);
+		expect(patched.deckMarkdown).not.toContain('<Transform :scale="0.84"');
+		expect(patched.deckMarkdown).toContain('zoom: 0.84');
+		expect(patched.deckMarkdown).toContain('This markdown prose is not part of a bounded component surface.');
+	});
+
 	test('does not compound a single-surface Transform with whole-slide zoom', () => {
 		const audit: SlidevLayoutAudit = {
 			slide: 2,

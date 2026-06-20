@@ -3,7 +3,7 @@ date: 2026-06-20
 last_updated: 2026-06-20
 topic: slidev-layout-quality-and-canvas-roadmap
 canonical: true
-status: stage9-custom-single-surface-transform-fixture-implemented
+status: stage10-vue-component-tree-surface-fixture-implemented
 ---
 
 # Slidev 布局质量与画布规划路线
@@ -26,7 +26,7 @@ status: stage9-custom-single-surface-transform-fixture-implemented
 
 1. 分支：`main`
 2. 远端：`origin/main`
-3. 本批次实现内容：rendered quality gate + clean-room `SlideLayoutPlan` 第一切片 + Mermaid 源图保持 fit 审计 + JS/TS/Python/Rust tokenizer + Mermaid 不拆图回归契约 + Stage 5 full-deck/export fixture、文本 glyph rect 测量、slot Transform 去整页 zoom 叠加、mixed Mermaid/prose 非图内容移动、相对图片资产镜像、local Slidev fork standalone loader 边界修复、Stage 6 frontmatter/cross-dir 资产镜像、CSS `url(...)` 与本地 `@import` 依赖图、HTML export 后资产同步、本地媒体 fixture 与离线字体 provider、Stage 7 font-safe slot/code convergence、Stage 8 Mermaid measured-fit ownership、Stage 9 custom single-surface local Transform fixture
+3. 本批次实现内容：rendered quality gate + clean-room `SlideLayoutPlan` 第一切片 + Mermaid 源图保持 fit 审计 + JS/TS/Python/Rust tokenizer + Mermaid 不拆图回归契约 + Stage 5 full-deck/export fixture、文本 glyph rect 测量、slot Transform 去整页 zoom 叠加、mixed Mermaid/prose 非图内容移动、相对图片资产镜像、local Slidev fork standalone loader 边界修复、Stage 6 frontmatter/cross-dir 资产镜像、CSS `url(...)` 与本地 `@import` 依赖图、HTML export 后资产同步、本地媒体 fixture 与离线字体 provider、Stage 7 font-safe slot/code convergence、Stage 8 Mermaid measured-fit ownership、Stage 9 custom single-surface local Transform fixture、Stage 10 bounded Vue component tree surface fixture
 4. 真实源文件：`docs/architecture.zh-CN.md`
 5. 本批次真实导出证据包：`/home/jacob/slidev-export-review/2026-06-20-quality/`
 6. 本批次最终 source-preserved-fit 输出归档：`/home/jacob/slidev-export-review/2026-06-20-source-preserved-fit-final/`
@@ -42,6 +42,8 @@ status: stage9-custom-single-surface-transform-fixture-implemented
 16. Stage 8 Mermaid measured-fit ownership 真实 `architecture.zh-CN.md` strict native standalone 验收包：`/home/jacob/slidev-export-review/2026-06-20-mermaid-measured-fit-real/`
 17. Stage 9 custom single-surface fixture 验收包：`/home/jacob/slidev-export-review/2026-06-20-stage9-custom-single-surface-fixtures/`
 18. Stage 9 真实 `architecture.zh-CN.md` strict native standalone 验收包：`/home/jacob/slidev-export-review/2026-06-20-stage9-architecture-real/`
+19. Stage 10 Vue component tree fixture 验收包：`/home/jacob/slidev-export-review/2026-06-20-stage10-vue-component-tree-fixtures/`
+20. Stage 10 真实 `architecture.zh-CN.md` strict native standalone 验收包：`/home/jacob/slidev-export-review/2026-06-20-stage10-architecture-real/`
 
 当前已落地事实：
 
@@ -78,11 +80,13 @@ status: stage9-custom-single-surface-transform-fixture-implemented
 31. Stage 8 真实 `architecture.zh-CN.md` strict native standalone rerun 已通过并归档：`ok = true`，使用 `/home/jacob/slidev/packages/slidev/bin/slidev.mjs`，加载 `/home/jacob/slidev/skills/slidev` 与 52 个 references，`actualMode = "standalone"`，`requiresLocalServer = false`，`standaloneGate.required = true` 且 `passed = true`，`mermaidSourcePreservation.passed = true`，源文档与导出 deck 均为 3 个 Mermaid fence 且 `changedFenceIndexes = []`，`hardOverflowCount = 0`，`lowEffectiveFontCount = 0`，`qualityMarginWarningCount = 0`，`lowContentUtilizationCount = 0`，`postPatchCount = 4`，`mermaidFitReviewCount = 3`，`mermaidLowZoomCount = 2`，`mermaidManualReviewCount = 1`。最终 deck 只有 rendered audit 推导出的 `zoomLines = ["0.285", "0.384"]`，不再包含生成阶段按行数或 LLM 选择带来的第三条 Mermaid zoom。
 32. Stage 9 新增 bounded raw HTML/component single-surface 收敛路径并已归档到 `/home/jacob/slidev-export-review/2026-06-20-stage9-custom-single-surface-fixtures/`：自定义 `layout: surface-shell` 且没有 slot owner marker 的单个超宽 component surface 可以被 measured local `<Transform>` 包裹；最终 deck 保留 custom layout frontmatter，不引入 `data-notemd-slot-zone`，也不会在已有 `<Transform>` 外再叠加整页 `zoom`；`custom-single-surface-component-stress` report 为 `ok = true`、`actualMode = "standalone"`、`hardOverflowCount = 0`、`lowEffectiveFontCount = 0`、`postPatchCount = 1`。
 33. Stage 9 真实 `architecture.zh-CN.md` strict native standalone rerun 已通过并归档到 `/home/jacob/slidev-export-review/2026-06-20-stage9-architecture-real/`：`ok = true`，使用 `/home/jacob/slidev/packages/slidev/bin/slidev.mjs`，加载 `/home/jacob/slidev/skills/slidev` 与 52 个 references，`actualMode = "standalone"`，`requiresLocalServer = false`，`standaloneGate.required = true` 且 `passed = true`，`mermaidSourcePreservation.passed = true`，源文档与导出 deck 均为 3 个 Mermaid fence 且 `changedFenceIndexes = []`，`hardOverflowCount = 0`，`lowEffectiveFontCount = 0`，`postPatchCount = 4`，`mermaidLowZoomCount = 2`，`mermaidManualReviewCount = 1`；可审查 deck 为 `architecture.zh-CN.stage9.slidev.md`。
+34. Stage 10 新增 bounded Vue component tree single-surface 收敛路径并已归档到 `/home/jacob/slidev-export-review/2026-06-20-stage10-vue-component-tree-fixtures/`：`custom-vue-component-tree-stress` 覆盖 multiline Vue tag opener、multiline prop array、嵌套 component、named template slot 与 custom layout shell；最终 deck 用 measured local `<Transform>` 包裹一个完整 component-only surface，保留 `layout: dashboard-shell`，不引入 `data-notemd-slot-zone`，不叠加整页 `zoom`，report 为 `ok = true`、`actualMode = "standalone"`、`hardOverflowCount = 0`、`lowEffectiveFontCount = 0`、`postPatchCount = 1`。该切片没有修改 Mermaid 策略。
+35. Stage 10 真实 `architecture.zh-CN.md` strict native standalone rerun 已通过并归档到 `/home/jacob/slidev-export-review/2026-06-20-stage10-architecture-real/`：`ok = true`，使用 `/home/jacob/slidev/packages/slidev/bin/slidev.mjs`，加载 `/home/jacob/slidev/skills/slidev` 与 52 个 references，`actualMode = "standalone"`，`requiresLocalServer = false`，`standaloneGate.required = true` 且 `passed = true`，`mermaidSourcePreservation.passed = true`，源文档与导出 deck 均为 3 个 Mermaid fence 且 `changedFenceIndexes = []`，`hardOverflowCount = 0`，`lowEffectiveFontCount = 0`，`postPatchCount = 4`，`mermaidLowZoomCount = 2`，`mermaidManualReviewCount = 1`，`zoomLines = ["0.285", "0.384"]`；可审查 deck 为 `architecture.zh-CN.stage10.slidev.md`。
 
 当前未完成事实：
 
 1. semantic split 仍只覆盖当前已有 table/code/text 支持集；Mermaid 源图保持后，过密原图只能通过布局/zoom/Transform 或人工复核处理，不能把一个源 Mermaid fence 自动拆成多个图；
-2. effective font 现在会把文本节点到 slide root 之间的局部 CSS `transform` / `scale` / `zoom` 乘入逐样本字号；full-deck slot fixture 已覆盖复杂 Vue/slot、嵌套 slot、component-heavy Transform、unsafe competing slot 自动分页，以及 bounded raw HTML/component single-surface local Transform 的真实收敛链路；更复杂的 Vue component tree、多个不稳定 surface owner 或不可安全分页的 custom layout 仍需继续加 fixture；
+2. effective font 现在会把文本节点到 slide root 之间的局部 CSS `transform` / `scale` / `zoom` 乘入逐样本字号；full-deck slot fixture 已覆盖复杂 Vue/slot、嵌套 slot、component-heavy Transform、unsafe competing slot 自动分页、bounded raw HTML/component single-surface local Transform，以及 bounded component-only Vue tree surface 的真实收敛链路；多个不稳定 surface owner、混合 Markdown/组件正文或不可安全分页的 custom layout 仍需继续加 fixture；
 3. `SlideLayoutPlan` 是生成前预算，不替代 Playwright rendered audit；
 4. 真实 `architecture.zh-CN.md` 仍需要每批次跑 strict standalone 验收，不能用单测替代；
 5. 当前真实 deck 仍可能在 rendered audit 之后出现 `zoom` 小于 `0.72` 的 Mermaid-only 页面；在“不改原 Mermaid 图内容”的约束下，低 zoom 有时是保留源图的代价，但不能由 source preparation 的固定参数或 LLM 主观决定，也不能扩散到 prose/table/code。混合 Mermaid/prose 页应先分离非图内容，不能把正文一起缩小。
@@ -104,7 +108,7 @@ status: stage9-custom-single-surface-transform-fixture-implemented
 | standalone 验证不能依赖外网字体 | 未显式配置 `fonts:` 的 prepared deck 注入 `fonts.provider: none`；显式字体配置保持用户选择 | 已落地 | 后续若需要品牌字体，应走本地 `public/` 或明确的 support asset，而不是默认拉远程字体 |
 | 完整支持 Slidev skill references | skill root 与 reference count 已进入 verifier | 已落地 | 可考虑上游 skill PR，但只放通用 guardrails |
 | 参考无限画布优化图/表/画布可见范围 | 已新增 clean-room `SlideLayoutPlan`，按 world-rect / viewport-fit 思想做生成前预算 | 已落地第一切片 | 后续加强语义拆分算法，不复制 AGPL 代码 |
-| custom component surface 无稳定 slot owner 时仍需收敛 | bounded raw HTML/component single-surface custom layout 现在可以用 measured local `<Transform>` 收敛，且已有 Transform 会阻止整页 zoom 叠加 | 已落地 Stage 9 切片 | 继续补 richer Vue/custom layout fixture；不要扩大到无法证明 owner surface 的任意组件树 |
+| custom component surface 无稳定 slot owner 时仍需收敛 | bounded raw HTML/component single-surface 与 bounded component-only Vue tree surface 现在可以用 measured local `<Transform>` 收敛，且已有 Transform 会阻止整页 zoom 叠加；混入 Markdown prose/table/fence/directive 的 surface 仍回到保守路径 | 已落地 Stage 10 切片 | 继续沉淀真实 unsupported layout；不要扩大到无法证明 owner surface 的任意组件树 |
 
 ## 4. 现有架构推进进度
 
@@ -601,10 +605,12 @@ interface SlideLayoutPlan {
 17. Stage 8 Mermaid measured-fit ownership 已落地：生成阶段不再按行数或 LLM 主观选择保留 Mermaid zoom；含 Mermaid 的生成页在写 prepared deck 前剥离 per-slide zoom，最终 zoom 只来自 rendered audit 的实际超界测量或进入 `mermaidFit` 复核。
 18. Stage 9 custom single-surface fixture 已落地并归档到 `/home/jacob/slidev-export-review/2026-06-20-stage9-custom-single-surface-fixtures/`：`custom-single-surface-component-stress` 通过生产 verifier，覆盖没有 slot owner marker 的自定义 layout 单 surface 局部 Transform；最终 deck 保留 `layout: surface-shell`，不引入 slot wrapper，不叠加整页 zoom，完整 fixture suite 扩展为 7 条。
 19. Stage 9 真实 `architecture.zh-CN.md` strict native standalone 已重新验收并归档到 `/home/jacob/slidev-export-review/2026-06-20-stage9-architecture-real/`；输出 deck `architecture.zh-CN.stage9.slidev.md` 可直接审查，3 个 Mermaid fence 均未改写或拆分。
+20. Stage 10 bounded Vue component tree surface fixture 已落地并归档到 `/home/jacob/slidev-export-review/2026-06-20-stage10-vue-component-tree-fixtures/`：完整 fixture suite 扩展为 8 条，`custom-vue-component-tree-stress` 通过生产 verifier，覆盖 multiline component opener、prop array、nested components 与 named template slot，在 custom layout 中用 measured local `<Transform>` 收敛一个 component-only surface。
+21. Stage 10 真实 `architecture.zh-CN.md` strict native standalone 已重新验收并归档到 `/home/jacob/slidev-export-review/2026-06-20-stage10-architecture-real/`；报告继续证明本地 Slidev fork、52 个 skill references、native standalone、3 个 Mermaid fence byte-stable、`changedFenceIndexes = []`、0 hard overflow 与 0 low effective font。该切片没有引入任何 Mermaid 源图拆分或改写。
 
 建议下一批实现顺序：
 
-1. 继续把更多真实失败样本沉淀为 full-deck/export fixtures，尤其是复杂 Vue component、多 Mermaid 页面混排、缺少稳定 owner 的 unsupported layout；Stage 9 只覆盖有界 raw HTML/component single-surface，不代表任意 Vue component tree 都可安全 Transform；
+1. 继续把更多真实失败样本沉淀为 full-deck/export fixtures，尤其是多个不稳定 owner、组件与 Markdown prose 混排、custom layout 需要分页但没有明确 surface boundary 的 unsupported layout；Stage 10 只证明 bounded component-only Vue tree surface，不代表任意 Vue component tree 都可安全 Transform；
 2. 对 Mermaid 继续只做源图保持的 fit/zoom/Transform 与人工复核边界，不引入自动拆原图策略；
 3. 继续增强更多语言专用 splitter；Python/Rust 当前是 parser-light，不是完整 AST；
 4. 评估是否把 source-preserved Mermaid fit review、mixed Mermaid/prose 仅移动非图内容的 guardrail、browser-check 与“不要拆用户原图”抽成通用 Slidev skill PR 建议。
@@ -624,9 +630,10 @@ interface SlideLayoutPlan {
 ```bash
 npm test -- --runInBand src/tests/slidevLayoutAudit.test.ts src/tests/slidevSourcePreparer.test.ts src/tests/slideExportComprehensive.test.ts src/tests/sidebarDomButtonClicks.test.ts
 npm test -- --runInBand src/tests/slidevLayoutPlan.test.ts src/tests/slidevLayoutWorkflow.test.ts
-npm run verify:slidev-layout-fixtures -- --timeout-ms 300000
+PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright npm test -- --runInBand src/tests/slidevRenderedMeasurement.test.ts
+PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright npm run verify:slidev-layout-fixtures -- --timeout-ms 300000
 npm run build
-npm run verify:slidev-export -- --format html --html-mode standalone --require-native-standalone --source architecture.zh-CN.md --json
+PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright npm run verify:slidev-export -- --format html --html-mode standalone --require-native-standalone --source architecture.zh-CN.md --json
 git diff --check
 ```
 

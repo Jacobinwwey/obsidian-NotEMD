@@ -3,7 +3,7 @@ date: 2026-06-20
 last_updated: 2026-06-20
 topic: slidev-layout-quality-and-canvas-roadmap
 canonical: false
-status: stage9-custom-single-surface-transform-fixture-implemented
+status: stage10-vue-component-tree-surface-fixture-implemented
 ---
 
 # Slidev Layout Quality And Canvas Roadmap
@@ -26,7 +26,7 @@ Current landed facts:
 8. `SlideLayoutPlan` is injected into deterministic outline generation, one-shot deck generation, and outline-continuation generation.
 9. The real `docs/architecture.zh-CN.md` strict standalone run is the recurring acceptance source for actual export behavior.
 
-The current slice adds the Stage 9 custom single-surface convergence fixture on top of Mermaid measured-fit ownership, font-safe slot/code convergence, and explicit CSS asset dependency graph copying:
+The current slice adds the Stage 10 bounded Vue component tree convergence fixture on top of Mermaid measured-fit ownership, font-safe slot/code convergence, explicit CSS asset dependency graph copying, and Stage 9 custom single-surface convergence:
 
 1. Markdown images, HTML media/link/srcset attributes, and Slidev frontmatter local file keys are copied into the prepared deck workspace.
 2. Local CSS files explicitly referenced by the deck are parsed for local `url(...)` dependencies and local `@import` stylesheet chains.
@@ -43,6 +43,7 @@ The current slice adds the Stage 9 custom single-surface convergence fixture on 
 13. Table/code structural splitting now also triggers when the font floor rejects zoom, and chunk count uses the measured fit factor instead of only the coarse readable-scale floor.
 14. Generated Mermaid slides no longer receive line-count seed zoom and no longer keep LLM-chosen Mermaid zoom; rendered audit owns any measured Mermaid zoom or `mermaidFit` review state. Existing user-authored Slidev decks still keep their explicit source settings in isolated working copies.
 15. Bounded raw HTML/component single-surface custom layouts can now receive a measured local `<Transform>` without requiring slot-owner wrappers, while existing `<Transform>` wrappers on slot and non-slot surfaces block follow-up whole-slide zoom so scale does not compound.
+16. Bounded component-only Vue tree surfaces with multiline component openers, multiline props, nested components, and named template slots can now receive the same measured local `<Transform>` path. Mixed Markdown prose/table/fence/directive content is intentionally rejected from this path.
 
 Closeout evidence:
 
@@ -57,6 +58,8 @@ Closeout evidence:
 9. Real Stage 8 `architecture.zh-CN.md` strict native standalone archive: `/home/jacob/slidev-export-review/2026-06-20-mermaid-measured-fit-real/`. The report is `ok = true`, uses `/home/jacob/slidev/packages/slidev/bin/slidev.mjs`, loads `/home/jacob/slidev/skills/slidev` with 52 references, preserves 3/3 Mermaid fences, strips generated Mermaid zoom before rendered audit, and closes with `hardOverflowCount = 0`, `lowEffectiveFontCount = 0`, `postPatchCount = 4`, `mermaidFitReviewCount = 3`, `mermaidLowZoomCount = 2`, and `mermaidManualReviewCount = 1`.
 10. Stage 9 fixture archive: `/home/jacob/slidev-export-review/2026-06-20-stage9-custom-single-surface-fixtures/`. It includes `custom-single-surface-component-stress`: a custom `layout: surface-shell` deck with one oversized raw HTML/component surface and no slot owner markers. The production fixture converges with a measured local `<Transform>` only, keeps the custom layout frontmatter, does not introduce `data-notemd-slot-zone`, does not stack whole-slide `zoom`, and closes with `hardOverflowCount = 0`, `lowEffectiveFontCount = 0`, and `postPatchCount = 1`.
 11. Real Stage 9 `architecture.zh-CN.md` strict native standalone archive: `/home/jacob/slidev-export-review/2026-06-20-stage9-architecture-real/`. The report is `ok = true`, uses `/home/jacob/slidev/packages/slidev/bin/slidev.mjs`, loads `/home/jacob/slidev/skills/slidev` with 52 references, outputs native standalone HTML, preserves 3/3 Mermaid fences with `changedFenceIndexes = []`, and closes with `hardOverflowCount = 0`, `lowEffectiveFontCount = 0`, `postPatchCount = 4`, `mermaidLowZoomCount = 2`, and `mermaidManualReviewCount = 1`. The reviewable deck is `architecture.zh-CN.stage9.slidev.md`.
+12. Stage 10 fixture archive: `/home/jacob/slidev-export-review/2026-06-20-stage10-vue-component-tree-fixtures/`. The suite now contains 8 production fixtures. `custom-vue-component-tree-stress` keeps `layout: dashboard-shell`, wraps one component-only Vue tree surface with measured local `<Transform>`, avoids `data-notemd-slot-zone`, avoids whole-slide zoom stacking, and closes with `hardOverflowCount = 0`, `lowEffectiveFontCount = 0`, and `postPatchCount = 1`.
+13. Real Stage 10 `architecture.zh-CN.md` strict native standalone archive: `/home/jacob/slidev-export-review/2026-06-20-stage10-architecture-real/`. The report is `ok = true`, uses Jacob's local Slidev fork, loads 52 skill references, outputs native standalone HTML, preserves 3/3 Mermaid fences with `changedFenceIndexes = []`, and closes with `hardOverflowCount = 0`, `lowEffectiveFontCount = 0`, `postPatchCount = 4`, `mermaidLowZoomCount = 2`, and `mermaidManualReviewCount = 1`. The reviewable deck is `architecture.zh-CN.stage10.slidev.md`.
 
 ## Mermaid Boundary
 
@@ -82,7 +85,7 @@ Mermaid-only slides may use measured low zoom to keep the full preserved diagram
 | Mixed Mermaid/prose must not use low whole-slide zoom | Only non-Mermaid content may move; Mermaid fences remain byte-stable | Improve outer layout and prose movement only |
 | Local assets must not disappear in standalone output | Markdown, HTML, frontmatter, CSS `url(...)`, CSS `@import`, and local media dependencies are copied explicitly; rejected local CSS references are sanitized in copied CSS | Extend only through explicit dependency parsing, not whole-directory copying |
 | Remote fonts must not be required for verification | Prepared decks default to `fonts.provider: none` | Use explicit local assets for branded fonts |
-| Custom component surfaces without stable slot owners need convergence evidence | Bounded raw HTML/component single-surface slides can receive a measured local `<Transform>` without slot wrappers; existing Transform blocks whole-slide zoom compounding | Keep richer Vue/custom layouts conservative until a fixture proves a safe owner surface |
+| Custom component surfaces without stable slot owners need convergence evidence | Bounded raw HTML/component single-surface slides and bounded component-only Vue tree surfaces can receive a measured local `<Transform>` without slot wrappers; existing Transform blocks whole-slide zoom compounding | Keep mixed Markdown/component surfaces and owner-ambiguous layouts conservative until a fixture proves a safe boundary |
 
 ## Architecture Direction
 
@@ -119,7 +122,7 @@ Required verification before closing a slice:
 
 The next useful slices are:
 
-1. Add more real failure fixtures for richer custom Vue layouts and unsupported layouts without stable owners; Stage 9 covers only bounded raw HTML/component single-surface slides, not arbitrary component trees.
+1. Add more real failure fixtures for unsupported layouts without stable owners, mixed Markdown/component surfaces, and custom layouts that need pagination without an explicit surface boundary; Stage 10 covers bounded component-only Vue tree surfaces, not arbitrary component trees.
 2. Keep Mermaid source-preserved fit review as a first-class report surface; do not introduce automatic Mermaid splitting.
 3. Extend parser-light code splitting only where it preserves semantic blocks better than line budgets.
 4. Consider an upstream Slidev skill PR only for general guardrails: complete references, source-preserved Mermaid fit review, browser-check expectations, standalone/fallback distinction, and no automatic user-diagram splitting.

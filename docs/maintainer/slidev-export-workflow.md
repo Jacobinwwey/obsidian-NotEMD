@@ -77,13 +77,13 @@ The current expanded fixture archive is:
 /home/jacob/slidev-export-review/2026-06-20-expanded-layout-fixtures/
 ```
 
-The current Stage 9 fixture archive is:
+The current Stage 10 fixture archive is:
 
 ```text
-/home/jacob/slidev-export-review/2026-06-20-stage9-custom-single-surface-fixtures/
+/home/jacob/slidev-export-review/2026-06-20-stage10-vue-component-tree-fixtures/
 ```
 
-It includes `custom-single-surface-component-stress`, which proves a bounded raw HTML/component surface inside a custom layout can converge through a measured local `<Transform>` without slot-owner wrappers or whole-slide zoom stacking.
+It includes `custom-single-surface-component-stress` and `custom-vue-component-tree-stress`, proving that a bounded raw HTML/component surface or bounded component-only Vue tree surface inside a custom layout can converge through a measured local `<Transform>` without slot-owner wrappers or whole-slide zoom stacking. The suite still requires Mermaid fences to remain byte-stable and must not split one source Mermaid diagram into several diagrams.
 
 For a live desktop-session smoke against the real Obsidian command path:
 
@@ -236,18 +236,20 @@ Current landed truth as of 2026-06-20:
 38. the matching real `architecture.zh-CN.md` strict standalone archive is `/home/jacob/slidev-export-review/2026-06-20-font-safe-real/`; the report is `ok = true`, uses Jacob's local Slidev fork, loads 52 skill references, outputs native standalone HTML, passes Mermaid source preservation, and archives the reviewable `architecture.zh-CN.slidev.md`.
 39. bounded raw HTML/component single-surface custom layouts can now use measured local `<Transform>` convergence without `data-notemd-slot-zone` wrappers. The `custom-single-surface-component-stress` fixture keeps `layout: surface-shell`, preserves the component surface content, and rejects the previous regression where a local Transform was compounded with whole-slide `zoom`.
 40. the Stage 9 real `architecture.zh-CN.md` strict standalone archive is `/home/jacob/slidev-export-review/2026-06-20-stage9-architecture-real/`; the report is `ok = true`, uses Jacob's local Slidev fork, loads 52 skill references, outputs native standalone HTML, preserves all 3 Mermaid fences with `changedFenceIndexes = []`, and archives the reviewable `architecture.zh-CN.stage9.slidev.md`.
+41. bounded component-only Vue tree surfaces can now use the same measured local `<Transform>` convergence path. The `custom-vue-component-tree-stress` fixture covers multiline component openers, multiline prop arrays, nested components, and named template slots while keeping `layout: dashboard-shell`, avoiding `data-notemd-slot-zone`, and avoiding whole-slide `zoom`.
+42. the Stage 10 real `architecture.zh-CN.md` strict standalone archive is `/home/jacob/slidev-export-review/2026-06-20-stage10-architecture-real/`; the report is `ok = true`, uses Jacob's local Slidev fork, loads 52 skill references, outputs native standalone HTML, preserves all 3 Mermaid fences with `changedFenceIndexes = []`, closes with `hardOverflowCount = 0` and `lowEffectiveFontCount = 0`, and archives the reviewable `architecture.zh-CN.stage10.slidev.md`.
 
 Current limitation:
 
 1. effective font measurement now accounts for common local CSS transform/scale/zoom chains, but the browser rendered audit remains the authority for complex Vue layouts; do not replace it with static Markdown estimates;
-2. richer custom/component-heavy Slidev layouts beyond the current supported structural set still remain conservative/manual-review paths, especially when no stable owner surface exists or content cannot be safely paginated. Stage 9 covers only bounded raw HTML/component single-surface slides; it is not proof that arbitrary Vue component trees can be transformed safely;
+2. richer custom/component-heavy Slidev layouts beyond the current supported structural set still remain conservative/manual-review paths, especially when no stable owner surface exists, when Markdown prose/table/fence/directive content is mixed into the surface, or when content cannot be safely paginated. Stage 10 covers bounded component-only Vue tree surfaces; it is not proof that arbitrary Vue component trees can be transformed safely;
 3. native standalone export now has a strict gate and the real architecture fixture passes it, but correctness still depends on post-build sanity detection; server-script fallback remains a compatibility lane and must not be counted as native standalone success;
 4. full-deck Playwright verification is deliberately slower than representative sampling, so future work should improve convergence rather than weaken the audit;
 5. `obsidian command id=notemd:export-slides` is still only a dispatch-level smoke because the Obsidian CLI does not expose an export-complete handshake.
 6. Mermaid `manual-review` evidence is not a hard gate failure. It is the correct fail-transparent outcome when preserving the original Mermaid source and guaranteeing projector-level readability cannot both be proven automatically.
 7. code splitting is still parser-light. TypeScript/JavaScript/Python/Rust now have top-level tokenizers, but full AST splitting and more language-specific splitters remain future work.
 8. The Mermaid no-split constraint does not mean Mermaid presentation quality automatically passes. If a very large source diagram can only remain complete at low zoom, the workflow should surface `source-preserved-fit-review` or `manual-review` instead of silently rewriting or splitting the diagram.
-9. Stage 5/6 full-deck fixtures now cover long-table, wide-table, mixed-code, Mermaid source-preserved fit, component-heavy slot Transform boundaries, mixed Mermaid/prose non-diagram content movement, local image assets, nested slot components, ultra-wide tables, frontmatter background/image/favicon assets, cross-directory assets, CSS `url(...)` image/font dependencies, local CSS `@import` chains, local video/audio/track assets, and offline font-provider boundaries, but they are not exhaustive; add more fixture sources for complex Vue components and unsupported layouts as they fail in real documents.
+9. the current full-deck fixtures cover long-table, wide-table, mixed-code, Mermaid source-preserved fit, component-heavy slot Transform boundaries, mixed Mermaid/prose non-diagram content movement, local image assets, nested slot components, ultra-wide tables, frontmatter background/image/favicon assets, cross-directory assets, CSS `url(...)` image/font dependencies, local CSS `@import` chains, local video/audio/track assets, offline font-provider boundaries, bounded raw HTML/component single-surface slides, and bounded component-only Vue tree surfaces, but they are not exhaustive; add more fixture sources for complex Vue components and unsupported layouts as they fail in real documents.
 
 ## Output Policy
 
@@ -303,7 +305,8 @@ For code changes, also run:
 
 ```bash
 npm test -- --runInBand src/tests/slidevLayoutAudit.test.ts src/tests/slidevSourcePreparer.test.ts src/tests/slideExportComprehensive.test.ts src/tests/sidebarDomButtonClicks.test.ts
-npm run verify:slidev-layout-fixtures -- --timeout-ms 300000
+PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright npm test -- --runInBand src/tests/slidevRenderedMeasurement.test.ts
+PLAYWRIGHT_BROWSERS_PATH=/home/jacob/.cache/ms-playwright npm run verify:slidev-layout-fixtures -- --timeout-ms 300000
 npm run build
 git diff --check
 ```
