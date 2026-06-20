@@ -949,6 +949,72 @@ describe('slidevSourcePreparer', () => {
         expect(writtenDeck).toContain('```mermaid\nflowchart TB\n  A --> B\n```');
     });
 
+    test('rejects one-step LLM decks that only change Mermaid fence metadata', async () => {
+        const skillRoot = '/skills/slidev';
+        process.env.NOTEMD_SLIDEV_SKILL_DIR = skillRoot;
+        const files = new Map([
+            [`${skillRoot}/SKILL.md`, 'Slidev skill instructions'],
+            [`${skillRoot}/references/core-syntax.md`, 'Use --- separators.'],
+        ]);
+        mockSafeRequire.mockImplementation((name: string) => {
+            if (name === 'path') {
+                return {
+                    join: (...parts: string[]) => parts.join('/').replace(/\/+/g, '/'),
+                };
+            }
+            if (name === 'fs') {
+                return {
+                    existsSync: (path: string) => files.has(path) || path === `${skillRoot}/references`,
+                    readFileSync: (path: string) => files.get(path) || '',
+                    readdirSync: (path: string) => path === `${skillRoot}/references`
+                        ? ['core-syntax.md']
+                        : [],
+                };
+            }
+            return null;
+        });
+        mockCallLLM.mockResolvedValue([
+            '---',
+            'theme: default',
+            'title: Architecture',
+            '---',
+            '',
+            '# Metadata Changed Diagram',
+            '',
+            '```mermaid {scale:0.5}',
+            'flowchart TB',
+            '  A --> B',
+            '```',
+        ].join('\n'));
+        const app = createApp([
+            '# Architecture',
+            '',
+            '## Diagram',
+            '',
+            '```mermaid {scale:0.7}',
+            'flowchart TB',
+            '  A --> B',
+            '```',
+        ].join('\n'));
+        const onProgress = jest.fn();
+
+        await prepareSlidevExportSource(
+            app,
+            createFile('architecture.zh-CN.md'),
+            config,
+            { deckGeneration: createDeckGenerationProfile() },
+            onProgress
+        );
+
+        const writtenDeck = (app.vault.adapter.write as jest.Mock).mock.calls[0][1] as string;
+        expect(writtenDeck).toContain('```mermaid {scale:0.7}\nflowchart TB\n  A --> B\n```');
+        expect(writtenDeck).not.toContain('```mermaid {scale:0.5}');
+        expect(onProgress).toHaveBeenCalledWith(
+            'slidev-source',
+            expect.stringContaining('LLM deck changed source Mermaid fences')
+        );
+    });
+
     test('rejects one-step LLM decks that split or rewrite source Mermaid fences', async () => {
         const skillRoot = '/skills/slidev';
         process.env.NOTEMD_SLIDEV_SKILL_DIR = skillRoot;

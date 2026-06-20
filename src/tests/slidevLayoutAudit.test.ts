@@ -521,7 +521,7 @@ describe('slidevLayoutAudit', () => {
 			findings: [],
 		};
 		const mermaidLines = [
-			'```mermaid',
+			'```mermaid {scale:0.7}',
 			'flowchart LR',
 			'  Source --> Transform',
 			'  Transform --> Standalone',
@@ -568,6 +568,7 @@ describe('slidevLayoutAudit', () => {
 		expect((patched.deckMarkdown.match(/```mermaid/g) || []).length).toBe(2);
 		expect(patched.deckMarkdown).toContain(mermaidLines.join('\n'));
 		expect(patched.deckMarkdown).toContain(secondMermaidLines.join('\n'));
+		expect(patched.deckMarkdown).toContain('```mermaid {scale:0.7}');
 		expect(patched.deckMarkdown).toContain('The export path must keep this prose readable');
 		expect((patched.deckMarkdown.match(/## Runtime Shape/g) || []).length).toBe(2);
 	});

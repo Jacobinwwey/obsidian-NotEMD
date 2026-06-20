@@ -121,7 +121,7 @@ docs/maintainer/slidev-standalone-acceptance-2026-06-18.zh-CN.md
 15. 严格 native standalone 收口时，`htmlExport.standaloneAttempt.loaderGaps: []`
 16. 严格 native standalone 收口时，`standaloneGate.passed: true`
 17. 源文件包含 Mermaid fence 时，除非人工显式改源文档，否则导出 deck 的 Mermaid fence 数量、顺序、fence metadata 与逐 fence 正文必须与源文档一致。
-18. Mermaid/prose 混排页不能保留低整页 zoom；如果可以分离，Mermaid fence 原样保留在 Mermaid 专属页，正文移动到可读页。
+18. Mermaid/prose 混排页不能保留低整页 zoom；如果可以迁移非图内容，Mermaid fence 的 opener、metadata、body、closer 原样保留在 Mermaid 专属页，正文移动到可读页。
 19. 已有局部 `<Transform>` 的页面，包括非 slot 的 single-surface wrapper，不能在后续 retry 中再叠加整页 `zoom`。
 
 任一条件失败，都应先修 NoteMD 工作流，再相信导出文件。
@@ -198,7 +198,7 @@ mermaidSourcePreservation.changedFenceIndexes
 
 1. 默认 HTML 验证在未传 `--sample-slides` 时会审计整个准备后的 deck；
 2. patcher 的 `zoom` 来自真实 overflow 测量，而不是固定导出常数；
-3. patcher 默认保留 Mermaid 源 fence，并会在不宜继续缩小时对 Markdown table、病态宽表或长 cell 表的 record-list fallback、非 Mermaid fenced code block、简单的标题 + 段落/列表页、generic slot-marked layout（含显式 `::default::`），以及可结构拆分的第一张 deck headmatter 页面做结构化拆分；
+3. patcher 默认保留 Mermaid 源 fence；结构化拆分只适用于 Markdown table、病态宽表或长 cell 表的 record-list fallback、非 Mermaid fenced code block、简单的标题 + 段落/列表页、generic slot-marked layout（含显式 `::default::`），以及可结构拆分的第一张 deck headmatter 页面；
 4. 生成 Mermaid 页的 guardrail 不再补缺省 `zoom`，也不信任 LLM 选择的 Mermaid `zoom`；写入 `_slidev-sources` 前会剥离生成页中的 Mermaid zoom，但用户已有 Slidev 源 deck 会在隔离 working copy 中保留显式源设置；
 5. 现有 Slidev deck 现在会进入 `_slidev-sources/<deck-basename>/` 隔离 working copy 目录；若 sibling 下存在 `layouts/`、`public/`、`setup/`、`components/`、`snippets/`、`styles/`、`global-top.vue`、`global-bottom.vue` 等常见 Slidev support entries，也会一并镜像进去；
 6. 渲染后布局审计现在也会测量带直接文本的 `div` / `section` / `article` / `aside` / `span`，因此 component-heavy 页面不会再被静默低估成“空布局”；
@@ -223,7 +223,7 @@ mermaidSourcePreservation.changedFenceIndexes
 25. synthetic full-deck layout fixtures 现在会跑完整生产 verifier：`source-layout-stress` 覆盖完整 skill references、native standalone、Mermaid fence 保真、record-list fallback 与 code splitting；`slot-component-stress` 覆盖 component-heavy slot 的局部 Transform 收敛，并防止整页 zoom 叠加。2026-06-20 归档为 `/home/jacob/slidev-export-review/2026-06-20-full-deck-layout-fixtures/`。
 26. text overflow measurement 现在对 text 元素使用 text-node Range glyph rectangles，而不是 block-level element box，因此不会因为 `h1` 的块级布局盒比实际可见文字宽就误判失败。
 27. Mermaid-only 页面可以用测量得到的低 zoom 保证一张保留源图完整可见；可读性风险通过 `mermaidFit.manual-review` 暴露，而不是拆分或改写原 Mermaid 图。
-28. Mermaid/prose 混排页现在会在允许 source-preserved Mermaid fit 之前先移动非 Mermaid 主内容；每个源 Mermaid fence 仍保持一个 byte-stable fence 且内容不变，unsupported mixed layout 会阻止低整页 zoom，而不是把正文一起缩小。
+28. Mermaid/prose 混排页现在会在允许 source-preserved Mermaid fit 之前先移动非 Mermaid 主内容；每个源 Mermaid fence 仍保持一个 byte-stable fence，opener、metadata、body、closer 均不变，unsupported mixed layout 会阻止低整页 zoom，而不是把正文一起缩小。
 29. prepared deck workspace 现在会复制 Markdown image、HTML media/link/srcset 属性和 Slidev frontmatter `background`、`image`、`src`、`favicon`、`poster`、`download` 显式引用的本地相对资产；deck 显式引用的本地 CSS 文件还会作为本地依赖图继续解析，包含 `url(...)` 图片/字体依赖和本地 `@import` 样式链，并按每个 CSS 文件所在目录解析相对路径。URL、绝对路径、NUL 字节和越界 traversal 会被拒绝，复制后的 CSS 会移除或中和这些被拒绝的本地引用，也不会粗暴复制整个源目录。
 30. local Slidev fork 的 standalone bundler 现在用括号平衡的函数边界替换来 stub Vite preload helper，避免误删第一张 slide loader binding。NoteMD strict standalone gate 仍保持 fail-closed，继续报告 loader gaps，而不会把 fallback 输出当成 native standalone 成功。
 31. native standalone 或 server-script HTML build 完成后，exporter 会把 prepared deck 仍显式引用的本地文件、CSS `url(...)` 依赖和本地 CSS `@import` 链同步到最终 `<source>-slides/` 输出目录，避免 frontmatter background、image layout、favicon、poster、linked CSS、imported CSS、本地字体或 CSS background image 反向依赖临时 prepared workspace；被拒绝的 CSS import/url 会在复制后的 CSS 中被移除或中和，避免 standalone 继续请求缺失的本地文件。
@@ -238,6 +238,7 @@ mermaidSourcePreservation.changedFenceIndexes
 40. Stage 9 真实 `architecture.zh-CN.md` strict standalone 验收包位于 `/home/jacob/slidev-export-review/2026-06-20-stage9-architecture-real/`；报告为 `ok = true`，使用本地 Slidev fork，加载 52 个 skill references，输出 native standalone HTML，3 个 Mermaid fence 均保持 `changedFenceIndexes = []`，并归档了可审查的 `architecture.zh-CN.stage9.slidev.md`。
 41. bounded component-only Vue tree surface 现在也可以通过 measured local `<Transform>` 收敛。`custom-vue-component-tree-stress` fixture 覆盖 multiline component opener、multiline prop array、nested components 与 named template slot，最终 deck 保留 `layout: dashboard-shell`，不引入 `data-notemd-slot-zone`，不叠加整页 `zoom`。
 42. Stage 10 真实 `architecture.zh-CN.md` strict standalone 验收包位于 `/home/jacob/slidev-export-review/2026-06-20-stage10-architecture-real/`；报告为 `ok = true`，使用本地 Slidev fork，加载 52 个 skill references，输出 native standalone HTML，3 个 Mermaid fence 均保持 `changedFenceIndexes = []`，`hardOverflowCount = 0`，`lowEffectiveFontCount = 0`，并归档了可审查的 `architecture.zh-CN.stage10.slidev.md`。
+43. Stage 11 Mermaid source boundary 收口验收包位于 `/home/jacob/slidev-export-review/2026-06-20-stage11-mermaid-source-boundary/`；新增回归测试覆盖 mixed Mermaid/prose 迁移后 inline metadata 仍保持，以及 LLM 只改 Mermaid fence metadata 时也必须被 source preparation 拒绝。真实 `architecture.zh-CN.md` strict native standalone report 为 `ok = true`，`actualMode = "standalone"`，`requiresLocalServer = false`，`mermaidSourcePreservation.passed = true`，`changedFenceIndexes = []`，`hardOverflowCount = 0`，`lowEffectiveFontCount = 0`，并归档了可审查的 `architecture.zh-CN.stage11.slidev.md`。
 
 当前限制：
 
