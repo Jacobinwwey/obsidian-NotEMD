@@ -337,13 +337,25 @@ describe('slidevExporter — All Format Combinations', () => {
         fs.writeFileSync(path.join(preparedDeckDirectory, 'assets/hero.svg'), '<svg/>', 'utf8');
         fs.writeFileSync(path.join(preparedDeckDirectory, 'assets/texture.svg'), '<svg/>', 'utf8');
         fs.writeFileSync(path.join(preparedDeckDirectory, 'assets/local-theme.css'), [
+            '@import "./imported-theme.css";',
+            '@import "https://example.test/remote-theme.css";',
+            '@import "../../outside.css";',
             '@font-face { font-family: FixtureTheme; src: url("./theme-font.woff2") format("woff2"); }',
             '.themed-backdrop { background-image: url("../media/theme-pattern.svg"); }',
+            '.remote-backdrop { background-image: url("https://example.test/remote-pattern.svg"); }',
             '.bad-backdrop { background-image: url("../../outside.svg"); }',
+            '.bad-null { background-image: url("bad\0asset.svg"); }',
+        ].join('\n'), 'utf8');
+        fs.writeFileSync(path.join(preparedDeckDirectory, 'assets/imported-theme.css'), [
+            '@font-face { font-family: FixtureImported; src: url("./imported-font.woff2") format("woff2"); }',
+            '.imported-backdrop { background-image: url("../media/imported-pattern.svg"); }',
         ].join('\n'), 'utf8');
         fs.writeFileSync(path.join(preparedDeckDirectory, 'assets/theme-font.woff2'), 'fake font payload', 'utf8');
+        fs.writeFileSync(path.join(preparedDeckDirectory, 'assets/imported-font.woff2'), 'fake imported font payload', 'utf8');
         fs.writeFileSync(path.join(preparedDeckDirectory, 'media/theme-pattern.svg'), '<svg/>', 'utf8');
+        fs.writeFileSync(path.join(preparedDeckDirectory, 'media/imported-pattern.svg'), '<svg/>', 'utf8');
         fs.writeFileSync(path.join(tempVaultRoot, 'export/_slidev-sources/outside.svg'), '<svg/>', 'utf8');
+        fs.writeFileSync(path.join(tempVaultRoot, 'export/_slidev-sources/outside.css'), 'body{}', 'utf8');
         mockGetVaultBasePath.mockReturnValue(tempVaultRoot);
         mockSafeRequire.mockImplementation((moduleName: string) => {
             if (moduleName === 'fs') return fs;
@@ -376,9 +388,21 @@ describe('slidevExporter — All Format Combinations', () => {
             expect(fs.existsSync(path.join(exportDirectory, 'assets/hero.svg'))).toBe(true);
             expect(fs.existsSync(path.join(exportDirectory, 'assets/texture.svg'))).toBe(true);
             expect(fs.existsSync(path.join(exportDirectory, 'assets/local-theme.css'))).toBe(true);
+            expect(fs.existsSync(path.join(exportDirectory, 'assets/imported-theme.css'))).toBe(true);
             expect(fs.existsSync(path.join(exportDirectory, 'assets/theme-font.woff2'))).toBe(true);
+            expect(fs.existsSync(path.join(exportDirectory, 'assets/imported-font.woff2'))).toBe(true);
             expect(fs.existsSync(path.join(exportDirectory, 'media/theme-pattern.svg'))).toBe(true);
+            expect(fs.existsSync(path.join(exportDirectory, 'media/imported-pattern.svg'))).toBe(true);
             expect(fs.existsSync(path.join(exportDirectory, 'outside.svg'))).toBe(false);
+            expect(fs.existsSync(path.join(exportDirectory, 'outside.css'))).toBe(false);
+            const exportedThemeCss = fs.readFileSync(path.join(exportDirectory, 'assets/local-theme.css'), 'utf8');
+            expect(exportedThemeCss).toContain('@import "./imported-theme.css";');
+            expect(exportedThemeCss).toContain('@import "https://example.test/remote-theme.css";');
+            expect(exportedThemeCss).toContain('url("../media/theme-pattern.svg")');
+            expect(exportedThemeCss).toContain('url("https://example.test/remote-pattern.svg")');
+            expect(exportedThemeCss).not.toContain('outside.css');
+            expect(exportedThemeCss).not.toContain('outside.svg');
+            expect(exportedThemeCss).not.toContain('\0');
         } finally {
             fs.rmSync(tempVaultRoot, { recursive: true, force: true });
         }

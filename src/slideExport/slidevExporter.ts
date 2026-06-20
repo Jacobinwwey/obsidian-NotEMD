@@ -8,7 +8,7 @@
 import type { App } from 'obsidian';
 import type { SlideExportConfig, ExecResult, ExportProgressCallback, SlidevExportSource, SlidevHtmlActualMode, SlidevHtmlExportOutcome } from './types';
 import { execFileAsync, getVaultBasePath, resolveNpxCommand, resolvePlaywrightBrowsersPath, resolveSlidevCommand, safeRequire } from './platformUtils';
-import { collectLocalAssetReferencesWithDependencies } from './slidevSourcePreparer';
+import { collectLocalAssetReferencesWithDependencies, copyLocalSlidevAssetReference } from './slidevSourcePreparer';
 
 function createBuildArgs(
 	inputPath: string,
@@ -63,36 +63,14 @@ function copyPreparedLocalFileReferencesToExport(
 	const copiedAssets: string[] = [];
 	const deckMarkdown = fs.readFileSync(absolutePreparedDeckPath, 'utf8');
 	for (const referencePath of collectLocalAssetReferencesWithDependencies(fs, path, preparedDeckDirectory, deckMarkdown)) {
-		const absoluteSourceAsset = path.join(preparedDeckDirectory, referencePath);
-		if (!isInsideDirectory(path, preparedDeckDirectory, absoluteSourceAsset) || !fs.existsSync(absoluteSourceAsset)) {
-			continue;
+		if (copyLocalSlidevAssetReference(fs, path, preparedDeckDirectory, outputDir, referencePath)) {
+			copiedAssets.push(referencePath);
 		}
-		const stat = fs.statSync?.(absoluteSourceAsset);
-		if (!stat?.isFile?.()) {
-			continue;
-		}
-
-		const absoluteTargetAsset = path.join(outputDir, referencePath);
-		if (!isInsideDirectory(path, outputDir, absoluteTargetAsset)) {
-			continue;
-		}
-		fs.mkdirSync?.(path.dirname(absoluteTargetAsset), { recursive: true });
-		if (fs.copyFileSync) {
-			fs.copyFileSync(absoluteSourceAsset, absoluteTargetAsset);
-		} else {
-			fs.cpSync?.(absoluteSourceAsset, absoluteTargetAsset);
-		}
-		copiedAssets.push(referencePath);
 	}
 
 	if (copiedAssets.length > 0) {
 		onProgress?.('slidev-build', `Copied local export assets: ${copiedAssets.join(', ')}`);
 	}
-}
-
-function isInsideDirectory(path: any, directoryPath: string, candidatePath: string): boolean {
-	const relativePath = path.relative(directoryPath, candidatePath);
-	return Boolean(relativePath) && !relativePath.startsWith('..') && !path.isAbsolute(relativePath);
 }
 
 function escapeRegExp(value: string): string {

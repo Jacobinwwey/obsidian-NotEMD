@@ -140,7 +140,7 @@ Real maintained baseline as of 2026-06-20:
 11. source preparation now injects a clean-room `SlideLayoutPlan` budget into deterministic outlines and LLM deck prompts
 12. rendered audit now reports source-preserved Mermaid fit evidence through `layoutAudit[].mermaidFit` and summary counters for Mermaid review, low zoom, and manual-review cases; the latest real strict run reports `mermaidSlideCount = 3`, `mermaidFitReviewCount = 3`, `mermaidLowZoomCount = 3`, and `mermaidManualReviewCount = 1`
 13. mixed Mermaid/prose slides no longer solve fit by keeping low whole-slide zoom on prose; the patcher may move only the non-Mermaid primary content onto a readable slide while preserving every source Mermaid fence as one byte-stable unchanged fence
-14. explicit local relative assets referenced by Markdown images, HTML media/link/srcset attributes, and Slidev frontmatter keys are copied next to the prepared deck; local CSS files referenced by the deck are parsed for local `url(...)` image/font dependencies relative to the CSS file location, so isolated `_slidev-sources` workspaces do not break source-relative SVG/PNG/JPEG/background/favicon/poster/font references
+14. explicit local relative assets referenced by Markdown images, HTML media/link/srcset attributes, and Slidev frontmatter keys are copied next to the prepared deck; local CSS files referenced by the deck are parsed as a local dependency graph, including `url(...)` image/font dependencies and local `@import` stylesheet chains relative to each CSS file location, so isolated `_slidev-sources` workspaces do not break source-relative SVG/PNG/JPEG/background/favicon/poster/font references
 15. the local Slidev fork's standalone bundler now preserves first-slide loader bindings when stubbing Vite preload helpers; NoteMD's strict standalone gate remains fail-closed and continues to report real `loaderGaps`
 16. HTML export syncs the prepared deck's explicit local file references into the final `<source>-slides/` output directory, and prepared decks default to `fonts.provider: none` unless the source already declares top-level `fonts:`
 
@@ -152,7 +152,7 @@ The current workflow is now strong enough to reject broken wiring, missing skill
 
 The current render-feedback loop is now:
 
-1. `prepareSlidevExportSource()` still loads the full Slidev skill directory, asks the LLM to preserve source Mermaid fences, and asks it to split dense prose, tables, or code before export.
+1. `prepareSlidevExportSource()` still loads the full Slidev skill directory, asks the LLM to preserve source Mermaid fences, rejects LLM deck candidates that change those fences, and asks it to split dense prose, tables, or code before export.
 2. `SlideLayoutPlan` estimates dense Markdown blocks before generation and feeds a deterministic layout budget into outlines and LLM prompts.
 3. `scripts/verify-slidev-export-workflow.cjs` and the product `exportSlidesCommand()` now share the same convergence workflow, which renders the built HTML in Playwright, waits for visible slide content, and measures the actual `slidev-page` root plus overflow-prone elements.
 4. `SlidevOverflowAudit` classifies `overflow`, `unreadable-scale`, `render-error`, `low-effective-font`, `tight-margin`, and `low-content-utilization` from rendered geometry, records source-preserved Mermaid fit status, and also records slot-zone owner rects, content bounds, scroll overflow, and recommended local transform scales instead of relying only on Markdown heuristics.
@@ -170,6 +170,8 @@ The current render-feedback loop is now:
 8. The verifier now audits the full deck by default and keeps retrying within a bounded loop until the rendered deck fits or the retry budget is exhausted.
 
 Mermaid handling has a stricter content-preservation rule than tables, code, or prose. A user-provided Mermaid fence remains one diagram. When the preserved diagram is low-zoom, low-font, or too tight to prove presentation quality automatically, the workflow records `fits`, `source-preserved-fit-review`, or `manual-review` evidence instead of rewriting the source graph into several diagrams.
+
+This is now enforced before the prepared deck is written, not only after export verification: both one-shot LLM deck generation and outline-continuation LLM generation compare every source Mermaid fence against the candidate deck and fall back to deterministic source-preserving preparation if the candidate changes count, order, fence metadata, or body text.
 
 The verifier now enforces that rule with `mermaidSourcePreservation`: each exported Mermaid fence is compared to the corresponding source fence. A block-count-only match is not enough.
 
@@ -204,9 +206,12 @@ Current landed state:
 14. the real `docs/architecture.zh-CN.md` strict native standalone run now closes with `actualMode = "standalone"`, `requiresLocalServer = false`, `loaderGaps = []`, `standaloneGate.passed = true`, `29` audited slides, zero hard overflow / unreadable scale / low effective font / quality margin warning / low utilization findings, and bounded retry closure.
 15. Mermaid fit review is now explicit report data. It is intentionally separate from hard overflow: a `manual-review` Mermaid status is evidence that source preservation and automatic readability proof are in tension, not permission to auto-split the diagram.
 16. the expanded full-deck fixture suite archives native standalone fixtures under `/home/jacob/slidev-export-review/2026-06-20-expanded-layout-fixtures/`: source-layout stress with 52 Slidev skill references, slot/component Transform stress, mixed Mermaid/prose non-diagram content separation, media/nested-slot/ultra-wide-table stress, and frontmatter/cross-directory asset stress.
-17. prepared deck export now keeps explicit frontmatter/media/CSS dependency assets available in final HTML output and disables remote font providers by default for prepared decks, while preserving explicit user font configuration.
+17. prepared deck export now keeps explicit frontmatter/media/CSS dependency assets available in final HTML output, including imported local CSS dependency chains, and disables remote font providers by default for prepared decks while preserving explicit user font configuration.
 18. the final CSS dependency verification archive is `/home/jacob/slidev-export-review/2026-06-20-css-asset-dependencies-final/`: the real `architecture.zh-CN.md` strict standalone report is `ok = true`, uses `/home/jacob/slidev/packages/slidev/bin/slidev.mjs`, loads 52 Slidev skill references, preserves all 3 source Mermaid fences byte-for-byte, and outputs native standalone HTML without local-server fallback.
-19. historical generated `docs/export/test-slidev-*`, `docs/export/test-slidev.pdf`, `docs/export/test-slidev-video.mp4`, and old `docs/export/slides/` artifacts are no longer tracked in `main`; reusable export guidance remains in `docs/export/README.md` and `docs/export/README.zh-CN.md`.
+19. out-of-scope CSS imports/URLs are not copied and are removed or neutralized in copied CSS files, so standalone output does not request rejected paths such as `outside.css` or `outside.svg`.
+20. the CSS import/media fixture archive is `/home/jacob/slidev-export-review/2026-06-20-css-import-media-fixtures/`: the production fixture suite now verifies local CSS `@import` recursion, imported CSS font/background dependencies, local video/audio/track/poster assets, CSS sanitizer behavior, and rejection of out-of-scope imported stylesheets in both prepared workspace and final standalone export.
+21. source preparation now rejects both one-shot and outline-continuation LLM deck candidates that split or rewrite source Mermaid fences, then falls back to deterministic source-preserving preparation instead of writing a mutated deck.
+22. historical generated `docs/export/test-slidev-*`, `docs/export/test-slidev.pdf`, `docs/export/test-slidev-video.mp4`, and old `docs/export/slides/` artifacts are no longer tracked in `main`; reusable export guidance remains in `docs/export/README.md` and `docs/export/README.zh-CN.md`.
 
 Current gap:
 

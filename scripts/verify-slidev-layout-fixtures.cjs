@@ -376,6 +376,19 @@ function createBackgroundCrossAssetStressDeck() {
         '',
         'The `image` frontmatter path is a local source-relative asset, not a remote URL.',
         '',
+        '---',
+        '',
+        '# Local Media Assets',
+        '',
+        '<video controls poster="./assets/poster.svg" style="width: 62%; max-height: 260px;">',
+        '  <source src="./media/clip.mp4" type="video/mp4">',
+        '  <track kind="captions" src="./media/captions.vtt" srclang="en" label="English">',
+        '</video>',
+        '',
+        '<audio controls>',
+        '  <source src="./media/narration.mp3" type="audio/mpeg">',
+        '</audio>',
+        '',
     ].join('\n');
 }
 
@@ -468,17 +481,33 @@ const FIXTURES = [
             { path: 'decks/assets/section-background.svg', content: createFixtureSvg('Section background', '#0f172a', '#22d3ee') },
             { path: 'decks/assets/hero.svg', content: createFixtureSvg('Hero image', '#ecfdf5', '#047857') },
             { path: 'decks/assets/favicon.svg', content: createFixtureSvg('Favicon', '#f8fafc', '#7c3aed') },
+            { path: 'decks/assets/poster.svg', content: createFixtureSvg('Video poster', '#eef2ff', '#4f46e5') },
             {
                 path: 'decks/assets/local-theme.css',
                 content: [
+                    '@import "./imported-theme.css";',
+                    '@import "../../outside.css";',
                     '@font-face { font-family: FixtureTheme; src: url("./theme-font.woff2") format("woff2"); }',
                     '.themed-backdrop { background-image: url("../media/theme-pattern.svg"); }',
                     '.bad-backdrop { background-image: url("../../outside.svg"); }',
                 ].join('\n'),
             },
+            {
+                path: 'decks/assets/imported-theme.css',
+                content: [
+                    '@font-face { font-family: FixtureImported; src: url("./imported-font.woff2") format("woff2"); }',
+                    '.imported-backdrop { background-image: url("../media/imported-pattern.svg"); }',
+                ].join('\n'),
+            },
             { path: 'decks/assets/theme-font.woff2', content: 'fake font payload' },
+            { path: 'decks/assets/imported-font.woff2', content: 'fake imported font payload' },
             { path: 'decks/media/theme-pattern.svg', content: createFixtureSvg('Theme pattern', '#fefce8', '#ca8a04') },
+            { path: 'decks/media/imported-pattern.svg', content: createFixtureSvg('Imported theme pattern', '#ecfeff', '#0891b2') },
+            { path: 'decks/media/clip.mp4', content: 'fake video payload' },
+            { path: 'decks/media/captions.vtt', content: 'WEBVTT\n\n00:00.000 --> 00:01.000\nFixture captions\n' },
+            { path: 'decks/media/narration.mp3', content: 'fake audio payload' },
             { path: 'outside.svg', content: createFixtureSvg('Outside rejected', '#fee2e2', '#dc2626') },
+            { path: 'outside.css', content: 'body{}' },
         ],
         expectFrontmatterAssets: true,
         expectedCopiedAssets: [
@@ -486,18 +515,32 @@ const FIXTURES = [
             'assets/section-background.svg',
             'assets/hero.svg',
             'assets/favicon.svg',
+            'assets/poster.svg',
             'assets/local-theme.css',
+            'assets/imported-theme.css',
             'assets/theme-font.woff2',
+            'assets/imported-font.woff2',
             'media/theme-pattern.svg',
+            'media/imported-pattern.svg',
+            'media/clip.mp4',
+            'media/captions.vtt',
+            'media/narration.mp3',
         ],
         expectedExportAssets: [
             'assets/deck-background.svg',
             'assets/section-background.svg',
             'assets/hero.svg',
             'assets/favicon.svg',
+            'assets/poster.svg',
             'assets/local-theme.css',
+            'assets/imported-theme.css',
             'assets/theme-font.woff2',
+            'assets/imported-font.woff2',
             'media/theme-pattern.svg',
+            'media/imported-pattern.svg',
+            'media/clip.mp4',
+            'media/captions.vtt',
+            'media/narration.mp3',
         ],
         expectedMermaidBlocks: 0,
     },
@@ -642,6 +685,8 @@ function assertFixtureReport(fixture, report, sourceMarkdown) {
             assert(fs.existsSync(path.join(preparedDeckDirectory, relativeAssetPath)), `${fixture.id}: prepared workspace is missing ${relativeAssetPath}`);
         }
         assert(!fs.existsSync(path.join(preparedDeckDirectory, 'outside.svg')), `${fixture.id}: prepared workspace copied an out-of-scope asset`);
+        assert(!fs.existsSync(path.join(preparedDeckDirectory, 'outside.css')), `${fixture.id}: prepared workspace copied an out-of-scope imported stylesheet`);
+        assertNoRejectedCssReferences(fixture.id, preparedDeckDirectory, 'prepared workspace');
     }
     if (fixture.expectedExportAssets) {
         const outputDirectory = fs.statSync(report.output.path).isDirectory()
@@ -651,11 +696,40 @@ function assertFixtureReport(fixture, report, sourceMarkdown) {
             assert(fs.existsSync(path.join(outputDirectory, relativeAssetPath)), `${fixture.id}: final export is missing ${relativeAssetPath}`);
         }
         assert(!fs.existsSync(path.join(outputDirectory, 'outside.svg')), `${fixture.id}: final export copied an out-of-scope asset`);
+        assert(!fs.existsSync(path.join(outputDirectory, 'outside.css')), `${fixture.id}: final export copied an out-of-scope imported stylesheet`);
+        assertNoRejectedCssReferences(fixture.id, outputDirectory, 'final export');
     }
     if (fixture.expectUltraWideTableSplit) {
         assert(!deckMarkdown.includes('| Capability | Trigger | Boundary | Evidence | Fallback | User surface | Owner | Replay command | Regression risk | Gate |'), `${fixture.id}: ultra-wide table survived unsplit`);
         assert((deckMarkdown.match(/Ultra Wide Contract Matrix/g) || []).length > 1, `${fixture.id}: ultra-wide table did not produce continuation slides`);
     }
+}
+
+function assertNoRejectedCssReferences(fixtureId, directoryPath, label) {
+    for (const cssFilePath of listCssFiles(directoryPath)) {
+        const cssText = fs.readFileSync(cssFilePath, 'utf8');
+        assert(!cssText.includes('outside.css'), `${fixtureId}: ${label} CSS still references outside.css in ${path.relative(directoryPath, cssFilePath)}`);
+        assert(!cssText.includes('outside.svg'), `${fixtureId}: ${label} CSS still references outside.svg in ${path.relative(directoryPath, cssFilePath)}`);
+    }
+}
+
+function listCssFiles(directoryPath) {
+    const files = [];
+    const pending = [directoryPath];
+    while (pending.length > 0) {
+        const current = pending.pop();
+        for (const entry of fs.readdirSync(current, { withFileTypes: true })) {
+            const entryPath = path.join(current, entry.name);
+            if (entry.isDirectory()) {
+                pending.push(entryPath);
+                continue;
+            }
+            if (entry.isFile() && entry.name.endsWith('.css')) {
+                files.push(entryPath);
+            }
+        }
+    }
+    return files;
 }
 
 function assertLowZoomOnlyTargetsMermaid(fixtureId, deckMarkdown) {

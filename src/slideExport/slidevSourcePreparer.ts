@@ -812,6 +812,11 @@ async function tryGenerateDeckWithLlm(
 			onProgress?.('slidev-source', 'LLM response was not a valid Slidev deck; using deterministic deck preparation.');
 			return null;
 		}
+		const mermaidFailure = describeMermaidFencePreservationFailure(sourceMarkdown, deckMarkdown);
+		if (mermaidFailure) {
+			onProgress?.('slidev-source', `LLM deck changed source Mermaid fences (${mermaidFailure}); using deterministic deck preparation.`);
+			return null;
+		}
 		return deckMarkdown.trim() + '\n';
 	} catch (error) {
 		const message = error instanceof Error ? error.message : String(error);
@@ -848,6 +853,11 @@ async function tryGenerateDeckFromOutlineWithLlm(
 		const deckMarkdown = extractMarkdownDeck(response);
 		if (!isSlidevDeckMarkdown(deckMarkdown)) {
 			onProgress?.('slidev-source', 'LLM response was not a valid Slidev deck; using deterministic deck preparation.');
+			return null;
+		}
+		const mermaidFailure = describeMermaidFencePreservationFailure(sourceMarkdown, deckMarkdown);
+		if (mermaidFailure) {
+			onProgress?.('slidev-source', `LLM deck from outline changed source Mermaid fences (${mermaidFailure}); using deterministic deck preparation.`);
 			return null;
 		}
 		return deckMarkdown.trim() + '\n';
@@ -1144,6 +1154,60 @@ function extractMarkdownOutline(response: string): string {
 	return response.trim();
 }
 
+function describeMermaidFencePreservationFailure(sourceMarkdown: string, deckMarkdown: string): string | null {
+	const sourceFences = extractMermaidFenceBlocks(sourceMarkdown);
+	const deckFences = extractMermaidFenceBlocks(deckMarkdown);
+	const changedFenceIndexes: number[] = [];
+	const comparedCount = Math.max(sourceFences.length, deckFences.length);
+	for (let index = 0; index < comparedCount; index++) {
+		if (sourceFences[index] !== deckFences[index]) {
+			changedFenceIndexes.push(index + 1);
+		}
+	}
+	if (changedFenceIndexes.length === 0) {
+		return null;
+	}
+	return [
+		`source=${sourceFences.length}`,
+		`deck=${deckFences.length}`,
+		`changed=${changedFenceIndexes.join(',')}`,
+	].join(', ');
+}
+
+function extractMermaidFenceBlocks(markdown: string): string[] {
+	const lines = markdown.split(/\r?\n/);
+	const fences: string[] = [];
+	let activeFence: { marker: string; lines: string[] } | null = null;
+
+	for (const line of lines) {
+		if (!activeFence) {
+			const openingMatch = line.trim().match(/^(```+|~~~+)\s*mermaid(?:\s+\{[^}]+\})?\s*$/i);
+			if (openingMatch) {
+				activeFence = {
+					marker: openingMatch[1],
+					lines: [line],
+				};
+			}
+			continue;
+		}
+
+		activeFence.lines.push(line);
+		if (isClosingFenceLine(line, activeFence.marker)) {
+			fences.push(activeFence.lines.join('\n'));
+			activeFence = null;
+		}
+	}
+
+	return fences;
+}
+
+function isClosingFenceLine(line: string, openingMarker: string): boolean {
+	const markerCharacter = openingMarker[0];
+	const markerCount = openingMarker.length;
+	const escapedMarker = markerCharacter.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+	return new RegExp(`^${escapedMarker}{${markerCount},}\\s*$`).test(line.trim());
+}
+
 function truncateText(text: string, maxChars: number): string {
 	if (text.length <= maxChars) {
 		return text;
@@ -1269,21 +1333,56 @@ function copyReferencedLocalAssetFilesWithNodeFs(
 	const absoluteSourceDir = path.dirname(absoluteSourcePath);
 	const absoluteTargetDirectory = path.join(vaultRoot, targetDirectoryPath);
 	for (const referencePath of collectLocalAssetReferencesWithDependencies(fs, path, absoluteSourceDir, deckMarkdown)) {
-		const absoluteSourceAsset = path.join(absoluteSourceDir, referencePath);
-		if (!isInsideDirectory(path, absoluteSourceDir, absoluteSourceAsset) || !fs.existsSync(absoluteSourceAsset)) {
-			continue;
+		if (copyLocalSlidevAssetReference(fs, path, absoluteSourceDir, absoluteTargetDirectory, referencePath)) {
+			copiedAssets.push(referencePath);
 		}
-		const stat = fs.statSync?.(absoluteSourceAsset);
-		if (!stat?.isFile?.()) {
-			continue;
-		}
-		const absoluteTargetAsset = path.join(absoluteTargetDirectory, referencePath);
-		fs.mkdirSync?.(path.dirname(absoluteTargetAsset), { recursive: true });
-		fs.cpSync(absoluteSourceAsset, absoluteTargetAsset);
-		copiedAssets.push(referencePath);
 	}
 
 	return copiedAssets;
+}
+
+export function copyLocalSlidevAssetReference(
+	fs: any,
+	path: any,
+	sourceDirectory: string,
+	targetDirectory: string,
+	referencePath: string,
+): boolean {
+	if (!fs?.existsSync || !path?.join || !path?.dirname || !path?.relative || !path?.isAbsolute) {
+		return false;
+	}
+
+	const absoluteSourceAsset = path.join(sourceDirectory, referencePath);
+	if (!isInsideDirectory(path, sourceDirectory, absoluteSourceAsset) || !fs.existsSync(absoluteSourceAsset)) {
+		return false;
+	}
+	const stat = fs.statSync?.(absoluteSourceAsset);
+	if (!stat?.isFile?.()) {
+		return false;
+	}
+
+	const absoluteTargetAsset = path.join(targetDirectory, referencePath);
+	if (!isInsideDirectory(path, targetDirectory, absoluteTargetAsset)) {
+		return false;
+	}
+
+	fs.mkdirSync?.(path.dirname(absoluteTargetAsset), { recursive: true });
+	if (isCssFileReference(referencePath) && fs.readFileSync && fs.writeFileSync) {
+		const cssText = fs.readFileSync(absoluteSourceAsset, 'utf8');
+		const copiedCssText = removeRejectedCssDependencyReferences(path, sourceDirectory, absoluteSourceAsset, cssText);
+		fs.writeFileSync(absoluteTargetAsset, copiedCssText, 'utf8');
+		return true;
+	}
+
+	if (fs.copyFileSync) {
+		fs.copyFileSync(absoluteSourceAsset, absoluteTargetAsset);
+		return true;
+	}
+	if (fs.cpSync) {
+		fs.cpSync(absoluteSourceAsset, absoluteTargetAsset);
+		return true;
+	}
+	return false;
 }
 
 export function collectLocalAssetReferencesWithDependencies(
@@ -1320,7 +1419,7 @@ export function collectLocalAssetReferencesWithDependencies(
 
 		const cssText = fs.readFileSync(absoluteCssPath, 'utf8');
 		const cssDirectory = path.dirname(absoluteCssPath);
-		for (const rawCssReference of extractCssUrlReferences(cssText)) {
+		for (const rawCssReference of extractCssLocalDependencyReferences(cssText)) {
 			const dependencyPath = normalizeCssDependencyReference(path, baseDirectory, cssDirectory, rawCssReference);
 			if (dependencyPath && !seen.has(dependencyPath)) {
 				pending.push(dependencyPath);
@@ -1512,6 +1611,58 @@ function extractCssUrlReferences(value: string): string[] {
 		}
 	}
 	return references;
+}
+
+function extractCssLocalDependencyReferences(cssText: string): string[] {
+	const references = new Set<string>(extractCssUrlReferences(cssText));
+	for (const match of cssText.matchAll(/@import\s+(?:url\(\s*(['"]?)(.*?)\1\s*\)|(['"])(.*?)\3)/gi)) {
+		const importedPath = match[2] || match[4];
+		if (importedPath) {
+			references.add(importedPath);
+		}
+	}
+	return Array.from(references);
+}
+
+function removeRejectedCssDependencyReferences(
+	path: any,
+	baseDirectory: string,
+	absoluteCssPath: string,
+	cssText: string,
+): string {
+	const cssDirectory = path.dirname(absoluteCssPath);
+	return cssText
+		.replace(/@import\s+(?:url\(\s*(['"]?)(.*?)\1\s*\)|(['"])(.*?)\3)\s*[^;]*;?/gi, (match, _urlQuote, urlImport, _quotedQuote, quotedImport) => {
+			const rawReference = urlImport || quotedImport;
+			if (!rawReference) {
+				return match;
+			}
+			if (isExternalOrFragmentCssReference(rawReference)) {
+				return match;
+			}
+			if (normalizeCssDependencyReference(path, baseDirectory, cssDirectory, rawReference)) {
+				return match;
+			}
+			return '/* removed unsupported CSS import */';
+		})
+		.replace(/url\(\s*(['"]?)(.*?)\1\s*\)/gi, (match, _quote, rawReference) => {
+			if (!rawReference || isExternalOrFragmentCssReference(rawReference)) {
+				return match;
+			}
+			if (normalizeCssDependencyReference(path, baseDirectory, cssDirectory, rawReference)) {
+				return match;
+			}
+			return 'url("")';
+		});
+}
+
+function isExternalOrFragmentCssReference(rawReference: string): boolean {
+	const withoutQuery = rawReference.trim().split(/[?#]/, 1)[0];
+	return (
+		!withoutQuery
+		|| withoutQuery.startsWith('#')
+		|| /^[a-z][a-z0-9+.-]*:/i.test(withoutQuery)
+	);
 }
 
 function normalizeLocalAssetReference(rawReference: string): string | null {

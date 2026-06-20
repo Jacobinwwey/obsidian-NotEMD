@@ -57,6 +57,28 @@ function createApp(content: string): any {
     };
 }
 
+function createDeckGenerationProfile() {
+    const reporter = {
+        abortController: new AbortController(),
+        activeTasks: 0,
+        log: jest.fn(),
+        updateStatus: jest.fn(),
+        requestCancel: jest.fn(),
+        clearDisplay: jest.fn(),
+        updateActiveTasks: jest.fn(),
+        get cancelled() {
+            return false;
+        },
+    };
+
+    return {
+        provider: { name: 'Mock', type: 'openai-compatible', apiKey: 'key', baseUrl: 'https://example.test', models: [] } as any,
+        modelName: 'mock-model',
+        settings: {} as any,
+        reporter,
+    };
+}
+
 const config: SlideExportConfig = {
     format: 'html',
     withClicks: false,
@@ -367,15 +389,27 @@ describe('slidevSourcePreparer', () => {
         fs.writeFileSync(path.join(sourceDirectory, 'assets/poster.svg'), '<svg/>', 'utf8');
         fs.writeFileSync(path.join(sourceDirectory, 'assets/small.svg'), '<svg/>', 'utf8');
         fs.writeFileSync(path.join(sourceDirectory, 'assets/large.svg'), '<svg/>', 'utf8');
-        fs.writeFileSync(path.join(sourceDirectory, 'assets/local-theme.css'), [
-            '@font-face { font-family: FixtureTheme; src: url("./theme-font.woff2") format("woff2"); }',
-            '.themed-backdrop { background-image: url("../media/theme-pattern.svg"); }',
-            '.bad-backdrop { background-image: url("../../outside.svg"); }',
-        ].join('\n'), 'utf8');
-        fs.writeFileSync(path.join(sourceDirectory, 'assets/theme-font.woff2'), 'fake font payload', 'utf8');
-        fs.writeFileSync(path.join(sourceDirectory, 'media/clip.mp4'), 'fake video payload', 'utf8');
-        fs.writeFileSync(path.join(sourceDirectory, 'media/theme-pattern.svg'), '<svg/>', 'utf8');
-        fs.writeFileSync(path.join(tempVaultRoot, 'docs/outside.svg'), '<svg/>', 'utf8');
+		fs.writeFileSync(path.join(sourceDirectory, 'assets/local-theme.css'), [
+			'@import "./imported-theme.css";',
+			'@import "https://example.test/remote-theme.css";',
+			'@import "../../outside.css";',
+			'@font-face { font-family: FixtureTheme; src: url("./theme-font.woff2") format("woff2"); }',
+			'.themed-backdrop { background-image: url("../media/theme-pattern.svg"); }',
+			'.remote-backdrop { background-image: url("https://example.test/remote-pattern.svg"); }',
+			'.bad-backdrop { background-image: url("../../outside.svg"); }',
+			'.bad-null { background-image: url("bad\0asset.svg"); }',
+		].join('\n'), 'utf8');
+		fs.writeFileSync(path.join(sourceDirectory, 'assets/imported-theme.css'), [
+			'@font-face { font-family: FixtureImported; src: url("./imported-font.woff2") format("woff2"); }',
+			'.imported-backdrop { background-image: url("../media/imported-pattern.svg"); }',
+		].join('\n'), 'utf8');
+		fs.writeFileSync(path.join(sourceDirectory, 'assets/theme-font.woff2'), 'fake font payload', 'utf8');
+		fs.writeFileSync(path.join(sourceDirectory, 'assets/imported-font.woff2'), 'fake imported font payload', 'utf8');
+		fs.writeFileSync(path.join(sourceDirectory, 'media/clip.mp4'), 'fake video payload', 'utf8');
+		fs.writeFileSync(path.join(sourceDirectory, 'media/theme-pattern.svg'), '<svg/>', 'utf8');
+		fs.writeFileSync(path.join(sourceDirectory, 'media/imported-pattern.svg'), '<svg/>', 'utf8');
+		fs.writeFileSync(path.join(tempVaultRoot, 'docs/outside.svg'), '<svg/>', 'utf8');
+		fs.writeFileSync(path.join(tempVaultRoot, 'docs/outside.css'), 'body{}', 'utf8');
 
         app.vault.adapter.write = jest.fn(async (vaultPath: string, content: string) => {
             const absolutePath = path.join(tempVaultRoot, vaultPath);
@@ -400,14 +434,26 @@ describe('slidevSourcePreparer', () => {
         expect(fs.existsSync(path.join(workspaceRoot, 'assets/slide-background.svg'))).toBe(true);
         expect(fs.existsSync(path.join(workspaceRoot, 'assets/poster.svg'))).toBe(true);
         expect(fs.existsSync(path.join(workspaceRoot, 'assets/small.svg'))).toBe(true);
-        expect(fs.existsSync(path.join(workspaceRoot, 'assets/large.svg'))).toBe(true);
-        expect(fs.existsSync(path.join(workspaceRoot, 'assets/local-theme.css'))).toBe(true);
-        expect(fs.existsSync(path.join(workspaceRoot, 'assets/theme-font.woff2'))).toBe(true);
-        expect(fs.existsSync(path.join(workspaceRoot, 'media/clip.mp4'))).toBe(true);
-        expect(fs.existsSync(path.join(workspaceRoot, 'media/theme-pattern.svg'))).toBe(true);
-        expect(fs.existsSync(path.join(workspaceRoot, 'outside.svg'))).toBe(false);
-        expect(fs.existsSync(path.join(workspaceRoot, 'absolute/poster.svg'))).toBe(false);
-    });
+		expect(fs.existsSync(path.join(workspaceRoot, 'assets/large.svg'))).toBe(true);
+		expect(fs.existsSync(path.join(workspaceRoot, 'assets/local-theme.css'))).toBe(true);
+		expect(fs.existsSync(path.join(workspaceRoot, 'assets/imported-theme.css'))).toBe(true);
+		expect(fs.existsSync(path.join(workspaceRoot, 'assets/theme-font.woff2'))).toBe(true);
+		expect(fs.existsSync(path.join(workspaceRoot, 'assets/imported-font.woff2'))).toBe(true);
+		expect(fs.existsSync(path.join(workspaceRoot, 'media/clip.mp4'))).toBe(true);
+		expect(fs.existsSync(path.join(workspaceRoot, 'media/theme-pattern.svg'))).toBe(true);
+		expect(fs.existsSync(path.join(workspaceRoot, 'media/imported-pattern.svg'))).toBe(true);
+		expect(fs.existsSync(path.join(workspaceRoot, 'outside.svg'))).toBe(false);
+		expect(fs.existsSync(path.join(workspaceRoot, 'outside.css'))).toBe(false);
+		expect(fs.existsSync(path.join(workspaceRoot, 'absolute/poster.svg'))).toBe(false);
+		const copiedThemeCss = fs.readFileSync(path.join(workspaceRoot, 'assets/local-theme.css'), 'utf8');
+		expect(copiedThemeCss).toContain('@import "./imported-theme.css";');
+		expect(copiedThemeCss).toContain('@import "https://example.test/remote-theme.css";');
+		expect(copiedThemeCss).toContain('url("../media/theme-pattern.svg")');
+		expect(copiedThemeCss).toContain('url("https://example.test/remote-pattern.svg")');
+		expect(copiedThemeCss).not.toContain('outside.css');
+		expect(copiedThemeCss).not.toContain('outside.svg');
+		expect(copiedThemeCss).not.toContain('\0');
+	});
 
     test('deterministic conversion does not split inside fenced code blocks', () => {
         const longCode = Array.from({ length: 120 }, (_, index) => `console.log(${index})`).join('\n');
@@ -806,6 +852,142 @@ describe('slidevSourcePreparer', () => {
         );
     });
 
+    test('accepts LLM decks only when source Mermaid fences stay byte-stable', async () => {
+        const skillRoot = '/skills/slidev';
+        process.env.NOTEMD_SLIDEV_SKILL_DIR = skillRoot;
+        const files = new Map([
+            [`${skillRoot}/SKILL.md`, 'Slidev skill instructions'],
+            [`${skillRoot}/references/core-syntax.md`, 'Use --- separators.'],
+        ]);
+        mockSafeRequire.mockImplementation((name: string) => {
+            if (name === 'path') {
+                return {
+                    join: (...parts: string[]) => parts.join('/').replace(/\/+/g, '/'),
+                };
+            }
+            if (name === 'fs') {
+                return {
+                    existsSync: (path: string) => files.has(path) || path === `${skillRoot}/references`,
+                    readFileSync: (path: string) => files.get(path) || '',
+                    readdirSync: (path: string) => path === `${skillRoot}/references`
+                        ? ['core-syntax.md']
+                        : [],
+                };
+            }
+            return null;
+        });
+        mockCallLLM.mockResolvedValue([
+            '---',
+            'theme: default',
+            'title: Architecture',
+            '---',
+            '',
+            '# LLM Diagram',
+            '',
+            '```mermaid',
+            'flowchart TB',
+            '  A --> B',
+            '```',
+        ].join('\n'));
+        const app = createApp([
+            '# Architecture',
+            '',
+            '## Diagram',
+            '',
+            '```mermaid',
+            'flowchart TB',
+            '  A --> B',
+            '```',
+        ].join('\n'));
+
+        await prepareSlidevExportSource(
+            app,
+            createFile('architecture.zh-CN.md'),
+            config,
+            { deckGeneration: createDeckGenerationProfile() },
+            jest.fn()
+        );
+
+        const writtenDeck = (app.vault.adapter.write as jest.Mock).mock.calls[0][1] as string;
+        expect(writtenDeck).toContain('# LLM Diagram');
+        expect(writtenDeck).toContain('```mermaid\nflowchart TB\n  A --> B\n```');
+    });
+
+    test('rejects one-step LLM decks that split or rewrite source Mermaid fences', async () => {
+        const skillRoot = '/skills/slidev';
+        process.env.NOTEMD_SLIDEV_SKILL_DIR = skillRoot;
+        const files = new Map([
+            [`${skillRoot}/SKILL.md`, 'Slidev skill instructions'],
+            [`${skillRoot}/references/core-syntax.md`, 'Use --- separators.'],
+        ]);
+        mockSafeRequire.mockImplementation((name: string) => {
+            if (name === 'path') {
+                return {
+                    join: (...parts: string[]) => parts.join('/').replace(/\/+/g, '/'),
+                };
+            }
+            if (name === 'fs') {
+                return {
+                    existsSync: (path: string) => files.has(path) || path === `${skillRoot}/references`,
+                    readFileSync: (path: string) => files.get(path) || '',
+                    readdirSync: (path: string) => path === `${skillRoot}/references`
+                        ? ['core-syntax.md']
+                        : [],
+                };
+            }
+            return null;
+        });
+        mockCallLLM.mockResolvedValue([
+            '---',
+            'theme: default',
+            'title: Architecture',
+            '---',
+            '',
+            '# Split Diagram',
+            '',
+            '```mermaid',
+            'flowchart TB',
+            '  A --> B',
+            '```',
+            '',
+            '---',
+            '',
+            '```mermaid',
+            'flowchart TB',
+            '  C --> D',
+            '```',
+        ].join('\n'));
+        const sourceMarkdown = [
+            '# Architecture',
+            '',
+            '## Diagram',
+            '',
+            '```mermaid',
+            'flowchart TB',
+            '  A --> B',
+            '  B --> C',
+            '```',
+        ].join('\n');
+        const app = createApp(sourceMarkdown);
+        const onProgress = jest.fn();
+
+        await prepareSlidevExportSource(
+            app,
+            createFile('architecture.zh-CN.md'),
+            config,
+            { deckGeneration: createDeckGenerationProfile() },
+            onProgress
+        );
+
+        const writtenDeck = (app.vault.adapter.write as jest.Mock).mock.calls[0][1] as string;
+        expect(writtenDeck).toContain('```mermaid\nflowchart TB\n  A --> B\n  B --> C\n```');
+        expect(writtenDeck).not.toContain('C --> D');
+        expect(onProgress).toHaveBeenCalledWith(
+            'slidev-source',
+            expect.stringContaining('LLM deck changed source Mermaid fences')
+        );
+    });
+
     test('uses a saved outline as deck-generation guidance during export continuation', async () => {
         const skillRoot = '/skills/slidev';
         process.env.NOTEMD_SLIDEV_SKILL_DIR = skillRoot;
@@ -883,6 +1065,73 @@ describe('slidevSourcePreparer', () => {
         expect(app.vault.adapter.write).toHaveBeenCalledWith(
             'export/_slidev-sources/architecture.zh-CN.slidev.md',
             expect.stringMatching(/^---\ntheme: default/)
+        );
+    });
+
+    test('rejects outline continuation decks that rewrite source Mermaid fences', async () => {
+        const skillRoot = '/skills/slidev';
+        process.env.NOTEMD_SLIDEV_SKILL_DIR = skillRoot;
+        const files = new Map([
+            [`${skillRoot}/SKILL.md`, 'Slidev skill instructions'],
+            [`${skillRoot}/references/core-syntax.md`, 'Use --- separators.'],
+        ]);
+        mockSafeRequire.mockImplementation((name: string) => {
+            if (name === 'path') {
+                return {
+                    join: (...parts: string[]) => parts.join('/').replace(/\/+/g, '/'),
+                };
+            }
+            if (name === 'fs') {
+                return {
+                    existsSync: (path: string) => files.has(path) || path === `${skillRoot}/references`,
+                    readFileSync: (path: string) => files.get(path) || '',
+                    readdirSync: (path: string) => path === `${skillRoot}/references`
+                        ? ['core-syntax.md']
+                        : [],
+                };
+            }
+            return null;
+        });
+        mockCallLLM.mockResolvedValue([
+            '---',
+            'theme: default',
+            'title: Architecture',
+            '---',
+            '',
+            '# Rewritten Diagram',
+            '',
+            '```mermaid',
+            'flowchart LR',
+            '  A --> B',
+            '```',
+        ].join('\n'));
+        const app = createApp([
+            '# Architecture',
+            '',
+            '## Diagram',
+            '',
+            '```mermaid',
+            'flowchart TB',
+            '  A --> B',
+            '```',
+        ].join('\n'));
+        const onProgress = jest.fn();
+
+        await prepareSlidevExportSourceFromOutline(
+            app,
+            createFile('architecture.zh-CN.md'),
+            '# Saved Outline\n\n1. Keep source Mermaid unchanged',
+            config,
+            { deckGeneration: createDeckGenerationProfile() },
+            onProgress
+        );
+
+        const writtenDeck = (app.vault.adapter.write as jest.Mock).mock.calls[0][1] as string;
+        expect(writtenDeck).toContain('```mermaid\nflowchart TB\n  A --> B\n```');
+        expect(writtenDeck).not.toContain('flowchart LR');
+        expect(onProgress).toHaveBeenCalledWith(
+            'slidev-source',
+            expect.stringContaining('LLM deck from outline changed source Mermaid fences')
         );
     });
 });
