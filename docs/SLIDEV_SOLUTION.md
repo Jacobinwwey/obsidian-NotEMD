@@ -157,7 +157,7 @@ The current render-feedback loop is now:
    - simple heading + paragraph/list slides
    - Markdown tables, including row-split and width-driven column decomposition
    - pathological width-heavy and long-cell tables through deterministic record-list fallback
-   - non-Mermaid fenced code blocks, with TypeScript/JavaScript top-level tokenizer chunking before generic semantic-block, blank-line, or line-budget fallback
+   - non-Mermaid fenced code blocks, with TypeScript/JavaScript/Python/Rust top-level tokenizer chunking before generic semantic-block, blank-line, or line-budget fallback
    - generic slot-marked layouts, including explicit `::default::`, supported built-in slot layouts, and custom named slots when the slot content is structurally patchable
    - unique component-heavy slot zones through local `<Transform :scale="...">` wrapping when structural splitting is unavailable
    - first-slide deck headmatter content when structural splitting is possible

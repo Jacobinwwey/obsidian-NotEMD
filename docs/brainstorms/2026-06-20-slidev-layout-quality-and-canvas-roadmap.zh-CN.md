@@ -3,7 +3,7 @@ date: 2026-06-20
 last_updated: 2026-06-20
 topic: slidev-layout-quality-and-canvas-roadmap
 canonical: true
-status: js-ts-code-tokenizer-and-mermaid-preservation-guarded
+status: python-rust-code-tokenizer-implemented
 ---
 
 # Slidev 布局质量与画布规划路线
@@ -26,12 +26,13 @@ status: js-ts-code-tokenizer-and-mermaid-preservation-guarded
 
 1. 分支：`main`
 2. 远端：`origin/main`
-3. 本批次实现内容：rendered quality gate + clean-room `SlideLayoutPlan` 第一切片 + Mermaid 源图保持 fit 审计 + JS/TS tokenizer + Mermaid 不拆图回归契约
+3. 本批次实现内容：rendered quality gate + clean-room `SlideLayoutPlan` 第一切片 + Mermaid 源图保持 fit 审计 + JS/TS/Python/Rust tokenizer + Mermaid 不拆图回归契约
 4. 真实源文件：`docs/architecture.zh-CN.md`
 5. 本批次真实导出证据包：`/home/jacob/slidev-export-review/2026-06-20-quality/`
 6. 本批次成功输出归档：`/home/jacob/slidev-export-review/2026-06-20-quality/preserve-mermaid-success-export-final/`
 7. 局部 transform 字号感知验收包：`/home/jacob/slidev-export-review/2026-06-20-local-transform-font/`
 8. JS/TS code tokenizer 验收包：`/home/jacob/slidev-export-review/2026-06-20-js-ts-code-tokenizer/`
+9. Python/Rust code tokenizer 验收包：`/home/jacob/slidev-export-review/2026-06-20-python-rust-code-tokenizer/`
 
 当前已落地事实：
 
@@ -46,7 +47,8 @@ status: js-ts-code-tokenizer-and-mermaid-preservation-guarded
 9. source preparation 已新增 clean-room `SlideLayoutPlan` 预算，并把 deterministic layout budget 接入非大纲、大纲继续导出与 outline prompt；
 10. `architecture.zh-CN.md` strict native standalone rerun 已通过：`slideCount = 29`，源文档与导出 deck 均为 3 个 Mermaid block，hard overflow / unreadable scale / low effective font / quality margin warning / low utilization 均为零；
 11. `slidevLayoutAudit` 单测新增 Mermaid source-preservation 回归：即使误收到 code structural patch，也不会把一个 Mermaid fence 拆成多个 fence；
-12. 当前生成产物可被 Git 看到，用于本地视觉检查，但不应提交进 `main`。
+12. Python/Rust code fence 现在也会先走轻量 top-level tokenizer，保持 import/use 组、decorator/attribute 与顶层 class/function/impl/module item 完整；
+13. 当前生成产物可被 Git 看到，用于本地视觉检查，但不应提交进 `main`。
 
 当前未完成事实：
 
@@ -234,6 +236,32 @@ status: js-ts-code-tokenizer-and-mermaid-preservation-guarded
 14. `mermaidManualReviewCount = 1`
 15. source Mermaid block count = 3，exported Mermaid block count = 3
 
+本切片新增 Python/Rust code tokenizer 后的真实 strict standalone rerun 证据包在：
+
+```text
+/home/jacob/slidev-export-review/2026-06-20-python-rust-code-tokenizer/architecture-strict-python-rust-code-tokenizer-report.json
+/home/jacob/slidev-export-review/2026-06-20-python-rust-code-tokenizer/architecture.zh-CN.python-rust-code-tokenizer.slidev.md
+/home/jacob/slidev-export-review/2026-06-20-python-rust-code-tokenizer/export/architecture.zh-CN-slides/index-standalone.html
+```
+
+该 rerun 的关键结果：
+
+1. `ok = true`
+2. `actualMode = "standalone"`
+3. `requiresLocalServer = false`
+4. `standaloneGate.passed = true`
+5. `slidev = "52.16.0 (/home/jacob/slidev/packages/slidev/bin/slidev.mjs)"`
+6. `skillRootPath = "/home/jacob/slidev/skills/slidev"`
+7. `skillReferenceCount = 52`
+8. `slideCount = 29`
+9. `hardOverflowCount = 0`
+10. `lowEffectiveFontCount = 0`
+11. `qualityMarginWarningCount = 0`
+12. `mermaidSlideCount = 3`
+13. `mermaidFitReviewCount = 3`
+14. `mermaidManualReviewCount = 1`
+15. source Mermaid block count = 3，exported Mermaid block count = 3
+
 ## 6. `ref/infinite-canvas` 的可借鉴点
 
 `ref/infinite-canvas` 的直接实现不能复制进 NoteMD：它是 AGPL-3.0，NoteMD 是 MIT。可借鉴的是 clean-room 设计思想：
@@ -379,7 +407,7 @@ interface SlideLayoutPlan {
 
 目标：避免“没溢出但不可读”的大表和代码块。
 
-实现状态：低 table/code effective font 现在分别触发 `split-table` 与 `reduce-code`，在没有 hard overflow 时也会进入结构化拆分；layout budget 会提前把宽表、长表和长代码标为 pre-split candidates。已补上三个更具体的质量策略：长 table cell 会转成 record-list，不继续挤压表格；code fence 会先按语义块拆分，尽量保留注释+函数/作用域块，失败时才退回空行/行预算；TypeScript/JavaScript fence 现在会先走轻量 top-level tokenizer，保持连续 import 组与顶层 type/function/class/const 声明完整。尚未落地的是完整 AST 级拆分，以及 Python/Rust 等更多语言的专用 splitter。
+实现状态：低 table/code effective font 现在分别触发 `split-table` 与 `reduce-code`，在没有 hard overflow 时也会进入结构化拆分；layout budget 会提前把宽表、长表和长代码标为 pre-split candidates。已补上四个更具体的质量策略：长 table cell 会转成 record-list，不继续挤压表格；code fence 会先按语义块拆分，尽量保留注释+函数/作用域块，失败时才退回空行/行预算；TypeScript/JavaScript fence 现在会先走轻量 top-level tokenizer，保持连续 import 组与顶层 type/function/class/const 声明完整；Python/Rust fence 也会先走轻量 top-level tokenizer，保持 import/use 组、decorator/attribute 与顶层 class/function/impl/module item 完整。尚未落地的是完整 AST 级拆分，以及更多语言的专用 splitter。
 
 表格策略：
 
@@ -391,9 +419,11 @@ interface SlideLayoutPlan {
 代码策略：
 
 1. TypeScript/JavaScript fence 优先按 top-level tokenizer 拆，连续 import 组和顶层声明不能被行预算切开；
-2. 超长 code fence 优先按语义块拆，包括注释前缀、括号/缩进作用域与续行边界；
-3. 宽代码优先解释/摘录关键片段；
-4. 代码字号低于阈值时不要继续 shrink。
+2. Python fence 优先按 import 组、decorator、class/function 和顶层缩进块拆；
+3. Rust fence 优先按 use 组、attribute、struct/enum/trait/impl/fn/mod/test module 等顶层 item 拆；
+4. 超长 code fence 继续退回通用语义块，包括注释前缀、括号/缩进作用域与续行边界；
+5. 宽代码优先解释/摘录关键片段；
+6. 代码字号低于阈值时不要继续 shrink。
 
 ### Stage 5：验收 fixture 扩展
 
@@ -418,7 +448,7 @@ interface SlideLayoutPlan {
 
 实现状态：已新增/扩展 unit fixtures：
 
-1. `src/tests/slidevLayoutAudit.test.ts` 覆盖 low effective font measurement、Mermaid 源图保持、Mermaid fit/manual-review 统计、table/code 质量 finding 驱动结构拆分、长 cell record-list fallback、代码语义块拆分、TypeScript import 组和顶层声明 tokenizer、summary 新字段；
+1. `src/tests/slidevLayoutAudit.test.ts` 覆盖 low effective font measurement、Mermaid 源图保持、Mermaid fit/manual-review 统计、table/code 质量 finding 驱动结构拆分、长 cell record-list fallback、代码语义块拆分、TypeScript import 组和顶层声明 tokenizer、Python import/decorator/top-level block tokenizer、Rust use/attribute/top-level item tokenizer、summary 新字段；
 2. `src/tests/slidevLayoutPlan.test.ts` 覆盖 clean-room layout budget 对 Mermaid 的 `preserve-source-fit` 与 table/code 的 pre-split 判断；
 3. `src/tests/slidevSourcePreparer.test.ts` 覆盖 deterministic outline 与 LLM prompt 都带 layout budget；
 4. `src/tests/slidevLayoutWorkflow.test.ts` 更新 summary schema，避免 verifier mock 停留在旧字段；
@@ -458,12 +488,13 @@ interface SlideLayoutPlan {
 6. Stage 4 第二切片：长 table cell 转 record-list，code fence 优先按语义块拆分，避免行预算切断函数体。
 7. Stage 1 第二切片：effective font measurement 已感知局部 CSS transform / scale / zoom，避免 `<Transform>` 包裹内容被误判为仍有原始字号。
 8. Stage 4 第三切片：TypeScript/JavaScript code fence 先走 top-level tokenizer，连续 import 组和顶层 type/function/class/const 声明保持完整，再进入 chunk 分配。
+9. Stage 4 第四切片：Python/Rust code fence 先走 top-level tokenizer，import/use 组、decorator/attribute 与顶层 class/function/impl/module item 保持完整，再进入 chunk 分配。
 
 建议下一批实现顺序：
 
 1. 扩展真实 fixture 包，把“保留 Mermaid 源图导致低 zoom 可接受”和“应人工复核”的场景分开，避免 gate 过松或误杀；
 2. 针对真实长表 fixture 增加 record-list 视觉验收，而不是只看 Markdown 结构；
-3. 继续增强 Python/Rust 等语言专用 splitter，至少保留缩进/作用域块；
+3. 继续增强更多语言专用 splitter；Python/Rust 当前是 parser-light，不是完整 AST；
 4. 评估是否把 source-preserved Mermaid fit review 抽成通用 Slidev skill PR 建议。
 
 不要先做：

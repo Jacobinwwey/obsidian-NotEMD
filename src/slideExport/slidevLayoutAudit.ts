@@ -2187,6 +2187,16 @@ function splitCodeFenceIntoChunks(codeBlock: FencedBlock, targetChunkCount: numb
 		return javascriptLikeChunks;
 	}
 
+	const pythonChunks = splitPythonCodeFenceIntoChunks(codeBlock, targetChunkCount);
+	if (pythonChunks) {
+		return pythonChunks;
+	}
+
+	const rustChunks = splitRustCodeFenceIntoChunks(codeBlock, targetChunkCount);
+	if (rustChunks) {
+		return rustChunks;
+	}
+
 	return splitGenericCodeFenceIntoChunks(codeBlock.bodyLines, targetChunkCount);
 }
 
@@ -2196,6 +2206,34 @@ function splitJavaScriptLikeCodeFenceIntoChunks(codeBlock: FencedBlock, targetCh
 	}
 
 	const topLevelBlocks = collectJavaScriptLikeTopLevelBlocks(codeBlock.bodyLines);
+	if (topLevelBlocks.length < 2) {
+		return null;
+	}
+
+	const chunkedTopLevelBlocks = chunkLineBlocks(topLevelBlocks, Math.max(2, Math.min(targetChunkCount, topLevelBlocks.length)));
+	return chunkedTopLevelBlocks.length >= 2 ? chunkedTopLevelBlocks : null;
+}
+
+function splitPythonCodeFenceIntoChunks(codeBlock: FencedBlock, targetChunkCount: number): string[][] | null {
+	if (!isPythonCodeFence(codeBlock.opener)) {
+		return null;
+	}
+
+	const topLevelBlocks = collectPythonTopLevelBlocks(codeBlock.bodyLines);
+	if (topLevelBlocks.length < 2) {
+		return null;
+	}
+
+	const chunkedTopLevelBlocks = chunkLineBlocks(topLevelBlocks, Math.max(2, Math.min(targetChunkCount, topLevelBlocks.length)));
+	return chunkedTopLevelBlocks.length >= 2 ? chunkedTopLevelBlocks : null;
+}
+
+function splitRustCodeFenceIntoChunks(codeBlock: FencedBlock, targetChunkCount: number): string[][] | null {
+	if (!isRustCodeFence(codeBlock.opener)) {
+		return null;
+	}
+
+	const topLevelBlocks = collectRustTopLevelBlocks(codeBlock.bodyLines);
 	if (topLevelBlocks.length < 2) {
 		return null;
 	}
@@ -2227,6 +2265,16 @@ function splitGenericCodeFenceIntoChunks(bodyLines: string[], targetChunkCount: 
 function isJavaScriptLikeCodeFence(opener: string): boolean {
 	const language = readCodeFenceLanguage(opener);
 	return ['js', 'jsx', 'javascript', 'mjs', 'cjs', 'node', 'ts', 'tsx', 'typescript'].includes(language);
+}
+
+function isPythonCodeFence(opener: string): boolean {
+	const language = readCodeFenceLanguage(opener);
+	return ['py', 'py3', 'python', 'python3'].includes(language);
+}
+
+function isRustCodeFence(opener: string): boolean {
+	const language = readCodeFenceLanguage(opener);
+	return ['rs', 'rust'].includes(language);
 }
 
 function readCodeFenceLanguage(opener: string): string {
@@ -2449,6 +2497,138 @@ function collectJavaScriptLikeTopLevelBlocks(lines: string[]): string[][] {
 	return blocks.filter(block => block.some(hasSubstantiveLine));
 }
 
+function collectPythonTopLevelBlocks(lines: string[]): string[][] {
+	const trimmedLines = trimOuterBlankLines(lines);
+	const blocks: string[][] = [];
+	let pendingLeadLines: string[] = [];
+	let index = 0;
+
+	while (index < trimmedLines.length) {
+		const line = trimmedLines[index];
+		const trimmed = line.trim();
+		if (trimmed.length === 0) {
+			index += 1;
+			continue;
+		}
+		if (isPythonLeadLine(trimmed)) {
+			pendingLeadLines.push(line);
+			index += 1;
+			continue;
+		}
+
+		if (startsPythonImport(trimmed)) {
+			const importGroup = [...pendingLeadLines];
+			pendingLeadLines = [];
+			while (index < trimmedLines.length) {
+				const nextTrimmed = trimmedLines[index].trim();
+				if (nextTrimmed.length === 0) {
+					index += 1;
+					if (importGroup.some(hasSubstantiveLine)) {
+						break;
+					}
+					continue;
+				}
+				if (isPythonCommentLine(nextTrimmed)) {
+					importGroup.push(trimmedLines[index]);
+					index += 1;
+					continue;
+				}
+				if (!startsPythonImport(nextTrimmed)) {
+					break;
+				}
+				const statement = consumePythonTopLevelBlock(trimmedLines, index);
+				importGroup.push(...statement.lines);
+				index = statement.nextIndex;
+			}
+			const normalizedImportGroup = trimOuterBlankLines(importGroup);
+			if (normalizedImportGroup.some(hasSubstantiveLine)) {
+				blocks.push(normalizedImportGroup);
+			}
+			continue;
+		}
+
+		const statement = consumePythonTopLevelBlock(trimmedLines, index);
+		const block = trimOuterBlankLines([...pendingLeadLines, ...statement.lines]);
+		pendingLeadLines = [];
+		index = statement.nextIndex;
+		if (block.some(hasSubstantiveLine)) {
+			blocks.push(block);
+		}
+	}
+
+	if (pendingLeadLines.some(hasSubstantiveLine)) {
+		blocks.push(trimOuterBlankLines(pendingLeadLines));
+	}
+
+	return blocks.filter(block => block.some(hasSubstantiveLine));
+}
+
+function collectRustTopLevelBlocks(lines: string[]): string[][] {
+	const trimmedLines = trimOuterBlankLines(lines);
+	const blocks: string[][] = [];
+	let pendingLeadLines: string[] = [];
+	let index = 0;
+
+	while (index < trimmedLines.length) {
+		const line = trimmedLines[index];
+		const trimmed = line.trim();
+		if (trimmed.length === 0) {
+			index += 1;
+			continue;
+		}
+		if (isRustLeadLine(trimmed)) {
+			pendingLeadLines.push(line);
+			index += 1;
+			continue;
+		}
+
+		if (startsRustImport(trimmed)) {
+			const importGroup = [...pendingLeadLines];
+			pendingLeadLines = [];
+			while (index < trimmedLines.length) {
+				const nextTrimmed = trimmedLines[index].trim();
+				if (nextTrimmed.length === 0) {
+					index += 1;
+					if (importGroup.some(hasSubstantiveLine)) {
+						break;
+					}
+					continue;
+				}
+				if (isRustCommentLine(nextTrimmed)) {
+					importGroup.push(trimmedLines[index]);
+					index += 1;
+					continue;
+				}
+				if (!startsRustImport(nextTrimmed)) {
+					break;
+				}
+				const statement = consumeRustTopLevelBlock(trimmedLines, index);
+				importGroup.push(...statement.lines);
+				index = statement.nextIndex;
+			}
+			const normalizedImportGroup = trimOuterBlankLines(importGroup);
+			if (normalizedImportGroup.some(hasSubstantiveLine)) {
+				blocks.push(normalizedImportGroup);
+			}
+			continue;
+		}
+
+		const statement = consumeRustTopLevelBlock(trimmedLines, index);
+		const block = trimOuterBlankLines([...pendingLeadLines, ...statement.lines]);
+		pendingLeadLines = [];
+		index = statement.nextIndex;
+		if (block.some(hasSubstantiveLine)) {
+			blocks.push(block);
+		}
+	}
+
+	if (pendingLeadLines.some(hasSubstantiveLine)) {
+		blocks.push(trimOuterBlankLines(pendingLeadLines));
+	}
+
+	return blocks.filter(block => block.some(hasSubstantiveLine));
+}
+
 function collectCodeFenceSegments(lines: string[]): string[][] {
 	const segments: string[][] = [];
 	let current: string[] = [];
@@ -2531,6 +2711,60 @@ function consumeJavaScriptLikeTopLevelStatement(lines: string[], startIndex: num
 		const previousSubstantiveLine = findLastSubstantiveLine(block);
 		const nextSubstantiveLine = findNextSubstantiveLine(lines, index);
 		if (isJavaScriptLikeStatementBoundary(previousSubstantiveLine, nextSubstantiveLine)) {
+			break;
+		}
+	}
+
+	return { lines: trimOuterBlankLines(block), nextIndex: index };
+}
+
+function consumePythonTopLevelBlock(lines: string[], startIndex: number): { lines: string[]; nextIndex: number } {
+	const block: string[] = [];
+	const blockStartIndent = countLeadingWhitespace(lines[startIndex] ?? '');
+	let delimiterDepth = 0;
+	let index = startIndex;
+
+	while (index < lines.length) {
+		const line = lines[index];
+		block.push(line);
+		delimiterDepth += measureCodeDelimiterDelta(line);
+		index += 1;
+
+		if (delimiterDepth > 0 || codeLineContinues(line)) {
+			continue;
+		}
+
+		const nextSubstantiveLine = findNextSubstantiveLine(lines, index);
+		if (!nextSubstantiveLine) {
+			break;
+		}
+		const nextIndent = countLeadingWhitespace(nextSubstantiveLine);
+		if (nextIndent <= blockStartIndent) {
+			break;
+		}
+	}
+
+	return { lines: trimOuterBlankLines(block), nextIndex: index };
+}
+
+function consumeRustTopLevelBlock(lines: string[], startIndex: number): { lines: string[]; nextIndex: number } {
+	const block: string[] = [];
+	let delimiterDepth = 0;
+	let index = startIndex;
+
+	while (index < lines.length) {
+		const line = lines[index];
+		block.push(line);
+		delimiterDepth += measureCodeDelimiterDelta(line);
+		index += 1;
+
+		if (delimiterDepth > 0 || codeLineContinues(line)) {
+			continue;
+		}
+
+		const previousSubstantiveLine = findLastSubstantiveLine(block);
+		const nextSubstantiveLine = findNextSubstantiveLine(lines, index);
+		if (isRustTopLevelBoundary(previousSubstantiveLine, nextSubstantiveLine)) {
 			break;
 		}
 	}
@@ -2626,6 +2860,48 @@ function startsJavaScriptLikeTopLevel(trimmedLine: string): boolean {
 	return /^(?:export\s+)?(?:(?:declare|abstract|async|default)\s+)*(?:class|function|interface|type|enum|namespace|module|const|let|var)\b/.test(trimmedLine)
 		|| /^export\s+(?:type\s+)?\{/.test(trimmedLine)
 		|| startsJavaScriptLikeImport(trimmedLine);
+}
+
+function isPythonLeadLine(trimmedLine: string): boolean {
+	return isPythonCommentLine(trimmedLine) || /^@/.test(trimmedLine);
+}
+
+function isPythonCommentLine(trimmedLine: string): boolean {
+	return /^#/.test(trimmedLine);
+}
+
+function startsPythonImport(trimmedLine: string): boolean {
+	return /^(?:from\s+\S+\s+import\b|import\s+)/.test(trimmedLine);
+}
+
+function isRustTopLevelBoundary(previousLine: string, nextLine: string | null): boolean {
+	if (!nextLine) {
+		return true;
+	}
+	const previousTrimmed = previousLine.trim();
+	const nextTrimmed = nextLine.trim();
+	if (isRustLeadLine(nextTrimmed) || startsRustTopLevel(nextTrimmed)) {
+		return true;
+	}
+	return /[;}]\s*$/.test(previousTrimmed);
+}
+
+function isRustLeadLine(trimmedLine: string): boolean {
+	return isRustCommentLine(trimmedLine) || /^#\[/.test(trimmedLine);
+}
+
+function isRustCommentLine(trimmedLine: string): boolean {
+	return /^(?:\/\/|\/\*|\*|\*\/)/.test(trimmedLine);
+}
+
+function startsRustImport(trimmedLine: string): boolean {
+	return /^(?:pub\s+)?use\s+/.test(trimmedLine) || /^extern\s+crate\s+/.test(trimmedLine);
+}
+
+function startsRustTopLevel(trimmedLine: string): boolean {
+	return startsRustImport(trimmedLine)
+		|| /^(?:pub(?:\([^)]*\))?\s+)?(?:async\s+)?(?:unsafe\s+)?(?:extern\s+"[^"]+"\s+)?(?:fn|struct|enum|trait|impl|mod|const|static|type|union)\b/.test(trimmedLine)
+		|| /^macro_rules!/.test(trimmedLine);
 }
 
 function shouldStartNextCodeSemanticBlock(

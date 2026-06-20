@@ -168,7 +168,7 @@ Mermaid 的规则比 table/code/prose 更严格：用户提供的一个 Mermaid 
 
 - 简单标题、段落、列表 slide
 - Markdown 表格拆行、拆列，病态宽表与长 cell 表转 record-list fallback
-- 非 Mermaid 代码块中，TypeScript/JavaScript 优先按 top-level tokenizer 分块，再退回通用语义块、空行或行数预算
+- 非 Mermaid 代码块中，TypeScript/JavaScript/Python/Rust 优先按 top-level tokenizer 分块，再退回通用语义块、空行或行数预算
 - slot-marked layout 与部分 component-heavy slot zone
 - effective font measurement 已感知局部 CSS `transform` / independent `scale` / CSS `zoom`，被局部 `<Transform>` 缩放的内容按真实渲染字号进入质量门
 

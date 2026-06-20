@@ -1041,6 +1041,166 @@ describe('slidevLayoutAudit', () => {
 		expect(patched.deckMarkdown).not.toContain('zoom: 0.08');
 	});
 
+	test('keeps Python imports, decorators, and top-level blocks intact when splitting dense fences', () => {
+		const audit: SlidevLayoutAudit = {
+			slide: 2,
+			safeRect: { left: 51.2, top: 43.2, right: 1228.8, bottom: 676.8, width: 1177.6, height: 633.6 },
+			contentBounds: { left: 48, top: 52, right: 1234, bottom: 920, width: 1186, height: 868 },
+			pageScale: 0.08,
+			codeMinFontPx: 7.4,
+			elementKinds: ['code'],
+			findings: [
+				{
+					kind: 'low-effective-font',
+					target: 'code',
+					message: 'Code font is too small',
+					recommendedPatch: 'reduce-code',
+					recommendedScale: null,
+					effectiveFontPx: 7.4,
+					fontThresholdPx: 10,
+				},
+			],
+		};
+		const importLines = [
+			'from dataclasses import dataclass',
+			'from pathlib import Path',
+			'import json',
+			'import typing as t',
+		];
+		const deck = [
+			'---',
+			'theme: default',
+			'---',
+			'',
+			'# Intro',
+			'',
+			'---',
+			'zoom: 0.08',
+			'---',
+			'',
+			'## Python Split',
+			'',
+			'```python',
+			...importLines,
+			'@dataclass',
+			'class ExportJob:',
+			'    source: Path',
+			'    output: Path',
+			'',
+			'    def label(self) -> str:',
+			'        return self.source.stem',
+			'async def load_export_job(path: Path) -> ExportJob:',
+			'    payload = json.loads(path.read_text())',
+			'    return ExportJob(',
+			'        source=Path(payload["source"]),',
+			'        output=Path(payload["output"]),',
+			'    )',
+			'def render_export(job: ExportJob) -> dict[str, str]:',
+			'    if not job.source.exists():',
+			'        raise FileNotFoundError(job.source)',
+			'    return {"label": job.label(), "output": str(job.output)}',
+			'if __name__ == "__main__":',
+			'    print(render_export(ExportJob(Path("deck.md"), Path("out"))))',
+			'```',
+		].join('\n');
+
+		const patched = patchDeckWithLayoutAudit(deck, [audit]);
+
+		expect(patched.changed).toBe(true);
+		expect(patched.blockedSlides).toEqual([]);
+		expect(countSlideDeckSlides(patched.deckMarkdown)).toBe(5);
+		expect((patched.deckMarkdown.match(/```python/g) || []).length).toBe(4);
+		expect(patched.deckMarkdown).toContain(importLines.join('\n'));
+		expect(patched.deckMarkdown).toMatch(/@dataclass\nclass ExportJob:[\s\S]*?return self\.source\.stem/);
+		expect(patched.deckMarkdown).toMatch(/async def load_export_job\(path: Path\) -> ExportJob:[\s\S]*?output=Path\(payload\["output"\]\),\n    \)/);
+		expect(patched.deckMarkdown).toMatch(/def render_export\(job: ExportJob\) -> dict\[str, str\]:[\s\S]*?return \{"label": job\.label\(\), "output": str\(job\.output\)\}/);
+		expect(patched.deckMarkdown).toMatch(/if __name__ == "__main__":[\s\S]*?print\(render_export/);
+		expect(patched.deckMarkdown).not.toContain('zoom: 0.08');
+	});
+
+	test('keeps Rust use groups, attributes, and top-level items intact when splitting dense fences', () => {
+		const audit: SlidevLayoutAudit = {
+			slide: 2,
+			safeRect: { left: 51.2, top: 43.2, right: 1228.8, bottom: 676.8, width: 1177.6, height: 633.6 },
+			contentBounds: { left: 48, top: 52, right: 1234, bottom: 920, width: 1186, height: 868 },
+			pageScale: 0.08,
+			codeMinFontPx: 7.4,
+			elementKinds: ['code'],
+			findings: [
+				{
+					kind: 'low-effective-font',
+					target: 'code',
+					message: 'Code font is too small',
+					recommendedPatch: 'reduce-code',
+					recommendedScale: null,
+					effectiveFontPx: 7.4,
+					fontThresholdPx: 10,
+				},
+			],
+		};
+		const useLines = [
+			'use std::collections::BTreeMap;',
+			'use std::path::{Path, PathBuf};',
+			'use crate::layout::SlideLayoutPlan;',
+			'use crate::render::RenderReport;',
+		];
+		const deck = [
+			'---',
+			'theme: default',
+			'---',
+			'',
+			'# Intro',
+			'',
+			'---',
+			'zoom: 0.08',
+			'---',
+			'',
+			'## Rust Split',
+			'',
+			'```rust',
+			...useLines,
+			'#[derive(Debug, Clone)]',
+			'pub struct ExportJob {',
+			'    pub source: PathBuf,',
+			'    pub metadata: BTreeMap<String, String>,',
+			'}',
+			'impl ExportJob {',
+			'    pub fn from_path(source: &Path) -> Self {',
+			'        Self { source: source.into(), metadata: BTreeMap::new() }',
+			'    }',
+			'    pub fn label(&self) -> String {',
+			'        self.source.display().to_string()',
+			'    }',
+			'}',
+			'pub fn render_export(plan: &SlideLayoutPlan, job: &ExportJob) -> RenderReport {',
+			'    let label = job.label();',
+			'    RenderReport::new(plan.source_title.clone(), label)',
+			'}',
+			'#[cfg(test)]',
+			'mod tests {',
+			'    use super::*;',
+			'    #[test]',
+			'    fn labels_export_jobs() {',
+			'        assert!(ExportJob::from_path(Path::new("deck.md")).label().contains("deck.md"));',
+			'    }',
+			'}',
+			'```',
+		].join('\n');
+
+		const patched = patchDeckWithLayoutAudit(deck, [audit]);
+
+		expect(patched.changed).toBe(true);
+		expect(patched.blockedSlides).toEqual([]);
+		expect(countSlideDeckSlides(patched.deckMarkdown)).toBe(5);
+		expect((patched.deckMarkdown.match(/```rust/g) || []).length).toBe(4);
+		expect(patched.deckMarkdown).toContain(useLines.join('\n'));
+		expect(patched.deckMarkdown).toMatch(/#\[derive\(Debug, Clone\)\]\npub struct ExportJob \{[\s\S]*?metadata: BTreeMap<String, String>,\n\}/);
+		expect(patched.deckMarkdown).toMatch(/impl ExportJob \{[\s\S]*?self\.source\.display\(\)\.to_string\(\)\n    \}\n\}/);
+		expect(patched.deckMarkdown).toMatch(/pub fn render_export\(plan: &SlideLayoutPlan, job: &ExportJob\) -> RenderReport \{[\s\S]*?RenderReport::new\(plan\.source_title\.clone\(\), label\)\n\}/);
+		expect(patched.deckMarkdown).toMatch(/#\[cfg\(test\)\]\nmod tests \{[\s\S]*?labels_export_jobs/);
+		expect(patched.deckMarkdown).not.toContain('zoom: 0.08');
+	});
+
 	test('splits code fences on low effective code font without waiting for scroll overflow', () => {
 		const audit: SlidevLayoutAudit = {
 			slide: 2,
