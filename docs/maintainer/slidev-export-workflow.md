@@ -98,6 +98,7 @@ Treat the command as passing only when the final JSON report has:
 14. for strict native standalone closure, `htmlExport.requiresLocalServer: false`
 15. for strict native standalone closure, `htmlExport.standaloneAttempt.loaderGaps: []`
 16. for strict native standalone closure, `standaloneGate.passed: true`
+17. when the source contains Mermaid fences, the exported deck preserves the same Mermaid block count unless a human explicitly edits the source.
 
 If any check fails, fix the NoteMD workflow before relying on the exported files.
 
@@ -115,7 +116,7 @@ The current implementation now includes a shared render-feedback gate after deck
 
 Use `ref/infinite-canvas` only as a clean-room design reference. The useful idea is not to embed an infinite canvas in Slidev export; it is to model generated slide elements as measurable world rectangles, compute union bounds, derive a fit camera for the fixed Slidev safe rectangle, and split content when fitting would make it unreadable. Do not copy AGPL-3.0 implementation code into this MIT project.
 
-The next report shape should not only record hard overflow. It should separate the hard gate from the quality gate and add fields equivalent to:
+The report shape now separates the hard gate from the quality gate. It records:
 
 ```text
 layoutAudit[].slide
@@ -128,6 +129,19 @@ layoutAudit[].tableBodyMinFontPx
 layoutAudit[].codeMinFontPx
 layoutAudit[].qualityMargins
 layoutAudit[].contentAreaRatio
+layoutAudit[].mermaidFit.status
+layoutAudit[].mermaidFit.reason
+layoutAudit[].mermaidFit.pageScale
+layoutAudit[].mermaidFit.fitScale
+layoutAudit[].mermaidFit.nextZoom
+layoutAudit[].mermaidFit.diagramBounds
+layoutAudit[].mermaidFit.effectiveMinFontPx
+layoutAudit[].mermaidFit.svgTextMinFontPx
+layoutAudit[].mermaidFit.qualityMargins
+layoutAudit[].mermaidFit.contentAreaRatio
+layoutAudit[].mermaidFit.lowZoom
+layoutAudit[].mermaidFit.lowFont
+layoutAudit[].mermaidFit.tightMargin
 layoutAudit[].recommendedPatch
 layoutAuditSummary.hardOverflowCount
 layoutAuditSummary.unreadableScaleCount
@@ -136,8 +150,14 @@ layoutAuditSummary.qualityMarginWarningCount
 layoutAuditSummary.lowContentUtilizationCount
 layoutAuditSummary.preSplitCount
 layoutAuditSummary.postPatchCount
+layoutAuditSummary.mermaidSlideCount
+layoutAuditSummary.mermaidFitReviewCount
+layoutAuditSummary.mermaidLowZoomCount
+layoutAuditSummary.mermaidManualReviewCount
 layoutAuditSummary.retryCount
 ```
+
+For Mermaid, `mermaidFit.status` is source-preserving evidence, not permission to rewrite a user diagram. `fits` means the preserved diagram satisfies the current rendered thresholds. `source-preserved-fit-review` means the deck remains structurally valid but should be visually reviewed, usually because zoom is low or margins are tight. `manual-review` means the preserved source diagram and presentation readability are in tension; the workflow must surface that fact instead of silently splitting the diagram.
 
 The detailed implementation direction is tracked in `docs/brainstorms/2026-06-20-slidev-layout-quality-and-canvas-roadmap.zh-CN.md`. That route keeps the current render-feedback loop as the final fact gate, adds a clean-room layout planning IR before generation, and translates the world-rect / viewport-fit ideas from `ref/infinite-canvas` into NoteMD-owned geometry logic instead of copying AGPL-3.0 implementation code or embedding an infinite-canvas UI in Slidev export.
 
@@ -155,11 +175,12 @@ Current landed truth as of 2026-06-20:
 10. hard overflow findings still use the rendered slide root as the pass/fail boundary, while `safeRect` remains the fit target for measured scale recommendations; this keeps edge-aligned layouts from being over-rejected while still letting the patcher derive conservative shrink factors;
 11. the shared `convergeSlidevDeckLayout()` workflow now runs inside `exportSlidesCommand()` and the maintainer verifier, so HTML/PDF/PNG/MP4 export all reuse the same converged prepared deck;
 12. the HTML exporter now returns a structured outcome with `requestedMode`, `actualMode`, fallback state, and standalone sanity details; known-bad native attempts are preserved as `index-standalone.failed.html` before compatibility fallback;
-13. the real `docs/architecture.zh-CN.md` strict native standalone workflow now closes with `ok: true`, `actualMode: "standalone"`, `requiresLocalServer: false`, `standaloneGate.passed: true`, `29` audited slides, and zero hard overflow / unreadable scale / low effective font / quality margin warning / low utilization findings with `retryCount = 4`; the preserve-Mermaid run kept the source and exported deck at `3` Mermaid blocks, and this batch's evidence package is stored at `/home/jacob/slidev-export-review/2026-06-20-quality/`;
+13. the real `docs/architecture.zh-CN.md` strict native standalone workflow now closes with `ok: true`, `actualMode: "standalone"`, `requiresLocalServer: false`, `standaloneGate.passed: true`, `29` audited slides, and zero hard overflow / unreadable scale / low effective font / quality margin warning / low utilization findings with `retryCount = 4`; the preserve-Mermaid run kept the source and exported deck at `3` Mermaid blocks, and the current evidence packages are stored at `/home/jacob/slidev-export-review/2026-06-20-quality/` and `/home/jacob/slidev-export-review/2026-06-20-mermaid-fit/`;
 14. `PDF` and `PNG` verification on the same source also return `ok: true`, and now export from the same converged deck instead of the raw prepared source;
 15. rendered layout audit now reports effective minimum font, SVG text font, table/code minimum font, quality margins, and content-area ratio alongside hard overflow;
 16. low effective font, tight margin, and low content utilization findings now carry structural `recommendedPatch` values for table/code/prose; Mermaid low-font metrics are recorded while preserving the source fence instead of automatically splitting one diagram into several diagrams;
 17. source preparation now builds a clean-room `SlideLayoutPlan` and injects its deterministic layout budget into generated outlines, one-shot Slidev deck prompts, and outline-continuation prompts.
+18. rendered layout audit now also reports `mermaidFit` and the matching summary counters so low Mermaid zoom, low Mermaid font, and manual-review cases remain visible without mutating the original Mermaid fence; the real `architecture.zh-CN.md` rerun reports `mermaidSlideCount = 3`, `mermaidFitReviewCount = 3`, `mermaidLowZoomCount = 3`, and `mermaidManualReviewCount = 1`.
 
 Current limitation:
 
@@ -168,6 +189,7 @@ Current limitation:
 3. native standalone export now has a strict gate and the real architecture fixture passes it, but correctness still depends on post-build sanity detection; server-script fallback remains a compatibility lane and must not be counted as native standalone success;
 4. full-deck Playwright verification is deliberately slower than representative sampling, so future work should improve convergence rather than weaken the audit;
 5. `obsidian command id=notemd:export-slides` is still only a dispatch-level smoke because the Obsidian CLI does not expose an export-complete handshake.
+6. Mermaid `manual-review` evidence is not a hard gate failure. It is the correct fail-transparent outcome when preserving the original Mermaid source and guaranteeing projector-level readability cannot both be proven automatically.
 
 ## Output Policy
 

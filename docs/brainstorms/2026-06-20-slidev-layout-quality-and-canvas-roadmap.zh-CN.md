@@ -3,7 +3,7 @@ date: 2026-06-20
 last_updated: 2026-06-20
 topic: slidev-layout-quality-and-canvas-roadmap
 canonical: true
-status: rendered-quality-and-layout-plan-implemented
+status: source-preserved-mermaid-fit-audit-implemented
 ---
 
 # Slidev 布局质量与画布规划路线
@@ -26,7 +26,7 @@ status: rendered-quality-and-layout-plan-implemented
 
 1. 分支：`main`
 2. 远端：`origin/main`
-3. 本批次实现内容：rendered quality gate + clean-room `SlideLayoutPlan` 第一切片
+3. 本批次实现内容：rendered quality gate + clean-room `SlideLayoutPlan` 第一切片 + Mermaid 源图保持 fit 审计
 4. 真实源文件：`docs/architecture.zh-CN.md`
 5. 本批次真实导出证据包：`/home/jacob/slidev-export-review/2026-06-20-quality/`
 6. 本批次成功输出归档：`/home/jacob/slidev-export-review/2026-06-20-quality/preserve-mermaid-success-export-final/`
@@ -40,14 +40,14 @@ status: rendered-quality-and-layout-plan-implemented
 5. HTML native standalone 有严格 gate；
 6. Playwright 默认审计完整 prepared deck；
 7. patcher 已支持 measured zoom、部分局部 `<Transform>`、table/code/simple slide/slot layout 结构化拆分；Mermaid 默认保留源 fence，不做自动拆图；
-8. rendered audit 已新增 effective font、SVG/table/code 最小字号、quality margin 与 content-area ratio；
+8. rendered audit 已新增 effective font、SVG/table/code 最小字号、quality margin、content-area ratio 与 Mermaid 源图保持 fit 证据；
 9. source preparation 已新增 clean-room `SlideLayoutPlan` 预算，并把 deterministic layout budget 接入非大纲、大纲继续导出与 outline prompt；
 10. `architecture.zh-CN.md` strict native standalone rerun 已通过：`slideCount = 29`，源文档与导出 deck 均为 3 个 Mermaid block，hard overflow / unreadable scale / low effective font / quality margin warning / low utilization 均为零；
 11. 当前生成产物可被 Git 看到，用于本地视觉检查，但不应提交进 `main`。
 
 当前未完成事实：
 
-1. semantic split 仍只覆盖当前已有 table/code/text 支持集；Mermaid 源图保持后，过密原图只能通过布局/zoom/Transform 或人工复核处理；
+1. semantic split 仍只覆盖当前已有 table/code/text 支持集；Mermaid 源图保持后，过密原图只能通过布局/zoom/Transform 或人工复核处理，不能把一个源 Mermaid fence 自动拆成多个图；
 2. effective font 目前以 DOM computed font size 乘 Slidev page zoom 为主，局部 CSS transform 的精确字体感知仍是后续增强点；
 3. `SlideLayoutPlan` 是生成前预算，不替代 Playwright rendered audit；
 4. 真实 `architecture.zh-CN.md` 仍需要每批次跑 strict standalone 验收，不能用单测替代；
@@ -63,6 +63,7 @@ status: rendered-quality-and-layout-plan-implemented
 | standalone 文件必须真实可打开 | strict native gate 检查 `actualMode = standalone`、`requiresLocalServer = false`、`loaderGaps = []` | 已落地 | 新 standalone 验收应继续走带日期 evidence package |
 | 不能提交测试生成文件 | `docs/export/` 产物可见但默认不提交，本批次真实输出已归档到仓库外 | 已收口 | 最终 commit 前继续检查 `git status --short docs/export` |
 | zoom 参数应由检测结果决定 | overflow patch 已用 measured fit scale；quality finding 现在会优先触发结构化拆分 | 已推进 | 继续避免把低 `zoom` 当最终修复手段 |
+| 不修改 Mermaid 原图内容 | prompt、layout budget、patcher 与 audit 都按 source-preserved 模型推进；Mermaid fit 问题进入证据字段或人工复核，不进入自动拆图 | 已落地当前切片 | 真实导出继续检查 source/exported Mermaid block count 一致 |
 | 完整支持 Slidev skill references | skill root 与 reference count 已进入 verifier | 已落地 | 可考虑上游 skill PR，但只放通用 guardrails |
 | 参考无限画布优化图/表/画布可见范围 | 已新增 clean-room `SlideLayoutPlan`，按 world-rect / viewport-fit 思想做生成前预算 | 已落地第一切片 | 后续加强语义拆分算法，不复制 AGPL 代码 |
 
@@ -146,7 +147,37 @@ status: rendered-quality-and-layout-plan-implemented
 12. `retryCount = 4`
 13. source Mermaid block count = 3，exported Mermaid block count = 3
 
-需要保持批判的一点：成功 deck 仍包含 `zoom: 0.285`、`0.384`、`0.40`。当前它们没有触发 low effective font 或 margin failure，说明 rendered gate 认为它们在这次输出里可接受；但从架构方向看，低 zoom 不应扩散到 table/code/prose。对 Mermaid，下一阶段应该继续增强源图保持的 fit 评估、局部 Transform 与人工复核证据，而不是默认拆原图。
+需要保持批判的一点：成功 deck 仍包含 `zoom: 0.285`、`0.384`、`0.40`。当前它们没有触发 hard gate failure，说明 rendered gate 认为它们在这次输出里没有裁切；但从架构方向看，低 zoom 不应扩散到 table/code/prose。对 Mermaid，当前路线已经明确为源图保持 fit 评估、局部 Transform 与人工复核证据，而不是默认拆原图。
+
+本切片新增 Mermaid fit 审计后的真实 strict standalone rerun 证据包在：
+
+```text
+/home/jacob/slidev-export-review/2026-06-20-mermaid-fit/architecture-strict-mermaid-fit-report.json
+/home/jacob/slidev-export-review/2026-06-20-mermaid-fit/architecture.zh-CN.mermaid-fit.slidev.md
+/home/jacob/slidev-export-review/2026-06-20-mermaid-fit/export/architecture.zh-CN-slides/index-standalone.html
+```
+
+该 rerun 的关键结果：
+
+1. `ok = true`
+2. `actualMode = "standalone"`
+3. `requiresLocalServer = false`
+4. `standaloneGate.passed = true`
+5. `slidev = "52.16.0 (/home/jacob/slidev/packages/slidev/bin/slidev.mjs)"`
+6. `skillRootPath = "/home/jacob/slidev/skills/slidev"`
+7. `skillReferenceCount = 52`
+8. `slideCount = 29`
+9. `hardOverflowCount = 0`
+10. `unreadableScaleCount = 0`
+11. `renderErrorCount = 0`
+12. `mermaidSlideCount = 3`
+13. `mermaidFitReviewCount = 3`
+14. `mermaidLowZoomCount = 3`
+15. `mermaidManualReviewCount = 1`
+16. source Mermaid block count = 3，exported Mermaid block count = 3
+17. `zoomLines = ["0.285", "0.384", "0.40"]`
+
+这次结果不是“质量问题消失”，而是把此前隐藏的质量判断变成了可审计事实：三张 Mermaid 页都因为保留源图而进入 fit review；第 3 页是 `manual-review`，原因是保留源图后若继续按 safe rect 拟合，`nextZoom = 0.2778` 会低于当前 readable floor `0.28`。这比自动拆图更符合用户约束，也更诚实。
 
 ## 6. `ref/infinite-canvas` 的可借鉴点
 
@@ -192,9 +223,26 @@ layoutAudit[].codeMinFontPx
 layoutAudit[].qualityMargins
 layoutAudit[].contentAreaRatio
 layoutAudit[].lowContentUtilization
+layoutAudit[].mermaidFit.status
+layoutAudit[].mermaidFit.reason
+layoutAudit[].mermaidFit.pageScale
+layoutAudit[].mermaidFit.fitScale
+layoutAudit[].mermaidFit.nextZoom
+layoutAudit[].mermaidFit.diagramBounds
+layoutAudit[].mermaidFit.effectiveMinFontPx
+layoutAudit[].mermaidFit.svgTextMinFontPx
+layoutAudit[].mermaidFit.qualityMargins
+layoutAudit[].mermaidFit.contentAreaRatio
+layoutAudit[].mermaidFit.lowZoom
+layoutAudit[].mermaidFit.lowFont
+layoutAudit[].mermaidFit.tightMargin
 layoutAuditSummary.lowEffectiveFontCount
 layoutAuditSummary.qualityMarginWarningCount
 layoutAuditSummary.lowContentUtilizationCount
+layoutAuditSummary.mermaidSlideCount
+layoutAuditSummary.mermaidFitReviewCount
+layoutAuditSummary.mermaidLowZoomCount
+layoutAuditSummary.mermaidManualReviewCount
 ```
 
 判定原则：
@@ -251,7 +299,15 @@ interface SlideLayoutPlan {
 
 目标：把 Mermaid 从“自动改写/拆图”改为“保持源 fence，先做布局适配，不能保证阅读质量时明确人工复核”。
 
-实现状态：已按用户约束调整为默认不拆 Mermaid。低 effective SVG/Mermaid 字号仍保留在 rendered measurement 字段中，但不再触发 `split-diagram` 或把一张源图改写成多张图；hard overflow 只能尝试保留源图的 measured `zoom` / layout 适配，低于可读下限时进入 blocked/manual-review。
+实现状态：已按用户约束调整为默认不拆 Mermaid。低 effective SVG/Mermaid 字号仍保留在 rendered measurement 字段中，但不再触发 `split-diagram` 或把一张源图改写成多张图；hard overflow 只能尝试保留源图的 measured `zoom` / layout / `<Transform>` 适配，低于可读下限时进入 blocked/manual-review。
+
+本切片新增 `mermaidFit` 审计结果：
+
+1. `fits`：保留源 fence 后仍满足当前渲染质量阈值；
+2. `source-preserved-fit-review`：源图未裁切，但存在低 zoom 或 tight margin，需要人工看图确认演示质量；
+3. `manual-review`：保留源图和可读性存在冲突，例如 Mermaid 字号过低，或 safe-rect fit 后会低于 readable floor。
+
+这些字段是源图保持证据，不是自动改写指令。`mermaidManualReviewCount` 也不是 hard gate failure；它表示在“不修改原 Mermaid 内容”的约束下，流程不能伪装成完全自动合格。
 
 保持策略：
 
@@ -260,6 +316,7 @@ interface SlideLayoutPlan {
 3. `SlideLayoutPlan` 对密集 Mermaid 给出 `preserve-source-fit`，而不是 `overview-detail`；
 4. overflow 时先用 measured `zoom` 或可证明不改源图的 layout/Transform；
 5. 单图过密导致“保留完整内容”和“投影可读”不可同时满足时，报告 manual-review，不伪造通过。
+6. 验收必须继续检查源文档 Mermaid block count 与导出 deck Mermaid block count 一致。
 
 ### Stage 4：Table / code quality splitter
 
@@ -303,7 +360,7 @@ interface SlideLayoutPlan {
 
 实现状态：已新增/扩展 unit fixtures：
 
-1. `src/tests/slidevLayoutAudit.test.ts` 覆盖 low effective font measurement、Mermaid 源图保持、table/code 质量 finding 驱动结构拆分、summary 新字段；
+1. `src/tests/slidevLayoutAudit.test.ts` 覆盖 low effective font measurement、Mermaid 源图保持、Mermaid fit/manual-review 统计、table/code 质量 finding 驱动结构拆分、summary 新字段；
 2. `src/tests/slidevLayoutPlan.test.ts` 覆盖 clean-room layout budget 对 Mermaid 的 `preserve-source-fit` 与 table/code 的 pre-split 判断；
 3. `src/tests/slidevSourcePreparer.test.ts` 覆盖 deterministic outline 与 LLM prompt 都带 layout budget；
 4. `src/tests/slidevLayoutWorkflow.test.ts` 更新 summary schema，避免 verifier mock 停留在旧字段。
@@ -326,7 +383,9 @@ interface SlideLayoutPlan {
 4. NoteMD 的 Playwright audit 内部字段；
 5. NoteMD 的 generated artifact policy。
 
-更合理的上游 PR 时机：Stage 1/2 在 NoteMD 中稳定后，只抽通用 prompt guardrails 和 browser-check 建议，不把 NoteMD 的实现细节带上去。
+不值得上游的方向：建议把一个用户提供的 Mermaid 原图自动拆成多个 Mermaid 图。这个策略会破坏源图语义边界，也会让导出器替用户做不可逆的图结构编辑。
+
+更合理的上游 PR 时机：Stage 1/2/3 在 NoteMD 中稳定后，只抽通用 prompt guardrails、source-preserved Mermaid fit review 和 browser-check 建议，不把 NoteMD 的实现细节带上去。
 
 ## 9. 后续推进顺序
 

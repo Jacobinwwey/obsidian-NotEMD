@@ -59,6 +59,10 @@ function createSummary(retryCount: number) {
 		lowContentUtilizationCount: 0,
 		preSplitCount: 0,
 		postPatchCount: retryCount,
+		mermaidSlideCount: 0,
+		mermaidFitReviewCount: 0,
+		mermaidLowZoomCount: 0,
+		mermaidManualReviewCount: 0,
 		retryCount,
 	};
 }

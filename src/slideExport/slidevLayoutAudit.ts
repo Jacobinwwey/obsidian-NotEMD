@@ -17,6 +17,24 @@ export interface SlidevQualityMargins {
 	min: number;
 }
 
+export type SlidevMermaidFitStatus = 'fits' | 'source-preserved-fit-review' | 'manual-review';
+
+export interface SlidevMermaidFitAudit {
+	status: SlidevMermaidFitStatus;
+	reason: string;
+	pageScale: number | null;
+	fitScale: number | null;
+	nextZoom: number | null;
+	diagramBounds: SlidevRect | null;
+	effectiveMinFontPx: number | null;
+	svgTextMinFontPx: number | null;
+	qualityMargins: SlidevQualityMargins | null;
+	contentAreaRatio: number | null;
+	lowZoom: boolean;
+	lowFont: boolean;
+	tightMargin: boolean;
+}
+
 export interface SlidevMeasuredElement {
 	kind: SlidevMeasuredElementKind;
 	selector: string;
@@ -108,6 +126,7 @@ export interface SlidevLayoutAudit {
 	qualityMargins?: SlidevQualityMargins | null;
 	contentAreaRatio?: number | null;
 	lowContentUtilization?: boolean;
+	mermaidFit?: SlidevMermaidFitAudit | null;
 	findings: SlidevLayoutFinding[];
 	elementKinds: SlidevMeasuredElementKind[];
 	slotZones?: SlidevSlotZoneAudit[];
@@ -141,6 +160,10 @@ export interface SlidevLayoutAuditSummary {
 	lowContentUtilizationCount: number;
 	preSplitCount: number;
 	postPatchCount: number;
+	mermaidSlideCount: number;
+	mermaidFitReviewCount: number;
+	mermaidLowZoomCount: number;
+	mermaidManualReviewCount: number;
 	retryCount: number;
 }
 
@@ -155,6 +178,7 @@ export interface SlidevLayoutAuditConfig {
 	minQualityMarginPx: number;
 	minContentAreaRatio: number;
 	lowContentUtilizationScaleThreshold: number;
+	mermaidLowZoomReviewScale: number;
 }
 
 export interface SlidevDeckPatchResult {
@@ -223,6 +247,7 @@ const DEFAULT_CONFIG: SlidevLayoutAuditConfig = {
 	minQualityMarginPx: 18,
 	minContentAreaRatio: 0.18,
 	lowContentUtilizationScaleThreshold: 0.55,
+	mermaidLowZoomReviewScale: 0.72,
 };
 
 export const NOTEMD_SLOT_ZONE_ATTR = 'data-notemd-slot-zone';
@@ -259,6 +284,7 @@ export function analyzeRenderedSlideMeasurement(
 			qualityMargins: qualityMetrics.qualityMargins,
 			contentAreaRatio: qualityMetrics.contentAreaRatio,
 			lowContentUtilization: false,
+			mermaidFit: null,
 			findings,
 			elementKinds,
 			slotZones: [],
@@ -358,6 +384,8 @@ export function analyzeRenderedSlideMeasurement(
 		});
 	}
 
+	const mermaidFit = analyzeSourcePreservedMermaidFit(measurement, qualityMetrics, resolvedConfig);
+
 	return {
 		slide: measurement.slide,
 		safeRect: measurement.safeRect,
@@ -370,6 +398,7 @@ export function analyzeRenderedSlideMeasurement(
 		qualityMargins: qualityMetrics.qualityMargins,
 		contentAreaRatio: qualityMetrics.contentAreaRatio,
 		lowContentUtilization,
+		mermaidFit,
 		findings,
 		elementKinds,
 		slotZones,
@@ -394,6 +423,10 @@ export function summarizeLayoutAudits(
 		lowContentUtilizationCount: audits.reduce((total, audit) => total + audit.findings.filter(finding => finding.kind === 'low-content-utilization').length, 0),
 		preSplitCount: audits.reduce((total, audit) => total + (audit.preSplitCount ?? 0), 0),
 		postPatchCount: retryCount,
+		mermaidSlideCount: audits.reduce((total, audit) => total + (audit.mermaidFit ? 1 : 0), 0),
+		mermaidFitReviewCount: audits.reduce((total, audit) => total + (audit.mermaidFit && audit.mermaidFit.status !== 'fits' ? 1 : 0), 0),
+		mermaidLowZoomCount: audits.reduce((total, audit) => total + (audit.mermaidFit?.lowZoom ? 1 : 0), 0),
+		mermaidManualReviewCount: audits.reduce((total, audit) => total + (audit.mermaidFit?.status === 'manual-review' ? 1 : 0), 0),
 		retryCount,
 	};
 }
@@ -559,6 +592,77 @@ function collectRenderedQualityMetrics(measurement: RenderedSlideMeasurement): {
 	};
 }
 
+function analyzeSourcePreservedMermaidFit(
+	measurement: RenderedSlideMeasurement,
+	qualityMetrics: {
+		qualityMargins: SlidevQualityMargins | null;
+		contentAreaRatio: number | null;
+	},
+	config: SlidevLayoutAuditConfig,
+): SlidevMermaidFitAudit | null {
+	const mermaidElements = measurement.elements.filter(element => element.kind === 'mermaid');
+	if (mermaidElements.length === 0) {
+		return null;
+	}
+
+	const diagramBounds = unionSlideRects(mermaidElements.map(element => element.rect));
+	const fitScale = diagramBounds && measurement.safeRect
+		? computeFitScale(diagramBounds, measurement.safeRect)
+		: null;
+	const nextZoom = measurement.pageScale !== null && fitScale !== null
+		? measurement.pageScale * fitScale
+		: null;
+	const mermaidSvgTextMinFontPx = minNumber(mermaidElements
+		.map(element => normalizePositiveNumber(element.svgTextMinFontPx))
+		.filter((value): value is number => value !== null));
+	const mermaidEffectiveMinFontPx = minNumber(mermaidElements
+		.map(element => normalizePositiveNumber(element.effectiveMinFontPx))
+		.filter((value): value is number => value !== null));
+	const fontFloor = mermaidSvgTextMinFontPx !== null ? config.minSvgTextFontPx : config.minEffectiveFontPx;
+	const measuredFont = mermaidSvgTextMinFontPx ?? mermaidEffectiveMinFontPx;
+	const lowFont = measuredFont !== null && measuredFont < fontFloor;
+	const lowZoom = measurement.pageScale !== null && measurement.pageScale < config.mermaidLowZoomReviewScale;
+	const tightMargin = qualityMetrics.qualityMargins !== null
+		&& qualityMetrics.qualityMargins.min < config.minQualityMarginPx;
+	const cannotFitAboveReadableFloor = nextZoom !== null && nextZoom < config.minReadableScale;
+
+	const reasons: string[] = [];
+	if (lowFont && measuredFont !== null) {
+		reasons.push(`preserved Mermaid font ${measuredFont.toFixed(1)}px is below ${fontFloor}px`);
+	}
+	if (lowZoom && measurement.pageScale !== null) {
+		reasons.push(`preserved Mermaid zoom ${measurement.pageScale.toFixed(3)} is below review scale ${config.mermaidLowZoomReviewScale.toFixed(2)}`);
+	}
+	if (tightMargin && qualityMetrics.qualityMargins) {
+		reasons.push(`preserved Mermaid margin ${qualityMetrics.qualityMargins.min.toFixed(1)}px is below ${config.minQualityMarginPx}px`);
+	}
+	if (cannotFitAboveReadableFloor && nextZoom !== null) {
+		reasons.push(`safe-rect fit would require zoom ${nextZoom.toFixed(3)}, below readable floor ${config.minReadableScale.toFixed(2)}`);
+	}
+
+	const status: SlidevMermaidFitStatus = lowFont || cannotFitAboveReadableFloor
+		? 'manual-review'
+		: lowZoom || tightMargin
+			? 'source-preserved-fit-review'
+			: 'fits';
+
+	return {
+		status,
+		reason: reasons.length > 0 ? reasons.join('; ') : 'preserved Mermaid diagram fits rendered quality thresholds',
+		pageScale: measurement.pageScale,
+		fitScale,
+		nextZoom,
+		diagramBounds,
+		effectiveMinFontPx: mermaidEffectiveMinFontPx,
+		svgTextMinFontPx: mermaidSvgTextMinFontPx,
+		qualityMargins: qualityMetrics.qualityMargins,
+		contentAreaRatio: qualityMetrics.contentAreaRatio,
+		lowZoom,
+		lowFont,
+		tightMargin,
+	};
+}
+
 function findLowEffectiveFontIssues(
 	measurement: RenderedSlideMeasurement,
 	elementKinds: SlidevMeasuredElementKind[],
@@ -680,6 +784,25 @@ function normalizePositiveNumber(value: number | null | undefined): number | nul
 
 function minNumber(values: number[]): number | null {
 	return values.length > 0 ? Math.min(...values) : null;
+}
+
+function unionSlideRects(rects: SlidevRect[]): SlidevRect | null {
+	if (rects.length === 0) {
+		return null;
+	}
+
+	const left = Math.min(...rects.map(rect => rect.left));
+	const top = Math.min(...rects.map(rect => rect.top));
+	const right = Math.max(...rects.map(rect => rect.right));
+	const bottom = Math.max(...rects.map(rect => rect.bottom));
+	return {
+		left,
+		top,
+		right,
+		bottom,
+		width: right - left,
+		height: bottom - top,
+	};
 }
 
 function hasDenseLayoutContent(elementKinds: SlidevMeasuredElementKind[]): boolean {

@@ -62,6 +62,7 @@ const DEFAULT_LAYOUT_AUDIT_CONFIG: SlidevLayoutAuditConfig = {
 	minQualityMarginPx: 18,
 	minContentAreaRatio: 0.18,
 	lowContentUtilizationScaleThreshold: 0.55,
+	mermaidLowZoomReviewScale: 0.72,
 };
 const SLIDEV_LAYOUT_NAVIGATION_TIMEOUT_MS = 60_000;
 

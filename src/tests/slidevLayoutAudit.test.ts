@@ -96,6 +96,12 @@ describe('slidevLayoutAudit', () => {
 		expect(audit.svgTextMinFontPx).toBeCloseTo(6.72, 2);
 		expect(audit.qualityMargins?.bottom).toBeCloseTo(66.8, 1);
 		expect(audit.contentAreaRatio).toBeGreaterThan(0);
+		expect(audit.mermaidFit).toEqual(expect.objectContaining({
+			status: 'manual-review',
+			lowZoom: true,
+			lowFont: true,
+		}));
+		expect(audit.mermaidFit?.reason).toContain('preserved Mermaid font');
 		expect(audit.findings).toEqual([]);
 	});
 
@@ -1021,7 +1027,7 @@ describe('slidevLayoutAudit', () => {
 			'::right::',
 			'',
 			'- Audit visible root',
-			'- Split Mermaid when unreadable',
+			'- Preserve Mermaid and report fit review',
 			'- Split table columns when width bound',
 			'- Split code fences when height bound',
 			'- Keep deterministic retry closure',
@@ -1632,6 +1638,10 @@ describe('slidevLayoutAudit', () => {
 		expect(summary.lowEffectiveFontCount).toBeGreaterThanOrEqual(0);
 		expect(summary.qualityMarginWarningCount).toBeGreaterThanOrEqual(0);
 		expect(summary.lowContentUtilizationCount).toBeGreaterThanOrEqual(0);
+		expect(summary.mermaidSlideCount).toBe(1);
+		expect(summary.mermaidFitReviewCount).toBe(1);
+		expect(summary.mermaidLowZoomCount).toBe(1);
+		expect(summary.mermaidManualReviewCount).toBe(0);
 		expect(summary.postPatchCount).toBe(1);
 		expect(summary.renderErrorCount).toBe(1);
 		expect(summary.retryCount).toBe(1);

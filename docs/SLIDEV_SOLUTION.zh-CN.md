@@ -147,6 +147,7 @@ npm run verify:slidev-export
 8. `layoutAuditSummary.unreadableCount = 0`
 9. `layoutAuditSummary.lowEffectiveFontCount = 0`
 10. quality-margin 与 content-area finding 要么为零，要么能被结构化 patch attempt 解释
+11. 除非人工显式改源文档，源 Mermaid fence 与导出 deck Mermaid block 保持一一对应
 
 ## 当前渲染收敛模型
 
@@ -154,8 +155,12 @@ npm run verify:slidev-export
 
 1. `prepareSlidevExportSource()` 加载完整 skill，并在 prompt 中要求保留 Mermaid 源 fence，同时拆分密集 prose/table/code。
 2. `SlideLayoutPlan` 在生成前估算 dense Markdown block，并把 deterministic layout budget 注入 outline 与 LLM prompt。
-3. `convergeSlidevDeckLayout()` 构建 HTML、打开浏览器、测量真实 `slidev-page`、易溢出元素、effective font、quality margin 与 content-area ratio。
+3. `convergeSlidevDeckLayout()` 构建 HTML、打开浏览器、测量真实 `slidev-page`、易溢出元素、effective font、quality margin、content-area ratio 与 Mermaid 源图保持 fit 状态。
 4. patcher 根据渲染证据应用 slide `zoom`、局部 `<Transform>`、结构化拆分或内容级重写；当 low effective font、tight margin 或 low utilization 出现时，table/code/prose 优先结构拆分，Mermaid 默认保持源图不拆。
+
+Mermaid 的规则比 table/code/prose 更严格：用户提供的一个 Mermaid fence 仍然是一张图。若保留源图后出现低 zoom、低字号或边距过紧，流程记录 `fits`、`source-preserved-fit-review` 或 `manual-review` 证据，而不是把原图静默拆成多张图。
+
+最新真实 strict run 的 Mermaid fit 计数为 `mermaidSlideCount = 3`、`mermaidFitReviewCount = 3`、`mermaidLowZoomCount = 3`、`mermaidManualReviewCount = 1`。这说明当前流程已经把低 zoom 风险显性化，但没有改写原 Mermaid 内容。
 
 支持的结构化 patch 范围包括：
 
@@ -170,6 +175,7 @@ npm run verify:slidev-export
 2. Standalone 正确性依赖 post-build sanity detection；fallback 通过不能当作 native standalone 通过。
 3. 全 deck Playwright 审计更正确但更慢，后续应优化收敛效率，而不是削弱审计范围。
 4. Obsidian CLI 可以派发 `notemd:export-slides`，但缺少导出完成握手，所以宿主命令烟测弱于 verifier。
+5. Mermaid `manual-review` 是源图保持约束下的透明证据，不是 hard gate failure，也不是自动拆图许可。
 
 ## Next-level 布局质量路线
 
@@ -179,7 +185,7 @@ npm run verify:slidev-export
 
 1. 保留 `convergeSlidevDeckLayout()` 作为最终事实门；
 2. 在 source preparation 前增加 clean-room `SlideGeometry` / `SlideLayoutPlan`，借鉴 `ref/infinite-canvas` 的 world rect、union bounds 与 viewport fit 思想，但不复制 AGPL-3.0 实现代码；
-3. 在 rendered audit 中新增 effective font、quality margin、content area ratio 与 low-utilization 指标；
+3. 在 rendered audit 中持续保留 effective font、quality margin、content area ratio、low-utilization 与 Mermaid fit-review 指标；
 4. 保留 Mermaid 源 fence，对 table/code/prose 做预拆分和语义拆分，避免非 Mermaid 内容继续依赖低 `zoom`；
 5. 将 hard gate 与 quality gate 分开报告：hard overflow 失败仍 fail closed，quality warning 用于推动拆分、重布局或人工复查。
 

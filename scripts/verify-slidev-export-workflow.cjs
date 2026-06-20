@@ -24,6 +24,7 @@ const LAYOUT_AUDIT_CONFIG = {
 	minQualityMarginPx: 18,
 	minContentAreaRatio: 0.18,
 	lowContentUtilizationScaleThreshold: 0.55,
+	mermaidLowZoomReviewScale: 0.72,
 };
 
 function parseArgs(argv) {

@@ -98,6 +98,7 @@ docs/maintainer/slidev-standalone-acceptance-2026-06-18.zh-CN.md
 14. 严格 native standalone 收口时，`htmlExport.requiresLocalServer: false`
 15. 严格 native standalone 收口时，`htmlExport.standaloneAttempt.loaderGaps: []`
 16. 严格 native standalone 收口时，`standaloneGate.passed: true`
+17. 源文件包含 Mermaid fence 时，除非人工显式改源文档，否则导出 deck 的 Mermaid block 数应与源文档一致。
 
 任一条件失败，都应先修 NoteMD 工作流，再相信导出文件。
 
@@ -115,7 +116,7 @@ docs/maintainer/slidev-standalone-acceptance-2026-06-18.zh-CN.md
 
 `ref/infinite-canvas` 只能作为 clean-room 设计参考。真正值得借鉴的不是把无限画布嵌进 Slidev export，而是先把 slide 元素建模成可测量的 world rect，计算 union bounds，再为固定 Slidev safe rect 推导 fit camera；一旦 fit 会破坏可读性，就拆分内容。不要把 AGPL-3.0 实现代码复制进 MIT 项目。
 
-下一阶段的报告结构不应只记录 hard overflow。它需要把 hard gate 与 quality gate 拆开，补充类似字段：
+当前报告结构已经把 hard gate 与 quality gate 拆开，包含以下字段：
 
 ```text
 layoutAudit[].slide
@@ -128,6 +129,19 @@ layoutAudit[].tableBodyMinFontPx
 layoutAudit[].codeMinFontPx
 layoutAudit[].qualityMargins
 layoutAudit[].contentAreaRatio
+layoutAudit[].mermaidFit.status
+layoutAudit[].mermaidFit.reason
+layoutAudit[].mermaidFit.pageScale
+layoutAudit[].mermaidFit.fitScale
+layoutAudit[].mermaidFit.nextZoom
+layoutAudit[].mermaidFit.diagramBounds
+layoutAudit[].mermaidFit.effectiveMinFontPx
+layoutAudit[].mermaidFit.svgTextMinFontPx
+layoutAudit[].mermaidFit.qualityMargins
+layoutAudit[].mermaidFit.contentAreaRatio
+layoutAudit[].mermaidFit.lowZoom
+layoutAudit[].mermaidFit.lowFont
+layoutAudit[].mermaidFit.tightMargin
 layoutAudit[].recommendedPatch
 layoutAuditSummary.hardOverflowCount
 layoutAuditSummary.unreadableScaleCount
@@ -136,8 +150,14 @@ layoutAuditSummary.qualityMarginWarningCount
 layoutAuditSummary.lowContentUtilizationCount
 layoutAuditSummary.preSplitCount
 layoutAuditSummary.postPatchCount
+layoutAuditSummary.mermaidSlideCount
+layoutAuditSummary.mermaidFitReviewCount
+layoutAuditSummary.mermaidLowZoomCount
+layoutAuditSummary.mermaidManualReviewCount
 layoutAuditSummary.retryCount
 ```
+
+对 Mermaid 来说，`mermaidFit.status` 是源图保持证据，不是允许自动改写用户图的指令。`fits` 表示保留源图后满足当前渲染阈值；`source-preserved-fit-review` 表示 deck 结构上成立，但由于低 zoom 或边距偏紧，需要人工看图确认演示质量；`manual-review` 表示保留源图与投影可读性存在冲突，流程必须暴露这个事实，而不是静默把一张图拆成多张图。
 
 具体推进路线见 `docs/brainstorms/2026-06-20-slidev-layout-quality-and-canvas-roadmap.zh-CN.md`。该路线保留当前 render-feedback loop 作为最终事实门，但在生成前增加 clean-room layout planning IR，并把 `ref/infinite-canvas` 的 world rect / viewport fit 思想转译为 NoteMD 自有几何算法，而不是复制 AGPL-3.0 实现或把无限画布 UI 嵌入 Slidev export。
 
@@ -155,11 +175,12 @@ layoutAuditSummary.retryCount
 10. pass/fail 的 hard overflow 仍以渲染后的 slide root 为边界，而 `safeRect` 继续只承担 measured scale 的保守拟合目标；这样既不会放过真正裁剪，也不会把合理的 edge-aligned layout 过度误杀；
 11. 共享的 `convergeSlidevDeckLayout()` 现在已经进入 `exportSlidesCommand()` 与维护者 verifier，因此 HTML/PDF/PNG/MP4 都会复用同一个收敛后的 prepared deck；
 12. HTML exporter 现在会返回结构化 outcome，包含 `requestedMode`、`actualMode`、fallback 状态与 standalone sanity 细节；已知坏掉的 native attempt 会先保留为 `index-standalone.failed.html`，再进入兼容 fallback；
-13. 真实 `docs/architecture.zh-CN.md` 严格 native standalone workflow 现在已经收敛到 `ok: true`、`actualMode: "standalone"`、`requiresLocalServer: false`、`standaloneGate.passed: true`、`29` 个审计页，hard overflow / unreadable scale / low effective font / quality margin warning / low utilization 均为零，`retryCount = 4`；preserve-Mermaid rerun 保持源文档与导出 deck 均为 `3` 个 Mermaid block；本批次证据包位于 `/home/jacob/slidev-export-review/2026-06-20-quality/`；
+13. 真实 `docs/architecture.zh-CN.md` 严格 native standalone workflow 现在已经收敛到 `ok: true`、`actualMode: "standalone"`、`requiresLocalServer: false`、`standaloneGate.passed: true`、`29` 个审计页，hard overflow / unreadable scale / low effective font / quality margin warning / low utilization 均为零，`retryCount = 4`；preserve-Mermaid rerun 保持源文档与导出 deck 均为 `3` 个 Mermaid block；当前证据包位于 `/home/jacob/slidev-export-review/2026-06-20-quality/` 与 `/home/jacob/slidev-export-review/2026-06-20-mermaid-fit/`；
 14. 同一真实源文件的 `PDF` 与 `PNG` 验证也返回 `ok: true`，而且现在导出自同一个收敛后的 deck，而不是 raw prepared source；
 15. rendered layout audit 现在会同时报告 effective minimum font、SVG text font、table/code minimum font、quality margins 与 content-area ratio；
 16. low effective font、tight margin 与 low content utilization finding 现在会对 table/code/prose 携带结构化 `recommendedPatch`；Mermaid 低字号指标会被记录，但默认保持源 fence，不把一张原图自动拆成多张图；
 17. source preparation 现在会生成 clean-room `SlideLayoutPlan`，并把 deterministic layout budget 注入 deterministic outline、一次性 Slidev deck prompt 与基于大纲继续导出的 prompt。
+18. rendered layout audit 现在还会报告 `mermaidFit` 与对应 summary 计数，让 Mermaid 低 zoom、低字号和 manual-review 情况可见，但不修改原始 Mermaid fence；真实 `architecture.zh-CN.md` rerun 报告 `mermaidSlideCount = 3`、`mermaidFitReviewCount = 3`、`mermaidLowZoomCount = 3`、`mermaidManualReviewCount = 1`。
 
 当前限制：
 
@@ -168,6 +189,7 @@ layoutAuditSummary.retryCount
 3. native standalone 现在已有严格 gate，且真实 architecture fixture 已通过；但正确性仍依赖 post-build sanity detection，server-script fallback 只是兼容通道，不能再被算作 native standalone 成功；
 4. full-deck Playwright 验证故意比代表性抽样更慢，后续优化方向应是提高 patch 收敛能力，而不是退回弱审计；
 5. `obsidian command id=notemd:export-slides` 目前仍只能算 dispatch-level smoke，因为 Obsidian CLI 没有暴露导出完成握手信号。
+6. Mermaid `manual-review` 证据不是 hard gate failure。它是在“不修改原 Mermaid 内容”和“自动保证投影级可读”不能同时被证明时，正确暴露给维护者的透明结果。
 
 ## 输出策略
 
