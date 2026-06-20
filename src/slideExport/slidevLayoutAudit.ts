@@ -9,6 +9,14 @@ export interface SlidevRect {
 	height: number;
 }
 
+export interface SlidevQualityMargins {
+	left: number;
+	top: number;
+	right: number;
+	bottom: number;
+	min: number;
+}
+
 export interface SlidevMeasuredElement {
 	kind: SlidevMeasuredElementKind;
 	selector: string;
@@ -16,6 +24,10 @@ export interface SlidevMeasuredElement {
 	slotOwner?: boolean;
 	textLength: number;
 	textPreview?: string;
+	minFontPx?: number | null;
+	effectiveMinFontPx?: number | null;
+	svgTextMinFontPx?: number | null;
+	textSampleCount?: number;
 	scrollWidth: number;
 	scrollHeight: number;
 	clientWidth: number;
@@ -41,13 +53,25 @@ export interface RenderedSlideMeasurement {
 	safeRect: SlidevRect | null;
 	contentBounds: SlidevRect | null;
 	pageScale: number | null;
+	effectiveMinFontPx?: number | null;
+	svgTextMinFontPx?: number | null;
+	tableBodyMinFontPx?: number | null;
+	codeMinFontPx?: number | null;
+	qualityMargins?: SlidevQualityMargins | null;
+	contentAreaRatio?: number | null;
 	elements: SlidevMeasuredElement[];
 	slotZones?: SlidevMeasuredSlotZone[];
 	errors: string[];
 }
 
-export type SlidevLayoutFindingKind = 'overflow' | 'unreadable-scale' | 'render-error';
-export type SlidevLayoutPatchKind = 'reduce-zoom' | 'split-diagram' | 'split-table' | 'reduce-code' | 'split-slide' | 'manual-review';
+export type SlidevLayoutFindingKind =
+	| 'overflow'
+	| 'unreadable-scale'
+	| 'render-error'
+	| 'low-effective-font'
+	| 'tight-margin'
+	| 'low-content-utilization';
+export type SlidevLayoutPatchKind = 'reduce-zoom' | 'split-table' | 'reduce-code' | 'split-slide' | 'manual-review';
 
 export interface SlidevLayoutFinding {
 	kind: SlidevLayoutFindingKind;
@@ -66,6 +90,10 @@ export interface SlidevLayoutFinding {
 		right: number;
 		bottom: number;
 	};
+	effectiveFontPx?: number;
+	fontThresholdPx?: number;
+	qualityMarginPx?: number;
+	contentAreaRatio?: number;
 }
 
 export interface SlidevLayoutAudit {
@@ -73,9 +101,17 @@ export interface SlidevLayoutAudit {
 	safeRect: SlidevRect | null;
 	contentBounds: SlidevRect | null;
 	pageScale: number | null;
+	effectiveMinFontPx?: number | null;
+	svgTextMinFontPx?: number | null;
+	tableBodyMinFontPx?: number | null;
+	codeMinFontPx?: number | null;
+	qualityMargins?: SlidevQualityMargins | null;
+	contentAreaRatio?: number | null;
+	lowContentUtilization?: boolean;
 	findings: SlidevLayoutFinding[];
 	elementKinds: SlidevMeasuredElementKind[];
 	slotZones?: SlidevSlotZoneAudit[];
+	preSplitCount?: number;
 }
 
 export interface SlidevSlotZoneAudit {
@@ -98,6 +134,13 @@ export interface SlidevLayoutAuditSummary {
 	overflowCount: number;
 	unreadableCount: number;
 	renderErrorCount: number;
+	hardOverflowCount: number;
+	unreadableScaleCount: number;
+	lowEffectiveFontCount: number;
+	qualityMarginWarningCount: number;
+	lowContentUtilizationCount: number;
+	preSplitCount: number;
+	postPatchCount: number;
 	retryCount: number;
 }
 
@@ -105,6 +148,13 @@ export interface SlidevLayoutAuditConfig {
 	overflowTolerancePx: number;
 	minReadableScale: number;
 	maxAutoPatchPasses: number;
+	minEffectiveFontPx: number;
+	minSvgTextFontPx: number;
+	minTableBodyFontPx: number;
+	minCodeFontPx: number;
+	minQualityMarginPx: number;
+	minContentAreaRatio: number;
+	lowContentUtilizationScaleThreshold: number;
 }
 
 export interface SlidevDeckPatchResult {
@@ -125,11 +175,6 @@ interface FencedBlock {
 interface PatchableSlideSurface {
 	frontmatterLines: string[];
 	bodyLines: string[];
-}
-
-interface MermaidSplitPlan {
-	repeatedLines: string[];
-	segments: string[][];
 }
 
 interface MarkdownTableBlock {
@@ -171,6 +216,13 @@ const DEFAULT_CONFIG: SlidevLayoutAuditConfig = {
 	overflowTolerancePx: 6,
 	minReadableScale: 0.28,
 	maxAutoPatchPasses: 2,
+	minEffectiveFontPx: 10,
+	minSvgTextFontPx: 9,
+	minTableBodyFontPx: 10,
+	minCodeFontPx: 10,
+	minQualityMarginPx: 18,
+	minContentAreaRatio: 0.18,
+	lowContentUtilizationScaleThreshold: 0.55,
 };
 
 export const NOTEMD_SLOT_ZONE_ATTR = 'data-notemd-slot-zone';
@@ -182,6 +234,7 @@ export function analyzeRenderedSlideMeasurement(
 	const resolvedConfig = { ...DEFAULT_CONFIG, ...config };
 	const findings: SlidevLayoutFinding[] = [];
 	const elementKinds = Array.from(new Set(measurement.elements.map(element => element.kind)));
+	const qualityMetrics = collectRenderedQualityMetrics(measurement);
 	const slotZones = measurement.safeRect
 		? analyzeRenderedSlotZones(measurement.slotZones ?? [], measurement.safeRect, resolvedConfig.overflowTolerancePx)
 		: [];
@@ -199,6 +252,13 @@ export function analyzeRenderedSlideMeasurement(
 			safeRect: measurement.safeRect,
 			contentBounds: measurement.contentBounds,
 			pageScale: measurement.pageScale,
+			effectiveMinFontPx: qualityMetrics.effectiveMinFontPx,
+			svgTextMinFontPx: qualityMetrics.svgTextMinFontPx,
+			tableBodyMinFontPx: qualityMetrics.tableBodyMinFontPx,
+			codeMinFontPx: qualityMetrics.codeMinFontPx,
+			qualityMargins: qualityMetrics.qualityMargins,
+			contentAreaRatio: qualityMetrics.contentAreaRatio,
+			lowContentUtilization: false,
 			findings,
 			elementKinds,
 			slotZones: [],
@@ -248,6 +308,46 @@ export function analyzeRenderedSlideMeasurement(
 		});
 	}
 
+	findings.push(...findLowEffectiveFontIssues(measurement, elementKinds, resolvedConfig));
+	const trailingQualityMargin = qualityMetrics.qualityMargins
+		? Math.min(qualityMetrics.qualityMargins.right, qualityMetrics.qualityMargins.bottom)
+		: null;
+	if (
+		trailingQualityMargin !== null
+		&& trailingQualityMargin >= 0
+		&& trailingQualityMargin < resolvedConfig.minQualityMarginPx
+		&& hasDenseLayoutContent(elementKinds)
+		&& hasAutoPatchableQualityContent(elementKinds)
+	) {
+		findings.push({
+			kind: 'tight-margin',
+			target: 'content',
+			message: `Slide trailing content margin ${trailingQualityMargin.toFixed(1)}px is below the quality floor ${resolvedConfig.minQualityMarginPx}px`,
+			recommendedPatch: dominantPatchTarget(elementKinds),
+			recommendedScale: null,
+			qualityMarginPx: trailingQualityMargin,
+		});
+	}
+
+	const lowContentUtilization = Boolean(
+		qualityMetrics.contentAreaRatio !== null
+		&& qualityMetrics.contentAreaRatio < resolvedConfig.minContentAreaRatio
+		&& measurement.pageScale !== null
+		&& measurement.pageScale < resolvedConfig.lowContentUtilizationScaleThreshold
+		&& hasDenseLayoutContent(elementKinds)
+		&& hasAutoPatchableQualityContent(elementKinds)
+	);
+	if (lowContentUtilization) {
+		findings.push({
+			kind: 'low-content-utilization',
+			target: 'content',
+			message: `Slide uses ${(qualityMetrics.contentAreaRatio! * 100).toFixed(1)}% of the safe area while already scaled down`,
+			recommendedPatch: dominantPatchTarget(elementKinds),
+			recommendedScale: null,
+			contentAreaRatio: qualityMetrics.contentAreaRatio ?? undefined,
+		});
+	}
+
 	if (measurement.pageScale !== null && measurement.pageScale < resolvedConfig.minReadableScale) {
 		findings.push({
 			kind: 'unreadable-scale',
@@ -263,6 +363,13 @@ export function analyzeRenderedSlideMeasurement(
 		safeRect: measurement.safeRect,
 		contentBounds: measurement.contentBounds,
 		pageScale: measurement.pageScale,
+		effectiveMinFontPx: qualityMetrics.effectiveMinFontPx,
+		svgTextMinFontPx: qualityMetrics.svgTextMinFontPx,
+		tableBodyMinFontPx: qualityMetrics.tableBodyMinFontPx,
+		codeMinFontPx: qualityMetrics.codeMinFontPx,
+		qualityMargins: qualityMetrics.qualityMargins,
+		contentAreaRatio: qualityMetrics.contentAreaRatio,
+		lowContentUtilization,
 		findings,
 		elementKinds,
 		slotZones,
@@ -273,11 +380,20 @@ export function summarizeLayoutAudits(
 	audits: SlidevLayoutAudit[],
 	retryCount = 0,
 ): SlidevLayoutAuditSummary {
+	const hardOverflowCount = audits.reduce((total, audit) => total + audit.findings.filter(finding => finding.kind === 'overflow').length, 0);
+	const unreadableScaleCount = audits.reduce((total, audit) => total + audit.findings.filter(finding => finding.kind === 'unreadable-scale').length, 0);
 	return {
 		slideCount: audits.length,
-		overflowCount: audits.reduce((total, audit) => total + audit.findings.filter(finding => finding.kind === 'overflow').length, 0),
-		unreadableCount: audits.reduce((total, audit) => total + audit.findings.filter(finding => finding.kind === 'unreadable-scale').length, 0),
+		overflowCount: hardOverflowCount,
+		unreadableCount: unreadableScaleCount,
 		renderErrorCount: audits.reduce((total, audit) => total + audit.findings.filter(finding => finding.kind === 'render-error').length, 0),
+		hardOverflowCount,
+		unreadableScaleCount,
+		lowEffectiveFontCount: audits.reduce((total, audit) => total + audit.findings.filter(finding => finding.kind === 'low-effective-font').length, 0),
+		qualityMarginWarningCount: audits.reduce((total, audit) => total + audit.findings.filter(finding => finding.kind === 'tight-margin').length, 0),
+		lowContentUtilizationCount: audits.reduce((total, audit) => total + audit.findings.filter(finding => finding.kind === 'low-content-utilization').length, 0),
+		preSplitCount: audits.reduce((total, audit) => total + (audit.preSplitCount ?? 0), 0),
+		postPatchCount: retryCount,
 		retryCount,
 	};
 }
@@ -307,23 +423,6 @@ export function patchDeckWithLayoutAudit(
 		const bestScale = chooseBestRecommendedScale(audit.findings);
 		const currentZoom = readSlideZoom(currentSlide) ?? 1;
 		const nextZoom = deriveMeasuredPatchZoom(currentZoom, bestScale);
-
-		if (shouldSplitDiagramBeforeZoom(audit.findings, nextZoom, resolvedConfig.minReadableScale)) {
-			const splitResult = splitOverflowingMermaidSlide(currentSlide, audit, currentZoom, nextZoom, resolvedConfig);
-			if (splitResult.slides) {
-				slides.splice(targetIndex, 1, ...splitResult.slides);
-				changedSlides.push(audit.slide);
-				slideOffset += splitResult.slides.length - 1;
-				continue;
-			}
-			if (nextZoom === null || nextZoom < resolvedConfig.minReadableScale) {
-				blockedSlides.push({
-					slide: audit.slide,
-					reason: splitResult.reason ?? 'diagram overflow requires manual review',
-				});
-				continue;
-			}
-		}
 
 		if (shouldSplitSimpleSlideBeforeZoom(audit.findings)) {
 			const splitResult = splitOverflowingSimpleSlide(currentSlide, audit, currentZoom, nextZoom, resolvedConfig);
@@ -427,6 +526,189 @@ export function patchDeckWithLayoutAudit(
 	};
 }
 
+function collectRenderedQualityMetrics(measurement: RenderedSlideMeasurement): {
+	effectiveMinFontPx: number | null;
+	svgTextMinFontPx: number | null;
+	tableBodyMinFontPx: number | null;
+	codeMinFontPx: number | null;
+	qualityMargins: SlidevQualityMargins | null;
+	contentAreaRatio: number | null;
+} {
+	const elementEffectiveFonts = measurement.elements
+		.map(element => normalizePositiveNumber(element.effectiveMinFontPx))
+		.filter((value): value is number => value !== null);
+	const elementSvgFonts = measurement.elements
+		.map(element => normalizePositiveNumber(element.svgTextMinFontPx))
+		.filter((value): value is number => value !== null);
+	const tableFonts = measurement.elements
+		.filter(element => element.kind === 'table')
+		.map(element => normalizePositiveNumber(element.effectiveMinFontPx))
+		.filter((value): value is number => value !== null);
+	const codeFonts = measurement.elements
+		.filter(element => element.kind === 'code')
+		.map(element => normalizePositiveNumber(element.effectiveMinFontPx))
+		.filter((value): value is number => value !== null);
+
+	return {
+		effectiveMinFontPx: normalizePositiveNumber(measurement.effectiveMinFontPx) ?? minNumber(elementEffectiveFonts),
+		svgTextMinFontPx: normalizePositiveNumber(measurement.svgTextMinFontPx) ?? minNumber(elementSvgFonts),
+		tableBodyMinFontPx: normalizePositiveNumber(measurement.tableBodyMinFontPx) ?? minNumber(tableFonts),
+		codeMinFontPx: normalizePositiveNumber(measurement.codeMinFontPx) ?? minNumber(codeFonts),
+		qualityMargins: measurement.qualityMargins ?? computeQualityMargins(measurement.contentBounds, measurement.safeRect),
+		contentAreaRatio: normalizePositiveNumber(measurement.contentAreaRatio) ?? computeContentAreaRatio(measurement.contentBounds, measurement.safeRect),
+	};
+}
+
+function findLowEffectiveFontIssues(
+	measurement: RenderedSlideMeasurement,
+	elementKinds: SlidevMeasuredElementKind[],
+	config: SlidevLayoutAuditConfig,
+): SlidevLayoutFinding[] {
+	const candidates = new Map<SlidevMeasuredElementKind, {
+		fontPx: number;
+		thresholdPx: number;
+		textPreview?: string;
+		slotZone?: string;
+		slotOwner?: boolean;
+	}>();
+
+	for (const element of measurement.elements) {
+		const fontPx = normalizePositiveNumber(element.effectiveMinFontPx);
+		if (fontPx === null || element.kind === 'image') {
+			continue;
+		}
+		if (shouldPreserveMermaidFontFinding(element.kind, elementKinds)) {
+			continue;
+		}
+
+		const thresholdPx = fontThresholdForElement(element, config);
+		if (fontPx >= thresholdPx) {
+			continue;
+		}
+
+		const existing = candidates.get(element.kind);
+		if (!existing || fontPx < existing.fontPx) {
+			candidates.set(element.kind, {
+				fontPx,
+				thresholdPx,
+				textPreview: element.textPreview,
+				slotZone: element.slotZone,
+				slotOwner: element.slotOwner,
+			});
+		}
+	}
+
+	return Array.from(candidates.entries()).map(([kind, candidate]) => ({
+		kind: 'low-effective-font' as const,
+		target: kind,
+		message: `${kind} effective font ${candidate.fontPx.toFixed(1)}px is below the quality floor ${candidate.thresholdPx}px`,
+		recommendedPatch: qualityPatchTargetForElement(kind, elementKinds),
+		recommendedScale: null,
+		slotZone: candidate.slotZone,
+		slotOwner: candidate.slotOwner,
+		textPreview: candidate.textPreview,
+		effectiveFontPx: candidate.fontPx,
+		fontThresholdPx: candidate.thresholdPx,
+	}));
+}
+
+function fontThresholdForElement(
+	element: SlidevMeasuredElement,
+	config: SlidevLayoutAuditConfig,
+): number {
+	switch (element.kind) {
+		case 'mermaid':
+			return element.svgTextMinFontPx !== null && element.svgTextMinFontPx !== undefined
+				? config.minSvgTextFontPx
+				: config.minEffectiveFontPx;
+		case 'table':
+			return config.minTableBodyFontPx;
+		case 'code':
+			return config.minCodeFontPx;
+		default:
+			return config.minEffectiveFontPx;
+	}
+}
+
+function qualityPatchTargetForElement(
+	kind: SlidevMeasuredElementKind,
+	elementKinds: SlidevMeasuredElementKind[],
+): SlidevLayoutPatchKind {
+	switch (kind) {
+		case 'mermaid':
+			return 'manual-review';
+		case 'table':
+			return 'split-table';
+		case 'code':
+			return 'reduce-code';
+		default:
+			if (elementKinds.some(elementKind => elementKind === 'mermaid' || elementKind === 'table' || elementKind === 'code')) {
+				return dominantPatchTarget(elementKinds);
+			}
+			return 'split-slide';
+	}
+}
+
+function computeQualityMargins(contentBounds: SlidevRect | null, safeRect: SlidevRect | null): SlidevQualityMargins | null {
+	if (!contentBounds || !safeRect) {
+		return null;
+	}
+
+	const margins = {
+		left: contentBounds.left - safeRect.left,
+		top: contentBounds.top - safeRect.top,
+		right: safeRect.right - contentBounds.right,
+		bottom: safeRect.bottom - contentBounds.bottom,
+	};
+	return {
+		...margins,
+		min: Math.min(margins.left, margins.top, margins.right, margins.bottom),
+	};
+}
+
+function computeContentAreaRatio(contentBounds: SlidevRect | null, safeRect: SlidevRect | null): number | null {
+	if (!contentBounds || !safeRect || contentBounds.width <= 0 || contentBounds.height <= 0 || safeRect.width <= 0 || safeRect.height <= 0) {
+		return null;
+	}
+
+	return Math.min(1, (contentBounds.width * contentBounds.height) / (safeRect.width * safeRect.height));
+}
+
+function normalizePositiveNumber(value: number | null | undefined): number | null {
+	return typeof value === 'number' && Number.isFinite(value) && value > 0 ? value : null;
+}
+
+function minNumber(values: number[]): number | null {
+	return values.length > 0 ? Math.min(...values) : null;
+}
+
+function hasDenseLayoutContent(elementKinds: SlidevMeasuredElementKind[]): boolean {
+	return elementKinds.some(kind => kind === 'mermaid' || kind === 'table' || kind === 'code' || kind === 'text' || kind === 'other');
+}
+
+function hasAutoPatchableQualityContent(elementKinds: SlidevMeasuredElementKind[]): boolean {
+	if (elementKinds.some(kind => kind === 'table' || kind === 'code')) {
+		return true;
+	}
+	if (elementKinds.includes('mermaid')) {
+		return false;
+	}
+	return elementKinds.some(kind => kind === 'text' || kind === 'other');
+}
+
+function shouldPreserveMermaidFontFinding(
+	kind: SlidevMeasuredElementKind,
+	elementKinds: SlidevMeasuredElementKind[],
+): boolean {
+	if (!elementKinds.includes('mermaid')) {
+		return false;
+	}
+	if (elementKinds.some(elementKind => elementKind === 'table' || elementKind === 'code')) {
+		return kind === 'mermaid';
+	}
+	return kind === 'mermaid' || kind === 'text' || kind === 'other';
+}
+
 function describeElementOverflow(kind: SlidevMeasuredElementKind, scrollOverflow: boolean): string {
 	if (scrollOverflow) {
 		switch (kind) {
@@ -452,14 +734,14 @@ function describeElementOverflow(kind: SlidevMeasuredElementKind, scrollOverflow
 }
 
 function dominantPatchTarget(elementKinds: SlidevMeasuredElementKind[]): SlidevLayoutPatchKind {
-	if (elementKinds.includes('mermaid')) {
-		return 'split-diagram';
-	}
 	if (elementKinds.includes('table')) {
 		return 'split-table';
 	}
 	if (elementKinds.includes('code')) {
 		return 'reduce-code';
+	}
+	if (elementKinds.includes('mermaid')) {
+		return 'reduce-zoom';
 	}
 	return 'split-slide';
 }
@@ -467,7 +749,7 @@ function dominantPatchTarget(elementKinds: SlidevMeasuredElementKind[]): SlidevL
 function patchTargetForElement(kind: SlidevMeasuredElementKind): SlidevLayoutPatchKind {
 	switch (kind) {
 		case 'mermaid':
-			return 'split-diagram';
+			return 'reduce-zoom';
 		case 'table':
 			return 'split-table';
 		case 'code':
@@ -687,22 +969,6 @@ function splitSlideDeck(deckMarkdown: string): string[] {
 	return slides;
 }
 
-function shouldSplitDiagramBeforeZoom(
-	findings: SlidevLayoutFinding[],
-	nextZoom: number | null,
-	minReadableScale: number,
-): boolean {
-	if (!findings.some(finding => finding.recommendedPatch === 'split-diagram')) {
-		return false;
-	}
-
-	if (findings.some(finding => finding.kind === 'unreadable-scale')) {
-		return true;
-	}
-
-	return nextZoom !== null && nextZoom < minReadableScale;
-}
-
 function shouldSplitSimpleSlideBeforeZoom(findings: SlidevLayoutFinding[]): boolean {
 	return findings.some(finding => finding.recommendedPatch === 'split-slide');
 }
@@ -715,6 +981,7 @@ function shouldSplitTableBeforeZoom(
 	return findings.some(finding => finding.recommendedPatch === 'split-table')
 		&& (
 			findings.some(finding => finding.kind === 'unreadable-scale')
+			|| hasQualityStructuralFinding(findings)
 			|| (nextZoom !== null && nextZoom < minReadableScale)
 			|| hasTableStructuralOverflow(findings)
 		);
@@ -728,9 +995,16 @@ function shouldSplitCodeBeforeZoom(
 	return findings.some(finding => finding.recommendedPatch === 'reduce-code')
 		&& (
 			findings.some(finding => finding.kind === 'unreadable-scale')
+			|| hasQualityStructuralFinding(findings)
 			|| (nextZoom !== null && nextZoom < minReadableScale)
 			|| hasCodeStructuralOverflow(findings)
 		);
+}
+
+function hasQualityStructuralFinding(findings: SlidevLayoutFinding[]): boolean {
+	return findings.some(finding => finding.kind === 'low-effective-font'
+		|| finding.kind === 'tight-margin'
+		|| finding.kind === 'low-content-utilization');
 }
 
 function hasSupportedSlotMarkers(slideMarkdown: string): boolean {
@@ -739,7 +1013,6 @@ function hasSupportedSlotMarkers(slideMarkdown: string): boolean {
 
 function hasStructuralSplitCandidate(findings: SlidevLayoutFinding[]): boolean {
 	return findings.some(finding => [
-		'split-diagram',
 		'split-table',
 		'reduce-code',
 		'split-slide',
@@ -754,58 +1027,6 @@ function hasCodeStructuralOverflow(findings: SlidevLayoutFinding[]): boolean {
 	return findings.some(finding => finding.target === 'code'
 		&& finding.scrollOverflow === true
 		&& (finding.overflowAxis === 'height' || finding.overflowAxis === 'both'));
-}
-
-function splitOverflowingMermaidSlide(
-	slideMarkdown: string,
-	audit: SlidevLayoutAudit,
-	currentZoom: number,
-	nextZoom: number | null,
-	config: SlidevLayoutAuditConfig,
-): { slides: string[] | null; reason?: string } {
-	const surface = extractPatchableSlideSurface(slideMarkdown);
-	if (!surface) {
-		return { slides: null, reason: 'diagram slide uses deck headmatter or unsupported layout syntax' };
-	}
-
-	const mermaidBlock = findSingleMermaidFenceBlock(surface.bodyLines);
-	if (!mermaidBlock) {
-		return { slides: null, reason: 'diagram split requires exactly one Mermaid fence' };
-	}
-
-	const targetChunkCount = resolveStructuralChunkCount(audit, currentZoom, nextZoom, config.minReadableScale);
-	const mermaidChunks = splitMermaidFenceIntoChunks(mermaidBlock.bodyLines, targetChunkCount);
-	if (!mermaidChunks || mermaidChunks.length < 2) {
-		return { slides: null, reason: 'Mermaid structure does not expose safe top-level split boundaries' };
-	}
-
-	const prefixLines = trimOuterBlankLines(surface.bodyLines.slice(0, mermaidBlock.startLine));
-	const suffixLines = trimOuterBlankLines(surface.bodyLines.slice(mermaidBlock.endLine + 1));
-	const continuationHeading = findFirstHeadingLine(prefixLines.length > 0 ? prefixLines : surface.bodyLines);
-	const cleanFrontmatter = stripFrontmatterKey(surface.frontmatterLines, 'zoom');
-	const splitSlides: string[] = [];
-
-	for (let index = 0; index < mermaidChunks.length; index++) {
-		const bodyLines: string[] = [];
-		if (index === 0) {
-			bodyLines.push(...prefixLines);
-		} else if (continuationHeading) {
-			bodyLines.push(continuationHeading, '');
-		}
-
-		bodyLines.push(mermaidBlock.opener, ...mermaidChunks[index], mermaidBlock.closer);
-
-		if (index === mermaidChunks.length - 1 && suffixLines.length > 0) {
-			const trailingLines = dropLeadingHeadingLine(suffixLines, continuationHeading);
-			if (trailingLines.length > 0) {
-				bodyLines.push('', ...trailingLines);
-			}
-		}
-
-		splitSlides.push(assemblePatchedSlide(cleanFrontmatter, bodyLines));
-	}
-
-	return { slides: splitSlides };
 }
 
 function splitOverflowingMarkdownTableSlide(
@@ -1060,13 +1281,6 @@ function applyZoneStructuralSplit(
 	nextZoom: number | null,
 	config: SlidevLayoutAuditConfig,
 ): { slides: string[] | null; reason?: string } {
-	if (shouldSplitDiagramBeforeZoom(audit.findings, nextZoom, config.minReadableScale)) {
-		const result = splitOverflowingMermaidSlide(zoneMarkdown, audit, currentZoom, nextZoom, config);
-		if (result.slides) {
-			return result;
-		}
-	}
-
 	if (shouldSplitSimpleSlideBeforeZoom(audit.findings)) {
 		const result = splitOverflowingSimpleSlide(zoneMarkdown, audit, currentZoom, nextZoom, config);
 		if (result.slides) {
@@ -1294,9 +1508,6 @@ function pickSlotLayoutTargetZone(
 	}
 
 	const matchers: Array<(lines: string[]) => boolean> = [];
-	if (audit.findings.some(finding => finding.recommendedPatch === 'split-diagram')) {
-		matchers.push(lines => findSingleMermaidFenceBlock(lines) !== null);
-	}
 	if (audit.findings.some(finding => finding.recommendedPatch === 'split-table')) {
 		matchers.push(lines => findSingleMarkdownTableBlock(lines) !== null);
 	}
@@ -1521,6 +1732,15 @@ function computeSlotFindingSeverityScore(finding: SlidevLayoutFinding): number {
 	if (finding.kind === 'unreadable-scale') {
 		score += 32;
 	}
+	if (finding.kind === 'low-effective-font') {
+		score += 40;
+	}
+	if (finding.kind === 'tight-margin') {
+		score += 18;
+	}
+	if (finding.kind === 'low-content-utilization') {
+		score += 22;
+	}
 	if (finding.slotOwner) {
 		score += 8;
 	}
@@ -1702,48 +1922,6 @@ function stripFrontmatterKey(frontmatterLines: string[], key: string): string[] 
 	return [...contentLines, '---'];
 }
 
-function findSingleMermaidFenceBlock(lines: string[]): FencedBlock | null {
-	let block: FencedBlock | null = null;
-	let activeFenceMarker: string | null = null;
-	let opener = '';
-	let startLine = -1;
-	let bodyLines: string[] = [];
-
-	for (let index = 0; index < lines.length; index++) {
-		const line = lines[index];
-		const trimmed = line.trim();
-		const openingMatch = trimmed.match(/^(```+|~~~+)\s*mermaid(?:\s+\{[^}]+\})?\s*$/i);
-		if (!activeFenceMarker && openingMatch) {
-			if (block) {
-				return null;
-			}
-			activeFenceMarker = openingMatch[1][0] === '~' ? '~~~' : '```';
-			opener = line;
-			startLine = index;
-			bodyLines = [];
-			continue;
-		}
-
-		if (activeFenceMarker && new RegExp(`^${escapeRegExp(activeFenceMarker)}+\\s*$`).test(trimmed)) {
-			block = {
-				startLine,
-				endLine: index,
-				opener,
-				closer: line,
-				bodyLines: trimOuterBlankLines(bodyLines),
-			};
-			activeFenceMarker = null;
-			continue;
-		}
-
-		if (activeFenceMarker) {
-			bodyLines.push(line);
-		}
-	}
-
-	return activeFenceMarker ? null : block;
-}
-
 function findSingleCodeFenceBlock(lines: string[]): FencedBlock | null {
 	let block: FencedBlock | null = null;
 	let activeFenceMarker: string | null = null;
@@ -1868,24 +2046,6 @@ function resolveStructuralChunkCount(
 	return Math.max(2, Math.min(4, Math.ceil(requiredFactor)));
 }
 
-function splitMermaidFenceIntoChunks(bodyLines: string[], targetChunkCount: number): string[][] | null {
-	const splitPlan = buildMermaidSplitPlan(bodyLines);
-	if (!splitPlan || splitPlan.segments.length < 2) {
-		return null;
-	}
-
-	const cappedChunkCount = Math.max(2, Math.min(targetChunkCount, splitPlan.segments.length));
-	const chunkedSegments = chunkLineBlocks(splitPlan.segments, cappedChunkCount);
-	if (chunkedSegments.length < 2) {
-		return null;
-	}
-
-	return chunkedSegments.map(chunk => trimOuterBlankLines([
-		...splitPlan.repeatedLines,
-		...chunk,
-	]));
-}
-
 function splitCodeFenceIntoChunks(bodyLines: string[], targetChunkCount: number): string[][] | null {
 	const codeSegments = collectCodeFenceSegments(bodyLines);
 	if (codeSegments.length >= 2) {
@@ -1955,112 +2115,6 @@ function splitMarkdownTableToRecordSlides(tableBlock: MarkdownTableBlock, target
 		}
 		return emitted;
 	}));
-}
-
-function buildMermaidSplitPlan(bodyLines: string[]): MermaidSplitPlan | null {
-	const trimmedBody = trimOuterBlankLines(bodyLines);
-	const typeIndex = trimmedBody.findIndex(line => {
-		const trimmed = line.trim();
-		return trimmed.length > 0 && !trimmed.startsWith('%%');
-	});
-	if (typeIndex < 0) {
-		return null;
-	}
-
-	const repeatedPrefix = trimOuterBlankLines(trimmedBody.slice(0, typeIndex));
-	const typeLine = trimmedBody[typeIndex];
-	const diagramBody = trimOuterBlankLines(trimmedBody.slice(typeIndex + 1));
-	const normalizedType = typeLine.trim().toLowerCase();
-
-	if (normalizedType.startsWith('sequencediagram')) {
-		return buildSequenceDiagramSplitPlan(repeatedPrefix, typeLine, diagramBody);
-	}
-
-	if (normalizedType.startsWith('flowchart') || normalizedType.startsWith('graph') || normalizedType.startsWith('mindmap')) {
-	const segments = collectMermaidTopLevelSegments(diagramBody, {
-		openPatterns: [/^subgraph\b/i],
-		closePattern: /^end\b/i,
-	});
-		return segments.length > 1
-			? {
-				repeatedLines: [...repeatedPrefix, typeLine],
-				segments,
-			}
-			: null;
-	}
-
-	return null;
-}
-
-function buildSequenceDiagramSplitPlan(
-	repeatedPrefix: string[],
-	typeLine: string,
-	bodyLines: string[],
-): MermaidSplitPlan | null {
-	const segments = collectMermaidTopLevelSegments(bodyLines, {
-		openPatterns: [/^(alt|opt|loop|par|critical|rect|box)\b/i],
-		closePattern: /^end\b/i,
-	});
-	if (segments.length < 2) {
-		return null;
-	}
-
-	const repeatedLines = [...repeatedPrefix, typeLine];
-	let bodyStart = 0;
-	while (bodyStart < segments.length && isSequenceInvariantSegment(segments[bodyStart])) {
-		repeatedLines.push(...segments[bodyStart], '');
-		bodyStart += 1;
-	}
-
-	const bodySegments = segments.slice(bodyStart);
-	if (bodySegments.length < 2) {
-		return null;
-	}
-
-	return {
-		repeatedLines: trimOuterBlankLines(repeatedLines),
-		segments: bodySegments,
-	};
-}
-
-function isSequenceInvariantSegment(segment: string[]): boolean {
-	const meaningfulLines = segment.map(line => line.trim()).filter(Boolean);
-	return meaningfulLines.length > 0 && meaningfulLines.every(line => /^(%%|autonumber\b|title\b|participant\b|actor\b|create\s+participant\b|destroy\s+participant\b|box\b|end\b)/i.test(line));
-}
-
-function collectMermaidTopLevelSegments(
-	lines: string[],
-	options: {
-		openPatterns: RegExp[];
-		closePattern: RegExp;
-	},
-): string[][] {
-	const segments: string[][] = [];
-	let current: string[] = [];
-	let depth = 0;
-
-	for (const line of lines) {
-		const trimmed = line.trim();
-		const currentHasContent = current.some(hasSubstantiveLine);
-		if (depth === 0 && currentHasContent && trimmed.length > 0) {
-			segments.push(trimOuterBlankLines(current));
-			current = [];
-		}
-
-		current.push(line);
-		if (options.openPatterns.some(pattern => pattern.test(trimmed))) {
-			depth += 1;
-		}
-		if (options.closePattern.test(trimmed)) {
-			depth = Math.max(0, depth - 1);
-		}
-	}
-
-	if (current.some(hasSubstantiveLine)) {
-		segments.push(trimOuterBlankLines(current));
-	}
-
-	return segments.filter(segment => segment.some(hasSubstantiveLine));
 }
 
 function hasSubstantiveLine(line: string): boolean {

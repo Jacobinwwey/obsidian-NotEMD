@@ -14,8 +14,16 @@ const path = require('path');
 const esbuild = require('esbuild');
 
 const LAYOUT_AUDIT_CONFIG = {
-	minReadableScale: 0.24,
+	overflowTolerancePx: 6,
+	minReadableScale: 0.28,
 	maxAutoPatchPasses: 6,
+	minEffectiveFontPx: 10,
+	minSvgTextFontPx: 9,
+	minTableBodyFontPx: 10,
+	minCodeFontPx: 10,
+	minQualityMarginPx: 18,
+	minContentAreaRatio: 0.18,
+	lowContentUtilizationScaleThreshold: 0.55,
 };
 
 function parseArgs(argv) {

@@ -15,6 +15,7 @@ export {
 	generateSlidevExportOutline,
 	getSlidevExportOutlinePath
 } from './slidevSourcePreparer';
+export { planSlidevMarkdownLayout, formatSlideLayoutPlanForPrompt } from './slidevLayoutPlan';
 export { exportSlidevHtml, exportSlidevHtmlWithOutcome, exportSlidevPdf, exportSlidevPng, autoInstallSlidev, autoInstallPlaywright } from './slidevExporter';
 export { convergeSlidevDeckLayout } from './slidevLayoutWorkflow';
 export { exportVideoMp4, getFfmpegInstallInstructions } from './videoExporter';

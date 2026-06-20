@@ -3,7 +3,7 @@ date: 2026-06-20
 last_updated: 2026-06-20
 topic: slidev-layout-quality-and-canvas-roadmap
 canonical: true
-status: progress-audit-and-next-plan
+status: rendered-quality-and-layout-plan-implemented
 ---
 
 # Slidev 布局质量与画布规划路线
@@ -26,9 +26,10 @@ status: progress-audit-and-next-plan
 
 1. 分支：`main`
 2. 远端：`origin/main`
-3. 当前头部：`71c77ed fix(slidev-export): refine sidebar workflow`
+3. 本批次实现内容：rendered quality gate + clean-room `SlideLayoutPlan` 第一切片
 4. 真实源文件：`docs/architecture.zh-CN.md`
-5. 当前真实导出检查产物：`docs/export/_slidev-sources/` 与 `docs/export/architecture.zh-CN-slides/`
+5. 本批次真实导出证据包：`/home/jacob/slidev-export-review/2026-06-20-quality/`
+6. 本批次成功输出归档：`/home/jacob/slidev-export-review/2026-06-20-quality/preserve-mermaid-success-export-final/`
 
 当前已落地事实：
 
@@ -38,15 +39,19 @@ status: progress-audit-and-next-plan
 4. `convergeSlidevDeckLayout()` 已进入产品导出路径与维护者 verifier；
 5. HTML native standalone 有严格 gate；
 6. Playwright 默认审计完整 prepared deck；
-7. patcher 已支持 measured zoom、部分局部 `<Transform>`、Mermaid/table/code/simple slide/slot layout 结构化拆分；
-8. 当前生成产物可被 Git 看到，用于本地视觉检查，但不应提交进 `main`。
+7. patcher 已支持 measured zoom、部分局部 `<Transform>`、table/code/simple slide/slot layout 结构化拆分；Mermaid 默认保留源 fence，不做自动拆图；
+8. rendered audit 已新增 effective font、SVG/table/code 最小字号、quality margin 与 content-area ratio；
+9. source preparation 已新增 clean-room `SlideLayoutPlan` 预算，并把 deterministic layout budget 接入非大纲、大纲继续导出与 outline prompt；
+10. `architecture.zh-CN.md` strict native standalone rerun 已通过：`slideCount = 29`，源文档与导出 deck 均为 3 个 Mermaid block，hard overflow / unreadable scale / low effective font / quality margin warning / low utilization 均为零；
+11. 当前生成产物可被 Git 看到，用于本地视觉检查，但不应提交进 `main`。
 
 当前未完成事实：
 
-1. 现有 gate 仍偏“硬正确性”：不裁切、能打开、能 standalone；
-2. 现有 gate 尚未充分衡量演示质量：有效字号、空间利用率、质量边距、图表语义拆分质量；
-3. 现有 pre-generation 阶段缺少确定性的布局规划 IR，LLM 仍可能把过密图表塞进一页；
-4. `ref/infinite-canvas` 的思想尚未转化成 NoteMD 自有的 clean-room geometry planner。
+1. semantic split 仍只覆盖当前已有 table/code/text 支持集；Mermaid 源图保持后，过密原图只能通过布局/zoom/Transform 或人工复核处理；
+2. effective font 目前以 DOM computed font size 乘 Slidev page zoom 为主，局部 CSS transform 的精确字体感知仍是后续增强点；
+3. `SlideLayoutPlan` 是生成前预算，不替代 Playwright rendered audit；
+4. 真实 `architecture.zh-CN.md` 仍需要每批次跑 strict standalone 验收，不能用单测替代；
+5. 当前真实 deck 仍可能出现 `zoom` 小于 `0.72` 的 Mermaid 页面；在“不改原 Mermaid 图内容”的约束下，低 zoom 有时是保留源图的代价，但不能扩散到 prose/table/code。
 
 ## 3. 先前要求与当前代码逐项对比
 
@@ -56,10 +61,10 @@ status: progress-audit-and-next-plan
 | 非大纲模式也要嵌入 Slidev skill 流程 | source preparation 会加载完整 skill references，不再只读 `SKILL.md` | 已落地 | skill reference 数继续作为 verifier 报告字段 |
 | 必须使用本地 Slidev fork | CLI 解析优先使用 `$HOME/slidev/packages/slidev/bin/slidev.mjs` | 已落地 | verifier 中继续检查 fork 路径 |
 | standalone 文件必须真实可打开 | strict native gate 检查 `actualMode = standalone`、`requiresLocalServer = false`、`loaderGaps = []` | 已落地 | 新 standalone 验收应继续走带日期 evidence package |
-| 不能提交测试生成文件 | `docs/export/` 产物可见但默认不提交 | 部分依赖操作者纪律 | 本批次收口必须归档/清理生成产物，保证 commit 不夹带测试输出 |
-| zoom 参数应由检测结果决定 | 当前 overflow patch 已用 measured fit scale 派生 `zoom` 或局部 transform scale | 部分落地 | quality gate 还不能只用 overflow scale，需要 effective font 与 margin 约束 |
+| 不能提交测试生成文件 | `docs/export/` 产物可见但默认不提交，本批次真实输出已归档到仓库外 | 已收口 | 最终 commit 前继续检查 `git status --short docs/export` |
+| zoom 参数应由检测结果决定 | overflow patch 已用 measured fit scale；quality finding 现在会优先触发结构化拆分 | 已推进 | 继续避免把低 `zoom` 当最终修复手段 |
 | 完整支持 Slidev skill references | skill root 与 reference count 已进入 verifier | 已落地 | 可考虑上游 skill PR，但只放通用 guardrails |
-| 参考无限画布优化图/表/画布可见范围 | 文档已明确 clean-room 参考方向，但代码尚未有 layout planning IR | 未落地到核心实现 | 下一阶段新增 `SlideGeometry` / `SlideLayoutPlan`，不要复制 AGPL 代码 |
+| 参考无限画布优化图/表/画布可见范围 | 已新增 clean-room `SlideLayoutPlan`，按 world-rect / viewport-fit 思想做生成前预算 | 已落地第一切片 | 后续加强语义拆分算法，不复制 AGPL 代码 |
 
 ## 4. 现有架构推进进度
 
@@ -96,26 +101,52 @@ status: progress-audit-and-next-plan
 2. table cell 字号、行高和底部边距足够；
 3. code token 在投影或共享屏幕里可读；
 4. 图表是否只占左半边而右侧大面积空白；
-5. 图表是否应该被拆成 overview + details，而不是整页 `zoom: 0.285`；
+5. Mermaid 源图在保留完整内容时是否需要更明确的 fit/zoom/Transform 或人工复核证据；
 6. slide 是否“未裁切但贴边”，导致视觉质量差。
 
 这不是实现细节，而是验收定义缺失。
 
-## 5. `architecture.zh-CN` 真实输出暴露的问题
+## 5. `architecture.zh-CN` 真实输出暴露的问题与本批次验收
 
-当前生成 deck 中有明确低 zoom 证据：
+先前生成 deck 中有明确低 zoom 证据：
 
 1. 系统架构页：`zoom: 0.285`
 2. LLM 调用管道页：`zoom: 0.384`
 3. 图表渲染平台页：`zoom: 0.40`
 
-这些值没有让 Playwright hard gate 失败，因为它们仍高于当前产品路径的 `minReadableScale: 0.24`。但从实际截图看：
+这些值没有让 Playwright hard gate 失败，因为它们仍高于旧产品路径的 `minReadableScale: 0.24`。但从实际截图看：
 
 1. slide 03 没有裁切，但图表集中在左半区，文字接近不可读；
 2. slide 05 没有裁切，但 sequence diagram 文字密度和线条跨度已经过高；
 3. slide 10 表格没有 overflow，但底部空间接近贴边，只是 hard gate 没有把它判为质量问题。
 
 因此，当前 `overflowCount = 0` 与 `unreadableCount = 0` 只能说明“没有硬裁切”，不能说明“演示质量合格”。
+
+本批次修正后，真实 strict standalone rerun 的证据包在：
+
+```text
+/home/jacob/slidev-export-review/2026-06-20-quality/architecture-strict-preserve-mermaid-report-final.json
+/home/jacob/slidev-export-review/2026-06-20-quality/architecture.zh-CN.preserve-mermaid.final.slidev.md
+/home/jacob/slidev-export-review/2026-06-20-quality/preserve-mermaid-success-export-final/
+```
+
+该 rerun 的关键结果：
+
+1. `ok = true`
+2. `actualMode = "standalone"`
+3. `standaloneGate.passed = true`
+4. `skillRootPath = "/home/jacob/slidev/skills/slidev"`
+5. `skillReferenceCount = 52`
+6. `slideCount = 29`
+7. `hardOverflowCount = 0`
+8. `unreadableScaleCount = 0`
+9. `lowEffectiveFontCount = 0`
+10. `qualityMarginWarningCount = 0`
+11. `lowContentUtilizationCount = 0`
+12. `retryCount = 4`
+13. source Mermaid block count = 3，exported Mermaid block count = 3
+
+需要保持批判的一点：成功 deck 仍包含 `zoom: 0.285`、`0.384`、`0.40`。当前它们没有触发 low effective font 或 margin failure，说明 rendered gate 认为它们在这次输出里可接受；但从架构方向看，低 zoom 不应扩散到 table/code/prose。对 Mermaid，下一阶段应该继续增强源图保持的 fit 评估、局部 Transform 与人工复核证据，而不是默认拆原图。
 
 ## 6. `ref/infinite-canvas` 的可借鉴点
 
@@ -131,8 +162,8 @@ status: progress-audit-and-next-plan
 
 1. `SlideBlockGeometry`：每个 heading、paragraph、Mermaid、table、code、image 都有 estimated/intrinsic size；
 2. `SlideViewportFit`：对固定 Slidev safe rect 计算 fit scale、margin、content-area ratio；
-3. `SlideLayoutPlan`：在生成 deck 前决定一页能放什么，何时预拆分；
-4. `SemanticSplitPlan`：对 Mermaid/table/code 做确定性拆分预算；
+3. `SlideLayoutPlan`：在生成 deck 前决定一页能放什么，何时预拆分 table/code/prose，何时对 Mermaid 做源图保持的 fit review；
+4. `SemanticFitPlan`：对 Mermaid 做保持源图的 fit/zoom/Transform 预算，对 table/code 做确定性拆分预算；
 5. rendered audit 仍作为最终事实门。
 
 不建议做：
@@ -148,6 +179,8 @@ status: progress-audit-and-next-plan
 ### Stage 1：增强 rendered quality measurement
 
 目标：把当前 hard gate 扩展成 hard gate + quality gate。
+
+实现状态：已落地到 `src/slideExport/slidevLayoutAudit.ts` 与 `src/slideExport/slidevLayoutWorkflow.ts`。产品路径与 verifier 现在统一使用 `minReadableScale = 0.28`。对 table/code/prose，低有效字号、贴边与低利用率会转换为 `recommendedPatch`；对 Mermaid，低字号保留为 rendered metric，不触发自动拆图。
 
 新增 measurement 字段：
 
@@ -175,6 +208,8 @@ layoutAuditSummary.lowContentUtilizationCount
 
 目标：在 LLM 生成 deck 前做几何预算。
 
+实现状态：已落地到 `src/slideExport/slidevLayoutPlan.ts`，并接入 `buildDeterministicSlidevOutline()`、一次性 LLM deck prompt、大纲继续导出 prompt 与 outline prompt。它只做预算与约束，不拥有最终验收。
+
 建议类型：
 
 ```ts
@@ -186,7 +221,8 @@ interface SlideBlockGeometry {
   intrinsicWidth: number;
   intrinsicHeight: number;
   minReadableFontPx: number;
-  splitAxes: Array<'semantic' | 'rows' | 'columns' | 'time' | 'graph-cluster'>;
+  splitAxes: Array<'semantic' | 'rows' | 'columns'>;
+  fitStressors: Array<'wide' | 'tall' | 'dense-sequence' | 'dense-graph' | 'dense-diagram'>;
 }
 
 interface SlideViewportFit {
@@ -200,6 +236,7 @@ interface SlideViewportFit {
 interface SlideLayoutPlan {
   slides: PlannedSlide[];
   preSplitCount: number;
+  fitReviewCount: number;
   warnings: string[];
 }
 ```
@@ -210,21 +247,25 @@ interface SlideLayoutPlan {
 2. 用 `SlideGeometry`、`SlideViewportFit`、`SlideLayoutPlan` 这类能说明职责的名字；
 3. 不用 bool/enum 参数让同一函数一会儿做 hard gate、一会儿做 quality gate；拆成独立操作。
 
-### Stage 3：Mermaid 语义拆分器
+### Stage 3：Mermaid 源图保持与适配
 
-目标：把大图从“缩小到能塞进一页”改为“生成 overview + details”。
+目标：把 Mermaid 从“自动改写/拆图”改为“保持源 fence，先做布局适配，不能保证阅读质量时明确人工复核”。
 
-拆分策略：
+实现状态：已按用户约束调整为默认不拆 Mermaid。低 effective SVG/Mermaid 字号仍保留在 rendered measurement 字段中，但不再触发 `split-diagram` 或把一张源图改写成多张图；hard overflow 只能尝试保留源图的 measured `zoom` / layout 适配，低于可读下限时进入 blocked/manual-review。
 
-1. `flowchart/graph`：按 subgraph、拓扑层、弱连通分量、边密度拆；
-2. `sequenceDiagram`：按 participant 数、message window、alt/loop 区块拆；
-3. `mindmap`：按一级分支拆；
-4. 图太复杂时生成 overview slide，再生成每个 cluster 的 detail slide；
-5. 每个 detail slide 保留上下文入口，不生成孤立片段。
+保持策略：
+
+1. 不自动把一个 Mermaid fence 改写成多个 Mermaid fence；
+2. LLM prompt 明确要求 preserve each source Mermaid fence；
+3. `SlideLayoutPlan` 对密集 Mermaid 给出 `preserve-source-fit`，而不是 `overview-detail`；
+4. overflow 时先用 measured `zoom` 或可证明不改源图的 layout/Transform；
+5. 单图过密导致“保留完整内容”和“投影可读”不可同时满足时，报告 manual-review，不伪造通过。
 
 ### Stage 4：Table / code quality splitter
 
 目标：避免“没溢出但不可读”的大表和代码块。
+
+实现状态：低 table/code effective font 现在分别触发 `split-table` 与 `reduce-code`，在没有 hard overflow 时也会进入结构化拆分；layout budget 会提前把宽表、长表和长代码标为 pre-split candidates。尚未落地的是更强的 cell-level rewrite 与代码语义 AST 级拆分。
 
 表格策略：
 
@@ -257,15 +298,22 @@ interface SlideLayoutPlan {
 2. hard overflow 为零；
 3. low effective font 为零，或只存在明确记录的 warning；
 4. quality margin warning 不超过约定阈值；
-5. `preSplitCount` 与 `postPatchCount` 可解释；
+5. `preSplitCount`、`fitReviewCount` 与 `postPatchCount` 可解释；
 6. 不出现低于质量阈值的 `zoom` 作为最终主要修复手段。
+
+实现状态：已新增/扩展 unit fixtures：
+
+1. `src/tests/slidevLayoutAudit.test.ts` 覆盖 low effective font measurement、Mermaid 源图保持、table/code 质量 finding 驱动结构拆分、summary 新字段；
+2. `src/tests/slidevLayoutPlan.test.ts` 覆盖 clean-room layout budget 对 Mermaid 的 `preserve-source-fit` 与 table/code 的 pre-split 判断；
+3. `src/tests/slidevSourcePreparer.test.ts` 覆盖 deterministic outline 与 LLM prompt 都带 layout budget；
+4. `src/tests/slidevLayoutWorkflow.test.ts` 更新 summary schema，避免 verifier mock 停留在旧字段。
 
 ## 8. 与上游 Slidev skill PR 的关系
 
 值得上游的内容：
 
 1. 长文档转 deck 应使用完整 references；
-2. 大 Mermaid/table/code 应优先拆分和 overview/detail，而不是只 zoom；
+2. 大 Mermaid 应保留源 fence 并明确 fit/manual-review 边界；table/code 应优先拆分，而不是只 zoom；
 3. 导出后应用真实浏览器检查；
 4. standalone 与 fallback 应区分记录；
 5. 输出目录应在 rebuild 前清理。
@@ -282,13 +330,21 @@ interface SlideLayoutPlan {
 
 ## 9. 后续推进顺序
 
+本批次已完成：
+
+1. Stage 1 measurement 第一切片：`minReadableScale` 口径统一为 `0.28`，新增 effective-font / quality-margin / content-area ratio 报告；
+2. Stage 2 layout planning IR 第一切片：支持 Markdown block、Mermaid、table、code 的预算估算；
+3. Stage 3/4 第一切片：low effective font 可触发 table/code 结构化 patch；Mermaid 改为源图保持，不再自动拆图；
+4. verifier JSON 与 unit fixtures 已覆盖新 summary schema；
+5. 真实 `architecture.zh-CN.md` strict standalone 已重新验收并归档。
+
 建议下一批实现顺序：
 
-1. 先做 Stage 1 measurement，修正 `minReadableScale` 口径，并增加 effective-font / quality-margin 报告；
-2. 再做 Stage 2 layout planning IR，先只支持 Markdown block、Mermaid、table、code；
-3. 再把 Stage 3 Mermaid splitter 接入 source preparation prompt 前置约束；
-4. 再把 Stage 4 table/code 质量拆分补齐；
-5. 最后扩 fixtures 和 verifier JSON，形成稳定回归门。
+1. 增强 Mermaid source-preserving fit：针对原 fence 计算最小可见 zoom、safe rect、可选局部 Transform 与 manual-review 原因；
+2. 增强 Mermaid 可读性报告：把 SVG 最小字号、图 bbox、content-area ratio 作为非改图证据输出，而不是触发拆图；
+3. 增强 table/code 语义改写：宽表转列簇或 record-list，代码按 AST/空行/注释段切分；
+4. 精确测量局部 CSS transform 对有效字号的影响；
+5. 扩展真实 fixture 包，把“保留 Mermaid 源图导致低 zoom 可接受”和“应人工复核”的场景分开，避免 gate 过松或误杀。
 
 不要先做：
 
@@ -304,6 +360,7 @@ interface SlideLayoutPlan {
 
 ```bash
 npm test -- --runInBand src/tests/slidevLayoutAudit.test.ts src/tests/slidevSourcePreparer.test.ts src/tests/slideExportComprehensive.test.ts src/tests/sidebarDomButtonClicks.test.ts
+npm test -- --runInBand src/tests/slidevLayoutPlan.test.ts src/tests/slidevLayoutWorkflow.test.ts
 npm run build
 npm run verify:slidev-export -- --format html --html-mode standalone --require-native-standalone --source architecture.zh-CN.md --json
 git diff --check

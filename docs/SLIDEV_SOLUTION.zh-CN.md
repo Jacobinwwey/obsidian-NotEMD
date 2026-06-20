@@ -145,19 +145,20 @@ npm run verify:slidev-export
 6. Playwright 样本无失败
 7. `layoutAuditSummary.overflowCount = 0`
 8. `layoutAuditSummary.unreadableCount = 0`
+9. `layoutAuditSummary.lowEffectiveFontCount = 0`
+10. quality-margin 与 content-area finding 要么为零，要么能被结构化 patch attempt 解释
 
 ## 当前渲染收敛模型
 
 渲染反馈循环由三部分组成：
 
-1. `prepareSlidevExportSource()` 加载完整 skill，并在 prompt 中要求拆分密集内容。
-2. `convergeSlidevDeckLayout()` 构建 HTML、打开浏览器、测量真实 `slidev-page` 与易溢出元素。
-3. patcher 根据渲染证据应用 slide `zoom`、局部 `<Transform>`、结构化拆分或内容级重写。
+1. `prepareSlidevExportSource()` 加载完整 skill，并在 prompt 中要求保留 Mermaid 源 fence，同时拆分密集 prose/table/code。
+2. `SlideLayoutPlan` 在生成前估算 dense Markdown block，并把 deterministic layout budget 注入 outline 与 LLM prompt。
+3. `convergeSlidevDeckLayout()` 构建 HTML、打开浏览器、测量真实 `slidev-page`、易溢出元素、effective font、quality margin 与 content-area ratio。
+4. patcher 根据渲染证据应用 slide `zoom`、局部 `<Transform>`、结构化拆分或内容级重写；当 low effective font、tight margin 或 low utilization 出现时，table/code/prose 优先结构拆分，Mermaid 默认保持源图不拆。
 
 支持的结构化 patch 范围包括：
 
-- Mermaid `flowchart` / `graph` / `mindmap`
-- Mermaid `sequenceDiagram`
 - 简单标题、段落、列表 slide
 - Markdown 表格拆行、拆列与 record-list fallback
 - 非 Mermaid 代码块分块
@@ -172,14 +173,14 @@ npm run verify:slidev-export
 
 ## Next-level 布局质量路线
 
-当前验收已经能证明“不裁切、能 standalone、真实 UI 等价路径可运行”，但还不能充分证明“演示质量合格”。真实 `architecture.zh-CN.md` 导出中仍有 `zoom: 0.285`、`0.384`、`0.40` 这类低缩放页；它们通过了 hard overflow gate，但视觉上仍可能过小、过空或贴边。
+当前验收已经能证明“不裁切、能 standalone、真实 UI 等价路径可运行”，但还不能单独证明“演示质量合格”。在 Mermaid 源图保持约束下，大型源 Mermaid 图有时仍需要较低 zoom；流程应该记录这个取舍，而不是把一张原图自动改写成多张图。
 
 下一阶段不应替换现有 render-feedback pipeline。正确方向是：
 
 1. 保留 `convergeSlidevDeckLayout()` 作为最终事实门；
 2. 在 source preparation 前增加 clean-room `SlideGeometry` / `SlideLayoutPlan`，借鉴 `ref/infinite-canvas` 的 world rect、union bounds 与 viewport fit 思想，但不复制 AGPL-3.0 实现代码；
 3. 在 rendered audit 中新增 effective font、quality margin、content area ratio 与 low-utilization 指标；
-4. 对 Mermaid/table/code 做预拆分和语义拆分，避免继续把大内容压到低 `zoom`；
+4. 保留 Mermaid 源 fence，对 table/code/prose 做预拆分和语义拆分，避免非 Mermaid 内容继续依赖低 `zoom`；
 5. 将 hard gate 与 quality gate 分开报告：hard overflow 失败仍 fail closed，quality warning 用于推动拆分、重布局或人工复查。
 
 具体路线和进度对比见：

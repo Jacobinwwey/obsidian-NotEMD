@@ -121,17 +121,22 @@ Important pass conditions:
 6. every Playwright sample has `failed: false`
 7. `layoutAuditSummary.overflowCount = 0`
 8. `layoutAuditSummary.unreadableCount = 0`
+9. `layoutAuditSummary.lowEffectiveFontCount = 0`
+10. quality-margin and content-area findings are either zero or explained by a structural patch attempt
 
-Real maintained baseline as of 2026-06-18:
+Real maintained baseline as of 2026-06-20:
 
 1. `node scripts/verify-slidev-export-workflow.cjs --json` on `docs/architecture.zh-CN.md` returns `ok: true`
 2. the report confirms `/home/jacob/slidev/packages/slidev/bin/slidev.mjs`
 3. the report confirms `/home/jacob/slidev/skills/slidev`
 4. default HTML verification now audits the full prepared deck, not only representative slides
-5. the real `architecture.zh-CN` deck converges to `28` slides after bounded patching with `overflowCount = 0`
+5. the real `architecture.zh-CN` deck converges to `29` audited slides after bounded patching with `overflowCount = 0`, while preserving the source Mermaid block count (`3` source blocks, `3` exported blocks)
 6. `PDF` and `PNG` verification on the same real source also return `ok: true` after exporting from the same converged deck
 7. the current local Slidev `52.16.0` fork now passes the strict native standalone gate for the real `architecture.zh-CN` HTML export after fixing NoteMD's loader-binding detector to accept minified identifiers such as `$n`; the final real output is `index-standalone.html`, not a fallback-only `index.html`
 8. existing Slidev deck fixtures now go through isolated prepared working copies, so maintainer verification no longer under-audits them as single-slide files or loses sibling `layouts/*.vue`
+9. rendered audit now includes effective font, SVG text font, table/code minimum font, quality margins, and content-area ratio
+10. low effective font, tight margin, and low utilization now create structural patch recommendations for table/code/prose before whole-slide zoom is reduced further; Mermaid keeps the source fence intact by default
+11. source preparation now injects a clean-room `SlideLayoutPlan` budget into deterministic outlines and LLM deck prompts
 
 Dedicated standalone acceptance evidence is tracked in `docs/maintainer/slidev-standalone-acceptance-2026-06-18.*`. The large generated HTML and screenshot output remains archived outside the repo under `/home/jacob/slidev-export-review/2026-06-18/standalone-strict/` so the main branch does not gain new one-off export artifacts.
 
@@ -141,13 +146,12 @@ The current workflow is now strong enough to reject broken wiring, missing skill
 
 The current render-feedback loop is now:
 
-1. `prepareSlidevExportSource()` still loads the full Slidev skill directory and asks the LLM to split dense sections before export.
-2. `scripts/verify-slidev-export-workflow.cjs` and the product `exportSlidesCommand()` now share the same convergence workflow, which renders the built HTML in Playwright, waits for visible slide content, and measures the actual `slidev-page` root plus overflow-prone elements.
-3. `SlidevOverflowAudit` classifies `overflow`, `unreadable-scale`, and `render-error` from rendered geometry, and now also records slot-zone owner rects, content bounds, scroll overflow, and recommended local transform scales instead of relying only on Markdown heuristics.
-4. `SlidevDeckPatch` now applies overflow-derived slide `zoom` values, zone-local `<Transform>` scales derived from detected out-of-bounds geometry, and escalates to content-level patching when shrinking further would make the slide unreadable or when the rendered finding already recommends structural splitting.
-5. The current structural patcher supports:
-   - Mermaid `flowchart` / `graph` / `mindmap`
-   - Mermaid `sequenceDiagram` with repeated participant declarations
+1. `prepareSlidevExportSource()` still loads the full Slidev skill directory, asks the LLM to preserve source Mermaid fences, and asks it to split dense prose, tables, or code before export.
+2. `SlideLayoutPlan` estimates dense Markdown blocks before generation and feeds a deterministic layout budget into outlines and LLM prompts.
+3. `scripts/verify-slidev-export-workflow.cjs` and the product `exportSlidesCommand()` now share the same convergence workflow, which renders the built HTML in Playwright, waits for visible slide content, and measures the actual `slidev-page` root plus overflow-prone elements.
+4. `SlidevOverflowAudit` classifies `overflow`, `unreadable-scale`, `render-error`, `low-effective-font`, `tight-margin`, and `low-content-utilization` from rendered geometry, and now also records slot-zone owner rects, content bounds, scroll overflow, and recommended local transform scales instead of relying only on Markdown heuristics.
+5. `SlidevDeckPatch` now applies overflow-derived slide `zoom` values, zone-local `<Transform>` scales derived from detected out-of-bounds geometry, and escalates to structural patching for tables, code, or prose when shrinking further would make the slide unreadable or when rendered quality findings recommend splitting.
+6. The current structural patcher supports:
    - simple heading + paragraph/list slides
    - Markdown tables, including row-split and width-driven column decomposition
    - pathological width-heavy tables through deterministic record-list fallback
@@ -164,14 +168,14 @@ Current landed state:
 
 1. `verify:slidev-export` now resolves Jacob's local Slidev fork, Slidev skill references, and Playwright browser cache from workspace-aware paths instead of trusting the current process home blindly.
 2. the maintainer verification chain now measures the visible `slidev-page` root with Playwright, captures Mermaid shadow-host bounding boxes, and fails when the actual visible slide root clips content.
-3. the patcher is no longer zoom-only: it first applies overflow-derived `zoom`, then structurally splits supported Mermaid, Markdown table, code-fence, and simple text/list slides when rendered evidence says further shrinking would be the wrong move.
+3. the patcher is no longer zoom-only: it first applies overflow-derived `zoom`, then structurally splits supported Markdown table, code-fence, and simple text/list slides when rendered evidence says further shrinking would be the wrong move; Mermaid source fences are preserved by default and are not rewritten into several diagrams.
 4. the real product export path now converges the prepared working deck before final `HTML`/`PDF`/`PNG`/`MP4` export, instead of keeping the patch/rebuild loop verifier-only.
 5. existing Slidev deck working copies now live under `_slidev-sources/<deck-basename>/`, and common sibling support entries such as `layouts/`, `public/`, `setup/`, `components/`, `snippets/`, `styles/`, `global-top.vue`, and `global-bottom.vue` are mirrored there when present.
 6. rendered layout audit now also measures direct-text `div`/`section`/`article`/`aside`/`span` blocks, which closes the previous under-audit gap for component-heavy slides.
 7. component-heavy slot zones now carry lightweight owner wrappers inside prepared working copies, so rendered measurements can feed slot ownership, zone-level owner geometry, local overflow scale, and slot-owned descendants that are clipped by `overflow-hidden` back into the patch loop instead of relying only on slide-global inference.
 8. hard overflow remains rooted in the rendered slide root, while `safeRect` stays the conservative fit target for measured scale recommendations; this keeps the gate tied to actual clipping while still steering shrink decisions away from edge-hugging layouts.
 9. `PDF` and `PNG` export now pass `PLAYWRIGHT_BROWSERS_PATH` through the Slidev CLI env so root-run verification can reuse Jacob's browser cache.
-10. the real `docs/architecture.zh-CN.md` HTML workflow now passes with a full-deck Playwright audit, `28` audited slides, `overflowCount = 0`, and bounded retry closure at `retryCount = 4`.
+10. the real `docs/architecture.zh-CN.md` HTML workflow now passes with a full-deck Playwright audit, `overflowCount = 0`, and bounded retry closure.
 11. an additional real maintainer-local structural overflow note now proves that Markdown table decomposition and code-fence chunking can converge through the same verifier path instead of only through unit tests.
 12. a real slot/headmatter Slidev deck now proves that native standalone loader gaps are detected and converted into a working `index.html + start-server.* + README.md` fallback instead of being treated as successful standalone output.
 13. real maintainer-local decks now also prove:
@@ -181,7 +185,7 @@ Current landed state:
    - slot-marked custom layouts backed by a real custom `layouts/*.vue` file
    - component-heavy custom slot layouts converging through zone-level owner-geometry-based local `<Transform>` wrapping, including same-slide multi-zone cases where more than one overflowing transformable slot can be wrapped in the same pass while slot signals and rendered text hints stay as bounded fallback for attribution ties
    - a dense two-zone custom layout where slot-owned descendants originally clipped under `overflow-hidden` are now measured correctly and converge to `ok: true` without forcing whole-slide zoom
-14. the real `docs/architecture.zh-CN.md` strict native standalone run now closes with `actualMode = "standalone"`, `requiresLocalServer = false`, `loaderGaps = []`, `standaloneGate.passed = true`, `28` audited slides, `overflowCount = 0`, `unreadableCount = 0`, `renderErrorCount = 0`, and `retryCount = 4`.
+14. the real `docs/architecture.zh-CN.md` strict native standalone run now closes with `actualMode = "standalone"`, `requiresLocalServer = false`, `loaderGaps = []`, `standaloneGate.passed = true`, `29` audited slides, zero hard overflow / unreadable scale / low effective font / quality margin warning / low utilization findings, and bounded retry closure.
 
 Current gap:
 
@@ -192,14 +196,14 @@ Current gap:
 
 ## Next-Level Layout Quality Direction
 
-The current acceptance proves that export does not clip, can pass strict standalone, and follows the real UI-equivalent workflow. It does not yet prove presentation quality. The real `architecture.zh-CN.md` output still contains low-zoom slides such as `zoom: 0.285`, `0.384`, and `0.40`; those can pass the hard overflow gate while still being too small, under-used, or tight at the edges.
+The current acceptance proves that export does not clip, can pass strict standalone, and follows the real UI-equivalent workflow. It does not by itself prove presentation quality. Under the source-preserving Mermaid constraint, a large source Mermaid diagram may still require low zoom; the workflow should record that tradeoff instead of rewriting the original diagram into several diagrams.
 
 The next direction should not replace the current render-feedback pipeline. It should:
 
 1. keep `convergeSlidevDeckLayout()` as the final fact gate;
 2. add a clean-room `SlideGeometry` / `SlideLayoutPlan` layer before source preparation, borrowing only the world-rect, union-bounds, and viewport-fit ideas from `ref/infinite-canvas` without copying AGPL-3.0 implementation code;
 3. add rendered effective-font, quality-margin, content-area-ratio, and low-utilization metrics;
-4. pre-split Mermaid/table/code content so large content is not solved mainly by low `zoom`;
+4. preserve Mermaid source fences while pre-splitting table/code/prose content so large non-Mermaid content is not solved mainly by low `zoom`;
 5. report hard gate and quality gate separately: hard overflow still fails closed, while quality warnings drive splitting, relayout, or manual review.
 
 Detailed progress comparison and implementation direction are tracked in:

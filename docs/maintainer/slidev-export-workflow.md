@@ -141,11 +141,11 @@ layoutAuditSummary.retryCount
 
 The detailed implementation direction is tracked in `docs/brainstorms/2026-06-20-slidev-layout-quality-and-canvas-roadmap.zh-CN.md`. That route keeps the current render-feedback loop as the final fact gate, adds a clean-room layout planning IR before generation, and translates the world-rect / viewport-fit ideas from `ref/infinite-canvas` into NoteMD-owned geometry logic instead of copying AGPL-3.0 implementation code or embedding an infinite-canvas UI in Slidev export.
 
-Current landed truth as of 2026-06-18:
+Current landed truth as of 2026-06-20:
 
 1. default HTML verification audits the full prepared deck when `--sample-slides` is not provided;
 2. the patcher derives `zoom` from measured overflow instead of fixed export constants;
-3. the patcher escalates to structural splitting for supported Mermaid diagrams (`flowchart`, `graph`, `mindmap`, `sequenceDiagram`), Markdown tables, pathological width-heavy tables through record-list fallback, non-Mermaid fenced code blocks, simple heading + paragraph/list slides, generic slot-marked layouts (including explicit `::default::`), and first-slide deck headmatter content when structural splitting is possible;
+3. the patcher preserves source Mermaid fences by default and escalates to structural splitting for Markdown tables, pathological width-heavy tables through record-list fallback, non-Mermaid fenced code blocks, simple heading + paragraph/list slides, generic slot-marked layouts (including explicit `::default::`), and first-slide deck headmatter content when structural splitting is possible;
 4. large Mermaid guardrails no longer overwrite a slide that already declares its own `zoom`;
 5. existing Slidev decks now use isolated prepared working-copy directories under `_slidev-sources/<deck-basename>/`, and common sibling Slidev support entries such as `layouts/`, `public/`, `setup/`, `components/`, `snippets/`, `styles/`, `global-top.vue`, and `global-bottom.vue` are mirrored into that workspace when present;
 6. rendered layout audit now also measures direct-text `div`/`section`/`article`/`aside`/`span` blocks, so component-heavy slides do not silently under-audit as empty layouts;
@@ -155,15 +155,19 @@ Current landed truth as of 2026-06-18:
 10. hard overflow findings still use the rendered slide root as the pass/fail boundary, while `safeRect` remains the fit target for measured scale recommendations; this keeps edge-aligned layouts from being over-rejected while still letting the patcher derive conservative shrink factors;
 11. the shared `convergeSlidevDeckLayout()` workflow now runs inside `exportSlidesCommand()` and the maintainer verifier, so HTML/PDF/PNG/MP4 export all reuse the same converged prepared deck;
 12. the HTML exporter now returns a structured outcome with `requestedMode`, `actualMode`, fallback state, and standalone sanity details; known-bad native attempts are preserved as `index-standalone.failed.html` before compatibility fallback;
-13. the real `docs/architecture.zh-CN.md` strict native standalone workflow now closes with `ok: true`, `actualMode: "standalone"`, `requiresLocalServer: false`, `standaloneGate.passed: true`, `28` audited slides, and zero `overflow` / `unreadable-scale` findings with `retryCount = 4`;
-14. `PDF` and `PNG` verification on the same source also return `ok: true`, and now export from the same converged deck instead of the raw prepared source.
+13. the real `docs/architecture.zh-CN.md` strict native standalone workflow now closes with `ok: true`, `actualMode: "standalone"`, `requiresLocalServer: false`, `standaloneGate.passed: true`, `29` audited slides, and zero hard overflow / unreadable scale / low effective font / quality margin warning / low utilization findings with `retryCount = 4`; the preserve-Mermaid run kept the source and exported deck at `3` Mermaid blocks, and this batch's evidence package is stored at `/home/jacob/slidev-export-review/2026-06-20-quality/`;
+14. `PDF` and `PNG` verification on the same source also return `ok: true`, and now export from the same converged deck instead of the raw prepared source;
+15. rendered layout audit now reports effective minimum font, SVG text font, table/code minimum font, quality margins, and content-area ratio alongside hard overflow;
+16. low effective font, tight margin, and low content utilization findings now carry structural `recommendedPatch` values for table/code/prose; Mermaid low-font metrics are recorded while preserving the source fence instead of automatically splitting one diagram into several diagrams;
+17. source preparation now builds a clean-room `SlideLayoutPlan` and injects its deterministic layout budget into generated outlines, one-shot Slidev deck prompts, and outline-continuation prompts.
 
 Current limitation:
 
-1. richer custom/component-heavy Slidev layouts beyond the current supported structural set still remain conservative/manual-review paths, especially when several component-heavy slot zones land in near-tied geometry but not every overflowing zone is transformable, or when the owner surface does not expose a stable local transform / structural split target;
-2. native standalone export now has a strict gate and the real architecture fixture passes it, but correctness still depends on post-build sanity detection; server-script fallback remains a compatibility lane and must not be counted as native standalone success;
-3. full-deck Playwright verification is deliberately slower than representative sampling, so future work should improve convergence rather than weaken the audit;
-4. `obsidian command id=notemd:export-slides` is still only a dispatch-level smoke because the Obsidian CLI does not expose an export-complete handshake.
+1. effective font measurement currently uses computed DOM font size multiplied by Slidev page zoom; future work should improve exact local CSS-transform awareness without weakening the rendered audit;
+2. richer custom/component-heavy Slidev layouts beyond the current supported structural set still remain conservative/manual-review paths, especially when several component-heavy slot zones land in near-tied geometry but not every overflowing zone is transformable, or when the owner surface does not expose a stable local transform / structural split target;
+3. native standalone export now has a strict gate and the real architecture fixture passes it, but correctness still depends on post-build sanity detection; server-script fallback remains a compatibility lane and must not be counted as native standalone success;
+4. full-deck Playwright verification is deliberately slower than representative sampling, so future work should improve convergence rather than weaken the audit;
+5. `obsidian command id=notemd:export-slides` is still only a dispatch-level smoke because the Obsidian CLI does not expose an export-complete handshake.
 
 ## Output Policy
 

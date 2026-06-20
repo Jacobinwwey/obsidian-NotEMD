@@ -46,11 +46,19 @@ const mockPatchDeckWithLayoutAudit = patchDeckWithLayoutAudit as jest.MockedFunc
 const mockSummarizeLayoutAudits = summarizeLayoutAudits as jest.MockedFunction<typeof summarizeLayoutAudits>;
 
 function createSummary(retryCount: number) {
+	const overflowCount = retryCount === 0 ? 1 : 0;
 	return {
 		slideCount: 1,
-		overflowCount: retryCount === 0 ? 1 : 0,
+		overflowCount,
 		unreadableCount: 0,
 		renderErrorCount: 0,
+		hardOverflowCount: overflowCount,
+		unreadableScaleCount: 0,
+		lowEffectiveFontCount: 0,
+		qualityMarginWarningCount: 0,
+		lowContentUtilizationCount: 0,
+		preSplitCount: 0,
+		postPatchCount: retryCount,
 		retryCount,
 	};
 }
@@ -241,7 +249,7 @@ describe('slidevLayoutWorkflow', () => {
 		expect(result.htmlExport.actualMode).toBe('server-script-fallback');
 		expect(result.htmlExportHistory).toHaveLength(2);
 		expect(result.checks).toHaveLength(1);
-		expect(page.goto).toHaveBeenCalledWith(expect.any(String), { waitUntil: 'domcontentloaded', timeout: 30_000 });
+		expect(page.goto).toHaveBeenCalledWith(expect.any(String), { waitUntil: 'domcontentloaded', timeout: 60_000 });
 		expect(page.waitForLoadState).toHaveBeenCalledWith('networkidle', { timeout: 10_000 });
 		expect(page.waitForFunction).toHaveBeenCalled();
 		expect(mockStartLocalServer).toHaveBeenCalled();

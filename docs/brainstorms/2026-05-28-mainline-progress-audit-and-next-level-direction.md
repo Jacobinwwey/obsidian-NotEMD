@@ -286,7 +286,7 @@ Current code already satisfies several earlier requirements:
 2. settings expose default format selection across `HTML`, `PDF`, `PNG`, and `MP4`, and expose HTML mode when `HTML` is selected;
 3. the sidebar has an inline Slidev export format selector instead of hiding format choice entirely;
 4. `exportSlidesCommand()` now probes environment, prepares a Slidev export source, runs the shared `convergeSlidevDeckLayout()` loop, and only then emits the selected final format from the converged prepared deck;
-5. `prepareSlidevExportSource()` loads the top-level Slidev skill and `references/*.md` when available, and the LLM prompt explicitly asks for dense slides to be split and large diagrams/tables/code to avoid clipping;
+5. `prepareSlidevExportSource()` loads the top-level Slidev skill and `references/*.md` when available, and the LLM prompt explicitly asks for dense prose/table/code to be split while preserving each Mermaid source fence and fitting it through layout, zoom, Transform, or manual review evidence;
 6. existing Slidev decks now write into isolated `_slidev-sources/<deck-basename>/` workspaces, and common sibling Slidev support entries such as `layouts/`, `public/`, `setup/`, `components/`, `snippets/`, `styles/`, `global-top.vue`, and `global-bottom.vue` are mirrored there when present;
 7. `scripts/verify-slidev-export-workflow.cjs` exercises production modules against the real `docs/architecture.zh-CN.md` source and records skill reference count, local fork, deck summary, Playwright results, and `.gitignore` visibility.
 
@@ -299,7 +299,7 @@ The important gap is equally clear:
 | UI format selection | Settings and sidebar controls expose format selection; HTML mode is conditional on HTML | Landed in code, still needs real UI smoke when UI changes |
 | Output visibility to Git | `verify:slidev-export` checks `.gitignore` hits for generated deck/output/screenshots | Landed for workflow evidence |
 | Rendered layout containment | Visible-root DOM bbox, scroll overflow, Mermaid host, table, code, and text overflow audit exists in the real maintainer workflow | Landed |
-| Automatic correction | `SlidevDeckPatch` now applies measured `zoom`, slot-zone-geometry-driven local `<Transform>` wrapping, Mermaid / table / code structural splitting, pathological table record fallback, generic slot-marked layout splitting, and first-slide headmatter structural splitting in a bounded retry loop shared by the verifier and `exportSlidesCommand()` | Landed, keep extending |
+| Automatic correction | `SlidevDeckPatch` now applies measured `zoom`, slot-zone-geometry-driven local `<Transform>` wrapping, table/code structural splitting, pathological table record fallback, generic slot-marked layout splitting, and first-slide headmatter structural splitting in a bounded retry loop shared by the verifier and `exportSlidesCommand()`; Mermaid source fences are preserved rather than auto-split | Landed, keep extending |
 
 The `ref/infinite-canvas` analysis supports a clean-room direction, not code reuse. Its useful architecture ideas are world-space nodes with `{ position, width, height }`, viewport transform `{ x, y, k }`, screen/world conversion, union bounds, natural image sizing, and minimap/bounds calculation. Those ideas map well to a static export-layout camera for Slidev. They do not justify turning Slidev into an interactive infinite canvas, and AGPL-3.0 code must not be copied into this MIT project.
 
@@ -605,7 +605,7 @@ Current WIP status:
 3. the JSON report records environment capability, local fork path, skill root, skill reference count, deck summary, Playwright samples, and `.gitignore` hits;
 4. `docs/maintainer/slidev-export-workflow.*` now defines pass criteria, output policy, UI contract, and when to run the workflow;
 5. `docs/SLIDEV_SOLUTION.md` and `docs/SLIDEV_HTML_FIX.md` now describe the current standalone-first, server-script-compatible truth, including the stricter `--require-native-standalone` gate.
-6. the current source-preparation prompt uses the full skill references and asks the model to split dense content; the only remaining static Mermaid zoom heuristic is now a missing-value seed, not an overwrite of explicit per-slide `zoom`; on re-export, whole-slide `zoom` comes from measured safe-rect overflow while local `<Transform>` scale comes from slot-owner geometry and scroll overflow.
+6. the current source-preparation prompt uses the full skill references, asks the model to split dense prose/table/code, and explicitly preserves Mermaid source fences; the only remaining static Mermaid zoom heuristic is now a missing-value seed, not an overwrite of explicit per-slide `zoom`; on re-export, whole-slide `zoom` comes from measured safe-rect overflow while local `<Transform>` scale comes from slot-owner geometry and scroll overflow.
 7. `node scripts/verify-slidev-export-workflow.cjs --json` can now prove, on the real `docs/architecture.zh-CN.md` input, that:
    - the workflow resolves `/home/jacob/slidev/packages/slidev/bin/slidev.mjs`
    - the workflow resolves `/home/jacob/slidev/skills/slidev`
@@ -667,17 +667,18 @@ Background:
 Current status:
 
 1. `convergeSlidevDeckLayout()` is the shared final fact gate for product export and maintainer verification;
-2. `slidevLayoutAudit.ts` already supports rendered bounding boxes, scroll overflow, slot-zone owner geometry, and several structural patch paths;
+2. `slidevLayoutAudit.ts` now supports rendered bounding boxes, scroll overflow, slot-zone owner geometry, effective font, SVG/table/code minimum font, quality margins, and content-area ratio;
 3. `docs/brainstorms/2026-06-20-slidev-layout-quality-and-canvas-roadmap.zh-CN.md` now tracks the detailed route, comparing previous requirements, current code, useful `ref/infinite-canvas` concepts, real-output gaps, and the implementation order;
-4. `docs/SLIDEV_SOLUTION.*` and `docs/maintainer/slidev-export-workflow.*` now state that the hard gate and quality gate must be reported separately.
+4. `src/slideExport/slidevLayoutPlan.ts` now carries the clean-room layout budget that translates world-rect / viewport-fit ideas into NoteMD-owned `SlideLayoutPlan` logic, and source preparation feeds that budget into deterministic outlines, one-shot export prompts, and outline-continuation prompts;
+5. low effective font, tight margins, and low content utilization now create structural `recommendedPatch` findings for table/code/prose; Mermaid source fences are preserved by default, with fit metrics recorded instead of auto-splitting the original diagram;
+6. `docs/SLIDEV_SOLUTION.*` and `docs/maintainer/slidev-export-workflow.*` now state that the hard gate and quality gate must be reported separately.
 
 Next direction:
 
-1. Stage 1 should enhance rendered measurement with effective font, SVG text font, table/code minimum font, quality margins, content-area ratio, and low utilization;
-2. Stage 2 should add a clean-room `SlideGeometry` / `SlideLayoutPlan` layer before LLM deck generation;
-3. Stage 3/4 should wire Mermaid/table/code semantic splitting into source preparation and patching so low `zoom` is not the main final fix;
-4. Stage 5 should expand fixtures to cover large flowcharts, long sequence diagrams, wide/tall tables, mixed code/table slides, component-heavy slot layouts, and the real `architecture.zh-CN.md`;
-5. every implementation slice must retain strict standalone and full-deck browser audit instead of regressing to CLI-only or representative sampling.
+1. Stage 1/2 have landed as a first slice; the next gate is real `architecture.zh-CN.md` strict-standalone validation and threshold calibration;
+2. Stage 3/4 should deepen source-preserving Mermaid fit/manual-review evidence, cell-level table rewrite, and code semantic excerpts instead of falling back to fixed zoom values;
+3. Stage 5 should keep expanding fixtures to cover large flowcharts, long sequence diagrams, wide/tall tables, mixed code/table slides, component-heavy slot layouts, and the real `architecture.zh-CN.md`;
+4. every implementation slice must retain strict standalone and full-deck browser audit instead of regressing to CLI-only or representative sampling.
 
 ## 6. Documentation Sync Rule
 
@@ -729,7 +730,7 @@ Any update that changes the truth claims in this document should still finish wi
 If the update touches Slidev export, also run:
 
 1. `npm run verify:slidev-export`
-2. `npm test -- --runInBand src/tests/slidevSourcePreparer.test.ts src/tests/slideExportComprehensive.test.ts`
+2. `npm test -- --runInBand src/tests/slidevLayoutAudit.test.ts src/tests/slidevLayoutPlan.test.ts src/tests/slidevSourcePreparer.test.ts src/tests/slidevLayoutWorkflow.test.ts src/tests/slideExportComprehensive.test.ts`
 
 Slidev export closure must also include a non-empty layout-audit report for `docs/architecture.zh-CN.md` with zero `overflow` and zero `unreadable-scale` findings. After Batch H lands, closure should additionally check effective-font, quality-margin, content-area-ratio, and pre/post split metrics instead of accepting low `zoom` as the final quality fix.
 

@@ -9,6 +9,7 @@ import type { App, TFile } from 'obsidian';
 import type { LLMProviderConfig, NotemdSettings, ProgressReporter } from '../types';
 import { callLLM } from '../llmUtils';
 import { decorateComponentHeavySlotZones } from './slidevLayoutAudit';
+import { formatSlideLayoutPlanForPrompt, planSlidevMarkdownLayout } from './slidevLayoutPlan';
 import type { ExportProgressCallback, SlideExportConfig, SlidevExportSource } from './types';
 import { getVaultBasePath, resolveWorkspaceHomeCandidates, safeRequire } from './platformUtils';
 
@@ -233,14 +234,21 @@ export function buildDeterministicSlidevDeck(markdown: string, fallbackTitle: st
 export function buildDeterministicSlidevOutline(markdown: string, fallbackTitle: string): string {
 	const title = extractTitle(markdown) || fallbackTitle;
 	const segments = splitMarkdownIntoSegments(markdown).filter(segment => segment.headingLevel > 1);
+	const layoutPlan = planSlidevMarkdownLayout(markdown, fallbackTitle);
 	const lines = [
 		`# Slidev Export Outline: ${title}`,
 		'',
 		'## Deck intent',
 		`- Title: ${title}`,
 		'- Output: polished Slidev deck generated from the source note',
-		'- Layout rule: split dense sections instead of compressing tables, diagrams, or code into one slide',
+		'- Layout rule: split dense prose, tables, or code instead of compressing them into one slide',
+		'- Mermaid rule: preserve each source Mermaid fence as one diagram; do not rewrite one Mermaid diagram into several diagrams',
 		'- Safety rule: use per-slide zoom or structural splits when content risks clipping on a 16:9 canvas',
+		'- Quality rule: avoid solving readability by shrinking primary content below the deterministic layout quality floor',
+		'',
+		'## Deterministic layout budget',
+		'',
+		...formatSlideLayoutPlanForPrompt(layoutPlan).split('\n').map(line => `- ${line}`),
 		'',
 		'## Slide sequence',
 		'',
@@ -851,15 +859,20 @@ function buildSlidevDeckPrompt(
 		.map(reference => `## ${reference.relativePath}\n\n${reference.content.trim()}`)
 		.join('\n\n');
 	const sourceTitle = extractTitle(sourceMarkdown) || sourceFile.basename;
+	const layoutPlan = formatSlideLayoutPlanForPrompt(planSlidevMarkdownLayout(sourceMarkdown, sourceFile.basename));
 
 	const system = [
 		'You convert long-form Markdown notes into polished Slidev decks.',
 		'Use the official Slidev skill instructions and references provided below.',
+		'Use the deterministic layout budget as a hard planning constraint before drafting slides.',
 		'Return only a complete Slidev Markdown deck. Do not wrap it in a code fence.',
 		'The deck must start with Slidev headmatter and use --- slide separators.',
-		'Preserve fenced code blocks, Mermaid diagrams, tables, and important technical details.',
-		'Split dense source sections into multiple readable slides instead of making one overflowing slide.',
-		'For large diagrams, tables, or code blocks, use per-slide frontmatter such as zoom: 0.55-0.75 or Transform so nothing is clipped on a 16:9 canvas.',
+		'Preserve fenced code blocks, tables, and important technical details.',
+		'Preserve each source Mermaid fence as one Mermaid diagram; do not split or rewrite one Mermaid diagram into several diagrams.',
+		'Split dense prose, tables, or code into multiple readable slides instead of making one overflowing slide.',
+		'For large Mermaid diagrams, preserve the source diagram and use layout, zoom, Transform, speaker notes, or adjacent explanation outside the fence.',
+		'For large tables or code blocks, prefer row/column splits or focused excerpts before zoom or Transform.',
+		'Do not use zoom below 0.72 for primary prose, table, or code content unless the slide is a deliberate overview and detail slides follow.',
 	].join('\n');
 
 	const user = [
@@ -871,6 +884,9 @@ function buildSlidevDeckPrompt(
 		'',
 		'# Slidev Skill Reference Contents',
 		truncateText(referenceText, MAX_LLM_REFERENCE_CHARS),
+		'',
+		'# Deterministic Layout Budget',
+		layoutPlan,
 		'',
 		'# Source Note',
 		`Path: ${sourceFile.path}`,
@@ -895,16 +911,21 @@ function buildSlidevDeckFromOutlinePrompt(
 		.map(reference => `## ${reference.relativePath}\n\n${reference.content.trim()}`)
 		.join('\n\n');
 	const sourceTitle = extractTitle(sourceMarkdown) || sourceFile.basename;
+	const layoutPlan = formatSlideLayoutPlanForPrompt(planSlidevMarkdownLayout(sourceMarkdown, sourceFile.basename));
 
 	const system = [
 		'You convert long-form Markdown notes into polished Slidev decks.',
 		'Use the saved Slidev export outline as the deck plan. Do not ignore it unless it conflicts with source facts.',
 		'Use the official Slidev skill instructions and references provided below.',
+		'Use the deterministic layout budget as a hard planning constraint before drafting slides.',
 		'Return only a complete Slidev Markdown deck. Do not wrap it in a code fence.',
 		'The deck must start with Slidev headmatter and use --- slide separators.',
-		'Preserve fenced code blocks, Mermaid diagrams, tables, and important technical details.',
-		'Split dense source sections into multiple readable slides instead of making one overflowing slide.',
-		'For large diagrams, tables, or code blocks, use per-slide frontmatter such as zoom: 0.55-0.75 or Transform so nothing is clipped on a 16:9 canvas.',
+		'Preserve fenced code blocks, tables, and important technical details.',
+		'Preserve each source Mermaid fence as one Mermaid diagram; do not split or rewrite one Mermaid diagram into several diagrams.',
+		'Split dense prose, tables, or code into multiple readable slides instead of making one overflowing slide.',
+		'For large Mermaid diagrams, preserve the source diagram and use layout, zoom, Transform, speaker notes, or adjacent explanation outside the fence.',
+		'For large tables or code blocks, prefer row/column splits or focused excerpts before zoom or Transform.',
+		'Do not use zoom below 0.72 for primary prose, table, or code content unless the slide is a deliberate overview and detail slides follow.',
 	].join('\n');
 
 	const user = [
@@ -916,6 +937,9 @@ function buildSlidevDeckFromOutlinePrompt(
 		'',
 		'# Slidev Skill Reference Contents',
 		truncateText(referenceText, MAX_LLM_REFERENCE_CHARS),
+		'',
+		'# Deterministic Layout Budget',
+		layoutPlan,
 		'',
 		'# Saved Slidev Export Outline',
 		outlineMarkdown.trim(),
@@ -942,13 +966,15 @@ function buildSlidevOutlinePrompt(
 		.map(reference => `## ${reference.relativePath}\n\n${reference.content.trim()}`)
 		.join('\n\n');
 	const sourceTitle = extractTitle(sourceMarkdown) || sourceFile.basename;
+	const layoutPlan = formatSlideLayoutPlanForPrompt(planSlidevMarkdownLayout(sourceMarkdown, sourceFile.basename));
 
 	const system = [
 		'You create reviewable implementation outlines for Slidev decks.',
 		'Use the official Slidev skill instructions and references provided below.',
+		'Use the deterministic layout budget to decide where the deck must pre-split dense prose/table/code and where Mermaid needs source-preserving fit review.',
 		'Return only Markdown. Do not wrap the outline in a code fence.',
 		'Define the intended slide sequence, each slide purpose, likely layout, source sections, and risks.',
-		'Call out diagrams, tables, code blocks, and dense sections that require splitting, zoom, Transform, or alternate layouts.',
+		'Call out Mermaid diagrams that must preserve their source fence, and tables, code blocks, and dense sections that require splitting, zoom, Transform, or alternate layouts.',
 		'The outline is a planning artifact for a later Slidev deck generation step, not the final deck.',
 	].join('\n');
 
@@ -961,6 +987,9 @@ function buildSlidevOutlinePrompt(
 		'',
 		'# Slidev Skill Reference Contents',
 		truncateText(referenceText, MAX_LLM_REFERENCE_CHARS),
+		'',
+		'# Deterministic Layout Budget',
+		layoutPlan,
 		'',
 		'# Source Note',
 		`Path: ${sourceFile.path}`,
@@ -1200,7 +1229,7 @@ function describeSegmentHandling(body: string): string {
 	const hasCode = /```+/.test(body);
 	const handling: string[] = [];
 	if (hasMermaid) {
-		handling.push('audit Mermaid fit and apply zoom or split if needed');
+		handling.push('preserve Mermaid source and audit fit');
 	}
 	if (hasTable) {
 		handling.push('split or transform wide tables');

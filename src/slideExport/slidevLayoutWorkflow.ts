@@ -53,9 +53,17 @@ export interface SlidevLayoutConvergenceResult {
 
 const DEFAULT_LAYOUT_AUDIT_CONFIG: SlidevLayoutAuditConfig = {
 	overflowTolerancePx: 6,
-	minReadableScale: 0.24,
+	minReadableScale: 0.28,
 	maxAutoPatchPasses: 6,
+	minEffectiveFontPx: 10,
+	minSvgTextFontPx: 9,
+	minTableBodyFontPx: 10,
+	minCodeFontPx: 10,
+	minQualityMarginPx: 18,
+	minContentAreaRatio: 0.18,
+	lowContentUtilizationScaleThreshold: 0.55,
 };
+const SLIDEV_LAYOUT_NAVIGATION_TIMEOUT_MS = 60_000;
 
 type PlaywrightRuntime = {
 	chromium?: {
@@ -240,7 +248,7 @@ async function runPlaywrightLayoutChecks(
 }
 
 async function openSlideForLayoutAudit(page: any, targetUrl: string): Promise<void> {
-	await page.goto(targetUrl, { waitUntil: 'domcontentloaded', timeout: 30_000 });
+	await page.goto(targetUrl, { waitUntil: 'domcontentloaded', timeout: SLIDEV_LAYOUT_NAVIGATION_TIMEOUT_MS });
 	if (typeof page.waitForLoadState === 'function') {
 		await page.waitForLoadState('networkidle', { timeout: 10_000 }).catch(() => undefined);
 	}
@@ -308,6 +316,66 @@ async function collectRenderedSlideMeasurement(page: any, slide: number): Promis
 			.map(element => ({ element, rect: element.getBoundingClientRect(), style: window.getComputedStyle(element) }))
 			.filter(entry => entry.style.display !== 'none' && entry.style.visibility !== 'hidden' && Number(entry.style.opacity || '1') > 0 && entry.rect.width > 2 && entry.rect.height > 2)
 			.sort((left, right) => (right.rect.width * right.rect.height) - (left.rect.width * left.rect.height))[0]?.element ?? null;
+		const parsePx = (value: string) => {
+			const parsed = Number.parseFloat(value);
+			return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+		};
+		const minMetric = (values: Array<number | null | undefined>) => {
+			const numbers = values.filter((value): value is number => typeof value === 'number' && Number.isFinite(value) && value > 0);
+			return numbers.length > 0 ? Math.min(...numbers) : null;
+		};
+		const textMetricSelectors = (kind: string) => {
+			switch (kind) {
+				case 'mermaid':
+					return 'svg text, svg tspan, foreignObject, foreignObject *';
+				case 'table':
+					return 'caption, th, td';
+				case 'code':
+					return 'pre, code, .line, span';
+				case 'text':
+					return 'h1, h2, h3, h4, p, li, blockquote, span';
+				default:
+					return 'h1, h2, h3, h4, p, li, blockquote, span, div, section, article, aside';
+			}
+		};
+		const collectFontMetrics = (element: Element, kind: string, pageScale: number | null) => {
+			const nodes = [element, ...Array.from(element.querySelectorAll(textMetricSelectors(kind)))]
+				.filter((node): node is Element => node instanceof Element);
+			const fontSamples: number[] = [];
+			const svgFontSamples: number[] = [];
+			for (const node of nodes) {
+				const text = (node.textContent || '').trim();
+				if (!text) {
+					continue;
+				}
+				const style = window.getComputedStyle(node);
+				if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity || '1') === 0) {
+					continue;
+				}
+				const fontPx = parsePx(style.fontSize);
+				if (fontPx === null) {
+					continue;
+				}
+				const rect = node.getBoundingClientRect();
+				if (rect.width < 1 || rect.height < 1) {
+					continue;
+				}
+				fontSamples.push(fontPx);
+				if (node.closest('svg')) {
+					svgFontSamples.push(fontPx);
+				}
+			}
+
+			const minFontPx = minMetric(fontSamples);
+			const minSvgFontPx = minMetric(svgFontSamples);
+			const scale = pageScale && Number.isFinite(pageScale) && pageScale > 0 ? pageScale : 1;
+			return {
+				minFontPx,
+				effectiveMinFontPx: minFontPx !== null ? minFontPx * scale : null,
+				svgTextMinFontPx: minSvgFontPx !== null ? minSvgFontPx * scale : null,
+				textSampleCount: fontSamples.length,
+			};
+		};
 
 		const slideRoot = pickVisibleLargest('.slidev-page')
 			|| pickVisibleLargest('.slidev-layout')
@@ -337,6 +405,11 @@ async function collectRenderedSlideMeasurement(page: any, slide: number): Promis
 			width: slideRootRect.width - safeInsetX * 2,
 			height: slideRootRect.height - safeInsetY * 2,
 		};
+		const zoomRaw = window.getComputedStyle(slideRoot).getPropertyValue('--slidev-slide-zoom-scale').trim()
+			|| (window.getComputedStyle(slideRoot) as any).scale
+			|| '1';
+		const pageScale = Number.parseFloat(zoomRaw);
+		const effectivePageScale = Number.isFinite(pageScale) ? pageScale : null;
 
 		const selectors: Array<[string, string]> = [
 			['mermaid', '.mermaid, [class*="mermaid"]'],
@@ -356,6 +429,10 @@ async function collectRenderedSlideMeasurement(page: any, slide: number): Promis
 				slotOwner?: boolean;
 				textLength: number;
 				textPreview?: string;
+				minFontPx?: number | null;
+				effectiveMinFontPx?: number | null;
+				svgTextMinFontPx?: number | null;
+				textSampleCount?: number;
 				scrollWidth: number;
 				scrollHeight: number;
 				clientWidth: number;
@@ -381,6 +458,7 @@ async function collectRenderedSlideMeasurement(page: any, slide: number): Promis
 				if (rect.width < 2 || rect.height < 2 || (!ownerElement && !overlaps(rect, slideRootRect))) {
 					continue;
 				}
+				const fontMetrics = collectFontMetrics(element, kind, effectivePageScale);
 
 				const textLength = (element.textContent || '').trim().length;
 				if (kind === 'other') {
@@ -404,6 +482,10 @@ async function collectRenderedSlideMeasurement(page: any, slide: number): Promis
 						slotOwner: element.hasAttribute(slotZoneAttr),
 						textLength,
 						textPreview: textLength > 0 ? toTextPreview(element.textContent || '') : undefined,
+						minFontPx: fontMetrics.minFontPx,
+						effectiveMinFontPx: fontMetrics.effectiveMinFontPx,
+						svgTextMinFontPx: fontMetrics.svgTextMinFontPx,
+						textSampleCount: fontMetrics.textSampleCount,
 						scrollWidth: element.scrollWidth || rect.width,
 						scrollHeight: element.scrollHeight || rect.height,
 						clientWidth: element.clientWidth || rect.width,
@@ -463,17 +545,37 @@ async function collectRenderedSlideMeasurement(page: any, slide: number): Promis
 			contentBounds.width = contentBounds.right - contentBounds.left;
 			contentBounds.height = contentBounds.bottom - contentBounds.top;
 		}
-
-		const zoomRaw = window.getComputedStyle(slideRoot).getPropertyValue('--slidev-slide-zoom-scale').trim()
-			|| (window.getComputedStyle(slideRoot) as any).scale
-			|| '1';
-		const pageScale = Number.parseFloat(zoomRaw);
+		const effectiveFontSamples = elements.map(element => element.effectiveMinFontPx).filter((value): value is number => typeof value === 'number' && Number.isFinite(value) && value > 0);
+		const svgTextFontSamples = elements.map(element => element.svgTextMinFontPx).filter((value): value is number => typeof value === 'number' && Number.isFinite(value) && value > 0);
+		const tableFontSamples = elements.filter(element => element.kind === 'table').map(element => element.effectiveMinFontPx).filter((value): value is number => typeof value === 'number' && Number.isFinite(value) && value > 0);
+		const codeFontSamples = elements.filter(element => element.kind === 'code').map(element => element.effectiveMinFontPx).filter((value): value is number => typeof value === 'number' && Number.isFinite(value) && value > 0);
+		const qualityMargins = contentBounds ? {
+			left: contentBounds.left - safeRect.left,
+			top: contentBounds.top - safeRect.top,
+			right: safeRect.right - contentBounds.right,
+			bottom: safeRect.bottom - contentBounds.bottom,
+			min: Math.min(
+				contentBounds.left - safeRect.left,
+				contentBounds.top - safeRect.top,
+				safeRect.right - contentBounds.right,
+				safeRect.bottom - contentBounds.bottom,
+			),
+		} : null;
+		const contentAreaRatio = contentBounds && safeRect.width > 0 && safeRect.height > 0
+			? Math.min(1, (contentBounds.width * contentBounds.height) / (safeRect.width * safeRect.height))
+			: null;
 
 		return {
 			slideRoot: slideRootRect,
 			safeRect,
 			contentBounds,
-			pageScale: Number.isFinite(pageScale) ? pageScale : null,
+			pageScale: effectivePageScale,
+			effectiveMinFontPx: minMetric(effectiveFontSamples),
+			svgTextMinFontPx: minMetric(svgTextFontSamples),
+			tableBodyMinFontPx: minMetric(tableFontSamples),
+			codeMinFontPx: minMetric(codeFontSamples),
+			qualityMargins,
+			contentAreaRatio,
 			elements,
 			slotZones,
 			errors: [],

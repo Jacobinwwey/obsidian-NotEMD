@@ -151,8 +151,11 @@ describe('slidevSourcePreparer', () => {
         ].join('\n'), 'architecture');
 
         expect(outline).toContain('# Slidev Export Outline: Architecture');
+        expect(outline).toContain('## Deterministic layout budget');
+        expect(outline).toContain('Pre-split candidates:');
+        expect(outline).toContain('Source-preserving fit reviews:');
         expect(outline).toContain('Runtime');
-        expect(outline).toContain('audit Mermaid fit');
+        expect(outline).toContain('preserve Mermaid source and audit fit');
         expect(outline).toContain('split or transform wide tables');
     });
 
@@ -566,6 +569,9 @@ describe('slidevSourcePreparer', () => {
             expect.anything(),
         );
         const userPrompt = mockCallLLM.mock.calls[0][2];
+        expect(userPrompt).toContain('# Deterministic Layout Budget');
+        expect(userPrompt).toContain('Pre-split candidates:');
+        expect(userPrompt).toContain('Source-preserving fit reviews:');
         expect(userPrompt).toContain('Use --- separators.');
         expect(userPrompt).toContain('Render Mermaid fences.');
         expect(userPrompt).toContain('Use icon components.');
@@ -710,6 +716,9 @@ describe('slidevSourcePreparer', () => {
         );
 
         const userPrompt = mockCallLLM.mock.calls[0][2];
+        expect(userPrompt).toContain('# Deterministic Layout Budget');
+        expect(userPrompt).toContain('Pre-split candidates:');
+        expect(userPrompt).toContain('Source-preserving fit reviews:');
         expect(userPrompt).toContain('# Saved Slidev Export Outline');
         expect(userPrompt).toContain('Runtime with zoom safety');
         expect(userPrompt).toContain('Split dense slides and control zoom.');

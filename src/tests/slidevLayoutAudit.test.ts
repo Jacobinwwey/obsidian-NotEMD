@@ -69,6 +69,36 @@ describe('slidevLayoutAudit', () => {
 		expect(audit.findings.some(finding => finding.kind === 'unreadable-scale')).toBe(true);
 	});
 
+	test('records Mermaid quality metrics without auto-splitting preserved source diagrams', () => {
+		const audit = analyzeRenderedSlideMeasurement(createMeasurement({
+			pageScale: 0.42,
+			contentBounds: { left: 100, top: 90, right: 980, bottom: 610, width: 880, height: 520 },
+			elements: [
+				{
+					kind: 'mermaid',
+					selector: '.mermaid',
+					textLength: 120,
+					textPreview: 'Runtime graph',
+					minFontPx: 16,
+					effectiveMinFontPx: 6.72,
+					svgTextMinFontPx: 6.72,
+					textSampleCount: 8,
+					scrollWidth: 880,
+					scrollHeight: 520,
+					clientWidth: 880,
+					clientHeight: 520,
+					rect: { left: 100, top: 90, right: 980, bottom: 610, width: 880, height: 520 },
+				},
+			],
+		}));
+
+		expect(audit.effectiveMinFontPx).toBeCloseTo(6.72, 2);
+		expect(audit.svgTextMinFontPx).toBeCloseTo(6.72, 2);
+		expect(audit.qualityMargins?.bottom).toBeCloseTo(66.8, 1);
+		expect(audit.contentAreaRatio).toBeGreaterThan(0);
+		expect(audit.findings).toEqual([]);
+	});
+
 	test('derives a smaller recommended scale from table scroll overflow even when the outer rect fits', () => {
 		const audit = analyzeRenderedSlideMeasurement(createMeasurement({
 			contentBounds: { left: 70, top: 60, right: 1160, bottom: 620, width: 1090, height: 560 },
@@ -139,7 +169,7 @@ describe('slidevLayoutAudit', () => {
 					kind: 'overflow',
 					target: 'content',
 					message: 'Slide content exceeds the safe visible rectangle',
-					recommendedPatch: 'split-diagram',
+					recommendedPatch: 'reduce-zoom',
 					recommendedScale: 0.82,
 				},
 			],
@@ -182,7 +212,7 @@ describe('slidevLayoutAudit', () => {
 					kind: 'overflow',
 					target: 'content',
 					message: 'Slide content exceeds the safe visible rectangle',
-					recommendedPatch: 'split-diagram',
+					recommendedPatch: 'reduce-zoom',
 					recommendedScale: 0.5,
 				},
 			],
@@ -209,7 +239,7 @@ describe('slidevLayoutAudit', () => {
 		]);
 	});
 
-	test('splits oversized Mermaid flowcharts into multiple slides before dropping below the readable floor', () => {
+	test('blocks oversized Mermaid flowcharts instead of rewriting source diagrams below the readable floor', () => {
 		const audit: SlidevLayoutAudit = {
 			slide: 2,
 			safeRect: { left: 51.2, top: 43.2, right: 1228.8, bottom: 676.8, width: 1177.6, height: 633.6 },
@@ -221,7 +251,7 @@ describe('slidevLayoutAudit', () => {
 					kind: 'overflow',
 					target: 'content',
 					message: 'Slide content exceeds the safe visible rectangle',
-					recommendedPatch: 'split-diagram',
+					recommendedPatch: 'reduce-zoom',
 					recommendedScale: 0.5,
 				},
 			],
@@ -255,18 +285,77 @@ describe('slidevLayoutAudit', () => {
 
 		const patched = patchDeckWithLayoutAudit(deck, [audit]);
 
-		expect(patched.changed).toBe(true);
-		expect(patched.changedSlides).toEqual([2]);
-		expect(patched.blockedSlides).toEqual([]);
-		expect(countSlideDeckSlides(patched.deckMarkdown)).toBe(3);
-		expect((patched.deckMarkdown.match(/```mermaid/g) || []).length).toBe(2);
-		expect((patched.deckMarkdown.match(/## Diagram/g) || []).length).toBe(2);
-		expect(patched.deckMarkdown).not.toContain('zoom: 0.30');
+		expect(patched.changed).toBe(false);
+		expect(patched.changedSlides).toEqual([]);
+		expect(patched.blockedSlides).toEqual([
+			expect.objectContaining({ slide: 2 }),
+		]);
+		expect(countSlideDeckSlides(patched.deckMarkdown)).toBe(2);
+		expect((patched.deckMarkdown.match(/```mermaid/g) || []).length).toBe(1);
+		expect((patched.deckMarkdown.match(/## Diagram/g) || []).length).toBe(1);
+		expect(patched.deckMarkdown).toContain('zoom: 0.30');
 		expect(patched.deckMarkdown).toContain('Decision -->|yes| PathA');
 		expect(patched.deckMarkdown).toContain('Retry --> Done');
 	});
 
-	test('repeats sequence participants when splitting oversized sequence diagrams', () => {
+	test('does not rewrite Mermaid diagrams on low effective font without hard overflow', () => {
+		const audit: SlidevLayoutAudit = {
+			slide: 2,
+			safeRect: { left: 51.2, top: 43.2, right: 1228.8, bottom: 676.8, width: 1177.6, height: 633.6 },
+			contentBounds: { left: 110, top: 96, right: 1040, bottom: 590, width: 930, height: 494 },
+			pageScale: 0.42,
+			effectiveMinFontPx: 6.8,
+			svgTextMinFontPx: 6.8,
+			elementKinds: ['mermaid'],
+			findings: [
+				{
+					kind: 'low-effective-font',
+					target: 'mermaid',
+					message: 'Mermaid effective font is too small',
+					recommendedPatch: 'manual-review',
+					recommendedScale: null,
+					effectiveFontPx: 6.8,
+					fontThresholdPx: 9,
+				},
+			],
+		};
+		const deck = [
+			'---',
+			'theme: default',
+			'---',
+			'',
+			'# Intro',
+			'',
+			'---',
+			'zoom: 0.42',
+			'---',
+			'',
+			'## Runtime Graph',
+			'',
+			'```mermaid',
+			'flowchart TB',
+			'  Start --> Decision',
+			'  Decision -->|yes| PathA',
+			'  Decision -->|no| PathB',
+			'  subgraph Details',
+			'    PathA --> Review',
+			'    Review --> Done',
+			'  end',
+			'  PathB --> Retry',
+			'  Retry --> Done',
+			'```',
+		].join('\n');
+
+		const patched = patchDeckWithLayoutAudit(deck, [audit]);
+
+		expect(patched.changed).toBe(false);
+		expect(patched.blockedSlides).toEqual([]);
+		expect(countSlideDeckSlides(patched.deckMarkdown)).toBe(2);
+		expect(patched.deckMarkdown).toContain('zoom: 0.42');
+		expect((patched.deckMarkdown.match(/```mermaid/g) || []).length).toBe(1);
+	});
+
+	test('blocks oversized sequence diagrams instead of splitting Mermaid participants', () => {
 		const audit: SlidevLayoutAudit = {
 			slide: 2,
 			safeRect: { left: 51.2, top: 43.2, right: 1228.8, bottom: 676.8, width: 1177.6, height: 633.6 },
@@ -278,7 +367,7 @@ describe('slidevLayoutAudit', () => {
 					kind: 'overflow',
 					target: 'content',
 					message: 'Slide content exceeds the safe visible rectangle',
-					recommendedPatch: 'split-diagram',
+					recommendedPatch: 'reduce-zoom',
 					recommendedScale: 0.6,
 				},
 			],
@@ -311,12 +400,14 @@ describe('slidevLayoutAudit', () => {
 
 		const patched = patchDeckWithLayoutAudit(deck, [audit]);
 
-		expect(patched.changed).toBe(true);
-		expect(patched.blockedSlides).toEqual([]);
-		expect(countSlideDeckSlides(patched.deckMarkdown)).toBe(3);
-		expect((patched.deckMarkdown.match(/participant User/g) || []).length).toBe(2);
-		expect((patched.deckMarkdown.match(/participant Plugin/g) || []).length).toBe(2);
-		expect((patched.deckMarkdown.match(/```mermaid/g) || []).length).toBe(2);
+		expect(patched.changed).toBe(false);
+		expect(patched.blockedSlides).toEqual([
+			expect.objectContaining({ slide: 2 }),
+		]);
+		expect(countSlideDeckSlides(patched.deckMarkdown)).toBe(2);
+		expect((patched.deckMarkdown.match(/participant User/g) || []).length).toBe(1);
+		expect((patched.deckMarkdown.match(/participant Plugin/g) || []).length).toBe(1);
+		expect((patched.deckMarkdown.match(/```mermaid/g) || []).length).toBe(1);
 		expect(patched.deckMarkdown).toContain('alt success');
 		expect(patched.deckMarkdown).toContain('Plugin->>Plugin: Verify layout');
 	});
@@ -479,6 +570,56 @@ describe('slidevLayoutAudit', () => {
 		expect((patched.deckMarkdown.match(/\| Provider \|/g) || []).length).toBe(2);
 		expect(patched.deckMarkdown).toContain('| Provider | Model | Runtime |');
 		expect(patched.deckMarkdown).toContain('| Provider | Token Ceiling | Notes |');
+	});
+
+	test('splits Markdown tables on low effective body font before relying on smaller zoom', () => {
+		const audit: SlidevLayoutAudit = {
+			slide: 2,
+			safeRect: { left: 51.2, top: 43.2, right: 1228.8, bottom: 676.8, width: 1177.6, height: 633.6 },
+			contentBounds: { left: 90, top: 82, right: 1120, bottom: 620, width: 1030, height: 538 },
+			pageScale: 0.58,
+			tableBodyMinFontPx: 7.8,
+			elementKinds: ['table'],
+			findings: [
+				{
+					kind: 'low-effective-font',
+					target: 'table',
+					message: 'Table body font is too small',
+					recommendedPatch: 'split-table',
+					recommendedScale: null,
+					effectiveFontPx: 7.8,
+					fontThresholdPx: 10,
+				},
+			],
+		};
+		const deck = [
+			'---',
+			'theme: default',
+			'---',
+			'',
+			'# Intro',
+			'',
+			'---',
+			'zoom: 0.58',
+			'---',
+			'',
+			'## Provider Matrix',
+			'',
+			'| Provider | Model | Runtime | Notes |',
+			'| --- | --- | --- | --- |',
+			'| OpenAI | gpt-4o | hosted | default hosted profile |',
+			'| Anthropic | claude-sonnet | hosted | long-context reasoning profile |',
+			'| Ollama | llama3 | local | local operator profile |',
+			'| LMStudio | local-model | local | desktop profile |',
+		].join('\n');
+
+		const patched = patchDeckWithLayoutAudit(deck, [audit]);
+
+		expect(patched.changed).toBe(true);
+		expect(patched.blockedSlides).toEqual([]);
+		expect(countSlideDeckSlides(patched.deckMarkdown)).toBe(3);
+		expect((patched.deckMarkdown.match(/\| Provider \| Model \| Runtime \| Notes \|/g) || []).length).toBe(2);
+		expect(patched.deckMarkdown).not.toContain('zoom: 0.58');
 	});
 
 	test('converts pathological width-heavy tables into record slides instead of only repeating column splits', () => {
@@ -651,6 +792,61 @@ describe('slidevLayoutAudit', () => {
 		expect(countSlideDeckSlides(patched.deckMarkdown)).toBe(3);
 		expect((patched.deckMarkdown.match(/```ts/g) || []).length).toBe(2);
 		expect((patched.deckMarkdown.match(/## Tall Export Pipeline/g) || []).length).toBe(2);
+	});
+
+	test('splits code fences on low effective code font without waiting for scroll overflow', () => {
+		const audit: SlidevLayoutAudit = {
+			slide: 2,
+			safeRect: { left: 51.2, top: 43.2, right: 1228.8, bottom: 676.8, width: 1177.6, height: 633.6 },
+			contentBounds: { left: 88, top: 80, right: 1140, bottom: 610, width: 1052, height: 530 },
+			pageScale: 0.62,
+			codeMinFontPx: 8.4,
+			elementKinds: ['code'],
+			findings: [
+				{
+					kind: 'low-effective-font',
+					target: 'code',
+					message: 'Code font is too small',
+					recommendedPatch: 'reduce-code',
+					recommendedScale: null,
+					effectiveFontPx: 8.4,
+					fontThresholdPx: 10,
+				},
+			],
+		};
+		const deck = [
+			'---',
+			'theme: default',
+			'---',
+			'',
+			'# Intro',
+			'',
+			'---',
+			'zoom: 0.62',
+			'---',
+			'',
+			'## Export Pipeline',
+			'',
+			'```ts',
+			'const environment = await probeEnvironment();',
+			'const slideSource = await prepareSlidevExportSource(app, sourceFile, config, {}, onProgress);',
+			'const htmlPath = await exportSlidevHtml(app, slideSource, config, onProgress);',
+			'',
+			'const auditResult = await runPlaywrightChecks(htmlPath, slidesToAudit, true, slideExport);',
+			'const patchResult = patchDeckWithLayoutAudit(deckMarkdown, auditResult.layoutAudits, config);',
+			'if (patchResult.changed) {',
+			'  await exportSlidevHtml(app, slideSource, config, onProgress);',
+			'}',
+			'```',
+		].join('\n');
+
+		const patched = patchDeckWithLayoutAudit(deck, [audit]);
+
+		expect(patched.changed).toBe(true);
+		expect(patched.blockedSlides).toEqual([]);
+		expect(countSlideDeckSlides(patched.deckMarkdown)).toBe(3);
+		expect((patched.deckMarkdown.match(/```ts/g) || []).length).toBe(2);
+		expect(patched.deckMarkdown).not.toContain('zoom: 0.62');
 	});
 
 	test('splits code inside supported two-cols slot layouts', () => {
@@ -1431,6 +1627,12 @@ describe('slidevLayoutAudit', () => {
 
 		expect(summary.slideCount).toBe(2);
 		expect(summary.overflowCount).toBeGreaterThan(0);
+		expect(summary.hardOverflowCount).toBe(summary.overflowCount);
+		expect(summary.unreadableScaleCount).toBe(summary.unreadableCount);
+		expect(summary.lowEffectiveFontCount).toBeGreaterThanOrEqual(0);
+		expect(summary.qualityMarginWarningCount).toBeGreaterThanOrEqual(0);
+		expect(summary.lowContentUtilizationCount).toBeGreaterThanOrEqual(0);
+		expect(summary.postPatchCount).toBe(1);
 		expect(summary.renderErrorCount).toBe(1);
 		expect(summary.retryCount).toBe(1);
 	});
