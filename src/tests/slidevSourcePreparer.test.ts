@@ -189,8 +189,61 @@ describe('slidevSourcePreparer', () => {
         expect(result.preparedDeckPath).toBe('export/_slidev-sources/existing-slidev/existing-slidev.slidev.md');
         expect(app.vault.adapter.write).toHaveBeenCalledWith(
             'export/_slidev-sources/existing-slidev/existing-slidev.slidev.md',
-            markdown
+            expect.stringContaining('fonts:\n  provider: none')
         );
+    });
+
+    test('existing Slidev decks preserve explicit font provider configuration', async () => {
+        const markdown = [
+            '---',
+            'theme: default',
+            'fonts:',
+            '  provider: google',
+            '---',
+            '',
+            '# First',
+        ].join('\n');
+        const app = createApp(markdown);
+
+        await prepareSlidevExportSource(
+            app,
+            createFile('docs/fonted-slidev.md'),
+            config,
+            {},
+            jest.fn()
+        );
+
+        const writtenDeck = (app.vault.adapter.write as jest.Mock).mock.calls[0][1] as string;
+        expect(writtenDeck).toContain('fonts:\n  provider: google');
+        expect(writtenDeck).not.toContain('provider: none');
+    });
+
+    test('existing Slidev decks reached from saved outline use the same offline working copy guardrails', async () => {
+        const markdown = [
+            '---',
+            'theme: default',
+            '---',
+            '',
+            '# First',
+            '',
+            '---',
+            '',
+            '# Second',
+        ].join('\n');
+        const app = createApp(markdown);
+
+        const result = await prepareSlidevExportSourceFromOutline(
+            app,
+            createFile('docs/existing-slidev.md'),
+            '# Outline',
+            config,
+            {},
+            jest.fn()
+        );
+
+        expect(result.inputFilePath).toBe('export/_slidev-sources/existing-slidev/existing-slidev.slidev.md');
+        const writtenDeck = (app.vault.adapter.write as jest.Mock).mock.calls[0][1] as string;
+        expect(writtenDeck).toContain('fonts:\n  provider: none');
     });
 
     test('existing Slidev decks decorate component-heavy slot zones with ownership wrappers before writing the working copy', async () => {
@@ -268,6 +321,84 @@ describe('slidevSourcePreparer', () => {
         expect(result.inputFilePath).toBe('export/_slidev-sources/existing-slidev/existing-slidev.slidev.md');
         expect(fs.existsSync(path.join(tempVaultRoot, 'export/_slidev-sources/existing-slidev/layouts/custom-grid.vue'))).toBe(true);
         expect(fs.existsSync(path.join(tempVaultRoot, 'export/_slidev-sources/existing-slidev/wide-schematic.svg'))).toBe(true);
+    });
+
+    test('existing Slidev decks copy frontmatter and media local file references into the isolated working copy', async () => {
+        const markdown = [
+            '---',
+            'theme: default',
+            'background: ./assets/deck-background.svg',
+            'favicon: ./assets/favicon.svg?version=1',
+            '---',
+            '',
+            '# Background',
+            '',
+            '---',
+            'layout: image-right',
+            "image: './assets/hero image.svg'",
+            'background: url("./assets/slide-background.svg")',
+            '---',
+            '',
+            '# Media',
+            '',
+            '<video controls poster="./assets/poster.svg">',
+            '  <source src="./media/clip.mp4" type="video/mp4">',
+            '</video>',
+            '<img srcset="./assets/small.svg 1x, ./assets/large.svg 2x" src="./assets/small.svg">',
+            '<link rel="stylesheet" href="./assets/local-theme.css">',
+            '',
+            '---',
+            'background: ../outside.svg',
+            'image: https://example.test/remote.svg',
+            'poster: /absolute/poster.svg',
+            '---',
+            '',
+            '# Rejected',
+        ].join('\n');
+        const app = createApp(markdown);
+        const tempVaultRoot = fs.mkdtempSync(path.join(require('os').tmpdir(), 'notemd-slidev-frontmatter-assets-'));
+        const sourceDirectory = path.join(tempVaultRoot, 'docs/decks');
+        fs.mkdirSync(path.join(sourceDirectory, 'assets'), { recursive: true });
+        fs.mkdirSync(path.join(sourceDirectory, 'media'), { recursive: true });
+        fs.writeFileSync(path.join(sourceDirectory, 'assets/deck-background.svg'), '<svg/>', 'utf8');
+        fs.writeFileSync(path.join(sourceDirectory, 'assets/favicon.svg'), '<svg/>', 'utf8');
+        fs.writeFileSync(path.join(sourceDirectory, 'assets/hero image.svg'), '<svg/>', 'utf8');
+        fs.writeFileSync(path.join(sourceDirectory, 'assets/slide-background.svg'), '<svg/>', 'utf8');
+        fs.writeFileSync(path.join(sourceDirectory, 'assets/poster.svg'), '<svg/>', 'utf8');
+        fs.writeFileSync(path.join(sourceDirectory, 'assets/small.svg'), '<svg/>', 'utf8');
+        fs.writeFileSync(path.join(sourceDirectory, 'assets/large.svg'), '<svg/>', 'utf8');
+        fs.writeFileSync(path.join(sourceDirectory, 'assets/local-theme.css'), 'body{}', 'utf8');
+        fs.writeFileSync(path.join(sourceDirectory, 'media/clip.mp4'), 'fake video payload', 'utf8');
+        fs.writeFileSync(path.join(tempVaultRoot, 'docs/outside.svg'), '<svg/>', 'utf8');
+
+        app.vault.adapter.write = jest.fn(async (vaultPath: string, content: string) => {
+            const absolutePath = path.join(tempVaultRoot, vaultPath);
+            fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+            fs.writeFileSync(absolutePath, content, 'utf8');
+        });
+        mockGetVaultBasePath.mockReturnValue(tempVaultRoot);
+        mockSafeRequire.mockImplementation((moduleName: string) => require(moduleName));
+
+        await prepareSlidevExportSource(
+            app,
+            createFile('docs/decks/background-assets.md'),
+            config,
+            {},
+            jest.fn()
+        );
+
+        const workspaceRoot = path.join(tempVaultRoot, 'export/_slidev-sources/background-assets');
+        expect(fs.existsSync(path.join(workspaceRoot, 'assets/deck-background.svg'))).toBe(true);
+        expect(fs.existsSync(path.join(workspaceRoot, 'assets/favicon.svg'))).toBe(true);
+        expect(fs.existsSync(path.join(workspaceRoot, 'assets/hero image.svg'))).toBe(true);
+        expect(fs.existsSync(path.join(workspaceRoot, 'assets/slide-background.svg'))).toBe(true);
+        expect(fs.existsSync(path.join(workspaceRoot, 'assets/poster.svg'))).toBe(true);
+        expect(fs.existsSync(path.join(workspaceRoot, 'assets/small.svg'))).toBe(true);
+        expect(fs.existsSync(path.join(workspaceRoot, 'assets/large.svg'))).toBe(true);
+        expect(fs.existsSync(path.join(workspaceRoot, 'assets/local-theme.css'))).toBe(true);
+        expect(fs.existsSync(path.join(workspaceRoot, 'media/clip.mp4'))).toBe(true);
+        expect(fs.existsSync(path.join(workspaceRoot, 'outside.svg'))).toBe(false);
+        expect(fs.existsSync(path.join(workspaceRoot, 'absolute/poster.svg'))).toBe(false);
     });
 
     test('deterministic conversion does not split inside fenced code blocks', () => {
@@ -434,6 +565,21 @@ describe('slidevSourcePreparer', () => {
         expect(guardedDeck).not.toContain('theme: seriph');
     });
 
+    test('presentation guardrails disable remote font provider when fonts are not configured', () => {
+        const deck = [
+            '---',
+            'theme: default',
+            'title: Architecture',
+            '---',
+            '',
+            '# Architecture',
+        ].join('\n');
+
+        const guardedDeck = applySlidevPresentationGuardrails(deck, 'default');
+
+        expect(guardedDeck).toContain('fonts:\n  provider: none');
+    });
+
     test('copies an existing Slidev deck into the prepared export workspace', async () => {
         const markdown = [
             '---',
@@ -459,7 +605,7 @@ describe('slidevSourcePreparer', () => {
         });
         expect(app.vault.adapter.write).toHaveBeenCalledWith(
             'export/_slidev-sources/slides/slides.slidev.md',
-            markdown
+            expect.stringContaining('fonts:\n  provider: none')
         );
     });
 

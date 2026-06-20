@@ -40,6 +40,7 @@ const MAX_LLM_REFERENCE_CHARS = 120000;
 const LARGE_MERMAID_LINE_THRESHOLD = 32;
 const SLIDEV_SUPPORT_DIRECTORIES = ['layouts', 'public', 'setup', 'snippets', 'components', 'styles'];
 const SLIDEV_SUPPORT_FILES = ['global-top.vue', 'global-bottom.vue', 'style.css', 'styles.css'];
+const SLIDEV_LOCAL_FILE_FRONTMATTER_KEYS = new Set(['background', 'image', 'src', 'favicon', 'poster', 'download']);
 
 export async function prepareSlidevExportSource(
 	app: App,
@@ -51,7 +52,13 @@ export async function prepareSlidevExportSource(
 	const sourceMarkdown = await app.vault.read(sourceFile);
 	if (isSlidevDeckMarkdown(sourceMarkdown)) {
 		onProgress?.('slidev-source', 'Current file is already a Slidev deck; writing working copy for export verification.');
-		const preparedDeckPath = await writePreparedDeckWorkspace(app, sourceFile, config, decorateComponentHeavySlotZones(sourceMarkdown), onProgress);
+		const preparedDeckPath = await writePreparedDeckWorkspace(
+			app,
+			sourceFile,
+			config,
+			prepareExistingSlidevDeckWorkingCopyMarkdown(sourceMarkdown),
+			onProgress,
+		);
 		return {
 			inputFilePath: preparedDeckPath,
 			outputBasename: sourceFile.basename,
@@ -129,7 +136,13 @@ export async function prepareSlidevExportSourceFromOutline(
 	const sourceMarkdown = await app.vault.read(sourceFile);
 	if (isSlidevDeckMarkdown(sourceMarkdown)) {
 		onProgress?.('slidev-source', 'Current file is already a Slidev deck; outline is not needed for this export.');
-		const preparedDeckPath = await writePreparedDeckWorkspace(app, sourceFile, config, decorateComponentHeavySlotZones(sourceMarkdown), onProgress);
+		const preparedDeckPath = await writePreparedDeckWorkspace(
+			app,
+			sourceFile,
+			config,
+			prepareExistingSlidevDeckWorkingCopyMarkdown(sourceMarkdown),
+			onProgress,
+		);
 		return {
 			inputFilePath: preparedDeckPath,
 			outputBasename: sourceFile.basename,
@@ -311,15 +324,46 @@ function normalizeDeckTheme(deckMarkdown: string, deckTheme: string): string {
 	for (let index = 1; index < lines.length; index++) {
 		if (lines[index].trim() === '---') {
 			lines.splice(index, 0, `theme: ${formatYamlTheme(deckTheme)}`);
-			return lines.join('\n');
+			return ensureSlidevOfflineFontProvider(lines.join('\n'));
 		}
 		if (/^theme\s*:/i.test(lines[index].trim())) {
 			lines[index] = `theme: ${formatYamlTheme(deckTheme)}`;
-			return lines.join('\n');
+			return ensureSlidevOfflineFontProvider(lines.join('\n'));
 		}
 	}
 
 	return deckMarkdown;
+}
+
+function prepareExistingSlidevDeckWorkingCopyMarkdown(deckMarkdown: string): string {
+	return ensureSlidevOfflineFontProvider(decorateComponentHeavySlotZones(deckMarkdown));
+}
+
+function ensureSlidevOfflineFontProvider(deckMarkdown: string): string {
+	const lines = deckMarkdown.split(/\r?\n/);
+	const headmatterEnd = findDeckHeadmatterEnd(lines);
+	if (headmatterEnd < 0 || hasTopLevelDeckHeadmatterKey(lines, headmatterEnd, 'fonts')) {
+		return deckMarkdown;
+	}
+	lines.splice(headmatterEnd, 0, 'fonts:', '  provider: none');
+	return lines.join('\n');
+}
+
+function findDeckHeadmatterEnd(lines: string[]): number {
+	if (lines[0]?.trim() !== '---') {
+		return -1;
+	}
+	for (let index = 1; index < lines.length; index++) {
+		if (lines[index].trim() === '---') {
+			return index;
+		}
+	}
+	return -1;
+}
+
+function hasTopLevelDeckHeadmatterKey(lines: string[], headmatterEnd: number, key: string): boolean {
+	const pattern = new RegExp(`^${key}\\s*:`, 'i');
+	return lines.slice(1, headmatterEnd).some(line => pattern.test(line.trim()));
 }
 
 function applySlideGuardrails(slideMarkdown: string): string {
@@ -1246,21 +1290,145 @@ function copyReferencedLocalAssetFilesWithNodeFs(
 	return copiedAssets;
 }
 
-function extractLocalAssetReferences(markdown: string): string[] {
+export function extractLocalAssetReferences(markdown: string): string[] {
 	const references = new Set<string>();
 	for (const match of markdown.matchAll(/!\[[^\]]*]\(([^)]+)\)/g)) {
-		const reference = normalizeLocalAssetReference(match[1]);
-		if (reference) {
-			references.add(reference);
+		addLocalAssetReference(references, match[1]);
+	}
+	for (const match of markdown.matchAll(/<(?:img|video|audio|source|track|iframe|embed|script)\b[^>]*\b(?:src|poster)\s*=\s*["']([^"']+)["'][^>]*>/gi)) {
+		addLocalAssetReference(references, match[1]);
+	}
+	for (const match of markdown.matchAll(/<(?:img|source)\b[^>]*\bsrcset\s*=\s*["']([^"']+)["'][^>]*>/gi)) {
+		for (const candidate of extractSrcsetReferences(match[1])) {
+			addLocalAssetReference(references, candidate);
 		}
 	}
-	for (const match of markdown.matchAll(/<img\b[^>]*\bsrc\s*=\s*["']([^"']+)["'][^>]*>/gi)) {
-		const reference = normalizeLocalAssetReference(match[1]);
-		if (reference) {
-			references.add(reference);
+	for (const match of markdown.matchAll(/<link\b[^>]*\bhref\s*=\s*["']([^"']+)["'][^>]*>/gi)) {
+		addLocalAssetReference(references, match[1]);
+	}
+	for (const value of extractSlidevFrontmatterLocalFileValues(markdown)) {
+		const cssUrls = extractCssUrlReferences(value);
+		if (cssUrls.length > 0) {
+			for (const candidate of cssUrls) {
+				addLocalAssetReference(references, candidate);
+			}
+			continue;
 		}
+		addLocalAssetReference(references, value);
 	}
 	return Array.from(references);
+}
+
+function addLocalAssetReference(references: Set<string>, rawReference: string): void {
+	const reference = normalizeLocalAssetReference(rawReference);
+	if (reference) {
+		references.add(reference);
+	}
+}
+
+function extractSrcsetReferences(rawSrcset: string): string[] {
+	return rawSrcset
+		.split(',')
+		.map(candidate => candidate.trim().split(/\s+/, 1)[0])
+		.filter(Boolean);
+}
+
+function extractSlidevFrontmatterLocalFileValues(markdown: string): string[] {
+	const values: string[] = [];
+	for (const blockLines of extractSlidevFrontmatterBlocks(markdown)) {
+		for (const line of blockLines) {
+			const match = line.match(/^\s*([A-Za-z][\w-]*)\s*:\s*(.+?)\s*$/);
+			if (!match || !SLIDEV_LOCAL_FILE_FRONTMATTER_KEYS.has(match[1].toLowerCase())) {
+				continue;
+			}
+			const value = normalizeYamlScalarFileValue(match[2]);
+			if (value) {
+				values.push(value);
+			}
+		}
+	}
+	return values;
+}
+
+function extractSlidevFrontmatterBlocks(markdown: string): string[][] {
+	const lines = markdown.split(/\r?\n/);
+	const blocks: string[][] = [];
+	let activeFenceMarker: string | null = null;
+
+	for (let index = 0; index < lines.length; index++) {
+		const trimmed = lines[index].trim();
+		const openingMatch = trimmed.match(/^(```+|~~~+)/);
+		if (openingMatch) {
+			activeFenceMarker = activeFenceMarker ? null : (openingMatch[1][0] === '~' ? '~~~' : '```');
+			continue;
+		}
+		if (activeFenceMarker || trimmed !== '---') {
+			continue;
+		}
+
+		const closingIndex = findFrontmatterClosingBoundary(lines, index + 1);
+		if (closingIndex < 0) {
+			continue;
+		}
+		const blockLines = lines.slice(index + 1, closingIndex);
+		if (!isSlidevFrontmatterBlock(blockLines)) {
+			continue;
+		}
+		blocks.push(blockLines);
+		index = closingIndex;
+	}
+
+	return blocks;
+}
+
+function findFrontmatterClosingBoundary(lines: string[], startIndex: number): number {
+	for (let index = startIndex; index < lines.length; index++) {
+		if (lines[index].trim() === '---') {
+			return index;
+		}
+	}
+	return -1;
+}
+
+function isSlidevFrontmatterBlock(lines: string[]): boolean {
+	let hasFrontmatterKey = false;
+	for (const line of lines) {
+		const trimmed = line.trim();
+		if (!trimmed || trimmed.startsWith('#')) {
+			continue;
+		}
+		if (/^[A-Za-z][\w-]*\s*:/.test(trimmed)) {
+			hasFrontmatterKey = true;
+			continue;
+		}
+		if (hasFrontmatterKey && (/^[-[{]/.test(trimmed) || /^\s+\S/.test(line))) {
+			continue;
+		}
+		return false;
+	}
+	return hasFrontmatterKey;
+}
+
+function normalizeYamlScalarFileValue(rawValue: string): string | null {
+	const withoutComment = rawValue.replace(/\s+#.*$/, '').trim();
+	if (!withoutComment || withoutComment === '|' || withoutComment === '>') {
+		return null;
+	}
+	const quote = withoutComment[0];
+	if ((quote === '"' || quote === "'") && withoutComment.endsWith(quote)) {
+		return withoutComment.slice(1, -1).trim();
+	}
+	return withoutComment;
+}
+
+function extractCssUrlReferences(value: string): string[] {
+	const references: string[] = [];
+	for (const match of value.matchAll(/url\(\s*(['"]?)(.*?)\1\s*\)/gi)) {
+		if (match[2]) {
+			references.push(match[2]);
+		}
+	}
+	return references;
 }
 
 function normalizeLocalAssetReference(rawReference: string): string | null {

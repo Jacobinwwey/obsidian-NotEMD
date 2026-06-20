@@ -251,15 +251,74 @@ function collectDeckSummary(deckPath) {
 		return null;
 	}
 	const deck = fs.readFileSync(deckPath, 'utf8');
+	const mermaidFences = extractMermaidFenceBlocks(deck);
 	return {
 		path: deckPath,
 		bytes: fs.statSync(deckPath).size,
 		theme: (deck.match(/^theme:\s*(.+)$/m) || [])[1] || null,
-		mermaidBlocks: (deck.match(/```mermaid/g) || []).length,
+		mermaidBlocks: mermaidFences.length,
 		zoomLines: [...deck.matchAll(/^zoom:\s*(.+)$/gm)].map(match => match[1]),
 		containsKnownStaleText: deck.includes('快速定位'),
 		containsMissingTheme: deck.includes('seriph'),
 	};
+}
+
+function collectMermaidSourcePreservation(sourcePath, deckPath) {
+	if (!sourcePath || !deckPath || !fs.existsSync(sourcePath) || !fs.existsSync(deckPath)) {
+		return null;
+	}
+
+	const sourceFences = extractMermaidFenceBlocks(fs.readFileSync(sourcePath, 'utf8'));
+	const deckFences = extractMermaidFenceBlocks(fs.readFileSync(deckPath, 'utf8'));
+	const changedFenceIndexes = [];
+	const comparedCount = Math.max(sourceFences.length, deckFences.length);
+	for (let index = 0; index < comparedCount; index++) {
+		if (sourceFences[index] !== deckFences[index]) {
+			changedFenceIndexes.push(index + 1);
+		}
+	}
+
+	return {
+		required: sourceFences.length > 0,
+		passed: changedFenceIndexes.length === 0,
+		sourceFenceCount: sourceFences.length,
+		deckFenceCount: deckFences.length,
+		changedFenceIndexes,
+	};
+}
+
+function extractMermaidFenceBlocks(markdown) {
+	const lines = markdown.split(/\r?\n/);
+	const fences = [];
+	let activeFence = null;
+
+	for (const line of lines) {
+		if (!activeFence) {
+			const openingMatch = line.trim().match(/^(```+|~~~+)\s*mermaid(?:\s+\{[^}]+\})?\s*$/i);
+			if (openingMatch) {
+				activeFence = {
+					marker: openingMatch[1],
+					lines: [line],
+				};
+			}
+			continue;
+		}
+
+		activeFence.lines.push(line);
+		if (isClosingFenceLine(line, activeFence.marker)) {
+			fences.push(activeFence.lines.join('\n'));
+			activeFence = null;
+		}
+	}
+
+	return fences;
+}
+
+function isClosingFenceLine(line, openingMarker) {
+	const markerCharacter = openingMarker[0];
+	const markerCount = openingMarker.length;
+	const escapedMarker = markerCharacter.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+	return new RegExp(`^${escapedMarker}{${markerCount},}\\s*$`).test(line.trim());
 }
 
 async function collectRenderedSlideMeasurement(page, slide) {
@@ -651,6 +710,7 @@ async function main() {
 	let absoluteExportPath = path.join(vaultRoot, exportPath);
 	const absoluteDeckPath = slideSource.preparedDeckPath ? path.join(vaultRoot, slideSource.preparedDeckPath) : null;
 	let deckSummary = collectDeckSummary(absoluteDeckPath);
+	const mermaidSourcePreservation = collectMermaidSourcePreservation(path.join(vaultRoot, sourceFile.path), absoluteDeckPath);
 	let playwrightChecks = layoutConvergence?.checks ?? [];
 	let layoutAudits = layoutConvergence?.layoutAudits ?? [];
 	let layoutAuditSummary = layoutConvergence?.layoutAuditSummary ?? slideExport.summarizeLayoutAudits([], 0);
@@ -690,6 +750,7 @@ async function main() {
 			&& ignoredOutputs.length === 0
 			&& !hasLayoutFailures
 			&& (!deckSummary || (!deckSummary.containsKnownStaleText && !deckSummary.containsMissingTheme))
+			&& (!mermaidSourcePreservation || mermaidSourcePreservation.passed)
 			&& standaloneGate.passed,
 		source: {
 			vaultRoot,
@@ -720,6 +781,7 @@ async function main() {
 		htmlExportHistory,
 		standaloneGate,
 		deck: deckSummary,
+		mermaidSourcePreservation,
 		playwright: playwrightChecks,
 		playwrightSlides: auditedSlides,
 		layoutAudit: layoutAudits,

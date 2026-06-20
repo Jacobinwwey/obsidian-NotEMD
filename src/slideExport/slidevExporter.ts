@@ -8,6 +8,7 @@
 import type { App } from 'obsidian';
 import type { SlideExportConfig, ExecResult, ExportProgressCallback, SlidevExportSource, SlidevHtmlActualMode, SlidevHtmlExportOutcome } from './types';
 import { execFileAsync, getVaultBasePath, resolveNpxCommand, resolvePlaywrightBrowsersPath, resolveSlidevCommand, safeRequire } from './platformUtils';
+import { extractLocalAssetReferences } from './slidevSourcePreparer';
 
 function createBuildArgs(
 	inputPath: string,
@@ -38,6 +39,60 @@ function recreateDirectory(directoryPath: string): void {
 	const fs: any = safeRequire('fs');
 	fs?.rmSync?.(directoryPath, { recursive: true, force: true });
 	fs?.mkdirSync?.(directoryPath, { recursive: true });
+}
+
+function copyPreparedLocalFileReferencesToExport(
+	source: SlidevExportSource,
+	vaultRoot: string,
+	outputDir: string,
+	onProgress?: ExportProgressCallback,
+): void {
+	const fs: any = safeRequire('fs');
+	const path: any = safeRequire('path');
+	if (!fs?.existsSync || !fs?.readFileSync || !path?.join || !path?.dirname || !path?.relative || !path?.isAbsolute) {
+		return;
+	}
+
+	const preparedDeckPath = source.preparedDeckPath ?? source.inputFilePath;
+	const absolutePreparedDeckPath = path.join(vaultRoot, preparedDeckPath);
+	if (!fs.existsSync(absolutePreparedDeckPath)) {
+		return;
+	}
+
+	const preparedDeckDirectory = path.dirname(absolutePreparedDeckPath);
+	const copiedAssets: string[] = [];
+	const deckMarkdown = fs.readFileSync(absolutePreparedDeckPath, 'utf8');
+	for (const referencePath of extractLocalAssetReferences(deckMarkdown)) {
+		const absoluteSourceAsset = path.join(preparedDeckDirectory, referencePath);
+		if (!isInsideDirectory(path, preparedDeckDirectory, absoluteSourceAsset) || !fs.existsSync(absoluteSourceAsset)) {
+			continue;
+		}
+		const stat = fs.statSync?.(absoluteSourceAsset);
+		if (!stat?.isFile?.()) {
+			continue;
+		}
+
+		const absoluteTargetAsset = path.join(outputDir, referencePath);
+		if (!isInsideDirectory(path, outputDir, absoluteTargetAsset)) {
+			continue;
+		}
+		fs.mkdirSync?.(path.dirname(absoluteTargetAsset), { recursive: true });
+		if (fs.copyFileSync) {
+			fs.copyFileSync(absoluteSourceAsset, absoluteTargetAsset);
+		} else {
+			fs.cpSync?.(absoluteSourceAsset, absoluteTargetAsset);
+		}
+		copiedAssets.push(referencePath);
+	}
+
+	if (copiedAssets.length > 0) {
+		onProgress?.('slidev-build', `Copied local export assets: ${copiedAssets.join(', ')}`);
+	}
+}
+
+function isInsideDirectory(path: any, directoryPath: string, candidatePath: string): boolean {
+	const relativePath = path.relative(directoryPath, candidatePath);
+	return Boolean(relativePath) && !relativePath.startsWith('..') && !path.isAbsolute(relativePath);
 }
 
 function escapeRegExp(value: string): string {
@@ -125,6 +180,7 @@ async function exportSlidevStandaloneHtml(
 	if (result.exitCode !== 0) {
 		throw new Error(`Slidev standalone build failed via ${slidev.description} (exit ${result.exitCode}): ${result.stderr || result.error?.message || 'unknown error'}`);
 	}
+	copyPreparedLocalFileReferencesToExport(source, vaultRoot, outputDir, onProgress);
 
 	const standaloneHtmlPath = `${config.outputSubfolder}/${source.outputBasename}-slides/index-standalone.html`;
 	const standaloneHtml = await app.vault.adapter.read(standaloneHtmlPath);
@@ -192,6 +248,7 @@ async function exportSlidevServerHtml(
 	if (result.exitCode !== 0) {
 		throw new Error(`Slidev build failed via ${slidev.description} (exit ${result.exitCode}): ${result.stderr || result.error?.message || 'unknown error'}`);
 	}
+	copyPreparedLocalFileReferencesToExport(source, vaultRoot, outputDir, onProgress);
 
 	const exportPath = `${config.outputSubfolder}/${source.outputBasename}-slides/index.html`;
 

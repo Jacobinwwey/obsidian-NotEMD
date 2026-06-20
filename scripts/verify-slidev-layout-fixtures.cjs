@@ -104,7 +104,7 @@ function createSourceLayoutStressMarkdown() {
         ['Standalone HTML', 'native bundle', 'loader bindings', 'index-standalone.html', 'fail closed when loader binding is missing', 'operator can open file directly', 'actualMode equals standalone'],
         ['Layout convergence', 'rendered audit', 'DOM geometry', 'layoutAuditSummary', 'retry when table or code overflows', 'progress log shows patch pass', 'hardOverflowCount stays zero'],
         ['Generated artifacts', 'maintainer review', 'visible export output', 'docs/export or archive', 'never hide generated files with gitignore', 'human can inspect deck markdown', 'ignoredOutputs stays empty'],
-        ['Mermaid preservation', 'source fence', 'diagram block count', 'prepared deck markdown', 'do not rewrite one source diagram into multiple diagrams', 'manual review is explicit', 'mermaid block count is stable'],
+        ['Mermaid preservation', 'source fence', 'exact fence content', 'prepared deck markdown', 'do not rewrite one source diagram into multiple diagrams', 'manual review is explicit', 'mermaid fences are byte-stable'],
     ];
     const wideTable = [
         '| Capability | Trigger | Invariant | Evidence artifact | Failure handling | User-visible surface | Audit signal |',
@@ -116,7 +116,7 @@ function createSourceLayoutStressMarkdown() {
         ['Provider retry cascade', 'StandaloneLoaderRegressionFingerprint0123456789 pushes one dense row past normal table width and makes the row unreadable before the final audit can judge the deck.', 'Convert the row into key-value record-list bullets so every field wraps independently and remains readable without shrinking the whole slide.', 'layout-fixture-report.json', 'export workflow'],
         ['Export artifact drift', 'PreparedDeckWorkspaceMirrorRegressionFingerprint0123456789 can leave a stale support file beside the copied deck when the source is already a Slidev workspace.', 'Recreate the prepared workspace and mirror support entries before every export verification run.', 'prepared-working-copy', 'source preparer'],
         ['Dense note section', 'LongTableCellReadabilityRegressionFingerprint0123456789 mixes failure reason, operator action, and evidence path into one oversized cell.', 'Prefer record-list slides over low zoom for long-cell tables because each row is a separate presentation record.', 'rendered measurement', 'layout audit'],
-        ['Manual review boundary', 'MermaidSourcePreservationRegressionFingerprint0123456789 should never cause the workflow to split one source Mermaid graph into several generated diagrams.', 'Expose source-preserved-fit-review or manual-review while keeping the original Mermaid fence count unchanged.', 'mermaidFit summary', 'maintainer'],
+        ['Manual review boundary', 'MermaidSourcePreservationRegressionFingerprint0123456789 should never cause the workflow to split one source Mermaid graph into several generated diagrams.', 'Expose source-preserved-fit-review or manual-review while keeping every original Mermaid fence byte-stable.', 'mermaidFit summary', 'maintainer'],
     ];
     const longTable = [
         '| Risk | Impact | Mitigation | Evidence | Owner |',
@@ -272,7 +272,7 @@ function createMediaNestedSlotStressDeck() {
         ['Image asset audit', 'Markdown image is present', 'Image layout must stay visible', 'wide-schematic.svg', 'Do not hide export assets', 'standalone HTML', 'source preparer', 'verify media fixture', 'broken relative asset path', 'native standalone'],
         ['Nested slot audit', 'Component content overflows a named slot', 'Only the overflowing slot is transformed', 'data-notemd-slot-zone', 'Do not shrink the whole slide', 'layout audit', 'patcher', 'verify slot fixture', 'wrong slot attribution', 'no low font'],
         ['Wide table audit', 'Ten-column table is too wide', 'Split columns or records structurally', 'final deck markdown', 'Do not rely on low zoom', 'maintainer report', 'table splitter', 'verify table fixture', 'cramped table text', 'no hard overflow'],
-        ['Mixed source audit', 'Mermaid appears beside prose', 'Mermaid fence remains intact', 'mermaid block count', 'Separate prose before low zoom', 'deck markdown', 'source-preserved fit', 'verify mixed fixture', 'prose made unreadable', 'no mixed low zoom'],
+        ['Mixed source audit', 'Mermaid appears beside prose', 'Mermaid fence remains byte-stable', 'mermaid fence comparison', 'Separate prose before low zoom', 'deck markdown', 'source-preserved fit', 'verify mixed fixture', 'prose made unreadable', 'no mixed low zoom'],
     ];
     const ultraWideTable = [
         `| ${ultraWideHeader.join(' | ')} |`,
@@ -342,6 +342,42 @@ function createMediaNestedSlotStressDeck() {
     ].join('\n');
 }
 
+function createBackgroundCrossAssetStressDeck() {
+    return [
+        '---',
+        'theme: default',
+        'mdc: true',
+        'background: ./assets/deck-background.svg',
+        'favicon: ./assets/favicon.svg?cache=fixture',
+        '---',
+        '',
+        '# Background Asset Stress',
+        '',
+        'This deck keeps local frontmatter assets beside a source file that lives in a nested directory.',
+        '',
+        '---',
+        'background: url("./assets/section-background.svg")',
+        'class: text-white',
+        '---',
+        '',
+        '# Section Backdrop',
+        '',
+        '- Frontmatter background references must survive prepared workspace isolation.',
+        '- The export must not depend on the original source directory after preparation.',
+        '- This slide intentionally avoids Mermaid so no diagram-preservation rule is involved.',
+        '',
+        '---',
+        'layout: image-right',
+        'image: ./assets/hero.svg',
+        '---',
+        '',
+        '# Image Frontmatter',
+        '',
+        'The `image` frontmatter path is a local source-relative asset, not a remote URL.',
+        '',
+    ].join('\n');
+}
+
 function createWideSchematicSvg() {
     return [
         '<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="560" viewBox="0 0 1440 560" role="img" aria-label="Wide schematic">',
@@ -365,6 +401,18 @@ function createWideSchematicSvg() {
         '    <text x="790" y="235">Browser check</text>',
         '    <text x="1135" y="235">HTML file</text>',
         '  </g>',
+        '</svg>',
+        '',
+    ].join('\n');
+}
+
+function createFixtureSvg(label, fill = '#f8fafc', accent = '#2563eb') {
+    return [
+        `<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720" role="img" aria-label="${label}">`,
+        `  <rect width="1280" height="720" fill="${fill}"/>`,
+        `  <rect x="86" y="96" width="1108" height="528" rx="32" fill="none" stroke="${accent}" stroke-width="12"/>`,
+        `  <text x="140" y="210" font-family="Inter, Arial, sans-serif" font-size="64" fill="#0f172a">${label}</text>`,
+        `  <text x="140" y="300" font-family="Inter, Arial, sans-serif" font-size="34" fill="#334155">source-relative asset copied into prepared workspace</text>`,
         '</svg>',
         '',
     ].join('\n');
@@ -408,6 +456,25 @@ const FIXTURES = [
         expectTransform: true,
         expectImageReference: true,
         expectUltraWideTableSplit: true,
+        expectedMermaidBlocks: 0,
+    },
+    {
+        id: 'background-cross-asset-stress',
+        sourcePath: 'decks/background-cross-asset-stress.md',
+        sourceMarkdown: createBackgroundCrossAssetStressDeck(),
+        files: [
+            { path: 'decks/assets/deck-background.svg', content: createFixtureSvg('Deck background', '#e0f2fe', '#0369a1') },
+            { path: 'decks/assets/section-background.svg', content: createFixtureSvg('Section background', '#0f172a', '#22d3ee') },
+            { path: 'decks/assets/hero.svg', content: createFixtureSvg('Hero image', '#ecfdf5', '#047857') },
+            { path: 'decks/assets/favicon.svg', content: createFixtureSvg('Favicon', '#f8fafc', '#7c3aed') },
+        ],
+        expectFrontmatterAssets: true,
+        expectedCopiedAssets: [
+            'assets/deck-background.svg',
+            'assets/section-background.svg',
+            'assets/hero.svg',
+            'assets/favicon.svg',
+        ],
         expectedMermaidBlocks: 0,
     },
 ];
@@ -509,13 +576,15 @@ function assertFixtureReport(fixture, report, sourceMarkdown) {
         assert(report.slideSource?.skillReferenceCount > 0, `${fixture.id}: expected Slidev skill references to be loaded`);
     }
 
-    const sourceMermaidBlocks = countMermaidBlocks(sourceMarkdown);
-    assert(report.deck?.mermaidBlocks === sourceMermaidBlocks, `${fixture.id}: source/exported Mermaid block count changed`);
+    const sourceMermaidFences = extractMermaidFenceBlocks(sourceMarkdown);
+    const sourceMermaidBlocks = sourceMermaidFences.length;
+    assert(report.deck?.mermaidBlocks === sourceMermaidBlocks, `${fixture.id}: source/exported Mermaid fence count changed`);
     if (typeof fixture.expectedMermaidBlocks === 'number') {
         assert(sourceMermaidBlocks === fixture.expectedMermaidBlocks, `${fixture.id}: fixture source Mermaid count changed`);
     }
 
     const deckMarkdown = fs.readFileSync(report.deck.path, 'utf8');
+    assertMermaidFencesUnchanged(fixture.id, sourceMermaidFences, extractMermaidFenceBlocks(deckMarkdown));
     assertLowZoomOnlyTargetsMermaid(fixture.id, deckMarkdown);
     if (fixture.expectRecordList) {
         assert(deckMarkdown.includes('- Risk: Provider retry cascade'), `${fixture.id}: long table did not converge to record-list fallback`);
@@ -537,6 +606,17 @@ function assertFixtureReport(fixture, report, sourceMarkdown) {
     }
     if (fixture.expectImageReference) {
         assert(deckMarkdown.includes('wide-schematic.svg'), `${fixture.id}: Markdown image reference did not survive deck convergence`);
+    }
+    if (fixture.expectFrontmatterAssets) {
+        assert(deckMarkdown.includes('background: ./assets/deck-background.svg'), `${fixture.id}: deck background frontmatter reference did not survive`);
+        assert(deckMarkdown.includes('background: url("./assets/section-background.svg")'), `${fixture.id}: slide background frontmatter reference did not survive`);
+        assert(deckMarkdown.includes('image: ./assets/hero.svg'), `${fixture.id}: image frontmatter reference did not survive`);
+    }
+    if (fixture.expectedCopiedAssets) {
+        const preparedDeckDirectory = path.dirname(report.deck.path);
+        for (const relativeAssetPath of fixture.expectedCopiedAssets) {
+            assert(fs.existsSync(path.join(preparedDeckDirectory, relativeAssetPath)), `${fixture.id}: prepared workspace is missing ${relativeAssetPath}`);
+        }
     }
     if (fixture.expectUltraWideTableSplit) {
         assert(!deckMarkdown.includes('| Capability | Trigger | Boundary | Evidence | Fallback | User surface | Owner | Replay command | Regression risk | Gate |'), `${fixture.id}: ultra-wide table survived unsplit`);
@@ -728,12 +808,56 @@ function escapeRegExp(value) {
 }
 
 function countMermaidBlocks(markdown) {
-    return (markdown.match(/```mermaid/gi) || []).length;
+    return extractMermaidFenceBlocks(markdown).length;
 }
 
 function countFenceOpeners(markdown, language) {
     const pattern = new RegExp('```\\s*' + language + '(?:\\s|\\n|$)', 'gi');
     return (markdown.match(pattern) || []).length;
+}
+
+function assertMermaidFencesUnchanged(fixtureId, sourceFences, deckFences) {
+    assert(deckFences.length === sourceFences.length, `${fixtureId}: exported Mermaid fence count changed`);
+    for (let index = 0; index < sourceFences.length; index++) {
+        assert(
+            deckFences[index] === sourceFences[index],
+            `${fixtureId}: Mermaid fence ${index + 1} changed; source Mermaid diagrams must stay byte-stable`
+        );
+    }
+}
+
+function extractMermaidFenceBlocks(markdown) {
+    const lines = markdown.split(/\r?\n/);
+    const fences = [];
+    let activeFence = null;
+
+    for (const line of lines) {
+        if (!activeFence) {
+            const openingMatch = line.trim().match(/^(```+|~~~+)\s*mermaid(?:\s+\{[^}]+\})?\s*$/i);
+            if (openingMatch) {
+                activeFence = {
+                    marker: openingMatch[1],
+                    lines: [line],
+                };
+            }
+            continue;
+        }
+
+        activeFence.lines.push(line);
+        if (isClosingFenceLine(line, activeFence.marker)) {
+            fences.push(activeFence.lines.join('\n'));
+            activeFence = null;
+        }
+    }
+
+    return fences;
+}
+
+function isClosingFenceLine(line, openingMarker) {
+    const markerCharacter = openingMarker[0];
+    const markerCount = openingMarker.length;
+    const escapedMarker = escapeRegExp(markerCharacter);
+    return new RegExp(`^${escapedMarker}{${markerCount},}\\s*$`).test(line.trim());
 }
 
 function copyFixtureEvidence(archiveRoot, fixture, report, sourcePath) {
@@ -744,6 +868,10 @@ function copyFixtureEvidence(archiveRoot, fixture, report, sourcePath) {
     fs.writeFileSync(path.join(fixtureArchive, 'report.json'), JSON.stringify(report, null, 2));
     if (report.deck?.path && fs.existsSync(report.deck.path)) {
         fs.copyFileSync(report.deck.path, path.join(fixtureArchive, path.basename(report.deck.path)));
+        fs.cpSync(path.dirname(report.deck.path), path.join(fixtureArchive, 'prepared-deck'), {
+            recursive: true,
+            filter: sourcePath => !sourcePath.split(path.sep).includes('node_modules'),
+        });
     }
     if (report.output?.path && fs.existsSync(report.output.path)) {
         const exportDirectory = fs.statSync(report.output.path).isDirectory()

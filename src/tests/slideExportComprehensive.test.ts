@@ -3,6 +3,9 @@ import { detectStandaloneBundleLoaderGaps, exportSlidevHtml, exportSlidevHtmlWit
 import { exportVideoMp4 } from '../slideExport/videoExporter';
 import type { SlideExportConfig, SlidevExportSource } from '../slideExport/types';
 import type { TFile, App } from 'obsidian';
+import * as fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
 
 jest.mock('../slideExport/platformUtils');
 
@@ -295,6 +298,78 @@ describe('slidevExporter — All Format Combinations', () => {
         });
         expect(mockExecFileAsync).toHaveBeenCalledTimes(1);
         expect(mockExecFileAsync.mock.calls[0][1]).toEqual(expect.arrayContaining(['--standalone-bundle']));
+    });
+
+    test('copies prepared local file references into the HTML export directory', async () => {
+        mockExecFileAsync.mockResolvedValue({ exitCode: 0, stdout: '', stderr: '' });
+        const tempVaultRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'notemd-slidev-export-assets-'));
+        const preparedDeckPath = 'export/_slidev-sources/deck/deck.slidev.md';
+        const preparedDeckDirectory = path.join(tempVaultRoot, 'export/_slidev-sources/deck');
+        fs.mkdirSync(path.join(preparedDeckDirectory, 'assets'), { recursive: true });
+        fs.writeFileSync(path.join(preparedDeckDirectory, 'deck.slidev.md'), [
+            '---',
+            'theme: default',
+            'background: ./assets/deck-background.svg',
+            'favicon: ./assets/favicon.svg?cache=test',
+            '---',
+            '',
+            '# Deck',
+            '',
+            '---',
+            'layout: image-right',
+            'image: ./assets/hero.svg',
+            '---',
+            '',
+            '# Image',
+            '',
+            '![Texture](./assets/texture.svg)',
+            '',
+            '---',
+            'background: ../outside.svg',
+            '---',
+            '',
+            '# Rejected',
+        ].join('\n'));
+        fs.writeFileSync(path.join(preparedDeckDirectory, 'assets/deck-background.svg'), '<svg/>', 'utf8');
+        fs.writeFileSync(path.join(preparedDeckDirectory, 'assets/favicon.svg'), '<svg/>', 'utf8');
+        fs.writeFileSync(path.join(preparedDeckDirectory, 'assets/hero.svg'), '<svg/>', 'utf8');
+        fs.writeFileSync(path.join(preparedDeckDirectory, 'assets/texture.svg'), '<svg/>', 'utf8');
+        fs.writeFileSync(path.join(tempVaultRoot, 'export/_slidev-sources/outside.svg'), '<svg/>', 'utf8');
+        mockGetVaultBasePath.mockReturnValue(tempVaultRoot);
+        mockSafeRequire.mockImplementation((moduleName: string) => {
+            if (moduleName === 'fs') return fs;
+            if (moduleName === 'path') return path;
+            return null;
+        });
+        const app = createMockApp(tempVaultRoot);
+        const source: SlidevExportSource = {
+            inputFilePath: preparedDeckPath,
+            outputBasename: 'deck',
+            sourceLabel: preparedDeckPath,
+            preparedDeckPath,
+        };
+        const config: SlideExportConfig = {
+            format: 'html',
+            withClicks: false,
+            outputSubfolder: 'export',
+            ffmpegFps: 1,
+            ffmpegCrf: 23,
+            slidevTheme: 'default',
+            timeoutMs: 120000,
+        };
+
+        try {
+            await exportSlidevHtmlWithOutcome(app, source, config, jest.fn());
+
+            const exportDirectory = path.join(tempVaultRoot, 'export/deck-slides');
+            expect(fs.existsSync(path.join(exportDirectory, 'assets/deck-background.svg'))).toBe(true);
+            expect(fs.existsSync(path.join(exportDirectory, 'assets/favicon.svg'))).toBe(true);
+            expect(fs.existsSync(path.join(exportDirectory, 'assets/hero.svg'))).toBe(true);
+            expect(fs.existsSync(path.join(exportDirectory, 'assets/texture.svg'))).toBe(true);
+            expect(fs.existsSync(path.join(exportDirectory, 'outside.svg'))).toBe(false);
+        } finally {
+            fs.rmSync(tempVaultRoot, { recursive: true, force: true });
+        }
     });
 
     test('reports explicit server-script html outcome without standalone attempt', async () => {
