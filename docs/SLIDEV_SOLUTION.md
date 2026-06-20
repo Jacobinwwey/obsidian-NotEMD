@@ -157,7 +157,7 @@ The current render-feedback loop is now:
    - simple heading + paragraph/list slides
    - Markdown tables, including row-split and width-driven column decomposition
    - pathological width-heavy and long-cell tables through deterministic record-list fallback
-   - non-Mermaid fenced code blocks with semantic-block chunking before blank-line or line-budget fallback
+   - non-Mermaid fenced code blocks, with TypeScript/JavaScript top-level tokenizer chunking before generic semantic-block, blank-line, or line-budget fallback
    - generic slot-marked layouts, including explicit `::default::`, supported built-in slot layouts, and custom named slots when the slot content is structurally patchable
    - unique component-heavy slot zones through local `<Transform :scale="...">` wrapping when structural splitting is unavailable
    - first-slide deck headmatter content when structural splitting is possible
@@ -165,6 +165,8 @@ The current render-feedback loop is now:
 7. The verifier now audits the full deck by default and keeps retrying within a bounded loop until the rendered deck fits or the retry budget is exhausted.
 
 Mermaid handling has a stricter content-preservation rule than tables, code, or prose. A user-provided Mermaid fence remains one diagram. When the preserved diagram is low-zoom, low-font, or too tight to prove presentation quality automatically, the workflow records `fits`, `source-preserved-fit-review`, or `manual-review` evidence instead of rewriting the source graph into several diagrams.
+
+That rule is also covered by a unit regression now: even if a Mermaid slide is mistakenly routed toward a code structural patch, the patcher must refuse to treat a `mermaid` fence as a splittable code block.
 
 The clean-room reference from `ref/infinite-canvas` is still the world-rect and viewport-transform idea: nodes have `{ position, width, height }`, the viewport has `{ x, y, k }`, and visible bounds are derived from transform math. For NoteMD export, that becomes an export-layout camera for a fixed Slidev safe rectangle, not an interactive infinite canvas. Because the reference project is AGPL-3.0 and NoteMD is MIT, implementation must be independent.
 

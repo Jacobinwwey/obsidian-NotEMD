@@ -175,7 +175,7 @@ layoutAuditSummary.retryCount
 10. pass/fail 的 hard overflow 仍以渲染后的 slide root 为边界，而 `safeRect` 继续只承担 measured scale 的保守拟合目标；这样既不会放过真正裁剪，也不会把合理的 edge-aligned layout 过度误杀；
 11. 共享的 `convergeSlidevDeckLayout()` 现在已经进入 `exportSlidesCommand()` 与维护者 verifier，因此 HTML/PDF/PNG/MP4 都会复用同一个收敛后的 prepared deck；
 12. HTML exporter 现在会返回结构化 outcome，包含 `requestedMode`、`actualMode`、fallback 状态与 standalone sanity 细节；已知坏掉的 native attempt 会先保留为 `index-standalone.failed.html`，再进入兼容 fallback；
-13. 真实 `docs/architecture.zh-CN.md` 严格 native standalone workflow 现在已经收敛到 `ok: true`、`actualMode: "standalone"`、`requiresLocalServer: false`、`standaloneGate.passed: true`、`29` 个审计页，hard overflow / unreadable scale / low effective font / quality margin warning / low utilization 均为零，`retryCount = 4`；preserve-Mermaid rerun 保持源文档与导出 deck 均为 `3` 个 Mermaid block；当前证据包位于 `/home/jacob/slidev-export-review/2026-06-20-quality/`、`/home/jacob/slidev-export-review/2026-06-20-mermaid-fit/` 与 `/home/jacob/slidev-export-review/2026-06-20-local-transform-font/`；
+13. 真实 `docs/architecture.zh-CN.md` 严格 native standalone workflow 现在已经收敛到 `ok: true`、`actualMode: "standalone"`、`requiresLocalServer: false`、`standaloneGate.passed: true`、`29` 个审计页，hard overflow / unreadable scale / low effective font / quality margin warning / low utilization 均为零，`retryCount = 4`；preserve-Mermaid rerun 保持源文档与导出 deck 均为 `3` 个 Mermaid block；当前证据包位于 `/home/jacob/slidev-export-review/2026-06-20-quality/`、`/home/jacob/slidev-export-review/2026-06-20-mermaid-fit/`、`/home/jacob/slidev-export-review/2026-06-20-local-transform-font/` 与 `/home/jacob/slidev-export-review/2026-06-20-js-ts-code-tokenizer/`；
 14. 同一真实源文件的 `PDF` 与 `PNG` 验证也返回 `ok: true`，而且现在导出自同一个收敛后的 deck，而不是 raw prepared source；
 15. rendered layout audit 现在会同时报告 effective minimum font、SVG text font、table/code minimum font、quality margins 与 content-area ratio；
 16. low effective font、tight margin 与 low content utilization finding 现在会对 table/code/prose 携带结构化 `recommendedPatch`；Mermaid 低字号指标会被记录，但默认保持源 fence，不把一张原图自动拆成多张图；
@@ -183,6 +183,8 @@ layoutAuditSummary.retryCount
 18. rendered layout audit 现在还会报告 `mermaidFit` 与对应 summary 计数，让 Mermaid 低 zoom、低字号和 manual-review 情况可见，但不修改原始 Mermaid fence；真实 `architecture.zh-CN.md` rerun 报告 `mermaidSlideCount = 3`、`mermaidFitReviewCount = 3`、`mermaidLowZoomCount = 3`、`mermaidManualReviewCount = 1`。
 19. table/code quality splitting 已进入第二个结构化切片：长 table cell 会转成 key-value record-list slide，code fence 会优先按语义块拆分，再退回空行或行数预算。
 20. effective font measurement 现在会把文本节点到 slide root 之间的局部 CSS `transform`、independent `scale` 与 CSS `zoom` 乘入逐样本字号，因此被局部 `<Transform>` 包裹的内容会按真实渲染字号进入质量门，而不是按未缩放的 computed font size 误判。
+21. TypeScript 与 JavaScript code fence 现在会先走轻量 top-level tokenizer，再进入通用语义拆分；连续 import 组和顶层 type/function/class/const 声明在密集代码页拆分时保持完整。
+22. Mermaid source-preservation 现在有独立回归测试：即使 Mermaid slide 被错误送入 code structural patch 候选，patcher 也不会把一个 `mermaid` fence 当作可拆分代码块。
 
 当前限制：
 
@@ -192,7 +194,8 @@ layoutAuditSummary.retryCount
 4. full-deck Playwright 验证故意比代表性抽样更慢，后续优化方向应是提高 patch 收敛能力，而不是退回弱审计；
 5. `obsidian command id=notemd:export-slides` 目前仍只能算 dispatch-level smoke，因为 Obsidian CLI 没有暴露导出完成握手信号。
 6. Mermaid `manual-review` 证据不是 hard gate failure。它是在“不修改原 Mermaid 内容”和“自动保证投影级可读”不能同时被证明时，正确暴露给维护者的透明结果。
-7. code splitting 仍是 parser-light，不是语言特定 AST 拆分；当前能保留常见括号/缩进语义块，AST 级拆分仍是后续工作。
+7. code splitting 仍是 parser-light；TypeScript/JavaScript 已有 top-level tokenizer，但完整 AST 拆分与更多语言专用 splitter 仍是后续工作。
+8. Mermaid 不拆图约束不等于 Mermaid 演示质量自动合格。超大源图如果只能靠低 zoom 保持完整，流程应暴露 `source-preserved-fit-review` 或 `manual-review`，而不是静默改图。
 
 ## 输出策略
 

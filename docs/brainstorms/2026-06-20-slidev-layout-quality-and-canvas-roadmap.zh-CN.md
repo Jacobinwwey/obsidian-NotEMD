@@ -3,7 +3,7 @@ date: 2026-06-20
 last_updated: 2026-06-20
 topic: slidev-layout-quality-and-canvas-roadmap
 canonical: true
-status: local-transform-font-measurement-implemented
+status: js-ts-code-tokenizer-and-mermaid-preservation-guarded
 ---
 
 # Slidev 布局质量与画布规划路线
@@ -26,11 +26,12 @@ status: local-transform-font-measurement-implemented
 
 1. 分支：`main`
 2. 远端：`origin/main`
-3. 本批次实现内容：rendered quality gate + clean-room `SlideLayoutPlan` 第一切片 + Mermaid 源图保持 fit 审计
+3. 本批次实现内容：rendered quality gate + clean-room `SlideLayoutPlan` 第一切片 + Mermaid 源图保持 fit 审计 + JS/TS tokenizer + Mermaid 不拆图回归契约
 4. 真实源文件：`docs/architecture.zh-CN.md`
 5. 本批次真实导出证据包：`/home/jacob/slidev-export-review/2026-06-20-quality/`
 6. 本批次成功输出归档：`/home/jacob/slidev-export-review/2026-06-20-quality/preserve-mermaid-success-export-final/`
 7. 局部 transform 字号感知验收包：`/home/jacob/slidev-export-review/2026-06-20-local-transform-font/`
+8. JS/TS code tokenizer 验收包：`/home/jacob/slidev-export-review/2026-06-20-js-ts-code-tokenizer/`
 
 当前已落地事实：
 
@@ -44,7 +45,8 @@ status: local-transform-font-measurement-implemented
 8. rendered audit 已新增 effective font、SVG/table/code 最小字号、quality margin、content-area ratio、局部 CSS transform 字号感知与 Mermaid 源图保持 fit 证据；
 9. source preparation 已新增 clean-room `SlideLayoutPlan` 预算，并把 deterministic layout budget 接入非大纲、大纲继续导出与 outline prompt；
 10. `architecture.zh-CN.md` strict native standalone rerun 已通过：`slideCount = 29`，源文档与导出 deck 均为 3 个 Mermaid block，hard overflow / unreadable scale / low effective font / quality margin warning / low utilization 均为零；
-11. 当前生成产物可被 Git 看到，用于本地视觉检查，但不应提交进 `main`。
+11. `slidevLayoutAudit` 单测新增 Mermaid source-preservation 回归：即使误收到 code structural patch，也不会把一个 Mermaid fence 拆成多个 fence；
+12. 当前生成产物可被 Git 看到，用于本地视觉检查，但不应提交进 `main`。
 
 当前未完成事实：
 
@@ -64,7 +66,7 @@ status: local-transform-font-measurement-implemented
 | standalone 文件必须真实可打开 | strict native gate 检查 `actualMode = standalone`、`requiresLocalServer = false`、`loaderGaps = []` | 已落地 | 新 standalone 验收应继续走带日期 evidence package |
 | 不能提交测试生成文件 | `docs/export/` 产物可见但默认不提交，本批次真实输出已归档到仓库外 | 已收口 | 最终 commit 前继续检查 `git status --short docs/export` |
 | zoom 参数应由检测结果决定 | overflow patch 已用 measured fit scale；quality finding 现在会优先触发结构化拆分 | 已推进 | 继续避免把低 `zoom` 当最终修复手段 |
-| 不修改 Mermaid 原图内容 | prompt、layout budget、patcher 与 audit 都按 source-preserved 模型推进；Mermaid fit 问题进入证据字段或人工复核，不进入自动拆图 | 已落地当前切片 | 真实导出继续检查 source/exported Mermaid block count 一致 |
+| 不修改 Mermaid 原图内容 | prompt、layout budget、patcher 与 audit 都按 source-preserved 模型推进；Mermaid fit 问题进入证据字段或人工复核，不进入自动拆图；单测已覆盖 Mermaid fence 不被误走 code split | 已落地当前切片 | 真实导出继续检查 source/exported Mermaid block count 一致 |
 | 完整支持 Slidev skill references | skill root 与 reference count 已进入 verifier | 已落地 | 可考虑上游 skill PR，但只放通用 guardrails |
 | 参考无限画布优化图/表/画布可见范围 | 已新增 clean-room `SlideLayoutPlan`，按 world-rect / viewport-fit 思想做生成前预算 | 已落地第一切片 | 后续加强语义拆分算法，不复制 AGPL 代码 |
 
@@ -186,6 +188,32 @@ status: local-transform-font-measurement-implemented
 /home/jacob/slidev-export-review/2026-06-20-local-transform-font/architecture-strict-local-transform-font-report.json
 /home/jacob/slidev-export-review/2026-06-20-local-transform-font/architecture.zh-CN.local-transform-font.slidev.md
 /home/jacob/slidev-export-review/2026-06-20-local-transform-font/export/architecture.zh-CN-slides/index-standalone.html
+```
+
+该 rerun 的关键结果：
+
+1. `ok = true`
+2. `actualMode = "standalone"`
+3. `requiresLocalServer = false`
+4. `standaloneGate.passed = true`
+5. `slidev = "52.16.0 (/home/jacob/slidev/packages/slidev/bin/slidev.mjs)"`
+6. `skillRootPath = "/home/jacob/slidev/skills/slidev"`
+7. `skillReferenceCount = 52`
+8. `slideCount = 29`
+9. `hardOverflowCount = 0`
+10. `lowEffectiveFontCount = 0`
+11. `qualityMarginWarningCount = 0`
+12. `mermaidSlideCount = 3`
+13. `mermaidFitReviewCount = 3`
+14. `mermaidManualReviewCount = 1`
+15. source Mermaid block count = 3，exported Mermaid block count = 3
+
+本切片新增 TypeScript/JavaScript code tokenizer 后的真实 strict standalone rerun 证据包在：
+
+```text
+/home/jacob/slidev-export-review/2026-06-20-js-ts-code-tokenizer/architecture-strict-js-ts-code-tokenizer-report.json
+/home/jacob/slidev-export-review/2026-06-20-js-ts-code-tokenizer/architecture.zh-CN.js-ts-code-tokenizer.slidev.md
+/home/jacob/slidev-export-review/2026-06-20-js-ts-code-tokenizer/export/architecture.zh-CN-slides/index-standalone.html
 ```
 
 该 rerun 的关键结果：
@@ -328,6 +356,8 @@ interface SlideLayoutPlan {
 
 实现状态：已按用户约束调整为默认不拆 Mermaid。低 effective SVG/Mermaid 字号仍保留在 rendered measurement 字段中，但不再触发 `split-diagram` 或把一张源图改写成多张图；hard overflow 只能尝试保留源图的 measured `zoom` / layout / `<Transform>` 适配，低于可读下限时进入 blocked/manual-review。
 
+本切片补了防回退测试：当 Mermaid slide 被错误标成 code structural patch 候选时，`findSingleCodeFenceBlock()` 仍拒绝把 `mermaid` fence 当作可拆分代码块，patcher 保持单个 Mermaid fence 与原始图内容。这个测试是约束，不是鼓励错误路由；正常路径仍应把 Mermaid 质量问题表达为 `mermaidFit` 和 `manual-review`。
+
 本切片新增 `mermaidFit` 审计结果：
 
 1. `fits`：保留源 fence 后仍满足当前渲染质量阈值；
@@ -349,7 +379,7 @@ interface SlideLayoutPlan {
 
 目标：避免“没溢出但不可读”的大表和代码块。
 
-实现状态：低 table/code effective font 现在分别触发 `split-table` 与 `reduce-code`，在没有 hard overflow 时也会进入结构化拆分；layout budget 会提前把宽表、长表和长代码标为 pre-split candidates。本切片继续补上两个更具体的质量策略：长 table cell 会转成 record-list，不继续挤压表格；code fence 会先按语义块拆分，尽量保留注释+函数/作用域块，失败时才退回空行/行预算。尚未落地的是语言特定 AST 级拆分。
+实现状态：低 table/code effective font 现在分别触发 `split-table` 与 `reduce-code`，在没有 hard overflow 时也会进入结构化拆分；layout budget 会提前把宽表、长表和长代码标为 pre-split candidates。已补上三个更具体的质量策略：长 table cell 会转成 record-list，不继续挤压表格；code fence 会先按语义块拆分，尽量保留注释+函数/作用域块，失败时才退回空行/行预算；TypeScript/JavaScript fence 现在会先走轻量 top-level tokenizer，保持连续 import 组与顶层 type/function/class/const 声明完整。尚未落地的是完整 AST 级拆分，以及 Python/Rust 等更多语言的专用 splitter。
 
 表格策略：
 
@@ -360,9 +390,10 @@ interface SlideLayoutPlan {
 
 代码策略：
 
-1. 超长 code fence 优先按语义块拆，包括注释前缀、括号/缩进作用域与续行边界；
-2. 宽代码优先解释/摘录关键片段；
-3. 代码字号低于阈值时不要继续 shrink。
+1. TypeScript/JavaScript fence 优先按 top-level tokenizer 拆，连续 import 组和顶层声明不能被行预算切开；
+2. 超长 code fence 优先按语义块拆，包括注释前缀、括号/缩进作用域与续行边界；
+3. 宽代码优先解释/摘录关键片段；
+4. 代码字号低于阈值时不要继续 shrink。
 
 ### Stage 5：验收 fixture 扩展
 
@@ -387,7 +418,7 @@ interface SlideLayoutPlan {
 
 实现状态：已新增/扩展 unit fixtures：
 
-1. `src/tests/slidevLayoutAudit.test.ts` 覆盖 low effective font measurement、Mermaid 源图保持、Mermaid fit/manual-review 统计、table/code 质量 finding 驱动结构拆分、长 cell record-list fallback、代码语义块拆分、summary 新字段；
+1. `src/tests/slidevLayoutAudit.test.ts` 覆盖 low effective font measurement、Mermaid 源图保持、Mermaid fit/manual-review 统计、table/code 质量 finding 驱动结构拆分、长 cell record-list fallback、代码语义块拆分、TypeScript import 组和顶层声明 tokenizer、summary 新字段；
 2. `src/tests/slidevLayoutPlan.test.ts` 覆盖 clean-room layout budget 对 Mermaid 的 `preserve-source-fit` 与 table/code 的 pre-split 判断；
 3. `src/tests/slidevSourcePreparer.test.ts` 覆盖 deterministic outline 与 LLM prompt 都带 layout budget；
 4. `src/tests/slidevLayoutWorkflow.test.ts` 更新 summary schema，避免 verifier mock 停留在旧字段；
@@ -426,12 +457,13 @@ interface SlideLayoutPlan {
 5. 真实 `architecture.zh-CN.md` strict standalone 已重新验收并归档；
 6. Stage 4 第二切片：长 table cell 转 record-list，code fence 优先按语义块拆分，避免行预算切断函数体。
 7. Stage 1 第二切片：effective font measurement 已感知局部 CSS transform / scale / zoom，避免 `<Transform>` 包裹内容被误判为仍有原始字号。
+8. Stage 4 第三切片：TypeScript/JavaScript code fence 先走 top-level tokenizer，连续 import 组和顶层 type/function/class/const 声明保持完整，再进入 chunk 分配。
 
 建议下一批实现顺序：
 
-1. 增强 table/code 语言特定拆分：TypeScript/JavaScript 可走轻量 AST 或 tokenizer，Python/Rust 等至少保留缩进/作用域块；
-2. 扩展真实 fixture 包，把“保留 Mermaid 源图导致低 zoom 可接受”和“应人工复核”的场景分开，避免 gate 过松或误杀；
-3. 针对真实长表 fixture 增加 record-list 视觉验收，而不是只看 Markdown 结构；
+1. 扩展真实 fixture 包，把“保留 Mermaid 源图导致低 zoom 可接受”和“应人工复核”的场景分开，避免 gate 过松或误杀；
+2. 针对真实长表 fixture 增加 record-list 视觉验收，而不是只看 Markdown 结构；
+3. 继续增强 Python/Rust 等语言专用 splitter，至少保留缩进/作用域块；
 4. 评估是否把 source-preserved Mermaid fit review 抽成通用 Slidev skill PR 建议。
 
 不要先做：

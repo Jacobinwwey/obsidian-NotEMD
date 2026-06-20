@@ -160,13 +160,15 @@ npm run verify:slidev-export
 
 Mermaid 的规则比 table/code/prose 更严格：用户提供的一个 Mermaid fence 仍然是一张图。若保留源图后出现低 zoom、低字号或边距过紧，流程记录 `fits`、`source-preserved-fit-review` 或 `manual-review` 证据，而不是把原图静默拆成多张图。
 
+这一点现在也有单元测试约束：即使 Mermaid slide 被错误送入 code structural patch 候选，patcher 也必须拒绝把 `mermaid` fence 当作可拆分代码块。
+
 最新真实 strict run 的 Mermaid fit 计数为 `mermaidSlideCount = 3`、`mermaidFitReviewCount = 3`、`mermaidLowZoomCount = 3`、`mermaidManualReviewCount = 1`。这说明当前流程已经把低 zoom 风险显性化，但没有改写原 Mermaid 内容。
 
 支持的结构化 patch 范围包括：
 
 - 简单标题、段落、列表 slide
 - Markdown 表格拆行、拆列，病态宽表与长 cell 表转 record-list fallback
-- 非 Mermaid 代码块优先按语义块分块，再退回空行或行数预算
+- 非 Mermaid 代码块中，TypeScript/JavaScript 优先按 top-level tokenizer 分块，再退回通用语义块、空行或行数预算
 - slot-marked layout 与部分 component-heavy slot zone
 - effective font measurement 已感知局部 CSS `transform` / independent `scale` / CSS `zoom`，被局部 `<Transform>` 缩放的内容按真实渲染字号进入质量门
 

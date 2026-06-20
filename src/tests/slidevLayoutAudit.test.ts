@@ -105,6 +105,60 @@ describe('slidevLayoutAudit', () => {
 		expect(audit.findings).toEqual([]);
 	});
 
+	test('refuses to split Mermaid fences even if a structural code patch is requested', () => {
+		const audit: SlidevLayoutAudit = {
+			slide: 2,
+			safeRect: { left: 51.2, top: 43.2, right: 1228.8, bottom: 676.8, width: 1177.6, height: 633.6 },
+			contentBounds: { left: 48, top: 52, right: 1234, bottom: 920, width: 1186, height: 868 },
+			pageScale: 0.08,
+			svgTextMinFontPx: 6.5,
+			elementKinds: ['mermaid'],
+			findings: [
+				{
+					kind: 'low-effective-font',
+					target: 'mermaid',
+					message: 'Mermaid font is too small',
+					recommendedPatch: 'reduce-code',
+					recommendedScale: null,
+					effectiveFontPx: 6.5,
+					fontThresholdPx: 10,
+				},
+			],
+		};
+		const mermaidLines = [
+			'graph TD',
+			'  A[Source Markdown Mermaid Fence] --> B[Prepared Slidev Deck]',
+			'  B --> C[Rendered Measurement]',
+			'  C --> D[Source-preserved Fit Review]',
+			'  D --> E[Manual Review When Needed]',
+		];
+		const deck = [
+			'---',
+			'theme: default',
+			'---',
+			'',
+			'# Intro',
+			'',
+			'---',
+			'zoom: 0.08',
+			'---',
+			'',
+			'## Mermaid Source Preservation',
+			'',
+			'```mermaid',
+			...mermaidLines,
+			'```',
+		].join('\n');
+
+		const patched = patchDeckWithLayoutAudit(deck, [audit]);
+
+		expect(patched.changed).toBe(false);
+		expect(patched.blockedSlides).toEqual([]);
+		expect(countSlideDeckSlides(patched.deckMarkdown)).toBe(2);
+		expect((patched.deckMarkdown.match(/```mermaid/g) || []).length).toBe(1);
+		expect(patched.deckMarkdown).toContain(mermaidLines.join('\n'));
+	});
+
 	test('derives a smaller recommended scale from table scroll overflow even when the outer rect fits', () => {
 		const audit = analyzeRenderedSlideMeasurement(createMeasurement({
 			contentBounds: { left: 70, top: 60, right: 1160, bottom: 620, width: 1090, height: 560 },
@@ -905,6 +959,86 @@ describe('slidevLayoutAudit', () => {
 		expect(patched.deckMarkdown).toMatch(/\/\/ Prepare the source once\.\nasync function prepareDeck\(\) \{[\s\S]*?return slideSource;\n\}/);
 		expect(patched.deckMarkdown).toMatch(/async function buildDeck\(slideSource\) \{[\s\S]*?return htmlPath;\n\}/);
 		expect(patched.deckMarkdown).not.toContain('zoom: 0.26');
+	});
+
+	test('keeps TypeScript import groups and top-level declarations intact when splitting dense fences', () => {
+		const audit: SlidevLayoutAudit = {
+			slide: 2,
+			safeRect: { left: 51.2, top: 43.2, right: 1228.8, bottom: 676.8, width: 1177.6, height: 633.6 },
+			contentBounds: { left: 48, top: 52, right: 1234, bottom: 920, width: 1186, height: 868 },
+			pageScale: 0.08,
+			codeMinFontPx: 7.4,
+			elementKinds: ['code'],
+			findings: [
+				{
+					kind: 'low-effective-font',
+					target: 'code',
+					message: 'Code font is too small',
+					recommendedPatch: 'reduce-code',
+					recommendedScale: null,
+					effectiveFontPx: 7.4,
+					fontThresholdPx: 10,
+				},
+			],
+		};
+		const importLines = [
+			'import alpha from "./alpha";',
+			'import beta from "./beta";',
+			'import gamma from "./gamma";',
+			'import delta from "./delta";',
+			'import epsilon from "./epsilon";',
+			'import zeta from "./zeta";',
+			'import eta from "./eta";',
+			'import type { SlideExportConfig } from "./types";',
+		];
+		const deck = [
+			'---',
+			'theme: default',
+			'---',
+			'',
+			'# Intro',
+			'',
+			'---',
+			'zoom: 0.08',
+			'---',
+			'',
+			'## TypeScript Split',
+			'',
+			'```ts',
+			...importLines,
+			'type ExportMode = {',
+			'  format: "html" | "pdf";',
+			'  config: SlideExportConfig;',
+			'};',
+			'export async function runExport(mode: ExportMode) {',
+			'  const environment = await alpha.probe();',
+			'  const slideSource = await beta.prepare(mode.config);',
+			'  return gamma.render(environment, slideSource);',
+			'}',
+			'export class SlideExportRunner {',
+			'  constructor(private readonly mode: ExportMode) {}',
+			'  async run() {',
+			'    return runExport(this.mode);',
+			'  }',
+			'}',
+			'const exporters = new Map<string, () => Promise<unknown>>([',
+			'  ["html", async () => runExport({ format: "html", config })],',
+			'  ["pdf", async () => runExport({ format: "pdf", config })],',
+			']);',
+			'```',
+		].join('\n');
+
+		const patched = patchDeckWithLayoutAudit(deck, [audit]);
+
+		expect(patched.changed).toBe(true);
+		expect(patched.blockedSlides).toEqual([]);
+		expect(countSlideDeckSlides(patched.deckMarkdown)).toBe(5);
+		expect((patched.deckMarkdown.match(/```ts/g) || []).length).toBe(4);
+		expect(patched.deckMarkdown).toContain(importLines.join('\n'));
+		expect(patched.deckMarkdown).toMatch(/type ExportMode = \{[\s\S]*?config: SlideExportConfig;\n\};/);
+		expect(patched.deckMarkdown).toMatch(/export async function runExport\(mode: ExportMode\) \{[\s\S]*?return gamma\.render\(environment, slideSource\);\n\}/);
+		expect(patched.deckMarkdown).toMatch(/export class SlideExportRunner \{[\s\S]*?return runExport\(this\.mode\);\n  \}\n\}/);
+		expect(patched.deckMarkdown).not.toContain('zoom: 0.08');
 	});
 
 	test('splits code fences on low effective code font without waiting for scroll overflow', () => {

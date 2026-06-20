@@ -1247,7 +1247,7 @@ function splitOverflowingCodeSlide(
 	}
 
 	const targetChunkCount = resolveStructuralChunkCount(audit, currentZoom, nextZoom, config.minReadableScale);
-	const codeChunks = splitCodeFenceIntoChunks(codeBlock.bodyLines, targetChunkCount);
+	const codeChunks = splitCodeFenceIntoChunks(codeBlock, targetChunkCount);
 	if (!codeChunks || codeChunks.length < 2) {
 		return { slides: null, reason: 'code block could not be distributed into multiple slides' };
 	}
@@ -2181,7 +2181,30 @@ function resolveStructuralChunkCount(
 	return Math.max(2, Math.min(4, Math.ceil(requiredFactor)));
 }
 
-function splitCodeFenceIntoChunks(bodyLines: string[], targetChunkCount: number): string[][] | null {
+function splitCodeFenceIntoChunks(codeBlock: FencedBlock, targetChunkCount: number): string[][] | null {
+	const javascriptLikeChunks = splitJavaScriptLikeCodeFenceIntoChunks(codeBlock, targetChunkCount);
+	if (javascriptLikeChunks) {
+		return javascriptLikeChunks;
+	}
+
+	return splitGenericCodeFenceIntoChunks(codeBlock.bodyLines, targetChunkCount);
+}
+
+function splitJavaScriptLikeCodeFenceIntoChunks(codeBlock: FencedBlock, targetChunkCount: number): string[][] | null {
+	if (!isJavaScriptLikeCodeFence(codeBlock.opener)) {
+		return null;
+	}
+
+	const topLevelBlocks = collectJavaScriptLikeTopLevelBlocks(codeBlock.bodyLines);
+	if (topLevelBlocks.length < 2) {
+		return null;
+	}
+
+	const chunkedTopLevelBlocks = chunkLineBlocks(topLevelBlocks, Math.max(2, Math.min(targetChunkCount, topLevelBlocks.length)));
+	return chunkedTopLevelBlocks.length >= 2 ? chunkedTopLevelBlocks : null;
+}
+
+function splitGenericCodeFenceIntoChunks(bodyLines: string[], targetChunkCount: number): string[][] | null {
 	const semanticBlocks = collectCodeSemanticBlocks(bodyLines);
 	if (semanticBlocks.length >= 2) {
 		const chunkedSemanticBlocks = chunkLineBlocks(semanticBlocks, Math.max(2, Math.min(targetChunkCount, semanticBlocks.length)));
@@ -2199,6 +2222,17 @@ function splitCodeFenceIntoChunks(bodyLines: string[], targetChunkCount: number)
 	}
 
 	return splitCodeLinesByBudget(bodyLines, targetChunkCount);
+}
+
+function isJavaScriptLikeCodeFence(opener: string): boolean {
+	const language = readCodeFenceLanguage(opener);
+	return ['js', 'jsx', 'javascript', 'mjs', 'cjs', 'node', 'ts', 'tsx', 'typescript'].includes(language);
+}
+
+function readCodeFenceLanguage(opener: string): string {
+	const trimmed = opener.trim();
+	const match = trimmed.match(/^(```+|~~~+)\s*([^\s{]+)/);
+	return match ? match[2].toLowerCase() : '';
 }
 
 function splitMarkdownTableByRows(tableBlock: MarkdownTableBlock, targetChunkCount: number): string[][] | null {
@@ -2349,6 +2383,72 @@ function collectCodeSemanticBlocks(lines: string[]): string[][] {
 	return blocks.filter(block => block.some(hasSubstantiveLine));
 }
 
+function collectJavaScriptLikeTopLevelBlocks(lines: string[]): string[][] {
+	const trimmedLines = trimOuterBlankLines(lines);
+	const blocks: string[][] = [];
+	let pendingLeadLines: string[] = [];
+	let index = 0;
+
+	while (index < trimmedLines.length) {
+		const line = trimmedLines[index];
+		const trimmed = line.trim();
+		if (trimmed.length === 0) {
+			index += 1;
+			continue;
+		}
+		if (isJavaScriptLikeLeadLine(trimmed)) {
+			pendingLeadLines.push(line);
+			index += 1;
+			continue;
+		}
+
+		if (startsJavaScriptLikeImport(trimmed)) {
+			const importGroup = [...pendingLeadLines];
+			pendingLeadLines = [];
+			while (index < trimmedLines.length) {
+				const nextTrimmed = trimmedLines[index].trim();
+				if (nextTrimmed.length === 0) {
+					index += 1;
+					if (importGroup.some(hasSubstantiveLine)) {
+						break;
+					}
+					continue;
+				}
+				if (isJavaScriptLikeLeadLine(nextTrimmed)) {
+					importGroup.push(trimmedLines[index]);
+					index += 1;
+					continue;
+				}
+				if (!startsJavaScriptLikeImport(nextTrimmed)) {
+					break;
+				}
+				const statement = consumeJavaScriptLikeTopLevelStatement(trimmedLines, index);
+				importGroup.push(...statement.lines);
+				index = statement.nextIndex;
+			}
+			const normalizedImportGroup = trimOuterBlankLines(importGroup);
+			if (normalizedImportGroup.some(hasSubstantiveLine)) {
+				blocks.push(normalizedImportGroup);
+			}
+			continue;
+		}
+
+		const statement = consumeJavaScriptLikeTopLevelStatement(trimmedLines, index);
+		const block = trimOuterBlankLines([...pendingLeadLines, ...statement.lines]);
+		pendingLeadLines = [];
+		index = statement.nextIndex;
+		if (block.some(hasSubstantiveLine)) {
+			blocks.push(block);
+		}
+	}
+
+	if (pendingLeadLines.some(hasSubstantiveLine)) {
+		blocks.push(trimOuterBlankLines(pendingLeadLines));
+	}
+
+	return blocks.filter(block => block.some(hasSubstantiveLine));
+}
+
 function collectCodeFenceSegments(lines: string[]): string[][] {
 	const segments: string[][] = [];
 	let current: string[] = [];
@@ -2406,6 +2506,126 @@ function splitCodeLinesByBudget(lines: string[], chunkCount: number): string[][]
 	}
 
 	return chunks.length >= 2 ? chunks : null;
+}
+
+function consumeJavaScriptLikeTopLevelStatement(lines: string[], startIndex: number): { lines: string[]; nextIndex: number } {
+	const block: string[] = [];
+	let delimiterDepth = 0;
+	let inBlockComment = false;
+	let index = startIndex;
+
+	while (index < lines.length) {
+		const line = lines[index];
+		block.push(line);
+		const commentState = updateJavaScriptBlockCommentState(line, inBlockComment);
+		inBlockComment = commentState.inBlockComment;
+		if (!commentState.onlyComment) {
+			delimiterDepth += measureCodeDelimiterDelta(line);
+		}
+		index += 1;
+
+		if (inBlockComment || delimiterDepth > 0 || codeLineContinues(line)) {
+			continue;
+		}
+
+		const previousSubstantiveLine = findLastSubstantiveLine(block);
+		const nextSubstantiveLine = findNextSubstantiveLine(lines, index);
+		if (isJavaScriptLikeStatementBoundary(previousSubstantiveLine, nextSubstantiveLine)) {
+			break;
+		}
+	}
+
+	return { lines: trimOuterBlankLines(block), nextIndex: index };
+}
+
+function updateJavaScriptBlockCommentState(line: string, inBlockComment: boolean): { inBlockComment: boolean; onlyComment: boolean } {
+	const commentVisibleLine = stripJavaScriptQuotedSegments(line);
+	let cursor = 0;
+	let activeComment = inBlockComment;
+	let sawCode = false;
+	while (cursor < commentVisibleLine.length) {
+		if (activeComment) {
+			const closeIndex = commentVisibleLine.indexOf('*/', cursor);
+			if (closeIndex === -1) {
+				return { inBlockComment: true, onlyComment: !sawCode };
+			}
+			cursor = closeIndex + 2;
+			activeComment = false;
+			continue;
+		}
+		const blockOpenIndex = commentVisibleLine.indexOf('/*', cursor);
+		const lineCommentIndex = commentVisibleLine.indexOf('//', cursor);
+		const nextCommentIndex = minNonNegative(blockOpenIndex, lineCommentIndex);
+		if (nextCommentIndex === -1) {
+			sawCode = sawCode || commentVisibleLine.slice(cursor).trim().length > 0;
+			break;
+		}
+		sawCode = sawCode || commentVisibleLine.slice(cursor, nextCommentIndex).trim().length > 0;
+		if (nextCommentIndex === lineCommentIndex) {
+			break;
+		}
+		activeComment = true;
+		cursor = nextCommentIndex + 2;
+	}
+	return { inBlockComment: activeComment, onlyComment: !sawCode };
+}
+
+function stripJavaScriptQuotedSegments(line: string): string {
+	return line.replace(/(["'`])(?:\\.|(?!\1).)*\1/g, '');
+}
+
+function minNonNegative(left: number, right: number): number {
+	if (left === -1) {
+		return right;
+	}
+	if (right === -1) {
+		return left;
+	}
+	return Math.min(left, right);
+}
+
+function findLastSubstantiveLine(lines: string[]): string {
+	for (let index = lines.length - 1; index >= 0; index--) {
+		if (hasSubstantiveLine(lines[index])) {
+			return lines[index];
+		}
+	}
+	return '';
+}
+
+function findNextSubstantiveLine(lines: string[], startIndex: number): string | null {
+	for (let index = startIndex; index < lines.length; index++) {
+		if (hasSubstantiveLine(lines[index])) {
+			return lines[index];
+		}
+	}
+	return null;
+}
+
+function isJavaScriptLikeStatementBoundary(previousLine: string, nextLine: string | null): boolean {
+	if (!nextLine) {
+		return true;
+	}
+	const previousTrimmed = previousLine.trim();
+	const nextTrimmed = nextLine.trim();
+	if (isJavaScriptLikeLeadLine(nextTrimmed) || startsJavaScriptLikeTopLevel(nextTrimmed)) {
+		return true;
+	}
+	return /[;}]\s*$/.test(previousTrimmed);
+}
+
+function isJavaScriptLikeLeadLine(trimmedLine: string): boolean {
+	return /^(?:\/\/|\/\*|\*|\*\/|@)/.test(trimmedLine);
+}
+
+function startsJavaScriptLikeImport(trimmedLine: string): boolean {
+	return /^import(?:\s+type)?(?:\s|{|["'])/.test(trimmedLine);
+}
+
+function startsJavaScriptLikeTopLevel(trimmedLine: string): boolean {
+	return /^(?:export\s+)?(?:(?:declare|abstract|async|default)\s+)*(?:class|function|interface|type|enum|namespace|module|const|let|var)\b/.test(trimmedLine)
+		|| /^export\s+(?:type\s+)?\{/.test(trimmedLine)
+		|| startsJavaScriptLikeImport(trimmedLine);
 }
 
 function shouldStartNextCodeSemanticBlock(
