@@ -204,6 +204,18 @@ interface PatchableSlideSurface {
 	bodyLines: string[];
 }
 
+interface ComponentPrimaryContentGroup {
+	kind: 'component' | 'primary';
+	lines: string[];
+}
+
+interface ComponentPrimaryContentPartition {
+	headingLine: string | null;
+	groups: ComponentPrimaryContentGroup[];
+	unsupportedPrimarySyntax: boolean;
+	ambiguousOrder: boolean;
+}
+
 interface MarkdownTableBlock {
 	startLine: number;
 	endLine: number;
@@ -494,6 +506,16 @@ export function patchDeckWithLayoutAudit(
 			}
 		}
 
+		if (shouldSeparateMixedComponentPrimaryContent(audit)) {
+			const separatedSurface = separateMixedComponentPrimaryContentSlide(currentSlide);
+			if (separatedSurface.slides) {
+				slides.splice(targetIndex, 1, ...separatedSurface.slides);
+				changedSlides.push(audit.slide);
+				slideOffset += separatedSurface.slides.length - 1;
+				continue;
+			}
+		}
+
 		const splitCompetingSlotZones = splitCompetingSupportedSlotLayoutZones(currentSlide, audit, resolvedConfig);
 		if (splitCompetingSlotZones.slides) {
 			slides.splice(targetIndex, 1, ...splitCompetingSlotZones.slides);
@@ -593,6 +615,14 @@ export function patchDeckWithLayoutAudit(
 			blockedSlides.push({
 				slide: audit.slide,
 				reason: 'mixed Mermaid and primary non-Mermaid content cannot be fixed with low whole-slide zoom',
+			});
+			continue;
+		}
+
+		if (containsComponentSurfaceWithPrimaryMarkdownContent(currentSlide)) {
+			blockedSlides.push({
+				slide: audit.slide,
+				reason: 'mixed component and primary Markdown content cannot be fixed with whole-slide zoom',
 			});
 			continue;
 		}
@@ -1276,6 +1306,22 @@ function shouldSeparateMixedMermaidPrimaryContent(audit: SlidevLayoutAudit): boo
 	);
 }
 
+function shouldSeparateMixedComponentPrimaryContent(audit: SlidevLayoutAudit): boolean {
+	if (audit.elementKinds.includes('mermaid')) {
+		return false;
+	}
+
+	return audit.findings.some(finding =>
+		finding.kind === 'overflow'
+		|| finding.kind === 'unreadable-scale'
+		|| finding.kind === 'low-effective-font'
+		|| finding.kind === 'tight-margin'
+		|| finding.kind === 'low-content-utilization'
+		|| finding.recommendedPatch === 'reduce-zoom'
+		|| finding.recommendedPatch === 'split-slide'
+	);
+}
+
 function isSourcePreservedMermaidFitSlide(slideMarkdown: string, audit: SlidevLayoutAudit): boolean {
 	if (!isSourcePreservedMermaidRenderedSurface(audit.elementKinds)) {
 		return false;
@@ -1752,6 +1798,31 @@ function separateMixedMermaidPrimaryContentSlide(
 	};
 }
 
+function separateMixedComponentPrimaryContentSlide(
+	slideMarkdown: string,
+): { slides: string[] | null; reason?: string } {
+	const surface = extractComponentPrimaryContentSurface(slideMarkdown);
+	if (!surface) {
+		return { slides: null, reason: 'mixed component slide uses deck headmatter or unsupported layout syntax' };
+	}
+
+	const partition = partitionComponentAndPrimaryContent(surface.bodyLines);
+	if (!canSeparateComponentPrimaryContent(partition)) {
+		return { slides: null, reason: 'mixed component slide does not expose one safe component/prose boundary' };
+	}
+
+	const cleanFrontmatter = stripFrontmatterKey(surface.frontmatterLines, 'zoom');
+	const headingLines = partition.headingLine ? [partition.headingLine, ''] : [];
+	const separatedSlides = partition.groups.map(group => assemblePatchedSlide(cleanFrontmatter, trimOuterBlankLines([
+		...headingLines,
+		...group.lines,
+	])));
+
+	return separatedSlides.length > 1
+		? { slides: separatedSlides }
+		: { slides: null, reason: 'mixed component separation produced fewer than two slides' };
+}
+
 function wrapOverflowingSlideSurfaceInTransform(
 	slideMarkdown: string,
 	audit: SlidevLayoutAudit,
@@ -1772,10 +1843,35 @@ function wrapOverflowingSlideSurfaceInTransform(
 
 	const surface = extractTransformableComponentSurface(slideMarkdown);
 	if (!surface) {
-		return null;
+		return wrapComponentSurfaceWithOptionalHeadingInTransform(slideMarkdown, transformScale);
 	}
 
 	return assemblePatchedSlide(surface.frontmatterLines, wrapLinesInTransform(surface.bodyLines, transformScale));
+}
+
+function wrapComponentSurfaceWithOptionalHeadingInTransform(
+	slideMarkdown: string,
+	transformScale: number,
+): string | null {
+	const surface = extractComponentPrimaryContentSurface(slideMarkdown);
+	if (!surface) {
+		return null;
+	}
+
+	const partition = partitionComponentAndPrimaryContent(surface.bodyLines);
+	if (
+		partition.unsupportedPrimarySyntax
+		|| partition.ambiguousOrder
+		|| partition.groups.length !== 1
+		|| partition.groups[0].kind !== 'component'
+	) {
+		return null;
+	}
+
+	const bodyLines = partition.headingLine
+		? [partition.headingLine, '', ...wrapLinesInTransform(partition.groups[0].lines, transformScale)]
+		: wrapLinesInTransform(partition.groups[0].lines, transformScale);
+	return assemblePatchedSlide(surface.frontmatterLines, bodyLines);
 }
 
 function extractPatchableSlideSurface(slideMarkdown: string): PatchableSlideSurface | null {
@@ -1793,6 +1889,26 @@ function extractPatchableSlideSurface(slideMarkdown: string): PatchableSlideSurf
 		return null;
 	}
 	if (bodyLines.some(line => /^::[\w-]+::$/.test(line.trim()) || /^:::\s*/.test(line.trim()) || /<(Transform|v-click|v-switch)\b/i.test(line.trim()))) {
+		return null;
+	}
+
+	return {
+		frontmatterLines,
+		bodyLines,
+	};
+}
+
+function extractComponentPrimaryContentSurface(slideMarkdown: string): PatchableSlideSurface | null {
+	const normalizedSlide = normalizeSlideFrontmatter(slideMarkdown);
+	if (normalizedSlide.trimStart().startsWith('---')) {
+		return null;
+	}
+
+	const lines = normalizedSlide.split(/\r?\n/);
+	const frontmatterEnd = findSlideFrontmatterEnd(lines);
+	const frontmatterLines = frontmatterEnd > 0 ? lines.slice(0, frontmatterEnd + 1) : [];
+	const bodyLines = frontmatterEnd > 0 ? lines.slice(frontmatterEnd + 1) : lines;
+	if (bodyLines.some(line => /^::[\w-]+::$/.test(line.trim()) || /^:::\s*/.test(line.trim()))) {
 		return null;
 	}
 
@@ -2493,6 +2609,17 @@ function containsMermaidWithPrimaryNonMermaidContent(slideMarkdown: string): boo
 	return partition.mermaidLines.length > 0 && partition.primaryContentLines.length > 0;
 }
 
+function containsComponentSurfaceWithPrimaryMarkdownContent(slideMarkdown: string): boolean {
+	const surface = extractComponentPrimaryContentSurface(slideMarkdown);
+	if (!surface) {
+		return false;
+	}
+
+	const partition = partitionComponentAndPrimaryContent(surface.bodyLines);
+	return partition.groups.some(group => group.kind === 'component')
+		&& partition.groups.some(group => group.kind === 'primary');
+}
+
 function extractSlideBodyLinesWithoutLayoutCheck(slideMarkdown: string): string[] | null {
 	const normalizedSlide = normalizeSlideFrontmatter(slideMarkdown);
 	if (!normalizedSlide.trim()) {
@@ -2563,7 +2690,74 @@ function partitionMermaidAndPrimaryContent(lines: string[]): {
 	};
 }
 
+function partitionComponentAndPrimaryContent(lines: string[]): ComponentPrimaryContentPartition {
+	const trimmedLines = trimOuterBlankLines(lines);
+	const headingIndex = trimmedLines.findIndex(line => /^#{1,6}\s+\S/.test(line.trim()));
+	const headingLine = headingIndex >= 0 ? trimmedLines[headingIndex].trim() : null;
+	const groups: ComponentPrimaryContentGroup[] = [];
+	let unsupportedPrimarySyntax = false;
+	let index = 0;
+
+	while (index < trimmedLines.length) {
+		const line = trimmedLines[index];
+		if (index === headingIndex || isIgnorableComponentCompanionLine(line)) {
+			index += 1;
+			continue;
+		}
+
+		const componentBlock = consumeComponentSurfaceBlock(trimmedLines, index);
+		if (componentBlock) {
+			appendComponentPrimaryGroup(groups, 'component', componentBlock.lines);
+			unsupportedPrimarySyntax = unsupportedPrimarySyntax || !componentBlock.complete;
+			index = componentBlock.nextIndex;
+			continue;
+		}
+
+		const unsupportedBlock = consumeUnsupportedPrimaryMarkdownBlock(trimmedLines, index);
+		if (unsupportedBlock) {
+			appendComponentPrimaryGroup(groups, 'primary', unsupportedBlock.lines);
+			unsupportedPrimarySyntax = true;
+			index = unsupportedBlock.nextIndex;
+			continue;
+		}
+
+		const primaryBlock = consumePrimaryMarkdownBlock(trimmedLines, index, headingIndex);
+		if (!primaryBlock) {
+			unsupportedPrimarySyntax = true;
+			index += 1;
+			continue;
+		}
+
+		appendComponentPrimaryGroup(groups, 'primary', primaryBlock.lines);
+		index = primaryBlock.nextIndex;
+	}
+
+	return {
+		headingLine,
+		groups,
+		unsupportedPrimarySyntax,
+		ambiguousOrder: hasAmbiguousComponentPrimaryOrder(groups),
+	};
+}
+
+function canSeparateComponentPrimaryContent(partition: ComponentPrimaryContentPartition): boolean {
+	if (partition.unsupportedPrimarySyntax || partition.ambiguousOrder) {
+		return false;
+	}
+	if (partition.groups.length !== 2) {
+		return false;
+	}
+	return partition.groups.some(group => group.kind === 'component')
+		&& partition.groups.some(group => group.kind === 'primary')
+		&& partition.groups.every(group => countMeaningfulLines(group.lines) > 0);
+}
+
 function isIgnorableMermaidCompanionLine(line: string): boolean {
+	const trimmed = line.trim();
+	return trimmed.length === 0 || /^<!--.*-->$/.test(trimmed);
+}
+
+function isIgnorableComponentCompanionLine(line: string): boolean {
 	const trimmed = line.trim();
 	return trimmed.length === 0 || /^<!--.*-->$/.test(trimmed);
 }
@@ -3574,6 +3768,120 @@ function containsTransformableComponentSyntax(lines: string[]): boolean {
 	return lines.some(line => /^\s*<[A-Za-z][\w-]*(?:\s|>|\/|$)/.test(line.trim()) || /^\s*<\/[A-Za-z][\w-]*\s*>/.test(line.trim()));
 }
 
+function consumeComponentSurfaceBlock(
+	lines: string[],
+	startIndex: number,
+): { lines: string[]; nextIndex: number; complete: boolean } | null {
+	if (!isComponentSurfaceStartLine(lines[startIndex])) {
+		return null;
+	}
+
+	const state: ComponentSurfaceScanState = { inOpenTag: false, quote: null };
+	const block: string[] = [];
+	let index = startIndex;
+
+	while (index < lines.length) {
+		const nextState: ComponentSurfaceScanState = { ...state };
+		if (!isTransformableComponentSurfaceLine(lines[index], nextState)) {
+			break;
+		}
+
+		block.push(lines[index]);
+		state.inOpenTag = nextState.inOpenTag;
+		state.quote = nextState.quote;
+		index += 1;
+
+		if (!state.inOpenTag && !nextMeaningfulLineStartsComponentSurface(lines, index)) {
+			break;
+		}
+	}
+
+	const componentLines = trimOuterBlankLines(block);
+	if (componentLines.length === 0) {
+		return null;
+	}
+
+	return {
+		lines: componentLines,
+		nextIndex: index,
+		complete: !state.inOpenTag && state.quote === null && componentSurfaceEndsAtBoundary(componentLines),
+	};
+}
+
+function consumeUnsupportedPrimaryMarkdownBlock(
+	lines: string[],
+	startIndex: number,
+): { lines: string[]; nextIndex: number } | null {
+	const trimmedLine = lines[startIndex].trim();
+	const fenceMatch = trimmedLine.match(/^(```+|~~~+)/);
+	if (fenceMatch) {
+		const fenceMarker = fenceMatch[1][0] === '~' ? '~~~' : '```';
+		const block = [lines[startIndex]];
+		let index = startIndex + 1;
+		while (index < lines.length) {
+			block.push(lines[index]);
+			if (new RegExp(`^${escapeRegExp(fenceMarker)}+\\s*$`).test(lines[index].trim())) {
+				index += 1;
+				break;
+			}
+			index += 1;
+		}
+		return {
+			lines: block,
+			nextIndex: index,
+		};
+	}
+
+	if (isUnsupportedComponentPrimaryLine(trimmedLine)) {
+		return {
+			lines: [lines[startIndex]],
+			nextIndex: startIndex + 1,
+		};
+	}
+
+	return null;
+}
+
+function consumePrimaryMarkdownBlock(
+	lines: string[],
+	startIndex: number,
+	headingIndex: number,
+): { lines: string[]; nextIndex: number } | null {
+	const block: string[] = [];
+	let index = startIndex;
+
+	while (index < lines.length) {
+		if (index === headingIndex) {
+			break;
+		}
+
+		const line = lines[index];
+		if (isIgnorableComponentCompanionLine(line)) {
+			const nextMeaningfulIndex = findNextMeaningfulLineIndex(lines, index + 1);
+			if (nextMeaningfulIndex < 0 || nextMeaningfulIndex === headingIndex) {
+				break;
+			}
+			if (isComponentSurfaceStartLine(lines[nextMeaningfulIndex]) || consumeUnsupportedPrimaryMarkdownBlock(lines, nextMeaningfulIndex)) {
+				break;
+			}
+			block.push(line);
+			index += 1;
+			continue;
+		}
+		if (isComponentSurfaceStartLine(line) || consumeUnsupportedPrimaryMarkdownBlock(lines, index)) {
+			break;
+		}
+
+		block.push(line);
+		index += 1;
+	}
+
+	const primaryLines = trimOuterBlankLines(block);
+	return primaryLines.length > 0
+		? { lines: primaryLines, nextIndex: index }
+		: null;
+}
+
 function containsOnlyTransformableComponentSurfaceSyntax(lines: string[]): boolean {
 	const state: ComponentSurfaceScanState = { inOpenTag: false, quote: null };
 	for (const line of lines) {
@@ -3612,6 +3920,75 @@ function isForbiddenComponentSurfaceLine(trimmedLine: string): boolean {
 		|| /^(```+|~~~+)/.test(trimmedLine)
 		|| isMarkdownTableRow(trimmedLine)
 		|| /^!\[.*\]\(.+\)/.test(trimmedLine);
+}
+
+function isUnsupportedComponentPrimaryLine(trimmedLine: string): boolean {
+	return isForbiddenComponentSurfaceLine(trimmedLine);
+}
+
+function isComponentSurfaceStartLine(line: string): boolean {
+	const trimmed = line.trim();
+	return /^<[A-Za-z][\w-]*(?:\s|>|\/|$)/.test(trimmed)
+		|| /^<\/[A-Za-z][\w-]*\s*>/.test(trimmed);
+}
+
+function nextMeaningfulLineStartsComponentSurface(lines: string[], startIndex: number): boolean {
+	const nextMeaningfulIndex = findNextMeaningfulLineIndex(lines, startIndex);
+	return nextMeaningfulIndex >= 0 && isComponentSurfaceStartLine(lines[nextMeaningfulIndex]);
+}
+
+function findNextMeaningfulLineIndex(lines: string[], startIndex: number): number {
+	for (let index = startIndex; index < lines.length; index++) {
+		if (!isIgnorableComponentCompanionLine(lines[index])) {
+			return index;
+		}
+	}
+	return -1;
+}
+
+function componentSurfaceEndsAtBoundary(lines: string[]): boolean {
+	const lastLine = findLastSubstantiveLine(lines).trim();
+	if (!lastLine) {
+		return false;
+	}
+
+	return /^<\/[A-Za-z][\w-]*\s*>$/.test(lastLine)
+		|| /\/>\s*$/.test(lastLine)
+		|| /^<([A-Za-z][\w-]*)\b[^>]*>.*<\/\1>\s*$/.test(lastLine);
+}
+
+function appendComponentPrimaryGroup(
+	groups: ComponentPrimaryContentGroup[],
+	kind: ComponentPrimaryContentGroup['kind'],
+	lines: string[],
+): void {
+	const normalizedLines = trimOuterBlankLines(lines);
+	if (normalizedLines.length === 0) {
+		return;
+	}
+
+	const previousGroup = groups[groups.length - 1];
+	if (previousGroup && previousGroup.kind === kind) {
+		appendSlideBlock(previousGroup.lines, normalizedLines);
+		return;
+	}
+
+	groups.push({
+		kind,
+		lines: normalizedLines,
+	});
+}
+
+function hasAmbiguousComponentPrimaryOrder(groups: ComponentPrimaryContentGroup[]): boolean {
+	let transitions = 0;
+	let previousKind: ComponentPrimaryContentGroup['kind'] | null = null;
+	for (const group of groups) {
+		if (previousKind !== null && group.kind !== previousKind) {
+			transitions += 1;
+		}
+		previousKind = group.kind;
+	}
+	return transitions > 1;
 }
 
 function updateComponentSurfaceScanState(line: string, state: ComponentSurfaceScanState): void {
@@ -3906,7 +4283,7 @@ function findSlideFrontmatterEnd(lines: string[]): number {
 		if (line === '---') {
 			return index;
 		}
-		if (line.startsWith('#') || line.startsWith('```') || line.startsWith(':::') || isSlotMarkerLine(line)) {
+		if (isSlideBodyBoundaryLine(line)) {
 			return -1;
 		}
 	}
@@ -3925,7 +4302,7 @@ function findBareFrontmatterBodyStart(lines: string[]): number {
 		if (!trimmed) {
 			return index;
 		}
-		if (index > 0 && (trimmed.startsWith('#') || trimmed.startsWith('```') || trimmed.startsWith(':::') || isSlotMarkerLine(trimmed))) {
+		if (index > 0 && isSlideBodyBoundaryLine(trimmed)) {
 			return index;
 		}
 	}
@@ -3949,12 +4326,21 @@ function isFrontmatterClosingBoundary(lines: string[]): boolean {
 		if (!line) {
 			continue;
 		}
-		if (line.startsWith('#') || line.startsWith('```') || line.startsWith(':::') || isSlotMarkerLine(line)) {
+		if (isSlideBodyBoundaryLine(line)) {
 			return false;
 		}
 	}
 
 	return true;
+}
+
+function isSlideBodyBoundaryLine(line: string): boolean {
+	return line.startsWith('#')
+		|| line.startsWith('```')
+		|| line.startsWith('~~~')
+		|| line.startsWith(':::')
+		|| line.startsWith('<')
+		|| isSlotMarkerLine(line);
 }
 
 function isSlotMarkerLine(line: string): boolean {

@@ -2442,7 +2442,52 @@ describe('slidevLayoutAudit', () => {
 		expect(patched.deckMarkdown).not.toContain('zoom: 0.84');
 	});
 
-	test('does not treat mixed component and Markdown prose as a single transformable surface', () => {
+	test('wraps a component surface with a heading without shrinking the heading', () => {
+		const audit: SlidevLayoutAudit = {
+			slide: 2,
+			safeRect: { left: 51.2, top: 43.2, right: 1228.8, bottom: 676.8, width: 1177.6, height: 633.6 },
+			contentBounds: { left: 48, top: 52, right: 1248, bottom: 812, width: 1200, height: 760 },
+			pageScale: 1,
+			elementKinds: ['other'],
+			findings: [
+				{
+					kind: 'overflow',
+					target: 'other',
+					message: 'component surface exceeds the safe visible rectangle',
+					recommendedPatch: 'reduce-zoom',
+					recommendedScale: 0.82,
+				},
+			],
+		};
+		const deck = [
+			'---',
+			'theme: default',
+			'---',
+			'',
+			'# Intro',
+			'',
+			'---',
+			'layout: dashboard-shell',
+			'---',
+			'',
+			'## Component Surface',
+			'',
+			'<DashboardGrid class="stage12-dashboard">',
+			'  <MetricPanel label="Queue A" value="128" />',
+			'</DashboardGrid>',
+		].join('\n');
+
+		const patched = patchDeckWithLayoutAudit(deck, [audit]);
+
+		expect(patched.changed).toBe(true);
+		expect(patched.blockedSlides).toEqual([]);
+		expect(countSlideDeckSlides(patched.deckMarkdown)).toBe(2);
+		expect(patched.deckMarkdown).toContain('## Component Surface\n\n<Transform :scale="0.82" origin="top left">');
+		expect(patched.deckMarkdown).toContain('<DashboardGrid class="stage12-dashboard">');
+		expect(patched.deckMarkdown).not.toContain('zoom: 0.82');
+	});
+
+	test('separates mixed component and Markdown prose instead of applying whole-slide zoom', () => {
 		const audit: SlidevLayoutAudit = {
 			slide: 2,
 			safeRect: { left: 51.2, top: 43.2, right: 1228.8, bottom: 676.8, width: 1177.6, height: 633.6 },
@@ -2479,9 +2524,65 @@ describe('slidevLayoutAudit', () => {
 		const patched = patchDeckWithLayoutAudit(deck, [audit]);
 
 		expect(patched.changed).toBe(true);
+		expect(patched.blockedSlides).toEqual([]);
+		expect(countSlideDeckSlides(patched.deckMarkdown)).toBe(3);
 		expect(patched.deckMarkdown).not.toContain('<Transform :scale="0.84"');
-		expect(patched.deckMarkdown).toContain('zoom: 0.84');
+		expect(patched.deckMarkdown).not.toContain('zoom: 0.84');
+		expect((patched.deckMarkdown.match(/layout: dashboard-shell/g) || []).length).toBe(2);
+		expect((patched.deckMarkdown.match(/<DashboardGrid class="stage10-dashboard">/g) || []).length).toBe(1);
+		expect((patched.deckMarkdown.match(/<MetricPanel label="Queue A" value="128" \/>/g) || []).length).toBe(1);
 		expect(patched.deckMarkdown).toContain('This markdown prose is not part of a bounded component surface.');
+	});
+
+	test('blocks whole-slide zoom for mixed component and fenced Markdown content when separation is unsafe', () => {
+		const audit: SlidevLayoutAudit = {
+			slide: 2,
+			safeRect: { left: 51.2, top: 43.2, right: 1228.8, bottom: 676.8, width: 1177.6, height: 633.6 },
+			contentBounds: { left: 48, top: 52, right: 1248, bottom: 812, width: 1200, height: 760 },
+			pageScale: 1,
+			elementKinds: ['other', 'code'],
+			findings: [
+				{
+					kind: 'overflow',
+					target: 'content',
+					message: 'Slide content exceeds the safe visible rectangle',
+					recommendedPatch: 'reduce-zoom',
+					recommendedScale: 0.62,
+				},
+			],
+		};
+		const deck = [
+			'---',
+			'theme: default',
+			'---',
+			'',
+			'# Intro',
+			'',
+			'---',
+			'layout: dashboard-shell',
+			'---',
+			'',
+			'<DashboardGrid class="stage12-dashboard">',
+			'  <MetricPanel label="Queue A" value="128" />',
+			'</DashboardGrid>',
+			'',
+			'```ts',
+			'const unsafeBoundary = "do not silently shrink this mixed surface";',
+			'```',
+		].join('\n');
+
+		const patched = patchDeckWithLayoutAudit(deck, [audit]);
+
+		expect(patched.changed).toBe(false);
+		expect(patched.blockedSlides).toEqual([
+			expect.objectContaining({
+				slide: 2,
+				reason: expect.stringContaining('mixed component and primary Markdown content'),
+			}),
+		]);
+		expect(countSlideDeckSlides(patched.deckMarkdown)).toBe(2);
+		expect(patched.deckMarkdown).not.toContain('zoom: 0.62');
+		expect(patched.deckMarkdown).toContain('const unsafeBoundary');
 	});
 
 	test('does not compound a single-surface Transform with whole-slide zoom', () => {
