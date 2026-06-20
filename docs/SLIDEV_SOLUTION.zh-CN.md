@@ -168,6 +168,7 @@ Mermaid 的规则比 table/code/prose 更严格：用户提供的一个 Mermaid 
 - Markdown 表格拆行、拆列，病态宽表与长 cell 表转 record-list fallback
 - 非 Mermaid 代码块优先按语义块分块，再退回空行或行数预算
 - slot-marked layout 与部分 component-heavy slot zone
+- effective font measurement 已感知局部 CSS `transform` / independent `scale` / CSS `zoom`，被局部 `<Transform>` 缩放的内容按真实渲染字号进入质量门
 
 当前仍存在的边界：
 

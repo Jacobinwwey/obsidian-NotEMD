@@ -286,7 +286,7 @@ function resolveSlidesToAudit(sampleSlides: number[] | null | undefined, deckMar
 	return filteredSlides.length > 0 ? filteredSlides : allSlides;
 }
 
-async function collectRenderedSlideMeasurement(page: any, slide: number): Promise<RenderedSlideMeasurement> {
+export async function collectRenderedSlideMeasurement(page: any, slide: number): Promise<RenderedSlideMeasurement> {
 	const measurement = await page.evaluate((slotZoneAttr: string) => {
 		type BrowserRect = {
 			left: number;
@@ -349,11 +349,13 @@ async function collectRenderedSlideMeasurement(page: any, slide: number): Promis
 					return 'h1, h2, h3, h4, p, li, blockquote, span, div, section, article, aside';
 			}
 		};
-		const collectFontMetrics = (element: Element, kind: string, pageScale: number | null) => {
+		const collectFontMetrics = (element: Element, kind: string, pageScale: number | null, renderedRoot: Element) => {
 			const nodes = [element, ...Array.from(element.querySelectorAll(textMetricSelectors(kind)))]
 				.filter((node): node is Element => node instanceof Element);
 			const fontSamples: number[] = [];
-			const svgFontSamples: number[] = [];
+			const effectiveFontSamples: number[] = [];
+			const effectiveSvgFontSamples: number[] = [];
+			const pageFontScale = pageScale && Number.isFinite(pageScale) && pageScale > 0 ? pageScale : 1;
 			for (const node of nodes) {
 				const text = (node.textContent || '').trim();
 				if (!text) {
@@ -371,21 +373,82 @@ async function collectRenderedSlideMeasurement(page: any, slide: number): Promis
 				if (rect.width < 1 || rect.height < 1) {
 					continue;
 				}
+				const localScale = resolveLocalRenderedScale(node, renderedRoot);
+				const effectiveFontPx = fontPx * pageFontScale * localScale;
 				fontSamples.push(fontPx);
+				effectiveFontSamples.push(effectiveFontPx);
 				if (node.closest('svg')) {
-					svgFontSamples.push(fontPx);
+					effectiveSvgFontSamples.push(effectiveFontPx);
 				}
 			}
 
 			const minFontPx = minMetric(fontSamples);
-			const minSvgFontPx = minMetric(svgFontSamples);
-			const scale = pageScale && Number.isFinite(pageScale) && pageScale > 0 ? pageScale : 1;
 			return {
 				minFontPx,
-				effectiveMinFontPx: minFontPx !== null ? minFontPx * scale : null,
-				svgTextMinFontPx: minSvgFontPx !== null ? minSvgFontPx * scale : null,
+				effectiveMinFontPx: minMetric(effectiveFontSamples),
+				svgTextMinFontPx: minMetric(effectiveSvgFontSamples),
 				textSampleCount: fontSamples.length,
 			};
+		};
+		const resolveLocalRenderedScale = (node: Element, renderedRoot: Element) => {
+			let scale = 1;
+			let current: Element | null = node;
+			while (current && current !== renderedRoot) {
+				const style = window.getComputedStyle(current);
+				scale *= readCssTransformScale(style.transform);
+				scale *= readCssIndependentScale((style as any).scale);
+				scale *= readCssZoomScale(style.getPropertyValue('zoom'));
+				current = current.parentElement;
+			}
+			return scale > 0 && Number.isFinite(scale) ? scale : 1;
+		};
+		const readCssTransformScale = (value: string) => {
+			if (!value || value === 'none') {
+				return 1;
+			}
+			const matrix = value.match(/^matrix\(([^)]+)\)$/);
+			if (matrix) {
+				const values = matrix[1].split(',').map(part => Number.parseFloat(part.trim()));
+				if (values.length >= 4 && values.every(Number.isFinite)) {
+					const scaleX = Math.hypot(values[0], values[1]);
+					const scaleY = Math.hypot(values[2], values[3]);
+					return Math.min(scaleX || 1, scaleY || 1);
+				}
+			}
+			const matrix3d = value.match(/^matrix3d\(([^)]+)\)$/);
+			if (matrix3d) {
+				const values = matrix3d[1].split(',').map(part => Number.parseFloat(part.trim()));
+				if (values.length >= 16 && values.every(Number.isFinite)) {
+					const scaleX = Math.hypot(values[0], values[1], values[2]);
+					const scaleY = Math.hypot(values[4], values[5], values[6]);
+					return Math.min(scaleX || 1, scaleY || 1);
+				}
+			}
+			return 1;
+		};
+		const readCssIndependentScale = (value: string | undefined) => {
+			if (!value || value === 'none') {
+				return 1;
+			}
+			const scales = value.split(/\s+/)
+				.map(part => parseCssScaleToken(part))
+				.filter(scale => Number.isFinite(scale) && scale > 0);
+			return scales.length > 0 ? Math.min(...scales) : 1;
+		};
+		const readCssZoomScale = (value: string) => {
+			if (!value || value === 'normal' || value === 'none') {
+				return 1;
+			}
+			const parsed = parseCssScaleToken(value);
+			return Number.isFinite(parsed) && parsed > 0 ? parsed : 1;
+		};
+		const parseCssScaleToken = (value: string) => {
+			const trimmed = value.trim();
+			const parsed = Number.parseFloat(trimmed);
+			if (!Number.isFinite(parsed)) {
+				return Number.NaN;
+			}
+			return trimmed.endsWith('%') ? parsed / 100 : parsed;
 		};
 
 		const slideRoot = pickVisibleLargest('.slidev-page')
@@ -469,7 +532,7 @@ async function collectRenderedSlideMeasurement(page: any, slide: number): Promis
 				if (rect.width < 2 || rect.height < 2 || (!ownerElement && !overlaps(rect, slideRootRect))) {
 					continue;
 				}
-				const fontMetrics = collectFontMetrics(element, kind, effectivePageScale);
+				const fontMetrics = collectFontMetrics(element, kind, effectivePageScale, slideRoot);
 
 				const textLength = (element.textContent || '').trim().length;
 				if (kind === 'other') {

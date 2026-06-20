@@ -175,17 +175,18 @@ layoutAuditSummary.retryCount
 10. pass/fail 的 hard overflow 仍以渲染后的 slide root 为边界，而 `safeRect` 继续只承担 measured scale 的保守拟合目标；这样既不会放过真正裁剪，也不会把合理的 edge-aligned layout 过度误杀；
 11. 共享的 `convergeSlidevDeckLayout()` 现在已经进入 `exportSlidesCommand()` 与维护者 verifier，因此 HTML/PDF/PNG/MP4 都会复用同一个收敛后的 prepared deck；
 12. HTML exporter 现在会返回结构化 outcome，包含 `requestedMode`、`actualMode`、fallback 状态与 standalone sanity 细节；已知坏掉的 native attempt 会先保留为 `index-standalone.failed.html`，再进入兼容 fallback；
-13. 真实 `docs/architecture.zh-CN.md` 严格 native standalone workflow 现在已经收敛到 `ok: true`、`actualMode: "standalone"`、`requiresLocalServer: false`、`standaloneGate.passed: true`、`29` 个审计页，hard overflow / unreadable scale / low effective font / quality margin warning / low utilization 均为零，`retryCount = 4`；preserve-Mermaid rerun 保持源文档与导出 deck 均为 `3` 个 Mermaid block；当前证据包位于 `/home/jacob/slidev-export-review/2026-06-20-quality/` 与 `/home/jacob/slidev-export-review/2026-06-20-mermaid-fit/`；
+13. 真实 `docs/architecture.zh-CN.md` 严格 native standalone workflow 现在已经收敛到 `ok: true`、`actualMode: "standalone"`、`requiresLocalServer: false`、`standaloneGate.passed: true`、`29` 个审计页，hard overflow / unreadable scale / low effective font / quality margin warning / low utilization 均为零，`retryCount = 4`；preserve-Mermaid rerun 保持源文档与导出 deck 均为 `3` 个 Mermaid block；当前证据包位于 `/home/jacob/slidev-export-review/2026-06-20-quality/`、`/home/jacob/slidev-export-review/2026-06-20-mermaid-fit/` 与 `/home/jacob/slidev-export-review/2026-06-20-local-transform-font/`；
 14. 同一真实源文件的 `PDF` 与 `PNG` 验证也返回 `ok: true`，而且现在导出自同一个收敛后的 deck，而不是 raw prepared source；
 15. rendered layout audit 现在会同时报告 effective minimum font、SVG text font、table/code minimum font、quality margins 与 content-area ratio；
 16. low effective font、tight margin 与 low content utilization finding 现在会对 table/code/prose 携带结构化 `recommendedPatch`；Mermaid 低字号指标会被记录，但默认保持源 fence，不把一张原图自动拆成多张图；
 17. source preparation 现在会生成 clean-room `SlideLayoutPlan`，并把 deterministic layout budget 注入 deterministic outline、一次性 Slidev deck prompt 与基于大纲继续导出的 prompt。
 18. rendered layout audit 现在还会报告 `mermaidFit` 与对应 summary 计数，让 Mermaid 低 zoom、低字号和 manual-review 情况可见，但不修改原始 Mermaid fence；真实 `architecture.zh-CN.md` rerun 报告 `mermaidSlideCount = 3`、`mermaidFitReviewCount = 3`、`mermaidLowZoomCount = 3`、`mermaidManualReviewCount = 1`。
 19. table/code quality splitting 已进入第二个结构化切片：长 table cell 会转成 key-value record-list slide，code fence 会优先按语义块拆分，再退回空行或行数预算。
+20. effective font measurement 现在会把文本节点到 slide root 之间的局部 CSS `transform`、independent `scale` 与 CSS `zoom` 乘入逐样本字号，因此被局部 `<Transform>` 包裹的内容会按真实渲染字号进入质量门，而不是按未缩放的 computed font size 误判。
 
 当前限制：
 
-1. effective font measurement 当前主要使用 DOM computed font size 乘 Slidev page zoom；后续应增强局部 CSS transform 的精确感知，但不能削弱 rendered audit；
+1. effective font measurement 现在已经覆盖常见局部 CSS transform / scale / zoom 链，但复杂 Vue layout 仍必须以浏览器 rendered audit 为准，不能退回静态 Markdown 估算；
 2. 超出当前支持集的 richer custom/component-heavy Slidev layout 仍保持保守/manual-review 路径，尤其是多个 component-heavy slot zone 的 zone 级几何仍然接近打平但并非每个溢出 zone 都可安全 transform、或 owner surface 本身不形成稳定 local transform / structural split target 的情况；
 3. native standalone 现在已有严格 gate，且真实 architecture fixture 已通过；但正确性仍依赖 post-build sanity detection，server-script fallback 只是兼容通道，不能再被算作 native standalone 成功；
 4. full-deck Playwright 验证故意比代表性抽样更慢，后续优化方向应是提高 patch 收敛能力，而不是退回弱审计；

@@ -189,6 +189,7 @@ Current landed state:
    - slot-marked custom layouts backed by a real custom `layouts/*.vue` file
    - component-heavy custom slot layouts converging through zone-level owner-geometry-based local `<Transform>` wrapping, including same-slide multi-zone cases where more than one overflowing transformable slot can be wrapped in the same pass while slot signals and rendered text hints stay as bounded fallback for attribution ties
    - a dense two-zone custom layout where slot-owned descendants originally clipped under `overflow-hidden` are now measured correctly and converge to `ok: true` without forcing whole-slide zoom
+   - local CSS `transform` / independent `scale` / CSS `zoom` awareness in effective font measurement, so locally transformed content is judged by rendered size
 14. the real `docs/architecture.zh-CN.md` strict native standalone run now closes with `actualMode = "standalone"`, `requiresLocalServer = false`, `loaderGaps = []`, `standaloneGate.passed = true`, `29` audited slides, zero hard overflow / unreadable scale / low effective font / quality margin warning / low utilization findings, and bounded retry closure.
 15. Mermaid fit review is now explicit report data. It is intentionally separate from hard overflow: a `manual-review` Mermaid status is evidence that source preservation and automatic readability proof are in tension, not permission to auto-split the diagram.
 

@@ -3,7 +3,7 @@ date: 2026-06-20
 last_updated: 2026-06-20
 topic: slidev-layout-quality-and-canvas-roadmap
 canonical: true
-status: source-preserved-mermaid-fit-audit-implemented
+status: local-transform-font-measurement-implemented
 ---
 
 # Slidev 布局质量与画布规划路线
@@ -30,6 +30,7 @@ status: source-preserved-mermaid-fit-audit-implemented
 4. 真实源文件：`docs/architecture.zh-CN.md`
 5. 本批次真实导出证据包：`/home/jacob/slidev-export-review/2026-06-20-quality/`
 6. 本批次成功输出归档：`/home/jacob/slidev-export-review/2026-06-20-quality/preserve-mermaid-success-export-final/`
+7. 局部 transform 字号感知验收包：`/home/jacob/slidev-export-review/2026-06-20-local-transform-font/`
 
 当前已落地事实：
 
@@ -40,7 +41,7 @@ status: source-preserved-mermaid-fit-audit-implemented
 5. HTML native standalone 有严格 gate；
 6. Playwright 默认审计完整 prepared deck；
 7. patcher 已支持 measured zoom、部分局部 `<Transform>`、table/code/simple slide/slot layout 结构化拆分；Mermaid 默认保留源 fence，不做自动拆图；
-8. rendered audit 已新增 effective font、SVG/table/code 最小字号、quality margin、content-area ratio 与 Mermaid 源图保持 fit 证据；
+8. rendered audit 已新增 effective font、SVG/table/code 最小字号、quality margin、content-area ratio、局部 CSS transform 字号感知与 Mermaid 源图保持 fit 证据；
 9. source preparation 已新增 clean-room `SlideLayoutPlan` 预算，并把 deterministic layout budget 接入非大纲、大纲继续导出与 outline prompt；
 10. `architecture.zh-CN.md` strict native standalone rerun 已通过：`slideCount = 29`，源文档与导出 deck 均为 3 个 Mermaid block，hard overflow / unreadable scale / low effective font / quality margin warning / low utilization 均为零；
 11. 当前生成产物可被 Git 看到，用于本地视觉检查，但不应提交进 `main`。
@@ -48,7 +49,7 @@ status: source-preserved-mermaid-fit-audit-implemented
 当前未完成事实：
 
 1. semantic split 仍只覆盖当前已有 table/code/text 支持集；Mermaid 源图保持后，过密原图只能通过布局/zoom/Transform 或人工复核处理，不能把一个源 Mermaid fence 自动拆成多个图；
-2. effective font 目前以 DOM computed font size 乘 Slidev page zoom 为主，局部 CSS transform 的精确字体感知仍是后续增强点；
+2. effective font 现在会把文本节点到 slide root 之间的局部 CSS `transform` / `scale` / `zoom` 乘入逐样本字号；后续仍应用真实 fixture 防止复杂 Vue layout 逃逸；
 3. `SlideLayoutPlan` 是生成前预算，不替代 Playwright rendered audit；
 4. 真实 `architecture.zh-CN.md` 仍需要每批次跑 strict standalone 验收，不能用单测替代；
 5. 当前真实 deck 仍可能出现 `zoom` 小于 `0.72` 的 Mermaid 页面；在“不改原 Mermaid 图内容”的约束下，低 zoom 有时是保留源图的代价，但不能扩散到 prose/table/code。
@@ -179,6 +180,32 @@ status: source-preserved-mermaid-fit-audit-implemented
 
 这次结果不是“质量问题消失”，而是把此前隐藏的质量判断变成了可审计事实：三张 Mermaid 页都因为保留源图而进入 fit review；第 3 页是 `manual-review`，原因是保留源图后若继续按 safe rect 拟合，`nextZoom = 0.2778` 会低于当前 readable floor `0.28`。这比自动拆图更符合用户约束，也更诚实。
 
+本切片新增局部 transform 字号感知后的真实 strict standalone rerun 证据包在：
+
+```text
+/home/jacob/slidev-export-review/2026-06-20-local-transform-font/architecture-strict-local-transform-font-report.json
+/home/jacob/slidev-export-review/2026-06-20-local-transform-font/architecture.zh-CN.local-transform-font.slidev.md
+/home/jacob/slidev-export-review/2026-06-20-local-transform-font/export/architecture.zh-CN-slides/index-standalone.html
+```
+
+该 rerun 的关键结果：
+
+1. `ok = true`
+2. `actualMode = "standalone"`
+3. `requiresLocalServer = false`
+4. `standaloneGate.passed = true`
+5. `slidev = "52.16.0 (/home/jacob/slidev/packages/slidev/bin/slidev.mjs)"`
+6. `skillRootPath = "/home/jacob/slidev/skills/slidev"`
+7. `skillReferenceCount = 52`
+8. `slideCount = 29`
+9. `hardOverflowCount = 0`
+10. `lowEffectiveFontCount = 0`
+11. `qualityMarginWarningCount = 0`
+12. `mermaidSlideCount = 3`
+13. `mermaidFitReviewCount = 3`
+14. `mermaidManualReviewCount = 1`
+15. source Mermaid block count = 3，exported Mermaid block count = 3
+
 ## 6. `ref/infinite-canvas` 的可借鉴点
 
 `ref/infinite-canvas` 的直接实现不能复制进 NoteMD：它是 AGPL-3.0，NoteMD 是 MIT。可借鉴的是 clean-room 设计思想：
@@ -211,7 +238,7 @@ status: source-preserved-mermaid-fit-audit-implemented
 
 目标：把当前 hard gate 扩展成 hard gate + quality gate。
 
-实现状态：已落地到 `src/slideExport/slidevLayoutAudit.ts` 与 `src/slideExport/slidevLayoutWorkflow.ts`。产品路径与 verifier 现在统一使用 `minReadableScale = 0.28`。对 table/code/prose，低有效字号、贴边与低利用率会转换为 `recommendedPatch`；对 Mermaid，低字号保留为 rendered metric，不触发自动拆图。
+实现状态：已落地到 `src/slideExport/slidevLayoutAudit.ts` 与 `src/slideExport/slidevLayoutWorkflow.ts`。产品路径与 verifier 现在统一使用 `minReadableScale = 0.28`。对 table/code/prose，低有效字号、贴边与低利用率会转换为 `recommendedPatch`；对 Mermaid，低字号保留为 rendered metric，不触发自动拆图。本切片补齐局部 CSS transform 字号感知：字体样本不再只用 DOM computed font size 乘整页 zoom，而是逐节点乘入从文本节点到 slide root 之间的 `transform` / independent `scale` / `zoom`。
 
 新增 measurement 字段：
 
@@ -363,7 +390,8 @@ interface SlideLayoutPlan {
 1. `src/tests/slidevLayoutAudit.test.ts` 覆盖 low effective font measurement、Mermaid 源图保持、Mermaid fit/manual-review 统计、table/code 质量 finding 驱动结构拆分、长 cell record-list fallback、代码语义块拆分、summary 新字段；
 2. `src/tests/slidevLayoutPlan.test.ts` 覆盖 clean-room layout budget 对 Mermaid 的 `preserve-source-fit` 与 table/code 的 pre-split 判断；
 3. `src/tests/slidevSourcePreparer.test.ts` 覆盖 deterministic outline 与 LLM prompt 都带 layout budget；
-4. `src/tests/slidevLayoutWorkflow.test.ts` 更新 summary schema，避免 verifier mock 停留在旧字段。
+4. `src/tests/slidevLayoutWorkflow.test.ts` 更新 summary schema，避免 verifier mock 停留在旧字段；
+5. `src/tests/slidevRenderedMeasurement.test.ts` 用真实 Playwright 页面验证局部 `transform: scale(0.5)` 与整页 `--slidev-slide-zoom-scale: 0.8` 会把 20px code font 测为 8px effective font。
 
 ## 8. 与上游 Slidev skill PR 的关系
 
@@ -397,14 +425,14 @@ interface SlideLayoutPlan {
 4. verifier JSON 与 unit fixtures 已覆盖新 summary schema；
 5. 真实 `architecture.zh-CN.md` strict standalone 已重新验收并归档；
 6. Stage 4 第二切片：长 table cell 转 record-list，code fence 优先按语义块拆分，避免行预算切断函数体。
+7. Stage 1 第二切片：effective font measurement 已感知局部 CSS transform / scale / zoom，避免 `<Transform>` 包裹内容被误判为仍有原始字号。
 
 建议下一批实现顺序：
 
-1. 精确测量局部 CSS transform 对有效字号的影响；
-2. 增强 table/code 语言特定拆分：TypeScript/JavaScript 可走轻量 AST 或 tokenizer，Python/Rust 等至少保留缩进/作用域块；
-3. 扩展真实 fixture 包，把“保留 Mermaid 源图导致低 zoom 可接受”和“应人工复核”的场景分开，避免 gate 过松或误杀；
-4. 针对真实长表 fixture 增加 record-list 视觉验收，而不是只看 Markdown 结构；
-5. 评估是否把 source-preserved Mermaid fit review 抽成通用 Slidev skill PR 建议。
+1. 增强 table/code 语言特定拆分：TypeScript/JavaScript 可走轻量 AST 或 tokenizer，Python/Rust 等至少保留缩进/作用域块；
+2. 扩展真实 fixture 包，把“保留 Mermaid 源图导致低 zoom 可接受”和“应人工复核”的场景分开，避免 gate 过松或误杀；
+3. 针对真实长表 fixture 增加 record-list 视觉验收，而不是只看 Markdown 结构；
+4. 评估是否把 source-preserved Mermaid fit review 抽成通用 Slidev skill PR 建议。
 
 不要先做：
 
